@@ -90,8 +90,8 @@ int geometry(int *xpos, int *ypos, int *widw, int *widh, int scrw, int scrh)
 		  "height: %i, xoff: %s%i, yoff: %s%i, xper: %i, yper: %i\n",
 		  width, height, xsign, xoff, ysign, yoff, xper, yper);
 
-		if (width  > 0 && widw) *widw = width;
-		if (height > 0 && widh) *widh = height;
+		if (width  > 0) *widw = width;
+		if (height > 0) *widh = height;
 
 		if(xoff != INT_MIN && xsign[0] == '-') xoff = scrw - *widw - xoff;
 		if(yoff != INT_MIN && ysign[0] == '-') yoff = scrh - *widh - yoff;
