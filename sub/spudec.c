@@ -228,7 +228,9 @@ static int spudec_alloc_image(spudec_handle_t *this, int stride, int height)
   if (this->image_size < this->stride * this->height) {
     if (this->image != NULL) {
       free(this->image);
+      this->image = NULL;
       free(this->pal_image);
+      this->pal_image = NULL;
       this->image_size = 0;
       this->pal_width = this->pal_height  = 0;
     }
