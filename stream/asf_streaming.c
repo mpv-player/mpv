@@ -825,8 +825,6 @@ err_out:
 }
 
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
-	URL_t *url;
-
 	stream->streaming_ctrl = streaming_ctrl_new();
 	if( stream->streaming_ctrl==NULL ) {
 		return STREAM_ERROR;
@@ -834,9 +832,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         stream->streaming_ctrl->audio_id_ptr = &stream->opts->audio_id;
         stream->streaming_ctrl->video_id_ptr = &stream->opts->video_id;
 	stream->streaming_ctrl->bandwidth = network_bandwidth;
-	url = url_new(stream->url);
-	stream->streaming_ctrl->url = check4proxies(url);
-	url_free(url);
+	stream->streaming_ctrl->url = url_new_with_proxy(stream->url);
 
 	mp_tmsg(MSGT_OPEN, MSGL_INFO, "STREAM_ASF, URL: %s\n", stream->url);
 	if((!strncmp(stream->url, "http", 4)) && (*file_format!=DEMUXER_TYPE_ASF && *file_format!=DEMUXER_TYPE_UNKNOWN)) {

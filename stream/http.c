@@ -223,7 +223,6 @@ static int scast_streaming_start(stream_t *stream) {
 static int nop_streaming_start( stream_t *stream ) {
 	HTTP_header_t *http_hdr = NULL;
 	char *next_url=NULL;
-	URL_t *rd_url=NULL;
 	int fd,ret;
 	if( stream==NULL ) return -1;
 
@@ -253,12 +252,9 @@ static int nop_streaming_start( stream_t *stream ) {
 				ret=-1;
 				next_url = http_get_field( http_hdr, "Location" );
 
-				if (next_url != NULL)
-					rd_url=url_new(next_url);
-
-				if (next_url != NULL && rd_url != NULL) {
+				if (next_url != NULL) {
 					mp_msg(MSGT_NETWORK,MSGL_STATUS,"Redirected: Using this url instead %s\n",next_url);
-							stream->streaming_ctrl->url=check4proxies(rd_url);
+							stream->streaming_ctrl->url=url_new_with_proxy(next_url);
 					ret=nop_streaming_start(stream); //recursively get streaming started
 				} else {
 					mp_msg(MSGT_NETWORK,MSGL_ERR,"Redirection failed\n");
@@ -402,7 +398,7 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 
 	// Get the reason phrase
 	ptr = strstr( hdr_ptr, "\n" );
-	if( hdr_ptr==NULL ) {
+	if( ptr==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Malformed answer. Unable to get the reason phrase.\n");
 		return -1;
 	}
@@ -463,24 +459,20 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 
 char *
 http_build_request( HTTP_header_t *http_hdr ) {
-	char *ptr, *uri;
+	char *ptr;
 	int len;
 	HTTP_field_t *field;
 	if( http_hdr==NULL ) return NULL;
         if( http_hdr->uri==NULL ) return NULL;
 
 	if( http_hdr->method==NULL ) http_set_method( http_hdr, "GET");
-
-        uri = malloc(strlen(http_hdr->uri) + 1);
-        if( uri==NULL ) {
-                mp_msg(MSGT_NETWORK,MSGL_ERR,"Memory allocation failed\n");
-                return NULL;
-        }
-        strcpy(uri,http_hdr->uri);
+	if( http_hdr->uri==NULL ) http_set_uri( http_hdr, "/");
+	if( !http_hdr->uri || !http_hdr->method)
+		return NULL;
 
 	//**** Compute the request length
 	// Add the Method line
-	len = strlen(http_hdr->method)+strlen(uri)+12;
+	len = strlen(http_hdr->method)+strlen(http_hdr->uri)+12;
 	// Add the fields
 	field = http_hdr->first_field;
 	while( field!=NULL ) {
@@ -508,7 +500,7 @@ http_build_request( HTTP_header_t *http_hdr ) {
 	//*** Building the request
 	ptr = http_hdr->buffer;
 	// Add the method line
-	ptr += sprintf( ptr, "%s %s HTTP/1.%d\r\n", http_hdr->method, uri, http_hdr->http_minor_version );
+	ptr += sprintf( ptr, "%s %s HTTP/1.%d\r\n", http_hdr->method, http_hdr->uri, http_hdr->http_minor_version );
 	field = http_hdr->first_field;
 	// Add the field
 	while( field!=NULL ) {
@@ -521,7 +513,6 @@ http_build_request( HTTP_header_t *http_hdr ) {
 		memcpy( ptr, http_hdr->body, http_hdr->body_size );
 	}
 
-	free(uri);
 	return http_hdr->buffer;
 }
 
@@ -726,7 +717,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 	do
 	{
 		redirect = 0;
-		if (fd > 0) closesocket(fd);
+		if (fd >= 0) closesocket(fd);
 		fd = http_send_request( url, 0 );
 		if( fd<0 ) {
 			goto err_out;
@@ -856,12 +847,12 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 	} while( redirect );
 
 err_out:
-	if (fd > 0) closesocket( fd );
+	if (fd >= 0) closesocket( fd );
 	fd = -1;
 	http_free( http_hdr );
 	http_hdr = NULL;
 out:
-	stream->streaming_ctrl->data = (void*)http_hdr;
+	stream->streaming_ctrl->data = http_hdr;
 	stream->fd = fd;
 	return res;
 }
@@ -895,16 +886,13 @@ static int fixup_open(stream_t *stream,int seekable) {
 
 static int open_s1(stream_t *stream,int mode, void* opts, int* file_format) {
 	int seekable=0;
-	URL_t *url;
 
 	stream->streaming_ctrl = streaming_ctrl_new();
 	if( stream->streaming_ctrl==NULL ) {
 		return STREAM_ERROR;
 	}
 	stream->streaming_ctrl->bandwidth = network_bandwidth;
-	url = url_new(stream->url);
-	stream->streaming_ctrl->url = check4proxies(url);
-	url_free(url);
+	stream->streaming_ctrl->url = url_new_with_proxy(stream->url);
 
 	mp_msg(MSGT_OPEN, MSGL_V, "STREAM_HTTP(1), URL: %s\n", stream->url);
 	seekable = http_streaming_start(stream, file_format);
@@ -924,16 +912,13 @@ static int open_s1(stream_t *stream,int mode, void* opts, int* file_format) {
 
 static int open_s2(stream_t *stream,int mode, void* opts, int* file_format) {
 	int seekable=0;
-	URL_t *url;
 
 	stream->streaming_ctrl = streaming_ctrl_new();
 	if( stream->streaming_ctrl==NULL ) {
 		return STREAM_ERROR;
 	}
 	stream->streaming_ctrl->bandwidth = network_bandwidth;
-	url = url_new(stream->url);
-	stream->streaming_ctrl->url = check4proxies(url);
-	url_free(url);
+	stream->streaming_ctrl->url = url_new_with_proxy(stream->url);
 
 	mp_msg(MSGT_OPEN, MSGL_V, "STREAM_HTTP(2), URL: %s\n", stream->url);
 	seekable = http_streaming_start(stream, file_format);

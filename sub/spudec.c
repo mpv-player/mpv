@@ -455,11 +455,6 @@ static void spudec_process_control(spudec_handle_t *this, int pts100)
 	       current_nibble[0] / 2, current_nibble[1] / 2);
 	off+=4;
 	break;
-      case 0xff:
-	/* All done, bye-bye */
-	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Done!\n");
-	return;
-//	break;
       default:
 	mp_msg(MSGT_SPUDEC,MSGL_WARN,"spudec: Error determining control type 0x%02x.  Skipping %d bytes.\n",
 	       type, next_off - off);

@@ -362,13 +362,13 @@ static void ts_add_stream(demuxer_t * demuxer, ES_stream_t *es)
 			if (lang && lang[0])
 				mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_AID_%d_LANG=%s\n", es->pid, lang);
 			priv->last_aid++;
-		}
 
-		if(es->extradata && es->extradata_len)
-		{
-			sh->wf = malloc(sizeof(*sh->wf) + es->extradata_len);
-			sh->wf->cbSize = es->extradata_len;
-			memcpy(sh->wf + 1, es->extradata, es->extradata_len);
+			if(es->extradata && es->extradata_len)
+			{
+				sh->wf = malloc(sizeof(*sh->wf) + es->extradata_len);
+				sh->wf->cbSize = es->extradata_len;
+				memcpy(sh->wf + 1, es->extradata, es->extradata_len);
+			}
 		}
 	}
 

@@ -106,7 +106,7 @@ streaming_ctrl_free( streaming_ctrl_t *streaming_ctrl ) {
 }
 
 URL_t*
-check4proxies( URL_t *url ) {
+check4proxies( const URL_t *url ) {
 	URL_t *url_out = NULL;
 	if( url==NULL ) return NULL;
 	url_out = url_new( url->url );
@@ -159,6 +159,14 @@ check4proxies( URL_t *url ) {
 		}
 	}
 	return url_out;
+}
+
+URL_t *url_new_with_proxy(const char *urlstr)
+{
+	URL_t *url = url_new(urlstr);
+	URL_t *url_with_proxy = check4proxies(url);
+	url_free(url);
+	return url_with_proxy;
 }
 
 int

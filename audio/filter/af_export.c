@@ -103,9 +103,11 @@ static int control(struct af_instance* af, int cmd, void* arg)
     // Init memory mapping
     s->fd = open(s->filename, O_RDWR | O_CREAT | O_TRUNC, 0640);
     mp_msg(MSGT_AFILTER, MSGL_INFO, "[export] Exporting to file: %s\n", s->filename);
-    if(s->fd < 0)
+    if(s->fd < 0) {
       mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Could not open/create file: %s\n",
 	     s->filename);
+      return AF_ERROR;
+    }
 
     // header + buffer
     mapsize = (SIZE_HEADER + (af->data->bps * s->sz * af->data->nch));

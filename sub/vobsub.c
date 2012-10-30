@@ -38,6 +38,7 @@
 #include "core/mp_msg.h"
 #include "core/path.h"
 #include "libavutil/common.h"
+#include "libavutil/intreadwrite.h"
 
 extern int vobsub_id;
 // Record the original -vobsubid set by commandline, since vobsub_id will be
@@ -660,8 +661,7 @@ int vobsub_parse_ifo(void* this, const char *const name, unsigned int *palette,
         } else if (memcmp(block, ifo_magic, strlen(ifo_magic) + 1))
             mp_msg(MSGT_VOBSUB, MSGL_ERR, "VobSub: Bad magic in IFO header\n");
         else {
-            unsigned long pgci_sector = block[0xcc] << 24 | block[0xcd] << 16
-                | block[0xce] << 8 | block[0xcf];
+            unsigned pgci_sector = AV_RB32(block + 0xcc);
             int standard = (block[0x200] & 0x30) >> 4;
             int resolution = (block[0x201] & 0x0c) >> 2;
             *height = standard ? 576 : 480;
@@ -693,12 +693,12 @@ int vobsub_parse_ifo(void* this, const char *const name, unsigned int *palette,
                 || rar_read(block, sizeof(block), 1, fd) != 1)
                 mp_msg(MSGT_VOBSUB, MSGL_ERR, "VobSub: Can't read IFO PGCI\n");
             else {
-                unsigned long idx;
-                unsigned long pgc_offset = block[0xc] << 24 | block[0xd] << 16
-                    | block[0xe] << 8 | block[0xf];
+                unsigned idx;
+                unsigned pgc_offset = AV_RB32(block + 0xc);
+                pgc_offset = FFMIN(pgc_offset, sizeof(block) - 0xa4 - 4*16);
                 for (idx = 0; idx < 16; ++idx) {
                     unsigned char *p = block + pgc_offset + 0xa4 + 4 * idx;
-                    palette[idx] = p[0] << 24 | p[1] << 16 | p[2] << 8 | p[3];
+                    palette[idx] = AV_RB32(p);
                 }
                 if (vob)
                     vob->have_palette = 1;

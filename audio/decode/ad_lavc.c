@@ -192,11 +192,11 @@ static int init(sh_audio_t *sh_audio)
     mp_msg(MSGT_DECAUDIO, MSGL_V, "INFO: libavcodec \"%s\" init OK!\n",
            lavc_codec->name);
 
-    if (sh_audio->format == 0x3343414D) {
+    if (sh_audio->wf && sh_audio->format == 0x3343414D) {
         // MACE 3:1
         sh_audio->ds->ss_div = 2 * 3; // 1 samples/packet
         sh_audio->ds->ss_mul = 2 * sh_audio->wf->nChannels; // 1 byte*ch/packet
-    } else if (sh_audio->format == 0x3643414D) {
+    } else if (sh_audio->wf && sh_audio->format == 0x3643414D) {
         // MACE 6:1
         sh_audio->ds->ss_div = 2 * 6; // 1 samples/packet
         sh_audio->ds->ss_mul = 2 * sh_audio->wf->nChannels; // 1 byte*ch/packet

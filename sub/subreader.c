@@ -165,7 +165,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current,
 	    s++;
 	    if (*s == 'P' || *s == 'p') { s++; state = 2; continue; } /* found '<P' */
 	    for (; *s != '>' && *s != '\0'; s++); /* skip remains of non-<P> TAG */
-	    if (s == '\0')
+	    if (*s == '\0')
 	      break;
 	    s++;
 	    continue;
@@ -276,7 +276,7 @@ static const char *sub_readtext(const char *source, char **dest) {
     }
 
     *dest= malloc (len+1);
-    if (!dest) {return ERR;}
+    if (!*dest) {return ERR;}
 
     strncpy(*dest, source, len);
     (*dest)[len]=0;

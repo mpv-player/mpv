@@ -818,13 +818,13 @@ static int play(void* data, int len, int flags)
 	mp_tmsg(MSGT_AO,MSGL_INFO,"[AO_ALSA] Trying to reset soundcard.\n");
 	if ((res = snd_pcm_prepare(alsa_handler)) < 0) {
 	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] pcm prepare error: %s\n", snd_strerror(res));
-	  return 0;
 	  break;
 	}
+	res = 0;
       }
   } while (res == 0);
 
-  return res < 0 ? res : res * bytes_per_sample;
+  return res < 0 ? 0 : res * bytes_per_sample;
 }
 
 /* how many byes are free in the buffer */
