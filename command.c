@@ -579,15 +579,17 @@ static int mp_property_audio_delay(m_option_t *prop, int action,
 {
     if (!(mpctx->sh_audio && mpctx->sh_video))
         return M_PROPERTY_UNAVAILABLE;
+    float delay = audio_delay;
     switch (action) {
     case M_PROPERTY_PRINT:
-        *(char **)arg = format_delay(audio_delay);
+        *(char **)arg = format_delay(delay);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        mpctx->delay -= audio_delay - *(float *)arg;
+        audio_delay = *(float *)arg;
+        mpctx->delay -= audio_delay - delay;
         return M_PROPERTY_OK;
     }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
 /// Audio codec tag (RO)
