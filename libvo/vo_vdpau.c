@@ -1445,7 +1445,7 @@ static struct vdpau_render_state *get_surface(struct vo *vo, int number)
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
 
-    if (number > MAX_VIDEO_SURFACES)
+    if (number >= MAX_VIDEO_SURFACES)
         return NULL;
     if (vc->surface_render[number].surface == VDP_INVALID_HANDLE
         && !vc->is_preempted) {
