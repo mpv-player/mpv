@@ -1256,7 +1256,7 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         code &= ~KEY_MODIFIER_SHIFT;
 
     if (code & MP_KEY_DOWN) {
-        if (ictx->num_key_down > MP_MAX_KEY_DOWN) {
+        if (ictx->num_key_down >= MP_MAX_KEY_DOWN) {
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many key down events "
                     "at the same time\n");
             return NULL;
