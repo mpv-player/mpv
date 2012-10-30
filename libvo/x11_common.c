@@ -95,6 +95,7 @@ char **vo_fstype_list;
 int metacity_hack = 0;
 
 #ifdef CONFIG_XF86VM
+static int modecount;
 XF86VidModeModeInfo **vidmodes = NULL;
 XF86VidModeModeLine modeline;
 #endif
@@ -1654,8 +1655,6 @@ void vo_vm_switch(struct vo *vo)
     int X = vo->dwidth, Y = vo->dheight;
     int modeline_width, modeline_height;
 
-    int modecount;
-
     if (XF86VidModeQueryExtension(mDisplay, &vm_event, &vm_error))
     {
         XF86VidModeQueryVersion(mDisplay, &vm_ver, &vm_rev);
@@ -1711,7 +1710,7 @@ void vo_vm_close(struct vo *vo)
     struct MPOpts *opts = vo->opts;
     if (vidmodes != NULL)
     {
-        int i, modecount;
+        int i;
 
         free(vidmodes);
         vidmodes = NULL;
@@ -1731,6 +1730,7 @@ void vo_vm_close(struct vo *vo)
         XF86VidModeSwitchToMode(dpy, vo->x11->screen, vidmodes[i]);
         free(vidmodes);
         vidmodes = NULL;
+        modecount = 0;
     }
 }
 
