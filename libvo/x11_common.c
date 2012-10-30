@@ -96,8 +96,8 @@ int metacity_hack = 0;
 
 #ifdef CONFIG_XF86VM
 static int modecount;
-XF86VidModeModeInfo **vidmodes = NULL;
-XF86VidModeModeLine modeline;
+static XF86VidModeModeInfo **vidmodes;
+static XF86VidModeModeLine modeline;
 #endif
 
 static int vo_x11_get_fs_type(int supported);
