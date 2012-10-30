@@ -167,15 +167,26 @@ static int mp_property_path(m_option_t *prop, int action, void *arg,
     return m_property_strdup_ro(prop, action, arg, mpctx->filename);
 }
 
+static int mp_property_filename(m_option_t *prop, int action, void *arg,
+                                MPContext *mpctx)
+{
+    if (!mpctx->filename)
+        return M_PROPERTY_UNAVAILABLE;
+    char *f = (char *)mp_basename(mpctx->filename);
+    return m_property_strdup_ro(prop, action, arg, (*f) ? f : mpctx->filename);
+}
+
 static int mp_property_media_title(m_option_t *prop, int action, void *arg,
                                    MPContext *mpctx)
 {
-    char *name = mpctx->filename;
+    char *name = NULL;
     if (mpctx->resolve_result)
         name = mpctx->resolve_result->title;
-    if (!name)
-        return M_PROPERTY_UNAVAILABLE;
-    return m_property_strdup_ro(prop, action, arg, name);
+    if (name && name[0]) {
+        return m_property_strdup_ro(prop, action, arg, name);
+    } else {
+        return mp_property_filename(prop, action, arg, mpctx);
+    }
 }
 
 static int mp_property_stream_path(m_option_t *prop, int action, void *arg,
@@ -185,16 +196,6 @@ static int mp_property_stream_path(m_option_t *prop, int action, void *arg,
     if (!stream || !stream->url)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_strdup_ro(prop, action, arg, stream->url);
-}
-
-/// filename without path (RO)
-static int mp_property_filename(m_option_t *prop, int action, void *arg,
-                                MPContext *mpctx)
-{
-    if (!mpctx->filename)
-        return M_PROPERTY_UNAVAILABLE;
-    char *f = (char *)mp_basename(mpctx->filename);
-    return m_property_strdup_ro(prop, action, arg, (*f) ? f : mpctx->filename);
 }
 
 /// Demuxer name (RO)
