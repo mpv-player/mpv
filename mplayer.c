@@ -23,6 +23,7 @@
 #include <assert.h>
 
 #include <libavutil/intreadwrite.h>
+#include <libavutil/attributes.h>
 
 #include "config.h"
 #include "talloc.h"
@@ -575,7 +576,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     }
 }
 
-static void exit_player(struct MPContext *mpctx, enum exit_reason how, int rc)
+static av_noreturn void exit_player(struct MPContext *mpctx,
+                                    enum exit_reason how, int rc)
 {
     uninit_player(mpctx, INITIALIZED_ALL);
 
