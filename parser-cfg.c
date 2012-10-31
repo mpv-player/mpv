@@ -45,7 +45,7 @@ static int recursion_depth = 0;
  */
 int m_config_parse_config_file(m_config_t *config, const char *conffile)
 {
-#define PRINT_LINENUM   mp_msg(MSGT_CFGPARSER, MSGL_V, "%s(%d): ", conffile, line_num)
+#define PRINT_LINENUM   mp_msg(MSGT_CFGPARSER, MSGL_ERR, "%s:%d: ", conffile, line_num)
 #define MAX_LINE_LEN    10000
 #define MAX_OPT_LEN     1000
 #define MAX_PARAM_LEN   1500
@@ -116,8 +116,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
             opt[opt_pos++] = line[line_pos++];
             if (opt_pos >= MAX_OPT_LEN) {
                 PRINT_LINENUM;
-                mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                       "too long option at line %d\n", line_num);
+                mp_msg(MSGT_CFGPARSER, MSGL_ERR, "too long option\n");
                 errors++;
                 ret = -1;
                 goto nextline;
@@ -125,8 +124,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
         }
         if (opt_pos == 0) {
             PRINT_LINENUM;
-            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parse error at line %d\n",
-                   line_num);
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parse error\n");
             ret = -1;
             errors++;
             continue;
@@ -151,7 +149,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
         if (line[line_pos++] != '=') {
             PRINT_LINENUM;
             mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                   "Option %s needs a parameter at line %d\n", opt, line_num);
+                   "option %s needs a parameter\n", opt);
             ret = -1;
             errors++;
             continue;
@@ -170,8 +168,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
                 if (param_pos >= MAX_PARAM_LEN) {
                     PRINT_LINENUM;
                     mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                           "Option %s has a too long parameter at line %d\n",
-                           opt, line_num);
+                           "option %s has a too long parameter\n", opt);
                     ret = -1;
                     errors++;
                     goto nextline;
@@ -198,7 +195,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
         if (param_pos == 0) {
             PRINT_LINENUM;
             mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                   "Option %s needs a parameter at line %d\n", opt, line_num);
+                   "option %s needs a parameter\n", opt);
             ret = -1;
             errors++;
             continue;
@@ -212,9 +209,8 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
         /* EOL / comment */
         if (line[line_pos] != '\0' && line[line_pos] != '#') {
             PRINT_LINENUM;
-            mp_msg(MSGT_CFGPARSER, MSGL_WARN,
-                   "extra characters on line %d: %s\n",
-                   line_num, line + line_pos);
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                   "extra characters: %s\n", line + line_pos);
             ret = -1;
         }
 
@@ -229,16 +225,12 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
         if (tmp < 0) {
             PRINT_LINENUM;
             if (tmp == M_OPT_UNKNOWN) {
-                mp_msg(MSGT_CFGPARSER, MSGL_WARN,
-                       "Warning: unknown option '%s' at line %d in file '%s'.\n",
-                       opt, line_num, conffile);
+                mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                       "unknown option '%s'\n", opt);
                 continue;
             }
             mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                   "Error parsing option %s=%s at line %d\n",
-                   opt, param, line_num);
-            ret = -1;
-            errors++;
+                   "setting option %s='%s' failed\n", opt, param);
             continue;
             /* break */
         }
@@ -251,5 +243,9 @@ nextline:
 out:
     config->mode = prev_mode;
     --recursion_depth;
+    if (ret < 0) {
+        mp_msg(MSGT_CFGPARSER, MSGL_FATAL, "Error loading config file %s.\n",
+               conffile);
+    }
     return ret;
 }
