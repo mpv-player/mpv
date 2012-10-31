@@ -746,13 +746,11 @@ static void free_str_list(void *dst)
 
 static int str_list_add(char **add, int n, void *dst, int pre)
 {
-    char **lst = VAL(dst);
-    int ln;
-
     if (!dst)
         return M_OPT_PARSER_ERR;
-    lst = VAL(dst);
+    char **lst = VAL(dst);
 
+    int ln;
     for (ln = 0; lst && lst[ln]; ln++)
         /**/;
 
