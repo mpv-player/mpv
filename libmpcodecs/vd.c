@@ -92,9 +92,8 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
   csp_again:
 
     if (mp_msg_test(MSGT_DECVIDEO, MSGL_V)) {
-        vf_instance_t *f = vf;
         mp_msg(MSGT_DECVIDEO, MSGL_V, "Trying filter chain:");
-        for (f = vf; f; f = f->next)
+        for (vf_instance_t *f = vf; f; f = f->next)
             mp_msg(MSGT_DECVIDEO, MSGL_V, " %s", f->info->name);
         mp_msg(MSGT_DECVIDEO, MSGL_V, "\n");
     }
