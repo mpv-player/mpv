@@ -300,7 +300,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     struct priv *p = vo->priv;
 
     Colormap theCmap;
-    unsigned long xswamask;
     const struct fmt2Xfmtentry_s *fmte = fmt2Xfmt;
 
 #ifdef CONFIG_XF86VM
@@ -348,13 +347,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
 #endif
         theCmap = vo_x11_create_colormap(vo, &p->vinfo);
-
-        xswamask = CWBackPixel | CWBorderPixel | CWColormap;
-
-#ifdef CONFIG_XF86VM
-        if (vm)
-            xswamask |= CWOverrideRedirect;
-#endif
 
         vo_x11_create_vo_window(vo, &p->vinfo, vo->dx, vo->dy, vo->dwidth,
                                 vo->dheight, flags, theCmap, "x11");
