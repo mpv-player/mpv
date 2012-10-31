@@ -358,9 +358,6 @@
     the start of the next one then keep playing video normally over the
     chapter change instead of doing a seek.
 
---codecpath=<dir>
-    Specify a directory for binary codecs.
-
 --codecs-file=<filename>
     Override the standard search path and use the specified file instead of
     the builtin codecs.conf.
