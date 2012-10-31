@@ -2101,7 +2101,6 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 {
     struct MPOpts *opts = &mpctx->opts;
     struct ao *ao = mpctx->ao;
-    unsigned int t;
     int playsize;
     int playflags = 0;
     bool audio_eof = false;
@@ -2118,9 +2117,6 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         playsize = 1;   // just initialize things (audio pts at least)
     else
         playsize = ao_get_space(ao);
-
-    // Fill buffer if needed:
-    t = GetTimer();
 
     // Coming here with hrseek_active still set means audio-only
     if (!mpctx->sh_video)
@@ -2149,7 +2145,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         else if (mpctx->sh_audio->ds->eof)
             audio_eof = true;
     }
-    t = GetTimer() - t;
+
     if (endpts != MP_NOPTS_VALUE && modifiable_audio_format) {
         double bytes = (endpts - written_audio_pts(mpctx) + audio_delay)
                        * ao->bps / opts->playback_speed;
