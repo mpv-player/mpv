@@ -1721,13 +1721,12 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
 
 static int parse_config_file(struct input_ctx *ictx, char *file)
 {
-    struct bstr res = {0};
     stream_t *s = open_stream(file, NULL, NULL);
     if (!s) {
         mp_msg(MSGT_INPUT, MSGL_V, "Can't open input config file %s.\n", file);
         return 0;
     }
-    res = stream_read_complete(s, NULL, 1000000, 0);
+    bstr res = stream_read_complete(s, NULL, 1000000, 0);
     free_stream(s);
     mp_msg(MSGT_INPUT, MSGL_V, "Parsing input config file %s\n", file);
     int n_binds = parse_config(ictx, false, res, file);
