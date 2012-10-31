@@ -103,7 +103,8 @@ static char **find_files(const char *original_file, const char *suffix)
     }
     closedir(dp);
     // NOTE: maybe should make it compare pointers instead
-    qsort(entries, num_results, sizeof(struct find_entry), cmp_entry);
+    if (entries)
+        qsort(entries, num_results, sizeof(struct find_entry), cmp_entry);
     results = talloc_realloc(NULL, results, char *, num_results);
     for (int i = 0; i < num_results; i++) {
         results[i] = entries[i].name;
