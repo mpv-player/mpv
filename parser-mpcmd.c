@@ -156,7 +156,6 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                                     int argc, char **argv)
 {
     int mode = 0;
-    bool opt_exit = false;   // exit immediately after parsing (help options)
     struct playlist_entry *local_start = NULL;
     bool shuffle = false;
 
@@ -182,10 +181,9 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             } else {
                 r = m_config_check_option(config, p.arg, p.param);
             }
-            if (r <= M_OPT_EXIT) {
-                opt_exit = true;
-                r = M_OPT_EXIT - r;
-            } else if (r < 0) {
+            if (r <= M_OPT_EXIT)
+                goto err_out;
+            if (r < 0) {
                 char *msg = m_option_strerror(r);
                 if (!msg)
                     goto print_err;
@@ -315,9 +313,6 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 "Missing closing --} on command line.\n");
         goto err_out;
     }
-
-    if (opt_exit)
-        goto err_out;
 
     if (shuffle)
         playlist_shuffle(files);
