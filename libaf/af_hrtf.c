@@ -26,6 +26,7 @@
 #include <inttypes.h>
 
 #include <math.h>
+#include <libavutil/common.h>
 
 #include "af.h"
 #include "dsp.h"
@@ -541,16 +542,16 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data)
 	      perception.  Note: Too much will destroy the acoustic space
 	      and may even result in headaches. */
 	   diff = STEXPAND2 * (left - right);
-	   out[0] = (int16_t)(left  + diff);
-	   out[1] = (int16_t)(right - diff);
+	   out[0] = av_clip_int16(left  + diff);
+	   out[1] = av_clip_int16(right - diff);
 	   break;
 	case HRTF_MIX_MATRIX2CH:
 	   /* Do attempt any stereo expansion with matrix encoded
 	      sources.  The L, R channels are already stereo expanded
 	      by the steering, any further stereo expansion will sound
 	      very unnatural. */
-	   out[0] = (int16_t)left;
-	   out[1] = (int16_t)right;
+	   out[0] = av_clip_int16(left);
+	   out[1] = av_clip_int16(right);
 	   break;
 	}
 
