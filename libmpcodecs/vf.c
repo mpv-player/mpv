@@ -358,8 +358,8 @@ mp_image_t *vf_get_image(vf_instance_t *vf, unsigned int outfmt,
             mpi->flags |= MP_IMGFLAG_TYPE_DISPLAYED;
         }
         mpi->qscale = NULL;
+        mpi->usage_count++;
     }
-    mpi->usage_count++;
     return mpi;
 }
 
