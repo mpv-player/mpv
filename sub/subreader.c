@@ -1106,9 +1106,11 @@ static subtitle *sub_read_line_jacosub(stream_t* st, subtitle * current,
 	    }			//-- switch
 	}			//-- for
 	*q = '\0';
-	current->text[current->lines] = strdup(line1);
+	if (current->lines < SUB_MAX_TEXT)
+	    current->text[current->lines] = strdup(line1);
     }				//-- while
-    current->lines++;
+    if (current->lines < SUB_MAX_TEXT)
+        current->lines++;
     return current;
 }
 
