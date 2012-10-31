@@ -195,7 +195,10 @@ static int scast_streaming_start(stream_t *stream) {
   if (is_ultravox)
     metaint = 0;
   else {
-    metaint = atoi(http_get_field(http_hdr, "Icy-MetaInt"));
+    metaint = -1;
+    char *h = http_get_field(http_hdr, "Icy-MetaInt");
+    if (h)
+        metaint = atoi(h);
     if (metaint <= 0)
       return -1;
   }
