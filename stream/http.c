@@ -463,21 +463,20 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 
 char *
 http_build_request( HTTP_header_t *http_hdr ) {
-	char *ptr, *uri=NULL;
+	char *ptr, *uri;
 	int len;
 	HTTP_field_t *field;
 	if( http_hdr==NULL ) return NULL;
+        if( http_hdr->uri==NULL ) return NULL;
 
 	if( http_hdr->method==NULL ) http_set_method( http_hdr, "GET");
-	if( http_hdr->uri==NULL ) http_set_uri( http_hdr, "/");
-	else {
-		uri = malloc(strlen(http_hdr->uri) + 1);
-		if( uri==NULL ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Memory allocation failed\n");
-			return NULL;
-		}
-		strcpy(uri,http_hdr->uri);
-	}
+
+        uri = malloc(strlen(http_hdr->uri) + 1);
+        if( uri==NULL ) {
+                mp_msg(MSGT_NETWORK,MSGL_ERR,"Memory allocation failed\n");
+                return NULL;
+        }
+        strcpy(uri,http_hdr->uri);
 
 	//**** Compute the request length
 	// Add the Method line
