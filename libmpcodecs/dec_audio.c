@@ -39,7 +39,7 @@
 
 int fakemono = 0;
 
-af_cfg_t af_cfg = { 1, NULL };	// Configuration for audio filters
+struct af_cfg af_cfg = { 1, NULL };	// Configuration for audio filters
 
 void afm_help(void)
 {
@@ -291,7 +291,7 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     af_fix_parameters(&(afs->output));
 
     // filter config:
-    memcpy(&afs->cfg, &af_cfg, sizeof(af_cfg_t));
+    memcpy(&afs->cfg, &af_cfg, sizeof(struct af_cfg));
 
     mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Building audio filter chain for %dHz/%dch/%s -> %dHz/%dch/%s...\n",
 	   afs->input.rate, afs->input.nch,

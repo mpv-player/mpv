@@ -92,7 +92,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     return control(af,AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, vol);
   }
   case AF_CONTROL_POST_CREATE:
-    s->fast = ((((af_cfg_t*)arg)->force & AF_INIT_FORMAT_MASK) ==
+    s->fast = ((((struct af_cfg*)arg)->force & AF_INIT_FORMAT_MASK) ==
       AF_INIT_FLOAT) ? 0 : 1;
     return AF_OK;
   case AF_CONTROL_VOLUME_ON_OFF | AF_CONTROL_SET:

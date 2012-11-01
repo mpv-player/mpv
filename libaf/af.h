@@ -97,11 +97,11 @@ extern int* af_cpu_speed;
 #endif
 
 // Configuration switches
-typedef struct af_cfg_s{
+struct af_cfg {
   int force;	// Initialization type
   char** list;	/* list of names of filters that are added to filter
 		   list during first initialization of stream */
-}af_cfg_t;
+};
 
 // Current audio stream
 typedef struct af_stream
@@ -113,7 +113,7 @@ typedef struct af_stream
   struct mp_audio input;
   struct mp_audio output;
   // Configuration for this stream
-  af_cfg_t cfg;
+  struct af_cfg cfg;
   struct MPOpts *opts;
 }af_stream_t;
 

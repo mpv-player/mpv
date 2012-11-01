@@ -279,7 +279,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     return af->control(af,AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET, &rate);
   }
   case AF_CONTROL_POST_CREATE:
-    if((((af_cfg_t*)arg)->force & AF_INIT_FORMAT_MASK) == AF_INIT_FLOAT)
+    if((((struct af_cfg*)arg)->force & AF_INIT_FORMAT_MASK) == AF_INIT_FLOAT)
       ((af_resample_t*)af->setup)->setup = RSMP_FLOAT;
     return AF_OK;
   case AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET:
