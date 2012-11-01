@@ -61,8 +61,6 @@ LIBAO_EXTERN(alsa)
 
 static snd_pcm_t *alsa_handler;
 static snd_pcm_format_t alsa_format;
-static snd_pcm_hw_params_t *alsa_hwparams;
-static snd_pcm_sw_params_t *alsa_swparams;
 
 #define BUFFER_TIME 500000  // 0.5 s
 #define FRAGCOUNT 16
@@ -487,6 +485,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: using device %s\n", alsa_device);
 
+    alsa_can_pause = 1;
+
     if (!alsa_handler) {
       int open_mode = block ? 0 : SND_PCM_NONBLOCK;
       int isac3 =  AF_FORMAT_IS_AC3(format) || AF_FORMAT_IS_IEC61937(format);
@@ -510,6 +510,9 @@ static int init(int rate_hz, int channels, int format, int flags)
       } else {
 	mp_msg(MSGT_AO,MSGL_V,"alsa-init: pcm opened in blocking mode\n");
       }
+
+      snd_pcm_hw_params_t *alsa_hwparams;
+      snd_pcm_sw_params_t *alsa_swparams;
 
       snd_pcm_hw_params_alloca(&alsa_hwparams);
       snd_pcm_sw_params_alloca(&alsa_swparams);
@@ -665,12 +668,13 @@ static int init(int rate_hz, int channels, int format, int flags)
       }
       /* end setting sw-params */
 
+      alsa_can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
+
       mp_msg(MSGT_AO,MSGL_V,"alsa: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
 	     ao_data.samplerate, ao_data.channels, (int)bytes_per_sample, ao_data.buffersize,
 	     snd_pcm_format_description(alsa_format));
 
     } // end switch alsa_handler (spdif)
-    alsa_can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
     return 1;
 } // end init
 
