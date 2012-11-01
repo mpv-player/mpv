@@ -155,6 +155,7 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
       if (m_option_parse(&url_opt, bstr0("stream url"), bstr0(filename), arg) < 0) {
 	mp_tmsg(MSGT_OPEN,MSGL_ERR, "URL parsing failed on url %s\n",filename);
 	m_struct_free(desc,arg);
+        *ret = STREAM_ERROR;
 	return NULL;
       }
     }
