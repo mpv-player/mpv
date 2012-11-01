@@ -233,15 +233,21 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
         for (i = 0; i < ctx->avc->nb_streams; ++i)
             if (ctx->avc->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
                 break;
-        if (i >= ctx->avc->nb_streams)
+        if (i >= ctx->avc->nb_streams) {
+            encode_lavc_fail(ctx,
+                    "encode-lavc: video stream missing, invalid codec?\n");
             return 0;
+        }
     }
     if (ctx->expect_audio) {
         for (i = 0; i < ctx->avc->nb_streams; ++i)
             if (ctx->avc->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO)
                 break;
-        if (i >= ctx->avc->nb_streams)
+        if (i >= ctx->avc->nb_streams) {
+            encode_lavc_fail(ctx,
+                    "encode-lavc: audio stream missing, invalid codec?\n");
             return 0;
+        }
     }
 
     ctx->header_written = -1;

@@ -293,6 +293,14 @@ static int encode(struct ao *ao, double apts, void *data);
 static void uninit(struct ao *ao, bool cut_audio)
 {
     struct priv *ac = ao->priv;
+    struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
+
+    if (!encode_lavc_start(ectx)) {
+        mp_msg(MSGT_ENCODE, MSGL_WARN,
+		"ao-lavc: not even ready to encode audio at end -> dropped");
+        return;
+    }
+
     if (ac->buffer) {
         double pts = ao->pts + ac->offset / (double) ao->samplerate;
         if (ao->buffer.len > 0) {
@@ -455,7 +463,8 @@ static int play(struct ao *ao, void *data, int len, int flags)
     len /= ac->sample_size * ao->channels;
 
     if (!encode_lavc_start(ectx)) {
-        mp_msg(MSGT_ENCODE, MSGL_WARN, "ao-lavc: NOTE: deferred initial audio frame (probably because video is not there yet)\n");
+        mp_msg(MSGT_ENCODE, MSGL_WARN,
+		"ao-lavc: not ready yet for encoding audio\n");
         return 0;
     }
     if (pts == MP_NOPTS_VALUE) {
