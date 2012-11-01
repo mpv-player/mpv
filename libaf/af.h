@@ -104,8 +104,7 @@ struct af_cfg {
 };
 
 // Current audio stream
-typedef struct af_stream
-{
+struct af_stream {
   // The first and last filter in the list
   struct af_instance* first;
   struct af_instance* last;
@@ -115,7 +114,7 @@ typedef struct af_stream
   // Configuration for this stream
   struct af_cfg cfg;
   struct MPOpts *opts;
-}af_stream_t;
+};
 
 /*********************************************
 // Return values
@@ -154,19 +153,19 @@ typedef struct af_stream
  * The function is reentrant i.e. if called with an already initialized
  * stream the stream will be reinitialized.
  */
-int af_init(af_stream_t* s);
+int af_init(struct af_stream* s);
 
 /**
  * \brief Uninit and remove all filters from audio filter chain
  */
-void af_uninit(af_stream_t* s);
+void af_uninit(struct af_stream* s);
 
 /**
  * \brief  Reinit the filter list from the given filter on downwards
  * \param  Filter instance to begin the reinit from
  * \return AF_OK on success or AF_ERROR on failure
  */
-int af_reinit(af_stream_t* s, struct af_instance* af);
+int af_reinit(struct af_stream* s, struct af_instance* af);
 
 /**
  * \brief This function adds the filter "name" to the stream s.
@@ -177,13 +176,13 @@ int af_reinit(af_stream_t* s, struct af_instance* af);
  * list of filters (i.e. at the beginning unless the
  * first filter is the format filter (why??).
  */
-struct af_instance* af_add(af_stream_t* s, char* name);
+struct af_instance* af_add(struct af_stream* s, char* name);
 
 /**
  * \brief Uninit and remove the filter "af"
  * \param af filter to remove
  */
-void af_remove(af_stream_t* s, struct af_instance* af);
+void af_remove(struct af_stream* s, struct af_instance* af);
 
 /**
  * \brief find filter in chain by name
@@ -192,7 +191,7 @@ void af_remove(af_stream_t* s, struct af_instance* af);
  *
  * This function is used for finding already initialized filters
  */
-struct af_instance* af_get(af_stream_t* s, char* name);
+struct af_instance* af_get(struct af_stream* s, char* name);
 
 /**
  * \brief filter data chunk through the filters in the list
@@ -200,7 +199,7 @@ struct af_instance* af_get(af_stream_t* s, char* name);
  * \return resulting data
  * \ingroup af_chain
  */
-struct mp_audio* af_play(af_stream_t* s, struct mp_audio* data);
+struct mp_audio* af_play(struct af_stream* s, struct mp_audio* data);
 
 /**
  * \brief send control to all filters, starting with the last until
@@ -209,19 +208,19 @@ struct mp_audio* af_play(af_stream_t* s, struct mp_audio* data);
  * \param arg argument for filter command
  * \return the accepting filter or NULL if none was found
  */
-struct af_instance *af_control_any_rev (af_stream_t* s, int cmd, void* arg);
+struct af_instance *af_control_any_rev (struct af_stream* s, int cmd, void* arg);
 
 /**
  * \brief calculate average ratio of filter output lenth to input length
  * \return the ratio
  */
-double af_calc_filter_multiplier(af_stream_t* s);
+double af_calc_filter_multiplier(struct af_stream* s);
 
 /**
  * \brief Calculate the total delay caused by the filters
  * \return delay in bytes of "missing" output
  */
-double af_calc_delay(af_stream_t* s);
+double af_calc_delay(struct af_stream* s);
 
 /** \} */ // end of af_chain group
 

@@ -273,7 +273,7 @@ void uninit_audio(sh_audio_t *sh_audio)
 int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
 		       int *out_samplerate, int *out_channels, int *out_format)
 {
-    af_stream_t *afs = sh_audio->afilter;
+    struct af_stream *afs = sh_audio->afilter;
     if (!afs) {
 	afs = calloc(1, sizeof(struct af_stream));
 	afs->opts = sh_audio->opts;

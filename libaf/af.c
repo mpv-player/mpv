@@ -101,7 +101,7 @@ static struct af_info* af_find(char*name)
 
 /* Find filter in the dynamic filter list using it's name This
    function is used for finding already initialized filters */
-struct af_instance* af_get(af_stream_t* s, char* name)
+struct af_instance* af_get(struct af_stream* s, char* name)
 {
   struct af_instance* af=s->first;
   // Find the filter
@@ -115,7 +115,7 @@ struct af_instance* af_get(af_stream_t* s, char* name)
 
 /*/ Function for creating a new filter of type name. The name may
   contain the commandline parameters for the filter */
-static struct af_instance* af_create(af_stream_t* s, const char* name_with_cmd)
+static struct af_instance* af_create(struct af_stream* s, const char* name_with_cmd)
 {
   char* name = strdup(name_with_cmd);
   char* cmdline = name;
@@ -169,7 +169,7 @@ err_out:
 /* Create and insert a new filter of type name before the filter in the
    argument. This function can be called during runtime, the return
    value is the new filter */
-static struct af_instance* af_prepend(af_stream_t* s, struct af_instance* af, const char* name)
+static struct af_instance* af_prepend(struct af_stream* s, struct af_instance* af, const char* name)
 {
   // Create the new filter and make sure it is OK
   struct af_instance* new=af_create(s,name);
@@ -193,7 +193,7 @@ static struct af_instance* af_prepend(af_stream_t* s, struct af_instance* af, co
 /* Create and insert a new filter of type name after the filter in the
    argument. This function can be called during runtime, the return
    value is the new filter */
-static struct af_instance* af_append(af_stream_t* s, struct af_instance* af, const char* name)
+static struct af_instance* af_append(struct af_stream* s, struct af_instance* af, const char* name)
 {
   // Create the new filter and make sure it is OK
   struct af_instance* new=af_create(s,name);
@@ -215,7 +215,7 @@ static struct af_instance* af_append(af_stream_t* s, struct af_instance* af, con
 }
 
 // Uninit and remove the filter "af"
-void af_remove(af_stream_t* s, struct af_instance* af)
+void af_remove(struct af_stream* s, struct af_instance* af)
 {
   if(!af) return;
 
@@ -250,7 +250,7 @@ static void print_fmt(struct mp_audio *d)
     }
 }
 
-static void af_print_filter_chain(af_stream_t* s)
+static void af_print_filter_chain(struct af_stream* s)
 {
     mp_msg(MSGT_AFILTER, MSGL_V, "Audio filter chain:\n");
 
@@ -277,7 +277,7 @@ static void af_print_filter_chain(af_stream_t* s)
 // state (for example, format filters that were tentatively inserted stay
 // inserted).
 // In that case, you should always rebuild the filter chain, or abort.
-int af_reinit(af_stream_t* s, struct af_instance* af)
+int af_reinit(struct af_stream* s, struct af_instance* af)
 {
   do{
     struct mp_audio in; // Format of the input to current filter
@@ -381,7 +381,7 @@ int af_reinit(af_stream_t* s, struct af_instance* af)
 }
 
 // Uninit and remove all filters
-void af_uninit(af_stream_t* s)
+void af_uninit(struct af_stream* s)
 {
   while(s->first)
     af_remove(s,s->first);
@@ -391,7 +391,7 @@ void af_uninit(af_stream_t* s)
  * Extend the filter chain so we get the required output format at the end.
  * \return AF_ERROR on error, AF_OK if successful.
  */
-static int fixup_output_format(af_stream_t* s)
+static int fixup_output_format(struct af_stream* s)
 {
     struct af_instance* af = NULL;
     // Check number of output channels fix if not OK
@@ -442,7 +442,7 @@ static int fixup_output_format(af_stream_t* s)
 /**
  * Automatic downmix to stereo in case the codec does not implement it.
  */
-static void af_downmix(af_stream_t* s)
+static void af_downmix(struct af_stream* s)
 {
     static const char * const downmix_strs[AF_NCH + 1] = {
         /*                FL       FR       RL       RR          FC          LF         AL      AR */
@@ -468,7 +468,7 @@ static void af_downmix(af_stream_t* s)
    If one of the prefered output parameters is 0 the one that needs
    no conversion is used (i.e. the output format in the last filter).
    The return value is 0 if success and -1 if failure */
-int af_init(af_stream_t* s)
+int af_init(struct af_stream* s)
 {
     struct MPOpts *opts = s->opts;
   int i=0;
@@ -570,7 +570,7 @@ int af_init(af_stream_t* s)
    to the stream s. The filter will be inserted somewhere nice in the
    list of filters. The return value is a pointer to the new filter,
    If the filter couldn't be added the return value is NULL. */
-struct af_instance* af_add(af_stream_t* s, char* name){
+struct af_instance* af_add(struct af_stream* s, char* name){
   struct af_instance* new;
   // Sanity check
   if(!s || !s->first || !name)
@@ -595,7 +595,7 @@ struct af_instance* af_add(af_stream_t* s, char* name){
 }
 
 // Filter data chunk through the filters in the list
-struct mp_audio* af_play(af_stream_t* s, struct mp_audio* data)
+struct mp_audio* af_play(struct af_stream* s, struct mp_audio* data)
 {
   struct af_instance* af=s->first;
   // Iterate through all filters
@@ -618,7 +618,7 @@ int af_lencalc(double mul, struct mp_audio* d)
 }
 
 // Calculate average ratio of filter output size to input size
-double af_calc_filter_multiplier(af_stream_t* s)
+double af_calc_filter_multiplier(struct af_stream* s)
 {
   struct af_instance* af=s->first;
   double mul = 1;
@@ -632,7 +632,7 @@ double af_calc_filter_multiplier(af_stream_t* s)
 }
 
 /* Calculate the total delay [bytes output] caused by the filters */
-double af_calc_delay(af_stream_t* s)
+double af_calc_delay(struct af_stream* s)
 {
   struct af_instance* af=s->first;
   register double delay = 0.0;
@@ -666,7 +666,7 @@ int af_resize_local_buffer(struct af_instance* af, struct mp_audio* data)
 }
 
 // documentation in af.h
-struct af_instance *af_control_any_rev (af_stream_t* s, int cmd, void* arg) {
+struct af_instance *af_control_any_rev (struct af_stream* s, int cmd, void* arg) {
   int res = AF_UNKNOWN;
   struct af_instance* filt = s->last;
   while (filt) {

@@ -32,7 +32,7 @@ enum {
 
 typedef struct mixer {
     struct ao *ao;
-    af_stream_t *afilter;
+    struct af_stream *afilter;
     int volstep;
     int softvol;
     float softvol_max;
