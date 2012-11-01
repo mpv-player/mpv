@@ -862,7 +862,7 @@ int glFmt2bpp(GLenum format, GLenum type)
     case GL_LUMINANCE_ALPHA:
         return 2 * component_size;
     }
-    return 0; // unknown
+    abort(); // unknown
 }
 
 /**
