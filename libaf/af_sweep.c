@@ -93,7 +93,7 @@ static int af_open(af_instance_t* af){
   return AF_OK;
 }
 
-af_info_t af_info_sweep = {
+struct af_info af_info_sweep = {
   "sine sweep",
   "sweep",
   "Michael Niedermayer",

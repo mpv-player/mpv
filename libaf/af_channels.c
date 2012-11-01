@@ -296,7 +296,7 @@ static int af_open(af_instance_t* af){
 }
 
 // Description of this filter
-af_info_t af_info_channels = {
+struct af_info af_info_channels = {
   "Insert or remove channels",
   "channels",
   "Anders",

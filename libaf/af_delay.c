@@ -190,7 +190,7 @@ static int af_open(af_instance_t* af){
 }
 
 // Description of this filter
-af_info_t af_info_delay = {
+struct af_info af_info_delay = {
     "Delay audio filter",
     "delay",
     "Anders",

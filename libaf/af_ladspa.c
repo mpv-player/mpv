@@ -102,7 +102,7 @@ static int af_ladspa_malloc_failed(char*);
 
 /* Description */
 
-af_info_t af_info_ladspa = {
+struct af_info af_info_ladspa = {
     "LADSPA plugin loader",
     "ladspa",
     "Ivo van Poorten",

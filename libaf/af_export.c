@@ -263,7 +263,7 @@ static int af_open( af_instance_t* af )
 }
 
 // Description of this filter
-af_info_t af_info_export = {
+struct af_info af_info_export = {
     "Sound export filter",
     "export",
     "Anders; Gustavo Sverzut Barbieri <gustavo.barbieri@ic.unicamp.br>",

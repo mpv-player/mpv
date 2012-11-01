@@ -322,7 +322,7 @@ static int af_open(af_instance_t* af){
     return AF_OK;
 }
 
-af_info_t af_info_lavcac3enc = {
+struct af_info af_info_lavcac3enc = {
     "runtime encode to ac3 using libavcodec",
     "lavcac3enc",
     "Ulion",

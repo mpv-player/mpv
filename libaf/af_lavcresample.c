@@ -203,7 +203,7 @@ static int af_open(af_instance_t* af){
   return AF_OK;
 }
 
-af_info_t af_info_lavcresample = {
+struct af_info af_info_lavcresample = {
   "Sample frequency conversion using libavcodec",
   "lavcresample",
   "Michael Niedermayer",

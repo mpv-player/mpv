@@ -343,7 +343,7 @@ static int af_open(af_instance_t* af){
 }
 
 // Description of this filter
-af_info_t af_info_volnorm = {
+struct af_info af_info_volnorm = {
     "Volume normalizer filter",
     "volnorm",
     "Alex Beregszaszi & Pierre Lombard",

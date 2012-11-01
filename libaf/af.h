@@ -53,20 +53,19 @@ struct mp_audio {
 
 /* Audio filter information not specific for current instance, but for
    a specific filter */
-typedef struct af_info_s
-{
+struct af_info {
   const char *info;
   const char *name;
   const char *author;
   const char *comment;
   const int flags;
   int (*open)(struct af_instance_s* vf);
-} af_info_t;
+};
 
 // Linked list of audio filters
 typedef struct af_instance_s
 {
-  af_info_t* info;
+  struct af_info* info;
   int (*control)(struct af_instance_s* af, int cmd, void* arg);
   void (*uninit)(struct af_instance_s* af);
   struct mp_audio* (*play)(struct af_instance_s* af, struct mp_audio* data);

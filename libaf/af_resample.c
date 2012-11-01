@@ -384,7 +384,7 @@ static int af_open(af_instance_t* af){
 }
 
 // Description of this plugin
-af_info_t af_info_resample = {
+struct af_info af_info_resample = {
   "Sample frequency conversion",
   "resample",
   "Anders",

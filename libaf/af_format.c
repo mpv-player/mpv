@@ -325,7 +325,7 @@ static int af_open(af_instance_t* af){
 }
 
 // Description of this filter
-af_info_t af_info_format = {
+struct af_info af_info_format = {
   "Sample format conversion",
   "format",
   "Anders",

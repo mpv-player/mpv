@@ -174,7 +174,7 @@ static int af_open(af_instance_t* af){
 }
 
 // Description of this filter
-af_info_t af_info_sinesuppress = {
+struct af_info af_info_sinesuppress = {
     "Sine Suppress",
     "sinesuppress",
     "Michael Niedermayer",
