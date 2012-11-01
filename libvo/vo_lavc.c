@@ -34,7 +34,7 @@
 #include "encode_lavc.h"
 
 #include "sub/sub.h"
-#include "libvo/osd.h"
+#include "sub/dec_sub.h"
 
 struct priv {
     uint8_t *buffer;
@@ -49,12 +49,11 @@ struct priv {
     int64_t lastframeipts;
     double expected_next_pts;
     mp_image_t *lastimg;
+    int lastimg_wants_osd;
     int lastdisplaycount;
 
     AVRational worst_time_base;
     int worst_time_base_is_stream;
-
-    struct osd_state *osd;
 
     struct mp_csp_details colorspace;
 };
@@ -156,11 +155,12 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     encode_lavc_set_csp(vo->encode_lavc_ctx, vc->stream, vc->colorspace.format);
     encode_lavc_set_csp_levels(vo->encode_lavc_ctx, vc->stream, vc->colorspace.levels_out);
-    vc->colorspace.format = encode_lavc_get_csp(vo->encode_lavc_ctx, vc->stream);
-    vc->colorspace.levels_out = encode_lavc_get_csp_levels(vo->encode_lavc_ctx, vc->stream);
 
     if (encode_lavc_open_codec(vo->encode_lavc_ctx, vc->stream) < 0)
         goto error;
+
+    vc->colorspace.format = encode_lavc_get_csp(vo->encode_lavc_ctx, vc->stream);
+    vc->colorspace.levels_out = encode_lavc_get_csp_levels(vo->encode_lavc_ctx, vc->stream);
 
     vc->buffer_size = 6 * width * height + 200;
     if (vc->buffer_size < FF_MIN_BUFFER_SIZE)
@@ -191,8 +191,18 @@ static int query_format(struct vo *vo, uint32_t format)
     if (!vo->encode_lavc_ctx)
         return 0;
 
-    return encode_lavc_supports_pixfmt(vo->encode_lavc_ctx, pix_fmt) ?
-           VFCAP_CSP_SUPPORTED : 0;
+    if (!encode_lavc_supports_pixfmt(vo->encode_lavc_ctx, pix_fmt))
+        return 0;
+
+    return
+        VFCAP_CSP_SUPPORTED |
+            // we can do it
+        VFCAP_CSP_SUPPORTED_BY_HW |
+            // we don't convert colorspaces here
+        VFCAP_OSD |
+            // we have OSD
+        VOCAP_NOSLICES;
+            // we don't use slices
 }
 
 static void write_packet(struct vo *vo, int size, AVPacket *packet)
@@ -272,63 +282,6 @@ static int encode_video(struct vo *vo, AVFrame *frame, AVPacket *packet)
 
         encode_lavc_write_stats(vo->encode_lavc_ctx, vc->stream);
         return size;
-    }
-}
-
-static void add_osd_to_lastimg_draw_func(void *ctx, int x0,int y0, int w,int h,unsigned char* src, unsigned char *srca, int stride){
-    struct priv *vc = ctx;
-    unsigned char* dst;
-    if(w<=0 || h<=0) return; // nothing to do...
-    //    printf("OSD redraw: %d;%d %dx%d  \n",x0,y0,w,h);
-    dst=vc->lastimg->planes[0]+
-        vc->lastimg->stride[0]*y0+
-        (vc->lastimg->bpp>>3)*x0;
-    switch(vc->lastimg->imgfmt){
-        case IMGFMT_BGR12:
-        case IMGFMT_RGB12:
-            vo_draw_alpha_rgb12(w, h, src, srca, stride, dst, vc->lastimg->stride[0]);
-            break;
-        case IMGFMT_BGR15:
-        case IMGFMT_RGB15:
-            vo_draw_alpha_rgb15(w,h,src,srca,stride,dst,vc->lastimg->stride[0]);
-            break;
-        case IMGFMT_BGR16:
-        case IMGFMT_RGB16:
-            vo_draw_alpha_rgb16(w,h,src,srca,stride,dst,vc->lastimg->stride[0]);
-            break;
-        case IMGFMT_BGR24:
-        case IMGFMT_RGB24:
-            vo_draw_alpha_rgb24(w,h,src,srca,stride,dst,vc->lastimg->stride[0]);
-            break;
-        case IMGFMT_BGR32:
-        case IMGFMT_RGB32:
-            vo_draw_alpha_rgb32(w,h,src,srca,stride,dst,vc->lastimg->stride[0]);
-            break;
-        case IMGFMT_YV12:
-        case IMGFMT_I420:
-        case IMGFMT_IYUV:
-        case IMGFMT_YVU9:
-        case IMGFMT_IF09:
-        case IMGFMT_Y800:
-        case IMGFMT_Y8:
-            vo_draw_alpha_yv12(w,h,src,srca,stride,dst,vc->lastimg->stride[0]);
-            break;
-        case IMGFMT_YUY2:
-            vo_draw_alpha_yuy2(w,h,src,srca,stride,dst,vc->lastimg->stride[0]);
-            break;
-        case IMGFMT_UYVY:
-            vo_draw_alpha_yuy2(w,h,src,srca,stride,dst+1,vc->lastimg->stride[0]);
-            break;
-        default:
-            mp_msg(MSGT_ENCODE, MSGL_WARN, "vo-lavc: tried to draw OSD on an usnupported pixel format\n");
-    }
-}
-
-static void add_osd_to_lastimg(struct vo *vo)
-{
-    struct priv *vc = vo->priv;
-    if(vc->osd) {
-        osd_draw_text(vc->osd, vc->lastimg->w, vc->lastimg->h, add_osd_to_lastimg_draw_func, vc);
     }
 }
 
@@ -503,7 +456,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
                        "vo-lavc: Frame at pts %d got displayed %d times\n",
                        (int) vc->lastframeipts, vc->lastdisplaycount);
             copy_mpi(vc->lastimg, mpi);
-            add_osd_to_lastimg(vo);
+            vc->lastimg_wants_osd = true;
 
             // palette hack
             if (vc->lastimg->imgfmt == IMGFMT_RGB8 ||
@@ -516,9 +469,41 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
                 vc->lastipts = -1;
             }
             vc->lastdisplaycount = 0;
-        } else
+        } else {
             mp_msg(MSGT_ENCODE, MSGL_INFO, "vo-lavc: Frame at pts %d got dropped "
                    "entirely because pts went backwards\n", (int) frameipts);
+            vc->lastimg_wants_osd = false;
+        }
+    }
+}
+
+static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
+{
+}
+
+static void check_events(struct vo *vo)
+{
+}
+
+static void draw_osd(struct vo *vo, struct osd_state *osd)
+{
+    struct priv *vc = vo->priv;
+
+    if (vc->lastimg && vc->lastimg_wants_osd) {
+        struct aspect_data asp = vo->aspdat;
+        double sar = (double)asp.orgw / asp.orgh;
+        double dar = (double)asp.prew / asp.preh;
+
+        struct mp_osd_res dim = {
+            .w = asp.orgw,
+            .h = asp.orgh,
+            .display_par = sar / dar,
+            .video_par = dar / sar,
+        };
+
+        mp_image_set_colorspace_details(vc->lastimg, &vc->colorspace);
+
+        osd_draw_on_image(osd, dim, osd->vo_pts, OSD_DRAW_SUB_ONLY, vc->lastimg);
     }
 }
 
@@ -547,22 +532,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return VO_NOTIMPL;
 }
 
-static void draw_osd(struct vo *vo, struct osd_state *osd)
-{
-    struct priv *vc = vo->priv;
-    vc->osd = osd;
-    if(vc->lastimg)
-        osd_update(vc->osd, vc->lastimg->w, vc->lastimg->h);
-}
-
-static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
-{
-}
-
-static void check_events(struct vo *vo)
-{
-}
-
 const struct vo_driver video_out_lavc = {
     .is_new = true,
     .buffer_frames = false,
@@ -581,4 +550,4 @@ const struct vo_driver video_out_lavc = {
     .flip_page_timed = flip_page_timed,
 };
 
-// vim: sw=4 ts=4 et
+// vim: sw=4 ts=4 et tw=80

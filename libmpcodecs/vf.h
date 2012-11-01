@@ -99,16 +99,14 @@ struct vf_ctrl_screenshot {
 #define VFCTRL_SET_PP_LEVEL 5       // set postprocessing level
 #define VFCTRL_SET_EQUALIZER 6 // set color options (brightness,contrast etc)
 #define VFCTRL_GET_EQUALIZER 8 // get color options (brightness,contrast etc)
-#define VFCTRL_DRAW_OSD 7
 #define VFCTRL_DUPLICATE_FRAME 11  // For encoding - encode zero-change frame
 #define VFCTRL_SKIP_NEXT_FRAME 12  // For encoding - drop the next frame that passes thru
 #define VFCTRL_FLUSH_FRAMES    13  // For encoding - flush delayed frames
 #define VFCTRL_SCREENSHOT      14  // Take screenshot, arg is vf_ctrl_screenshot
-#define VFCTRL_INIT_EOSD       15  // Select EOSD renderer
-#define VFCTRL_DRAW_EOSD       16  // Render EOSD */
+#define VFCTRL_INIT_OSD        15  // Filter OSD renderer present?
 #define VFCTRL_SET_DEINTERLACE 18  // Set deinterlacing status
 #define VFCTRL_GET_DEINTERLACE 19  // Get deinterlacing status
-/* Hack to make the OSD state object available to vf_expand and vf_ass which
+/* Hack to make the OSD state object available to vf_sub which
  * access OSD/subtitle state outside of normal OSD draw time. */
 #define VFCTRL_SET_OSD_OBJ 20
 #define VFCTRL_SET_YUV_COLORSPACE 22 // arg is struct mp_csp_details*

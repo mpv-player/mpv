@@ -27,7 +27,7 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-#include "vf_scale.h"
+#include "libmpcodecs/sws_utils.h"
 #include "fmt-conversion.h"
 #include "libvo/fastmemcpy.h"
 
@@ -141,6 +141,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
             image = *vf->priv->image;
         image.w = vf->priv->image->w;
         image.h = vf->priv->image->h;
+        vf_clone_mpi_attributes(&image, mpi);
         vf->priv->image_callback(vf->priv->image_callback_ctx, &image);
         vf->priv->store_slices = 0;
     }

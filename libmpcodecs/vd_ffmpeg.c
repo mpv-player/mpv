@@ -774,6 +774,8 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
         swap_palette(mpi->planes[1]);
 #endif
 
+    mpi->colorspace = sh->colorspace;
+    mpi->levels = sh->color_range;
     mpi->qscale = pic->qscale_table;
     mpi->qstride = pic->qstride;
     mpi->pict_type = pic->pict_type;

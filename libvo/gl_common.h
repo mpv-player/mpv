@@ -33,6 +33,8 @@
 #include "video_out.h"
 #include "csputils.h"
 
+#include "libmpcodecs/mp_image.h"
+
 #if defined(CONFIG_GL_COCOA) && !defined(CONFIG_GL_X11)
 #ifdef GL_VERSION_3_0
 #include <OpenGL/gl3.h>
@@ -63,6 +65,8 @@ int glCreatePPMTex(GL *gl, GLenum target, GLenum fmt, GLint filter,
 void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
                  const void *dataptr, int stride,
                  int x, int y, int w, int h, int slice);
+void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
+                int x, int y, int w, int h, uint8_t val, void **scratch);
 void glDownloadTex(GL *gl, GLenum target, GLenum format, GLenum type,
                    void *dataptr, int stride);
 void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
@@ -70,6 +74,7 @@ void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                int sx, int sy, int rect_tex, int is_yv12, int flip);
 int loadGPUProgram(GL *gl, GLenum target, char *prog);
 void glCheckError(GL *gl, const char *info);
+mp_image_t *glGetWindowScreenshot(GL *gl);
 
 /** \addtogroup glconversion
  * \{ */
@@ -380,6 +385,7 @@ struct GL {
     void (GLAPIENTRY *Uniform1f)(GLint, GLfloat);
     void (GLAPIENTRY *Uniform2f)(GLint, GLfloat, GLfloat);
     void (GLAPIENTRY *Uniform3f)(GLint, GLfloat, GLfloat, GLfloat);
+    void (GLAPIENTRY *Uniform4f)(GLint, GLfloat, GLfloat, GLfloat, GLfloat);
     void (GLAPIENTRY *Uniform1i)(GLint, GLint);
     void (GLAPIENTRY *UniformMatrix3fv)(GLint, GLsizei, GLboolean,
                                         const GLfloat *);

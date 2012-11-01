@@ -28,6 +28,7 @@
 #include "mp_msg.h"
 #include "libmpdemux/stheader.h"
 #include "sub.h"
+#include "dec_sub.h"
 #include "ass_mp.h"
 #include "sd.h"
 #include "subassconvert.h"
@@ -36,6 +37,7 @@ struct sd_ass_priv {
     struct ass_track *ass_track;
     bool vsfilter_aspect;
     bool incomplete_event;
+    struct sub_bitmap *parts;
 };
 
 static void free_last_event(ASS_Track *track)
@@ -126,30 +128,26 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
 }
 
 static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
+                        struct mp_osd_res dim, double pts,
                         struct sub_bitmaps *res)
 {
     struct sd_ass_priv *ctx = sh->context;
     struct MPOpts *opts = osd->opts;
 
-    if (osd->sub_pts == MP_NOPTS_VALUE)
+    if (pts == MP_NOPTS_VALUE)
         return;
 
-    double scale = osd->normal_scale;
+    double scale = dim.display_par;
     bool use_vs_aspect = opts->ass_style_override
                          ? opts->ass_vsfilter_aspect_compat : 1;
     if (ctx->vsfilter_aspect && use_vs_aspect)
-        scale = osd->vsfilter_scale;
+        scale = scale * dim.video_par;
     ASS_Renderer *renderer = osd->ass_renderer;
-    mp_ass_configure(renderer, opts, &osd->dim, osd->unscaled);
+    mp_ass_configure(renderer, opts, &dim);
     ass_set_aspect_ratio(renderer, scale, 1);
-    int changed;
-    res->imgs = ass_render_frame(renderer, ctx->ass_track,
-                                 osd->sub_pts * 1000 + .5, &changed);
-    if (changed == 2)
-        res->bitmap_id = ++res->bitmap_pos_id;
-    else if (changed)
-        res->bitmap_pos_id++;
-    res->type = SUBBITMAP_LIBASS;
+    mp_ass_render_frame(renderer, ctx->ass_track, pts * 1000 + .5,
+                        &ctx->parts, res);
+    talloc_steal(ctx, ctx->parts);
 }
 
 static void reset(struct sh_sub *sh, struct osd_state *osd)

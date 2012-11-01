@@ -32,7 +32,7 @@
 #include <ass/ass_types.h>
 
 struct MPOpts;
-struct mp_eosd_res;
+struct mp_osd_res;
 
 ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts);
 ASS_Track *mp_ass_read_subdata(ASS_Library *library, struct MPOpts *opts,
@@ -42,13 +42,18 @@ ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
 
 struct MPOpts;
 void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
-                      struct mp_eosd_res *dim, bool unscaled);
+                      struct mp_osd_res *dim);
 void mp_ass_configure_fonts(ASS_Renderer *priv);
 ASS_Library *mp_ass_init(struct MPOpts *opts);
 
+struct sub_bitmap;
+struct sub_bitmaps;
+void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
+                         struct sub_bitmap **parts, struct sub_bitmaps *res);
+
 #else /* CONFIG_ASS */
 
-/* Needed for EOSD code using this type to compile */
+/* Needed for OSD code using this type to compile */
 
 typedef struct ass_image {
     int w, h;

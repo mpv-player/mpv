@@ -3,6 +3,8 @@
  *
  * Copyleft (C) 2009 Reimar Döffinger <Reimar.Doeffinger@gmx.de>
  *
+ * mp_invert_yuv2rgb based on DarkPlaces engine, original code (GPL2 or later)
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -37,6 +39,7 @@ char * const mp_csp_names[MP_CSP_COUNT] = {
     "BT.601 (SD)",
     "BT.709 (HD)",
     "SMPTE-240M",
+    "RGB",
 };
 
 char * const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
@@ -54,6 +57,7 @@ enum mp_csp avcol_spc_to_mp_csp(enum AVColorSpace colorspace)
         case AVCOL_SPC_BT470BG:   return MP_CSP_BT_601;
 	case AVCOL_SPC_SMPTE170M: return MP_CSP_BT_601;
         case AVCOL_SPC_SMPTE240M: return MP_CSP_SMPTE_240M;
+        case AVCOL_SPC_RGB:       return MP_CSP_RGB;
         default:                  return MP_CSP_AUTO;
     }
 }
@@ -73,7 +77,8 @@ enum AVColorSpace mp_csp_to_avcol_spc(enum mp_csp colorspace)
         case MP_CSP_BT_709:     return AVCOL_SPC_BT709;
         case MP_CSP_BT_601:     return AVCOL_SPC_BT470BG;
         case MP_CSP_SMPTE_240M: return AVCOL_SPC_SMPTE240M;
-        default:                return AVCOL_SPC_RGB;
+        case MP_CSP_RGB:        return AVCOL_SPC_RGB;
+        default:                return AVCOL_SPC_UNSPECIFIED;
     }
 }
 
@@ -228,6 +233,16 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
         m[i][COL_Y] *= params->contrast;
         m[i][COL_C] += (rgblev.max-rgblev.min) * (1 - params->contrast)/2;
     }
+
+    int in_bits = FFMAX(params->int_bits_in, 1);
+    int out_bits = FFMAX(params->int_bits_out, 1);
+    double in_scale = (1 << in_bits) - 1.0;
+    double out_scale = (1 << out_bits) - 1.0;
+    for (int i = 0; i < 3; i++) {
+        m[i][COL_C] *= out_scale; // constant is 1.0
+        for (int x = 0; x < 3; x++)
+            m[i][x] *= out_scale / in_scale;
+    }
 }
 
 //! size of gamma map use to avoid slow exp function in gen_yuv2rgb_map
@@ -316,4 +331,61 @@ int mp_csp_equalizer_set(struct mp_csp_equalizer *eq, const char *property,
     eq->values[index] = value;
 
     return 1;
+}
+
+void mp_invert_yuv2rgb(float out[3][4], float in[3][4])
+{
+    float m00 = in[0][0], m01 = in[0][1], m02 = in[0][2], m03 = in[0][3],
+          m10 = in[1][0], m11 = in[1][1], m12 = in[1][2], m13 = in[1][3],
+          m20 = in[2][0], m21 = in[2][1], m22 = in[2][2], m23 = in[2][3];
+
+    // calculate the adjoint
+    out[0][0] =  (m11 * m22 - m21 * m12);
+    out[0][1] = -(m01 * m22 - m21 * m02);
+    out[0][2] =  (m01 * m12 - m11 * m02);
+    out[1][0] = -(m10 * m22 - m20 * m12);
+    out[1][1] =  (m00 * m22 - m20 * m02);
+    out[1][2] = -(m00 * m12 - m10 * m02);
+    out[2][0] =  (m10 * m21 - m20 * m11);
+    out[2][1] = -(m00 * m21 - m20 * m01);
+    out[2][2] =  (m00 * m11 - m10 * m01);
+
+    // calculate the determinant (as inverse == 1/det * adjoint,
+    // adjoint * m == identity * det, so this calculates the det)
+    float det = m00 * out[0][0] + m10 * out[0][1] + m20 * out[0][2];
+    det = 1.0f / det;
+
+    out[0][0] *= det;
+    out[0][1] *= det;
+    out[0][2] *= det;
+    out[1][0] *= det;
+    out[1][1] *= det;
+    out[1][2] *= det;
+    out[2][0] *= det;
+    out[2][1] *= det;
+    out[2][2] *= det;
+
+    // fix the constant coefficient
+    // rgb = M * yuv + C
+    // M^-1 * rgb = yuv + M^-1 * C
+    // yuv = M^-1 * rgb - M^-1 * C
+    //                  ^^^^^^^^^^
+    out[0][3] = -(out[0][0] * m03 + out[0][1] * m13 + out[0][2] * m23);
+    out[1][3] = -(out[1][0] * m03 + out[1][1] * m13 + out[1][2] * m23);
+    out[2][3] = -(out[2][0] * m03 + out[2][1] * m13 + out[2][2] * m23);
+}
+
+// Multiply the color in c with the given matrix.
+// c is {R, G, B} or {Y, U, V} (depending on input/output and matrix).
+// Output is clipped to the given number of bits.
+void mp_map_int_color(float matrix[3][4], int clip_bits, int c[3])
+{
+    int in[3] = {c[0], c[1], c[2]};
+    for (int i = 0; i < 3; i++) {
+        double val = matrix[i][3];
+        for (int x = 0; x < 3; x++)
+            val += matrix[i][x] * in[x];
+        int ival = lrint(val);
+        c[i] = av_clip(ival, 0, (1 << clip_bits) - 1);
+    }
 }

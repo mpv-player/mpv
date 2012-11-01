@@ -24,6 +24,7 @@
 #ifndef MPLAYER_CSPUTILS_H
 #define MPLAYER_CSPUTILS_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "libavcodec/avcodec.h"
@@ -38,6 +39,7 @@ enum mp_csp {
     MP_CSP_BT_601,
     MP_CSP_BT_709,
     MP_CSP_SMPTE_240M,
+    MP_CSP_RGB,
     MP_CSP_COUNT
 };
 
@@ -69,9 +71,19 @@ struct mp_csp_params {
     float rgamma;
     float ggamma;
     float bgamma;
+    // texture_bits/input_bits is for rescaling fixed point input to range [0,1]
     int texture_bits;
     int input_bits;
+    // for scaling integer input and output (if 0, assume range [0,1])
+    int int_bits_in;
+    int int_bits_out;
 };
+
+#define MP_CSP_PARAMS_DEFAULTS {                                \
+    .colorspace = MP_CSP_DETAILS_DEFAULTS,                      \
+    .brightness = 0, .contrast = 1, .hue = 0, .saturation = 1,  \
+    .rgamma = 1, .ggamma = 1, .bgamma = 1,                      \
+    .texture_bits = 8, .input_bits = 8}
 
 enum mp_csp_equalizer_param {
     MP_CSP_EQ_BRIGHTNESS,
@@ -132,5 +144,8 @@ void mp_gen_gamma_map(unsigned char *map, int size, float gamma);
 #define COL_C 3
 void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float yuv2rgb[3][4]);
 void mp_gen_yuv2rgb_map(struct mp_csp_params *params, uint8_t *map, int size);
+
+void mp_invert_yuv2rgb(float out[3][4], float in[3][4]);
+void mp_map_int_color(float matrix[3][4], int clip_bits, int c[3]);
 
 #endif /* MPLAYER_CSPUTILS_H */

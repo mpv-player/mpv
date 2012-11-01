@@ -22,7 +22,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 #include "mp_msg.h"
+#include "libvo/csputils.h"
 
 //--------- codec's requirements (filled by the codec/vf) ---------
 
@@ -109,9 +111,10 @@ typedef struct mp_image {
     int number;
     unsigned char bpp;  // bits/pixel. NOT depth! for RGB it will be n*8
     unsigned int imgfmt;
-    int width,height;  // stored dimensions
+    int width,height;  // internal to vf.c, do not use (stored dimensions)
     int w,h;  // visible dimensions
-    unsigned char* planes[MP_MAX_PLANES];
+    int display_w,display_h; // if set (!= 0), anamorphic size
+    uint8_t *planes[MP_MAX_PLANES];
     int stride[MP_MAX_PLANES];
     char * qscale;
     int qstride;
@@ -124,6 +127,8 @@ typedef struct mp_image {
     int chroma_height;
     int chroma_x_shift; // horizontal
     int chroma_y_shift; // vertical
+    enum mp_csp colorspace;
+    enum mp_csp_levels levels;
     int usage_count;
     /* for private use by filter or vo driver (to store buffer id or dmpi) */
     void* priv;
@@ -136,5 +141,22 @@ void free_mp_image(mp_image_t* mpi);
 mp_image_t* alloc_mpi(int w, int h, unsigned long int fmt);
 void mp_image_alloc_planes(mp_image_t *mpi);
 void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi);
+
+enum mp_csp mp_image_csp(struct mp_image *img);
+enum mp_csp_levels mp_image_levels(struct mp_image *img);
+
+struct mp_csp_details;
+void mp_image_set_colorspace_details(struct mp_image *image,
+                                     struct mp_csp_details *csp);
+
+// this macro requires img_format.h to be included too:
+#define MP_IMAGE_PLANAR_BITS_PER_PIXEL_ON_PLANE(mpi, p) \
+    (IMGFMT_IS_YUVP16((mpi)->imgfmt) ? 16 : 8)
+#define MP_IMAGE_BITS_PER_PIXEL_ON_PLANE(mpi, p) \
+    (((mpi)->flags & MP_IMGFLAG_PLANAR) \
+        ? MP_IMAGE_PLANAR_BITS_PER_PIXEL_ON_PLANE(mpi, p) \
+        : (mpi)->bpp)
+#define MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, p) \
+    ((MP_IMAGE_BITS_PER_PIXEL_ON_PLANE(mpi, p) * ((mpi)->w >> (p ? mpi->chroma_x_shift : 0)) + 7) / 8)
 
 #endif /* MPLAYER_MP_IMAGE_H */

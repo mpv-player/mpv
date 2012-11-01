@@ -67,7 +67,7 @@ void main() {
     texcoord = vertex_texcoord;
 }
 
-#!section frag_eosd
+#!section frag_osd_libass
 uniform sampler2D textures[3];
 
 in vec2 texcoord;
@@ -78,15 +78,14 @@ void main() {
     out_color = vec4(color.rgb, color.a * texture(textures[0], texcoord).r);
 }
 
-#!section frag_osd
+#!section frag_osd_rgba
 uniform sampler2D textures[3];
 
 in vec2 texcoord;
-in vec4 color;
 DECLARE_FRAGPARMS
 
 void main() {
-    out_color = texture(textures[0], texcoord).rrrg * color;
+    out_color = texture(textures[0], texcoord);
 }
 
 #!section frag_video

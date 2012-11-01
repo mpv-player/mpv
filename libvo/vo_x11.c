@@ -24,7 +24,7 @@
 #include "config.h"
 #include "video_out.h"
 #include "aspect.h"
-#include "osd.h"
+#include "csputils.h"
 #include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/vfcap.h"
 
@@ -43,8 +43,7 @@
 
 #include "sub/sub.h"
 
-#include "libswscale/swscale.h"
-#include "libmpcodecs/vf_scale.h"
+#include "libmpcodecs/sws_utils.h"
 #define MODE_RGB  0x1
 #define MODE_BGR  0x2
 
@@ -112,42 +111,6 @@ static void check_events(struct vo *vo)
                                 p->myximage->height);
     if (ret & VO_EVENT_EXPOSE && p->int_pause)
         flip_page(vo);
-}
-
-static void draw_alpha_32(int x0, int y0, int w, int h, unsigned char *src,
-                          unsigned char *srca, int stride,
-                          unsigned char *dst, uint32_t dst_width)
-{
-    vo_draw_alpha_rgb32(w, h, src, srca, stride,
-                        dst + 4 * (y0 * dst_width + x0),
-                        4 * dst_width);
-}
-
-static void draw_alpha_24(int x0, int y0, int w, int h, unsigned char *src,
-                          unsigned char *srca, int stride,
-                          unsigned char *dst, uint32_t dst_width)
-{
-    vo_draw_alpha_rgb24(w, h, src, srca, stride,
-                        dst + 3 * (y0 * dst_width + x0),
-                        3 * dst_width);
-}
-
-static void draw_alpha_16(int x0, int y0, int w, int h, unsigned char *src,
-                          unsigned char *srca, int stride,
-                          unsigned char *dst, uint32_t dst_width)
-{
-    vo_draw_alpha_rgb16(w, h, src, srca, stride,
-                        dst + 2 * (y0 * dst_width + x0),
-                        2 * dst_width);
-}
-
-static void draw_alpha_15(int x0, int y0, int w, int h, unsigned char *src,
-                          unsigned char *srca, int stride,
-                          unsigned char *dst, uint32_t dst_width)
-{
-    vo_draw_alpha_rgb15(w, h, src, srca, stride,
-                        dst + 2 * (y0 * dst_width + x0),
-                        2 * dst_width);
 }
 
 static void getMyXImage(struct priv *p)
@@ -450,36 +413,33 @@ static void Display_Image(struct priv *p, XImage *myximage, uint8_t *ImageData)
     p->myximage->data -= p->out_offset;
 }
 
-static void draw_osd_elem(void *ctx, int x0, int y0, int w, int h,
-                          unsigned char *src, unsigned char *srca, int stride)
+static struct mp_image get_x_buffer(struct priv *p)
 {
-    struct priv *p = ctx;
+    struct mp_image img = {0};
+    img.w = img.width = p->image_width;
+    img.h = img.height = p->image_height;
+    mp_image_setfmt(&img, p->out_format);
 
-    switch (p->myximage->bits_per_pixel) {
-    case 24:
-        draw_alpha_24(x0, y0, w, h, src, srca, stride, p->ImageData,
-                      p->image_width);
-        break;
-    case 32:
-        draw_alpha_32(x0, y0, w, h, src, srca, stride, p->ImageData,
-                      p->image_width);
-        break;
-    case 15:
-        draw_alpha_15(x0, y0, w, h, src, srca, stride, p->ImageData,
-                      p->image_width);
-        break;
-    case 16:
-        draw_alpha_16(x0, y0, w, h, src, srca, stride, p->ImageData,
-                      p->image_width);
-        break;
-    default:;
-    }
+    img.planes[0] = p->ImageData;
+    img.stride[0] = p->image_width * ((p->bpp + 7) / 8);
+
+    return img;
 }
 
 static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct priv *p = vo->priv;
-    osd_draw_text(osd, p->image_width, p->image_height, draw_osd_elem, p);
+
+    struct mp_image img = get_x_buffer(p);
+
+    struct mp_osd_res res = {
+        .w = img.w,
+        .h = img.h,
+        .display_par = vo->monitor_par,
+        .video_par = vo->aspdat.par,
+    };
+
+    osd_draw_on_image(osd, res, osd->vo_pts, 0, &img);
 }
 
 static void flip_page(struct vo *vo)

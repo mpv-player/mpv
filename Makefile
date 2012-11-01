@@ -38,9 +38,7 @@ SRCS_COMMON-$(FTP)                   += stream/stream_ftp.c
 SRCS_COMMON-$(GIF)                   += libmpdemux/demux_gif.c
 SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c osdep/mmap_anon.c
 SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
-SRCS_COMMON-$(LIBASS)                += libmpcodecs/vf_ass.c \
-                                        sub/ass_mp.c \
-                                        sub/sd_ass.c \
+SRCS_COMMON-$(LIBASS)                += sub/ass_mp.c sub/sd_ass.c
 
 SRCS_COMMON-$(LIBBLURAY)             += stream/stream_bluray.c
 SRCS_COMMON-$(LIBBS2B)               += libaf/af_bs2b.c
@@ -144,6 +142,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/img_format.c \
               libmpcodecs/mp_image.c \
               libmpcodecs/pullup.c \
+              libmpcodecs/sws_utils.c \
               libmpcodecs/vd.c \
               libmpcodecs/vd_ffmpeg.c \
               libmpcodecs/vf.c \
@@ -170,6 +169,7 @@ SRCS_COMMON = asxparser.c \
               libmpcodecs/vf_screenshot.c \
               libmpcodecs/vf_softpulldown.c \
               libmpcodecs/vf_stereo3d.c \
+              libmpcodecs/vf_sub.c \
               libmpcodecs/vf_swapuv.c \
               libmpcodecs/vf_unsharp.c \
               libmpcodecs/vf_vo.c \
@@ -197,8 +197,6 @@ SRCS_COMMON = asxparser.c \
               libmpdemux/mf.c \
               libmpdemux/mp_taglists.c \
               libmpdemux/video.c \
-              libvo/osd.c \
-              libvo/eosd_packer.c \
               libvo/bitmap_packer.c \
               osdep/numcores.c \
               osdep/io.c \
@@ -216,6 +214,8 @@ SRCS_COMMON = asxparser.c \
               sub/sd_lavc.c \
               sub/spudec.c \
               sub/sub.c \
+              sub/img_convert.c \
+              sub/draw_bmp.c \
               sub/subassconvert.c \
               sub/subreader.c \
               sub/vobsub.c \
@@ -234,7 +234,7 @@ SRCS_MPLAYER-$(COREVIDEO)    += libvo/vo_corevideo.m
 SRCS_MPLAYER-$(DIRECT3D)     += libvo/vo_direct3d.c libvo/w32_common.c
 SRCS_MPLAYER-$(DSOUND)       += libao2/ao_dsound.c
 SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_opengl.c \
-                                libvo/vo_opengl_old.c pnm_loader.c
+                                libvo/gl_osd.c libvo/vo_opengl_old.c pnm_loader.c
 SRCS_MPLAYER-$(ENCODING)     += libvo/vo_lavc.c libao2/ao_lavc.c encode_lavc.c
 SRCS_MPLAYER-$(GL_WIN32)     += libvo/w32_common.c
 SRCS_MPLAYER-$(GL_X11)       += libvo/x11_common.c

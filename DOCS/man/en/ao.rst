@@ -94,7 +94,7 @@ dsound (Windows only)
 
 null
     Produces no audio output but maintains video playback speed. Use
-    ``--nosound`` for benchmarking.
+    ``--no-audio`` for benchmarking.
 
 pcm
     raw PCM/wave file writer audio output

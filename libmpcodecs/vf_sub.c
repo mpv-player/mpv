@@ -35,41 +35,25 @@
 #include "mp_image.h"
 #include "vf.h"
 #include "sub/sub.h"
+#include "sub/dec_sub.h"
 
 #include "libvo/fastmemcpy.h"
+#include "libvo/csputils.h"
 
 #include "m_option.h"
 #include "m_struct.h"
-
-#include "sub/ass_mp.h"
-
-#define _r(c)  ((c)>>24)
-#define _g(c)  (((c)>>16)&0xFF)
-#define _b(c)  (((c)>>8)&0xFF)
-#define _a(c)  ((c)&0xFF)
-#define rgba2y(c)  ( (( 263*_r(c) + 516*_g(c) + 100*_b(c)) >> 10) + 16  )
-#define rgba2u(c)  ( ((-152*_r(c) - 298*_g(c) + 450*_b(c)) >> 10) + 128 )
-#define rgba2v(c)  ( (( 450*_r(c) - 376*_g(c) -  73*_b(c)) >> 10) + 128 )
-
 
 static const struct vf_priv_s {
     int outh, outw;
 
     unsigned int outfmt;
-
-    // 1 = auto-added filter: insert only if chain does not support EOSD already
-    // 0 = insert always
-    int auto_insert;
+    struct mp_csp_details csp;
 
     struct osd_state *osd;
-    double aspect_correction;
-
-    unsigned char *planes[3];
-    struct line_limits {
-        uint16_t start;
-        uint16_t end;
-    } *line_limits;
-} vf_priv_dflt;
+    struct mp_osd_res dim;
+} vf_priv_dflt = {
+    .csp = MP_CSP_DETAILS_DEFAULTS,
+};
 
 static int config(struct vf_instance *vf,
                   int width, int height, int d_width, int d_height,
@@ -87,11 +71,17 @@ static int config(struct vf_instance *vf,
         d_height = d_height * vf->priv->outh / height;
     }
 
-    vf->priv->planes[1]   = malloc(vf->priv->outw * vf->priv->outh);
-    vf->priv->planes[2]   = malloc(vf->priv->outw * vf->priv->outh);
-    vf->priv->line_limits = malloc((vf->priv->outh + 1) / 2 * sizeof(*vf->priv->line_limits));
+    double dar = (double)d_width / d_height;
+    double sar = (double)width / height;
 
-    vf->priv->aspect_correction = (double)width / height * d_height / d_width;
+    vf->priv->dim = (struct mp_osd_res) {
+        .w = vf->priv->outw,
+        .h = vf->priv->outh,
+        .mt = opts->ass_top_margin,
+        .mb = opts->ass_bottom_margin,
+        .display_par = sar / dar,
+        .video_par = dar / sar,
+    };
 
     return vf_next_config(vf, vf->priv->outw, vf->priv->outh, d_width,
 			  d_height, flags, outfmt);
@@ -225,153 +215,16 @@ static int prepare_image(struct vf_instance *vf, mp_image_t *mpi)
     return 0;
 }
 
-static void update_limits(struct vf_instance *vf, int starty, int endy,
-                          int startx, int endx)
-{
-    starty >>= 1;
-    endy = (endy + 1) >> 1;
-    startx >>= 1;
-    endx = (endx + 1) >> 1;
-    for (int i = starty; i < endy; i++) {
-        struct line_limits *ll = vf->priv->line_limits + i;
-        if (startx < ll->start)
-            ll->start = startx;
-        if (endx > ll->end)
-            ll->end = endx;
-    }
-}
-
-/**
- * \brief Copy specified rows from render_context.dmpi to render_context.planes, upsampling to 4:4:4
- */
-static void copy_from_image(struct vf_instance *vf)
-{
-    int pl;
-
-    for (pl = 1; pl < 3; ++pl) {
-        int dst_stride = vf->priv->outw;
-        int src_stride = vf->dmpi->stride[pl];
-
-        unsigned char *src = vf->dmpi->planes[pl];
-        unsigned char *dst = vf->priv->planes[pl];
-        for (int i = 0; i < (vf->priv->outh + 1) / 2; i++) {
-            struct line_limits *ll = vf->priv->line_limits + i;
-            unsigned char *dst_next = dst + dst_stride;
-            for (int j = ll->start; j < ll->end; j++) {
-                unsigned char val = src[j];
-                dst[j << 1] = val;
-                dst[(j << 1) + 1] = val;
-                dst_next[j << 1] = val;
-                dst_next[(j << 1) + 1] = val;
-            }
-            src += src_stride;
-            dst = dst_next + dst_stride;
-        }
-    }
-}
-
-/**
- * \brief Copy all previously copied rows back to render_context.dmpi
- */
-static void copy_to_image(struct vf_instance *vf)
-{
-    int pl;
-    int i, j;
-    for (pl = 1; pl < 3; ++pl) {
-        int dst_stride = vf->dmpi->stride[pl];
-        int src_stride = vf->priv->outw;
-
-        unsigned char *dst      = vf->dmpi->planes[pl];
-        unsigned char *src      = vf->priv->planes[pl];
-        unsigned char *src_next = vf->priv->planes[pl] + src_stride;
-        for (i = 0; i < vf->priv->outh / 2; ++i) {
-            for (j = vf->priv->line_limits[i].start; j < vf->priv->line_limits[i].end; j++) {
-                unsigned val = 0;
-                val += src[j << 1];
-                val += src[(j << 1) + 1];
-                val += src_next[j << 1];
-                val += src_next[(j << 1) + 1];
-                dst[j] = val >> 2;
-            }
-            dst += dst_stride;
-            src      = src_next + src_stride;
-            src_next = src + src_stride;
-        }
-    }
-}
-
-static void my_draw_bitmap(struct vf_instance *vf, unsigned char *bitmap,
-			   int bitmap_w, int bitmap_h, int stride,
-			   int dst_x, int dst_y, unsigned color)
-{
-    unsigned char y = rgba2y(color);
-    unsigned char u = rgba2u(color);
-    unsigned char v = rgba2v(color);
-    unsigned char opacity = 255 - _a(color);
-    unsigned char *src, *dsty, *dstu, *dstv;
-    int i, j;
-    mp_image_t *dmpi = vf->dmpi;
-
-    src = bitmap;
-    dsty = dmpi->planes[0] + dst_x + dst_y * dmpi->stride[0];
-    dstu = vf->priv->planes[1] + dst_x + dst_y * vf->priv->outw;
-    dstv = vf->priv->planes[2] + dst_x + dst_y * vf->priv->outw;
-    for (i = 0; i < bitmap_h; ++i) {
-        for (j = 0; j < bitmap_w; ++j) {
-            unsigned k = (src[j] * opacity + 255) >> 8;
-            dsty[j] = (k * y + (255 - k) * dsty[j] + 255) >> 8;
-            dstu[j] = (k * u + (255 - k) * dstu[j] + 255) >> 8;
-            dstv[j] = (k * v + (255 - k) * dstv[j] + 255) >> 8;
-        }
-        src  += stride;
-        dsty += dmpi->stride[0];
-        dstu += vf->priv->outw;
-        dstv += vf->priv->outw;
-    }
-}
-
-static int render_frame(struct vf_instance *vf, mp_image_t *mpi,
-			const ASS_Image *img)
-{
-    if (img) {
-        for (int i = 0; i < (vf->priv->outh + 1) / 2; i++)
-            vf->priv->line_limits[i] = (struct line_limits){65535, 0};
-        for (const ASS_Image *im = img; im; im = im->next)
-            update_limits(vf, im->dst_y, im->dst_y + im->h,
-			  im->dst_x, im->dst_x + im->w);
-        copy_from_image(vf);
-        while (img) {
-            my_draw_bitmap(vf, img->bitmap, img->w, img->h, img->stride,
-                           img->dst_x, img->dst_y, img->color);
-            img = img->next;
-        }
-        copy_to_image(vf);
-    }
-    return 0;
-}
-
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     struct vf_priv_s *priv = vf->priv;
-    struct MPOpts *opts = vf->opts;
     struct osd_state *osd = priv->osd;
-    ASS_Image *images = 0;
-    if (pts != MP_NOPTS_VALUE) {
-        osd->dim = (struct mp_eosd_res){ .w = vf->priv->outw,
-                                         .h = vf->priv->outh,
-                                         .mt = opts->ass_top_margin,
-                                         .mb = opts->ass_bottom_margin };
-        osd->normal_scale = vf->priv->aspect_correction;
-        osd->vsfilter_scale = 1;
-        osd->sub_pts = pts - osd->sub_offset;
-        osd->support_rgba = false;
-        struct sub_bitmaps b;
-        sub_get_bitmaps(osd, &b);
-        images = b.imgs;
-    }
 
     prepare_image(vf, mpi);
-    render_frame(vf, mpi, images);
+    mp_image_set_colorspace_details(mpi, &priv->csp);
+
+    if (pts != MP_NOPTS_VALUE)
+        osd_draw_on_image(osd, priv->dim, pts, OSD_DRAW_SUB_FILTER, vf->dmpi);
 
     return vf_next_put_image(vf, vf->dmpi, pts);
 }
@@ -393,19 +246,19 @@ static int control(vf_instance_t *vf, int request, void *data)
     case VFCTRL_SET_OSD_OBJ:
         vf->priv->osd = data;
         break;
-    case VFCTRL_INIT_EOSD:
+    case VFCTRL_INIT_OSD:
         return CONTROL_TRUE;
-    case VFCTRL_DRAW_EOSD:
-        return CONTROL_TRUE;
+    case VFCTRL_SET_YUV_COLORSPACE: {
+        struct mp_csp_details colorspace = *(struct mp_csp_details *)data;
+        vf->priv->csp = colorspace;
+        break;
+    }
     }
     return vf_next_control(vf, request, data);
 }
 
 static void uninit(struct vf_instance *vf)
 {
-    free(vf->priv->planes[1]);
-    free(vf->priv->planes[2]);
-    free(vf->priv->line_limits);
     free(vf->priv);
 }
 
@@ -418,20 +271,11 @@ static const unsigned int fmt_list[] = {
 
 static int vf_open(vf_instance_t *vf, char *args)
 {
-    int flags;
     vf->priv->outfmt = vf_match_csp(&vf->next, fmt_list, IMGFMT_YV12);
-    if (vf->priv->outfmt)
-        flags = vf_next_query_format(vf, vf->priv->outfmt);
     if (!vf->priv->outfmt) {
         uninit(vf);
         return 0;
-    } else if (vf->priv->auto_insert && flags & VFCAP_EOSD) {
-        uninit(vf);
-        return -1;
     }
-
-    if (vf->priv->auto_insert)
-        mp_msg(MSGT_ASS, MSGL_INFO, "[ass] auto-open\n");
 
     vf->config = config;
     vf->query_format = query_format;
@@ -439,26 +283,25 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->control   = control;
     vf->get_image = get_image;
     vf->put_image = put_image;
-    vf->default_caps = VFCAP_EOSD | VFCAP_EOSD_FILTER;
+    vf->default_caps = VFCAP_OSD;
     return 1;
 }
 
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s, f)
 static const m_option_t vf_opts_fields[] = {
-    {"auto", ST_OFF(auto_insert), CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 static const m_struct_t vf_opts = {
-    "ass",
+    "sub",
     sizeof(struct vf_priv_s),
     &vf_priv_dflt,
     vf_opts_fields
 };
 
-const vf_info_t vf_info_ass = {
-    "Render ASS/SSA subtitles",
-    "ass",
+const vf_info_t vf_info_sub = {
+    "Render subtitles",
+    "sub",
     "Evgeniy Stepanov",
     "",
     vf_open,

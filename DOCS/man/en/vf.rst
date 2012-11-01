@@ -663,15 +663,15 @@ screenshot
     not always safe to insert this filter by default. See the
     ``Taking screenshots`` section for details.
 
-ass
-    Moves SSA/ASS subtitle rendering to an arbitrary point in the filter
+sub
+    Moves subtitle rendering to an arbitrary point in the filter
     chain, or force subtitle rendering in the video filter as opposed to using
-    video output EOSD support. See the ``--ass`` option.
+    video output OSD support.
 
     *EXAMPLE*:
 
-    ``--vf=ass,eq``
-        Moves SSA/ASS rendering before the eq filter. This will put both
+    ``--vf=sub,eq``
+        Moves sub rendering before the eq filter. This will put both
         subtitle colors and video under the influence of the video equalizer
         settings.
 

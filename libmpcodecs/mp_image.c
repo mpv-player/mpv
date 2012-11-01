@@ -26,11 +26,30 @@
 
 #include "libmpcodecs/img_format.h"
 #include "libmpcodecs/mp_image.h"
+#include "libmpcodecs/sws_utils.h"
 
 #include "libvo/fastmemcpy.h"
 #include "libavutil/mem.h"
+#include "libavutil/common.h"
 
 void mp_image_alloc_planes(mp_image_t *mpi) {
+  if (mpi->imgfmt == IMGFMT_BGRA) {
+    mpi->stride[0]=FFALIGN(mpi->width*4,SWS_MIN_BYTE_ALIGN);
+    mpi->planes[0]=av_malloc(mpi->stride[0]*mpi->height);
+    mpi->flags|=MP_IMGFLAG_ALLOCATED;
+    return;
+  }
+  if (mpi->imgfmt == IMGFMT_444P16 || mpi->imgfmt == IMGFMT_444P) {
+    int bp = mpi->imgfmt == IMGFMT_444P16 ? 2 : 1;
+    mpi->stride[0]=FFALIGN(mpi->width*bp,SWS_MIN_BYTE_ALIGN);
+    mpi->stride[1]=mpi->stride[2]=mpi->stride[0];
+    int imgsize = mpi->stride[0] * mpi->height;
+    mpi->planes[0]=av_malloc(imgsize*3);
+    mpi->planes[1]=mpi->planes[0]+imgsize;
+    mpi->planes[2]=mpi->planes[1]+imgsize;
+    mpi->flags|=MP_IMGFLAG_ALLOCATED;
+    return;
+  }
   // IF09 - allocate space for 4. plane delta info - unused
   if (mpi->imgfmt == IMGFMT_IF09) {
     mpi->planes[0]=av_malloc(mpi->bpp*mpi->width*(mpi->height+2)/8+
@@ -40,7 +59,9 @@ void mp_image_alloc_planes(mp_image_t *mpi) {
   if (!mpi->planes[0])
     abort(); //out of memory
   if (mpi->flags&MP_IMGFLAG_PLANAR) {
-    int bpp = IMGFMT_IS_YUVP16(mpi->imgfmt)? 2 : 1;
+    // FIXME this code only supports same bpp for all planes, and bpp divisible
+    // by 8. Currently the case for all planar formats.
+    int bpp = MP_IMAGE_PLANAR_BITS_PER_PIXEL_ON_PLANE(mpi, 0) / 8;
     // YV12/I420/YVU9/IF09. feel free to add other planar formats here...
     mpi->stride[0]=mpi->stride[3]=bpp*mpi->width;
     if(mpi->num_planes > 2){
@@ -82,15 +103,15 @@ mp_image_t* alloc_mpi(int w, int h, unsigned long int fmt) {
 
 void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi) {
   if(mpi->flags&MP_IMGFLAG_PLANAR){
-    memcpy_pic(dmpi->planes[0],mpi->planes[0], mpi->w, mpi->h,
+    memcpy_pic(dmpi->planes[0],mpi->planes[0], MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, 0), mpi->h,
 	       dmpi->stride[0],mpi->stride[0]);
-    memcpy_pic(dmpi->planes[1],mpi->planes[1], mpi->chroma_width, mpi->chroma_height,
+    memcpy_pic(dmpi->planes[1],mpi->planes[1], MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, 1), mpi->chroma_height,
 	       dmpi->stride[1],mpi->stride[1]);
-    memcpy_pic(dmpi->planes[2], mpi->planes[2], mpi->chroma_width, mpi->chroma_height,
+    memcpy_pic(dmpi->planes[2], mpi->planes[2], MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, 2), mpi->chroma_height,
 	       dmpi->stride[2],mpi->stride[2]);
   } else {
     memcpy_pic(dmpi->planes[0],mpi->planes[0],
-	       mpi->w*(dmpi->bpp/8), mpi->h,
+	       MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, 0), mpi->h,
 	       dmpi->stride[0],mpi->stride[0]);
   }
 }
@@ -180,6 +201,9 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->flags|=MP_IMGFLAG_SWAPPED;
     case IMGFMT_YUY2:
         mpi->chroma_x_shift = 1;
+        mpi->chroma_y_shift = 1;
+        mpi->chroma_width=(mpi->width>>1);
+        mpi->chroma_height=(mpi->height>>1);
 	mpi->bpp=16;
 	mpi->num_planes=1;
 	return;
@@ -225,3 +249,32 @@ void free_mp_image(mp_image_t* mpi){
     talloc_free(mpi);
 }
 
+enum mp_csp mp_image_csp(struct mp_image *img)
+{
+    if (img->colorspace != MP_CSP_AUTO)
+        return img->colorspace;
+    return (img->flags & MP_IMGFLAG_YUV) ? MP_CSP_BT_601 : MP_CSP_RGB;
+}
+
+enum mp_csp_levels mp_image_levels(struct mp_image *img)
+{
+    if (img->levels != MP_CSP_LEVELS_AUTO)
+        return img->levels;
+    return (img->flags & MP_IMGFLAG_YUV) ? MP_CSP_LEVELS_TV : MP_CSP_LEVELS_PC;
+}
+
+void mp_image_set_colorspace_details(struct mp_image *image,
+                                     struct mp_csp_details *csp)
+{
+    if (image->flags & MP_IMGFLAG_YUV) {
+        image->colorspace = csp->format;
+        if (image->colorspace == MP_CSP_AUTO)
+            image->colorspace = MP_CSP_BT_601;
+        image->levels = csp->levels_in;
+        if (image->levels == MP_CSP_LEVELS_AUTO)
+            image->levels = MP_CSP_LEVELS_TV;
+    } else {
+        image->colorspace = MP_CSP_RGB;
+        image->levels = MP_CSP_LEVELS_PC;
+    }
+}

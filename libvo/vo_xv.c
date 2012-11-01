@@ -47,7 +47,6 @@
 #include "video_out.h"
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"
-#include "osd.h"
 #include "x11_common.h"
 #include "fastmemcpy.h"
 #include "sub/sub.h"
@@ -78,14 +77,10 @@ struct xvctx {
     uint32_t image_height;
     uint32_t image_format;
     int is_paused;
-    struct vo_rect src_rect;
-    struct vo_rect dst_rect;
+    struct mp_rect src_rect;
+    struct mp_rect dst_rect;
     uint32_t max_width, max_height; // zero means: not set
     int mode_switched;
-    int osd_objects_drawn;
-    void (*draw_alpha_fnc)(void *ctx, int x0, int y0, int w, int h,
-                           unsigned char *src, unsigned char *srca,
-                           int stride);
 #ifdef HAVE_SHM
     XShmSegmentInfo Shminfo[2 + 1];
     int Shmem_Flag;
@@ -93,82 +88,22 @@ struct xvctx {
 };
 
 static void allocate_xvimage(struct vo *, int);
-
-
-static void fixup_osd_position(struct vo *vo, int *x0, int *y0, int *w, int *h)
-{
-    struct xvctx *ctx = vo->priv;
-    *x0 += ctx->image_width * (vo->panscan_x >> 1)
-                            / (vo->dwidth + vo->panscan_x);
-    *w = av_clip(*w, 0, ctx->image_width);
-    *h = av_clip(*h, 0, ctx->image_height);
-    *x0 = FFMIN(*x0, ctx->image_width  - *w);
-    *y0 = FFMIN(*y0, ctx->image_height - *h);
-}
-
-static void draw_alpha_yv12(void *p, int x0, int y0, int w, int h,
-                            unsigned char *src, unsigned char *srca,
-                            int stride)
-{
-    struct vo *vo = p;
-    struct xvctx *ctx = vo->priv;
-    fixup_osd_position(vo, &x0, &y0, &w, &h);
-    vo_draw_alpha_yv12(w, h, src, srca, stride,
-                       ctx->xvimage[ctx->current_buf]->data +
-                       ctx->xvimage[ctx->current_buf]->offsets[0] +
-                       ctx->xvimage[ctx->current_buf]->pitches[0] * y0 + x0,
-                       ctx->xvimage[ctx->current_buf]->pitches[0]);
-    ctx->osd_objects_drawn++;
-}
-
-static void draw_alpha_yuy2(void *p, int x0, int y0, int w, int h,
-                            unsigned char *src, unsigned char *srca,
-                            int stride)
-{
-    struct vo *vo = p;
-    struct xvctx *ctx = vo->priv;
-    fixup_osd_position(vo, &x0, &y0, &w, &h);
-    vo_draw_alpha_yuy2(w, h, src, srca, stride,
-                       ctx->xvimage[ctx->current_buf]->data +
-                       ctx->xvimage[ctx->current_buf]->offsets[0] +
-                       ctx->xvimage[ctx->current_buf]->pitches[0] * y0 + 2 * x0,
-                       ctx->xvimage[ctx->current_buf]->pitches[0]);
-    ctx->osd_objects_drawn++;
-}
-
-static void draw_alpha_uyvy(void *p, int x0, int y0, int w, int h,
-                            unsigned char *src, unsigned char *srca,
-                            int stride)
-{
-    struct vo *vo = p;
-    struct xvctx *ctx = vo->priv;
-    fixup_osd_position(vo, &x0, &y0, &w, &h);
-    vo_draw_alpha_yuy2(w, h, src, srca, stride,
-                       ctx->xvimage[ctx->current_buf]->data +
-                       ctx->xvimage[ctx->current_buf]->offsets[0] +
-                       ctx->xvimage[ctx->current_buf]->pitches[0] * y0 + 2 * x0 + 1,
-                       ctx->xvimage[ctx->current_buf]->pitches[0]);
-    ctx->osd_objects_drawn++;
-}
-
-static void draw_alpha_null(void *p, int x0, int y0, int w, int h,
-                            unsigned char *src, unsigned char *srca,
-                            int stride)
-{
-}
-
-
 static void deallocate_xvimage(struct vo *vo, int foo);
 
 static void resize(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
 
-    calc_src_dst_rects(vo, ctx->image_width, ctx->image_height, &ctx->src_rect,
-                       &ctx->dst_rect, NULL, NULL);
-    struct vo_rect *dst = &ctx->dst_rect;
-    vo_x11_clearwindow_part(vo, vo->x11->window, dst->width, dst->height);
-    vo_xv_draw_colorkey(vo, dst->left, dst->top, dst->width, dst->height);
+    // Can't be used, because the function calculates screen-space coordinates,
+    // while we need video-space.
+    struct mp_osd_res unused;
+
+    vo_get_src_dst_rects(vo, &ctx->src_rect, &ctx->dst_rect, &unused);
+
+    struct mp_rect *dst = &ctx->dst_rect;
+    int dw = dst->x1 - dst->x0, dh = dst->y1 - dst->y0;
+    vo_x11_clearwindow_part(vo, vo->x11->window, dw, dh);
+    vo_xv_draw_colorkey(vo, dst->x0, dst->y0, dw, dh);
 }
 
 /*
@@ -256,23 +191,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     mp_msg(MSGT_VO, MSGL_V, "using Xvideo port %d for hw scaling\n",
            x11->xv_port);
-
-    switch (ctx->xv_format) {
-    case IMGFMT_YV12:
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
-        ctx->draw_alpha_fnc = draw_alpha_yv12;
-        break;
-    case IMGFMT_YUY2:
-    case IMGFMT_YVYU:
-        ctx->draw_alpha_fnc = draw_alpha_yuy2;
-        break;
-    case IMGFMT_UYVY:
-        ctx->draw_alpha_fnc = draw_alpha_uyvy;
-        break;
-    default:
-        ctx->draw_alpha_fnc = draw_alpha_null;
-    }
 
     // In case config has been called before
     for (i = 0; i < ctx->total_buffers; i++)
@@ -362,33 +280,55 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
 {
     struct xvctx *ctx = vo->priv;
     struct vo_x11_state *x11 = vo->x11;
-    struct vo_rect *src = &ctx->src_rect;
-    struct vo_rect *dst = &ctx->dst_rect;
+    struct mp_rect *src = &ctx->src_rect;
+    struct mp_rect *dst = &ctx->dst_rect;
+    int dw = dst->x1 - dst->x0, dh = dst->y1 - dst->y0;
+    int sw = src->x1 - src->x0, sh = src->y1 - src->y0;
 #ifdef HAVE_SHM
     if (ctx->Shmem_Flag) {
         XvShmPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc, xvi,
-                      src->left, src->top, src->width, src->height,
-                      dst->left, dst->top, dst->width, dst->height,
+                      src->x0, src->y0, sw, sh,
+                      dst->x0, dst->y0, dw, dh,
                       False);
     } else
 #endif
     {
         XvPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc, xvi,
-                   src->left, src->top, src->width, src->height,
-                   dst->left, dst->top, dst->width, dst->height);
+                   src->x0, src->y0, sw, sh,
+                   dst->x0, dst->y0, dw, dh);
     }
 }
 
-// Only copies luma for planar formats as draw_alpha doesn't change others */
-static void copy_backup_image(struct vo *vo, int dest, int src)
+static struct mp_image get_xv_buffer(struct vo *vo, int buf_index)
 {
     struct xvctx *ctx = vo->priv;
+    XvImage *xv_image = ctx->xvimage[buf_index];
 
-    XvImage *vb = ctx->xvimage[dest];
-    XvImage *cp = ctx->xvimage[src];
-    memcpy_pic(vb->data + vb->offsets[0], cp->data + cp->offsets[0],
-               vb->width, vb->height,
-               vb->pitches[0], cp->pitches[0]);
+    struct mp_image img = {0};
+    img.w = img.width = xv_image->width;
+    img.h = img.height = xv_image->height;
+    mp_image_setfmt(&img, ctx->image_format);
+
+    bool swapuv = ctx->image_format == IMGFMT_YV12;
+    for (int n = 0; n < img.num_planes; n++) {
+        int sn = n > 0 &&  swapuv ? (n == 1 ? 2 : 1) : n;
+        img.planes[n] = xv_image->data + xv_image->offsets[sn];
+        img.stride[n] = xv_image->pitches[sn];
+    }
+
+    struct mp_csp_details csp = {0};
+    vo_control(vo, VOCTRL_GET_YUV_COLORSPACE, &csp);
+    mp_image_set_colorspace_details(&img, &csp);
+
+    return img;
+}
+
+static void copy_backup_image(struct vo *vo, int dest, int src)
+{
+    struct mp_image img_dest = get_xv_buffer(vo, dest);
+    struct mp_image img_src = get_xv_buffer(vo, src);
+
+    copy_mpi(&img_dest, &img_src);
 }
 
 static void check_events(struct vo *vo)
@@ -405,13 +345,22 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct xvctx *ctx = vo->priv;
 
-    ctx->osd_objects_drawn = 0;
-    osd_draw_text(osd,
-                  ctx->image_width -
-                  ctx->image_width * vo->panscan_x / (vo->dwidth +
-                                                      vo->panscan_x),
-                  ctx->image_height, ctx->draw_alpha_fnc, vo);
-    if (ctx->osd_objects_drawn)
+    struct mp_image img = get_xv_buffer(vo, ctx->current_buf);
+
+    struct mp_rect *src = &ctx->src_rect;
+    struct mp_rect *dst = &ctx->dst_rect;
+    int dw = dst->x1 - dst->x0, dh = dst->y1 - dst->y0;
+    int sw = src->x1 - src->x0, sh = src->y1 - src->y0;
+    double xvpar = (double)dw / dh * sh / sw;
+
+    struct mp_osd_res res = {
+        .w = ctx->image_width,
+        .h = ctx->image_height,
+        .display_par = vo->monitor_par / xvpar,
+        .video_par = vo->aspdat.par,
+    };
+
+    if (osd_draw_on_image(osd, res, osd->vo_pts, 0, &img))
         ctx->unchanged_image = false;
 }
 
@@ -481,42 +430,12 @@ static mp_image_t *get_screenshot(struct vo *vo)
     struct xvctx *ctx = vo->priv;
 
     // try to get an image without OSD
-    if (ctx->have_image_copy)
-        copy_backup_image(vo, ctx->visible_buf, ctx->num_buffers);
+    int id = ctx->have_image_copy ? ctx->num_buffers : ctx->visible_buf;
+    struct mp_image img = get_xv_buffer(vo, id);
+    img.display_w = vo->aspdat.prew;
+    img.display_h = vo->aspdat.preh;
 
-    XvImage *xv_image = ctx->xvimage[ctx->visible_buf];
-
-    int w = xv_image->width;
-    int h = xv_image->height;
-
-    mp_image_t *image = alloc_mpi(w, h, ctx->image_format);
-
-    int bytes = 1;
-    if (!(image->flags & MP_IMGFLAG_PLANAR) && (image->flags & MP_IMGFLAG_YUV))
-        // packed YUV
-        bytes = image->bpp / 8;
-
-    memcpy_pic(image->planes[0], xv_image->data + xv_image->offsets[0],
-               bytes * w, h, image->stride[0], xv_image->pitches[0]);
-
-    if (image->flags & MP_IMGFLAG_PLANAR) {
-        int swap = ctx->image_format == IMGFMT_YV12;
-        int p1 = swap ? 2 : 1;
-        int p2 = swap ? 1 : 2;
-
-        w /= 2;
-        h /= 2;
-
-        memcpy_pic(image->planes[p1], xv_image->data + xv_image->offsets[1],
-                   w, h, image->stride[p1], xv_image->pitches[1]);
-        memcpy_pic(image->planes[p2], xv_image->data + xv_image->offsets[2],
-                   w, h, image->stride[p2], xv_image->pitches[2]);
-    }
-
-    image->w = vo->aspdat.prew;
-    image->h = vo->aspdat.preh;
-
-    return image;
+    return talloc_memdup(NULL, &img, sizeof(img));
 }
 
 static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
@@ -766,6 +685,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         args->out_image = get_screenshot(vo);
+        args->has_osd = !ctx->have_image_copy;
         return true;
     }
     }

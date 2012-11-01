@@ -34,30 +34,19 @@
 #include <unistd.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 
 #include <libavutil/common.h>
 #include <libavutil/intreadwrite.h>
-#include <libswscale/swscale.h>
 
 #include "config.h"
 #include "mp_msg.h"
 
 #include "spudec.h"
 #include "vobsub.h"
+#include "sub.h"
 #include "mpcommon.h"
-
-/* Valid values for spu_aamode:
-   0: none (fastest, most ugly)
-   1: approximate
-   2: full (slowest)
-   3: bilinear (similiar to vobsub, fast and not too bad)
-   4: uses swscaler gaussian (this is the only one that looks good)
- */
-
-int spu_aamode = 3;
-int spu_alignment = -1;
-float spu_gaussvar = 1.0;
-extern int sub_pos;
+#include "libvo/csputils.h"
 
 typedef struct spu_packet_t packet_t;
 struct spu_packet_t {
@@ -76,13 +65,6 @@ struct spu_packet_t {
   unsigned int width, height, stride;
   unsigned int start_pts, end_pts;
   packet_t *next;
-};
-
-struct palette_crop_cache {
-  int valid;
-  uint32_t palette;
-  int sx, sy, ex, ey;
-  int result;
 };
 
 typedef struct {
@@ -106,23 +88,17 @@ typedef struct {
   unsigned int width, height, stride;
   size_t image_size;		/* Size of the image buffer */
   unsigned char *image;		/* Grayscale value */
-  unsigned char *aimage;	/* Alpha value */
   unsigned int pal_start_col, pal_start_row;
   unsigned int pal_width, pal_height;
   unsigned char *pal_image;	/* palette entry value */
-  unsigned int scaled_frame_width, scaled_frame_height;
-  unsigned int scaled_start_col, scaled_start_row;
-  unsigned int scaled_width, scaled_height, scaled_stride;
-  size_t scaled_image_size;
-  unsigned char *scaled_image;
-  unsigned char *scaled_aimage;
   int auto_palette; /* 1 if we lack a palette and must use an heuristic. */
   int font_start_level;  /* Darkest value used for the computed font */
   int spu_changed;
   unsigned int forced_subs_only;     /* flag: 0=display all subtitle, !0 display only forced subtitles */
   unsigned int is_forced_sub;         /* true if current subtitle is a forced subtitle */
 
-  struct palette_crop_cache palette_crop_cache;
+  struct sub_bitmap sub_part, borrowed_sub_part;
+  struct osd_bmp_indexed borrowed_bmp;
 } spudec_handle_t;
 
 static void spudec_queue_packet(spudec_handle_t *this, packet_t *packet)
@@ -185,40 +161,6 @@ static inline unsigned char get_nibble(packet_t *packet)
   return nib;
 }
 
-/* Cut the sub to visible part */
-static inline void spudec_cut_image(spudec_handle_t *this)
-{
-  unsigned int fy, ly;
-  unsigned int first_y, last_y;
-
-  if (this->stride == 0 || this->height == 0) {
-    return;
-  }
-
-  for (fy = 0; fy < this->image_size && !this->aimage[fy]; fy++);
-  for (ly = this->stride * this->height-1; ly && !this->aimage[ly]; ly--);
-  first_y = fy / this->stride;
-  last_y = ly / this->stride;
-  //printf("first_y: %d, last_y: %d\n", first_y, last_y);
-  this->start_row += first_y;
-
-  // Some subtitles trigger this condition
-  if (last_y + 1 > first_y ) {
-	  this->height = last_y - first_y +1;
-  } else {
-	  this->height = 0;
-	  return;
-  }
-
-//  printf("new h %d new start %d (sz %d st %d)---\n\n", this->height, this->start_row, this->image_size, this->stride);
-
-  if (first_y > 0) {
-    memmove(this->image,  this->image  + this->stride * first_y, this->stride * this->height);
-    memmove(this->aimage, this->aimage + this->stride * first_y, this->stride * this->height);
-  }
-}
-
-
 static int spudec_alloc_image(spudec_handle_t *this, int stride, int height)
 {
   if (this->width > stride) // just a safeguard
@@ -237,7 +179,6 @@ static int spudec_alloc_image(spudec_handle_t *this, int stride, int height)
     this->image = malloc(2 * this->stride * this->height);
     if (this->image) {
       this->image_size = this->stride * this->height;
-      this->aimage = this->image + this->image_size;
       // use stride here as well to simplify reallocation checks
       this->pal_image = malloc(this->stride * this->height);
     }
@@ -245,100 +186,67 @@ static int spudec_alloc_image(spudec_handle_t *this, int stride, int height)
   return this->image != NULL;
 }
 
-/**
- * \param pal palette in MPlayer-style gray-alpha values, i.e.
- *            alpha == 0 means transparent, 1 fully opaque,
- *            gray value <= 256 - alpha.
- */
-static void pal2gray_alpha(const uint16_t *pal,
-                           const uint8_t *src, int src_stride,
-                           uint8_t *dst, uint8_t *dsta,
-                           int dst_stride, int w, int h)
+static void setup_palette(spudec_handle_t *spu, uint32_t palette[256])
 {
-  int x, y;
-  for (y = 0; y < h; y++) {
-    for (x = 0; x < w; x++) {
-      uint16_t pixel = pal[src[x]];
-      *dst++  = pixel;
-      *dsta++ = pixel >> 8;
+    memset(palette, 0, sizeof(palette));
+    struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
+    csp.int_bits_in = 8;
+    csp.int_bits_out = 8;
+    float cmatrix[3][4];
+    mp_get_yuv2rgb_coeffs(&csp, cmatrix);
+    for (int i = 0; i < 4; ++i) {
+        int alpha = spu->alpha[i];
+        // extend 4 -> 8 bit
+        alpha |= alpha << 4;
+        if (spu->custom && (spu->cuspal[i] >> 31) != 0)
+            alpha = 0;
+        int color = spu->custom ? spu->cuspal[i] :
+                    spu->global_palette[spu->palette[i]];
+        int c[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
+        mp_map_int_color(cmatrix, 8, c);
+        // R and G swapped, possibly due to vobsub_palette_to_yuv()
+        palette[i] = (alpha << 24u) | (c[2] << 16) | (c[1] << 8) | c[0];
     }
-    for (; x < dst_stride; x++)
-      *dsta++ = *dst++ = 0;
-    src += src_stride;
-  }
 }
 
-static int apply_palette_crop(spudec_handle_t *this,
-                              unsigned crop_x, unsigned crop_y,
-                              unsigned crop_w, unsigned crop_h)
+static void crop_image(struct sub_bitmap *part)
 {
-  int i;
-  uint8_t *src;
-  uint16_t pal[4];
-  unsigned stride = (crop_w + 7) & ~7;
-  if (crop_x > this->pal_width || crop_y > this->pal_height ||
-      crop_w > this->pal_width - crop_x || crop_h > this->pal_width - crop_y ||
-      crop_w > 0x8000 || crop_h > 0x8000 ||
-      stride * crop_h  > this->image_size) {
-    return 0;
-  }
-  for (i = 0; i < 4; ++i) {
-    int color;
-    int alpha = this->alpha[i];
-    // extend 4 -> 8 bit
-    alpha |= alpha << 4;
-    if (this->custom && (this->cuspal[i] >> 31) != 0)
-      alpha = 0;
-    color = this->custom ? this->cuspal[i] :
-            this->global_palette[this->palette[i]];
-    color = (color >> 16) & 0xff;
-    // convert to MPlayer-style gray/alpha palette
-    color = FFMIN(color, alpha);
-    pal[i] = (-alpha << 8) | color;
-  }
-  src = this->pal_image + crop_y * this->pal_width + crop_x;
-  pal2gray_alpha(pal, src, this->pal_width,
-                 this->image, this->aimage, stride,
-                 crop_w, crop_h);
-  this->width  = crop_w;
-  this->height = crop_h;
-  this->stride = stride;
-  this->start_col = this->pal_start_col + crop_x;
-  this->start_row = this->pal_start_row + crop_y;
-  spudec_cut_image(this);
-
-  // reset scaled image
-  this->scaled_frame_width = 0;
-  this->scaled_frame_height = 0;
-  this->palette_crop_cache.valid = 0;
-  return 1;
-}
-
-int spudec_apply_palette_crop(void *this, uint32_t palette,
-                              int sx, int sy, int ex, int ey)
-{
-  spudec_handle_t *spu = this;
-  struct palette_crop_cache *c = &spu->palette_crop_cache;
-  if (c->valid && c->palette == palette &&
-      c->sx == sx && c->sy == sy && c->ex == ex && c->ey == ey)
-    return c->result;
-  spu->palette[0] = (palette >> 28) & 0xf;
-  spu->palette[1] = (palette >> 24) & 0xf;
-  spu->palette[2] = (palette >> 20) & 0xf;
-  spu->palette[3] = (palette >> 16) & 0xf;
-  spu->alpha[0]   = (palette >> 12) & 0xf;
-  spu->alpha[1]   = (palette >>  8) & 0xf;
-  spu->alpha[2]   = (palette >>  4) & 0xf;
-  spu->alpha[3]   =  palette        & 0xf;
-  spu->spu_changed = 1;
-  c->result = apply_palette_crop(spu,
-                                 sx - spu->pal_start_col, sy - spu->pal_start_row,
-                                 ex - sx, ey - sy);
-  c->palette = palette;
-  c->sx = sx; c->sy = sy;
-  c->ex = ex; c->ey = ey;
-  c->valid = 1;
-  return c->result;
+    if (part->w < 1 || part->h < 1)
+        return;
+    struct osd_bmp_indexed *bmp = part->bitmap;
+    bool invisible[256];
+    for (int n = 0; n < 256; n++)
+        invisible[n] = !(bmp->palette[n] >> 24);
+    int y0 = 0, y1 = part->h, x0 = part->w, x1 = 0;
+    bool y_all_invisible = true;
+    for (int y = 0; y < part->h; y++) {
+        uint8_t *pixels = bmp->bitmap + part->stride * y;
+        int cur = 0;
+        while (cur < part->w && invisible[pixels[cur]])
+            cur++;
+        int start_visible = cur;
+        int last_visible = -1;
+        while (cur < part->w) {
+            if (!invisible[pixels[cur]])
+                last_visible = cur;
+            cur++;
+        }
+        x0 = FFMIN(x0, start_visible);
+        x1 = FFMAX(x1, last_visible);
+        bool all_invisible = last_visible == -1;
+        if (all_invisible) {
+            if (y_all_invisible)
+                y0 = y;
+        } else {
+            y_all_invisible = false;
+            y1 = y + 1;
+        }
+    }
+    bmp->bitmap += x0 + y0 * part->stride;
+    part->w = FFMAX(x1 - x0, 0);
+    part->h = FFMAX(y1 - y0, 0);
+    part->x += x0;
+    part->y += y0;
 }
 
 static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
@@ -387,7 +295,18 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
     memset(dst, color, len);
     dst += len;
   }
-  apply_palette_crop(this, 0, 0, this->pal_width, this->pal_height);
+
+  struct sub_bitmap *sub_part = &this->sub_part;
+  struct osd_bmp_indexed *bmp = &this->borrowed_bmp;
+  bmp->bitmap = this->pal_image;
+  setup_palette(this, bmp->palette);
+  sub_part->bitmap = bmp;
+  sub_part->stride = this->pal_width;
+  sub_part->w = this->pal_width;
+  sub_part->h = this->pal_height;
+  sub_part->x = this->pal_start_col;
+  sub_part->y = this->pal_start_row;
+  crop_image(sub_part);
 }
 
 
@@ -413,8 +332,8 @@ static void compute_palette(spudec_handle_t *this, packet_t *packet)
     start = 0x80;
     step = 0;
   } else {
-    start = this->font_start_level;
-    step = (0xF0-this->font_start_level)/(cused-1);
+    start = 72;
+    step = (0xF0-start)/(cused-1);
   }
   memset(used, 0, sizeof(used));
   for (i=0; i<4; i++) {
@@ -686,17 +605,12 @@ void spudec_heartbeat(void *this, unsigned int pts100)
       free(spu->image);
       spu->image_size = packet->data_len;
       spu->image      = packet->packet;
-      spu->aimage     = packet->packet + packet->stride * packet->height;
       packet->packet  = NULL;
       spu->width      = packet->width;
       spu->height     = packet->height;
       spu->stride     = packet->stride;
       spu->start_col  = packet->start_col;
       spu->start_row  = packet->start_row;
-
-      // reset scaled image
-      spu->scaled_frame_width = 0;
-      spu->scaled_frame_height = 0;
     } else {
       if (spu->auto_palette)
         compute_palette(spu, packet);
@@ -724,486 +638,30 @@ void spudec_set_forced_subs_only(void * const this, const unsigned int flag)
   }
 }
 
-void spudec_draw(void *this, void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx)
+void spudec_get_indexed(void *this, struct mp_osd_res *dim,
+                        struct sub_bitmaps *res)
 {
     spudec_handle_t *spu = this;
-    if (spudec_visible(spu))
-    {
-	draw_alpha(ctx, spu->start_col, spu->start_row, spu->width, spu->height,
-		   spu->image, spu->aimage, spu->stride);
-	spu->spu_changed = 0;
+    *res = (struct sub_bitmaps) { .format = SUBBITMAP_INDEXED };
+    struct sub_bitmap *part = &spu->borrowed_sub_part;
+    res->parts = part;
+    *part = spu->sub_part;
+    // Empty subs do happen when cropping
+    bool empty = part->w < 1 || part->h < 1;
+    if (spudec_visible(spu) && !empty) {
+        double xscale = (double) (dim->w - dim->ml - dim->mr) / spu->orig_frame_width;
+        double yscale = (double) (dim->h - dim->mt - dim->mb) / spu->orig_frame_height;
+        part->x = part->x * xscale + dim->ml;
+        part->y = part->y * yscale + dim->mt;
+        part->dw = part->w * xscale;
+        part->dh = part->h * yscale;
+        res->num_parts = 1;
+        res->scaled = true;
     }
-}
-
-/* calc the bbox for spudec subs */
-void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int* bbox)
-{
-  spudec_handle_t *spu = me;
-  if (spu->orig_frame_width == 0 || spu->orig_frame_height == 0
-  || (spu->orig_frame_width == dxs && spu->orig_frame_height == dys)) {
-    // unscaled
-    bbox[0] = spu->start_col;
-    bbox[1] = spu->start_col + spu->width;
-    bbox[2] = spu->start_row;
-    bbox[3] = spu->start_row + spu->height;
-  }
-  else {
-    // scaled
-    unsigned int scalex = 0x100 * dxs / spu->orig_frame_width;
-    unsigned int scaley = 0x100 * dys / spu->orig_frame_height;
-    bbox[0] = spu->start_col * scalex / 0x100;
-    bbox[1] = spu->start_col * scalex / 0x100 + spu->width * scalex / 0x100;
-    switch (spu_alignment) {
-    case 0:
-      bbox[3] = dys*sub_pos/100 + spu->height * scaley / 0x100;
-      if (bbox[3] > dys) bbox[3] = dys;
-      bbox[2] = bbox[3] - spu->height * scaley / 0x100;
-      break;
-    case 1:
-      if (sub_pos < 50) {
-        bbox[2] = dys*sub_pos/100 - spu->height * scaley / 0x200;
-        bbox[3] = bbox[2] + spu->height;
-      } else {
-        bbox[3] = dys*sub_pos/100 + spu->height * scaley / 0x200;
-        if (bbox[3] > dys) bbox[3] = dys;
-        bbox[2] = bbox[3] - spu->height * scaley / 0x100;
-      }
-      break;
-    case 2:
-      bbox[2] = dys*sub_pos/100 - spu->height * scaley / 0x100;
-      bbox[3] = bbox[2] + spu->height;
-      break;
-    default: /* -1 */
-      bbox[2] = spu->start_row * scaley / 0x100;
-      bbox[3] = spu->start_row * scaley / 0x100 + spu->height * scaley / 0x100;
-      break;
+    if (spu->spu_changed) {
+        res->bitmap_id = res->bitmap_pos_id = 1;
+        spu->spu_changed = 0;
     }
-  }
-}
-/* transform mplayer's alpha value into an opacity value that is linear */
-static inline int canon_alpha(int alpha)
-{
-  return (uint8_t)-alpha;
-}
-
-typedef struct {
-  unsigned position;
-  unsigned left_up;
-  unsigned right_down;
-}scale_pixel;
-
-
-static void scale_table(unsigned int start_src, unsigned int start_tar, unsigned int end_src, unsigned int end_tar, scale_pixel * table)
-{
-  unsigned int t;
-  unsigned int delta_src = end_src - start_src;
-  unsigned int delta_tar = end_tar - start_tar;
-  int src = 0;
-  int src_step;
-  if (delta_src == 0 || delta_tar == 0) {
-    return;
-  }
-  src_step = (delta_src << 16) / delta_tar >>1;
-  for (t = 0; t<=delta_tar; src += (src_step << 1), t++){
-    table[t].position= FFMIN(src >> 16, end_src - 1);
-    table[t].right_down = src & 0xffff;
-    table[t].left_up = 0x10000 - table[t].right_down;
-  }
-}
-
-/* bilinear scale, similar to vobsub's code */
-static void scale_image(int x, int y, scale_pixel* table_x, scale_pixel* table_y, spudec_handle_t * spu)
-{
-  int alpha[4];
-  int color[4];
-  unsigned int scale[4];
-  int base = table_y[y].position * spu->stride + table_x[x].position;
-  int scaled = y * spu->scaled_stride + x;
-  alpha[0] = canon_alpha(spu->aimage[base]);
-  alpha[1] = canon_alpha(spu->aimage[base + 1]);
-  alpha[2] = canon_alpha(spu->aimage[base + spu->stride]);
-  alpha[3] = canon_alpha(spu->aimage[base + spu->stride + 1]);
-  color[0] = spu->image[base];
-  color[1] = spu->image[base + 1];
-  color[2] = spu->image[base + spu->stride];
-  color[3] = spu->image[base + spu->stride + 1];
-  scale[0] = (table_x[x].left_up * table_y[y].left_up >> 16) * alpha[0];
-  if (table_y[y].left_up == 0x10000) // necessary to avoid overflow-case
-    scale[0] = table_x[x].left_up * alpha[0];
-  scale[1] = (table_x[x].right_down * table_y[y].left_up >>16) * alpha[1];
-  scale[2] = (table_x[x].left_up * table_y[y].right_down >> 16) * alpha[2];
-  scale[3] = (table_x[x].right_down * table_y[y].right_down >> 16) * alpha[3];
-  spu->scaled_image[scaled] = (color[0] * scale[0] + color[1] * scale[1] + color[2] * scale[2] + color[3] * scale[3])>>24;
-  spu->scaled_aimage[scaled] = (scale[0] + scale[1] + scale[2] + scale[3]) >> 16;
-  if (spu->scaled_aimage[scaled]){
-    // ensure that MPlayer's simplified alpha-blending can not overflow
-    spu->scaled_image[scaled] = FFMIN(spu->scaled_image[scaled], spu->scaled_aimage[scaled]);
-    // convert to MPlayer-style alpha
-    spu->scaled_aimage[scaled] = -spu->scaled_aimage[scaled];
-  }
-}
-
-static void sws_spu_image(unsigned char *d1, unsigned char *d2, int dw, int dh,
-                          int ds, const unsigned char* s1, unsigned char* s2,
-                          int sw, int sh, int ss)
-{
-	struct SwsContext *ctx;
-	static SwsFilter filter;
-	static int firsttime = 1;
-	static float oldvar;
-	int i;
-
-	if (!firsttime && oldvar != spu_gaussvar) sws_freeVec(filter.lumH);
-	if (firsttime) {
-		filter.lumH = filter.lumV =
-			filter.chrH = filter.chrV = sws_getGaussianVec(spu_gaussvar, 3.0);
-		sws_normalizeVec(filter.lumH, 1.0);
-		firsttime = 0;
-		oldvar = spu_gaussvar;
-	}
-
-	ctx=sws_getContext(sw, sh, PIX_FMT_GRAY8, dw, dh, PIX_FMT_GRAY8, SWS_GAUSS, &filter, NULL, NULL);
-	sws_scale(ctx,&s1,&ss,0,sh,&d1,&ds);
-	for (i=ss*sh-1; i>=0; i--) s2[i] = -s2[i];
-	sws_scale(ctx,(const uint8_t **)&s2,&ss,0,sh,&d2,&ds);
-	for (i=ds*dh-1; i>=0; i--) d2[i] = -d2[i];
-	sws_freeContext(ctx);
-}
-
-void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx)
-{
-  spudec_handle_t *spu = me;
-  scale_pixel *table_x;
-  scale_pixel *table_y;
-
-  if (spudec_visible(spu)) {
-
-    // check if only forced subtitles are requested
-    if( (spu->forced_subs_only) && !(spu->is_forced_sub) ){
-	return;
-    }
-
-    if (!(spu_aamode&16) && (spu->orig_frame_width == 0 || spu->orig_frame_height == 0
-	|| (spu->orig_frame_width == dxs && spu->orig_frame_height == dys))) {
-        spudec_draw(spu, draw_alpha, ctx);
-    }
-    else {
-      if (spu->scaled_frame_width != dxs || spu->scaled_frame_height != dys) {	/* Resizing is needed */
-	/* scaled_x = scalex * x / 0x100
-	   scaled_y = scaley * y / 0x100
-	   order of operations is important because of rounding. */
-	unsigned int scalex = 0x100 * dxs / spu->orig_frame_width;
-	unsigned int scaley = 0x100 * dys / spu->orig_frame_height;
-	spu->scaled_start_col = spu->start_col * scalex / 0x100;
-	spu->scaled_start_row = spu->start_row * scaley / 0x100;
-	spu->scaled_width = spu->width * scalex / 0x100;
-	spu->scaled_height = spu->height * scaley / 0x100;
-	/* Kludge: draw_alpha needs width multiple of 8 */
-	spu->scaled_stride = (spu->scaled_width + 7) & ~7;
-	if (spu->scaled_image_size < spu->scaled_stride * spu->scaled_height) {
-	  if (spu->scaled_image) {
-	    free(spu->scaled_image);
-	    spu->scaled_image_size = 0;
-	  }
-	  spu->scaled_image = malloc(2 * spu->scaled_stride * spu->scaled_height);
-	  if (spu->scaled_image) {
-	    spu->scaled_image_size = spu->scaled_stride * spu->scaled_height;
-	    spu->scaled_aimage = spu->scaled_image + spu->scaled_image_size;
-	  }
-	}
-	if (spu->scaled_image) {
-	  unsigned int x, y;
-	  // needs to be 0-initialized because draw_alpha draws always a
-	  // multiple of 8 pixels. TODO: optimize
-	  if (spu->scaled_width & 7)
-	    memset(spu->scaled_image, 0, 2 * spu->scaled_image_size);
-	  if (spu->scaled_width <= 1 || spu->scaled_height <= 1) {
-	    goto nothing_to_do;
-	  }
-	  switch(spu_aamode&15) {
-	  case 4:
-	  sws_spu_image(spu->scaled_image, spu->scaled_aimage,
-		  spu->scaled_width, spu->scaled_height, spu->scaled_stride,
-		  spu->image, spu->aimage, spu->width, spu->height, spu->stride);
-	  break;
-	  case 3:
-	  table_x = calloc(spu->scaled_width, sizeof(scale_pixel));
-	  table_y = calloc(spu->scaled_height, sizeof(scale_pixel));
-	  if (!table_x || !table_y) {
-	    mp_msg(MSGT_SPUDEC, MSGL_FATAL, "Fatal: spudec_draw_scaled: calloc failed\n");
-	  }
-	  scale_table(0, 0, spu->width - 1, spu->scaled_width - 1, table_x);
-	  scale_table(0, 0, spu->height - 1, spu->scaled_height - 1, table_y);
-	  for (y = 0; y < spu->scaled_height; y++)
-	    for (x = 0; x < spu->scaled_width; x++)
-	      scale_image(x, y, table_x, table_y, spu);
-	  free(table_x);
-	  free(table_y);
-	  break;
-	  case 0:
-	  /* no antialiasing */
-	  for (y = 0; y < spu->scaled_height; ++y) {
-	    int unscaled_y = y * 0x100 / scaley;
-	    int strides = spu->stride * unscaled_y;
-	    int scaled_strides = spu->scaled_stride * y;
-	    for (x = 0; x < spu->scaled_width; ++x) {
-	      int unscaled_x = x * 0x100 / scalex;
-	      spu->scaled_image[scaled_strides + x] = spu->image[strides + unscaled_x];
-	      spu->scaled_aimage[scaled_strides + x] = spu->aimage[strides + unscaled_x];
-	    }
-	  }
-	  break;
-	  case 1:
-	  {
-	    /* Intermediate antialiasing. */
-	    for (y = 0; y < spu->scaled_height; ++y) {
-	      const unsigned int unscaled_top = y * spu->orig_frame_height / dys;
-	      unsigned int unscaled_bottom = (y + 1) * spu->orig_frame_height / dys;
-	      if (unscaled_bottom >= spu->height)
-		unscaled_bottom = spu->height - 1;
-	      for (x = 0; x < spu->scaled_width; ++x) {
-		const unsigned int unscaled_left = x * spu->orig_frame_width / dxs;
-		unsigned int unscaled_right = (x + 1) * spu->orig_frame_width / dxs;
-		unsigned int color = 0;
-		unsigned int alpha = 0;
-		unsigned int walkx, walky;
-		unsigned int base, tmp;
-		if (unscaled_right >= spu->width)
-		  unscaled_right = spu->width - 1;
-		for (walky = unscaled_top; walky <= unscaled_bottom; ++walky)
-		  for (walkx = unscaled_left; walkx <= unscaled_right; ++walkx) {
-		    base = walky * spu->stride + walkx;
-		    tmp = canon_alpha(spu->aimage[base]);
-		    alpha += tmp;
-		    color += tmp * spu->image[base];
-		  }
-		base = y * spu->scaled_stride + x;
-		spu->scaled_image[base] = alpha ? color / alpha : 0;
-		spu->scaled_aimage[base] =
-		  alpha * (1 + unscaled_bottom - unscaled_top) * (1 + unscaled_right - unscaled_left);
-		/* spu->scaled_aimage[base] =
-		  alpha * dxs * dys / spu->orig_frame_width / spu->orig_frame_height; */
-		if (spu->scaled_aimage[base]) {
-		  spu->scaled_aimage[base] = 256 - spu->scaled_aimage[base];
-		  if (spu->scaled_aimage[base] + spu->scaled_image[base] > 255)
-		    spu->scaled_image[base] = 256 - spu->scaled_aimage[base];
-		}
-	      }
-	    }
-	  }
-	  break;
-	  case 2:
-	  {
-	    /* Best antialiasing.  Very slow. */
-	    /* Any pixel (x, y) represents pixels from the original
-	       rectangular region comprised between the columns
-	       unscaled_y and unscaled_y + 0x100 / scaley and the rows
-	       unscaled_x and unscaled_x + 0x100 / scalex
-
-	       The original rectangular region that the scaled pixel
-	       represents is cut in 9 rectangular areas like this:
-
-	       +---+-----------------+---+
-	       | 1 |        2        | 3 |
-	       +---+-----------------+---+
-	       |   |                 |   |
-	       | 4 |        5        | 6 |
-	       |   |                 |   |
-	       +---+-----------------+---+
-	       | 7 |        8        | 9 |
-	       +---+-----------------+---+
-
-	       The width of the left column is at most one pixel and
-	       it is never null and its right column is at a pixel
-	       boundary.  The height of the top row is at most one
-	       pixel it is never null and its bottom row is at a
-	       pixel boundary. The width and height of region 5 are
-	       integral values.  The width of the right column is
-	       what remains and is less than one pixel.  The height
-	       of the bottom row is what remains and is less than
-	       one pixel.
-
-	       The row above 1, 2, 3 is unscaled_y.  The row between
-	       1, 2, 3 and 4, 5, 6 is top_low_row.  The row between 4,
-	       5, 6 and 7, 8, 9 is (unsigned int)unscaled_y_bottom.
-	       The row beneath 7, 8, 9 is unscaled_y_bottom.
-
-	       The column left of 1, 4, 7 is unscaled_x.  The column
-	       between 1, 4, 7 and 2, 5, 8 is left_right_column.  The
-	       column between 2, 5, 8 and 3, 6, 9 is (unsigned
-	       int)unscaled_x_right.  The column right of 3, 6, 9 is
-	       unscaled_x_right. */
-	    const double inv_scalex = (double) 0x100 / scalex;
-	    const double inv_scaley = (double) 0x100 / scaley;
-	    for (y = 0; y < spu->scaled_height; ++y) {
-	      const double unscaled_y = y * inv_scaley;
-	      const double unscaled_y_bottom = unscaled_y + inv_scaley;
-	      const unsigned int top_low_row = FFMIN(unscaled_y_bottom, unscaled_y + 1.0);
-	      const double top = top_low_row - unscaled_y;
-	      const unsigned int height = unscaled_y_bottom > top_low_row
-		? (unsigned int) unscaled_y_bottom - top_low_row
-		: 0;
-	      const double bottom = unscaled_y_bottom > top_low_row
-		? unscaled_y_bottom - floor(unscaled_y_bottom)
-		: 0.0;
-	      for (x = 0; x < spu->scaled_width; ++x) {
-		const double unscaled_x = x * inv_scalex;
-		const double unscaled_x_right = unscaled_x + inv_scalex;
-		const unsigned int left_right_column = FFMIN(unscaled_x_right, unscaled_x + 1.0);
-		const double left = left_right_column - unscaled_x;
-		const unsigned int width = unscaled_x_right > left_right_column
-		  ? (unsigned int) unscaled_x_right - left_right_column
-		  : 0;
-		const double right = unscaled_x_right > left_right_column
-		  ? unscaled_x_right - floor(unscaled_x_right)
-		  : 0.0;
-		double color = 0.0;
-		double alpha = 0.0;
-		double tmp;
-		unsigned int base;
-		/* Now use these informations to compute a good alpha,
-                   and lightness.  The sum is on each of the 9
-                   region's surface and alpha and lightness.
-
-		  transformed alpha = sum(surface * alpha) / sum(surface)
-		  transformed color = sum(surface * alpha * color) / sum(surface * alpha)
-		*/
-		/* 1: top left part */
-		base = spu->stride * (unsigned int) unscaled_y;
-		tmp = left * top * canon_alpha(spu->aimage[base + (unsigned int) unscaled_x]);
-		alpha += tmp;
-		color += tmp * spu->image[base + (unsigned int) unscaled_x];
-		/* 2: top center part */
-		if (width > 0) {
-		  unsigned int walkx;
-		  for (walkx = left_right_column; walkx < (unsigned int) unscaled_x_right; ++walkx) {
-		    base = spu->stride * (unsigned int) unscaled_y + walkx;
-		    tmp = /* 1.0 * */ top * canon_alpha(spu->aimage[base]);
-		    alpha += tmp;
-		    color += tmp * spu->image[base];
-		  }
-		}
-		/* 3: top right part */
-		if (right > 0.0) {
-		  base = spu->stride * (unsigned int) unscaled_y + (unsigned int) unscaled_x_right;
-		  tmp = right * top * canon_alpha(spu->aimage[base]);
-		  alpha += tmp;
-		  color += tmp * spu->image[base];
-		}
-		/* 4: center left part */
-		if (height > 0) {
-		  unsigned int walky;
-		  for (walky = top_low_row; walky < (unsigned int) unscaled_y_bottom; ++walky) {
-		    base = spu->stride * walky + (unsigned int) unscaled_x;
-		    tmp = left /* * 1.0 */ * canon_alpha(spu->aimage[base]);
-		    alpha += tmp;
-		    color += tmp * spu->image[base];
-		  }
-		}
-		/* 5: center part */
-		if (width > 0 && height > 0) {
-		  unsigned int walky;
-		  for (walky = top_low_row; walky < (unsigned int) unscaled_y_bottom; ++walky) {
-		    unsigned int walkx;
-		    base = spu->stride * walky;
-		    for (walkx = left_right_column; walkx < (unsigned int) unscaled_x_right; ++walkx) {
-		      tmp = /* 1.0 * 1.0 * */ canon_alpha(spu->aimage[base + walkx]);
-		      alpha += tmp;
-		      color += tmp * spu->image[base + walkx];
-		    }
-		  }
-		}
-		/* 6: center right part */
-		if (right > 0.0 && height > 0) {
-		  unsigned int walky;
-		  for (walky = top_low_row; walky < (unsigned int) unscaled_y_bottom; ++walky) {
-		    base = spu->stride * walky + (unsigned int) unscaled_x_right;
-		    tmp = right /* * 1.0 */ * canon_alpha(spu->aimage[base]);
-		    alpha += tmp;
-		    color += tmp * spu->image[base];
-		  }
-		}
-		/* 7: bottom left part */
-		if (bottom > 0.0) {
-		  base = spu->stride * (unsigned int) unscaled_y_bottom + (unsigned int) unscaled_x;
-		  tmp = left * bottom * canon_alpha(spu->aimage[base]);
-		  alpha += tmp;
-		  color += tmp * spu->image[base];
-		}
-		/* 8: bottom center part */
-		if (width > 0 && bottom > 0.0) {
-		  unsigned int walkx;
-		  base = spu->stride * (unsigned int) unscaled_y_bottom;
-		  for (walkx = left_right_column; walkx < (unsigned int) unscaled_x_right; ++walkx) {
-		    tmp = /* 1.0 * */ bottom * canon_alpha(spu->aimage[base + walkx]);
-		    alpha += tmp;
-		    color += tmp * spu->image[base + walkx];
-		  }
-		}
-		/* 9: bottom right part */
-		if (right > 0.0 && bottom > 0.0) {
-		  base = spu->stride * (unsigned int) unscaled_y_bottom + (unsigned int) unscaled_x_right;
-		  tmp = right * bottom * canon_alpha(spu->aimage[base]);
-		  alpha += tmp;
-		  color += tmp * spu->image[base];
-		}
-		/* Finally mix these transparency and brightness information suitably */
-		base = spu->scaled_stride * y + x;
-		spu->scaled_image[base] = alpha > 0 ? color / alpha : 0;
-		spu->scaled_aimage[base] = alpha * scalex * scaley / 0x10000;
-		if (spu->scaled_aimage[base]) {
-		  spu->scaled_aimage[base] = 256 - spu->scaled_aimage[base];
-		  if (spu->scaled_aimage[base] + spu->scaled_image[base] > 255)
-		    spu->scaled_image[base] = 256 - spu->scaled_aimage[base];
-		}
-	      }
-	    }
-	  }
-	  }
-nothing_to_do:
-	  /* Kludge: draw_alpha needs width multiple of 8. */
-	  if (spu->scaled_width < spu->scaled_stride)
-	    for (y = 0; y < spu->scaled_height; ++y) {
-	      memset(spu->scaled_aimage + y * spu->scaled_stride + spu->scaled_width, 0,
-		     spu->scaled_stride - spu->scaled_width);
-	    }
-	  spu->scaled_frame_width = dxs;
-	  spu->scaled_frame_height = dys;
-	}
-      }
-      if (spu->scaled_image){
-        switch (spu_alignment) {
-        case 0:
-          spu->scaled_start_row = dys*sub_pos/100;
-	  if (spu->scaled_start_row + spu->scaled_height > dys)
-	    spu->scaled_start_row = dys - spu->scaled_height;
-	  break;
-	case 1:
-          spu->scaled_start_row = dys*sub_pos/100 - spu->scaled_height/2;
-	  if (sub_pos >= 50 && spu->scaled_start_row + spu->scaled_height > dys)
-	      spu->scaled_start_row = dys - spu->scaled_height;
-	  break;
-        case 2:
-          spu->scaled_start_row = dys*sub_pos/100 - spu->scaled_height;
-	  break;
-	}
-	draw_alpha(ctx, spu->scaled_start_col, spu->scaled_start_row, spu->scaled_width, spu->scaled_height,
-		   spu->scaled_image, spu->scaled_aimage, spu->scaled_stride);
-	spu->spu_changed = 0;
-      }
-    }
-  }
-  else
-  {
-    mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPU not displayed: start_pts=%d  end_pts=%d  now_pts=%d\n",
-        spu->start_pts, spu->end_pts, spu->now_pts);
-  }
-}
-
-void spudec_set_font_factor(void * this, double factor)
-{
-  spudec_handle_t *spu = this;
-  spu->font_start_level = (int)(0xF0-(0xE0*factor));
 }
 
 static void spudec_parse_extradata(spudec_handle_t *this,
@@ -1302,99 +760,12 @@ void spudec_free(void *this)
       spudec_free_packet(spudec_dequeue_packet(spu));
     free(spu->packet);
     spu->packet = NULL;
-    free(spu->scaled_image);
-    spu->scaled_image = NULL;
     free(spu->image);
     spu->image = NULL;
-    spu->aimage = NULL;
     free(spu->pal_image);
     spu->pal_image = NULL;
     spu->image_size = 0;
     spu->pal_width = spu->pal_height  = 0;
     free(spu);
   }
-}
-
-#define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
-
-packet_t *spudec_packet_create(int x, int y, int w, int h)
-{
-  packet_t *packet;
-  int stride = (w + 7) & ~7;
-  if ((unsigned)w >= 0x8000 || (unsigned)h > 0x4000)
-    return NULL;
-  packet = calloc(1, sizeof(packet_t));
-  packet->is_decoded = 1;
-  packet->width = w;
-  packet->height = h;
-  packet->stride = stride;
-  packet->start_col = x;
-  packet->start_row = y;
-  packet->data_len = 2 * stride * h;
-  if (packet->data_len) { // size 0 is a special "clear" packet
-    packet->packet = malloc(packet->data_len);
-    if (!packet->packet) {
-      free(packet);
-      packet = NULL;
-    }
-  }
-  return packet;
-}
-
-void spudec_packet_clear(packet_t *packet)
-{
-  /* clear alpha and value, as value is premultiplied */
-  memset(packet->packet, 0, packet->data_len);
-}
-
-void spudec_packet_fill(packet_t *packet,
-                        const uint8_t *pal_img, int pal_stride,
-                        const void *palette,
-                        int x, int y, int w, int h)
-{
-  const uint32_t *pal = palette;
-  uint8_t *img  = packet->packet + x + y * packet->stride;
-  uint8_t *aimg = img + packet->stride * packet->height;
-  int i;
-  uint16_t g8a8_pal[256];
-
-  for (i = 0; i < 256; i++) {
-      uint32_t pixel = pal[i];
-      int alpha = pixel >> 24;
-      int gray = (((pixel & 0x000000ff) >>  0) +
-                  ((pixel & 0x0000ff00) >>  7) +
-                  ((pixel & 0x00ff0000) >> 16)) >> 2;
-      gray = FFMIN(gray, alpha);
-      g8a8_pal[i] = (-alpha << 8) | gray;
-  }
-  pal2gray_alpha(g8a8_pal, pal_img, pal_stride,
-                 img, aimg, packet->stride, w, h);
-}
-
-void spudec_packet_send(void *spu, packet_t *packet, double pts, double endpts)
-{
-  packet->start_pts = 0;
-  packet->end_pts = 0x7fffffff;
-  if (pts != MP_NOPTS_VALUE)
-    packet->start_pts = pts * 90000;
-  if (endpts != MP_NOPTS_VALUE)
-    packet->end_pts = endpts * 90000;
-  spudec_queue_packet(spu, packet);
-}
-
-/**
- * palette must contain at least 256 32-bit entries, otherwise crashes
- * are possible
- */
-void spudec_set_paletted(void *spu, const uint8_t *pal_img, int pal_stride,
-                         const void *palette,
-                         int x, int y, int w, int h,
-                         double pts, double endpts)
-{
-  packet_t *packet = spudec_packet_create(x, y, w, h);
-  if (!packet)
-      return;
-  if (packet->data_len) // size 0 is a special "clear" packet
-    spudec_packet_fill(packet, pal_img, pal_stride, palette, 0, 0, w, h);
-  spudec_packet_send(spu, packet, pts, endpts);
 }

@@ -19,11 +19,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
-#include <libavutil/mem.h>
 #include <libavutil/common.h>
 
-#include "config.h"
+#include "mpcommon.h"
 
 #include "stream/stream.h"
 
@@ -35,8 +35,11 @@
 #include "mp_msg.h"
 #include "libvo/video_out.h"
 #include "sub.h"
-#include "sub/ass_mp.h"
+#include "dec_sub.h"
+#include "img_convert.h"
+#include "draw_bmp.h"
 #include "spudec.h"
+#include "subreader.h"
 
 
 char * const sub_osd_names[]={
@@ -56,211 +59,67 @@ char * const sub_osd_names[]={
 };
 char * const sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "", "", "", "", "" };
 
-int sub_unicode=0;
 int sub_utf8=0;
 int sub_pos=100;
-int sub_width_p=100;
 int sub_visibility=1;
-int sub_bg_color=0; /* subtitles background color */
-int sub_bg_alpha=0;
-int sub_justify=0;
 
-int vo_osd_progbar_type=-1;
-int vo_osd_progbar_value=100;   // 0..256
 subtitle* vo_sub=NULL;
-char *subtitle_font_encoding = NULL;
-float text_font_scale_factor = 3.5;
-float osd_font_scale_factor = 4.0;
-float subtitle_font_radius = 2.0;
-float subtitle_font_thickness = 2.0;
-// 0 = no autoscale
-// 1 = video height
-// 2 = video width
-// 3 = diagonal
-int subtitle_autoscale = 3;
+float text_font_scale_factor = 6;
 
 char *font_name = NULL;
 char *sub_font_name = NULL;
-float font_factor = 0.75;
 float sub_delay = 0;
 float sub_fps = 0;
-
-// allocates/enlarges the alpha/bitmap buffer
-void osd_alloc_buf(mp_osd_obj_t* obj)
-{
-    int len;
-    if (obj->bbox.x2 < obj->bbox.x1) obj->bbox.x2 = obj->bbox.x1;
-    if (obj->bbox.y2 < obj->bbox.y1) obj->bbox.y2 = obj->bbox.y1;
-    obj->stride = ((obj->bbox.x2-obj->bbox.x1)+7)&(~7);
-    len = obj->stride*(obj->bbox.y2-obj->bbox.y1);
-    if (obj->allocated<len) {
-	obj->allocated = len;
-	av_free(obj->bitmap_buffer);
-	av_free(obj->alpha_buffer);
-	obj->bitmap_buffer = av_malloc(len);
-	obj->alpha_buffer  = av_malloc(len);
-    }
-    memset(obj->bitmap_buffer, sub_bg_color, len);
-    memset(obj->alpha_buffer, sub_bg_alpha, len);
-}
-
-// renders the buffer
-void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)(void *ctx, int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride), void *ctx)
-{
-    if (obj->allocated > 0) {
-	draw_alpha(ctx,
-		   obj->bbox.x1,obj->bbox.y1,
-		   obj->bbox.x2-obj->bbox.x1,
-		   obj->bbox.y2-obj->bbox.y1,
-		   obj->bitmap_buffer,
-		   obj->alpha_buffer,
-		   obj->stride);
-    }
-}
-
-inline static void vo_update_spudec_sub(struct osd_state *osd, mp_osd_obj_t* obj)
-{
-  unsigned int bbox[4];
-  spudec_calc_bbox(vo_spudec, osd->w, osd->h, bbox);
-  obj->bbox.x1 = bbox[0];
-  obj->bbox.x2 = bbox[1];
-  obj->bbox.y1 = bbox[2];
-  obj->bbox.y2 = bbox[3];
-  obj->flags |= OSDFLAG_BBOX;
-}
-
-inline static void vo_draw_spudec_sub(mp_osd_obj_t* obj, void (*draw_alpha)(void *ctx, int x0, int y0, int w, int h, unsigned char* src, unsigned char* srca, int stride), void *ctx)
-{
-    spudec_draw_scaled(vo_spudec, obj->dxs, obj->dys, draw_alpha, ctx);
-}
 
 void *vo_spudec=NULL;
 void *vo_vobsub=NULL;
 
-mp_osd_obj_t* vo_osd_list=NULL;
+static struct osd_state *global_osd;
 
-static mp_osd_obj_t* new_osd_obj(int type){
-    mp_osd_obj_t* osd=malloc(sizeof(mp_osd_obj_t));
-    memset(osd,0,sizeof(mp_osd_obj_t));
-    osd->next=vo_osd_list;
-    vo_osd_list=osd;
-    osd->type=type;
-    osd->alpha_buffer = NULL;
-    osd->bitmap_buffer = NULL;
-    osd->allocated = -1;
-    return osd;
-}
 
-void osd_free(struct osd_state *osd)
+static bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b)
 {
-    osd_destroy_backend(osd);
-    mp_osd_obj_t* obj=vo_osd_list;
-    while(obj){
-	mp_osd_obj_t* next=obj->next;
-	av_free(obj->alpha_buffer);
-	av_free(obj->bitmap_buffer);
-	free(obj);
-	obj=next;
-    }
-    vo_osd_list=NULL;
-    talloc_free(osd);
-}
-
-static int osd_update_ext(struct osd_state *osd, int dxs, int dys,
-                          int left_border, int top_border, int right_border,
-                          int bottom_border, int orig_w, int orig_h)
-{
-    struct MPOpts *opts = osd->opts;
-    mp_osd_obj_t* obj=vo_osd_list;
-    int chg=0;
-
-    osd->w = dxs;
-    osd->h = dys;
-
-    osd_font_load(osd);
-
-    while(obj){
-      if(dxs!=obj->dxs || dys!=obj->dys || obj->flags&OSDFLAG_FORCE_UPDATE){
-        int vis=obj->flags&OSDFLAG_VISIBLE;
-	obj->flags&=~OSDFLAG_BBOX;
-	switch(obj->type){
-	case OSDTYPE_SUBTITLE:
-	    vo_update_text_sub(osd, obj);
-	    break;
-	case OSDTYPE_PROGBAR:
-	    vo_update_text_progbar(osd, obj);
-	    break;
-	case OSDTYPE_SPU:
-	    if (opts->sub_visibility && vo_spudec && spudec_visible(vo_spudec)){
-	        vo_update_spudec_sub(osd, obj);
-		obj->flags|=OSDFLAG_VISIBLE|OSDFLAG_CHANGED;
-	    }
-	    else
-		obj->flags&=~OSDFLAG_VISIBLE;
-	    break;
-	case OSDTYPE_OSD:
-	    if(osd->osd_text[0]){
-		vo_update_text_osd(osd, obj);
-		obj->flags|=OSDFLAG_VISIBLE|OSDFLAG_CHANGED;
-	    } else
-		obj->flags&=~OSDFLAG_VISIBLE;
-	    break;
-	}
-	// check bbox:
-	if(!(obj->flags&OSDFLAG_BBOX)){
-	    // we don't know, so assume the whole screen changed :(
-	    obj->bbox.x1=obj->bbox.y1=0;
-	    obj->bbox.x2=dxs;
-	    obj->bbox.y2=dys;
-	    obj->flags|=OSDFLAG_BBOX;
-	} else {
-	    // check bbox, reduce it if it's out of bounds (corners):
-	    if(obj->bbox.x1<0) obj->bbox.x1=0;
-	    if(obj->bbox.y1<0) obj->bbox.y1=0;
-	    if(obj->bbox.x2>dxs) obj->bbox.x2=dxs;
-	    if(obj->bbox.y2>dys) obj->bbox.y2=dys;
-	    if(obj->flags&OSDFLAG_VISIBLE)
-	    // debug:
-	    mp_msg(MSGT_OSD,MSGL_DBG2,"OSD update: %d;%d %dx%d  \n",
-		obj->bbox.x1,obj->bbox.y1,obj->bbox.x2-obj->bbox.x1,
-		obj->bbox.y2-obj->bbox.y1);
-	}
-	// check if visibility changed:
-	if(vis != (obj->flags&OSDFLAG_VISIBLE) ) obj->flags|=OSDFLAG_CHANGED;
-	// remove the cause of automatic update:
-	obj->dxs=dxs; obj->dys=dys;
-	obj->flags&=~OSDFLAG_FORCE_UPDATE;
-      }
-      if(obj->flags&OSDFLAG_CHANGED){
-        chg|=1<<obj->type;
-	mp_msg(MSGT_OSD,MSGL_DBG2,"OSD chg: %d  V: %s  pb:%d  \n",obj->type,(obj->flags&OSDFLAG_VISIBLE)?"yes":"no",vo_osd_progbar_type);
-      }
-      obj=obj->next;
-    }
-    return chg;
-}
-
-int osd_update(struct osd_state *osd, int dxs, int dys)
-{
-    return osd_update_ext(osd, dxs, dys, 0, 0, 0, 0, dxs, dys);
+    return a.w == b.w && a.h == b.h && a.ml == b.ml && a.mt == b.mt
+        && a.mr == b.mr && a.mb == b.mb
+        && a.display_par == b.display_par
+        && a.video_par == b.video_par;
 }
 
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
 {
     struct osd_state *osd = talloc_zero(NULL, struct osd_state);
-    *osd = (struct osd_state){
+    *osd = (struct osd_state) {
         .opts = opts,
         .ass_library = asslib,
+        .osd_text = talloc_strdup(osd, ""),
+        .progbar_type = -1,
     };
-    // temp hack, should be moved to mplayer later
-    new_osd_obj(OSDTYPE_OSD);
-    new_osd_obj(OSDTYPE_SUBTITLE);
-    new_osd_obj(OSDTYPE_PROGBAR);
-    new_osd_obj(OSDTYPE_SPU);
-    osd_font_invalidate();
-    osd->osd_text = talloc_strdup(osd, "");
+
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        struct osd_object *obj = talloc_struct(osd, struct osd_object, {
+            .type = n,
+        });
+        for (int i = 0; i < OSD_CONV_CACHE_MAX; i++)
+            obj->cache[i] = talloc_steal(obj, osd_conv_cache_new());
+        osd->objs[n] = obj;
+    }
+
+    osd->objs[OSDTYPE_SPU]->is_sub = true;      // spudec.c
+    osd->objs[OSDTYPE_SUB]->is_sub = true;      // dec_sub.c
+    osd->objs[OSDTYPE_SUBTITLE]->is_sub = true; // osd_libass.c
+
     osd_init_backend(osd);
+    global_osd = osd;
     return osd;
+}
+
+void osd_free(struct osd_state *osd)
+{
+    if (!osd)
+        return;
+    osd_destroy_backend(osd);
+    talloc_free(osd);
+    global_osd = NULL;
 }
 
 void osd_set_text(struct osd_state *osd, const char *text)
@@ -274,98 +133,155 @@ void osd_set_text(struct osd_state *osd, const char *text)
     vo_osd_changed(OSDTYPE_OSD);
 }
 
-void osd_draw_text_ext(struct osd_state *osd, int dxs, int dys,
-                       int left_border, int top_border, int right_border,
-                       int bottom_border, int orig_w, int orig_h,
-                       void (*draw_alpha)(void *ctx, int x0, int y0, int w,
-                                          int h, unsigned char* src,
-                                          unsigned char *srca,
-                                          int stride),
-                   void *ctx)
+static bool spu_visible(struct osd_state *osd, struct osd_object *obj)
 {
-    mp_osd_obj_t* obj=vo_osd_list;
-    osd_update_ext(osd, dxs, dys, left_border, top_border, right_border,
-                   bottom_border, orig_w, orig_h);
-    while(obj){
-      if(obj->flags&OSDFLAG_VISIBLE){
-	switch(obj->type){
-	case OSDTYPE_SPU:
-            if (vo_spudec)
-                vo_draw_spudec_sub(obj, draw_alpha, ctx); // FIXME
-	    break;
-	case OSDTYPE_OSD:
-	case OSDTYPE_SUBTITLE:
-	case OSDTYPE_PROGBAR:
-	    vo_draw_text_from_buffer(obj, draw_alpha, ctx);
-	    break;
-	}
-	obj->old_bbox=obj->bbox;
-	obj->flags|=OSDFLAG_OLD_BBOX;
-      }
-      obj->flags&=~OSDFLAG_CHANGED;
-      obj=obj->next;
+    struct MPOpts *opts = osd->opts;
+    return opts->sub_visibility && vo_spudec && spudec_visible(vo_spudec);
+}
+
+static void render_object(struct osd_state *osd, struct osd_object *obj,
+                          struct mp_osd_res res, double video_pts,
+                          const bool formats[SUBBITMAP_COUNT],
+                          struct sub_bitmaps *out_imgs)
+{
+    *out_imgs = (struct sub_bitmaps) {0};
+
+    if (!osd_res_equals(res, obj->vo_res))
+        obj->force_redraw = true;
+    obj->vo_res = res;
+
+    if (obj->type == OSDTYPE_SPU) {
+        if (spu_visible(osd, obj))
+            spudec_get_indexed(vo_spudec, &obj->vo_res, out_imgs);
+    } else if (obj->type == OSDTYPE_SUB) {
+        double sub_pts = video_pts;
+        if (sub_pts != MP_NOPTS_VALUE)
+            sub_pts += sub_delay - osd->sub_offset;
+        sub_get_bitmaps(osd, obj->vo_res, sub_pts, out_imgs);
+    } else {
+        osd_object_get_bitmaps(osd, obj, out_imgs);
+    }
+
+    if (obj->force_redraw) {
+        out_imgs->bitmap_id++;
+        out_imgs->bitmap_pos_id++;
+    }
+
+    obj->force_redraw = false;
+    obj->vo_bitmap_id += out_imgs->bitmap_id;
+    obj->vo_bitmap_pos_id += out_imgs->bitmap_pos_id;
+
+    if (out_imgs->num_parts == 0)
+        return;
+
+    if (obj->cached.bitmap_id == obj->vo_bitmap_id
+        && obj->cached.bitmap_pos_id == obj->vo_bitmap_pos_id
+        && formats[obj->cached.format])
+    {
+        *out_imgs = obj->cached;
+        return;
+    }
+
+    out_imgs->render_index = obj->type;
+    out_imgs->bitmap_id = obj->vo_bitmap_id;
+    out_imgs->bitmap_pos_id = obj->vo_bitmap_pos_id;
+
+    if (formats[out_imgs->format])
+        return;
+
+    bool cached = false; // do we have a copy of all the image data?
+
+    if (formats[SUBBITMAP_RGBA] && out_imgs->format == SUBBITMAP_INDEXED)
+        cached |= osd_conv_idx_to_rgba(obj->cache[0], out_imgs);
+
+    if (cached)
+        obj->cached = *out_imgs;
+}
+
+// draw_flags is a bit field of OSD_DRAW_* constants
+void osd_draw(struct osd_state *osd, struct mp_osd_res res,
+              double video_pts, int draw_flags,
+              const bool formats[SUBBITMAP_COUNT],
+              void (*cb)(void *ctx, struct sub_bitmaps *imgs), void *cb_ctx)
+{
+    if (draw_flags & OSD_DRAW_SUB_FILTER)
+        draw_flags |= OSD_DRAW_SUB_ONLY;
+
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        struct osd_object *obj = osd->objs[n];
+
+        // Object is drawn into the video frame itself; don't draw twice
+        if (osd->render_subs_in_filter && obj->is_sub &&
+            !(draw_flags & OSD_DRAW_SUB_FILTER))
+            continue;
+        if ((draw_flags & OSD_DRAW_SUB_ONLY) && !obj->is_sub)
+            continue;
+
+        struct sub_bitmaps imgs;
+        render_object(osd, obj, res, video_pts, formats, &imgs);
+        if (imgs.num_parts > 0) {
+            if (formats[imgs.format]) {
+                cb(cb_ctx, &imgs);
+            } else {
+                mp_msg(MSGT_OSD, MSGL_ERR,
+                       "Can't render OSD part %d (format %d).\n",
+                       obj->type, imgs.format);
+            }
+        }
     }
 }
 
-void osd_draw_text(struct osd_state *osd, int dxs, int dys,
-                   void (*draw_alpha)(void *ctx, int x0, int y0, int w, int h,
-                                      unsigned char* src, unsigned char *srca,
-                                      int stride),
-                   void *ctx)
+struct draw_on_image_closure {
+    struct osd_state *osd;
+    struct mp_image *dest;
+    bool changed;
+};
+
+static void draw_on_image(void *ctx, struct sub_bitmaps *imgs)
 {
-    osd_draw_text_ext(osd, dxs, dys, 0, 0, 0, 0, dxs, dys, draw_alpha, ctx);
+    struct draw_on_image_closure *closure = ctx;
+    struct osd_state *osd = closure->osd;
+    mp_draw_sub_bitmaps(&osd->draw_cache, closure->dest, imgs);
+    talloc_steal(osd, osd->draw_cache);
+    closure->changed = true;
+}
+
+// Returns whether anything was drawn.
+bool osd_draw_on_image(struct osd_state *osd, struct mp_osd_res res,
+                       double video_pts, int draw_flags, struct mp_image *dest)
+{
+    struct draw_on_image_closure closure = {osd, dest};
+    osd_draw(osd, res, video_pts, draw_flags, mp_draw_sub_formats,
+             &draw_on_image, &closure);
+    return closure.changed;
 }
 
 void vo_osd_changed(int new_value)
 {
-    mp_osd_obj_t* obj=vo_osd_list;
-
-    while(obj){
-	if(obj->type==new_value) obj->flags|=OSDFLAG_FORCE_UPDATE;
-	obj=obj->next;
+    struct osd_state *osd = global_osd;
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        if (osd->objs[n]->type == new_value)
+            osd->objs[n]->force_redraw = true;
     }
+    osd->want_redraw = true;
 }
 
-void vo_osd_reset_changed(void)
+bool sub_bitmaps_bb(struct sub_bitmaps *imgs, struct mp_rect *out_bb)
 {
-    mp_osd_obj_t* obj = vo_osd_list;
-    while (obj) {
-        obj->flags = obj->flags & ~OSDFLAG_FORCE_UPDATE;
-        obj = obj->next;
+    struct mp_rect bb = {INT_MAX, INT_MAX, INT_MIN, INT_MIN};
+    for (int n = 0; n < imgs->num_parts; n++) {
+        struct sub_bitmap *p = &imgs->parts[n];
+        bb.x0 = FFMIN(bb.x0, p->x);
+        bb.y0 = FFMIN(bb.y0, p->y);
+        bb.x1 = FFMAX(bb.x1, p->x + p->dw);
+        bb.y1 = FFMAX(bb.y1, p->y + p->dh);
     }
-}
 
-bool vo_osd_has_changed(struct osd_state *osd)
-{
-    mp_osd_obj_t* obj = vo_osd_list;
-    while (obj) {
-        if (obj->flags & OSDFLAG_FORCE_UPDATE)
-            return true;
-        obj = obj->next;
-    }
-    return false;
-}
+    // avoid degenerate bounding box if empty
+    bb.x0 = FFMIN(bb.x0, bb.x1);
+    bb.y0 = FFMIN(bb.y0, bb.y1);
 
-void vo_osd_resized()
-{
-    // font needs to be adjusted
-    osd_font_invalidate();
-    // OSD needs to be drawn fresh for new size
-    vo_osd_changed(OSDTYPE_OSD);
-    vo_osd_changed(OSDTYPE_SUBTITLE);
-}
+    *out_bb = bb;
 
-// return TRUE if we have osd in the specified rectangular area:
-int vo_osd_check_range_update(int x1,int y1,int x2,int y2){
-    mp_osd_obj_t* obj=vo_osd_list;
-    while(obj){
-	if(obj->flags&OSDFLAG_VISIBLE){
-	    if(	(obj->bbox.x1<=x2 && obj->bbox.x2>=x1) &&
-		(obj->bbox.y1<=y2 && obj->bbox.y2>=y1) &&
-		obj->bbox.y2 > obj->bbox.y1 && obj->bbox.x2 > obj->bbox.x1
-		) return 1;
-	}
-	obj=obj->next;
-    }
-    return 0;
+    return bb.x0 < bb.x1 && bb.y0 < bb.y1;
 }

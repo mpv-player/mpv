@@ -1302,7 +1302,8 @@ static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
     switch (action) {
     case M_PROPERTY_SET:
         *pscale = *(float *) arg;
-        vo_osd_resized();
+        vo_osd_changed(OSDTYPE_SUBTITLE);
+        vo_osd_changed(OSDTYPE_OSD);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
         *(float *)arg = *pscale;

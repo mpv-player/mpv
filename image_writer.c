@@ -39,9 +39,8 @@
 #include "libmpcodecs/vf.h"
 #include "fmt-conversion.h"
 
-//for sws_getContextFromCmdLine_hq and mp_sws_set_colorspace
-#include "libmpcodecs/vf_scale.h"
-#include "libvo/csputils.h"
+#include "libmpcodecs/sws_utils.h"
+#include "libmpcodecs/vf.h"
 
 #include "m_option.h"
 
@@ -260,12 +259,14 @@ const char *image_writer_file_ext(const struct image_writer_opts *opts)
     return get_writer(opts)->file_ext;
 }
 
-int write_image(struct mp_image *image, const struct mp_csp_details *csp,
-                const struct image_writer_opts *opts, const char *filename)
+int write_image(struct mp_image *image, const struct image_writer_opts *opts,
+                const char *filename)
 {
     struct mp_image *allocated_image = NULL;
     struct image_writer_opts defs = image_writer_opts_defaults;
-    bool is_anamorphic = image->w != image->width || image->h != image->height;
+    int d_w = image->display_w ? image->display_w : image->w;
+    int d_h = image->display_h ? image->display_h : image->h;
+    bool is_anamorphic = image->w != d_w || image->h != d_h;
 
     if (!opts)
         opts = &defs;
@@ -284,28 +285,17 @@ int write_image(struct mp_image *image, const struct mp_csp_details *csp,
         }
     }
 
+    // Caveat: - no colorspace/levels conversion done if pixel formats equal
+    //         - RGB->YUV assumes BT.601
+    //         - color levels broken in various ways thanks to libswscale
     if (image->imgfmt != destfmt || is_anamorphic) {
-        struct mp_image *dst = alloc_mpi(image->w, image->h, destfmt);
+        struct mp_image *dst = alloc_mpi(d_w, d_h, destfmt);
+        vf_clone_mpi_attributes(dst, image);
 
-        struct SwsContext *sws = sws_getContextFromCmdLine_hq(image->width,
-                                                              image->height,
-                                                              image->imgfmt,
-                                                              dst->width,
-                                                              dst->height,
-                                                              dst->imgfmt);
+        int flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP |
+                    SWS_ACCURATE_RND | SWS_BITEXACT;
 
-        struct mp_csp_details colorspace = MP_CSP_DETAILS_DEFAULTS;
-        if (csp)
-            colorspace = *csp;
-        // This is a property of the output device; images always use
-        // full-range RGB.
-        colorspace.levels_out = MP_CSP_LEVELS_PC;
-        mp_sws_set_colorspace(sws, &colorspace);
-
-        sws_scale(sws, (const uint8_t **)image->planes, image->stride, 0,
-                  image->height, dst->planes, dst->stride);
-
-        sws_freeContext(sws);
+        mp_image_swscale(dst, image, flags);
 
         allocated_image = dst;
         image = dst;
@@ -327,4 +317,11 @@ int write_image(struct mp_image *image, const struct mp_csp_details *csp,
     free_mp_image(allocated_image);
 
     return success;
+}
+
+void dump_png(struct mp_image *image, const char *filename)
+{
+    struct image_writer_opts opts = image_writer_opts_defaults;
+    opts.format = "png";
+    write_image(image, &opts, filename);
 }

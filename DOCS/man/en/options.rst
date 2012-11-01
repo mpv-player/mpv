@@ -19,16 +19,6 @@
 
     *NOTE*: See ``--ac=help`` for a full list of available codecs.
 
-    *EXAMPLE*:
-
-    :``--ac=mp3acm``:     Force the l3codeca.acm MP3 codec.
-    :``--ac=mad,``:       Try libmad first, then fall back on others.
-    :``--ac=hwac3,a52,``: Try hardware AC-3 passthrough, software AC-3, then
-                          others.
-    :``--ac=hwdts,``:     Try hardware DTS passthrough, then fall back on
-                          others.
-    :``--ac=-ffmp3,``:    Skip FFmpeg's MP3 decoder.
-
 --af=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of audio filters to apply to the audio stream. See
     :ref:`audio_filters` for details and descriptions of the available filters.
@@ -80,7 +70,6 @@
     *EXAMPLE*:
 
     :``--afm=ffmpeg``:    Try FFmpeg's libavcodec codecs first.
-    :``--afm=acm,dshow``: Try Win32 codecs first.
 
 --aid=<ID|auto|no>
     Select audio channel. ``auto`` selects the default, ``no`` disables audio.
@@ -125,9 +114,9 @@
     features in other subtitle formats by conversion to ASS markup. Enabled by
     default if the player was compiled with libass support.
 
-    *NOTE*: Some of the other subtitle options were written for the old
-    non-libass subtitle rendering system and may not work the same way or at
-    all with libass rendering enabled.
+    *NOTE*: With ``--ass``, some of the ASS subtitle options work for non-ASS
+    text subtitles only, because ASS subtitles include their own styling
+    information.
 
 --ass-border-color=<value>
     Sets the border (outline) color for text subtitles. The color format is
@@ -158,8 +147,6 @@
     :1:       FreeType autohinter, light mode
     :2:       FreeType autohinter, normal mode
     :3:       font native hinter
-    :0-3 + 4: The same, but hinting will only be performed if the OSD is
-              rendered at screen resolution and will therefore not be scaled.
 
     The default value is 0 (no hinting).
 
@@ -242,6 +229,8 @@
     is also used to set the maximum delivery bandwidth allowing faster cache
     filling and stream dumping.
 
+    *NOTE*: probably broken/useless.
+
 --untimed
     Do not sleep when outputting video frames. Useful for benchmarks when used
     with --no-audio.
@@ -319,7 +308,7 @@
         Add <value> sectors to the values reported when addressing tracks. May
         be negative.
 
-    (no)skip
+    (no-)skip
         (Never) accept imperfect data reconstruction.
 
 --cdrom-device=<path>
@@ -392,12 +381,6 @@
     :BT.601:        ITU-R BT.601 (SD)
     :BT.709:        ITU-R BT.709 (HD)
     :SMPTE-240M:    SMPTE-240M
-    :sd:            alias for BT.601
-    :hd:            alias for BT.709
-    :0:             compatibility alias for auto (do not use)
-    :1:             compatibility alias for BT.601 (do not use)
-    :2:             compatibility alias for BT.709 (do not use)
-    :3:             compatibility alias for SMPTE-240M (do not use)
 
 --colormatrix-input-range=<color-range>
     YUV color levels used with YUV to RGB conversion. This option is only
@@ -489,10 +472,6 @@
 
     ``--display=xtest.localdomain:0``
 
---double, --no-double
-    Double buffering. The option to disable this exists mostly for debugging
-    purposes and should not normally be used.
-
 --doubleclick-time
     Time in milliseconds to recognize two consecutive button presses as a
     double-click (default: 300).
@@ -542,6 +521,8 @@
     EDL entries later. See http://www.mplayerhq.hu/DOCS/HTML/en/edl.html for
     details.
 
+    *NOTE*: broken.
+
 --embeddedfonts, --no-embeddedfonts
     Use fonts embedded in Matroska container files and ASS scripts (default:
     enabled). These fonts can be used for SSA/ASS subtitle rendering
@@ -569,14 +550,6 @@
     reliable enough), the filename extension is used to select the demuxer.
     Always falls back on content-based demuxer selection.
 
---ffactor=<number>
-    Resample the font alphamap. Can be:
-
-    :0:    plain white fonts
-    :0.75: very narrow black outline (default)
-    :1:    narrow black outline
-    :10:   bold black outline
-
 --field-dominance=<-1-1>
     Set first field for interlaced content. Useful for deinterlacers that
     double the framerate: ``--vf=tfields=1``, ``--vf=yadif=1`` and
@@ -596,15 +569,6 @@
 
 --flip
     Flip image upside-down.
-
---flip-hebrew
-    Turns on flipping subtitles using FriBiDi.
-
---flip-hebrew-commas, --no-flip-hebrew-commas
-    Enabled by default.
-    Change FriBiDi's assumptions about the placements of commas in subtitles.
-    Use this if commas in subtitles are shown at the start of a sentence
-    instead of at the end.
 
 --font=<pattern-or-filename>
     Specify font to use for OSD and for subtitles that do not themselves
@@ -643,6 +607,8 @@
 --fps=<float>
     Override video framerate. Useful if the original value is wrong or missing.
 
+    *NOTE*: Works in ``--no-correct-pts`` mode only.
+
 --framedrop=<no|yes|hard>
     Skip displaying some frames to maintain A/V sync on slow systems. Video
     filters are not applied to such frames. For B-frames even decoding is
@@ -650,14 +616,10 @@
     decoding and output of any frame can be skipped, and will lead to an even
     worse playback experience.
 
-    Practical use of this feature is questionable. Disabled by default.
+    *NOTE*: Practical use of this feature is questionable. Disabled by default.
 
 --frames=<number>
     Play/convert only first <number> frames, then quit.
-
---fribidi-charset=<name>
-    Specifies the character set that will be passed to FriBiDi when decoding
-    non-UTF-8 subtitles (default: ISO8859-8).
 
 --fullscreen
 --fs
@@ -761,7 +723,7 @@
     Command that is executed every 30 seconds during playback via *system()* -
     i.e. using the shell.
 
-    *NOTE*: mpv uses this command without any checking, it is your
+    *NOTE*: mpv uses this command without any checking. It is your
     responsibility to ensure it does not cause security problems (e.g. make
     sure to use full paths if "." is in your path like on Windows). It also
     only works when playing video (i.e. not with ``--no-video`` but works with
@@ -779,7 +741,7 @@
     --heartbeat-cmd="gnome-screensaver-command -p" file``
 
 --help
-    Show short summary of options and key bindings.
+    Show short summary of options.
 
 --hr-seek=<no|absolute|yes>
     Select when to use precise seeks that are not limited to keyframes. Such
@@ -831,14 +793,7 @@
     drivers.
 
 --identify
-    Shorthand for ``--msglevel=identify=4``. Show file parameters in an easily
-    parseable format. Also prints more detailed information about subtitle and
-    audio track languages and IDs. In some cases you can get more information
-    by using ``--msglevel=identify=6``. For example, for a DVD or Blu-ray it
-    will list the chapters and time length of each title, as well as a disk
-    ID. Combine this with ``--frames=0`` to suppress all video output. The
-    wrapper script ``TOOLS/midentify.sh`` suppresses the other mpv output
-    and (hopefully) shellescapes the filenames.
+    Deprecated. Use ``TOOLS/mpv_identify.sh``.
 
 --idle
     Makes mpv wait idly instead of quitting when there is no file to play.
@@ -898,7 +853,7 @@
     ar-rate
         Number of key presses to generate per second on autorepeat.
 
-    (no)default-bindings
+    (no-)default-bindings
         Use the key bindings that mpv ships with by default.
 
     keylist
@@ -1308,7 +1263,7 @@
     values mean multiples of the default range. Negative numbers mean you can
     zoom in up to a factor of ``--panscanrange=+1``. E.g. ``--panscanrange=-3``
     allows a zoom factor of up to 4. This feature is experimental. Do not
-    report bugs unless you are using ``--vo=gl``.
+    report bugs unless you are using ``--vo=opengl``.
 
 --passwd=<password>
     Used with some network protocols. Specify password for HTTP authentication.
@@ -1337,7 +1292,7 @@
     $$
         Expands to ``$``.
     $}
-        Expands to ``}``. (To produce this character inside rexursive
+        Expands to ``}``. (To produce this character inside recursive
         expansion.)
     $>
         Disable property expansion and special handling of ``$`` for the rest
@@ -1359,19 +1314,12 @@
     sources. Do NOT use ``--playlist`` with random internet sources or files
     you don't trust!
 
-    *NOTE*: This option is considered an entry so options found after it will
-    apply only to the elements of this playlist.
-
     FIXME: This needs to be clarified and documented thoroughly.
 
 --pp=<quality>
-    This option only works when decoding video with Win32 DirectShow DLLs with
-    internal postprocessing routines. See also ``--vf=pp``. Set the DLL
-    postprocess level. The valid range of ``--pp`` values varies by codec, it
-    is mostly 0-6, where 0=disable, 6=slowest/best.
+    See also ``--vf=pp``.
 
 --pphelp
-    Show a summary about the available postprocess filters and their usage.
     See also ``--vf=pp``.
 
 --prefer-ipv4
@@ -1573,18 +1521,6 @@
     images may cover the movie window, though. May not work with all video
     output drivers.
 
---rtsp-destination
-    Used with ``rtsp://`` URLs to force the destination IP address to be
-    bound. This option may be useful with some RTSP server which do not send
-    RTP packets to the right interface. If the connection to the RTSP server
-    fails, use ``-v`` to see which IP address mpv tries to bind to and try
-    to force it to one assigned to your computer instead.
-
---rtsp-port
-    Used with ``rtsp://`` URLs to force the client's port number. This option
-    may be useful if you are behind a router and want to forward the RTSP
-    stream from the server to a specific client.
-
 --saturation=<-100-100>
     Adjust the saturation of the video signal (default: 0). You can get
     grayscale output with this option. Not supported by all video output
@@ -1665,9 +1601,9 @@
         insert the number of the current month as number. You have to use
         multiple ``%tX`` specifiers to build a full date/time string.
     ``%{prop[:fallback text]}``
-        Insert the value of the slave property 'prop'. E.g. %{filename} is the
-        same as %f. If the property doesn't exist or is not available, nothing
-        is inserted, unless a fallback is specified.
+        Insert the value of the slave property 'prop'. E.g. ``%{filename}`` is
+        the same as ``%f``. If the property doesn't exist or is not available,
+        an error text is inserted, unless a fallback is specified.
     ``%%``
         Replaced with the ``%`` character itself.
 
@@ -1741,10 +1677,10 @@
     :yes:   always use the volume filter
     :auto:  prefer the volume filter if the audio driver uses the system mixer (default)
 
-    The intention with ``auto`` is to avoid changing system mixer settings with
-    default settings. mpv is a video player, not a mixer panel. On the other
-    hand, mixer controls should be used for sound servers like PulseAudio, which
-    provide per-application volume.
+    The intention of ``auto`` is to avoid changing system mixer settings from
+    within mpv with default settings. mpv is a video player, not a mixer panel.
+    On the other hand, mixer controls are enabled for sound servers like
+    PulseAudio, which provide per-application volume.
 
 --softvol-max=<10.0-10000.0>
     Set the maximum amplification level in percent (default: 200). A value of
@@ -1754,30 +1690,6 @@
 
 --speed=<0.01-100>
     Slow down or speed up playback by the factor given as parameter.
-
---spuaa=<mode>
-    Antialiasing/scaling mode for DVD/VOBsub. A value of 16 may be added to
-    <mode> in order to force scaling even when original and scaled frame size
-    already match. This can be employed to e.g. smooth subtitles with gaussian
-    blur. Available modes are:
-
-    :0: none (fastest, very ugly)
-    :1: approximate (broken?)
-    :2: full (slow)
-    :3: bilinear (default, fast and not too bad)
-    :4: uses swscaler gaussian blur (looks very good)
-
---spualign=<-1-2>
-    Specify how SPU (DVD/VOBsub) subtitles should be aligned.
-
-    :-1:  Original position
-    :0:   Align at top (original behavior, default).
-    :1:   Align at center.
-    :2:   Align at bottom.
-
---spugauss=<0.0-3.0>
-    Variance parameter of gaussian used by ``--spuaa=4``. Higher means more
-    blur (default: 1.0).
 
 --srate=<Hz>
     Select the output sample rate to be used (of course sound cards have
@@ -1806,11 +1718,12 @@
     :chs=<h>:       chroma horizontal shifting
     :cvs=<v>:       chroma vertical shifting
 
-    *EXAMPLE*: ``--vf=scale=-ssf=lgb=3.0``
+    *EXAMPLE*: ``--vf=scale --ssf=lgb=3.0``
 
 --sstep=<sec>
-    Skip <sec> seconds after every frame. Since mpv will only seek to
-    the next keyframe unless you use ``--hr-seek`` this may be inexact.
+    Skip <sec> seconds after every frame.
+
+    *NOTE*: without ``--hr-seek``, skipping will snap to keyframes.
 
 --stereo=<mode>
     Select type of MP2/MP3 stereo output.
@@ -1828,15 +1741,6 @@
 --sub=<subtitlefile1,subtitlefile2,...>
     Use/display these subtitle files. Only one file can be displayed at the
     same time.
-
---sub-bg-alpha=<0-255>
-    Specify the alpha channel value for subtitles and OSD backgrounds. Big
-    values mean more transparency. 0 means completely transparent.
-
---sub-bg-color=<0-255>
-    Specify the color value for subtitles and OSD backgrounds. Currently
-    subtitles are grayscale so this value is equivalent to the intensity of
-    the color. 255 means white and 0 black.
 
 --sub-demuxer=<[+]name>
     Force subtitle demuxer type for ``--subfile``. Using a '+' before the name
@@ -1899,42 +1803,17 @@
     Delays subtitles by <sec> seconds. Can be negative.
 
 --subfile=<filename>
-    (BETA CODE)
-    Currently useless. Same as ``--audiofile``, but for subtitle streams
-    (OggDS?).
+    Open the given file with a demuxer, and use its subtitle streams. Same as
+    ``--audiofile``, but for subtitle streams.
+
+    Use ``--sub`` for normal text subtitle files.
 
 --subfont=<pattern-or-filename>
     Sets the subtitle font (see ``--font``). If no ``--subfont`` is given,
     ``--font`` is used for subtitles too.
 
---subfont-autoscale=<0-3>
-    Sets the autoscale mode.
-
-    *NOTE*: 0 means that text scale and OSD scale are font heights in points.
-
-    The mode can be:
-
-    :0: no autoscale
-    :1: proportional to movie height
-    :2: proportional to movie width
-    :3: proportional to movie diagonal (default)
-
---subfont-blur=<0-8>
-    Sets the font blur radius (default: 2).
-
---subfont-encoding=<value>
-    Sets the font encoding. When set to 'unicode', all the glyphs from the
-    font file will be rendered and unicode will be used (default: unicode).
-
---subfont-osd-scale=<0-100>
-    Sets the autoscale coefficient of the OSD elements (default: 4).
-
---subfont-outline=<0-8>
-    Sets the font outline thickness (default: 2).
-
 --subfont-text-scale=<0-100>
-    Sets the subtitle text autoscale coefficient as percentage of the screen
-    size (default: 3.5).
+    Factor for the text subtitle and OSD font size (default: 6).
 
 --subfps=<rate>
     Specify the framerate of the subtitle file (default: movie fps).
@@ -1946,10 +1825,6 @@
     Specify the position of subtitles on the screen. The value is the vertical
     position of the subtitle in % of the screen height.
     Can be useful with ``--vf=expand``.
-
---subwidth=<10-100>
-    Specify the maximum width of subtitles on the screen. Useful for TV-out.
-    The value is the width of the subtitle in % of the screen width.
 
 --sws=<n>
     Specify the software scaler algorithm to be used with the ``--zoom``
@@ -1982,8 +1857,9 @@
     console. The escape sequence should move the pointer to the beginning of
     the line used for the OSD and clear it (default: ``^[[A\r^[[K``).
 
---title
-    Set the window title. Properties are expanded (see ``--playing-msg``).
+--title=<string>
+    Set the window title. Properties are expanded on playback start
+    (see ``--playing-msg``).
 
 --tv=<option1:option2:...>
     This option tunes various properties of the TV capture module. For
@@ -2196,9 +2072,6 @@
         the device (default: 50). A signal strength higher than this value will
         indicate that the currently scanning channel is active.
 
---unicode
-    Tells mpv to handle the subtitle file as unicode.
-
 --use-filedir-conf
     Look for a file-specific configuration file in the same directory as the
     file that is being played.
@@ -2228,13 +2101,6 @@
 
     *NOTE*: See ``--vc=help`` for a full list of available codecs.
 
-    *EXAMPLE*:
-
-    :``--vc=divx``:             Force Win32/VfW DivX codec, no fallback.
-    :``--vc=-divxds,-divx,``:   Skip Win32 DivX codecs.
-    :``--vc=ffmpeg12,mpeg12,``: Try libavcodec's MPEG-1/2 codec, then
-                                libmpeg2, then others.
-
 --vf=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of video filters to apply to the video stream. See
     :ref:`video_filters` for details and descriptions of the available filters.
@@ -2248,14 +2114,6 @@
     the given codec families work.
 
     *NOTE*: See ``--vfm=help`` for a full list of available codec families.
-
-    *EXAMPLE*:
-
-    :``--vfm=ffmpeg,dshow,vfw``:
-        Try the libavcodec, then Directshow, then VfW codecs and fall back on
-        others, if they do not work.
-    :``--vfm=xanim``:
-        Try XAnim codecs first.
 
 --vid=<ID|auto|no>
     Select video channel. ``auto`` selects the default, ``no`` disables video.
@@ -2282,21 +2140,15 @@
     (default: 3).
 
 --volume=<-1-100>
-    Set the startup volume in the mixer, either hardware or software (if used
-    with ``--softvol``). A value of -1 (the default) will not change the
-    volume. See also ``--af=volume``.
+    Set the startup volume. A value of -1 (the default) will not change the
+    volume. See also ``--softvol``.
 
 --no-vsync
-    Tries to disable vsync.
+    Tries to disable vsync. (Effective with some video outputs only.)
 
 --wid=<ID>
-    (X11, OpenGL and DirectX only)
-    This tells mpv to attach to an existing window. Useful to embed
-    mpv in a browser (e.g. the plugger extension). Earlier this option
-    always filled the given window completely, thus aspect scaling, panscan,
-    etc were no longer handled by mpv but had to be managed by the
-    application that created the window. Now aspect is maintained by default.
-    If you don't want that use ``--no-keepaspect``.
+    (X11 and win32 only)
+    This tells mpv to attach to an existing window.See ``--slave-broken``.
 
 --x=<width>
     Scale image to width <width> (if software/hardware scaling is available).
@@ -2349,6 +2201,4 @@
     Disables aspect calculations.
 
 --zoom
-    Allow software scaling, where available. This will allow scaling with
-    output drivers (like x11) that do not support hardware scaling,
-    where mpv disables scaling by default for performance reasons.
+    Useful for ``--vo=x11`` only. Enables scaling.

@@ -64,8 +64,6 @@ enum mp_voctrl {
     VOCTRL_ONTOP,
     VOCTRL_ROOTWIN,
     VOCTRL_BORDER,
-    VOCTRL_DRAW_EOSD,
-    VOCTRL_GET_EOSD_RES,                // struct mp_eosd_res
 
     VOCTRL_SET_DEINTERLACE,
     VOCTRL_GET_DEINTERLACE,
@@ -107,6 +105,8 @@ struct voctrl_screenshot_args {
     // image data directly.
     // Is never NULL. (Failure has to be indicated by returning VO_FALSE.)
     struct mp_image *out_image;
+    // Whether the VO rendered OSD/subtitles into out_image
+    bool has_osd;
 };
 
 typedef struct {
@@ -233,6 +233,7 @@ struct vo_driver {
 struct vo {
     int config_ok;  // Last config call was successful?
     int config_count;  // Total number of successful config calls
+    int default_caps; // query_format() result for configured video format
 
     bool frame_loaded;  // Is there a next frame the VO could flip to?
     struct mp_image *waiting_mpi;
@@ -256,7 +257,7 @@ struct vo {
     int event_fd;  // check_events() should be called when this has input
     int registered_fd;  // set to event_fd when registered in input system
 
-    // requested position/resolution
+    // requested position/resolution (usually window position/window size)
     int dx;
     int dy;
     int dwidth;
@@ -265,12 +266,13 @@ struct vo {
     int panscan_x;
     int panscan_y;
     float panscan_amount;
-    float monitor_aspect;
+    float monitor_par;
     struct aspect_data {
         int orgw; // real width
         int orgh; // real height
         int prew; // prescaled width
         int preh; // prescaled height
+        float par; // pixel aspect ratio out of orgw/orgh and prew/preh
         int scrw; // horizontal resolution
         int scrh; // vertical resolution
         float asp;
@@ -311,7 +313,6 @@ extern int xinerama_x;
 extern int xinerama_y;
 
 extern int vo_grabpointer;
-extern int vo_doublebuffering;
 extern int vo_vsync;
 extern int vo_fs;
 extern int vo_fsmode;
@@ -336,13 +337,12 @@ struct mp_keymap {
   int to;
 };
 int lookup_keymap_table(const struct mp_keymap *map, int key);
-struct vo_rect {
-  int left, right, top, bottom, width, height;
-};
-void calc_src_dst_rects(struct vo *vo, int src_width, int src_height,
-                        struct vo_rect *src, struct vo_rect *dst,
-                        struct vo_rect *borders, const struct vo_rect *crop);
+
 void vo_mouse_movement(struct vo *vo, int posx, int posy);
+
+struct mp_osd_res;
+void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
+                          struct mp_rect *out_dst, struct mp_osd_res *out_osd);
 
 static inline int aspect_scaling(void)
 {

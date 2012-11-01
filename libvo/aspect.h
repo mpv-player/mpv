@@ -24,10 +24,7 @@ struct vo;
 void panscan_init(struct vo *vo);
 void panscan_calc_windowed(struct vo *vo);
 
-void aspect_save_orig(struct vo *vo, int orgw, int orgh);
-
-void aspect_save_prescale(struct vo *vo, int prew, int preh);
-
+void aspect_save_videores(struct vo *vo, int w, int h, int d_w, int d_h);
 void aspect_save_screenres(struct vo *vo, int scrw, int scrh);
 
 #define A_WINZOOM 2 ///< zoom to fill window size

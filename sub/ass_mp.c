@@ -61,17 +61,6 @@ ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
         style->treat_fontname_as_pattern = 1;
 
         double fs = track->PlayResY * text_font_scale_factor / 100.;
-        /* The font size is always proportional to video height only;
-         * real -subfont-autoscale behavior is not implemented.
-         * Apply a correction that corresponds to about 4:3 aspect ratio
-         * video to get a size somewhat closer to what non-libass rendering
-         * would produce with the same text_font_scale_factor
-         * and subtitle_autoscale.
-         */
-        if (subtitle_autoscale == 2)
-            fs *= 1.3;
-        else if (subtitle_autoscale == 3)
-            fs *= 1.7;
 
         uint32_t c1 = 0xFFFFFF00;
         uint32_t c2 = 0x00000000;
@@ -228,7 +217,7 @@ ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
 }
 
 void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
-                      struct mp_eosd_res *dim, bool unscaled)
+                      struct mp_osd_res *dim)
 {
     ass_set_frame_size(priv, dim->w, dim->h);
     ass_set_margins(priv, dim->mt, dim->mb, dim->ml, dim->mr);
@@ -243,10 +232,7 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
         set_sub_pos = 100 - sub_pos;
         set_line_spacing = opts->ass_line_spacing;
         set_font_scale = opts->ass_font_scale;
-        if (!unscaled && (opts->ass_hinting & 4))
-            set_hinting = 0;
-        else
-            set_hinting = opts->ass_hinting & 3;
+        set_hinting = opts->ass_hinting & 3; // +4 was for no hinting if scaled
     }
 
     ass_set_use_margins(priv, set_use_margins);
@@ -279,6 +265,41 @@ void mp_ass_configure_fonts(ASS_Renderer *priv)
     free(dir);
     free(path);
     free(family);
+}
+
+void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
+                         struct sub_bitmap **parts, struct sub_bitmaps *res)
+{
+    int changed;
+    ASS_Image *imgs = ass_render_frame(renderer, track, time, &changed);
+    if (changed == 2)
+        res->bitmap_id = ++res->bitmap_pos_id;
+    else if (changed)
+        res->bitmap_pos_id++;
+    res->format = SUBBITMAP_LIBASS;
+
+    res->parts = *parts;
+    res->num_parts = 0;
+    int num_parts_alloc = MP_TALLOC_ELEMS(res->parts);
+    for (struct ass_image *img = imgs; img; img = img->next) {
+        if (img->w == 0 || img->h == 0)
+            continue;
+        if (res->num_parts >= num_parts_alloc) {
+            num_parts_alloc = FFMAX(num_parts_alloc * 2, 32);
+            res->parts = talloc_realloc(NULL, res->parts, struct sub_bitmap,
+                                        num_parts_alloc);
+        }
+        struct sub_bitmap *p = &res->parts[res->num_parts];
+        p->bitmap = img->bitmap;
+        p->stride = img->stride;
+        p->libass.color = img->color;
+        p->dw = p->w = img->w;
+        p->dh = p->h = img->h;
+        p->x = img->dst_x;
+        p->y = img->dst_y;
+        res->num_parts++;
+    }
+    *parts = res->parts;
 }
 
 static int map_ass_level[] = {

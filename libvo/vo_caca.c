@@ -325,9 +325,9 @@ static void uninit(struct vo *vo)
 
 static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
-    if (vo_osd_progbar_type != -1)
-        osdpercent(MESSAGE_DURATION, 0, 255, vo_osd_progbar_value,
-                   sub_osd_names[vo_osd_progbar_type], "");
+    if (osd->progbar_type != -1)
+        osdpercent(MESSAGE_DURATION, 0, 255, osd->progbar_value,
+                   sub_osd_names[osd->progbar_type], "");
 }
 
 static int preinit(struct vo *vo, const char *arg)

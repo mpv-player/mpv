@@ -995,7 +995,6 @@ void init_vo_spudec(struct MPContext *mpctx)
         sh_sub_t *sh = mpctx->sh_sub;
         vo_spudec = spudec_new_scaled(NULL, width, height, sh->extradata,
                                       sh->extradata_len);
-        spudec_set_font_factor(vo_spudec, font_factor);
     }
 
     if (vo_spudec != NULL) {
@@ -1313,7 +1312,7 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
         // the difference is greater assume it's wrapped around from below 0
         if (mpctx->osd_visible - now > 36000000) {
             mpctx->osd_visible = 0;
-            vo_osd_progbar_type = -1; // disable
+            mpctx->osd->progbar_type = -1; // disable
             vo_osd_changed(OSDTYPE_PROGBAR);
             mpctx->osd_function = mpctx->paused ? OSD_PAUSE : OSD_PLAY;
         }
@@ -1373,8 +1372,8 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
 
     if (mpctx->sh_video && opts->term_osd != 1) {
         mpctx->osd_visible = (GetTimerMS() + 1000) | 1;
-        vo_osd_progbar_type = type;
-        vo_osd_progbar_value = 256 * (val - min) / (max - min);
+        mpctx->osd->progbar_type = type;
+        mpctx->osd->progbar_value = 256 * (val - min) / (max - min);
         vo_osd_changed(OSDTYPE_PROGBAR);
         return;
     }
@@ -1661,6 +1660,8 @@ double playing_audio_pts(struct MPContext *mpctx)
 
 static void reset_subtitles(struct MPContext *mpctx)
 {
+    if (mpctx->sh_sub)
+        sub_reset(mpctx->sh_sub, mpctx->osd);
     sub_clear_text(&mpctx->subs, MP_NOPTS_VALUE);
     if (vo_sub)
         set_osd_subtitle(mpctx, NULL);
@@ -1696,7 +1697,9 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
     }
 
     // DVD sub:
-    if (track->vobsub_id_plus_one || type == 'v') {
+    if ((track->vobsub_id_plus_one || type == 'v')
+        && !(sh_sub && sh_sub->active))
+    {
         int timestamp;
         // Get a sub packet from the demuxer (or the vobsub.c thing, which
         // should be a demuxer, but isn't).
@@ -1745,7 +1748,8 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 spudec_assemble(vo_spudec, packet, len, timestamp);
         }
     } else if (d_sub && (is_text_sub(type) || (sh_sub && sh_sub->active))) {
-        if (d_sub->non_interleaved)
+        bool non_interleaved = track->is_external; // if demuxing subs only
+        if (non_interleaved)
             ds_get_next_pts(d_sub);
 
         while (d_sub->first) {
@@ -1755,7 +1759,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 if (!opts->ass_enabled || !is_text_sub(type))
                     break;
                 // Try to avoid demuxing whole file at once
-                if (d_sub->non_interleaved && subpts_s > curpts_s + 1)
+                if (non_interleaved && subpts_s > curpts_s + 1)
                     break;
             }
             double duration = d_sub->first->duration;
@@ -1791,7 +1795,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 sub_add_text(&mpctx->subs, packet, len, endpts_s);
                 set_osd_subtitle(mpctx, &mpctx->subs);
             }
-            if (d_sub->non_interleaved)
+            if (non_interleaved)
                 ds_get_next_pts(d_sub);
         }
         if (!opts->ass_enabled)
@@ -2255,45 +2259,11 @@ int reinit_video_chain(struct MPContext *mpctx)
         sh_video->vfilter = vf_open_filter(opts, NULL, "vo", vf_arg);
     }
 
-#ifdef CONFIG_ASS
-    if (opts->ass_enabled) {
-        int i;
-        int insert = 1;
-        if (opts->vf_settings)
-            for (i = 0; opts->vf_settings[i].name; ++i)
-                if (strcmp(opts->vf_settings[i].name, "ass") == 0) {
-                    insert = 0;
-                    break;
-                }
-        if (insert) {
-            extern vf_info_t vf_info_ass;
-            const vf_info_t *libass_vfs[] = {
-                &vf_info_ass, NULL
-            };
-            char *vf_arg[] = {
-                "auto", "yes", NULL
-            };
-            int retcode = 0;
-            struct vf_instance *vf_ass = vf_open_plugin_noerr(opts, libass_vfs,
-                                                              sh_video->vfilter,
-                                                              "ass", vf_arg,
-                                                              &retcode);
-            if (vf_ass)
-                sh_video->vfilter = vf_ass;
-            else if (retcode == -1) // vf_ass open() returns -1 VO has EOSD
-                mp_msg(MSGT_CPLAYER, MSGL_V, "[ass] vf_ass not needed\n");
-            else
-                mp_msg(MSGT_CPLAYER, MSGL_ERR,
-                       "ASS: cannot add video filter\n");
-        }
-    }
-#endif
-
     sh_video->vfilter = append_filters(sh_video->vfilter, opts->vf_settings);
 
-    if (opts->ass_enabled)
-        sh_video->vfilter->control(sh_video->vfilter, VFCTRL_INIT_EOSD,
-                                   mpctx->ass_library);
+    struct vf_instance *vf = sh_video->vfilter;
+    mpctx->osd->render_subs_in_filter
+        = vf->control(vf, VFCTRL_INIT_OSD, NULL) == VO_TRUE;
 
     init_best_video_codec(sh_video, video_codec_list, video_fm_list);
 
@@ -2403,7 +2373,7 @@ static double update_video(struct MPContext *mpctx)
     struct sh_video *sh_video = mpctx->sh_video;
     struct vo *video_out = mpctx->video_out;
     sh_video->vfilter->control(sh_video->vfilter, VFCTRL_SET_OSD_OBJ,
-                               mpctx->osd); // for vf_ass
+                               mpctx->osd); // for vf_sub
     if (!mpctx->opts.correct_pts)
         return update_video_nocorrect_pts(mpctx);
 
@@ -2532,24 +2502,25 @@ void unpause_player(struct MPContext *mpctx)
     (void)get_relative_time(mpctx);     // ignore time that passed during pause
 }
 
-static int redraw_osd(struct MPContext *mpctx)
+static void draw_osd(struct MPContext *mpctx)
 {
-    struct sh_video *sh_video = mpctx->sh_video;
-    struct vf_instance *vf = sh_video->vfilter;
-    if (sh_video->output_flags & VFCAP_OSD_FILTER)
-        return -1;
-    if (vo_redraw_frame(mpctx->video_out) < 0)
-        return -1;
-    mpctx->osd->sub_pts = mpctx->video_pts;
-    if (mpctx->osd->sub_pts != MP_NOPTS_VALUE)
-        mpctx->osd->sub_pts += sub_delay - mpctx->osd->sub_offset;
+    struct vo *vo = mpctx->video_out;
 
-    if (!(sh_video->output_flags & VFCAP_EOSD_FILTER))
-        vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
-    vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
-    vo_osd_reset_changed();
-    vo_flip_page(mpctx->video_out, 0, -1);
-    return 0;
+    mpctx->osd->vo_pts = mpctx->video_pts;
+    vo_draw_osd(vo, mpctx->osd);
+    mpctx->osd->want_redraw = false;
+}
+
+static bool redraw_osd(struct MPContext *mpctx)
+{
+    struct vo *vo = mpctx->video_out;
+    if (vo_redraw_frame(vo) < 0)
+        return false;
+
+    draw_osd(mpctx);
+
+    vo_flip_page(vo, 0, -1);
+    return true;
 }
 
 void add_step_frame(struct MPContext *mpctx)
@@ -3154,13 +3125,7 @@ static void run_playloop(struct MPContext *mpctx)
         mpctx->video_pts = sh_video->pts;
         update_subtitles(mpctx, sh_video->pts);
         update_osd_msg(mpctx);
-        struct vf_instance *vf = sh_video->vfilter;
-        mpctx->osd->sub_pts = mpctx->video_pts;
-        if (mpctx->osd->sub_pts != MP_NOPTS_VALUE)
-            mpctx->osd->sub_pts += sub_delay - mpctx->osd->sub_offset;
-        vf->control(vf, VFCTRL_DRAW_EOSD, mpctx->osd);
-        vf->control(vf, VFCTRL_DRAW_OSD, mpctx->osd);
-        vo_osd_reset_changed();
+        draw_osd(mpctx);
 
         mpctx->time_frame -= get_relative_time(mpctx);
         mpctx->time_frame -= vo->flip_queue_offset;
@@ -3299,22 +3264,23 @@ static void run_playloop(struct MPContext *mpctx)
                 audio_sleep = 0.020;
         }
         sleeptime = FFMIN(sleeptime, audio_sleep);
-        if (sleeptime > 0) {
-            if (!mpctx->sh_video)
-                goto novideo;
-            if (vo_osd_has_changed(mpctx->osd) || mpctx->video_out->want_redraw)
-            {
-                if (redraw_osd(mpctx) < 0) {
-                    if (mpctx->paused && video_left)
-                        add_step_frame(mpctx);
-                    else
-                        goto novideo;
+        if (sleeptime > 0 && mpctx->sh_video) {
+            bool want_redraw = mpctx->video_out->want_redraw;
+            if (mpctx->video_out->default_caps & VFCAP_OSD)
+                want_redraw |= mpctx->osd->want_redraw;
+            mpctx->osd->want_redraw = false;
+            if (want_redraw) {
+                if (redraw_osd(mpctx)) {
+                    sleeptime = 0;
+                } else if (mpctx->paused && video_left) {
+                    // force redrawing OSD by framestepping
+                    add_step_frame(mpctx);
+                    sleeptime = 0;
                 }
-            } else {
-            novideo:
-                mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
             }
         }
+        if (sleeptime > 0)
+            mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
     }
 
     //================= Keyboard events, SEEKing ====================
@@ -3587,6 +3553,8 @@ static void open_external_file(struct MPContext *mpctx, char *filename,
         if (stream->type == filter) {
             struct track *t = add_stream_track(mpctx, stream, false);
             t->is_external = true;
+            t->title = talloc_strdup(t, filename);
+            num_added++;
         }
     }
     if (num_added == 0) {

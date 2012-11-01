@@ -19,6 +19,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <assert.h>
+
 #import "vo_corevideo.h"
 
 // mplayer includes
@@ -32,9 +34,9 @@
 #import "csputils.h"
 #import "libmpcodecs/vfcap.h"
 #import "libmpcodecs/mp_image.h"
-#import "osd.h"
 
 #import "gl_common.h"
+#import "gl_osd.h"
 #import "cocoa_common.h"
 
 struct quad {
@@ -44,44 +46,31 @@ struct quad {
     GLfloat upperLeft[2];
 };
 
-#define CV_VERTICES_PER_QUAD 6
-#define CV_MAX_OSD_PARTS 20
-
-struct osd_p {
-    GLuint tex[CV_MAX_OSD_PARTS];
-    NSRect tex_rect[CV_MAX_OSD_PARTS];
-    int tex_cnt;
-};
-
 struct priv {
     MPGLContext *mpglctx;
     OSType pixelFormat;
     unsigned int image_width;
     unsigned int image_height;
     struct mp_csp_details colorspace;
+    int ass_border_x, ass_border_y;
 
     CVPixelBufferRef pixelBuffer;
     CVOpenGLTextureCacheRef textureCache;
     CVOpenGLTextureRef texture;
     struct quad *quad;
 
-    struct osd_p *osd;
+    struct mpgl_osd *osd;
 };
 
 static void resize(struct vo *vo, int width, int height)
 {
     struct priv *p = vo->priv;
     GL *gl = p->mpglctx->gl;
-    p->image_width = width;
-    p->image_height = height;
 
-    mp_msg(MSGT_VO, MSGL_V, "[vo_corevideo] New OpenGL Viewport (0, 0, %d, "
-                            "%d)\n", p->image_width, p->image_height);
-
-    gl->Viewport(0, 0, p->image_width, p->image_height);
+    gl->Viewport(0, 0, width, height);
     gl->MatrixMode(GL_PROJECTION);
     gl->LoadIdentity();
-
+    p->ass_border_x = p->ass_border_y = 0;
     if (aspect_scaling()) {
         int new_w, new_h;
         GLdouble scale_x, scale_y;
@@ -90,16 +79,16 @@ static void resize(struct vo *vo, int width, int height)
         panscan_calc_windowed(vo);
         new_w += vo->panscan_x;
         new_h += vo->panscan_y;
-        scale_x = (GLdouble)new_w / (GLdouble)p->image_width;
-        scale_y = (GLdouble)new_h / (GLdouble)p->image_height;
+        scale_x = (GLdouble)new_w / (GLdouble)width;
+        scale_y = (GLdouble)new_h / (GLdouble)height;
         gl->Scaled(scale_x, scale_y, 1);
+        p->ass_border_x = (vo->dwidth - new_w) / 2;
+        p->ass_border_y = (vo->dheight - new_h) / 2;
     }
 
     gl->Ortho(0, p->image_width, p->image_height, 0, -1.0, 1.0);
     gl->MatrixMode(GL_MODELVIEW);
     gl->LoadIdentity();
-
-    vo_osd_resized();
 
     gl->Clear(GL_COLOR_BUFFER_BIT);
     vo->want_redraw = true;
@@ -125,6 +114,9 @@ static int init_gl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     gl->DrawBuffer(GL_BACK);
     gl->TexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
+    if (!p->osd)
+        p->osd = mpgl_osd_init(gl, true);
+
     resize(vo, d_width, d_height);
 
     gl->ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
@@ -142,7 +134,6 @@ static void release_cv_entities(struct vo *vo) {
     p->texture = NULL;
     CVOpenGLTextureCacheRelease(p->textureCache);
     p->textureCache = NULL;
-
 }
 
 static int config(struct vo *vo, uint32_t width, uint32_t height,
@@ -169,90 +160,6 @@ static void check_events(struct vo *vo)
     int e = p->mpglctx->check_events(vo);
     if (e & VO_EVENT_RESIZE)
         resize(vo, vo->dwidth, vo->dheight);
-}
-
-static void create_osd_texture(void *ctx, int x0, int y0, int w, int h,
-                               unsigned char *src, unsigned char *srca,
-                               int stride)
-{
-    struct priv *p = ((struct vo *) ctx)->priv;
-    struct osd_p *osd = p->osd;
-    GL *gl = p->mpglctx->gl;
-
-    if (w <= 0 || h <= 0 || stride < w) {
-        mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
-        return;
-    }
-
-    if (osd->tex_cnt >= CV_MAX_OSD_PARTS) {
-        mp_msg(MSGT_VO, MSGL_ERR, "Too many OSD parts, contact the"
-                                  " developers!\n");
-        return;
-    }
-
-    gl->GenTextures(1, &osd->tex[osd->tex_cnt]);
-    gl->BindTexture(GL_TEXTURE_2D, osd->tex[osd->tex_cnt]);
-    glCreateClearTex(gl, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, GL_LUMINANCE_ALPHA,
-                     GL_UNSIGNED_BYTE, GL_LINEAR, w, h, 0);
-    {
-        int i;
-        unsigned char *tmp = malloc(stride * h * 2);
-        // convert alpha from weird MPlayer scale.
-        for (i = 0; i < h * stride; i++) {
-            tmp[i*2+0] = src[i];
-            tmp[i*2+1] = -srca[i];
-        }
-        glUploadTex(gl, GL_TEXTURE_2D, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE,
-                    tmp, stride * 2, 0, 0, w, h, 0);
-        free(tmp);
-    }
-
-    osd->tex_rect[osd->tex_cnt] = NSMakeRect(x0, y0, w, h);
-
-    gl->BindTexture(GL_TEXTURE_2D, 0);
-    osd->tex_cnt++;
-}
-
-static void clearOSD(struct vo *vo)
-{
-    struct priv *p = vo->priv;
-    struct osd_p *osd = p->osd;
-    GL *gl = p->mpglctx->gl;
-
-    if (!osd->tex_cnt)
-        return;
-    gl->DeleteTextures(osd->tex_cnt, osd->tex);
-    osd->tex_cnt = 0;
-}
-
-static void draw_osd(struct vo *vo, struct osd_state *osd_s)
-{
-    struct priv *p = vo->priv;
-    struct osd_p *osd = p->osd;
-    GL *gl = p->mpglctx->gl;
-
-    if (vo_osd_has_changed(osd_s)) {
-        clearOSD(vo);
-        osd_draw_text_ext(osd_s, vo->dwidth, vo->dheight, 0, 0, 0, 0,
-                          p->image_width, p->image_height, create_osd_texture,
-                          vo);
-    }
-
-    if (osd->tex_cnt > 0) {
-        gl->Enable(GL_BLEND);
-        gl->BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-        for (int n = 0; n < osd->tex_cnt; n++) {
-            NSRect tr = osd->tex_rect[n];
-            gl->BindTexture(GL_TEXTURE_2D, osd->tex[n]);
-            glDrawTex(gl, tr.origin.x, tr.origin.y,
-                      tr.size.width, tr.size.height,
-                      0, 0, 1.0, 1.0, 1, 1, 0, 0, 0);
-        }
-
-        gl->Disable(GL_BLEND);
-        gl->BindTexture(GL_TEXTURE_2D, 0);
-    }
 }
 
 static void prepare_texture(struct vo *vo)
@@ -366,8 +273,10 @@ static int query_format(struct vo *vo, uint32_t format)
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    mpgl_uninit(p->mpglctx);
+    if (p->osd)
+        mpgl_osd_destroy(p->osd);
     release_cv_entities(vo);
+    mpgl_uninit(p->mpglctx);
 }
 
 
@@ -379,14 +288,37 @@ static int preinit(struct vo *vo, const char *arg)
         .mpglctx = mpgl_init(GLTYPE_COCOA, vo),
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
         .quad = talloc_ptrtype(p, p->quad),
-        .osd = talloc_ptrtype(p, p->osd),
-    };
-
-    *p->osd = (struct osd_p) {
-        .tex_cnt = 0,
     };
 
     return 0;
+}
+
+static void draw_osd(struct vo *vo, struct osd_state *osd)
+{
+    struct priv *p = vo->priv;
+    GL *gl = p->mpglctx->gl;
+    assert(p->osd);
+
+    gl->MatrixMode(GL_PROJECTION);
+    gl->PushMatrix();
+    gl->LoadIdentity();
+    gl->Ortho(0, vo->dwidth, vo->dheight, 0, -1, 1);
+
+    struct mp_osd_res res = {
+        .w = vo->dwidth,
+        .h = vo->dheight,
+        .display_par = vo->monitor_par,
+        .video_par = vo->aspdat.par,
+    };
+
+    if (aspect_scaling()) {
+        res.ml = res.mr = p->ass_border_x;
+        res.mt = res.mb = p->ass_border_y;
+    }
+
+    mpgl_osd_draw_legacy(p->osd, osd, res);
+
+    gl->PopMatrix();
 }
 
 static CFStringRef get_cv_csp_matrix(struct vo *vo)
@@ -410,6 +342,45 @@ static void set_yuv_colorspace(struct vo *vo)
                           kCVImageBufferYCbCrMatrixKey, get_cv_csp_matrix(vo),
                           kCVAttachmentMode_ShouldPropagate);
     vo->want_redraw = true;
+}
+
+static int get_image_fmt(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    switch (p->pixelFormat) {
+        case kYUVSPixelFormat:   return IMGFMT_YUY2;
+        case k24RGBPixelFormat:  return IMGFMT_RGB24;
+        case k32ARGBPixelFormat: return IMGFMT_ARGB;
+        case k32BGRAPixelFormat: return IMGFMT_BGRA;
+    }
+    mp_msg(MSGT_VO, MSGL_ERR, "[vo_corevideo] Failed to convert pixel format. "
+        "Please contact the developers. PixelFormat: %d\n", p->pixelFormat);
+    return -1;
+}
+
+static mp_image_t *get_screenshot(struct vo *vo)
+{
+    int img_fmt = get_image_fmt(vo);
+    if (img_fmt < 0) return NULL;
+
+    struct priv *p = vo->priv;
+    void *base = CVPixelBufferGetBaseAddress(p->pixelBuffer);
+
+    size_t width      = CVPixelBufferGetWidth(p->pixelBuffer);
+    size_t height     = CVPixelBufferGetHeight(p->pixelBuffer);
+    size_t stride     = CVPixelBufferGetBytesPerRow(p->pixelBuffer);
+    size_t image_size = stride * height;
+
+    mp_image_t *image = alloc_mpi(width, height, img_fmt);
+    memcpy(image->planes[0], base, image_size);
+    image->stride[0]  = stride;
+
+    image->display_w = vo->aspdat.prew;
+    image->display_h = vo->aspdat.preh;
+
+    mp_image_set_colorspace_details(image, &p->colorspace);
+
+    return image;
 }
 
 static int control(struct vo *vo, uint32_t request, void *data)
@@ -455,6 +426,14 @@ static int control(struct vo *vo, uint32_t request, void *data)
         case VOCTRL_GET_YUV_COLORSPACE:
             *(struct mp_csp_details *)data = p->colorspace;
             return VO_TRUE;
+        case VOCTRL_SCREENSHOT: {
+            struct voctrl_screenshot_args *args = data;
+            if (args->full_window)
+                args->out_image = glGetWindowScreenshot(p->mpglctx->gl);
+            else
+                args->out_image = get_screenshot(vo);
+            return VO_TRUE;
+        }
     }
     return VO_NOTIMPL;
 }

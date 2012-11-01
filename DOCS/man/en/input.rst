@@ -14,16 +14,24 @@ with shift.
 
 A list of special keys can be obtained with
 
-| **mplayer** --input=keylist
+| **mpv** --input=keylist
 
 In general, keys can be combined with ``Shift``, ``Ctrl`` and ``Alt``:
 
 | ctrl+q quit
 
+**mpv** can be started in input test mode, which displays key bindings and the
+commands they're bound to on the OSD, instead of running the commands:
+
+| **mpv** --input=test --demuxer=rawvideo --rawvideo=w=1280:h=720 /dev/zero
+
+(Commands which normally close the player will not work in this mode, and you
+must kill **mpv** externally to make it exit.)
+
 General input command syntax
 ----------------------------
 
-`[Shift+][Ctrl+][Alt+][Meta+]<key> [<prefix>] <command> (<argument>)*`
+`[Shift+][Ctrl+][Alt+][Meta+]<key> [<prefixes>] <command> (<argument>)*`
 
 Newlines always start a new binding. ``#`` starts a comment (outside of quoted
 string arguments). To bind commands to the ``#`` key, ``SHARP`` can be used.
@@ -45,7 +53,7 @@ ignore
     disabling default bindings, without disabling all bindings with
     ``--input=default-bindings=no``.
 
-seek <seconds> [relative|absolute|absolute-percent] [default-precise|exact|keyframes]
+seek <seconds> [relative|absolute|absolute-percent|- [default-precise|exact|keyframes]]
     Change the playback position. By default, seeks by a relative amount of
     seconds.
 
@@ -56,7 +64,7 @@ seek <seconds> [relative|absolute|absolute-percent] [default-precise|exact|keyfr
     absolute
         Seek to a given time.
     absolute-percent
-        Seek to agiven percent position.
+        Seek to a given percent position.
 
     The third argument defines how exact the seek is:
 
@@ -87,27 +95,30 @@ cycle <property> [up|down]
 speed_mult <value>
     Multiply the ``speed`` property by the given value.
 
-screenshot [single|each-frame] [video|window]
+screenshot [subtitles|video|window|- [single|each-frame]]
     Take a screenshot.
 
     First argument:
+
+    <subtitles> (default)
+        Save the video image, in its original resolution, and with subtitles.
+        Some video outputs may still include the OSD in the output under certain
+        circumstances.
+    <video>
+        Like ``subtitles``, but typically without OSD or subtitles. The exact
+        behavior depends on the selected video output.
+    <window>
+        Save the contents of the mpv window. Typically scaled, with OSD and
+        subtitles. The exact behavior depends on the selected video output, and
+        if no support is available, this will act like ``video``.
+
+    Second argument:
 
     <single> (default)
         Take a single screenshot.
     <each-frame>
         Take a screenshot each frame. Issue this command again to stop taking
         screenshots.
-
-    Second argument:
-
-    <video> (default)
-        Save the video image, in its original resolution. Typically without
-        OSD or subtitles, but the exact behavior depends on the selected video
-        output.
-    <window>
-        Save the contents of the mplayer window. Typically scaled, with OSD and
-        subtitles. The exact behavior depends on the selected video output, and
-        if not support is available, this will act like ``video``.
 
 playlist_next [weak|force]
     Go to the next entry on the playlist.
@@ -164,7 +175,7 @@ print_text "<string>"
     Print text to stdout. The string can contain properties, which are expanded
     like in ``--playing-msg``.
 
-show_text "<string>" [<duration>] [<level>]
+show_text "<string>" [<duration>|- [<level>]]
     Show text on the OSD. The string can contain properties, which are expanded
     like in ``--playing-msg``. This can be used to show playback time, filename,
     and so on.
@@ -204,9 +215,9 @@ osd-bar
     If possible, show a bar with this command. Seek commands will show the
     progress bar, property changing commands may show the newly set value.
 osd-msg
-    If possible, show an OSD message with this command. The seek command shows
-    the current playback time (like ``show_progress``), property changing
-    commands show the newly set value as text.
+    If possible, show an OSD message with this command. Seek command show
+    the current playback time, property changing commands show the newly set
+    value as text.
 osd-msg-bar
     Combine osd-bar and osd-msg.
 
@@ -220,7 +231,7 @@ pausing_keep_force. (Should these be made official?)
 Properties
 ----------
 
-Properties are used to set mplayer options during runtime, or to query arbitrary
+Properties are used to set mpv options during runtime, or to query arbitrary
 information. They can be manipulated with the ``set``/``add``/``cycle``
 commands, and retrieved with ``show_text``, or anything else that uses property
 expansion. (See ``--playing-msg`` how properties are expanded.)
@@ -253,7 +264,7 @@ edition                     x current MKV edition number
 titles                        number of DVD titles
 chapters                      number of chapters
 editions                      number of MKV editions
-angle                         current DVD angle
+angle                       x current DVD angle
 metadata                      metadata key/value pairs
 metadata/<key>                value of metedata entry <key>
 pause                       x pause status (bool)
@@ -303,8 +314,8 @@ sub-scale                   x subtitle font size multiplicator
 ass-use-margins             x see ``--ass-use-margins``
 ass-vsfilter-aspect-compat  x see ``--ass-vsfilter-aspect-compat``
 ass-style-override          x see ``--ass-style-override``
-tv-brightness
-tv-contrast
-tv-saturation
-tv-hue
+tv-brightness               x
+tv-contrast                 x
+tv-saturation               x
+tv-hue                      x
 =========================== = ==================================================

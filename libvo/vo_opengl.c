@@ -37,6 +37,7 @@
 #endif
 
 #include "talloc.h"
+#include "mpcommon.h"
 #include "bstr.h"
 #include "mp_msg.h"
 #include "subopt-helper.h"
@@ -44,23 +45,19 @@
 #include "libmpcodecs/vfcap.h"
 #include "libmpcodecs/mp_image.h"
 #include "geometry.h"
-#include "osd.h"
 #include "sub/sub.h"
-#include "eosd_packer.h"
+#include "bitmap_packer.h"
 
 #include "gl_common.h"
+#include "gl_osd.h"
 #include "filter_kernels.h"
 #include "aspect.h"
 #include "fastmemcpy.h"
-#include "sub/ass_mp.h"
 
 static const char vo_opengl_shaders[] =
 // Generated from libvo/vo_opengl_shaders.glsl
 #include "libvo/vo_opengl_shaders.h"
 ;
-
-// How many parts the OSD may consist of at most.
-#define MAX_OSD_PARTS 20
 
 // Pixel width of 1D lookup textures.
 #define LOOKUP_TEXTURE_SIZE 256
@@ -114,7 +111,7 @@ struct vertex {
 #define VERTEX_ATTRIB_TEXCOORD 2
 
 // 2 triangles primitives per quad = 6 vertices per quad
-// (GL_QUAD is deprecated, strips can't be used with EOSD image lists)
+// (GL_QUAD is deprecated, strips can't be used with OSD image lists)
 #define VERTICES_PER_QUAD 6
 
 struct texplane {
@@ -173,18 +170,10 @@ struct gl_priv {
     GLuint vertex_buffer;
     GLuint vao;
 
-    GLuint osd_program, eosd_program;
+    GLuint osd_programs[SUBBITMAP_COUNT];
     GLuint indirect_program, scale_sep_program, final_program;
 
-    GLuint osd_textures[MAX_OSD_PARTS];
-    int osd_textures_count;
-    struct vertex osd_va[MAX_OSD_PARTS * VERTICES_PER_QUAD];
-
-    GLuint eosd_texture;
-    int eosd_texture_width, eosd_texture_height;
-    GLuint eosd_buffer;
-    struct vertex *eosd_va;
-    struct eosd_packer *eosd;
+    struct mpgl_osd *osd;
 
     GLuint lut_3d_texture;
     int lut_3d_w, lut_3d_h, lut_3d_d;
@@ -230,12 +219,14 @@ struct gl_priv {
     int mpi_flipped;
     int vo_flipped;
 
-    struct vo_rect src_rect;    // displayed part of the source video
-    struct vo_rect dst_rect;    // video rectangle on output window
-    int border_x, border_y;     // OSD borders
+    struct mp_rect src_rect;    // displayed part of the source video
+    struct mp_rect dst_rect;    // video rectangle on output window
+    struct mp_osd_res osd_rect; // OSD size/margins
     int vp_x, vp_y, vp_w, vp_h; // GL viewport
 
     int frames_rendered;
+
+    void *scratch;
 };
 
 struct fmt_entry {
@@ -257,6 +248,11 @@ static const struct fmt_entry mp_to_gl_formats[] = {
     {IMGFMT_BGR24,   GL_RGB,   GL_BGR,  8,  GL_UNSIGNED_BYTE},
     {IMGFMT_BGRA,    GL_RGBA,  GL_BGRA, 8,  GL_UNSIGNED_BYTE},
     {0},
+};
+
+static const char *osd_shaders[SUBBITMAP_COUNT] = {
+    [SUBBITMAP_LIBASS] = "frag_osd_libass",
+    [SUBBITMAP_RGBA] =   "frag_osd_rgba",
 };
 
 
@@ -489,6 +485,15 @@ static void update_uniforms(struct gl_priv *p, GLuint program)
     gl->Uniform1f(gl->GetUniformLocation(program, "filter_param1"),
                   isnan(sparam1) ? 0.5f : sparam1);
 
+    loc = gl->GetUniformLocation(program, "osd_color");
+    if (loc >= 0) {
+        int r = (p->osd_color >> 16) & 0xff;
+        int g = (p->osd_color >> 8) & 0xff;
+        int b = p->osd_color & 0xff;
+        int a = 0xff - (p->osd_color >> 24);
+        gl->Uniform4f(loc, r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
+    }
+
     gl->UseProgram(0);
 
     debug_check_gl(p, "update_uniforms()");
@@ -496,8 +501,8 @@ static void update_uniforms(struct gl_priv *p, GLuint program)
 
 static void update_all_uniforms(struct gl_priv *p)
 {
-    update_uniforms(p, p->osd_program);
-    update_uniforms(p, p->eosd_program);
+    for (int n = 0; n < SUBBITMAP_COUNT; n++)
+        update_uniforms(p, p->osd_programs[n]);
     update_uniforms(p, p->indirect_program);
     update_uniforms(p, p->scale_sep_program);
     update_uniforms(p, p->final_program);
@@ -661,20 +666,21 @@ static void compile_shaders(struct gl_priv *p)
     char *vertex_shader = get_section(tmp, src, "vertex_all");
     char *shader_prelude = get_section(tmp, src, "prelude");
     char *s_video = get_section(tmp, src, "frag_video");
-    char *s_eosd = get_section(tmp, src, "frag_eosd");
-    char *s_osd = get_section(tmp, src, "frag_osd");
 
     char *header = talloc_asprintf(tmp, "#version %d\n%s", gl->glsl_version,
                                    shader_prelude);
 
-    char *header_eosd = talloc_strdup(tmp, header);
-    shader_def_opt(&header_eosd, "USE_3DLUT", p->use_lut_3d);
+    char *header_osd = talloc_strdup(tmp, header);
+    shader_def_opt(&header_osd, "USE_3DLUT", p->use_lut_3d);
 
-    p->eosd_program =
-        create_program(gl, "eosd", header_eosd, vertex_shader, s_eosd);
-
-    p->osd_program =
-        create_program(gl, "osd", header, vertex_shader, s_osd);
+    for (int n = 0; n < SUBBITMAP_COUNT; n++) {
+        const char *name = osd_shaders[n];
+        if (name) {
+            char *s_osd = get_section(tmp, src, name);
+            p->osd_programs[n] =
+                create_program(gl, name, header_osd, vertex_shader, s_osd);
+        }
+    }
 
     char *header_conv = talloc_strdup(tmp, "");
     char *header_final = talloc_strdup(tmp, "");
@@ -775,8 +781,8 @@ static void delete_shaders(struct gl_priv *p)
 {
     GL *gl = p->gl;
 
-    delete_program(gl, &p->osd_program);
-    delete_program(gl, &p->eosd_program);
+    for (int n = 0; n < SUBBITMAP_COUNT; n++)
+        delete_program(gl, &p->osd_programs[n]);
     delete_program(gl, &p->indirect_program);
     delete_program(gl, &p->scale_sep_program);
     delete_program(gl, &p->final_program);
@@ -784,8 +790,10 @@ static void delete_shaders(struct gl_priv *p)
 
 static double get_scale_factor(struct gl_priv *p)
 {
-    double sx = p->dst_rect.width / (double)p->src_rect.width;
-    double sy = p->dst_rect.height / (double)p->src_rect.height;
+    double sx = (p->dst_rect.x1 - p->dst_rect.x0) /
+                (double)(p->src_rect.x1 - p->src_rect.x0);
+    double sy = (p->dst_rect.y1 - p->dst_rect.y0) /
+                (double)(p->src_rect.y1 - p->src_rect.y0);
     // xxx: actually we should use different scalers in X/Y directions if the
     // scale factors are different due to anamorphic content
     return FFMIN(sx, sy);
@@ -939,6 +947,11 @@ static void reinit_rendering(struct gl_priv *p)
 
     if (p->indirect_program && !p->indirect_fbo.fbo)
         fbotex_init(p, &p->indirect_fbo, p->texture_width, p->texture_height);
+
+    if (!p->osd) {
+        p->osd = mpgl_osd_init(p->gl, false);
+        p->osd->use_pbo = p->use_pbo;
+    }
 }
 
 static void uninit_rendering(struct gl_priv *p)
@@ -956,6 +969,10 @@ static void uninit_rendering(struct gl_priv *p)
 
     gl->DeleteTextures(1, &p->dither_texture);
     p->dither_texture = 0;
+
+    if (p->osd)
+        mpgl_osd_destroy(p->osd);
+    p->osd = NULL;
 }
 
 static void init_lut_3d(struct gl_priv *p)
@@ -1111,16 +1128,16 @@ static void do_render(struct gl_priv *p)
         gl->Enable(GL_FRAMEBUFFER_SRGB);
 
     if (p->stereo_mode) {
-        int w = p->src_rect.width;
+        int w = p->src_rect.x1 - p->src_rect.x0;
         int imgw = p->image_width;
 
         glEnable3DLeft(gl, p->stereo_mode);
 
         write_quad(vb,
-                   p->dst_rect.left, p->dst_rect.top,
-                   p->dst_rect.right, p->dst_rect.bottom,
-                   p->src_rect.left / 2, p->src_rect.top,
-                   p->src_rect.left / 2 + w / 2, p->src_rect.bottom,
+                   p->dst_rect.x0, p->dst_rect.y0,
+                   p->dst_rect.x1, p->dst_rect.y1,
+                   p->src_rect.x0 / 2, p->src_rect.y0,
+                   p->src_rect.x0 / 2 + w / 2, p->src_rect.y1,
                    final_texw, final_texh,
                    NULL, is_flipped);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
@@ -1128,10 +1145,10 @@ static void do_render(struct gl_priv *p)
         glEnable3DRight(gl, p->stereo_mode);
 
         write_quad(vb,
-                   p->dst_rect.left, p->dst_rect.top,
-                   p->dst_rect.right, p->dst_rect.bottom,
-                   p->src_rect.left / 2 + imgw / 2, p->src_rect.top,
-                   p->src_rect.left / 2 + imgw / 2 + w / 2, p->src_rect.bottom,
+                   p->dst_rect.x0, p->dst_rect.y0,
+                   p->dst_rect.x1, p->dst_rect.y1,
+                   p->src_rect.x0 / 2 + imgw / 2, p->src_rect.y0,
+                   p->src_rect.x0 / 2 + imgw / 2 + w / 2, p->src_rect.y1,
                    final_texw, final_texh,
                    NULL, is_flipped);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
@@ -1139,10 +1156,10 @@ static void do_render(struct gl_priv *p)
         glDisable3D(gl, p->stereo_mode);
     } else {
         write_quad(vb,
-                   p->dst_rect.left, p->dst_rect.top,
-                   p->dst_rect.right, p->dst_rect.bottom,
-                   p->src_rect.left, p->src_rect.top,
-                   p->src_rect.right, p->src_rect.bottom,
+                   p->dst_rect.x0, p->dst_rect.y0,
+                   p->dst_rect.x1, p->dst_rect.y1,
+                   p->src_rect.x0, p->src_rect.y0,
+                   p->src_rect.x1, p->src_rect.y1,
                    final_texw, final_texh,
                    NULL, is_flipped);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
@@ -1159,15 +1176,16 @@ static void do_render(struct gl_priv *p)
 static void update_window_sized_objects(struct gl_priv *p)
 {
     if (p->scale_sep_program) {
-        if (p->dst_rect.height > p->scale_sep_fbo.tex_h) {
+        int h = p->dst_rect.y1 - p->dst_rect.y0;
+        if (h > p->scale_sep_fbo.tex_h) {
             fbotex_uninit(p, &p->scale_sep_fbo);
             // Round up to an arbitrary alignment to make window resizing or
             // panscan controls smoother (less texture reallocations).
-            int height = FFALIGN(p->dst_rect.height, 256);
+            int height = FFALIGN(h, 256);
             fbotex_init(p, &p->scale_sep_fbo, p->image_width, height);
         }
         p->scale_sep_fbo.vp_w = p->image_width;
-        p->scale_sep_fbo.vp_h = p->dst_rect.height;
+        p->scale_sep_fbo.vp_h = h;
     }
 }
 
@@ -1178,20 +1196,10 @@ static void resize(struct gl_priv *p)
 
     mp_msg(MSGT_VO, MSGL_V, "[gl] Resize: %dx%d\n", vo->dwidth, vo->dheight);
     p->vp_x = 0, p->vp_y = 0;
-    if (WinID >= 0) {
-        int w = vo->dwidth, h = vo->dheight;
-        int old_y = vo->dheight;
-        geometry(&p->vp_x, &p->vp_y, &w, &h, vo->dwidth, vo->dheight);
-        p->vp_y = old_y - h - p->vp_y;
-    }
     p->vp_w = vo->dwidth, p->vp_h = vo->dheight;
     gl->Viewport(p->vp_x, p->vp_y, p->vp_w, p->vp_h);
 
-    struct vo_rect borders;
-    calc_src_dst_rects(vo, p->image_width, p->image_height, &p->src_rect,
-                       &p->dst_rect, &borders, NULL);
-    p->border_x = borders.left;
-    p->border_y = borders.top;
+    vo_get_src_dst_rects(vo, &p->src_rect, &p->dst_rect, &p->osd_rect);
 
     bool need_scaler_reinit = false;    // filter size change needed
     bool need_scaler_update = false;    // filter LUT change needed
@@ -1219,7 +1227,6 @@ static void resize(struct gl_priv *p)
     update_window_sized_objects(p);
     update_all_uniforms(p);
 
-    vo_osd_resized();
     gl->Clear(GL_COLOR_BUFFER_BIT);
     vo->want_redraw = true;
 }
@@ -1234,9 +1241,9 @@ static void flip_page(struct vo *vo)
 
     p->glctx->swapGlBuffers(p->glctx);
 
-    if (p->dst_rect.left > p->vp_x || p->dst_rect.top > p->vp_y
-        || p->dst_rect.right < p->vp_x + p->vp_w
-        || p->dst_rect.bottom < p->vp_y + p->vp_h)
+    if (p->dst_rect.x0 > p->vp_x || p->dst_rect.y0 > p->vp_y
+        || p->dst_rect.x1 < p->vp_x + p->vp_w
+        || p->dst_rect.y1 < p->vp_y + p->vp_h)
     {
         gl->Clear(GL_COLOR_BUFFER_BIT);
     }
@@ -1380,236 +1387,68 @@ static mp_image_t *get_screenshot(struct gl_priv *p)
     }
     gl->ActiveTexture(GL_TEXTURE0);
 
-    image->width = p->image_width;
-    image->height = p->image_height;
+    image->w = p->image_width;
+    image->h = p->image_height;
+    image->display_w = p->vo->aspdat.prew;
+    image->display_h = p->vo->aspdat.preh;
 
-    image->w = p->vo->aspdat.prew;
-    image->h = p->vo->aspdat.preh;
+    mp_image_set_colorspace_details(image, &p->colorspace);
 
     return image;
 }
 
-static mp_image_t *get_window_screenshot(struct gl_priv *p)
-{
-    GL *gl = p->gl;
-
-    mp_image_t *image = alloc_mpi(p->vp_w, p->vp_h, IMGFMT_RGB24);
-    gl->PixelStorei(GL_PACK_ALIGNMENT, 4);
-    gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
-    gl->ReadBuffer(GL_FRONT);
-    // flip image while reading
-    for (int y = 0; y < p->vp_h; y++) {
-        gl->ReadPixels(p->vp_x, p->vp_y + p->vp_h - y - 1, p->vp_w, 1,
-                       GL_RGB, GL_UNSIGNED_BYTE,
-                       image->planes[0] + y * image->stride[0]);
-    }
-    return image;
-}
-
-static void clear_osd(struct gl_priv *p)
-{
-    GL *gl = p->gl;
-
-    if (!p->osd_textures_count)
-        return;
-    gl->DeleteTextures(p->osd_textures_count, p->osd_textures);
-    p->osd_textures_count = 0;
-}
-
-static void create_osd_texture(void *ctx, int x0, int y0, int w, int h,
-                               unsigned char *src, unsigned char *srca,
-                               int stride)
+static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
 {
     struct gl_priv *p = ctx;
     GL *gl = p->gl;
 
-    if (w <= 0 || h <= 0 || stride < w) {
-        mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
+    struct mpgl_osd_part *osd = mpgl_osd_generate(p->osd, imgs);
+    if (!osd)
         return;
+
+    assert(osd->format != SUBBITMAP_EMPTY);
+
+    if (!osd->num_vertices) {
+        osd->vertices = talloc_realloc(osd, osd->vertices, struct vertex,
+                                       osd->packer->count * VERTICES_PER_QUAD);
+
+        struct vertex *va = osd->vertices;
+
+        for (int n = 0; n < osd->packer->count; n++) {
+            struct sub_bitmap *b = &imgs->parts[n];
+            struct pos p = osd->packer->result[n];
+
+            // NOTE: the blend color is used with SUBBITMAP_LIBASS only, so it
+            //       doesn't matter that we upload garbage for the other formats
+            uint32_t c = b->libass.color;
+            uint8_t color[4] = { c >> 24, (c >> 16) & 0xff,
+                                (c >> 8) & 0xff, 255 - (c & 0xff) };
+
+            write_quad(&va[osd->num_vertices],
+                    b->x, b->y, b->x + b->dw, b->y + b->dh,
+                    p.x, p.y, p.x + b->w, p.y + b->h,
+                    osd->w, osd->h, color, false);
+            osd->num_vertices += VERTICES_PER_QUAD;
+        }
     }
 
-    if (p->osd_textures_count >= MAX_OSD_PARTS) {
-        mp_msg(MSGT_VO, MSGL_ERR, "Too many OSD parts, contact the developers!\n");
-        return;
-    }
+    debug_check_gl(p, "before drawing osd");
 
-    int sx, sy;
-    tex_size(p, w, h, &sx, &sy);
+    gl->UseProgram(p->osd_programs[osd->format]);
+    mpgl_osd_set_gl_state(p->osd, osd);
+    draw_triangles(p, osd->vertices, osd->num_vertices);
+    mpgl_osd_unset_gl_state(p->osd, osd);
+    gl->UseProgram(0);
 
-    gl->GenTextures(1, &p->osd_textures[p->osd_textures_count]);
-    gl->BindTexture(GL_TEXTURE_2D, p->osd_textures[p->osd_textures_count]);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RG, sx, sy, 0, GL_RG, GL_UNSIGNED_BYTE,
-                   NULL);
-    default_tex_params(gl, GL_TEXTURE_2D, GL_NEAREST);
-    unsigned char *tmp = malloc(stride * h * 2);
-    // Convert alpha from weird MPlayer scale.
-    for (int i = 0; i < h * stride; i++) {
-        tmp[i*2+0] = src[i];
-        tmp[i*2+1] = -srca[i];
-    }
-    glUploadTex(gl, GL_TEXTURE_2D, GL_RG, GL_UNSIGNED_BYTE, tmp, stride * 2,
-                0, 0, w, h, 0);
-    free(tmp);
-
-    gl->BindTexture(GL_TEXTURE_2D, 0);
-
-    uint8_t color[4] = {(p->osd_color >> 16) & 0xff, (p->osd_color >> 8) & 0xff,
-                        p->osd_color & 0xff, 0xff - (p->osd_color >> 24)};
-
-    write_quad(&p->osd_va[p->osd_textures_count * VERTICES_PER_QUAD],
-               x0, y0, x0 + w, y0 + h, 0, 0, w, h,
-               sx, sy, color, false);
-
-    p->osd_textures_count++;
+    debug_check_gl(p, "after drawing osd");
 }
 
 static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct gl_priv *p = vo->priv;
-    GL *gl = p->gl;
+    assert(p->osd);
 
-    if (vo_osd_has_changed(osd)) {
-        clear_osd(p);
-        osd_draw_text_ext(osd, vo->dwidth, vo->dheight, p->border_x,
-                          p->border_y, p->border_x,
-                          p->border_y, p->image_width,
-                          p->image_height, create_osd_texture, p);
-    }
-
-    if (p->osd_textures_count > 0) {
-        gl->Enable(GL_BLEND);
-        // OSD bitmaps use premultiplied alpha.
-        gl->BlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-        gl->UseProgram(p->osd_program);
-
-        for (int n = 0; n < p->osd_textures_count; n++) {
-            gl->BindTexture(GL_TEXTURE_2D, p->osd_textures[n]);
-            draw_triangles(p, &p->osd_va[n * VERTICES_PER_QUAD],
-                           VERTICES_PER_QUAD);
-        }
-
-        gl->UseProgram(0);
-
-        gl->Disable(GL_BLEND);
-        gl->BindTexture(GL_TEXTURE_2D, 0);
-    }
-}
-
-static void gen_eosd(struct gl_priv *p, mp_eosd_images_t *imgs)
-{
-    GL *gl = p->gl;
-
-    bool need_repos, need_upload, need_allocate;
-    eosd_packer_generate(p->eosd, imgs, &need_repos, &need_upload,
-                         &need_allocate);
-
-    if (!need_repos)
-        return;
-
-    if (!p->eosd_texture) {
-        gl->GenTextures(1, &p->eosd_texture);
-        gl->GenBuffers(1, &p->eosd_buffer);
-    }
-
-    gl->BindTexture(GL_TEXTURE_2D, p->eosd_texture);
-
-    if (need_allocate) {
-        tex_size(p, p->eosd->surface.w, p->eosd->surface.h,
-                 &p->eosd_texture_width, &p->eosd_texture_height);
-        gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RED,
-                       p->eosd_texture_width, p->eosd_texture_height, 0,
-                       GL_RED, GL_UNSIGNED_BYTE, NULL);
-        default_tex_params(gl, GL_TEXTURE_2D, GL_NEAREST);
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->eosd_buffer);
-        gl->BufferData(GL_PIXEL_UNPACK_BUFFER,
-                       p->eosd->surface.w * p->eosd->surface.h,
-                       NULL,
-                       GL_DYNAMIC_COPY);
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    }
-
-    p->eosd_va = talloc_realloc_size(p->eosd, p->eosd_va,
-                                     p->eosd->targets_count
-                                     * sizeof(struct vertex)
-                                     * VERTICES_PER_QUAD);
-
-    if (need_upload && p->use_pbo && p->eosd->targets_count) {
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->eosd_buffer);
-        char *data = gl->MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-        if (!data) {
-            mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Error: can't upload subtitles! "
-                                        "Subtitles will look corrupted.\n");
-        } else {
-            for (int n = 0; n < p->eosd->targets_count; n++) {
-                struct eosd_target *target = &p->eosd->targets[n];
-                ASS_Image *i = target->ass_img;
-
-                void *pdata = data + target->source.y0 * p->eosd->surface.w
-                              + target->source.x0;
-
-                memcpy_pic(pdata, i->bitmap, i->w, i->h,
-                           p->eosd->surface.w, i->stride);
-            }
-            if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER))
-                mp_msg(MSGT_VO, MSGL_FATAL, "[gl] EOSD PBO upload failed. "
-                       "Remove the 'pbo' suboption.\n");
-            struct eosd_rect rc;
-            eosd_packer_calculate_source_bb(p->eosd, &rc);
-            glUploadTex(gl, GL_TEXTURE_2D, GL_RED, GL_UNSIGNED_BYTE, NULL,
-                        p->eosd->surface.w, rc.x0, rc.y0,
-                        rc.x1 - rc.x0, rc.y1 - rc.y0, 0);
-        }
-        gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    } else if (need_upload) {
-        // non-PBO upload
-        for (int n = 0; n < p->eosd->targets_count; n++) {
-            struct eosd_target *target = &p->eosd->targets[n];
-            ASS_Image *i = target->ass_img;
-
-            glUploadTex(gl, GL_TEXTURE_2D, GL_RED, GL_UNSIGNED_BYTE, i->bitmap,
-                        i->stride, target->source.x0, target->source.y0,
-                        i->w, i->h, 0);
-        }
-    }
-
-    gl->BindTexture(GL_TEXTURE_2D, 0);
-
-    debug_check_gl(p, "EOSD upload");
-
-    for (int n = 0; n < p->eosd->targets_count; n++) {
-        struct eosd_target *target = &p->eosd->targets[n];
-        ASS_Image *i = target->ass_img;
-        uint8_t color[4] = { i->color >> 24, (i->color >> 16) & 0xff,
-                            (i->color >> 8) & 0xff, 255 - (i->color & 0xff) };
-
-        write_quad(&p->eosd_va[n * VERTICES_PER_QUAD],
-                   target->dest.x0, target->dest.y0,
-                   target->dest.x1, target->dest.y1,
-                   target->source.x0, target->source.y0,
-                   target->source.x1, target->source.y1,
-                   p->eosd_texture_width, p->eosd_texture_height,
-                   color, false);
-    }
-}
-
-static void draw_eosd(struct gl_priv *p, mp_eosd_images_t *imgs)
-{
-    GL *gl = p->gl;
-
-    gen_eosd(p, imgs);
-
-    if (p->eosd->targets_count == 0)
-        return;
-
-    gl->Enable(GL_BLEND);
-    gl->BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    gl->BindTexture(GL_TEXTURE_2D, p->eosd_texture);
-    gl->UseProgram(p->eosd_program);
-    draw_triangles(p, p->eosd_va, p->eosd->targets_count * VERTICES_PER_QUAD);
-    gl->UseProgram(0);
-    gl->BindTexture(GL_TEXTURE_2D, 0);
-    gl->Disable(GL_BLEND);
+    osd_draw(osd, p->osd_rect, osd->vo_pts, 0, p->osd->formats, draw_osd_cb, p);
 }
 
 // Disable features that are not supported with the current OpenGL version.
@@ -1732,10 +1571,6 @@ static int init_gl(struct gl_priv *p)
 
     gl->BindBuffer(GL_ARRAY_BUFFER, 0);
 
-    GLint max_texture_size;
-    gl->GetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
-    eosd_packer_reinit(p->eosd, max_texture_size, max_texture_size);
-
     gl->ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     gl->Clear(GL_COLOR_BUFFER_BIT);
 
@@ -1759,13 +1594,6 @@ static void uninit_gl(struct gl_priv *p)
     p->vao = 0;
     gl->DeleteBuffers(1, &p->vertex_buffer);
     p->vertex_buffer = 0;
-
-    clear_osd(p);
-    gl->DeleteTextures(1, &p->eosd_texture);
-    p->eosd_texture = 0;
-    gl->DeleteBuffers(1, &p->eosd_buffer);
-    p->eosd_buffer = 0;
-    eosd_packer_reinit(p->eosd, 0, 0);
 
     gl->DeleteTextures(1, &p->lut_3d_texture);
     p->lut_3d_texture = 0;
@@ -1847,7 +1675,7 @@ static int query_format(uint32_t format)
 {
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP |
                VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE |
-               VFCAP_OSD | VFCAP_EOSD | VFCAP_EOSD_UNSCALED;
+               VFCAP_OSD;
     if (!init_format(format, NULL))
         return 0;
     return caps;
@@ -1923,19 +1751,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return query_format(*(uint32_t *)data);
     case VOCTRL_DRAW_IMAGE:
         return draw_image(p, data);
-    case VOCTRL_DRAW_EOSD:
-        if (!data)
-            return VO_FALSE;
-        draw_eosd(p, data);
-        return VO_TRUE;
-    case VOCTRL_GET_EOSD_RES: {
-        mp_eosd_res_t *r = data;
-        r->w = vo->dwidth;
-        r->h = vo->dheight;
-        r->ml = r->mr = p->border_x;
-        r->mt = r->mb = p->border_y;
-        return VO_TRUE;
-    }
     case VOCTRL_ONTOP:
         if (!p->glctx->ontop)
             break;
@@ -2003,7 +1818,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         if (args->full_window)
-            args->out_image = get_window_screenshot(p);
+            args->out_image = glGetWindowScreenshot(p->gl);
         else
             args->out_image = get_screenshot(p);
         return true;
@@ -2351,6 +2166,7 @@ static int preinit(struct vo *vo, const char *arg)
             { .index = 1, .name = "bilinear" },
         },
         .scaler_params = {NAN, NAN},
+        .scratch = talloc_zero_array(p, char *, 1),
     };
 
     p->defaults = talloc(p, struct gl_priv);
@@ -2429,8 +2245,6 @@ static int preinit(struct vo *vo, const char *arg)
 
     p->orig_cmdline = talloc(p, struct gl_priv);
     *p->orig_cmdline = *p;
-
-    p->eosd = eosd_packer_create(vo);
 
     p->glctx = mpgl_init(backend, vo);
     if (!p->glctx)
