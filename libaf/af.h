@@ -38,87 +38,87 @@ struct af_instance;
 
 // Audio data chunk
 struct mp_audio {
-  void* audio;  // data buffer
-  int len;      // buffer length
-  int rate;	// sample rate
-  int nch;	// number of channels
-  int format;	// format
-  int bps; 	// bytes per sample
+    void *audio; // data buffer
+    int len;    // buffer length
+    int rate;   // sample rate
+    int nch;    // number of channels
+    int format; // format
+    int bps;    // bytes per sample
 };
 
 
 // Flags used for defining the behavior of an audio filter
-#define AF_FLAGS_REENTRANT 	0x00000000
-#define AF_FLAGS_NOT_REENTRANT 	0x00000001
+#define AF_FLAGS_REENTRANT      0x00000000
+#define AF_FLAGS_NOT_REENTRANT  0x00000001
 
 /* Audio filter information not specific for current instance, but for
    a specific filter */
 struct af_info {
-  const char *info;
-  const char *name;
-  const char *author;
-  const char *comment;
-  const int flags;
-  int (*open)(struct af_instance* vf);
+    const char *info;
+    const char *name;
+    const char *author;
+    const char *comment;
+    const int flags;
+    int (*open)(struct af_instance *vf);
 };
 
 // Linked list of audio filters
 struct af_instance {
-  struct af_info* info;
-  int (*control)(struct af_instance* af, int cmd, void* arg);
-  void (*uninit)(struct af_instance* af);
-  struct mp_audio* (*play)(struct af_instance* af, struct mp_audio* data);
-  void* setup;	  // setup data for this specific instance and filter
-  struct mp_audio* data; // configuration for outgoing data stream
-  struct af_instance* next;
-  struct af_instance* prev;
-  double delay; /* Delay caused by the filter, in units of bytes read without
-		 * corresponding output */
-  double mul; /* length multiplier: how much does this instance change
-		 the length of the buffer. */
+    struct af_info *info;
+    int (*control)(struct af_instance *af, int cmd, void *arg);
+    void (*uninit)(struct af_instance *af);
+    struct mp_audio * (*play)(struct af_instance *af, struct mp_audio *data);
+    void *setup;  // setup data for this specific instance and filter
+    struct mp_audio *data; // configuration for outgoing data stream
+    struct af_instance *next;
+    struct af_instance *prev;
+    double delay; /* Delay caused by the filter, in units of bytes read without
+                   * corresponding output */
+    double mul; /* length multiplier: how much does this instance change
+                   the length of the buffer. */
 };
 
 // Initialization flags
-extern int* af_cpu_speed;
+extern int *af_cpu_speed;
 
-#define AF_INIT_AUTO		0x00000000
-#define AF_INIT_SLOW		0x00000001
-#define AF_INIT_FAST		0x00000002
-#define AF_INIT_FORCE	  	0x00000003
-#define AF_INIT_TYPE_MASK 	0x00000003
+#define AF_INIT_AUTO            0x00000000
+#define AF_INIT_SLOW            0x00000001
+#define AF_INIT_FAST            0x00000002
+#define AF_INIT_FORCE           0x00000003
+#define AF_INIT_TYPE_MASK       0x00000003
 
-#define AF_INIT_INT		0x00000000
-#define AF_INIT_FLOAT		0x00000004
-#define AF_INIT_FORMAT_MASK	0x00000004
+#define AF_INIT_INT             0x00000000
+#define AF_INIT_FLOAT           0x00000004
+#define AF_INIT_FORMAT_MASK     0x00000004
 
 // Default init type
 #ifndef AF_INIT_TYPE
-#define AF_INIT_TYPE (af_cpu_speed?*af_cpu_speed:AF_INIT_SLOW)
+#define AF_INIT_TYPE (af_cpu_speed ? *af_cpu_speed : AF_INIT_SLOW)
 #endif
 
 // Configuration switches
 struct af_cfg {
-  int force;	// Initialization type
-  char** list;	/* list of names of filters that are added to filter
-		   list during first initialization of stream */
+    int force;  // Initialization type
+    char **list; /* list of names of filters that are added to filter
+                    list during first initialization of stream */
 };
 
 // Current audio stream
 struct af_stream {
-  // The first and last filter in the list
-  struct af_instance* first;
-  struct af_instance* last;
-  // Storage for input and output data formats
-  struct mp_audio input;
-  struct mp_audio output;
-  // Configuration for this stream
-  struct af_cfg cfg;
-  struct MPOpts *opts;
+    // The first and last filter in the list
+    struct af_instance *first;
+    struct af_instance *last;
+    // Storage for input and output data formats
+    struct mp_audio input;
+    struct mp_audio output;
+    // Configuration for this stream
+    struct af_cfg cfg;
+    struct MPOpts *opts;
 };
 
 /*********************************************
-// Return values
-*/
+   // Return values
+ */
 
 #define AF_DETACH   2
 #define AF_OK       1
@@ -131,8 +131,8 @@ struct af_stream {
 
 
 /*********************************************
-// Export functions
-*/
+   // Export functions
+ */
 
 /**
  * \defgroup af_chain Audio filter chain functions
@@ -153,19 +153,19 @@ struct af_stream {
  * The function is reentrant i.e. if called with an already initialized
  * stream the stream will be reinitialized.
  */
-int af_init(struct af_stream* s);
+int af_init(struct af_stream *s);
 
 /**
  * \brief Uninit and remove all filters from audio filter chain
  */
-void af_uninit(struct af_stream* s);
+void af_uninit(struct af_stream *s);
 
 /**
  * \brief  Reinit the filter list from the given filter on downwards
  * \param  Filter instance to begin the reinit from
  * \return AF_OK on success or AF_ERROR on failure
  */
-int af_reinit(struct af_stream* s, struct af_instance* af);
+int af_reinit(struct af_stream *s, struct af_instance *af);
 
 /**
  * \brief This function adds the filter "name" to the stream s.
@@ -176,13 +176,13 @@ int af_reinit(struct af_stream* s, struct af_instance* af);
  * list of filters (i.e. at the beginning unless the
  * first filter is the format filter (why??).
  */
-struct af_instance* af_add(struct af_stream* s, char* name);
+struct af_instance *af_add(struct af_stream *s, char *name);
 
 /**
  * \brief Uninit and remove the filter "af"
  * \param af filter to remove
  */
-void af_remove(struct af_stream* s, struct af_instance* af);
+void af_remove(struct af_stream *s, struct af_instance *af);
 
 /**
  * \brief find filter in chain by name
@@ -191,7 +191,7 @@ void af_remove(struct af_stream* s, struct af_instance* af);
  *
  * This function is used for finding already initialized filters
  */
-struct af_instance* af_get(struct af_stream* s, char* name);
+struct af_instance *af_get(struct af_stream *s, char *name);
 
 /**
  * \brief filter data chunk through the filters in the list
@@ -199,7 +199,7 @@ struct af_instance* af_get(struct af_stream* s, char* name);
  * \return resulting data
  * \ingroup af_chain
  */
-struct mp_audio* af_play(struct af_stream* s, struct mp_audio* data);
+struct mp_audio *af_play(struct af_stream *s, struct mp_audio *data);
 
 /**
  * \brief send control to all filters, starting with the last until
@@ -208,19 +208,19 @@ struct mp_audio* af_play(struct af_stream* s, struct mp_audio* data);
  * \param arg argument for filter command
  * \return the accepting filter or NULL if none was found
  */
-struct af_instance *af_control_any_rev (struct af_stream* s, int cmd, void* arg);
+struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg);
 
 /**
  * \brief calculate average ratio of filter output lenth to input length
  * \return the ratio
  */
-double af_calc_filter_multiplier(struct af_stream* s);
+double af_calc_filter_multiplier(struct af_stream *s);
 
 /**
  * \brief Calculate the total delay caused by the filters
  * \return delay in bytes of "missing" output
  */
-double af_calc_delay(struct af_stream* s);
+double af_calc_delay(struct af_stream *s);
 
 /** \} */ // end of af_chain group
 
@@ -233,12 +233,12 @@ double af_calc_delay(struct af_stream* s);
 
 /* Helper function called by the macro with the same name only to be
    called from inside filters */
-int af_resize_local_buffer(struct af_instance* af, struct mp_audio* data);
+int af_resize_local_buffer(struct af_instance *af, struct mp_audio *data);
 
 /* Helper function used to calculate the exact buffer length needed
    when buffers are resized. The returned length is >= than what is
    needed */
-int af_lencalc(double mul, struct mp_audio* data);
+int af_lencalc(double mul, struct mp_audio *data);
 
 /**
  * \brief convert dB to gain value
@@ -250,7 +250,7 @@ int af_lencalc(double mul, struct mp_audio* data);
  * \param ma maximum dB value, input will be clamped to this
  * \return AF_ERROR on error, AF_OK otherwise
  */
-int af_from_dB(int n, float* in, float* out, float k, float mi, float ma);
+int af_from_dB(int n, float *in, float *out, float k, float mi, float ma);
 
 /**
  * \brief convert gain value to dB
@@ -260,7 +260,7 @@ int af_from_dB(int n, float* in, float* out, float k, float mi, float ma);
  * \param k output values will be multiplied by this
  * \return AF_ERROR on error, AF_OK otherwise
  */
-int af_to_dB(int n, float* in, float* out, float k);
+int af_to_dB(int n, float *in, float *out, float k);
 
 /**
  * \brief convert milliseconds to sample time
@@ -272,7 +272,7 @@ int af_to_dB(int n, float* in, float* out, float k);
  * \param ma maximum ms value, input will be clamped to this
  * \return AF_ERROR on error, AF_OK otherwise
  */
-int af_from_ms(int n, float* in, int* out, int rate, float mi, float ma);
+int af_from_ms(int n, float *in, int *out, int rate, float mi, float ma);
 
 /**
  * \brief convert sample time to milliseconds
@@ -282,7 +282,7 @@ int af_from_ms(int n, float* in, int* out, int rate, float mi, float ma);
  * \param rate sample rate
  * \return AF_ERROR on error, AF_OK otherwise
  */
-int af_to_ms(int n, int* in, float* out, int rate);
+int af_to_ms(int n, int *in, float *out, int rate);
 
 /**
  * \brief test if output format matches
@@ -293,7 +293,7 @@ int af_to_ms(int n, int* in, float* out, int rate);
  *
  * compares the format, bps, rate and nch values of af->data with out
  */
-int af_test_output(struct af_instance* af, struct mp_audio* out);
+int af_test_output(struct af_instance *af, struct mp_audio *out);
 
 /**
  * \brief soft clipping function using sin()
@@ -321,28 +321,29 @@ void af_fix_parameters(struct mp_audio *data);
    called to ensure the buffer is big enough.
  * \ingroup af_filter
  */
-#define RESIZE_LOCAL_BUFFER(a,d)\
-((a->data->len < af_lencalc(a->mul,d))?af_resize_local_buffer(a,d):AF_OK)
+#define RESIZE_LOCAL_BUFFER(a, d) \
+    ((a->data->len < \
+      af_lencalc(a->mul, d)) ? af_resize_local_buffer(a, d) : AF_OK)
 
 /* Some other useful macro definitions*/
 #ifndef min
-#define min(a,b)(((a)>(b))?(b):(a))
+#define min(a, b)(((a) > (b)) ? (b) : (a))
 #endif
 
 #ifndef max
-#define max(a,b)(((a)>(b))?(a):(b))
+#define max(a, b)(((a) > (b)) ? (a) : (b))
 #endif
 
 #ifndef clamp
-#define clamp(a,min,max) (((a)>(max))?(max):(((a)<(min))?(min):(a)))
+#define clamp(a, min, max) (((a) > (max)) ? (max) : (((a) < (min)) ? (min) : (a)))
 #endif
 
 #ifndef sign
-#define sign(a) (((a)>0)?(1):(-1))
+#define sign(a) (((a) > 0) ? (1) : (-1))
 #endif
 
 #ifndef lrnd
-#define lrnd(a,b) ((b)((a)>=0.0?(a)+0.5:(a)-0.5))
+#define lrnd(a, b) ((b)((a) >= 0.0 ? (a) + 0.5 : (a) - 0.5))
 #endif
 
 #endif /* MPLAYER_AF_H */
