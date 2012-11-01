@@ -1567,8 +1567,8 @@ static void glSetupYUVFragprog(GL *gl, gl_conversion_params_t *params)
     char *yuv_prog = NULL;
     char **prog = &yuv_prog;
     int cur_texu = 3;
-    char lum_scale_texs[1];
-    char chrom_scale_texs[1];
+    char lum_scale_texs[1] = {0};
+    char chrom_scale_texs[1] = {0};
     char conv_texs[1];
     char filt_texs[1] = {0};
     GLint i;
