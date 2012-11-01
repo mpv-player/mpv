@@ -52,10 +52,10 @@ static void float2int(float* in, void* out, int len, int bps);
 // From signed int to float
 static void int2float(void* in, float* out, int len, int bps);
 
-static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data);
-static struct mp_audio* play_swapendian(struct af_instance_s* af, struct mp_audio* data);
-static struct mp_audio* play_float_s16(struct af_instance_s* af, struct mp_audio* data);
-static struct mp_audio* play_s16_float(struct af_instance_s* af, struct mp_audio* data);
+static struct mp_audio* play(struct af_instance* af, struct mp_audio* data);
+static struct mp_audio* play_swapendian(struct af_instance* af, struct mp_audio* data);
+static struct mp_audio* play_float_s16(struct af_instance* af, struct mp_audio* data);
+static struct mp_audio* play_s16_float(struct af_instance* af, struct mp_audio* data);
 
 // Helper functions to check sanity for input arguments
 
@@ -86,7 +86,7 @@ static int check_format(int format)
 }
 
 // Initialization and runtime control
-static int control(struct af_instance_s* af, int cmd, void* arg)
+static int control(struct af_instance* af, int cmd, void* arg)
 {
   switch(cmd){
   case AF_CONTROL_REINIT:{
@@ -168,7 +168,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 }
 
 // Deallocate memory
-static void uninit(struct af_instance_s* af)
+static void uninit(struct af_instance* af)
 {
   if (af->data)
       free(af->data->audio);
@@ -176,7 +176,7 @@ static void uninit(struct af_instance_s* af)
   af->setup = 0;
 }
 
-static struct mp_audio* play_swapendian(struct af_instance_s* af, struct mp_audio* data)
+static struct mp_audio* play_swapendian(struct af_instance* af, struct mp_audio* data)
 {
   struct mp_audio*   l   = af->data;	// Local data
   struct mp_audio*   c   = data;	// Current working data
@@ -193,7 +193,7 @@ static struct mp_audio* play_swapendian(struct af_instance_s* af, struct mp_audi
   return c;
 }
 
-static struct mp_audio* play_float_s16(struct af_instance_s* af, struct mp_audio* data)
+static struct mp_audio* play_float_s16(struct af_instance* af, struct mp_audio* data)
 {
   struct mp_audio*   l   = af->data;	// Local data
   struct mp_audio*   c   = data;	// Current working data
@@ -212,7 +212,7 @@ static struct mp_audio* play_float_s16(struct af_instance_s* af, struct mp_audio
   return c;
 }
 
-static struct mp_audio* play_s16_float(struct af_instance_s* af, struct mp_audio* data)
+static struct mp_audio* play_s16_float(struct af_instance* af, struct mp_audio* data)
 {
   struct mp_audio*   l   = af->data;	// Local data
   struct mp_audio*   c   = data;	// Current working data
@@ -232,7 +232,7 @@ static struct mp_audio* play_s16_float(struct af_instance_s* af, struct mp_audio
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
+static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   struct mp_audio*   l   = af->data;	// Local data
   struct mp_audio*   c   = data;	// Current working data
@@ -313,7 +313,7 @@ static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
 }
 
 // Allocate memory and set function pointers
-static int af_open(af_instance_t* af){
+static int af_open(struct af_instance* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;

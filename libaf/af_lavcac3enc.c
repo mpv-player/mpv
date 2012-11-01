@@ -58,7 +58,7 @@ typedef struct af_ac3enc_s {
 } af_ac3enc_t;
 
 // Initialization and runtime control
-static int control(struct af_instance_s *af, int cmd, void *arg)
+static int control(struct af_instance *af, int cmd, void *arg)
 {
     af_ac3enc_t *s  = af->setup;
     struct mp_audio *data = arg;
@@ -152,7 +152,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
 }
 
 // Deallocate memory
-static void uninit(struct af_instance_s* af)
+static void uninit(struct af_instance* af)
 {
     if (af->data)
         free(af->data->audio);
@@ -170,7 +170,7 @@ static void uninit(struct af_instance_s* af)
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
+static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
     af_ac3enc_t *s = af->setup;
     struct mp_audio *c = data;    // Current working data
@@ -275,7 +275,7 @@ static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
     return c;
 }
 
-static int af_open(af_instance_t* af){
+static int af_open(struct af_instance* af){
 
     af_ac3enc_t *s = calloc(1,sizeof(af_ac3enc_t));
     af->control=control;

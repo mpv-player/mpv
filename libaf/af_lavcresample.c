@@ -50,7 +50,7 @@ typedef struct af_resample_s{
 
 
 // Initialization and runtime control
-static int control(struct af_instance_s* af, int cmd, void* arg)
+static int control(struct af_instance* af, int cmd, void* arg)
 {
   af_resample_t* s   = (af_resample_t*)af->setup;
   struct mp_audio *data= (struct mp_audio*)arg;
@@ -100,7 +100,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 }
 
 // Deallocate memory
-static void uninit(struct af_instance_s* af)
+static void uninit(struct af_instance* af)
 {
     if(af->data)
         free(af->data->audio);
@@ -116,7 +116,7 @@ static void uninit(struct af_instance_s* af)
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
+static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   af_resample_t *s = af->setup;
   int i, j, consumed, ret = 0;
@@ -188,7 +188,7 @@ static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
   return data;
 }
 
-static int af_open(af_instance_t* af){
+static int af_open(struct af_instance* af){
   af_resample_t *s = calloc(1,sizeof(af_resample_t));
   af->control=control;
   af->uninit=uninit;

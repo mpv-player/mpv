@@ -78,7 +78,7 @@ typedef struct af_volume_s
 }af_volnorm_t;
 
 // Initialization and runtime control
-static int control(struct af_instance_s* af, int cmd, void* arg)
+static int control(struct af_instance* af, int cmd, void* arg)
 {
   af_volnorm_t* s   = (af_volnorm_t*)af->setup;
 
@@ -114,7 +114,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 }
 
 // Deallocate memory
-static void uninit(struct af_instance_s* af)
+static void uninit(struct af_instance* af)
 {
     free(af->data);
     free(af->setup);
@@ -296,7 +296,7 @@ static void method2_float(af_volnorm_t *s, struct mp_audio *c)
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
+static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   af_volnorm_t *s = af->setup;
 
@@ -318,7 +318,7 @@ static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
 }
 
 // Allocate memory and set function pointers
-static int af_open(af_instance_t* af){
+static int af_open(struct af_instance* af){
   int i = 0;
   af->control=control;
   af->uninit=uninit;

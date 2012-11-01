@@ -78,7 +78,7 @@ typedef struct af_scaletempo_s
   short   speed_pitch;
 } af_scaletempo_t;
 
-static int fill_queue(struct af_instance_s* af, struct mp_audio* data, int offset)
+static int fill_queue(struct af_instance* af, struct mp_audio* data, int offset)
 {
   af_scaletempo_t* s = af->setup;
   int bytes_in = data->len - offset;
@@ -219,7 +219,7 @@ static void output_overlap_s16(af_scaletempo_t* s, void* buf_out,
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
+static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   af_scaletempo_t* s = af->setup;
   int offset_in;
@@ -285,7 +285,7 @@ static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
 }
 
 // Initialization and runtime control
-static int control(struct af_instance_s* af, int cmd, void* arg)
+static int control(struct af_instance* af, int cmd, void* arg)
 {
   af_scaletempo_t* s = af->setup;
   switch(cmd){
@@ -533,7 +533,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 }
 
 // Deallocate memory
-static void uninit(struct af_instance_s* af)
+static void uninit(struct af_instance* af)
 {
   af_scaletempo_t* s = af->setup;
   free(af->data->audio);
@@ -547,7 +547,7 @@ static void uninit(struct af_instance_s* af)
 }
 
 // Allocate memory and set function pointers
-static int af_open(af_instance_t* af){
+static int af_open(struct af_instance* af){
   af_scaletempo_t* s;
 
   af->control   = control;

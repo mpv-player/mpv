@@ -64,7 +64,7 @@ typedef struct af_export_s
    cmd control command
    arg argument
 */
-static int control(struct af_instance_s* af, int cmd, void* arg)
+static int control(struct af_instance* af, int cmd, void* arg)
 {
   af_export_t* s = af->setup;
   switch (cmd){
@@ -173,7 +173,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 /* Free allocated memory and clean up other stuff too.
    af audio filter instance
 */
-static void uninit( struct af_instance_s* af )
+static void uninit( struct af_instance* af )
 {
   free(af->data);
   af->data = NULL;
@@ -201,7 +201,7 @@ static void uninit( struct af_instance_s* af )
    af audio filter instance
    data audio data
 */
-static struct mp_audio* play( struct af_instance_s* af, struct mp_audio* data )
+static struct mp_audio* play( struct af_instance* af, struct mp_audio* data )
 {
   struct mp_audio*   	c   = data;	     // Current working data
   af_export_t* 	s   = af->setup;     // Setup for this instance
@@ -246,7 +246,7 @@ static struct mp_audio* play( struct af_instance_s* af, struct mp_audio* data )
    af audio filter instance
    returns AF_OK or AF_ERROR
 */
-static int af_open( af_instance_t* af )
+static int af_open( struct af_instance* af )
 {
   af->control = control;
   af->uninit  = uninit;

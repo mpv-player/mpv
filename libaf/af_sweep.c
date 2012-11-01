@@ -34,7 +34,7 @@ typedef struct af_sweep_s{
 
 
 // Initialization and runtime control
-static int control(struct af_instance_s* af, int cmd, void* arg)
+static int control(struct af_instance* af, int cmd, void* arg)
 {
   af_sweept* s   = (af_sweept*)af->setup;
   struct mp_audio *data= (struct mp_audio*)arg;
@@ -58,14 +58,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 }
 
 // Deallocate memory
-static void uninit(struct af_instance_s* af)
+static void uninit(struct af_instance* af)
 {
     free(af->data);
     free(af->setup);
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
+static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   af_sweept *s = af->setup;
   int i, j;
@@ -83,7 +83,7 @@ static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
   return data;
 }
 
-static int af_open(af_instance_t* af){
+static int af_open(struct af_instance* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;

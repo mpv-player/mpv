@@ -203,7 +203,7 @@ void mixer_setbalance(mixer_t *mixer, float val)
     float level[AF_NCH];
     int i;
     af_control_ext_t arg_ext = { .arg = level };
-    af_instance_t *af_pan_balance;
+    struct af_instance *af_pan_balance;
 
     mixer->balance = val;
 

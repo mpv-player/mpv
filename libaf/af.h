@@ -29,7 +29,7 @@
 #include "cpudetect.h"
 #include "mp_msg.h"
 
-struct af_instance_s;
+struct af_instance;
 
 // Number of channels
 #ifndef AF_NCH
@@ -59,25 +59,24 @@ struct af_info {
   const char *author;
   const char *comment;
   const int flags;
-  int (*open)(struct af_instance_s* vf);
+  int (*open)(struct af_instance* vf);
 };
 
 // Linked list of audio filters
-typedef struct af_instance_s
-{
+struct af_instance {
   struct af_info* info;
-  int (*control)(struct af_instance_s* af, int cmd, void* arg);
-  void (*uninit)(struct af_instance_s* af);
-  struct mp_audio* (*play)(struct af_instance_s* af, struct mp_audio* data);
+  int (*control)(struct af_instance* af, int cmd, void* arg);
+  void (*uninit)(struct af_instance* af);
+  struct mp_audio* (*play)(struct af_instance* af, struct mp_audio* data);
   void* setup;	  // setup data for this specific instance and filter
   struct mp_audio* data; // configuration for outgoing data stream
-  struct af_instance_s* next;
-  struct af_instance_s* prev;
+  struct af_instance* next;
+  struct af_instance* prev;
   double delay; /* Delay caused by the filter, in units of bytes read without
 		 * corresponding output */
   double mul; /* length multiplier: how much does this instance change
 		 the length of the buffer. */
-}af_instance_t;
+};
 
 // Initialization flags
 extern int* af_cpu_speed;
@@ -108,8 +107,8 @@ typedef struct af_cfg_s{
 typedef struct af_stream
 {
   // The first and last filter in the list
-  af_instance_t* first;
-  af_instance_t* last;
+  struct af_instance* first;
+  struct af_instance* last;
   // Storage for input and output data formats
   struct mp_audio input;
   struct mp_audio output;
@@ -167,7 +166,7 @@ void af_uninit(af_stream_t* s);
  * \param  Filter instance to begin the reinit from
  * \return AF_OK on success or AF_ERROR on failure
  */
-int af_reinit(af_stream_t* s, af_instance_t* af);
+int af_reinit(af_stream_t* s, struct af_instance* af);
 
 /**
  * \brief This function adds the filter "name" to the stream s.
@@ -178,13 +177,13 @@ int af_reinit(af_stream_t* s, af_instance_t* af);
  * list of filters (i.e. at the beginning unless the
  * first filter is the format filter (why??).
  */
-af_instance_t* af_add(af_stream_t* s, char* name);
+struct af_instance* af_add(af_stream_t* s, char* name);
 
 /**
  * \brief Uninit and remove the filter "af"
  * \param af filter to remove
  */
-void af_remove(af_stream_t* s, af_instance_t* af);
+void af_remove(af_stream_t* s, struct af_instance* af);
 
 /**
  * \brief find filter in chain by name
@@ -193,7 +192,7 @@ void af_remove(af_stream_t* s, af_instance_t* af);
  *
  * This function is used for finding already initialized filters
  */
-af_instance_t* af_get(af_stream_t* s, char* name);
+struct af_instance* af_get(af_stream_t* s, char* name);
 
 /**
  * \brief filter data chunk through the filters in the list
@@ -210,7 +209,7 @@ struct mp_audio* af_play(af_stream_t* s, struct mp_audio* data);
  * \param arg argument for filter command
  * \return the accepting filter or NULL if none was found
  */
-af_instance_t *af_control_any_rev (af_stream_t* s, int cmd, void* arg);
+struct af_instance *af_control_any_rev (af_stream_t* s, int cmd, void* arg);
 
 /**
  * \brief calculate average ratio of filter output lenth to input length
@@ -235,7 +234,7 @@ double af_calc_delay(af_stream_t* s);
 
 /* Helper function called by the macro with the same name only to be
    called from inside filters */
-int af_resize_local_buffer(af_instance_t* af, struct mp_audio* data);
+int af_resize_local_buffer(struct af_instance* af, struct mp_audio* data);
 
 /* Helper function used to calculate the exact buffer length needed
    when buffers are resized. The returned length is >= than what is
@@ -295,7 +294,7 @@ int af_to_ms(int n, int* in, float* out, int rate);
  *
  * compares the format, bps, rate and nch values of af->data with out
  */
-int af_test_output(struct af_instance_s* af, struct mp_audio* out);
+int af_test_output(struct af_instance* af, struct mp_audio* out);
 
 /**
  * \brief soft clipping function using sin()

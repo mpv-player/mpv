@@ -38,7 +38,7 @@ struct af_bs2b {
 };
 
 #define PLAY(name, type) \
-static struct mp_audio *play_##name(struct af_instance_s *af, struct mp_audio *data) \
+static struct mp_audio *play_##name(struct af_instance *af, struct mp_audio *data) \
 { \
     /* filter is called for all pairs of samples available in the buffer */ \
     bs2b_cross_feed_##name(((struct af_bs2b*)(af->setup))->filter, \
@@ -92,7 +92,7 @@ static int test_feed(void *par)
 }
 
 /// Initialization and runtime control
-static int control(struct af_instance_s *af, int cmd, void *arg)
+static int control(struct af_instance *af, int cmd, void *arg)
 {
     struct af_bs2b *s = af->setup;
 
@@ -227,7 +227,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg)
 }
 
 /// Deallocate memory and close library
-static void uninit(struct af_instance_s *af)
+static void uninit(struct af_instance *af)
 {
     struct af_bs2b *s = af->setup;
     free(af->data);
@@ -237,7 +237,7 @@ static void uninit(struct af_instance_s *af)
 }
 
 /// Allocate memory, set function pointers and init library
-static int af_open(af_instance_t *af)
+static int af_open(struct af_instance *af)
 {
     struct af_bs2b *s;
     af->control = control;

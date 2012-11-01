@@ -2265,7 +2265,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         char *af_args = strdup(cmd->args[0].v.s);
         char *af_commands = af_args;
         char *af_command;
-        af_instance_t *af;
+        struct af_instance *af;
         while ((af_command = strsep(&af_commands, ",")) != NULL) {
             if (cmd->id == MP_CMD_AF_DEL) {
                 af = af_get(mpctx->mixer.afilter, af_command);
@@ -2287,7 +2287,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     case MP_CMD_AF_CMDLINE:
         if (sh_audio) {
-            af_instance_t *af = af_get(sh_audio->afilter, cmd->args[0].v.s);
+            struct af_instance *af = af_get(sh_audio->afilter, cmd->args[0].v.s);
             if (!af) {
                 mp_msg(MSGT_CPLAYER, MSGL_WARN,
                        "Filter '%s' not found in chain.\n", cmd->args[0].v.s);

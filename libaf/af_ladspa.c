@@ -95,7 +95,7 @@ typedef struct af_ladspa_s
 
 /* ------------------------------------------------------------------------- */
 
-static int af_open(af_instance_t *af);
+static int af_open(struct af_instance *af);
 static int af_ladspa_malloc_failed(char*);
 
 /* ------------------------------------------------------------------------- */
@@ -485,7 +485,7 @@ static int af_ladspa_malloc_failed(char *myname) {
  *              operation.
  */
 
-static int control(struct af_instance_s *af, int cmd, void *arg) {
+static int control(struct af_instance *af, int cmd, void *arg) {
     af_ladspa_t *setup = (af_ladspa_t*) af->setup;
     int i, r;
     float val;
@@ -650,7 +650,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
  * \return  No return value.
  */
 
-static void uninit(struct af_instance_s *af) {
+static void uninit(struct af_instance *af) {
     int i;
 
     free(af->data);
@@ -710,7 +710,7 @@ static void uninit(struct af_instance_s *af) {
  * \return      Either AF_ERROR or AF_OK
  */
 
-static struct mp_audio* play(struct af_instance_s *af, struct mp_audio *data) {
+static struct mp_audio* play(struct af_instance *af, struct mp_audio *data) {
     af_ladspa_t *setup = af->setup;
     const LADSPA_Descriptor *pdes = setup->plugin_descriptor;
     float *audio = (float*)data->audio;
@@ -882,7 +882,7 @@ static struct mp_audio* play(struct af_instance_s *af, struct mp_audio *data) {
  * \return      Either AF_ERROR or AF_OK
  */
 
-static int af_open(af_instance_t *af) {
+static int af_open(struct af_instance *af) {
 
     af->control=control;
     af->uninit=uninit;

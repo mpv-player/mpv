@@ -30,7 +30,7 @@
 // Data for specific instances of this filter
 
 // Initialization and runtime control
-static int control(struct af_instance_s* af, int cmd, void* arg)
+static int control(struct af_instance* af, int cmd, void* arg)
 {
 	switch(cmd){
 		case AF_CONTROL_REINIT:
@@ -44,13 +44,13 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 }
 
 // Deallocate memory
-static void uninit(struct af_instance_s* af)
+static void uninit(struct af_instance* af)
 {
 	free(af->data);
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
+static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
 	struct mp_audio*	c	= data;		 // Current working data
 	float*		a	= c->audio;	 // Audio data
@@ -74,7 +74,7 @@ static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
 }
 
 // Allocate memory and set function pointers
-static int af_open(af_instance_t* af){
+static int af_open(struct af_instance* af){
 	af->control	= control;
 	af->uninit	= uninit;
 	af->play	= play;

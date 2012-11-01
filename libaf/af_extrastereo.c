@@ -34,11 +34,11 @@ typedef struct af_extrastereo_s
     float mul;
 }af_extrastereo_t;
 
-static struct mp_audio* play_s16(struct af_instance_s* af, struct mp_audio* data);
-static struct mp_audio* play_float(struct af_instance_s* af, struct mp_audio* data);
+static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data);
+static struct mp_audio* play_float(struct af_instance* af, struct mp_audio* data);
 
 // Initialization and runtime control
-static int control(struct af_instance_s* af, int cmd, void* arg)
+static int control(struct af_instance* af, int cmd, void* arg)
 {
   af_extrastereo_t* s   = (af_extrastereo_t*)af->setup;
 
@@ -80,14 +80,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 }
 
 // Deallocate memory
-static void uninit(struct af_instance_s* af)
+static void uninit(struct af_instance* af)
 {
     free(af->data);
     free(af->setup);
 }
 
 // Filter data through filter
-static struct mp_audio* play_s16(struct af_instance_s* af, struct mp_audio* data)
+static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data)
 {
   af_extrastereo_t *s = af->setup;
   register int i = 0;
@@ -109,7 +109,7 @@ static struct mp_audio* play_s16(struct af_instance_s* af, struct mp_audio* data
   return data;
 }
 
-static struct mp_audio* play_float(struct af_instance_s* af, struct mp_audio* data)
+static struct mp_audio* play_float(struct af_instance* af, struct mp_audio* data)
 {
   af_extrastereo_t *s = af->setup;
   register int i = 0;
@@ -132,7 +132,7 @@ static struct mp_audio* play_float(struct af_instance_s* af, struct mp_audio* da
 }
 
 // Allocate memory and set function pointers
-static int af_open(af_instance_t* af){
+static int af_open(struct af_instance* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play_s16;

@@ -86,7 +86,7 @@ typedef struct af_surround_s
 }af_surround_t;
 
 // Initialization and runtime control
-static int control(struct af_instance_s* af, int cmd, void* arg)
+static int control(struct af_instance* af, int cmd, void* arg)
 {
   af_surround_t *s = af->setup;
   switch(cmd){
@@ -147,7 +147,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 }
 
 // Deallocate memory
-static void uninit(struct af_instance_s* af)
+static void uninit(struct af_instance* af)
 {
   if(af->data)
     free(af->data->audio);
@@ -167,7 +167,7 @@ static float steering_matrix[][12] = {
 //static int amp_L = 0, amp_R = 0, amp_C = 0, amp_S = 0;
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data){
+static struct mp_audio* play(struct af_instance* af, struct mp_audio* data){
   af_surround_t* s   = (af_surround_t*)af->setup;
   float*	 m   = steering_matrix[0];
   float*     	 in  = data->audio; 	// Input audio data
@@ -249,7 +249,7 @@ static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data){
   return data;
 }
 
-static int af_open(af_instance_t* af){
+static int af_open(struct af_instance* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
