@@ -498,8 +498,8 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
 
         /* accept FLOAT, let af_format do conversion */
 
-        af->data->rate   = ((af_data_t*)arg)->rate;
-        af->data->nch    = ((af_data_t*)arg)->nch;
+        af->data->rate   = ((struct mp_audio*)arg)->rate;
+        af->data->nch    = ((struct mp_audio*)arg)->nch;
         af->data->format = AF_FORMAT_FLOAT_NE;
         af->data->bps    = 4;
 
@@ -507,7 +507,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
          * filter, has to be done in play() :-/
          */
 
-        return af_test_output(af, (af_data_t*)arg);
+        return af_test_output(af, (struct mp_audio*)arg);
     case AF_CONTROL_COMMAND_LINE: {
         char *buf;
         char *line = arg;
@@ -710,7 +710,7 @@ static void uninit(struct af_instance_s *af) {
  * \return      Either AF_ERROR or AF_OK
  */
 
-static af_data_t* play(struct af_instance_s *af, af_data_t *data) {
+static struct mp_audio* play(struct af_instance_s *af, struct mp_audio *data) {
     af_ladspa_t *setup = af->setup;
     const LADSPA_Descriptor *pdes = setup->plugin_descriptor;
     float *audio = (float*)data->audio;
@@ -889,7 +889,7 @@ static int af_open(af_instance_t *af) {
     af->play=play;
     af->mul=1;
 
-    af->data = calloc(1, sizeof(af_data_t));
+    af->data = calloc(1, sizeof(struct mp_audio));
     if (af->data == NULL)
         return af_ladspa_malloc_failed((char*)af_info_ladspa.name);
 

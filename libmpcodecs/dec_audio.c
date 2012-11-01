@@ -353,7 +353,7 @@ static int filter_n_bytes(sh_audio_t *sh, struct bstr *outbuf, int len)
     }
 
     // Filter
-    af_data_t filter_input = {
+    struct mp_audio filter_input = {
 	.audio = sh->a_buffer,
 	.len = len,
 	.rate = sh->samplerate,
@@ -361,7 +361,7 @@ static int filter_n_bytes(sh_audio_t *sh, struct bstr *outbuf, int len)
 	.format = sh->sample_format
     };
     af_fix_parameters(&filter_input);
-    af_data_t *filter_output = af_play(sh->afilter, &filter_input);
+    struct mp_audio *filter_output = af_play(sh->afilter, &filter_input);
     if (!filter_output)
 	return -1;
     set_min_out_buffer_size(outbuf, outbuf->len + filter_output->len);

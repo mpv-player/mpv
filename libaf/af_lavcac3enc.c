@@ -61,7 +61,7 @@ typedef struct af_ac3enc_s {
 static int control(struct af_instance_s *af, int cmd, void *arg)
 {
     af_ac3enc_t *s  = af->setup;
-    af_data_t *data = arg;
+    struct mp_audio *data = arg;
     int i, bit_rate, test_output_res;
     static const int default_bit_rate[AC3_MAX_CHANNELS+1] = \
         {0, 96000, 192000, 256000, 384000, 448000, 448000};
@@ -170,11 +170,11 @@ static void uninit(struct af_instance_s* af)
 }
 
 // Filter data through filter
-static af_data_t* play(struct af_instance_s* af, af_data_t* data)
+static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
 {
     af_ac3enc_t *s = af->setup;
-    af_data_t *c = data;    // Current working data
-    af_data_t *l;
+    struct mp_audio *c = data;    // Current working data
+    struct mp_audio *l;
     int len, left, outsize = 0, destsize;
     char *buf, *src, *dest;
     int max_output_len;
@@ -282,7 +282,7 @@ static int af_open(af_instance_t* af){
     af->uninit=uninit;
     af->play=play;
     af->mul=1;
-    af->data=calloc(1,sizeof(af_data_t));
+    af->data=calloc(1,sizeof(struct mp_audio));
     af->setup=s;
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");

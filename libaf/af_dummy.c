@@ -30,7 +30,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 {
   switch(cmd){
   case AF_CONTROL_REINIT:
-    memcpy(af->data,(af_data_t*)arg,sizeof(af_data_t));
+    memcpy(af->data,(struct mp_audio*)arg,sizeof(struct mp_audio));
     mp_msg(MSGT_AFILTER, MSGL_V, "[dummy] Was reinitialized: %iHz/%ich/%s\n",
 	af->data->rate,af->data->nch,af_fmt2str_short(af->data->format));
     return AF_OK;
@@ -45,7 +45,7 @@ static void uninit(struct af_instance_s* af)
 }
 
 // Filter data through filter
-static af_data_t* play(struct af_instance_s* af, af_data_t* data)
+static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
 {
   // Do something necessary to get rid of annoying warning during compile
   if(!af)
@@ -59,7 +59,7 @@ static int af_open(af_instance_t* af){
   af->uninit=uninit;
   af->play=play;
   af->mul=1;
-  af->data=malloc(sizeof(af_data_t));
+  af->data=malloc(sizeof(struct mp_audio));
   if(af->data == NULL)
     return AF_ERROR;
   return AF_OK;

@@ -85,13 +85,13 @@ int af_to_ms(int n, int* in, float* out, int rate)
 }
 
 /* Helper function for testing the output format */
-int af_test_output(struct af_instance_s* af, af_data_t* out)
+int af_test_output(struct af_instance_s* af, struct mp_audio* out)
 {
   if((af->data->format != out->format) ||
      (af->data->bps    != out->bps)    ||
      (af->data->rate   != out->rate)   ||
      (af->data->nch    != out->nch)){
-    memcpy(out,af->data,sizeof(af_data_t));
+    memcpy(out,af->data,sizeof(struct mp_audio));
     return AF_FALSE;
   }
   return AF_OK;

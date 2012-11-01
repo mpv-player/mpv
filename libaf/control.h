@@ -89,7 +89,7 @@ typedef struct af_control_ext_s{
 // MANDATORY CALLS
 
 /* Reinitialize filter. The optional argument contains the new
-   configuration in form of a af_data_t struct. If the filter does not
+   configuration in form of a struct mp_audio struct. If the filter does not
    support the new format the struct should be changed and AF_FALSE
    should be returned. If the incoming and outgoing data streams are
    identical the filter can return AF_DETACH. This will remove the

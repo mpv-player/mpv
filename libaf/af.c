@@ -240,7 +240,7 @@ void af_remove(af_stream_t* s, af_instance_t* af)
   free(af);
 }
 
-static void print_fmt(af_data_t *d)
+static void print_fmt(struct mp_audio *d)
 {
     if (d) {
         mp_msg(MSGT_AFILTER, MSGL_V, "%dHz/%dch/%s", d->rate, d->nch,
@@ -280,7 +280,7 @@ static void af_print_filter_chain(af_stream_t* s)
 int af_reinit(af_stream_t* s, af_instance_t* af)
 {
   do{
-    af_data_t in; // Format of the input to current filter
+    struct mp_audio in; // Format of the input to current filter
     int rv=0; // Return value
 
     // Check if there are any filters left in the list
@@ -293,9 +293,9 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
 
     // Check if this is the first filter
     if(!af->prev)
-      memcpy(&in,&(s->input),sizeof(af_data_t));
+      memcpy(&in,&(s->input),sizeof(struct mp_audio));
     else
-      memcpy(&in,af->prev->data,sizeof(af_data_t));
+      memcpy(&in,af->prev->data,sizeof(struct mp_audio));
     // Reset just in case...
     in.audio=NULL;
     in.len=0;
@@ -319,9 +319,9 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
 	    return rv;
 	  // Initialize channels filter
 	  if(!new->prev)
-	    memcpy(&in,&(s->input),sizeof(af_data_t));
+	    memcpy(&in,&(s->input),sizeof(struct mp_audio));
 	  else
-	    memcpy(&in,new->prev->data,sizeof(af_data_t));
+	    memcpy(&in,new->prev->data,sizeof(struct mp_audio));
 	  if(AF_OK != (rv = new->control(new,AF_CONTROL_REINIT,&in)))
 	    return rv;
 	}
@@ -336,9 +336,9 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
 	    return rv;
 	  // Initialize format filter
 	  if(!new->prev)
-	    memcpy(&in,&(s->input),sizeof(af_data_t));
+	    memcpy(&in,&(s->input),sizeof(struct mp_audio));
 	  else
-	    memcpy(&in,new->prev->data,sizeof(af_data_t));
+	    memcpy(&in,new->prev->data,sizeof(struct mp_audio));
 	  if(AF_OK != (rv = new->control(new,AF_CONTROL_REINIT,&in)))
 	    return rv;
 	}
@@ -595,7 +595,7 @@ af_instance_t* af_add(af_stream_t* s, char* name){
 }
 
 // Filter data chunk through the filters in the list
-af_data_t* af_play(af_stream_t* s, af_data_t* data)
+struct mp_audio* af_play(af_stream_t* s, struct mp_audio* data)
 {
   af_instance_t* af=s->first;
   // Iterate through all filters
@@ -611,7 +611,7 @@ af_data_t* af_play(af_stream_t* s, af_data_t* data)
  * when using the RESIZE_LOCAL_BUFFER macro. The +t+1 part ensures the
  * value is >= len*mul rounded upwards to whole samples even if the
  * double 'mul' is inexact. */
-int af_lencalc(double mul, af_data_t* d)
+int af_lencalc(double mul, struct mp_audio* d)
 {
   int t = d->bps * d->nch;
   return d->len * mul + t + 1;
@@ -647,7 +647,7 @@ double af_calc_delay(af_stream_t* s)
 
 /* Helper function called by the macro with the same name this
    function should not be called directly */
-int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
+int af_resize_local_buffer(af_instance_t* af, struct mp_audio* data)
 {
   // Calculate new length
   register int len = af_lencalc(af->mul,data);
@@ -690,7 +690,7 @@ void af_help (void) {
   }
 }
 
-void af_fix_parameters(af_data_t *data)
+void af_fix_parameters(struct mp_audio *data)
 {
     if (data->nch < 0 || data->nch > AF_NCH) {
       mp_msg(MSGT_AFILTER, MSGL_ERR, "Invalid number of channels %i, assuming 2.\n", data->nch);

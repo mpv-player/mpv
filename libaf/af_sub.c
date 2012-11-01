@@ -69,8 +69,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // Sanity check
     if(!arg) return AF_ERROR;
 
-    af->data->rate   = ((af_data_t*)arg)->rate;
-    af->data->nch    = max(s->ch+1,((af_data_t*)arg)->nch);
+    af->data->rate   = ((struct mp_audio*)arg)->rate;
+    af->data->nch    = max(s->ch+1,((struct mp_audio*)arg)->nch);
     af->data->format = AF_FORMAT_FLOAT_NE;
     af->data->bps    = 4;
 
@@ -81,7 +81,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
        (-1 == af_filter_szxform(sp[1].a, sp[1].b, Q, s->fc,
        (float)af->data->rate, &s->k, s->w[1])))
       return AF_ERROR;
-    return af_test_output(af,(af_data_t*)arg);
+    return af_test_output(af,(struct mp_audio*)arg);
   }
   case AF_CONTROL_COMMAND_LINE:{
     int   ch=5;
@@ -139,9 +139,9 @@ static void uninit(struct af_instance_s* af)
 #endif
 
 // Filter data through filter
-static af_data_t* play(struct af_instance_s* af, af_data_t* data)
+static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
 {
-  af_data_t*    c   = data;	 // Current working data
+  struct mp_audio*    c   = data;	 // Current working data
   af_sub_t*  	s   = af->setup; // Setup for this instance
   float*   	a   = c->audio;	 // Audio data
   int		len = c->len/4;	 // Number of samples in current audio block
@@ -167,7 +167,7 @@ static int af_open(af_instance_t* af){
   af->uninit=uninit;
   af->play=play;
   af->mul=1;
-  af->data=calloc(1,sizeof(af_data_t));
+  af->data=calloc(1,sizeof(struct mp_audio));
   af->setup=s=calloc(1,sizeof(af_sub_t));
   if(af->data == NULL || af->setup == NULL)
     return AF_ERROR;

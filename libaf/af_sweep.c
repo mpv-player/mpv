@@ -37,7 +37,7 @@ typedef struct af_sweep_s{
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
   af_sweept* s   = (af_sweept*)af->setup;
-  af_data_t *data= (af_data_t*)arg;
+  struct mp_audio *data= (struct mp_audio*)arg;
 
   switch(cmd){
   case AF_CONTROL_REINIT:
@@ -65,7 +65,7 @@ static void uninit(struct af_instance_s* af)
 }
 
 // Filter data through filter
-static af_data_t* play(struct af_instance_s* af, af_data_t* data)
+static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
 {
   af_sweept *s = af->setup;
   int i, j;
@@ -88,7 +88,7 @@ static int af_open(af_instance_t* af){
   af->uninit=uninit;
   af->play=play;
   af->mul=1;
-  af->data=calloc(1,sizeof(af_data_t));
+  af->data=calloc(1,sizeof(struct mp_audio));
   af->setup=calloc(1,sizeof(af_sweept));
   return AF_OK;
 }

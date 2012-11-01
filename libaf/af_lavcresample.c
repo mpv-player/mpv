@@ -53,7 +53,7 @@ typedef struct af_resample_s{
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
   af_resample_t* s   = (af_resample_t*)af->setup;
-  af_data_t *data= (af_data_t*)arg;
+  struct mp_audio *data= (struct mp_audio*)arg;
   int out_rate, test_output_res; // helpers for checking input format
 
   switch(cmd){
@@ -83,7 +83,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // hack to make af_test_output ignore the samplerate change
     out_rate = af->data->rate;
     af->data->rate = data->rate;
-    test_output_res = af_test_output(af, (af_data_t*)arg);
+    test_output_res = af_test_output(af, (struct mp_audio*)arg);
     af->data->rate = out_rate;
     return test_output_res;
   case AF_CONTROL_COMMAND_LINE:{
@@ -116,7 +116,7 @@ static void uninit(struct af_instance_s* af)
 }
 
 // Filter data through filter
-static af_data_t* play(struct af_instance_s* af, af_data_t* data)
+static struct mp_audio* play(struct af_instance_s* af, struct mp_audio* data)
 {
   af_resample_t *s = af->setup;
   int i, j, consumed, ret = 0;
@@ -194,7 +194,7 @@ static int af_open(af_instance_t* af){
   af->uninit=uninit;
   af->play=play;
   af->mul=1;
-  af->data=calloc(1,sizeof(af_data_t));
+  af->data=calloc(1,sizeof(struct mp_audio));
   s->filter_length= 16;
   s->cutoff= max(1.0 - 6.5/(s->filter_length+8), 0.80);
   s->phase_shift= 10;
