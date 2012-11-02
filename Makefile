@@ -326,7 +326,7 @@ endif
 all: $(ALL_PRG-yes) locales
 
 %.1: %.rst
-	rst2man $< $@
+	$(RST2MAN) $< $@
 
 %.o: %.S
 	$(CC) $(DEPFLAGS) $(CFLAGS) -c -o $@ $<
@@ -414,7 +414,7 @@ osdep/mpv-rc.o: osdep/mpv.exe.manifest
 ###### installation / clean / generic rules #######
 
 check_rst2man:
-	@which rst2man > /dev/null 2>&1 || (printf "\n\trst2man not found. You need the docutils (>= 0.7) to generate the manpages. Alternatively you can use 'install-no-man' rule.\n\n" && exit 1)
+	@which $(RST2MAN) > /dev/null 2>&1 || (printf "\n\trst2man not found. You need the docutils (>= 0.7) to generate the manpages. Alternatively you can use 'install-no-man' rule.\n\n" && exit 1)
 
 install: $(INSTALL_TARGETS-yes)
 

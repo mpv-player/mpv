@@ -956,6 +956,11 @@ if cygwin ; then
   extra_cflags="$extra_cflags -mwin32"
 fi
 
+_rst2man=rst2man
+if [ -f "$(which rst2man.py)" ] ; then
+  _rst2man=rst2man.py
+fi
+
 TMPC="$mplayer_tmpdir/tmp.c"
 TMPCPP="$mplayer_tmpdir/tmp.cpp"
 TMPEXE="$mplayer_tmpdir/tmp$_exesuf"
@@ -3332,6 +3337,7 @@ EXTRALIBS_MPLAYER  = $libs_mplayer
 
 GETCH = $_getch
 TIMER = $_timer
+RST2MAN = $_rst2man
 
 EXESUF      = $_exesuf
 EXESUFS_ALL = .exe
