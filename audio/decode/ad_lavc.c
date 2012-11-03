@@ -35,6 +35,7 @@
 
 #include "ad_internal.h"
 #include "audio/reorder_ch.h"
+#include "audio/fmt-conversion.h"
 
 #include "compat/mpbswap.h"
 #include "compat/libav.h"
@@ -144,17 +145,8 @@ static int preinit(sh_audio_t *sh)
 static int setup_format(sh_audio_t *sh_audio,
                         const AVCodecContext *lavc_context)
 {
-    int sample_format = sh_audio->sample_format;
-    switch (av_get_packed_sample_fmt(lavc_context->sample_fmt)) {
-    case AV_SAMPLE_FMT_U8:  sample_format = AF_FORMAT_U8;       break;
-    case AV_SAMPLE_FMT_S16: sample_format = AF_FORMAT_S16_NE;   break;
-    case AV_SAMPLE_FMT_S32: sample_format = AF_FORMAT_S32_NE;   break;
-    case AV_SAMPLE_FMT_FLT: sample_format = AF_FORMAT_FLOAT_NE; break;
-    default:
-        mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Unsupported sample format\n");
-        sample_format = AF_FORMAT_UNKNOWN;
-    }
-
+    int sample_format        =
+        af_from_avformat(av_get_packed_sample_fmt(lavc_context->sample_fmt));
     bool broken_srate        = false;
     int samplerate           = lavc_context->sample_rate;
     int container_samplerate = sh_audio->container_out_samplerate;
@@ -279,13 +271,9 @@ static int init(sh_audio_t *sh_audio, const char *decoder)
     if (sh_audio->wf && sh_audio->wf->nAvgBytesPerSec)
         sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
 
-    switch (av_get_packed_sample_fmt(lavc_context->sample_fmt)) {
-    case AV_SAMPLE_FMT_U8:
-    case AV_SAMPLE_FMT_S16:
-    case AV_SAMPLE_FMT_S32:
-    case AV_SAMPLE_FMT_FLT:
-        break;
-    default:
+    int af_sample_fmt =
+        af_from_avformat(av_get_packed_sample_fmt(lavc_context->sample_fmt));
+    if (af_sample_fmt == AF_FORMAT_UNKNOWN) {
         uninit(sh_audio);
         return 0;
     }
