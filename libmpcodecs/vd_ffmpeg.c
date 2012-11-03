@@ -365,7 +365,7 @@ static void uninit(sh_video_t *sh)
     }
 
     av_freep(&avctx);
-    av_freep(&ctx->pic);
+    avcodec_free_frame(&ctx->pic);
     talloc_free(ctx);
 }
 

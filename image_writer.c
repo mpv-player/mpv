@@ -138,7 +138,7 @@ error_exit:
     if (avctx)
         avcodec_close(avctx);
     av_free(avctx);
-    av_free(pic);
+    avcodec_free_frame(&pic);
     free(outbuffer);
     return success;
 }

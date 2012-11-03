@@ -391,7 +391,7 @@ static int encode(struct ao *ao, double apts, void *data)
                 ac->savepts = frame->pts;
         }
 
-        av_free(frame);
+        avcodec_free_frame(&frame);
     }
     else
     {

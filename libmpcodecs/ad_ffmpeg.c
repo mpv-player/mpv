@@ -248,7 +248,7 @@ static void uninit(sh_audio_t *sh)
         av_freep(&lavc_context->extradata);
         av_freep(&lavc_context);
     }
-    av_free(ctx->avframe);
+    avcodec_free_frame(&ctx->avframe);
     talloc_free(ctx);
     sh->context = NULL;
 }

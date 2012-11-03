@@ -20,14 +20,20 @@
 #define MPV_LIBAV_COMPAT_H
 
 #include <libavutil/version.h>
+#include <libavutil/avutil.h>
 #include <libavutil/cpu.h>
+#include <libavcodec/version.h>
 
-#ifdef AV_CPU_FLAG_MMXEXT
+#ifndef AV_CPU_FLAG_MMX2
 #define AV_CPU_FLAG_MMX2 AV_CPU_FLAG_MMXEXT
 #endif
 
 #if LIBAVUTIL_VERSION_MICRO < 100
 #define AV_CODEC_ID_SUBRIP CODEC_ID_TEXT
+#endif
+
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 28, 0)
+#define avcodec_free_frame av_freep
 #endif
 
 #endif /* MPV_LIBAV_COMPAT_H */

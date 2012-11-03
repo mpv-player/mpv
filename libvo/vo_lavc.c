@@ -436,7 +436,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
             ++vc->lastdisplaycount;
         }
 
-        av_free(frame);
+        avcodec_free_frame(&frame);
     }
 
     if (!mpi) {
