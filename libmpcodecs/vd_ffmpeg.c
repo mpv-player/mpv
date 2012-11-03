@@ -174,7 +174,7 @@ static int init(sh_video_t *sh)
             && lavc_codec->id != CODEC_ID_INTERPLAY_VIDEO
             && lavc_codec->id != CODEC_ID_ROQ && lavc_codec->id != CODEC_ID_VP8
             && lavc_codec->id != CODEC_ID_LAGARITH)
-        ctx->do_dr1 = 1;
+        ctx->do_dr1 = sh->opts->vd_use_dr1;
     ctx->ip_count = ctx->b_count = 0;
 
     ctx->pic = avcodec_alloc_frame();

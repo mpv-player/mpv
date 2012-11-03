@@ -100,6 +100,7 @@ typedef struct MPOpts {
     float screen_size_xy;
     int flip;
     int vd_use_slices;
+    int vd_use_dr1;
     char **sub_name;
     char **sub_paths;
     int sub_auto;
