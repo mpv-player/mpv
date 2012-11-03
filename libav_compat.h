@@ -19,6 +19,9 @@
 #ifndef MPV_LIBAV_COMPAT_H
 #define MPV_LIBAV_COMPAT_H
 
+#include <libavutil/version.h>
+#include <libavutil/cpu.h>
+
 #ifdef AV_CPU_FLAG_MMXEXT
 #define AV_CPU_FLAG_MMX2 AV_CPU_FLAG_MMXEXT
 #endif
