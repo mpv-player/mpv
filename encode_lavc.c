@@ -769,44 +769,44 @@ static void encode_lavc_printoptions(void *obj, const char *indent,
          * Don't print anything but CONST's on level two.
          * Only print items from the requested unit.
          */
-        if (!unit && opt->type == FF_OPT_TYPE_CONST)
+        if (!unit && opt->type == AV_OPT_TYPE_CONST)
             continue;
-        else if (unit && opt->type != FF_OPT_TYPE_CONST)
+        else if (unit && opt->type != AV_OPT_TYPE_CONST)
             continue;
-        else if (unit && opt->type == FF_OPT_TYPE_CONST
+        else if (unit && opt->type == AV_OPT_TYPE_CONST
                  && strcmp(unit, opt->unit))
             continue;
-        else if (unit && opt->type == FF_OPT_TYPE_CONST)
+        else if (unit && opt->type == AV_OPT_TYPE_CONST)
             mp_msg(MSGT_ENCODE, MSGL_INFO, "%s", subindent);
         else
             mp_msg(MSGT_ENCODE, MSGL_INFO, "%s", indent);
 
         switch (opt->type) {
-        case FF_OPT_TYPE_FLAGS:
+        case AV_OPT_TYPE_FLAGS:
             snprintf(optbuf, sizeof(optbuf), "%s=<flags>", opt->name);
             break;
-        case FF_OPT_TYPE_INT:
+        case AV_OPT_TYPE_INT:
             snprintf(optbuf, sizeof(optbuf), "%s=<int>", opt->name);
             break;
-        case FF_OPT_TYPE_INT64:
+        case AV_OPT_TYPE_INT64:
             snprintf(optbuf, sizeof(optbuf), "%s=<int64>", opt->name);
             break;
-        case FF_OPT_TYPE_DOUBLE:
+        case AV_OPT_TYPE_DOUBLE:
             snprintf(optbuf, sizeof(optbuf), "%s=<double>", opt->name);
             break;
-        case FF_OPT_TYPE_FLOAT:
+        case AV_OPT_TYPE_FLOAT:
             snprintf(optbuf, sizeof(optbuf), "%s=<float>", opt->name);
             break;
-        case FF_OPT_TYPE_STRING:
+        case AV_OPT_TYPE_STRING:
             snprintf(optbuf, sizeof(optbuf), "%s=<string>", opt->name);
             break;
-        case FF_OPT_TYPE_RATIONAL:
+        case AV_OPT_TYPE_RATIONAL:
             snprintf(optbuf, sizeof(optbuf), "%s=<rational>", opt->name);
             break;
-        case FF_OPT_TYPE_BINARY:
+        case AV_OPT_TYPE_BINARY:
             snprintf(optbuf, sizeof(optbuf), "%s=<binary>", opt->name);
             break;
-        case FF_OPT_TYPE_CONST:
+        case AV_OPT_TYPE_CONST:
             snprintf(optbuf, sizeof(optbuf), "  [+-]%s", opt->name);
             break;
         default:
@@ -818,7 +818,7 @@ static void encode_lavc_printoptions(void *obj, const char *indent,
         if (opt->help)
             mp_msg(MSGT_ENCODE, MSGL_INFO, " %s", opt->help);
         mp_msg(MSGT_ENCODE, MSGL_INFO, "\n");
-        if (opt->unit && opt->type != FF_OPT_TYPE_CONST)
+        if (opt->unit && opt->type != AV_OPT_TYPE_CONST)
             encode_lavc_printoptions(obj, indent, subindent, opt->unit,
                                      filter_and, filter_eq);
     }

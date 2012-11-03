@@ -32,6 +32,7 @@
 #include <libavutil/avstring.h>
 #include <libavutil/mathematics.h>
 #include <libavutil/opt.h>
+#include "libav_compat.h"
 
 #include "config.h"
 #include "options.h"

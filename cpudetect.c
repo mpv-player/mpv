@@ -21,6 +21,7 @@
 #include <stdlib.h>
 
 #include <libavutil/cpu.h>
+#include "libav_compat.h"
 
 #include "config.h"
 #include "cpudetect.h"
