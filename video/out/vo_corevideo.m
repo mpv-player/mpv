@@ -385,8 +385,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
     switch (request) {
-        case VOCTRL_QUERY_FORMAT:
-            return query_format(vo, *(uint32_t*)data);
         case VOCTRL_ONTOP:
             p->mpglctx->ontop(vo);
             return VO_TRUE;
@@ -442,6 +440,7 @@ const struct vo_driver video_out_corevideo = {
         ""
     },
     .preinit = preinit,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .draw_image = draw_image,

@@ -1660,7 +1660,7 @@ static bool init_format(int fmt, struct gl_priv *init)
     return true;
 }
 
-static int query_format(uint32_t format)
+static int query_format(struct vo *vo, uint32_t format)
 {
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP |
                VFCAP_ACCEPT_STRIDE | VFCAP_OSD;
@@ -1735,8 +1735,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct gl_priv *p = vo->priv;
 
     switch (request) {
-    case VOCTRL_QUERY_FORMAT:
-        return query_format(*(uint32_t *)data);
     case VOCTRL_ONTOP:
         if (!p->glctx->ontop)
             break;
@@ -2257,6 +2255,7 @@ const struct vo_driver video_out_opengl = {
         ""
     },
     .preinit = preinit,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .draw_image = draw_image,
@@ -2275,6 +2274,7 @@ const struct vo_driver video_out_opengl_hq = {
         ""
     },
     .preinit = preinit,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .draw_image = draw_image,

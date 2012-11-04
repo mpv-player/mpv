@@ -598,8 +598,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return p->int_pause = 1;
     case VOCTRL_RESUME:
         return p->int_pause = 0;
-    case VOCTRL_QUERY_FORMAT:
-        return query_format(vo, *((uint32_t *) data));
     case VOCTRL_FULLSCREEN:
         vo_x11_fullscreen(vo);
         vo_x11_clearwindow(vo, vo->x11->window);
@@ -649,6 +647,7 @@ const struct vo_driver video_out_x11 = {
 #endif
     },
     .preinit = preinit,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .draw_image = draw_image,

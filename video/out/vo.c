@@ -390,7 +390,7 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
         vo->dheight = d_height;
     }
 
-    vo->default_caps = vo_control(vo, VOCTRL_QUERY_FORMAT, &format);
+    vo->default_caps = vo->driver->query_format(vo, format);
 
     int ret = vo->driver->config(vo, width, height, d_width, d_height, flags,
                                  format);

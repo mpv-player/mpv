@@ -36,10 +36,8 @@
 #define VO_EVENT_MOVE 16
 
 enum mp_voctrl {
-    /* does the device support the required format */
-    VOCTRL_QUERY_FORMAT = 1,
     /* signal a device reset seek */
-    VOCTRL_RESET,
+    VOCTRL_RESET = 1,
     /* used to switch to fullscreen */
     VOCTRL_FULLSCREEN,
     /* signal a device pause */
@@ -154,6 +152,14 @@ struct vo_driver {
      *   returns: zero on successful initialization, non-zero on error.
      */
     int (*preinit)(struct vo *vo, const char *arg);
+
+    /*
+     * Whether the given image format is supported and config() will succeed.
+     * format: fourcc of pixel format
+     * returns: 0 on not supported, otherwise a bitmask of VFCAP_* values
+     */
+    int (*query_format)(struct vo *vo, uint32_t format);
+
     /*
      * Initialize (means CONFIGURE) the display driver.
      * params:

@@ -995,9 +995,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *vc = vo->priv;
     switch (request) {
-    case VOCTRL_QUERY_FORMAT:
-        return query_format(vo, *((uint32_t *)data));
-        return 0;
     case VOCTRL_FULLSCREEN:
         set_fullscreen(vo, !vo_fs);
         return 1;
@@ -1055,6 +1052,7 @@ const struct vo_driver video_out_sdl = {
         {NULL}
     },
     .preinit = preinit,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .draw_image = draw_image,

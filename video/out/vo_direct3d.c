@@ -1212,8 +1212,9 @@ static bool init_rendering_mode(d3d_priv *priv, uint32_t fmt, bool initialize)
  *  @return 0 on failure, device capabilities (not probed
  *          currently) on success.
  */
-static int query_format(d3d_priv *priv, uint32_t movie_fmt)
+static int query_format(struct vo *vo, uint32_t movie_fmt)
 {
+    d3d_priv *priv = vo->priv;
     if (!init_rendering_mode(priv, movie_fmt, false))
         return 0;
 
@@ -1444,8 +1445,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     d3d_priv *priv = vo->priv;
 
     switch (request) {
-    case VOCTRL_QUERY_FORMAT:
-        return query_format(priv, *(uint32_t*) data);
     case VOCTRL_FULLSCREEN:
         vo_w32_fullscreen(vo);
         resize_d3d(priv);
@@ -2066,6 +2065,7 @@ const struct vo_driver video_out_direct3d = {
         ""
     },
     .preinit = preinit_standard,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .draw_image = draw_image,
@@ -2084,6 +2084,7 @@ const struct vo_driver video_out_direct3d_shaders = {
         ""
     },
     .preinit = preinit_shaders,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .draw_image = draw_image,

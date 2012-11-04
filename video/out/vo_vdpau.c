@@ -1427,7 +1427,7 @@ static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
     return VO_TRUE;
 }
 
-static int query_format(uint32_t format)
+static int query_format(struct vo *vo, uint32_t format)
 {
     int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
         | VFCAP_OSD | VFCAP_FLIP;
@@ -1604,8 +1604,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (vc->dropped_frame)
             vo->want_redraw = true;
         return true;
-    case VOCTRL_QUERY_FORMAT:
-        return query_format(*(uint32_t *)data);
     case VOCTRL_GET_IMAGE:
         return get_image(vo, data);
     case VOCTRL_BORDER:
@@ -1686,6 +1684,7 @@ const struct vo_driver video_out_vdpau = {
         ""
     },
     .preinit = preinit,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .draw_image_pts = draw_image,

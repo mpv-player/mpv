@@ -81,10 +81,6 @@ static int preinit(struct vo *vo, const char *arg)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    switch (request) {
-    case VOCTRL_QUERY_FORMAT:
-        return query_format(vo, *((uint32_t *)data));
-    }
     return VO_NOTIMPL;
 }
 
@@ -96,6 +92,7 @@ const struct vo_driver video_out_null = {
         ""
     },
     .preinit = preinit,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .draw_image = draw_image,

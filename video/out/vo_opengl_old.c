@@ -1081,8 +1081,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct gl_priv *p = vo->priv;
 
     switch (request) {
-    case VOCTRL_QUERY_FORMAT:
-        return query_format(vo, *(uint32_t *)data);
     case VOCTRL_ONTOP:
         if (!p->glctx->ontop)
             break;
@@ -1170,6 +1168,7 @@ const struct vo_driver video_out_opengl_old = {
         ""
     },
     .preinit = preinit,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .draw_image = draw_image,

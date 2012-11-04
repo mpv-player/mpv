@@ -463,8 +463,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     mp_draw_sub_backup_reset(ctx->osd_backup);
 }
 
-static int query_format(struct xvctx *ctx, uint32_t format)
+static int query_format(struct vo *vo, uint32_t format)
 {
+    struct xvctx *ctx = vo->priv;
     uint32_t i;
     int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD | VFCAP_ACCEPT_STRIDE;       // FIXME! check for DOWN
 
@@ -640,8 +641,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return (ctx->is_paused = 1);
     case VOCTRL_RESUME:
         return (ctx->is_paused = 0);
-    case VOCTRL_QUERY_FORMAT:
-        return query_format(ctx, *((uint32_t *) data));
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
@@ -691,6 +690,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 const struct vo_driver video_out_xv = {
     .info = &info,
     .preinit = preinit,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .draw_image = draw_image,

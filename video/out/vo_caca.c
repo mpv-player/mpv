@@ -355,7 +355,7 @@ static int preinit(struct vo *vo, const char *arg)
     return 0;
 }
 
-static int query_format(uint32_t format)
+static int query_format(struct vo *vo, uint32_t format)
 {
     if (format == IMGFMT_BGR24)
         return VFCAP_OSD | VFCAP_CSP_SUPPORTED;
@@ -365,12 +365,7 @@ static int query_format(uint32_t format)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    switch (request) {
-    case VOCTRL_QUERY_FORMAT:
-        return query_format(*((uint32_t *)data));
-    default:
-        return VO_NOTIMPL;
-    }
+    return VO_NOTIMPL;
 }
 
 const struct vo_driver video_out_caca = {
@@ -381,6 +376,7 @@ const struct vo_driver video_out_caca = {
         ""
     },
     .preinit = preinit,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .draw_image = draw_image,

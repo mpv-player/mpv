@@ -512,8 +512,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *vc = vo->priv;
     switch (request) {
-    case VOCTRL_QUERY_FORMAT:
-        return query_format(vo, *((uint32_t *)data));
     case VOCTRL_SET_YUV_COLORSPACE:
         vc->colorspace = *(struct mp_csp_details *)data;
         if (vc->stream) {
@@ -539,6 +537,7 @@ const struct vo_driver video_out_lavc = {
         ""
     },
     .preinit = preinit,
+    .query_format = query_format,
     .config = config,
     .control = control,
     .uninit = uninit,
