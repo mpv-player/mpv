@@ -52,8 +52,6 @@ enum mp_voctrl {
     VOCTRL_GET_EQUALIZER,               // struct voctrl_get_equalizer_args
     VOCTRL_DUPLICATE_FRAME,
 
-    VOCTRL_START_SLICE,
-
     /* for vdpau hardware decoding */
     VOCTRL_HWDEC_DECODER_RENDER,        // pointer to hw state
 
@@ -194,17 +192,6 @@ struct vo_driver {
     void (*get_buffered_frame)(struct vo *vo, bool eof);
 
     /*
-     * Draw a planar YUV slice to the buffer:
-     * params:
-     *   src[3] = source image planes (Y,U,V)
-     *   stride[3] = source image planes line widths (in bytes)
-     *   w,h = width*height of area to be copied (in Y pixels)
-     *   x,y = position at the destination image (in Y pixels)
-     */
-    int (*draw_slice)(struct vo *vo, uint8_t *src[], int stride[], int w,
-                      int h, int x, int y);
-
-    /*
      * Draws OSD to the screen buffer
      */
     void (*draw_osd)(struct vo *vo, struct osd_state *osd);
@@ -302,7 +289,6 @@ int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts);
 int vo_redraw_frame(struct vo *vo);
 int vo_get_buffered_frame(struct vo *vo, bool eof);
 void vo_skip_frame(struct vo *vo);
-int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y);
 void vo_new_frame_imminent(struct vo *vo);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);
 void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration);

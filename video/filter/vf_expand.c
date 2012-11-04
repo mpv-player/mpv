@@ -48,7 +48,6 @@ static struct vf_priv_s {
     int exp_x,exp_y;
     double aspect;
     int round;
-    int first_slice;
 } const vf_priv_dflt = {
   -1,-1,
   -1,-1,
@@ -56,7 +55,6 @@ static struct vf_priv_s {
   -1,-1,
   0.,
   1,
-  0
 };
 
 //===========================================================================//
@@ -141,11 +139,6 @@ static void get_image(struct vf_instance *vf, mp_image_t *mpi){
 	    mpi->type, mpi->flags,
             FFMAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x),
             FFMAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
-	if((vf->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
-	  !(vf->dmpi->flags & MP_IMGFLAG_DIRECT)){
-	    mp_tmsg(MSGT_VFILTER, MSGL_INFO, "Full DR not possible, trying SLICES instead!\n");
-	    return;
-	}
 	// set up mpi as a cropped-down image of dmpi:
 	if(mpi->flags&MP_IMGFLAG_PLANAR){
 	    mpi->planes[0]=vf->dmpi->planes[0]+
@@ -164,73 +157,7 @@ static void get_image(struct vf_instance *vf, mp_image_t *mpi){
 	mpi->stride[0]=vf->dmpi->stride[0];
 	mpi->width=vf->dmpi->width;
 	mpi->flags|=MP_IMGFLAG_DIRECT;
-	mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
-//	vf->dmpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
     }
-}
-
-static void start_slice(struct vf_instance *vf, mp_image_t *mpi){
-//    printf("start_slice called! flag=%d\n",mpi->flags&MP_IMGFLAG_DRAW_CALLBACK);
-    // they want slices!!! allocate the buffer.
-    if(!mpi->priv)
-	mpi->priv=vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-//	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
-	    MP_IMGTYPE_TEMP, mpi->flags,
-            FFMAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x),
-            FFMAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
-    vf->priv->first_slice = 1;
-}
-
-static void draw_top_blackbar_slice(struct vf_instance *vf,
-				    unsigned char** src, int* stride, int w,int h, int x, int y){
-    if(vf->priv->exp_y>0 && y == 0) {
-	vf_next_draw_slice(vf, vf->dmpi->planes, vf->dmpi->stride,
-			   vf->dmpi->w,vf->priv->exp_y,0,0);
-    }
-
-}
-
-static void draw_bottom_blackbar_slice(struct vf_instance *vf,
-				    unsigned char** src, int* stride, int w,int h, int x, int y){
-    if(vf->priv->exp_y+vf->h<vf->dmpi->h && y+h == vf->h) {
-	unsigned char *src2[MP_MAX_PLANES];
-	src2[0] = vf->dmpi->planes[0]
-		+ (vf->priv->exp_y+vf->h)*vf->dmpi->stride[0];
-	if(vf->dmpi->flags&MP_IMGFLAG_PLANAR){
-	    src2[1] = vf->dmpi->planes[1]
-		+ ((vf->priv->exp_y+vf->h)>>vf->dmpi->chroma_y_shift)*vf->dmpi->stride[1];
-	    src2[2] = vf->dmpi->planes[2]
-		+ ((vf->priv->exp_y+vf->h)>>vf->dmpi->chroma_y_shift)*vf->dmpi->stride[2];
-	} else {
-	    src2[1] = vf->dmpi->planes[1]; // passthrough rgb8 palette
-	}
-	vf_next_draw_slice(vf, src2, vf->dmpi->stride,
-			   vf->dmpi->w,vf->dmpi->h-(vf->priv->exp_y+vf->h),
-			   0,vf->priv->exp_y+vf->h);
-    }
-}
-
-static void draw_slice(struct vf_instance *vf,
-        unsigned char** src, int* stride, int w,int h, int x, int y){
-//    printf("draw_slice() called %d at %d\n",h,y);
-
-    if (y == 0 && y+h == vf->h) {
-	// special case - only one slice
-	draw_top_blackbar_slice(vf, src, stride, w, h, x, y);
-	vf_next_draw_slice(vf,src,stride,w,h,x+vf->priv->exp_x,y+vf->priv->exp_y);
-	draw_bottom_blackbar_slice(vf, src, stride, w, h, x, y);
-	return;
-    }
-    if (vf->priv->first_slice) {
-	draw_top_blackbar_slice(vf, src, stride, w, h, x, y);
-	draw_bottom_blackbar_slice(vf, src, stride, w, h, x, y);
-    }
-    vf_next_draw_slice(vf,src,stride,w,h,x+vf->priv->exp_x,y+vf->priv->exp_y);
-    if (!vf->priv->first_slice) {
-	draw_top_blackbar_slice(vf, src, stride, w, h, x, y);
-	draw_bottom_blackbar_slice(vf, src, stride, w, h, x, y);
-    }
-    vf->priv->first_slice = 0;
 }
 
 // w, h = width and height of the actual video frame (located at exp_x/exp_y)
@@ -249,7 +176,7 @@ static void clear_borders(struct vf_instance *vf, int w, int h)
 }
 
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
-    if(mpi->flags&MP_IMGFLAG_DIRECT || mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
+    if(mpi->flags&MP_IMGFLAG_DIRECT){
 	vf->dmpi=mpi->priv;
 	if(!vf->dmpi) { mp_tmsg(MSGT_VFILTER, MSGL_WARN, "Why do we get NULL??\n"); return 0; }
 	mpi->priv=NULL;
@@ -304,8 +231,6 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->control=control;
     vf->query_format=query_format;
-    vf->start_slice=start_slice;
-    vf->draw_slice=draw_slice;
     vf->get_image=get_image;
     vf->put_image=put_image;
     mp_msg(MSGT_VFILTER, MSGL_INFO, "Expand: %d x %d, %d ; %d, aspect: %f, round: %d\n",

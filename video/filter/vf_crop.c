@@ -86,8 +86,6 @@ static int config(struct vf_instance *vf,
 
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
-    if (mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)
-	return vf_next_put_image(vf,vf->dmpi, pts);
     dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	MP_IMGTYPE_EXPORT, 0,
 	vf->priv->crop_w, vf->priv->crop_h);
@@ -111,54 +109,11 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     return vf_next_put_image(vf,dmpi, pts);
 }
 
-static void start_slice(struct vf_instance *vf, mp_image_t *mpi){
-    vf->dmpi = vf_get_image(vf->next, mpi->imgfmt, mpi->type, mpi->flags,
-	vf->priv->crop_w, vf->priv->crop_h);
-}
-
-static void draw_slice(struct vf_instance *vf,
-        unsigned char** src, int* stride, int w,int h, int x, int y){
-    unsigned char *src2[3];
-    src2[0] = src[0];
-    if (vf->dmpi->flags & MP_IMGFLAG_PLANAR) {
-	    src2[1] = src[1];
-	    src2[2] = src[2];
-    }
-    //mp_msg(MSGT_VFILTER, MSGL_V, "crop slice %d %d %d %d ->", w,h,x,y);
-    if ((x -= vf->priv->crop_x) < 0) {
-	x = -x;
-	src2[0] += x;
-	if (vf->dmpi->flags & MP_IMGFLAG_PLANAR) {
-		src2[1] += x>>vf->dmpi->chroma_x_shift;
-		src2[2] += x>>vf->dmpi->chroma_x_shift;
-	}
-	w -= x;
-	x = 0;
-    }
-    if ((y -= vf->priv->crop_y) < 0) {
-	y = -y;
-	src2[0] += y*stride[0];
-	if (vf->dmpi->flags & MP_IMGFLAG_PLANAR) {
-		src2[1] += (y>>vf->dmpi->chroma_y_shift)*stride[1];
-		src2[2] += (y>>vf->dmpi->chroma_y_shift)*stride[2];
-	}
-	h -= y;
-	y = 0;
-    }
-    if (x+w > vf->priv->crop_w) w = vf->priv->crop_w-x;
-    if (y+h > vf->priv->crop_h) h = vf->priv->crop_h-y;
-    //mp_msg(MSGT_VFILTER, MSGL_V, "%d %d %d %d\n", w,h,x,y);
-    if (w <= 0 || h <= 0) return;
-    vf_next_draw_slice(vf,src2,stride,w,h,x,y);
-}
-
 //===========================================================================//
 
 static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->put_image=put_image;
-    vf->start_slice=start_slice;
-    vf->draw_slice=draw_slice;
     vf->default_reqs=VFCAP_ACCEPT_STRIDE;
     mp_msg(MSGT_VFILTER, MSGL_INFO, "Crop: %d x %d, %d ; %d\n",
     vf->priv->crop_w,

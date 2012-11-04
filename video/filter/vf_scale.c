@@ -47,7 +47,6 @@ static struct vf_priv_s {
     double param[2];
     unsigned int fmt;
     struct SwsContext *ctx;
-    struct SwsContext *ctx2; //for interlaced slices only
     unsigned char* palette;
     int interlaced;
     int noup;
@@ -59,7 +58,6 @@ static struct vf_priv_s {
   0,
   {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
   0,
-  NULL,
   NULL,
   NULL
 };
@@ -301,7 +299,6 @@ static int config(struct vf_instance *vf,
 
     // free old ctx:
     if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
-    if(vf->priv->ctx2)sws_freeContext(vf->priv->ctx2);
 
     // new swscaler:
     sws_getFlagsAndFilterFromCmdLine(&int_sws_flags, &srcFilter, &dstFilter);
@@ -312,13 +309,6 @@ static int config(struct vf_instance *vf,
 		  vf->priv->w, vf->priv->h >> vf->priv->interlaced,
 	    dfmt,
 	    int_sws_flags, srcFilter, dstFilter, vf->priv->param);
-    if(vf->priv->interlaced){
-        vf->priv->ctx2=sws_getContext(width, height >> 1,
-	    sfmt,
-		  vf->priv->w, vf->priv->h >> 1,
-	    dfmt,
-	    int_sws_flags, srcFilter, dstFilter, vf->priv->param);
-    }
     if(!vf->priv->ctx){
 	// error...
 	mp_msg(MSGT_VFILTER,MSGL_WARN,"Couldn't init SwScaler for this setup\n");
@@ -388,16 +378,6 @@ static int config(struct vf_instance *vf,
     return vf_next_config(vf,vf->priv->w,vf->priv->h,d_width,d_height,flags,best);
 }
 
-static void start_slice(struct vf_instance *vf, mp_image_t *mpi){
-//    printf("start_slice called! flag=%d\n",mpi->flags&MP_IMGFLAG_DRAW_CALLBACK);
-    if(!(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)) return; // shouldn't happen
-    // they want slices!!! allocate the buffer.
-    mpi->priv=vf->dmpi=vf_get_image(vf->next,vf->priv->fmt,
-//	mpi->type, mpi->flags & (~MP_IMGFLAG_DRAW_CALLBACK),
-	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
-	vf->priv->w, vf->priv->h);
-}
-
 static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src[MP_MAX_PLANES], int src_stride[MP_MAX_PLANES],
                   int y, int h,  uint8_t *dst[MP_MAX_PLANES], int dst_stride[MP_MAX_PLANES], int interlaced){
     const uint8_t *src2[MP_MAX_PLANES]={src[0], src[1], src[2], src[3]};
@@ -428,24 +408,13 @@ static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src
     }
 }
 
-static void draw_slice(struct vf_instance *vf,
-        unsigned char** src, int* stride, int w,int h, int x, int y){
-    mp_image_t *dmpi=vf->dmpi;
-    if(!dmpi){
-	mp_msg(MSGT_VFILTER,MSGL_FATAL,"vf_scale: draw_slice() called with dmpi=NULL (no get_image?)\n");
-	return;
-    }
-//    printf("vf_scale::draw_slice() y=%d h=%d\n",y,h);
-    scale(vf->priv->ctx, vf->priv->ctx2, src, stride, y, h, dmpi->planes, dmpi->stride, vf->priv->interlaced);
-}
-
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi=mpi->priv;
 
 //    printf("vf_scale::put_image(): processing whole frame! dmpi=%p flag=%d\n",
 //	dmpi, (mpi->flags&MP_IMGFLAG_DRAW_CALLBACK));
 
-  if(!(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK && dmpi)){
+  if(!dmpi){
 
     // hope we'll get DR buffer:
     dmpi=vf_get_image(vf->next,vf->priv->fmt,
@@ -512,17 +481,11 @@ static int control(struct vf_instance *vf, int request, void* data){
 
 	r= sws_setColorspaceDetails(vf->priv->ctx, inv_table, srcRange, table, dstRange, brightness, contrast, saturation);
 	if(r<0) break;
-	if(vf->priv->ctx2){
-            r= sws_setColorspaceDetails(vf->priv->ctx2, inv_table, srcRange, table, dstRange, brightness, contrast, saturation);
-            if(r<0) break;
-        }
 
 	return CONTROL_TRUE;
     case VFCTRL_SET_YUV_COLORSPACE: {
         struct mp_csp_details colorspace = *(struct mp_csp_details *)data;
         if (mp_sws_set_colorspace(vf->priv->ctx, &colorspace) >= 0) {
-            if (vf->priv->ctx2)
-                mp_sws_set_colorspace(vf->priv->ctx2, &colorspace);
             vf->priv->colorspace = colorspace;
             return 1;
         }
@@ -619,15 +582,12 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
 
 static void uninit(struct vf_instance *vf){
     if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
-    if(vf->priv->ctx2) sws_freeContext(vf->priv->ctx2);
     free(vf->priv->palette);
     free(vf->priv);
 }
 
 static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
-    vf->start_slice=start_slice;
-    vf->draw_slice=draw_slice;
     vf->put_image=put_image;
     vf->query_format=query_format;
     vf->control= control;

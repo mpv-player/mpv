@@ -482,8 +482,6 @@ const m_option_t common_opts[] = {
 
     OPT_FLAG_CONSTANTS("flip", flip, 0, -1, 1),
 
-    // draw by slices or whole frame (useful with libmpeg2/libavcodec)
-    OPT_MAKE_FLAGS("slices", vd_use_slices, 0),
     // use (probably completely broken) decoder direct rendering
     OPT_MAKE_FLAGS("dr1", vd_use_dr1, 0),
     {"field-dominance", &field_dominance, CONF_TYPE_CHOICE, 0,

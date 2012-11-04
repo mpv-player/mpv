@@ -30,12 +30,6 @@
 #include "video/vfcap.h"
 #include "video/mp_image.h"
 
-static int draw_slice(struct vo *vo, uint8_t *image[], int stride[],
-                      int w, int h, int x, int y)
-{
-    return 0;
-}
-
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
 }
@@ -96,7 +90,6 @@ const struct vo_driver video_out_null = {
     .config = config,
     .control = control,
     .draw_image = draw_image,
-    .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,

@@ -99,7 +99,6 @@ static void get_image(struct vf_instance *vf, mp_image_t *mpi)
 	mpi->stride[2] = c->stride[2];
 
 	mpi->flags |= MP_IMGFLAG_DIRECT;
-	mpi->flags &= ~MP_IMGFLAG_DRAW_CALLBACK;
 }
 #endif
 

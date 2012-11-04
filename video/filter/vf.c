@@ -260,11 +260,9 @@ mp_image_t *vf_get_image(vf_instance_t *vf, unsigned int outfmt,
         // keep buffer allocation status & color flags only:
         mpi->flags &= MP_IMGFLAG_ALLOCATED | MP_IMGFLAG_TYPE_DISPLAYED |
                       MP_IMGFLAGMASK_COLORS;
-        // accept restrictions, draw_slice and palette flags only:
+        // accept restrictions, palette flags only:
         mpi->flags |= mp_imgflag & (MP_IMGFLAGMASK_RESTRICTIONS |
-                          MP_IMGFLAG_DRAW_CALLBACK | MP_IMGFLAG_RGB_PALETTE);
-        if (!vf->draw_slice)
-            mpi->flags &= ~MP_IMGFLAG_DRAW_CALLBACK;
+                                    MP_IMGFLAG_RGB_PALETTE);
         if (mpi->width != w2 || mpi->height != h || missing_palette) {
             if (mpi->flags & MP_IMGFLAG_ALLOCATED) {
                 if (mpi->width < w2 || mpi->height < h || missing_palette) {
@@ -331,17 +329,13 @@ mp_image_t *vf_get_image(vf_instance_t *vf, unsigned int outfmt,
                 vf_mpi_clear(mpi, 0, 0, mpi->width, mpi->height);
             }
         }
-        if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
-            if (vf->start_slice)
-                vf->start_slice(vf, mpi);
         if (!(mpi->flags & MP_IMGFLAG_TYPE_DISPLAYED)) {
             mp_msg(MSGT_DECVIDEO, MSGL_V,
-                   "*** [%s] %s%s mp_image_t, %dx%dx%dbpp %s %s, %d bytes\n",
+                   "*** [%s] %s mp_image_t, %dx%dx%dbpp %s %s, %d bytes\n",
                    vf->info->name,
                    (mpi->type == MP_IMGTYPE_EXPORT) ? "Exporting" :
                    ((mpi->flags & MP_IMGFLAG_DIRECT) ?
                             "Direct Rendering" : "Allocating"),
-                   (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK) ? " (slices)" : "",
                    mpi->width, mpi->height, mpi->bpp,
                    (mpi->flags & MP_IMGFLAG_YUV) ? "YUV" :
                            ((mpi->flags & MP_IMGFLAG_SWAPPED) ? "BGR" : "RGB"),
@@ -662,39 +656,6 @@ int vf_next_query_format(struct vf_instance *vf, unsigned int fmt)
 int vf_next_put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     return vf->next->put_image(vf->next, mpi, pts);
-}
-
-void vf_next_draw_slice(struct vf_instance *vf, unsigned char **src,
-                        int *stride, int w, int h, int x, int y)
-{
-    if (vf->next->draw_slice) {
-        vf->next->draw_slice(vf->next, src, stride, w, h, x, y);
-        return;
-    }
-    if (!vf->dmpi) {
-        mp_msg(MSGT_VFILTER, MSGL_ERR,
-               "draw_slice: dmpi not stored by vf_%s\n", vf->info->name);
-        return;
-    }
-    if (!(vf->dmpi->flags & MP_IMGFLAG_PLANAR)) {
-        memcpy_pic(vf->dmpi->planes[0] + y * vf->dmpi->stride[0] +
-                       vf->dmpi->bpp / 8 * x,
-                   src[0], vf->dmpi->bpp / 8 * w, h, vf->dmpi->stride[0],
-                   stride[0]);
-        return;
-    }
-    memcpy_pic(vf->dmpi->planes[0] + y * vf->dmpi->stride[0] + x, src[0],
-               w, h, vf->dmpi->stride[0], stride[0]);
-    memcpy_pic(vf->dmpi->planes[1]
-                   + (y >> vf->dmpi->chroma_y_shift) * vf->dmpi->stride[1]
-                   + (x >> vf->dmpi->chroma_x_shift),
-               src[1], w >> vf->dmpi->chroma_x_shift,
-               h >> vf->dmpi->chroma_y_shift, vf->dmpi->stride[1], stride[1]);
-    memcpy_pic(vf->dmpi->planes[2]
-                   + (y >> vf->dmpi->chroma_y_shift) * vf->dmpi->stride[2]
-                   + (x >> vf->dmpi->chroma_x_shift),
-               src[2], w >> vf->dmpi->chroma_x_shift,
-               h >> vf->dmpi->chroma_y_shift, vf->dmpi->stride[2], stride[2]);
 }
 
 //============================================================================

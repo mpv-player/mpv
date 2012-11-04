@@ -213,11 +213,6 @@ void vo_skip_frame(struct vo *vo)
     vo->frame_loaded = false;
 }
 
-int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int x, int y)
-{
-    return vo->driver->draw_slice(vo, src, stride, w, h, x, y);
-}
-
 void vo_new_frame_imminent(struct vo *vo)
 {
     if (vo->driver->buffer_frames)

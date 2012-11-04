@@ -37,9 +37,6 @@ struct vf_priv_s {
 };
 #define video_out (vf->priv->vo)
 
-static void draw_slice(struct vf_instance *vf, unsigned char **src,
-                       int *stride, int w, int h, int x, int y);
-
 static int config(struct vf_instance *vf,
                   int width, int height, int d_width, int d_height,
                   unsigned int flags, unsigned int outfmt)
@@ -69,7 +66,6 @@ static int config(struct vf_instance *vf,
 
     // save vo's stride capability for the wanted colorspace:
     vf->default_caps = video_out->default_caps;
-    vf->draw_slice = (vf->default_caps & VOCAP_NOSLICES) ? NULL : draw_slice;
 
     return 1;
 }
@@ -140,21 +136,6 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
     return vo_draw_image(video_out, mpi, pts);
 }
 
-static void start_slice(struct vf_instance *vf, mp_image_t *mpi)
-{
-    if (!video_out->config_ok)
-        return;
-    vo_control(video_out, VOCTRL_START_SLICE, mpi);
-}
-
-static void draw_slice(struct vf_instance *vf, unsigned char **src,
-                       int *stride, int w, int h, int x, int y)
-{
-    if (!video_out->config_ok)
-        return;
-    vo_draw_slice(video_out, src, stride, w, h, x, y);
-}
-
 static void uninit(struct vf_instance *vf)
 {
     if (vf->priv) {
@@ -172,8 +153,6 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->query_format = query_format;
     vf->get_image = get_image;
     vf->put_image = put_image;
-    vf->draw_slice = draw_slice;
-    vf->start_slice = start_slice;
     vf->uninit = uninit;
     vf->priv = calloc(1, sizeof(struct vf_priv_s));
     vf->priv->vo = (struct vo *)args;

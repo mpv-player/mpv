@@ -66,7 +66,6 @@ typedef struct {
     AVCodecContext *avctx;
     AVFrame *pic;
     enum PixelFormat pix_fmt;
-    int do_slices;
     int do_dr1;
     int vo_initialized;
     int best_csp;
@@ -83,8 +82,6 @@ typedef struct {
 
 static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
-static void draw_slice(struct AVCodecContext *s, const AVFrame *src,
-                       int offset[4], int y, int type, int height);
 static void draw_slice_hwdec(struct AVCodecContext *s, const AVFrame *src,
                              int offset[4], int y, int type, int height);
 
@@ -169,11 +166,6 @@ static int init(sh_video_t *sh)
     if (!sh->codecname)
         sh->codecname = lavc_codec->name;
 
-    if (sh->opts->vd_use_slices
-            && (lavc_codec->capabilities & CODEC_CAP_DRAW_HORIZ_BAND)
-            && !do_vis_debug)
-        ctx->do_slices = 1;
-
     if (lavc_codec->capabilities & CODEC_CAP_DR1 && !do_vis_debug
             && lavc_codec->id != CODEC_ID_H264
             && lavc_codec->id != CODEC_ID_INTERPLAY_VIDEO
@@ -192,7 +184,6 @@ static int init(sh_video_t *sh)
     if (lavc_codec->capabilities & CODEC_CAP_HWACCEL   // XvMC
         || lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU) {
         ctx->do_dr1    = true;
-        ctx->do_slices = true;
         lavc_param->threads    = 1;
         avctx->get_format      = get_format;
         avctx->get_buffer      = get_buffer;
@@ -219,7 +210,6 @@ static int init(sh_video_t *sh)
      * from other threads. */
     if (lavc_param->threads > 1) {
         ctx->do_dr1 = false;
-        ctx->do_slices = false;
         mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Asking decoder to use "
                 "%d threads if supported.\n", lavc_param->threads);
     }
@@ -384,34 +374,6 @@ static void draw_slice_hwdec(struct AVCodecContext *s,
     vf->control(vf, VFCTRL_HWDEC_DECODER_RENDER, state_ptr);
 }
 
-static void draw_slice(struct AVCodecContext *s,
-                       const AVFrame *src, int offset[4],
-                       int y, int type, int height)
-{
-    sh_video_t *sh = s->opaque;
-    uint8_t *source[MP_MAX_PLANES] = {
-        src->data[0] + offset[0], src->data[1] + offset[1],
-        src->data[2] + offset[2]
-    };
-    int strides[MP_MAX_PLANES] = {
-        src->linesize[0], src->linesize[1], src->linesize[2]
-    };
-    if (height < 0) {
-        int i;
-        height = -height;
-        y -= height;
-        for (i = 0; i < MP_MAX_PLANES; i++) {
-            strides[i] = -strides[i];
-            source[i] -= strides[i];
-        }
-    }
-    if (y < sh->disp_h) {
-        height = FFMIN(height, sh->disp_h - y);
-        mpcodecs_draw_slice(sh, source, strides, sh->disp_w, height, 0, y);
-    }
-}
-
-
 static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt)
 {
     vd_ffmpeg_ctx *ctx = sh->context;
@@ -498,17 +460,14 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic)
             type = MP_IMGTYPE_STATIC;
             flags |= MP_IMGFLAG_PRESERVE;
         }
-        flags |= ctx->do_slices ? MP_IMGFLAG_DRAW_CALLBACK : 0;
         mp_msg(MSGT_DECVIDEO, MSGL_DBG2,
                type == MP_IMGTYPE_STATIC ? "using STATIC\n" : "using TEMP\n");
     } else {
         if (!pic->reference) {
             ctx->b_count++;
-            flags |= ctx->do_slices ? MP_IMGFLAG_DRAW_CALLBACK : 0;
         } else {
             ctx->ip_count++;
-            flags |= MP_IMGFLAG_PRESERVE | MP_IMGFLAG_READABLE
-                     | (ctx->do_slices ? MP_IMGFLAG_DRAW_CALLBACK : 0);
+            flags |= MP_IMGFLAG_PRESERVE | MP_IMGFLAG_READABLE;
         }
     }
 
@@ -548,16 +507,6 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic)
     mpi = mpcodecs_get_image(sh, type, flags, width, height);
     if (!mpi)
         return -1;
-
-    // ok, let's see what did we get:
-    if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK &&
-        !(mpi->flags & MP_IMGFLAG_DIRECT)) {
-        // nice, filter/vo likes draw_callback :)
-        avctx->draw_horiz_band = draw_slice;
-    } else
-        avctx->draw_horiz_band = NULL;
-    if (IMGFMT_IS_HWACCEL(mpi->imgfmt))
-        avctx->draw_horiz_band = draw_slice_hwdec;
 
     pic->data[0] = mpi->planes[0];
     pic->data[1] = mpi->planes[1];

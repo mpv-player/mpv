@@ -1309,7 +1309,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
     if (IMGFMT_IS_VDPAU(vc->image_format)) {
         rndr = mpi->priv;
         reserved_mpi = mpi;
-    } else if (!(mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)) {
+    } else {
         rndr = get_surface(vo, vc->deint_counter);
         vc->deint_counter = WRAP_ADD(vc->deint_counter, 1, NUM_BUFFERED_VIDEO);
         if (handle_preemption(vo) >= 0) {
@@ -1323,11 +1323,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
             CHECK_ST_WARNING("Error when calling "
                              "vdp_video_surface_put_bits_y_cb_cr");
         }
-    } else
-        // We don't support slice callbacks so this shouldn't occur -
-        // I think the flags test above in pointless, but I'm adding
-        // this instead of removing it just in case.
-        abort();
+    }
     if (mpi->fields & MP_IMGFIELD_ORDERED)
         vc->top_field_first = !!(mpi->fields & MP_IMGFIELD_TOP_FIRST);
     else
@@ -1437,7 +1433,6 @@ static int query_format(struct vo *vo, uint32_t format)
     case IMGFMT_NV12:
     case IMGFMT_YUY2:
     case IMGFMT_UYVY:
-        return default_flags | VOCAP_NOSLICES;
     case IMGFMT_VDPAU_MPEG1:
     case IMGFMT_VDPAU_MPEG2:
     case IMGFMT_VDPAU_H264:

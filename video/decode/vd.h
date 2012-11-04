@@ -54,7 +54,5 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
 
 mp_image_t *mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag,
                                int w, int h);
-void mpcodecs_draw_slice(sh_video_t *sh, unsigned char **src, int *stride,
-                         int w, int h, int x, int y);
 
 #endif /* MPLAYER_VD_H */

@@ -587,29 +587,6 @@ static void flip_page(struct vo *vo)
         gl->Clear(GL_COLOR_BUFFER_BIT);
 }
 
-static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
-                      int x, int y)
-{
-    struct gl_priv *p = vo->priv;
-    GL *gl = p->gl;
-
-    p->mpi_flipped = stride[0] < 0;
-    glUploadTex(gl, p->target, p->gl_format, p->gl_type, src[0], stride[0],
-                x, y, w, h, p->slice_height);
-    if (p->is_yuv) {
-        int xs, ys;
-        mp_get_chroma_shift(p->image_format, &xs, &ys, NULL);
-        gl->ActiveTexture(GL_TEXTURE1);
-        glUploadTex(gl, p->target, p->gl_format, p->gl_type, src[1], stride[1],
-                    x >> xs, y >> ys, w >> xs, h >> ys, p->slice_height);
-        gl->ActiveTexture(GL_TEXTURE2);
-        glUploadTex(gl, p->target, p->gl_format, p->gl_type, src[2], stride[2],
-                    x >> xs, y >> ys, w >> xs, h >> ys, p->slice_height);
-        gl->ActiveTexture(GL_TEXTURE0);
-    }
-    return 0;
-}
-
 static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
 {
     struct gl_priv *p = vo->priv;
@@ -719,8 +696,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     unsigned char *planes[3];
     mp_image_t mpi2 = *mpi;
     int w = mpi->w, h = mpi->h;
-    if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
-        goto skip_upload;
     mpi2.flags = 0;
     mpi2.type = MP_IMGTYPE_TEMP;
     mpi2.width = mpi2.w;
@@ -807,7 +782,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     if (mpi->flags & MP_IMGFLAG_DIRECT) {
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     }
-skip_upload:
+
     do_render(vo);
 }
 
@@ -1172,7 +1147,6 @@ const struct vo_driver video_out_opengl_old = {
     .config = config,
     .control = control,
     .draw_image = draw_image,
-    .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,

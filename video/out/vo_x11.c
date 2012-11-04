@@ -300,7 +300,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     }
 
     /* set image size (which is indeed neither the input nor output size),
-       if zoom is on it will be changed during draw_slice anyway so we don't
+       if zoom is on it will be changed during draw_image anyway so we don't
        duplicate the aspect code here
      */
     p->image_width = (width + 7) & (~7);
@@ -474,8 +474,7 @@ static void flip_page(struct vo *vo)
     XSync(vo->x11->display, False);
 }
 
-static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
-                      int x, int y)
+static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
     uint8_t *dst[MP_MAX_PLANES] = {NULL};
@@ -517,15 +516,9 @@ static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
         dst[0] += dstStride[0] * (p->image_height - 1);
         dstStride[0] = -dstStride[0];
     }
-    sws_scale(p->swsContext, (const uint8_t **)src, stride, y, h, dst,
-              dstStride);
+    sws_scale(p->swsContext, (const uint8_t **)mpi->planes, mpi->stride,
+              0, mpi->h, dst, dstStride);
     mp_draw_sub_backup_reset(p->osd_backup);
-    return 0;
-}
-
-static void draw_image(struct vo *vo, mp_image_t *mpi)
-{
-    draw_slice(vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
 }
 
 static int query_format(struct vo *vo, uint32_t format)
@@ -651,7 +644,6 @@ const struct vo_driver video_out_x11 = {
     .config = config,
     .control = control,
     .draw_image = draw_image,
-    .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,

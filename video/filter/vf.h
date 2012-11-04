@@ -66,9 +66,6 @@ typedef struct vf_instance {
     int (*query_format)(struct vf_instance *vf, unsigned int fmt);
     void (*get_image)(struct vf_instance *vf, mp_image_t *mpi);
     int (*put_image)(struct vf_instance *vf, mp_image_t *mpi, double pts);
-    void (*start_slice)(struct vf_instance *vf, mp_image_t *mpi);
-    void (*draw_slice)(struct vf_instance *vf, unsigned char **src,
-                       int *stride, int w, int h, int x, int y);
     void (*uninit)(struct vf_instance *vf);
 
     int (*continue_buffered_image)(struct vf_instance *vf);
@@ -141,8 +138,6 @@ int vf_next_config(struct vf_instance *vf,
 int vf_next_control(struct vf_instance *vf, int request, void *data);
 int vf_next_query_format(struct vf_instance *vf, unsigned int fmt);
 int vf_next_put_image(struct vf_instance *vf, mp_image_t *mpi, double pts);
-void vf_next_draw_slice(struct vf_instance *vf, unsigned char **src,
-                        int *stride, int w, int h, int x, int y);
 
 struct m_obj_settings;
 vf_instance_t *append_filters(vf_instance_t *last,

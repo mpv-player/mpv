@@ -937,7 +937,7 @@
         :8:      macroblock (MB) type
         :16:     per-block quantization parameter (QP)
         :32:     motion vector
-        :0x0040: motion vector visualization (use ``--no-slices``)
+        :0x0040: motion vector visualization
         :0x0080: macroblock (MB) skip
         :0x0100: startcode
         :0x0200: PTS
@@ -1758,12 +1758,6 @@
     protocol should be developed (and will, if there is enough interest).
 
     This affects smplayer, smplayer2, mplayerosx, and others.
-
---slices, --no-slices
-    Drawing video by 16-pixel height slices/bands, instead draws the
-    whole frame in a single run. May be faster or slower, depending on video
-    card and available cache. It has effect only with libavcodec codecs.
-    Enabled by default if applicable; usually disabled when threading is used.
 
 --softsleep
     Time frames by repeatedly checking the current time instead of asking

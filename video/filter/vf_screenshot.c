@@ -37,7 +37,7 @@ struct vf_priv_s {
     mp_image_t *image;
     void (*image_callback)(void *, mp_image_t *);
     void *image_callback_ctx;
-    int shot, store_slices;
+    int shot;
 };
 
 //===========================================================================//
@@ -54,53 +54,8 @@ static int config(struct vf_instance *vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static void start_slice(struct vf_instance *vf, mp_image_t *mpi)
-{
-    mpi->priv=
-    vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-        mpi->type, mpi->flags, mpi->width, mpi->height);
-    if (vf->priv->shot) {
-        vf->priv->store_slices = 1;
-        if (!(vf->priv->image->flags & MP_IMGFLAG_ALLOCATED))
-            mp_image_alloc_planes(vf->priv->image);
-    }
-
-}
-
-static void memcpy_pic_slice(unsigned char *dst, unsigned char *src,
-                             int bytesPerLine, int y, int h,
-                             int dstStride, int srcStride)
-{
-    memcpy_pic(dst + h * dstStride, src + h * srcStride, bytesPerLine,
-               h, dstStride, srcStride);
-}
-
-static void draw_slice(struct vf_instance *vf, unsigned char** src,
-                       int* stride, int w,int h, int x, int y)
-{
-    if (vf->priv->store_slices) {
-        mp_image_t *dst = vf->priv->image;
-        int bp = (dst->bpp + 7) / 8;
-
-        if (dst->flags & MP_IMGFLAG_PLANAR) {
-            int bytes_per_line[3] = { w * bp, dst->chroma_width, dst->chroma_width };
-            for (int n = 0; n < 3; n++) {
-                memcpy_pic_slice(dst->planes[n], src[n], bytes_per_line[n],
-                                 y, h, dst->stride[n], stride[n]);
-            }
-        } else {
-            memcpy_pic_slice(dst->planes[0], src[0], dst->w*bp, y, dst->h,
-                             dst->stride[0], stride[0]);
-        }
-    }
-    vf_next_draw_slice(vf,src,stride,w,h,x,y);
-}
-
 static void get_image(struct vf_instance *vf, mp_image_t *mpi)
 {
-    // FIXME: should vf.c really call get_image when using slices??
-    if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
-      return;
     vf->dmpi= vf_get_image(vf->next, mpi->imgfmt,
                            mpi->type, mpi->flags/* | MP_IMGFLAG_READABLE*/, mpi->width, mpi->height);
 
@@ -119,7 +74,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     mp_image_t *dmpi = (mp_image_t *)mpi->priv;
 
-    if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))){
+    if(!(mpi->flags&(MP_IMGFLAG_DIRECT))){
         dmpi=vf_get_image(vf->next,mpi->imgfmt,
                                     MP_IMGTYPE_EXPORT, 0,
                                     mpi->width, mpi->height);
@@ -134,11 +89,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 
     if(vf->priv->shot) {
         vf->priv->shot=0;
-        mp_image_t image;
-        if (!vf->priv->store_slices)
-            image = *dmpi;
-        else
-            image = *vf->priv->image;
+        mp_image_t image = *dmpi;
         image.flags &= ~MP_IMGFLAG_ALLOCATED;
         image.w = vf->priv->image->w;
         image.h = vf->priv->image->h;
@@ -146,7 +97,6 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
         image.display_w = vf->priv->image->display_w;
         image.display_h = vf->priv->image->display_h;
         vf->priv->image_callback(vf->priv->image_callback_ctx, &image);
-        vf->priv->store_slices = 0;
     }
 
     return vf_next_put_image(vf, dmpi, pts);
@@ -188,13 +138,10 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->control=control;
     vf->put_image=put_image;
     vf->query_format=query_format;
-    vf->start_slice=start_slice;
-    vf->draw_slice=draw_slice;
     vf->get_image=get_image;
     vf->uninit=uninit;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     vf->priv->shot=0;
-    vf->priv->store_slices=0;
     vf->priv->image=NULL;
     return 1;
 }

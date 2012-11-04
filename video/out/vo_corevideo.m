@@ -246,7 +246,7 @@ static int query_format(struct vo *vo, uint32_t format)
 {
     struct priv *p = vo->priv;
     const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
-                      VFCAP_OSD | VOCAP_NOSLICES;
+                      VFCAP_OSD;
     switch (format) {
         case IMGFMT_YUY2:
             p->pixelFormat = kYUVSPixelFormat;

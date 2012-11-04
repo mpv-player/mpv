@@ -84,7 +84,6 @@ static void uninit(vf_instance_t *vf) {
 static int vf_open(vf_instance_t *vf, char *args)
 {
     vf->config = config;
-    vf->draw_slice = vf_next_draw_slice;
     vf->uninit = uninit;
     //vf->default_caps = 0;
     vf->priv = calloc(sizeof(struct vf_priv_s), 1);

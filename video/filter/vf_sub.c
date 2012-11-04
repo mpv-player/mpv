@@ -104,12 +104,6 @@ static void get_image(struct vf_instance *vf, mp_image_t *mpi)
                                         FFMAX(mpi->width,  vf->priv->outw),
                                         FFMAX(mpi->height, vf->priv->outh));
 
-    if ((vf->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
-        !(vf->dmpi->flags & MP_IMGFLAG_DIRECT)) {
-        mp_tmsg(MSGT_ASS, MSGL_INFO, "Full DR not possible, trying SLICES instead!\n");
-        return;
-    }
-
     int tmargin = vf->priv->opt_top_margin;
     // set up mpi as a cropped-down image of dmpi:
     if (mpi->flags & MP_IMGFLAG_PLANAR) {
@@ -124,8 +118,6 @@ static void get_image(struct vf_instance *vf, mp_image_t *mpi)
     mpi->stride[0] = vf->dmpi->stride[0];
     mpi->width = vf->dmpi->width;
     mpi->flags |= MP_IMGFLAG_DIRECT;
-    mpi->flags &= ~MP_IMGFLAG_DRAW_CALLBACK;
-//	vf->dmpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
 }
 
 static void blank(mp_image_t *mpi, int y1, int y2)
@@ -155,8 +147,7 @@ static void blank(mp_image_t *mpi, int y1, int y2)
 static int prepare_image(struct vf_instance *vf, mp_image_t *mpi)
 {
     int tmargin = vf->priv->opt_top_margin;
-    if (mpi->flags & MP_IMGFLAG_DIRECT
-	|| mpi->flags & MP_IMGFLAG_DRAW_CALLBACK) {
+    if (mpi->flags & MP_IMGFLAG_DIRECT) {
         vf->dmpi = mpi->priv;
         if (!vf->dmpi) {
             mp_tmsg(MSGT_ASS, MSGL_WARN, "Why do we get NULL??\n");

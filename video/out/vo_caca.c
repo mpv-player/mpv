@@ -171,12 +171,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                        mpi->planes[0]);
 }
 
-static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
-                      int x, int y)
-{
-    return 0;
-}
-
 static void flip_page(struct vo *vo)
 {
     if (showosdmessage) {
@@ -380,7 +374,6 @@ const struct vo_driver video_out_caca = {
     .config = config,
     .control = control,
     .draw_image = draw_image,
-    .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,

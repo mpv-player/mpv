@@ -871,8 +871,7 @@ static void uninit_d3d(d3d_priv *priv)
 static void d3d_upload_and_render_frame_texture(d3d_priv *priv,
                                                     mp_image_t *mpi)
 {
-    if (!(mpi->flags & MP_IMGFLAG_DRAW_CALLBACK))
-        draw_slice(priv->vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
+    draw_slice(priv->vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
 
     d3d_unlock_video_objects(priv);
 
@@ -893,9 +892,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         d3d_upload_and_render_frame_texture(priv, mpi);
         return;
     }
-
-    if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
-        goto skip_upload;
 
     if (mpi->flags & MP_IMGFLAG_PLANAR) { /* Copy a planar frame. */
         draw_slice(priv->vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
@@ -2069,7 +2065,6 @@ const struct vo_driver video_out_direct3d = {
     .config = config,
     .control = control,
     .draw_image = draw_image,
-    .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,
@@ -2088,7 +2083,6 @@ const struct vo_driver video_out_direct3d_shaders = {
     .config = config,
     .control = control,
     .draw_image = draw_image,
-    .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,

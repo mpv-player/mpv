@@ -36,7 +36,5 @@
 #define VFCAP_ACCEPT_STRIDE 0x400
 // filter does postprocessing (so you shouldn't scale/filter image before it)
 #define VFCAP_POSTPROC 0x800
-// used by libvo and vf_vo, indicates the VO does not support draw_slice for this format
-#define VOCAP_NOSLICES 0x8000
 
 #endif /* MPLAYER_VFCAP_H */

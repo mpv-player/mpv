@@ -73,10 +73,6 @@
 
 #define MP_IMGFLAGMASK_COLORS 0xF00
 
-// codec uses drawing/rendering callbacks (draw_slice()-like thing, DR method 2)
-// [the codec will set this flag if it supports callbacks, and the vo _may_
-//  clear it in get_image() if draw_slice() not implemented]
-#define MP_IMGFLAG_DRAW_CALLBACK 0x1000
 // set if it's in video buffer/memory: [set by vo/vf's get_image() !!!]
 #define MP_IMGFLAG_DIRECT 0x2000
 // set if buffer is allocated (used in destination images):
