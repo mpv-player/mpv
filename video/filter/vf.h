@@ -86,19 +86,13 @@ typedef struct vf_seteq {
     int value;
 } vf_equalizer_t;
 
-struct vf_ctrl_screenshot {
-    // When the screenshot is complete, pass it to this callback.
-    void (*image_callback)(void *, mp_image_t *);
-    void *image_callback_ctx;
-};
-
 #define VFCTRL_QUERY_MAX_PP_LEVEL 4 // query max postprocessing level (if any)
 #define VFCTRL_SET_PP_LEVEL 5       // set postprocessing level
 #define VFCTRL_SET_EQUALIZER 6 // set color options (brightness,contrast etc)
 #define VFCTRL_GET_EQUALIZER 8 // get color options (brightness,contrast etc)
 #define VFCTRL_HWDEC_DECODER_RENDER 9 // vdpau hw decoding
 #define VFCTRL_HWDEC_ALLOC_SURFACE 10 // vdpau hw decoding
-#define VFCTRL_SCREENSHOT      14  // Take screenshot, arg is vf_ctrl_screenshot
+#define VFCTRL_SCREENSHOT      14  // Take screenshot, arg is voctrl_screenshot_args
 #define VFCTRL_INIT_OSD        15  // Filter OSD renderer present?
 #define VFCTRL_SET_DEINTERLACE 18  // Set deinterlacing status
 #define VFCTRL_GET_DEINTERLACE 19  // Get deinterlacing status

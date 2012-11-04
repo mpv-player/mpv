@@ -23,29 +23,25 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "core/mp_msg.h"
+#include "talloc.h"
+
 #include "video/img_format.h"
 #include "video/mp_image.h"
-#include "vf.h"
 #include "video/sws_utils.h"
-#include "video/fmt-conversion.h"
-#include "video/memcpy_pic.h"
+#include "video/out/vo.h"
 
-#include <libswscale/swscale.h>
+#include "vf.h"
 
 struct vf_priv_s {
     int display_w, display_h;
-    void (*image_callback)(void *, mp_image_t *);
-    void *image_callback_ctx;
-    int shot;
+    struct mp_image *current;
 };
-
-//===========================================================================//
 
 static int config(struct vf_instance *vf,
                   int width, int height, int d_width, int d_height,
                   unsigned int flags, unsigned int outfmt)
 {
+    mp_image_unrefp(&vf->priv->current);
     vf->priv->display_w = d_width;
     vf->priv->display_h = d_height;
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
@@ -53,57 +49,37 @@ static int config(struct vf_instance *vf,
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-    if(vf->priv->shot) {
-        vf->priv->shot=0;
-        mp_image_t image = *mpi;
-        image.flags &= ~MP_IMGFLAG_ALLOCATED;
-        mp_image_copy_attributes(&image, mpi);
-        mp_image_set_display_size(&image, vf->priv->display_w,
-                                  vf->priv->display_h);
-        vf->priv->image_callback(vf->priv->image_callback_ctx, &image);
-    }
-
+    mp_image_unrefp(&vf->priv->current);
+    vf->priv->current = talloc_steal(vf, mp_image_new_ref(mpi));
+    mp_image_set_display_size(vf->priv->current, vf->priv->display_w,
+                              vf->priv->display_h);
     return mpi;
 }
 
 static int control (vf_instance_t *vf, int request, void *data)
 {
-    if(request==VFCTRL_SCREENSHOT) {
-        struct vf_ctrl_screenshot *cmd = (struct vf_ctrl_screenshot *)data;
-        vf->priv->image_callback = cmd->image_callback;
-        vf->priv->image_callback_ctx = cmd->image_callback_ctx;
-        vf->priv->shot=1;
+    if (request == VFCTRL_SCREENSHOT && vf->priv->current) {
+        struct voctrl_screenshot_args *args = data;
+        args->out_image = mp_image_new_ref(vf->priv->current);
         return CONTROL_TRUE;
     }
     return vf_next_control (vf, request, data);
 }
 
-
-//===========================================================================//
-
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    enum PixelFormat av_format = imgfmt2pixfmt(fmt);
-
-    if (av_format != PIX_FMT_NONE && sws_isSupportedInput(av_format))
+    if (mp_sws_supported_format(fmt))
         return vf_next_query_format(vf, fmt);
     return 0;
 }
 
-static void uninit(vf_instance_t *vf)
-{
-    free(vf->priv);
-}
-
 static int vf_open(vf_instance_t *vf, char *args)
 {
-    vf->config=config;
-    vf->control=control;
-    vf->filter=filter;
-    vf->query_format=query_format;
-    vf->uninit=uninit;
-    vf->priv=malloc(sizeof(struct vf_priv_s));
-    vf->priv->shot=0;
+    vf->config = config;
+    vf->control = control;
+    vf->filter = filter;
+    vf->query_format = query_format;
+    vf->priv = talloc_zero(vf, struct vf_priv_s);
     return 1;
 }
 
@@ -126,5 +102,3 @@ const vf_info_t vf_info_screenshot_force = {
     vf_open,
     NULL
 };
-
-//===========================================================================//
