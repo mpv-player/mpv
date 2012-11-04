@@ -36,6 +36,10 @@ static int draw_slice(struct vo *vo, uint8_t *image[], int stride[],
     return 0;
 }
 
+static void draw_image(struct vo *vo, mp_image_t *mpi)
+{
+}
+
 static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
 }
@@ -85,7 +89,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 }
 
 const struct vo_driver video_out_null = {
-    .is_new = false,
     .info = &(const vo_info_t) {
         "Null video output",
         "null",
@@ -95,6 +98,7 @@ const struct vo_driver video_out_null = {
     .preinit = preinit,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,

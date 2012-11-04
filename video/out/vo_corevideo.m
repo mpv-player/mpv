@@ -219,7 +219,7 @@ static void flip_page(struct vo *vo)
     p->mpglctx->gl->Clear(GL_COLOR_BUFFER_BIT);
 }
 
-static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
     CVReturn error;
@@ -240,7 +240,6 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
     }
 
     do_render(vo);
-    return VO_TRUE;
 }
 
 static int query_format(struct vo *vo, uint32_t format)
@@ -386,8 +385,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
     switch (request) {
-        case VOCTRL_DRAW_IMAGE:
-            return draw_image(vo, data);
         case VOCTRL_QUERY_FORMAT:
             return query_format(vo, *(uint32_t*)data);
         case VOCTRL_ONTOP:
@@ -438,7 +435,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 }
 
 const struct vo_driver video_out_corevideo = {
-    .is_new = true,
     .info = &(const vo_info_t) {
         "Mac OS X Core Video",
         "corevideo",
@@ -448,6 +444,7 @@ const struct vo_driver video_out_corevideo = {
     .preinit = preinit,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,

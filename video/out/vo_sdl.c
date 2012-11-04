@@ -825,7 +825,7 @@ static int query_format(struct vo *vo, uint32_t format)
     return 0;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
+static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *vc = vo->priv;
     void *pixels;
@@ -997,8 +997,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
         return query_format(vo, *((uint32_t *)data));
-    case VOCTRL_DRAW_IMAGE:
-        draw_image(vo, (mp_image_t *)data, vo->next_pts);
         return 0;
     case VOCTRL_FULLSCREEN:
         set_fullscreen(vo, !vo_fs);
@@ -1008,7 +1006,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_RESUME:
         return vc->int_pause = 0;
     case VOCTRL_REDRAW_FRAME:
-        draw_image(vo, NULL, MP_NOPTS_VALUE);
+        draw_image(vo, NULL);
         return 1;
     case VOCTRL_UPDATE_SCREENINFO:
         update_screeninfo(vo);
@@ -1042,7 +1040,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 #define OPT_BASE_STRUCT struct priv
 
 const struct vo_driver video_out_sdl = {
-    .is_new = true,
     .info = &(const vo_info_t) {
         "SDL 2.0 Renderer",
         "sdl",
@@ -1060,6 +1057,7 @@ const struct vo_driver video_out_sdl = {
     .preinit = preinit,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
     .uninit = uninit,
     .check_events = check_events,
     .draw_osd = draw_osd,

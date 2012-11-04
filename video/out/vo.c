@@ -159,6 +159,15 @@ int vo_control(struct vo *vo, uint32_t request, void *data)
     return vo->driver->control(vo, request, data);
 }
 
+static void draw_image_pts(struct vo *vo, struct mp_image *mpi, double pts)
+{
+    if (vo->driver->draw_image_pts) {
+        vo->driver->draw_image_pts(vo, mpi, pts);
+    } else {
+        vo->driver->draw_image(vo, mpi);
+    }
+}
+
 // Return -1 if driver appears not to support a draw_image interface,
 // 0 otherwise (whether the driver actually drew something or not).
 int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts)
@@ -166,18 +175,12 @@ int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts)
     if (!vo->config_ok)
         return 0;
     if (vo->driver->buffer_frames) {
-        vo->driver->draw_image(vo, mpi, pts);
+        draw_image_pts(vo, mpi, pts);
         return 0;
     }
     vo->frame_loaded = true;
     vo->next_pts = pts;
-    // Guaranteed to support at least DRAW_IMAGE later
-    if (vo->driver->is_new) {
-        vo->waiting_mpi = mpi;
-        return 0;
-    }
-    if (vo_control(vo, VOCTRL_DRAW_IMAGE, mpi) == VO_NOTIMPL)
-        return -1;
+    vo->waiting_mpi = mpi;
     return 0;
 }
 
@@ -217,12 +220,10 @@ int vo_draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h, int
 
 void vo_new_frame_imminent(struct vo *vo)
 {
-    if (!vo->driver->is_new)
-        return;
     if (vo->driver->buffer_frames)
         vo_control(vo, VOCTRL_NEWFRAME, NULL);
     else {
-        vo_control(vo, VOCTRL_DRAW_IMAGE, vo->waiting_mpi);
+        draw_image_pts(vo, vo->waiting_mpi, vo->next_pts);
         vo->waiting_mpi = NULL;
     }
 }

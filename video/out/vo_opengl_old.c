@@ -709,7 +709,7 @@ static void clear_border(struct vo *vo, uint8_t *dst, int start, int stride,
         memset(dst, value, stride * bottom_border);
 }
 
-static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
@@ -809,7 +809,6 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
     }
 skip_upload:
     do_render(vo);
-    return VO_TRUE;
 }
 
 static mp_image_t *get_screenshot(struct vo *vo)
@@ -1084,8 +1083,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
         return query_format(vo, *(uint32_t *)data);
-    case VOCTRL_DRAW_IMAGE:
-        return draw_image(vo, data);
     case VOCTRL_ONTOP:
         if (!p->glctx->ontop)
             break;
@@ -1166,7 +1163,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 }
 
 const struct vo_driver video_out_opengl_old = {
-    .is_new = true,
     .info = &(const vo_info_t) {
         "OpenGL",
         "opengl-old",
@@ -1176,6 +1172,7 @@ const struct vo_driver video_out_opengl_old = {
     .preinit = preinit,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,

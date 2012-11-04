@@ -164,12 +164,11 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     return resize();
 }
 
-static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     assert(mpi->stride[0] == image_width * 3);
     caca_dither_bitmap(canvas, 0, 0, screen_w, screen_h, dither,
                        mpi->planes[0]);
-    return true;
 }
 
 static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
@@ -369,15 +368,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
         return query_format(*((uint32_t *)data));
-    case VOCTRL_DRAW_IMAGE:
-        return draw_image(vo, data);
     default:
         return VO_NOTIMPL;
     }
 }
 
 const struct vo_driver video_out_caca = {
-    .is_new = false,
     .info = &(const vo_info_t) {
         "libcaca",
         "caca",
@@ -387,6 +383,7 @@ const struct vo_driver video_out_caca = {
     .preinit = preinit,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,

@@ -48,7 +48,6 @@ enum mp_voctrl {
     VOCTRL_RESUME,
     /* libmpcodecs direct rendering */
     VOCTRL_GET_IMAGE,
-    VOCTRL_DRAW_IMAGE,
     VOCTRL_GET_PANSCAN,
     VOCTRL_SET_PANSCAN,
     VOCTRL_SET_EQUALIZER,               // struct voctrl_set_equalizer_args
@@ -144,8 +143,6 @@ struct osd_state;
 struct mp_image;
 
 struct vo_driver {
-    // Driver uses new API
-    bool is_new;
     // Driver buffers or adds (deinterlace) frames and will keep track
     // of pts values itself
     bool buffer_frames;
@@ -176,7 +173,8 @@ struct vo_driver {
      */
     int (*control)(struct vo *vo, uint32_t request, void *data);
 
-    void (*draw_image)(struct vo *vo, struct mp_image *mpi, double pts);
+    void (*draw_image)(struct vo *vo, struct mp_image *mpi);
+    void (*draw_image_pts)(struct vo *vo, struct mp_image *mpi, double pts);
 
     /*
      * Get extra frames from the VO, such as those added by VDPAU

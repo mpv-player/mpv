@@ -1608,8 +1608,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return query_format(*(uint32_t *)data);
     case VOCTRL_GET_IMAGE:
         return get_image(vo, data);
-    case VOCTRL_DRAW_IMAGE:
-        abort(); // draw_image() should get called directly
     case VOCTRL_BORDER:
         vo_x11_border(vo);
         checked_resize(vo);
@@ -1680,7 +1678,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 #define OPT_BASE_STRUCT struct vdpctx
 
 const struct vo_driver video_out_vdpau = {
-    .is_new = true,
     .buffer_frames = true,
     .info = &(const struct vo_info_s){
         "VDPAU with X11",
@@ -1691,7 +1688,7 @@ const struct vo_driver video_out_vdpau = {
     .preinit = preinit,
     .config = config,
     .control = control,
-    .draw_image = draw_image,
+    .draw_image_pts = draw_image,
     .get_buffered_frame = set_next_frame_info,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,

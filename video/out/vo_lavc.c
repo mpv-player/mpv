@@ -514,9 +514,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
         return query_format(vo, *((uint32_t *)data));
-    case VOCTRL_DRAW_IMAGE:
-        draw_image(vo, (mp_image_t *)data, vo->next_pts);
-        return 0;
     case VOCTRL_SET_YUV_COLORSPACE:
         vc->colorspace = *(struct mp_csp_details *)data;
         if (vc->stream) {
@@ -534,7 +531,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 }
 
 const struct vo_driver video_out_lavc = {
-    .is_new = true,
     .buffer_frames = false,
     .info = &(const struct vo_info_s){
         "video encoding using libavcodec",
@@ -547,6 +543,7 @@ const struct vo_driver video_out_lavc = {
     .control = control,
     .uninit = uninit,
     .check_events = check_events,
+    .draw_image_pts = draw_image,
     .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,
 };

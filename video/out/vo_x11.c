@@ -523,6 +523,11 @@ static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
     return 0;
 }
 
+static void draw_image(struct vo *vo, mp_image_t *mpi)
+{
+    draw_slice(vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
+}
+
 static int query_format(struct vo *vo, uint32_t format)
 {
     mp_msg(MSGT_VO, MSGL_DBG2,
@@ -627,7 +632,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 }
 
 const struct vo_driver video_out_x11 = {
-    .is_new = false,
     .info = &(const vo_info_t) {
         "X11 ( XImage/Shm )",
         "x11",
@@ -647,6 +651,7 @@ const struct vo_driver video_out_x11 = {
     .preinit = preinit,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,

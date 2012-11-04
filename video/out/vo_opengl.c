@@ -1298,8 +1298,9 @@ static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
     return VO_TRUE;
 }
 
-static uint32_t draw_image(struct gl_priv *p, mp_image_t *mpi)
+static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
+    struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
     int n;
 
@@ -1348,7 +1349,6 @@ static uint32_t draw_image(struct gl_priv *p, mp_image_t *mpi)
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 skip_upload:
     do_render(p);
-    return VO_TRUE;
 }
 
 static mp_image_t *get_screenshot(struct gl_priv *p)
@@ -1737,8 +1737,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
         return query_format(*(uint32_t *)data);
-    case VOCTRL_DRAW_IMAGE:
-        return draw_image(p, data);
     case VOCTRL_ONTOP:
         if (!p->glctx->ontop)
             break;
@@ -2252,7 +2250,6 @@ err_out:
 }
 
 const struct vo_driver video_out_opengl = {
-    .is_new = true,
     .info = &(const vo_info_t) {
         "Extended OpenGL Renderer",
         "opengl",
@@ -2262,6 +2259,7 @@ const struct vo_driver video_out_opengl = {
     .preinit = preinit,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
@@ -2270,7 +2268,6 @@ const struct vo_driver video_out_opengl = {
 };
 
 const struct vo_driver video_out_opengl_hq = {
-    .is_new = true,
     .info = &(const vo_info_t) {
         "Extended OpenGL Renderer (high quality rendering preset)",
         "opengl-hq",
@@ -2280,6 +2277,7 @@ const struct vo_driver video_out_opengl_hq = {
     .preinit = preinit,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,

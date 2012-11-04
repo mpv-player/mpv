@@ -868,7 +868,7 @@ static void uninit_d3d(d3d_priv *priv)
     priv->d3d_handle = NULL;
 }
 
-static uint32_t d3d_upload_and_render_frame_texture(d3d_priv *priv,
+static void d3d_upload_and_render_frame_texture(d3d_priv *priv,
                                                     mp_image_t *mpi)
 {
     if (!(mpi->flags & MP_IMGFLAG_DRAW_CALLBACK))
@@ -880,20 +880,19 @@ static uint32_t d3d_upload_and_render_frame_texture(d3d_priv *priv,
         d3dtex_update(priv, &priv->planes[n].texture);
     }
 
-    return d3d_draw_frame(priv);
+    d3d_draw_frame(priv);
 }
 
-/** @brief Render a frame on the screen.
- *  @param mpi mpi structure with the decoded frame inside
- *  @return VO_TRUE on success, VO_ERROR on failure
- */
-static uint32_t d3d_upload_and_render_frame(d3d_priv *priv, mp_image_t *mpi)
+static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
+    d3d_priv *priv = vo->priv;
     if (!priv->d3d_device)
-        return VO_TRUE;
+        return;
 
-    if (priv->use_textures)
-        return d3d_upload_and_render_frame_texture(priv, mpi);
+    if (priv->use_textures) {
+        d3d_upload_and_render_frame_texture(priv, mpi);
+        return;
+    }
 
     if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
         goto skip_upload;
@@ -908,7 +907,7 @@ static uint32_t d3d_upload_and_render_frame(d3d_priv *priv, mp_image_t *mpi)
         if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
                                               &priv->locked_rect, NULL, 0))) {
             mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Surface lock failed.\n");
-            return VO_ERROR;
+            return;
         }
     }
 
@@ -918,7 +917,7 @@ static uint32_t d3d_upload_and_render_frame(d3d_priv *priv, mp_image_t *mpi)
 skip_upload:
     d3d_unlock_video_objects(priv);
 
-    return d3d_draw_frame(priv);
+    d3d_draw_frame(priv);
 }
 
 static uint32_t d3d_draw_frame(d3d_priv *priv)
@@ -1447,8 +1446,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
         return query_format(priv, *(uint32_t*) data);
-    case VOCTRL_DRAW_IMAGE:
-        return d3d_upload_and_render_frame(priv, data);
     case VOCTRL_FULLSCREEN:
         vo_w32_fullscreen(vo);
         resize_d3d(priv);
@@ -2062,7 +2059,6 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 #define AUTHOR "Georgi Petrov (gogothebee) <gogothebee@gmail.com> and others"
 
 const struct vo_driver video_out_direct3d = {
-    .is_new = true,
     .info = &(const vo_info_t) {
         "Direct3D 9 Renderer",
         "direct3d",
@@ -2072,6 +2068,7 @@ const struct vo_driver video_out_direct3d = {
     .preinit = preinit_standard,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
@@ -2080,7 +2077,6 @@ const struct vo_driver video_out_direct3d = {
 };
 
 const struct vo_driver video_out_direct3d_shaders = {
-    .is_new = true,
     .info = &(const vo_info_t) {
         "Direct3D 9 Renderer (using shaders for YUV conversion)",
         "direct3d_shaders",
@@ -2090,6 +2086,7 @@ const struct vo_driver video_out_direct3d_shaders = {
     .preinit = preinit_shaders,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,

@@ -441,7 +441,7 @@ static mp_image_t *get_screenshot(struct vo *vo)
     return res;
 }
 
-static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct xvctx *ctx = vo->priv;
 
@@ -455,12 +455,12 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
                    ctx->xvimage[ctx->current_buf]->offsets[0], mpi->planes[0],
                    mpi->w * (mpi->bpp / 8), mpi->h,
                    ctx->xvimage[ctx->current_buf]->pitches[0], mpi->stride[0]);
-    else
-          return false;
+    else {
+        mp_msg(MSGT_VO, MSGL_ERR, "[VO_XV] Couldn't draw image.\n");
+        return;
+    }
 
     mp_draw_sub_backup_reset(ctx->osd_backup);
-
-    return true;
 }
 
 static int query_format(struct xvctx *ctx, uint32_t format)
@@ -642,8 +642,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return (ctx->is_paused = 0);
     case VOCTRL_QUERY_FORMAT:
         return query_format(ctx, *((uint32_t *) data));
-    case VOCTRL_DRAW_IMAGE:
-        return draw_image(vo, data);
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
@@ -691,11 +689,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
 }
 
 const struct vo_driver video_out_xv = {
-    .is_new = 1,
     .info = &info,
     .preinit = preinit,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
     .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page = flip_page,

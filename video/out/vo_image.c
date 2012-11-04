@@ -96,7 +96,7 @@ static void flip_page(struct vo *vo)
 {
 }
 
-static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
 
@@ -118,8 +118,6 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
     talloc_free(t);
 
     (p->frame)++;
-
-    return VO_TRUE;
 }
 
 static int query_format(struct vo *vo, uint32_t fmt)
@@ -150,8 +148,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_QUERY_FORMAT:
         return query_format(vo, *(uint32_t *)data);
-    case VOCTRL_DRAW_IMAGE:
-        return draw_image(vo, data);
     case VOCTRL_SET_YUV_COLORSPACE:
         p->colorspace = *(struct mp_csp_details *)data;
         return true;
@@ -170,7 +166,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
 const struct vo_driver video_out_image =
 {
-    .is_new = true,
     .info = &(const vo_info_t) {
         "Write video frames to image files",
         "image",
@@ -189,6 +184,7 @@ const struct vo_driver video_out_image =
     .preinit = preinit,
     .config = config,
     .control = control,
+    .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,

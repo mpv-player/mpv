@@ -135,18 +135,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 {
     if (!video_out->config_ok)
         return 0;
-    // first check, maybe the vo/vf plugin implements draw_image using mpi:
-    if (vo_draw_image(video_out, mpi, pts) >= 0)
-        return 1;
-    // nope, fallback to old draw_frame/draw_slice:
-    if (!(mpi->flags & (MP_IMGFLAG_DIRECT | MP_IMGFLAG_DRAW_CALLBACK))) {
-        // blit frame:
-        if (vf->default_caps & VFCAP_ACCEPT_STRIDE)
-            vo_draw_slice(video_out, mpi->planes, mpi->stride, mpi->w, mpi->h,
-                          0, 0);
-        // else: out of luck
-    }
-    return 1;
+    return vo_draw_image(video_out, mpi, pts);
 }
 
 static void start_slice(struct vf_instance *vf, mp_image_t *mpi)
