@@ -54,6 +54,9 @@ enum mp_voctrl {
 
     VOCTRL_START_SLICE,
 
+    /* for vdpau hardware decoding */
+    VOCTRL_HWDEC_DECODER_RENDER,        // pointer to hw state
+
     VOCTRL_NEWFRAME,
     VOCTRL_SKIPFRAME,
     VOCTRL_REDRAW_FRAME,

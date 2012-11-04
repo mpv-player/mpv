@@ -100,9 +100,7 @@ struct vf_ctrl_screenshot {
 #define VFCTRL_SET_PP_LEVEL 5       // set postprocessing level
 #define VFCTRL_SET_EQUALIZER 6 // set color options (brightness,contrast etc)
 #define VFCTRL_GET_EQUALIZER 8 // get color options (brightness,contrast etc)
-#define VFCTRL_DUPLICATE_FRAME 11  // For encoding - encode zero-change frame
-#define VFCTRL_SKIP_NEXT_FRAME 12  // For encoding - drop the next frame that passes thru
-#define VFCTRL_FLUSH_FRAMES    13  // For encoding - flush delayed frames
+#define VFCTRL_HWDEC_DECODER_RENDER 9 // vdpau hw decoding
 #define VFCTRL_SCREENSHOT      14  // Take screenshot, arg is vf_ctrl_screenshot
 #define VFCTRL_INIT_OSD        15  // Filter OSD renderer present?
 #define VFCTRL_SET_DEINTERLACE 18  // Set deinterlacing status

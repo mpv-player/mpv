@@ -1252,17 +1252,16 @@ static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
     vc->surface_num = WRAP_ADD(vc->surface_num, 1, vc->num_output_surfaces);
 }
 
-static int draw_slice(struct vo *vo, uint8_t *image[], int stride[], int w,
-                      int h, int x, int y)
+static int decoder_render(struct vo *vo, void *state_ptr)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
+    struct vdpau_render_state *rndr = (struct vdpau_render_state *)state_ptr;
 
     if (handle_preemption(vo) < 0)
         return VO_TRUE;
 
-    struct vdpau_render_state *rndr = (struct vdpau_render_state *)image[0];
     int max_refs = vc->image_format == IMGFMT_VDPAU_H264 ?
         rndr->info.h264.num_ref_frames : 2;
     if (!IMGFMT_IS_VDPAU(vc->image_format))
@@ -1606,6 +1605,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     case VOCTRL_GET_IMAGE:
         return get_image(vo, data);
+    case VOCTRL_HWDEC_DECODER_RENDER:
+        return decoder_render(vo, data);
     case VOCTRL_BORDER:
         vo_x11_border(vo);
         checked_resize(vo);
@@ -1689,7 +1690,6 @@ const struct vo_driver video_out_vdpau = {
     .control = control,
     .draw_image_pts = draw_image,
     .get_buffered_frame = set_next_frame_info,
-    .draw_slice = draw_slice,
     .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,
     .check_events = check_events,

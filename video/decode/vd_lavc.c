@@ -40,6 +40,7 @@
 
 #include "vd.h"
 #include "video/img_format.h"
+#include "video/filter/vf.h"
 #include "demux/stheader.h"
 #include "demux/demux_packet.h"
 #include "core/codec-cfg.h"
@@ -84,6 +85,8 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void draw_slice(struct AVCodecContext *s, const AVFrame *src,
                        int offset[4], int y, int type, int height);
+static void draw_slice_hwdec(struct AVCodecContext *s, const AVFrame *src,
+                             int offset[4], int y, int type, int height);
 
 static enum PixelFormat get_format(struct AVCodecContext *avctx,
                                    const enum PixelFormat *pix_fmt);
@@ -195,7 +198,7 @@ static int init(sh_video_t *sh)
         avctx->get_buffer      = get_buffer;
         avctx->release_buffer  = release_buffer;
         avctx->reget_buffer    = get_buffer;
-        avctx->draw_horiz_band = draw_slice;
+        avctx->draw_horiz_band = draw_slice_hwdec;
         if (lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU)
             mp_msg(MSGT_DECVIDEO, MSGL_V, "[VD_FFMPEG] VDPAU hardware "
                    "decoding.\n");
@@ -371,6 +374,16 @@ static void uninit(sh_video_t *sh)
     talloc_free(ctx);
 }
 
+static void draw_slice_hwdec(struct AVCodecContext *s,
+                             const AVFrame *src, int offset[4],
+                             int y, int type, int height)
+{
+    sh_video_t *sh = s->opaque;
+    struct vf_instance *vf = sh->vfilter;
+    void *state_ptr = src->data[0];
+    vf->control(vf, VFCTRL_HWDEC_DECODER_RENDER, state_ptr);
+}
+
 static void draw_slice(struct AVCodecContext *s,
                        const AVFrame *src, int offset[4],
                        int y, int type, int height)
@@ -544,7 +557,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic)
     } else
         avctx->draw_horiz_band = NULL;
     if (IMGFMT_IS_HWACCEL(mpi->imgfmt))
-        avctx->draw_horiz_band = draw_slice;
+        avctx->draw_horiz_band = draw_slice_hwdec;
 
     pic->data[0] = mpi->planes[0];
     pic->data[1] = mpi->planes[1];
