@@ -58,7 +58,6 @@ static int config(struct vf_instance *vf, int width, int height,
 
 static int vf_open(vf_instance_t *vf, char *args){
     vf->query_format=query_format;
-    vf->default_caps=0;
     if (vf->priv->outfmt)
         vf->config=config;
     return 1;

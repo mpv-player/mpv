@@ -196,16 +196,13 @@ static enum mode analyze_plane(unsigned char *old, unsigned char *new,
    return mode;
    }
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
    {
-   mp_image_t *dmpi;
    int w;
    enum mode mode;
 
-   if(!(dmpi=vf_get_image(vf->next, mpi->imgfmt,
-			  MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-			  mpi->w, mpi->h)))
-      return 0;
+   struct mp_image *dmpi = vf_alloc_out_image(vf);
+   mp_image_copy_attributes(dmpi, mpi);
 
    w=dmpi->w;
    if(!(dmpi->flags&MP_IMGFLAG_PLANAR))
@@ -237,7 +234,8 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 	       &vf->priv->buf[2], mode);
       }
 
-   return vf_next_put_image(vf, dmpi, pts);
+   talloc_free(mpi);
+   return dmpi;
    }
 
 static void uninit(struct vf_instance *vf)
@@ -252,9 +250,8 @@ static void uninit(struct vf_instance *vf)
 
 static int vf_open(vf_instance_t *vf, char *args)
    {
-   vf->put_image = put_image;
+   vf->filter = filter;
    vf->uninit = uninit;
-   vf->default_reqs = VFCAP_ACCEPT_STRIDE;
 
    if(!(vf->priv = calloc(1, sizeof(struct vf_priv_s))))
       {

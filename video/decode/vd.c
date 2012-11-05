@@ -190,9 +190,6 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
            "VO Config (%dx%d->%dx%d,flags=%d,0x%X)\n", sh->disp_w,
            sh->disp_h, screen_size_x, screen_size_y, vocfg_flags, out_fmt);
 
-    vf->w = sh->disp_w;
-    vf->h = sh->disp_h;
-
     if (vf_config_wrapper
         (vf, sh->disp_w, sh->disp_h, screen_size_x, screen_size_y, vocfg_flags,
          out_fmt) == 0) {

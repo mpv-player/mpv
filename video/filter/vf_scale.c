@@ -408,31 +408,15 @@ static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src
     }
 }
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
-    mp_image_t *dmpi=mpi->priv;
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
+{
+    struct mp_image *dmpi = vf_alloc_out_image(vf);
+    mp_image_copy_attributes(dmpi, mpi);
 
-//    printf("vf_scale::put_image(): processing whole frame! dmpi=%p flag=%d\n",
-//	dmpi, (mpi->flags&MP_IMGFLAG_DRAW_CALLBACK));
+    scale(vf->priv->ctx, vf->priv->ctx, mpi->planes,mpi->stride,0,mpi->h,dmpi->planes,dmpi->stride, vf->priv->interlaced);
 
-  if(!dmpi){
-
-    // hope we'll get DR buffer:
-    dmpi=vf_get_image(vf->next,vf->priv->fmt,
-	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
-	vf->priv->w, vf->priv->h);
-
-      scale(vf->priv->ctx, vf->priv->ctx, mpi->planes,mpi->stride,0,mpi->h,dmpi->planes,dmpi->stride, vf->priv->interlaced);
-  }
-
-    if(vf->priv->w==mpi->w && vf->priv->h==mpi->h){
-	// just conversion, no scaling -> keep postprocessing data
-	// this way we can apply pp filter to non-yv12 source using scaler
-        vf_clone_mpi_attributes(dmpi, mpi);
-    }
-
-    if(vf->priv->palette) dmpi->planes[1]=vf->priv->palette; // export palette!
-
-    return vf_next_put_image(vf,dmpi, pts);
+    talloc_free(mpi);
+    return dmpi;
 }
 
 static int control(struct vf_instance *vf, int request, void* data){
@@ -588,7 +572,7 @@ static void uninit(struct vf_instance *vf){
 
 static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
-    vf->put_image=put_image;
+    vf->filter=filter;
     vf->query_format=query_format;
     vf->control= control;
     vf->uninit=uninit;

@@ -2442,6 +2442,28 @@ no_video:
     return 0;
 }
 
+static bool filter_output_queued_frame(struct MPContext *mpctx)
+{
+    struct sh_video *sh_video = mpctx->sh_video;
+    struct vo *video_out = mpctx->video_out;
+
+    struct mp_image *img = vf_chain_output_queued_frame(sh_video->vfilter);
+    if (img && video_out->config_ok)
+        vo_draw_image(video_out, img);
+    talloc_free(img);
+
+    return !!img;
+}
+
+static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
+{
+    struct sh_video *sh_video = mpctx->sh_video;
+
+    frame->pts = sh_video->pts;
+    vf_filter_frame(sh_video->vfilter, frame);
+    filter_output_queued_frame(mpctx);
+}
+
 static double update_video_nocorrect_pts(struct MPContext *mpctx)
 {
     struct sh_video *sh_video = mpctx->sh_video;
@@ -2451,7 +2473,7 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         // In nocorrect-pts mode there is no way to properly time these frames
         if (vo_get_buffered_frame(video_out, 0) >= 0)
             break;
-        if (vf_output_queued_frame(sh_video->vfilter))
+        if (filter_output_queued_frame(mpctx))
             break;
         unsigned char *packet = NULL;
         frame_time = sh_video->next_frame_time;
@@ -2476,7 +2498,7 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         decoded_frame = decode_video(sh_video, sh_video->ds->current, packet,
                                      in_size, framedrop_type, sh_video->pts);
         if (decoded_frame) {
-            filter_video(sh_video, decoded_frame, sh_video->pts);
+            filter_video(mpctx, decoded_frame);
         }
         break;
     }
@@ -2528,9 +2550,7 @@ static double update_video(struct MPContext *mpctx)
     while (1) {
         if (vo_get_buffered_frame(video_out, false) >= 0)
             break;
-        // XXX Time used in this call is not counted in any performance
-        // timer now
-        if (vf_output_queued_frame(sh_video->vfilter))
+        if (filter_output_queued_frame(mpctx))
             break;
         int in_size = 0;
         unsigned char *buf = NULL;
@@ -2557,11 +2577,11 @@ static double update_video(struct MPContext *mpctx)
             mpctx->hrseek_framedrop = false;
         int framedrop_type = mpctx->hrseek_framedrop ? 1 :
                              check_framedrop(mpctx, sh_video->frametime);
-        void *decoded_frame = decode_video(sh_video, pkt, buf, in_size,
-                                           framedrop_type, pts);
+        struct mp_image *decoded_frame =
+            decode_video(sh_video, pkt, buf, in_size, framedrop_type, pts);
         if (decoded_frame) {
             determine_frame_pts(mpctx);
-            filter_video(sh_video, decoded_frame, sh_video->pts);
+            filter_video(mpctx, decoded_frame);
         } else if (!pkt) {
             if (vo_get_buffered_frame(video_out, true) < 0)
                 return -1;

@@ -35,30 +35,25 @@ struct vf_priv_s {
 	long long out;
 	struct vf_detc_pts_buf ptsbuf;
 	int last_frame_duration;
-	double buffered_pts;
-	mp_image_t *buffered_mpi;
-	int buffered_last_frame_duration;
+        struct mp_image *buffer;
 };
 
-static int continue_buffered_image(struct vf_instance *vf)
+static int filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-	double pts = vf->priv->buffered_pts;
-	mp_image_t *mpi = vf->priv->buffered_mpi;
-	vf->priv->out++;
-	vf->priv->state=0;
-	return vf_next_put_image(vf, mpi, vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, pts, 0, 0, vf->priv->buffered_last_frame_duration));
-}
-
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
-{
-	mp_image_t *dmpi;
-	int ret = 0;
 	int flags = mpi->fields;
 	int state = vf->priv->state;
+        struct vf_priv_s *p = vf->priv;
 
-	dmpi = vf_get_image(vf->next, mpi->imgfmt,
-	                    MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
-	                    MP_IMGFLAG_PRESERVE, mpi->width, mpi->height);
+        if (!p->buffer || p->buffer->w != mpi->w || p->buffer->h != mpi->h ||
+            p->buffer->imgfmt != mpi->imgfmt)
+        {
+            mp_image_unrefp(&p->buffer);
+            p->buffer = mp_image_alloc(mpi->imgfmt, mpi->w, mpi->h);
+            talloc_steal(vf, p->buffer);
+        }
+        mp_image_copy_attributes(p->buffer, mpi);
+
+        struct mp_image *dmpi = p->buffer;
 
 	vf->priv->in++;
 
@@ -75,7 +70,9 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 	}
 
 	if (state == 0) {
-		ret = vf_next_put_image(vf, mpi, vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, pts, 0, 0, vf->priv->last_frame_duration));
+                struct mp_image *new = mp_image_new_ref(mpi);
+                new->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, vf->priv->last_frame_duration);
+                vf_add_output_frame(vf, new);
 		vf->priv->out++;
 		if (flags & MP_IMGFIELD_REPEAT_FIRST) {
 			my_memcpy_pic(dmpi->planes[0],
@@ -111,13 +108,16 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 			              mpi->chroma_width, mpi->chroma_height/2,
 			              dmpi->stride[2]*2, mpi->stride[2]*2);
 		}
-		ret = vf_next_put_image(vf, dmpi, vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, pts, 0, 0, vf->priv->last_frame_duration));
+		struct mp_image *new = mp_image_new_ref(mpi);
+                new->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, vf->priv->last_frame_duration);
+		vf_add_output_frame(vf, new);
 		vf->priv->out++;
 		if (flags & MP_IMGFIELD_REPEAT_FIRST) {
-			vf->priv->buffered_mpi = mpi;
-			vf->priv->buffered_pts = pts;
-			vf->priv->buffered_last_frame_duration = vf->priv->last_frame_duration;
-			vf_queue_frame(vf, continue_buffered_image);
+                        struct mp_image *new = mp_image_new_ref(mpi);
+                        new->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, 3);
+                        vf_add_output_frame(vf, new);
+                        vf->priv->out++;
+                        vf->priv->state=0;
 		} else {
 			my_memcpy_pic(dmpi->planes[0],
 			              mpi->planes[0], mpi->w, mpi->h/2,
@@ -145,7 +145,9 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 	else
 		vf->priv->last_frame_duration = 2;
 
-	return ret;
+        talloc_free(mpi);
+
+        return 0;
 }
 
 static int config(struct vf_instance *vf,
@@ -164,9 +166,8 @@ static void uninit(struct vf_instance *vf)
 static int vf_open(vf_instance_t *vf, char *args)
 {
     vf->config = config;
-    vf->put_image = put_image;
+    vf->filter_ext = filter;
     vf->uninit = uninit;
-    vf->default_reqs = VFCAP_ACCEPT_STRIDE;
     vf->priv = calloc(1, sizeof(struct vf_priv_s));
     vf->priv->last_frame_duration = 2;
     vf_detc_init_pts_buf(&vf->priv->ptsbuf);

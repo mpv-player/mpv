@@ -208,16 +208,14 @@ static void deNoise(unsigned char *Frame,        // mpi->planes[x]
 }
 
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
+{
 	int cw= mpi->w >> mpi->chroma_x_shift;
 	int ch= mpi->h >> mpi->chroma_y_shift;
         int W = mpi->w, H = mpi->h;
 
-	mp_image_t *dmpi=vf_get_image(vf->next,mpi->imgfmt,
-		MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-                mpi->w,mpi->h);
-
-	if(!dmpi) return 0;
+        struct mp_image *dmpi = vf_alloc_out_image(vf);
+        mp_image_copy_attributes(dmpi, mpi);
 
         deNoise(mpi->planes[0], dmpi->planes[0],
 		vf->priv->Line, &vf->priv->Frame[0], W, H,
@@ -238,7 +236,8 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
                 vf->priv->Coefs[2],
                 vf->priv->Coefs[3]);
 
-	return vf_next_put_image(vf,dmpi, pts);
+        talloc_free(mpi);
+        return dmpi;
 }
 
 //===========================================================================//
@@ -284,7 +283,7 @@ static int vf_open(vf_instance_t *vf, char *args){
         double Param1, Param2, Param3, Param4;
 
 	vf->config=config;
-	vf->put_image=put_image;
+	vf->filter=filter;
         vf->query_format=query_format;
         vf->uninit=uninit;
 	vf->priv=malloc(sizeof(struct vf_priv_s));

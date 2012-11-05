@@ -53,7 +53,7 @@ enum mp_voctrl {
 
     /* for vdpau hardware decoding */
     VOCTRL_HWDEC_DECODER_RENDER,        // pointer to hw state
-    VOCTRL_HWDEC_GET_SURFACE,           // struct mp_image
+    VOCTRL_HWDEC_ALLOC_SURFACE,         // struct mp_image**
 
     VOCTRL_NEWFRAME,
     VOCTRL_SKIPFRAME,
@@ -285,7 +285,7 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
 void list_video_out(void);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);
-int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts);
+int vo_draw_image(struct vo *vo, struct mp_image *mpi);
 int vo_redraw_frame(struct vo *vo);
 int vo_get_buffered_frame(struct vo *vo, bool eof);
 void vo_skip_frame(struct vo *vo);

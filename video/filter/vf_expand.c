@@ -124,97 +124,54 @@ static int config(struct vf_instance *vf,
     return vf_next_config(vf,vf->priv->exp_w,vf->priv->exp_h,d_width,d_height,flags,outfmt);
 }
 
-// there are 4 cases:
-// codec --DR--> expand --DR--> vo
-// codec --DR--> expand -copy-> vo
-// codec -copy-> expand --DR--> vo
-// codec -copy-> expand -copy-> vo (worst case)
-
-static void get_image(struct vf_instance *vf, mp_image_t *mpi){
-//    if(mpi->type==MP_IMGTYPE_IPB) return; // not yet working
-    if(vf->priv->exp_w==mpi->width ||
-       (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) ){
-	// try full DR !
-	mpi->priv=vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-	    mpi->type, mpi->flags,
-            FFMAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x),
-            FFMAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
-	// set up mpi as a cropped-down image of dmpi:
-	if(mpi->flags&MP_IMGFLAG_PLANAR){
-	    mpi->planes[0]=vf->dmpi->planes[0]+
-		vf->priv->exp_y*vf->dmpi->stride[0]+vf->priv->exp_x;
-	    mpi->planes[1]=vf->dmpi->planes[1]+
-		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->dmpi->stride[1]+(vf->priv->exp_x>>mpi->chroma_x_shift);
-	    mpi->planes[2]=vf->dmpi->planes[2]+
-		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->dmpi->stride[2]+(vf->priv->exp_x>>mpi->chroma_x_shift);
-	    mpi->stride[1]=vf->dmpi->stride[1];
-	    mpi->stride[2]=vf->dmpi->stride[2];
-	} else {
-	    mpi->planes[0]=vf->dmpi->planes[0]+
-		vf->priv->exp_y*vf->dmpi->stride[0]+
-		vf->priv->exp_x*(vf->dmpi->bpp/8);
-	}
-	mpi->stride[0]=vf->dmpi->stride[0];
-	mpi->width=vf->dmpi->width;
-	mpi->flags|=MP_IMGFLAG_DIRECT;
-    }
-}
-
-// w, h = width and height of the actual video frame (located at exp_x/exp_y)
-static void clear_borders(struct vf_instance *vf, int w, int h)
+// w, h = width and height of the source frame (located at exp_x/exp_y)
+static void clear_borders(struct vf_instance *vf, struct mp_image *dmpi,
+                          int w, int h)
 {
     // upper border (over the full width)
-    vf_mpi_clear(vf->dmpi, 0, 0, vf->priv->exp_w, vf->priv->exp_y);
+    vf_mpi_clear(dmpi, 0, 0, vf->priv->exp_w, vf->priv->exp_y);
     // lower border
-    vf_mpi_clear(vf->dmpi, 0, vf->priv->exp_y + h, vf->priv->exp_w,
+    vf_mpi_clear(dmpi, 0, vf->priv->exp_y + h, vf->priv->exp_w,
                  vf->priv->exp_h - (vf->priv->exp_y + h));
     // left
-    vf_mpi_clear(vf->dmpi, 0, vf->priv->exp_y, vf->priv->exp_x, h);
+    vf_mpi_clear(dmpi, 0, vf->priv->exp_y, vf->priv->exp_x, h);
     // right
-    vf_mpi_clear(vf->dmpi, vf->priv->exp_x + w, vf->priv->exp_y,
+    vf_mpi_clear(dmpi, vf->priv->exp_x + w, vf->priv->exp_y,
                  vf->priv->exp_w - (vf->priv->exp_x + w), h);
 }
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
-    if(mpi->flags&MP_IMGFLAG_DIRECT){
-	vf->dmpi=mpi->priv;
-	if(!vf->dmpi) { mp_tmsg(MSGT_VFILTER, MSGL_WARN, "Why do we get NULL??\n"); return 0; }
-	mpi->priv=NULL;
-        clear_borders(vf,mpi->w,mpi->h);
-	// we've used DR, so we're ready...
-	if(!(mpi->flags&MP_IMGFLAG_PLANAR))
-	    vf->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
-	return vf_next_put_image(vf,vf->dmpi, pts);
-    }
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
+{
+    if (vf->priv->exp_x == 0 && vf->priv->exp_y == 0 &&
+        vf->priv->exp_w == mpi->w && vf->priv->exp_h == mpi->h)
+        return mpi;
 
-    // hope we'll get DR buffer:
-    vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-	vf->priv->exp_w, vf->priv->exp_h);
+    struct mp_image *dmpi = vf_alloc_out_image(vf);
+    mp_image_copy_attributes(dmpi, mpi);
 
     // copy mpi->dmpi...
     if(mpi->flags&MP_IMGFLAG_PLANAR){
-	memcpy_pic(vf->dmpi->planes[0]+
-	        vf->priv->exp_y*vf->dmpi->stride[0]+vf->priv->exp_x,
+	memcpy_pic(dmpi->planes[0]+
+	        vf->priv->exp_y*dmpi->stride[0]+vf->priv->exp_x,
 		mpi->planes[0], mpi->w, mpi->h,
-		vf->dmpi->stride[0],mpi->stride[0]);
-	memcpy_pic(vf->dmpi->planes[1]+
-		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->dmpi->stride[1]+(vf->priv->exp_x>>mpi->chroma_x_shift),
+		dmpi->stride[0],mpi->stride[0]);
+	memcpy_pic(dmpi->planes[1]+
+		(vf->priv->exp_y>>mpi->chroma_y_shift)*dmpi->stride[1]+(vf->priv->exp_x>>mpi->chroma_x_shift),
 		mpi->planes[1], (mpi->w>>mpi->chroma_x_shift), (mpi->h>>mpi->chroma_y_shift),
-		vf->dmpi->stride[1],mpi->stride[1]);
-	memcpy_pic(vf->dmpi->planes[2]+
-		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->dmpi->stride[2]+(vf->priv->exp_x>>mpi->chroma_x_shift),
+		dmpi->stride[1],mpi->stride[1]);
+	memcpy_pic(dmpi->planes[2]+
+		(vf->priv->exp_y>>mpi->chroma_y_shift)*dmpi->stride[2]+(vf->priv->exp_x>>mpi->chroma_x_shift),
 		mpi->planes[2], (mpi->w>>mpi->chroma_x_shift), (mpi->h>>mpi->chroma_y_shift),
-		vf->dmpi->stride[2],mpi->stride[2]);
+		dmpi->stride[2],mpi->stride[2]);
     } else {
-	memcpy_pic(vf->dmpi->planes[0]+
-	        vf->priv->exp_y*vf->dmpi->stride[0]+vf->priv->exp_x*(vf->dmpi->bpp/8),
-		mpi->planes[0], mpi->w*(vf->dmpi->bpp/8), mpi->h,
-		vf->dmpi->stride[0],mpi->stride[0]);
-	vf->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
+	memcpy_pic(dmpi->planes[0]+
+	        vf->priv->exp_y*dmpi->stride[0]+vf->priv->exp_x*(dmpi->bpp/8),
+		mpi->planes[0], mpi->w*(dmpi->bpp/8), mpi->h,
+		dmpi->stride[0],mpi->stride[0]);
     }
-    clear_borders(vf,mpi->w,mpi->h);
-    return vf_next_put_image(vf,vf->dmpi, pts);
+    clear_borders(vf, dmpi, mpi->w, mpi->h);
+    talloc_free(mpi);
+    return dmpi;
 }
 
 //===========================================================================//
@@ -231,8 +188,7 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->control=control;
     vf->query_format=query_format;
-    vf->get_image=get_image;
-    vf->put_image=put_image;
+    vf->filter=filter;
     mp_msg(MSGT_VFILTER, MSGL_INFO, "Expand: %d x %d, %d ; %d, aspect: %f, round: %d\n",
     vf->priv->cfg_exp_w,
     vf->priv->cfg_exp_h,

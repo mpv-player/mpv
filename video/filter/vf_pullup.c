@@ -75,55 +75,25 @@ static void init_pullup(struct vf_instance *vf, mp_image_t *mpi)
 	vf->priv->qbuf = malloc(c->w[3]);
 }
 
-
-#if 0
-static void get_image(struct vf_instance *vf, mp_image_t *mpi)
-{
-	struct pullup_context *c = vf->priv->ctx;
-	struct pullup_buffer *b;
-
-	if (mpi->type == MP_IMGTYPE_STATIC) return;
-
-	if (!vf->priv->init) init_pullup(vf, mpi);
-
-	b = pullup_get_buffer(c, 2);
-	if (!b) return; /* shouldn't happen... */
-
-	mpi->priv = b;
-
-	mpi->planes[0] = b->planes[0];
-	mpi->planes[1] = b->planes[1];
-	mpi->planes[2] = b->planes[2];
-	mpi->stride[0] = c->stride[0];
-	mpi->stride[1] = c->stride[1];
-	mpi->stride[2] = c->stride[2];
-
-	mpi->flags |= MP_IMGFLAG_DIRECT;
-}
-#endif
-
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
 	struct pullup_context *c = vf->priv->ctx;
 	struct pullup_buffer *b;
 	struct pullup_frame *f;
-	mp_image_t *dmpi;
-	int ret;
 	int p;
 	int i;
+        double pts = mpi->pts;
+        struct mp_image *dmpi = NULL;
 
 	if (!vf->priv->init) init_pullup(vf, mpi);
 
-	if (mpi->flags & MP_IMGFLAG_DIRECT) {
-		b = mpi->priv;
-		mpi->priv = 0;
-	} else {
+	if (1) {
 		b = pullup_get_buffer(c, 2);
 		if (!b) {
 			mp_msg(MSGT_VFILTER,MSGL_ERR,"Could not get buffer from pullup!\n");
 			f = pullup_get_frame(c);
 			pullup_release_frame(f);
-			return 0;
+			goto skip;
 		}
 		memcpy_pic(b->planes[0], mpi->planes[0], mpi->w, mpi->h,
 			c->stride[0], mpi->stride[0]);
@@ -174,21 +144,23 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 
 	/* Fake yes for first few frames (buffer depth) to keep from
 	 * breaking A/V sync with G1's bad architecture... */
-	if (!f) return vf->priv->fakecount ? (--vf->priv->fakecount,1) : 0;
+	//if (!f) return vf->priv->fakecount ? (--vf->priv->fakecount,1) : 0;
+	if (!f)
+            goto skip;
 
 	if (f->length < 2) {
 		pullup_release_frame(f);
 		f = pullup_get_frame(c);
-		if (!f) return 0;
+		if (!f) goto skip;
 		if (f->length < 2) {
 			pullup_release_frame(f);
 			if (!(mpi->fields & MP_IMGFIELD_REPEAT_FIRST))
-				return 0;
+				goto skip;
 			f = pullup_get_frame(c);
-			if (!f) return 0;
+			if (!f) goto skip;
 			if (f->length < 2) {
 				pullup_release_frame(f);
-				return 0;
+				goto skip;
 			}
 		}
 	}
@@ -210,66 +182,42 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 	}
 #endif
 
-	/* If the frame isn't already exportable... */
-	while (!f->buffer) {
-		dmpi = vf_get_image(vf->next, mpi->imgfmt,
-			MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-			mpi->width, mpi->height);
-		/* FIXME: Is it ok to discard dmpi if it's not direct? */
-		if (!(dmpi->flags & MP_IMGFLAG_DIRECT)) {
-			pullup_pack_frame(c, f);
-			break;
-		}
-		/* Direct render fields into output buffer */
-		my_memcpy_pic(dmpi->planes[0], f->ofields[0]->planes[0],
-			mpi->w, mpi->h/2, dmpi->stride[0]*2, c->stride[0]*2);
-		my_memcpy_pic(dmpi->planes[0] + dmpi->stride[0],
-			f->ofields[1]->planes[0] + c->stride[0],
-			mpi->w, mpi->h/2, dmpi->stride[0]*2, c->stride[0]*2);
-		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			my_memcpy_pic(dmpi->planes[1], f->ofields[0]->planes[1],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[1]*2, c->stride[1]*2);
-			my_memcpy_pic(dmpi->planes[1] + dmpi->stride[1],
-				f->ofields[1]->planes[1] + c->stride[1],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[1]*2, c->stride[1]*2);
-			my_memcpy_pic(dmpi->planes[2], f->ofields[0]->planes[2],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[2]*2, c->stride[2]*2);
-			my_memcpy_pic(dmpi->planes[2] + dmpi->stride[2],
-				f->ofields[1]->planes[2] + c->stride[2],
-				mpi->chroma_width, mpi->chroma_height/2,
-				dmpi->stride[2]*2, c->stride[2]*2);
-		}
-		pullup_release_frame(f);
-		if (mpi->qscale) {
-			dmpi->qscale = vf->priv->qbuf;
-			dmpi->qstride = mpi->qstride;
-			dmpi->qscale_type = mpi->qscale_type;
-		}
-		return vf_next_put_image(vf, dmpi, f->pts);
-	}
-	dmpi = vf_get_image(vf->next, mpi->imgfmt,
-		MP_IMGTYPE_EXPORT, MP_IMGFLAG_ACCEPT_STRIDE,
-		mpi->width, mpi->height);
+        /* If the frame isn't already exportable... */
+        if (!f->buffer)
+            pullup_pack_frame(c, f);
 
-	dmpi->planes[0] = f->buffer->planes[0];
-	dmpi->planes[1] = f->buffer->planes[1];
-	dmpi->planes[2] = f->buffer->planes[2];
+        // NOTE: the copy could probably be avoided by changing or using the
+        //       pullup internal buffer management. But right now just do the
+        //       safe thing and always copy. Code outside the filter might
+        //       hold a buffer reference even if the filter chain is destroyed.
+        dmpi = vf_alloc_out_image(vf);
+        mp_image_copy_attributes(dmpi, mpi);
 
-	dmpi->stride[0] = c->stride[0];
-	dmpi->stride[1] = c->stride[1];
-	dmpi->stride[2] = c->stride[2];
+        struct mp_image data = *dmpi;
 
+	data.planes[0] = f->buffer->planes[0];
+	data.planes[1] = f->buffer->planes[1];
+	data.planes[2] = f->buffer->planes[2];
+
+	data.stride[0] = c->stride[0];
+	data.stride[1] = c->stride[1];
+	data.stride[2] = c->stride[2];
+
+        mp_image_copy(dmpi, &data);
+
+        dmpi->pts = f->pts;
+
+        // Warning: entirely bogus memory management of qscale
 	if (mpi->qscale) {
 		dmpi->qscale = vf->priv->qbuf;
 		dmpi->qstride = mpi->qstride;
 		dmpi->qscale_type = mpi->qscale_type;
 	}
-	ret = vf_next_put_image(vf, dmpi, f->pts);
 	pullup_release_frame(f);
-	return ret;
+
+skip:
+        talloc_free(mpi);
+	return dmpi;
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
@@ -302,12 +250,10 @@ static int vf_open(vf_instance_t *vf, char *args)
 {
 	struct vf_priv_s *p;
 	struct pullup_context *c;
-	//vf->get_image = get_image;
-	vf->put_image = put_image;
+	vf->filter = filter;
 	vf->config = config;
 	vf->query_format = query_format;
 	vf->uninit = uninit;
-	vf->default_reqs = VFCAP_ACCEPT_STRIDE;
 	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
 	p->ctx = c = pullup_alloc_context();
 	p->fakecount = 1;

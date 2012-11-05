@@ -34,7 +34,7 @@
 #include <libswscale/swscale.h>
 
 struct vf_priv_s {
-    mp_image_t *image;
+    int display_w, display_h;
     void (*image_callback)(void *, mp_image_t *);
     void *image_callback_ctx;
     int shot;
@@ -46,58 +46,24 @@ static int config(struct vf_instance *vf,
                   int width, int height, int d_width, int d_height,
                   unsigned int flags, unsigned int outfmt)
 {
-    free_mp_image(vf->priv->image);
-    vf->priv->image = new_mp_image(width, height);
-    mp_image_setfmt(vf->priv->image, outfmt);
-    vf->priv->image->display_w = d_width;
-    vf->priv->image->display_h = d_height;
+    vf->priv->display_w = d_width;
+    vf->priv->display_h = d_height;
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static void get_image(struct vf_instance *vf, mp_image_t *mpi)
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-    vf->dmpi= vf_get_image(vf->next, mpi->imgfmt,
-                           mpi->type, mpi->flags/* | MP_IMGFLAG_READABLE*/, mpi->width, mpi->height);
-
-    for (int i = 0; i < MP_MAX_PLANES; i++) {
-        mpi->planes[i]=vf->dmpi->planes[i];
-        mpi->stride[i]=vf->dmpi->stride[i];
-    }
-    mpi->width=vf->dmpi->width;
-
-    mpi->flags|=MP_IMGFLAG_DIRECT;
-
-    mpi->priv=(void*)vf->dmpi;
-}
-
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
-{
-    mp_image_t *dmpi = (mp_image_t *)mpi->priv;
-
-    if(!(mpi->flags&(MP_IMGFLAG_DIRECT))){
-        dmpi=vf_get_image(vf->next,mpi->imgfmt,
-                                    MP_IMGTYPE_EXPORT, 0,
-                                    mpi->width, mpi->height);
-        vf_clone_mpi_attributes(dmpi, mpi);
-        for (int i = 0; i < MP_MAX_PLANES; i++) {
-            dmpi->planes[i]=mpi->planes[i];
-            dmpi->stride[i]=mpi->stride[i];
-        }
-        dmpi->width=mpi->width;
-        dmpi->height=mpi->height;
-    }
-
     if(vf->priv->shot) {
         vf->priv->shot=0;
-        mp_image_t image = *dmpi;
+        mp_image_t image = *mpi;
         image.flags &= ~MP_IMGFLAG_ALLOCATED;
         mp_image_copy_attributes(&image, mpi);
-        mp_image_set_display_size(&image, vf->priv->image->display_w,
-                                  vf->priv->image->display_h);
+        mp_image_set_display_size(&image, vf->priv->display_w,
+                                  vf->priv->display_h);
         vf->priv->image_callback(vf->priv->image_callback_ctx, &image);
     }
 
-    return vf_next_put_image(vf, dmpi, pts);
+    return mpi;
 }
 
 static int control (vf_instance_t *vf, int request, void *data)
@@ -126,7 +92,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 
 static void uninit(vf_instance_t *vf)
 {
-    free_mp_image(vf->priv->image);
     free(vf->priv);
 }
 
@@ -134,13 +99,11 @@ static int vf_open(vf_instance_t *vf, char *args)
 {
     vf->config=config;
     vf->control=control;
-    vf->put_image=put_image;
+    vf->filter=filter;
     vf->query_format=query_format;
-    vf->get_image=get_image;
     vf->uninit=uninit;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     vf->priv->shot=0;
-    vf->priv->image=NULL;
     return 1;
 }
 

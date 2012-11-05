@@ -84,11 +84,9 @@ static int config(struct vf_instance *vf,
     return vf_next_config(vf,vf->priv->crop_w,vf->priv->crop_h,d_width,d_height,flags,outfmt);
 }
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
-    mp_image_t *dmpi;
-    dmpi=vf_get_image(vf->next,mpi->imgfmt,
-	MP_IMGTYPE_EXPORT, 0,
-	vf->priv->crop_w, vf->priv->crop_h);
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
+{
+    mp_image_t *dmpi = mpi;
     if(mpi->flags&MP_IMGFLAG_PLANAR){
 	dmpi->planes[0]=mpi->planes[0]+
 	    vf->priv->crop_y*mpi->stride[0]+vf->priv->crop_x;
@@ -102,19 +100,16 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	dmpi->planes[0]=mpi->planes[0]+
 	    vf->priv->crop_y*mpi->stride[0]+
 	    vf->priv->crop_x*(mpi->bpp/8);
-	dmpi->planes[1]=mpi->planes[1]; // passthrough rgb8 palette
     }
-    dmpi->stride[0]=mpi->stride[0];
-    dmpi->width=mpi->width;
-    return vf_next_put_image(vf,dmpi, pts);
+    mp_image_set_size(dmpi, vf->priv->crop_w, vf->priv->crop_h);
+    return mpi;
 }
 
 //===========================================================================//
 
 static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
-    vf->put_image=put_image;
-    vf->default_reqs=VFCAP_ACCEPT_STRIDE;
+    vf->filter=filter;
     mp_msg(MSGT_VFILTER, MSGL_INFO, "Crop: %d x %d, %d ; %d\n",
     vf->priv->crop_w,
     vf->priv->crop_h,

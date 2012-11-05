@@ -85,7 +85,6 @@ static int vf_open(vf_instance_t *vf, char *args)
 {
     vf->config = config;
     vf->uninit = uninit;
-    //vf->default_caps = 0;
     vf->priv = calloc(sizeof(struct vf_priv_s), 1);
     vf->priv->aspect = 0.;
     vf->priv->w = -1;

@@ -237,15 +237,19 @@ void apply_lut (eq2_param_t *par, unsigned char *dst, unsigned char *src,
   }
 }
 
-static
-int put_image (vf_instance_t *vf, mp_image_t *src, double pts)
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *src)
 {
-  unsigned      i;
   vf_eq2_t      *eq2;
-  mp_image_t    *dst;
   unsigned long img_n,img_c;
 
   eq2 = vf->priv;
+
+  bool skip = true;
+  for (int i = 0; i < 3; i++)
+      skip &= eq2->param[i].adjust == NULL;
+
+  if (skip)
+      return src;
 
   if ((eq2->buf_w[0] != src->w) || (eq2->buf_h[0] != src->h)) {
     eq2->buf_w[0] = src->w;
@@ -262,23 +266,24 @@ int put_image (vf_instance_t *vf, mp_image_t *src, double pts)
       eq2->buf[0] = realloc (eq2->buf[0], img_n);
   }
 
-  dst = vf_get_image (vf->next, src->imgfmt, MP_IMGTYPE_EXPORT, 0, src->w, src->h);
+  struct mp_image dst = *src;
 
-  for (i = 0; i < ((src->num_planes>1)?3:1); i++) {
+  for (int i = 0; i < ((src->num_planes>1)?3:1); i++) {
     if (eq2->param[i].adjust != NULL) {
-      dst->planes[i] = eq2->buf[i];
-      dst->stride[i] = eq2->buf_w[i];
+      dst.planes[i] = eq2->buf[i];
+      dst.stride[i] = eq2->buf_w[i];
 
-      eq2->param[i].adjust (&eq2->param[i], dst->planes[i], src->planes[i],
-        eq2->buf_w[i], eq2->buf_h[i], dst->stride[i], src->stride[i]);
-    }
-    else {
-      dst->planes[i] = src->planes[i];
-      dst->stride[i] = src->stride[i];
+      eq2->param[i].adjust (&eq2->param[i], dst.planes[i], src->planes[i],
+        eq2->buf_w[i], eq2->buf_h[i], dst.stride[i], src->stride[i]);
     }
   }
 
-  return vf_next_put_image (vf, dst, pts);
+  struct mp_image *new = vf_alloc_out_image(vf);
+  mp_image_copy(new, &dst);
+  mp_image_copy_attributes(new, &dst);
+
+  talloc_free(src);
+  return new;
 }
 
 static
@@ -454,7 +459,7 @@ int vf_open(vf_instance_t *vf, char *args)
 
   vf->control = control;
   vf->query_format = query_format;
-  vf->put_image = put_image;
+  vf->filter = filter;
   vf->uninit = uninit;
 
   vf->priv = malloc (sizeof (vf_eq2_t));

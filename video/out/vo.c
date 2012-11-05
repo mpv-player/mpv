@@ -38,6 +38,7 @@
 #include "core/mp_fifo.h"
 #include "core/m_config.h"
 #include "core/mp_msg.h"
+#include "video/mp_image.h"
 #include "video/vfcap.h"
 #include "sub/sub.h"
 
@@ -159,28 +160,20 @@ int vo_control(struct vo *vo, uint32_t request, void *data)
     return vo->driver->control(vo, request, data);
 }
 
-static void draw_image_pts(struct vo *vo, struct mp_image *mpi, double pts)
-{
-    if (vo->driver->draw_image_pts) {
-        vo->driver->draw_image_pts(vo, mpi, pts);
-    } else {
-        vo->driver->draw_image(vo, mpi);
-    }
-}
-
 // Return -1 if driver appears not to support a draw_image interface,
 // 0 otherwise (whether the driver actually drew something or not).
-int vo_draw_image(struct vo *vo, struct mp_image *mpi, double pts)
+int vo_draw_image(struct vo *vo, struct mp_image *mpi)
 {
     if (!vo->config_ok)
         return 0;
     if (vo->driver->buffer_frames) {
-        draw_image_pts(vo, mpi, pts);
+        vo->driver->draw_image(vo, mpi);
         return 0;
     }
     vo->frame_loaded = true;
-    vo->next_pts = pts;
-    vo->waiting_mpi = mpi;
+    vo->next_pts = mpi->pts;
+    assert(!vo->waiting_mpi);
+    vo->waiting_mpi = mp_image_new_ref(mpi);
     return 0;
 }
 
@@ -211,6 +204,7 @@ void vo_skip_frame(struct vo *vo)
 {
     vo_control(vo, VOCTRL_SKIPFRAME, NULL);
     vo->frame_loaded = false;
+    mp_image_unrefp(&vo->waiting_mpi);
 }
 
 void vo_new_frame_imminent(struct vo *vo)
@@ -218,8 +212,11 @@ void vo_new_frame_imminent(struct vo *vo)
     if (vo->driver->buffer_frames)
         vo_control(vo, VOCTRL_NEWFRAME, NULL);
     else {
-        draw_image_pts(vo, vo->waiting_mpi, vo->next_pts);
-        vo->waiting_mpi = NULL;
+        assert(vo->frame_loaded);
+        assert(vo->waiting_mpi);
+        assert(vo->waiting_mpi->pts == vo->next_pts);
+        vo->driver->draw_image(vo, vo->waiting_mpi);
+        mp_image_unrefp(&vo->waiting_mpi);
     }
 }
 
@@ -262,6 +259,7 @@ void vo_seek_reset(struct vo *vo)
     vo_control(vo, VOCTRL_RESET, NULL);
     vo->frame_loaded = false;
     vo->hasframe = false;
+    mp_image_unrefp(&vo->waiting_mpi);
 }
 
 void vo_destroy(struct vo *vo)
@@ -269,6 +267,7 @@ void vo_destroy(struct vo *vo)
     if (vo->registered_fd != -1)
         mp_input_rm_key_fd(vo->input_ctx, vo->registered_fd);
     vo->driver->uninit(vo);
+    talloc_free(vo->waiting_mpi);
     talloc_free(vo);
 }
 

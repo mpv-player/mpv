@@ -140,7 +140,8 @@ struct vdpctx {
     struct mp_osd_res                  osd_rect;
 
     struct vdpau_render_state          surface_render[MAX_VIDEO_SURFACES];
-    int                                surface_num;
+    bool                               surface_in_use[MAX_VIDEO_SURFACES];
+    int                                surface_num; // indexes output_surfaces
     int                                query_surface_num;
     VdpTime                            recent_vsync_time;
     float                              user_fps;
@@ -332,15 +333,12 @@ static void add_new_video_surface(struct vo *vo, VdpVideoSurface surface,
     struct vdpctx *vc = vo->priv;
     struct buffered_video_surface *bv = vc->buffered_video;
 
-    if (reserved_mpi)
-        reserved_mpi->usage_count++;
-    if (bv[NUM_BUFFERED_VIDEO - 1].mpi)
-        bv[NUM_BUFFERED_VIDEO - 1].mpi->usage_count--;
+    mp_image_unrefp(&bv[NUM_BUFFERED_VIDEO - 1].mpi);
 
     for (int i = NUM_BUFFERED_VIDEO - 1; i > 0; i--)
         bv[i] = bv[i - 1];
     bv[0] = (struct buffered_video_surface){
-        .mpi = reserved_mpi,
+        .mpi = reserved_mpi ? mp_image_new_ref(reserved_mpi) : NULL,
         .surface = surface,
         .pts = pts,
     };
@@ -358,8 +356,7 @@ static void forget_frames(struct vo *vo)
     vc->dropped_frame = false;
     for (int i = 0; i < NUM_BUFFERED_VIDEO; i++) {
         struct buffered_video_surface *p = vc->buffered_video + i;
-        if (p->mpi)
-            p->mpi->usage_count--;
+        mp_image_unrefp(&p->mpi);
         *p = (struct buffered_video_surface){
             .surface = VDP_INVALID_HANDLE,
         };
@@ -1299,7 +1296,7 @@ static struct vdpau_render_state *get_surface(struct vo *vo, int number)
     return &vc->surface_render[number];
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
+static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
@@ -1329,7 +1326,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
     else
         vc->top_field_first = 1;
 
-    add_new_video_surface(vo, rndr->surface, reserved_mpi, pts);
+    add_new_video_surface(vo, rndr->surface, reserved_mpi, mpi->pts);
 
     return;
 }
@@ -1392,23 +1389,38 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
     return image;
 }
 
-static uint32_t get_decoder_surface(struct vo *vo, mp_image_t *mpi)
+static void release_decoder_surface(void *ptr)
+{
+    bool *in_use_ptr = ptr;
+    *in_use_ptr = false;
+}
+
+static struct mp_image *get_decoder_surface(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
-    struct vdpau_render_state *rndr;
 
     if (!IMGFMT_IS_VDPAU(vc->image_format))
-        return VO_FALSE;
+        return NULL;
 
-    rndr = get_surface(vo, mpi->number);
-    if (!rndr) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] no surfaces available in "
-               "get_decoder_surface\n");
-        // TODO: this probably breaks things forever, provide a dummy buffer?
-        return VO_FALSE;
+    for (int n = 0; n < MAX_VIDEO_SURFACES; n++) {
+        if (!vc->surface_in_use[n]) {
+            vc->surface_in_use[n] = true;
+            struct mp_image *res =
+                mp_image_new_custom_ref(&(struct mp_image){0},
+                                        &vc->surface_in_use[n],
+                                        release_decoder_surface);
+            mp_image_setfmt(res, vc->image_format);
+            mp_image_set_size(res, vc->vid_width, vc->vid_height);
+            struct vdpau_render_state *rndr = get_surface(vo, n);
+            res->planes[0] = (void *)rndr;
+            return res;
+        }
     }
-    mpi->planes[0] = (void *)rndr;
-    return VO_TRUE;
+
+    mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] no surfaces available in "
+           "get_decoder_surface\n");
+    // TODO: this probably breaks things forever, provide a dummy buffer?
+    return NULL;
 }
 
 static int query_format(struct vo *vo, uint32_t format)
@@ -1587,8 +1599,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (vc->dropped_frame)
             vo->want_redraw = true;
         return true;
-    case VOCTRL_HWDEC_GET_SURFACE:
-        return get_decoder_surface(vo, data);
+    case VOCTRL_HWDEC_ALLOC_SURFACE:
+        *(struct mp_image **)data = get_decoder_surface(vo);
+        return true;
     case VOCTRL_HWDEC_DECODER_RENDER:
         return decoder_render(vo, data);
     case VOCTRL_BORDER:
@@ -1672,7 +1685,7 @@ const struct vo_driver video_out_vdpau = {
     .query_format = query_format,
     .config = config,
     .control = control,
-    .draw_image_pts = draw_image,
+    .draw_image = draw_image,
     .get_buffered_frame = set_next_frame_info,
     .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,

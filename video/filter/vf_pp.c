@@ -21,6 +21,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <errno.h>
+#include <assert.h>
 
 #include "config.h"
 #include "core/mp_msg.h"
@@ -93,43 +94,26 @@ static int control(struct vf_instance *vf, int request, void* data){
     return vf_next_control(vf,request,data);
 }
 
-static void get_image(struct vf_instance *vf, mp_image_t *mpi){
-    if(vf->priv->pp&0xFFFF) return; // non-local filters enabled
-    if((mpi->type==MP_IMGTYPE_IPB || vf->priv->pp) &&
-	mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
-    if(!(mpi->flags&MP_IMGFLAG_ACCEPT_STRIDE) && mpi->imgfmt!=vf->priv->outfmt)
-	return; // colorspace differ
-    // ok, we can do pp in-place (or pp disabled):
-    vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-        mpi->type, mpi->flags | MP_IMGFLAG_READABLE, mpi->width, mpi->height);
-    mpi->planes[0]=vf->dmpi->planes[0];
-    mpi->stride[0]=vf->dmpi->stride[0];
-    mpi->width=vf->dmpi->width;
-    if(mpi->flags&MP_IMGFLAG_PLANAR){
-        mpi->planes[1]=vf->dmpi->planes[1];
-        mpi->planes[2]=vf->dmpi->planes[2];
-	mpi->stride[1]=vf->dmpi->stride[1];
-	mpi->stride[2]=vf->dmpi->stride[2];
-    }
-    mpi->flags|=MP_IMGFLAG_DIRECT;
-}
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
+{
+    // pass-through if pp disabled
+    if (!vf->priv->pp)
+        return mpi;
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
-    if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
-	// no DR, so get a new image! hope we'll get DR buffer:
-	vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-	    MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE |
-	    MP_IMGFLAG_PREFER_ALIGNED_STRIDE | MP_IMGFLAG_READABLE,
-//	    MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-//	    mpi->w,mpi->h);
-	    (mpi->width+7)&(~7),(mpi->height+7)&(~7));
-	vf->dmpi->w=mpi->w; vf->dmpi->h=mpi->h; // display w;h
+    bool non_local = vf->priv->pp & 0xFFFF;
+
+    struct mp_image *dmpi = mpi;
+    if (!mp_image_is_writeable(mpi) || non_local) {
+        dmpi = vf_alloc_out_image(vf);
+        mp_image_copy_attributes(dmpi, mpi);
     }
 
-    if(vf->priv->pp || !(mpi->flags&MP_IMGFLAG_DIRECT)){
+    // apparently this is required
+    assert(mpi->stride[0] >= ((mpi->w+7)&(~7)));
+
 	// do the postprocessing! (or copy if no DR)
 	pp_postprocess((const uint8_t **)mpi->planes, mpi->stride,
-		    vf->dmpi->planes,vf->dmpi->stride,
+		    dmpi->planes,dmpi->stride,
 		    (mpi->w+7)&(~7),mpi->h,
 		    mpi->qscale, mpi->qstride,
 		    vf->priv->ppMode[ vf->priv->pp ], vf->priv->context,
@@ -138,8 +122,10 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 #else
 		    mpi->pict_type);
 #endif
-    }
-    return vf_next_put_image(vf,vf->dmpi, pts);
+
+    if (dmpi != mpi)
+        talloc_free(mpi);
+    return dmpi;
 }
 
 //===========================================================================//
@@ -162,8 +148,7 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->query_format=query_format;
     vf->control=control;
     vf->config=config;
-    vf->get_image=get_image;
-    vf->put_image=put_image;
+    vf->filter=filter;
     vf->uninit=uninit;
     vf->default_caps=VFCAP_ACCEPT_STRIDE|VFCAP_POSTPROC;
     vf->priv=malloc(sizeof(struct vf_priv_s));

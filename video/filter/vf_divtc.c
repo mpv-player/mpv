@@ -46,6 +46,7 @@ struct vf_priv_s
    unsigned int *csdata;
    int *history;
    struct vf_detc_pts_buf ptsbuf;
+   struct mp_image *buffer;
    };
 
 /*
@@ -258,19 +259,23 @@ static int match(struct vf_priv_s *p, int *diffs,
    return m;
    }
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
    {
-   mp_image_t *dmpi, *tmpi=0;
    int n, m, f, newphase;
    struct vf_priv_s *p=vf->priv;
    unsigned int checksum;
    double d;
 
-   dmpi=vf_get_image(vf->next, mpi->imgfmt,
-		     MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
-		     MP_IMGFLAG_PRESERVE | MP_IMGFLAG_READABLE,
-		     mpi->width, mpi->height);
-   vf_clone_mpi_attributes(dmpi, mpi);
+   if (!p->buffer || p->buffer->w != mpi->w || p->buffer->h != mpi->h ||
+       p->buffer->imgfmt != mpi->imgfmt)
+   {
+       mp_image_unrefp(&p->buffer);
+       p->buffer = mp_image_alloc(mpi->imgfmt, mpi->w, mpi->h);
+       talloc_steal(vf, p->buffer);
+   }
+
+   struct mp_image *dmpi = p->buffer;
+   double pts = mpi->pts;
 
    newphase=p->phase;
 
@@ -360,26 +365,24 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
       case 0:
 	 imgop(copyop, dmpi, mpi, 0);
          vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 1);
+         talloc_free(mpi);
 	 return 0;
 
       case 4:
 	 if(p->deghost>0)
 	    {
-	    tmpi=vf_get_image(vf->next, mpi->imgfmt,
-			      MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE |
-			      MP_IMGFLAG_READABLE,
-			      mpi->width, mpi->height);
-	    vf_clone_mpi_attributes(tmpi, mpi);
+            imgop(copyop, dmpi, mpi, 0);
+            vf_make_out_image_writeable(vf, mpi);
 
-	    imgop(copyop, tmpi, mpi, 0);
-	    imgop(deghost_plane, tmpi, dmpi, p->deghost);
-	    imgop(copyop, dmpi, mpi, 0);
-	    return vf_next_put_image(vf, tmpi, vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 0));
+	    imgop(deghost_plane, mpi, dmpi, p->deghost);
+            mpi->pts = vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 0);
+	    return mpi;
 	    }
       }
 
    imgop(copyop, dmpi, mpi, 0);
-   return vf_next_put_image(vf, dmpi, vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 0));
+   mpi->pts = vf_detc_adjust_pts(&p->ptsbuf, pts, 0, 0);
+   return mpi;
    }
 
 static int analyze(struct vf_priv_s *p)
@@ -613,10 +616,9 @@ static int vf_open(vf_instance_t *vf, char *args)
       return 0;
       }
 
-   vf->put_image=put_image;
+   vf->filter=filter;
    vf->uninit=uninit;
    vf->query_format=query_format;
-   vf->default_reqs=VFCAP_ACCEPT_STRIDE;
    if(!(vf->priv=p=calloc(1, sizeof(struct vf_priv_s))))
       goto nomem;
 

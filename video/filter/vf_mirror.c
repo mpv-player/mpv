@@ -83,13 +83,10 @@ static void mirror(unsigned char* dst,unsigned char* src,int dststride,int srcst
 
 //===========================================================================//
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
-    mp_image_t *dmpi;
-
-    // hope we'll get DR buffer:
-    dmpi=vf_get_image(vf->next,mpi->imgfmt,
-	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-	mpi->w, mpi->h);
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
+{
+    mp_image_t *dmpi = vf_alloc_out_image(vf);
+    mp_image_copy_attributes(dmpi, mpi);
 
     if(mpi->flags&MP_IMGFLAG_PLANAR){
 	       mirror(dmpi->planes[0],mpi->planes[0],
@@ -108,14 +105,15 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	dmpi->planes[1]=mpi->planes[1]; // passthrough rgb8 palette
     }
 
-    return vf_next_put_image(vf,dmpi, pts);
+    talloc_free(mpi);
+    return dmpi;
 }
 
 //===========================================================================//
 
 static int vf_open(vf_instance_t *vf, char *args){
     //vf->config=config;
-    vf->put_image=put_image;
+    vf->filter=filter;
     return 1;
 }
 

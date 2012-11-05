@@ -144,8 +144,10 @@ typedef struct mp_image {
     int chroma_y_shift; // vertical
     enum mp_csp colorspace;
     enum mp_csp_levels levels;
+    /* only inside filter chain */
+    double pts;
     /* memory management */
-    int number, usage_count; // used by old VF/DR and vdpau code only
+    int number, usage_count;
     struct m_refcount *refcount;
     /* for private use by filter or vo driver (to store buffer id or dmpi) */
     void* priv;

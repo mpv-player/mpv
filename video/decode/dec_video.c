@@ -104,7 +104,6 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
 void get_detected_video_colorspace(struct sh_video *sh, struct mp_csp_details *csp)
 {
     struct MPOpts *opts = sh->opts;
-    struct vf_instance *vf = sh->vfilter;
 
     csp->format = opts->requested_colorspace;
     csp->levels_in = opts->requested_input_range;
@@ -113,7 +112,7 @@ void get_detected_video_colorspace(struct sh_video *sh, struct mp_csp_details *c
     if (csp->format == MP_CSP_AUTO)
         csp->format = sh->colorspace;
     if (csp->format == MP_CSP_AUTO)
-        csp->format = mp_csp_guess_colorspace(vf->w, vf->h);
+        csp->format = mp_csp_guess_colorspace(sh->disp_w, sh->disp_h);
 
     if (csp->levels_in == MP_CSP_LEVELS_AUTO)
         csp->levels_in = sh->color_range;
@@ -400,8 +399,10 @@ void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
     }
 #endif
 
-    if (!mpi || drop_frame)
+    if (!mpi || drop_frame) {
+        talloc_free(mpi);
         return NULL;            // error / skipped frame
+    }
 
     if (field_dominance == 0)
         mpi->fields |= MP_IMGFIELD_TOP_FIRST;
@@ -431,12 +432,4 @@ void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
         || pts == MP_NOPTS_VALUE)
         sh_video->num_sorted_pts_problems++;
     return mpi;
-}
-
-int filter_video(sh_video_t *sh_video, void *frame, double pts)
-{
-    mp_image_t *mpi = frame;
-    vf_instance_t *vf = sh_video->vfilter;
-    // apply video filters and call the leaf vo/ve
-    return vf->put_image(vf, mpi, pts);
 }

@@ -245,8 +245,8 @@ static void blur_line_sse2(uint16_t *dc, uint16_t *buf, uint16_t *buf1,
 }
 #endif // HAVE_6REGS && HAVE_SSE2
 
-static void filter(struct vf_priv_s *ctx, uint8_t *dst, uint8_t *src,
-                   int width, int height, int dstride, int sstride, int r)
+static void filter_plane(struct vf_priv_s *ctx, uint8_t *dst, uint8_t *src,
+                         int width, int height, int dstride, int sstride, int r)
 {
     int bstride = ((width+15)&~15)/2;
     int y;
@@ -287,38 +287,15 @@ static void filter(struct vf_priv_s *ctx, uint8_t *dst, uint8_t *src,
     }
 }
 
-static void get_image(struct vf_instance *vf, mp_image_t *mpi)
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-    if (mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
-    // ok, we can do pp in-place:
-    vf->dmpi = vf_get_image(vf->next, mpi->imgfmt,
-                            mpi->type, mpi->flags, mpi->width, mpi->height);
-    mpi->planes[0] = vf->dmpi->planes[0];
-    mpi->stride[0] = vf->dmpi->stride[0];
-    mpi->width = vf->dmpi->width;
-    if (mpi->flags&MP_IMGFLAG_PLANAR){
-        mpi->planes[1] = vf->dmpi->planes[1];
-        mpi->planes[2] = vf->dmpi->planes[2];
-        mpi->stride[1] = vf->dmpi->stride[1];
-        mpi->stride[2] = vf->dmpi->stride[2];
+    struct mp_image *dmpi = mpi;
+    if (!mp_image_is_writeable(mpi)) {
+        dmpi = vf_alloc_out_image(vf);
+        mp_image_copy_attributes(dmpi, mpi);
     }
-    mpi->flags |= MP_IMGFLAG_DIRECT;
-}
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
-{
-    mp_image_t *dmpi = vf->dmpi;
-    int p;
-
-    if (!(mpi->flags&MP_IMGFLAG_DIRECT)) {
-        // no DR, so get a new image. hope we'll get DR buffer:
-        dmpi = vf_get_image(vf->next,mpi->imgfmt, MP_IMGTYPE_TEMP,
-                            MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
-                            mpi->w, mpi->h);
-    }
-    vf_clone_mpi_attributes(dmpi, mpi);
-
-    for (p=0; p<mpi->num_planes; p++) {
+    for (int p=0; p < mpi->num_planes; p++) {
         int w = mpi->w;
         int h = mpi->h;
         int r = vf->priv->radius;
@@ -329,14 +306,16 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
             r = av_clip((r+1)&~1,4,32);
         }
         if (FFMIN(w,h) > 2*r)
-            filter(vf->priv, dmpi->planes[p], mpi->planes[p], w, h,
-                             dmpi->stride[p], mpi->stride[p], r);
+            filter_plane(vf->priv, dmpi->planes[p], mpi->planes[p], w, h,
+                                   dmpi->stride[p], mpi->stride[p], r);
         else if (dmpi->planes[p] != mpi->planes[p])
             memcpy_pic(dmpi->planes[p], mpi->planes[p], w, h,
                        dmpi->stride[p], mpi->stride[p]);
     }
 
-    return vf_next_put_image(vf, dmpi, pts);
+    if (dmpi != mpi)
+        talloc_free(mpi);
+    return dmpi;
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
@@ -386,8 +365,7 @@ static void uninit(struct vf_instance *vf)
 
 static int vf_open(vf_instance_t *vf, char *args)
 {
-    vf->get_image=get_image;
-    vf->put_image=put_image;
+    vf->filter=filter;
     vf->query_format=query_format;
     vf->config=config;
     vf->uninit=uninit;

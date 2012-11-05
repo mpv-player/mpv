@@ -74,22 +74,16 @@ static int config(struct vf_instance *vf,
     if (vf->priv->direction & 4) {
 	if (width<height) vf->priv->direction&=3;
     }
-    if (vf->priv->direction & 4){
-	vf->put_image=vf_next_put_image; // passthru mode!
-/* FIXME: this should be in an other procedure in vf.c; that should always check
-     whether the filter after the passthrough one still (not)supports slices */
-	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
-    }
     return vf_next_config(vf,height,width,d_height,d_width,flags,outfmt);
 }
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
-    mp_image_t *dmpi;
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
+{
+    if (vf->priv->direction & 4)
+        return mpi;
 
-    // hope we'll get DR buffer:
-    dmpi=vf_get_image(vf->next,mpi->imgfmt,
-	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-	mpi->h, mpi->w);
+    struct mp_image *dmpi = vf_alloc_out_image(vf);
+    mp_image_copy_attributes(dmpi, mpi);
 
     if(mpi->flags&MP_IMGFLAG_PLANAR){
 	rotate(dmpi->planes[0],mpi->planes[0],
@@ -108,7 +102,8 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
 	dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
     }
 
-    return vf_next_put_image(vf,dmpi, pts);
+    talloc_free(mpi);
+    return dmpi;
 }
 
 //===========================================================================//
@@ -132,7 +127,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
 
 static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
-    vf->put_image=put_image;
+    vf->filter=filter;
     vf->query_format=query_format;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     vf->priv->direction=args?atoi(args):0;

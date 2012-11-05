@@ -8,13 +8,9 @@
 #include "demux/stheader.h"
 #include "video/mp_image.h"
 
-#define MAX_NUM_MPI 50
-
 typedef struct ffmpeg_ctx {
     AVCodecContext *avctx;
     AVFrame *pic;
-    struct mp_image *last_mpi;
-    struct mp_image hwdec_mpi[MAX_NUM_MPI];
     struct hwdec *hwdec;
     enum PixelFormat pix_fmt;
     int do_hw_dr1, do_dr1;
@@ -28,6 +24,7 @@ typedef struct ffmpeg_ctx {
     int rawvideo_fmt;
     AVCodec *software_fallback;
     struct FramePool *dr1_buffer_pool;
+    struct mp_image_pool *non_dr1_pool;
 } vd_ffmpeg_ctx;
 
 int mp_codec_get_buffer(AVCodecContext *s, AVFrame *frame);

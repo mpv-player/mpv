@@ -74,7 +74,7 @@ static int preinit(struct vo *vo, const char *arg)
     return 0;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi, double pts);
+static void draw_image(struct vo *vo, mp_image_t *mpi);
 static void uninit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
@@ -82,7 +82,7 @@ static void uninit(struct vo *vo)
         return;
 
     if (vc->lastipts >= 0 && vc->stream)
-        draw_image(vo, NULL, MP_NOPTS_VALUE);
+        draw_image(vo, NULL);
 
     if (vc->lastimg) {
         // palette hack
@@ -284,7 +284,7 @@ static int encode_video(struct vo *vo, AVFrame *frame, AVPacket *packet)
     }
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
+static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *vc = vo->priv;
     struct encode_lavc_context *ectx = vo->encode_lavc_ctx;
@@ -293,6 +293,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
     AVCodecContext *avc;
     int64_t frameipts;
     double nextpts;
+
+    double pts = mpi ? mpi->pts : MP_NOPTS_VALUE;
 
     if (!vc)
         return;
@@ -540,7 +542,7 @@ const struct vo_driver video_out_lavc = {
     .control = control,
     .uninit = uninit,
     .check_events = check_events,
-    .draw_image_pts = draw_image,
+    .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,
 };

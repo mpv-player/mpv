@@ -41,6 +41,7 @@
 
 #include "vd.h"
 #include "video/img_format.h"
+#include "video/mp_image_pool.h"
 #include "video/filter/vf.h"
 #include "demux/stheader.h"
 #include "demux/demux_packet.h"
@@ -244,6 +245,7 @@ static int init(sh_video_t *sh)
 
     ctx = sh->context = talloc_zero(NULL, vd_ffmpeg_ctx);
     ctx->rawvideo_fmt = PIX_FMT_NONE;
+    ctx->non_dr1_pool = talloc_steal(ctx, mp_image_pool_new(16));
 
     if (sh->codec->dll) {
         lavc_codec = avcodec_find_decoder_by_name(sh->codec->dll);
@@ -478,7 +480,6 @@ static void uninit_avctx(sh_video_t *sh)
     av_freep(&avctx);
     avcodec_free_frame(&ctx->pic);
 
-    mp_image_unrefp(&ctx->last_mpi);
     mp_buffer_pool_free(&ctx->dr1_buffer_pool);
 }
 
@@ -518,7 +519,7 @@ static int init_vo(sh_video_t *sh)
             width != sh->disp_w || height != sh->disp_h ||
             avctx->pix_fmt != ctx->pix_fmt || !ctx->vo_initialized)
     {
-        mp_image_unrefp(&ctx->last_mpi);
+        mp_image_pool_clear(ctx->non_dr1_pool);
         ctx->vo_initialized = 0;
         mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
 
@@ -579,22 +580,6 @@ static void draw_slice_hwdec(struct AVCodecContext *s,
     vf->control(vf, VFCTRL_HWDEC_DECODER_RENDER, state_ptr);
 }
 
-static struct mp_image *get_image_hwdec(vd_ffmpeg_ctx *ctx)
-{
-    for (int n = 0; n < MAX_NUM_MPI; n++) {
-        struct mp_image *cur = &ctx->hwdec_mpi[n];
-        if (cur->usage_count == 0) {
-            *cur = (struct mp_image) {
-                .number = n,
-                .imgfmt = ctx->best_csp,
-                .usage_count = 1,
-            };
-            return cur;
-        }
-    }
-    return NULL;
-}
-
 static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
 {
     sh_video_t *sh = avctx->opaque;
@@ -620,12 +605,12 @@ static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
 
     assert(IMGFMT_IS_HWACCEL(ctx->best_csp));
 
-    struct mp_image *mpi = get_image_hwdec(ctx);
-    if (!mpi)
-        return -1;
+    struct mp_image *mpi = NULL;
 
     struct vf_instance *vf = sh->vfilter;
-    vf->control(vf, VFCTRL_HWDEC_GET_SURFACE, mpi);
+    vf->control(vf, VFCTRL_HWDEC_ALLOC_SURFACE, &mpi);
+    if (!mpi)
+        return -1;
 
     for (int i = 0; i < 4; i++)
         pic->data[i] = mpi->planes[i];
@@ -647,9 +632,8 @@ static void release_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
 
     assert(pic->type == FF_BUFFER_TYPE_USER);
     assert(mpi);
-    assert(mpi->usage_count > 0);
 
-    mpi->usage_count--;
+    talloc_free(mpi);
 
     for (int i = 0; i < 4; i++)
         pic->data[i] = NULL;
@@ -726,13 +710,14 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
         return -1;
 
     struct mp_image *mpi = NULL;
-    if (ctx->do_hw_dr1 && pic->opaque)
+    if (ctx->do_hw_dr1 && pic->opaque) {
         mpi = pic->opaque; // reordered frame
+        assert(mpi);
+        mpi = mp_image_new_ref(mpi);
+    }
 
     if (!mpi) {
         struct mp_image new = {0};
-        new.type = MP_IMGTYPE_EXPORT;
-        new.flags = MP_IMGFLAG_PRESERVE;
         mp_image_set_size(&new, avctx->width, avctx->height);
         mp_image_setfmt(&new, ctx->best_csp);
         for (int i = 0; i < 4; i++) {
@@ -741,23 +726,17 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
         }
         if (ctx->do_dr1 && pic->opaque) {
             struct FrameBuffer *fb = pic->opaque;
-            mp_image_unrefp(&ctx->last_mpi);
-            mp_buffer_ref(fb); // reference for last_mpi
-            ctx->last_mpi = mp_image_new_external_ref(&new, fb, fb_ref,
-                                                      fb_unref, fb_is_unique);
+            mp_buffer_ref(fb); // initial reference for mpi
+            mpi = mp_image_new_external_ref(&new, fb, fb_ref, fb_unref,
+                                            fb_is_unique);
         } else {
-            if (!ctx->last_mpi)
-                ctx->last_mpi = mp_image_alloc(ctx->best_csp, new.w, new.h);
-            mp_image_make_writeable(&ctx->last_mpi);
-            assert(ctx->last_mpi->w == new.w && ctx->last_mpi->h == new.h);
-            assert(ctx->last_mpi->imgfmt == new.imgfmt);
-            mp_image_copy(ctx->last_mpi, &new);
+            mpi = mp_image_pool_get(ctx->non_dr1_pool, new.imgfmt,
+                                    new.w, new.h);
+            mp_image_copy(mpi, &new);
         }
-        mpi = ctx->last_mpi;
     }
 
-    if (!mpi->planes[0])
-        return 0; // ?
+    assert(mpi->planes[0]);
 
     assert(mpi->imgfmt == pixfmt2imgfmt(avctx->pix_fmt));
 

@@ -372,18 +372,16 @@ static void ilpack(unsigned char *dst, unsigned char *src[3],
 }
 
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-    mp_image_t *dmpi;
+    mp_image_t *dmpi = vf_alloc_out_image(vf);
+    mp_image_copy_attributes(dmpi, mpi);
 
-    // hope we'll get DR buffer:
-    dmpi=vf_get_image(vf->next, IMGFMT_YUY2,
-              MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-              mpi->w, mpi->h);
 
     ilpack(dmpi->planes[0], mpi->planes, dmpi->stride[0], mpi->stride, mpi->w, mpi->h, vf->priv->pack);
 
-    return vf_next_put_image(vf,dmpi, pts);
+    talloc_free(mpi);
+    return dmpi;
 }
 
 static int config(struct vf_instance *vf,
@@ -411,7 +409,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 {
     vf->config=config;
     vf->query_format=query_format;
-    vf->put_image=put_image;
+    vf->filter=filter;
     vf->priv = calloc(1, sizeof(struct vf_priv_s));
     vf->priv->mode = 1;
     if (args) sscanf(args, "%d", &vf->priv->mode);

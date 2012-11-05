@@ -279,11 +279,10 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
                           d_width, d_height, flags, outfmt);
 }
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-    mp_image_t *dmpi;
     if (vf->priv->in.fmt == vf->priv->out.fmt) { //nothing to do
-        dmpi = mpi;
+        return mpi;
     } else {
         int out_off_left, out_off_right;
         int in_off_left  = vf->priv->in.row_left   * mpi->stride[0]  +
@@ -291,9 +290,9 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
         int in_off_right = vf->priv->in.row_right  * mpi->stride[0]  +
                            vf->priv->in.off_right;
 
-        dmpi = vf_get_image(vf->next, IMGFMT_RGB24, MP_IMGTYPE_TEMP,
-                            MP_IMGFLAG_ACCEPT_STRIDE,
-                            vf->priv->out.width, vf->priv->out.height);
+        struct mp_image *dmpi = vf_alloc_out_image(vf);
+        mp_image_copy_attributes(dmpi, mpi);
+
         out_off_left   = vf->priv->out.row_left  * dmpi->stride[0] +
                          vf->priv->out.off_left;
         out_off_right  = vf->priv->out.row_right * dmpi->stride[0] +
@@ -374,11 +373,13 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
         default:
             mp_msg(MSGT_VFILTER, MSGL_WARN,
                    "[stereo3d] stereo format of output is not supported\n");
-            return 0;
+            return NULL;
             break;
         }
+
+        talloc_free(mpi);
+        return dmpi;
     }
-    return vf_next_put_image(vf, dmpi, pts);
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
@@ -398,7 +399,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 {
     vf->config          = config;
     vf->uninit          = uninit;
-    vf->put_image       = put_image;
+    vf->filter          = filter;
     vf->query_format    = query_format;
 
     return 1;

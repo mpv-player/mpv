@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
+#include <assert.h>
 
 #include "config.h"
 #include "core/mp_msg.h"
@@ -149,14 +150,13 @@ static int config(struct vf_instance *vf,
         return 0;
     }
 
-    if (vf->priv->out_cnt >= 2) {
-        int i;
-        for (i = 0; i < vf->priv->out_cnt; ++i) {
-            vf->priv->outpic[i] =
-                alloc_mpi(vf->priv->out_width, vf->priv->out_height,
-                          vf->priv->outfmt);
-            set_imgprop(&vf->priv->filter.outpic[i], vf->priv->outpic[i]);
-        }
+    for (int i = 0; i < vf->priv->out_cnt; ++i) {
+        talloc_free(vf->priv->outpic[i]);
+        vf->priv->outpic[i] =
+            mp_image_alloc(vf->priv->out_width, vf->priv->out_height,
+                           vf->priv->outfmt);
+        set_imgprop(&vf->priv->filter.outpic[i], vf->priv->outpic[i]);
+        talloc_steal(vf, vf->priv->outpic[i]);
     }
 
     return vf_next_config(vf, vf->priv->out_width,
@@ -175,52 +175,13 @@ static void uninit(struct vf_instance *vf)
         DLLClose(vf->priv->dll);
         vf->priv->dll = NULL;
     }
-    if (vf->priv->out_cnt >= 2) {
-        int i;
-        for (i = 0; i < vf->priv->out_cnt; ++i) {
-            free_mp_image(vf->priv->outpic[i]);
-            vf->priv->outpic[i] = NULL;
-        }
-    }
     if (vf->priv->qbuffer) {
         free(vf->priv->qbuffer);
         vf->priv->qbuffer = NULL;
     }
 }
 
-// NOTE: only called if (vf->priv->out_cnt >= 2) {
-static int continue_put_image(struct vf_instance *vf)
-{
-    int k;
-    int ret = 0;
-
-    mp_image_t *dmpi =
-        vf_get_image(vf->next, vf->priv->outfmt, MP_IMGTYPE_EXPORT, 0,
-                     vf->priv->outpic[vf->priv->outbufferpos]->w,
-                     vf->priv->outpic[vf->priv->outbufferpos]->h);
-    for (k = 0; k < vf->priv->outpic[vf->priv->outbufferpos]->num_planes;
-         ++k) {
-        dmpi->planes[k] = vf->priv->outpic[vf->priv->outbufferpos]->planes[k];
-        dmpi->stride[k] = vf->priv->outpic[vf->priv->outbufferpos]->stride[k];
-    }
-
-    // pass through qscale if we can
-    vf_clone_mpi_attributes(dmpi, vf->priv->outbuffermpi);
-
-    ret =
-        vf_next_put_image(vf, dmpi,
-                          vf->priv->filter.outpic[vf->priv->outbufferpos].pts);
-
-    ++vf->priv->outbufferpos;
-
-    // more frames left?
-    if (vf->priv->outbufferpos < vf->priv->outbufferlen)
-        vf_queue_frame(vf, continue_put_image);
-
-    return ret;
-}
-
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
+static int filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     int i, k;
 
@@ -245,36 +206,32 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
         vf->priv->filter.inpic_qscalestride = 0;
         vf->priv->filter.inpic_qscaleshift = 0;
     }
-    vf->priv->filter.inpic.pts = pts;
+    vf->priv->filter.inpic.pts = mpi->pts;
 
-    if (vf->priv->out_cnt >= 2) {
-        // more than one out pic
-        int ret = vf->priv->filter.put_image(&vf->priv->filter);
-        if (ret <= 0)
-            return ret;
+    struct mp_image *out[FILTER_MAX_OUTCNT] = {0};
 
-        vf->priv->outbuffermpi = mpi;
-        vf->priv->outbufferlen = ret;
-        vf->priv->outbufferpos = 0;
-        return continue_put_image(vf);
-    } else {
-        // efficient case: exactly one out pic
-        mp_image_t *dmpi =
-            vf_get_image(vf->next, vf->priv->outfmt,
-                    MP_IMGTYPE_TEMP,
-                    MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
-                    vf->priv->out_width, vf->priv->out_height);
-        set_imgprop(&vf->priv->filter.outpic[0], dmpi);
-
-        int ret = vf->priv->filter.put_image(&vf->priv->filter);
-        if (ret <= 0)
-            return ret;
-
-        // pass through qscale if we can
-        vf_clone_mpi_attributes(dmpi, mpi);
-
-        return vf_next_put_image(vf, dmpi, vf->priv->filter.outpic[0].pts);
+    for (int n = 0; n < vf->priv->out_cnt; n++) {
+        out[n] = vf_alloc_out_image(vf);
+        mp_image_copy_attributes(out[n], mpi);
+        set_imgprop(&vf->priv->filter.outpic[n], out[n]);
     }
+
+    // more than one out pic
+    int ret = vf->priv->filter.put_image(&vf->priv->filter);
+    if (ret < 0)
+        ret = 0;
+    assert(ret <= vf->priv->out_cnt);
+
+    for (int n = 0; n < ret; n++) {
+        out[n]->pts = vf->priv->filter.outpic[n].pts;
+        vf_add_output_frame(vf, out[n]);
+    }
+    for (int n = ret; n < FILTER_MAX_OUTCNT; n++) {
+        talloc_free(out[n]);
+    }
+
+    talloc_free(mpi);
+    return 0;
 }
 
 //===========================================================================//
@@ -319,7 +276,7 @@ static int vf_open(vf_instance_t *vf, char *args)
                vf->priv->cfg_dllname);
         return 0;
     }
-    
+
     vf_dlopen_getcontext_func *func =
         (vf_dlopen_getcontext_func *) DLLSymbol(vf->priv->dll, "vf_dlopen_getcontext");
     if (!func) {
@@ -352,7 +309,7 @@ static int vf_open(vf_instance_t *vf, char *args)
         return 0;
     }
 
-    vf->put_image = put_image;
+    vf->filter_ext = filter;
     vf->query_format = query_format;
     vf->config = config;
     vf->uninit = uninit;

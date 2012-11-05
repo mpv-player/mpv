@@ -96,21 +96,16 @@ static void toright(unsigned char *dst[3], unsigned char *src[3],
 	}
 }
 
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-	mp_image_t *dmpi;
-
-        // hope we'll get DR buffer:
-        dmpi=vf_get_image(vf->next, IMGFMT_YV12,
-                          MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE |
-                          ((vf->priv->scaleh == 1) ? MP_IMGFLAG_READABLE : 0),
-                          mpi->w * vf->priv->scalew,
-                          mpi->h / vf->priv->scaleh - vf->priv->skipline);
+	mp_image_t *dmpi = vf_alloc_out_image(vf);
+        mp_image_copy_attributes(dmpi, mpi);
 
 	toright(dmpi->planes, mpi->planes, dmpi->stride,
 		mpi->stride, mpi->w, mpi->h, vf->priv);
 
-	return vf_next_put_image(vf,dmpi, pts);
+        talloc_free(mpi);
+	return dmpi;
 }
 
 static int config(struct vf_instance *vf,
@@ -144,7 +139,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 {
 	vf->config=config;
 	vf->query_format=query_format;
-	vf->put_image=put_image;
+	vf->filter=filter;
 	vf->uninit=uninit;
 
 	vf->priv = calloc(1, sizeof (struct vf_priv_s));

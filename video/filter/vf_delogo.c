@@ -101,7 +101,7 @@ static void update_sub(struct vf_priv_s *p, double pts)
 }
 
 static void delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int width, int height,
-                   int logo_x, int logo_y, int logo_w, int logo_h, int band, int show, int direct) {
+                   int logo_x, int logo_y, int logo_w, int logo_h, int band, int show) {
     int y, x;
     int interp, dist;
     uint8_t *xdst, *xsrc;
@@ -123,8 +123,6 @@ static void delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int
     topleft = src+logo_y1*srcStride+logo_x1;
     topright = src+logo_y1*srcStride+logo_x2-1;
     botleft = src+(logo_y2-1)*srcStride+logo_x1;
-
-    if (!direct) memcpy_pic(dst, src, width, height, dstStride, srcStride);
 
     dst += (logo_y1+1)*dstStride;
     src += (logo_y1+1)*srcStride;
@@ -175,55 +173,26 @@ static int config(struct vf_instance *vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-
-static void get_image(struct vf_instance *vf, mp_image_t *mpi){
-    if(mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
-    if(mpi->imgfmt!=vf->priv->outfmt) return; // colorspace differ
-    // ok, we can do pp in-place (or pp disabled):
-    mpi->priv =
-    vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-                          mpi->type, mpi->flags, mpi->w, mpi->h);
-    mpi->planes[0]=vf->dmpi->planes[0];
-    mpi->stride[0]=vf->dmpi->stride[0];
-    mpi->width=vf->dmpi->width;
-    if(mpi->flags&MP_IMGFLAG_PLANAR){
-        mpi->planes[1]=vf->dmpi->planes[1];
-        mpi->planes[2]=vf->dmpi->planes[2];
-        mpi->stride[1]=vf->dmpi->stride[1];
-        mpi->stride[2]=vf->dmpi->stride[2];
+static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
+{
+    struct mp_image *dmpi = mpi;
+    if (!mp_image_is_writeable(mpi)) {
+        dmpi = vf_alloc_out_image(vf);
+        mp_image_copy_attributes(dmpi, mpi);
     }
-    mpi->flags|=MP_IMGFLAG_DIRECT;
-}
-
-static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts){
-    mp_image_t *dmpi;
-
-    if(mpi->flags&MP_IMGFLAG_DIRECT) {
-        vf->dmpi = mpi->priv;
-        mpi->priv = NULL;
-    } else {
-        // no DR, so get a new image! hope we'll get DR buffer:
-        vf->dmpi=vf_get_image(vf->next,vf->priv->outfmt,
-                              MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
-                              mpi->w,mpi->h);
-    }
-    dmpi= vf->dmpi;
 
     if (vf->priv->timed_rect)
-        update_sub(vf->priv, pts);
+        update_sub(vf->priv, dmpi->pts);
     delogo(dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h,
-           vf->priv->xoff, vf->priv->yoff, vf->priv->lw, vf->priv->lh, vf->priv->band, vf->priv->show,
-           mpi->flags&MP_IMGFLAG_DIRECT);
+           vf->priv->xoff, vf->priv->yoff, vf->priv->lw, vf->priv->lh, vf->priv->band, vf->priv->show);
     delogo(dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w/2, mpi->h/2,
-           vf->priv->xoff/2, vf->priv->yoff/2, vf->priv->lw/2, vf->priv->lh/2, vf->priv->band/2, vf->priv->show,
-           mpi->flags&MP_IMGFLAG_DIRECT);
+           vf->priv->xoff/2, vf->priv->yoff/2, vf->priv->lw/2, vf->priv->lh/2, vf->priv->band/2, vf->priv->show);
     delogo(dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w/2, mpi->h/2,
-           vf->priv->xoff/2, vf->priv->yoff/2, vf->priv->lw/2, vf->priv->lh/2, vf->priv->band/2, vf->priv->show,
-           mpi->flags&MP_IMGFLAG_DIRECT);
+           vf->priv->xoff/2, vf->priv->yoff/2, vf->priv->lw/2, vf->priv->lh/2, vf->priv->band/2, vf->priv->show);
 
-    vf_clone_mpi_attributes(dmpi, mpi);
-
-    return vf_next_put_image(vf,dmpi, pts);
+    if (dmpi != mpi)
+        talloc_free(mpi);
+    return dmpi;
 }
 
 static void uninit(struct vf_instance *vf){
@@ -323,8 +292,7 @@ load_error:
 
 static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
-    vf->put_image=put_image;
-    vf->get_image=get_image;
+    vf->filter=filter;
     vf->query_format=query_format;
     vf->uninit=uninit;
 
