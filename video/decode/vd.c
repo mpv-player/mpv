@@ -218,13 +218,3 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
 
     return 1;
 }
-
-// mp_imgtype: buffering type, see mp_image.h
-// mp_imgflag: buffer requirements (read/write, preserve, stride limits), see mp_image.h
-// returns NULL or allocated mp_image_t*
-// Note: buffer allocation may be moved to mpcodecs_config_vo() later...
-mp_image_t *mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag,
-                               int w, int h)
-{
-    return vf_get_image(sh->vfilter, sh->outfmt, mp_imgtype, mp_imgflag, w, h);
-}

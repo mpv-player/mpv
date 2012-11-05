@@ -67,6 +67,7 @@ static const vd_info_t info = {
 typedef struct {
     AVCodecContext *avctx;
     AVFrame *pic;
+    struct mp_image export_mpi;
     struct mp_image hwdec_mpi[MAX_NUM_MPI];
     enum PixelFormat pix_fmt;
     int do_dr1;
@@ -75,16 +76,11 @@ typedef struct {
     int qp_stat[32];
     double qp_sum;
     double inv_qp_sum;
-    int ip_count;
-    int b_count;
     AVRational last_sample_aspect_ratio;
     enum AVDiscard skip_frame;
 } vd_ffmpeg_ctx;
 
 #include "core/m_option.h"
-
-static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
-static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
 
 static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic);
@@ -218,8 +214,6 @@ static int init(sh_video_t *sh)
     vd_ffmpeg_ctx *ctx;
     AVCodec *lavc_codec = NULL;
     enum PixelFormat rawfmt = PIX_FMT_NONE;
-    int do_vis_debug = lavc_param->vismv ||
-            (lavc_param->debug & (FF_DEBUG_VIS_MB_TYPE | FF_DEBUG_VIS_QP));
 
     ctx = sh->context = talloc_zero(NULL, vd_ffmpeg_ctx);
 
@@ -254,14 +248,6 @@ static int init(sh_video_t *sh)
     if (!sh->codecname)
         sh->codecname = lavc_codec->name;
 
-    if (lavc_codec->capabilities & CODEC_CAP_DR1 && !do_vis_debug
-            && lavc_codec->id != CODEC_ID_H264
-            && lavc_codec->id != CODEC_ID_INTERPLAY_VIDEO
-            && lavc_codec->id != CODEC_ID_ROQ && lavc_codec->id != CODEC_ID_VP8
-            && lavc_codec->id != CODEC_ID_LAGARITH)
-        ctx->do_dr1 = sh->opts->vd_use_dr1;
-    ctx->ip_count = ctx->b_count = 0;
-
     ctx->pic = avcodec_alloc_frame();
     ctx->avctx = avcodec_alloc_context3(lavc_codec);
     avctx = ctx->avctx;
@@ -293,20 +279,6 @@ static int init(sh_video_t *sh)
         }
         threads = FFMIN(threads, 16);
         avctx->thread_count = threads;
-    }
-    /* Our get_buffer and draw_horiz_band callbacks are not safe to call
-     * from other threads. */
-    if (avctx->thread_count > 1) {
-        ctx->do_dr1 = false;
-        mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Asking decoder to use "
-                "%d threads if supported.\n", avctx->thread_count);
-    }
-
-    if (ctx->do_dr1 && avctx->get_buffer != get_buffer_hwdec) {
-        avctx->flags |= CODEC_FLAG_EMU_EDGE;
-        avctx->get_buffer = get_buffer;
-        avctx->release_buffer = release_buffer;
-        avctx->reget_buffer = get_buffer;
     }
 
     avctx->flags |= lavc_param->bitexact;
@@ -588,141 +560,6 @@ static void release_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
         pic->data[i] = NULL;
 }
 
-static int get_buffer(AVCodecContext *avctx, AVFrame *pic)
-{
-    sh_video_t *sh = avctx->opaque;
-    vd_ffmpeg_ctx *ctx = sh->context;
-    mp_image_t *mpi = NULL;
-    int flags = MP_IMGFLAG_ACCEPT_ALIGNED_STRIDE |
-                MP_IMGFLAG_PREFER_ALIGNED_STRIDE;
-    int type = MP_IMGTYPE_IPB;
-    int width = avctx->width;
-    int height = avctx->height;
-    // special case to handle reget_buffer without buffer hints
-    if (pic->opaque && pic->data[0] && !pic->buffer_hints)
-        return 0;
-    avcodec_align_dimensions(avctx, &width, &height);
-
-    if (pic->buffer_hints) {
-        mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "Buffer hints: %u\n",
-               pic->buffer_hints);
-        type = MP_IMGTYPE_TEMP;
-        if (pic->buffer_hints & FF_BUFFER_HINTS_READABLE)
-            flags |= MP_IMGFLAG_READABLE;
-        if (pic->buffer_hints & FF_BUFFER_HINTS_PRESERVE) {
-            type = MP_IMGTYPE_STATIC;
-            flags |= MP_IMGFLAG_PRESERVE;
-        }
-        if (pic->buffer_hints & FF_BUFFER_HINTS_REUSABLE) {
-            type = MP_IMGTYPE_STATIC;
-            flags |= MP_IMGFLAG_PRESERVE;
-        }
-        mp_msg(MSGT_DECVIDEO, MSGL_DBG2,
-               type == MP_IMGTYPE_STATIC ? "using STATIC\n" : "using TEMP\n");
-    } else {
-        if (!pic->reference) {
-            ctx->b_count++;
-        } else {
-            ctx->ip_count++;
-            flags |= MP_IMGFLAG_PRESERVE | MP_IMGFLAG_READABLE;
-        }
-    }
-
-    if (init_vo(sh, avctx->pix_fmt) < 0) {
-        avctx->release_buffer = avcodec_default_release_buffer;
-        avctx->get_buffer = avcodec_default_get_buffer;
-        avctx->reget_buffer = avcodec_default_reget_buffer;
-        if (pic->data[0])
-            release_buffer(avctx, pic);
-        return avctx->get_buffer(avctx, pic);
-    }
-
-    if (IMGFMT_IS_HWACCEL(ctx->best_csp))
-        type =  MP_IMGTYPE_NUMBERED | (0xffff << 16);
-    else if (!pic->buffer_hints) {
-        if (ctx->b_count > 1 || ctx->ip_count > 2) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "[VD_FFMPEG] DRI failure.\n");
-
-            ctx->do_dr1 = 0; //FIXME
-            avctx->get_buffer = avcodec_default_get_buffer;
-            avctx->reget_buffer = avcodec_default_reget_buffer;
-            if (pic->data[0])
-                release_buffer(avctx, pic);
-            return avctx->get_buffer(avctx, pic);
-        }
-
-        if (avctx->has_b_frames || ctx->b_count)
-            type = MP_IMGTYPE_IPB;
-        else
-            type = MP_IMGTYPE_IP;
-        mp_msg(MSGT_DECVIDEO, MSGL_DBG2,
-               type == MP_IMGTYPE_IPB ? "using IPB\n" : "using IP\n");
-    }
-
-    if (ctx->best_csp == IMGFMT_RGB8 || ctx->best_csp == IMGFMT_BGR8)
-        flags |= MP_IMGFLAG_RGB_PALETTE;
-    mpi = mpcodecs_get_image(sh, type, flags, width, height);
-    if (!mpi)
-        return -1;
-
-    pic->data[0] = mpi->planes[0];
-    pic->data[1] = mpi->planes[1];
-    pic->data[2] = mpi->planes[2];
-    pic->data[3] = mpi->planes[3];
-
-    /* Note: some (many) codecs in libavcodec require
-     * linesize[1] == linesize[2] and no changes between frames.
-     * Lavc will check that and die with an error message if it's not true.
-     */
-    pic->linesize[0] = mpi->stride[0];
-    pic->linesize[1] = mpi->stride[1];
-    pic->linesize[2] = mpi->stride[2];
-    pic->linesize[3] = mpi->stride[3];
-
-    pic->opaque = mpi;
-
-    pic->type = FF_BUFFER_TYPE_USER;
-
-    /* The libavcodec reordered_opaque functionality is implemented by
-     * a similar copy in avcodec_default_get_buffer() and without a
-     * workaround like this it'd stop working when a custom buffer
-     * callback is used.
-     */
-    pic->reordered_opaque = avctx->reordered_opaque;
-    return 0;
-}
-
-static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic)
-{
-    mp_image_t *mpi = pic->opaque;
-    sh_video_t *sh = avctx->opaque;
-    vd_ffmpeg_ctx *ctx = sh->context;
-
-    if (ctx->ip_count <= 2 && ctx->b_count <= 1) {
-        if (mpi->flags & MP_IMGFLAG_PRESERVE)
-            ctx->ip_count--;
-        else
-            ctx->b_count--;
-    }
-
-    if (mpi) {
-        // release mpi (in case MPI_IMGTYPE_NUMBERED is used, e.g. for VDPAU)
-        mpi->usage_count--;
-        if (mpi->usage_count < 0) {
-            mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Bad mp_image usage count, please report!\n");
-            mpi->usage_count = 0;
-        }
-    }
-
-    if (pic->type != FF_BUFFER_TYPE_USER) {
-        avcodec_default_release_buffer(avctx, pic);
-        return;
-    }
-
-    for (int i = 0; i < 4; i++)
-        pic->data[i] = NULL;
-}
-
 static av_unused void swap_palette(void *pal)
 {
     int i;
@@ -740,7 +577,6 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     vd_ffmpeg_ctx *ctx = sh->context;
     AVFrame *pic = ctx->pic;
     AVCodecContext *avctx = ctx->avctx;
-    mp_image_t *mpi = NULL;
     AVPacket pkt;
 
     if (flags & 2)
@@ -779,39 +615,28 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     if (init_vo(sh, avctx->pix_fmt) < 0)
         return NULL;
 
+    struct mp_image *mpi = NULL;
     if (dr1 && pic->opaque)
         mpi = (mp_image_t *)pic->opaque;
 
-    if (!mpi)
-        mpi = mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE,
-                                 avctx->width, avctx->height);
-    if (!mpi) {   // temporary error?
-        mp_tmsg(MSGT_DECVIDEO, MSGL_WARN,
-                "[VD_FFMPEG] Couldn't allocate image for codec.\n");
-        return NULL;
-    }
-
-    if (!dr1) {
-        mpi->planes[0] = pic->data[0];
-        mpi->planes[1] = pic->data[1];
-        mpi->planes[2] = pic->data[2];
-        mpi->planes[3] = pic->data[3];
-        mpi->stride[0] = pic->linesize[0];
-        mpi->stride[1] = pic->linesize[1];
-        mpi->stride[2] = pic->linesize[2];
-        mpi->stride[3] = pic->linesize[3];
+    if (!mpi) {
+        mpi = &ctx->export_mpi;
+        *mpi = (struct mp_image) {0};
+        mpi->type = MP_IMGTYPE_EXPORT;
+        mpi->flags = MP_IMGFLAG_PRESERVE;
+        mpi->w = mpi->width = avctx->width;
+        mpi->h = mpi->height = avctx->height;
+        mp_image_setfmt(mpi, ctx->best_csp);
+        for (int i = 0; i < 4; i++) {
+            mpi->planes[i] = pic->data[i];
+            mpi->stride[i] = pic->linesize[i];
+        }
     }
 
     if (!mpi->planes[0])
         return NULL;
 
     assert(mpi->imgfmt == pixfmt2imgfmt(avctx->pix_fmt));
-
-    if (ctx->best_csp == IMGFMT_422P && mpi->chroma_y_shift == 1) {
-        // we have 422p but user wants 420p
-        mpi->stride[1] *= 2;
-        mpi->stride[2] *= 2;
-    }
 
 #if BYTE_ORDER == BIG_ENDIAN
     // FIXME: this might cause problems for buffers with FF_BUFFER_HINTS_PRESERVE

@@ -46,10 +46,6 @@ extern const vd_functions_t *const mpcodecs_vd_drivers[];
 #define VDCTRL_QUERY_UNSEEN_FRAMES 9 // current decoder lag
 #define VDCTRL_RESET_ASPECT 10 // reinit filter/VO chain for new aspect ratio
 
-// callbacks:
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int outfmt);
-
-mp_image_t *mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag,
-                               int w, int h);
 
 #endif /* MPLAYER_VD_H */
