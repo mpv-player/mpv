@@ -42,15 +42,12 @@ typedef struct vd_functions
 // NULL terminated array of all drivers
 extern const vd_functions_t *const mpcodecs_vd_drivers[];
 
-#define VDCTRL_QUERY_FORMAT 3       // test for availabilty of a format
 #define VDCTRL_RESYNC_STREAM 8 // reset decode state after seeking
 #define VDCTRL_QUERY_UNSEEN_FRAMES 9 // current decoder lag
 #define VDCTRL_RESET_ASPECT 10 // reinit filter/VO chain for new aspect ratio
 
 // callbacks:
-int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
-                       const unsigned int *outfmts,
-                       unsigned int preferred_outfmt);
+int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int outfmt);
 
 mp_image_t *mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag,
                                int w, int h);

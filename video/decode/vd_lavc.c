@@ -408,23 +408,11 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt)
         sh->disp_h = height;
         ctx->pix_fmt = pix_fmt;
         ctx->best_csp = pixfmt2imgfmt(pix_fmt);
-        const unsigned int *supported_fmts;
-        if (ctx->best_csp == IMGFMT_YV12)
-            supported_fmts = (const unsigned int[]){
-                IMGFMT_YV12, IMGFMT_I420, IMGFMT_IYUV, 0xffffffff
-            };
-        else if (ctx->best_csp == IMGFMT_422P)
-            supported_fmts = (const unsigned int[]){
-                IMGFMT_422P, IMGFMT_YV12, IMGFMT_I420, IMGFMT_IYUV, 0xffffffff
-            };
-        else
-            supported_fmts = (const unsigned int[]){ctx->best_csp, 0xffffffff};
 
         sh->colorspace = avcol_spc_to_mp_csp(avctx->colorspace);
         sh->color_range = avcol_range_to_mp_csp_levels(avctx->color_range);
 
-        if (!mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, supported_fmts,
-                                ctx->best_csp))
+        if (!mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, ctx->best_csp))
             return -1;
         ctx->vo_initialized = 1;
     }
@@ -726,6 +714,8 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     if (!mpi->planes[0])
         return NULL;
 
+    assert(mpi->imgfmt == pixfmt2imgfmt(avctx->pix_fmt));
+
     if (ctx->best_csp == IMGFMT_422P && mpi->chroma_y_shift == 1) {
         // we have 422p but user wants 420p
         mpi->stride[1] *= 2;
@@ -777,24 +767,6 @@ static int control(sh_video_t *sh, int cmd, void *arg)
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
     switch (cmd) {
-    case VDCTRL_QUERY_FORMAT: {
-        int format = (*((int *)arg));
-        if (format == ctx->best_csp)
-            return CONTROL_TRUE;
-        // possible conversions:
-        switch (format) {
-        case IMGFMT_YV12:
-        case IMGFMT_IYUV:
-        case IMGFMT_I420:
-            // "converted" using pointer/stride modification
-            if (ctx->best_csp == IMGFMT_YV12)
-                return CONTROL_TRUE;   // u/v swap
-            if (ctx->best_csp == IMGFMT_422P && !ctx->do_dr1)
-                return CONTROL_TRUE;   // half stride
-            break;
-        }
-        return CONTROL_FALSE;
-    }
     case VDCTRL_RESYNC_STREAM:
         avcodec_flush_buffers(avctx);
         return CONTROL_TRUE;

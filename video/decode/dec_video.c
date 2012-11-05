@@ -252,12 +252,6 @@ static int init_video(sh_video_t *sh_video, char *codecname, char *vfm,
         orig_h = sh_video->bih ? sh_video->bih->biHeight : sh_video->disp_h;
         sh_video->disp_w = orig_w;
         sh_video->disp_h = orig_h;
-        // it's available, let's try to init!
-        if (sh_video->codec->flags & CODECS_FLAG_ALIGN16) {
-            // align width/height to n*16
-            sh_video->disp_w = (sh_video->disp_w + 15) & (~15);
-            sh_video->disp_h = (sh_video->disp_h + 15) & (~15);
-        }
         if (sh_video->bih) {
             sh_video->bih->biWidth = sh_video->disp_w;
             sh_video->bih->biHeight = sh_video->disp_h;

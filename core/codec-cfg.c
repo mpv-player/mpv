@@ -138,71 +138,6 @@ static int add_to_format(char *s, char *alias,unsigned int *fourcc, unsigned int
     return 1;
 }
 
-static int add_to_inout(char *sfmt, char *sflags, unsigned int *outfmt,
-                        unsigned char *outflags)
-{
-
-    static char *flagstr[] = {
-        "flip",
-        "noflip",
-        "yuvhack",
-        "query",
-        "static",
-        NULL
-    };
-
-    int i, j, freeslots;
-    unsigned char flags;
-
-    for (i = 0; i < CODECS_MAX_OUTFMT && outfmt[i] != 0xffffffff; i++)
-        /* NOTHING */;
-    freeslots = CODECS_MAX_OUTFMT - i;
-    if (!freeslots)
-        goto err_out_too_many;
-
-    flags = 0;
-    if(sflags) {
-        do {
-            for (j = 0; flagstr[j] != NULL; j++)
-                if (!strncmp(sflags, flagstr[j],
-                             strlen(flagstr[j])))
-                    break;
-            if (flagstr[j] == NULL)
-                goto err_out_parse_error;
-            flags|=(1<<j);
-            sflags+=strlen(flagstr[j]);
-        } while (*(sflags++) == ',');
-
-        if (*(--sflags) != '\0')
-            goto err_out_parse_error;
-    }
-
-    do {
-        for (j = 0; isalnum(sfmt[j]) || sfmt[j] == '_'; j++);
-        unsigned int fmt = mp_imgfmt_from_name((bstr) {sfmt, j}, true);
-        if (!fmt)
-            goto err_out_parse_error;
-        outfmt[i] = fmt;
-        outflags[i] = flags;
-        ++i;
-        sfmt += j;
-    } while ((*(sfmt++) == ',') && --freeslots);
-
-    if (!freeslots)
-        goto err_out_too_many;
-
-    if (*(--sfmt) != '\0')
-        goto err_out_parse_error;
-
-    return 1;
-err_out_too_many:
-    mp_tmsg(MSGT_CODECCFG,MSGL_ERR,"too many out...");
-    return 0;
-err_out_parse_error:
-    mp_tmsg(MSGT_CODECCFG,MSGL_ERR,"parse error");
-    return 0;
-}
-
 static int validate_codec(codecs_t *c, int type)
 {
     unsigned int i;
@@ -422,8 +357,6 @@ int parse_codec_cfg(const char *cfgfile)
             ++*nr_codecsp;
             memset(codec,0,sizeof(codecs_t));
             memset(codec->fourcc, 0xff, sizeof(codec->fourcc));
-            memset(codec->outfmt, 0xff, sizeof(codec->outfmt));
-            memset(codec->infmt, 0xff, sizeof(codec->infmt));
 
             if (get_token(1, 1) < 0)
                 goto err_out_parse_error;
@@ -497,25 +430,11 @@ int parse_codec_cfg(const char *cfgfile)
                     *endptr != '\0')
                     goto err_out_parse_error;
             }
-        } else if (!strcmp(token[0], "out")) {
-            if (get_token(1, 2) < 0)
-                goto err_out_parse_error;
-            if (!add_to_inout(token[0], token[1], codec->outfmt,
-                              codec->outflags))
-                goto err_out_print_linenum;
-        } else if (!strcmp(token[0], "in")) {
-            if (get_token(1, 2) < 0)
-                goto err_out_parse_error;
-            if (!add_to_inout(token[0], token[1], codec->infmt,
-                              codec->inflags))
-                goto err_out_print_linenum;
         } else if (!strcmp(token[0], "flags")) {
             if (get_token(1, 1) < 0)
                 goto err_out_parse_error;
-            if (!strcmp(token[0], "seekable"))
-                codec->flags |= CODECS_FLAG_SEEKABLE;
-            else if (!strcmp(token[0], "align16"))
-                codec->flags |= CODECS_FLAG_ALIGN16;
+            if (!strcmp(token[0], "flip"))
+                codec->flags |= CODECS_FLAG_FLIP;
             else
                 goto err_out_parse_error;
         } else if (!strcmp(token[0], "status")) {

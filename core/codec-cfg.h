@@ -22,19 +22,9 @@
 #include <stdbool.h>
 
 #define CODECS_MAX_FOURCC       92
-#define CODECS_MAX_OUTFMT       16
-#define CODECS_MAX_INFMT        16
 
 // Global flags:
-#define CODECS_FLAG_SEEKABLE    (1<<0)
-#define CODECS_FLAG_ALIGN16     (1<<1)
-
-// Outfmt flags:
 #define CODECS_FLAG_FLIP        (1<<0)
-#define CODECS_FLAG_NOFLIP      (1<<1)
-#define CODECS_FLAG_YUVHACK     (1<<2)
-#define CODECS_FLAG_QUERY       (1<<3)
-#define CODECS_FLAG_STATIC      (1<<4)
 
 #define CODECS_STATUS__MIN              0
 #define CODECS_STATUS_NOT_WORKING      -1
@@ -59,10 +49,6 @@ typedef struct {
 typedef struct codecs {
     unsigned int fourcc[CODECS_MAX_FOURCC];
     unsigned int fourccmap[CODECS_MAX_FOURCC];
-    unsigned int outfmt[CODECS_MAX_OUTFMT];
-    unsigned char outflags[CODECS_MAX_OUTFMT];
-    unsigned int infmt[CODECS_MAX_INFMT];
-    unsigned char inflags[CODECS_MAX_INFMT];
     char *name;
     char *info;
     char *comment;

@@ -480,7 +480,7 @@ const m_option_t common_opts[] = {
     OPT_FLAG_CONSTANTS("no-aspect", movie_aspect, 0, 0, 0),
     OPT_FLOATRANGE("xy", screen_size_xy, 0, 0.001, 4096),
 
-    OPT_FLAG_CONSTANTS("flip", flip, 0, -1, 1),
+    OPT_FLAG_CONSTANTS("flip", flip, 0, 0, 1),
 
     // use (probably completely broken) decoder direct rendering
     OPT_MAKE_FLAGS("dr1", vd_use_dr1, 0),

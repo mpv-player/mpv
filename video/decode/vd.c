@@ -16,9 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "config.h"
 #include "core/mp_msg.h"
@@ -51,13 +52,9 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
     NULL
 };
 
-int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
-                       const unsigned int *outfmts,
-                       unsigned int preferred_outfmt)
+int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
 {
     struct MPOpts *opts = sh->opts;
-    int j;
-    unsigned int out_fmt = 0;
     int screen_size_x = 0;
     int screen_size_y = 0;
     vf_instance_t *vf = sh->vfilter;
@@ -76,61 +73,37 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
     if (!sh->disp_w || !sh->disp_h)
         return 0;
 
-    mp_msg(MSGT_DECVIDEO, MSGL_V,
-           "VDec: vo config request - %d x %d (preferred colorspace: %s)\n",
-           w, h, vo_format_name(preferred_outfmt));
+    mp_msg(MSGT_DECVIDEO, MSGL_V, "VDec: vo config request - %d x %d (%s)\n",
+           w, h, vo_format_name(out_fmt));
 
     if (get_video_quality_max(sh) <= 0 && divx_quality) {
         // user wants postprocess but no pp filter yet:
         sh->vfilter = vf = vf_open_filter(opts, vf, "pp", NULL);
     }
 
-    if (!outfmts || sh->codec->outfmt[0] != 0xffffffff)
-        outfmts = sh->codec->outfmt;
-
     // check if libvo and codec has common outfmt (no conversion):
-  csp_again:
-
-    if (mp_msg_test(MSGT_DECVIDEO, MSGL_V)) {
-        mp_msg(MSGT_DECVIDEO, MSGL_V, "Trying filter chain:");
-        for (vf_instance_t *f = vf; f; f = f->next)
-            mp_msg(MSGT_DECVIDEO, MSGL_V, " %s", f->info->name);
-        mp_msg(MSGT_DECVIDEO, MSGL_V, "\n");
-    }
-
-    j = -1;
-    for (int i = 0; i < CODECS_MAX_OUTFMT; i++) {
-        int flags;
-        out_fmt = outfmts[i];
-        if (out_fmt == (unsigned int) 0xFFFFFFFF)
-            break;
-        flags = vf->query_format(vf, out_fmt);
-        mp_msg(MSGT_CPLAYER, MSGL_DBG2,
-               "vo_debug: query(%s) returned 0x%X (i=%d) \n",
-               vo_format_name(out_fmt), flags, i);
-        if ((flags & VFCAP_CSP_SUPPORTED_BY_HW)
-            || (flags & VFCAP_CSP_SUPPORTED && j < 0)) {
-            // check (query) if codec really support this outfmt...
-            sh->outfmtidx = j; // pass index to the control() function this way
-            if (sh->vd_driver->control(sh, VDCTRL_QUERY_FORMAT, &out_fmt) ==
-                CONTROL_FALSE) {
-                mp_msg(MSGT_CPLAYER, MSGL_DBG2,
-                       "vo_debug: codec query_format(%s) returned FALSE\n",
-                       vo_format_name(out_fmt));
-                continue;
-            }
-            j = i;
-            sh->output_flags = flags;
-            if (flags & VFCAP_CSP_SUPPORTED_BY_HW)
-                break;
+    for (;;) {
+        if (mp_msg_test(MSGT_DECVIDEO, MSGL_V)) {
+            mp_msg(MSGT_DECVIDEO, MSGL_V, "Trying filter chain:");
+            for (vf_instance_t *f = vf; f; f = f->next)
+                mp_msg(MSGT_DECVIDEO, MSGL_V, " %s", f->info->name);
+            mp_msg(MSGT_DECVIDEO, MSGL_V, "\n");
         }
-    }
-    if (j < 0) {
+
+        int flags = vf->query_format(vf, out_fmt);
+        mp_msg(MSGT_CPLAYER, MSGL_DBG2, "vo_debug: query(%s) returned 0x%X \n",
+               vo_format_name(out_fmt), flags);
+        if ((flags & VFCAP_CSP_SUPPORTED_BY_HW)
+            || (flags & VFCAP_CSP_SUPPORTED))
+        {
+            sh->output_flags = flags;
+            break;
+        }
         // TODO: no match - we should use conversion...
         if (strcmp(vf->info->name, "scale")) {
             mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Could not find matching colorspace - retrying with -vf scale...\n");
             vf = vf_open_filter(opts, vf, "scale", NULL);
-            goto csp_again;
+            continue;
         }
         mp_tmsg(MSGT_CPLAYER, MSGL_WARN,
             "The selected video_out device is incompatible with this codec.\n"\
@@ -139,24 +112,18 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
         sh->vf_initialized = -1;
         return 0;               // failed
     }
-    out_fmt = outfmts[j];
     sh->outfmt = out_fmt;
-    mp_msg(MSGT_CPLAYER, MSGL_V, "VDec: using %s as output csp (no %d)\n",
-           vo_format_name(out_fmt), j);
-    sh->outfmtidx = j;
+    mp_msg(MSGT_CPLAYER, MSGL_V, "VDec: using %s as output csp\n",
+           vo_format_name(out_fmt));
     sh->vfilter = vf;
 
     // autodetect flipping
-    if (opts->flip == -1) {
-        opts->flip = 0;
-        if (sh->codec->outflags[j] & CODECS_FLAG_FLIP)
-            if (!(sh->codec->outflags[j] & CODECS_FLAG_NOFLIP))
-                opts->flip = 1;
-    }
-    if (opts->flip && !(sh->output_flags & VFCAP_FLIP)) {
+    bool flip = !!opts->flip != !!(sh->codec->flags & CODECS_FLAG_FLIP);
+    if (flip && !(sh->output_flags & VFCAP_FLIP)) {
         // we need to flip, but no flipping filter avail.
         vf_add_before_vo(&vf, "flip", NULL);
         sh->vfilter = vf;
+        flip = false;
     }
     // time to do aspect ratio corrections...
 
@@ -216,7 +183,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
 
     vocfg_flags = (opts->fullscreen ? VOFLAG_FULLSCREEN : 0)
         | (opts->vidmode ? VOFLAG_MODESWITCHING : 0)
-        | (opts->flip ? VOFLAG_FLIPPING : 0);
+        | (flip ? VOFLAG_FLIPPING : 0);
 
     // Time to config libvo!
     mp_msg(MSGT_CPLAYER, MSGL_V,
