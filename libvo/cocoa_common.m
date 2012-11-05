@@ -370,6 +370,7 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     [s->window setAcceptsMouseMovedEvents:YES];
     [s->glContext setView:glView];
     [s->glContext makeCurrentContext];
+    [s->window setVideoOutput:vo];
 
     [NSApp setDelegate:s->window];
     [s->window setDelegate:s->window];
@@ -477,7 +478,6 @@ int vo_cocoa_check_events(struct vo *vo)
                    inMode:NSEventTrackingRunLoopMode dequeue:YES];
     if (event == nil)
         return 0;
-    [s->window setVideoOutput:vo];
     [NSApp sendEvent:event];
 
     if (s->did_resize) {
