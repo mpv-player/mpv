@@ -110,6 +110,87 @@ const m_option_t lavc_decode_opts_conf[] = {
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
+// print debugging stats into a file
+static void print_vstats(sh_video_t *sh, int len)
+{
+    vd_ffmpeg_ctx *ctx = sh->context;
+    AVCodecContext *avctx = ctx->avctx;
+    struct lavc_param *lavc_param = &sh->opts->lavc_param;
+
+    if (!lavc_param->vstats)
+        return;
+
+    static FILE *fvstats = NULL;
+    char filename[20];
+    static long long int all_len = 0;
+    static int frame_number = 0;
+    static double all_frametime = 0.0;
+    AVFrame *pic = avctx->coded_frame;
+    double quality = 0.0;
+
+    if (!pic)
+        return;
+
+    if (!fvstats) {
+        time_t today2;
+        struct tm *today;
+        today2 = time(NULL);
+        today = localtime(&today2);
+        sprintf(filename, "vstats_%02d%02d%02d.log", today->tm_hour,
+                today->tm_min, today->tm_sec);
+        fvstats = fopen(filename, "w");
+        if (!fvstats) {
+            perror("fopen");
+            lavc_param->vstats = 0; // disable block
+            return;
+            /*exit(1);*/
+        }
+    }
+
+    // average MB quantizer
+    {
+        int x, y;
+        int w = ((avctx->width << avctx->lowres) + 15) >> 4;
+        int h = ((avctx->height << avctx->lowres) + 15) >> 4;
+        int8_t *q = pic->qscale_table;
+        for (y = 0; y < h; y++) {
+            for (x = 0; x < w; x++)
+                quality += (double)*(q + x);
+            q += pic->qstride;
+        }
+        quality /= w * h;
+    }
+
+    all_len += len;
+    all_frametime += sh->frametime;
+    fprintf(fvstats, "frame= %5d q= %2.2f f_size= %6d s_size= %8.0fkB ",
+            ++frame_number, quality, len, (double)all_len / 1024);
+    fprintf(fvstats, "time= %0.3f br= %7.1fkbits/s avg_br= %7.1fkbits/s ",
+            all_frametime, (double)(len * 8) / sh->frametime / 1000.0,
+            (double)(all_len * 8) / all_frametime / 1000.0);
+    switch (pic->pict_type) {
+    case AV_PICTURE_TYPE_I:
+        fprintf(fvstats, "type= I\n");
+        break;
+    case AV_PICTURE_TYPE_P:
+        fprintf(fvstats, "type= P\n");
+        break;
+    case AV_PICTURE_TYPE_S:
+        fprintf(fvstats, "type= S\n");
+        break;
+    case AV_PICTURE_TYPE_B:
+        fprintf(fvstats, "type= B\n");
+        break;
+    default:
+        fprintf(fvstats, "type= ? (%d)\n", pic->pict_type);
+        break;
+    }
+
+    ctx->qp_stat[(int)(quality + 0.5)]++;
+    ctx->qp_sum += quality;
+    ctx->inv_qp_sum += 1.0 / (double)quality;
+}
+
 static enum AVDiscard str2AVDiscard(char *str)
 {
     if (!str)                               return AVDISCARD_DEFAULT;
@@ -571,7 +652,6 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     vd_ffmpeg_ctx *ctx = sh->context;
     AVFrame *pic = ctx->pic;
     AVCodecContext *avctx = ctx->avctx;
-    struct lavc_param *lavc_param = &sh->opts->lavc_param;
     mp_image_t *mpi = NULL;
     int dr1 = ctx->do_dr1;
     AVPacket pkt;
@@ -606,81 +686,8 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     dr1 = ctx->do_dr1;
     if (ret < 0)
         mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Error while decoding frame!\n");
-    //-- vstats generation
-    while (lavc_param->vstats) { // always one time loop
-        static FILE *fvstats = NULL;
-        char filename[20];
-        static long long int all_len = 0;
-        static int frame_number = 0;
-        static double all_frametime = 0.0;
-        AVFrame *pic = avctx->coded_frame;
-        double quality = 0.0;
 
-        if (!pic)
-            break;
-
-        if (!fvstats) {
-            time_t today2;
-            struct tm *today;
-            today2 = time(NULL);
-            today = localtime(&today2);
-            sprintf(filename, "vstats_%02d%02d%02d.log", today->tm_hour,
-                    today->tm_min, today->tm_sec);
-            fvstats = fopen(filename, "w");
-            if (!fvstats) {
-                perror("fopen");
-                lavc_param->vstats = 0; // disable block
-                break;
-                /*exit(1);*/
-            }
-        }
-
-        // average MB quantizer
-        {
-            int x, y;
-            int w = ((avctx->width << avctx->lowres) + 15) >> 4;
-            int h = ((avctx->height << avctx->lowres) + 15) >> 4;
-            int8_t *q = pic->qscale_table;
-            for (y = 0; y < h; y++) {
-                for (x = 0; x < w; x++)
-                    quality += (double)*(q + x);
-                q += pic->qstride;
-            }
-            quality /= w * h;
-        }
-
-        all_len += len;
-        all_frametime += sh->frametime;
-        fprintf(fvstats, "frame= %5d q= %2.2f f_size= %6d s_size= %8.0fkB ",
-                ++frame_number, quality, len, (double)all_len / 1024);
-        fprintf(fvstats, "time= %0.3f br= %7.1fkbits/s avg_br= %7.1fkbits/s ",
-                all_frametime, (double)(len * 8) / sh->frametime / 1000.0,
-                (double)(all_len * 8) / all_frametime / 1000.0);
-        switch (pic->pict_type) {
-        case AV_PICTURE_TYPE_I:
-            fprintf(fvstats, "type= I\n");
-            break;
-        case AV_PICTURE_TYPE_P:
-            fprintf(fvstats, "type= P\n");
-            break;
-        case AV_PICTURE_TYPE_S:
-            fprintf(fvstats, "type= S\n");
-            break;
-        case AV_PICTURE_TYPE_B:
-            fprintf(fvstats, "type= B\n");
-            break;
-        default:
-            fprintf(fvstats, "type= ? (%d)\n", pic->pict_type);
-            break;
-        }
-
-        ctx->qp_stat[(int)(quality + 0.5)]++;
-        ctx->qp_sum += quality;
-        ctx->inv_qp_sum += 1.0 / (double)quality;
-
-        break;
-    }
-    //--
+    print_vstats(sh, len);
 
     if (!got_picture)
         return NULL;                     // skipped image
