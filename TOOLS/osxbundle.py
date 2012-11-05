@@ -50,30 +50,29 @@ def copy_bundle():
 def copy_binary():
     shutil.copy(binary_name, target_binary())
 
-def run_install_name_tool(target_file, dylib_path, destination_directory):
+def run_install_name_tool(target_file, dylib_path, dest_dir, root=True):
     new_dylib_path = os.path.join("@executable_path", "lib",
         os.path.basename(dylib_path))
 
     sh("install_name_tool -change %s %s %s" % \
         (dylib_path, new_dylib_path, target_file))
-    sh("install_name_tool -id %s %s" % \
-        (new_dylib_path, os.path.join(destination_directory,
-            os.path.basename(dylib_path))))
+    if root:
+        sh("install_name_tool -id %s %s" % \
+            (new_dylib_path, os.path.join(dest_dir,
+                os.path.basename(dylib_path))))
 
-def cp_dylibs(target_file, destination_directory):
+def cp_dylibs(target_file, dest_dir):
     for dylib_path in user_dylib_lst(target_file):
-        dylib_destination_path = os.path.join(destination_directory,
-            os.path.basename(dylib_path))
-        shutil.copy(dylib_path, dylib_destination_path)
-        os.chmod(dylib_destination_path, 0o755)
-        cp_dylibs(dylib_destination_path, destination_directory)
+        dylib_dest_path = os.path.join(dest_dir, os.path.basename(dylib_path))
+        shutil.copy(dylib_path, dylib_dest_path)
+        os.chmod(dylib_dest_path, 0o755)
+        cp_dylibs(dylib_dest_path, dest_dir)
 
-def fix_dylibs_paths(target_file, destination_directory):
+def fix_dylibs_paths(target_file, dest_dir, root=True):
     for dylib_path in user_dylib_lst(target_file):
-        dylib_destination_path = os.path.join(destination_directory,
-            os.path.basename(dylib_path))
-        run_install_name_tool(target_file, dylib_path, destination_directory)
-        fix_dylibs_paths(dylib_destination_path, destination_directory)
+        dylib_dest_path = os.path.join(dest_dir, os.path.basename(dylib_path))
+        run_install_name_tool(target_file, dylib_path, dest_dir, root)
+        fix_dylibs_paths(dylib_dest_path, dest_dir, False)
 
 def apply_plist_template(plist_file, version):
     sh("sed -i -e 's/{{VERSION}}/%s/g' %s" % (version, plist_file))
