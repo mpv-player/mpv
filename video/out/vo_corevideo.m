@@ -232,7 +232,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                                      " texture Cache(%d)\n", error);
 
         error = CVPixelBufferCreateWithBytes(NULL, mpi->width, mpi->height,
-                    p->pixelFormat, mpi->planes[0], mpi->width * mpi->bpp / 8,
+                    p->pixelFormat, mpi->planes[0], mpi->stride[0],
                     NULL, NULL, NULL, &p->pixelBuffer);
         if(error != kCVReturnSuccess)
             mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create Pixel"
