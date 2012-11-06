@@ -44,8 +44,7 @@ enum mp_voctrl {
     VOCTRL_PAUSE,
     /* start/resume playback */
     VOCTRL_RESUME,
-    /* libmpcodecs direct rendering */
-    VOCTRL_GET_IMAGE,
+
     VOCTRL_GET_PANSCAN,
     VOCTRL_SET_PANSCAN,
     VOCTRL_SET_EQUALIZER,               // struct voctrl_set_equalizer_args
@@ -54,6 +53,7 @@ enum mp_voctrl {
 
     /* for vdpau hardware decoding */
     VOCTRL_HWDEC_DECODER_RENDER,        // pointer to hw state
+    VOCTRL_HWDEC_GET_SURFACE,           // struct mp_image
 
     VOCTRL_NEWFRAME,
     VOCTRL_SKIPFRAME,

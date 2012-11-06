@@ -62,9 +62,12 @@ static const vd_info_t info = {
 #error palette too large, adapt libmpcodecs/vf.c:vf_get_image
 #endif
 
+#define MAX_NUM_MPI 50
+
 typedef struct {
     AVCodecContext *avctx;
     AVFrame *pic;
+    struct mp_image hwdec_mpi[MAX_NUM_MPI];
     enum PixelFormat pix_fmt;
     int do_dr1;
     int vo_initialized;
@@ -82,11 +85,15 @@ typedef struct {
 
 static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer(AVCodecContext *avctx, AVFrame *pic);
+
+static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic);
+static void release_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic);
 static void draw_slice_hwdec(struct AVCodecContext *s, const AVFrame *src,
                              int offset[4], int y, int type, int height);
 
-static enum PixelFormat get_format(struct AVCodecContext *avctx,
-                                   const enum PixelFormat *pix_fmt);
+static enum PixelFormat get_format_hwdec(struct AVCodecContext *avctx,
+                                         const enum PixelFormat *pix_fmt);
+
 static void uninit(struct sh_video *sh);
 
 const m_option_t lavc_decode_opts_conf[] = {
@@ -267,10 +274,9 @@ static int init(sh_video_t *sh)
     if (lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU) {
         ctx->do_dr1            = true;
         avctx->thread_count    = 1;
-        avctx->get_format      = get_format;
-        avctx->get_buffer      = get_buffer;
-        avctx->release_buffer  = release_buffer;
-        avctx->reget_buffer    = get_buffer;
+        avctx->get_format      = get_format_hwdec;
+        avctx->get_buffer      = get_buffer_hwdec;
+        avctx->release_buffer  = release_buffer_hwdec;
         avctx->draw_horiz_band = draw_slice_hwdec;
         if (lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU)
             mp_msg(MSGT_DECVIDEO, MSGL_V, "[VD_FFMPEG] VDPAU hardware "
@@ -296,7 +302,7 @@ static int init(sh_video_t *sh)
                 "%d threads if supported.\n", avctx->thread_count);
     }
 
-    if (ctx->do_dr1) {
+    if (ctx->do_dr1 && avctx->get_buffer != get_buffer_hwdec) {
         avctx->flags |= CODEC_FLAG_EMU_EDGE;
         avctx->get_buffer = get_buffer;
         avctx->release_buffer = release_buffer;
@@ -444,16 +450,6 @@ static void uninit(sh_video_t *sh)
     talloc_free(ctx);
 }
 
-static void draw_slice_hwdec(struct AVCodecContext *s,
-                             const AVFrame *src, int offset[4],
-                             int y, int type, int height)
-{
-    sh_video_t *sh = s->opaque;
-    struct vf_instance *vf = sh->vfilter;
-    void *state_ptr = src->data[0];
-    vf->control(vf, VFCTRL_HWDEC_DECODER_RENDER, state_ptr);
-}
-
 static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt)
 {
     vd_ffmpeg_ctx *ctx = sh->context;
@@ -497,6 +493,99 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt)
         ctx->vo_initialized = 1;
     }
     return 0;
+}
+
+static enum PixelFormat get_format_hwdec(struct AVCodecContext *avctx,
+                                         const enum PixelFormat *fmt)
+{
+    sh_video_t *sh = avctx->opaque;
+    int i;
+
+    for (i = 0; fmt[i] != PIX_FMT_NONE; i++) {
+        int imgfmt = pixfmt2imgfmt(fmt[i]);
+        if (!IMGFMT_IS_HWACCEL(imgfmt))
+            continue;
+        mp_msg(MSGT_DECVIDEO, MSGL_V, "[VD_FFMPEG] Trying pixfmt=%d.\n", i);
+        if (init_vo(sh, fmt[i]) >= 0)
+            break;
+    }
+    return fmt[i];
+}
+
+static void draw_slice_hwdec(struct AVCodecContext *s,
+                             const AVFrame *src, int offset[4],
+                             int y, int type, int height)
+{
+    sh_video_t *sh = s->opaque;
+    struct vf_instance *vf = sh->vfilter;
+    void *state_ptr = src->data[0];
+    vf->control(vf, VFCTRL_HWDEC_DECODER_RENDER, state_ptr);
+}
+
+static struct mp_image *get_image_hwdec(vd_ffmpeg_ctx *ctx)
+{
+    for (int n = 0; n < MAX_NUM_MPI; n++) {
+        struct mp_image *cur = &ctx->hwdec_mpi[n];
+        if (cur->usage_count == 0) {
+            *cur = (struct mp_image) {
+                .number = n,
+                .imgfmt = ctx->best_csp,
+                .usage_count = 1,
+            };
+            return cur;
+        }
+    }
+    return NULL;
+}
+
+static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
+{
+    sh_video_t *sh = avctx->opaque;
+    vd_ffmpeg_ctx *ctx = sh->context;
+
+    assert(IMGFMT_IS_HWACCEL(ctx->best_csp));
+
+    // Uncertain whether this is needed; at least deals with VO/filter failures
+    if (init_vo(sh, avctx->pix_fmt) < 0) {
+        avctx->release_buffer = avcodec_default_release_buffer;
+        avctx->get_buffer = avcodec_default_get_buffer;
+        avctx->reget_buffer = avcodec_default_reget_buffer;
+        return avctx->get_buffer(avctx, pic);
+    }
+
+    struct mp_image *mpi = get_image_hwdec(ctx);
+    if (!mpi)
+        return -1;
+
+    struct vf_instance *vf = sh->vfilter;
+    vf->control(vf, VFCTRL_HWDEC_GET_SURFACE, mpi);
+
+    for (int i = 0; i < 4; i++)
+        pic->data[i] = mpi->planes[i];
+    pic->opaque = mpi;
+    pic->type = FF_BUFFER_TYPE_USER;
+
+    /* The libavcodec reordered_opaque functionality is implemented by
+     * a similar copy in avcodec_default_get_buffer() and without a
+     * workaround like this it'd stop working when a custom buffer
+     * callback is used.
+     */
+    pic->reordered_opaque = avctx->reordered_opaque;
+    return 0;
+}
+
+static void release_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
+{
+    mp_image_t *mpi = pic->opaque;
+
+    assert(pic->type == FF_BUFFER_TYPE_USER);
+    assert(mpi);
+    assert(mpi->usage_count > 0);
+
+    mpi->usage_count--;
+
+    for (int i = 0; i < 4; i++)
+        pic->data[i] = NULL;
 }
 
 static int get_buffer(AVCodecContext *avctx, AVFrame *pic)
@@ -652,11 +741,7 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     AVFrame *pic = ctx->pic;
     AVCodecContext *avctx = ctx->avctx;
     mp_image_t *mpi = NULL;
-    int dr1 = ctx->do_dr1;
     AVPacket pkt;
-
-    if (!dr1)
-        avctx->draw_horiz_band = NULL;
 
     if (flags & 2)
         avctx->skip_frame = AVDISCARD_ALL;
@@ -682,7 +767,7 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     ret = avcodec_decode_video2(avctx, pic, &got_picture, &pkt);
     *reordered_pts = (union pts){.i = pic->reordered_opaque}.d;
 
-    dr1 = ctx->do_dr1;
+    int dr1 = ctx->do_dr1;
     if (ret < 0)
         mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Error while decoding frame!\n");
 
@@ -749,23 +834,6 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
         mpi->fields |= MP_IMGFIELD_REPEAT_FIRST;
 
     return mpi;
-}
-
-static enum PixelFormat get_format(struct AVCodecContext *avctx,
-                                   const enum PixelFormat *fmt)
-{
-    sh_video_t *sh = avctx->opaque;
-    int i;
-
-    for (i = 0; fmt[i] != PIX_FMT_NONE; i++) {
-        int imgfmt = pixfmt2imgfmt(fmt[i]);
-        if (!IMGFMT_IS_HWACCEL(imgfmt))
-            continue;
-        mp_msg(MSGT_DECVIDEO, MSGL_V, "[VD_FFMPEG] Trying pixfmt=%d.\n", i);
-        if (init_vo(sh, fmt[i]) >= 0)
-            break;
-    }
-    return fmt[i];
 }
 
 static int control(sh_video_t *sh, int cmd, void *arg)

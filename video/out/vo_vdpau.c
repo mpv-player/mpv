@@ -1307,7 +1307,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi, double pts)
     struct vdpau_render_state *rndr;
 
     if (IMGFMT_IS_VDPAU(vc->image_format)) {
-        rndr = mpi->priv;
+        rndr = (struct vdpau_render_state *)mpi->planes[0];
         reserved_mpi = mpi;
     } else {
         rndr = get_surface(vo, vc->deint_counter);
@@ -1394,31 +1394,22 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
     return image;
 }
 
-static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
+static uint32_t get_decoder_surface(struct vo *vo, mp_image_t *mpi)
 {
     struct vdpctx *vc = vo->priv;
     struct vdpau_render_state *rndr;
 
-    // no dr for non-decoding for now
     if (!IMGFMT_IS_VDPAU(vc->image_format))
-        return VO_FALSE;
-    if (mpi->type != MP_IMGTYPE_NUMBERED)
         return VO_FALSE;
 
     rndr = get_surface(vo, mpi->number);
     if (!rndr) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] no surfaces available in "
-               "get_image\n");
+               "get_decoder_surface\n");
         // TODO: this probably breaks things forever, provide a dummy buffer?
         return VO_FALSE;
     }
-    mpi->flags |= MP_IMGFLAG_DIRECT;
-    mpi->stride[0] = mpi->stride[1] = mpi->stride[2] = 0;
-    mpi->planes[0] = mpi->planes[1] = mpi->planes[2] = NULL;
-    // hack to get around a check and to avoid a special-case in vd_ffmpeg.c
     mpi->planes[0] = (void *)rndr;
-    mpi->num_planes = 1;
-    mpi->priv = rndr;
     return VO_TRUE;
 }
 
@@ -1598,8 +1589,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (vc->dropped_frame)
             vo->want_redraw = true;
         return true;
-    case VOCTRL_GET_IMAGE:
-        return get_image(vo, data);
+    case VOCTRL_HWDEC_GET_SURFACE:
+        return get_decoder_surface(vo, data);
     case VOCTRL_HWDEC_DECODER_RENDER:
         return decoder_render(vo, data);
     case VOCTRL_BORDER:

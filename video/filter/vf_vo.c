@@ -105,6 +105,8 @@ static int control(struct vf_instance *vf, int request, void *data)
     }
     case VFCTRL_HWDEC_DECODER_RENDER:
         return vo_control(video_out, VOCTRL_HWDEC_DECODER_RENDER, data);
+    case VFCTRL_HWDEC_GET_SURFACE:
+        return vo_control(video_out, VOCTRL_HWDEC_GET_SURFACE, data);
     }
     return CONTROL_UNKNOWN;
 }
@@ -117,16 +119,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
         if (fmt == IMGFMT_YV12 || fmt == IMGFMT_I420 || fmt == IMGFMT_IYUV)
             flags |= VFCAP_ACCEPT_STRIDE;
     return flags;
-}
-
-static void get_image(struct vf_instance *vf,
-                      mp_image_t *mpi)
-{
-    if (!video_out->config_ok)
-        return;
-    // GET_IMAGE is required for hardware-accelerated formats
-    if (IMGFMT_IS_HWACCEL(mpi->imgfmt))
-        vo_control(video_out, VOCTRL_GET_IMAGE, mpi);
 }
 
 static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
@@ -151,7 +143,6 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->config = config;
     vf->control = control;
     vf->query_format = query_format;
-    vf->get_image = get_image;
     vf->put_image = put_image;
     vf->uninit = uninit;
     vf->priv = calloc(1, sizeof(struct vf_priv_s));
