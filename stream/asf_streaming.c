@@ -64,29 +64,17 @@ static int asf_read_wrapper(int fd, void *buffer, int len, streaming_ctrl_t *str
 }
 
 // We can try several protocol for asf streaming
-// * first the UDP protcol, if there is a firewall, UDP
-//   packets will not come back, so the mmsu will fail.
-// * Then we can try TCP, but if there is a proxy for
+// * First we can try TCP, but if there is a proxy for
 //   internet connection, the TCP connection will not get
 //   through
 // * Then we can try HTTP.
 //
-// Note: Using 	WMP sequence  MMSU then MMST and then HTTP.
+// Note: Using 	WMP sequence  MMST and then HTTP.
 
 static int asf_streaming_start( stream_t *stream, int *demuxer_type) {
     char *proto = stream->streaming_ctrl->url->protocol;
     int fd = -1;
     int port = stream->streaming_ctrl->url->port;
-
-    // Is protocol mms or mmsu?
-    if (!strcasecmp(proto, "mmsu") || !strcasecmp(proto, "mms"))
-    {
-		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/UDP...\n");
-		//fd = asf_mmsu_streaming_start( stream );
-		if( fd>-1 ) return fd; //mmsu support is not implemented yet - using this code
-		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/UDP failed\n");
-		if( fd==-2 ) return -1;
-	}
 
     //Is protocol mms or mmst?
     if (!strcasecmp(proto, "mmst") || !strcasecmp(proto, "mms"))
@@ -861,7 +849,7 @@ const stream_info_t stream_info_asf = {
   "Bertrand, Reimar Doeffinger, Albeu",
   "originally based on work by Majormms (is that code still there?)",
   open_s,
-  {"mms", "mmsu", "mmst", "http", "http_proxy", "mmsh", "mmshttp", NULL},
+  {"mms", "mmst", "http", "http_proxy", "mmsh", "mmshttp", NULL},
   NULL,
   0 // Urls are an option string
 };
