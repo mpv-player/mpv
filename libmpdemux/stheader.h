@@ -184,8 +184,6 @@ struct sh_video *new_sh_video_vid(struct demuxer *demuxer, int id, int vid);
 struct sh_sub *new_sh_sub_sid(struct demuxer *demuxer, int id, int sid);
 struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
                                    const char *lang);
-void free_sh_audio(struct demuxer *demuxer, int id);
-void free_sh_video(struct sh_video *sh);
 
 const char *sh_sub_type2str(int type);
 

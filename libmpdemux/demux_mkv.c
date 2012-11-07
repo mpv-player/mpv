@@ -1542,7 +1542,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
     mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported audio "
             "codec ID '%s' for track %u or missing/faulty\n[mkv] "
             "private codec data.\n", track->codec_id, track->tnum);
-    free_sh_audio(demuxer, track->id);
     return 1;
 }
 

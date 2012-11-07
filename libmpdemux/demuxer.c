@@ -400,7 +400,7 @@ sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
     return demuxer->a_streams[id];
 }
 
-void free_sh_audio(demuxer_t *demuxer, int id)
+static void free_sh_audio(demuxer_t *demuxer, int id)
 {
     sh_audio_t *sh = demuxer->a_streams[id];
     demuxer->a_streams[id] = NULL;
@@ -429,7 +429,7 @@ sh_video_t *new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
     return demuxer->v_streams[id];
 }
 
-void free_sh_video(sh_video_t *sh)
+static void free_sh_video(sh_video_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_video at %p\n", sh);
     free(sh->bih);
