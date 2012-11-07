@@ -29,9 +29,9 @@ Converts a "StringLikeTHIS" into a
 sub uncamelize($) {
     local $_ = shift;
     # lc followed by UC: lc_UC
-    s/(?<=[a-z])([A-Z])/_$1/g;
+    s/(?<=[a-z])([A-Z])/_\L$1/g;
     # UC followed by two lc: _UClclc
-    s/([A-Z])(?=[a-z]{2})/_$1/g;
+    s/([A-Z])(?=[a-z]{2})/_\L$1/g;
     # strip leading _ that the second regexp might add; lowercase all
     s/^_//; lc
 }
