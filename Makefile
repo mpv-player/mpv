@@ -349,31 +349,31 @@ mpv$(EXESUF):
 	$(CC) -o $@ $^ $(EXTRALIBS)
 
 codec-cfg.c: codecs.conf.h
-codecs.conf.h: TOOLS/file2string.py etc/codecs.conf
+codecs.conf.h: TOOLS/file2string.pl etc/codecs.conf
 	./$^ >$@
 
 input/input.c: input/input_conf.h
-input/input_conf.h: TOOLS/file2string.py etc/input.conf
+input/input_conf.h: TOOLS/file2string.pl etc/input.conf
 	./$^ >$@
 
 libvo/vo_vdpau.c: libvo/vdpau_template.c
-libvo/vdpau_template.c: TOOLS/vdpau_functions.py
+libvo/vdpau_template.c: TOOLS/vdpau_functions.pl
 	./$< > $@
 
 libmpdemux/ebml.c libmpdemux/demux_mkv.c: libmpdemux/ebml_types.h
-libmpdemux/ebml_types.h: TOOLS/matroska.py
+libmpdemux/ebml_types.h: TOOLS/matroska.pl
 	./$< --generate-header > $@
 
 libmpdemux/ebml.c: libmpdemux/ebml_defs.c
-libmpdemux/ebml_defs.c: TOOLS/matroska.py
+libmpdemux/ebml_defs.c: TOOLS/matroska.pl
 	./$< --generate-definitions > $@
 
 libvo/vo_opengl.c: libvo/vo_opengl_shaders.h
-libvo/vo_opengl_shaders.h: TOOLS/file2string.py libvo/vo_opengl_shaders.glsl
+libvo/vo_opengl_shaders.h: TOOLS/file2string.pl libvo/vo_opengl_shaders.glsl
 	./$^ >$@
 
 sub/osd_libass.c: sub/osd_font.h
-sub/osd_font.h: TOOLS/file2string.py sub/osd_font.pfb
+sub/osd_font.h: TOOLS/file2string.pl sub/osd_font.pfb
 	./$^ >$@
 
 # ./configure must be rerun if it changed
