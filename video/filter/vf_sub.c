@@ -66,13 +66,13 @@ static int config(struct vf_instance *vf,
     vf->priv->outh = height + opts->ass_top_margin + opts->ass_bottom_margin;
     vf->priv->outw = width;
 
+    double dar = (double)d_width / d_height;
+    double sar = (double)width / height;
+
     if (!opts->screen_size_x && !opts->screen_size_y) {
         d_width = d_width * vf->priv->outw / width;
         d_height = d_height * vf->priv->outh / height;
     }
-
-    double dar = (double)d_width / d_height;
-    double sar = (double)width / height;
 
     vf->priv->dim = (struct mp_osd_res) {
         .w = vf->priv->outw,
