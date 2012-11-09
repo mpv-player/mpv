@@ -18,9 +18,9 @@
 #include <assert.h>
 #include "config.h"
 #include "playlist.h"
-#include "mpcommon.h"
+#include "core/mp_common.h"
 #include "talloc.h"
-#include "path.h"
+#include "core/path.h"
 
 struct playlist_entry *playlist_entry_new(const char *filename)
 {

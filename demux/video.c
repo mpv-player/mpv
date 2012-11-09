@@ -27,10 +27,10 @@
 
 #include <libavutil/mem.h>
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #include "stream/stream.h"
-#include "demuxer.h"
+#include "demux.h"
 #include "stheader.h"
 #include "parse_es.h"
 #include "mpeg_hdr.h"

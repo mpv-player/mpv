@@ -25,8 +25,8 @@
 
 #include "config.h"
 #include "osdep/timer.h"
-#include "libaf/format.h"
-#include "audio_out.h"
+#include "audio/format.h"
+#include "ao.h"
 
 struct priv {
     unsigned last_time;

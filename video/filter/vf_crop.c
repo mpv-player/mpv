@@ -21,15 +21,15 @@
 #include <string.h>
 
 #include "config.h"
-#include "mp_msg.h"
-#include "options.h"
+#include "core/mp_msg.h"
+#include "core/options.h"
 
-#include "img_format.h"
-#include "mp_image.h"
+#include "video/img_format.h"
+#include "video/mp_image.h"
 #include "vf.h"
 
-#include "m_option.h"
-#include "m_struct.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 
 static const struct vf_priv_s {
     int crop_w,crop_h;

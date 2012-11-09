@@ -17,7 +17,7 @@
  */
 
 #include "talloc.h"
-#include "mpcommon.h"
+#include "core/mp_common.h"
 
 char *mp_format_time(double time, bool fractions)
 {

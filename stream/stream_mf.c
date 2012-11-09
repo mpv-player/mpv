@@ -26,7 +26,7 @@
 #include <string.h>
 
 #include "stream.h"
-#include "libmpdemux/demuxer.h"
+#include "demux/demux.h"
 
 static int
 mf_stream_open (stream_t *stream, int mode, void *opts, int *file_format)

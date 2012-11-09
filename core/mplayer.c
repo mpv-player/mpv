@@ -63,33 +63,33 @@
 
 #include <errno.h>
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "av_log.h"
 
 
-#include "m_option.h"
-#include "m_config.h"
-#include "mplayer.h"
-#include "m_property.h"
+#include "core/m_option.h"
+#include "core/m_config.h"
+#include "core/mplayer.h"
+#include "core/m_property.h"
 
 #include "sub/subreader.h"
 #include "sub/find_subfiles.h"
 #include "sub/dec_sub.h"
 
-#include "mp_osd.h"
-#include "libvo/video_out.h"
-#include "screenshot.h"
+#include "core/mp_osd.h"
+#include "video/out/vo.h"
+#include "core/screenshot.h"
 
 #include "sub/sub.h"
-#include "cpudetect.h"
+#include "core/cpudetect.h"
 
 #ifdef CONFIG_X11
-#include "libvo/x11_common.h"
+#include "video/out/x11_common.h"
 #endif
 
-#include "libao2/audio_out.h"
+#include "audio/out/ao.h"
 
-#include "codec-cfg.h"
+#include "core/codec-cfg.h"
 
 #include "sub/spudec.h"
 #include "sub/vobsub.h"
@@ -97,9 +97,9 @@
 #include "osdep/getch2.h"
 #include "osdep/timer.h"
 
-#include "input/input.h"
+#include "core/input/input.h"
 
-#include "encode.h"
+#include "core/encode.h"
 
 int slave_mode = 0;
 int enable_mouse_movements = 0;
@@ -119,20 +119,20 @@ char *heartbeat_cmd;
 //**************************************************************************//
 //             Playtree
 //**************************************************************************//
-#include "playlist.h"
-#include "playlist_parser.h"
+#include "core/playlist.h"
+#include "core/playlist_parser.h"
 
 //**************************************************************************//
 //             Config
 //**************************************************************************//
-#include "parser-cfg.h"
-#include "parser-mpcmd.h"
+#include "core/parser-cfg.h"
+#include "core/parser-mpcmd.h"
 
 //**************************************************************************//
 //             Config file
 //**************************************************************************//
 
-#include "path.h"
+#include "core/path.h"
 
 //**************************************************************************//
 //**************************************************************************//
@@ -142,24 +142,24 @@ char *heartbeat_cmd;
 static int max_framesize = 0;
 
 #include "stream/stream.h"
-#include "libmpdemux/demuxer.h"
-#include "libmpdemux/stheader.h"
+#include "demux/demux.h"
+#include "demux/stheader.h"
 
 #ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
 #endif
 
-#include "libmpcodecs/dec_audio.h"
-#include "libmpcodecs/dec_video.h"
-#include "libmpcodecs/mp_image.h"
-#include "libmpcodecs/vf.h"
-#include "libmpcodecs/vd.h"
+#include "audio/decode/dec_audio.h"
+#include "video/decode/dec_video.h"
+#include "video/mp_image.h"
+#include "video/filter/vf.h"
+#include "video/decode/vd.h"
 
-#include "mixer.h"
+#include "audio/mixer.h"
 
-#include "mp_core.h"
-#include "options.h"
-#include "defaultopts.h"
+#include "core/mp_core.h"
+#include "core/options.h"
+#include "core/defaultopts.h"
 
 static const char help_text[] = _(
 "Usage:   mpv [options] [url|path/]filename\n"
@@ -200,7 +200,7 @@ static const char av_desync_help_text[] = _(
 //**************************************************************************//
 //**************************************************************************//
 
-#include "mp_fifo.h"
+#include "core/mp_fifo.h"
 
 static int drop_frame_cnt; // total number of dropped frames
 
@@ -244,8 +244,8 @@ char *edl_output_filename; // file to put EDL entries in (-edlout)
 
 int use_filedir_conf;
 
-#include "mpcommon.h"
-#include "command.h"
+#include "core/mp_common.h"
+#include "core/command.h"
 
 static void reset_subtitles(struct MPContext *mpctx);
 static void reinit_subs(struct MPContext *mpctx);
@@ -789,11 +789,11 @@ static void load_per_file_options(m_config_t *conf,
         m_config_set_option(conf, params[n].name, params[n].value);
 }
 
-/* When libmpdemux performs a blocking operation (network connection or
+/* When demux performs a blocking operation (network connection or
  * cache filling) if the operation fails we use this function to check
  * if it was interrupted by the user.
  * The function returns whether it was interrupted. */
-static bool libmpdemux_was_interrupted(struct MPContext *mpctx)
+static bool demux_was_interrupted(struct MPContext *mpctx)
 {
     for (;;) {
         if (mpctx->stop_play != KEEP_PLAYING
@@ -3741,7 +3741,7 @@ static void play_current_file(struct MPContext *mpctx)
         stream_filename = mpctx->resolve_result->url;
     mpctx->stream = open_stream(stream_filename, opts, &mpctx->file_format);
     if (!mpctx->stream) { // error...
-        libmpdemux_was_interrupted(mpctx);
+        demux_was_interrupted(mpctx);
         goto terminate_playback;
     }
     mpctx->initialized_flags |= INITIALIZED_STREAM;
@@ -3778,7 +3778,7 @@ goto_enable_cache:
                                               opts->stream_cache_min_percent,
                                               opts->stream_cache_seek_min_percent);
         if (res == 0)
-            if (libmpdemux_was_interrupted(mpctx))
+            if (demux_was_interrupted(mpctx))
                 goto terminate_playback;
     }
 

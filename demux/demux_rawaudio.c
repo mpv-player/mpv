@@ -23,12 +23,12 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "m_option.h"
+#include "core/m_option.h"
 
 #include "stream/stream.h"
-#include "demuxer.h"
+#include "demux.h"
 #include "stheader.h"
-#include "libaf/format.h"
+#include "audio/format.h"
 
 
 static int channels = 2;

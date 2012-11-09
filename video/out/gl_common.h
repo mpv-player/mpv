@@ -28,12 +28,12 @@
 #include <stdint.h>
 
 #include "config.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
-#include "video_out.h"
-#include "csputils.h"
+#include "vo.h"
+#include "video/csputils.h"
 
-#include "libmpcodecs/mp_image.h"
+#include "video/mp_image.h"
 
 #if defined(CONFIG_GL_COCOA) && !defined(CONFIG_GL_X11)
 #ifdef GL_VERSION_3_0
@@ -47,7 +47,7 @@
 #include <GL/glext.h>
 #endif
 
-#include "libvo/gl_header_fixes.h"
+#include "video/out/gl_header_fixes.h"
 
 struct GL;
 typedef struct GL GL;

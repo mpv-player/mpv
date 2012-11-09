@@ -26,13 +26,13 @@
 #include <stddef.h>
 #include <sys/types.h>
 
-#include "options.h"
+#include "core/options.h"
 #include "config.h"
-#include "m_config.h"
-#include "m_option.h"
+#include "core/m_config.h"
+#include "core/m_option.h"
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
-#include "libvo/csputils.h"
+#include "video/csputils.h"
 
 extern char *lirc_configfile;
 
@@ -67,7 +67,7 @@ extern int reuse_socket;
 
 extern int dvd_speed; /* stream/stream_dvd.c */
 
-/* defined in libmpdemux: */
+/* defined in demux: */
 extern const m_option_t demux_rawaudio_opts[];
 extern const m_option_t demux_rawvideo_opts[];
 extern const m_option_t cdda_opts[];
@@ -204,7 +204,7 @@ const m_option_t mfopts_conf[]={
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-#include "libaf/af.h"
+#include "audio/filter/af.h"
 extern struct af_cfg af_cfg; // Audio filter configuration, defined in libmpcodecs/dec_audio.c
 const m_option_t audio_filter_conf[]={
     {"list", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},

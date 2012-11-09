@@ -78,10 +78,10 @@
 #endif
 #endif
 
-#include "libaf/format.h"
-#include "libmpcodecs/img_format.h"
+#include "audio/format.h"
+#include "video/img_format.h"
 #include "tv.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 static tvi_handle_t *tvi_init_bsdbt848(tv_param_t* tv_param);
 /* information about this file */

@@ -22,11 +22,11 @@
 
 
 #include "encode_lavc.h"
-#include "mp_msg.h"
-#include "libmpcodecs/vfcap.h"
-#include "options.h"
+#include "core/mp_msg.h"
+#include "video/vfcap.h"
+#include "core/options.h"
 #include "osdep/timer.h"
-#include "libvo/video_out.h"
+#include "video/out/vo.h"
 #include "talloc.h"
 #include "stream/stream.h"
 

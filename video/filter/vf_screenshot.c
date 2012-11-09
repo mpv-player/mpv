@@ -23,13 +23,13 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "mp_msg.h"
-#include "img_format.h"
-#include "mp_image.h"
+#include "core/mp_msg.h"
+#include "video/img_format.h"
+#include "video/mp_image.h"
 #include "vf.h"
-#include "libmpcodecs/sws_utils.h"
-#include "fmt-conversion.h"
-#include "libvo/fastmemcpy.h"
+#include "video/sws_utils.h"
+#include "video/fmt-conversion.h"
+#include "video/memcpy_pic.h"
 
 #include <libswscale/swscale.h>
 

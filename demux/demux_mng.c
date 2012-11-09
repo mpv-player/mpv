@@ -26,12 +26,12 @@
 
 #include "config.h"
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #include "stream/stream.h"
-#include "demuxer.h"
+#include "demux.h"
 #include "stheader.h"
-#include "libmpcodecs/img_format.h"
+#include "video/img_format.h"
 
 #define MNG_SUPPORT_READ
 #define MNG_SUPPORT_DISPLAY

@@ -35,14 +35,14 @@
 #include "config.h"
 
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #include "stream.h"
-#include "libmpdemux/demuxer.h"
-#include "libmpdemux/stheader.h"
+#include "demux/demux.h"
+#include "demux/stheader.h"
 
-#include "libaf/format.h"
-#include "libmpcodecs/img_format.h"
+#include "audio/format.h"
+#include "video/img_format.h"
 #include "libavutil/avstring.h"
 #include "osdep/timer.h"
 

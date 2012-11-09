@@ -32,11 +32,11 @@
 #include <winsock2.h>
 #endif
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "network.h"
 #include "stream.h"
-#include "m_option.h"
-#include "m_struct.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 #include "tcp.h"
 
 static struct stream_priv_s {

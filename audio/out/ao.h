@@ -21,7 +21,7 @@
 
 #include <stdbool.h>
 
-#include "bstr.h"
+#include "core/bstr.h"
 
 #define CONTROL_OK 1
 #define CONTROL_TRUE 1

@@ -35,8 +35,8 @@
 #include <libavutil/avstring.h>
 
 #include "talloc.h"
-#include "m_option.h"
-#include "mp_msg.h"
+#include "core/m_option.h"
+#include "core/mp_msg.h"
 #include "stream/url.h"
 
 char *m_option_strerror(int code)
@@ -1116,7 +1116,7 @@ const m_option_type_t m_option_type_subconfig_struct = {
     .parse = parse_subconf,
 };
 
-#include "libmpcodecs/img_format.h"
+#include "video/img_format.h"
 
 static int parse_imgfmt(const m_option_t *opt, struct bstr name,
                         struct bstr param, void *dst)
@@ -1154,7 +1154,7 @@ const m_option_type_t m_option_type_imgfmt = {
     .copy  = copy_opt,
 };
 
-#include "libaf/format.h"
+#include "audio/format.h"
 
 static int parse_afmt(const m_option_t *opt, struct bstr name,
                       struct bstr param, void *dst)
@@ -1308,7 +1308,7 @@ const m_option_type_t m_option_type_time_size = {
 
 //// Objects (i.e. filters, etc) settings
 
-#include "m_struct.h"
+#include "core/m_struct.h"
 
 #undef VAL
 #define VAL(x) (*(m_obj_settings_t **)(x))

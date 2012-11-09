@@ -25,7 +25,7 @@
 
 #include "config.h"
 #include "talloc.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #include <libgen.h>
 #include <errno.h>
@@ -36,12 +36,12 @@
 #define FIRST_PCM_AID 160
 
 #include "stream.h"
-#include "m_option.h"
-#include "m_struct.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 
 #include "stream_dvd.h"
 #include "stream_dvd_common.h"
-#include "libmpdemux/demuxer.h"
+#include "demux/demux.h"
 
 static char* dvd_device_current;
 int dvd_angle=1;

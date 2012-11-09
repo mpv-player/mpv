@@ -22,11 +22,11 @@
 #include <sys/types.h>
 
 #include "config.h"
-#include "video_out.h"
+#include "vo.h"
 #include "aspect.h"
-#include "csputils.h"
-#include "libmpcodecs/mp_image.h"
-#include "libmpcodecs/vfcap.h"
+#include "video/csputils.h"
+#include "video/mp_image.h"
+#include "video/vfcap.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -43,11 +43,11 @@
 
 #include "sub/sub.h"
 
-#include "libmpcodecs/sws_utils.h"
+#include "video/sws_utils.h"
 #define MODE_RGB  0x1
 #define MODE_BGR  0x2
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 extern int sws_flags;
 

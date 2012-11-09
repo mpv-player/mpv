@@ -42,10 +42,10 @@
 #include <inttypes.h>
 #include <errno.h>
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "stream.h"
-#include "m_option.h"
-#include "m_struct.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 #include "tcp.h"
 
 #include <vstream-client.h>

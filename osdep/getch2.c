@@ -53,9 +53,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "bstr.h"
-#include "mp_fifo.h"
-#include "input/keycodes.h"
+#include "core/bstr.h"
+#include "core/mp_fifo.h"
+#include "core/input/keycodes.h"
 #include "getch2.h"
 
 #ifdef HAVE_TERMIOS

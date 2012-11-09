@@ -32,8 +32,8 @@
 #include <IOKit/storage/IOCDTypes.h>
 #include <IOKit/storage/IOCDMedia.h>
 #include <IOKit/storage/IOCDMediaBSDClient.h>
-#include "mpbswap.h"
-#include "mp_msg.h"
+#include "compat/mpbswap.h"
+#include "core/mp_msg.h"
 #include "stream.h"
 
 //=================== VideoCD ==========================

@@ -35,15 +35,15 @@
 #include <caca.h>
 
 #include "config.h"
-#include "video_out.h"
+#include "vo.h"
 #include "sub/sub.h"
-#include "libmpcodecs/mp_image.h"
-#include "libmpcodecs/vfcap.h"
+#include "video/mp_image.h"
+#include "video/vfcap.h"
 
-#include "input/keycodes.h"
-#include "input/input.h"
-#include "mp_msg.h"
-#include "mp_fifo.h"
+#include "core/input/keycodes.h"
+#include "core/input/input.h"
+#include "core/mp_msg.h"
+#include "core/mp_fifo.h"
 
 /* caca stuff */
 static caca_canvas_t  *canvas;

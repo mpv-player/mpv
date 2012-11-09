@@ -19,7 +19,7 @@
 #ifndef MPLAYER_M_STRUCT_H
 #define MPLAYER_M_STRUCT_H
 
-#include "bstr.h"
+#include "core/bstr.h"
 
 /// \defgroup OptionsStruct Options struct
 /// \ingroup Options

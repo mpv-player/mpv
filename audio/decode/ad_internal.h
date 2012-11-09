@@ -19,12 +19,12 @@
 #ifndef MPLAYER_AD_INTERNAL_H
 #define MPLAYER_AD_INTERNAL_H
 
-#include "codec-cfg.h"
-#include "libaf/format.h"
+#include "core/codec-cfg.h"
+#include "audio/format.h"
 
 #include "stream/stream.h"
-#include "libmpdemux/demuxer.h"
-#include "libmpdemux/stheader.h"
+#include "demux/demux.h"
+#include "demux/stheader.h"
 
 #include "ad.h"
 

@@ -37,13 +37,13 @@
 #endif
 
 #include "talloc.h"
-#include "mpcommon.h"
-#include "bstr.h"
-#include "mp_msg.h"
-#include "subopt-helper.h"
-#include "video_out.h"
-#include "libmpcodecs/vfcap.h"
-#include "libmpcodecs/mp_image.h"
+#include "core/mp_common.h"
+#include "core/bstr.h"
+#include "core/mp_msg.h"
+#include "core/subopt-helper.h"
+#include "vo.h"
+#include "video/vfcap.h"
+#include "video/mp_image.h"
 #include "geometry.h"
 #include "sub/sub.h"
 #include "bitmap_packer.h"
@@ -52,11 +52,11 @@
 #include "gl_osd.h"
 #include "filter_kernels.h"
 #include "aspect.h"
-#include "fastmemcpy.h"
+#include "video/memcpy_pic.h"
 
 static const char vo_opengl_shaders[] =
 // Generated from libvo/vo_opengl_shaders.glsl
-#include "libvo/vo_opengl_shaders.h"
+#include "video/out/vo_opengl_shaders.h"
 ;
 
 // Pixel width of 1D lookup textures.

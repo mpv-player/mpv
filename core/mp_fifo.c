@@ -24,7 +24,7 @@
 #include "input/keycodes.h"
 #include "mp_fifo.h"
 #include "talloc.h"
-#include "options.h"
+#include "core/options.h"
 
 
 struct mp_fifo {

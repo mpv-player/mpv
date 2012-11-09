@@ -20,7 +20,7 @@
 #define MPLAYER_MACOSX_FINDER_ARGS_H
 
 #include <stdbool.h>
-#include "m_config.h"
+#include "core/m_config.h"
 
 struct playlist;
 bool macosx_finder_args(m_config_t *config, struct playlist *files,

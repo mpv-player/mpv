@@ -21,11 +21,11 @@
 
 #include <stdbool.h>
 
-#include "options.h"
-#include "mixer.h"
+#include "core/options.h"
 #include "sub/subreader.h"
 #include "sub/find_subfiles.h"
-#include "libmpdemux/demuxer.h"
+#include "audio/mixer.h"
+#include "demux/demux.h"
 
 // definitions used internally by the core player code
 

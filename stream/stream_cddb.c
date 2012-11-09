@@ -49,8 +49,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "mp_msg.h"
-#include "path.h"
+#include "core/mp_msg.h"
+#include "core/path.h"
 
 #if defined(__linux__)
 #include <linux/cdrom.h>
@@ -63,11 +63,11 @@
 #elif defined(__APPLE__) || defined(__DARWIN__)
 #include <IOKit/storage/IOCDTypes.h>
 #include <IOKit/storage/IOCDMediaBSDClient.h>
-#include "mpbswap.h"
+#include "compat/mpbswap.h"
 #endif
 
 #include "cdd.h"
-#include "mpcommon.h"
+#include "core/mp_common.h"
 #include "stream.h"
 #include "network.h"
 #include "libavutil/common.h"

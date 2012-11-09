@@ -21,7 +21,7 @@
 
 #include <stdlib.h>
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 extern char ** audio_fm_list;
 extern char ** video_fm_list;

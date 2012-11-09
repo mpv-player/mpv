@@ -26,7 +26,7 @@
 
 #include <string.h>
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #include "priority.h"
 

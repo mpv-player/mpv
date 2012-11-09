@@ -30,7 +30,7 @@
 
 #include "config.h"
 #include "af.h"
-#include "mpbswap.h"
+#include "compat/mpbswap.h"
 
 /* Functions used by play to convert the input audio to the correct
    format */

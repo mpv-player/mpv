@@ -436,7 +436,6 @@ _opt=-O2
 _cross_compile=no
 _prefix="/usr/local"
 ffmpeg=auto
-_mplayer=yes
 _encoding=yes
 _x11=auto
 _xshape=auto
@@ -621,8 +620,6 @@ for ac_option do
   --disable-translation)             _translation=no            ;;
   --enable-cross-compile)           _cross_compile=yes          ;;
   --disable-cross-compile)          _cross_compile=no           ;;
-  --enable-mpv)         _mplayer=yes    ;;
-  --disable-mpv)        _mplayer=no     ;;
   --enable-encoding)    _encoding=yes   ;;
   --disable-encoding)   _encoding=no    ;;
   --enable-x11)         _x11=yes        ;;
@@ -3332,8 +3329,7 @@ CFLAGS   = $WARNFLAGS $ERRORFLAGS $WARN_CFLAGS $CFLAGS $extra_cflags
 CXXFLAGS = $WARNFLAGS $ERRORFLAGS $CXXFLAGS $extra_cflags $extra_cxxflags
 DEPFLAGS = $DEPFLAGS
 
-EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs
-EXTRALIBS_MPLAYER  = $libs_mplayer
+EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs $libs_mplayer
 
 GETCH = $_getch
 TIMER = $_timer
@@ -3345,8 +3341,6 @@ EXESUFS_ALL = .exe
 ARCH = $arch
 $(mak_enable "$arch_all"    "$arch"    ARCH)
 $(mak_enable "$subarch_all" "$subarch" ARCH)
-
-MPLAYER  = $_mplayer
 
 NEED_GETTIMEOFDAY = $need_gettimeofday
 NEED_GLOB         = $need_glob

@@ -25,8 +25,8 @@
 #include <assert.h>
 #include <stdbool.h>
 
-#include "mp_msg.h"
-#include "m_option.h"
+#include "core/mp_msg.h"
+#include "core/m_option.h"
 #include "m_config.h"
 #include "playlist.h"
 #include "playlist_parser.h"

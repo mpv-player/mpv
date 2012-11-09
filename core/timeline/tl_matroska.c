@@ -30,12 +30,12 @@
 
 #include "talloc.h"
 
-#include "mp_core.h"
-#include "mp_msg.h"
-#include "libmpdemux/demuxer.h"
-#include "path.h"
-#include "bstr.h"
-#include "mpcommon.h"
+#include "core/mp_core.h"
+#include "core/mp_msg.h"
+#include "demux/demux.h"
+#include "core/path.h"
+#include "core/bstr.h"
+#include "core/mp_common.h"
 #include "stream/stream.h"
 
 struct find_entry {

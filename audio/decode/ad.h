@@ -19,8 +19,8 @@
 #ifndef MPLAYER_AD_H
 #define MPLAYER_AD_H
 
-#include "mpc_info.h"
-#include "libmpdemux/stheader.h"
+#include "core/mpc_info.h"
+#include "demux/stheader.h"
 
 typedef struct mp_codec_info ad_info_t;
 

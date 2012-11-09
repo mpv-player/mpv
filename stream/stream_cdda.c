@@ -29,15 +29,15 @@
 #include "talloc.h"
 
 #include "stream.h"
-#include "m_option.h"
-#include "m_struct.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 #include "libavutil/common.h"
-#include "mpbswap.h"
-#include "libmpdemux/demuxer.h"
+#include "compat/mpbswap.h"
+#include "demux/demux.h"
 
 #include "cdd.h"
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 extern char *cdrom_device;
 

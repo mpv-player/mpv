@@ -33,11 +33,11 @@
 
 #include "config.h"
 #include "libavutil/common.h"
-#include "libmpdemux/demuxer.h"
+#include "demux/demux.h"
 #include "talloc.h"
-#include "mp_msg.h"
-#include "m_struct.h"
-#include "m_option.h"
+#include "core/mp_msg.h"
+#include "core/m_struct.h"
+#include "core/m_option.h"
 #include "stream.h"
 
 #define BLURAY_SECTOR_SIZE     6144

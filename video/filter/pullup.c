@@ -21,8 +21,8 @@
 #include <string.h>
 #include "config.h"
 #include "pullup.h"
-#include "cpudetect.h"
-#include "mpcommon.h"
+#include "core/cpudetect.h"
+#include "core/mp_common.h"
 
 
 

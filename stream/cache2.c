@@ -57,11 +57,11 @@ static void *ThreadProc(void *s);
 #define FORKED_CACHE 0
 #endif
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #include "stream.h"
 #include "cache2.h"
-#include "mpcommon.h"
+#include "core/mp_common.h"
 
 typedef struct {
   // constats:

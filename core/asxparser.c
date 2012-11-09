@@ -27,9 +27,9 @@
 #include "playlist.h"
 #include "playlist_parser.h"
 #include "stream/stream.h"
-#include "libmpdemux/demuxer.h"
+#include "demux/demux.h"
 #include "asxparser.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 
 typedef struct ASX_Parser_t ASX_Parser_t;

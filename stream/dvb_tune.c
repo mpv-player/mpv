@@ -37,7 +37,7 @@
 #include "config.h"
 #include "dvbin.h"
 #include "dvb_tune.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 
 

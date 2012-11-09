@@ -24,11 +24,11 @@
 
 #include "talloc.h"
 
-#include "libmpcodecs/img_format.h"
-#include "libmpcodecs/mp_image.h"
-#include "libmpcodecs/sws_utils.h"
+#include "video/img_format.h"
+#include "video/mp_image.h"
+#include "video/sws_utils.h"
 
-#include "libvo/fastmemcpy.h"
+#include "video/memcpy_pic.h"
 #include "libavutil/mem.h"
 #include "libavutil/common.h"
 

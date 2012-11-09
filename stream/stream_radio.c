@@ -53,10 +53,10 @@
 
 
 #include "stream.h"
-#include "libmpdemux/demuxer.h"
-#include "m_struct.h"
-#include "m_option.h"
-#include "mp_msg.h"
+#include "demux/demux.h"
+#include "core/m_struct.h"
+#include "core/m_option.h"
+#include "core/mp_msg.h"
 #include "stream_radio.h"
 #include "libavutil/avstring.h"
 

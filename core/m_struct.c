@@ -24,9 +24,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "m_option.h"
-#include "m_struct.h"
-#include "mp_msg.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
+#include "core/mp_msg.h"
 
 const m_option_t*
 m_struct_get_field(const m_struct_t* st,const char* f) {

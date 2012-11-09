@@ -20,11 +20,11 @@
 
 #include "libavformat/avformat.h"
 #include "libavformat/avio.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "stream.h"
-#include "m_option.h"
-#include "m_struct.h"
-#include "libmpdemux/demuxer.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
+#include "demux/demux.h"
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {

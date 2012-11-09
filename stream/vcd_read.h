@@ -26,7 +26,7 @@
 
 #include <libavutil/intreadwrite.h>
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "stream.h"
 //=================== VideoCD ==========================
 #if	defined(__linux__) || defined(sun) || defined(__bsdi__)

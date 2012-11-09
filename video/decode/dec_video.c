@@ -17,35 +17,35 @@
  */
 
 #include "config.h"
-#include "options.h"
+#include "core/options.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #include "osdep/timer.h"
 #include "osdep/shmem.h"
 
 #include "stream/stream.h"
-#include "libmpdemux/demuxer.h"
+#include "demux/demux.h"
 
-#include "codec-cfg.h"
+#include "core/codec-cfg.h"
 
-#include "libvo/video_out.h"
-#include "libvo/csputils.h"
+#include "video/out/vo.h"
+#include "video/csputils.h"
 
-#include "libmpdemux/stheader.h"
-#include "vd.h"
-#include "vf.h"
+#include "demux/stheader.h"
+#include "video/decode/vd.h"
+#include "video/filter/vf.h"
 
-#include "dec_video.h"
+#include "video/decode/dec_video.h"
 
 // ===================================================================
 
-#include "cpudetect.h"
+#include "core/cpudetect.h"
 
 int field_dominance = -1;
 

@@ -20,7 +20,7 @@
 #ifndef MPLAYER_COCOA_EVENTS_H
 #define MPLAYER_COCOA_EVENTS_H
 
-#include "input/input.h"
+#include "core/input/input.h"
 
 void cocoa_events_init(struct input_ctx *ictx,
     void (*read_all_fd_events)(struct input_ctx *ictx, int time));

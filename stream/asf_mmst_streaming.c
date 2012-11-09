@@ -35,8 +35,8 @@
 #include <inttypes.h>
 
 #include "config.h"
-#include "options.h"
-#include "mp_msg.h"
+#include "core/options.h"
+#include "core/mp_msg.h"
 
 #if HAVE_WINSOCK2_H
 #include <winsock2.h>
@@ -47,7 +47,7 @@
 #endif
 
 #include "url.h"
-#include "libmpdemux/asf.h"
+#include "demux/asf.h"
 
 #include "stream.h"
 #include "asf_mmst_streaming.h"

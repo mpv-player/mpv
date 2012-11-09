@@ -23,7 +23,7 @@
 #include "config.h"
 
 #include "audio_in.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include <string.h>
 #include <errno.h>
 

@@ -22,14 +22,14 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include "options.h"
-#include "input/keycodes.h"
-#include "input/input.h"
-#include "mp_msg.h"
-#include "video_out.h"
+#include "core/options.h"
+#include "core/input/keycodes.h"
+#include "core/input/input.h"
+#include "core/mp_msg.h"
+#include "vo.h"
 #include "aspect.h"
 #include "w32_common.h"
-#include "mp_fifo.h"
+#include "core/mp_fifo.h"
 #include "osdep/io.h"
 #include "talloc.h"
 
@@ -577,7 +577,7 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
             // first vo_config call; vo_config() will always set vo_dx/dy so
             // that the window is centered on the screen, and this is the only
             // time we actually want to use vo_dy/dy (this is not sane, and
-            // video_out.h should provide a function to query the initial
+            // vo.h should provide a function to query the initial
             // window position instead)
             w32->window_bounds_initialized = true;
             reset_size = true;

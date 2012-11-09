@@ -17,9 +17,9 @@
  */
 
 #include "config.h"
-#include "img_format.h"
+#include "video/img_format.h"
 #include "stdio.h"
-#include "mpbswap.h"
+#include "compat/mpbswap.h"
 
 #include <string.h>
 

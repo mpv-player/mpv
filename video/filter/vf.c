@@ -26,16 +26,16 @@
 
 #include "config.h"
 
-#include "mp_msg.h"
-#include "m_option.h"
-#include "m_struct.h"
+#include "core/mp_msg.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 
 
-#include "img_format.h"
-#include "mp_image.h"
+#include "video/img_format.h"
+#include "video/mp_image.h"
 #include "vf.h"
 
-#include "libvo/fastmemcpy.h"
+#include "video/memcpy_pic.h"
 
 extern const vf_info_t vf_info_vo;
 extern const vf_info_t vf_info_crop;

@@ -42,10 +42,9 @@
 #include <assert.h>
 #include "talloc.h"
 #include "gl_common.h"
-#include "csputils.h"
 #include "aspect.h"
 #include "pnm_loader.h"
-#include "options.h"
+#include "core/options.h"
 #include "sub/sub.h"
 #include "bitmap_packer.h"
 

@@ -23,7 +23,7 @@
 #include "config.h"
 
 #include "talloc.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "sub.h"
 #include "libavutil/common.h"
 
@@ -32,7 +32,7 @@ static const char osd_font_pfb[] =
 ;
 
 #include "sub/ass_mp.h"
-#include "mp_core.h"
+#include "core/mp_core.h"
 
 
 // NOTE: \fs-5 to reduce the size of the symbols in relation to normal text.

@@ -41,18 +41,18 @@
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
 
-#include "options.h"
+#include "core/options.h"
 #include "talloc.h"
-#include "mp_msg.h"
-#include "video_out.h"
-#include "libmpcodecs/vfcap.h"
-#include "libmpcodecs/mp_image.h"
+#include "core/mp_msg.h"
+#include "vo.h"
+#include "video/vfcap.h"
+#include "video/mp_image.h"
 #include "x11_common.h"
-#include "fastmemcpy.h"
+#include "video/memcpy_pic.h"
 #include "sub/sub.h"
 #include "aspect.h"
-#include "csputils.h"
-#include "subopt-helper.h"
+#include "video/csputils.h"
+#include "core/subopt-helper.h"
 
 static const vo_info_t info = {
     "X11/Xv",

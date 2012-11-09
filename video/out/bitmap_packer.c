@@ -26,10 +26,10 @@
 
 #include "talloc.h"
 #include "bitmap_packer.h"
-#include "mp_msg.h"
-#include "mpcommon.h"
+#include "core/mp_msg.h"
+#include "core/mp_common.h"
 #include "sub/dec_sub.h"
-#include "fastmemcpy.h"
+#include "video/memcpy_pic.h"
 
 #define IS_POWER_OF_2(x) (((x) > 0) && !(((x) - 1) & (x)))
 

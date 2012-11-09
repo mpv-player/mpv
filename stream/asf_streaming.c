@@ -26,8 +26,8 @@
 #include <libavutil/intreadwrite.h>
 
 #include "config.h"
-#include "mp_msg.h"
-#include "options.h"
+#include "core/mp_msg.h"
+#include "core/options.h"
 
 #if HAVE_WINSOCK2_H
 #include <winsock2.h>
@@ -35,15 +35,15 @@
 
 #include "url.h"
 #include "http.h"
-#include "libmpdemux/asf.h"
+#include "demux/asf.h"
 
 #include "stream.h"
-#include "libmpdemux/demuxer.h"
+#include "demux/demux.h"
 #include "asf_mmst_streaming.h"
 #include "network.h"
 #include "tcp.h"
 
-#include "libmpdemux/asfguid.h"
+#include "demux/asfguid.h"
 
 extern int network_bandwidth;
 

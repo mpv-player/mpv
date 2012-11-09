@@ -33,7 +33,7 @@
 
 #include "config.h"
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #if !HAVE_WINSOCK2_H
 #include <netdb.h>

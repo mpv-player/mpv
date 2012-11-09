@@ -22,13 +22,13 @@
 #include <limits.h>
 
 #include "config.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
-#include "img_format.h"
-#include "mp_image.h"
+#include "video/img_format.h"
+#include "video/mp_image.h"
 #include "vf.h"
 
-#include "libvo/fastmemcpy.h"
+#include "video/memcpy_pic.h"
 
 enum mode { PROGRESSIVE, TOP_FIRST, BOTTOM_FIRST,
 	    TOP_FIRST_ANALYZE, BOTTOM_FIRST_ANALYZE,

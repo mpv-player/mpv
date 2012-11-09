@@ -26,8 +26,8 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
-#include "libmpcodecs/img_format.h"
-#include "mpcommon.h"
+#include "video/img_format.h"
+#include "core/mp_common.h"
 
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2

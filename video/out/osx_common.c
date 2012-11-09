@@ -20,12 +20,11 @@
 // only to get keycode definitions from HIToolbox/Events.h
 #include <Carbon/Carbon.h>
 #include <CoreServices/CoreServices.h>
-#include "config.h"
 #include "osx_common.h"
-#include "video_out.h"
-#include "input/keycodes.h"
-#include "input/input.h"
-#include "mp_msg.h"
+#include "video/out/vo.h"
+#include "core/input/keycodes.h"
+#include "core/input/input.h"
+#include "core/mp_msg.h"
 
 /*
  * Define keycodes only found in OSX >= 10.5 for older versions

@@ -29,9 +29,9 @@
 #include <ctype.h>
 
 #include "config.h"
-#include "options.h"
+#include "core/options.h"
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #if HAVE_WINSOCK2_H
 #include <winsock2.h>
@@ -39,9 +39,8 @@
 #endif
 
 #include "stream.h"
-#include "libmpdemux/demuxer.h"
-#include "m_config.h"
-#include "mpcommon.h"
+#include "demux/demux.h"
+#include "core/mp_common.h"
 #include "network.h"
 #include "tcp.h"
 #include "http.h"

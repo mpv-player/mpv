@@ -28,17 +28,16 @@
 #include <sys/stat.h>
 
 #include "config.h"
-#include "options.h"
+#include "core/options.h"
 #include "talloc.h"
-#include "mp_msg.h"
-#include "m_config.h"
+#include "core/mp_msg.h"
 
 #include "stream/stream.h"
-#include "demuxer.h"
+#include "demux.h"
 #include "stheader.h"
 #include "mf.h"
 
-#include "libaf/format.h"
+#include "audio/format.h"
 
 #include "libavcodec/avcodec.h"
 #if MP_INPUT_BUFFER_PADDING_SIZE < FF_INPUT_BUFFER_PADDING_SIZE

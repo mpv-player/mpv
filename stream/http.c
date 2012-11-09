@@ -35,10 +35,10 @@
 
 #include "http.h"
 #include "url.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #include "stream.h"
-#include "libmpdemux/demuxer.h"
+#include "demux/demux.h"
 #include "network.h"
 
 #include "libavutil/base64.h"

@@ -24,13 +24,13 @@
 
 #include <libavutil/common.h>
 
-#include "mpcommon.h"
+#include "core/mp_common.h"
 #include "sub/draw_bmp.h"
 #include "sub/sub.h"
-#include "libmpcodecs/mp_image.h"
-#include "libmpcodecs/sws_utils.h"
-#include "libmpcodecs/img_format.h"
-#include "libvo/csputils.h"
+#include "video/mp_image.h"
+#include "video/sws_utils.h"
+#include "video/img_format.h"
+#include "video/csputils.h"
 
 const bool mp_draw_sub_formats[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = true,

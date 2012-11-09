@@ -23,16 +23,16 @@
 #include <math.h>
 
 #include "config.h"
-#include "mp_msg.h"
-#include "cpudetect.h"
+#include "core/mp_msg.h"
+#include "core/cpudetect.h"
 #include "libavutil/common.h"
-#include "mpbswap.h"
+#include "compat/mpbswap.h"
 
-#include "img_format.h"
-#include "mp_image.h"
+#include "video/img_format.h"
+#include "video/mp_image.h"
 #include "vf.h"
 
-#include "libvo/fastmemcpy.h"
+#include "video/memcpy_pic.h"
 
 const vf_info_t vf_info_divtc;
 

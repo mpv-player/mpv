@@ -35,7 +35,7 @@
 
 #include "cookies.h"
 #include "http.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #define MAX_COOKIES 20
 

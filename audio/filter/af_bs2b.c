@@ -27,7 +27,7 @@
 #include <string.h>
 
 #include "af.h"
-#include "subopt-helper.h"
+#include "core/subopt-helper.h"
 
 /// Internal specific data of the filter
 struct af_bs2b {

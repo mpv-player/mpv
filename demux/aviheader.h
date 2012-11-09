@@ -23,7 +23,7 @@
 #include <stdint.h>
 #include "config.h"
 #include "libavutil/common.h"
-#include "mpbswap.h"
+#include "compat/mpbswap.h"
 
 #ifndef mmioFOURCC
 #define mmioFOURCC( ch0, ch1, ch2, ch3 )				\

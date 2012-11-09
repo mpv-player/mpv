@@ -26,9 +26,9 @@
 #include <string.h>
 
 #include "stream.h"
-#include "libmpdemux/demuxer.h"
-#include "m_option.h"
-#include "m_struct.h"
+#include "demux/demux.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 #include "tv.h"
 
 #include <stdio.h>

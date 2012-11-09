@@ -24,7 +24,7 @@
 #include <stdbool.h>
 
 #include "config.h"
-#include "bstr.h"
+#include "core/bstr.h"
 
 // m_option allows to parse, print and copy data of various types.
 

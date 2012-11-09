@@ -19,11 +19,11 @@
 /* Stuff for correct aspect scaling. */
 #include "aspect.h"
 #include "geometry.h"
-#include "video_out.h"
-#include "mp_msg.h"
-#include "options.h"
+#include "vo.h"
+#include "core/mp_msg.h"
+#include "core/options.h"
 
-#include "video_out.h"
+#include "vo.h"
 
 void aspect_save_videores(struct vo *vo, int w, int h, int d_w, int d_h)
 {

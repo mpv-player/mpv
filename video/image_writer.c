@@ -22,6 +22,7 @@
 
 #include <libswscale/swscale.h>
 #include <libavcodec/avcodec.h>
+#include <libavutil/mem.h>
 
 #include "config.h"
 
@@ -33,16 +34,14 @@
 
 #include "image_writer.h"
 #include "talloc.h"
-#include "libmpcodecs/img_format.h"
-#include "libmpcodecs/mp_image.h"
-#include "libmpcodecs/dec_video.h"
-#include "libmpcodecs/vf.h"
-#include "fmt-conversion.h"
+#include "video/img_format.h"
+#include "video/mp_image.h"
+#include "video/fmt-conversion.h"
 
-#include "libmpcodecs/sws_utils.h"
-#include "libmpcodecs/vf.h"
+#include "video/sws_utils.h"
+#include "video/filter/vf.h"
 
-#include "m_option.h"
+#include "core/m_option.h"
 
 const struct image_writer_opts image_writer_opts_defaults = {
     .format = "jpg",

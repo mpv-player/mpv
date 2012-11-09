@@ -22,7 +22,7 @@
 #define MPLAYER_PATH_H
 
 #include <stdbool.h>
-#include "bstr.h"
+#include "core/bstr.h"
 
 char *get_path(const char *filename);
 

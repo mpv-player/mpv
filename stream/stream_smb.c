@@ -21,10 +21,10 @@
 #include <libsmbclient.h>
 #include <unistd.h>
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "stream.h"
-#include "m_option.h"
-#include "m_struct.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 
 static struct stream_priv_s {
 } stream_priv_dflts = {

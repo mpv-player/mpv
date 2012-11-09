@@ -25,8 +25,8 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "bstr.h"
-#include "mpcommon.h"
+#include "core/bstr.h"
+#include "core/mp_common.h"
 #include "demux_packet.h"
 #include "stheader.h"
 

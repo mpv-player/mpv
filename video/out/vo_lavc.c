@@ -22,16 +22,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "mpcommon.h"
-#include "options.h"
-#include "fmt-conversion.h"
-#include "libmpcodecs/mp_image.h"
-#include "libmpcodecs/vfcap.h"
-#include "subopt-helper.h"
+#include "core/mp_common.h"
+#include "core/options.h"
+#include "video/fmt-conversion.h"
+#include "video/mp_image.h"
+#include "video/vfcap.h"
+#include "core/subopt-helper.h"
 #include "talloc.h"
-#include "video_out.h"
+#include "vo.h"
 
-#include "encode_lavc.h"
+#include "core/encode_lavc.h"
 
 #include "sub/sub.h"
 #include "sub/dec_sub.h"

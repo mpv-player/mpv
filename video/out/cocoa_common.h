@@ -20,7 +20,7 @@
 #ifndef MPLAYER_COCOA_COMMON_H
 #define MPLAYER_COCOA_COMMON_H
 
-#include "video_out.h"
+#include "vo.h"
 
 struct vo_cocoa_state;
 

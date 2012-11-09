@@ -132,7 +132,7 @@ void mp_msg_init(void);
 int mp_msg_test(int mod, int lev);
 
 #include "config.h"
-#include "mpcommon.h"
+#include "core/mp_common.h"
 
 char *mp_gtext(const char *string);
 

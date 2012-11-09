@@ -20,8 +20,8 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "bstr.h"
-#include "demuxer.h"
+#include "core/bstr.h"
+#include "demux.h"
 #include "stream/stream.h"
 
 // timeline/tl_cue.c

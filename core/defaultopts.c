@@ -2,8 +2,8 @@
 
 #include "config.h"
 #include "defaultopts.h"
-#include "options.h"
-#include "mixer.h"
+#include "core/options.h"
+#include "audio/mixer.h"
 
 void set_default_mplayer_options(struct MPOpts *opts)
 {

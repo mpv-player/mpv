@@ -25,7 +25,7 @@
 
 // for avi_stream_id():
 #include "stream/stream.h"
-#include "demuxer.h"
+#include "demux.h"
 
 #include "aviheader.h"
 #include "ms_hdr.h"

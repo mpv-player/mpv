@@ -24,16 +24,15 @@
 #import "vo_corevideo.h"
 
 // mplayer includes
-#import "fastmemcpy.h"
 #import "talloc.h"
-#import "video_out.h"
+#import "vo.h"
 #import "aspect.h"
 #import "sub/sub.h"
-#import "subopt-helper.h"
+#import "core/subopt-helper.h"
 
-#import "csputils.h"
-#import "libmpcodecs/vfcap.h"
-#import "libmpcodecs/mp_image.h"
+#import "video/csputils.h"
+#import "video/vfcap.h"
+#import "video/mp_image.h"
 
 #import "gl_common.h"
 #import "gl_osd.h"

@@ -23,10 +23,10 @@
 #include <limits.h>
 
 #include "config.h"
-#include "bstr.h"
-#include "options.h"
-#include "mp_msg.h"
-#include "mp_fifo.h"
+#include "core/bstr.h"
+#include "core/options.h"
+#include "core/mp_msg.h"
+#include "core/mp_fifo.h"
 #include "libavutil/common.h"
 #include "x11_common.h"
 #include "talloc.h"
@@ -35,7 +35,7 @@
 #include <unistd.h>
 #include <assert.h>
 
-#include "video_out.h"
+#include "vo.h"
 #include "aspect.h"
 #include "geometry.h"
 #include "osdep/timer.h"
@@ -70,11 +70,11 @@
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
 
-#include "subopt-helper.h"
+#include "core/subopt-helper.h"
 #endif
 
-#include "input/input.h"
-#include "input/keycodes.h"
+#include "core/input/input.h"
+#include "core/input/keycodes.h"
 
 #define WIN_LAYER_ONBOTTOM               2
 #define WIN_LAYER_NORMAL                 4

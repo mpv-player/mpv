@@ -24,7 +24,7 @@
 #include <inttypes.h>
 #include <limits.h>
 
-#include "af.h"
+#include "audio/filter/af.h"
 
 int af_fmt2bits(int format)
 {

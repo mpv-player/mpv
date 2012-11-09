@@ -30,13 +30,13 @@
 #include <libavutil/common.h>
 
 #include "config.h"
-#include "mp_msg.h"
-#include "path.h"
+#include "core/mp_msg.h"
+#include "core/path.h"
 #include "ass_mp.h"
 #include "subreader.h"
 #include "sub/sub.h"
 #include "stream/stream.h"
-#include "options.h"
+#include "core/options.h"
 
 ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
 {

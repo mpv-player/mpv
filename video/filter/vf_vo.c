@@ -22,13 +22,13 @@
 #include <stdbool.h>
 
 #include "config.h"
-#include "mp_msg.h"
-#include "options.h"
+#include "core/mp_msg.h"
+#include "core/options.h"
 
-#include "mp_image.h"
+#include "video/mp_image.h"
 #include "vf.h"
 
-#include "libvo/video_out.h"
+#include "video/out/vo.h"
 
 #include "sub/sub.h"
 

@@ -19,9 +19,9 @@
 #ifndef MPLAYER_VD_H
 #define MPLAYER_VD_H
 
-#include "mp_image.h"
-#include "mpc_info.h"
-#include "libmpdemux/stheader.h"
+#include "video/mp_image.h"
+#include "core/mpc_info.h"
+#include "demux/stheader.h"
 
 typedef struct mp_codec_info vd_info_t;
 

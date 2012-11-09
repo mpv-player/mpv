@@ -21,9 +21,9 @@
 #include <libavutil/common.h>
 
 #include "config.h"
-#include "libao2/audio_out.h"
-#include "libaf/af.h"
-#include "mp_msg.h"
+#include "audio/out/ao.h"
+#include "audio/filter/af.h"
+#include "core/mp_msg.h"
 #include "mixer.h"
 
 

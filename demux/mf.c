@@ -37,9 +37,9 @@
 #endif
 #include "osdep/strsep.h"
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "stream/stream.h"
-#include "path.h"
+#include "core/path.h"
 
 #include "mf.h"
 

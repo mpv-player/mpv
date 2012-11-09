@@ -41,15 +41,15 @@
 #include <winsock2.h>
 #endif
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "osdep/shmem.h"
 #include "osdep/timer.h"
 #include "network.h"
 #include "stream.h"
-#include "libmpdemux/demuxer.h"
+#include "demux/demux.h"
 
-#include "m_option.h"
-#include "m_struct.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 
 #include "cache2.h"
 

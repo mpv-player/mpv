@@ -25,7 +25,7 @@
 #ifndef MPLAYER_TV_H
 #define MPLAYER_TV_H
 
-#include "libmpdemux/demuxer.h"
+#include "demux/demux.h"
 
 typedef struct tv_param_s {
     char *freq;

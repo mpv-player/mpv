@@ -23,8 +23,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include "mp_msg.h"
-#include "libvo/csputils.h"
+#include "core/mp_msg.h"
+#include "csputils.h"
 
 //--------- codec's requirements (filled by the codec/vf) ---------
 

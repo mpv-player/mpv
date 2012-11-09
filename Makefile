@@ -23,292 +23,294 @@ include config.mak
 
 ###### variable declarations #######
 
-SRCS_AUDIO_INPUT-$(ALSA)             += stream/ai_alsa1x.c
-SRCS_AUDIO_INPUT-$(OSS)              += stream/ai_oss.c
-SRCS_COMMON-$(AUDIO_INPUT)           += $(SRCS_AUDIO_INPUT-yes)
-SRCS_COMMON-$(CDDA)                  += stream/stream_cdda.c \
-                                        stream/cdinfo.c
-SRCS_COMMON-$(CDDB)                  += stream/stream_cddb.c
-SRCS_COMMON-$(DVBIN)                 += stream/dvb_tune.c \
-                                        stream/stream_dvb.c
-SRCS_COMMON-$(DVDREAD)               += stream/stream_dvd.c \
-                                        stream/stream_dvd_common.c
+SOURCES_AUDIO_INPUT-$(ALSA)     += stream/ai_alsa1x.c
+SOURCES_AUDIO_INPUT-$(OSS)      += stream/ai_oss.c
+SOURCES-$(AUDIO_INPUT)          += $(SOURCES_AUDIO_INPUT-yes)
+SOURCES-$(CDDA)                 += stream/stream_cdda.c \
+                                   stream/cdinfo.c
+SOURCES-$(CDDB)                 += stream/stream_cddb.c
+SOURCES-$(DVBIN)                += stream/dvb_tune.c \
+                                   stream/stream_dvb.c
+SOURCES-$(DVDREAD)              += stream/stream_dvd.c \
+                                   stream/stream_dvd_common.c
 
-SRCS_COMMON-$(FTP)                   += stream/stream_ftp.c
-SRCS_COMMON-$(GIF)                   += libmpdemux/demux_gif.c
-SRCS_COMMON-$(HAVE_SYS_MMAN_H)       += libaf/af_export.c osdep/mmap_anon.c
-SRCS_COMMON-$(LADSPA)                += libaf/af_ladspa.c
-SRCS_COMMON-$(LIBASS)                += sub/ass_mp.c sub/sd_ass.c
+SOURCES-$(FTP)                  += stream/stream_ftp.c
+SOURCES-$(GIF)                  += demux/demux_gif.c
+SOURCES-$(HAVE_SYS_MMAN_H)      += audio/filter/af_export.c osdep/mmap_anon.c
+SOURCES-$(LADSPA)               += audio/filter/af_ladspa.c
+SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c
 
-SRCS_COMMON-$(LIBBLURAY)             += stream/stream_bluray.c
-SRCS_COMMON-$(LIBBS2B)               += libaf/af_bs2b.c
+SOURCES-$(LIBBLURAY)            += stream/stream_bluray.c
+SOURCES-$(LIBBS2B)              += audio/filter/af_bs2b.c
 
-SRCS_COMMON-$(LIBPOSTPROC)           += libmpcodecs/vf_pp.c
-SRCS_COMMON-$(LIBSMBCLIENT)          += stream/stream_smb.c
+SOURCES-$(LIBPOSTPROC)          += video/filter/vf_pp.c
+SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
-SRCS_COMMON-$(MACOSX_FINDER)         += osdep/macosx_finder_args.m
-SRCS_COMMON-$(COCOA)                 += libvo/osx_common.c \
-                                        libvo/cocoa_common.m \
-                                        osdep/cocoa_events.m
-SRCS_COMMON-$(MNG)                   += libmpdemux/demux_mng.c
-SRCS_COMMON-$(MPG123)                += libmpcodecs/ad_mpg123.c
+SOURCES-$(MACOSX_FINDER)        += osdep/macosx_finder_args.m
+SOURCES-$(COCOA)                += video/out/osx_common.c \
+                                   video/out/cocoa_common.m \
+                                   osdep/cocoa_events.m
+SOURCES-$(MNG)                  += demux/demux_mng.c
+SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
 
-SRCS_COMMON-$(NEED_GETTIMEOFDAY)     += osdep/gettimeofday.c
-SRCS_COMMON-$(NEED_GLOB)             += osdep/glob-win.c
-SRCS_COMMON-$(NEED_SETENV)           += osdep/setenv.c
-SRCS_COMMON-$(NEED_SHMEM)            += osdep/shmem.c
-SRCS_COMMON-$(NEED_STRSEP)           += osdep/strsep.c
-SRCS_COMMON-$(NEED_VSSCANF)          += osdep/vsscanf.c
-SRCS_COMMON-$(NETWORKING)            += stream/stream_netstream.c \
-                                        stream/asf_mmst_streaming.c \
-                                        stream/asf_streaming.c \
-                                        stream/cookies.c \
-                                        stream/http.c \
-                                        stream/network.c \
-                                        stream/udp.c \
-                                        stream/tcp.c \
-                                        stream/stream_udp.c \
+SOURCES-$(NEED_GETTIMEOFDAY)    += osdep/gettimeofday.c
+SOURCES-$(NEED_GLOB)            += osdep/glob-win.c
+SOURCES-$(NEED_SETENV)          += osdep/setenv.c
+SOURCES-$(NEED_SHMEM)           += osdep/shmem.c
+SOURCES-$(NEED_STRSEP)          += osdep/strsep.c
+SOURCES-$(NEED_VSSCANF)         += osdep/vsscanf.c
+SOURCES-$(NETWORKING)           += stream/stream_netstream.c \
+                                   stream/asf_mmst_streaming.c \
+                                   stream/asf_streaming.c \
+                                   stream/cookies.c \
+                                   stream/http.c \
+                                   stream/network.c \
+                                   stream/udp.c \
+                                   stream/tcp.c \
+                                   stream/stream_udp.c \
 
-SRCS_COMMON-$(PRIORITY)              += osdep/priority.c
-SRCS_COMMON-$(PVR)                   += stream/stream_pvr.c
-SRCS_COMMON-$(RADIO)                 += stream/stream_radio.c
-SRCS_COMMON-$(RADIO_CAPTURE)         += stream/audio_in.c
-SRCS_COMMON-$(STREAM_CACHE)          += stream/cache2.c
+SOURCES-$(PRIORITY)             += osdep/priority.c
+SOURCES-$(PVR)                  += stream/stream_pvr.c
+SOURCES-$(RADIO)                += stream/stream_radio.c
+SOURCES-$(RADIO_CAPTURE)        += stream/audio_in.c
+SOURCES-$(STREAM_CACHE)         += stream/cache2.c
 
-SRCS_COMMON-$(TV)                    += stream/stream_tv.c stream/tv.c \
-                                        stream/frequencies.c stream/tvi_dummy.c
-SRCS_COMMON-$(TV_BSDBT848)           += stream/tvi_bsdbt848.c
+SOURCES-$(TV)                   += stream/stream_tv.c stream/tv.c \
+                                   stream/frequencies.c stream/tvi_dummy.c
+SOURCES-$(TV_BSDBT848)          += stream/tvi_bsdbt848.c
 
-SRCS_COMMON-$(TV_V4L2)               += stream/tvi_v4l2.c stream/audio_in.c
-SRCS_COMMON-$(VCD)                   += stream/stream_vcd.c
-SRCS_COMMON-$(VSTREAM)               += stream/stream_vstream.c
+SOURCES-$(TV_V4L2)              += stream/tvi_v4l2.c stream/audio_in.c
+SOURCES-$(VCD)                  += stream/stream_vcd.c
+SOURCES-$(VSTREAM)              += stream/stream_vstream.c
+SOURCES-$(DUMMY_OSD)            += sub/osd_dummy.c
+SOURCES-$(LIBASS_OSD)           += sub/osd_libass.c
 
-SRCS_COMMON-$(DUMMY_OSD)             += sub/osd_dummy.c
-SRCS_COMMON-$(LIBASS_OSD)            += sub/osd_libass.c
+SOURCES-$(ALSA)                 += audio/out/ao_alsa.c
+SOURCES-$(APPLE_IR)             += core/input/appleir.c
+SOURCES-$(APPLE_REMOTE)         += core/input/ar.c
+SOURCES-$(CACA)                 += video/out/vo_caca.c
+SOURCES-$(COREAUDIO)            += audio/out/ao_coreaudio.c
+SOURCES-$(COREVIDEO)            += video/out/vo_corevideo.m
+SOURCES-$(DIRECT3D)             += video/out/vo_direct3d.c \
+                                   video/out/w32_common.c
+SOURCES-$(DSOUND)               += audio/out/ao_dsound.c
+SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
+                                   video/out/vo_opengl.c \
+                                   video/out/vo_opengl_old.c \
+                                   video/out/pnm_loader.c
 
-SRCS_COMMON = asxparser.c \
-              av_log.c \
-              av_opts.c \
-              bstr.c \
-              codec-cfg.c \
-              cpudetect.c \
-              defaultopts.c \
-              fmt-conversion.c \
-              m_config.c \
-              m_option.c \
-              m_struct.c \
-              mp_msg.c \
-              mpcommon.c \
-              version.c \
-              parser-cfg.c \
-              path.c \
-              playlist.c \
-              playlist_parser.c \
-              subopt-helper.c \
-              talloc.c \
-              libaf/af.c \
-              libaf/af_center.c \
-              libaf/af_channels.c \
-              libaf/af_delay.c \
-              libaf/af_dummy.c \
-              libaf/af_equalizer.c \
-              libaf/af_extrastereo.c \
-              libaf/af_format.c \
-              libaf/af_hrtf.c \
-              libaf/af_karaoke.c \
-              libaf/af_lavcac3enc.c \
-              libaf/af_lavcresample.c \
-              libaf/af_pan.c \
-              libaf/af_resample.c \
-              libaf/af_scaletempo.c \
-              libaf/af_sinesuppress.c \
-              libaf/af_sub.c \
-              libaf/af_surround.c \
-              libaf/af_sweep.c \
-              libaf/af_tools.c \
-              libaf/af_volnorm.c \
-              libaf/af_volume.c \
-              libaf/filter.c \
-              libaf/format.c \
-              libaf/reorder_ch.c \
-              libaf/window.c \
-              libmpcodecs/ad.c \
-              libmpcodecs/ad_ffmpeg.c \
-              libmpcodecs/ad_pcm.c \
-              libmpcodecs/ad_dvdpcm.c \
-              libmpcodecs/ad_spdif.c      \
-              libmpcodecs/dec_audio.c \
-              libmpcodecs/dec_video.c \
-              libmpcodecs/img_format.c \
-              libmpcodecs/mp_image.c \
-              libmpcodecs/pullup.c \
-              libmpcodecs/sws_utils.c \
-              libmpcodecs/vd.c \
-              libmpcodecs/vd_ffmpeg.c \
-              libmpcodecs/vf.c \
-              libmpcodecs/vf_crop.c \
-              libmpcodecs/vf_delogo.c \
-              libmpcodecs/vf_divtc.c \
-              libmpcodecs/vf_dlopen.c \
-              libmpcodecs/vf_down3dright.c \
-              libmpcodecs/vf_dsize.c \
-              libmpcodecs/vf_eq2.c \
-              libmpcodecs/vf_expand.c \
-              libmpcodecs/vf_flip.c \
-              libmpcodecs/vf_format.c \
-              libmpcodecs/vf_gradfun.c \
-              libmpcodecs/vf_hqdn3d.c \
-              libmpcodecs/vf_ilpack.c \
-              libmpcodecs/vf_mirror.c \
-              libmpcodecs/vf_noformat.c \
-              libmpcodecs/vf_noise.c \
-              libmpcodecs/vf_phase.c \
-              libmpcodecs/vf_pullup.c \
-              libmpcodecs/vf_rotate.c \
-              libmpcodecs/vf_scale.c \
-              libmpcodecs/vf_screenshot.c \
-              libmpcodecs/vf_softpulldown.c \
-              libmpcodecs/vf_stereo3d.c \
-              libmpcodecs/vf_sub.c \
-              libmpcodecs/vf_swapuv.c \
-              libmpcodecs/vf_unsharp.c \
-              libmpcodecs/vf_vo.c \
-              libmpcodecs/vf_yadif.c \
-              libmpdemux/asfheader.c \
-              libmpdemux/aviheader.c \
-              libmpdemux/aviprint.c \
-              libmpdemux/demuxer.c \
-              libmpdemux/demux_asf.c \
-              libmpdemux/demux_avi.c \
-              libmpdemux/demux_edl.c \
-              libmpdemux/demux_cue.c \
-              libmpdemux/demux_lavf.c \
-              libmpdemux/demux_mf.c \
-              libmpdemux/demux_mkv.c \
-              libmpdemux/demux_mpg.c \
-              libmpdemux/demux_ts.c \
-              libmpdemux/mp3_hdr.c \
-              libmpdemux/parse_es.c \
-              libmpdemux/mpeg_hdr.c \
-              libmpdemux/demux_rawaudio.c \
-              libmpdemux/demux_rawvideo.c \
-              libmpdemux/ebml.c \
-              libmpdemux/extension.c \
-              libmpdemux/mf.c \
-              libmpdemux/mp_taglists.c \
-              libmpdemux/video.c \
-              libvo/bitmap_packer.c \
-              osdep/numcores.c \
-              osdep/io.c \
-              osdep/$(GETCH) \
-              osdep/$(TIMER) \
-              stream/stream.c \
-              stream/stream_ffmpeg.c \
-              stream/stream_file.c \
-              stream/stream_mf.c \
-              stream/stream_null.c \
-              stream/url.c \
-              sub/dec_sub.c \
-              sub/find_sub.c \
-              sub/find_subfiles.c \
-              sub/sd_lavc.c \
-              sub/spudec.c \
-              sub/sub.c \
-              sub/img_convert.c \
-              sub/draw_bmp.c \
-              sub/subassconvert.c \
-              sub/subreader.c \
-              sub/vobsub.c \
-              timeline/tl_edl.c \
-              timeline/tl_matroska.c \
-              timeline/tl_cue.c \
-              $(SRCS_COMMON-yes)
+SOURCES-$(ENCODING)             += video/out/vo_lavc.c audio/out/ao_lavc.c \
+                                   core/encode_lavc.c
+SOURCES-$(GL_WIN32)             += video/out/w32_common.c
+SOURCES-$(GL_X11)               += video/out/x11_common.c
+
+SOURCES-$(JACK)                 += audio/out/ao_jack.c
+SOURCES-$(JOYSTICK)             += core/input/joystick.c
+SOURCES-$(LIBQUVI)              += core/quvi.c
+SOURCES-$(LIRC)                 += core/input/lirc.c
+SOURCES-$(OPENAL)               += audio/out/ao_openal.c
+SOURCES-$(OSS)                  += audio/out/ao_oss.c
+SOURCES-$(PULSE)                += audio/out/ao_pulse.c
+SOURCES-$(PORTAUDIO)            += audio/out/ao_portaudio.c
+SOURCES-$(RSOUND)               += audio/out/ao_rsound.c
+SOURCES-$(VDPAU)                += video/out/vo_vdpau.c
+
+SOURCES-$(X11)                  += video/out/vo_x11.c video/out/x11_common.c
+SOURCES-$(XV)                   += video/out/vo_xv.c
 
 
-SRCS_MPLAYER-$(ALSA)         += libao2/ao_alsa.c
-SRCS_MPLAYER-$(APPLE_IR)     += input/appleir.c
-SRCS_MPLAYER-$(APPLE_REMOTE) += input/ar.c
-SRCS_MPLAYER-$(CACA)         += libvo/vo_caca.c
-SRCS_MPLAYER-$(COREAUDIO)    += libao2/ao_coreaudio.c
-SRCS_MPLAYER-$(COREVIDEO)    += libvo/vo_corevideo.m
-SRCS_MPLAYER-$(DIRECT3D)     += libvo/vo_direct3d.c libvo/w32_common.c
-SRCS_MPLAYER-$(DSOUND)       += libao2/ao_dsound.c
-SRCS_MPLAYER-$(GL)           += libvo/gl_common.c libvo/vo_opengl.c \
-                                libvo/gl_osd.c libvo/vo_opengl_old.c pnm_loader.c
-SRCS_MPLAYER-$(ENCODING)     += libvo/vo_lavc.c libao2/ao_lavc.c encode_lavc.c
-SRCS_MPLAYER-$(GL_WIN32)     += libvo/w32_common.c
-SRCS_MPLAYER-$(GL_X11)       += libvo/x11_common.c
+SOURCES = talloc.c \
+          audio/format.c \
+          audio/mixer.c \
+          audio/reorder_ch.c \
+          audio/decode/ad.c \
+          audio/decode/ad_dvdpcm.c \
+          audio/decode/ad_lavc.c \
+          audio/decode/ad_pcm.c \
+          audio/decode/ad_spdif.c      \
+          audio/decode/dec_audio.c \
+          audio/filter/af.c \
+          audio/filter/af_center.c \
+          audio/filter/af_channels.c \
+          audio/filter/af_delay.c \
+          audio/filter/af_dummy.c \
+          audio/filter/af_equalizer.c \
+          audio/filter/af_extrastereo.c \
+          audio/filter/af_format.c \
+          audio/filter/af_hrtf.c \
+          audio/filter/af_karaoke.c \
+          audio/filter/af_lavcac3enc.c \
+          audio/filter/af_lavcresample.c \
+          audio/filter/af_pan.c \
+          audio/filter/af_resample.c \
+          audio/filter/af_scaletempo.c \
+          audio/filter/af_sinesuppress.c \
+          audio/filter/af_sub.c \
+          audio/filter/af_surround.c \
+          audio/filter/af_sweep.c \
+          audio/filter/af_tools.c \
+          audio/filter/af_volnorm.c \
+          audio/filter/af_volume.c \
+          audio/filter/filter.c \
+          audio/filter/window.c \
+          audio/out/ao.c \
+          audio/out/ao_null.c \
+          audio/out/ao_pcm.c \
+          core/asxparser.c \
+          core/av_log.c \
+          core/av_opts.c \
+          core/bstr.c \
+          core/codec-cfg.c \
+          core/command.c \
+          core/cpudetect.c \
+          core/defaultopts.c \
+          core/m_config.c \
+          core/m_option.c \
+          core/m_property.c \
+          core/m_struct.c \
+          core/mp_common.c \
+          core/mp_fifo.c \
+          core/mp_msg.c \
+          core/mplayer.c \
+          core/parser-cfg.c \
+          core/parser-mpcmd.c \
+          core/path.c \
+          core/playlist.c \
+          core/playlist_parser.c \
+          core/screenshot.c \
+          core/subopt-helper.c \
+          core/version.c \
+          core/input/input.c \
+          core/timeline/tl_edl.c \
+          core/timeline/tl_matroska.c \
+          core/timeline/tl_cue.c \
+          demux/asfheader.c \
+          demux/aviheader.c \
+          demux/aviprint.c \
+          demux/demux.c \
+          demux/demux_asf.c \
+          demux/demux_avi.c \
+          demux/demux_edl.c \
+          demux/demux_cue.c \
+          demux/demux_lavf.c \
+          demux/demux_mf.c \
+          demux/demux_mkv.c \
+          demux/demux_mpg.c \
+          demux/demux_ts.c \
+          demux/mp3_hdr.c \
+          demux/parse_es.c \
+          demux/mpeg_hdr.c \
+          demux/demux_rawaudio.c \
+          demux/demux_rawvideo.c \
+          demux/ebml.c \
+          demux/extension.c \
+          demux/mf.c \
+          demux/mp_taglists.c \
+          demux/video.c \
+          osdep/numcores.c \
+          osdep/io.c \
+          stream/stream.c \
+          stream/stream_file.c \
+          stream/stream_lavf.c \
+          stream/stream_mf.c \
+          stream/stream_null.c \
+          stream/url.c \
+          sub/dec_sub.c \
+          sub/draw_bmp.c \
+          sub/find_sub.c \
+          sub/find_subfiles.c \
+          sub/img_convert.c \
+          sub/sd_lavc.c \
+          sub/spudec.c \
+          sub/sub.c \
+          sub/subassconvert.c \
+          sub/subreader.c \
+          sub/vobsub.c \
+          video/csputils.c \
+          video/fmt-conversion.c \
+          video/image_writer.c \
+          video/img_format.c \
+          video/mp_image.c \
+          video/sws_utils.c \
+          video/decode/dec_video.c \
+          video/decode/vd.c \
+          video/decode/vd_lavc.c \
+          video/filter/vf.c \
+          video/filter/pullup.c \
+          video/filter/vf_crop.c \
+          video/filter/vf_delogo.c \
+          video/filter/vf_divtc.c \
+          video/filter/vf_dlopen.c \
+          video/filter/vf_down3dright.c \
+          video/filter/vf_dsize.c \
+          video/filter/vf_eq2.c \
+          video/filter/vf_expand.c \
+          video/filter/vf_flip.c \
+          video/filter/vf_format.c \
+          video/filter/vf_gradfun.c \
+          video/filter/vf_hqdn3d.c \
+          video/filter/vf_ilpack.c \
+          video/filter/vf_mirror.c \
+          video/filter/vf_noformat.c \
+          video/filter/vf_noise.c \
+          video/filter/vf_phase.c \
+          video/filter/vf_pullup.c \
+          video/filter/vf_rotate.c \
+          video/filter/vf_scale.c \
+          video/filter/vf_screenshot.c \
+          video/filter/vf_softpulldown.c \
+          video/filter/vf_stereo3d.c \
+          video/filter/vf_sub.c \
+          video/filter/vf_swapuv.c \
+          video/filter/vf_unsharp.c \
+          video/filter/vf_vo.c \
+          video/filter/vf_yadif.c \
+          video/out/bitmap_packer.c \
+          video/out/aspect.c \
+          video/out/filter_kernels.c \
+          video/out/geometry.c \
+          video/out/vo.c \
+          video/out/vo_null.c \
+          video/out/vo_image.c \
+          osdep/$(GETCH) \
+          osdep/$(TIMER) \
+          $(SOURCES-yes)
 
-SRCS_MPLAYER-$(JACK)         += libao2/ao_jack.c
-SRCS_MPLAYER-$(JOYSTICK)     += input/joystick.c
-SRCS_MPLAYER-$(LIBQUVI)       += quvi.c
-SRCS_MPLAYER-$(LIRC)          += input/lirc.c
-SRCS_MPLAYER-$(OPENAL)        += libao2/ao_openal.c
-SRCS_MPLAYER-$(OSS)           += libao2/ao_oss.c
-SRCS_MPLAYER-$(PULSE)         += libao2/ao_pulse.c
-SRCS_MPLAYER-$(PORTAUDIO)     += libao2/ao_portaudio.c
-SRCS_MPLAYER-$(RSOUND)        += libao2/ao_rsound.c
-SRCS_MPLAYER-$(VDPAU)         += libvo/vo_vdpau.c
+OBJECTS         += $(addsuffix .o, $(basename $(SOURCES)))
+OBJECTS-$(PE_EXECUTABLE) += osdep/mpv-rc.o
+OBJECTS         += $(OBJECTS-yes)
 
-SRCS_MPLAYER-$(X11)           += libvo/vo_x11.c libvo/x11_common.c
-SRCS_MPLAYER-$(XV)            += libvo/vo_xv.c
+DEP_FILES = $(patsubst %.S,%.d,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SOURCES:.m=.d) $(SOURCES:.m=.d))))
 
-SRCS_MPLAYER = command.c \
-               m_property.c \
-               mixer.c \
-               mp_fifo.c \
-               mplayer.c \
-               parser-mpcmd.c \
-               screenshot.c \
-               image_writer.c \
-               input/input.c \
-               libao2/ao_null.c \
-               libao2/ao_pcm.c \
-               libao2/audio_out.c \
-               libvo/aspect.c \
-               libvo/csputils.c \
-               libvo/filter_kernels.c \
-               libvo/geometry.c \
-               libvo/video_out.c \
-               libvo/vo_null.c \
-               libvo/vo_image.c \
-               $(SRCS_MPLAYER-yes)
+ALL_PRG         += mpv$(EXESUF)
 
-COMMON_LIBS += $(COMMON_LIBS-yes)
+INSTALL_TARGETS += check_rst2man       \
+                   install-mpv     \
+                   install-mpv-man \
+                   install-mpv-msg
 
-OBJS_COMMON    += $(addsuffix .o, $(basename $(SRCS_COMMON)))
-OBJS_MPLAYER   += $(addsuffix .o, $(basename $(SRCS_MPLAYER)))
-OBJS_MPLAYER-$(PE_EXECUTABLE) += osdep/mpv-rc.o
-OBJS_MPLAYER   += $(OBJS_MPLAYER-yes)
-
-MPLAYER_DEPS  = $(OBJS_MPLAYER)  $(OBJS_COMMON) $(COMMON_LIBS)
-DEP_FILES = $(patsubst %.S,%.d,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SRCS_COMMON:.m=.d) $(SRCS_MPLAYER:.m=.d))))
-
-ALL_PRG-$(MPLAYER)  += mpv$(EXESUF)
-
-INSTALL_TARGETS-$(MPLAYER)  += check_rst2man       \
-                               install-mpv     \
-                               install-mpv-man \
-                               install-mpv-msg
-
-INSTALL_NO_MAN_TARGETS-$(MPLAYER) += install-mpv  \
-                                     install-mpv-msg
+INSTALL_NO_MAN_TARGETS += install-mpv  \
+                          install-mpv-msg
 
 DIRS =  . \
-        input \
-        libaf \
-        libao2 \
-        libmpcodecs \
-        libmpdemux \
-        libvo \
+        audio \
+        audio/decode \
+        audio/filter \
+        audio/out \
+        core \
+        core/input \
+        core/timeline \
+        demux \
         osdep \
         stream \
         sub \
-        timeline \
+        video \
+        video/decode \
+        video/filter \
+        video/out
 
 MOFILES := $(MSG_LANGS:%=locale/%/LC_MESSAGES/mpv.mo)
 
-ALLHEADERS = $(foreach dir,$(DIRS),$(wildcard $(dir)/*.h))
 
 ADDSUFFIXES     = $(foreach suf,$(1),$(addsuffix $(suf),$(2)))
 ADD_ALL_DIRS    = $(call ADDSUFFIXES,$(1),$(DIRS))
@@ -323,7 +325,7 @@ endif
 
 ###### generic rules #######
 
-all: $(ALL_PRG-yes) locales
+all: $(ALL_PRG) locales
 
 %.1: %.rst
 	$(RST2MAN) $< $@
@@ -343,33 +345,32 @@ all: $(ALL_PRG-yes) locales
 %-rc.o: %.rc
 	$(WINDRES) -I. $< $@
 
-mpv$(EXESUF): $(MPLAYER_DEPS)
-mpv$(EXESUF): EXTRALIBS += $(EXTRALIBS_MPLAYER)
+mpv$(EXESUF): $(OBJECTS)
 mpv$(EXESUF):
 	$(CC) -o $@ $^ $(EXTRALIBS)
 
-codec-cfg.c: codecs.conf.h
-codecs.conf.h: TOOLS/file2string.pl etc/codecs.conf
+core/codec-cfg.c: core/codecs.conf.h
+core/codecs.conf.h: TOOLS/file2string.pl etc/codecs.conf
 	./$^ >$@
 
-input/input.c: input/input_conf.h
-input/input_conf.h: TOOLS/file2string.pl etc/input.conf
+core/input/input.c: core/input/input_conf.h
+core/input/input_conf.h: TOOLS/file2string.pl etc/input.conf
 	./$^ >$@
 
-libvo/vo_vdpau.c: libvo/vdpau_template.c
-libvo/vdpau_template.c: TOOLS/vdpau_functions.pl
+video/out/vo_vdpau.c: video/out/vdpau_template.c
+video/out/vdpau_template.c: TOOLS/vdpau_functions.pl
 	./$< > $@
 
-libmpdemux/ebml.c libmpdemux/demux_mkv.c: libmpdemux/ebml_types.h
-libmpdemux/ebml_types.h: TOOLS/matroska.pl
+demux/ebml.c demux/demux_mkv.c: demux/ebml_types.h
+demux/ebml_types.h: TOOLS/matroska.pl
 	./$< --generate-header > $@
 
-libmpdemux/ebml.c: libmpdemux/ebml_defs.c
-libmpdemux/ebml_defs.c: TOOLS/matroska.pl
+demux/ebml.c: demux/ebml_defs.c
+demux/ebml_defs.c: TOOLS/matroska.pl
 	./$< --generate-definitions > $@
 
-libvo/vo_opengl.c: libvo/vo_opengl_shaders.h
-libvo/vo_opengl_shaders.h: TOOLS/file2string.pl libvo/vo_opengl_shaders.glsl
+video/out/vo_opengl.c: video/out/vo_opengl_shaders.h
+video/out/vo_opengl_shaders.h: TOOLS/file2string.pl video/out/vo_opengl_shaders.glsl
 	./$^ >$@
 
 sub/osd_libass.c: sub/osd_font.h
@@ -400,13 +401,10 @@ locale/%/LC_MESSAGES/mpv.mo: po/%.po
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
 
-checkheaders: $(ALLHEADERS:.h=.ho)
-
-
 
 ###### dependency declarations / specific CFLAGS ######
 
-version.c osdep/mpv-rc.o: version.h
+core/version.c osdep/mpv-rc.o: version.h
 
 osdep/mpv-rc.o: osdep/mpv.exe.manifest
 
@@ -464,11 +462,11 @@ clean:
 	-$(RM) $(call ADD_ALL_EXESUFS,mpv)
 	-$(RM) $(MOFILES)
 	-$(RM) version.h
-	-$(RM) codecs.conf.h
-	-$(RM) input/input_conf.h
-	-$(RM) libvo/vdpau_template.c
-	-$(RM) libmpdemux/ebml_types.h libmpdemux/ebml_defs.c
-	-$(RM) libvo/vo_opengl_shaders.h
+	-$(RM) core/codecs.conf.h
+	-$(RM) core/input/input_conf.h
+	-$(RM) video/out/vdpau_template.c
+	-$(RM) demux/ebml_types.h demux/ebml_defs.c
+	-$(RM) video/out/vo_opengl_shaders.h
 	-$(RM) sub/osd_font.h
 
 distclean: clean

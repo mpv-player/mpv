@@ -25,19 +25,18 @@
 #include <libswscale/swscale.h>
 
 #include "config.h"
-#include "bstr.h"
+#include "core/bstr.h"
 #include "osdep/io.h"
-#include "path.h"
+#include "core/path.h"
 #include "talloc.h"
-#include "mp_msg.h"
-#include "libvo/video_out.h"
-#include "libvo/csputils.h"
-#include "libmpcodecs/vfcap.h"
-#include "libmpcodecs/mp_image.h"
-#include "fmt-conversion.h"
-#include "image_writer.h"
-#include "m_config.h"
-#include "m_option.h"
+#include "core/mp_msg.h"
+#include "video/out/vo.h"
+#include "video/csputils.h"
+#include "video/vfcap.h"
+#include "video/mp_image.h"
+#include "video/fmt-conversion.h"
+#include "video/image_writer.h"
+#include "core/m_option.h"
 
 struct priv {
     struct image_writer_opts *opts;

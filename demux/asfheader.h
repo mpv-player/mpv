@@ -20,7 +20,7 @@
 #define MPLAYER_ASFHEADER_H
 
 #include "asf.h"
-#include "demuxer.h"
+#include "demux.h"
 
 int asf_check_header(demuxer_t *demuxer);
 int read_asf_header(demuxer_t *demuxer, struct asf_priv *asf);

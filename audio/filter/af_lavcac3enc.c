@@ -32,7 +32,7 @@
 
 #include "config.h"
 #include "af.h"
-#include "reorder_ch.h"
+#include "audio/reorder_ch.h"
 
 
 #define AC3_MAX_CHANNELS 6

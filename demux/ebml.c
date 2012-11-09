@@ -34,8 +34,8 @@
 #include "talloc.h"
 #include "ebml.h"
 #include "stream/stream.h"
-#include "mpbswap.h"
-#include "mp_msg.h"
+#include "compat/mpbswap.h"
+#include "core/mp_msg.h"
 
 #ifndef SIZE_MAX
 #define SIZE_MAX ((size_t)-1)

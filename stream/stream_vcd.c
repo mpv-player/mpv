@@ -22,10 +22,10 @@
 #include <windows.h>
 #endif
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "stream.h"
-#include "m_option.h"
-#include "m_struct.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 
 #include <fcntl.h>
 #include <stdlib.h>
@@ -47,7 +47,7 @@
 #include "vcd_read.h"
 #endif
 
-#include "libmpdemux/demuxer.h"
+#include "demux/demux.h"
 
 extern char *cdrom_device;
 

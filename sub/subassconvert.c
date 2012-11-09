@@ -25,9 +25,9 @@
 #include <stdarg.h>
 #include <stdbool.h>
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "subassconvert.h"
-#include "bstr.h"
+#include "core/bstr.h"
 #include "libavutil/common.h"
 
 struct line {

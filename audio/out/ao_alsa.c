@@ -36,18 +36,18 @@
 #include <alloca.h>
 
 #include "config.h"
-#include "subopt-helper.h"
-#include "mixer.h"
-#include "mp_msg.h"
+#include "core/subopt-helper.h"
+#include "audio/mixer.h"
+#include "core/mp_msg.h"
 
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #define ALSA_PCM_NEW_SW_PARAMS_API
 
 #include <alsa/asoundlib.h>
 
-#include "audio_out.h"
+#include "ao.h"
 #include "audio_out_internal.h"
-#include "libaf/format.h"
+#include "audio/format.h"
 
 static const ao_info_t info =
 {

@@ -37,7 +37,7 @@
 #include <linux/types.h>
 #include <linux/input.h>
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 // keycodes.h defines would conflict with linux/input.h ones
 #define AR_DEFINES_ONLY

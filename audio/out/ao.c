@@ -24,9 +24,9 @@
 #include "talloc.h"
 
 #include "config.h"
-#include "audio_out.h"
+#include "ao.h"
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 // there are some globals:
 struct ao *global_ao;

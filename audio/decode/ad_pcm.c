@@ -26,8 +26,8 @@
 #include "talloc.h"
 #include "config.h"
 #include "ad_internal.h"
-#include "libaf/format.h"
-#include "libaf/reorder_ch.h"
+#include "audio/format.h"
+#include "audio/reorder_ch.h"
 
 static const ad_info_t info = {
     "Uncompressed PCM audio decoder",

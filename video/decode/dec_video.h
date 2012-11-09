@@ -19,7 +19,7 @@
 #ifndef MPLAYER_DEC_VIDEO_H
 #define MPLAYER_DEC_VIDEO_H
 
-#include "libmpdemux/stheader.h"
+#include "demux/stheader.h"
 
 struct osd_state;
 

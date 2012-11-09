@@ -20,7 +20,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "demuxer.h"
+#include "demux.h"
 #include "stream/stream.h"
 
 static int try_open_file(struct demuxer *demuxer)

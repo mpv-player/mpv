@@ -30,18 +30,18 @@
 
 #include "config.h"
 #include "talloc.h"
-#include "mp_msg.h"
-#include "subopt-helper.h"
-#include "video_out.h"
-#include "libmpcodecs/vfcap.h"
-#include "libmpcodecs/mp_image.h"
+#include "core/mp_msg.h"
+#include "core/subopt-helper.h"
+#include "vo.h"
+#include "video/vfcap.h"
+#include "video/mp_image.h"
 #include "geometry.h"
 #include "sub/sub.h"
 
 #include "gl_common.h"
 #include "gl_osd.h"
 #include "aspect.h"
-#include "fastmemcpy.h"
+#include "video/memcpy_pic.h"
 
 //for gl_priv.use_yuv
 #define MASK_ALL_YUV (~(1 << YUV_CONVERSION_NONE))

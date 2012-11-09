@@ -28,7 +28,7 @@
 #include <libavutil/mathematics.h>
 
 #include "encode.h"
-#include "libvo/csputils.h"
+#include "video/csputils.h"
 
 struct encode_lavc_context {
     struct encode_output_conf *options;

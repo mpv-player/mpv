@@ -32,11 +32,11 @@
 #include <sys/types.h>
 
 #include "config.h"
-#include "mpcommon.h"
+#include "core/mp_common.h"
 #include "vobsub.h"
 #include "spudec.h"
-#include "mp_msg.h"
-#include "path.h"
+#include "core/mp_msg.h"
+#include "core/path.h"
 #include "libavutil/common.h"
 
 extern int vobsub_id;

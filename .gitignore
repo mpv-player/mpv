@@ -10,16 +10,16 @@
 /mpv
 /mpv.app
 /version.h
-/codecs.conf.h
-/input/input_conf.h
+/core/codecs.conf.h
+/core/input/input_conf.h
 /tags
 /TAGS
 /locale
 /po
-/libvo/vo_opengl_shaders.h
-/libmpdemux/ebml_defs.c
-/libmpdemux/ebml_types.h
-/libvo/vdpau_template.c
+/video/out/vo_opengl_shaders.h
+/video/out/vdpau_template.c
+/demux/ebml_defs.c
+/demux/ebml_types.h
 /sub/osd_font.h
-DOCS/man/*/mpv.1
+/DOCS/man/*/mpv.1
 

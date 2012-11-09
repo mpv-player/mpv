@@ -21,8 +21,8 @@
 #include <libavcodec/avcodec.h>
 
 #include "talloc.h"
-#include "mp_msg.h"
-#include "libmpdemux/stheader.h"
+#include "core/mp_msg.h"
+#include "demux/stheader.h"
 #include "sd.h"
 #include "dec_sub.h"
 #include "sub.h"

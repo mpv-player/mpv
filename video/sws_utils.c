@@ -20,13 +20,13 @@
 
 #include <libavutil/opt.h>
 
-#include "libmpcodecs/sws_utils.h"
+#include "sws_utils.h"
 
-#include "libmpcodecs/mp_image.h"
-#include "libmpcodecs/img_format.h"
+#include "video/mp_image.h"
+#include "video/img_format.h"
 #include "fmt-conversion.h"
-#include "libvo/csputils.h"
-#include "mp_msg.h"
+#include "csputils.h"
+#include "core/mp_msg.h"
 
 //global sws_flags from the command line
 int sws_flags = 2;

@@ -21,12 +21,12 @@
 #include <string.h>
 
 #include "config.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
-#include "mp_image.h"
+#include "video/mp_image.h"
 #include "vf.h"
 
-#include "libvo/video_out.h"
+#include "video/out/vo.h"
 
 //===========================================================================//
 

@@ -29,10 +29,10 @@
 
 #include "talloc.h"
 
-#include "subopt-helper.h"
+#include "core/subopt-helper.h"
 #include "osdep/timer.h"
-#include "libaf/format.h"
-#include "audio_out.h"
+#include "audio/format.h"
+#include "ao.h"
 
 struct priv {
     rsound_t *rd;

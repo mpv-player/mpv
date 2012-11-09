@@ -27,16 +27,15 @@
 #include <libavutil/audioconvert.h>
 
 #include "config.h"
-#include "options.h"
-#include "mpcommon.h"
-#include "fmt-conversion.h"
-#include "libaf/format.h"
-#include "libaf/reorder_ch.h"
+#include "core/options.h"
+#include "core/mp_common.h"
+#include "audio/format.h"
+#include "audio/reorder_ch.h"
 #include "talloc.h"
-#include "audio_out.h"
-#include "mp_msg.h"
+#include "ao.h"
+#include "core/mp_msg.h"
 
-#include "encode_lavc.h"
+#include "core/encode_lavc.h"
 
 static const char *sample_padding_signed = "\x00\x00\x00\x00";
 static const char *sample_padding_u8     = "\x80";

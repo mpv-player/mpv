@@ -38,7 +38,7 @@
 
 #include "af.h"
 #include "libavutil/common.h"
-#include "subopt-helper.h"
+#include "core/subopt-helper.h"
 
 // Data for specific instances of this filter
 typedef struct af_scaletempo_s

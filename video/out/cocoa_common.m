@@ -26,17 +26,17 @@
 
 #include "config.h"
 
-#include "options.h"
-#include "video_out.h"
+#include "core/options.h"
+#include "vo.h"
 #include "aspect.h"
 
-#include "mp_fifo.h"
+#include "core/mp_fifo.h"
 #include "talloc.h"
 
-#include "input/input.h"
-#include "input/keycodes.h"
+#include "core/input/input.h"
+#include "core/input/keycodes.h"
 #include "osx_common.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #ifndef NSOpenGLPFAOpenGLProfile
 #define NSOpenGLPFAOpenGLProfile 99

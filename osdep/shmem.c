@@ -38,7 +38,7 @@
 #include <fcntl.h>
 #include <inttypes.h>
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #ifdef AIX
 #include <sys/select.h>

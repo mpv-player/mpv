@@ -20,7 +20,7 @@
 #define MPLAYER_STREAM_H
 
 #include "config.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "url.h"
 #include <stdio.h>
 #include <string.h>
@@ -28,7 +28,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
-#include "bstr.h"
+#include "core/bstr.h"
 
 #ifndef O_BINARY
 #define O_BINARY 0

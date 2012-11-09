@@ -26,14 +26,15 @@
 
 #include "config.h"
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #include "stream/stream.h"
-#include "demuxer.h"
+#include "demux.h"
 #include "stheader.h"
+#include "video/memcpy_pic.h"
 
 #include <gif_lib.h>
-#include "libvo/fastmemcpy.h"
+
 typedef struct {
   int current_pts;
   unsigned char *palette;

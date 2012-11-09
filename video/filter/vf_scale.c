@@ -23,23 +23,23 @@
 #include <sys/types.h>
 
 #include "config.h"
-#include "mp_msg.h"
-#include "options.h"
+#include "core/mp_msg.h"
+#include "core/options.h"
 
-#include "img_format.h"
-#include "mp_image.h"
+#include "video/img_format.h"
+#include "video/mp_image.h"
 #include "vf.h"
-#include "fmt-conversion.h"
-#include "mpbswap.h"
+#include "video/fmt-conversion.h"
+#include "compat/mpbswap.h"
 
-#include "libmpcodecs/sws_utils.h"
+#include "video/sws_utils.h"
 
-#include "libvo/csputils.h"
+#include "video/csputils.h"
 // VOFLAG_SWSCALE
-#include "libvo/video_out.h"
+#include "video/out/vo.h"
 
-#include "m_option.h"
-#include "m_struct.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 
 static struct vf_priv_s {
     int w,h;

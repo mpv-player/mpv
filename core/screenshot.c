@@ -25,20 +25,20 @@
 #include "osdep/io.h"
 
 #include "talloc.h"
-#include "screenshot.h"
-#include "mp_core.h"
-#include "command.h"
-#include "bstr.h"
-#include "mp_msg.h"
-#include "path.h"
-#include "libmpcodecs/mp_image.h"
-#include "libmpcodecs/dec_video.h"
-#include "libmpcodecs/vf.h"
-#include "libvo/video_out.h"
-#include "image_writer.h"
+#include "core/screenshot.h"
+#include "core/mp_core.h"
+#include "core/command.h"
+#include "core/bstr.h"
+#include "core/mp_msg.h"
+#include "core/path.h"
+#include "video/mp_image.h"
+#include "video/decode/dec_video.h"
+#include "video/filter/vf.h"
+#include "video/out/vo.h"
+#include "video/image_writer.h"
 #include "sub/sub.h"
 
-#include "libvo/csputils.h"
+#include "video/csputils.h"
 
 #define MODE_FULL_WINDOW 1
 #define MODE_SUBTITLES 2

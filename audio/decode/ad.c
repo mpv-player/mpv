@@ -25,8 +25,8 @@
 #include "config.h"
 
 #include "stream/stream.h"
-#include "libmpdemux/demuxer.h"
-#include "libmpdemux/stheader.h"
+#include "demux/demux.h"
+#include "demux/stheader.h"
 #include "ad.h"
 
 /* Missed vorbis, mad, dshow */

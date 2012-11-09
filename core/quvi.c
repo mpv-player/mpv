@@ -19,8 +19,8 @@
 #include <quvi/quvi.h>
 
 #include "talloc.h"
-#include "mp_msg.h"
-#include "options.h"
+#include "core/mp_msg.h"
+#include "core/options.h"
 #include "mplayer.h"
 
 struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)

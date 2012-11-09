@@ -38,7 +38,7 @@
 #include <fcntl.h>
 
 #include "af.h"
-#include "path.h"
+#include "core/path.h"
 
 #define DEF_SZ 512 // default buffer size (in samples)
 #define SHARED_FILE "mpv-af_export" /* default file name

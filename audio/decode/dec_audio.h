@@ -19,7 +19,7 @@
 #ifndef MPLAYER_DEC_AUDIO_H
 #define MPLAYER_DEC_AUDIO_H
 
-#include "libmpdemux/stheader.h"
+#include "demux/stheader.h"
 
 struct bstr;
 

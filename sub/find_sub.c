@@ -22,13 +22,12 @@
 
 #include <stdio.h>
 
-#include "libvo/video_out.h"
 #include "sub.h"
 #include "subreader.h"
 
-#include "mp_msg.h"
-#include "mpcommon.h"
-#include "mplayer.h"
+#include "core/mp_msg.h"
+#include "core/mp_common.h"
+#include "core/mplayer.h"
 
 static int current_sub=0;
 

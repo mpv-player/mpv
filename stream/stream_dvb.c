@@ -40,10 +40,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include <errno.h>
 
 #include "stream.h"
-#include "libmpdemux/demuxer.h"
-#include "m_option.h"
-#include "m_struct.h"
-#include "path.h"
+#include "demux/demux.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
+#include "core/path.h"
 #include "libavutil/avstring.h"
 
 #include "dvbin.h"

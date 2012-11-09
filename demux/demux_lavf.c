@@ -32,19 +32,19 @@
 #include <libavutil/avstring.h>
 #include <libavutil/mathematics.h>
 #include <libavutil/opt.h>
-#include "libav_compat.h"
+#include "compat/libav.h"
 
 #include "config.h"
-#include "options.h"
-#include "mp_msg.h"
-#include "av_opts.h"
-#include "bstr.h"
+#include "core/options.h"
+#include "core/mp_msg.h"
+#include "core/av_opts.h"
+#include "core/bstr.h"
 
 #include "stream/stream.h"
 #include "aviprint.h"
-#include "demuxer.h"
+#include "demux.h"
 #include "stheader.h"
-#include "m_option.h"
+#include "core/m_option.h"
 
 #include "mp_taglists.h"
 

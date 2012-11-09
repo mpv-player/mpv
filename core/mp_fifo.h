@@ -19,7 +19,7 @@
 #ifndef MPLAYER_MP_FIFO_H
 #define MPLAYER_MP_FIFO_H
 
-#include "bstr.h"
+#include "core/bstr.h"
 
 struct mp_fifo;
 void mplayer_put_key(struct mp_fifo *fifo, int code);

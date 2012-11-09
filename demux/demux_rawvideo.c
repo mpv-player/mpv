@@ -23,13 +23,13 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "m_option.h"
+#include "core/m_option.h"
 
 #include "stream/stream.h"
-#include "demuxer.h"
+#include "demux.h"
 #include "stheader.h"
 
-#include "libmpcodecs/img_format.h"
+#include "video/img_format.h"
 
 static int format = IMGFMT_I420;
 static int size_id = 0;

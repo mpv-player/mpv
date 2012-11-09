@@ -22,7 +22,7 @@
 #include <string.h>
 #include <limits.h>
 #include "geometry.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 /* A string of the form [WxH][+X+Y] or xpos[%]:ypos[%] */
 char *vo_geometry;

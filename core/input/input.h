@@ -20,8 +20,8 @@
 #define MPLAYER_INPUT_H
 
 #include <stdbool.h>
-#include "bstr.h"
-#include "m_option.h"
+#include "core/bstr.h"
+#include "core/m_option.h"
 
 // All command IDs
 enum mp_command_type {
@@ -211,7 +211,7 @@ void mp_input_register_options(struct m_config *cfg);
 // Wake up sleeping input loop from another thread.
 void mp_input_wakeup(struct input_ctx *ictx);
 
-// Interruptible usleep:  (used by libmpdemux)
+// Interruptible usleep:  (used by demux)
 int mp_input_check_interrupt(struct input_ctx *ictx, int time);
 
 extern int async_quit_request;

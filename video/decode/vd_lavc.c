@@ -29,20 +29,20 @@
 
 #include "talloc.h"
 #include "config.h"
-#include "mp_msg.h"
-#include "options.h"
-#include "av_opts.h"
+#include "core/mp_msg.h"
+#include "core/options.h"
+#include "core/av_opts.h"
 
-#include "mpbswap.h"
-#include "fmt-conversion.h"
+#include "compat/mpbswap.h"
+#include "video/fmt-conversion.h"
 
 #include "vd.h"
-#include "img_format.h"
-#include "libmpdemux/stheader.h"
-#include "libmpdemux/demux_packet.h"
-#include "codec-cfg.h"
+#include "video/img_format.h"
+#include "demux/stheader.h"
+#include "demux/demux_packet.h"
+#include "core/codec-cfg.h"
 #include "osdep/numcores.h"
-#include "libvo/csputils.h"
+#include "video/csputils.h"
 
 static const vd_info_t info = {
     "libavcodec video codecs",
@@ -76,7 +76,7 @@ typedef struct {
     enum AVDiscard skip_frame;
 } vd_ffmpeg_ctx;
 
-#include "m_option.h"
+#include "core/m_option.h"
 
 static int get_buffer(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer(AVCodecContext *avctx, AVFrame *pic);

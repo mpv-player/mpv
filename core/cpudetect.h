@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include "config.h"
 
-#include "ffmpeg_files/x86_cpu.h"
+#include "compat/x86_cpu.h"
 
 typedef struct cpucaps_s {
     bool hasMMX;

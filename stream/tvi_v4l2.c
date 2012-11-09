@@ -55,9 +55,9 @@ known issues:
 #include <linux/types.h>
 #include <linux/videodev2.h>
 #endif
-#include "mp_msg.h"
-#include "libmpcodecs/img_format.h"
-#include "libaf/format.h"
+#include "core/mp_msg.h"
+#include "video/img_format.h"
+#include "audio/format.h"
 #include "tv.h"
 #include "audio_in.h"
 

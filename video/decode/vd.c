@@ -21,21 +21,21 @@
 #include <string.h>
 
 #include "config.h"
-#include "mp_msg.h"
-#include "options.h"
+#include "core/mp_msg.h"
+#include "core/options.h"
 
-#include "codec-cfg.h"
+#include "core/codec-cfg.h"
 
-#include "img_format.h"
+#include "video/img_format.h"
 
 #include "stream/stream.h"
-#include "libmpdemux/demuxer.h"
-#include "libmpdemux/stheader.h"
+#include "demux/demux.h"
+#include "demux/stheader.h"
 #include "dec_video.h"
 
 #include "vd.h"
-#include "vf.h"
-#include "libvo/video_out.h"
+#include "video/filter/vf.h"
+#include "video/out/vo.h"
 
 extern const vd_functions_t mpcodecs_vd_ffmpeg;
 

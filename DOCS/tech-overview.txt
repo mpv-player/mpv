@@ -2,7 +2,7 @@ NOTE: DOCS/OUTDATED-tech/* may contain more detailed information, but most of it
       is possibly or definitely outdated. This file intends to give a big
       picture of how mplayer/mpv is structured.
 
-mplayer.c:
+core/mplayer.c:
     This contains the main play loop, anything related to mplayer and playback
     related initializations. It also contains the main function. Generally, it
     accesses all other subsystems, initializes them, and pushes data between
@@ -72,7 +72,7 @@ talloc.h & talloc.c:
     Documentation can be found here:
         http://git.samba.org/?p=samba.git;a=blob;f=lib/talloc/talloc.h;hb=HEAD
 
-mp_core.h:
+core/mp_core.h:
     Data structures for mplayer.c and command.c. They are usually not accessed
     by other parts of mplayer for the sake of modularization.
 
@@ -83,7 +83,7 @@ mp_core.h:
     options.h contains the global option struct MPOpts, and its default values
     are in defaultopts.c for some reason.
 
-input/input.c:
+core/input/input.c:
     This translates keyboard input comming from libvo and other sources (such
     as remote control devices like Apple IR or slave mode commands) to the
     key bindings listed in the user's (or the builtin) input.conf and turns
@@ -95,14 +95,14 @@ input/input.c:
     direction of slave mode communication, mplayer to application, consists of
     random mp_msg() calls all over the code in all parts of the player.)
 
-command.c:
+core/command.c:
     This contains the implementation for slave commands and properties.
     Properties are essentially dynamic variables changed by certain commands.
     This is basically responsible for all user commands, like initiating
     seeking, switching tracks, etc. It calls into mplayer.c, where most of the
     work is done, but also into other parts of mplayer.
 
-mp_msg.h:
+core/mp_msg.h:
     All terminal output should go though mp_msg().
 
 stream/*:
@@ -123,7 +123,7 @@ stream/*:
     cache2.c is a horrible little thing which provides a caching wrapper around
     stream implementations, needed for smooth network playback.
 
-libmpdemux/:
+demux/:
     Demuxers split data streams into audio/video/sub streams, which in turn
     yield packets. Packets (see demux_packet.h) are mostly byte chunks tagged
     with a playback time (PTS). These packets are passed to the decoders.
@@ -133,29 +133,28 @@ libmpdemux/:
     There are some pseudo demuxers like demux_cue.c, which exist only to invoke
     other frontend code (tl_cue.c in this case).
 
-    The main interface is in demuxer.h. A demuxer provides a list of available
+    The main interface is in demux.h. A demuxer provides a list of available
     streams. Also, for each type of stream (video/audio/sub) there is a
     demux_stream. This contains the current packet stream coming from the
     demuxer as a linked list of demux_packets.
 
-libmpcodecs/:
+video/:
     This contains several things related to audio/video encoding, as well as
     video filters.
 
     mp_image.h and img_format.h define how mplayer stores video frames
     internally.
 
+video/decode/:
     vd_*.c are video decoders. (There's only vd_ffmpeg.c left.) dec_video.c/vd.c
     handle most of connecting the frontend with the actual decoder.
 
+video/filter/:
     vf_*.c and vf.c form the video filter chain. They are fed by the video
     decoder, and output the filtered images to the VOs though vf_vo.c. By
     default, no video filters (except vf_vo) are used.
 
-    ad_*.c and dec_audio.c/ad.c handle audio decoding. The audio filter chain is
-    separately in libaf.
-
-libvo/:
+video/out/:
     Video output. They also create GUI windows and handle user input. In most
     cases, the windowing code is shared among VOs, like x11_common.c for X11 and
     w32_common.c for Windows. The VOs stand between frontend and windowing code.
@@ -167,12 +166,17 @@ libvo/:
 
     vo_vdpau and vo_opengl should be taken as reference.
 
-libaf/:
-    Audio filter chain. format.h/format.c define the audio formats.
+audio/:
+    format.h/format.c define the audio formats.
 
-libao2/:
-    Audio outputs. (It was probably named libao2 because libao is already
-    another library unrelated to mplayer?)
+audio/decode/:
+    ad_*.c and dec_audio.c/ad.c handle audio decoding.
+
+audio/filter/:
+    Audio filter chain.
+
+audio/out/:
+    Audio outputs.
 
     Unlike VOs, AOs can't be reconfigured on a format change. Without
     --gapless-audio, even playing a new file will close and re-open the audio
@@ -192,7 +196,7 @@ sub/:
     subtitle event from the demuxer and converting it to ass for display is
     different from loading a text subtitle and converting it to ass.
 
-timeline/:
+core/timeline/:
     A timeline is the abstraction used by mplayer.c to combine several files
     into one seemingly linear video. It's mainly used for ordered chapters
     playback. The high level code to find and load other files containing the

@@ -25,10 +25,9 @@
 
 #include "img_convert.h"
 #include "sub.h"
-#include "spudec.h"
-#include "libmpcodecs/img_format.h"
-#include "libmpcodecs/mp_image.h"
-#include "libmpcodecs/sws_utils.h"
+#include "video/img_format.h"
+#include "video/mp_image.h"
+#include "video/sws_utils.h"
 
 struct osd_conv_cache {
     struct sub_bitmap part;

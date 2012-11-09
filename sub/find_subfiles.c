@@ -6,10 +6,10 @@
 
 #include "osdep/io.h"
 
-#include "mp_msg.h"
-#include "options.h"
-#include "path.h"
-#include "mpcommon.h"
+#include "core/mp_msg.h"
+#include "core/options.h"
+#include "core/path.h"
+#include "core/mp_common.h"
 #include "sub/find_subfiles.h"
 #include "sub/sub.h"
 #include "sub/subreader.h"

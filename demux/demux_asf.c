@@ -27,13 +27,13 @@
 #include <libavutil/intreadwrite.h>
 
 #include "config.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #include "stream/stream.h"
 #include "asf.h"
 #include "asfheader.h"
-#include "demuxer.h"
-#include "libmpcodecs/dec_audio.h"
+#include "demux.h"
+#include "audio/decode/dec_audio.h"
 
 // based on asf file-format doc by Eugene [http://divx.euro.ru]
 

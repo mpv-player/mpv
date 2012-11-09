@@ -19,12 +19,13 @@
 #ifndef MPLAYER_VF_H
 #define MPLAYER_VF_H
 
-#include "mp_image.h"
-#include "mpcommon.h"
-#include "stdbool.h"
+#include <stdbool.h>
 
-#include "mpc_info.h"
-#include "vfcap.h"
+#include "video/mp_image.h"
+#include "core/mp_common.h"
+
+#include "core/mpc_info.h"
+#include "video/vfcap.h"
 
 struct MPOpts;
 struct vf_instance;

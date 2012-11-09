@@ -30,10 +30,10 @@
 #include <libavutil/common.h>
 
 #include "talloc.h"
-#include "m_option.h"
+#include "core/m_option.h"
 #include "m_property.h"
-#include "mp_msg.h"
-#include "mpcommon.h"
+#include "core/mp_msg.h"
+#include "core/mp_common.h"
 
 const struct m_option_type m_option_type_dummy = {
     .name = "Unknown",

@@ -28,9 +28,9 @@
 #include <stdint.h>
 #include <string.h>
 #include <windows.h>
-#include "input/keycodes.h"
-#include "input/input.h"
-#include "mp_fifo.h"
+#include "core/input/keycodes.h"
+#include "core/input/input.h"
+#include "core/mp_fifo.h"
 #include "getch2.h"
 
 int mp_input_slave_cmd_func(int fd,char* dest,int size){

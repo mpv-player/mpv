@@ -35,13 +35,13 @@
 #include <AL/alext.h>
 #endif
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
-#include "audio_out.h"
+#include "ao.h"
 #include "audio_out_internal.h"
-#include "libaf/format.h"
+#include "audio/format.h"
 #include "osdep/timer.h"
-#include "subopt-helper.h"
+#include "core/subopt-helper.h"
 
 static const ao_info_t info =
 {

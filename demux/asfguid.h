@@ -23,7 +23,7 @@
 
 #include <inttypes.h>
 #include "libavutil/common.h"
-#include "mpbswap.h"
+#include "compat/mpbswap.h"
 
 
 #define	ASF_LOAD_GUID_PREFIX(guid)	AV_RL32(guid)

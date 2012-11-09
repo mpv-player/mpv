@@ -35,7 +35,7 @@
  */
 
 #include "cocoa_events.h"
-#include "libvo/cocoa_common.h"
+#include "video/out/cocoa_common.h"
 #include "talloc.h"
 
 #import <Cocoa/Cocoa.h>

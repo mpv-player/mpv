@@ -40,7 +40,7 @@
 #include <linux/types.h>
 #include <linux/videodev2.h>
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #include "stream.h"
 #include "pvr.h"

@@ -21,9 +21,6 @@
 
 #include <stdbool.h>
 
-#include "libaf/af.h"
-#include "libao2/audio_out.h"
-
 enum {
     SOFTVOL_NO = 0,
     SOFTVOL_YES = 1,

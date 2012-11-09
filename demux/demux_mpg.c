@@ -25,13 +25,13 @@
 #include <math.h>
 
 #include "config.h"
-#include "mp_msg.h"
-#include "options.h"
+#include "core/mp_msg.h"
+#include "core/options.h"
 
 #include "libavutil/attributes.h"
-#include "libmpcodecs/dec_audio.h"
+#include "audio/decode/dec_audio.h"
 #include "stream/stream.h"
-#include "demuxer.h"
+#include "demux.h"
 #include "parse_es.h"
 #include "stheader.h"
 #include "mp3_hdr.h"

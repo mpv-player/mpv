@@ -26,7 +26,7 @@
 #include "config.h"
 #include "mpeg_hdr.h"
 #include "libavutil/attributes.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 static float frameratecode2framerate[16] = {
   0,

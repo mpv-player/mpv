@@ -22,7 +22,7 @@
 #include <sys/types.h>
 #include <inttypes.h>
 #include "libavutil/common.h"
-#include "mpbswap.h"
+#include "compat/mpbswap.h"
 
 ///////////////////////
 // ASF Object Header

@@ -24,7 +24,7 @@
 #include <stdbool.h>
 
 #include "stream/stream.h"
-#include "bstr.h"
+#include "core/bstr.h"
 
 
 /* EBML version supported */

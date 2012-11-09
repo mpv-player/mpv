@@ -24,17 +24,17 @@
 #include <libavutil/common.h>
 
 #include "config.h"
-#include "mp_msg.h"
-#include "options.h"
+#include "core/mp_msg.h"
+#include "core/options.h"
 
-#include "img_format.h"
-#include "mp_image.h"
+#include "video/img_format.h"
+#include "video/mp_image.h"
 #include "vf.h"
 
-#include "libvo/fastmemcpy.h"
+#include "video/memcpy_pic.h"
 
-#include "m_option.h"
-#include "m_struct.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 
 static struct vf_priv_s {
     // These four values are a backup of the values parsed from the command line.

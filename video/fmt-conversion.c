@@ -16,10 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #include "libavutil/avutil.h"
 #include <libavutil/pixdesc.h>
-#include "libmpcodecs/img_format.h"
+#include "video/img_format.h"
 #include "fmt-conversion.h"
 
 static const struct {

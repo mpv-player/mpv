@@ -21,7 +21,7 @@
 #include "config.h"
 
 #include <stdio.h>
-#include "libmpcodecs/img_format.h"
+#include "video/img_format.h"
 #include "tv.h"
 
 static tvi_handle_t *tvi_init_dummy(tv_param_t* tv_param);

@@ -31,8 +31,8 @@
 #include "talloc.h"
 
 #include "m_config.h"
-#include "m_option.h"
-#include "mp_msg.h"
+#include "core/m_option.h"
+#include "core/mp_msg.h"
 
 #define MAX_PROFILE_DEPTH 20
 

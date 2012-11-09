@@ -19,7 +19,7 @@
 #ifndef MPLAYER_AUDIO_OUT_INTERNAL_H
 #define MPLAYER_AUDIO_OUT_INTERNAL_H
 
-#include "options.h"
+#include "core/options.h"
 
 // prototypes:
 //static ao_info_t info;

@@ -22,20 +22,20 @@
 #include <assert.h>
 
 #include "config.h"
-#include "mp_msg.h"
-#include "bstr.h"
+#include "core/mp_msg.h"
+#include "core/bstr.h"
 
 #include "stream/stream.h"
-#include "libmpdemux/demuxer.h"
+#include "demux/demux.h"
 
-#include "codec-cfg.h"
-#include "libmpdemux/stheader.h"
+#include "core/codec-cfg.h"
+#include "demux/stheader.h"
 
 #include "dec_audio.h"
 #include "ad.h"
-#include "libaf/format.h"
+#include "audio/format.h"
 
-#include "libaf/af.h"
+#include "audio/filter/af.h"
 
 int fakemono = 0;
 

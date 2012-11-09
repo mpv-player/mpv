@@ -25,10 +25,10 @@
 #include <string.h>
 #include <errno.h>
 #include "config.h"
-#include "mp_msg.h"
-#include "video_out.h"
-#include "libmpcodecs/vfcap.h"
-#include "libmpcodecs/mp_image.h"
+#include "core/mp_msg.h"
+#include "vo.h"
+#include "video/vfcap.h"
+#include "video/mp_image.h"
 
 static int draw_slice(struct vo *vo, uint8_t *image[], int stride[],
                       int w, int h, int x, int y)

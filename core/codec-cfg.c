@@ -31,12 +31,12 @@
 #include <stdint.h>
 
 #include "config.h"
-#include "mp_msg.h"
-#include "libmpcodecs/img_format.h"
+#include "core/mp_msg.h"
+#include "video/img_format.h"
 #include "codec-cfg.h"
-#include "bstr.h"
+#include "core/bstr.h"
 #include "stream/stream.h"
-#include "path.h"
+#include "core/path.h"
 
 static const char embedded_file[] =
 #include "codecs.conf.h"

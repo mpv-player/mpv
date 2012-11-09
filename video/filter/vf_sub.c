@@ -28,20 +28,20 @@
 #include <libavutil/common.h>
 
 #include "config.h"
-#include "mp_msg.h"
-#include "options.h"
+#include "core/mp_msg.h"
+#include "core/options.h"
 
-#include "img_format.h"
-#include "mp_image.h"
+#include "video/img_format.h"
+#include "video/mp_image.h"
 #include "vf.h"
 #include "sub/sub.h"
 #include "sub/dec_sub.h"
 
-#include "libvo/fastmemcpy.h"
-#include "libvo/csputils.h"
+#include "video/memcpy_pic.h"
+#include "video/csputils.h"
 
-#include "m_option.h"
-#include "m_struct.h"
+#include "core/m_option.h"
+#include "core/m_struct.h"
 
 static const struct vf_priv_s {
     int outh, outw;

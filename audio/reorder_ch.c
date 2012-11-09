@@ -25,12 +25,12 @@
 #include <inttypes.h>
 #include <string.h>
 
-#include "reorder_ch.h"
+#include "audio/reorder_ch.h"
 
 #ifdef TEST
 #define mp_msg(mod,lev, fmt, args... )  printf( fmt, ## args )
 #else
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 #endif
 
 

@@ -21,11 +21,11 @@
 #include <assert.h>
 
 #include "config.h"
-#include "libmpdemux/stheader.h"
+#include "demux/stheader.h"
 #include "sub/sd.h"
 #include "sub/sub.h"
 #include "sub/dec_sub.h"
-#include "options.h"
+#include "core/options.h"
 
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;

@@ -23,11 +23,10 @@
 
 #include "config.h"
 
-#include "options.h"
-#include "libaf/format.h"
+#include "core/options.h"
+#include "audio/format.h"
 #include "control.h"
-#include "cpudetect.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 struct af_instance;
 

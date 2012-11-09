@@ -21,11 +21,11 @@
 #include <stdlib.h>
 
 #include <libavutil/cpu.h>
-#include "libav_compat.h"
+#include "compat/libav.h"
 
 #include "config.h"
-#include "cpudetect.h"
-#include "mp_msg.h"
+#include "core/cpudetect.h"
+#include "core/mp_msg.h"
 
 CpuCaps gCpuCaps;
 

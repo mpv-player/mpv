@@ -31,7 +31,7 @@
 #include <libintl.h>
 #endif
 
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 /* maximum message length of mp_msg */
 #define MSGSIZE_MAX 6144

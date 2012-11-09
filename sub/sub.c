@@ -23,17 +23,16 @@
 
 #include <libavutil/common.h>
 
-#include "mpcommon.h"
+#include "core/mp_common.h"
 
 #include "stream/stream.h"
 
 #include "osdep/timer.h"
 
 #include "talloc.h"
-#include "options.h"
-#include "mplayer.h"
-#include "mp_msg.h"
-#include "libvo/video_out.h"
+#include "core/options.h"
+#include "core/mplayer.h"
+#include "core/mp_msg.h"
 #include "sub.h"
 #include "dec_sub.h"
 #include "img_convert.h"

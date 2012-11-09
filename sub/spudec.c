@@ -40,13 +40,13 @@
 #include <libavutil/intreadwrite.h>
 
 #include "config.h"
-#include "mp_msg.h"
+#include "core/mp_msg.h"
 
 #include "spudec.h"
 #include "vobsub.h"
 #include "sub.h"
-#include "mpcommon.h"
-#include "libvo/csputils.h"
+#include "core/mp_common.h"
+#include "video/csputils.h"
 
 typedef struct spu_packet_t packet_t;
 struct spu_packet_t {

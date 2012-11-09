@@ -31,8 +31,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "config.h"
-#include "mp_msg.h"
-#include "path.h"
+#include "core/mp_msg.h"
+#include "core/path.h"
 
 #ifdef CONFIG_MACOSX_BUNDLE
 #include <CoreFoundation/CoreFoundation.h>

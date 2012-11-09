@@ -28,11 +28,11 @@
 
 #include "talloc.h"
 
-#include "subopt-helper.h"
-#include "libaf/format.h"
-#include "libaf/reorder_ch.h"
-#include "audio_out.h"
-#include "mp_msg.h"
+#include "core/subopt-helper.h"
+#include "audio/format.h"
+#include "audio/reorder_ch.h"
+#include "ao.h"
+#include "core/mp_msg.h"
 
 #ifdef __MINGW32__
 // for GetFileType to detect pipes
