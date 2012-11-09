@@ -31,7 +31,6 @@
 #include "config.h"
 #include "af.h"
 #include "mpbswap.h"
-#include "libvo/fastmemcpy.h"
 
 /* Functions used by play to convert the input audio to the correct
    format */
@@ -295,7 +294,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
       if(c->bps != l->bps)
 	change_bps(c->audio,l->audio,len,c->bps,l->bps);
       else
-	fast_memcpy(l->audio,c->audio,len*c->bps);
+	memcpy(l->audio,c->audio,len*c->bps);
       break;
     }
   }

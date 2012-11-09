@@ -24,9 +24,6 @@
 #include <string.h>
 #include <stddef.h>
 
-// meaningless ancient alias
-#define fast_memcpy memcpy
-
 #define memcpy_pic(d, s, b, h, ds, ss) memcpy_pic2(d, s, b, h, ds, ss, 0)
 #define my_memcpy_pic(d, s, b, h, ds, ss) memcpy_pic2(d, s, b, h, ds, ss, 1)
 

@@ -36,8 +36,6 @@ static const ad_info_t info = {
 
 LIBAD_EXTERN(mpg123)
 
-#include "libvo/fastmemcpy.h"
-
 /* Reducing the ifdeffery to two main variants:
  *   1. most compatible to any libmpg123 version
  *   2. fastest variant with recent libmpg123 (>=1.14)

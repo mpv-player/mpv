@@ -138,8 +138,8 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
 		}
 	}
 	if (mpi->qscale) {
-		fast_memcpy(b->planes[3], mpi->qscale, c->w[3]);
-		fast_memcpy(b->planes[3]+c->w[3], mpi->qscale, c->w[3]);
+		memcpy(b->planes[3], mpi->qscale, c->w[3]);
+		memcpy(b->planes[3]+c->w[3], mpi->qscale, c->w[3]);
 	}
 
 	p = mpi->fields & MP_IMGFIELD_TOP_FIRST ? 0 :

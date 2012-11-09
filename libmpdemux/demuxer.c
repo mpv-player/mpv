@@ -33,8 +33,6 @@
 #include "mp_msg.h"
 #include "m_config.h"
 
-#include "libvo/fastmemcpy.h"
-
 #include "stream/stream.h"
 #include "demuxer.h"
 #include "stheader.h"
@@ -701,7 +699,7 @@ int demux_read_data(demux_stream_t *ds, unsigned char *mem, int len)
             if (x > len)
                 x = len;
             if (mem)
-                fast_memcpy(mem + bytes, &ds->buffer[ds->buffer_pos], x);
+                memcpy(mem + bytes, &ds->buffer[ds->buffer_pos], x);
             bytes += x;
             len -= x;
             ds->buffer_pos += x;

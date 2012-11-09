@@ -37,7 +37,6 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "mp_msg.h"
-#include "libvo/fastmemcpy.h"
 #include "osdep/timer.h"
 #include "subopt-helper.h"
 
@@ -358,8 +357,8 @@ static int write_buffer(unsigned char *data, int len)
   	    if(write_offset>=buffer_size)write_offset=dwBytes2;
   	} else {
   	    // Write to pointers without reordering.
-	fast_memcpy(lpvPtr1,data,dwBytes1);
-    if (NULL != lpvPtr2 )fast_memcpy(lpvPtr2,data+dwBytes1,dwBytes2);
+	memcpy(lpvPtr1,data,dwBytes1);
+    if (NULL != lpvPtr2 )memcpy(lpvPtr2,data+dwBytes1,dwBytes2);
 	write_offset+=dwBytes1+dwBytes2;
     if(write_offset>=buffer_size)write_offset=dwBytes2;
   	}

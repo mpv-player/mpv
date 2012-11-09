@@ -82,10 +82,10 @@ static void unsharp( uint8_t *dst, uint8_t *src, int dstStride, int srcStride, i
 	if( src == dst )
 	    return;
 	if( dstStride == srcStride )
-	    fast_memcpy( dst, src, srcStride*height );
+	    memcpy( dst, src, srcStride*height );
 	else
 	    for( y=0; y<height; y++, dst+=dstStride, src+=srcStride )
-		fast_memcpy( dst, src, width );
+		memcpy( dst, src, width );
 	return;
     }
 

@@ -24,7 +24,6 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <string.h>
-#include "libvo/fastmemcpy.h"
 
 #include "reorder_ch.h"
 
@@ -285,7 +284,7 @@ void reorder_channel_copy(void *src,
                           int samplesize)
 {
     if (dest_layout==src_layout) {
-        fast_memcpy(dest, src, samples*samplesize);
+        memcpy(dest, src, samples*samplesize);
         return;
     }
     if (!AF_IS_SAME_CH_NUM(dest_layout,src_layout)) {
@@ -400,7 +399,7 @@ void reorder_channel_copy(void *src,
         mp_msg(MSGT_GLOBAL, MSGL_WARN, "[reorder_channel_copy] unsupport "
                "from %x to %x, %d * %d\n", src_layout, dest_layout,
                samples, samplesize);
-        fast_memcpy(dest, src, samples*samplesize);
+        memcpy(dest, src, samples*samplesize);
     }
 }
 
@@ -1327,7 +1326,7 @@ void reorder_channel_copy_nch(void *src,
             src_layout < 0 || dest_layout < 0 ||
             src_layout >= AF_CHANNEL_LAYOUT_SOURCE_NUM ||
             dest_layout >= AF_CHANNEL_LAYOUT_SOURCE_NUM)
-        fast_memcpy(dest, src, samples*samplesize);
+        memcpy(dest, src, samples*samplesize);
     else if (chnum == 6)
         reorder_channel_copy(src, channel_layout_mapping_6ch[src_layout],
                              dest, channel_layout_mapping_6ch[dest_layout],

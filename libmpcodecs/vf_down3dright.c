@@ -85,7 +85,7 @@ static void toright(unsigned char *dst[3], unsigned char *src[3],
 					*t++ = *sR++;
 			}
 			if (p->scaleh == 1) {
-				fast_memcpy(to + dst, to, dst);
+				memcpy(to + dst, to, dst);
                                 to += dst;
 			}
 			to += dst;

@@ -66,13 +66,13 @@ static void store_ref(struct vf_priv_s *p, uint8_t *src[3], int src_stride[3], i
 
         memcpy_pic(p->ref[2][i], src[i], pn_width, pn_height, p->stride[i], src_stride[i]);
 
-        fast_memcpy(p->ref[2][i] +  pn_height   * p->stride[i],
+        memcpy(p->ref[2][i] +  pn_height   * p->stride[i],
                           src[i] + (pn_height-1)*src_stride[i], pn_width);
-        fast_memcpy(p->ref[2][i] + (pn_height+1)* p->stride[i],
+        memcpy(p->ref[2][i] + (pn_height+1)* p->stride[i],
                           src[i] + (pn_height-1)*src_stride[i], pn_width);
 
-        fast_memcpy(p->ref[2][i] -   p->stride[i], src[i], pn_width);
-        fast_memcpy(p->ref[2][i] - 2*p->stride[i], src[i], pn_width);
+        memcpy(p->ref[2][i] -   p->stride[i], src[i], pn_width);
+        memcpy(p->ref[2][i] - 2*p->stride[i], src[i], pn_width);
     }
 }
 
@@ -367,7 +367,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int 
                 uint8_t *dst2= &dst[i][y*dst_stride[i]];
                 filter_line(p, dst2, prev, cur, next, w, refs, parity ^ tff);
             }else{
-                fast_memcpy(&dst[i][y*dst_stride[i]], &p->ref[1][i][y*refs], w);
+                memcpy(&dst[i][y*dst_stride[i]], &p->ref[1][i][y*refs], w);
             }
         }
     }
