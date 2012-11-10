@@ -29,7 +29,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-#include "core/mp_common.h"
+#include "compat/compiler.h"
 
 /* HACK: libsmbclient uses dynamically linked libtalloc.so which has
  * identically named symbols. This name collision caused a crash under
