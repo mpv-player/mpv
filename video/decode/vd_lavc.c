@@ -27,6 +27,8 @@
 #include <libavutil/opt.h>
 #include <libavutil/intreadwrite.h>
 
+#include "compat/libav.h"
+
 #include "talloc.h"
 #include "config.h"
 #include "core/mp_msg.h"

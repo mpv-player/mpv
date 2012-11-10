@@ -24,6 +24,8 @@
 #include <libavcodec/avcodec.h>
 #include <libavutil/mem.h>
 
+#include "compat/libav.h"
+
 #include "config.h"
 
 #ifdef CONFIG_JPEG

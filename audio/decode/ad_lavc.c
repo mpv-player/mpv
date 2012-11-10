@@ -35,6 +35,7 @@
 #include "audio/reorder_ch.h"
 
 #include "compat/mpbswap.h"
+#include "compat/libav.h"
 
 static const ad_info_t info =
 {
