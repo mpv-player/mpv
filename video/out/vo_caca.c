@@ -39,6 +39,7 @@
 #include "sub/sub.h"
 #include "video/mp_image.h"
 #include "video/vfcap.h"
+#include "video/memcpy_pic.h"
 
 #include "core/input/keycodes.h"
 #include "core/input/input.h"
@@ -49,6 +50,7 @@
 static caca_canvas_t  *canvas;
 static caca_display_t *display;
 static caca_dither_t  *dither           = NULL;
+static uint8_t        *dither_buffer    = NULL;
 static const char     *dither_antialias = "default";
 static const char     *dither_charset   = "default";
 static const char     *dither_color     = "default";
@@ -132,6 +134,7 @@ static int resize(void)
     screen_h = caca_get_canvas_height(canvas);
 
     caca_free_dither(dither);
+    talloc_free(dither_buffer);
 
     dither = caca_create_dither(bpp, image_width, image_height,
                                 depth * image_width,
@@ -140,6 +143,8 @@ static int resize(void)
         mp_msg(MSGT_VO, MSGL_FATAL, "vo_caca: caca_create_dither failed!\n");
         return ENOSYS;
     }
+    dither_buffer =
+        talloc_array(NULL, uint8_t, depth * image_width * image_height);
 
     /* Default libcaca features */
     caca_set_dither_antialias(dither, dither_antialias);
@@ -166,9 +171,9 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
-    assert(mpi->stride[0] == image_width * 3);
-    caca_dither_bitmap(canvas, 0, 0, screen_w, screen_h, dither,
-                       mpi->planes[0]);
+    memcpy_pic(dither_buffer, mpi->planes[0], image_width * depth, image_height,
+               image_width * depth, mpi->stride[0]);
+    caca_dither_bitmap(canvas, 0, 0, screen_w, screen_h, dither, dither_buffer);
 }
 
 static void flip_page(struct vo *vo)
@@ -312,6 +317,8 @@ static void uninit(struct vo *vo)
 {
     caca_free_dither(dither);
     dither = NULL;
+    talloc_free(dither_buffer);
+    dither_buffer = NULL;
     caca_free_display(display);
     caca_free_canvas(canvas);
 }
