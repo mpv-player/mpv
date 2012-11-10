@@ -2063,7 +2063,7 @@ static bool create_window_w32_old(struct MPGLContext *ctx, uint32_t d_width,
     }
 
     HWND win = ctx->vo->w32->window;
-    HDC windc = vo_w32_get_dc(ctx->vo, win);
+    HDC windc = GetDC(win);
     bool res = false;
 
     HGLRC new_context = wglCreateContext(windc);
@@ -2084,7 +2084,7 @@ static bool create_window_w32_old(struct MPGLContext *ctx, uint32_t d_width,
     res = true;
 
 out:
-    vo_w32_release_dc(ctx->vo, win, windc);
+    ReleaseDC(win, windc);
     return res;
 }
 
@@ -2101,7 +2101,7 @@ static bool create_window_w32_gl3(struct MPGLContext *ctx, uint32_t d_width,
         return true; // not reusing it breaks gl3!
 
     HWND win = ctx->vo->w32->window;
-    HDC windc = vo_w32_get_dc(ctx->vo, win);
+    HDC windc = GetDC(win);
     HGLRC new_context = 0;
 
     new_context = wglCreateContext(windc);
@@ -2200,9 +2200,9 @@ static void releaseGlContext_w32(MPGLContext *ctx)
 
 static void swapGlBuffers_w32(MPGLContext *ctx)
 {
-    HDC vo_hdc = vo_w32_get_dc(ctx->vo, ctx->vo->w32->window);
+    HDC vo_hdc = GetDC(ctx->vo->w32->window);
     SwapBuffers(vo_hdc);
-    vo_w32_release_dc(ctx->vo, ctx->vo->w32->window, vo_hdc);
+    ReleaseDC(ctx->vo->w32->window, vo_hdc);
 }
 #endif
 

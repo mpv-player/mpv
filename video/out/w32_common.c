@@ -534,7 +534,7 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
     struct vo_w32_state *w32 = vo->w32;
     PIXELFORMATDESCRIPTOR pfd;
     int pf;
-    HDC vo_hdc = vo_w32_get_dc(vo, w32->window);
+    HDC vo_hdc = GetDC(w32->window);
 
     memset(&pfd, 0, sizeof pfd);
     pfd.nSize = sizeof pfd;
@@ -548,12 +548,12 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
     pf = ChoosePixelFormat(vo_hdc, &pfd);
     if (!pf) {
         mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to select a valid pixel format!\n");
-        vo_w32_release_dc(vo, w32->window, vo_hdc);
+        ReleaseDC(w32->window, vo_hdc);
         return 0;
     }
 
     SetPixelFormat(vo_hdc, pf, &pfd);
-    vo_w32_release_dc(vo, w32->window, vo_hdc);
+    ReleaseDC(w32->window, vo_hdc);
 
     // we already have a fully initialized window, so nothing needs to be done
     if (flags & VOFLAG_HIDDEN)
@@ -732,26 +732,4 @@ void vo_w32_uninit(struct vo *vo)
     UnregisterClassW(classname, 0);
     talloc_free(w32);
     vo->w32 = NULL;
-}
-
-/**
- * \brief get a device context to draw in
- *
- * \param wnd window the DC should belong to if it makes sense
- */
-HDC vo_w32_get_dc(struct vo *vo, HWND wnd)
-{
-    struct vo_w32_state *w32 = vo->w32;
-    return GetDC(wnd);
-}
-
-/**
- * \brief release a device context
- *
- * \param wnd window the DC probably belongs to
- */
-void vo_w32_release_dc(struct vo *vo, HWND wnd, HDC dc)
-{
-    struct vo_w32_state *w32 = vo->w32;
-    ReleaseDC(wnd, dc);
 }
