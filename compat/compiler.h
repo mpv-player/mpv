@@ -5,6 +5,8 @@
 
 #ifdef __GNUC__
 
+#define MP_NORETURN __attribute__((noreturn))
+
 /** Use gcc attribute to check printf fns.  a1 is the 1-based index of
  * the parameter containing the format, and a2 the index of the first
  * argument. **/
@@ -19,6 +21,7 @@
 
 #else
 #define PRINTF_ATTRIBUTE(a1, a2)
+#define MP_NORETURN
 #endif
 
 #endif

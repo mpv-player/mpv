@@ -576,7 +576,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     }
 }
 
-static av_noreturn void exit_player(struct MPContext *mpctx,
+static MP_NORETURN void exit_player(struct MPContext *mpctx,
                                     enum exit_reason how, int rc)
 {
     uninit_player(mpctx, INITIALIZED_ALL);
