@@ -292,6 +292,12 @@ vec4 sample_sharpen5(sampler2D tex, vec2 texsize, vec2 texcoord) {
     return p + t * filter_param1;
 }
 
+vec3 srgb_compand(vec3 v)
+{
+    return mix(1.055 * pow(v, vec3(1.0/2.4)) - vec3(0.055), v * 12.92,
+               lessThanEqual(v, vec3(0.0031308)));
+}
+
 void main() {
 #ifdef USE_PLANAR
     vec3 color = vec3(SAMPLE_L(textures[0], textures_size[0], texcoord).r,
@@ -324,6 +330,9 @@ void main() {
 #endif
 #ifdef USE_3DLUT
     color = texture3D(lut_3d, color).rgb;
+#endif
+#ifdef USE_SRGB
+    color.rgb = srgb_compand(color.rgb);
 #endif
 #ifdef USE_DITHER
     float dither_value = texture(dither, gl_FragCoord.xy / dither_size).r;

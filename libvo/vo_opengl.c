@@ -698,6 +698,7 @@ static void compile_shaders(struct gl_priv *p)
     shader_def_opt(&header_final, "USE_LINEAR_CONV_INV", p->use_lut_3d);
     shader_def_opt(&header_final, "USE_GAMMA_POW", p->use_gamma);
     shader_def_opt(&header_final, "USE_3DLUT", p->use_lut_3d);
+    shader_def_opt(&header_final, "USE_SRGB", p->use_srgb);
     shader_def_opt(&header_final, "USE_DITHER", p->dither_texture != 0);
 
     if (p->use_scale_sep && p->scalers[0].kernel) {
@@ -1122,11 +1123,6 @@ static void do_render(struct gl_priv *p)
     float final_texw = p->image_width * source->tex_w / (float)source->vp_w;
     float final_texh = p->image_height * source->tex_h / (float)source->vp_h;
 
-    bool use_srgb_fb = p->use_srgb && !p->use_lut_3d;
-
-    if (use_srgb_fb)
-        gl->Enable(GL_FRAMEBUFFER_SRGB);
-
     if (p->stereo_mode) {
         int w = p->src_rect.x1 - p->src_rect.x0;
         int imgw = p->image_width;
@@ -1164,9 +1160,6 @@ static void do_render(struct gl_priv *p)
                    NULL, is_flipped);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
     }
-
-    if (use_srgb_fb)
-        gl->Disable(GL_FRAMEBUFFER_SRGB);
 
     gl->UseProgram(0);
 
@@ -1457,8 +1450,7 @@ static void check_gl_features(struct gl_priv *p)
     GL *gl = p->gl;
     bool have_float_tex = gl->mpgl_caps & MPGL_CAP_FLOAT_TEX;
     bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
-    bool have_srgb = (gl->mpgl_caps & MPGL_CAP_SRGB_TEX) &&
-                     (gl->mpgl_caps & MPGL_CAP_SRGB_FB);
+    bool have_srgb = gl->mpgl_caps & MPGL_CAP_SRGB_TEX;
 
     char *disabled[10];
     int n_disabled = 0;
@@ -1492,10 +1484,6 @@ static void check_gl_features(struct gl_priv *p)
     if (!have_fbo && p->use_lut_3d) {
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (FBO)";
-    }
-    if (!have_srgb && p->use_lut_3d) {
-        p->use_lut_3d = false;
-        disabled[n_disabled++] = "color management (sRGB)";
     }
 
     if (!have_fbo) {
