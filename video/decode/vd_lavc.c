@@ -733,8 +733,7 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
         struct mp_image new = {0};
         new.type = MP_IMGTYPE_EXPORT;
         new.flags = MP_IMGFLAG_PRESERVE;
-        new.w = new.width = avctx->width;
-        new.h = new.height = avctx->height;
+        mp_image_set_size(&new, avctx->width, avctx->height);
         mp_image_setfmt(&new, ctx->best_csp);
         for (int i = 0; i < 4; i++) {
             new.planes[i] = pic->data[i];

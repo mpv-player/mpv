@@ -318,8 +318,7 @@ static struct mp_image get_xv_buffer(struct vo *vo, int buf_index)
     XvImage *xv_image = ctx->xvimage[buf_index];
 
     struct mp_image img = {0};
-    img.w = img.width = ctx->image_width;
-    img.h = img.height = ctx->image_height;
+    mp_image_set_size(&img, ctx->image_width, ctx->image_height);
     mp_image_setfmt(&img, ctx->image_format);
 
     bool swapuv = ctx->image_format == IMGFMT_YV12;
@@ -398,10 +397,9 @@ static mp_image_t *get_screenshot(struct vo *vo)
     struct mp_image *res = alloc_mpi(img.w, img.h, img.imgfmt);
     copy_mpi(res, &img);
     vf_clone_mpi_attributes(res, &img);
+    mp_image_set_display_size(res, vo->aspdat.prew, vo->aspdat.preh);
     // try to get an image without OSD
     mp_draw_sub_backup_restore(ctx->osd_backup, res);
-    res->display_w = vo->aspdat.prew;
-    res->display_h = vo->aspdat.preh;
 
     return res;
 }

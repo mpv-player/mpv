@@ -91,11 +91,9 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
         vf->priv->shot=0;
         mp_image_t image = *dmpi;
         image.flags &= ~MP_IMGFLAG_ALLOCATED;
-        image.w = vf->priv->image->w;
-        image.h = vf->priv->image->h;
-        vf_clone_mpi_attributes(&image, mpi);
-        image.display_w = vf->priv->image->display_w;
-        image.display_h = vf->priv->image->display_h;
+        mp_image_copy_attributes(&image, mpi);
+        mp_image_set_display_size(&image, vf->priv->image->display_w,
+                                  vf->priv->image->display_h);
         vf->priv->image_callback(vf->priv->image_callback_ctx, &image);
     }
 

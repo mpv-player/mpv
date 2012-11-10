@@ -101,8 +101,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct priv *p = vo->priv;
 
     mp_image_t img = *mpi;
-    img.display_w = p->d_width;
-    img.display_h = p->d_height;
+    mp_image_set_display_size(&img, p->d_width, p->d_height);
     mp_image_set_colorspace_details(&img, &p->colorspace);
 
     void *t = talloc_new(NULL);

@@ -1558,8 +1558,7 @@ static void check_events(struct vo *vo)
 static bool get_video_buffer(d3d_priv *priv, struct mp_image *out)
 {
     *out = (struct mp_image) {0};
-    out->w = out->width  = priv->src_width;
-    out->h = out->height = priv->src_height;
+    mp_image_set_size(out, priv->src_width, priv->src_height);
     mp_image_setfmt(out, priv->image_format);
 
     if (!priv->d3d_device)
@@ -1639,10 +1638,9 @@ static mp_image_t *get_screenshot(d3d_priv *priv)
     if (!get_video_buffer(priv, &buffer))
         return NULL;
 
-    struct mp_image *image = alloc_mpi(buffer.w, buffer.h, buffer.imgfmt);
-    copy_mpi(image, &buffer);
-    image->display_w = priv->vo->aspdat.prew;
-    image->display_h = priv->vo->aspdat.preh;
+    struct mp_image *image = mp_image_new_copy(&buffer);
+    mp_image_set_display_size(image, priv->vo->aspdat.prew,
+                                     priv->vo->aspdat.preh);
 
     mp_image_set_colorspace_details(image, &priv->colorspace);
 

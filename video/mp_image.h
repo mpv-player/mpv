@@ -166,6 +166,9 @@ void mp_image_make_writeable(struct mp_image *img);
 void mp_image_setrefp(struct mp_image **p_img, struct mp_image *new_value);
 void mp_image_unrefp(struct mp_image **p_img);
 
+void mp_image_set_size(struct mp_image *mpi, int w, int h);
+void mp_image_set_display_size(struct mp_image *mpi, int dw, int dh);
+
 struct mp_image *mp_image_new_empty(int w, int h);
 void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt);
 void mp_image_alloc_planes(struct mp_image *mpi);

@@ -309,9 +309,24 @@ struct mp_image *mp_image_new_empty(int w, int h)
 {
     struct mp_image *mpi = talloc_zero(NULL, struct mp_image);
     talloc_set_destructor(mpi, mp_image_destructor);
-    mpi->width=mpi->w=w;
-    mpi->height=mpi->h=h;
+    mp_image_set_size(mpi, w, h);
     return mpi;
+}
+
+// Caller has to make sure this doesn't exceed the allocated plane data/strides.
+void mp_image_set_size(struct mp_image *mpi, int w, int h)
+{
+    mpi->w = mpi->width = w;
+    mpi->h = mpi->height = h;
+    mpi->chroma_width = mpi->w >> mpi->chroma_x_shift;
+    mpi->chroma_height = mpi->h >> mpi->chroma_y_shift;
+    mpi->display_w = mpi->display_h = 0;
+}
+
+void mp_image_set_display_size(struct mp_image *mpi, int dw, int dh)
+{
+    mpi->display_w = dw;
+    mpi->display_h = dh;
 }
 
 struct mp_image *mp_image_alloc(unsigned int imgfmt, int w, int h)

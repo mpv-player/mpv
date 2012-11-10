@@ -419,8 +419,7 @@ static void Display_Image(struct priv *p, XImage *myximage, uint8_t *ImageData)
 static struct mp_image get_x_buffer(struct priv *p)
 {
     struct mp_image img = {0};
-    img.w = img.width = p->image_width;
-    img.h = img.height = p->image_height;
+    mp_image_set_size(&img, p->image_width, p->image_height);
     mp_image_setfmt(&img, p->out_format);
 
     img.planes[0] = p->ImageData;

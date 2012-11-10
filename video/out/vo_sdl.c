@@ -435,8 +435,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     }
 
     mp_image_t *texmpi = &vc->texmpi;
-    texmpi->width = texmpi->w = width;
-    texmpi->height = texmpi->h = height;
+    mp_image_set_size(texmpi, width, height);
     mp_image_setfmt(texmpi, format);
     switch (texmpi->num_planes) {
     case 1:

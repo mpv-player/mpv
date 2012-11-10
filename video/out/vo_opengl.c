@@ -1350,11 +1350,8 @@ static mp_image_t *get_screenshot(struct gl_priv *p)
                       image->planes[n], image->stride[n]);
     }
     gl->ActiveTexture(GL_TEXTURE0);
-
-    image->w = p->image_width;
-    image->h = p->image_height;
-    image->display_w = p->vo->aspdat.prew;
-    image->display_h = p->vo->aspdat.preh;
+    mp_image_set_size(image, p->image_width, p->image_height);
+    mp_image_set_display_size(image, p->vo->aspdat.prew, p->vo->aspdat.preh);
 
     mp_image_set_colorspace_details(image, &p->colorspace);
 

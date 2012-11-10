@@ -333,11 +333,7 @@ static void mp_image_crop(struct mp_image *img, struct mp_rect rc)
             (rc.y0 >> (p ? img->chroma_y_shift : 0)) * img->stride[p] +
             (rc.x0 >> (p ? img->chroma_x_shift : 0)) * bits / 8;
     }
-    img->w = rc.x1 - rc.x0;
-    img->h = rc.y1 - rc.y0;
-    img->chroma_width = img->w >> img->chroma_x_shift;
-    img->chroma_height = img->h >> img->chroma_y_shift;
-    img->display_w = img->display_h = 0;
+    mp_image_set_size(img, rc.x1 - rc.x0, rc.y1 - rc.y0);
 }
 
 static bool clip_to_bb(struct mp_rect bb, struct mp_rect *rc)

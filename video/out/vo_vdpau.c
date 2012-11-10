@@ -1375,8 +1375,7 @@ static struct mp_image *get_screenshot(struct vo *vo)
     struct mp_image *image = read_output_surface(vc, vc->screenshot_surface,
                                                  vc->vid_width, vc->vid_height);
 
-    image->display_w = vo->aspdat.prew;
-    image->display_h = vo->aspdat.preh;
+    mp_image_set_display_size(image, vo->aspdat.prew, vo->aspdat.preh);
 
     return image;
 }
@@ -1389,8 +1388,7 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
     struct mp_image *image = read_output_surface(vo->priv, screen,
                                                  vc->output_surface_width,
                                                  vc->output_surface_height);
-    image->width = image->w = vo->dwidth;
-    image->height = image->h = vo->dheight;
+    mp_image_set_size(image, vo->dwidth, vo->dheight);
     return image;
 }
 
