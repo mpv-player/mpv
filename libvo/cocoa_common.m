@@ -256,9 +256,15 @@ static void update_screen_info(struct vo *vo)
 void vo_cocoa_update_xinerama_info(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
+    struct MPOpts *opts = vo->opts;
+
     update_screen_info(vo);
     aspect_save_screenres(vo, s->screen_frame.size.width,
                               s->screen_frame.size.height);
+    opts->vo_screenwidth = s->screen_frame.size.width;
+    opts->vo_screenheight = s->screen_frame.size.height;
+    xinerama_x = s->screen_frame.origin.x;
+    xinerama_y = s->screen_frame.origin.y;
 }
 
 int vo_cocoa_change_attributes(struct vo *vo)
@@ -376,7 +382,7 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     [s->window setDelegate:s->window];
     [s->window setContentSize:s->current_video_size];
     [s->window setContentAspectRatio:s->current_video_size];
-    [s->window center];
+    [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
 
     if (flags & VOFLAG_HIDDEN) {
         [s->window orderOut:nil];

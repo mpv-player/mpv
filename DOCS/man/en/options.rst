@@ -704,6 +704,10 @@
 
     *NOTE*: May not be supported by some of the older VO drivers.
 
+    *NOTE (OSX)*: On Mac OSX the origin of the screen coordinate system is
+    located on the the bottom-left corner. For instance, ``0:0`` will place the
+    window at the bottom-left of the screen.
+
     *EXAMPLE*:
 
     ``50:40``
