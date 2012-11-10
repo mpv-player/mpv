@@ -168,7 +168,8 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->uninit = uninit;
     vf->default_reqs = VFCAP_ACCEPT_STRIDE;
     vf->priv = calloc(1, sizeof(struct vf_priv_s));
-    vf->priv->state = 0;
+    vf->priv->last_frame_duration = 2;
+    vf_detc_init_pts_buf(&vf->priv->ptsbuf);
     return 1;
 }
 
