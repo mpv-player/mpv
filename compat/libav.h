@@ -19,7 +19,6 @@
 #ifndef MPV_LIBAV_COMPAT_H
 #define MPV_LIBAV_COMPAT_H
 
-#include <libavutil/version.h>
 #include <libavutil/avutil.h>
 #include <libavutil/cpu.h>
 #include <libavcodec/version.h>
