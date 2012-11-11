@@ -37,11 +37,14 @@
 # define in varying
 #endif
 
+// Earlier GLSL doesn't support mix() with bvec
+#if __VERSION__ >= 130
 vec3 srgb_compand(vec3 v)
 {
     return mix(1.055 * pow(v, vec3(1.0/2.4)) - vec3(0.055), v * 12.92,
                lessThanEqual(v, vec3(0.0031308)));
 }
+#endif
 
 #!section vertex_all
 

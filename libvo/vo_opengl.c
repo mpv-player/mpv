@@ -1455,6 +1455,10 @@ static void check_gl_features(struct gl_priv *p)
     bool have_fbo = gl->mpgl_caps & MPGL_CAP_FB;
     bool have_srgb = gl->mpgl_caps & MPGL_CAP_SRGB_TEX;
 
+    // srgb_compand() not available
+    if (gl->glsl_version < 130)
+        have_srgb = false;
+
     char *disabled[10];
     int n_disabled = 0;
 
@@ -1487,6 +1491,10 @@ static void check_gl_features(struct gl_priv *p)
     if (!have_fbo && p->use_lut_3d) {
         p->use_lut_3d = false;
         disabled[n_disabled++] = "color management (FBO)";
+    }
+    if (!have_srgb && p->use_lut_3d) {
+        p->use_lut_3d = false;
+        disabled[n_disabled++] = "color management (sRGB)";
     }
 
     if (!have_fbo) {
