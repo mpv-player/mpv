@@ -2148,7 +2148,6 @@ static int preinit(struct vo *vo, const char *arg)
         .dither_depth = hq ? 0 : -1,
         .fbo_format = hq ? GL_RGB16 : GL_RGB,
         .use_scale_sep = 1,
-        .use_fancy_downscaling = hq,
         .scalers = {
             { .index = 0, .name = hq ? "lanczos2" : "bilinear" },
             { .index = 1, .name = "bilinear" },
