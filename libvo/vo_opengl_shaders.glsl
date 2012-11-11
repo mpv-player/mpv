@@ -37,6 +37,12 @@
 # define in varying
 #endif
 
+vec3 srgb_compand(vec3 v)
+{
+    return mix(1.055 * pow(v, vec3(1.0/2.4)) - vec3(0.055), v * 12.92,
+               lessThanEqual(v, vec3(0.0031308)));
+}
+
 #!section vertex_all
 
 #if __VERSION__ < 130
@@ -61,9 +67,19 @@ void main() {
 #endif
     gl_Position = vec4(position, 1);
     color = vertex_color;
+
+#ifdef USE_LINEAR_CONV
+	// If no 3dlut is being used, we need to pull up to linear light for
+	// the sRGB function. *IF* 3dlut is used, we do not.
+    color.rgb = pow(color.rgb, vec3(2.2));
+#endif
 #ifdef USE_3DLUT
     color = vec4(texture3D(lut_3d, color.rgb).rgb, color.a);
 #endif
+#ifdef USE_SRGB
+    color.rgb = srgb_compand(color.rgb);
+#endif
+
     texcoord = vertex_texcoord;
 }
 
@@ -290,12 +306,6 @@ vec4 sample_sharpen5(sampler2D tex, vec2 texsize, vec2 texcoord) {
               + texture(tex, texcoord + st2 * vec2( 0, -1));
     vec4 t = p * 0.859375 + sum2 * -0.1171875 + sum1 * -0.09765625;
     return p + t * filter_param1;
-}
-
-vec3 srgb_compand(vec3 v)
-{
-    return mix(1.055 * pow(v, vec3(1.0/2.4)) - vec3(0.055), v * 12.92,
-               lessThanEqual(v, vec3(0.0031308)));
 }
 
 void main() {
