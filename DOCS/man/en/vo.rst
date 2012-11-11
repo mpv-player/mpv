@@ -330,7 +330,8 @@ opengl
         NOTE: for YUV colorspaces, gamma 2.2 is assumed. RGB input is always
         assumed to be in sRGB.
         This option is not really useful, as gamma-correct scaling has not much
-        influence on typical video playback.
+        influence on typical video playback. Most visible effect comes from
+        slightly different gamma.
 
     pbo
         Enable use of PBOs. This is faster, but can sometimes lead to
