@@ -671,7 +671,10 @@ static void compile_shaders(struct gl_priv *p)
                                    shader_prelude);
 
     char *header_osd = talloc_strdup(tmp, header);
-    shader_def_opt(&header_osd, "USE_3DLUT", p->use_lut_3d);
+    shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV", p->use_srgb &&
+                                                      !p->use_lut_3d);
+    shader_def_opt(&header_osd, "USE_OSD_3DLUT", p->use_lut_3d);
+    shader_def_opt(&header_osd, "USE_OSD_SRGB", p->use_srgb);
 
     for (int n = 0; n < SUBBITMAP_COUNT; n++) {
         const char *name = osd_shaders[n];
