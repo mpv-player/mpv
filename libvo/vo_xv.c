@@ -76,6 +76,7 @@ struct xvctx {
     uint32_t image_width;
     uint32_t image_height;
     uint32_t image_format;
+    struct mp_csp_details cached_csp;
     int is_paused;
     struct mp_rect src_rect;
     struct mp_rect dst_rect;
@@ -89,6 +90,17 @@ struct xvctx {
 
 static void allocate_xvimage(struct vo *, int);
 static void deallocate_xvimage(struct vo *vo, int foo);
+
+static void read_xv_csp(struct vo *vo)
+{
+    struct xvctx *ctx = vo->priv;
+    struct vo_x11_state *x11 = vo->x11;
+    struct mp_csp_details *cspc = &ctx->cached_csp;
+    *cspc = (struct mp_csp_details) MP_CSP_DETAILS_DEFAULTS;
+    int bt709_enabled;
+    if (vo_xv_get_eq(vo, x11->xv_port, "bt_709", &bt709_enabled))
+        cspc->format = bt709_enabled == 100 ? MP_CSP_BT_709 : MP_CSP_BT_601;
+}
 
 static void resize(struct vo *vo)
 {
@@ -104,6 +116,7 @@ static void resize(struct vo *vo)
     int dw = dst->x1 - dst->x0, dh = dst->y1 - dst->y0;
     vo_x11_clearwindow_part(vo, vo->x11->window, dw, dh);
     vo_xv_draw_colorkey(vo, dst->x0, dst->y0, dw, dh);
+    read_xv_csp(vo);
 }
 
 /*
@@ -316,9 +329,7 @@ static struct mp_image get_xv_buffer(struct vo *vo, int buf_index)
         img.stride[n] = xv_image->pitches[sn];
     }
 
-    struct mp_csp_details csp = {0};
-    vo_control(vo, VOCTRL_GET_YUV_COLORSPACE, &csp);
-    mp_image_set_colorspace_details(&img, &csp);
+    mp_image_set_colorspace_details(&img, &ctx->cached_csp);
 
     return img;
 }
@@ -665,14 +676,13 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct mp_csp_details* given_cspc = data;
         int is_709 = given_cspc->format == MP_CSP_BT_709;
         vo_xv_set_eq(vo, x11->xv_port, "bt_709", is_709 * 200 - 100);
+        read_xv_csp(vo);
         vo->want_redraw = true;
         return true;
     case VOCTRL_GET_YUV_COLORSPACE:;
         struct mp_csp_details* cspc = data;
-        *cspc = (struct mp_csp_details) MP_CSP_DETAILS_DEFAULTS;
-        int bt709_enabled;
-        if (vo_xv_get_eq(vo, x11->xv_port, "bt_709", &bt709_enabled))
-            cspc->format = bt709_enabled == 100 ? MP_CSP_BT_709 : MP_CSP_BT_601;
+        read_xv_csp(vo);
+        *cspc = ctx->cached_csp;
         return true;
     case VOCTRL_ONTOP:
         vo_x11_ontop(vo);
