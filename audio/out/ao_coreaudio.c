@@ -415,8 +415,8 @@ static void print_help(void)
 static int init(int rate,int channels,int format,int flags)
 {
 AudioStreamBasicDescription inDesc;
-ComponentDescription desc;
-Component comp;
+AudioComponentDescription desc;
+AudioComponent comp;
 AURenderCallbackStruct renderCallback;
 OSStatus err;
 UInt32 size, maxFrames, b_alive;
@@ -563,13 +563,13 @@ int device_id, display_help = 0;
 	desc.componentFlags = 0;
 	desc.componentFlagsMask = 0;
 
-	comp = FindNextComponent(NULL, &desc);  //Finds an component that meets the desc spec's
+	comp = AudioComponentFindNext(NULL, &desc);  //Finds an component that meets the desc spec's
 	if (comp == NULL) {
 		ao_msg(MSGT_AO, MSGL_WARN, "Unable to find Output Unit component\n");
 		goto err_out;
 	}
 
-	err = OpenAComponent(comp, &(ao->theOutputUnit));  //gains access to the services provided by the component
+	err = AudioComponentInstanceNew(comp, &(ao->theOutputUnit));  //gains access to the services provided by the component
 	if (err) {
 		ao_msg(MSGT_AO, MSGL_WARN, "Unable to open Output Unit component: [%4.4s]\n", (char *)&err);
 		goto err_out;
@@ -631,7 +631,7 @@ int device_id, display_help = 0;
 err_out2:
     AudioUnitUninitialize(ao->theOutputUnit);
 err_out1:
-    CloseComponent(ao->theOutputUnit);
+    AudioComponentInstanceDispose(ao->theOutputUnit);
 err_out:
     av_fifo_free(ao->buffer);
     free(ao);
@@ -1147,7 +1147,7 @@ static void uninit(int immed)
   if (!ao->b_digital) {
       AudioOutputUnitStop(ao->theOutputUnit);
       AudioUnitUninitialize(ao->theOutputUnit);
-      CloseComponent(ao->theOutputUnit);
+      AudioComponentInstanceDispose(ao->theOutputUnit);
   }
   else {
       /* Stop device. */
