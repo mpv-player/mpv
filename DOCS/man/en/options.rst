@@ -877,6 +877,17 @@
     disable the window manager hints that force the window aspect ratio.
     (Ignored in fullscreen mode.)
 
+--keep-open
+    Do not terminate when playing or seeking beyond the end of the file.
+    Instead, pause the player. When trying to seek beyond end of the file, the
+    player will pause at an arbitrary playback position (or, in corner cases,
+    not redraw the window at all).
+
+    *NOTE*: this option is not respected when using ``--frames``, ``--end``,
+    ``--length``, or when passing a chapter range to ``--chapter``. Explicitly
+    skipping to the next file or skipping beyond the last chapter will terminate
+    playback as well, even if ``--keep-open`` is given.
+
 --key-fifo-size=<2-65000>
     Specify the size of the FIFO that buffers key events (default: 7). If it
     is too small some events may be lost. The main disadvantage of setting it

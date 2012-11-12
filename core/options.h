@@ -77,6 +77,7 @@ typedef struct MPOpts {
     struct m_rel_time play_end;
     struct m_rel_time play_length;
     int start_paused;
+    int keep_open;
     int audio_id;
     int video_id;
     int sub_id;

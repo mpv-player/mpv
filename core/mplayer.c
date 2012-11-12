@@ -3183,6 +3183,7 @@ static void run_playloop(struct MPContext *mpctx)
         vo_new_frame_imminent(vo);
         struct sh_video *sh_video = mpctx->sh_video;
         mpctx->video_pts = sh_video->pts;
+        mpctx->last_vo_pts = mpctx->video_pts;
         update_subtitles(mpctx, sh_video->pts);
         update_osd_msg(mpctx);
         draw_osd(mpctx);
@@ -3367,6 +3368,18 @@ static void run_playloop(struct MPContext *mpctx)
     if (step_sec > 0 && !mpctx->paused && !mpctx->restart_playback) {
         mpctx->osd_function = OSD_FFW;
         queue_seek(mpctx, MPSEEK_RELATIVE, step_sec, 0);
+    }
+
+    if (opts->keep_open && mpctx->stop_play == AT_END_OF_FILE) {
+        mpctx->stop_play = KEEP_PLAYING;
+        pause_player(mpctx);
+        if (mpctx->video_out && !mpctx->video_out->hasframe) {
+            // Force screen refresh to make OSD usable
+            double seek_to = mpctx->last_vo_pts;
+            if (seek_to == MP_NOPTS_VALUE)
+                seek_to = 0; // arbitrary default
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_to, 1);
+        }
     }
 
     /* Looping. */
@@ -4019,6 +4032,7 @@ goto_enable_cache:
     mpctx->drop_message_shown = 0;
     mpctx->restart_playback = true;
     mpctx->video_pts = 0;
+    mpctx->last_vo_pts = MP_NOPTS_VALUE;
     mpctx->last_seek_pts = 0;
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;

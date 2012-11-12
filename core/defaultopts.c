@@ -39,6 +39,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .term_osd = 2,
         .consolecontrols = 1,
         .doubleclick_time = 300,
+        .keep_open = 0,
         .audio_id = -1,
         .video_id = -1,
         .sub_id = -1,

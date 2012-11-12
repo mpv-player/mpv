@@ -380,8 +380,8 @@ const m_option_t common_opts[] = {
     OPT_REL_TIME("end", play_end, 0),
     OPT_REL_TIME("length", play_length, 0),
 
-    // start paused
     OPT_FLAG_ON("pause", start_paused, 0),
+    OPT_FLAG_ON("keep-open", keep_open, 0),
 
     // AVI specific: force non-interleaved mode
     {"avi-ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1, NULL},
