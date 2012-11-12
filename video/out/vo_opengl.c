@@ -2208,7 +2208,7 @@ static int preinit(struct vo *vo, const char *arg)
     };
 
     if (subopt_parse(arg, subopts) != 0) {
-        mp_msg(MSGT_VO, MSGL_FATAL, help_text);
+        mp_msg(MSGT_VO, MSGL_FATAL, "%s", help_text);
         goto err_out;
     }
 

@@ -330,8 +330,9 @@ static CFStringRef get_cv_csp_matrix(struct vo *vo)
             return kCVImageBufferYCbCrMatrix_ITU_R_709_2;
         case MP_CSP_SMPTE_240M:
             return kCVImageBufferYCbCrMatrix_SMPTE_240M_1995;
+        default:
+            return kCVImageBufferYCbCrMatrix_ITU_R_601_4;
     }
-    return kCVImageBufferYCbCrMatrix_ITU_R_601_4;
 }
 
 static void set_yuv_colorspace(struct vo *vo)

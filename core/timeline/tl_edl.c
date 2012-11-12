@@ -322,11 +322,12 @@ void build_edl_timeline(struct MPContext *mpctx)
             else if (!parts[i].duration)
                 anything_done = true;
             parts[i].duration = duration;
-            if (duration && parts[i].src.start < 0)
+            if (duration && parts[i].src.start < 0) {
                 if (parts[i].src.end < 0)
                     missing_srcstart = i;
                 else
                     parts[i].src.start = parts[i].src.end - duration;
+            }
         }
         if (!anything_done) {
             if (missing_duration >= 0) {

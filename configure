@@ -1162,7 +1162,7 @@ if test -z "$CFLAGS" ; then
     WARNFLAGS="-wd167 -wd556 -wd144"
   elif test "$cc_vendor" = "clang"; then
     CFLAGS="$_opt $_debug $_profile $_march $_pipe"
-    WARNFLAGS="-Wall -Wno-switch-enum -Wno-logical-op-parentheses -Wpointer-arith -Wundef -Wno-pointer-sign -Wmissing-prototypes"
+    WARNFLAGS="-Wall -Wno-switch -Wno-logical-op-parentheses -Wpointer-arith -Wundef -Wno-pointer-sign -Wmissing-prototypes"
     ERRORFLAGS="-Werror=implicit-function-declaration"
   elif test "$cc_vendor" != "gnu" ; then
     CFLAGS="$_opt $_debug $_profile $_march $_mcpu $_pipe"

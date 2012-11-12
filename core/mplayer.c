@@ -1079,7 +1079,7 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
             mpctx->last_av_difference = MP_NOPTS_VALUE;
         if (mpctx->last_av_difference > 0.5 && drop_frame_cnt > 50
             && !mpctx->drop_message_shown) {
-            mp_tmsg(MSGT_AVSYNC, MSGL_WARN, mp_gtext(av_desync_help_text));
+            mp_tmsg(MSGT_AVSYNC, MSGL_WARN, "%s", mp_gtext(av_desync_help_text));
             mpctx->drop_message_shown = true;
         }
     }
@@ -3771,7 +3771,9 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->stream->start_pos += seek_to_byte;
 
     // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
+#ifdef CONFIG_DVBIN
 goto_enable_cache:
+#endif
     if (opts->stream_cache_size > 0) {
         int res = stream_enable_cache_percent(mpctx->stream,
                                               opts->stream_cache_size,

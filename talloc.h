@@ -58,7 +58,10 @@ typedef void TALLOC_CTX;
 
 /* try to make talloc_set_destructor() and talloc_steal() type safe,
    if we have a recent gcc */
-#if (__GNUC__ >= 3)
+#if defined(__clang__) && defined(__llvm__)
+#define _TALLOC_TYPEOF(ptr) void *
+#define talloc_steal(ctx, ptr) _talloc_steal((ctx),(ptr))
+#elif (__GNUC__ >= 3)
 #define _TALLOC_TYPEOF(ptr) __typeof__(ptr)
 /* this extremely strange macro is to avoid some braindamaged warning
    stupidity in gcc 4.1.x */

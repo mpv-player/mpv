@@ -188,7 +188,7 @@ static int spudec_alloc_image(spudec_handle_t *this, int stride, int height)
 
 static void setup_palette(spudec_handle_t *spu, uint32_t palette[256])
 {
-    memset(palette, 0, sizeof(palette));
+    memset(palette, 0, sizeof(*palette) * 256);
     struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
     csp.int_bits_in = 8;
     csp.int_bits_out = 8;
