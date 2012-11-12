@@ -91,9 +91,10 @@ __midentify__allprops="
 "
 # TODO add metadata support once mpv can do it
 
-__midentify__propstr="X-MIDENTIFY-START:\\n"
+__midentify__propstr="X-MIDENTIFY-START:$__midentify__LF"
 for __midentify__key in $__midentify__allprops; do
-    __midentify__propstr=$__midentify__propstr"X-MIDENTIFY: $__midentify__key \${=$__midentify__key}\\n"
+    __midentify__propstr=$__midentify__propstr"X-MIDENTIFY: $__midentify__key \${=$__midentify__key}$__midentify__LF"
+    __midentify__key=`echo "$__midentify__key" | tr - _`
     eval unset $__midentify__nextprefix$__midentify__key
 done
 
@@ -124,6 +125,7 @@ while :; do
                 __midentify__fileindex=$(($__midentify__fileindex+1))
                 __midentify__nextprefix=$__midentify__nextprefix$__midentify__fileindex\_
                 for __midentify__key in $__midentify__allprops; do
+                    __midentify__key=`echo "$__midentify__key" | tr - _`
                     eval unset $__midentify__nextprefix$__midentify__key
                 done
             else
@@ -137,6 +139,7 @@ while :; do
             __midentify__key=${__midentify__line#X-MIDENTIFY:\ }
             __midentify__value=${__midentify__key#* }
             __midentify__key=${__midentify__key%% *}
+            __midentify__key=`echo "$__midentify__key" | tr - _`
             if [ -n "$__midentify__nextprefix" ]; then
                 if [ -z "$__midentify__prefix" ]; then
                     echo >&2 "Got X-MIDENTIFY: without X-MIDENTIFY-START:"
