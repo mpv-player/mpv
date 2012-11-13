@@ -382,6 +382,7 @@ Miscellaneous options:
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --enable-static        build a statically linked binary
   --with-install=PATH    path to a custom install program
+  --disable-manpage      do not build and install manpage [auto]
 
 Advanced options:
   --enable-shm              enable shm [autodetect]
@@ -499,6 +500,7 @@ def_stream_cache="#define CONFIG_STREAM_CACHE 1"
 def_priority="#undef CONFIG_PRIORITY"
 def_pthread_cache="#undef PTHREAD_CACHE"
 need_shmem=yes
+_build_man=auto
 for ac_option do
   case "$ac_option" in
   --help|-help|-h)
@@ -732,6 +734,9 @@ for ac_option do
   --enable-sortsub) _sortsub=yes ;;
   --disable-sortsub) _sortsub=no ;;
 
+  --enable-manpage) _build_man=yes ;;
+  --disable-manpage) _build_man=no ;;
+
   *)
     echo "Unknown parameter: $ac_option" >&2
     exit 1
@@ -916,6 +921,16 @@ _rst2man=rst2man
 if [ -f "$(which rst2man.py)" ] ; then
   _rst2man=rst2man.py
 fi
+
+echocheck "whether to build manpages with rst2man"
+if test "$_build_man" = auto ; then
+    _build_man=no
+    command_check "$_rst2man" --version && _build_man=yes
+else
+    _build_man=no
+fi
+echores "$_build_man"
+
 
 TMPC="$mplayer_tmpdir/tmp.c"
 TMPCPP="$mplayer_tmpdir/tmp.cpp"
@@ -3228,6 +3243,7 @@ EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs $libs_mplaye
 GETCH = $_getch
 TIMER = $_timer
 RST2MAN = $_rst2man
+BUILD_MAN = $_build_man
 
 EXESUF      = $_exesuf
 EXESUFS_ALL = .exe

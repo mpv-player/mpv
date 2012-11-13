@@ -282,13 +282,15 @@ OBJECTS         += $(OBJECTS-yes)
 
 DEP_FILES = $(patsubst %.S,%.d,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SOURCES:.m=.d) $(SOURCES:.m=.d))))
 
-ALL_PRG         += mpv$(EXESUF)
-
-INSTALL_TARGETS += check_rst2man       \
-                   install-mpv     \
-                   install-mpv-man
+ALL_TARGETS     += mpv$(EXESUF)
 
 INSTALL_NO_MAN_TARGETS += install-mpv
+INSTALL_TARGETS = $(INSTALL_NO_MAN_TARGETS)
+
+ifeq ($(BUILD_MAN),yes)
+    INSTALL_TARGETS += install-mpv-man
+    ALL_TARGETS     += DOCS/man/en/mpv.1
+endif
 
 DIRS =  . \
         audio \
@@ -321,7 +323,7 @@ endif
 
 ###### generic rules #######
 
-all: $(ALL_PRG)
+all: $(ALL_TARGETS)
 
 %.1: %.rst
 	$(RST2MAN) $< $@
@@ -406,9 +408,6 @@ DOCS/man/en/mpv.1: DOCS/man/en/af.rst \
 
 
 ###### installation / clean / generic rules #######
-
-check_rst2man:
-	@which $(RST2MAN) > /dev/null 2>&1 || (printf "\n\trst2man not found. You need the docutils (>= 0.7) to generate the manpages. Alternatively you can use 'install-no-man' rule.\n\n" && exit 1)
 
 install: $(INSTALL_TARGETS)
 
