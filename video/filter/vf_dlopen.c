@@ -170,7 +170,7 @@ static void uninit(struct vf_instance *vf)
 {
     if (vf->priv->filter.uninit)
         vf->priv->filter.uninit(&vf->priv->filter);
-    memset(&vf->priv->filter, 0, sizeof(&vf->priv->filter));
+    memset(&vf->priv->filter, 0, sizeof(vf->priv->filter));
     if (vf->priv->dll) {
         DLLClose(vf->priv->dll);
         vf->priv->dll = NULL;
