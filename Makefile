@@ -414,9 +414,9 @@ osdep/mpv-rc.o: osdep/mpv.exe.manifest
 check_rst2man:
 	@which $(RST2MAN) > /dev/null 2>&1 || (printf "\n\trst2man not found. You need the docutils (>= 0.7) to generate the manpages. Alternatively you can use 'install-no-man' rule.\n\n" && exit 1)
 
-install: $(INSTALL_TARGETS-yes)
+install: $(INSTALL_TARGETS)
 
-install-no-man: $(INSTALL_NO_MAN_TARGETS-yes)
+install-no-man: $(INSTALL_NO_MAN_TARGETS)
 
 install-dirs:
 	if test ! -d $(BINDIR) ; then $(INSTALL) -d $(BINDIR) ; fi
