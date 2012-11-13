@@ -286,11 +286,9 @@ ALL_PRG         += mpv$(EXESUF)
 
 INSTALL_TARGETS += check_rst2man       \
                    install-mpv     \
-                   install-mpv-man \
-                   install-mpv-msg
+                   install-mpv-man
 
-INSTALL_NO_MAN_TARGETS += install-mpv  \
-                          install-mpv-msg
+INSTALL_NO_MAN_TARGETS += install-mpv
 
 DIRS =  . \
         audio \
@@ -309,8 +307,6 @@ DIRS =  . \
         video/filter \
         video/out
 
-MOFILES := $(MSG_LANGS:%=locale/%/LC_MESSAGES/mpv.mo)
-
 
 ADDSUFFIXES     = $(foreach suf,$(1),$(addsuffix $(suf),$(2)))
 ADD_ALL_DIRS    = $(call ADDSUFFIXES,$(1),$(DIRS))
@@ -325,7 +321,7 @@ endif
 
 ###### generic rules #######
 
-all: $(ALL_PRG) locales
+all: $(ALL_PRG)
 
 %.1: %.rst
 	$(RST2MAN) $< $@
@@ -392,15 +388,8 @@ version.h .version: version.sh
 %$(EXESUF): %.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-locales: $(MOFILES)
-
-locale/%/LC_MESSAGES/mpv.mo: po/%.po
-	mkdir -p $(dir $@)
-	msgfmt -c -o $@ $<
-
 %.ho: %.h
 	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
-
 
 ###### dependency declarations / specific CFLAGS ######
 
@@ -421,46 +410,26 @@ install-no-man: $(INSTALL_NO_MAN_TARGETS)
 install-dirs:
 	if test ! -d $(BINDIR) ; then $(INSTALL) -d $(BINDIR) ; fi
 	if test ! -d $(CONFDIR) ; then $(INSTALL) -d $(CONFDIR) ; fi
-	if test ! -d $(LIBDIR) ; then $(INSTALL) -d $(LIBDIR) ; fi
 
 install-%: %$(EXESUF) install-dirs
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
 
-install-mpv-man:  $(foreach lang,$(MAN_LANGS),install-mpv-man-$(lang))
-install-mpv-msg:  $(foreach lang,$(MSG_LANGS),install-mpv-msg-$(lang))
+install-mpv-man:  install-mpv-man-en
 
 install-mpv-man-en: DOCS/man/en/mpv.1
 	if test ! -d $(MANDIR)/man1 ; then $(INSTALL) -d $(MANDIR)/man1 ; fi
 	$(INSTALL) -m 644 DOCS/man/en/mpv.1 $(MANDIR)/man1/
 
-define MPLAYER_MAN_RULE
-install-mpv-man-$(lang): DOCS/man/$(lang)/mpv.1
-	if test ! -d $(MANDIR)/$(lang)/man1 ; then $(INSTALL) -d $(MANDIR)/$(lang)/man1 ; fi
-	$(INSTALL) -m 644 DOCS/man/$(lang)/mpv.1 $(MANDIR)/$(lang)/man1/
-endef
-
-$(foreach lang,$(filter-out en,$(MAN_LANG_ALL)),$(eval $(MPLAYER_MAN_RULE)))
-
-define MPLAYER_MSG_RULE
-install-mpv-msg-$(lang):
-	if test ! -d $(LOCALEDIR)/$(lang)/LC_MESSAGES ; then $(INSTALL) -d $(LOCALEDIR)/$(lang)/LC_MESSAGES ; fi
-	$(INSTALL) -m 644 locale/$(lang)/LC_MESSAGES/mpv.mo $(LOCALEDIR)/$(lang)/LC_MESSAGES/
-endef
-
-$(foreach lang,$(MSG_LANG_ALL),$(eval $(MPLAYER_MSG_RULE)))
-
 uninstall:
 	$(RM) $(BINDIR)/mpv$(EXESUF)
 	$(RM) $(MANDIR)/man1/mpv.1
-	$(RM) $(foreach lang,$(MAN_LANGS),$(foreach man,mpv.1,$(MANDIR)/$(lang)/man1/$(man)))
-	$(RM) $(foreach lang,$(MSG_LANGS),$(LOCALEDIR)/$(lang)/LC_MESSAGES/mpv.1)
+	$(RM) $(MANDIR)/en/man1/mpv.1
 
 clean:
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.d /*.a /*.ho /*~)
-	-$(RM) $(foreach lang,$(MAN_LANGS),$(foreach man,mpv.1,DOCS/man/$(lang)/$(man)))
 	-$(RM) $(call ADD_ALL_DIRS,/*.o /*.a /*.ho /*~)
 	-$(RM) $(call ADD_ALL_EXESUFS,mpv)
-	-$(RM) $(MOFILES)
+	-$(RM) DOCS/man/en/mpv.1
 	-$(RM) version.h
 	-$(RM) core/codecs.conf.h
 	-$(RM) core/input/input_conf.h
@@ -470,7 +439,6 @@ clean:
 	-$(RM) sub/osd_font.h
 
 distclean: clean
-	-$(RM) -r locale
 	-$(RM) config.log config.mak config.h TAGS tags
 
 TAGS:
@@ -484,7 +452,7 @@ osxbundle:
 
 -include $(DEP_FILES)
 
-.PHONY: all locales *install*
+.PHONY: all *install*
 .PHONY: checkheaders *clean .version
 
 # Disable suffix rules.  Most of the builtin rules are suffix rules,

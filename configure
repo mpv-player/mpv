@@ -272,10 +272,6 @@ case $(echo -n) in
   *)    _echo_n='-n '   _echo_c=        ;;      # BSD echo
 esac
 
-msg_lang_all=''
-ls po/*.po >/dev/null 2>&1 && msg_lang_all=$(echo po/*.po | sed -e 's:po/\([^[:space:]]*\)\.po:\1:g')
-man_lang_all=$(echo DOCS/man/??/mpv.1 DOCS/man/??_??/mpv.1 | sed -e "s:DOCS/man/\(..\)/mpv.1:\1:g" -e "s:DOCS/man/\(.._..\)/mpv.1:\1:g")
-doc_lang_all=$(echo DOCS/xml/??/ DOCS/xml/??_??/ | sed -e "s:DOCS/xml/\(..\)/:\1:g" -e "s:DOCS/xml/\(.._..\)/:\1:g")
 
 show_help(){
 cat << EOF
@@ -292,12 +288,9 @@ Installation directories:
   --mandir=DIR           directory for installing man pages [PREFIX/share/man]
   --confdir=DIR          directory for installing configuration files
                          [PREFIX/etc/mpv]
-  --localedir=DIR        directory for locale tree [PREFIX/share/locale]
-  --libdir=DIR           directory for object code libraries [PREFIX/lib]
-  --codecsdir=DIR        directory for binary codecs [LIBDIR/codecs]
+  --localedir=DIR        directory for gettext locales [PREFIX/share/locale]
 
 Optional features:
-  --disable-mpv          disable mpv compilation [enable]
   --disable-encoding     disable encoding functionality [enable]
   --enable-termcap       use termcap database for key codes [autodetect]
   --enable-termios       use termios database for key codes [autodetect]
@@ -378,22 +371,8 @@ Audio output:
   --disable-dsound        disable DirectSound audio output [autodetect]
   --disable-select       disable using select() on the audio device [enable]
 
-Language options:
-  --enable-translation   enable support for translated output [disable]
-  --language-doc=lang    language to use for the documentation [en]
-  --language-man=lang    language to use for the man pages [en]
-  --language-msg=lang    extra languages for program messages [all]
-  --language=lang        default language to use [en]
-Specific options override --language. You can pass a list of languages separated
-by whitespace or commas instead of a single language. Nonexisting translations
-will be dropped from each list. All translations available in the list will be
-installed. The value "all" will activate all translations. The LINGUAS
-environment variable is honored. In all cases the fallback is English.
-The program always supports English-language output; additional message
-languages are only installed if --enable-translation is also specified.
-Available values for --language-doc are: all $doc_lang_all
-Available values for --language-man are: all $man_lang_all
-Available values for --language-msg are: all $msg_lang_all
+Localization options:
+  --enable-gettext       enable gettext() usage [disable]
 
 Miscellaneous options:
   --enable-cross-compile enable cross-compilation [disable]
@@ -492,9 +471,8 @@ _apple_remote=auto
 _apple_ir=auto
 _termcap=auto
 _termios=auto
-#language=en
 _shm=auto
-_translation=no
+_gettext=no
 _cdda=auto
 _cddb=auto
 _coreaudio=auto
@@ -541,12 +519,6 @@ for ac_option do
   --confdir=*)
     _confdir=$(echo $ac_option | cut -d '=' -f 2)
     ;;
-  --libdir=*)
-    _libdir=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --codecsdir=*)
-    _codecsdir=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
   --localedir=*)
     _localedir=$(echo $ac_option | cut -d '=' -f 2)
     ;;
@@ -580,18 +552,6 @@ for ac_option do
   --windres=*)
     _windres=$(echo $ac_option | cut -d '=' -f 2)
     ;;
-  --language-doc=*)
-    language_doc=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --language-man=*)
-    language_man=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --language-msg=*)
-    language_msg=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --language=*)
-    language=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
 
   --enable-static)
     _ld_static='-static'
@@ -616,8 +576,8 @@ for ac_option do
   --disable-debug)
     _debug=
     ;;
-  --enable-translation)              _translation=yes           ;;
-  --disable-translation)             _translation=no            ;;
+  --enable-gettext)                 _gettext=yes                ;;
+  --disable-gettext)                _gettext=no                 ;;
   --enable-cross-compile)           _cross_compile=yes          ;;
   --disable-cross-compile)          _cross_compile=no           ;;
   --enable-encoding)    _encoding=yes   ;;
@@ -785,7 +745,6 @@ test -z "$_bindir"  && _bindir="$_prefix/bin"
 test -z "$_datadir" && _datadir="$_prefix/share/mpv"
 test -z "$_mandir"  && _mandir="$_prefix/share/man"
 test -z "$_confdir" && _confdir="$_prefix/etc/mpv"
-test -z "$_libdir"  && _libdir="$_prefix/lib"
 test -z "$_localedir"  && _localedir="$_prefix/share/locale"
 
 for tmpdir in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
@@ -1271,54 +1230,13 @@ else
 fi
 
 
-echocheck "translation support"
-if test "$_translation" = yes; then
-  def_translation="#define CONFIG_TRANSLATION 1"
+echocheck "gettext support"
+if test "$_gettext" = yes; then
+  def_gettext="#define CONFIG_GETTEXT 1"
 else
-  def_translation="#undef CONFIG_TRANSLATION"
+  def_gettext="#undef CONFIG_GETTEXT"
 fi
-echores "$_translation"
-
-echocheck "language"
-# Set preferred languages, "all" uses English as main language.
-test -z "$language" && language=$LINGUAS
-test -z "$language_doc" && language_doc=$language
-test -z "$language_man" && language_man=$language
-test -z "$language_msg" && language_msg=$language
-test -z "$language_msg" && language_msg="all"
-language_doc=$(echo $language_doc | tr , " ")
-language_man=$(echo $language_man | tr , " ")
-language_msg=$(echo $language_msg | tr , " ")
-
-test "$language_doc" = "all" && language_doc=$doc_lang_all
-test "$language_man" = "all" && language_man=$man_lang_all
-test "$language_msg" = "all" && language_msg=$msg_lang_all
-
-if test "$_translation" != yes ; then
-  language_msg=""
-fi
-
-# Prune non-existing translations from language lists.
-# Set message translation to the first available language.
-# Fall back on English.
-for lang in $language_doc ; do
-  test -d DOCS/xml/$lang && tmp_language_doc="$tmp_language_doc $lang"
-done
-language_doc=$tmp_language_doc
-test -z "$language_doc" && language_doc=en
-
-for lang in $language_man ; do
-  test -d DOCS/man/$lang && tmp_language_man="$tmp_language_man $lang"
-done
-language_man=$tmp_language_man
-test -z "$language_man" && language_man=en
-
-for lang in $language_msg ; do
-  test -f po/$lang.po && tmp_language_msg="$tmp_language_msg $lang"
-done
-language_msg=$tmp_language_msg
-
-echores "messages (en+): $language_msg - man pages: $language_man - documentation: $language_doc"
+echores "$_gettext"
 
 
 echocheck "__builtin_expect"
@@ -2910,22 +2828,6 @@ test "$_libbs2b" = yes && def_libbs2b="#define CONFIG_LIBBS2B 1"
 echores "$_libbs2b"
 
 
-if test -z "$_codecsdir" ; then
-  for dir in "$_libdir/codecs" "$_libdir/win32" /usr/local/lib/codecs \
-             /usr/lib/codecs /usr/local/lib/win32 /usr/lib/win32 ; do
-    if test -d "$dir" ; then
-      _codecsdir="$dir"
-      break;
-    fi;
-  done
-fi
-# Fall back on default directory.
-if test -z "$_codecsdir" ; then
-  _codecsdir="$_libdir/codecs"
-  mingw32 && _codecsdir="codecs"
-fi
-
-
 echocheck "LCMS2 support"
 if test "$_lcms2" = auto ; then
     _lcms2=no
@@ -3304,17 +3206,9 @@ export LC_ALL = C
 
 CONFIGURATION = $configuration
 
-DOC_LANGS = $language_doc
-DOC_LANG_ALL = $doc_lang_all
-MAN_LANGS = $language_man
-MAN_LANG_ALL = $man_lang_all
-MSG_LANGS = $language_msg
-MSG_LANG_ALL = $msg_lang_all
-
 prefix  = \$(DESTDIR)$_prefix
 BINDIR  = \$(DESTDIR)$_bindir
 DATADIR = \$(DESTDIR)$_datadir
-LIBDIR  = \$(DESTDIR)$_libdir
 MANDIR  = \$(DESTDIR)$_mandir
 CONFDIR = \$(DESTDIR)$_confdir
 LOCALEDIR = \$(DESTDIR)$_localedir
@@ -3457,7 +3351,7 @@ cat > $TMPH << EOF
 #define MPLAYER_CONFDIR "$_confdir"
 #define MPLAYER_LOCALEDIR "$_localedir"
 
-$def_translation
+$def_gettext
 
 
 /* system headers */
@@ -3658,11 +3552,6 @@ Config files successfully generated by ./configure $configuration !
   Install prefix: $_prefix
   Data directory: $_datadir
   Config direct.: $_confdir
-
-  Languages:
-    Messages (in addition to English): $language_msg
-    Manual pages: $language_man
-    Documentation: $language_doc
 
   Enabled optional drivers:
     Input: $inputmodules

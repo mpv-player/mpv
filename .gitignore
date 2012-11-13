@@ -14,8 +14,6 @@
 /core/input/input_conf.h
 /tags
 /TAGS
-/locale
-/po
 /video/out/vo_opengl_shaders.h
 /video/out/vdpau_template.c
 /demux/ebml_defs.c
