@@ -388,8 +388,6 @@ version.h .version: version.sh
 %$(EXESUF): %.c
 	$(CC) $(CFLAGS) -o $@ $^
 
-%.ho: %.h
-	$(CC) $(CFLAGS) -Wno-unused -c -o $@ -x c $<
 
 ###### dependency declarations / specific CFLAGS ######
 
@@ -452,8 +450,7 @@ osxbundle:
 
 -include $(DEP_FILES)
 
-.PHONY: all *install*
-.PHONY: checkheaders *clean .version
+.PHONY: all *install* *clean .version
 
 # Disable suffix rules.  Most of the builtin rules are suffix rules,
 # so this saves some time on slow systems.
