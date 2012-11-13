@@ -395,6 +395,15 @@ core/version.c osdep/mpv-rc.o: version.h
 
 osdep/mpv-rc.o: osdep/mpv.exe.manifest
 
+DOCS/man/en/mpv.1: DOCS/man/en/af.rst \
+                   DOCS/man/en/ao.rst \
+                   DOCS/man/en/changes.rst \
+                   DOCS/man/en/encode.rst \
+                   DOCS/man/en/input.rst \
+                   DOCS/man/en/options.rst \
+                   DOCS/man/en/vf.rst \
+                   DOCS/man/en/vo.rst
+
 
 ###### installation / clean / generic rules #######
 
