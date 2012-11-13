@@ -457,6 +457,8 @@ nop_streaming_seek( int fd, off_t pos, streaming_ctrl_t *stream_ctrl ) {
 
 void fixup_network_stream_cache(stream_t *stream) {
   struct MPOpts *opts = stream->opts;
+  if(!opts)
+    return;
   if(stream->streaming_ctrl->buffering) {
     if(opts->stream_cache_size<0) {
       // cache option not set, will use our computed value.
