@@ -3314,13 +3314,25 @@ static void run_playloop(struct MPContext *mpctx)
                                   mpctx->stop_play == PT_NEXT_ENTRY)) {
         mp_msg(MSGT_CPLAYER, MSGL_V, "loop_times = %d\n", opts->loop_times);
 
+        int stop_reason = mpctx->stop_play;
+
         if (opts->loop_times > 1)
             opts->loop_times--;
         else if (opts->loop_times == 1)
             opts->loop_times = -1;
         play_n_frames = play_n_frames_mf;
         mpctx->stop_play = 0;
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->seek_to_sec, 0);
+        mpctx->seek = (struct seek_params) {0};
+        struct seek_params sp = {
+            .type = MPSEEK_ABSOLUTE,
+            .amount = opts->seek_to_sec,
+            .exact = 1,
+        };
+        if (seek(mpctx, sp, false) != 0) {
+            mp_msg(MSGT_CPLAYER, MSGL_ERR, "Can't loop an unseekable file.\n");
+            opts->loop_times = -1;
+            mpctx->stop_play = stop_reason;
+        }
     }
 
     if (mpctx->seek.type) {
