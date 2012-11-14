@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "compat/libav.h"
 #include "core/mp_common.h"
 #include "core/options.h"
 #include "video/fmt-conversion.h"

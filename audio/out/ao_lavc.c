@@ -26,6 +26,7 @@
 #include <libavutil/common.h>
 #include <libavutil/audioconvert.h>
 
+#include "compat/libav.h"
 #include "config.h"
 #include "core/options.h"
 #include "core/mp_common.h"

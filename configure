@@ -2860,7 +2860,7 @@ echores "$_lcms2"
 
 # Test with > against Libav 0.8 versions which will NOT work rather than
 # specify minimum version, to allow (future) point releases to possibly work.
-all_libav_libs="libavutil > 51.26.0:libavcodec > 54.00.0:libavformat > 53.20.0:libswscale >= 2.0.0"
+all_libav_libs="libavutil > 51.22.0:libavcodec >= 53.35.0:libavformat > 53.20.0:libswscale >= 2.0.0"
 echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
   IFS=":"   # shell should not be used for programming
@@ -2869,6 +2869,15 @@ if test "$ffmpeg" = auto ; then
   fi
 fi
 echores "yes"
+
+
+echocheck "Libav 0.8 compatibility hack"
+if test "$_encoding" = yes && $_pkg_config "libavcodec >= 54.0.0" ; then
+    echores "no"
+else
+    _encoding=no
+    echores "yes"
+fi
 
 
 echocheck "libpostproc >= 52.0.0"
