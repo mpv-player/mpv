@@ -102,7 +102,17 @@
 #define IMGFMT_BGR_DEPTH(fmt) ((fmt)&0x3F)
 
 // AV_PIX_FMT_BGR0
-#define IMGFMT_BGR0 0x1DC70000
+#define IMGFMT_BGR0  0x1DC70000
+// AV_PIX_FMT_GRAY16LE
+#define IMGFMT_Y16LE 0x1DC70001
+// AV_PIX_FMT_GRAY16BE
+#define IMGFMT_Y16BE 0x1DC70002
+
+#if BYTE_ORDER == BIG_ENDIAN
+#define IMGFMT_Y16 IMGFMT_Y16BE
+#else
+#define IMGFMT_Y16 IMGFMT_Y16LE
+#endif
 
 /* Planar YUV Formats */
 
@@ -170,8 +180,8 @@
 #endif
 
 // These macros are misnamed - they actually match 9, 10 or 16 bits
-#define IMGFMT_IS_YUVP16_LE(fmt) (((fmt - 0x51000034) & 0xfc0000ff) == 0)
-#define IMGFMT_IS_YUVP16_BE(fmt) (((fmt - 0x34000051) & 0xff0000fc) == 0)
+#define IMGFMT_IS_YUVP16_LE(fmt) (((fmt - 0x51000034) & 0xfc0000ff) == 0 || fmt == IMGFMT_Y16LE)
+#define IMGFMT_IS_YUVP16_BE(fmt) (((fmt - 0x34000051) & 0xff0000fc) == 0 || fmt == IMGFMT_Y16BE)
 #define IMGFMT_IS_YUVP16(fmt)    (IMGFMT_IS_YUVP16_LE(fmt) || IMGFMT_IS_YUVP16_BE(fmt))
 
 /* Packed YUV Formats */

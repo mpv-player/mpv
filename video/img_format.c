@@ -103,6 +103,12 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift,
             xs = 31;
             ys = 31;
             break;
+        case IMGFMT_Y16BE:
+        case IMGFMT_Y16LE:
+            bits = 16;
+            xs = 31;
+            ys = 31;
+            break;
         default:
             err = 1;
             break;
@@ -164,6 +170,9 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     {"hm12", IMGFMT_HM12},
     {"y800", IMGFMT_Y800},
     {"y8", IMGFMT_Y8},
+    {"y16ne", IMGFMT_Y16},
+    {"y16le", IMGFMT_Y16LE},
+    {"y16be", IMGFMT_Y16BE},
     {"nv12", IMGFMT_NV12},
     {"nv21", IMGFMT_NV21},
     {"bgr24", IMGFMT_BGR24},

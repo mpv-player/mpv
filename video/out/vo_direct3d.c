@@ -49,8 +49,6 @@
 
 
 // TODO: beg someone to add this (there is already IMGFMT_Y8)
-// equals MAKEFOURCC('Y', '1', '6', ' ')
-#define IMGFMT_Y16 0x20363159
 #define IMGFMT_A8Y8 MAKEFOURCC('A', '8', 'Y', '8')
 
 #define IMGFMT_IS_Y(x) ((x) == IMGFMT_Y8 || (x) == IMGFMT_Y16 || (x) == IMGFMT_A8Y8)

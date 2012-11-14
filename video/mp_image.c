@@ -193,6 +193,8 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	return;
     case IMGFMT_Y800:
     case IMGFMT_Y8:
+    case IMGFMT_Y16LE:
+    case IMGFMT_Y16BE:
 	/* they're planar ones, but for easier handling use them as packed */
 	mpi->flags&=~MP_IMGFLAG_PLANAR;
 	mpi->num_planes=1;
