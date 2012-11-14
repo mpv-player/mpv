@@ -415,7 +415,6 @@ install-no-man: $(INSTALL_NO_MAN_TARGETS)
 
 install-dirs:
 	if test ! -d $(BINDIR) ; then $(INSTALL) -d $(BINDIR) ; fi
-	if test ! -d $(CONFDIR) ; then $(INSTALL) -d $(CONFDIR) ; fi
 
 install-%: %$(EXESUF) install-dirs
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
