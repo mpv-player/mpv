@@ -1126,10 +1126,6 @@ echocheck "assembler support of -pipe option"
 cflag_check -pipe -I. && _pipe="-pipe" && echores "yes" || echores "no"
 
 # Checking for CFLAGS
-_install_strip="-s"
-if test "$_profile" != "" || test "$_debug" != "" ; then
-  _install_strip=
-fi
 if test -z "$CFLAGS" ; then
   if test "$cc_vendor" = "intel" ; then
     CFLAGS="$_opt $_debug $_profile $_march $_mcpu $_pipe -fomit-frame-pointer"
@@ -3240,7 +3236,6 @@ LOCALEDIR = \$(DESTDIR)$_localedir
 CC      = $_cc
 CXX     = $_cc
 INSTALL = $_install
-INSTALLSTRIP = $_install_strip
 WINDRES = $_windres
 
 CFLAGS   = $WARNFLAGS $ERRORFLAGS $WARN_CFLAGS $CFLAGS $extra_cflags

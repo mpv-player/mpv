@@ -284,12 +284,13 @@ DEP_FILES = $(patsubst %.S,%.d,$(patsubst %.cpp,%.d,$(patsubst %.c,%.d,$(SOURCES
 
 ALL_TARGETS     += mpv$(EXESUF)
 
-INSTALL_NO_MAN_TARGETS += install-mpv
-INSTALL_TARGETS = $(INSTALL_NO_MAN_TARGETS)
+INSTALL_BIN     += install-mpv
+INSTALL_BIN_STRIP += install-mpv-strip
+INSTALL_MAN      =
 
 ifeq ($(BUILD_MAN),yes)
-    INSTALL_TARGETS += install-mpv-man
-    ALL_TARGETS     += DOCS/man/en/mpv.1
+    INSTALL_MAN += install-mpv-man
+    ALL_TARGETS += DOCS/man/en/mpv.1
 endif
 
 DIRS =  . \
@@ -409,15 +410,19 @@ DOCS/man/en/mpv.1: DOCS/man/en/af.rst \
 
 ###### installation / clean / generic rules #######
 
-install: $(INSTALL_TARGETS)
-
-install-no-man: $(INSTALL_NO_MAN_TARGETS)
+install:               $(INSTALL_BIN)       $(INSTALL_MAN)
+install-no-man:        $(INSTALL_BIN)
+install-strip:         $(INSTALL_BIN_STRIP) $(INSTALL_MAN)
+install-strip-no-man:  $(INSTALL_BIN_STRIP)
 
 install-dirs:
 	if test ! -d $(BINDIR) ; then $(INSTALL) -d $(BINDIR) ; fi
 
 install-%: %$(EXESUF) install-dirs
-	$(INSTALL) -m 755 $(INSTALLSTRIP) $< $(BINDIR)
+	$(INSTALL) -m 755 $< $(BINDIR)
+
+install-%-strip: %$(EXESUF) install-dirs
+	$(INSTALL) -m 755 -s $< $(BINDIR)
 
 install-mpv-man:  install-mpv-man-en
 
