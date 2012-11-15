@@ -162,7 +162,6 @@ struct gl_priv {
     int swap_interval;
     GLint fbo_format;
     int stereo_mode;
-    int osd_color;
 
     struct gl_priv *defaults;
     struct gl_priv *orig_cmdline;
@@ -484,15 +483,6 @@ static void update_uniforms(struct gl_priv *p, GLuint program)
     float sparam1 = p->scaler_params[0];
     gl->Uniform1f(gl->GetUniformLocation(program, "filter_param1"),
                   isnan(sparam1) ? 0.5f : sparam1);
-
-    loc = gl->GetUniformLocation(program, "osd_color");
-    if (loc >= 0) {
-        int r = (p->osd_color >> 16) & 0xff;
-        int g = (p->osd_color >> 8) & 0xff;
-        int b = p->osd_color & 0xff;
-        int a = 0xff - (p->osd_color >> 24);
-        gl->Uniform4f(loc, r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f);
-    }
 
     gl->UseProgram(0);
 
@@ -2096,7 +2086,6 @@ static bool reparse_cmdline(struct gl_priv *p, char *arg)
         {"pbo",                 OPT_ARG_BOOL,   &opt->use_pbo},
         {"glfinish",            OPT_ARG_BOOL,   &opt->use_glFinish},
         {"swapinterval",        OPT_ARG_INT,    &opt->swap_interval},
-        {"osdcolor",            OPT_ARG_INT,    &opt->osd_color},
         {"lscale",              OPT_ARG_MSTRZ,  &scalers[0], scaler_valid},
         {"cscale",              OPT_ARG_MSTRZ,  &scalers[1], scaler_valid},
         {"lparam1",             OPT_ARG_FLOAT,  &opt->scaler_params[0]},
@@ -2129,7 +2118,6 @@ static bool reparse_cmdline(struct gl_priv *p, char *arg)
     p->use_pbo = opt->use_pbo;
     p->use_glFinish = opt->use_glFinish;
     p->swap_interval = opt->swap_interval;
-    p->osd_color = opt->osd_color;
     memcpy(p->scaler_params, opt->scaler_params, sizeof(p->scaler_params));
     p->use_fancy_downscaling = opt->use_fancy_downscaling;
     p->use_indirect = opt->use_indirect;
@@ -2154,7 +2142,6 @@ static int preinit(struct vo *vo, const char *arg)
         .use_npot = 1,
         .use_pbo = hq,
         .swap_interval = vo_vsync,
-        .osd_color = 0xffffff,
         .dither_depth = hq ? 0 : -1,
         .fbo_format = hq ? GL_RGB16 : GL_RGB,
         .use_scale_sep = 1,
@@ -2184,7 +2171,6 @@ static int preinit(struct vo *vo, const char *arg)
         {"pbo",                 OPT_ARG_BOOL,   &p->use_pbo},
         {"glfinish",            OPT_ARG_BOOL,   &p->use_glFinish},
         {"swapinterval",        OPT_ARG_INT,    &p->swap_interval},
-        {"osdcolor",            OPT_ARG_INT,    &p->osd_color},
         {"stereo",              OPT_ARG_INT,    &p->stereo_mode},
         {"lscale",              OPT_ARG_MSTRZ,  &scalers[0], scaler_valid},
         {"cscale",              OPT_ARG_MSTRZ,  &scalers[1], scaler_valid},
@@ -2323,8 +2309,6 @@ static const char help_text[] =
 "     kaiser: (defaults: 6.33 6.33)\n"
 "     sharpen3: lparam1 sets sharpening strength (default: 0.5)\n"
 "     sharpen5: as with sharpen3\n"
-"  osdcolor=<0xAARRGGBB>\n"
-"    Use the given color for the OSD.\n"
 "  stereo=<n>\n"
 "    0: normal display\n"
 "    1: side-by-side to red-cyan stereo\n"

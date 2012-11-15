@@ -306,9 +306,6 @@ opengl
     lparam2=<value>
         See ``lparam1``.
 
-    osdcolor=<0xAARRGGBB>
-        Use the given color for the OSD.
-
     stereo=<value>
         Select a method for stereo display. You may have to use ``--aspect`` to
         fix the aspect value. Experimental, do not expect too much from it.
@@ -495,9 +492,6 @@ opengl-old
         much better with FreeType fonts and uses the borders in fullscreen
         mode. Does not work correctly with ass subtitles (see ``--ass``), you
         can instead render them without OpenGL support via ``--vf=ass``.
-    osdcolor=<0xAARRGGBB>
-        Color for OSD (default: 0x00ffffff, corresponds to non-transparent
-        white).
     rectangle=<0,1,2>
         Select usage of rectangular textures which saves video RAM, but often
         is slower (default: 0).
