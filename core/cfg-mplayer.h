@@ -489,7 +489,8 @@ const m_option_t common_opts[] = {
     OPT_MAKE_FLAGS("slices", vd_use_slices, 0),
     // use (probably completely broken) decoder direct rendering
     OPT_MAKE_FLAGS("dr1", vd_use_dr1, 0),
-    {"field-dominance", &field_dominance, CONF_TYPE_INT, CONF_RANGE, -1, 1, NULL},
+    {"field-dominance", &field_dominance, CONF_TYPE_CHOICE, 0,
+     M_CHOICES(({"auto", -1}, {"top", 0}, {"bottom", 1}))},
 
     {"lavdopts", (void *) lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     {"lavfdopts", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},

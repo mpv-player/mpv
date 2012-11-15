@@ -528,15 +528,14 @@
     reliable enough), the filename extension is used to select the demuxer.
     Always falls back on content-based demuxer selection.
 
---field-dominance=<-1-1>
+--field-dominance=<auto|top|bottom>
     Set first field for interlaced content. Useful for deinterlacers that
-    double the framerate: ``--vf=tfields=1``, ``--vf=yadif=1`` and
-    ``--vo=vdpau:deint``.
+    double the framerate: ``--vf=yadif=1`` and ``--vo=vdpau:deint``.
 
-    :-1: auto (default): If the decoder does not export the appropriate
-         information, it falls back to 0 (top field first).
-    :0:  top field first
-    :1:  bottom field first
+    :auto:    (default) If the decoder does not export the appropriate
+              information, it falls back to 0 (top field first).
+    :top:     top field first
+    :bottom:  bottom field first
 
 --no-fixed-vo, --fixed-vo
     ``--no-fixed-vo`` enforces closing and reopening the video window for
