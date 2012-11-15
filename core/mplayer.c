@@ -943,15 +943,15 @@ static void add_dvd_tracks(struct MPContext *mpctx)
 #endif
 }
 
-void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
-                   int noerr)
+struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
+                               float fps, int noerr)
 {
     struct MPOpts *opts = &mpctx->opts;
     sub_data *subd = NULL;
     struct sh_sub *sh = NULL;
 
     if (filename == NULL)
-        return;
+        return NULL;
 
     if (opts->ass_enabled) {
 #ifdef CONFIG_ASS
@@ -976,7 +976,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
     if (!sh && !subd) {
         mp_tmsg(MSGT_CPLAYER, noerr ? MSGL_WARN : MSGL_ERR,
                 "Cannot load subtitles: %s\n", filename);
-        return;
+        return NULL;
     }
 
     struct track *track = talloc_ptrtype(NULL, track);
@@ -988,8 +988,10 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
         .is_external = true,
         .sh_sub = talloc_steal(track, sh),
         .subdata = talloc_steal(track, subd),
+        .external_filename = talloc_strdup(track, filename),
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
+    return track;
 }
 
 void init_vo_spudec(struct MPContext *mpctx)
@@ -1983,12 +1985,40 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid)
 {
+    if (tid == -1)
+        return mpctx->current_track[type];
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
         if (track->type == type && track->user_tid == tid)
             return track;
     }
     return NULL;
+}
+
+bool mp_remove_track(struct MPContext *mpctx, struct track *track)
+{
+    if (track->under_timeline)
+        return false;
+    if (!track->is_external)
+        return false;
+
+    if (mpctx->current_track[track->type] == track) {
+        mp_switch_track(mpctx, track->type, NULL);
+        if (mpctx->current_track[track->type] == track)
+            return false;
+    }
+
+    int index = 0;
+    while (index < mpctx->num_tracks && mpctx->tracks[index] != track)
+        index++;
+    assert(index < mpctx->num_tracks);
+    while (index + 1 < mpctx->num_tracks) {
+        mpctx->tracks[index] = mpctx->tracks[index + 1];
+        index++;
+    }
+    mpctx->num_tracks--;
+    talloc_free(track);
+    return true;
 }
 
 /* Modify video timing to match the audio timeline. There are two main
@@ -3540,13 +3570,13 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
     double sub_fps = mpctx->sh_video ? mpctx->sh_video->fps : 25;
     if (mpctx->opts.sub_name) {
         for (int i = 0; mpctx->opts.sub_name[i] != NULL; ++i)
-            add_subtitles(mpctx, mpctx->opts.sub_name[i], sub_fps, 0);
+            mp_add_subtitles(mpctx, mpctx->opts.sub_name[i], sub_fps, 0);
     }
     if (mpctx->opts.sub_auto) { // auto load sub file ...
         char **tmp = find_text_subtitles(&mpctx->opts, mpctx->filename);
         int nsub = MP_TALLOC_ELEMS(tmp);
         for (int i = 0; i < nsub; i++)
-            add_subtitles(mpctx, tmp[i], sub_fps, 1);
+            mp_add_subtitles(mpctx, tmp[i], sub_fps, 1);
         talloc_free(tmp);
     }
 }
@@ -3596,6 +3626,7 @@ static void open_external_file(struct MPContext *mpctx, char *filename,
             struct track *t = add_stream_track(mpctx, stream, false);
             t->is_external = true;
             t->title = talloc_strdup(t, filename);
+            t->external_filename = talloc_strdup(t, filename);
             num_added++;
         }
     }

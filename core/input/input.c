@@ -144,7 +144,9 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_PRINT_TEXT, "print_text", { ARG_STRING } },
   { MP_CMD_SHOW_TEXT, "show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
   { MP_CMD_SHOW_PROGRESS, "show_progress", },
-  { MP_CMD_SUB_LOAD, "sub_load", { ARG_STRING } },
+  { MP_CMD_SUB_ADD, "sub_add", { ARG_STRING } },
+  { MP_CMD_SUB_REMOVE, "sub_remove", { OARG_INT(-1) } },
+  { MP_CMD_SUB_RELOAD, "sub_reload", { OARG_INT(-1) } },
 
   { MP_CMD_TV_START_SCAN, "tv_start_scan", },
   { MP_CMD_TV_STEP_CHANNEL, "tv_step_channel", { ARG_INT } },
@@ -231,6 +233,7 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"saturation",              "add saturation"},
     {"hue",                     "add hue"},
     {"switch_vsync",            "cycle vsync"},
+    {"sub_load",                "sub_add"},
     {"sub_select",              "cycle sub"},
     {"sub_pos",                 "add sub-pos"},
     {"sub_delay",               "add sub-delay"},

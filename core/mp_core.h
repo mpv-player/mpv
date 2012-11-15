@@ -100,6 +100,7 @@ struct track {
 
     // If this track is from an external file (e.g. subtitle file).
     bool is_external;
+    char *external_filename;
 
     // If the track's stream changes with the timeline (ordered chapters).
     bool under_timeline;
@@ -274,7 +275,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask);
 void reinit_audio_chain(struct MPContext *mpctx);
 void init_vo_spudec(struct MPContext *mpctx);
 double playing_audio_pts(struct MPContext *mpctx);
-void add_subtitles(struct MPContext *mpctx, char *filename, float fps, int noerr);
+struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
+                               float fps, int noerr);
 int reinit_video_chain(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);
@@ -294,6 +296,7 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
                      struct track *track);
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);
+bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 
 // timeline/tl_matroska.c
 void build_ordered_chapter_timeline(struct MPContext *mpctx);

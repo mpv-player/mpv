@@ -158,9 +158,19 @@ run "<command>"
 quit [<code>]
     Exit the player using the given exit code.
 
-sub_load "<file>"
+sub_add "<file>"
     Load the given subtitle file. It's not selected as current subtitle after
     loading.
+
+sub_remove [<id>]
+    Remove the given subtitle track. If the ``id`` argument is missing, remove
+    the current track. (Works on external subtitle files only.)
+
+sub_reload [<id>]
+    Reload the given subtitle tracks. If the ``id`` argument is missing, remove
+    the current track. (Works on external subtitle files only.)
+
+    This works by unloading and re-adding the subtitle track.
 
 sub_step <skip>
     Change subtitle timing such, that the subtitle event after the next <skip>

@@ -2205,11 +2205,32 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 #endif /* CONFIG_TV */
 
-    case MP_CMD_SUB_LOAD:
+    case MP_CMD_SUB_ADD:
         if (sh_video) {
-            add_subtitles(mpctx, cmd->args[0].v.s, sh_video->fps, 0);
+            mp_add_subtitles(mpctx, cmd->args[0].v.s, sh_video->fps, 0);
         }
         break;
+
+    case MP_CMD_SUB_REMOVE: {
+        struct track *sub = mp_track_by_tid(mpctx, STREAM_SUB, cmd->args[0].v.i);
+        if (sub)
+            mp_remove_track(mpctx, sub);
+        break;
+    }
+
+    case MP_CMD_SUB_RELOAD: {
+        struct track *sub = mp_track_by_tid(mpctx, STREAM_SUB, cmd->args[0].v.i);
+        if (sh_video && sub && sub->is_external && sub->external_filename)
+        {
+            struct track *nsub = mp_add_subtitles(mpctx, sub->external_filename,
+                                                  sh_video->fps, 0);
+            if (nsub) {
+                mp_remove_track(mpctx, sub);
+                mp_switch_track(mpctx, nsub->type, nsub);
+            }
+        }
+        break;
+    }
 
     case MP_CMD_SCREENSHOT:
         screenshot_request(mpctx, cmd->args[0].v.i, cmd->args[1].v.i);
