@@ -1675,6 +1675,23 @@ double playing_audio_pts(struct MPContext *mpctx)
     return pts - mpctx->opts.playback_speed *ao_get_delay(mpctx->ao);
 }
 
+// When reading subtitles from a demuxer, and we don't read video or audio
+// from the demuxer, we must explicitly read subtitle packets. (Normally,
+// subs are interleaved with video and audio, so we get them automatically.)
+static bool is_non_interleaved(struct MPContext *mpctx, struct track *track)
+{
+    if (track->is_external || !track->demuxer)
+        return true;
+
+    struct demuxer *demuxer = track->demuxer;
+    for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+        struct track *other = mpctx->current_track[type];
+        if (other != track && other->demuxer && other->demuxer == demuxer)
+            return false;
+    }
+    return true;
+}
+
 static void reset_subtitles(struct MPContext *mpctx)
 {
     if (mpctx->sh_sub)
@@ -1765,7 +1782,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 spudec_assemble(vo_spudec, packet, len, timestamp);
         }
     } else if (d_sub && (is_text_sub(type) || (sh_sub && sh_sub->active))) {
-        bool non_interleaved = track->is_external; // if demuxing subs only
+        bool non_interleaved = is_non_interleaved(mpctx, track);
         if (non_interleaved)
             ds_get_next_pts(d_sub);
 

@@ -693,12 +693,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     mp_msg(MSGT_HEADER, MSGL_V, "LAVF: build %d\n", LIBAVFORMAT_BUILD);
     demuxer->audio->id = -2;  // wait for higher-level code to select track
     if (!priv->video_streams) {
-        if (!priv->audio_streams) {
-            mp_msg(MSGT_HEADER, MSGL_ERR,
-                   "LAVF: no audio or video headers found - broken file?\n");
-            return NULL;
-        }
-        demuxer->video->id = -2; // audio-only
+        demuxer->video->id = -2; // audio-only / sub-only
     }
 
     // disabled because unreliable per-stream bitrate values returned
