@@ -435,8 +435,7 @@
 
 --cookies-file=<filename>
     (network only)
-    Read HTTP cookies from <filename> (default: ``~/.mozilla/`` and
-    ``~/.netscape/``) and skip reading from default locations. The file is
+    Read HTTP cookies from <filename>. The file is
     assumed to be in Netscape format.
 
 --correct-pts, --no-correct-pts

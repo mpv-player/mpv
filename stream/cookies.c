@@ -181,52 +181,13 @@ static struct cookie_list_type *load_cookies_from(const char *filename,
     return list;
 }
 
-/* Attempt to load cookies.txt from various locations. Returns a pointer to the linked list contain the cookies. */
+/* Attempt to load cookies.txt. Returns a pointer to the linked list contain the cookies. */
 static struct cookie_list_type *load_cookies(void)
 {
-    DIR *dir;
-    struct dirent *ent;
-    struct cookie_list_type *list = NULL;
-    char *buf;
-
-    char *homedir;
-
     if (cookies_file)
-	return load_cookies_from(cookies_file, list);
+	return load_cookies_from(cookies_file, NULL);
 
-    homedir = getenv("HOME");
-    if (!homedir)
-	return list;
-
-
-    buf = malloc(strlen(homedir) + sizeof("/.mozilla/default") + 1);
-    sprintf(buf, "%s/.mozilla/default", homedir);
-    dir = opendir(buf);
-    free(buf);
-
-    if (dir) {
-	while ((ent = readdir(dir)) != NULL) {
-	    if ((ent->d_name)[0] != '.') {
-		const char *home = getenv("HOME");
-		unsigned len = strlen(home) +
-		               sizeof("/.mozilla/default/") +
-		               strlen(ent->d_name) + sizeof("cookies.txt") + 1;
-		buf = malloc(len);
-		snprintf(buf, len, "%s/.mozilla/default/%s/cookies.txt",
-			 home, ent->d_name);
-		list = load_cookies_from(buf, list);
-		free(buf);
-	    }
-	}
-	closedir(dir);
-    }
-
-    buf = malloc(strlen(homedir) + sizeof("/.netscape/cookies.txt") + 1);
-    sprintf(buf, "%s/.netscape/cookies.txt", homedir);
-    list = load_cookies_from(buf, list);
-    free(buf);
-
-    return list;
+    return NULL;
 }
 
 /* Take an HTTP_header_t, and insert the correct headers. The cookie files are read if necessary. */
