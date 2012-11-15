@@ -175,6 +175,7 @@ struct m_sub_options {
 #define CONF_TYPE_OBJ_PARAMS    (&m_option_type_obj_params)
 #define CONF_TYPE_TIME          (&m_option_type_time)
 #define CONF_TYPE_TIME_SIZE     (&m_option_type_time_size)
+#define CONF_TYPE_CHOICE        (&m_option_type_choice)
 
 // Possible option values. Code is allowed to access option data without going
 // through this union. It serves for self-documentation and to get minimal

@@ -104,6 +104,7 @@ Command line switches
     -forcedsubsonly                     --sub-forced-only
     -ni                                 --avi-ni
     -benchmark                          --untimed (no stats)
+    -xineramascreen                     --screen (different values)
     =================================== ===================================
 
 input.conf and slave commands

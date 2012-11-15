@@ -694,8 +694,8 @@
     border". If an external window is specified using the ``--wid`` option,
     then the x and y coordinates are relative to the top-left corner of the
     window rather than the screen. The coordinates are relative to the screen
-    given with ``--xineramascreen`` for the video output drivers that fully
-    support ``--xineramascreen`` (direct3d, gl, vdpau, x11, xv, corevideo).
+    given with ``--screen`` for the video output drivers that fully
+    support ``--screen``.
 
     *NOTE*: May not be supported by some of the older VO drivers.
 
@@ -2151,19 +2151,17 @@
     Scale image to width <width> (if software/hardware scaling is available).
     Disables aspect calculations.
 
---xineramascreen=<-2-...>
-    In Xinerama configurations (i.e. a single desktop that spans across
+--screen=<all|current|0-32>
+    In multi-monitor configurations (i.e. a single desktop that spans across
     multiple displays) this option tells mpv which screen to display the
-    movie on. A value of -2 means fullscreen across the whole virtual display
-    (in this case Xinerama information is completely ignored), -1 means
+    movie on. A value of ``all?? means fullscreen across the whole virtual display
+    (in this case system provided information is completely ignored), ``current`` means
     fullscreen on the display the window currently is on. The initial position
     set via the ``--geometry`` option is relative to the specified screen.
     Will usually only work with ``--fstype=-fullscreen`` or ``--fstype=none``.
     This option is not suitable to only set the startup screen (because it
     will always display on the given screen in fullscreen mode),
     ``--geometry`` is the best that is available for that purpose currently.
-    Supported by at least the direct3d, gl, x11, xv and corevideo video output
-    drivers.
 
 --xy=<value>
 

@@ -636,7 +636,8 @@ const m_option_t mplayer_opts[]={
     {"heartbeat-cmd", &heartbeat_cmd, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"mouseinput", &vo_nomouse_input, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
-    {"xineramascreen", &xinerama_screen, CONF_TYPE_INT, CONF_RANGE, -2, 32, NULL},
+    {"screen", &xinerama_screen, CONF_TYPE_CHOICE, CONF_RANGE,
+     .min = 0, .max = 32, M_CHOICES(({"all", -2}, {"current", -1}))},
 
     OPT_INTRANGE("brightness", vo_gamma_brightness, 0, -100, 100),
     OPT_INTRANGE("saturation", vo_gamma_saturation, 0, -100, 100),
