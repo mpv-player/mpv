@@ -1722,6 +1722,10 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
 
 static int parse_config_file(struct input_ctx *ictx, char *file)
 {
+    if (!mp_path_exists(file)) {
+        mp_msg(MSGT_INPUT, MSGL_V, "Input config file %s missing.\n", file);
+        return 0;
+    }
     stream_t *s = open_stream(file, NULL, NULL);
     if (!s) {
         mp_msg(MSGT_INPUT, MSGL_V, "Can't open input config file %s.\n", file);
