@@ -1,6 +1,8 @@
 #ifndef MPLAYER_OPTIONS_H
 #define MPLAYER_OPTIONS_H
 
+#include "core/m_option.h"
+
 typedef struct MPOpts {
     char **video_driver_list;
     char **audio_driver_list;
@@ -69,7 +71,9 @@ typedef struct MPOpts {
     int consolecontrols;
     int doubleclick_time;
     int list_properties;
-    double seek_to_sec;
+    struct m_rel_time play_start;
+    struct m_rel_time play_end;
+    struct m_rel_time play_length;
     int start_paused;
     int audio_id;
     int video_id;

@@ -165,7 +165,7 @@ static const char help_text[] = _(
 "Usage:   mpv [options] [url|path/]filename\n"
 "\n"
 "Basic options: (complete list in the man page)\n"
-" --ss=<position>   seek to given (seconds or hh:mm:ss) position\n"
+" --start=<time>    seek to given (percent, seconds, or hh:mm:ss) position\n"
 " --no-audio        do not play sound\n"
 " --no-video        do not play video\n"
 " --fs              fullscreen playback\n"
@@ -207,8 +207,6 @@ static int drop_frame_cnt; // total number of dropped frames
 // seek:
 static int64_t seek_to_byte;
 static double step_sec;
-
-static m_time_size_t end_at = { .type = END_AT_NONE, .pos = 0 };
 
 // codecs:
 char **audio_codec_list; // override audio codec
@@ -256,6 +254,39 @@ static float get_relative_time(struct MPContext *mpctx)
     unsigned int delta = new_time - mpctx->last_time;
     mpctx->last_time = new_time;
     return delta * 0.000001;
+}
+
+static double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t,
+                              double fallback_time)
+{
+    double length = get_time_length(mpctx);
+    switch (t.type) {
+    case REL_TIME_ABSOLUTE:
+        return t.pos;
+    case REL_TIME_NEGATIVE:
+        if (length != 0)
+            return FFMAX(length - t.pos, 0.0);
+        break;
+    case REL_TIME_PERCENT:
+        if (length != 0)
+            return length * (t.pos / 100.0);
+        break;
+    }
+    return fallback_time;
+}
+
+static double get_play_end_pts(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    if (opts->play_end.type) {
+        return rel_time_to_abs(mpctx, opts->play_end, MP_NOPTS_VALUE);
+    } else if (opts->play_length.type) {
+        double start = rel_time_to_abs(mpctx, opts->play_start, -1);
+        double length = rel_time_to_abs(mpctx, opts->play_length, -1);
+        if (start != -1 && length != -1)
+            return start + length;
+    }
+    return MP_NOPTS_VALUE;
 }
 
 static void print_stream(struct MPContext *mpctx, struct track *t, int id)
@@ -1138,17 +1169,20 @@ static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
     }
 
 #ifdef CONFIG_ENCODING
-    float position = (get_current_time(mpctx) - opts->seek_to_sec) /
-                     (get_time_length(mpctx) - opts->seek_to_sec);
-    if (end_at.type == END_AT_TIME)
-        position = max(position, (get_current_time(mpctx) - opts->seek_to_sec)
-                               / (end_at.pos - opts->seek_to_sec));
+    double startpos = rel_time_to_abs(mpctx, opts->play_start, 0);
+    double endpos = rel_time_to_abs(mpctx, opts->play_end, -1);
+    float position = (get_current_time(mpctx) - startpos) /
+                     (get_time_length(mpctx) - startpos);
+    if (endpos != -1)
+        position = max(position, (get_current_time(mpctx) - startpos)
+                               / (endpos - startpos));
     if (play_n_frames_mf)
         position = max(position,
                        1.0 - play_n_frames / (double) play_n_frames_mf);
     char lavcbuf[80];
     if (encode_lavc_getstatus(mpctx->encode_lavc_ctx, lavcbuf, sizeof(lavcbuf),
-            position, get_current_time(mpctx) - opts->seek_to_sec) >= 0) {
+            position, get_current_time(mpctx) - startpos) >= 0)
+    {
         // encoding stats
         saddf(line, width, "%s ", lavcbuf);
     } else
@@ -2970,7 +3004,7 @@ static void run_playloop(struct MPContext *mpctx)
     struct MPOpts *opts = &mpctx->opts;
     bool full_audio_buffers = false;
     bool audio_left = false, video_left = false;
-    double endpts = end_at.type == END_AT_TIME ? end_at.pos : MP_NOPTS_VALUE;
+    double endpts = get_play_end_pts(mpctx);
     bool end_is_chapter = false;
     double sleeptime = WAKEUP_PERIOD;
     bool was_restart = mpctx->restart_playback;
@@ -3325,7 +3359,7 @@ static void run_playloop(struct MPContext *mpctx)
         mpctx->seek = (struct seek_params) {0};
         struct seek_params sp = {
             .type = MPSEEK_ABSOLUTE,
-            .amount = opts->seek_to_sec,
+            .amount = rel_time_to_abs(mpctx, opts->play_start, 0),
             .exact = 1,
         };
         if (seek(mpctx, sp, false) != 0) {
@@ -3963,10 +3997,10 @@ goto_enable_cache:
     mpctx->last_chapter_seek = -2;
 
     // If there's a timeline force an absolute seek to initialize state
-    if (opts->seek_to_sec || mpctx->timeline) {
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, opts->seek_to_sec, 0);
+    double startpos = rel_time_to_abs(mpctx, opts->play_start, -1);
+    if (startpos != -1 || mpctx->timeline) {
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, 0);
         seek(mpctx, mpctx->seek, false);
-        end_at.pos += opts->seek_to_sec;
     }
     if (opts->chapterrange[0] > 0) {
         double pts;
@@ -3975,12 +4009,6 @@ goto_enable_cache:
             queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, 0);
             seek(mpctx, mpctx->seek, false);
         }
-    }
-
-    if (end_at.type == END_AT_SIZE) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_WARN,
-                "Option -endpos in mpv does not yet support size units.\n");
-        end_at.type = END_AT_NONE;
     }
 
     mpctx->seek = (struct seek_params){ 0 };

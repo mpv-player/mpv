@@ -336,7 +336,7 @@
 
 --chapter=<start[-end]>
     Specify which chapter to start playing at. Optionally specify which
-    chapter to end playing at (default: 1).
+    chapter to end playing at. Also see ``--start``.
 
 --chapter-merge-threshold=<number>
     Threshold for merging almost consecutive ordered chapter parts in
@@ -518,20 +518,9 @@
     enabled). These fonts can be used for SSA/ASS subtitle rendering
     (``--ass`` option).
 
---endpos=<[[hh:]mm:]ss[.ms]>
-    Stop at given time.
-
-    *NOTE*: When used in conjunction with ``--ss`` option, ``--endpos`` time
-    will shift forward by seconds specified with ``--ss``.
-
-    *EXAMPLE*:
-
-    ``--endpos=56``
-        Stop at 56 seconds.
-    ``--endpos=01:10:00``
-        Stop at 1 hour 10 minutes.
-    ``--ss=10 --endpos=56``
-        Stop at 1 minute 6 seconds.
+--end=<relative time>
+    Stop at given absolute time. See ``--start`` for valid option values and
+    examples.
 
 --no-extbased, --extbased
     ``--no-extbased`` disables extension-based demuxer selection. By default, when the file type
@@ -1057,6 +1046,10 @@
         Encryption key the demuxer should use. This is the raw binary data of
         the key converted to a hexadecimal string.
 
+--length=<relative time>
+    Stop after a given time relative to the start time.
+    See ``--start`` for valid option values and examples.
+
 --lirc, --no-lirc
     Enable/disable LIRC support. Enabled by default.
 
@@ -1515,7 +1508,7 @@
 
 --sb=<n>
     Seek to byte position. Useful for playback from CD-ROM images or VOB files
-    with junk at the beginning. See also ``--ss``.
+    with junk at the beginning. See also ``--start``.
 
 --screenshot-format=<type>
     Set the image file type used for saving screenshots.
@@ -1685,15 +1678,27 @@
     inserted into the audio filter layer to compensate for the difference. The
     type of resampling can be controlled by the ``--af-adv`` option.
 
---ss=<time>
+--start=<relative time>
     Seek to given time position.
+
+    The general format for absolute times is ``[[hh:]mm:]ss[.ms]``. If the time
+    is negated with ``-``, the seek is relative from the end of the file.
+
+    It's also possible to seek to a percent position with ``pp%``.
 
     *EXAMPLE*:
 
-    ``--ss=56``
+    ``--start=56``
         Seeks to 56 seconds.
-    ``--ss=01:10:00``
+    ``--start=01:10:00``
         Seeks to 1 hour 10 min.
+    ``--start=50%``
+        Seeks to the middle of the file.
+    ``--start=30 --end=40``
+        Seeks to 30 seconds, plays 10 seconds, and exits.
+    ``--start=-3:20 --length=10``
+        Seeks to 3 minutes and 20 seconds before the end of the file, plays
+        10 seconds, and exits.
 
 --ssf=<mode>
     Specifies software scaler parameters.

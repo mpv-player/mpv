@@ -376,13 +376,12 @@ const m_option_t common_opts[] = {
 
     // seek to byte/seconds position
     {"sb", &seek_to_byte, CONF_TYPE_INT64, CONF_MIN, 0, 0, NULL},
-    OPT_TIME("ss", seek_to_sec, 0),
+    OPT_REL_TIME("start", play_start, 0),
+    OPT_REL_TIME("end", play_end, 0),
+    OPT_REL_TIME("length", play_length, 0),
 
     // start paused
     OPT_FLAG_ON("pause", start_paused, 0),
-
-    // stop at given position
-    {"endpos", &end_at, CONF_TYPE_TIME_SIZE, 0, 0, 0, NULL},
 
     // AVI specific: force non-interleaved mode
     {"avi-ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1, NULL},

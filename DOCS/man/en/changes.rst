@@ -105,6 +105,8 @@ Command line switches
     -ni                                 --avi-ni
     -benchmark                          --untimed (no stats)
     -xineramascreen                     --screen (different values)
+    -ss                                 --start
+    -endpos                             --length
     =================================== ===================================
 
 input.conf and slave commands

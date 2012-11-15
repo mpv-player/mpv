@@ -359,7 +359,7 @@ static bool parse_pls(play_tree_parser_t* p) {
       mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding entry %s\n",entries[num].file);
       playlist_add_file(p->pl,entries[num].file);
       if (entries[num].length)
-          playlist_entry_add_param(p->pl->last,  bstr0("endpos"), bstr0(entries[num].length));
+          playlist_entry_add_param(p->pl->last,  bstr0("end"), bstr0(entries[num].length));
       free(entries[num].file);
     }
     // When we have info in playtree we add these info

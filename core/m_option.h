@@ -44,7 +44,7 @@ extern const m_option_type_t m_option_type_double;
 extern const m_option_type_t m_option_type_string;
 extern const m_option_type_t m_option_type_string_list;
 extern const m_option_type_t m_option_type_time;
-extern const m_option_type_t m_option_type_time_size;
+extern const m_option_type_t m_option_type_rel_time;
 extern const m_option_type_t m_option_type_choice;
 
 extern const m_option_type_t m_option_type_print;
@@ -58,13 +58,17 @@ extern const m_option_type_t m_option_type_afmt;
 // Callback used by m_option_type_print_func options.
 typedef int (*m_opt_func_full_t)(const m_option_t *, const char *, const char *);
 
-#define END_AT_NONE   0
-#define END_AT_TIME   1
-#define END_AT_SIZE   2
-typedef struct {
+enum m_rel_time_type {
+    REL_TIME_NONE,
+    REL_TIME_ABSOLUTE,
+    REL_TIME_NEGATIVE,
+    REL_TIME_PERCENT,
+};
+
+struct m_rel_time {
     double pos;
-    int type;
-} m_time_size_t;
+    enum m_rel_time_type type;
+};
 
 // Extra definition needed for \ref m_option_type_obj_settings_list options.
 typedef struct {
@@ -174,7 +178,6 @@ struct m_sub_options {
 #define CONF_TYPE_CUSTOM_URL    (&m_option_type_custom_url)
 #define CONF_TYPE_OBJ_PARAMS    (&m_option_type_obj_params)
 #define CONF_TYPE_TIME          (&m_option_type_time)
-#define CONF_TYPE_TIME_SIZE     (&m_option_type_time_size)
 #define CONF_TYPE_CHOICE        (&m_option_type_choice)
 
 // Possible option values. Code is allowed to access option data without going
@@ -193,7 +196,7 @@ union m_option_value {
     m_span_t span;
     m_obj_settings_t *obj_settings_list;
     double time;
-    m_time_size_t time_size;
+    struct m_rel_time rel_time;
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -506,6 +509,7 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_CHOICE_OR_INT(...) OPT_CHOICE_OR_INT_(__VA_ARGS__, .type = &m_option_type_choice)
 #define OPT_CHOICE_OR_INT_(optname, varname, flags, minval, maxval, choices, ...) OPT_GENERAL(optname, varname, (flags) | CONF_RANGE, .min = minval, .max = maxval, M_CHOICES(choices), __VA_ARGS__)
 #define OPT_TIME(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_time)
+#define OPT_REL_TIME(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_rel_time)
 
 #define OPT_TRACKCHOICE(name, var) OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))
 

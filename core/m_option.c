@@ -1248,60 +1248,49 @@ const m_option_type_t m_option_type_time = {
 };
 
 
-// Time or size (-endpos)
+// Relative time
 
-static int parse_time_size(const m_option_t *opt, struct bstr name,
-                           struct bstr param, void *dst)
+static int parse_rel_time(const m_option_t *opt, struct bstr name,
+                          struct bstr param, void *dst)
 {
-    m_time_size_t ts;
-    char unit[4];
-    double end_at;
+    struct m_rel_time t = {0};
 
     if (param.len == 0)
         return M_OPT_MISSING_PARAM;
 
-    ts.pos = 0;
-    /* End at size parsing */
-    if (bstr_sscanf(param, "%lf%3s", &end_at, unit) == 2) {
-        ts.type = END_AT_SIZE;
-        if (!strcasecmp(unit, "b"))
-            ;
-        else if (!strcasecmp(unit, "kb"))
-            end_at *= 1024;
-        else if (!strcasecmp(unit, "mb"))
-            end_at *= 1024 * 1024;
-        else if (!strcasecmp(unit, "gb"))
-            end_at *= 1024 * 1024 * 1024;
-        else
-            ts.type = END_AT_NONE;
-
-        if (ts.type == END_AT_SIZE) {
-            ts.pos  = end_at;
+    // Percent pos
+    double percent;
+    if (bstr_sscanf(param, "%lf%%", &percent) == 1) {
+        if (percent >= 0 && percent <= 100) {
+            t.type = REL_TIME_PERCENT;
+            t.pos = percent;
             goto out;
         }
     }
 
-    /* End at time parsing. This has to be last because the parsing accepts
-     * even a number followed by garbage */
-    if (!parse_timestring(param, &end_at, 0)) {
-        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-               "Option %.*s: invalid time or size: '%.*s'\n",
-               BSTR_P(name), BSTR_P(param));
-        return M_OPT_INVALID;
+    double sign = bstr_eatstart0(&param, "-") ? -1 : +1;
+    double time;
+    if (parse_timestring(param, &time, 0)) {
+        t.type = sign ? REL_TIME_NEGATIVE : REL_TIME_ABSOLUTE;
+        t.pos = time;
+        goto out;
     }
 
-    ts.type = END_AT_TIME;
-    ts.pos  = end_at;
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+           "Option %.*s: invalid time or size: '%.*s'\n",
+           BSTR_P(name), BSTR_P(param));
+    return M_OPT_INVALID;
+
 out:
     if (dst)
-        *(m_time_size_t *)dst = ts;
+        *(struct m_rel_time *)dst = t;
     return 1;
 }
 
-const m_option_type_t m_option_type_time_size = {
-    .name  = "Time or size",
-    .size  = sizeof(m_time_size_t),
-    .parse = parse_time_size,
+const m_option_type_t m_option_type_rel_time = {
+    .name  = "Relative time or percent position",
+    .size  = sizeof(struct m_rel_time),
+    .parse = parse_rel_time,
     .copy  = copy_opt,
 };
 
