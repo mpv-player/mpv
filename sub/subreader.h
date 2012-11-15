@@ -91,7 +91,6 @@ void subcp_close (void); /* for demux_ogg.c */
 const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *preferred_language, const char *fallback);
 const char* guess_cp(struct stream *st, const char *preferred_language, const char *fallback);
 #endif
-void sub_free( sub_data * subd );
 struct MPContext;
 void find_sub(struct MPContext *mpctx, sub_data* subd,int key);
 void step_sub(sub_data *subd, float pts, int movement);

@@ -1374,6 +1374,8 @@ const char* guess_cp(stream_t *st, const char *preferred_language, const char *f
 #undef MAX_GUESS_BUFFER_SIZE
 #endif
 
+static int sub_destroy(void *ptr);
+
 sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
 {
     int utf16;
@@ -1758,7 +1760,8 @@ if ((suboverlap_enabled == 2) ||
     return_sub = first;
 }
     if (return_sub == NULL) return NULL;
-    subt_data = malloc(sizeof(sub_data));
+    subt_data = talloc_zero(NULL, sub_data);
+    talloc_set_destructor(subt_data, sub_destroy);
     subt_data->filename = strdup(filename);
     subt_data->sub_uses_time = uses_time;
     subt_data->sub_num = sub_num;
@@ -1767,18 +1770,16 @@ if ((suboverlap_enabled == 2) ||
     return subt_data;
 }
 
-void sub_free( sub_data * subd )
+static int sub_destroy(void *ptr)
 {
+    sub_data *subd = ptr;
     int i, j;
-
-    if ( !subd ) return;
-
     for (i = 0; i < subd->sub_num; i++)
         for (j = 0; j < subd->subtitles[i].lines; j++)
             free( subd->subtitles[i].text[j] );
     free( subd->subtitles );
     free( subd->filename );
-    free( subd );
+    return 0;
 }
 
 #define MAX_SUBLINE 512

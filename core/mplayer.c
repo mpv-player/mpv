@@ -530,10 +530,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     if (mask & INITIALIZED_DEMUXER) {
         mpctx->initialized_flags &= ~INITIALIZED_DEMUXER;
         for (int i = 0; i < mpctx->num_tracks; i++) {
-            struct track *track = mpctx->tracks[i];
-            sub_free(track->subdata);
-            talloc_free(track->sh_sub);
-            talloc_free(track);
+            talloc_free(mpctx->tracks[i]);
         }
         mpctx->num_tracks = 0;
         for (int t = 0; t < STREAM_TYPE_COUNT; t++)
@@ -965,7 +962,7 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
             subd = sub_read_file(filename, fps, &mpctx->opts);
             if (subd) {
                 asst = mp_ass_read_subdata(mpctx->ass_library, opts, subd, fps);
-                sub_free(subd);
+                talloc_free(subd);
                 subd = NULL;
             }
         }
@@ -989,8 +986,8 @@ void add_subtitles(struct MPContext *mpctx, char *filename, float fps,
         .user_tid = find_new_tid(mpctx, STREAM_SUB),
         .demuxer_id = -1,
         .is_external = true,
-        .sh_sub = sh,
-        .subdata = subd,
+        .sh_sub = talloc_steal(track, sh),
+        .subdata = talloc_steal(track, subd),
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
 }
