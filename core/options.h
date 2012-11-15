@@ -95,7 +95,6 @@ typedef struct MPOpts {
     float playback_speed;
     float drc_level;
     struct m_obj_settings *vf_settings;
-    int softzoom;
     float movie_aspect;
     float screen_size_xy;
     int flip;

@@ -51,14 +51,13 @@ static int config(struct vf_instance *vf,
     }
 
     const vo_info_t *info = video_out->driver->info;
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "VO: [%s] %dx%d => %dx%d %s %s%s%s\n",
            info->short_name,
            width, height,
            d_width, d_height,
            vo_format_name(outfmt),
            (flags & VOFLAG_FULLSCREEN) ? " [fs]" : "",
            (flags & VOFLAG_MODESWITCHING) ? " [vm]" : "",
-           (flags & VOFLAG_SWSCALE) ? " [zoom]" : "",
            (flags & VOFLAG_FLIPPING) ? " [flip]" : "");
     mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Description: %s\n", info->name);
     mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Author: %s\n", info->author);

@@ -2174,6 +2174,3 @@
 --y=<height>
     Scale image to height <height> (if software/hardware scaling is available).
     Disables aspect calculations.
-
---zoom
-    Useful for ``--vo=x11`` only. Enables scaling.

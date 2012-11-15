@@ -35,7 +35,6 @@
 #include "video/sws_utils.h"
 
 #include "video/csputils.h"
-// VOFLAG_SWSCALE
 #include "video/out/vo.h"
 
 #include "core/m_option.h"
@@ -191,7 +190,6 @@ static int config(struct vf_instance *vf,
 	unsigned int flags, unsigned int outfmt){
     struct MPOpts *opts = vf->opts;
     unsigned int best=find_best_out(vf, outfmt);
-    int vo_flags;
     int int_sws_flags=0;
     int round_w=0, round_h=0;
     int i;
@@ -208,32 +206,10 @@ static int config(struct vf_instance *vf,
     if (outfmt == IMGFMT_RGB8 || outfmt == IMGFMT_BGR8) sfmt = PIX_FMT_PAL8;
     dfmt = imgfmt2pixfmt(best);
 
-    vo_flags=vf->next->query_format(vf->next,best);
+    vf->next->query_format(vf->next,best);
 
     vf->priv->w = vf->priv->cfg_w;
     vf->priv->h = vf->priv->cfg_h;
-
-    // scaling to dwidth*d_height, if all these TRUE:
-    // - option -zoom
-    // - no other sw/hw up/down scaling avail.
-    // - we're after postproc
-    // - user didn't set w:h
-    if(!(vo_flags&VFCAP_POSTPROC) && (flags&VOFLAG_SWSCALE) &&
-	    vf->priv->w<0 && vf->priv->h<0){	// -zoom
-	int x=(vo_flags&VFCAP_SWSCALE) ? 0 : 1;
-	if(d_width<width || d_height<height){
-	    // downscale!
-	    if(vo_flags&VFCAP_HWSCALE_DOWN) x=0;
-	} else {
-	    // upscale:
-	    if(vo_flags&VFCAP_HWSCALE_UP) x=0;
-	}
-	if(x){
-	    // user wants sw scaling! (-zoom)
-	    vf->priv->w=d_width;
-	    vf->priv->h=d_height;
-	}
-    }
 
     if (vf->priv->w <= -8) {
       vf->priv->w += 8;
@@ -615,8 +591,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
 	flags=vf_next_query_format(vf,best);
 	if(!(flags&(VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW))) return 0; // huh?
 	if(fmt!=best) flags&=~VFCAP_CSP_SUPPORTED_BY_HW;
-	// do not allow scaling, if we are before the PP fliter!
-	if(!(flags&VFCAP_POSTPROC)) flags|=VFCAP_SWSCALE;
 	return flags;
     }
     return 0;	// nomatching in-fmt

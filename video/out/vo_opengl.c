@@ -1673,8 +1673,7 @@ static bool init_format(int fmt, struct gl_priv *init)
 static int query_format(uint32_t format)
 {
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP |
-               VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE |
-               VFCAP_OSD;
+               VFCAP_ACCEPT_STRIDE | VFCAP_OSD;
     if (!init_format(format, NULL))
         return 0;
     return caps;

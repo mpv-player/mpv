@@ -269,7 +269,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     int vm = flags & VOFLAG_MODESWITCHING;
 #endif
     p->Flip_Flag = flags & VOFLAG_FLIPPING;
-    p->zoomFlag = flags & VOFLAG_SWSCALE;
+    p->zoomFlag = 1;
 
     p->old_vo_dwidth = -1;
     p->old_vo_dheight = -1;
@@ -507,10 +507,10 @@ static int query_format(struct vo *vo, uint32_t format)
             return 0;           // TODO 8bpp not yet fully implemented
         if (IMGFMT_BGR_DEPTH(format) == vo->x11->depthonscreen)
             return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
-                   VFCAP_OSD | VFCAP_SWSCALE | VFCAP_FLIP |
+                   VFCAP_OSD | VFCAP_FLIP |
                    VFCAP_ACCEPT_STRIDE;
         else
-            return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE |
+            return VFCAP_CSP_SUPPORTED | VFCAP_OSD |
                    VFCAP_FLIP |
                    VFCAP_ACCEPT_STRIDE;
     }
@@ -519,7 +519,7 @@ static int query_format(struct vo *vo, uint32_t format)
     case IMGFMT_I420:
     case IMGFMT_IYUV:
     case IMGFMT_YV12:
-        return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE |
+        return VFCAP_CSP_SUPPORTED | VFCAP_OSD |
                VFCAP_ACCEPT_STRIDE;
     }
     return 0;

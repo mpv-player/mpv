@@ -130,8 +130,7 @@ static int query_format(struct vo *vo, uint32_t fmt)
     // always wants RGB (at least for now), but it probably doesn't matter
     // whether we or screenshot.c do the conversion.
     if (av_format != PIX_FMT_NONE && sws_isSupportedInput(av_format))
-        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
-               VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
+        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     return 0;
 }
 

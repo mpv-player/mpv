@@ -1218,8 +1218,7 @@ static int query_format(d3d_priv *priv, uint32_t movie_fmt)
     if (!init_rendering_mode(priv, movie_fmt, false))
         return 0;
 
-    int osd_caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
-                 | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
+    int osd_caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     if (!priv->opt_disable_osd)
         osd_caps |= VFCAP_OSD;
     return osd_caps;

@@ -479,7 +479,7 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 static int query_format(struct xvctx *ctx, uint32_t format)
 {
     uint32_t i;
-    int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_ACCEPT_STRIDE;       // FIXME! check for DOWN
+    int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD | VFCAP_ACCEPT_STRIDE;       // FIXME! check for DOWN
 
     /* check image formats */
     for (i = 0; i < ctx->formats; i++) {

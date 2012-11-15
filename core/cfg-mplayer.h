@@ -480,7 +480,6 @@ const m_option_t common_opts[] = {
     // scaling:
     {"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
     {"ssf", (void *) scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-    OPT_MAKE_FLAGS("zoom", softzoom, 0),
     OPT_FLOATRANGE("aspect", movie_aspect, 0, 0.1, 10.0),
     OPT_FLAG_CONSTANTS("no-aspect", movie_aspect, 0, 0, 0),
     OPT_FLOATRANGE("xy", screen_size_xy, 0, 0.001, 4096),

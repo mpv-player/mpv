@@ -832,7 +832,7 @@ static int query_format(struct vo *vo, uint32_t format)
 
     int depth;
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP |
-               VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
+               VFCAP_ACCEPT_STRIDE;
     if (p->use_osd)
         caps |= VFCAP_OSD;
     if (format == IMGFMT_RGB24 || format == IMGFMT_RGBA)

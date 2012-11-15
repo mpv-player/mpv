@@ -216,7 +216,6 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h,
 
     vocfg_flags = (opts->fullscreen ? VOFLAG_FULLSCREEN : 0)
         | (opts->vidmode ? VOFLAG_MODESWITCHING : 0)
-        | (opts->softzoom ? VOFLAG_SWSCALE : 0)
         | (opts->flip ? VOFLAG_FLIPPING : 0);
 
     // Time to config libvo!
