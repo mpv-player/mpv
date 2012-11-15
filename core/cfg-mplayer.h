@@ -570,7 +570,11 @@ const m_option_t mplayer_opts[]={
                 {"auto", SOFTVOL_AUTO})),
     OPT_FLOATRANGE("softvol-max", softvol_max, 0, 10, 10000),
     {"volstep", &volstep, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-    {"volume", &start_volume, CONF_TYPE_FLOAT, CONF_RANGE, -1, 10000, NULL},
+    OPT_FLOATRANGE("volume", mixer_init_volume, 0, -1, 10000),
+    OPT_CHOICE("mute", mixer_init_mute, 0,
+               ({"auto", -1},
+                {"no", 0},
+                {"yes", 1})),
     OPT_MAKE_FLAGS("gapless-audio", gapless_audio, 0),
     // override audio buffer size (used only by -ao oss/win32, obsolete)
     OPT_INT("abs", ao_buffersize, 0),

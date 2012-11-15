@@ -13,6 +13,8 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .fixed_vo = 1,
         .softvol = SOFTVOL_AUTO,
         .softvol_max = 200,
+        .mixer_init_volume = -1,
+        .mixer_init_mute = -1,
         .ao_buffersize = -1,
         .vo_wintitle = "mpv - ${media-title}",
         .monitor_pixel_aspect = 1.0,

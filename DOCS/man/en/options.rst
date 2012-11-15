@@ -1158,6 +1158,10 @@
 --msgmodule
     Prepend module name in front of each console message.
 
+--mute=<auto|yes|no>
+    Set startup audio mute status. ``auto`` (default) will not change the mute
+    status. Also see ``--volume``.
+
 --name
     Set the window class name for X11-based video output methods.
 

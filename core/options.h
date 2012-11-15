@@ -11,6 +11,8 @@ typedef struct MPOpts {
     char *mixer_device;
     char *mixer_channel;
     int softvol;
+    float mixer_init_volume;
+    int mixer_init_mute;
     float softvol_max;
     int gapless_audio;
     int ao_buffersize;

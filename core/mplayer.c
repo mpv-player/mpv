@@ -103,7 +103,6 @@
 
 int slave_mode = 0;
 int enable_mouse_movements = 0;
-float start_volume = -1;
 
 #include "osdep/priority.h"
 
@@ -3947,8 +3946,11 @@ goto_enable_cache:
             audio_delay += mpctx->sh_video->stream_delay;
     }
     if (mpctx->sh_audio) {
-        if (start_volume >= 0)
-            mixer_setvolume(&mpctx->mixer, start_volume, start_volume);
+        if (opts->mixer_init_volume >= 0)
+            mixer_setvolume(&mpctx->mixer, opts->mixer_init_volume,
+                            opts->mixer_init_volume);
+        if (opts->mixer_init_mute >= 0)
+            mixer_setmute(&mpctx->mixer, opts->mixer_init_mute);
         if (!ignore_start)
             audio_delay -= mpctx->sh_audio->stream_delay;
     }
