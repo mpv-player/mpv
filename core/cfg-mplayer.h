@@ -320,7 +320,7 @@ const m_option_t common_opts[] = {
     // -v is handled in command line preparser
     {"v", NULL, CONF_TYPE_FLAG, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
     {"msglevel", (void *) msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
-    {"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+    {"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL | CONF_PRE_PARSE, 0, 1, NULL},
     {"msgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 #ifdef CONFIG_PRIORITY
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
