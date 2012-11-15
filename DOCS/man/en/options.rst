@@ -361,7 +361,7 @@
     options --colormatrix-input-range and --colormatrix-output-range.
 
     These options are not always supported. Different video outputs provide
-    varying degrees of support. The gl and vdpau video output drivers usually
+    varying degrees of support. The opengl and vdpau video output drivers usually
     offer full support. The xv output can set the color space if the system
     video driver supports it, but not input and output levels. The scale video
     filter can configure color space and input levels, but only if the output
@@ -472,7 +472,7 @@
 
     ``--display=xtest.localdomain:0``
 
---doubleclick-time
+--doubleclick-time=<milliseconds>
     Time in milliseconds to recognize two consecutive button presses as a
     double-click (default: 300).
 
@@ -543,9 +543,8 @@
     ``--ss=10 --endpos=56``
         Stop at 1 minute 6 seconds.
 
---extbased, --no-extbased
-    Enabled by default.
-    Disables extension-based demuxer selection. By default, when the file type
+--no-extbased, --extbased
+    ``--no-extbased`` disables extension-based demuxer selection. By default, when the file type
     (demuxer) cannot be detected reliably (the file has no header or it is not
     reliable enough), the filename extension is used to select the demuxer.
     Always falls back on content-based demuxer selection.
@@ -560,12 +559,9 @@
     :0:  top field first
     :1:  bottom field first
 
---fixed-vo, --no-fixed-vo
-    ``--fixed-vo`` enforces a fixed video system for multiple files (one
-    (un)initialization for all files). Therefore only one window will be
-    opened for all files. Now enabled by default, use ``--no-fixed-vo`` to
-    disable and create a new window whenever the video stream changes. Some of
-    the older drivers may not be *fixed-vo* compliant.
+--no-fixed-vo, --fixed-vo
+    ``--no-fixed-vo`` enforces closing and reopening the video window for
+    multiple files (one (un)initialization for all files).
 
 --flip
     Flip image upside-down.
@@ -621,8 +617,7 @@
 --frames=<number>
     Play/convert only first <number> frames, then quit.
 
---fullscreen
---fs
+--fullscreen, --fs
     Fullscreen playback (centers movie, and paints black bands around it).
 
 --fsmode-dontuse=<0-31>
@@ -818,6 +813,7 @@
     size for VOBsub subtitles.
 
 --ignore-start
+    Matters with the builtin AVI demuxer only, which is not enabled by default.
     Ignore the specified starting time for streams in AVI files. This
     nullifies stream delays.
 
@@ -891,14 +887,10 @@
 --joystick, --no-joystick
     Enable/disable joystick support. Enabled by default.
 
---keepaspect, --no-keepaspect
-    Keep window aspect ratio when resizing windows. Enabled by default. By
-    default mpv tries to keep the correct video aspect ratio by
-    instructing the window manager to maintain window aspect when resizing,
-    and by adding black bars if the window manager nevertheless allows window
-    shape to change. --no-keepaspect disables window manager aspect hints and
-    scales the video to completely fill the window without regard for aspect
-    ratio.
+--no-keepaspect, --keepaspect
+    --no-keepaspect will always stretch the video to window size, and will
+    disable the window manager hints that force the window aspect ratio.
+    (Ignored in fullscreen mode.)
 
 --key-fifo-size=<2-65000>
     Specify the size of the FIFO that buffers key events (default: 7). If it
@@ -1146,8 +1138,8 @@
     Enabled by default. Disable mouse button press/release input
     (mozplayerxp's context menu relies on this option).
 
---msgcolor
-    Enable colorful console output on terminals that support ANSI color.
+--no-msgcolor
+    Disable colorful console output on terminals.
 
 --msglevel=<module1=level1:module2=level2:...>
     Control verbosity directly for each module. The *all* module changes the
@@ -1253,7 +1245,8 @@
 
 --overlapsub
     Allows the next subtitle to be displayed while the current one is still
-    visible (default is to enable the support only for specific formats).
+    visible (default is to enable the support only for specific formats). This
+    only matters for subtitles loaded with ``-sub``.
 
 --panscan=<0.0-1.0>
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9
@@ -1828,7 +1821,6 @@
 --sub-pos=<0-100>
     Specify the position of subtitles on the screen. The value is the vertical
     position of the subtitle in % of the screen height.
-    Can be useful with ``--vf=expand``.
 
 --sws=<n>
     Specify the software scaler algorithm to be used with the ``--zoom``
@@ -2090,7 +2082,8 @@
     Use <string> as user agent for HTTP streaming.
 
 --utf8
-    Tells mpv to handle the subtitle file as UTF-8.
+    Tells mpv to handle the subtitle file as UTF-8. By default, the subtitle
+    file encoding is guessed, and all text converted to UTF-8 internally.
 
 -v
     Increment verbosity level, one level for each ``-v`` found on the command
@@ -2171,28 +2164,6 @@
     ``--geometry`` is the best that is available for that purpose currently.
     Supported by at least the direct3d, gl, x11, xv and corevideo video output
     drivers.
-
---xvidopts=<option1:option2:...>
-    Specify additional parameters when decoding with Xvid.
-
-    *NOTE*: Since libavcodec is faster than Xvid you might want to use the
-    libavcodec postprocessing filter (``--vf=pp``) and decoder
-    (``--vfm=ffmpeg``) instead.
-
-    Xvid's internal postprocessing filters:
-
-    :deblock-chroma (see also ``--vf=pp``):    chroma deblock filter
-    :deblock-luma   (see also ``--vf=pp``):    luma deblock filter
-    :dering-luma    (see also ``--vf=pp``):    luma deringing filter
-    :dering-chroma  (see also ``--vf=pp``):    chroma deringing filter
-    :filmeffect     (see also ``--vf=noise``):
-        Adds artificial film grain to the video. May increase perceived
-        quality, while lowering true quality.
-
-    rendering methods:
-
-    :dr2:   Activate direct rendering method 2.
-    :nodr2: Deactivate direct rendering method 2.
 
 --xy=<value>
 

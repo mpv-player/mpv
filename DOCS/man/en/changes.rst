@@ -57,11 +57,12 @@ General changes for mplayer2 to mpv
 * Removal of teletext support
 * Replace image VOs (``--vo=jpeg`` etc.) with ``--vo=image``
 * Do not lose settings when playing a new file in the same player instance
-* New location for config files, new name for the binary. (Planned change.)
+* New location for config files, new name for the binary.
 * Slave mode compatibility broken (see below)
-* Encoding functionality (replacement for mencoder)
-  (Remove ``--vo=gif89a``, ``--vo=md5sum``, ``--vo=yuv4mpeg``, as encoding can
-  handle these use cases.)
+* Encoding functionality (replacement for mencoder, see ``DOCS/encoding.rst``)
+* Remove ``--vo=gif89a``, ``--vo=md5sum``, ``--vo=yuv4mpeg``, as encoding can
+  handle these use cases. For yuv4mpeg, for example, use:
+  ``mpv input.mkv -o output.y4m --no-audio``.
 * Image subtitles (DVDs etc.) are rendered in color and use more correct
   positioning
 * General code cleanups
@@ -149,7 +150,8 @@ Other
 ~~~~~
 
 * The playtree has been removed. **mpv**'s internal playlist is a simple and
-  flat list now. This makes the code easier, and makes using it less confusing.
+  flat list now. This makes the code easier, and makes **mpv** usage less
+  confusing.
 * Slave mode is broken. This mode is entirely insane in the ``old`` versions of
   mplayer. A proper slave mode application needed tons of code and hacks to get
   it right. The main problem is that slave mode is a bad and incomplete

@@ -128,9 +128,6 @@ v
 j and J
     Cycle through the available subtitles.
 
-y and g
-    Adjust subtitle delay to immediately display previous/next subtitle.
-
 F
     Toggle displaying "forced subtitles".
 
@@ -602,9 +599,6 @@ Stream from HTTP:
 
 Stream using RTSP:
     ``mpv rtsp://server.example.com/streamName``
-
-input from standard V4L:
-    ``mpv tv:// --tv=driver=v4l:width=640:height=480:outfmt=i420 --vc=rawi420 --vo=xv``
 
 AUTHORS
 =======

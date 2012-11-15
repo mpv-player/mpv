@@ -534,9 +534,3 @@ scaletempo[=option1:option2:...]
         Would playback audio file at 1.2x normal speed, with audio at normal
         pitch. Changing playback speed, would change pitch, leaving audio
         tempo at 1.2x.
-
-stats
-    Collects and prints statistics about the audio stream, especially the
-    volume. These statistics are especially intended to help adjusting the
-    volume while avoiding clipping. The volumes are printed in dB and
-    compatible with the volume audio filter.

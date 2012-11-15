@@ -77,8 +77,7 @@ seek <seconds> [relative|absolute|absolute-percent|- [default-precise|exact|keyf
         Always restart playback at keyframe boundaries (fast).
 
 frame_step
-    Basically seek forward by one frame. Actually this plays one frame, then
-    pauses again.
+    Play one frame, then pause.
 
 set <property> "<value>"
     Set the given property to the given value.
@@ -154,7 +153,7 @@ playlist_clear
 
 run "<command>"
     Run the given command with ``/bin/sh -c``. The string is expanded like in
-    ``--playing-msg`` before
+    ``--playing-msg``.
 
 quit [<code>]
     Exit the player using the given exit code.
@@ -197,7 +196,7 @@ show_tracks
 
 
 
-Undocumented properties: tv_start_scan, tv_step_channel, tv_step_norm,
+Undocumented commands: tv_start_scan, tv_step_channel, tv_step_norm,
 tv_step_chanlist, tv_set_channel, tv_last_channel, tv_set_freq, tv_step_freq,
 tv_set_norm, dvb_set_channel, radio_step_channel, radio_set_channel,
 radio_set_freq, radio_step_freq (all of these should be replaced by properties),
@@ -266,7 +265,7 @@ chapters                      number of chapters
 editions                      number of MKV editions
 angle                       x current DVD angle
 metadata                      metadata key/value pairs
-metadata/<key>                value of metedata entry <key>
+metadata/<key>                value of metadata entry <key>
 pause                       x pause status (bool)
 pts-association-mode        x see ``--pts-association-mode``
 hr-seek                     x see ``--hr-seek``

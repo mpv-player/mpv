@@ -236,7 +236,7 @@ opengl
     and color management.
 
     By default, it tries to use fast and fail-safe settings. Use the alias
-    ``opengl-hq`` to use this driver with defaults set for high quality
+    ``opengl-hq`` to use this driver with defaults set to high quality
     rendering.
 
     Requires at least OpenGL 2.1 and the GL_ARB_texture_rg extension. For older
@@ -410,8 +410,8 @@ opengl
         first render the video into a video-sized RGB texture, and
         draw the result on screen. The luma scaler is used to scale
         the RGB image when rendering to screen. The chroma scaler
-        is used only on YUV conversion, and only if the video uses
-        chroma-subsampling.
+        is used only on YUV conversion, and only if the video is
+        chroma-subsampled (usually the case).
         This mechanism is disabled on RGB input.
         Specifying this option directly is generally useful for debugging only.
 
@@ -472,8 +472,7 @@ opengl-old
     OpenGL video output driver, old version. Video size must be smaller
     than the maximum texture size of your OpenGL implementation. Intended to
     work even with the most basic OpenGL implementations, but also makes use
-    of newer extensions, which allow support for more colorspaces and direct
-    rendering.
+    of newer extensions, which allow support for more colorspaces.
 
     The code performs very few checks, so if a feature does not work, this
     might be because it is not supported by your card/OpenGL implementation
@@ -680,7 +679,7 @@ image
         Select the image file format.
 
         jpg
-            JPEG files, extension .jpg.
+            JPEG files, extension .jpg. (Default.)
         jpeg
             JPEG files, extension .jpeg.
         png
@@ -699,9 +698,9 @@ image
     jpeg-quality=<0-100>
         JPEG quality factor (default: 90)
     [no-]jpeg-progressive
-        Specify standard or progressive JPEG (default: noprogressive).
+        Specify standard or progressive JPEG (default: no).
     [no-]jpeg-baseline
-        Specify use of JPEG baseline or not (default: baseline).
+        Specify use of JPEG baseline or not (default: yes).
     jpeg-optimize=<0-100>
         JPEG optimization factor (default: 100)
     jpeg-smooth=<0-100>

@@ -515,9 +515,7 @@ divtc[=options]
     and can resync at the exact spot. These passes do *not* correspond to pass
     one and two of the encoding process. You must run an extra pass using
     divtc pass one before the actual encoding throwing the resulting video
-    away. Use ``--nosound --ovc=raw -o /dev/null`` to avoid wasting CPU power
-    for this pass. You may add something like ``crop=2:2:0:0`` after divtc to
-    speed things up even more. Then use divtc pass two for the actual
+    away. Then use divtc pass two for the actual
     encoding. If you use multiple encoder passes, use divtc pass two for all
     of them. The options are:
 
@@ -662,6 +660,9 @@ screenshot
     output doesn't provide working direct screenshot support. Note that it is
     not always safe to insert this filter by default. See the
     ``Taking screenshots`` section for details.
+
+screenshot_force
+    Same as ``screenshot``, but prefer it over VO based screenshot code.
 
 sub
     Moves subtitle rendering to an arbitrary point in the filter
