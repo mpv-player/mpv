@@ -621,7 +621,8 @@ const m_option_t mplayer_opts[]={
                 {"full", MP_CSP_LEVELS_PC})),
 
     {"grabpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    OPT_INTRANGE("cursor-autohide-delay", cursor_autohide_delay, 0, -2, 30000),
+    OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
+                      0, 30000, ({"no", -1}, {"always", -2})),
 
     {"refreshrate",&vo_refresh_rate,CONF_TYPE_INT,CONF_RANGE, 0,100, NULL},
     {"wid", &WinID, CONF_TYPE_INT64, 0, 0, 0, NULL},

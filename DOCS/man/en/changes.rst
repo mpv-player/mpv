@@ -107,6 +107,7 @@ Command line switches
     -xineramascreen                     --screen (different values)
     -ss                                 --start
     -endpos                             --length
+    --cursor-autohide-delay             --cursor-autohide
     =================================== ===================================
 
 input.conf and slave commands

@@ -448,9 +448,9 @@
     off by some frames. This option does not work correctly with some demuxers
     and codecs.
 
---cursor-autohide-delay=<number>
+--cursor-autohide=<number|no|always>
     Make mouse cursor automatically hide after given number of milliseconds.
-    A value of -1 will disable cursor autohide. A value of -2 means the cursor
+    ``no`` will disable cursor autohide. ``always`` means the cursor
     will stay hidden. Supported by video output drivers which use X11 or
     OS X Cocoa.
 
