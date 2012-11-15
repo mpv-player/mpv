@@ -1092,26 +1092,11 @@ static void write_status_line(struct MPContext *mpctx, const char *line)
     }
 }
 
-static void print_status(struct MPContext *mpctx, double a_pos, bool at_frame)
+static void print_status(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     sh_video_t * const sh_video = mpctx->sh_video;
 
-    if (mpctx->sh_audio && a_pos == MP_NOPTS_VALUE)
-        a_pos = playing_audio_pts(mpctx);
-    if (mpctx->sh_audio && sh_video && at_frame) {
-        mpctx->last_av_difference = a_pos - mpctx->video_pts - audio_delay;
-        if (mpctx->time_frame > 0)
-            mpctx->last_av_difference +=
-                    mpctx->time_frame * opts->playback_speed;
-        if (a_pos == MP_NOPTS_VALUE || mpctx->video_pts == MP_NOPTS_VALUE)
-            mpctx->last_av_difference = MP_NOPTS_VALUE;
-        if (mpctx->last_av_difference > 0.5 && drop_frame_cnt > 50
-            && !mpctx->drop_message_shown) {
-            mp_tmsg(MSGT_AVSYNC, MSGL_WARN, "%s", mp_gtext(av_desync_help_text));
-            mpctx->drop_message_shown = true;
-        }
-    }
     if (opts->quiet)
         return;
 
@@ -1517,7 +1502,7 @@ static void update_osd_msg(struct MPContext *mpctx)
                 write_status_line(mpctx, "");
                 mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s%s\n", opts->term_osd_esc,
                        mpctx->terminal_osd_text);
-                print_status(mpctx, MP_NOPTS_VALUE, false);
+                print_status(mpctx);
             }
         }
         return;
@@ -2540,7 +2525,7 @@ void pause_player(struct MPContext *mpctx)
 
     // Only print status if there's actually a file being played.
     if (mpctx->num_sources)
-        print_status(mpctx, MP_NOPTS_VALUE, false);
+        print_status(mpctx);
 
     if (!mpctx->opts.quiet)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
@@ -3024,6 +3009,25 @@ int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts)
     return -1;
 }
 
+static void update_avsync(struct MPContext *mpctx)
+{
+    if (!mpctx->sh_audio || !mpctx->sh_video)
+        return;
+
+    double a_pos = playing_audio_pts(mpctx);
+
+    mpctx->last_av_difference = a_pos - mpctx->video_pts - audio_delay;
+    if (mpctx->time_frame > 0)
+        mpctx->last_av_difference +=
+                mpctx->time_frame * mpctx->opts.playback_speed;
+    if (a_pos == MP_NOPTS_VALUE || mpctx->video_pts == MP_NOPTS_VALUE)
+        mpctx->last_av_difference = MP_NOPTS_VALUE;
+    if (mpctx->last_av_difference > 0.5 && drop_frame_cnt > 50
+        && !mpctx->drop_message_shown) {
+        mp_tmsg(MSGT_AVSYNC, MSGL_WARN, "%s", mp_gtext(av_desync_help_text));
+        mpctx->drop_message_shown = true;
+    }
+}
 
 static void run_playloop(struct MPContext *mpctx)
 {
@@ -3233,7 +3237,8 @@ static void run_playloop(struct MPContext *mpctx)
             mpctx->time_frame = 0;
             get_relative_time(mpctx);
         }
-        print_status(mpctx, MP_NOPTS_VALUE, true);
+        update_avsync(mpctx);
+        print_status(mpctx);
         screenshot_flip(mpctx);
 
         if (play_n_frames >= 0) {
@@ -3267,7 +3272,7 @@ static void run_playloop(struct MPContext *mpctx)
 #ifdef CONFIG_STREAM_CACHE
     // The cache status is part of the status line. Possibly update it.
     if (mpctx->paused && opts->stream_cache_size > 0)
-        print_status(mpctx, MP_NOPTS_VALUE, false);
+        print_status(mpctx);
 #endif
 
     if (!video_left && (!mpctx->paused || was_restart)) {
@@ -3276,7 +3281,7 @@ static void run_playloop(struct MPContext *mpctx)
             a_pos = (written_audio_pts(mpctx) -
                      mpctx->opts.playback_speed * buffered_audio);
         }
-        print_status(mpctx, a_pos, false);
+        print_status(mpctx);
 
         if (!mpctx->sh_video)
             update_subtitles(mpctx, a_pos);
