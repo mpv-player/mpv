@@ -463,15 +463,6 @@
     Force demuxer type. Use a '+' before the name to force it, this will skip
     some checks! Give the demuxer name as printed by ``--demuxer=help``.
 
---display=<name>
-    (X11 only)
-    Specify the hostname and display number of the X server you want to
-    display on.
-
-    *EXAMPLE*:
-
-    ``--display=xtest.localdomain:0``
-
 --doubleclick-time=<milliseconds>
     Time in milliseconds to recognize two consecutive button presses as a
     double-click (default: 300).

@@ -576,10 +576,6 @@ const m_option_t mplayer_opts[]={
 
     {"edlout", &edl_output_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL},
 
-#ifdef CONFIG_X11
-    {"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#endif
-
     // force window width/height or resolution (with -vm)
     OPT_INTRANGE("x", screen_size_x, 0, 0, 4096),
     OPT_INTRANGE("y", screen_size_y, 0, 0, 4096),

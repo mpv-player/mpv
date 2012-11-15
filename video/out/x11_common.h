@@ -115,8 +115,6 @@ extern int metacity_hack;
 
 extern char** vo_fstype_list;
 
-extern char *mDisplayName;
-
 struct vo_x11_state *vo_x11_init_state(void);
 int vo_init(struct vo *vo);
 void vo_uninit(struct vo_x11_state *x11);

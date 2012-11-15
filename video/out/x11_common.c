@@ -87,8 +87,6 @@ int stop_xscreensaver = 1;
 
 static int dpms_disabled = 0;
 
-char *mDisplayName = NULL;
-
 char **vo_fstype_list;
 
 /* 1 means that the WM is metacity (broken as hell) */
@@ -410,13 +408,7 @@ int vo_init(struct vo *vo)
 
     XSetErrorHandler(x11_errorhandler);
 
-#if 0
-    if (!mDisplayName)
-        if (!(mDisplayName = getenv("DISPLAY")))
-            mDisplayName = strdup(":0.0");
-#else
-    dispName = XDisplayName(mDisplayName);
-#endif
+    dispName = XDisplayName(NULL);
 
     mp_msg(MSGT_VO, MSGL_V, "X11 opening display: %s\n", dispName);
 
