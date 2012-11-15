@@ -510,7 +510,8 @@ const m_option_t common_opts[] = {
     // enable Closed Captioning display
     {"overlapsub", &suboverlap_enabled, CONF_TYPE_FLAG, 0, 0, 2, NULL},
     {"sub-no-text-pp", &sub_no_text_pp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"sub-fuzziness", &sub_match_fuzziness, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
+    {"autosub-match", &sub_match_fuzziness, CONF_TYPE_CHOICE, 0,
+     M_CHOICES(({"exact", 0}, {"fuzzy", 1}, {"all", 2}))},
     {"font", &font_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"subfont", &sub_font_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"sub-pos", &sub_pos, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},

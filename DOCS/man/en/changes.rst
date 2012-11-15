@@ -108,6 +108,7 @@ Command line switches
     -ss                                 --start
     -endpos                             --length
     --cursor-autohide-delay             --cursor-autohide
+    -sub-fuzziness                      --autosub-match
     =================================== ===================================
 
 input.conf and slave commands

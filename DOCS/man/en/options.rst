@@ -206,7 +206,14 @@
 
 --autosub, --no-autosub
     Load additional subtitle files matching the video filename. Enabled by
-    default. See also ``--sub-fuzziness``.
+    default. See also ``--autosub-match``.
+
+--autosub-match=<exact|fuzzy|all>
+    Adjust matching fuzziness when searching for subtitles:
+
+    :exact: exact match
+    :fuzzy: Load all subs containing movie name.
+    :all:   Load all subs in the current and ``--sub-paths`` directories.
 
 --autosync=<factor>
     Gradually adjusts the A/V sync based on audio delay measurements.
@@ -1737,13 +1744,6 @@
     Force subtitle demuxer type for ``--subfile``. Using a '+' before the name
     will force it, this will skip some checks! Give the demuxer name as
     printed by ``--sub-demuxer=help``.
-
---sub-fuzziness=<mode>
-    Adjust matching fuzziness when searching for subtitles:
-
-    :0: exact match
-    :1: Load all subs containing movie name.
-    :2: Load all subs in the current and ``--sub-paths`` directories.
 
 --sub-no-text-pp
     Disables any kind of text post processing done after loading the
