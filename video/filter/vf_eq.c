@@ -509,9 +509,9 @@ int vf_open(vf_instance_t *vf, char *args)
   return 1;
 }
 
-const vf_info_t vf_info_eq2 = {
+const vf_info_t vf_info_eq = {
   "Software equalizer",
-  "eq2",
+  "eq",
   "Hampa Hug, Daniel Moreno, Richard Felker",
   "",
   &vf_open,

@@ -405,7 +405,7 @@ hqdn3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]
         chroma temporal strength (default:
         ``luma_tmp*chroma_spatial/luma_spatial``)
 
-eq2[=gamma:contrast:brightness:saturation:rg:gg:bg:weight]
+eq[=gamma:contrast:brightness:saturation:rg:gg:bg:weight]
     Software equalizer that uses lookup tables (slow),
     allowing gamma correction in addition to simple brightness and contrast
     adjustment. The parameters are given as floating point

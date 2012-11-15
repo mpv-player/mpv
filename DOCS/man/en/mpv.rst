@@ -170,7 +170,7 @@ c
     Change YUV colorspace.
 
 (The following keys are valid only when using a video output that supports the
-corresponding adjustment, or the software equalizer (``--vf=eq2``).)
+corresponding adjustment, or the software equalizer (``--vf=eq``).)
 
 1 and 2
     Adjust contrast.
@@ -351,7 +351,7 @@ as the file played and then tries to load any file-specific configuration.
 | # start with mf://filemask
 | mf=type=png:fps=25
 | # Eerie negative images are cool.
-| vf=eq2=1.0:-0.8
+| vf=eq=1.0:-0.8
 
 
 PROFILES

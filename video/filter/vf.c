@@ -48,7 +48,7 @@ extern const vf_info_t vf_info_flip;
 extern const vf_info_t vf_info_rotate;
 extern const vf_info_t vf_info_mirror;
 extern const vf_info_t vf_info_noise;
-extern const vf_info_t vf_info_eq2;
+extern const vf_info_t vf_info_eq;
 extern const vf_info_t vf_info_gradfun;
 extern const vf_info_t vf_info_unsharp;
 extern const vf_info_t vf_info_swapuv;
@@ -89,7 +89,7 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_screenshot_force,
 
     &vf_info_noise,
-    &vf_info_eq2,
+    &vf_info_eq,
     &vf_info_gradfun,
     &vf_info_unsharp,
     &vf_info_swapuv,

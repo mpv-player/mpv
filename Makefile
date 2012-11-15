@@ -243,7 +243,7 @@ SOURCES = talloc.c \
           video/filter/vf_dlopen.c \
           video/filter/vf_down3dright.c \
           video/filter/vf_dsize.c \
-          video/filter/vf_eq2.c \
+          video/filter/vf_eq.c \
           video/filter/vf_expand.c \
           video/filter/vf_flip.c \
           video/filter/vf_format.c \
