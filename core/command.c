@@ -285,6 +285,14 @@ static int mp_property_length(m_option_t *prop, int action, void *arg,
     return m_property_double_ro(prop, action, arg, len);
 }
 
+static int mp_property_avsync(m_option_t *prop, int action, void *arg,
+                              MPContext *mpctx)
+{
+    if (!mpctx->sh_audio || !mpctx->sh_video)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_double_ro(prop, action, arg, mpctx->last_av_difference);
+}
+
 /// Current position in percent (RW)
 static int mp_property_percent_pos(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
@@ -1383,6 +1391,7 @@ static const m_option_t mp_properties[] = {
       M_OPT_MIN, 0, 0, NULL },
     { "length", mp_property_length, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
+    { "avsync", mp_property_avsync, CONF_TYPE_DOUBLE },
     { "percent-pos", mp_property_percent_pos, CONF_TYPE_INT,
       M_OPT_RANGE, 0, 100, NULL },
     { "time-pos", mp_property_time_pos, CONF_TYPE_TIME,

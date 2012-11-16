@@ -266,6 +266,7 @@ stream-end                    end position in bytes in source stream
 stream-length                 length in bytes (${stream-end} - ${stream-start})
 stream-time-pos             x time position in source stream (also see time-pos)
 length                        length of the current file in seconds
+avsync                        last A/V synchronization difference
 percent-pos                 x position in current file (0-100)
 time-pos                    x position in current file in seconds
 chapter                     x current chapter number
