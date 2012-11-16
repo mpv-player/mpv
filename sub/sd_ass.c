@@ -77,9 +77,13 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
     ASS_Track *track = ctx->ass_track;
 
     if (sh->type == 'a') { // ssa/ass subs
-        ass_process_chunk(track, data, data_len,
-                          (long long)(pts*1000 + 0.5),
-                          (long long)(duration*1000 + 0.5));
+        if (bstr_startswith0((bstr){data, data_len}, "Dialogue: ")) {
+            ass_process_data(track, data, data_len);
+        } else {
+            ass_process_chunk(track, data, data_len,
+                              (long long)(pts*1000 + 0.5),
+                              (long long)(duration*1000 + 0.5));
+        }
         return;
     }
     // plaintext subs
