@@ -1088,12 +1088,10 @@
     Maximum A-V sync correction per frame (in seconds)
 
 --mf=<option1:option2:...>
-    Used when decoding from multiple PNG or JPEG files.
+    Used when decoding from multiple PNG or JPEG files with ``mf://``.
 
     Available options are:
 
-    :w=<value>:    input file width (default: autodetect)
-    :h=<value>:    input file height (default: autodetect)
     :fps=<value>:  output fps (default: 25)
     :type=<value>: input file type (available: jpeg, png, tga, sgi)
 

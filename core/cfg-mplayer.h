@@ -190,15 +190,11 @@ const m_option_t scaler_filter_conf[]={
 
 extern char *dvd_device, *cdrom_device;
 
-extern int    mf_w;
-extern int    mf_h;
 extern double mf_fps;
 extern char * mf_type;
 extern m_obj_list_t vf_obj_list;
 
 const m_option_t mfopts_conf[]={
-    {"w", &mf_w, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"h", &mf_h, CONF_TYPE_INT, 0, 0, 0, NULL},
     {"fps", &mf_fps, CONF_TYPE_DOUBLE, 0, 0, 0, NULL},
     {"type", &mf_type, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}

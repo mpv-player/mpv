@@ -80,7 +80,6 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef CONFIG_TV
     &demuxer_desc_tv,
 #endif
-    &demuxer_desc_mf,
     &demuxer_desc_lavf_preferred,
     &demuxer_desc_avi,
     &demuxer_desc_asf,
@@ -99,6 +98,8 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_mpeg4_es,
     &demuxer_desc_h264_es,
     &demuxer_desc_mpeg_ts,
+    // auto-probe last, because it checks file-extensions only
+    &demuxer_desc_mf,
     /* Please do not add any new demuxers here. If you want to implement a new
      * demuxer, add it to libavformat, except for wrappers around external
      * libraries and demuxers requiring binary support. */

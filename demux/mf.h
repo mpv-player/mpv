@@ -19,18 +19,20 @@
 #ifndef MPLAYER_MF_H
 #define MPLAYER_MF_H
 
-extern int    mf_w;
-extern int    mf_h;
 extern double mf_fps;
 extern char * mf_type;
 
 typedef struct
 {
+ struct sh_video *sh;
  int curr_frame;
  int nr_of_files;
  char ** names;
+ // optional
+ struct stream **streams;
 } mf_t;
 
-mf_t* open_mf(char * filename);
+mf_t* open_mf_pattern(char * filename);
+mf_t* open_mf_single(char * filename);
 
 #endif /* MPLAYER_MF_H */

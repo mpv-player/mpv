@@ -43,12 +43,11 @@
 
 #include "mf.h"
 
-int    mf_w = 0; //352; // let codecs to detect it
-int    mf_h = 0; //288;
 double mf_fps = 25.0;
 char * mf_type = NULL; //"jpg";
 
-mf_t* open_mf(char * filename){
+mf_t* open_mf_pattern(char * filename)
+{
 #if defined(HAVE_GLOB) || defined(__MINGW32__)
  glob_t        gg;
  int           i;
@@ -168,4 +167,13 @@ exit_mf:
  mp_msg(MSGT_STREAM,MSGL_FATAL,"[mf] mf support is disabled on your os\n");
  return 0;
 #endif
+}
+
+mf_t* open_mf_single(char * filename)
+{
+    mf_t *mf = calloc(1, sizeof(mf_t));
+    mf->nr_of_files = 1;
+    mf->names = calloc(1, sizeof(char *));
+    mf->names[0] = strdup(filename);
+    return mf;
 }
