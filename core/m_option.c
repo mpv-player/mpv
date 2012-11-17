@@ -1259,16 +1259,16 @@ static int parse_rel_time(const m_option_t *opt, struct bstr name,
         return M_OPT_MISSING_PARAM;
 
     // Percent pos
-    double percent;
-    if (bstr_sscanf(param, "%lf%%", &percent) == 1) {
-        if (percent >= 0 && percent <= 100) {
+    if (bstr_endswith0(param, "%")) {
+        double percent = bstrtod(bstr_splice(param, 0, -1), &param);
+        if (param.len == 0 && percent >= 0 && percent <= 100) {
             t.type = REL_TIME_PERCENT;
             t.pos = percent;
             goto out;
         }
     }
 
-    double sign = bstr_eatstart0(&param, "-") ? -1 : +1;
+    bool sign = bstr_eatstart0(&param, "-");
     double time;
     if (parse_timestring(param, &time, 0)) {
         t.type = sign ? REL_TIME_NEGATIVE : REL_TIME_ABSOLUTE;
