@@ -1116,6 +1116,53 @@ const m_option_type_t m_option_type_subconfig_struct = {
     .parse = parse_subconf,
 };
 
+static int parse_color(const m_option_t *opt, struct bstr name,
+                        struct bstr param, void *dst)
+{
+    if (param.len == 0)
+        return M_OPT_MISSING_PARAM;
+
+    bstr val = param;
+    struct m_color color = {0};
+
+    if (bstr_eatstart0(&val, "#")) {
+        // #[AA]RRGGBB
+        if (val.len != 6 && val.len != 8)
+            goto error;
+        bool has_alpha = val.len == 8;
+        uint32_t c = bstrtoll(val, &val, 16);
+        if (val.len)
+            goto error;
+        color = (struct m_color) {
+            (c >> 16) & 0xFF,
+            (c >> 8) & 0xFF,
+            c & 0xFF,
+            has_alpha ? (c >> 24) & 0xFF : 0xFF,
+        };
+    } else {
+        goto error;
+    }
+
+    if (dst)
+        *((struct m_color *)dst) = color;
+
+    return 1;
+
+error:
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+           "Option %.*s: invalid color: '%.*s'\n",
+           BSTR_P(name), BSTR_P(param));
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+           "Valid colors must be in the form #RRRGGBB or #AARRGGBB (in hex)\n");
+    return M_OPT_INVALID;
+}
+
+const m_option_type_t m_option_type_color = {
+    .name  = "Color",
+    .size  = sizeof(struct m_color),
+    .parse = parse_color,
+};
+
 #include "video/img_format.h"
 
 static int parse_imgfmt(const m_option_t *opt, struct bstr name,

@@ -54,6 +54,7 @@ extern const m_option_type_t m_option_type_subconfig;
 extern const m_option_type_t m_option_type_subconfig_struct;
 extern const m_option_type_t m_option_type_imgfmt;
 extern const m_option_type_t m_option_type_afmt;
+extern const m_option_type_t m_option_type_color;
 
 // Callback used by m_option_type_print_func options.
 typedef int (*m_opt_func_full_t)(const m_option_t *, const char *, const char *);
@@ -69,6 +70,10 @@ enum m_rel_time_type {
 struct m_rel_time {
     double pos;
     enum m_rel_time_type type;
+};
+
+struct m_color {
+    uint8_t r, g, b, a;
 };
 
 // Extra definition needed for \ref m_option_type_obj_settings_list options.
@@ -198,6 +203,7 @@ union m_option_value {
     m_obj_settings_t *obj_settings_list;
     double time;
     struct m_rel_time rel_time;
+    struct m_color color;
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -511,6 +517,7 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_CHOICE_OR_INT_(optname, varname, flags, minval, maxval, choices, ...) OPT_GENERAL(optname, varname, (flags) | CONF_RANGE, .min = minval, .max = maxval, M_CHOICES(choices), __VA_ARGS__)
 #define OPT_TIME(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_time)
 #define OPT_REL_TIME(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_rel_time)
+#define OPT_COLOR(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_color)
 
 #define OPT_TRACKCHOICE(name, var) OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))
 
