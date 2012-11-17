@@ -38,13 +38,46 @@
 #include "stream/stream.h"
 #include "core/options.h"
 
+void mp_ass_set_style(ASS_Style *style, struct osd_style_opts *opts)
+{
+    if (opts->font) {
+        free(style->FontName);
+        style->FontName = strdup(opts->font);
+        style->treat_fontname_as_pattern = 1;
+    }
+
+    // libass_font_size = FontSize * (window_height / MP_ASS_FONT_PLAYRESY)
+    // scale translates parameters from PlayResY=720 to MP_ASS_FONT_PLAYRESY
+    double scale = MP_ASS_FONT_PLAYRESY / 720.0;
+
+    style->FontSize = opts->font_size * scale;
+    style->PrimaryColour = MP_ASS_COLOR(opts->color);
+    style->SecondaryColour = style->PrimaryColour;
+    if (opts->back_color.a) {
+        style->OutlineColour = MP_ASS_COLOR(opts->back_color);
+        style->BorderStyle = 3; // opaque box
+    } else {
+        style->OutlineColour = MP_ASS_COLOR(opts->border_color);
+        style->BorderStyle = 1; // outline
+    }
+    style->BackColour = MP_ASS_COLOR(opts->shadow_color);
+    style->Outline = opts->border_size * scale;
+    style->Shadow = opts->shadow_offset * scale;
+    style->Spacing = opts->spacing * scale;
+    style->MarginL = opts->margin_x * scale;
+    style->MarginR = style->MarginL;
+    style->MarginV = opts->margin_y * scale;
+    style->ScaleX = 1.;
+    style->ScaleY = 1.;
+}
+
 ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
 {
     ASS_Track *track = ass_new_track(library);
 
     track->track_type = TRACK_TYPE_ASS;
     track->Timer = 100.;
-    track->PlayResY = 288;
+    track->PlayResY = MP_ASS_FONT_PLAYRESY;
     track->WrapStyle = 0;
 
     if (opts->ass_styles_file && opts->ass_style_override)
@@ -56,32 +89,8 @@ ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
         track->default_style = sid;
         ASS_Style *style = track->styles + sid;
         style->Name = strdup("Default");
-        style->FontName = sub_font_name ? strdup(sub_font_name)
-            : font_name ? strdup(font_name) : strdup("Sans");
-        style->treat_fontname_as_pattern = 1;
-
-        double fs = track->PlayResY * text_font_scale_factor / 100.;
-
-        uint32_t c1 = 0xFFFFFF00;
-        uint32_t c2 = 0x00000000;
-        if (opts->ass_color)
-            c1 = strtoll(opts->ass_color, NULL, 16);
-        if (opts->ass_border_color)
-            c2 = strtoll(opts->ass_border_color, NULL, 16);
-
-        style->FontSize = fs;
-        style->PrimaryColour = c1;
-        style->SecondaryColour = c1;
-        style->OutlineColour = c2;
-        style->BackColour = 0x00000000;
-        style->BorderStyle = 1;
         style->Alignment = 2;
-        style->Outline = fs / 16;
-        style->MarginL = 10;
-        style->MarginR = 10;
-        style->MarginV = 5;
-        style->ScaleX = 1.;
-        style->ScaleY = 1.;
+        mp_ass_set_style(style, opts->osd_style);
     }
 
     if (opts->ass_style_override)
@@ -231,7 +240,7 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
         set_use_margins = opts->ass_use_margins;
         set_sub_pos = 100 - sub_pos;
         set_line_spacing = opts->ass_line_spacing;
-        set_font_scale = opts->ass_font_scale;
+        set_font_scale = opts->sub_scale;
         set_hinting = opts->ass_hinting & 3; // +4 was for no hinting if scaled
     }
 
@@ -244,27 +253,20 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
     ass_set_line_spacing(priv, set_line_spacing);
 }
 
-void mp_ass_configure_fonts(ASS_Renderer *priv)
+void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts)
 {
-    char *dir, *path, *family;
+    char *dir, *path;
     dir = get_path("fonts");
     path = get_path("subfont.ttf");
     if (!mp_path_exists(path)) {
         free(path);
         path = NULL;
     }
-    if (sub_font_name)
-        family = strdup(sub_font_name);
-    else if (font_name)
-        family = strdup(font_name);
-    else
-        family = 0;
 
-    ass_set_fonts(priv, path, family, 1, NULL, 1);
+    ass_set_fonts(priv, path, opts->font, 1, NULL, 1);
 
     free(dir);
     free(path);
-    free(family);
 }
 
 void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,

@@ -1224,7 +1224,7 @@ static int property_sub_helper(m_option_t *prop, int action, void *arg,
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_SET)
-        vo_osd_changed(OSDTYPE_SUBTITLE);
+        osd_subs_changed(mpctx->osd);
     return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
@@ -1297,28 +1297,6 @@ static int mp_property_sub_forced_only(m_option_t *prop, int action,
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(prop, action, arg, mpctx);
-}
-
-/// Subtitle scale (RW)
-static int mp_property_sub_scale(m_option_t *prop, int action, void *arg,
-                                 MPContext *mpctx)
-{
-    struct MPOpts *opts = &mpctx->opts;
-
-    float *pscale = opts->ass_enabled
-                    ? &opts->ass_font_scale : &text_font_scale_factor;
-
-    switch (action) {
-    case M_PROPERTY_SET:
-        *pscale = *(float *) arg;
-        vo_osd_changed(OSDTYPE_SUBTITLE);
-        vo_osd_changed(OSDTYPE_OSD);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-        *(float *)arg = *pscale;
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 
@@ -1486,8 +1464,7 @@ static const m_option_t mp_properties[] = {
     { "sub-visibility", mp_property_sub_visibility, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
     M_OPTION_PROPERTY_CUSTOM("sub-forced-only", mp_property_sub_forced_only),
-    { "sub-scale", mp_property_sub_scale, CONF_TYPE_FLOAT,
-      M_OPT_RANGE, 0, 100, NULL },
+    M_OPTION_PROPERTY_CUSTOM("sub-scale", property_sub_helper),
 #ifdef CONFIG_ASS
     M_OPTION_PROPERTY_CUSTOM("ass-use-margins", property_sub_helper),
     M_OPTION_PROPERTY_CUSTOM("ass-vsfilter-aspect-compat", property_sub_helper),

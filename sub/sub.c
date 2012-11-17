@@ -63,18 +63,47 @@ int sub_pos=100;
 int sub_visibility=1;
 
 subtitle* vo_sub=NULL;
-float text_font_scale_factor = 6;
 
-char *font_name = NULL;
-char *sub_font_name = NULL;
 float sub_delay = 0;
 float sub_fps = 0;
 
 void *vo_spudec=NULL;
 void *vo_vobsub=NULL;
 
-static struct osd_state *global_osd;
+static const const struct osd_style_opts osd_style_opts_def = {
+    .font = "Sans",
+    .font_size = 45,
+    .color = {255, 255, 255, 255},
+    .border_color = {0, 0, 0, 255},
+    .shadow_color = {240, 240, 240, 128},
+    .border_size = 2.5,
+    .shadow_offset = 0,
+    .margin_x = 25,
+    .margin_y = 10,
+};
 
+#undef OPT_BASE_STRUCT
+#define OPT_BASE_STRUCT struct osd_style_opts
+const struct m_sub_options osd_style_conf = {
+    .opts = (m_option_t[]) {
+        OPT_STRING("font", font, 0),
+        OPT_FLOATRANGE("font-size", font_size, 0, 1, 9000),
+        OPT_COLOR("color", color, 0),
+        OPT_COLOR("border-color", border_color, 0),
+        OPT_COLOR("shadow-color", shadow_color, 0),
+        OPT_COLOR("back-color", back_color, 0),
+        OPT_FLOATRANGE("border-size", border_size, 0, 0, 10),
+        OPT_FLOATRANGE("shadow-offset", shadow_offset, 0, 0, 10),
+        OPT_FLOATRANGE("spacing", spacing, 0, -10, 10),
+        OPT_INTRANGE("margin-x", margin_x, 0, 0, 300),
+        OPT_INTRANGE("margin-y", margin_y, 0, 0, 600),
+        {0}
+    },
+    .size = sizeof(struct osd_style_opts),
+    .defaults = &osd_style_opts_def,
+};
+
+static struct osd_state *global_osd;
 
 static bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b)
 {
@@ -263,6 +292,14 @@ void vo_osd_changed(int new_value)
             osd->objs[n]->force_redraw = true;
     }
     osd->want_redraw = true;
+}
+
+void osd_subs_changed(struct osd_state *osd)
+{
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        if (osd->objs[n]->is_sub)
+            vo_osd_changed(n);
+    }
 }
 
 bool sub_bitmaps_bb(struct sub_bitmaps *imgs, struct mp_rect *out_bb)

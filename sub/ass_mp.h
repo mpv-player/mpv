@@ -27,12 +27,24 @@
 #include "config.h"
 #include "subreader.h"
 
+// font sizes and explicit tags in subassconvert.c assume this size (?)
+#define MP_ASS_FONT_PLAYRESY 288
+
+#define MP_ASS_RGBA(r, g, b, a) \
+    (((r) << 24U) | ((g) << 16) | ((b) << 8) | (0xFF - (a)))
+
+// m_color argument
+#define MP_ASS_COLOR(c) MP_ASS_RGBA((c).r, (c).g, (c).b, (c).a)
+
 #ifdef CONFIG_ASS
 #include <ass/ass.h>
 #include <ass/ass_types.h>
 
 struct MPOpts;
 struct mp_osd_res;
+struct osd_style_opts;
+
+void mp_ass_set_style(ASS_Style *style, struct osd_style_opts *opts);
 
 ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts);
 ASS_Track *mp_ass_read_subdata(ASS_Library *library, struct MPOpts *opts,
@@ -43,7 +55,7 @@ ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
 struct MPOpts;
 void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
                       struct mp_osd_res *dim);
-void mp_ass_configure_fonts(ASS_Renderer *priv);
+void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts);
 ASS_Library *mp_ass_init(struct MPOpts *opts);
 
 struct sub_bitmap;

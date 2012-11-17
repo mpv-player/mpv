@@ -23,6 +23,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "core/m_option.h"
+
 // NOTE: VOs must support at least SUBBITMAP_LIBASS and SUBBITMAP_RGBA.
 enum sub_bitmap_format {
     SUBBITMAP_EMPTY = 0,// no bitmaps; always has num_parts==0
@@ -172,6 +174,22 @@ enum mp_osd_font_codepoints {
     OSD_PB_1 = 0x13,
 };
 
+struct osd_style_opts {
+    char *font;
+    float font_size;
+    struct m_color color;
+    struct m_color border_color;
+    struct m_color shadow_color;
+    struct m_color back_color;
+    float border_size;
+    float shadow_offset;
+    float spacing;
+    int margin_x;
+    int margin_y;
+};
+
+extern const struct m_sub_options osd_style_conf;
+
 /* now in textform */
 extern char * const sub_osd_names[];
 extern char * const sub_osd_names_short[];
@@ -181,10 +199,6 @@ extern int sub_utf8;
 extern char *sub_cp;
 extern int sub_pos;
 
-extern float text_font_scale_factor;
-
-extern char *font_name;
-extern char *sub_font_name;
 extern float sub_delay;
 extern float sub_fps;
 
@@ -192,6 +206,7 @@ extern float sub_fps;
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
 void osd_set_text(struct osd_state *osd, const char *text);
 void vo_osd_changed(int new_value);
+void osd_subs_changed(struct osd_state *osd);
 void osd_free(struct osd_state *osd);
 
 enum mp_osd_draw_flags {

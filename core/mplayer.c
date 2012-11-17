@@ -3740,7 +3740,7 @@ static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
     assert(!mpctx->osd->ass_renderer);
     mpctx->osd->ass_renderer = ass_renderer_init(mpctx->osd->ass_library);
     if (mpctx->osd->ass_renderer)
-        mp_ass_configure_fonts(mpctx->osd->ass_renderer);
+        mp_ass_configure_fonts(mpctx->osd->ass_renderer, mpctx->opts.osd_style);
 #endif
 }
 

@@ -110,8 +110,9 @@ typedef struct MPOpts {
     char **sub_name;
     char **sub_paths;
     int sub_auto;
+    struct osd_style_opts *osd_style;
+    float sub_scale;
     int ass_enabled;
-    float ass_font_scale;
     float ass_line_spacing;
     int ass_top_margin;
     int ass_bottom_margin;
@@ -119,8 +120,6 @@ typedef struct MPOpts {
     int ass_vsfilter_aspect_compat;
     int use_embedded_fonts;
     char **ass_force_style_list;
-    char *ass_color;
-    char *ass_border_color;
     char *ass_styles_file;
     int ass_style_override;
     int ass_hinting;

@@ -46,7 +46,7 @@ void osd_init_backend(struct osd_state *osd)
                  sizeof(osd_font_pfb) - 1);
 
     osd->osd_render = ass_renderer_init(osd->osd_ass_library);
-    mp_ass_configure_fonts(osd->osd_render);
+    mp_ass_configure_fonts(osd->osd_render, osd->opts->osd_style);
     ass_set_aspect_ratio(osd->osd_render, 1.0, 1.0);
 }
 
@@ -59,30 +59,27 @@ void osd_destroy_backend(struct osd_state *osd)
     osd->osd_ass_library = NULL;
 }
 
-static void update_font_style(ASS_Track *track, ASS_Style *style, double factor)
-{
-    // Set to neutral base direction, as opposed to VSFilter LTR default
-    style->Encoding = -1;
-
-    // duplicated from ass_mp.c
-    style->FontSize = track->PlayResY * factor / 100.;
-    style->Outline = style->FontSize / 16;
-}
-
-
 static ASS_Track *create_osd_ass_track(struct osd_state *osd)
 {
-    ASS_Track *track = mp_ass_default_track(osd->osd_ass_library, osd->opts);
-    ASS_Style *style = track->styles + track->default_style;
+    ASS_Track *track = ass_new_track(osd->osd_ass_library);
 
+    track->track_type = TRACK_TYPE_ASS;
+    track->Timer = 100.;
+    track->PlayResY = MP_ASS_FONT_PLAYRESY;
     track->PlayResX = track->PlayResY * 1.33333;
+    track->WrapStyle = 1; // end-of-line wrapping instead of smart wrapping
 
-    update_font_style(track, style, text_font_scale_factor);
-
-    style->Alignment = 5;
-
-    free(style->FontName);
-    style->FontName = strdup(font_name ? font_name : "Sans");
+    if (track->n_styles == 0) {
+        track->Kerning = true;
+        int sid = ass_alloc_style(track);
+        track->default_style = sid;
+        ASS_Style *style = track->styles + sid;
+        style->Alignment = 5; // top-title, left
+        style->Name = strdup("OSD");
+        mp_ass_set_style(style, osd->opts->osd_style);
+        // Set to neutral base direction, as opposed to VSFilter LTR default
+        style->Encoding = -1;
+    }
 
     return track;
 }
@@ -172,7 +169,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 
     ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
 
-    style->Alignment = 10;
+    style->Alignment = 10; // all centered
     style->MarginL = style->MarginR = style->MarginV = 0;
 
     // We need a fixed font size with respect to the OSD width.
@@ -226,9 +223,12 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
     if (!obj->osd_track)
         obj->osd_track = mp_ass_default_track(osd->osd_ass_library, osd->opts);
 
-    ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
+    struct osd_style_opts font = *opts->osd_style;
+    font.font_size *= opts->sub_scale;
 
-    update_font_style(obj->osd_track, style, text_font_scale_factor);
+    ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
+    mp_ass_set_style(style, &font);
+
 #if LIBASS_VERSION >= 0x01010000
     ass_set_line_position(osd->osd_render, 100 - sub_pos);
 #endif

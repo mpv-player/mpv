@@ -118,19 +118,9 @@
     text subtitles only, because ASS subtitles include their own styling
     information.
 
---ass-border-color=<value>
-    Sets the border (outline) color for text subtitles. The color format is
-    RRGGBBAA.
-
 --ass-bottom-margin=<value>
     Adds a black band at the bottom of the frame. The SSA/ASS renderer can
     place subtitles there (with ``--ass-use-margins``).
-
---ass-color=<value>
-    Sets the color for text subtitles. The color format is RRGGBBAA.
-
---ass-font-scale=<value>
-    Set the scale coefficient to be used for fonts in the SSA/ASS renderer.
 
 --ass-force-style=<[Style.]Param=Value[,...]>
     Override some style or script info parameters.
@@ -550,19 +540,6 @@
 
 --flip
     Flip image upside-down.
-
---font=<pattern-or-filename>
-    Specify font to use for OSD and for subtitles that do not themselves
-    specify a particular font. See also ``--subfont``. With fontconfig enabled
-    the argument is a fontconfig pattern and the default is ``sans``. Without
-    fontconfig the argument is a filename and the default is
-    ``~/.mpv/subfont.ttf``.
-
-    *EXAMPLE*:
-
-    - ``--font=~/.mpv/arialuni.ttf`` (no fontconfig)
-    - ``--font='Bitstream Vera Sans'`` (usual case with fontconfig)
-    - ``--font='Bitstream Vera Sans:style=Bold'`` (usual case with fontconfig)
 
 --force-window-position
     Forcefully move mpv's video output window to default location whenever
@@ -1234,6 +1211,89 @@
 --osd-duration=<time>
     Set the duration of the OSD messages in ms (default: 1000).
 
+--osd-color=<#RRGGBB>
+    Specify the color used for OSD. This is also used for unstyled text
+    subtitles. This option (and most other ``--osd-`` options) are ignored
+    when ASS subtitles are rendered, unless the ``--no-ass`` option is
+    specified.
+
+    The color is specified in hex RGB, and each 2-digit group expresses a
+    color value in the range 0 (``00``) to 255 (`FF`). For example, ``#FF0000``
+    is red.
+
+    You can specify transparency by specifying an alpha value in the form
+    ``#AARRGGBB``. 0 is fully transparent, while ``FF`` is opaque (opaque is
+    default with the shorter color specification).
+
+--osd-back-color=<#RRGGBB>
+    See ``--osd-color``. Color used for OSD text background.
+
+--osd-border-color=<#RRGGBB>
+    See ``--osd-color``. Color used for the OSD font border.
+
+    *Note*: ignored when ``--osd-back-color`` is specified (or more
+    exactly: when that option is not set to completely transparent).
+
+--osd-shadow-color=<#RRGGBB>
+    See ``--osd-color``. Color used for OSD text shadow.
+
+--osd-font-size=<size>
+    Specify the OSD font size. The unit is the size in scaled pixels at a
+    window height of 720. The actual pixel size is scaled with the window
+    height: if the window height is larger or smaller than 720, the actual size
+    of the text increases or decreases as well.
+
+    Default: 45.
+
+--osd-border-size=<size>
+    Size of the OSD font border in scaled pixels (see ``--osd-font-size`` for
+    details). A value of 0 disables borders.
+
+    Default: 2.5.
+
+--osd-margin-x=<size>
+    Left and right screen margin for the OSD in scaled pixels (see
+    ``--osd-font-size`` for details).
+
+    This option specifies the distance of the OSD to the left, as well as at
+    which distance from the right border long OSD text will be broken.
+
+    Default: 25.
+
+--osd-margin-y=<size>
+    Top and bottom screen margin for the OSD in scaled pixels (see
+    ``--osd-font-size`` for details).
+
+    This option specifies the vertical margins of the OSD. This is also used
+    for unstyled text subtitles. If you just want to raise the vertical
+    subtitle position, use ``--sub-pos``.
+
+    Default: 10.
+
+--osd-shadow-offset=<size>
+    Displacement of the OSD text shadow in scaled pixels (see
+    ``--osd-font-size`` for details). A value of 0 disables shadows.
+
+    Default: 0.
+
+--osd-spacing=<size>
+    Horizontal OSD font spacing in scaled pixels (see ``--osd-font-size`` for
+    details). This value is added to the normal letter spacing. Negative values
+    are allowed.
+
+    Default: 0.
+
+--osd-font=<pattern>
+    Specify font to use for OSD and for subtitles that do not themselves
+    specify a particular font. The default is ``Sans``.
+
+    Typically ignored for ASS-subtitles.
+
+    *EXAMPLE*:
+
+    - ``--osd-font='Bitstream Vera Sans'``
+    - ``--osd-font='Bitstream Vera Sans:style=Bold'`` (fontconfig pattern)
+
 --osd-fractions
     Show OSD times with fractions of seconds.
 
@@ -1816,13 +1876,6 @@
 
     Use ``--sub`` for normal text subtitle files.
 
---subfont=<pattern-or-filename>
-    Sets the subtitle font (see ``--font``). If no ``--subfont`` is given,
-    ``--font`` is used for subtitles too.
-
---subfont-text-scale=<0-100>
-    Factor for the text subtitle and OSD font size (default: 6).
-
 --subfps=<rate>
     Specify the framerate of the subtitle file (default: movie fps).
 
@@ -1832,6 +1885,9 @@
 --sub-pos=<0-100>
     Specify the position of subtitles on the screen. The value is the vertical
     position of the subtitle in % of the screen height.
+
+--sub-scale=<0-100>
+    Factor for the text subtitle font size (default: 1).
 
 --sws=<n>
     Specify the software scaler algorithm to be used with the ``--zoom``
