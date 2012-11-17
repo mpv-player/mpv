@@ -127,7 +127,8 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
 {
     struct MPOpts *opts = &mpctx->opts;
 
-    if (opts->stream_cache_size <= 0)
+    if (!(opts->stream_cache_size > 0 ||
+          opts->stream_cache_size < 0 && (*stream)->cache_size))
         return 0;
 
     char *filename = talloc_strdup(NULL, (*demuxer)->filename);

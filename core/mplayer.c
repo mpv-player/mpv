@@ -1183,7 +1183,7 @@ static void print_status(struct MPContext *mpctx)
 
 #ifdef CONFIG_STREAM_CACHE
     // cache stats
-    if (opts->stream_cache_size > 0)
+    if (mpctx->stream->cached)
         saddf(line, width, " C: %d%%", cache_fill_status(mpctx->stream));
 #endif
 
@@ -3301,7 +3301,7 @@ static void run_playloop(struct MPContext *mpctx)
 
 #ifdef CONFIG_STREAM_CACHE
     // The cache status is part of the status line. Possibly update it.
-    if (mpctx->paused && opts->stream_cache_size > 0)
+    if (mpctx->paused && mpctx->stream && mpctx->stream->cached)
         print_status(mpctx);
 #endif
 
@@ -3633,25 +3633,16 @@ static void open_external_file(struct MPContext *mpctx, char *filename,
                                char *demuxer_name, int stream_cache,
                                enum stream_type filter)
 {
+    struct MPOpts *opts = &mpctx->opts;
     if (!filename)
         return;
     int format = 0;
     struct stream *stream = open_stream(filename, &mpctx->opts, &format);
     if (!stream)
         goto err_out;
-    if (stream_cache) {
-        if (!stream_enable_cache(stream, stream_cache * 1024,
-                stream_cache * 1024 *
-                        (mpctx->opts.stream_cache_min_percent / 100.0),
-                stream_cache * 1024 *
-                        (mpctx->opts.stream_cache_seek_min_percent / 100.0)))
-        {
-            free_stream(stream);
-            mp_msg(MSGT_CPLAYER, MSGL_ERR,
-                    "Can't enable external file stream cache\n");
-            return;
-        }
-    }
+    stream_enable_cache_percent(stream, stream_cache,
+                                opts->stream_cache_min_percent,
+                                opts->stream_cache_seek_min_percent);
     // deal with broken demuxers: preselect streams
     int vs = -2, as = -2, ss = -2;
     switch (filter) {
@@ -3893,17 +3884,15 @@ static void play_current_file(struct MPContext *mpctx)
 
     // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
 #ifdef CONFIG_DVBIN
-goto_enable_cache:
+goto_enable_cache: ;
 #endif
-    if (opts->stream_cache_size > 0) {
-        int res = stream_enable_cache_percent(mpctx->stream,
-                                              opts->stream_cache_size,
-                                              opts->stream_cache_min_percent,
-                                              opts->stream_cache_seek_min_percent);
-        if (res == 0)
-            if (demux_was_interrupted(mpctx))
-                goto terminate_playback;
-    }
+    int res = stream_enable_cache_percent(mpctx->stream,
+                                          opts->stream_cache_size,
+                                          opts->stream_cache_min_percent,
+                                          opts->stream_cache_seek_min_percent);
+    if (res == 0)
+        if (demux_was_interrupted(mpctx))
+            goto terminate_playback;
 
     //============ Open DEMUXERS --- DETECT file type =======================
 

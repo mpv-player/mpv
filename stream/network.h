@@ -77,7 +77,6 @@ int http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry);
 URL_t* check4proxies(const URL_t *url);
 URL_t *url_new_with_proxy(const char *urlstr);
 
-void fixup_network_stream_cache(stream_t *stream);
 int http_seek(stream_t *stream, int64_t pos);
 
 #endif /* MPLAYER_NETWORK_H */

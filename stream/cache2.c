@@ -452,7 +452,14 @@ int stream_enable_cache_percent(stream_t *stream, int64_t stream_cache_size,
 /**
  * \return 1 on success, 0 if the function was interrupted and -1 on error
  */
-int stream_enable_cache(stream_t *stream,int64_t size,int64_t min,int64_t seek_limit){
+int stream_enable_cache(stream_t *stream,int64_t size,int64_t min,int64_t seek_limit)
+{
+  if (size < 0)
+      size = stream->cache_size * 1024;
+  if (!size)
+      return 1;
+  mp_tmsg(MSGT_NETWORK,MSGL_INFO,"Cache size set to %"PRId64" KiB\n", size / 1024);
+
   int ss = stream->sector_size ? stream->sector_size : STREAM_BUFFER_SIZE;
   int res = -1;
   cache_vars_t* s;
@@ -521,6 +528,7 @@ int stream_enable_cache(stream_t *stream,int64_t size,int64_t min,int64_t seek_l
         }
     }
     mp_msg(MSGT_CACHE,MSGL_STATUS,"\n");
+    stream->cached = true;
     return 1; // parent exits
 
 err_out:

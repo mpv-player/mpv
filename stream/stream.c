@@ -182,6 +182,16 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     free(s);
     return NULL;
   }
+
+  s->cache_size = 0;
+  if (s->streaming_ctrl && s->streaming_ctrl->buffering) {
+    // Set default cache size to use if user does not specify it.
+    // buffer in KBytes, *5 assuming the prefill is 20% of the buffer.
+    s->cache_size = s->streaming_ctrl->prebuffer_size / 1024 * 5;
+    if (s->cache_size < 64)
+      s->cache_size = 64;
+  }
+
   if(s->type <= -2)
     mp_msg(MSGT_OPEN,MSGL_WARN, "Warning streams need a type !!!!\n");
   if(s->flags & MP_STREAM_SEEK && !s->seek)
@@ -200,8 +210,8 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
 }
 
 
-stream_t *open_stream_full(const char *filename, int mode,
-                           struct MPOpts *options, int *file_format)
+static stream_t *open_stream_full(const char *filename, int mode,
+                                  struct MPOpts *options, int *file_format)
 {
   int i,j,l,r;
   const stream_info_t* sinfo;

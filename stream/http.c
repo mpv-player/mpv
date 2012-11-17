@@ -880,7 +880,6 @@ static int fixup_open(stream_t *stream,int seekable) {
 		return STREAM_UNSUPPORTED;
 	}
 
-	fixup_network_stream_cache(stream);
 	return STREAM_OK;
 }
 

@@ -324,8 +324,7 @@ const m_option_t common_opts[] = {
 // ------------------------- stream options --------------------
 
 #ifdef CONFIG_STREAM_CACHE
-    OPT_INTRANGE("cache", stream_cache_size, M_OPT_LOCAL, 32, 0x7fffffff,
-                 OPTDEF_INT(-1)),
+    OPT_INTRANGE("cache", stream_cache_size, 0, 32, 0x7fffffff, OPTDEF_INT(-1)),
     OPT_FLAG_CONSTANTS("no-cache", stream_cache_size, 0, -1, 0),
 
     OPT_FLOATRANGE("cache-min", stream_cache_min_percent, 0, 0, 99),
