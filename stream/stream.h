@@ -100,7 +100,7 @@
 struct stream_lang_req {
 	int type; // STREAM_AUDIO, STREAM_SUB
 	int id;
-        char *name;
+        char name[50];
 };
 
 typedef enum {

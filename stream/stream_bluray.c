@@ -30,6 +30,8 @@
  */
 
 #include <libbluray/bluray.h>
+#include <string.h>
+#include <assert.h>
 
 #include "config.h"
 #include "libavutil/common.h"
@@ -215,7 +217,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
             }
             while (count-- > 0) {
                 if (si->pid == req->id) {
-                    req->name = talloc_strndup(NULL, si->lang, 4);
+                    snprintf(req->name, sizeof(req->name), "%.4s", si->lang);
                     bd_free_title_info(ti);
                     return STREAM_OK;
                 }

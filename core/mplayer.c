@@ -910,7 +910,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
                                       track->demuxer_id)
         };
         stream_control(track->demuxer->stream, STREAM_CTRL_GET_LANG, &req);
-        track->lang = talloc_steal(track, req.name);
+        track->lang = talloc_strdup(track, req.name);
     }
 
     return track;
@@ -941,7 +941,7 @@ static void add_dvd_tracks(struct MPContext *mpctx)
 
             struct stream_lang_req req = {.type = STREAM_SUB, .id = n};
             stream_control(stream, STREAM_CTRL_GET_LANG, &req);
-            track->lang = talloc_steal(track, req.name);
+            track->lang = talloc_strdup(track, req.name);
         }
     }
 #endif

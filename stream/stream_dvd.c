@@ -707,7 +707,7 @@ static int control(stream_t *stream,int cmd,void* arg)
             }
             if (!lang)
                 break;
-            req->name = talloc_strdup(NULL, (char[]) {lang >> 8, lang, 0});
+            snprintf(req->name, sizeof(req->name), "%c%c", lang >> 8, lang);
             return STREAM_OK;
         }
     }
