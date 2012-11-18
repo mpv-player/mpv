@@ -63,6 +63,7 @@ enum m_rel_time_type {
     REL_TIME_ABSOLUTE,
     REL_TIME_NEGATIVE,
     REL_TIME_PERCENT,
+    REL_TIME_CHAPTER,
 };
 
 struct m_rel_time {

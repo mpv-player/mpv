@@ -1268,6 +1268,16 @@ static int parse_rel_time(const m_option_t *opt, struct bstr name,
         }
     }
 
+    // Chapter pos
+    if (bstr_startswith0(param, "#")) {
+        int chapter = bstrtoll(bstr_cut(param, 1), &param, 10);
+        if (param.len == 0 && chapter >= 1) {
+            t.type = REL_TIME_CHAPTER;
+            t.pos = chapter - 1;
+            goto out;
+        }
+    }
+
     bool sign = bstr_eatstart0(&param, "-");
     double time;
     if (parse_timestring(param, &time, 0)) {
@@ -1277,7 +1287,7 @@ static int parse_rel_time(const m_option_t *opt, struct bstr name,
     }
 
     mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-           "Option %.*s: invalid time or size: '%.*s'\n",
+           "Option %.*s: invalid time or position: '%.*s'\n",
            BSTR_P(name), BSTR_P(param));
     return M_OPT_INVALID;
 

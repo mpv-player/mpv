@@ -1703,7 +1703,9 @@
     The general format for absolute times is ``[[hh:]mm:]ss[.ms]``. If the time
     is negated with ``-``, the seek is relative from the end of the file.
 
-    It's also possible to seek to a percent position with ``pp%``.
+    ``pp%`` seeks to percent position pp (0-100).
+
+    ``#c`` seeks to chapter number c. (Chapters start from 1.)
 
     *EXAMPLE*:
 
@@ -1718,6 +1720,8 @@
     ``--start=-3:20 --length=10``
         Seeks to 3 minutes and 20 seconds before the end of the file, plays
         10 seconds, and exits.
+    ``--start=#2 --end=#4``
+        Plays chapters 2 and 3, and exits.
 
 --ssf=<mode>
     Specifies software scaler parameters.
