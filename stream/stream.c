@@ -476,6 +476,15 @@ int stream_control(stream_t *s, int cmd, void *arg){
   return s->control(s, cmd, arg);
 }
 
+void stream_update_size(stream_t *s)
+{
+    uint64_t size;
+    if (stream_control(s, STREAM_CTRL_GET_SIZE, &size) == STREAM_OK) {
+        if (size > s->end_pos)
+            s->end_pos = size;
+    }
+}
+
 stream_t* new_memory_stream(unsigned char* data,int len){
   stream_t *s;
 
