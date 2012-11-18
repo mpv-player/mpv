@@ -2076,8 +2076,9 @@ static int write_to_ao(struct MPContext *mpctx, void *data, int len, int flags,
         // Keep correct pts for remaining data - could be used to flush
         // remaining buffer when closing ao.
         ao->pts += played / bps;
+        return played;
     }
-    return played;
+    return 0;
 }
 
 #define ASYNC_PLAY_DONE -3
