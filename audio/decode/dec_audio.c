@@ -405,7 +405,7 @@ int decode_audio(sh_audio_t *sh_audio, struct bstr *outbuf, int minlen)
         return -1;
     max_decode_len -= max_decode_len % unitsize;
 
-    while (outbuf->len < minlen) {
+    while (minlen >=0 && outbuf->len < minlen) {
 	int declen = (minlen - outbuf->len) / filter_multiplier
 	    + (unitsize << 5); // some extra for possible filter buffering
 	if (huge_filter_buffer)

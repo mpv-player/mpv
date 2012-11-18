@@ -2124,7 +2124,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
             bytes = 0;
         }
 
-        if (fabs(ptsdiff) > 300)   // pts reset or just broken?
+        if (fabs(ptsdiff) > 300 || isnan(ptsdiff))   // pts reset or just broken?
             bytes = 0;
 
         if (bytes > 0)
