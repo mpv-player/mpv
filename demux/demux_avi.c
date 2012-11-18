@@ -222,7 +222,7 @@ do{
   int flags=1;
   AVIINDEXENTRY *idx=NULL;
   if(priv->idx_size>0 && priv->idx_pos<priv->idx_size){
-    off_t pos;
+    int64_t pos;
 
     idx=&((AVIINDEXENTRY *)priv->idx)[priv->idx_pos++];
 
@@ -239,7 +239,7 @@ do{
       continue; // skip this chunk
     }
 
-    pos = (off_t)priv->idx_offset+AVI_IDX_OFFSET(idx);
+    pos = (int64_t)priv->idx_offset+AVI_IDX_OFFSET(idx);
     if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start) && (demux->stream->flags & MP_STREAM_SEEK)){
       mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!   idx=0x%"PRIX64"  \n",(int64_t)pos);
       continue;
@@ -327,7 +327,7 @@ do{
                        idx_pos=priv->idx_pos++;
 
   if(priv->idx_size>0 && idx_pos<priv->idx_size){
-    off_t pos;
+    int64_t pos;
     idx=&((AVIINDEXENTRY *)priv->idx)[idx_pos];
 
     if(idx->dwFlags&AVIIF_LIST){
@@ -384,7 +384,7 @@ avi_priv_t *priv=demux->priv;
 unsigned int id=0;
 unsigned int len;
 int ret=0;
-off_t *fpos=NULL;
+int64_t *fpos=NULL;
 
   if(ds==demux->video) fpos=&priv->idx_pos_v; else
   if(ds==demux->audio) fpos=&priv->idx_pos_a; else
@@ -477,12 +477,12 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
   if(priv->idx_size>0){
       // check that file is non-interleaved:
       int i;
-      off_t a_pos=-1;
-      off_t v_pos=-1;
+      int64_t a_pos=-1;
+      int64_t v_pos=-1;
       for(i=0;i<priv->idx_size;i++){
         AVIINDEXENTRY* idx=&((AVIINDEXENTRY *)priv->idx)[i];
         demux_stream_t* ds=demux_avi_select_stream(demuxer,idx->ckid);
-        off_t pos = priv->idx_offset + AVI_IDX_OFFSET(idx);
+        int64_t pos = priv->idx_offset + AVI_IDX_OFFSET(idx);
         if(a_pos==-1 && ds==demuxer->audio){
           a_pos=pos;
           if(v_pos!=-1) break;

@@ -89,7 +89,7 @@ static int fill_buffer(stream_t *s, char* buffer, int max_len){
   return len;
 }
 
-static int seek(stream_t *s,off_t newpos) {
+static int seek(stream_t *s,int64_t newpos) {
   s->pos = newpos;
   return 1;
 }

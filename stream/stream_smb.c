@@ -85,7 +85,7 @@ static int control(stream_t *s, int cmd, void *arg) {
   return STREAM_UNSUPPORTED;
 }
 
-static int seek(stream_t *s,off_t newpos) {
+static int seek(stream_t *s,int64_t newpos) {
   s->pos = newpos;
   if(smbc_lseek(s->fd,s->pos,SEEK_SET)<0) {
     s->eof=1;
@@ -119,7 +119,7 @@ static void close_f(stream_t *s){
 static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
   char *filename;
   mode_t m = 0;
-  off_t len;
+  int64_t len;
   int fd, err;
 
   filename = stream->url;

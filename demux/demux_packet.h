@@ -28,7 +28,7 @@ typedef struct demux_packet {
     double pts;
     double duration;
     double stream_pts;
-    off_t pos; // position in index (AVI) or file (MPG)
+    int64_t pos; // position in index (AVI) or file (MPG)
     unsigned char *buffer;
     bool keyframe;
     int refcount; // counter for the master packet, if 0, buffer can be free()d

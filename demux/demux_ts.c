@@ -60,7 +60,7 @@
 
 int ts_prog;
 int ts_keep_broken=0;
-off_t ts_probe = 0;
+int64_t ts_probe = 0;
 int audio_substream_id = -1;
 
 typedef enum
@@ -434,8 +434,8 @@ static int ts_check_file(demuxer_t * demuxer)
 	uint32_t _read, i, count = 0, is_ts;
 	int cc[NB_PID_MAX], last_cc[NB_PID_MAX], pid, cc_ok, c, good, bad;
 	uint8_t size = 0;
-	off_t pos = 0;
-	off_t init_pos;
+	int64_t pos = 0;
+	int64_t init_pos;
 
 	mp_msg(MSGT_DEMUX, MSGL_V, "Checking for MPEG-TS...\n");
 
@@ -629,7 +629,7 @@ typedef struct {
 	int32_t apid, vpid, spid;	//stream ids
 	char alang[4];	//languages
 	uint16_t prog;
-	off_t probe;
+	int64_t probe;
 } tsdemux_init_t;
 
 //second stage: returns the count of A52 syncwords found
@@ -663,12 +663,12 @@ static int a52_check(char *buf, int len)
 }
 
 
-static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
+static int64_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 {
 	int video_found = 0, audio_found = 0, i, num_packets = 0, req_apid, req_vpid, req_spid;
 	int is_audio, is_video, is_sub, has_tables;
 	int32_t p, chosen_pid = 0;
-	off_t pos=0, ret = 0, init_pos, end_pos;
+	int64_t pos=0, ret = 0, init_pos, end_pos;
 	ES_stream_t es;
 	unsigned char tmp[TS_FEC_PACKET_SIZE];
 	ts_priv_t *priv = (ts_priv_t*) demuxer->priv;
@@ -979,7 +979,7 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	uint8_t packet_size;
 	sh_video_t *sh_video;
 	sh_audio_t *sh_audio;
-	off_t start_pos;
+	int64_t start_pos;
 	tsdemux_init_t params;
 	ts_priv_t * priv = demuxer->priv;
 
@@ -3253,7 +3253,7 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_d
 	sh_video_t *sh_video=d_video->sh;
 	ts_priv_t * priv = (ts_priv_t*) demuxer->priv;
 	int i, video_stats;
-	off_t newpos;
+	int64_t newpos;
 
 	//================= seek in MPEG-TS ==========================
 

@@ -110,7 +110,7 @@ static int parse_line(char **ptr, char *cols[6])
 }
 
 /* Loads a file into RAM */
-static char *load_file(const char *filename, off_t * length)
+static char *load_file(const char *filename, int64_t * length)
 {
     int fd = -1;
     char *buffer = NULL;
@@ -163,7 +163,7 @@ static struct cookie_list_type *load_cookies_from(const char *filename,
 						  *list)
 {
     char *ptr;
-    off_t length;
+    int64_t length;
 
     ptr = load_file(filename, &length);
     if (!ptr)

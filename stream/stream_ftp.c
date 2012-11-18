@@ -260,7 +260,7 @@ static int FtpOpenPort(struct stream_priv_s* p) {
   return fd;
 }
 
-static int FtpOpenData(stream_t* s,off_t newpos) {
+static int FtpOpenData(stream_t* s,int64_t newpos) {
   struct stream_priv_s* p = s->priv;
   int resp;
   char str[256],rsp_txt[256];
@@ -308,7 +308,7 @@ static int fill_buffer(stream_t *s, char* buffer, int max_len){
   return (r <= 0) ? -1 : r;
 }
 
-static int seek(stream_t *s,off_t newpos) {
+static int seek(stream_t *s,int64_t newpos) {
   struct stream_priv_s* p = s->priv;
   int resp;
   char rsp_txt[256];

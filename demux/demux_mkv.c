@@ -142,7 +142,7 @@ typedef struct mkv_index {
 } mkv_index_t;
 
 typedef struct mkv_demuxer {
-    off_t segment_start;
+    int64_t segment_start;
 
     double duration, last_pts;
     uint64_t last_filepos;
@@ -159,7 +159,7 @@ typedef struct mkv_demuxer {
     mkv_index_t *indexes;
     int num_indexes;
 
-    off_t *parsed_pos;
+    int64_t *parsed_pos;
     int num_parsed_pos;
     bool parsed_info;
     bool parsed_tracks;
@@ -198,7 +198,7 @@ static void *grow_array(void *array, int nelem, size_t elsize)
     return array;
 }
 
-static bool is_parsed_header(struct mkv_demuxer *mkv_d, off_t pos)
+static bool is_parsed_header(struct mkv_demuxer *mkv_d, int64_t pos)
 {
     int low = 0;
     int high = mkv_d->num_parsed_pos;
@@ -212,7 +212,7 @@ static bool is_parsed_header(struct mkv_demuxer *mkv_d, off_t pos)
     if (mkv_d->num_parsed_pos && mkv_d->parsed_pos[low] == pos)
         return true;
     if (!(mkv_d->num_parsed_pos & 31))
-        mkv_d->parsed_pos = talloc_realloc(mkv_d, mkv_d->parsed_pos, off_t,
+        mkv_d->parsed_pos = talloc_realloc(mkv_d, mkv_d->parsed_pos, int64_t,
                                        mkv_d->num_parsed_pos + 32);
     mkv_d->num_parsed_pos++;
     for (int i = mkv_d->num_parsed_pos - 1; i > low; i--)
@@ -919,7 +919,7 @@ static int demux_mkv_read_attachments(demuxer_t *demuxer)
 }
 
 static int read_header_element(struct demuxer *demuxer, uint32_t id,
-                               off_t at_filepos);
+                               int64_t at_filepos);
 
 static int demux_mkv_read_seekhead(demuxer_t *demuxer)
 {
@@ -936,7 +936,7 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
         goto out;
     }
     /* off now holds the position of the next element after the seek head. */
-    off_t off = stream_tell(s);
+    int64_t off = stream_tell(s);
     for (int i = 0; i < seekhead.n_seek; i++) {
         struct ebml_seek *seek = &seekhead.seek[i];
         if (seek->n_seek_id != 1 || seek->n_seek_position != 1) {
@@ -967,7 +967,7 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
     return res;
 }
 
-static bool seek_pos_id(struct stream *s, off_t pos, uint32_t id)
+static bool seek_pos_id(struct stream *s, int64_t pos, uint32_t id)
 {
     if (!stream_seek(s, pos)) {
         mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Failed to seek in file\n");
@@ -981,11 +981,11 @@ static bool seek_pos_id(struct stream *s, off_t pos, uint32_t id)
 }
 
 static int read_header_element(struct demuxer *demuxer, uint32_t id,
-                               off_t at_filepos)
+                               int64_t at_filepos)
 {
     struct mkv_demuxer *mkv_d = demuxer->priv;
     stream_t *s = demuxer->stream;
-    off_t pos = stream_tell(s) - 4;
+    int64_t pos = stream_tell(s) - 4;
     int res = 1;
 
     switch(id) {
@@ -2290,7 +2290,7 @@ static int seek_creating_index(struct demuxer *demuxer, float rel_seek_secs,
     }
 
     if (target_tc_ns > max_tc) {
-        if ((off_t) max_filepos > stream_tell(s))
+        if ((int64_t) max_filepos > stream_tell(s))
             stream_seek(s, max_filepos);
         else
             stream_seek(s, stream_tell(s) + mkv_d->cluster_size);

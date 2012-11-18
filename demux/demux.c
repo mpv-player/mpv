@@ -559,7 +559,7 @@ static void get_parser(sh_common_t *sh, AVCodecContext **avctx, AVCodecParserCon
     sh->parser = *parser;
 }
 
-int ds_parse(demux_stream_t *ds, uint8_t **buffer, int *len, double pts, off_t pos)
+int ds_parse(demux_stream_t *ds, uint8_t **buffer, int *len, double pts, int64_t pos)
 {
     AVCodecContext *avctx;
     AVCodecParserContext *parser;
@@ -584,7 +584,7 @@ void ds_clear_parser(demux_stream_t *ds)
 }
 
 void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len,
-                    double pts, off_t pos, bool keyframe)
+                    double pts, int64_t pos, bool keyframe)
 {
     demux_packet_t *dp = new_demux_packet(len);
     len = stream_read(stream, dp->buffer, len);

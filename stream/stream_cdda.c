@@ -196,7 +196,7 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
     return CDIO_CD_FRAMESIZE_RAW;
 }
 
-static int seek(stream_t *s, off_t newpos)
+static int seek(stream_t *s, int64_t newpos)
 {
     cdda_priv *p = (cdda_priv *)s->priv;
     int sec;

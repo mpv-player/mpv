@@ -2922,8 +2922,8 @@ int get_percent_pos(struct MPContext *mpctx)
         ;
     else {
         int len = (demuxer->movi_end - demuxer->movi_start) / 100;
-        off_t pos = demuxer->filepos > 0 ?
-                    demuxer->filepos : stream_tell(demuxer->stream);
+        int64_t pos = demuxer->filepos > 0 ?
+                      demuxer->filepos : stream_tell(demuxer->stream);
         if (len > 0)
             ans = (pos - demuxer->movi_start) / len;
         else

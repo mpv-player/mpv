@@ -78,7 +78,7 @@ static demuxer_t* demux_rawaudio_open(demuxer_t* demuxer) {
 static int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
   sh_audio_t* sh_audio = demuxer->audio->sh;
   int l = sh_audio->wf->nAvgBytesPerSec;
-  off_t spos = stream_tell(demuxer->stream);
+  int64_t spos = stream_tell(demuxer->stream);
   demux_packet_t*  dp;
 
   if(demuxer->stream->eof)
@@ -98,7 +98,7 @@ static int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
 static void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
   stream_t* s = demuxer->stream;
   sh_audio_t* sh_audio = demuxer->audio->sh;
-  off_t base,pos;
+  int64_t base,pos;
 
   base = (flags & SEEK_ABSOLUTE) ? demuxer->movi_start : stream_tell(s);
   if(flags & SEEK_FACTOR)

@@ -43,7 +43,7 @@ static int write_buffer(stream_t *s, char *buffer, int len)
     return len;
 }
 
-static int seek(stream_t *s, off_t newpos)
+static int seek(stream_t *s, int64_t newpos)
 {
     AVIOContext *avio = s->priv;
     s->pos = newpos;

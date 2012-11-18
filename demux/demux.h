@@ -116,8 +116,8 @@ typedef struct demux_stream {
     double pts;            // current buffer's pts
     int pts_bytes;         // number of bytes read after last pts stamp
     int eof;               // end of demuxed stream? (true if all buffer empty)
-    off_t pos;               // position in the input stream (file)
-    off_t dpos;              // position in the demuxed stream
+    int64_t pos;               // position in the input stream (file)
+    int64_t dpos;              // position in the demuxed stream
     int pack_no;           // serial number of packet
     bool keyframe;         // keyframe flag of current packet
 //---------------
@@ -216,9 +216,9 @@ struct demuxer_params {
 typedef struct demuxer {
     const demuxer_desc_t *desc; ///< Demuxer description structure
     const char *filetype; // format name when not identified by demuxer (libavformat)
-    off_t filepos;  // input stream current pos.
-    off_t movi_start;
-    off_t movi_end;
+    int64_t filepos;  // input stream current pos.
+    int64_t movi_start;
+    int64_t movi_end;
     struct stream *stream;
     double stream_pts;     // current stream pts, if applicable (e.g. dvd)
     double reference_clock;
@@ -306,12 +306,12 @@ struct sh_stream *ds_gsh(struct demux_stream *ds);
 
 void ds_add_packet(struct demux_stream *ds, struct demux_packet *dp);
 void ds_read_packet(struct demux_stream *ds, struct stream *stream, int len,
-                    double pts, off_t pos, bool keyframe);
+                    double pts, int64_t pos, bool keyframe);
 
 int demux_fill_buffer(struct demuxer *demux, struct demux_stream *ds);
 int ds_fill_buffer(struct demux_stream *ds);
 
-static inline off_t ds_tell(struct demux_stream *ds)
+static inline int64_t ds_tell(struct demux_stream *ds)
 {
     return (ds->dpos - ds->buffer_size) + ds->buffer_pos;
 }
@@ -340,7 +340,7 @@ int ds_get_packet_sub(struct demux_stream *ds, unsigned char **start);
 struct demux_packet *ds_get_packet2(struct demux_stream *ds, bool repeat_last);
 double ds_get_next_pts(struct demux_stream *ds);
 int ds_parse(struct demux_stream *sh, uint8_t **buffer, int *len, double pts,
-             off_t pos);
+             int64_t pos);
 void ds_clear_parser(struct demux_stream *sh);
 
 static inline int avi_stream_id(unsigned int id)

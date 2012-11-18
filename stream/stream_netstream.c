@@ -187,7 +187,7 @@ static int fill_buffer(stream_t *s, char* buffer, int max_len){
 }
 
 
-static int seek(stream_t *s,off_t newpos) {
+static int seek(stream_t *s,int64_t newpos) {
   uint64_t pos = le2me_64((uint64_t)newpos);
   mp_net_stream_packet_t* pack;
 

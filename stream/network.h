@@ -67,10 +67,10 @@ streaming_ctrl_t *streaming_ctrl_new(void);
 int streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size);
 
 int nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctrl );
-int nop_streaming_seek( int fd, off_t pos, streaming_ctrl_t *stream_ctrl );
+int nop_streaming_seek( int fd, int64_t pos, streaming_ctrl_t *stream_ctrl );
 void streaming_ctrl_free( streaming_ctrl_t *streaming_ctrl );
 
-int http_send_request(URL_t *url, off_t pos);
+int http_send_request(URL_t *url, int64_t pos);
 HTTP_header_t *http_read_response(int fd);
 
 int http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry);
@@ -78,6 +78,6 @@ URL_t* check4proxies(const URL_t *url);
 URL_t *url_new_with_proxy(const char *urlstr);
 
 void fixup_network_stream_cache(stream_t *stream);
-int http_seek(stream_t *stream, off_t pos);
+int http_seek(stream_t *stream, int64_t pos);
 
 #endif /* MPLAYER_NETWORK_H */
