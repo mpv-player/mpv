@@ -382,6 +382,8 @@ static int parse_choice(const struct m_option *opt, struct bstr name,
         mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Valid values are:");
         for (alt = opt->priv; alt->name; alt++)
             mp_msg(MSGT_CFGPARSER, MSGL_ERR, " %s", alt->name);
+        if ((opt->flags & M_OPT_MIN) && (opt->flags & M_OPT_MAX))
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR, " %g-%g", opt->min, opt->max);
         mp_msg(MSGT_CFGPARSER, MSGL_ERR, "\n");
         return M_OPT_INVALID;
     }
