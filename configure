@@ -387,6 +387,7 @@ Miscellaneous options:
 Advanced options:
   --enable-shm              enable shm [autodetect]
   --enable-debug[=1-3]      compile-in debugging information [disable]
+  --disable-optimization    compile without -O2 [enable]
 
 Use these options if autodetection fails:
   --extra-cflags=FLAGS        extra CFLAGS
@@ -562,14 +563,21 @@ for ac_option do
     ;;
   --enable-debug)
     _debug='-g'
-    _opt=
     ;;
   --enable-debug=*)
     _debug=$(echo $_echo_n '-g'$_echo_c; echo $ac_option | cut -d '=' -f 2)
-    _opt=
     ;;
   --disable-debug)
     _debug=
+    ;;
+  --enable-optimization)
+    _opt='-O2'
+    ;;
+  --enable-optimization=*)
+    _opt=$(echo $_echo_n '-O'$_echo_c; echo $ac_option | cut -d '=' -f 2)
+    ;;
+  --disable-optimization)
+    _opt=
     ;;
   --enable-gettext)                 _gettext=yes                ;;
   --disable-gettext)                _gettext=no                 ;;
@@ -3408,7 +3416,6 @@ $def_priority
 
 
 /* configurable options */
-$def_debug
 $def_sortsub
 $def_stream_cache
 $def_pthread_cache
