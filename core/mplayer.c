@@ -1335,7 +1335,7 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
             mpctx->osd_visible = 0;
             mpctx->osd->progbar_type = -1; // disable
             vo_osd_changed(OSDTYPE_PROGBAR);
-            mpctx->osd_function = mpctx->paused ? OSD_PAUSE : OSD_PLAY;
+            mpctx->osd_function = 0;
         }
     }
 
@@ -1403,6 +1403,12 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
                 name, ROUND(100 * (val - min) / (max - min)));
 }
 
+void set_osd_function(struct MPContext *mpctx, int osd_function)
+{
+    mpctx->osd_function = osd_function;
+    mpctx->osd_visible = (GetTimerMS() + 1000) | 1;
+}
+
 /**
  * \brief Display text subtitles on the OSD
  */
@@ -1439,7 +1445,10 @@ static void sadd_osd_status(char *buffer, int len, struct MPContext *mpctx,
                             bool full)
 {
     bool fractions = mpctx->opts.osd_fractions;
-    saddf_osd_function_sym(buffer, len, mpctx->osd_function);
+    int sym = mpctx->osd_function;
+    if (!sym)
+        sym = mpctx->paused || mpctx->step_frames ? OSD_PAUSE : OSD_PLAY;
+    saddf_osd_function_sym(buffer, len, sym);
     sadd_hhmmssff(buffer, len, get_current_time(mpctx), fractions);
     if (full) {
         saddf(buffer, len, " / ");
@@ -2537,7 +2546,7 @@ void pause_player(struct MPContext *mpctx)
     mpctx->paused = 1;
     mpctx->step_frames = 0;
     mpctx->time_frame -= get_relative_time(mpctx);
-    mpctx->osd_function = OSD_PAUSE;
+    mpctx->osd_function = 0;
 
     if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
         vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
@@ -2558,8 +2567,7 @@ void unpause_player(struct MPContext *mpctx)
     if (!mpctx->paused)
         return;
     mpctx->paused = 0;
-    if (!mpctx->step_frames)
-        mpctx->osd_function = OSD_PLAY;
+    mpctx->osd_function = 0;
 
     if (mpctx->ao && mpctx->sh_audio)
         ao_resume(mpctx->ao);
@@ -3393,7 +3401,7 @@ static void run_playloop(struct MPContext *mpctx)
 
     // handle -sstep
     if (step_sec > 0 && !mpctx->paused && !mpctx->restart_playback) {
-        mpctx->osd_function = OSD_FFW;
+        set_osd_function(mpctx, OSD_FFW);
         queue_seek(mpctx, MPSEEK_RELATIVE, step_sec, 0);
     }
 
@@ -4316,7 +4324,6 @@ int main(int argc, char *argv[])
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){
-        .osd_function = OSD_PLAY,
         .begin_skip = MP_NOPTS_VALUE,
         .file_format = DEMUXER_TYPE_UNKNOWN,
         .last_dvb_step = 1,

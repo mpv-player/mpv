@@ -137,8 +137,8 @@ typedef struct MPContext {
 
     int add_osd_seek_info; // bitfield of enum mp_osd_seek_info
     unsigned int osd_visible;
-
     int osd_function;
+
     struct playlist *playlist;
     char *filename; // currently playing file
     struct mp_resolve_result *resolve_result;

@@ -42,4 +42,7 @@ void set_osd_msg(struct MPContext *mpctx, int id, int level, int time, const cha
 void set_osd_tmsg(struct MPContext *mpctx, int id, int level, int time, const char* fmt, ...);
 void rm_osd_msg(struct MPContext *mpctx, int id);
 
+// osd_function is the symbol appearing in the video status, such as OSD_PLAY
+void set_osd_function(struct MPContext *mpctx, int osd_function);
+
 #endif /* MPLAYER_MP_OSD_H */

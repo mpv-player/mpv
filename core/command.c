@@ -1756,23 +1756,21 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         float v = cmd->args[0].v.f;
         int abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
         int exact = (cmd->nargs > 2) ? cmd->args[2].v.i : 0;
-        int function;
         if (abs == 2) {   // Absolute seek to a timestamp in seconds
             queue_seek(mpctx, MPSEEK_ABSOLUTE, v, exact);
-            function = v > get_current_time(mpctx) ? OSD_FFW : OSD_REW;
+            set_osd_function(mpctx,
+                             v > get_current_time(mpctx) ? OSD_FFW : OSD_REW);
         } else if (abs) {           /* Absolute seek by percentage */
             queue_seek(mpctx, MPSEEK_FACTOR, v / 100.0, exact);
-            function = OSD_FFW; // Direction isn't set correctly
+            set_osd_function(mpctx, OSD_FFW); // Direction isn't set correctly
         } else {
             queue_seek(mpctx, MPSEEK_RELATIVE, v, exact);
-            function = (v > 0) ? OSD_FFW : OSD_REW;
+            set_osd_function(mpctx, (v > 0) ? OSD_FFW : OSD_REW);
         }
         if (bar_osd)
             mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
         if (msg_osd && !auto_osd)
             mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT;
-        if (mpctx->add_osd_seek_info)
-            mpctx->osd_function = function;
         break;
     }
 
