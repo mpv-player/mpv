@@ -43,9 +43,6 @@ extern int stop_xscreensaver;
 extern int mp_msg_color;
 extern int mp_msg_module;
 
-/* defined in codec-cfg.c */
-extern char *codecs_file;
-
 /* defined in dec_video.c */
 extern int field_dominance;
 
@@ -490,7 +487,7 @@ const m_option_t common_opts[] = {
 
     {"lavdopts", (void *) lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     {"lavfdopts", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-    {"codecs-file", &codecs_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    OPT_STRING("codecs-file", codecs_file, 0),
 // ------------------------- subtitles options --------------------
 
     OPT_STRINGLIST("sub", sub_name, 0),

@@ -4252,19 +4252,10 @@ static bool handle_help_options(struct MPContext *mpctx)
 static bool load_codecs_conf(struct MPContext *mpctx)
 {
     /* Check codecs.conf. */
-    if (!codecs_file || !parse_codec_cfg(codecs_file)) {
-        char *mem_ptr;
-        if (!parse_codec_cfg(mem_ptr = get_path("codecs.conf"))) {
-            if (!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")) {
-                if (!parse_codec_cfg(NULL))
-                    return false;
-                mp_tmsg(MSGT_CPLAYER, MSGL_V,
-                        "Using built-in default codecs.conf.\n");
-            }
-        }
-        free(mem_ptr); // release the buffer created by get_path()
-    }
-    return true;
+    if (mpctx->opts.codecs_file && parse_codec_cfg(mpctx->opts.codecs_file))
+        return true;
+    mp_tmsg(MSGT_CPLAYER, MSGL_V, "Using built-in default codecs.conf.\n");
+    return parse_codec_cfg(NULL);
 }
 
 #ifdef PTW32_STATIC_LIB

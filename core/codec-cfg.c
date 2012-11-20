@@ -59,9 +59,6 @@ static const struct bstr builtin_codecs_conf = {
 #define TYPE_VIDEO      0
 #define TYPE_AUDIO      1
 
-static int codecs_conf_release;
-char * codecs_file = NULL;
-
 static int add_to_fourcc(char *s, char *alias, unsigned int *fourcc,
                          unsigned int *map)
 {
@@ -383,7 +380,6 @@ int parse_codec_cfg(const char *cfgfile)
         tmp = atoi(token[0]);
         if (tmp < codec_cfg_min)
             goto err_out_release_num;
-        codecs_conf_release = tmp;
         while ((tmp = get_token(1, 1)) == RET_EOL)
             /* NOTHING */;
         if (tmp == RET_EOF)
