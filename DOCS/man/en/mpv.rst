@@ -120,7 +120,7 @@ o
 
 d
     Toggle frame dropping states: none / skip display / skip decoding (see
-    ``--framedrop`` and ``--hardframedrop``).
+    ``--framedrop``).
 
 v
     Toggle subtitle visibility.

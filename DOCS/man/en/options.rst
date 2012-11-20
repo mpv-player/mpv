@@ -2221,7 +2221,7 @@
 --screen=<all|current|0-32>
     In multi-monitor configurations (i.e. a single desktop that spans across
     multiple displays) this option tells mpv which screen to display the
-    movie on. A value of ``all?? means fullscreen across the whole virtual display
+    movie on. A value of ``all`` means fullscreen across the whole virtual display
     (in this case system provided information is completely ignored), ``current`` means
     fullscreen on the display the window currently is on. The initial position
     set via the ``--geometry`` option is relative to the specified screen.
