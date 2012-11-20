@@ -1474,7 +1474,6 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
                      "Chapter: %s", chapter);
         talloc_free(chapter);
     }
-    assert(mpctx->master_demuxer);
     if ((mpctx->add_osd_seek_info & OSD_SEEK_INFO_EDITION)
         && mpctx->master_demuxer)
     {

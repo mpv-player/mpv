@@ -19,6 +19,8 @@
 #ifndef MPLAYER_MP_OSD_H
 #define MPLAYER_MP_OSD_H
 
+#include "compat/compiler.h"
+
 #define OSD_MSG_TEXT                    1
 #define OSD_MSG_SUB_DELAY               2
 #define OSD_MSG_SPEED                   3
@@ -38,8 +40,8 @@
 struct MPContext;
 
 void set_osd_bar(struct MPContext *mpctx, int type,const char* name,double min,double max,double val);
-void set_osd_msg(struct MPContext *mpctx, int id, int level, int time, const char* fmt, ...);
-void set_osd_tmsg(struct MPContext *mpctx, int id, int level, int time, const char* fmt, ...);
+void set_osd_msg(struct MPContext *mpctx, int id, int level, int time, const char* fmt, ...) PRINTF_ATTRIBUTE(5,6);
+void set_osd_tmsg(struct MPContext *mpctx, int id, int level, int time, const char* fmt, ...) PRINTF_ATTRIBUTE(5,6);
 void rm_osd_msg(struct MPContext *mpctx, int id);
 
 // osd_function is the symbol appearing in the video status, such as OSD_PLAY
