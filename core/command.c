@@ -754,7 +754,7 @@ static int property_switch_track(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
         if (!track)
-            *(char **) arg = talloc_strdup(NULL, mp_gtext("disabled"));
+            *(char **) arg = talloc_strdup(NULL, "no");
         else {
             char *lang = track->lang;
             if (!lang)
@@ -1919,9 +1919,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             opts->osd_level = v > max ? max : v;
         if (msg_osd && opts->osd_level <= 1)
             set_osd_tmsg(mpctx, OSD_MSG_OSD_STATUS, 0, osd_duration,
-                         "OSD: %s",
-                         opts->osd_level ? mp_gtext("enabled") :
-                         mp_gtext("disabled"));
+                         "OSD: %s", opts->osd_level ? "yes" : "no");
         else
             rm_osd_msg(mpctx, OSD_MSG_OSD_STATUS);
         break;
