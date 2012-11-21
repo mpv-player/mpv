@@ -2170,10 +2170,6 @@
 --user-agent=<string>
     Use <string> as user agent for HTTP streaming.
 
---utf8
-    Tells mpv to handle the subtitle file as UTF-8. By default, the subtitle
-    file encoding is guessed, and all text converted to UTF-8 internally.
-
 -v
     Increment verbosity level, one level for each ``-v`` found on the command
     line.

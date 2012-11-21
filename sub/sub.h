@@ -195,8 +195,6 @@ extern const struct m_sub_options osd_style_conf;
 extern char * const sub_osd_names[];
 extern char * const sub_osd_names_short[];
 
-extern int sub_utf8;
-
 extern char *sub_cp;
 extern int sub_pos;
 

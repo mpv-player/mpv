@@ -58,7 +58,6 @@ char * const sub_osd_names[]={
 };
 char * const sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "", "", "", "", "" };
 
-int sub_utf8=0;
 int sub_pos=100;
 int sub_visibility=1;
 
