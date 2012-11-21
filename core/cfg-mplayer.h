@@ -466,7 +466,7 @@ const m_option_t common_opts[] = {
     // postprocessing:
     {"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
 #ifdef CONFIG_LIBPOSTPROC
-    {"pphelp", &pp_help, CONF_TYPE_PRINT, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
+    {"pphelp", (void *) &pp_help, CONF_TYPE_PRINT, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
 #endif
 
     // scaling:
