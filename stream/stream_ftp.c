@@ -32,7 +32,7 @@
 #include <winsock2.h>
 #endif
 
-#include <libavutil/avutil.h>
+#include <libavutil/common.h>
 
 #include "core/mp_msg.h"
 #include "network.h"
