@@ -102,8 +102,8 @@ static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
         goto print_open_fail;
 
     avctx->time_base = AV_TIME_BASE_Q;
-    avctx->width = image->width;
-    avctx->height = image->height;
+    avctx->width = image->w;
+    avctx->height = image->h;
     avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
     if (ctx->writer->lavc_codec == CODEC_ID_PNG)
         avctx->compression_level = ctx->opts->png_compression;
@@ -115,7 +115,7 @@ static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
         goto error_exit;
     }
 
-    size_t outbuffer_size = image->width * image->height * 3 * 2;
+    size_t outbuffer_size = image->w * image->h * 3 * 2;
     outbuffer = malloc(outbuffer_size);
     if (!outbuffer)
         goto error_exit;
@@ -173,8 +173,8 @@ static int write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
     jpeg_create_compress(&cinfo);
     jpeg_stdio_dest(&cinfo, fp);
 
-    cinfo.image_width = image->width;
-    cinfo.image_height = image->height;
+    cinfo.image_width = image->w;
+    cinfo.image_height = image->h;
     cinfo.input_components = 3;
     cinfo.in_color_space = JCS_RGB;
 
@@ -182,11 +182,8 @@ static int write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
     cinfo.JFIF_major_version = 1;
     cinfo.JFIF_minor_version = 2;
     cinfo.density_unit = 1; /* 0=unknown, 1=dpi, 2=dpcm */
-    /* Image DPI is determined by Y_density, so we leave that at
-       jpeg_dpi if possible and crunch X_density instead (PAR > 1) */
-    // NOTE: write_image never passes anamorphic images currently
-    cinfo.X_density = ctx->opts->jpeg_dpi*image->width/image->w;
-    cinfo.Y_density = ctx->opts->jpeg_dpi*image->height/image->h;
+    cinfo.X_density = ctx->opts->jpeg_dpi;
+    cinfo.Y_density = ctx->opts->jpeg_dpi;
     cinfo.write_Adobe_marker = TRUE;
 
     jpeg_set_defaults(&cinfo);

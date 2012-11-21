@@ -238,7 +238,7 @@ static struct mp_image *add_subs(struct MPContext *mpctx,
                                  struct mp_image *image)
 {
     if (!(image->flags & MP_IMGFLAG_ALLOCATED)) {
-        struct mp_image *new_image = alloc_mpi(image->width, image->height,
+        struct mp_image *new_image = alloc_mpi(image->w, image->h,
                                                image->imgfmt);
         copy_mpi(new_image, image);
         vf_clone_mpi_attributes(new_image, image);
@@ -248,7 +248,7 @@ static struct mp_image *add_subs(struct MPContext *mpctx,
     int d_w = image->display_w ? image->display_w : image->w;
     int d_h = image->display_h ? image->display_h : image->h;
 
-    double sar = (double)image->width / image->height;
+    double sar = (double)image->w / image->h;
     double dar = (double)d_w / d_h;
     struct mp_osd_res res = {
         .w = image->w,

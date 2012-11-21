@@ -49,8 +49,8 @@ static int config(struct vf_instance *vf,
     free_mp_image(vf->priv->image);
     vf->priv->image = new_mp_image(width, height);
     mp_image_setfmt(vf->priv->image, outfmt);
-    vf->priv->image->w = d_width;
-    vf->priv->image->h = d_height;
+    vf->priv->image->display_w = d_width;
+    vf->priv->image->display_h = d_height;
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
@@ -142,6 +142,8 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
         image.w = vf->priv->image->w;
         image.h = vf->priv->image->h;
         vf_clone_mpi_attributes(&image, mpi);
+        image.display_w = vf->priv->image->display_w;
+        image.display_h = vf->priv->image->display_h;
         vf->priv->image_callback(vf->priv->image_callback_ctx, &image);
         vf->priv->store_slices = 0;
     }
