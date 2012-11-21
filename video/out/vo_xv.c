@@ -47,9 +47,11 @@
 #include "vo.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"
+#include "video/filter/vf.h"
 #include "x11_common.h"
 #include "video/memcpy_pic.h"
 #include "sub/sub.h"
+#include "sub/draw_bmp.h"
 #include "aspect.h"
 #include "video/csputils.h"
 #include "core/subopt-helper.h"
@@ -69,10 +71,9 @@ struct xvctx {
     int current_ip_buf;
     int num_buffers;
     int total_buffers;
-    bool have_image_copy;
-    bool unchanged_image;
     int visible_buf;
-    XvImage *xvimage[2 + 1];
+    XvImage *xvimage[2];
+    struct mp_draw_sub_backup *osd_backup;
     uint32_t image_width;
     uint32_t image_height;
     uint32_t image_format;
@@ -83,7 +84,7 @@ struct xvctx {
     uint32_t max_width, max_height; // zero means: not set
     int mode_switched;
 #ifdef HAVE_SHM
-    XShmSegmentInfo Shminfo[2 + 1];
+    XShmSegmentInfo Shminfo[2];
     int Shmem_Flag;
 #endif
 };
@@ -150,7 +151,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     }
 
     ctx->visible_buf = -1;
-    ctx->have_image_copy = false;
 
     /* check image formats */
     ctx->xv_format = 0;
@@ -210,7 +210,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         deallocate_xvimage(vo, i);
 
     ctx->num_buffers = 2;
-    ctx->total_buffers = ctx->num_buffers + 1;
+    ctx->total_buffers = ctx->num_buffers;
 
     for (i = 0; i < ctx->total_buffers; i++)
         allocate_xvimage(vo, i);
@@ -334,14 +334,6 @@ static struct mp_image get_xv_buffer(struct vo *vo, int buf_index)
     return img;
 }
 
-static void copy_backup_image(struct vo *vo, int dest, int src)
-{
-    struct mp_image img_dest = get_xv_buffer(vo, dest);
-    struct mp_image img_src = get_xv_buffer(vo, src);
-
-    copy_mpi(&img_dest, &img_src);
-}
-
 static void check_events(struct vo *vo)
 {
     int e = vo_x11_check_events(vo);
@@ -371,22 +363,17 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         .video_par = vo->aspdat.par,
     };
 
-    if (osd_draw_on_image(osd, res, osd->vo_pts, 0, &img))
-        ctx->unchanged_image = false;
+    osd_draw_on_image_bk(osd, res, osd->vo_pts, 0, ctx->osd_backup, &img);
 }
 
 static int redraw_frame(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
 
-    if (ctx->have_image_copy)
-        copy_backup_image(vo, ctx->visible_buf, ctx->num_buffers);
-    else if (ctx->unchanged_image) {
-        copy_backup_image(vo, ctx->num_buffers, ctx->visible_buf);
-        ctx->have_image_copy = true;
-    }  else
-        return false;
+    struct mp_image img = get_xv_buffer(vo, ctx->visible_buf);
+    mp_draw_sub_backup_restore(ctx->osd_backup, &img);
     ctx->current_buf = ctx->visible_buf;
+
     return true;
 }
 
@@ -433,6 +420,8 @@ static int draw_slice(struct vo *vo, uint8_t *image[], int stride[], int w,
     else
         memcpy_pic(dst, image[2], w, h, current_image->pitches[1], stride[2]);
 
+    mp_draw_sub_backup_reset(ctx->osd_backup);
+
     return 0;
 }
 
@@ -440,20 +429,21 @@ static mp_image_t *get_screenshot(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
 
+    struct mp_image img = get_xv_buffer(vo, ctx->visible_buf);
+    struct mp_image *res = alloc_mpi(img.w, img.h, img.imgfmt);
+    copy_mpi(res, &img);
+    vf_clone_mpi_attributes(res, &img);
     // try to get an image without OSD
-    int id = ctx->have_image_copy ? ctx->num_buffers : ctx->visible_buf;
-    struct mp_image img = get_xv_buffer(vo, id);
-    img.display_w = vo->aspdat.prew;
-    img.display_h = vo->aspdat.preh;
+    mp_draw_sub_backup_restore(ctx->osd_backup, res);
+    res->display_w = vo->aspdat.prew;
+    res->display_h = vo->aspdat.preh;
 
-    return talloc_memdup(NULL, &img, sizeof(img));
+    return res;
 }
 
 static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct xvctx *ctx = vo->priv;
-
-    ctx->have_image_copy = false;
 
     if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
         ; // done
@@ -468,11 +458,8 @@ static uint32_t draw_image(struct vo *vo, mp_image_t *mpi)
     else
           return false;
 
-    if (ctx->is_paused) {
-        copy_backup_image(vo, ctx->num_buffers, ctx->current_buf);
-        ctx->have_image_copy = true;
-    }
-    ctx->unchanged_image = true;
+    mp_draw_sub_backup_reset(ctx->osd_backup);
+
     return true;
 }
 
@@ -635,6 +622,8 @@ static int preinit(struct vo *vo, const char *arg)
     ctx->fo = XvListImageFormats(x11->display, x11->xv_port,
                                  (int *) &ctx->formats);
 
+    ctx->osd_backup = talloc_steal(ctx, mp_draw_sub_backup_new());
+
     return 0;
 
   error:
@@ -695,7 +684,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         args->out_image = get_screenshot(vo);
-        args->has_osd = !ctx->have_image_copy;
         return true;
     }
     }

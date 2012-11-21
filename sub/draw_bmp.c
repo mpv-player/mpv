@@ -374,6 +374,7 @@ static void align_bbox(int xstep, int ystep, struct mp_rect *rc)
     rc->y1 = FFALIGN(rc->y1, ystep);
 }
 
+// Post condition, if true returned: rc is inside img
 static bool align_bbox_for_swscale(struct mp_image *img, struct mp_rect *rc)
 {
     struct mp_rect img_rect = {0, 0, img->w, img->h};
@@ -525,6 +526,129 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
         mp_image_swscale(&dst_region, temp, SWS_AREA); // chroma down
         free_mp_image(temp);
     }
+}
+
+struct mp_draw_sub_backup
+{
+    bool valid;
+    struct mp_image *image;                     // backed up image parts
+    struct line_ext *lines[MP_MAX_PLANES];      // backup range for each line
+};
+
+struct line_ext {
+    int x0, x1; // x1 is exclusive
+};
+
+struct mp_draw_sub_backup *mp_draw_sub_backup_new(void)
+{
+    return talloc_zero(NULL, struct mp_draw_sub_backup);
+}
+
+// Signal that the full image is valid (nothing to backup).
+void mp_draw_sub_backup_reset(struct mp_draw_sub_backup *backup)
+{
+    backup->valid = true;
+    if (backup->image) {
+        for (int p = 0; p < MP_MAX_PLANES; p++) {
+            int h = backup->image->h;
+            for (int y = 0; y < h; y++) {
+                struct line_ext *ext = &backup->lines[p][y];
+                ext->x0 = ext->x1 = -1;
+            }
+        }
+    }
+}
+
+static void backup_realloc(struct mp_draw_sub_backup *backup,
+                           struct mp_image *img)
+{
+    if (backup->image && backup->image->imgfmt == img->imgfmt
+        && backup->image->w == img->w && backup->image->h == img->h)
+        return;
+
+    talloc_free_children(backup);
+    backup->image = alloc_mpi(img->w, img->h, img->imgfmt);
+    talloc_steal(backup, backup->image);
+    for (int p = 0; p < MP_MAX_PLANES; p++) {
+        backup->lines[p] = talloc_array(backup, struct line_ext,
+                                        backup->image->h);
+    }
+    mp_draw_sub_backup_reset(backup);
+}
+
+static void copy_line(struct mp_image *dst, struct mp_image *src,
+                      int p, int plane_y, int x0, int x1)
+{
+    int bits = MP_IMAGE_BITS_PER_PIXEL_ON_PLANE(dst, p);
+    int xs = p ? dst->chroma_x_shift : 0;
+    memcpy(dst->planes[p] + plane_y * dst->stride[p] + (x0 >> xs) * bits / 8,
+           src->planes[p] + plane_y * src->stride[p] + (x0 >> xs) * bits / 8,
+           ((x1 - x0) >> xs) * bits / 8);
+}
+
+static void backup_rect(struct mp_draw_sub_backup *backup, struct mp_image *img,
+                        int plane, struct mp_rect rc)
+{
+    if (!align_bbox_for_swscale(img, &rc))
+        return;
+    int ys = plane ? img->chroma_y_shift : 0;
+    int yp = ys ? ((1 << ys) - 1) : 0;
+    for (int y = (rc.y0 >> ys); y < ((rc.y1 + yp) >> ys); y++) {
+        struct line_ext *ext = &backup->lines[plane][y];
+        if (ext->x0 == -1) {
+            copy_line(backup->image, img, plane, y, rc.x0, rc.x1);
+            ext->x0 = rc.x0;
+            ext->x1 = rc.x1;
+        } else {
+            if (rc.x0 < ext->x0) {
+                copy_line(backup->image, img, plane, y, rc.x0, ext->x0);
+                ext->x0 = rc.x0;
+            }
+            if (ext->x1 < rc.x1) {
+                copy_line(backup->image, img, plane, y, ext->x1, rc.x1);
+                ext->x1 = rc.x1;
+            }
+        }
+    }
+}
+
+void mp_draw_sub_backup_add(struct mp_draw_sub_backup *backup,
+                            struct mp_image *img, struct sub_bitmaps *sbs)
+{
+    backup_realloc(backup, img);
+
+    for (int p = 0; p < img->num_planes; p++) {
+        for (int i = 0; i < sbs->num_parts; ++i) {
+            struct sub_bitmap *sb = &sbs->parts[i];
+            struct mp_rect rc = {sb->x, sb->y, sb->x + sb->dw, sb->y + sb->dh};
+            backup_rect(backup, img, p, rc);
+        }
+    }
+}
+
+bool mp_draw_sub_backup_restore(struct mp_draw_sub_backup *backup,
+                                struct mp_image *buffer)
+{
+    if (!backup->image || backup->image->imgfmt != buffer->imgfmt
+        || backup->image->w != buffer->w || backup->image->h != buffer->h
+        || !backup->valid)
+    {
+        backup->valid = false;
+        return false;
+    }
+    struct mp_image *img = backup->image;
+    for (int p = 0; p < img->num_planes; p++) {
+        int ys = p ? img->chroma_y_shift : 0;
+        int yp = ys ? ((1 << ys) - 1) : 0;
+        int p_h = ((img->h + yp) >> ys);
+        for (int y = 0; y < p_h; y++) {
+            struct line_ext *ext = &backup->lines[p][y];
+            if (ext->x0 < ext->x1) {
+                copy_line(buffer, img, p, y, ext->x0, ext->x1);
+            }
+        }
+    }
+    return true;
 }
 
 // vim: ts=4 sw=4 et tw=80
