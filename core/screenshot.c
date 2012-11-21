@@ -290,9 +290,11 @@ static void vf_screenshot_callback(void *pctx, struct mp_image *image)
 {
     struct MPContext *mpctx = (struct MPContext *)pctx;
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
-    screenshot_save(mpctx, image, ctx->mode);
-    if (ctx->each_frame)
-        screenshot_request(mpctx, ctx->mode, false);
+    screenshot_save(mpctx, image, ctx->mode == MODE_SUBTITLES);
+    if (ctx->each_frame) {
+        ctx->each_frame = false;
+        screenshot_request(mpctx, ctx->mode, true);
+    }
 }
 
 static bool force_vf(struct MPContext *mpctx)
@@ -320,10 +322,13 @@ void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame)
 
         if (each_frame) {
             ctx->each_frame = !ctx->each_frame;
-            ctx->mode = mode;
             if (!ctx->each_frame)
                 return;
+        } else {
+            ctx->each_frame = false;
         }
+
+        ctx->mode = mode;
 
         struct voctrl_screenshot_args args =
                             { .full_window = (mode == MODE_FULL_WINDOW) };
@@ -365,5 +370,6 @@ void screenshot_flip(struct MPContext *mpctx)
     if (ctx->using_vf_screenshot)
         return;
 
-    screenshot_request(mpctx, ctx->mode, false);
+    ctx->each_frame = false;
+    screenshot_request(mpctx, ctx->mode, true);
 }

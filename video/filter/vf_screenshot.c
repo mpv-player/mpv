@@ -139,6 +139,7 @@ static int put_image(struct vf_instance *vf, mp_image_t *mpi, double pts)
             image = *dmpi;
         else
             image = *vf->priv->image;
+        image.flags &= ~MP_IMGFLAG_ALLOCATED;
         image.w = vf->priv->image->w;
         image.h = vf->priv->image->h;
         vf_clone_mpi_attributes(&image, mpi);
