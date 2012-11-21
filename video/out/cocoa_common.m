@@ -323,7 +323,8 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     struct vo_cocoa_state *s = vo->cocoa;
     struct MPOpts *opts = vo->opts;
 
-    const NSRect window_rect = NSMakeRect(0, 0, d_width, d_height);
+    const NSRect window_rect = NSMakeRect(xinerama_x, xinerama_y,
+                                          d_width, d_height);
     const NSRect glview_rect = NSMakeRect(0, 0, 100, 100);
 
     s->window =
