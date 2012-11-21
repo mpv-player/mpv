@@ -442,6 +442,17 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     osd_draw_on_image(osd, res, osd->vo_pts, 0, &img);
 }
 
+static mp_image_t *get_screenshot(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+
+    struct mp_image img = get_x_buffer(p);
+    struct mp_image *res = alloc_mpi(img.w, img.h, img.imgfmt);
+    copy_mpi(res, &img);
+
+    return res;
+}
+
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -587,6 +598,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_UPDATE_SCREENINFO:
         update_xinerama_info(vo);
         return VO_TRUE;
+    case VOCTRL_SCREENSHOT: {
+        struct voctrl_screenshot_args *args = data;
+        args->out_image = get_screenshot(vo);
+        return true;
+    }
     }
     return VO_NOTIMPL;
 }
