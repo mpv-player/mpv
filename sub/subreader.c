@@ -625,19 +625,14 @@ static subtitle *sub_read_line_rt(stream_t *st,subtitle *current,
 static subtitle *sub_read_line_ssa(stream_t *st,subtitle *current,
                                     struct readline_args *args)
 {
-/*
- * Sub Station Alpha v4 (and v2?) scripts have 9 commas before subtitle
- * other Sub Station Alpha scripts have only 8 commas before subtitle
- * Reading the "ScriptType:" field is not reliable since many scripts appear
- * w/o it
- *
- * http://www.scriptclub.org is a good place to find more examples
- * http://www.eswat.demon.co.uk is where the SSA specs can be found
- */
+    /* Instead of hardcoding the expected fields and their order on
+     * each dialogue line, this code should parse the "Format: " line
+     * which lists the fields used in the script. As is, this may not
+     * work correctly with all scripts.
+     */
+
         int utf16 = args->utf16;
         int comma;
-        static int max_comma = 32; /* let's use 32 for the case that the */
-                    /*  amount of commas increase with newer SSA versions */
 
 	int hour1, min1, sec1, hunsec1,
 	    hour2, min2, sec2, hunsec2, nothing;
@@ -647,7 +642,6 @@ static subtitle *sub_read_line_ssa(stream_t *st,subtitle *current,
 	     line3[LINE_LEN+1],
 	     *line2;
 	char *tmp;
-	const char *brace;
 
 	do {
 		if (!stream_read_line (st, line, LINE_LEN, utf16)) return NULL;
@@ -665,21 +659,11 @@ static subtitle *sub_read_line_ssa(stream_t *st,subtitle *current,
 
         line2=strchr(line3, ',');
         if (!line2) return NULL;
-        brace = strchr(line2, '{');
 
-        for (comma = 4; comma < max_comma; comma ++)
-          {
-            tmp = line2;
-            if(!(tmp=strchr(++tmp, ','))) break;
-            if(brace && brace < tmp) break; // comma inside command
-            if(tmp[1] == ' ') break;
-                  /* a space after a comma means we're already in a sentence */
-            line2 = tmp;
-          }
-
-        if(comma < max_comma)max_comma = comma;
-	/* eliminate the trailing comma */
-	if(*line2 == ',') line2++;
+        for (comma = 3; comma < 9; comma ++)
+            if (!(line2 = strchr(++line2, ',')))
+                return NULL;
+        line2++;
 
 	current->lines=0;num=0;
 	current->start = 360000*hour1 + 6000*min1 + 100*sec1 + hunsec1;
@@ -701,25 +685,18 @@ static subtitle *sub_read_line_ssa(stream_t *st,subtitle *current,
 	return current;
 }
 
-static void sub_pp_ssa(subtitle *sub) {
-	int l=sub->lines;
-	char *so,*de,*start;
-
-	while (l){
-            	/* eliminate any text enclosed with {}, they are font and color settings */
-            	so=de=sub->text[--l];
-            	while (*so) {
-            		if(*so == '{' && so[1]=='\\') {
-            			for (start=so; *so && *so!='}'; so++);
-            			if(*so) so++; else so=start;
-            		}
-            		if(*so) {
-            			*de=*so;
-            			so++; de++;
-            		}
-            	}
-            	*de=*so;
+static void sub_pp_ssa(subtitle *sub)
+{
+    for (int i = 0; i < sub->lines; i++) {
+        char *s, *d;
+        s = d = sub->text[i];
+        while (1) {
+            while (*s == '{')
+                while (*s && *s++ != '}');
+            if (!(*d++ = *s++))
+                break;
         }
+    }
 }
 
 /*
