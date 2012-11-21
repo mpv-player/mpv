@@ -42,6 +42,7 @@
 #endif
 
 #include "sub/sub.h"
+#include "sub/draw_bmp.h"
 
 #include "video/sws_utils.h"
 #define MODE_RGB  0x1
@@ -53,6 +54,8 @@ extern int sws_flags;
 
 struct priv {
     struct vo *vo;
+
+    struct mp_draw_sub_backup *osd_backup;
 
     /* local data */
     unsigned char *ImageData;
@@ -439,7 +442,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         .video_par = vo->aspdat.par,
     };
 
-    osd_draw_on_image(osd, res, osd->vo_pts, 0, &img);
+    osd_draw_on_image_bk(osd, res, osd->vo_pts, 0, p->osd_backup, &img);
 }
 
 static mp_image_t *get_screenshot(struct vo *vo)
@@ -449,8 +452,19 @@ static mp_image_t *get_screenshot(struct vo *vo)
     struct mp_image img = get_x_buffer(p);
     struct mp_image *res = alloc_mpi(img.w, img.h, img.imgfmt);
     copy_mpi(res, &img);
+    mp_draw_sub_backup_restore(p->osd_backup, res);
 
     return res;
+}
+
+static int redraw_frame(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+
+    struct mp_image img = get_x_buffer(p);
+    mp_draw_sub_backup_restore(p->osd_backup, &img);
+
+    return true;
 }
 
 static void flip_page(struct vo *vo)
@@ -505,6 +519,7 @@ static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
     }
     sws_scale(p->swsContext, (const uint8_t **)src, stride, y, h, dst,
               dstStride);
+    mp_draw_sub_backup_reset(p->osd_backup);
     return 0;
 }
 
@@ -563,6 +578,8 @@ static int preinit(struct vo *vo, const char *arg)
         return ENOSYS;
     }
 
+    p->osd_backup = talloc_steal(p, mp_draw_sub_backup_new());
+
     if (!vo_init(vo))
         return -1;              // Can't open X11
     return 0;
@@ -598,6 +615,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_UPDATE_SCREENINFO:
         update_xinerama_info(vo);
         return VO_TRUE;
+    case VOCTRL_REDRAW_FRAME:
+        return redraw_frame(vo);
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         args->out_image = get_screenshot(vo);
