@@ -239,11 +239,12 @@ static void allocate_xvimage(struct vo *vo, int foo)
         ctx->Shmem_Flag = 0;
         mp_tmsg(MSGT_VO, MSGL_INFO, "[VO_XV] Shared memory not supported\nReverting to normal Xv.\n");
     }
+    int aligned_w = FFALIGN(ctx->image_width, 16);
     if (ctx->Shmem_Flag) {
         ctx->xvimage[foo] =
             (XvImage *) XvShmCreateImage(x11->display, x11->xv_port,
                                          ctx->xv_format, NULL,
-                                         ctx->image_width, ctx->image_height,
+                                         aligned_w, ctx->image_height,
                                          &ctx->Shminfo[foo]);
 
         ctx->Shminfo[foo].shmid = shmget(IPC_PRIVATE,
@@ -262,7 +263,7 @@ static void allocate_xvimage(struct vo *vo, int foo)
     {
         ctx->xvimage[foo] =
             (XvImage *) XvCreateImage(x11->display, x11->xv_port,
-                                      ctx->xv_format, NULL, ctx->image_width,
+                                      ctx->xv_format, NULL, aligned_w,
                                       ctx->image_height);
         ctx->xvimage[foo]->data = malloc(ctx->xvimage[foo]->data_size);
         XSync(x11->display, False);
@@ -318,8 +319,8 @@ static struct mp_image get_xv_buffer(struct vo *vo, int buf_index)
     XvImage *xv_image = ctx->xvimage[buf_index];
 
     struct mp_image img = {0};
-    img.w = img.width = xv_image->width;
-    img.h = img.height = xv_image->height;
+    img.w = img.width = ctx->image_width;
+    img.h = img.height = ctx->image_height;
     mp_image_setfmt(&img, ctx->image_format);
 
     bool swapuv = ctx->image_format == IMGFMT_YV12;
