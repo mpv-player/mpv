@@ -85,10 +85,11 @@ struct mp_osd_res {
 
 enum mp_osdtype {
     OSDTYPE_SUB,
-    OSDTYPE_OSD,
     OSDTYPE_SUBTITLE,
-    OSDTYPE_PROGBAR,
     OSDTYPE_SPU,
+
+    OSDTYPE_PROGBAR,
+    OSDTYPE_OSD,
 
     MAX_OSD_PARTS
 };
