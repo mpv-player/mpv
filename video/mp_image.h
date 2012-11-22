@@ -26,6 +26,9 @@
 #include "core/mp_msg.h"
 #include "csputils.h"
 
+// Minimum stride alignment in pixels
+#define MP_STRIDE_ALIGNMENT 32
+
 //--------- codec's requirements (filled by the codec/vf) ---------
 
 //--- buffer content restrictions:
