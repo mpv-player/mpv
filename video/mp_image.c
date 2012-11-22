@@ -149,6 +149,10 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     if (out_fmt == IMGFMT_GBRP) {
         mpi->bpp=24;
         mpi->flags|=MP_IMGFLAG_PLANAR;
+        mpi->chroma_x_shift = 0;
+        mpi->chroma_y_shift = 0;
+        mpi->chroma_width=mpi->width;
+        mpi->chroma_height=mpi->height;
         return;
     }
     mpi->flags|=MP_IMGFLAG_YUV;

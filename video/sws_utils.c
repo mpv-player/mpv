@@ -151,9 +151,54 @@ static int mp_csp_to_sws_colorspace(enum mp_csp csp)
     }
 }
 
+// component_offset[]: byte index of each r (0), g (1), b (2), a (3) component
+static void planarize32(struct mp_image *dst, struct mp_image *src,
+                        int component_offset[4])
+{
+    for (int y = 0; y < dst->h; y++) {
+        for (int p = 0; p < 3; p++) {
+            uint8_t *d_line = dst->planes[p] + y * dst->stride[p];
+            uint8_t *s_line = src->planes[0] + y * src->stride[0];
+            s_line += component_offset[(p + 1) % 3]; // GBR => RGB
+            for (int x = 0; x < dst->w; x++) {
+                d_line[x] = s_line[x * 4];
+            }
+        }
+    }
+}
+
+#define SET_COMPS(comp, r, g, b, a) \
+    { (comp)[0] = (r); (comp)[1] = (g); (comp)[2] = (b); (comp)[3] = (a); }
+
+static void to_gbrp(struct mp_image *dst, struct mp_image *src,
+                    int my_sws_flags)
+{
+    struct mp_image *temp = NULL;
+    int comp[4];
+
+    switch (src->imgfmt) {
+    case IMGFMT_ABGR: SET_COMPS(comp, 3, 2, 1, 0); break;
+    case IMGFMT_BGRA: SET_COMPS(comp, 2, 1, 0, 3); break;
+    case IMGFMT_ARGB: SET_COMPS(comp, 1, 2, 3, 0); break;
+    case IMGFMT_RGBA: SET_COMPS(comp, 0, 1, 2, 3); break;
+    default:
+        temp = alloc_mpi(dst->w, dst->h, IMGFMT_RGBA);
+        mp_image_swscale(temp, src, my_sws_flags);
+        src = temp;
+        SET_COMPS(comp, 0, 1, 2, 3);
+    }
+
+    planarize32(dst, src, comp);
+
+    talloc_free(temp);
+}
+
 void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
                       int my_sws_flags)
 {
+    if (dst->imgfmt == IMGFMT_GBRP)
+        return to_gbrp(dst, src, my_sws_flags);
+
     enum PixelFormat s_fmt = imgfmt2pixfmt(src->imgfmt);
     if (src->imgfmt == IMGFMT_RGB8 || src->imgfmt == IMGFMT_BGR8)
         s_fmt = PIX_FMT_PAL8;

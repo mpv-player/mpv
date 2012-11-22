@@ -307,7 +307,14 @@ static void draw_ass(struct mp_draw_sub_cache **cache, struct mp_rect bb,
         int b = (sb->libass.color >> 8) & 0xFF;
         int a = 255 - (sb->libass.color & 0xFF);
         int color_yuv[3] = {r, g, b};
-        mp_map_int_color(rgb2yuv, bits, color_yuv);
+        if (dst.flags & MP_IMGFLAG_YUV) {
+            mp_map_int_color(rgb2yuv, bits, color_yuv);
+        } else {
+            assert(dst.imgfmt == IMGFMT_GBRP);
+            color_yuv[0] = g;
+            color_yuv[1] = b;
+            color_yuv[2] = r;
+        }
 
         int bytes = (bits + 7) / 8;
         uint8_t *alpha_p = (uint8_t *)sb->bitmap + src_y * sb->stride + src_x;
@@ -411,6 +418,10 @@ static void get_closest_y444_format(int imgfmt, int *out_format, int *out_bits)
                     return;
             }
         }
+    } else {
+        *out_format = IMGFMT_GBRP;
+        *out_bits = 8;
+        return;
     }
     *out_format = IMGFMT_444P16;
     *out_bits = 16;
