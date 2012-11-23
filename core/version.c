@@ -19,3 +19,4 @@
 #include "version.h"
 
 const char *mplayer_version  = "mpv " VERSION;
+const char *mplayer_builddate = BUILDDATE;

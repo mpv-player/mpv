@@ -31,6 +31,7 @@
 #define ROUND(x) ((int)((x) < 0 ? (x) - 0.5 : (x) + 0.5))
 
 extern const char *mplayer_version;
+extern const char *mplayer_builddate;
 
 char *mp_format_time(double time, bool fractions);
 

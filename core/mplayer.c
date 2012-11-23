@@ -4186,7 +4186,7 @@ static void play_files(struct MPContext *mpctx)
 static void print_version(int always)
 {
     mp_msg(MSGT_CPLAYER, always ? MSGL_INFO : MSGL_V,
-           "%s (C) 2000-2012 mpv/MPlayer/mplayer2 projects\n", mplayer_version);
+           "%s (C) 2000-2012 mpv/MPlayer/mplayer2 projects\n built on %s\n", mplayer_version, mplayer_builddate);
 }
 
 static bool handle_help_options(struct MPContext *mpctx)

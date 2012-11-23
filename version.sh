@@ -1,5 +1,7 @@
 #!/bin/sh
 
+export LC_ALL=C
+
 test "$1" && extra="-$1"
 
 # Extract revision number from file used by daily tarball snapshots
@@ -15,10 +17,12 @@ test $version || version=git-$git_revision
 
 NEW_REVISION="#define VERSION \"${version}${extra}\""
 OLD_REVISION=$(head -n 1 version.h 2> /dev/null)
+BUILDDATE="#define BUILDDATE \"$(date)\""
 
 # Update version.h only on revision changes to avoid spurious rebuilds
 if test "$NEW_REVISION" != "$OLD_REVISION"; then
     cat <<EOF > version.h
 $NEW_REVISION
+$BUILDDATE
 EOF
 fi
