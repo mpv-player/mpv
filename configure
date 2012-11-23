@@ -2571,34 +2571,24 @@ else
 fi
 echores "$_jack"
 
+
 echocheck "OpenAL"
 if test "$_openal" = auto ; then
   _openal=no
-cat > $TMPC << EOF
-#ifdef OPENAL_AL_H
-#include <OpenAL/al.h>
-#else
-#include <AL/al.h>
-#endif
-int main(void) {
-  alSourceQueueBuffers(0, 0, 0);
-//  alGetSourcei(0, AL_SAMPLE_OFFSET, 0);
-  return 0;
-}
-EOF
-  for I in "-lopenal" "-lopenal32" "-framework OpenAL" ; do
-    cc_check $I && _openal=yes && break
-    cc_check -DOPENAL_AL_H=1 $I && def_openal_h='#define OPENAL_AL_H 1' && _openal=yes && break
-  done
-  test "$_openal" = yes && libs_mplayer="$libs_mplayer $I"
+  if pkg_config_add 'openal >= 1.13' ; then
+      _openal=yes
+  fi
 fi
+echores "$_openal"
+
 if test "$_openal" = yes ; then
   def_openal='#define CONFIG_OPENAL 1'
   aomodules="openal $aomodules"
 else
+  def_openal='#undef CONFIG_OPENAL'
   noaomodules="openal $noaomodules"
 fi
-echores "$_openal"
+
 
 echocheck "ALSA audio"
 if test "$_alsa" = auto ; then
