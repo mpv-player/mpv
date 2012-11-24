@@ -24,21 +24,17 @@
 #include <string.h>
 #include <stddef.h>
 
-#define memcpy_pic(d, s, b, h, ds, ss) memcpy_pic2(d, s, b, h, ds, ss, 0)
-#define my_memcpy_pic(d, s, b, h, ds, ss) memcpy_pic2(d, s, b, h, ds, ss, 1)
+#define my_memcpy_pic memcpy_pic
+#define memcpy_pic2(d, s, b, h, ds, ss, unused) memcpy_pic(d, s, b, h, ds, ss)
 
-/**
- * \param limit2width always skip data between end of line and start of next
- *                    instead of copying the full block when strides are the same
- */
-static inline void * memcpy_pic2(void * dst, const void * src,
-                                 int bytesPerLine, int height,
-                                 int dstStride, int srcStride, int limit2width)
+static inline void * memcpy_pic(void * dst, const void * src,
+                                int bytesPerLine, int height,
+                                int dstStride, int srcStride)
 {
 	int i;
 	void *retval=dst;
 
-	if(!limit2width && dstStride == srcStride)
+	if(bytesPerLine == dstStride && dstStride == srcStride)
 	{
 		if (srcStride < 0) {
 	    		src = (uint8_t*)src + (height-1)*srcStride;
