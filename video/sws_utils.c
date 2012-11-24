@@ -171,12 +171,10 @@ static void to_gbrp(struct mp_image *dst, struct mp_image *src,
     talloc_free(temp);
 }
 
-void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
-                      int my_sws_flags)
-{
-    if (dst->imgfmt == IMGFMT_GBRP)
-        return to_gbrp(dst, src, my_sws_flags);
 
+static void mp_sws_set_conv(struct SwsContext *sws, struct mp_image *dst,
+                            struct mp_image *src, int my_sws_flags)
+{
     enum PixelFormat s_fmt = imgfmt2pixfmt(src->imgfmt);
     if (src->imgfmt == IMGFMT_RGB8 || src->imgfmt == IMGFMT_BGR8)
         s_fmt = PIX_FMT_PAL8;
@@ -195,8 +193,6 @@ void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
     s_range = s_range && s_yuv;
     d_range = d_range && d_yuv;
 
-    struct SwsContext *sws = sws_alloc_context();
-
     av_opt_set_int(sws, "sws_flags", my_sws_flags, 0);
 
     av_opt_set_int(sws, "srcw", src->w, 0);
@@ -210,6 +206,16 @@ void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
     sws_setColorspaceDetails(sws, sws_getCoefficients(s_csp), s_range,
                              sws_getCoefficients(d_csp), d_range,
                              0, 1 << 16, 1 << 16);
+}
+
+void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
+                      int my_sws_flags)
+{
+    if (dst->imgfmt == IMGFMT_GBRP)
+        return to_gbrp(dst, src, my_sws_flags);
+
+    struct SwsContext *sws = sws_alloc_context();
+    mp_sws_set_conv(sws, dst, src, my_sws_flags);
 
     int res = sws_init_context(sws, NULL, NULL);
     assert(res >= 0);
@@ -217,6 +223,28 @@ void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
     sws_scale(sws, (const uint8_t *const *) src->planes, src->stride,
               0, src->h, dst->planes, dst->stride);
     sws_freeContext(sws);
+}
+
+void mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
+                            float gblur)
+{
+    struct SwsContext *sws = sws_alloc_context();
+
+    int flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP |
+                SWS_ACCURATE_RND | SWS_BITEXACT;
+
+    mp_sws_set_conv(sws, dst, src, flags);
+
+    SwsFilter *src_filter = sws_getDefaultFilter(gblur, gblur, 0, 0, 0, 0, 0);
+
+    int res = sws_init_context(sws, src_filter, NULL);
+    assert(res >= 0);
+
+    sws_scale(sws, (const uint8_t *const *) src->planes, src->stride,
+              0, src->h, dst->planes, dst->stride);
+    sws_freeContext(sws);
+
+    sws_freeFilter(src_filter);
 }
 
 // vim: ts=4 sw=4 et tw=80

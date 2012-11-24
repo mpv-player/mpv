@@ -110,6 +110,7 @@ Command line switches
     --cursor-autohide-delay             --cursor-autohide
     -sub-fuzziness                      --autosub-match
     -subfont-text-scale                 --sub-scale
+    -spugauss                           --sub-gauss
     =================================== ===================================
 
 input.conf and slave commands

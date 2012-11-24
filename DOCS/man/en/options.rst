@@ -1882,6 +1882,13 @@
     *NOTE*: <rate> > movie fps speeds the subtitles up for frame-based
     subtitle files and slows them down for time-based ones.
 
+--sub-gauss=<0.0-3.0>
+    Apply gaussian blur to image subtitles (default: 0). This can help making
+    pixelated DVD/Vobsubs look nicer. A value other than 0 also switches to
+    software subtitle scaling. Might be slow.
+
+    *NOTE*: never applied to text subtitles.
+
 --sub-pos=<0-100>
     Specify the position of subtitles on the screen. The value is the vertical
     position of the subtitle in % of the screen height.

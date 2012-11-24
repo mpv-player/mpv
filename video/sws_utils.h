@@ -23,6 +23,9 @@ bool mp_sws_supported_format(int imgfmt);
 void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
                       int my_sws_flags);
 
+void mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
+                            float gblur);
+
 #endif /* MP_SWS_UTILS_H */
 
 // vim: ts=4 sw=4 et tw=80

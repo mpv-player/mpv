@@ -28,6 +28,7 @@
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
+#include "video/memcpy_pic.h"
 
 struct osd_conv_cache {
     struct sub_bitmap part;
@@ -83,6 +84,47 @@ bool osd_conv_idx_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
             for (int x = 0; x < s->w; x++)
                 *outbmp++ = sb.palette[*inbmp++];
         }
+    }
+    return true;
+}
+
+bool osd_conv_blur_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
+                        double gblur)
+{
+    struct sub_bitmaps src = *imgs;
+    if (src.format != SUBBITMAP_RGBA)
+        return false;
+
+    talloc_free(c->parts);
+    imgs->parts = c->parts = talloc_array(c, struct sub_bitmap, src.num_parts);
+
+    for (int n = 0; n < src.num_parts; n++) {
+        struct sub_bitmap *d = &imgs->parts[n];
+        struct sub_bitmap *s = &src.parts[n];
+
+        // add a transparent padding border to reduce artifacts
+        int pad = 5;
+        struct mp_image *temp = alloc_mpi(s->w + pad * 2, s->h + pad * 2,
+                                          IMGFMT_BGRA);
+        memset_pic(temp->planes[0], 0, temp->w * 4, temp->h, temp->stride[0]);
+        uint8_t *p0 = temp->planes[0] + pad * 4 + pad * temp->stride[0];
+        memcpy_pic(p0, s->bitmap, s->w * 4, s->h, temp->stride[0], s->stride);
+
+        double sx = (double)s->dw / s->w;
+        double sy = (double)s->dh / s->h;
+
+        d->x = s->x - pad * sx;
+        d->y = s->y - pad * sy;
+        d->w = d->dw = s->dw + pad * 2 * sx;
+        d->h = d->dh = s->dh + pad * 2 * sy;
+        struct mp_image *image = alloc_mpi(d->w, d->h, IMGFMT_BGRA);
+        talloc_steal(c->parts, image);
+        d->stride = image->stride[0];
+        d->bitmap = image->planes[0];
+
+        mp_image_sw_blur_scale(image, temp, gblur);
+
+        talloc_free(temp);
     }
     return true;
 }

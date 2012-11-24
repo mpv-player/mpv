@@ -172,6 +172,8 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
                           const bool formats[SUBBITMAP_COUNT],
                           struct sub_bitmaps *out_imgs)
 {
+    struct MPOpts *opts = osd->opts;
+
     *out_imgs = (struct sub_bitmaps) {0};
 
     if (!osd_res_equals(res, obj->vo_res))
@@ -221,6 +223,9 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
 
     if (formats[SUBBITMAP_RGBA] && out_imgs->format == SUBBITMAP_INDEXED)
         cached |= osd_conv_idx_to_rgba(obj->cache[0], out_imgs);
+
+    if (out_imgs->format == SUBBITMAP_RGBA && opts->sub_gauss != 0.0f)
+        cached |= osd_conv_blur_rgba(obj->cache[1], out_imgs, opts->sub_gauss);
 
     if (cached)
         obj->cached = *out_imgs;
