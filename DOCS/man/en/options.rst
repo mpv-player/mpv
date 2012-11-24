@@ -1890,9 +1890,9 @@
     Factor for the text subtitle font size (default: 1).
 
 --sws=<n>
-    Specify the software scaler algorithm to be used with the ``--zoom``
-    option. This affects video output drivers which lack hardware
-    acceleration, e.g. x11. See also ``--vf=scale`` and ``--zoom``.
+    Specify the software scaler algorithm to be used with ``--vf=scale``. This
+    also affects video output drivers which lack hardware acceleration,
+    e.g. x11. See also ``--vf=scale``.
 
     Available types are:
 

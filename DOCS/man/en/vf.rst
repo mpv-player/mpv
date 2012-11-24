@@ -104,9 +104,6 @@ scale[=w:h[:interlaced[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
     <w>,<h>
         scaled width/height (default: original width/height)
 
-        *NOTE*: If ``--zoom`` is used, and underlying filters (including
-        libvo) are incapable of scaling, it defaults to d_width/d_height!
-
         :0:      scaled d_width/d_height
         :-1:     original width/height
         :-2:     Calculate w/h using the other dimension and the prescaled
