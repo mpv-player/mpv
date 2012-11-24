@@ -17,11 +17,6 @@ void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam,
 struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat,
                                              int dstW, int dstH,
                                              int dstFormat);
-struct SwsContext *sws_getContextFromCmdLine_hq(int srcW, int srcH,
-                                                int srcFormat, int dstW,
-                                                int dstH,
-                                                int dstFormat);
-int mp_sws_set_colorspace(struct SwsContext *sws, struct mp_csp_details *csp);
 
 bool mp_sws_supported_format(int imgfmt);
 

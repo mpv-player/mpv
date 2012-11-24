@@ -93,10 +93,9 @@ void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam,
 }
 
 // will use sws_flags & src_filter (from cmd line)
-static struct SwsContext *sws_getContextFromCmdLine2(int srcW, int srcH,
-                                                     int srcFormat, int dstW,
-                                                     int dstH, int dstFormat,
-                                                     int extraflags)
+struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH,
+                                             int srcFormat, int dstW,
+                                             int dstH, int dstFormat)
 {
     int flags;
     SwsFilter *dstFilterParam, *srcFilterParam;
@@ -108,29 +107,8 @@ static struct SwsContext *sws_getContextFromCmdLine2(int srcW, int srcH,
         sfmt = PIX_FMT_PAL8;
     sws_getFlagsAndFilterFromCmdLine(&flags, &srcFilterParam, &dstFilterParam);
 
-    return sws_getContext(srcW, srcH, sfmt, dstW, dstH, dfmt, flags |
-                          extraflags, srcFilterParam, dstFilterParam,
-                          NULL);
-}
-
-struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat,
-                                             int dstW, int dstH,
-                                             int dstFormat)
-{
-    return sws_getContextFromCmdLine2(srcW, srcH, srcFormat, dstW, dstH,
-                                      dstFormat,
-                                      0);
-}
-
-struct SwsContext *sws_getContextFromCmdLine_hq(int srcW, int srcH,
-                                                int srcFormat, int dstW,
-                                                int dstH,
-                                                int dstFormat)
-{
-    return sws_getContextFromCmdLine2(
-               srcW, srcH, srcFormat, dstW, dstH, dstFormat,
-               SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP |
-               SWS_ACCURATE_RND | SWS_BITEXACT);
+    return sws_getContext(srcW, srcH, sfmt, dstW, dstH, dfmt, flags,
+                          srcFilterParam, dstFilterParam, NULL);
 }
 
 bool mp_sws_supported_format(int imgfmt)

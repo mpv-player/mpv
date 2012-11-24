@@ -64,6 +64,9 @@ static struct vf_priv_s {
   NULL
 };
 
+static int mp_sws_set_colorspace(struct SwsContext *sws,
+                                 struct mp_csp_details *csp);
+
 //===========================================================================//
 
 static const unsigned int outfmt_list[]={
@@ -541,7 +544,8 @@ static const int mp_csp_to_swscale[MP_CSP_COUNT] = {
 // do nothing or return an error.
 // The csp argument is set to the supported values.
 // Return 0 on success and -1 on error.
-int mp_sws_set_colorspace(struct SwsContext *sws, struct mp_csp_details *csp)
+static int mp_sws_set_colorspace(struct SwsContext *sws,
+                                 struct mp_csp_details *csp)
 {
     int *table, *inv_table;
     int brightness, contrast, saturation, srcRange, dstRange;
