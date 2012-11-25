@@ -128,3 +128,38 @@ bool osd_conv_blur_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
     }
     return true;
 }
+
+static void rgba_to_gray(uint32_t *colors, size_t count)
+{
+    for (int n = 0; n < count; n++) {
+        uint32_t c = colors[n];
+        int b = c & 0xFF;
+        int g = (c >> 8) & 0xFF;
+        int r = (c >> 16) & 0xFF;
+        int a = (c >> 24) & 0xFF;
+        r = g = b = (r + g + b) / 3;
+        colors[n] = b | (g << 8) | (r << 16) | (a << 24);
+    }
+}
+
+bool osd_conv_idx_to_gray(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
+{
+    struct sub_bitmaps src = *imgs;
+    if (src.format != SUBBITMAP_INDEXED)
+        return false;
+
+    talloc_free(c->parts);
+    imgs->parts = c->parts = talloc_array(c, struct sub_bitmap, src.num_parts);
+
+    for (int n = 0; n < src.num_parts; n++) {
+        struct sub_bitmap *d = &imgs->parts[n];
+        struct sub_bitmap *s = &src.parts[n];
+        struct osd_bmp_indexed sb = *(struct osd_bmp_indexed *)s->bitmap;
+
+        rgba_to_gray(sb.palette, 256);
+
+        *d = *s;
+        d->bitmap = talloc_memdup(c->parts, &sb, sizeof(sb));
+    }
+    return true;
+}

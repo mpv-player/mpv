@@ -64,7 +64,7 @@ General changes for mplayer2 to mpv
   handle these use cases. For yuv4mpeg, for example, use:
   ``mpv input.mkv -o output.y4m --no-audio``.
 * Image subtitles (DVDs etc.) are rendered in color and use more correct
-  positioning
+  positioning (color can be disabled with ``--sub-gray``)
 * General code cleanups
 * Many more changes
 

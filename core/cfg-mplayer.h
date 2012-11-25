@@ -507,6 +507,7 @@ const m_option_t common_opts[] = {
      M_CHOICES(({"exact", 0}, {"fuzzy", 1}, {"all", 2}))},
     {"sub-pos", &sub_pos, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
     OPT_FLOATRANGE("sub-gauss", sub_gauss, 0, 0.0, 3.0),
+    OPT_MAKE_FLAGS("sub-gray", sub_gray, 0),
     OPT_MAKE_FLAGS("ass", ass_enabled, 0),
     OPT_FLOATRANGE("sub-scale", sub_scale, 0, 0, 100),
     OPT_FLOATRANGE("ass-line-spacing", ass_line_spacing, 0, -1000, 1000),

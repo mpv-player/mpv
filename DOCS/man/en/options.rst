@@ -1889,6 +1889,12 @@
 
     *NOTE*: never applied to text subtitles.
 
+--sub-gray
+    Convert image subtitles to grayscale. Can help making yellow DVD/Vobsubs
+    look nicer.
+
+    *NOTE*: never affects text subtitles.
+
 --sub-pos=<0-100>
     Specify the position of subtitles on the screen. The value is the vertical
     position of the subtitle in % of the screen height.

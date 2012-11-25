@@ -114,6 +114,7 @@ typedef struct MPOpts {
     struct osd_style_opts *osd_style;
     float sub_scale;
     float sub_gauss;
+    int sub_gray;
     int ass_enabled;
     float ass_line_spacing;
     int ass_top_margin;
