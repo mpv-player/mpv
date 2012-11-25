@@ -231,34 +231,43 @@ void subassconvert_subrip(const char *orig, char *dest, int dest_buffer_size)
                     tag->has_size = true;
                     has_valid_attr = true;
                 } else if (!bstrcmp0(attr, "color")) {
-                    if (bstr_eatstart(&val, bstr0("#"))) {
-                        // #RRGGBB format
-                        tag->color = bstrtoll(val, &val, 16) & 0x00ffffff;
-                        if (val.len)
-                            break;
-                        tag->color = ((tag->color & 0xff) << 16)
-                            | (tag->color & 0xff00)
-                            | ((tag->color & 0xff0000) >> 16);
-                    } else {
-                        // Standard web colors
-                        for (int i = 0; i < FF_ARRAY_ELEMS(subrip_web_colors); i++) {
-                            char *color = subrip_web_colors[i].s;
-                            if (bstrcasecmp(val, bstr0(color)) == 0) {
-                                tag->color = subrip_web_colors[i].v;
-                                goto foundcolor;
-                            }
+                    int found = 0;
+
+                    // Try to lookup the string in standard web colors
+                    for (int i = 0; i < FF_ARRAY_ELEMS(subrip_web_colors); i++) {
+                        char *color = subrip_web_colors[i].s;
+                        if (bstrcasecmp(val, bstr0(color)) == 0) {
+                            tag->color = subrip_web_colors[i].v;
+                            found = 1;
                         }
-
-                        /* We didn't find any matching color */
-                        mp_tmsg(MSGT_SUBREADER, MSGL_WARN,
-                                "SubRip: unknown font color in subtitle: %s\n", orig);
-                        append_text(&new_line, "{\\c}");
-                        continue;
-
-                    foundcolor: ;
                     }
-                    append_text(&new_line, "{\\c&H%06X&}", tag->color);
-                    tag->has_color = true;
+
+                    // If it's not a web color it must be a HEX RGB value
+                    if (!found) {
+                        // Remove the leading '#'
+                        bstr_eatstart(&val, bstr0("#"));
+
+                        // Parse RRGGBB format
+                        tag->color = bstrtoll(val, &val, 16) & 0x00ffffff;
+                        if (!val.len) {
+                            tag->color = ((tag->color & 0xff) << 16)
+                                | (tag->color & 0xff00)
+                                | ((tag->color & 0xff0000) >> 16);
+                            found = 1;
+                        }
+                    }
+
+                    if (found) {
+                        append_text(&new_line, "{\\c&H%06X&}", tag->color);
+                        tag->has_color = true;
+                    } else {
+                        // We didn't find any matching color
+                        mp_tmsg(MSGT_SUBREADER, MSGL_WARN,
+                                "SubRip: unknown font color in subtitle: %s\n",
+                                orig);
+                        append_text(&new_line, "{\\c}");
+                    }
+
                     has_valid_attr = true;
                 } else if (!bstrcmp0(attr, "face")) {
                     /* Font face attribute */
