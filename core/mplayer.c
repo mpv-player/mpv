@@ -910,7 +910,8 @@ static struct track *add_stream_track(struct MPContext *mpctx,
                                       track->demuxer_id)
         };
         stream_control(track->demuxer->stream, STREAM_CTRL_GET_LANG, &req);
-        track->lang = talloc_strdup(track, req.name);
+        if (req.name[0])
+            track->lang = talloc_strdup(track, req.name);
     }
 
     return track;
