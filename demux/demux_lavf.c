@@ -389,16 +389,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_audio->samplerate = codec->sample_rate;
         sh_audio->i_bps = codec->bit_rate / 8;
         switch (codec->codec_id) {
-        case CODEC_ID_PCM_S8:
-        case CODEC_ID_PCM_U8:
-            sh_audio->samplesize = 1;
-            break;
-        case CODEC_ID_PCM_S16LE:
-        case CODEC_ID_PCM_S16BE:
-        case CODEC_ID_PCM_U16LE:
-        case CODEC_ID_PCM_U16BE:
-            sh_audio->samplesize = 2;
-            break;
         case CODEC_ID_PCM_ALAW:
             sh_audio->format = 0x6;
             break;

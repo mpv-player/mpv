@@ -64,6 +64,8 @@ static int init_audio_codec(sh_audio_t *sh_audio)
 {
     assert(!sh_audio->initialized);
     resync_audio_stream(sh_audio);
+    sh_audio->samplesize = 2;
+    sh_audio->sample_format = AF_FORMAT_S16_NE;
     if ((af_cfg.force & AF_INIT_FORMAT_MASK) == AF_INIT_FLOAT) {
 	int fmt = AF_FORMAT_FLOAT_NE;
 	if (sh_audio->ad_driver->control(sh_audio, ADCTRL_QUERY_FORMAT,
