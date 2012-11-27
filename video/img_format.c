@@ -49,6 +49,12 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift,
         case 0x51:
             bits = 16;
             break;
+        case 0x55:
+            bits = 14;
+            break;
+        case 0x54:
+            bits = 12;
+            break;
         case 0x52:
             bits = 10;
             break;
@@ -129,27 +135,45 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift,
 struct mp_imgfmt_entry mp_imgfmt_list[] = {
     {"444p16le", IMGFMT_444P16_LE},
     {"444p16be", IMGFMT_444P16_BE},
+    {"444p14le", IMGFMT_444P14_LE},
+    {"444p14be", IMGFMT_444P14_BE},
+    {"444p12le", IMGFMT_444P12_LE},
+    {"444p12be", IMGFMT_444P12_BE},
     {"444p10le", IMGFMT_444P10_LE},
     {"444p10be", IMGFMT_444P10_BE},
     {"444p9le", IMGFMT_444P9_LE},
     {"444p9be", IMGFMT_444P9_BE},
     {"422p16le", IMGFMT_422P16_LE},
     {"422p16be", IMGFMT_422P16_BE},
+    {"422p14le", IMGFMT_422P14_LE},
+    {"422p14be", IMGFMT_422P14_BE},
+    {"422p12le", IMGFMT_422P12_LE},
+    {"422p12be", IMGFMT_422P12_BE},
     {"422p10le", IMGFMT_422P10_LE},
     {"422p10be", IMGFMT_422P10_BE},
     {"422p9le",  IMGFMT_422P9_LE},
     {"422p9be",  IMGFMT_422P9_BE},
     {"420p16le", IMGFMT_420P16_LE},
     {"420p16be", IMGFMT_420P16_BE},
+    {"420p14le", IMGFMT_420P14_LE},
+    {"420p14be", IMGFMT_420P14_BE},
+    {"420p12le", IMGFMT_420P12_LE},
+    {"420p12be", IMGFMT_420P12_BE},
     {"420p10le", IMGFMT_420P10_LE},
     {"420p10be", IMGFMT_420P10_BE},
     {"420p9le", IMGFMT_420P9_LE},
     {"420p9be", IMGFMT_420P9_BE},
     {"444p16", IMGFMT_444P16},
+    {"444p14", IMGFMT_444P14},
+    {"444p12", IMGFMT_444P12},
     {"444p10", IMGFMT_444P10},
     {"444p9", IMGFMT_444P9},
     {"422p16", IMGFMT_422P16},
+    {"422p14", IMGFMT_422P14},
+    {"422p12", IMGFMT_422P12},
     {"422p10", IMGFMT_422P10},
+    {"420p14", IMGFMT_420P14},
+    {"420p12", IMGFMT_420P12},
     {"420p10", IMGFMT_420P10},
     {"420p9", IMGFMT_420P9},
     {"420p16", IMGFMT_420P16},

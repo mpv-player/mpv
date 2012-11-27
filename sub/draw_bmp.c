@@ -416,6 +416,14 @@ static void get_closest_y444_format(int imgfmt, int *out_format, int *out_bits)
                     *out_format = IMGFMT_444P10;
                     *out_bits = 10;
                     return;
+                case 12:
+                    *out_format = IMGFMT_444P12;
+                    *out_bits = 12;
+                    return;
+                case 14:
+                    *out_format = IMGFMT_444P14;
+                    *out_bits = 14;
+                    return;
             }
         }
     } else {
