@@ -74,14 +74,14 @@ static int check_format(int format)
 {
   char buf[256];
   switch(format & AF_FORMAT_SPECIAL_MASK){
-  case(AF_FORMAT_IMA_ADPCM):
-  case(AF_FORMAT_MPEG2):
-  case(AF_FORMAT_AC3):
-    mp_msg(MSGT_AFILTER, MSGL_ERR, "[format] Sample format %s not yet supported \n",
-	 af_fmt2str(format,buf,256));
-    return AF_ERROR;
+  case 0: /* non-special formats */
+  case AF_FORMAT_MU_LAW:
+  case AF_FORMAT_A_LAW:
+    return AF_OK;
   }
-  return AF_OK;
+  mp_msg(MSGT_AFILTER, MSGL_ERR, "[format] Sample format %s not yet supported \n",
+         af_fmt2str(format,buf,256));
+  return AF_ERROR;
 }
 
 // Initialization and runtime control
@@ -92,14 +92,23 @@ static int control(struct af_instance* af, int cmd, void* arg)
     char buf1[256];
     char buf2[256];
     struct mp_audio *data = arg;
+    int supported_ac3 = 0;
 
     // Make sure this filter isn't redundant
     if(af->data->format == data->format &&
        af->data->bps == data->bps)
       return AF_DETACH;
 
+    // A bit complex because we can convert AC3
+    // to generic iec61937 but not the other way
+    // round.
+    if (AF_FORMAT_IS_AC3(af->data->format))
+      supported_ac3 = AF_FORMAT_IS_AC3(data->format);
+    else if (AF_FORMAT_IS_IEC61937(af->data->format))
+      supported_ac3 = AF_FORMAT_IS_IEC61937(data->format);
+
     // Allow trivial AC3-endianness conversion
-    if (!AF_FORMAT_IS_AC3(af->data->format) || !AF_FORMAT_IS_AC3(data->format))
+    if (!supported_ac3)
     // Check for errors in configuration
     if((AF_OK != check_bps(data->bps)) ||
        (AF_OK != check_format(data->format)) ||
@@ -107,9 +116,10 @@ static int control(struct af_instance* af, int cmd, void* arg)
        (AF_OK != check_format(af->data->format)))
       return AF_ERROR;
 
+    af_fmt2str(data->format,buf1,256);
+    af_fmt2str(af->data->format,buf2,256);
     mp_msg(MSGT_AFILTER, MSGL_V, "[format] Changing sample format from %s to %s\n",
-	   af_fmt2str(data->format,buf1,256),
-	   af_fmt2str(af->data->format,buf2,256));
+	   buf1, buf2);
 
     af->data->rate = data->rate;
     af->data->nch  = data->nch;
@@ -128,16 +138,14 @@ static int control(struct af_instance* af, int cmd, void* arg)
 	(af->data->format == AF_FORMAT_S16_NE))
     {
 	mp_msg(MSGT_AFILTER, MSGL_V, "[format] Accelerated %s to %s conversion\n",
-	   af_fmt2str(data->format,buf1,256),
-	   af_fmt2str(af->data->format,buf2,256));
+	   buf1, buf2);
 	af->play = play_float_s16;
     }
     if ((data->format == AF_FORMAT_S16_NE) &&
 	(af->data->format == AF_FORMAT_FLOAT_NE))
     {
 	mp_msg(MSGT_AFILTER, MSGL_V, "[format] Accelerated %s to %s conversion\n",
-	   af_fmt2str(data->format,buf1,256),
-	   af_fmt2str(af->data->format,buf2,256));
+	   buf1, buf2);
 	af->play = play_s16_float;
     }
     return AF_OK;

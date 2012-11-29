@@ -112,7 +112,7 @@ static int control(int cmd, void *arg)
       long get_vol, set_vol;
       float f_multi;
 
-      if(AF_FORMAT_IS_AC3(ao_data.format) || AF_FORMAT_IS_IEC61937(ao_data.format))
+      if(AF_FORMAT_IS_IEC61937(ao_data.format))
 	return CONTROL_TRUE;
 
       if(mixer_channel) {
@@ -436,7 +436,7 @@ static int init(int rate_hz, int channels, int format, int flags)
      * while opening the abstract alias for the spdif subdevice
      * 'iec958'
      */
-    if (AF_FORMAT_IS_AC3(format) || AF_FORMAT_IS_IEC61937(format)) {
+    if (AF_FORMAT_IS_IEC61937(format)) {
 	device.str = "iec958";
 	mp_msg(MSGT_AO,MSGL_V,"alsa-spdif-init: playing AC3/iec61937/iec958, %i channels\n", channels);
     }
@@ -489,7 +489,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     if (!alsa_handler) {
       int open_mode = block ? 0 : SND_PCM_NONBLOCK;
-      int isac3 =  AF_FORMAT_IS_AC3(format) || AF_FORMAT_IS_IEC61937(format);
+      int isac3 =  AF_FORMAT_IS_IEC61937(format);
       //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
       if ((err = try_open_device(alsa_device, open_mode, isac3)) < 0)
 	{
