@@ -195,6 +195,7 @@ direct3d_shaders (Windows only)
     texture-memory=N
         Only affects operation with shaders/texturing enabled, and (E)OSD.
         Values for N:
+
             0
                 default, will often use an additional shadow texture + copy
             1

@@ -21,7 +21,7 @@
 
 --af=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of audio filters to apply to the audio stream. See
-    :ref:`audio_filters` for details and descriptions of the available filters.
+    `audio_filters` for details and descriptions of the available filters.
     The option variants ``--af-add``, ``--af-pre``, ``--af-del`` and
     ``--af-clr`` exist to modify a previously specified list, but you
     shouldn't need these for typical use.
@@ -94,7 +94,7 @@
     Specify a priority list of audio output drivers to be used. For
     interactive use you'd normally specify a single one to use, but in
     configuration files specifying a list of fallbacks may make sense. See
-    :ref:`audio_outputs` for details and descriptions of available drivers.
+    `audio_outputs` for details and descriptions of available drivers.
 
 --ar, --no-ar
       Enable/disable AppleIR remote support. Enabled by default.
@@ -1330,31 +1330,31 @@
 
 --playing-msg=<string>
     Print out a string before starting playback. The string is expanded for
-    properties, e.g. ``--playing-msg=file: ${filename}`` will print the string
-    ``file: `` followed by the currently played filename.
+    properties, e.g. ``--playing-msg=file: \${filename}`` will print the string
+    ``file:`` followed by a space and the currently played filename.
 
     The following expansions are supported:
 
-    ${NAME}
+    \${NAME}
         Expands to the value of the property ``NAME``. If ``NAME`` starts with
         ``=``, use the raw value of the property. If retrieving the property
-        fails, expand to an error string. (Use ``${NAME:}`` with a trailing
+        fails, expand to an error string. (Use ``\${NAME:}`` with a trailing
         ``:`` to expand to an empty string instead.)
-    ${NAME:STR}
+    \${NAME:STR}
         Expands to the value of the property ``NAME``, or ``STR`` if the
         property can't be retrieved. ``STR`` is expanded recursively.
-    ${!NAME:STR}
+    \${!NAME:STR}
         Expands to ``STR`` (recursively) if the property ``NAME`` can't be
         retrieved.
-    ${?NAME:STR}
+    \${?NAME:STR}
         Expands to ``STR`` (recursively) if the property ``NAME`` is available.
-    $$
-        Expands to ``$``.
-    $}
+    \$\$
+        Expands to ``\$``.
+    \$}
         Expands to ``}``. (To produce this character inside recursive
         expansion.)
-    $>
-        Disable property expansion and special handling of ``$`` for the rest
+    \$>
+        Disable property expansion and special handling of ``\$`` for the rest
         of the string.
 
 --status-msg=<string>
@@ -2180,7 +2180,7 @@
 
 --vf=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of video filters to apply to the video stream. See
-    :ref:`video_filters` for details and descriptions of the available filters.
+    `video_filters` for details and descriptions of the available filters.
     The option variants ``--vf-add``, ``--vf-pre``, ``--vf-del`` and
     ``--vf-clr`` exist to modify a previously specified list, but you
     shouldn't need these for typical use.
@@ -2203,7 +2203,7 @@
     Specify a priority list of video output drivers to be used. For
     interactive use you'd normally specify a single one to use, but in
     configuration files specifying a list of fallbacks may make sense. See
-    :ref:`video_outputs` for details and descriptions of available drivers.
+    `video_outputs` for details and descriptions of available drivers.
 
 --vobsub=<file>
     Specify a VOBsub file to use for subtitles. Has to be the full pathname
