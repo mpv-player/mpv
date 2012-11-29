@@ -1,5 +1,16 @@
-mpv manual page
-####################
+mpv
+###
+
+##############
+a movie player
+##############
+
+:Author: wm4
+:Date: 2012-11-29
+:Copyright: GPLv3
+:Version: git
+:Manual section: 1
+:Manual group: multimedia
 
 Synopsis
 ========
