@@ -91,6 +91,7 @@ struct xvctx {
 
 static void allocate_xvimage(struct vo *, int);
 static void deallocate_xvimage(struct vo *vo, int foo);
+static struct mp_image get_xv_buffer(struct vo *vo, int buf_index);
 
 static void read_xv_csp(struct vo *vo)
 {
@@ -239,7 +240,7 @@ static void allocate_xvimage(struct vo *vo, int foo)
         ctx->Shmem_Flag = 0;
         mp_tmsg(MSGT_VO, MSGL_INFO, "[VO_XV] Shared memory not supported\nReverting to normal Xv.\n");
     }
-    int aligned_w = FFALIGN(ctx->image_width, 16);
+    int aligned_w = FFALIGN(ctx->image_width, 32);
     if (ctx->Shmem_Flag) {
         ctx->xvimage[foo] =
             (XvImage *) XvShmCreateImage(x11->display, x11->xv_port,
@@ -265,10 +266,11 @@ static void allocate_xvimage(struct vo *vo, int foo)
             (XvImage *) XvCreateImage(x11->display, x11->xv_port,
                                       ctx->xv_format, NULL, aligned_w,
                                       ctx->image_height);
-        ctx->xvimage[foo]->data = malloc(ctx->xvimage[foo]->data_size);
+        ctx->xvimage[foo]->data = av_malloc(ctx->xvimage[foo]->data_size);
         XSync(x11->display, False);
     }
-    memset(ctx->xvimage[foo]->data, 128, ctx->xvimage[foo]->data_size);
+    struct mp_image img = get_xv_buffer(vo, foo);
+    vf_mpi_clear(&img, 0, 0, img.w, img.h);
     return;
 }
 
@@ -282,7 +284,7 @@ static void deallocate_xvimage(struct vo *vo, int foo)
     } else
 #endif
     {
-        free(ctx->xvimage[foo]->data);
+        av_free(ctx->xvimage[foo]->data);
     }
     XFree(ctx->xvimage[foo]);
 
