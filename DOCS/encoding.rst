@@ -131,7 +131,7 @@ What works
 * Using x264 presets/tunings/profiles (by using profile=, tune=, preset= in the
   -ovcopts)
 * Deinterlacing/Inverse Telecine with any of mpv's filters for that
-* Audio file converting: mpv -o outfile.mp3 infile.flac -novideo -oac
+* Audio file converting: mpv -o outfile.mp3 infile.flac -no-video -oac
   libmp3lame -oacopts ab=320k
 * inverse telecine filters (confirmed working: detc, pullup, filmdint)
 

@@ -127,11 +127,9 @@ static int init(struct ao *ao, char *params)
     struct priv *priv = talloc_zero(ao, struct priv);
     ao->priv = priv;
 
-    int fast = 0;
     const opt_t subopts[] = {
         {"waveheader", OPT_ARG_BOOL,  &priv->waveheader, NULL},
         {"file",       OPT_ARG_MSTRZ, &priv->outputfilename, NULL},
-        {"fast",       OPT_ARG_BOOL,  &fast, NULL},
         {NULL}
     };
     // set defaults
@@ -140,11 +138,6 @@ static int init(struct ao *ao, char *params)
     if (subopt_parse(params, subopts) != 0)
         return -1;
 
-    if (fast)
-        mp_msg(MSGT_AO, MSGL_WARN,
-               "[AO PCM] Suboption \"fast\" is deprecated.\n"
-               "[AO PCM] Use -novideo, or -benchmark if you want "
-               "faster playback with video.\n");
     if (!priv->outputfilename)
         priv->outputfilename =
             strdup(priv->waveheader ? "audiodump.wav" : "audiodump.pcm");
@@ -175,7 +168,7 @@ static int init(struct ao *ao, char *params)
             priv->waveheader ? "WAVE" : "RAW PCM", ao->samplerate,
             ao->channels, af_fmt2str_short(ao->format));
     mp_tmsg(MSGT_AO, MSGL_INFO,
-            "[AO PCM] Info: Faster dumping is achieved with -novideo\n"
+            "[AO PCM] Info: Faster dumping is achieved with -no-video\n"
             "[AO PCM] Info: To write WAVE files use -ao pcm:waveheader (default).\n");
 
     priv->fp = fopen(priv->outputfilename, "wb");
