@@ -337,7 +337,6 @@ Optional features:
   --enable-libavfilter   enable libavfilter [disabled] [unused]
 
 Codecs:
-  --enable-gif              enable GIF support [autodetect]
   --enable-mng              enable MNG input support [autodetect]
   --enable-jpeg             enable JPEG input/output support [autodetect]
   --enable-libcdio          enable libcdio support [autodetect]
@@ -428,7 +427,6 @@ _dsound=auto
 _nas=auto
 _mng=auto
 _jpeg=auto
-_gif=auto
 _gl=auto
 _aa=auto
 _caca=auto
@@ -605,8 +603,6 @@ for ac_option do
   --disable-mng)        _mng=no         ;;
   --enable-jpeg)        _jpeg=yes       ;;
   --disable-jpeg)       _jpeg=no        ;;
-  --enable-gif)         _gif=yes        ;;
-  --disable-gif)        _gif=no         ;;
   --enable-gl)          _gl=yes         ;;
   --disable-gl)         _gl=no          ;;
   --enable-caca)        _caca=yes       ;;
@@ -2213,91 +2209,6 @@ else
 fi
 
 
-echocheck "GIF support"
-# This is to appease people who want to force gif support.
-# If it is forced to yes, then we still do checks to determine
-# which gif library to use.
-if test "$_gif" = yes ; then
-  _force_gif=yes
-  _gif=auto
-fi
-
-if test "$_gif" = auto ; then
-  _gif=no
-  for _ld_gif in "-lungif" "-lgif" ; do
-    statement_check gif_lib.h 'QuantizeBuffer(0, 0, 0, 0, 0, 0, 0, 0)' $_ld_gif && _gif=yes && break
-  done
-fi
-
-# If no library was found, and the user wants support forced,
-# then we force it on with libgif, as this is the safest
-# assumption IMHO.  (libungif & libregif both create symbolic
-# links to libgif.  We also assume that no x11 support is needed,
-# because if you are forcing this, then you _should_ know what
-# you are doing.  [ Besides, package maintainers should never
-# have compiled x11 deps into libungif in the first place. ] )
-# </rant>
-#   --Joey
-if test "$_force_gif" = yes && test "$_gif" = no ; then
-  _gif=yes
-  _ld_gif="-lgif"
-fi
-
-if test "$_gif" = yes ; then
-  def_gif='#define CONFIG_GIF 1'
-  codecmodules="gif $codecmodules"
-  res_comment="old version, some encoding functions disabled"
-  def_gif_4='#undef CONFIG_GIF_4'
-  extra_ldflags="$extra_ldflags $_ld_gif"
-
-  cat > $TMPC << EOF
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <gif_lib.h>
-static void catch(int sig) { exit(1); }
-int main(void) {
-  signal(SIGSEGV, catch);  // catch segfault
-  printf("EGifPutExtensionFirst is at address %p\n", EGifPutExtensionFirst);
-  EGifSetGifVersion("89a");   // this will segfault a buggy gif lib.
-  return 0;
-}
-EOF
-  if cc_check "$_ld_gif" ; then
-    def_gif_4='#define CONFIG_GIF_4 1'
-    res_comment=""
-  fi
-else
-  def_gif='#undef CONFIG_GIF'
-  def_gif_4='#undef CONFIG_GIF_4'
-  nocodecmodules="gif $nocodecmodules"
-fi
-echores "$_gif"
-
-
-case "$_gif" in yes*)
-  echocheck "broken giflib workaround"
-  def_gif_tvt_hack='#define CONFIG_GIF_TVT_HACK 1'
-
-  cat > $TMPC << EOF
-#include <stdio.h>
-#include <gif_lib.h>
-int main(void) {
-  GifFileType gif = {.UserData = NULL};
-  printf("UserData is at address %p\n", gif.UserData);
-  return 0;
-}
-EOF
-  if cc_check "$_ld_gif" ; then
-    def_gif_tvt_hack='#undef CONFIG_GIF_TVT_HACK'
-    echores "disabled"
-  else
-    echores "enabled"
-  fi
-  ;;
-esac
-
-
 #################
 # VIDEO + AUDIO #
 #################
@@ -3265,7 +3176,6 @@ DVBIN = $_dvbin
 DVDREAD = $_dvdread
 DXR3 = $_dxr3
 FTP = $_ftp
-GIF = $_gif
 GL = $_gl
 GL_COCOA = $_gl_cocoa
 GL_WIN32 = $_gl_win32
@@ -3510,9 +3420,6 @@ $def_direct3d
 $def_dsound
 $def_dvb
 $def_dvbin
-$def_gif
-$def_gif_4
-$def_gif_tvt_hack
 $def_gl
 $def_gl_cocoa
 $def_gl_win32
