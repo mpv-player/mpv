@@ -1428,22 +1428,6 @@ fi
 echores "$_gethostbyname2"
 
 
-echocheck "inttypes.h (required)"
-_inttypes=no
-header_check inttypes.h && _inttypes=yes
-echores "$_inttypes"
-
-if test "$_inttypes" = no ; then
-  echocheck "sys/bitypes.h (inttypes.h predecessor)"
-  header_check sys/bitypes.h && _inttypes=yes
-  if test "$_inttypes" = yes ; then
-    die "You don't have inttypes.h, but sys/bitypes.h is present. Please copy etc/inttypes.h into the include path, and re-run configure."
-  else
-    die "Cannot find header either inttypes.h or bitypes.h. There is no chance for compilation to succeed."
-  fi
-fi
-
-
 echocheck "mman.h"
 _mman=no
 statement_check sys/mman.h 'mmap(0, 0, 0, 0, 0, 0)' && _mman=yes
