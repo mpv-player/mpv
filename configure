@@ -336,7 +336,6 @@ Optional features:
 
 Codecs:
   --enable-gif              enable GIF support [autodetect]
-  --enable-png              enable PNG input support [autodetect]
   --enable-mng              enable MNG input support [autodetect]
   --enable-jpeg             enable JPEG input/output support [autodetect]
   --enable-libcdio          enable libcdio support [autodetect]
@@ -425,7 +424,6 @@ _vdpau=auto
 _direct3d=auto
 _dsound=auto
 _nas=auto
-_png=auto
 _mng=auto
 _jpeg=auto
 _gif=auto
@@ -599,8 +597,6 @@ for ac_option do
   --disable-direct3d)   _direct3d=no    ;;
   --enable-dsound)      _dsound=yes     ;;
   --disable-dsound)     _dsound=no      ;;
-  --enable-png)         _png=yes        ;;
-  --disable-png)        _png=no         ;;
   --enable-mng)         _mng=yes        ;;
   --disable-mng)        _mng=no         ;;
   --enable-jpeg)        _jpeg=yes       ;;
@@ -2197,29 +2193,6 @@ else
 fi
 
 
-echocheck "PNG support"
-if test "$_png" = auto ; then
-  _png=no
-cat > $TMPC << EOF
-#include <stdio.h>
-#include <string.h>
-#include <png.h>
-int main(void) {
-  printf("png.h : %s\n", PNG_LIBPNG_VER_STRING);
-  printf("libpng: %s\n", png_libpng_ver);
-  return strcmp(PNG_LIBPNG_VER_STRING, png_libpng_ver);
-}
-EOF
-  cc_check -lpng -lz $_ld_lm && _png=yes
-fi
-echores "$_png"
-if test "$_png" = yes ; then
-  def_png='#define CONFIG_PNG 1'
-  extra_ldflags="$extra_ldflags -lpng -lz"
-else
-  def_png='#undef CONFIG_PNG'
-fi
-
 echocheck "MNG support"
 if test "$_mng" = auto ; then
   _mng=no
@@ -3299,7 +3272,6 @@ NETWORKING = $networking
 OPENAL = $_openal
 OSS = $_ossaudio
 PE_EXECUTABLE = $_pe_executable
-PNG = $_png
 PRIORITY = $_priority
 PULSE = $_pulse
 PORTAUDIO = $_portaudio
@@ -3521,7 +3493,6 @@ $def_gl_win32
 $def_gl_x11
 $def_jpeg
 $def_mng
-$def_png
 $def_v4l2
 $def_vdpau
 $def_vm
