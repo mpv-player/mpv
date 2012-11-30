@@ -64,6 +64,7 @@ const m_option_t lavfdopts_conf[] = {
 #define BIO_BUFFER_SIZE 32768
 
 typedef struct lavf_priv {
+    char *filename;
     AVInputFormat *avif;
     AVFormatContext *avfc;
     AVIOContext *pb;
@@ -151,6 +152,19 @@ static void list_formats(void)
         mp_msg(MSGT_DEMUX, MSGL_INFO, "%15s : %s\n", fmt->name, fmt->long_name);
 }
 
+static char *remove_prefix(char *s, const char **prefixes)
+{
+    for (int n = 0; prefixes[n]; n++) {
+        int len = strlen(prefixes[n]);
+        if (strncmp(s, prefixes[n], len) == 0)
+            return s + len;
+    }
+    return s;
+}
+
+static const char *prefixes[] =
+    {"ffmpeg://", "lavf://", "avdevice://", "av://", NULL};
+
 static int lavf_check_file(demuxer_t *demuxer)
 {
     struct MPOpts *opts = demuxer->opts;
@@ -162,13 +176,37 @@ static int lavf_check_file(demuxer_t *demuxer)
     int score;
 
     if (!demuxer->priv)
-        demuxer->priv = calloc(sizeof(lavf_priv_t), 1);
+        demuxer->priv = talloc_zero(NULL, lavf_priv_t);
     priv = demuxer->priv;
     priv->autoselect_sub = -1;
+
+    priv->filename = demuxer->stream->url;
+    if (!priv->filename) {
+        priv->filename = "mp:unknown";
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "Stream url is not set!\n");
+    }
+
+    priv->filename = remove_prefix(priv->filename, prefixes);
+
+    char *avdevice_format = NULL;
+    if (demuxer->stream->type == STREAMTYPE_AVDEVICE) {
+        // always require filename in the form "format:filename"
+        char *sep = strchr(priv->filename, ':');
+        if (!sep) {
+            mp_msg(MSGT_DEMUX, MSGL_FATAL,
+                "Must specify filename in 'format:filename' form\n");
+            return 0;
+        }
+        avdevice_format = talloc_strndup(priv, priv->filename,
+                                         sep - priv->filename);
+        priv->filename = sep + 1;
+    }
 
     char *format = lavfdopts->format;
     if (!format)
         format = demuxer->stream->lavf_type;
+    if (!format)
+        format = avdevice_format;
     if (format) {
         if (strcmp(format, "help") == 0) {
             list_formats();
@@ -194,14 +232,7 @@ static int lavf_check_file(demuxer_t *demuxer)
             return 0;
         }
         probe_data_size += read_size;
-        avpd.filename = demuxer->stream->url;
-        if (!avpd.filename) {
-            mp_msg(MSGT_DEMUX, MSGL_WARN, "Stream url is not set!\n");
-            avpd.filename = "";
-        }
-        if (!strncmp(avpd.filename, "ffmpeg://", 9) ||
-                !strncmp(avpd.filename, "lavf://", 7))
-            avpd.filename += 9;
+        avpd.filename = priv->filename;
         avpd.buf_size = probe_data_size;
 
         score = 0;
@@ -619,20 +650,9 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
         }
     }
 
-    char *filename = demuxer->stream->url;
-
-    if (filename) {
-        if (demuxer->stream->lavf_type && !strcmp(demuxer->stream->lavf_type,
-                                                  "rtsp")) {
-            // Remove possible leading ffmpeg:// or lavf://
-            char *name = strstr(filename, "rtsp:");
-            if (name)
-                filename = name;
-        }
-    } else
-        filename = "mp:unknown";
-
-    if (!(priv->avif->flags & AVFMT_NOFILE)) {
+    if (!(priv->avif->flags & AVFMT_NOFILE) &&
+        demuxer->stream->type != STREAMTYPE_AVDEVICE)
+    {
         priv->pb = avio_alloc_context(priv->buffer, BIO_BUFFER_SIZE, 0,
                                       demuxer, mp_read, NULL, mp_seek);
         priv->pb->read_seek = mp_read_seek;
@@ -642,7 +662,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
         avfc->pb = priv->pb;
     }
 
-    if (avformat_open_input(&avfc, filename, priv->avif, NULL) < 0) {
+    if (avformat_open_input(&avfc, priv->filename, priv->avif, NULL) < 0) {
         mp_msg(MSGT_HEADER, MSGL_ERR,
                "LAVF_header: avformat_open_input() failed\n");
         return NULL;
@@ -1047,7 +1067,7 @@ static void demux_close_lavf(demuxer_t *demuxer)
             avformat_close_input(&priv->avfc);
         }
         av_freep(&priv->pb);
-        free(priv);
+        talloc_free(priv);
         demuxer->priv = NULL;
     }
 }

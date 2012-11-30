@@ -611,6 +611,9 @@ Stream from HTTP:
 Stream using RTSP:
     ``mpv rtsp://server.example.com/streamName``
 
+Play a libavfilter graph:
+    ``mpv avdevice://lavfi:mandlebrot``
+
 AUTHORS
 =======
 

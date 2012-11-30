@@ -210,6 +210,7 @@ SOURCES = talloc.c \
           osdep/numcores.c \
           osdep/io.c \
           stream/stream.c \
+          stream/stream_avdevice.c \
           stream/stream_file.c \
           stream/stream_lavf.c \
           stream/stream_mf.c \

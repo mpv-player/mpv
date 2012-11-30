@@ -333,6 +333,8 @@ Optional features:
   --disable-libass-osd   disable OSD rendering with libass [autodetect]
   --enable-rpath         enable runtime linker path for extra libs [disabled]
   --disable-libpostproc  disable postprocess filter (vf_pp) [autodetect]
+  --enable-libavdevice   enable libavdevice demuxers [disabled]
+  --enable-libavfilter   enable libavfilter [disabled] [unused]
 
 Codecs:
   --enable-gif              enable GIF support [autodetect]
@@ -490,6 +492,8 @@ _ass=auto
 _libass_osd=auto
 _rpath=no
 libpostproc=auto
+libavfilter=no
+libavdevice=no
 _asmalign_pot=auto
 _stream_cache=yes
 _priority=no
@@ -707,6 +711,10 @@ for ac_option do
   --disable-rpath)      _rpath=no       ;;
   --enable-libpostproc) libpostproc=yes ;;
   --disable-libpostproc) libpostproc=no ;;
+  --enable-libavdevice) libavdevice=auto ;;
+  --disable-libavdevice) libavdevice=no ;;
+  --enable-libavfilter) libavfilter=auto ;;
+  --disable-libavfilter) libavfilter=no ;;
 
   --enable-enca)        _enca=yes       ;;
   --disable-enca)       _enca=no        ;;
@@ -2824,6 +2832,36 @@ else
 fi
 
 
+echocheck "libavfilter >= 3.17.0"
+if test "$libavfilter" = auto ; then
+    libavfilter=no
+    if pkg_config_add "libavfilter >= 3.17.0" ; then
+        libavfilter=yes
+    fi
+fi
+if test "$libavfilter" = yes ; then
+    def_libavfilter='#define CONFIG_LIBAVFILTER 1'
+else
+    def_libavfilter='#undef CONFIG_LIBAVFILTER'
+fi
+echores "$libavfilter"
+
+
+echocheck "libavdevice >= 54.0.0"
+if test "$libavdevice" = auto ; then
+    libavdevice=no
+    if pkg_config_add "libavdevice >= 54.0.0" ; then
+        libavdevice=yes
+    fi
+fi
+if test "$libavdevice" = yes ; then
+    def_libavdevice='#define CONFIG_LIBAVDEVICE 1'
+else
+    def_libavdevice='#undef CONFIG_LIBAVDEVICE'
+fi
+echores "$libavdevice"
+
+
 echocheck "libpostproc >= 52.0.0"
 if test "$libpostproc" = auto ; then
     libpostproc=no
@@ -3245,6 +3283,8 @@ LIBBLURAY = $_bluray
 LIBBS2B = $_libbs2b
 LCMS2 = $_lcms2
 LIBPOSTPROC = $libpostproc
+LIBAVDEVICE = $libavdevice
+LIBAVFILTER = $libavfilter
 LIBSMBCLIENT = $_smb
 LIBQUVI = $_libquvi
 LIBTHEORA = $_theora
@@ -3403,6 +3443,8 @@ $def_mpg123
 $def_zlib
 
 $def_libpostproc
+$def_libavdevice
+$def_libavfilter
 
 
 /* Audio output drivers */

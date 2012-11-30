@@ -33,6 +33,10 @@
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 
+#ifdef CONFIG_LIBAVDEVICE
+#include <libavdevice/avdevice.h>
+#endif
+
 static int av_log_level_to_mp_level(int av_level)
 {
     if (av_level > AV_LOG_VERBOSE)
@@ -113,6 +117,10 @@ void init_libav(void)
     avcodec_register_all();
     av_register_all();
     avformat_network_init();
+
+#ifdef CONFIG_LIBAVDEVICE
+    avdevice_register_all();
+#endif
 }
 
 #define V(x) (x)>>16, (x)>>8 & 255, (x) & 255

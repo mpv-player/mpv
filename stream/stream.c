@@ -81,6 +81,7 @@ extern const stream_info_t stream_info_smb;
 extern const stream_info_t stream_info_null;
 extern const stream_info_t stream_info_mf;
 extern const stream_info_t stream_info_ffmpeg;
+extern const stream_info_t stream_info_avdevice;
 extern const stream_info_t stream_info_file;
 extern const stream_info_t stream_info_ifo;
 extern const stream_info_t stream_info_dvd;
@@ -94,6 +95,7 @@ static const stream_info_t* const auto_open_streams[] = {
   &stream_info_cdda,
 #endif
   &stream_info_ffmpeg,  // use for rstp:// before http fallback
+  &stream_info_avdevice,
 #ifdef CONFIG_NETWORKING
   &stream_info_netstream,
   &stream_info_http1,
