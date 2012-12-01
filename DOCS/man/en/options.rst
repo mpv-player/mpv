@@ -261,9 +261,18 @@
     from slow media, but can also have negative effects, especially with file
     formats that require a lot of seeking, such as mp4. See also ``--no-cache``.
 
+--cache-pause=<no|percentage>
+    If the cache percentage goes below the specified value, pause and wait
+    until the percentage set by ``--cache-min`` is reached, then resume
+    playback (default: 10). If ``no`` is specified, this behavior is disabled.
+
+    When the player is paused this way, the status line shows ``Buffering``
+    instead of ``Paused``, and the OSD uses a clock symbol instead of the
+    normal paused symbol.
+
 --cache-min=<percentage>
     Playback will start when the cache has been filled up to <percentage> of
-    the total.
+    the total (default: 20).
 
 --cache-seek-min=<percentage>
     If a seek is to be made to a position within <percentage> of the cache

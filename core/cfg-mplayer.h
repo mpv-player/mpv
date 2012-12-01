@@ -329,6 +329,8 @@ const m_option_t common_opts[] = {
 
     OPT_FLOATRANGE("cache-min", stream_cache_min_percent, 0, 0, 99),
     OPT_FLOATRANGE("cache-seek-min", stream_cache_seek_min_percent, 0, 0, 99),
+    OPT_CHOICE_OR_INT("cache-pause", stream_cache_pause, 0,
+                      0, 40, ({"no", -1})),
 #endif /* CONFIG_STREAM_CACHE */
     {"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #ifdef CONFIG_DVDREAD

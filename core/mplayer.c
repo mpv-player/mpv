@@ -1051,6 +1051,14 @@ static int get_cache_percent(struct MPContext *mpctx)
     return -1;
 }
 
+static bool get_cache_idle(struct MPContext *mpctx)
+{
+    int idle = 0;
+    if (mpctx->stream)
+        stream_control(mpctx->stream, STREAM_CTRL_GET_CACHE_IDLE, &idle);
+    return idle;
+}
+
 /**
  * \brief append a formatted string
  * \param buf buffer to print into
@@ -1131,8 +1139,12 @@ static void print_status(struct MPContext *mpctx)
     line[0] = '\0';
 
     // Playback status
-    if (mpctx->paused)
+    if (mpctx->paused_for_cache) {
+        saddf(line, width, "(Buffering) ");
+    } else if (mpctx->paused) {
         saddf(line, width, "(Paused) ");
+    }
+
     if (mpctx->sh_audio)
         saddf(line, width, "A");
     if (mpctx->sh_video)
@@ -1458,8 +1470,15 @@ static void sadd_osd_status(char *buffer, int len, struct MPContext *mpctx,
 {
     bool fractions = mpctx->opts.osd_fractions;
     int sym = mpctx->osd_function;
-    if (!sym)
-        sym = mpctx->paused || mpctx->step_frames ? OSD_PAUSE : OSD_PLAY;
+    if (!sym) {
+        if (mpctx->paused_for_cache) {
+            sym = OSD_CLOCK;
+        } else if (mpctx->paused || mpctx->step_frames) {
+            sym = OSD_PAUSE;
+        } else {
+            sym = OSD_PLAY;
+        }
+    }
     saddf_osd_function_sym(buffer, len, sym);
     sadd_hhmmssff(buffer, len, get_current_time(mpctx), fractions);
     if (full) {
@@ -2579,6 +2598,7 @@ void unpause_player(struct MPContext *mpctx)
         return;
     mpctx->paused = 0;
     mpctx->osd_function = 0;
+    mpctx->paused_for_cache = false;
 
     if (mpctx->ao && mpctx->sh_audio)
         ao_resume(mpctx->ao);
@@ -3070,6 +3090,22 @@ static void update_avsync(struct MPContext *mpctx)
     }
 }
 
+static void handle_pause_on_low_cache(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    int cache = get_cache_percent(mpctx);
+    bool idle = get_cache_idle(mpctx);
+    if (mpctx->paused && mpctx->paused_for_cache) {
+        if (cache < 0 || cache >= opts->stream_cache_min_percent || idle)
+            unpause_player(mpctx);
+    } else if (!mpctx->paused) {
+        if (cache >= 0 && cache <= opts->stream_cache_pause && !idle) {
+            pause_player(mpctx);
+            mpctx->paused_for_cache = true;
+        }
+    }
+}
+
 static void run_playloop(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -3389,6 +3425,8 @@ static void run_playloop(struct MPContext *mpctx)
     }
 
     //================= Keyboard events, SEEKing ====================
+
+    handle_pause_on_low_cache(mpctx);
 
     mp_cmd_t *cmd;
     while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {

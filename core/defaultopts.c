@@ -32,6 +32,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .chapter_merge_threshold = 100,
         .stream_cache_min_percent = 20.0,
         .stream_cache_seek_min_percent = 50.0,
+        .stream_cache_pause = 10.0,
         .chapterrange = {-1, -1},
         .edition_id = -1,
         .user_correct_pts = -1,

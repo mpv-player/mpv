@@ -93,6 +93,7 @@ typedef struct {
   volatile int control_res;
   volatile double stream_time_length;
   volatile double stream_time_pos;
+  volatile int idle;
 } cache_vars_t;
 
 static void cache_wakeup(stream_t *s)
@@ -420,6 +421,7 @@ static void cache_mainloop(cache_vars_t *s) {
 #endif
     do {
         if (!cache_fill(s)) {
+            s->idle = 1;
 #if FORKED_CACHE
             // Let signal wake us up, we cannot leave this
             // enabled since we do not handle EINTR in most places.
@@ -436,8 +438,10 @@ static void cache_mainloop(cache_vars_t *s) {
             sa.sa_handler = SIG_IGN;
             sigaction(SIGUSR1, &sa, NULL);
 #endif
-        } else
+        } else {
             sleep_count = 0;
+            s->idle = 0;
+        }
     } while (cache_execute_control(s));
 }
 
@@ -623,6 +627,9 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
       return STREAM_OK;
     case STREAM_CTRL_GET_CACHE_FILL:
       *(int64_t *)arg = s->max_filepos - s->read_filepos;
+      return STREAM_OK;
+    case STREAM_CTRL_GET_CACHE_IDLE:
+      *(int *)arg = s->idle;
       return STREAM_OK;
     case STREAM_CTRL_SEEK_TO_TIME:
       s->control_double_arg = *(double *)arg;
