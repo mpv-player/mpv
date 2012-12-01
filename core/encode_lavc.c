@@ -253,6 +253,9 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
     ctx->header_written = -1;
 
     if (!(ctx->avc->oformat->flags & AVFMT_NOFILE)) {
+        mp_msg(MSGT_ENCODE, MSGL_INFO, "Opening output file: %s\n",
+                ctx->avc->filename);
+
         if (avio_open(&ctx->avc->pb, ctx->avc->filename,
                       AVIO_FLAG_WRITE) < 0) {
             encode_lavc_fail(ctx, "encode-lavc: could not open '%s'\n",
@@ -262,6 +265,9 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
     }
 
     ctx->t0 = GetTimerMS();
+
+    mp_msg(MSGT_ENCODE, MSGL_INFO, "Opening muxer: %s [%s]\n",
+            ctx->avc->oformat->long_name, ctx->avc->oformat->name);
 
     if (avformat_write_header(ctx->avc, &ctx->foptions) < 0) {
         encode_lavc_fail(ctx, "encode-lavc: could not write header\n");
@@ -579,6 +585,9 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx, AVStream *stream)
 
     switch (stream->codec->codec_type) {
     case AVMEDIA_TYPE_VIDEO:
+        mp_msg(MSGT_ENCODE, MSGL_INFO, "Opening video encoder: %s [%s]\n",
+                ctx->vc->long_name, ctx->vc->name);
+
         if (ctx->vc->capabilities & CODEC_CAP_EXPERIMENTAL) {
             stream->codec->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
             mp_msg(MSGT_ENCODE, MSGL_WARN, _(
@@ -612,6 +621,9 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx, AVStream *stream)
 
         break;
     case AVMEDIA_TYPE_AUDIO:
+        mp_msg(MSGT_ENCODE, MSGL_INFO, "Opening audio encoder: %s [%s]\n",
+                ctx->ac->long_name, ctx->ac->name);
+
         if (ctx->ac->capabilities & CODEC_CAP_EXPERIMENTAL) {
             stream->codec->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
             mp_msg(MSGT_ENCODE, MSGL_WARN, _(
