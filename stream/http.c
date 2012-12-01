@@ -938,7 +938,7 @@ const stream_info_t stream_info_http1 = {
   "Bertrand, Albeau, Reimar Doeffinger, Arpi?",
   "plain http",
   open_s1,
-  {"http", "http_proxy", "unsv", "icyx", "noicyx", NULL},
+  {"mp_http", "mp_http_proxy", "unsv", "icyx", "noicyx", NULL},
   NULL,
   0 // Urls are an option string
 };
@@ -949,7 +949,7 @@ const stream_info_t stream_info_http2 = {
   "Bertrand, Albeu, Arpi? who?",
   "plain http, also used as fallback for many other protocols",
   open_s2,
-  {"http", "http_proxy", "pnm", "mms", "mmsu", "mmst", "rtsp", NULL},	//all the others as fallback
+  {"mp_http", "mp_http_proxy", "pnm", "mms", "mmsu", "mmst", "rtsp", NULL},	//all the others as fallback
   NULL,
   0 // Urls are an option string
 };

@@ -152,6 +152,8 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     stream->write_buffer = write_buffer;
     stream->control = control;
     stream->close = close_f;
+    // enable cache (should be avoided for files, but no way to detect this)
+    stream->streaming = true;
     res = STREAM_OK;
 
 out:
@@ -164,7 +166,7 @@ const stream_info_t stream_info_ffmpeg = {
   "",
   "",
   open_f,
-  { "lavf", "ffmpeg", "rtmp", "rtsp", NULL },
+  { "lavf", "ffmpeg", "rtmp", "rtsp", "http", "https", NULL },
   NULL,
   1 // Urls are an option string
 };
