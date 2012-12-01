@@ -104,7 +104,8 @@ options are added by it::
   -profile enc-to-nok-6300    3GP for Nokia 6300
   -profile enc-to-psp         MP4 for PlayStation Portable
   -profile enc-to-iphone      MP4 for iPhone
-  -profile enc-to-iphone4     MP4 for iPhone 4 (double res)
+  -profile enc-to-iphone-4    MP4 for iPhone 4 (double res)
+  -profile enc-to-iphone-5    MP4 for iPhone 5 (even larger res)
 
 You can encode using these with a command line like::
 
