@@ -98,6 +98,8 @@
 #define STREAM_CTRL_GET_NUM_TITLES 12
 #define STREAM_CTRL_GET_LANG 13
 #define STREAM_CTRL_GET_CURRENT_TITLE 14
+#define STREAM_CTRL_GET_CACHE_SIZE 15
+#define STREAM_CTRL_GET_CACHE_FILL 16
 
 struct stream_lang_req {
 	int type; // STREAM_AUDIO, STREAM_SUB
@@ -113,8 +115,6 @@ typedef enum {
 typedef struct streaming_control {
 	URL_t *url;
 	streaming_status status;
-	int buffering;	// boolean
-	unsigned int prebuffer_size;
 	char *buffer;
 	unsigned int buffer_size;
 	unsigned int buffer_pos;
@@ -167,8 +167,9 @@ typedef struct stream {
   int64_t pos,start_pos,end_pos;
   int eof;
   int mode; //STREAM_READ or STREAM_WRITE
-  int cache_size;   // cache size to use if enabled
-  bool cached;
+  bool streaming;       // known to be a network stream if true
+  int cache_size;       // cache size in KB to use if enabled
+  bool cached;          // cache active
   unsigned int cache_pid;
   void* cache_data;
   void* priv; // used for DVD, TV, RTSP etc

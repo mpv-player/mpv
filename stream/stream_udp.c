@@ -51,9 +51,8 @@ udp_streaming_start (stream_t *stream)
 
   streaming_ctrl->streaming_read = nop_streaming_read;
   streaming_ctrl->streaming_seek = nop_streaming_seek;
-  streaming_ctrl->prebuffer_size = 64 * 1024; /* 64 KBytes */
-  streaming_ctrl->buffering = 0;
   streaming_ctrl->status = streaming_playing_e;
+  stream->streaming = false;
 
   return 0;
 }

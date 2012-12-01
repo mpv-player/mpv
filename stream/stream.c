@@ -183,13 +183,9 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     return NULL;
   }
 
-  s->cache_size = 0;
-  if (s->streaming_ctrl && s->streaming_ctrl->buffering) {
+  if (s->streaming && !s->cache_size) {
     // Set default cache size to use if user does not specify it.
-    // buffer in KBytes, *5 assuming the prefill is 20% of the buffer.
-    s->cache_size = s->streaming_ctrl->prebuffer_size / 1024 * 5;
-    if (s->cache_size < 64)
-      s->cache_size = 64;
+    s->cache_size = 320;
   }
 
   if(s->type <= -2)
@@ -480,11 +476,11 @@ void stream_reset(stream_t *s){
 }
 
 int stream_control(stream_t *s, int cmd, void *arg){
-  if(!s->control) return STREAM_UNSUPPORTED;
 #ifdef CONFIG_STREAM_CACHE
   if (s->cache_pid)
     return cache_do_control(s, cmd, arg);
 #endif
+  if(!s->control) return STREAM_UNSUPPORTED;
   return s->control(s, cmd, arg);
 }
 

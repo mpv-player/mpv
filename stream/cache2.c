@@ -360,9 +360,9 @@ static cache_vars_t* cache_init(int64_t size,int sector){
 
   memset(s,0,sizeof(cache_vars_t));
   num=size/sector;
-  if(num < 16){
-     num = 16;
-  }//32kb min_size
+  if(num < 32){
+     num = 32;
+  }//64kb min_size
   s->buffer_size=num*sector;
   s->sector_size=sector;
   s->buffer=shared_alloc(s->buffer_size);
@@ -583,14 +583,6 @@ int cache_stream_fill_buffer(stream_t *s){
 
 }
 
-int cache_fill_status(stream_t *s) {
-  cache_vars_t *cv;
-  if (!s || !s->cache_data)
-    return -1;
-  cv = s->cache_data;
-  return (cv->max_filepos-cv->read_filepos)/(cv->buffer_size / 100);
-}
-
 int cache_stream_seek_long(stream_t *stream,int64_t pos){
   cache_vars_t* s;
   int64_t newpos;
@@ -626,6 +618,12 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
   int pos_change = 0;
   cache_vars_t* s = stream->cache_data;
   switch (cmd) {
+    case STREAM_CTRL_GET_CACHE_SIZE:
+      *(int64_t *)arg = s->buffer_size;
+      return STREAM_OK;
+    case STREAM_CTRL_GET_CACHE_FILL:
+      *(int64_t *)arg = s->max_filepos - s->read_filepos;
+      return STREAM_OK;
     case STREAM_CTRL_SEEK_TO_TIME:
       s->control_double_arg = *(double *)arg;
       s->control = cmd;

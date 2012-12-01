@@ -166,7 +166,8 @@ static int max_idx(int s_count, int *s_rates, int bound) {
   return best;
 }
 
-static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
+static int asf_streaming_parse_header(stream_t *s, int fd) {
+  streaming_ctrl_t* streaming_ctrl = s->streaming_ctrl;
   ASF_stream_chunck_t chunk;
   asf_http_streaming_ctrl_t* asf_ctrl = streaming_ctrl->data;
   char* buffer=NULL, *chunk_buffer=NULL;
@@ -246,7 +247,9 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
       asf_ctrl->packet_size = AV_RL32(&fileh->max_packet_size);
       // before playing.
       // preroll: time in ms to bufferize before playing
-      streaming_ctrl->prebuffer_size = (unsigned int)(((double)fileh->preroll/1000.0)*((double)fileh->max_bitrate/8.0));
+      unsigned int preroll = (unsigned int)(((double)fileh->preroll/1000.0)*((double)fileh->max_bitrate/8.0));
+      // buffer in KBytes, *5 assuming the prefill is 20% of the buffer.
+      s->cache_size = preroll / 1024 * 5;
   }
 
   pos = start;
@@ -754,7 +757,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 				if( asf_http_ctrl->request==1 ) {
 					if( asf_http_ctrl->streaming_type!=ASF_PlainText_e ) {
 						// First request, we only got the ASF header.
-						ret = asf_streaming_parse_header(fd,stream->streaming_ctrl);
+						ret = asf_streaming_parse_header(stream,fd);
 						if(ret < 0) goto err_out;
 						if(asf_http_ctrl->n_audio == 0 && asf_http_ctrl->n_video == 0) {
 							mp_tmsg(MSGT_NETWORK,MSGL_ERR,"No stream found.\n");
@@ -796,7 +799,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 	} else {
 		stream->streaming_ctrl->streaming_read = asf_http_streaming_read;
 		stream->streaming_ctrl->streaming_seek = asf_http_streaming_seek;
-		stream->streaming_ctrl->buffering = 1;
+		stream->streaming = true;
 	}
 	stream->streaming_ctrl->status = streaming_playing_e;
 	stream->close = close_s;

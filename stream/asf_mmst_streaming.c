@@ -671,8 +671,8 @@ int asf_mmst_streaming_start(stream_t *stream)
   stream->fd = s;
   stream->streaming_ctrl->streaming_read = asf_mmst_streaming_read;
   stream->streaming_ctrl->streaming_seek = asf_mmst_streaming_seek;
-  stream->streaming_ctrl->buffering = 1;
   stream->streaming_ctrl->status = streaming_playing_e;
+  stream->streaming = true;
 
   packet_length1 = packet_length;
   mp_msg(MSGT_NETWORK,MSGL_INFO,"mmst packet_length = %d\n", packet_length);

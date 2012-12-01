@@ -214,9 +214,8 @@ static int scast_streaming_start(stream_t *stream) {
   stream->streaming_ctrl->data = scast_data;
   stream->streaming_ctrl->streaming_read = scast_streaming_read;
   stream->streaming_ctrl->streaming_seek = NULL;
-  stream->streaming_ctrl->prebuffer_size = 64 * 1024; // 64 KBytes
-  stream->streaming_ctrl->buffering = 1;
   stream->streaming_ctrl->status = streaming_playing_e;
+  stream->streaming = true;
   return 0;
 }
 
@@ -293,9 +292,8 @@ static int nop_streaming_start( stream_t *stream ) {
 
 	stream->streaming_ctrl->streaming_read = nop_streaming_read;
 	stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
-	stream->streaming_ctrl->prebuffer_size = 64*1024; // 64 KBytes
-	stream->streaming_ctrl->buffering = 1;
 	stream->streaming_ctrl->status = streaming_playing_e;
+        stream->streaming = true;
 	return 0;
 }
 
