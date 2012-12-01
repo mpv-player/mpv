@@ -118,27 +118,37 @@ int convert_key(unsigned key, unsigned charcode)
 /**
  * Checks at runtime that OSX version is the same or newer than the one
  * provided as input.
+ * Currently reads SystemVersion.plist file since Gestalt was deprecated.
+ * This is supposedly the current way supported by Apple engineers. More info:
+ * http://stackoverflow.com/a/11072974/499456
  */
 int is_osx_version_at_least(int majorv, int minorv, int bugfixv)
 {
-    OSErr err;
-    SInt32 major, minor, bugfix;
-    if ((err = Gestalt(gestaltSystemVersionMajor,  &major)) != noErr)
-        goto fail;
-    if ((err = Gestalt(gestaltSystemVersionMinor,  &minor)) != noErr)
-        goto fail;
-    if ((err = Gestalt(gestaltSystemVersionBugFix, &bugfix)) != noErr)
-        goto fail;
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSString *plist = @"/System/Library/CoreServices/SystemVersion.plist";
+    NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:plist];
+    NSString *version = [dict objectForKey:@"ProductVersion"];
+    NSArray *components = [version componentsSeparatedByString:@"."];
+    int rv = 0;
+
+    // All the  above code just sends messages to nil. If anything failed,
+    // we just end up with an invalid components array.
+    if ([components count] != 3) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[osx] Failed to get your system version. "
+                "Please open a bug report.\n");
+        goto cleanup_and_return;
+    }
+
+    int major  = [[components objectAtIndex:0] intValue];
+    int minor  = [[components objectAtIndex:1] intValue];
+    int bugfix = [[components objectAtIndex:2] intValue];
 
     if(major > majorv ||
         (major == majorv && (minor > minorv ||
             (minor == minorv && bugfix >= bugfixv))))
-      return 1;
-    else
-      return 0;
-fail:
-    // There's no reason the Gestalt system call should fail on OSX.
-    mp_msg(MSGT_VO, MSGL_FATAL, "[osx] Failed to get system version number. "
-        "Please contact the developers. Error code: %ld\n", (long)err);
-    return 0;
+        rv = 1;
+
+cleanup_and_return:
+    [pool release];
+    return rv;
 }
