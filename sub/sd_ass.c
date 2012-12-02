@@ -38,6 +38,7 @@ struct sd_ass_priv {
     bool vsfilter_aspect;
     bool incomplete_event;
     struct sub_bitmap *parts;
+    bool flush_on_seek;
 };
 
 static void free_last_event(ASS_Track *track)
@@ -78,6 +79,8 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
 
     if (sh->type == 'a') { // ssa/ass subs
         if (bstr_startswith0((bstr){data, data_len}, "Dialogue: ")) {
+            // broken ffmpeg ASS packet format
+            ctx->flush_on_seek = true;
             ass_process_data(track, data, data_len);
         } else {
             ass_process_chunk(track, data, data_len,
@@ -160,6 +163,9 @@ static void reset(struct sh_sub *sh, struct osd_state *osd)
     if (ctx->incomplete_event)
         free_last_event(ctx->ass_track);
     ctx->incomplete_event = false;
+    if (ctx->flush_on_seek)
+        ass_flush_events(ctx->ass_track);
+    ctx->flush_on_seek = false;
 }
 
 static void uninit(struct sh_sub *sh)
