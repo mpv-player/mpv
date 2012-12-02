@@ -44,7 +44,7 @@ struct mp_fifo *mp_fifo_create(struct input_ctx *input, struct MPOpts *opts)
 
 static void put_double(struct mp_fifo *fifo, int code)
 {
-  if (code >= MOUSE_BTN0 && code < MOUSE_BTN_END)
+  if (code >= MOUSE_BTN0 && code <= MOUSE_BTN2)
       mp_input_feed_key(fifo->input, code - MOUSE_BTN0 + MOUSE_BTN0_DBL);
 }
 
