@@ -46,6 +46,7 @@ struct priv {
     uint8_t *buffer;
     size_t buffer_size;
     AVStream *stream;
+    bool planarize;
     int pcmhack;
     int aframesize;
     int aframecount;
@@ -112,27 +113,32 @@ static int init(struct ao *ao, char *params)
              ++sampleformat) {
             switch (*sampleformat) {
             case AV_SAMPLE_FMT_U8:
+            case AV_SAMPLE_FMT_U8P:
                 if (ao->format == AF_FORMAT_U8)
                     goto out_search;
                 break;
             case AV_SAMPLE_FMT_S16:
+            case AV_SAMPLE_FMT_S16P:
                 if (ao->format == AF_FORMAT_S16_BE)
                     goto out_search;
                 if (ao->format == AF_FORMAT_S16_LE)
                     goto out_search;
                 break;
             case AV_SAMPLE_FMT_S32:
+            case AV_SAMPLE_FMT_S32P:
                 if (ao->format == AF_FORMAT_S32_BE)
                     goto out_search;
                 if (ao->format == AF_FORMAT_S32_LE)
                     goto out_search;
                 break;
             case AV_SAMPLE_FMT_FLT:
+            case AV_SAMPLE_FMT_FLTP:
                 if (ao->format == AF_FORMAT_FLOAT_BE)
                     goto out_search;
                 if (ao->format == AF_FORMAT_FLOAT_LE)
                     goto out_search;
                 break;
+            // FIXME do we need support for AV_SAMPLE_FORMAT_DBL/DBLP?
             default:
                 break;
             }
@@ -151,17 +157,22 @@ out_search:
              ++sampleformat) {
             switch (*sampleformat) {
             case AV_SAMPLE_FMT_U8:
+            case AV_SAMPLE_FMT_U8P:
                 ao->format = AF_FORMAT_U8;
                 goto out_takefirst;
             case AV_SAMPLE_FMT_S16:
+            case AV_SAMPLE_FMT_S16P:
                 ao->format = AF_FORMAT_S16_NE;
                 goto out_takefirst;
             case AV_SAMPLE_FMT_S32:
+            case AV_SAMPLE_FMT_S32P:
                 ao->format = AF_FORMAT_S32_NE;
                 goto out_takefirst;
             case AV_SAMPLE_FMT_FLT:
+            case AV_SAMPLE_FMT_FLTP:
                 ao->format = AF_FORMAT_FLOAT_NE;
                 goto out_takefirst;
+            // FIXME do we need support for AV_SAMPLE_FORMAT_DBL/DBLP?
             default:
                 break;
             }
@@ -202,6 +213,32 @@ out_takefirst:
         ac->sample_padding = sample_padding_float;
         ao->format = AF_FORMAT_FLOAT_NE;
         break;
+    }
+
+    // detect if we have to planarize
+    ac->planarize = false;
+    {
+        bool found_format = false;
+        bool found_alternate_format = false;
+        for (sampleformat = codec->sample_fmts;
+             sampleformat && *sampleformat != AV_SAMPLE_FMT_NONE;
+             ++sampleformat) {
+            if (*sampleformat == ac->stream->codec->sample_fmt)
+                found_format = true;
+            if (*sampleformat ==
+                    av_get_alt_sample_fmt(ac->stream->codec->sample_fmt, 1))
+                found_alternate_format = true;
+        }
+        if (!found_format && found_alternate_format) {
+            ac->stream->codec->sample_fmt =
+                av_get_alt_sample_fmt(ac->stream->codec->sample_fmt, 1);
+            ac->planarize = true;
+        }
+        if (!found_format && !found_alternate_format) {
+            // shouldn't happen
+            mp_msg(MSGT_ENCODE, MSGL_ERR,
+                   "ao-lavc: sample format not found\n");
+        }
     }
 
     ac->stream->codec->bits_per_raw_sample = ac->sample_size * 8;
@@ -274,6 +311,10 @@ out_takefirst:
     ao->untimed = true;
     ao->priv = ac;
 
+    if (ac->planarize)
+        mp_msg(MSGT_ENCODE, MSGL_WARN,
+                "ao-lavc: need to planarize audio data\n");
+
     return 0;
 }
 
@@ -297,7 +338,7 @@ static void uninit(struct ao *ao, bool cut_audio)
 
     if (!encode_lavc_start(ectx)) {
         mp_msg(MSGT_ENCODE, MSGL_WARN,
-		"ao-lavc: not even ready to encode audio at end -> dropped");
+                "ao-lavc: not even ready to encode audio at end -> dropped");
         return;
     }
 
@@ -357,8 +398,14 @@ static int encode(struct ao *ao, double apts, void *data)
     {
         frame = avcodec_alloc_frame();
         frame->nb_samples = ac->aframesize;
-        if(avcodec_fill_audio_frame(frame, ao->channels, ac->stream->codec->sample_fmt, data, ac->aframesize * ao->channels * ac->sample_size, 1))
-        {
+
+        if (ac->planarize) {
+            void *data2 = talloc_size(ao, ac->aframesize * ao->channels * ac->sample_size);
+            reorder_to_planar(data2, data, ac->sample_size, ao->channels, ac->aframesize);
+            data = data2;
+        }
+
+        if (avcodec_fill_audio_frame(frame, ao->channels, ac->stream->codec->sample_fmt, data, ac->aframesize * ao->channels * ac->sample_size, 1)) {
             mp_msg(MSGT_ENCODE, MSGL_ERR, "ao-lavc: error filling\n");
             return -1;
         }
@@ -392,6 +439,11 @@ static int encode(struct ao *ao, double apts, void *data)
         }
 
         avcodec_free_frame(&frame);
+
+        if (ac->planarize) {
+            talloc_free(data);
+            data = NULL;
+        }
     }
     else
     {

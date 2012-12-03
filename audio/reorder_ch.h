@@ -130,4 +130,8 @@ void reorder_channel_nch(void *buf,
                          int samples,
                          int samplesize);
 
+/// Utility function for planar audio conversions
+void reorder_to_planar(void *restrict out, const void *restrict in,
+        size_t size, size_t nchan, size_t nmemb);
+
 #endif /* MPLAYER_REORDER_CH_H */

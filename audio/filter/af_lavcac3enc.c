@@ -47,6 +47,7 @@ const uint16_t ac3_bitrate_tab[19] = {
 typedef struct af_ac3enc_s {
     struct AVCodec        *lavc_acodec;
     struct AVCodecContext *lavc_actx;
+    bool planarize;
     int add_iec61937_header;
     int bit_rate;
     int pending_data_size;
@@ -232,8 +233,19 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
                                     c->nch,
                                     s->expect_len / samplesize, samplesize);
 
-            len = avcodec_encode_audio(s->lavc_actx, dest, destsize,
-                                       (void *)s->pending_data);
+            void *data = (void *) s->pending_data;
+            if (s->planarize) {
+                void *data2 = malloc(s->expect_len);
+                reorder_to_planar(data2, data, samplesize,
+                        c->nch, s->expect_len / samplesize / c->nch);
+                data = data2;
+            }
+
+            len = avcodec_encode_audio(s->lavc_actx, dest, destsize, data);
+
+            if (s->planarize)
+                free(data);
+
             s->pending_len = 0;
         }
         else {
@@ -243,7 +255,20 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
                                     AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
                                     c->nch,
                                     s->expect_len / samplesize, samplesize);
-            len = avcodec_encode_audio(s->lavc_actx,dest,destsize,(void *)src);
+
+            void *data = (void *) src;
+            if (s->planarize) {
+                void *data2 = malloc(s->expect_len);
+                reorder_to_planar(data2, data, samplesize,
+                        c->nch, s->expect_len / samplesize / c->nch);
+                data = data2;
+            }
+
+            len = avcodec_encode_audio(s->lavc_actx, dest, destsize, data);
+
+            if (s->planarize)
+                free(data);
+
             src += s->expect_len;
             left -= s->expect_len;
         }
@@ -305,10 +330,22 @@ static int af_open(struct af_instance* af){
         } else if (fmts[i] == AV_SAMPLE_FMT_S16) {
             s->in_sampleformat = AF_FORMAT_S16_NE;
             s->lavc_actx->sample_fmt = fmts[i];
+            s->planarize = 0;
             break;
         } else if (fmts[i] == AV_SAMPLE_FMT_FLT) {
             s->in_sampleformat = AF_FORMAT_FLOAT_NE;
             s->lavc_actx->sample_fmt = fmts[i];
+            s->planarize = 0;
+            break;
+        } else if (fmts[i] == AV_SAMPLE_FMT_S16P) {
+            s->in_sampleformat = AF_FORMAT_S16_NE;
+            s->lavc_actx->sample_fmt = fmts[i];
+            s->planarize = 1;
+            break;
+        } else if (fmts[i] == AV_SAMPLE_FMT_FLTP) {
+            s->in_sampleformat = AF_FORMAT_FLOAT_NE;
+            s->lavc_actx->sample_fmt = fmts[i];
+            s->planarize = 1;
             break;
         }
     }
@@ -318,6 +355,10 @@ static int af_open(struct af_instance* af){
     s->pending_data_size = AF_NCH * AC3_FRAME_SIZE *
         af_fmt2bits(s->in_sampleformat) / 8;
     s->pending_data = malloc(s->pending_data_size);
+
+    if (s->planarize)
+        mp_msg(MSGT_AFILTER, MSGL_WARN,
+                "[af_lavcac3enc]: need to planarize audio data\n");
 
     return AF_OK;
 }
