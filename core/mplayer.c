@@ -1841,6 +1841,9 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
             }
             double duration = d_sub->first->duration;
             len = ds_get_packet_sub(d_sub, &packet);
+            mp_dbg(MSGT_CPLAYER, MSGL_V, "Sub: c_pts=%5.3f s_pts=%5.3f "
+                   "duration=%5.3f len=%d\n", curpts_s, subpts_s, duration,
+                   len);
             if (type == 'm') {
                 if (len < 2)
                     continue;
@@ -1927,6 +1930,45 @@ static float timing_sleep(struct MPContext *mpctx, float time_frame)
     return time_frame;
 }
 
+static void set_dvdsub_fake_extradata(struct sh_sub *sh_sub, struct stream *st,
+                                      struct sh_video *sh_video)
+{
+#ifdef CONFIG_DVDREAD
+    if (st->type != STREAMTYPE_DVD || !sh_video)
+        return;
+
+    struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
+    csp.int_bits_in = 8;
+    csp.int_bits_out = 8;
+    float cmatrix[3][4];
+    mp_get_yuv2rgb_coeffs(&csp, cmatrix);
+
+    int width  = sh_video->disp_w;
+    int height = sh_video->disp_h;
+    int *palette = ((dvd_priv_t *)st->priv)->cur_pgc->palette;
+
+    char *s = NULL;
+    s = talloc_asprintf_append(s, "size: %dx%d\n", width, height);
+    s = talloc_asprintf_append(s, "palette: ");
+    for (int i = 0; i < 16; i++) {
+        int color = palette[i];
+        int c[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
+        mp_map_int_color(cmatrix, 8, c);
+        color = (c[2] << 16) | (c[1] << 8) | c[0];
+
+        if (i != 0)
+            talloc_asprintf_append(s, ", ");
+        s = talloc_asprintf_append(s, "%06x", color);
+    }
+    s = talloc_asprintf_append(s, "\n");
+
+    free(sh_sub->extradata);
+    sh_sub->extradata = strdup(s);
+    sh_sub->extradata_len = strlen(s);
+    talloc_free(s);
+#endif
+}
+
 static void reinit_subs(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -1968,7 +2010,11 @@ static void reinit_subs(struct MPContext *mpctx)
 #endif
         vo_osd_changed(OSDTYPE_SUBTITLE);
     } else if (track->stream) {
-        if (mpctx->sh_sub->type == 'v')
+        struct stream *s = track->demuxer ? track->demuxer->stream : NULL;
+        if (s && s->type == STREAMTYPE_DVD)
+            set_dvdsub_fake_extradata(mpctx->sh_sub, s, mpctx->sh_video);
+        if (mpctx->sh_sub->type == 'v' && track->demuxer
+            && track->demuxer->type == DEMUXER_TYPE_MPEG_PS)
             init_vo_spudec(mpctx);
         else
             sub_init(mpctx->sh_sub, mpctx->osd);
