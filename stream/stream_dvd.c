@@ -490,6 +490,8 @@ static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *
     d->angle_seek     = 0;
 
     pos = (int64_t) d->cur_pack * 2048;
+    stream_seek(stream, pos);
+
     mp_msg(MSGT_OPEN,MSGL_V,"\r\nSTREAM_DVD, seeked to chapter: %d, cell: %u, pos: %"PRIu64"\n",
         chapter, d->cur_pack, pos);
 
