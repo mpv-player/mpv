@@ -49,13 +49,13 @@
 #include "mp_taglists.h"
 
 #define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
-#define SMALL_MAX_PROBE_SIZE (32 * 1024)
 #define PROBE_BUF_SIZE (2 * 1024 * 1024)
 
 const m_option_t lavfdopts_conf[] = {
     OPT_INTRANGE("probesize", lavfdopts.probesize, 0, 32, INT_MAX),
     OPT_STRING("format", lavfdopts.format, 0),
     OPT_INTRANGE("analyzeduration", lavfdopts.analyzeduration, 0, 0, INT_MAX),
+    OPT_INTRANGE("probescore", lavfdopts.probescore, 0, 0, 100),
     OPT_STRING("cryptokey", lavfdopts.cryptokey, 0),
     OPT_STRING("o", lavfdopts.avopt, 0),
     {NULL, NULL, 0, 0, 0, 0, NULL}
@@ -175,8 +175,8 @@ static int lavf_check_file(demuxer_t *demuxer)
     int read_size = INITIAL_PROBE_SIZE;
     int score;
 
-    if (!demuxer->priv)
-        demuxer->priv = talloc_zero(NULL, lavf_priv_t);
+    assert(!demuxer->priv);
+    demuxer->priv = talloc_zero(NULL, lavf_priv_t);
     priv = demuxer->priv;
     priv->autoselect_sub = -1;
 
@@ -194,7 +194,7 @@ static int lavf_check_file(demuxer_t *demuxer)
         char *sep = strchr(priv->filename, ':');
         if (!sep) {
             mp_msg(MSGT_DEMUX, MSGL_FATAL,
-                "Must specify filename in 'format:filename' form\n");
+                   "Must specify filename in 'format:filename' form\n");
             return 0;
         }
         avdevice_format = talloc_strndup(priv, priv->filename,
@@ -219,8 +219,15 @@ static int lavf_check_file(demuxer_t *demuxer)
         }
         mp_msg(MSGT_DEMUX, MSGL_INFO, "Forced lavf %s demuxer\n",
                priv->avif->long_name);
-        return DEMUXER_TYPE_LAVF;
+        goto success;
     }
+
+    // AVPROBE_SCORE_RETRY + 1 is the "recommended" limit. Below that, the user
+    // is supposed to retry with larger probe sizes until a higher value is
+    // reached.
+    int min_probe = AVPROBE_SCORE_RETRY + 1;
+    if (lavfdopts->probescore)
+        min_probe = lavfdopts->probescore;
 
     avpd.buf = av_mallocz(FFMAX(BIO_BUFFER_SIZE, PROBE_BUF_SIZE) +
                           FF_INPUT_BUFFER_PADDING_SIZE);
@@ -237,19 +244,27 @@ static int lavf_check_file(demuxer_t *demuxer)
 
         score = 0;
         priv->avif = av_probe_input_format2(&avpd, probe_data_size > 0, &score);
+
+        if (priv->avif) {
+            mp_msg(MSGT_HEADER, MSGL_V, "Found '%s' at score=%d size=%d.\n",
+                   priv->avif->name, score, probe_data_size);
+        }
+
+        if (priv->avif && score >= min_probe)
+            break;
+
+        priv->avif = NULL;
         read_size = FFMIN(2 * read_size, PROBE_BUF_SIZE - probe_data_size);
-    } while ((demuxer->desc->type != DEMUXER_TYPE_LAVF_PREFERRED ||
-              probe_data_size < SMALL_MAX_PROBE_SIZE) &&
-             score <= AVPROBE_SCORE_MAX / 4 &&
-             read_size > 0 && probe_data_size < PROBE_BUF_SIZE);
+    } while (read_size > 0 && probe_data_size < PROBE_BUF_SIZE);
     av_free(avpd.buf);
 
-    if (!priv->avif || score <= AVPROBE_SCORE_MAX / 4) {
+    if (!priv->avif) {
         mp_msg(MSGT_HEADER, MSGL_V,
-               "LAVF_check: no clue about this gibberish!\n");
+               "No format found, try lowering probescore.\n");
         return 0;
-    } else
-        mp_msg(MSGT_HEADER, MSGL_V, "LAVF_check: %s\n", priv->avif->long_name);
+    }
+
+success:
 
     demuxer->filetype = priv->avif->long_name;
     if (!demuxer->filetype)
@@ -271,27 +286,6 @@ static bool matches_avinputformat_name(struct lavf_priv *priv,
             return true;
         avifname = next + 1;
     }
-}
-
-/* formats for which an internal demuxer is preferred */
-static const char * const preferred_internal[] = {
-    /* lavf Matroska demuxer doesn't support ordered chapters and fails
-     * for more files */
-    "matroska",
-    NULL
-};
-
-static int lavf_check_preferred_file(demuxer_t *demuxer)
-{
-    if (lavf_check_file(demuxer)) {
-        const char * const *p;
-        lavf_priv_t *priv = demuxer->priv;
-        for (p = preferred_internal; *p; p++)
-            if (matches_avinputformat_name(priv, *p))
-                return 0;
-        return DEMUXER_TYPE_LAVF_PREFERRED;
-    }
-    return 0;
 }
 
 static uint8_t char2int(char c)
@@ -600,6 +594,10 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     lavf_priv_t *priv = demuxer->priv;
     int i;
 
+    // do not allow forcing the demuxer
+    if (!priv->avif)
+        return NULL;
+
     stream_seek(demuxer->stream, 0);
 
     avfc = avformat_alloc_context();
@@ -659,13 +657,11 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     }
 
     priv->avfc = avfc;
-
     if (avformat_find_stream_info(avfc, NULL) < 0) {
         mp_msg(MSGT_HEADER, MSGL_ERR,
                "LAVF_header: av_find_stream_info() failed\n");
         return NULL;
     }
-
     /* Add metadata. */
     while ((t = av_dict_get(avfc->metadata, "", t,
                             AV_DICT_IGNORE_SUFFIX)))
@@ -1078,24 +1074,8 @@ const demuxer_desc_t demuxer_desc_lavf = {
     "Michael Niedermayer",
     "supports many formats, requires libavformat",
     DEMUXER_TYPE_LAVF,
-    0, // Check after other demuxer
-    lavf_check_file,
-    demux_lavf_fill_buffer,
-    demux_open_lavf,
-    demux_close_lavf,
-    demux_seek_lavf,
-    demux_lavf_control
-};
-
-const demuxer_desc_t demuxer_desc_lavf_preferred = {
-    "libavformat preferred demuxer",
-    "lavfpref",
-    "libavformat",
-    "Michael Niedermayer",
-    "supports many formats, requires libavformat",
-    DEMUXER_TYPE_LAVF_PREFERRED,
     1,
-    lavf_check_preferred_file,
+    lavf_check_file,
     demux_lavf_fill_buffer,
     demux_open_lavf,
     demux_close_lavf,

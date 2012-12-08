@@ -57,7 +57,6 @@ extern const demuxer_desc_t demuxer_desc_avi;
 extern const demuxer_desc_t demuxer_desc_asf;
 extern const demuxer_desc_t demuxer_desc_matroska;
 extern const demuxer_desc_t demuxer_desc_lavf;
-extern const demuxer_desc_t demuxer_desc_lavf_preferred;
 extern const demuxer_desc_t demuxer_desc_mng;
 extern const demuxer_desc_t demuxer_desc_mpeg_ps;
 extern const demuxer_desc_t demuxer_desc_mpeg_pes;
@@ -79,11 +78,10 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef CONFIG_TV
     &demuxer_desc_tv,
 #endif
-    &demuxer_desc_lavf_preferred,
-    &demuxer_desc_avi,
-    &demuxer_desc_asf,
     &demuxer_desc_matroska,
     &demuxer_desc_lavf,
+    &demuxer_desc_avi,
+    &demuxer_desc_asf,
 #ifdef CONFIG_MNG
     &demuxer_desc_mng,
 #endif
@@ -920,6 +918,7 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
 {
     struct demuxer *demuxer;
     int fformat;
+    mp_msg(MSGT_DEMUXER, MSGL_V, "Trying demuxer: %s\n", desc->name);
     demuxer = new_demuxer(opts, stream, desc->type, audio_id,
                           video_id, sub_id, filename);
     demuxer->params = params;

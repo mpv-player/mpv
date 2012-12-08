@@ -1028,6 +1028,12 @@
 
     analyzeduration=<value>
         Maximum length in seconds to analyze the stream properties.
+    probescore=<1-100>
+        Minimum required libavformat probe score. Lower values will require
+        less data to be loaded (makes streams start faster), but makes file
+        format detection less reliable. Can be used to force auto-detected
+        libavformat demuxers, even if libavformat considers the detection not
+        reliable enough. (Default: 26.)
     format=<value>
         Force a specific libavformat demuxer.
     o=<key>=<value>[,<key>=<value>[,...]]

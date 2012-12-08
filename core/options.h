@@ -150,6 +150,7 @@ typedef struct MPOpts {
 
     struct lavfdopts {
         unsigned int probesize;
+        int probescore;
         unsigned int analyzeduration;
         char *format;
         char *cryptokey;
