@@ -284,7 +284,7 @@ static double get_play_end_pts(struct MPContext *mpctx)
     if (opts->play_end.type) {
         return rel_time_to_abs(mpctx, opts->play_end, MP_NOPTS_VALUE);
     } else if (opts->play_length.type) {
-        double start = rel_time_to_abs(mpctx, opts->play_start, -1);
+        double start = rel_time_to_abs(mpctx, opts->play_start, 0);
         double length = rel_time_to_abs(mpctx, opts->play_length, -1);
         if (start != -1 && length != -1)
             return start + length;
