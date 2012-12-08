@@ -71,20 +71,18 @@ int sub_match_fuzziness=0; // level of sub name matching fuzziness
 
 /* Use the SUB_* constant defined in the header file */
 int sub_format=SUB_INVALID;
-#ifdef CONFIG_SORTSUB
 /*
    Some subtitling formats, namely AQT and Subrip09, define the end of a
    subtitle as the beginning of the following. Since currently we read one
    subtitle at time, for these format we keep two global *subtitle,
    previous_aqt_sub and previous_subrip09_sub, pointing to previous subtitle,
    so we can change its end when we read current subtitle starting time.
-   When CONFIG_SORTSUB is defined, we use a single global unsigned long,
+   We use a single global unsigned long,
    previous_sub_end, for both (and even future) formats, to store the end of
    the previous sub: it is initialized to 0 in sub_read_file and eventually
    modified by sub_read_aqt_line or sub_read_subrip09_line.
  */
 unsigned long previous_sub_end;
-#endif
 
 static int eol(char p) {
 	return p=='\r' || p=='\n' || p=='\0';
@@ -791,11 +789,6 @@ static subtitle *sub_read_line_mpsub(stream_t *st, subtitle *current,
 	return NULL; // we should have returned before if it's OK
 }
 
-#ifndef CONFIG_SORTSUB
-//we don't need this if we use previous_sub_end
-subtitle *previous_aqt_sub = NULL;
-#endif
-
 static subtitle *sub_read_line_aqt(stream_t *st,subtitle *current,
                                    struct readline_args *args)
 {
@@ -811,15 +804,8 @@ retry:
 		break;
     }
 
-#ifdef CONFIG_SORTSUB
     if (!previous_sub_end)
     previous_sub_end = (current->start) ? current->start - 1 : 0;
-#else
-    if (previous_aqt_sub != NULL)
-	previous_aqt_sub->end = current->start-1;
-
-    previous_aqt_sub = current;
-#endif
 
     if (!stream_read_line (st, line, LINE_LEN, utf16))
 	return NULL;
@@ -834,20 +820,11 @@ retry:
     if (set_multiline_text(current, line, 1) == ERR)
         return ERR;
 
-    if (!strlen(current->text[0]) && !strlen(current->text[1])) {
-#ifndef CONFIG_SORTSUB
-	// void subtitle -> end of previous marked and exit
-	previous_aqt_sub = NULL;
-#endif
+    if (!strlen(current->text[0]) && !strlen(current->text[1]))
 	goto retry;
-	}
 
     return current;
 }
-
-#ifndef CONFIG_SORTSUB
-subtitle *previous_subrip09_sub = NULL;
-#endif
 
 static subtitle *sub_read_line_subrip09(stream_t *st,subtitle *current,
                                     struct readline_args *args)
@@ -868,15 +845,8 @@ retry:
 
     current->start = a1*360000+a2*6000+a3*100;
 
-#ifdef CONFIG_SORTSUB
     if (!previous_sub_end)
-    previous_sub_end = (current->start) ? current->start - 1 : 0;
-#else
-    if (previous_subrip09_sub != NULL)
-	previous_subrip09_sub->end = current->start-1;
-
-    previous_subrip09_sub = current;
-#endif
+        previous_sub_end = (current->start) ? current->start - 1 : 0;
 
     if (!stream_read_line (st, line, LINE_LEN, utf16))
 	return NULL;
@@ -886,13 +856,8 @@ retry:
     if (set_multiline_text(current, line, 0) == ERR)
         return ERR;
 
-    if (!strlen(current->text[0]) && current->lines <= 1) {
-#ifndef CONFIG_SORTSUB
-	// void subtitle -> end of previous marked and exit
-	previous_subrip09_sub = NULL;
-#endif
+    if (!strlen(current->text[0]) && current->lines <= 1)
 	goto retry;
-	}
 
     return current;
 }
@@ -1414,21 +1379,16 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
     if (!first)
         abort();
 
-#ifdef CONFIG_SORTSUB
     alloced_sub =
     sub = malloc(sizeof(subtitle));
     //This is to deal with those formats (AQT & Subrip) which define the end of a subtitle
     //as the beginning of the following
     previous_sub_end = 0;
-#endif
     while(1){
         if(sub_num>=n_max){
             n_max+=16;
             first=realloc(first,n_max*sizeof(subtitle));
         }
-#ifndef CONFIG_SORTSUB
-	sub = &first[sub_num];
-#endif
 	memset(sub, '\0', sizeof(subtitle));
         sub=srp->read(fd, sub, &(struct readline_args){utf16, opts});
         if(!sub) break;   // EOF
@@ -1447,7 +1407,6 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
 	 }
         // Apply any post processing that needs recoding first
         if ((sub!=ERR) && !sub_no_text_pp && srp->post) srp->post(sub);
-#ifdef CONFIG_SORTSUB
 	if(!sub_num || (first[sub_num - 1].start <= sub->start)){
 	    first[sub_num].start = sub->start;
   	    first[sub_num].end   = sub->end;
@@ -1486,7 +1445,6 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
     		}
 	    }
 	}
-#endif
         if(sub==ERR) ++sub_errs; else ++sub_num; // Error vs. Valid
     }
 
