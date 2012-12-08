@@ -52,7 +52,6 @@
 #include "video/decode/dec_video.h"
 #include "audio/decode/dec_audio.h"
 #include "osdep/strsep.h"
-#include "sub/vobsub.h"
 #include "sub/spudec.h"
 #include "core/path.h"
 #include "sub/ass_mp.h"

@@ -35,18 +35,11 @@
 #define INITIALIZED_GETCH2  8
 #define INITIALIZED_SPUDEC  32
 #define INITIALIZED_STREAM  64
-#define INITIALIZED_VOBSUB  256
 #define INITIALIZED_DEMUXER 512
 #define INITIALIZED_ACODEC  1024
 #define INITIALIZED_VCODEC  2048
 #define INITIALIZED_SUB     4096
 #define INITIALIZED_ALL     0xFFFF
-
-
-#define SUB_SOURCE_SUBS 0
-#define SUB_SOURCE_VOBSUB 1
-#define SUB_SOURCE_DEMUX 2
-#define SUB_SOURCES 3
 
 
 enum stop_play_reason {
@@ -120,9 +113,6 @@ struct track {
 
     // External text subtitle using non-libass subtitle renderer.
     struct sub_data *subdata;
-
-    // External image subtitle (data is in vo_vobsub). 0 if not set.
-    int vobsub_id_plus_one;
 };
 
 typedef struct MPContext {

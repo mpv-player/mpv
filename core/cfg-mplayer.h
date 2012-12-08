@@ -498,8 +498,6 @@ const m_option_t common_opts[] = {
     {"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
     OPT_MAKE_FLAGS("autosub", sub_auto, 0),
     {"sub-forced-only", &forced_subs_only, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    // specify IFO file for VOBSUB subtitle
-    {"ifo", &spudec_ifo, CONF_TYPE_STRING, 0, 0, 0, NULL},
     // enable Closed Captioning display
     {"overlapsub", &suboverlap_enabled, CONF_TYPE_FLAG, 0, 0, 2, NULL},
     {"sub-no-text-pp", &sub_no_text_pp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -648,9 +646,6 @@ const m_option_t mplayer_opts[]={
                ({"0", 0}, {"1", 1}, {"2", 2}, {"3", 3})),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
     OPT_MAKE_FLAGS("osd-fractions", osd_fractions, 0),
-
-    OPT_STRING("vobsub", vobsub_name, 0),
-    {"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 
     {"sstep", &step_sec, CONF_TYPE_DOUBLE, CONF_MIN, 0, 0, NULL},
 

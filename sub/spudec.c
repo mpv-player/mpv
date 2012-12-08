@@ -43,7 +43,6 @@
 #include "core/mp_msg.h"
 
 #include "spudec.h"
-#include "vobsub.h"
 #include "sub.h"
 #include "core/mp_common.h"
 #include "video/csputils.h"
@@ -657,6 +656,33 @@ void spudec_get_indexed(void *this, struct mp_osd_res *dim,
         res->bitmap_id = res->bitmap_pos_id = 1;
         spu->spu_changed = 0;
     }
+}
+
+static unsigned int vobsub_palette_to_yuv(unsigned int pal)
+{
+    int r, g, b, y, u, v;
+    // Palette in idx file is not rgb value, it was calculated by wrong formula.
+    // Here's reversed formula of the one used to generate palette in idx file.
+    r = pal >> 16 & 0xff;
+    g = pal >> 8 & 0xff;
+    b = pal & 0xff;
+    y = av_clip_uint8( 0.1494  * r + 0.6061 * g + 0.2445 * b);
+    u = av_clip_uint8( 0.6066  * r - 0.4322 * g - 0.1744 * b + 128);
+    v = av_clip_uint8(-0.08435 * r - 0.3422 * g + 0.4266 * b + 128);
+    y = y * 219 / 255 + 16;
+    return y << 16 | u << 8 | v;
+}
+
+static unsigned int vobsub_rgb_to_yuv(unsigned int rgb)
+{
+    int r, g, b, y, u, v;
+    r = rgb >> 16 & 0xff;
+    g = rgb >> 8 & 0xff;
+    b = rgb & 0xff;
+    y = ( 0.299   * r + 0.587   * g + 0.114   * b) * 219 / 255 + 16.5;
+    u = (-0.16874 * r - 0.33126 * g + 0.5     * b) * 224 / 255 + 128.5;
+    v = ( 0.5     * r - 0.41869 * g - 0.08131 * b) * 224 / 255 + 128.5;
+    return y << 16 | u << 8 | v;
 }
 
 static void spudec_parse_extradata(spudec_handle_t *this,

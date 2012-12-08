@@ -87,7 +87,7 @@ static void append_dir_subtitles(struct MPOpts *opts,
                                  struct bstr path, const char *fname,
                                  int limit_fuzziness)
 {
-    char *sub_exts[] = {"utf", "utf8", "utf-8", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", "js", "ass", NULL};
+    char *sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", "js", "ass", NULL};
     void *tmpmem = talloc_new(NULL);
     FILE *f;
     assert(strlen(fname) < 1e6);
@@ -116,20 +116,6 @@ static void append_dir_subtitles(struct MPOpts *opts,
         bstr_lower(tmp_fname_noext);
         struct bstr tmp_fname_ext = get_ext(dename);
         struct bstr tmp_fname_trim = bstr_strip(tmp_fname_noext);
-
-        // If it's a .sub, check if there is a .idx with the same name. If
-        // there is one, it's certainly a vobsub so we skip it.
-        if (bstrcasecmp(tmp_fname_ext, bstr0("sub")) == 0) {
-            char *idxname = talloc_asprintf(tmpmem2, "%.*s.idx",
-                                            (int)tmp_fname_noext.len,
-                                            de->d_name);
-            char *idx = mp_path_join(tmpmem2, path, bstr0(idxname));
-            f = fopen(idx, "rt");
-            if (f) {
-                fclose(f);
-                goto next_sub;
-            }
-        }
 
         // does it end with a subtitle extension?
 #ifdef CONFIG_ICONV
@@ -183,7 +169,7 @@ static void append_dir_subtitles(struct MPOpts *opts,
         if (prio) {
             prio += prio;
 #ifdef CONFIG_ICONV
-            if (i < 3) // prefer UTF-8 coded
+            if (i < 4) // prefer UTF-8 coded, or idx over sub (vobsubs)
                 prio++;
 #endif
             char *subpath = mp_path_join(*slist, path, dename);
@@ -240,39 +226,4 @@ char **find_text_subtitles(struct MPOpts *opts, const char *fname)
 
     talloc_free(slist);
     return subnames;
-}
-
-char **find_vob_subtitles(struct MPOpts *opts, const char *fname)
-{
-    char **vobs = talloc_array_ptrtype(NULL, vobs, 1);
-    int n = 0;
-
-    // Potential vobsub in the media directory
-    struct bstr bname = bstr0(mp_basename(fname));
-    int pdot = bstrrchr(bname, '.');
-    if (pdot >= 0)
-        bname.len = pdot;
-    vobs[n++] = mp_path_join(vobs, mp_dirname(fname), bname);
-
-    // Potential vobsubs in directories specified by sub-paths option
-    if (opts->sub_paths) {
-        for (int i = 0; opts->sub_paths[i]; i++) {
-            char *path = mp_path_join(NULL, mp_dirname(fname),
-                                      bstr0(opts->sub_paths[i]));
-            MP_GROW_ARRAY(vobs, n);
-            vobs[n++] = mp_path_join(vobs, bstr0(path), bname);
-            talloc_free(path);
-        }
-    }
-
-    // Potential vobsub in ~/.mplayer/sub
-    char *mp_subdir = get_path("sub/");
-    if (mp_subdir) {
-        MP_GROW_ARRAY(vobs, n);
-        vobs[n++] = mp_path_join(vobs, bstr0(mp_subdir), bname);
-    }
-
-    free(mp_subdir);
-    MP_RESIZE_ARRAY(NULL, vobs, n);
-    return vobs;
 }

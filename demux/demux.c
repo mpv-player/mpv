@@ -459,6 +459,16 @@ void free_demuxer(demuxer_t *demuxer)
 
 void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
 {
+    // demux API can't handle 0-sized packets, but at least some vobsubs
+    // generate them. Skipping them seems to work fine. Not skipping them will
+    // stop demuxing with external vobsubs. See FATE sub/vobsub.{idx,sub} at
+    // pts=185.91.
+    if (dp->len == 0 && ds->stream_type == STREAM_SUB) {
+        mp_dbg(MSGT_DEMUXER, MSGL_INFO, "Discarding empty subtitle packet.\n");
+        free_demux_packet(dp);
+        return;
+    }
+
     // append packet to DS stream:
     ++ds->packs;
     ds->bytes += dp->len;

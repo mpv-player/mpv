@@ -112,6 +112,7 @@ Command line switches
     -sub-fuzziness                      --autosub-match
     -subfont-text-scale                 --sub-scale
     -spugauss                           --sub-gauss
+    -vobsub                             --sub (pass the .idx file)
     =================================== ===================================
 
 input.conf and slave commands

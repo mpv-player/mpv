@@ -205,6 +205,8 @@
     :fuzzy: Load all subs containing movie name.
     :all:   Load all subs in the current and ``--sub-paths`` directories.
 
+    (Default: exact.)
+
 --autosync=<factor>
     Gradually adjusts the A/V sync based on audio delay measurements.
     Specifying ``--autosync=0``, the default, will cause frame timing to be
@@ -778,10 +780,6 @@
 
     *NOTE*: This option only works if the underlying media supports seeking
     (i.e. not with stdin, pipe, etc).
-
---ifo=<file>
-    Indicate the VOBsub IFO file that will be used to load palette and frame
-    size for VOBsub subtitles.
 
 --ignore-start
     Matters with the builtin AVI demuxer only, which is not enabled by default.
@@ -1692,7 +1690,7 @@
 --sid=<ID|auto|no>
     Display the subtitle stream specified by <ID> (0-31). ``auto`` selects the
     default, ``no`` disables subtitles.
-    See also ``--slang``, ``--vobsubid``, ``--no-sub``.
+    See also ``--slang``, ``--no-sub``.
 
 --slang=<languagecode[,languagecode,...]>
     Specify a priority list of subtitle languages to use. Different container
@@ -1883,7 +1881,9 @@
     Open the given file with a demuxer, and use its subtitle streams. Same as
     ``--audiofile``, but for subtitle streams.
 
-    Use ``--sub`` for normal text subtitle files.
+    *NOTE*: use ``--sub`` for subtitle files. This option is useless, unless
+    you want to force libavformat subtitle parsers instead of libass or
+    internal subtitle parsers.
 
 --subfps=<rate>
     Specify the framerate of the subtitle file (default: movie fps).
@@ -2209,13 +2209,6 @@
     interactive use you'd normally specify a single one to use, but in
     configuration files specifying a list of fallbacks may make sense. See
     `video_outputs` for details and descriptions of available drivers.
-
---vobsub=<file>
-    Specify a VOBsub file to use for subtitles. Has to be the full pathname
-    without extension, i.e. without the ``.idx``, ``.ifo`` or ``.sub``.
-
---vobsubid=<0-31>
-    Specify the VOBsub subtitle ID.
 
 --volstep=<0-100>
     Set the step size of mixer volume changes in percent of the whole range

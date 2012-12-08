@@ -31,8 +31,6 @@ extern float  audio_delay;
 
 extern double force_fps;
 
-extern int vobsub_id;
-
 struct MPContext;
 struct MPOpts;
 struct subtitle;

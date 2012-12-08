@@ -225,7 +225,6 @@ SOURCES = talloc.c \
           sub/sub.c \
           sub/subassconvert.c \
           sub/subreader.c \
-          sub/vobsub.c \
           video/csputils.c \
           video/fmt-conversion.c \
           video/image_writer.c \
