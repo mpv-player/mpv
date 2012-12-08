@@ -94,9 +94,9 @@ static const char * const prefix[] = { "lavf://", "ffmpeg://" };
 static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
 {
     int flags = 0;
-    const char *filename;
     AVIOContext *avio = NULL;
     int res = STREAM_ERROR;
+    void *temp = talloc_new(NULL);
 
     if (mode == STREAM_READ)
         flags = AVIO_FLAG_READ;
@@ -108,9 +108,8 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
         goto out;
     }
 
-    if (stream->url)
-        filename = stream->url;
-    else {
+    const char *filename = stream->url;
+    if (!filename) {
         mp_msg(MSGT_OPEN, MSGL_ERR, "[ffmpeg] No URL\n");
         goto out;
     }
@@ -128,6 +127,14 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
         return STREAM_OK;
     }
     mp_msg(MSGT_OPEN, MSGL_V, "[ffmpeg] Opening %s\n", filename);
+
+    // Replace "mms://" with "mmsh://", so that most mms:// URLs just work.
+    bstr b_filename = bstr0(filename);
+    if (bstr_eatstart0(&b_filename, "mms://") ||
+        bstr_eatstart0(&b_filename, "mmshttp://"))
+    {
+        filename = talloc_asprintf(temp, "mmsh://%.*s", BSTR_P(b_filename));
+    }
 
     if (avio_open(&avio, filename, flags) < 0)
         goto out;
@@ -157,6 +164,7 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     res = STREAM_OK;
 
 out:
+    talloc_free(temp);
     return res;
 }
 
@@ -166,7 +174,8 @@ const stream_info_t stream_info_ffmpeg = {
   "",
   "",
   open_f,
-  { "lavf", "ffmpeg", "rtmp", "rtsp", "http", "https", NULL },
+  { "lavf", "ffmpeg", "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh",
+    "mmshttp", NULL },
   NULL,
   1 // Urls are an option string
 };

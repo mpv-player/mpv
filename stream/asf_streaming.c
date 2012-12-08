@@ -77,7 +77,7 @@ static int asf_streaming_start( stream_t *stream, int *demuxer_type) {
     int port = stream->streaming_ctrl->url->port;
 
     //Is protocol mms or mmst?
-    if (!strcasecmp(proto, "mmst") || !strcasecmp(proto, "mms"))
+    if (!strcasecmp(proto, "mp_mmst") || !strcasecmp(proto, "mp_mms"))
     {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/TCP...\n");
 		fd = asf_mmst_streaming_start( stream );
@@ -88,9 +88,9 @@ static int asf_streaming_start( stream_t *stream, int *demuxer_type) {
 	}
 
     //Is protocol http, http_proxy, or mms?
-    if (!strcasecmp(proto, "http_proxy") || !strcasecmp(proto, "http") ||
-	!strcasecmp(proto, "mms") || !strcasecmp(proto, "mmsh") ||
-	!strcasecmp(proto, "mmshttp"))
+    if (!strcasecmp(proto, "mp_http_proxy") || !strcasecmp(proto, "mp_http") ||
+	!strcasecmp(proto, "mp_mms") || !strcasecmp(proto, "mp_mmsh") ||
+	!strcasecmp(proto, "mp_mmshttp"))
     {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/HTTP...\n");
 		fd = asf_http_streaming_start( stream, demuxer_type );
@@ -552,7 +552,7 @@ static HTTP_header_t *asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	http_add_basic_authentication( http_hdr, url->username, url->password );
 
 	// Check if we are using a proxy
-	if( !strcasecmp( url->protocol, "http_proxy" ) ) {
+	if( !strcasecmp( url->protocol, "mp_http_proxy" ) ) {
 		server_url = url_new( (url->file)+1 );
 		if( server_url==NULL ) {
 			mp_tmsg(MSGT_NETWORK,MSGL_ERR,"invalid proxy URL\n");
@@ -707,7 +707,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 		done = 1;
 		if( fd>0 ) closesocket( fd );
 
-		if( !strcasecmp( url->protocol, "http_proxy" ) ) {
+		if( !strcasecmp( url->protocol, "mp_http_proxy" ) ) {
 			if( url->port==0 ) url->port = 8080;
 		} else {
 			if( url->port==0 ) url->port = 80;
@@ -826,7 +826,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 	stream->streaming_ctrl->url = url_new_with_proxy(stream->url);
 
 	mp_tmsg(MSGT_OPEN, MSGL_INFO, "STREAM_ASF, URL: %s\n", stream->url);
-	if((!strncmp(stream->url, "http", 4)) && (*file_format!=DEMUXER_TYPE_ASF && *file_format!=DEMUXER_TYPE_UNKNOWN)) {
+	if((!strncmp(stream->url, "mp_http", 4)) && (*file_format!=DEMUXER_TYPE_ASF && *file_format!=DEMUXER_TYPE_UNKNOWN)) {
 		streaming_ctrl_free(stream->streaming_ctrl);
 		stream->streaming_ctrl = NULL;
 		return STREAM_UNSUPPORTED;
@@ -851,7 +851,7 @@ const stream_info_t stream_info_asf = {
   "Bertrand, Reimar Doeffinger, Albeu",
   "originally based on work by Majormms (is that code still there?)",
   open_s,
-  {"mms", "mmst", "http", "http_proxy", "mmsh", "mmshttp", NULL},
+  {"mp_mms", "mp_mmst", "mp_http", "mp_http_proxy", "mp_mmsh", "mp_mmshttp", NULL},
   NULL,
   0 // Urls are an option string
 };
