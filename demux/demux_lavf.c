@@ -886,9 +886,17 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs,
         priv->last_pts += rel_seek_secs * priv->avfc->duration;
     } else
         priv->last_pts += rel_seek_secs * AV_TIME_BASE;
-    if (av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags) < 0) {
-        avsflags ^= AVSEEK_FLAG_BACKWARD;
+
+    if (!priv->avfc->iformat->read_seek2) {
+        // Normal seeking.
         av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
+    } else {
+        // av_seek_frame() won't work. Use "new" seeking API. We don't use this
+        // API by default, because there are some major issues.
+        // Set max_ts==ts, so that demuxing starts from an earlier position in
+        // the worst case.
+        avformat_seek_file(priv->avfc, -1, INT64_MIN,
+                           priv->last_pts, priv->last_pts, avsflags);
     }
 }
 

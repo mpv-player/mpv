@@ -439,6 +439,23 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
 /// step size of mixer changes
 int volstep = 3;
 
+// Time used to seek external tracks to.
+static double get_main_demux_pts(struct MPContext *mpctx)
+{
+    double main_new_pos = MP_NOPTS_VALUE;
+    if (mpctx->demuxer) {
+        for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+            struct demux_stream *ds = mpctx->demuxer->ds[type];
+            if (ds->sh && main_new_pos == MP_NOPTS_VALUE) {
+                demux_fill_buffer(mpctx->demuxer, ds);
+                if (ds->first)
+                    main_new_pos = ds->first->pts;
+            }
+        }
+    }
+    return main_new_pos;
+}
+
 static void set_demux_field(struct MPContext *mpctx, enum stream_type type,
                             struct sh_stream *s)
 {
@@ -456,8 +473,13 @@ static void init_demux_stream(struct MPContext *mpctx, enum stream_type type)
     struct track *track = mpctx->current_track[type];
     set_demux_field(mpctx, type, track ? track->stream : NULL);
     struct sh_stream *stream = mpctx->sh[type];
-    if (stream)
+    if (stream) {
         demuxer_switch_track(stream->demuxer, type, stream);
+        if (track->is_external) {
+            double pts = get_main_demux_pts(mpctx);
+            demux_seek(stream->demuxer, pts, audio_delay, SEEK_ABSOLUTE);
+        }
+    }
 }
 
 static void cleanup_demux_stream(struct MPContext *mpctx, enum stream_type type)
@@ -2863,18 +2885,12 @@ static int seek(MPContext *mpctx, struct seek_params seek,
         have_external_tracks |= track && track->is_external && track->demuxer;
     }
     if (have_external_tracks) {
-        double main_new_pos = MP_NOPTS_VALUE;
-        if (seek.type == MPSEEK_ABSOLUTE)
+        double main_new_pos;
+        if (seek.type == MPSEEK_ABSOLUTE) {
             main_new_pos = seek.amount - mpctx->video_offset;
-        for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
-            struct demux_stream *ds = mpctx->demuxer->ds[type];
-            if (ds->sh && main_new_pos == MP_NOPTS_VALUE) {
-                demux_fill_buffer(mpctx->demuxer, ds);
-                if (ds->first)
-                    main_new_pos = ds->first->pts;
-            }
+        } else {
+            main_new_pos = get_main_demux_pts(mpctx);
         }
-        assert(main_new_pos != MP_NOPTS_VALUE);
         for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
             struct track *track = mpctx->current_track[type];
             if (track && track->is_external && track->demuxer)

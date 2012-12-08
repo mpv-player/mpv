@@ -1077,6 +1077,10 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
             mp_tmsg(MSGT_SEEK, MSGL_WARN, "Cannot seek in this file.\n");
         return 0;
     }
+
+    if (rel_seek_secs == MP_NOPTS_VALUE && (flags & SEEK_ABSOLUTE))
+        return 0;
+
     // clear demux buffers:
     demux_flush(demuxer);
     demuxer->video->eof = 0;
