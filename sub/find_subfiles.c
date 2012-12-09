@@ -212,10 +212,10 @@ char **find_text_subtitles(struct MPOpts *opts, const char *fname)
     }
 
     // Load subtitles in ~/.mplayer/sub limiting sub fuzziness
-    char *mp_subdir = get_path("sub/");
+    char *mp_subdir = mp_find_user_config_file("sub/");
     if (mp_subdir)
         append_dir_subtitles(opts, &slist, &n, bstr0(mp_subdir), fname, 1);
-    free(mp_subdir);
+    talloc_free(mp_subdir);
 
     // Sort subs by priority and append them
     qsort(slist, n, sizeof(*slist), compare_sub_priority);

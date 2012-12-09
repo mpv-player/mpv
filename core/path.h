@@ -24,7 +24,17 @@
 #include <stdbool.h>
 #include "core/bstr.h"
 
-char *get_path(const char *filename);
+
+// Search for the input filename in several paths. These include user and global
+// config locations by default. Some platforms may implement additional platform
+// related lookups (i.e.: OSX inside an application bundle).
+char *mp_find_config_file(const char *filename);
+
+// Search for the input filename in the global configuration location.
+char *mp_find_global_config_file(const char *filename);
+
+// Search for the input filename in the user configuration location.
+char *mp_find_user_config_file(const char *filename);
 
 // Return pointer to filename part of path
 

@@ -717,6 +717,7 @@ int cddb_resolve(const char *dev, char **xmcd_file)
     char cddb_cache_dir[] = DEFAULT_CACHE_DIR;
     char *home_dir = NULL;
     cddb_data_t cddb_data;
+    void *talloc_ctx = talloc_new(NULL);
 
     if (cdtoc_last_track <= 0) {
         cdtoc_last_track = read_toc(dev);
@@ -747,7 +748,8 @@ int cddb_resolve(const char *dev, char **xmcd_file)
         home_dir = getenv("HOMEPATH");
     // Last resort, store the cddb cache in the mplayer directory
     if (home_dir == NULL)
-        home_dir = (char *)get_path("");
+        home_dir = (char *)talloc_steal(talloc_ctx,
+                                        mp_find_user_config_file(""));
 #endif
     if (home_dir == NULL) {
         cddb_data.cache_dir = NULL;
@@ -756,10 +758,12 @@ int cddb_resolve(const char *dev, char **xmcd_file)
         cddb_data.cache_dir = malloc(len);
         if (cddb_data.cache_dir == NULL) {
             mp_tmsg(MSGT_DEMUX, MSGL_ERR, "Memory allocation failed.\n");
+            talloc_free(talloc_ctx);
             return -1;
         }
         snprintf(cddb_data.cache_dir, len, "%s%s", home_dir, cddb_cache_dir);
     }
+    talloc_free(talloc_ctx);
 
     // Check for a cached file
     if (cddb_read_cache(&cddb_data) < 0) {

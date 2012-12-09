@@ -3187,6 +3187,7 @@ LIBQUVI = $_libquvi
 LIBTHEORA = $_theora
 LIRC = $_lirc
 MACOSX_FINDER = $_macosx_finder
+MACOSX_BUNDLE = $_macosx_bundle
 MNG = $_mng
 MPG123 = $_mpg123
 NETWORKING = $networking

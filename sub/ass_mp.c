@@ -255,23 +255,18 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
 
 void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts)
 {
-    char *default_font = get_path("subfont.ttf");
-    char *config       = get_path("fonts.conf");
+    char *default_font = mp_find_user_config_file("subfont.ttf");
+    char *config       = mp_find_config_file("fonts.conf");
 
     if (!mp_path_exists(default_font)) {
-        free(default_font);
+        talloc_free(default_font);
         default_font = NULL;
-    }
-
-    if (!mp_path_exists(config)) {
-        free(config);
-        config = NULL;
     }
 
     ass_set_fonts(priv, default_font, opts->font, 1, config, 1);
 
-    free(default_font);
-    free(config);
+    talloc_free(default_font);
+    talloc_free(config);
 }
 
 void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
@@ -332,11 +327,11 @@ static void message_callback(int level, const char *format, va_list va, void *ct
 ASS_Library *mp_ass_init(struct MPOpts *opts)
 {
     ASS_Library *priv;
-    char *path = get_path("fonts");
+    char *path = mp_find_user_config_file("fonts");
     priv = ass_library_init();
     ass_set_message_cb(priv, message_callback, NULL);
     ass_set_fonts_dir(priv, path);
     ass_set_extract_fonts(priv, opts->use_embedded_fonts);
-    free(path);
+    talloc_free(path);
     return priv;
 }

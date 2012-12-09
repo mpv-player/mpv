@@ -1794,7 +1794,8 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
 
     char *file;
     char *config_file = input_conf->config_file;
-    file = config_file[0] != '/' ? get_path(config_file) : config_file;
+    file = config_file[0] != '/' ?
+        mp_find_user_config_file(config_file) : config_file;
     if (!file)
         return ictx;
 
@@ -1802,7 +1803,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
         // free file if it was allocated by get_path(),
         // before it gets overwritten
         if (file != config_file)
-            free(file);
+            talloc_free(file);
         // Try global conf dir
         file = MPLAYER_CONFDIR "/input.conf";
         if (!parse_config_file(ictx, file))
@@ -1811,7 +1812,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
     } else {
         // free file if it was allocated by get_path()
         if (file != config_file)
-            free(file);
+            talloc_free(file);
     }
 
 #ifdef CONFIG_JOYSTICK

@@ -777,36 +777,41 @@ dvb_config_t *dvb_get_config(void)
 			continue;
 		}
 
-		conf_file = get_path("channels.conf");
-		switch(type)
-		{
-			case TUNER_TER:
-			conf_file = get_path("channels.conf.ter");
-				break;
-			case TUNER_CBL:
-			conf_file = get_path("channels.conf.cbl");
-				break;
-			case TUNER_SAT:
-			conf_file = get_path("channels.conf.sat");
-				break;
-			case TUNER_ATSC:
-			conf_file = get_path("channels.conf.atsc");
-				break;
-		}
+        void *talloc_ctx = talloc_new(NULL);
+        conf_file = talloc_steal(talloc_ctx,
+                mp_find_user_config_file("channels.conf"));
+        switch(type) {
+            case TUNER_TER:
+                conf_file = talloc_steal(talloc_ctx,
+                        mp_find_user_config_file("channels.conf.ter"));
+                break;
+            case TUNER_CBL:
+                conf_file = talloc_steal(talloc_ctx,
+                        mp_find_user_config_file("channels.conf.cbl"));
+                break;
+            case TUNER_SAT:
+                conf_file = talloc_steal(talloc_ctx,
+                        mp_find_user_config_file("channels.conf.sat"));
+                break;
+            case TUNER_ATSC:
+                conf_file = talloc_steal(talloc_ctx,
+                        mp_find_user_config_file("channels.conf.atsc"));
+                break;
+        }
 
-		if((access(conf_file, F_OK | R_OK) != 0))
-		{
-			free(conf_file);
-			conf_file = get_path("channels.conf");
-			if((access(conf_file, F_OK | R_OK) != 0))
-			{
-				free(conf_file);
-				conf_file = strdup(MPLAYER_CONFDIR "/channels.conf");
-			}
-		}
+        if((access(conf_file, F_OK | R_OK) != 0)) {
+            conf_file = talloc_steal(talloc_ctx,
+                    mp_find_user_config_file("channels.conf"));
 
-		list = dvb_get_channels(conf_file, type);
-		free(conf_file);
+            if((access(conf_file, F_OK | R_OK) != 0)) {
+                conf_file = talloc_steal(talloc_ctx,
+                        mp_find_global_config_file("channels.conf"));
+            }
+        }
+
+        list = dvb_get_channels(conf_file, type);
+        talloc_free(talloc_ctx);
+
 		if(list == NULL)
 			continue;
 
