@@ -22,6 +22,10 @@
 #include <math.h>
 #include <assert.h>
 
+#ifdef PTW32_STATIC_LIB
+#include <pthread.h>
+#endif
+
 #include <libavutil/intreadwrite.h>
 #include <libavutil/attributes.h>
 

@@ -1490,7 +1490,7 @@ cc_check $_ld_tmp -DPTW32_STATIC_LIB && (tmp_run || test "$_ld_static") && _ld_p
 fi
 fi
 if test "$_pthreads" = yes ; then
-  test $_ld_pthread && res_comment="using $_ld_pthread"
+  test "$_ld_pthread" && res_comment="using $_ld_pthread"
   def_pthreads='#define HAVE_PTHREADS 1'
   def_threads='#define HAVE_THREADS 1'
   extra_cflags="$extra_cflags $THREAD_CFLAGS"
