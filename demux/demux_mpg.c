@@ -286,6 +286,49 @@ static void new_audio_stream(demuxer_t *demux, int aid){
   if(demux->audio->id==-1) demux->audio->id=aid;
 }
 
+static void dvdpcm_header(sh_audio_t *sh)
+{
+    if (sh->format != 0x10001)
+        return;
+
+    WAVEFORMATEX *wf = calloc(sizeof(*wf), 1);
+
+    if(sh->codecdata_len==3){
+        // we have LPCM header:
+        unsigned char h=sh->codecdata[1];
+        wf->nChannels=1+(h&7);
+        switch((h>>4)&3){
+        case 0: wf->nSamplesPerSec=48000;break;
+        case 1: wf->nSamplesPerSec=96000;break;
+        case 2: wf->nSamplesPerSec=44100;break;
+        case 3: wf->nSamplesPerSec=32000;break;
+        }
+        switch ((h >> 6) & 3) {
+          case 0:
+            wf->wBitsPerSample = 2 * 8;
+            break;
+          case 1:
+            mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Samples of this format are needed to improve support. Please contact the developers.\n");
+            wf->nAvgBytesPerSec = wf->nChannels * wf->nSamplesPerSec * 5 / 2;
+          case 2:
+            wf->wBitsPerSample = 3 * 8;
+            break;
+          default:
+            wf->wBitsPerSample = 2 * 8;
+        }
+    } else {
+        // use defaults:
+        wf->nChannels=2;
+        wf->nSamplesPerSec=48000;
+        wf->wBitsPerSample = 2 * 8;
+    }
+    if (!wf->nAvgBytesPerSec)
+        wf->nAvgBytesPerSec = wf->wBitsPerSample / 8 * wf->nChannels * wf->nSamplesPerSec;
+    if (wf->wBitsPerSample == 16)
+        sh->format = 0x20776172; // 'raw ', pcm_s16be
+    sh->wf = wf;
+}
+
 static int demux_mpg_read_packet(demuxer_t *demux,int id){
   int d av_unused;
   int len;
@@ -526,6 +569,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 //          printf("[%02X] ",c);
           len-=3;
           if(len<=0) mp_msg(MSGT_DEMUX,MSGL_V,"End of packet while searching for PCM header\n");
+          dvdpcm_header((sh_audio_t*)(ds->sh));
         }
 //        printf("  \n");
       } //  if(demux->audio->id==aid)
@@ -559,6 +603,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         if(priv->es_map[id - 0x1B0])
           sh->format = priv->es_map[id - 0x1B0];
           mp_dbg(MSGT_DEMUX,MSGL_DBG2,"ASSIGNED TO STREAM %d CODEC %x\n", id, priv->es_map[id - 0x1B0]);
+        dvdpcm_header(sh);
       }
     }
   } else

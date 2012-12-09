@@ -123,7 +123,6 @@ SOURCES = talloc.c \
           audio/mixer.c \
           audio/reorder_ch.c \
           audio/decode/ad.c \
-          audio/decode/ad_dvdpcm.c \
           audio/decode/ad_lavc.c \
           audio/decode/ad_spdif.c      \
           audio/decode/dec_audio.c \
