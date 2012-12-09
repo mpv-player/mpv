@@ -125,7 +125,6 @@ SOURCES = talloc.c \
           audio/decode/ad.c \
           audio/decode/ad_dvdpcm.c \
           audio/decode/ad_lavc.c \
-          audio/decode/ad_pcm.c \
           audio/decode/ad_spdif.c      \
           audio/decode/dec_audio.c \
           audio/filter/af.c \

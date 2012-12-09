@@ -59,6 +59,86 @@ struct priv {
     int previous_data_left;  // input demuxer packet data
 };
 
+struct pcm_map
+{
+    int tag;
+    const char *codecs[5]; // {any, 1byte, 2bytes, 3bytes, 4bytes}
+};
+
+// NOTE: some of these are needed to make rawaudio with demux_mkv and others
+//       work. ffmpeg does similar mapping internally, not part of the public
+//       API. Some of these might be dead leftovers for demux_mov support.
+static const struct pcm_map tag_map[] = {
+    // Microsoft PCM
+    {0x0,           {NULL, "pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"}},
+    {0x1,           {NULL, "pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"}},
+    // MS PCM, Extended
+    {0xfffe,        {NULL, "pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"}},
+    // IEEE float
+    {0x3,           {"pcm_f32le"}},
+    // 'raw '
+    {0x20776172,    {"pcm_s16be", [1] = "pcm_u8"}},
+    // 'twos'/'sowt'
+    {0x736F7774,    {"pcm_s16be", [1] = "pcm_s8"}},
+    {0x74776F73,    {"pcm_s16be", [1] = "pcm_s8"}},
+    // 'fl32'/'FL32'
+    {0x32336c66,    {"pcm_f32be"}},
+    {0x32334C46,    {"pcm_f32be"}},
+    // '23lf'/'lpcm'
+    {0x666c3332,    {"pcm_f32le"}},
+    {0x6D63706C,    {"pcm_f32le"}},
+    // 'in24', bigendian int24
+    {0x34326e69,    {"pcm_s24be"}},
+    // '42ni', little endian int24, MPlayer internal fourCC
+    {0x696e3234,    {"pcm_s24le"}},
+    // 'in32', bigendian int32
+    {0x32336e69,    {"pcm_s32be"}},
+    // '23ni', little endian int32, MPlayer internal fourCC
+    {0x696e3332,    {"pcm_s32le"}},
+    {-1},
+};
+
+// For demux_rawaudio.c; needed because ffmpeg doesn't have these sample
+// formats natively.
+static const struct pcm_map af_map[] = {
+    {AF_FORMAT_U8,              {"pcm_u8"}},
+    {AF_FORMAT_S8,              {"pcm_u8"}},
+    {AF_FORMAT_U16_LE,          {"pcm_u16le"}},
+    {AF_FORMAT_U16_BE,          {"pcm_u16be"}},
+    {AF_FORMAT_S16_LE,          {"pcm_s16le"}},
+    {AF_FORMAT_S16_BE,          {"pcm_s16be"}},
+    {AF_FORMAT_U24_LE,          {"pcm_u24le"}},
+    {AF_FORMAT_U24_BE,          {"pcm_u24be"}},
+    {AF_FORMAT_S24_LE,          {"pcm_s24le"}},
+    {AF_FORMAT_S24_BE,          {"pcm_s24be"}},
+    {AF_FORMAT_U32_LE,          {"pcm_u32le"}},
+    {AF_FORMAT_U32_BE,          {"pcm_u32be"}},
+    {AF_FORMAT_S32_LE,          {"pcm_s32le"}},
+    {AF_FORMAT_S32_BE,          {"pcm_s32be"}},
+    {AF_FORMAT_FLOAT_LE,        {"pcm_f32le"}},
+    {AF_FORMAT_FLOAT_BE,        {"pcm_f32be"}},
+    {-1},
+};
+
+static const char *find_pcm_decoder(const struct pcm_map *map, int format,
+                                    int bits_per_sample)
+{
+    int bytes = (bits_per_sample + 7) / 8;
+    for (int n = 0; map[n].tag != -1; n++) {
+        const struct pcm_map *entry = &map[n];
+        if (entry->tag == format) {
+            const char *dec = NULL;
+            if (bytes >= 1 && bytes <= 4)
+                dec = entry->codecs[bytes];
+            if (!dec)
+                dec = entry->codecs[0];
+            if (dec)
+                return dec;
+        }
+    }
+    return NULL;
+}
+
 static int preinit(sh_audio_t *sh)
 {
     return 1;
@@ -115,12 +195,23 @@ static int init(sh_audio_t *sh_audio)
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
 
-    if (sh_audio->codec->dll) {
-        lavc_codec = avcodec_find_decoder_by_name(sh_audio->codec->dll);
+    const char *dll = sh_audio->codec->dll;
+
+    if (sh_audio->wf && dll && strcmp(dll, "pcm") == 0) {
+        if (sh_audio->format == MKTAG('M', 'P', 'a', 'f')) {
+            // demuxer_rawaudio convenience (abuses wFormatTag)
+            dll = find_pcm_decoder(af_map, sh_audio->wf->wFormatTag, 0);
+        } else {
+            dll = find_pcm_decoder(tag_map, sh_audio->format,
+                                   sh_audio->wf->wBitsPerSample);
+        }
+    }
+
+    if (dll) {
+        lavc_codec = avcodec_find_decoder_by_name(dll);
         if (!lavc_codec) {
             mp_tmsg(MSGT_DECAUDIO, MSGL_ERR,
-                    "Cannot find codec '%s' in libavcodec...\n",
-                    sh_audio->codec->dll);
+                    "Cannot find codec '%s' in libavcodec...\n", dll);
             return 0;
         }
     } else if (!sh_audio->libav_codec_id) {
