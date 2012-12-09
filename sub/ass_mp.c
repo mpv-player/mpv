@@ -255,18 +255,23 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
 
 void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts)
 {
-    char *dir, *path;
-    dir = get_path("fonts");
-    path = get_path("subfont.ttf");
-    if (!mp_path_exists(path)) {
-        free(path);
-        path = NULL;
+    char *default_font = get_path("subfont.ttf");
+    char *config       = get_path("fonts.conf");
+
+    if (!mp_path_exists(default_font)) {
+        free(default_font);
+        default_font = NULL;
     }
 
-    ass_set_fonts(priv, path, opts->font, 1, NULL, 1);
+    if (!mp_path_exists(config)) {
+        free(config);
+        config = NULL;
+    }
 
-    free(dir);
-    free(path);
+    ass_set_fonts(priv, default_font, opts->font, 1, config, 1);
+
+    free(default_font);
+    free(config);
 }
 
 void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
