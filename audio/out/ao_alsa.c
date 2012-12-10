@@ -415,12 +415,6 @@ static int init(int rate_hz, int channels, int format, int flags)
       case AF_FORMAT_FLOAT_BE:
 	alsa_format = SND_PCM_FORMAT_FLOAT_BE;
 	break;
-      case AF_FORMAT_MU_LAW:
-	alsa_format = SND_PCM_FORMAT_MU_LAW;
-	break;
-      case AF_FORMAT_A_LAW:
-	alsa_format = SND_PCM_FORMAT_A_LAW;
-	break;
 
       default:
 	alsa_format = SND_PCM_FORMAT_MPEG; //? default should be -1

@@ -784,9 +784,6 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
 	    case AF_FORMAT_S32_BE:
 		sh_audio_format = 0x1; /* PCM */
 		break;
-	    case AF_FORMAT_IMA_ADPCM:
-	    case AF_FORMAT_MU_LAW:
-	    case AF_FORMAT_A_LAW:
 	    case AF_FORMAT_MPEG2:
 	    default:
 		mp_tmsg(MSGT_TV, MSGL_ERR, "Audio type '%s (%x)' unsupported!\n",

@@ -63,8 +63,6 @@ char* af_fmt2str(int format, char* str, int size)
 }
 
 const struct af_fmt_entry af_fmtstr_table[] = {
-    { "mulaw", AF_FORMAT_MU_LAW },
-    { "alaw", AF_FORMAT_A_LAW },
     { "mpeg2", AF_FORMAT_MPEG2 },
     { "ac3le", AF_FORMAT_AC3_LE },
     { "ac3be", AF_FORMAT_AC3_BE },
@@ -72,7 +70,6 @@ const struct af_fmt_entry af_fmtstr_table[] = {
     { "iec61937le", AF_FORMAT_IEC61937_LE },
     { "iec61937be", AF_FORMAT_IEC61937_BE },
     { "iec61937ne", AF_FORMAT_IEC61937_NE },
-    { "imaadpcm", AF_FORMAT_IMA_ADPCM },
 
     { "u8", AF_FORMAT_U8 },
     { "s8", AF_FORMAT_S8 },

@@ -88,9 +88,6 @@ static int format2oss(int format)
     case AF_FORMAT_FLOAT_NE: return AFMT_FLOAT;
 #endif
     // SPECIALS
-    case AF_FORMAT_MU_LAW: return AFMT_MU_LAW;
-    case AF_FORMAT_A_LAW: return AFMT_A_LAW;
-    case AF_FORMAT_IMA_ADPCM: return AFMT_IMA_ADPCM;
 #ifdef AFMT_MPEG
     case AF_FORMAT_MPEG2: return AFMT_MPEG;
 #endif
@@ -131,9 +128,6 @@ static int oss2format(int format)
     case AFMT_FLOAT: return AF_FORMAT_FLOAT_NE;
 #endif
     // SPECIALS
-    case AFMT_MU_LAW: return AF_FORMAT_MU_LAW;
-    case AFMT_A_LAW: return AF_FORMAT_A_LAW;
-    case AFMT_IMA_ADPCM: return AF_FORMAT_IMA_ADPCM;
 #ifdef AFMT_MPEG
     case AFMT_MPEG: return AF_FORMAT_MPEG2;
 #endif

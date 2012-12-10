@@ -245,7 +245,7 @@ format[=format]
         endianness of the computer mpv is running on). Valid values
         (amongst others) are: 's16le', 'u32be' and 'u24ne'. Exceptions to this
         rule that are also valid format specifiers: u8, s8, floatle, floatbe,
-        floatne, mulaw, alaw, mpeg2, ac3 and imaadpcm.
+        floatne, mpeg2, and ac3.
 
 volume[=v[:sc]]
     Implements software volume control. Use this filter with caution since it

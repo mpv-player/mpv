@@ -35,11 +35,6 @@
 /* Functions used by play to convert the input audio to the correct
    format */
 
-/* The below includes retrieves functions for converting to and from
-   ulaw and alaw */
-#include "af_format_ulaw.h"
-#include "af_format_alaw.h"
-
 // Switch endianness
 static void endian(void* in, void* out, int len, int bps);
 // From signed to unsigned and the other way
@@ -73,12 +68,8 @@ static int check_bps(int bps)
 static int check_format(int format)
 {
   char buf[256];
-  switch(format & AF_FORMAT_SPECIAL_MASK){
-  case 0: /* non-special formats */
-  case AF_FORMAT_MU_LAW:
-  case AF_FORMAT_A_LAW:
+  if ((format & AF_FORMAT_SPECIAL_MASK) == 0)
     return AF_OK;
-  }
   mp_msg(MSGT_AFILTER, MSGL_ERR, "[format] Sample format %s not yet supported \n",
          af_fmt2str(format,buf,256));
   return AF_ERROR;
@@ -253,32 +244,10 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
     endian(c->audio,c->audio,len,c->bps);
 
   // Conversion table
-  if((c->format & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_MU_LAW) {
-    from_ulaw(c->audio, l->audio, len, l->bps, l->format&AF_FORMAT_POINT_MASK);
-    if(AF_FORMAT_A_LAW == (l->format&AF_FORMAT_SPECIAL_MASK))
-      to_ulaw(l->audio, l->audio, len, 1, AF_FORMAT_SI);
-    if((l->format&AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
-      si2us(l->audio,len,l->bps);
-  } else if((c->format & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_A_LAW) {
-    from_alaw(c->audio, l->audio, len, l->bps, l->format&AF_FORMAT_POINT_MASK);
-    if(AF_FORMAT_A_LAW == (l->format&AF_FORMAT_SPECIAL_MASK))
-      to_alaw(l->audio, l->audio, len, 1, AF_FORMAT_SI);
-    if((l->format&AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
-      si2us(l->audio,len,l->bps);
-  } else if((c->format & AF_FORMAT_POINT_MASK) == AF_FORMAT_F) {
-    switch(l->format&AF_FORMAT_SPECIAL_MASK){
-    case(AF_FORMAT_MU_LAW):
-      to_ulaw(c->audio, l->audio, len, c->bps, c->format&AF_FORMAT_POINT_MASK);
-      break;
-    case(AF_FORMAT_A_LAW):
-      to_alaw(c->audio, l->audio, len, c->bps, c->format&AF_FORMAT_POINT_MASK);
-      break;
-    default:
+  if((c->format & AF_FORMAT_POINT_MASK) == AF_FORMAT_F) {
       float2int(c->audio, l->audio, len, l->bps);
       if((l->format&AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
 	si2us(l->audio,len,l->bps);
-      break;
-    }
   } else {
     // Input must be int
 
@@ -287,13 +256,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
       si2us(c->audio,len,c->bps);
     }
     // Convert to special formats
-    switch(l->format&(AF_FORMAT_SPECIAL_MASK|AF_FORMAT_POINT_MASK)){
-    case(AF_FORMAT_MU_LAW):
-      to_ulaw(c->audio, l->audio, len, c->bps, c->format&AF_FORMAT_POINT_MASK);
-      break;
-    case(AF_FORMAT_A_LAW):
-      to_alaw(c->audio, l->audio, len, c->bps, c->format&AF_FORMAT_POINT_MASK);
-      break;
+    switch(l->format&AF_FORMAT_POINT_MASK){
     case(AF_FORMAT_F):
       int2float(c->audio, l->audio, len, c->bps);
       break;

@@ -57,12 +57,9 @@
 #define AF_FORMAT_48BIT		(5<<3)
 #define AF_FORMAT_BITS_MASK	(7<<3)
 
-// Special flags refering to non pcm data
-#define AF_FORMAT_MU_LAW	(1<<6)
-#define AF_FORMAT_A_LAW		(2<<6)
+// Special flags refering to non pcm data (note: 1<<6, 2<<6, 5<<6 unused)
 #define AF_FORMAT_MPEG2		(3<<6) // MPEG(2) audio
 #define AF_FORMAT_AC3		(4<<6) // Dolby Digital AC3
-#define AF_FORMAT_IMA_ADPCM	(5<<6)
 #define AF_FORMAT_IEC61937      (6<<6)
 #define AF_FORMAT_SPECIAL_MASK	(7<<6)
 

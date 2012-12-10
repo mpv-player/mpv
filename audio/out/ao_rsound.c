@@ -80,12 +80,6 @@ static int set_format(struct ao *ao)
     case AF_FORMAT_U32_BE:
         rsd_format = RSD_U32_BE;
         break;
-    case AF_FORMAT_A_LAW:
-        rsd_format = RSD_ALAW;
-        break;
-    case AF_FORMAT_MU_LAW:
-        rsd_format = RSD_MULAW;
-        break;
     default:
         rsd_format = RSD_S16_LE;
         ao->format = AF_FORMAT_S16_LE;
