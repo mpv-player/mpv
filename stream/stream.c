@@ -179,7 +179,7 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     streaming_ctrl_free(s->streaming_ctrl);
 #endif
     free(s->url);
-    free(s);
+    talloc_free(s);
     return NULL;
   }
 
@@ -201,6 +201,9 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
   mp_msg(MSGT_OPEN,MSGL_V, "STREAM: Description: %s\n",sinfo->info);
   mp_msg(MSGT_OPEN,MSGL_V, "STREAM: Author: %s\n", sinfo->author);
   mp_msg(MSGT_OPEN,MSGL_V, "STREAM: Comment: %s\n", sinfo->comment);
+
+  if (s->mime_type)
+    mp_msg(MSGT_OPEN, MSGL_V, "Mime-type: '%s'\n", s->mime_type);
 
   return s;
 }
@@ -510,8 +513,7 @@ stream_t* new_memory_stream(unsigned char* data,int len){
 }
 
 stream_t* new_stream(int fd,int type){
-  stream_t *s=calloc(1, sizeof(stream_t));
-  if(s==NULL) return NULL;
+  stream_t *s=talloc_zero(NULL, stream_t);
 
 #if HAVE_WINSOCK2_H
   {
@@ -523,11 +525,6 @@ stream_t* new_stream(int fd,int type){
 
   s->fd=fd;
   s->type=type;
-  s->buf_pos=s->buf_len=0;
-  s->start_pos=s->end_pos=0;
-  s->priv=NULL;
-  s->url=NULL;
-  s->cache_pid=0;
   stream_reset(s);
   return s;
 }
@@ -551,11 +548,8 @@ void free_stream(stream_t *s){
   mp_msg(MSGT_STREAM,MSGL_V,"WINSOCK2 uninit\n");
   WSACleanup(); // there might be a better place for this (-> later)
 #endif
-  // Disabled atm, i don't like that. s->priv can be anything after all
-  // streams should destroy their priv on close
-  //free(s->priv);
   free(s->url);
-  free(s);
+  talloc_free(s);
 }
 
 stream_t* new_ds_stream(demux_stream_t *ds) {

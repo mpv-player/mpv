@@ -83,7 +83,22 @@ typedef struct lavf_priv {
     bool use_dts;
     bool seek_by_bytes;
     int bitrate;
+    char *mime_type;
 } lavf_priv_t;
+
+static const char *map_demuxer_mime_type[][2] = {
+    {"audio/aacp", "aac"},
+    {0}
+};
+
+static const char *find_demuxer_from_mime_type(char *mime_type)
+{
+    for (int n = 0; map_demuxer_mime_type[n][0]; n++) {
+        if (strcasecmp(map_demuxer_mime_type[n][0], mime_type) == 0)
+            return map_demuxer_mime_type[n][1];
+    }
+    return NULL;
+}
 
 static int mp_read(void *opaque, uint8_t *buf, int size)
 {
@@ -207,6 +222,8 @@ static int lavf_check_file(demuxer_t *demuxer)
         format = demuxer->stream->lavf_type;
     if (!format)
         format = avdevice_format;
+    if (!format && demuxer->stream->mime_type)
+        format = (char *)find_demuxer_from_mime_type(demuxer->stream->mime_type);
     if (format) {
         if (strcmp(format, "help") == 0) {
             list_formats();

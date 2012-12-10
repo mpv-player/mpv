@@ -16,10 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "config.h"
+#include <libavformat/avformat.h>
+#include <libavformat/avio.h>
+#include <libavutil/opt.h>
 
-#include "libavformat/avformat.h"
-#include "libavformat/avio.h"
+#include "config.h"
 #include "core/mp_msg.h"
 #include "stream.h"
 #include "core/m_option.h"
@@ -138,6 +139,12 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
 
     if (avio_open(&avio, filename, flags) < 0)
         goto out;
+
+    if (avio->av_class) {
+        uint8_t *mt = NULL;
+        if (av_opt_get(avio, "mime_type", AV_OPT_SEARCH_CHILDREN, &mt) >= 0)
+            stream->mime_type = talloc_strdup(stream, mt);
+    }
 
     char *rtmp[] = {"rtmp:", "rtmpt:", "rtmpe:", "rtmpte:", "rtmps:"};
     for (int i = 0; i < FF_ARRAY_ELEMS(rtmp); i++)
