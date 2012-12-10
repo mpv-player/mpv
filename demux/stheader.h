@@ -58,7 +58,8 @@ struct sh_stream {
     int lavf_codec_tag;
 
     char *title;
-    bool default_track;
+    bool default_track;         // container default track flag
+    bool attached_picture;      // stream is a picture (such as album art)
 
     // shouldn't exist type of stuff
     struct MPOpts *opts;

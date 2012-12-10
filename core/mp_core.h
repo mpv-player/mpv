@@ -89,6 +89,7 @@ struct track {
 
     char *title;
     bool default_track;
+    bool attached_picture;
     char *lang;
 
     // If this track is from an external file (e.g. subtitle file).

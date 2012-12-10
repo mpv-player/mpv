@@ -186,6 +186,16 @@
     name to force it, this will skip some checks! Give the demuxer name as
     printed by ``--audio-demuxer=help``. ``--audio-demuxer=audio`` forces MP3.
 
+--audio-display=<no|attachment>
+    Setting this option to ``attachment`` (default) will display image
+    attachments when playing audio files. It will display the first image
+    found, and additional images are available as video streams.
+
+    Setting this option to ``no`` disables display of video entirely when
+    playing audio files.
+
+    This option has no influence on files with normal video tracks.
+
 --audiofile=<filename>
     Play audio from an external file (WAV, MP3 or Ogg Vorbis) while viewing a
     movie.

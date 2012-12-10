@@ -438,6 +438,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         priv->vstreams[priv->video_streams] = i;
         sh_video->libav_codec_id = codec->codec_id;
         sh_video->gsh->lavf_codec_tag = lavf_codec_tag;
+        if (st->disposition & AV_DISPOSITION_ATTACHED_PIC)
+            sh_video->gsh->attached_picture = true;
         bih = calloc(sizeof(*bih) + codec->extradata_size, 1);
 
         if (codec->codec_id == CODEC_ID_RAWVIDEO) {

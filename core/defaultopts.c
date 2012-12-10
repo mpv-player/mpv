@@ -44,6 +44,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .audio_id = -1,
         .video_id = -1,
         .sub_id = -1,
+        .audio_display = 1,
         .sub_visibility = 1,
         .extension_parsing = 1,
         .audio_output_channels = 2,

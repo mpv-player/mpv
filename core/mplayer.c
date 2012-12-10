@@ -320,6 +320,8 @@ static void print_stream(struct MPContext *mpctx, struct track *t, int id)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " --%s=%s", langopt, t->lang);
     if (t->default_track)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " (*)");
+    if (t->attached_picture)
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, " [P]");
     if (t->title)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " '%s'", t->title);
     mp_msg(MSGT_CPLAYER, MSGL_INFO, " (");
@@ -914,6 +916,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
         .demuxer_id = stream->demuxer_id,
         .title = stream->title,
         .default_track = stream->default_track,
+        .attached_picture = stream->attached_picture,
         .lang = stream->common_header->lang,
         .under_timeline = under_timeline,
         .demuxer = stream->demuxer,
@@ -3592,14 +3595,16 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs)
         return l1 > l2;
     if (t1->default_track != t2->default_track)
         return t1->default_track;
+    if (t1->attached_picture != t2->attached_picture)
+        return !t1->attached_picture;
     return t1->user_tid <= t2->user_tid;
 }
 static struct track *select_track(struct MPContext *mpctx,
-                                  enum stream_type type, int tid, char **langs,
-                                  bool select_fallback)
+                                  enum stream_type type, int tid, char **langs)
 {
     if (tid == -2)
         return NULL;
+    bool select_fallback = type == STREAM_VIDEO || type == STREAM_AUDIO;
     struct track *pick = NULL;
     for (int n = 0; n < mpctx->num_tracks; n++) {
         struct track *track = mpctx->tracks[n];
@@ -3612,6 +3617,8 @@ static struct track *select_track(struct MPContext *mpctx,
     }
     if (pick && !select_fallback && !pick->is_external
         && !match_lang(langs, pick->lang) && !pick->default_track)
+        pick = NULL;
+    if (pick && pick->attached_picture && !mpctx->opts.audio_display)
         pick = NULL;
     return pick;
 }
@@ -3990,13 +3997,13 @@ goto_enable_cache: ;
     check_previous_track_selection(mpctx);
 
     mpctx->current_track[STREAM_VIDEO] =
-        select_track(mpctx, STREAM_VIDEO, mpctx->opts.video_id, NULL, true);
+        select_track(mpctx, STREAM_VIDEO, mpctx->opts.video_id, NULL);
     mpctx->current_track[STREAM_AUDIO] =
         select_track(mpctx, STREAM_AUDIO, mpctx->opts.audio_id,
-                     mpctx->opts.audio_lang, true);
+                     mpctx->opts.audio_lang);
     mpctx->current_track[STREAM_SUB] =
         select_track(mpctx, STREAM_SUB, mpctx->opts.sub_id,
-                     mpctx->opts.sub_lang, false);
+                     mpctx->opts.sub_lang);
 
     demux_info_print(mpctx->master_demuxer);
     print_file_properties(mpctx, mpctx->filename);

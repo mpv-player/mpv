@@ -85,6 +85,7 @@ typedef struct MPOpts {
     int sub_id;
     char **audio_lang;
     char **sub_lang;
+    int audio_display;
     int sub_visibility;
     char *quvi_format;
 
