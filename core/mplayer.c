@@ -2976,14 +2976,14 @@ double get_current_time(struct MPContext *mpctx)
         return 0;
     if (demuxer->stream_pts != MP_NOPTS_VALUE)
         return demuxer->stream_pts;
+    double apts = playing_audio_pts(mpctx);
+    if (apts != MP_NOPTS_VALUE)
+        return apts;
     if (mpctx->sh_video) {
         double pts = mpctx->video_pts;
         if (pts != MP_NOPTS_VALUE)
             return pts;
     }
-    double apts = playing_audio_pts(mpctx);
-    if (apts != MP_NOPTS_VALUE)
-        return apts;
     if (mpctx->last_seek_pts != MP_NOPTS_VALUE)
         return mpctx->last_seek_pts;
     return 0;
