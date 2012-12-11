@@ -1,6 +1,8 @@
 #ifndef MPV_LAVC_H
 #define MPV_LAVC_H
 
+#include <stdbool.h>
+
 #include <libavcodec/avcodec.h>
 
 #include "demux/stheader.h"
@@ -11,11 +13,11 @@
 typedef struct ffmpeg_ctx {
     AVCodecContext *avctx;
     AVFrame *pic;
-    struct mp_image export_mpi;
+    struct mp_image *last_mpi;
     struct mp_image hwdec_mpi[MAX_NUM_MPI];
     struct hwdec *hwdec;
     enum PixelFormat pix_fmt;
-    int do_dr1;
+    int do_hw_dr1, do_dr1;
     int vo_initialized;
     int best_csp;
     int qp_stat[32];
@@ -35,6 +37,7 @@ struct FrameBuffer;
 
 void mp_buffer_ref(struct FrameBuffer *buffer);
 void mp_buffer_unref(struct FrameBuffer *buffer);
+bool mp_buffer_is_unique(struct FrameBuffer *buffer);
 
 void mp_buffer_pool_free(struct FramePool **pool);
 

@@ -306,7 +306,7 @@ static int init_avctx(sh_video_t *sh, AVCodec *lavc_codec, struct hwdec *hwdec)
     if (!sh->codecname)
         sh->codecname = lavc_codec->name;
 
-    ctx->do_dr1 = 0;
+    ctx->do_dr1 = ctx->do_hw_dr1 = 0;
     ctx->pix_fmt = PIX_FMT_NONE;
     ctx->vo_initialized = 0;
     ctx->hwdec = hwdec;
@@ -320,7 +320,8 @@ static int init_avctx(sh_video_t *sh, AVCodec *lavc_codec, struct hwdec *hwdec)
     avctx->thread_count = lavc_param->threads;
 
     if (ctx->hwdec && ctx->hwdec->api == HWDEC_VDPAU) {
-        ctx->do_dr1            = true;
+        assert(lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU);
+        ctx->do_hw_dr1         = true;
         avctx->thread_count    = 1;
         avctx->get_format      = get_format_hwdec;
         avctx->get_buffer      = get_buffer_hwdec;
@@ -330,7 +331,8 @@ static int init_avctx(sh_video_t *sh, AVCodec *lavc_codec, struct hwdec *hwdec)
             avctx->slice_flags =
                 SLICE_FLAG_CODED_ORDER | SLICE_FLAG_ALLOW_FIELD;
         }
-    } else {
+    } else if (lavc_codec->capabilities & CODEC_CAP_DR1) {
+        ctx->do_dr1            = true;
         avctx->get_buffer      = mp_codec_get_buffer;
         avctx->release_buffer  = mp_codec_release_buffer;
     }
@@ -475,6 +477,8 @@ static void uninit_avctx(sh_video_t *sh)
 
     av_freep(&avctx);
     avcodec_free_frame(&ctx->pic);
+
+    mp_image_unrefp(&ctx->last_mpi);
     mp_buffer_pool_free(&ctx->dr1_buffer_pool);
 }
 
@@ -514,6 +518,7 @@ static int init_vo(sh_video_t *sh)
             width != sh->disp_w || height != sh->disp_h ||
             avctx->pix_fmt != ctx->pix_fmt || !ctx->vo_initialized)
     {
+        mp_image_unrefp(&ctx->last_mpi);
         ctx->vo_initialized = 0;
         mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
 
@@ -658,6 +663,21 @@ static av_unused void swap_palette(void *pal)
         p[i] = le2me_32(p[i]);
 }
 
+static void fb_ref(void *b)
+{
+    mp_buffer_ref(b);
+}
+
+static void fb_unref(void *b)
+{
+    mp_buffer_unref(b);
+}
+
+static bool fb_is_unique(void *b)
+{
+    return mp_buffer_is_unique(b);
+}
+
 static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
                   int len, int flags, double *reordered_pts,
                   struct mp_image **out_image)
@@ -706,21 +726,35 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
         return -1;
 
     struct mp_image *mpi = NULL;
-    if (ctx->do_dr1 && pic->opaque)
-        mpi = (mp_image_t *)pic->opaque;
+    if (ctx->do_hw_dr1 && pic->opaque)
+        mpi = pic->opaque; // reordered frame
 
     if (!mpi) {
-        mpi = &ctx->export_mpi;
-        *mpi = (struct mp_image) {0};
-        mpi->type = MP_IMGTYPE_EXPORT;
-        mpi->flags = MP_IMGFLAG_PRESERVE;
-        mpi->w = mpi->width = avctx->width;
-        mpi->h = mpi->height = avctx->height;
-        mp_image_setfmt(mpi, ctx->best_csp);
+        struct mp_image new = {0};
+        new.type = MP_IMGTYPE_EXPORT;
+        new.flags = MP_IMGFLAG_PRESERVE;
+        new.w = new.width = avctx->width;
+        new.h = new.height = avctx->height;
+        mp_image_setfmt(&new, ctx->best_csp);
         for (int i = 0; i < 4; i++) {
-            mpi->planes[i] = pic->data[i];
-            mpi->stride[i] = pic->linesize[i];
+            new.planes[i] = pic->data[i];
+            new.stride[i] = pic->linesize[i];
         }
+        if (ctx->do_dr1 && pic->opaque) {
+            struct FrameBuffer *fb = pic->opaque;
+            mp_image_unrefp(&ctx->last_mpi);
+            mp_buffer_ref(fb); // reference for last_mpi
+            ctx->last_mpi = mp_image_new_external_ref(&new, fb, fb_ref,
+                                                      fb_unref, fb_is_unique);
+        } else {
+            if (!ctx->last_mpi)
+                ctx->last_mpi = mp_image_alloc(ctx->best_csp, new.w, new.h);
+            mp_image_make_writeable(&ctx->last_mpi);
+            assert(ctx->last_mpi->w == new.w && ctx->last_mpi->h == new.h);
+            assert(ctx->last_mpi->imgfmt == new.imgfmt);
+            mp_image_copy(ctx->last_mpi, &new);
+        }
+        mpi = ctx->last_mpi;
     }
 
     if (!mpi->planes[0])

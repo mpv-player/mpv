@@ -190,6 +190,11 @@ void mp_buffer_unref(struct FrameBuffer *buf)
         mp_buffer_pool_free(&pool);
 }
 
+bool mp_buffer_is_unique(struct FrameBuffer *buf)
+{
+    return buf->refcount == 1;
+}
+
 void mp_codec_release_buffer(AVCodecContext *s, AVFrame *frame)
 {
     FrameBuffer *buf = frame->opaque;
