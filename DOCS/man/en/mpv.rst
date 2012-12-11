@@ -28,7 +28,7 @@ Synopsis
 | **mpv** \dvb://[card\_number@]channel [options]
 | **mpv** \mf://[filemask|\@listfile] [-mf options] [options]
 | **mpv** [cdda|cddb]://track[-endtrack][:speed][/device] [options]
-| **mpv** [file|mms[t]|http|http\_proxy|rt[s]p|ftp|udp|unsv|icyx|noicyx|smb]:// [user:pass\@]URL[:port] [options]
+| **mpv** [file|mms[t]|http|httpproxy|rt[s]p|ftp|udp|unsv|icyx|noicyx|smb]:// [user:pass\@]URL[:port] [options]
 
 
 DESCRIPTION
