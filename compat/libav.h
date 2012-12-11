@@ -22,6 +22,7 @@
 #include <libavutil/avutil.h>
 #include <libavutil/cpu.h>
 #include <libavcodec/version.h>
+#include <libavformat/version.h>
 
 #ifndef AV_CPU_FLAG_MMX2
 #define AV_CPU_FLAG_MMX2 AV_CPU_FLAG_MMXEXT
@@ -37,6 +38,15 @@
 
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 28, 0)
 #define avcodec_free_frame av_freep
+#endif
+
+#if LIBAVFORMAT_VERSION_MICRO < 100
+#define AVPROBE_SCORE_RETRY (AVPROBE_SCORE_MAX/4)
+#endif
+
+// For Libav 0.9
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(54, 2, 100)
+#define AV_DISPOSITION_ATTACHED_PIC      0x0400
 #endif
 
 #endif /* MPV_LIBAV_COMPAT_H */

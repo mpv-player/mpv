@@ -140,11 +140,13 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     if (avio_open(&avio, filename, flags) < 0)
         goto out;
 
+#if LIBAVFORMAT_VERSION_MICRO >= 100
     if (avio->av_class) {
         uint8_t *mt = NULL;
         if (av_opt_get(avio, "mime_type", AV_OPT_SEARCH_CHILDREN, &mt) >= 0)
             stream->mime_type = talloc_strdup(stream, mt);
     }
+#endif
 
     char *rtmp[] = {"rtmp:", "rtmpt:", "rtmpe:", "rtmpte:", "rtmps:"};
     for (int i = 0; i < FF_ARRAY_ELEMS(rtmp); i++)
