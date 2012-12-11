@@ -21,18 +21,83 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "talloc.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
+#include "video/filter/vf.h"
 
 #include "video/memcpy_pic.h"
 #include "libavutil/mem.h"
 #include "libavutil/common.h"
 
+struct m_refcount {
+    void *arg;
+    // free() is called if refcount reaches 0.
+    void (*free)(void *arg);
+    // External refcounted object (such as libavcodec DR buffers). This assumes
+    // that the actual data is managed by the external object, not by
+    // m_refcount. The .ext_* calls use that external object's refcount
+    // primitives. It usually doesn't make sense to set both .free and .ext_*.
+    void (*ext_ref)(void *arg);
+    void (*ext_unref)(void *arg);
+    bool (*ext_is_unique)(void *arg);
+    // Native refcount (there may be additional references if .ext_* are set)
+    int refcount;
+};
+
+// Only for checking API usage
+static int m_refcount_destructor(void *ptr)
+{
+    struct m_refcount *ref = ptr;
+    assert(ref->refcount == 0);
+    return 0;
+}
+
+// Starts out with refcount==1, caller can set .arg and .free and .ext_*
+static struct m_refcount *m_refcount_new(void)
+{
+    struct m_refcount *ref = talloc_ptrtype(NULL, ref);
+    *ref = (struct m_refcount) { .refcount = 1 };
+    talloc_set_destructor(ref, m_refcount_destructor);
+    return ref;
+}
+
+static void m_refcount_ref(struct m_refcount *ref)
+{
+    ref->refcount++;
+    if (ref->ext_ref)
+        ref->ext_ref(ref->arg);
+}
+
+static void m_refcount_unref(struct m_refcount *ref)
+{
+    assert(ref->refcount > 0);
+    if (ref->ext_unref)
+        ref->ext_unref(ref->arg);
+    ref->refcount--;
+    if (ref->refcount == 0) {
+        if (ref->free)
+            ref->free(ref->arg);
+        talloc_free(ref);
+    }
+}
+
+static bool m_refcount_is_unique(struct m_refcount *ref)
+{
+    if (ref->refcount > 1)
+        return false;
+    if (ref->ext_is_unique)
+        return ref->ext_is_unique(ref->arg); // referenced only by us
+    return true;
+}
+
+
 void mp_image_alloc_planes(mp_image_t *mpi) {
+  assert(!mpi->refcount);
   // IF09 - allocate space for 4. plane delta info - unused
   if (mpi->imgfmt == IMGFMT_IF09) {
     mpi->planes[0]=av_malloc(mpi->bpp*mpi->width*(mpi->height+2)/8+
@@ -75,19 +140,8 @@ void mp_image_alloc_planes(mp_image_t *mpi) {
   mpi->flags|=MP_IMGFLAG_ALLOCATED;
 }
 
-mp_image_t* alloc_mpi(int w, int h, unsigned long int fmt) {
-  mp_image_t* mpi = new_mp_image(w,h);
-
-  mpi->width=FFALIGN(w, MP_STRIDE_ALIGNMENT);
-  mp_image_setfmt(mpi,fmt);
-  mp_image_alloc_planes(mpi);
-  mpi->width=w;
-  mp_image_setfmt(mpi,fmt); // reset chroma size
-
-  return mpi;
-}
-
-void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi) {
+void mp_image_copy(struct mp_image *dmpi, struct mp_image *mpi)
+{
   if(mpi->flags&MP_IMGFLAG_PLANAR){
     memcpy_pic(dmpi->planes[0],mpi->planes[0], MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, 0), mpi->h,
 	       dmpi->stride[0],mpi->stride[0]);
@@ -100,6 +154,11 @@ void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi) {
 	       MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, 0), mpi->h,
 	       dmpi->stride[0],mpi->stride[0]);
   }
+}
+
+void mp_image_copy_attributes(struct mp_image *dmpi, struct mp_image *mpi)
+{
+    vf_clone_mpi_attributes(dmpi, mpi);
 }
 
 void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
@@ -231,7 +290,11 @@ static int mp_image_destructor(void *ptr)
 {
     mp_image_t *mpi = ptr;
 
-    if(mpi->flags&MP_IMGFLAG_ALLOCATED){
+    if (mpi->refcount) {
+        m_refcount_unref(mpi->refcount);
+    }
+
+    if (mpi->flags & MP_IMGFLAG_ALLOCATED) {
         /* because we allocate the whole image at once */
         av_free(mpi->planes[0]);
         if (mpi->flags & MP_IMGFLAG_RGB_PALETTE)
@@ -241,16 +304,155 @@ static int mp_image_destructor(void *ptr)
     return 0;
 }
 
-mp_image_t* new_mp_image(int w,int h){
-    mp_image_t* mpi = talloc_zero(NULL, mp_image_t);
+// Image without format or allocated image data
+struct mp_image *mp_image_new_empty(int w, int h)
+{
+    struct mp_image *mpi = talloc_zero(NULL, struct mp_image);
     talloc_set_destructor(mpi, mp_image_destructor);
     mpi->width=mpi->w=w;
     mpi->height=mpi->h=h;
     return mpi;
 }
 
-void free_mp_image(mp_image_t* mpi){
-    talloc_free(mpi);
+struct mp_image *mp_image_alloc(unsigned int imgfmt, int w, int h)
+{
+    struct mp_image *mpi = mp_image_new_empty(w, h);
+
+    mpi->width = FFALIGN(w, MP_STRIDE_ALIGNMENT);
+    mp_image_setfmt(mpi, imgfmt);
+    mp_image_alloc_planes(mpi);
+    mpi->width = w;
+    mp_image_setfmt(mpi, imgfmt); // reset chroma size
+
+    mpi->flags &= ~MP_IMGFLAG_ALLOCATED;
+    mpi->refcount = m_refcount_new();
+    mpi->refcount->free = av_free;
+    mpi->refcount->arg = mpi->planes[0];
+    // NOTE: palette isn't free'd. Palette handling should be fixed instead.
+
+    return mpi;
+}
+
+struct mp_image *mp_image_new_copy(struct mp_image *img)
+{
+    struct mp_image *new = mp_image_alloc(img->imgfmt, img->w, img->h);
+    mp_image_copy(new, img);
+    mp_image_copy_attributes(new, img);
+
+    // Normally these are covered by the reference to the original image data
+    // (like the AVFrame in vd_lavc.c), but we can't manage it on our own.
+    new->qscale = NULL;
+    new->qstride = 0;
+
+    return new;
+}
+
+// Make dst take over the image data of src, and free src.
+// This is basically a safe version of *dst = *src; free(src);
+// Only works with ref-counted images, and can't change image size/format.
+void mp_image_steal_data(struct mp_image *dst, struct mp_image *src)
+{
+    assert(dst->imgfmt == src->imgfmt && dst->w == src->w && dst->h == src->h);
+    assert(dst->refcount && src->refcount);
+
+    for (int p = 0; p < MP_MAX_PLANES; p++) {
+        dst->planes[p] = src->planes[p];
+        dst->stride[p] = src->stride[p];
+    }
+    mp_image_copy_attributes(dst, src);
+
+    m_refcount_unref(dst->refcount);
+    dst->refcount = src->refcount;
+    talloc_set_destructor(src, NULL);
+    talloc_free(src);
+}
+
+// Return a new reference to img. The returned reference is owned by the caller,
+// while img is left untouched.
+struct mp_image *mp_image_new_ref(struct mp_image *img)
+{
+    if (!img->refcount)
+        return mp_image_new_copy(img);
+
+    struct mp_image *new = talloc_ptrtype(NULL, new);
+    talloc_set_destructor(new, mp_image_destructor);
+    *new = *img;
+
+    m_refcount_ref(new->refcount);
+    return new;
+}
+
+// Return a reference counted reference to img. If the reference count reaches
+// 0, call free(free_arg). The data passed by img must not be free'd before
+// that. The new reference will be writeable.
+struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *free_arg,
+                                         void (*free)(void *arg))
+{
+    struct mp_image *new = talloc_ptrtype(NULL, new);
+    talloc_set_destructor(new, mp_image_destructor);
+    *new = *img;
+
+    new->flags &= ~MP_IMGFLAG_ALLOCATED;
+    new->refcount = m_refcount_new();
+    new->refcount->free = free;
+    new->refcount->arg = free_arg;
+    return new;
+}
+
+// Return a reference counted reference to img. ref/unref/is_unique are used to
+// connect to an external refcounting API. It is assumed that the new object
+// has an initial reference to that external API.
+struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
+                                           void (*ref)(void *arg),
+                                           void (*unref)(void *arg),
+                                           bool (*is_unique)(void *arg))
+{
+    struct mp_image *new = talloc_ptrtype(NULL, new);
+    talloc_set_destructor(new, mp_image_destructor);
+    *new = *img;
+
+    new->flags &= ~MP_IMGFLAG_ALLOCATED;
+    new->refcount = m_refcount_new();
+    new->refcount->ext_ref = ref;
+    new->refcount->ext_unref = unref;
+    new->refcount->ext_is_unique = is_unique;
+    new->refcount->arg = arg;
+    return new;
+}
+
+bool mp_image_is_writeable(struct mp_image *img)
+{
+    // if non ref-counted, it's writeable if the caller allocated the image
+    if (!img->refcount)
+        return img->flags & MP_IMGFLAG_ALLOCATED;
+    return m_refcount_is_unique(img->refcount);
+}
+
+// Make the image data referenced by img writeable. This allocates new data
+// if the data wasn't already writeable, and img->planes[] and img->stride[]
+// will be set to the copy.
+void mp_image_make_writeable(struct mp_image *img)
+{
+    if (mp_image_is_writeable(img))
+        return;
+
+    mp_image_steal_data(img, mp_image_new_copy(img));
+    assert(mp_image_is_writeable(img));
+}
+
+void mp_image_setrefp(struct mp_image **p_img, struct mp_image *new_value)
+{
+    if (*p_img != new_value) {
+        talloc_free(*p_img);
+        *p_img = new_value ? mp_image_new_ref(new_value) : NULL;
+    }
+}
+
+// Mere helper function (mp_image can be directly free'd with talloc_free)
+void mp_image_unrefp(struct mp_image **p_img)
+{
+    talloc_free(*p_img);
+    *p_img = NULL;
 }
 
 enum mp_csp mp_image_csp(struct mp_image *img)

@@ -19,6 +19,7 @@
 #ifndef MPLAYER_MP_IMAGE_H
 #define MPLAYER_MP_IMAGE_H
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -104,10 +105,25 @@
 #define MP_IMGFIELD_BOTTOM 0x10
 #define MP_IMGFIELD_INTERLACED 0x20
 
+/* Memory management:
+ * - mp_image is a light-weight reference to the actual image data (pixels).
+ *   The actual image data is reference counted and can outlive mp_image
+ *   allocations. mp_image references can be created with mp_image_new_ref()
+ *   and free'd with talloc_free() (the helpers mp_image_setrefp() and
+ *   mp_image_unrefp() can also be used). The actual image data is free'd when
+ *   the last mp_image reference to it is free'd.
+ * - Each mp_image has a clear owner. The owner can do anything with it, such
+ *   as changing mp_image fields. Instead of making ownership ambiguous by
+ *   sharing a mp_image reference, new references should be created.
+ * - Write access to the actual image data is allowed only after calling
+ *   mp_image_make_writeable(), or if mp_image_is_writeable() returns true.
+ *   Conceptually, images can be changed by their owner only, and copy-on-write
+ *   is used to ensure that other references do not see any changes to the
+ *   image data. mp_image_make_writeable() will do that copy if required.
+ */
 typedef struct mp_image {
     unsigned int flags;
     unsigned char type;
-    int number;
     unsigned char bpp;  // bits/pixel. NOT depth! for RGB it will be n*8
     unsigned int imgfmt;
     int width,height;  // internal to vf.c, do not use (stored dimensions)
@@ -128,18 +144,40 @@ typedef struct mp_image {
     int chroma_y_shift; // vertical
     enum mp_csp colorspace;
     enum mp_csp_levels levels;
-    int usage_count;
+    /* memory management */
+    int number, usage_count; // used by old VF/DR and vdpau code only
+    struct m_refcount *refcount;
     /* for private use by filter or vo driver (to store buffer id or dmpi) */
     void* priv;
 } mp_image_t;
 
-void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt);
-mp_image_t* new_mp_image(int w,int h);
-void free_mp_image(mp_image_t* mpi);
+#define alloc_mpi(w, h, fmt) mp_image_alloc(fmt, w, h)
+#define free_mp_image talloc_free
+#define new_mp_image mp_image_new_empty
+#define copy_mpi mp_image_copy
 
-mp_image_t* alloc_mpi(int w, int h, unsigned long int fmt);
-void mp_image_alloc_planes(mp_image_t *mpi);
-void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi);
+struct mp_image *mp_image_alloc(unsigned int fmt, int w, int h);
+void mp_image_copy(struct mp_image *dmpi, struct mp_image *mpi);
+void mp_image_copy_attributes(struct mp_image *dmpi, struct mp_image *mpi);
+struct mp_image *mp_image_new_copy(struct mp_image *img);
+struct mp_image *mp_image_new_ref(struct mp_image *img);
+bool mp_image_is_writeable(struct mp_image *img);
+void mp_image_make_writeable(struct mp_image *img);
+void mp_image_setrefp(struct mp_image **p_img, struct mp_image *new_value);
+void mp_image_unrefp(struct mp_image **p_img);
+
+struct mp_image *mp_image_new_empty(int w, int h);
+void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt);
+void mp_image_alloc_planes(struct mp_image *mpi);
+void mp_image_steal_data(struct mp_image *dst, struct mp_image *src);
+
+struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *arg,
+                                         void (*free)(void *arg));
+
+struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
+                                           void (*ref)(void *arg),
+                                           void (*unref)(void *arg),
+                                           bool (*is_unique)(void *arg));
 
 enum mp_csp mp_image_csp(struct mp_image *img);
 enum mp_csp_levels mp_image_levels(struct mp_image *img);
