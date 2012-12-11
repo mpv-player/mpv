@@ -58,31 +58,11 @@ static const vd_info_t info = {
 };
 
 #include "libavcodec/avcodec.h"
+#include "lavc.h"
 
 #if AVPALETTE_SIZE > 1024
 #error palette too large, adapt libmpcodecs/vf.c:vf_get_image
 #endif
-
-#define MAX_NUM_MPI 50
-
-typedef struct {
-    AVCodecContext *avctx;
-    AVFrame *pic;
-    struct mp_image export_mpi;
-    struct mp_image hwdec_mpi[MAX_NUM_MPI];
-    struct hwdec *hwdec;
-    enum PixelFormat pix_fmt;
-    int do_dr1;
-    int vo_initialized;
-    int best_csp;
-    int qp_stat[32];
-    double qp_sum;
-    double inv_qp_sum;
-    AVRational last_sample_aspect_ratio;
-    enum AVDiscard skip_frame;
-    int rawvideo_fmt;
-    AVCodec *software_fallback;
-} vd_ffmpeg_ctx;
 
 #include "core/m_option.h"
 
@@ -350,6 +330,9 @@ static int init_avctx(sh_video_t *sh, AVCodec *lavc_codec, struct hwdec *hwdec)
             avctx->slice_flags =
                 SLICE_FLAG_CODED_ORDER | SLICE_FLAG_ALLOW_FIELD;
         }
+    } else {
+        avctx->get_buffer      = mp_codec_get_buffer;
+        avctx->release_buffer  = mp_codec_release_buffer;
     }
 
     if (avctx->thread_count == 0) {
@@ -492,6 +475,7 @@ static void uninit_avctx(sh_video_t *sh)
 
     av_freep(&avctx);
     avcodec_free_frame(&ctx->pic);
+    mp_buffer_pool_free(&ctx->dr1_buffer_pool);
 }
 
 static void uninit(sh_video_t *sh)
