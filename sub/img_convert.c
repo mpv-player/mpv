@@ -163,3 +163,79 @@ bool osd_conv_idx_to_gray(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
     }
     return true;
 }
+
+static void draw_ass_rgba(unsigned char *src, int src_w, int src_h,
+                          int src_stride, unsigned char *dst, size_t dst_stride,
+                          int dst_x, int dst_y, uint32_t color)
+{
+    const unsigned int r = (color >> 24) & 0xff;
+    const unsigned int g = (color >> 16) & 0xff;
+    const unsigned int b = (color >>  8) & 0xff;
+    const unsigned int a = 0xff - (color & 0xff);
+
+    dst += dst_y * dst_stride + dst_x * 4;
+
+    for (int y = 0; y < src_h; y++, dst += dst_stride, src += src_stride) {
+        uint32_t *dstrow = (uint32_t *) dst;
+        for (int x = 0; x < src_w; x++) {
+            const unsigned int v = src[x];
+            int rr = (r * a * v);
+            int gg = (g * a * v);
+            int bb = (b * a * v);
+            int aa =      a * v;
+            uint32_t dstpix = dstrow[x];
+            unsigned int dstb =  dstpix        & 0xFF;
+            unsigned int dstg = (dstpix >>  8) & 0xFF;
+            unsigned int dstr = (dstpix >> 16) & 0xFF;
+            unsigned int dsta = (dstpix >> 24) & 0xFF;
+            dstb = (bb       + dstb * (255 * 255 - aa)) / (255 * 255);
+            dstg = (gg       + dstg * (255 * 255 - aa)) / (255 * 255);
+            dstr = (rr       + dstr * (255 * 255 - aa)) / (255 * 255);
+            dsta = (aa * 255 + dsta * (255 * 255 - aa)) / (255 * 255);
+            dstrow[x] = dstb | (dstg << 8) | (dstr << 16) | (dsta << 24);
+        }
+    }
+}
+
+bool osd_conv_ass_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
+{
+    struct sub_bitmaps src = *imgs;
+    if (src.format != SUBBITMAP_LIBASS)
+        return false;
+    assert(!src.scaled); // ASS is always unscaled
+
+    struct sub_bitmap *bmp = &c->part;
+
+    imgs->format = SUBBITMAP_RGBA;
+    imgs->parts = bmp;
+    imgs->num_parts = 0;
+
+    struct mp_rect bb;
+    if (!sub_bitmaps_bb(&src, &bb))
+        return true;
+
+    bmp->x = bb.x0;
+    bmp->y = bb.y0;
+    bmp->w = bmp->dw = bb.x1 - bb.x0;
+    bmp->h = bmp->dh = bb.y1 - bb.y0;
+    bmp->stride = bmp->w * 4;
+    size_t newsize = bmp->h * bmp->stride;
+    if (talloc_get_size(bmp->bitmap) < newsize) {
+        talloc_free(bmp->bitmap);
+        bmp->bitmap = talloc_array(c, char, newsize);
+    }
+
+    memset_pic(bmp->bitmap, 0, bmp->w * 4, bmp->h, bmp->stride);
+
+    for (int n = 0; n < src.num_parts; n++) {
+        struct sub_bitmap *s = &src.parts[n];
+
+        draw_ass_rgba(s->bitmap, s->w, s->h, s->stride,
+                      bmp->bitmap, bmp->stride,
+                      s->x - bb.x0, s->y - bb.y0,
+                      s->libass.color);
+    }
+
+    imgs->num_parts = 1;
+    return true;
+}

@@ -25,7 +25,7 @@
 
 #include "core/m_option.h"
 
-// NOTE: VOs must support at least SUBBITMAP_LIBASS and SUBBITMAP_RGBA.
+// NOTE: VOs must support at least SUBBITMAP_RGBA.
 enum sub_bitmap_format {
     SUBBITMAP_EMPTY = 0,// no bitmaps; always has num_parts==0
     SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
@@ -94,7 +94,7 @@ enum mp_osdtype {
     MAX_OSD_PARTS
 };
 
-#define OSD_CONV_CACHE_MAX 3
+#define OSD_CONV_CACHE_MAX 4
 
 struct osd_object {
     int type; // OSDTYPE_*
