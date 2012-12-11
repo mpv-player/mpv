@@ -126,6 +126,9 @@ typedef struct MPOpts {
     char *ass_styles_file;
     int ass_style_override;
     int ass_hinting;
+
+    int hwdec_api;
+
     struct lavc_param {
         int workaround_bugs;
         int error_resilience;

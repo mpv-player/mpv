@@ -26,6 +26,7 @@
 #include <libavutil/common.h>
 #include <libavutil/opt.h>
 #include <libavutil/intreadwrite.h>
+#include <libavutil/pixdesc.h>
 
 #include "compat/libav.h"
 
@@ -69,6 +70,7 @@ typedef struct {
     AVFrame *pic;
     struct mp_image export_mpi;
     struct mp_image hwdec_mpi[MAX_NUM_MPI];
+    struct hwdec *hwdec;
     enum PixelFormat pix_fmt;
     int do_dr1;
     int vo_initialized;
@@ -78,10 +80,14 @@ typedef struct {
     double inv_qp_sum;
     AVRational last_sample_aspect_ratio;
     enum AVDiscard skip_frame;
+    int rawvideo_fmt;
+    AVCodec *software_fallback;
 } vd_ffmpeg_ctx;
 
 #include "core/m_option.h"
 
+static int init_avctx(sh_video_t *sh, AVCodec *lavc_codec, struct hwdec *hwdec);
+static void uninit_avctx(sh_video_t *sh);
 static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic);
 static void release_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic);
 static void draw_slice_hwdec(struct AVCodecContext *s, const AVFrame *src,
@@ -112,6 +118,50 @@ const m_option_t lavc_decode_opts_conf[] = {
     OPT_STRING("o", lavc_param.avopt, 0),
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
+
+// keep in sync with --hwdec option
+enum hwdec_type {
+    HWDEC_NONE = 0,
+    HWDEC_VDPAU = 1,
+    HWDEC_VDA = 2,
+    HWDEC_CRYSTALHD = 3,
+};
+
+struct hwdec {
+    enum hwdec_type api;
+    char *codec, *hw_codec;
+};
+
+static const struct hwdec hwdec[] = {
+    {HWDEC_VDPAU,       "h264",         "h264_vdpau"},
+    {HWDEC_VDPAU,       "wmv3",         "wmv3_vdpau"},
+    {HWDEC_VDPAU,       "vc1",          "vc1_vdpau"},
+    {HWDEC_VDPAU,       "mpegvideo",    "mpegvideo_vdpau"},
+    {HWDEC_VDPAU,       "mpeg1video",   "mpeg1video_vdpau"},
+    {HWDEC_VDPAU,       "mpeg2video",   "mpegvideo_vdpau"},
+    {HWDEC_VDPAU,       "mpeg2",        "mpeg2_vdpau"},
+    {HWDEC_VDPAU,       "mpeg4",        "mpeg4_vdpau"},
+
+    {HWDEC_VDA,         "h264",         "h264_vda"},
+
+    {HWDEC_CRYSTALHD,   "mpeg2",        "mpeg2_crystalhd"},
+    {HWDEC_CRYSTALHD,   "msmpeg4",      "msmpeg4_crystalhd"},
+    {HWDEC_CRYSTALHD,   "wmv3",         "wmv3_crystalhd"},
+    {HWDEC_CRYSTALHD,   "vc1",          "vc1_crystalhd"},
+    {HWDEC_CRYSTALHD,   "h264",         "h264_crystalhd"},
+    {HWDEC_CRYSTALHD,   "mpeg4",        "mpeg4_crystalhd"},
+
+    {0}
+};
+
+static struct hwdec *find_hwcodec(enum hwdec_type api, const char *codec)
+{
+    for (int n = 0; hwdec[n].api; n++) {
+        if (hwdec[n].api == api && strcmp(hwdec[n].codec, codec) == 0)
+            return (struct hwdec *)&hwdec[n];
+    }
+    return NULL;
+}
 
 // print debugging stats into a file
 static void print_vstats(sh_video_t *sh, int len)
@@ -209,13 +259,11 @@ static enum AVDiscard str2AVDiscard(char *str)
 
 static int init(sh_video_t *sh)
 {
-    struct lavc_param *lavc_param = &sh->opts->lavc_param;
-    AVCodecContext *avctx;
     vd_ffmpeg_ctx *ctx;
     AVCodec *lavc_codec = NULL;
-    enum PixelFormat rawfmt = PIX_FMT_NONE;
 
     ctx = sh->context = talloc_zero(NULL, vd_ffmpeg_ctx);
+    ctx->rawvideo_fmt = PIX_FMT_NONE;
 
     if (sh->codec->dll) {
         lavc_codec = avcodec_find_decoder_by_name(sh->codec->dll);
@@ -235,8 +283,8 @@ static int init(sh_video_t *sh)
             return 0;
         }
     } else if (!IMGFMT_IS_HWACCEL(sh->format)) {
-        rawfmt = imgfmt2pixfmt(sh->format);
-        if (rawfmt != PIX_FMT_NONE)
+        ctx->rawvideo_fmt = imgfmt2pixfmt(sh->format);
+        if (ctx->rawvideo_fmt != PIX_FMT_NONE)
             lavc_codec = avcodec_find_decoder_by_name("rawvideo");
     }
     if (!lavc_codec) {
@@ -244,30 +292,64 @@ static int init(sh_video_t *sh)
         return 0;
     }
 
+    struct hwdec *hwdec = find_hwcodec(sh->opts->hwdec_api, lavc_codec->name);
+    if (hwdec) {
+        AVCodec *lavc_hwcodec = avcodec_find_decoder_by_name(hwdec->hw_codec);
+        if (lavc_hwcodec) {
+            ctx->software_fallback = lavc_codec;
+            lavc_codec = lavc_hwcodec;
+        } else {
+            hwdec = NULL;
+            mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "Using software decoding.\n");
+        }
+    }
+
+    if (!init_avctx(sh, lavc_codec, hwdec)) {
+        mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Error initializing hardware "
+                "decoding, falling back to software decoding.\n");
+        lavc_codec = ctx->software_fallback;
+        ctx->software_fallback = NULL;
+        if (!init_avctx(sh, lavc_codec, NULL)) {
+            uninit(sh);
+            return 0;
+        }
+    }
+    return 1;
+}
+
+static int init_avctx(sh_video_t *sh, AVCodec *lavc_codec, struct hwdec *hwdec)
+{
+    vd_ffmpeg_ctx *ctx = sh->context;
+    struct lavc_param *lavc_param = &sh->opts->lavc_param;
+
     sh->codecname = lavc_codec->long_name;
     if (!sh->codecname)
         sh->codecname = lavc_codec->name;
 
+    ctx->do_dr1 = 0;
+    ctx->pix_fmt = PIX_FMT_NONE;
+    ctx->vo_initialized = 0;
+    ctx->hwdec = hwdec;
     ctx->pic = avcodec_alloc_frame();
     ctx->avctx = avcodec_alloc_context3(lavc_codec);
-    avctx = ctx->avctx;
+    AVCodecContext *avctx = ctx->avctx;
     avctx->opaque = sh;
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
     avctx->codec_id = lavc_codec->id;
 
     avctx->thread_count = lavc_param->threads;
 
-    if (lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU) {
+    if (ctx->hwdec && ctx->hwdec->api == HWDEC_VDPAU) {
         ctx->do_dr1            = true;
         avctx->thread_count    = 1;
         avctx->get_format      = get_format_hwdec;
         avctx->get_buffer      = get_buffer_hwdec;
         avctx->release_buffer  = release_buffer_hwdec;
-        avctx->draw_horiz_band = draw_slice_hwdec;
-        if (lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU)
-            mp_msg(MSGT_DECVIDEO, MSGL_V, "[VD_FFMPEG] VDPAU hardware "
-                   "decoding.\n");
-        avctx->slice_flags = SLICE_FLAG_CODED_ORDER | SLICE_FLAG_ALLOW_FIELD;
+        if (ctx->hwdec->api == HWDEC_VDPAU) {
+            avctx->draw_horiz_band = draw_slice_hwdec;
+            avctx->slice_flags =
+                SLICE_FLAG_CODED_ORDER | SLICE_FLAG_ALLOW_FIELD;
+        }
     }
 
     if (avctx->thread_count == 0) {
@@ -289,10 +371,10 @@ static int init(sh_video_t *sh)
     if (lavc_param->gray)
         avctx->flags |= CODEC_FLAG_GRAY;
     avctx->flags2 |= lavc_param->fast;
-    if (rawfmt == PIX_FMT_NONE) {
+    if (ctx->rawvideo_fmt == PIX_FMT_NONE) {
         avctx->codec_tag = sh->format;
     } else {
-        avctx->pix_fmt = rawfmt;
+        avctx->pix_fmt = ctx->rawvideo_fmt;
     }
     if (sh->gsh->lavf_codec_tag)
         avctx->codec_tag = sh->gsh->lavf_codec_tag;
@@ -387,27 +469,18 @@ static int init(sh_video_t *sh)
     /* open it */
     if (avcodec_open2(avctx, lavc_codec, NULL) < 0) {
         mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not open codec.\n");
-        uninit(sh);
+        uninit_avctx(sh);
         return 0;
     }
     return 1;
 }
 
-static void uninit(sh_video_t *sh)
+static void uninit_avctx(sh_video_t *sh)
 {
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
 
     sh->codecname = NULL;
-    if (sh->opts->lavc_param.vstats && avctx->coded_frame) {
-        for (int i = 1; i < 32; i++)
-            mp_msg(MSGT_DECVIDEO, MSGL_INFO,
-                   "QP: %d, count: %d\n", i, ctx->qp_stat[i]);
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] Arithmetic mean of QP: "
-            "%2.4f, Harmonic mean of QP: %2.4f\n",
-            ctx->qp_sum / avctx->coded_frame->coded_picture_number,
-            1.0 / (ctx->inv_qp_sum / avctx->coded_frame->coded_picture_number));
-    }
 
     if (avctx) {
         if (avctx->codec && avcodec_close(avctx) < 0)
@@ -419,19 +492,34 @@ static void uninit(sh_video_t *sh)
 
     av_freep(&avctx);
     avcodec_free_frame(&ctx->pic);
-    talloc_free(ctx);
 }
 
-static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt)
+static void uninit(sh_video_t *sh)
 {
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
-    float aspect = av_q2d(avctx->sample_aspect_ratio) *
-                   avctx->width / avctx->height;
-    int width, height;
 
-    width = avctx->width;
-    height = avctx->height;
+    if (avctx && sh->opts->lavc_param.vstats && avctx->coded_frame) {
+        for (int i = 1; i < 32; i++)
+            mp_msg(MSGT_DECVIDEO, MSGL_INFO,
+                   "QP: %d, count: %d\n", i, ctx->qp_stat[i]);
+        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] Arithmetic mean of QP: "
+            "%2.4f, Harmonic mean of QP: %2.4f\n",
+            ctx->qp_sum / avctx->coded_frame->coded_picture_number,
+            1.0 / (ctx->inv_qp_sum / avctx->coded_frame->coded_picture_number));
+    }
+
+    uninit_avctx(sh);
+    talloc_free(ctx);
+}
+
+static int init_vo(sh_video_t *sh)
+{
+    vd_ffmpeg_ctx *ctx = sh->context;
+    AVCodecContext *avctx = ctx->avctx;
+    int width = avctx->width;
+    int height = avctx->height;
+    float aspect = av_q2d(avctx->sample_aspect_ratio) * width / height;
 
     /* Reconfiguring filter/VO chain may invalidate direct rendering buffers
      * we have allocated for libavcodec (including the VDPAU HW decoding
@@ -440,7 +528,8 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt)
      */
     if (av_cmp_q(avctx->sample_aspect_ratio, ctx->last_sample_aspect_ratio) ||
             width != sh->disp_w || height != sh->disp_h ||
-            pix_fmt != ctx->pix_fmt || !ctx->vo_initialized) {
+            avctx->pix_fmt != ctx->pix_fmt || !ctx->vo_initialized)
+    {
         ctx->vo_initialized = 0;
         mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
 
@@ -454,14 +543,16 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt)
         ctx->last_sample_aspect_ratio = avctx->sample_aspect_ratio;
         sh->disp_w = width;
         sh->disp_h = height;
-        ctx->pix_fmt = pix_fmt;
-        ctx->best_csp = pixfmt2imgfmt(pix_fmt);
+
+        ctx->pix_fmt = avctx->pix_fmt;
+        ctx->best_csp = pixfmt2imgfmt(avctx->pix_fmt);
 
         sh->colorspace = avcol_spc_to_mp_csp(avctx->colorspace);
         sh->color_range = avcol_range_to_mp_csp_levels(avctx->color_range);
 
         if (!mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, ctx->best_csp))
             return -1;
+
         ctx->vo_initialized = 1;
     }
     return 0;
@@ -471,17 +562,22 @@ static enum PixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                                          const enum PixelFormat *fmt)
 {
     sh_video_t *sh = avctx->opaque;
-    int i;
+    vd_ffmpeg_ctx *ctx = sh->context;
 
-    for (i = 0; fmt[i] != PIX_FMT_NONE; i++) {
+    mp_msg(MSGT_DECVIDEO, MSGL_V, "Pixel formats supported by decoder:");
+    for (int i = 0; fmt[i] != PIX_FMT_NONE; i++)
+        mp_msg(MSGT_DECVIDEO, MSGL_V, " %s", av_get_pix_fmt_name(fmt[i]));
+    mp_msg(MSGT_DECVIDEO, MSGL_V, "\n");
+
+    assert(ctx->hwdec);
+
+    for (int i = 0; fmt[i] != PIX_FMT_NONE; i++) {
         int imgfmt = pixfmt2imgfmt(fmt[i]);
-        if (!IMGFMT_IS_HWACCEL(imgfmt))
-            continue;
-        mp_msg(MSGT_DECVIDEO, MSGL_V, "[VD_FFMPEG] Trying pixfmt=%d.\n", i);
-        if (init_vo(sh, fmt[i]) >= 0)
-            break;
+        if (ctx->hwdec->api == HWDEC_VDPAU && IMGFMT_IS_VDPAU(imgfmt))
+            return fmt[i];
     }
-    return fmt[i];
+
+    return PIX_FMT_NONE;
 }
 
 static void draw_slice_hwdec(struct AVCodecContext *s,
@@ -515,15 +611,25 @@ static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
     sh_video_t *sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
 
-    assert(IMGFMT_IS_HWACCEL(ctx->best_csp));
+    /* Decoders using ffmpeg's hwaccel architecture (everything except vdpau)
+     * can fall back to software decoding automatically. However, we don't
+     * want that: multithreading was already disabled. ffmpeg's fallback
+     * isn't really useful, and causes more trouble than it helps.
+     *
+     * Instead of trying to "adjust" the thread_count fields in avctx, let
+     * decoding fail hard. Then decode_with_fallback() will do our own software
+     * fallback. Fully reinitializing the decoder is saner, and will probably
+     * save us from other weird corner cases, like having to "reroute" the
+     * get_buffer callback.
+     */
+    int imgfmt = pixfmt2imgfmt(avctx->pix_fmt);
+    if (!IMGFMT_IS_HWACCEL(imgfmt))
+        return -1;
 
-    // Uncertain whether this is needed; at least deals with VO/filter failures
-    if (init_vo(sh, avctx->pix_fmt) < 0) {
-        avctx->release_buffer = avcodec_default_release_buffer;
-        avctx->get_buffer = avcodec_default_get_buffer;
-        avctx->reget_buffer = avcodec_default_reget_buffer;
-        return avctx->get_buffer(avctx, pic);
-    }
+    if (init_vo(sh) < 0)
+        return -1;
+
+    assert(IMGFMT_IS_HWACCEL(ctx->best_csp));
 
     struct mp_image *mpi = get_image_hwdec(ctx);
     if (!mpi)
@@ -568,9 +674,9 @@ static av_unused void swap_palette(void *pal)
         p[i] = le2me_32(p[i]);
 }
 
-static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
-                               void *data, int len, int flags,
-                               double *reordered_pts)
+static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
+                  int len, int flags, double *reordered_pts,
+                  struct mp_image **out_image)
 {
     int got_picture = 0;
     int ret;
@@ -601,22 +707,22 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     union pts { int64_t i; double d; };
     avctx->reordered_opaque = (union pts){.d = *reordered_pts}.i;
     ret = avcodec_decode_video2(avctx, pic, &got_picture, &pkt);
-    *reordered_pts = (union pts){.i = pic->reordered_opaque}.d;
-
-    int dr1 = ctx->do_dr1;
-    if (ret < 0)
+    if (ret < 0) {
         mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Error while decoding frame!\n");
+        return -1;
+    }
+    *reordered_pts = (union pts){.i = pic->reordered_opaque}.d;
 
     print_vstats(sh, len);
 
     if (!got_picture)
-        return NULL;                     // skipped image
+        return 0;                     // skipped image
 
-    if (init_vo(sh, avctx->pix_fmt) < 0)
-        return NULL;
+    if (init_vo(sh) < 0)
+        return -1;
 
     struct mp_image *mpi = NULL;
-    if (dr1 && pic->opaque)
+    if (ctx->do_dr1 && pic->opaque)
         mpi = (mp_image_t *)pic->opaque;
 
     if (!mpi) {
@@ -634,7 +740,7 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     }
 
     if (!mpi->planes[0])
-        return NULL;
+        return 0; // ?
 
     assert(mpi->imgfmt == pixfmt2imgfmt(avctx->pix_fmt));
 
@@ -658,7 +764,39 @@ static struct mp_image *decode(struct sh_video *sh, struct demux_packet *packet,
     if (pic->repeat_pict == 1)
         mpi->fields |= MP_IMGFIELD_REPEAT_FIRST;
 
-    return mpi;
+    *out_image = mpi;
+    return 1;
+}
+
+static struct mp_image *decode_with_fallback(struct sh_video *sh,
+                                struct demux_packet *packet, void *data,
+                                int len, int flags, double *reordered_pts)
+{
+    vd_ffmpeg_ctx *ctx = sh->context;
+    if (!ctx->avctx)
+        return NULL;
+
+    struct mp_image *mpi = NULL;
+    int res = decode(sh, packet, data, len, flags, reordered_pts, &mpi);
+    if (res >= 0)
+        return mpi;
+
+    // Failed hardware decoding? Try again in software.
+    if (ctx->software_fallback) {
+        uninit_avctx(sh);
+        sh->vf_initialized = 0;
+        mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Error using hardware "
+                "decoding, falling back to software decoding.\n");
+        AVCodec *codec = ctx->software_fallback;
+        ctx->software_fallback = NULL;
+        if (init_avctx(sh, codec, NULL)) {
+            mpi = NULL;
+            decode(sh, packet, data, len, flags, reordered_pts, &mpi);
+            return mpi;
+        }
+    }
+
+    return NULL;
 }
 
 static int control(sh_video_t *sh, int cmd, void *arg)
@@ -677,7 +815,7 @@ static int control(sh_video_t *sh, int cmd, void *arg)
     case VDCTRL_RESET_ASPECT:
         if (ctx->vo_initialized)
             ctx->vo_initialized = false;
-        init_vo(sh, avctx->pix_fmt);
+        init_vo(sh);
         return true;
     }
     return CONTROL_UNKNOWN;
@@ -688,5 +826,5 @@ const struct vd_functions mpcodecs_vd_ffmpeg = {
     .init = init,
     .uninit = uninit,
     .control = control,
-    .decode = decode,
+    .decode = decode_with_fallback,
 };

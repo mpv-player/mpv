@@ -779,6 +779,18 @@
     negative of the image with this option. Not supported by all video output
     drivers.
 
+--hwdec=<api>
+    Specify the hardware video decoding API that should be used if possible.
+    Whether hardware decoding is actually done depends on the video codec. If
+    hardware decoding is not possible, mpv will fall back to software decoding.
+
+    <api> can be one of the following:
+
+    :no:        always use software decoding (default)
+    :vdpau:     works with nvidia drivers only, requires ``--vo=vdpau``
+    :vda:       OSX
+    :crystalhd: Broadcom Crystal HD
+
 --identify
     Deprecated. Use ``TOOLS/mpv_identify.sh``.
 

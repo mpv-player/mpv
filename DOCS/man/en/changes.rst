@@ -117,6 +117,7 @@ Command line switches
     -spugauss                           --sub-gauss
     -vobsub                             --sub (pass the .idx file)
     -ass-bottom-margin                  --vf=sub=bottom:top
+    -vc ffh264vdpau (etc.)              --hwdec=vdpau
     =================================== ===================================
 
 input.conf and slave commands

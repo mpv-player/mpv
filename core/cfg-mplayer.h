@@ -467,6 +467,12 @@ const m_option_t common_opts[] = {
     {"ac", &audio_codec_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
     {"vc", &video_codec_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
+    OPT_CHOICE("hwdec", hwdec_api, 0,
+               ({"no", 0},
+                {"vdpau", 1},
+                {"vda", 2},
+                {"crystalhd", 3})),
+
     // postprocessing:
     {"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
 #ifdef CONFIG_LIBPOSTPROC
