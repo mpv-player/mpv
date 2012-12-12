@@ -36,6 +36,7 @@ struct sd_lavc_priv {
     struct sub_bitmap *outbitmaps;
     struct osd_bmp_indexed *imgs;
     bool bitmaps_changed;
+    double pts;
     double endpts;
 };
 
@@ -107,6 +108,7 @@ static void clear(struct sd_lavc_priv *priv)
     talloc_free(priv->imgs);
     priv->imgs = NULL;
     priv->bitmaps_changed = true;
+    priv->pts = MP_NOPTS_VALUE;
     priv->endpts = MP_NOPTS_VALUE;
     if (priv->have_sub)
         avsubtitle_free(&priv->sub);
@@ -165,6 +167,7 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
                 b->y = r->y;
             }
             priv->count = sub.num_rects;
+            priv->pts = pts;
             priv->endpts = endpts;
             break;
         default:
@@ -181,6 +184,8 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
 {
     struct sd_lavc_priv *priv = sh->context;
 
+    if (priv->pts != MP_NOPTS_VALUE && pts < priv->pts)
+        return;
     if (priv->endpts != MP_NOPTS_VALUE && (pts >= priv->endpts ||
                                            pts < priv->endpts - 300))
         clear(priv);
@@ -213,7 +218,8 @@ static void reset(struct sh_sub *sh, struct osd_state *osd)
 {
     struct sd_lavc_priv *priv = sh->context;
 
-    clear(priv);
+    if (priv->pts == MP_NOPTS_VALUE)
+        clear(priv);
     // lavc might not do this right for all codecs; may need close+reopen
     avcodec_flush_buffers(priv->avctx);
 }

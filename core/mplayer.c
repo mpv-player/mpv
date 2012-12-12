@@ -1839,7 +1839,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
         while (d_sub->first) {
             double subpts_s = ds_get_next_pts(d_sub);
             if (subpts_s > curpts_s) {
-                mp_dbg(MSGT_CPLAYER, MSGL_V,
+                mp_dbg(MSGT_CPLAYER, MSGL_DBG2,
                        "Sub early: c_pts=%5.3f s_pts=%5.3f\n",
                        curpts_s, subpts_s);
                 // Libass handled subs can be fed to it in advance
