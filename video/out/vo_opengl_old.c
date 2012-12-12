@@ -587,10 +587,12 @@ static void flip_page(struct vo *vo)
         gl->Clear(GL_COLOR_BUFFER_BIT);
 }
 
-static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
+static bool get_image(struct vo *vo, mp_image_t *mpi, int *th, bool *cplane)
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
+
+    bool common_plane = false;
 
     int needed_size;
     if (!gl->GenBuffers || !gl->BindBuffer || !gl->BufferData || !gl->MapBuffer) {
@@ -598,19 +600,15 @@ static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
             mp_msg(MSGT_VO, MSGL_ERR, "[gl] extensions missing for dr\n"
                    "Expect a _major_ speed penalty\n");
         p->err_shown = 1;
-        return VO_FALSE;
+        return false;
     }
-    if (mpi->flags & MP_IMGFLAG_READABLE)
-        return VO_FALSE;
-    if (mpi->type != MP_IMGTYPE_STATIC && mpi->type != MP_IMGTYPE_TEMP &&
-        (mpi->type != MP_IMGTYPE_NUMBERED || mpi->number))
-        return VO_FALSE;
+    int width = mpi->w, height = mpi->h;
     if (p->ati_hack) {
-        mpi->width = p->texture_width;
-        mpi->height = p->texture_height;
+        width = p->texture_width;
+        height = p->texture_height;
     }
-    mpi->stride[0] = mpi->width * mpi->bpp / 8;
-    needed_size = mpi->stride[0] * mpi->height;
+    mpi->stride[0] = width * mpi->bpp / 8;
+    needed_size = mpi->stride[0] * height;
     if (!p->buffer)
         gl->GenBuffers(1, &p->buffer);
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer);
@@ -628,24 +626,24 @@ static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
             mp_msg(MSGT_VO, MSGL_ERR, "[gl] could not acquire buffer for dr\n"
                    "Expect a _major_ speed penalty\n");
         p->err_shown = 1;
-        return VO_FALSE;
+        return false;
     }
     if (p->is_yuv) {
         // planar YUV
         int xs, ys, component_bits;
         mp_get_chroma_shift(p->image_format, &xs, &ys, &component_bits);
         int bp = (component_bits + 7) / 8;
-        mpi->flags |= MP_IMGFLAG_COMMON_STRIDE | MP_IMGFLAG_COMMON_PLANE;
-        mpi->stride[0] = mpi->width * bp;
-        mpi->planes[1] = mpi->planes[0] + mpi->stride[0] * mpi->height;
-        mpi->stride[1] = (mpi->width >> xs) * bp;
-        mpi->planes[2] = mpi->planes[1] + mpi->stride[1] * (mpi->height >> ys);
-        mpi->stride[2] = (mpi->width >> xs) * bp;
+        common_plane = true;
+        mpi->stride[0] = width * bp;
+        mpi->planes[1] = mpi->planes[0] + mpi->stride[0] * height;
+        mpi->stride[1] = (width >> xs) * bp;
+        mpi->planes[2] = mpi->planes[1] + mpi->stride[1] * (height >> ys);
+        mpi->stride[2] = (width >> xs) * bp;
         if (p->ati_hack) {
-            mpi->flags &= ~MP_IMGFLAG_COMMON_PLANE;
+            common_plane = false;
             if (!p->buffer_uv[0])
                 gl->GenBuffers(2, p->buffer_uv);
-            int buffer_size = mpi->stride[1] * mpi->height;
+            int buffer_size = mpi->stride[1] * height;
             if (buffer_size > p->buffersize_uv) {
                 gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer_uv[0]);
                 gl->BufferData(GL_PIXEL_UNPACK_BUFFER, buffer_size, NULL,
@@ -667,8 +665,9 @@ static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
             mpi->planes[2] = p->bufferptr_uv[1];
         }
     }
-    mpi->flags |= MP_IMGFLAG_DIRECT;
-    return VO_TRUE;
+    *th = height;
+    *cplane = common_plane;
+    return true;
 }
 
 static void clear_border(struct vo *vo, uint8_t *dst, int start, int stride,
@@ -696,12 +695,12 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     unsigned char *planes[3];
     mp_image_t mpi2 = *mpi;
     int w = mpi->w, h = mpi->h;
+    int th = h;
+    bool common_plane = false;
+    bool pbo = false;
     mpi2.flags = 0;
-    mpi2.type = MP_IMGTYPE_TEMP;
-    mpi2.width = mpi2.w;
-    mpi2.height = mpi2.h;
-    if (p->force_pbo && !(mpi->flags & MP_IMGFLAG_DIRECT) && !p->bufferptr
-        && get_image(vo, &mpi2) == VO_TRUE)
+    if (p->force_pbo && !p->bufferptr
+        && get_image(vo, &mpi2, &th, &common_plane))
     {
         int bp = mpi->bpp / 8;
         int xs, ys, component_bits;
@@ -720,16 +719,17 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         if (p->ati_hack) {
             // since we have to do a full upload we need to clear the borders
             clear_border(vo, mpi2.planes[0], mpi->w * bp, mpi2.stride[0],
-                         mpi->h, mpi2.height, 0);
+                         mpi->h, th, 0);
             if (p->is_yuv) {
                 int clear = get_chroma_clear_val(component_bits);
                 clear_border(vo, mpi2.planes[1], uv_bytes, mpi2.stride[1],
-                             mpi->h >> ys, mpi2.height >> ys, clear);
+                             mpi->h >> ys, th >> ys, clear);
                 clear_border(vo, mpi2.planes[2], uv_bytes, mpi2.stride[2],
-                             mpi->h >> ys, mpi2.height >> ys, clear);
+                             mpi->h >> ys, th >> ys, clear);
             }
         }
         mpi = &mpi2;
+        pbo = true;
     }
     stride[0] = mpi->stride[0];
     stride[1] = mpi->stride[1];
@@ -738,7 +738,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     planes[1] = mpi->planes[1];
     planes[2] = mpi->planes[2];
     p->mpi_flipped = stride[0] < 0;
-    if (mpi->flags & MP_IMGFLAG_DIRECT) {
+    if (pbo) {
         intptr_t base = (intptr_t)planes[0];
         if (p->ati_hack) {
             w = p->texture_width;
@@ -752,7 +752,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer);
         gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
         p->bufferptr = NULL;
-        if (!(mpi->flags & MP_IMGFLAG_COMMON_PLANE))
+        if (!common_plane)
             planes[0] = planes[1] = planes[2] = NULL;
         slice = 0; // always "upload" full texture
     }
@@ -761,7 +761,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     if (p->is_yuv) {
         int xs, ys;
         mp_get_chroma_shift(p->image_format, &xs, &ys, NULL);
-        if ((mpi->flags & MP_IMGFLAG_DIRECT) && !(mpi->flags & MP_IMGFLAG_COMMON_PLANE)) {
+        if (pbo && !common_plane) {
             gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer_uv[0]);
             gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
             p->bufferptr_uv[0] = NULL;
@@ -769,7 +769,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         gl->ActiveTexture(GL_TEXTURE1);
         glUploadTex(gl, p->target, p->gl_format, p->gl_type, planes[1],
                     stride[1], 0, 0, w >> xs, h >> ys, slice);
-        if ((mpi->flags & MP_IMGFLAG_DIRECT) && !(mpi->flags & MP_IMGFLAG_COMMON_PLANE)) {
+        if (pbo && !common_plane) {
             gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer_uv[1]);
             gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
             p->bufferptr_uv[1] = NULL;
@@ -779,7 +779,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                     stride[2], 0, 0, w >> xs, h >> ys, slice);
         gl->ActiveTexture(GL_TEXTURE0);
     }
-    if (mpi->flags & MP_IMGFLAG_DIRECT) {
+    if (pbo) {
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     }
 
@@ -819,8 +819,7 @@ static int query_format(struct vo *vo, uint32_t format)
     struct gl_priv *p = vo->priv;
 
     int depth;
-    int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP |
-               VFCAP_ACCEPT_STRIDE;
+    int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP;
     if (p->use_osd)
         caps |= VFCAP_OSD;
     if (format == IMGFMT_RGB24 || format == IMGFMT_RGBA)

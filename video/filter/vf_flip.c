@@ -40,14 +40,14 @@ static int config(struct vf_instance *vf,
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     mpi->planes[0]=mpi->planes[0]+
-		    mpi->stride[0]*(mpi->height-1);
+		    mpi->stride[0]*(mpi->h-1);
     mpi->stride[0]=-mpi->stride[0];
     if(mpi->flags&MP_IMGFLAG_PLANAR){
         mpi->planes[1]=mpi->planes[1]+
-	    mpi->stride[1]*((mpi->height>>mpi->chroma_y_shift)-1);
+	    mpi->stride[1]*((mpi->h>>mpi->chroma_y_shift)-1);
 	mpi->stride[1]=-mpi->stride[1];
 	mpi->planes[2]=mpi->planes[2]+
-	    mpi->stride[2]*((mpi->height>>mpi->chroma_y_shift)-1);
+	    mpi->stride[2]*((mpi->h>>mpi->chroma_y_shift)-1);
 	mpi->stride[2]=-mpi->stride[2];
     }
     return mpi;

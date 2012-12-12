@@ -188,7 +188,7 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
     set_imgprop(&vf->priv->filter.inpic, mpi);
     if (mpi->qscale) {
         if (mpi->qscale_type != 0) {
-            k = mpi->qstride * ((mpi->height + 15) >> 4);
+            k = mpi->qstride * ((mpi->h + 15) >> 4);
             if (vf->priv->qbuffersize != k) {
                 vf->priv->qbuffer = realloc(vf->priv->qbuffer, k);
                 vf->priv->qbuffersize = k;

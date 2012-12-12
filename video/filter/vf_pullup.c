@@ -58,7 +58,7 @@ static void init_pullup(struct vf_instance *vf, mp_image_t *mpi)
 		c->h[1] = c->h[2] = mpi->chroma_height;
 		c->w[3] = ((mpi->w+15)/16) * ((mpi->h+15)/16);
 		c->h[3] = 2;
-		c->stride[0] = mpi->width;
+		c->stride[0] = mpi->w;
 		c->stride[1] = c->stride[2] = mpi->chroma_width;
 		c->stride[3] = c->w[3];
 		c->background[1] = c->background[2] = 128;

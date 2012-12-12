@@ -127,24 +127,16 @@ void vf_mpi_clear(mp_image_t *mpi, int x0, int y0, int w, int h)
     if (mpi->flags & MP_IMGFLAG_PLANAR) {
         y0 &= ~1;
         h += h & 1;
-        if (x0 == 0 && w == mpi->width) {
-            // full width clear:
-            memset(mpi->planes[0] + mpi->stride[0] * y0, 0, mpi->stride[0] * h);
-            memset(mpi->planes[1] + mpi->stride[1] *(y0 >> mpi->chroma_y_shift),
-                   128, mpi->stride[1] * (h >> mpi->chroma_y_shift));
-            memset(mpi->planes[2] + mpi->stride[2] *(y0 >> mpi->chroma_y_shift),
-                   128, mpi->stride[2] * (h >> mpi->chroma_y_shift));
-        } else
-            for (y = y0; y < y0 + h; y += 2) {
-                memset(mpi->planes[0] + x0 + mpi->stride[0] * y, 0, w);
-                memset(mpi->planes[0] + x0 + mpi->stride[0] * (y + 1), 0, w);
-                memset(mpi->planes[1] + (x0 >> mpi->chroma_x_shift) +
-                       mpi->stride[1] * (y >> mpi->chroma_y_shift),
-                       128, (w >> mpi->chroma_x_shift));
-                memset(mpi->planes[2] + (x0 >> mpi->chroma_x_shift) +
-                       mpi->stride[2] * (y >> mpi->chroma_y_shift),
-                       128, (w >> mpi->chroma_x_shift));
-            }
+        for (y = y0; y < y0 + h; y += 2) {
+            memset(mpi->planes[0] + x0 + mpi->stride[0] * y, 0, w);
+            memset(mpi->planes[0] + x0 + mpi->stride[0] * (y + 1), 0, w);
+            memset(mpi->planes[1] + (x0 >> mpi->chroma_x_shift) +
+                    mpi->stride[1] * (y >> mpi->chroma_y_shift),
+                    128, (w >> mpi->chroma_x_shift));
+            memset(mpi->planes[2] + (x0 >> mpi->chroma_x_shift) +
+                    mpi->stride[2] * (y >> mpi->chroma_y_shift),
+                    128, (w >> mpi->chroma_x_shift));
+        }
         return;
     }
     // packed:
@@ -378,7 +370,7 @@ void vf_clone_mpi_attributes(mp_image_t *dst, mp_image_t *src)
     dst->fields = src->fields;
     dst->qscale_type = src->qscale_type;
     dst->pts = src->pts;
-    if (dst->width == src->width && dst->height == src->height) {
+    if (dst->w == src->w && dst->h == src->h) {
         dst->qstride = src->qstride;
         dst->qscale = src->qscale;
         dst->display_w = src->display_w;

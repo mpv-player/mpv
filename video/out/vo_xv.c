@@ -418,7 +418,7 @@ static int query_format(struct vo *vo, uint32_t format)
 {
     struct xvctx *ctx = vo->priv;
     uint32_t i;
-    int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD | VFCAP_ACCEPT_STRIDE;       // FIXME! check for DOWN
+    int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD;
 
     /* check image formats */
     for (i = 0; i < ctx->formats; i++) {

@@ -150,7 +150,7 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->filter=filter;
     vf->uninit=uninit;
-    vf->default_caps=VFCAP_ACCEPT_STRIDE|VFCAP_POSTPROC;
+    vf->default_caps=VFCAP_POSTPROC;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     vf->priv->context=NULL;
 

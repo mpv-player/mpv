@@ -100,10 +100,10 @@ void mp_image_alloc_planes(mp_image_t *mpi) {
   assert(!mpi->refcount);
   // IF09 - allocate space for 4. plane delta info - unused
   if (mpi->imgfmt == IMGFMT_IF09) {
-    mpi->planes[0]=av_malloc(mpi->bpp*mpi->width*(mpi->height+2)/8+
+    mpi->planes[0]=av_malloc(mpi->bpp*mpi->w*(mpi->h+2)/8+
                             mpi->chroma_width*mpi->chroma_height);
   } else
-    mpi->planes[0]=av_malloc(mpi->bpp*mpi->width*(mpi->height+2)/8);
+    mpi->planes[0]=av_malloc(mpi->bpp*mpi->w*(mpi->h+2)/8);
   if (!mpi->planes[0])
     abort(); //out of memory
   if (mpi->flags&MP_IMGFLAG_PLANAR) {
@@ -111,18 +111,18 @@ void mp_image_alloc_planes(mp_image_t *mpi) {
     // by 8. Currently the case for all planar formats.
     int bpp = MP_IMAGE_PLANAR_BITS_PER_PIXEL_ON_PLANE(mpi, 0) / 8;
     // YV12/I420/YVU9/IF09. feel free to add other planar formats here...
-    mpi->stride[0]=mpi->stride[3]=bpp*mpi->width;
+    mpi->stride[0]=mpi->stride[3]=bpp*mpi->w;
     if(mpi->num_planes > 2){
       mpi->stride[1]=mpi->stride[2]=bpp*mpi->chroma_width;
       if(mpi->flags&MP_IMGFLAG_SWAPPED){
         // I420/IYUV  (Y,U,V)
-        mpi->planes[1]=mpi->planes[0]+mpi->stride[0]*mpi->height;
+        mpi->planes[1]=mpi->planes[0]+mpi->stride[0]*mpi->h;
         mpi->planes[2]=mpi->planes[1]+mpi->stride[1]*mpi->chroma_height;
         if (mpi->num_planes > 3)
             mpi->planes[3]=mpi->planes[2]+mpi->stride[2]*mpi->chroma_height;
       } else {
         // YV12,YVU9,IF09  (Y,V,U)
-        mpi->planes[2]=mpi->planes[0]+mpi->stride[0]*mpi->height;
+        mpi->planes[2]=mpi->planes[0]+mpi->stride[0]*mpi->h;
         mpi->planes[1]=mpi->planes[2]+mpi->stride[1]*mpi->chroma_height;
         if (mpi->num_planes > 3)
             mpi->planes[3]=mpi->planes[1]+mpi->stride[1]*mpi->chroma_height;
@@ -130,10 +130,10 @@ void mp_image_alloc_planes(mp_image_t *mpi) {
     } else {
       // NV12/NV21
       mpi->stride[1]=mpi->chroma_width;
-      mpi->planes[1]=mpi->planes[0]+mpi->stride[0]*mpi->height;
+      mpi->planes[1]=mpi->planes[0]+mpi->stride[0]*mpi->h;
     }
   } else {
-    mpi->stride[0]=mpi->width*mpi->bpp/8;
+    mpi->stride[0]=mpi->w*mpi->bpp/8;
     if (mpi->flags & MP_IMGFLAG_RGB_PALETTE)
       mpi->planes[1] = av_malloc(1024);
   }
@@ -196,16 +196,16 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
         mpi->flags|=MP_IMGFLAG_PLANAR;
         mpi->chroma_x_shift = 0;
         mpi->chroma_y_shift = 0;
-        mpi->chroma_width=mpi->width;
-        mpi->chroma_height=mpi->height;
+        mpi->chroma_width=mpi->w;
+        mpi->chroma_height=mpi->h;
         return;
     }
     mpi->flags|=MP_IMGFLAG_YUV;
     if (mp_get_chroma_shift(out_fmt, NULL, NULL, NULL)) {
         mpi->flags|=MP_IMGFLAG_PLANAR;
         mpi->bpp = mp_get_chroma_shift(out_fmt, &mpi->chroma_x_shift, &mpi->chroma_y_shift, NULL);
-        mpi->chroma_width  = mpi->width  >> mpi->chroma_x_shift;
-        mpi->chroma_height = mpi->height >> mpi->chroma_y_shift;
+        mpi->chroma_width  = mpi->w >> mpi->chroma_x_shift;
+        mpi->chroma_height = mpi->h >> mpi->chroma_y_shift;
     }
     switch(out_fmt){
     case IMGFMT_I420:
@@ -265,8 +265,8 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     case IMGFMT_YUY2:
         mpi->chroma_x_shift = 1;
         mpi->chroma_y_shift = 1;
-        mpi->chroma_width=(mpi->width>>1);
-        mpi->chroma_height=(mpi->height>>1);
+        mpi->chroma_width=(mpi->w>>1);
+        mpi->chroma_height=(mpi->h>>1);
 	mpi->bpp=16;
 	mpi->num_planes=1;
 	return;
@@ -276,8 +276,8 @@ void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->flags|=MP_IMGFLAG_PLANAR;
 	mpi->bpp=12;
 	mpi->num_planes=2;
-	mpi->chroma_width=(mpi->width>>0);
-	mpi->chroma_height=(mpi->height>>1);
+	mpi->chroma_width=(mpi->w>>0);
+	mpi->chroma_height=(mpi->h>>1);
 	mpi->chroma_x_shift=0;
 	mpi->chroma_y_shift=1;
 	return;
@@ -316,8 +316,8 @@ struct mp_image *mp_image_new_empty(int w, int h)
 // Caller has to make sure this doesn't exceed the allocated plane data/strides.
 void mp_image_set_size(struct mp_image *mpi, int w, int h)
 {
-    mpi->w = mpi->width = w;
-    mpi->h = mpi->height = h;
+    mpi->w = w;
+    mpi->h = h;
     mpi->chroma_width = mpi->w >> mpi->chroma_x_shift;
     mpi->chroma_height = mpi->h >> mpi->chroma_y_shift;
     mpi->display_w = mpi->display_h = 0;
@@ -333,10 +333,10 @@ struct mp_image *mp_image_alloc(unsigned int imgfmt, int w, int h)
 {
     struct mp_image *mpi = mp_image_new_empty(w, h);
 
-    mpi->width = FFALIGN(w, MP_STRIDE_ALIGNMENT);
+    mpi->w = FFALIGN(w, MP_STRIDE_ALIGNMENT);
     mp_image_setfmt(mpi, imgfmt);
     mp_image_alloc_planes(mpi);
-    mpi->width = w;
+    mpi->w = w;
     mp_image_setfmt(mpi, imgfmt); // reset chroma size
 
     mpi->flags &= ~MP_IMGFLAG_ALLOCATED;

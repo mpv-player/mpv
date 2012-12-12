@@ -1237,29 +1237,23 @@ static void flip_page(struct vo *vo)
     p->frames_rendered++;
 }
 
-static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
+static bool get_image(struct vo *vo, mp_image_t *mpi)
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
     if (!p->use_pbo)
-        return VO_FALSE;
+        return false;
 
     // We don't support alpha planes. (Disabling PBOs with normal draw calls is
     // an undesired, but harmless side-effect.)
     if (mpi->num_planes != p->plane_count)
-        return VO_FALSE;
+        return false;
 
-    if (mpi->flags & MP_IMGFLAG_READABLE)
-        return VO_FALSE;
-    if (mpi->type != MP_IMGTYPE_STATIC && mpi->type != MP_IMGTYPE_TEMP &&
-        (mpi->type != MP_IMGTYPE_NUMBERED || mpi->number))
-        return VO_FALSE;
-    mpi->flags &= ~MP_IMGFLAG_COMMON_PLANE;
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &p->planes[n];
-        mpi->stride[n] = (mpi->width >> plane->shift_x) * p->plane_bytes;
-        int needed_size = (mpi->height >> plane->shift_y) * mpi->stride[n];
+        mpi->stride[n] = (mpi->w >> plane->shift_x) * p->plane_bytes;
+        int needed_size = (mpi->h >> plane->shift_y) * mpi->stride[n];
         if (!plane->gl_buffer)
             gl->GenBuffers(1, &plane->gl_buffer);
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
@@ -1274,8 +1268,7 @@ static uint32_t get_image(struct vo *vo, mp_image_t *mpi)
         mpi->planes[n] = plane->buffer_ptr;
         gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     }
-    mpi->flags |= MP_IMGFLAG_DIRECT;
-    return VO_TRUE;
+    return true;
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
@@ -1288,14 +1281,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     mp_image_t mpi2 = *mpi;
     int w = mpi->w, h = mpi->h;
-    mpi2.flags = 0;
-    mpi2.type = MP_IMGTYPE_TEMP;
-    mpi2.width = mpi2.w;
-    mpi2.height = mpi2.h;
-    if (!(mpi->flags & MP_IMGFLAG_DIRECT)
-        && !p->planes[0].buffer_ptr
-        && get_image(p->vo, &mpi2) == VO_TRUE)
-    {
+    bool pbo = false;
+    if (!p->planes[0].buffer_ptr && get_image(p->vo, &mpi2)) {
         for (n = 0; n < p->plane_count; n++) {
             struct texplane *plane = &p->planes[n];
             int xs = plane->shift_x, ys = plane->shift_y;
@@ -1304,13 +1291,14 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                        mpi2.stride[n], mpi->stride[n]);
         }
         mpi = &mpi2;
+        pbo = true;
     }
     p->mpi_flipped = mpi->stride[0] < 0;
     for (n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &p->planes[n];
         int xs = plane->shift_x, ys = plane->shift_y;
         void *plane_ptr = mpi->planes[n];
-        if (mpi->flags & MP_IMGFLAG_DIRECT) {
+        if (pbo) {
             gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
             if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER))
                 mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Video PBO upload failed. "
@@ -1638,7 +1626,7 @@ static bool init_format(int fmt, struct gl_priv *init)
 static int query_format(struct vo *vo, uint32_t format)
 {
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP |
-               VFCAP_ACCEPT_STRIDE | VFCAP_OSD;
+               VFCAP_OSD;
     if (!init_format(format, NULL))
         return 0;
     return caps;

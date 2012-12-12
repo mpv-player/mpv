@@ -814,8 +814,7 @@ static int query_format(struct vo *vo, uint32_t format)
 {
     struct priv *vc = vo->priv;
     int i, j;
-    int cap = VFCAP_CSP_SUPPORTED | VFCAP_FLIP | VFCAP_ACCEPT_STRIDE |
-              VFCAP_OSD;
+    int cap = VFCAP_CSP_SUPPORTED | VFCAP_FLIP | VFCAP_OSD;
     for (i = 0; i < vc->renderer_info.num_texture_formats; ++i)
         for (j = 0; j < sizeof(formats) / sizeof(formats[0]); ++j)
             if (vc->renderer_info.texture_formats[i] == formats[j].sdl)
@@ -941,8 +940,7 @@ static void update_screeninfo(struct vo *vo)
 static struct mp_image *get_screenshot(struct vo *vo)
 {
     struct priv *vc = vo->priv;
-    mp_image_t *image = alloc_mpi(vc->ssmpi->width, vc->ssmpi->height,
-                                  vc->ssmpi->imgfmt);
+    mp_image_t *image = alloc_mpi(vc->ssmpi->w, vc->ssmpi->h, vc->ssmpi->imgfmt);
     copy_mpi(image, vc->ssmpi);
     return image;
 }

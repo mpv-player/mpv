@@ -530,20 +530,17 @@ static int query_format(struct vo *vo, uint32_t format)
             return 0;           // TODO 8bpp not yet fully implemented
         if (IMGFMT_BGR_DEPTH(format) == vo->x11->depthonscreen)
             return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
-                   VFCAP_OSD | VFCAP_FLIP |
-                   VFCAP_ACCEPT_STRIDE;
+                   VFCAP_OSD | VFCAP_FLIP;
         else
             return VFCAP_CSP_SUPPORTED | VFCAP_OSD |
-                   VFCAP_FLIP |
-                   VFCAP_ACCEPT_STRIDE;
+                   VFCAP_FLIP;
     }
 
     switch (format) {
     case IMGFMT_I420:
     case IMGFMT_IYUV:
     case IMGFMT_YV12:
-        return VFCAP_CSP_SUPPORTED | VFCAP_OSD |
-               VFCAP_ACCEPT_STRIDE;
+        return VFCAP_CSP_SUPPORTED | VFCAP_OSD;
     }
     return 0;
 }
