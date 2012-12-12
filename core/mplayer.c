@@ -2156,9 +2156,6 @@ static int write_to_ao(struct MPContext *mpctx, void *data, int len, int flags,
     struct ao *ao = mpctx->ao;
     double bps = ao->bps / mpctx->opts.playback_speed;
     ao->pts = pts;
-    // hack used by some mpeg-writing AOs
-    ao->brokenpts = ((mpctx->sh_video ? mpctx->sh_video->timer : 0) +
-                     mpctx->delay) * 90000.0;
     int played = ao_play(mpctx->ao, data, len, flags);
     if (played > 0) {
         mpctx->delay += played / bps;
@@ -2268,10 +2265,6 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     bool modifiable_audio_format = !(ao->format & AF_FORMAT_SPECIAL_MASK);
     int unitsize = ao->channels * af_fmt2bits(ao->format) / 8;
-
-    // hack used by some mpeg-writing AOs
-    ao->brokenpts = ((mpctx->sh_video ? mpctx->sh_video->timer : 0) +
-                     mpctx->delay) * 90000.0;
 
     if (mpctx->paused)
         playsize = 1;   // just initialize things (audio pts at least)

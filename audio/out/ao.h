@@ -96,7 +96,6 @@ struct ao {
     int bps;
     int outburst;
     int buffersize;
-    int brokenpts;
     double pts;
     struct bstr buffer;
     int buffer_playable_size;
