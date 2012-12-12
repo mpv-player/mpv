@@ -255,11 +255,6 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 continue;
             }
 
-            if (bstrcmp0(p.arg, "v") == 0) {
-                verbose++;
-                continue;
-            }
-
             if (mode == LOCAL) {
                 MP_TARRAY_APPEND(NULL, local_params, local_params_count,
                                  (struct playlist_param) {p.arg, p.param});
@@ -351,6 +346,8 @@ void m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
             // Option parsing errors will be handled later as well.
             if (p.mp_opt->flags & M_OPT_PRE_PARSE)
                 m_config_set_option(config, p.arg, p.param);
+            if (bstrcmp0(p.arg, "v") == 0)
+                verbose++;
         }
     }
 
