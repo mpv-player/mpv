@@ -227,6 +227,7 @@ SOURCES = talloc.c \
           video/image_writer.c \
           video/img_format.c \
           video/mp_image.c \
+          video/mp_image_pool.c \
           video/sws_utils.c \
           video/decode/dec_video.c \
           video/decode/lavc_dr1.c \
