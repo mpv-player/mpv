@@ -661,10 +661,18 @@ screenshot
 screenshot_force
     Same as ``screenshot``, but prefer it over VO based screenshot code.
 
-sub
+sub=[=bottom-margin:top-margin]
     Moves subtitle rendering to an arbitrary point in the filter
     chain, or force subtitle rendering in the video filter as opposed to using
     video output OSD support.
+
+
+    <bottom-margin>
+        Adds a black band at the bottom of the frame. The SSA/ASS renderer can
+        place subtitles there (with ``--ass-use-margins``).
+    <top-margin>
+        Black band on the top for toptitles  (with ``--ass-use-margins``).
+
 
     *EXAMPLE*:
 

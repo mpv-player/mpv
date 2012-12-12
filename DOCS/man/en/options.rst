@@ -118,10 +118,6 @@
     text subtitles only, because ASS subtitles include their own styling
     information.
 
---ass-bottom-margin=<value>
-    Adds a black band at the bottom of the frame. The SSA/ASS renderer can
-    place subtitles there (with ``--ass-use-margins``).
-
 --ass-force-style=<[Style.]Param=Value[,...]>
     Override some style or script info parameters.
 
@@ -155,10 +151,6 @@
           for any of these options can lead to incorrect subtitle rendering.
           (Default.)
     :no:  Render subtitles as forced by subtitle scripts.
-
---ass-top-margin=<value>
-    Adds a black band at the top of the frame. The SSA/ASS renderer can place
-    toptitles there (with ``--ass-use-margins``).
 
 --ass-use-margins
     Enables placing toptitles and subtitles in black borders when they are

@@ -44,6 +44,7 @@
 #include "core/m_struct.h"
 
 static const struct vf_priv_s {
+    int opt_top_margin, opt_bottom_margin;
     int outh, outw;
 
     unsigned int outfmt;
@@ -63,7 +64,8 @@ static int config(struct vf_instance *vf,
     if (outfmt == IMGFMT_IF09)
         return 0;
 
-    vf->priv->outh = height + opts->ass_top_margin + opts->ass_bottom_margin;
+    vf->priv->outh = height + vf->priv->opt_top_margin +
+                     vf->priv->opt_bottom_margin;
     vf->priv->outw = width;
 
     double dar = (double)d_width / d_height;
@@ -77,8 +79,8 @@ static int config(struct vf_instance *vf,
     vf->priv->dim = (struct mp_osd_res) {
         .w = vf->priv->outw,
         .h = vf->priv->outh,
-        .mt = opts->ass_top_margin,
-        .mb = opts->ass_bottom_margin,
+        .mt = vf->priv->opt_top_margin,
+        .mb = vf->priv->opt_bottom_margin,
         .display_par = sar / dar,
         .video_par = dar / sar,
     };
@@ -108,7 +110,7 @@ static void get_image(struct vf_instance *vf, mp_image_t *mpi)
         return;
     }
 
-    int tmargin = vf->opts->ass_top_margin;
+    int tmargin = vf->priv->opt_top_margin;
     // set up mpi as a cropped-down image of dmpi:
     if (mpi->flags & MP_IMGFLAG_PLANAR) {
         mpi->planes[0] = vf->dmpi->planes[0] +  tmargin * vf->dmpi->stride[0];
@@ -152,8 +154,7 @@ static void blank(mp_image_t *mpi, int y1, int y2)
 
 static int prepare_image(struct vf_instance *vf, mp_image_t *mpi)
 {
-    struct MPOpts *opts = vf->opts;
-    int tmargin = opts->ass_top_margin;
+    int tmargin = vf->priv->opt_top_margin;
     if (mpi->flags & MP_IMGFLAG_DIRECT
 	|| mpi->flags & MP_IMGFLAG_DRAW_CALLBACK) {
         vf->dmpi = mpi->priv;
@@ -165,8 +166,8 @@ static int prepare_image(struct vf_instance *vf, mp_image_t *mpi)
         // we've used DR, so we're ready...
         if (tmargin)
             blank(vf->dmpi, 0, tmargin);
-        if (opts->ass_bottom_margin)
-            blank(vf->dmpi, vf->priv->outh - opts->ass_bottom_margin,
+        if (vf->priv->opt_bottom_margin)
+            blank(vf->dmpi, vf->priv->outh - vf->priv->opt_bottom_margin,
                   vf->priv->outh);
         if (!(mpi->flags & MP_IMGFLAG_PLANAR))
             vf->dmpi->planes[1] = mpi->planes[1];             // passthrough rgb8 palette
@@ -209,8 +210,8 @@ static int prepare_image(struct vf_instance *vf, mp_image_t *mpi)
     }
     if (tmargin)
         blank(vf->dmpi, 0, tmargin);
-    if (opts->ass_bottom_margin)
-        blank(vf->dmpi, vf->priv->outh - opts->ass_bottom_margin,
+    if (vf->priv->opt_bottom_margin)
+        blank(vf->dmpi, vf->priv->outh - vf->priv->opt_bottom_margin,
               vf->priv->outh);
     return 0;
 }
@@ -289,6 +290,10 @@ static int vf_open(vf_instance_t *vf, char *args)
 
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s, f)
 static const m_option_t vf_opts_fields[] = {
+    {"bottom-margin", ST_OFF(opt_bottom_margin),
+     CONF_TYPE_INT, M_OPT_RANGE, 0, 2000},
+    {"top-margin", ST_OFF(opt_top_margin),
+     CONF_TYPE_INT, M_OPT_RANGE, 0, 2000},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 

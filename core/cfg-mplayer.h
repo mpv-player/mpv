@@ -512,8 +512,6 @@ const m_option_t common_opts[] = {
     OPT_MAKE_FLAGS("ass", ass_enabled, 0),
     OPT_FLOATRANGE("sub-scale", sub_scale, 0, 0, 100),
     OPT_FLOATRANGE("ass-line-spacing", ass_line_spacing, 0, -1000, 1000),
-    OPT_INTRANGE("ass-top-margin", ass_top_margin, 0, 0, 2000),
-    OPT_INTRANGE("ass-bottom-margin", ass_bottom_margin, 0, 0, 2000),
     OPT_MAKE_FLAGS("ass-use-margins", ass_use_margins, 0),
     OPT_MAKE_FLAGS("ass-vsfilter-aspect-compat", ass_vsfilter_aspect_compat, 0),
     OPT_MAKE_FLAGS("embeddedfonts", use_embedded_fonts, 0),

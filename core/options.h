@@ -119,8 +119,6 @@ typedef struct MPOpts {
     int sub_gray;
     int ass_enabled;
     float ass_line_spacing;
-    int ass_top_margin;
-    int ass_bottom_margin;
     int ass_use_margins;
     int ass_vsfilter_aspect_compat;
     int use_embedded_fonts;
