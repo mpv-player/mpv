@@ -239,10 +239,10 @@ static int lavf_check_file(demuxer_t *demuxer)
         goto success;
     }
 
-    // AVPROBE_SCORE_RETRY + 1 is the "recommended" limit. Below that, the user
+    // AVPROBE_SCORE_MAX/4 + 1 is the "recommended" limit. Below that, the user
     // is supposed to retry with larger probe sizes until a higher value is
     // reached.
-    int min_probe = AVPROBE_SCORE_RETRY + 1;
+    int min_probe = AVPROBE_SCORE_MAX/4 + 1;
     if (lavfdopts->probescore)
         min_probe = lavfdopts->probescore;
 

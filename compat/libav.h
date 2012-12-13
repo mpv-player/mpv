@@ -40,10 +40,6 @@
 #define avcodec_free_frame av_freep
 #endif
 
-#if LIBAVFORMAT_VERSION_MICRO < 100
-#define AVPROBE_SCORE_RETRY (AVPROBE_SCORE_MAX/4)
-#endif
-
 // For Libav 0.9
 #if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(54, 2, 100)
 #define AV_DISPOSITION_ATTACHED_PIC      0x0400
