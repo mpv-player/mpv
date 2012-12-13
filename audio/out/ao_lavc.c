@@ -219,22 +219,22 @@ out_takefirst:
     ac->planarize = false;
     {
         bool found_format = false;
-        bool found_alternate_format = false;
+        bool found_planar_format = false;
         for (sampleformat = codec->sample_fmts;
              sampleformat && *sampleformat != AV_SAMPLE_FMT_NONE;
              ++sampleformat) {
             if (*sampleformat == ac->stream->codec->sample_fmt)
                 found_format = true;
             if (*sampleformat ==
-                    av_get_alt_sample_fmt(ac->stream->codec->sample_fmt, 1))
-                found_alternate_format = true;
+                    av_get_planar_sample_fmt(ac->stream->codec->sample_fmt))
+                found_planar_format = true;
         }
-        if (!found_format && found_alternate_format) {
+        if (!found_format && found_planar_format) {
             ac->stream->codec->sample_fmt =
-                av_get_alt_sample_fmt(ac->stream->codec->sample_fmt, 1);
+                av_get_planar_sample_fmt(ac->stream->codec->sample_fmt);
             ac->planarize = true;
         }
-        if (!found_format && !found_alternate_format) {
+        if (!found_format && !found_planar_format) {
             // shouldn't happen
             mp_msg(MSGT_ENCODE, MSGL_ERR,
                    "ao-lavc: sample format not found\n");
