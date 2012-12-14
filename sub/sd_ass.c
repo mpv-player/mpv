@@ -185,12 +185,18 @@ const struct sd_functions sd_ass = {
     .uninit = uninit,
 };
 
+static int sd_ass_track_destructor(void *ptr)
+{
+    uninit(ptr);
+    return 1;
+}
 
 struct sh_sub *sd_ass_create_from_track(struct ass_track *track,
                                         bool vsfilter_aspect,
                                         struct MPOpts *opts)
 {
     struct sh_sub *sh = talloc(NULL, struct sh_sub);
+    talloc_set_destructor(sh, sd_ass_track_destructor);
     *sh = (struct sh_sub) {
         .opts = opts,
         .type = 'a',
