@@ -139,7 +139,7 @@ enum PixelFormat imgfmt2pixfmt(int fmt)
             break;
     pix_fmt = conversion_map[i].pix_fmt;
     if (pix_fmt == PIX_FMT_NONE)
-        mp_msg(MSGT_GLOBAL, MSGL_ERR, "Unsupported format %s\n", vo_format_name(fmt));
+        mp_msg(MSGT_GLOBAL, MSGL_V, "Unsupported format %s\n", vo_format_name(fmt));
     return pix_fmt;
 }
 
