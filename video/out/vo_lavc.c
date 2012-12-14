@@ -71,6 +71,7 @@ static int preinit(struct vo *vo, const char *arg)
     vc = vo->priv;
     vc->harddup = vo->encode_lavc_ctx->options->harddup;
     vc->colorspace = (struct mp_csp_details) MP_CSP_DETAILS_DEFAULTS;
+    vo->untimed = true;
     return 0;
 }
 

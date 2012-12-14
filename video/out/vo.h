@@ -228,6 +228,8 @@ struct vo {
     int config_count;  // Total number of successful config calls
     int default_caps; // query_format() result for configured video format
 
+    bool untimed;       // non-interactive, don't do sleep calls in playloop
+
     bool frame_loaded;  // Is there a next frame the VO could flip to?
     struct mp_image *waiting_mpi;
     double next_pts;    // pts value of the next frame if any

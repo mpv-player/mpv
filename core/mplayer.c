@@ -3321,7 +3321,7 @@ static void run_playloop(struct MPContext *mpctx)
              * If untimed is set always output frames immediately
              * without sleeping.
              */
-            if (mpctx->time_frame < -0.2 || opts->untimed)
+            if (mpctx->time_frame < -0.2 || opts->untimed || vo->untimed)
                 mpctx->time_frame = 0;
         }
 
@@ -3344,8 +3344,7 @@ static void run_playloop(struct MPContext *mpctx)
 
         mpctx->time_frame -= get_relative_time(mpctx);
         mpctx->time_frame -= vo->flip_queue_offset;
-        if (mpctx->time_frame > 0.001
-            && !(mpctx->sh_video->output_flags & VFCAP_TIMER))
+        if (mpctx->time_frame > 0.001)
             mpctx->time_frame = timing_sleep(mpctx, mpctx->time_frame);
         mpctx->time_frame += vo->flip_queue_offset;
 
@@ -4446,7 +4445,6 @@ int main(int argc, char *argv[])
         m_config_set_option0(mpctx->mconfig, "ao", "lavc");
         m_config_set_option0(mpctx->mconfig, "fixed-vo", "yes");
         m_config_set_option0(mpctx->mconfig, "gapless-audio", "yes");
-        m_config_set_option0(mpctx->mconfig, "untimed", "yes");
     }
 #endif
 

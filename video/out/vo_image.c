@@ -137,6 +137,7 @@ static void uninit(struct vo *vo)
 
 static int preinit(struct vo *vo, const char *arg)
 {
+    vo->untimed = true;
     return 0;
 }
 

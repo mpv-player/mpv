@@ -29,8 +29,6 @@
 // driver/filter can do vertical flip (upside-down)
 #define VFCAP_FLIP 0x80
 
-// driver/hardware handles timing (blocking)
-#define VFCAP_TIMER 0x100
 // filter does postprocessing (so you shouldn't scale/filter image before it)
 #define VFCAP_POSTPROC 0x800
 
