@@ -2881,10 +2881,11 @@ static int seek(MPContext *mpctx, struct seek_params seek,
     } else
         mpctx->last_seek_pts = MP_NOPTS_VALUE;
 
-    if (hr_seek) {
+    if (hr_seek || mpctx->timeline) {
         mpctx->hrseek_active = true;
         mpctx->hrseek_framedrop = true;
-        mpctx->hrseek_pts = seek.amount;
+        mpctx->hrseek_pts = hr_seek ? seek.amount
+                                 : mpctx->timeline[mpctx->timeline_part].start;
     }
 
     mpctx->start_timestamp = GetTimerMS();
