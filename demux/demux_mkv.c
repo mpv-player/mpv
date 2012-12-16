@@ -503,6 +503,14 @@ static void parse_trackaudio(struct demuxer *demuxer, struct mkv_track *track,
                "[mkv] |   + Output sampling frequency: %f\n", track->a_osfreq);
     } else
         track->a_osfreq = track->a_sfreq;
+    // Something creates files with osfreq incorrectly set
+    if (track->a_sfreq == 44100 && track->a_osfreq == 96000) {
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Audio track has codec frequency "
+               "%.1f and playback frequency %.1f.\n[mkv] This looks wrong. "
+               "Assuming this file is corrupt and ignoring the latter.\n",
+               track->a_sfreq, track->a_osfreq);
+        track->a_osfreq = track->a_sfreq;
+    }
     if (audio->n_bit_depth) {
         track->a_bps = audio->bit_depth;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Bit depth: %u\n",
