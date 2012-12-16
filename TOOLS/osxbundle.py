@@ -64,7 +64,13 @@ def run_install_name_tool(target_file, dylib_path, dest_dir, root=True):
 def cp_dylibs(target_file, dest_dir):
     for dylib_path in user_dylib_lst(target_file):
         dylib_dest_path = os.path.join(dest_dir, os.path.basename(dylib_path))
-        shutil.copy(dylib_path, dylib_dest_path)
+
+        try:
+            shutil.copy(dylib_path, dylib_dest_path)
+        except IOError:
+            sys.exit("%s uses library %s which is not available anymore" % \
+                     (target_file, dylib_path) )
+
         os.chmod(dylib_dest_path, 0o755)
         cp_dylibs(dylib_dest_path, dest_dir)
 
