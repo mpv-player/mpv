@@ -87,8 +87,7 @@ static void uninit(struct vo *vo)
 
     if (vc->lastimg) {
         // palette hack
-        if (vc->lastimg->imgfmt == IMGFMT_RGB8
-                || vc->lastimg->imgfmt == IMGFMT_BGR8)
+        if (vc->lastimg->imgfmt == IMGFMT_PAL8)
             vc->lastimg->planes[1] = NULL;
         free_mp_image(vc->lastimg);
         vc->lastimg = NULL;
@@ -175,9 +174,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     vc->lastimg = alloc_mpi(width, height, format);
 
     // palette hack
-    if (vc->lastimg->imgfmt == IMGFMT_RGB8 ||
-            vc->lastimg->imgfmt == IMGFMT_BGR8)
-        vc->lastimg->planes[1] = talloc_zero_size(vc, 1024);
+    if (vc->lastimg->imgfmt == IMGFMT_PAL8)
+        vc->lastimg->planes[1] = talloc_zero_size(vc, MP_PALETTE_SIZE);
 
     return 0;
 
@@ -461,9 +459,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
             vc->lastimg_wants_osd = true;
 
             // palette hack
-            if (vc->lastimg->imgfmt == IMGFMT_RGB8 ||
-                    vc->lastimg->imgfmt == IMGFMT_BGR8)
-                memcpy(vc->lastimg->planes[1], mpi->planes[1], 1024);
+            if (vc->lastimg->imgfmt == IMGFMT_PAL8)
+                memcpy(vc->lastimg->planes[1], mpi->planes[1], MP_PALETTE_SIZE);
 
             vc->lastframeipts = vc->lastipts = frameipts;
             if (ectx->options->rawts && vc->lastipts < 0) {

@@ -639,14 +639,6 @@ static void release_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
         pic->data[i] = NULL;
 }
 
-static av_unused void swap_palette(void *pal)
-{
-    int i;
-    uint32_t *p = pal;
-    for (i = 0; i < AVPALETTE_COUNT; i++)
-        p[i] = le2me_32(p[i]);
-}
-
 static void fb_ref(void *b)
 {
     mp_buffer_ref(b);
@@ -739,12 +731,6 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
     assert(mpi->planes[0]);
 
     assert(mpi->imgfmt == pixfmt2imgfmt(avctx->pix_fmt));
-
-#if BYTE_ORDER == BIG_ENDIAN
-    // FIXME: this might cause problems for buffers with FF_BUFFER_HINTS_PRESERVE
-    if (mpi->bpp == 8)
-        swap_palette(mpi->planes[1]);
-#endif
 
     mpi->colorspace = sh->colorspace;
     mpi->levels = sh->color_range;

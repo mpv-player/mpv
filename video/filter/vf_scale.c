@@ -47,7 +47,6 @@ static struct vf_priv_s {
     double param[2];
     unsigned int fmt;
     struct SwsContext *ctx;
-    unsigned char* palette;
     int interlaced;
     int noup;
     int accurate_rnd;
@@ -57,9 +56,6 @@ static struct vf_priv_s {
   -1,-1,
   0,
   {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
-  0,
-  NULL,
-  NULL
 };
 
 static int mp_sws_set_colorspace(struct SwsContext *sws,
@@ -162,6 +158,7 @@ static int preferred_conversions[][2] = {
     {IMGFMT_GBRP, IMGFMT_RGB24},
     {IMGFMT_GBRP, IMGFMT_BGR32},
     {IMGFMT_GBRP, IMGFMT_RGB32},
+    {IMGFMT_PAL8, IMGFMT_BGR32},
     {0, 0}
 };
 
@@ -210,7 +207,6 @@ static int config(struct vf_instance *vf,
     unsigned int best=find_best_out(vf, outfmt);
     int int_sws_flags=0;
     int round_w=0, round_h=0;
-    int i;
     SwsFilter *srcFilter, *dstFilter;
     enum PixelFormat dfmt, sfmt;
 
@@ -221,7 +217,6 @@ static int config(struct vf_instance *vf,
 	return 0;
     }
     sfmt = imgfmt2pixfmt(outfmt);
-    if (outfmt == IMGFMT_RGB8 || outfmt == IMGFMT_BGR8) sfmt = PIX_FMT_PAL8;
     dfmt = imgfmt2pixfmt(best);
 
     vf->next->query_format(vf->next,best);
@@ -315,51 +310,6 @@ static int config(struct vf_instance *vf,
 	return 0;
     }
     vf->priv->fmt=best;
-
-    free(vf->priv->palette);
-    vf->priv->palette=NULL;
-    switch(best){
-    case IMGFMT_RGB8: {
-      /* set 332 palette for 8 bpp */
-	vf->priv->palette=malloc(4*256);
-	for(i=0; i<256; i++){
-	    vf->priv->palette[4*i+0]=4*(i>>6)*21;
-	    vf->priv->palette[4*i+1]=4*((i>>3)&7)*9;
-	    vf->priv->palette[4*i+2]=4*((i&7)&7)*9;
-            vf->priv->palette[4*i+3]=0;
-	}
-	break; }
-    case IMGFMT_BGR8: {
-      /* set 332 palette for 8 bpp */
-	vf->priv->palette=malloc(4*256);
-	for(i=0; i<256; i++){
-	    vf->priv->palette[4*i+0]=4*(i&3)*21;
-	    vf->priv->palette[4*i+1]=4*((i>>2)&7)*9;
-	    vf->priv->palette[4*i+2]=4*((i>>5)&7)*9;
-            vf->priv->palette[4*i+3]=0;
-	}
-	break; }
-    case IMGFMT_BGR4:
-    case IMGFMT_BG4B: {
-	vf->priv->palette=malloc(4*16);
-	for(i=0; i<16; i++){
-	    vf->priv->palette[4*i+0]=4*(i&1)*63;
-	    vf->priv->palette[4*i+1]=4*((i>>1)&3)*21;
-	    vf->priv->palette[4*i+2]=4*((i>>3)&1)*63;
-            vf->priv->palette[4*i+3]=0;
-	}
-	break; }
-    case IMGFMT_RGB4:
-    case IMGFMT_RG4B: {
-	vf->priv->palette=malloc(4*16);
-	for(i=0; i<16; i++){
-	    vf->priv->palette[4*i+0]=4*(i>>3)*63;
-	    vf->priv->palette[4*i+1]=4*((i>>1)&3)*21;
-	    vf->priv->palette[4*i+2]=4*((i&1)&1)*63;
-            vf->priv->palette[4*i+3]=0;
-	}
-	break; }
-    }
 
     if (!opts->screen_size_x && !opts->screen_size_y
         && !(opts->screen_size_xy >= 0.001)) {
@@ -566,7 +516,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
 
 static void uninit(struct vf_instance *vf){
     if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
-    free(vf->priv->palette);
     free(vf->priv);
 }
 

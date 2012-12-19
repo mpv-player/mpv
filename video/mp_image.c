@@ -105,7 +105,7 @@ static void mp_image_alloc_planes(struct mp_image *mpi)
         mpi->stride[n] = FFALIGN(line_bytes, SWS_MIN_BYTE_ALIGN);
         plane_size[n] = mpi->stride[n] * mpi->plane_h[n];
     }
-    if (mpi->flags & MP_IMGFLAG_RGB_PALETTE)
+    if (mpi->imgfmt == IMGFMT_PAL8)
         plane_size[1] = MP_PALETTE_SIZE;
 
     size_t sum = 0;
@@ -184,8 +184,6 @@ struct mp_image *mp_image_alloc(unsigned int imgfmt, int w, int h)
     mpi->refcount = m_refcount_new();
     mpi->refcount->free = av_free;
     mpi->refcount->arg = mpi->planes[0];
-    // NOTE: palette isn't free'd. Palette handling should be fixed instead.
-
     return mpi;
 }
 
@@ -318,6 +316,8 @@ void mp_image_copy(struct mp_image *dst, struct mp_image *src)
         memcpy_pic(dst->planes[n], src->planes[n], line_bytes, dst->plane_h[n],
                    dst->stride[n], src->stride[n]);
     }
+    if (dst->imgfmt == IMGFMT_PAL8)
+        memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
 }
 
 enum mp_csp mp_image_csp(struct mp_image *img)

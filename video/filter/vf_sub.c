@@ -144,7 +144,6 @@ static void prepare_image(struct vf_instance *vf, struct mp_image *dmpi,
 		   mpi->h,
                    dmpi->stride[0],
 		   mpi->stride[0]);
-        dmpi->planes[1] = mpi->planes[1];   // passthrough rgb8 palette
     }
     if (tmargin)
         blank(dmpi, 0, tmargin);

@@ -33,8 +33,6 @@
 #define MP_IMGFLAG_YUV 0x200
 // set if it's swapped (BGR or YVU) plane/byteorder
 #define MP_IMGFLAG_SWAPPED 0x400
-// set if you want memory for palette allocated and managed by vf_get_image etc.
-#define MP_IMGFLAG_RGB_PALETTE 0x800
 // set if the format is standard YUV format:
 // - planar and yuv colorspace
 // - chroma shift 0-2
@@ -135,7 +133,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(unsigned int out_fmt);
 #define IMGFMT_RG4B  IMGFMT_RGB4_CHAR
 #define IMGFMT_BG4B  IMGFMT_BGR4_CHAR
 
-
 // AV_PIX_FMT_BGR0
 #define IMGFMT_BGR0  0x1DC70000
 
@@ -159,6 +156,8 @@ static inline bool IMGFMT_IS_BGR(unsigned int fmt)
 #define IMGFMT_Y16LE 0x1DC70001
 // AV_PIX_FMT_GRAY16BE
 #define IMGFMT_Y16BE 0x1DC70002
+// AV_PIX_FMT_PAL8
+#define IMGFMT_PAL8  0x1DC70003
 
 #if BYTE_ORDER == BIG_ENDIAN
 #define IMGFMT_Y16 IMGFMT_Y16BE

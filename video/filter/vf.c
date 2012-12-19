@@ -380,6 +380,9 @@ void vf_clone_mpi_attributes(mp_image_t *dst, mp_image_t *src)
         dst->colorspace = src->colorspace;
         dst->levels = src->levels;
     }
+    if (dst->imgfmt == IMGFMT_PAL8 && src->imgfmt == IMGFMT_PAL8) {
+        memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
+    }
 }
 
 // Used by filters to add a filtered frame to the output queue.

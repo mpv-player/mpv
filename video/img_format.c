@@ -113,6 +113,7 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     {"rgb15", IMGFMT_RGB15},
     {"rgb12", IMGFMT_RGB12},
     {"rgb8", IMGFMT_RGB8},
+    {"pal8", IMGFMT_PAL8},
     {"rgb4", IMGFMT_RGB4},
     {"rg4b", IMGFMT_RG4B},
     {"rgb1", IMGFMT_RGB1},

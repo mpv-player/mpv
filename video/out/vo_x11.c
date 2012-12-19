@@ -526,8 +526,8 @@ static int query_format(struct vo *vo, uint32_t format)
            "vo_x11: query_format was called: %x (%s)\n", format,
            vo_format_name(format));
     if (IMGFMT_IS_BGR(format)) {
-        if (IMGFMT_BGR_DEPTH(format) <= 8)
-            return 0;           // TODO 8bpp not yet fully implemented
+        if (IMGFMT_BGR_DEPTH(format) < 8)
+            return 0;
         if (IMGFMT_BGR_DEPTH(format) == vo->x11->depthonscreen)
             return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
                    VFCAP_OSD | VFCAP_FLIP;

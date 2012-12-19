@@ -240,7 +240,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
     if (IMGFMT_IS_HWACCEL(fmt))
         return 0;  // these can't really be filtered
-    if (fmt == IMGFMT_RGB8 || fmt == IMGFMT_BGR8)
+    if (fmt == IMGFMT_PAL8)
         return 0;  // we don't have palette support, sorry
     const char *fmtname = mp_imgfmt_to_name(fmt);
     if (!fmtname)

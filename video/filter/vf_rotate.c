@@ -99,7 +99,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 	rotate(dmpi->planes[0],mpi->planes[0],
 	       dmpi->stride[0],mpi->stride[0],
 	       dmpi->w,dmpi->h,dmpi->bpp>>3,vf->priv->direction);
-	dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
     }
 
     talloc_free(mpi);
