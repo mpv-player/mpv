@@ -666,6 +666,9 @@ int vo_w32_init(struct vo *vo)
     if (WinID >= 0)
         EnableWindow(w32->window, 0);
 
+    // we don't have proper event handling
+    vo->wakeup_period = 0.02;
+
     updateScreenProperties(vo);
 
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n",

@@ -241,6 +241,7 @@ struct vo {
     bool want_redraw;   // visible frame wrong (window resize), needs refresh
     bool redrawing;     // between redrawing frame and flipping it
     bool hasframe;      // >= 1 frame has been drawn, so redraw is possible
+    double wakeup_period; // if > 0, this sets the maximum wakeup period for event polling
 
     double flip_queue_offset; // queue flip events at most this much in advance
 

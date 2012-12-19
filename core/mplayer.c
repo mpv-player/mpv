@@ -36,17 +36,8 @@
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
 #include <windows.h>
-// No proper file descriptor event handling; keep waking up to poll input
-#define WAKEUP_PERIOD 0.02
-#else
-/* Even if we can immediately wake up in response to most input events,
- * there are some timers which are not registered to the event loop
- * and need to be checked periodically (like automatic mouse cursor hiding).
- * OSD content updates behave similarly. Also some uncommon input devices
- * may not have proper FD event support.
- */
-#define WAKEUP_PERIOD 0.5
 #endif
+#define WAKEUP_PERIOD 0.5
 #include <string.h>
 #include <unistd.h>
 
@@ -3140,6 +3131,28 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     }
 }
 
+static double get_wakeup_period(struct MPContext *mpctx)
+{
+    /* Even if we can immediately wake up in response to most input events,
+     * there are some timers which are not registered to the event loop
+     * and need to be checked periodically (like automatic mouse cursor hiding).
+     * OSD content updates behave similarly. Also some uncommon input devices
+     * may not have proper FD event support.
+     */
+    double sleeptime = WAKEUP_PERIOD;
+
+#ifndef HAVE_POSIX_SELECT
+    // No proper file descriptor event handling; keep waking up to poll input
+    sleeptime = FFMIN(sleeptime, 0.02);
+#endif
+
+    if (mpctx->video_out)
+        if (mpctx->video_out->wakeup_period > 0)
+            sleeptime = FFMIN(sleeptime, mpctx->video_out->wakeup_period);
+
+    return sleeptime;
+}
+
 static void run_playloop(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -3147,7 +3160,7 @@ static void run_playloop(struct MPContext *mpctx)
     bool audio_left = false, video_left = false;
     double endpts = get_play_end_pts(mpctx);
     bool end_is_chapter = false;
-    double sleeptime = WAKEUP_PERIOD;
+    double sleeptime = get_wakeup_period(mpctx);
     bool was_restart = mpctx->restart_playback;
 
 #ifdef CONFIG_ENCODING
@@ -3808,7 +3821,8 @@ static void idle_loop(struct MPContext *mpctx)
     {
         uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_VO);
         mp_cmd_t *cmd;
-        while (!(cmd = mp_input_get_cmd(mpctx->input, WAKEUP_PERIOD * 1000,
+        while (!(cmd = mp_input_get_cmd(mpctx->input,
+                                        get_wakeup_period(mpctx) * 1000,
                                         false)));
         run_command(mpctx, cmd);
         mp_cmd_free(cmd);
