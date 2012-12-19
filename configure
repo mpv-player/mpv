@@ -174,7 +174,7 @@ pkg_config_add() {
   echo "libs: $ltmp" >> "$TMPLOG"
   echo >> "$TMPLOG"
   extra_cflags="$extra_cflags $ctmp"
-  extra_ldflags="$extra_ldflags $ltmp"
+  libs_mplayer="$libs_mplayer $ltmp"
 }
 
 tmp_run() {
@@ -891,7 +891,7 @@ if win32 ; then
   _exesuf=".exe"
   extra_cflags="$extra_cflags -fno-common -DWINVER=0x0500"
   # -lwinmm is always needed for osdep/timer-win2.c
-  extra_ldflags="$extra_ldflags -lwinmm"
+  libs_mplayer="$libs_mplayer -lwinmm"
   _pe_executable=yes
   _timer=timer-win2.c
   _priority=yes
@@ -1371,7 +1371,7 @@ test $_winsock2_h = no && test $inet_pton = no &&
 if test "$networking" = yes ; then
   def_network='#define CONFIG_NETWORK 1'
   def_networking='#define CONFIG_NETWORKING 1'
-  extra_ldflags="$extra_ldflags $_ld_sock"
+  libs_mplayer="$libs_mplayer $_ld_sock"
   inputmodules="networking $inputmodules"
 else
   noinputmodules="networking $noinputmodules"
@@ -1555,7 +1555,7 @@ int main(void) {
 EOF
   _iconv=no
   for _ld_tmp in "" "-liconv" "-liconv $_ld_dl" ; do
-    cc_check $_ld_lm $_ld_tmp && extra_ldflags="$extra_ldflags $_ld_tmp" &&
+    cc_check $_ld_lm $_ld_tmp && libs_mplayer="$libs_mplayer $_ld_tmp" &&
       _iconv=yes && break
   done
   if test "$_iconv" != yes ; then
@@ -1602,7 +1602,7 @@ if test "$_termcap" = auto ; then
   _termcap=no
   for _ld_tmp in "-lncurses" "-ltinfo" "-ltermcap"; do
     statement_check term.h 'tgetent(0, 0)' $_ld_tmp &&
-      extra_ldflags="$extra_ldflags $_ld_tmp" && _termcap=yes && break
+      libs_mplayer="$libs_mplayer $_ld_tmp" && _termcap=yes && break
   done
 fi
 if test "$_termcap" = yes ; then
@@ -1761,7 +1761,7 @@ echocheck "Mac OS X Finder Support"
 def_macosx_finder='#undef CONFIG_MACOSX_FINDER'
 if test "$_macosx_finder" = yes ; then
   def_macosx_finder='#define CONFIG_MACOSX_FINDER 1'
-  extra_ldflags="$extra_ldflags -framework Cocoa"
+  libs_mplayer="$libs_mplayer -framework Cocoa"
 fi
 echores "$_macosx_finder"
 
@@ -1841,13 +1841,13 @@ fi
 
 echocheck "Samba support (libsmbclient)"
 if test "$_smb" = yes; then
-  extra_ldflags="$extra_ldflags -lsmbclient"
+  libs_mplayer="$libs_mplayer -lsmbclient"
 fi
 if test "$_smb" = auto; then
   _smb=no
   for _ld_tmp in "-lsmbclient" "-lsmbclient $_ld_dl" "-lsmbclient $_ld_dl -lnsl" "-lsmbclient $_ld_dl -lssl -lnsl" ; do
     statement_check libsmbclient.h 'smbc_opendir("smb://")' $_ld_tmp &&
-      extra_ldflags="$extra_ldflags $_ld_tmp" && _smb=yes && break
+      libs_mplayer="$libs_mplayer $_ld_tmp" && _smb=yes && break
   done
 fi
 
@@ -2184,7 +2184,7 @@ fi
 echores "$_mng"
 if test "$_mng" = yes ; then
   def_mng='#define CONFIG_MNG 1'
-  extra_ldflags="$extra_ldflags -lmng -lz"
+  libs_mplayer="$libs_mplayer -lmng -lz"
 else
   def_mng='#undef CONFIG_MNG'
 fi
@@ -2198,7 +2198,7 @@ echores "$_jpeg"
 
 if test "$_jpeg" = yes ; then
   def_jpeg='#define CONFIG_JPEG 1'
-  extra_ldflags="$extra_ldflags -ljpeg"
+  libs_mplayer="$libs_mplayer -ljpeg"
 else
   def_jpeg='#undef CONFIG_JPEG'
 fi
@@ -2355,7 +2355,7 @@ EOF
      fi
    elif netbsd || openbsd ; then
      def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound"'
-     extra_ldflags="$extra_ldflags -lossaudio"
+     libs_mplayer="$libs_mplayer -lossaudio"
    else
      def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
    fi
@@ -2640,7 +2640,7 @@ if test "$_enca" = auto ; then
 fi
     if test "$_enca" = yes ; then
         def_enca='#define CONFIG_ENCA 1'
-        extra_ldflags="$extra_ldflags -lenca"
+        libs_mplayer="$libs_mplayer -lenca"
     else
         def_enca='#undef CONFIG_ENCA'
     fi
@@ -2652,7 +2652,7 @@ _zlib=no
 statement_check zlib.h 'inflate(0, Z_NO_FLUSH)' -lz && _zlib=yes
 if test "$_zlib" = yes ; then
   def_zlib='#define CONFIG_ZLIB 1'
-  extra_ldflags="$extra_ldflags -lz"
+  libs_mplayer="$libs_mplayer -lz"
 else
   def_zlib='#define CONFIG_ZLIB 0'
 fi
@@ -3002,7 +3002,7 @@ fi
 if test "$_vstream" = yes ; then
   def_vstream='#define CONFIG_VSTREAM 1'
   inputmodules="vstream $inputmodules"
-  extra_ldflags="$extra_ldflags -lvstream-client"
+  libs_mplayer="$libs_mplayer -lvstream-client"
 else
   noinputmodules="vstream $noinputmodules"
   def_vstream='#undef CONFIG_VSTREAM'
@@ -3038,8 +3038,9 @@ else
 fi
 
 
-extra_ldflags="$extra_ldflags $_ld_pthread $_ld_dl"
-(netbsd || openbsd) && x86_32 && extra_ldflags="$extra_ldflags -li386"
+extra_ldflags="$extra_ldflags $_ld_pthread"
+libs_mplayer="$libs_mplayer $_ld_dl"
+(netbsd || openbsd) && x86_32 && libs_mplayer="$libs_mplayer -li386"
 
 
 echocheck "joystick"
