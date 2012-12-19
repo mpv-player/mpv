@@ -47,7 +47,6 @@
 #include "vo.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"
-#include "video/filter/vf.h"
 #include "x11_common.h"
 #include "video/memcpy_pic.h"
 #include "sub/sub.h"
@@ -267,7 +266,7 @@ static void allocate_xvimage(struct vo *vo, int foo)
         XSync(x11->display, False);
     }
     struct mp_image img = get_xv_buffer(vo, foo);
-    vf_mpi_clear(&img, 0, 0, img.w, img.h);
+    mp_image_clear(&img, 0, 0, img.w, img.h);
     return;
 }
 
@@ -394,9 +393,7 @@ static mp_image_t *get_screenshot(struct vo *vo)
     struct xvctx *ctx = vo->priv;
 
     struct mp_image img = get_xv_buffer(vo, ctx->visible_buf);
-    struct mp_image *res = alloc_mpi(img.w, img.h, img.imgfmt);
-    copy_mpi(res, &img);
-    vf_clone_mpi_attributes(res, &img);
+    struct mp_image *res = mp_image_new_copy(&img);
     mp_image_set_display_size(res, vo->aspdat.prew, vo->aspdat.preh);
     // try to get an image without OSD
     mp_draw_sub_backup_restore(ctx->osd_backup, res);

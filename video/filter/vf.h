@@ -102,8 +102,6 @@ typedef struct vf_seteq {
 #define VFCTRL_SET_YUV_COLORSPACE 22 // arg is struct mp_csp_details*
 #define VFCTRL_GET_YUV_COLORSPACE 23 // arg is struct mp_csp_details*
 
-// functions:
-void vf_mpi_clear(mp_image_t *mpi, int x0, int y0, int w, int h);
 
 struct mp_image *vf_alloc_out_image(struct vf_instance *vf);
 void vf_make_out_image_writeable(struct vf_instance *vf, struct mp_image *img);
@@ -124,7 +122,6 @@ vf_instance_t *vf_add_before_vo(vf_instance_t **vf, char *name, char **args);
 
 unsigned int vf_match_csp(vf_instance_t **vfp, const unsigned int *list,
                           unsigned int preferred);
-void vf_clone_mpi_attributes(mp_image_t *dst, mp_image_t *src);
 
 // default wrappers:
 int vf_next_config(struct vf_instance *vf,

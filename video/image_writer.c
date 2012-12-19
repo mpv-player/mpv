@@ -39,9 +39,7 @@
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/fmt-conversion.h"
-
 #include "video/sws_utils.h"
-#include "video/filter/vf.h"
 
 #include "core/m_option.h"
 
@@ -288,7 +286,7 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
     //         - color levels broken in various ways thanks to libswscale
     if (image->imgfmt != destfmt || is_anamorphic) {
         struct mp_image *dst = alloc_mpi(d_w, d_h, destfmt);
-        vf_clone_mpi_attributes(dst, image);
+        mp_image_copy_attributes(dst, image);
 
         int flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP |
                     SWS_ACCURATE_RND | SWS_BITEXACT;

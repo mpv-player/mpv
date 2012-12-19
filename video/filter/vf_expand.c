@@ -129,15 +129,15 @@ static void clear_borders(struct vf_instance *vf, struct mp_image *dmpi,
                           int w, int h)
 {
     // upper border (over the full width)
-    vf_mpi_clear(dmpi, 0, 0, vf->priv->exp_w, vf->priv->exp_y);
+    mp_image_clear(dmpi, 0, 0, vf->priv->exp_w, vf->priv->exp_y);
     // lower border
-    vf_mpi_clear(dmpi, 0, vf->priv->exp_y + h, vf->priv->exp_w,
-                 vf->priv->exp_h - (vf->priv->exp_y + h));
+    mp_image_clear(dmpi, 0, vf->priv->exp_y + h, vf->priv->exp_w,
+                   vf->priv->exp_h - (vf->priv->exp_y + h));
     // left
-    vf_mpi_clear(dmpi, 0, vf->priv->exp_y, vf->priv->exp_x, h);
+    mp_image_clear(dmpi, 0, vf->priv->exp_y, vf->priv->exp_x, h);
     // right
-    vf_mpi_clear(dmpi, vf->priv->exp_x + w, vf->priv->exp_y,
-                 vf->priv->exp_w - (vf->priv->exp_x + w), h);
+    mp_image_clear(dmpi, vf->priv->exp_x + w, vf->priv->exp_y,
+                   vf->priv->exp_w - (vf->priv->exp_x + w), h);
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)

@@ -118,58 +118,6 @@ const m_obj_list_t vf_obj_list = {
     M_ST_OFF(vf_info_t, opts)
 };
 
-//============================================================================
-// mpi stuff:
-
-void vf_mpi_clear(mp_image_t *mpi, int x0, int y0, int w, int h)
-{
-    int y;
-    if (mpi->flags & MP_IMGFLAG_PLANAR) {
-        y0 &= ~1;
-        h += h & 1;
-        for (y = y0; y < y0 + h; y += 2) {
-            memset(mpi->planes[0] + x0 + mpi->stride[0] * y, 0, w);
-            memset(mpi->planes[0] + x0 + mpi->stride[0] * (y + 1), 0, w);
-            memset(mpi->planes[1] + (x0 >> mpi->chroma_x_shift) +
-                    mpi->stride[1] * (y >> mpi->chroma_y_shift),
-                    128, (w >> mpi->chroma_x_shift));
-            memset(mpi->planes[2] + (x0 >> mpi->chroma_x_shift) +
-                    mpi->stride[2] * (y >> mpi->chroma_y_shift),
-                    128, (w >> mpi->chroma_x_shift));
-        }
-        return;
-    }
-    // packed:
-    for (y = y0; y < y0 + h; y++) {
-        unsigned char *dst = mpi->planes[0] + mpi->stride[0] * y +
-                             (mpi->bpp >> 3) * x0;
-        if (mpi->flags & MP_IMGFLAG_YUV) {
-            unsigned int *p = (unsigned int *) dst;
-            int size = (mpi->bpp >> 3) * w / 4;
-            int i;
-#ifdef BIG_ENDIAN
-#define CLEAR_PACKEDYUV_PATTERN 0x00800080
-#define CLEAR_PACKEDYUV_PATTERN_SWAPPED 0x80008000
-#else
-#define CLEAR_PACKEDYUV_PATTERN 0x80008000
-#define CLEAR_PACKEDYUV_PATTERN_SWAPPED 0x00800080
-#endif
-            if (mpi->flags & MP_IMGFLAG_SWAPPED) {
-                for (i = 0; i < size - 3; i += 4)
-                    p[i] = p[i + 1] = p[i + 2] = p[i + 3] = CLEAR_PACKEDYUV_PATTERN_SWAPPED;
-                for (; i < size; i++)
-                    p[i] = CLEAR_PACKEDYUV_PATTERN_SWAPPED;
-            } else {
-                for (i = 0; i < size - 3; i += 4)
-                    p[i] = p[i + 1] = p[i + 2] = p[i + 3] = CLEAR_PACKEDYUV_PATTERN;
-                for (; i < size; i++)
-                    p[i] = CLEAR_PACKEDYUV_PATTERN;
-            }
-        } else
-            memset(dst, 0, (mpi->bpp >> 3) * w);
-    }
-}
-
 // Get a new image for filter output, with size and pixel format according to
 // the last vf_config call.
 struct mp_image *vf_alloc_out_image(struct vf_instance *vf)
@@ -362,27 +310,6 @@ unsigned int vf_match_csp(vf_instance_t **vfp, const unsigned int *list,
     if (best)
         *vfp = vf;    // else uninit vf  !FIXME!
     return best;
-}
-
-void vf_clone_mpi_attributes(mp_image_t *dst, mp_image_t *src)
-{
-    dst->pict_type = src->pict_type;
-    dst->fields = src->fields;
-    dst->qscale_type = src->qscale_type;
-    dst->pts = src->pts;
-    if (dst->w == src->w && dst->h == src->h) {
-        dst->qstride = src->qstride;
-        dst->qscale = src->qscale;
-        dst->display_w = src->display_w;
-        dst->display_h = src->display_h;
-    }
-    if ((dst->flags & MP_IMGFLAG_YUV) == (src->flags & MP_IMGFLAG_YUV)) {
-        dst->colorspace = src->colorspace;
-        dst->levels = src->levels;
-    }
-    if (dst->imgfmt == IMGFMT_PAL8 && src->imgfmt == IMGFMT_PAL8) {
-        memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
-    }
 }
 
 // Used by filters to add a filtered frame to the output queue.

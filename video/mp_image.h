@@ -97,6 +97,7 @@ typedef struct mp_image {
 #define copy_mpi mp_image_copy
 
 struct mp_image *mp_image_alloc(unsigned int fmt, int w, int h);
+void mp_image_clear(struct mp_image *mpi, int x0, int y0, int w, int h);
 void mp_image_copy(struct mp_image *dmpi, struct mp_image *mpi);
 void mp_image_copy_attributes(struct mp_image *dmpi, struct mp_image *mpi);
 struct mp_image *mp_image_new_copy(struct mp_image *img);
