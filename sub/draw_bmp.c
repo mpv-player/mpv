@@ -213,23 +213,23 @@ static void unpremultiply_and_split_BGR32(struct mp_image *img,
 static void scale_sb_rgba(struct sub_bitmap *sb, struct mp_image *dst_format,
                           struct mp_image **out_sbi, struct mp_image **out_sba)
 {
-    struct mp_image *sbisrc = new_mp_image(sb->w, sb->h);
-    mp_image_setfmt(sbisrc, IMGFMT_BGR32);
-    sbisrc->planes[0] = sb->bitmap;
-    sbisrc->stride[0] = sb->stride;
-    struct mp_image *sbisrc2 = alloc_mpi(sb->dw, sb->dh, IMGFMT_BGR32);
-    mp_image_swscale(sbisrc2, sbisrc, SWS_BILINEAR);
+    struct mp_image sbisrc = {0};
+    mp_image_setfmt(&sbisrc, IMGFMT_BGR32);
+    mp_image_set_size(&sbisrc, sb->w, sb->h);
+    sbisrc.planes[0] = sb->bitmap;
+    sbisrc.stride[0] = sb->stride;
+    struct mp_image *sbisrc2 = mp_image_alloc(IMGFMT_BGR32, sb->dw, sb->dh);
+    mp_image_swscale(sbisrc2, &sbisrc, SWS_BILINEAR);
 
-    struct mp_image *sba = alloc_mpi(sb->dw, sb->dh, IMGFMT_Y8);
+    struct mp_image *sba = mp_image_alloc(IMGFMT_Y8, sb->dw, sb->dh);
     unpremultiply_and_split_BGR32(sbisrc2, sba);
 
-    struct mp_image *sbi = alloc_mpi(sb->dw, sb->dh, dst_format->imgfmt);
+    struct mp_image *sbi = mp_image_alloc(dst_format->imgfmt, sb->dw, sb->dh);
     sbi->colorspace = dst_format->colorspace;
     sbi->levels = dst_format->levels;
     mp_image_swscale(sbi, sbisrc2, SWS_BILINEAR);
 
-    free_mp_image(sbisrc);
-    free_mp_image(sbisrc2);
+    talloc_free(sbisrc2);
 
     *out_sbi = sbi;
     *out_sba = sba;
@@ -328,10 +328,9 @@ static void draw_ass(struct mp_draw_sub_cache **cache, struct mp_rect bb,
 static void mp_image_crop(struct mp_image *img, struct mp_rect rc)
 {
     for (int p = 0; p < img->num_planes; ++p) {
-        int bits = MP_IMAGE_BITS_PER_PIXEL_ON_PLANE(img, p);
         img->planes[p] +=
-            (rc.y0 >> (p ? img->chroma_y_shift : 0)) * img->stride[p] +
-            (rc.x0 >> (p ? img->chroma_x_shift : 0)) * bits / 8;
+            (rc.y0 >> img->fmt.ys[p]) * img->stride[p] +
+            (rc.x0 >> img->fmt.xs[p]) * img->fmt.bpp[p] / 8;
     }
     mp_image_set_size(img, rc.x1 - rc.x0, rc.y1 - rc.y0);
 }
@@ -359,7 +358,7 @@ static void get_swscale_alignment(const struct mp_image *img, int *out_xstep,
     }
 
     for (int p = 0; p < img->num_planes; ++p) {
-        int bits = MP_IMAGE_BITS_PER_PIXEL_ON_PLANE(img, p);
+        int bits = img->fmt.bpp[p];
         // the * 2 fixes problems with writing past the destination width
         while (((sx >> img->chroma_x_shift) * bits) % (SWS_MIN_BYTE_ALIGN * 8 * 2))
             sx *= 2;
@@ -594,7 +593,7 @@ static void backup_realloc(struct mp_draw_sub_backup *backup,
 static void copy_line(struct mp_image *dst, struct mp_image *src,
                       int p, int plane_y, int x0, int x1)
 {
-    int bits = MP_IMAGE_BITS_PER_PIXEL_ON_PLANE(dst, p);
+    int bits = dst->fmt.bpp[p];
     int xs = p ? dst->chroma_x_shift : 0;
     memcpy(dst->planes[p] + plane_y * dst->stride[p] + (x0 >> xs) * bits / 8,
            src->planes[p] + plane_y * src->stride[p] + (x0 >> xs) * bits / 8,

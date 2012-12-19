@@ -95,65 +95,31 @@ static bool m_refcount_is_unique(struct m_refcount *ref)
     return true;
 }
 
-
-void mp_image_alloc_planes(mp_image_t *mpi) {
-  assert(!mpi->refcount);
-  // IF09 - allocate space for 4. plane delta info - unused
-  if (mpi->imgfmt == IMGFMT_IF09) {
-    mpi->planes[0]=av_malloc(mpi->bpp*mpi->w*(mpi->h+2)/8+
-                            mpi->chroma_width*mpi->chroma_height);
-  } else
-    mpi->planes[0]=av_malloc(mpi->bpp*mpi->w*(mpi->h+2)/8);
-  if (!mpi->planes[0])
-    abort(); //out of memory
-  if (mpi->flags&MP_IMGFLAG_PLANAR) {
-    // FIXME this code only supports same bpp for all planes, and bpp divisible
-    // by 8. Currently the case for all planar formats.
-    int bpp = MP_IMAGE_PLANAR_BITS_PER_PIXEL_ON_PLANE(mpi, 0) / 8;
-    // YV12/I420/YVU9/IF09. feel free to add other planar formats here...
-    mpi->stride[0]=mpi->stride[3]=bpp*mpi->w;
-    if(mpi->num_planes > 2){
-      mpi->stride[1]=mpi->stride[2]=bpp*mpi->chroma_width;
-      if(mpi->flags&MP_IMGFLAG_SWAPPED){
-        // I420/IYUV  (Y,U,V)
-        mpi->planes[1]=mpi->planes[0]+mpi->stride[0]*mpi->h;
-        mpi->planes[2]=mpi->planes[1]+mpi->stride[1]*mpi->chroma_height;
-        if (mpi->num_planes > 3)
-            mpi->planes[3]=mpi->planes[2]+mpi->stride[2]*mpi->chroma_height;
-      } else {
-        // YV12,YVU9,IF09  (Y,V,U)
-        mpi->planes[2]=mpi->planes[0]+mpi->stride[0]*mpi->h;
-        mpi->planes[1]=mpi->planes[2]+mpi->stride[1]*mpi->chroma_height;
-        if (mpi->num_planes > 3)
-            mpi->planes[3]=mpi->planes[1]+mpi->stride[1]*mpi->chroma_height;
-      }
-    } else {
-      // NV12/NV21
-      mpi->stride[1]=mpi->chroma_width;
-      mpi->planes[1]=mpi->planes[0]+mpi->stride[0]*mpi->h;
-    }
-  } else {
-    mpi->stride[0]=mpi->w*mpi->bpp/8;
-    if (mpi->flags & MP_IMGFLAG_RGB_PALETTE)
-      mpi->planes[1] = av_malloc(1024);
-  }
-  mpi->flags|=MP_IMGFLAG_ALLOCATED;
-}
-
-void mp_image_copy(struct mp_image *dmpi, struct mp_image *mpi)
+static void mp_image_alloc_planes(struct mp_image *mpi)
 {
-  if(mpi->flags&MP_IMGFLAG_PLANAR){
-    memcpy_pic(dmpi->planes[0],mpi->planes[0], MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, 0), mpi->h,
-	       dmpi->stride[0],mpi->stride[0]);
-    memcpy_pic(dmpi->planes[1],mpi->planes[1], MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, 1), mpi->chroma_height,
-	       dmpi->stride[1],mpi->stride[1]);
-    memcpy_pic(dmpi->planes[2], mpi->planes[2], MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, 2), mpi->chroma_height,
-	       dmpi->stride[2],mpi->stride[2]);
-  } else {
-    memcpy_pic(dmpi->planes[0],mpi->planes[0],
-	       MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, 0), mpi->h,
-	       dmpi->stride[0],mpi->stride[0]);
-  }
+    assert(!mpi->planes[0]);
+
+    size_t plane_size[MP_MAX_PLANES];
+    for (int n = 0; n < MP_MAX_PLANES; n++) {
+        int line_bytes = (mpi->plane_w[n] * mpi->fmt.bpp[n] + 7) / 8;
+        mpi->stride[n] = FFALIGN(line_bytes, SWS_MIN_BYTE_ALIGN);
+        plane_size[n] = mpi->stride[n] * mpi->plane_h[n];
+    }
+    if (mpi->flags & MP_IMGFLAG_RGB_PALETTE)
+        plane_size[1] = MP_PALETTE_SIZE;
+
+    size_t sum = 0;
+    for (int n = 0; n < MP_MAX_PLANES; n++)
+        sum += plane_size[n];
+
+    uint8_t *data = av_malloc(FFMAX(sum, 1));
+    if (!data)
+        abort(); //out of memory
+
+    for (int n = 0; n < MP_MAX_PLANES; n++) {
+        mpi->planes[n] = plane_size[n] ? data : NULL;
+        data += plane_size[n];
+    }
 }
 
 void mp_image_copy_attributes(struct mp_image *dmpi, struct mp_image *mpi)
@@ -178,28 +144,13 @@ void mp_image_setfmt(struct mp_image *mpi, unsigned int out_fmt)
 static int mp_image_destructor(void *ptr)
 {
     mp_image_t *mpi = ptr;
-
-    if (mpi->refcount) {
-        m_refcount_unref(mpi->refcount);
-    }
-
-    if (mpi->flags & MP_IMGFLAG_ALLOCATED) {
-        /* because we allocate the whole image at once */
-        av_free(mpi->planes[0]);
-        if (mpi->flags & MP_IMGFLAG_RGB_PALETTE)
-            av_free(mpi->planes[1]);
-    }
-
+    m_refcount_unref(mpi->refcount);
     return 0;
 }
 
-// Image without format or allocated image data
-struct mp_image *mp_image_new_empty(int w, int h)
+static int mp_chroma_div_up(int size, int shift)
 {
-    struct mp_image *mpi = talloc_zero(NULL, struct mp_image);
-    talloc_set_destructor(mpi, mp_image_destructor);
-    mp_image_set_size(mpi, w, h);
-    return mpi;
+    return (size + (1 << shift) - 1) >> shift;
 }
 
 // Caller has to make sure this doesn't exceed the allocated plane data/strides.
@@ -208,8 +159,8 @@ void mp_image_set_size(struct mp_image *mpi, int w, int h)
     mpi->w = w;
     mpi->h = h;
     for (int n = 0; n < mpi->num_planes; n++) {
-        mpi->plane_w[n] = mpi->w >> mpi->fmt.xs[n];
-        mpi->plane_h[n] = mpi->h >> mpi->fmt.ys[n];
+        mpi->plane_w[n] = mp_chroma_div_up(mpi->w, mpi->fmt.xs[n]);
+        mpi->plane_h[n] = mp_chroma_div_up(mpi->h, mpi->fmt.ys[n]);
     }
     mpi->chroma_width = mpi->plane_w[1];
     mpi->chroma_height = mpi->plane_h[1];
@@ -224,15 +175,12 @@ void mp_image_set_display_size(struct mp_image *mpi, int dw, int dh)
 
 struct mp_image *mp_image_alloc(unsigned int imgfmt, int w, int h)
 {
-    struct mp_image *mpi = mp_image_new_empty(w, h);
-
-    mpi->w = FFALIGN(w, MP_STRIDE_ALIGNMENT);
+    struct mp_image *mpi = talloc_zero(NULL, struct mp_image);
+    talloc_set_destructor(mpi, mp_image_destructor);
+    mp_image_set_size(mpi, w, h);
     mp_image_setfmt(mpi, imgfmt);
     mp_image_alloc_planes(mpi);
-    mpi->w = w;
-    mp_image_setfmt(mpi, imgfmt); // reset chroma size
 
-    mpi->flags &= ~MP_IMGFLAG_ALLOCATED;
     mpi->refcount = m_refcount_new();
     mpi->refcount->free = av_free;
     mpi->refcount->arg = mpi->planes[0];
@@ -300,7 +248,6 @@ struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *free_arg,
     talloc_set_destructor(new, mp_image_destructor);
     *new = *img;
 
-    new->flags &= ~MP_IMGFLAG_ALLOCATED;
     new->refcount = m_refcount_new();
     new->refcount->free = free;
     new->refcount->arg = free_arg;
@@ -319,7 +266,6 @@ struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
     talloc_set_destructor(new, mp_image_destructor);
     *new = *img;
 
-    new->flags &= ~MP_IMGFLAG_ALLOCATED;
     new->refcount = m_refcount_new();
     new->refcount->ext_ref = ref;
     new->refcount->ext_unref = unref;
@@ -330,9 +276,8 @@ struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
 
 bool mp_image_is_writeable(struct mp_image *img)
 {
-    // if non ref-counted, it's writeable if the caller allocated the image
     if (!img->refcount)
-        return img->flags & MP_IMGFLAG_ALLOCATED;
+        return true; // not ref-counted => always considered writeable
     return m_refcount_is_unique(img->refcount);
 }
 
@@ -361,6 +306,18 @@ void mp_image_unrefp(struct mp_image **p_img)
 {
     talloc_free(*p_img);
     *p_img = NULL;
+}
+
+void mp_image_copy(struct mp_image *dst, struct mp_image *src)
+{
+    assert(dst->imgfmt == src->imgfmt);
+    assert(dst->w == src->w && dst->h == src->h);
+    assert(mp_image_is_writeable(dst));
+    for (int n = 0; n < dst->num_planes; n++) {
+        int line_bytes = (dst->plane_w[n] * dst->fmt.bpp[n] + 7) / 8;
+        memcpy_pic(dst->planes[n], src->planes[n], line_bytes, dst->plane_h[n],
+                   dst->stride[n], src->stride[n]);
+    }
 }
 
 enum mp_csp mp_image_csp(struct mp_image *img)

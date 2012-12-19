@@ -61,8 +61,8 @@ static const vd_info_t info = {
 #include "libavcodec/avcodec.h"
 #include "lavc.h"
 
-#if AVPALETTE_SIZE > 1024
-#error palette too large, adapt libmpcodecs/vf.c:vf_get_image
+#if AVPALETTE_SIZE != MP_PALETTE_SIZE
+#error palette too large, adapt video/mp_image.h:MP_PALETTE_SIZE
 #endif
 
 #include "core/m_option.h"

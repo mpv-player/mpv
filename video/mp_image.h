@@ -28,11 +28,7 @@
 #include "csputils.h"
 #include "video/img_format.h"
 
-// Minimum stride alignment in pixels
-#define MP_STRIDE_ALIGNMENT 32
-
-// set if buffer is allocated (used in destination images):
-#define MP_IMGFLAG_ALLOCATED 0x4000
+#define MP_PALETTE_SIZE (256 * 4)
 
 #define MP_IMGFIELD_ORDERED 0x01
 #define MP_IMGFIELD_TOP_FIRST 0x02
@@ -113,9 +109,7 @@ void mp_image_unrefp(struct mp_image **p_img);
 void mp_image_set_size(struct mp_image *mpi, int w, int h);
 void mp_image_set_display_size(struct mp_image *mpi, int dw, int dh);
 
-struct mp_image *mp_image_new_empty(int w, int h);
 void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt);
-void mp_image_alloc_planes(struct mp_image *mpi);
 void mp_image_steal_data(struct mp_image *dst, struct mp_image *src);
 
 struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *arg,
@@ -132,15 +126,5 @@ enum mp_csp_levels mp_image_levels(struct mp_image *img);
 struct mp_csp_details;
 void mp_image_set_colorspace_details(struct mp_image *image,
                                      struct mp_csp_details *csp);
-
-// this macro requires img_format.h to be included too:
-#define MP_IMAGE_PLANAR_BITS_PER_PIXEL_ON_PLANE(mpi, p) \
-    (IMGFMT_IS_YUVP16((mpi)->imgfmt) ? 16 : 8)
-#define MP_IMAGE_BITS_PER_PIXEL_ON_PLANE(mpi, p) \
-    (((mpi)->flags & MP_IMGFLAG_PLANAR) \
-        ? MP_IMAGE_PLANAR_BITS_PER_PIXEL_ON_PLANE(mpi, p) \
-        : (mpi)->bpp)
-#define MP_IMAGE_BYTES_PER_ROW_ON_PLANE(mpi, p) \
-    ((MP_IMAGE_BITS_PER_PIXEL_ON_PLANE(mpi, p) * ((mpi)->w >> (p ? mpi->chroma_x_shift : 0)) + 7) / 8)
 
 #endif /* MPLAYER_MP_IMAGE_H */
