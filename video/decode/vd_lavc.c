@@ -501,22 +501,21 @@ static void uninit(sh_video_t *sh)
     talloc_free(ctx);
 }
 
-static int init_vo(sh_video_t *sh)
+static int init_vo(sh_video_t *sh, AVFrame *frame)
 {
     vd_ffmpeg_ctx *ctx = sh->context;
-    AVCodecContext *avctx = ctx->avctx;
-    int width = avctx->width;
-    int height = avctx->height;
-    float aspect = av_q2d(avctx->sample_aspect_ratio) * width / height;
+    int width = frame->width;
+    int height = frame->height;
+    float aspect = av_q2d(frame->sample_aspect_ratio) * width / height;
 
     /* Reconfiguring filter/VO chain may invalidate direct rendering buffers
      * we have allocated for libavcodec (including the VDPAU HW decoding
      * case). Is it guaranteed that the code below only triggers in a situation
      * with no busy direct rendering buffers for reference frames?
      */
-    if (av_cmp_q(avctx->sample_aspect_ratio, ctx->last_sample_aspect_ratio) ||
+    if (av_cmp_q(frame->sample_aspect_ratio, ctx->last_sample_aspect_ratio) ||
             width != sh->disp_w || height != sh->disp_h ||
-            avctx->pix_fmt != ctx->pix_fmt || !ctx->vo_initialized)
+            frame->format != ctx->pix_fmt || !ctx->vo_initialized)
     {
         mp_image_pool_clear(ctx->non_dr1_pool);
         ctx->vo_initialized = 0;
@@ -529,15 +528,15 @@ static int init_vo(sh_video_t *sh)
         // _sample_ aspect is unchanged.
         if (sh->aspect == 0 || ctx->last_sample_aspect_ratio.den)
             sh->aspect = aspect;
-        ctx->last_sample_aspect_ratio = avctx->sample_aspect_ratio;
+        ctx->last_sample_aspect_ratio = frame->sample_aspect_ratio;
         sh->disp_w = width;
         sh->disp_h = height;
 
-        ctx->pix_fmt = avctx->pix_fmt;
-        ctx->best_csp = pixfmt2imgfmt(avctx->pix_fmt);
+        ctx->pix_fmt = frame->format;
+        ctx->best_csp = pixfmt2imgfmt(frame->format);
 
-        sh->colorspace = avcol_spc_to_mp_csp(avctx->colorspace);
-        sh->color_range = avcol_range_to_mp_csp_levels(avctx->color_range);
+        sh->colorspace = avcol_spc_to_mp_csp(ctx->avctx->colorspace);
+        sh->color_range = avcol_range_to_mp_csp_levels(ctx->avctx->color_range);
 
         if (!mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, ctx->best_csp))
             return -1;
@@ -595,11 +594,11 @@ static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
      * save us from other weird corner cases, like having to "reroute" the
      * get_buffer callback.
      */
-    int imgfmt = pixfmt2imgfmt(avctx->pix_fmt);
+    int imgfmt = pixfmt2imgfmt(pic->format);
     if (!IMGFMT_IS_HWACCEL(imgfmt))
         return -1;
 
-    if (init_vo(sh) < 0)
+    if (init_vo(sh, pic) < 0)
         return -1;
 
     assert(IMGFMT_IS_HWACCEL(ctx->best_csp));
@@ -697,7 +696,7 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
     if (!got_picture)
         return 0;                     // skipped image
 
-    if (init_vo(sh) < 0)
+    if (init_vo(sh, pic) < 0)
         return -1;
 
     struct mp_image *mpi = NULL;
@@ -709,7 +708,7 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
 
     if (!mpi) {
         struct mp_image new = {0};
-        mp_image_set_size(&new, avctx->width, avctx->height);
+        mp_image_set_size(&new, pic->width, pic->height);
         mp_image_setfmt(&new, ctx->best_csp);
         for (int i = 0; i < 4; i++) {
             new.planes[i] = pic->data[i];
@@ -729,7 +728,7 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
 
     assert(mpi->planes[0]);
 
-    assert(mpi->imgfmt == pixfmt2imgfmt(avctx->pix_fmt));
+    assert(mpi->imgfmt == pixfmt2imgfmt(pic->format));
 
     mpi->colorspace = sh->colorspace;
     mpi->levels = sh->color_range;
@@ -796,7 +795,7 @@ static int control(sh_video_t *sh, int cmd, void *arg)
     case VDCTRL_RESET_ASPECT:
         if (ctx->vo_initialized)
             ctx->vo_initialized = false;
-        init_vo(sh);
+        init_vo(sh, ctx->pic);
         return true;
     }
     return CONTROL_UNKNOWN;
