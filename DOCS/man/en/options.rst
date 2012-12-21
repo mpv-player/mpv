@@ -532,9 +532,9 @@
     enabled). These fonts can be used for SSA/ASS subtitle rendering
     (``--ass`` option).
 
---end=<relative time>
-    Stop at given absolute time. See ``--start`` for valid option values and
-    examples.
+--end=<time>
+    Stop at given absolute time. Use ``--length`` if the time should be relative
+    to ``--start``. See ``--start`` for valid option values and examples.
 
 --no-extbased, --extbased
     ``--no-extbased`` disables extension-based demuxer selection. By default, when the file type
@@ -547,7 +547,7 @@
     double the framerate: ``--vf=yadif=1`` and ``--vo=vdpau:deint``.
 
     :auto:    (default) If the decoder does not export the appropriate
-              information, it falls back to 0 (top field first).
+              information, it falls back to ``top`` (top field first).
     :top:     top field first
     :bottom:  bottom field first
 
@@ -1234,19 +1234,24 @@
 --osd-duration=<time>
     Set the duration of the OSD messages in ms (default: 1000).
 
---osd-color=<#RRGGBB>
+--osd-color=<#RRGGBB|#AARRGGBB>
     Specify the color used for OSD. This is also used for unstyled text
     subtitles. This option (and most other ``--osd-`` options) are ignored
     when ASS subtitles are rendered, unless the ``--no-ass`` option is
     specified.
 
-    The color is specified in hex RGB, and each 2-digit group expresses a
-    color value in the range 0 (``00``) to 255 (`FF`). For example, ``#FF0000``
-    is red.
+    The color is specified as a RGB hex triplet, and each 2-digit group
+    expresses a color value in the range 0 (``00``) to 255 (`FF`).
+    For example, ``#FF0000`` is red. This is similar to web colors.
 
     You can specify transparency by specifying an alpha value in the form
     ``#AARRGGBB``. 0 is fully transparent, while ``FF`` is opaque (opaque is
     default with the shorter color specification).
+
+    *EXAMPLE*:
+
+    - ``--osd-color='#FF0000'`` set OSD to opaque red
+    - ``--osd-color='#C0808080'`` set OSD to 50% gray with 75% alpha
 
 --osd-back-color=<#RRGGBB>
     See ``--osd-color``. Color used for OSD text background.
@@ -1811,7 +1816,7 @@
     ``--start=-3:20 --length=10``
         Seeks to 3 minutes and 20 seconds before the end of the file, plays
         10 seconds, and exits.
-    ``--start=#2 --end=#4``
+    ``--start='#2' --end='#4'``
         Plays chapters 2 and 3, and exits.
 
 --ssf=<mode>
