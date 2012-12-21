@@ -23,6 +23,8 @@
 #ifndef MPLAYER_REORDER_CH_H
 #define MPLAYER_REORDER_CH_H
 
+#include <inttypes.h>
+
 // L   - Left
 // R   - Right
 // C   - Center
@@ -132,6 +134,8 @@ void reorder_channel_nch(void *buf,
 
 /// Utility function for planar audio conversions
 void reorder_to_planar(void *restrict out, const void *restrict in,
-        size_t size, size_t nchan, size_t nmemb);
+                       size_t size, size_t nchan, size_t nmemb);
+void reorder_to_packed(uint8_t *out, uint8_t **in,
+                       size_t size, size_t nchan, size_t nmemb);
 
 #endif /* MPLAYER_REORDER_CH_H */

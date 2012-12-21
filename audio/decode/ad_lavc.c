@@ -52,8 +52,8 @@ LIBAD_EXTERN(ffmpeg)
 struct priv {
     AVCodecContext *avctx;
     AVFrame *avframe;
-    char *output;
-    char *output_packed; // used by deplanarize to store packed audio samples
+    uint8_t *output;
+    uint8_t *output_packed; // used by deplanarize to store packed audio samples
     int output_left;
     int unitsize;
     int previous_data_left;  // input demuxer packet data
@@ -363,6 +363,7 @@ static av_always_inline void deplanarize(struct sh_audio *sh)
 {
     struct priv *priv = sh->context;
 
+    uint8_t **planes  = priv->avframe->extended_data;
     size_t bps        = av_get_bytes_per_sample(priv->avctx->sample_fmt);
     size_t nb_samples = priv->avframe->nb_samples;
     size_t channels   = priv->avctx->channels;
@@ -372,17 +373,7 @@ static av_always_inline void deplanarize(struct sh_audio *sh)
         priv->output_packed =
             talloc_realloc_size(priv, priv->output_packed, size);
 
-    size_t offset = 0;
-    unsigned char *output_ptr = priv->output_packed;
-    unsigned char **src = priv->avframe->data;
-
-    for (size_t s = 0; s < nb_samples; s++) {
-        for (size_t c = 0; c < channels; c++) {
-            memcpy(output_ptr, src[c] + offset, bps);
-            output_ptr += bps;
-        }
-        offset += bps;
-    }
+    reorder_to_packed(priv->output_packed, planes, bps, channels, nb_samples);
 
     priv->output = priv->output_packed;
 }
