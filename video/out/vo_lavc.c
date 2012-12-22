@@ -85,13 +85,7 @@ static void uninit(struct vo *vo)
     if (vc->lastipts >= 0 && vc->stream)
         draw_image(vo, NULL);
 
-    if (vc->lastimg) {
-        // palette hack
-        if (vc->lastimg->imgfmt == IMGFMT_PAL8)
-            vc->lastimg->planes[1] = NULL;
-        talloc_free(vc->lastimg);
-        vc->lastimg = NULL;
-    }
+    mp_image_unrefp(&vc->lastimg);
 
     vo->priv = NULL;
 }
@@ -171,11 +165,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     vc->buffer = talloc_size(vc, vc->buffer_size);
 
-    vc->lastimg = mp_image_alloc(format, width, height);
-
-    // palette hack
-    if (vc->lastimg->imgfmt == IMGFMT_PAL8)
-        vc->lastimg->planes[1] = talloc_zero_size(vc, MP_PALETTE_SIZE);
+    mp_image_unrefp(&vc->lastimg);
 
     return 0;
 
@@ -455,12 +445,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                 mp_msg(MSGT_ENCODE, MSGL_INFO,
                        "vo-lavc: Frame at pts %d got displayed %d times\n",
                        (int) vc->lastframeipts, vc->lastdisplaycount);
-            mp_image_copy(vc->lastimg, mpi);
+            mp_image_setrefp(&vc->lastimg, mpi);
             vc->lastimg_wants_osd = true;
-
-            // palette hack
-            if (vc->lastimg->imgfmt == IMGFMT_PAL8)
-                memcpy(vc->lastimg->planes[1], mpi->planes[1], MP_PALETTE_SIZE);
 
             vc->lastframeipts = vc->lastipts = frameipts;
             if (ectx->options->rawts && vc->lastipts < 0) {
@@ -501,6 +487,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         };
 
         mp_image_set_colorspace_details(vc->lastimg, &vc->colorspace);
+        mp_image_make_writeable(vc->lastimg);
 
         osd_draw_on_image(osd, dim, osd->vo_pts, OSD_DRAW_SUB_ONLY, vc->lastimg);
     }
