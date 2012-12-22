@@ -390,41 +390,6 @@ static void flip_page(struct vo *vo)
     return;
 }
 
-static int draw_slice(struct vo *vo, uint8_t *image[], int stride[], int w,
-                      int h, int x, int y)
-{
-    struct xvctx *ctx = vo->priv;
-    uint8_t *dst;
-    XvImage *current_image = ctx->xvimage[ctx->current_buf];
-
-    dst = current_image->data + current_image->offsets[0]
-        + current_image->pitches[0] * y + x;
-    memcpy_pic(dst, image[0], w, h, current_image->pitches[0], stride[0]);
-
-    x /= 2;
-    y /= 2;
-    w /= 2;
-    h /= 2;
-
-    dst = current_image->data + current_image->offsets[1]
-        + current_image->pitches[1] * y + x;
-    if (ctx->image_format != IMGFMT_YV12)
-        memcpy_pic(dst, image[1], w, h, current_image->pitches[1], stride[1]);
-    else
-        memcpy_pic(dst, image[2], w, h, current_image->pitches[1], stride[2]);
-
-    dst = current_image->data + current_image->offsets[2]
-        + current_image->pitches[2] * y + x;
-    if (ctx->image_format == IMGFMT_YV12)
-        memcpy_pic(dst, image[1], w, h, current_image->pitches[1], stride[1]);
-    else
-        memcpy_pic(dst, image[2], w, h, current_image->pitches[1], stride[2]);
-
-    mp_draw_sub_backup_reset(ctx->osd_backup);
-
-    return 0;
-}
-
 static mp_image_t *get_screenshot(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
@@ -445,18 +410,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct xvctx *ctx = vo->priv;
 
-    if (mpi->flags & MP_IMGFLAG_PLANAR)
-        draw_slice(vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
-    else if (mpi->flags & MP_IMGFLAG_YUV)
-        // packed YUV:
-        memcpy_pic(ctx->xvimage[ctx->current_buf]->data +
-                   ctx->xvimage[ctx->current_buf]->offsets[0], mpi->planes[0],
-                   mpi->w * (mpi->bpp / 8), mpi->h,
-                   ctx->xvimage[ctx->current_buf]->pitches[0], mpi->stride[0]);
-    else {
-        mp_msg(MSGT_VO, MSGL_ERR, "[VO_XV] Couldn't draw image.\n");
-        return;
-    }
+    struct mp_image xv_buffer = get_xv_buffer(vo, ctx->current_buf);
+    copy_mpi(&xv_buffer, mpi);
 
     mp_draw_sub_backup_reset(ctx->osd_backup);
 }
