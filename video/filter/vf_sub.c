@@ -155,9 +155,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     struct vf_priv_s *priv = vf->priv;
     struct osd_state *osd = priv->osd;
 
-    if (vf->priv->opt_top_margin || vf->priv->opt_bottom_margin ||
-        !mp_image_is_writeable(mpi))
-    {
+    if (vf->priv->opt_top_margin || vf->priv->opt_bottom_margin) {
         struct mp_image *dmpi = vf_alloc_out_image(vf);
         mp_image_copy_attributes(dmpi, mpi);
         prepare_image(vf, dmpi, mpi);
@@ -167,8 +165,8 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 
     mp_image_set_colorspace_details(mpi, &priv->csp);
 
-    if (mpi->pts != MP_NOPTS_VALUE)
-        osd_draw_on_image(osd, priv->dim, mpi->pts, OSD_DRAW_SUB_FILTER, mpi);
+    osd_draw_on_image_p(osd, priv->dim, mpi->pts, OSD_DRAW_SUB_FILTER,
+                        vf->out_pool, mpi);
 
     return mpi;
 }

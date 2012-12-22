@@ -487,7 +487,6 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         };
 
         mp_image_set_colorspace_details(vc->lastimg, &vc->colorspace);
-        mp_image_make_writeable(vc->lastimg);
 
         osd_draw_on_image(osd, dim, osd->vo_pts, OSD_DRAW_SUB_ONLY, vc->lastimg);
     }

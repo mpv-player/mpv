@@ -235,8 +235,6 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
 
 static void add_subs(struct MPContext *mpctx, struct mp_image *image)
 {
-    mp_image_make_writeable(image);
-
     int d_w = image->display_w ? image->display_w : image->w;
     int d_h = image->display_h ? image->display_h : image->h;
 

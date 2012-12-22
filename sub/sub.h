@@ -222,6 +222,11 @@ struct mp_image;
 bool osd_draw_on_image(struct osd_state *osd, struct mp_osd_res res,
                        double video_pts, int draw_flags, struct mp_image *dest);
 
+struct mp_image_pool;
+void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
+                         double video_pts, int draw_flags,
+                         struct mp_image_pool *pool, struct mp_image *dest);
+
 struct mp_draw_sub_backup;
 void osd_draw_on_image_bk(struct osd_state *osd, struct mp_osd_res res,
                           double video_pts, int draw_flags,
