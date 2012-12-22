@@ -55,7 +55,7 @@ extern int sws_flags;
 struct priv {
     struct vo *vo;
 
-    struct mp_draw_sub_backup *osd_backup;
+    struct mp_image *original_image;
 
     /* local data */
     unsigned char *ImageData;
@@ -268,6 +268,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     Colormap theCmap;
     const struct fmt2Xfmtentry_s *fmte = fmt2Xfmt;
 
+    mp_image_unrefp(&p->original_image);
+
 #ifdef CONFIG_XF86VM
     int vm = flags & VOFLAG_MODESWITCHING;
 #endif
@@ -441,28 +443,19 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         .video_par = vo->aspdat.par,
     };
 
-    osd_draw_on_image_bk(osd, res, osd->vo_pts, 0, p->osd_backup, &img);
+    osd_draw_on_image(osd, res, osd->vo_pts, 0, &img);
 }
 
 static mp_image_t *get_screenshot(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    struct mp_image img = get_x_buffer(p);
-    struct mp_image *res = mp_image_new_copy(&img);
-    mp_draw_sub_backup_restore(p->osd_backup, res);
+    if (!p->original_image)
+        return NULL;
 
+    struct mp_image *res = mp_image_new_ref(p->original_image);
+    mp_image_set_display_size(res, vo->aspdat.prew, vo->aspdat.preh);
     return res;
-}
-
-static int redraw_frame(struct vo *vo)
-{
-    struct priv *p = vo->priv;
-
-    struct mp_image img = get_x_buffer(p);
-    mp_draw_sub_backup_restore(p->osd_backup, &img);
-
-    return true;
 }
 
 static void flip_page(struct vo *vo)
@@ -516,7 +509,19 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
     sws_scale(p->swsContext, (const uint8_t **)mpi->planes, mpi->stride,
               0, mpi->h, dst, dstStride);
-    mp_draw_sub_backup_reset(p->osd_backup);
+
+    mp_image_setrefp(&p->original_image, mpi);
+}
+
+static int redraw_frame(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+
+    if (!p->original_image)
+        return false;
+
+    draw_image(vo, p->original_image);
+    return true;
 }
 
 static int query_format(struct vo *vo, uint32_t format)
@@ -551,6 +556,8 @@ static void uninit(struct vo *vo)
     if (p->myximage)
         freeMyXImage(p);
 
+    talloc_free(p->original_image);
+
 #ifdef CONFIG_XF86VM
     vo_vm_close(vo);
 #endif
@@ -570,8 +577,6 @@ static int preinit(struct vo *vo, const char *arg)
         mp_msg(MSGT_VO, MSGL_ERR, "vo_x11: Unknown subdevice: %s\n", arg);
         return ENOSYS;
     }
-
-    p->osd_backup = talloc_steal(p, mp_draw_sub_backup_new());
 
     if (!vo_init(vo))
         return -1;              // Can't open X11

@@ -275,7 +275,6 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
 struct draw_on_image_closure {
     struct osd_state *osd;
     struct mp_image *dest;
-    struct mp_draw_sub_backup *bk;
     struct mp_image_pool *pool;
     bool changed;
 };
@@ -284,8 +283,6 @@ static void draw_on_image(void *ctx, struct sub_bitmaps *imgs)
 {
     struct draw_on_image_closure *closure = ctx;
     struct osd_state *osd = closure->osd;
-    if (closure->bk)
-        mp_draw_sub_backup_add(closure->bk, closure->dest, imgs);
     if (closure->pool) {
         mp_image_pool_make_writeable(closure->pool, closure->dest);
     } else {
@@ -314,16 +311,7 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
                          double video_pts, int draw_flags,
                          struct mp_image_pool *pool, struct mp_image *dest)
 {
-    struct draw_on_image_closure closure = {osd, dest, .pool = pool};
-    osd_draw(osd, res, video_pts, draw_flags, mp_draw_sub_formats,
-             &draw_on_image, &closure);
-}
-
-void osd_draw_on_image_bk(struct osd_state *osd, struct mp_osd_res res,
-                          double video_pts, int draw_flags,
-                          struct mp_draw_sub_backup *bk, struct mp_image *dest)
-{
-    struct draw_on_image_closure closure = {osd, dest, bk};
+    struct draw_on_image_closure closure = {osd, dest, pool};
     osd_draw(osd, res, video_pts, draw_flags, mp_draw_sub_formats,
              &draw_on_image, &closure);
 }

@@ -227,11 +227,6 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
                          double video_pts, int draw_flags,
                          struct mp_image_pool *pool, struct mp_image *dest);
 
-struct mp_draw_sub_backup;
-void osd_draw_on_image_bk(struct osd_state *osd, struct mp_osd_res res,
-                          double video_pts, int draw_flags,
-                          struct mp_draw_sub_backup *bk, struct mp_image *dest);
-
 struct mp_rect;
 bool sub_bitmaps_bb(struct sub_bitmaps *imgs, struct mp_rect *out_bb);
 

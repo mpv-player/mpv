@@ -73,7 +73,7 @@ struct xvctx {
     int total_buffers;
     int visible_buf;
     XvImage *xvimage[2];
-    struct mp_draw_sub_backup *osd_backup;
+    struct mp_image *original_image;
     uint32_t image_width;
     uint32_t image_height;
     uint32_t image_format;
@@ -158,6 +158,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     int depth;
     struct xvctx *ctx = vo->priv;
     int i;
+
+    mp_image_unrefp(&ctx->original_image);
 
     ctx->image_height = height;
     ctx->image_width = width;
@@ -383,17 +385,19 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         .video_par = vo->aspdat.par,
     };
 
-    osd_draw_on_image_bk(osd, res, osd->vo_pts, 0, ctx->osd_backup, &img);
+    osd_draw_on_image(osd, res, osd->vo_pts, 0, &img);
 }
 
 static int redraw_frame(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
 
-    struct mp_image img = get_xv_buffer(vo, ctx->visible_buf);
-    mp_draw_sub_backup_restore(ctx->osd_backup, &img);
-    ctx->current_buf = ctx->visible_buf;
+    if (!ctx->original_image)
+        return false;
 
+    struct mp_image img = get_xv_buffer(vo, ctx->visible_buf);
+    mp_image_copy(&img, ctx->original_image);
+    ctx->current_buf = ctx->visible_buf;
     return true;
 }
 
@@ -414,12 +418,11 @@ static mp_image_t *get_screenshot(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
 
-    struct mp_image img = get_xv_buffer(vo, ctx->visible_buf);
-    struct mp_image *res = mp_image_new_copy(&img);
-    mp_image_set_display_size(res, vo->aspdat.prew, vo->aspdat.preh);
-    // try to get an image without OSD
-    mp_draw_sub_backup_restore(ctx->osd_backup, res);
+    if (!ctx->original_image)
+        return NULL;
 
+    struct mp_image *res = mp_image_new_ref(ctx->original_image);
+    mp_image_set_display_size(res, vo->aspdat.prew, vo->aspdat.preh);
     return res;
 }
 
@@ -430,7 +433,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct mp_image xv_buffer = get_xv_buffer(vo, ctx->current_buf);
     mp_image_copy(&xv_buffer, mpi);
 
-    mp_draw_sub_backup_reset(ctx->osd_backup);
+    mp_image_setrefp(&ctx->original_image, mpi);
 }
 
 static int query_format(struct vo *vo, uint32_t format)
@@ -453,6 +456,8 @@ static void uninit(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
     int i;
+
+    talloc_free(ctx->original_image);
 
     ctx->visible_buf = -1;
     if (ctx->ai)
@@ -594,8 +599,6 @@ static int preinit(struct vo *vo, const char *arg)
 
     ctx->fo = XvListImageFormats(x11->display, x11->xv_port,
                                  (int *) &ctx->formats);
-
-    ctx->osd_backup = talloc_steal(ctx, mp_draw_sub_backup_new());
 
     return 0;
 
