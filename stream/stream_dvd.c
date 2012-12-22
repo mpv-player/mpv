@@ -200,7 +200,7 @@ static int dvd_next_cell(dvd_priv_t *d) {
   if(next_cell>=d->last_cell)
     return -1; // EOF
   if(d->cur_pgc->cell_playback[next_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK ) {
-    next_cell+=dvd_angle;
+    next_cell+=dvd_angle-1;
     if(next_cell>=d->last_cell)
       return -1; // EOF
   }
@@ -240,7 +240,7 @@ read_next:
     if(next>=0) {
       d->cur_cell=next;
       // if( d->cur_pgc->cell_playback[d->cur_cell].block_type
-      // == BLOCK_TYPE_ANGLE_BLOCK ) d->cur_cell+=dvd_angle;
+      // == BLOCK_TYPE_ANGLE_BLOCK ) d->cur_cell+=dvd_angle-1;
       d->cur_pack = d->cur_pgc->cell_playback[ d->cur_cell ].first_sector;
       d->cell_last_pack=d->cur_pgc->cell_playback[ d->cur_cell ].last_sector;
       mp_msg(MSGT_DVD,MSGL_V, "DVD next cell: %d  pack: 0x%X-0x%X  \n",d->cur_cell,d->cur_pack,d->cell_last_pack);
@@ -295,7 +295,7 @@ read_next:
         if(skip && skip!=0x7fffffff) {
           // sml_agli table has valid data (at least one non-zero):
          d->cur_pack=d->dsi_pack.dsi_gi.nv_pck_lbn+
-         d->dsi_pack.sml_agli.data[dvd_angle].address;
+         d->dsi_pack.sml_agli.data[dvd_angle-1].address;
          d->angle_seek=0;
          d->cur_pack--;
          mp_msg(MSGT_DVD,MSGL_V, "Angle-seek synced using sml_agli map!  new_lba=0x%X  \n",d->cur_pack);
@@ -482,7 +482,7 @@ static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *
 
     d->cur_cell = pgc->program_map[ptt.pgn - 1] - 1;
     if(pgc->cell_playback[d->cur_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK)
-       d->cur_cell += dvd_angle;
+       d->cur_cell += dvd_angle-1;
     d->cur_pack       = pgc->cell_playback[d->cur_cell].first_sector;
     d->cell_last_pack = pgc->cell_playback[d->cur_cell].last_sector;
 
@@ -683,7 +683,7 @@ static int control(stream_t *stream,int cmd,void* arg)
         }
         case STREAM_CTRL_GET_ANGLE:
         {
-            *((int *)arg) = dvd_angle+1;
+            *((int *)arg) = dvd_angle;
             return 1;
         }
         case STREAM_CTRL_SET_ANGLE:
@@ -691,7 +691,7 @@ static int control(stream_t *stream,int cmd,void* arg)
             int ang = *((int *)arg);
             if(ang>d->vmg_file->tt_srpt->title[dvd_title].nr_of_angles || ang<=0)
                 break;
-            dvd_angle = ang - 1;
+            dvd_angle = ang;
             d->angle_seek = 1;
             return 1;
         }
@@ -848,7 +848,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       mp_tmsg(MSGT_OPEN,MSGL_ERR, "Invalid DVD angle number: %d\n", dvd_angle);
       goto fail;
     }
-    --dvd_angle; // remap 1.. -> 0..
 
     ttn = tt_srpt->title[dvd_title].vts_ttn - 1;
     /**
@@ -993,7 +992,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       d->last_cell=d->cur_pgc->nr_of_cells;
 
     if(d->cur_pgc->cell_playback[d->cur_cell].block_type == BLOCK_TYPE_ANGLE_BLOCK )
-      d->cur_cell+=dvd_angle;
+      d->cur_cell+=dvd_angle-1;
     d->cur_pack = d->cur_pgc->cell_playback[ d->cur_cell ].first_sector;
     d->cell_last_pack=d->cur_pgc->cell_playback[ d->cur_cell ].last_sector;
     mp_msg(MSGT_DVD,MSGL_V, "DVD start cell: %d  pack: 0x%X-0x%X  \n",d->cur_cell,d->cur_pack,d->cell_last_pack);
