@@ -388,19 +388,6 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     osd_draw_on_image(osd, res, osd->vo_pts, 0, &img);
 }
 
-static int redraw_frame(struct vo *vo)
-{
-    struct xvctx *ctx = vo->priv;
-
-    if (!ctx->original_image)
-        return false;
-
-    struct mp_image img = get_xv_buffer(vo, ctx->visible_buf);
-    mp_image_copy(&img, ctx->original_image);
-    ctx->current_buf = ctx->visible_buf;
-    return true;
-}
-
 static void flip_page(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
@@ -434,6 +421,17 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     mp_image_copy(&xv_buffer, mpi);
 
     mp_image_setrefp(&ctx->original_image, mpi);
+}
+
+static int redraw_frame(struct vo *vo)
+{
+    struct xvctx *ctx = vo->priv;
+
+    if (!ctx->original_image)
+        return false;
+
+    draw_image(vo, ctx->original_image);
+    return true;
 }
 
 static int query_format(struct vo *vo, uint32_t format)
