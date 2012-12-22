@@ -91,11 +91,6 @@ typedef struct mp_image {
     void* priv;
 } mp_image_t;
 
-#define alloc_mpi(w, h, fmt) mp_image_alloc(fmt, w, h)
-#define free_mp_image talloc_free
-#define new_mp_image mp_image_new_empty
-#define copy_mpi mp_image_copy
-
 struct mp_image *mp_image_alloc(unsigned int fmt, int w, int h);
 void mp_image_clear(struct mp_image *mpi, int x0, int y0, int w, int h);
 void mp_image_copy(struct mp_image *dmpi, struct mp_image *mpi);

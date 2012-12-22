@@ -1616,7 +1616,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     if (!get_video_buffer(priv, &buffer))
         return;
 
-    copy_mpi(&buffer, mpi);
+    mp_image_copy(&buffer, mpi);
 
     d3d_unlock_video_objects(priv);
 
@@ -1697,7 +1697,7 @@ static mp_image_t *get_window_screenshot(d3d_priv *priv)
     if (width < 1 || height < 1)
         goto error_exit;
 
-    image = alloc_mpi(width, height, IMGFMT_BGR32);
+    image = mp_image_alloc(IMGFMT_BGR32, width, height);
 
     IDirect3DSurface9_LockRect(surface, &locked_rect, NULL, 0);
 
@@ -1712,7 +1712,7 @@ static mp_image_t *get_window_screenshot(d3d_priv *priv)
 
 error_exit:
     if (image)
-        free_mp_image(image);
+        talloc_free(image);
     if (surface)
         IDirect3DSurface9_Release(surface);
     return NULL;

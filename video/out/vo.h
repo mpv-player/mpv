@@ -98,7 +98,7 @@ struct voctrl_screenshot_args {
     // implemented.
     int full_window;
     // Will be set to a newly allocated image, that contains the screenshot.
-    // The caller has to free the pointer with free_mp_image().
+    // The caller has to free the image with talloc_free().
     // It is not specified whether the image data is a copy or references the
     // image data directly.
     // Is never NULL. (Failure has to be indicated by returning VO_FALSE.)

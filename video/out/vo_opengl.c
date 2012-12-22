@@ -1321,8 +1321,8 @@ static mp_image_t *get_screenshot(struct gl_priv *p)
 {
     GL *gl = p->gl;
 
-    mp_image_t *image = alloc_mpi(p->texture_width, p->texture_height,
-                                  p->image_format);
+    mp_image_t *image = mp_image_alloc(p->image_format, p->texture_width,
+                                                        p->texture_height);
 
     // NOTE about image formats with alpha plane: we don't even have the alpha
     // anymore. We never upload it to any texture, as it would be a waste of

@@ -791,8 +791,8 @@ static mp_image_t *get_screenshot(struct vo *vo)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    mp_image_t *image = alloc_mpi(p->texture_width, p->texture_height,
-                                  p->image_format);
+    mp_image_t *image = mp_image_alloc(p->image_format, p->texture_width,
+                                                        p->texture_height);
 
     glDownloadTex(gl, p->target, p->gl_format, p->gl_type, image->planes[0],
                   image->stride[0]);

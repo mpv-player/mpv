@@ -1978,7 +1978,7 @@ mp_image_t *glGetWindowScreenshot(GL *gl)
 {
     GLint vp[4]; //x, y, w, h
     gl->GetIntegerv(GL_VIEWPORT, vp);
-    mp_image_t *image = alloc_mpi(vp[2], vp[3], IMGFMT_RGB24);
+    mp_image_t *image = mp_image_alloc(IMGFMT_RGB24, vp[2], vp[3]);
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     gl->PixelStorei(GL_PACK_ALIGNMENT, 0);
     gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);

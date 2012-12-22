@@ -406,7 +406,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct xvctx *ctx = vo->priv;
 
     struct mp_image xv_buffer = get_xv_buffer(vo, ctx->current_buf);
-    copy_mpi(&xv_buffer, mpi);
+    mp_image_copy(&xv_buffer, mpi);
 
     mp_draw_sub_backup_reset(ctx->osd_backup);
 }

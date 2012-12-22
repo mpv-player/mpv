@@ -274,8 +274,8 @@ static void draw_rgba(struct mp_draw_sub_cache **cache, struct mp_rect bb,
             part->imgs[i].i = talloc_steal(part, sbi);
             part->imgs[i].a = talloc_steal(part, sba);
         } else {
-            free_mp_image(sbi);
-            free_mp_image(sba);
+            talloc_free(sbi);
+            talloc_free(sba);
         }
     }
 }
@@ -520,7 +520,7 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
     if (dst->imgfmt == format) {
         temp = &dst_region;
     } else {
-        temp = alloc_mpi(bb.x1 - bb.x0, bb.y1 - bb.y0, format);
+        temp = mp_image_alloc(format, bb.x1 - bb.x0, bb.y1 - bb.y0);
         // temp is always YUV, dst_region not
         // reduce amount of conversions in YUV case (upsampling/shifting only)
         if (dst_region.flags & MP_IMGFLAG_YUV) {
@@ -538,7 +538,7 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
 
     if (temp != &dst_region) {
         mp_image_swscale(&dst_region, temp, SWS_AREA); // chroma down
-        free_mp_image(temp);
+        talloc_free(temp);
     }
 }
 
@@ -581,7 +581,7 @@ static void backup_realloc(struct mp_draw_sub_backup *backup,
         return;
 
     talloc_free_children(backup);
-    backup->image = alloc_mpi(img->w, img->h, img->imgfmt);
+    backup->image = mp_image_alloc(img->imgfmt, img->w, img->h);
     talloc_steal(backup, backup->image);
     for (int p = 0; p < MP_MAX_PLANES; p++) {
         backup->lines[p] = talloc_array(backup, struct line_ext,

@@ -158,7 +158,7 @@ static void to_gbrp(struct mp_image *dst, struct mp_image *src,
     case IMGFMT_ARGB: SET_COMPS(comp, 1, 2, 3, 0); break;
     case IMGFMT_RGBA: SET_COMPS(comp, 0, 1, 2, 3); break;
     default:
-        temp = alloc_mpi(dst->w, dst->h, IMGFMT_RGBA);
+        temp = mp_image_alloc(IMGFMT_RGBA, dst->w, dst->h);
         mp_image_swscale(temp, src, my_sws_flags);
         src = temp;
         SET_COMPS(comp, 0, 1, 2, 3);

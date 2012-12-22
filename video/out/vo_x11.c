@@ -449,8 +449,7 @@ static mp_image_t *get_screenshot(struct vo *vo)
     struct priv *p = vo->priv;
 
     struct mp_image img = get_x_buffer(p);
-    struct mp_image *res = alloc_mpi(img.w, img.h, img.imgfmt);
-    copy_mpi(res, &img);
+    struct mp_image *res = mp_image_new_copy(&img);
     mp_draw_sub_backup_restore(p->osd_backup, res);
 
     return res;

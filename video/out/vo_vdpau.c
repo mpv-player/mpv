@@ -1339,7 +1339,7 @@ static struct mp_image *read_output_surface(struct vdpctx *vc,
 {
     VdpStatus vdp_st;
     struct vdp_functions *vdp = vc->vdp;
-    struct mp_image *image = alloc_mpi(width, height, IMGFMT_BGR32);
+    struct mp_image *image = mp_image_alloc(IMGFMT_BGR32, width, height);
     image->colorspace = MP_CSP_RGB;
     image->levels = vc->colorspace.levels_out; // hardcoded with conv. matrix
 

@@ -448,7 +448,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         return -1;
     }
 
-    vc->ssmpi = alloc_mpi(width, height, format);
+    vc->ssmpi = mp_image_alloc(format, width, height);
 
     resize(vo, d_width, d_height);
 
@@ -593,7 +593,7 @@ static void uninit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
     destroy_renderer(vo);
-    free_mp_image(vc->ssmpi);
+    talloc_free(vc->ssmpi);
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
     talloc_free(vc);
 }
@@ -857,7 +857,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     if (color_add > 255)
         color_add = 255;
 
-    // typically this runs in parallel with the following copy_mpi call
+    // typically this runs in parallel with the following mp_image_copy call
     SDL_SetRenderDrawColor(vc->renderer, color_add, color_add, color_add, 255);
     SDL_RenderClear(vc->renderer);
 
@@ -894,7 +894,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                 texmpi->stride[2] = pitch / 2;
             }
         }
-        copy_mpi(texmpi, mpi);
+        mp_image_copy(texmpi, mpi);
 
         SDL_UnlockTexture(vc->tex);
     }
@@ -909,7 +909,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     dst.w = vc->dst_rect.x1 - vc->dst_rect.x0;
     dst.h = vc->dst_rect.y1 - vc->dst_rect.y0;
 
-    // typically this runs in parallel with the following copy_mpi call
+    // typically this runs in parallel with the following mp_image_copy call
     if (color_mod > 255) {
         SDL_SetTextureColorMod(vc->tex, color_mod / 2, color_mod / 2, color_mod / 2);
         SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
@@ -919,7 +919,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
     }
     if (mpi)
-        copy_mpi(vc->ssmpi, mpi);
+        mp_image_copy(vc->ssmpi, mpi);
 }
 
 static void update_screeninfo(struct vo *vo)
@@ -940,19 +940,18 @@ static void update_screeninfo(struct vo *vo)
 static struct mp_image *get_screenshot(struct vo *vo)
 {
     struct priv *vc = vo->priv;
-    mp_image_t *image = alloc_mpi(vc->ssmpi->w, vc->ssmpi->h, vc->ssmpi->imgfmt);
-    copy_mpi(image, vc->ssmpi);
-    return image;
+    return mp_image_new_copy(vc->ssmpi);
 }
 
 static struct mp_image *get_window_screenshot(struct vo *vo)
 {
     struct priv *vc = vo->priv;
-    mp_image_t *image = alloc_mpi(vo->dwidth, vo->dheight, vc->osd_format.mpv);
+    struct mp_image *image = mp_image_alloc(vc->osd_format.mpv, vo->dwidth,
+                                                                vo->dheight);
     if (SDL_RenderReadPixels(vc->renderer, NULL, vc->osd_format.sdl,
                              image->planes[0], image->stride[0])) {
         mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_RenderReadPixels failed\n");
-        free_mp_image(image);
+        talloc_free(image);
         return NULL;
     }
     return image;

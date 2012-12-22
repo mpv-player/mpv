@@ -89,7 +89,7 @@ static void uninit(struct vo *vo)
         // palette hack
         if (vc->lastimg->imgfmt == IMGFMT_PAL8)
             vc->lastimg->planes[1] = NULL;
-        free_mp_image(vc->lastimg);
+        talloc_free(vc->lastimg);
         vc->lastimg = NULL;
     }
 
@@ -171,7 +171,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     vc->buffer = talloc_size(vc, vc->buffer_size);
 
-    vc->lastimg = alloc_mpi(width, height, format);
+    vc->lastimg = mp_image_alloc(format, width, height);
 
     // palette hack
     if (vc->lastimg->imgfmt == IMGFMT_PAL8)
@@ -455,7 +455,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                 mp_msg(MSGT_ENCODE, MSGL_INFO,
                        "vo-lavc: Frame at pts %d got displayed %d times\n",
                        (int) vc->lastframeipts, vc->lastdisplaycount);
-            copy_mpi(vc->lastimg, mpi);
+            mp_image_copy(vc->lastimg, mpi);
             vc->lastimg_wants_osd = true;
 
             // palette hack

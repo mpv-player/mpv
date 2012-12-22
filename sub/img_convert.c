@@ -73,7 +73,7 @@ bool osd_conv_idx_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
         rgba_to_premultiplied_rgba(sb.palette, 256);
 
         *d = *s;
-        struct mp_image *image = alloc_mpi(s->w, s->h, IMGFMT_BGRA);
+        struct mp_image *image = mp_image_alloc(IMGFMT_BGRA, s->w, s->h);
         talloc_steal(c->parts, image);
         d->stride = image->stride[0];
         d->bitmap = image->planes[0];
@@ -104,8 +104,8 @@ bool osd_conv_blur_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
 
         // add a transparent padding border to reduce artifacts
         int pad = 5;
-        struct mp_image *temp = alloc_mpi(s->w + pad * 2, s->h + pad * 2,
-                                          IMGFMT_BGRA);
+        struct mp_image *temp = mp_image_alloc(IMGFMT_BGRA, s->w + pad * 2,
+                                                            s->h + pad * 2);
         memset_pic(temp->planes[0], 0, temp->w * 4, temp->h, temp->stride[0]);
         uint8_t *p0 = temp->planes[0] + pad * 4 + pad * temp->stride[0];
         memcpy_pic(p0, s->bitmap, s->w * 4, s->h, temp->stride[0], s->stride);
@@ -117,7 +117,7 @@ bool osd_conv_blur_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
         d->y = s->y - pad * sy;
         d->w = d->dw = s->dw + pad * 2 * sx;
         d->h = d->dh = s->dh + pad * 2 * sy;
-        struct mp_image *image = alloc_mpi(d->w, d->h, IMGFMT_BGRA);
+        struct mp_image *image = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
         talloc_steal(c->parts, image);
         d->stride = image->stride[0];
         d->bitmap = image->planes[0];
