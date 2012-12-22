@@ -48,6 +48,7 @@ typedef struct FrameBuffer {
     int h, w;
     int pix_fmt;
 
+    int used_by_decoder, needed_by_decoder;
     int refcount;
     struct FramePool *pool;
     struct FrameBuffer *next;
@@ -155,6 +156,15 @@ int mp_codec_get_buffer(AVCodecContext *s, AVFrame *frame)
     frame->type          = FF_BUFFER_TYPE_USER;
     frame->extended_data = frame->data;
 
+    buf->used_by_decoder = buf->needed_by_decoder = 1;
+    if (frame->buffer_hints & FF_BUFFER_HINTS_VALID) {
+        buf->needed_by_decoder =
+            (frame->buffer_hints & FF_BUFFER_HINTS_PRESERVE) ||
+            (frame->buffer_hints & FF_BUFFER_HINTS_REUSABLE);
+    } else {
+        buf->needed_by_decoder = !!frame->reference;
+    }
+
     for (i = 0; i < FF_ARRAY_ELEMS(buf->data); i++) {
         frame->base[i]     = buf->base[i];  // XXX h264.c uses base though it shouldn't
         frame->data[i]     = buf->data[i];
@@ -192,7 +202,12 @@ void mp_buffer_unref(struct FrameBuffer *buf)
 
 bool mp_buffer_is_unique(struct FrameBuffer *buf)
 {
-    return buf->refcount == 1;
+    int refcount = buf->refcount;
+    // Decoder has a reference, but doesn't want to use it. (ffmpeg has no good
+    // way of transferring frame ownership to the user.)
+    if (buf->used_by_decoder && !buf->needed_by_decoder)
+        refcount--;
+    return refcount == 1;
 }
 
 void mp_codec_release_buffer(AVCodecContext *s, AVFrame *frame)
@@ -204,6 +219,8 @@ void mp_codec_release_buffer(AVCodecContext *s, AVFrame *frame)
         avcodec_default_release_buffer(s, frame);
         return;
     }
+
+    buf->used_by_decoder = buf->needed_by_decoder = 0;
 
     for (i = 0; i < FF_ARRAY_ELEMS(frame->data); i++)
         frame->data[i] = NULL;
