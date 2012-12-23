@@ -74,7 +74,7 @@ void main() {
 #ifdef USE_OSD_LINEAR_CONV
     // If no 3dlut is being used, we need to pull up to linear light for
     // the sRGB function. *IF* 3dlut is used, we do not.
-    color.rgb = pow(color.rgb, vec3(2.2));
+    color.rgb = pow(color.rgb, vec3(1.0/0.45));
 #endif
 #ifdef USE_OSD_3DLUT
     color = vec4(texture3D(lut_3d, color.rgb).rgb, color.a);
@@ -331,12 +331,12 @@ void main() {
     color = mat3(colormatrix) * color + colormatrix[3];
 #endif
 #ifdef USE_LINEAR_CONV
-    color = pow(color, vec3(2.2));
+    color = pow(color, vec3(1.0/0.45));
 #endif
 #ifdef USE_LINEAR_CONV_INV
     // Convert from linear RGB to gamma RGB before putting it through the 3D-LUT
     // in the final stage.
-    color = pow(color, vec3(1.0/2.2));
+    color = pow(color, vec3(0.45));
 #endif
 #ifdef USE_GAMMA_POW
     color = pow(color, inv_gamma);

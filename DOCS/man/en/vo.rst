@@ -325,8 +325,8 @@ opengl
         Enable gamma-correct scaling by working in linear light. This
         makes use of sRGB textures and framebuffers.
         This option forces the options 'indirect' and 'gamma'.
-        NOTE: for YUV colorspaces, gamma 2.2 is assumed. RGB input is always
-        assumed to be in sRGB.
+        NOTE: for YUV colorspaces, gamma 1/0.45 (2.222) is assumed. RGB input
+        is always assumed to be in sRGB.
         This option is not really useful, as gamma-correct scaling has not much
         influence on typical video playback. Most visible effect comes from
         slightly different gamma.
