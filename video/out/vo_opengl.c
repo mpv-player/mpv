@@ -1908,7 +1908,7 @@ static bool load_icc(struct gl_priv *p, const char *icc_file,
         .Green = {0.30, 0.60, 1.0},
         .Blue  = {0.15, 0.06, 1.0},
     };
-    cmsToneCurve *tonecurve = cmsBuildGamma(NULL, 2.2);
+    cmsToneCurve *tonecurve = cmsBuildGamma(NULL, 1/0.45);
     cmsHPROFILE vid_profile = cmsCreateRGBProfile(&d65, &bt709prim,
                         (cmsToneCurve*[3]){tonecurve, tonecurve, tonecurve});
     cmsFreeToneCurve(tonecurve);
@@ -2318,7 +2318,7 @@ static const char help_text[] =
 "    Enable gamma-correct scaling by working in linear light. This\n"
 "    makes use of sRGB textures and framebuffers.\n"
 "    This option forces the options 'indirect' and 'gamma'.\n"
-"    NOTE: For YUV colorspaces, gamma 2.2 is assumed. RGB input is always\n"
+"    NOTE: For YUV colorspaces, gamma 1/0.45 is assumed. RGB input is always\n"
 "    assumed to be in sRGB.\n"
 "  pbo\n"
 "    Enable use of PBOs. This is faster, but can sometimes lead to\n"
