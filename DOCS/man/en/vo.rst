@@ -212,15 +212,6 @@ direct3d_shaders (Windows only)
     exact-backbuffer
         Always resize the backbuffer to window size.
 
-    no16bit-textures
-        Don't use textures with a 16 bit color channel for YUV formats that
-        use more than 8 bits per component. Instead, use D3DFMT_A8L8 textures
-        and compute the values sampled from the 2 channels back into one.
-        Might be slower, since the shader becomes slightly more complicated.
-        Might work better, if your drivers either don't support D3DFMT_L16,
-        or if either the texture unit or the shaders don't operate in at least
-        16 bit precision.
-
 direct3d (Windows only)
     Same as ``direct3d_shaders``, but with the options ``disable-textures``
     and ``disable-shaders`` forced.
