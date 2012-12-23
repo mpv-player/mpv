@@ -236,9 +236,6 @@ static const bool osd_fmt_supported[SUBBITMAP_COUNT] = {
 static void update_colorspace(d3d_priv *priv);
 static void d3d_clear_video_textures(d3d_priv *priv);
 static bool resize_d3d(d3d_priv *priv);
-static uint32_t d3d_draw_frame(d3d_priv *priv);
-static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
-                      int x, int y);
 static void uninit(struct vo *vo);
 static void flip_page(struct vo *vo);
 static mp_image_t *get_screenshot(d3d_priv *priv);
@@ -866,54 +863,6 @@ static void uninit_d3d(d3d_priv *priv)
         IDirect3D9_Release(priv->d3d_handle);
     }
     priv->d3d_handle = NULL;
-}
-
-static void d3d_upload_and_render_frame_texture(d3d_priv *priv,
-                                                    mp_image_t *mpi)
-{
-    draw_slice(priv->vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
-
-    d3d_unlock_video_objects(priv);
-
-    for (int n = 0; n < priv->plane_count; n++) {
-        d3dtex_update(priv, &priv->planes[n].texture);
-    }
-
-    d3d_draw_frame(priv);
-}
-
-static void draw_image(struct vo *vo, mp_image_t *mpi)
-{
-    d3d_priv *priv = vo->priv;
-    if (!priv->d3d_device)
-        return;
-
-    if (priv->use_textures) {
-        d3d_upload_and_render_frame_texture(priv, mpi);
-        return;
-    }
-
-    if (mpi->flags & MP_IMGFLAG_PLANAR) { /* Copy a planar frame. */
-        draw_slice(priv->vo, mpi->planes, mpi->stride, mpi->w, mpi->h, 0, 0);
-        goto skip_upload;
-    }
-
-    /* If we're here, then we should lock the rect and copy a packed frame */
-    if (!priv->locked_rect.pBits) {
-        if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
-                                              &priv->locked_rect, NULL, 0))) {
-            mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Surface lock failed.\n");
-            return;
-        }
-    }
-
-    memcpy_pic(priv->locked_rect.pBits, mpi->planes[0], mpi->stride[0],
-               mpi->height, priv->locked_rect.Pitch, mpi->stride[0]);
-
-skip_upload:
-    d3d_unlock_video_objects(priv);
-
-    d3d_draw_frame(priv);
 }
 
 static uint32_t d3d_draw_frame(d3d_priv *priv)
@@ -1604,165 +1553,81 @@ static void check_events(struct vo *vo)
         vo->want_redraw = true;
 }
 
-static int draw_slice_textures(d3d_priv *priv, uint8_t *src[], int stride[],
-                               int w, int h, int x, int y)
+// Lock buffers and fill out to point to them.
+// Must call d3d_unlock_video_objects() to unlock the buffers again.
+static bool get_video_buffer(d3d_priv *priv, struct mp_image *out)
 {
-    if (!d3d_lock_video_textures(priv))
-        return VO_FALSE;
-
-    for (int n = 0; n < priv->plane_count; n++) {
-        struct texplane *plane = &priv->planes[n];
-
-        int dst_stride = plane->locked_rect.Pitch;
-        uint8_t *pdst = (uint8_t*)plane->locked_rect.pBits
-                        + (y >> plane->shift_y) * dst_stride
-                        + (x >> plane->shift_x) * plane->bytes_per_pixel;
-
-        memcpy_pic(pdst, src[n], (w >> plane->shift_x) * plane->bytes_per_pixel,
-                   h >> plane->shift_y, dst_stride, stride[n]);
-    }
-
-    return 0;
-}
-
-/** @brief libvo Callback: Draw slice
- *  @return 0 on success
- */
-static int draw_slice(struct vo *vo, uint8_t *src[], int stride[], int w, int h,
-                      int x, int y)
-{
-    d3d_priv *priv = vo->priv;
+    *out = (struct mp_image) {0};
+    out->w = out->width  = priv->src_width;
+    out->h = out->height = priv->src_height;
+    mp_image_setfmt(out, priv->image_format);
 
     if (!priv->d3d_device)
-        return 0;
+        return false;
 
-    char *my_src;   /**< Pointer to the source image */
-    char *dst;      /**< Pointer to the destination image */
-    int  uv_stride; /**< Stride of the U/V planes */
+    if (priv->use_textures) {
+        if (!d3d_lock_video_textures(priv))
+            return false;
 
-    if (priv->use_textures)
-        return draw_slice_textures(priv, src, stride, w, h, x, y);
+        for (int n = 0; n < priv->plane_count; n++) {
+            struct texplane *plane = &priv->planes[n];
+            out->planes[n] = plane->locked_rect.pBits;
+            out->stride[n] = plane->locked_rect.Pitch;
+        }
+    } else {
+        if (!priv->locked_rect.pBits) {
+            if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
+                                                  &priv->locked_rect, NULL, 0)))
+            {
+                mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Surface lock failed.\n");
+                return false;
+            }
+        }
 
-    /* Lock the offscreen surface if it's not already locked. */
-    if (!priv->locked_rect.pBits) {
-        if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
-                                              &priv->locked_rect, NULL, 0))) {
-            mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Surface lock failure.\n");
-            return VO_FALSE;
+        uint8_t *base = priv->locked_rect.pBits;
+        size_t stride = priv->locked_rect.Pitch;
+
+        out->planes[0] = base;
+        out->stride[0] = stride;
+
+        if (out->num_planes == 3) {
+            bool swap = priv->movie_src_fmt == MAKEFOURCC('Y','V','1','2');
+
+            size_t uv_stride = stride / 2;
+            uint8_t *u = base + out->h * stride;
+            uint8_t *v = u + (out->h / 2) * uv_stride;
+
+            out->planes[1] = swap ? v : u;
+            out->planes[2] = swap ? u : v;
+
+            out->stride[1] = out->stride[2] = uv_stride;
         }
     }
 
-    uv_stride = priv->locked_rect.Pitch / 2;
-
-    /* Copy Y */
-    dst = priv->locked_rect.pBits;
-    dst = dst + priv->locked_rect.Pitch * y + x;
-    my_src = src[0];
-    memcpy_pic(dst, my_src, w, h, priv->locked_rect.Pitch, stride[0]);
-
-    w /= 2;
-    h /= 2;
-    x /= 2;
-    y /= 2;
-
-    /* Copy U */
-    dst = priv->locked_rect.pBits;
-    dst = dst + priv->locked_rect.Pitch * priv->src_height
-          + uv_stride * y + x;
-    if (priv->movie_src_fmt == MAKEFOURCC('Y','V','1','2'))
-        my_src = src[2];
-    else
-        my_src = src[1];
-
-    memcpy_pic(dst, my_src, w, h, uv_stride, stride[1]);
-
-    /* Copy V */
-    dst = priv->locked_rect.pBits;
-    dst = dst + priv->locked_rect.Pitch * priv->src_height
-          + uv_stride * (priv->src_height / 2) + uv_stride * y + x;
-    if (priv->movie_src_fmt == MAKEFOURCC('Y','V','1','2'))
-        my_src=src[1];
-    else
-        my_src=src[2];
-
-    memcpy_pic(dst, my_src, w, h, uv_stride, stride[2]);
-
-    return 0; /* Success */
+    return true;
 }
 
-static bool get_screenshot_from_surface(d3d_priv *priv, mp_image_t *image)
+static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
-    if (!priv->locked_rect.pBits) {
-        if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
-                                              &priv->locked_rect, NULL, 0))) {
-            mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Surface lock failed.\n");
-            return false;
-        }
-    }
+    d3d_priv *priv = vo->priv;
+    if (!priv->d3d_device)
+        return;
 
-    if (image->flags & MP_IMGFLAG_PLANAR) {
-        char *src;
-        int w = priv->src_width;
-        int h = priv->src_height;
-        int swapped = priv->movie_src_fmt == MAKEFOURCC('Y','V','1','2');
-        int plane1 = swapped ? 2 : 1;
-        int plane2 = swapped ? 1 : 2;
+    struct mp_image buffer;
+    if (!get_video_buffer(priv, &buffer))
+        return;
 
-        int uv_stride = priv->locked_rect.Pitch / 2;
-
-        /* Copy Y */
-        src = priv->locked_rect.pBits;
-        memcpy_pic(image->planes[0], src, w, h, priv->locked_rect.Pitch,
-                   image->stride[0]);
-
-        w /= 2;
-        h /= 2;
-
-        /* Copy U */
-        src = priv->locked_rect.pBits;
-        src = src + priv->locked_rect.Pitch * priv->src_height;
-
-        memcpy_pic(image->planes[plane1], src, w, h, uv_stride,
-                   image->stride[1]);
-
-        /* Copy V */
-        src = priv->locked_rect.pBits;
-        src = src + priv->locked_rect.Pitch * priv->src_height
-            + uv_stride * (priv->src_height / 2);
-
-        memcpy_pic(image->planes[plane2], src, w, h, uv_stride,
-                   image->stride[2]);
-    } else {
-        // packed YUV or RGB
-        memcpy_pic(image->planes[0], priv->locked_rect.pBits, image->stride[0],
-                   image->height, priv->locked_rect.Pitch, image->stride[0]);
-    }
+    copy_mpi(&buffer, mpi);
 
     d3d_unlock_video_objects(priv);
-    return true;
-}
 
-static bool get_screenshot_from_texture(d3d_priv *priv, mp_image_t *image)
-{
-    if (!d3d_lock_video_textures(priv)) {
-        d3d_unlock_video_objects(priv);
-        return false;
+    if (priv->use_textures) {
+        for (int n = 0; n < priv->plane_count; n++) {
+            d3dtex_update(priv, &priv->planes[n].texture);
+        }
     }
 
-    assert(image->num_planes == priv->plane_count);
-
-    for (int n = 0; n < priv->plane_count; n++) {
-        struct texplane *plane = &priv->planes[n];
-
-        int width = priv->src_width >> plane->shift_x;
-        int height = priv->src_height >> plane->shift_y;
-
-        memcpy_pic(image->planes[n], plane->locked_rect.pBits,
-                   width * plane->bytes_per_pixel, height,
-                   image->stride[n], plane->locked_rect.Pitch);
-    }
-
-    return true;
+    d3d_draw_frame(priv);
 }
 
 static mp_image_t *get_screenshot(d3d_priv *priv)
@@ -1770,26 +1635,18 @@ static mp_image_t *get_screenshot(d3d_priv *priv)
     if (!priv->d3d_device)
         return NULL;
 
-    mp_image_t *image = alloc_mpi(priv->src_width, priv->src_height,
-                                  priv->image_format);
-
-    bool res;
-
-    if (priv->use_textures)
-        res = get_screenshot_from_texture(priv, image);
-    else
-        res = get_screenshot_from_surface(priv, image);
-
-    if (!res) {
-        free_mp_image(image);
+    struct mp_image buffer;
+    if (!get_video_buffer(priv, &buffer))
         return NULL;
-    }
 
+    struct mp_image *image = alloc_mpi(buffer.w, buffer.h, buffer.imgfmt);
+    copy_mpi(image, &buffer);
     image->display_w = priv->vo->aspdat.prew;
     image->display_h = priv->vo->aspdat.preh;
 
     mp_image_set_colorspace_details(image, &priv->colorspace);
 
+    d3d_unlock_video_objects(priv);
     return image;
 }
 
