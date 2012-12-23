@@ -54,11 +54,11 @@ struct formatmap_entry {
     int is_rgba;
 };
 const struct formatmap_entry formats[] = {
-    {SDL_PIXELFORMAT_YV12, IMGFMT_YV12, 0},
-    {SDL_PIXELFORMAT_IYUV, IMGFMT_IYUV, 0},
-    {SDL_PIXELFORMAT_YUY2, IMGFMT_YUY2, 0},
+    {SDL_PIXELFORMAT_YV12, IMGFMT_420P, 0},
+    {SDL_PIXELFORMAT_IYUV, IMGFMT_420P, 0},
+    {SDL_PIXELFORMAT_YUY2, IMGFMT_YUYV, 0},
     {SDL_PIXELFORMAT_UYVY, IMGFMT_UYVY, 0},
-    {SDL_PIXELFORMAT_YVYU, IMGFMT_YVYU, 0},
+    //{SDL_PIXELFORMAT_YVYU, IMGFMT_YVYU, 0},
 #if BYTE_ORDER == BIG_ENDIAN
     {SDL_PIXELFORMAT_RGBX8888, IMGFMT_RGBA, 0}, // has no alpha -> bad for OSD
     {SDL_PIXELFORMAT_BGRX8888, IMGFMT_BGRA, 0}, // has no alpha -> bad for OSD
@@ -172,6 +172,7 @@ struct priv {
     int renderer_index;
     SDL_RendererInfo renderer_info;
     SDL_Texture *tex;
+    int tex_swapped;
     mp_image_t texmpi;
     mp_image_t *ssmpi;
     struct mp_rect src_rect;
@@ -427,6 +428,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         return -1;
     }
 
+    vc->tex_swapped = texfmt == SDL_PIXELFORMAT_YV12;
     vc->tex = SDL_CreateTexture(vc->renderer, texfmt,
                                 SDL_TEXTUREACCESS_STREAMING, width, height);
     if (!vc->tex) {
@@ -878,7 +880,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         texmpi->planes[0] = pixels;
         texmpi->stride[0] = pitch;
         if (texmpi->num_planes == 3) {
-            if (texmpi->imgfmt == IMGFMT_YV12) {
+            if (vc->tex_swapped) {
                 texmpi->planes[2] =
                     ((Uint8 *) texmpi->planes[0] + texmpi->h * pitch);
                 texmpi->stride[2] = pitch / 2;

@@ -1203,6 +1203,41 @@ const m_option_type_t m_option_type_imgfmt = {
     .copy  = copy_opt,
 };
 
+static int parse_fourcc(const m_option_t *opt, struct bstr name,
+                        struct bstr param, void *dst)
+{
+    if (param.len == 0)
+        return M_OPT_MISSING_PARAM;
+
+    unsigned int value;
+
+    if (param.len == 4) {
+        uint8_t *s = param.start;
+        value = s[0] | (s[1] << 8) | (s[2] << 16) | (s[3] << 24);
+    } else {
+        bstr rest;
+        value = bstrtoll(param, &rest, 16);
+        if (rest.len != 0) {
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                   "Option %.*s: invalid FourCC: '%.*s'\n",
+                   BSTR_P(name), BSTR_P(param));
+            return M_OPT_INVALID;
+        }
+    }
+
+    if (dst)
+        *((unsigned int *)dst) = value;
+
+    return 1;
+}
+
+const m_option_type_t m_option_type_fourcc = {
+    .name  = "FourCC",
+    .size  = sizeof(unsigned int),
+    .parse = parse_fourcc,
+    .copy  = copy_opt,
+};
+
 #include "audio/format.h"
 
 static int parse_afmt(const m_option_t *opt, struct bstr name,

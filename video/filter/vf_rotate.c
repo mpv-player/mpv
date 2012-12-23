@@ -111,14 +111,10 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
     if(IMGFMT_IS_RGB(fmt) || IMGFMT_IS_BGR(fmt)) return vf_next_query_format(vf, fmt);
     // we can support only symmetric (chroma_x_shift==chroma_y_shift) YUV formats:
     switch(fmt) {
-	case IMGFMT_YV12:
-	case IMGFMT_I420:
-	case IMGFMT_IYUV:
-	case IMGFMT_YVU9:
-//	case IMGFMT_IF09:
 	case IMGFMT_Y8:
-	case IMGFMT_Y800:
-	case IMGFMT_444P:
+        case IMGFMT_444P:
+        case IMGFMT_420P:
+        case IMGFMT_410P:
 	    return vf_next_query_format(vf, fmt);
     }
     return 0;

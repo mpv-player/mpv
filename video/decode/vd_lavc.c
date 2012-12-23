@@ -244,7 +244,6 @@ static int init(sh_video_t *sh)
     AVCodec *lavc_codec = NULL;
 
     ctx = sh->context = talloc_zero(NULL, vd_ffmpeg_ctx);
-    ctx->rawvideo_fmt = PIX_FMT_NONE;
     ctx->non_dr1_pool = talloc_steal(ctx, mp_image_pool_new(16));
 
     if (sh->codec->dll) {
@@ -264,10 +263,6 @@ static int init(sh_video_t *sh)
             uninit(sh);
             return 0;
         }
-    } else if (!IMGFMT_IS_HWACCEL(sh->format)) {
-        ctx->rawvideo_fmt = imgfmt2pixfmt(sh->format);
-        if (ctx->rawvideo_fmt != PIX_FMT_NONE)
-            lavc_codec = avcodec_find_decoder_by_name("rawvideo");
     }
     if (!lavc_codec) {
         uninit(sh);
@@ -358,11 +353,7 @@ static int init_avctx(sh_video_t *sh, AVCodec *lavc_codec, struct hwdec *hwdec)
     if (lavc_param->gray)
         avctx->flags |= CODEC_FLAG_GRAY;
     avctx->flags2 |= lavc_param->fast;
-    if (ctx->rawvideo_fmt == PIX_FMT_NONE) {
-        avctx->codec_tag = sh->format;
-    } else {
-        avctx->pix_fmt = ctx->rawvideo_fmt;
-    }
+    avctx->codec_tag = sh->format;
     if (sh->gsh->lavf_codec_tag)
         avctx->codec_tag = sh->gsh->lavf_codec_tag;
     avctx->stream_codec_tag = sh->video.fccHandler;
@@ -438,6 +429,14 @@ static int init_avctx(sh_video_t *sh, AVCodec *lavc_codec, struct hwdec *hwdec)
                                           FF_INPUT_BUFFER_PADDING_SIZE);
             memcpy(avctx->extradata, sh->bih + 1, avctx->extradata_size);
         }
+        break;
+
+    case MKTAG('M', 'P', 'v', 'f'):
+        avctx->codec_tag = 0;
+        avctx->pix_fmt = imgfmt2pixfmt(sh->imgfmt);
+        break;
+    case MKTAG('M', 'P', 'r', 'v'):
+        avctx->codec_tag = sh->imgfmt;
         break;
 
     default:

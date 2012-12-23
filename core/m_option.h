@@ -53,6 +53,7 @@ extern const m_option_type_t m_option_type_print_func_param;
 extern const m_option_type_t m_option_type_subconfig;
 extern const m_option_type_t m_option_type_subconfig_struct;
 extern const m_option_type_t m_option_type_imgfmt;
+extern const m_option_type_t m_option_type_fourcc;
 extern const m_option_type_t m_option_type_afmt;
 extern const m_option_type_t m_option_type_color;
 
@@ -177,6 +178,7 @@ struct m_sub_options {
 #define CONF_TYPE_SUBCONFIG     (&m_option_type_subconfig)
 #define CONF_TYPE_STRING_LIST   (&m_option_type_string_list)
 #define CONF_TYPE_IMGFMT        (&m_option_type_imgfmt)
+#define CONF_TYPE_FOURCC        (&m_option_type_fourcc)
 #define CONF_TYPE_AFMT          (&m_option_type_afmt)
 #define CONF_TYPE_SPAN          (&m_option_type_span)
 #define CONF_TYPE_OBJ_SETTINGS_LIST (&m_option_type_obj_settings_list)
@@ -198,6 +200,7 @@ union m_option_value {
     char *string;
     char **string_list;
     int imgfmt;
+    unsigned int fourcc;
     int afmt;
     m_span_t span;
     m_obj_settings_t *obj_settings_list;

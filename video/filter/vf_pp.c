@@ -72,11 +72,9 @@ static void uninit(struct vf_instance *vf){
 
 static int query_format(struct vf_instance *vf, unsigned int fmt){
     switch(fmt){
-    case IMGFMT_YV12:
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
     case IMGFMT_444P:
     case IMGFMT_422P:
+    case IMGFMT_420P:
     case IMGFMT_411P:
 	return vf_next_query_format(vf,fmt);
     }
@@ -133,9 +131,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 extern int divx_quality;
 
 static const unsigned int fmt_list[]={
-    IMGFMT_YV12,
-    IMGFMT_I420,
-    IMGFMT_IYUV,
+    IMGFMT_420P,
     IMGFMT_444P,
     IMGFMT_422P,
     IMGFMT_411P,
@@ -155,7 +151,7 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->priv->context=NULL;
 
     // check csp:
-    vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_YV12);
+    vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_420P);
     if(!vf->priv->outfmt) return 0; // no csp match :(
 
     char *name = args ? args : "de";

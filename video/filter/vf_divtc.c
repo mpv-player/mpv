@@ -577,11 +577,10 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
    {
    switch(fmt)
       {
-      case IMGFMT_444P: case IMGFMT_IYUV: case IMGFMT_RGB24:
+      case IMGFMT_444P: case IMGFMT_RGB24:
       case IMGFMT_422P: case IMGFMT_UYVY: case IMGFMT_BGR24:
-      case IMGFMT_411P: case IMGFMT_YUY2: case IMGFMT_IF09:
-      case IMGFMT_YV12: case IMGFMT_I420: case IMGFMT_YVU9:
-      case IMGFMT_IUYV: case IMGFMT_Y800: case IMGFMT_Y8:
+      case IMGFMT_411P: case IMGFMT_YUYV: case IMGFMT_410P:
+      case IMGFMT_420P: case IMGFMT_Y8:
 	 return vf_next_query_format(vf,fmt);
       }
 

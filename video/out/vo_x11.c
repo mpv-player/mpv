@@ -536,9 +536,7 @@ static int query_format(struct vo *vo, uint32_t format)
     }
 
     switch (format) {
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
-    case IMGFMT_YV12:
+    case IMGFMT_420P:
         return VFCAP_CSP_SUPPORTED | VFCAP_OSD;
     }
     return 0;

@@ -141,13 +141,13 @@ int glFindFormat(uint32_t fmt, int have_texture_rg, int *bpp, GLint *gl_texfmt,
         else if (IMGFMT_IS_YUVP16_BE(fmt))
             fmt = IMGFMT_420P16_BE;
         else
-            fmt = IMGFMT_YV12;
+            fmt = IMGFMT_420P;
     }
 
     *bpp = IMGFMT_IS_BGR(fmt) ? IMGFMT_BGR_DEPTH(fmt) : IMGFMT_RGB_DEPTH(fmt);
     *gl_texfmt = 3;
     switch (fmt) {
-    case IMGFMT_RGB48NE:
+    case IMGFMT_RGB48:
         *gl_format = GL_RGB;
         *gl_type = GL_UNSIGNED_SHORT;
         break;
@@ -167,9 +167,8 @@ int glFindFormat(uint32_t fmt, int have_texture_rg, int *bpp, GLint *gl_texfmt,
         *gl_format = have_texture_rg ? GL_RED : GL_LUMINANCE;
         *gl_type = GL_UNSIGNED_SHORT;
         break;
-    case IMGFMT_YV12:
+    case IMGFMT_420P:
         supported = 0; // no native YV12 support
-    case IMGFMT_Y800:
     case IMGFMT_Y8:
         *gl_texfmt = 1;
         *bpp = 8;
@@ -177,9 +176,6 @@ int glFindFormat(uint32_t fmt, int have_texture_rg, int *bpp, GLint *gl_texfmt,
         *gl_type = GL_UNSIGNED_BYTE;
         break;
     case IMGFMT_UYVY:
-    // IMGFMT_YUY2 would be more logical for the _REV format,
-    // but gives clearly swapped colors.
-    case IMGFMT_YVYU:
         *gl_texfmt = GL_YCBCR_MESA;
         *bpp = 16;
         *gl_format = GL_YCBCR_MESA;

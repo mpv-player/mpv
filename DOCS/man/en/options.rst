@@ -1605,10 +1605,11 @@
     :sqcif|qcif|cif|4cif|pal|ntsc: set standard image size
     :w=<value>:                    image width in pixels
     :h=<value>:                    image height in pixels
-    :i420|yv12|yuy2|y8:            set colorspace
     :format=<value>:               colorspace (fourcc) in hex or string
-                                   constant. Use ``--rawvideo=format=help``
-                                   for a list of possible strings.
+                                   constant.
+    :mp-format=<value>:            colorspace by internal video format
+                                   Use ``--rawvideo=mp-format=help``
+                                   for a list of possible formats.
     :size=<value>:                 frame size in Bytes
 
     *EXAMPLE*:

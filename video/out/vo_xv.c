@@ -47,6 +47,7 @@
 #include "vo.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"
+#include "video/img_fourcc.h"
 #include "x11_common.h"
 #include "video/memcpy_pic.h"
 #include "sub/sub.h"
@@ -88,9 +89,30 @@ struct xvctx {
 #endif
 };
 
+struct fmt_entry {
+    int imgfmt;
+    int fourcc;
+};
+static const struct fmt_entry fmt_table[] = {
+    {IMGFMT_420P,       MP_FOURCC_YV12},
+    {IMGFMT_420P,       MP_FOURCC_I420},
+    {IMGFMT_YUYV,       MP_FOURCC_YUY2},
+    {IMGFMT_UYVY,       MP_FOURCC_UYVY},
+    {0}
+};
+
 static void allocate_xvimage(struct vo *, int);
 static void deallocate_xvimage(struct vo *vo, int foo);
 static struct mp_image get_xv_buffer(struct vo *vo, int buf_index);
+
+static int find_xv_format(int imgfmt)
+{
+    for (int n = 0; fmt_table[n].imgfmt; n++) {
+        if (fmt_table[n].imgfmt == imgfmt)
+            return fmt_table[n].fourcc;
+    }
+    return 0;
+}
 
 static void read_xv_csp(struct vo *vo)
 {
@@ -158,7 +180,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         mp_msg(MSGT_VO, MSGL_V, "Xvideo image format: 0x%x (%4.4s) %s\n",
                ctx->fo[i].id, (char *) &ctx->fo[i].id,
                (ctx->fo[i].format == XvPacked) ? "packed" : "planar");
-        if (ctx->fo[i].id == format)
+        if (ctx->fo[i].id == find_xv_format(format))
             ctx->xv_format = ctx->fo[i].id;
     }
     if (!ctx->xv_format)
@@ -320,7 +342,7 @@ static struct mp_image get_xv_buffer(struct vo *vo, int buf_index)
     mp_image_set_size(&img, ctx->image_width, ctx->image_height);
     mp_image_setfmt(&img, ctx->image_format);
 
-    bool swapuv = ctx->image_format == IMGFMT_YV12;
+    bool swapuv = ctx->xv_format == MP_FOURCC_YV12;
     for (int n = 0; n < img.num_planes; n++) {
         int sn = n > 0 &&  swapuv ? (n == 1 ? 2 : 1) : n;
         img.planes[n] = xv_image->data + xv_image->offsets[sn];
@@ -417,10 +439,12 @@ static int query_format(struct vo *vo, uint32_t format)
     uint32_t i;
     int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD;
 
-    /* check image formats */
-    for (i = 0; i < ctx->formats; i++) {
-        if (ctx->fo[i].id == format)
-            return flag;        //xv_format = fo[i].id;
+    int fourcc = find_xv_format(format);
+    if (fourcc) {
+        for (i = 0; i < ctx->formats; i++) {
+            if (ctx->fo[i].id == fourcc)
+                return flag;
+        }
     }
     return 0;
 }

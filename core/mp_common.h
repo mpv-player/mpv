@@ -28,6 +28,9 @@
 // both int64_t and double should be able to represent this exactly
 #define MP_NOPTS_VALUE (-1LL<<63)
 
+#define MP_CONCAT_(a, b) a ## b
+#define MP_CONCAT(a, b) MP_CONCAT_(a, b)
+
 #define ROUND(x) ((int)((x) < 0 ? (x) - 0.5 : (x) + 0.5))
 
 extern const char *mplayer_version;

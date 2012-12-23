@@ -66,7 +66,7 @@ static int config(struct vf_instance *vf,
     struct MPOpts *opts = vf->opts;
     mp_image_t test_mpi;
     mp_image_setfmt(&test_mpi, outfmt);
-    if (outfmt == IMGFMT_IF09 || !test_mpi.bpp) return 0;
+    if (test_mpi.num_planes > 3 || !test_mpi.bpp) return 0;
     vf->priv->exp_x = vf->priv->cfg_exp_x;
     vf->priv->exp_y = vf->priv->cfg_exp_y;
     vf->priv->exp_w = vf->priv->cfg_exp_w;

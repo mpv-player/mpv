@@ -21,7 +21,6 @@ typedef struct ffmpeg_ctx {
     double inv_qp_sum;
     AVRational last_sample_aspect_ratio;
     enum AVDiscard skip_frame;
-    int rawvideo_fmt;
     AVCodec *software_fallback;
     struct FramePool *dr1_buffer_pool;
     struct mp_image_pool *non_dr1_pool;

@@ -17,132 +17,86 @@
  */
 
 #include <assert.h>
+#include <string.h>
 
 #include <libavutil/pixfmt.h>
 #include <libavutil/pixdesc.h>
 
-#include "config.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/fmt-conversion.h"
 
-#include <string.h>
+#define FMT(string, id)                                 \
+    {string,            id},
+
+#define FMT_ENDIAN(string, id)                          \
+    {string,            id},                            \
+    {string "le",       MP_CONCAT(id, _LE)},            \
+    {string "be",       MP_CONCAT(id, _BE)},            \
 
 struct mp_imgfmt_entry mp_imgfmt_list[] = {
-    {"444p16le", IMGFMT_444P16_LE},
-    {"444p16be", IMGFMT_444P16_BE},
-    {"444p14le", IMGFMT_444P14_LE},
-    {"444p14be", IMGFMT_444P14_BE},
-    {"444p12le", IMGFMT_444P12_LE},
-    {"444p12be", IMGFMT_444P12_BE},
-    {"444p10le", IMGFMT_444P10_LE},
-    {"444p10be", IMGFMT_444P10_BE},
-    {"444p9le", IMGFMT_444P9_LE},
-    {"444p9be", IMGFMT_444P9_BE},
-    {"422p16le", IMGFMT_422P16_LE},
-    {"422p16be", IMGFMT_422P16_BE},
-    {"422p14le", IMGFMT_422P14_LE},
-    {"422p14be", IMGFMT_422P14_BE},
-    {"422p12le", IMGFMT_422P12_LE},
-    {"422p12be", IMGFMT_422P12_BE},
-    {"422p10le", IMGFMT_422P10_LE},
-    {"422p10be", IMGFMT_422P10_BE},
-    {"422p9le",  IMGFMT_422P9_LE},
-    {"422p9be",  IMGFMT_422P9_BE},
-    {"420p16le", IMGFMT_420P16_LE},
-    {"420p16be", IMGFMT_420P16_BE},
-    {"420p14le", IMGFMT_420P14_LE},
-    {"420p14be", IMGFMT_420P14_BE},
-    {"420p12le", IMGFMT_420P12_LE},
-    {"420p12be", IMGFMT_420P12_BE},
-    {"420p10le", IMGFMT_420P10_LE},
-    {"420p10be", IMGFMT_420P10_BE},
-    {"420p9le", IMGFMT_420P9_LE},
-    {"420p9be", IMGFMT_420P9_BE},
-    {"444p16", IMGFMT_444P16},
-    {"444p14", IMGFMT_444P14},
-    {"444p12", IMGFMT_444P12},
-    {"444p10", IMGFMT_444P10},
-    {"444p9", IMGFMT_444P9},
-    {"422p16", IMGFMT_422P16},
-    {"422p14", IMGFMT_422P14},
-    {"422p12", IMGFMT_422P12},
-    {"422p10", IMGFMT_422P10},
-    {"420p14", IMGFMT_420P14},
-    {"420p12", IMGFMT_420P12},
-    {"420p10", IMGFMT_420P10},
-    {"420p9", IMGFMT_420P9},
-    {"420p16", IMGFMT_420P16},
-    {"420a", IMGFMT_420A},
-    {"444p", IMGFMT_444P},
-    {"422p", IMGFMT_422P},
-    {"411p", IMGFMT_411P},
-    {"440p", IMGFMT_440P},
-    {"yuy2", IMGFMT_YUY2},
-    {"yvyu", IMGFMT_YVYU},
-    {"uyvy", IMGFMT_UYVY},
-    {"yvu9", IMGFMT_YVU9},
-    {"if09", IMGFMT_IF09},
-    {"yv12", IMGFMT_YV12},
-    {"i420", IMGFMT_I420},
-    {"iyuv", IMGFMT_IYUV},
-    {"clpl", IMGFMT_CLPL},
-    {"hm12", IMGFMT_HM12},
-    {"y800", IMGFMT_Y800},
-    {"y8", IMGFMT_Y8},
-    {"y16ne", IMGFMT_Y16},
-    {"y16le", IMGFMT_Y16LE},
-    {"y16be", IMGFMT_Y16BE},
-    {"nv12", IMGFMT_NV12},
-    {"nv21", IMGFMT_NV21},
-    {"bgr24", IMGFMT_BGR24},
-    {"bgr32", IMGFMT_BGR32},
-    {"bgr16", IMGFMT_BGR16},
-    {"bgr15", IMGFMT_BGR15},
-    {"bgr12", IMGFMT_BGR12},
-    {"bgr8", IMGFMT_BGR8},
-    {"bgr4", IMGFMT_BGR4},
-    {"bg4b", IMGFMT_BG4B},
-    {"bgr1", IMGFMT_BGR1},
-    {"rgb48be", IMGFMT_RGB48BE},
-    {"rgb48le", IMGFMT_RGB48LE},
-    {"rgb48ne", IMGFMT_RGB48NE},
-    {"rgb24", IMGFMT_RGB24},
-    {"rgb32", IMGFMT_RGB32},
-    {"rgb16", IMGFMT_RGB16},
-    {"rgb15", IMGFMT_RGB15},
-    {"rgb12", IMGFMT_RGB12},
-    {"rgb8", IMGFMT_RGB8},
-    {"pal8", IMGFMT_PAL8},
-    {"rgb4", IMGFMT_RGB4},
-    {"rg4b", IMGFMT_RG4B},
-    {"rgb1", IMGFMT_RGB1},
-    {"rgba", IMGFMT_RGBA},
-    {"argb", IMGFMT_ARGB},
-    {"bgra", IMGFMT_BGRA},
-    {"abgr", IMGFMT_ABGR},
-    {"bgr0", IMGFMT_BGR0},
-    {"gbrp", IMGFMT_GBRP},
-    {"mjpeg", IMGFMT_MJPEG},
-    {"mjpg", IMGFMT_MJPEG},
-    {"vdpau_h264", IMGFMT_VDPAU_H264},
-    {"vdpau_mpeg1", IMGFMT_VDPAU_MPEG1},
-    {"vdpau_mpeg2", IMGFMT_VDPAU_MPEG2},
-    {"vdpau_mpeg4", IMGFMT_VDPAU_MPEG4},
-    {"vdpau_wmv3", IMGFMT_VDPAU_WMV3},
-    {"vdpau_vc1", IMGFMT_VDPAU_VC1},
+    FMT("y8",                   IMGFMT_Y8)
+    FMT_ENDIAN("y16",           IMGFMT_Y16)
+    FMT("yuyv",                 IMGFMT_YUYV)
+    FMT("uyvy",                 IMGFMT_UYVY)
+    FMT("nv12",                 IMGFMT_NV12)
+    FMT("nv21",                 IMGFMT_NV21)
+    FMT("444p",                 IMGFMT_444P)
+    FMT("422p",                 IMGFMT_422P)
+    FMT("440p",                 IMGFMT_440P)
+    FMT("420p",                 IMGFMT_420P)
+    FMT("yv12",                 IMGFMT_420P) // old alias for UI
+    FMT("411p",                 IMGFMT_411P)
+    FMT("410p",                 IMGFMT_410P)
+    FMT_ENDIAN("444p16",        IMGFMT_444P16)
+    FMT_ENDIAN("444p14",        IMGFMT_444P14)
+    FMT_ENDIAN("444p12",        IMGFMT_444P12)
+    FMT_ENDIAN("444p10",        IMGFMT_444P10)
+    FMT_ENDIAN("444p9",         IMGFMT_444P9)
+    FMT_ENDIAN("422p16",        IMGFMT_422P16)
+    FMT_ENDIAN("422p14",        IMGFMT_422P14)
+    FMT_ENDIAN("422p12",        IMGFMT_422P12)
+    FMT_ENDIAN("422p10",        IMGFMT_422P10)
+    FMT_ENDIAN("422p9",         IMGFMT_422P9)
+    FMT_ENDIAN("420p16",        IMGFMT_420P16)
+    FMT_ENDIAN("420p14",        IMGFMT_420P14)
+    FMT_ENDIAN("420p12",        IMGFMT_420P12)
+    FMT_ENDIAN("420p10",        IMGFMT_420P10)
+    FMT_ENDIAN("420p9",         IMGFMT_420P9)
+    FMT("420ap",                IMGFMT_420AP)
+    FMT("argb",                 IMGFMT_ARGB)
+    FMT("bgra",                 IMGFMT_BGRA)
+    FMT("bgr0",                 IMGFMT_BGR0)
+    FMT("abgr",                 IMGFMT_ABGR)
+    FMT("rgba",                 IMGFMT_RGBA)
+    FMT("rgb32",                IMGFMT_RGB32)
+    FMT("bgr32",                IMGFMT_BGR32)
+    FMT("bgr24",                IMGFMT_BGR24)
+    FMT("rgb24",                IMGFMT_RGB24)
+    FMT_ENDIAN("rgb48",         IMGFMT_RGB48)
+    FMT("rgb8",                 IMGFMT_RGB8)
+    FMT("bgr8",                 IMGFMT_BGR8)
+    FMT("rgb4_byte",            IMGFMT_RGB4_BYTE)
+    FMT("bgr4_byte",            IMGFMT_BGR4_BYTE)
+    FMT("rgb4",                 IMGFMT_RGB4)
+    FMT("bgr4",                 IMGFMT_BGR4)
+    FMT("mono",                 IMGFMT_MONO)
+    FMT_ENDIAN("rgb12",         IMGFMT_RGB12)
+    FMT_ENDIAN("rgb15",         IMGFMT_RGB15)
+    FMT_ENDIAN("rgb16",         IMGFMT_RGB16)
+    FMT_ENDIAN("bgr12",         IMGFMT_BGR12)
+    FMT_ENDIAN("bgr15",         IMGFMT_BGR15)
+    FMT_ENDIAN("bgr16",         IMGFMT_BGR16)
+    FMT("pal8",                 IMGFMT_PAL8)
+    FMT("gbrp",                 IMGFMT_GBRP)
+    FMT("vdpau_mpeg1",          IMGFMT_VDPAU_MPEG1)
+    FMT("vdpau_mpeg2",          IMGFMT_VDPAU_MPEG2)
+    FMT("vdpau_h264",           IMGFMT_VDPAU_H264)
+    FMT("vdpau_wmv3",           IMGFMT_VDPAU_WMV3)
+    FMT("vdpau_vc1",            IMGFMT_VDPAU_VC1)
+    FMT("vdpau_mpeg4",          IMGFMT_VDPAU_MPEG4)
     {0}
 };
-
-const char *vo_format_name(int format)
-{
-    const char *name = mp_imgfmt_to_name(format);
-    if (name)
-        return name;
-    static char unknown_format[20];
-    snprintf(unknown_format, 20, "Unknown 0x%04x", format);
-    return unknown_format;
-}
 
 int mp_get_chroma_shift(int format, int *x_shift, int *y_shift,
                         int *component_bits)
@@ -162,12 +116,6 @@ int mp_get_chroma_shift(int format, int *x_shift, int *y_shift,
 
 unsigned int mp_imgfmt_from_name(bstr name, bool allow_hwaccel)
 {
-    if (bstr_startswith0(name, "0x")) {
-        bstr rest;
-        unsigned int fmt = bstrtoll(name, &rest, 16);
-        if (rest.len == 0)
-            return fmt;
-    }
     for(struct mp_imgfmt_entry *p = mp_imgfmt_list; p->name; ++p) {
         if(!bstrcasecmp0(name, p->name)) {
             if (!allow_hwaccel && IMGFMT_IS_HWACCEL(p->fmt))
@@ -241,8 +189,15 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
             desc.num_planes++;
     }
 
-    if (desc.bpp[0] <= 8 || !(pd->flags & PIX_FMT_BE))
-        desc.flags |= MP_IMGFLAG_NE;
+    // Packed RGB formats are the only formats that have less than 8 bits per
+    // component, and still require endian dependent access.
+    if (pd->comp[0].depth_minus1 + 1 <= 8 &&
+        !(mpfmt >= IMGFMT_RGB12_LE || mpfmt <= IMGFMT_BGR16_BE))
+    {
+        desc.flags |= MP_IMGFLAG_LE | MP_IMGFLAG_BE;
+    } else {
+        desc.flags |= (pd->flags & PIX_FMT_BE) ? MP_IMGFLAG_BE : MP_IMGFLAG_LE;
+    }
 
     desc.plane_bits = planedepth[0];
 
@@ -297,20 +252,15 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
     // compatibility with old mp_image_setfmt()
 
     switch (desc.id) {
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
-        desc.flags |= MP_IMGFLAG_SWAPPED; // completely pointless
-        break;
     case IMGFMT_UYVY:
         desc.flags |= MP_IMGFLAG_SWAPPED; // for vf_mpi_clear()
         /* fallthrough */
-    case IMGFMT_YUY2:
+    case IMGFMT_YUYV:
         desc.chroma_ys = 1; // ???
         break;
     case IMGFMT_Y8:
-    case IMGFMT_Y800:
-    case IMGFMT_Y16LE:
-    case IMGFMT_Y16BE:
+    case IMGFMT_Y16_LE:
+    case IMGFMT_Y16_BE:
         // probably for vo_opengl, and possibly more code using Y8
         desc.chroma_xs = desc.chroma_ys = 31;
         break;
@@ -324,7 +274,6 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
         break;
     case IMGFMT_RGB4:
     case IMGFMT_BGR4:
-    case IMGFMT_BGR1:
         desc.flags ^= MP_IMGFLAG_SWAPPED; // ???
         break;
     case IMGFMT_BGR0:
@@ -334,6 +283,12 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
 
     if (pd->flags & PIX_FMT_HWACCEL)
         desc.chroma_xs = desc.chroma_ys = 0;
+
+    if (!(pd->flags & PIX_FMT_HWACCEL) && !(pd->flags & PIX_FMT_BITSTREAM)) {
+        desc.flags |= MP_IMGFLAG_BYTE_ALIGNED;
+        for (int p = 0; p < desc.num_planes; p++)
+            desc.bytes[p] = desc.bpp[p] / 8;
+    }
 
     for (int p = 0; p < desc.num_planes; p++) {
         desc.xs[p] = (p == 1 || p == 2) ? desc.chroma_xs : 0;

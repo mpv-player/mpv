@@ -21,7 +21,7 @@
 #include "config.h"
 
 #include <stdio.h>
-#include "video/img_format.h"
+#include "video/img_fourcc.h"
 #include "tv.h"
 
 static tvi_handle_t *tvi_init_dummy(tv_param_t* tv_param);
@@ -74,14 +74,13 @@ static int control(priv_t *priv, int cmd, void *arg)
 	case TVI_CONTROL_IS_VIDEO:
 	    return TVI_CONTROL_TRUE;
 	case TVI_CONTROL_VID_GET_FORMAT:
-//	    *(int *)arg = IMGFMT_YV12;
-	    *(int *)arg = IMGFMT_YV12;
+	    *(int *)arg = MP_FOURCC_YV12;
 	    return TVI_CONTROL_TRUE;
 	case TVI_CONTROL_VID_SET_FORMAT:
 	{
 //	    int req_fmt = *(int *)arg;
 	    int req_fmt = *(int *)arg;
-	    if (req_fmt != IMGFMT_YV12)
+	    if (req_fmt != MP_FOURCC_YV12)
 		return TVI_CONTROL_FALSE;
 	    return TVI_CONTROL_TRUE;
 	}

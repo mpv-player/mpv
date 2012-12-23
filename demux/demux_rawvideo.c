@@ -30,8 +30,10 @@
 #include "stheader.h"
 
 #include "video/img_format.h"
+#include "video/img_fourcc.h"
 
-static int format = IMGFMT_I420;
+static int format = MP_FOURCC_I420;
+static int mp_format;
 static int size_id = 0;
 static int width = 0;
 static int height = 0;
@@ -51,15 +53,8 @@ const m_option_t demux_rawvideo_opts[] = {
   { "16cif", &size_id, CONF_TYPE_FLAG,0,0,7, NULL },
   { "sif", &size_id, CONF_TYPE_FLAG,0,0,8, NULL },
   // format:
-  { "format", &format, CONF_TYPE_IMGFMT, 0, 0 , 0, NULL },
-  // below options are obsolete
-  { "i420", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_I420, NULL },
-  { "yv12", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_YV12, NULL },
-  { "nv12", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_NV12, NULL },
-  { "hm12", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_HM12, NULL },
-  { "yuy2", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_YUY2, NULL },
-  { "uyvy", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_UYVY, NULL },
-  { "y8", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_Y8, NULL },
+  { "format", &format, CONF_TYPE_FOURCC, 0, 0 , 0, NULL },
+  { "mp-format", &mp_format, CONF_TYPE_IMGFMT, 0, 0 , 0, NULL },
   // misc:
   { "fps", &fps, CONF_TYPE_FLOAT,CONF_RANGE,0.001,1000, NULL },
   { "size", &imgsize, CONF_TYPE_INT, CONF_RANGE, 1 , 8192*8192*4, NULL },
@@ -86,30 +81,58 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
       return 0;
   }
 
-  if(!imgsize)
-  switch(format){
-  case IMGFMT_I420:
-  case IMGFMT_IYUV:
-  case IMGFMT_NV12:
-  case IMGFMT_HM12:
-  case IMGFMT_YV12: imgsize=width*height+2*(width>>1)*(height>>1);break;
-  case IMGFMT_YUY2:
-  case IMGFMT_UYVY: imgsize=width*height*2;break;
-  case IMGFMT_Y800:
-  case IMGFMT_Y8: imgsize=width*height;break;
-  default:
-      if (IMGFMT_IS_RGB(format))
-        imgsize = width * height * ((IMGFMT_RGB_DEPTH(format) + 7) >> 3);
-      else if (IMGFMT_IS_BGR(format))
-        imgsize = width * height * ((IMGFMT_BGR_DEPTH(format) + 7) >> 3);
-      else {
+  int tag, fmt;
+  if (mp_format) {
+    tag = MP_FOURCC_IMGFMT;
+    fmt = mp_format;
+    if (!imgsize) {
+      struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(mp_format);
+      for (int p = 0; p < desc.num_planes; p++) {
+        imgsize += ((width >> desc.xs[p]) * (height >> desc.ys[p]) *
+                    desc.bpp[p] + 7) / 8;
+      }
+    }
+  } else {
+    tag = MP_FOURCC_RAWVIDEO;
+    fmt = format;
+  }
+
+  if (!imgsize) {
+    int bpp = 0;
+    switch(format){
+    case MP_FOURCC_I420: case MP_FOURCC_IYUV:
+    case MP_FOURCC_NV12: case MP_FOURCC_NV21:
+    case MP_FOURCC_HM12:
+    case MP_FOURCC_YV12:
+      bpp = 12;
+      break;
+    case MP_FOURCC_RGB12: case MP_FOURCC_BGR12:
+    case MP_FOURCC_RGB15: case MP_FOURCC_BGR15:
+    case MP_FOURCC_RGB16: case MP_FOURCC_BGR16:
+    case MP_FOURCC_YUY2:  case MP_FOURCC_UYVY:
+      bpp = 16;
+      break;
+    case MP_FOURCC_RGB8: case MP_FOURCC_BGR8:
+    case MP_FOURCC_Y800: case MP_FOURCC_Y8:
+      bpp = 8;
+      break;
+    case MP_FOURCC_RGB24: case MP_FOURCC_BGR24:
+      bpp = 24;
+      break;
+    case MP_FOURCC_RGB32: case MP_FOURCC_BGR32:
+      bpp = 32;
+      break;
+    }
+    if (!bpp) {
       mp_msg(MSGT_DEMUX,MSGL_ERR,"rawvideo: img size not specified and unknown format!\n");
       return 0;
-      }
+    }
+    imgsize = width * height * bpp / 8;
   }
 
   sh_video = new_sh_video(demuxer,0);
-  sh_video->format=format;
+  sh_video->format=tag;
+  sh_video->imgfmt=fmt;
   sh_video->fps=fps;
   sh_video->frametime=1.0/fps;
   sh_video->disp_w=width;

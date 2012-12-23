@@ -756,15 +756,13 @@ static int initialize_vdpau_objects(struct vo *vo)
 
     vc->vdp_chroma_type = VDP_CHROMA_TYPE_420;
     switch (vc->image_format) {
-    case IMGFMT_YV12:
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
+    case IMGFMT_420P:
         vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YV12;
         break;
     case IMGFMT_NV12:
         vc->vdp_pixel_format = VDP_YCBCR_FORMAT_NV12;
         break;
-    case IMGFMT_YUY2:
+    case IMGFMT_YUYV:
         vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YUYV;
         vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
         break;
@@ -1428,11 +1426,9 @@ static int query_format(struct vo *vo, uint32_t format)
     int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
         | VFCAP_OSD | VFCAP_FLIP;
     switch (format) {
-    case IMGFMT_YV12:
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
+    case IMGFMT_420P:
     case IMGFMT_NV12:
-    case IMGFMT_YUY2:
+    case IMGFMT_YUYV:
     case IMGFMT_UYVY:
     case IMGFMT_VDPAU_MPEG1:
     case IMGFMT_VDPAU_MPEG2:

@@ -248,7 +248,7 @@ static int query_format(struct vo *vo, uint32_t format)
     const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
                       VFCAP_OSD;
     switch (format) {
-        case IMGFMT_YUY2:
+        case IMGFMT_YUYV:
             p->pixelFormat = kYUVSPixelFormat;
             return flags;
 
@@ -346,7 +346,7 @@ static int get_image_fmt(struct vo *vo)
 {
     struct priv *p = vo->priv;
     switch (p->pixelFormat) {
-        case kYUVSPixelFormat:   return IMGFMT_YUY2;
+        case kYUVSPixelFormat:   return IMGFMT_YUYV;
         case k24RGBPixelFormat:  return IMGFMT_RGB24;
         case k32ARGBPixelFormat: return IMGFMT_ARGB;
         case k32BGRAPixelFormat: return IMGFMT_BGRA;

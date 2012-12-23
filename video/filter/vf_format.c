@@ -35,7 +35,7 @@ static struct vf_priv_s {
     unsigned int fmt;
     unsigned int outfmt;
 } const vf_priv_dflt = {
-  IMGFMT_YUY2,
+  IMGFMT_YUYV,
   0
 };
 

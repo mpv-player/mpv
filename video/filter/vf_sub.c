@@ -61,8 +61,6 @@ static int config(struct vf_instance *vf,
                   unsigned int flags, unsigned int outfmt)
 {
     struct MPOpts *opts = vf->opts;
-    if (outfmt == IMGFMT_IF09)
-        return 0;
 
     vf->priv->outh = height + vf->priv->opt_top_margin +
                      vf->priv->opt_bottom_margin;
@@ -178,9 +176,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
     switch (fmt) {
-    case IMGFMT_YV12:
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
+    case IMGFMT_420P:
         return vf_next_query_format(vf, vf->priv->outfmt);
     }
     return 0;
@@ -209,15 +205,13 @@ static void uninit(struct vf_instance *vf)
 }
 
 static const unsigned int fmt_list[] = {
-    IMGFMT_YV12,
-    IMGFMT_I420,
-    IMGFMT_IYUV,
+    IMGFMT_420P,
     0
 };
 
 static int vf_open(vf_instance_t *vf, char *args)
 {
-    vf->priv->outfmt = vf_match_csp(&vf->next, fmt_list, IMGFMT_YV12);
+    vf->priv->outfmt = vf_match_csp(&vf->next, fmt_list, IMGFMT_420P);
     if (!vf->priv->outfmt) {
         uninit(vf);
         return 0;

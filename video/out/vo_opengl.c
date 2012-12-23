@@ -237,7 +237,7 @@ struct fmt_entry {
 };
 
 static const struct fmt_entry mp_to_gl_formats[] = {
-    {IMGFMT_RGB48NE, GL_RGB16, GL_RGB,  16, GL_UNSIGNED_SHORT},
+    {IMGFMT_RGB48,   GL_RGB16, GL_RGB,  16, GL_UNSIGNED_SHORT},
     {IMGFMT_RGB24,   GL_RGB,   GL_RGB,  8,  GL_UNSIGNED_BYTE},
     {IMGFMT_RGBA,    GL_RGBA,  GL_RGBA, 8,  GL_UNSIGNED_BYTE},
     {IMGFMT_RGB15,   GL_RGBA,  GL_RGBA, 5,  GL_UNSIGNED_SHORT_1_5_5_5_REV},

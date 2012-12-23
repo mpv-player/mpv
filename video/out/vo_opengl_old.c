@@ -831,9 +831,9 @@ static int query_format(struct vo *vo, uint32_t format)
         return caps;
     // HACK, otherwise we get only b&w with some filters (e.g. -vf eq)
     // ideally MPlayer should be fixed instead not to use Y800 when it has the choice
-    if (!p->use_yuv && (format == IMGFMT_Y8 || format == IMGFMT_Y800))
+    if (!p->use_yuv && (format == IMGFMT_Y8))
         return 0;
-    if (!p->use_ycbcr && (format == IMGFMT_UYVY || format == IMGFMT_YVYU))
+    if (!p->use_ycbcr && (format == IMGFMT_UYVY))
         return 0;
     if (p->many_fmts &&
         glFindFormat(format, p->have_texture_rg, NULL, NULL, NULL, NULL))

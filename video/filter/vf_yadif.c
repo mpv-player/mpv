@@ -477,10 +477,7 @@ static void uninit(struct vf_instance *vf){
 //===========================================================================//
 static int query_format(struct vf_instance *vf, unsigned int fmt){
     switch(fmt){
-	case IMGFMT_YV12:
-	case IMGFMT_I420:
-	case IMGFMT_IYUV:
-	case IMGFMT_Y800:
+	case IMGFMT_420P:
 	case IMGFMT_Y8:
 	    return vf_next_query_format(vf,fmt);
     }

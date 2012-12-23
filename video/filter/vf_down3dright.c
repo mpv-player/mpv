@@ -114,7 +114,7 @@ static int config(struct vf_instance *vf,
 {
 	/* FIXME - also support UYVY output? */
 	return vf_next_config(vf, width * vf->priv->scalew,
-			      height / vf->priv->scaleh - vf->priv->skipline, d_width, d_height, flags, IMGFMT_YV12);
+			      height / vf->priv->scaleh - vf->priv->skipline, d_width, d_height, flags, IMGFMT_420P);
 }
 
 
@@ -122,10 +122,8 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
 	/* FIXME - really any YUV 4:2:0 input format should work */
 	switch (fmt) {
-	case IMGFMT_YV12:
-	case IMGFMT_IYUV:
-	case IMGFMT_I420:
-		return vf_next_query_format(vf, IMGFMT_YV12);
+	case IMGFMT_420P:
+		return vf_next_query_format(vf, IMGFMT_420P);
 	}
 	return 0;
 }

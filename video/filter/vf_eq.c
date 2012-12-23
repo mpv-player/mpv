@@ -425,16 +425,13 @@ static
 int query_format (vf_instance_t *vf, unsigned fmt)
 {
   switch (fmt) {
-    case IMGFMT_YVU9:
-    case IMGFMT_IF09:
-    case IMGFMT_YV12:
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
-    case IMGFMT_Y800:
     case IMGFMT_Y8:
     case IMGFMT_444P:
     case IMGFMT_422P:
+    case IMGFMT_440P:
+    case IMGFMT_420P:
     case IMGFMT_411P:
+    case IMGFMT_410P:
       return vf_next_query_format (vf, fmt);
   }
 

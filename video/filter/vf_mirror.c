@@ -50,8 +50,7 @@ static void mirror(unsigned char* dst,unsigned char* src,int dststride,int srcst
 		    dst[x*4+3]=src[1+(w2-x-1)*4];
 		}
 		break; }
-	    case IMGFMT_YUY2:
-	    case IMGFMT_YVYU: {
+	    case IMGFMT_YUYV: {
 		// packed YUV is tricky. U,V are 32bpp while Y is 16bpp:
 		int w2=w>>1;
 		for(x=0;x<w2;x++){

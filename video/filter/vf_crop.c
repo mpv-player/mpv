@@ -54,18 +54,14 @@ static int config(struct vf_instance *vf,
     if(!IMGFMT_IS_RGB(outfmt) && !IMGFMT_IS_BGR(outfmt)){
 	switch(outfmt){
 	case IMGFMT_444P:
-	case IMGFMT_Y800:
 	case IMGFMT_Y8:
 	    break;
-	case IMGFMT_YVU9:
-	case IMGFMT_IF09:
+	case IMGFMT_410P:
 	    vf->priv->crop_y&=~3;
 	case IMGFMT_411P:
 	    vf->priv->crop_x&=~3;
 	    break;
-	case IMGFMT_YV12:
-	case IMGFMT_I420:
-	case IMGFMT_IYUV:
+	case IMGFMT_420P:
 	    vf->priv->crop_y&=~1;
 	default:
 	    vf->priv->crop_x&=~1;

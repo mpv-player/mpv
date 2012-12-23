@@ -79,7 +79,7 @@
 #endif
 
 #include "audio/format.h"
-#include "video/img_format.h"
+#include "video/img_fourcc.h"
 #include "tv.h"
 #include "core/mp_msg.h"
 
@@ -450,14 +450,14 @@ static int control(priv_t *priv, int cmd, void *arg)
         }
 
     case TVI_CONTROL_VID_GET_FORMAT:
-        *(int *)arg = IMGFMT_UYVY;
+        *(int *)arg = MP_FOURCC_UYVY;
         return TVI_CONTROL_TRUE;
 
     case TVI_CONTROL_VID_SET_FORMAT:
         {
         int req_fmt = *(int *)arg;
 
-        if(req_fmt != IMGFMT_UYVY) return TVI_CONTROL_FALSE;
+        if(req_fmt != MP_FOURCC_UYVY) return TVI_CONTROL_FALSE;
 
         return TVI_CONTROL_TRUE;
         }

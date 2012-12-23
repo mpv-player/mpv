@@ -156,7 +156,7 @@ struct vo_driver {
 
     /*
      * Whether the given image format is supported and config() will succeed.
-     * format: fourcc of pixel format
+     * format: one of IMGFMT_*
      * returns: 0 on not supported, otherwise a bitmask of VFCAP_* values
      */
     int (*query_format)(struct vo *vo, uint32_t format);

@@ -107,7 +107,7 @@ const m_option_t tvopts_conf[]={
     {"width", &stream_tv_defaults.width, CONF_TYPE_INT, 0, 0, 4096, NULL},
     {"height", &stream_tv_defaults.height, CONF_TYPE_INT, 0, 0, 4096, NULL},
     {"input", &stream_tv_defaults.input, CONF_TYPE_INT, 0, 0, 20, NULL},
-    {"outfmt", &stream_tv_defaults.outfmt, CONF_TYPE_IMGFMT, 0, 0, 0, NULL},
+    {"outfmt", &stream_tv_defaults.outfmt, CONF_TYPE_FOURCC, 0, 0, 0, NULL},
     {"fps", &stream_tv_defaults.fps, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
     {"channels", &stream_tv_defaults.channels, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
     {"brightness", &stream_tv_defaults.brightness, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},

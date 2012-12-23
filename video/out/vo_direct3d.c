@@ -202,12 +202,12 @@ struct fmt_entry {
 
 static const struct fmt_entry fmt_table[] = {
     // planar YUV
-    {IMGFMT_YV12,  MAKEFOURCC('Y','V','1','2')},
-    {IMGFMT_I420,  MAKEFOURCC('I','4','2','0')},
-    {IMGFMT_IYUV,  MAKEFOURCC('I','Y','U','V')},
-    {IMGFMT_YVU9,  MAKEFOURCC('Y','V','U','9')},
+    {IMGFMT_420P,  MAKEFOURCC('Y','V','1','2')},
+    {IMGFMT_420P,  MAKEFOURCC('I','4','2','0')},
+    {IMGFMT_420P,  MAKEFOURCC('I','Y','U','V')},
+    {IMGFMT_410P,  MAKEFOURCC('Y','V','U','9')},
     // packed YUV
-    {IMGFMT_YUY2,  D3DFMT_YUY2},
+    {IMGFMT_YUYV,  D3DFMT_YUY2},
     {IMGFMT_UYVY,  D3DFMT_UYVY},
     // packed RGB
     {IMGFMT_BGR32, D3DFMT_X8R8G8B8},
@@ -1460,7 +1460,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
  *  @param d_height Screen (destination) height
  *  @param options  Options bitmap
  *  @param format   Movie colorspace format (using MPlayer's
- *                  defines, e.g. IMGFMT_YUY2)
+ *                  defines, e.g. IMGFMT_YUYV)
  *  @return 0 on success, VO_ERROR on failure
  */
 static int config(struct vo *vo, uint32_t width, uint32_t height,

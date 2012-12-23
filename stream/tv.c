@@ -42,7 +42,7 @@
 #include "demux/stheader.h"
 
 #include "audio/format.h"
-#include "video/img_format.h"
+#include "video/img_fourcc.h"
 #include "libavutil/avstring.h"
 #include "osdep/timer.h"
 
@@ -409,14 +409,14 @@ static int open_tv(tvi_handle_t *tvh)
     int i;
     const tvi_functions_t *funcs = tvh->functions;
     static const int tv_fmt_list[] = {
-      IMGFMT_YV12,
-      IMGFMT_I420,
-      IMGFMT_UYVY,
-      IMGFMT_YUY2,
-      IMGFMT_RGB32,
-      IMGFMT_RGB24,
-      IMGFMT_RGB16,
-      IMGFMT_RGB15
+      MP_FOURCC_YV12,
+      MP_FOURCC_I420,
+      MP_FOURCC_UYVY,
+      MP_FOURCC_YUY2,
+      MP_FOURCC_RGB32,
+      MP_FOURCC_RGB24,
+      MP_FOURCC_RGB16,
+      MP_FOURCC_RGB15
     };
 
     if (funcs->control(tvh->priv, TVI_CONTROL_IS_VIDEO, 0) != TVI_CONTROL_TRUE)
@@ -437,16 +437,16 @@ static int open_tv(tvi_handle_t *tvh)
     {
     switch(tvh->tv_param->outfmt)
     {
-	case IMGFMT_YV12:
-	case IMGFMT_I420:
-	case IMGFMT_UYVY:
-	case IMGFMT_YUY2:
-	case IMGFMT_RGB32:
-	case IMGFMT_RGB24:
-	case IMGFMT_BGR32:
-	case IMGFMT_BGR24:
-	case IMGFMT_BGR16:
-	case IMGFMT_BGR15:
+	case MP_FOURCC_YV12:
+	case MP_FOURCC_I420:
+	case MP_FOURCC_UYVY:
+	case MP_FOURCC_YUY2:
+	case MP_FOURCC_RGB32:
+	case MP_FOURCC_RGB24:
+	case MP_FOURCC_BGR32:
+	case MP_FOURCC_BGR24:
+	case MP_FOURCC_BGR16:
+	case MP_FOURCC_BGR15:
 	    break;
 	default:
 	    mp_tmsg(MSGT_TV, MSGL_ERR,
@@ -715,9 +715,10 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     sh_video = new_sh_video(demuxer, 0);
 
     /* get IMAGE FORMAT */
-    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_FORMAT, &sh_video->format);
-//    if (IMGFMT_IS_RGB(sh_video->format) || IMGFMT_IS_BGR(sh_video->format))
-//	sh_video->format = 0x0;
+    int fourcc;
+    funcs->control(tvh->priv, TVI_CONTROL_VID_GET_FORMAT, &fourcc);
+    sh_video->format = MP_FOURCC_RAWVIDEO;
+    sh_video->imgfmt = fourcc;
 
     /* set FPS and FRAMETIME */
 

@@ -87,8 +87,7 @@ static const unsigned int outfmt_list[]={
     IMGFMT_422P10_BE,
     IMGFMT_422P9_LE,
     IMGFMT_422P9_BE,
-    IMGFMT_YV12,
-    IMGFMT_I420,
+    IMGFMT_420P,
     IMGFMT_420P16_LE,
     IMGFMT_420P16_BE,
     IMGFMT_420P14_LE,
@@ -99,14 +98,12 @@ static const unsigned int outfmt_list[]={
     IMGFMT_420P10_BE,
     IMGFMT_420P9_LE,
     IMGFMT_420P9_BE,
-    IMGFMT_420A,
-    IMGFMT_IYUV,
-    IMGFMT_YVU9,
-    IMGFMT_IF09,
+    IMGFMT_420AP,
+    IMGFMT_410P,
     IMGFMT_411P,
     IMGFMT_NV12,
     IMGFMT_NV21,
-    IMGFMT_YUY2,
+    IMGFMT_YUYV,
     IMGFMT_UYVY,
     IMGFMT_440P,
 // RGB and grayscale (Y8 and Y800):
@@ -119,24 +116,22 @@ static const unsigned int outfmt_list[]={
     IMGFMT_BGR24,
     IMGFMT_RGB24,
     IMGFMT_GBRP,
-    IMGFMT_RGB48LE,
-    IMGFMT_RGB48BE,
+    IMGFMT_RGB48_LE,
+    IMGFMT_RGB48_BE,
     IMGFMT_BGR16,
     IMGFMT_RGB16,
     IMGFMT_BGR15,
     IMGFMT_RGB15,
     IMGFMT_BGR12,
     IMGFMT_RGB12,
-    IMGFMT_Y800,
     IMGFMT_Y8,
     IMGFMT_BGR8,
     IMGFMT_RGB8,
     IMGFMT_BGR4,
     IMGFMT_RGB4,
-    IMGFMT_BG4B,
-    IMGFMT_RG4B,
-    IMGFMT_BGR1,
-    IMGFMT_RGB1,
+    IMGFMT_RGB4_BYTE,
+    IMGFMT_BGR4_BYTE,
+    IMGFMT_MONO,
     0
 };
 
@@ -147,13 +142,13 @@ static const unsigned int outfmt_list[]={
  * fast assembler implementation.
  */
 static int preferred_conversions[][2] = {
-    {IMGFMT_YUY2, IMGFMT_UYVY},
-    {IMGFMT_YUY2, IMGFMT_422P},
-    {IMGFMT_UYVY, IMGFMT_YUY2},
+    {IMGFMT_YUYV, IMGFMT_UYVY},
+    {IMGFMT_YUYV, IMGFMT_422P},
+    {IMGFMT_UYVY, IMGFMT_YUYV},
     {IMGFMT_UYVY, IMGFMT_422P},
-    {IMGFMT_422P, IMGFMT_YUY2},
+    {IMGFMT_422P, IMGFMT_YUYV},
     {IMGFMT_422P, IMGFMT_UYVY},
-    {IMGFMT_420P10, IMGFMT_YV12},
+    {IMGFMT_420P10, IMGFMT_420P},
     {IMGFMT_GBRP, IMGFMT_BGR24},
     {IMGFMT_GBRP, IMGFMT_RGB24},
     {IMGFMT_GBRP, IMGFMT_BGR32},
@@ -277,13 +272,11 @@ static int config(struct vf_instance *vf,
 
     // calculate the missing parameters:
     switch(best) {
-    case IMGFMT_YV12:		/* YV12 needs w & h rounded to 2 */
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
+    case IMGFMT_420P:		/* YV12 needs w & h rounded to 2 */
     case IMGFMT_NV12:
     case IMGFMT_NV21:
       vf->priv->h = (vf->priv->h + 1) & ~1;
-    case IMGFMT_YUY2:		/* YUY2 needs w rounded to 2 */
+    case IMGFMT_YUYV:		/* YUY2 needs w rounded to 2 */
     case IMGFMT_UYVY:
       vf->priv->w = (vf->priv->w + 1) & ~1;
     }

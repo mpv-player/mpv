@@ -56,7 +56,7 @@ known issues:
 #include <linux/videodev2.h>
 #endif
 #include "core/mp_msg.h"
-#include "video/img_format.h"
+#include "video/img_fourcc.h"
 #include "audio/format.h"
 #include "tv.h"
 #include "audio_in.h"
@@ -180,27 +180,27 @@ static void *video_grabber(void *data);
 
     Only few of the fourccs are the same in v4l2 and mplayer:
 
-    IMGFMT_YVU9 == V4L2_PIX_FMT_YVU410
-    IMGFMT_YV12 == V4L2_PIX_FMT_YVU420
-    IMGFMT_NV12 == V4L2_PIX_FMT_NV12
-    IMGFMT_422P == V4L2_PIX_FMT_YUV422P
-    IMGFMT_411P == V4L2_PIX_FMT_YUV411P
-    IMGFMT_UYVY == V4L2_PIX_FMT_UYVY
-    IMGFMT_Y41P == V4L2_PIX_FMT_Y41P
+    MP_FOURCC_YVU9 == V4L2_PIX_FMT_YVU410
+    MP_FOURCC_YV12 == V4L2_PIX_FMT_YVU420
+    MP_FOURCC_NV12 == V4L2_PIX_FMT_NV12
+    MP_FOURCC_422P == V4L2_PIX_FMT_YUV422P
+    MP_FOURCC_411P == V4L2_PIX_FMT_YUV411P
+    MP_FOURCC_UYVY == V4L2_PIX_FMT_UYVY
+    MP_FOURCC_Y41P == V4L2_PIX_FMT_Y41P
 
     This may be an useful translation table for some others:
 
-    IMGFMT_RGB8  == V4L2_PIX_FMT_RGB332
-    IMGFMT_BGR15 == V4L2_PIX_FMT_RGB555
-    IMGFMT_BGR16 == V4L2_PIX_FMT_RGB565
-    IMGFMT_RGB24 == V4L2_PIX_FMT_RGB24
-    IMGFMT_RGB32 == V4L2_PIX_FMT_RGB32
-    IMGFMT_BGR24 == V4L2_PIX_FMT_BGR24
-    IMGFMT_BGR32 == V4L2_PIX_FMT_BGR32
-    IMGFMT_Y800  == V4L2_PIX_FMT_GREY
-    IMGFMT_IF09  == V4L2_PIX_FMT_YUV410
-    IMGFMT_I420  == V4L2_PIX_FMT_YUV420
-    IMGFMT_YUY2  == V4L2_PIX_FMT_YUYV
+    MP_FOURCC_RGB8  == V4L2_PIX_FMT_RGB332
+    MP_FOURCC_BGR15 == V4L2_PIX_FMT_RGB555
+    MP_FOURCC_BGR16 == V4L2_PIX_FMT_RGB565
+    MP_FOURCC_RGB24 == V4L2_PIX_FMT_RGB24
+    MP_FOURCC_RGB32 == V4L2_PIX_FMT_RGB32
+    MP_FOURCC_BGR24 == V4L2_PIX_FMT_BGR24
+    MP_FOURCC_BGR32 == V4L2_PIX_FMT_BGR32
+    MP_FOURCC_Y800  == V4L2_PIX_FMT_GREY
+    MP_FOURCC_YUV9  == V4L2_PIX_FMT_YUV410
+    MP_FOURCC_I420  == V4L2_PIX_FMT_YUV420
+    MP_FOURCC_YUY2  == V4L2_PIX_FMT_YUYV
 
 \**********************************************************************/
 
@@ -210,20 +210,20 @@ static void *video_grabber(void *data);
 static int fcc_mp2vl(int fcc)
 {
     switch (fcc) {
-    case IMGFMT_RGB8:   return V4L2_PIX_FMT_RGB332;
-    case IMGFMT_BGR15:  return V4L2_PIX_FMT_RGB555;
-    case IMGFMT_BGR16:  return V4L2_PIX_FMT_RGB565;
-    case IMGFMT_RGB24:  return V4L2_PIX_FMT_RGB24;
-    case IMGFMT_RGB32:  return V4L2_PIX_FMT_RGB32;
-    case IMGFMT_BGR24:  return V4L2_PIX_FMT_BGR24;
-    case IMGFMT_BGR32:  return V4L2_PIX_FMT_BGR32;
-    case IMGFMT_Y800:   return V4L2_PIX_FMT_GREY;
-    case IMGFMT_IF09:   return V4L2_PIX_FMT_YUV410;
-    case IMGFMT_I420:   return V4L2_PIX_FMT_YUV420;
-    case IMGFMT_YUY2:   return V4L2_PIX_FMT_YUYV;
-    case IMGFMT_YV12:   return V4L2_PIX_FMT_YVU420;
-    case IMGFMT_UYVY:   return V4L2_PIX_FMT_UYVY;
-    case IMGFMT_MJPEG:   return V4L2_PIX_FMT_MJPEG;
+    case MP_FOURCC_RGB8:   return V4L2_PIX_FMT_RGB332;
+    case MP_FOURCC_BGR15:  return V4L2_PIX_FMT_RGB555;
+    case MP_FOURCC_BGR16:  return V4L2_PIX_FMT_RGB565;
+    case MP_FOURCC_RGB24:  return V4L2_PIX_FMT_RGB24;
+    case MP_FOURCC_RGB32:  return V4L2_PIX_FMT_RGB32;
+    case MP_FOURCC_BGR24:  return V4L2_PIX_FMT_BGR24;
+    case MP_FOURCC_BGR32:  return V4L2_PIX_FMT_BGR32;
+    case MP_FOURCC_Y800:   return V4L2_PIX_FMT_GREY;
+    case MP_FOURCC_YUV9:   return V4L2_PIX_FMT_YUV410;
+    case MP_FOURCC_I420:   return V4L2_PIX_FMT_YUV420;
+    case MP_FOURCC_YUY2:   return V4L2_PIX_FMT_YUYV;
+    case MP_FOURCC_YV12:   return V4L2_PIX_FMT_YVU420;
+    case MP_FOURCC_UYVY:   return V4L2_PIX_FMT_UYVY;
+    case MP_FOURCC_MJPEG:   return V4L2_PIX_FMT_MJPEG;
     }
     return fcc;
 }
@@ -234,20 +234,20 @@ static int fcc_mp2vl(int fcc)
 static int fcc_vl2mp(int fcc)
 {
     switch (fcc) {
-    case V4L2_PIX_FMT_RGB332:   return IMGFMT_RGB8;
-    case V4L2_PIX_FMT_RGB555:   return IMGFMT_BGR15;
-    case V4L2_PIX_FMT_RGB565:   return IMGFMT_BGR16;
-    case V4L2_PIX_FMT_RGB24:    return IMGFMT_RGB24;
-    case V4L2_PIX_FMT_RGB32:    return IMGFMT_RGB32;
-    case V4L2_PIX_FMT_BGR24:    return IMGFMT_BGR24;
-    case V4L2_PIX_FMT_BGR32:    return IMGFMT_BGR32;
-    case V4L2_PIX_FMT_GREY:     return IMGFMT_Y800;
-    case V4L2_PIX_FMT_YUV410:   return IMGFMT_IF09;
-    case V4L2_PIX_FMT_YUV420:   return IMGFMT_I420;
-    case V4L2_PIX_FMT_YVU420:   return IMGFMT_YV12;
-    case V4L2_PIX_FMT_YUYV:     return IMGFMT_YUY2;
-    case V4L2_PIX_FMT_UYVY:     return IMGFMT_UYVY;
-    case V4L2_PIX_FMT_MJPEG:     return IMGFMT_MJPEG;
+    case V4L2_PIX_FMT_RGB332:   return MP_FOURCC_RGB8;
+    case V4L2_PIX_FMT_RGB555:   return MP_FOURCC_BGR15;
+    case V4L2_PIX_FMT_RGB565:   return MP_FOURCC_BGR16;
+    case V4L2_PIX_FMT_RGB24:    return MP_FOURCC_RGB24;
+    case V4L2_PIX_FMT_RGB32:    return MP_FOURCC_RGB32;
+    case V4L2_PIX_FMT_BGR24:    return MP_FOURCC_BGR24;
+    case V4L2_PIX_FMT_BGR32:    return MP_FOURCC_BGR32;
+    case V4L2_PIX_FMT_GREY:     return MP_FOURCC_Y800;
+    case V4L2_PIX_FMT_YUV410:   return MP_FOURCC_YUV9;
+    case V4L2_PIX_FMT_YUV420:   return MP_FOURCC_I420;
+    case V4L2_PIX_FMT_YVU420:   return MP_FOURCC_YV12;
+    case V4L2_PIX_FMT_YUYV:     return MP_FOURCC_YUY2;
+    case V4L2_PIX_FMT_UYVY:     return MP_FOURCC_UYVY;
+    case V4L2_PIX_FMT_MJPEG:     return MP_FOURCC_MJPEG;
     }
     return fcc;
 }
@@ -1252,9 +1252,9 @@ static int init(priv_t *priv)
         if (ioctl(priv->video_fd, VIDIOC_ENUM_FMT, &fmtdesc) < 0) {
             break;
         }
-        mp_msg(MSGT_TV, MSGL_V, " Format %-6s (%2d bits, %s): %s\n",
+        mp_msg(MSGT_TV, MSGL_V, " Format %-6s (%2d bits, %s)\n",
                pixfmt2name(fmtdesc.pixelformat), pixfmt2depth(fmtdesc.pixelformat),
-               fmtdesc.description, vo_format_name(fcc_vl2mp(fmtdesc.pixelformat)));
+               fmtdesc.description);
     }
     mp_msg(MSGT_TV, MSGL_INFO, " Current format: %s\n",
            pixfmt2name(priv->format.fmt.pix.pixelformat));
