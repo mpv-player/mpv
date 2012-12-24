@@ -108,7 +108,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 //===========================================================================//
 
 static int query_format(struct vf_instance *vf, unsigned int fmt){
-    if(IMGFMT_IS_RGB(fmt) || IMGFMT_IS_BGR(fmt)) return vf_next_query_format(vf, fmt);
+    if(IMGFMT_IS_RGB(fmt)) return vf_next_query_format(vf, fmt);
     // we can support only symmetric (chroma_x_shift==chroma_y_shift) YUV formats:
     switch(fmt) {
 	case IMGFMT_Y8:

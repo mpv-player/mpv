@@ -961,14 +961,12 @@ static int get_chroma_clear_val(int bit_depth)
 // this macro is supposed to work on all formats supported by 3D rendering, and
 // that produce "reasonable" output (i.e. no mixed up colors)
 #define IMGFMT_IS_ANY_RND(x) \
-    (IMGFMT_IS_BGR(x) || IMGFMT_IS_RGB(x) || IMGFMT_IS_Y(x))
+    (IMGFMT_IS_RGB(x) || IMGFMT_IS_Y(x))
 
 // pixel size in bit for any IMGFMT_IS_ANY_RND(x)==true
 // we assume that the actual pixel strides are always aligned on bytes
 static int imgfmt_any_rnd_depth(int fmt)
 {
-    if (IMGFMT_IS_BGR(fmt))
-        return IMGFMT_BGR_DEPTH(fmt);
     if (IMGFMT_IS_RGB(fmt))
         return IMGFMT_RGB_DEPTH(fmt);
     if (IMGFMT_IS_Y(fmt))
@@ -1033,9 +1031,12 @@ static D3DFORMAT check_shader_conversion(d3d_priv *priv, uint32_t fmt)
 {
     if (priv->opt_disable_shaders)
         return 0;
-    int component_bits;
-    if (!mp_get_chroma_shift(fmt, NULL, NULL, &component_bits))
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    if (!(desc.flags & MP_IMGFLAG_YUV_P) || !(desc.flags & MP_IMGFLAG_NE))
         return 0;
+    if (desc.num_planes != 3)
+        return 0;
+    int component_bits = desc.plane_bits;
     if (component_bits < 8 || component_bits > 16)
         return 0;
     bool is_8bit = component_bits == 8;
@@ -1116,17 +1117,15 @@ static bool init_rendering_mode(d3d_priv *priv, uint32_t fmt, bool initialize)
         } else {
             mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Using YUV shaders.\n");
 
-            int sx, sy, component_bits;
-            mp_get_chroma_shift(priv->image_format, &sx, &sy, &component_bits);
+            struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(priv->image_format);
             priv->plane_count = 3;
             for (n = 0; n < 3; n++) {
                 planes[n].d3d_format = shader_d3dfmt;
-                planes[n].bits_per_pixel = component_bits;
-                if (n > 0) {
-                    planes[n].shift_x = sx;
-                    planes[n].shift_y = sy;
-                    planes[n].clearval = get_chroma_clear_val(component_bits);
-                }
+                planes[n].bits_per_pixel = desc.plane_bits;
+                planes[n].shift_x = desc.xs[n];
+                planes[n].shift_y = desc.ys[n];
+                if (n > 0)
+                    planes[n].clearval = get_chroma_clear_val(desc.plane_bits);
             }
             if (shader_d3dfmt != D3DFMT_A8L8) {
                 priv->pixel_shader_data = d3d_shader_yuv;

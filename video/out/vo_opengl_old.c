@@ -169,7 +169,6 @@ static void update_yuvconv(struct vo *vo)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    int xs, ys, depth;
     struct mp_csp_params cparams = { .colorspace = p->colorspace };
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
     gl_conversion_params_t params = {
@@ -177,9 +176,10 @@ static void update_yuvconv(struct vo *vo)
         p->texture_width, p->texture_height, 0, 0, p->filter_strength,
         p->noise_strength
     };
-    mp_get_chroma_shift(p->image_format, &xs, &ys, &depth);
-    params.chrom_texw = params.texw >> xs;
-    params.chrom_texh = params.texh >> ys;
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->image_format);
+    int depth = desc.plane_bits;
+    params.chrom_texw = params.texw >> desc.chroma_xs;
+    params.chrom_texh = params.texh >> desc.chroma_ys;
     params.csp_params.input_bits = depth;
     params.csp_params.texture_bits = depth+7 & ~7;
     glSetupYUVConversion(gl, &params);
@@ -427,10 +427,10 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
         gl->TexParameteri(p->target, GL_GENERATE_MIPMAP, GL_TRUE);
 
     if (p->is_yuv) {
+        struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->image_format);
         int i;
-        int xs, ys, depth;
+        int xs = desc.chroma_xs, ys = desc.chroma_ys, depth = desc.plane_bits;
         scale_type = get_scale_type(vo, 1);
-        mp_get_chroma_shift(p->image_format, &xs, &ys, &depth);
         int clear = get_chroma_clear_val(depth);
         gl->GenTextures(21, p->default_texs);
         p->default_texs[21] = 0;
@@ -502,12 +502,15 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 {
     struct gl_priv *p = vo->priv;
 
-    int xs, ys;
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(format);
+
     p->image_height = height;
     p->image_width = width;
     p->image_format = format;
-    p->is_yuv = mp_get_chroma_shift(p->image_format, &xs, &ys, NULL) > 0;
-    p->is_yuv |= (xs << 8) | (ys << 16);
+    p->is_yuv = !!(desc.flags & MP_IMGFLAG_YUV_P);
+    p->is_yuv |= (desc.chroma_xs << 8) | (desc.chroma_ys << 16);
+    if (format == IMGFMT_Y8)
+        p->is_yuv = 0;
     glFindFormat(format, p->have_texture_rg, NULL, &p->texfmt, &p->gl_format,
                  &p->gl_type);
 
@@ -630,9 +633,9 @@ static bool get_image(struct vo *vo, mp_image_t *mpi, int *th, bool *cplane)
     }
     if (p->is_yuv) {
         // planar YUV
-        int xs, ys, component_bits;
-        mp_get_chroma_shift(p->image_format, &xs, &ys, &component_bits);
-        int bp = (component_bits + 7) / 8;
+        struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->image_format);
+        int xs = desc.chroma_xs, ys = desc.chroma_ys, depth = desc.plane_bits;
+        int bp = (depth + 7) / 8;
         common_plane = true;
         mpi->stride[0] = width * bp;
         mpi->planes[1] = mpi->planes[0] + mpi->stride[0] * height;
@@ -702,11 +705,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     if (p->force_pbo && !p->bufferptr
         && get_image(vo, &mpi2, &th, &common_plane))
     {
-        int bp = mpi->bpp / 8;
-        int xs, ys, component_bits;
-        mp_get_chroma_shift(p->image_format, &xs, &ys, &component_bits);
-        if (p->is_yuv)
-            bp = (component_bits + 7) / 8;
+        struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->image_format);
+        int bp = desc.bytes[0];
+        int xs = desc.chroma_xs, ys = desc.chroma_ys, depth = desc.plane_bits;
         memcpy_pic(mpi2.planes[0], mpi->planes[0], mpi->w * bp, mpi->h,
                    mpi2.stride[0], mpi->stride[0]);
         int uv_bytes = (mpi->w >> xs) * bp;
@@ -721,7 +722,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
             clear_border(vo, mpi2.planes[0], mpi->w * bp, mpi2.stride[0],
                          mpi->h, th, 0);
             if (p->is_yuv) {
-                int clear = get_chroma_clear_val(component_bits);
+                int clear = get_chroma_clear_val(depth);
                 clear_border(vo, mpi2.planes[1], uv_bytes, mpi2.stride[1],
                              mpi->h >> ys, th >> ys, clear);
                 clear_border(vo, mpi2.planes[2], uv_bytes, mpi2.stride[2],
@@ -759,8 +760,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     glUploadTex(gl, p->target, p->gl_format, p->gl_type, planes[0],
                 stride[0], 0, 0, w, h, slice);
     if (p->is_yuv) {
-        int xs, ys;
-        mp_get_chroma_shift(p->image_format, &xs, &ys, NULL);
+        struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->image_format);
+        int xs = desc.chroma_xs, ys = desc.chroma_ys;
         if (pbo && !common_plane) {
             gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, p->buffer_uv[0]);
             gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
@@ -818,16 +819,18 @@ static int query_format(struct vo *vo, uint32_t format)
 {
     struct gl_priv *p = vo->priv;
 
-    int depth;
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(format);
+
+    int depth = desc.plane_bits;
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP;
     if (p->use_osd)
         caps |= VFCAP_OSD;
     if (format == IMGFMT_RGB24 || format == IMGFMT_RGBA)
         return caps;
-    if (p->use_yuv && mp_get_chroma_shift(format, NULL, NULL, &depth) &&
+    if (p->use_yuv && (desc.flags & MP_IMGFLAG_YUV_P) &&
         (depth == 8 || depth == 16 ||
          p->max_tex_component_size >= 16 && glYUVLargeRange(p->use_yuv)) &&
-        (IMGFMT_IS_YUVP16_NE(format) || !IMGFMT_IS_YUVP16(format)))
+        (depth <= 16 && (desc.flags & MP_IMGFLAG_NE)))
         return caps;
     // HACK, otherwise we get only b&w with some filters (e.g. -vf eq)
     // ideally MPlayer should be fixed instead not to use Y800 when it has the choice

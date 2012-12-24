@@ -39,13 +39,14 @@
 #define MP_IMGFLAG_PLANAR 0x100
 // set if it's YUV colorspace
 #define MP_IMGFLAG_YUV 0x200
-// set if it's swapped (BGR or YVU) plane/byteorder
-#define MP_IMGFLAG_SWAPPED 0x400
+// set if it's RGB colorspace
+#define MP_IMGFLAG_RGB 0x400
 // set if the format is in a standard YUV format:
 // - planar and yuv colorspace
 // - chroma shift 0-2
 // - 1-4 planes (1: gray, 2: gray/alpha, 3: yuv, 4: yuv/alpha)
-// - 8-16 bit per pixel/plane, all planes have same depth
+// - 8-16 bit per pixel/plane, all planes have same depth,
+//   each plane has exactly one component
 #define MP_IMGFLAG_YUV_P 0x1000
 // set if in little endian, or endian independent
 #define MP_IMGFLAG_LE 0x2000
@@ -240,51 +241,16 @@ enum mp_imgfmt {
 static inline bool IMGFMT_IS_RGB(unsigned int fmt)
 {
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
-    return !(desc.flags & MP_IMGFLAG_YUV) && !(desc.flags & MP_IMGFLAG_SWAPPED)
-           && desc.num_planes == 1 && desc.id != IMGFMT_BGR0;
-}
-static inline bool IMGFMT_IS_BGR(unsigned int fmt)
-{
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
-    return !(desc.flags & MP_IMGFLAG_YUV) && (desc.flags & MP_IMGFLAG_SWAPPED)
-           && desc.num_planes == 1 && desc.id != IMGFMT_BGR0;
+    return (desc.flags & MP_IMGFLAG_RGB) && desc.num_planes == 1;
 }
 
 #define IMGFMT_RGB_DEPTH(fmt) (mp_imgfmt_get_desc(fmt).plane_bits)
-#define IMGFMT_BGR_DEPTH(fmt) (mp_imgfmt_get_desc(fmt).plane_bits)
-
-#if BYTE_ORDER == BIG_ENDIAN
-#define IMGFMT_IS_YUVP16_NE(fmt) IMGFMT_IS_YUVP16_BE(fmt)
-#else
-#define IMGFMT_IS_YUVP16_NE(fmt) IMGFMT_IS_YUVP16_LE(fmt)
-#endif
-
-// These functions are misnamed - they actually match 9 to 16 bits (inclusive)
-static inline bool IMGFMT_IS_YUVP16_LE(int fmt) {
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
-    return (desc.flags & MP_IMGFLAG_YUV_P) && desc.plane_bits > 8 &&
-           (desc.flags & MP_IMGFLAG_LE);
-}
-static inline bool IMGFMT_IS_YUVP16_BE(int fmt) {
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
-    return (desc.flags & MP_IMGFLAG_YUV_P) && desc.plane_bits > 8 &&
-           (desc.flags & MP_IMGFLAG_BE);
-}
-
-#define IMGFMT_IS_YUVP16(fmt)    (IMGFMT_IS_YUVP16_LE(fmt) || IMGFMT_IS_YUVP16_BE(fmt))
 
 #define IMGFMT_IS_VDPAU(fmt) \
     (((fmt) >= IMGFMT_VDPAU_FIRST) && ((fmt) <= IMGFMT_VDPAU_LAST))
 
 #define IMGFMT_IS_HWACCEL(fmt) IMGFMT_IS_VDPAU(fmt)
 
-/**
- * Calculates the scale shifts for the chroma planes for planar YUV
- *
- * \param component_bits bits per component
- * \return bits-per-pixel for format if successful (i.e. format is 3 or 4-planes planar YUV), 0 otherwise
- */
-int mp_get_chroma_shift(int format, int *x_shift, int *y_shift, int *component_bits);
 
 struct mp_imgfmt_entry {
     const char *name;

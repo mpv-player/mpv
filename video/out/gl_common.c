@@ -110,7 +110,7 @@ void glAdjustAlignment(GL *gl, int stride)
  *
  * All parameters may be NULL.
  * \param fmt MPlayer format to analyze.
- * \param bpp [OUT] bits per pixel of that format.
+ * \param dummy reserved
  * \param gl_texfmt [OUT] internal texture format that fits the
  * image format, not necessarily the best for performance.
  * \param gl_format [OUT] OpenGL format for this image format.
@@ -118,15 +118,12 @@ void glAdjustAlignment(GL *gl, int stride)
  * \return 1 if format is supported by OpenGL, 0 if not.
  * \ingroup gltexture
  */
-int glFindFormat(uint32_t fmt, int have_texture_rg, int *bpp, GLint *gl_texfmt,
+int glFindFormat(uint32_t fmt, int have_texture_rg, int *dummy, GLint *gl_texfmt,
                  GLenum *gl_format, GLenum *gl_type)
 {
     int supported = 1;
-    int dummy1;
     GLenum dummy2;
     GLint dummy3;
-    if (!bpp)
-        bpp = &dummy1;
     if (!gl_texfmt)
         gl_texfmt = &dummy3;
     if (!gl_format)
@@ -134,17 +131,15 @@ int glFindFormat(uint32_t fmt, int have_texture_rg, int *bpp, GLint *gl_texfmt,
     if (!gl_type)
         gl_type = &dummy2;
 
-    if (mp_get_chroma_shift(fmt, NULL, NULL, NULL)) {
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    if (desc.flags & MP_IMGFLAG_YUV_P) {
         // reduce the possible cases a bit
-        if (IMGFMT_IS_YUVP16_LE(fmt))
-            fmt = IMGFMT_420P16_LE;
-        else if (IMGFMT_IS_YUVP16_BE(fmt))
-            fmt = IMGFMT_420P16_BE;
+        if (desc.plane_bits > 8)
+            fmt = IMGFMT_420P16;
         else
             fmt = IMGFMT_420P;
     }
 
-    *bpp = IMGFMT_IS_BGR(fmt) ? IMGFMT_BGR_DEPTH(fmt) : IMGFMT_RGB_DEPTH(fmt);
     *gl_texfmt = 3;
     switch (fmt) {
     case IMGFMT_RGB48:
@@ -163,7 +158,6 @@ int glFindFormat(uint32_t fmt, int have_texture_rg, int *bpp, GLint *gl_texfmt,
     case IMGFMT_420P16:
         supported = 0; // no native YUV support
         *gl_texfmt = have_texture_rg ? GL_R16 : GL_LUMINANCE16;
-        *bpp = 16;
         *gl_format = have_texture_rg ? GL_RED : GL_LUMINANCE;
         *gl_type = GL_UNSIGNED_SHORT;
         break;
@@ -171,13 +165,11 @@ int glFindFormat(uint32_t fmt, int have_texture_rg, int *bpp, GLint *gl_texfmt,
         supported = 0; // no native YV12 support
     case IMGFMT_Y8:
         *gl_texfmt = 1;
-        *bpp = 8;
         *gl_format = GL_LUMINANCE;
         *gl_type = GL_UNSIGNED_BYTE;
         break;
     case IMGFMT_UYVY:
         *gl_texfmt = GL_YCBCR_MESA;
-        *bpp = 16;
         *gl_format = GL_YCBCR_MESA;
         *gl_type = fmt == IMGFMT_UYVY ? GL_UNSIGNED_SHORT_8_8 : GL_UNSIGNED_SHORT_8_8_REV;
         break;

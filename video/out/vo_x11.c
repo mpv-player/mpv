@@ -524,15 +524,17 @@ static int query_format(struct vo *vo, uint32_t format)
     mp_msg(MSGT_VO, MSGL_DBG2,
            "vo_x11: query_format was called: %x (%s)\n", format,
            vo_format_name(format));
-    if (IMGFMT_IS_BGR(format)) {
-        if (IMGFMT_BGR_DEPTH(format) < 8)
-            return 0;
-        if (IMGFMT_BGR_DEPTH(format) == vo->x11->depthonscreen)
-            return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
-                   VFCAP_OSD | VFCAP_FLIP;
-        else
-            return VFCAP_CSP_SUPPORTED | VFCAP_OSD |
-                   VFCAP_FLIP;
+    if (IMGFMT_IS_RGB(format)) {
+        for (int n = 0; fmt2Xfmt[n].mpfmt; n++) {
+            if (fmt2Xfmt[n].mpfmt == format) {
+                if (IMGFMT_RGB_DEPTH(format) == vo->x11->depthonscreen) {
+                    return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
+                           VFCAP_OSD | VFCAP_FLIP;
+                } else {
+                    return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_FLIP;
+                }
+            }
+        }
     }
 
     switch (format) {

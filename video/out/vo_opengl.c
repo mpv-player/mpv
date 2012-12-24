@@ -1558,17 +1558,19 @@ static bool init_format(int fmt, struct gl_priv *init)
     if (!init)
         init = &dummy;
 
-    mp_image_t dummy_img = {0};
-    mp_image_setfmt(&dummy_img, fmt);
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    if (!desc.id)
+        return false;
 
     init->image_format = fmt;
     init->component_bits = -1;
+    init->plane_bits = desc.plane_bits;
 
     // RGB/packed formats
     for (const struct fmt_entry *e = mp_to_gl_formats; e->mp_format; e++) {
         if (e->mp_format == fmt) {
             supported = true;
-            init->plane_bits = dummy_img.bpp;
+            init->plane_bits = desc.bpp[0];
             init->gl_format = e->format;
             init->gl_internal_format = e->internal_format;
             init->component_bits = e->component_bits;
@@ -1578,14 +1580,14 @@ static bool init_format(int fmt, struct gl_priv *init)
     }
 
     // YUV/planar formats
-    if (!supported && mp_get_chroma_shift(fmt, NULL, NULL, &init->plane_bits)) {
+    if (!supported && (desc.flags & MP_IMGFLAG_YUV_P)) {
         init->gl_format = GL_RED;
         init->component_bits = init->plane_bits;
         if (init->plane_bits == 8) {
             supported = true;
             init->gl_internal_format = GL_RED;
             init->gl_type = GL_UNSIGNED_BYTE;
-        } else if (IMGFMT_IS_YUVP16_NE(fmt)) {
+        } else if (init->plane_bits <= 16 && (desc.flags & MP_IMGFLAG_NE)) {
             supported = true;
             init->gl_internal_format = GL_R16;
             init->gl_type = GL_UNSIGNED_SHORT;
@@ -1605,19 +1607,19 @@ static bool init_format(int fmt, struct gl_priv *init)
         return false;
 
     init->plane_bytes = (init->plane_bits + 7) / 8;
-    init->is_yuv = dummy_img.flags & MP_IMGFLAG_YUV;
+    init->is_yuv = desc.flags & MP_IMGFLAG_YUV;
     init->is_linear_rgb = false;
 
     // NOTE: we throw away the additional alpha plane, if one exists.
-    init->plane_count = dummy_img.num_planes > 2 ? 3 : 1;
-    assert(dummy_img.num_planes >= init->plane_count);
-    assert(dummy_img.num_planes <= init->plane_count + 1);
+    init->plane_count = desc.num_planes > 2 ? 3 : 1;
+    assert(desc.num_planes >= init->plane_count);
+    assert(desc.num_planes <= init->plane_count + 1);
 
     for (int n = 0; n < init->plane_count; n++) {
         struct texplane *plane = &init->planes[n];
 
-        plane->shift_x = n > 0 ? dummy_img.chroma_x_shift : 0;
-        plane->shift_y = n > 0 ? dummy_img.chroma_y_shift : 0;
+        plane->shift_x = desc.xs[n];
+        plane->shift_y = desc.ys[n];
     }
 
     return true;

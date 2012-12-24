@@ -368,17 +368,13 @@ void mp_image_clear(struct mp_image *mpi, int x0, int y0, int w, int h)
 #define CLEAR_PACKEDYUV_PATTERN 0x80008000
 #define CLEAR_PACKEDYUV_PATTERN_SWAPPED 0x00800080
 #endif
-            if (mpi->flags & MP_IMGFLAG_SWAPPED) {
-                for (i = 0; i < size - 3; i += 4)
-                    p[i] = p[i + 1] = p[i + 2] = p[i + 3] = CLEAR_PACKEDYUV_PATTERN_SWAPPED;
-                for (; i < size; i++)
-                    p[i] = CLEAR_PACKEDYUV_PATTERN_SWAPPED;
-            } else {
-                for (i = 0; i < size - 3; i += 4)
-                    p[i] = p[i + 1] = p[i + 2] = p[i + 3] = CLEAR_PACKEDYUV_PATTERN;
-                for (; i < size; i++)
-                    p[i] = CLEAR_PACKEDYUV_PATTERN;
-            }
+            int clear = CLEAR_PACKEDYUV_PATTERN;
+            if (mpi->imgfmt == IMGFMT_UYVY)
+                clear = CLEAR_PACKEDYUV_PATTERN_SWAPPED;
+            for (i = 0; i < size - 3; i += 4)
+                p[i] = p[i + 1] = p[i + 2] = p[i + 3] = clear;
+            for (; i < size; i++)
+                p[i] = clear;
         } else
             memset(dst, 0, (mpi->bpp >> 3) * w);
     }

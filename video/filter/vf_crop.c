@@ -51,7 +51,7 @@ static int config(struct vf_instance *vf,
     if(vf->priv->crop_x<0) vf->priv->crop_x=(width-vf->priv->crop_w)/2;
     if(vf->priv->crop_y<0) vf->priv->crop_y=(height-vf->priv->crop_h)/2;
     // rounding:
-    if(!IMGFMT_IS_RGB(outfmt) && !IMGFMT_IS_BGR(outfmt)){
+    if(!IMGFMT_IS_RGB(outfmt)){
 	switch(outfmt){
 	case IMGFMT_444P:
 	case IMGFMT_Y8:

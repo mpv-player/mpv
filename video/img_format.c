@@ -98,22 +98,6 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     {0}
 };
 
-int mp_get_chroma_shift(int format, int *x_shift, int *y_shift,
-                        int *component_bits)
-{
-    struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(format);
-    if (fmt.id && (fmt.flags & MP_IMGFLAG_YUV_P)) {
-        if (x_shift)
-            *x_shift = fmt.xs[1];
-        if (y_shift)
-            *y_shift = fmt.ys[1];
-        if (component_bits)
-            *component_bits = fmt.plane_bits;
-        return fmt.avg_bpp;
-    }
-    return 0;
-}
-
 unsigned int mp_imgfmt_from_name(bstr name, bool allow_hwaccel)
 {
     for(struct mp_imgfmt_entry *p = mp_imgfmt_list; p->name; ++p) {
@@ -134,21 +118,6 @@ const char *mp_imgfmt_to_name(unsigned int fmt)
             return p->name;
     }
     return NULL;
-}
-
-static int comp_bit_order(const AVPixFmtDescriptor *pd, int bpp, int c)
-{
-    int el_size = (pd->flags & PIX_FMT_BITSTREAM) ? 1 : 8;
-    // NOTE: offset_plus1 can be 0
-    int offset = (((int)pd->comp[c].offset_plus1) - 1) * el_size;
-    int read_depth = pd->comp[c].shift + pd->comp[c].depth_minus1 + 1;
-    if (read_depth <= 8 && !(pd->flags & PIX_FMT_BITSTREAM))
-        offset += 8 * !!(pd->flags & PIX_FMT_BE);
-    offset += pd->comp[c].shift;
-    // revert ffmpeg's bullshit hack that mixes byte and bit access
-    if ((pd->flags & PIX_FMT_BE) && bpp <= 16 && read_depth <= 8)
-        offset = (8 + offset) % 16;
-    return offset;
 }
 
 static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
@@ -201,11 +170,12 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
 
     desc.plane_bits = planedepth[0];
 
-    if (!(pd->flags & PIX_FMT_RGB) && !(pd->flags & PIX_FMT_HWACCEL) &&
-        fmt != PIX_FMT_MONOWHITE && fmt != PIX_FMT_MONOBLACK &&
+    if (!(pd->flags & PIX_FMT_RGB) && fmt != PIX_FMT_MONOBLACK &&
         fmt != PIX_FMT_PAL8)
     {
         desc.flags |= MP_IMGFLAG_YUV;
+    } else {
+        desc.flags |= MP_IMGFLAG_RGB;
     }
 
 #ifdef PIX_FMT_ALPHA
@@ -228,61 +198,6 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
         if (same_depth && pd->nb_components == desc.num_planes)
             desc.flags |= MP_IMGFLAG_YUV_P;
     }
-
-    if ((pd->flags & PIX_FMT_RGB) && desc.num_planes == 1
-        && pd->nb_components >= 3)
-    {
-        // RGB vs. BGR component order, as distinguished by mplayer:
-        // - for byte accessed formats (RGB24, RGB48), the order of bytes
-        //   determines RGB/BGR (e.g. R is first byte -> RGB)
-        // - for bit accessed formats (RGB32, RGB16, etc.), the order of bits
-        //   determines BGR/RGB (e.g. R is LSB -> RGB)
-        // - formats like IMGFMT_RGBA are aliases to allow byte access to bit-
-        //   accessed formats (IMGFMT_RGBA is RGB32 on LE, BGR32|128 on BE)
-        //   (ffmpeg does it the other way around, and defines bit-access
-        //   aliases to byte-accessed formats)
-        int b = desc.bpp[0];
-        bool swap = comp_bit_order(pd, b, 0) > comp_bit_order(pd, b, 1);
-        if ((desc.bpp[0] == 24 || desc.bpp[0] > 32) && BYTE_ORDER == BIG_ENDIAN)
-            swap = !swap; // byte accessed
-        if (swap)
-            desc.flags |= MP_IMGFLAG_SWAPPED;
-    }
-
-    // compatibility with old mp_image_setfmt()
-
-    switch (desc.id) {
-    case IMGFMT_UYVY:
-        desc.flags |= MP_IMGFLAG_SWAPPED; // for vf_mpi_clear()
-        /* fallthrough */
-    case IMGFMT_YUYV:
-        desc.chroma_ys = 1; // ???
-        break;
-    case IMGFMT_Y8:
-    case IMGFMT_Y16_LE:
-    case IMGFMT_Y16_BE:
-        // probably for vo_opengl, and possibly more code using Y8
-        desc.chroma_xs = desc.chroma_ys = 31;
-        break;
-    case IMGFMT_NV12:
-        desc.flags |= MP_IMGFLAG_SWAPPED; // completely pointless
-        /* fallthrough */
-    case IMGFMT_NV21:
-        // some hack to make cropping code etc. work? (doesn't work anyway)
-        desc.chroma_xs = 0;
-        desc.chroma_ys = 1;
-        break;
-    case IMGFMT_RGB4:
-    case IMGFMT_BGR4:
-        desc.flags ^= MP_IMGFLAG_SWAPPED; // ???
-        break;
-    case IMGFMT_BGR0:
-        desc.flags &= ~MP_IMGFLAG_SWAPPED; // not covered by IS_RGB/IS_BGR
-        break;
-    }
-
-    if (pd->flags & PIX_FMT_HWACCEL)
-        desc.chroma_xs = desc.chroma_ys = 0;
 
     if (!(pd->flags & PIX_FMT_HWACCEL) && !(pd->flags & PIX_FMT_BITSTREAM)) {
         desc.flags |= MP_IMGFLAG_BYTE_ALIGNED;
