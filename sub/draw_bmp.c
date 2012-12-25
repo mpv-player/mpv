@@ -321,16 +321,6 @@ static void draw_ass(struct mp_draw_sub_cache *cache, struct mp_rect bb,
     }
 }
 
-static bool clip_to_bb(struct mp_rect bb, struct mp_rect *rc)
-{
-    rc->x0 = FFMAX(bb.x0, rc->x0);
-    rc->y0 = FFMAX(bb.y0, rc->y0);
-    rc->x1 = FFMIN(bb.x1, rc->x1);
-    rc->y1 = FFMIN(bb.y1, rc->y1);
-
-    return rc->x1 > rc->x0 && rc->y1 > rc->y0;
-}
-
 static void get_swscale_alignment(const struct mp_image *img, int *out_xstep,
                                   int *out_ystep)
 {
@@ -361,12 +351,12 @@ static bool align_bbox_for_swscale(struct mp_image *img, struct mp_rect *rc)
 {
     struct mp_rect img_rect = {0, 0, img->w, img->h};
     // Get rid of negative coordinates
-    if (!clip_to_bb(img_rect, rc))
+    if (!mp_rect_intersection(rc, &img_rect))
         return false;
     int xstep, ystep;
     get_swscale_alignment(img, &xstep, &ystep);
     align_bbox(xstep, ystep, rc);
-    return clip_to_bb(img_rect, rc);
+    return mp_rect_intersection(rc, &img_rect);
 }
 
 // Try to find best/closest YUV 444 format (or similar) for imgfmt
@@ -436,7 +426,7 @@ static bool get_sub_area(struct mp_rect bb, struct mp_image *temp,
     struct mp_rect dst = {sb->x - bb.x0, sb->y - bb.y0};
     dst.x1 = dst.x0 + sb->dw;
     dst.y1 = dst.y0 + sb->dh;
-    if (!clip_to_bb((struct mp_rect){0, 0, temp->w, temp->h}, &dst))
+    if (!mp_rect_intersection(&dst, &(struct mp_rect){0, 0, temp->w, temp->h}))
         return false;
 
     *out_src_x = (dst.x0 - sb->x) + bb.x0;
@@ -543,24 +533,27 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
     int format, bits;
     get_closest_y444_format(dst->imgfmt, &format, &bits);
 
-    struct mp_rect bb;
-    if (!mp_sub_bitmaps_bb(sbs, &bb))
-        return;
+    struct mp_rect rc_list[MP_SUB_BB_LIST_MAX];
+    int num_rc = mp_get_sub_bb_list(sbs, rc_list, MP_SUB_BB_LIST_MAX);
 
-    if (!align_bbox_for_swscale(dst, &bb))
-        return;
+    for (int r = 0; r < num_rc; r++) {
+        struct mp_rect bb = rc_list[r];
 
-    struct mp_image dst_region = *dst;
-    mp_image_crop_rc(&dst_region, bb);
-    struct mp_image *temp = chroma_up(cache_, format, &dst_region);
+        if (!align_bbox_for_swscale(dst, &bb))
+            return;
 
-    if (sbs->format == SUBBITMAP_RGBA) {
-        draw_rgba(cache_, bb, temp, bits, sbs);
-    } else if (sbs->format == SUBBITMAP_LIBASS) {
-        draw_ass(cache_, bb, temp, bits, sbs);
+        struct mp_image dst_region = *dst;
+        mp_image_crop_rc(&dst_region, bb);
+        struct mp_image *temp = chroma_up(cache_, format, &dst_region);
+
+        if (sbs->format == SUBBITMAP_RGBA) {
+            draw_rgba(cache_, bb, temp, bits, sbs);
+        } else if (sbs->format == SUBBITMAP_LIBASS) {
+            draw_ass(cache_, bb, temp, bits, sbs);
+        }
+
+        chroma_down(&dst_region, temp);
     }
-
-    chroma_down(&dst_region, temp);
 
     if (cache) {
         *cache = cache_;
