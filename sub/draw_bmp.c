@@ -464,23 +464,64 @@ static struct mp_image *chroma_up(struct mp_draw_sub_cache *cache, int imgfmt,
     cache->upsample_temp = *cache->upsample_img;
     struct mp_image *temp = &cache->upsample_temp;
     mp_image_set_size(temp, src->w, src->h);
-    // temp is always YUV, but src not necessarily
-    // reduce amount of conversions in YUV case (upsampling/shifting only)
+
+    // The temp image is always YUV, but src not necessarily.
+    // Reduce amount of conversions in YUV case (upsampling/shifting only)
     if (src->flags & MP_IMGFLAG_YUV) {
         temp->colorspace = src->colorspace;
         temp->levels = src->levels;
     }
-    mp_image_swscale(temp, src, SWS_POINT); // chroma up
+
+    if (src->imgfmt == IMGFMT_420P) {
+        assert(imgfmt == IMGFMT_444P);
+        // Faster upsampling: keep Y plane, upsample chroma planes only
+        // The whole point is not having swscale copy the Y plane
+        struct mp_image t_dst = *temp;
+        mp_image_setfmt(&t_dst, IMGFMT_Y8);
+        mp_image_set_size(&t_dst, temp->chroma_width, temp->chroma_height);
+        struct mp_image t_src = t_dst;
+        mp_image_set_size(&t_src, src->chroma_width, src->chroma_height);
+        for (int c = 0; c < 2; c++) {
+            t_dst.planes[0] = temp->planes[1 + c];
+            t_dst.stride[0] = temp->stride[1 + c];
+            t_src.planes[0] = src->planes[1 + c];
+            t_src.stride[0] = src->stride[1 + c];
+            mp_image_swscale(&t_dst, &t_src, SWS_POINT);
+        }
+        temp->planes[0] = src->planes[0];
+        temp->stride[0] = src->stride[0];
+    } else {
+        mp_image_swscale(temp, src, SWS_POINT);
+    }
 
     return temp;
 }
 
-// Undo chroma_up()
+// Undo chroma_up() (copy temp to old_src if needed)
 static void chroma_down(struct mp_image *old_src, struct mp_image *temp)
 {
     assert(old_src->w == temp->w && old_src->h == temp->h);
     if (temp != old_src) {
-        mp_image_swscale(old_src, temp, SWS_AREA); // chroma down
+        if (old_src->imgfmt == IMGFMT_420P) {
+            // Downsampling, skipping the Y plane (see chroma_up())
+            assert(temp->imgfmt == IMGFMT_444P);
+            assert(temp->planes[0] == old_src->planes[0]);
+            struct mp_image t_dst = *temp;
+            mp_image_setfmt(&t_dst, IMGFMT_Y8);
+            mp_image_set_size(&t_dst, old_src->chroma_width,
+                              old_src->chroma_height);
+            struct mp_image t_src = t_dst;
+            mp_image_set_size(&t_src, temp->chroma_width, temp->chroma_height);
+            for (int c = 0; c < 2; c++) {
+                t_dst.planes[0] = old_src->planes[1 + c];
+                t_dst.stride[0] = old_src->stride[1 + c];
+                t_src.planes[0] = temp->planes[1 + c];
+                t_src.stride[0] = temp->stride[1 + c];
+                mp_image_swscale(&t_dst, &t_src, SWS_AREA);
+            }
+        } else {
+            mp_image_swscale(old_src, temp, SWS_AREA); // chroma down
+        }
     }
 }
 
