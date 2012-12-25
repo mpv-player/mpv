@@ -298,4 +298,6 @@ const char *mp_imgfmt_to_name(unsigned int fmt);
 
 #define vo_format_name mp_imgfmt_to_name
 
+int mp_imgfmt_find_yuv_planar(int xs, int ys, int planes, int component_bits);
+
 #endif /* MPLAYER_IMG_FORMAT_H */

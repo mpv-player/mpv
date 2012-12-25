@@ -264,7 +264,7 @@ static void draw_rgba(struct mp_draw_sub_cache **cache, struct mp_rect bb,
 
         int bytes = (bits + 7) / 8;
         uint8_t *alpha_p = sba->planes[0] + src_y * sba->stride[0] + src_x;
-        for (int p = 0; p < 3; p++) {
+        for (int p = 0; p < (temp->num_planes > 2 ? 3 : 1); p++) {
             void *src = sbi->planes[p] + src_y * sbi->stride[p] + src_x * bytes;
             blend_src_alpha(dst.planes[p], dst.stride[p], src, sbi->stride[p],
                             alpha_p, sba->stride[0], dst.w, dst.h, bytes);
@@ -318,7 +318,7 @@ static void draw_ass(struct mp_draw_sub_cache **cache, struct mp_rect bb,
 
         int bytes = (bits + 7) / 8;
         uint8_t *alpha_p = (uint8_t *)sb->bitmap + src_y * sb->stride + src_x;
-        for (int p = 0; p < 3; p++) {
+        for (int p = 0; p < (temp->num_planes > 2 ? 3 : 1); p++) {
             blend_const_alpha(dst.planes[p], dst.stride[p], color_yuv[p],
                               alpha_p, sb->stride, a, dst.w, dst.h, bytes);
         }
@@ -350,12 +350,6 @@ static void get_swscale_alignment(const struct mp_image *img, int *out_xstep,
 {
     int sx = (1 << img->chroma_x_shift);
     int sy = (1 << img->chroma_y_shift);
-
-    // Hack for IMGFMT_Y8
-    if (img->chroma_x_shift == 31 && img->chroma_y_shift == 31) {
-        sx = 1;
-        sy = 1;
-    }
 
     for (int p = 0; p < img->num_planes; ++p) {
         int bits = img->fmt.bpp[p];
@@ -389,49 +383,25 @@ static bool align_bbox_for_swscale(struct mp_image *img, struct mp_rect *rc)
     return clip_to_bb(img_rect, rc);
 }
 
-// Try to find best/closest YUV 444 format for imgfmt
+// Try to find best/closest YUV 444 format (or similar) for imgfmt
 static void get_closest_y444_format(int imgfmt, int *out_format, int *out_bits)
 {
-#ifdef ACCURATE
-    struct mp_image tmp = {0};
-    mp_image_setfmt(&tmp, imgfmt);
-    if (tmp.flags & MP_IMGFLAG_YUV) {
-        int bits;
-        if (mp_get_chroma_shift(imgfmt, NULL, NULL, &bits)) {
-            switch (bits) {
-                case 8:
-                    *out_format = IMGFMT_444P;
-                    *out_bits = 8;
-                    return;
-                case 9:
-                    *out_format = IMGFMT_444P9;
-                    *out_bits = 9;
-                    return;
-                case 10:
-                    *out_format = IMGFMT_444P10;
-                    *out_bits = 10;
-                    return;
-                case 12:
-                    *out_format = IMGFMT_444P12;
-                    *out_bits = 12;
-                    return;
-                case 14:
-                    *out_format = IMGFMT_444P14;
-                    *out_bits = 14;
-                    return;
-            }
-        }
-    } else {
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(imgfmt);
+    if (desc.flags & MP_IMGFLAG_RGB) {
         *out_format = IMGFMT_GBRP;
         *out_bits = 8;
         return;
+    } else if (desc.flags & MP_IMGFLAG_YUV_P) {
+        *out_format = mp_imgfmt_find_yuv_planar(0, 0, desc.num_planes,
+                                                desc.plane_bits);
+        if (*out_format && mp_sws_supported_format(*out_format)) {
+            *out_bits = mp_imgfmt_get_desc(*out_format).plane_bits;
+            return;
+        }
     }
-    *out_format = IMGFMT_444P16;
-    *out_bits = 16;
-#else
+    // fallback
     *out_format = IMGFMT_444P;
     *out_bits = 8;
-#endif
 }
 
 static struct part *get_cache(struct mp_draw_sub_cache **cache,
