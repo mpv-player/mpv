@@ -55,7 +55,7 @@ struct mp_draw_sub_cache
     struct part *parts[MAX_OSD_PARTS];
 };
 
-static struct part *get_cache(struct mp_draw_sub_cache **cache,
+static struct part *get_cache(struct mp_draw_sub_cache *cache,
                               struct sub_bitmaps *sbs, struct mp_image *format);
 static bool get_sub_area(struct mp_rect bb, struct mp_image *temp,
                          struct sub_bitmap *sb, struct mp_image *out_area,
@@ -235,11 +235,12 @@ static void scale_sb_rgba(struct sub_bitmap *sb, struct mp_image *dst_format,
     *out_sba = sba;
 }
 
-static void draw_rgba(struct mp_draw_sub_cache **cache, struct mp_rect bb,
+static void draw_rgba(struct mp_draw_sub_cache *cache, struct mp_rect bb,
                       struct mp_image *temp, int bits,
                       struct sub_bitmaps *sbs)
 {
     struct part *part = get_cache(cache, sbs, temp);
+    assert(part);
 
     for (int i = 0; i < sbs->num_parts; ++i) {
         struct sub_bitmap *sb = &sbs->parts[i];
@@ -252,12 +253,8 @@ static void draw_rgba(struct mp_draw_sub_cache **cache, struct mp_rect bb,
         if (!get_sub_area(bb, temp, sb, &dst, &src_x, &src_y))
             continue;
 
-        struct mp_image *sbi = NULL;
-        struct mp_image *sba = NULL;
-        if (part) {
-            sbi = part->imgs[i].i;
-            sba = part->imgs[i].a;
-        }
+        struct mp_image *sbi = part->imgs[i].i;
+        struct mp_image *sba = part->imgs[i].a;
 
         if (!(sbi && sba))
             scale_sb_rgba(sb, temp, &sbi, &sba);
@@ -270,17 +267,12 @@ static void draw_rgba(struct mp_draw_sub_cache **cache, struct mp_rect bb,
                             alpha_p, sba->stride[0], dst.w, dst.h, bytes);
         }
 
-        if (part) {
-            part->imgs[i].i = talloc_steal(part, sbi);
-            part->imgs[i].a = talloc_steal(part, sba);
-        } else {
-            talloc_free(sbi);
-            talloc_free(sba);
-        }
+        part->imgs[i].i = talloc_steal(part, sbi);
+        part->imgs[i].a = talloc_steal(part, sba);
     }
 }
 
-static void draw_ass(struct mp_draw_sub_cache **cache, struct mp_rect bb,
+static void draw_ass(struct mp_draw_sub_cache *cache, struct mp_rect bb,
                      struct mp_image *temp, int bits, struct sub_bitmaps *sbs)
 {
     struct mp_csp_params cspar = MP_CSP_PARAMS_DEFAULTS;
@@ -394,17 +386,14 @@ static void get_closest_y444_format(int imgfmt, int *out_format, int *out_bits)
     *out_bits = 8;
 }
 
-static struct part *get_cache(struct mp_draw_sub_cache **cache,
+static struct part *get_cache(struct mp_draw_sub_cache *cache,
                               struct sub_bitmaps *sbs, struct mp_image *format)
 {
-    if (cache && !*cache)
-        *cache = talloc_zero(NULL, struct mp_draw_sub_cache);
-
     struct part *part = NULL;
 
     bool use_cache = sbs->format == SUBBITMAP_RGBA;
-    if (cache && use_cache) {
-        part = (*cache)->parts[sbs->render_index];
+    if (use_cache) {
+        part = cache->parts[sbs->render_index];
         if (part) {
             if (part->bitmap_pos_id != sbs->bitmap_pos_id
                 || part->imgfmt != format->imgfmt
@@ -416,7 +405,7 @@ static struct part *get_cache(struct mp_draw_sub_cache **cache,
             }
         }
         if (!part) {
-            part = talloc(*cache, struct part);
+            part = talloc(cache, struct part);
             *part = (struct part) {
                 .bitmap_pos_id = sbs->bitmap_pos_id,
                 .num_imgs = sbs->num_parts,
@@ -428,7 +417,7 @@ static struct part *get_cache(struct mp_draw_sub_cache **cache,
                                            part->num_imgs);
         }
         assert(part->num_imgs == sbs->num_parts);
-        (*cache)->parts[sbs->render_index] = part;
+        cache->parts[sbs->render_index] = part;
     }
 
     return part;
@@ -464,6 +453,10 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
     if (!mp_sws_supported_format(dst->imgfmt))
         return;
 
+    struct mp_draw_sub_cache *cache_ = cache ? *cache : NULL;
+    if (!cache_)
+        cache_ = talloc_zero(NULL, struct mp_draw_sub_cache);
+
     int format, bits;
     get_closest_y444_format(dst->imgfmt, &format, &bits);
 
@@ -491,14 +484,20 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
     }
 
     if (sbs->format == SUBBITMAP_RGBA) {
-        draw_rgba(cache, bb, temp, bits, sbs);
+        draw_rgba(cache_, bb, temp, bits, sbs);
     } else if (sbs->format == SUBBITMAP_LIBASS) {
-        draw_ass(cache, bb, temp, bits, sbs);
+        draw_ass(cache_, bb, temp, bits, sbs);
     }
 
     if (temp != &dst_region) {
         mp_image_swscale(&dst_region, temp, SWS_AREA); // chroma down
         talloc_free(temp);
+    }
+
+    if (cache) {
+        *cache = cache_;
+    } else {
+        talloc_free(cache_);
     }
 }
 
