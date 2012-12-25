@@ -367,14 +367,15 @@ static mp_image_t *get_screenshot(struct vo *vo)
     size_t width      = CVPixelBufferGetWidth(p->pixelBuffer);
     size_t height     = CVPixelBufferGetHeight(p->pixelBuffer);
     size_t stride     = CVPixelBufferGetBytesPerRow(p->pixelBuffer);
-    size_t image_size = stride * height;
 
-    mp_image_t *image = alloc_mpi(width, height, img_fmt);
-    memcpy(image->planes[0], base, image_size);
-    image->stride[0]  = stride;
+    struct mp_image img = {0};
+    mp_image_setfmt(&img, img_fmt);
+    mp_image_set_size(&img, width, height);
+    img.planes[0] = base;
+    img.stride[0] = stride;
 
+    struct mp_image *image = mp_image_new_copy(&img);
     mp_image_set_display_size(image, vo->aspdat.prew, vo->aspdat.preh);
-
     mp_image_set_colorspace_details(image, &p->colorspace);
 
     return image;
