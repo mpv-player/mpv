@@ -443,6 +443,35 @@ static bool get_sub_area(struct mp_rect bb, struct mp_image *temp,
     return true;
 }
 
+// Convert the src image to imgfmt (which should be a 444 format)
+static struct mp_image *chroma_up(struct mp_draw_sub_cache *cache, int imgfmt,
+                                  struct mp_image *src)
+{
+    if (src->imgfmt == imgfmt)
+        return src;
+
+    struct mp_image *temp = mp_image_alloc(imgfmt, src->w, src->h);
+    // temp is always YUV, but src not necessarily
+    // reduce amount of conversions in YUV case (upsampling/shifting only)
+    if (src->flags & MP_IMGFLAG_YUV) {
+        temp->colorspace = src->colorspace;
+        temp->levels = src->levels;
+    }
+    mp_image_swscale(temp, src, SWS_POINT); // chroma up
+
+    return temp;
+}
+
+// Undo chroma_up()
+static void chroma_down(struct mp_image *old_src, struct mp_image *temp)
+{
+    assert(old_src->w == temp->w && old_src->h == temp->h);
+    if (temp != old_src) {
+        mp_image_swscale(old_src, temp, SWS_AREA); // chroma down
+        talloc_free(temp);
+    }
+}
+
 // cache: if not NULL, the function will set *cache to a talloc-allocated cache
 //        containing scaled versions of sbs contents - free the cache with
 //        talloc_free()
@@ -467,21 +496,9 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
     if (!align_bbox_for_swscale(dst, &bb))
         return;
 
-    struct mp_image *temp;
     struct mp_image dst_region = *dst;
     mp_image_crop_rc(&dst_region, bb);
-    if (dst->imgfmt == format) {
-        temp = &dst_region;
-    } else {
-        temp = mp_image_alloc(format, bb.x1 - bb.x0, bb.y1 - bb.y0);
-        // temp is always YUV, dst_region not
-        // reduce amount of conversions in YUV case (upsampling/shifting only)
-        if (dst_region.flags & MP_IMGFLAG_YUV) {
-            temp->colorspace = dst_region.colorspace;
-            temp->levels = dst_region.levels;
-        }
-        mp_image_swscale(temp, &dst_region, SWS_POINT); // chroma up
-    }
+    struct mp_image *temp = chroma_up(cache_, format, &dst_region);
 
     if (sbs->format == SUBBITMAP_RGBA) {
         draw_rgba(cache_, bb, temp, bits, sbs);
@@ -489,10 +506,7 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
         draw_ass(cache_, bb, temp, bits, sbs);
     }
 
-    if (temp != &dst_region) {
-        mp_image_swscale(&dst_region, temp, SWS_AREA); // chroma down
-        talloc_free(temp);
-    }
+    chroma_down(&dst_region, temp);
 
     if (cache) {
         *cache = cache_;
