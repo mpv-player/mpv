@@ -210,6 +210,12 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
         desc.ys[p] = (p == 1 || p == 2) ? desc.chroma_ys : 0;
     }
 
+    desc.align_x = 1 << desc.chroma_xs;
+    desc.align_y = 1 << desc.chroma_ys;
+
+    if ((desc.bpp[0] % 8) != 0)
+        desc.align_x = 8 / desc.bpp[0]; // expect power of 2
+
     return desc;
 }
 

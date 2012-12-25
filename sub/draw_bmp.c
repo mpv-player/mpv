@@ -325,16 +325,6 @@ static void draw_ass(struct mp_draw_sub_cache **cache, struct mp_rect bb,
     }
 }
 
-static void mp_image_crop(struct mp_image *img, struct mp_rect rc)
-{
-    for (int p = 0; p < img->num_planes; ++p) {
-        img->planes[p] +=
-            (rc.y0 >> img->fmt.ys[p]) * img->stride[p] +
-            (rc.x0 >> img->fmt.xs[p]) * img->fmt.bpp[p] / 8;
-    }
-    mp_image_set_size(img, rc.x1 - rc.x0, rc.y1 - rc.y0);
-}
-
 static bool clip_to_bb(struct mp_rect bb, struct mp_rect *rc)
 {
     rc->x0 = FFMAX(bb.x0, rc->x0);
@@ -459,7 +449,7 @@ static bool get_sub_area(struct mp_rect bb, struct mp_image *temp,
     *out_src_x = (dst.x0 - sb->x) + bb.x0;
     *out_src_y = (dst.y0 - sb->y) + bb.y0;
     *out_area = *temp;
-    mp_image_crop(out_area, dst);
+    mp_image_crop_rc(out_area, dst);
 
     return true;
 }
@@ -486,7 +476,7 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
 
     struct mp_image *temp;
     struct mp_image dst_region = *dst;
-    mp_image_crop(&dst_region, bb);
+    mp_image_crop_rc(&dst_region, bb);
     if (dst->imgfmt == format) {
         temp = &dst_region;
     } else {

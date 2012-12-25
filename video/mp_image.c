@@ -335,6 +335,28 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     }
 }
 
+// Crop the given image to (x0, y0)-(x1, y1) (bottom/right border exclusive)
+// x0/y0 must be naturally aligned.
+void mp_image_crop(struct mp_image *img, int x0, int y0, int x1, int y1)
+{
+    assert(x0 >= 0 && y0 >= 0);
+    assert(x0 <= x1 && y0 <= y1);
+    assert(x1 <= img->w && y1 <= img->h);
+    assert(!(x0 & (img->fmt.align_x - 1)));
+    assert(!(y0 & (img->fmt.align_y - 1)));
+
+    for (int p = 0; p < img->num_planes; ++p) {
+        img->planes[p] += (y0 >> img->fmt.ys[p]) * img->stride[p] +
+                          (x0 >> img->fmt.xs[p]) * img->fmt.bpp[p] / 8;
+    }
+    mp_image_set_size(img, x1 - x0, y1 - y0);
+}
+
+void mp_image_crop_rc(struct mp_image *img, struct mp_rect rc)
+{
+    mp_image_crop(img, rc.x0, rc.y0, rc.x1, rc.y1);
+}
+
 void mp_image_clear(struct mp_image *mpi, int x0, int y0, int w, int h)
 {
     int y;

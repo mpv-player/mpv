@@ -102,6 +102,9 @@ void mp_image_make_writeable(struct mp_image *img);
 void mp_image_setrefp(struct mp_image **p_img, struct mp_image *new_value);
 void mp_image_unrefp(struct mp_image **p_img);
 
+void mp_image_crop(struct mp_image *img, int x0, int y0, int x1, int y1);
+void mp_image_crop_rc(struct mp_image *img, struct mp_rect rc);
+
 void mp_image_set_size(struct mp_image *mpi, int w, int h);
 void mp_image_set_display_size(struct mp_image *mpi, int dw, int dh);
 
