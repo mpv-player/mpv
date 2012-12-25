@@ -37,6 +37,7 @@
 #include "sub/sub.h"
 #include "sub/dec_sub.h"
 
+#include "video/sws_utils.h"
 #include "video/memcpy_pic.h"
 #include "video/csputils.h"
 
@@ -45,9 +46,9 @@
 
 static const struct vf_priv_s {
     int opt_top_margin, opt_bottom_margin;
+
     int outh, outw;
 
-    unsigned int outfmt;
     struct mp_csp_details csp;
 
     struct osd_state *osd;
@@ -60,8 +61,6 @@ static int config(struct vf_instance *vf,
                   int width, int height, int d_width, int d_height,
                   unsigned int flags, unsigned int outfmt)
 {
-    struct MPOpts *opts = vf->opts;
-
     vf->priv->outh = height + vf->priv->opt_top_margin +
                      vf->priv->opt_bottom_margin;
     vf->priv->outw = width;
@@ -69,10 +68,8 @@ static int config(struct vf_instance *vf,
     double dar = (double)d_width / d_height;
     double sar = (double)width / height;
 
-    if (!opts->screen_size_x && !opts->screen_size_y) {
-        d_width = d_width * vf->priv->outw / width;
-        d_height = d_height * vf->priv->outh / height;
-    }
+    vf_rescale_dsize(vf, &d_width, &d_height, width, height,
+                     vf->priv->outw, vf->priv->outh);
 
     vf->priv->dim = (struct mp_osd_res) {
         .w = vf->priv->outw,
@@ -87,67 +84,16 @@ static int config(struct vf_instance *vf,
 			  d_height, flags, outfmt);
 }
 
-static void blank(mp_image_t *mpi, int y1, int y2)
-{
-    int color[3] = {16, 128, 128};    // black (YUV)
-    int y;
-    unsigned char *dst;
-    int chroma_rows = (y2 - y1) >> mpi->chroma_y_shift;
-
-    dst = mpi->planes[0] + y1 * mpi->stride[0];
-    for (y = 0; y < y2 - y1; ++y) {
-        memset(dst, color[0], mpi->w);
-        dst += mpi->stride[0];
-    }
-    dst = mpi->planes[1] + (y1 >> mpi->chroma_y_shift) * mpi->stride[1];
-    for (y = 0; y < chroma_rows; ++y) {
-        memset(dst, color[1], mpi->chroma_width);
-        dst += mpi->stride[1];
-    }
-    dst = mpi->planes[2] + (y1 >> mpi->chroma_y_shift) * mpi->stride[2];
-    for (y = 0; y < chroma_rows; ++y) {
-        memset(dst, color[2], mpi->chroma_width);
-        dst += mpi->stride[2];
-    }
-}
-
 static void prepare_image(struct vf_instance *vf, struct mp_image *dmpi,
                           struct mp_image *mpi)
 {
-    int tmargin = vf->priv->opt_top_margin;
-    // copy mpi->dmpi...
-    if (mpi->flags & MP_IMGFLAG_PLANAR) {
-        memcpy_pic(dmpi->planes[0] + tmargin * dmpi->stride[0],
-                   mpi->planes[0],
-		   mpi->w,
-		   mpi->h,
-                   dmpi->stride[0],
-		   mpi->stride[0]);
-        memcpy_pic(dmpi->planes[1] + (tmargin >> mpi->chroma_y_shift) * dmpi->stride[1],
-                   mpi->planes[1],
-		   mpi->w >> mpi->chroma_x_shift,
-		   mpi->h >> mpi->chroma_y_shift,
-                   dmpi->stride[1],
-		   mpi->stride[1]);
-        memcpy_pic(dmpi->planes[2] + (tmargin >> mpi->chroma_y_shift) * dmpi->stride[2],
-                   mpi->planes[2],
-		   mpi->w >> mpi->chroma_x_shift,
-		   mpi->h >> mpi->chroma_y_shift,
-                   dmpi->stride[2],
-		   mpi->stride[2]);
-    } else {
-        memcpy_pic(dmpi->planes[0] + tmargin * dmpi->stride[0],
-                   mpi->planes[0],
-		   mpi->w * (dmpi->bpp / 8),
-		   mpi->h,
-                   dmpi->stride[0],
-		   mpi->stride[0]);
-    }
-    if (tmargin)
-        blank(dmpi, 0, tmargin);
-    if (vf->priv->opt_bottom_margin)
-        blank(dmpi, vf->priv->outh - vf->priv->opt_bottom_margin,
-              vf->priv->outh);
+    int y1 = MP_ALIGN_DOWN(vf->priv->opt_top_margin, mpi->fmt.align_y);
+    int y2 = MP_ALIGN_DOWN(y1 + mpi->h, mpi->fmt.align_y);
+    struct mp_image cropped = *dmpi;
+    mp_image_crop(&cropped, 0, y1, mpi->w, y1 + mpi->h);
+    mp_image_copy(&cropped, mpi);
+    mp_image_clear(dmpi, 0, 0, dmpi->w, y1);
+    mp_image_clear(dmpi, 0, y2, dmpi->w, vf->priv->outh);
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
@@ -173,11 +119,9 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    switch (fmt) {
-    case IMGFMT_420P:
-        return vf_next_query_format(vf, vf->priv->outfmt);
-    }
-    return 0;
+    if (!mp_sws_supported_format(fmt))
+        return 0;
+    return vf_next_query_format(vf, fmt);
 }
 
 static int control(vf_instance_t *vf, int request, void *data)
@@ -202,19 +146,8 @@ static void uninit(struct vf_instance *vf)
     free(vf->priv);
 }
 
-static const unsigned int fmt_list[] = {
-    IMGFMT_420P,
-    0
-};
-
 static int vf_open(vf_instance_t *vf, char *args)
 {
-    vf->priv->outfmt = vf_match_csp(&vf->next, fmt_list, IMGFMT_420P);
-    if (!vf->priv->outfmt) {
-        uninit(vf);
-        return 0;
-    }
-
     vf->config = config;
     vf->query_format = query_format;
     vf->uninit    = uninit;
@@ -230,7 +163,7 @@ static const m_option_t vf_opts_fields[] = {
      CONF_TYPE_INT, M_OPT_RANGE, 0, 2000},
     {"top-margin", ST_OFF(opt_top_margin),
      CONF_TYPE_INT, M_OPT_RANGE, 0, 2000},
-    {NULL, NULL, 0, 0, 0, 0, NULL}
+    {0},
 };
 
 static const m_struct_t vf_opts = {
