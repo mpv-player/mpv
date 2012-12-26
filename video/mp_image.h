@@ -126,4 +126,8 @@ struct mp_csp_details;
 void mp_image_set_colorspace_details(struct mp_image *image,
                                      struct mp_csp_details *csp);
 
+// align must be a power of two (align >= 1), v >= 0
+#define MP_ALIGN_UP(v, align) FFALIGN(v, align)
+#define MP_ALIGN_DOWN(v, align) ((v) & ~((align) - 1))
+
 #endif /* MPLAYER_MP_IMAGE_H */
