@@ -321,8 +321,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
     switch (fmt){
-    case IMGFMT_NV12:
-    case IMGFMT_NV21:
     case IMGFMT_Y8:
     case IMGFMT_444P:
     case IMGFMT_422P:
