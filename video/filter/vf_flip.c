@@ -30,34 +30,34 @@
 
 //===========================================================================//
 
-static int config(struct vf_instance *vf,
-        int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt){
-    flags&=~VOFLAG_FLIPPING; // remove the FLIP flag
+static int config(struct vf_instance *vf, int width, int height,
+                  int d_width, int d_height,
+                  unsigned int flags, unsigned int outfmt)
+{
+    flags &= ~VOFLAG_FLIPPING; // remove the VO flip flag
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-    mpi->planes[0]=mpi->planes[0]+
-		    mpi->stride[0]*(mpi->h-1);
-    mpi->stride[0]=-mpi->stride[0];
-    if(mpi->flags&MP_IMGFLAG_PLANAR){
-        mpi->planes[1]=mpi->planes[1]+
-	    mpi->stride[1]*((mpi->h>>mpi->chroma_y_shift)-1);
-	mpi->stride[1]=-mpi->stride[1];
-	mpi->planes[2]=mpi->planes[2]+
-	    mpi->stride[2]*((mpi->h>>mpi->chroma_y_shift)-1);
-	mpi->stride[2]=-mpi->stride[2];
+    for (int p = 0; p < mpi->num_planes; p++) {
+        mpi->planes[p] = mpi->planes[p] + mpi->stride[p] * (mpi->plane_h[p] - 1);
+        mpi->stride[p] = -mpi->stride[p];
     }
     return mpi;
 }
 
-//===========================================================================//
+static int query_format(struct vf_instance *vf, unsigned int fmt)
+{
+    if (!IMGFMT_IS_HWACCEL(fmt))
+        return vf_next_query_format(vf, fmt);
+    return 0;
+}
 
 static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->filter=filter;
+    vf->query_format = query_format;
     return 1;
 }
 
