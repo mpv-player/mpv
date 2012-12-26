@@ -186,7 +186,7 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
         desc.flags |= MP_IMGFLAG_ALPHA;
 #endif
 
-    if (desc.num_planes > 1)
+    if (desc.num_planes == pd->nb_components)
         desc.flags |= MP_IMGFLAG_PLANAR;
 
     if (desc.flags & MP_IMGFLAG_YUV) {

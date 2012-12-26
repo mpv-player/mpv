@@ -35,7 +35,7 @@
 #define MP_IMGFLAG_BYTE_ALIGNED 0x1
 // set if (possibly) alpha is included (might be not definitive for packed RGB)
 #define MP_IMGFLAG_ALPHA 0x80
-// set if number of planes > 1
+// Uses one component per plane (set even if it's just one plane)
 #define MP_IMGFLAG_PLANAR 0x100
 // set if it's YUV colorspace
 #define MP_IMGFLAG_YUV 0x200
