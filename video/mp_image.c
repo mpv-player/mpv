@@ -25,6 +25,7 @@
 
 #include <libavutil/mem.h>
 #include <libavutil/common.h>
+#include <libavutil/bswap.h>
 
 #include "talloc.h"
 
@@ -357,48 +358,45 @@ void mp_image_crop_rc(struct mp_image *img, struct mp_rect rc)
     mp_image_crop(img, rc.x0, rc.y0, rc.x1, rc.y1);
 }
 
-void mp_image_clear(struct mp_image *mpi, int x0, int y0, int w, int h)
+// Bottom/right border is allowed not to be aligned, but it might implicitly
+// overwrite pixel data until the alignment (align_x/align_y) is reached.
+void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
 {
-    int y;
-    if (mpi->flags & MP_IMGFLAG_PLANAR) {
-        y0 &= ~1;
-        h += h & 1;
-        for (y = y0; y < y0 + h; y += 2) {
-            memset(mpi->planes[0] + x0 + mpi->stride[0] * y, 0, w);
-            memset(mpi->planes[0] + x0 + mpi->stride[0] * (y + 1), 0, w);
-            memset(mpi->planes[1] + (x0 >> mpi->chroma_x_shift) +
-                    mpi->stride[1] * (y >> mpi->chroma_y_shift),
-                    128, (w >> mpi->chroma_x_shift));
-            memset(mpi->planes[2] + (x0 >> mpi->chroma_x_shift) +
-                    mpi->stride[2] * (y >> mpi->chroma_y_shift),
-                    128, (w >> mpi->chroma_x_shift));
-        }
-        return;
+    assert(x0 >= 0 && y0 >= 0);
+    assert(x0 <= x1 && y0 <= y1);
+    assert(x1 <= img->w && y1 <= img->h);
+    assert(!(x0 & (img->fmt.align_x - 1)));
+    assert(!(y0 & (img->fmt.align_y - 1)));
+
+    struct mp_image area = *img;
+    mp_image_crop(&area, x0, y0, x1, y1);
+
+    uint32_t plane_clear[MP_MAX_PLANES] = {0};
+
+    if (area.imgfmt == IMGFMT_YUYV) {
+        plane_clear[0] = av_le2ne16(0x8000);
+    } else if (area.imgfmt == IMGFMT_UYVY) {
+        plane_clear[0] = av_le2ne16(0x0080);
+    } else if (area.imgfmt == IMGFMT_NV12 || area.imgfmt == IMGFMT_NV21) {
+        plane_clear[1] = 0x8080;
+    } else if (area.flags & MP_IMGFLAG_YUV_P) {
+        uint16_t chroma_clear = (1 << area.fmt.plane_bits) / 2;
+        if (!(area.flags & MP_IMGFLAG_NE))
+            chroma_clear = av_bswap16(chroma_clear);
+        if (area.num_planes > 2)
+            plane_clear[1] = plane_clear[2] = chroma_clear;
     }
-    // packed:
-    for (y = y0; y < y0 + h; y++) {
-        unsigned char *dst = mpi->planes[0] + mpi->stride[0] * y +
-                             (mpi->bpp >> 3) * x0;
-        if (mpi->flags & MP_IMGFLAG_YUV) {
-            unsigned int *p = (unsigned int *) dst;
-            int size = (mpi->bpp >> 3) * w / 4;
-            int i;
-#if BYTE_ORDER == BIG_ENDIAN
-#define CLEAR_PACKEDYUV_PATTERN 0x00800080
-#define CLEAR_PACKEDYUV_PATTERN_SWAPPED 0x80008000
-#else
-#define CLEAR_PACKEDYUV_PATTERN 0x80008000
-#define CLEAR_PACKEDYUV_PATTERN_SWAPPED 0x00800080
-#endif
-            int clear = CLEAR_PACKEDYUV_PATTERN;
-            if (mpi->imgfmt == IMGFMT_UYVY)
-                clear = CLEAR_PACKEDYUV_PATTERN_SWAPPED;
-            for (i = 0; i < size - 3; i += 4)
-                p[i] = p[i + 1] = p[i + 2] = p[i + 3] = clear;
-            for (; i < size; i++)
-                p[i] = clear;
-        } else
-            memset(dst, 0, (mpi->bpp >> 3) * w);
+
+    for (int p = 0; p < area.num_planes; p++) {
+        int bpp = area.fmt.bpp[p];
+        int bytes = (area.plane_w[p] * bpp + 7) / 8;
+        if (bpp <= 8) {
+            memset_pic(area.planes[p], plane_clear[p], bytes,
+                       area.plane_h[p], area.stride[p]);
+        } else {
+            memset16_pic(area.planes[p], plane_clear[p], (bytes + 1) / 2,
+                         area.plane_h[p], area.stride[p]);
+        }
     }
 }
 

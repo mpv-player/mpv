@@ -70,4 +70,20 @@ static inline void memset_pic(void *dst, int fill, int bytesPerLine, int height,
     }
 }
 
+static inline void memset16_pic(void *dst, int fill, int unitsPerLine,
+                                int height, int stride)
+{
+    if (fill == 0) {
+        memset_pic(dst, 0, unitsPerLine * 2, height, stride);
+    } else {
+        for (int i = 0; i < height; i++) {
+            uint16_t *line = dst;
+            uint16_t *end = line + unitsPerLine;
+            while (line < end)
+                *line++ = fill;
+            dst = (uint8_t *)dst + stride;
+        }
+    }
+}
+
 #endif /* MPLAYER_FASTMEMCPY_H */

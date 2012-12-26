@@ -63,10 +63,6 @@ static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt)
 {
-    struct MPOpts *opts = vf->opts;
-    mp_image_t test_mpi;
-    mp_image_setfmt(&test_mpi, outfmt);
-    if (test_mpi.num_planes > 3 || !test_mpi.bpp) return 0;
     vf->priv->exp_x = vf->priv->cfg_exp_x;
     vf->priv->exp_y = vf->priv->cfg_exp_y;
     vf->priv->exp_w = vf->priv->cfg_exp_w;
@@ -99,89 +95,58 @@ static int config(struct vf_instance *vf,
 
     if(vf->priv->exp_x<0 || vf->priv->exp_x+width>vf->priv->exp_w) vf->priv->exp_x=(vf->priv->exp_w-width)/2;
     if(vf->priv->exp_y<0 || vf->priv->exp_y+height>vf->priv->exp_h) vf->priv->exp_y=(vf->priv->exp_h-height)/2;
-    if(test_mpi.flags & MP_IMGFLAG_YUV) {
-        int x_align_mask = (1 << test_mpi.chroma_x_shift) - 1;
-        int y_align_mask = (1 << test_mpi.chroma_y_shift) - 1;
-        // For 1-plane format non-aligned offsets will completely
-        // destroy the colours, for planar it will break the chroma
-        // sampling position.
-        if (vf->priv->exp_x & x_align_mask) {
-            vf->priv->exp_x &= ~x_align_mask;
-            mp_msg(MSGT_VFILTER, MSGL_ERR, "Specified x offset not supported "
-                   "for YUV, reduced to %i.\n", vf->priv->exp_x);
-        }
-        if (vf->priv->exp_y & y_align_mask) {
-            vf->priv->exp_y &= ~y_align_mask;
-            mp_msg(MSGT_VFILTER, MSGL_ERR, "Specified y offset not supported "
-                   "for YUV, reduced to %i.\n", vf->priv->exp_y);
-        }
-    }
 
-    if(!opts->screen_size_x && !opts->screen_size_y){
-	d_width=d_width*vf->priv->exp_w/width;
-	d_height=d_height*vf->priv->exp_h/height;
-    }
+    struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(outfmt);
+
+    vf->priv->exp_x = MP_ALIGN_DOWN(vf->priv->exp_x, fmt.align_x);
+    vf->priv->exp_y = MP_ALIGN_DOWN(vf->priv->exp_y, fmt.align_y);
+
+    vf_rescale_dsize(vf, &d_width, &d_height, width, height,
+                     vf->priv->exp_w, vf->priv->exp_h);
+
     return vf_next_config(vf,vf->priv->exp_w,vf->priv->exp_h,d_width,d_height,flags,outfmt);
-}
-
-// w, h = width and height of the source frame (located at exp_x/exp_y)
-static void clear_borders(struct vf_instance *vf, struct mp_image *dmpi,
-                          int w, int h)
-{
-    // upper border (over the full width)
-    mp_image_clear(dmpi, 0, 0, vf->priv->exp_w, vf->priv->exp_y);
-    // lower border
-    mp_image_clear(dmpi, 0, vf->priv->exp_y + h, vf->priv->exp_w,
-                   vf->priv->exp_h - (vf->priv->exp_y + h));
-    // left
-    mp_image_clear(dmpi, 0, vf->priv->exp_y, vf->priv->exp_x, h);
-    // right
-    mp_image_clear(dmpi, vf->priv->exp_x + w, vf->priv->exp_y,
-                   vf->priv->exp_w - (vf->priv->exp_x + w), h);
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-    if (vf->priv->exp_x == 0 && vf->priv->exp_y == 0 &&
-        vf->priv->exp_w == mpi->w && vf->priv->exp_h == mpi->h)
+    int e_x = vf->priv->exp_x, e_y = vf->priv->exp_y;
+    int e_w = vf->priv->exp_w, e_h = vf->priv->exp_h;
+
+    if (e_x == 0 && e_y == 0 && e_w == mpi->w && e_h == mpi->h)
         return mpi;
 
     struct mp_image *dmpi = vf_alloc_out_image(vf);
     mp_image_copy_attributes(dmpi, mpi);
 
-    // copy mpi->dmpi...
-    if(mpi->flags&MP_IMGFLAG_PLANAR){
-	memcpy_pic(dmpi->planes[0]+
-	        vf->priv->exp_y*dmpi->stride[0]+vf->priv->exp_x,
-		mpi->planes[0], mpi->w, mpi->h,
-		dmpi->stride[0],mpi->stride[0]);
-	memcpy_pic(dmpi->planes[1]+
-		(vf->priv->exp_y>>mpi->chroma_y_shift)*dmpi->stride[1]+(vf->priv->exp_x>>mpi->chroma_x_shift),
-		mpi->planes[1], (mpi->w>>mpi->chroma_x_shift), (mpi->h>>mpi->chroma_y_shift),
-		dmpi->stride[1],mpi->stride[1]);
-	memcpy_pic(dmpi->planes[2]+
-		(vf->priv->exp_y>>mpi->chroma_y_shift)*dmpi->stride[2]+(vf->priv->exp_x>>mpi->chroma_x_shift),
-		mpi->planes[2], (mpi->w>>mpi->chroma_x_shift), (mpi->h>>mpi->chroma_y_shift),
-		dmpi->stride[2],mpi->stride[2]);
-    } else {
-	memcpy_pic(dmpi->planes[0]+
-	        vf->priv->exp_y*dmpi->stride[0]+vf->priv->exp_x*(dmpi->bpp/8),
-		mpi->planes[0], mpi->w*(dmpi->bpp/8), mpi->h,
-		dmpi->stride[0],mpi->stride[0]);
-    }
-    clear_borders(vf, dmpi, mpi->w, mpi->h);
+    struct mp_image cropped = *dmpi;
+    mp_image_crop(&cropped, e_x, e_y, e_x + mpi->w, e_y + mpi->h);
+    mp_image_copy(&cropped, mpi);
+
+    int e_x2 = e_x + MP_ALIGN_DOWN(mpi->w, mpi->fmt.align_x);
+    int e_y2 = e_y + MP_ALIGN_DOWN(mpi->h, mpi->fmt.align_y);
+
+    // top border (over the full width)
+    mp_image_clear(dmpi, 0, 0, e_w, e_y);
+    // bottom border (over the full width)
+    mp_image_clear(dmpi, 0, e_y2, e_w, e_h);
+    // left
+    mp_image_clear(dmpi, 0, e_y, e_x, e_y2);
+    // right
+    mp_image_clear(dmpi, e_x2, e_y, e_w, e_y2);
+
     talloc_free(mpi);
     return dmpi;
 }
-
-//===========================================================================//
 
 static int control(struct vf_instance *vf, int request, void* data){
     return vf_next_control(vf,request,data);
 }
 
-static int query_format(struct vf_instance *vf, unsigned int fmt){
-  return vf_next_query_format(vf,fmt);
+static int query_format(struct vf_instance *vf, unsigned int fmt)
+{
+    if (!IMGFMT_IS_HWACCEL(fmt))
+        return vf_next_query_format(vf, fmt);
+    return 0;
 }
 
 static int vf_open(vf_instance_t *vf, char *args){
