@@ -39,18 +39,14 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     return mpi;
 }
 
-static int query_format(struct vf_instance *vf, unsigned int fmt){
-	switch(fmt)
-	{
-	case IMGFMT_444P:
-        case IMGFMT_422P:
-        case IMGFMT_440P:
-        case IMGFMT_420P:
-        case IMGFMT_411P:
-        case IMGFMT_410P:
-		return vf_next_query_format(vf, fmt);
-	}
-	return 0;
+static int query_format(struct vf_instance *vf, unsigned int fmt)
+{
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    if (!(desc.flags & MP_IMGFLAG_BYTE_ALIGNED))
+        return 0;
+    if (!(desc.num_planes >= 3 && desc.bytes[1] == desc.bytes[2]))
+        return 0;
+    return vf_next_query_format(vf, fmt);
 }
 
 static int vf_open(vf_instance_t *vf, char *args){
