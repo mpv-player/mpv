@@ -38,6 +38,16 @@ struct vf_priv_s {
         struct mp_image *buffer;
 };
 
+static void copy_pic_field(struct mp_image *dmpi, struct mp_image *mpi, int f)
+{
+    for (int p = 0; p < dmpi->num_planes; p++) {
+        my_memcpy_pic(dmpi->planes[p] + dmpi->stride[p] * f,
+                      mpi->planes[p] + mpi->stride[p] * f,
+                      mpi->plane_w[p], mpi->plane_h[p] / 2,
+                      dmpi->stride[p] * 2, mpi->stride[p] * 2);
+    }
+}
+
 static int filter(struct vf_instance *vf, struct mp_image *mpi)
 {
 	int flags = mpi->fields;
@@ -75,39 +85,11 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
                 vf_add_output_frame(vf, new);
 		vf->priv->out++;
 		if (flags & MP_IMGFIELD_REPEAT_FIRST) {
-			my_memcpy_pic(dmpi->planes[0],
-			           mpi->planes[0], mpi->w, mpi->h/2,
-			           dmpi->stride[0]*2, mpi->stride[0]*2);
-			if (mpi->flags & MP_IMGFLAG_PLANAR) {
-				my_memcpy_pic(dmpi->planes[1],
-				              mpi->planes[1],
-				              mpi->chroma_width,
-				              mpi->chroma_height/2,
-				              dmpi->stride[1]*2,
-				              mpi->stride[1]*2);
-				my_memcpy_pic(dmpi->planes[2],
-				              mpi->planes[2],
-				              mpi->chroma_width,
-				              mpi->chroma_height/2,
-				              dmpi->stride[2]*2,
-				              mpi->stride[2]*2);
-			}
+			copy_pic_field(dmpi, mpi, 0);
 			state=1;
 		}
 	} else {
-		my_memcpy_pic(dmpi->planes[0]+dmpi->stride[0],
-		              mpi->planes[0]+mpi->stride[0], mpi->w, mpi->h/2,
-		              dmpi->stride[0]*2, mpi->stride[0]*2);
-		if (mpi->flags & MP_IMGFLAG_PLANAR) {
-			my_memcpy_pic(dmpi->planes[1]+dmpi->stride[1],
-			              mpi->planes[1]+mpi->stride[1],
-			              mpi->chroma_width, mpi->chroma_height/2,
-			              dmpi->stride[1]*2, mpi->stride[1]*2);
-			my_memcpy_pic(dmpi->planes[2]+dmpi->stride[2],
-			              mpi->planes[2]+mpi->stride[2],
-			              mpi->chroma_width, mpi->chroma_height/2,
-			              dmpi->stride[2]*2, mpi->stride[2]*2);
-		}
+		copy_pic_field(dmpi, mpi, 1);
 		struct mp_image *new = mp_image_new_ref(mpi);
                 new->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, vf->priv->last_frame_duration);
 		vf_add_output_frame(vf, new);
@@ -119,23 +101,7 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
                         vf->priv->out++;
                         vf->priv->state=0;
 		} else {
-			my_memcpy_pic(dmpi->planes[0],
-			              mpi->planes[0], mpi->w, mpi->h/2,
-			              dmpi->stride[0]*2, mpi->stride[0]*2);
-			if (mpi->flags & MP_IMGFLAG_PLANAR) {
-				my_memcpy_pic(dmpi->planes[1],
-				              mpi->planes[1],
-				              mpi->chroma_width,
-				              mpi->chroma_height/2,
-				              dmpi->stride[1]*2,
-				              mpi->stride[1]*2);
-				my_memcpy_pic(dmpi->planes[2],
-				              mpi->planes[2],
-				              mpi->chroma_width,
-				              mpi->chroma_height/2,
-				              dmpi->stride[2]*2,
-				              mpi->stride[2]*2);
-			}
+                        copy_pic_field(dmpi, mpi, 0);
 		}
 	}
 
@@ -163,11 +129,22 @@ static void uninit(struct vf_instance *vf)
 	free(vf->priv);
 }
 
+static int query_format(struct vf_instance *vf, unsigned int fmt)
+{
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    if (!(desc.flags & MP_IMGFLAG_YUV_P))
+        return 0;
+    if (desc.plane_bits != 8)
+        return 0;
+    return vf_next_query_format(vf, fmt);
+}
+
 static int vf_open(vf_instance_t *vf, char *args)
 {
     vf->config = config;
     vf->filter_ext = filter;
     vf->uninit = uninit;
+    vf->query_format = query_format;
     vf->priv = calloc(1, sizeof(struct vf_priv_s));
     vf->priv->last_frame_duration = 2;
     vf_detc_init_pts_buf(&vf->priv->ptsbuf);
