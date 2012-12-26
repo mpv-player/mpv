@@ -66,15 +66,19 @@ static void rotate(unsigned char* dst,unsigned char* src,int dststride,int srcst
     }
 }
 
-//===========================================================================//
-
-static int config(struct vf_instance *vf,
-        int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt){
+static int config(struct vf_instance *vf, int width, int height,
+                  int d_width, int d_height,
+                  unsigned int flags, unsigned int outfmt)
+{
     if (vf->priv->direction & 4) {
-	if (width<height) vf->priv->direction&=3;
+        if (width < height)
+            vf->priv->direction &= 3;
     }
-    return vf_next_config(vf,height,width,d_height,d_width,flags,outfmt);
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(outfmt);
+    int a_w = MP_ALIGN_DOWN(width, desc.align_x);
+    int a_h = MP_ALIGN_DOWN(height, desc.align_y);
+    vf_rescale_dsize(vf, &d_width, &d_height, width, height, a_w, a_h);
+    return vf_next_config(vf, a_h, a_w, d_height, d_width, flags, outfmt);
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
@@ -85,39 +89,26 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     struct mp_image *dmpi = vf_alloc_out_image(vf);
     mp_image_copy_attributes(dmpi, mpi);
 
-    if(mpi->flags&MP_IMGFLAG_PLANAR){
-	rotate(dmpi->planes[0],mpi->planes[0],
-	       dmpi->stride[0],mpi->stride[0],
-	       dmpi->w,dmpi->h,1,vf->priv->direction);
-	rotate(dmpi->planes[1],mpi->planes[1],
-	       dmpi->stride[1],mpi->stride[1],
-	       dmpi->w>>mpi->chroma_x_shift,dmpi->h>>mpi->chroma_y_shift,1,vf->priv->direction);
-	rotate(dmpi->planes[2],mpi->planes[2],
-	       dmpi->stride[2],mpi->stride[2],
-	       dmpi->w>>mpi->chroma_x_shift,dmpi->h>>mpi->chroma_y_shift,1,vf->priv->direction);
-    } else {
-	rotate(dmpi->planes[0],mpi->planes[0],
-	       dmpi->stride[0],mpi->stride[0],
-	       dmpi->w,dmpi->h,dmpi->bpp>>3,vf->priv->direction);
+    for (int p = 0; p < mpi->num_planes; p++) {
+        rotate(dmpi->planes[p],mpi->planes[p], dmpi->stride[p],mpi->stride[p],
+               dmpi->plane_w[p], dmpi->plane_h[p], mpi->fmt.bytes[p],
+               vf->priv->direction);
     }
 
     talloc_free(mpi);
     return dmpi;
 }
 
-//===========================================================================//
-
-static int query_format(struct vf_instance *vf, unsigned int fmt){
-    if(IMGFMT_IS_RGB(fmt)) return vf_next_query_format(vf, fmt);
-    // we can support only symmetric (chroma_x_shift==chroma_y_shift) YUV formats:
-    switch(fmt) {
-	case IMGFMT_Y8:
-        case IMGFMT_444P:
-        case IMGFMT_420P:
-        case IMGFMT_410P:
-	    return vf_next_query_format(vf, fmt);
-    }
-    return 0;
+static int query_format(struct vf_instance *vf, unsigned int fmt)
+{
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    if (!(desc.flags & MP_IMGFLAG_BYTE_ALIGNED))
+        return 0;
+    if (desc.chroma_xs != desc.chroma_ys)
+        return 0;
+    if (desc.num_planes == 1 && (desc.chroma_xs || desc.chroma_ys))
+        return 0;
+    return vf_next_query_format(vf, fmt);
 }
 
 static int vf_open(vf_instance_t *vf, char *args){
