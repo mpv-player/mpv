@@ -198,15 +198,14 @@ static enum mode analyze_plane(unsigned char *old, unsigned char *new,
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
    {
-   int w;
    enum mode mode;
 
    struct mp_image *dmpi = vf_alloc_out_image(vf);
    mp_image_copy_attributes(dmpi, mpi);
 
-   w=dmpi->w;
-   if(!(dmpi->flags&MP_IMGFLAG_PLANAR))
-      w*=dmpi->bpp/8;
+   int pw[MP_MAX_PLANES] = {0};
+   for (int p = 0; p < mpi->num_planes; p++)
+       pw[p] = (mpi->w * mpi->fmt.bpp[p] + 7) / 8;
 
    mode=vf->priv->mode;
 
@@ -214,25 +213,14 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
       mode=PROGRESSIVE;
    else
       mode=analyze_plane(vf->priv->buf[0], mpi->planes[0],
-			 w, dmpi->h, w, mpi->stride[0], mode,
+			 pw[0], dmpi->h, pw[0], mpi->stride[0], mode,
 			 vf->priv->verbose, mpi->fields);
 
-   do_plane(dmpi->planes[0], mpi->planes[0],
-	    w, dmpi->h,
-	    dmpi->stride[0], mpi->stride[0],
-	    &vf->priv->buf[0], mode);
-
-   if(dmpi->flags&MP_IMGFLAG_PLANAR)
-      {
-      do_plane(dmpi->planes[1], mpi->planes[1],
-	       dmpi->chroma_width, dmpi->chroma_height,
-	       dmpi->stride[1], mpi->stride[1],
-	       &vf->priv->buf[1], mode);
-      do_plane(dmpi->planes[2], mpi->planes[2],
-	       dmpi->chroma_width, dmpi->chroma_height,
-	       dmpi->stride[2], mpi->stride[2],
-	       &vf->priv->buf[2], mode);
-      }
+   for (int p = 0; p < mpi->num_planes; p++) {
+      do_plane(dmpi->planes[p], mpi->planes[p], pw[p], dmpi->plane_h[p],
+               dmpi->stride[p], mpi->stride[p],
+               &vf->priv->buf[p], mode);
+   }
 
    talloc_free(mpi);
    return dmpi;
@@ -248,10 +236,21 @@ static void uninit(struct vf_instance *vf)
    free(vf->priv);
    }
 
+static int query_format(struct vf_instance *vf, unsigned int fmt)
+{
+    if (IMGFMT_IS_HWACCEL(fmt))
+        return 0;
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    if (desc.num_planes > 3)
+        return 0;
+    return vf_next_query_format(vf, fmt);
+}
+
 static int vf_open(vf_instance_t *vf, char *args)
    {
    vf->filter = filter;
    vf->uninit = uninit;
+   vf->query_format = query_format;
 
    if(!(vf->priv = calloc(1, sizeof(struct vf_priv_s))))
       {
