@@ -199,20 +199,13 @@ static int imgop(int(*planeop)(unsigned char *, unsigned char *,
 			       int, int, int, int, int),
 		 mp_image_t *dst, mp_image_t *src, int arg)
    {
-   if(dst->flags&MP_IMGFLAG_PLANAR)
-      return planeop(dst->planes[0], src?src->planes[0]:0,
-		     dst->w, dst->h,
-		     dst->stride[0], src?src->stride[0]:0, arg)+
-	     planeop(dst->planes[1], src?src->planes[1]:0,
-		     dst->chroma_width, dst->chroma_height,
-		     dst->stride[1], src?src->stride[1]:0, arg)+
-	     planeop(dst->planes[2], src?src->planes[2]:0,
-		     dst->chroma_width, dst->chroma_height,
-		     dst->stride[2], src?src->stride[2]:0, arg);
-
-   return planeop(dst->planes[0], src?src->planes[0]:0,
-		  dst->w*(dst->bpp/8), dst->h,
-		  dst->stride[0], src?src->stride[0]:0, arg);
+       int sum = 0;
+       for (int p = 0; p < dst->num_planes; p++) {
+           sum += planeop(dst->planes[p], src ? src->planes[p] : NULL,
+                          dst->w * (dst->fmt.bpp[p] / 8), dst->plane_h[p],
+                          dst->stride[p], src ? src->stride[p] : 0, arg);
+       }
+       return sum;
    }
 
 /*
