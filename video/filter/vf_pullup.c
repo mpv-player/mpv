@@ -47,7 +47,6 @@ static void init_pullup(struct vf_instance *vf, mp_image_t *mpi)
 {
 	struct pullup_context *c = vf->priv->ctx;
 
-	if (mpi->flags & MP_IMGFLAG_PLANAR) {
 		c->format = PULLUP_FMT_Y;
 		c->nplanes = 4;
 		pullup_preinit_context(c);
@@ -62,7 +61,6 @@ static void init_pullup(struct vf_instance *vf, mp_image_t *mpi)
 		c->stride[1] = c->stride[2] = mpi->chroma_width;
 		c->stride[3] = c->w[3];
 		c->background[1] = c->background[2] = 128;
-	}
 
 	if (gCpuCaps.hasMMX) c->cpu |= PULLUP_CPU_MMX;
 	if (gCpuCaps.hasMMX2) c->cpu |= PULLUP_CPU_MMX2;
@@ -97,14 +95,12 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 		}
 		memcpy_pic(b->planes[0], mpi->planes[0], mpi->w, mpi->h,
 			c->stride[0], mpi->stride[0]);
-		if (mpi->flags & MP_IMGFLAG_PLANAR) {
 			memcpy_pic(b->planes[1], mpi->planes[1],
 				mpi->chroma_width, mpi->chroma_height,
 				c->stride[1], mpi->stride[1]);
 			memcpy_pic(b->planes[2], mpi->planes[2],
 				mpi->chroma_width, mpi->chroma_height,
 				c->stride[2], mpi->stride[2]);
-		}
 	}
 	if (mpi->qscale) {
 		memcpy(b->planes[3], mpi->qscale, c->w[3]);
