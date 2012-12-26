@@ -28,90 +28,77 @@
 #include "video/mp_image.h"
 #include "vf.h"
 
+static int config(struct vf_instance *vf, int width, int height,
+                  int d_width, int d_height,
+                  unsigned int flags, unsigned int fmt)
+{
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    int a_w = MP_ALIGN_DOWN(width, desc.align_x);
+    vf_rescale_dsize(vf, &d_width, &d_height, width, height, a_w, height);
+    return vf_next_config(vf, a_w, height, d_width, d_height, flags, fmt);
+}
 
-static void mirror(unsigned char* dst,unsigned char* src,int dststride,int srcstride,int w,int h,int bpp,unsigned int fmt){
-    int y;
-    for(y=0;y<h;y++){
-	int x;
-	switch(bpp){
-	case 1:
-	    for(x=0;x<w;x++) dst[x]=src[w-x-1];
-	    break;
-	case 2:
-	    switch(fmt){
-	    case IMGFMT_UYVY: {
-		// packed YUV is tricky. U,V are 32bpp while Y is 16bpp:
-		int w2=w>>1;
-		for(x=0;x<w2;x++){
-		    // TODO: optimize this...
-		    dst[x*4+0]=src[0+(w2-x-1)*4];
-		    dst[x*4+1]=src[3+(w2-x-1)*4];
-		    dst[x*4+2]=src[2+(w2-x-1)*4];
-		    dst[x*4+3]=src[1+(w2-x-1)*4];
-		}
-		break; }
-	    case IMGFMT_YUYV: {
-		// packed YUV is tricky. U,V are 32bpp while Y is 16bpp:
-		int w2=w>>1;
-		for(x=0;x<w2;x++){
-		    // TODO: optimize this...
-		    dst[x*4+0]=src[2+(w2-x-1)*4];
-		    dst[x*4+1]=src[1+(w2-x-1)*4];
-		    dst[x*4+2]=src[0+(w2-x-1)*4];
-		    dst[x*4+3]=src[3+(w2-x-1)*4];
-		}
-		break; }
-	    default:
-		for(x=0;x<w;x++) *((short*)(dst+x*2))=*((short*)(src+(w-x-1)*2));
-	    }
-	    break;
-	case 3:
-	    for(x=0;x<w;x++){
-		dst[x*3+0]=src[0+(w-x-1)*3];
-		dst[x*3+1]=src[1+(w-x-1)*3];
-		dst[x*3+2]=src[2+(w-x-1)*3];
-	    }
-	    break;
-	case 4:
-	    for(x=0;x<w;x++) *((int*)(dst+x*4))=*((int*)(src+(w-x-1)*4));
-	}
-	src+=srcstride;
-	dst+=dststride;
+static inline void mirror_4_m(uint8_t *dst, uint8_t *src, int p,
+                              int c0, int c1, int c2, int c3)
+{
+    for (int x = 0; x < p; x++) {
+        dst[x * 4 + 0] = src[(p - x - 1) * 4 + c0];
+        dst[x * 4 + 1] = src[(p - x - 1) * 4 + c1];
+        dst[x * 4 + 2] = src[(p - x - 1) * 4 + c2];
+        dst[x * 4 + 3] = src[(p - x - 1) * 4 + c3];
     }
 }
 
-//===========================================================================//
+static inline void mirror(uint8_t *dst, uint8_t *src, int bp, int w)
+{
+    for (int x = 0; x < w; x++)
+        memcpy(dst + x * bp, src + (w - x - 1) * bp, bp);
+}
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     mp_image_t *dmpi = vf_alloc_out_image(vf);
     mp_image_copy_attributes(dmpi, mpi);
 
-    if(mpi->flags&MP_IMGFLAG_PLANAR){
-	       mirror(dmpi->planes[0],mpi->planes[0],
-	       dmpi->stride[0],mpi->stride[0],
-	       dmpi->w,dmpi->h,1,mpi->imgfmt);
-	       mirror(dmpi->planes[1],mpi->planes[1],
-	       dmpi->stride[1],mpi->stride[1],
-	       dmpi->w>>mpi->chroma_x_shift,dmpi->h>>mpi->chroma_y_shift,1,mpi->imgfmt);
-	       mirror(dmpi->planes[2],mpi->planes[2],
-	       dmpi->stride[2],mpi->stride[2],
-	       dmpi->w>>mpi->chroma_x_shift,dmpi->h>>mpi->chroma_y_shift,1,mpi->imgfmt);
-    } else {
-	mirror(dmpi->planes[0],mpi->planes[0],
-	       dmpi->stride[0],mpi->stride[0],
-	       dmpi->w,dmpi->h,dmpi->bpp>>3,mpi->imgfmt);
+    for (int p = 0; p < mpi->num_planes; p++) {
+        for (int y = 0; y < mpi->plane_h[p]; y++) {
+            void *p_src = mpi->planes[p] + mpi->stride[p] * y;
+            void *p_dst = dmpi->planes[p] + dmpi->stride[p] * y;
+            int w = dmpi->plane_w[p];
+            if (mpi->imgfmt == IMGFMT_YUYV) {
+                mirror_4_m(p_dst, p_src, w / 2, 2, 1, 0, 3);
+            } else if (mpi->imgfmt == IMGFMT_UYVY) {
+                mirror_4_m(p_dst, p_src, w / 2, 0, 3, 2, 1);
+            } else {
+                // make the compiler unroll the memcpy in mirror()
+                switch (mpi->fmt.bytes[p]) {
+                case 1: mirror(p_dst, p_src, 1, w); break;
+                case 2: mirror(p_dst, p_src, 2, w); break;
+                case 3: mirror(p_dst, p_src, 3, w); break;
+                case 4: mirror(p_dst, p_src, 4, w); break;
+                default:
+                    mirror(p_dst, p_src, mpi->fmt.bytes[p], w);
+                }
+            }
+        }
     }
 
     talloc_free(mpi);
     return dmpi;
 }
 
-//===========================================================================//
+static int query_format(struct vf_instance *vf, unsigned int fmt)
+{
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    if (!(desc.flags & MP_IMGFLAG_BYTE_ALIGNED))
+        return 0;
+    return vf_next_query_format(vf, fmt);
+}
 
 static int vf_open(vf_instance_t *vf, char *args){
-    //vf->config=config;
+    vf->config=config;
     vf->filter=filter;
+    vf->query_format=query_format;
     return 1;
 }
 
