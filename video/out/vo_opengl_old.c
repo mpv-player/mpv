@@ -610,7 +610,11 @@ static bool get_image(struct vo *vo, mp_image_t *mpi, int *th, bool *cplane)
         width = p->texture_width;
         height = p->texture_height;
     }
-    mpi->stride[0] = width * mpi->bpp / 8;
+    int avgbpp16 = 0;
+    for (int p = 0; p < 4; p++)
+        avgbpp16 += (16 * mpi->fmt.bpp[p]) >> mpi->fmt.xs[p] >> mpi->fmt.ys[p];
+    int avgbpp = avgbpp16 / 16;
+    mpi->stride[0] = width * avgbpp / 8;
     needed_size = mpi->stride[0] * height;
     if (!p->buffer)
         gl->GenBuffers(1, &p->buffer);

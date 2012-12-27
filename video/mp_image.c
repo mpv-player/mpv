@@ -129,7 +129,6 @@ void mp_image_setfmt(struct mp_image *mpi, unsigned int out_fmt)
     mpi->fmt = fmt;
     mpi->flags |= fmt.flags;
     mpi->imgfmt = fmt.id;
-    mpi->bpp = fmt.avg_bpp;
     mpi->chroma_x_shift = fmt.chroma_xs;
     mpi->chroma_y_shift = fmt.chroma_ys;
     mpi->num_planes = fmt.num_planes;

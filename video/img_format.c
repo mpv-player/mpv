@@ -158,8 +158,6 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
     };
 
     int planedepth[4] = {0};
-    int xs[4] = {0, pd->log2_chroma_w, pd->log2_chroma_w, 0};
-    int ys[4] = {0, pd->log2_chroma_h, pd->log2_chroma_h, 0};
     int el_size = (pd->flags & PIX_FMT_BITSTREAM) ? 1 : 8;
     for (int c = 0; c < pd->nb_components; c++) {
         AVComponentDescriptor d = pd->comp[c];
@@ -168,12 +166,6 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
             desc.bpp[d.plane] = (d.step_minus1 + 1) * el_size;
         planedepth[d.plane] += d.depth_minus1 + 1;
     }
-
-    int avgbpp16 = 0;
-    for (int p = 0; p < 4; p++)
-        avgbpp16 += (16 * desc.bpp[p]) >> xs[p] >> ys[p];
-    desc.avg_bpp = avgbpp16 / 16;
-    //assert(desc.avg_bpp == av_get_padded_bits_per_pixel(pd));
 
     for (int p = 0; p < 4; p++) {
         if (desc.bpp[p])

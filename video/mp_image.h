@@ -58,7 +58,6 @@ typedef struct mp_image {
     struct mp_imgfmt_desc fmt;
 
     // fields redundant to fmt, for convenience or compatibility
-    unsigned char bpp;  // bits/pixel. NOT depth! for RGB it will be n*8
     unsigned int imgfmt;
     int num_planes;
     int chroma_x_shift; // horizontal
