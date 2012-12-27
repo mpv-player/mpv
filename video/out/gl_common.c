@@ -655,11 +655,20 @@ static void getFunctions(GL *gl, void *(*getProcAddress)(const GLubyte *),
         if (gl3 && section->ver_removed && gl->version >= section->ver_removed)
             continue;
 
-        bool must_exist = section->ver_core && gl->version >= section->ver_core
-                          && !section->partial_ok;
+        // NOTE: Function entrypoints can exist, even if they do not work.
+        //       We must always check extension strings and versions.
 
-        if (!must_exist && section->extension &&
-            !strstr(gl->extensions, section->extension))
+        bool exists = false;
+        if (section->ver_core)
+            exists = gl->version >= section->ver_core;
+
+        if (section->extension && strstr(gl->extensions, section->extension))
+            exists = true;
+
+        if (section->partial_ok)
+            exists = true; // possibly
+
+        if (!exists)
             continue;
 
         void *loaded[MAX_FN_COUNT] = {0};
@@ -677,13 +686,13 @@ static void getFunctions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                 ptr = fn->fallback;
             if (!ptr) {
                 all_loaded = false;
-                if (must_exist) {
-                    // Either we or the driver are not conforming to OpenGL.
-                    mp_msg(MSGT_VO, MSGL_ERR, "[gl] Required function '%s' not "
-                           "found.\n", fn->funcnames[0]);
-                    talloc_free_children(gl);
-                    *gl = (GL) {0};
-                    return;
+                if (!section->partial_ok) {
+                    mp_msg(MSGT_VO, MSGL_V, "[gl] Required function '%s' not "
+                           "found for %s/%d.%d.\n", fn->funcnames[0],
+                           section->extension ? section->extension : "native",
+                           MPGL_VER_GET_MAJOR(section->ver_core),
+                           MPGL_VER_GET_MINOR(section->ver_core));
+                    break;
                 }
             }
             assert(i < MAX_FN_COUNT);
