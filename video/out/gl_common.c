@@ -364,6 +364,7 @@ struct gl_functions gl_functions[] = {
             DEF_FN_HARD(DrawArrays),
             DEF_FN_HARD(GetString),
             DEF_FN_HARD(GetError),
+            DEF_FN_HARD(GetTexLevelParameteriv),
             {0}
         },
     },

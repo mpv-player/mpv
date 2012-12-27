@@ -75,6 +75,7 @@ struct gl_priv {
     uint32_t image_format;
     int many_fmts;
     int have_texture_rg;
+    int max_tex_component_size;
     int ati_hack;
     int force_pbo;
     int use_glFinish;
@@ -346,6 +347,22 @@ static void autodetectGlExtensions(struct vo *vo)
             eq_caps |= MP_CSP_EQ_CAPS_GAMMA;
     }
     p->video_eq.capabilities = eq_caps;
+
+    {
+        int target = p->use_rectangle == 1 ? GL_TEXTURE_RECTANGLE : GL_TEXTURE_2D;
+        GLint gl_texfmt;
+        GLenum gl_format, gl_type;
+        glFindFormat(IMGFMT_420P16, p->have_texture_rg, NULL, &gl_texfmt,
+                     &gl_format, &gl_type);
+        glCreateClearTex(gl, target, gl_texfmt, gl_format, gl_type,
+                         GL_LINEAR, 64, 64, 0);
+        int tex_size_token = p->have_texture_rg ? GL_TEXTURE_RED_SIZE
+                                                : GL_TEXTURE_INTENSITY_SIZE;
+        GLint size = 8;
+        gl->GetTexLevelParameteriv(target, 0, tex_size_token, &size);
+        mp_msg(MSGT_VO, MSGL_V, "[gl] 16 bit texture depth: %d.\n", size);
+        p->max_tex_component_size = size;
+    }
 
     if (is_ati && (p->lscale == 1 || p->lscale == 2 || p->cscale == 1 || p->cscale == 2))
         mp_msg(MSGT_VO, MSGL_WARN, "[gl] Selected scaling mode may be broken on"
@@ -838,7 +855,8 @@ static int query_format(struct vo *vo, uint32_t format)
     if (format == IMGFMT_RGB24 || format == IMGFMT_RGBA)
         return caps;
     if (p->use_yuv && mp_get_chroma_shift(format, NULL, NULL, &depth) &&
-        (depth == 8 || depth == 16 || glYUVLargeRange(p->use_yuv)) &&
+        (depth == 8 || depth == 16 ||
+         p->max_tex_component_size >= 16 && glYUVLargeRange(p->use_yuv)) &&
         (IMGFMT_IS_YUVP16_NE(format) || !IMGFMT_IS_YUVP16(format)))
         return caps;
     // HACK, otherwise we get only b&w with some filters (e.g. -vf eq)

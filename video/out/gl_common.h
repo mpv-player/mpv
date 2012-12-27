@@ -318,6 +318,8 @@ struct GL {
     void (GLAPIENTRY *EnableClientState)(GLenum);
     void (GLAPIENTRY *DisableClientState)(GLenum);
     GLenum (GLAPIENTRY *GetError)(void);
+    void (GLAPIENTRY *GetTexLevelParameteriv)(GLenum, GLint, GLenum, GLint *);
+
 
     void (GLAPIENTRY *GenBuffers)(GLsizei, GLuint *);
     void (GLAPIENTRY *DeleteBuffers)(GLsizei, const GLuint *);
