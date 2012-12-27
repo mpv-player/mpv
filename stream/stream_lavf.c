@@ -137,8 +137,13 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
         filename = talloc_asprintf(temp, "mmsh://%.*s", BSTR_P(b_filename));
     }
 
-    if (avio_open(&avio, filename, flags) < 0)
+    int err = avio_open(&avio, filename, flags);
+    if (err < 0) {
+        if (err == AVERROR_PROTOCOL_NOT_FOUND)
+            mp_msg(MSGT_OPEN, MSGL_ERR, "[ffmpeg] Protocol not found. Make sure"
+                   " ffmpeg/Libav is compiled with networking support.\n");
         goto out;
+    }
 
 #if LIBAVFORMAT_VERSION_MICRO >= 100
     if (avio->av_class) {
