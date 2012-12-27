@@ -1740,7 +1740,7 @@ static bool is_non_interleaved(struct MPContext *mpctx, struct track *track)
     struct demuxer *demuxer = track->demuxer;
     for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
         struct track *other = mpctx->current_track[type];
-        if (other != track && other->demuxer && other->demuxer == demuxer)
+        if (other && other != track && other->demuxer && other->demuxer == demuxer)
             return false;
     }
     return true;
