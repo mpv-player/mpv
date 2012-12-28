@@ -43,4 +43,7 @@ struct mp_rect {
     int x1, y1;
 };
 
+void mp_rect_union(struct mp_rect *rc, const struct mp_rect *src);
+bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2);
+
 #endif /* MPLAYER_MPCOMMON_H */
