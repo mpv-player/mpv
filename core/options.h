@@ -29,6 +29,7 @@ typedef struct MPOpts {
     int fullscreen;
     int vo_dbpp;
     float vo_panscanrange;
+    int vo_force_rgba_osd;
     int requested_colorspace;
     int requested_input_range;
     int requested_output_range;

@@ -170,10 +170,15 @@ static bool spu_visible(struct osd_state *osd, struct osd_object *obj)
 
 static void render_object(struct osd_state *osd, struct osd_object *obj,
                           struct mp_osd_res res, double video_pts,
-                          const bool formats[SUBBITMAP_COUNT],
+                          const bool sub_formats[SUBBITMAP_COUNT],
                           struct sub_bitmaps *out_imgs)
 {
     struct MPOpts *opts = osd->opts;
+
+    bool formats[SUBBITMAP_COUNT];
+    memcpy(formats, sub_formats, sizeof(formats));
+    if (opts->vo_force_rgba_osd)
+        formats[SUBBITMAP_LIBASS] = false;
 
     *out_imgs = (struct sub_bitmaps) {0};
 

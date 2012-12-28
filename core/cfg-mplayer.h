@@ -610,6 +610,7 @@ const m_option_t mplayer_opts[]={
     {"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1.0, NULL},
     OPT_FLOATRANGE("panscanrange", vo_panscanrange, 0, -19.0, 99.0),
+    OPT_MAKE_FLAGS("force-rgba-osd-rendering", vo_force_rgba_osd, 0),
     OPT_CHOICE("colormatrix", requested_colorspace, 0,
                ({"auto", MP_CSP_AUTO},
                 {"BT.601", MP_CSP_BT_601},

@@ -565,6 +565,14 @@
 --flip
     Flip image upside-down.
 
+--force-rgba-osd-rendering
+    Change how some video outputs render the OSD and text subtitles. This
+    does not change appearance of the subtitles and only has performance
+    implications. For VOs which support native ASS rendering (like ``vdpau``,
+    ``opengl``, ``direct3d``), this can be slightly faster or slower,
+    depending on GPU drivers and hardware. For other VOs, this just makes
+    rendering slower.
+
 --force-window-position
     Forcefully move mpv's video output window to default location whenever
     there is a change in video parameters, video stream or file. This used to
