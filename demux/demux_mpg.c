@@ -844,7 +844,7 @@ static int demux_mpg_gxf_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
     return 0;
   }
   {
-    register uint32_t state = (uint32_t)demux->priv;
+    register uint32_t state = (uint32_t)(uintptr_t)demux->priv;
     register int pos = -len;
     unsigned char *buf = &pack->buffer[len];
     do {
@@ -852,7 +852,7 @@ static int demux_mpg_gxf_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
       if (unlikely((state | 3) == 0x1bf))
         pos = find_end(&buf, pos, demux->stream);
     } while (++pos < 0);
-    demux->priv = (void *)state;
+    demux->priv = (void *)(uintptr_t)state;
     len = buf - pack->buffer;
   }
   if (len < STREAM_BUFFER_SIZE)
