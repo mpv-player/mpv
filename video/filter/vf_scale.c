@@ -118,6 +118,10 @@ static const unsigned int outfmt_list[]={
 // RGB and grayscale (Y8 and Y800):
     IMGFMT_BGR32,
     IMGFMT_RGB32,
+    IMGFMT_ABGR,
+    IMGFMT_ARGB,
+    IMGFMT_BGRA,
+    IMGFMT_RGBA,
     IMGFMT_BGR24,
     IMGFMT_RGB24,
     IMGFMT_GBRP,
