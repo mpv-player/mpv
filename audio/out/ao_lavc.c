@@ -1,9 +1,9 @@
 /*
  * audio encoding using libavformat
- * Copyright (C) 2011 Rudolf Polzer <divVerent@xonotic.org>
+ * Copyright (C) 2011-2012 Rudolf Polzer <divVerent@xonotic.org>
  * NOTE: this file is partially based on ao_pcm.c by Atmosfear
  *
- * This file is part of MPlayer.
+ * This file is part of mpv.
  *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

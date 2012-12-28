@@ -1,9 +1,9 @@
 /*
- * Raw video muxing using libavformat
+ * muxing using libavformat
  * Copyright (C) 2010 Nicolas George <george@nsup.org>
- * Copyright (C) 2011 Rudolf Polzer <divVerent@xonotic.org>
+ * Copyright (C) 2011-2012 Rudolf Polzer <divVerent@xonotic.org>
  *
- * This file is part of MPlayer.
+ * This file is part of mpv.
  *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

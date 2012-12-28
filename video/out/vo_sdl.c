@@ -1,9 +1,8 @@
 /*
- * video output driver for SDL2
+ * video output driver for SDL 2.0+
+ * Copyright (C) 2012 Rudolf Polzer <divVerent@xonotic.org>
  *
- * by divVerent <divVerent@xonotic.org>
- *
- * This file is part of MPlayer.
+ * This file is part of mpv.
  *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
