@@ -348,6 +348,8 @@ Video output:
   --enable-gl              enable OpenGL video output [autodetect]
   --enable-caca            enable CACA  video output [autodetect]
   --enable-direct3d        enable Direct3D video output [autodetect]
+  --enable-sdl             enable SDL audio output [autodetect]
+  --enable-sdl2            enable SDL 2.0+ audio and video output [autodetect]
   --enable-xv              enable Xv video output [autodetect]
   --enable-vdpau           enable VDPAU acceleration [autodetect]
   --enable-vm              enable XF86VidMode support [autodetect]
@@ -422,6 +424,8 @@ _xss=auto
 _xv=auto
 _vdpau=auto
 _direct3d=auto
+_sdl=auto
+_sdl2=auto
 _dsound=auto
 _nas=auto
 _mng=auto
@@ -595,6 +599,10 @@ for ac_option do
   --disable-vdpau)      _vdpau=no       ;;
   --enable-direct3d)    _direct3d=yes   ;;
   --disable-direct3d)   _direct3d=no    ;;
+  --enable-sdl)         _sdl=yes       ;;
+  --disable-sdl)        _sdl=no        ;;
+  --enable-sdl2)        _sdl2=yes       ;;
+  --disable-sdl2)       _sdl2=no        ;;
   --enable-dsound)      _dsound=yes     ;;
   --disable-dsound)     _dsound=no      ;;
   --enable-mng)         _mng=yes        ;;
@@ -2319,6 +2327,39 @@ echores "$_dsound"
 fi #if win32; then
 
 
+echocheck "SDL 2.0"
+if test "$_sdl2" = auto ; then
+  pkg_config_add 'sdl2' && _sdl2=yes
+fi
+if test "$_sdl2" = yes ; then
+  _sdl=yes # sdl2 implies sdl
+  def_sdl='#define CONFIG_SDL 1'
+  def_sdl2='#define CONFIG_SDL2 1'
+  vomodules="sdl $vomodules"
+  aomodules="sdl $aomodules"
+  echores "$_sdl2"
+else
+  def_sdl2='#undef CONFIG_SDL2'
+  echores "$_sdl2"
+  echocheck "SDL"
+  if test "$_sdl" = auto ; then
+    pkg_config_add 'sdl' && _sdl=yes
+  fi
+  if test "$_sdl" = yes ; then
+    def_sdl='#define CONFIG_SDL 1'
+    novomodules="sdl $novomodules"
+    aomodules="sdl $aomodules"
+  else
+    def_sdl='#undef CONFIG_SDL'
+    novomodules="sdl $novomodules"
+    noaomodules="sdl $noaomodules"
+  fi
+  echores "$_sdl"
+fi
+
+
+
+
 #########
 # AUDIO #
 #########
@@ -3159,6 +3200,8 @@ COCOA = $_cocoa
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
 DIRECT3D = $_direct3d
+SDL = $_sdl
+SDL2 = $_sdl2
 DSOUND = $_dsound
 DVBIN = $_dvbin
 DVDREAD = $_dvdread
@@ -3405,6 +3448,8 @@ $def_caca
 $def_corevideo
 $def_cocoa
 $def_direct3d
+$def_sdl
+$def_sdl2
 $def_dsound
 $def_dvb
 $def_dvbin

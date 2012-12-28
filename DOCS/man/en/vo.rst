@@ -660,6 +660,11 @@ opengl-old
         x11
             X11/GLX
 
+sdl
+    SDL 2.0+ Render video output driver, depending on system with or without
+    hardware acceleration. Should work everywhere where SDL 2.0 builds. For
+    tuning, refer to your copy of the file SDL_hints.h.
+
 null
     Produces no video output. Useful for benchmarking.
 

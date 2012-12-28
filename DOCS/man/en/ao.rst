@@ -92,6 +92,21 @@ dsound (Windows only)
         Sets the device number to use. Playing a file with ``-v`` will show a
         list of available devices.
 
+sdl
+    SDL 1.2+ audio output driver. Should work everywhere where SDL 1.2 builds,
+    but may require the SDL_AUDIODRIVER environment variable to be set
+    appropriately for your system.
+
+    buflen=<length>
+        Sets the audio buffer length in seconds. Is used only approximately,
+        or even disaregarded entirely by the sound system. Playing a file with
+        ``-v`` will show the requested and obtained exact buffer size. A value
+        of 0 selects the sound system default.
+
+    bufcnt=<count>
+        Sets the number of extra audio buffers in mpv. Usually needs not be
+        changed.
+
 null
     Produces no audio output but maintains video playback speed. Use
     ``--no-audio`` for benchmarking.
