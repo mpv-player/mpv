@@ -194,11 +194,12 @@ static int change_vdptime_sync(struct vdpctx *vc, unsigned int *t)
     unsigned int t1 = *t;
     unsigned int t2 = GetTimer();
     uint64_t old = vc->last_vdp_time + (t1 - vc->last_sync_update) * 1000ULL;
-    if (vdp_time > old)
+    if (vdp_time > old) {
         if (vdp_time > old + (t2 - t1) * 1000ULL)
             vdp_time -= (t2 - t1) * 1000ULL;
         else
             vdp_time = old;
+    }
     mp_msg(MSGT_VO, MSGL_DBG2, "[vdpau] adjusting VdpTime offset by %f µs\n",
            (int64_t)(vdp_time - old) / 1000.);
     vc->last_vdp_time = vdp_time;
