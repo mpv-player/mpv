@@ -227,9 +227,6 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
                          double video_pts, int draw_flags,
                          struct mp_image_pool *pool, struct mp_image *dest);
 
-struct mp_rect;
-bool sub_bitmaps_bb(struct sub_bitmaps *imgs, struct mp_rect *out_bb);
-
 // defined in osd_libass.c and osd_dummy.c
 
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,

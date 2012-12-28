@@ -27,6 +27,7 @@
 #include "core/mp_common.h"
 #include "sub/draw_bmp.h"
 #include "sub/sub.h"
+#include "sub/img_convert.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
 #include "video/img_format.h"
@@ -543,7 +544,7 @@ void mp_draw_sub_bitmaps(struct mp_draw_sub_cache **cache, struct mp_image *dst,
     get_closest_y444_format(dst->imgfmt, &format, &bits);
 
     struct mp_rect bb;
-    if (!sub_bitmaps_bb(sbs, &bb))
+    if (!mp_sub_bitmaps_bb(sbs, &bb))
         return;
 
     if (!align_bbox_for_swscale(dst, &bb))
