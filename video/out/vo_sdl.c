@@ -61,7 +61,7 @@ const struct formatmap_entry formats[] = {
 #if BYTE_ORDER == BIG_ENDIAN
     {SDL_PIXELFORMAT_RGBX8888, IMGFMT_RGBA, 0}, // has no alpha -> bad for OSD
     {SDL_PIXELFORMAT_BGRX8888, IMGFMT_BGRA, 0}, // has no alpha -> bad for OSD
-    {SDL_PIXELFORMAT_ARGB8888, IMGFMT_ARGB, 1},
+    {SDL_PIXELFORMAT_ARGB8888, IMGFMT_ARGB, 1}, // matches SUBBITMAP_RGBA
     {SDL_PIXELFORMAT_RGBA8888, IMGFMT_RGBA, 1},
     {SDL_PIXELFORMAT_ABGR8888, IMGFMT_ABGR, 1},
     {SDL_PIXELFORMAT_BGRA8888, IMGFMT_BGRA, 1},
@@ -77,7 +77,7 @@ const struct formatmap_entry formats[] = {
 #else
     {SDL_PIXELFORMAT_RGBX8888, IMGFMT_ABGR, 0}, // has no alpha -> bad for OSD
     {SDL_PIXELFORMAT_BGRX8888, IMGFMT_ARGB, 0}, // has no alpha -> bad for OSD
-    {SDL_PIXELFORMAT_ARGB8888, IMGFMT_BGRA, 1},
+    {SDL_PIXELFORMAT_ARGB8888, IMGFMT_BGRA, 1}, // matches SUBBITMAP_RGBA
     {SDL_PIXELFORMAT_RGBA8888, IMGFMT_ABGR, 1},
     {SDL_PIXELFORMAT_ABGR8888, IMGFMT_RGBA, 1},
     {SDL_PIXELFORMAT_BGRA8888, IMGFMT_ARGB, 1},
@@ -561,39 +561,57 @@ static void uninit(struct vo *vo)
     talloc_free(vc);
 }
 
-static void subbitmap_to_texture(struct vo *vo, SDL_Texture *tex,
-                                 struct sub_bitmap *bmp,
-                                 uint32_t andmask, uint32_t ormask)
+static inline void upload_to_texture(struct vo *vo, SDL_Texture *tex,
+                                     int w, int h, void *bitmap, int stride)
 {
     struct priv *vc = vo->priv;
 
-    uint32_t *temppixels;
-    temppixels = talloc_array(vo, uint32_t, bmp->w * bmp->h);
-
-    // apply pixel masks
-    int x, y;
-    for (y = 0; y < bmp->h; ++y) {
-        const uint32_t *src =
-            (const uint32_t *) ((const char *) bmp->bitmap + y * bmp->stride);
-        uint32_t *dst = temppixels + y * bmp->w;
-        for (x = 0; x < bmp->w; ++x)
-            dst[x] = (src[x] & andmask) | ormask;
+    if (vc->osd_format.sdl == SDL_PIXELFORMAT_ARGB8888) {
+        // NOTE: this optimization is questionable, because SDL docs say
+        // that this way is slow.
+        // It did measure up faster, though...
+        SDL_UpdateTexture(tex, NULL, bitmap, stride);
+        return;
     }
 
-    // convert to SDL's format and upload
     void *pixels;
     int pitch;
     if (SDL_LockTexture(tex, NULL, &pixels, &pitch)) {
         mp_msg(MSGT_VO, MSGL_ERR, "[sdl] Could not lock texture\n");
     } else {
-        SDL_ConvertPixels(bmp->w, bmp->h, SDL_PIXELFORMAT_ARGB8888,
-                          temppixels, sizeof(uint32_t) * bmp->w,
+        SDL_ConvertPixels(w, h, SDL_PIXELFORMAT_ARGB8888,
+                          bitmap, stride,
                           vc->osd_format.sdl,
                           pixels, pitch);
         SDL_UnlockTexture(tex);
     }
+}
 
-    talloc_free(temppixels);
+static inline void subbitmap_to_texture(struct vo *vo, SDL_Texture *tex,
+                                        struct sub_bitmap *bmp,
+                                        uint32_t ormask)
+{
+    if (ormask == 0) {
+        upload_to_texture(vo, tex, bmp->w, bmp->h,
+                          bmp->bitmap, bmp->stride);
+    } else {
+        uint32_t *temppixels;
+        temppixels = talloc_array(vo, uint32_t, bmp->w * bmp->h);
+
+        int x, y;
+        for (y = 0; y < bmp->h; ++y) {
+            const uint32_t *src =
+                (const uint32_t *) ((const char *) bmp->bitmap + y * bmp->stride);
+            uint32_t *dst = temppixels + y * bmp->w;
+            for (x = 0; x < bmp->w; ++x)
+                dst[x] = src[x] | ormask;
+        }
+
+        upload_to_texture(vo, tex, bmp->w, bmp->h,
+                          temppixels, sizeof(uint32_t) * bmp->w);
+
+        talloc_free(temppixels);
+    }
 }
 
 static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
@@ -643,8 +661,8 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
             if (target->tex) {
                 SDL_SetTextureBlendMode(target->tex,
                                         SDL_BLENDMODE_BLEND);
-                subbitmap_to_texture(vo, target->tex, bmp,
-                                     0xFF000000, 0x00000000); // RGBA -> 000A
+                SDL_SetTextureColorMod(target->tex, 0, 0, 0);
+                subbitmap_to_texture(vo, target->tex, bmp, 0); // RGBA -> 000A
             }
 
             // tex2: added texture
@@ -663,7 +681,7 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
                 SDL_SetTextureBlendMode(target->tex2,
                                         SDL_BLENDMODE_ADD);
                 subbitmap_to_texture(vo, target->tex2, bmp,
-                                     0x00FFFFFF, 0xFF000000); // RGBA -> RGB1
+                                     0xFF000000); // RGBA -> RGB1
             }
         }
     }
