@@ -31,8 +31,9 @@
 #include "video/memcpy_pic.h"
 
 struct osd_conv_cache {
-    struct sub_bitmap part;
+    struct sub_bitmap part[MP_SUB_BB_LIST_MAX];
     struct sub_bitmap *parts;
+    void *scratch;
 };
 
 struct osd_conv_cache *osd_conv_cache_new(void)
@@ -204,39 +205,59 @@ bool osd_conv_ass_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
         return false;
     assert(!src.scaled); // ASS is always unscaled
 
-    struct sub_bitmap *bmp = &c->part;
+    struct mp_rect bb_list[MP_SUB_BB_LIST_MAX];
+    int num_bb = mp_get_sub_bb_list(&src, bb_list, MP_SUB_BB_LIST_MAX);
 
     imgs->format = SUBBITMAP_RGBA;
-    imgs->parts = bmp;
-    imgs->num_parts = 0;
+    imgs->parts = c->part;
+    imgs->num_parts = num_bb;
 
-    struct mp_rect bb;
-    if (!mp_sub_bitmaps_bb(&src, &bb))
-        return true;
-
-    bmp->x = bb.x0;
-    bmp->y = bb.y0;
-    bmp->w = bmp->dw = bb.x1 - bb.x0;
-    bmp->h = bmp->dh = bb.y1 - bb.y0;
-    bmp->stride = bmp->w * 4;
-    size_t newsize = bmp->h * bmp->stride;
-    if (talloc_get_size(bmp->bitmap) < newsize) {
-        talloc_free(bmp->bitmap);
-        bmp->bitmap = talloc_array(c, char, newsize);
+    size_t newsize = 0;
+    for (int n = 0; n < num_bb; n++) {
+        struct mp_rect bb = bb_list[n];
+        int w = bb.x1 - bb.x0;
+        int h = bb.y1 - bb.y0;
+        int stride = w * 4;
+        newsize += h * stride;
     }
 
-    memset_pic(bmp->bitmap, 0, bmp->w * 4, bmp->h, bmp->stride);
-
-    for (int n = 0; n < src.num_parts; n++) {
-        struct sub_bitmap *s = &src.parts[n];
-
-        draw_ass_rgba(s->bitmap, s->w, s->h, s->stride,
-                      bmp->bitmap, bmp->stride,
-                      s->x - bb.x0, s->y - bb.y0,
-                      s->libass.color);
+    if (talloc_get_size(c->scratch) < newsize) {
+        talloc_free(c->scratch);
+        c->scratch = talloc_array(c, uint8_t, newsize);
     }
 
-    imgs->num_parts = 1;
+    uint8_t *data = c->scratch;
+
+    for (int n = 0; n < num_bb; n++) {
+        struct mp_rect bb = bb_list[n];
+        struct sub_bitmap *bmp = &c->part[n];
+
+        bmp->x = bb.x0;
+        bmp->y = bb.y0;
+        bmp->w = bmp->dw = bb.x1 - bb.x0;
+        bmp->h = bmp->dh = bb.y1 - bb.y0;
+        bmp->stride = bmp->w * 4;
+        bmp->bitmap = data;
+        data += bmp->h * bmp->stride;
+
+        memset_pic(bmp->bitmap, 0, bmp->w * 4, bmp->h, bmp->stride);
+
+        for (int n = 0; n < src.num_parts; n++) {
+            struct sub_bitmap *s = &src.parts[n];
+
+            // Assume mp_get_sub_bb_list() never splits sub bitmaps
+            // So we don't clip/adjust the size of the sub bitmap
+            if (s->x > bb.x1 || s->x + s->w < bb.x0 ||
+                s->y > bb.y1 || s->y + s->h < bb.y0)
+                continue;
+
+            draw_ass_rgba(s->bitmap, s->w, s->h, s->stride,
+                          bmp->bitmap, bmp->stride,
+                          s->x - bb.x0, s->y - bb.y0,
+                          s->libass.color);
+        }
+    }
+
     return true;
 }
 
