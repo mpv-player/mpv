@@ -1761,20 +1761,25 @@ static void reset_subtitles(struct MPContext *mpctx)
 
 static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
 {
-    mpctx->osd->sub_offset = mpctx->video_offset;
     struct MPOpts *opts = &mpctx->opts;
     struct sh_video *sh_video = mpctx->sh_video;
     struct sh_sub *sh_sub = mpctx->sh_sub;
     struct demux_stream *d_sub = sh_sub ? sh_sub->ds : NULL;
-    double refpts_s = refpts_tl - mpctx->osd->sub_offset;
-    double curpts_s = refpts_s + sub_delay;
     unsigned char *packet = NULL;
     int len;
     int type = sh_sub ? sh_sub->type : '\0';
 
+    mpctx->osd->sub_offset = mpctx->video_offset;
+
     struct track *track = mpctx->current_track[STREAM_SUB];
     if (!track)
         return;
+
+    if (!track->under_timeline)
+        mpctx->osd->sub_offset = 0;
+
+    double refpts_s = refpts_tl - mpctx->osd->sub_offset;
+    double curpts_s = refpts_s + sub_delay;
 
     // find sub
     if (track->subdata) {
