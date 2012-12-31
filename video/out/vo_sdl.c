@@ -46,6 +46,7 @@
 #include "aspect.h"
 #include "config.h"
 #include "vo.h"
+#include "geometry.h"
 
 struct formatmap_entry {
     Uint32 sdl;
@@ -254,8 +255,12 @@ static int init_renderer(struct vo *vo, int w, int h)
     struct priv *vc = vo->priv;
 
     vc->window = SDL_CreateWindow("MPV",
-                                  SDL_WINDOWPOS_UNDEFINED,
-                                  SDL_WINDOWPOS_UNDEFINED,
+                                  geometry_xy_changed
+                                      ? vo->dx
+                                      : SDL_WINDOWPOS_UNDEFINED,
+                                  geometry_xy_changed
+                                      ? vo->dy
+                                      : SDL_WINDOWPOS_UNDEFINED,
                                   w, h,
                                   SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
     if (!vc->window) {
