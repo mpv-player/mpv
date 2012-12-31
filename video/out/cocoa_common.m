@@ -136,6 +136,7 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .cursor_autohide_delay = vo->opts->cursor_autohide_delay,
         .power_mgmt_assertion = kIOPMNullAssertionID,
     };
+    if (!vo_border) s->windowed_mask = NSBorderlessWindowMask;
     return s;
 }
 
