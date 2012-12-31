@@ -450,8 +450,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         return -1;
     }
 
-    vc->ssmpi = mp_image_alloc(format, width, height);
-
     resize(vo, d_width, d_height);
 
     SDL_DisableScreenSaver();
@@ -899,6 +897,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         mp_image_copy(texmpi, mpi);
 
         SDL_UnlockTexture(vc->tex);
+
+        mp_image_setrefp(&vc->ssmpi, mpi);
     }
 
     SDL_Rect src, dst;
@@ -920,8 +920,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         SDL_SetTextureColorMod(vc->tex, color_mod, color_mod, color_mod);
         SDL_RenderCopy(vc->renderer, vc->tex, &src, &dst);
     }
-    if (mpi)
-        mp_image_copy(vc->ssmpi, mpi);
 }
 
 static void update_screeninfo(struct vo *vo)
@@ -942,7 +940,7 @@ static void update_screeninfo(struct vo *vo)
 static struct mp_image *get_screenshot(struct vo *vo)
 {
     struct priv *vc = vo->priv;
-    return mp_image_new_copy(vc->ssmpi);
+    return vc->ssmpi ? mp_image_new_ref(vc->ssmpi) : NULL;
 }
 
 static struct mp_image *get_window_screenshot(struct vo *vo)
