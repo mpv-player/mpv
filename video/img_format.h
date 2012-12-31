@@ -23,6 +23,46 @@
 #include "config.h"
 #include "core/bstr.h"
 
+#define MP_MAX_PLANES 4
+
+// set if (possibly) alpha is included (might be not definitive for packed RGB)
+#define MP_IMGFLAG_ALPHA 0x80
+// set if number of planes > 1
+#define MP_IMGFLAG_PLANAR 0x100
+// set if it's YUV colorspace
+#define MP_IMGFLAG_YUV 0x200
+// set if it's swapped (BGR or YVU) plane/byteorder
+#define MP_IMGFLAG_SWAPPED 0x400
+// set if you want memory for palette allocated and managed by vf_get_image etc.
+#define MP_IMGFLAG_RGB_PALETTE 0x800
+// set if the format is standard YUV format:
+// - planar and yuv colorspace
+// - chroma shift 0-2
+// - 1-4 planes (1: gray, 2: gray/alpha, 3: yuv, 4: yuv/alpha)
+// - 8-16 bit per pixel/plane, all planes have same depth
+#define MP_IMGFLAG_YUV_P 0x1000
+// set if format is in native endian, or <= 8 bit per pixel/plane
+#define MP_IMGFLAG_NE 0x2000
+
+#define MP_IMGFLAG_FMT_MASK 0x3FFF
+
+struct mp_imgfmt_desc {
+    int id;                 // IMGFMT_*
+    int avformat;           // AV_PIX_FMT_* (or AV_PIX_FMT_NONE)
+    const char *name;       // e.g. "420p16"
+    int flags;              // MP_IMGFLAG_* bitfield
+    int num_planes;
+    int chroma_xs, chroma_ys; // chroma shift (i.e. log2 of chroma pixel size)
+    int avg_bpp;
+    int bpp[MP_MAX_PLANES];
+    int plane_bits;         // number of bits in use for plane 0
+    // chroma shifts per plane (provided for convenience with planar formats)
+    int xs[MP_MAX_PLANES];
+    int ys[MP_MAX_PLANES];
+};
+
+struct mp_imgfmt_desc mp_imgfmt_get_desc(unsigned int out_fmt);
+
 /* RGB/BGR Formats */
 
 #define IMGFMT_RGB_MASK 0xFFFFFF00
@@ -95,14 +135,26 @@
 #define IMGFMT_RG4B  IMGFMT_RGB4_CHAR
 #define IMGFMT_BG4B  IMGFMT_BGR4_CHAR
 
-#define IMGFMT_IS_RGB(fmt) (((fmt)&IMGFMT_RGB_MASK)==IMGFMT_RGB)
-#define IMGFMT_IS_BGR(fmt) (((fmt)&IMGFMT_BGR_MASK)==IMGFMT_BGR)
-
-#define IMGFMT_RGB_DEPTH(fmt) ((fmt)&0x3F)
-#define IMGFMT_BGR_DEPTH(fmt) ((fmt)&0x3F)
 
 // AV_PIX_FMT_BGR0
 #define IMGFMT_BGR0  0x1DC70000
+
+static inline bool IMGFMT_IS_RGB(unsigned int fmt)
+{
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    return !(desc.flags & MP_IMGFLAG_YUV) && !(desc.flags & MP_IMGFLAG_SWAPPED)
+           && desc.num_planes == 1 && desc.id != IMGFMT_BGR0;
+}
+static inline bool IMGFMT_IS_BGR(unsigned int fmt)
+{
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    return !(desc.flags & MP_IMGFLAG_YUV) && (desc.flags & MP_IMGFLAG_SWAPPED)
+           && desc.num_planes == 1 && desc.id != IMGFMT_BGR0;
+}
+
+#define IMGFMT_RGB_DEPTH(fmt) (mp_imgfmt_get_desc(fmt).plane_bits)
+#define IMGFMT_BGR_DEPTH(fmt) (mp_imgfmt_get_desc(fmt).plane_bits)
+
 // AV_PIX_FMT_GRAY16LE
 #define IMGFMT_Y16LE 0x1DC70001
 // AV_PIX_FMT_GRAY16BE
@@ -203,9 +255,20 @@
 #define IMGFMT_IS_YUVP16_NE(fmt) IMGFMT_IS_YUVP16_LE(fmt)
 #endif
 
-// These macros are misnamed - they actually match 9 to 16 bits (inclusive)
-#define IMGFMT_IS_YUVP16_LE(fmt) (((fmt - 0x51000034) & 0xf80000ff) == 0 || fmt == IMGFMT_Y16LE)
-#define IMGFMT_IS_YUVP16_BE(fmt) (((fmt - 0x34000051) & 0xff0000f8) == 0 || fmt == IMGFMT_Y16BE)
+// These functions are misnamed - they actually match 9 to 16 bits (inclusive)
+static inline bool IMGFMT_IS_YUVP16_LE(int fmt) {
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    bool le_is_ne = BYTE_ORDER == LITTLE_ENDIAN;
+    return (desc.flags & MP_IMGFLAG_YUV_P) && desc.plane_bits > 8 &&
+           (le_is_ne == !!(desc.flags & MP_IMGFLAG_NE));
+}
+static inline bool IMGFMT_IS_YUVP16_BE(int fmt) {
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
+    bool be_is_ne = BYTE_ORDER == BIG_ENDIAN;
+    return (desc.flags & MP_IMGFLAG_YUV_P) && desc.plane_bits > 8 &&
+           (be_is_ne == !!(desc.flags & MP_IMGFLAG_NE));
+}
+
 #define IMGFMT_IS_YUVP16(fmt)    (IMGFMT_IS_YUVP16_LE(fmt) || IMGFMT_IS_YUVP16_BE(fmt))
 
 /* Packed YUV Formats */

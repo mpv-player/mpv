@@ -26,25 +26,13 @@
 #include <inttypes.h>
 #include "core/mp_msg.h"
 #include "csputils.h"
+#include "video/img_format.h"
 
 // Minimum stride alignment in pixels
 #define MP_STRIDE_ALIGNMENT 32
 
-//--------- color info (filled by mp_image_setfmt() ) -----------
-// set if number of planes > 1
-#define MP_IMGFLAG_PLANAR 0x100
-// set if it's YUV colorspace
-#define MP_IMGFLAG_YUV 0x200
-// set if it's swapped (BGR or YVU) plane/byteorder
-#define MP_IMGFLAG_SWAPPED 0x400
-// set if you want memory for palette allocated and managed by vf_get_image etc.
-#define MP_IMGFLAG_RGB_PALETTE 0x800
-
-
 // set if buffer is allocated (used in destination images):
 #define MP_IMGFLAG_ALLOCATED 0x4000
-
-#define MP_MAX_PLANES	4
 
 #define MP_IMGFIELD_ORDERED 0x01
 #define MP_IMGFIELD_TOP_FIRST 0x02
@@ -71,23 +59,32 @@
  */
 typedef struct mp_image {
     unsigned int flags;
+    struct mp_imgfmt_desc fmt;
+
+    // fields redundant to fmt, for convenience or compatibility
     unsigned char bpp;  // bits/pixel. NOT depth! for RGB it will be n*8
     unsigned int imgfmt;
+    int num_planes;
+    int chroma_x_shift; // horizontal
+    int chroma_y_shift; // vertical
+
     int w,h;  // visible dimensions
     int display_w,display_h; // if set (!= 0), anamorphic size
     uint8_t *planes[MP_MAX_PLANES];
     int stride[MP_MAX_PLANES];
+
     char * qscale;
     int qstride;
     int pict_type; // 0->unknown, 1->I, 2->P, 3->B
     int fields;
     int qscale_type; // 0->mpeg1/4/h263, 1->mpeg2
-    int num_planes;
-    /* these are only used by planar formats Y,U(Cb),V(Cr) */
+
+    /* redundant */
     int chroma_width;
     int chroma_height;
-    int chroma_x_shift; // horizontal
-    int chroma_y_shift; // vertical
+    int plane_w[MP_MAX_PLANES];
+    int plane_h[MP_MAX_PLANES];
+
     enum mp_csp colorspace;
     enum mp_csp_levels levels;
     /* only inside filter chain */

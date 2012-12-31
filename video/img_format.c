@@ -16,121 +16,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <assert.h>
+
+#include <libavutil/pixfmt.h>
+#include <libavutil/pixdesc.h>
+
 #include "config.h"
 #include "video/img_format.h"
-#include "stdio.h"
-#include "compat/mpbswap.h"
+#include "video/mp_image.h"
+#include "video/fmt-conversion.h"
 
 #include <string.h>
-
-const char *vo_format_name(int format)
-{
-    const char *name = mp_imgfmt_to_name(format);
-    if (name)
-        return name;
-    static char unknown_format[20];
-    snprintf(unknown_format, 20, "Unknown 0x%04x", format);
-    return unknown_format;
-}
-
-int mp_get_chroma_shift(int format, int *x_shift, int *y_shift,
-                        int *component_bits)
-{
-    int xs = 0, ys = 0;
-    int bpp;
-    int err = 0;
-    int bits = 8;
-    if ((format & 0xff0000f0) == 0x34000050)
-        format = bswap_32(format);
-    if ((format & 0xf00000ff) == 0x50000034) {
-        switch (format >> 24) {
-        case 0x50:
-            break;
-        case 0x51:
-            bits = 16;
-            break;
-        case 0x55:
-            bits = 14;
-            break;
-        case 0x54:
-            bits = 12;
-            break;
-        case 0x52:
-            bits = 10;
-            break;
-        case 0x53:
-            bits = 9;
-            break;
-        default:
-            err = 1;
-            break;
-        }
-        switch (format & 0x00ffffff) {
-        case 0x00343434: // 444
-            xs = 0;
-            ys = 0;
-            break;
-        case 0x00323234: // 422
-            xs = 1;
-            ys = 0;
-            break;
-        case 0x00303234: // 420
-            xs = 1;
-            ys = 1;
-            break;
-        case 0x00313134: // 411
-            xs = 2;
-            ys = 0;
-            break;
-        case 0x00303434: // 440
-            xs = 0;
-            ys = 1;
-            break;
-        default:
-            err = 1;
-            break;
-        }
-    } else
-        switch (format) {
-        case IMGFMT_420A:
-        case IMGFMT_I420:
-        case IMGFMT_IYUV:
-        case IMGFMT_YV12:
-            xs = 1;
-            ys = 1;
-            break;
-        case IMGFMT_IF09:
-        case IMGFMT_YVU9:
-            xs = 2;
-            ys = 2;
-            break;
-        case IMGFMT_Y8:
-        case IMGFMT_Y800:
-            xs = 31;
-            ys = 31;
-            break;
-        case IMGFMT_Y16BE:
-        case IMGFMT_Y16LE:
-            bits = 16;
-            xs = 31;
-            ys = 31;
-            break;
-        default:
-            err = 1;
-            break;
-        }
-    if (x_shift)
-        *x_shift = xs;
-    if (y_shift)
-        *y_shift = ys;
-    if (component_bits)
-        *component_bits = bits;
-    bpp = 8 + ((16 >> xs) >> ys);
-    if (format == IMGFMT_420A)
-        bpp += 8;
-    bpp *= (bits + 7) >> 3;
-    return err ? 0 : bpp;
-}
 
 struct mp_imgfmt_entry mp_imgfmt_list[] = {
     {"444p16le", IMGFMT_444P16_LE},
@@ -237,6 +133,32 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     {0}
 };
 
+const char *vo_format_name(int format)
+{
+    const char *name = mp_imgfmt_to_name(format);
+    if (name)
+        return name;
+    static char unknown_format[20];
+    snprintf(unknown_format, 20, "Unknown 0x%04x", format);
+    return unknown_format;
+}
+
+int mp_get_chroma_shift(int format, int *x_shift, int *y_shift,
+                        int *component_bits)
+{
+    struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(format);
+    if (fmt.id && (fmt.flags & MP_IMGFLAG_YUV_P)) {
+        if (x_shift)
+            *x_shift = fmt.xs[1];
+        if (y_shift)
+            *y_shift = fmt.ys[1];
+        if (component_bits)
+            *component_bits = fmt.plane_bits;
+        return fmt.avg_bpp;
+    }
+    return 0;
+}
+
 unsigned int mp_imgfmt_from_name(bstr name, bool allow_hwaccel)
 {
     if (bstr_startswith0(name, "0x")) {
@@ -263,4 +185,172 @@ const char *mp_imgfmt_to_name(unsigned int fmt)
             return p->name;
     }
     return NULL;
+}
+
+static int comp_bit_order(const AVPixFmtDescriptor *pd, int bpp, int c)
+{
+    int el_size = (pd->flags & PIX_FMT_BITSTREAM) ? 1 : 8;
+    // NOTE: offset_plus1 can be 0
+    int offset = (((int)pd->comp[c].offset_plus1) - 1) * el_size;
+    int read_depth = pd->comp[c].shift + pd->comp[c].depth_minus1 + 1;
+    if (read_depth <= 8 && !(pd->flags & PIX_FMT_BITSTREAM))
+        offset += 8 * !!(pd->flags & PIX_FMT_BE);
+    offset += pd->comp[c].shift;
+    // revert ffmpeg's bullshit hack that mixes byte and bit access
+    if ((pd->flags & PIX_FMT_BE) && bpp <= 16 && read_depth <= 8)
+        offset = (8 + offset) % 16;
+    return offset;
+}
+
+static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
+{
+    const AVPixFmtDescriptor *pd = &av_pix_fmt_descriptors[fmt];
+    int mpfmt = pixfmt2imgfmt(fmt);
+    if (!pd || !mpfmt)
+        return (struct mp_imgfmt_desc) {0};
+
+    struct mp_imgfmt_desc desc = {
+        .id = mpfmt,
+        .avformat = fmt,
+        .name = mp_imgfmt_to_name(desc.id),
+        .chroma_xs = pd->log2_chroma_w,
+        .chroma_ys = pd->log2_chroma_h,
+    };
+
+    int planedepth[4] = {0};
+    int xs[4] = {0, pd->log2_chroma_w, pd->log2_chroma_w, 0};
+    int ys[4] = {0, pd->log2_chroma_h, pd->log2_chroma_h, 0};
+    int el_size = (pd->flags & PIX_FMT_BITSTREAM) ? 1 : 8;
+    for (int c = 0; c < pd->nb_components; c++) {
+        AVComponentDescriptor d = pd->comp[c];
+        // multiple components per plane -> Y is definitive, ignore chroma
+        if (!desc.bpp[d.plane])
+            desc.bpp[d.plane] = (d.step_minus1 + 1) * el_size;
+        planedepth[d.plane] += d.depth_minus1 + 1;
+    }
+
+    int avgbpp16 = 0;
+    for (int p = 0; p < 4; p++)
+        avgbpp16 += (16 * desc.bpp[p]) >> xs[p] >> ys[p];
+    desc.avg_bpp = avgbpp16 / 16;
+    //assert(desc.avg_bpp == av_get_padded_bits_per_pixel(pd));
+
+    for (int p = 0; p < 4; p++) {
+        if (desc.bpp[p])
+            desc.num_planes++;
+    }
+
+    if (desc.bpp[0] <= 8 || !(pd->flags & PIX_FMT_BE))
+        desc.flags |= MP_IMGFLAG_NE;
+
+    desc.plane_bits = planedepth[0];
+
+    if (!(pd->flags & PIX_FMT_RGB) && !(pd->flags & PIX_FMT_HWACCEL) &&
+        fmt != PIX_FMT_MONOWHITE && fmt != PIX_FMT_MONOBLACK &&
+        fmt != PIX_FMT_PAL8)
+    {
+        desc.flags |= MP_IMGFLAG_YUV;
+    }
+
+#ifdef PIX_FMT_ALPHA
+    if (pd->flags & PIX_FMT_ALPHA)
+        desc.flags |= MP_IMGFLAG_ALPHA;
+#else
+    if (desc.num_planes > 3)
+        desc.flags |= MP_IMGFLAG_ALPHA;
+#endif
+
+    if (desc.num_planes > 1)
+        desc.flags |= MP_IMGFLAG_PLANAR;
+
+    if (desc.flags & MP_IMGFLAG_YUV) {
+        bool same_depth = true;
+        for (int p = 0; p < desc.num_planes; p++) {
+            same_depth &= planedepth[p] == planedepth[0] &&
+                          desc.bpp[p] == desc.bpp[0];
+        }
+        if (same_depth && pd->nb_components == desc.num_planes)
+            desc.flags |= MP_IMGFLAG_YUV_P;
+    }
+
+    if ((pd->flags & PIX_FMT_RGB) && desc.num_planes == 1
+        && pd->nb_components >= 3)
+    {
+        // RGB vs. BGR component order, as distinguished by mplayer:
+        // - for byte accessed formats (RGB24, RGB48), the order of bytes
+        //   determines RGB/BGR (e.g. R is first byte -> RGB)
+        // - for bit accessed formats (RGB32, RGB16, etc.), the order of bits
+        //   determines BGR/RGB (e.g. R is LSB -> RGB)
+        // - formats like IMGFMT_RGBA are aliases to allow byte access to bit-
+        //   accessed formats (IMGFMT_RGBA is RGB32 on LE, BGR32|128 on BE)
+        //   (ffmpeg does it the other way around, and defines bit-access
+        //   aliases to byte-accessed formats)
+        int b = desc.bpp[0];
+        bool swap = comp_bit_order(pd, b, 0) > comp_bit_order(pd, b, 1);
+        if ((desc.bpp[0] == 24 || desc.bpp[0] > 32) && BYTE_ORDER == BIG_ENDIAN)
+            swap = !swap; // byte accessed
+        if (swap)
+            desc.flags |= MP_IMGFLAG_SWAPPED;
+    }
+
+    // compatibility with old mp_image_setfmt()
+
+    switch (desc.id) {
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
+        desc.flags |= MP_IMGFLAG_SWAPPED; // completely pointless
+        break;
+    case IMGFMT_UYVY:
+        desc.flags |= MP_IMGFLAG_SWAPPED; // for vf_mpi_clear()
+        /* fallthrough */
+    case IMGFMT_YUY2:
+        desc.chroma_ys = 1; // ???
+        break;
+    case IMGFMT_Y8:
+    case IMGFMT_Y800:
+    case IMGFMT_Y16LE:
+    case IMGFMT_Y16BE:
+        // probably for vo_opengl, and possibly more code using Y8
+        desc.chroma_xs = desc.chroma_ys = 31;
+        break;
+    case IMGFMT_NV12:
+        desc.flags |= MP_IMGFLAG_SWAPPED; // completely pointless
+        /* fallthrough */
+    case IMGFMT_NV21:
+        // some hack to make cropping code etc. work? (doesn't work anyway)
+        desc.chroma_xs = 0;
+        desc.chroma_ys = 1;
+        break;
+    case IMGFMT_RGB4:
+    case IMGFMT_BGR4:
+    case IMGFMT_BGR1:
+        desc.flags ^= MP_IMGFLAG_SWAPPED; // ???
+        break;
+    case IMGFMT_BGR0:
+        desc.flags &= ~MP_IMGFLAG_SWAPPED; // not covered by IS_RGB/IS_BGR
+        break;
+    }
+
+    if (pd->flags & PIX_FMT_HWACCEL)
+        desc.chroma_xs = desc.chroma_ys = 0;
+
+    for (int p = 0; p < desc.num_planes; p++) {
+        desc.xs[p] = (p == 1 || p == 2) ? desc.chroma_xs : 0;
+        desc.ys[p] = (p == 1 || p == 2) ? desc.chroma_ys : 0;
+    }
+
+    return desc;
+}
+
+struct mp_imgfmt_desc mp_imgfmt_get_desc(unsigned int out_fmt)
+{
+    struct mp_imgfmt_desc fmt = {0};
+    enum PixelFormat avfmt = imgfmt2pixfmt(out_fmt);
+    if (avfmt != PIX_FMT_NONE)
+        fmt = get_avutil_fmt(avfmt);
+    if (!fmt.id) {
+        mp_msg(MSGT_DECVIDEO, MSGL_V, "mp_image: unknown out_fmt: 0x%X\n",
+               out_fmt);
+    }
+    return fmt;
 }

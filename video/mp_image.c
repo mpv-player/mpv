@@ -23,16 +23,16 @@
 #include <string.h>
 #include <assert.h>
 
+#include <libavutil/mem.h>
+#include <libavutil/common.h>
+
 #include "talloc.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"
 #include "video/filter/vf.h"
-
 #include "video/memcpy_pic.h"
-#include "libavutil/mem.h"
-#include "libavutil/common.h"
 
 struct m_refcount {
     void *arg;
@@ -161,129 +161,18 @@ void mp_image_copy_attributes(struct mp_image *dmpi, struct mp_image *mpi)
     vf_clone_mpi_attributes(dmpi, mpi);
 }
 
-void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
-    mpi->flags&=~(MP_IMGFLAG_PLANAR|MP_IMGFLAG_YUV|MP_IMGFLAG_SWAPPED);
-    mpi->imgfmt=out_fmt;
-    // compressed formats
-    if(IMGFMT_IS_HWACCEL(out_fmt)){
-	mpi->bpp=0;
-	return;
-    }
-    mpi->num_planes=1;
-    if (IMGFMT_IS_RGB(out_fmt)) {
-	if (IMGFMT_RGB_DEPTH(out_fmt) < 8 && !(out_fmt&128))
-	    mpi->bpp = IMGFMT_RGB_DEPTH(out_fmt);
-	else
-	    mpi->bpp=(IMGFMT_RGB_DEPTH(out_fmt)+7)&(~7);
-	return;
-    }
-    if (IMGFMT_IS_BGR(out_fmt)) {
-	if (IMGFMT_BGR_DEPTH(out_fmt) < 8 && !(out_fmt&128))
-	    mpi->bpp = IMGFMT_BGR_DEPTH(out_fmt);
-	else
-	    mpi->bpp=(IMGFMT_BGR_DEPTH(out_fmt)+7)&(~7);
-	mpi->flags|=MP_IMGFLAG_SWAPPED;
-	return;
-    }
-    switch (out_fmt) {
-    case IMGFMT_BGR0:
-        mpi->bpp = 32;
-        return;
-    }
-    mpi->num_planes=3;
-    if (out_fmt == IMGFMT_GBRP) {
-        mpi->bpp=24;
-        mpi->flags|=MP_IMGFLAG_PLANAR;
-        mpi->chroma_x_shift = 0;
-        mpi->chroma_y_shift = 0;
-        mpi->chroma_width=mpi->w;
-        mpi->chroma_height=mpi->h;
-        return;
-    }
-    mpi->flags|=MP_IMGFLAG_YUV;
-    if (mp_get_chroma_shift(out_fmt, NULL, NULL, NULL)) {
-        mpi->flags|=MP_IMGFLAG_PLANAR;
-        mpi->bpp = mp_get_chroma_shift(out_fmt, &mpi->chroma_x_shift, &mpi->chroma_y_shift, NULL);
-        mpi->chroma_width  = mpi->w >> mpi->chroma_x_shift;
-        mpi->chroma_height = mpi->h >> mpi->chroma_y_shift;
-    }
-    switch(out_fmt){
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
-	mpi->flags|=MP_IMGFLAG_SWAPPED;
-    case IMGFMT_YV12:
-	return;
-    case IMGFMT_420A:
-    case IMGFMT_IF09:
-	mpi->num_planes=4;
-    case IMGFMT_YVU9:
-    case IMGFMT_444P:
-    case IMGFMT_422P:
-    case IMGFMT_411P:
-    case IMGFMT_440P:
-    case IMGFMT_444P16_LE:
-    case IMGFMT_444P16_BE:
-    case IMGFMT_444P14_LE:
-    case IMGFMT_444P14_BE:
-    case IMGFMT_444P12_LE:
-    case IMGFMT_444P12_BE:
-    case IMGFMT_444P10_LE:
-    case IMGFMT_444P10_BE:
-    case IMGFMT_444P9_LE:
-    case IMGFMT_444P9_BE:
-    case IMGFMT_422P16_LE:
-    case IMGFMT_422P16_BE:
-    case IMGFMT_422P14_LE:
-    case IMGFMT_422P14_BE:
-    case IMGFMT_422P12_LE:
-    case IMGFMT_422P12_BE:
-    case IMGFMT_422P10_LE:
-    case IMGFMT_422P10_BE:
-    case IMGFMT_422P9_LE:
-    case IMGFMT_422P9_BE:
-    case IMGFMT_420P16_LE:
-    case IMGFMT_420P16_BE:
-    case IMGFMT_420P14_LE:
-    case IMGFMT_420P14_BE:
-    case IMGFMT_420P12_LE:
-    case IMGFMT_420P12_BE:
-    case IMGFMT_420P10_LE:
-    case IMGFMT_420P10_BE:
-    case IMGFMT_420P9_LE:
-    case IMGFMT_420P9_BE:
-	return;
-    case IMGFMT_Y800:
-    case IMGFMT_Y8:
-    case IMGFMT_Y16LE:
-    case IMGFMT_Y16BE:
-	/* they're planar ones, but for easier handling use them as packed */
-	mpi->flags&=~MP_IMGFLAG_PLANAR;
-	mpi->num_planes=1;
-	return;
-    case IMGFMT_UYVY:
-	mpi->flags|=MP_IMGFLAG_SWAPPED;
-    case IMGFMT_YUY2:
-        mpi->chroma_x_shift = 1;
-        mpi->chroma_y_shift = 1;
-        mpi->chroma_width=(mpi->w>>1);
-        mpi->chroma_height=(mpi->h>>1);
-	mpi->bpp=16;
-	mpi->num_planes=1;
-	return;
-    case IMGFMT_NV12:
-	mpi->flags|=MP_IMGFLAG_SWAPPED;
-    case IMGFMT_NV21:
-	mpi->flags|=MP_IMGFLAG_PLANAR;
-	mpi->bpp=12;
-	mpi->num_planes=2;
-	mpi->chroma_width=(mpi->w>>0);
-	mpi->chroma_height=(mpi->h>>1);
-	mpi->chroma_x_shift=0;
-	mpi->chroma_y_shift=1;
-	return;
-    }
-    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"mp_image: unknown out_fmt: 0x%X\n",out_fmt);
-    mpi->bpp=0;
+void mp_image_setfmt(struct mp_image *mpi, unsigned int out_fmt)
+{
+    mpi->flags &= ~MP_IMGFLAG_FMT_MASK;
+    struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(out_fmt);
+    mpi->fmt = fmt;
+    mpi->flags |= fmt.flags;
+    mpi->imgfmt = fmt.id;
+    mpi->bpp = fmt.avg_bpp;
+    mpi->chroma_x_shift = fmt.chroma_xs;
+    mpi->chroma_y_shift = fmt.chroma_ys;
+    mpi->num_planes = fmt.num_planes;
+    mp_image_set_size(mpi, mpi->w, mpi->h);
 }
 
 static int mp_image_destructor(void *ptr)
@@ -318,8 +207,12 @@ void mp_image_set_size(struct mp_image *mpi, int w, int h)
 {
     mpi->w = w;
     mpi->h = h;
-    mpi->chroma_width = mpi->w >> mpi->chroma_x_shift;
-    mpi->chroma_height = mpi->h >> mpi->chroma_y_shift;
+    for (int n = 0; n < mpi->num_planes; n++) {
+        mpi->plane_w[n] = mpi->w >> mpi->fmt.xs[n];
+        mpi->plane_h[n] = mpi->h >> mpi->fmt.ys[n];
+    }
+    mpi->chroma_width = mpi->plane_w[1];
+    mpi->chroma_height = mpi->plane_h[1];
     mpi->display_w = mpi->display_h = 0;
 }
 
