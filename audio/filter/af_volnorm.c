@@ -51,7 +51,7 @@
 // Silence level
 // FIXME: should be relative to the level of the samples
 #define SIL_S16 (SHRT_MAX * 0.01)
-#define SIL_FLOAT (INT_MAX * 0.01) // FIXME
+#define SIL_FLOAT 0.01
 
 // smooth must be in ]0.0, 1.0[
 #define SMOOTH_MUL 0.06
@@ -106,7 +106,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 	return AF_ERROR;
     s->method = i-1;
     s->mid_s16 = ((float)SHRT_MAX) * target;
-    s->mid_float = ((float)INT_MAX) * target;
+    s->mid_float = target;
     return AF_OK;
   }
   }
@@ -333,7 +333,7 @@ static int af_open(struct af_instance* af){
   ((af_volnorm_t*)af->setup)->lastavg = ((float)SHRT_MAX) * DEFAULT_TARGET;
   ((af_volnorm_t*)af->setup)->idx = 0;
   ((af_volnorm_t*)af->setup)->mid_s16 = ((float)SHRT_MAX) * DEFAULT_TARGET;
-  ((af_volnorm_t*)af->setup)->mid_float = ((float)INT_MAX) * DEFAULT_TARGET;
+  ((af_volnorm_t*)af->setup)->mid_float = DEFAULT_TARGET;
   for (i = 0; i < NSAMPLES; i++)
   {
      ((af_volnorm_t*)af->setup)->mem[i].len = 0;
