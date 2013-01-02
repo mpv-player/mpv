@@ -49,6 +49,7 @@
 #define MODE_BGR  0x2
 
 #include "core/mp_msg.h"
+#include "osdep/timer.h"
 
 extern int sws_flags;
 
@@ -92,10 +93,10 @@ struct priv {
 
 #ifdef HAVE_SHM
     int Shmem_Flag;
+    int Shm_Warned_Slow;
 
     XShmSegmentInfo Shminfo[1];
     int gXErrorFlag;
-    int CompletionType;
 #endif
 };
 
@@ -120,15 +121,15 @@ static void getMyXImage(struct priv *p)
 {
     struct vo *vo = p->vo;
 #ifdef HAVE_SHM
-    if (vo->x11->display_is_local && XShmQueryExtension(vo->x11->display))
+    if (vo->x11->display_is_local && XShmQueryExtension(vo->x11->display)) {
         p->Shmem_Flag = 1;
-    else {
+        vo->x11->ShmCompletionEvent = XShmGetEventBase(vo->x11->display)
+                                    + ShmCompletion;
+    } else {
         p->Shmem_Flag = 0;
         mp_msg(MSGT_VO, MSGL_WARN,
                "Shared memory not supported\nReverting to normal Xlib\n");
     }
-    if (p->Shmem_Flag)
-        p->CompletionType = XShmGetEventBase(vo->x11->display) + ShmCompletion;
 
     if (p->Shmem_Flag) {
         p->myximage =
@@ -409,6 +410,7 @@ static void Display_Image(struct priv *p, XImage *myximage, uint8_t *ImageData)
         XShmPutImage(vo->x11->display, vo->x11->window, vo->x11->vo_gc,
                      p->myximage, 0, 0, x, y, p->dst_width, p->myximage->height,
                      True);
+        vo->x11->ShmCompletionWaitCount++;
     } else
 #endif
     {
@@ -458,6 +460,25 @@ static mp_image_t *get_screenshot(struct vo *vo)
     return res;
 }
 
+static void wait_for_completion(struct vo *vo, int max_outstanding)
+{
+#ifdef HAVE_SHM
+    struct priv *ctx = vo->priv;
+    struct vo_x11_state *x11 = vo->x11;
+    if (ctx->Shmem_Flag) {
+        while (x11->ShmCompletionWaitCount > max_outstanding) {
+            if (!ctx->Shm_Warned_Slow) {
+                mp_msg(MSGT_VO, MSGL_WARN, "[VO_X11] X11 can't keep up! Waiting"
+                                           " for XShm completion events...\n");
+                ctx->Shm_Warned_Slow = 1;
+            }
+            usec_sleep(1000);
+            check_events(vo);
+        }
+    }
+#endif
+}
+
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -470,6 +491,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct priv *p = vo->priv;
     uint8_t *dst[MP_MAX_PLANES] = {NULL};
     int dstStride[MP_MAX_PLANES] = {0};
+
+    wait_for_completion(vo, 0);
 
     if ((p->old_vo_dwidth != vo->dwidth || p->old_vo_dheight != vo->dheight)
         /*&& y==0 */ && p->zoomFlag)
@@ -635,9 +658,6 @@ const struct vo_driver video_out_x11 = {
         .srcH = -1,
         .old_vo_dwidth = -1,
         .old_vo_dheight = -1,
-#ifdef HAVE_SHM
-        .CompletionType = -1,
-#endif
     },
     .preinit = preinit,
     .query_format = query_format,

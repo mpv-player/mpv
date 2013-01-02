@@ -80,6 +80,13 @@ struct vo_x11_state {
     unsigned int oldfuncs;
     XComposeStatus compose_status;
 
+    /* XShm stuff */
+    int ShmCompletionEvent;
+    /* Number of outstanding XShmPutImage requests */
+    /* Decremented when ShmCompletionEvent is received */
+    /* Increment it before XShmPutImage */
+    int ShmCompletionWaitCount;
+
     Atom XA_NET_SUPPORTED;
     Atom XA_NET_WM_STATE;
     Atom XA_NET_WM_STATE_FULLSCREEN;

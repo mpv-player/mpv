@@ -903,6 +903,11 @@ int vo_x11_check_events(struct vo *vo)
                     Event.xclient.data.l[0] == x11->XAWM_DELETE_WINDOW)
                     mplayer_put_key(vo->key_fifo, KEY_CLOSE_WIN);
                 break;
+        default:
+                if (Event.type == x11->ShmCompletionEvent)
+                    if (x11->ShmCompletionWaitCount > 0)
+                        x11->ShmCompletionWaitCount--;
+                break;
         }
     }
     return ret;
