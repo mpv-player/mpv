@@ -59,12 +59,12 @@ struct priv {
     struct mp_image *original_image;
 
     /* local data */
-    unsigned char *ImageData;
+    unsigned char *ImageData[2];
     //! original unaligned pointer for free
-    unsigned char *ImageDataOrig;
+    unsigned char *ImageDataOrig[2];
 
     /* X11 related variables */
-    XImage *myximage;
+    XImage *myximage[2];
     int depth, bpp;
     XWindowAttributes attribs;
 
@@ -91,11 +91,16 @@ struct priv {
 
     int firstTime;
 
-#ifdef HAVE_SHM
+    int current_buf;
+    int visible_buf;
+    int num_buffers;
+    int total_buffers;
+
     int Shmem_Flag;
+#ifdef HAVE_SHM
     int Shm_Warned_Slow;
 
-    XShmSegmentInfo Shminfo[1];
+    XShmSegmentInfo Shminfo[2];
     int gXErrorFlag;
 #endif
 };
@@ -111,13 +116,14 @@ static void check_events(struct vo *vo)
     if (ret & VO_EVENT_RESIZE)
         vo_x11_clearwindow(vo, vo->x11->window);
     else if (ret & VO_EVENT_EXPOSE)
-        vo_x11_clearwindow_part(vo, vo->x11->window, p->myximage->width,
-                                p->myximage->height);
+        vo_x11_clearwindow_part(vo, vo->x11->window,
+                                    p->myximage[p->current_buf]->width,
+                                    p->myximage[p->current_buf]->height);
     if (ret & VO_EVENT_EXPOSE && p->int_pause)
         flip_page(vo);
 }
 
-static void getMyXImage(struct priv *p)
+static void getMyXImage(struct priv *p, int foo)
 {
     struct vo *vo = p->vo;
 #ifdef HAVE_SHM
@@ -132,52 +138,50 @@ static void getMyXImage(struct priv *p)
     }
 
     if (p->Shmem_Flag) {
-        p->myximage =
+        p->myximage[foo] =
             XShmCreateImage(vo->x11->display, p->vinfo.visual, p->depth,
-                            ZPixmap, NULL, &p->Shminfo[0], p->image_width,
+                            ZPixmap, NULL, &p->Shminfo[foo], p->image_width,
                             p->image_height);
-        if (p->myximage == NULL) {
+        if (p->myximage[foo] == NULL) {
             mp_msg(MSGT_VO, MSGL_WARN,
                    "Shared memory error,disabling ( Ximage error )\n");
             goto shmemerror;
         }
-        p->Shminfo[0].shmid = shmget(IPC_PRIVATE,
-                                     p->myximage->bytes_per_line *
-                                        p->myximage->height,
-                                     IPC_CREAT | 0777);
-        if (p->Shminfo[0].shmid < 0) {
-            XDestroyImage(p->myximage);
+        p->Shminfo[foo].shmid = shmget(IPC_PRIVATE,
+                                       p->myximage[foo]->bytes_per_line *
+                                       p->myximage[foo]->height,
+                                       IPC_CREAT | 0777);
+        if (p->Shminfo[foo].shmid < 0) {
+            XDestroyImage(p->myximage[foo]);
             mp_msg(MSGT_VO, MSGL_V, "%s\n", strerror(errno));
             //perror( strerror( errno ) );
             mp_msg(MSGT_VO, MSGL_WARN,
                    "Shared memory error,disabling ( seg id error )\n");
             goto shmemerror;
         }
-        p->Shminfo[0].shmaddr = (char *) shmat(p->Shminfo[0].shmid, 0, 0);
+        p->Shminfo[foo].shmaddr = (char *) shmat(p->Shminfo[foo].shmid, 0, 0);
 
-        if (p->Shminfo[0].shmaddr == ((char *) -1)) {
-            XDestroyImage(p->myximage);
-            if (p->Shminfo[0].shmaddr != ((char *) -1))
-                shmdt(p->Shminfo[0].shmaddr);
+        if (p->Shminfo[foo].shmaddr == ((char *) -1)) {
+            XDestroyImage(p->myximage[foo]);
             mp_msg(MSGT_VO, MSGL_WARN,
                    "Shared memory error,disabling ( address error )\n");
             goto shmemerror;
         }
-        p->myximage->data = p->Shminfo[0].shmaddr;
-        p->ImageData = (unsigned char *) p->myximage->data;
-        p->Shminfo[0].readOnly = False;
-        XShmAttach(vo->x11->display, &p->Shminfo[0]);
+        p->myximage[foo]->data = p->Shminfo[foo].shmaddr;
+        p->ImageData[foo] = (unsigned char *) p->myximage[foo]->data;
+        p->Shminfo[foo].readOnly = False;
+        XShmAttach(vo->x11->display, &p->Shminfo[foo]);
 
         XSync(vo->x11->display, False);
 
         if (p->gXErrorFlag) {
-            XDestroyImage(p->myximage);
-            shmdt(p->Shminfo[0].shmaddr);
+            XDestroyImage(p->myximage[foo]);
+            shmdt(p->Shminfo[foo].shmaddr);
             mp_msg(MSGT_VO, MSGL_WARN, "Shared memory error,disabling.\n");
             p->gXErrorFlag = 0;
             goto shmemerror;
         } else
-            shmctl(p->Shminfo[0].shmid, IPC_RMID, 0);
+            shmctl(p->Shminfo[foo].shmid, IPC_RMID, 0);
 
         if (!p->firstTime) {
             mp_msg(MSGT_VO, MSGL_V, "Sharing memory.\n");
@@ -187,36 +191,40 @@ static void getMyXImage(struct priv *p)
 shmemerror:
         p->Shmem_Flag = 0;
 #endif
-    p->myximage =
+    p->myximage[foo] =
         XCreateImage(vo->x11->display, p->vinfo.visual, p->depth, ZPixmap,
                      0, NULL, p->image_width, p->image_height, 8, 0);
-    p->ImageDataOrig =
-        malloc(p->myximage->bytes_per_line * p->image_height + 32);
-    p->myximage->data = p->ImageDataOrig + 16 - ((long)p->ImageDataOrig & 15);
-    memset(p->myximage->data, 0, p->myximage->bytes_per_line * p->image_height);
-    p->ImageData = p->myximage->data;
+    p->ImageDataOrig[foo] =
+        malloc(p->myximage[foo]->bytes_per_line * p->image_height + 32);
+    p->myximage[foo]->data = p->ImageDataOrig[foo] + 16
+                           - ((long)p->ImageDataOrig & 15);
+    memset(p->myximage[foo]->data, 0, p->myximage[foo]->bytes_per_line
+                                      * p->image_height);
+    p->ImageData[foo] = p->myximage[foo]->data;
 #ifdef HAVE_SHM
 }
 #endif
 }
 
-static void freeMyXImage(struct priv *p)
+static void freeMyXImage(struct priv *p, int foo)
 {
     struct vo *vo = p->vo;
 #ifdef HAVE_SHM
     if (p->Shmem_Flag) {
-        XShmDetach(vo->x11->display, &p->Shminfo[0]);
-        XDestroyImage(p->myximage);
-        shmdt(p->Shminfo[0].shmaddr);
+        XShmDetach(vo->x11->display, &p->Shminfo[foo]);
+        XDestroyImage(p->myximage[foo]);
+        shmdt(p->Shminfo[foo].shmaddr);
     } else
 #endif
     {
-        p->myximage->data = p->ImageDataOrig;
-        XDestroyImage(p->myximage);
-        p->ImageDataOrig = NULL;
+        if (p->myximage[foo]) {
+            p->myximage[foo]->data = p->ImageDataOrig[foo];
+            XDestroyImage(p->myximage[foo]);
+            p->ImageDataOrig[foo] = NULL;
+        }
     }
-    p->myximage = NULL;
-    p->ImageData = NULL;
+    p->myximage[foo] = NULL;
+    p->ImageData[foo] = NULL;
 }
 
 #if BYTE_ORDER == BIG_ENDIAN
@@ -335,11 +343,14 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 #endif
     }
 
-    if (p->myximage) {
-        freeMyXImage(p);
-        sws_freeContext(p->swsContext);
-    }
-    getMyXImage(p);
+    int i;
+    for (i = 0; i < p->total_buffers; i++)
+        freeMyXImage(p, i);
+    sws_freeContext(p->swsContext);
+    p->num_buffers = 2;
+    p->total_buffers = p->num_buffers;
+    for (i = 0; i < p->total_buffers; i++)
+        getMyXImage(p, i);
 
     while (fmte->mpfmt) {
         int depth = IMGFMT_RGB_DEPTH(fmte->mpfmt);
@@ -348,11 +359,11 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         if (depth == 15)
             depth = 16;
 
-        if (depth == p->myximage->bits_per_pixel &&
-            fmte->byte_order == p->myximage->byte_order &&
-            fmte->red_mask == p->myximage->red_mask &&
-            fmte->green_mask == p->myximage->green_mask &&
-            fmte->blue_mask == p->myximage->blue_mask)
+        if (depth == p->myximage[0]->bits_per_pixel &&
+            fmte->byte_order == p->myximage[0]->byte_order &&
+            fmte->red_mask == p->myximage[0]->red_mask &&
+            fmte->green_mask == p->myximage[0]->green_mask &&
+            fmte->blue_mask == p->myximage[0]->blue_mask)
             break;
         fmte++;
     }
@@ -363,7 +374,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         return -1;
     }
     p->out_format = fmte->mpfmt;
-    p->bpp = p->myximage->bits_per_pixel;
+    p->bpp = p->myximage[0]->bits_per_pixel;
     p->out_offset = 0;
     // We can easily "emulate" non-native RGB32 and BGR32
     if (p->out_format == (IMGFMT_BGR32 | 128)
@@ -392,8 +403,10 @@ static void Display_Image(struct priv *p, XImage *myximage, uint8_t *ImageData)
 {
     struct vo *vo = p->vo;
 
+    XImage *x_image = p->myximage[p->current_buf];
+
     int x = (vo->dwidth - p->dst_width) / 2;
-    int y = (vo->dheight - p->myximage->height) / 2;
+    int y = (vo->dheight - x_image->height) / 2;
 
     // do not draw if the image needs rescaling
     if ((p->old_vo_dwidth != vo->dwidth ||
@@ -404,29 +417,29 @@ static void Display_Image(struct priv *p, XImage *myximage, uint8_t *ImageData)
         x = vo->dx;
         y = vo->dy;
     }
-    p->myximage->data += p->out_offset;
+    x_image->data += p->out_offset;
 #ifdef HAVE_SHM
     if (p->Shmem_Flag) {
         XShmPutImage(vo->x11->display, vo->x11->window, vo->x11->vo_gc,
-                     p->myximage, 0, 0, x, y, p->dst_width, p->myximage->height,
+                     x_image, 0, 0, x, y, p->dst_width, x_image->height,
                      True);
         vo->x11->ShmCompletionWaitCount++;
     } else
 #endif
     {
         XPutImage(vo->x11->display, vo->x11->window, vo->x11->vo_gc,
-                  p->myximage, 0, 0, x, y, p->dst_width, p->myximage->height);
+                  x_image, 0, 0, x, y, p->dst_width, x_image->height);
     }
-    p->myximage->data -= p->out_offset;
+    x_image->data -= p->out_offset;
 }
 
-static struct mp_image get_x_buffer(struct priv *p)
+static struct mp_image get_x_buffer(struct priv *p, int buf_index)
 {
     struct mp_image img = {0};
     mp_image_set_size(&img, p->image_width, p->image_height);
     mp_image_setfmt(&img, p->out_format);
 
-    img.planes[0] = p->ImageData;
+    img.planes[0] = p->ImageData[buf_index];
     img.stride[0] = p->image_width * ((p->bpp + 7) / 8);
 
     return img;
@@ -436,7 +449,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct priv *p = vo->priv;
 
-    struct mp_image img = get_x_buffer(p);
+    struct mp_image img = get_x_buffer(p, p->current_buf);
 
     struct mp_osd_res res = {
         .w = img.w,
@@ -482,8 +495,13 @@ static void wait_for_completion(struct vo *vo, int max_outstanding)
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    Display_Image(p, p->myximage, p->ImageData);
-    XSync(vo->x11->display, False);
+    Display_Image(p, p->myximage[p->current_buf],
+                     p->ImageData[p->current_buf]);
+    p->visible_buf = p->current_buf;
+    p->current_buf = (p->current_buf + 1) % p->num_buffers;
+
+    if (!p->Shmem_Flag)
+        XSync(vo->x11->display, False);
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
@@ -492,7 +510,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     uint8_t *dst[MP_MAX_PLANES] = {NULL};
     int dstStride[MP_MAX_PLANES] = {0};
 
-    wait_for_completion(vo, 0);
+    wait_for_completion(vo, p->num_buffers - 1);
 
     if ((p->old_vo_dwidth != vo->dwidth || p->old_vo_dheight != vo->dheight)
         /*&& y==0 */ && p->zoomFlag)
@@ -516,16 +534,19 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
             p->image_width = (newW + 7) & (~7);
             p->image_height = newH;
 
-            freeMyXImage(p);
-            getMyXImage(p);
+            int i;
+            for (i = 0; i < p->total_buffers; i++)
+                freeMyXImage(p, i);
             sws_freeContext(oldContext);
+            for (i = 0; i < p->total_buffers; i++)
+                getMyXImage(p, i);
         } else
             p->swsContext = oldContext;
         p->dst_width = newW;
     }
 
     dstStride[0] = p->image_width * ((p->bpp + 7) / 8);
-    dst[0] = p->ImageData;
+    dst[0] = p->ImageData[p->current_buf];
     if (p->Flip_Flag) {
         dst[0] += dstStride[0] * (p->image_height - 1);
         dstStride[0] = -dstStride[0];
@@ -576,8 +597,10 @@ static int query_format(struct vo *vo, uint32_t format)
 static void uninit(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    if (p->myximage)
-        freeMyXImage(p);
+    if (p->myximage[0])
+        freeMyXImage(p, 0);
+    if (p->myximage[1])
+        freeMyXImage(p, 1);
 
     talloc_free(p->original_image);
 
