@@ -523,6 +523,9 @@ const m_option_t common_opts[] = {
     OPT_GENERAL("osd", osd_style, M_OPT_PREFIXED,
                 .type = &m_option_type_subconfig_struct,
                 .priv = (void*)&osd_style_conf),
+    OPT_GENERAL("sub-text", sub_text_style, M_OPT_PREFIXED,
+                .type = &m_option_type_subconfig_struct,
+                .priv = (void*)&osd_style_conf),
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 

@@ -114,6 +114,7 @@ typedef struct MPOpts {
     char **sub_paths;
     int sub_auto;
     struct osd_style_opts *osd_style;
+    struct osd_style_opts *sub_text_style;
     float sub_scale;
     float sub_gauss;
     int sub_gray;

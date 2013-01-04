@@ -110,6 +110,9 @@ Command line switches
     -endpos                             --length
     --cursor-autohide-delay             --cursor-autohide
     -sub-fuzziness                      --autosub-match
+    -subfont                            --sub-text-font
+    -font                               --osd-font
+    -subfont-*                          --sub-text-*, --osd-*
     -subfont-text-scale                 --sub-scale
     -spugauss                           --sub-gauss
     -vobsub                             --sub (pass the .idx file)

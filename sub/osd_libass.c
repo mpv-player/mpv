@@ -223,7 +223,7 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
     if (!obj->osd_track)
         obj->osd_track = mp_ass_default_track(osd->osd_ass_library, osd->opts);
 
-    struct osd_style_opts font = *opts->osd_style;
+    struct osd_style_opts font = *opts->sub_text_style;
     font.font_size *= opts->sub_scale;
 
     ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;

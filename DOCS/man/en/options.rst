@@ -1231,26 +1231,24 @@
     search for video segments from other files, and will also ignore any
     chapter order specified for the main file.
 
---osd-back-color=<#RRGGBB>
-    See ``--osd-color``. Color used for OSD text background.
+--osd-back-color=<#RRGGBB>, --sub-text-back-color=<#RRGGBB>
+    See ``--osd-color``. Color used for OSD/sub text background.
 
---osd-border-color=<#RRGGBB>
-    See ``--osd-color``. Color used for the OSD font border.
+--osd-border-color=<#RRGGBB>, --sub-text-border-color=<#RRGGBB>
+    See ``--osd-color``. Color used for the OSD/sub font border.
 
-    *Note*: ignored when ``--osd-back-color`` is specified (or more
-    exactly: when that option is not set to completely transparent).
+    *NOTE*: ignored when ``--osd-back-color``/``--sub-text-back-color`` is
+    specified (or more exactly: when that option is not set to completely
+    transparent).
 
---osd-border-size=<size>
-    Size of the OSD font border in scaled pixels (see ``--osd-font-size`` for
-    details). A value of 0 disables borders.
+--osd-border-size=<size>, --sub-text-border-size=<size>
+    Size of the OSD/sub font border in scaled pixels (see ``--osd-font-size``
+    for details). A value of 0 disables borders.
 
     Default: 2.5.
 
---osd-color=<#RRGGBB|#AARRGGBB>
-    Specify the color used for OSD. This is also used for unstyled text
-    subtitles. This option (and most other ``--osd-`` options) are ignored
-    when ASS subtitles are rendered, unless the ``--no-ass`` option is
-    specified.
+--osd-color=<#RRGGBB|#AARRGGBB>, --sub-text-color=<#RRGGBB|#AARRGGBB>
+    Specify the color used for OSD/unstyled text subtitles.
 
     The color is specified as a RGB hex triplet, and each 2-digit group
     expresses a color value in the range 0 (``00``) to 255 (`FF`).
@@ -1268,19 +1266,21 @@
 --osd-duration=<time>
     Set the duration of the OSD messages in ms (default: 1000).
 
---osd-font=<pattern>
+--osd-font=<pattern>, --sub-text-font=<pattern>
     Specify font to use for OSD and for subtitles that do not themselves
     specify a particular font. The default is ``Sans``.
-
-    Typically ignored for ASS-subtitles.
 
     *EXAMPLE*:
 
     - ``--osd-font='Bitstream Vera Sans'``
     - ``--osd-font='Bitstream Vera Sans:style=Bold'`` (fontconfig pattern)
 
---osd-font-size=<size>
-    Specify the OSD font size. The unit is the size in scaled pixels at a
+    *NOTE*: the ``--sub-text-font`` option (and most other ``--sub-text-``
+    options) are ignored when ASS-subtitles are rendered, unless the
+    ``--no-ass`` option is specified.
+
+--osd-font-size=<size>, --sub-text-font-size=<size>
+    Specify the OSD/sub font size. The unit is the size in scaled pixels at a
     window height of 720. The actual pixel size is scaled with the window
     height: if the window height is larger or smaller than 720, the actual size
     of the text increases or decreases as well.
@@ -1298,8 +1298,8 @@
     :2: volume + seek + timer + percentage
     :3: volume + seek + timer + percentage + total time
 
---osd-margin-x=<size>
-    Left and right screen margin for the OSD in scaled pixels (see
+--osd-margin-x=<size>, --sub-text-margin-x=<size>
+    Left and right screen margin for the OSD/subs in scaled pixels (see
     ``--osd-font-size`` for details).
 
     This option specifies the distance of the OSD to the left, as well as at
@@ -1307,8 +1307,8 @@
 
     Default: 25.
 
---osd-margin-y=<size>
-    Top and bottom screen margin for the OSD in scaled pixels (see
+--osd-margin-y=<size>, --sub-text-margin-y=<size>
+    Top and bottom screen margin for the OSD/subs in scaled pixels (see
     ``--osd-font-size`` for details).
 
     This option specifies the vertical margins of the OSD. This is also used
@@ -1317,19 +1317,19 @@
 
     Default: 10.
 
---osd-shadow-color=<#RRGGBB>
-    See ``--osd-color``. Color used for OSD text shadow.
+--osd-shadow-color=<#RRGGBB>, --sub-text-shadow-color=<#RRGGBB>
+    See ``--osd-color``. Color used for OSD/sub text shadow.
 
---osd-shadow-offset=<size>
-    Displacement of the OSD text shadow in scaled pixels (see
+--osd-shadow-offset=<size>, --sub-text-shadow-offset=<size>
+    Displacement of the OSD/sub text shadow in scaled pixels (see
     ``--osd-font-size`` for details). A value of 0 disables shadows.
 
     Default: 0.
 
---osd-spacing=<size>
-    Horizontal OSD font spacing in scaled pixels (see ``--osd-font-size`` for
-    details). This value is added to the normal letter spacing. Negative values
-    are allowed.
+--osd-spacing=<size>, --sub-text-spacing=<size>
+    Horizontal OSD/sub font spacing in scaled pixels (see ``--osd-font-size``
+    for details). This value is added to the normal letter spacing. Negative
+    values are allowed.
 
     Default: 0.
 

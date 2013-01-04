@@ -90,7 +90,7 @@ ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
         ASS_Style *style = track->styles + sid;
         style->Name = strdup("Default");
         style->Alignment = 2;
-        mp_ass_set_style(style, opts->osd_style);
+        mp_ass_set_style(style, opts->sub_text_style);
     }
 
     if (opts->ass_style_override)
