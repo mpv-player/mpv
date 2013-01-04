@@ -1231,8 +1231,20 @@
     search for video segments from other files, and will also ignore any
     chapter order specified for the main file.
 
---osd-duration=<time>
-    Set the duration of the OSD messages in ms (default: 1000).
+--osd-back-color=<#RRGGBB>
+    See ``--osd-color``. Color used for OSD text background.
+
+--osd-border-color=<#RRGGBB>
+    See ``--osd-color``. Color used for the OSD font border.
+
+    *Note*: ignored when ``--osd-back-color`` is specified (or more
+    exactly: when that option is not set to completely transparent).
+
+--osd-border-size=<size>
+    Size of the OSD font border in scaled pixels (see ``--osd-font-size`` for
+    details). A value of 0 disables borders.
+
+    Default: 2.5.
 
 --osd-color=<#RRGGBB|#AARRGGBB>
     Specify the color used for OSD. This is also used for unstyled text
@@ -1253,17 +1265,19 @@
     - ``--osd-color='#FF0000'`` set OSD to opaque red
     - ``--osd-color='#C0808080'`` set OSD to 50% gray with 75% alpha
 
---osd-back-color=<#RRGGBB>
-    See ``--osd-color``. Color used for OSD text background.
+--osd-duration=<time>
+    Set the duration of the OSD messages in ms (default: 1000).
 
---osd-border-color=<#RRGGBB>
-    See ``--osd-color``. Color used for the OSD font border.
+--osd-font=<pattern>
+    Specify font to use for OSD and for subtitles that do not themselves
+    specify a particular font. The default is ``Sans``.
 
-    *Note*: ignored when ``--osd-back-color`` is specified (or more
-    exactly: when that option is not set to completely transparent).
+    Typically ignored for ASS-subtitles.
 
---osd-shadow-color=<#RRGGBB>
-    See ``--osd-color``. Color used for OSD text shadow.
+    *EXAMPLE*:
+
+    - ``--osd-font='Bitstream Vera Sans'``
+    - ``--osd-font='Bitstream Vera Sans:style=Bold'`` (fontconfig pattern)
 
 --osd-font-size=<size>
     Specify the OSD font size. The unit is the size in scaled pixels at a
@@ -1273,11 +1287,16 @@
 
     Default: 45.
 
---osd-border-size=<size>
-    Size of the OSD font border in scaled pixels (see ``--osd-font-size`` for
-    details). A value of 0 disables borders.
+--osd-fractions
+    Show OSD times with fractions of seconds.
 
-    Default: 2.5.
+--osd-level=<0-3>
+    Specifies which mode the OSD should start in.
+
+    :0: subtitles only
+    :1: volume + seek (default)
+    :2: volume + seek + timer + percentage
+    :3: volume + seek + timer + percentage + total time
 
 --osd-margin-x=<size>
     Left and right screen margin for the OSD in scaled pixels (see
@@ -1298,6 +1317,9 @@
 
     Default: 10.
 
+--osd-shadow-color=<#RRGGBB>
+    See ``--osd-color``. Color used for OSD text shadow.
+
 --osd-shadow-offset=<size>
     Displacement of the OSD text shadow in scaled pixels (see
     ``--osd-font-size`` for details). A value of 0 disables shadows.
@@ -1310,28 +1332,6 @@
     are allowed.
 
     Default: 0.
-
---osd-font=<pattern>
-    Specify font to use for OSD and for subtitles that do not themselves
-    specify a particular font. The default is ``Sans``.
-
-    Typically ignored for ASS-subtitles.
-
-    *EXAMPLE*:
-
-    - ``--osd-font='Bitstream Vera Sans'``
-    - ``--osd-font='Bitstream Vera Sans:style=Bold'`` (fontconfig pattern)
-
---osd-fractions
-    Show OSD times with fractions of seconds.
-
---osd-level=<0-3>
-    Specifies which mode the OSD should start in.
-
-    :0: subtitles only
-    :1: volume + seek (default)
-    :2: volume + seek + timer + percentage
-    :3: volume + seek + timer + percentage + total time
 
 --overlapsub
     Allows the next subtitle to be displayed while the current one is still
