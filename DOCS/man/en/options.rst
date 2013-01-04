@@ -109,14 +109,17 @@
     - ``--aspect=16:9`` or ``--aspect=1.7777``
 
 --ass, --no-ass
-    Use libass to render all text subtitles. This enables support for the
-    native styling of SSA/ASS subtitles, and also support for some styling
-    features in other subtitle formats by conversion to ASS markup. Enabled by
-    default if the player was compiled with libass support.
+    Render ASS subtitles natively, and convert text subtitles in other formats
+    to ASS internally (enabled by default).
 
-    *NOTE*: With ``--ass``, some of the ASS subtitle options work for non-ASS
-    text subtitles only, because ASS subtitles include their own styling
-    information.
+    If ``--no-ass`` is specified, all subtitles are converted to plain text
+    internally. All tags and style declarations are stripped and ignored. The
+    subtitle renderer uses the font style as specified by the ``--sub-text-``
+    options instead.
+
+    *NOTE*: Using ``--no-ass`` may lead to incorrect or completely broken
+    rendering of ASS/SSA subtitles. It can sometimes be useful to forcibly
+    override the styling of ASS subtitles, but should be avoided in general.
 
 --ass-force-style=<[Style.]Param=Value[,...]>
     Override some style or script info parameters.
@@ -125,6 +128,8 @@
 
     - ``--ass-force-style=FontName=Arial,Default.Bold=1``
     - ``--ass-force-style=PlayResY=768``
+
+    *NOTE*: Using this option may lead to incorrect subtitle rendering.
 
 --ass-hinting=<type>
     Set hinting type. <type> can be:
@@ -143,6 +148,8 @@
     Load all SSA/ASS styles found in the specified file and use them for
     rendering text subtitles. The syntax of the file is exactly like the ``[V4
     Styles]`` / ``[V4+ Styles]`` section of SSA/ASS.
+
+    *NOTE*: Using this option may lead to incorrect subtitle rendering.
 
 --ass-style-override=<yes|no>
     Control whether user style overrides should be applied.
@@ -1937,8 +1944,14 @@
     Specify the position of subtitles on the screen. The value is the vertical
     position of the subtitle in % of the screen height.
 
+    *NOTE*: this affects ASS subtitles as well, and may lead to incorrect
+    subtitle rendering. Use with care, or use ``--sub-text-margin-y`` instead.
+
 --sub-scale=<0-100>
     Factor for the text subtitle font size (default: 1).
+
+    *NOTE*: this affects ASS subtitles as well, and may lead to incorrect
+    subtitle rendering. Use with care, or use ``--sub-text-font-size`` instead.
 
 --sws=<n>
     Specify the software scaler algorithm to be used with ``--vf=scale``. This
