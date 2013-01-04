@@ -665,6 +665,9 @@ sdl
     hardware acceleration. Should work everywhere where SDL 2.0 builds. For
     tuning, refer to your copy of the file SDL_hints.h.
 
+    sw
+        Continue even if a software renderer is detected.
+
 null
     Produces no video output. Useful for benchmarking.
 

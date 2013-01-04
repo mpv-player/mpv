@@ -169,6 +169,7 @@ struct priv {
     bool reinit_renderer;
     SDL_Window *window;
     SDL_Renderer *renderer;
+    int renderer_index;
     SDL_RendererInfo renderer_info;
     SDL_Texture *tex;
     mp_image_t texmpi;
@@ -193,24 +194,32 @@ struct priv {
     unsigned int mouse_timer;
     int mouse_hidden;
     int brightness, contrast;
+
+    // options
+    int allow_sw;
 };
 
-static bool is_good_renderer(int n, const char *driver_name_wanted)
+static bool is_good_renderer(SDL_RendererInfo *ri,
+                             const char *driver_name_wanted, int allow_sw,
+                             struct formatmap_entry *osd_format)
 {
-    SDL_RendererInfo ri;
-    if (SDL_GetRenderDriverInfo(n, &ri))
-        return false;
-
     if (driver_name_wanted && driver_name_wanted[0])
-        if (strcmp(driver_name_wanted, ri.name))
+        if (strcmp(driver_name_wanted, ri->name))
             return false;
 
+    if (!allow_sw &&
+        !(ri->flags & SDL_RENDERER_ACCELERATED))
+        return false;
+
     int i, j;
-    for (i = 0; i < ri.num_texture_formats; ++i)
+    for (i = 0; i < ri->num_texture_formats; ++i)
         for (j = 0; j < sizeof(formats) / sizeof(formats[0]); ++j)
-            if (ri.texture_formats[i] == formats[j].sdl)
-                if (formats[j].is_rgba)
+            if (ri->texture_formats[i] == formats[j].sdl)
+                if (formats[j].is_rgba) {
+                    if (osd_format)
+                        *osd_format = formats[j];
                     return true;
+                }
 
     return false;
 }
@@ -250,10 +259,19 @@ static void destroy_renderer(struct vo *vo)
     }
 }
 
-static int init_renderer(struct vo *vo, int w, int h)
+static bool try_create_renderer(struct vo *vo, int i, const char *driver,
+                                int w, int h)
 {
     struct priv *vc = vo->priv;
 
+    // first probe
+    SDL_RendererInfo ri;
+    if (SDL_GetRenderDriverInfo(i, &ri))
+        return false;
+    if (!is_good_renderer(&ri, driver, vc->allow_sw, NULL))
+        return false;
+
+    // then actually try
     vc->window = SDL_CreateWindow("MPV",
                                   geometry_xy_changed
                                       ? vo->dx
@@ -266,47 +284,61 @@ static int init_renderer(struct vo *vo, int w, int h)
     if (!vc->window) {
         mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_CreateWindow failedd\n");
         destroy_renderer(vo);
-        return -1;
-    }
-
-    int n = SDL_GetNumRenderDrivers();
-    int i;
-    for (i = 0; i < n; ++i)
-        if (is_good_renderer(i, SDL_GetHint(SDL_HINT_RENDER_DRIVER)))
-            break;
-    if (i >= n)
-        for (i = 0; i < n; ++i)
-            if (is_good_renderer(i, NULL))
-                break;
-    if (i >= n) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] No supported renderer\n");
-        destroy_renderer(vo);
-        return -1;
+        return false;
     }
 
     vc->renderer = SDL_CreateRenderer(vc->window, i, 0);
     if (!vc->renderer) {
         mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_CreateRenderer failed\n");
         destroy_renderer(vo);
-        return -1;
+        return false;
     }
 
     if (SDL_GetRendererInfo(vc->renderer, &vc->renderer_info)) {
         mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_GetRendererInfo failed\n");
         destroy_renderer(vo);
-        return -1;
+        return false;
     }
 
-    mp_msg(MSGT_VO, MSGL_INFO, "[sdl] Using %s\n", vc->renderer_info.name);
+    if (!is_good_renderer(&vc->renderer_info, NULL, vc->allow_sw,
+                          &vc->osd_format)) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] Renderer '%s' does not fulfill "
+                                  "requirements on this system\n",
+                                  vc->renderer_info.name);
+        destroy_renderer(vo);
+        return false;
+    }
 
-    int j;
-    for (i = 0; i < vc->renderer_info.num_texture_formats; ++i)
-        for (j = 0; j < sizeof(formats) / sizeof(formats[0]); ++j)
-            if (vc->renderer_info.texture_formats[i] == formats[j].sdl)
-                if (formats[j].is_rgba)
-                    vc->osd_format = formats[j];
+    if (vc->renderer_index != i) {
+        mp_msg(MSGT_VO, MSGL_INFO, "[sdl] Using %s\n", vc->renderer_info.name);
+        vc->renderer_index = i;
+    }
 
-    return 0;
+    return true;
+}
+
+static int init_renderer(struct vo *vo, int w, int h)
+{
+    struct priv *vc = vo->priv;
+
+    int n = SDL_GetNumRenderDrivers();
+    int i;
+
+    if (vc->renderer_index >= 0)
+        if (try_create_renderer(vo, vc->renderer_index, NULL, w, h))
+            return 0;
+
+    for (i = 0; i < n; ++i)
+        if (try_create_renderer(vo, i, SDL_GetHint(SDL_HINT_RENDER_DRIVER),
+                                w, h))
+            return 0;
+
+    for (i = 0; i < n; ++i)
+        if (try_create_renderer(vo, i, NULL, w, h))
+            return 0;
+
+    mp_msg(MSGT_VO, MSGL_ERR, "[sdl] No supported renderer\n");
+    return -1;
 }
 
 static void resize(struct vo *vo, int w, int h)
@@ -1016,6 +1048,13 @@ const struct vo_driver video_out_sdl = {
         ""
     },
     .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv) {
+        .renderer_index = -1
+    },
+    .options = (const struct m_option []){
+        OPT_FLAG_ON("sw", allow_sw, 0),
+        {NULL}
+    },
     .preinit = preinit,
     .config = config,
     .control = control,
