@@ -229,10 +229,8 @@ static void allocate_xvimage(struct vo *vo, int foo)
 {
     struct xvctx *ctx = vo->priv;
     struct vo_x11_state *x11 = vo->x11;
-    /*
-     * allocate XvImages.  FIXME: no error checking, without
-     * mit-shm this will bomb... trzing to fix ::atmos
-     */
+    // align it for faster OSD rendering (draw_bmp.c swscale usage)
+    int aligned_w = FFALIGN(ctx->image_width, 32);
 #ifdef HAVE_SHM
     if (x11->display_is_local && XShmQueryExtension(x11->display))
         ctx->Shmem_Flag = 1;
@@ -240,7 +238,6 @@ static void allocate_xvimage(struct vo *vo, int foo)
         ctx->Shmem_Flag = 0;
         mp_tmsg(MSGT_VO, MSGL_INFO, "[VO_XV] Shared memory not supported\nReverting to normal Xv.\n");
     }
-    int aligned_w = FFALIGN(ctx->image_width, 32);
     if (ctx->Shmem_Flag) {
         ctx->xvimage[foo] =
             (XvImage *) XvShmCreateImage(x11->display, x11->xv_port,
