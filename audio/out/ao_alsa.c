@@ -69,6 +69,7 @@ static size_t bytes_per_sample;
 
 static int alsa_can_pause;
 static snd_pcm_sframes_t prepause_frames;
+static float delay_before_pause;
 
 #define ALSA_DEVICE_SIZE 256
 
@@ -354,6 +355,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: using ALSA %s\n", snd_asoundlib_version());
 
     prepause_frames = 0;
+    delay_before_pause = 0;
 
     snd_lib_error_set_handler(alsa_error_handler);
 
@@ -703,6 +705,7 @@ static void audio_pause(void)
     int err;
 
     if (alsa_can_pause) {
+        delay_before_pause = get_delay();
         if ((err = snd_pcm_pause(alsa_handler, 1)) < 0)
         {
             mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] pcm pause error: %s\n", snd_strerror(err));
@@ -713,6 +716,7 @@ static void audio_pause(void)
         if (snd_pcm_delay(alsa_handler, &prepause_frames) < 0
             || prepause_frames < 0)
             prepause_frames = 0;
+        delay_before_pause = prepause_frames / (float)ao_data.samplerate;
 
         if ((err = snd_pcm_drop(alsa_handler)) < 0)
         {
@@ -757,6 +761,7 @@ static void reset(void)
     int err;
 
     prepause_frames = 0;
+    delay_before_pause = 0;
     if ((err = snd_pcm_drop(alsa_handler)) < 0)
     {
 	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] pcm prepare error: %s\n", snd_strerror(err));
@@ -846,6 +851,9 @@ static float get_delay(void)
 {
   if (alsa_handler) {
     snd_pcm_sframes_t delay;
+
+    if (snd_pcm_state(alsa_handler) == SND_PCM_STATE_PAUSED)
+      return delay_before_pause;
 
     if (snd_pcm_delay(alsa_handler, &delay) < 0)
       return 0;
