@@ -63,19 +63,5 @@ struct sub_bitmaps;
 void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
                          struct sub_bitmap **parts, struct sub_bitmaps *res);
 
-#else /* CONFIG_ASS */
-
-/* Needed for OSD code using this type to compile */
-
-typedef struct ass_image {
-    int w, h;
-    int stride;
-    unsigned char *bitmap;
-    uint32_t color;
-    int dst_x, dst_y;
-    struct ass_image *next;
-} ASS_Image;
-
-#endif
-
+#endif                          /* CONFIG_ASS */
 #endif                          /* MPLAYER_ASS_MP_H */
