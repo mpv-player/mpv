@@ -28,6 +28,7 @@
 #include "osdep/timer.h"
 
 #include <libavutil/fifo.h>
+#include <libavutil/common.h>
 #include <SDL.h>
 
 // hack because SDL can't be asked about the current delay
