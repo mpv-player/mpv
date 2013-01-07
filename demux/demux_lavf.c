@@ -1066,6 +1066,21 @@ redo:
         priv->cur_program = prog->progid = program->id;
         return DEMUXER_CTRL_OK;
     }
+    case DEMUXER_CTRL_RESYNC:
+        /* NOTE:
+         *
+         * We actually want to call ff_read_frame_flush() here, but it is
+         * internal.
+         *
+         * This function call seems to do the same for now.
+         *
+         * Once ff_read_frame_flush() is exported in some way, change this to
+         * call the new API instead of relying on av_seek_frame() to do this
+         * for us.
+         */
+        av_seek_frame(priv->avfc, 0, avio_tell(priv->avfc->pb),
+                      AVSEEK_FLAG_BYTE);
+        return DEMUXER_CTRL_OK;
     default:
         return DEMUXER_CTRL_NOTIMPL;
     }
