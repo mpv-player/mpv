@@ -1,0 +1,59 @@
+Cross compiling mpv to Windows is supported with MinGW-w64. This can be used to
+produce both 32 bit and 64 bit executables. MinGW-w64 is available from
+http://mingw-w64.sourceforge.net.
+
+You have to run mpv's configure with these arguments:
+    ./configure --enable-cross-compile --target=i686-w64-mingw32
+
+Using MXE to setup a MinGW-w64 environment is recommended: http://mxe.cc
+Currently, using an experimental branch of MXE is required:
+    https://github.com/tonytheodore/mxe.git
+
+Warning: the original MinGW (http://www.mingw.org) is unsupported.
+
+Note that MingGW environments included in Linux distributions are often broken,
+outdated and useless, and usually don't use MinGW-w64.
+
+Example with MXE
+================
+
+# Download MXE. Note that compiling the required packages requires about 1 GB
+# or more! We are using an experimental repository, which supports MinGW-w64.
+# The official MXE supports classic MinGW only, which doesn't work with mpv.
+
+cd /opt
+git clone https://github.com/tonytheodore/mxe.git mingw
+cd mingw
+
+# Edit the MXE target, so that MingGW-w64 for 32 bit targets is built.
+
+echo "MXE_TARGETS := i686-w64-mingw32" > settings.mk
+
+# Build required packages. The following provide a minimum required to build
+# mpv. (Not all of the following packages are strictly required.)
+
+make gcc
+make ffmpeg
+make libass
+make jpeg
+make pthreads
+
+# MXE and MingGW-w64 don't provide up-to-date OpenGL headers (to my knowledge).
+
+wget http://www.opengl.org/registry/api/glext.h
+mv glext.h usr/i686-w64-mingw32/include/GL/
+
+# Build mpv. The target will be used to automatically select the name of the
+# build tools involved (e.g. it will use i686-w64-mingw32-gcc).
+
+git clone https://github.com/mpv-player/mpv.git
+cd mpv
+export PATH=/opt/mingw/usr/bin/:$PATH
+./configure --enable-cross-compile --target=i686-w64-mingw32
+make
+
+# This should work. For some reason, the resulting .exe will depend on the DLL
+# /opt/mingw/usr/i686-w64-mingw32/bin/libwinpthread-1.dll because pthreads-w32
+# folks don't like static linking. How to enable static linking is left as
+# exercise for the reader. Passsing --disable-pthreads to mpv's configure will
+# get rid of the dependency, but may disable some features.
