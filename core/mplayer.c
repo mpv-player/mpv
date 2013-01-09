@@ -4166,6 +4166,9 @@ goto_enable_cache: ;
 
 terminate_playback:  // don't jump here after ao/vo/getch initialization!
 
+    if (mpctx->step_frames)
+        mpctx->paused = 1;
+
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
 
     // xxx handle this as INITIALIZED_CONFIG?
