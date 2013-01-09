@@ -1089,7 +1089,8 @@
 
 --loop=<number|inf|no>
     Loops playback <number> times. ``inf`` means forever and ``no`` disables
-    looping.
+    looping. If several files are specified on command line, the whole playlist
+    is looped.
 
 --mc=<seconds/frame>
     Maximum A-V sync correction per frame (in seconds)

@@ -3511,32 +3511,6 @@ static void run_playloop(struct MPContext *mpctx)
         }
     }
 
-    /* Looping. */
-    if (opts->loop_times >= 0 && (mpctx->stop_play == AT_END_OF_FILE ||
-                                  mpctx->stop_play == PT_NEXT_ENTRY)) {
-        mp_msg(MSGT_CPLAYER, MSGL_V, "loop_times = %d\n", opts->loop_times);
-
-        int stop_reason = mpctx->stop_play;
-
-        if (opts->loop_times > 1)
-            opts->loop_times--;
-        else if (opts->loop_times == 1)
-            opts->loop_times = -1;
-        play_n_frames = play_n_frames_mf;
-        mpctx->stop_play = 0;
-        mpctx->seek = (struct seek_params) {0};
-        struct seek_params sp = {
-            .type = MPSEEK_ABSOLUTE,
-            .amount = rel_time_to_abs(mpctx, opts->play_start, 0),
-            .exact = 1,
-        };
-        if (seek(mpctx, sp, false) != 0) {
-            mp_msg(MSGT_CPLAYER, MSGL_ERR, "Can't loop an unseekable file.\n");
-            opts->loop_times = -1;
-            mpctx->stop_play = stop_reason;
-        }
-    }
-
     if (mpctx->seek.type) {
         seek(mpctx, mpctx->seek, false);
         mpctx->seek = (struct seek_params){ 0 };
@@ -4097,11 +4071,6 @@ goto_enable_cache: ;
 
     //==================== START PLAYING =======================
 
-    if (opts->loop_times > 1)
-        opts->loop_times--;
-    else if (opts->loop_times == 1)
-        opts->loop_times = -1;
-
     mp_tmsg(MSGT_CPLAYER, MSGL_V, "Starting playback...\n");
 
     drop_frame_cnt = 0;          // fix for multifile fps benchmark
@@ -4216,6 +4185,14 @@ static void play_files(struct MPContext *mpctx)
 
         if (mpctx->stop_play == PT_NEXT_ENTRY) {
             new_entry = playlist_get_next(mpctx->playlist, +1);
+            if (!new_entry && mpctx->opts.loop_times >= 0) {
+                new_entry = mpctx->playlist->first;
+                if (mpctx->opts.loop_times > 0) {
+                    mpctx->opts.loop_times--;
+                    if (mpctx->opts.loop_times == 0)
+                        mpctx->opts.loop_times = -1;
+                }
+            }
         } else if (mpctx->stop_play == PT_CURRENT_ENTRY) {
             new_entry = mpctx->playlist->current;
         } else if (mpctx->stop_play == PT_RESTART) {

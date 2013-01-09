@@ -667,7 +667,7 @@ const m_option_t mplayer_opts[]={
     {"leak-report", "", CONF_TYPE_PRINT, 0, 0, 0, (void*)1},
 
     OPT_FLAG_CONSTANTS("no-loop", loop_times, 0, 0, -1),
-    OPT_CHOICE_OR_INT("loop", loop_times, M_OPT_LOCAL, 1, 10000,
+    OPT_CHOICE_OR_INT("loop", loop_times, CONF_GLOBAL, 1, 10000,
                       ({"no", -1}, {"0", -1},
                        {"inf", 0})),
 
