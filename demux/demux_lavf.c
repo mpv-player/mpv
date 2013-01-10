@@ -1078,8 +1078,10 @@ redo:
          * call the new API instead of relying on av_seek_frame() to do this
          * for us.
          */
+        avio_flush(priv->avfc->pb);
         av_seek_frame(priv->avfc, 0, avio_tell(priv->avfc->pb),
                       AVSEEK_FLAG_BYTE);
+        avio_flush(priv->avfc->pb);
         return DEMUXER_CTRL_OK;
     default:
         return DEMUXER_CTRL_NOTIMPL;
