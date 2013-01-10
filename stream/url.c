@@ -61,7 +61,7 @@ end:
 }
 
 static int is_proxy(const URL_t *url) {
-  return !strcasecmp(url->protocol, "http_proxy") && url->file && strstr(url->file, "://");
+  return !strcasecmp(url->protocol, "mp_http_proxy") && url->file && strstr(url->file, "://");
 }
 
 int url_is_protocol(const URL_t *url, const char *proto) {
@@ -137,12 +137,12 @@ static char *get_noauth_url(const URL_t *url)
 char *get_http_proxy_url(const URL_t *proxy, const char *host_url)
 {
     if (proxy->username)
-        return mp_asprintf("http_proxy://%s:%s@%s:%d/%s",
+        return mp_asprintf("mp_http_proxy://%s:%s@%s:%d/%s",
                            proxy->username,
                            proxy->password ? proxy->password : "",
                            proxy->hostname, proxy->port, host_url);
     else
-        return mp_asprintf("http_proxy://%s:%d/%s",
+        return mp_asprintf("mp_http_proxy://%s:%d/%s",
                            proxy->hostname, proxy->port, host_url);
 }
 

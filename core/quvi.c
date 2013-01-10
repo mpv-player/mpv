@@ -26,11 +26,17 @@
 struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
 {
     QUVIcode rc;
+    bool mp_url = false;
 
     quvi_t q;
     rc = quvi_init(&q);
     if (rc != QUVI_OK)
         return NULL;
+
+    if (!strncmp(url, "mp_", 3)) {
+        url += 3;
+        mp_url = true;
+    }
 
     // Don't try to use quvi on an URL that's not directly supported, since
     // quvi will do a network access anyway in order to check for HTTP
@@ -65,8 +71,12 @@ struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
 
     char *val;
 
-    if (quvi_getprop(m, QUVIPROP_MEDIAURL, &val) == QUVI_OK)
-        result->url = talloc_strdup(result, val);
+    if (quvi_getprop(m, QUVIPROP_MEDIAURL, &val) == QUVI_OK) {
+        if (mp_url)
+            result->url = talloc_asprintf(result, "mp_%s", val);
+        else
+            result->url = talloc_strdup(result, val);
+    }
 
     if (quvi_getprop(m, QUVIPROP_PAGETITLE, &val) == QUVI_OK)
         result->title = talloc_strdup(result, val);

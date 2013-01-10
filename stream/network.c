@@ -110,12 +110,12 @@ check4proxies( const URL_t *url ) {
 	URL_t *url_out = NULL;
 	if( url==NULL ) return NULL;
 	url_out = url_new( url->url );
-	if( !strcasecmp(url->protocol, "http_proxy") ) {
+	if( !strcasecmp(url->protocol, "mp_http_proxy") ) {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Using HTTP proxy: http://%s:%d\n", url->hostname, url->port );
 		return url_out;
 	}
 	// Check if the http_proxy environment variable is set.
-	if( !strcasecmp(url->protocol, "http") ) {
+	if( !strcasecmp(url->protocol, "mp_http") ) {
 		char *proxy;
 		proxy = getenv("http_proxy");
 		if( proxy!=NULL ) {
@@ -180,9 +180,12 @@ http_send_request( URL_t *url, int64_t pos ) {
 
 	http_hdr = http_new_header();
 
-	if( !strcasecmp(url->protocol, "http_proxy") ) {
+	if( !strcasecmp(url->protocol, "mp_http_proxy") ) {
 		proxy = 1;
-		server_url = url_new( (url->file)+1 );
+		if (!strncasecmp(url->file, "/mp_", 3))
+			server_url = url_new( (url->file)+4 );
+		else
+			server_url = url_new( (url->file)+1 );
 		if (!server_url) {
 			mp_msg(MSGT_NETWORK, MSGL_ERR, "Invalid URL '%s' to proxify\n", url->file+1);
 			goto err_out;
