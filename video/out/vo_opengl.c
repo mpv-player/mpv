@@ -194,7 +194,6 @@ struct gl_priv {
     // per pixel (full pixel when packed, each component when planar)
     int plane_bytes;
     int plane_bits;
-    int component_bits;
 
     GLint gl_internal_format;
     GLenum gl_format;
@@ -231,20 +230,19 @@ struct fmt_entry {
     int mp_format;
     GLint internal_format;
     GLenum format;
-    int component_bits;
     GLenum type;
 };
 
 static const struct fmt_entry mp_to_gl_formats[] = {
-    {IMGFMT_RGB48,   GL_RGB16, GL_RGB,  16, GL_UNSIGNED_SHORT},
-    {IMGFMT_RGB24,   GL_RGB,   GL_RGB,  8,  GL_UNSIGNED_BYTE},
-    {IMGFMT_RGBA,    GL_RGBA,  GL_RGBA, 8,  GL_UNSIGNED_BYTE},
-    {IMGFMT_RGB15,   GL_RGBA,  GL_RGBA, 5,  GL_UNSIGNED_SHORT_1_5_5_5_REV},
-    {IMGFMT_RGB16,   GL_RGB,   GL_RGB,  6,  GL_UNSIGNED_SHORT_5_6_5_REV},
-    {IMGFMT_BGR15,   GL_RGBA,  GL_BGRA, 5,  GL_UNSIGNED_SHORT_1_5_5_5_REV},
-    {IMGFMT_BGR16,   GL_RGB,   GL_RGB,  6,  GL_UNSIGNED_SHORT_5_6_5},
-    {IMGFMT_BGR24,   GL_RGB,   GL_BGR,  8,  GL_UNSIGNED_BYTE},
-    {IMGFMT_BGRA,    GL_RGBA,  GL_BGRA, 8,  GL_UNSIGNED_BYTE},
+    {IMGFMT_RGB48,   GL_RGB16, GL_RGB,  GL_UNSIGNED_SHORT},
+    {IMGFMT_RGB24,   GL_RGB,   GL_RGB,  GL_UNSIGNED_BYTE},
+    {IMGFMT_RGBA,    GL_RGBA,  GL_RGBA, GL_UNSIGNED_BYTE},
+    {IMGFMT_RGB15,   GL_RGBA,  GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV},
+    {IMGFMT_RGB16,   GL_RGB,   GL_RGB,  GL_UNSIGNED_SHORT_5_6_5_REV},
+    {IMGFMT_BGR15,   GL_RGBA,  GL_BGRA, GL_UNSIGNED_SHORT_1_5_5_5_REV},
+    {IMGFMT_BGR16,   GL_RGB,   GL_RGB,  GL_UNSIGNED_SHORT_5_6_5},
+    {IMGFMT_BGR24,   GL_RGB,   GL_BGR,  GL_UNSIGNED_BYTE},
+    {IMGFMT_BGRA,    GL_RGBA,  GL_BGRA, GL_UNSIGNED_BYTE},
     {0},
 };
 
@@ -885,14 +883,10 @@ static void init_dither(struct gl_priv *p)
     if (p->dither_depth > 0)
         dst_depth = p->dither_depth;
 
-    int src_depth = p->component_bits;
-    if (p->use_lut_3d)
-        src_depth = 16;
-
-    if (dst_depth >= src_depth || p->dither_depth < 0 || src_depth < 0)
+    if (p->dither_depth < 0)
         return;
 
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Dither %d->%d.\n", src_depth, dst_depth);
+    mp_msg(MSGT_VO, MSGL_V, "[gl] Dither to %d.\n", dst_depth);
 
     // This defines how many bits are considered significant for output on
     // screen. The superfluous bits will be used for rounded according to the
@@ -1562,7 +1556,6 @@ static bool init_format(int fmt, struct gl_priv *init)
         return false;
 
     init->image_format = fmt;
-    init->component_bits = -1;
     init->plane_bits = desc.plane_bits;
 
     // RGB/packed formats
@@ -1572,7 +1565,6 @@ static bool init_format(int fmt, struct gl_priv *init)
             init->plane_bits = desc.bpp[0];
             init->gl_format = e->format;
             init->gl_internal_format = e->internal_format;
-            init->component_bits = e->component_bits;
             init->gl_type = e->type;
             break;
         }
@@ -1581,7 +1573,6 @@ static bool init_format(int fmt, struct gl_priv *init)
     // YUV/planar formats
     if (!supported && (desc.flags & MP_IMGFLAG_YUV_P)) {
         init->gl_format = GL_RED;
-        init->component_bits = init->plane_bits;
         if (init->plane_bits == 8) {
             supported = true;
             init->gl_internal_format = GL_RED;
@@ -1596,7 +1587,7 @@ static bool init_format(int fmt, struct gl_priv *init)
     // RGB/planar
     if (!supported && fmt == IMGFMT_GBRP) {
         supported = true;
-        init->plane_bits = init->component_bits = 8;
+        init->plane_bits = 8;
         init->gl_format = GL_RED;
         init->gl_internal_format = GL_RED;
         init->gl_type = GL_UNSIGNED_BYTE;
@@ -2290,10 +2281,6 @@ static const char help_text[] =
 "        8 bits per component are assumed.\n"
 "     8: Dither to 8 bit output.\n"
 "    Default: -1.\n"
-"    Note that dithering will always be disabled if the bit depth\n"
-"    of the video is lower or qual to the detected dither-depth.\n"
-"    If color management is enabled, input depth is assumed to be\n"
-"    16 bits, because the 3D LUT output is 16 bit wide.\n"
 "  debug\n"
 "    Check for OpenGL errors, i.e. call glGetError(). Also request a\n"
 "    debug OpenGL context.\n"

@@ -337,11 +337,6 @@ opengl
         8
             Dither to 8 bit output.
 
-        Note that dithering will always be disabled if the bit depth
-        of the video is lower or equal to the detected dither-depth.
-        If color management is enabled, input depth is assumed to be
-        16 bits, because the 3D LUT output is 16 bit wide.
-
         Note that the depth of the connected video display device can not be
         detected. Often, LCD panels will do dithering on their own, which
         conflicts with vo_opengl's dithering, and leads to ugly output.
