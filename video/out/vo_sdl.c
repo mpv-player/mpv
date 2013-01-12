@@ -378,7 +378,8 @@ static void set_fullscreen(struct vo *vo, int fs)
         SDL_SetWindowDisplayMode(vc->window, NULL);
     else {
         SDL_DisplayMode mode;
-        if (!SDL_GetCurrentDisplayMode(SDL_GetWindowDisplay(vc->window), &mode))
+        if (!SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(vc->window),
+                                       &mode))
             SDL_SetWindowDisplayMode(vc->window, &mode);
     }
 
@@ -927,7 +928,8 @@ static void update_screeninfo(struct vo *vo)
 {
     struct priv *vc = vo->priv;
     SDL_DisplayMode mode;
-    if (SDL_GetCurrentDisplayMode(SDL_GetWindowDisplay(vc->window), &mode)) {
+    if (SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(vc->window),
+                                  &mode)) {
         mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_GetCurrentDisplayMode failed\n");
         return;
     }
