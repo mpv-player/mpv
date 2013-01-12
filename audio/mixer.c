@@ -124,8 +124,8 @@ static void setvolume_internal(mixer_t *mixer, float l, float r)
 void mixer_setvolume(mixer_t *mixer, float l, float r)
 {
     checkvolume(mixer);  // to check mute status and AO support for volume
-    mixer->vol_l = av_clip(l, 0, 100);
-    mixer->vol_r = av_clip(r, 0, 100);
+    mixer->vol_l = av_clipf(l, 0, 100);
+    mixer->vol_r = av_clipf(r, 0, 100);
     if (!mixer->ao || mixer->muted_using_volume)
         return;
     setvolume_internal(mixer, mixer->vol_l, mixer->vol_r);
