@@ -61,7 +61,7 @@ static int diff_MMX(unsigned char *old, unsigned char *new, int os, int ns)
 	"pxor %%mm4, %%mm4 \n\t"
 	"pxor %%mm7, %%mm7 \n\t"
 
-	ASMALIGN(4)
+	".align 4 \n\t"
 	"1: \n\t"
 
 	"movq (%%"REG_S"), %%mm0 \n\t"

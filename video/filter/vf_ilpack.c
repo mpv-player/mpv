@@ -83,7 +83,7 @@ static void pack_nn_MMX(unsigned char *dst, unsigned char *y,
     int av_unused us, int av_unused vs)
 {
     __asm__ volatile (""
-        ASMALIGN(4)
+        ".align 4 \n\t"
         "1: \n\t"
         "movq (%0), %%mm1 \n\t"
         "movq (%0), %%mm2 \n\t"
@@ -123,7 +123,7 @@ static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 #endif
         "pxor %%mm0, %%mm0 \n\t"
 
-        ASMALIGN(4)
+        ".align 4 \n\t"
         ".Lli0: \n\t"
         "movq (%%"REG_S"), %%mm1 \n\t"
         "movq (%%"REG_S"), %%mm2 \n\t"
@@ -231,7 +231,7 @@ static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 #endif
         "pxor %%mm0, %%mm0 \n\t"
 
-        ASMALIGN(4)
+        ".align 4 \n\t"
         ".Lli1: \n\t"
         "movq (%%"REG_S"), %%mm1 \n\t"
         "movq (%%"REG_S"), %%mm2 \n\t"

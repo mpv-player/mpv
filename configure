@@ -492,7 +492,6 @@ _rpath=no
 libpostproc=auto
 libavfilter=no
 libavdevice=no
-_asmalign_pot=auto
 _stream_cache=yes
 _priority=no
 def_dos_paths="#define HAVE_DOS_PATHS 0"
@@ -1186,19 +1185,6 @@ echores $pic
 
 
 if x86 ; then
-
-echocheck ".align is a power of two"
-if test "$_asmalign_pot" = auto ; then
-_asmalign_pot=no
-inline_asm_check '".align 3"' && _asmalign_pot=yes
-fi
-if test "$_asmalign_pot" = "yes" ; then
-  def_asmalign_pot='#define ASMALIGN(ZEROBITS) ".align " #ZEROBITS "\n\t"'
-else
-  def_asmalign_pot='#define ASMALIGN(ZEROBITS) ".align 1<<" #ZEROBITS "\n\t"'
-fi
-echores $_asmalign_pot
-
 
 echocheck "ebx availability"
 ebx_available=no
@@ -3304,7 +3290,6 @@ $def_vsscanf
 
 
 /* system-specific features */
-$def_asmalign_pot
 $def_dl
 $def_dos_paths
 $def_iconv

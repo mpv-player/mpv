@@ -152,7 +152,7 @@ static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int 
 		"pcmpeqb %%mm7, %%mm7		\n\t"
 		"psllw $15, %%mm7		\n\t"
 		"packsswb %%mm7, %%mm7		\n\t"
-		ASMALIGN(4)
+		".align 4                       \n\t"
 		"1:				\n\t"
 		"movq (%0, %%"REG_a"), %%mm0	\n\t"
 		"movq (%1, %%"REG_a"), %%mm1	\n\t"
@@ -181,7 +181,7 @@ static inline void lineNoise_MMX2(uint8_t *dst, uint8_t *src, int8_t *noise, int
 		"pcmpeqb %%mm7, %%mm7		\n\t"
 		"psllw $15, %%mm7		\n\t"
 		"packsswb %%mm7, %%mm7		\n\t"
-		ASMALIGN(4)
+		".align 4                       \n\t"
 		"1:				\n\t"
 		"movq (%0, %%"REG_a"), %%mm0	\n\t"
 		"movq (%1, %%"REG_a"), %%mm1	\n\t"
@@ -219,7 +219,7 @@ static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t 
 
 	__asm__ volatile(
 		"mov %5, %%"REG_a"		\n\t"
-		ASMALIGN(4)
+		".align 4                       \n\t"
 		"1:				\n\t"
 		"movq (%1, %%"REG_a"), %%mm1	\n\t"
 		"movq (%0, %%"REG_a"), %%mm0	\n\t"
