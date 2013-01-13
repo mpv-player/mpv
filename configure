@@ -2029,21 +2029,10 @@ echores "$_xf86keysym"
 echocheck "CACA"
 if test "$_caca" = auto ; then
   _caca=no
-  if ( caca-config --version ) >> "$TMPLOG" 2>&1 ; then
-  cat > $TMPC << EOF
-#include <caca.h>
-#ifdef CACA_API_VERSION_1
-  #include <caca0.h>
-#endif
-int main(void) { caca_init(); return 0; }
-EOF
-  cc_check $(caca-config --libs) && _caca=yes
-  fi
+  pkg_config_add 'caca >= 0.99.beta18' && _caca=yes
 fi
 if test "$_caca" = yes ; then
   def_caca='#define CONFIG_CACA 1'
-  extra_cflags="$extra_cflags $(caca-config --cflags)"
-  libs_mplayer="$libs_mplayer $(caca-config --libs)"
   vomodules="caca $vomodules"
 else
   def_caca='#undef CONFIG_CACA'
