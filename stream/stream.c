@@ -65,7 +65,6 @@ static struct input_ctx *stream_check_interrupt_ctx;
 
 extern const stream_info_t stream_info_vcd;
 extern const stream_info_t stream_info_cdda;
-extern const stream_info_t stream_info_netstream;
 extern const stream_info_t stream_info_asf;
 extern const stream_info_t stream_info_udp;
 extern const stream_info_t stream_info_http1;
@@ -97,7 +96,6 @@ static const stream_info_t* const auto_open_streams[] = {
   &stream_info_ffmpeg,  // use for rstp:// before http fallback
   &stream_info_avdevice,
 #ifdef CONFIG_NETWORKING
-  &stream_info_netstream,
   &stream_info_http1,
   &stream_info_asf,
   &stream_info_udp,
