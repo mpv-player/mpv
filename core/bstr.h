@@ -65,6 +65,7 @@ struct bstr *bstr_splitlines(void *talloc_ctx, struct bstr str);
 struct bstr bstr_lstrip(struct bstr str);
 struct bstr bstr_strip(struct bstr str);
 struct bstr bstr_split(struct bstr str, const char *sep, struct bstr *rest);
+bool bstr_split_tok(bstr str, const char *tok, bstr *out_left, bstr *out_right);
 struct bstr bstr_splice(struct bstr str, int start, int end);
 long long bstrtoll(struct bstr str, struct bstr *rest, int base);
 double bstrtod(struct bstr str, struct bstr *rest);

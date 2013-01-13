@@ -121,6 +121,19 @@ struct bstr bstr_split(struct bstr str, const char *sep, struct bstr *rest)
     return bstr_splice(str, 0, end);
 }
 
+// Unlike with bstr_split(), tok is a string, and not a set of char.
+// If tok is in str, return true, and: concat(out_left, tok, out_right) == str
+// Otherwise, return false, and set out_left==str, out_right==""
+bool bstr_split_tok(bstr str, const char *tok, bstr *out_left, bstr *out_right)
+{
+    bstr bsep = bstr0(tok);
+    int pos = bstr_find(str, bsep);
+    if (pos < 0)
+        pos = str.len;
+    *out_left = bstr_splice(str, 0, pos);
+    *out_right = bstr_cut(str, pos + bsep.len);
+    return pos != str.len;
+}
 
 struct bstr bstr_splice(struct bstr str, int start, int end)
 {

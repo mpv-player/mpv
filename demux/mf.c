@@ -35,7 +35,6 @@
 #else
 #include "osdep/glob.h"
 #endif
-#include "osdep/strsep.h"
 
 #include "core/mp_msg.h"
 #include "stream/stream.h"
@@ -91,9 +90,14 @@ mf_t* open_mf_pattern(char * filename)
  if( strchr( filename,',') )
   {
    mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] filelist: %s\n",filename );
+   bstr bfilename = bstr0(filename);
 
-   while ( ( fname=strsep( &filename,"," ) ) )
+   while (bfilename.len)
     {
+     bstr bfname;
+     bstr_split_tok(bfilename, ",", &bfname, &bfilename);
+     char *fname = bstrdup0(NULL, bfname);
+
      if ( !mp_path_exists( fname ) )
       {
        mp_msg( MSGT_STREAM,MSGL_V,"[mf] file not found: '%s'\n",fname );
@@ -101,10 +105,11 @@ mf_t* open_mf_pattern(char * filename)
       else
       {
        mf->names=realloc( mf->names,( mf->nr_of_files + 1 ) * sizeof( char* ) );
-       mf->names[mf->nr_of_files]=strdup( fname );
+       mf->names[mf->nr_of_files] = strdup(fname);
 //       mp_msg( MSGT_STREAM,MSGL_V,"[mf] added file %d.: %s\n",mf->nr_of_files,mf->names[mf->nr_of_files] );
        mf->nr_of_files++;
       }
+      talloc_free(fname);
     }
    mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files );
 

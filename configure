@@ -1617,19 +1617,6 @@ fi
 echores "$_shm"
 
 
-echocheck "strsep()"
-_strsep=no
-statement_check string.h 'char *s = "Hello, world!"; strsep(&s, ",")' && _strsep=yes
-if test "$_strsep" = yes ; then
-  def_strsep='#define HAVE_STRSEP 1'
- need_strsep=no
-else
-  def_strsep='#undef HAVE_STRSEP'
- need_strsep=yes
-fi
-echores "$_strsep"
-
-
 echocheck "POSIX select()"
 cat > $TMPC << EOF
 #include <stdio.h>
@@ -3110,7 +3097,6 @@ $(mak_enable "$subarch_all" "$subarch" ARCH)
 
 NEED_GLOB         = $need_glob
 NEED_SHMEM        = $need_shmem
-NEED_STRSEP       = $need_strsep
 
 # features
 ALSA = $_alsa
@@ -3246,7 +3232,6 @@ $def_posix_select
 $def_select
 $def_setmode
 $def_shm
-$def_strsep
 $def_sysi86
 $def_sysi86_iv
 $def_termcap

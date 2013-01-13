@@ -56,7 +56,6 @@ SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
 SOURCES-$(NEED_GETTIMEOFDAY)    += osdep/gettimeofday.c
 SOURCES-$(NEED_GLOB)            += osdep/glob-win.c
 SOURCES-$(NEED_SHMEM)           += osdep/shmem.c
-SOURCES-$(NEED_STRSEP)          += osdep/strsep.c
 SOURCES-$(NETWORKING)           += stream/stream_netstream.c \
                                    stream/asf_mmst_streaming.c \
                                    stream/asf_streaming.c \

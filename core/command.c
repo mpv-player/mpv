@@ -51,7 +51,6 @@
 #include "audio/filter/af.h"
 #include "video/decode/dec_video.h"
 #include "audio/decode/dec_audio.h"
-#include "osdep/strsep.h"
 #include "sub/spudec.h"
 #include "core/path.h"
 #include "sub/ass_mp.h"
@@ -2266,16 +2265,19 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (!sh_audio)
             break;
         char *af_args = strdup(cmd->args[0].v.s);
-        char *af_commands = af_args;
-        char *af_command;
+        bstr af_commands = bstr0(af_args);
         struct af_instance *af;
-        while ((af_command = strsep(&af_commands, ",")) != NULL) {
+        while (af_commands.len) {
+            bstr af_command;
+            bstr_split_tok(af_commands, ",", &af_command, &af_commands);
+            char *af_command0 = bstrdup0(NULL, af_command);
             if (cmd->id == MP_CMD_AF_DEL) {
-                af = af_get(mpctx->mixer.afilter, af_command);
+                af = af_get(mpctx->mixer.afilter, af_command0);
                 if (af != NULL)
                     af_remove(mpctx->mixer.afilter, af);
             } else
-                af_add(mpctx->mixer.afilter, af_command);
+                af_add(mpctx->mixer.afilter, af_command0);
+            talloc_free(af_command0);
         }
         reinit_audio_chain(mpctx);
         free(af_args);

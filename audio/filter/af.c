@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "osdep/strsep.h"
 
 #include "af.h"
 
@@ -129,7 +128,13 @@ static struct af_instance* af_create(struct af_stream* s, const char* name_with_
   memset(new,0,sizeof(struct af_instance));
 
   // Check for commandline parameters
-  strsep(&cmdline, "=");
+  char *skip = strstr(cmdline, "=");
+  if (skip) {
+      *skip = '\0'; // for name
+      cmdline = skip + 1;
+  } else {
+      cmdline = NULL;
+  }
 
   // Find filter from name
   if(NULL == (new->info=af_find(name)))
