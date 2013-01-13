@@ -53,15 +53,7 @@ struct GL;
 typedef struct GL GL;
 
 void glAdjustAlignment(GL *gl, int stride);
-
-int glFindFormat(uint32_t format, int have_texture_rg, int *bpp,
-                 GLint *gl_texfmt, GLenum *gl_format, GLenum *gl_type);
 int glFmt2bpp(GLenum format, GLenum type);
-void glCreateClearTex(GL *gl, GLenum target, GLenum fmt, GLenum format,
-                      GLenum type, GLint filter, int w, int h,
-                      unsigned char val);
-int glCreatePPMTex(GL *gl, GLenum target, GLenum fmt, GLint filter,
-                   FILE *f, int *width, int *height, int *maxval);
 void glUploadTex(GL *gl, GLenum target, GLenum format, GLenum type,
                  const void *dataptr, int stride,
                  int x, int y, int w, int h, int slice);
@@ -69,89 +61,8 @@ void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
                 int x, int y, int w, int h, uint8_t val, void **scratch);
 void glDownloadTex(GL *gl, GLenum target, GLenum format, GLenum type,
                    void *dataptr, int stride);
-void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
-               GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
-               int sx, int sy, int rect_tex, int is_yv12, int flip);
-int loadGPUProgram(GL *gl, GLenum target, char *prog);
 void glCheckError(GL *gl, const char *info);
 mp_image_t *glGetWindowScreenshot(GL *gl);
-
-/** \addtogroup glconversion
- * \{ */
-//! do not use YUV conversion, this should always stay 0
-#define YUV_CONVERSION_NONE 0
-//! use nVidia specific register combiners for YUV conversion
-//! implementation has been removed
-#define YUV_CONVERSION_COMBINERS 1
-//! use a fragment program for YUV conversion
-#define YUV_CONVERSION_FRAGMENT 2
-//! use a fragment program for YUV conversion with gamma using POW
-#define YUV_CONVERSION_FRAGMENT_POW 3
-//! use a fragment program with additional table lookup for YUV conversion
-#define YUV_CONVERSION_FRAGMENT_LOOKUP 4
-//! use ATI specific register combiners ("fragment program")
-#define YUV_CONVERSION_COMBINERS_ATI 5
-//! use a fragment program with 3D table lookup for YUV conversion
-#define YUV_CONVERSION_FRAGMENT_LOOKUP3D 6
-//! use ATI specific "text" register combiners ("fragment program")
-#define YUV_CONVERSION_TEXT_FRAGMENT 7
-//! use normal bilinear scaling for textures
-#define YUV_SCALER_BILIN 0
-//! use higher quality bicubic scaling for textures
-#define YUV_SCALER_BICUB 1
-//! use cubic scaling in X and normal linear scaling in Y direction
-#define YUV_SCALER_BICUB_X 2
-//! use cubic scaling without additional lookup texture
-#define YUV_SCALER_BICUB_NOTEX 3
-#define YUV_SCALER_UNSHARP 4
-#define YUV_SCALER_UNSHARP2 5
-//! mask for conversion type
-#define YUV_CONVERSION_MASK 0xF
-//! mask for scaler type
-#define YUV_SCALER_MASK 0xF
-//! shift value for luminance scaler type
-#define YUV_LUM_SCALER_SHIFT 8
-//! shift value for chrominance scaler type
-#define YUV_CHROM_SCALER_SHIFT 12
-//! extract conversion out of type
-#define YUV_CONVERSION(t) ((t) & YUV_CONVERSION_MASK)
-//! extract luminance scaler out of type
-#define YUV_LUM_SCALER(t) (((t) >> YUV_LUM_SCALER_SHIFT) & YUV_SCALER_MASK)
-//! extract chrominance scaler out of type
-#define YUV_CHROM_SCALER(t) (((t) >> YUV_CHROM_SCALER_SHIFT) & YUV_SCALER_MASK)
-#define SET_YUV_CONVERSION(c)   ((c) & YUV_CONVERSION_MASK)
-#define SET_YUV_LUM_SCALER(s)   (((s) & YUV_SCALER_MASK) << YUV_LUM_SCALER_SHIFT)
-#define SET_YUV_CHROM_SCALER(s) (((s) & YUV_SCALER_MASK) << YUV_CHROM_SCALER_SHIFT)
-//! returns whether the yuv conversion supports large brightness range etc.
-static inline int glYUVLargeRange(int conv)
-{
-    switch (conv) {
-    case YUV_CONVERSION_NONE:
-    case YUV_CONVERSION_COMBINERS_ATI:
-    case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
-    case YUV_CONVERSION_TEXT_FRAGMENT:
-        return 0;
-    }
-    return 1;
-}
-/** \} */
-
-typedef struct {
-    GLenum target;
-    int type;
-    struct mp_csp_params csp_params;
-    int texw;
-    int texh;
-    int chrom_texw;
-    int chrom_texh;
-    float filter_strength;
-    float noise_strength;
-} gl_conversion_params_t;
-
-int glAutodetectYUVConversion(GL *gl);
-void glSetupYUVConversion(GL *gl, gl_conversion_params_t *params);
-void glEnableYUVConversion(GL *gl, GLenum target, int type);
-void glDisableYUVConversion(GL *gl, GLenum target, int type);
 
 #define GL_3D_RED_CYAN        1
 #define GL_3D_GREEN_MAGENTA   2
