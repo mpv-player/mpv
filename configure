@@ -355,7 +355,6 @@ Video output:
   --enable-vm              enable XF86VidMode support [autodetect]
   --enable-xinerama        enable Xinerama support [autodetect]
   --enable-x11             enable X11 video output [autodetect]
-  --enable-xshape          enable XShape support [autodetect]
   --disable-xss            disable screensaver support via xss [autodetect]
   --disable-corevideo      disable CoreVideo video output [autodetect]
   --disable-cocoa          disable Cocoa OpenGL backend [autodetect]
@@ -419,7 +418,6 @@ _prefix="/usr/local"
 ffmpeg=auto
 _encoding=yes
 _x11=auto
-_xshape=auto
 _xss=auto
 _xv=auto
 _vdpau=auto
@@ -589,8 +587,6 @@ for ac_option do
   --disable-encoding)   _encoding=no    ;;
   --enable-x11)         _x11=yes        ;;
   --disable-x11)        _x11=no         ;;
-  --enable-xshape)      _xshape=yes     ;;
-  --disable-xshape)     _xshape=no      ;;
   --enable-xss)         _xss=yes        ;;
   --disable-xss)        _xss=no         ;;
   --enable-xv)          _xv=yes         ;;
