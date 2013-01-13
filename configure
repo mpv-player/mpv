@@ -1630,25 +1630,6 @@ fi
 echores "$_strsep"
 
 
-echocheck "vsscanf()"
-cat > $TMPC << EOF
-#define _ISOC99_SOURCE
-#include <stdarg.h>
-#include <stdio.h>
-int main(void) { va_list ap; vsscanf("foo", "bar", ap); return 0; }
-EOF
-_vsscanf=no
-cc_check && _vsscanf=yes
-if test "$_vsscanf" = yes ; then
-  def_vsscanf='#define HAVE_VSSCANF 1'
-  need_vsscanf=no
-else
-  def_vsscanf='#undef HAVE_VSSCANF'
-  need_vsscanf=yes
-fi
-echores "$_vsscanf"
-
-
 echocheck "POSIX select()"
 cat > $TMPC << EOF
 #include <stdio.h>
@@ -3144,7 +3125,6 @@ NEED_GETTIMEOFDAY = $need_gettimeofday
 NEED_GLOB         = $need_glob
 NEED_SHMEM        = $need_shmem
 NEED_STRSEP       = $need_strsep
-NEED_VSSCANF      = $need_vsscanf
 
 # features
 ALSA = $_alsa
@@ -3286,7 +3266,6 @@ $def_sysi86
 $def_sysi86_iv
 $def_termcap
 $def_termios
-$def_vsscanf
 
 
 /* system-specific features */

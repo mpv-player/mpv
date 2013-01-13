@@ -58,7 +58,6 @@ SOURCES-$(NEED_GLOB)            += osdep/glob-win.c
 SOURCES-$(NEED_SETENV)          += osdep/setenv.c
 SOURCES-$(NEED_SHMEM)           += osdep/shmem.c
 SOURCES-$(NEED_STRSEP)          += osdep/strsep.c
-SOURCES-$(NEED_VSSCANF)         += osdep/vsscanf.c
 SOURCES-$(NETWORKING)           += stream/stream_netstream.c \
                                    stream/asf_mmst_streaming.c \
                                    stream/asf_streaming.c \
