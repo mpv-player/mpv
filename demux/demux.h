@@ -32,7 +32,7 @@
 
 struct MPOpts;
 
-#ifdef HAVE_BUILTIN_EXPECT
+#if (__GNUC__ >= 3)
 #define likely(x) __builtin_expect((x) != 0, 1)
 #define unlikely(x) __builtin_expect((x) != 0, 0)
 #else

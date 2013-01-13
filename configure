@@ -1246,25 +1246,6 @@ fi
 echores "$_gettext"
 
 
-echocheck "__builtin_expect"
-# GCC branch prediction hint
-cat > $TMPC << EOF
-static int foo(int a) {
-    a = __builtin_expect(a, 10);
-    return a == 10 ? 0 : 1;
-}
-int main(void) { return foo(10) && foo(0); }
-EOF
-_builtin_expect=no
-cc_check && _builtin_expect=yes
-if test "$_builtin_expect" = yes ; then
-  def_builtin_expect='#define HAVE_BUILTIN_EXPECT 1'
-else
-  def_builtin_expect='#undef HAVE_BUILTIN_EXPECT'
-fi
-echores "$_builtin_expect"
-
-
 echocheck "mkstemp"
 _mkstemp=no
 define_statement_check "_XOPEN_SOURCE 600" "stdlib.h" 'mkstemp("")' && _mkstemp=yes
@@ -3324,7 +3305,6 @@ $def_vsscanf
 
 /* system-specific features */
 $def_asmalign_pot
-$def_builtin_expect
 $def_dl
 $def_dos_paths
 $def_iconv
