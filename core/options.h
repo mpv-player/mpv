@@ -142,7 +142,6 @@ typedef struct MPOpts {
         int skip_top;
         int skip_bottom;
         int fast;
-        char *lowres_str;
         char *skip_loop_filter_str;
         char *skip_idct_str;
         char *skip_frame_str;

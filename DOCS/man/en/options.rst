@@ -989,19 +989,6 @@
         For best decoding quality use the same IDCT algorithm for decoding and
         encoding. This may come at a price in accuracy, though.
 
-    lowres=<number>[,<w>]
-        Decode at lower resolutions. Low resolution decoding is not supported
-        by all codecs, and it will often result in ugly artifacts. This is not
-        a bug, but a side effect of not decoding at full resolution.
-
-        :0: disabled
-        :1: 1/2 resolution
-        :2: 1/4 resolution
-        :3: 1/8 resolution
-
-        If <w> is specified lowres decoding will be used only if the width of
-        the video is major than or equal to <w>.
-
     o=<key>=<value>[,<key>=<value>[,...]]
         Pass AVOptions to libavcodec decoder. Note, a patch to make the o=
         unneeded and pass all unknown options through the AVOption system is

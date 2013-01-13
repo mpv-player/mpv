@@ -90,7 +90,6 @@ const m_option_t lavc_decode_opts_conf[] = {
     OPT_INTRANGE("st", lavc_param.skip_top, 0, 0, 999),
     OPT_INTRANGE("sb", lavc_param.skip_bottom, 0, 0, 999),
     OPT_FLAG_CONSTANTS("fast", lavc_param.fast, 0, 0, CODEC_FLAG2_FAST),
-    OPT_STRING("lowres", lavc_param.lowres_str, 0),
     OPT_STRING("skiploopfilter", lavc_param.skip_loop_filter_str, 0),
     OPT_STRING("skipidct", lavc_param.skip_idct_str, 0),
     OPT_STRING("skipframe", lavc_param.skip_frame_str, 0),
@@ -184,8 +183,8 @@ static void print_vstats(sh_video_t *sh, int len)
     // average MB quantizer
     {
         int x, y;
-        int w = ((avctx->width << avctx->lowres) + 15) >> 4;
-        int h = ((avctx->height << avctx->lowres) + 15) >> 4;
+        int w = ((avctx->width) + 15) >> 4;
+        int h = ((avctx->height) + 15) >> 4;
         int8_t *q = pic->qscale_table;
         for (y = 0; y < h; y++) {
             for (x = 0; x < w; x++)
@@ -365,14 +364,6 @@ static int init_avctx(sh_video_t *sh, AVCodec *lavc_codec, struct hwdec *hwdec)
     avctx->debug_mv = lavc_param->vismv;
     avctx->skip_top   = lavc_param->skip_top;
     avctx->skip_bottom = lavc_param->skip_bottom;
-    if (lavc_param->lowres_str != NULL) {
-        int lowres, lowres_w;
-        sscanf(lavc_param->lowres_str, "%d,%d", &lowres, &lowres_w);
-        if (lowres < 1 || lowres > 16 ||
-                lowres_w > 0 && avctx->width < lowres_w)
-            lowres = 0;
-        avctx->lowres = lowres;
-    }
     avctx->skip_loop_filter = str2AVDiscard(lavc_param->skip_loop_filter_str);
     avctx->skip_idct = str2AVDiscard(lavc_param->skip_idct_str);
     avctx->skip_frame = str2AVDiscard(lavc_param->skip_frame_str);
