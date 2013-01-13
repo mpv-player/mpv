@@ -1041,8 +1041,6 @@
         :2: Visualize forward predicted MVs of B-frames.
         :4: Visualize backward predicted MVs of B-frames.
 
-    vstats
-        Prints some statistics and stores them in ``./vstats_*.log``.
 
 --lavfdopts=<option1:option2:...>
     Specify parameters for libavformat demuxers (``--demuxer=lavf``). Separate

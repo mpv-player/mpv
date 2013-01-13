@@ -84,7 +84,6 @@ const m_option_t lavc_decode_opts_conf[] = {
     OPT_FLAG_ON("gray", lavc_param.gray, 0),
     OPT_INTRANGE("idct", lavc_param.idct_algo, 0, 0, 99),
     OPT_INTRANGE("ec", lavc_param.error_concealment, 0, 0, 99),
-    OPT_FLAG_ON("vstats", lavc_param.vstats, 0),
     OPT_INTRANGE("debug", lavc_param.debug, 0, 0, 9999999),
     OPT_INTRANGE("vismv", lavc_param.vismv, 0, 0, 9999999),
     OPT_INTRANGE("st", lavc_param.skip_top, 0, 0, 999),
@@ -141,87 +140,6 @@ static struct hwdec *find_hwcodec(enum hwdec_type api, const char *codec)
             return (struct hwdec *)&hwdec[n];
     }
     return NULL;
-}
-
-// print debugging stats into a file
-static void print_vstats(sh_video_t *sh, int len)
-{
-    vd_ffmpeg_ctx *ctx = sh->context;
-    AVCodecContext *avctx = ctx->avctx;
-    struct lavc_param *lavc_param = &sh->opts->lavc_param;
-
-    if (!lavc_param->vstats)
-        return;
-
-    static FILE *fvstats = NULL;
-    char filename[20];
-    static long long int all_len = 0;
-    static int frame_number = 0;
-    static double all_frametime = 0.0;
-    AVFrame *pic = avctx->coded_frame;
-    double quality = 0.0;
-
-    if (!pic)
-        return;
-
-    if (!fvstats) {
-        time_t today2;
-        struct tm *today;
-        today2 = time(NULL);
-        today = localtime(&today2);
-        sprintf(filename, "vstats_%02d%02d%02d.log", today->tm_hour,
-                today->tm_min, today->tm_sec);
-        fvstats = fopen(filename, "w");
-        if (!fvstats) {
-            perror("fopen");
-            lavc_param->vstats = 0; // disable block
-            return;
-            /*exit(1);*/
-        }
-    }
-
-    // average MB quantizer
-    {
-        int x, y;
-        int w = ((avctx->width) + 15) >> 4;
-        int h = ((avctx->height) + 15) >> 4;
-        int8_t *q = pic->qscale_table;
-        for (y = 0; y < h; y++) {
-            for (x = 0; x < w; x++)
-                quality += (double)*(q + x);
-            q += pic->qstride;
-        }
-        quality /= w * h;
-    }
-
-    all_len += len;
-    all_frametime += sh->frametime;
-    fprintf(fvstats, "frame= %5d q= %2.2f f_size= %6d s_size= %8.0fkB ",
-            ++frame_number, quality, len, (double)all_len / 1024);
-    fprintf(fvstats, "time= %0.3f br= %7.1fkbits/s avg_br= %7.1fkbits/s ",
-            all_frametime, (double)(len * 8) / sh->frametime / 1000.0,
-            (double)(all_len * 8) / all_frametime / 1000.0);
-    switch (pic->pict_type) {
-    case AV_PICTURE_TYPE_I:
-        fprintf(fvstats, "type= I\n");
-        break;
-    case AV_PICTURE_TYPE_P:
-        fprintf(fvstats, "type= P\n");
-        break;
-    case AV_PICTURE_TYPE_S:
-        fprintf(fvstats, "type= S\n");
-        break;
-    case AV_PICTURE_TYPE_B:
-        fprintf(fvstats, "type= B\n");
-        break;
-    default:
-        fprintf(fvstats, "type= ? (%d)\n", pic->pict_type);
-        break;
-    }
-
-    ctx->qp_stat[(int)(quality + 0.5)]++;
-    ctx->qp_sum += quality;
-    ctx->inv_qp_sum += 1.0 / (double)quality;
 }
 
 static enum AVDiscard str2AVDiscard(char *str)
@@ -478,16 +396,6 @@ static void uninit(sh_video_t *sh)
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
 
-    if (avctx && sh->opts->lavc_param.vstats && avctx->coded_frame) {
-        for (int i = 1; i < 32; i++)
-            mp_msg(MSGT_DECVIDEO, MSGL_INFO,
-                   "QP: %d, count: %d\n", i, ctx->qp_stat[i]);
-        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[VD_FFMPEG] Arithmetic mean of QP: "
-            "%2.4f, Harmonic mean of QP: %2.4f\n",
-            ctx->qp_sum / avctx->coded_frame->coded_picture_number,
-            1.0 / (ctx->inv_qp_sum / avctx->coded_frame->coded_picture_number));
-    }
-
     uninit_avctx(sh);
     talloc_free(ctx);
 }
@@ -681,8 +589,6 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
         return -1;
     }
     *reordered_pts = (union pts){.i = pic->reordered_opaque}.d;
-
-    print_vstats(sh, len);
 
     if (!got_picture)
         return 0;                     // skipped image

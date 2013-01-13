@@ -135,7 +135,6 @@ typedef struct MPOpts {
         int error_resilience;
         int error_concealment;
         int gray;
-        int vstats;
         int idct_algo;
         int debug;
         int vismv;
