@@ -1232,17 +1232,6 @@ fi
 echores "$_gettext"
 
 
-echocheck "mkstemp"
-_mkstemp=no
-define_statement_check "_XOPEN_SOURCE 600" "stdlib.h" 'mkstemp("")' && _mkstemp=yes
-if test "$_mkstemp" = yes ; then
-  def_mkstemp='#define HAVE_MKSTEMP 1'
-else
-  def_mkstemp='#define HAVE_MKSTEMP 0'
-fi
-echores "$_mkstemp"
-
-
 echocheck "nanosleep"
 _nanosleep=no
 statement_check time.h 'nanosleep(0, 0)' && _nanosleep=yes
@@ -3378,7 +3367,6 @@ $def_xv
 $def_encoding
 
 $def_fast_64bit
-$def_mkstemp
 $def_pthreads
 $def_threads
 $def_xform_asm
