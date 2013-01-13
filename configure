@@ -1656,19 +1656,6 @@ fi
 echores "$_select"
 
 
-echocheck "gettimeofday()"
-_gettimeofday=no
-statement_check sys/time.h 'struct timeval tv; struct timezone tz; gettimeofday(&tv, &tz)' && _gettimeofday=yes
-if test "$_gettimeofday" = yes ; then
-  def_gettimeofday='#define HAVE_GETTIMEOFDAY 1'
-  need_gettimeofday=no
-else
-  def_gettimeofday='#undef HAVE_GETTIMEOFDAY'
-  need_gettimeofday=yes
-fi
-echores "$_gettimeofday"
-
-
 echocheck "glob()"
 _glob=no
 statement_check glob.h 'glob("filename", 0, 0, 0)' && _glob=yes
@@ -3121,7 +3108,6 @@ ARCH = $arch
 $(mak_enable "$arch_all"    "$arch"    ARCH)
 $(mak_enable "$subarch_all" "$subarch" ARCH)
 
-NEED_GETTIMEOFDAY = $need_gettimeofday
 NEED_GLOB         = $need_glob
 NEED_SHMEM        = $need_shmem
 NEED_STRSEP       = $need_strsep
@@ -3254,7 +3240,6 @@ $def_winsock2_h
 
 /* system functions */
 $def_gethostbyname2
-$def_gettimeofday
 $def_glob
 $def_nanosleep
 $def_posix_select
