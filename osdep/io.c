@@ -87,7 +87,7 @@ void mp_get_converted_argv(int *argc, char ***argv)
 int mp_stat(const char *path, struct stat *buf)
 {
     wchar_t *wpath = mp_from_utf8(NULL, path);
-    int res = _wstat64(wpath, buf);
+    int res = _wstati64(wpath, buf);
     talloc_free(wpath);
     return res;
 }
