@@ -425,7 +425,6 @@ _direct3d=auto
 _sdl=auto
 _sdl2=auto
 _dsound=auto
-_nas=auto
 _mng=auto
 _jpeg=auto
 _gl=auto
@@ -1451,9 +1450,9 @@ if test "$_pthreads" = yes ; then
   def_threads='#define HAVE_THREADS 1'
   extra_cflags="$extra_cflags $THREAD_CFLAGS"
 else
-  res_comment="v4l2, ao_nas, win32 loader disabled"
+  res_comment="v4l2 disabled"
   def_pthreads='#undef HAVE_PTHREADS'
-  _nas=no ; _tv_v4l2=no
+  _tv_v4l2=no
 fi
 echores "$_pthreads"
 
@@ -3285,7 +3284,6 @@ $def_libavfilter
 $def_alsa
 $def_coreaudio
 $def_jack
-$def_nas
 $def_openal
 $def_openal_h
 $def_ossaudio
