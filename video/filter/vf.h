@@ -43,7 +43,7 @@ typedef struct vf_info {
 
 struct vf_format {
     int configured;
-    int w, h, fmt;
+    int w, h, dw, dh, flags, fmt;
 };
 
 typedef struct vf_instance {
@@ -140,6 +140,7 @@ void vf_uninit_filter_chain(vf_instance_t *vf);
 int vf_config_wrapper(struct vf_instance *vf,
                       int width, int height, int d_width, int d_height,
                       unsigned int flags, unsigned int outfmt);
+void vf_print_filter_chain(int msglevel, struct vf_instance *vf);
 
 void vf_rescale_dsize(struct vf_instance *vf, int *d_width, int *d_height,
                       int old_w, int old_h, int new_w, int new_h);

@@ -151,6 +151,35 @@ static struct mp_image *vf_default_filter(struct vf_instance *vf,
     return mpi;
 }
 
+static void print_fmt(int msglevel, struct vf_format *fmt)
+{
+    if (fmt && fmt->configured) {
+        mp_msg(MSGT_VFILTER, msglevel, "%dx%d", fmt->w, fmt->h);
+        if (fmt->w != fmt->dw || fmt->h != fmt->dh)
+            mp_msg(MSGT_VFILTER, msglevel, "->%dx%d", fmt->dw, fmt->dh);
+        mp_msg(MSGT_VFILTER, msglevel, " %s %#x", mp_imgfmt_to_name(fmt->fmt),
+               fmt->flags);
+    } else {
+        mp_msg(MSGT_VFILTER, msglevel, "???");
+    }
+}
+
+void vf_print_filter_chain(int msglevel, struct vf_instance *vf)
+{
+    if (!mp_msg_test(MSGT_VFILTER, msglevel))
+        return;
+
+    for (vf_instance_t *f = vf; f; f = f->next) {
+        mp_msg(MSGT_VFILTER, msglevel, " [%s] ", f->info->name);
+        print_fmt(msglevel, &f->fmt_in);
+        if (f->next) {
+            mp_msg(MSGT_VFILTER, msglevel, " -> ");
+            print_fmt(msglevel, &f->fmt_out);
+        }
+        mp_msg(MSGT_VFILTER, msglevel, "\n");
+    }
+}
+
 struct vf_instance *vf_open_plugin_noerr(struct MPOpts *opts,
                                          const vf_info_t *const *filter_list,
                                          vf_instance_t *next, const char *name,
@@ -385,8 +414,9 @@ int vf_config_wrapper(struct vf_instance *vf,
     if (r) {
         vf->fmt_in = (struct vf_format) {
             .configured = 1,
-            .w = width,
-            .h = height,
+            .w = width,    .h = height,
+            .dw = d_width, .dh = d_height,
+            .flags = flags,
             .fmt = outfmt,
         };
         vf->fmt_out = vf->next ? vf->next->fmt_in : (struct vf_format){0};

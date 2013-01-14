@@ -83,12 +83,8 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
 
     // check if libvo and codec has common outfmt (no conversion):
     for (;;) {
-        if (mp_msg_test(MSGT_DECVIDEO, MSGL_V)) {
-            mp_msg(MSGT_DECVIDEO, MSGL_V, "Trying filter chain:");
-            for (vf_instance_t *f = vf; f; f = f->next)
-                mp_msg(MSGT_DECVIDEO, MSGL_V, " %s", f->info->name);
-            mp_msg(MSGT_DECVIDEO, MSGL_V, "\n");
-        }
+        mp_msg(MSGT_VFILTER, MSGL_V, "Trying filter chain:\n");
+        vf_print_filter_chain(MSGL_V, vf);
 
         int flags = vf->query_format(vf, out_fmt);
         mp_msg(MSGT_CPLAYER, MSGL_DBG2, "vo_debug: query(%s) returned 0x%X \n",
@@ -108,7 +104,9 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
         mp_tmsg(MSGT_CPLAYER, MSGL_WARN,
             "The selected video_out device is incompatible with this codec.\n"\
             "Try appending the scale filter to your filter list,\n"\
-            "e.g. -vf spp,scale instead of -vf spp.\n");
+            "e.g. -vf filter,scale instead of -vf filter.\n");
+        mp_tmsg(MSGT_VFILTER, MSGL_WARN, "Attempted filter chain:\n");
+        vf_print_filter_chain(MSGL_WARN, vf);
         sh->vf_initialized = -1;
         return 0;               // failed
     }
@@ -197,6 +195,9 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
         sh->vf_initialized = -1;
         return 0;
     }
+
+    mp_tmsg(MSGT_VFILTER, MSGL_V, "Video filter chain:\n");
+    vf_print_filter_chain(MSGL_V, vf);
 
     sh->vf_initialized = 1;
 
