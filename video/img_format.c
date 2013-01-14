@@ -203,7 +203,14 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
     if (desc.num_planes == pd->nb_components)
         desc.flags |= MP_IMGFLAG_PLANAR;
 
-    if (desc.flags & MP_IMGFLAG_YUV) {
+    if (!(pd->flags & PIX_FMT_HWACCEL) && !(pd->flags & PIX_FMT_BITSTREAM)) {
+        desc.flags |= MP_IMGFLAG_BYTE_ALIGNED;
+        for (int p = 0; p < desc.num_planes; p++)
+            desc.bytes[p] = desc.bpp[p] / 8;
+    }
+
+    if ((desc.flags & MP_IMGFLAG_YUV) && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED))
+    {
         bool same_depth = true;
         for (int p = 0; p < desc.num_planes; p++) {
             same_depth &= planedepth[p] == planedepth[0] &&
@@ -211,12 +218,6 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
         }
         if (same_depth && pd->nb_components == desc.num_planes)
             desc.flags |= MP_IMGFLAG_YUV_P;
-    }
-
-    if (!(pd->flags & PIX_FMT_HWACCEL) && !(pd->flags & PIX_FMT_BITSTREAM)) {
-        desc.flags |= MP_IMGFLAG_BYTE_ALIGNED;
-        for (int p = 0; p < desc.num_planes; p++)
-            desc.bytes[p] = desc.bpp[p] / 8;
     }
 
     for (int p = 0; p < desc.num_planes; p++) {
