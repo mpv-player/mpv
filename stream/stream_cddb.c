@@ -857,7 +857,6 @@ cd_info_t *cddb_parse_xmcd(char *xmcd_file)
     cd_info_t *cd_info = NULL;
     int length, pos = 0;
     char *ptr, *ptr2;
-    unsigned int audiolen;
     if (xmcd_file == NULL)
         return NULL;
 
@@ -887,7 +886,7 @@ cd_info_t *cddb_parse_xmcd(char *xmcd_file)
                 ;
             // Search for a track title
             else if (xmcd_parse_ttitle(cd_info, ptr))
-                audiolen++;    // <-- audiolen++ to shut up gcc warning
+                ;
         }
         if (ptr2[1] == '\n')
             ptr2++;
@@ -895,7 +894,7 @@ cd_info_t *cddb_parse_xmcd(char *xmcd_file)
         ptr = ptr2 + 1;
     }
 
-    audiolen = cdtoc[cd_info->nb_tracks].frame-cdtoc[0].frame;
+    unsigned int audiolen = cdtoc[cd_info->nb_tracks].frame-cdtoc[0].frame;
     cd_info->min  = (unsigned int)  (audiolen / (60 * 75));
     cd_info->sec  = (unsigned int) ((audiolen / 75) % 60);
     cd_info->msec = (unsigned int)  (audiolen % 75);

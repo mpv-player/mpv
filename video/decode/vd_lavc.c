@@ -394,7 +394,6 @@ static void uninit_avctx(sh_video_t *sh)
 static void uninit(sh_video_t *sh)
 {
     vd_ffmpeg_ctx *ctx = sh->context;
-    AVCodecContext *avctx = ctx->avctx;
 
     uninit_avctx(sh);
     talloc_free(ctx);
