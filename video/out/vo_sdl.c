@@ -770,11 +770,6 @@ static int preinit(struct vo *vo, const char *arg)
         return -1;
     }
 
-    // work around broken XVidMode support for now (TODO regularily test
-    // whether this is still necessary)
-    SDL_SetHintWithPriority(SDL_HINT_VIDEO_X11_XVIDMODE, "0",
-                            SDL_HINT_DEFAULT);
-
     // predefine SDL defaults (SDL env vars shall override)
     SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1",
                             SDL_HINT_DEFAULT);
