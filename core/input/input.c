@@ -1515,7 +1515,7 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
     ictx->got_new_events = true;
     if (!cmd)
         return 0;
-    queue_add(&ictx->control_cmd_queue, cmd, true);
+    queue_add(&ictx->control_cmd_queue, cmd, false);
     return 1;
 }
 
