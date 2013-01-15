@@ -1679,6 +1679,7 @@ echocheck "Mac OS X Bundle file locations"
 def_macosx_bundle='#undef CONFIG_MACOSX_BUNDLE'
 test "$_macosx_bundle" = auto && _macosx_bundle=$_macosx_finder
 if test "$_macosx_bundle" = yes ; then
+  extra_ldflags="$extra_ldflags -headerpad_max_install_names"
   def_macosx_bundle='#define CONFIG_MACOSX_BUNDLE 1'
 fi
 echores "$_macosx_bundle"
