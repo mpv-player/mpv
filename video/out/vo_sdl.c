@@ -375,16 +375,15 @@ static void set_fullscreen(struct vo *vo, int fs)
     struct priv *vc = vo->priv;
     struct MPOpts *opts = vo->opts;
 
-    if (opts->vidmode)
-        SDL_SetWindowDisplayMode(vc->window, NULL);
-    else {
-        SDL_DisplayMode mode;
-        if (!SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(vc->window),
-                                       &mode))
-            SDL_SetWindowDisplayMode(vc->window, &mode);
+    Uint32 fs_flags = 0;
+    if (fs) {
+        if (opts->vidmode)
+            fs_flags |= SDL_WINDOW_FULLSCREEN;
+        else
+            fs_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
     }
 
-    if (SDL_SetWindowFullscreen(vc->window, fs)) {
+    if (SDL_SetWindowFullscreen(vc->window, fs_flags)) {
         mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_SetWindowFullscreen failed\n");
         return;
     }
