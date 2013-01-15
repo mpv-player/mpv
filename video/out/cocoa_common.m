@@ -767,6 +767,26 @@ void create_menu()
     }
 }
 
+- (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames
+{
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSArray *sorted_filenames = [filenames
+        sortedArrayUsingSelector:@selector(compare:)];
+
+    for (int i = 0; i < [sorted_filenames count]; i++) {
+        NSString *filename = [sorted_filenames objectAtIndex:i];
+        NSString *escaped_filename = escape_loadfile_name(filename);
+
+        char *cmd = talloc_asprintf(NULL, "loadfile \"%s\"%s",
+                                    [escaped_filename UTF8String],
+                                    (i == 0) ? "" : " append");
+        mp_input_queue_cmd(_vo->input_ctx, mp_input_parse_cmd(bstr0(cmd), ""));
+        talloc_free(cmd);
+    }
+
+    [pool release];
+}
+
 - (void)applicationWillBecomeActive:(NSNotification *)aNotification
 {
     if (vo_fs && current_screen_has_dock_or_menubar(_vo)) {
