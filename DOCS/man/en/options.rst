@@ -2026,9 +2026,8 @@
 
     outfmt=<value>
         Specify the output format of the tuner with a preset value supported
-        by the V4L driver (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2, i420)
-        or an arbitrary format given as hex value. Try outfmt=help for a list
-        of all available formats.
+        by the V4L driver (YV12, UYVY, YUY2, I420)
+        or an arbitrary format given as hex value.
 
     width=<value>
         output window width

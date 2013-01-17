@@ -214,36 +214,36 @@ dsize[=aspect|w:h:aspect-method:r]
     <r>
         Rounds up to make both width and height divisible by <r> (default: 1).
 
-format[=fourcc[:outfourcc]]
+format[=fmt[:outfmt]]
     Restricts the colorspace for the next filter without doing any conversion.
     Use together with the scale filter for a real conversion.
 
     *NOTE*: For a list of available formats see ``format=fmt=help``.
 
-    <fourcc>
-        format name like rgb15, bgr24, yv12, etc (default: yuy2)
-    <outfourcc>
+    <fmt>
+        format name like rgb15, bgr24, 420p, etc (default: yuyv)
+    <outfmt>
         Format name that should be substituted for the output. If this is not
-        100% compatible with the <fourcc> value it will crash.
+        100% compatible with the <fmt> value it will crash.
 
         *EXAMPLE*
 
         ====================== =====================
         Valid                  Invalid (will crash)
         ====================== =====================
-        ``format=rgb24:bgr24`` ``format=rgb24:yv12``
-        ``format=yuyv:yuy2``
+        ``format=rgb24:bgr24`` ``format=rgb24:420p``
+        ``format=yuyv:uyvy``
         ====================== =====================
 
-noformat[=fourcc]
+noformat[=fmt]
     Restricts the colorspace for the next filter without doing any conversion.
     Unlike the format filter, this will allow any colorspace except the one
     you specify.
 
     *NOTE*: For a list of available formats see ``noformat=fmt=help``.
 
-    <fourcc>
-        format name like rgb15, bgr24, yv12, etc (default: yv12)
+    <fmt>
+        format name like rgb15, bgr24, 420p, etc (default: 420p)
 
 pp[=filter1[:option1[:option2...]]/[-]filter2...]
     Enables the specified chain of postprocessing subfilters. Subfilters must
