@@ -46,7 +46,6 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     FMT("422p",                 IMGFMT_422P)
     FMT("440p",                 IMGFMT_440P)
     FMT("420p",                 IMGFMT_420P)
-    FMT("yv12",                 IMGFMT_420P) // old alias for UI
     FMT("411p",                 IMGFMT_411P)
     FMT("410p",                 IMGFMT_410P)
     FMT_ENDIAN("444p16",        IMGFMT_444P16)
@@ -122,14 +121,23 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
 
 unsigned int mp_imgfmt_from_name(bstr name, bool allow_hwaccel)
 {
+    int img_fmt = 0;
     for(struct mp_imgfmt_entry *p = mp_imgfmt_list; p->name; ++p) {
-        if(!bstrcasecmp0(name, p->name)) {
-            if (!allow_hwaccel && IMGFMT_IS_HWACCEL(p->fmt))
-                return 0;
-            return p->fmt;
+        if(bstr_equals0(name, p->name)) {
+            img_fmt = p->fmt;
+            break;
         }
     }
-    return 0;
+    if (!img_fmt) {
+        char *t = bstrdup0(NULL, name);
+        img_fmt = pixfmt2imgfmt(av_get_pix_fmt(t));
+        talloc_free(t);
+    }
+    if (!img_fmt && bstr_equals0(name, "yv12"))
+        img_fmt = IMGFMT_420P; // old alias for UI
+    if (!allow_hwaccel && IMGFMT_IS_HWACCEL(img_fmt))
+        return 0;
+    return img_fmt;
 }
 
 const char *mp_imgfmt_to_name(unsigned int fmt)

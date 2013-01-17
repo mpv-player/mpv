@@ -175,6 +175,9 @@ static const struct {
 
 enum PixelFormat imgfmt2pixfmt(int fmt)
 {
+    if (fmt == IMGFMT_NONE)
+        return PIX_FMT_NONE;
+
     int i;
     enum PixelFormat pix_fmt;
     for (i = 0; conversion_map[i].fmt; i++)
@@ -188,6 +191,9 @@ enum PixelFormat imgfmt2pixfmt(int fmt)
 
 int pixfmt2imgfmt(enum PixelFormat pix_fmt)
 {
+    if (pix_fmt == PIX_FMT_NONE)
+        return IMGFMT_NONE;
+
     int i;
     for (i = 0; conversion_map[i].pix_fmt != PIX_FMT_NONE; i++)
         if (conversion_map[i].pix_fmt == pix_fmt)
