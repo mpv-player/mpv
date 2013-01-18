@@ -2287,7 +2287,8 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
              * implementation would require draining buffered old-format audio
              * while displaying video, then doing the output format switch.
              */
-            uninit_player(mpctx, INITIALIZED_AO);
+            if (!mpctx->opts.gapless_audio)
+                uninit_player(mpctx, INITIALIZED_AO);
             reinit_audio_chain(mpctx);
             return -1;
         } else if (res == ASYNC_PLAY_DONE)
