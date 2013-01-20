@@ -1104,7 +1104,7 @@ static int play(void* output_samples,int num_bytes,int flags)
     audio_resume();
 
     do {
-        exit_reason = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.01, true);
+        exit_reason = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
     } while (exit_reason == kCFRunLoopRunHandledSource);
 
     return wrote;
