@@ -472,7 +472,7 @@ static void vo_cocoa_display_cursor(struct vo *vo, int requested_state)
 int vo_cocoa_check_events(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    NSEvent *event;
+
     int ms_time = (int) ([[NSProcessInfo processInfo] systemUptime] * 1000);
 
     // automatically hide mouse cursor
@@ -482,26 +482,31 @@ int vo_cocoa_check_events(struct vo *vo)
         s->cursor_timer = ms_time;
     }
 
-    event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil
-                   inMode:NSEventTrackingRunLoopMode dequeue:YES];
-    if (event == nil)
-        return 0;
-    [NSApp sendEvent:event];
+    int result = 0;
 
-    if (s->did_resize) {
-        s->did_resize = NO;
-        resize_window(vo);
-        return VO_EVENT_RESIZE;
+    for (;;) {
+        NSEvent* event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:nil
+                       inMode:NSEventTrackingRunLoopMode dequeue:YES];
+        if (event == nil)
+            break;
+        [NSApp sendEvent:event];
+
+        if (s->did_resize) {
+            s->did_resize = NO;
+            resize_window(vo);
+            result |= VO_EVENT_RESIZE;
+        }
+        // Without SDL's bootstrap code (include SDL.h in mplayer.c),
+        // on Leopard, we have trouble to get the play window automatically focused
+        // when the app is actived. The Following code fix this problem.
+        if ([event type] == NSAppKitDefined
+                && [event subtype] == NSApplicationActivatedEventType) {
+            [s->window makeMainWindow];
+            [s->window makeKeyAndOrderFront:nil];
+        }
     }
-    // Without SDL's bootstrap code (include SDL.h in mplayer.c),
-    // on Leopard, we have trouble to get the play window automatically focused
-    // when the app is actived. The Following code fix this problem.
-    if ([event type] == NSAppKitDefined
-            && [event subtype] == NSApplicationActivatedEventType) {
-        [s->window makeMainWindow];
-        [s->window makeKeyAndOrderFront:nil];
-    }
-    return 0;
+
+    return result;
 }
 
 void vo_cocoa_fullscreen(struct vo *vo)
