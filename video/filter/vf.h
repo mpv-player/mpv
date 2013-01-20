@@ -86,6 +86,7 @@ typedef struct vf_seteq {
     int value;
 } vf_equalizer_t;
 
+#define VFCTRL_SEEK_RESET 1 // reset on picture and PTS discontinuities
 #define VFCTRL_QUERY_MAX_PP_LEVEL 4 // query max postprocessing level (if any)
 #define VFCTRL_SET_PP_LEVEL 5       // set postprocessing level
 #define VFCTRL_SET_EQUALIZER 6 // set color options (brightness,contrast etc)
@@ -109,6 +110,7 @@ void vf_add_output_frame(struct vf_instance *vf, struct mp_image *img);
 
 int vf_filter_frame(struct vf_instance *vf, struct mp_image *img);
 struct mp_image *vf_chain_output_queued_frame(struct vf_instance *vf);
+void vf_chain_seek_reset(struct vf_instance *vf);
 
 vf_instance_t *vf_open_plugin(struct MPOpts *opts,
         const vf_info_t * const *filter_list, vf_instance_t *next,

@@ -123,6 +123,16 @@ static int config(struct vf_instance *vf,
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
+static int control(vf_instance_t *vf, int request, void *data)
+{
+    switch (request) {
+    case VFCTRL_SEEK_RESET:
+        vf_detc_init_pts_buf(&vf->priv->ptsbuf);
+        break;
+    }
+    return vf_next_control(vf, request, data);
+}
+
 static void uninit(struct vf_instance *vf)
 {
 	mp_msg(MSGT_VFILTER, MSGL_INFO, "softpulldown: %lld frames in, %lld frames out\n", vf->priv->in, vf->priv->out);
@@ -143,6 +153,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 {
     vf->config = config;
     vf->filter_ext = filter;
+    vf->control = control;
     vf->uninit = uninit;
     vf->query_format = query_format;
     vf->priv = calloc(1, sizeof(struct vf_priv_s));

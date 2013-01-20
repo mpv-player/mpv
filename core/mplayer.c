@@ -2704,6 +2704,8 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
         resync_video_stream(mpctx->sh_video);
         mpctx->sh_video->timer = 0;
         vo_seek_reset(mpctx->video_out);
+        if (mpctx->sh_video->vf_initialized == 1)
+            vf_chain_seek_reset(mpctx->sh_video->vfilter);
         mpctx->sh_video->timer = 0;
         mpctx->sh_video->num_buffered_pts = 0;
         mpctx->sh_video->last_pts = MP_NOPTS_VALUE;

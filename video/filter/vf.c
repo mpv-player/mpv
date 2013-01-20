@@ -401,6 +401,13 @@ static void vf_forget_frames(struct vf_instance *vf)
     vf->num_out_queued = 0;
 }
 
+void vf_chain_seek_reset(struct vf_instance *vf)
+{
+    vf->control(vf, VFCTRL_SEEK_RESET, NULL);
+    for (struct vf_instance *cur = vf; cur; cur = cur->next)
+        vf_forget_frames(cur);
+}
+
 int vf_config_wrapper(struct vf_instance *vf,
                       int width, int height, int d_width, int d_height,
                       unsigned int flags, unsigned int outfmt)

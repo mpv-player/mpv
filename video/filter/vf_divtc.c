@@ -592,6 +592,16 @@ static void uninit(struct vf_instance *vf)
       }
    }
 
+static int control(vf_instance_t *vf, int request, void *data)
+{
+    switch (request) {
+    case VFCTRL_SEEK_RESET:
+        vf_detc_init_pts_buf(&vf->priv->ptsbuf);
+        break;
+    }
+    return vf_next_control(vf, request, data);
+}
+
 static int vf_open(vf_instance_t *vf, char *args)
    {
    struct vf_priv_s *p;
@@ -611,6 +621,7 @@ static int vf_open(vf_instance_t *vf, char *args)
    vf->filter=filter;
    vf->uninit=uninit;
    vf->query_format=query_format;
+   vf->control=control;
    if(!(vf->priv=p=calloc(1, sizeof(struct vf_priv_s))))
       goto nomem;
 
