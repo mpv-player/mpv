@@ -59,6 +59,9 @@
 - (NSRect)convertRectToBacking:(NSRect)aRect;
 - (void)setWantsBestResolutionOpenGLSurface:(BOOL)aBool;
 @end
+@interface NSEvent (IntroducedInLion)
+- (BOOL)hasPreciseScrollingDeltas;
+@end
 #endif
 
 // add power management assertion not available on OSX versions prior to 10.7
@@ -113,6 +116,8 @@ struct vo_cocoa_state {
     bool out_fs_resize;
 
     IOPMAssertionID power_mgmt_assertion;
+
+    CGFloat accumulated_scroll;
 };
 
 static int _instances = 0;
@@ -135,15 +140,27 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .display_cursor = 1,
         .cursor_autohide_delay = vo->opts->cursor_autohide_delay,
         .power_mgmt_assertion = kIOPMNullAssertionID,
+        .accumulated_scroll = 0,
     };
     if (!vo_border) s->windowed_mask = NSBorderlessWindowMask;
     return s;
 }
 
+static bool is_lion_or_above()
+{
+    static bool result = false, checked = false;
+    if(!checked)
+    {
+        result = is_osx_version_at_least(10, 7, 0);
+        checked = true;
+    }
+    return result;
+}
+
 static bool supports_hidpi(NSView *view)
 {
     SEL hdpi_selector = @selector(setWantsBestResolutionOpenGLSurface:);
-    return is_osx_version_at_least(10, 7, 0) && view &&
+    return is_lion_or_above() && view &&
            [view respondsToSelector:hdpi_selector];
 }
 
@@ -738,10 +755,27 @@ void create_menu()
 
 - (void)scrollWheel:(NSEvent *)theEvent
 {
-    if ([theEvent deltaY] > 0)
-        mplayer_put_key(_vo->key_fifo, MOUSE_BTN3);
-    else
-        mplayer_put_key(_vo->key_fifo, MOUSE_BTN4);
+    struct vo_cocoa_state *s = _vo->cocoa;
+    CGFloat delta = [theEvent deltaY] - [theEvent deltaX];
+
+    if (is_lion_or_above() && [theEvent hasPreciseScrollingDeltas]) {
+        s->accumulated_scroll += delta;
+        static const CGFloat threshold = 10;
+        while (s->accumulated_scroll >= threshold) {
+            s->accumulated_scroll -= threshold;
+            mplayer_put_key(_vo->key_fifo, MOUSE_BTN3);
+        }
+        while (s->accumulated_scroll <= -threshold) {
+            s->accumulated_scroll += threshold;
+            mplayer_put_key(_vo->key_fifo, MOUSE_BTN4);
+        }
+    }
+    else {
+        if (delta > 0)
+            mplayer_put_key(_vo->key_fifo, MOUSE_BTN3);
+        else
+            mplayer_put_key(_vo->key_fifo, MOUSE_BTN4);
+    }
 }
 
 - (void)mouseEvent:(NSEvent *)theEvent
