@@ -144,8 +144,8 @@ int vf_config_wrapper(struct vf_instance *vf,
                       unsigned int flags, unsigned int outfmt);
 void vf_print_filter_chain(int msglevel, struct vf_instance *vf);
 
-void vf_rescale_dsize(struct vf_instance *vf, int *d_width, int *d_height,
-                      int old_w, int old_h, int new_w, int new_h);
+void vf_rescale_dsize(int *d_width, int *d_height, int old_w, int old_h,
+                      int new_w, int new_h);
 
 static inline int norm_qscale(int qscale, int type)
 {

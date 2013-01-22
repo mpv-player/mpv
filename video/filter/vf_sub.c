@@ -68,7 +68,7 @@ static int config(struct vf_instance *vf,
     double dar = (double)d_width / d_height;
     double sar = (double)width / height;
 
-    vf_rescale_dsize(vf, &d_width, &d_height, width, height,
+    vf_rescale_dsize(&d_width, &d_height, width, height,
                      vf->priv->outw, vf->priv->outh);
 
     vf->priv->dim = (struct mp_osd_res) {

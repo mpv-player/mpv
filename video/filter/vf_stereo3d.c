@@ -148,8 +148,6 @@ static inline uint8_t ana_convert(int coeff[6], uint8_t left[3], uint8_t right[3
 static int config(struct vf_instance *vf, int width, int height, int d_width,
                   int d_height, unsigned int flags, unsigned int outfmt)
 {
-    struct MPOpts *opts = vf->opts;
-
     if ((width & 1) || (height & 1)) {
         mp_msg(MSGT_VFILTER, MSGL_WARN, "[stereo3d] invalid height or width\n");
         return 0;
@@ -271,10 +269,8 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
         return 0;
         break;
     }
-    if (!opts->screen_size_x && !opts->screen_size_y) {
-        d_width     = d_width  * vf->priv->out.width  / width;
-        d_height    = d_height * vf->priv->out.height / height;
-    }
+    vf_rescale_dsize(&d_width, &d_height, width, height,
+                     vf->priv->out.width, vf->priv->out.height);
     return vf_next_config(vf, vf->priv->out.width, vf->priv->out.height,
                           d_width, d_height, flags, outfmt);
 }

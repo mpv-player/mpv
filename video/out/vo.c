@@ -356,6 +356,63 @@ struct vo *init_best_video_out(struct MPOpts *opts,
     return NULL;
 }
 
+// Set window size (vo->dwidth/dheight) and position (vo->dx/dy) according to
+// the video display size d_w/d_h.
+// NOTE: currently, all GUI backends do their own handling of window geometry
+//       additional to this code. This is to deal with initial window placement,
+//       fullscreen handling, avoiding resize on config() with no size change,
+//       multi-monitor stuff, and possibly more.
+static void determine_window_geometry(struct vo *vo, int d_w, int d_h)
+{
+    struct MPOpts *opts = vo->opts;
+
+    int vid_w = vo->aspdat.orgw;
+    int vid_h = vo->aspdat.orgh;
+
+    if (opts->screen_size_x || opts->screen_size_y) {
+        d_w = opts->screen_size_x;
+        d_h = opts->screen_size_y;
+        if (!opts->vidmode) {
+            if (!d_w)
+                d_w = 1;
+            if (!d_h)
+                d_h = 1;
+            if (d_w <= 8)
+                d_w *= vid_w;
+            if (d_h <= 8)
+                d_h *= vid_h;
+        }
+    }
+
+    // This is only for applying monitor pixel aspect
+    // Store d_w/d_h, because aspect() uses it
+    aspect_save_videores(vo, vid_w, vid_h, d_w, d_h);
+    aspect(vo, &d_w, &d_h, A_NOZOOM);
+
+    if (opts->screen_size_xy >= 0.001) {
+        if (opts->screen_size_xy <= 8) {
+            // -xy means x+y scale
+            d_w *= opts->screen_size_xy;
+            d_h *= opts->screen_size_xy;
+        } else {
+            // -xy means forced width while keeping correct aspect
+            d_h = opts->screen_size_xy * d_h / d_w;
+            d_w = opts->screen_size_xy;
+        }
+    }
+
+    vo->dx = (int)(opts->vo_screenwidth - d_w) / 2;
+    vo->dy = (int)(opts->vo_screenheight - d_h) / 2;
+    geometry(&vo->dx, &vo->dy, &d_w, &d_h,
+             opts->vo_screenwidth, opts->vo_screenheight);
+    geometry_xy_changed |= xinerama_screen >= 0;
+
+    vo->dx += xinerama_x;
+    vo->dy += xinerama_y;
+    vo->dwidth = d_w;
+    vo->dheight = d_h;
+}
+
 static int event_fd_callback(void *ctx, int fd)
 {
     struct vo *vo = ctx;
@@ -367,21 +424,13 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
                      uint32_t format)
 {
-    struct MPOpts *opts = vo->opts;
     panscan_init(vo);
     aspect_save_videores(vo, width, height, d_width, d_height);
 
     if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
-        aspect(vo, &d_width, &d_height, A_NOZOOM);
-        vo->dx = (int)(opts->vo_screenwidth - d_width) / 2;
-        vo->dy = (int)(opts->vo_screenheight - d_height) / 2;
-        geometry(&vo->dx, &vo->dy, &d_width, &d_height,
-                 opts->vo_screenwidth, opts->vo_screenheight);
-        geometry_xy_changed |= xinerama_screen >= 0;
-        vo->dx += xinerama_x;
-        vo->dy += xinerama_y;
-        vo->dwidth = d_width;
-        vo->dheight = d_height;
+        determine_window_geometry(vo, d_width, d_height);
+        d_width = vo->dwidth;
+        d_height = vo->dheight;
     }
 
     vo->default_caps = vo->driver->query_format(vo, format);

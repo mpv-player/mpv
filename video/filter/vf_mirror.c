@@ -34,7 +34,7 @@ static int config(struct vf_instance *vf, int width, int height,
 {
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
     int a_w = MP_ALIGN_DOWN(width, desc.align_x);
-    vf_rescale_dsize(vf, &d_width, &d_height, width, height, a_w, height);
+    vf_rescale_dsize(&d_width, &d_height, width, height, a_w, height);
     return vf_next_config(vf, a_w, height, d_width, d_height, flags, fmt);
 }
 

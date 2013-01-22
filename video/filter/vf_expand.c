@@ -101,7 +101,7 @@ static int config(struct vf_instance *vf,
     vf->priv->exp_x = MP_ALIGN_DOWN(vf->priv->exp_x, fmt.align_x);
     vf->priv->exp_y = MP_ALIGN_DOWN(vf->priv->exp_y, fmt.align_y);
 
-    vf_rescale_dsize(vf, &d_width, &d_height, width, height,
+    vf_rescale_dsize(&d_width, &d_height, width, height,
                      vf->priv->exp_w, vf->priv->exp_h);
 
     return vf_next_config(vf,vf->priv->exp_w,vf->priv->exp_h,d_width,d_height,flags,outfmt);

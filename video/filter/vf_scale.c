@@ -303,9 +303,6 @@ static int config(struct vf_instance *vf,
 	return 0;
     }
     vf->priv->fmt=best;
-
-    if (!opts->screen_size_x && !opts->screen_size_y
-        && !(opts->screen_size_xy >= 0.001)) {
 	// Compute new d_width and d_height, preserving aspect
 	// while ensuring that both are >= output size in pixels.
 	if (vf->priv->h * d_width > vf->priv->w * d_height) {
@@ -317,7 +314,6 @@ static int config(struct vf_instance *vf,
 	}
 	//d_width=d_width*vf->priv->w/width;
 	//d_height=d_height*vf->priv->h/height;
-    }
     return vf_next_config(vf,vf->priv->w,vf->priv->h,d_width,d_height,flags,best);
 }
 

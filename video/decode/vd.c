@@ -55,8 +55,6 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
 {
     struct MPOpts *opts = sh->opts;
-    int screen_size_x = 0;
-    int screen_size_y = 0;
     vf_instance_t *vf = sh->vfilter;
     int vocfg_flags = 0;
 
@@ -130,53 +128,25 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
     else if (sh->stream_aspect != 0.0)
         sh->aspect = sh->stream_aspect;
 
-    if (opts->screen_size_x || opts->screen_size_y) {
-        screen_size_x = opts->screen_size_x;
-        screen_size_y = opts->screen_size_y;
-        if (!opts->vidmode) {
-            if (!screen_size_x)
-                screen_size_x = 1;
-            if (!screen_size_y)
-                screen_size_y = 1;
-            if (screen_size_x <= 8)
-                screen_size_x *= sh->disp_w;
-            if (screen_size_y <= 8)
-                screen_size_y *= sh->disp_h;
+    int d_w = sh->disp_w;
+    int d_h = sh->disp_h;
+
+    if (sh->aspect > 0.01) {
+        int new_w = d_h * sh->aspect;
+        int new_h = d_h;
+        // we don't like horizontal downscale
+        if (new_w < d_w) {
+            new_w = d_w;
+            new_h = d_w / sh->aspect;
         }
-    } else {
-        // check source format aspect, calculate prescale ::atmos
-        screen_size_x = sh->disp_w;
-        screen_size_y = sh->disp_h;
-        if (opts->screen_size_xy >= 0.001) {
-            if (opts->screen_size_xy <= 8) {
-                // -xy means x+y scale
-                screen_size_x *= opts->screen_size_xy;
-                screen_size_y *= opts->screen_size_xy;
-            } else {
-                // -xy means forced width while keeping correct aspect
-                screen_size_x = opts->screen_size_xy;
-                screen_size_y = opts->screen_size_xy * sh->disp_h / sh->disp_w;
-            }
+        if (abs(d_w - new_w) >= 4 || abs(d_h - new_h) >= 4) {
+            d_w = new_w;
+            d_h = new_h;
+            mp_tmsg(MSGT_CPLAYER, MSGL_V, "Aspect ratio is %.2f:1 - "
+                    "scaling to correct movie aspect.\n", sh->aspect);
         }
-        if (sh->aspect > 0.01) {
-            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ASPECT=%1.4f\n",
-                   sh->aspect);
-            int w = screen_size_y * sh->aspect;
-            int h = screen_size_y;
-            // we don't like horizontal downscale || user forced width:
-            if (w < screen_size_x || opts->screen_size_xy > 8) {
-                w = screen_size_x;
-                h = screen_size_x / sh->aspect;
-            }
-            if (abs(screen_size_x - w) >= 4 || abs(screen_size_y - h) >= 4) {
-                screen_size_x = w;
-                screen_size_y = h;
-                mp_tmsg(MSGT_CPLAYER, MSGL_V, "Aspect ratio is %.2f:1 - "
-                        "scaling to correct movie aspect.\n", sh->aspect);
-            }
-        } else {
-            mp_tmsg(MSGT_CPLAYER, MSGL_V, "Movie-Aspect is undefined - no prescaling applied.\n");
-        }
+
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ASPECT=%1.4f\n", sh->aspect);
     }
 
     vocfg_flags = (opts->fullscreen ? VOFLAG_FULLSCREEN : 0)
@@ -186,11 +156,10 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
     // Time to config libvo!
     mp_msg(MSGT_CPLAYER, MSGL_V,
            "VO Config (%dx%d->%dx%d,flags=%d,0x%X)\n", sh->disp_w,
-           sh->disp_h, screen_size_x, screen_size_y, vocfg_flags, out_fmt);
+           sh->disp_h, d_w, d_h, vocfg_flags, out_fmt);
 
-    if (vf_config_wrapper
-        (vf, sh->disp_w, sh->disp_h, screen_size_x, screen_size_y, vocfg_flags,
-         out_fmt) == 0) {
+    if (vf_config_wrapper(vf, sh->disp_w, sh->disp_h, d_w, d_h, vocfg_flags,
+                          out_fmt) == 0) {
         mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "FATAL: Cannot initialize video driver.\n");
         sh->vf_initialized = -1;
         return 0;

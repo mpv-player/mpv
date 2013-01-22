@@ -63,7 +63,7 @@ static int config(struct vf_instance *vf,
 	mp_tmsg(MSGT_VFILTER, MSGL_WARN, "[CROP] Bad position/width/height - cropped area outside of the original!\n");
 	return 0;
     }
-    vf_rescale_dsize(vf, &d_width, &d_height, width, height,
+    vf_rescale_dsize(&d_width, &d_height, width, height,
                      vf->priv->crop_w, vf->priv->crop_h);
     return vf_next_config(vf,vf->priv->crop_w,vf->priv->crop_h,d_width,d_height,flags,outfmt);
 }

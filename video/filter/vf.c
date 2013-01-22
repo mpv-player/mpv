@@ -514,16 +514,12 @@ void vf_uninit_filter_chain(vf_instance_t *vf)
     }
 }
 
-// When cropping an image that had old_w/old_h/*d_width/*d_height to the new
-// size new_w/new_h, adjust *d_width/*d_height such that the new image has
-// the same pixel aspect ratio.
-void vf_rescale_dsize(struct vf_instance *vf, int *d_width, int *d_height,
-                      int old_w, int old_h, int new_w, int new_h)
+// When changing the size of an image that had old_w/old_h with
+// DAR *d_width/*d_height to the new size new_w/new_h, adjust
+// *d_width/*d_height such that the new image has the same pixel aspect ratio.
+void vf_rescale_dsize(int *d_width, int *d_height, int old_w, int old_h,
+                      int new_w, int new_h)
 {
-    // No idea what this is about
-    if (vf->opts->screen_size_x || vf->opts->screen_size_y)
-        return;
-
     *d_width  = *d_width  * new_w / old_w;
     *d_height = *d_height * new_h / old_h;
 }
