@@ -594,8 +594,8 @@ const m_option_t mplayer_opts[]={
     // video mode switching: (x11,xv,dga)
     OPT_MAKE_FLAGS("vm", vidmode, 0),
     // start in fullscreen mode:
-    OPT_MAKE_FLAGS("fullscreen", fullscreen, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("fs", fullscreen, CONF_GLOBAL),
+    OPT_MAKE_FLAGS("fullscreen", fullscreen, 0),
+    OPT_MAKE_FLAGS("fs", fullscreen, 0),
     // set fullscreen switch method (workaround for buggy WMs)
     {"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
     // set bpp (x11+vm)
