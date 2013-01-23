@@ -16,8 +16,6 @@ typedef struct MPOpts {
     float softvol_max;
     int gapless_audio;
     int ao_buffersize;
-    int screen_size_x;
-    int screen_size_y;
     int vo_screenwidth;
     int vo_screenheight;
     struct m_geometry vo_geometry;
@@ -110,7 +108,6 @@ typedef struct MPOpts {
     float drc_level;
     struct m_obj_settings *vf_settings;
     float movie_aspect;
-    float screen_size_xy;
     int flip;
     int vd_use_dr1;
     char **sub_name;

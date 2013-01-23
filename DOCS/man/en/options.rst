@@ -2329,10 +2329,6 @@
     (X11 and win32 only)
     This tells mpv to attach to an existing window.See ``--slave-broken``.
 
---x=<width>
-    Scale image to width <width> (if software/hardware scaling is available).
-    Disables aspect calculations.
-
 --screen=<all|current|0-32>
     In multi-monitor configurations (i.e. a single desktop that spans across
     multiple displays) this option tells mpv which screen to display the
@@ -2344,13 +2340,3 @@
     This option is not suitable to only set the startup screen (because it
     will always display on the given screen in fullscreen mode),
     ``--geometry`` is the best that is available for that purpose currently.
-
---xy=<value>
-
-    :value<=8: Scale image by factor <value>.
-    :value>8:  Set width to value and calculate height to keep correct aspect
-               ratio.
-
---y=<height>
-    Scale image to height <height> (if software/hardware scaling is available).
-    Disables aspect calculations.

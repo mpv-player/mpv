@@ -483,7 +483,6 @@ const m_option_t common_opts[] = {
     {"ssf", (void *) scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     OPT_FLOATRANGE("aspect", movie_aspect, 0, 0.1, 10.0),
     OPT_FLAG_CONSTANTS("no-aspect", movie_aspect, 0, 0, 0),
-    OPT_FLOATRANGE("xy", screen_size_xy, 0, 0.001, 4096),
 
     OPT_FLAG_CONSTANTS("flip", flip, 0, 0, 1),
 
@@ -579,9 +578,6 @@ const m_option_t mplayer_opts[]={
 
     {"edlout", &edl_output_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL},
 
-    // force window width/height or resolution (with -vm)
-    OPT_INTRANGE("x", screen_size_x, 0, 0, 4096),
-    OPT_INTRANGE("y", screen_size_y, 0, 0, 4096),
     // set screen dimensions (when not detectable or virtual!=visible)
     OPT_INTRANGE("screenw", vo_screenwidth, CONF_GLOBAL, 0, 4096),
     OPT_INTRANGE("screenh", vo_screenheight, CONF_GLOBAL, 0, 4096),

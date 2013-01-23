@@ -118,6 +118,8 @@ Command line switches
     -vobsub                             --sub (pass the .idx file)
     -ass-bottom-margin                  --vf=sub=bottom:top
     -vc ffh264vdpau (etc.)              --hwdec=vdpau
+    -x, -y                              --geometry + --no-keepaspect
+    -xy                                 --autofit
     =================================== ===================================
 
 input.conf and slave commands

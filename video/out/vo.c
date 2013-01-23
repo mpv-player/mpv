@@ -394,40 +394,8 @@ static void determine_window_geometry(struct vo *vo, int d_w, int d_h)
     int scr_w = opts->vo_screenwidth;
     int scr_h = opts->vo_screenheight;
 
-    int vid_w = vo->aspdat.orgw;
-    int vid_h = vo->aspdat.orgh;
-
-    if (opts->screen_size_x || opts->screen_size_y) {
-        d_w = opts->screen_size_x;
-        d_h = opts->screen_size_y;
-        if (!opts->vidmode) {
-            if (!d_w)
-                d_w = 1;
-            if (!d_h)
-                d_h = 1;
-            if (d_w <= 8)
-                d_w *= vid_w;
-            if (d_h <= 8)
-                d_h *= vid_h;
-        }
-    }
-
     // This is only for applying monitor pixel aspect
-    // Store d_w/d_h, because aspect() uses it
-    aspect_save_videores(vo, vid_w, vid_h, d_w, d_h);
     aspect(vo, &d_w, &d_h, A_NOZOOM);
-
-    if (opts->screen_size_xy >= 0.001) {
-        if (opts->screen_size_xy <= 8) {
-            // -xy means x+y scale
-            d_w *= opts->screen_size_xy;
-            d_h *= opts->screen_size_xy;
-        } else {
-            // -xy means forced width while keeping correct aspect
-            d_h = opts->screen_size_xy * d_h / d_w;
-            d_w = opts->screen_size_xy;
-        }
-    }
 
     apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->vo_autofit, true);
     apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->vo_autofit_larger, false);
