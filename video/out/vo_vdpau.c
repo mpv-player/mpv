@@ -851,7 +851,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     XSetWindowAttributes xswa;
     XWindowAttributes attribs;
     unsigned long xswamask;
-    int depth;
 
 #ifdef CONFIG_XF86VM
     int vm = flags & VOFLAG_MODESWITCHING;
@@ -877,10 +876,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 #endif
     XGetWindowAttributes(x11->display, DefaultRootWindow(x11->display),
                          &attribs);
-    depth = attribs.depth;
-    if (depth != 15 && depth != 16 && depth != 24 && depth != 32)
-        depth = 24;
-    XMatchVisualInfo(x11->display, x11->screen, depth, TrueColor, &vinfo);
+    XMatchVisualInfo(x11->display, x11->screen, attribs.depth, TrueColor,
+                     &vinfo);
 
     xswa.background_pixel = 0;
     xswa.border_pixel     = 0;
