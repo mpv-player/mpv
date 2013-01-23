@@ -1166,68 +1166,82 @@ const m_option_type_t m_option_type_color = {
 };
 
 
-
-static bool parse_geometry_str(struct m_geometry *gm, char *s)
+// Parse a >=0 number starting at s. Set s to the string following the number.
+// If the number ends with '%', eat that and set *out_per to true, but only
+// if the number is between 0-100; if not, don't eat anything, even the number.
+static bool eat_num_per(bstr *s, int *out_num, bool *out_per)
 {
-    if (s == NULL)
-        return true;
-    char xsign[2], ysign[2], dummy[2];
-    int width, height, xoff, yoff, xper, yper;
-    int ok = 0;
-    for (int i = 0; !ok && i < 9; i++) {
-        width = height = xoff = yoff = xper = yper = INT_MIN;
-        strcpy(xsign, "+");
-        strcpy(ysign, "+");
-        switch (i) {
-        case 0:
-            ok = sscanf(s, "%ix%i%1[+-]%i%1[+-]%i%c",
-                        &width, &height, xsign, &xoff, ysign,
-                        &yoff, dummy) == 6;
-            break;
-        case 1:
-            ok = sscanf(s, "%ix%i%c", &width, &height, dummy) == 2;
-            break;
-        case 2:
-            ok = sscanf(s, "%1[+-]%i%1[+-]%i%c",
-                        xsign, &xoff, ysign, &yoff, dummy) == 4;
-            break;
-        case 3:
-            ok = sscanf(s, "%i%%:%i%1[%]%c", &xper, &yper, dummy, dummy) == 3;
-            break;
-        case 4:
-            ok = sscanf(s, "%i:%i%1[%]%c", &xoff, &yper, dummy, dummy) == 3;
-            break;
-        case 5:
-            ok = sscanf(s, "%i%%:%i%c", &xper, &yoff, dummy) == 2;
-            break;
-        case 6:
-            ok = sscanf(s, "%i:%i%c", &xoff, &yoff, dummy) == 2;
-            break;
-        case 7:
-            ok = sscanf(s, "%i%1[%]%c", &xper, dummy, dummy) == 2;
-            break;
-        case 8:
-            ok = sscanf(s, "%i%c", &xoff, dummy) == 1;
-            break;
-        }
-    }
-    if (!ok)
+    bstr rest;
+    long long v = bstrtoll(*s, &rest, 10);
+    if (s->len == rest.len || v < INT_MIN || v > INT_MAX)
         return false;
-
-    gm->x_per = xper >= 0 && xper <= 100;
-    gm->x = gm->x_per ? xper : xoff;
-    gm->x_sign = xsign[0] == '-';
-    gm->y_per = yper >= 0 && yper <= 100;
-    gm->y = gm->y_per ? yper : yoff;
-    gm->y_sign = ysign[0] == '-';
-    gm->xy_valid = gm->x != INT_MIN || gm->y != INT_MIN;
-
-    gm->w = width;
-    gm->h = height;
-    gm->wh_valid = gm->w > 0 || gm->h > 0;
-
+    *out_num = v;
+    *out_per = false;
+    *s = rest;
+    if (bstr_eatstart0(&rest, "%") && v >= 0 && v <= 100) {
+        *out_per = true;
+        *s = rest;
+    }
     return true;
 }
+
+static bool parse_geometry_str(struct m_geometry *gm, bstr s)
+{
+    *gm = (struct m_geometry) { .x = INT_MIN, .y = INT_MIN };
+    if (s.len == 0)
+        return true;
+    // Approximate grammar:
+    // [W[xH]][{+-}X{+-}Y] | [X:Y]
+    // (meaning: [optional] {one character of} one|alternative)
+    // Every number can be followed by '%'
+    int num;
+    bool per;
+
+#define READ_NUM(F, F_PER) do {         \
+    if (!eat_num_per(&s, &num, &per))   \
+        goto error;                     \
+    gm->F = num;                        \
+    gm->F_PER = per;                    \
+} while(0)
+
+#define READ_SIGN(F) do {               \
+    if (bstr_eatstart0(&s, "+")) {      \
+        gm->F = false;                  \
+    } else if (bstr_eatstart0(&s, "-")) {\
+        gm->F = true;                   \
+    } else goto error;                  \
+} while(0)
+
+    if (bstrchr(s, ':') < 0) {
+        gm->wh_valid = true;
+        if (!bstr_startswith0(s, "+") && !bstr_startswith0(s, "-")) {
+            READ_NUM(w, w_per);
+            if (bstr_eatstart0(&s, "x"))
+                READ_NUM(h, h_per);
+        }
+        if (s.len > 0) {
+            gm->xy_valid = true;
+            READ_SIGN(x_sign);
+            READ_NUM(x, x_per);
+            READ_SIGN(y_sign);
+            READ_NUM(y, y_per);
+        }
+    } else {
+        gm->xy_valid = true;
+        READ_NUM(x, x_per);
+        if (!bstr_eatstart0(&s, ":"))
+            goto error;
+        READ_NUM(y, y_per);
+    }
+
+    return s.len == 0;
+
+error:
+    return false;
+}
+
+#undef READ_NUM
+#undef READ_SIGN
 
 // xpos,ypos: position of the left upper corner
 // widw,widh: width and height of the window
@@ -1237,10 +1251,18 @@ void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
                       int scrw, int scrh, struct m_geometry *gm)
 {
     if (gm->wh_valid) {
+        int prew = *widw, preh = *widh;
         if (gm->w > 0)
-            *widw = gm->w;
+            *widw = gm->w_per ? scrw * (gm->w / 100.0) : gm->w;
         if (gm->h > 0)
-            *widh = gm->h;
+            *widh = gm->h_per ? scrh * (gm->h / 100.0) : gm->h;
+        // keep aspect if the other value is not set
+        double asp = (double)prew / preh;
+        if (gm->w > 0 && !(gm->h > 0)) {
+            *widh = *widw / asp;
+        } else if (!(gm->w > 0) && gm->h > 0) {
+            *widw = *widh * asp;
+        }
     }
 
     if (gm->xy_valid) {
@@ -1255,7 +1277,7 @@ void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
             *ypos = gm->y;
             if (gm->y_per)
                 *ypos = (scrh - *widh) * (*ypos / 100.0);
-            if (gm->x_sign)
+            if (gm->y_sign)
                 *ypos = scrh - *widh - *ypos;
         }
     }
@@ -1264,11 +1286,8 @@ void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
 static int parse_geometry(const m_option_t *opt, struct bstr name,
                           struct bstr param, void *dst)
 {
-    char *s = bstrdup0(NULL, param);
-    struct m_geometry gm = {0};
-    bool res = parse_geometry_str(&gm, s);
-    talloc_free(s);
-    if (!res)
+    struct m_geometry gm;
+    if (!parse_geometry_str(&gm, param))
         goto error;
 
     if (dst)
@@ -1280,7 +1299,7 @@ error:
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: invalid geometry: '%.*s'\n",
            BSTR_P(name), BSTR_P(param));
     mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-           "Valid format: [WxH][[+-]X[+-]Y] | [X[%%]:[Y[%%]]]\n");
+           "Valid format: [W[%%][xH[%%]]][{+-}X[%%]{+-}Y[%%]] | [X[%%]:Y[%%]]\n");
     return M_OPT_INVALID;
 }
 

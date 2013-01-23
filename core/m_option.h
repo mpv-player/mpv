@@ -81,6 +81,7 @@ struct m_color {
 struct m_geometry {
     int x, y, w, h;
     bool xy_valid : 1, wh_valid : 1;
+    bool w_per : 1, h_per : 1;
     bool x_sign : 1, y_sign : 1, x_per : 1, y_per : 1;
 };
 

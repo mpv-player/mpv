@@ -676,22 +676,24 @@
     consider using options such as ``--srate`` and ``--format`` to explicitly
     select what the shared output format will be.
 
---geometry=<x[%][:y[%]]>, --geometry=<[WxH][+-x+-y]>
-    Adjust where the output is on the screen initially. The x and y
-    specifications are in pixels measured from the top-left of the screen to
-    the top-left of the image being displayed, however if a percentage sign is
-    given after the argument it turns the value into a percentage of the
-    screen size in that direction. It also supports the standard X11
-    ``--geometry`` option format, in which e.g. +10-50 means "place 10 pixels
-    from the left border and 50 pixels from the lower border" and "--20+-10"
-    means "place 20 pixels beyond the right and 10 pixels beyond the top
-    border". If an external window is specified using the ``--wid`` option,
+--geometry=<[W[xH]][+-x+-y]>, --geometry=<x:y>
+    Adjust the initial window position or size. W and H set the window size in
+    pixels. x and y set the window position, measured in pixels from the
+    top-left of the screen to the top-left of the image being displayed. If a
+    percentage sign (``%``) is given after the argument it turns the value into
+    a percentage of the screen size in that direction. Positions are specified
+    similar to the standard X11 ``--geometry`` option format, in which e.g.
+    +10-50 means "place 10 pixels from the left border and 50 pixels from the
+    lower border" and "--20+-10" means "place 20 pixels beyond the right and
+    10 pixels beyond the top border".
+
+    If an external window is specified using the ``--wid`` option,
     then the x and y coordinates are relative to the top-left corner of the
     window rather than the screen. The coordinates are relative to the screen
     given with ``--screen`` for the video output drivers that fully
     support ``--screen``.
 
-    *NOTE*: May not be supported by some of the older VO drivers.
+    *NOTE*: Generally only supported by GUI VOs. Ignored for encoding.
 
     *NOTE (OSX)*: On Mac OSX the origin of the screen coordinate system is
     located on the the bottom-left corner. For instance, ``0:0`` will place the
@@ -703,10 +705,18 @@
         Places the window at x=50, y=40.
     ``50%:50%``
         Places the window in the middle of the screen.
-    ``100%``
-        Places the window at the middle of the right edge of the screen.
     ``100%:100%``
         Places the window at the bottom right corner of the screen.
+    ``50%``
+        Sets the window width to half the screen width. Window height is set so
+        that the window has the video aspect ratio.
+    ``50%x50%``
+        Forces the window width and height to half the screen width and height.
+        Will show black borders to compensate for the video aspect ration (with
+        most VOs and without ``--no-keepaspect``).
+    ``50%+10+10``
+        Sets the window to half the screen widths, and positions it 10 pixels
+        below/left of the top left corner of the screen.
 
 --grabpointer, --no-grabpointer
     ``--no-grabpointer`` tells the player to not grab the mouse pointer after a
