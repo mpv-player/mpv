@@ -41,9 +41,12 @@ void get_screen_size(void);
 /* Load key definitions from the TERMCAP database. 'termtype' can be NULL */
 int load_termcap(char *termtype);
 
-/* Enable and disable STDIN line-buffering */
+/* Initialize getch2 */
 void getch2_enable(void);
 void getch2_disable(void);
+
+/* Enable and disable STDIN line-buffering */
+void getch2_poll(void);
 
 /* Read a character or a special key code (see keycodes.h) */
 struct mp_fifo;

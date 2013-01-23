@@ -166,6 +166,9 @@ bool getch2(struct mp_fifo *fifo)
     return true;
 }
 
+void getch2_poll(void){
+}
+
 void getch2_enable(void)
 {
 	DWORD retval;

@@ -32,6 +32,7 @@
 #include <assert.h>
 
 #include "osdep/io.h"
+#include "osdep/getch2.h"
 
 #include "input.h"
 #include "core/mp_fifo.h"
@@ -1503,6 +1504,7 @@ static void read_all_fd_events(struct input_ctx *ictx, int time)
 
 static void read_all_events(struct input_ctx *ictx, int time)
 {
+    getch2_poll();
 #ifdef CONFIG_COCOA
     cocoa_events_read_all_events(ictx, time);
 #else

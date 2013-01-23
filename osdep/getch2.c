@@ -55,11 +55,13 @@
 
 #include "core/bstr.h"
 #include "core/mp_fifo.h"
+#include "core/input/input.h"
 #include "core/input/keycodes.h"
 #include "getch2.h"
 
 #ifdef HAVE_TERMIOS
-static struct termios tio_orig;
+static volatile struct termios tio_orig;
+static volatile int tio_orig_set;
 #endif
 static int getch2_len=0;
 static unsigned char getch2_buf[BUF_LEN];
@@ -284,39 +286,118 @@ bool getch2(struct mp_fifo *fifo)
     return true;
 }
 
-static volatile int getch2_status=0;
+static volatile int getch2_active=0;
+static volatile int getch2_enabled=0;
 
-static void do_enable_getch2(void)
+static void do_activate_getch2(void)
 {
+    if (getch2_active)
+        return;
 #ifdef HAVE_TERMIOS
     struct termios tio_new;
     tcgetattr(0,&tio_new);
+    if (!tio_orig_set) {
+        tio_orig = tio_new;
+        tio_orig_set = 1;
+    }
     tio_new.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
     tio_new.c_cc[VMIN] = 1;
     tio_new.c_cc[VTIME] = 0;
     tcsetattr(0,TCSANOW,&tio_new);
 #endif
+    getch2_active=1;
+}
+
+static void do_deactivate_getch2(void)
+{
+    if (!getch2_active)
+        return;
+#ifdef HAVE_TERMIOS
+    if (tio_orig_set) {
+        // once set, it will never be set again
+        // so we can cast away volatile here
+        tcsetattr(0, TCSANOW, (const struct termios *) &tio_orig);
+    }
+#endif
+    getch2_active=0;
+}
+
+// sigaction wrapper
+static int setsigaction(int signo, void (*handler) (int),
+                        int flags, bool do_mask)
+{
+    struct sigaction sa;
+    sa.sa_handler = handler;
+    if(do_mask)
+        sigfillset(&sa.sa_mask);
+    else
+        sigemptyset(&sa.sa_mask);
+    sa.sa_flags = flags;
+    return sigaction(signo, &sa, NULL);
+}
+
+void getch2_poll(void){
+    if (!getch2_enabled)
+        return;
+
+    // check if we are in the foreground process group
+    int newstatus = (tcgetpgrp(0) == getpgrp());
+
+    // and activate getch2 if we are, deactivate otherwise
+    if (newstatus)
+        do_activate_getch2();
+    else
+        do_deactivate_getch2();
+}
+
+static void stop_sighandler(int signum)
+{
+    do_deactivate_getch2();
+
+    // note: for this signal, we use SA_RESETHAND but do NOT mask signals
+    // so this will invoke the default handler
+    raise(SIGTSTP);
 }
 
 static void continue_sighandler(int signum)
 {
-    if (getch2_status)
-        do_enable_getch2();
+    // SA_RESETHAND has reset SIGTSTP, so we need to restore it here
+    setsigaction(SIGTSTP, stop_sighandler, SA_RESETHAND, false);
+
+    getch2_poll();
+}
+
+static void quit_request_sighandler(int signum)
+{
+    async_quit_request = 1;
 }
 
 void getch2_enable(void){
-#ifdef HAVE_TERMIOS
-    tcgetattr(0,&tio_orig);
-    do_enable_getch2();
-#endif
-    getch2_status=1;
-    signal(SIGCONT,continue_sighandler);
+    if (getch2_enabled)
+        return;
+
+    // handlers to fix terminal settings
+    setsigaction(SIGCONT, continue_sighandler, 0, true);
+    setsigaction(SIGTSTP, stop_sighandler, SA_RESETHAND, false);
+    setsigaction(SIGINT, quit_request_sighandler, SA_RESETHAND, false);
+    setsigaction(SIGTTIN, SIG_IGN, 0, true);
+
+    do_activate_getch2();
+
+    getch2_enabled = 1;
 }
 
 void getch2_disable(void){
-    if(!getch2_status) return; // already disabled / never enabled
-    getch2_status=0;
-#ifdef HAVE_TERMIOS
-    tcsetattr(0,TCSANOW,&tio_orig);
-#endif
+    if (!getch2_enabled)
+        return;
+
+    // restore signals
+    setsigaction(SIGCONT, SIG_DFL, 0, false);
+    setsigaction(SIGTSTP, SIG_DFL, 0, false);
+    setsigaction(SIGINT, SIG_DFL, 0, false);
+    setsigaction(SIGTTIN, SIG_DFL, 0, false);
+
+    do_deactivate_getch2();
+
+    getch2_enabled = 0;
 }

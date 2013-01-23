@@ -31,6 +31,10 @@
 #include <libintl.h>
 #endif
 
+#ifndef __MINGW32__
+#include <signal.h>
+#endif
+
 #include "core/mp_msg.h"
 
 /* maximum message length of mp_msg */
@@ -79,6 +83,13 @@ void mp_msg_init(void){
     GetConsoleScreenBufferInfo(hSTDOUT, &cinfo);
     stdoutAttrs = cinfo.wAttributes;
 #endif
+#ifndef __MINGW32__
+    struct sigaction sa;
+    sa.sa_handler = SIG_IGN;
+    sa.sa_flags = 0;
+    sigemptyset(&sa.sa_mask);
+    sigaction(SIGTTOU, &sa, NULL); // just write to stdout if you have to
+#endif
     int i;
     char *env = getenv("MPV_VERBOSE");
     if (env)
@@ -98,6 +109,13 @@ void mp_msg_init(void){
 
 int mp_msg_test(int mod, int lev)
 {
+#ifndef __MINGW32__
+    if (lev == MSGL_STATUS) {
+        // skip status line output if we are not in the foreground process group
+        if (tcgetpgrp(0) != getpgrp())
+            return false;
+    }
+#endif
     return lev <= (mp_msg_levels[mod] == -2 ? mp_msg_level_all + verbose : mp_msg_levels[mod]);
 }
 
