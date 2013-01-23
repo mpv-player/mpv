@@ -37,7 +37,6 @@
 
 #include "vo.h"
 #include "aspect.h"
-#include "geometry.h"
 #include "osdep/timer.h"
 
 #include <X11/Xmd.h>
@@ -1105,6 +1104,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
   struct MPOpts *opts = vo->opts;
   struct vo_x11_state *x11 = vo->x11;
   Display *mDisplay = vo->x11->display;
+  bool force_change_xy = opts->vo_geometry.xy_valid || xinerama_screen >= 0;
   if (WinID >= 0) {
     vo_fs = flags & VOFLAG_FULLSCREEN;
     x11->window = WinID ? (Window)WinID : x11->rootwin;
@@ -1148,7 +1148,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     hint.x = x; hint.y = y;
     hint.width = width; hint.height = height;
     hint.flags = PSize;
-    if (geometry_xy_changed)
+    if (force_change_xy)
       hint.flags |= PPosition;
     XSetWMNormalHints(mDisplay, x11->window, &hint);
     if (!vo_border) vo_x11_decoration(vo, 0);
@@ -1167,7 +1167,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
   }
   vo_x11_update_window_title(vo);
   if (opts->vo_ontop) vo_x11_setlayer(vo, x11->window, opts->vo_ontop);
-  vo_x11_update_geometry(vo, !geometry_xy_changed);
+  vo_x11_update_geometry(vo, !force_change_xy);
   vo_x11_nofs_sizepos(vo, vo->dx, vo->dy, width, height);
   if (!!vo_fs != !!(flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen(vo);

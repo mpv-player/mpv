@@ -46,7 +46,6 @@
 #include "aspect.h"
 #include "config.h"
 #include "vo.h"
-#include "geometry.h"
 
 struct formatmap_entry {
     Uint32 sdl;
@@ -272,14 +271,12 @@ static bool try_create_renderer(struct vo *vo, int i, const char *driver,
     if (!is_good_renderer(&ri, driver, vc->allow_sw, NULL))
         return false;
 
+    bool xy_valid = vo->opts->vo_geometry.xy_valid;
+
     // then actually try
     vc->window = SDL_CreateWindow("MPV",
-                                  geometry_xy_changed
-                                      ? vo->dx
-                                      : SDL_WINDOWPOS_UNDEFINED,
-                                  geometry_xy_changed
-                                      ? vo->dy
-                                      : SDL_WINDOWPOS_UNDEFINED,
+                                  xy_valid ? vo->dx : SDL_WINDOWPOS_UNDEFINED,
+                                  xy_valid ? vo->dy : SDL_WINDOWPOS_UNDEFINED,
                                   w, h,
                                   SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
     if (!vc->window) {

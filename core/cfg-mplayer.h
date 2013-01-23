@@ -37,7 +37,6 @@
 extern char *lirc_configfile;
 
 /* only used at startup (setting these values from configfile) */
-extern char *vo_geometry;
 extern int stop_xscreensaver;
 
 extern int mp_msg_color;
@@ -586,8 +585,7 @@ const m_option_t mplayer_opts[]={
     // set screen dimensions (when not detectable or virtual!=visible)
     OPT_INTRANGE("screenw", vo_screenwidth, CONF_GLOBAL, 0, 4096),
     OPT_INTRANGE("screenh", vo_screenheight, CONF_GLOBAL, 0, 4096),
-    // Geometry string
-    {"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    OPT_GEOMETRY("geometry", vo_geometry, 0),
     OPT_MAKE_FLAGS("force-window-position", force_window_position, 0),
     // vo name (X classname) and window title strings
     OPT_STRING("name", vo_winname, 0),

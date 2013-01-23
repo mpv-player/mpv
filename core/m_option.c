@@ -1165,6 +1165,134 @@ const m_option_type_t m_option_type_color = {
     .parse = parse_color,
 };
 
+
+
+static bool parse_geometry_str(struct m_geometry *gm, char *s)
+{
+    if (s == NULL)
+        return true;
+    char xsign[2], ysign[2], dummy[2];
+    int width, height, xoff, yoff, xper, yper;
+    int ok = 0;
+    for (int i = 0; !ok && i < 9; i++) {
+        width = height = xoff = yoff = xper = yper = INT_MIN;
+        strcpy(xsign, "+");
+        strcpy(ysign, "+");
+        switch (i) {
+        case 0:
+            ok = sscanf(s, "%ix%i%1[+-]%i%1[+-]%i%c",
+                        &width, &height, xsign, &xoff, ysign,
+                        &yoff, dummy) == 6;
+            break;
+        case 1:
+            ok = sscanf(s, "%ix%i%c", &width, &height, dummy) == 2;
+            break;
+        case 2:
+            ok = sscanf(s, "%1[+-]%i%1[+-]%i%c",
+                        xsign, &xoff, ysign, &yoff, dummy) == 4;
+            break;
+        case 3:
+            ok = sscanf(s, "%i%%:%i%1[%]%c", &xper, &yper, dummy, dummy) == 3;
+            break;
+        case 4:
+            ok = sscanf(s, "%i:%i%1[%]%c", &xoff, &yper, dummy, dummy) == 3;
+            break;
+        case 5:
+            ok = sscanf(s, "%i%%:%i%c", &xper, &yoff, dummy) == 2;
+            break;
+        case 6:
+            ok = sscanf(s, "%i:%i%c", &xoff, &yoff, dummy) == 2;
+            break;
+        case 7:
+            ok = sscanf(s, "%i%1[%]%c", &xper, dummy, dummy) == 2;
+            break;
+        case 8:
+            ok = sscanf(s, "%i%c", &xoff, dummy) == 1;
+            break;
+        }
+    }
+    if (!ok)
+        return false;
+
+    gm->x_per = xper >= 0 && xper <= 100;
+    gm->x = gm->x_per ? xper : xoff;
+    gm->x_sign = xsign[0] == '-';
+    gm->y_per = yper >= 0 && yper <= 100;
+    gm->y = gm->y_per ? yper : yoff;
+    gm->y_sign = ysign[0] == '-';
+    gm->xy_valid = gm->x != INT_MIN || gm->y != INT_MIN;
+
+    gm->w = width;
+    gm->h = height;
+    gm->wh_valid = gm->w > 0 || gm->h > 0;
+
+    return true;
+}
+
+// xpos,ypos: position of the left upper corner
+// widw,widh: width and height of the window
+// scrw,scrh: width and height of the current screen
+// The input parameters should be set to a centered window (default fallbacks).
+void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
+                      int scrw, int scrh, struct m_geometry *gm)
+{
+    if (gm->wh_valid) {
+        if (gm->w > 0)
+            *widw = gm->w;
+        if (gm->h > 0)
+            *widh = gm->h;
+    }
+
+    if (gm->xy_valid) {
+        if (gm->x != INT_MIN) {
+            *xpos = gm->x;
+            if (gm->x_per)
+                *xpos = (scrw - *widw) * (*xpos / 100.0);
+            if (gm->x_sign)
+                *xpos = scrw - *widw - *xpos;
+        }
+        if (gm->y != INT_MIN) {
+            *ypos = gm->y;
+            if (gm->y_per)
+                *ypos = (scrh - *widh) * (*ypos / 100.0);
+            if (gm->x_sign)
+                *ypos = scrh - *widh - *ypos;
+        }
+    }
+}
+
+static int parse_geometry(const m_option_t *opt, struct bstr name,
+                          struct bstr param, void *dst)
+{
+    char *s = bstrdup0(NULL, param);
+    struct m_geometry gm = {0};
+    bool res = parse_geometry_str(&gm, s);
+    talloc_free(s);
+    if (!res)
+        goto error;
+
+    if (dst)
+        *((struct m_geometry *)dst) = gm;
+
+    return 1;
+
+error:
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: invalid geometry: '%.*s'\n",
+           BSTR_P(name), BSTR_P(param));
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+           "Valid format: [WxH][[+-]X[+-]Y] | [X[%%]:[Y[%%]]]\n");
+    return M_OPT_INVALID;
+}
+
+const m_option_type_t m_option_type_geometry = {
+    .name  = "Window geometry",
+    .size  = sizeof(struct m_geometry),
+    .parse = parse_geometry,
+};
+
+
+
+
 #include "video/img_format.h"
 
 static int parse_imgfmt(const m_option_t *opt, struct bstr name,

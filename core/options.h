@@ -20,6 +20,7 @@ typedef struct MPOpts {
     int screen_size_y;
     int vo_screenwidth;
     int vo_screenheight;
+    struct m_geometry vo_geometry;
     int force_window_position;
     char *vo_winname;
     char *vo_wintitle;

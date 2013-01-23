@@ -266,7 +266,6 @@ SOURCES = talloc.c \
           video/out/bitmap_packer.c \
           video/out/aspect.c \
           video/out/filter_kernels.c \
-          video/out/geometry.c \
           video/out/vo.c \
           video/out/vo_null.c \
           video/out/vo_image.c \

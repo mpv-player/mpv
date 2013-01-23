@@ -18,7 +18,6 @@
 
 /* Stuff for correct aspect scaling. */
 #include "aspect.h"
-#include "geometry.h"
 #include "vo.h"
 #include "core/mp_msg.h"
 #include "core/options.h"
@@ -102,7 +101,7 @@ void aspect(struct vo *vo, int *srcw, int *srch, int zoom)
     int fitw;
     int fith;
     get_max_dims(vo, &fitw, &fith, zoom);
-    if (!zoom && geometry_wh_changed) {
+    if (!zoom && vo->opts->vo_geometry.wh_valid) {
         mp_msg(MSGT_VO, MSGL_DBG2, "aspect(0) no aspect forced!\n");
         return; // the user doesn't want to fix aspect
     }

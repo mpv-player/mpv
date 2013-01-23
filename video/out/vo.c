@@ -33,7 +33,6 @@
 #include "core/bstr.h"
 #include "vo.h"
 #include "aspect.h"
-#include "geometry.h"
 #include "core/input/input.h"
 #include "core/mp_fifo.h"
 #include "core/m_config.h"
@@ -403,9 +402,9 @@ static void determine_window_geometry(struct vo *vo, int d_w, int d_h)
 
     vo->dx = (int)(opts->vo_screenwidth - d_w) / 2;
     vo->dy = (int)(opts->vo_screenheight - d_h) / 2;
-    geometry(&vo->dx, &vo->dy, &d_w, &d_h,
-             opts->vo_screenwidth, opts->vo_screenheight);
-    geometry_xy_changed |= xinerama_screen >= 0;
+    m_geometry_apply(&vo->dx, &vo->dy, &d_w, &d_h,
+                     opts->vo_screenwidth, opts->vo_screenheight,
+                     &opts->vo_geometry);
 
     vo->dx += xinerama_x;
     vo->dy += xinerama_y;

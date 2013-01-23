@@ -44,7 +44,6 @@
 #include "vo.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"
-#include "geometry.h"
 #include "sub/sub.h"
 #include "bitmap_packer.h"
 
