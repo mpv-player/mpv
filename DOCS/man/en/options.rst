@@ -203,6 +203,51 @@
     Enables caching for the stream used by ``--audiofile``, using the
     specified amount of memory.
 
+--autofit=<[W[xH]]>
+    Set the initial window size to a maximum size specified by WxH, without
+    changing the window's aspect ratio. The size is measured in pixels, or if
+    a number is followed by a percentage sign (``%``), in percents of the
+    screen size.
+
+    This option never changes the aspect ratio of the window. If the aspect
+    ratio mismatches, the window's size is reduced until it fits into the
+    specified size.
+
+    Window position is not taken into account, nor is it modified by this
+    option (the window manager still may place the window differently depending
+    on size). Use ``--geometry`` to change the window position. Its effects
+    are applied after this option.
+
+    See ``--geometry`` for details how this is handled with multi-monitor
+    setups, or if the ``--wid`` option is used.
+
+    Use ``--autofit-larger`` instead if you don't want the window to get larger.
+    Use ``--geometry`` if you want to force both window width and height to a
+    specific size.
+
+    *NOTE*: Generally only supported by GUI VOs. Ignored for encoding.
+
+    *EXAMPLE*:
+
+    ``70%``
+        Make the window width 70% of the screen size, keeping aspect ratio.
+    ``1000``
+        Set the window width to 1000 pixels, keeping aspect ratio.
+    ``70%:60%``
+        Make the window as large as possible, without being wider than 70% of
+        the screen width, or higher than 60% of the screen height.
+
+--autofit-larger=<[W[xH]]>
+    This option behaves exactly like ``--autofit``, except the window size is
+    only changed if the window would be larger than the specified size.
+
+    *EXAMPLE*:
+
+    ``90%x80%``
+        If the video is larger than 90% of the screen width or 80% of the
+        screen height, make the window smaller until either its width is 90%
+        of the screen, or its height is 80% of the screen.
+
 --autosub, --no-autosub
     Load additional subtitle files matching the video filename. Enabled by
     default. See also ``--autosub-match``.
@@ -717,6 +762,9 @@
     ``50%+10+10``
         Sets the window to half the screen widths, and positions it 10 pixels
         below/left of the top left corner of the screen.
+
+    See also ``--autofit`` and ``--autofit-larger`` for fitting the window into
+    a given size without changing aspect ratio.
 
 --grabpointer, --no-grabpointer
     ``--no-grabpointer`` tells the player to not grab the mouse pointer after a

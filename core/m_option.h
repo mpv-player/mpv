@@ -57,6 +57,7 @@ extern const m_option_type_t m_option_type_fourcc;
 extern const m_option_type_t m_option_type_afmt;
 extern const m_option_type_t m_option_type_color;
 extern const m_option_type_t m_option_type_geometry;
+extern const m_option_type_t m_option_type_size_box;
 
 // Callback used by m_option_type_print_func options.
 typedef int (*m_opt_func_full_t)(const m_option_t *, const char *, const char *);
@@ -219,6 +220,7 @@ union m_option_value {
     struct m_rel_time rel_time;
     struct m_color color;
     struct m_geometry geometry;
+    struct m_geometry size_box;
 };
 
 ////////////////////////////////////////////////////////////////////////////
@@ -534,6 +536,7 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_REL_TIME(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_rel_time)
 #define OPT_COLOR(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_color)
 #define OPT_GEOMETRY(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_geometry)
+#define OPT_SIZE_BOX(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_size_box)
 
 #define OPT_TRACKCHOICE(name, var) OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))
 

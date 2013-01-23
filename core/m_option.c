@@ -1309,7 +1309,34 @@ const m_option_type_t m_option_type_geometry = {
     .parse = parse_geometry,
 };
 
+static int parse_size_box(const m_option_t *opt, struct bstr name,
+                          struct bstr param, void *dst)
+{
+    struct m_geometry gm;
+    if (!parse_geometry_str(&gm, param))
+        goto error;
 
+    if (gm.xy_valid)
+        goto error;
+
+    if (dst)
+        *((struct m_geometry *)dst) = gm;
+
+    return 1;
+
+error:
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: invalid size: '%.*s'\n",
+           BSTR_P(name), BSTR_P(param));
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+           "Valid format: W[%%][xH[%%]] or empty string\n");
+    return M_OPT_INVALID;
+}
+
+const m_option_type_t m_option_type_size_box = {
+    .name  = "Window size",
+    .size  = sizeof(struct m_geometry),
+    .parse = parse_size_box,
+};
 
 
 #include "video/img_format.h"

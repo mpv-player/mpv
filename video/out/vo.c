@@ -355,6 +355,32 @@ struct vo *init_best_video_out(struct MPOpts *opts,
     return NULL;
 }
 
+// Fit *w/*h into the size specified by geo.
+static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
+                          struct m_geometry *geo, bool allow_upscale)
+{
+    if (!geo->wh_valid)
+        return;
+
+    int dummy;
+    int n_w = *w, n_h = *h;
+    m_geometry_apply(&dummy, &dummy, &n_w, &n_h, scr_w, scr_h, geo);
+
+    if (!allow_upscale && *w <= n_w && *h <= n_h)
+        return;
+
+    // If aspect mismatches, always make the window smaller than the fit box
+    double asp = (double)*w / *h;
+    double n_asp = (double)n_w / n_h;
+    if (n_asp <= asp) {
+        *w = n_w;
+        *h = n_w / asp;
+    } else {
+        *w = n_h * asp;
+        *h = n_h;
+    }
+}
+
 // Set window size (vo->dwidth/dheight) and position (vo->dx/dy) according to
 // the video display size d_w/d_h.
 // NOTE: currently, all GUI backends do their own handling of window geometry
@@ -364,6 +390,9 @@ struct vo *init_best_video_out(struct MPOpts *opts,
 static void determine_window_geometry(struct vo *vo, int d_w, int d_h)
 {
     struct MPOpts *opts = vo->opts;
+
+    int scr_w = opts->vo_screenwidth;
+    int scr_h = opts->vo_screenheight;
 
     int vid_w = vo->aspdat.orgw;
     int vid_h = vo->aspdat.orgh;
@@ -400,10 +429,12 @@ static void determine_window_geometry(struct vo *vo, int d_w, int d_h)
         }
     }
 
+    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->vo_autofit, true);
+    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->vo_autofit_larger, false);
+
     vo->dx = (int)(opts->vo_screenwidth - d_w) / 2;
     vo->dy = (int)(opts->vo_screenheight - d_h) / 2;
-    m_geometry_apply(&vo->dx, &vo->dy, &d_w, &d_h,
-                     opts->vo_screenwidth, opts->vo_screenheight,
+    m_geometry_apply(&vo->dx, &vo->dy, &d_w, &d_h, scr_w, scr_h,
                      &opts->vo_geometry);
 
     vo->dx += xinerama_x;

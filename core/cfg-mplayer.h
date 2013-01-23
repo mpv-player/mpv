@@ -586,6 +586,8 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("screenw", vo_screenwidth, CONF_GLOBAL, 0, 4096),
     OPT_INTRANGE("screenh", vo_screenheight, CONF_GLOBAL, 0, 4096),
     OPT_GEOMETRY("geometry", vo_geometry, 0),
+    OPT_SIZE_BOX("autofit", vo_autofit, 0),
+    OPT_SIZE_BOX("autofit-larger", vo_autofit_larger, 0),
     OPT_MAKE_FLAGS("force-window-position", force_window_position, 0),
     // vo name (X classname) and window title strings
     OPT_STRING("name", vo_winname, 0),
