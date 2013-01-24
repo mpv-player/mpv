@@ -357,12 +357,18 @@ video/out/vo_vdpau.c: video/out/vdpau_template.c
 video/out/vdpau_template.c: TOOLS/vdpau_functions.pl
 	./$< > $@
 
+MKVLIB_DEPS = TOOLS/lib/Parse/Matroska.pm \
+              TOOLS/lib/Parse/Matroska/Definitions.pm \
+              TOOLS/lib/Parse/Matroska/Element.pm \
+              TOOLS/lib/Parse/Matroska/Reader.pm \
+              TOOLS/lib/Parse/Matroska/Utils.pm \
+
 demux/ebml.c demux/demux_mkv.c: demux/ebml_types.h
-demux/ebml_types.h: TOOLS/matroska.pl
+demux/ebml_types.h: TOOLS/matroska.pl $(MKVLIB_DEPS)
 	./$< --generate-header > $@
 
 demux/ebml.c: demux/ebml_defs.c
-demux/ebml_defs.c: TOOLS/matroska.pl
+demux/ebml_defs.c: TOOLS/matroska.pl $(MKVLIB_DEPS)
 	./$< --generate-definitions > $@
 
 video/out/vo_opengl.c: video/out/vo_opengl_shaders.h

@@ -92,6 +92,7 @@ typedef struct mkv_track {
 
     uint32_t v_width, v_height, v_dwidth, v_dheight;
     double v_frate;
+    uint32_t colorspace;
 
     uint32_t a_formattag;
     uint32_t a_channels, a_bps;
@@ -553,6 +554,12 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
         track->v_height = video->pixel_height;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Pixel height: %u\n",
                track->v_height);
+    }
+    if (video->n_colour_space && video->colour_space.len == 4) {
+        uint8_t *d = (uint8_t *)&video->colour_space.start[0];
+        track->colorspace = d[0] | (d[1] << 8) | (d[2] << 16) | (d[3] << 24);
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Colorspace: %#x\n",
+               (unsigned int)track->colorspace);
     }
 }
 
@@ -1225,7 +1232,9 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
             // copy type1 and type2 info from rv properties
             memcpy(dst, src - 8, 8 + cnt);
             track->realmedia = 1;
-
+        } else if (strcmp(track->codec_id, MKV_V_UNCOMPRESSED) == 0) {
+            // raw video, "like AVI" - this is a FourCC
+            bih->biCompression = track->colorspace;
         } else {
             const videocodec_info_t *vi = vinfo;
             while (vi->id && strcmp(vi->id, track->codec_id))
