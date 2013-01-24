@@ -2513,7 +2513,7 @@ echores "$_dvdread"
 echocheck "libcdio"
 if test "$_libcdio" = auto ; then
     _libcdio=no
-    if pkg_config_add libcdio_paranoia ; then
+    if pkg_config_add 'libcdio_paranoia < 10.2+0.90' ; then
         _libcdio=yes
     fi
 fi
