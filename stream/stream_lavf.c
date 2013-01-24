@@ -27,6 +27,9 @@
 #include "core/m_struct.h"
 #include "demux/demux.h"
 
+#include "network.h"
+#include "cookies.h"
+
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
     AVIOContext *avio = s->priv;
@@ -97,6 +100,7 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     int flags = 0;
     AVIOContext *avio = NULL;
     int res = STREAM_ERROR;
+    AVDictionary *dict = NULL;
     void *temp = talloc_new(NULL);
 
     if (mode == STREAM_READ)
@@ -137,7 +141,28 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
         filename = talloc_asprintf(temp, "mmsh://%.*s", BSTR_P(b_filename));
     }
 
-    int err = avio_open(&avio, filename, flags);
+#ifdef CONFIG_NETWORKING
+    // HTTP specific options (other protocols ignore them)
+    if (network_useragent)
+        av_dict_set(&dict, "user-agent", network_useragent, 0);
+    if (network_cookies_enabled)
+        av_dict_set(&dict, "cookies", talloc_steal(temp, cookies_lavf()), 0);
+    char *cust_headers = talloc_strdup(temp, "");
+    if (network_referrer) {
+        cust_headers = talloc_asprintf_append(cust_headers, "Referer: %s\r\n",
+                                              network_referrer);
+    }
+    if (network_http_header_fields) {
+        for (int n = 0; network_http_header_fields[n]; n++) {
+            cust_headers = talloc_asprintf_append(cust_headers, "%s\r\n",
+                                                  network_http_header_fields[n]);
+        }
+    }
+    if (strlen(cust_headers))
+        av_dict_set(&dict, "headers", cust_headers, 0);
+#endif
+
+    int err = avio_open2(&avio, filename, flags, NULL, &dict);
     if (err < 0) {
         if (err == AVERROR_PROTOCOL_NOT_FOUND)
             mp_msg(MSGT_OPEN, MSGL_ERR, "[ffmpeg] Protocol not found. Make sure"
@@ -178,6 +203,7 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     res = STREAM_OK;
 
 out:
+    av_dict_free(&dict);
     talloc_free(temp);
     return res;
 }

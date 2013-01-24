@@ -495,14 +495,10 @@
     (network only)
     Support cookies when making HTTP requests. Disabled by default.
 
-    *WARNING*: works with the deprecated ``mp_http://`` protocol only.
-
 --cookies-file=<filename>
     (network only)
     Read HTTP cookies from <filename>. The file is
     assumed to be in Netscape format.
-
-    *WARNING*: works with the deprecated ``mp_http://`` protocol only.
 
 --correct-pts, --no-correct-pts
     Switches mpv to a mode where timestamps for video frames are
@@ -823,8 +819,6 @@
 
 --http-header-fields=<field1,field2>
     Set custom HTTP fields when accessing HTTP stream.
-
-    *WARNING*: works with the deprecated ``mp_http://`` protocol only.
 
     *EXAMPLE*:
 
@@ -1677,8 +1671,6 @@
 --referrer=<string>
     Specify a referrer path or URL for HTTP requests.
 
-    *WARNING*: works with the deprecated ``mp_http://`` protocol only.
-
 --reuse-socket
     (udp:// only)
     Allows a socket to be reused by other processes as soon as it is closed.
@@ -2271,8 +2263,6 @@
 
 --user-agent=<string>
     Use <string> as user agent for HTTP streaming.
-
-    *WARNING*: works with the deprecated ``mp_http://`` protocol only.
 
 -v
     Increment verbosity level, one level for each ``-v`` found on the command

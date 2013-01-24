@@ -261,3 +261,24 @@ cookies_set(HTTP_header_t * http_hdr, const char *domain, const char *url)
 	http_set_field(http_hdr, buf);
     free(buf);
 }
+
+// Return a cookies string as expected by lavf (libavformat/http.c). The format
+// is like a Set-Cookie header (http://curl.haxx.se/rfc/cookie_spec.html),
+// separated by newlines.
+char *cookies_lavf(void)
+{
+    if (!cookie_list)
+        cookie_list = load_cookies();
+
+    struct cookie_list_type *list = cookie_list;
+    char *res = talloc_strdup(NULL, "");
+
+    while (list) {
+        res = talloc_asprintf_append_buffer(res,
+                    "%s=%s; path=%s; domain=%s; %s\n", list->name, list->value,
+                    list->path, list->domain, list->secure ? "secure" : "");
+        list = list->next;
+    }
+
+    return res;
+}

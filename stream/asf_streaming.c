@@ -45,8 +45,6 @@
 
 #include "demux/asfguid.h"
 
-extern int network_bandwidth;
-
 static int asf_http_streaming_start(stream_t *stream, int *demuxer_type);
 
 static int asf_read_wrapper(int fd, void *buffer, int len, streaming_ctrl_t *stream_ctrl) {

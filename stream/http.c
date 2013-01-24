@@ -45,8 +45,6 @@
 
 #include <libavutil/avutil.h>
 
-extern int network_bandwidth;
-
 typedef struct {
   unsigned metaint;
   unsigned metapos;
