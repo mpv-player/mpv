@@ -405,6 +405,11 @@ static int init_vo(sh_video_t *sh, AVFrame *frame)
     int width = frame->width;
     int height = frame->height;
     float aspect = av_q2d(frame->sample_aspect_ratio) * width / height;
+    int pix_fmt = frame->format;
+
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 40, 0)
+    pix_fmt = ctx->avctx->pix_fmt;
+#endif
 
     /* Reconfiguring filter/VO chain may invalidate direct rendering buffers
      * we have allocated for libavcodec (including the VDPAU HW decoding
@@ -413,7 +418,7 @@ static int init_vo(sh_video_t *sh, AVFrame *frame)
      */
     if (av_cmp_q(frame->sample_aspect_ratio, ctx->last_sample_aspect_ratio) ||
             width != sh->disp_w || height != sh->disp_h ||
-            frame->format != ctx->pix_fmt || !ctx->vo_initialized)
+            pix_fmt != ctx->pix_fmt || !ctx->vo_initialized)
     {
         mp_image_pool_clear(ctx->non_dr1_pool);
         ctx->vo_initialized = 0;
@@ -430,8 +435,8 @@ static int init_vo(sh_video_t *sh, AVFrame *frame)
         sh->disp_w = width;
         sh->disp_h = height;
 
-        ctx->pix_fmt = frame->format;
-        ctx->best_csp = pixfmt2imgfmt(frame->format);
+        ctx->pix_fmt = pix_fmt;
+        ctx->best_csp = pixfmt2imgfmt(pix_fmt);
 
         sh->colorspace = avcol_spc_to_mp_csp(ctx->avctx->colorspace);
         sh->color_range = avcol_range_to_mp_csp_levels(ctx->avctx->color_range);
@@ -623,8 +628,6 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
     }
 
     assert(mpi->planes[0]);
-
-    assert(mpi->imgfmt == pixfmt2imgfmt(pic->format));
 
     mpi->colorspace = sh->colorspace;
     mpi->levels = sh->color_range;
