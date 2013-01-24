@@ -286,21 +286,30 @@ static int stream_reconnect(stream_t *s)
 {
 #define MAX_RECONNECT_RETRIES 5
 #define RECONNECT_SLEEP_MS 1000
-    int retry = 0;
+    if (!s->streaming)
+        return 0;
     int64_t pos = s->pos;
-    // Seeking is used as a hack to make network streams
-    // reopen the connection, ideally they would implement
-    // e.g. a STREAM_CTRL_RECONNECT to do this
-    do {
-        if (retry >= MAX_RECONNECT_RETRIES)
-            return 0;
+    for (int retry = 0; retry < MAX_RECONNECT_RETRIES; retry++) {
+        mp_msg(MSGT_STREAM, MSGL_WARN,
+               "Connection lost! Attempting to reconnect...\n");
+
         if (retry)
             usec_sleep(RECONNECT_SLEEP_MS * 1000);
-        retry++;
+
         s->eof = 1;
         stream_reset(s);
-    } while (stream_seek_internal(s, pos) >= 0 || s->pos != pos); // seek failed
-    return 1;
+
+        // Some streams (internal http.c) don't support STREAM_CTRL_RECONNECT,
+        // but do it when trying to seek.
+        if (s->control) {
+            if (s->control(s, STREAM_CTRL_RECONNECT, NULL) == STREAM_ERROR)
+                continue;
+        }
+
+        if (stream_seek_internal(s, pos) < 0 && s->pos == pos)
+            return 1;
+    }
+    return 0;
 }
 
 int stream_read_internal(stream_t *s, void *buf, int len)

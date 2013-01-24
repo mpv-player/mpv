@@ -30,9 +30,13 @@
 #include "network.h"
 #include "cookies.h"
 
+static int open_f(stream_t *stream, int mode, void *opts, int *file_format);
+
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
     AVIOContext *avio = s->priv;
+    if (!avio)
+        return -1;
     int r = avio_read(avio, buffer, max_len);
     return (r <= 0) ? -1 : r;
 }
@@ -40,6 +44,8 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
 static int write_buffer(stream_t *s, char *buffer, int len)
 {
     AVIOContext *avio = s->priv;
+    if (!avio)
+        return -1;
     avio_write(avio, buffer, len);
     avio_flush(avio);
     if (avio->error)
@@ -50,6 +56,8 @@ static int write_buffer(stream_t *s, char *buffer, int len)
 static int seek(stream_t *s, int64_t newpos)
 {
     AVIOContext *avio = s->priv;
+    if (!avio)
+        return -1;
     s->pos = newpos;
     if (avio_seek(avio, s->pos, SEEK_SET) < 0) {
         s->eof = 1;
@@ -58,9 +66,23 @@ static int seek(stream_t *s, int64_t newpos)
     return 1;
 }
 
+static void close_f(stream_t *stream)
+{
+    AVIOContext *avio = stream->priv;
+    /* NOTE: As of 2011 write streams must be manually flushed before close.
+     * Currently write_buffer() always flushes them after writing.
+     * avio_close() could return an error, but we have no way to return that
+     * with the current stream API.
+     */
+    if (avio)
+        avio_close(avio);
+}
+
 static int control(stream_t *s, int cmd, void *arg)
 {
     AVIOContext *avio = s->priv;
+    if (!avio && cmd != STREAM_CTRL_RECONNECT)
+        return -1;
     int64_t size, ts;
     double pts;
     switch(cmd) {
@@ -78,19 +100,16 @@ static int control(stream_t *s, int cmd, void *arg)
         if (ts >= 0)
             return 1;
         break;
+    case STREAM_CTRL_RECONNECT: {
+        if (avio && avio->write_flag)
+            break; // don't bother with this
+        // avio doesn't seem to support this - emulate it by reopening
+        close_f(s);
+        s->priv = NULL;
+        return open_f(s, STREAM_READ, NULL, &(int) {0});
+    }
     }
     return STREAM_UNSUPPORTED;
-}
-
-static void close_f(stream_t *stream)
-{
-    AVIOContext *avio = stream->priv;
-    /* NOTE: As of 2011 write streams must be manually flushed before close.
-     * Currently write_buffer() always flushes them after writing.
-     * avio_close() could return an error, but we have no way to return that
-     * with the current stream API.
-     */
-    avio_close(avio);
 }
 
 static const char * const prefix[] = { "lavf://", "ffmpeg://" };

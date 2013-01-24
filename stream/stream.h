@@ -101,6 +101,7 @@
 #define STREAM_CTRL_GET_CACHE_SIZE 15
 #define STREAM_CTRL_GET_CACHE_FILL 16
 #define STREAM_CTRL_GET_CACHE_IDLE 17
+#define STREAM_CTRL_RECONNECT 18
 
 struct stream_lang_req {
     int type;     // STREAM_AUDIO, STREAM_SUB
