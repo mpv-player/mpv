@@ -29,6 +29,8 @@
 #include <libavutil/intreadwrite.h>
 #include <libavutil/attributes.h>
 
+#include <libavcodec/version.h>
+
 #include "config.h"
 #include "talloc.h"
 
@@ -2014,8 +2016,15 @@ static void reinit_subs(struct MPContext *mpctx)
         struct stream *s = track->demuxer ? track->demuxer->stream : NULL;
         if (s && s->type == STREAMTYPE_DVD)
             set_dvdsub_fake_extradata(mpctx->sh_sub, s, mpctx->sh_video);
+        // lavc dvdsubdec doesn't read color/resolution on Libav 9.1 and below
+        // Don't use it for new ffmpeg; spudec can't handle ffmpeg .idx demuxing
+        // (ffmpeg added .idx demuxing during lavc 54.79.100)
+        bool broken_lavc = false;
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 40, 0)
+        broken_lavc = true;
+#endif
         if (mpctx->sh_sub->type == 'v' && track->demuxer
-            && track->demuxer->type == DEMUXER_TYPE_MPEG_PS)
+            && (track->demuxer->type == DEMUXER_TYPE_MPEG_PS || broken_lavc))
             init_vo_spudec(mpctx);
         else
             sub_init(mpctx->sh_sub, mpctx->osd);
