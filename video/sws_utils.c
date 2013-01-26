@@ -207,7 +207,7 @@ static void mp_sws_set_conv(struct SwsContext *sws, struct mp_image *dst,
 void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
                       int my_sws_flags)
 {
-    if (dst->imgfmt == IMGFMT_GBRP)
+    if (dst->imgfmt == IMGFMT_GBRP && !sws_isSupportedOutput(PIX_FMT_GBRP))
         return to_gbrp(dst, src, my_sws_flags);
 
     struct SwsContext *sws = sws_alloc_context();
