@@ -198,7 +198,6 @@ static unsigned int find_best_out(vf_instance_t *vf, int in_format){
 static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
-    struct MPOpts *opts = vf->opts;
     unsigned int best=find_best_out(vf, outfmt);
     int int_sws_flags=0;
     int round_w=0, round_h=0;
