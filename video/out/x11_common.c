@@ -65,41 +65,76 @@
 #include <X11/XF86keysym.h>
 #endif
 
-#ifdef CONFIG_XV
-#include <X11/extensions/Xv.h>
-#include <X11/extensions/Xvlib.h>
-
-#include "core/subopt-helper.h"
-#endif
-
 #include "core/input/input.h"
 #include "core/input/keycodes.h"
+
+#define vo_wm_LAYER 1
+#define vo_wm_FULLSCREEN 2
+#define vo_wm_STAYS_ON_TOP 4
+#define vo_wm_ABOVE 8
+#define vo_wm_BELOW 16
+#define vo_wm_NETWM (vo_wm_FULLSCREEN | vo_wm_STAYS_ON_TOP | vo_wm_ABOVE | vo_wm_BELOW)
+
+/* EWMH state actions, see
+         http://freedesktop.org/Standards/wm-spec/index.html#id2768769 */
+#define _NET_WM_STATE_REMOVE        0    /* remove/unset property */
+#define _NET_WM_STATE_ADD           1    /* add/set property */
+#define _NET_WM_STATE_TOGGLE        2    /* toggle property  */
 
 #define WIN_LAYER_ONBOTTOM               2
 #define WIN_LAYER_NORMAL                 4
 #define WIN_LAYER_ONTOP                  6
 #define WIN_LAYER_ABOVE_DOCK             10
 
-int fs_layer = WIN_LAYER_ABOVE_DOCK;
+// ----- Motif header: -------
 
-int stop_xscreensaver = 1;
+#define MWM_HINTS_FUNCTIONS     (1L << 0)
+#define MWM_HINTS_DECORATIONS   (1L << 1)
+#define MWM_HINTS_INPUT_MODE    (1L << 2)
+#define MWM_HINTS_STATUS        (1L << 3)
 
-static int dpms_disabled = 0;
+#define MWM_FUNC_ALL            (1L << 0)
+#define MWM_FUNC_RESIZE         (1L << 1)
+#define MWM_FUNC_MOVE           (1L << 2)
+#define MWM_FUNC_MINIMIZE       (1L << 3)
+#define MWM_FUNC_MAXIMIZE       (1L << 4)
+#define MWM_FUNC_CLOSE          (1L << 5)
 
-char **vo_fstype_list;
+#define MWM_DECOR_ALL           (1L << 0)
+#define MWM_DECOR_BORDER        (1L << 1)
+#define MWM_DECOR_RESIZEH       (1L << 2)
+#define MWM_DECOR_TITLE         (1L << 3)
+#define MWM_DECOR_MENU          (1L << 4)
+#define MWM_DECOR_MINIMIZE      (1L << 5)
+#define MWM_DECOR_MAXIMIZE      (1L << 6)
 
-/* 1 means that the WM is metacity (broken as hell) */
-int metacity_hack = 0;
+#define MWM_INPUT_MODELESS 0
+#define MWM_INPUT_PRIMARY_APPLICATION_MODAL 1
+#define MWM_INPUT_SYSTEM_MODAL 2
+#define MWM_INPUT_FULL_APPLICATION_MODAL 3
+#define MWM_INPUT_APPLICATION_MODAL MWM_INPUT_PRIMARY_APPLICATION_MODAL
 
-#ifdef CONFIG_XF86VM
-static int modecount;
-static XF86VidModeModeInfo **vidmodes;
-static XF86VidModeModeLine modeline;
-#endif
+#define MWM_TEAROFF_WINDOW      (1L<<0)
 
-static int vo_x11_get_fs_type(int supported);
-static void saver_off(Display *);
-static void saver_on(Display *);
+typedef struct
+{
+    long flags;
+    long functions;
+    long decorations;
+    long input_mode;
+    long state;
+} MotifWmHints;
+
+static XErrorHandler old_handler = NULL;
+static int selectinput_err = 0;
+
+static void vo_x11_update_geometry(struct vo *vo, bool update_pos);
+static int vo_x11_get_fs_type(struct vo *vo);
+static void saver_on(struct vo_x11_state *x11);
+static void saver_off(struct vo_x11_state *x11);
+static void vo_x11_selectinput_witherr(Display *display, Window w,
+                                       long event_mask);
+static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer);
 
 /*
  * Sends the EWMH fullscreen state event.
@@ -108,7 +143,7 @@ static void saver_on(Display *);
  *                         _NET_WM_STATE_ADD    -- add state
  *                         _NET_WM_STATE_TOGGLE -- toggle
  */
-void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action)
+static void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action)
 {
     assert(action == _NET_WM_STATE_REMOVE ||
            action == _NET_WM_STATE_ADD || action == _NET_WM_STATE_TOGGLE);
@@ -279,17 +314,18 @@ static int vo_wm_detect(struct vo *vo)
     if (x11_get_property(x11, x11->XA_WIN_PROTOCOLS, &args, &nitems))
     {
         mp_msg(MSGT_VO, MSGL_V, "[x11] Detected wm supports layers.\n");
+        int metacity_hack = 0;
         for (i = 0; i < nitems; i++)
         {
-            if (args[i] == x11->XA_WIN_LAYER)
-            {
+            if (args[i] == x11->XA_WIN_LAYER) {
                 wm |= vo_wm_LAYER;
                 metacity_hack |= 1;
-            } else
+            } else {
                 /* metacity is the only window manager I know which reports
                  * supporting only the _WIN_LAYER hint in _WIN_PROTOCOLS.
                  * (what's more support for it is broken) */
                 metacity_hack |= 2;
+            }
         }
         XFree(args);
         if (wm && (metacity_hack == 1))
@@ -337,7 +373,7 @@ static void init_atoms(struct vo_x11_state *x11)
     x11->XA_NET_WM_CM = XInternAtom(x11->display, buf, False);
 }
 
-void update_xinerama_info(struct vo *vo) {
+void vo_x11_update_screeninfo(struct vo *vo) {
     struct MPOpts *opts = vo->opts;
     xinerama_x = xinerama_y = 0;
 #ifdef CONFIG_XINERAMA
@@ -375,35 +411,25 @@ void update_xinerama_info(struct vo *vo) {
     aspect_save_screenres(vo, opts->vo_screenwidth, opts->vo_screenheight);
 }
 
-int vo_init(struct vo *vo)
+int vo_x11_init(struct vo *vo)
 {
     struct MPOpts *opts = vo->opts;
-// int       mScreen;
-    int depth, bpp;
-    unsigned int mask;
-
-// char    * DisplayName = ":0.0";
-// Display * mDisplay;
-    XImage *mXImage = NULL;
-
-// Window    mRootWin;
-    XWindowAttributes attribs;
     char *dispName;
 
-    if (vo->x11)
-        return 1;
+    assert(!vo->x11);
 
-    vo->x11 = vo_x11_init_state();
-    struct vo_x11_state *x11 = vo->x11;
+    struct vo_x11_state *x11 = talloc_ptrtype(NULL, x11);
+    *x11 = (struct vo_x11_state){
+        .olddecor = MWM_DECOR_ALL,
+        .oldfuncs = MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE |
+                    MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE,
+        .old_gravity = NorthWestGravity,
+        .fs_layer = WIN_LAYER_ABOVE_DOCK,
+    };
+    vo->x11 = x11;
 
     if (vo_rootwin)
         WinID = 0; // use root window
-
-    if (x11->depthonscreen)
-    {
-        saver_off(x11->display);
-        return 1;               // already called
-    }
 
     XSetErrorHandler(x11_errorhandler);
 
@@ -430,6 +456,7 @@ int vo_init(struct vo *vo)
 #ifdef CONFIG_XF86VM
     {
         int clock;
+        XF86VidModeModeLine modeline;
 
         XF86VidModeGetModeLine(x11->display, x11->screen, &clock, &modeline);
         if (!opts->vo_screenwidth)
@@ -444,55 +471,7 @@ int vo_init(struct vo *vo)
         if (!opts->vo_screenheight)
             opts->vo_screenheight = DisplayHeight(x11->display, x11->screen);
     }
-    // get color depth (from root window, or the best visual):
-    XGetWindowAttributes(x11->display, x11->rootwin, &attribs);
-    depth = attribs.depth;
 
-    if (depth != 15 && depth != 16 && depth != 24 && depth != 32)
-    {
-        Visual *visual;
-
-        depth = vo_find_depth_from_visuals(x11->display, x11->screen, &visual);
-        if (depth != -1)
-            mXImage = XCreateImage(x11->display, visual, depth, ZPixmap,
-                                   0, NULL, 1, 1, 8, 1);
-    } else
-        mXImage =
-            XGetImage(x11->display, x11->rootwin, 0, 0, 1, 1, AllPlanes, ZPixmap);
-
-    x11->depthonscreen = depth;   // display depth on screen
-
-    // get bits/pixel from XImage structure:
-    if (mXImage == NULL)
-    {
-        mask = 0;
-    } else
-    {
-        /*
-         * for the depth==24 case, the XImage structures might use
-         * 24 or 32 bits of data per pixel.  The x11->depthonscreen
-         * field stores the amount of data per pixel in the
-         * XImage structure!
-         *
-         * Maybe we should rename vo_depthonscreen to (or add) vo_bpp?
-         */
-        bpp = mXImage->bits_per_pixel;
-        if ((x11->depthonscreen + 7) / 8 != (bpp + 7) / 8)
-            x11->depthonscreen = bpp;     // by A'rpi
-        mask =
-            mXImage->red_mask | mXImage->green_mask | mXImage->blue_mask;
-        mp_msg(MSGT_VO, MSGL_V,
-               "vo: X11 color mask:  %X  (R:%lX G:%lX B:%lX)\n", mask,
-               mXImage->red_mask, mXImage->green_mask, mXImage->blue_mask);
-        XDestroyImage(mXImage);
-    }
-    if (((x11->depthonscreen + 7) / 8) == 2)
-    {
-        if (mask == 0x7FFF)
-            x11->depthonscreen = 15;
-        else if (mask == 0xFFFF)
-            x11->depthonscreen = 16;
-    }
 // XCloseDisplay( mDisplay );
 /* slightly improved local display detection AST */
     if (strncmp(dispName, "unix:", 5) == 0)
@@ -503,39 +482,20 @@ int vo_init(struct vo *vo)
         x11->display_is_local = 1;
     else
         x11->display_is_local = 0;
-    mp_msg(MSGT_VO, MSGL_V,
-           "vo: X11 running at %dx%d with depth %d and %d bpp (\"%s\" => %s display)\n",
-           opts->vo_screenwidth, opts->vo_screenheight, depth, x11->depthonscreen,
-           dispName, x11->display_is_local ? "local" : "remote");
+    mp_msg(MSGT_VO, MSGL_V, "vo: X11 running at %dx%d (\"%s\" => %s display)\n",
+           opts->vo_screenwidth, opts->vo_screenheight, dispName,
+           x11->display_is_local ? "local" : "remote");
 
     x11->wm_type = vo_wm_detect(vo);
 
-    x11->fs_type = vo_x11_get_fs_type(x11->wm_type);
+    x11->fs_type = vo_x11_get_fs_type(vo);
 
     fstype_dump(x11->fs_type);
 
-    saver_off(x11->display);
-    return 1;
-}
+    if (opts->vo_stop_screensaver)
+        saver_off(x11);
 
-void vo_uninit(struct vo_x11_state *x11)
-{
-    if (!x11)
-        return;
-    if (!x11->display)
-    {
-        mp_msg(MSGT_VO, MSGL_V,
-               "vo: x11 uninit called but X11 not initialized..\n");
-    } else {
-        mp_msg(MSGT_VO, MSGL_V, "vo: uninit ...\n");
-        if (x11->xim)
-            XCloseIM(x11->xim);
-        XSetErrorHandler(NULL);
-        XCloseDisplay(x11->display);
-        x11->depthonscreen = 0;
-        x11->display = NULL;
-    }
-    talloc_free(x11);
+    return 1;
 }
 
 static const struct mp_keymap keymap[] = {
@@ -599,55 +559,14 @@ static int vo_x11_lookupkey(int key)
     return mpkey;
 }
 
-
-// ----- Motif header: -------
-
-#define MWM_HINTS_FUNCTIONS     (1L << 0)
-#define MWM_HINTS_DECORATIONS   (1L << 1)
-#define MWM_HINTS_INPUT_MODE    (1L << 2)
-#define MWM_HINTS_STATUS        (1L << 3)
-
-#define MWM_FUNC_ALL            (1L << 0)
-#define MWM_FUNC_RESIZE         (1L << 1)
-#define MWM_FUNC_MOVE           (1L << 2)
-#define MWM_FUNC_MINIMIZE       (1L << 3)
-#define MWM_FUNC_MAXIMIZE       (1L << 4)
-#define MWM_FUNC_CLOSE          (1L << 5)
-
-#define MWM_DECOR_ALL           (1L << 0)
-#define MWM_DECOR_BORDER        (1L << 1)
-#define MWM_DECOR_RESIZEH       (1L << 2)
-#define MWM_DECOR_TITLE         (1L << 3)
-#define MWM_DECOR_MENU          (1L << 4)
-#define MWM_DECOR_MINIMIZE      (1L << 5)
-#define MWM_DECOR_MAXIMIZE      (1L << 6)
-
-#define MWM_INPUT_MODELESS 0
-#define MWM_INPUT_PRIMARY_APPLICATION_MODAL 1
-#define MWM_INPUT_SYSTEM_MODAL 2
-#define MWM_INPUT_FULL_APPLICATION_MODAL 3
-#define MWM_INPUT_APPLICATION_MODAL MWM_INPUT_PRIMARY_APPLICATION_MODAL
-
-#define MWM_TEAROFF_WINDOW      (1L<<0)
-
-typedef struct
-{
-    long flags;
-    long functions;
-    long decorations;
-    long input_mode;
-    long state;
-} MotifWmHints;
-
-static MotifWmHints vo_MotifWmHints;
-static Atom vo_MotifHints = None;
-
-void vo_x11_decoration(struct vo *vo, int d)
+static void vo_x11_decoration(struct vo *vo, int d)
 {
     struct vo_x11_state *x11 = vo->x11;
     Atom mtype;
     int mformat;
     unsigned long mn, mb;
+    Atom vo_MotifHints;
+    MotifWmHints vo_MotifWmHints;
 
     if (!WinID)
         return;
@@ -702,7 +621,7 @@ void vo_x11_decoration(struct vo *vo, int d)
     }
 }
 
-void vo_x11_classhint(struct vo *vo, Window window, const char *name)
+static void vo_x11_classhint(struct vo *vo, Window window, const char *name)
 {
     struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
@@ -719,51 +638,41 @@ void vo_x11_classhint(struct vo *vo, Window window, const char *name)
 void vo_x11_uninit(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
-    saver_on(x11->display);
+    assert(x11);
+
+    saver_on(x11);
     if (x11->window != None)
         vo_showcursor(x11->display, x11->window);
 
     if (x11->f_gc != None)
-    {
         XFreeGC(vo->x11->display, x11->f_gc);
-        x11->f_gc = None;
-    }
-    {
-        if (x11->vo_gc != None)
-        {
-            XFreeGC(vo->x11->display, x11->vo_gc);
-            x11->vo_gc = None;
-        }
-        if (x11->window != None)
-        {
-            XClearWindow(x11->display, x11->window);
-            if (WinID < 0)
-            {
-                XEvent xev;
+    if (x11->vo_gc != None)
+        XFreeGC(vo->x11->display, x11->vo_gc);
+    if (x11->window != None) {
+        XClearWindow(x11->display, x11->window);
+        if (WinID < 0) {
+            XEvent xev;
 
-                if (x11->xic)
-                    XDestroyIC(x11->xic);
-                x11->xic = NULL;
-
-                XUnmapWindow(x11->display, x11->window);
-                XSelectInput(x11->display, x11->window, StructureNotifyMask);
-                XDestroyWindow(x11->display, x11->window);
-                do
-                {
-                    XNextEvent(x11->display, &xev);
-                }
-                while (xev.type != DestroyNotify
-                       || xev.xdestroywindow.event != x11->window);
-            }
-            x11->window = None;
+            XUnmapWindow(x11->display, x11->window);
+            XSelectInput(x11->display, x11->window, StructureNotifyMask);
+            XDestroyWindow(x11->display, x11->window);
+            do {
+                XNextEvent(x11->display, &xev);
+            } while (xev.type != DestroyNotify ||
+                     xev.xdestroywindow.event != x11->window);
         }
-        vo_fs = 0;
-        x11->vo_old_width = x11->vo_old_height = 0;
-        x11->last_video_width = 0;
-        x11->last_video_height = 0;
-        x11->size_changed_during_fs = false;
     }
-    vo_uninit(x11);
+    if (x11->xic)
+        XDestroyIC(x11->xic);
+    vo_fs = 0;
+
+    mp_msg(MSGT_VO, MSGL_V, "vo: uninit ...\n");
+    if (x11->xim)
+        XCloseIM(x11->xim);
+    XSetErrorHandler(NULL);
+    XCloseDisplay(x11->display);
+
+    talloc_free(x11);
     vo->x11 = NULL;
 }
 
@@ -912,40 +821,8 @@ int vo_x11_check_events(struct vo *vo)
     return ret;
 }
 
-/**
- * \brief sets the size and position of the non-fullscreen window.
- */
-static void vo_x11_nofs_sizepos(struct vo *vo, int x, int y,
-                                int width, int height)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    if (width == x11->last_video_width && height == x11->last_video_height) {
-        if (!vo->opts->force_window_position && !x11->size_changed_during_fs)
-            return;
-    } else if (vo_fs)
-        x11->size_changed_during_fs = true;
-    x11->last_video_height = height;
-    x11->last_video_width = width;
-    vo_x11_sizehint(vo, x, y, width, height, 0);
-  if (vo_fs) {
-    x11->vo_old_x = x;
-    x11->vo_old_y = y;
-    x11->vo_old_width = width;
-    x11->vo_old_height = height;
-  }
-  else
-  {
-    vo->dwidth = width;
-    vo->dheight = height;
-    if (vo->opts->force_window_position)
-        XMoveResizeWindow(vo->x11->display, vo->x11->window, x, y, width,
-                          height);
-    else
-        XResizeWindow(vo->x11->display, vo->x11->window, width, height);
-  }
-}
-
-void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max)
+static void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height,
+                            int max)
 {
     struct vo_x11_state *x11 = vo->x11;
     x11->vo_hint.flags = 0;
@@ -988,6 +865,39 @@ void vo_x11_sizehint(struct vo *vo, int x, int y, int width, int height, int max
     x11->vo_hint.flags |= PWinGravity;
     x11->vo_hint.win_gravity = StaticGravity;
     XSetWMNormalHints(x11->display, x11->window, &x11->vo_hint);
+}
+
+/**
+ * \brief sets the size and position of the non-fullscreen window.
+ */
+static void vo_x11_nofs_sizepos(struct vo *vo, int x, int y,
+                                int width, int height)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    if (width == x11->last_video_width && height == x11->last_video_height) {
+        if (!vo->opts->force_window_position && !x11->size_changed_during_fs)
+            return;
+    } else if (vo_fs)
+        x11->size_changed_during_fs = true;
+    x11->last_video_height = height;
+    x11->last_video_width = width;
+    vo_x11_sizehint(vo, x, y, width, height, 0);
+  if (vo_fs) {
+    x11->vo_old_x = x;
+    x11->vo_old_y = y;
+    x11->vo_old_width = width;
+    x11->vo_old_height = height;
+  }
+  else
+  {
+    vo->dwidth = width;
+    vo->dheight = height;
+    if (vo->opts->force_window_position)
+        XMoveResizeWindow(vo->x11->display, vo->x11->window, x, y, width,
+                          height);
+    else
+        XResizeWindow(vo->x11->display, vo->x11->window, width, height);
+  }
 }
 
 static int vo_x11_get_gnome_layer(struct vo_x11_state *x11, Window win)
@@ -1232,7 +1142,7 @@ void vo_x11_clearwindow(struct vo *vo, Window vo_window)
 }
 
 
-void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
+static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
 {
     struct vo_x11_state *x11 = vo->x11;
     if (WinID >= 0)
@@ -1251,7 +1161,8 @@ void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
         xev.window = vo_window;
         xev.message_type = x11->XA_WIN_LAYER;
         xev.format = 32;
-        xev.data.l[0] = layer ? fs_layer : x11->orig_layer;  // if not fullscreen, stay on default layer
+        // if not fullscreen, stay on default layer
+        xev.data.l[0] = layer ? x11->fs_layer : x11->orig_layer;
         xev.data.l[1] = CurrentTime;
         mp_msg(MSGT_VO, MSGL_V,
                "[x11] Layered style stay on top (layer %ld).\n",
@@ -1292,22 +1203,24 @@ void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
     }
 }
 
-static int vo_x11_get_fs_type(int supported)
+static int vo_x11_get_fs_type(struct vo *vo)
 {
+    struct vo_x11_state *x11 = vo->x11;
+    int type = x11->wm_type;
+    char **fstype_list = vo->opts->vo_fstype_list;
     int i;
-    int type = supported;
 
-    if (vo_fstype_list)
+    if (fstype_list)
     {
-        for (i = 0; vo_fstype_list[i]; i++)
+        for (i = 0; fstype_list[i]; i++)
         {
             int neg = 0;
-            char *arg = vo_fstype_list[i];
+            char *arg = fstype_list[i];
 
-            if (vo_fstype_list[i][0] == '-')
+            if (fstype_list[i][0] == '-')
             {
                 neg = 1;
-                arg = vo_fstype_list[i] + 1;
+                arg = fstype_list[i] + 1;
             }
 
             if (!strncmp(arg, "layer", 5))
@@ -1315,11 +1228,11 @@ static int vo_x11_get_fs_type(int supported)
                 if (!neg && (arg[5] == '='))
                 {
                     char *endptr = NULL;
-                    int layer = strtol(vo_fstype_list[i] + 6, &endptr, 10);
+                    int layer = strtol(fstype_list[i] + 6, &endptr, 10);
 
                     if (endptr && *endptr == '\0' && layer >= 0
                         && layer <= 15)
-                        fs_layer = layer;
+                        x11->fs_layer = layer;
                 }
                 if (neg)
                     type &= ~vo_wm_LAYER;
@@ -1363,18 +1276,15 @@ static int vo_x11_get_fs_type(int supported)
     return type;
 }
 
-/**
- * \brief update vo->dx, vo->dy, vo->dwidth and vo->dheight with current values of vo->x11->window
- * \return returns current color depth of vo->x11->window
- */
-int vo_x11_update_geometry(struct vo *vo, bool update_pos)
+// update vo->dx, vo->dy, vo->dwidth and vo->dheight with current values of vo->x11->window
+static void vo_x11_update_geometry(struct vo *vo, bool update_pos)
 {
     struct vo_x11_state *x11 = vo->x11;
-    unsigned depth, w, h;
+    unsigned w, h, dummy_uint;
     int dummy_int;
     Window dummy_win;
     XGetGeometry(x11->display, x11->window, &dummy_win, &dummy_int, &dummy_int,
-                 &w, &h, &dummy_int, &depth);
+                 &w, &h, &dummy_int, &dummy_uint);
     if (w <= INT_MAX && h <= INT_MAX) {
         vo->dwidth = w;
         vo->dheight = h;
@@ -1382,8 +1292,6 @@ int vo_x11_update_geometry(struct vo *vo, bool update_pos)
     if (update_pos)
         XTranslateCoordinates(x11->display, x11->window, x11->rootwin, 0, 0,
                               &vo->dx, &vo->dy, &dummy_win);
-
-    return depth <= INT_MAX ? depth : 0;
 }
 
 void vo_x11_fullscreen(struct vo *vo)
@@ -1424,7 +1332,7 @@ void vo_x11_fullscreen(struct vo *vo)
             x11->vo_old_width = vo->dwidth;
             x11->vo_old_height = vo->dheight;
         }
-            update_xinerama_info(vo);
+            vo_x11_update_screeninfo(vo);
             x = xinerama_x;
             y = xinerama_y;
             w = opts->vo_screenwidth;
@@ -1484,16 +1392,14 @@ void vo_x11_border(struct vo *vo)
  * XScreensaver stuff
  */
 
-static int screensaver_off;
-static unsigned int time_last;
-
 void xscreensaver_heartbeat(struct vo_x11_state *x11)
 {
     unsigned int time = GetTimerMS();
 
-    if (x11->display && screensaver_off && (time - time_last) > 30000)
+    if (x11->display && x11->screensaver_off &&
+        (time - x11->screensaver_time_last) > 30000)
     {
-        time_last = time;
+        x11->screensaver_time_last = time;
 
         XResetScreenSaver(x11->display);
     }
@@ -1519,25 +1425,21 @@ static int xss_suspend(Display *mDisplay, Bool suspend)
  * End of XScreensaver stuff
  */
 
-static void saver_on(Display * mDisplay)
+static void saver_on(struct vo_x11_state *x11)
 {
-
-    if (!screensaver_off)
+    Display *mDisplay = x11->display;
+    if (!x11->screensaver_off)
         return;
-    screensaver_off = 0;
+    x11->screensaver_off = 0;
     if (xss_suspend(mDisplay, False))
         return;
 #ifdef CONFIG_XDPMS
-    if (dpms_disabled)
-    {
+    if (x11->dpms_disabled) {
         int nothing;
-        if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
-        {
-            if (!DPMSEnable(mDisplay))
-            {                   // restoring power saving settings
+        if (DPMSQueryExtension(mDisplay, &nothing, &nothing)) {
+            if (!DPMSEnable(mDisplay)) {    // restoring power saving settings
                 mp_msg(MSGT_VO, MSGL_WARN, "DPMS not available?\n");
-            } else
-            {
+            } else {
                 // DPMS does not seem to be enabled unless we call DPMSInfo
                 BOOL onoff;
                 CARD16 state;
@@ -1554,18 +1456,19 @@ static void saver_on(Display * mDisplay)
                 }
             }
         }
-        dpms_disabled = 0;
+        x11->dpms_disabled = 0;
     }
 #endif
 }
 
-static void saver_off(Display * mDisplay)
+static void saver_off(struct vo_x11_state *x11)
 {
+    Display *mDisplay = x11->display;
     int nothing;
 
-    if (!stop_xscreensaver || screensaver_off)
+    if (x11->screensaver_off)
         return;
-    screensaver_off = 1;
+    x11->screensaver_off = 1;
     if (xss_suspend(mDisplay, True))
         return;
 #ifdef CONFIG_XDPMS
@@ -1580,7 +1483,7 @@ static void saver_off(Display * mDisplay)
             Status stat;
 
             mp_msg(MSGT_VO, MSGL_V, "Disabling DPMS\n");
-            dpms_disabled = 1;
+            x11->dpms_disabled = 1;
             stat = DPMSDisable(mDisplay);       // monitor powersave off
             mp_msg(MSGT_VO, MSGL_V, "DPMSDisable stat: %d\n", stat);
         }
@@ -1588,8 +1491,6 @@ static void saver_off(Display * mDisplay)
 #endif
 }
 
-static XErrorHandler old_handler = NULL;
-static int selectinput_err = 0;
 static int x11_selectinput_errorhandler(Display * display,
                                         XErrorEvent * event)
 {
@@ -1611,8 +1512,8 @@ static int x11_selectinput_errorhandler(Display * display,
     return 0;
 }
 
-void vo_x11_selectinput_witherr(Display * display, Window w,
-                                long event_mask)
+static void vo_x11_selectinput_witherr(Display * display, Window w,
+                                       long event_mask)
 {
     XSync(display, False);
     old_handler = XSetErrorHandler(x11_selectinput_errorhandler);
@@ -1663,18 +1564,18 @@ void vo_vm_switch(struct vo *vo)
                "XF86VidMode extension not available.\n");
     }
 
-    if (have_vm)
-    {
-        if (vidmodes == NULL)
-            XF86VidModeGetAllModeLines(mDisplay, x11->screen, &modecount,
-                                       &vidmodes);
+    if (have_vm) {
+        int modecount = 0;
+        XF86VidModeModeInfo **vidmodes = NULL;
+        XF86VidModeGetAllModeLines(mDisplay, x11->screen, &modecount, &vidmodes);
         j = 0;
         modeline_width = vidmodes[0]->hdisplay;
         modeline_height = vidmodes[0]->vdisplay;
 
-        for (i = 1; i < modecount; i++)
+        for (i = 1; i < modecount; i++) {
             if ((vidmodes[i]->hdisplay >= X)
                 && (vidmodes[i]->vdisplay >= Y))
+            {
                 if ((vidmodes[i]->hdisplay <= modeline_width)
                     && (vidmodes[i]->vdisplay <= modeline_height))
                 {
@@ -1682,6 +1583,8 @@ void vo_vm_switch(struct vo *vo)
                     modeline_height = vidmodes[i]->vdisplay;
                     j = i;
                 }
+            }
+        }
 
         mp_tmsg(MSGT_VO, MSGL_INFO, "XF86VM: Selected video mode %dx%d for image size %dx%d.\n",
                modeline_width, modeline_height, X, Y);
@@ -1698,21 +1601,23 @@ void vo_vm_switch(struct vo *vo)
         vo->dwidth = modeline_width;
         vo->dheight = modeline_height;
         aspect_save_screenres(vo, modeline_width, modeline_height);
+
+        x11->vm_set = 1;
+        free(vidmodes);
     }
 }
 
 void vo_vm_close(struct vo *vo)
 {
-    Display *dpy = vo->x11->display;
+    struct vo_x11_state *x11 = vo->x11;
+    Display *dpy = x11->display;
     struct MPOpts *opts = vo->opts;
-    if (vidmodes != NULL)
-    {
+    if (x11->vm_set) {
+        int modecount = 0;
+        XF86VidModeModeInfo **vidmodes = NULL;
         int i;
 
-        free(vidmodes);
-        vidmodes = NULL;
-        XF86VidModeGetAllModeLines(dpy, vo->x11->screen, &modecount,
-                                   &vidmodes);
+        XF86VidModeGetAllModeLines(dpy, x11->screen, &modecount, &vidmodes);
         for (i = 0; i < modecount; i++)
             if ((vidmodes[i]->hdisplay == opts->vo_screenwidth)
                 && (vidmodes[i]->vdisplay == opts->vo_screenheight))
@@ -1723,10 +1628,9 @@ void vo_vm_close(struct vo *vo)
                 break;
             }
 
-        XF86VidModeSwitchToMode(dpy, vo->x11->screen, vidmodes[i]);
-        XF86VidModeSwitchToMode(dpy, vo->x11->screen, vidmodes[i]);
+        XF86VidModeSwitchToMode(dpy, x11->screen, vidmodes[i]);
+        XF86VidModeSwitchToMode(dpy, x11->screen, vidmodes[i]);
         free(vidmodes);
-        vidmodes = NULL;
         modecount = 0;
     }
 }
@@ -1745,64 +1649,6 @@ double vo_vm_get_fps(struct vo *vo)
 #endif
 
 
-/*
- * Scan the available visuals on this Display/Screen.  Try to find
- * the 'best' available TrueColor visual that has a decent color
- * depth (at least 15bit).  If there are multiple visuals with depth
- * >= 15bit, we prefer visuals with a smaller color depth.
- */
-int vo_find_depth_from_visuals(Display * dpy, int screen,
-                               Visual ** visual_return)
-{
-    XVisualInfo visual_tmpl;
-    XVisualInfo *visuals;
-    int nvisuals, i;
-    int bestvisual = -1;
-    int bestvisual_depth = -1;
-
-    visual_tmpl.screen = screen;
-    visual_tmpl.class = TrueColor;
-    visuals = XGetVisualInfo(dpy,
-                             VisualScreenMask | VisualClassMask,
-                             &visual_tmpl, &nvisuals);
-    if (visuals != NULL)
-    {
-        for (i = 0; i < nvisuals; i++)
-        {
-            mp_msg(MSGT_VO, MSGL_V,
-                   "vo: X11 truecolor visual %#lx, depth %d, R:%lX G:%lX B:%lX\n",
-                   visuals[i].visualid, visuals[i].depth,
-                   visuals[i].red_mask, visuals[i].green_mask,
-                   visuals[i].blue_mask);
-            /*
-             * Save the visual index and its depth, if this is the first
-             * truecolor visul, or a visual that is 'preferred' over the
-             * previous 'best' visual.
-             */
-            if (bestvisual_depth == -1
-                || (visuals[i].depth >= 15
-                    && (visuals[i].depth < bestvisual_depth
-                        || bestvisual_depth < 15)))
-            {
-                bestvisual = i;
-                bestvisual_depth = visuals[i].depth;
-            }
-        }
-
-        if (bestvisual != -1 && visual_return != NULL)
-            *visual_return = visuals[bestvisual].visual;
-
-        XFree(visuals);
-    }
-    return bestvisual_depth;
-}
-
-
-static Colormap cmap = None;
-static XColor cols[256];
-static int cm_size, red_mask, green_mask, blue_mask;
-
-
 Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1813,39 +1659,39 @@ Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo)
                                AllocNone);
 
     /* can this function get called twice or more? */
-    if (cmap)
-        return cmap;
-    cm_size = vinfo->colormap_size;
-    red_mask = vinfo->red_mask;
-    green_mask = vinfo->green_mask;
-    blue_mask = vinfo->blue_mask;
-    ru = (red_mask & (red_mask - 1)) ^ red_mask;
-    gu = (green_mask & (green_mask - 1)) ^ green_mask;
-    bu = (blue_mask & (blue_mask - 1)) ^ blue_mask;
-    rvu = 65536ull * ru / (red_mask + ru);
-    gvu = 65536ull * gu / (green_mask + gu);
-    bvu = 65536ull * bu / (blue_mask + bu);
+    if (x11->cmap)
+        return x11->cmap;
+    x11->cm_size = vinfo->colormap_size;
+    x11->red_mask = vinfo->red_mask;
+    x11->green_mask = vinfo->green_mask;
+    x11->blue_mask = vinfo->blue_mask;
+    ru = (x11->red_mask & (x11->red_mask - 1)) ^ x11->red_mask;
+    gu = (x11->green_mask & (x11->green_mask - 1)) ^ x11->green_mask;
+    bu = (x11->blue_mask & (x11->blue_mask - 1)) ^ x11->blue_mask;
+    rvu = 65536ull * ru / (x11->red_mask + ru);
+    gvu = 65536ull * gu / (x11->green_mask + gu);
+    bvu = 65536ull * bu / (x11->blue_mask + bu);
     r = g = b = 0;
     rv = gv = bv = 0;
     m = DoRed | DoGreen | DoBlue;
-    for (k = 0; k < cm_size; k++)
+    for (k = 0; k < x11->cm_size; k++)
     {
         int t;
 
-        cols[k].pixel = r | g | b;
-        cols[k].red = rv;
-        cols[k].green = gv;
-        cols[k].blue = bv;
-        cols[k].flags = m;
-        t = (r + ru) & red_mask;
+        x11->cols[k].pixel = r | g | b;
+        x11->cols[k].red = rv;
+        x11->cols[k].green = gv;
+        x11->cols[k].blue = bv;
+        x11->cols[k].flags = m;
+        t = (r + ru) & x11->red_mask;
         if (t < r)
             m &= ~DoRed;
         r = t;
-        t = (g + gu) & green_mask;
+        t = (g + gu) & x11->green_mask;
         if (t < g)
             m &= ~DoGreen;
         g = t;
-        t = (b + bu) & blue_mask;
+        t = (b + bu) & x11->blue_mask;
         if (t < b)
             m &= ~DoBlue;
         b = t;
@@ -1853,21 +1699,11 @@ Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo)
         gv += gvu;
         bv += bvu;
     }
-    cmap = XCreateColormap(x11->display, x11->rootwin, vinfo->visual, AllocAll);
-    XStoreColors(x11->display, cmap, cols, cm_size);
-    return cmap;
+    x11->cmap = XCreateColormap(x11->display, x11->rootwin, vinfo->visual,
+                                AllocAll);
+    XStoreColors(x11->display, x11->cmap, x11->cols, x11->cm_size);
+    return x11->cmap;
 }
-
-/*
- * Via colormaps/gamma ramps we can do gamma, brightness, contrast,
- * hue and red/green/blue intensity, but we cannot do saturation.
- * Currently only gamma, brightness and contrast are implemented.
- * Is there sufficient interest for hue and/or red/green/blue intensity?
- */
-/* these values have range [-100,100] and are initially 0 */
-static int vo_gamma = 0;
-static int vo_brightness = 0;
-static int vo_contrast = 0;
 
 static int transform_color(float val,
                            float brightness, float contrast, float gamma) {
@@ -1883,9 +1719,13 @@ static int transform_color(float val,
 
 uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value)
 {
+    struct vo_x11_state *x11 = vo->x11;
     float gamma, brightness, contrast;
     float rf, gf, bf;
     int k;
+    int red_mask = x11->red_mask;
+    int green_mask = x11->green_mask;
+    int blue_mask = x11->blue_mask;
 
     /*
      * IMPLEMENTME: consider using XF86VidModeSetGammaRamp in the case
@@ -1898,21 +1738,21 @@ uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value)
      * for some reason) it is impossible to restore the setting,
      * and such behaviour could be rather annoying for the users.
      */
-    if (cmap == None)
+    if (x11->cmap == None)
         return VO_NOTAVAIL;
 
     if (!strcasecmp(name, "brightness"))
-        vo_brightness = value;
+        x11->vo_brightness = value;
     else if (!strcasecmp(name, "contrast"))
-        vo_contrast = value;
+        x11->vo_contrast = value;
     else if (!strcasecmp(name, "gamma"))
-        vo_gamma = value;
+        x11->vo_gamma = value;
     else
         return VO_NOTIMPL;
 
-    brightness = 0.01 * vo_brightness;
-    contrast = tan(0.0095 * (vo_contrast + 100) * M_PI / 4);
-    gamma = pow(2, -0.02 * vo_gamma);
+    brightness = 0.01 * x11->vo_brightness;
+    contrast = tan(0.0095 * (x11->vo_contrast + 100) * M_PI / 4);
+    gamma = pow(2, -0.02 * x11->vo_gamma);
 
     rf = (float) ((red_mask & (red_mask - 1)) ^ red_mask) / red_mask;
     gf = (float) ((green_mask & (green_mask - 1)) ^ green_mask) /
@@ -1920,28 +1760,29 @@ uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value)
     bf = (float) ((blue_mask & (blue_mask - 1)) ^ blue_mask) / blue_mask;
 
     /* now recalculate the colormap using the newly set value */
-    for (k = 0; k < cm_size; k++)
+    for (k = 0; k < x11->cm_size; k++)
     {
-        cols[k].red   = transform_color(rf * k, brightness, contrast, gamma);
-        cols[k].green = transform_color(gf * k, brightness, contrast, gamma);
-        cols[k].blue  = transform_color(bf * k, brightness, contrast, gamma);
+        x11->cols[k].red   = transform_color(rf * k, brightness, contrast, gamma);
+        x11->cols[k].green = transform_color(gf * k, brightness, contrast, gamma);
+        x11->cols[k].blue  = transform_color(bf * k, brightness, contrast, gamma);
     }
 
-    XStoreColors(vo->x11->display, cmap, cols, cm_size);
+    XStoreColors(vo->x11->display, x11->cmap, x11->cols, x11->cm_size);
     XFlush(vo->x11->display);
     return VO_TRUE;
 }
 
-uint32_t vo_x11_get_equalizer(const char *name, int *value)
+uint32_t vo_x11_get_equalizer(struct vo *vo, const char *name, int *value)
 {
-    if (cmap == None)
+    struct vo_x11_state *x11 = vo->x11;
+    if (x11->cmap == None)
         return VO_NOTAVAIL;
     if (!strcasecmp(name, "brightness"))
-        *value = vo_brightness;
+        *value = x11->vo_brightness;
     else if (!strcasecmp(name, "contrast"))
-        *value = vo_contrast;
+        *value = x11->vo_contrast;
     else if (!strcasecmp(name, "gamma"))
-        *value = vo_gamma;
+        *value = x11->vo_gamma;
     else
         return VO_NOTIMPL;
     return VO_TRUE;
@@ -1951,451 +1792,4 @@ bool vo_x11_screen_is_composited(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     return XGetSelectionOwner(x11->display, x11->XA_NET_WM_CM) != None;
-}
-
-#ifdef CONFIG_XV
-
-static int xv_find_atom(struct vo *vo, uint32_t xv_port, const char *name,
-                        bool get, int *min, int *max)
-{
-    Atom atom = None;
-    int howmany = 0;
-    XvAttribute *attributes = XvQueryPortAttributes(vo->x11->display, xv_port,
-                                                    &howmany);
-    for (int i = 0; i < howmany && attributes; i++) {
-        int flag = get ? XvGettable : XvSettable;
-        if (attributes[i].flags & flag) {
-            atom = XInternAtom(vo->x11->display, attributes[i].name, True);
-            *min = attributes[i].min_value;
-            *max = attributes[i].max_value;
-/* since we have SET_DEFAULTS first in our list, we can check if it's available
-   then trigger it if it's ok so that the other values are at default upon query */
-            if (atom != None) {
-                if (!strcmp(attributes[i].name, "XV_BRIGHTNESS") &&
-                    (!strcasecmp(name, "brightness")))
-                    break;
-                else if (!strcmp(attributes[i].name, "XV_CONTRAST") &&
-                         (!strcasecmp(name, "contrast")))
-                    break;
-                else if (!strcmp(attributes[i].name, "XV_SATURATION") &&
-                         (!strcasecmp(name, "saturation")))
-                    break;
-                else if (!strcmp(attributes[i].name, "XV_HUE") &&
-                         (!strcasecmp(name, "hue")))
-                    break;
-                if (!strcmp(attributes[i].name, "XV_RED_INTENSITY") &&
-                        (!strcasecmp(name, "red_intensity")))
-                    break;
-                else if (!strcmp(attributes[i].name, "XV_GREEN_INTENSITY")
-                         && (!strcasecmp(name, "green_intensity")))
-                    break;
-                else if (!strcmp(attributes[i].name, "XV_BLUE_INTENSITY")
-                         && (!strcasecmp(name, "blue_intensity")))
-                    break;
-                else if ((!strcmp(attributes[i].name, "XV_ITURBT_709") //NVIDIA
-                          || !strcmp(attributes[i].name, "XV_COLORSPACE"))//ATI
-                         && (!strcasecmp(name, "bt_709")))
-                    break;
-                atom = None;
-                continue;
-            }
-        }
-    }
-    XFree(attributes);
-    return atom;
-}
-
-int vo_xv_set_eq(struct vo *vo, uint32_t xv_port, const char *name, int value)
-{
-    mp_dbg(MSGT_VO, MSGL_V, "xv_set_eq called! (%s, %d)\n", name, value);
-
-    int min, max;
-    int atom = xv_find_atom(vo, xv_port, name, false, &min, &max);
-    if (atom != None) {
-        // -100 -> min
-        //   0  -> (max+min)/2
-        // +100 -> max
-        int port_value = (value + 100) * (max - min) / 200 + min;
-        XvSetPortAttribute(vo->x11->display, xv_port, atom, port_value);
-        return VO_TRUE;
-    }
-    return VO_FALSE;
-}
-
-int vo_xv_get_eq(struct vo *vo, uint32_t xv_port, const char *name, int *value)
-{
-    int min, max;
-    int atom = xv_find_atom(vo, xv_port, name, true, &min, &max);
-    if (atom != None) {
-        int port_value = 0;
-        XvGetPortAttribute(vo->x11->display, xv_port, atom, &port_value);
-
-        *value = (port_value - min) * 200 / (max - min) - 100;
-        mp_dbg(MSGT_VO, MSGL_V, "xv_get_eq called! (%s, %d)\n",
-                name, *value);
-        return VO_TRUE;
-    }
-    return VO_FALSE;
-}
-
-/**
- * \brief Interns the requested atom if it is available.
- *
- * \param atom_name String containing the name of the requested atom.
- *
- * \return Returns the atom if available, else None is returned.
- *
- */
-static Atom xv_intern_atom_if_exists(struct vo_x11_state *x11,
-                                     char const *atom_name)
-{
-  XvAttribute * attributes;
-  int attrib_count,i;
-  Atom xv_atom = None;
-
-  attributes = XvQueryPortAttributes(x11->display, x11->xv_port, &attrib_count );
-  if( attributes!=NULL )
-  {
-    for ( i = 0; i < attrib_count; ++i )
-    {
-      if ( strcmp(attributes[i].name, atom_name ) == 0 )
-      {
-        xv_atom = XInternAtom(x11->display, atom_name, False );
-        break; // found what we want, break out
-      }
-    }
-    XFree( attributes );
-  }
-
-  return xv_atom;
-}
-
-/**
- * \brief Try to enable vsync for xv.
- * \return Returns -1 if not available, 0 on failure and 1 on success.
- */
-int vo_xv_enable_vsync(struct vo *vo)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    Atom xv_atom = xv_intern_atom_if_exists(x11, "XV_SYNC_TO_VBLANK");
-  if (xv_atom == None)
-    return -1;
-  return XvSetPortAttribute(x11->display, x11->xv_port, xv_atom, 1) == Success;
-}
-
-/**
- * \brief Get maximum supported source image dimensions.
- *
- *   This function does not set the variables pointed to by
- * width and height if the information could not be retrieved,
- * so the caller is reponsible for properly initializing them.
- *
- * \param width [out] The maximum width gets stored here.
- * \param height [out] The maximum height gets stored here.
- *
- */
-void vo_xv_get_max_img_dim(struct vo *vo,  uint32_t * width, uint32_t * height)
-{
-    struct vo_x11_state *x11 = vo->x11;
-  XvEncodingInfo * encodings;
-  //unsigned long num_encodings, idx; to int or too long?!
-  unsigned int num_encodings, idx;
-
-  XvQueryEncodings(x11->display, x11->xv_port, &num_encodings, &encodings);
-
-  if ( encodings )
-  {
-      for ( idx = 0; idx < num_encodings; ++idx )
-      {
-          if ( strcmp( encodings[idx].name, "XV_IMAGE" ) == 0 )
-          {
-              *width  = encodings[idx].width;
-              *height = encodings[idx].height;
-              break;
-          }
-      }
-  }
-
-  mp_msg( MSGT_VO, MSGL_V,
-          "[xv common] Maximum source image dimensions: %ux%u\n",
-          *width, *height );
-
-  XvFreeEncodingInfo( encodings );
-}
-
-/**
- * \brief Print information about the colorkey method and source.
- *
- * \param ck_handling Integer value containing the information about
- *                    colorkey handling (see x11_common.h).
- *
- * Outputs the content of |ck_handling| as a readable message.
- *
- */
-static void vo_xv_print_ck_info(struct vo_x11_state *x11)
-{
-  mp_msg( MSGT_VO, MSGL_V, "[xv common] " );
-
-  switch ( x11->xv_ck_info.method )
-  {
-    case CK_METHOD_NONE:
-      mp_msg( MSGT_VO, MSGL_V, "Drawing no colorkey.\n" ); return;
-    case CK_METHOD_AUTOPAINT:
-      mp_msg( MSGT_VO, MSGL_V, "Colorkey is drawn by Xv." ); break;
-    case CK_METHOD_MANUALFILL:
-      mp_msg( MSGT_VO, MSGL_V, "Drawing colorkey manually." ); break;
-    case CK_METHOD_BACKGROUND:
-      mp_msg( MSGT_VO, MSGL_V, "Colorkey is drawn as window background." ); break;
-  }
-
-  mp_msg( MSGT_VO, MSGL_V, "\n[xv common] " );
-
-  switch ( x11->xv_ck_info.source )
-  {
-    case CK_SRC_CUR:
-      mp_msg( MSGT_VO, MSGL_V, "Using colorkey from Xv (0x%06lx).\n",
-              x11->xv_colorkey );
-      break;
-    case CK_SRC_USE:
-      if ( x11->xv_ck_info.method == CK_METHOD_AUTOPAINT )
-      {
-        mp_msg( MSGT_VO, MSGL_V,
-                "Ignoring colorkey from mpv (0x%06lx).\n",
-                x11->xv_colorkey );
-      }
-      else
-      {
-        mp_msg( MSGT_VO, MSGL_V,
-                "Using colorkey from mpv (0x%06lx)."
-                " Use -colorkey to change.\n",
-                x11->xv_colorkey );
-      }
-      break;
-    case CK_SRC_SET:
-      mp_msg( MSGT_VO, MSGL_V,
-              "Setting and using colorkey from mpv (0x%06lx)."
-              " Use -colorkey to change.\n",
-              x11->xv_colorkey );
-      break;
-  }
-}
-/**
- * \brief Init colorkey depending on the settings in xv_ck_info.
- *
- * \return Returns 0 on failure and 1 on success.
- *
- * Sets the colorkey variable according to the CK_SRC_* and CK_METHOD_*
- * flags in xv_ck_info.
- *
- * Possiblilities:
- *   * Methods
- *     - manual colorkey drawing ( CK_METHOD_MANUALFILL )
- *     - set colorkey as window background ( CK_METHOD_BACKGROUND )
- *     - let Xv paint the colorkey ( CK_METHOD_AUTOPAINT )
- *   * Sources
- *     - use currently set colorkey ( CK_SRC_CUR )
- *     - use colorkey in vo_colorkey ( CK_SRC_USE )
- *     - use and set colorkey in vo_colorkey ( CK_SRC_SET )
- *
- * NOTE: If vo_colorkey has bits set after the first 3 low order bytes
- *       we don't draw anything as this means it was forced to off.
- */
-int vo_xv_init_colorkey(struct vo *vo)
-{
-    struct vo_x11_state *x11 = vo->x11;
-  Atom xv_atom;
-  int rez;
-
-  /* check if colorkeying is needed */
-  xv_atom = xv_intern_atom_if_exists(vo->x11, "XV_COLORKEY");
-
-  /* if we have to deal with colorkeying ... */
-  if( xv_atom != None && !(vo_colorkey & 0xFF000000) )
-  {
-    /* check if we should use the colorkey specified in vo_colorkey */
-    if ( x11->xv_ck_info.source != CK_SRC_CUR )
-    {
-      x11->xv_colorkey = vo_colorkey;
-
-      /* check if we have to set the colorkey too */
-      if ( x11->xv_ck_info.source == CK_SRC_SET )
-      {
-        xv_atom = XInternAtom(x11->display, "XV_COLORKEY",False);
-
-        rez = XvSetPortAttribute(x11->display, x11->xv_port, xv_atom, vo_colorkey);
-        if ( rez != Success )
-        {
-          mp_msg( MSGT_VO, MSGL_FATAL,
-                  "[xv common] Couldn't set colorkey!\n" );
-          return 0; // error setting colorkey
-        }
-      }
-    }
-    else
-    {
-      int colorkey_ret;
-
-      rez=XvGetPortAttribute(x11->display,x11->xv_port, xv_atom, &colorkey_ret);
-      if ( rez == Success )
-      {
-         x11->xv_colorkey = colorkey_ret;
-      }
-      else
-      {
-        mp_msg( MSGT_VO, MSGL_FATAL,
-                "[xv common] Couldn't get colorkey!"
-                "Maybe the selected Xv port has no overlay.\n" );
-        return 0; // error getting colorkey
-      }
-    }
-
-    xv_atom = xv_intern_atom_if_exists(vo->x11, "XV_AUTOPAINT_COLORKEY");
-
-    /* should we draw the colorkey ourselves or activate autopainting? */
-    if ( x11->xv_ck_info.method == CK_METHOD_AUTOPAINT )
-    {
-      rez = !Success; // reset rez to something different than Success
-
-      if ( xv_atom != None ) // autopaint is supported
-      {
-        rez = XvSetPortAttribute(x11->display, x11->xv_port, xv_atom, 1);
-      }
-
-      if ( rez != Success )
-      {
-        // fallback to manual colorkey drawing
-        x11->xv_ck_info.method = CK_METHOD_MANUALFILL;
-      }
-    }
-    else // disable colorkey autopainting if supported
-    {
-      if ( xv_atom != None ) // we have autopaint attribute
-      {
-        XvSetPortAttribute(x11->display, x11->xv_port, xv_atom, 0);
-      }
-    }
-  }
-  else // do no colorkey drawing at all
-  {
-    x11->xv_ck_info.method = CK_METHOD_NONE;
-  } /* end: should we draw colorkey */
-
-  /* output information about the current colorkey settings */
-  vo_xv_print_ck_info(x11);
-
-  return 1; // success
-}
-
-/**
- * \brief Draw the colorkey on the video window.
- *
- * Draws the colorkey depending on the set method ( colorkey_handling ).
- *
- * Also draws the black bars ( when the video doesn't fit the display in
- * fullscreen ) separately, so they don't overlap with the video area.
- * It doesn't call XFlush.
- *
- */
-void vo_xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
-                         int32_t w, int32_t h)
-{
-    struct vo_x11_state *x11 = vo->x11;
-  if( x11->xv_ck_info.method == CK_METHOD_MANUALFILL ||
-      x11->xv_ck_info.method == CK_METHOD_BACKGROUND   )//less tearing than XClearWindow()
-  {
-    XSetForeground(x11->display, x11->vo_gc, x11->xv_colorkey );
-    XFillRectangle(x11->display, x11->window, x11->vo_gc,
-                    x, y,
-                    w, h );
-  }
-}
-
-/** \brief Tests if a valid argument for the ck suboption was given. */
-int xv_test_ck( void * arg )
-{
-  strarg_t * strarg = (strarg_t *)arg;
-
-  if ( strargcmp( strarg, "use" ) == 0 ||
-       strargcmp( strarg, "set" ) == 0 ||
-       strargcmp( strarg, "cur" ) == 0    )
-  {
-    return 1;
-  }
-
-  return 0;
-}
-/** \brief Tests if a valid arguments for the ck-method suboption was given. */
-int xv_test_ckm( void * arg )
-{
-  strarg_t * strarg = (strarg_t *)arg;
-
-  if ( strargcmp( strarg, "bg" ) == 0 ||
-       strargcmp( strarg, "man" ) == 0 ||
-       strargcmp( strarg, "auto" ) == 0    )
-  {
-    return 1;
-  }
-
-  return 0;
-}
-
-/**
- * \brief Modify the colorkey_handling var according to str
- *
- * Checks if a valid pointer ( not NULL ) to the string
- * was given. And in that case modifies the colorkey_handling
- * var to reflect the requested behaviour.
- * If nothing happens the content of colorkey_handling stays
- * the same.
- *
- * \param str Pointer to the string or NULL
- *
- */
-void xv_setup_colorkeyhandling(struct vo *vo, const char *ck_method_str,
-                               const char *ck_str)
-{
-    struct vo_x11_state *x11 = vo->x11;
-  /* check if a valid pointer to the string was passed */
-  if ( ck_str )
-  {
-    if ( strncmp( ck_str, "use", 3 ) == 0 )
-    {
-      x11->xv_ck_info.source = CK_SRC_USE;
-    }
-    else if ( strncmp( ck_str, "set", 3 ) == 0 )
-    {
-      x11->xv_ck_info.source = CK_SRC_SET;
-    }
-  }
-  /* check if a valid pointer to the string was passed */
-  if ( ck_method_str )
-  {
-    if ( strncmp( ck_method_str, "bg", 2 ) == 0 )
-    {
-      x11->xv_ck_info.method = CK_METHOD_BACKGROUND;
-    }
-    else if ( strncmp( ck_method_str, "man", 3 ) == 0 )
-    {
-      x11->xv_ck_info.method = CK_METHOD_MANUALFILL;
-    }
-    else if ( strncmp( ck_method_str, "auto", 4 ) == 0 )
-    {
-      x11->xv_ck_info.method = CK_METHOD_AUTOPAINT;
-    }
-  }
-}
-
-#endif
-
-struct vo_x11_state *vo_x11_init_state(void)
-{
-    struct vo_x11_state *s = talloc_ptrtype(NULL, s);
-    *s = (struct vo_x11_state){
-        .xv_ck_info = { CK_METHOD_MANUALFILL, CK_SRC_CUR },
-        .olddecor = MWM_DECOR_ALL,
-        .oldfuncs = MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE |
-                    MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE,
-        .old_gravity = NorthWestGravity,
-    };
-    return s;
 }

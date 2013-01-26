@@ -36,9 +36,6 @@
 
 extern char *lirc_configfile;
 
-/* only used at startup (setting these values from configfile) */
-extern int stop_xscreensaver;
-
 extern int mp_msg_color;
 extern int mp_msg_module;
 
@@ -615,8 +612,8 @@ const m_option_t mplayer_opts[]={
     {"refreshrate",&vo_refresh_rate,CONF_TYPE_INT,CONF_RANGE, 0,100, NULL},
     {"wid", &WinID, CONF_TYPE_INT64, 0, 0, 0, NULL},
 #ifdef CONFIG_X11
-    {"stop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"fstype", &vo_fstype_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
+    OPT_MAKE_FLAGS("stop-xscreensaver", vo_stop_screensaver, 0),
+    OPT_STRINGLIST("fstype", vo_fstype_list, 0),
 #endif
     {"heartbeat-cmd", &heartbeat_cmd, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"mouseinput", &vo_nomouse_input, CONF_TYPE_FLAG, 0, 1, 0, NULL},

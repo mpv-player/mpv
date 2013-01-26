@@ -3284,7 +3284,7 @@ static void run_playloop(struct MPContext *mpctx)
         vo_check_events(vo);
 
 #ifdef CONFIG_X11
-        if (stop_xscreensaver && vo->x11) {
+        if (vo->x11) {
             xscreensaver_heartbeat(vo->x11);
         }
 #endif
@@ -4299,7 +4299,7 @@ static bool handle_help_options(struct MPContext *mpctx)
         opt_exit = 1;
     }
 #ifdef CONFIG_X11
-    if (vo_fstype_list && strcmp(vo_fstype_list[0], "help") == 0) {
+    if (opts->vo_fstype_list && strcmp(opts->vo_fstype_list[0], "help") == 0) {
         fstype_help();
         mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
         opt_exit = 1;

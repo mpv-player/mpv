@@ -1511,7 +1511,7 @@ static int preinit(struct vo *vo, const char *arg)
     if (vc->deint < 0)
         vc->deint = 0;
 
-    if (!vo_init(vo))
+    if (!vo_x11_init(vo))
         return -1;
 
     // After this calling uninit() should work to free resources
@@ -1632,7 +1632,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         vo_x11_ontop(vo);
         return VO_TRUE;
     case VOCTRL_UPDATE_SCREENINFO:
-        update_xinerama_info(vo);
+        vo_x11_update_screeninfo(vo);
         return VO_TRUE;
     case VOCTRL_NEWFRAME:
         vc->deint_queue_pos = next_deint_queue_pos(vo, true);

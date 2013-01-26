@@ -88,6 +88,7 @@ struct priv {
     int dst_width;
 
     XVisualInfo vinfo;
+    int ximage_depth;
 
     int firstTime;
 
@@ -121,6 +122,56 @@ static void check_events(struct vo *vo)
                                     p->myximage[p->current_buf]->height);
     if (ret & VO_EVENT_EXPOSE && p->int_pause)
         flip_page(vo);
+}
+
+/* Scan the available visuals on this Display/Screen.  Try to find
+ * the 'best' available TrueColor visual that has a decent color
+ * depth (at least 15bit).  If there are multiple visuals with depth
+ * >= 15bit, we prefer visuals with a smaller color depth. */
+static int find_depth_from_visuals(Display * dpy, int screen,
+                                   Visual ** visual_return)
+{
+    XVisualInfo visual_tmpl;
+    XVisualInfo *visuals;
+    int nvisuals, i;
+    int bestvisual = -1;
+    int bestvisual_depth = -1;
+
+    visual_tmpl.screen = screen;
+    visual_tmpl.class = TrueColor;
+    visuals = XGetVisualInfo(dpy,
+                             VisualScreenMask | VisualClassMask,
+                             &visual_tmpl, &nvisuals);
+    if (visuals != NULL)
+    {
+        for (i = 0; i < nvisuals; i++)
+        {
+            mp_msg(MSGT_VO, MSGL_V,
+                   "vo: X11 truecolor visual %#lx, depth %d, R:%lX G:%lX B:%lX\n",
+                   visuals[i].visualid, visuals[i].depth,
+                   visuals[i].red_mask, visuals[i].green_mask,
+                   visuals[i].blue_mask);
+            /*
+             * Save the visual index and its depth, if this is the first
+             * truecolor visul, or a visual that is 'preferred' over the
+             * previous 'best' visual.
+             */
+            if (bestvisual_depth == -1
+                || (visuals[i].depth >= 15
+                    && (visuals[i].depth < bestvisual_depth
+                        || bestvisual_depth < 15)))
+            {
+                bestvisual = i;
+                bestvisual_depth = visuals[i].depth;
+            }
+        }
+
+        if (bestvisual != -1 && visual_return != NULL)
+            *visual_return = visuals[bestvisual].visual;
+
+        XFree(visuals);
+    }
+    return bestvisual_depth;
 }
 
 static void getMyXImage(struct priv *p, int foo)
@@ -298,8 +349,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if (p->depth != 15 && p->depth != 16 && p->depth != 24 && p->depth != 32) {
         Visual *visual;
 
-        p->depth = vo_find_depth_from_visuals(vo->x11->display, vo->x11->screen,
-                                              &visual);
+        p->depth = find_depth_from_visuals(vo->x11->display, vo->x11->screen,
+                                           &visual);
     }
     if (!XMatchVisualInfo(vo->x11->display, vo->x11->screen, p->depth,
                           DirectColor, &p->vinfo)
@@ -327,8 +378,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
         vo_x11_create_vo_window(vo, &p->vinfo, vo->dx, vo->dy, vo->dwidth,
                                 vo->dheight, flags, theCmap, "x11");
-        if (WinID > 0)
-            p->depth = vo_x11_update_geometry(vo, true);
 
 #ifdef CONFIG_XF86VM
         if (vm) {
@@ -341,6 +390,15 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                            CurrentTime);
         }
 #endif
+    }
+
+    if (WinID > 0) {
+        unsigned depth, dummy_uint;
+        int dummy_int;
+        Window dummy_win;
+        XGetGeometry(vo->x11->display, vo->x11->window, &dummy_win, &dummy_int,
+                     &dummy_int, &dummy_uint, &dummy_uint, &dummy_uint, &depth);
+        p->depth = depth;
     }
 
     int i;
@@ -570,13 +628,14 @@ static int redraw_frame(struct vo *vo)
 
 static int query_format(struct vo *vo, uint32_t format)
 {
+    struct priv *p = vo->priv;
     mp_msg(MSGT_VO, MSGL_DBG2,
            "vo_x11: query_format was called: %x (%s)\n", format,
            vo_format_name(format));
     if (IMGFMT_IS_RGB(format)) {
         for (int n = 0; fmt2Xfmt[n].mpfmt; n++) {
             if (fmt2Xfmt[n].mpfmt == format) {
-                if (IMGFMT_RGB_DEPTH(format) == vo->x11->depthonscreen) {
+                if (IMGFMT_RGB_DEPTH(format) == p->ximage_depth) {
                     return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
                            VFCAP_OSD | VFCAP_FLIP;
                 } else {
@@ -593,6 +652,64 @@ static int query_format(struct vo *vo, uint32_t format)
     return 0;
 }
 
+static void find_x11_depth(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    struct priv *p = vo->priv;
+    XImage *mXImage = NULL;
+    int depth, bpp, ximage_depth;
+    unsigned int mask;
+    XWindowAttributes attribs;
+
+    // get color depth (from root window, or the best visual):
+    XGetWindowAttributes(x11->display, x11->rootwin, &attribs);
+    depth = attribs.depth;
+
+    if (depth != 15 && depth != 16 && depth != 24 && depth != 32)
+    {
+        Visual *visual;
+
+        depth = find_depth_from_visuals(x11->display, x11->screen, &visual);
+        if (depth != -1)
+            mXImage = XCreateImage(x11->display, visual, depth, ZPixmap,
+                                   0, NULL, 1, 1, 8, 1);
+    } else
+        mXImage =
+            XGetImage(x11->display, x11->rootwin, 0, 0, 1, 1, AllPlanes, ZPixmap);
+
+    ximage_depth = depth;   // display depth on screen
+
+    // get bits/pixel from XImage structure:
+    if (mXImage == NULL)
+    {
+        mask = 0;
+    } else
+    {
+        /* for the depth==24 case, the XImage structures might use
+         * 24 or 32 bits of data per pixel. */
+        bpp = mXImage->bits_per_pixel;
+        if ((ximage_depth + 7) / 8 != (bpp + 7) / 8)
+            ximage_depth = bpp;     // by A'rpi
+        mask =
+            mXImage->red_mask | mXImage->green_mask | mXImage->blue_mask;
+        mp_msg(MSGT_VO, MSGL_V,
+               "vo: X11 color mask:  %X  (R:%lX G:%lX B:%lX)\n", mask,
+               mXImage->red_mask, mXImage->green_mask, mXImage->blue_mask);
+        XDestroyImage(mXImage);
+    }
+    if (((ximage_depth + 7) / 8) == 2)
+    {
+        if (mask == 0x7FFF)
+            ximage_depth = 15;
+        else if (mask == 0xFFFF)
+            ximage_depth = 16;
+    }
+
+    mp_msg(MSGT_VO, MSGL_V, "vo: X11 depth %d and %d bpp.\n", depth,
+           ximage_depth);
+
+    p->ximage_depth = ximage_depth;
+}
 
 static void uninit(struct vo *vo)
 {
@@ -624,8 +741,9 @@ static int preinit(struct vo *vo, const char *arg)
         return ENOSYS;
     }
 
-    if (!vo_init(vo))
+    if (!vo_x11_init(vo))
         return -1;              // Can't open X11
+    find_x11_depth(vo);
     return 0;
 }
 
@@ -649,13 +767,13 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_GET_EQUALIZER:
     {
         struct voctrl_get_equalizer_args *args = data;
-        return vo_x11_get_equalizer(args->name, args->valueptr);
+        return vo_x11_get_equalizer(vo, args->name, args->valueptr);
     }
     case VOCTRL_ONTOP:
         vo_x11_ontop(vo);
         return VO_TRUE;
     case VOCTRL_UPDATE_SCREENINFO:
-        update_xinerama_info(vo);
+        vo_x11_update_screeninfo(vo);
         return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
         return redraw_frame(vo);

@@ -1392,12 +1392,12 @@ MPGLContext *mpgl_init(enum MPGLType type, struct vo *vo)
         ctx->create_window_gl3 = create_window_x11_gl3;
         ctx->releaseGlContext = releaseGlContext_x11;
         ctx->swapGlBuffers = swapGlBuffers_x11;
-        ctx->update_xinerama_info = update_xinerama_info;
+        ctx->update_xinerama_info = vo_x11_update_screeninfo;
         ctx->border = vo_x11_border;
         ctx->check_events = vo_x11_check_events;
         ctx->fullscreen = vo_x11_fullscreen;
         ctx->ontop = vo_x11_ontop;
-        ctx->vo_init = vo_init;
+        ctx->vo_init = vo_x11_init;
         ctx->vo_uninit = vo_x11_uninit;
         break;
 #endif

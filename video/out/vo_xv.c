@@ -64,7 +64,21 @@ static const vo_info_t info = {
     ""
 };
 
+#define CK_METHOD_NONE       0 // no colorkey drawing
+#define CK_METHOD_BACKGROUND 1 // set colorkey as window background
+#define CK_METHOD_AUTOPAINT  2 // let xv draw the colorkey
+#define CK_METHOD_MANUALFILL 3 // manually draw the colorkey
+#define CK_SRC_USE           0 // use specified / default colorkey
+#define CK_SRC_SET           1 // use and set specified / default colorkey
+#define CK_SRC_CUR           2 // use current colorkey (get it from xv)
+
 struct xvctx {
+    struct xv_ck_info_s {
+        int method; // CK_METHOD_* constants
+        int source; // CK_SRC_* constants
+    } xv_ck_info;
+    unsigned long xv_colorkey;
+    unsigned int xv_port;
     XvAdaptorInfo *ai;
     XvImageFormatValues *fo;
     unsigned int formats, adaptors, xv_format;
@@ -116,14 +130,342 @@ static int find_xv_format(int imgfmt)
     return 0;
 }
 
-static void read_xv_csp(struct vo *vo)
+static int xv_find_atom(struct vo *vo, uint32_t xv_port, const char *name,
+                        bool get, int *min, int *max)
+{
+    Atom atom = None;
+    int howmany = 0;
+    XvAttribute *attributes = XvQueryPortAttributes(vo->x11->display, xv_port,
+                                                    &howmany);
+    for (int i = 0; i < howmany && attributes; i++) {
+        int flag = get ? XvGettable : XvSettable;
+        if (attributes[i].flags & flag) {
+            atom = XInternAtom(vo->x11->display, attributes[i].name, True);
+            *min = attributes[i].min_value;
+            *max = attributes[i].max_value;
+/* since we have SET_DEFAULTS first in our list, we can check if it's available
+   then trigger it if it's ok so that the other values are at default upon query */
+            if (atom != None) {
+                if (!strcmp(attributes[i].name, "XV_BRIGHTNESS") &&
+                    (!strcasecmp(name, "brightness")))
+                    break;
+                else if (!strcmp(attributes[i].name, "XV_CONTRAST") &&
+                         (!strcasecmp(name, "contrast")))
+                    break;
+                else if (!strcmp(attributes[i].name, "XV_SATURATION") &&
+                         (!strcasecmp(name, "saturation")))
+                    break;
+                else if (!strcmp(attributes[i].name, "XV_HUE") &&
+                         (!strcasecmp(name, "hue")))
+                    break;
+                if (!strcmp(attributes[i].name, "XV_RED_INTENSITY") &&
+                    (!strcasecmp(name, "red_intensity")))
+                    break;
+                else if (!strcmp(attributes[i].name, "XV_GREEN_INTENSITY")
+                         && (!strcasecmp(name, "green_intensity")))
+                    break;
+                else if (!strcmp(attributes[i].name, "XV_BLUE_INTENSITY")
+                         && (!strcasecmp(name, "blue_intensity")))
+                    break;
+                else if ((!strcmp(attributes[i].name, "XV_ITURBT_709") //NVIDIA
+                          || !strcmp(attributes[i].name, "XV_COLORSPACE")) //ATI
+                         && (!strcasecmp(name, "bt_709")))
+                    break;
+                atom = None;
+                continue;
+            }
+        }
+    }
+    XFree(attributes);
+    return atom;
+}
+
+static int xv_set_eq(struct vo *vo, uint32_t xv_port, const char *name,
+                     int value)
+{
+    mp_dbg(MSGT_VO, MSGL_V, "xv_set_eq called! (%s, %d)\n", name, value);
+
+    int min, max;
+    int atom = xv_find_atom(vo, xv_port, name, false, &min, &max);
+    if (atom != None) {
+        // -100 -> min
+        //   0  -> (max+min)/2
+        // +100 -> max
+        int port_value = (value + 100) * (max - min) / 200 + min;
+        XvSetPortAttribute(vo->x11->display, xv_port, atom, port_value);
+        return VO_TRUE;
+    }
+    return VO_FALSE;
+}
+
+static int xv_get_eq(struct vo *vo, uint32_t xv_port, const char *name,
+                     int *value)
+{
+    int min, max;
+    int atom = xv_find_atom(vo, xv_port, name, true, &min, &max);
+    if (atom != None) {
+        int port_value = 0;
+        XvGetPortAttribute(vo->x11->display, xv_port, atom, &port_value);
+
+        *value = (port_value - min) * 200 / (max - min) - 100;
+        mp_dbg(MSGT_VO, MSGL_V, "xv_get_eq called! (%s, %d)\n",
+               name, *value);
+        return VO_TRUE;
+    }
+    return VO_FALSE;
+}
+
+static Atom xv_intern_atom_if_exists(struct vo *vo, char const *atom_name)
+{
+    struct xvctx *ctx = vo->priv;
+    XvAttribute *attributes;
+    int attrib_count, i;
+    Atom xv_atom = None;
+
+    attributes = XvQueryPortAttributes(vo->x11->display, ctx->xv_port,
+                                       &attrib_count);
+    if (attributes != NULL) {
+        for (i = 0; i < attrib_count; ++i) {
+            if (strcmp(attributes[i].name, atom_name) == 0) {
+                xv_atom = XInternAtom(vo->x11->display, atom_name, False);
+                break;
+            }
+        }
+        XFree(attributes);
+    }
+
+    return xv_atom;
+}
+
+// Try to enable vsync for xv.
+// Returns -1 if not available, 0 on failure and 1 on success.
+static int xv_enable_vsync(struct vo *vo)
+{
+    struct xvctx *ctx = vo->priv;
+    Atom xv_atom = xv_intern_atom_if_exists(vo, "XV_SYNC_TO_VBLANK");
+    if (xv_atom == None)
+        return -1;
+    return XvSetPortAttribute(vo->x11->display, ctx->xv_port, xv_atom, 1)
+           == Success;
+}
+
+// Get maximum supported source image dimensions.
+// If querying the dimensions fails, don't change *width and *height.
+static void xv_get_max_img_dim(struct vo *vo, uint32_t *width, uint32_t *height)
+{
+    struct xvctx *ctx = vo->priv;
+    XvEncodingInfo *encodings;
+    unsigned int num_encodings, idx;
+
+    XvQueryEncodings(vo->x11->display, ctx->xv_port, &num_encodings, &encodings);
+
+    if (encodings) {
+        for (idx = 0; idx < num_encodings; ++idx) {
+            if (strcmp(encodings[idx].name, "XV_IMAGE") == 0) {
+                *width  = encodings[idx].width;
+                *height = encodings[idx].height;
+                break;
+            }
+        }
+    }
+
+    mp_msg(MSGT_VO, MSGL_V,
+           "[xv] Maximum source image dimensions: %ux%u\n",
+           *width, *height);
+
+    XvFreeEncodingInfo(encodings);
+}
+
+static void xv_print_ck_info(struct xvctx *xv)
+{
+    mp_msg(MSGT_VO, MSGL_V, "[xv] ");
+
+    switch (xv->xv_ck_info.method) {
+    case CK_METHOD_NONE:
+        mp_msg(MSGT_VO, MSGL_V, "Drawing no colorkey.\n");
+        return;
+    case CK_METHOD_AUTOPAINT:
+        mp_msg(MSGT_VO, MSGL_V, "Colorkey is drawn by Xv.");
+        break;
+    case CK_METHOD_MANUALFILL:
+        mp_msg(MSGT_VO, MSGL_V, "Drawing colorkey manually.");
+        break;
+    case CK_METHOD_BACKGROUND:
+        mp_msg(MSGT_VO, MSGL_V, "Colorkey is drawn as window background.");
+        break;
+    }
+
+    mp_msg(MSGT_VO, MSGL_V, "\n[xv] ");
+
+    switch (xv->xv_ck_info.source) {
+    case CK_SRC_CUR:
+        mp_msg(MSGT_VO, MSGL_V, "Using colorkey from Xv (0x%06lx).\n",
+               xv->xv_colorkey);
+        break;
+    case CK_SRC_USE:
+        if (xv->xv_ck_info.method == CK_METHOD_AUTOPAINT) {
+            mp_msg(MSGT_VO, MSGL_V, "Ignoring colorkey from mpv (0x%06lx).\n",
+                   xv->xv_colorkey);
+        } else {
+            mp_msg(MSGT_VO, MSGL_V,
+                   "Using colorkey from mpv (0x%06lx). Use -colorkey to change.\n",
+                   xv->xv_colorkey);
+        }
+        break;
+    case CK_SRC_SET:
+        mp_msg(MSGT_VO, MSGL_V, "Setting and using colorkey from mpv (0x%06lx)."
+               " Use -colorkey to change.\n", xv->xv_colorkey);
+        break;
+    }
+}
+
+/* NOTE: If vo_colorkey has bits set after the first 3 low order bytes
+ *       we don't draw anything as this means it was forced to off. */
+static int xv_init_colorkey(struct vo *vo)
+{
+    struct xvctx *ctx = vo->priv;
+    Display *display = vo->x11->display;
+    Atom xv_atom;
+    int rez;
+
+    /* check if colorkeying is needed */
+    xv_atom = xv_intern_atom_if_exists(vo, "XV_COLORKEY");
+    if (xv_atom != None && !(vo_colorkey & 0xFF000000)) {
+        if (ctx->xv_ck_info.source == CK_SRC_CUR) {
+            int colorkey_ret;
+
+            rez = XvGetPortAttribute(display, ctx->xv_port, xv_atom,
+                                     &colorkey_ret);
+            if (rez == Success)
+                ctx->xv_colorkey = colorkey_ret;
+            else {
+                mp_msg(MSGT_VO, MSGL_FATAL, "[xv] Couldn't get colorkey!"
+                       "Maybe the selected Xv port has no overlay.\n");
+                return 0; // error getting colorkey
+            }
+        } else {
+            ctx->xv_colorkey = vo_colorkey;
+
+            /* check if we have to set the colorkey too */
+            if (ctx->xv_ck_info.source == CK_SRC_SET) {
+                xv_atom = XInternAtom(display, "XV_COLORKEY", False);
+
+                rez = XvSetPortAttribute(display, ctx->xv_port, xv_atom,
+                                         vo_colorkey);
+                if (rez != Success) {
+                    mp_msg(MSGT_VO, MSGL_FATAL, "[xv] Couldn't set colorkey!\n");
+                    return 0; // error setting colorkey
+                }
+            }
+        }
+
+        xv_atom = xv_intern_atom_if_exists(vo, "XV_AUTOPAINT_COLORKEY");
+
+        /* should we draw the colorkey ourselves or activate autopainting? */
+        if (ctx->xv_ck_info.method == CK_METHOD_AUTOPAINT) {
+            rez = !Success;
+
+            if (xv_atom != None) // autopaint is supported
+                rez = XvSetPortAttribute(display, ctx->xv_port, xv_atom, 1);
+
+            if (rez != Success)
+                ctx->xv_ck_info.method = CK_METHOD_MANUALFILL;
+        } else {
+            // disable colorkey autopainting if supported
+            if (xv_atom != None)
+                XvSetPortAttribute(display, ctx->xv_port, xv_atom, 0);
+        }
+    } else // do no colorkey drawing at all
+        ctx->xv_ck_info.method = CK_METHOD_NONE;
+
+    xv_print_ck_info(ctx);
+
+    return 1;
+}
+
+/* Draw the colorkey on the video window.
+ *
+ * Draws the colorkey depending on the set method ( colorkey_handling ).
+ *
+ * Also draws the black bars ( when the video doesn't fit the display in
+ * fullscreen ) separately, so they don't overlap with the video area. */
+static void xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
+                             int32_t w, int32_t h)
 {
     struct xvctx *ctx = vo->priv;
     struct vo_x11_state *x11 = vo->x11;
+    if (ctx->xv_ck_info.method == CK_METHOD_MANUALFILL ||
+        ctx->xv_ck_info.method == CK_METHOD_BACKGROUND)
+    {
+        //less tearing than XClearWindow()
+        XSetForeground(x11->display, x11->vo_gc, ctx->xv_colorkey);
+        XFillRectangle(x11->display, x11->window, x11->vo_gc, x, y, w, h);
+    }
+}
+
+// Tests if a valid argument for the ck suboption was given.
+static int xv_test_ck(void *arg)
+{
+    strarg_t *strarg = (strarg_t *)arg;
+
+    if (strargcmp(strarg, "use") == 0 ||
+        strargcmp(strarg, "set") == 0 ||
+        strargcmp(strarg, "cur") == 0)
+        return 1;
+
+    return 0;
+}
+
+// Tests if a valid arguments for the ck-method suboption was given.
+static int xv_test_ckm(void *arg)
+{
+    strarg_t *strarg = (strarg_t *)arg;
+
+    if (strargcmp(strarg, "bg") == 0 ||
+        strargcmp(strarg, "man") == 0 ||
+        strargcmp(strarg, "auto") == 0)
+        return 1;
+
+    return 0;
+}
+
+/* Modify the colorkey_handling var according to str
+ *
+ * Checks if a valid pointer ( not NULL ) to the string
+ * was given. And in that case modifies the colorkey_handling
+ * var to reflect the requested behaviour.
+ * If nothing happens the content of colorkey_handling stays
+ * the same.
+ */
+static void xv_setup_colorkeyhandling(struct xvctx *ctx,
+                                      const char *ck_method_str,
+                                      const char *ck_str)
+{
+    /* check if a valid pointer to the string was passed */
+    if (ck_str) {
+        if (strncmp(ck_str, "use", 3) == 0)
+            ctx->xv_ck_info.source = CK_SRC_USE;
+        else if (strncmp(ck_str, "set", 3) == 0)
+            ctx->xv_ck_info.source = CK_SRC_SET;
+    }
+    /* check if a valid pointer to the string was passed */
+    if (ck_method_str) {
+        if (strncmp(ck_method_str, "bg", 2) == 0)
+            ctx->xv_ck_info.method = CK_METHOD_BACKGROUND;
+        else if (strncmp(ck_method_str, "man", 3) == 0)
+            ctx->xv_ck_info.method = CK_METHOD_MANUALFILL;
+        else if (strncmp(ck_method_str, "auto", 4) == 0)
+            ctx->xv_ck_info.method = CK_METHOD_AUTOPAINT;
+    }
+}
+
+static void read_xv_csp(struct vo *vo)
+{
+    struct xvctx *ctx = vo->priv;
     struct mp_csp_details *cspc = &ctx->cached_csp;
     *cspc = (struct mp_csp_details) MP_CSP_DETAILS_DEFAULTS;
     int bt709_enabled;
-    if (vo_xv_get_eq(vo, x11->xv_port, "bt_709", &bt709_enabled))
+    if (xv_get_eq(vo, ctx->xv_port, "bt_709", &bt709_enabled))
         cspc->format = bt709_enabled == 100 ? MP_CSP_BT_709 : MP_CSP_BT_601;
 }
 
@@ -140,7 +482,7 @@ static void resize(struct vo *vo)
     struct mp_rect *dst = &ctx->dst_rect;
     int dw = dst->x1 - dst->x0, dh = dst->y1 - dst->y0;
     vo_x11_clearwindow_part(vo, vo->x11->window, dw, dh);
-    vo_xv_draw_colorkey(vo, dst->x0, dst->y0, dw, dh);
+    xv_draw_colorkey(vo, dst->x0, dst->y0, dw, dh);
     read_xv_csp(vo);
 }
 
@@ -204,8 +546,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
         xswa.border_pixel = 0;
         xswamask = CWBorderPixel;
-        if (x11->xv_ck_info.method == CK_METHOD_BACKGROUND) {
-            xswa.background_pixel = x11->xv_colorkey;
+        if (ctx->xv_ck_info.method == CK_METHOD_BACKGROUND) {
+            xswa.background_pixel = ctx->xv_colorkey;
             xswamask |= CWBackPixel;
         }
 
@@ -226,7 +568,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     }
 
     mp_msg(MSGT_VO, MSGL_V, "using Xvideo port %d for hw scaling\n",
-           x11->xv_port);
+           ctx->xv_port);
 
     // In case config has been called before
     for (i = 0; i < ctx->total_buffers; i++)
@@ -264,7 +606,7 @@ static void allocate_xvimage(struct vo *vo, int foo)
     }
     if (ctx->Shmem_Flag) {
         ctx->xvimage[foo] =
-            (XvImage *) XvShmCreateImage(x11->display, x11->xv_port,
+            (XvImage *) XvShmCreateImage(x11->display, ctx->xv_port,
                                          ctx->xv_format, NULL,
                                          aligned_w, ctx->image_height,
                                          &ctx->Shminfo[foo]);
@@ -284,7 +626,7 @@ static void allocate_xvimage(struct vo *vo, int foo)
 #endif
     {
         ctx->xvimage[foo] =
-            (XvImage *) XvCreateImage(x11->display, x11->xv_port,
+            (XvImage *) XvCreateImage(x11->display, ctx->xv_port,
                                       ctx->xv_format, NULL, aligned_w,
                                       ctx->image_height);
         ctx->xvimage[foo]->data = av_malloc(ctx->xvimage[foo]->data_size);
@@ -323,7 +665,7 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
     int sw = src->x1 - src->x0, sh = src->y1 - src->y0;
 #ifdef HAVE_SHM
     if (ctx->Shmem_Flag) {
-        XvShmPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc, xvi,
+        XvShmPutImage(x11->display, ctx->xv_port, x11->window, x11->vo_gc, xvi,
                       src->x0, src->y0, sw, sh,
                       dst->x0, dst->y0, dw, dh,
                       True);
@@ -331,7 +673,7 @@ static inline void put_xvimage(struct vo *vo, XvImage *xvi)
     } else
 #endif
     {
-        XvPutImage(x11->display, x11->xv_port, x11->window, x11->vo_gc, xvi,
+        XvPutImage(x11->display, ctx->xv_port, x11->window, x11->vo_gc, xvi,
                    src->x0, src->y0, sw, sh,
                    dst->x0, dst->y0, dw, dh);
     }
@@ -504,11 +846,14 @@ static int preinit(struct vo *vo, const char *arg)
     unsigned int i;
     strarg_t ck_src_arg = { 0, NULL };
     strarg_t ck_method_arg = { 0, NULL };
-    struct xvctx *ctx = talloc_zero(vo, struct xvctx);
+    struct xvctx *ctx = talloc_ptrtype(vo, ctx);
+    *ctx = (struct xvctx) {
+        .xv_ck_info = { CK_METHOD_MANUALFILL, CK_SRC_CUR },
+    };
     vo->priv = ctx;
     int xv_adaptor = -1;
 
-    if (!vo_init(vo))
+    if (!vo_x11_init(vo))
         return -1;
 
     struct vo_x11_state *x11 = vo->x11;
@@ -516,14 +861,12 @@ static int preinit(struct vo *vo, const char *arg)
     const opt_t subopts[] =
     {
       /* name         arg type     arg var         test */
-      {  "port",      OPT_ARG_INT, &x11->xv_port,  int_pos },
+      {  "port",      OPT_ARG_INT, &ctx->xv_port,  int_pos },
       {  "adaptor",   OPT_ARG_INT, &xv_adaptor,    int_non_neg },
       {  "ck",        OPT_ARG_STR, &ck_src_arg,    xv_test_ck },
       {  "ck-method", OPT_ARG_STR, &ck_method_arg, xv_test_ckm },
       {  NULL }
     };
-
-    x11->xv_port = 0;
 
     /* parse suboptions */
     if (subopt_parse(arg, subopts) != 0) {
@@ -531,7 +874,7 @@ static int preinit(struct vo *vo, const char *arg)
     }
 
     /* modify colorkey settings according to the given options */
-    xv_setup_colorkeyhandling(vo, ck_method_arg.str, ck_src_arg.str);
+    xv_setup_colorkeyhandling(ctx, ck_method_arg.str, ck_src_arg.str);
 
     /* check for Xvideo extension */
     unsigned int ver, rel, req, ev, err;
@@ -549,7 +892,7 @@ static int preinit(struct vo *vo, const char *arg)
     }
 
     /* check adaptors */
-    if (x11->xv_port) {
+    if (ctx->xv_port) {
         int port_found;
 
         for (port_found = 0, i = 0; !port_found && i < ctx->adaptors; i++) {
@@ -558,7 +901,7 @@ static int preinit(struct vo *vo, const char *arg)
                 for (xv_p = ctx->ai[i].base_id;
                      xv_p < ctx->ai[i].base_id + ctx->ai[i].num_ports;
                      ++xv_p) {
-                    if (xv_p == x11->xv_port) {
+                    if (xv_p == ctx->xv_port) {
                         port_found = 1;
                         break;
                     }
@@ -566,15 +909,15 @@ static int preinit(struct vo *vo, const char *arg)
             }
         }
         if (port_found) {
-            if (XvGrabPort(x11->display, x11->xv_port, CurrentTime))
-                x11->xv_port = 0;
+            if (XvGrabPort(x11->display, ctx->xv_port, CurrentTime))
+                ctx->xv_port = 0;
         } else {
             mp_tmsg(MSGT_VO, MSGL_WARN, "[VO_XV] Invalid port parameter, overriding with port 0.\n");
-            x11->xv_port = 0;
+            ctx->xv_port = 0;
         }
     }
 
-    for (i = 0; i < ctx->adaptors && x11->xv_port == 0; i++) {
+    for (i = 0; i < ctx->adaptors && ctx->xv_port == 0; i++) {
         /* check if adaptor number has been specified */
         if (xv_adaptor != -1 && xv_adaptor != i)
             continue;
@@ -583,7 +926,7 @@ static int preinit(struct vo *vo, const char *arg)
             for (xv_p = ctx->ai[i].base_id;
                  xv_p < ctx->ai[i].base_id + ctx->ai[i].num_ports; ++xv_p)
                 if (!XvGrabPort(x11->display, xv_p, CurrentTime)) {
-                    x11->xv_port = xv_p;
+                    ctx->xv_port = xv_p;
                     mp_msg(MSGT_VO, MSGL_V,
                            "[VO_XV] Using Xv Adapter #%d (%s)\n",
                            i, ctx->ai[i].name);
@@ -595,7 +938,7 @@ static int preinit(struct vo *vo, const char *arg)
                 }
         }
     }
-    if (!x11->xv_port) {
+    if (!ctx->xv_port) {
         if (busy_ports)
             mp_tmsg(MSGT_VO, MSGL_ERR,
                 "[VO_XV] Could not find free Xvideo port - maybe another process is already\n"\
@@ -611,13 +954,13 @@ static int preinit(struct vo *vo, const char *arg)
         goto error;
     }
 
-    if (!vo_xv_init_colorkey(vo)) {
+    if (!xv_init_colorkey(vo)) {
         goto error;             // bail out, colorkey setup failed
     }
-    vo_xv_enable_vsync(vo);
-    vo_xv_get_max_img_dim(vo, &ctx->max_width, &ctx->max_height);
+    xv_enable_vsync(vo);
+    xv_get_max_img_dim(vo, &ctx->max_width, &ctx->max_height);
 
-    ctx->fo = XvListImageFormats(x11->display, x11->xv_port,
+    ctx->fo = XvListImageFormats(x11->display, ctx->xv_port,
                                  (int *) &ctx->formats);
 
     return 0;
@@ -630,7 +973,6 @@ static int preinit(struct vo *vo, const char *arg)
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct xvctx *ctx = vo->priv;
-    struct vo_x11_state *x11 = vo->x11;
     switch (request) {
     case VOCTRL_PAUSE:
         return (ctx->is_paused = 1);
@@ -647,16 +989,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_EQUALIZER: {
         vo->want_redraw = true;
         struct voctrl_set_equalizer_args *args = data;
-        return vo_xv_set_eq(vo, x11->xv_port, args->name, args->value);
+        return xv_set_eq(vo, ctx->xv_port, args->name, args->value);
     }
     case VOCTRL_GET_EQUALIZER: {
         struct voctrl_get_equalizer_args *args = data;
-        return vo_xv_get_eq(vo, x11->xv_port, args->name, args->valueptr);
+        return xv_get_eq(vo, ctx->xv_port, args->name, args->valueptr);
     }
     case VOCTRL_SET_YUV_COLORSPACE:;
         struct mp_csp_details* given_cspc = data;
         int is_709 = given_cspc->format == MP_CSP_BT_709;
-        vo_xv_set_eq(vo, x11->xv_port, "bt_709", is_709 * 200 - 100);
+        xv_set_eq(vo, ctx->xv_port, "bt_709", is_709 * 200 - 100);
         read_xv_csp(vo);
         vo->want_redraw = true;
         return true;
@@ -669,7 +1011,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         vo_x11_ontop(vo);
         return VO_TRUE;
     case VOCTRL_UPDATE_SCREENINFO:
-        update_xinerama_info(vo);
+        vo_x11_update_screeninfo(vo);
         return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
         return redraw_frame(vo);
