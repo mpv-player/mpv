@@ -132,6 +132,8 @@ static void saver_off(struct vo_x11_state *x11);
 static void vo_x11_selectinput_witherr(Display *display, Window w,
                                        long event_mask);
 static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer);
+static void vo_x11_vm_switch(struct vo *vo);
+static void vo_x11_vm_close(struct vo *vo);
 
 /*
  * Sends the EWMH fullscreen state event.
@@ -637,6 +639,7 @@ void vo_x11_uninit(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     assert(x11);
 
+    vo_x11_vm_close(vo);
     saver_on(x11);
     if (x11->window != None)
         vo_showcursor(x11->display, x11->window);
@@ -1047,6 +1050,8 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
   if (flags & VOFLAG_HIDDEN)
     goto final;
   if (x11->window_state & VOFLAG_HIDDEN) {
+    if (flags & VOFLAG_MODESWITCHING)
+      vo_x11_vm_switch(vo);
     XSizeHints hint;
     x11->window_state &= ~VOFLAG_HIDDEN;
     vo_x11_classhint(vo, x11->window, classname);
@@ -1083,6 +1088,15 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     // set the size values right.
     vo->dwidth  = vo->opts->vo_screenwidth;
     vo->dheight = vo->opts->vo_screenheight;
+  }
+  if (x11->vm_set) {
+    /* Grab the mouse pointer in our window */
+    if (vo_grabpointer) {
+      XGrabPointer(x11->display, x11->window, True, 0, GrabModeAsync,
+                   GrabModeAsync, x11->window, None, CurrentTime);
+    }
+    XSetInputFocus(x11->display, x11->window, RevertToNone,
+                   CurrentTime);
   }
 final:
   if (x11->vo_gc != None)
@@ -1516,7 +1530,7 @@ static void vo_x11_selectinput_witherr(Display *display, Window w,
 }
 
 #ifdef CONFIG_XF86VM
-void vo_vm_switch(struct vo *vo)
+static void vo_x11_vm_switch(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     struct MPOpts *opts = vo->opts;
@@ -1581,7 +1595,7 @@ void vo_vm_switch(struct vo *vo)
     }
 }
 
-void vo_vm_close(struct vo *vo)
+static void vo_x11_vm_close(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     Display *dpy = x11->display;
@@ -1609,7 +1623,7 @@ void vo_vm_close(struct vo *vo)
     }
 }
 
-double vo_vm_get_fps(struct vo *vo)
+double vo_x11_vm_get_fps(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     int clock;
@@ -1620,6 +1634,22 @@ double vo_vm_get_fps(struct vo *vo)
         XFree(modeline.private);
     return 1e3 * clock / modeline.htotal / modeline.vtotal;
 }
+
+#else /* CONFIG_XF86VM */
+
+static void vo_x11_vm_switch(struct vo *vo)
+{
+}
+
+static void vo_x11_vm_close(struct vo *vo)
+{
+}
+
+double vo_vm_get_fps(struct vo *vo)
+{
+    return 0;
+}
+
 #endif
 
 

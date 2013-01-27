@@ -97,7 +97,6 @@ struct xvctx {
     struct mp_rect src_rect;
     struct mp_rect dst_rect;
     uint32_t max_width, max_height; // zero means: not set
-    int mode_switched;
     int Shmem_Flag;
 #ifdef HAVE_SHM
     XShmSegmentInfo Shminfo[2];
@@ -532,13 +531,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         return -1;
 
     {
-#ifdef CONFIG_XF86VM
-        int vm = flags & VOFLAG_MODESWITCHING;
-        if (vm) {
-            vo_vm_switch(vo);
-            ctx->mode_switched = 1;
-        }
-#endif
         XGetWindowAttributes(x11->display, DefaultRootWindow(x11->display),
                              &attribs);
         XMatchVisualInfo(x11->display, x11->screen, attribs.depth, TrueColor,
@@ -554,17 +546,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, vo->dwidth,
                                 vo->dheight, flags, CopyFromParent, "xv");
         XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
-
-#ifdef CONFIG_XF86VM
-        if (vm) {
-            /* Grab the mouse pointer in our window */
-            if (vo_grabpointer)
-                XGrabPointer(x11->display, x11->window, True, 0, GrabModeAsync,
-                             GrabModeAsync, x11->window, None, CurrentTime);
-            XSetInputFocus(x11->display, x11->window, RevertToNone,
-                           CurrentTime);
-        }
-#endif
     }
 
     mp_msg(MSGT_VO, MSGL_V, "using Xvideo port %d for hw scaling\n",
@@ -831,10 +812,6 @@ static void uninit(struct vo *vo)
     }
     for (i = 0; i < ctx->total_buffers; i++)
         deallocate_xvimage(vo, i);
-#ifdef CONFIG_XF86VM
-    if (ctx->mode_switched)
-        vo_vm_close(vo);
-#endif
     // uninit() shouldn't get called unless initialization went past vo_init()
     vo_x11_uninit(vo);
 }

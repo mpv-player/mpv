@@ -330,9 +330,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     mp_image_unrefp(&p->original_image);
 
-#ifdef CONFIG_XF86VM
-    int vm = flags & VOFLAG_MODESWITCHING;
-#endif
     p->Flip_Flag = flags & VOFLAG_FLIPPING;
     p->zoomFlag = 1;
 
@@ -369,27 +366,10 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     p->image_height = height;
 
     {
-#ifdef CONFIG_XF86VM
-        if (vm)
-            vo_vm_switch(vo);
-
-#endif
         theCmap = vo_x11_create_colormap(vo, &p->vinfo);
 
         vo_x11_create_vo_window(vo, &p->vinfo, vo->dx, vo->dy, vo->dwidth,
                                 vo->dheight, flags, theCmap, "x11");
-
-#ifdef CONFIG_XF86VM
-        if (vm) {
-            /* Grab the mouse pointer in our window */
-            if (vo_grabpointer)
-                XGrabPointer(vo->x11->display, vo->x11->window, True, 0,
-                             GrabModeAsync, GrabModeAsync,
-                             vo->x11->window, None, CurrentTime);
-            XSetInputFocus(vo->x11->display, vo->x11->window, RevertToNone,
-                           CurrentTime);
-        }
-#endif
     }
 
     if (WinID > 0) {
@@ -721,11 +701,6 @@ static void uninit(struct vo *vo)
 
     talloc_free(p->original_image);
 
-#ifdef CONFIG_XF86VM
-    vo_vm_close(vo);
-#endif
-
-    p->zoomFlag = 0;
     vo_x11_uninit(vo);
 
     sws_freeContext(p->swsContext);

@@ -130,11 +130,7 @@ void vo_x11_ontop(struct vo *vo);
 void vo_x11_border(struct vo *vo);
 void vo_x11_update_screeninfo(struct vo *vo);
 
-#ifdef CONFIG_XF86VM
-void vo_vm_switch(struct vo *vo);
-void vo_vm_close(struct vo *vo);
-double vo_vm_get_fps(struct vo *vo);
-#endif
+double vo_x11_vm_get_fps(struct vo *vo);
 
 void xscreensaver_heartbeat(struct vo_x11_state *x11);
 

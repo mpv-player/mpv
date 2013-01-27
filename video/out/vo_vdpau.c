@@ -178,9 +178,6 @@ struct vdpctx {
 
     // Video equalizer
     struct mp_csp_equalizer video_eq;
-
-    // These tell what's been initialized and uninit() should free/uninitialize
-    bool mode_switched;
 };
 
 static bool status_ok(struct vo *vo);
@@ -526,7 +523,7 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
                "refresh rate of %.3f Hz.\n", vc->user_fps);
     } else if (vc->user_fps == 0) {
 #ifdef CONFIG_XF86VM
-        double fps = vo_vm_get_fps(vo);
+        double fps = vo_x11_vm_get_fps(vo);
         if (!fps)
             mp_msg(MSGT_VO, MSGL_WARN, "[vdpau] Failed to get display FPS\n");
         else {
@@ -852,10 +849,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     XWindowAttributes attribs;
     unsigned long xswamask;
 
-#ifdef CONFIG_XF86VM
-    int vm = flags & VOFLAG_MODESWITCHING;
-#endif
-
     if (handle_preemption(vo) < 0)
         return -1;
 
@@ -868,12 +861,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if (IMGFMT_IS_VDPAU(vc->image_format) && !create_vdp_decoder(vo, 2))
         return -1;
 
-#ifdef CONFIG_XF86VM
-    if (vm) {
-        vo_vm_switch(vo);
-        vc->mode_switched = true;
-    }
-#endif
     XGetWindowAttributes(x11->display, DefaultRootWindow(x11->display),
                          &attribs);
     XMatchVisualInfo(x11->display, x11->screen, attribs.depth, TrueColor,
@@ -888,17 +875,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, d_width, d_height,
                             flags, CopyFromParent, "vdpau");
     XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
-
-#ifdef CONFIG_XF86VM
-    if (vm) {
-        /* Grab the mouse pointer in our window */
-        if (vo_grabpointer)
-            XGrabPointer(x11->display, x11->window, True, 0,
-                         GrabModeAsync, GrabModeAsync,
-                         x11->window, None, CurrentTime);
-        XSetInputFocus(x11->display, x11->window, RevertToNone, CurrentTime);
-    }
-#endif
 
     if (initialize_vdpau_objects(vo) < 0)
         return -1;
@@ -1485,10 +1461,6 @@ static void uninit(struct vo *vo)
     /* Destroy all vdpau objects */
     destroy_vdpau_objects(vo);
 
-#ifdef CONFIG_XF86VM
-    if (vc->mode_switched)
-        vo_vm_close(vo);
-#endif
     vo_x11_uninit(vo);
 
     // Free bitstream buffers allocated by FFmpeg
