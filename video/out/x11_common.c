@@ -125,9 +125,6 @@ typedef struct
     long state;
 } MotifWmHints;
 
-static XErrorHandler old_handler = NULL;
-static int selectinput_err = 0;
-
 static void vo_x11_update_geometry(struct vo *vo, bool update_pos);
 static int vo_x11_get_fs_type(struct vo *vo);
 static void saver_on(struct vo_x11_state *x11);
@@ -1491,53 +1488,30 @@ static void saver_off(struct vo_x11_state *x11)
 #endif
 }
 
-static int x11_selectinput_errorhandler(Display * display,
-                                        XErrorEvent * event)
-{
-    if (event->error_code == BadAccess)
-    {
-        selectinput_err = 1;
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "X11 error: BadAccess during XSelectInput Call\n");
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "X11 error: The 'ButtonPressMask' mask of specified window has probably already used by another appication (see man XSelectInput)\n");
-        /* If you think MPlayer should shutdown with this error,
-         * comment out the following line */
-        return 0;
-    }
-    if (old_handler != NULL)
-        old_handler(display, event);
-    else
-        x11_errorhandler(display, event);
-    return 0;
-}
-
-static void vo_x11_selectinput_witherr(Display * display, Window w,
+static void vo_x11_selectinput_witherr(Display *display, Window w,
                                        long event_mask)
 {
-    XSync(display, False);
-    old_handler = XSetErrorHandler(x11_selectinput_errorhandler);
-    selectinput_err = 0;
     if (vo_nomouse_input)
-    {
-        XSelectInput(display, w,
-                     event_mask &
-                     (~(ButtonPressMask | ButtonReleaseMask)));
-    } else
-    {
-        XSelectInput(display, w, event_mask);
-    }
-    XSync(display, False);
-    XSetErrorHandler(old_handler);
-    if (selectinput_err)
-    {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "X11 error: mpv discards mouse control (reconfiguring)\n");
-        XSelectInput(display, w,
-                     event_mask &
-                     (~
-                      (ButtonPressMask | ButtonReleaseMask |
-                       PointerMotionMask)));
+        event_mask &= ~(ButtonPressMask | ButtonReleaseMask);
+
+    // NOTE: this can raise BadAccess, which should be ignored by the X error
+    //       handler; also see below
+    XSelectInput(display, w, event_mask);
+
+    // Test whether setting the event mask failed (with a BadAccess X error,
+    // although we don't know whether this really happened).
+    // This is needed for obscure situations like using --rootwin with a window
+    // manager active.
+    XWindowAttributes a;
+    if (XGetWindowAttributes(display, w, &a)) {
+        long bad = ButtonPressMask | ButtonReleaseMask | PointerMotionMask;
+        if ((event_mask & bad) && (a.all_event_masks & bad) &&
+            ((a.your_event_mask & bad) != (event_mask & bad)))
+        {
+            mp_msg(MSGT_VO, MSGL_ERR, "X11 error: error during XSelectInput "
+                   "call, trying without mouse events\n");
+            XSelectInput(display, w, event_mask & ~bad);
+        }
     }
 }
 
