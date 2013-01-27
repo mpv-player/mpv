@@ -124,33 +124,39 @@ int convert_key(unsigned key, unsigned charcode)
  */
 int is_osx_version_at_least(int majorv, int minorv, int bugfixv)
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSString *plist = @"/System/Library/CoreServices/SystemVersion.plist";
-    NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:plist];
-    NSString *version = [dict objectForKey:@"ProductVersion"];
-    NSArray *components = [version componentsSeparatedByString:@"."];
-    int rv = 0;
+    // Initialize cache
+    static int c_majorv = -1, c_minorv = -1, c_bugfixv = -1;
 
-    // All the  above code just sends messages to nil. If anything failed,
-    // we just end up with an invalid components array.
-    if ([components count] != 3) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[osx] Failed to get your system version. "
-                "Please open a bug report.\n");
-        goto cleanup_and_return;
+    // If version cache is empty, fill it
+    if (c_majorv < 0 && c_minorv < 0 && c_bugfixv < 0) {
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+        NSString *plist = @"/System/Library/CoreServices/SystemVersion.plist";
+        NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:plist];
+        NSString *version = [dict objectForKey:@"ProductVersion"];
+        NSArray *components = [version componentsSeparatedByString:@"."];
+
+        // All the  above code just sends messages to nil. If anything failed,
+        // we just end up with an invalid components array.
+        if ([components count] != 3) {
+            mp_msg(MSGT_VO, MSGL_ERR, "[osx] Failed to get your system version. "
+                    "Please open a bug report.\n");
+            [pool release];
+            return -1;
+        }
+
+        c_majorv  = [[components objectAtIndex:0] intValue];
+        c_minorv  = [[components objectAtIndex:1] intValue];
+        c_bugfixv = [[components objectAtIndex:2] intValue];
+
+        [pool release];
     }
 
-    int major  = [[components objectAtIndex:0] intValue];
-    int minor  = [[components objectAtIndex:1] intValue];
-    int bugfix = [[components objectAtIndex:2] intValue];
-
-    if(major > majorv ||
-        (major == majorv && (minor > minorv ||
-            (minor == minorv && bugfix >= bugfixv))))
-        rv = 1;
-
-cleanup_and_return:
-    [pool release];
-    return rv;
+    if(c_majorv > majorv ||
+        (c_majorv == majorv && (c_minorv > minorv ||
+            (c_minorv == minorv && c_bugfixv >= bugfixv))))
+        return 1;
+    else
+        return 0;
 }
 
 struct escape_couple {

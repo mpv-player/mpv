@@ -147,20 +147,10 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
     return s;
 }
 
-static bool is_lion_or_above()
-{
-    static bool result = false, checked = false;
-    if (!checked) {
-        result = is_osx_version_at_least(10, 7, 0);
-        checked = true;
-    }
-    return result;
-}
-
 static bool supports_hidpi(NSView *view)
 {
     SEL hdpi_selector = @selector(setWantsBestResolutionOpenGLSurface:);
-    return is_lion_or_above() && view &&
+    return is_osx_version_at_least(10, 7, 0) && view &&
            [view respondsToSelector:hdpi_selector];
 }
 
@@ -765,7 +755,8 @@ void create_menu()
         delta = - [theEvent deltaX];
     }
 
-    if (is_lion_or_above() && [theEvent hasPreciseScrollingDeltas]) {
+    if (is_osx_version_at_least(10, 7, 0) &&
+        [theEvent hasPreciseScrollingDeltas]) {
         s->accumulated_scroll += delta;
         static const CGFloat threshold = 10;
         while (s->accumulated_scroll >= threshold) {
