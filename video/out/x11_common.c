@@ -1060,10 +1060,10 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     hint.x = x; hint.y = y;
     hint.width = width; hint.height = height;
     hint.flags = PSize;
-    if (force_change_xy)
+    if (force_change_xy || x11->vm_set)
       hint.flags |= PPosition;
     XSetWMNormalHints(mDisplay, x11->window, &hint);
-    if (!vo_border) vo_x11_decoration(vo, 0);
+    if (!vo_border || x11->vm_set) vo_x11_decoration(vo, 0);
     // map window
     x11->xic = XCreateIC(x11->xim,
                          XNInputStyle, XIMPreeditNone | XIMStatusNone,
@@ -1533,11 +1533,10 @@ static void vo_x11_selectinput_witherr(Display *display, Window w,
 static void vo_x11_vm_switch(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
-    struct MPOpts *opts = vo->opts;
     Display *mDisplay = x11->display;
     int vm_event, vm_error;
     int vm_ver, vm_rev;
-    int i, j, have_vm = 0;
+    int have_vm = 0;
     int X = vo->dwidth, Y = vo->dheight;
     int modeline_width, modeline_height;
 
@@ -1553,14 +1552,25 @@ static void vo_x11_vm_switch(struct vo *vo)
     }
 
     if (have_vm) {
+        if (!x11->vm_orig_w) {
+            int clock;
+            XF86VidModeModeLine modeline;
+            XF86VidModeGetModeLine(x11->display, x11->screen, &clock, &modeline);
+            x11->vm_orig_w = modeline.hdisplay;
+            x11->vm_orig_h = modeline.vdisplay;
+        }
+
         int modecount = 0;
         XF86VidModeModeInfo **vidmodes = NULL;
         XF86VidModeGetAllModeLines(mDisplay, x11->screen, &modecount, &vidmodes);
-        j = 0;
+        if (modecount == 0)
+            return;
+
+        int j = 0;
         modeline_width = vidmodes[0]->hdisplay;
         modeline_height = vidmodes[0]->vdisplay;
 
-        for (i = 1; i < modecount; i++) {
+        for (int i = 1; i < modecount; i++) {
             if ((vidmodes[i]->hdisplay >= X)
                 && (vidmodes[i]->vdisplay >= Y))
             {
@@ -1578,11 +1588,11 @@ static void vo_x11_vm_switch(struct vo *vo)
                modeline_width, modeline_height, X, Y);
         XF86VidModeLockModeSwitch(mDisplay, x11->screen, 0);
         XF86VidModeSwitchToMode(mDisplay, x11->screen, vidmodes[j]);
-        XF86VidModeSwitchToMode(mDisplay, x11->screen, vidmodes[j]);
 
         // FIXME: all this is more of a hack than proper solution
-        X = (opts->vo_screenwidth - modeline_width) / 2;
-        Y = (opts->vo_screenheight - modeline_height) / 2;
+        //        center the video if the screen has different size
+        X = (x11->vm_orig_w - modeline_width) / 2;
+        Y = (x11->vm_orig_h - modeline_height) / 2;
         XF86VidModeSetViewPort(mDisplay, x11->screen, X, Y);
         vo->dx = X;
         vo->dy = Y;
@@ -1599,27 +1609,27 @@ static void vo_x11_vm_close(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     Display *dpy = x11->display;
-    struct MPOpts *opts = vo->opts;
     if (x11->vm_set) {
         int modecount = 0;
         XF86VidModeModeInfo **vidmodes = NULL;
-        int i;
+        XF86VidModeModeInfo *mode = NULL;
 
         XF86VidModeGetAllModeLines(dpy, x11->screen, &modecount, &vidmodes);
-        for (i = 0; i < modecount; i++)
-            if ((vidmodes[i]->hdisplay == opts->vo_screenwidth)
-                && (vidmodes[i]->vdisplay == opts->vo_screenheight))
+        for (int i = 0; i < modecount; i++) {
+            if ((vidmodes[i]->hdisplay == x11->vm_orig_w)
+                && (vidmodes[i]->vdisplay == x11->vm_orig_h))
             {
-                mp_msg(MSGT_VO, MSGL_INFO,
-                       "Returning to original mode %dx%d\n",
-                       opts->vo_screenwidth, opts->vo_screenheight);
+                mp_msg(MSGT_VO, MSGL_INFO, "Returning to original mode %dx%d\n",
+                       x11->vm_orig_w, x11->vm_orig_h);
+                mode = vidmodes[i];
                 break;
             }
+        }
 
-        XF86VidModeSwitchToMode(dpy, x11->screen, vidmodes[i]);
-        XF86VidModeSwitchToMode(dpy, x11->screen, vidmodes[i]);
+        if (mode)
+            XF86VidModeSwitchToMode(dpy, x11->screen, mode);
+
         free(vidmodes);
-        modecount = 0;
     }
 }
 
