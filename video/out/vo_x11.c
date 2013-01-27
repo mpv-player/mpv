@@ -325,7 +325,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 {
     struct priv *p = vo->priv;
 
-    Colormap theCmap;
     const struct fmt2Xfmtentry_s *fmte = fmt2Xfmt;
 
     mp_image_unrefp(&p->original_image);
@@ -365,12 +364,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     p->image_width = (width + 7) & (~7);
     p->image_height = height;
 
-    {
-        theCmap = vo_x11_create_colormap(vo, &p->vinfo);
-
-        vo_x11_create_vo_window(vo, &p->vinfo, vo->dx, vo->dy, vo->dwidth,
-                                vo->dheight, flags, theCmap, "x11");
-    }
+    vo_x11_create_vo_window(vo, &p->vinfo, vo->dx, vo->dy, vo->dwidth,
+                            vo->dheight, flags, "x11");
 
     if (WinID > 0) {
         unsigned depth, dummy_uint;

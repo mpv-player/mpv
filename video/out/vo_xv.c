@@ -494,10 +494,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t format)
 {
     struct vo_x11_state *x11 = vo->x11;
-    XVisualInfo vinfo;
-    XSetWindowAttributes xswa;
-    XWindowAttributes attribs;
-    unsigned long xswamask;
     struct xvctx *ctx = vo->priv;
     int i;
 
@@ -530,23 +526,11 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if (!ctx->xv_format)
         return -1;
 
-    {
-        XGetWindowAttributes(x11->display, DefaultRootWindow(x11->display),
-                             &attribs);
-        XMatchVisualInfo(x11->display, x11->screen, attribs.depth, TrueColor,
-                         &vinfo);
+    vo_x11_create_vo_window(vo, NULL, vo->dx, vo->dy, vo->dwidth,
+                            vo->dheight, flags, "xv");
 
-        xswa.border_pixel = 0;
-        xswamask = CWBorderPixel;
-        if (ctx->xv_ck_info.method == CK_METHOD_BACKGROUND) {
-            xswa.background_pixel = ctx->xv_colorkey;
-            xswamask |= CWBackPixel;
-        }
-
-        vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, vo->dwidth,
-                                vo->dheight, flags, CopyFromParent, "xv");
-        XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
-    }
+    if (ctx->xv_ck_info.method == CK_METHOD_BACKGROUND)
+        XSetWindowBackground(x11->display, x11->window, ctx->xv_colorkey);
 
     mp_msg(MSGT_VO, MSGL_V, "using Xvideo port %d for hw scaling\n",
            ctx->xv_port);

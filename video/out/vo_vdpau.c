@@ -843,11 +843,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t format)
 {
     struct vdpctx *vc = vo->priv;
-    struct vo_x11_state *x11 = vo->x11;
-    XVisualInfo vinfo;
-    XSetWindowAttributes xswa;
-    XWindowAttributes attribs;
-    unsigned long xswamask;
 
     if (handle_preemption(vo) < 0)
         return -1;
@@ -861,20 +856,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if (IMGFMT_IS_VDPAU(vc->image_format) && !create_vdp_decoder(vo, 2))
         return -1;
 
-    XGetWindowAttributes(x11->display, DefaultRootWindow(x11->display),
-                         &attribs);
-    XMatchVisualInfo(x11->display, x11->screen, attribs.depth, TrueColor,
-                     &vinfo);
-
-    xswa.background_pixel = 0;
-    xswa.border_pixel     = 0;
-    /* Do not use CWBackPixel: It leads to VDPAU errors after
-     * aspect ratio changes. */
-    xswamask = CWBorderPixel;
-
-    vo_x11_create_vo_window(vo, &vinfo, vo->dx, vo->dy, d_width, d_height,
-                            flags, CopyFromParent, "vdpau");
-    XChangeWindowAttributes(x11->display, x11->window, xswamask, &xswa);
+    vo_x11_create_vo_window(vo, NULL, vo->dx, vo->dy, d_width, d_height,
+                            flags, "vdpau");
 
     if (initialize_vdpau_objects(vo) < 0)
         return -1;

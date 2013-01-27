@@ -43,6 +43,7 @@ struct vo_x11_state {
     XIC xic;
 
     GC vo_gc;
+    Colormap colormap;
 
     int wm_type;
     int fs_type;
@@ -116,14 +117,13 @@ int vo_x11_init(struct vo *vo);
 void vo_x11_uninit(struct vo *vo);
 int vo_x11_check_events(struct vo *vo);
 void vo_x11_fullscreen(struct vo *vo);
-Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo);
 uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value);
 uint32_t vo_x11_get_equalizer(struct vo *vo, const char *name, int *value);
 bool vo_x11_screen_is_composited(struct vo *vo);
 void fstype_help(void);
 void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
         int x, int y, unsigned int width, unsigned int height, int flags,
-	Colormap col_map, const char *classname);
+        const char *classname);
 void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
 	int img_width, int img_height);
 void vo_x11_clearwindow(struct vo *vo, Window vo_window);

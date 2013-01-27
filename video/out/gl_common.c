@@ -1089,11 +1089,8 @@ static bool create_glx_window(struct MPGLContext *ctx, uint32_t d_width,
     if (glx_ctx->context) {
         // GL context and window already exist.
         // Only update window geometry etc.
-        Colormap colormap = XCreateColormap(vo->x11->display, vo->x11->rootwin,
-                                            glx_ctx->vinfo->visual, AllocNone);
         vo_x11_create_vo_window(vo, glx_ctx->vinfo, vo->dx, vo->dy, d_width,
-                                d_height, flags, colormap, "gl");
-        XFreeColormap(vo->x11->display, colormap);
+                                d_height, flags, "gl");
         return true;
     }
 
@@ -1144,11 +1141,8 @@ static bool create_glx_window(struct MPGLContext *ctx, uint32_t d_width,
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_GREEN_SIZE, &ctx->depth_g);
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_BLUE_SIZE, &ctx->depth_b);
 
-    Colormap colormap = XCreateColormap(vo->x11->display, vo->x11->rootwin,
-                                        glx_ctx->vinfo->visual, AllocNone);
     vo_x11_create_vo_window(vo, glx_ctx->vinfo, vo->dx, vo->dy, d_width,
-                            d_height, flags, colormap, "gl");
-    XFreeColormap(vo->x11->display, colormap);
+                            d_height, flags, "gl");
 
     return true;
 }

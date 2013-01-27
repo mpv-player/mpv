@@ -134,6 +134,8 @@ static void vo_x11_selectinput_witherr(Display *display, Window w,
 static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer);
 static void vo_x11_vm_switch(struct vo *vo);
 static void vo_x11_vm_close(struct vo *vo);
+static void vo_x11_create_colormap(struct vo_x11_state *x11,
+                                   XVisualInfo *vinfo);
 
 /*
  * Sends the EWMH fullscreen state event.
@@ -664,6 +666,8 @@ void vo_x11_uninit(struct vo *vo)
     }
     if (x11->xic)
         XDestroyIC(x11->xic);
+    if (x11->colormap != None)
+        XFreeColormap(vo->x11->display, x11->colormap);
     vo_fs = 0;
 
     mp_msg(MSGT_VO, MSGL_V, "vo: uninit ...\n");
@@ -961,29 +965,37 @@ static void vo_x11_update_window_title(struct vo *vo)
     vo_x11_set_property_utf8(vo, x11->XA_NET_WM_ICON_NAME, title);
 }
 
-//
-static Window vo_x11_create_smooth_window(struct vo_x11_state *x11, Window mRoot,
-                                   Visual * vis, int x, int y,
-                                   unsigned int width, unsigned int height,
-                                   int depth, Colormap col_map)
+static void setup_window_params(struct vo_x11_state *x11, XVisualInfo *vis,
+                                unsigned long *mask, XSetWindowAttributes *att)
 {
-    unsigned long xswamask = CWBorderPixel;
+    vo_x11_create_colormap(x11, vis);
+
+    *mask = CWBorderPixel | CWColormap;
+    att->border_pixel = 0;
+    att->colormap = x11->colormap;
+}
+
+static void find_default_visual(struct vo_x11_state *x11, XVisualInfo *vis)
+{
+    Display *display = x11->display;
+    XWindowAttributes attribs;
+    XGetWindowAttributes(display, DefaultRootWindow(display), &attribs);
+    XMatchVisualInfo(display, x11->screen, attribs.depth, TrueColor, vis);
+}
+
+static Window vo_x11_create_smooth_window(struct vo_x11_state *x11,
+                                          XVisualInfo *vis, int x, int y,
+                                          unsigned int width, unsigned int height)
+{
+    unsigned long xswamask;
     XSetWindowAttributes xswa;
     Window ret_win;
 
-    if (col_map != CopyFromParent)
-    {
-        xswa.colormap = col_map;
-        xswamask |= CWColormap;
-    }
-    xswa.background_pixel = 0;
-    xswa.border_pixel = 0;
-    xswa.backing_store = NotUseful;
-    xswa.bit_gravity = StaticGravity;
+    setup_window_params(x11, vis, &xswamask, &xswa);
 
     ret_win =
-        XCreateWindow(x11->display, x11->rootwin, x, y, width, height, 0, depth,
-                      CopyFromParent, vis, xswamask, &xswa);
+        XCreateWindow(x11->display, x11->rootwin, x, y, width, height, 0,
+                      vis->depth, CopyFromParent, vis->visual, xswamask, &xswa);
     XSetWMProtocols(x11->display, ret_win, &x11->XAWM_DELETE_WINDOW, 1);
     if (x11->f_gc == None)
         x11->f_gc = XCreateGC(x11->display, ret_win, 0, 0);
@@ -994,14 +1006,12 @@ static Window vo_x11_create_smooth_window(struct vo_x11_state *x11, Window mRoot
 
 /**
  * \brief create and setup a window suitable for display
- * \param vis Visual to use for creating the window
+ * \param vis Visual to use for creating the window (NULL for default)
  * \param x x position of window
  * \param y y position of window
  * \param width width of window
  * \param height height of window
  * \param flags flags for window creation.
- *              Only VOFLAG_FULLSCREEN is supported so far.
- * \param col_map Colourmap for window or CopyFromParent if a specific colormap isn't needed
  * \param classname name to use for the classhint
  *
  * This also does the grunt-work like setting Window Manager hints etc.
@@ -1009,22 +1019,24 @@ static Window vo_x11_create_smooth_window(struct vo_x11_state *x11, Window mRoot
  */
 void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
                              unsigned int width, unsigned int height, int flags,
-                             Colormap col_map, const char *classname)
+                             const char *classname)
 {
   struct MPOpts *opts = vo->opts;
   struct vo_x11_state *x11 = vo->x11;
   Display *mDisplay = vo->x11->display;
   bool force_change_xy = opts->vo_geometry.xy_valid || xinerama_screen >= 0;
+  XVisualInfo vinfo_storage;
+  if (!vis) {
+    vis = &vinfo_storage;
+    find_default_visual(x11, vis);
+  }
   if (WinID >= 0) {
+    unsigned long xswamask;
+    XSetWindowAttributes xswa;
     vo_fs = flags & VOFLAG_FULLSCREEN;
     x11->window = WinID ? (Window)WinID : x11->rootwin;
-    if (col_map != CopyFromParent) {
-      unsigned long xswamask = CWColormap;
-      XSetWindowAttributes xswa;
-      xswa.colormap = col_map;
-      XChangeWindowAttributes(mDisplay, x11->window, xswamask, &xswa);
-      XInstallColormap(mDisplay, col_map);
-    }
+    setup_window_params(x11, vis, &xswamask, &xswa);
+    XChangeWindowAttributes(mDisplay, x11->window, xswamask, &xswa);
     if (WinID) {
         // Expose events can only really be handled by us, so request them.
         vo_x11_selectinput_witherr(mDisplay, x11->window, ExposureMask);
@@ -1043,8 +1055,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     vo_fs = 0;
     vo->dwidth = width;
     vo->dheight = height;
-    x11->window = vo_x11_create_smooth_window(x11, x11->rootwin, vis->visual,
-                      x, y, width, height, vis->depth, col_map);
+    x11->window = vo_x11_create_smooth_window(x11, vis, x, y, width, height);
     x11->window_state = VOFLAG_HIDDEN;
   }
   if (flags & VOFLAG_HIDDEN)
@@ -1663,18 +1674,22 @@ double vo_vm_get_fps(struct vo *vo)
 #endif
 
 
-Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo)
+static void vo_x11_create_colormap(struct vo_x11_state *x11,
+                                   XVisualInfo *vinfo)
 {
-    struct vo_x11_state *x11 = vo->x11;
     unsigned k, r, g, b, ru, gu, bu, m, rv, gv, bv, rvu, gvu, bvu;
 
-    if (vinfo->class != DirectColor)
-        return XCreateColormap(x11->display, x11->rootwin, vinfo->visual,
-                               AllocNone);
+    if (x11->colormap != None)
+        return;
 
-    /* can this function get called twice or more? */
-    if (x11->cmap)
-        return x11->cmap;
+    if (vinfo->class != DirectColor) {
+        x11->colormap = XCreateColormap(x11->display, x11->rootwin,
+                                        vinfo->visual, AllocNone);
+        return;
+    }
+
+    // DirectColor is requested by vo_x11 by default, for the equalizer
+
     x11->cm_size = vinfo->colormap_size;
     x11->red_mask = vinfo->red_mask;
     x11->green_mask = vinfo->green_mask;
@@ -1713,10 +1728,9 @@ Colormap vo_x11_create_colormap(struct vo *vo, XVisualInfo *vinfo)
         gv += gvu;
         bv += bvu;
     }
-    x11->cmap = XCreateColormap(x11->display, x11->rootwin, vinfo->visual,
-                                AllocAll);
-    XStoreColors(x11->display, x11->cmap, x11->cols, x11->cm_size);
-    return x11->cmap;
+    x11->colormap = XCreateColormap(x11->display, x11->rootwin, vinfo->visual,
+                                    AllocAll);
+    XStoreColors(x11->display, x11->colormap, x11->cols, x11->cm_size);
 }
 
 static int transform_color(float val,
@@ -1752,7 +1766,7 @@ uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value)
      * for some reason) it is impossible to restore the setting,
      * and such behaviour could be rather annoying for the users.
      */
-    if (x11->cmap == None)
+    if (x11->colormap == None)
         return VO_NOTAVAIL;
 
     if (!strcasecmp(name, "brightness"))
@@ -1781,7 +1795,7 @@ uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value)
         x11->cols[k].blue  = transform_color(bf * k, brightness, contrast, gamma);
     }
 
-    XStoreColors(vo->x11->display, x11->cmap, x11->cols, x11->cm_size);
+    XStoreColors(vo->x11->display, x11->colormap, x11->cols, x11->cm_size);
     XFlush(vo->x11->display);
     return VO_TRUE;
 }
@@ -1789,7 +1803,7 @@ uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value)
 uint32_t vo_x11_get_equalizer(struct vo *vo, const char *name, int *value)
 {
     struct vo_x11_state *x11 = vo->x11;
-    if (x11->cmap == None)
+    if (x11->colormap == None)
         return VO_NOTAVAIL;
     if (!strcasecmp(name, "brightness"))
         *value = x11->vo_brightness;
