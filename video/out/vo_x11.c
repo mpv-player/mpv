@@ -68,8 +68,6 @@ struct priv {
     int depth, bpp;
     XWindowAttributes attribs;
 
-    int int_pause;
-
     int Flip_Flag;
     int zoomFlag;
 
@@ -120,8 +118,8 @@ static void check_events(struct vo *vo)
         vo_x11_clearwindow_part(vo, vo->x11->window,
                                     p->myximage[p->current_buf]->width,
                                     p->myximage[p->current_buf]->height);
-    if (ret & VO_EVENT_EXPOSE && p->int_pause)
-        flip_page(vo);
+    if (ret & VO_EVENT_EXPOSE)
+        vo->want_redraw = true;
 }
 
 /* Scan the available visuals on this Display/Screen.  Try to find
@@ -719,12 +717,7 @@ static int preinit(struct vo *vo, const char *arg)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    struct priv *p = vo->priv;
     switch (request) {
-    case VOCTRL_PAUSE:
-        return p->int_pause = 1;
-    case VOCTRL_RESUME:
-        return p->int_pause = 0;
     case VOCTRL_FULLSCREEN:
         vo_x11_fullscreen(vo);
         vo_x11_clearwindow(vo, vo->x11->window);
