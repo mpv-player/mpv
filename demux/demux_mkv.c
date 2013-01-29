@@ -1170,6 +1170,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
 {
     BITMAPINFOHEADER *bih;
     sh_video_t *sh_v;
+    bool raw = false;
 
     if (track->ms_compat) {     /* MS compatibility mode */
         BITMAPINFOHEADER *src;
@@ -1235,6 +1236,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
         } else if (strcmp(track->codec_id, MKV_V_UNCOMPRESSED) == 0) {
             // raw video, "like AVI" - this is a FourCC
             bih->biCompression = track->colorspace;
+            raw = true;
         } else {
             const videocodec_info_t *vi = vinfo;
             while (vi->id && strcmp(vi->id, track->codec_id))
@@ -1263,6 +1265,10 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
     sh_v->gsh->title = talloc_strdup(sh_v, track->name);
     sh_v->bih = bih;
     sh_v->format = sh_v->bih->biCompression;
+    if (raw) {
+        sh_v->format = mmioFOURCC('M', 'P', 'r', 'v');
+        sh_v->imgfmt = sh_v->bih->biCompression;
+    }
     if (track->v_frate == 0.0)
         track->v_frate = 25.0;
     sh_v->fps = track->v_frate;
