@@ -1573,6 +1573,16 @@
     Particularly useful on slow terminals or broken ones which do not properly
     handle carriage return (i.e. \\r).
 
+--quvi-format=<best|default|...>
+    Video format/quality that is directly passed to libquvi (default: ``best``).
+    This is used when opening links to streaming sites like YouTube. The
+    interpretation of this value is highly specific to the streaming site and
+    the video. The only well defined values that work on all sites are ``best``
+    (best quality/highest bandwidth, default), and ``default`` (lowest quality).
+
+    The quvi command line tool can be used to find out which formats are
+    supported for a given URL: ``quvi --query-formats URL``.
+
 --radio=<option1:option2:...>
     These options set various parameters of the radio capture module. For
     listening to radio with mpv use ``radio://<frequency>`` (if channels

@@ -62,9 +62,7 @@ x11 (X11 only)
 
 vdpau (X11 only)
     Uses the VDPAU interface to display and optionally also decode video.
-    Hardware decoding is used with ``--vc=ffmpeg12vdpau``,
-    ``--vc=ffwmv3vdpau``, ``--vc=ffvc1vdpau``, ``--vc=ffh264vdpau`` or
-    ``--vc=ffodivxvdpau``.
+    Hardware decoding is used with ``--hwdec=vdpau``.
 
     sharpen=<-1-1>
         For positive values, apply a sharpening algorithm to the video, for
