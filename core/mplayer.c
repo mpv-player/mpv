@@ -4066,7 +4066,7 @@ goto_enable_cache: ;
 
     if (opts->playing_msg) {
         char *msg = mp_property_expand_string(mpctx, opts->playing_msg);
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", msg);
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s\n", msg);
         talloc_free(msg);
     }
 
