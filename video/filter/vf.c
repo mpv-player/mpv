@@ -65,7 +65,6 @@ extern const vf_info_t vf_info_phase;
 extern const vf_info_t vf_info_divtc;
 extern const vf_info_t vf_info_softskip;
 extern const vf_info_t vf_info_screenshot;
-extern const vf_info_t vf_info_screenshot_force;
 extern const vf_info_t vf_info_sub;
 extern const vf_info_t vf_info_yadif;
 extern const vf_info_t vf_info_stereo3d;
@@ -88,7 +87,6 @@ static const vf_info_t *const filter_list[] = {
 #endif
 
     &vf_info_screenshot,
-    &vf_info_screenshot_force,
 
     &vf_info_noise,
     &vf_info_eq,

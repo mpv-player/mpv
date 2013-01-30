@@ -272,19 +272,6 @@ static void screenshot_save(struct MPContext *mpctx, struct mp_image *image,
     talloc_free(image);
 }
 
-static bool force_vf(struct MPContext *mpctx)
-{
-    if (mpctx->sh_video) {
-        struct vf_instance *vf = mpctx->sh_video->vfilter;
-        while (vf) {
-            if (strcmp(vf->info->name, "screenshot_force") == 0)
-                return true;
-            vf = vf->next;
-        }
-    }
-    return false;
-}
-
 void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame)
 {
     if (mpctx->video_out && mpctx->video_out->config_ok) {
@@ -307,15 +294,11 @@ void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame)
         struct voctrl_screenshot_args args =
                             { .full_window = (mode == MODE_FULL_WINDOW) };
 
-        if (!force_vf(mpctx))
-            vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &args);
+        struct vf_instance *vfilter = mpctx->sh_video->vfilter;
+        vfilter->control(vfilter, VFCTRL_SCREENSHOT, &args);
 
-        if (!args.out_image) {
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, "No VO support for taking"
-                   " screenshots, trying VFCTRL_SCREENSHOT!\n");
-            struct vf_instance *vfilter = mpctx->sh_video->vfilter;
-            vfilter->control(vfilter, VFCTRL_SCREENSHOT, &args);
-        }
+        if (!args.out_image)
+            vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &args);
 
         if (args.out_image) {
             if (args.has_osd)
@@ -323,7 +306,7 @@ void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame)
             screenshot_save(mpctx, args.out_image, mode == MODE_SUBTITLES);
         } else {
             mp_msg(MSGT_CPLAYER, MSGL_INFO,
-                   "...failed (need --vf=screenshot?)\n");
+                   "Taking screenshot failed (need --vf=screenshot?)\n");
         }
     }
 }

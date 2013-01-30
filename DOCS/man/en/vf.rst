@@ -658,9 +658,6 @@ screenshot
     not always safe to insert this filter by default. See the
     ``Taking screenshots`` section for details.
 
-screenshot_force
-    Same as ``screenshot``, but prefer it over VO based screenshot code.
-
 sub=[=bottom-margin:top-margin]
     Moves subtitle rendering to an arbitrary point in the filter
     chain, or force subtitle rendering in the video filter as opposed to using
