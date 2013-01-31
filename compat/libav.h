@@ -32,7 +32,7 @@
 #define AV_CODEC_ID_SUBRIP CODEC_ID_TEXT
 #endif
 
-#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(51, 27, 0)
+#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(51, 36, 0)
 #define av_get_packed_sample_fmt(x) (x)
 #endif
 

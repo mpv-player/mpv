@@ -189,7 +189,7 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
         goto out;
     }
 
-#if LIBAVFORMAT_VERSION_MICRO >= 100
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 0, 0)
     if (avio->av_class) {
         uint8_t *mt = NULL;
         if (av_opt_get(avio, "mime_type", AV_OPT_SEARCH_CHILDREN, &mt) >= 0)
