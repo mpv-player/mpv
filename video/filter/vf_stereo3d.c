@@ -45,6 +45,7 @@ typedef enum stereo_code {
     ANAGLYPH_GM_GRAY,   //anaglyph green/magenta gray
     ANAGLYPH_GM_HALF,   //anaglyph green/magenta half colored
     ANAGLYPH_GM_COLOR,  //anaglyph green/magenta colored
+    ANAGLYPH_GM_DUBOIS, //anaglyph green/magenta dubois
     ANAGLYPH_YB_GRAY,   //anaglyph yellow/blue gray
     ANAGLYPH_YB_HALF,   //anaglyph yellow/blue half colored
     ANAGLYPH_YB_COLOR,  //anaglyph yellow/blue colored
@@ -104,6 +105,10 @@ static const int ana_coeff[][3][6] = {
     {{    0,     0,     0, 65536,     0,     0},
      {    0, 65536,     0,     0,     0,     0},
      {    0,     0,     0,     0,     0, 65536}},
+  [ANAGLYPH_GM_DUBOIS]  =
+    {{-4063,-10354, -2556, 34669, 46203,  1573},
+     {18612, 43778,  9372, -1049,  -983, -4260},
+     { -983, -1769,  1376,   590,  4915, 61407}},
   [ANAGLYPH_YB_GRAY]   =
     {{    0,     0,     0, 19595, 38470,  7471},
      {    0,     0,     0, 19595, 38470,  7471},
@@ -212,6 +217,7 @@ static int config(struct vf_instance *vf, int width, int height, int d_width,
     case ANAGLYPH_GM_GRAY:
     case ANAGLYPH_GM_HALF:
     case ANAGLYPH_GM_COLOR:
+    case ANAGLYPH_GM_DUBOIS:
     case ANAGLYPH_YB_GRAY:
     case ANAGLYPH_YB_HALF:
     case ANAGLYPH_YB_COLOR:
@@ -336,9 +342,11 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
         case ANAGLYPH_GM_GRAY:
         case ANAGLYPH_GM_HALF:
         case ANAGLYPH_GM_COLOR:
+        case ANAGLYPH_GM_DUBOIS:
         case ANAGLYPH_YB_GRAY:
         case ANAGLYPH_YB_HALF:
-        case ANAGLYPH_YB_COLOR: {
+        case ANAGLYPH_YB_COLOR:
+        case ANAGLYPH_YB_DUBOIS: {
             int x,y,il,ir,o;
             unsigned char *source     = mpi->planes[0];
             unsigned char *dest       = dmpi->planes[0];
@@ -420,6 +428,8 @@ static const struct format_preset {
     {"anaglyph_green_magenta_half_color",ANAGLYPH_GM_HALF},
     {"agmc",                             ANAGLYPH_GM_COLOR},
     {"anaglyph_green_magenta_color",     ANAGLYPH_GM_COLOR},
+    {"agmd",                             ANAGLYPH_GM_DUBOIS},
+    {"anaglyph_green_magenta_dubois",    ANAGLYPH_GM_DUBOIS},
     {"aybg",                             ANAGLYPH_YB_GRAY},
     {"anaglyph_yellow_blue_gray",        ANAGLYPH_YB_GRAY},
     {"aybh",                             ANAGLYPH_YB_HALF},
