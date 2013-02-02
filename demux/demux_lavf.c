@@ -785,19 +785,9 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
     if (id == demux->audio->id) {
         // audio
         ds = demux->audio;
-        if (!ds->sh) {
-            ds->sh = demux->a_streams[id];
-            mp_msg(MSGT_DEMUX, MSGL_V, "Auto-selected LAVF audio ID = %d\n",
-                   ds->id);
-        }
     } else if (id == demux->video->id) {
         // video
         ds = demux->video;
-        if (!ds->sh) {
-            ds->sh = demux->v_streams[id];
-            mp_msg(MSGT_DEMUX, MSGL_V, "Auto-selected LAVF video ID = %d\n",
-                   ds->id);
-        }
     } else if (id == demux->sub->id) {
         // subtitle
         ds = demux->sub;

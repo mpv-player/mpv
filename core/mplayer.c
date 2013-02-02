@@ -3226,17 +3226,6 @@ static void run_playloop(struct MPContext *mpctx)
             mpctx->stop_play = PT_NEXT_ENTRY;
     }
 
-    // Possibly needed for stream auto selection in demux_lavf (?)
-    if (!mpctx->sh_audio && mpctx->master_demuxer->audio->sh) {
-        for (int n = 0; n < mpctx->num_tracks; n++) {
-            if (mpctx->tracks[n]->stream == ds_gsh(mpctx->master_demuxer->audio)) {
-                mpctx->current_track[STREAM_AUDIO] = mpctx->tracks[n];
-                break;
-            }
-        }
-        reinit_audio_chain(mpctx);
-    }
-
     if (mpctx->step_frames && !mpctx->sh_video) {
         mpctx->step_frames = 0;
         pause_player(mpctx);
