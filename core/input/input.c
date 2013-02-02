@@ -61,10 +61,6 @@
 
 #include "ar.h"
 
-#ifdef CONFIG_COCOA
-#include "osdep/cocoa_events.h"
-#endif
-
 #define MP_MAX_KEY_DOWN 32
 
 struct cmd_bind {
@@ -1505,11 +1501,7 @@ static void read_all_fd_events(struct input_ctx *ictx, int time)
 static void read_all_events(struct input_ctx *ictx, int time)
 {
     getch2_poll();
-#ifdef CONFIG_COCOA
-    cocoa_events_read_all_events(ictx, time);
-#else
     read_all_fd_events(ictx, time);
-#endif
 }
 
 int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
@@ -1774,10 +1766,6 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
 
     parse_config(ictx, true, bstr0(builtin_input_conf), "<default>");
 
-#ifdef CONFIG_COCOA
-    cocoa_events_init(ictx, read_all_fd_events);
-#endif
-
 #ifndef __MINGW32__
     long ret = pipe(ictx->wakeup_pipe);
     for (int i = 0; i < 2 && ret >= 0; i++) {
@@ -1890,10 +1878,6 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
 
 void mp_input_uninit(struct input_ctx *ictx)
 {
-#ifdef CONFIG_COCOA
-    cocoa_events_uninit();
-#endif
-
     if (!ictx)
         return;
 
