@@ -23,17 +23,24 @@
 
 char *mp_format_time(double time, bool fractions)
 {
-    if (time < 0)
+    if (time == MP_NOPTS_VALUE)
         return talloc_strdup(NULL, "unknown");
-    int h, m, s = time;
+    char sign[2] = {0};
+    if (time < 0) {
+        time = -time;
+        sign[0] = '-';
+    }
+    long long int itime = time;
+    int64_t h, m, s;
+    s = itime;
     h = s / 3600;
     s -= h * 3600;
     m = s / 60;
     s -= m * 60;
-    char *res = talloc_asprintf(NULL, "%02d:%02d:%02d", h, m, s);
+    char *res = talloc_asprintf(NULL, "%s%02lld:%02lld:%02lld", sign, h, m, s);
     if (fractions)
         res = talloc_asprintf_append(res, ".%03d",
-                                     (int)((time - (int)time) * 1000));
+                                     (int)((time - itime) * 1000));
     return res;
 }
 
