@@ -107,7 +107,6 @@ struct vo_cocoa_state {
     NSString *window_title;
 
     NSInteger window_level;
-    NSInteger fullscreen_window_level;
 
     int display_cursor;
     int cursor_timer;
@@ -302,13 +301,12 @@ static void vo_set_level(struct vo *vo, int ontop)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     if (ontop) {
-        s->window_level = NSNormalWindowLevel + 1;
+        s->window_level = NSScreenSaverWindowLevel;
     } else {
         s->window_level = NSNormalWindowLevel;
     }
 
-    if (!vo_fs)
-        [s->window setLevel:s->window_level];
+    [s->window setLevel:s->window_level];
 }
 
 void vo_cocoa_ontop(struct vo *vo)
@@ -826,6 +824,8 @@ void create_menu()
 
 - (void)applicationWillBecomeActive:(NSNotification *)aNotification
 {
+    struct vo_cocoa_state *s = _vo->cocoa;
+    [self setLevel:s->window_level];
     if (vo_fs && current_screen_has_dock_or_menubar(_vo)) {
         [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
                                       NSApplicationPresentationHideMenuBar];
@@ -834,6 +834,7 @@ void create_menu()
 
 - (void)applicationWillResignActive:(NSNotification *)aNotification
 {
+    [self setLevel:NSNormalWindowLevel];
     if (vo_fs) {
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
     }
