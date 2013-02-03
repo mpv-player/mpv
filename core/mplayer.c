@@ -3264,6 +3264,10 @@ static void run_playloop(struct MPContext *mpctx)
                 mpctx->time_frame += frame_time / opts->playback_speed;
                 adjust_sync(mpctx, frame_time);
             }
+            if (!video_left) {
+                mpctx->delay = 0;
+                mpctx->last_av_difference = 0;
+            }
         }
 
         if (endpts != MP_NOPTS_VALUE)
