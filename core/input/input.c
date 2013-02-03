@@ -1328,7 +1328,9 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
         unsigned int t = GetTimer();
         // First time : wait delay
         if (ictx->ar_state == 0
-            && (t - ictx->last_key_down) >= ictx->ar_delay * 1000) {
+            && (t - ictx->last_key_down) >= ictx->ar_delay * 1000)
+        {
+            talloc_free(ictx->ar_cmd);
             ictx->ar_cmd = get_cmd_from_keys(ictx, ictx->num_key_down,
                                              ictx->key_down);
             if (!ictx->ar_cmd) {
@@ -1519,8 +1521,10 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
  */
 mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
 {
-    if (async_quit_request)
-        return mp_input_parse_cmd(bstr0("quit 1"), "");
+    if (async_quit_request) {
+        struct mp_cmd *cmd = mp_input_parse_cmd(bstr0("quit 1"), "");
+        queue_add(&ictx->control_cmd_queue, cmd, true);
+    }
 
     if (ictx->control_cmd_queue.first || ictx->key_cmd_queue.first)
         time = 0;
@@ -1876,6 +1880,15 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
     return ictx;
 }
 
+static void clear_queue(struct cmd_queue *queue)
+{
+    while (queue->first) {
+        struct mp_cmd *item = queue->first;
+        queue_remove(queue, item);
+        talloc_free(item);
+    }
+}
+
 void mp_input_uninit(struct input_ctx *ictx)
 {
     if (!ictx)
@@ -1889,9 +1902,13 @@ void mp_input_uninit(struct input_ctx *ictx)
         if (ictx->cmd_fds[i].close_func)
             ictx->cmd_fds[i].close_func(ictx->cmd_fds[i].fd);
     }
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < 2; i++) {
         if (ictx->wakeup_pipe[i] != -1)
             close(ictx->wakeup_pipe[i]);
+    }
+    clear_queue(&ictx->key_cmd_queue);
+    clear_queue(&ictx->control_cmd_queue);
+    talloc_free(ictx->ar_cmd);
     talloc_free(ictx);
 }
 
