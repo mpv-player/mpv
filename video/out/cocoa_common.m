@@ -852,12 +852,7 @@ void create_menu()
         andEventID:kAEQuitApplication];
 }
 
-- (void)normalSize
-{
-    struct vo_cocoa_state *s = _vo->cocoa;
-    if (!vo_fs)
-        [self setContentSize:s->current_video_size keepCentered:YES];
-}
+- (void)normalSize { [self mulSize:1.0f]; }
 
 - (void)halfSize { [self mulSize:0.5f];}
 
@@ -866,10 +861,10 @@ void create_menu()
 - (void)mulSize:(float)multiplier
 {
     if (!vo_fs) {
-        struct vo_cocoa_state *s = _vo->cocoa;
-        NSSize size = [[self contentView] frame].size;
-        size.width  = s->current_video_size.width  * (multiplier);
-        size.height = s->current_video_size.height * (multiplier);
+        NSSize size = {
+            .width  = _vo->aspdat.prew * multiplier,
+            .height = _vo->aspdat.preh * multiplier
+        };
         [self setContentSize:size keepCentered:YES];
     }
 }
