@@ -804,7 +804,11 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
     dp = new_demux_packet_fromdata(pkt->data, pkt->size);
     dp->avpacket = pkt;
 
+    AVStream *st = priv->avfc->streams[id];
+
     int64_t ts = priv->use_dts ? pkt->dts : pkt->pts;
+    if (ts == AV_NOPTS_VALUE && (st->disposition & AV_DISPOSITION_ATTACHED_PIC))
+        ts = 0;
     if (ts != AV_NOPTS_VALUE) {
         dp->pts = ts * av_q2d(priv->avfc->streams[id]->time_base);
         priv->last_pts = dp->pts * AV_TIME_BASE;
