@@ -19,77 +19,17 @@ license details are listed below:
 Name:       a couple of files copied from FFmpeg
 Version:    updated to different versions
 URL:        http://www.ffmpeg.org
-Directory:  ffmpeg_files
+Directory:  compat/x86_cpu.h
 Copyright:  Many, see individual files for copyright notices.
 License:    GNU Lesser General Public License
-
-
-Name:       avifile DLL loader
-Version:    0.47 + patches + CVS updates
-URL:        http://avifile.sourceforge.net/
-Directory:  loader/
-Copyright:  1993 Robert J. Amstadt
-            1994 Eric Youndale & Erik Bos
-            1995 Thomas Sandford
-            1995-1996 Alexandre Julliard
-            1996-1998 Marcus Meissner
-            1996 Martin von Loewis
-            2000-2001 Eugene Kuznetsov (divx@euro.ru)
-License:    GNU General Public License
 
 
 Name:       dvbstream
 Version:    0.4.3-pre3 (CVS checkout)
 URL:        http://sourceforge.net/projects/dvbtools/
-Directory:  stream/dvbin.h stream/rtp.c stream/stream_dvb.c
+Directory:  stream/dvbin.h stream/stream_dvb.c
 Copyright:  2001-2002 Dave Chapman <dave@dchapman.com>
 License:    GNU General Public License
 
 
-Name:       librtsp
-Version:    xine CVS 2003/04/10 + patches
-URL:        http://www.xinehq.de
-Directory:  stream/librtsp/
-Copyright:  2000-2002 the xine project
-License:    GNU General Public License
-
-
-Name:       realrtsp
-Version:    xine CVS 2003/04/17 + patches
-URL:        http://www.xinehq.de
-Directory:  stream/realrtsp/
-Copyright:  2002 the xine project
-License:    GNU General Public License
-
-
-Name:       pnm protocol implementation
-Version:    xine CVS 2002/12/26 + patches
-URL:        http://www.xinehq.de
-Directory:  stream/pnm.[ch]
-Copyright:  2000-2002 the xine project
-License:    GNU General Public License
-
-
-Name:       id3edit
-Version:    1.9 + patches
-URL:        http://id3edit.sourceforge.net/
-Directory:  libmpdemux/genres.h
-Copyright:  2001 Jason Carter
-License:    GNU General Public License
-
-
-Name:       FreeSDP
-Version:    0.4.1
-URL:        https://savannah.nongnu.org/projects/freesdp/
-Directory:  stream/freesdp/
-Copyright:  2001-2003 Federico Montesino Pouzols <fedemp@suidzer0.org>
-License:    GNU General Public License
-
-
-Name:       MJPEG Tools
-Version:    post 2001-12-03 release or CVS snapshot
-URL:        http://mjpeg.sourceforge.net/
-Directory:  libmpdemux/yuv4mpeg*
-Copyright:  2001 Matthew J. Marjanovic <maddog@mir.com>
-            2001 Andrew Stevens <andrew.stevens@philips.com>
-License:    GNU General Public License
+This is not a complete list. grep the sources for "Copyright".
