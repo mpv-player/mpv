@@ -4191,6 +4191,26 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
 #endif
 }
 
+// Determine the next file to play. Note that if this function returns non-NULL,
+// it can have side-effects and mutate mpctx.
+struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction)
+{
+    struct playlist_entry *next = playlist_get_next(mpctx->playlist, direction);
+    if (!next && mpctx->opts.loop_times >= 0) {
+        if (direction > 0) {
+            next = mpctx->playlist->first;
+            if (next && mpctx->opts.loop_times > 0) {
+                mpctx->opts.loop_times--;
+                if (mpctx->opts.loop_times == 0)
+                    mpctx->opts.loop_times = -1;
+            }
+        } else {
+            next = mpctx->playlist->last;
+        }
+    }
+    return next;
+}
+
 // Play all entries on the playlist, starting from the current entry.
 // Return if all done.
 static void play_files(struct MPContext *mpctx)
@@ -4210,15 +4230,7 @@ static void play_files(struct MPContext *mpctx)
         struct playlist_entry *new_entry = NULL;
 
         if (mpctx->stop_play == PT_NEXT_ENTRY) {
-            new_entry = playlist_get_next(mpctx->playlist, +1);
-            if (!new_entry && mpctx->opts.loop_times >= 0) {
-                new_entry = mpctx->playlist->first;
-                if (mpctx->opts.loop_times > 0) {
-                    mpctx->opts.loop_times--;
-                    if (mpctx->opts.loop_times == 0)
-                        mpctx->opts.loop_times = -1;
-                }
-            }
+            new_entry = mp_next_file(mpctx, +1);
         } else if (mpctx->stop_play == PT_CURRENT_ENTRY) {
             new_entry = mpctx->playlist->current;
         } else if (mpctx->stop_play == PT_RESTART) {
