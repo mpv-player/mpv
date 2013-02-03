@@ -2741,6 +2741,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;
     mpctx->total_avsync_change = 0;
+    mpctx->step_frames = 0;
     drop_frame_cnt = 0;
 
 #ifdef CONFIG_ENCODING
@@ -3200,6 +3201,7 @@ static void run_playloop(struct MPContext *mpctx)
     bool end_is_chapter = false;
     double sleeptime = get_wakeup_period(mpctx);
     bool was_restart = mpctx->restart_playback;
+    bool new_video_frame_shown = false;
 
 #ifdef CONFIG_ENCODING
     if (encode_lavc_didfail(mpctx->encode_lavc_ctx)) {
@@ -3224,11 +3226,6 @@ static void run_playloop(struct MPContext *mpctx)
         int cur_chapter = get_current_chapter(mpctx);
         if (cur_chapter != -1 && cur_chapter + 1 > opts->chapterrange[1])
             mpctx->stop_play = PT_NEXT_ENTRY;
-    }
-
-    if (mpctx->step_frames && !mpctx->sh_video) {
-        mpctx->step_frames = 0;
-        pause_player(mpctx);
     }
 
     if (mpctx->sh_audio && !mpctx->restart_playback && !mpctx->ao->untimed) {
@@ -3394,19 +3391,24 @@ static void run_playloop(struct MPContext *mpctx)
         update_avsync(mpctx);
         print_status(mpctx);
         screenshot_flip(mpctx);
+        new_video_frame_shown = true;
 
         if (play_n_frames >= 0) {
             --play_n_frames;
             if (play_n_frames <= 0)
                 mpctx->stop_play = PT_NEXT_ENTRY;
         }
-        if (mpctx->step_frames > 0) {
-            mpctx->step_frames--;
-            if (mpctx->step_frames == 0)
-                pause_player(mpctx);
-        }
         break;
     } // video
+
+    if (mpctx->step_frames > 0 && !mpctx->paused) {
+        // If no more video is available, one frame means one playloop iteration.
+        // Otherwise, one frame means one video frame.
+        if (!video_left || new_video_frame_shown)
+            mpctx->step_frames--;
+        if (mpctx->step_frames == 0)
+            pause_player(mpctx);
+    }
 
     if (mpctx->sh_audio && (mpctx->restart_playback ? !video_left :
                             mpctx->ao->untimed && (mpctx->delay <= 0 ||
