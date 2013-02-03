@@ -301,7 +301,7 @@ static void vo_set_level(struct vo *vo, int ontop)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     if (ontop) {
-        s->window_level = NSScreenSaverWindowLevel;
+        s->window_level = NSNormalWindowLevel + 1;
     } else {
         s->window_level = NSNormalWindowLevel;
     }
@@ -824,9 +824,9 @@ void create_menu()
 
 - (void)applicationWillBecomeActive:(NSNotification *)aNotification
 {
-    struct vo_cocoa_state *s = _vo->cocoa;
-    [self setLevel:s->window_level];
     if (vo_fs && current_screen_has_dock_or_menubar(_vo)) {
+        struct vo_cocoa_state *s = _vo->cocoa;
+        [self setLevel:s->window_level];
         [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
                                       NSApplicationPresentationHideMenuBar];
     }
@@ -834,8 +834,8 @@ void create_menu()
 
 - (void)applicationWillResignActive:(NSNotification *)aNotification
 {
-    [self setLevel:NSNormalWindowLevel];
     if (vo_fs) {
+        [self setLevel:NSNormalWindowLevel];
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
     }
 }
