@@ -3000,6 +3000,8 @@ double get_current_time(struct MPContext *mpctx)
         return 0;
     if (demuxer->stream_pts != MP_NOPTS_VALUE)
         return demuxer->stream_pts;
+    if (mpctx->hrseek_active)
+        return mpctx->hrseek_pts;
     double apts = playing_audio_pts(mpctx);
     if (apts != MP_NOPTS_VALUE)
         return apts;
