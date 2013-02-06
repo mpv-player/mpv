@@ -34,6 +34,7 @@ static void checkvolume(struct mixer *mixer)
 
     if (mixer->softvol == SOFTVOL_AUTO) {
         mixer->softvol = mixer->ao->per_application_mixer
+                         || mixer->ao->no_persistent_volume
                          ? SOFTVOL_NO : SOFTVOL_YES;
     }
 
