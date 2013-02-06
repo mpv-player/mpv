@@ -146,6 +146,9 @@ struct vo_driver {
     // of pts values itself
     bool buffer_frames;
 
+    // Encoding functionality, which can be invoked via --o only.
+    bool encode;
+
     const vo_info_t *info;
     /*
      * Preinitializes driver (real INITIALIZATION)

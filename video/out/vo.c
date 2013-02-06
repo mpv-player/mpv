@@ -131,6 +131,8 @@ const struct vo_driver *video_out_drivers[] =
 
 static int vo_preinit(struct vo *vo, char *arg)
 {
+    if (vo->driver->encode != !!vo->encode_lavc_ctx)
+        return -1;
     if (vo->driver->priv_size) {
         vo->priv = talloc_zero_size(vo, vo->driver->priv_size);
         if (vo->driver->priv_defaults)
@@ -268,12 +270,14 @@ void vo_destroy(struct vo *vo)
 
 void list_video_out(void)
 {
-    int i = 0;
     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Available video output drivers:\n");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_OUTPUTS\n");
-    while (video_out_drivers[i]) {
-        const vo_info_t *info = video_out_drivers[i++]->info;
-        mp_msg(MSGT_GLOBAL, MSGL_INFO,"\t%s\t%s\n", info->short_name, info->name);
+    for (int i = 0; video_out_drivers[i]; i++) {
+        const vo_info_t *info = video_out_drivers[i]->info;
+        if (!video_out_drivers[i]->encode) {
+            mp_msg(MSGT_GLOBAL, MSGL_INFO,"\t%s\t%s\n",
+                   info->short_name, info->name);
+        }
     }
     mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }

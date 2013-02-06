@@ -91,13 +91,14 @@ static const struct ao_driver * const audio_out_drivers[] = {
 
 void list_audio_out(void)
 {
-    int i=0;
     mp_tmsg(MSGT_AO, MSGL_INFO, "Available audio output drivers:\n");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_OUTPUTS\n");
-    while (audio_out_drivers[i]) {
-        const ao_info_t *info = audio_out_drivers[i++]->info;
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "\t%s\t%s\n", info->short_name,
-               info->name);
+    for (int i = 0; audio_out_drivers[i]; i++) {
+        const ao_info_t *info = audio_out_drivers[i]->info;
+        if (!audio_out_drivers[i]->encode) {
+            mp_msg(MSGT_GLOBAL, MSGL_INFO, "\t%s\t%s\n",
+                   info->short_name, info->name);
+        }
     }
     mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
@@ -108,6 +109,13 @@ struct ao *ao_create(struct MPOpts *opts, struct input_ctx *input)
     *r = (struct ao){.outburst = 512, .buffersize = -1,
                      .opts = opts, .input_ctx = input };
     return r;
+}
+
+static bool ao_try_init(struct ao *ao, char *params)
+{
+    if (ao->driver->encode != !!ao->encode_lavc_ctx)
+        return false;
+    return ao->driver->init(ao, params) >= 0;
 }
 
 void ao_init(struct ao *ao, char **ao_list)
@@ -148,7 +156,7 @@ void ao_init(struct ao *ao, char **ao_list)
         if (audio_out) {
             // name matches, try it
             ao->driver = audio_out;
-            if (audio_out->init(ao, params) >= 0) {
+            if (ao_try_init(ao, params)) {
                 ao->driver = audio_out;
                 ao->initialized = true;
                 return;
@@ -167,13 +175,14 @@ void ao_init(struct ao *ao, char **ao_list)
  try_defaults:
     mp_tmsg(MSGT_AO, MSGL_V, "Trying every known audio driver...\n");
 
+    ao->probing = false;
+
     // now try the rest...
     for (int i = 0; audio_out_drivers[i]; i++) {
         const struct ao_driver *audio_out = audio_out_drivers[i];
         ao->driver = audio_out;
         ao->probing = true;
-        if (audio_out->init(ao, NULL) >= 0) {
-            ao->probing = false;
+        if (ao_try_init(ao, NULL)) {
             ao->initialized = true;
             ao->driver = audio_out;
             return;
