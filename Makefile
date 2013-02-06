@@ -72,7 +72,6 @@ SOURCES-$(STREAM_CACHE)         += stream/cache2.c
 
 SOURCES-$(TV)                   += stream/stream_tv.c stream/tv.c \
                                    stream/frequencies.c stream/tvi_dummy.c
-SOURCES-$(TV_BSDBT848)          += stream/tvi_bsdbt848.c
 
 SOURCES-$(TV_V4L2)              += stream/tvi_v4l2.c stream/audio_in.c
 SOURCES-$(VCD)                  += stream/stream_vcd.c

@@ -28,12 +28,6 @@
 typedef struct radio_param_s{
     /** name of radio device file */
     char*   device;
-#ifdef CONFIG_RADIO_BSDBT848
-    /** minimal allowed frequency */
-    float   freq_min;
-    /** maximal allowed frequency */
-    float   freq_max;
-#endif
     /** radio driver (v4l,v4l2) */
     char*   driver;
     /** channels list (see man page) */

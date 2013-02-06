@@ -305,10 +305,8 @@ Optional features:
   --enable-radio         enable radio interface [disable]
   --enable-radio-capture enable radio capture (through PCI/line-in) [disable]
   --disable-radio-v4l2   disable Video4Linux2 radio interface [autodetect]
-  --disable-radio-bsdbt848   disable BSD BT848 radio interface [autodetect]
   --disable-tv           disable TV interface (TV/DVB grabbers) [enable]
   --disable-tv-v4l2      disable Video4Linux2 TV interface [autodetect]
-  --disable-tv-bsdbt848  disable BSD BT848 interface [autodetect]
   --disable-pvr          disable Video4Linux2 MPEG PVR [autodetect]
   --disable-networking   disable networking [enable]
   --enable-winsock2_h    enable winsock2_h [autodetect]
@@ -454,10 +452,8 @@ _select=yes
 _radio=no
 _radio_capture=no
 _radio_v4l2=auto
-_radio_bsdbt848=auto
 _tv=yes
 _tv_v4l2=auto
-_tv_bsdbt848=auto
 _pvr=auto
 networking=yes
 _winsock2_h=auto
@@ -646,8 +642,6 @@ for ac_option do
   --disable-alsa)       _alsa=no        ;;
   --enable-tv)          _tv=yes         ;;
   --disable-tv)         _tv=no          ;;
-  --enable-tv-bsdbt848)  _tv_bsdbt848=yes ;;
-  --disable-tv-bsdbt848) _tv_bsdbt848=no  ;;
   --enable-tv-v4l2)     _tv_v4l2=yes    ;;
   --disable-tv-v4l2)    _tv_v4l2=no     ;;
   --enable-radio)       _radio=yes      ;;
@@ -656,8 +650,6 @@ for ac_option do
   --disable-radio)      _radio=no       ;;
   --enable-radio-v4l2)  _radio_v4l2=yes ;;
   --disable-radio-v4l2) _radio_v4l2=no  ;;
-  --enable-radio-bsdbt848)      _radio_bsdbt848=yes     ;;
-  --disable-radio-bsdbt848)     _radio_bsdbt848=no      ;;
   --enable-pvr)         _pvr=yes        ;;
   --disable-pvr)        _pvr=no         ;;
   --enable-networking)     networking=yes    ;;
@@ -2727,81 +2719,6 @@ fi
 echores "$_tv"
 
 
-if freebsd || netbsd || openbsd || dragonfly ; then
-  echocheck "*BSD BT848 bt8xx header"
-  _ioctl_bt848_h=no
-  for file in "machine/ioctl_bt848.h" \
-            "dev/bktr/ioctl_bt848.h" \
-            "dev/video/bktr/ioctl_bt848.h" \
-            "dev/ic/bt8xx.h" ; do
-    cat > $TMPC <<EOF
-#include <sys/types.h>
-#include <sys/ioctl.h>
-#include <$file>
-int main(void) { ioctl(0, TVTUNER_GETFREQ, 0); return 0; }
-EOF
-    if cc_check ; then
-     _ioctl_bt848_h=yes
-     _ioctl_bt848_h_name="$file"
-     break;
-    fi
-  done
-  if test "$_ioctl_bt848_h" = yes ; then
-    def_ioctl_bt848_h_name="#define IOCTL_BT848_H_NAME <$_ioctl_bt848_h_name>"
-    res_comment="using $_ioctl_bt848_h_name"
-  else
-    def_ioctl_bt848_h_name="#undef IOCTL_BT848_H_NAME"
-  fi
-  echores "$_ioctl_bt848_h"
-
-  echocheck "*BSD ioctl_meteor.h"
-  _ioctl_meteor_h=no
-  for ioctl_meteor_h_path in "machine/ioctl_meteor.h" "dev/bktr/ioctl_meteor.h" "dev/video/bktr/ioctl_meteor.h" ; do
-    statement_check_broken "sys/types.h" "$ioctl_meteor_h_path" 'ioctl(0, METEORSINPUT, 0)' &&
-      _ioctl_meteor_h=yes && break
-  done
-  if test "$_ioctl_meteor_h" = yes ; then
-    def_ioctl_meteor_h_name="#define IOCTL_METEOR_H_NAME <$ioctl_meteor_h_path>"
-    res_comment="using $ioctl_meteor_h_path"
-  else
-    def_ioctl_meteor_h_name="#undef IOCTL_METEOR_H_NAME"
-  fi
-  echores "$_ioctl_meteor_h"
-
-  echocheck "*BSD BrookTree 848 TV interface"
-  if test "$_tv_bsdbt848" = auto ; then
-    _tv_bsdbt848=no
-    if test "$_tv" = yes ; then
-      cat > $TMPC <<EOF
-#include <sys/types.h>
-$def_ioctl_meteor_h_name
-$def_ioctl_bt848_h_name
-#ifdef IOCTL_METEOR_H_NAME
-#include IOCTL_METEOR_H_NAME
-#endif
-#ifdef IOCTL_BT848_H_NAME
-#include IOCTL_BT848_H_NAME
-#endif
-int main(void) {
- ioctl(0, METEORSINPUT, 0);
- ioctl(0, TVTUNER_GETFREQ, 0);
- return 0;
-}
-EOF
-      cc_check && _tv_bsdbt848=yes
-    fi
-  fi
-  if test "$_tv_bsdbt848" = yes ; then
-    def_tv_bsdbt848='#define CONFIG_TV_BSDBT848 1'
-    inputmodules="tv-bsdbt848 $inputmodules"
-  else
-    def_tv_bsdbt848='#undef CONFIG_TV_BSDBT848'
-    noinputmodules="tv-bsdbt848 $noinputmodules"
-  fi
-  echores "$_tv_bsdbt848"
-fi #if freebsd || netbsd || openbsd || dragonfly
-
-
 echocheck "Video 4 Linux 2 TV interface"
 if test "$_tv_v4l2" = auto ; then
   _tv_v4l2=no
@@ -2860,31 +2777,8 @@ fi
 echores "$_radio_v4l2"
 
 
-if freebsd || netbsd || openbsd || dragonfly &&
-  test "$_radio" = yes && test "$_radio_bsdbt848" = auto ; then
-echocheck "*BSD BrookTree 848 Radio interface"
-   _radio_bsdbt848=no
-    cat > $TMPC <<EOF
-#include <sys/types.h>
-$def_ioctl_bt848_h_name
-#ifdef IOCTL_BT848_H_NAME
-#include IOCTL_BT848_H_NAME
-#endif
-int main(void) { ioctl(0, RADIO_GETFREQ, 0); return 0; }
-EOF
-    cc_check && _radio_bsdbt848=yes
-echores "$_radio_bsdbt848"
-fi #if freebsd || netbsd || openbsd || dragonfly && _radio && _radio_bsdbt848
-
-if test "$_radio_bsdbt848" = yes ; then
-  def_radio_bsdbt848='#define CONFIG_RADIO_BSDBT848 1'
-else
-  def_radio_bsdbt848='#undef CONFIG_RADIO_BSDBT848'
-fi
-
-if test "$_radio_v4l2" = no &&
-   test "$_radio_bsdbt848" = no && test "$_radio" = yes ; then
-    die "Radio driver requires BSD BT848 or V4L2!"
+if test "$_radio_v4l2" = no && test "$_radio" = yes ; then
+    die "Radio driver requires V4L2!"
 fi
 
 echocheck "Video 4 Linux 2 MPEG PVR interface"
@@ -3135,7 +3029,6 @@ RADIO_CAPTURE=$_radio_capture
 RSOUND = $_rsound
 STREAM_CACHE = $_stream_cache
 TV = $_tv
-TV_BSDBT848 = $_tv_bsdbt848
 TV_V4L2 = $_tv_v4l2
 VCD = $_vcd
 VDPAU = $_vdpau
@@ -3290,18 +3183,14 @@ $def_libbs2b
 /* input */
 $def_apple_ir
 $def_apple_remote
-$def_ioctl_bt848_h_name
-$def_ioctl_meteor_h_name
 $def_joystick
 $def_lirc
 $def_lircc
 $def_pvr
 $def_radio
-$def_radio_bsdbt848
 $def_radio_capture
 $def_radio_v4l2
 $def_tv
-$def_tv_bsdbt848
 $def_tv_v4l2
 
 

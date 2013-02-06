@@ -1598,12 +1598,6 @@
     volume=<0..100>
         sound volume for radio device (default 100)
 
-    freq_min=<value> (\*BSD BT848 only)
-        minimum allowed frequency (default: 87.50)
-
-    freq_max=<value> (\*BSD BT848 only)
-        maximum allowed frequency (default: 108.00)
-
     channels=<frequency>-<name>,<frequency>-<name>,...
         Set channel list. Use _ for spaces in names (or play with quoting ;-).
         The channel names will then be written using OSD and the slave
@@ -2059,13 +2053,10 @@
 
     driver=<value>
         See ``--tv=driver=help`` for a list of compiled-in TV input drivers.
-        available: dummy, v4l, v4l2, bsdbt848 (default: autodetect)
+        available: dummy, v4l2 (default: autodetect)
 
     device=<value>
-        Specify TV device (default: ``/dev/video0``). NOTE: For the bsdbt848
-        driver you can provide both bktr and tuner device names separating
-        them with a comma, tuner after bktr (e.g. ``--tv
-        device=/dev/bktr1,/dev/tuner1``).
+        Specify TV device (default: ``/dev/video0``).
 
     input=<value>
         Specify input (default: 0 (TV), see console output for available
@@ -2093,8 +2084,7 @@
         maximum size of the capture buffer in megabytes (default: dynamical)
 
     norm=<value>
-        For bsdbt848 and v4l, PAL, SECAM, NTSC are available. For v4l2, see
-        the console output for a list of all available norms, also see the
+        See the console output for a list of all available norms, also see the
         normid option below.
 
     normid=<value> (v4l2 only)

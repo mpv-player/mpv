@@ -57,15 +57,11 @@ char *tv_channel_last_real;
 /* enumerating drivers (like in stream.c) */
 extern const tvi_info_t tvi_info_dummy;
 extern const tvi_info_t tvi_info_v4l2;
-extern const tvi_info_t tvi_info_bsdbt848;
 
 /** List of drivers in autodetection order */
 static const tvi_info_t* tvi_driver_list[]={
 #ifdef CONFIG_TV_V4L2
     &tvi_info_v4l2,
-#endif
-#ifdef CONFIG_TV_BSDBT848
-    &tvi_info_bsdbt848,
 #endif
     &tvi_info_dummy,
     NULL
