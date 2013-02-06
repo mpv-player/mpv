@@ -88,41 +88,37 @@ extern struct vo_driver video_out_corevideo;
 
 const struct vo_driver *video_out_drivers[] =
 {
+#if CONFIG_VDPAU
+        &video_out_vdpau,
+#endif
+#ifdef CONFIG_GL
+        &video_out_opengl,
+#endif
 #ifdef CONFIG_DIRECT3D
         &video_out_direct3d_shaders,
         &video_out_direct3d,
 #endif
-#ifdef CONFIG_GL_COCOA
-        &video_out_opengl,
-        &video_out_opengl_old,
-#endif
 #ifdef CONFIG_COREVIDEO
         &video_out_corevideo,
-#endif
-#if CONFIG_VDPAU
-        &video_out_vdpau,
 #endif
 #ifdef CONFIG_XV
         &video_out_xv,
 #endif
-#ifdef CONFIG_GL
-#if !defined CONFIG_GL_COCOA
-        &video_out_opengl,
-        &video_out_opengl_old,
-#endif
-#endif
 #ifdef CONFIG_SDL2
         &video_out_sdl,
+#endif
+#ifdef CONFIG_GL
+        &video_out_opengl_old,
 #endif
 #ifdef CONFIG_X11
         &video_out_x11,
 #endif
-#ifdef CONFIG_CACA
-        &video_out_caca,
-#endif
         &video_out_null,
         // should not be auto-selected
         &video_out_image,
+#ifdef CONFIG_CACA
+        &video_out_caca,
+#endif
 #ifdef CONFIG_ENCODING
         &video_out_lavc,
 #endif
