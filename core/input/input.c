@@ -198,6 +198,7 @@ static const mp_cmd_t mp_cmds[] = {
 
   { MP_CMD_SHOW_CHAPTERS, "show_chapters", },
   { MP_CMD_SHOW_TRACKS, "show_tracks", },
+  { MP_CMD_SHOW_PLAYLIST, "show_playlist", },
 
   { MP_CMD_VO_CMDLINE, "vo_cmdline", { ARG_STRING } },
 

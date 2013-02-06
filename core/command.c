@@ -1739,6 +1739,23 @@ static void show_tracks_on_osd(MPContext *mpctx)
     talloc_free(res);
 }
 
+static void show_playlist_on_osd(MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    char *res = NULL;
+
+    for (struct playlist_entry *e = mpctx->playlist->first; e; e = e->next) {
+        if (mpctx->playlist->current == e) {
+            res = talloc_asprintf_append(res, "> %s <\n", e->filename);
+        } else {
+            res = talloc_asprintf_append(res, "%s\n", e->filename);
+        }
+    }
+
+    set_osd_msg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration, "%s", res);
+    talloc_free(res);
+}
+
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -2307,6 +2324,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     case MP_CMD_SHOW_TRACKS:
         show_tracks_on_osd(mpctx);
+        break;
+    case MP_CMD_SHOW_PLAYLIST:
+        show_playlist_on_osd(mpctx);
         break;
 
     default:
