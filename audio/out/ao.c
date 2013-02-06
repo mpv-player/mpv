@@ -61,11 +61,11 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #ifdef CONFIG_OSS_AUDIO
     &audio_out_oss,
 #endif
-#ifdef CONFIG_PORTAUDIO
-    &audio_out_portaudio,
-#endif
 #ifdef CONFIG_DSOUND
     &audio_out_dsound,
+#endif
+#ifdef CONFIG_PORTAUDIO
+    &audio_out_portaudio,
 #endif
     // wrappers:
 #ifdef CONFIG_JACK
