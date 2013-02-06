@@ -235,8 +235,6 @@ typedef struct MPContext {
     int last_chapter_seek;
     double last_chapter_pts;
 
-    float begin_skip; ///< start time of the current skip while on edlout mode
-
     struct ass_library *ass_library;
 
     int file_format;

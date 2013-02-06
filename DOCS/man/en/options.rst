@@ -566,15 +566,6 @@
     to -1 (the default), mpv will choose the first edition declared as a
     default, or if there is no default, the first edition defined.
 
---edlout=<filename>
-    Creates a new file and writes edit decision list (EDL) records to it.
-    During playback, the user hits 'i' to mark the start or end of a skip
-    block. This provides a starting point from which the user can fine-tune
-    EDL entries later. See http://www.mplayerhq.hu/DOCS/HTML/en/edl.html for
-    details.
-
-    *NOTE*: broken.
-
 --embeddedfonts, --no-embeddedfonts
     Use fonts embedded in Matroska container files and ASS scripts (default:
     enabled). These fonts can be used for SSA/ASS subtitle rendering

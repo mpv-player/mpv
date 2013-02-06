@@ -560,8 +560,6 @@ const m_option_t mplayer_opts[]={
     // override audio buffer size (used only by -ao oss/win32, obsolete)
     OPT_INT("abs", ao_buffersize, 0),
 
-    {"edlout", &edl_output_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL},
-
     // set screen dimensions (when not detectable or virtual!=visible)
     OPT_INTRANGE("screenw", vo_screenwidth, CONF_GLOBAL, 0, 4096),
     OPT_INTRANGE("screenh", vo_screenheight, CONF_GLOBAL, 0, 4096),

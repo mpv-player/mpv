@@ -1844,27 +1844,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
-    case MP_CMD_EDL_MARK:
-        if (edl_fd) {
-            float v = get_current_time(mpctx);
-            if (mpctx->begin_skip == MP_NOPTS_VALUE) {
-                mpctx->begin_skip = v;
-                mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
-                        "EDL skip start, press 'i' again to end block.\n");
-            } else {
-                if (mpctx->begin_skip > v)
-                    mp_tmsg(MSGT_CPLAYER, MSGL_WARN,
-                            "EDL skip canceled, last start > stop\n");
-                else {
-                    fprintf(edl_fd, "%f %f %d\n", mpctx->begin_skip, v, 0);
-                    mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
-                            "EDL skip end, line written.\n");
-                }
-                mpctx->begin_skip = MP_NOPTS_VALUE;
-            }
-        }
-        break;
-
     case MP_CMD_SPEED_MULT: {
         float v = cmd->args[0].v.f;
         v *= mpctx->opts.playback_speed;

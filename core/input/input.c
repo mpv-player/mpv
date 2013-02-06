@@ -123,7 +123,6 @@ static const mp_cmd_t mp_cmds[] = {
                       {"exact", 1},             {"1", 1},
                       {"keyframes", -1},        {"-1", -1})),
   }},
-  { MP_CMD_EDL_MARK, "edl_mark", },
   { MP_CMD_SPEED_MULT, "speed_mult", { ARG_FLOAT } },
   { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
   { MP_CMD_STOP, "stop", },

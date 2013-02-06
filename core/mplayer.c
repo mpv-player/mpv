@@ -230,9 +230,6 @@ static int play_n_frames_mf = -1;
 
 // ---
 
-FILE *edl_fd;  // file to write to when in -edlout mode.
-char *edl_output_filename; // file to put EDL entries in (-edlout)
-
 int use_filedir_conf;
 
 #include "core/mp_common.h"
@@ -3898,16 +3895,6 @@ static void play_current_file(struct MPContext *mpctx)
 
     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Playing %s.\n", mpctx->filename);
 
-    if (edl_output_filename) {
-        if (edl_fd)
-            fclose(edl_fd);
-        if ((edl_fd = fopen(edl_output_filename, "w")) == NULL) {
-            mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
-                    "Can't open EDL file [%s] for writing.\n",
-                    edl_output_filename);
-        }
-    }
-
     //============ Open & Sync STREAM --- fork cache2 ====================
 
     assert(mpctx->stream == NULL);
@@ -4399,7 +4386,6 @@ int main(int argc, char *argv[])
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){
-        .begin_skip = MP_NOPTS_VALUE,
         .file_format = DEMUXER_TYPE_UNKNOWN,
         .last_dvb_step = 1,
         .terminal_osd_text = talloc_strdup(mpctx, ""),
