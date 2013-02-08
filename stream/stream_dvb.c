@@ -123,6 +123,9 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 	FILE *f;
 	char line[CHANNEL_LINE_LEN], *colon;
 
+        if (!filename)
+            return NULL;
+
 	int fields, cnt, pcnt, k;
 	int has8192, has0;
 	dvb_channel_t *ptr, *tmp, chn;
@@ -799,11 +802,11 @@ dvb_config_t *dvb_get_config(void)
                 break;
         }
 
-        if((access(conf_file, F_OK | R_OK) != 0)) {
+        if(conf_file && (access(conf_file, F_OK | R_OK) != 0)) {
             conf_file = talloc_steal(talloc_ctx,
                     mp_find_user_config_file("channels.conf"));
 
-            if((access(conf_file, F_OK | R_OK) != 0)) {
+            if(conf_file && (access(conf_file, F_OK | R_OK) != 0)) {
                 conf_file = talloc_steal(talloc_ctx,
                         mp_find_global_config_file("channels.conf"));
             }

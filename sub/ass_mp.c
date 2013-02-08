@@ -262,7 +262,7 @@ void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts)
     char *default_font = mp_find_user_config_file("subfont.ttf");
     char *config       = mp_find_config_file("fonts.conf");
 
-    if (!mp_path_exists(default_font)) {
+    if (default_font && !mp_path_exists(default_font)) {
         talloc_free(default_font);
         default_font = NULL;
     }
@@ -334,7 +334,8 @@ ASS_Library *mp_ass_init(struct MPOpts *opts)
     char *path = mp_find_user_config_file("fonts");
     priv = ass_library_init();
     ass_set_message_cb(priv, message_callback, NULL);
-    ass_set_fonts_dir(priv, path);
+    if (path)
+        ass_set_fonts_dir(priv, path);
     ass_set_extract_fonts(priv, opts->use_embedded_fonts);
     talloc_free(path);
     return priv;
