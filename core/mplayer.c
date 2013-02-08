@@ -1159,20 +1159,16 @@ static void print_status(struct MPContext *mpctx)
         saddf(line, width, "A");
     if (mpctx->sh_video)
         saddf(line, width, "V");
-    saddf(line, width, ":");
+    saddf(line, width, ": ");
 
     // Playback position
     double cur = get_current_time(mpctx);
-    saddf(line, width, " %.1f ", cur);
-    saddf(line, width, "(");
     sadd_hhmmssff(line, width, cur, mpctx->opts.osd_fractions);
-    saddf(line, width, ")");
 
     double len = get_time_length(mpctx);
     if (len >= 0) {
-        saddf(line, width, " / %.1f (", len);
+        saddf(line, width, " / ");
         sadd_hhmmssff(line, width, len, mpctx->opts.osd_fractions);
-        saddf(line, width, ")");
     }
 
     sadd_percentage(line, width, get_percent_pos(mpctx));
