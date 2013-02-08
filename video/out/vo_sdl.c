@@ -1035,7 +1035,7 @@ const struct vo_driver video_out_sdl = {
         .renderer_index = -1
     },
     .options = (const struct m_option []){
-        OPT_FLAG_ON("sw", allow_sw, 0),
+        OPT_FLAG("sw", allow_sw, 0),
         {NULL}
     },
     .preinit = preinit,

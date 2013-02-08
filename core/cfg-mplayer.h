@@ -287,7 +287,7 @@ extern const m_option_t lavc_decode_opts_conf[];
 
 const m_option_t common_opts[] = {
 // ------------------------- common options --------------------
-    OPT_MAKE_FLAGS("quiet", quiet, CONF_GLOBAL),
+    OPT_FLAG("quiet", quiet, CONF_GLOBAL),
     {"really-quiet", &verbose, CONF_TYPE_STORE, CONF_GLOBAL|CONF_PRE_PARSE, 0, -10, NULL},
     // -v is handled in command line preparser
     {"v", NULL, CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
@@ -353,8 +353,8 @@ const m_option_t common_opts[] = {
     OPT_REL_TIME("end", play_end, 0),
     OPT_REL_TIME("length", play_length, 0),
 
-    OPT_FLAG_ON("pause", start_paused, 0),
-    OPT_FLAG_ON("keep-open", keep_open, 0),
+    OPT_FLAG("pause", start_paused, 0),
+    OPT_FLAG("keep-open", keep_open, 0),
 
     // AVI specific: force non-interleaved mode
     {"avi-ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -392,7 +392,7 @@ const m_option_t common_opts[] = {
     OPT_STRING("demuxer", demuxer_name, 0),
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
-    OPT_MAKE_FLAGS("extbased", extension_parsing, 0),
+    OPT_FLAG("extbased", extension_parsing, 0),
 
     {"mf", (void *) mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
 #ifdef CONFIG_RADIO
@@ -468,7 +468,7 @@ const m_option_t common_opts[] = {
     OPT_FLAG_CONSTANTS("flip", flip, 0, 0, 1),
 
     // use (probably completely broken) decoder direct rendering
-    OPT_MAKE_FLAGS("dr1", vd_use_dr1, 0),
+    OPT_FLAG("dr1", vd_use_dr1, 0),
     {"field-dominance", &field_dominance, CONF_TYPE_CHOICE, 0,
      M_CHOICES(({"auto", -1}, {"top", 0}, {"bottom", 1}))},
 
@@ -482,7 +482,7 @@ const m_option_t common_opts[] = {
     {"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"sub-delay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
     {"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
-    OPT_MAKE_FLAGS("autosub", sub_auto, 0),
+    OPT_FLAG("autosub", sub_auto, 0),
     {"sub-forced-only", &forced_subs_only, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     // enable Closed Captioning display
     {"overlapsub", &suboverlap_enabled, CONF_TYPE_FLAG, 0, 0, 2, NULL},
@@ -491,13 +491,13 @@ const m_option_t common_opts[] = {
      M_CHOICES(({"exact", 0}, {"fuzzy", 1}, {"all", 2}))},
     {"sub-pos", &sub_pos, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
     OPT_FLOATRANGE("sub-gauss", sub_gauss, 0, 0.0, 3.0),
-    OPT_MAKE_FLAGS("sub-gray", sub_gray, 0),
-    OPT_MAKE_FLAGS("ass", ass_enabled, 0),
+    OPT_FLAG("sub-gray", sub_gray, 0),
+    OPT_FLAG("ass", ass_enabled, 0),
     OPT_FLOATRANGE("sub-scale", sub_scale, 0, 0, 100),
     OPT_FLOATRANGE("ass-line-spacing", ass_line_spacing, 0, -1000, 1000),
-    OPT_MAKE_FLAGS("ass-use-margins", ass_use_margins, 0),
-    OPT_MAKE_FLAGS("ass-vsfilter-aspect-compat", ass_vsfilter_aspect_compat, 0),
-    OPT_MAKE_FLAGS("embeddedfonts", use_embedded_fonts, 0),
+    OPT_FLAG("ass-use-margins", ass_use_margins, 0),
+    OPT_FLAG("ass-vsfilter-aspect-compat", ass_vsfilter_aspect_compat, 0),
+    OPT_FLAG("embeddedfonts", use_embedded_fonts, 0),
     OPT_STRINGLIST("ass-force-style", ass_force_style_list, 0),
     OPT_STRING("ass-styles", ass_styles_file, 0),
     OPT_INTRANGE("ass-hinting", ass_hinting, 0, 0, 7),
@@ -535,8 +535,8 @@ const m_option_t mplayer_opts[]={
 //---------------------- libao/libvo options ------------------------
     OPT_STRINGLIST("vo", video_driver_list, 0),
     OPT_STRINGLIST("ao", audio_driver_list, 0),
-    OPT_MAKE_FLAGS("fixed-vo", fixed_vo, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("ontop", vo_ontop, 0),
+    OPT_FLAG("fixed-vo", fixed_vo, CONF_GLOBAL),
+    OPT_FLAG("ontop", vo_ontop, 0),
     {"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"border", &vo_border, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
@@ -553,7 +553,7 @@ const m_option_t mplayer_opts[]={
                ({"auto", -1},
                 {"no", 0},
                 {"yes", 1}, {"", 1})),
-    OPT_MAKE_FLAGS("gapless-audio", gapless_audio, 0),
+    OPT_FLAG("gapless-audio", gapless_audio, 0),
     // override audio buffer size (used only by -ao oss/win32, obsolete)
     OPT_INT("abs", ao_buffersize, 0),
 
@@ -563,7 +563,7 @@ const m_option_t mplayer_opts[]={
     OPT_GEOMETRY("geometry", vo_geometry, 0),
     OPT_SIZE_BOX("autofit", vo_autofit, 0),
     OPT_SIZE_BOX("autofit-larger", vo_autofit_larger, 0),
-    OPT_MAKE_FLAGS("force-window-position", force_window_position, 0),
+    OPT_FLAG("force-window-position", force_window_position, 0),
     // vo name (X classname) and window title strings
     OPT_STRING("name", vo_winname, 0),
     OPT_STRING("title", vo_wintitle, 0),
@@ -571,10 +571,10 @@ const m_option_t mplayer_opts[]={
     OPT_FLOATRANGE("monitoraspect", force_monitor_aspect, 0, 0.0, 9.0),
     OPT_FLOATRANGE("monitorpixelaspect", monitor_pixel_aspect, 0, 0.2, 9.0),
     // video mode switching: (x11,xv,dga)
-    OPT_MAKE_FLAGS("vm", vidmode, 0),
+    OPT_FLAG("vm", vidmode, 0),
     // start in fullscreen mode:
-    OPT_MAKE_FLAGS("fullscreen", fullscreen, 0),
-    OPT_MAKE_FLAGS("fs", fullscreen, 0),
+    OPT_FLAG("fullscreen", fullscreen, 0),
+    OPT_FLAG("fs", fullscreen, 0),
     // set fullscreen switch method (workaround for buggy WMs)
     {"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
     // set bpp (x11+vm)
@@ -585,7 +585,7 @@ const m_option_t mplayer_opts[]={
     {"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1.0, NULL},
     OPT_FLOATRANGE("panscanrange", vo_panscanrange, 0, -19.0, 99.0),
-    OPT_MAKE_FLAGS("force-rgba-osd-rendering", vo_force_rgba_osd, 0),
+    OPT_FLAG("force-rgba-osd-rendering", vo_force_rgba_osd, 0),
     OPT_CHOICE("colormatrix", requested_colorspace, 0,
                ({"auto", MP_CSP_AUTO},
                 {"BT.601", MP_CSP_BT_601},
@@ -607,7 +607,7 @@ const m_option_t mplayer_opts[]={
     {"refreshrate",&vo_refresh_rate,CONF_TYPE_INT,CONF_RANGE, 0,100, NULL},
     {"wid", &WinID, CONF_TYPE_INT64, 0, 0, 0, NULL},
 #ifdef CONFIG_X11
-    OPT_MAKE_FLAGS("stop-xscreensaver", vo_stop_screensaver, 0),
+    OPT_FLAG("stop-xscreensaver", vo_stop_screensaver, 0),
     OPT_STRINGLIST("fstype", vo_fstype_list, 0),
 #endif
     {"heartbeat-cmd", &heartbeat_cmd, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -629,7 +629,7 @@ const m_option_t mplayer_opts[]={
     OPT_CHOICE("osd-level", osd_level, 0,
                ({"0", 0}, {"1", 1}, {"2", 2}, {"3", 3})),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
-    OPT_MAKE_FLAGS("osd-fractions", osd_fractions, 0),
+    OPT_FLAG("osd-fractions", osd_fractions, 0),
 
     {"sstep", &step_sec, CONF_TYPE_DOUBLE, CONF_MIN, 0, 0, NULL},
 
@@ -638,7 +638,7 @@ const m_option_t mplayer_opts[]={
                 {"yes", 1},
                 {"hard", 2})),
 
-    OPT_FLAG_ON("untimed", untimed, 0),
+    OPT_FLAG("untimed", untimed, 0),
 
 #ifdef CONFIG_LIRC
     {"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
@@ -655,21 +655,21 @@ const m_option_t mplayer_opts[]={
     {"{", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
     {"}", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
 
-    OPT_MAKE_FLAGS("ordered-chapters", ordered_chapters, 0),
+    OPT_FLAG("ordered-chapters", ordered_chapters, 0),
     OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),
 
     // a-v sync stuff:
-    OPT_MAKE_FLAGS("correct-pts", user_correct_pts, 0),
+    OPT_FLAG("correct-pts", user_correct_pts, 0),
     OPT_CHOICE("pts-association-mode", user_pts_assoc_mode, 0,
                ({"auto", 0}, {"decoder", 1}, {"sort", 2})),
-    OPT_MAKE_FLAGS("initial-audio-sync", initial_audio_sync, 0),
+    OPT_FLAG("initial-audio-sync", initial_audio_sync, 0),
     OPT_CHOICE("hr-seek", hr_seek, 0,
                ({"no", -1}, {"absolute", 0}, {"always", 1}, {"yes", 1})),
     OPT_FLOATRANGE("hr-seek-demuxer-offset", hr_seek_demuxer_offset, 0, -9, 99),
     OPT_CHOICE_OR_INT("autosync", autosync, 0, 0, 10000,
                       ({"no", -1})),
 
-    OPT_FLAG_ON("softsleep", softsleep, 0),
+    OPT_FLAG("softsleep", softsleep, 0),
 
     OPT_CHOICE("term-osd", term_osd, 0,
                ({"force", 1},
@@ -681,9 +681,9 @@ const m_option_t mplayer_opts[]={
     OPT_STRING("status-msg", status_msg, 0),
 
     {"slave-broken", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
-    OPT_MAKE_FLAGS("idle", player_idle_mode, CONF_GLOBAL),
+    OPT_FLAG("idle", player_idle_mode, CONF_GLOBAL),
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
-    OPT_MAKE_FLAGS("consolecontrols", consolecontrols, CONF_GLOBAL),
+    OPT_FLAG("consolecontrols", consolecontrols, CONF_GLOBAL),
     {"mouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
     OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
 #ifdef CONFIG_TV
@@ -693,7 +693,7 @@ const m_option_t mplayer_opts[]={
     {"screenshot", (void *) screenshot_conf, CONF_TYPE_SUBCONFIG,
      M_OPT_PREFIXED, 0, 0, NULL},
 
-    OPT_FLAG_ON("list-properties", list_properties, CONF_GLOBAL),
+    OPT_FLAG("list-properties", list_properties, CONF_GLOBAL),
     {"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},
     {"help", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {"h", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
@@ -707,15 +707,15 @@ const m_option_t mplayer_opts[]={
     OPT_STRINGLIST("ovcopts*", encode_output.vopts, CONF_GLOBAL),
     OPT_STRING("oac", encode_output.acodec, CONF_GLOBAL),
     OPT_STRINGLIST("oacopts*", encode_output.aopts, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("oharddup", encode_output.harddup, CONF_GLOBAL),
+    OPT_FLAG("oharddup", encode_output.harddup, CONF_GLOBAL),
     OPT_FLOATRANGE("ovoffset", encode_output.voffset, CONF_GLOBAL, -1000000.0, 1000000.0),
     OPT_FLOATRANGE("oaoffset", encode_output.aoffset, CONF_GLOBAL, -1000000.0, 1000000.0),
-    OPT_MAKE_FLAGS("ocopyts", encode_output.copyts, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("orawts", encode_output.rawts, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("oautofps", encode_output.autofps, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("oneverdrop", encode_output.neverdrop, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("ovfirst", encode_output.video_first, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("oafirst", encode_output.audio_first, CONF_GLOBAL),
+    OPT_FLAG("ocopyts", encode_output.copyts, CONF_GLOBAL),
+    OPT_FLAG("orawts", encode_output.rawts, CONF_GLOBAL),
+    OPT_FLAG("oautofps", encode_output.autofps, CONF_GLOBAL),
+    OPT_FLAG("oneverdrop", encode_output.neverdrop, CONF_GLOBAL),
+    OPT_FLAG("ovfirst", encode_output.video_first, CONF_GLOBAL),
+    OPT_FLAG("oafirst", encode_output.audio_first, CONF_GLOBAL),
 #endif
 
     {NULL, NULL, 0, 0, 0, 0, NULL}

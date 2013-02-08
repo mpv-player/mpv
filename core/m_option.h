@@ -520,9 +520,7 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
  * 0). Thus the first OPT_FLAG_CONSTANTS is a wrapper which just adds one
  * argument to ensure __VA_ARGS__ is not empty when calling the next macro.
  */
-#define OPT_FLAG_ON(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_flag, .max = 1)
-#define OPT_FLAG_OFF(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_flag, .min = 1)
-#define OPT_MAKE_FLAGS OPT_FLAG_ON
+#define OPT_FLAG(...) OPT_GENERAL(__VA_ARGS__, .type = &m_option_type_flag, .max = 1)
 #define OPT_FLAG_CONSTANTS(...) OPT_FLAG_CONSTANTS_(__VA_ARGS__, .type = &m_option_type_flag)
 #define OPT_FLAG_CONSTANTS_(optname, varname, flags, offvalue, value, ...) OPT_GENERAL(optname, varname, flags, .min = offvalue, .max = value, __VA_ARGS__)
 #define OPT_FLAG_STORE(optname, varname, flags, value) OPT_GENERAL(optname, varname, flags, .max = value, .type = &m_option_type_store)

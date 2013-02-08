@@ -528,17 +528,17 @@ static const m_option_t input_conf[] = {
     OPT_STRING("js-dev", input.js_dev, CONF_GLOBAL),
     OPT_STRING("ar-dev", input.ar_dev, CONF_GLOBAL),
     OPT_STRING("file", input.in_file, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("default-bindings", input.default_bindings, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("test", input.test, CONF_GLOBAL),
+    OPT_FLAG("default-bindings", input.default_bindings, CONF_GLOBAL),
+    OPT_FLAG("test", input.test, CONF_GLOBAL),
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 static const m_option_t mp_input_opts[] = {
     { "input", (void *)&input_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-    OPT_MAKE_FLAGS("joystick", input.use_joystick, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("lirc", input.use_lirc, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("lircc", input.use_lircc, CONF_GLOBAL),
-    OPT_MAKE_FLAGS("ar", input.use_ar, CONF_GLOBAL),
+    OPT_FLAG("joystick", input.use_joystick, CONF_GLOBAL),
+    OPT_FLAG("lirc", input.use_lirc, CONF_GLOBAL),
+    OPT_FLAG("lircc", input.use_lircc, CONF_GLOBAL),
+    OPT_FLAG("ar", input.use_ar, CONF_GLOBAL),
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 

@@ -81,7 +81,7 @@ static void uninit(struct sh_video *sh);
 
 const m_option_t lavc_decode_opts_conf[] = {
     OPT_INTRANGE("bug", lavc_param.workaround_bugs, 0, -1, 999999),
-    OPT_FLAG_ON("gray", lavc_param.gray, 0),
+    OPT_FLAG("gray", lavc_param.gray, 0),
     OPT_INTRANGE("idct", lavc_param.idct_algo, 0, 0, 99),
     OPT_INTRANGE("ec", lavc_param.error_concealment, 0, 0, 99),
     OPT_INTRANGE("debug", lavc_param.debug, 0, 0, 9999999),
