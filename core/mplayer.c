@@ -689,8 +689,9 @@ static bool parse_cfgfiles(struct MPContext *mpctx, m_config_t *conf)
     struct MPOpts *opts = &mpctx->opts;
     char *conffile;
     int conffile_fd;
-    if (!(opts->noconfig & 2) &&
-        m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf") < 0)
+    if (!opts->load_config)
+        return true;
+    if (!m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf") < 0)
         return false;
     if ((conffile = mp_find_user_config_file("")) == NULL)
         mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Cannot find HOME directory.\n");
@@ -708,8 +709,7 @@ static bool parse_cfgfiles(struct MPContext *mpctx, m_config_t *conf)
                 write(conffile_fd, DEF_CONFIG, sizeof(DEF_CONFIG) - 1);
                 close(conffile_fd);
             }
-            if (!(opts->noconfig & 1) &&
-                m_config_parse_config_file(conf, conffile) < 0)
+            if (m_config_parse_config_file(conf, conffile) < 0)
                 return false;
             talloc_free(conffile);
         }
@@ -3657,7 +3657,7 @@ static void check_previous_track_selection(struct MPContext *mpctx)
 
 static void init_input(struct MPContext *mpctx)
 {
-    mpctx->input = mp_input_init(&mpctx->opts.input);
+    mpctx->input = mp_input_init(&mpctx->opts.input, mpctx->opts.load_config);
     mpctx->key_fifo = mp_fifo_create(mpctx->input, &mpctx->opts);
     if (slave_mode)
         mp_input_add_cmd_fd(mpctx->input, 0, USE_FD0_CMD_SELECT, MP_INPUT_SLAVE_CMD_FUNC, NULL);

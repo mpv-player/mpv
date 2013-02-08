@@ -886,8 +886,7 @@
 
     conf=<filename>
         Specify input configuration file other than the default
-        ``~/.mpv/input.conf``. ``~/.mpv/<filename>`` is assumed if no
-        full path is given.
+        ``~/.mpv/input.conf``.
 
     ar-dev=<device>
         Device to be used for Apple IR Remote (default is autodetected, Linux
@@ -1251,17 +1250,16 @@
     Disables colorkeying. Only supported by the xv (see ``--vo=xv:ck``) video
     output driver.
 
---no-config=<options>
-    Do not parse selected configuration files.
+--no-config
+    Do not load default configuration files. This prevents loading of
+    ``~/.mpv/config`` and ``~/.mpv/input.conf``, as well as loading the
+    same files from system wide configuration directories.
 
-    *NOTE*: If ``--include`` or ``--use-filedir-conf`` options are specified
-    at the command line, they will be honoured.
+    Loading of some configuration files is not affected by this option, such
+    as configuration files for cddb, DVB code and fontconfig.
 
-    Available options are:
-
-    :all:    all configuration files
-    :system: system configuration file
-    :user:   user configuration file
+    *NOTE*: Files explicitly requested by command line options, like
+    ``--include`` or ``--use-filedir-conf``, will still be loaded.
 
 --no-idx
     Do not use index present in the file even if one is present.

@@ -520,7 +520,7 @@ static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam);
 
 // Our command line options
 static const m_option_t input_conf[] = {
-    OPT_STRING("conf", input.config_file, CONF_GLOBAL, OPTDEF_STR("input.conf")),
+    OPT_STRING("conf", input.config_file, CONF_GLOBAL),
     OPT_INT("ar-delay", input.ar_delay, CONF_GLOBAL),
     OPT_INT("ar-rate", input.ar_rate, CONF_GLOBAL),
     { "keylist", print_key_list, CONF_TYPE_PRINT_FUNC, CONF_GLOBAL | CONF_NOCFG },
@@ -1721,15 +1721,16 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
     return n_binds;
 }
 
-static int parse_config_file(struct input_ctx *ictx, char *file)
+static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
 {
     if (!mp_path_exists(file)) {
-        mp_msg(MSGT_INPUT, MSGL_V, "Input config file %s missing.\n", file);
+        mp_msg(MSGT_INPUT, warn ? MSGL_ERR : MSGL_V,
+               "Input config file %s not found.\n", file);
         return 0;
     }
     stream_t *s = open_stream(file, NULL, NULL);
     if (!s) {
-        mp_msg(MSGT_INPUT, MSGL_V, "Can't open input config file %s.\n", file);
+        mp_msg(MSGT_INPUT, MSGL_ERR, "Can't open input config file %s.\n", file);
         return 0;
     }
     bstr res = stream_read_complete(s, NULL, 1000000, 0);
@@ -1754,7 +1755,8 @@ char *mp_input_get_section(struct input_ctx *ictx)
     return ictx->section;
 }
 
-struct input_ctx *mp_input_init(struct input_conf *input_conf)
+struct input_ctx *mp_input_init(struct input_conf *input_conf,
+                                bool load_default_conf)
 {
     struct input_ctx *ictx = talloc_ptrtype(NULL, ictx);
     *ictx = (struct input_ctx){
@@ -1786,27 +1788,18 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf)
                             NULL, NULL);
 #endif
 
-    char *file;
-    char *config_file = input_conf->config_file;
-    file = config_file[0] != '/' ?
-        mp_find_user_config_file(config_file) : config_file;
-    if (!file)
-        return ictx;
-
-    if (!parse_config_file(ictx, file)) {
-        // free file if it was allocated by get_path(),
-        // before it gets overwritten
-        if (file != config_file)
-            talloc_free(file);
+    bool config_ok = false;
+    if (input_conf->config_file)
+        config_ok = parse_config_file(ictx, input_conf->config_file, true);
+    if (!config_ok && load_default_conf) {
         // Try global conf dir
-        file = MPLAYER_CONFDIR "/input.conf";
-        if (!parse_config_file(ictx, file))
-            mp_msg(MSGT_INPUT, MSGL_V, "Falling back on default (hardcoded) "
-                   "input config\n");
-    } else {
-        // free file if it was allocated by get_path()
-        if (file != config_file)
-            talloc_free(file);
+        char *file = mp_find_config_file("input.conf");
+        config_ok = file && parse_config_file(ictx, file, false);
+        talloc_free(file);
+    }
+    if (!config_ok) {
+        mp_msg(MSGT_INPUT, MSGL_V, "Falling back on default (hardcoded) "
+               "input config\n");
     }
 
 #ifdef CONFIG_JOYSTICK

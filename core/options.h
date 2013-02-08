@@ -54,7 +54,7 @@ typedef struct MPOpts {
     int ordered_chapters;
     int chapter_merge_threshold;
     int quiet;
-    int noconfig;
+    int load_config;
     char *codecs_file;
     int stream_cache_size;
     float stream_cache_min_percent;

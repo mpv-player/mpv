@@ -203,7 +203,8 @@ char *mp_input_get_section(struct input_ctx *ictx);
 
 // Initialize the input system
 struct input_conf;
-struct input_ctx *mp_input_init(struct input_conf *input_conf);
+struct input_ctx *mp_input_init(struct input_conf *input_conf,
+                                bool load_default_conf);
 
 void mp_input_uninit(struct input_ctx *ictx);
 

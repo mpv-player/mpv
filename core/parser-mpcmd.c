@@ -289,7 +289,7 @@ err_out:
 extern int mp_msg_levels[];
 
 /* Parse some command line options early before main parsing.
- * --noconfig prevents reading configuration files (otherwise done before
+ * --no-config prevents reading configuration files (otherwise done before
  * command line parsing), and --really-quiet suppresses messages printed
  * during normal options parsing.
  */

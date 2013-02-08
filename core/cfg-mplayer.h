@@ -297,8 +297,7 @@ const m_option_t common_opts[] = {
 #ifdef CONFIG_PRIORITY
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
-    OPT_CHOICE("no-config", noconfig, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE,
-               ({"no", 0}, {"user", 1}, {"system", 2}, {"all", 3})),
+    OPT_FLAG("config", load_config, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
 
 // ------------------------- stream options --------------------
 
