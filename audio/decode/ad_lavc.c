@@ -221,24 +221,23 @@ static int init(sh_audio_t *sh_audio, const char *decoder)
     lavc_context = avcodec_alloc_context3(lavc_codec);
     ctx->avctx = lavc_context;
     ctx->avframe = avcodec_alloc_frame();
+    lavc_context->codec_type = AVMEDIA_TYPE_AUDIO;
+    lavc_context->codec_id = lavc_codec->id;
+
+    lavc_context->request_channels = opts->audio_output_channels;
 
     // Always try to set - option only exists for AC3 at the moment
     av_opt_set_double(lavc_context, "drc_scale", opts->drc_level,
                       AV_OPT_SEARCH_CHILDREN);
+
+    lavc_context->codec_tag = sh_audio->format;
     lavc_context->sample_rate = sh_audio->samplerate;
     lavc_context->bit_rate = sh_audio->i_bps * 8;
-
-    lavc_context->request_channels = opts->audio_output_channels;
-    lavc_context->codec_tag = sh_audio->format; //FOURCC
-    if (sh_audio->gsh->lavf_codec_tag)
-        lavc_context->codec_tag = sh_audio->gsh->lavf_codec_tag;
-    lavc_context->codec_type = AVMEDIA_TYPE_AUDIO;
-    lavc_context->codec_id = lavc_codec->id; // not sure if required, imho not --A'rpi
 
     if (sh_audio->wf)
         set_from_wf(lavc_context, sh_audio->wf);
 
-    // for QDM2
+    // demux_mkv, demux_mpg
     if (sh_audio->codecdata_len && sh_audio->codecdata &&
             !lavc_context->extradata) {
         lavc_context->extradata = av_malloc(sh_audio->codecdata_len +
@@ -247,6 +246,9 @@ static int init(sh_audio_t *sh_audio, const char *decoder)
         memcpy(lavc_context->extradata, (char *)sh_audio->codecdata,
                lavc_context->extradata_size);
     }
+
+    if (sh_audio->gsh->lav_headers)
+        mp_copy_lav_codec_headers(lavc_context, sh_audio->gsh->lav_headers);
 
     /* open it */
     if (avcodec_open2(lavc_context, lavc_codec, NULL) < 0) {

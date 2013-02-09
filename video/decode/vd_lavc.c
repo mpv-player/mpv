@@ -297,16 +297,10 @@ static int init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
 
     avctx->flags |= lavc_param->bitexact;
 
-    avctx->coded_width  = sh->disp_w;
-    avctx->coded_height = sh->disp_h;
     avctx->workaround_bugs = lavc_param->workaround_bugs;
     if (lavc_param->gray)
         avctx->flags |= CODEC_FLAG_GRAY;
     avctx->flags2 |= lavc_param->fast;
-    avctx->codec_tag = sh->format;
-    if (sh->gsh->lavf_codec_tag)
-        avctx->codec_tag = sh->gsh->lavf_codec_tag;
-    avctx->stream_codec_tag = sh->video.fccHandler;
     avctx->idct_algo = lavc_param->idct_algo;
     avctx->error_concealment = lavc_param->error_concealment;
     avctx->debug = lavc_param->debug;
@@ -332,6 +326,14 @@ static int init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
     // Do this after the above avopt handling in case it changes values
     ctx->skip_frame = avctx->skip_frame;
 
+    avctx->codec_tag = sh->format;
+    avctx->coded_width  = sh->disp_w;
+    avctx->coded_height = sh->disp_h;
+
+    // demux_avi only
+    avctx->stream_codec_tag = sh->video.fccHandler;
+
+    // demux_mkv, demux_avi, demux_asf
     if (sh->bih)
         set_from_bih(avctx, sh->format, sh->bih);
 
@@ -339,6 +341,9 @@ static int init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
         avctx->pix_fmt = imgfmt2pixfmt(sh->format);
         avctx->codec_tag = 0;
     }
+
+    if (sh->gsh->lav_headers)
+        mp_copy_lav_codec_headers(avctx, sh->gsh->lav_headers);
 
     /* open it */
     if (avcodec_open2(avctx, lavc_codec, NULL) < 0) {

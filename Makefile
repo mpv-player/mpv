@@ -201,7 +201,6 @@ SOURCES = talloc.c \
           demux/ebml.c \
           demux/extension.c \
           demux/mf.c \
-          demux/mp_taglists.c \
           demux/video.c \
           osdep/numcores.c \
           osdep/io.c \

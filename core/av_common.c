@@ -23,6 +23,40 @@
 #include "codecs.h"
 
 
+// Copy the codec-related fields from st into avctx. This does not set the
+// codec itself, only codec related header data provided by libavformat.
+// The goal is to initialize a new decoder with the header data provided by
+// libavformat, and unlike avcodec_copy_context(), allow the user to create
+// a clean AVCodecContext for a manually selected AVCodec.
+// This is strictly for decoding only.
+void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st)
+{
+    if (st->extradata_size) {
+        av_free(avctx->extradata);
+        avctx->extradata_size = 0;
+        avctx->extradata =
+            av_mallocz(st->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+        if (avctx->extradata) {
+            avctx->extradata_size = st->extradata_size;
+            memcpy(avctx->extradata, st->extradata, st->extradata_size);
+        }
+    }
+    avctx->codec_tag                = st->codec_tag;
+    avctx->stream_codec_tag         = st->stream_codec_tag;
+    avctx->bit_rate                 = st->bit_rate;
+    avctx->width                    = st->width;
+    avctx->height                   = st->height;
+    avctx->pix_fmt                  = st->pix_fmt;
+    avctx->sample_aspect_ratio      = st->sample_aspect_ratio;
+    avctx->chroma_sample_location   = st->chroma_sample_location;
+    avctx->sample_rate              = st->sample_rate;
+    avctx->channels                 = st->channels;
+    avctx->block_align              = st->block_align;
+    avctx->channel_layout           = st->channel_layout;
+    avctx->audio_service_type       = st->audio_service_type;
+    avctx->bits_per_coded_sample    = st->bits_per_coded_sample;
+}
+
 #if !HAVE_AVCODEC_IS_DECODER_API
 static int av_codec_is_decoder(AVCodec *codec)
 {

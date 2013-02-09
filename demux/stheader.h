@@ -59,8 +59,9 @@ struct sh_stream {
     // E.g. "h264" (usually corresponds to AVCodecDescriptor.name)
     const char *codec;
 
-    // Work around other hacks.
-    int lavf_codec_tag;
+    // Codec specific header data (set by demux_lavf.c)
+    // Other demuxers use sh_audio->wf and sh_video->bih instead.
+    struct AVCodecContext *lav_headers;
 
     char *title;
     char *lang;                 // language code

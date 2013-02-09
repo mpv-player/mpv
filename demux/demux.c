@@ -339,6 +339,14 @@ static struct sh_stream *new_sh_stream(demuxer_t *demuxer,
     return sh;
 }
 
+static void free_sh_stream(struct sh_stream *sh)
+{
+    if (sh->lav_headers) {
+        avcodec_close(sh->lav_headers);
+        av_free(sh->lav_headers);
+    }
+}
+
 sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
 {
     if (id > MAX_S_STREAMS - 1 || id < 0) {
@@ -372,7 +380,7 @@ static void free_sh_sub(sh_sub_t *sh)
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
     free(sh->extradata);
     clear_parser((sh_common_t *)sh);
-    talloc_free(sh);
+    free_sh_stream(sh->gsh);
 }
 
 sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
@@ -401,7 +409,7 @@ static void free_sh_audio(demuxer_t *demuxer, int id)
     free(sh->wf);
     free(sh->codecdata);
     clear_parser((sh_common_t *)sh);
-    talloc_free(sh);
+    free_sh_stream(sh->gsh);
 }
 
 sh_video_t *new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
@@ -427,7 +435,7 @@ static void free_sh_video(sh_video_t *sh)
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_video at %p\n", sh);
     free(sh->bih);
     clear_parser((sh_common_t *)sh);
-    talloc_free(sh);
+    free_sh_stream(sh->gsh);
 }
 
 void free_demuxer(demuxer_t *demuxer)
