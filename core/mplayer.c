@@ -288,7 +288,7 @@ static void print_stream(struct MPContext *mpctx, struct track *t, int id)
     const char *langopt = "?";
     switch (t->type) {
     case STREAM_VIDEO:
-        tname = "Video"; selopt = "vid"; langopt = "vlang";
+        tname = "Video"; selopt = "vid"; langopt = NULL;
         break;
     case STREAM_AUDIO:
         tname = "Audio"; selopt = "aid"; langopt = "alang";
@@ -300,7 +300,7 @@ static void print_stream(struct MPContext *mpctx, struct track *t, int id)
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "[stream] %-5s %3s",
            tname, mpctx->current_track[t->type] == t ? "(+)" : "");
     mp_msg(MSGT_CPLAYER, MSGL_INFO, " --%s=%d", selopt, t->user_tid);
-    if (t->lang)
+    if (t->lang && langopt)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " --%s=%s", langopt, t->lang);
     if (t->default_track)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " (*)");
@@ -877,7 +877,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
         .title = stream->title,
         .default_track = stream->default_track,
         .attached_picture = stream->attached_picture,
-        .lang = stream->common_header->lang,
+        .lang = stream->lang,
         .under_timeline = under_timeline,
         .demuxer = stream->demuxer,
         .stream = stream,

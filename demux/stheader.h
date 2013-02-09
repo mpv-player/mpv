@@ -63,6 +63,7 @@ struct sh_stream {
     int lavf_codec_tag;
 
     char *title;
+    char *lang;                 // language code
     bool default_track;         // container default track flag
     bool attached_picture;      // stream is a picture (such as album art)
 
@@ -93,7 +94,6 @@ struct sh_stream {
     double pts;                                                         \
     /* decoder context */                                               \
     void *context;                                                      \
-    char *lang;   /* track language */                                  \
 
 typedef struct sh_common {
     SH_COMMON

@@ -329,10 +329,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
     lavf_priv_t *priv = demuxer->priv;
     AVStream *st = avfc->streams[i];
     AVCodecContext *codec = st->codec;
-    char *stream_type = NULL;
-    int stream_id;
-    AVDictionaryEntry *lang = av_dict_get(st->metadata, "language", NULL, 0);
-    AVDictionaryEntry *title = av_dict_get(st->metadata, "title", NULL, 0);
+    struct sh_stream *sh = NULL;
     // Work around collisions resulting from the hacks changing codec_tag.
     int lavf_codec_tag = codec->codec_tag;
     // Don't use native MPEG codec tag values with our generic tag tables.
@@ -347,8 +344,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
 
     const char *mp_codec = mp_codec_from_av_codec_id(codec->codec_id);
 
-    bool set_demuxer_id = matches_avinputformat_name(priv, "mpeg");
-
     switch (codec->codec_type) {
     case AVMEDIA_TYPE_AUDIO: {
         WAVEFORMATEX *wf;
@@ -356,12 +351,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_audio = new_sh_audio_aid(demuxer, i, priv->audio_streams);
         if (!sh_audio)
             break;
-        if (set_demuxer_id)
-            sh_audio->gsh->demuxer_id = st->id;
-        stream_type = "audio";
+        sh = sh_audio->gsh;
         priv->astreams[priv->audio_streams] = i;
-        sh_audio->gsh->codec = mp_codec;
-        sh_audio->gsh->lavf_codec_tag = lavf_codec_tag;
         wf = calloc(sizeof(*wf) + codec->extradata_size, 1);
         // mp4a tag is used for all mp4 files no matter what they actually contain
         if (codec->codec_tag == MKTAG('m', 'p', '4', 'a'))
@@ -405,22 +396,10 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             sh_audio->format = 0x7;
             break;
         }
-        if (title && title->value) {
-            sh_audio->gsh->title = talloc_strdup(sh_audio, title->value);
-            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_NAME=%s\n",
-                   priv->audio_streams, title->value);
-        }
-        if (lang && lang->value) {
-            sh_audio->lang = talloc_strdup(sh_audio, lang->value);
-            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n",
-                   priv->audio_streams, sh_audio->lang);
-        }
-        if (st->disposition & AV_DISPOSITION_DEFAULT)
-            sh_audio->gsh->default_track = 1;
         if (mp_msg_test(MSGT_HEADER, MSGL_V))
             print_wave_header(sh_audio->wf, MSGL_V);
         st->discard = AVDISCARD_ALL;
-        stream_id = priv->audio_streams++;
+        priv->audio_streams++;
         break;
     }
     case AVMEDIA_TYPE_VIDEO: {
@@ -429,12 +408,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_video = new_sh_video_vid(demuxer, i, priv->video_streams);
         if (!sh_video)
             break;
-        if (set_demuxer_id)
-            sh_video->gsh->demuxer_id = st->id;
-        stream_type = "video";
+        sh = sh_video->gsh;
         priv->vstreams[priv->video_streams] = i;
-        sh_video->gsh->codec = mp_codec;
-        sh_video->gsh->lavf_codec_tag = lavf_codec_tag;
         if (st->disposition & AV_DISPOSITION_ATTACHED_PIC)
             sh_video->gsh->attached_picture = true;
         bih = calloc(sizeof(*bih) + codec->extradata_size, 1);
@@ -496,11 +471,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             sh_video->aspect = codec->width  * codec->sample_aspect_ratio.num
                     / (float)(codec->height * codec->sample_aspect_ratio.den);
         sh_video->i_bps = codec->bit_rate / 8;
-        if (title && title->value) {
-            sh_video->gsh->title = talloc_strdup(sh_video, title->value);
-            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VID_%d_NAME=%s\n",
-                   priv->video_streams, title->value);
-        }
+
         mp_msg(MSGT_DEMUX, MSGL_DBG2, "aspect= %d*%d/(%d*%d)\n",
                codec->width, codec->sample_aspect_ratio.num,
                codec->height, codec->sample_aspect_ratio.den);
@@ -517,7 +488,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             demuxer->video->id = i;
             demuxer->video->sh = demuxer->v_streams[i];
         }
-        stream_id = priv->video_streams++;
+        priv->video_streams++;
         break;
     }
     case AVMEDIA_TYPE_SUBTITLE: {
@@ -545,31 +516,15 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_sub = new_sh_sub_sid(demuxer, i, priv->sub_streams);
         if (!sh_sub)
             break;
-        if (set_demuxer_id)
-            sh_sub->gsh->demuxer_id = st->id;
-        stream_type = "subtitle";
+        sh = sh_sub->gsh;
         priv->sstreams[priv->sub_streams] = i;
-        sh_sub->gsh->codec = mp_codec;
-        sh_sub->gsh->lavf_codec_tag = lavf_codec_tag;
         sh_sub->type = type;
         if (codec->extradata_size) {
             sh_sub->extradata = malloc(codec->extradata_size);
             memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
             sh_sub->extradata_len = codec->extradata_size;
         }
-        if (title && title->value) {
-            sh_sub->gsh->title = talloc_strdup(sh_sub, title->value);
-            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_NAME=%s\n",
-                   priv->sub_streams, title->value);
-        }
-        if (lang && lang->value) {
-            sh_sub->lang = talloc_strdup(sh_sub, lang->value);
-            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n",
-                   priv->sub_streams, sh_sub->lang);
-        }
-        if (st->disposition & AV_DISPOSITION_DEFAULT)
-            sh_sub->gsh->default_track = 1;
-        stream_id = priv->sub_streams++;
+        priv->sub_streams++;
         break;
     }
     case AVMEDIA_TYPE_ATTACHMENT: {
@@ -586,15 +541,19 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
     default:
         st->discard = AVDISCARD_ALL;
     }
-    if (stream_type) {
-        mp_msg(MSGT_DEMUX, MSGL_V, "[lavf] stream %d: %s, -%cid %d",
-               i, stream_type, *stream_type, stream_id);
-        if (lang && lang->value && *stream_type != 'v')
-            mp_msg(MSGT_DEMUX, MSGL_V, ", -%clang %s",
-                   *stream_type, lang->value);
+    if (sh) {
+        sh->codec = mp_codec;
+        sh->lavf_codec_tag = lavf_codec_tag;
+        if (st->disposition & AV_DISPOSITION_DEFAULT)
+            sh->default_track = 1;
+        if (matches_avinputformat_name(priv, "mpeg"))
+            sh->demuxer_id = st->id;
+        AVDictionaryEntry *title = av_dict_get(st->metadata, "title", NULL, 0);
         if (title && title->value)
-            mp_msg(MSGT_DEMUX, MSGL_V, ", %s", title->value);
-        mp_msg(MSGT_DEMUX, MSGL_V, "\n");
+            sh->title = talloc_strdup(sh, title->value);
+        AVDictionaryEntry *lang = av_dict_get(st->metadata, "language", NULL, 0);
+        if (lang && lang->value)
+            sh->lang = talloc_strdup(sh, lang->value);
     }
 }
 

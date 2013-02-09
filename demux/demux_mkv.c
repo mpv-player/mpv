@@ -1337,7 +1337,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
         return 1;
 
     if (track->language && (strcmp(track->language, "und") != 0))
-        sh_a->lang = talloc_strdup(sh_a, track->language);
+        sh_a->gsh->lang = talloc_strdup(sh_a, track->language);
     sh_a->gsh->demuxer_id = track->tnum;
     sh_a->gsh->title = talloc_strdup(sh_a, track->name);
     sh_a->gsh->default_track = track->default_track;
@@ -1602,7 +1602,7 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track,
         memcpy(sh->extradata, track->private_data, track->private_size);
         sh->extradata_len = track->private_size;
         if (track->language && (strcmp(track->language, "und") != 0))
-            sh->lang = talloc_strdup(sh, track->language);
+            sh->gsh->lang = talloc_strdup(sh, track->language);
         sh->gsh->title = talloc_strdup(sh, track->name);
         sh->gsh->default_track = track->default_track;
     } else {
