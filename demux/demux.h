@@ -131,8 +131,6 @@ typedef struct demux_stream {
 // ---- asf -----
     struct demux_packet *asf_packet; // read asf fragments here
     int asf_seq;
-// ---- mov -----
-    unsigned int ss_mul, ss_div;
 // ---- stream header ----
     void *sh;              // points to sh_audio or sh_video
 } demux_stream_t;

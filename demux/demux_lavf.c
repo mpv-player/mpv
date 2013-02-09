@@ -42,7 +42,6 @@
 #include "core/bstr.h"
 
 #include "stream/stream.h"
-#include "aviprint.h"
 #include "demux.h"
 #include "stheader.h"
 #include "core/m_option.h"
@@ -371,18 +370,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         if (codec->extradata_size)
             memcpy(wf + 1, codec->extradata, codec->extradata_size);
         sh_audio->wf = wf;
-        sh_audio->audio.dwSampleSize = codec->block_align;
-        if (codec->frame_size && codec->sample_rate) {
-            sh_audio->audio.dwScale = codec->frame_size;
-            sh_audio->audio.dwRate = codec->sample_rate;
-        } else {
-            sh_audio->audio.dwScale = codec->block_align ? codec->block_align * 8 : 8;
-            sh_audio->audio.dwRate = codec->bit_rate;
-        }
-        int g = av_gcd(sh_audio->audio.dwScale, sh_audio->audio.dwRate);
-        sh_audio->audio.dwScale /= g;
-        sh_audio->audio.dwRate  /= g;
-//          printf("sca:%d rat:%d fs:%d sr:%d ba:%d\n", sh_audio->audio.dwScale, sh_audio->audio.dwRate, codec->frame_size, codec->sample_rate, codec->block_align);
         sh_audio->ds = demuxer->audio;
         sh_audio->format = codec->codec_tag;
         sh_audio->channels = codec->channels;
@@ -396,8 +383,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
             sh_audio->format = 0x7;
             break;
         }
-        if (mp_msg_test(MSGT_HEADER, MSGL_V))
-            print_wave_header(sh_audio->wf, MSGL_V);
         st->discard = AVDISCARD_ALL;
         priv->audio_streams++;
         break;
@@ -440,13 +425,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_video->bih = bih;
         sh_video->disp_w = codec->width;
         sh_video->disp_h = codec->height;
-        if (st->time_base.den) {     /* if container has time_base, use that */
-            sh_video->video.dwRate = st->time_base.den;
-            sh_video->video.dwScale = st->time_base.num;
-        } else {
-            sh_video->video.dwRate = codec->time_base.den;
-            sh_video->video.dwScale = codec->time_base.num;
-        }
         /* Try to make up some frame rate value, even if it's not reliable.
          * FPS information is needed to support subtitle formats which base
          * timing on frame numbers.
@@ -479,8 +457,6 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_video->ds = demuxer->video;
         if (codec->extradata_size)
             memcpy(sh_video->bih + 1, codec->extradata, codec->extradata_size);
-        if ( mp_msg_test(MSGT_HEADER, MSGL_V))
-            print_video_header(sh_video->bih, MSGL_V);
         if (demuxer->video->id != priv->video_streams
             && demuxer->video->id != -1)
             st->discard = AVDISCARD_ALL;
