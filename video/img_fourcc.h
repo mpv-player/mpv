@@ -40,16 +40,6 @@
 
 #define MP_FOURCC_MJPEG MP_FOURCC('M', 'J', 'P', 'G')
 
-/* mplayer internal FourCCs
- * see codecs.conf/vd_lavc.c
- */
-
-// lavc raw video decoder uses fourcc specified in sh_video->imgfmt
-#define MP_FOURCC_RAWVIDEO MP_FOURCC('M', 'P', 'r', 'v')
-
-// lavc raw video decoder uses image format (IMGFMT_*) in sh_video->imgfmt
-#define MP_FOURCC_IMGFMT   MP_FOURCC('M', 'P', 'v', 'f')
-
 // NOTE: no "HM12" decoder exists, as vd_hmblck has been removed
 //       likely breaks video with some TV cards
 #define MP_FOURCC_HM12 0x32314D48

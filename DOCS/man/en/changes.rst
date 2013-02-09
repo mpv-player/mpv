@@ -120,6 +120,7 @@ Command line switches
     -vobsub                             --sub (pass the .idx file)
     -ass-bottom-margin                  --vf=sub=bottom:top
     -vc ffh264vdpau (etc.)              --hwdec=vdpau
+    -ac spdifac3                        --ad=spdif:ac3 (see --ad=help)
     -x W, -y H                          --geometry=WxH + --no-keepaspect
     -xy W                               --autofit=W
     =================================== ===================================

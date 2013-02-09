@@ -19,17 +19,20 @@
 #ifndef MPLAYER_AD_H
 #define MPLAYER_AD_H
 
-#include "core/mpc_info.h"
+#include "core/codecs.h"
 #include "demux/stheader.h"
 
 typedef struct mp_codec_info ad_info_t;
 
+struct mp_decoder_list;
+
 /* interface of video decoder drivers */
 typedef struct ad_functions
 {
-    const ad_info_t *info;
+    const char *name;
+    void (*add_decoders)(struct mp_decoder_list *list);
     int (*preinit)(sh_audio_t *sh);
-    int (*init)(sh_audio_t *sh);
+    int (*init)(sh_audio_t *sh, const char *decoder);
     void (*uninit)(sh_audio_t *sh);
     int (*control)(sh_audio_t *sh,int cmd,void* arg, ...);
     int (*decode_audio)(sh_audio_t *sh, unsigned char *buffer, int minlen,

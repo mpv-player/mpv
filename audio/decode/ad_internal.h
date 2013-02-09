@@ -19,7 +19,7 @@
 #ifndef MPLAYER_AD_INTERNAL_H
 #define MPLAYER_AD_INTERNAL_H
 
-#include "core/codec-cfg.h"
+#include "core/codecs.h"
 #include "audio/format.h"
 
 #include "stream/stream.h"
@@ -28,14 +28,16 @@
 
 #include "ad.h"
 
-static int init(sh_audio_t *sh);
+static void add_decoders(struct mp_decoder_list *list);
+static int init(sh_audio_t *sh, const char *decoder);
 static int preinit(sh_audio_t *sh);
 static void uninit(sh_audio_t *sh);
 static int control(sh_audio_t *sh,int cmd,void* arg, ...);
 static int decode_audio(sh_audio_t *sh,unsigned char *buffer,int minlen,int maxlen);
 
 #define LIBAD_EXTERN(x) const ad_functions_t mpcodecs_ad_##x = {\
-	&info,\
+        #x, \
+	add_decoders, \
 	preinit,\
 	init,\
         uninit,\

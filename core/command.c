@@ -30,7 +30,6 @@
 #include "stream/stream.h"
 #include "demux/demux.h"
 #include "demux/stheader.h"
-#include "codec-cfg.h"
 #include "mplayer.h"
 #include "playlist.h"
 #include "playlist_parser.h"
@@ -603,22 +602,16 @@ static int mp_property_audio_delay(m_option_t *prop, int action,
 static int mp_property_audio_format(m_option_t *prop, int action,
                                     void *arg, MPContext *mpctx)
 {
-    if (!mpctx->sh_audio)
-        return M_PROPERTY_UNAVAILABLE;
-    return m_property_int_ro(prop, action, arg, mpctx->sh_audio->format);
+    const char *c = mpctx->sh_audio ? mpctx->sh_audio->gsh->codec : NULL;
+    return m_property_strdup_ro(prop, action, arg, c);
 }
 
 /// Audio codec name (RO)
 static int mp_property_audio_codec(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
 {
-    if (!mpctx->sh_audio || !mpctx->sh_audio->codec)
-        return M_PROPERTY_UNAVAILABLE;
-    if (action == M_PROPERTY_GET) {
-        *(char **)arg = talloc_strdup(NULL, mpctx->sh_audio->codec->name);
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    const char *c = mpctx->sh_audio ? mpctx->sh_audio->gsh->decoder_desc : NULL;
+    return m_property_strdup_ro(prop, action, arg, c);
 }
 
 /// Audio bitrate (RO)
@@ -1103,51 +1096,16 @@ static int mp_property_vsync(m_option_t *prop, int action, void *arg,
 static int mp_property_video_format(m_option_t *prop, int action,
                                     void *arg, MPContext *mpctx)
 {
-    char *meta;
-    if (!mpctx->sh_video)
-        return M_PROPERTY_UNAVAILABLE;
-    switch (action) {
-    case M_PROPERTY_PRINT:
-        switch (mpctx->sh_video->format) {
-        case 0x10000001:
-            meta = talloc_strdup(NULL, "mpeg1");
-            break;
-        case 0x10000002:
-            meta = talloc_strdup(NULL, "mpeg2");
-            break;
-        case 0x10000004:
-            meta = talloc_strdup(NULL, "mpeg4");
-            break;
-        case 0x10000005:
-            meta = talloc_strdup(NULL, "h264");
-            break;
-        default:
-            if (mpctx->sh_video->format >= 0x20202020) {
-                meta = talloc_asprintf(NULL, "%.4s",
-                                       (char *) &mpctx->sh_video->format);
-            } else
-                meta = talloc_asprintf(NULL, "0x%08X", mpctx->sh_video->format);
-        }
-        *(char **)arg = meta;
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-        *(int *)arg = mpctx->sh_video->format;
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    const char *c = mpctx->sh_video ? mpctx->sh_video->gsh->codec : NULL;
+    return m_property_strdup_ro(prop, action, arg, c);
 }
 
 /// Video codec name (RO)
 static int mp_property_video_codec(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
 {
-    if (!mpctx->sh_video || !mpctx->sh_video->codec)
-        return M_PROPERTY_UNAVAILABLE;
-    if (action == M_PROPERTY_GET) {
-        *(char **)arg = talloc_strdup(NULL, mpctx->sh_video->codec->name);
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    const char *c = mpctx->sh_video ? mpctx->sh_video->gsh->decoder_desc : NULL;
+    return m_property_strdup_ro(prop, action, arg, c);
 }
 
 
@@ -1395,7 +1353,7 @@ static const m_option_t mp_properties[] = {
     { "mute", mp_property_mute, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
     M_OPTION_PROPERTY_CUSTOM("audio-delay", mp_property_audio_delay),
-    { "audio-format", mp_property_audio_format, CONF_TYPE_INT,
+    { "audio-format", mp_property_audio_format, CONF_TYPE_STRING,
       0, 0, 0, NULL },
     { "audio-codec", mp_property_audio_codec, CONF_TYPE_STRING,
       0, 0, 0, NULL },
@@ -1435,7 +1393,7 @@ static const m_option_t mp_properties[] = {
                     .offset = offsetof(struct MPOpts, vo_gamma_hue)),
     M_OPTION_PROPERTY_CUSTOM("panscan", mp_property_panscan),
     M_OPTION_PROPERTY_CUSTOM_("vsync", mp_property_vsync),
-    { "video-format", mp_property_video_format, CONF_TYPE_INT,
+    { "video-format", mp_property_video_format, CONF_TYPE_STRING,
       0, 0, 0, NULL },
     { "video-codec", mp_property_video_codec, CONF_TYPE_STRING,
       0, 0, 0, NULL },

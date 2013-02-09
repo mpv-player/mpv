@@ -86,7 +86,7 @@
 
 #include "audio/out/ao.h"
 
-#include "core/codec-cfg.h"
+#include "core/codecs.h"
 
 #include "sub/spudec.h"
 
@@ -203,12 +203,6 @@ static int drop_frame_cnt; // total number of dropped frames
 static int64_t seek_to_byte;
 static double step_sec;
 
-// codecs:
-char **audio_codec_list; // override audio codec
-char **video_codec_list; // override video codec
-char **audio_fm_list;    // override audio codec family
-char **video_fm_list;    // override video codec family
-
 // this dvdsub_id was selected via slang
 // use this to allow dvdnav to follow -slang across stream resets,
 // in particular the subtitle ID for a language changes
@@ -314,37 +308,12 @@ static void print_stream(struct MPContext *mpctx, struct track *t, int id)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " [P]");
     if (t->title)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " '%s'", t->title);
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, " (");
-    if (s && s->common_header->format) {
-        int format = s->common_header->format;
-        // not sure about endian crap
-        char name[sizeof(format) + 1] = {0};
-        memcpy(name, &format, sizeof(format));
-        bool ok = true;
-        for (int n = 0; name[n]; n++) {
-            if ((name[n] < 32 || name[n] >= 128) && name[n] != 0)
-                ok = false;
-        }
-        if (ok && strlen(name) > 0) {
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", name);
-        } else {
-            mp_msg(MSGT_CPLAYER, MSGL_INFO, "%#x", format);
-        }
-    } else if (s && t->type == STREAM_SUB) {
-        char t = s->sub->type;
-        const char *name = NULL;
-        switch (t) {
-        case 't': name = "SRT"; break;
-        case 'a': name = "ASS"; break;
-        case 'v': name = "VobSub"; break;
-        }
-        if (!name)
-            name = (char[2]){t, '\0'};
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", name);
-    }
-    if (s && s->common_header->demuxer_codecname)
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "/%s", s->common_header->demuxer_codecname);
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, ")");
+    const char *codec = s ? s->codec : NULL;
+    if (s && t->type == STREAM_SUB)
+        codec = sh_sub_type2str(s->sub->type);
+    if (t->sh_sub) // external subs hack
+        codec = sh_sub_type2str(t->sh_sub->type);
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, " (%s)", codec ? codec : "<unknown>");
     if (t->is_external)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " (external)");
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
@@ -1590,7 +1559,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         goto no_audio;
     }
     if (!(mpctx->initialized_flags & INITIALIZED_ACODEC)) {
-        if (!init_best_audio_codec(mpctx->sh_audio, audio_codec_list, audio_fm_list))
+        if (!init_best_audio_codec(mpctx->sh_audio, opts->audio_decoders))
             goto init_error;
         mpctx->initialized_flags |= INITIALIZED_ACODEC;
     }
@@ -2414,16 +2383,12 @@ int reinit_video_chain(struct MPContext *mpctx)
     mpctx->osd->render_subs_in_filter
         = vf->control(vf, VFCTRL_INIT_OSD, NULL) == VO_TRUE;
 
-    init_best_video_codec(sh_video, video_codec_list, video_fm_list);
+    init_best_video_codec(sh_video, opts->video_decoders);
 
     if (!sh_video->initialized)
         goto err_out;
 
     mpctx->initialized_flags |= INITIALIZED_VCODEC;
-
-    if (sh_video->codec)
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_VIDEO_CODEC=%s\n", sh_video->codec->name);
 
     sh_video->last_pts = MP_NOPTS_VALUE;
     sh_video->num_buffered_pts = 0;
@@ -4261,33 +4226,21 @@ static bool handle_help_options(struct MPContext *mpctx)
         list_audio_out();
         opt_exit = 1;
     }
-    if (audio_codec_list && strcmp(audio_codec_list[0], "help") == 0) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Available audio codecs:\n");
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_CODECS\n");
-        list_codecs(1);
-        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
+    if (opts->audio_decoders && strcmp(opts->audio_decoders, "help") == 0) {
+        struct mp_decoder_list *list = mp_audio_decoder_list();
+        mp_print_decoders(MSGT_CPLAYER, MSGL_INFO, "Audio decoders:", list);
+        talloc_free(list);
         opt_exit = 1;
     }
-    if (video_codec_list && strcmp(video_codec_list[0], "help") == 0) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Available video codecs:\n");
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_CODECS\n");
-        list_codecs(0);
-        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
-        opt_exit = 1;
-    }
-    if (video_fm_list && strcmp(video_fm_list[0], "help") == 0) {
-        vfm_help();
-        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
-        opt_exit = 1;
-    }
-    if (audio_fm_list && strcmp(audio_fm_list[0], "help") == 0) {
-        afm_help();
-        mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
+    if (opts->video_decoders && strcmp(opts->video_decoders, "help") == 0) {
+        struct mp_decoder_list *list = mp_video_decoder_list();
+        mp_print_decoders(MSGT_CPLAYER, MSGL_INFO, "Video decoders:", list);
+        talloc_free(list);
         opt_exit = 1;
     }
     if (af_cfg.list && strcmp(af_cfg.list[0], "help") == 0) {
         af_help();
-        printf("\n");
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
         opt_exit = 1;
     }
 #ifdef CONFIG_X11
@@ -4313,15 +4266,6 @@ static bool handle_help_options(struct MPContext *mpctx)
         opt_exit = 1;
 #endif
     return opt_exit;
-}
-
-static bool load_codecs_conf(struct MPContext *mpctx)
-{
-    /* Check codecs.conf. */
-    if (mpctx->opts.codecs_file && parse_codec_cfg(mpctx->opts.codecs_file))
-        return true;
-    mp_tmsg(MSGT_CPLAYER, MSGL_V, "Using built-in default codecs.conf.\n");
-    return parse_codec_cfg(NULL);
 }
 
 #ifdef PTW32_STATIC_LIB
@@ -4414,9 +4358,6 @@ int main(int argc, char *argv[])
     {
         exit_player(mpctx, EXIT_ERROR, 1);
     }
-
-    if (!load_codecs_conf(mpctx))
-        exit_player(mpctx, EXIT_ERROR, 1);
 
     if (handle_help_options(mpctx))
         exit_player(mpctx, EXIT_NONE, 1);

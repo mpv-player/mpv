@@ -28,6 +28,8 @@
 #include "talloc.h"
 
 #include "config.h"
+#include "core/av_common.h"
+#include "core/codecs.h"
 #include "core/mp_msg.h"
 #include "core/options.h"
 
@@ -37,17 +39,7 @@
 #include "compat/mpbswap.h"
 #include "compat/libav.h"
 
-static const ad_info_t info =
-{
-    "libavcodec audio decoders",
-    "ffmpeg",
-    "",
-    "",
-    "",
-    .print_name = "libavcodec",
-};
-
-LIBAD_EXTERN(ffmpeg)
+LIBAD_EXTERN(lavc)
 
 struct priv {
     AVCodecContext *avctx;
@@ -189,47 +181,25 @@ static int setup_format(sh_audio_t *sh_audio,
     return 0;
 }
 
-static int init(sh_audio_t *sh_audio)
+static int init(sh_audio_t *sh_audio, const char *decoder)
 {
     struct MPOpts *opts = sh_audio->opts;
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
 
-    const char *dll = sh_audio->codec->dll;
-
-    if (sh_audio->wf && dll && strcmp(dll, "pcm") == 0) {
-        if (sh_audio->format == MKTAG('M', 'P', 'a', 'f')) {
-            // demuxer_rawaudio convenience (abuses wFormatTag)
-            dll = find_pcm_decoder(af_map, sh_audio->wf->wFormatTag, 0);
-        } else {
-            dll = find_pcm_decoder(tag_map, sh_audio->format,
+    if (sh_audio->wf && strcmp(decoder, "pcm") == 0) {
+        decoder = find_pcm_decoder(tag_map, sh_audio->format,
                                    sh_audio->wf->wBitsPerSample);
-        }
+    } else if (sh_audio->wf && strcmp(decoder, "mp-pcm") == 0) {
+        decoder = find_pcm_decoder(af_map, sh_audio->format, 0);
     }
 
-    if (dll) {
-        lavc_codec = avcodec_find_decoder_by_name(dll);
-        if (!lavc_codec) {
-            mp_tmsg(MSGT_DECAUDIO, MSGL_ERR,
-                    "Cannot find codec '%s' in libavcodec...\n", dll);
-            return 0;
-        }
-    } else if (!sh_audio->libav_codec_id) {
-        mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "No Libav codec ID known. "
-                "Generic lavc decoder is not applicable.\n");
+    lavc_codec = avcodec_find_decoder_by_name(decoder);
+    if (!lavc_codec) {
+        mp_tmsg(MSGT_DECAUDIO, MSGL_ERR,
+                "Cannot find codec '%s' in libavcodec...\n", decoder);
         return 0;
-    } else {
-        lavc_codec = avcodec_find_decoder(sh_audio->libav_codec_id);
-        if (!lavc_codec) {
-            mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Libavcodec has no decoder "
-                   "for this codec\n");
-            return 0;
-        }
     }
-
-    sh_audio->codecname = lavc_codec->long_name;
-    if (!sh_audio->codecname)
-        sh_audio->codecname = lavc_codec->name;
 
     struct priv *ctx = talloc_zero(NULL, struct priv);
     sh_audio->context = ctx;
@@ -303,7 +273,7 @@ static int init(sh_audio_t *sh_audio)
         }
         if (++tries >= 5) {
             mp_msg(MSGT_DECAUDIO, MSGL_ERR,
-                   "ad_ffmpeg: initial decode failed\n");
+                   "ad_lavc: initial decode failed\n");
             uninit(sh_audio);
             return 0;
         }
@@ -328,7 +298,6 @@ static int init(sh_audio_t *sh_audio)
 
 static void uninit(sh_audio_t *sh)
 {
-    sh->codecname = NULL;
     struct priv *ctx = sh->context;
     if (!ctx)
         return;
@@ -493,4 +462,11 @@ static int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
         sh_audio->pts_bytes += size;
     }
     return len;
+}
+
+static void add_decoders(struct mp_decoder_list *list)
+{
+    mp_add_lavc_decoders(list, AVMEDIA_TYPE_AUDIO);
+    mp_add_decoder(list, "lavc", "pcm", "pcm", "Raw PCM");
+    mp_add_decoder(list, "lavc", "mp-pcm", "mp-pcm", "Raw PCM");
 }

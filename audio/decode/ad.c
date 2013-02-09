@@ -32,7 +32,7 @@
 /* Missed vorbis, mad, dshow */
 
 extern const ad_functions_t mpcodecs_ad_mpg123;
-extern const ad_functions_t mpcodecs_ad_ffmpeg;
+extern const ad_functions_t mpcodecs_ad_lavc;
 extern const ad_functions_t mpcodecs_ad_spdif;
 
 const ad_functions_t * const mpcodecs_ad_drivers[] =
@@ -40,7 +40,7 @@ const ad_functions_t * const mpcodecs_ad_drivers[] =
 #ifdef CONFIG_MPG123
   &mpcodecs_ad_mpg123,
 #endif
-  &mpcodecs_ad_ffmpeg,
+  &mpcodecs_ad_lavc,
   &mpcodecs_ad_spdif,
   NULL
 };

@@ -81,10 +81,11 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
       return 0;
   }
 
-  int tag, fmt;
+  const char *decoder = "rawvideo";
+  int imgfmt = format;
   if (mp_format) {
-    tag = MP_FOURCC_IMGFMT;
-    fmt = mp_format;
+    decoder = "mp-rawvideo";
+    imgfmt = mp_format;
     if (!imgsize) {
       struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(mp_format);
       for (int p = 0; p < desc.num_planes; p++) {
@@ -92,9 +93,6 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
                     desc.bpp[p] + 7) / 8;
       }
     }
-  } else {
-    tag = MP_FOURCC_RAWVIDEO;
-    fmt = format;
   }
 
   if (!imgsize) {
@@ -131,8 +129,8 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
   }
 
   sh_video = new_sh_video(demuxer,0);
-  sh_video->format=tag;
-  sh_video->imgfmt=fmt;
+  sh_video->gsh->codec=decoder;
+  sh_video->format=imgfmt;
   sh_video->fps=fps;
   sh_video->frametime=1.0/fps;
   sh_video->disp_w=width;

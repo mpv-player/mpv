@@ -21,14 +21,16 @@
 #include <unistd.h>
 #include <assert.h>
 
+#include "demux/codec_tags.h"
+
 #include "config.h"
+#include "core/codecs.h"
 #include "core/mp_msg.h"
 #include "core/bstr.h"
 
 #include "stream/stream.h"
 #include "demux/demux.h"
 
-#include "core/codec-cfg.h"
 #include "demux/stheader.h"
 
 #include "dec_audio.h"
@@ -41,27 +43,7 @@ int fakemono = 0;
 
 struct af_cfg af_cfg = {1, NULL}; // Configuration for audio filters
 
-void afm_help(void)
-{
-    int i;
-    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO,
-            "Available (compiled-in) audio codec families/drivers:\n");
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_DRIVERS\n");
-    mp_msg(MSGT_DECAUDIO, MSGL_INFO, "    afm:    info:  (comment)\n");
-    for (i = 0; mpcodecs_ad_drivers[i] != NULL; i++)
-        if (mpcodecs_ad_drivers[i]->info->comment
-            && mpcodecs_ad_drivers[i]->info->comment[0])
-            mp_msg(MSGT_DECAUDIO, MSGL_INFO, "%9s  %s (%s)\n",
-                   mpcodecs_ad_drivers[i]->info->short_name,
-                   mpcodecs_ad_drivers[i]->info->name,
-                   mpcodecs_ad_drivers[i]->info->comment);
-        else
-            mp_msg(MSGT_DECAUDIO, MSGL_INFO, "%9s  %s\n",
-                   mpcodecs_ad_drivers[i]->info->short_name,
-                   mpcodecs_ad_drivers[i]->info->name);
-}
-
-static int init_audio_codec(sh_audio_t *sh_audio)
+static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
 {
     assert(!sh_audio->initialized);
     resync_audio_stream(sh_audio);
@@ -77,7 +59,7 @@ static int init_audio_codec(sh_audio_t *sh_audio)
     }
     sh_audio->audio_out_minsize = 8192; // default, preinit() may change it
     if (!sh_audio->ad_driver->preinit(sh_audio)) {
-        mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "ADecoder preinit failed :(\n");
+        mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Audio decoder preinit failed.\n");
         return 0;
     }
 
@@ -104,8 +86,8 @@ static int init_audio_codec(sh_audio_t *sh_audio)
         abort();
     sh_audio->a_buffer_len = 0;
 
-    if (!sh_audio->ad_driver->init(sh_audio)) {
-        mp_tmsg(MSGT_DECAUDIO, MSGL_V, "ADecoder init failed :(\n");
+    if (!sh_audio->ad_driver->init(sh_audio, decoder)) {
+        mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Audio decoder init failed.\n");
         uninit_audio(sh_audio); // free buffers
         return 0;
     }
@@ -125,140 +107,83 @@ static int init_audio_codec(sh_audio_t *sh_audio)
     return 1;
 }
 
-static int init_audio(sh_audio_t *sh_audio, char *codecname, char *afm,
-                      int status, stringset_t *selected)
+struct mp_decoder_list *mp_audio_decoder_list(void)
 {
-    int force = 0;
-    if (codecname && codecname[0] == '+') {
-        codecname = &codecname[1];
-        force = 1;
-    }
-    sh_audio->codec = NULL;
-    while (1) {
-        const ad_functions_t *mpadec;
-        sh_audio->ad_driver = 0;
-        if (!(sh_audio->codec = find_audio_codec(sh_audio->format, NULL,
-                                                 sh_audio->codec, force)))
-            break;
-        // ok we found one codec
-        if (stringset_test(selected, sh_audio->codec->name))
-            continue;   // already tried & failed
-        if (codecname && strcmp(sh_audio->codec->name, codecname))
-            continue;   // -ac
-        if (afm && strcmp(sh_audio->codec->drv, afm))
-            continue;   // afm doesn't match
-        if (!force && sh_audio->codec->status < status)
-            continue;   // too unstable
-        stringset_add(selected, sh_audio->codec->name); // tagging it
-        // ok, it matches all rules, let's find the driver!
-        int i;
-        for (i = 0; mpcodecs_ad_drivers[i] != NULL; i++)
-            if (!strcmp(mpcodecs_ad_drivers[i]->info->short_name,
-                        sh_audio->codec->drv))
-                break;
-        mpadec = mpcodecs_ad_drivers[i];
-        if (!mpadec) {  // driver not available (==compiled in)
-            mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Requested audio codec family "
-                    "[%s] (afm=%s) not available.\nEnable it at compilation.\n",
-                    sh_audio->codec->name, sh_audio->codec->drv);
-            continue;
-        }
-        // it's available, let's try to init!
-        // init()
-        mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Opening audio decoder: [%s] %s\n",
-                mpadec->info->short_name, mpadec->info->name);
-        sh_audio->ad_driver = mpadec;
-        if (!init_audio_codec(sh_audio)) {
-            mp_tmsg(MSGT_DECAUDIO, MSGL_WARN, "Audio decoder init failed for "
-                    "codecs.conf entry \"%s\".\n", sh_audio->codec->name);
-            continue;   // try next...
-        }
-        // Yeah! We got it!
-        return 1;
-    }
-    return 0;
+    struct mp_decoder_list *list = talloc_zero(NULL, struct mp_decoder_list);
+    for (int i = 0; mpcodecs_ad_drivers[i] != NULL; i++)
+        mpcodecs_ad_drivers[i]->add_decoders(list);
+    return list;
 }
 
-int init_best_audio_codec(sh_audio_t *sh_audio, char **audio_codec_list,
-                          char **audio_fm_list)
+static struct mp_decoder_list *mp_select_audio_decoders(const char *codec,
+                                                        char *selection)
 {
-    stringset_t selected;
-    char *ac_l_default[2] = {
-        "", (char *) NULL
-    };
-    // hack:
-    if (!audio_codec_list)
-        audio_codec_list = ac_l_default;
-    // Go through the codec.conf and find the best codec...
-    sh_audio->initialized = 0;
-    stringset_init(&selected);
-    while (!sh_audio->initialized && *audio_codec_list) {
-        char *audio_codec = *(audio_codec_list++);
-        if (audio_codec[0]) {
-            if (audio_codec[0] == '-') {
-                // disable this codec:
-                stringset_add(&selected, audio_codec + 1);
-            } else {
-                // forced codec by name:
-                mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Forced audio codec: %s\n",
-                        audio_codec);
-                init_audio(sh_audio, audio_codec, NULL, -1, &selected);
-            }
-        } else {
-            int status;
-            // try in stability order: UNTESTED, WORKING, BUGGY.
-            // never try CRASHING.
-            if (audio_fm_list) {
-                char **fmlist = audio_fm_list;
-                // try first the preferred codec families:
-                while (!sh_audio->initialized && *fmlist) {
-                    char *audio_fm = *(fmlist++);
-                    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO,
-                            "Trying to force audio codec driver family %s...\n",
-                            audio_fm);
-                    for (status = CODECS_STATUS__MAX;
-                         status >= CODECS_STATUS__MIN; --status)
-                        if (init_audio(sh_audio, NULL, audio_fm, status,
-                                       &selected))
-                            break;
-                }
-            }
-            if (!sh_audio->initialized)
-                for (status = CODECS_STATUS__MAX; status >= CODECS_STATUS__MIN;
-                     --status)
-                    if (init_audio(sh_audio, NULL, NULL, status, &selected))
-                        break;
+    struct mp_decoder_list *list = mp_audio_decoder_list();
+    struct mp_decoder_list *new = mp_select_decoders(list, codec, selection);
+    talloc_free(list);
+    return new;
+}
+
+static const struct ad_functions *find_driver(const char *name)
+{
+    for (int i = 0; mpcodecs_ad_drivers[i] != NULL; i++) {
+        if (strcmp(mpcodecs_ad_drivers[i]->name, name) == 0)
+            return mpcodecs_ad_drivers[i];
+    }
+    return NULL;
+}
+
+int init_best_audio_codec(sh_audio_t *sh_audio, char *audio_decoders)
+{
+    assert(!sh_audio->initialized);
+
+    struct mp_decoder_entry *decoder = NULL;
+    struct mp_decoder_list *list =
+        mp_select_audio_decoders(sh_audio->gsh->codec, audio_decoders);
+
+    mp_print_decoders(MSGT_DECAUDIO, MSGL_V, "Codec list:", list);
+
+    for (int n = 0; n < list->num_entries; n++) {
+        struct mp_decoder_entry *sel = &list->entries[n];
+        const struct ad_functions *driver = find_driver(sel->family);
+        if (!driver)
+            continue;
+        mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Opening audio decoder %s:%s\n",
+                sel->family, sel->decoder);
+        sh_audio->ad_driver = driver;
+        if (init_audio_codec(sh_audio, sel->decoder)) {
+            decoder = sel;
+            break;
         }
-    }
-    stringset_free(&selected);
-
-    if (!sh_audio->initialized) {
-        mp_tmsg(MSGT_DECAUDIO, MSGL_ERR,
-                "Cannot find codec for audio format 0x%X.\n",
-                sh_audio->format);
-        return 0;   // failed
+        sh_audio->ad_driver = NULL;
+        mp_tmsg(MSGT_DECAUDIO, MSGL_WARN, "Audio decoder init failed for "
+                "%s:%s\n", sel->family, sel->decoder);
     }
 
-    mp_tmsg(MSGT_DECAUDIO, MSGL_INFO, "Selected audio codec: %s [%s]\n",
-            sh_audio->codecname ? sh_audio->codecname : sh_audio->codec->info,
-            sh_audio->ad_driver->info->print_name ?
-            sh_audio->ad_driver->info->print_name :
-            sh_audio->ad_driver->info->short_name);
-    mp_tmsg(MSGT_DECAUDIO, MSGL_V,
-            "Audio codecs.conf entry: %s (%s)  afm: %s\n",
-            sh_audio->codec->name, sh_audio->codec->info, sh_audio->codec->drv);
-    mp_msg(MSGT_DECAUDIO, MSGL_V,
-           "AUDIO: %d Hz, %d ch, %s, %3.1f kbit/%3.2f%% (ratio: %d->%d)\n",
-           sh_audio->samplerate, sh_audio->channels,
-           af_fmt2str_short(sh_audio->sample_format),
-           sh_audio->i_bps * 8 * 0.001,
-           ((float) sh_audio->i_bps / sh_audio->o_bps) * 100.0,
-           sh_audio->i_bps, sh_audio->o_bps);
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-           "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
-           sh_audio->i_bps * 8, sh_audio->samplerate, sh_audio->channels);
+    if (sh_audio->initialized) {
+        sh_audio->gsh->decoder_desc =
+            talloc_asprintf(NULL, "%s [%s:%s]", decoder->desc, decoder->family,
+                            decoder->decoder);
+        mp_msg(MSGT_DECAUDIO, MSGL_INFO, "Selected audio codec: %s\n",
+               sh_audio->gsh->decoder_desc);
+        mp_msg(MSGT_DECAUDIO, MSGL_V,
+               "AUDIO: %d Hz, %d ch, %s, %3.1f kbit/%3.2f%% (ratio: %d->%d)\n",
+               sh_audio->samplerate, sh_audio->channels,
+               af_fmt2str_short(sh_audio->sample_format),
+               sh_audio->i_bps * 8 * 0.001,
+               ((float) sh_audio->i_bps / sh_audio->o_bps) * 100.0,
+               sh_audio->i_bps, sh_audio->o_bps);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
+               "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
+               sh_audio->i_bps * 8, sh_audio->samplerate, sh_audio->channels);
+    } else {
+        mp_msg(MSGT_DECAUDIO, MSGL_ERR,
+               "Failed to initialize an audio decoder for codec '%s'.\n",
+               sh_audio->gsh->codec ? sh_audio->gsh->codec : "<unknown>");
+    }
 
-    return 1;   // success
+    talloc_free(list);
+    return sh_audio->initialized;
 }
 
 void uninit_audio(sh_audio_t *sh_audio)
@@ -270,11 +195,12 @@ void uninit_audio(sh_audio_t *sh_audio)
         sh_audio->afilter = NULL;
     }
     if (sh_audio->initialized) {
-        mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Uninit audio: %s\n",
-                sh_audio->codec->drv);
+        mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Uninit audio.\n");
         sh_audio->ad_driver->uninit(sh_audio);
         sh_audio->initialized = 0;
     }
+    talloc_free(sh_audio->gsh->decoder_desc);
+    sh_audio->gsh->decoder_desc = NULL;
     av_freep(&sh_audio->a_buffer);
     av_freep(&sh_audio->a_in_buffer);
 }

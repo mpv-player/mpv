@@ -24,7 +24,6 @@
 #include "video/mp_image.h"
 #include "core/mp_common.h"
 
-#include "core/mpc_info.h"
 #include "video/vfcap.h"
 
 struct MPOpts;

@@ -283,7 +283,7 @@ hr-seek                     x see ``--hr-seek``
 volume                      x current volume (0-100)
 mute                        x current mute status (bool)
 audio-delay                 x see ``--audio-delay``
-audio-format                  audio format (codec tag)
+audio-format                  audio format (string)
 audio-codec                   audio codec selected for decoding
 audio-bitrate                 audio bitrate
 samplerate                    audio samplerate
@@ -306,7 +306,7 @@ saturation                  x see ``--saturation``
 hue                         x see ``--hue``
 panscan                     x see ``--panscan``
 vsync                       x see ``--vsync``
-video-format                  video format (integer FourCC)
+video-format                  video format (string)
 video-codec                   video codec selected for decoding
 video-bitrate                 video bitrate
 width                         video width

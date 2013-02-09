@@ -18,7 +18,7 @@ typedef struct ffmpeg_ctx {
     int best_csp;
     AVRational last_sample_aspect_ratio;
     enum AVDiscard skip_frame;
-    AVCodec *software_fallback;
+    const char *software_fallback_decoder;
     struct FramePool *dr1_buffer_pool;
     struct mp_image_pool *non_dr1_pool;
 } vd_ffmpeg_ctx;

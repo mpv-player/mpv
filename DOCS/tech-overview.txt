@@ -203,7 +203,5 @@ core/timeline/:
     segments for playing an ordered chapters file is in tl_matroska.c.
 
 etc/:
-    The files codecs.conf and input.conf are actually integrated into the
-    mplayer binary by the build system. These files define the default settings.
-    codecs.conf maps video/audio formats to decoders. input.conf contains
-    the default keybindings.
+    The file input.conf is actually integrated into the mpv binary by the
+    build system. It contains the default keybindings.

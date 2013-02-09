@@ -10,6 +10,8 @@ void set_default_mplayer_options(struct MPOpts *opts)
     *opts = (const struct MPOpts){
         .audio_driver_list = NULL,
         .video_driver_list = NULL,
+        .audio_decoders = "-spdif:*", // never select spdif by default
+        .video_decoders = NULL,
         .fixed_vo = 1,
         .softvol = SOFTVOL_AUTO,
         .softvol_max = 200,

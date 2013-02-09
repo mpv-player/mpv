@@ -1261,13 +1261,14 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
 
     sh_v = new_sh_video(demuxer, vid);
     sh_v->gsh->demuxer_id = track->tnum;
-    sh_v->demuxer_codecname = track->codec_id;
     sh_v->gsh->title = talloc_strdup(sh_v, track->name);
     sh_v->bih = bih;
     sh_v->format = sh_v->bih->biCompression;
     if (raw) {
-        sh_v->format = mmioFOURCC('M', 'P', 'r', 'v');
-        sh_v->imgfmt = sh_v->bih->biCompression;
+        sh_v->gsh->codec = "rawvideo";
+    } else {
+        mp_set_video_codec_from_tag(sh_v);
+        sh_v->format = mp_video_fourcc_alias(sh_v->format);
     }
     if (track->v_frate == 0.0)
         track->v_frate = 25.0;
@@ -1338,7 +1339,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
     if (track->language && (strcmp(track->language, "und") != 0))
         sh_a->lang = talloc_strdup(sh_a, track->language);
     sh_a->gsh->demuxer_id = track->tnum;
-    sh_a->demuxer_codecname = track->codec_id;
     sh_a->gsh->title = talloc_strdup(sh_a, track->name);
     sh_a->gsh->default_track = track->default_track;
     sh_a->ds = demuxer->audio;
@@ -1569,6 +1569,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
         goto error;
     }
 
+    mp_set_audio_codec_from_tag(sh_a);
+
     return 0;
 
  error:
@@ -1586,7 +1588,6 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track,
         uint8_t *buffer;
         sh_sub_t *sh = new_sh_sub(demuxer, sid);
         sh->gsh->demuxer_id = track->tnum;
-        sh->demuxer_codecname = track->codec_id;
         track->sh_sub = sh;
         sh->type = track->subtitle_type;
         size = track->private_size;

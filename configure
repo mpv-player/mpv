@@ -2663,6 +2663,28 @@ else
 fi
 
 
+echocheck "libavcodec AVCodecDescriptor API"
+_avcodec_codec_desc_api=no
+statement_check libavcodec/avcodec.h 'const AVCodecDescriptor *desc = avcodec_descriptor_get_by_name("c")' $_ld_tmp && _avcodec_codec_desc_api=yes
+if test "$_avcodec_codec_desc_api" = yes ; then
+  def_avcodec_codec_desc_api='#define HAVE_AVCODEC_CODEC_DESC_API 1'
+else
+  def_avcodec_codec_desc_api='#define HAVE_AVCODEC_CODEC_DESC_API 0'
+fi
+echores "$_avcodec_codec_desc_api"
+
+
+echocheck "libavcodec av_codec_is_decoder API"
+_avcodec_is_decoder_api=no
+statement_check libavcodec/avcodec.h 'av_codec_is_decoder(NULL)' $_ld_tmp && _avcodec_is_decoder_api=yes
+if test "$_avcodec_is_decoder_api" = yes ; then
+  def_avcodec_is_decoder_api='#define HAVE_AVCODEC_IS_DECODER_API 1'
+else
+  def_avcodec_is_decoder_api='#define HAVE_AVCODEC_IS_DECODER_API 0'
+fi
+echores "$_avcodec_is_decoder_api"
+
+
 echocheck "libavfilter >= 3.17.0"
 if test "$libavfilter" = auto ; then
     libavfilter=no
@@ -3158,6 +3180,8 @@ $def_vcd
 $def_mpg123
 $def_zlib
 
+$def_avcodec_codec_desc_api
+$def_avcodec_is_decoder_api
 $def_libpostproc
 $def_libavdevice
 $def_libavfilter

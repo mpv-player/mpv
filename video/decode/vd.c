@@ -25,8 +25,6 @@
 #include "core/mp_msg.h"
 #include "core/options.h"
 
-#include "core/codec-cfg.h"
-
 #include "video/img_format.h"
 
 #include "stream/stream.h"
@@ -114,7 +112,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
     sh->vfilter = vf;
 
     // autodetect flipping
-    bool flip = !!opts->flip != !!(sh->codec->flags & CODECS_FLAG_FLIP);
+    bool flip = opts->flip;
     if (flip && !(sh->output_flags & VFCAP_FLIP)) {
         // we need to flip, but no flipping filter avail.
         vf_add_before_vo(&vf, "flip", NULL);

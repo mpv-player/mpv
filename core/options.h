@@ -38,6 +38,9 @@ typedef struct MPOpts {
     char** vo_fstype_list;
     int vo_stop_screensaver;
 
+    char *audio_decoders;
+    char *video_decoders;
+
     // ranges -100 - 100, 1000 if the vo default should be used
     int vo_gamma_gamma;
     int vo_gamma_brightness;
@@ -55,7 +58,6 @@ typedef struct MPOpts {
     int chapter_merge_threshold;
     int quiet;
     int load_config;
-    char *codecs_file;
     int stream_cache_size;
     float stream_cache_min_percent;
     float stream_cache_seek_min_percent;

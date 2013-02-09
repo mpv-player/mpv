@@ -26,14 +26,6 @@
 
 #include "ad_internal.h"
 
-static const ad_info_t info = {
-    "MPEG 1.0/2.0/2.5 layers I, II, III",
-    "mpg123",
-    "Thomas Orgis",
-    "mpg123.org",
-    "High-performance decoder using libmpg123."
-};
-
 LIBAD_EXTERN(mpg123)
 
 /* Reducing the ifdeffery to two main variants:
@@ -327,7 +319,7 @@ static int reopen_stream(sh_audio_t *sh)
  * Paranoia note: The mpg123_close() on errors is not really necessary,
  * But it ensures that we don't accidentally continue decoding with a
  * bad state (possibly interpreting the format badly or whatnot). */
-static int init(sh_audio_t *sh)
+static int init(sh_audio_t *sh, const char *decoder)
 {
     long rate    = 0;
     int channels = 0;
@@ -486,4 +478,10 @@ static int control(sh_audio_t *sh, int cmd, void *arg, ...)
         break;
     }
     return CONTROL_UNKNOWN;
+}
+
+static void add_decoders(struct mp_decoder_list *list)
+{
+    mp_add_decoder(list, "mpg123", "mp3", "mp3",
+                   "High-performance decoder using libmpg123");
 }

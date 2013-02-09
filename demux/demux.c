@@ -29,6 +29,7 @@
 
 #include "config.h"
 #include "core/options.h"
+#include "core/av_common.h"
 #include "talloc.h"
 #include "core/mp_msg.h"
 
@@ -485,63 +486,28 @@ void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
            ds->demuxer->video->packs);
 }
 
-static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parser, unsigned format)
+static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parser, const char *format)
 {
-    enum CodecID codec_id = CODEC_ID_NONE;
+    enum CodecID codec_id = mp_codec_to_av_codec_id(format);
 
-    switch (format) {
-    case MKTAG('M', 'P', '4', 'L'):
-        codec_id = CODEC_ID_AAC_LATM;
-        break;
-    case 0x2000:
-    case 0x332D6361:
-    case 0x332D4341:
-    case 0x20736D:
-    case MKTAG('s', 'a', 'c', '3'):
-        codec_id = CODEC_ID_AC3;
-        break;
-    case MKTAG('d', 'n', 'e', 't'):
-        // DNET/byte-swapped AC-3 - there is no parser for that yet
-        //codec_id = CODEC_ID_DNET;
-        break;
-    case MKTAG('E', 'A', 'C', '3'):
-        codec_id = CODEC_ID_EAC3;
-        break;
-    case 0x2001:
-    case 0x86:
-        codec_id = CODEC_ID_DTS;
-        break;
-    case MKTAG('f', 'L', 'a', 'C'):
-        codec_id = CODEC_ID_FLAC;
-        break;
-    case MKTAG('M', 'L', 'P', ' '):
-        codec_id = CODEC_ID_MLP;
-        break;
-    case 0x55:
-    case 0x5500736d:
-    case 0x55005354:
-    case MKTAG('.', 'm', 'p', '3'):
-    case MKTAG('M', 'P', '3', ' '):
-    case MKTAG('L', 'A', 'M', 'E'):
-        codec_id = CODEC_ID_MP3;
-        break;
-    case 0x50:
-    case 0x5000736d:
-    case MKTAG('.', 'm', 'p', '2'):
-    case MKTAG('.', 'm', 'p', '1'):
-        codec_id = CODEC_ID_MP2;
-        break;
-    case MKTAG('T', 'R', 'H', 'D'):
-        codec_id = CODEC_ID_TRUEHD;
-        break;
-    }
-    if (codec_id != CODEC_ID_NONE) {
+    switch (codec_id) {
+    case CODEC_ID_AAC_LATM:
+    case CODEC_ID_AC3:
+    case CODEC_ID_EAC3:
+    case CODEC_ID_DTS:
+    case CODEC_ID_FLAC:
+    case CODEC_ID_MLP:
+    case CODEC_ID_MP3:
+    case CODEC_ID_MP2:
+    case CODEC_ID_TRUEHD:
         *avctx = avcodec_alloc_context3(NULL);
         if (!*avctx)
             return;
         *parser = av_parser_init(codec_id);
         if (!*parser)
             av_freep(avctx);
+        break;
+    default: ;
     }
 }
 
@@ -558,7 +524,7 @@ static void get_parser(sh_common_t *sh, AVCodecContext **avctx, AVCodecParserCon
     if (*parser)
         return;
 
-    allocate_parser(avctx, parser, sh->format);
+    allocate_parser(avctx, parser, sh->gsh->codec);
     sh->avctx  = *avctx;
     sh->parser = *parser;
 }

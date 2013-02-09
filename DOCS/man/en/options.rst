@@ -10,14 +10,32 @@
     (``--ao=oss`` only) (OBSOLETE)
     Override audio driver/card buffer size detection.
 
---ac=<[-\|+]codec1,[-\|+]codec2,...[,]>
-    Specify a priority list of audio codecs to be used, according to their
-    codec name in codecs.conf. Use a '-' before the codec name to omit it.
-    Use a '+' before the codec name to force it, this will likely crash! If
-    the list has a trailing ',' mpv will fall back on codecs not contained
-    in the list.
+--ad=<[+|-]family1:(*|decoder1),[+|-]family2:(*|decoder2),...[-]>
+    Specify a priority list of audio decoders to be used, according to their
+    family and decoder name. Entries like ``family:*`` prioritize all decoders
+    of the given family. When determining which decoder to use, the first
+    decoder that matches the audio format is selected. If that is unavailable,
+    the next decoder is used. Finally, it tries all other decoders that are not
+    explicitly selected or rejected by the option.
 
-    *NOTE*: See ``--ac=help`` for a full list of available codecs.
+    ``-`` at the end of the list suppresses fallback to other available
+    decoders not on the ``--ad`` list. ``+`` in front of an entry forces the
+    decoder. Both of these shouldn't normally be used, because they break
+    normal decoder auto-selection!
+
+    ``-`` in front of an entry disables selection of the decoder.
+
+    *EXAMPLE*:
+
+    ``--ad=lavc:mp3float``
+        Prefer the FFmpeg/Libav ``mp3float`` decoder over all other mp3
+        decoders.
+
+    ``--ad=spdif:ac3,lavc:*``
+        Always prefer spdif AC3 over FFmpeg/Libav over anything else.
+
+    ``--ad=help``
+        List all available decoders.
 
 --af=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of audio filters to apply to the audio stream. See
@@ -59,17 +77,6 @@
 
     list=<filters>
         Same as ``--af``.
-
---afm=<driver1,driver2,...>
-    Specify a priority list of audio codec families to be used, according to
-    their codec name in codecs.conf. Falls back on the default codecs if none
-    of the given codec families work.
-
-    *NOTE*: See ``--afm=help`` for a full list of available codec families.
-
-    *EXAMPLE*:
-
-    :``--afm=ffmpeg``:    Try FFmpeg's libavcodec codecs first.
 
 --aid=<ID|auto|no>
     Select audio channel. ``auto`` selects the default, ``no`` disables audio.
@@ -408,10 +415,6 @@
     If the end of one playback part is less than the given threshold away from
     the start of the next one then keep playing video normally over the
     chapter change instead of doing a seek.
-
---codecs-file=<filename>
-    Override the standard search path and use the specified file instead of
-    the builtin codecs.conf.
 
 --colormatrix=<colorspace>
     Controls the YUV to RGB color space conversion when playing video. There
@@ -2257,14 +2260,13 @@
     Increment verbosity level, one level for each ``-v`` found on the command
     line.
 
---vc=<[-\|+]codec1,[-\|+]codec2,...[,]>
-    Specify a priority list of video codecs to be used, according to their
-    codec name in ``codecs.conf``. Use a '-' before the codec name to omit it.
-    Use a '+' before the codec name to force it, this will likely crash! If
-    the list has a trailing ',' mpv will fall back on codecs not contained
-    in the list.
+--vd=<[+|-]family1:(*|decoder1),[+|-]family2:(*|decoder2),...[-]>
+    Specify a priority list of video decoders to be used, according to their
+    family and name. See ``--ad`` for further details. Both of these options
+    use the same syntax and semantics, the only difference is that they
+    operate on different codec lists.
 
-    *NOTE*: See ``--vc=help`` for a full list of available codecs.
+    *NOTE*: See ``--vd=help`` for a full list of available decoders.
 
 --vf=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of video filters to apply to the video stream. See
@@ -2272,13 +2274,6 @@
     The option variants ``--vf-add``, ``--vf-pre``, ``--vf-del`` and
     ``--vf-clr`` exist to modify a previously specified list, but you
     shouldn't need these for typical use.
-
---vfm=<driver1,driver2,...>
-    Specify a priority list of video codec families to be used, according to
-    their names in codecs.conf. Falls back on the default codecs if none of
-    the given codec families work.
-
-    *NOTE*: See ``--vfm=help`` for a full list of available codec families.
 
 --vid=<ID|auto|no>
     Select video channel. ``auto`` selects the default, ``no`` disables video.

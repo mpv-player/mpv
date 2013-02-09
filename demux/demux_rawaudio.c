@@ -51,17 +51,16 @@ static demuxer_t* demux_rawaudio_open(demuxer_t* demuxer) {
       return NULL;
 
   sh_audio = new_sh_audio(demuxer,0);
+  sh_audio->gsh->codec = "mp-pcm";
+  sh_audio->format = format;
   sh_audio->wf = w = malloc(sizeof(*w));
-  // Not a WAVEFORMATEX format; just abuse it to pass the internal mplayer
-  // format to ad_pcm.c
-  w->wFormatTag = format;
-  sh_audio->format = MKTAG('M', 'P', 'a', 'f');
+  w->wFormatTag = 0;
   w->nChannels = sh_audio->channels = channels;
   w->nSamplesPerSec = sh_audio->samplerate = samplerate;
-  sh_audio->samplesize = (af_fmt2bits(format) + 7) / 8;
-  w->nAvgBytesPerSec = samplerate * sh_audio->samplesize * channels;
-  w->nBlockAlign = channels * sh_audio->samplesize;
-  w->wBitsPerSample = 8 * sh_audio->samplesize;
+  int samplesize = (af_fmt2bits(format) + 7) / 8;
+  w->nAvgBytesPerSec = samplerate * samplesize * channels;
+  w->nBlockAlign = channels * samplesize;
+  w->wBitsPerSample = 8 * samplesize;
   w->cbSize = 0;
 
   demuxer->movi_start = demuxer->stream->start_pos;

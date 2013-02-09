@@ -439,11 +439,9 @@ const m_option_t common_opts[] = {
     {"af-adv", (void *) audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
     OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
-    // select audio/video codec (by name) or codec family (by number):
-    {"afm", &audio_fm_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-    {"vfm", &video_fm_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-    {"ac", &audio_codec_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-    {"vc", &video_codec_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
+
+    OPT_STRING("ad", audio_decoders, 0),
+    OPT_STRING("vd", video_decoders, 0),
 
     OPT_CHOICE("hwdec", hwdec_api, 0,
                ({"no", 0},
@@ -473,7 +471,6 @@ const m_option_t common_opts[] = {
 
     {"lavdopts", (void *) lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     {"lavfdopts", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-    OPT_STRING("codecs-file", codecs_file, 0),
 // ------------------------- subtitles options --------------------
 
     OPT_STRINGLIST("sub", sub_name, 0),

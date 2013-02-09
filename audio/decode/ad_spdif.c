@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Copyright (C) 2012 Naoya OYAMA
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -24,15 +26,8 @@
 
 #include "config.h"
 #include "core/mp_msg.h"
+#include "core/av_common.h"
 #include "ad_internal.h"
-
-static const ad_info_t info = {
-    "libavformat/spdifenc audio pass-through decoder.",
-    "spdif",
-    "Naoya OYAMA",
-    "Naoya OYAMA",
-    "For ALL hardware decoders"
-};
 
 LIBAD_EXTERN(spdif)
 
@@ -76,22 +71,21 @@ static int preinit(sh_audio_t *sh)
     return 1;
 }
 
-static int init(sh_audio_t *sh)
+static int codecs[] = {
+    CODEC_ID_AAC,
+    CODEC_ID_AC3,
+    CODEC_ID_DTS,
+    CODEC_ID_EAC3,
+    CODEC_ID_MP3,
+    CODEC_ID_TRUEHD,
+    CODEC_ID_NONE
+};
+
+static int init(sh_audio_t *sh, const char *decoder)
 {
-    int i, x, in_size, srate, bps, *dtshd_rate;
+    int x, in_size, srate, bps, *dtshd_rate;
     unsigned char *start;
     double pts;
-    static const struct {
-        const char *name; enum CodecID id;
-    } fmt_id_type[] = {
-        { "aac" , CODEC_ID_AAC    },
-        { "ac3" , CODEC_ID_AC3    },
-        { "dca" , CODEC_ID_DTS    },
-        { "eac3", CODEC_ID_EAC3   },
-        { "mpa" , CODEC_ID_MP3    },
-        { "thd" , CODEC_ID_TRUEHD },
-        { NULL  , 0 }
-    };
     AVFormatContext     *lavf_ctx  = NULL;
     AVStream            *stream    = NULL;
     const AVOption      *opt       = NULL;
@@ -122,12 +116,7 @@ static int init(sh_audio_t *sh)
         goto fail;
     lavf_ctx->duration   = AV_NOPTS_VALUE;
     lavf_ctx->start_time = AV_NOPTS_VALUE;
-    for (i = 0; fmt_id_type[i].name; i++) {
-        if (!strcmp(sh->codec->dll, fmt_id_type[i].name)) {
-            lavf_ctx->streams[0]->codec->codec_id = fmt_id_type[i].id;
-            break;
-        }
-    }
+    lavf_ctx->streams[0]->codec->codec_id = mp_codec_to_av_codec_id(decoder);
     lavf_ctx->raw_packet_buffer_remaining_size = RAW_PACKET_BUFFER_SIZE;
     if (AVERROR_PATCHWELCOME == lavf_ctx->oformat->write_header(lavf_ctx)) {
         mp_msg(MSGT_DECAUDIO,MSGL_INFO,
@@ -305,4 +294,15 @@ static void uninit(sh_audio_t *sh)
     }
     av_freep(&lavf_ctx);
     av_freep(&spdif_ctx);
+}
+
+static void add_decoders(struct mp_decoder_list *list)
+{
+    for (int n = 0; codecs[n] != CODEC_ID_NONE; n++) {
+        const char *format = mp_codec_from_av_codec_id(codecs[n]);
+        if (format) {
+            mp_add_decoder(list, "spdif", format, format,
+                           "libavformat/spdifenc audio pass-through decoder");
+        }
+    }
 }

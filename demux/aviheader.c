@@ -279,6 +279,8 @@ while(1){
         sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
         sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
         sh_video->format = sh_video->bih->biCompression;
+        mp_set_video_codec_from_tag(sh_video);
+        sh_video->format = mp_video_fourcc_alias(sh_video->format);
 //        if(demuxer->video->id==-1) demuxer->video->id=stream_id;
         // IdxFix:
         idxfix_videostream=stream_id;
@@ -335,6 +337,7 @@ while(1){
 	if (sh_audio->format == 1 &&
 	    last_fccHandler == mmioFOURCC('A', 'x', 'a', 'n'))
 	    sh_audio->format = last_fccHandler;
+        mp_set_audio_codec_from_tag(sh_audio);
 	sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
         chunksize=0;
         if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf,MSGL_V);

@@ -20,18 +20,17 @@
 #define MPLAYER_VD_H
 
 #include "video/mp_image.h"
-#include "core/mpc_info.h"
 #include "demux/stheader.h"
 
-typedef struct mp_codec_info vd_info_t;
-
 struct demux_packet;
+struct mp_decoder_list;
 
 /* interface of video decoder drivers */
 typedef struct vd_functions
 {
-    const vd_info_t *info;
-    int (*init)(sh_video_t *sh);
+    const char *name;
+    void (*add_decoders)(struct mp_decoder_list *list);
+    int (*init)(sh_video_t *sh, const char *decoder);
     void (*uninit)(sh_video_t *sh);
     int (*control)(sh_video_t *sh, int cmd, void *arg);
     struct mp_image *(*decode)(struct sh_video *sh, struct demux_packet *pkt,

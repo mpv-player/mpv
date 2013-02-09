@@ -22,11 +22,11 @@
 #include "demux/stheader.h"
 
 struct osd_state;
+struct mp_decoder_list;
 
-// dec_video.c:
-void vfm_help(void);
+struct mp_decoder_list *mp_video_decoder_list(void);
 
-int init_best_video_codec(sh_video_t *sh_video, char** video_codec_list, char** video_fm_list);
+int init_best_video_codec(sh_video_t *sh_video, char* video_decoders);
 void uninit_video(sh_video_t *sh_video);
 
 struct demux_packet;

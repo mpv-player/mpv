@@ -349,6 +349,7 @@ static int asf_init_audio_stream(demuxer_t *demuxer,struct asf_priv* asf, sh_aud
   memcpy(sh_audio->wf,buffer,streamh->type_size);
   le2me_WAVEFORMATEX(sh_audio->wf);
   sh_audio->format=sh_audio->wf->wFormatTag;
+  mp_set_audio_codec_from_tag(sh_audio);
   if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf,MSGL_V);
   if(ASF_LOAD_GUID_PREFIX(streamh->concealment)==ASF_GUID_PREFIX_audio_conceal_interleave){
     buffer = &hdr[pos];
@@ -516,6 +517,9 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
             sh_video->bih->biHeight;
         }
         sh_video->i_bps = asf->bps;
+        sh_video->format = sh_video->bih->biCompression;
+        mp_set_video_codec_from_tag(sh_video);
+        sh_video->format = mp_video_fourcc_alias(sh_video->format);
 
         if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_video_header(sh_video->bih, MSGL_V);
         //asf_video_id=streamh.stream_no & 0x7F;

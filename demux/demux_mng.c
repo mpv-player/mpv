@@ -437,8 +437,8 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
     sh_video->ds = demuxer->video;
 
     // set format of pixels in video packets
-    sh_video->format = MP_FOURCC_RAWVIDEO;
-    sh_video->imgfmt = MP_FOURCC_RGB32;
+    sh_video->gsh->codec = "rawvideo";
+    sh_video->format = MP_FOURCC_RGB32;
 
     // set framerate to some value (MNG does not have a fixed framerate)
     sh_video->fps       = 5.0f;

@@ -358,6 +358,8 @@ int m_property_strdup_ro(const struct m_option* prop, int action, void* arg,
                          const char *var)
 {
     if (action == M_PROPERTY_GET) {
+        if (!var)
+            return M_PROPERTY_UNAVAILABLE;
         *(char **)arg = talloc_strdup(NULL, var);
         return M_PROPERTY_OK;
     }

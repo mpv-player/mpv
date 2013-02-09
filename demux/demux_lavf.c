@@ -38,6 +38,7 @@
 #include "core/options.h"
 #include "core/mp_msg.h"
 #include "core/av_opts.h"
+#include "core/av_common.h"
 #include "core/bstr.h"
 
 #include "stream/stream.h"
@@ -344,8 +345,7 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
     if (override_tag)
         codec->codec_tag = override_tag;
 
-    AVCodec *avc = avcodec_find_decoder(codec->codec_id);
-    const char *codec_name = avc ? avc->name : "unknown";
+    const char *mp_codec = mp_codec_from_av_codec_id(codec->codec_id);
 
     bool set_demuxer_id = matches_avinputformat_name(priv, "mpeg");
 
@@ -356,12 +356,11 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_audio = new_sh_audio_aid(demuxer, i, priv->audio_streams);
         if (!sh_audio)
             break;
-        sh_audio->demuxer_codecname = codec_name;
         if (set_demuxer_id)
             sh_audio->gsh->demuxer_id = st->id;
         stream_type = "audio";
         priv->astreams[priv->audio_streams] = i;
-        sh_audio->libav_codec_id = codec->codec_id;
+        sh_audio->gsh->codec = mp_codec;
         sh_audio->gsh->lavf_codec_tag = lavf_codec_tag;
         wf = calloc(sizeof(*wf) + codec->extradata_size, 1);
         // mp4a tag is used for all mp4 files no matter what they actually contain
@@ -430,12 +429,11 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_video = new_sh_video_vid(demuxer, i, priv->video_streams);
         if (!sh_video)
             break;
-        sh_video->demuxer_codecname = codec_name;
         if (set_demuxer_id)
             sh_video->gsh->demuxer_id = st->id;
         stream_type = "video";
         priv->vstreams[priv->video_streams] = i;
-        sh_video->libav_codec_id = codec->codec_id;
+        sh_video->gsh->codec = mp_codec;
         sh_video->gsh->lavf_codec_tag = lavf_codec_tag;
         if (st->disposition & AV_DISPOSITION_ATTACHED_PIC)
             sh_video->gsh->attached_picture = true;
@@ -547,12 +545,11 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_sub = new_sh_sub_sid(demuxer, i, priv->sub_streams);
         if (!sh_sub)
             break;
-        sh_sub->demuxer_codecname = codec_name;
         if (set_demuxer_id)
             sh_sub->gsh->demuxer_id = st->id;
         stream_type = "subtitle";
         priv->sstreams[priv->sub_streams] = i;
-        sh_sub->libav_codec_id = codec->codec_id;
+        sh_sub->gsh->codec = mp_codec;
         sh_sub->gsh->lavf_codec_tag = lavf_codec_tag;
         sh_sub->type = type;
         if (codec->extradata_size) {
@@ -590,10 +587,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         st->discard = AVDISCARD_ALL;
     }
     if (stream_type) {
-        if (!avc && *stream_type == 's' && demuxer->s_streams[i])
-            codec_name = sh_sub_type2str((demuxer->s_streams[i])->type);
-        mp_msg(MSGT_DEMUX, MSGL_V, "[lavf] stream %d: %s (%s), -%cid %d",
-               i, stream_type, codec_name, *stream_type, stream_id);
+        mp_msg(MSGT_DEMUX, MSGL_V, "[lavf] stream %d: %s, -%cid %d",
+               i, stream_type, *stream_type, stream_id);
         if (lang && lang->value && *stream_type != 'v')
             mp_msg(MSGT_DEMUX, MSGL_V, ", -%clang %s",
                    *stream_type, lang->value);
