@@ -376,8 +376,8 @@ void vo_x11_update_screeninfo(struct vo *vo)
     struct MPOpts *opts = vo->opts;
     xinerama_x = xinerama_y = 0;
 #ifdef CONFIG_XINERAMA
-    if (xinerama_screen >= -1 && XineramaIsActive(vo->x11->display)) {
-        int screen = xinerama_screen;
+    if (opts->vo_screen_id >= -1 && XineramaIsActive(vo->x11->display)) {
+        int screen = opts->vo_screen_id;
         XineramaScreenInfo *screens;
         int num_screens;
 
@@ -994,7 +994,7 @@ void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
     Display *mDisplay = vo->x11->display;
-    bool force_change_xy = opts->vo_geometry.xy_valid || xinerama_screen >= 0;
+    bool force_change_xy = opts->vo_geometry.xy_valid || opts->vo_screen_id >= 0;
     XVisualInfo vinfo_storage;
     if (!vis) {
         vis = &vinfo_storage;

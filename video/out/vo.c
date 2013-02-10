@@ -46,7 +46,6 @@
 #include "x11_common.h"
 #endif
 
-int xinerama_screen = -1;
 int xinerama_x;
 int xinerama_y;
 

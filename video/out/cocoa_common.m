@@ -256,18 +256,20 @@ static int current_screen_has_dock_or_menubar(struct vo *vo)
 static void update_screen_info(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
+    struct MPOpts *opts = vo->opts;
+    int screen_id = opts->vo_screen_id;
     s->screen_array = [NSScreen screens];
-    if (xinerama_screen >= (int)[s->screen_array count]) {
+    if (screen_id >= (int)[s->screen_array count]) {
         mp_msg(MSGT_VO, MSGL_INFO, "[cocoa] Device ID %d does not exist, "
-            "falling back to main device\n", xinerama_screen);
-        xinerama_screen = -1;
+            "falling back to main device\n", screen_id);
+        screen_id = -1;
     }
 
-    if (xinerama_screen < 0) { // default behaviour
+    if (screen_id < 0) { // default behaviour
         if (! (s->screen_handle = [s->window screen]) )
             s->screen_handle = [s->screen_array objectAtIndex:0];
     } else {
-        s->screen_handle = [s->screen_array objectAtIndex:(xinerama_screen)];
+        s->screen_handle = [s->screen_array objectAtIndex:(screen_id)];
     }
 
     s->screen_frame = [s->screen_handle frame];

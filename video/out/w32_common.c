@@ -312,12 +312,13 @@ static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p)
 {
     struct vo *vo = (void*)p;
     struct vo_w32_state *w32 = vo->w32;
+    struct MPOpts *opts = vo->opts;
     // this defaults to the last screen if specified number does not exist
     xinerama_x = r->left;
     xinerama_y = r->top;
     vo->opts->vo_screenwidth = r->right - r->left;
     vo->opts->vo_screenheight = r->bottom - r->top;
-    if (w32->mon_cnt == xinerama_screen)
+    if (w32->mon_cnt == opts->vo_screen_id)
         return FALSE;
     w32->mon_cnt++;
     return TRUE;
@@ -340,8 +341,9 @@ static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p)
 void w32_update_xinerama_info(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
+    struct MPOpts *opts = vo->opts;
     xinerama_x = xinerama_y = 0;
-    if (xinerama_screen < -1) {
+    if (opts->vo_screen_id < -1) {
         int tmp;
         xinerama_x = GetSystemMetrics(SM_XVIRTUALSCREEN);
         xinerama_y = GetSystemMetrics(SM_YVIRTUALSCREEN);
@@ -349,7 +351,7 @@ void w32_update_xinerama_info(struct vo *vo)
         if (tmp) vo->opts->vo_screenwidth = tmp;
         tmp = GetSystemMetrics(SM_CYVIRTUALSCREEN);
         if (tmp) vo->opts->vo_screenheight = tmp;
-    } else if (xinerama_screen == -1) {
+    } else if (opts->vo_screen_id == -1) {
         MONITORINFO mi;
         HMONITOR m = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
         mi.cbSize = sizeof(mi);
@@ -358,7 +360,7 @@ void w32_update_xinerama_info(struct vo *vo)
         xinerama_y = mi.rcMonitor.top;
         vo->opts->vo_screenwidth = mi.rcMonitor.right - mi.rcMonitor.left;
         vo->opts->vo_screenheight = mi.rcMonitor.bottom - mi.rcMonitor.top;
-    } else if (xinerama_screen > 0) {
+    } else if (opts->vo_screen_id > 0) {
         w32->mon_cnt = 0;
         EnumDisplayMonitors(NULL, NULL, mon_enum, (LONG_PTR)vo);
     }
