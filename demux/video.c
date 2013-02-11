@@ -99,6 +99,7 @@ switch(video_codec){
     // in case no strf chunk has been seen in avi, we have no bitmap header
     if(!sh_video->bih) return 0;
     sh_video->format=sh_video->bih->biCompression;
+    mp_set_video_codec_from_tag(sh_video);
     sh_video->disp_w=sh_video->bih->biWidth;
     sh_video->disp_h=abs(sh_video->bih->biHeight);
   }
@@ -392,7 +393,9 @@ mpeg_header_parser:
   break;
  }
 } // switch(file_format)
-
+if (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS ||
+    d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS)
+  mp_set_video_codec_from_tag(sh_video);
 return 1;
 }
 
