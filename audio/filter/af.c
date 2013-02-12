@@ -35,7 +35,7 @@ extern struct af_info af_info_pan;
 extern struct af_info af_info_surround;
 extern struct af_info af_info_sub;
 extern struct af_info af_info_export;
-extern struct af_info af_info_volnorm;
+extern struct af_info af_info_drc;
 extern struct af_info af_info_extrastereo;
 extern struct af_info af_info_lavcac3enc;
 extern struct af_info af_info_lavcresample;
@@ -62,7 +62,7 @@ static struct af_info* filter_list[]={
 #ifdef HAVE_SYS_MMAN_H
    &af_info_export,
 #endif
-   &af_info_volnorm,
+   &af_info_drc,
    &af_info_extrastereo,
    &af_info_lavcac3enc,
    &af_info_lavcresample,

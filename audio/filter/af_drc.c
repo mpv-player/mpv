@@ -75,12 +75,12 @@ typedef struct af_volume_s
     // "Ideal" level
     float mid_s16;
     float mid_float;
-}af_volnorm_t;
+}af_drc_t;
 
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_volnorm_t* s   = (af_volnorm_t*)af->setup;
+  af_drc_t* s   = (af_drc_t*)af->setup;
 
   switch(cmd){
   case AF_CONTROL_REINIT:
@@ -120,7 +120,7 @@ static void uninit(struct af_instance* af)
     free(af->setup);
 }
 
-static void method1_int16(af_volnorm_t *s, struct mp_audio *c)
+static void method1_int16(af_drc_t *s, struct mp_audio *c)
 {
   register int i = 0;
   int16_t *data = (int16_t*)c->audio;	// Audio data
@@ -162,7 +162,7 @@ static void method1_int16(af_volnorm_t *s, struct mp_audio *c)
   s->lastavg = (1.0 - SMOOTH_LASTAVG) * s->lastavg + SMOOTH_LASTAVG * newavg;
 }
 
-static void method1_float(af_volnorm_t *s, struct mp_audio *c)
+static void method1_float(af_drc_t *s, struct mp_audio *c)
 {
   register int i = 0;
   float *data = (float*)c->audio;	// Audio data
@@ -199,7 +199,7 @@ static void method1_float(af_volnorm_t *s, struct mp_audio *c)
   s->lastavg = (1.0 - SMOOTH_LASTAVG) * s->lastavg + SMOOTH_LASTAVG * newavg;
 }
 
-static void method2_int16(af_volnorm_t *s, struct mp_audio *c)
+static void method2_int16(af_drc_t *s, struct mp_audio *c)
 {
   register int i = 0;
   int16_t *data = (int16_t*)c->audio;	// Audio data
@@ -249,7 +249,7 @@ static void method2_int16(af_volnorm_t *s, struct mp_audio *c)
   s->idx = (s->idx + 1) % NSAMPLES;
 }
 
-static void method2_float(af_volnorm_t *s, struct mp_audio *c)
+static void method2_float(af_drc_t *s, struct mp_audio *c)
 {
   register int i = 0;
   float *data = (float*)c->audio;	// Audio data
@@ -298,7 +298,7 @@ static void method2_float(af_volnorm_t *s, struct mp_audio *c)
 // Filter data through filter
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
-  af_volnorm_t *s = af->setup;
+  af_drc_t *s = af->setup;
 
   if(af->data->format == (AF_FORMAT_S16_NE))
   {
@@ -325,27 +325,27 @@ static int af_open(struct af_instance* af){
   af->play=play;
   af->mul=1;
   af->data=calloc(1,sizeof(struct mp_audio));
-  af->setup=calloc(1,sizeof(af_volnorm_t));
+  af->setup=calloc(1,sizeof(af_drc_t));
   if(af->data == NULL || af->setup == NULL)
     return AF_ERROR;
 
-  ((af_volnorm_t*)af->setup)->mul = MUL_INIT;
-  ((af_volnorm_t*)af->setup)->lastavg = ((float)SHRT_MAX) * DEFAULT_TARGET;
-  ((af_volnorm_t*)af->setup)->idx = 0;
-  ((af_volnorm_t*)af->setup)->mid_s16 = ((float)SHRT_MAX) * DEFAULT_TARGET;
-  ((af_volnorm_t*)af->setup)->mid_float = DEFAULT_TARGET;
+  ((af_drc_t*)af->setup)->mul = MUL_INIT;
+  ((af_drc_t*)af->setup)->lastavg = ((float)SHRT_MAX) * DEFAULT_TARGET;
+  ((af_drc_t*)af->setup)->idx = 0;
+  ((af_drc_t*)af->setup)->mid_s16 = ((float)SHRT_MAX) * DEFAULT_TARGET;
+  ((af_drc_t*)af->setup)->mid_float = DEFAULT_TARGET;
   for (i = 0; i < NSAMPLES; i++)
   {
-     ((af_volnorm_t*)af->setup)->mem[i].len = 0;
-     ((af_volnorm_t*)af->setup)->mem[i].avg = 0;
+     ((af_drc_t*)af->setup)->mem[i].len = 0;
+     ((af_drc_t*)af->setup)->mem[i].avg = 0;
   }
   return AF_OK;
 }
 
 // Description of this filter
-struct af_info af_info_volnorm = {
-    "Volume normalizer filter",
-    "volnorm",
+struct af_info af_info_drc = {
+    "Dynamic range compression filter",
+    "drc",
     "Alex Beregszaszi & Pierre Lombard",
     "",
     AF_FLAGS_NOT_REENTRANT,

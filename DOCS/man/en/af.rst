@@ -428,8 +428,9 @@ extrastereo[=mul]
         (average of both channels), with 1.0 sound will be unchanged, with
         -1.0 left and right channels will be swapped.
 
-volnorm[=method:target]
-    Maximizes the volume without distorting the sound.
+drc[=method:target]
+    Applies dynamic range compression. This maximizes the volume by compressing
+    the audio signal's dynamic range.
 
     <method>
         Sets the used method.
@@ -444,6 +445,9 @@ volnorm[=method:target]
     <target>
         Sets the target amplitude as a fraction of the maximum for the sample
         type (default: 0.25).
+
+    *NOTE*: This filter can cause distortion with audio signals that have a
+    very large dynamic range.
 
 ladspa=file:label[:controls...]
     Load a LADSPA (Linux Audio Developer's Simple Plugin API) plugin. This

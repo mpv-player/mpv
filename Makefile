@@ -143,7 +143,7 @@ SOURCES = talloc.c \
           audio/filter/af_surround.c \
           audio/filter/af_sweep.c \
           audio/filter/af_tools.c \
-          audio/filter/af_volnorm.c \
+          audio/filter/af_drc.c \
           audio/filter/af_volume.c \
           audio/filter/filter.c \
           audio/filter/window.c \
