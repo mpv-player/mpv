@@ -501,44 +501,50 @@ int vo_x11_init(struct vo *vo)
 
 static const struct mp_keymap keymap[] = {
     // special keys
-    {XK_Pause, KEY_PAUSE}, {XK_Escape, KEY_ESC}, {XK_BackSpace, KEY_BS},
-    {XK_Tab, KEY_TAB}, {XK_Return, KEY_ENTER},
-    {XK_Menu, KEY_MENU}, {XK_Print, KEY_PRINT},
+    {XK_Pause, MP_KEY_PAUSE}, {XK_Escape, MP_KEY_ESC},
+    {XK_BackSpace, MP_KEY_BS}, {XK_Tab, MP_KEY_TAB}, {XK_Return, MP_KEY_ENTER},
+    {XK_Menu, MP_KEY_MENU}, {XK_Print, MP_KEY_PRINT},
 
     // cursor keys
-    {XK_Left, KEY_LEFT}, {XK_Right, KEY_RIGHT}, {XK_Up, KEY_UP}, {XK_Down, KEY_DOWN},
+    {XK_Left, MP_KEY_LEFT}, {XK_Right, MP_KEY_RIGHT}, {XK_Up, MP_KEY_UP},
+    {XK_Down, MP_KEY_DOWN},
 
     // navigation block
-    {XK_Insert, KEY_INSERT}, {XK_Delete, KEY_DELETE}, {XK_Home, KEY_HOME}, {XK_End, KEY_END},
-    {XK_Page_Up, KEY_PAGE_UP}, {XK_Page_Down, KEY_PAGE_DOWN},
+    {XK_Insert, MP_KEY_INSERT}, {XK_Delete, MP_KEY_DELETE},
+    {XK_Home, MP_KEY_HOME}, {XK_End, MP_KEY_END}, {XK_Page_Up, MP_KEY_PAGE_UP},
+    {XK_Page_Down, MP_KEY_PAGE_DOWN},
 
     // F-keys
-    {XK_F1, KEY_F+1}, {XK_F2, KEY_F+2}, {XK_F3, KEY_F+3}, {XK_F4, KEY_F+4},
-    {XK_F5, KEY_F+5}, {XK_F6, KEY_F+6}, {XK_F7, KEY_F+7}, {XK_F8, KEY_F+8},
-    {XK_F9, KEY_F+9}, {XK_F10, KEY_F+10}, {XK_F11, KEY_F+11}, {XK_F12, KEY_F+12},
+    {XK_F1, MP_KEY_F+1}, {XK_F2, MP_KEY_F+2}, {XK_F3, MP_KEY_F+3},
+    {XK_F4, MP_KEY_F+4}, {XK_F5, MP_KEY_F+5}, {XK_F6, MP_KEY_F+6},
+    {XK_F7, MP_KEY_F+7}, {XK_F8, MP_KEY_F+8}, {XK_F9, MP_KEY_F+9},
+    {XK_F10, MP_KEY_F+10}, {XK_F11, MP_KEY_F+11}, {XK_F12, MP_KEY_F+12},
 
     // numpad independent of numlock
-    {XK_KP_Subtract, '-'}, {XK_KP_Add, '+'}, {XK_KP_Multiply, '*'}, {XK_KP_Divide, '/'},
-    {XK_KP_Enter, KEY_KPENTER},
+    {XK_KP_Subtract, '-'}, {XK_KP_Add, '+'}, {XK_KP_Multiply, '*'},
+    {XK_KP_Divide, '/'}, {XK_KP_Enter, MP_KEY_KPENTER},
 
     // numpad with numlock
-    {XK_KP_0, KEY_KP0}, {XK_KP_1, KEY_KP1}, {XK_KP_2, KEY_KP2},
-    {XK_KP_3, KEY_KP3}, {XK_KP_4, KEY_KP4}, {XK_KP_5, KEY_KP5},
-    {XK_KP_6, KEY_KP6}, {XK_KP_7, KEY_KP7}, {XK_KP_8, KEY_KP8},
-    {XK_KP_9, KEY_KP9}, {XK_KP_Decimal, KEY_KPDEC},
-    {XK_KP_Separator, KEY_KPDEC},
+    {XK_KP_0, MP_KEY_KP0}, {XK_KP_1, MP_KEY_KP1}, {XK_KP_2, MP_KEY_KP2},
+    {XK_KP_3, MP_KEY_KP3}, {XK_KP_4, MP_KEY_KP4}, {XK_KP_5, MP_KEY_KP5},
+    {XK_KP_6, MP_KEY_KP6}, {XK_KP_7, MP_KEY_KP7}, {XK_KP_8, MP_KEY_KP8},
+    {XK_KP_9, MP_KEY_KP9}, {XK_KP_Decimal, MP_KEY_KPDEC},
+    {XK_KP_Separator, MP_KEY_KPDEC},
 
     // numpad without numlock
-    {XK_KP_Insert, KEY_KPINS}, {XK_KP_End, KEY_KP1}, {XK_KP_Down, KEY_KP2},
-    {XK_KP_Page_Down, KEY_KP3}, {XK_KP_Left, KEY_KP4}, {XK_KP_Begin, KEY_KP5},
-    {XK_KP_Right, KEY_KP6}, {XK_KP_Home, KEY_KP7}, {XK_KP_Up, KEY_KP8},
-    {XK_KP_Page_Up, KEY_KP9}, {XK_KP_Delete, KEY_KPDEL},
+    {XK_KP_Insert, MP_KEY_KPINS}, {XK_KP_End, MP_KEY_KP1},
+    {XK_KP_Down, MP_KEY_KP2}, {XK_KP_Page_Down, MP_KEY_KP3},
+    {XK_KP_Left, MP_KEY_KP4}, {XK_KP_Begin, MP_KEY_KP5},
+    {XK_KP_Right, MP_KEY_KP6}, {XK_KP_Home, MP_KEY_KP7}, {XK_KP_Up, MP_KEY_KP8},
+    {XK_KP_Page_Up, MP_KEY_KP9}, {XK_KP_Delete, MP_KEY_KPDEL},
 
 #ifdef XF86XK_AudioPause
-    {XF86XK_MenuKB, KEY_MENU},
-    {XF86XK_AudioPlay, KEY_PLAY}, {XF86XK_AudioPause, KEY_PAUSE}, {XF86XK_AudioStop, KEY_STOP},
-    {XF86XK_AudioPrev, KEY_PREV}, {XF86XK_AudioNext, KEY_NEXT},
-    {XF86XK_AudioMute, KEY_MUTE}, {XF86XK_AudioLowerVolume, KEY_VOLUME_DOWN}, {XF86XK_AudioRaiseVolume, KEY_VOLUME_UP},
+    {XF86XK_MenuKB, MP_KEY_MENU},
+    {XF86XK_AudioPlay, MP_KEY_PLAY}, {XF86XK_AudioPause, MP_KEY_PAUSE},
+    {XF86XK_AudioStop, MP_KEY_STOP}, {XF86XK_AudioPrev, MP_KEY_PREV},
+    {XF86XK_AudioNext, MP_KEY_NEXT}, {XF86XK_AudioMute, MP_KEY_MUTE},
+    {XF86XK_AudioLowerVolume, MP_KEY_VOLUME_DOWN},
+    {XF86XK_AudioRaiseVolume, MP_KEY_VOLUME_UP},
 #endif
 
     {0, 0}
@@ -729,13 +735,13 @@ int vo_x11_check_events(struct vo *vo)
                     KeySym keySym = 0;
                     int modifiers = 0;
                     if (Event.xkey.state & ShiftMask)
-                        modifiers |= KEY_MODIFIER_SHIFT;
+                        modifiers |= MP_KEY_MODIFIER_SHIFT;
                     if (Event.xkey.state & ControlMask)
-                        modifiers |= KEY_MODIFIER_CTRL;
+                        modifiers |= MP_KEY_MODIFIER_CTRL;
                     if (Event.xkey.state & Mod1Mask)
-                        modifiers |= KEY_MODIFIER_ALT;
+                        modifiers |= MP_KEY_MODIFIER_ALT;
                     if (Event.xkey.state & Mod4Mask)
-                        modifiers |= KEY_MODIFIER_META;
+                        modifiers |= MP_KEY_MODIFIER_META;
                     if (x11->xic) {
                         Status status;
                         int len = Xutf8LookupString(x11->xic, &Event.xkey, buf,
@@ -776,8 +782,8 @@ int vo_x11_check_events(struct vo *vo)
                     x11->mouse_timer = GetTimerMS();
                 }
                 mplayer_put_key(vo->key_fifo,
-                                (MOUSE_BTN0 + Event.xbutton.button - 1)
-                                | MP_KEY_DOWN);
+                                (MP_MOUSE_BTN0 + Event.xbutton.button - 1)
+                                | MP_KEY_STATE_DOWN);
                 break;
             case ButtonRelease:
                 if (opts->cursor_autohide_delay > -2) {
@@ -786,7 +792,7 @@ int vo_x11_check_events(struct vo *vo)
                     x11->mouse_timer = GetTimerMS();
                 }
                 mplayer_put_key(vo->key_fifo,
-                                MOUSE_BTN0 + Event.xbutton.button - 1);
+                                MP_MOUSE_BTN0 + Event.xbutton.button - 1);
                 break;
             case PropertyNotify:
                 {
@@ -808,12 +814,12 @@ int vo_x11_check_events(struct vo *vo)
                 break;
             case DestroyNotify:
                 mp_msg(MSGT_VO, MSGL_WARN, "Our window was destroyed, exiting\n");
-                mplayer_put_key(vo->key_fifo, KEY_CLOSE_WIN);
+                mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
                 break;
 	    case ClientMessage:
                 if (Event.xclient.message_type == x11->XAWM_PROTOCOLS &&
                     Event.xclient.data.l[0] == x11->XAWM_DELETE_WINDOW)
-                    mplayer_put_key(vo->key_fifo, KEY_CLOSE_WIN);
+                    mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
                 break;
         default:
                 if (Event.type == x11->ShmCompletionEvent)

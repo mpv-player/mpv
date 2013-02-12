@@ -656,10 +656,10 @@ void create_menu()
 - (BOOL)resignFirstResponder { return YES; }
 - (BOOL)windowShouldClose:(id)sender
 {
-    mplayer_put_key(_vo->key_fifo, KEY_CLOSE_WIN);
+    mplayer_put_key(_vo->key_fifo, MP_KEY_CLOSE_WIN);
     // We have to wait for MPlayer to handle this,
     // otherwise we are in trouble if the
-    // KEY_CLOSE_WIN handler is disabled
+    // MP_KEY_CLOSE_WIN handler is disabled
     return NO;
 }
 
@@ -673,7 +673,7 @@ void create_menu()
 - (void)handleQuitEvent:(NSAppleEventDescriptor*)e
          withReplyEvent:(NSAppleEventDescriptor*)r
 {
-    mplayer_put_key(_vo->key_fifo, KEY_CLOSE_WIN);
+    mplayer_put_key(_vo->key_fifo, MP_KEY_CLOSE_WIN);
 }
 
 - (void)keyDown:(NSEvent *)theEvent
@@ -689,14 +689,14 @@ void create_menu()
 
     if (key > -1) {
         if ([theEvent modifierFlags] & NSShiftKeyMask)
-            key |= KEY_MODIFIER_SHIFT;
+            key |= MP_KEY_MODIFIER_SHIFT;
         if ([theEvent modifierFlags] & NSControlKeyMask)
-            key |= KEY_MODIFIER_CTRL;
+            key |= MP_KEY_MODIFIER_CTRL;
         if (([theEvent modifierFlags] & NSLeftAlternateKeyMask) ==
                 NSLeftAlternateKeyMask)
-            key |= KEY_MODIFIER_ALT;
+            key |= MP_KEY_MODIFIER_ALT;
         if ([theEvent modifierFlags] & NSCommandKeyMask)
-            key |= KEY_MODIFIER_META;
+            key |= MP_KEY_MODIFIER_META;
         mplayer_put_key(_vo->key_fifo, key);
     }
 }
@@ -760,17 +760,17 @@ void create_menu()
         static const CGFloat threshold = 10;
         while (s->accumulated_scroll >= threshold) {
             s->accumulated_scroll -= threshold;
-            mplayer_put_key(_vo->key_fifo, MOUSE_BTN3);
+            mplayer_put_key(_vo->key_fifo, MP_MOUSE_BTN3);
         }
         while (s->accumulated_scroll <= -threshold) {
             s->accumulated_scroll += threshold;
-            mplayer_put_key(_vo->key_fifo, MOUSE_BTN4);
+            mplayer_put_key(_vo->key_fifo, MP_MOUSE_BTN4);
         }
     } else {
         if (delta > 0)
-            mplayer_put_key(_vo->key_fifo, MOUSE_BTN3);
+            mplayer_put_key(_vo->key_fifo, MP_MOUSE_BTN3);
         else
-            mplayer_put_key(_vo->key_fifo, MOUSE_BTN4);
+            mplayer_put_key(_vo->key_fifo, MP_MOUSE_BTN4);
     }
 }
 
@@ -786,17 +786,17 @@ void create_menu()
             case NSRightMouseDown:
             case NSOtherMouseDown:
                 mplayer_put_key(_vo->key_fifo,
-                                (MOUSE_BTN0 + buttonNumber) | MP_KEY_DOWN);
+                                (MP_MOUSE_BTN0 + buttonNumber) | MP_KEY_STATE_DOWN);
                 // Looks like Cocoa doesn't create MouseUp events when we are
                 // doing the second click in a double click. Put in the key_fifo
                 // the key that would be put from the MouseUp handling code.
                 if([theEvent clickCount] == 2)
-                   mplayer_put_key(_vo->key_fifo, MOUSE_BTN0 + buttonNumber);
+                   mplayer_put_key(_vo->key_fifo, MP_MOUSE_BTN0 + buttonNumber);
                 break;
             case NSLeftMouseUp:
             case NSRightMouseUp:
             case NSOtherMouseUp:
-                mplayer_put_key(_vo->key_fifo, MOUSE_BTN0 + buttonNumber);
+                mplayer_put_key(_vo->key_fifo, MP_MOUSE_BTN0 + buttonNumber);
                 break;
         }
     }

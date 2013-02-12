@@ -75,30 +75,30 @@ typedef struct cookie_keycode_map {
  */
 
 static const cookie_keycode_map_t ar_codes_tiger[] = {
-    { "\x0E\x06\x03\x02",         4, AR_PREV_HOLD     },
-    { "\x0E\x06\x04\x02",         4, AR_NEXT_HOLD     },
-    { "\x0E\x06\x0E\x06",         4, AR_MENU_HOLD     },
-    { "\x0E\x0C\x0B\x06",         4, AR_VUP           },
-    { "\x0E\x0D\x0B\x06",         4, AR_VDOWN         },
-    { "\x0E\x07\x06\x0E\x07\x06", 6, AR_MENU          },
-    { "\x0E\x08\x06\x0E\x08\x06", 6, AR_PLAY          },
-    { "\x0E\x09\x06\x0E\x09\x06", 6, AR_NEXT          },
-    { "\x0E\x0A\x06\x0E\x0A\x06", 6, AR_PREV          },
-    { "\x12\x0E\x06\x12\x0E\x06", 6, AR_PLAY_HOLD     },
+    { "\x0E\x06\x03\x02",         4, MP_AR_PREV_HOLD     },
+    { "\x0E\x06\x04\x02",         4, MP_AR_NEXT_HOLD     },
+    { "\x0E\x06\x0E\x06",         4, MP_AR_MENU_HOLD     },
+    { "\x0E\x0C\x0B\x06",         4, MP_AR_VUP           },
+    { "\x0E\x0D\x0B\x06",         4, MP_AR_VDOWN         },
+    { "\x0E\x07\x06\x0E\x07\x06", 6, MP_AR_MENU          },
+    { "\x0E\x08\x06\x0E\x08\x06", 6, MP_AR_PLAY          },
+    { "\x0E\x09\x06\x0E\x09\x06", 6, MP_AR_NEXT          },
+    { "\x0E\x0A\x06\x0E\x0A\x06", 6, MP_AR_PREV          },
+    { "\x12\x0E\x06\x12\x0E\x06", 6, MP_AR_PLAY_HOLD     },
     { NULL,                       0, MP_INPUT_NOTHING },
 };
 
 static const cookie_keycode_map_t ar_codes_leopard[] = {
-    { "\x1F\x13\x03\x02",         4, AR_PREV_HOLD     },
-    { "\x1F\x13\x04\x02",         4, AR_NEXT_HOLD     },
-    { "\x1F\x13\x1F\x13",         4, AR_MENU_HOLD     },
-    { "\x1F\x1D\x1C\x13",         4, AR_VUP           },
-    { "\x1F\x1E\x1C\x13",         4, AR_VDOWN         },
-    { "\x1F\x14\x13\x1F\x14\x13", 6, AR_MENU          },
-    { "\x1F\x15\x13\x1F\x15\x13", 6, AR_PLAY          },
-    { "\x1F\x16\x13\x1F\x16\x13", 6, AR_NEXT          },
-    { "\x1F\x17\x13\x1F\x17\x13", 6, AR_PREV          },
-    { "\x23\x1F\x13\x23\x1F\x13", 6, AR_PLAY_HOLD     },
+    { "\x1F\x13\x03\x02",         4, MP_AR_PREV_HOLD     },
+    { "\x1F\x13\x04\x02",         4, MP_AR_NEXT_HOLD     },
+    { "\x1F\x13\x1F\x13",         4, MP_AR_MENU_HOLD     },
+    { "\x1F\x1D\x1C\x13",         4, MP_AR_VUP           },
+    { "\x1F\x1E\x1C\x13",         4, MP_AR_VDOWN         },
+    { "\x1F\x14\x13\x1F\x14\x13", 6, MP_AR_MENU          },
+    { "\x1F\x15\x13\x1F\x15\x13", 6, MP_AR_PLAY          },
+    { "\x1F\x16\x13\x1F\x16\x13", 6, MP_AR_NEXT          },
+    { "\x1F\x17\x13\x1F\x17\x13", 6, MP_AR_PREV          },
+    { "\x23\x1F\x13\x23\x1F\x13", 6, MP_AR_PLAY_HOLD     },
     { NULL,                       0, MP_INPUT_NOTHING },
 };
 
@@ -368,13 +368,13 @@ int mp_input_ar_read(void *ctx, int fd)
                 ret = ar_code->keycode;
                 switch (ret) {
                     // For these 4 keys, the remote can keep a hold state.
-                    case AR_VUP:
-                    case AR_VDOWN:
-                    case AR_NEXT_HOLD:
-                    case AR_PREV_HOLD:
+                    case MP_AR_VUP:
+                    case MP_AR_VDOWN:
+                    case MP_AR_NEXT_HOLD:
+                    case MP_AR_PREV_HOLD:
                         for (i = cookie_nr-ar_code->seq_len; i < cookie_nr; ++i) {
                             if (value_queue[i]) {
-                                down = MP_KEY_DOWN;
+                                down = MP_KEY_STATE_DOWN;
                                 break;
                             }
                         }
@@ -445,19 +445,19 @@ int main(void)
     }
 
     while (1) {
-        switch ((ret = mp_input_ar_read(NULL, 0)) & ~MP_KEY_DOWN) {
-            case AR_PLAY:       printf(" - AR_PLAY."); break;
-            case AR_PLAY_HOLD:  printf(" - AR_PLAY_HOLD."); break;
-            case AR_NEXT:       printf(" - AR_NEXT."); break;
-            case AR_NEXT_HOLD:  printf(" - AR_NEXT_HOLD."); break;
-            case AR_PREV:       printf(" - AR_PREV."); break;
-            case AR_PREV_HOLD:  printf(" - AR_PREV_HOLD."); break;
-            case AR_MENU:       printf(" - AR_MENU."); break;
-            case AR_MENU_HOLD:  printf(" - AR_MENU_HOLD."); break;
-            case AR_VUP:        printf(" - AR_VUP."); break;
-            case AR_VDOWN:      printf(" - AR_VDOWN."); break;
+        switch ((ret = mp_input_ar_read(NULL, 0)) & ~MP_KEY_STATE_DOWN) {
+            case MP_AR_PLAY:       printf(" - MP_AR_PLAY."); break;
+            case MP_AR_PLAY_HOLD:  printf(" - MP_AR_PLAY_HOLD."); break;
+            case MP_AR_NEXT:       printf(" - MP_AR_NEXT."); break;
+            case MP_AR_NEXT_HOLD:  printf(" - MP_AR_NEXT_HOLD."); break;
+            case MP_AR_PREV:       printf(" - MP_AR_PREV."); break;
+            case MP_AR_PREV_HOLD:  printf(" - MP_AR_PREV_HOLD."); break;
+            case MP_AR_MENU:       printf(" - MP_AR_MENU."); break;
+            case MP_AR_MENU_HOLD:  printf(" - MP_AR_MENU_HOLD."); break;
+            case MP_AR_VUP:        printf(" - MP_AR_VUP."); break;
+            case MP_AR_VDOWN:      printf(" - MP_AR_VDOWN."); break;
         }
-        if ((ret > 0 )&&(ret & MP_KEY_DOWN))
+        if ((ret > 0 )&&(ret & MP_KEY_STATE_DOWN))
             printf(" [hold]");
         if (ret > 0)
             printf("\n");

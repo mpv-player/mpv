@@ -119,28 +119,28 @@ int load_termcap(char *termtype){
   if(screen_height<1 || screen_height>255) screen_height=24;
   erase_to_end_of_line= tgetstr("ce",&term_p);
 
-  termcap_add("kP",KEY_PGUP);
-  termcap_add("kN",KEY_PGDWN);
-  termcap_add("kh",KEY_HOME);
-  termcap_add("kH",KEY_END);
-  termcap_add("kI",KEY_INS);
-  termcap_add("kD",KEY_DEL);
-  termcap_add("kb",KEY_BS);
-  termcap_add("kl",KEY_LEFT);
-  termcap_add("kd",KEY_DOWN);
-  termcap_add("ku",KEY_UP);
-  termcap_add("kr",KEY_RIGHT);
-  termcap_add("k0",KEY_F+0);
-  termcap_add("k1",KEY_F+1);
-  termcap_add("k2",KEY_F+2);
-  termcap_add("k3",KEY_F+3);
-  termcap_add("k4",KEY_F+4);
-  termcap_add("k5",KEY_F+5);
-  termcap_add("k6",KEY_F+6);
-  termcap_add("k7",KEY_F+7);
-  termcap_add("k8",KEY_F+8);
-  termcap_add("k9",KEY_F+9);
-  termcap_add("k;",KEY_F+10);
+  termcap_add("kP",MP_KEY_PGUP);
+  termcap_add("kN",MP_KEY_PGDWN);
+  termcap_add("kh",MP_KEY_HOME);
+  termcap_add("kH",MP_KEY_END);
+  termcap_add("kI",MP_KEY_INS);
+  termcap_add("kD",MP_KEY_DEL);
+  termcap_add("kb",MP_KEY_BS);
+  termcap_add("kl",MP_KEY_LEFT);
+  termcap_add("kd",MP_KEY_DOWN);
+  termcap_add("ku",MP_KEY_UP);
+  termcap_add("kr",MP_KEY_RIGHT);
+  termcap_add("k0",MP_KEY_F+0);
+  termcap_add("k1",MP_KEY_F+1);
+  termcap_add("k2",MP_KEY_F+2);
+  termcap_add("k3",MP_KEY_F+3);
+  termcap_add("k4",MP_KEY_F+4);
+  termcap_add("k5",MP_KEY_F+5);
+  termcap_add("k6",MP_KEY_F+6);
+  termcap_add("k7",MP_KEY_F+7);
+  termcap_add("k8",MP_KEY_F+8);
+  termcap_add("k9",MP_KEY_F+9);
+  termcap_add("k;",MP_KEY_F+10);
   return getch2_key_db;
 }
 
@@ -192,20 +192,20 @@ bool getch2(struct mp_fifo *fifo)
         code = getch2_buf[0];
         /* Check the well-known codes... */
         if (code != 27) {
-            if (code == 'A'-64) code = KEY_HOME;
-            else if (code == 'E'-64) code = KEY_END;
-            else if (code == 'D'-64) code = KEY_DEL;
-            else if (code == 'H'-64) code = KEY_BS;
-            else if (code == 'U'-64) code = KEY_PGUP;
-            else if (code == 'V'-64) code = KEY_PGDWN;
-            else if (code == 8 || code==127) code = KEY_BS;
+            if (code == 'A'-64) code = MP_KEY_HOME;
+            else if (code == 'E'-64) code = MP_KEY_END;
+            else if (code == 'D'-64) code = MP_KEY_DEL;
+            else if (code == 'H'-64) code = MP_KEY_BS;
+            else if (code == 'U'-64) code = MP_KEY_PGUP;
+            else if (code == 'V'-64) code = MP_KEY_PGDWN;
+            else if (code == 8 || code==127) code = MP_KEY_BS;
             else if (code == 10 || code==13) {
                 if (getch2_len > 1) {
                     int c = getch2_buf[1];
                     if ((c == 10 || c == 13) && (c != code))
                         len = 2;
                 }
-                code = KEY_ENTER;
+                code = MP_KEY_ENTER;
             } else {
                 int utf8len = bstr_parse_utf8_code_length(code);
                 if (utf8len > 0 && utf8len <= getch2_len) {
@@ -221,19 +221,19 @@ bool getch2(struct mp_fifo *fifo)
         else if (getch2_len > 1) {
             int c = getch2_buf[1];
             if (c == 27) {
-                code = KEY_ESC;
+                code = MP_KEY_ESC;
                 len = 2;
                 goto found;
             }
             if (c >= '0' && c <= '9') {
-                code = c-'0'+KEY_F;
+                code = c-'0'+MP_KEY_F;
                 len = 2;
                 goto found;
             }
             if (getch2_len >= 4 && c == '[' && getch2_buf[2] == '[') {
                 int c = getch2_buf[3];
                 if (c >= 'A' && c < 'A'+12) {
-                    code = KEY_F+1 + c-'A';
+                    code = MP_KEY_F+1 + c-'A';
                     len = 4;
                     goto found;
                 }
@@ -241,9 +241,9 @@ bool getch2(struct mp_fifo *fifo)
             if ((c == '[' || c == 'O') && getch2_len >= 3) {
                 int c = getch2_buf[2];
                 const int ctable[] = {
-                    KEY_UP, KEY_DOWN, KEY_RIGHT, KEY_LEFT, 0,
-                    KEY_END, KEY_PGDWN, KEY_HOME, KEY_PGUP, 0, 0, KEY_INS, 0, 0, 0,
-                    KEY_F+1, KEY_F+2, KEY_F+3, KEY_F+4};
+                    MP_KEY_UP, MP_KEY_DOWN, MP_KEY_RIGHT, MP_KEY_LEFT, 0,
+                    MP_KEY_END, MP_KEY_PGDWN, MP_KEY_HOME, MP_KEY_PGUP, 0, 0, MP_KEY_INS, 0, 0, 0,
+                    MP_KEY_F+1, MP_KEY_F+2, MP_KEY_F+3, MP_KEY_F+4};
                 if (c >= 'A' && c <= 'S')
                     if (ctable[c - 'A']) {
                         code = ctable[c - 'A'];
@@ -253,7 +253,7 @@ bool getch2(struct mp_fifo *fifo)
             }
             if (getch2_len >= 4 && c == '[' && getch2_buf[3] == '~') {
                 int c = getch2_buf[2];
-                const int ctable[8] = {KEY_HOME, KEY_INS, KEY_DEL, KEY_END, KEY_PGUP, KEY_PGDWN, KEY_HOME, KEY_END};
+                const int ctable[8] = {MP_KEY_HOME, MP_KEY_INS, MP_KEY_DEL, MP_KEY_END, MP_KEY_PGUP, MP_KEY_PGDWN, MP_KEY_HOME, MP_KEY_END};
                 if (c >= '1' && c <= '8') {
                     code = ctable[c - '1'];
                     len = 4;
@@ -270,7 +270,7 @@ bool getch2(struct mp_fifo *fifo)
                     int a = i*10 + j;
                     for (i = 0; i < 20; i++)
                         if (ftable[i] == a) {
-                            code = KEY_F+1 + i;
+                            code = MP_KEY_F+1 + i;
                             len = 5;
                             goto found;
                         }

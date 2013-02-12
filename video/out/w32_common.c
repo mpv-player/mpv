@@ -39,25 +39,25 @@ static const wchar_t classname[] = L"mpv";
 
 static const struct mp_keymap vk_map[] = {
     // special keys
-    {VK_ESCAPE, KEY_ESC}, {VK_BACK, KEY_BS}, {VK_TAB, KEY_TAB},
-    {VK_RETURN, KEY_ENTER}, {VK_PAUSE, KEY_PAUSE}, {VK_SNAPSHOT, KEY_PRINT},
+    {VK_ESCAPE, MP_KEY_ESC}, {VK_BACK, MP_KEY_BS}, {VK_TAB, MP_KEY_TAB},
+    {VK_RETURN, MP_KEY_ENTER}, {VK_PAUSE, MP_KEY_PAUSE}, {VK_SNAPSHOT, MP_KEY_PRINT},
 
     // cursor keys
-    {VK_LEFT, KEY_LEFT}, {VK_UP, KEY_UP}, {VK_RIGHT, KEY_RIGHT}, {VK_DOWN, KEY_DOWN},
+    {VK_LEFT, MP_KEY_LEFT}, {VK_UP, MP_KEY_UP}, {VK_RIGHT, MP_KEY_RIGHT}, {VK_DOWN, MP_KEY_DOWN},
 
     // navigation block
-    {VK_INSERT, KEY_INSERT}, {VK_DELETE, KEY_DELETE}, {VK_HOME, KEY_HOME}, {VK_END, KEY_END},
-    {VK_PRIOR, KEY_PAGE_UP}, {VK_NEXT, KEY_PAGE_DOWN},
+    {VK_INSERT, MP_KEY_INSERT}, {VK_DELETE, MP_KEY_DELETE}, {VK_HOME, MP_KEY_HOME}, {VK_END, MP_KEY_END},
+    {VK_PRIOR, MP_KEY_PAGE_UP}, {VK_NEXT, MP_KEY_PAGE_DOWN},
 
     // F-keys
-    {VK_F1, KEY_F+1}, {VK_F2, KEY_F+2}, {VK_F3, KEY_F+3}, {VK_F4, KEY_F+4},
-    {VK_F5, KEY_F+5}, {VK_F6, KEY_F+6}, {VK_F7, KEY_F+7}, {VK_F8, KEY_F+8},
-    {VK_F9, KEY_F+9}, {VK_F10, KEY_F+10}, {VK_F11, KEY_F+11}, {VK_F12, KEY_F+12},
+    {VK_F1, MP_KEY_F+1}, {VK_F2, MP_KEY_F+2}, {VK_F3, MP_KEY_F+3}, {VK_F4, MP_KEY_F+4},
+    {VK_F5, MP_KEY_F+5}, {VK_F6, MP_KEY_F+6}, {VK_F7, MP_KEY_F+7}, {VK_F8, MP_KEY_F+8},
+    {VK_F9, MP_KEY_F+9}, {VK_F10, MP_KEY_F+10}, {VK_F11, MP_KEY_F+11}, {VK_F12, MP_KEY_F+12},
     // numpad
-    {VK_NUMPAD0, KEY_KP0}, {VK_NUMPAD1, KEY_KP1}, {VK_NUMPAD2, KEY_KP2},
-    {VK_NUMPAD3, KEY_KP3}, {VK_NUMPAD4, KEY_KP4}, {VK_NUMPAD5, KEY_KP5},
-    {VK_NUMPAD6, KEY_KP6}, {VK_NUMPAD7, KEY_KP7}, {VK_NUMPAD8, KEY_KP8},
-    {VK_NUMPAD9, KEY_KP9}, {VK_DECIMAL, KEY_KPDEC},
+    {VK_NUMPAD0, MP_KEY_KP0}, {VK_NUMPAD1, MP_KEY_KP1}, {VK_NUMPAD2, MP_KEY_KP2},
+    {VK_NUMPAD3, MP_KEY_KP3}, {VK_NUMPAD4, MP_KEY_KP4}, {VK_NUMPAD5, MP_KEY_KP5},
+    {VK_NUMPAD6, MP_KEY_KP6}, {VK_NUMPAD7, MP_KEY_KP7}, {VK_NUMPAD8, MP_KEY_KP8},
+    {VK_NUMPAD9, MP_KEY_KP9}, {VK_DECIMAL, MP_KEY_KPDEC},
 
     {0, 0}
 };
@@ -103,11 +103,11 @@ static int mod_state(struct vo *vo)
 {
     int res = 0;
     if (key_state(vo, VK_CONTROL))
-        res |= KEY_MODIFIER_CTRL;
+        res |= MP_KEY_MODIFIER_CTRL;
     if (key_state(vo, VK_SHIFT))
-        res |= KEY_MODIFIER_SHIFT;
+        res |= MP_KEY_MODIFIER_SHIFT;
     if (key_state(vo, VK_MENU))
-        res |= KEY_MODIFIER_ALT;
+        res |= MP_KEY_MODIFIER_ALT;
     return res;
 }
 
@@ -171,7 +171,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             }
             break;
         case WM_CLOSE:
-            mplayer_put_key(vo->key_fifo, KEY_CLOSE_WIN);
+            mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
             break;
         case WM_SYSCOMMAND:
             switch (wParam) {
@@ -198,15 +198,15 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             // E.g. AltGr+9 on a German keyboard would yield Ctrl+Alt+[
             // Warning: wine handles this differently. Don't test this on wine!
             if (key_state(vo, VK_RMENU))
-                mods &= ~(KEY_MODIFIER_CTRL | KEY_MODIFIER_ALT);
+                mods &= ~(MP_KEY_MODIFIER_CTRL | MP_KEY_MODIFIER_ALT);
             // Apparently Ctrl+A to Ctrl+Z is special cased, and produces
             // character codes from 1-26. Work it around.
             // Also, enter/return (including the keypad variant) and CTRL+J both
             // map to wParam==10. As a workaround, check VK_RETURN to
             // distinguish these two key combinations.
-            if ((mods & KEY_MODIFIER_CTRL) && code >= 1 && code <= 26
+            if ((mods & MP_KEY_MODIFIER_CTRL) && code >= 1 && code <= 26
                 && !key_state(vo, VK_RETURN))
-                code = code - 1 + (mods & KEY_MODIFIER_SHIFT ? 'A' : 'a');
+                code = code - 1 + (mods & MP_KEY_MODIFIER_SHIFT ? 'A' : 'a');
             if (code >= 32 && code < (1<<21)) {
                 mplayer_put_key(vo->key_fifo, code | mods);
                 // At least with Alt+char, not calling DefWindowProcW stops
@@ -217,7 +217,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         }
         case WM_LBUTTONDOWN:
             if (!vo_nomouse_input && (vo_fs || (wParam & MK_CONTROL))) {
-                mplayer_put_key(vo->key_fifo, MOUSE_BTN0 | mod_state(vo));
+                mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN0 | mod_state(vo));
                 break;
             }
             if (!vo_fs) {
@@ -228,11 +228,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         case WM_MBUTTONDOWN:
             if (!vo_nomouse_input)
-                mplayer_put_key(vo->key_fifo, MOUSE_BTN1 | mod_state(vo));
+                mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN1 | mod_state(vo));
             break;
         case WM_RBUTTONDOWN:
             if (!vo_nomouse_input)
-                mplayer_put_key(vo->key_fifo, MOUSE_BTN2 | mod_state(vo));
+                mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN2 | mod_state(vo));
             break;
         case WM_MOUSEMOVE:
             vo_mouse_movement(vo, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
@@ -241,18 +241,18 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             if (!vo_nomouse_input) {
                 int x = GET_WHEEL_DELTA_WPARAM(wParam);
                 if (x > 0)
-                    mplayer_put_key(vo->key_fifo, MOUSE_BTN3 | mod_state(vo));
+                    mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN3 | mod_state(vo));
                 else
-                    mplayer_put_key(vo->key_fifo, MOUSE_BTN4 | mod_state(vo));
+                    mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN4 | mod_state(vo));
             }
             break;
         case WM_XBUTTONDOWN:
             if (!vo_nomouse_input) {
                 int x = HIWORD(wParam);
                 if (x == 1)
-                    mplayer_put_key(vo->key_fifo, MOUSE_BTN5 | mod_state(vo));
+                    mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN5 | mod_state(vo));
                 else // if (x == 2)
-                    mplayer_put_key(vo->key_fifo, MOUSE_BTN6 | mod_state(vo));
+                    mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN6 | mod_state(vo));
             }
             break;
     }
@@ -302,7 +302,7 @@ int vo_w32_check_events(struct vo *vo)
             MoveWindow(w32->window, 0, 0, r.right, r.bottom, FALSE);
         if (!IsWindow(WIN_ID_TO_HWND(WinID)))
             // Window has probably been closed, e.g. due to program crash
-            mplayer_put_key(vo->key_fifo, KEY_CLOSE_WIN);
+            mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
     }
 
     return w32->event_flags;

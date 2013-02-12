@@ -44,8 +44,8 @@ struct mp_fifo *mp_fifo_create(struct input_ctx *input, struct MPOpts *opts)
 
 static void put_double(struct mp_fifo *fifo, int code)
 {
-  if (code >= MOUSE_BTN0 && code <= MOUSE_BTN2)
-      mp_input_feed_key(fifo->input, code - MOUSE_BTN0 + MOUSE_BTN0_DBL);
+  if (code >= MP_MOUSE_BTN0 && code <= MP_MOUSE_BTN2)
+      mp_input_feed_key(fifo->input, code - MP_MOUSE_BTN0 + MP_MOUSE_BTN0_DBL);
 }
 
 void mplayer_put_key(struct mp_fifo *fifo, int code)
@@ -54,12 +54,12 @@ void mplayer_put_key(struct mp_fifo *fifo, int code)
     int doubleclick_time = fifo->opts->doubleclick_time;
     // ignore system-doubleclick if we generate these events ourselves
     if (doubleclick_time
-        && (code & ~MP_KEY_DOWN) >= MOUSE_BTN0_DBL
-        && (code & ~MP_KEY_DOWN) < MOUSE_BTN_DBL_END)
+        && (code & ~MP_KEY_STATE_DOWN) >= MP_MOUSE_BTN0_DBL
+        && (code & ~MP_KEY_STATE_DOWN) < MP_MOUSE_BTN_DBL_END)
         return;
     mp_input_feed_key(fifo->input, code);
-    if (code & MP_KEY_DOWN) {
-        code &= ~MP_KEY_DOWN;
+    if (code & MP_KEY_STATE_DOWN) {
+        code &= ~MP_KEY_STATE_DOWN;
         if (fifo->last_key_down == code
             && now - fifo->last_down_time < doubleclick_time)
             put_double(fifo, code);

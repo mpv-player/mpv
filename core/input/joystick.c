@@ -137,18 +137,18 @@ int mp_input_joystick_read(void *ctx, int fd) {
     btns &= ~(1 << ev.number);
     btns |= (ev.value << ev.number);
     if(ev.value == 1)
-      return (JOY_BTN0 + ev.number) | MP_KEY_DOWN;
+      return (MP_JOY_BTN0 + ev.number) | MP_KEY_STATE_DOWN;
     else
-      return JOY_BTN0 + ev.number;
+      return MP_JOY_BTN0 + ev.number;
   } else if(ev.type & JS_EVENT_AXIS) {
     if(ev.value < -JOY_AXIS_DELTA && axis[ev.number] != -1) {
       axis[ev.number] = -1;
-      return (JOY_AXIS0_MINUS+(2*ev.number)) | MP_KEY_DOWN;
+      return (MP_JOY_AXIS0_MINUS+(2*ev.number)) | MP_KEY_STATE_DOWN;
     } else if(ev.value > JOY_AXIS_DELTA && axis[ev.number] != 1) {
       axis[ev.number] = 1;
-      return (JOY_AXIS0_PLUS+(2*ev.number)) | MP_KEY_DOWN;
+      return (MP_JOY_AXIS0_PLUS+(2*ev.number)) | MP_KEY_STATE_DOWN;
     } else if(ev.value <= JOY_AXIS_DELTA && ev.value >= -JOY_AXIS_DELTA && axis[ev.number] != 0) {
-      int r = axis[ev.number] == 1 ? JOY_AXIS0_PLUS+(2*ev.number) : JOY_AXIS0_MINUS+(2*ev.number);
+      int r = axis[ev.number] == 1 ? MP_JOY_AXIS0_PLUS+(2*ev.number) : MP_JOY_AXIS0_MINUS+(2*ev.number);
       axis[ev.number] = 0;
       return r;
     } else

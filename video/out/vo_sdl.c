@@ -98,70 +98,70 @@ struct keymap_entry {
     int mpv;
 };
 const struct keymap_entry keys[] = {
-    {SDLK_RETURN, KEY_ENTER},
-    {SDLK_ESCAPE, KEY_ESC},
-    {SDLK_BACKSPACE, KEY_BACKSPACE},
-    {SDLK_TAB, KEY_TAB},
-    {SDLK_PRINTSCREEN, KEY_PRINT},
-    {SDLK_PAUSE, KEY_PAUSE},
-    {SDLK_INSERT, KEY_INSERT},
-    {SDLK_HOME, KEY_HOME},
-    {SDLK_PAGEUP, KEY_PAGE_UP},
-    {SDLK_DELETE, KEY_DELETE},
-    {SDLK_END, KEY_END},
-    {SDLK_PAGEDOWN, KEY_PAGE_DOWN},
-    {SDLK_RIGHT, KEY_RIGHT},
-    {SDLK_LEFT, KEY_LEFT},
-    {SDLK_DOWN, KEY_DOWN},
-    {SDLK_UP, KEY_UP},
-    {SDLK_KP_ENTER, KEY_KPENTER},
-    {SDLK_KP_1, KEY_KP1},
-    {SDLK_KP_2, KEY_KP2},
-    {SDLK_KP_3, KEY_KP3},
-    {SDLK_KP_4, KEY_KP4},
-    {SDLK_KP_5, KEY_KP5},
-    {SDLK_KP_6, KEY_KP6},
-    {SDLK_KP_7, KEY_KP7},
-    {SDLK_KP_8, KEY_KP8},
-    {SDLK_KP_9, KEY_KP9},
-    {SDLK_KP_0, KEY_KP0},
-    {SDLK_KP_PERIOD, KEY_KPDEC},
-    {SDLK_POWER, KEY_POWER},
-    {SDLK_MENU, KEY_MENU},
-    {SDLK_STOP, KEY_STOP},
-    {SDLK_MUTE, KEY_MUTE},
-    {SDLK_VOLUMEUP, KEY_VOLUME_UP},
-    {SDLK_VOLUMEDOWN, KEY_VOLUME_DOWN},
-    {SDLK_KP_COMMA, KEY_KPDEC},
-    {SDLK_AUDIONEXT, KEY_NEXT},
-    {SDLK_AUDIOPREV, KEY_PREV},
-    {SDLK_AUDIOSTOP, KEY_STOP},
-    {SDLK_AUDIOPLAY, KEY_PLAY},
-    {SDLK_AUDIOMUTE, KEY_MUTE},
-    {SDLK_F1, KEY_F + 1},
-    {SDLK_F2, KEY_F + 2},
-    {SDLK_F3, KEY_F + 3},
-    {SDLK_F4, KEY_F + 4},
-    {SDLK_F5, KEY_F + 5},
-    {SDLK_F6, KEY_F + 6},
-    {SDLK_F7, KEY_F + 7},
-    {SDLK_F8, KEY_F + 8},
-    {SDLK_F9, KEY_F + 9},
-    {SDLK_F10, KEY_F + 10},
-    {SDLK_F11, KEY_F + 11},
-    {SDLK_F12, KEY_F + 12},
-    {SDLK_F13, KEY_F + 13},
-    {SDLK_F14, KEY_F + 14},
-    {SDLK_F15, KEY_F + 15},
-    {SDLK_F16, KEY_F + 16},
-    {SDLK_F17, KEY_F + 17},
-    {SDLK_F18, KEY_F + 18},
-    {SDLK_F19, KEY_F + 19},
-    {SDLK_F20, KEY_F + 20},
-    {SDLK_F21, KEY_F + 21},
-    {SDLK_F22, KEY_F + 22},
-    {SDLK_F23, KEY_F + 23},
-    {SDLK_F24, KEY_F + 24}
+    {SDLK_RETURN, MP_KEY_ENTER},
+    {SDLK_ESCAPE, MP_KEY_ESC},
+    {SDLK_BACKSPACE, MP_KEY_BACKSPACE},
+    {SDLK_TAB, MP_KEY_TAB},
+    {SDLK_PRINTSCREEN, MP_KEY_PRINT},
+    {SDLK_PAUSE, MP_KEY_PAUSE},
+    {SDLK_INSERT, MP_KEY_INSERT},
+    {SDLK_HOME, MP_KEY_HOME},
+    {SDLK_PAGEUP, MP_KEY_PAGE_UP},
+    {SDLK_DELETE, MP_KEY_DELETE},
+    {SDLK_END, MP_KEY_END},
+    {SDLK_PAGEDOWN, MP_KEY_PAGE_DOWN},
+    {SDLK_RIGHT, MP_KEY_RIGHT},
+    {SDLK_LEFT, MP_KEY_LEFT},
+    {SDLK_DOWN, MP_KEY_DOWN},
+    {SDLK_UP, MP_KEY_UP},
+    {SDLK_KP_ENTER, MP_KEY_KPENTER},
+    {SDLK_KP_1, MP_KEY_KP1},
+    {SDLK_KP_2, MP_KEY_KP2},
+    {SDLK_KP_3, MP_KEY_KP3},
+    {SDLK_KP_4, MP_KEY_KP4},
+    {SDLK_KP_5, MP_KEY_KP5},
+    {SDLK_KP_6, MP_KEY_KP6},
+    {SDLK_KP_7, MP_KEY_KP7},
+    {SDLK_KP_8, MP_KEY_KP8},
+    {SDLK_KP_9, MP_KEY_KP9},
+    {SDLK_KP_0, MP_KEY_KP0},
+    {SDLK_KP_PERIOD, MP_KEY_KPDEC},
+    {SDLK_POWER, MP_KEY_POWER},
+    {SDLK_MENU, MP_KEY_MENU},
+    {SDLK_STOP, MP_KEY_STOP},
+    {SDLK_MUTE, MP_KEY_MUTE},
+    {SDLK_VOLUMEUP, MP_KEY_VOLUME_UP},
+    {SDLK_VOLUMEDOWN, MP_KEY_VOLUME_DOWN},
+    {SDLK_KP_COMMA, MP_KEY_KPDEC},
+    {SDLK_AUDIONEXT, MP_KEY_NEXT},
+    {SDLK_AUDIOPREV, MP_KEY_PREV},
+    {SDLK_AUDIOSTOP, MP_KEY_STOP},
+    {SDLK_AUDIOPLAY, MP_KEY_PLAY},
+    {SDLK_AUDIOMUTE, MP_KEY_MUTE},
+    {SDLK_F1, MP_KEY_F + 1},
+    {SDLK_F2, MP_KEY_F + 2},
+    {SDLK_F3, MP_KEY_F + 3},
+    {SDLK_F4, MP_KEY_F + 4},
+    {SDLK_F5, MP_KEY_F + 5},
+    {SDLK_F6, MP_KEY_F + 6},
+    {SDLK_F7, MP_KEY_F + 7},
+    {SDLK_F8, MP_KEY_F + 8},
+    {SDLK_F9, MP_KEY_F + 9},
+    {SDLK_F10, MP_KEY_F + 10},
+    {SDLK_F11, MP_KEY_F + 11},
+    {SDLK_F12, MP_KEY_F + 12},
+    {SDLK_F13, MP_KEY_F + 13},
+    {SDLK_F14, MP_KEY_F + 14},
+    {SDLK_F15, MP_KEY_F + 15},
+    {SDLK_F16, MP_KEY_F + 16},
+    {SDLK_F17, MP_KEY_F + 17},
+    {SDLK_F18, MP_KEY_F + 18},
+    {SDLK_F19, MP_KEY_F + 19},
+    {SDLK_F20, MP_KEY_F + 20},
+    {SDLK_F21, MP_KEY_F + 21},
+    {SDLK_F22, MP_KEY_F + 22},
+    {SDLK_F23, MP_KEY_F + 23},
+    {SDLK_F24, MP_KEY_F + 24}
 };
 
 struct priv {
@@ -505,7 +505,7 @@ static void check_events(struct vo *vo)
             }
             break;
         case SDL_QUIT:
-            mplayer_put_key(vo->key_fifo, KEY_CLOSE_WIN);
+            mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
             break;
         case SDL_TEXTINPUT: {
             int sdl_mod = SDL_GetModState();
@@ -513,11 +513,11 @@ static void check_events(struct vo *vo)
             // we ignore KMOD_LSHIFT, KMOD_RSHIFT and KMOD_RALT because
             // these are already factored into ev.text.text
             if (sdl_mod & (KMOD_LCTRL | KMOD_RCTRL))
-                mpv_mod |= KEY_MODIFIER_CTRL;
+                mpv_mod |= MP_KEY_MODIFIER_CTRL;
             if (sdl_mod & KMOD_LALT)
-                mpv_mod |= KEY_MODIFIER_ALT;
+                mpv_mod |= MP_KEY_MODIFIER_ALT;
             if (sdl_mod & (KMOD_LGUI | KMOD_RGUI))
-                mpv_mod |= KEY_MODIFIER_META;
+                mpv_mod |= MP_KEY_MODIFIER_META;
             struct bstr t = {
                 ev.text.text, strlen(ev.text.text)
             };
@@ -542,13 +542,13 @@ static void check_events(struct vo *vo)
                 }
             if (keycode) {
                 if (ev.key.keysym.mod & (KMOD_LSHIFT | KMOD_RSHIFT))
-                    keycode |= KEY_MODIFIER_SHIFT;
+                    keycode |= MP_KEY_MODIFIER_SHIFT;
                 if (ev.key.keysym.mod & (KMOD_LCTRL | KMOD_RCTRL))
-                    keycode |= KEY_MODIFIER_CTRL;
+                    keycode |= MP_KEY_MODIFIER_CTRL;
                 if (ev.key.keysym.mod & (KMOD_LALT | KMOD_RALT))
-                    keycode |= KEY_MODIFIER_ALT;
+                    keycode |= MP_KEY_MODIFIER_ALT;
                 if (ev.key.keysym.mod & (KMOD_LGUI | KMOD_RGUI))
-                    keycode |= KEY_MODIFIER_META;
+                    keycode |= MP_KEY_MODIFIER_META;
                 mplayer_put_key(vo->key_fifo, keycode);
             }
             break;
@@ -568,7 +568,7 @@ static void check_events(struct vo *vo)
                 vc->mouse_timer = GetTimerMS();
             }
             mplayer_put_key(vo->key_fifo,
-                            (MOUSE_BTN0 + ev.button.button - 1) | MP_KEY_DOWN);
+                (MP_MOUSE_BTN0 + ev.button.button - 1) | MP_KEY_STATE_DOWN);
             break;
         case SDL_MOUSEBUTTONUP:
             if (opts->cursor_autohide_delay >= 0) {
@@ -577,7 +577,7 @@ static void check_events(struct vo *vo)
                 vc->mouse_timer = GetTimerMS();
             }
             mplayer_put_key(vo->key_fifo,
-                            (MOUSE_BTN0 + ev.button.button - 1));
+                            (MP_MOUSE_BTN0 + ev.button.button - 1));
             break;
         case SDL_MOUSEWHEEL:
             break;

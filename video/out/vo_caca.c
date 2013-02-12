@@ -212,22 +212,22 @@ static void set_next_str(const char * const *list, const char **str,
 }
 
 static const struct mp_keymap keysym_map[] = {
-    {CACA_KEY_RETURN, KEY_ENTER}, {CACA_KEY_ESCAPE, KEY_ESC},
-    {CACA_KEY_UP, KEY_DOWN}, {CACA_KEY_DOWN, KEY_DOWN},
-    {CACA_KEY_LEFT, KEY_LEFT}, {CACA_KEY_RIGHT, KEY_RIGHT},
-    {CACA_KEY_PAGEUP, KEY_PAGE_UP}, {CACA_KEY_PAGEDOWN, KEY_PAGE_DOWN},
-    {CACA_KEY_HOME, KEY_HOME}, {CACA_KEY_END, KEY_END},
-    {CACA_KEY_INSERT, KEY_INSERT}, {CACA_KEY_DELETE, KEY_DELETE},
-    {CACA_KEY_BACKSPACE, KEY_BACKSPACE}, {CACA_KEY_TAB, KEY_TAB},
-    {CACA_KEY_PAUSE, KEY_PAUSE},
-    {CACA_KEY_F1, KEY_F+1}, {CACA_KEY_F2, KEY_F+2},
-    {CACA_KEY_F3, KEY_F+3}, {CACA_KEY_F4, KEY_F+4},
-    {CACA_KEY_F5, KEY_F+5}, {CACA_KEY_F6, KEY_F+6},
-    {CACA_KEY_F7, KEY_F+7}, {CACA_KEY_F8, KEY_F+8},
-    {CACA_KEY_F9, KEY_F+9}, {CACA_KEY_F10, KEY_F+10},
-    {CACA_KEY_F11, KEY_F+11}, {CACA_KEY_F12, KEY_F+12},
-    {CACA_KEY_F13, KEY_F+13}, {CACA_KEY_F14, KEY_F+14},
-    {CACA_KEY_F15, KEY_F+15},
+    {CACA_KEY_RETURN, MP_KEY_ENTER}, {CACA_KEY_ESCAPE, MP_KEY_ESC},
+    {CACA_KEY_UP, MP_KEY_UP}, {CACA_KEY_DOWN, MP_KEY_DOWN},
+    {CACA_KEY_LEFT, MP_KEY_LEFT}, {CACA_KEY_RIGHT, MP_KEY_RIGHT},
+    {CACA_KEY_PAGEUP, MP_KEY_PAGE_UP}, {CACA_KEY_PAGEDOWN, MP_KEY_PAGE_DOWN},
+    {CACA_KEY_HOME, MP_KEY_HOME}, {CACA_KEY_END, MP_KEY_END},
+    {CACA_KEY_INSERT, MP_KEY_INSERT}, {CACA_KEY_DELETE, MP_KEY_DELETE},
+    {CACA_KEY_BACKSPACE, MP_KEY_BACKSPACE}, {CACA_KEY_TAB, MP_KEY_TAB},
+    {CACA_KEY_PAUSE, MP_KEY_PAUSE},
+    {CACA_KEY_F1, MP_KEY_F+1}, {CACA_KEY_F2, MP_KEY_F+2},
+    {CACA_KEY_F3, MP_KEY_F+3}, {CACA_KEY_F4, MP_KEY_F+4},
+    {CACA_KEY_F5, MP_KEY_F+5}, {CACA_KEY_F6, MP_KEY_F+6},
+    {CACA_KEY_F7, MP_KEY_F+7}, {CACA_KEY_F8, MP_KEY_F+8},
+    {CACA_KEY_F9, MP_KEY_F+9}, {CACA_KEY_F10, MP_KEY_F+10},
+    {CACA_KEY_F11, MP_KEY_F+11}, {CACA_KEY_F12, MP_KEY_F+12},
+    {CACA_KEY_F13, MP_KEY_F+13}, {CACA_KEY_F14, MP_KEY_F+14},
+    {CACA_KEY_F15, MP_KEY_F+15},
     {0, 0}
 };
 
@@ -242,7 +242,7 @@ static void check_events(struct vo *vo)
             resize();
             break;
         case CACA_EVENT_QUIT:
-            mplayer_put_key(vo->key_fifo, KEY_CLOSE_WIN);
+            mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
             break;
         case CACA_EVENT_MOUSE_MOTION:
             vo_mouse_movement(vo, cev.data.mouse.x, cev.data.mouse.y);
@@ -250,12 +250,12 @@ static void check_events(struct vo *vo)
         case CACA_EVENT_MOUSE_PRESS:
             if (!vo_nomouse_input)
                 mplayer_put_key(vo->key_fifo,
-                        (MOUSE_BTN0 + cev.data.mouse.button - 1) | MP_KEY_DOWN);
+                    (MP_MOUSE_BTN0 + cev.data.mouse.button - 1) | MP_KEY_STATE_DOWN);
             break;
         case CACA_EVENT_MOUSE_RELEASE:
             if (!vo_nomouse_input)
                 mplayer_put_key(vo->key_fifo,
-                                MOUSE_BTN0 + cev.data.mouse.button - 1);
+                                MP_MOUSE_BTN0 + cev.data.mouse.button - 1);
             break;
         case CACA_EVENT_KEY_PRESS:
         {

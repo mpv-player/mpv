@@ -39,8 +39,6 @@
 
 #include "core/mp_msg.h"
 
-// keycodes.h defines would conflict with linux/input.h ones
-#define AR_DEFINES_ONLY
 #include "keycodes.h"
 
 #define EVDEV_MAX_EVENTS 32
@@ -63,16 +61,16 @@ static const struct {
   int value;
   int mp_keycode;
 } apple_ir_mapping[] = {
-  { APPLE_IR_PLAY,              1,   AR_PLAY      },
-  { APPLE_IR_PLAY,              2,   AR_PLAY_HOLD },
-  { APPLE_IR_FORWARD,           1,   AR_NEXT      },
-  { APPLE_IR_FORWARD,           2,   AR_NEXT_HOLD },
-  { APPLE_IR_BACKWARD,          1,   AR_PREV      },
-  { APPLE_IR_BACKWARD,          2,   AR_PREV_HOLD },
-  { APPLE_IR_MENU,              1,   AR_MENU      },
-  { APPLE_IR_MENU,              2,   AR_MENU_HOLD },
-  { APPLE_IR_PLUS,              1,   AR_VUP       },
-  { APPLE_IR_MINUS,             1,   AR_VDOWN     },
+  { APPLE_IR_PLAY,              1,   MP_AR_PLAY      },
+  { APPLE_IR_PLAY,              2,   MP_AR_PLAY_HOLD },
+  { APPLE_IR_FORWARD,           1,   MP_AR_NEXT      },
+  { APPLE_IR_FORWARD,           2,   MP_AR_NEXT_HOLD },
+  { APPLE_IR_BACKWARD,          1,   MP_AR_PREV      },
+  { APPLE_IR_BACKWARD,          2,   MP_AR_PREV_HOLD },
+  { APPLE_IR_MENU,              1,   MP_AR_MENU      },
+  { APPLE_IR_MENU,              2,   MP_AR_MENU_HOLD },
+  { APPLE_IR_PLUS,              1,   MP_AR_VUP       },
+  { APPLE_IR_MINUS,             1,   MP_AR_VDOWN     },
   { -1,                        -1,   -1           }
 };
 

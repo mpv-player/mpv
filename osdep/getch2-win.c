@@ -108,37 +108,37 @@ static int getch2_internal(void)
 					switch(eventbuffer[i].Event.KeyEvent.wVirtualKeyCode)
 					{
 					case VK_HOME:
-						return KEY_HOME;
+						return MP_KEY_HOME;
 					case VK_END:
-						return KEY_END;
+						return MP_KEY_END;
 					case VK_DELETE:
-						return KEY_DEL;
+						return MP_KEY_DEL;
                     case VK_INSERT:
-						return KEY_INS;
+						return MP_KEY_INS;
 					case VK_BACK:
-						return KEY_BS;
+						return MP_KEY_BS;
 					case VK_PRIOR:
-						return KEY_PGUP;
+						return MP_KEY_PGUP;
 					case VK_NEXT:
-						return KEY_PGDWN;
+						return MP_KEY_PGDWN;
 					case VK_RETURN:
-						return KEY_ENTER;
+						return MP_KEY_ENTER;
 					case VK_ESCAPE:
-						return KEY_ESC;
+						return MP_KEY_ESC;
 					case VK_LEFT:
-						return KEY_LEFT;
+						return MP_KEY_LEFT;
 					case VK_UP:
-						return KEY_UP;
+						return MP_KEY_UP;
 					case VK_RIGHT:
-						return KEY_RIGHT;
+						return MP_KEY_RIGHT;
 					case VK_DOWN:
-						return KEY_DOWN;
+						return MP_KEY_DOWN;
                     case VK_SHIFT:
                         continue;
 					}
 					/*check for function keys*/
         			if(0x87 >= eventbuffer[i].Event.KeyEvent.wVirtualKeyCode && eventbuffer[i].Event.KeyEvent.wVirtualKeyCode >= 0x70)
-						return KEY_F + 1 + eventbuffer[i].Event.KeyEvent.wVirtualKeyCode - 0x70;
+						return MP_KEY_F + 1 + eventbuffer[i].Event.KeyEvent.wVirtualKeyCode - 0x70;
 
 					/*only characters should be remaining*/
 					//printf("getch2: YOU PRESSED \"%c\" \n",eventbuffer[i].Event.KeyEvent.uChar.AsciiChar);

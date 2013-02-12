@@ -79,30 +79,30 @@
 
 static const struct mp_keymap keymap[] = {
     // special keys
-    {0x34, KEY_ENTER}, // Enter key on some iBooks?
-    {kVK_Return, KEY_ENTER},
-    {kVK_Escape, KEY_ESC},
-    {kVK_Delete, KEY_BACKSPACE}, {kVK_Option, KEY_BACKSPACE}, {kVK_Control, KEY_BACKSPACE}, {kVK_Shift, KEY_BACKSPACE},
-    {kVK_Tab, KEY_TAB},
+    {0x34, MP_KEY_ENTER}, // Enter key on some iBooks?
+    {kVK_Return, MP_KEY_ENTER},
+    {kVK_Escape, MP_KEY_ESC},
+    {kVK_Delete, MP_KEY_BACKSPACE}, {kVK_Option, MP_KEY_BACKSPACE}, {kVK_Control, MP_KEY_BACKSPACE}, {kVK_Shift, MP_KEY_BACKSPACE},
+    {kVK_Tab, MP_KEY_TAB},
 
     // cursor keys
-    {kVK_UpArrow, KEY_UP}, {kVK_DownArrow, KEY_DOWN}, {kVK_LeftArrow, KEY_LEFT}, {kVK_RightArrow, KEY_RIGHT},
+    {kVK_UpArrow, MP_KEY_UP}, {kVK_DownArrow, MP_KEY_DOWN}, {kVK_LeftArrow, MP_KEY_LEFT}, {kVK_RightArrow, MP_KEY_RIGHT},
 
     // navigation block
-    {kVK_Help, KEY_INSERT}, {kVK_ForwardDelete, KEY_DELETE}, {kVK_Home, KEY_HOME},
-    {kVK_End, KEY_END}, {kVK_PageUp, KEY_PAGE_UP}, {kVK_PageDown, KEY_PAGE_DOWN},
+    {kVK_Help, MP_KEY_INSERT}, {kVK_ForwardDelete, MP_KEY_DELETE}, {kVK_Home, MP_KEY_HOME},
+    {kVK_End, MP_KEY_END}, {kVK_PageUp, MP_KEY_PAGE_UP}, {kVK_PageDown, MP_KEY_PAGE_DOWN},
 
     // F-keys
-    {kVK_F1, KEY_F + 1}, {kVK_F2, KEY_F + 2}, {kVK_F3, KEY_F + 3}, {kVK_F4, KEY_F + 4},
-    {kVK_F5, KEY_F + 5}, {kVK_F6, KEY_F + 6}, {kVK_F7, KEY_F + 7}, {kVK_F8, KEY_F + 8},
-    {kVK_F9, KEY_F + 9}, {kVK_F10, KEY_F + 10}, {kVK_F11, KEY_F + 11}, {kVK_F12, KEY_F + 12},
+    {kVK_F1, MP_KEY_F + 1}, {kVK_F2, MP_KEY_F + 2}, {kVK_F3, MP_KEY_F + 3}, {kVK_F4, MP_KEY_F + 4},
+    {kVK_F5, MP_KEY_F + 5}, {kVK_F6, MP_KEY_F + 6}, {kVK_F7, MP_KEY_F + 7}, {kVK_F8, MP_KEY_F + 8},
+    {kVK_F9, MP_KEY_F + 9}, {kVK_F10, MP_KEY_F + 10}, {kVK_F11, MP_KEY_F + 11}, {kVK_F12, MP_KEY_F + 12},
 
     // numpad
     {kVK_ANSI_KeypadPlus, '+'}, {kVK_ANSI_KeypadMinus, '-'}, {kVK_ANSI_KeypadMultiply, '*'},
-    {kVK_ANSI_KeypadDivide, '/'}, {kVK_ANSI_KeypadEnter, KEY_KPENTER}, {kVK_ANSI_KeypadDecimal, KEY_KPDEC},
-    {kVK_ANSI_Keypad0, KEY_KP0}, {kVK_ANSI_Keypad1, KEY_KP1}, {kVK_ANSI_Keypad2, KEY_KP2}, {kVK_ANSI_Keypad3, KEY_KP3},
-    {kVK_ANSI_Keypad4, KEY_KP4}, {kVK_ANSI_Keypad5, KEY_KP5}, {kVK_ANSI_Keypad6, KEY_KP6}, {kVK_ANSI_Keypad7, KEY_KP7},
-    {kVK_ANSI_Keypad8, KEY_KP8}, {kVK_ANSI_Keypad9, KEY_KP9},
+    {kVK_ANSI_KeypadDivide, '/'}, {kVK_ANSI_KeypadEnter, MP_KEY_KPENTER}, {kVK_ANSI_KeypadDecimal, MP_KEY_KPDEC},
+    {kVK_ANSI_Keypad0, MP_KEY_KP0}, {kVK_ANSI_Keypad1, MP_KEY_KP1}, {kVK_ANSI_Keypad2, MP_KEY_KP2}, {kVK_ANSI_Keypad3, MP_KEY_KP3},
+    {kVK_ANSI_Keypad4, MP_KEY_KP4}, {kVK_ANSI_Keypad5, MP_KEY_KP5}, {kVK_ANSI_Keypad6, MP_KEY_KP6}, {kVK_ANSI_Keypad7, MP_KEY_KP7},
+    {kVK_ANSI_Keypad8, MP_KEY_KP8}, {kVK_ANSI_Keypad9, MP_KEY_KP9},
 
     {0, 0}
 };
