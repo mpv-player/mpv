@@ -31,7 +31,7 @@ char *mp_format_time(double time, bool fractions)
         sign[0] = '-';
     }
     long long int itime = time;
-    int64_t h, m, s;
+    long long int h, m, s;
     s = itime;
     h = s / 3600;
     s -= h * 3600;
