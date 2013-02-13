@@ -2872,6 +2872,12 @@ static int seek(MPContext *mpctx, struct seek_params seek,
     } else
         mpctx->last_seek_pts = MP_NOPTS_VALUE;
 
+    // The hr_seek==false case is for skipping frames with PTS before the
+    // current timeline chapter start. It's not really known where the demuxer
+    // level seek will end up, so the hrseek mechanism is abused to skip all
+    // frames before chapter start by setting hrseek_pts to the chapter start.
+    // It does nothing when the seek is inside of the current chapter, and
+    // seeking past the chapter is handled elsewhere.
     if (hr_seek || mpctx->timeline) {
         mpctx->hrseek_active = true;
         mpctx->hrseek_framedrop = true;
@@ -2958,15 +2964,15 @@ double get_current_time(struct MPContext *mpctx)
         return 0;
     if (demuxer->stream_pts != MP_NOPTS_VALUE)
         return demuxer->stream_pts;
-    if (mpctx->hrseek_active)
-        return mpctx->hrseek_pts;
-    double apts = playing_audio_pts(mpctx);
-    if (apts != MP_NOPTS_VALUE)
-        return apts;
-    if (mpctx->sh_video) {
-        double pts = mpctx->video_pts;
-        if (pts != MP_NOPTS_VALUE)
-            return pts;
+    if (!mpctx->restart_playback) {
+        double apts = playing_audio_pts(mpctx);
+        if (apts != MP_NOPTS_VALUE)
+            return apts;
+        if (mpctx->sh_video) {
+            double pts = mpctx->video_pts;
+            if (pts != MP_NOPTS_VALUE)
+                return pts;
+        }
     }
     if (mpctx->last_seek_pts != MP_NOPTS_VALUE)
         return mpctx->last_seek_pts;
