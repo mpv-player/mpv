@@ -192,7 +192,7 @@ void uninit_video(sh_video_t *sh_video)
 
 static int init_video_codec(sh_video_t *sh_video, const char *decoder)
 {
-    assert(!sh_video->vf_initialized);
+    assert(!sh_video->initialized);
 
     if (!sh_video->vd_driver->init(sh_video, decoder)) {
         mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Video decoder init failed.\n");
