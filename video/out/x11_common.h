@@ -122,10 +122,11 @@ uint32_t vo_x11_get_equalizer(struct vo *vo, const char *name, int *value);
 bool vo_x11_screen_is_composited(struct vo *vo);
 void fstype_help(void);
 void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
-        int x, int y, unsigned int width, unsigned int height, int flags,
-        const char *classname);
+                             int x, int y, unsigned int width,
+                             unsigned int height, int flags,
+                             const char *classname);
 void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
-	int img_width, int img_height);
+                             int img_width, int img_height);
 void vo_x11_clearwindow(struct vo *vo, Window vo_window);
 void vo_x11_ontop(struct vo *vo);
 void vo_x11_border(struct vo *vo);
