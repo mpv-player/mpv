@@ -499,6 +499,8 @@ const m_option_t common_opts[] = {
     OPT_INTRANGE("ass-hinting", ass_hinting, 0, 0, 7),
     OPT_CHOICE("ass-style-override", ass_style_override, 0,
                ({"no", 0}, {"yes", 1})),
+    OPT_FLOATRANGE("osd-bar-align-x", osd_bar_align_x, 0, -1.0, +1.0),
+    OPT_FLOATRANGE("osd-bar-align-y", osd_bar_align_y, 0, -1.0, +1.0),
     OPT_GENERAL("osd", osd_style, M_OPT_PREFIXED,
                 .type = &m_option_type_subconfig_struct,
                 .priv = (void*)&osd_style_conf),

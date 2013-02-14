@@ -1288,6 +1288,12 @@
     search for video segments from other files, and will also ignore any
     chapter order specified for the main file.
 
+--osd-bar-align-x=<-1..1>
+    Position of the OSD bar. -1 is far left, 0 is centered, 1 is far right.
+
+--osd-bar-align-y=<-1..1>
+    Position of the OSD bar. -1 is top, 0 is centered, 1 is bottom.
+
 --osd-back-color=<#RRGGBB>, --sub-text-back-color=<#RRGGBB>
     See ``--osd-color``. Color used for OSD/sub text background.
 

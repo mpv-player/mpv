@@ -155,10 +155,23 @@ static void update_osd(struct osd_state *osd, struct osd_object *obj)
     talloc_free(text);
 }
 
+static int get_align(float val, int res, int *out_margin)
+{
+    *out_margin = FFMAX(0, (1.0 - fabs(val)) * res / 2);
+    if (fabs(val) < 0.1)
+        return 1; // centered
+    return val > 0 ? 2 : 0; // bottom / top (or right / left)
+}
+
+static const int ass_align_x[3] = {1, 2, 3};
+static const int ass_align_y[3] = {4, 8, 0};
+
 #define OSDBAR_ELEMS 46
 
 static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 {
+    struct MPOpts *opts = osd->opts;
+
     if (osd->progbar_type < 0) {
         clear_obj(obj);
         return;
@@ -169,8 +182,12 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 
     ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
 
-    style->Alignment = 10; // all centered
-    style->MarginL = style->MarginR = style->MarginV = 0;
+    int ax = get_align(opts->osd_bar_align_x, obj->osd_track->PlayResX,
+                       &style->MarginR);
+    int ay = get_align(opts->osd_bar_align_y, obj->osd_track->PlayResY,
+                       &style->MarginV);
+    style->Alignment = ass_align_x[ax] + ass_align_y[ay];
+    style->MarginL = style->MarginR;
 
     // We need a fixed font size with respect to the OSD width.
     // Assume the OSD bar takes 2/3 of the OSD width at PlayResY=288 and
