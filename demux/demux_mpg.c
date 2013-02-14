@@ -572,6 +572,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
           len-=3;
           if(len<=0) mp_msg(MSGT_DEMUX,MSGL_V,"End of packet while searching for PCM header\n");
           dvdpcm_header((sh_audio_t*)(ds->sh));
+          mp_set_audio_codec_from_tag((sh_audio_t*)(ds->sh));
         }
 //        printf("  \n");
       } //  if(demux->audio->id==aid)
