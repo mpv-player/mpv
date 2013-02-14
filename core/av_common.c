@@ -17,6 +17,8 @@
 
 #include <assert.h>
 
+#include <libavutil/common.h>
+
 #include "config.h"
 #include "core/mp_talloc.h"
 #include "av_common.h"
