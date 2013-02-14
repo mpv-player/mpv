@@ -598,6 +598,7 @@ static void allocate_xvimage(struct vo *vo, int foo)
         XSync(x11->display, False);
     }
     struct mp_image img = get_xv_buffer(vo, foo);
+    img.w = aligned_w;
     mp_image_clear(&img, 0, 0, img.w, img.h);
     return;
 }
