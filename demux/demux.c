@@ -574,6 +574,32 @@ void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len,
     ds_add_packet(ds, dp);
 }
 
+static bool demux_check_queue_full(demuxer_t *demux)
+{
+    int apacks = demux->audio ? demux->audio->packs : 0;
+    int abytes = demux->audio ? demux->audio->bytes : 0;
+    int vpacks = demux->video ? demux->video->packs : 0;
+    int vbytes = demux->video ? demux->video->bytes : 0;
+
+    if (apacks < MAX_PACKS && abytes < MAX_PACK_BYTES &&
+        vpacks < MAX_PACKS && vbytes < MAX_PACK_BYTES)
+        return false;
+
+    if (!demux->warned_queue_overflow) {
+        mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "\nToo many packets in the demuxer "
+                "packet queue (video: %d packets in %d bytes, audio: %d "
+                "packets in %d bytes).\n", vpacks, vbytes, apacks, abytes);
+        mp_tmsg(MSGT_DEMUXER, MSGL_HINT, "Maybe you are playing a non-"
+                "interleaved stream/file or the codec failed?\nFor AVI files, "
+                "try to force non-interleaved mode with the "
+                "--demuxer=avi --avi-ni options.\n");
+    }
+
+    demux->warned_queue_overflow = true;
+
+    return true;
+}
+
 // return value:
 //     0 = EOF or no stream found or invalid type
 //     1 = successfully read a packet
@@ -598,14 +624,10 @@ int ds_fill_buffer(demux_stream_t *ds)
            ds == demux->sub   ? "d_sub"   : "unknown");
     while (1) {
         int apacks = demux->audio ? demux->audio->packs : 0;
-        int abytes = demux->audio ? demux->audio->bytes : 0;
         int vpacks = demux->video ? demux->video->packs : 0;
         int vbytes = demux->video ? demux->video->bytes : 0;
         if (ds->packs) {
             demux_packet_t *p = ds->first;
-            // obviously not yet EOF after all
-            ds->eof = 0;
-            ds->fill_count = 0;
             // copy useful data:
             ds->buffer = p->buffer;
             ds->buffer_pos = 0;
@@ -636,6 +658,7 @@ int ds_fill_buffer(demux_stream_t *ds)
              * despite the eof flag then it's better to clear it to avoid
              * weird behavior. */
             ds->eof = 0;
+            ds->fill_count = 0;
             return 1;
         }
         // avoid buffering too far ahead in e.g. badly interleaved files
@@ -646,30 +669,16 @@ int ds_fill_buffer(demux_stream_t *ds)
         // with more than 1s precision.
         if (ds->fill_count > 80)
             break;
-        // avoid printing the "too many ..." message over and over
-        if (ds->eof)
+
+        if (demux_check_queue_full(demux))
             break;
 
-#define MaybeNI _("Maybe you are playing a non-interleaved stream/file or the codec failed?\n" \
-                "For AVI files, try to force non-interleaved mode with the --demuxer=avi --avi-ni options.\n")
-
-        if (apacks >= MAX_PACKS || abytes >= MAX_PACK_BYTES) {
-            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "\nToo many audio packets in the buffer: (%d in %d bytes).\n",
-                   apacks, abytes);
-            mp_tmsg(MSGT_DEMUXER, MSGL_HINT, MaybeNI);
-            break;
-        }
-        if (vpacks >= MAX_PACKS || vbytes >= MAX_PACK_BYTES) {
-            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "\nToo many video packets in the buffer: (%d in %d bytes).\n",
-                   vpacks, vbytes);
-            mp_tmsg(MSGT_DEMUXER, MSGL_HINT, MaybeNI);
-            break;
-        }
         if (!demux_fill_buffer(demux, ds)) {
             mp_dbg(MSGT_DEMUXER, MSGL_DBG2,
                    "ds_fill_buffer()->demux_fill_buffer() failed\n");
             break; // EOF
         }
+
         if (demux->audio)
             ds->fill_count += demux->audio->packs - apacks;
         if (demux->video && demux->video->packs > vpacks &&
@@ -835,20 +844,8 @@ double ds_get_next_pts(demux_stream_t *ds)
     // if we have not read from the "current" packet, consider it
     // as the next, otherwise we never get the pts for the first packet.
     while (!ds->first && (!ds->current || ds->buffer_pos)) {
-        if (demux->audio->packs >= MAX_PACKS
-            || demux->audio->bytes >= MAX_PACK_BYTES) {
-            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "\nToo many audio packets in the buffer: (%d in %d bytes).\n",
-                   demux->audio->packs, demux->audio->bytes);
-            mp_tmsg(MSGT_DEMUXER, MSGL_HINT, MaybeNI);
+        if (demux_check_queue_full(demux))
             return MP_NOPTS_VALUE;
-        }
-        if (demux->video->packs >= MAX_PACKS
-            || demux->video->bytes >= MAX_PACK_BYTES) {
-            mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "\nToo many video packets in the buffer: (%d in %d bytes).\n",
-                   demux->video->packs, demux->video->bytes);
-            mp_tmsg(MSGT_DEMUXER, MSGL_HINT, MaybeNI);
-            return MP_NOPTS_VALUE;
-        }
         if (!demux_fill_buffer(demux, ds))
             return MP_NOPTS_VALUE;
     }
@@ -1094,6 +1091,7 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
     demuxer->video->eof = 0;
     demuxer->audio->eof = 0;
     demuxer->sub->eof = 0;
+    demuxer->warned_queue_overflow = false;
 
     /* HACK: assume any demuxer used with these streams can cope with
      * the stream layer suddenly seeking to a different position under it

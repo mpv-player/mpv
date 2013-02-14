@@ -235,6 +235,7 @@ typedef struct demuxer {
      * that would make pts ambigious, preferably supports back/forward flags */
     bool accurate_seek;
     enum timestamp_type timestamp_type;
+    bool warned_queue_overflow;
 
     struct demux_stream *ds[STREAM_TYPE_COUNT]; // video/audio/sub buffers
 
