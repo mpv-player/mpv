@@ -425,7 +425,6 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     int picture_coding_type=0;
     int in_size=0;
     video_codec_t video_codec = find_video_codec(sh_video);
-    sh_video->needs_parsing = video_codec != VIDEO_OTHER;
 
     *start=NULL;
 
