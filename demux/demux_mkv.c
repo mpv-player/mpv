@@ -1314,6 +1314,8 @@ static struct mkv_audio_tag {
     { MKV_A_AAC_4LTP,  0, mmioFOURCC('M', 'P', '4', 'A') },
     { MKV_A_AAC,       0, mmioFOURCC('M', 'P', '4', 'A') },
     { MKV_A_VORBIS,    0, mmioFOURCC('v', 'r', 'b', 's') },
+    { MKV_A_OPUS,      0, mmioFOURCC('O', 'p', 'u', 's') },
+    { MKV_A_OPUS_EXP,  0, mmioFOURCC('O', 'p', 'u', 's') },
     { MKV_A_QDMC,      0, mmioFOURCC('Q', 'D', 'M', 'C') },
     { MKV_A_QDMC2,     0, mmioFOURCC('Q', 'D', 'M', '2') },
     { MKV_A_WAVPACK,   0, mmioFOURCC('W', 'V', 'P', 'K') },
@@ -1462,6 +1464,9 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
             memcpy((unsigned char *) (sh_a->wf + 1), track->private_data,
                    sh_a->wf->cbSize);
         }
+    } else if (!strcmp(track->codec_id, MKV_A_OPUS)
+               || !strcmp(track->codec_id, MKV_A_OPUS_EXP)) {
+        sh_a->format = mmioFOURCC('O', 'p', 'u', 's');
     } else if (!strncmp(track->codec_id, MKV_A_REALATRC, 7)) {
         if (track->private_size < RAPROPERTIES4_SIZE)
             goto error;

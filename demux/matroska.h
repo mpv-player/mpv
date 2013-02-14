@@ -41,6 +41,8 @@
 #define MKV_A_PCM        "A_PCM/INT/LIT"
 #define MKV_A_PCM_BE     "A_PCM/INT/BIG"
 #define MKV_A_VORBIS     "A_VORBIS"
+#define MKV_A_OPUS       "A_OPUS"
+#define MKV_A_OPUS_EXP   "A_OPUS/EXPERIMENTAL"
 #define MKV_A_ACM        "A_MS/ACM"
 #define MKV_A_REAL28     "A_REAL/28_8"
 #define MKV_A_REALATRC   "A_REAL/ATRC"
