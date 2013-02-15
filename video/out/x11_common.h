@@ -64,6 +64,14 @@ struct vo_x11_state {
     int vo_old_width;
     int vo_old_height;
 
+    // Current actual window position (updated on window move/resize events).
+    int win_x;
+    int win_y;
+    unsigned int win_width;
+    unsigned int win_height;
+
+    int pending_vo_events;
+
     /* Keep track of original video width/height to determine when to
      * resize window when reconfiguring. Resize window when video size
      * changes, but don't force window size changes as long as video size

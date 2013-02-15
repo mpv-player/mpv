@@ -131,7 +131,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             w32->event_flags |= VO_EVENT_EXPOSE;
             break;
         case WM_MOVE: {
-            w32->event_flags |= VO_EVENT_MOVE;
             POINT p = {0};
             ClientToScreen(w32->window, &p);
             w32->window_x = p.x;
@@ -295,7 +294,6 @@ int vo_w32_check_events(struct vo *vo)
         ClientToScreen(w32->window, &p);
         if (p.x != w32->window_x || p.y != w32->window_y) {
             w32->window_x = p.x; w32->window_y = p.y;
-            w32->event_flags |= VO_EVENT_MOVE;
         }
         res = GetClientRect(WIN_ID_TO_HWND(WinID), &r);
         if (res && (r.right != vo->dwidth || r.bottom != vo->dheight))

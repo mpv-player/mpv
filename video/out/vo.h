@@ -31,8 +31,6 @@
 
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2
-#define VO_EVENT_KEYPRESS 4
-#define VO_EVENT_MOVE 16
 
 enum mp_voctrl {
     /* signal a device reset seek */

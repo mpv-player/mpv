@@ -373,26 +373,27 @@ static void init_atoms(struct vo_x11_state *x11)
 void vo_x11_update_screeninfo(struct vo *vo)
 {
     struct MPOpts *opts = vo->opts;
+    struct vo_x11_state *x11 = vo->x11;
     bool all_screens = vo_fs && opts->vo_fsscreen_id == -2;
     xinerama_x = xinerama_y = 0;
     if (all_screens) {
-        opts->vo_screenwidth = vo->x11->ws_width;
-        opts->vo_screenheight = vo->x11->ws_height;
+        opts->vo_screenwidth = x11->ws_width;
+        opts->vo_screenheight = x11->ws_height;
     }
 #ifdef CONFIG_XINERAMA
-    if (opts->vo_screen_id >= -1 && XineramaIsActive(vo->x11->display) &&
+    if (opts->vo_screen_id >= -1 && XineramaIsActive(x11->display) &&
         !all_screens)
     {
         int screen = vo_fs ? opts->vo_fsscreen_id : opts->vo_screen_id;
         XineramaScreenInfo *screens;
         int num_screens;
 
-        screens = XineramaQueryScreens(vo->x11->display, &num_screens);
+        screens = XineramaQueryScreens(x11->display, &num_screens);
         if (screen >= num_screens)
             screen = num_screens - 1;
         if (screen == -1) {
-            int x = vo->dx + vo->dwidth / 2;
-            int y = vo->dy + vo->dheight / 2;
+            int x = x11->win_x + x11->win_width / 2;
+            int y = x11->win_y + x11->win_height / 2;
             for (screen = num_screens - 1; screen > 0; screen--) {
                 int left = screens[screen].x_org;
                 int right = left + screens[screen].width;
@@ -662,17 +663,15 @@ void vo_x11_uninit(struct vo *vo)
     vo->x11 = NULL;
 }
 
-static int check_resize(struct vo *vo)
+static void update_vo_size(struct vo *vo)
 {
-    int old_w = vo->dwidth, old_h = vo->dheight;
-    int old_x = vo->dx, old_y = vo->dy;
-    int rc = 0;
-    vo_x11_update_geometry(vo, true);
-    if (vo->dwidth != old_w || vo->dheight != old_h)
-        rc |= VO_EVENT_RESIZE;
-    if (vo->dx != old_x || vo->dy != old_y)
-        rc |= VO_EVENT_MOVE;
-    return rc;
+    struct vo_x11_state *x11 = vo->x11;
+
+    if (x11->win_width != vo->dwidth || x11->win_height != vo->dheight) {
+        vo->dwidth = x11->win_width;
+        vo->dheight = x11->win_height;
+        x11->pending_vo_events |= VO_EVENT_RESIZE;
+    }
 }
 
 int vo_x11_check_events(struct vo *vo)
@@ -680,7 +679,6 @@ int vo_x11_check_events(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     struct MPOpts *opts = vo->opts;
     Display *display = vo->x11->display;
-    int ret = 0;
     XEvent Event;
 
     if (x11->mouse_waiting_hide && opts->cursor_autohide_delay != -1 &&
@@ -693,18 +691,18 @@ int vo_x11_check_events(struct vo *vo)
     xscreensaver_heartbeat(vo->x11);
 
     if (WinID > 0)
-        ret |= check_resize(vo);
+        vo_x11_update_geometry(vo, true);
     while (XPending(display)) {
         XNextEvent(display, &Event);
 //       printf("\rEvent.type=%X  \n",Event.type);
         switch (Event.type) {
         case Expose:
-            ret |= VO_EVENT_EXPOSE;
+            x11->pending_vo_events |= VO_EVENT_EXPOSE;
             break;
         case ConfigureNotify:
             if (x11->window == None)
                 break;
-            ret |= check_resize(vo);
+            vo_x11_update_geometry(vo, true);
             break;
         case KeyPress: {
             char buf[100];
@@ -736,7 +734,6 @@ int vo_x11_check_events(struct vo *vo)
                 if (mpkey)
                     mplayer_put_key(vo->key_fifo, mpkey | modifiers);
             }
-            ret |= VO_EVENT_KEYPRESS;
         }
         break;
         case MotionNotify:
@@ -796,11 +793,14 @@ int vo_x11_check_events(struct vo *vo)
             break;
         }
     }
-    if (WinID >= 0 && (ret & (VO_EVENT_MOVE | VO_EVENT_RESIZE))) {
-        int x = vo->dx, y = vo->dy;
-        unsigned int w = vo->dwidth, h = vo->dheight;
+    update_vo_size(vo);
+    if (WinID >= 0 && (x11->pending_vo_events & VO_EVENT_RESIZE)) {
+        int x = x11->win_x, y = x11->win_y;
+        unsigned int w = x11->win_width, h = x11->win_height;
         XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
     }
+    int ret = x11->pending_vo_events;
+    x11->pending_vo_events = 0;
     return ret;
 }
 
@@ -867,8 +867,9 @@ static void vo_x11_nofs_sizepos(struct vo *vo, int x, int y,
         x11->vo_old_width = width;
         x11->vo_old_height = height;
     } else {
-        vo->dwidth = width;
-        vo->dheight = height;
+        x11->win_width = width;
+        x11->win_height = height;
+        update_vo_size(vo);
         if (vo->opts->force_window_position) {
             XMoveResizeWindow(vo->x11->display, vo->x11->window, x, y, width,
                               height);
@@ -1006,13 +1007,11 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     if (WinID >= 0) {
         XSelectInput(mDisplay, WinID, StructureNotifyMask);
         vo_x11_update_geometry(vo, true);
-        x = vo->dx; y = vo->dy;
-        width = vo->dwidth; height = vo->dheight;
+        x = x11->win_x; y = x11->win_y;
+        width = x11->win_width; height = x11->win_height;
     }
     if (x11->window == None) {
         vo_fs = 0;
-        vo->dwidth = width;
-        vo->dheight = height;
         x11->window = vo_x11_create_smooth_window(x11, vis, x, y, width, height);
         x11->window_state = VOFLAG_HIDDEN;
     }
@@ -1052,14 +1051,14 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     if (opts->vo_ontop)
         vo_x11_setlayer(vo, x11->window, opts->vo_ontop);
     vo_x11_update_geometry(vo, !force_change_xy);
-    vo_x11_nofs_sizepos(vo, vo->dx, vo->dy, width, height);
+    vo_x11_nofs_sizepos(vo, x11->win_x, x11->win_y, width, height);
     if (!!vo_fs != !!(flags & VOFLAG_FULLSCREEN)) {
         vo_x11_fullscreen(vo);
     } else if (vo_fs) {
         // if we are already in fullscreen do not switch back and forth, just
         // set the size values right.
-        vo->dwidth  = vo->opts->vo_screenwidth;
-        vo->dheight = vo->opts->vo_screenheight;
+        x11->win_width = vo->opts->vo_screenwidth;
+        x11->win_height = vo->opts->vo_screenheight;
     }
 final:
     if (x11->vo_gc != None)
@@ -1068,6 +1067,9 @@ final:
 
     XSync(mDisplay, False);
     vo->event_fd = ConnectionNumber(x11->display);
+
+    update_vo_size(vo);
+    x11->pending_vo_events &= ~VO_EVENT_RESIZE; // implicitly done by the VO
 }
 
 void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
@@ -1080,8 +1082,8 @@ void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
     if (x11->f_gc == None)
         return;
 
-    u_dheight = vo->dheight;
-    u_dwidth = vo->dwidth;
+    u_dheight = x11->win_height;
+    u_dwidth = x11->win_width;
     if ((u_dheight <= img_height) && (u_dwidth <= img_width))
         return;
 
@@ -1236,7 +1238,7 @@ static int vo_x11_get_fs_type(struct vo *vo)
     return type;
 }
 
-// update vo->dx, vo->dy, vo->dwidth and vo->dheight with current values of vo->x11->window
+// update x11->win_x, x11->win_y, x11->win_width and x11->win_height with current values of vo->x11->window
 static void vo_x11_update_geometry(struct vo *vo, bool update_pos)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1247,15 +1249,15 @@ static void vo_x11_update_geometry(struct vo *vo, bool update_pos)
     XGetGeometry(x11->display, win, &dummy_win, &dummy_int, &dummy_int,
                  &w, &h, &dummy_int, &dummy_uint);
     if (w <= INT_MAX && h <= INT_MAX) {
-        vo->dwidth = w;
-        vo->dheight = h;
+        x11->win_width = w;
+        x11->win_height = h;
     }
     if (WinID >= 0) {
-        vo->dx = 0;
-        vo->dy = 0;
+        x11->win_x = 0;
+        x11->win_y = 0;
     } else if (update_pos) {
         XTranslateCoordinates(x11->display, x11->window, x11->rootwin, 0, 0,
-                              &vo->dx, &vo->dy, &dummy_win);
+                              &x11->win_x, &x11->win_y, &dummy_win);
     }
 }
 
@@ -1284,7 +1286,7 @@ void vo_x11_fullscreen(struct vo *vo)
         }
         vo_fs = VO_FALSE;
         if (x11->size_changed_during_fs && (x11->fs_type & vo_wm_FULLSCREEN)) {
-            vo_x11_nofs_sizepos(vo, vo->dx, vo->dy, x11->last_video_width,
+            vo_x11_nofs_sizepos(vo, x11->win_x, x11->win_y, x11->last_video_width,
                                 x11->last_video_height);
         }
         x11->size_changed_during_fs = false;
@@ -1292,10 +1294,10 @@ void vo_x11_fullscreen(struct vo *vo)
         // win->fs
         vo_fs = VO_TRUE;
 
-        x11->vo_old_x = vo->dx;
-        x11->vo_old_y = vo->dy;
-        x11->vo_old_width = vo->dwidth;
-        x11->vo_old_height = vo->dheight;
+        x11->vo_old_x = x11->win_x;
+        x11->vo_old_y = x11->win_y;
+        x11->vo_old_width = x11->win_width;
+        x11->vo_old_height = x11->win_height;
 
         vo_x11_update_screeninfo(vo);
 

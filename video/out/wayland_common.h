@@ -121,7 +121,6 @@ struct vo_wayland_input {
     } xkb;
 
     int modifiers;
-    int events;
 
     struct {
         uint32_t sym;

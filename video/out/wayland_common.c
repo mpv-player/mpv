@@ -319,7 +319,6 @@ static void keyboard_handle_key(void *data,
         int mpkey = lookupkey(sym);
         if (mpkey)
             mplayer_put_key(wl->vo->key_fifo, mpkey);
-        input->events |= VO_EVENT_KEYPRESS;
     }
 
     if (state == WL_KEYBOARD_KEY_STATE_RELEASED && key == input->repeat.key) {
@@ -952,7 +951,6 @@ int vo_wayland_check_events (struct vo *vo)
     int i, ret, count;
     struct epoll_event ep[16];
 
-    wl->input->events = 0;
     wl_display_dispatch_pending(wl->display->display);
 
     ret = wl_display_flush(wl->display->display);
@@ -975,10 +973,8 @@ int vo_wayland_check_events (struct vo *vo)
         task->run(task, ep[i].events, wl);
     }
 
-    ret = wl->input->events;
-    ret |= wl->window->events;
+    ret = wl->window->events;
 
-    wl->input->events = 0;
     wl->window->events = 0;
 
     return ret;
