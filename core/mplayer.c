@@ -1038,39 +1038,19 @@ static bool get_cache_idle(struct MPContext *mpctx)
     return idle;
 }
 
-/**
- * \brief append a formatted string
- * \param buf buffer to print into
- * \param len maximum number of characters in buf, not including terminating 0
- * \param format printf format string
- */
-static void saddf(char *buf, int len, const char *format, ...)
-{
-    va_list va;
-    va_start(va, format);
-    int pos = strlen(buf);
-    pos += vsnprintf(buf + pos, len - pos, format, va);
-    va_end(va);
-    if (pos >= len && len > 0)
-        buf[len - 1] = 0;
-}
+#define saddf(var, ...) (*(var) = talloc_asprintf_append((*var), __VA_ARGS__))
 
-/**
- * \brief append time in the hh:mm:ss.f format
- * \param buf buffer to print into
-  * \param len maximum number of characters in buf, not including terminating 0
- * \param time time value to convert/append
- */
-static void sadd_hhmmssff(char *buf, int len, double time, bool fractions)
+// append time in the hh:mm:ss format (plus fractions if wanted)
+static void sadd_hhmmssff(char **buf, double time, bool fractions)
 {
     char *s = mp_format_time(time, fractions);
-    saddf(buf, len, "%s", s);
+    *buf = talloc_strdup_append(*buf, s);
     talloc_free(s);
 }
 
-static void sadd_percentage(char *buf, int len, int percent) {
+static void sadd_percentage(char **buf, int percent) {
     if (percent >= 0)
-        saddf(buf, len, " (%d%%)", percent);
+        *buf = talloc_asprintf_append(*buf, " (%d%%)", percent);
 }
 
 static int get_term_width(void)
@@ -1112,48 +1092,45 @@ static void print_status(struct MPContext *mpctx)
         return;
     }
 
-    // one additional char for the terminating null
-    int width = get_term_width() + 1;
-    char *line = malloc(width);
-    line[0] = '\0';
+    char *line = NULL;
 
     // Playback status
     if (mpctx->paused_for_cache) {
-        saddf(line, width, "(Buffering) ");
+        saddf(&line, "(Buffering) ");
     } else if (mpctx->paused) {
-        saddf(line, width, "(Paused) ");
+        saddf(&line, "(Paused) ");
     }
 
     if (mpctx->sh_audio)
-        saddf(line, width, "A");
+        saddf(&line, "A");
     if (mpctx->sh_video)
-        saddf(line, width, "V");
-    saddf(line, width, ": ");
+        saddf(&line, "V");
+    saddf(&line, ": ");
 
     // Playback position
     double cur = get_current_time(mpctx);
-    sadd_hhmmssff(line, width, cur, mpctx->opts.osd_fractions);
+    sadd_hhmmssff(&line, cur, mpctx->opts.osd_fractions);
 
     double len = get_time_length(mpctx);
     if (len >= 0) {
-        saddf(line, width, " / ");
-        sadd_hhmmssff(line, width, len, mpctx->opts.osd_fractions);
+        saddf(&line, " / ");
+        sadd_hhmmssff(&line, len, mpctx->opts.osd_fractions);
     }
 
-    sadd_percentage(line, width, get_percent_pos(mpctx));
+    sadd_percentage(&line, get_percent_pos(mpctx));
 
     // other
     if (opts->playback_speed != 1)
-        saddf(line, width, " x%4.2f", opts->playback_speed);
+        saddf(&line, " x%4.2f", opts->playback_speed);
 
     // A-V sync
     if (mpctx->sh_audio && sh_video) {
         if (mpctx->last_av_difference != MP_NOPTS_VALUE)
-            saddf(line, width, " A-V:%7.3f", mpctx->last_av_difference);
+            saddf(&line, " A-V:%7.3f", mpctx->last_av_difference);
         else
-            saddf(line, width, " A-V: ???");
+            saddf(&line, " A-V: ???");
         if (fabs(mpctx->total_avsync_change) > 0.05)
-            saddf(line, width, " ct:%7.3f", mpctx->total_avsync_change);
+            saddf(&line, " ct:%7.3f", mpctx->total_avsync_change);
     }
 
 #ifdef CONFIG_ENCODING
@@ -1172,22 +1149,22 @@ static void print_status(struct MPContext *mpctx)
             position, get_current_time(mpctx) - startpos) >= 0)
     {
         // encoding stats
-        saddf(line, width, "%s ", lavcbuf);
+        saddf(&line, "%s ", lavcbuf);
     } else
 #endif
     {
         // VO stats
         if (sh_video && drop_frame_cnt)
-            saddf(line, width, " D: %d", drop_frame_cnt);
+            saddf(&line, " D: %d", drop_frame_cnt);
     }
 
     int cache = get_cache_percent(mpctx);
     if (cache >= 0)
-        saddf(line, width, " C: %d%%", cache);
+        saddf(&line, " C: %d%%", cache);
 
     // end
     write_status_line(mpctx, line);
-    free(line);
+    talloc_free(line);
 }
 
 /**
@@ -1439,15 +1416,14 @@ void set_osd_subtitle(struct MPContext *mpctx, subtitle *subs)
 }
 
 // sym == mpctx->osd_function
-static void saddf_osd_function_sym(char *buffer, int len, int sym)
+static void saddf_osd_function_sym(char **buffer, int sym)
 {
     char temp[10];
     osd_get_function_sym(temp, sizeof(temp), sym);
-    saddf(buffer, len, "%s ", temp);
+    saddf(buffer, "%s ", temp);
 }
 
-static void sadd_osd_status(char *buffer, int len, struct MPContext *mpctx,
-                            bool full)
+static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
 {
     bool fractions = mpctx->opts.osd_fractions;
     int sym = mpctx->osd_function;
@@ -1460,12 +1436,12 @@ static void sadd_osd_status(char *buffer, int len, struct MPContext *mpctx,
             sym = OSD_PLAY;
         }
     }
-    saddf_osd_function_sym(buffer, len, sym);
-    sadd_hhmmssff(buffer, len, get_current_time(mpctx), fractions);
+    saddf_osd_function_sym(buffer, sym);
+    sadd_hhmmssff(buffer, get_current_time(mpctx), fractions);
     if (full) {
-        saddf(buffer, len, " / ");
-        sadd_hhmmssff(buffer, len, get_time_length(mpctx), fractions);
-        sadd_percentage(buffer, len, get_percent_pos(mpctx));
+        saddf(buffer, " / ");
+        sadd_hhmmssff(buffer, get_time_length(mpctx), fractions);
+        sadd_percentage(buffer, get_percent_pos(mpctx));
     }
 }
 
@@ -1540,13 +1516,13 @@ static void update_osd_msg(struct MPContext *mpctx)
 
     if (mpctx->sh_video && opts->term_osd != 1) {
         // fallback on the timer
-        char text[128] = "";
-        int len = sizeof(text);
+        char *text = NULL;
 
         if (osd_level >= 2)
-            sadd_osd_status(text, len, mpctx, osd_level == 3);
+            sadd_osd_status(&text, mpctx, osd_level == 3);
 
         osd_set_text(osd, text);
+        talloc_free(text);
 
         if (msg && msg->show_position)
             update_osd_bar(mpctx, OSD_BAR_SEEK, 0, 100, get_percent_pos(mpctx));
