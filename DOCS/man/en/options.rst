@@ -1437,7 +1437,7 @@
 
 --playing-msg=<string>
     Print out a string before starting playback. The string is expanded for
-    properties, e.g. ``--playing-msg=file: \${filename}`` will print the string
+    properties, e.g. ``--playing-msg=file: ${filename}`` will print the string
     ``file:`` followed by a space and the currently played filename.
 
     The following expansions are supported:
@@ -1445,7 +1445,7 @@
     \${NAME}
         Expands to the value of the property ``NAME``. If ``NAME`` starts with
         ``=``, use the raw value of the property. If retrieving the property
-        fails, expand to an error string. (Use ``\${NAME:}`` with a trailing
+        fails, expand to an error string. (Use ``${NAME:}`` with a trailing
         ``:`` to expand to an empty string instead.)
     \${NAME:STR}
         Expands to the value of the property ``NAME``, or ``STR`` if the
@@ -1456,13 +1456,18 @@
     \${?NAME:STR}
         Expands to ``STR`` (recursively) if the property ``NAME`` is available.
     \$\$
-        Expands to ``\$``.
+        Expands to ``$``.
     \$}
         Expands to ``}``. (To produce this character inside recursive
         expansion.)
     \$>
-        Disable property expansion and special handling of ``\$`` for the rest
+        Disable property expansion and special handling of ``$`` for the rest
         of the string.
+
+    This option also parses C-style escapes. Example:
+
+    - ``\n`` becomes a newline character
+    - ``\\`` expands to ``\``
 
 --status-msg=<string>
     Print out a custom string during playback instead of the standard status
