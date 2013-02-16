@@ -678,6 +678,7 @@ const m_option_t mplayer_opts[]={
     OPT_STRING("term-osd-esc", term_osd_esc, 0, OPTDEF_STR("\x1b[A\r\x1b[K")),
     OPT_STRING("playing-msg", playing_msg, 0),
     OPT_STRING("status-msg", status_msg, 0),
+    OPT_STRING("osd-status-msg", osd_status_msg, 0),
 
     {"slave-broken", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
     OPT_FLAG("idle", player_idle_mode, CONF_GLOBAL),

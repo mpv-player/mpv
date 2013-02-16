@@ -1404,6 +1404,12 @@
 
     Default: 0.
 
+--osd-status-msg=<string>
+    Show a custom string during playback instead of the standard status text.
+    This overrides the status text used for ``--osd-level=3``, when using the
+    ``show_progress`` command (by default mapped to ``P``), or in some
+    non-default cases when seeking. Expands properties. See ``--playing-msg``.
+
 --overlapsub
     Allows the next subtitle to be displayed while the current one is still
     visible (default is to enable the support only for specific formats). This
