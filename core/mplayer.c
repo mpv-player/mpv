@@ -1376,13 +1376,8 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
     return NULL;
 }
 
-/**
- * \brief Display the OSD bar.
- *
- * Display the OSD bar or fall back on a simple message.
- *
- */
-
+// type: mp_osd_font_codepoints, ASCII, or OSD_BAR_*
+// name: fallback for terminal OSD
 void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
                  double min, double max, double val)
 {
@@ -1400,6 +1395,17 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
 
     set_osd_msg(mpctx, OSD_MSG_BAR, 1, opts->osd_duration, "%s: %d %%",
                 name, ROUND(100 * (val - min) / (max - min)));
+}
+
+// Update a currently displayed bar of the same type, without resetting the
+// timer.
+static void update_osd_bar(struct MPContext *mpctx, int type,
+                           double min, double max, double val)
+{
+    if (mpctx->osd->progbar_type == type) {
+        mpctx->osd->progbar_value = 256 * (val - min) / (max - min);
+        vo_osd_changed(OSDTYPE_PROGBAR);
+    }
 }
 
 void set_osd_function(struct MPContext *mpctx, int osd_function)
@@ -1467,8 +1473,10 @@ static void sadd_osd_status(char *buffer, int len, struct MPContext *mpctx,
 // function, because multiple successive seek commands can be coalesced.
 static void add_seek_osd_messages(struct MPContext *mpctx)
 {
-    if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_BAR)
-        set_osd_bar(mpctx, 0, "Position", 0, 100, get_percent_pos(mpctx));
+    if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_BAR) {
+        set_osd_bar(mpctx, OSD_BAR_SEEK, "Position", 0, 100,
+                    get_percent_pos(mpctx));
+    }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_TEXT) {
         mp_osd_msg_t *msg = add_osd_msg(mpctx, OSD_MSG_TEXT, 1,
                                         mpctx->opts.osd_duration);
@@ -1539,6 +1547,9 @@ static void update_osd_msg(struct MPContext *mpctx)
             sadd_osd_status(text, len, mpctx, osd_level == 3);
 
         osd_set_text(osd, text);
+
+        if (msg && msg->show_position)
+            update_osd_bar(mpctx, OSD_BAR_SEEK, 0, 100, get_percent_pos(mpctx));
         return;
     }
 

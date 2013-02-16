@@ -37,6 +37,8 @@
 #define MAX_TERM_OSD_LEVEL 1
 #define OSD_LEVEL_INVISIBLE 4
 
+#define OSD_BAR_SEEK 256
+
 struct MPContext;
 
 void set_osd_bar(struct MPContext *mpctx, int type,const char* name,double min,double max,double val);

@@ -204,9 +204,11 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 
     char *text = talloc_strdup(NULL, "{\\q2}");
 
-    if (osd->progbar_type >= 32) {
+    if (osd->progbar_type == 0 || osd->progbar_type >= 256) {
+        // no sym
+    } else if (osd->progbar_type >= 32) {
         text = append_utf8_buffer(text, osd->progbar_type);
-    } else if (osd->progbar_type > 0) {
+    } else {
         text = talloc_strdup_append_buffer(text, ASS_USE_OSD_FONT);
         text = append_utf8_buffer(text, OSD_CODEPOINTS + osd->progbar_type);
         text = talloc_strdup_append_buffer(text, "{\\r}");
