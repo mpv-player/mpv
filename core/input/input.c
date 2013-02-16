@@ -31,6 +31,9 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include <libavutil/avstring.h>
+#include <libavutil/common.h>
+
 #include "osdep/io.h"
 #include "osdep/getch2.h"
 
@@ -38,8 +41,6 @@
 #include "core/mp_fifo.h"
 #include "keycodes.h"
 #include "osdep/timer.h"
-#include "libavutil/avstring.h"
-#include "libavutil/common.h"
 #include "core/mp_msg.h"
 #include "core/m_config.h"
 #include "core/m_option.h"
@@ -48,6 +49,7 @@
 #include "core/options.h"
 #include "core/bstr.h"
 #include "stream/stream.h"
+#include "core/mp_common.h"
 
 #include "joystick.h"
 
@@ -546,17 +548,6 @@ static const char builtin_input_conf[] =
 #include "core/input/input_conf.h"
 ;
 
-// Encode the unicode codepoint as UTF-8, and append to the end of the
-// talloc'ed buffer.
-static char *append_utf8_buffer(char *buffer, uint32_t codepoint)
-{
-    char data[8];
-    uint8_t tmp;
-    char *output = data;
-    PUT_UTF8(codepoint, tmp, *output++ = tmp;);
-    return talloc_strndup_append_buffer(buffer, data, output - data);
-}
-
 static char *get_key_name(int key, char *ret)
 {
     for (int i = 0; modifier_names[i].name; i++) {
@@ -573,7 +564,7 @@ static char *get_key_name(int key, char *ret)
 
     // printable, and valid unicode range
     if (key >= 32 && key <= 0x10FFFF)
-        return append_utf8_buffer(ret, key);
+        return mp_append_utf8_buffer(ret, key);
 
     // Print the hex key code
     return talloc_asprintf_append_buffer(ret, "%#-8x", key);
@@ -779,48 +770,6 @@ static bool eat_token(bstr *str, const char *tok)
     return false;
 }
 
-static bool append_escape(bstr *code, char **str)
-{
-    if (code->len < 1)
-        return false;
-    char replace = 0;
-    switch (code->start[0]) {
-    case '"':  replace = '"';  break;
-    case '\\': replace = '\\'; break;
-    case 'b':  replace = '\b'; break;
-    case 'f':  replace = '\f'; break;
-    case 'n':  replace = '\n'; break;
-    case 'r':  replace = '\r'; break;
-    case 't':  replace = '\t'; break;
-    case 'e':  replace = '\x1b'; break;
-    case '\'': replace = '\''; break;
-    }
-    if (replace) {
-        *str = talloc_strndup_append_buffer(*str, &replace, 1);
-        *code = bstr_cut(*code, 1);
-        return true;
-    }
-    if (code->start[0] == 'x' && code->len >= 3) {
-        bstr num = bstr_splice(*code, 1, 3);
-        char c = bstrtoll(num, &num, 16);
-        if (!num.len)
-            return false;
-        *str = talloc_strndup_append_buffer(*str, &c, 1);
-        *code = bstr_cut(*code, 3);
-        return true;
-    }
-    if (code->start[0] == 'u' && code->len >= 5) {
-        bstr num = bstr_splice(*code, 1, 5);
-        int c = bstrtoll(num, &num, 16);
-        if (num.len)
-            return false;
-        *str = append_utf8_buffer(*str, c);
-        *code = bstr_cut(*code, 5);
-        return true;
-    }
-    return false;
-}
-
 static bool read_escaped_string(void *talloc_ctx, bstr *str, bstr *literal)
 {
     bstr t = *str;
@@ -830,7 +779,7 @@ static bool read_escaped_string(void *talloc_ctx, bstr *str, bstr *literal)
             break;
         if (t.start[0] == '\\') {
             t = bstr_cut(t, 1);
-            if (!append_escape(&t, &new))
+            if (!mp_parse_escape(&t, &new))
                 goto error;
         } else {
             new = talloc_strndup_append_buffer(new, t.start, 1);

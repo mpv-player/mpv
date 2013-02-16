@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "compat/compiler.h"
 #include "core/mp_talloc.h"
@@ -52,5 +53,10 @@ struct mp_rect {
 
 void mp_rect_union(struct mp_rect *rc, const struct mp_rect *src);
 bool mp_rect_intersection(struct mp_rect *rc, const struct mp_rect *rc2);
+
+char *mp_append_utf8_buffer(char *buffer, uint32_t codepoint);
+
+struct bstr;
+bool mp_parse_escape(struct bstr *code, char **str);
 
 #endif /* MPLAYER_MPCOMMON_H */
