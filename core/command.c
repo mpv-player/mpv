@@ -1447,14 +1447,6 @@ int mp_property_do(const char *name, int action, void *val,
     return m_property_do(mp_properties, name, action, val, ctx);
 }
 
-char *mp_property_print(const char *name, struct MPContext *ctx)
-{
-    char *ret = NULL;
-    if (mp_property_do(name, M_PROPERTY_PRINT, &ret, ctx) <= 0)
-        return NULL;
-    return ret;
-}
-
 char *mp_property_expand_string(struct MPContext *mpctx, char *str)
 {
     return m_properties_expand_string(mp_properties, str, mpctx);
@@ -1574,24 +1566,29 @@ static void show_property_osd(MPContext *mpctx, const char *pname,
     }
 
     if (osd_progbar && (prop.flags & CONF_RANGE) == CONF_RANGE) {
+        bool ok = false;
         if (prop.type == CONF_TYPE_INT) {
             int i;
-            if (mp_property_do(prop.name, M_PROPERTY_GET, &i, mpctx) > 0)
-                set_osd_bar(mpctx, osd_progbar, osd_name,
-                            prop.min, prop.max, i);
+            ok = mp_property_do(prop.name, M_PROPERTY_GET, &i, mpctx) > 0;
+            if (ok)
+                set_osd_bar(mpctx, osd_progbar, osd_name, prop.min, prop.max, i);
         } else if (prop.type == CONF_TYPE_FLOAT) {
             float f;
-            if (mp_property_do(prop.name, M_PROPERTY_GET, &f, mpctx) > 0)
-                set_osd_bar(mpctx, osd_progbar, osd_name,
-                            prop.min, prop.max, f);
+            ok = mp_property_do(prop.name, M_PROPERTY_GET, &f, mpctx) > 0;
+            if (ok)
+                set_osd_bar(mpctx, osd_progbar, osd_name, prop.min, prop.max, f);
         }
-        if (osd_mode == MP_ON_OSD_AUTO && opts->osd_bar_visible)
+        if (ok && osd_mode == MP_ON_OSD_AUTO && opts->osd_bar_visible)
             return;
     }
 
     if (osd_name) {
-        char *val = mp_property_print(prop.name, mpctx);
-        if (val) {
+        char *val = NULL;
+        int r = mp_property_do(prop.name, M_PROPERTY_PRINT, &val, mpctx);
+        if (r == M_PROPERTY_UNAVAILABLE) {
+            set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration,
+                         "%s: (unavailable)", osd_name);
+        } else if (r >= 0 && val) {
             int osd_id = 0;
             if (p) {
                 int index = p - property_osd_display;
@@ -1750,15 +1747,16 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_SET: {
         int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_SET_STRING,
                                cmd->args[1].v.s, mpctx);
-        if (r == M_PROPERTY_UNKNOWN)
+        if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
+            show_property_osd(mpctx, cmd->args[0].v.s, cmd->on_osd);
+        } else if (r == M_PROPERTY_UNKNOWN) {
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
                    "Unknown property: '%s'\n", cmd->args[0].v.s);
-        else if (r <= 0)
+        } else if (r <= 0) {
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
                    "Failed to set property '%s' to '%s'.\n",
                    cmd->args[0].v.s, cmd->args[1].v.s);
-        else
-            show_property_osd(mpctx, cmd->args[0].v.s, cmd->on_osd);
+        }
         break;
     }
 
@@ -1772,15 +1770,16 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (cmd->args[1].v.f)
             s.inc = cmd->args[1].v.f;
         int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_SWITCH, &s, mpctx);
-        if (r == M_PROPERTY_UNKNOWN)
+        if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
+            show_property_osd(mpctx, cmd->args[0].v.s, cmd->on_osd);
+        } else if (r == M_PROPERTY_UNKNOWN) {
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
                    "Unknown property: '%s'\n", cmd->args[0].v.s);
-        else if (r <= 0)
+        } else if (r <= 0) {
             mp_msg(MSGT_CPLAYER, MSGL_WARN,
                    "Failed to increment property '%s' by %g.\n",
                    cmd->args[0].v.s, s.inc);
-        else
-            show_property_osd(mpctx, cmd->args[0].v.s, cmd->on_osd);
+        }
         break;
     }
 

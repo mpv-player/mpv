@@ -27,6 +27,5 @@ char *mp_property_expand_string(struct MPContext *mpctx, char *str);
 void property_print_help(void);
 int mp_property_do(const char* name, int action, void* val,
                    struct MPContext *mpctx);
-char* mp_property_print(const char *name, struct MPContext *mpctx);
 
 #endif /* MPLAYER_COMMAND_H */
