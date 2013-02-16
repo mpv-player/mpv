@@ -117,6 +117,7 @@ typedef struct MPOpts {
     char **sub_name;
     char **sub_paths;
     int sub_auto;
+    int osd_bar_visible;
     float osd_bar_align_x;
     float osd_bar_align_y;
     struct osd_style_opts *osd_style;

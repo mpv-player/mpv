@@ -1585,7 +1585,7 @@ static void show_property_osd(MPContext *mpctx, const char *pname,
                 set_osd_bar(mpctx, osd_progbar, osd_name,
                             prop.min, prop.max, f);
         }
-        if (osd_mode == MP_ON_OSD_AUTO)
+        if (osd_mode == MP_ON_OSD_AUTO && opts->osd_bar_visible)
             return;
     }
 
@@ -1742,7 +1742,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         }
         if (bar_osd)
             mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
-        if (msg_osd && !auto_osd)
+        if (msg_osd && !(auto_osd && opts->osd_bar_visible))
             mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT;
         break;
     }

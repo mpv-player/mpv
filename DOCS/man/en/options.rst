@@ -1288,6 +1288,14 @@
     search for video segments from other files, and will also ignore any
     chapter order specified for the main file.
 
+--no-osd-bar, --osd-bar
+    Disable display of the OSD bar. This will make some things (like seeking)
+    use OSD text messages instead of the bar.
+
+    You can configure this on a per-command basis in input.conf using ``osd-``
+    prefixes, see ``Input command prefixes``. If you want to disable the OSD
+    completely, use ``--osd-level=0``.
+
 --osd-bar-align-x=<-1..1>
     Position of the OSD bar. -1 is far left, 0 is centered, 1 is far right.
 

@@ -57,6 +57,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .drc_level = 1.,
         .movie_aspect = -1.,
         .sub_auto = 1,
+        .osd_bar_visible = 1,
 #ifdef CONFIG_ASS
         .ass_enabled = 1,
 #endif

@@ -1382,7 +1382,7 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
                  double min, double max, double val)
 {
     struct MPOpts *opts = &mpctx->opts;
-    if (opts->osd_level < 1)
+    if (opts->osd_level < 1 || !opts->osd_bar_visible)
         return;
 
     if (mpctx->sh_video && opts->term_osd != 1) {
