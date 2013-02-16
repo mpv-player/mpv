@@ -147,20 +147,12 @@ const struct m_option *m_config_get_option(const struct m_config *config,
 struct m_config_option *m_config_get_co(const struct m_config *config,
                                         struct bstr name);
 
-/*  Map options like "no-opt=" to "opt=no".
- *  config:     config object.
- *  name:       option's name. May be set to a new name.
- *  value:      option value. May be set to a new value.
- *  ambiguous:  if true, "value" may be either an option value, or a separate,
- *              unrelated option following the current option.
- *  returns the following error codes:
- *          < 0: one of the M_OPT_ error codes
- *          0: the option is valid, *value is set implicitly
- *             ("--foo bar" maps to "--foo=yes" + "bar", *value == "yes")
- *          1: the option is valid, *value is a proper parameter
- */
-int m_config_map_option(struct m_config *config, bstr *name, bstr *value,
-                        bool ambiguous);
+// Return a hint to the option parser whether a parameter is/may be required.
+// The option may still accept empty/non-empty parameters independent from
+// this, and this function is useful only for handling ambiguous options like
+// flags (e.g. "--a" is ok, "--a=yes" is also ok).
+// Returns: error code (<0), or number of expected params (0, 1)
+int m_config_option_requires_param(struct m_config *config, bstr name);
 
 /*  Print a list of all registered options.
  *  \param config The config object.

@@ -82,7 +82,7 @@ static int split_opt_silent(struct parse_state *p)
 
     bool ambiguous = !bstr_split_tok(p->arg, "=", &p->arg, &p->param);
 
-    int r = m_config_map_option(p->config, &p->arg, &p->param, ambiguous);
+    int r = m_config_option_requires_param(p->config, p->arg);
     if (r < 0)
         return r;
 
