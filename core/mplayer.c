@@ -1160,7 +1160,7 @@ static void print_status(struct MPContext *mpctx)
 
     int cache = mp_get_cache_percent(mpctx);
     if (cache >= 0)
-        saddf(&line, " C: %d%%", cache);
+        saddf(&line, " Cache: %d%%", cache);
 
     // end
     write_status_line(mpctx, line);
