@@ -1448,6 +1448,9 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
             saddf(buffer, " / ");
             sadd_hhmmssff(buffer, get_time_length(mpctx), fractions);
             sadd_percentage(buffer, get_percent_pos(mpctx));
+            int cache = mp_get_cache_percent(mpctx);
+            if (cache >= 0)
+                saddf(buffer, " Cache: %d%%", cache);
         }
     }
 }
