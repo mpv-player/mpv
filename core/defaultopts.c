@@ -23,6 +23,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .vo_panscanrange = 1.0,
         .cursor_autohide_delay = 1000,
         .vo_screen_id = -1,
+        .vo_fsscreen_id = -1,
         .vo_gamma_gamma = 1000,
         .vo_gamma_brightness = 1000,
         .vo_gamma_contrast = 1000,

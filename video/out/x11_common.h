@@ -34,6 +34,8 @@ struct vo_x11_state {
     Window rootwin;
     int screen;
     int display_is_local;
+    int ws_width;
+    int ws_height;
 
     int screensaver_off;
     int dpms_disabled;

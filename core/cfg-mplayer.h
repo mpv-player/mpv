@@ -613,6 +613,9 @@ const m_option_t mplayer_opts[]={
     {"mouseinput", &vo_nomouse_input, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
     OPT_CHOICE_OR_INT("screen", vo_screen_id, 0, 0, 32,
+                      ({"default", -1})),
+
+    OPT_CHOICE_OR_INT("fs-screen", vo_fsscreen_id, 0, 0, 32,
                       ({"all", -2}, {"current", -1})),
 
     OPT_INTRANGE("brightness", vo_gamma_brightness, 0, -100, 100),

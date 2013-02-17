@@ -108,8 +108,8 @@ struct vo_cocoa_state {
     NSSize previous_video_size;
 
     NSRect screen_frame;
+    NSRect fsscreen_frame;
     NSScreen *screen_handle;
-    NSArray *screen_array;
 
     NSInteger windowed_mask;
     NSInteger fullscreen_mask;
@@ -253,26 +253,39 @@ static int current_screen_has_dock_or_menubar(struct vo *vo)
     return f.size.height > vf.size.height || f.size.width > vf.size.width;
 }
 
+static int get_screen_handle(int identifier, NSWindow *window, NSScreen **screen) {
+    NSArray *screens  = [NSScreen screens];
+    int n_of_displays = [screens count];
+
+    if (identifier >= n_of_displays) { // check if the identifier is out of bounds
+        mp_msg(MSGT_VO, MSGL_INFO, "[cocoa] Screen ID %d does not exist, "
+            "falling back to main device\n", identifier);
+        identifier = -1;
+    }
+
+    if (identifier < 0) {
+        // default behaviour gets either the window screen or the main screen
+        // if window is not available
+        if (! (*screen = [window screen]) )
+            *screen = [screens objectAtIndex:0];
+        return 0;
+    } else {
+        *screen = [screens objectAtIndex:(identifier)];
+        return 1;
+    }
+}
+
 static void update_screen_info(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     struct MPOpts *opts = vo->opts;
-    int screen_id = opts->vo_screen_id;
-    s->screen_array = [NSScreen screens];
-    if (screen_id >= (int)[s->screen_array count]) {
-        mp_msg(MSGT_VO, MSGL_INFO, "[cocoa] Device ID %d does not exist, "
-            "falling back to main device\n", screen_id);
-        screen_id = -1;
-    }
+    NSScreen *ws, *fss;
 
-    if (screen_id < 0) { // default behaviour
-        if (! (s->screen_handle = [s->window screen]) )
-            s->screen_handle = [s->screen_array objectAtIndex:0];
-    } else {
-        s->screen_handle = [s->screen_array objectAtIndex:(screen_id)];
-    }
+    get_screen_handle(opts->vo_screen_id, s->window, &ws);
+    s->screen_frame = [ws frame];
 
-    s->screen_frame = [s->screen_handle frame];
+    get_screen_handle(opts->vo_fsscreen_id, s->window, &fss);
+    s->fsscreen_frame = [fss frame];
 }
 
 void vo_cocoa_update_xinerama_info(struct vo *vo)
@@ -642,7 +655,7 @@ void create_menu()
         s->windowed_frame = [self frame];
         [self setHasShadow:NO];
         [self setStyleMask:s->fullscreen_mask];
-        [self setFrame:s->screen_frame display:YES animate:NO];
+        [self setFrame:s->fsscreen_frame display:YES animate:NO];
         vo_fs = VO_TRUE;
         vo_cocoa_display_cursor(_vo, 0);
         [self setMovableByWindowBackground: NO];

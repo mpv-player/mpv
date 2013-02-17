@@ -312,13 +312,12 @@ static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p)
 {
     struct vo *vo = (void*)p;
     struct vo_w32_state *w32 = vo->w32;
-    struct MPOpts *opts = vo->opts;
     // this defaults to the last screen if specified number does not exist
     xinerama_x = r->left;
     xinerama_y = r->top;
     vo->opts->vo_screenwidth = r->right - r->left;
     vo->opts->vo_screenheight = r->bottom - r->top;
-    if (w32->mon_cnt == opts->vo_screen_id)
+    if (w32->mon_cnt == w32->mon_id)
         return FALSE;
     w32->mon_cnt++;
     return TRUE;
@@ -342,8 +341,9 @@ void w32_update_xinerama_info(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
     struct MPOpts *opts = vo->opts;
+    int screen = vo_fs ? opts->vo_fsscreen_id : opts->vo_screen_id;
     xinerama_x = xinerama_y = 0;
-    if (opts->vo_screen_id < -1) {
+    if (vo_fs && screen == -2) {
         int tmp;
         xinerama_x = GetSystemMetrics(SM_XVIRTUALSCREEN);
         xinerama_y = GetSystemMetrics(SM_YVIRTUALSCREEN);
@@ -351,7 +351,7 @@ void w32_update_xinerama_info(struct vo *vo)
         if (tmp) vo->opts->vo_screenwidth = tmp;
         tmp = GetSystemMetrics(SM_CYVIRTUALSCREEN);
         if (tmp) vo->opts->vo_screenheight = tmp;
-    } else if (opts->vo_screen_id == -1) {
+    } else if (screen == -1) {
         MONITORINFO mi;
         HMONITOR m = MonitorFromWindow(w32->window, MONITOR_DEFAULTTOPRIMARY);
         mi.cbSize = sizeof(mi);
@@ -360,8 +360,9 @@ void w32_update_xinerama_info(struct vo *vo)
         xinerama_y = mi.rcMonitor.top;
         vo->opts->vo_screenwidth = mi.rcMonitor.right - mi.rcMonitor.left;
         vo->opts->vo_screenheight = mi.rcMonitor.bottom - mi.rcMonitor.top;
-    } else if (opts->vo_screen_id > 0) {
+    } else if (screen >= 0) {
         w32->mon_cnt = 0;
+        w32->mon_id = screen;
         EnumDisplayMonitors(NULL, NULL, mon_enum, (LONG_PTR)vo);
     }
     aspect_save_screenres(vo, vo->opts->vo_screenwidth,

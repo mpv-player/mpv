@@ -19,6 +19,7 @@ typedef struct MPOpts {
     int vo_screenwidth;
     int vo_screenheight;
     int vo_screen_id;
+    int vo_fsscreen_id;
     struct m_geometry vo_geometry;
     struct m_geometry vo_autofit;
     struct m_geometry vo_autofit_larger;

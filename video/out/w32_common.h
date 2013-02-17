@@ -50,6 +50,7 @@ struct vo_w32_state {
 
     int event_flags;
     int mon_cnt;
+    int mon_id;
 };
 
 int vo_w32_init(struct vo *vo);

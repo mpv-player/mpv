@@ -374,10 +374,17 @@ static void init_atoms(struct vo_x11_state *x11)
 void vo_x11_update_screeninfo(struct vo *vo)
 {
     struct MPOpts *opts = vo->opts;
+    bool all_screens = vo_fs && opts->vo_fsscreen_id == -2;
     xinerama_x = xinerama_y = 0;
+    if (all_screens) {
+        opts->vo_screenwidth = vo->x11->ws_width;
+        opts->vo_screenheight = vo->x11->ws_height;
+    }
 #ifdef CONFIG_XINERAMA
-    if (opts->vo_screen_id >= -1 && XineramaIsActive(vo->x11->display)) {
-        int screen = opts->vo_screen_id;
+    if (opts->vo_screen_id >= -1 && XineramaIsActive(vo->x11->display) &&
+        !all_screens)
+    {
+        int screen = vo_fs ? opts->vo_fsscreen_id : opts->vo_screen_id;
         XineramaScreenInfo *screens;
         int num_screens;
 
@@ -450,23 +457,16 @@ int vo_x11_init(struct vo *vo)
 
     init_atoms(vo->x11);
 
-#ifdef CONFIG_XF86VM
-    {
-        int clock;
-        XF86VidModeModeLine modeline;
+    x11->ws_width = opts->vo_screenwidth;
+    x11->ws_height = opts->vo_screenheight;
 
-        XF86VidModeGetModeLine(x11->display, x11->screen, &clock, &modeline);
-        if (!opts->vo_screenwidth)
-            opts->vo_screenwidth = modeline.hdisplay;
-        if (!opts->vo_screenheight)
-            opts->vo_screenheight = modeline.vdisplay;
-    }
-#endif
+    if (!x11->ws_width)
+        x11->ws_width = DisplayWidth(x11->display, x11->screen);
+    if (!x11->ws_height)
+        x11->ws_height = DisplayHeight(x11->display, x11->screen);
 
-    if (!opts->vo_screenwidth)
-        opts->vo_screenwidth = DisplayWidth(x11->display, x11->screen);
-    if (!opts->vo_screenheight)
-        opts->vo_screenheight = DisplayHeight(x11->display, x11->screen);
+    opts->vo_screenwidth = x11->ws_width;
+    opts->vo_screenheight = x11->ws_height;
 
     if (strncmp(dispName, "unix:", 5) == 0)
         dispName += 4;
@@ -1297,6 +1297,10 @@ void vo_x11_fullscreen(struct vo *vo)
 
     if (vo_fs) {
         vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_REMOVE);   // removes fullscreen state if wm supports EWMH
+        if ((x11->fs_type & vo_wm_FULLSCREEN) && opts->vo_fsscreen_id != -1) {
+            XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
+            vo_x11_sizehint(vo, x, y, w, h, 0);
+        }
         vo_fs = VO_FALSE;
         if (x11->size_changed_during_fs && (x11->fs_type & vo_wm_FULLSCREEN)) {
             vo_x11_nofs_sizepos(vo, vo->dx, vo->dy, x11->last_video_width,
@@ -1305,20 +1309,29 @@ void vo_x11_fullscreen(struct vo *vo)
         x11->size_changed_during_fs = false;
     } else {
         // win->fs
-        vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_ADD);      // sends fullscreen state to be added if wm supports EWMH
-
         vo_fs = VO_TRUE;
-        if (!(x11->fs_type & vo_wm_FULLSCREEN)) {  // not needed with EWMH fs
-            x11->vo_old_x = vo->dx;
-            x11->vo_old_y = vo->dy;
-            x11->vo_old_width = vo->dwidth;
-            x11->vo_old_height = vo->dheight;
-        }
+
+        x11->vo_old_x = vo->dx;
+        x11->vo_old_y = vo->dy;
+        x11->vo_old_width = vo->dwidth;
+        x11->vo_old_height = vo->dheight;
+
         vo_x11_update_screeninfo(vo);
+
         x = xinerama_x;
         y = xinerama_y;
         w = opts->vo_screenwidth;
         h = opts->vo_screenheight;
+
+        if ((x11->fs_type & vo_wm_FULLSCREEN) && opts->vo_fsscreen_id != -1) {
+            // The EWMH fullscreen hint always works on the current screen, so
+            // change the current screen forcibly.
+            // This was observed to work under IceWM, but not Unity/Compiz and
+            // awesome (but --screen etc. doesn't really work on these either).
+            XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
+        }
+
+        vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_ADD);      // sends fullscreen state to be added if wm supports EWMH
     }
     {
         long dummy;

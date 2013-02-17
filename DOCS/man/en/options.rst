@@ -649,6 +649,21 @@
 --fullscreen, --fs
     Fullscreen playback (centers movie, and paints black bands around it).
 
+
+--fs-screen=<all|current|0-32>
+    In multi-monitor configurations (i.e. a single desktop that spans across
+    multiple displays) this option tells mpv which screen to go fullscreen to.
+    If ``default`` is provided mpv will fallback to using the behaviour
+    depending on what the user provided with the ``screen`` option.
+
+    *NOTE (X11)*: this option does not work properly with all window managers.
+    ``all`` in particular will usually only work with ``--fstype=-fullscreen``
+    or ``--fstype=none``, and even then only with some window managers.
+
+    *NOTE (OSX)*: ``all`` doesn't work on OSX and will behave like ``current``.
+
+    See also ``--screen``.
+
 --fsmode-dontuse=<0-31>
     OBSOLETE, use the ``--fs`` option.
     Try this option if you still experience fullscreen problems.
@@ -733,6 +748,8 @@
     *NOTE (OSX)*: On Mac OSX the origin of the screen coordinate system is
     located on the the bottom-left corner. For instance, ``0:0`` will place the
     window at the bottom-left of the screen.
+
+    *NOTE (X11)*: this option does not work properly with all window managers.
 
     *EXAMPLE*:
 
@@ -1710,6 +1727,18 @@
     Seek to byte position. Useful for playback from CD-ROM images or VOB files
     with junk at the beginning. See also ``--start``.
 
+--screen=<default|0-32>
+    In multi-monitor configurations (i.e. a single desktop that spans across
+    multiple displays) this option tells mpv which screen to display the
+    movie on.
+
+    This option doesn't always work. In these cases, try to use ``--geometry``
+    to position the window explicitly.
+
+    *NOTE (X11)*: this option does not work properly with all window managers.
+
+    See also ``--fs-screen``.
+
 --screenshot-format=<type>
     Set the image file type used for saving screenshots.
 
@@ -2327,15 +2356,3 @@
 --wid=<ID>
     (X11 and win32 only)
     This tells mpv to attach to an existing window.See ``--slave-broken``.
-
---screen=<all|current|0-32>
-    In multi-monitor configurations (i.e. a single desktop that spans across
-    multiple displays) this option tells mpv which screen to display the
-    movie on. A value of ``all`` means fullscreen across the whole virtual display
-    (in this case system provided information is completely ignored), ``current`` means
-    fullscreen on the display the window currently is on. The initial position
-    set via the ``--geometry`` option is relative to the specified screen.
-    Will usually only work with ``--fstype=-fullscreen`` or ``--fstype=none``.
-    This option is not suitable to only set the startup screen (because it
-    will always display on the given screen in fullscreen mode),
-    ``--geometry`` is the best that is available for that purpose currently.
