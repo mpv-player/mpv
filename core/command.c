@@ -532,6 +532,15 @@ static int mp_property_pause(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_cache(m_option_t *prop, int action, void *arg,
+                             void *ctx)
+{
+    MPContext *mpctx = ctx;
+    int cache = mp_get_cache_percent(mpctx);
+    if (cache < 0)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop, action, arg, cache);
+}
 
 /// Volume (RW)
 static int mp_property_volume(m_option_t *prop, int action, void *arg,
@@ -1344,6 +1353,7 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "pause", mp_property_pause, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
+    { "cache", mp_property_cache, CONF_TYPE_INT },
     M_OPTION_PROPERTY("pts-association-mode"),
     M_OPTION_PROPERTY("hr-seek"),
 

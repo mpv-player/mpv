@@ -1017,7 +1017,7 @@ void init_vo_spudec(struct MPContext *mpctx)
     }
 }
 
-static int get_cache_percent(struct MPContext *mpctx)
+int mp_get_cache_percent(struct MPContext *mpctx)
 {
     if (mpctx->stream) {
         int64_t size = -1;
@@ -1030,7 +1030,7 @@ static int get_cache_percent(struct MPContext *mpctx)
     return -1;
 }
 
-static bool get_cache_idle(struct MPContext *mpctx)
+static bool mp_get_cache_idle(struct MPContext *mpctx)
 {
     int idle = 0;
     if (mpctx->stream)
@@ -1158,7 +1158,7 @@ static void print_status(struct MPContext *mpctx)
             saddf(&line, " D: %d", drop_frame_cnt);
     }
 
-    int cache = get_cache_percent(mpctx);
+    int cache = mp_get_cache_percent(mpctx);
     if (cache >= 0)
         saddf(&line, " C: %d%%", cache);
 
@@ -3117,8 +3117,8 @@ static void update_avsync(struct MPContext *mpctx)
 static void handle_pause_on_low_cache(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
-    int cache = get_cache_percent(mpctx);
-    bool idle = get_cache_idle(mpctx);
+    int cache = mp_get_cache_percent(mpctx);
+    bool idle = mp_get_cache_idle(mpctx);
     if (mpctx->paused && mpctx->paused_for_cache) {
         if (cache < 0 || cache >= opts->stream_cache_min_percent || idle)
             unpause_player(mpctx);
@@ -3386,7 +3386,7 @@ static void run_playloop(struct MPContext *mpctx)
     update_osd_msg(mpctx);
 
     // The cache status is part of the status line. Possibly update it.
-    if (mpctx->paused && get_cache_percent(mpctx) >= 0)
+    if (mpctx->paused && mp_get_cache_percent(mpctx) >= 0)
         print_status(mpctx);
 
     if (!video_left && (!mpctx->paused || was_restart)) {

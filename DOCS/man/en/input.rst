@@ -278,6 +278,7 @@ angle                       x current DVD angle
 metadata                      metadata key/value pairs
 metadata/<key>                value of metadata entry <key>
 pause                       x pause status (bool)
+cache                         network cache fill state (0-100)
 pts-association-mode        x see ``--pts-association-mode``
 hr-seek                     x see ``--hr-seek``
 volume                      x current volume (0-100)
