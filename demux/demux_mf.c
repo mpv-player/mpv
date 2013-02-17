@@ -198,6 +198,7 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] file type was not set! (try -mf type=ext)\n" );
     goto error;
   }
+  mp_set_video_codec_from_tag(sh_video);
 
   // make sure that the video demuxer stream header knows about its
   // parent video demuxer stream (this is getting wacky), or else
