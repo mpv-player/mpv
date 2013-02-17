@@ -330,6 +330,9 @@ The option ``--a`` is never reset here.
 CONFIGURATION FILES
 ===================
 
+Location and syntax
+-------------------
+
 You can put all of the options in configuration files which will be read every
 time mpv is run. The system-wide configuration file 'mpv.conf' is in
 your configuration directory (e.g. ``/etc/mpv`` or
@@ -339,6 +342,34 @@ command line override either. The syntax of the configuration files is
 ``option=<value>``, everything after a *#* is considered a comment. Options
 that work without values can be enabled by setting them to *yes* and disabled by
 setting them to *no*. Even suboptions can be specified in this way.
+
+*EXAMPLE CONFIGURATION FILE:*
+
+| # Use opengl video output by default.
+| vo=opengl
+| # Use quotes for text that can contain spaces:
+| status-msg="Time: ${time-pos}"
+
+Putting command line options into the configuration file
+--------------------------------------------------------
+
+Almost all command line options can be put into the configuration file. Here
+is a small guide:
+
++----------------------+--------------------------+
+| Option               | Configuration file entry |
++======================+==========================+
+| --flag               | flag                     |
++----------------------+--------------------------+
+| -opt val             | opt=val                  |
++----------------------+--------------------------+
+| --opt=val            | opt=val                  |
++----------------------+--------------------------+
+| -opt "has spaces"    | opt="has spaces"         |
++----------------------+--------------------------+
+
+File specific configuration files
+---------------------------------
 
 You can also write file-specific configuration files. If you wish to have a
 configuration file for a file called 'movie.avi', create a file named
@@ -352,21 +383,9 @@ file-specific configuration is loaded from ``~/.mpv``. In addition, the
 For this, mpv first tries to load a mpv.conf from the same directory
 as the file played and then tries to load any file-specific configuration.
 
-*EXAMPLE MPV CONFIGURATION FILE:*
 
-| # Use opengl video output by default.
-| vo=opengl
-| # I love practicing handstands while watching videos.
-| flip=yes
-| # Decode multiple files from PNG,
-| # start with mf://filemask
-| mf=type=png:fps=25
-| # Eerie negative images are cool.
-| vf=eq=1.0:-0.8
-
-
-PROFILES
-========
+Profiles
+--------
 
 To ease working with different configurations profiles can be defined in the
 configuration files. A profile starts with its name between square brackets,
@@ -377,6 +396,10 @@ option. To end the profile, start another one or use the profile name
 
 *EXAMPLE MPV PROFILE:*
 
+| [vo.vdpau]
+| # Use hardware decoding (this might break playback of some h264 files)
+| hwdec=vdpau
+|
 | [protocol.dvd]
 | profile-desc="profile for dvd:// streams"
 | vf=pp=hb/vb/dr/al/fd
