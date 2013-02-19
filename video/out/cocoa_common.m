@@ -51,8 +51,20 @@
 #define NSOpenGLProfileVersion3_2Core 0x3200
 #endif
 
-#define NSLeftAlternateKeyMask (0x000020 | NSAlternateKeyMask)
+#define NSLeftAlternateKeyMask  (0x000020 | NSAlternateKeyMask)
 #define NSRightAlternateKeyMask (0x000040 | NSAlternateKeyMask)
+
+static bool LeftAltPressed(NSEvent *event)
+{
+    return ([event modifierFlags] & NSLeftAlternateKeyMask) ==
+            NSLeftAlternateKeyMask;
+}
+
+static bool RightAltPressed(NSEvent *event)
+{
+    return ([event modifierFlags] & NSRightAlternateKeyMask) ==
+            NSRightAlternateKeyMask;
+}
 
 // add methods not available on OSX versions prior to 10.7
 #ifndef MAC_OS_X_VERSION_10_7
@@ -678,22 +690,21 @@ void create_menu()
 
 - (void)keyDown:(NSEvent *)theEvent
 {
-    unsigned char charcode;
-    if (([theEvent modifierFlags] & NSRightAlternateKeyMask) ==
-            NSRightAlternateKeyMask)
-        charcode = *[[theEvent characters] UTF8String];
-    else
-        charcode = [[theEvent charactersIgnoringModifiers] characterAtIndex:0];
+    NSString *chars;
 
-    int key = convert_key([theEvent keyCode], charcode);
+    if (RightAltPressed(theEvent))
+        chars = [theEvent characters];
+    else
+        chars = [theEvent charactersIgnoringModifiers];
+
+    int key = convert_key([theEvent keyCode], *[chars UTF8String]);
 
     if (key > -1) {
         if ([theEvent modifierFlags] & NSShiftKeyMask)
             key |= MP_KEY_MODIFIER_SHIFT;
         if ([theEvent modifierFlags] & NSControlKeyMask)
             key |= MP_KEY_MODIFIER_CTRL;
-        if (([theEvent modifierFlags] & NSLeftAlternateKeyMask) ==
-                NSLeftAlternateKeyMask)
+        if (LeftAltPressed(theEvent))
             key |= MP_KEY_MODIFIER_ALT;
         if ([theEvent modifierFlags] & NSCommandKeyMask)
             key |= MP_KEY_MODIFIER_META;
