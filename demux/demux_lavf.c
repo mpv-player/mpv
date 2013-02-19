@@ -724,7 +724,14 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs,
 
     if (!priv->avfc->iformat->read_seek2) {
         // Normal seeking.
-        av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
+        int r = av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
+        if (r < 0 && (avsflags & AVSEEK_FLAG_BACKWARD)) {
+            // When seeking before the beginning of the file, and seeking fails,
+            // try again without the backwards flag to make it seek to the
+            // beginning.
+            avsflags &= ~AVSEEK_FLAG_BACKWARD;
+            av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
+        }
     } else {
         // av_seek_frame() won't work. Use "new" seeking API. We don't use this
         // API by default, because there are some major issues.
