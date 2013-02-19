@@ -3028,6 +3028,8 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter)
     char *dname = name;
     if (name) {
         dname = talloc_asprintf(NULL, "(%d) %s", chapter + 1, name);
+    } else if (chapter < -1) {
+        dname = talloc_strdup(NULL, "(unavailable)");
     } else {
         int chapter_count = get_chapter_count(mpctx);
         if (chapter_count <= 0)
@@ -3044,8 +3046,11 @@ char *chapter_display_name(struct MPContext *mpctx, int chapter)
 // returns NULL if chapter name unavailable
 char *chapter_name(struct MPContext *mpctx, int chapter)
 {
-    if (mpctx->chapters)
+    if (mpctx->chapters) {
+        if (chapter < 0 || chapter >= mpctx->num_chapters)
+            return NULL;
         return talloc_strdup(NULL, mpctx->chapters[chapter].name);
+    }
     if (mpctx->master_demuxer)
         return demuxer_chapter_name(mpctx->master_demuxer, chapter);
     return NULL;
