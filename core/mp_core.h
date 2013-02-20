@@ -127,8 +127,9 @@ typedef struct MPContext {
     subtitle subs; // subtitle list used when reading subtitles from demuxer
 
     int add_osd_seek_info; // bitfield of enum mp_osd_seek_info
-    unsigned int osd_visible;
+    unsigned int osd_visible; // for the osd bar only
     int osd_function;
+    unsigned int osd_function_visible;
 
     struct playlist *playlist;
     char *filename; // currently playing file

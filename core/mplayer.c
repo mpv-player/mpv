@@ -1311,6 +1311,11 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
             mpctx->osd_visible = 0;
             mpctx->osd->progbar_type = -1; // disable
             vo_osd_changed(OSDTYPE_PROGBAR);
+        }
+    }
+    if (mpctx->osd_function_visible) {
+        if (mpctx->osd_function_visible - now > 36000000) {
+            mpctx->osd_function_visible = 0;
             mpctx->osd_function = 0;
         }
     }
@@ -1380,8 +1385,11 @@ static void update_osd_bar(struct MPContext *mpctx, int type,
                            double min, double max, double val)
 {
     if (mpctx->osd->progbar_type == type) {
-        mpctx->osd->progbar_value = 256 * (val - min) / (max - min);
-        vo_osd_changed(OSDTYPE_PROGBAR);
+        int new_value = 256 * (val - min) / (max - min);
+        if (new_value != mpctx->osd->progbar_value) {
+            mpctx->osd->progbar_value = new_value;
+            vo_osd_changed(OSDTYPE_PROGBAR);
+        }
     }
 }
 
@@ -1390,7 +1398,7 @@ void set_osd_function(struct MPContext *mpctx, int osd_function)
     struct MPOpts *opts = &mpctx->opts;
 
     mpctx->osd_function = osd_function;
-    mpctx->osd_visible = (GetTimerMS() + opts->osd_duration) | 1;
+    mpctx->osd_function_visible = (GetTimerMS() + opts->osd_duration) | 1;
 }
 
 /**
@@ -1502,6 +1510,7 @@ static void update_osd_msg(struct MPContext *mpctx)
     struct osd_state *osd = mpctx->osd;
 
     add_seek_osd_messages(mpctx);
+    update_osd_bar(mpctx, OSD_BAR_SEEK, 0, 100, get_percent_pos(mpctx));
 
     // Look if we have a msg
     mp_osd_msg_t *msg = get_osd_msg(mpctx);
@@ -1535,9 +1544,6 @@ static void update_osd_msg(struct MPContext *mpctx)
 
         osd_set_text(osd, text);
         talloc_free(text);
-
-        if (msg && msg->show_position)
-            update_osd_bar(mpctx, OSD_BAR_SEEK, 0, 100, get_percent_pos(mpctx));
         return;
     }
 
