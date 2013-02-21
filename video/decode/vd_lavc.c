@@ -157,7 +157,7 @@ static int init(sh_video_t *sh, const char *decoder)
     if (hwdec) {
         AVCodec *lavc_hwcodec = avcodec_find_decoder_by_name(hwdec->hw_codec);
         if (lavc_hwcodec) {
-            ctx->software_fallback_decoder = decoder;
+            ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
             decoder = lavc_hwcodec->name;
         } else {
             hwdec = NULL;
