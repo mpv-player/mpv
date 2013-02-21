@@ -118,27 +118,6 @@ typedef struct m_obj_settings {
  */
 extern const m_option_type_t m_option_type_obj_settings_list;
 
-// Extra definition needed for \ref m_option_type_obj_presets options.
-typedef struct {
-    // Description of the struct holding the presets.
-    const struct m_struct_st *in_desc;
-    // Description of the struct that should be set by the presets.
-    const struct m_struct_st *out_desc;
-    // Pointer to an array of structs defining the various presets.
-    const void *presets;
-    // Offset of the preset's name inside the in_struct.
-    void *name_off;
-} m_obj_presets_t;
-
-// Set several fields in a struct at once.
-/** For this two struct descriptions are used. One for the struct holding the
- *  preset and one for the struct beeing set. Every field present in both
- *  structs will be copied from the preset struct to the destination one.
- *  The option priv field (\ref m_option::priv) must point to a correctly
- *  filled \ref m_obj_presets_t.
- */
-extern const m_option_type_t m_option_type_obj_presets;
-
 // Parse an URL into a struct.
 /** The option priv field (\ref m_option::priv) must point to a
  *  \ref m_struct_st describing which fields of the URL must be used.
@@ -196,7 +175,6 @@ struct m_sub_options {
 #define CONF_TYPE_AFMT          (&m_option_type_afmt)
 #define CONF_TYPE_SPAN          (&m_option_type_span)
 #define CONF_TYPE_OBJ_SETTINGS_LIST (&m_option_type_obj_settings_list)
-#define CONF_TYPE_OBJ_PRESETS   (&m_option_type_obj_presets)
 #define CONF_TYPE_CUSTOM_URL    (&m_option_type_custom_url)
 #define CONF_TYPE_OBJ_PARAMS    (&m_option_type_obj_params)
 #define CONF_TYPE_TIME          (&m_option_type_time)
