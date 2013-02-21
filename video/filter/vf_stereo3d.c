@@ -409,11 +409,7 @@ static int vf_open(vf_instance_t *vf, char *args)
     return 1;
 }
 
-///Presets usage
-static const struct format_preset {
-  char* name;
-  stereo_code scode;
-} vf_format_presets_defs[] = {
+const struct m_opt_choice_alternatives stereo_code_names[] = {
     {"arcg",                             ANAGLYPH_RC_GRAY},
     {"anaglyph_red_cyan_gray",           ANAGLYPH_RC_GRAY},
     {"arch",                             ANAGLYPH_RC_HALF},
@@ -465,53 +461,11 @@ static const struct format_preset {
     { NULL, 0}
 };
 
-#define ST_OFF(f) M_ST_OFF(struct format_preset,f)
-static const m_option_t vf_format_preset_fields_in[] = {
-  {"in", ST_OFF(scode), CONF_TYPE_INT, 0,0,0, NULL},
-  { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-static const m_option_t vf_format_preset_fields_out[] = {
-  {"out", ST_OFF(scode), CONF_TYPE_INT, 0,0,0, NULL},
-  { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-
-static const m_struct_t vf_format_preset_in = {
-  "stereo_format_preset_in",
-  sizeof(struct format_preset),
-  NULL,
-  vf_format_preset_fields_in
-};
-static const m_struct_t vf_format_preset_out = {
-  "stereo_format_preset_out",
-  sizeof(struct format_preset),
-  NULL,
-  vf_format_preset_fields_out
-};
-
-static const m_struct_t vf_opts;
-static const m_obj_presets_t format_preset_in = {
-  (struct m_struct_st*)&vf_format_preset_in,
-  (struct m_struct_st*)&vf_opts,
-  (struct format_preset*)vf_format_presets_defs,
-  ST_OFF(name)
-};
-static const m_obj_presets_t format_preset_out = {
-  (struct m_struct_st*)&vf_format_preset_out,
-  (struct m_struct_st*)&vf_opts,
-  (struct format_preset*)vf_format_presets_defs,
-  ST_OFF(name)
-};
-
-/// Now the options
 #undef ST_OFF
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
 static const m_option_t vf_opts_fields[] = {
-  {"stereo_in", 0, CONF_TYPE_OBJ_PRESETS, 0, 0, 0,
-                   (m_obj_presets_t*)&format_preset_in},
-  {"stereo_out", 0, CONF_TYPE_OBJ_PRESETS, 0, 0, 0,
-                    (m_obj_presets_t*)&format_preset_out},
-  {"in", ST_OFF(in.fmt), CONF_TYPE_INT, 0,0,0, NULL},
-  {"out", ST_OFF(out.fmt), CONF_TYPE_INT, 0,0,0, NULL},
+  {"in", ST_OFF(in.fmt), CONF_TYPE_CHOICE, .priv = (void *)stereo_code_names},
+  {"out", ST_OFF(out.fmt), CONF_TYPE_CHOICE,  .priv = (void *)stereo_code_names},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 
