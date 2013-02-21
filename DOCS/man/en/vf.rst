@@ -97,7 +97,7 @@ rotate[=<0-7>]
     :2: Rotate by 90 degrees counterclockwise.
     :3: Rotate by 90 degrees counterclockwise and flip.
 
-scale[=w:h[:interlaced[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
+scale[=w:h[:interlaced[:chr_drop[:par[:par2[:noup[:arnd]]]]]]]
     Scales the image with the software scaler (slow) and performs a YUV<->RGB
     colorspace conversion (see also ``--sws``).
 
@@ -141,16 +141,6 @@ scale[=w:h[:interlaced[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
         --sws=7 (gaussian): sharpness (0 (soft) - 100 (sharp))
 
         --sws=9 (lanczos):  filter length (1-10)
-
-    <presize>
-        Scale to preset sizes.
-
-        :qntsc: 352x240 (NTSC quarter screen)
-        :qpal:  352x288 (PAL quarter screen)
-        :ntsc:  720x480 (standard NTSC)
-        :pal:   720x576 (standard PAL)
-        :sntsc: 640x480 (square pixel NTSC)
-        :spal:  768x576 (square pixel PAL)
 
     <noup>
         Disallow upscaling past the original dimensions.

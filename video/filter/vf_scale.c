@@ -520,44 +520,6 @@ static int vf_open(vf_instance_t *vf, char *args){
     return 1;
 }
 
-/// An example of presets usage
-static const struct size_preset {
-  char* name;
-  int w, h;
-} vf_size_presets_defs[] = {
-  // TODO add more 'standard' resolutions
-  { "qntsc", 352, 240 },
-  { "qpal", 352, 288 },
-  { "ntsc", 720, 480 },
-  { "pal", 720, 576 },
-  { "sntsc", 640, 480 },
-  { "spal", 768, 576 },
-  { NULL, 0, 0}
-};
-
-#define ST_OFF(f) M_ST_OFF(struct size_preset,f)
-static const m_option_t vf_size_preset_fields[] = {
-  {"w", ST_OFF(w), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
-  {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,1 ,0, NULL},
-  { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-
-static const m_struct_t vf_size_preset = {
-  "scale_size_preset",
-  sizeof(struct size_preset),
-  NULL,
-  vf_size_preset_fields
-};
-
-static const m_struct_t vf_opts;
-static const m_obj_presets_t size_preset = {
-  &vf_size_preset, // Input struct desc
-  &vf_opts, // Output struct desc
-  vf_size_presets_defs, // The list of presets
-  ST_OFF(name) // At wich offset is the name field in the preset struct
-};
-
-/// Now the options
 #undef ST_OFF
 #define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
 static const m_option_t vf_opts_fields[] = {
@@ -567,9 +529,6 @@ static const m_option_t vf_opts_fields[] = {
   {"chr-drop", ST_OFF(v_chr_drop), CONF_TYPE_INT, M_OPT_RANGE, 0, 3, NULL},
   {"param" , ST_OFF(param[0]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
   {"param2", ST_OFF(param[1]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
-  // Note that here the 2 field is NULL (ie 0)
-  // As we want this option to act on the option struct itself
-  {"presize", 0, CONF_TYPE_OBJ_PRESETS, 0, 0, 0, (void *)&size_preset},
   {"noup", ST_OFF(noup), CONF_TYPE_INT, M_OPT_RANGE, 0, 2, NULL},
   {"arnd", ST_OFF(accurate_rnd), CONF_TYPE_FLAG, 0, 0, 1, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
