@@ -157,7 +157,7 @@ input.conf and slave commands
     |                                | a negative step instead.               |
     +--------------------------------+----------------------------------------+
     | step_property <prop> <step>    | Prefix cycle or add with no-osd:       |
-    | <dur>                          | no-osd cycle <prop> <step>             |
+    | <dir>                          | no-osd cycle <prop> <step>             |
     +--------------------------------+----------------------------------------+
     | osd_show_property_text <text>  | show_text <text>                       |
     |                                | The property expansion format string   |

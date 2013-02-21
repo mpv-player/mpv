@@ -355,14 +355,6 @@ struct m_option {
 // The option should be set during command line pre-parsing
 #define M_OPT_PRE_PARSE         (1 << 6)
 
-// For options with children, add all children as top-level arguments
-// (e.g. "--parent=child=value" becomes "--parent-child=value")
-#define M_OPT_PREFIXED          (1 << 8)
-
-// Similar to M_OPT_PREFIXED, but drop the prefix.
-// (e.g. "--parent=child=value" becomes "--child=value")
-#define M_OPT_MERGE             (1 << 9)
-
 // See M_OPT_TYPE_OPTIONAL_PARAM.
 #define M_OPT_OPTIONAL_PARAM    (1 << 10)
 
@@ -555,10 +547,12 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_TRACKCHOICE(name, var) OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))
 
 // subconf must have the type struct m_sub_options.
-// flagv should be M_OPT_MERGE or M_OPT_FLATTEN.
+// All sub-options are prefixed with "name-" and are added to the current
+// (containing) option list.
+// If name is "", add the sub-options directly instead.
 // varname refers to the field, that must be a pointer to a field described by
 // the subconf struct.
-#define OPT_SUBSTRUCT(varname, subconf, flagv) OPT_GENERAL("-", varname, flagv, .type = &m_option_type_subconfig_struct, .priv = (void*)&subconf)
+#define OPT_SUBSTRUCT(name, varname, subconf, flagv) OPT_GENERAL(name, varname, flagv, .type = &m_option_type_subconfig_struct, .priv = (void*)&subconf)
 
 #define OPT_BASE_STRUCT struct MPOpts
 

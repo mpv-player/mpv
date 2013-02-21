@@ -35,7 +35,7 @@ struct m_sub_options;
 // Config option
 struct m_config_option {
     struct m_config_option *next;
-    // Full name (ie option:subopt).
+    // Full name (ie option-subopt).
     char *name;
     // Option description.
     const struct m_option *opt;

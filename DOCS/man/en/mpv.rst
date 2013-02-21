@@ -49,7 +49,7 @@ INTERACTIVE CONTROL
 
 mpv has a fully configurable, command-driven control layer which allows you
 to control mpv using keyboard, mouse, joystick or remote control (with
-LIRC). See the ``--input`` option for ways to customize it.
+LIRC). See the ``--input-`` options for ways to customize it.
 
 keyboard control
 ----------------
@@ -588,7 +588,7 @@ FILES
     mpv user settings
 
 ``~/.mpv/input.conf``
-    input bindings (see ``--input=keylist`` for the full list)
+    input bindings (see ``--input-keylist`` for the full list)
 
 ``~/.mpv/DVDkeys/``
     cached CSS keys

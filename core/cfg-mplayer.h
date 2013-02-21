@@ -95,11 +95,8 @@ const m_option_t tvopts_conf[]={
     {"saturation", &stream_tv_defaults.saturation, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
     {"gain", &stream_tv_defaults.gain, CONF_TYPE_INT, CONF_RANGE, -1, 100, NULL},
 #if defined(CONFIG_TV_V4L2)
-    {"buffersize", &stream_tv_defaults.buffer_size, CONF_TYPE_INT, CONF_RANGE, 16, 1024, NULL},
     {"amode", &stream_tv_defaults.amode, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
     {"volume", &stream_tv_defaults.volume, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
-#endif
-#if defined(CONFIG_TV_V4L2)
     {"bass", &stream_tv_defaults.bass, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
     {"treble", &stream_tv_defaults.treble, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
     {"balance", &stream_tv_defaults.balance, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
@@ -502,12 +499,8 @@ const m_option_t common_opts[] = {
     OPT_FLAG("osd-bar", osd_bar_visible, 0),
     OPT_FLOATRANGE("osd-bar-align-x", osd_bar_align_x, 0, -1.0, +1.0),
     OPT_FLOATRANGE("osd-bar-align-y", osd_bar_align_y, 0, -1.0, +1.0),
-    OPT_GENERAL("osd", osd_style, M_OPT_PREFIXED,
-                .type = &m_option_type_subconfig_struct,
-                .priv = (void*)&osd_style_conf),
-    OPT_GENERAL("sub-text", sub_text_style, M_OPT_PREFIXED,
-                .type = &m_option_type_subconfig_struct,
-                .priv = (void*)&osd_style_conf),
+    OPT_SUBSTRUCT("osd", osd_style, osd_style_conf, 0),
+    OPT_SUBSTRUCT("sub-text", sub_text_style, osd_style_conf, 0),
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -523,7 +516,7 @@ const m_option_t tvscan_conf[]={
 extern const struct m_sub_options image_writer_conf;
 
 const m_option_t screenshot_conf[] = {
-    OPT_SUBSTRUCT(screenshot_image_opts, image_writer_conf, M_OPT_MERGE),
+    OPT_SUBSTRUCT("", screenshot_image_opts, image_writer_conf, 0),
     OPT_STRING("template", screenshot_template, 0),
     {0},
 };
@@ -694,8 +687,7 @@ const m_option_t mplayer_opts[]={
     {"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif /* CONFIG_TV */
 
-    {"screenshot", (void *) screenshot_conf, CONF_TYPE_SUBCONFIG,
-     M_OPT_PREFIXED, 0, 0, NULL},
+    {"screenshot", (void *) screenshot_conf, CONF_TYPE_SUBCONFIG},
 
     OPT_FLAG("list-properties", list_properties, CONF_GLOBAL),
     {"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},

@@ -196,7 +196,7 @@ const struct vo_driver video_out_image =
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
     },
     .options = (const struct m_option[]) {
-        OPT_SUBSTRUCT(opts, image_writer_conf, M_OPT_MERGE),
+        OPT_SUBSTRUCT("", opts, image_writer_conf, 0),
         OPT_STRING("outdir", outdir, 0),
         {0},
     },

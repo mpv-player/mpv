@@ -896,55 +896,47 @@
     their start timestamps differ, and then video timing is gradually adjusted
     if necessary to reach correct synchronization later.
 
---input=<commands>
-    This option can be used to configure certain parts of the input system.
-    Paths are relative to ``~/.mpv/``.
+--input-conf=<filename>
+    Specify input configuration file other than the default
+    ``~/.mpv/input.conf``.
 
-    *NOTE*: Autorepeat is currently only supported by joysticks.
+--input-ar-dev=<device>
+    Device to be used for Apple IR Remote (default is autodetected, Linux
+    only).
 
-    Available commands are:
+--input-ar-delay
+    Delay in milliseconds before we start to autorepeat a key (0 to
+    disable).
 
-    conf=<filename>
-        Specify input configuration file other than the default
-        ``~/.mpv/input.conf``.
+--input-ar-rate
+    Number of key presses to generate per second on autorepeat.
 
-    ar-dev=<device>
-        Device to be used for Apple IR Remote (default is autodetected, Linux
-        only).
+--no-input-default-bindings
+    Use the key bindings that mpv ships with by default.
 
-    ar-delay
-        Delay in milliseconds before we start to autorepeat a key (0 to
-        disable).
+--input-keylist
+    Prints all keys that can be bound to commands.
 
-    ar-rate
-        Number of key presses to generate per second on autorepeat.
+--input-cmdlist
+    Prints all commands that can be bound to keys.
 
-    (no-)default-bindings
-        Use the key bindings that mpv ships with by default.
+--input-js-dev
+    Specifies the joystick device to use (default: ``/dev/input/js0``).
 
-    keylist
-        Prints all keys that can be bound to commands.
+--input-file=<filename>
+    Read commands from the given file. Mostly useful with a FIFO.
+    See also ``--slave``.
 
-    cmdlist
-        Prints all commands that can be bound to keys.
+    *NOTE*: When the given file is a FIFO mpv opens both ends so you
+    can do several `echo "seek 10" > mp_pipe` and the pipe will stay
+    valid.
 
-    js-dev
-        Specifies the joystick device to use (default: ``/dev/input/js0``).
-
-    file=<filename>
-        Read commands from the given file. Mostly useful with a FIFO.
-        See also ``--slave``.
-
-        *NOTE*: When the given file is a FIFO mpv opens both ends so you
-        can do several `echo "seek 10" > mp_pipe` and the pipe will stay
-        valid.
-
-    test
-        Input test mode. Instead of executing commands on key presses, mpv
-        will show the keys and the bound commands on the OSD. Has to be used
-        with a dummy video, and the normal ways to quit the player will not
-        work (key bindings that normally quit will be shown on OSD only, just
-        like any other binding).
+--input-test
+    Input test mode. Instead of executing commands on key presses, mpv
+    will show the keys and the bound commands on the OSD. Has to be used
+    with a dummy video, and the normal ways to quit the player will not
+    work (key bindings that normally quit will be shown on OSD only, just
+    like any other binding).
 
 --ipv4-only-proxy
     Skip any HTTP proxy for IPv6 addresses. It will still be used for IPv4
