@@ -647,8 +647,8 @@ const m_option_t mplayer_opts[]={
 
     {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN, 1, 0, NULL},
     {"shuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
-    {"{", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
-    {"}", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
+    {"{", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
+    {"}", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
 
     OPT_FLAG("ordered-chapters", ordered_chapters, 0),
     OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),

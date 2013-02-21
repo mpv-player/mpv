@@ -202,6 +202,10 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 shuffle = parse_flag(p.arg, p.param);
                 continue;
             }
+            if (bstrcmp0(p.arg, "no-shuffle") == 0) {
+                shuffle = false;
+                continue;
+            }
 
             if (bstrcmp0(p.arg, "playlist") == 0) {
                 // append the playlist to the local args
