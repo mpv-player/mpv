@@ -1677,7 +1677,6 @@
     Available options are:
 
     :fps=<value>:                  rate in frames per second (default: 25.0)
-    :sqcif|qcif|cif|4cif|pal|ntsc: set standard image size
     :w=<value>:                    image width in pixels
     :h=<value>:                    image height in pixels
     :format=<value>:               colorspace (fourcc) in hex or string

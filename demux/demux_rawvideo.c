@@ -34,7 +34,6 @@
 
 static int format = MP_FOURCC_I420;
 static int mp_format;
-static int size_id = 0;
 static int width = 0;
 static int height = 0;
 static float fps = 25;
@@ -44,14 +43,6 @@ const m_option_t demux_rawvideo_opts[] = {
   // size:
   { "w", &width, CONF_TYPE_INT,CONF_RANGE,1,8192, NULL },
   { "h", &height, CONF_TYPE_INT,CONF_RANGE,1,8192, NULL },
-  { "sqcif", &size_id, CONF_TYPE_FLAG,0,0,1, NULL },
-  { "qcif", &size_id, CONF_TYPE_FLAG,0,0,2, NULL },
-  { "cif", &size_id, CONF_TYPE_FLAG,0,0,3, NULL },
-  { "4cif", &size_id, CONF_TYPE_FLAG,0,0,4, NULL },
-  { "pal", &size_id, CONF_TYPE_FLAG,0,0,5, NULL },
-  { "ntsc", &size_id, CONF_TYPE_FLAG,0,0,6, NULL },
-  { "16cif", &size_id, CONF_TYPE_FLAG,0,0,7, NULL },
-  { "sif", &size_id, CONF_TYPE_FLAG,0,0,8, NULL },
   // format:
   { "format", &format, CONF_TYPE_FOURCC, 0, 0 , 0, NULL },
   { "mp-format", &mp_format, CONF_TYPE_IMGFMT, 0, 0 , 0, NULL },
@@ -66,16 +57,6 @@ const m_option_t demux_rawvideo_opts[] = {
 static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
   sh_video_t* sh_video;
 
-  switch(size_id){
-  case 1: width=128; height=96; break;
-  case 2: width=176; height=144; break;
-  case 3: width=352; height=288; break;
-  case 4: width=704; height=576; break;
-  case 5: width=720; height=576; break;
-  case 6: width=720; height=480; break;
-  case 7: width=1408;height=1152;break;
-  case 8: width=352; height=240; break;
-  }
   if(!width || !height){
       mp_msg(MSGT_DEMUX,MSGL_ERR,"rawvideo: width or height not specified!\n");
       return 0;
