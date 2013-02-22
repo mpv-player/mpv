@@ -601,7 +601,7 @@ phase[=t|b|p|a|u|T|B|A|U][:v]
         average squared difference between fields for t, b, and p
         alternatives.
 
-yadif=[mode[:field_dominance]]
+yadif=[mode[:enabled=yes|no]]
     Yet another deinterlacing filter
 
     <mode>
@@ -610,11 +610,10 @@ yadif=[mode[:field_dominance]]
         :2: Like 0 but skips spatial interlacing check.
         :3: Like 1 but skips spatial interlacing check.
 
-    <field_dominance> (DEPRECATED)
-        Operates like tfields.
-
-        *NOTE*: This option will possibly be removed in a future version. Use
-        ``--field-dominance`` instead.
+    <enabled>
+        :yes: Filter is active (default).
+        :no:  Filter is not active, but can be deactivated with the ``D`` key
+              (or any other key that toggles the ``deinterlace`` property).
 
 down3dright[=lines]
     Reposition and resize stereoscopic images. Extracts both stereo fields and

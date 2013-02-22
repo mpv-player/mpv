@@ -27,6 +27,7 @@
 #include "config.h"
 #include "core/cpudetect.h"
 #include "core/options.h"
+#include "core/m_struct.h"
 
 #include "core/mp_msg.h"
 #include "video/img_format.h"
@@ -48,6 +49,10 @@ struct vf_priv_s {
     int stride[3];
     uint8_t *ref[4][3];
     int do_deinterlace;
+};
+
+static const struct vf_priv_s vf_priv_default = {
+    .do_deinterlace = 1,
 };
 
 static void (*filter_line)(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, uint8_t *cur, uint8_t *next, int w, int refs, int parity);
@@ -470,8 +475,6 @@ static void uninit(struct vf_instance *vf){
         if(*p) free(*p - 3*vf->priv->stride[i/3]);
         *p= NULL;
     }
-    free(vf->priv);
-    vf->priv=NULL;
 }
 
 //===========================================================================//
@@ -501,13 +504,9 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->filter_ext=filter_image;
     vf->query_format=query_format;
     vf->uninit=uninit;
-    vf->priv=malloc(sizeof(struct vf_priv_s));
     vf->control=control;
-    memset(vf->priv, 0, sizeof(struct vf_priv_s));
 
-    vf->priv->mode=0;
     vf->priv->parity= -1;
-    vf->priv->do_deinterlace=1;
 
     if (args) sscanf(args, "%d:%d", &vf->priv->mode, &vf->priv->parity);
 
@@ -519,11 +518,26 @@ static int vf_open(vf_instance_t *vf, char *args){
     return 1;
 }
 
+#undef ST_OFF
+#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+static const m_option_t vf_opts_fields[] = {
+  {"mode", ST_OFF(mode), CONF_TYPE_INT, M_OPT_RANGE, 0, 3},
+  {"enabled", ST_OFF(do_deinterlace), CONF_TYPE_FLAG, 0, 0, 1},
+  {0}
+};
+
+static const m_struct_t vf_opts = {
+  "yadif",
+  sizeof(struct vf_priv_s),
+  &vf_priv_default,
+  vf_opts_fields
+};
+
 const vf_info_t vf_info_yadif = {
     "Yet Another DeInterlacing Filter",
     "yadif",
     "Michael Niedermayer",
     "",
     vf_open,
-    NULL
+    &vf_opts
 };
