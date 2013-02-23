@@ -31,7 +31,6 @@
 #include "playlist.h"
 #include "playlist_parser.h"
 #include "parser-mpcmd.h"
-#include "osdep/macosx_finder_args.h"
 
 #define GLOBAL 0
 #define LOCAL 1
@@ -133,10 +132,6 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
     assert(!config->file_local_mode);
 
     mode = GLOBAL;
-#ifdef CONFIG_MACOSX_FINDER
-    if (macosx_finder_args(config, files, argc, argv))
-        return true;
-#endif
 
     struct parse_state p = {config, argc, argv};
     while (split_opt(&p)) {

@@ -1073,7 +1073,6 @@ static OSStatus RenderCallbackSPDIF( AudioDeviceID inDevice,
 static int play(void* output_samples,int num_bytes,int flags)
 {
     int wrote, b_digital;
-    SInt32 exit_reason;
 
     // Check whether we need to reset the digital output stream.
     if (ao->b_digital && ao->b_stream_format_changed)
@@ -1102,10 +1101,6 @@ static int play(void* output_samples,int num_bytes,int flags)
 
     wrote=write_buffer(output_samples, num_bytes);
     audio_resume();
-
-    do {
-        exit_reason = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
-    } while (exit_reason == kCFRunLoopRunHandledSource);
 
     return wrote;
 }

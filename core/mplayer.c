@@ -86,6 +86,10 @@
 #include "video/out/x11_common.h"
 #endif
 
+#ifdef CONFIG_COCOA
+#include "osdep/macosx_application.h"
+#endif
+
 #include "audio/out/ao.h"
 
 #include "core/codecs.h"
@@ -607,7 +611,14 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 
     talloc_free(mpctx);
 
+#ifdef CONFIG_COCOA
+    terminate_cocoa_application();
+    // never reach here:
+    // terminate calls exit itself, just silence compiler warning
+    exit(0);
+#else
     exit(rc);
+#endif
 }
 
 static void mk_config_dir(char *subdir)
@@ -3792,6 +3803,32 @@ static void run_playloop(struct MPContext *mpctx)
     execute_queued_seek(mpctx);
 }
 
+static void run_playloop_opaque_callback(void *context)
+{
+    run_playloop((struct MPContext *)context);
+}
+
+static int check_stop_play(void *context)
+{
+    struct MPContext *mpctx = context;
+    return mpctx->stop_play;
+}
+
+static void schedule_run_playloop(struct MPContext *mpctx)
+{
+
+    #ifdef CONFIG_COCOA
+        cocoa_run_loop_schedule(run_playloop_opaque_callback,
+                                check_stop_play,
+                                mpctx, // passed in as opaque type
+                                mpctx->input,
+                                mpctx->key_fifo);
+        cocoa_run_runloop();
+    #else
+        while (!check_stop_play(mpctx))
+            run_playloop(mpctx);
+    #endif
+}
 
 static int read_keys(void *ctx, int fd)
 {
@@ -4395,8 +4432,7 @@ goto_enable_cache: ;
     if (mpctx->opts.pause)
         pause_player(mpctx);
 
-    while (!mpctx->stop_play)
-        run_playloop(mpctx);
+    schedule_run_playloop(mpctx);
 
     mp_msg(MSGT_GLOBAL, MSGL_V, "EOF code: %d  \n", mpctx->stop_play);
 
@@ -4584,6 +4620,11 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
         talloc_enable_leak_report();
 
     GetCpuCaps(&gCpuCaps);
+
+#ifdef CONFIG_COCOA
+    init_cocoa_application();
+    macosx_finder_args_preinit(p_argc, p_argv);
+#endif
 
 #ifdef __MINGW32__
     mp_get_converted_argv(p_argc, p_argv);

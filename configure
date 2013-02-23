@@ -316,8 +316,6 @@ Optional features:
   --disable-dvdread      disable libdvdread [autodetect]
   --disable-cddb         disable cddb [autodetect]
   --disable-enca         disable ENCA charset oracle library [autodetect]
-  --enable-macosx-finder enable Mac OS X Finder invocation parameter
-                         parsing [disabled]
   --enable-macosx-bundle enable Mac OS X bundle file locations [autodetect]
   --disable-inet6        disable IPv6 support [autodetect]
   --disable-gethostbyname2  gethostbyname2 part of the C library [autodetect]
@@ -476,7 +474,6 @@ _cddb=auto
 _coreaudio=auto
 _corevideo=auto
 _cocoa=auto
-_macosx_finder=no
 _macosx_bundle=auto
 _enca=auto
 _inet6=auto
@@ -722,8 +719,6 @@ for ac_option do
   --disable-corevideo) _corevideo=no ;;
   --enable-cocoa) _cocoa=yes ;;
   --disable-cocoa) _cocoa=no ;;
-  --enable-macosx-finder) _macosx_finder=yes ;;
-  --disable-macosx-finder) _macosx_finder=no ;;
   --enable-macosx-bundle) _macosx_bundle=yes ;;
   --disable-macosx-bundle) _macosx_bundle=no ;;
 
@@ -1665,17 +1660,9 @@ echores "$_sys_sysinfo"
 
 if darwin; then
 
-echocheck "Mac OS X Finder Support"
-def_macosx_finder='#undef CONFIG_MACOSX_FINDER'
-if test "$_macosx_finder" = yes ; then
-  def_macosx_finder='#define CONFIG_MACOSX_FINDER 1'
-  libs_mplayer="$libs_mplayer -framework Cocoa"
-fi
-echores "$_macosx_finder"
-
 echocheck "Mac OS X Bundle file locations"
 def_macosx_bundle='#undef CONFIG_MACOSX_BUNDLE'
-test "$_macosx_bundle" = auto && _macosx_bundle=$_macosx_finder
+test "$_macosx_bundle" = auto
 if test "$_macosx_bundle" = yes ; then
   extra_ldflags="$extra_ldflags -headerpad_max_install_names"
   def_macosx_bundle='#define CONFIG_MACOSX_BUNDLE 1'
@@ -3087,7 +3074,6 @@ LIBSMBCLIENT = $_smb
 LIBQUVI = $_libquvi
 LIBTHEORA = $_theora
 LIRC = $_lirc
-MACOSX_FINDER = $_macosx_finder
 MACOSX_BUNDLE = $_macosx_bundle
 MNG = $_mng
 MPG123 = $_mpg123
@@ -3190,7 +3176,6 @@ $def_dl
 $def_dos_paths
 $def_iconv
 $def_macosx_bundle
-$def_macosx_finder
 $def_priority
 
 
