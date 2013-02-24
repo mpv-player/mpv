@@ -54,7 +54,7 @@ char *network_username=NULL;
 char *network_password=NULL;
 int   network_bandwidth=0;
 int   network_cookies_enabled = 0;
-char *network_useragent="Mozilla/5.0";
+char *network_useragent="MPlayer 1.1-4.7";
 char *network_referrer=NULL;
 char **network_http_header_fields=NULL;
 
