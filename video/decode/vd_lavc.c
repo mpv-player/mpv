@@ -671,9 +671,11 @@ static int control(sh_video_t *sh, int cmd, void *arg)
         return CONTROL_TRUE;
     case VDCTRL_QUERY_UNSEEN_FRAMES:;
         int delay = avctx->has_b_frames;
+        assert(delay >= 0);
         if (avctx->active_thread_type & FF_THREAD_FRAME)
             delay += avctx->thread_count - 1;
-        return delay + 10;
+        *(int *)arg = delay;
+        return CONTROL_TRUE;
     case VDCTRL_RESET_ASPECT:
         if (ctx->vo_initialized)
             ctx->vo_initialized = false;

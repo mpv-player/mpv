@@ -172,10 +172,9 @@ int get_current_video_decoder_lag(sh_video_t *sh_video)
     const struct vd_functions *vd = sh_video->vd_driver;
     if (!vd)
         return -1;
-    int ret = vd->control(sh_video, VDCTRL_QUERY_UNSEEN_FRAMES, NULL);
-    if (ret >= 10)
-        return ret - 10;
-    return -1;
+    int ret = -1;
+    vd->control(sh_video, VDCTRL_QUERY_UNSEEN_FRAMES, &ret);
+    return ret;
 }
 
 void uninit_video(sh_video_t *sh_video)
