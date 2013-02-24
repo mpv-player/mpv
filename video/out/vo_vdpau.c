@@ -856,7 +856,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if (IMGFMT_IS_VDPAU(vc->image_format) && !create_vdp_decoder(vo, 2))
         return -1;
 
-    vo_x11_create_vo_window(vo, NULL, vo->dx, vo->dy, d_width, d_height,
+    vo_x11_config_vo_window(vo, NULL, vo->dx, vo->dy, d_width, d_height,
                             flags, "vdpau");
 
     if (initialize_vdpau_objects(vo) < 0)

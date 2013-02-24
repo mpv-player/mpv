@@ -123,7 +123,7 @@ uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value);
 uint32_t vo_x11_get_equalizer(struct vo *vo, const char *name, int *value);
 bool vo_x11_screen_is_composited(struct vo *vo);
 void fstype_help(void);
-void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis,
+void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis,
                              int x, int y, unsigned int width,
                              unsigned int height, int flags,
                              const char *classname);

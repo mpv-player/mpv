@@ -843,10 +843,10 @@ mp_image_t *glGetWindowScreenshot(GL *gl)
 #ifdef CONFIG_GL_COCOA
 #include "cocoa_common.h"
 
-static bool create_window_cocoa(struct MPGLContext *ctx, uint32_t d_width,
+static bool config_window_cocoa(struct MPGLContext *ctx, uint32_t d_width,
                                 uint32_t d_height, uint32_t flags)
 {
-    int rv = vo_cocoa_create_window(ctx->vo, d_width, d_height, flags,
+    int rv = vo_cocoa_config_window(ctx->vo, d_width, d_height, flags,
                                     ctx->requested_gl_version >= MPGL_VER(3, 0));
     if (rv != 0)
         return false;
@@ -1024,7 +1024,7 @@ out:
     return false;
 }
 
-static bool create_window_w32(struct MPGLContext *ctx, uint32_t d_width,
+static bool config_window_w32(struct MPGLContext *ctx, uint32_t d_width,
                               uint32_t d_height, uint32_t flags)
 {
     if (!vo_w32_config(ctx->vo, d_width, d_height, flags))
@@ -1200,7 +1200,7 @@ static GLXFBConfig select_fb_config(struct vo *vo, const int *attribs)
     return fbconfig;
 }
 
-static bool create_window_x11(struct MPGLContext *ctx, uint32_t d_width,
+static bool config_window_x11(struct MPGLContext *ctx, uint32_t d_width,
                               uint32_t d_height, uint32_t flags)
 {
     struct vo *vo = ctx->vo;
@@ -1209,7 +1209,7 @@ static bool create_window_x11(struct MPGLContext *ctx, uint32_t d_width,
     if (glx_ctx->context) {
         // GL context and window already exist.
         // Only update window geometry etc.
-        vo_x11_create_vo_window(vo, glx_ctx->vinfo, vo->dx, vo->dy, d_width,
+        vo_x11_config_vo_window(vo, glx_ctx->vinfo, vo->dx, vo->dy, d_width,
                                 d_height, flags, "gl");
         return true;
     }
@@ -1261,7 +1261,7 @@ static bool create_window_x11(struct MPGLContext *ctx, uint32_t d_width,
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_GREEN_SIZE, &ctx->depth_g);
     glXGetFBConfigAttrib(vo->x11->display, fbc, GLX_BLUE_SIZE, &ctx->depth_b);
 
-    vo_x11_create_vo_window(vo, glx_ctx->vinfo, vo->dx, vo->dy, d_width,
+    vo_x11_config_vo_window(vo, glx_ctx->vinfo, vo->dx, vo->dy, d_width,
                             d_height, flags, "gl");
 
     bool success = false;
@@ -1347,7 +1347,7 @@ MPGLContext *mpgl_init(enum MPGLType type, struct vo *vo)
     switch (ctx->type) {
 #ifdef CONFIG_GL_COCOA
     case GLTYPE_COCOA:
-        ctx->create_window = create_window_cocoa;
+        ctx->config_window = config_window_cocoa;
         ctx->releaseGlContext = releaseGlContext_cocoa;
         ctx->swapGlBuffers = swapGlBuffers_cocoa;
         ctx->check_events = vo_cocoa_check_events;
@@ -1363,7 +1363,7 @@ MPGLContext *mpgl_init(enum MPGLType type, struct vo *vo)
 #ifdef CONFIG_GL_WIN32
     case GLTYPE_W32:
         ctx->priv = talloc_zero(ctx, struct w32_context);
-        ctx->create_window = create_window_w32;
+        ctx->config_window = config_window_w32;
         ctx->releaseGlContext = releaseGlContext_w32;
         ctx->swapGlBuffers = swapGlBuffers_w32;
         ctx->update_xinerama_info = w32_update_xinerama_info;
@@ -1378,7 +1378,7 @@ MPGLContext *mpgl_init(enum MPGLType type, struct vo *vo)
 #ifdef CONFIG_GL_X11
     case GLTYPE_X11:
         ctx->priv = talloc_zero(ctx, struct glx_context);
-        ctx->create_window = create_window_x11;
+        ctx->config_window = config_window_x11;
         ctx->releaseGlContext = releaseGlContext_x11;
         ctx->swapGlBuffers = swapGlBuffers_x11;
         ctx->update_xinerama_info = vo_x11_update_screeninfo;
@@ -1408,7 +1408,7 @@ bool mpgl_destroy_window(struct MPGLContext *ctx)
     return ctx->vo_init_ok;
 }
 
-bool mpgl_create_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
+bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
                         uint32_t d_height, uint32_t flags)
 {
     if (!ctx->vo_init_ok)
@@ -1419,7 +1419,7 @@ bool mpgl_create_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
     ctx->requested_gl_version = (gl_caps & MPGL_CAP_GL_LEGACY)
                                 ? MPGL_VER(2, 1) : MPGL_VER(3, 0);
 
-    if (ctx->create_window(ctx, d_width, d_height, flags)) {
+    if (ctx->config_window(ctx, d_width, d_height, flags)) {
         int missing = (ctx->gl->mpgl_caps & gl_caps) ^ gl_caps;
         if (!missing)
             return true;

@@ -362,7 +362,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     p->image_width = (width + 7) & (~7);
     p->image_height = height;
 
-    vo_x11_create_vo_window(vo, &p->vinfo, vo->dx, vo->dy, vo->dwidth,
+    vo_x11_config_vo_window(vo, &p->vinfo, vo->dx, vo->dy, vo->dwidth,
                             vo->dheight, flags, "x11");
 
     if (WinID > 0) {

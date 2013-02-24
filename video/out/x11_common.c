@@ -984,7 +984,7 @@ static Window vo_x11_create_smooth_window(struct vo_x11_state *x11,
  *
  * If the window already exists, it just moves and resizes it.
  */
-void vo_x11_create_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
+void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
                              unsigned int width, unsigned int height, int flags,
                              const char *classname)
 {

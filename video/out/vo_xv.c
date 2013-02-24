@@ -526,7 +526,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if (!ctx->xv_format)
         return -1;
 
-    vo_x11_create_vo_window(vo, NULL, vo->dx, vo->dy, vo->dwidth,
+    vo_x11_config_vo_window(vo, NULL, vo->dx, vo->dy, vo->dwidth,
                             vo->dheight, flags, "xv");
 
     if (ctx->xv_ck_info.method == CK_METHOD_BACKGROUND)

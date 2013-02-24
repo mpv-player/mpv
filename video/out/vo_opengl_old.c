@@ -1723,7 +1723,7 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     return 1;
 }
 
-static bool create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
+static bool config_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
                           uint32_t flags)
 {
     struct gl_priv *p = vo->priv;
@@ -1734,7 +1734,7 @@ static bool create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     int mpgl_caps = MPGL_CAP_GL_LEGACY;
     if (!p->allow_sw)
         mpgl_caps |= MPGL_CAP_NO_SW;
-    return mpgl_create_window(p->glctx, mpgl_caps, d_width, d_height, flags);
+    return mpgl_config_window(p->glctx, mpgl_caps, d_width, d_height, flags);
 }
 
 static int config(struct vo *vo, uint32_t width, uint32_t height,
@@ -1760,7 +1760,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if (vo->config_count)
         uninitGl(vo);
 
-    if (!create_window(vo, d_width, d_height, flags))
+    if (!config_window(vo, d_width, d_height, flags))
         return -1;
 
     initGl(vo, vo->dwidth, vo->dheight);
@@ -2272,7 +2272,7 @@ static int preinit(struct vo *vo, const char *arg)
     p->gl = p->glctx->gl;
 
     if (p->use_yuv == -1) {
-        if (!create_window(vo, 320, 200, VOFLAG_HIDDEN))
+        if (!config_window(vo, 320, 200, VOFLAG_HIDDEN))
             goto err_out;
         autodetectGlExtensions(vo);
         // We created a window to test whether the GL context supports hardware

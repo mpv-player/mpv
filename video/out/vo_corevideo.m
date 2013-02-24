@@ -145,7 +145,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     p->image_height = height;
 
     int mpgl_caps = MPGL_CAP_GL_LEGACY;
-    if (!mpgl_create_window(p->mpglctx, mpgl_caps, d_width, d_height, flags))
+    if (!mpgl_config_window(p->mpglctx, mpgl_caps, d_width, d_height, flags))
         return -1;
 
     init_gl(vo, vo->dwidth, vo->dheight);

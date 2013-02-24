@@ -1624,7 +1624,7 @@ static int query_format(struct vo *vo, uint32_t format)
     return caps;
 }
 
-static bool create_window(struct gl_priv *p, uint32_t d_width,
+static bool config_window(struct gl_priv *p, uint32_t d_width,
                           uint32_t d_height, uint32_t flags)
 {
     if (p->stereo_mode == GL_3D_QUADBUFFER)
@@ -1636,7 +1636,7 @@ static bool create_window(struct gl_priv *p, uint32_t d_width,
     int mpgl_caps = MPGL_CAP_GL21 | MPGL_CAP_TEX_RG;
     if (!p->allow_sw)
         mpgl_caps |= MPGL_CAP_NO_SW;
-    return mpgl_create_window(p->glctx, mpgl_caps, d_width, d_height, flags);
+    return mpgl_config_window(p->glctx, mpgl_caps, d_width, d_height, flags);
 }
 
 static int config(struct vo *vo, uint32_t width, uint32_t height,
@@ -1645,7 +1645,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 {
     struct gl_priv *p = vo->priv;
 
-    if (!create_window(p, d_width, d_height, flags))
+    if (!config_window(p, d_width, d_height, flags))
         return -1;
 
     if (!p->vertex_buffer)
@@ -2185,7 +2185,7 @@ static int preinit(struct vo *vo, const char *arg)
         goto err_out;
     p->gl = p->glctx->gl;
 
-    if (!create_window(p, 320, 200, VOFLAG_HIDDEN))
+    if (!config_window(p, 320, 200, VOFLAG_HIDDEN))
         goto err_out;
     check_gl_features(p);
     // We created a window to test whether the GL context could be

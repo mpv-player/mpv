@@ -108,7 +108,7 @@ typedef struct MPGLContext {
     // Bit size of each component in the created framebuffer. 0 if unknown.
     int depth_r, depth_g, depth_b;
 
-    // GL version requested from create_window_gl3 backend (MPGL_VER mangled).
+    // GL version requested from config_window_gl3 backend (MPGL_VER mangled).
     // (Might be different from the actual version in gl->version.)
     int requested_gl_version;
 
@@ -126,7 +126,7 @@ typedef struct MPGLContext {
     // GL context. (The caller must check if the created GL version is ok. The
     // callee must try to fall back to an older version if the requested
     // version is not available, and newer versions are incompatible.)
-    bool (*create_window)(struct MPGLContext *ctx, uint32_t d_width,
+    bool (*config_window)(struct MPGLContext *ctx, uint32_t d_width,
                           uint32_t d_height, uint32_t flags);
 
     // optional
@@ -147,11 +147,11 @@ MPGLContext *mpgl_init(enum MPGLType type, struct vo *vo);
 void mpgl_uninit(MPGLContext *ctx);
 
 // Create a VO window and create a GL context on it.
-// (Calls create_window_gl3 or create_window+setGlWindow.)
+// (Calls config_window_gl3 or config_window+setGlWindow.)
 // gl_caps: bitfield of MPGL_CAP_* (required GL version and feature set)
 // flags: passed to the backend's create window function
 // Returns success.
-bool mpgl_create_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
+bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
                         uint32_t d_height, uint32_t flags);
 
 // Destroy the window, without resetting GL3 vs. GL2 context choice.
