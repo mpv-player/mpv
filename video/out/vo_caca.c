@@ -36,7 +36,6 @@
 
 #include "config.h"
 #include "vo.h"
-#include "sub/sub.h"
 #include "video/mp_image.h"
 #include "video/vfcap.h"
 #include "video/memcpy_pic.h"
@@ -70,63 +69,6 @@ static unsigned int rmask = 0xff0000;
 static unsigned int gmask = 0x00ff00;
 static unsigned int bmask = 0x0000ff;
 static unsigned int amask = 0;
-
-#define MESSAGE_SIZE     512
-#define MESSAGE_DURATION   5
-
-static time_t stoposd     = 0;
-static int showosdmessage = 0;
-static char osdmessagetext[MESSAGE_SIZE];
-static char posbar[MESSAGE_SIZE];
-
-static int osdx = 0, osdy = 0;
-static int posbary = 2;
-
-static void osdmessage(int duration, const char *fmt, ...)
-{
-    /* for outputting a centered string at the window bottom for a while */
-    va_list ar;
-    char m[MESSAGE_SIZE];
-
-    va_start(ar, fmt);
-    vsprintf(m, fmt, ar);
-    va_end(ar);
-    strcpy(osdmessagetext, m);
-
-    showosdmessage = 1;
-    stoposd        = time(NULL) + duration;
-    osdx           = (screen_w - strlen(osdmessagetext)) / 2;
-    posbar[0]      = '\0';
-}
-
-static void osdpercent(int duration, int min, int max, int val,
-                       const char *desc, const char *unit)
-{
-    /* prints a bar for setting values */
-    float step;
-    int where, i;
-
-    step  = (float)screen_w / (float)(max - min);
-    where = (val - min) * step;
-    osdmessage(duration, "%s: %i%s", desc, val, unit);
-    posbar[0]            = '|';
-    posbar[screen_w - 1] = '|';
-
-    for (i = 0; i < screen_w; i++) {
-        if (i == where)
-            posbar[i] = '#';
-        else
-            posbar[i] = '-';
-    }
-
-    if (where != 0)
-        posbar[0] = '|';
-
-    if (where != (screen_w - 1))
-        posbar[screen_w - 1] = '|';
-
-    posbar[screen_w] = '\0';
-}
 
 static int resize(void)
 {
@@ -163,9 +105,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     image_width  = width;
     image_format = format;
 
-    showosdmessage = 0;
-    posbar[0]      = '\0';
-
     return resize();
 }
 
@@ -178,18 +117,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
 static void flip_page(struct vo *vo)
 {
-    if (showosdmessage) {
-        if (time(NULL) >= stoposd) {
-            showosdmessage = 0;
-            if (*posbar)
-                posbar[0] = '\0';
-        } else {
-            caca_put_str(canvas, osdx, osdy, osdmessagetext);
-            if (*posbar)
-                caca_put_str(canvas, 0, posbary, posbar);
-        }
-    }
-
     caca_refresh_display(display);
 }
 
@@ -273,7 +200,6 @@ static void check_events(struct vo *vo)
                 set_next_str(caca_get_dither_algorithm_list(dither),
                              &dither_algo, &msg_name);
                 caca_set_dither_algorithm(dither, dither_algo);
-                osdmessage(MESSAGE_DURATION, "Using %s", msg_name);
                 break;
 
             case 'a':
@@ -282,7 +208,6 @@ static void check_events(struct vo *vo)
                 set_next_str(caca_get_dither_antialias_list(dither),
                              &dither_antialias, &msg_name);
                 caca_set_dither_antialias(dither, dither_antialias);
-                osdmessage(MESSAGE_DURATION, "Using %s", msg_name);
                 break;
 
             case 'h':
@@ -291,7 +216,6 @@ static void check_events(struct vo *vo)
                 set_next_str(caca_get_dither_charset_list(dither),
                              &dither_charset, &msg_name);
                 caca_set_dither_charset(dither, dither_charset);
-                osdmessage(MESSAGE_DURATION, "Using %s", msg_name);
                 break;
 
             case 'c':
@@ -300,7 +224,6 @@ static void check_events(struct vo *vo)
                 set_next_str(caca_get_dither_color_list(dither),
                              &dither_color, &msg_name);
                 caca_set_dither_color(dither, dither_color);
-                osdmessage(MESSAGE_DURATION, "Using %s", msg_name);
                 break;
 
             default:
@@ -321,13 +244,6 @@ static void uninit(struct vo *vo)
     dither_buffer = NULL;
     caca_free_display(display);
     caca_free_canvas(canvas);
-}
-
-static void draw_osd(struct vo *vo, struct osd_state *osd)
-{
-    if (osd->progbar_type != -1)
-        osdpercent(MESSAGE_DURATION, 0, 255, osd->progbar_value,
-                   sub_osd_names[osd->progbar_type], "");
 }
 
 static int preinit(struct vo *vo, const char *arg)
@@ -359,7 +275,7 @@ static int preinit(struct vo *vo, const char *arg)
 static int query_format(struct vo *vo, uint32_t format)
 {
     if (format == IMGFMT_BGR24)
-        return VFCAP_OSD | VFCAP_CSP_SUPPORTED;
+        return VFCAP_CSP_SUPPORTED;
 
     return 0;
 }
@@ -381,7 +297,6 @@ const struct vo_driver video_out_caca = {
     .config = config,
     .control = control,
     .draw_image = draw_image,
-    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,

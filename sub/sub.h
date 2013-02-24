@@ -191,10 +191,6 @@ struct osd_style_opts {
 
 extern const struct m_sub_options osd_style_conf;
 
-/* now in textform */
-extern char * const sub_osd_names[];
-extern char * const sub_osd_names_short[];
-
 extern char *sub_cp;
 extern int sub_pos;
 

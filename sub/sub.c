@@ -42,24 +42,6 @@
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
 
-
-char * const sub_osd_names[]={
-    _("Seekbar"),
-    _("Play"),
-    _("Pause"),
-    _("Stop"),
-    _("Rewind"),
-    _("Forward"),
-    _("Clock"),
-    _("Contrast"),
-    _("Saturation"),
-    _("Volume"),
-    _("Brightness"),
-    _("Hue"),
-    _("Balance")
-};
-char * const sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "", "", "", "", "" };
-
 int sub_pos=100;
 int sub_visibility=1;
 
