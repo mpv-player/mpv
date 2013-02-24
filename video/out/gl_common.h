@@ -108,7 +108,7 @@ typedef struct MPGLContext {
     // Bit size of each component in the created framebuffer. 0 if unknown.
     int depth_r, depth_g, depth_b;
 
-    // GL version requested from create_window_gl3 backend.
+    // GL version requested from create_window_gl3 backend (MPGL_VER mangled).
     // (Might be different from the actual version in gl->version.)
     int requested_gl_version;
 
@@ -119,13 +119,15 @@ typedef struct MPGLContext {
     void (*vo_uninit)(struct vo *vo);
     void (*releaseGlContext)(struct MPGLContext *);
 
-    // Creates GL 1.x/2.x legacy context.
-    bool (*create_window_old)(struct MPGLContext *ctx, uint32_t d_width,
-                              uint32_t d_height, uint32_t flags);
-
-    // Creates GL 3.x core context.
-    bool (*create_window_gl3)(struct MPGLContext *ctx, uint32_t d_width,
-                              uint32_t d_height, uint32_t flags);
+    // Resize the window, or create a new window if there isn't one yet.
+    // On the first call, it creates a GL context according to what's specified
+    // in MPGLContext.requested_gl_version. This is just a hint, and if the
+    // requested version is not available, it may return a completely different
+    // GL context. (The caller must check if the created GL version is ok. The
+    // callee must try to fall back to an older version if the requested
+    // version is not available, and newer versions are incompatible.)
+    bool (*create_window)(struct MPGLContext *ctx, uint32_t d_width,
+                          uint32_t d_height, uint32_t flags);
 
     // optional
     void (*pause)(struct vo *vo);
@@ -136,9 +138,6 @@ typedef struct MPGLContext {
 
     // For free use by the backend.
     void *priv;
-    // Internal to gl_common.c.
-    bool (*selected_create_window)(struct MPGLContext *ctx, uint32_t d_width,
-                                   uint32_t d_height, uint32_t flags);
     bool vo_init_ok;
 } MPGLContext;
 
