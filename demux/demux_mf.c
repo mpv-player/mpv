@@ -94,7 +94,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
     return 1;
 }
 
-// force extension/type to have a fourcc
+// map file extension/type to a codec name
 
 static const struct {
   const char *type;
@@ -122,12 +122,26 @@ static const struct {
   { "sgi",  "sgi" },
   { "sun",  "sunrast" },
   { "ras",  "sunrast" },
+  { "rs",   "sunrast" },
   { "ra",   "sunrast" },
   { "im1",  "sunrast" },
   { "im8",  "sunrast" },
   { "im24",  "sunrast" },
+  { "im32",  "sunrast" },
   { "sunras",  "sunrast" },
   { "xbm",  "xbm" },
+  { "pam",  "pam" },
+  { "pbm",  "pbm" },
+  { "pgm",  "pgm" },
+  { "pgmyuv",  "pgmyuv" },
+  { "ppm",  "ppm" },
+  { "pnm",  "ppm" },
+  { "gif",  "gif" }, // usually handled by demux_lavf
+  { "pix",  "brender_pix" },
+  { "exr",  "exr" },
+  { "pic",  "pictor" },
+  { "xface",  "xface" },
+  { "xwd",  "xwd" },
   {0}
 };
 
