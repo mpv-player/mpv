@@ -226,7 +226,7 @@
     are applied after this option.
 
     See ``--geometry`` for details how this is handled with multi-monitor
-    setups, or if the ``--wid`` option is used.
+    setups.
 
     Use ``--autofit-larger`` instead if you don't want the window to get larger.
     Use ``--geometry`` if you want to force both window width and height to a
@@ -737,11 +737,11 @@
     lower border" and "--20+-10" means "place 20 pixels beyond the right and
     10 pixels beyond the top border".
 
-    If an external window is specified using the ``--wid`` option,
-    then the x and y coordinates are relative to the top-left corner of the
-    window rather than the screen. The coordinates are relative to the screen
-    given with ``--screen`` for the video output drivers that fully
-    support ``--screen``.
+    If an external window is specified using the ``--wid`` option, this
+    option is ignored.
+
+    The coordinates are relative to the screen given with ``--screen`` for the
+    video output drivers that fully support ``--screen``.
 
     *NOTE*: Generally only supported by GUI VOs. Ignored for encoding.
 
@@ -2343,4 +2343,10 @@
 
 --wid=<ID>
     (X11 and win32 only)
-    This tells mpv to attach to an existing window.See ``--slave-broken``.
+    This tells mpv to attach to an existing window. The ID is interpreted as
+    "Window" on X11, and as HWND on win32. If a VO is selected that supports
+    this option, a new window will be created and the given window will be set
+    as parent. The window will always be resized to cover the parent window
+    fully, and will add black bars to compensate for the video aspect ratio.
+
+    See ``--slave-broken``.

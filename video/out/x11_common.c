@@ -638,17 +638,15 @@ void vo_x11_uninit(struct vo *vo)
         XFreeGC(vo->x11->display, x11->vo_gc);
     if (x11->window != None) {
         XClearWindow(x11->display, x11->window);
-        if (WinID < 0) {
-            XEvent xev;
+        XUnmapWindow(x11->display, x11->window);
 
-            XUnmapWindow(x11->display, x11->window);
-            XSelectInput(x11->display, x11->window, StructureNotifyMask);
-            XDestroyWindow(x11->display, x11->window);
-            do {
-                XNextEvent(x11->display, &xev);
-            } while (xev.type != DestroyNotify ||
-                     xev.xdestroywindow.event != x11->window);
-        }
+        XSelectInput(x11->display, x11->window, StructureNotifyMask);
+        XDestroyWindow(x11->display, x11->window);
+        XEvent xev;
+        do {
+            XNextEvent(x11->display, &xev);
+        } while (xev.type != DestroyNotify ||
+                    xev.xdestroywindow.event != x11->window);
     }
     if (x11->xic)
         XDestroyIC(x11->xic);
@@ -797,6 +795,11 @@ int vo_x11_check_events(struct vo *vo)
             }
             break;
         }
+    }
+    if (WinID >= 0 && (ret & (VO_EVENT_MOVE | VO_EVENT_RESIZE))) {
+        int x = vo->dx, y = vo->dy;
+        unsigned int w = vo->dwidth, h = vo->dheight;
+        XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
     }
     return ret;
 }
@@ -960,13 +963,14 @@ static Window vo_x11_create_smooth_window(struct vo_x11_state *x11,
 {
     unsigned long xswamask;
     XSetWindowAttributes xswa;
-    Window ret_win;
 
     setup_window_params(x11, vis, &xswamask, &xswa);
 
-    ret_win =
-        XCreateWindow(x11->display, x11->rootwin, x, y, width, height, 0,
-                      vis->depth, CopyFromParent, vis->visual, xswamask, &xswa);
+    Window parent = WinID >= 0 ? WinID : x11->rootwin;
+
+    Window ret_win =
+        XCreateWindow(x11->display, parent, x, y, width, height, 0, vis->depth,
+                      CopyFromParent, vis->visual, xswamask, &xswa);
     XSetWMProtocols(x11->display, ret_win, &x11->XAWM_DELETE_WINDOW, 1);
     if (x11->f_gc == None)
         x11->f_gc = XCreateGC(x11->display, ret_win, 0, 0);
@@ -991,33 +995,19 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     struct MPOpts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
     Display *mDisplay = vo->x11->display;
-    bool force_change_xy = opts->vo_geometry.xy_valid || opts->vo_screen_id >= 0;
+    bool force_change_xy = opts->vo_geometry.xy_valid ||
+                           opts->vo_screen_id >= 0 ||
+                           WinID >= 0;
     XVisualInfo vinfo_storage;
     if (!vis) {
         vis = &vinfo_storage;
         find_default_visual(x11, vis);
     }
     if (WinID >= 0) {
-        unsigned long xswamask;
-        XSetWindowAttributes xswa;
-        vo_fs = flags & VOFLAG_FULLSCREEN;
-        x11->window = WinID ? (Window)WinID : x11->rootwin;
-        setup_window_params(x11, vis, &xswamask, &xswa);
-        XChangeWindowAttributes(mDisplay, x11->window, xswamask, &xswa);
-        if (WinID) {
-            // Expose events can only really be handled by us, so request them.
-            vo_x11_selectinput_witherr(mDisplay, x11->window, ExposureMask);
-        } else {
-            // Do not capture events since it might break the parent application
-            // if it relies on events being forwarded to the parent of WinID.
-            // It also is consistent with the w32_common.c code.
-            vo_x11_selectinput_witherr(mDisplay, x11->window,
-                                       StructureNotifyMask | KeyPressMask |
-                                       ButtonPressMask | ButtonReleaseMask |
-                                       PointerMotionMask | ExposureMask);
-        }
+        XSelectInput(mDisplay, WinID, StructureNotifyMask);
         vo_x11_update_geometry(vo, true);
-        goto final;
+        x = vo->dx; y = vo->dy;
+        width = vo->dwidth; height = vo->dheight;
     }
     if (x11->window == None) {
         vo_fs = 0;
@@ -1263,13 +1253,17 @@ static void vo_x11_update_geometry(struct vo *vo, bool update_pos)
     unsigned w, h, dummy_uint;
     int dummy_int;
     Window dummy_win;
-    XGetGeometry(x11->display, x11->window, &dummy_win, &dummy_int, &dummy_int,
+    Window win = WinID >= 0 ? WinID : x11->window;
+    XGetGeometry(x11->display, win, &dummy_win, &dummy_int, &dummy_int,
                  &w, &h, &dummy_int, &dummy_uint);
     if (w <= INT_MAX && h <= INT_MAX) {
         vo->dwidth = w;
         vo->dheight = h;
     }
-    if (update_pos) {
+    if (WinID >= 0) {
+        vo->dx = 0;
+        vo->dy = 0;
+    } else if (update_pos) {
         XTranslateCoordinates(x11->display, x11->window, x11->rootwin, 0, 0,
                               &vo->dx, &vo->dy, &dummy_win);
     }
