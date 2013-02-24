@@ -160,8 +160,9 @@ static int init(sh_video_t *sh, const char *decoder)
             ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
             decoder = lavc_hwcodec->name;
         } else {
+            mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "Decoder '%s' not found in "
+                    "libavcodec, using software decoding.\n", hwdec->hw_codec);
             hwdec = NULL;
-            mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "Using software decoding.\n");
         }
     }
 
