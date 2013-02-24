@@ -223,7 +223,6 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"vo_fullscreen",           "no-osd cycle fullscreen"},
     {"panscan",                 "add panscan"},
     {"vo_ontop",                "cycle ontop"},
-    {"vo_rootwin",              "cycle rootwin"},
     {"vo_border",               "cycle border"},
     {"frame_drop",              "cycle framedrop"},
     {"gamma",                   "add gamma"},

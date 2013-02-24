@@ -60,7 +60,6 @@ enum mp_voctrl {
     VOCTRL_REDRAW_FRAME,
 
     VOCTRL_ONTOP,
-    VOCTRL_ROOTWIN,
     VOCTRL_BORDER,
 
     VOCTRL_SET_DEINTERLACE,
@@ -316,7 +315,6 @@ extern int vo_fsmode;
 extern float vo_panscan;
 extern int vo_refresh_rate;
 extern int vo_keepaspect;
-extern int vo_rootwin;
 extern int vo_border;
 
 extern int vo_nomouse_input;

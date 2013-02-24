@@ -529,7 +529,6 @@ const m_option_t mplayer_opts[]={
     OPT_STRINGLIST("ao", audio_driver_list, 0),
     OPT_FLAG("fixed-vo", fixed_vo, CONF_GLOBAL),
     OPT_FLAG("ontop", vo_ontop, 0),
-    {"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"border", &vo_border, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
     OPT_STRING("mixer", mixer_device, 0),

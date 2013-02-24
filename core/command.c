@@ -1025,14 +1025,6 @@ static int mp_property_ontop(m_option_t *prop, int action, void *arg,
                                &mpctx->opts.vo_ontop, mpctx);
 }
 
-/// Display in the root window (RW)
-static int mp_property_rootwin(m_option_t *prop, int action, void *arg,
-                               MPContext *mpctx)
-{
-    return mp_property_vo_flag(prop, action, arg, VOCTRL_ROOTWIN,
-                               &vo_rootwin, mpctx);
-}
-
 /// Show window borders (RW)
 static int mp_property_border(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
@@ -1388,7 +1380,6 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("colormatrix-output-range",
                              mp_property_colormatrix_output_range),
     M_OPTION_PROPERTY_CUSTOM("ontop", mp_property_ontop),
-    M_OPTION_PROPERTY_CUSTOM("rootwin", mp_property_rootwin),
     M_OPTION_PROPERTY_CUSTOM("border", mp_property_border),
     M_OPTION_PROPERTY_CUSTOM("framedrop", mp_property_framedrop),
     M_OPTION_PROPERTY_CUSTOM_("gamma", mp_property_gamma,
@@ -1504,7 +1495,6 @@ static struct property_osd_display {
     // video
     { "panscan", _("Panscan"), .osd_progbar = OSD_PANSCAN },
     { "ontop", _("Stay on top") },
-    { "rootwin", _("Rootwin") },
     { "border", _("Border") },
     { "framedrop", _("Framedrop") },
     { "deinterlace", _("Deinterlace") },

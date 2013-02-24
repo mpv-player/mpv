@@ -433,9 +433,6 @@ int vo_x11_init(struct vo *vo)
     };
     vo->x11 = x11;
 
-    if (vo_rootwin)
-        WinID = 0;  // use root window
-
     XSetErrorHandler(x11_errorhandler);
 
     dispName = XDisplayName(NULL);

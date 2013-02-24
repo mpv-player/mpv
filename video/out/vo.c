@@ -57,7 +57,6 @@ int vo_fsmode = 0;
 float vo_panscan = 0.0f;
 int vo_refresh_rate=0;
 int vo_keepaspect=1;
-int vo_rootwin=0;
 int vo_border=1;
 int64_t WinID = -1;
 

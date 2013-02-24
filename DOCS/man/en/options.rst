@@ -1706,11 +1706,6 @@
     (udp:// only)
     Allows a socket to be reused by other processes as soon as it is closed.
 
---rootwin
-    Play movie in the root window (desktop background). Desktop background
-    images may cover the movie window, though. May not work with all video
-    output drivers.
-
 --saturation=<-100-100>
     Adjust the saturation of the video signal (default: 0). You can get
     grayscale output with this option. Not supported by all video output

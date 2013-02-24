@@ -297,7 +297,6 @@ colormatrix                 x see ``--colormatrix``
 colormatrix-input-range     x see ``--colormatrix-input-range``
 colormatrix-output-range    x see ``--colormatrix-output-range``
 ontop                       x see ``--ontop``
-rootwin                     x see ``--rootwin``
 border                      x see ``--border``
 framedrop                   x see ``--framedrop``
 gamma                       x see ``--gamma``
