@@ -34,6 +34,7 @@
 
 static int format = MP_FOURCC_I420;
 static int mp_format;
+static char *codec;
 static int width = 0;
 static int height = 0;
 static float fps = 25;
@@ -46,6 +47,7 @@ const m_option_t demux_rawvideo_opts[] = {
   // format:
   { "format", &format, CONF_TYPE_FOURCC, 0, 0 , 0, NULL },
   { "mp-format", &mp_format, CONF_TYPE_IMGFMT, 0, 0 , 0, NULL },
+  { "codec", &codec, CONF_TYPE_STRING, 0, 0 , 0, NULL },
   // misc:
   { "fps", &fps, CONF_TYPE_FLOAT,CONF_RANGE,0.001,1000, NULL },
   { "size", &imgsize, CONF_TYPE_INT, CONF_RANGE, 1 , 8192*8192*4, NULL },
@@ -74,6 +76,8 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
                     desc.bpp[p] + 7) / 8;
       }
     }
+  } else if (codec && codec[0]) {
+    decoder = talloc_strdup(demuxer, codec);
   }
 
   if (!imgsize) {

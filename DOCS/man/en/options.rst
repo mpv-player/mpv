@@ -1684,6 +1684,8 @@
     :mp-format=<value>:            colorspace by internal video format
                                    Use ``--rawvideo=mp-format=help``
                                    for a list of possible formats.
+    :codec:                        set the video codec (instead of selecting
+                                   the rawvideo codec)
     :size=<value>:                 frame size in Bytes
 
     *EXAMPLE*:
