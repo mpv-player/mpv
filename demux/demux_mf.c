@@ -127,6 +127,7 @@ static const struct {
   { "im8",  "sunrast" },
   { "im24",  "sunrast" },
   { "sunras",  "sunrast" },
+  { "xbm",  "xbm" },
   {0}
 };
 

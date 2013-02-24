@@ -132,6 +132,7 @@ static const unsigned int outfmt_list[]={
     IMGFMT_RGB4_BYTE,
     IMGFMT_BGR4_BYTE,
     IMGFMT_MONO,
+    IMGFMT_MONO_W,
     0
 };
 

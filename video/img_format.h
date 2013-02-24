@@ -197,6 +197,7 @@ enum mp_imgfmt {
     IMGFMT_RGB4,                // r1 g2 b1, bit-packed
     IMGFMT_BGR4,
     IMGFMT_MONO,                // 1 bit per pixel, bit-packed
+    IMGFMT_MONO_W,              // like IMGFMT_MONO, but inverted (white pixels)
 
     // Accessed with bit-shifts after endian-swapping the uint16_t pixel
     IMGFMT_RGB12_LE,            // 4r 4g 4b 4a  (LSB to MSB)
