@@ -134,8 +134,6 @@ char *heartbeat_cmd;
 //             Input media streaming & demultiplexer:
 //**************************************************************************//
 
-static int max_framesize = 0;
-
 #include "stream/stream.h"
 #include "demux/demux.h"
 #include "demux/stheader.h"
@@ -614,24 +612,16 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 
     talloc_free(mpctx->key_fifo);
 
-    switch (how) {
-    case EXIT_QUIT:
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "\nExiting... (%s)\n", "Quit");
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_EXIT=QUIT\n");
-        break;
-    case EXIT_EOF:
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "\nExiting... (%s)\n", "End of file");
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_EXIT=EOF\n");
-        break;
-    case EXIT_ERROR:
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "\nExiting... (%s)\n", "Fatal error");
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_EXIT=ERROR\n");
-        break;
-    default:
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_EXIT=NONE\n");
+    if (how != EXIT_NONE) {
+        const char *reason;
+        switch (how) {
+        case EXIT_QUIT:  reason = "Quit"; break;
+        case EXIT_EOF:   reason = "End of file"; break;
+        case EXIT_ERROR: reason = "Fatal error"; break;
+        default:         abort();
+        }
+        mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "\nExiting... (%s)\n", reason);
     }
-    mp_msg(MSGT_CPLAYER, MSGL_DBG2,
-           "max framesize was %d bytes\n", max_framesize);
 
     // must be last since e.g. mp_msg uses option values
     // that will be freed by this.
@@ -2458,8 +2448,6 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
                                        &packet, force_fps);
         if (in_size < 0)
             return -1;
-        if (in_size > max_framesize)
-            max_framesize = in_size;
         sh_video->timer += frame_time;
         if (mpctx->sh_audio)
             mpctx->delay -= frame_time;
@@ -2544,8 +2532,6 @@ static double update_video(struct MPContext *mpctx)
         }
         if (pts != MP_NOPTS_VALUE)
             pts += mpctx->video_offset;
-        if (in_size > max_framesize)
-            max_framesize = in_size;
         if (pts >= mpctx->hrseek_pts - .005)
             mpctx->hrseek_framedrop = false;
         int framedrop_type = mpctx->hrseek_framedrop ? 1 :
@@ -4419,7 +4405,8 @@ int main(int argc, char *argv[])
     mpctx->playlist->current = mpctx->playlist->first;
     play_files(mpctx);
 
-    exit_player(mpctx, EXIT_EOF, mpctx->quit_player_rc);
+    exit_player(mpctx, mpctx->stop_play == PT_QUIT ? EXIT_QUIT : EXIT_EOF,
+                mpctx->quit_player_rc);
 
     return 1;
 }

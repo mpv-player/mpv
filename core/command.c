@@ -1734,8 +1734,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     switch (cmd->id) {
     case MP_CMD_SEEK: {
         float v = cmd->args[0].v.f;
-        int abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
-        int exact = (cmd->nargs > 2) ? cmd->args[2].v.i : 0;
+        int abs = cmd->args[1].v.i;
+        int exact = cmd->args[2].v.i;
         if (abs == 2) {   // Absolute seek to a timestamp in seconds
             queue_seek(mpctx, MPSEEK_ABSOLUTE, v, exact);
             set_osd_function(mpctx,
@@ -1825,7 +1825,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_QUIT:
         mpctx->stop_play = PT_QUIT;
-        mpctx->quit_player_rc = (cmd->nargs > 0) ? cmd->args[0].v.i : 0;
+        mpctx->quit_player_rc = cmd->args[0].v.i;
         break;
 
     case MP_CMD_PLAYLIST_NEXT:
