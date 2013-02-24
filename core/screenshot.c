@@ -30,6 +30,7 @@
 #include "core/command.h"
 #include "core/bstr.h"
 #include "core/mp_msg.h"
+#include "core/mp_osd.h"
 #include "core/path.h"
 #include "video/mp_image.h"
 #include "video/decode/dec_video.h"
@@ -47,7 +48,8 @@ typedef struct screenshot_ctx {
     struct MPContext *mpctx;
 
     int mode;
-    int each_frame;
+    bool each_frame;
+    bool osd;
 
     int frameno;
 } screenshot_ctx;
@@ -59,6 +61,31 @@ void screenshot_init(struct MPContext *mpctx)
         .mpctx = mpctx,
         .frameno = 1,
     };
+}
+
+#define SMSG_OK 0
+#define SMSG_ERR 1
+
+static void screenshot_msg(screenshot_ctx *ctx, int status, const char *msg,
+                           ...) PRINTF_ATTRIBUTE(3,4);
+
+static void screenshot_msg(screenshot_ctx *ctx, int status, const char *msg,
+                           ...)
+{
+    va_list ap;
+    char *s;
+
+    va_start(ap, msg);
+    s = talloc_vasprintf(NULL, msg, ap);
+    va_end(ap);
+
+    mp_msg(MSGT_CPLAYER, status == SMSG_ERR ? MSGL_ERR : MSGL_INFO, "%s\n", s);
+    if (ctx->osd) {
+        set_osd_tmsg(ctx->mpctx, OSD_MSG_TEXT, 1, ctx->mpctx->opts.osd_duration,
+                     "%s", s);
+    }
+
+    talloc_free(s);
 }
 
 static char *stripext(void *talloc_ctx, const char *s)
@@ -213,9 +240,9 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
                                    &ctx->frameno);
 
         if (!fname) {
-            mp_msg(MSGT_CPLAYER, MSGL_ERR, "Invalid screenshot filename "
-                   "template! Fix or remove the --screenshot-template option."
-                   "\n");
+            screenshot_msg(ctx, SMSG_ERR, "Invalid screenshot filename "
+                           "template! Fix or remove the --screenshot-template "
+                           "option.");
             return NULL;
         }
 
@@ -223,8 +250,8 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
             return fname;
 
         if (sequence == prev_sequence) {
-            mp_msg(MSGT_CPLAYER, MSGL_ERR, "Can't save screenshot, file '%s' "
-                   "already exists!\n", fname);
+            screenshot_msg(ctx, SMSG_ERR, "Can't save screenshot, file '%s' "
+                           "already exists!", fname);
             talloc_free(fname);
             return NULL;
         }
@@ -263,20 +290,20 @@ static void screenshot_save(struct MPContext *mpctx, struct mp_image *image,
 
     char *filename = gen_fname(ctx, image_writer_file_ext(opts));
     if (filename) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "*** screenshot '%s' ***\n", filename);
+        screenshot_msg(ctx, SMSG_OK, "Screenshot: '%s'", filename);
         if (!write_image(image, opts, filename))
-            mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nError writing screenshot!\n");
+            screenshot_msg(ctx, SMSG_ERR, "Error writing screenshot!");
         talloc_free(filename);
     }
 
     talloc_free(image);
 }
 
-void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame)
+void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
+                        bool osd)
 {
     if (mpctx->video_out && mpctx->video_out->config_ok) {
         screenshot_ctx *ctx = mpctx->screenshot_ctx;
-
 
         if (mode == MODE_SUBTITLES && mpctx->osd->render_subs_in_filter)
             mode = 0;
@@ -290,6 +317,7 @@ void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame)
         }
 
         ctx->mode = mode;
+        ctx->osd = osd;
 
         struct voctrl_screenshot_args args =
                             { .full_window = (mode == MODE_FULL_WINDOW) };
@@ -305,8 +333,7 @@ void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame)
                 mode = 0;
             screenshot_save(mpctx, args.out_image, mode == MODE_SUBTITLES);
         } else {
-            mp_msg(MSGT_CPLAYER, MSGL_INFO,
-                   "Taking screenshot failed (need --vf=screenshot?)\n");
+            screenshot_msg(ctx, SMSG_ERR, "Taking screenshot failed.");
         }
     }
 }
@@ -319,5 +346,5 @@ void screenshot_flip(struct MPContext *mpctx)
         return;
 
     ctx->each_frame = false;
-    screenshot_request(mpctx, ctx->mode, true);
+    screenshot_request(mpctx, ctx->mode, true, ctx->osd);
 }

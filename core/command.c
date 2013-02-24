@@ -2166,7 +2166,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SCREENSHOT:
-        screenshot_request(mpctx, cmd->args[0].v.i, cmd->args[1].v.i);
+        screenshot_request(mpctx, cmd->args[0].v.i, cmd->args[1].v.i,
+                           !!(cmd->on_osd & MP_ON_OSD_MSG));
         break;
 
     case MP_CMD_RUN:

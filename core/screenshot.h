@@ -30,7 +30,9 @@ void screenshot_init(struct MPContext *mpctx);
 // mode: 0: -, 1: save the actual output window contents, 2: with subtitles.
 // each_frame: If set, this toggles per-frame screenshots, exactly like the
 //             screenshot slave command (MP_CMD_SCREENSHOT).
-void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame);
+// osd: show status on OSD
+void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
+                        bool osd);
 
 // Called by the playback core code when a new frame is displayed.
 void screenshot_flip(struct MPContext *mpctx);
