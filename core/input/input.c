@@ -92,6 +92,7 @@ struct key_name {
 #define ARG_STRING              { .type = {"", NULL, &m_option_type_string} }
 #define ARG_CHOICE(c)           { .type = {"", NULL, &m_option_type_choice,    \
                                            M_CHOICES(c)} }
+#define ARG_TIME                { .type = {"", NULL, &m_option_type_time} }
 
 #define OARG_FLOAT(def)         { .type = {"", NULL, &m_option_type_float},    \
                                   .optional = true, .v.f = def }
@@ -117,7 +118,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_RADIO_STEP_FREQ, "radio_step_freq", {ARG_FLOAT } },
 
   { MP_CMD_SEEK, "seek", {
-      ARG_FLOAT,
+      ARG_TIME,
       OARG_CHOICE(0, ({"relative", 0},          {"0", 0},
                       {"absolute-percent", 1},  {"1", 1},
                       {"absolute", 2},          {"2", 2})),

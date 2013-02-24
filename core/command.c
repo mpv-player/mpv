@@ -1723,7 +1723,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
     switch (cmd->id) {
     case MP_CMD_SEEK: {
-        float v = cmd->args[0].v.f;
+        double v = cmd->args[0].v.d;
         int abs = cmd->args[1].v.i;
         int exact = cmd->args[2].v.i;
         if (abs == 2) {   // Absolute seek to a timestamp in seconds

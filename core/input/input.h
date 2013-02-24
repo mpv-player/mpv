@@ -121,6 +121,7 @@ struct mp_cmd_arg {
     union {
         int i;
         float f;
+        double d;
         char *s;
     } v;
 };
