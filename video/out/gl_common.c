@@ -1308,12 +1308,6 @@ static struct backend backends[] = {
     {"cocoa", GLTYPE_COCOA},
     {"win", GLTYPE_W32},
     {"x11", GLTYPE_X11},
-    // mplayer-svn aliases (note that mplayer-svn couples these with the numeric
-    // values of the internal GLTYPE_* constants)
-    {"-1", GLTYPE_AUTO},
-    { "0", GLTYPE_W32},
-    { "1", GLTYPE_X11},
-
     {0}
 };
 
