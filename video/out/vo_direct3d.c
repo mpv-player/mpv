@@ -129,8 +129,6 @@ typedef struct d3d_priv {
 
     struct vo *vo;
 
-    int is_clear_needed;        /**< 1 = Clear the backbuffer before StretchRect
-                                0 = (default) Don't clear it */
     D3DLOCKED_RECT locked_rect; /**< The locked offscreen surface */
     RECT fs_movie_rect;         /**< Rect (upscaled) of the movie when displayed
                                 in fullscreen */
@@ -297,12 +295,6 @@ static void calc_fs_rect(d3d_priv *priv)
            "<vo_direct3d>Video rectangle: t: %ld, l: %ld, r: %ld, b:%ld\n",
            priv->fs_movie_rect.top,   priv->fs_movie_rect.left,
            priv->fs_movie_rect.right, priv->fs_movie_rect.bottom);
-
-    /* The backbuffer should be cleared before next StretchRect. This is
-     * necessary because our new draw area could be smaller than the
-     * previous one used by StretchRect and without it, leftovers from the
-     * previous frame will be left. */
-    priv->is_clear_needed = 1;
 }
 
 // Adjust the texture size *width/*height to fit the requirements of the D3D
@@ -832,7 +824,6 @@ static bool resize_d3d(d3d_priv *priv)
     IDirect3DDevice9_SetTransform(priv->d3d_device, D3DTS_VIEW, &view);
 
     calc_fs_rect(priv);
-
     priv->vo->want_redraw = true;
 
     return 1;
@@ -867,11 +858,7 @@ static uint32_t d3d_draw_frame(d3d_priv *priv)
     if (!d3d_begin_scene(priv))
         return VO_ERROR;
 
-    if (priv->is_clear_needed || priv->opt_swap_discard) {
-        IDirect3DDevice9_Clear(priv->d3d_device, 0, NULL,
-                               D3DCLEAR_TARGET, 0, 0, 0);
-        priv->is_clear_needed = 0;
-    }
+    IDirect3DDevice9_Clear(priv->d3d_device, 0, NULL, D3DCLEAR_TARGET, 0, 0, 0);
 
     if (priv->use_textures) {
 
@@ -1325,7 +1312,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_RESET:
         return VO_NOTIMPL;
     case VOCTRL_REDRAW_FRAME:
-        priv->is_clear_needed = 1;
         d3d_draw_frame(priv);
         return VO_TRUE;
     case VOCTRL_SET_YUV_COLORSPACE:
@@ -1366,6 +1352,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         calc_fs_rect(priv);
+        priv->vo->want_redraw = true;
         return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
