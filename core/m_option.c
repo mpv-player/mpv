@@ -535,23 +535,8 @@ static int parse_double(const m_option_t *opt, struct bstr name,
     struct bstr rest;
     double tmp_float = bstrtod(param, &rest);
 
-    switch (rest.len ? rest.start[0] : 0) {
-    case ':':
-    case '/':
-        tmp_float /= bstrtod(bstr_cut(rest, 1), &rest);
-        break;
-    case '.':
-    case ',':
-        /* we also handle floats specified with
-         * non-locale decimal point ::atmos
-         */
-        rest = bstr_cut(rest, 1);
-        if (tmp_float < 0)
-            tmp_float -= 1.0 / pow(10, rest.len) * bstrtod(rest, &rest);
-        else
-            tmp_float += 1.0 / pow(10, rest.len) * bstrtod(rest, &rest);
-        break;
-    }
+    if (bstr_eatstart0(&rest, ":") || bstr_eatstart0(&rest, "/"))
+        tmp_float /= bstrtod(rest, &rest);
 
     if (rest.len) {
         mp_msg(MSGT_CFGPARSER, MSGL_ERR,
