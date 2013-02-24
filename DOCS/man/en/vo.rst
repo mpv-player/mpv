@@ -652,6 +652,9 @@ sdl
     sw
         Continue even if a software renderer is detected.
 
+    switch-mode
+        Instruct SDL to switch the monitor video mode when going fullscreen.
+
 null
     Produces no video output. Useful for benchmarking.
 

@@ -52,8 +52,6 @@ struct vo_x11_state {
     int window_state;
     int fs_flip;
     int fs_layer;
-    int vm_set;
-    int vm_orig_w, vm_orig_h;
 
     GC f_gc;
     XSizeHints vo_hint;

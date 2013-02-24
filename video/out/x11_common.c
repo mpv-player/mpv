@@ -133,8 +133,6 @@ static void saver_off(struct vo_x11_state *x11);
 static void vo_x11_selectinput_witherr(Display *display, Window w,
                                        long event_mask);
 static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer);
-static void vo_x11_vm_switch(struct vo *vo);
-static void vo_x11_vm_close(struct vo *vo);
 static void vo_x11_create_colormap(struct vo_x11_state *x11,
                                    XVisualInfo *vinfo);
 
@@ -627,7 +625,6 @@ void vo_x11_uninit(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     assert(x11);
 
-    vo_x11_vm_close(vo);
     saver_on(x11);
     if (x11->window != None)
         vo_showcursor(x11->display, x11->window);
@@ -1019,8 +1016,6 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     if (flags & VOFLAG_HIDDEN)
         goto final;
     if (x11->window_state & VOFLAG_HIDDEN) {
-        if (flags & VOFLAG_MODESWITCHING)
-            vo_x11_vm_switch(vo);
         XSizeHints hint;
         x11->window_state &= ~VOFLAG_HIDDEN;
         vo_x11_classhint(vo, x11->window, classname);
@@ -1031,10 +1026,10 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
         hint.width = width;
         hint.height = height;
         hint.flags = PSize;
-        if (force_change_xy || x11->vm_set)
+        if (force_change_xy)
             hint.flags |= PPosition;
         XSetWMNormalHints(mDisplay, x11->window, &hint);
-        if (!vo_border || x11->vm_set)
+        if (!vo_border)
             vo_x11_decoration(vo, 0);
         // map window
         x11->xic = XCreateIC(x11->xim,
@@ -1062,14 +1057,6 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
         // set the size values right.
         vo->dwidth  = vo->opts->vo_screenwidth;
         vo->dheight = vo->opts->vo_screenheight;
-    }
-    if (x11->vm_set) {
-        /* Grab the mouse pointer in our window */
-        if (vo_grabpointer) {
-            XGrabPointer(x11->display, x11->window, True, 0, GrabModeAsync,
-                         GrabModeAsync, x11->window, None, CurrentTime);
-        }
-        XSetInputFocus(x11->display, x11->window, RevertToNone, CurrentTime);
     }
 final:
     if (x11->vo_gc != None)
@@ -1490,108 +1477,6 @@ static void vo_x11_selectinput_witherr(Display *display, Window w,
 }
 
 #ifdef CONFIG_XF86VM
-static void vo_x11_vm_switch(struct vo *vo)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    Display *mDisplay = x11->display;
-    int vm_event, vm_error;
-    int vm_ver, vm_rev;
-    int have_vm = 0;
-    int X = vo->dwidth, Y = vo->dheight;
-    int modeline_width, modeline_height;
-
-    if (XF86VidModeQueryExtension(mDisplay, &vm_event, &vm_error)) {
-        XF86VidModeQueryVersion(mDisplay, &vm_ver, &vm_rev);
-        mp_msg(MSGT_VO, MSGL_V, "XF86VidMode extension v%i.%i\n", vm_ver,
-               vm_rev);
-        have_vm = 1;
-    } else {
-        mp_msg(MSGT_VO, MSGL_WARN,
-               "XF86VidMode extension not available.\n");
-    }
-
-    if (have_vm) {
-        if (!x11->vm_orig_w) {
-            int clock;
-            XF86VidModeModeLine modeline;
-            XF86VidModeGetModeLine(x11->display, x11->screen, &clock, &modeline);
-            x11->vm_orig_w = modeline.hdisplay;
-            x11->vm_orig_h = modeline.vdisplay;
-        }
-
-        int modecount = 0;
-        XF86VidModeModeInfo **vidmodes = NULL;
-        XF86VidModeGetAllModeLines(mDisplay, x11->screen, &modecount, &vidmodes);
-        if (modecount == 0)
-            return;
-
-        int j = 0;
-        modeline_width = vidmodes[0]->hdisplay;
-        modeline_height = vidmodes[0]->vdisplay;
-
-        for (int i = 1; i < modecount; i++) {
-            if ((vidmodes[i]->hdisplay >= X)
-                && (vidmodes[i]->vdisplay >= Y))
-            {
-                if ((vidmodes[i]->hdisplay <= modeline_width)
-                    && (vidmodes[i]->vdisplay <= modeline_height))
-                {
-                    modeline_width = vidmodes[i]->hdisplay;
-                    modeline_height = vidmodes[i]->vdisplay;
-                    j = i;
-                }
-            }
-        }
-
-        mp_tmsg(MSGT_VO, MSGL_INFO, "XF86VM: Selected video mode %dx%d for image size %dx%d.\n",
-               modeline_width, modeline_height, X, Y);
-        XF86VidModeLockModeSwitch(mDisplay, x11->screen, 0);
-        XF86VidModeSwitchToMode(mDisplay, x11->screen, vidmodes[j]);
-
-        // FIXME: all this is more of a hack than proper solution
-        //        center the video if the screen has different size
-        X = (x11->vm_orig_w - modeline_width) / 2;
-        Y = (x11->vm_orig_h - modeline_height) / 2;
-        XF86VidModeSetViewPort(mDisplay, x11->screen, X, Y);
-        vo->dx = X;
-        vo->dy = Y;
-        vo->dwidth = modeline_width;
-        vo->dheight = modeline_height;
-        aspect_save_screenres(vo, modeline_width, modeline_height);
-
-        x11->vm_set = 1;
-        free(vidmodes);
-    }
-}
-
-static void vo_x11_vm_close(struct vo *vo)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    Display *dpy = x11->display;
-    if (x11->vm_set) {
-        int modecount = 0;
-        XF86VidModeModeInfo **vidmodes = NULL;
-        XF86VidModeModeInfo *mode = NULL;
-
-        XF86VidModeGetAllModeLines(dpy, x11->screen, &modecount, &vidmodes);
-        for (int i = 0; i < modecount; i++) {
-            if ((vidmodes[i]->hdisplay == x11->vm_orig_w)
-                && (vidmodes[i]->vdisplay == x11->vm_orig_h))
-            {
-                mp_msg(MSGT_VO, MSGL_INFO, "Returning to original mode %dx%d\n",
-                       x11->vm_orig_w, x11->vm_orig_h);
-                mode = vidmodes[i];
-                break;
-            }
-        }
-
-        if (mode)
-            XF86VidModeSwitchToMode(dpy, x11->screen, mode);
-
-        free(vidmodes);
-    }
-}
-
 double vo_x11_vm_get_fps(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1603,22 +1488,11 @@ double vo_x11_vm_get_fps(struct vo *vo)
         XFree(modeline.private);
     return 1e3 * clock / modeline.htotal / modeline.vtotal;
 }
-
 #else /* CONFIG_XF86VM */
-
-static void vo_x11_vm_switch(struct vo *vo)
-{
-}
-
-static void vo_x11_vm_close(struct vo *vo)
-{
-}
-
 double vo_vm_get_fps(struct vo *vo)
 {
     return 0;
 }
-
 #endif
 
 

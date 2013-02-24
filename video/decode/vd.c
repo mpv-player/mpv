@@ -147,9 +147,8 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ASPECT=%1.4f\n", sh->aspect);
     }
 
-    vocfg_flags = (opts->fullscreen ? VOFLAG_FULLSCREEN : 0)
-        | (opts->vidmode ? VOFLAG_MODESWITCHING : 0)
-        | (flip ? VOFLAG_FLIPPING : 0);
+    vocfg_flags = (opts->fullscreen ? VOFLAG_FULLSCREEN : 0) |
+                  (flip ? VOFLAG_FLIPPING : 0);
 
     // Time to config libvo!
     mp_msg(MSGT_CPLAYER, MSGL_V,

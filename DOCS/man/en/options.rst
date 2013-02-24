@@ -2320,10 +2320,6 @@
 --vid=<ID|auto|no>
     Select video channel. ``auto`` selects the default, ``no`` disables video.
 
---vm
-    Try to change to a different video mode. Supported by the x11 and xv video
-    output drivers.
-
 --vo=<driver1[:suboption1[=value]:...],driver2,...[,]>
     Specify a priority list of video output drivers to be used. For
     interactive use you'd normally specify a single one to use, but in

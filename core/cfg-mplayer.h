@@ -561,15 +561,11 @@ const m_option_t mplayer_opts[]={
     // set aspect ratio of monitor - useful for 16:9 TV-out
     OPT_FLOATRANGE("monitoraspect", force_monitor_aspect, 0, 0.0, 9.0),
     OPT_FLOATRANGE("monitorpixelaspect", monitor_pixel_aspect, 0, 0.2, 9.0),
-    // video mode switching: (x11,xv,dga)
-    OPT_FLAG("vm", vidmode, 0),
     // start in fullscreen mode:
     OPT_FLAG("fullscreen", fullscreen, 0),
     OPT_FLAG("fs", fullscreen, 0),
     // set fullscreen switch method (workaround for buggy WMs)
     {"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
-    // set bpp (x11+vm)
-    OPT_INTRANGE("bpp", vo_dbpp, 0, 0, 32),
     {"colorkey", &vo_colorkey, CONF_TYPE_INT, 0, 0, 0, NULL},
     {"no-colorkey", &vo_colorkey, CONF_TYPE_STORE, 0, 0, 0x1000000, NULL},
     // wait for v-sync (gl)
@@ -591,7 +587,6 @@ const m_option_t mplayer_opts[]={
                 {"limited", MP_CSP_LEVELS_TV},
                 {"full", MP_CSP_LEVELS_PC})),
 
-    {"grabpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),
 

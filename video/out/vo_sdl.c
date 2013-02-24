@@ -197,6 +197,7 @@ struct priv {
 
     // options
     int allow_sw;
+    int switch_mode;
 };
 
 static bool is_good_renderer(SDL_RendererInfo *ri,
@@ -370,11 +371,10 @@ static void check_resize(struct vo *vo)
 static void set_fullscreen(struct vo *vo, int fs)
 {
     struct priv *vc = vo->priv;
-    struct MPOpts *opts = vo->opts;
 
     Uint32 fs_flags = 0;
     if (fs) {
-        if (opts->vidmode)
+        if (vc->switch_mode)
             fs_flags |= SDL_WINDOW_FULLSCREEN;
         else
             fs_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
@@ -1036,6 +1036,7 @@ const struct vo_driver video_out_sdl = {
     },
     .options = (const struct m_option []){
         OPT_FLAG("sw", allow_sw, 0),
+        OPT_FLAG("switch-mode", switch_mode, 0),
         {NULL}
     },
     .preinit = preinit,

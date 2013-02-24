@@ -388,50 +388,6 @@ static void updateScreenProperties(struct vo *vo)
     w32_update_xinerama_info(vo);
 }
 
-static void changeMode(struct vo *vo)
-{
-    struct vo_w32_state *w32 = vo->w32;
-    DEVMODE dm;
-    dm.dmSize = sizeof dm;
-    dm.dmDriverExtra = 0;
-
-    dm.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-    dm.dmBitsPerPel = w32->depthonscreen;
-    dm.dmPelsWidth = vo->opts->vo_screenwidth;
-    dm.dmPelsHeight = vo->opts->vo_screenheight;
-
-    if (w32->vm) {
-        int bestMode = -1;
-        int bestScore = INT_MAX;
-        int i;
-        for (i = 0; EnumDisplaySettings(0, i, &dm); ++i) {
-            int score = (dm.dmPelsWidth - w32->o_dwidth)
-                        * (dm.dmPelsHeight - w32->o_dheight);
-            if (dm.dmBitsPerPel != w32->depthonscreen
-                || dm.dmPelsWidth < w32->o_dwidth
-                || dm.dmPelsHeight < w32->o_dheight)
-                continue;
-
-            if (score < bestScore) {
-                bestScore = score;
-                bestMode = i;
-            }
-        }
-
-        if (bestMode != -1)
-            EnumDisplaySettings(0, bestMode, &dm);
-
-        ChangeDisplaySettings(&dm, CDS_FULLSCREEN);
-    }
-}
-
-static void resetMode(struct vo *vo)
-{
-    struct vo_w32_state *w32 = vo->w32;
-    if (w32->vm)
-        ChangeDisplaySettings(0, 0);
-}
-
 static DWORD update_style(struct vo *vo, DWORD style)
 {
     const DWORD NO_FRAME = WS_POPUP;
@@ -465,10 +421,8 @@ static int reinit_window_state(struct vo *vo)
 
     // xxx not sure if this can trigger any unwanted messages (WM_MOVE/WM_SIZE)
     if (vo_fs) {
-        changeMode(vo);
         while (ShowCursor(0) >= 0) /**/ ;
     } else {
-        resetMode(vo);
         while (ShowCursor(1) < 0) /**/ ;
     }
     updateScreenProperties(vo);
@@ -594,7 +548,6 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
     }
 
     vo_fs = flags & VOFLAG_FULLSCREEN;
-    w32->vm = flags & VOFLAG_MODESWITCHING;
     return reinit_window_state(vo);
 }
 
@@ -732,7 +685,6 @@ void vo_w32_uninit(struct vo *vo)
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: uninit\n");
     if (!w32)
         return;
-    resetMode(vo);
     ShowCursor(1);
     DestroyWindow(w32->window);
     UnregisterClassW(classname, 0);

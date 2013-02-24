@@ -28,9 +28,7 @@ typedef struct MPOpts {
     char *vo_wintitle;
     float force_monitor_aspect;
     float monitor_pixel_aspect;
-    int vidmode;
     int fullscreen;
-    int vo_dbpp;
     float vo_panscanrange;
     int vo_force_rgba_osd;
     int requested_colorspace;

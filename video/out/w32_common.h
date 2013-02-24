@@ -26,8 +26,6 @@
 struct vo_w32_state {
     HWND window;
 
-    bool vm;
-
     int depthonscreen;
 
     // last non-fullscreen extends (updated only on fullscreen or on initialization)

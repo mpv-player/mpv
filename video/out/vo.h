@@ -118,7 +118,6 @@ typedef struct {
 #define VO_NOTIMPL	-3
 
 #define VOFLAG_FULLSCREEN	0x01
-#define VOFLAG_MODESWITCHING	0x02
 #define VOFLAG_FLIPPING		0x08
 #define VOFLAG_HIDDEN		0x10  //< Use to create a hidden window
 #define VOFLAG_STEREO		0x20  //< Use to create a stereo-capable window
@@ -308,7 +307,6 @@ extern const struct vo_driver *video_out_drivers[];
 extern int xinerama_x;
 extern int xinerama_y;
 
-extern int vo_grabpointer;
 extern int vo_vsync;
 extern int vo_fs;
 extern int vo_fsmode;
