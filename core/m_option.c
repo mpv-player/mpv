@@ -522,6 +522,10 @@ static int clamp_double(const m_option_t *opt, void *val)
         v = opt->min;
         r = M_OPT_OUT_OF_RANGE;
     }
+    if (!isfinite(v)) {
+        v = opt->min;
+        r = M_OPT_OUT_OF_RANGE;
+    }
     VAL(val) = v;
     return r;
 }
@@ -561,6 +565,13 @@ static int parse_double(const m_option_t *opt, struct bstr name,
                    BSTR_P(name), opt->max, BSTR_P(param));
             return M_OPT_OUT_OF_RANGE;
         }
+
+    if (!isfinite(tmp_float)) {
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+               "The %.*s option must be a finite number: %.*s\n",
+               BSTR_P(name), BSTR_P(param));
+        return M_OPT_OUT_OF_RANGE;
+    }
 
     if (dst)
         VAL(dst) = tmp_float;
@@ -1532,6 +1543,8 @@ static int parse_timestring(struct bstr str, double *time, char endchar)
         return 0;  /* unsupported time format */
     if (len < str.len && str.start[len] != endchar)
         return 0;  /* invalid extra characters at the end */
+    if (!isfinite(*time))
+        return 0;
     return len;
 }
 
