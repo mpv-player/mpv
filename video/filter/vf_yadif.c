@@ -508,8 +508,6 @@ static int vf_open(vf_instance_t *vf, char *args){
 
     vf->priv->parity= -1;
 
-    if (args) sscanf(args, "%d:%d", &vf->priv->mode, &vf->priv->parity);
-
     filter_line = filter_line_c;
 #if HAVE_MMX
     if(gCpuCaps.hasMMX2) filter_line = filter_line_mmx2;
