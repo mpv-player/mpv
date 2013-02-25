@@ -97,6 +97,7 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     FMT("rgb4",                 IMGFMT_RGB4)
     FMT("bgr4",                 IMGFMT_BGR4)
     FMT("mono",                 IMGFMT_MONO)
+    FMT("mono_w",               IMGFMT_MONO_W)
     FMT_ENDIAN("rgb12",         IMGFMT_RGB12)
     FMT_ENDIAN("rgb15",         IMGFMT_RGB15)
     FMT_ENDIAN("rgb16",         IMGFMT_RGB16)
