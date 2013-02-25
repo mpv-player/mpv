@@ -794,14 +794,6 @@ static int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
 	    if (sh_video->video.dwLength<=1) return DEMUXER_CTRL_GUESS;
 	    return DEMUXER_CTRL_OK;
 
-	case DEMUXER_CTRL_GET_PERCENT_POS:
-    	    if (!priv->numberofframes || !sh_video) {
-              return DEMUXER_CTRL_DONTKNOW;
-	    }
-	    *((int *)arg)=(int)(priv->video_pack_no*100/priv->numberofframes);
-	    if (sh_video->video.dwLength<=1) return DEMUXER_CTRL_GUESS;
-	    return DEMUXER_CTRL_OK;
-
 	case DEMUXER_CTRL_SWITCH_AUDIO:
 	case DEMUXER_CTRL_SWITCH_VIDEO: {
 	    int audio = (cmd == DEMUXER_CTRL_SWITCH_AUDIO);

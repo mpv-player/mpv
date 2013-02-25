@@ -589,18 +589,6 @@ static int demux_mng_control(demuxer_t * demuxer, int cmd, void * arg)
           }
           break;
 
-      // get position in movie
-      case DEMUXER_CTRL_GET_PERCENT_POS:
-          if (mng_priv->header_processed && mng_priv->total_time_ms > 0) {
-              *(int *)arg = (100 * mng_priv->show_cur_time_ms
-                             + mng_priv->total_time_ms / 2)
-                            / mng_priv->total_time_ms;
-              return DEMUXER_CTRL_OK;
-          } else {
-              return DEMUXER_CTRL_DONTKNOW;
-          }
-          break;
-
       default:
           return DEMUXER_CTRL_NOTIMPL;
 

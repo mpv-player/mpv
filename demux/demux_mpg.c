@@ -1074,9 +1074,9 @@ static int demux_mpg_control(demuxer_t *demuxer, int cmd, void *arg)
             }
     		return DEMUXER_CTRL_DONTKNOW;
 
-	case DEMUXER_CTRL_GET_PERCENT_POS:
+	case DEMUXER_CTRL_GET_START_TIME:
             if (mpg_d && mpg_d->has_valid_timestamps && mpg_d->first_to_final_pts_len > 0.0) {
-              *((int *)arg)=(int)(100 * (mpg_d->last_pts-mpg_d->first_pts) / mpg_d->first_to_final_pts_len);
+              *((float *)arg)=mpg_d->first_pts;
               return DEMUXER_CTRL_OK;
             }
 	    return DEMUXER_CTRL_DONTKNOW;

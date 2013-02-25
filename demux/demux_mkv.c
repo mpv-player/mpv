@@ -2505,14 +2505,6 @@ static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
         *((double *) arg) = (double) mkv_d->duration;
         return DEMUXER_CTRL_OK;
 
-    case DEMUXER_CTRL_GET_PERCENT_POS:
-        if (mkv_d->duration == 0) {
-            return DEMUXER_CTRL_DONTKNOW;
-        }
-
-        *((int *) arg) = (int) (100 * mkv_d->last_pts / mkv_d->duration);
-        return DEMUXER_CTRL_OK;
-
     case DEMUXER_CTRL_SWITCH_AUDIO:;
         int new_aid = *(int *) arg;
         int current_aid = demuxer->audio->id;

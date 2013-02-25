@@ -614,9 +614,6 @@ static int demux_asf_control(demuxer_t *demuxer,int cmd, void *arg){
 	    *((double *)arg)=asf->movielength;
 	    return DEMUXER_CTRL_OK;
 
-	case DEMUXER_CTRL_GET_PERCENT_POS:
-		return DEMUXER_CTRL_DONTKNOW;
-
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;
     }

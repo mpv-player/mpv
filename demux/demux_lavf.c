@@ -765,15 +765,10 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
         *((double *)arg) = (double)priv->avfc->duration / AV_TIME_BASE;
         return DEMUXER_CTRL_OK;
 
-    case DEMUXER_CTRL_GET_PERCENT_POS:
-        if (priv->seek_by_bytes)
-            return DEMUXER_CTRL_DONTKNOW;  // let it use the fallback code
-        if (priv->avfc->duration == 0 || priv->avfc->duration == AV_NOPTS_VALUE)
-            return DEMUXER_CTRL_DONTKNOW;
-
-        *((int *)arg) = (int)((priv->last_pts - priv->avfc->start_time) * 100 /
-                              priv->avfc->duration);
+    case DEMUXER_CTRL_GET_START_TIME:
+        *((double *)arg) = (double)priv->avfc->start_time / AV_TIME_BASE;
         return DEMUXER_CTRL_OK;
+
     case DEMUXER_CTRL_SWITCH_AUDIO:
     case DEMUXER_CTRL_SWITCH_VIDEO:
     {

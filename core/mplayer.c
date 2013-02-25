@@ -2970,18 +2970,28 @@ double get_current_time(struct MPContext *mpctx)
     return 0;
 }
 
+static double get_start_time(struct MPContext *mpctx)
+{
+    struct demuxer *demuxer = mpctx->demuxer;
+    if (!demuxer)
+        return 0;
+    double time = 0;
+    demux_control(demuxer, DEMUXER_CTRL_GET_START_TIME, &time);
+    return time;
+}
+
 int get_percent_pos(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return 0;
     int ans = 0;
-    if (mpctx->timeline)
-        ans = get_current_time(mpctx) * 100 /
-              mpctx->timeline[mpctx->num_timeline_parts].start;
-    else if (demux_control(demuxer, DEMUXER_CTRL_GET_PERCENT_POS, &ans) > 0)
-        ;
-    else {
+    double start = get_start_time(mpctx);
+    double len = get_time_length(mpctx);
+    double pos = get_current_time(mpctx);
+    if (len > 0) {
+        ans = (pos - start) / len * 100;
+    } else {
         int len = (demuxer->movi_end - demuxer->movi_start) / 100;
         int64_t pos = demuxer->filepos > 0 ?
                       demuxer->filepos : stream_tell(demuxer->stream);
