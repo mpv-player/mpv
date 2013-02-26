@@ -1460,8 +1460,8 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
 static void add_seek_osd_messages(struct MPContext *mpctx)
 {
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_BAR) {
-        set_osd_bar(mpctx, OSD_BAR_SEEK, "Position", 0, 100,
-                    get_percent_pos(mpctx));
+        set_osd_bar(mpctx, OSD_BAR_SEEK, "Position", 0, 1,
+                    av_clipf(get_current_pos_ratio(mpctx), 0, 1));
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_TEXT) {
         mp_osd_msg_t *msg = add_osd_msg(mpctx, OSD_MSG_TEXT, 1,
@@ -1500,7 +1500,8 @@ static void update_osd_msg(struct MPContext *mpctx)
     struct osd_state *osd = mpctx->osd;
 
     add_seek_osd_messages(mpctx);
-    update_osd_bar(mpctx, OSD_BAR_SEEK, 0, 100, get_percent_pos(mpctx));
+    update_osd_bar(mpctx, OSD_BAR_SEEK, 0, 1,
+                   av_clipf(get_current_pos_ratio(mpctx), 0, 1));
 
     // Look if we have a msg
     mp_osd_msg_t *msg = get_osd_msg(mpctx);
@@ -2980,31 +2981,31 @@ static double get_start_time(struct MPContext *mpctx)
     return time;
 }
 
-int get_percent_pos(struct MPContext *mpctx)
+// Return playback position in 0.0-1.0 ratio, or -1 if unknown.
+double get_current_pos_ratio(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
-        return 0;
-    int ans = 0;
+        return -1;
+    double ans = -1;
     double start = get_start_time(mpctx);
     double len = get_time_length(mpctx);
     double pos = get_current_time(mpctx);
     if (len > 0) {
-        ans = (pos - start) / len * 100;
+        ans = av_clipf((pos - start) / len, 0, 1);
     } else {
-        int len = (demuxer->movi_end - demuxer->movi_start) / 100;
+        int len = (demuxer->movi_end - demuxer->movi_start);
         int64_t pos = demuxer->filepos > 0 ?
                       demuxer->filepos : stream_tell(demuxer->stream);
         if (len > 0)
-            ans = (pos - demuxer->movi_start) / len;
-        else
-            ans = 0;
+            ans = av_clipf((double)(pos - demuxer->movi_start) / len, 0, 1);
     }
-    if (ans < 0)
-        ans = 0;
-    if (ans > 100)
-        ans = 100;
     return ans;
+}
+
+int get_percent_pos(struct MPContext *mpctx)
+{
+    return av_clip(get_current_pos_ratio(mpctx) * 100, 0, 100);
 }
 
 // -2 is no chapters, -1 is before first chapter
