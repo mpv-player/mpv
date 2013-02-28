@@ -2243,6 +2243,7 @@ static int preinit(struct vo *vo, const char *arg)
                "    cocoa: Cocoa/OSX\n"
                "    win: Win32/WGL\n"
                "    x11: X11/GLX\n"
+               "    wayland: Wayland/EGL\n"
                "\n");
         return -1;
     }

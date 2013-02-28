@@ -386,6 +386,8 @@ opengl
             Win32/WGL
         x11
             X11/GLX
+        wayland
+            Wayland/EGL
 
     indirect
         Do YUV conversion and scaling as separate passes. This will
@@ -643,6 +645,8 @@ opengl-old
             Win32/WGL
         x11
             X11/GLX
+        waylnad
+            Wayland/EGL
 
 sdl
     SDL 2.0+ Render video output driver, depending on system with or without
