@@ -353,6 +353,7 @@ Video output:
   --enable-vm              enable XF86VidMode support [autodetect]
   --enable-xinerama        enable Xinerama support [autodetect]
   --enable-x11             enable X11 video output [autodetect]
+  --enable-wayland         enable Wayland video output [autodetect]
   --disable-xss            disable screensaver support via xss [autodetect]
   --disable-corevideo      disable CoreVideo video output [autodetect]
   --disable-cocoa          disable Cocoa OpenGL backend [autodetect]
@@ -416,6 +417,7 @@ _prefix="/usr/local"
 ffmpeg=auto
 _encoding=yes
 _x11=auto
+_wayland=auto
 _xss=auto
 _xv=auto
 _vdpau=auto
@@ -576,6 +578,8 @@ for ac_option do
   --disable-cross-compile)          _cross_compile=no           ;;
   --enable-encoding)    _encoding=yes   ;;
   --disable-encoding)   _encoding=no    ;;
+  --enable-wayland)     _wayland=yes    ;;
+  --disable-wayland)    _wayland=no     ;;
   --enable-x11)         _x11=yes        ;;
   --disable-x11)        _x11=no         ;;
   --enable-xss)         _xss=yes        ;;
@@ -1829,6 +1833,17 @@ depends_on_application_services(){
 
 fi #if darwin
 
+echocheck "Wayland"
+if test "$_wayland" != no; then
+ _wayland="no"
+  pkg_config_add "wayland-client >= 1.0.0 wayland-egl >= 1.0.0 wayland-cursor >= 1.0.0 xkbcommon >= 0.2.0" \
+  && _wayland="yes"
+  res_comment=""
+else
+  _wayland="no"
+  res_comment=""
+fi
+echores "$_wayland"
 
 echocheck "X11 headers presence"
   _x11_headers="no"
@@ -2105,20 +2120,23 @@ fi
 # conflicts between -lGL and -framework OpenGL
 echocheck "OpenGL"
 #Note: this test is run even with --enable-gl since we autodetect linker flags
-if (test "$_x11" = yes || test "$_cocoa" = yes || win32) && test "$_gl" != no ; then
+if (test "$_x11" = yes || test "$_wayland" = yes || test "$_cocoa" = yes || win32) && test "$_gl" != no ; then
   cat > $TMPC << EOF
 #ifdef GL_WIN32
 #include <windows.h>
-#include <GL/gl.h>
+#elif defined(GL_WAYLAND)
+#include <EGL/egl.h>
 #else
-#include <GL/gl.h>
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 #endif
+#include <GL/gl.h>
 int main(int argc, char *argv[]) {
 #ifdef GL_WIN32
   HDC dc;
   wglCreateContext(dc);
+#elif defined(GL_WAYLAND)
+  eglCreateContext(NULL, NULL, EGL_NO_CONTEXT, NULL);
 #else
   glXCreateContext(NULL, NULL, NULL, True);
 #endif
@@ -2136,6 +2154,11 @@ EOF
         break
       fi
     done
+  fi
+  if test "$_wayland" = yes && cc_check -DGL_WAYLAND -lGL -lEGL ; then
+    _gl=yes
+    _gl_wayland=yes
+    libs_mplayer="$libs_mplayer -lGL -lEGL"
   fi
   if win32 && cc_check -DGL_WIN32 -lopengl32 ; then
     _gl=yes
@@ -2164,12 +2187,17 @@ if test "$_gl" = yes ; then
     def_gl_x11='#define CONFIG_GL_X11 1'
     res_comment="$res_comment x11"
   fi
+  if test "$_gl_wayland" = yes ; then
+    def_gl_wayland='#define CONFIG_GL_WAYLAND'
+    res_comment="$res_comment wayland"
+  fi
   vomodules="opengl $vomodules"
 else
   def_gl='#undef CONFIG_GL'
   def_gl_cocoa='#undef CONFIG_GL_COCOA'
   def_gl_win32='#undef CONFIG_GL_WIN32'
   def_gl_x11='#undef CONFIG_GL_X11'
+  def_gl_wayland='#undef CONFIG_GL_WAYLAND'
   novomodules="opengl $novomodules"
 fi
 echores "$_gl"
@@ -3015,6 +3043,7 @@ GL = $_gl
 GL_COCOA = $_gl_cocoa
 GL_WIN32 = $_gl_win32
 GL_X11 = $_gl_x11
+GL_WAYLAND = $_gl_wayland
 HAVE_POSIX_SELECT = $_posix_select
 HAVE_SYS_MMAN_H = $_mman
 JACK = $_jack
@@ -3056,6 +3085,7 @@ VCD = $_vcd
 VDPAU = $_vdpau
 VSTREAM = $_vstream
 X11 = $_x11
+WAYLAND = $_wayland
 XV = $_xv
 
 # FFmpeg
@@ -3251,12 +3281,14 @@ $def_gl
 $def_gl_cocoa
 $def_gl_win32
 $def_gl_x11
+$def_gl_wayland
 $def_jpeg
 $def_mng
 $def_v4l2
 $def_vdpau
 $def_vm
 $def_x11
+$def_wayland
 $def_xdpms
 $def_xf86keysym
 $def_xinerama

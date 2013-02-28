@@ -2313,6 +2313,7 @@ static const char help_text[] =
 "    cocoa: Cocoa/OSX\n"
 "    win: Win32/WGL\n"
 "    x11: X11/GLX\n"
+"    wayland: Wayland/EGL\n"
 "  indirect\n"
 "    Do YUV conversion and scaling as separate passes. This will\n"
 "    first render the video into a video-sized RGB texture, and\n"
