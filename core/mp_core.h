@@ -280,6 +280,7 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
                 int exact);
 int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts);
 double get_time_length(struct MPContext *mpctx);
+double get_start_time(struct MPContext *mpctx);
 double get_current_time(struct MPContext *mpctx);
 int get_percent_pos(struct MPContext *mpctx);
 double get_current_pos_ratio(struct MPContext *mpctx);

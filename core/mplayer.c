@@ -2769,9 +2769,12 @@ static int seek(MPContext *mpctx, struct seek_params seek,
         && seek.amount < mpctx->last_chapter_pts
         || seek.amount < 0)
         mpctx->last_chapter_seek = -2;
-    if (mpctx->timeline && seek.type == MPSEEK_FACTOR) {
-        seek.amount *= mpctx->timeline[mpctx->num_timeline_parts].start;
-        seek.type = MPSEEK_ABSOLUTE;
+    if (seek.type == MPSEEK_FACTOR) {
+        double len = get_time_length(mpctx);
+        if (len > 0 && !mpctx->demuxer->ts_resets_possible) {
+            seek.amount = seek.amount * len + get_start_time(mpctx);
+            seek.type = MPSEEK_ABSOLUTE;
+        }
     }
     if ((mpctx->demuxer->accurate_seek || mpctx->timeline)
         && seek.type == MPSEEK_RELATIVE) {
@@ -2807,9 +2810,11 @@ static int seek(MPContext *mpctx, struct seek_params seek,
     int demuxer_style = 0;
     switch (seek.type) {
     case MPSEEK_FACTOR:
-        demuxer_style |= SEEK_FACTOR; // fallthrough
+        demuxer_style |= SEEK_ABSOLUTE | SEEK_FACTOR;
+        break;
     case MPSEEK_ABSOLUTE:
         demuxer_style |= SEEK_ABSOLUTE;
+        break;
     }
     if (hr_seek || seek.direction < 0)
         demuxer_style |= SEEK_BACKWARD;
@@ -2970,7 +2975,7 @@ double get_current_time(struct MPContext *mpctx)
     return 0;
 }
 
-static double get_start_time(struct MPContext *mpctx)
+double get_start_time(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
@@ -2990,7 +2995,7 @@ double get_current_pos_ratio(struct MPContext *mpctx)
     double start = get_start_time(mpctx);
     double len = get_time_length(mpctx);
     double pos = get_current_time(mpctx);
-    if (len > 0) {
+    if (len > 0 && !demuxer->ts_resets_possible) {
         ans = av_clipf((pos - start) / len, 0, 1);
     } else {
         int len = (demuxer->movi_end - demuxer->movi_start);

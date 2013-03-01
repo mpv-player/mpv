@@ -585,6 +585,8 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
         demuxer->video->id = -2; // audio-only / sub-only
     }
 
+    demuxer->ts_resets_possible = priv->avif->flags & AVFMT_TS_DISCONT;
+
     // disabled because unreliable per-stream bitrate values returned
     // by libavformat trigger this heuristic incorrectly and break things
 #if 0
@@ -713,16 +715,27 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs,
         priv->last_pts = 0;
     else if (rel_seek_secs < 0)
         avsflags = AVSEEK_FLAG_BACKWARD;
+
     if (flags & SEEK_FORWARD)
         avsflags = 0;
     else if (flags & SEEK_BACKWARD)
         avsflags = AVSEEK_FLAG_BACKWARD;
+
     if (flags & SEEK_FACTOR) {
-        if (priv->avfc->duration == 0 || priv->avfc->duration == AV_NOPTS_VALUE)
-            return;
-        priv->last_pts += rel_seek_secs * priv->avfc->duration;
-    } else
+        if (demuxer->movi_end > 0 && demuxer->ts_resets_possible &&
+            !(priv->avif->flags & AVFMT_NO_BYTE_SEEK))
+        {
+            avsflags |= AVSEEK_FLAG_BYTE;
+            priv->last_pts = (demuxer->movi_end - demuxer->movi_start) *
+                             rel_seek_secs;
+        } else if (priv->avfc->duration != 0 &&
+                   priv->avfc->duration != AV_NOPTS_VALUE)
+        {
+            priv->last_pts = rel_seek_secs * priv->avfc->duration;
+        }
+    } else {
         priv->last_pts += rel_seek_secs * AV_TIME_BASE;
+    }
 
     if (!priv->avfc->iformat->read_seek2) {
         // Normal seeking.

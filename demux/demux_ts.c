@@ -990,6 +990,7 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 
 
 	demuxer->type= DEMUXER_TYPE_MPEG_TS;
+        demuxer->ts_resets_possible = true;
 
 
 	stream_reset(demuxer->stream);

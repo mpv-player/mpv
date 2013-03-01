@@ -1134,6 +1134,8 @@ static demuxer_t* demux_mpg_es_open(demuxer_t* demuxer)
     demuxer->video->sh = new_sh_video(demuxer,0); // create dummy video stream header, id=0
     sh_video=demuxer->video->sh;sh_video->ds=demuxer->video;
 
+    demuxer->ts_resets_possible = true;
+
     return demuxer;
 }
 
@@ -1142,6 +1144,9 @@ static demuxer_t *demux_mpg_gxf_open(demuxer_t *demuxer) {
   demuxer->video->sh = new_sh_video(demuxer,0);
   ((sh_video_t *)demuxer->video->sh)->ds = demuxer->video;
   demuxer->priv = (void *) 0xffffffff;
+
+  demuxer->ts_resets_possible = true;
+
   return demuxer;
 }
 
@@ -1151,6 +1156,8 @@ static demuxer_t* demux_mpg_ps_open(demuxer_t* demuxer)
     sh_video_t *sh_video=NULL;
 
     sh_video=demuxer->video->sh;sh_video->ds=demuxer->video;
+
+    demuxer->ts_resets_possible = true;
 
     if(demuxer->audio->id!=-2) {
         if(!ds_fill_buffer(demuxer->audio)){
