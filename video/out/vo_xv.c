@@ -93,7 +93,6 @@ struct xvctx {
     uint32_t image_height;
     uint32_t image_format;
     struct mp_csp_details cached_csp;
-    int is_paused;
     struct mp_rect src_rect;
     struct mp_rect dst_rect;
     uint32_t max_width, max_height; // zero means: not set
@@ -936,10 +935,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct xvctx *ctx = vo->priv;
     switch (request) {
-    case VOCTRL_PAUSE:
-        return (ctx->is_paused = 1);
-    case VOCTRL_RESUME:
-        return (ctx->is_paused = 0);
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:

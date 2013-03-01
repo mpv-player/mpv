@@ -177,7 +177,6 @@ struct priv {
     struct mp_rect src_rect;
     struct mp_rect dst_rect;
     struct mp_osd_res osd_res;
-    int int_pause;
     struct formatmap_entry osd_format;
     struct osd_bitmap_surface {
         int bitmap_id;
@@ -980,15 +979,10 @@ static int get_eq(struct vo *vo, const char *name, int *value)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    struct priv *vc = vo->priv;
     switch (request) {
     case VOCTRL_FULLSCREEN:
         set_fullscreen(vo, !vo_fs);
         return 1;
-    case VOCTRL_PAUSE:
-        return vc->int_pause = 1;
-    case VOCTRL_RESUME:
-        return vc->int_pause = 0;
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, NULL);
         return 1;
