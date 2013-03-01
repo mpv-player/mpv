@@ -152,6 +152,10 @@ struct m_opt_choice_alternatives {
     int value;
 };
 
+// For OPT_STRING_VALIDATE(). Behaves like m_option_type.parse().
+typedef int (*m_opt_string_validate_fn)(const m_option_t *opt, struct bstr name,
+                                        struct bstr param);
+
 // m_option.priv points to this if M_OPT_TYPE_USE_SUBSTRUCT is used
 struct m_sub_options {
     const struct m_option *opts;
@@ -613,6 +617,12 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 
 #define OPT_TRACKCHOICE(name, var) \
     OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))
+
+#define OPT_STRING_VALIDATE_(optname, varname, flags, validate_fn, ...)        \
+    OPT_GENERAL(char*, optname, varname, flags, __VA_ARGS__,                                            \
+                .priv = MP_EXPECT_TYPE(m_opt_string_validate_fn, validate_fn))
+#define OPT_STRING_VALIDATE(...) \
+    OPT_STRING_VALIDATE_(__VA_ARGS__, .type = &m_option_type_string)
 
 // subconf must have the type struct m_sub_options.
 // All sub-options are prefixed with "name-" and are added to the current

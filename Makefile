@@ -91,7 +91,8 @@ SOURCES-$(DIRECT3D)             += video/out/vo_direct3d.c \
                                    video/out/w32_common.c
 SOURCES-$(DSOUND)               += audio/out/ao_dsound.c
 SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
-                                   video/out/vo_opengl.c \
+                                   video/out/vo_opengl.c video/out/gl_lcms.c \
+                                   video/out/gl_video.c \
                                    video/out/vo_opengl_old.c \
                                    video/out/pnm_loader.c
 
@@ -371,8 +372,8 @@ demux/ebml.c: demux/ebml_defs.c
 demux/ebml_defs.c: TOOLS/matroska.pl $(MKVLIB_DEPS)
 	./$< --generate-definitions > $@
 
-video/out/vo_opengl.c: video/out/vo_opengl_shaders.h
-video/out/vo_opengl_shaders.h: TOOLS/file2string.pl video/out/vo_opengl_shaders.glsl
+video/out/gl_video.c: video/out/gl_video_shaders.h
+video/out/gl_video_shaders.h: TOOLS/file2string.pl video/out/gl_video_shaders.glsl
 	./$^ >$@
 
 sub/osd_libass.c: sub/osd_font.h
@@ -447,7 +448,7 @@ clean:
 	-$(RM) core/input/input_conf.h
 	-$(RM) video/out/vdpau_template.c
 	-$(RM) demux/ebml_types.h demux/ebml_defs.c
-	-$(RM) video/out/vo_opengl_shaders.h
+	-$(RM) video/out/gl_video_shaders.h
 	-$(RM) sub/osd_font.h
 
 distclean: clean

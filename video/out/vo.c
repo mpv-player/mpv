@@ -119,9 +119,16 @@ static int vo_preinit(struct vo *vo, char *arg)
         char n[50];
         int l = snprintf(n, sizeof(n), "vo/%s", vo->driver->info->short_name);
         assert(l < sizeof(n));
+        if (vo->driver->init_option_string) {
+            m_config_parse_suboptions(cfg, n,
+                                      (char *)vo->driver->init_option_string);
+        }
         int r = m_config_parse_suboptions(cfg, n, arg);
-        if (r < 0)
+        if (r < 0) {
+            if (vo->driver->help_text)
+                mp_msg(MSGT_VO, MSGL_FATAL, "%s\n", vo->driver->help_text);
             return r;
+        }
     }
     return vo->driver->preinit(vo, arg);
 }

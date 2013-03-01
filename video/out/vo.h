@@ -220,6 +220,12 @@ struct vo_driver {
 
     // List of options to parse into priv struct (requires privsize to be set)
     const struct m_option *options;
+
+    // Help text to print when option parsing fails
+    const char *help_text;
+
+    // Parse these options before parsing user options
+    const char *init_option_string;
 };
 
 struct vo {
