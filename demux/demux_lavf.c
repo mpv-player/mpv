@@ -768,7 +768,8 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
         return DEMUXER_CTRL_OK;
 
     case DEMUXER_CTRL_GET_START_TIME:
-        *((double *)arg) = (double)priv->avfc->start_time / AV_TIME_BASE;
+        *((double *)arg) = priv->avfc->start_time == AV_NOPTS_VALUE ?
+                           0 : (double)priv->avfc->start_time / AV_TIME_BASE;
         return DEMUXER_CTRL_OK;
 
     case DEMUXER_CTRL_SWITCH_AUDIO:
