@@ -171,11 +171,6 @@ direct3d_shaders (Windows only)
         Never render YUV video with more than 8 bits per component.
         (Using this flag will force software conversion to 8 bit.)
 
-    disable-osd
-        Disable OSD rendering for subtitles.
-        (Using this flag might force the insertion of the 'ass' video filter,
-        which will render the subtitles in software.)
-
     disable-texture-align
         Normally texture sizes are always aligned to 16. With this option
         enabled, the video texture will always have exactly the same size as
@@ -628,11 +623,6 @@ opengl-old
         setting has no effect, the size of the slices as provided by the
         decoder is used. If the decoder does not use slice rendering, the
         default is 16.
-    (no-)osd
-        Enable or disable support for OSD rendering via OpenGL (default:
-        enabled). This option is for testing; to disable the OSD use
-        ``--osd-level=0`` instead.
-
     sw
         Continue even if a software renderer is detected.
 

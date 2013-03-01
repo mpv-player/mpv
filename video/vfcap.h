@@ -24,8 +24,6 @@
 #define VFCAP_CSP_SUPPORTED 0x1
 // set, if the given colorspace is supported _without_ conversion
 #define VFCAP_CSP_SUPPORTED_BY_HW 0x2
-// set if the driver/filter can draw OSD
-#define VFCAP_OSD 0x4
 // driver/filter can do vertical flip (upside-down)
 #define VFCAP_FLIP 0x80
 

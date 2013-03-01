@@ -227,7 +227,6 @@ struct vo_driver {
 struct vo {
     int config_ok;  // Last config call was successful?
     int config_count;  // Total number of successful config calls
-    int default_caps; // query_format() result for configured video format
 
     bool untimed;       // non-interactive, don't do sleep calls in playloop
 
@@ -291,6 +290,7 @@ void list_video_out(void);
 int vo_control(struct vo *vo, uint32_t request, void *data);
 int vo_draw_image(struct vo *vo, struct mp_image *mpi);
 int vo_redraw_frame(struct vo *vo);
+bool vo_get_want_redraw(struct vo *vo);
 int vo_get_buffered_frame(struct vo *vo, bool eof);
 void vo_skip_frame(struct vo *vo);
 void vo_new_frame_imminent(struct vo *vo);

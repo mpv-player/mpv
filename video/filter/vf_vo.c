@@ -63,9 +63,6 @@ static int config(struct vf_instance *vf,
     if (vo_config(video_out, width, height, d_width, d_height, flags, outfmt))
         return 0;
 
-    // save vo's stride capability for the wanted colorspace:
-    vf->default_caps = video_out->default_caps;
-
     return 1;
 }
 

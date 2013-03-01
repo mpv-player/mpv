@@ -66,8 +66,6 @@ typedef struct vf_instance {
 
     void (*uninit)(struct vf_instance *vf);
 
-    // caps:
-    unsigned int default_caps; // used by default query_format()
     // data:
     struct vf_format fmt_in, fmt_out;
     struct vf_instance *next;

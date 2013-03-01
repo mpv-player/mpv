@@ -55,7 +55,6 @@ struct gl_priv {
 
     int allow_sw;
 
-    int use_osd;
     int scaled_osd;
     struct mpgl_osd *osd;
     int osd_color;
@@ -1468,9 +1467,8 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
-    assert(p->osd);
 
-    if (!p->use_osd)
+    if (!p->osd)
         return;
 
     if (!p->scaled_osd) {
@@ -1572,8 +1570,6 @@ static void autodetectGlExtensions(struct vo *vo)
                     && strstr(renderer, "Mesa DRI R200") ? 1 : 0;
         }
     }
-    if (p->use_osd == -1)
-        p->use_osd = gl->BindTexture != NULL;
     if (p->use_yuv == -1)
         p->use_yuv = glAutodetectYUVConversion(gl);
 
@@ -1711,8 +1707,10 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
         update_yuvconv(vo);
     }
 
-    p->osd = mpgl_osd_init(gl, true);
-    p->osd->scaled = p->scaled_osd;
+    if (gl->BindTexture) {
+        p->osd = mpgl_osd_init(gl, true);
+        p->osd->scaled = p->scaled_osd;
+    }
 
     resize(vo, d_width, d_height);
 
@@ -2068,8 +2066,6 @@ static int query_format(struct vo *vo, uint32_t format)
 
     int depth = desc.plane_bits;
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP;
-    if (p->use_osd)
-        caps |= VFCAP_OSD;
     if (format == IMGFMT_RGB24 || format == IMGFMT_RGBA)
         return caps;
     if (p->use_yuv && (desc.flags & MP_IMGFLAG_YUV_P) &&
@@ -2115,7 +2111,6 @@ static int preinit(struct vo *vo, const char *arg)
 
     *p = (struct gl_priv) {
         .many_fmts = 1,
-        .use_osd = -1,
         .use_yuv = -1,
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
         .filter_strength = 0.5,
@@ -2138,7 +2133,6 @@ static int preinit(struct vo *vo, const char *arg)
 
     const opt_t subopts[] = {
         {"manyfmts",     OPT_ARG_BOOL, &p->many_fmts,    NULL},
-        {"osd",          OPT_ARG_BOOL, &p->use_osd,      NULL},
         {"scaled-osd",   OPT_ARG_BOOL, &p->scaled_osd,   NULL},
         {"ycbcr",        OPT_ARG_BOOL, &p->use_ycbcr,    NULL},
         {"slice-height", OPT_ARG_INT,  &p->slice_height, int_non_neg},
@@ -2178,8 +2172,6 @@ static int preinit(struct vo *vo, const char *arg)
                "    Disable extended color formats for OpenGL 1.2 and later\n"
                "  slice-height=<0-...>\n"
                "    Slice size for texture transfer, 0 for whole image\n"
-               "  noosd\n"
-               "    Do not use OpenGL OSD code\n"
                "  scaled-osd\n"
                "    Render OSD at movie resolution and scale it\n"
                "  rectangle=<0,1,2>\n"

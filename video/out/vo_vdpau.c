@@ -1380,7 +1380,7 @@ static struct mp_image *get_decoder_surface(struct vo *vo)
 static int query_format(struct vo *vo, uint32_t format)
 {
     int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
-        | VFCAP_OSD | VFCAP_FLIP;
+        | VFCAP_FLIP;
     switch (format) {
     case IMGFMT_420P:
     case IMGFMT_NV12:

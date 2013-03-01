@@ -2634,7 +2634,6 @@ static void draw_osd(struct MPContext *mpctx)
 
     mpctx->osd->vo_pts = mpctx->video_pts;
     vo_draw_osd(vo, mpctx->osd);
-    mpctx->osd->want_redraw = false;
 }
 
 static bool redraw_osd(struct MPContext *mpctx)
@@ -3458,8 +3457,8 @@ static void run_playloop(struct MPContext *mpctx)
         }
         sleeptime = FFMIN(sleeptime, audio_sleep);
         if (sleeptime > 0 && mpctx->sh_video) {
-            bool want_redraw = mpctx->video_out->want_redraw;
-            if (mpctx->video_out->default_caps & VFCAP_OSD)
+            bool want_redraw = vo_get_want_redraw(mpctx->video_out);
+            if (mpctx->video_out->driver->draw_osd)
                 want_redraw |= mpctx->osd->want_redraw;
             mpctx->osd->want_redraw = false;
             if (want_redraw) {

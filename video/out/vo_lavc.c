@@ -187,10 +187,8 @@ static int query_format(struct vo *vo, uint32_t format)
     return
         VFCAP_CSP_SUPPORTED |
             // we can do it
-        VFCAP_CSP_SUPPORTED_BY_HW |
+        VFCAP_CSP_SUPPORTED_BY_HW;
             // we don't convert colorspaces here
-        VFCAP_OSD;
-            // we have OSD
 }
 
 static void write_packet(struct vo *vo, int size, AVPacket *packet)

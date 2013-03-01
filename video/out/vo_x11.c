@@ -610,9 +610,9 @@ static int query_format(struct vo *vo, uint32_t format)
             if (fmt2Xfmt[n].mpfmt == format) {
                 if (IMGFMT_RGB_DEPTH(format) == p->ximage_depth) {
                     return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
-                           VFCAP_OSD | VFCAP_FLIP;
+                           VFCAP_FLIP;
                 } else {
-                    return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_FLIP;
+                    return VFCAP_CSP_SUPPORTED | VFCAP_FLIP;
                 }
             }
         }
@@ -620,7 +620,7 @@ static int query_format(struct vo *vo, uint32_t format)
 
     switch (format) {
     case IMGFMT_420P:
-        return VFCAP_CSP_SUPPORTED | VFCAP_OSD;
+        return VFCAP_CSP_SUPPORTED;
     }
     return 0;
 }

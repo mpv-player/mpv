@@ -245,8 +245,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 static int query_format(struct vo *vo, uint32_t format)
 {
     struct priv *p = vo->priv;
-    const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
-                      VFCAP_OSD;
+    const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     switch (format) {
         case IMGFMT_YUYV:
             p->pixelFormat = kYUVSPixelFormat;

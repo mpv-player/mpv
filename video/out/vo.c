@@ -176,10 +176,18 @@ int vo_redraw_frame(struct vo *vo)
     if (!vo->config_ok || !vo->hasframe)
         return -1;
     if (vo_control(vo, VOCTRL_REDRAW_FRAME, NULL) == true) {
+        vo->want_redraw = false;
         vo->redrawing = true;
         return 0;
     }
     return -1;
+}
+
+bool vo_get_want_redraw(struct vo *vo)
+{
+    if (!vo->config_ok || !vo->hasframe)
+        return false;
+    return vo->want_redraw;
 }
 
 int vo_get_buffered_frame(struct vo *vo, bool eof)
@@ -216,7 +224,7 @@ void vo_new_frame_imminent(struct vo *vo)
 
 void vo_draw_osd(struct vo *vo, struct osd_state *osd)
 {
-    if (vo->config_ok && (vo->default_caps & VFCAP_OSD))
+    if (vo->config_ok && vo->driver->draw_osd)
         vo->driver->draw_osd(vo, osd);
 }
 
@@ -428,14 +436,10 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
         d_height = vo->dheight;
     }
 
-    vo->default_caps = vo->driver->query_format(vo, format);
-
     int ret = vo->driver->config(vo, width, height, d_width, d_height, flags,
                                  format);
     vo->config_ok = (ret == 0);
     vo->config_count += vo->config_ok;
-    if (!vo->config_ok)
-        vo->default_caps = 0;
     if (vo->registered_fd == -1 && vo->event_fd != -1 && vo->config_ok) {
         mp_input_add_key_fd(vo->input_ctx, vo->event_fd, 1, event_fd_callback,
                             NULL, vo);

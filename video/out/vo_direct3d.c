@@ -119,7 +119,6 @@ typedef struct d3d_priv {
     int opt_disable_stretchrect;
     int opt_disable_shaders;
     int opt_only_8bit;
-    int opt_disable_osd;
     int opt_disable_texture_align;
     // debugging
     int opt_force_power_of_2;
@@ -1124,10 +1123,7 @@ static int query_format(struct vo *vo, uint32_t movie_fmt)
     if (!init_rendering_mode(priv, movie_fmt, false))
         return 0;
 
-    int osd_caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
-    if (!priv->opt_disable_osd)
-        osd_caps |= VFCAP_OSD;
-    return osd_caps;
+    return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
 }
 
 /****************************************************************************
@@ -1160,7 +1156,7 @@ static void update_colorspace(d3d_priv *priv)
 }
 
 const char *options_help_text = "-vo direct3d command line help:\n"
-"Example: -vo direct3d:disable-osd:disable-textures\n"
+"Example: -vo direct3d:disable-textures\n"
 "Options:\n"
 "    prefer-stretchrect\n"
 "        Use IDirect3DDevice9::StretchRect over other methods if possible.\n"
@@ -1175,10 +1171,6 @@ const char *options_help_text = "-vo direct3d command line help:\n"
 "    only-8bit\n"
 "        Never render YUV video with more than 8 bits per component.\n"
 "        (Using this flag will force software conversion to 8 bit.)\n"
-"    disable-osd\n"
-"        Disable OSD rendering.\n"
-"        (Using this flag might force the insertion of the 'ass' video filter,\n"
-"         which will render the subtitles in software.)\n"
 "    disable-texture-align\n"
 "        Normally texture sizes are always aligned to 16. With this option\n"
 "        enabled, the video texture will always have exactly the same size as\n"
@@ -1240,7 +1232,6 @@ static int preinit_internal(struct vo *vo, const char *arg, bool allow_shaders)
         {"disable-stretchrect", OPT_ARG_BOOL, &priv->opt_disable_stretchrect},
         {"disable-shaders", OPT_ARG_BOOL, &priv->opt_disable_shaders},
         {"only-8bit", OPT_ARG_BOOL, &priv->opt_only_8bit},
-        {"disable-osd", OPT_ARG_BOOL, &priv->opt_disable_osd},
         {"force-power-of-2", OPT_ARG_BOOL, &priv->opt_force_power_of_2},
         {"disable-texture-align", OPT_ARG_BOOL, &priv->opt_disable_texture_align},
         {"texture-memory", OPT_ARG_INT, &priv->opt_texture_memory},

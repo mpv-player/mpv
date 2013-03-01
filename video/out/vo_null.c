@@ -34,10 +34,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
 }
 
-static void draw_osd(struct vo *vo, struct osd_state *osd)
-{
-}
-
 static void flip_page(struct vo *vo)
 {
 }
@@ -90,7 +86,6 @@ const struct vo_driver video_out_null = {
     .config = config,
     .control = control,
     .draw_image = draw_image,
-    .draw_osd = draw_osd,
     .flip_page = flip_page,
     .check_events = check_events,
     .uninit = uninit,

@@ -767,7 +767,7 @@ static int query_format(struct vo *vo, uint32_t format)
 {
     struct xvctx *ctx = vo->priv;
     uint32_t i;
-    int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD;
+    int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
 
     int fourcc = find_xv_format(format);
     if (fourcc) {

@@ -1617,8 +1617,7 @@ static bool init_format(int fmt, struct gl_priv *init)
 
 static int query_format(struct vo *vo, uint32_t format)
 {
-    int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP |
-               VFCAP_OSD;
+    int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP;
     if (!init_format(format, NULL))
         return 0;
     return caps;

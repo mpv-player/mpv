@@ -145,7 +145,7 @@ static void flip_page(struct vo *vo)
 static int query_format(struct vo *vo, uint32_t fmt)
 {
     if (mp_sws_supported_format(fmt))
-        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD;
+        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     return 0;
 }
 

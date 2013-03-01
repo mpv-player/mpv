@@ -153,7 +153,6 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->uninit    = uninit;
     vf->control   = control;
     vf->filter    = filter;
-    vf->default_caps = VFCAP_OSD;
     return 1;
 }
 

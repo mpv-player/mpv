@@ -463,10 +463,7 @@ int vf_next_control(struct vf_instance *vf, int request, void *data)
 
 int vf_next_query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    int flags = vf->next->query_format(vf->next, fmt);
-    if (flags)
-        flags |= vf->default_caps;
-    return flags;
+    return vf->next->query_format(vf->next, fmt);
 }
 
 //============================================================================
