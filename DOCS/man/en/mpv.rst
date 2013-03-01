@@ -142,9 +142,6 @@ j and J
 F
     Toggle displaying "forced subtitles".
 
-a
-    Toggle subtitle alignment: top / middle / bottom.
-
 x and z
     Adjust subtitle delay by +/- 0.1 seconds.
 
