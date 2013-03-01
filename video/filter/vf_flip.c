@@ -40,10 +40,7 @@ static int config(struct vf_instance *vf, int width, int height,
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
-    for (int p = 0; p < mpi->num_planes; p++) {
-        mpi->planes[p] = mpi->planes[p] + mpi->stride[p] * (mpi->plane_h[p] - 1);
-        mpi->stride[p] = -mpi->stride[p];
-    }
+    mp_image_vflip(mpi);
     return mpi;
 }
 

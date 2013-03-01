@@ -103,6 +103,7 @@ void mp_image_unrefp(struct mp_image **p_img);
 void mp_image_clear(struct mp_image *mpi, int x0, int y0, int x1, int y1);
 void mp_image_crop(struct mp_image *img, int x0, int y0, int x1, int y1);
 void mp_image_crop_rc(struct mp_image *img, struct mp_rect rc);
+void mp_image_vflip(struct mp_image *img);
 
 void mp_image_set_size(struct mp_image *mpi, int w, int h);
 void mp_image_set_display_size(struct mp_image *mpi, int dw, int dh);

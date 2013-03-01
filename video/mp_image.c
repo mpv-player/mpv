@@ -399,6 +399,14 @@ void mp_image_clear(struct mp_image *img, int x0, int y0, int x1, int y1)
     }
 }
 
+void mp_image_vflip(struct mp_image *img)
+{
+    for (int p = 0; p < img->num_planes; p++) {
+        img->planes[p] = img->planes[p] + img->stride[p] * (img->plane_h[p] - 1);
+        img->stride[p] = -img->stride[p];
+    }
+}
+
 enum mp_csp mp_image_csp(struct mp_image *img)
 {
     if (img->colorspace != MP_CSP_AUTO)
