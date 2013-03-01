@@ -134,6 +134,4 @@ void vo_x11_update_screeninfo(struct vo *vo);
 
 double vo_x11_vm_get_fps(struct vo *vo);
 
-void xscreensaver_heartbeat(struct vo_x11_state *x11);
-
 #endif /* MPLAYER_X11_COMMON_H */

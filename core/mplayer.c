@@ -3245,11 +3245,6 @@ static void run_playloop(struct MPContext *mpctx)
         // ================================================================
         vo_check_events(vo);
 
-#ifdef CONFIG_X11
-        if (vo->x11) {
-            xscreensaver_heartbeat(vo->x11);
-        }
-#endif
         if (heartbeat_cmd) {
             static unsigned last_heartbeat;
             unsigned now = GetTimerMS();

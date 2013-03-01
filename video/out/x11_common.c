@@ -128,6 +128,7 @@ typedef struct
 
 static void vo_x11_update_geometry(struct vo *vo, bool update_pos);
 static int vo_x11_get_fs_type(struct vo *vo);
+static void xscreensaver_heartbeat(struct vo_x11_state *x11);
 static void saver_on(struct vo_x11_state *x11);
 static void saver_off(struct vo_x11_state *x11);
 static void vo_x11_selectinput_witherr(Display *display, Window w,
@@ -688,6 +689,8 @@ int vo_x11_check_events(struct vo *vo)
         vo_hidecursor(display, x11->window);
         x11->mouse_waiting_hide = 0;
     }
+
+    xscreensaver_heartbeat(vo->x11);
 
     if (WinID > 0)
         ret |= check_resize(vo);
@@ -1359,7 +1362,7 @@ void vo_x11_border(struct vo *vo)
     vo_x11_decoration(vo, vo_border && !vo_fs);
 }
 
-void xscreensaver_heartbeat(struct vo_x11_state *x11)
+static void xscreensaver_heartbeat(struct vo_x11_state *x11)
 {
     unsigned int time = GetTimerMS();
 
