@@ -187,7 +187,7 @@ corresponding adjustment, or the software equalizer (``--vf=eq``).)
     Adjust brightness.
 
 5 and 6
-    Adjust hue.
+    Adjust gamma.
 
 7 and 8
     Adjust saturation.
