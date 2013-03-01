@@ -70,12 +70,8 @@ static int control(struct vf_instance *vf, int request, void *data)
 {
     switch (request) {
     case VFCTRL_GET_DEINTERLACE:
-        if (!video_out)
-            return CONTROL_FALSE;   // vo not configured?
         return vo_control(video_out, VOCTRL_GET_DEINTERLACE, data) == VO_TRUE;
     case VFCTRL_SET_DEINTERLACE:
-        if (!video_out)
-            return CONTROL_FALSE;    // vo not configured?
         return vo_control(video_out, VOCTRL_SET_DEINTERLACE, data) == VO_TRUE;
     case VFCTRL_GET_YUV_COLORSPACE:
         return vo_control(video_out, VOCTRL_GET_YUV_COLORSPACE, data) == true;
