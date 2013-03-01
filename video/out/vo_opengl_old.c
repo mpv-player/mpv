@@ -2093,7 +2093,7 @@ static void uninit(struct vo *vo)
 
 static int backend_valid(void *arg)
 {
-    return mpgl_find_backend(*(const char **)arg) >= 0;
+    return mpgl_find_backend(*(const char **)arg) >= -1;
 }
 
 static int preinit(struct vo *vo, const char *arg)
@@ -2248,10 +2248,10 @@ static int preinit(struct vo *vo, const char *arg)
         p->use_yuv = 2;
     }
 
-    int backend = backend_arg ? mpgl_find_backend(backend_arg) : GLTYPE_AUTO;
+    char *backend = talloc_strdup(vo, backend_arg);
     free(backend_arg);
 
-    p->glctx = mpgl_init(backend, vo);
+    p->glctx = mpgl_init(vo, backend);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;

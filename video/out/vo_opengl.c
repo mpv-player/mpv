@@ -1943,7 +1943,7 @@ static int lut3d_size_valid(void *arg)
 
 static int backend_valid(void *arg)
 {
-    return mpgl_find_backend(*(const char **)arg) >= 0;
+    return mpgl_find_backend(*(const char **)arg) >= -1;
 }
 
 struct fbo_format {
@@ -2146,7 +2146,7 @@ static int preinit(struct vo *vo, const char *arg)
         goto err_out;
     }
 
-    int backend = backend_arg ? mpgl_find_backend(backend_arg) : GLTYPE_AUTO;
+    char *backend = talloc_strdup(vo, backend_arg);
     free(backend_arg);
 
     if (fbo_format)
@@ -2178,7 +2178,7 @@ static int preinit(struct vo *vo, const char *arg)
     p->orig_cmdline = talloc(p, struct gl_priv);
     *p->orig_cmdline = *p;
 
-    p->glctx = mpgl_init(backend, vo);
+    p->glctx = mpgl_init(vo, backend);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;

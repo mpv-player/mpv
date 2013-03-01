@@ -49,6 +49,8 @@ struct vo_w32_state {
     int mon_id;
 };
 
+struct vo;
+
 int vo_w32_init(struct vo *vo);
 void vo_w32_uninit(struct vo *vo);
 void vo_w32_ontop(struct vo *vo);

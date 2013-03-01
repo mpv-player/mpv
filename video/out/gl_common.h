@@ -73,14 +73,6 @@ void glEnable3DLeft(GL *gl, int type);
 void glEnable3DRight(GL *gl, int type);
 void glDisable3D(GL *gl, int type);
 
-enum MPGLType {
-    GLTYPE_AUTO,
-    GLTYPE_COCOA,
-    GLTYPE_W32,
-    GLTYPE_X11,
-    GLTYPE_WAYLAND,
-};
-
 enum {
     MPGL_CAP_GL                 = (1 << 0),     // GL was successfully loaded
     MPGL_CAP_GL_LEGACY          = (1 << 1),     // GL 1.1 (but not 3.x)
@@ -104,7 +96,6 @@ enum {
 
 typedef struct MPGLContext {
     GL *gl;
-    enum MPGLType type;
     struct vo *vo;
 
     // Bit size of each component in the created framebuffer. 0 if unknown.
@@ -142,9 +133,7 @@ typedef struct MPGLContext {
     void *priv;
 } MPGLContext;
 
-int mpgl_find_backend(const char *name);
-
-MPGLContext *mpgl_init(enum MPGLType type, struct vo *vo);
+MPGLContext *mpgl_init(struct vo *vo, const char *backend_name);
 void mpgl_uninit(MPGLContext *ctx);
 
 // Create a VO window and create a GL context on it.
@@ -154,6 +143,18 @@ void mpgl_uninit(MPGLContext *ctx);
 // Returns success.
 bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
                         uint32_t d_height, uint32_t flags);
+
+int mpgl_find_backend(const char *name);
+
+void mpgl_set_backend_cocoa(MPGLContext *ctx);
+void mpgl_set_backend_w32(MPGLContext *ctx);
+void mpgl_set_backend_x11(MPGLContext *ctx);
+void mpgl_set_backend_wayland(MPGLContext *ctx);
+
+void *mp_getdladdr(const char *s);
+
+void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
+                         const char *ext2);
 
 // print a multi line string with line numbers (e.g. for shader sources)
 // mod, lev: module and log level, as in mp_msg()

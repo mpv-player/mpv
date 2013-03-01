@@ -276,7 +276,7 @@ static int preinit(struct vo *vo, const char *arg)
     struct priv *p = vo->priv;
 
     *p = (struct priv) {
-        .mpglctx = mpgl_init(GLTYPE_COCOA, vo),
+        .mpglctx = mpgl_init(vo, "cocoa"),
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
         .quad = talloc_ptrtype(p, p->quad),
     };

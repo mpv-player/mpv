@@ -97,9 +97,12 @@ SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
 
 SOURCES-$(ENCODING)             += video/out/vo_lavc.c audio/out/ao_lavc.c \
                                    core/encode_lavc.c
-SOURCES-$(GL_WIN32)             += video/out/w32_common.c
-SOURCES-$(GL_X11)               += video/out/x11_common.c
-SOURCES-$(GL_WAYLAND)           += video/out/wayland_common.c
+
+SOURCES-$(GL_WIN32)             += video/out/w32_common.c video/out/gl_w32.c
+SOURCES-$(GL_X11)               += video/out/x11_common.c video/out/gl_x11.c
+SOURCES-$(GL_COCOA)             += video/out/gl_cocoa.c
+SOURCES-$(GL_WAYLAND)           += video/out/wayland_common.c \
+                                   video/out/gl_wayland.c
 
 SOURCES-$(JACK)                 += audio/out/ao_jack.c
 SOURCES-$(JOYSTICK)             += core/input/joystick.c
