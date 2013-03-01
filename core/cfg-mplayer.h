@@ -456,8 +456,7 @@ const m_option_t common_opts[] = {
     {"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
     {"ssf", (void *) scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     OPT_FLOATRANGE("aspect", movie_aspect, 0, 0.1, 10.0),
-    // xxx: this aliases int with float, which is very evil (but works in this case)
-    OPT_FLAG_STORE("no-aspect", movie_aspect, 0, 0),
+    OPT_FLOAT_STORE("no-aspect", movie_aspect, 0, 0),
 
     OPT_FLAG_CONSTANTS("flip", flip, 0, 0, 1),
 

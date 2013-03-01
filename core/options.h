@@ -158,9 +158,9 @@ typedef struct MPOpts {
     } lavc_param;
 
     struct lavfdopts {
-        unsigned int probesize;
+        int probesize;
         int probescore;
-        unsigned int analyzeduration;
+        int analyzeduration;
         char *format;
         char *cryptokey;
         char *avopt;
@@ -169,8 +169,8 @@ typedef struct MPOpts {
     struct input_conf {
         char *config_file;
         int key_fifo_size;
-        unsigned int ar_delay;
-        unsigned int ar_rate;
+        int ar_delay;
+        int ar_rate;
         char *js_dev;
         char *ar_dev;
         char *in_file;

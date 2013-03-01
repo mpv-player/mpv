@@ -179,6 +179,34 @@ const m_option_type_t m_option_type_store = {
     .parse = parse_store,
 };
 
+// Same for float types
+
+#undef VAL
+#define VAL(x) (*(float *)(x))
+
+static int parse_store_float(const m_option_t *opt, struct bstr name,
+                             struct bstr param, void *dst)
+{
+    if (param.len == 0 || bstrcasecmp0(param, "yes") == 0) {
+        if (dst)
+            VAL(dst) = opt->max;
+        return 0;
+    } else {
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+               "Invalid parameter for %.*s flag: %.*s\n",
+               BSTR_P(name), BSTR_P(param));
+        return M_OPT_DISALLOW_PARAM;
+    }
+}
+
+const m_option_type_t m_option_type_float_store = {
+    // can only be activated
+    .name  = "Flag",
+    .size  = sizeof(float),
+    .flags = M_OPT_TYPE_OPTIONAL_PARAM,
+    .parse = parse_store_float,
+};
+
 // Integer
 
 #undef VAL
