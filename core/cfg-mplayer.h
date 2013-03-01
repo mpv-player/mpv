@@ -282,6 +282,8 @@ const m_option_t msgl_config[]={
 
 extern const m_option_t lavc_decode_opts_conf[];
 
+#define OPT_BASE_STRUCT struct MPOpts
+
 const m_option_t common_opts[] = {
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, CONF_GLOBAL),

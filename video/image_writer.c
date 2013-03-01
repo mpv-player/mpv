@@ -54,7 +54,6 @@ const struct image_writer_opts image_writer_opts_defaults = {
     .jpeg_baseline = 1,
 };
 
-#undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct image_writer_opts
 
 const struct m_sub_options image_writer_conf = {

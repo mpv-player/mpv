@@ -65,7 +65,6 @@ static const const struct osd_style_opts osd_style_opts_def = {
     .margin_y = 10,
 };
 
-#undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct osd_style_opts
 const struct m_sub_options osd_style_conf = {
     .opts = (m_option_t[]) {

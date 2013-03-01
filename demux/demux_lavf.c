@@ -49,6 +49,8 @@
 #define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
 #define PROBE_BUF_SIZE (2 * 1024 * 1024)
 
+#define OPT_BASE_STRUCT struct MPOpts
+
 const m_option_t lavfdopts_conf[] = {
     OPT_INTRANGE("probesize", lavfdopts.probesize, 0, 32, INT_MAX),
     OPT_STRING("format", lavfdopts.format, 0),

@@ -71,6 +71,8 @@ static enum PixelFormat get_format_hwdec(struct AVCodecContext *avctx,
 
 static void uninit(struct sh_video *sh);
 
+#define OPT_BASE_STRUCT struct MPOpts
+
 const m_option_t lavc_decode_opts_conf[] = {
     OPT_INTRANGE("bug", lavc_param.workaround_bugs, 0, -1, 999999),
     OPT_FLAG("gray", lavc_param.gray, 0),

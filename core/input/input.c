@@ -518,6 +518,8 @@ int async_quit_request;
 static int print_key_list(m_option_t *cfg, char *optname, char *optparam);
 static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam);
 
+#define OPT_BASE_STRUCT struct MPOpts
+
 // Our command line options
 static const m_option_t input_conf[] = {
     OPT_STRING("conf", input.config_file, CONF_GLOBAL),

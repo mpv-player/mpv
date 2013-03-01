@@ -619,6 +619,4 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
                        .type = &m_option_type_subconfig_struct, \
                        .priv = (void*)&subconf)
 
-#define OPT_BASE_STRUCT struct MPOpts
-
 #endif /* MPLAYER_M_OPTION_H */

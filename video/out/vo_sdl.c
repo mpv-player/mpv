@@ -1014,7 +1014,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return VO_NOTIMPL;
 }
 
-#undef OPT_BASE_STRUCT
 #define OPT_BASE_STRUCT struct priv
 
 const struct vo_driver video_out_sdl = {
