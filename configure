@@ -1836,7 +1836,7 @@ fi #if darwin
 echocheck "Wayland"
 if test "$_wayland" != no; then
  _wayland="no"
-  pkg_config_add "wayland-client >= 1.0.0 wayland-egl >= 1.0.0 wayland-cursor >= 1.0.0 xkbcommon >= 0.2.0" \
+  pkg_config_add "wayland-client >= 1.0.0 wayland-egl >= 9.0.0 wayland-cursor >= 1.0.0 xkbcommon >= 0.2.0" \
   && _wayland="yes"
   res_comment=""
 else
