@@ -1672,12 +1672,6 @@ static void check_events(struct vo *vo)
     struct gl_priv *p = vo->priv;
 
     int e = p->glctx->check_events(vo);
-    if (e & VO_EVENT_REINIT) {
-        uninit_gl(p);
-        init_gl(p);
-        init_video(p);
-        resize(p);
-    }
     if (e & VO_EVENT_RESIZE)
         resize(p);
     if (e & VO_EVENT_EXPOSE)

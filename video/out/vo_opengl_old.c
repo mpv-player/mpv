@@ -1771,10 +1771,6 @@ static void check_events(struct vo *vo)
     struct gl_priv *p = vo->priv;
 
     int e = p->glctx->check_events(vo);
-    if (e & VO_EVENT_REINIT) {
-        uninitGl(vo);
-        initGl(vo, vo->dwidth, vo->dheight);
-    }
     if (e & VO_EVENT_RESIZE)
         resize(vo, vo->dwidth, vo->dheight);
     if (e & VO_EVENT_EXPOSE)
