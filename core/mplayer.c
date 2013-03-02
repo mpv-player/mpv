@@ -3471,8 +3471,14 @@ static void run_playloop(struct MPContext *mpctx)
                 }
             }
         }
-        if (sleeptime > 0)
-            mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
+        if (sleeptime > 0) {
+            int sleep_ms = sleeptime * 1000;
+            if (mpctx->sh_video) {
+                unsigned int vo_sleep = vo_get_sleep_time(mpctx->video_out);
+                sleep_ms = FFMIN(sleep_ms, vo_sleep);
+            }
+            mp_input_get_cmd(mpctx->input, sleep_ms, true);
+        }
     }
 
     //================= Keyboard events, SEEKing ====================

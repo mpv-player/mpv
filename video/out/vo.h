@@ -238,6 +238,9 @@ struct vo {
 
     double flip_queue_offset; // queue flip events at most this much in advance
 
+    unsigned int next_wakeup_time; // deadline for next vo_check_events() call,
+                                   // in GetTimerMS() units (set by VO)
+
     const struct vo_driver *driver;
     void *priv;
     struct MPOpts *opts;
@@ -294,6 +297,7 @@ void vo_new_frame_imminent(struct vo *vo);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);
 void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration);
 void vo_check_events(struct vo *vo);
+unsigned int vo_get_sleep_time(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);
 

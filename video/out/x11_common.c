@@ -665,6 +665,20 @@ void vo_x11_uninit(struct vo *vo)
     vo->x11 = NULL;
 }
 
+static void vo_x11_unhide_cursor(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    struct MPOpts *opts = vo->opts;
+
+    if (opts->cursor_autohide_delay > -2) {
+        vo_showcursor(x11->display, x11->window);
+        if (opts->cursor_autohide_delay >= 0) {
+            x11->mouse_waiting_hide = 1;
+            x11->mouse_timer = GetTimerMS() + opts->cursor_autohide_delay;
+        }
+    }
+}
+
 static void update_vo_size(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -679,13 +693,10 @@ static void update_vo_size(struct vo *vo)
 int vo_x11_check_events(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
-    struct MPOpts *opts = vo->opts;
     Display *display = vo->x11->display;
     XEvent Event;
 
-    if (x11->mouse_waiting_hide && opts->cursor_autohide_delay != -1 &&
-        (GetTimerMS() - x11->mouse_timer >= opts->cursor_autohide_delay))
-    {
+    if (x11->mouse_waiting_hide && GetTimerMS() >= x11->mouse_timer) {
         vo_hidecursor(display, x11->window);
         x11->mouse_waiting_hide = 0;
     }
@@ -740,29 +751,16 @@ int vo_x11_check_events(struct vo *vo)
         break;
         case MotionNotify:
             vo_mouse_movement(vo, Event.xmotion.x, Event.xmotion.y);
-
-            if (opts->cursor_autohide_delay > -2) {
-                vo_showcursor(display, x11->window);
-                x11->mouse_waiting_hide = 1;
-                x11->mouse_timer = GetTimerMS();
-            }
+            vo_x11_unhide_cursor(vo);
             break;
         case ButtonPress:
-            if (opts->cursor_autohide_delay > -2) {
-                vo_showcursor(display, x11->window);
-                x11->mouse_waiting_hide = 1;
-                x11->mouse_timer = GetTimerMS();
-            }
+            vo_x11_unhide_cursor(vo);
             mplayer_put_key(vo->key_fifo,
                             (MP_MOUSE_BTN0 + Event.xbutton.button - 1)
                             | MP_KEY_STATE_DOWN);
             break;
         case ButtonRelease:
-            if (opts->cursor_autohide_delay > -2) {
-                vo_showcursor(display, x11->window);
-                x11->mouse_waiting_hide = 1;
-                x11->mouse_timer = GetTimerMS();
-            }
+            vo_x11_unhide_cursor(vo);
             mplayer_put_key(vo->key_fifo,
                             MP_MOUSE_BTN0 + Event.xbutton.button - 1);
             break;
@@ -795,6 +793,10 @@ int vo_x11_check_events(struct vo *vo)
             break;
         }
     }
+
+    if (x11->mouse_waiting_hide)
+        vo->next_wakeup_time = FFMIN(vo->next_wakeup_time, x11->mouse_timer);
+
     update_vo_size(vo);
     if (WinID >= 0 && (x11->pending_vo_events & VO_EVENT_RESIZE)) {
         int x = x11->win_x, y = x11->win_y;
