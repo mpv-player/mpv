@@ -44,25 +44,21 @@ struct vo_x11_state {
     XIM xim;
     XIC xic;
 
-    GC vo_gc;
+    GC f_gc;    // used to paint background
+    GC vo_gc;   // used to paint video
     Colormap colormap;
 
     int wm_type;
     int fs_type;
-    int window_state;
+    bool window_hidden;
     int fs_flip;
     int fs_layer;
 
-    GC f_gc;
     XSizeHints vo_hint;
     unsigned int mouse_timer;
     int mouse_waiting_hide;
     int orig_layer;
     int old_gravity;
-    int vo_old_x;
-    int vo_old_y;
-    int vo_old_width;
-    int vo_old_height;
 
     // Current actual window position (updated on window move/resize events).
     int win_x;
@@ -72,17 +68,24 @@ struct vo_x11_state {
 
     int pending_vo_events;
 
+    // last non-fullscreen extends (updated on fullscreen or reinitialization)
+    int nofs_width;
+    int nofs_height;
+    int nofs_x;
+    int nofs_y;
+
     /* Keep track of original video width/height to determine when to
      * resize window when reconfiguring. Resize window when video size
      * changes, but don't force window size changes as long as video size
      * stays the same (even if that size is different from the current
      * window size after the user modified the latter). */
-    int last_video_width;
-    int last_video_height;
+    int old_dwidth;
+    int old_dheight;
     /* Video size changed during fullscreen when we couldn't tell the new
      * size to the window manager. Must set window size when turning
      * fullscreen off. */
     bool size_changed_during_fs;
+    bool pos_changed_during_fs;
 
     unsigned int olddecor;
     unsigned int oldfuncs;
