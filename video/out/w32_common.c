@@ -384,7 +384,6 @@ static void updateScreenProperties(struct vo *vo)
 
     vo->opts->vo_screenwidth = dm.dmPelsWidth;
     vo->opts->vo_screenheight = dm.dmPelsHeight;
-    w32->depthonscreen = dm.dmBitsPerPel;
     w32_update_xinerama_info(vo);
 }
 
@@ -627,9 +626,8 @@ int vo_w32_init(struct vo *vo)
 
     updateScreenProperties(vo);
 
-    mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d with depth %d\n",
-           vo->opts->vo_screenwidth, vo->opts->vo_screenheight,
-           w32->depthonscreen);
+    mp_msg(MSGT_VO, MSGL_V, "vo: win32: running at %dx%d\n",
+           vo->opts->vo_screenwidth, vo->opts->vo_screenheight);
 
     return 1;
 }
