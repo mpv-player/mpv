@@ -635,7 +635,7 @@ opengl-old
             Win32/WGL
         x11
             X11/GLX
-        waylnad
+        wayland
             Wayland/EGL
 
 sdl
