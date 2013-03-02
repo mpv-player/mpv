@@ -1599,7 +1599,6 @@ MPGLContext *mpgl_init(enum MPGLType type, struct vo *vo)
         .gl = talloc_zero(ctx, GL),
         .type = type,
         .vo = vo,
-        .vo_init_ok = true,
     };
     switch (ctx->type) {
 #ifdef CONFIG_GL_COCOA
@@ -1669,23 +1668,9 @@ MPGLContext *mpgl_init(enum MPGLType type, struct vo *vo)
     return NULL;
 }
 
-bool mpgl_destroy_window(struct MPGLContext *ctx)
-{
-    ctx->releaseGlContext(ctx);
-    *ctx->gl = (GL) {0};
-    // This is a caveat. At least on X11, this will recreate the X display
-    // connection. Also, if vo_init() fails, unspecified things will happen.
-    ctx->vo_uninit(ctx->vo);
-    ctx->vo_init_ok = ctx->vo_init(ctx->vo);
-    return ctx->vo_init_ok;
-}
-
 bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
                         uint32_t d_height, uint32_t flags)
 {
-    if (!ctx->vo_init_ok)
-        return false;
-
     gl_caps |= MPGL_CAP_GL;
 
     ctx->requested_gl_version = (gl_caps & MPGL_CAP_GL_LEGACY)
@@ -1710,9 +1695,7 @@ bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
 
 void mpgl_uninit(MPGLContext *ctx)
 {
-    if (!ctx)
-        return;
-    if (ctx->vo_init_ok) {
+    if (ctx) {
         ctx->releaseGlContext(ctx);
         ctx->vo_uninit(ctx->vo);
     }

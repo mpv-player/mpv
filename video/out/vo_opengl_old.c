@@ -2264,12 +2264,6 @@ static int preinit(struct vo *vo, const char *arg)
         if (!config_window(vo, 320, 200, VOFLAG_HIDDEN))
             goto err_out;
         autodetectGlExtensions(vo);
-        // We created a window to test whether the GL context supports hardware
-        // acceleration and so on. Destroy that window to make sure all state
-        // associated with it is lost.
-        uninitGl(vo);
-        if (!mpgl_destroy_window(p->glctx))
-            goto err_out;
     }
     if (p->many_fmts)
         mp_msg(MSGT_VO, MSGL_INFO, "[gl] using extended formats. "

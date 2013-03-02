@@ -2181,12 +2181,6 @@ static int preinit(struct vo *vo, const char *arg)
     if (!config_window(p, 320, 200, VOFLAG_HIDDEN))
         goto err_out;
     check_gl_features(p);
-    // We created a window to test whether the GL context could be
-    // created and so on. Destroy that window to make sure all state
-    // associated with it is lost.
-    uninit_gl(p);
-    if (!mpgl_destroy_window(p->glctx))
-        goto err_out;
 
     return 0;
 

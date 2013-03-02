@@ -139,7 +139,6 @@ typedef struct MPGLContext {
 
     // For free use by the backend.
     void *priv;
-    bool vo_init_ok;
 } MPGLContext;
 
 int mpgl_find_backend(const char *name);
@@ -154,10 +153,6 @@ void mpgl_uninit(MPGLContext *ctx);
 // Returns success.
 bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
                         uint32_t d_height, uint32_t flags);
-
-// Destroy the window, without resetting GL3 vs. GL2 context choice.
-// If this fails (false), mpgl_uninit(ctx) must be called.
-bool mpgl_destroy_window(struct MPGLContext *ctx);
 
 // print a multi line string with line numbers (e.g. for shader sources)
 // mod, lev: module and log level, as in mp_msg()
