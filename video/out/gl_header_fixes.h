@@ -21,6 +21,8 @@
  * version 2.1 of the License, or (at your option) any later version.
  */
 
+#ifdef MP_GET_GL_WORKAROUNDS
+
 // workaround for some gl.h headers
 #ifndef GLAPIENTRY
 #ifdef APIENTRY
@@ -244,6 +246,12 @@
 #endif
 #endif
 
+#undef MP_GET_GL_WORKAROUNDS
+
+#endif
+
+#ifdef MP_GET_GLX_WORKAROUNDS
+
 // FreeBSD 10.0-CURRENT lacks the GLX_ARB_create_context extension completely
 #ifndef GLX_CONTEXT_MAJOR_VERSION_ARB
 #define GLX_CONTEXT_MAJOR_VERSION_ARB           0x2091
@@ -257,4 +265,8 @@
 #endif
 #define GLX_CONTEXT_CORE_PROFILE_BIT_ARB        0x00000001
 #define GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB 0x00000002
+#endif
+
+#undef MP_GET_GLX_WORKAROUNDS
+
 #endif

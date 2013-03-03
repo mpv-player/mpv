@@ -47,6 +47,7 @@
 #include <GL/glext.h>
 #endif
 
+#define MP_GET_GL_WORKAROUNDS
 #include "video/out/gl_header_fixes.h"
 
 struct GL;

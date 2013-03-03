@@ -1060,7 +1060,11 @@ static void swapGlBuffers_w32(MPGLContext *ctx)
 #ifdef CONFIG_GL_X11
 #include <X11/Xlib.h>
 #include <GL/glx.h>
+
 #include "x11_common.h"
+
+#define MP_GET_GLX_WORKAROUNDS
+#include "gl_header_fixes.h"
 
 struct glx_context {
     XVisualInfo *vinfo;
