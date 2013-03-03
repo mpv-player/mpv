@@ -109,6 +109,7 @@ typedef struct MPOpts {
 
     int audio_output_channels;
     int audio_output_format;
+    int dtshd;
     float playback_speed;
     float drc_level;
     struct m_obj_settings *vf_settings;
