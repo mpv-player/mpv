@@ -355,8 +355,6 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
                          uint32_t flags, int gl3profile)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    struct MPOpts *opts = vo->opts;
-
     const NSRect window_rect = NSMakeRect(xinerama_x, xinerama_y,
                                           d_width, d_height);
     const NSRect glview_rect = NSMakeRect(0, 0, 100, 100);
@@ -410,21 +408,6 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
 
     [NSApp setDelegate:s->window];
     [s->window setDelegate:s->window];
-    [s->window setContentSize:s->current_video_size];
-    [s->window setContentAspectRatio:s->current_video_size];
-    [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
-
-    if (flags & VOFLAG_HIDDEN) {
-        [s->window orderOut:nil];
-    } else {
-        [s->window makeKeyAndOrderFront:nil];
-        [NSApp activateIgnoringOtherApps:YES];
-    }
-
-    if (flags & VOFLAG_FULLSCREEN)
-        vo_cocoa_fullscreen(vo);
-
-    vo_set_level(vo, opts->vo_ontop);
 
     return 0;
 }
@@ -453,6 +436,13 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
                            int gl3profile)
 {
     struct vo_cocoa_state *s = vo->cocoa;
+    struct MPOpts *opts = vo->opts;
+
+    if (vo->config_count > 0) {
+        NSPoint origin = [s->window frame].origin;
+        vo->dx = origin.x;
+        vo->dy = origin.y;
+    }
 
     update_state_sizes(s, d_width, d_height);
 
@@ -462,6 +452,22 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
     } else {
         update_window(vo);
     }
+
+    if (flags & VOFLAG_HIDDEN) {
+        [s->window orderOut:nil];
+    } else {
+        [s->window makeKeyAndOrderFront:nil];
+        [NSApp activateIgnoringOtherApps:YES];
+    }
+
+    if (flags & VOFLAG_FULLSCREEN)
+        vo_cocoa_fullscreen(vo);
+
+    vo_set_level(vo, opts->vo_ontop);
+
+    [s->window setContentSize:s->current_video_size];
+    [s->window setContentAspectRatio:s->current_video_size];
+    [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
 
     resize_window(vo);
 
