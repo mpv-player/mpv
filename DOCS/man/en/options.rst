@@ -531,6 +531,13 @@
     Time in milliseconds to recognize two consecutive button presses as a
     double-click (default: 300).
 
+--dtshd, --no-dtshd
+    When using DTS passthrough, output any DTS-HD track as-is.
+    With ``--no-dts`` (the default) only the DTS Core parts will be output.
+
+    DTS-HD tracks can be sent over HDMI but not over the original
+    coax/toslink S/PDIF system.
+
 --dvbin=<options>
     Pass the following parameters to the DVB input module, in order to
     override the default ones:
