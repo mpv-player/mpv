@@ -50,7 +50,7 @@ mf_t* open_mf_pattern(char * filename)
 #if defined(HAVE_GLOB) || defined(__MINGW32__)
  glob_t        gg;
  int           i;
- char        * fname;
+ char        * fname = NULL;
  mf_t        * mf;
  int           error_count = 0;
  int	       count = 0;

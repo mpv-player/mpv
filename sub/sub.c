@@ -53,7 +53,7 @@ float sub_fps = 0;
 void *vo_spudec=NULL;
 void *vo_vobsub=NULL;
 
-static const const struct osd_style_opts osd_style_opts_def = {
+static const struct osd_style_opts osd_style_opts_def = {
     .font = "Sans",
     .font_size = 45,
     .color = {255, 255, 255, 255},

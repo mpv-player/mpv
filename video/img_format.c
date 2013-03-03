@@ -161,7 +161,7 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
     struct mp_imgfmt_desc desc = {
         .id = mpfmt,
         .avformat = fmt,
-        .name = mp_imgfmt_to_name(desc.id),
+        .name = mp_imgfmt_to_name(mpfmt),
         .chroma_xs = pd->log2_chroma_w,
         .chroma_ys = pd->log2_chroma_h,
     };
