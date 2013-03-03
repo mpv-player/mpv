@@ -940,6 +940,33 @@ void mpgl_uninit(MPGLContext *ctx)
     talloc_free(ctx);
 }
 
+void mpgl_set_context(MPGLContext *ctx)
+{
+    if (ctx->set_current)
+        ctx->set_current(ctx, true);
+}
+
+void mpgl_unset_context(MPGLContext *ctx)
+{
+    if (ctx->set_current)
+        ctx->set_current(ctx, false);
+}
+
+void mpgl_lock(MPGLContext *ctx)
+{
+    mpgl_set_context(ctx);
+}
+
+void mpgl_unlock(MPGLContext *ctx)
+{
+    mpgl_unset_context(ctx);
+}
+
+bool mpgl_is_thread_safe(MPGLContext *ctx)
+{
+    return !!ctx->set_current;
+}
+
 void mp_log_source(int mod, int lev, const char *src)
 {
     int line = 1;
