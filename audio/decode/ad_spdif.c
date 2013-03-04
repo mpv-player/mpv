@@ -27,6 +27,7 @@
 #include "config.h"
 #include "core/mp_msg.h"
 #include "core/av_common.h"
+#include "core/options.h"
 #include "ad_internal.h"
 
 LIBAD_EXTERN(spdif)
@@ -162,19 +163,27 @@ static int init(sh_audio_t *sh, const char *decoder)
         sh->channels                    = 2;
         sh->i_bps                       = bps;
         break;
-    case CODEC_ID_DTS: // FORCE USE DTS-HD
-        opt = av_opt_find(&lavf_ctx->oformat->priv_class,
-                          "dtshd_rate", NULL, 0, 0);
-        if (!opt)
-            goto fail;
-        dtshd_rate                      = (int*)(((uint8_t*)lavf_ctx->priv_data) +
-                                          opt->offset);
-        *dtshd_rate                     = 192000*4;
-        spdif_ctx->iec61937_packet_size = 32768;
-        sh->sample_format               = AF_FORMAT_IEC61937_LE;
-        sh->samplerate                  = 192000; // DTS core require 48000
-        sh->channels                    = 2*4;
-        sh->i_bps                       = bps;
+    case CODEC_ID_DTS:
+        if(sh->opts->dtshd) {
+            opt = av_opt_find(&lavf_ctx->oformat->priv_class,
+                              "dtshd_rate", NULL, 0, 0);
+            if (!opt)
+                goto fail;
+            dtshd_rate                      = (int*)(((uint8_t*)lavf_ctx->priv_data) +
+                                              opt->offset);
+            *dtshd_rate                     = 192000*4;
+            spdif_ctx->iec61937_packet_size = 32768;
+            sh->sample_format               = AF_FORMAT_IEC61937_LE;
+            sh->samplerate                  = 192000; // DTS core require 48000
+            sh->channels                    = 2*4;
+            sh->i_bps                       = bps;
+        } else {
+            spdif_ctx->iec61937_packet_size = 32768;
+            sh->sample_format               = AF_FORMAT_AC3_LE;
+            sh->samplerate                  = srate;
+            sh->channels                    = 2;
+            sh->i_bps                       = bps;
+        }
         break;
     case CODEC_ID_EAC3:
         spdif_ctx->iec61937_packet_size = 24576;
