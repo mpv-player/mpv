@@ -696,7 +696,11 @@ void create_menu()
 {
     // this is only valid as a starting value. it will be rewritten in the
     // -fullscreen method.
-    return !_vo->opts->vo.fs;
+    if (_vo) {
+        return !_vo->opts->vo.fs;
+    } else {
+        return NO;
+    }
 }
 
 - (void)handleQuitEvent:(NSAppleEventDescriptor*)e
