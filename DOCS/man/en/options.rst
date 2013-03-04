@@ -533,7 +533,7 @@
 
 --dtshd, --no-dtshd
     When using DTS passthrough, output any DTS-HD track as-is.
-    With ``--no-dts`` (the default) only the DTS Core parts will be output.
+    With ``--no-dtshd`` (the default) only the DTS Core parts will be output.
 
     DTS-HD tracks can be sent over HDMI but not over the original
     coax/toslink S/PDIF system.
