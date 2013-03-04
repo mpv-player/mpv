@@ -122,7 +122,7 @@ struct vo_cocoa_state {
 
     int display_cursor;
     int cursor_timer;
-    int vo.cursor_autohide_delay;
+    int vo_cursor_autohide_delay;
 
     bool did_resize;
     bool out_fs_resize;
@@ -150,11 +150,11 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .windowed_frame = {{0,0},{0,0}},
         .out_fs_resize = NO,
         .display_cursor = 1,
-        .vo.cursor_autohide_delay = vo->opts->vo.cursor_autohide_delay,
+        .vo_cursor_autohide_delay = vo->opts->vo.cursor_autohide_delay,
         .power_mgmt_assertion = kIOPMNullAssertionID,
         .accumulated_scroll = 0,
     };
-    if (!vo_border) s->windowed_mask = NSBorderlessWindowMask;
+    if (!vo->opts->vo.border) s->windowed_mask = NSBorderlessWindowMask;
     return s;
 }
 
@@ -491,12 +491,12 @@ static void vo_cocoa_display_cursor(struct vo *vo, int requested_state)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     if (requested_state) {
-        if (!vo->opts->vo.fs || s->vo.cursor_autohide_delay > -2) {
+        if (!vo->opts->vo.fs || s->vo_cursor_autohide_delay > -2) {
             s->display_cursor = requested_state;
             CGDisplayShowCursor(kCGDirectMainDisplay);
         }
     } else {
-        if (s->vo.cursor_autohide_delay != -1) {
+        if (s->vo_cursor_autohide_delay != -1) {
             s->display_cursor = requested_state;
             CGDisplayHideCursor(kCGDirectMainDisplay);
         }
@@ -511,7 +511,7 @@ int vo_cocoa_check_events(struct vo *vo)
 
     // automatically hide mouse cursor
     if (vo->opts->vo.fs && s->display_cursor &&
-        (ms_time - s->cursor_timer >= s->vo.cursor_autohide_delay)) {
+        (ms_time - s->cursor_timer >= s->vo_cursor_autohide_delay)) {
         vo_cocoa_display_cursor(vo, 0);
         s->cursor_timer = ms_time;
     }
@@ -696,7 +696,7 @@ void create_menu()
 {
     // this is only valid as a starting value. it will be rewritten in the
     // -fullscreen method.
-    return !_vo->opts->o_fs;
+    return !_vo->opts->vo.fs;
 }
 
 - (void)handleQuitEvent:(NSAppleEventDescriptor*)e
