@@ -3803,33 +3803,6 @@ static void run_playloop(struct MPContext *mpctx)
     execute_queued_seek(mpctx);
 }
 
-static void run_playloop_opaque_callback(void *context)
-{
-    run_playloop((struct MPContext *)context);
-}
-
-static int check_stop_play(void *context)
-{
-    struct MPContext *mpctx = context;
-    return mpctx->stop_play;
-}
-
-static void schedule_run_playloop(struct MPContext *mpctx)
-{
-
-    #ifdef CONFIG_COCOA
-        cocoa_run_loop_schedule(run_playloop_opaque_callback,
-                                check_stop_play,
-                                mpctx, // passed in as opaque type
-                                mpctx->input,
-                                mpctx->key_fifo);
-        cocoa_run_runloop();
-    #else
-        while (!check_stop_play(mpctx))
-            run_playloop(mpctx);
-    #endif
-}
-
 static int read_keys(void *ctx, int fd)
 {
     if (getch2(ctx))
@@ -3953,6 +3926,10 @@ static void init_input(struct MPContext *mpctx)
         mp_input_add_key_fd(mpctx->input, 0, 1, read_keys, NULL, mpctx->key_fifo);
     // Set the libstream interrupt callback
     stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
+
+#ifdef CONFIG_COCOA
+    cocoa_set_state(mpctx->input, mpctx->key_fifo);
+#endif
 }
 
 static void open_subtitles_from_options(struct MPContext *mpctx)
@@ -4432,7 +4409,8 @@ goto_enable_cache: ;
     if (mpctx->opts.pause)
         pause_player(mpctx);
 
-    schedule_run_playloop(mpctx);
+    while (!mpctx->stop_play)
+        run_playloop(mpctx);
 
     mp_msg(MSGT_GLOBAL, MSGL_V, "EOF code: %d  \n", mpctx->stop_play);
 
@@ -4621,11 +4599,6 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
 
     GetCpuCaps(&gCpuCaps);
 
-#ifdef CONFIG_COCOA
-    init_cocoa_application();
-    macosx_finder_args_preinit(p_argc, p_argv);
-#endif
-
 #ifdef __MINGW32__
     mp_get_converted_argv(p_argc, p_argv);
 #endif
@@ -4654,7 +4627,7 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
 /* This preprocessor directive is a hack to generate a mplayer-nomain.o object
  * file for some tools to link against. */
 #ifndef DISABLE_MAIN
-int main(int argc, char *argv[])
+static int mpv_main(int argc, char *argv[])
 {
     osdep_preinit(&argc, &argv);
 
@@ -4747,4 +4720,14 @@ int main(int argc, char *argv[])
 
     return 1;
 }
+
+int main(int argc, char *argv[])
+{
+#ifdef CONFIG_COCOA
+    cocoa_main(mpv_main, argc, argv);
+#else
+    mpv_main(argc, argv);
+#endif
+}
+
 #endif /* DISABLE_MAIN */

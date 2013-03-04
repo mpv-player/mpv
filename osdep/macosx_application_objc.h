@@ -22,16 +22,10 @@
 @interface Application : NSObject<NSApplicationDelegate>
 - (void)initialize_menu;
 - (void)registerSelector:(SEL)selector forKey:(MPMenuKey)key;
-- (void)call_callback;
-- (void)schedule_timer;
 - (void)stopPlayback;
 
-@property(nonatomic, assign) play_loop_callback callback;
-@property(nonatomic, assign) should_stop_callback shouldStopPlayback;
-@property(nonatomic, assign) void *context;
 @property(nonatomic, assign) struct input_ctx *inputContext;
 @property(nonatomic, assign) struct mp_fifo *keyFIFO;
-@property(nonatomic, retain) NSTimer *callbackTimer;
 @property(nonatomic, retain) NSMutableDictionary *menuItems;
 @property(nonatomic, retain) NSArray *files;
 @property(nonatomic, retain) NSMutableArray *argumentsList;

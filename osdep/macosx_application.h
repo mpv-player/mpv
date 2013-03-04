@@ -22,9 +22,7 @@
 struct input_ctx;
 struct mp_fifo;
 
-// Playloop callback function pointer
-typedef void(*play_loop_callback)(void *);
-typedef int(*should_stop_callback)(void *);
+typedef int (*mpv_main_fn)(int, char**);
 
 // Menu Keys identifing menu items
 typedef enum {
@@ -35,22 +33,23 @@ typedef enum {
     MPM_ZOOM,
 } MPMenuKey;
 
+// multithreaded wrapper for mpv_main
+int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[]);
+
 void cocoa_register_menu_item_action(MPMenuKey key, void* action);
 
 // initializes Cocoa application
 void init_cocoa_application(void);
 void terminate_cocoa_application(void);
+void cocoa_autorelease_pool_alloc(void);
+void cocoa_autorelease_pool_drain(void);
 
 // Runs the Cocoa Main Event Loop
 void cocoa_run_runloop(void);
+void cocoa_stop_runloop(void);
 void cocoa_post_fake_event(void);
 
-// Adds play_loop as a timer of the Main Cocoa Event Loop
-void cocoa_run_loop_schedule(play_loop_callback callback,
-                             should_stop_callback playback_stopped,
-                             void *context,
-                             struct input_ctx *input_context,
-                             struct mp_fifo *key_fifo);
+void cocoa_set_state(struct input_ctx *input_context, struct mp_fifo *key_fifo);
 
 void macosx_finder_args_preinit(int *argc, char ***argv);
 

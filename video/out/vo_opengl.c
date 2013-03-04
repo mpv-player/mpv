@@ -156,6 +156,13 @@ static bool config_window(struct gl_priv *p, uint32_t d_width,
     return mpgl_config_window(p->glctx, mpgl_caps, d_width, d_height, flags);
 }
 
+static void video_resize_redraw_callback(struct vo *vo, int w, int h)
+{
+    struct gl_priv *p = vo->priv;
+    gl_video_resize_redraw(p->renderer, w, h);
+
+}
+
 static int config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t d_width, uint32_t d_height, uint32_t flags,
                   uint32_t format)
@@ -167,6 +174,10 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if (!config_window(p, d_width, d_height, flags)) {
         mpgl_unlock(p->glctx);
         return -1;
+    }
+
+    if (p->glctx->register_resize_callback) {
+        p->glctx->register_resize_callback(vo, video_resize_redraw_callback);
     }
 
     gl_video_config(p->renderer, format, width, height,
@@ -352,6 +363,8 @@ static int preinit(struct vo *vo, const char *arg)
 
     if (!config_window(p, 320, 200, VOFLAG_HIDDEN))
         goto err_out;
+
+    mpgl_set_context(p->glctx);
 
     if (p->gl->SwapInterval)
         p->gl->SwapInterval(p->swap_interval);

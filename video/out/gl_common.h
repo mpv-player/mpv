@@ -131,6 +131,13 @@ typedef struct MPGLContext {
     void (*border)(struct vo *vo);
     void (*update_xinerama_info)(struct vo *vo);
 
+    // An optional function to register a resize callback in the backend that
+    // can be called on separate thread to handle resize events immediately
+    // (without waiting for vo_check_events, which will come later for the
+    // proper resize)
+    void (*register_resize_callback)(struct vo *vo,
+                                     void (*cb)(struct vo *vo, int w, int h));
+
     // For free use by the backend.
     void *priv;
 } MPGLContext;

@@ -16,8 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <pthread.h>
 #include "talloc.h"
 
+#include "core/mp_msg.h"
 #include "core/mp_fifo.h"
 #include "core/input/input.h"
 #include "core/input/keycodes.h"
@@ -25,10 +27,9 @@
 #include "osdep/macosx_application_objc.h"
 #include "video/out/osx_common.h"
 
-// 0.0001 seems too much and 0.01 too low, no idea why this works so well
-#define COCOA_MAGIC_TIMER_DELAY 0.001
-
 static Application *app;
+static NSAutoreleasePool *pool;
+static pthread_t playback_thread_id;
 
 @interface Application (PrivateMethods)
 - (NSMenuItem *)menuItemWithParent:(NSMenu *)parent
@@ -54,12 +55,8 @@ static Application *app;
 @synthesize argumentsList = _arguments_list;
 @synthesize willStopOnOpenEvent = _will_stop_on_open_event;
 
-@synthesize callback = _callback;
-@synthesize shouldStopPlayback = _should_stop_playback;
-@synthesize context = _context;
 @synthesize inputContext = _input_context;
 @synthesize keyFIFO = _key_fifo;
-@synthesize callbackTimer = _callback_timer;
 @synthesize menuItems = _menu_items;
 
 - (id)init
@@ -118,32 +115,6 @@ static Application *app;
 }
 
 #undef _R
-
-- (void)call_callback
-{
-    if (self.shouldStopPlayback(self.context)) {
-        [NSApp stop:nil];
-        cocoa_post_fake_event();
-    } else {
-        self.callback(self.context);
-    }
-}
-
-- (void)schedule_timer
-{
-    self.callbackTimer =
-        [NSTimer timerWithTimeInterval:COCOA_MAGIC_TIMER_DELAY
-                                target:self
-                              selector:@selector(call_callback)
-                              userInfo:nil
-                               repeats:YES];
-
-    [[NSRunLoop currentRunLoop] addTimer:self.callbackTimer
-                                forMode:NSDefaultRunLoopMode];
-
-    [[NSRunLoop currentRunLoop] addTimer:self.callbackTimer
-                                forMode:NSEventTrackingRunLoopMode];
-}
 
 - (void)stopPlayback
 {
@@ -216,7 +187,8 @@ static Application *app;
 
     self.files = [filesToOpen sortedArrayUsingSelector:@selector(compare:)];
     if (self.willStopOnOpenEvent) {
-        [NSApp stop:nil];
+        self.willStopOnOpenEvent = NO;
+        cocoa_stop_runloop();
     } else {
         [self handleFiles];
     }
@@ -235,6 +207,41 @@ static Application *app;
     talloc_free(ctx);
 }
 @end
+
+struct playback_thread_ctx {
+    mpv_main_fn mpv_main;
+    int  *argc;
+    char ***argv;
+};
+
+static void *playback_thread(void *ctx_obj)
+{
+    struct playback_thread_ctx *ctx = (struct playback_thread_ctx*) ctx_obj;
+    ctx->mpv_main(*ctx->argc, *ctx->argv);
+    cocoa_stop_runloop();
+    pthread_exit(NULL);
+}
+
+int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
+{
+    struct playback_thread_ctx ctx = {0};
+    ctx.mpv_main = mpv_main;
+    ctx.argc     = &argc;
+    ctx.argv     = &argv;
+
+    init_cocoa_application();
+    macosx_finder_args_preinit(&argc, &argv);
+    pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
+    cocoa_run_runloop();
+
+    // This should never be reached: cocoa_run_runloop blocks until the process
+    // is quit
+    mp_msg(MSGT_CPLAYER, MSGL_ERR, "There was either a problem initializing "
+           "Cocoa or the Runloop was stopped unexpectedly. Please report this "
+           "issues to a developer.\n");
+    pthread_join(playback_thread_id, NULL);
+    return 1;
+}
 
 void cocoa_register_menu_item_action(MPMenuKey key, void* action)
 {
@@ -256,26 +263,38 @@ void terminate_cocoa_application(void)
     [NSApp terminate:app];
 }
 
-void cocoa_run_runloop(void)
+void cocoa_autorelease_pool_alloc(void)
+{
+    pool = [[NSAutoreleasePool alloc] init];
+}
+
+void cocoa_autorelease_pool_drain(void)
+{
+    [pool drain];
+}
+
+
+void cocoa_run_runloop()
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     [NSApp run];
     [pool drain];
 }
 
-void cocoa_run_loop_schedule(play_loop_callback callback,
-                             should_stop_callback stop_query,
-                             void *context,
-                             struct input_ctx *input_context,
-                             struct mp_fifo *key_fifo)
+void cocoa_stop_runloop(void)
+{
+    [NSApp performSelectorOnMainThread:@selector(stop:)
+                            withObject:nil
+                         waitUntilDone:true];
+    cocoa_post_fake_event();
+}
+
+void cocoa_set_state(struct input_ctx *input_context,
+                     struct mp_fifo *key_fifo)
 {
     [NSApp setDelegate:app];
-    app.callback            = callback;
-    app.context             = context;
-    app.shouldStopPlayback  = stop_query;
     app.inputContext        = input_context;
     app.keyFIFO             = key_fifo;
-    [app schedule_timer];
 }
 
 void cocoa_post_fake_event(void)

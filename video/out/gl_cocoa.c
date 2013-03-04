@@ -51,6 +51,11 @@ static void swapGlBuffers_cocoa(MPGLContext *ctx)
     vo_cocoa_swap_buffers(ctx->vo);
 }
 
+static void set_current_cocoa(MPGLContext *ctx, bool current)
+{
+    vo_cocoa_set_current_context(ctx->vo, current);
+}
+
 void mpgl_set_backend_cocoa(MPGLContext *ctx)
 {
     ctx->config_window = config_window_cocoa;
@@ -63,5 +68,8 @@ void mpgl_set_backend_cocoa(MPGLContext *ctx)
     ctx->vo_init = vo_cocoa_init;
     ctx->pause = vo_cocoa_pause;
     ctx->resume = vo_cocoa_resume;
+    ctx->register_resize_callback = vo_cocoa_register_resize_callback;
     ctx->vo_uninit = vo_cocoa_uninit;
+    ctx->set_current = set_current_cocoa;
+    ctx->set_current = set_current_cocoa;
 }
