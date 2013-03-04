@@ -1380,9 +1380,6 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     EGLBoolean ret;
 
     GL *gl = ctx->gl;
-
-    void *(*getProcAddress)(const GLubyte *);
-    const char *(*eglExtStr)(EGLDisplay *, int);
     const char *eglstr = "";
 
     egl_ctx->egl.dpy = eglGetDisplay(wl->display->display);
@@ -1436,13 +1433,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
 
     assert(ret == EGL_TRUE);
 
-    getProcAddress = getdladdr("eglGetProcAddress");
-    if (!getProcAddress)
-        mp_msg(MSGT_VO, MSGL_WARN, "[egl] No eglGetProcAdress");
-
-    eglExtStr = getdladdr("eglQueryString");
-    if (eglExtStr)
-        eglstr = eglExtStr(egl_ctx->egl.dpy, EGL_EXTENSIONS);
+    eglstr = eglQueryString(egl_ctx->egl.dpy, EGL_EXTENSIONS);
 
     getFunctions(gl, (void*(*)(const GLubyte*))eglGetProcAddress, eglstr);
     if (!gl->BindProgram)
