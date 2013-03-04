@@ -122,7 +122,7 @@ struct vo_cocoa_state {
 
     int display_cursor;
     int cursor_timer;
-    int cursor_autohide_delay;
+    int vo.cursor_autohide_delay;
 
     bool did_resize;
     bool out_fs_resize;
@@ -150,7 +150,7 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .windowed_frame = {{0,0},{0,0}},
         .out_fs_resize = NO,
         .display_cursor = 1,
-        .cursor_autohide_delay = vo->opts->cursor_autohide_delay,
+        .vo.cursor_autohide_delay = vo->opts->vo.cursor_autohide_delay,
         .power_mgmt_assertion = kIOPMNullAssertionID,
         .accumulated_scroll = 0,
     };
@@ -281,10 +281,10 @@ static void update_screen_info(struct vo *vo)
     struct MPOpts *opts = vo->opts;
     NSScreen *ws, *fss;
 
-    get_screen_handle(opts->vo_screen_id, s->window, &ws);
+    get_screen_handle(opts->vo.screen_id, s->window, &ws);
     s->screen_frame = [ws frame];
 
-    get_screen_handle(opts->vo_fsscreen_id, s->window, &fss);
+    get_screen_handle(opts->vo.fsscreen_id, s->window, &fss);
     s->fsscreen_frame = [fss frame];
 }
 
@@ -296,10 +296,10 @@ void vo_cocoa_update_xinerama_info(struct vo *vo)
     update_screen_info(vo);
     aspect_save_screenres(vo, s->screen_frame.size.width,
                               s->screen_frame.size.height);
-    opts->vo_screenwidth = s->screen_frame.size.width;
-    opts->vo_screenheight = s->screen_frame.size.height;
-    xinerama_x = s->screen_frame.origin.x;
-    xinerama_y = s->screen_frame.origin.y;
+    opts->vo.screenwidth = s->screen_frame.size.width;
+    opts->vo.screenheight = s->screen_frame.size.height;
+    vo->xinerama_x = s->screen_frame.origin.x;
+    vo->xinerama_y = s->screen_frame.origin.y;
 }
 
 int vo_cocoa_change_attributes(struct vo *vo)
@@ -339,8 +339,8 @@ static void vo_set_level(struct vo *vo, int ontop)
 void vo_cocoa_ontop(struct vo *vo)
 {
     struct MPOpts *opts = vo->opts;
-    opts->vo_ontop = !opts->vo_ontop;
-    vo_set_level(vo, opts->vo_ontop);
+    opts->vo.ontop = !opts->vo.ontop;
+    vo_set_level(vo, opts->vo.ontop);
 }
 
 static void update_state_sizes(struct vo_cocoa_state *s,
@@ -355,7 +355,7 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
                          uint32_t flags, int gl3profile)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    const NSRect window_rect = NSMakeRect(xinerama_x, xinerama_y,
+    const NSRect window_rect = NSMakeRect(vo->xinerama_x, vo->xinerama_y,
                                           d_width, d_height);
     const NSRect glview_rect = NSMakeRect(0, 0, 100, 100);
 
@@ -418,7 +418,7 @@ static void update_window(struct vo *vo)
 
     if (s->current_video_size.width  != s->previous_video_size.width ||
         s->current_video_size.height != s->previous_video_size.height) {
-        if (vo_fs) {
+        if (vo->opts->vo.fs) {
             // we will resize as soon as we get out of fullscreen
             s->out_fs_resize = YES;
         } else {
@@ -463,7 +463,7 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
     if (flags & VOFLAG_FULLSCREEN)
         vo_cocoa_fullscreen(vo);
 
-    vo_set_level(vo, opts->vo_ontop);
+    vo_set_level(vo, opts->vo.ontop);
 
     [s->window setContentSize:s->current_video_size];
     [s->window setContentAspectRatio:s->current_video_size];
@@ -491,12 +491,12 @@ static void vo_cocoa_display_cursor(struct vo *vo, int requested_state)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     if (requested_state) {
-        if (!vo_fs || s->cursor_autohide_delay > -2) {
+        if (!vo->opts->vo.fs || s->vo.cursor_autohide_delay > -2) {
             s->display_cursor = requested_state;
             CGDisplayShowCursor(kCGDirectMainDisplay);
         }
     } else {
-        if (s->cursor_autohide_delay != -1) {
+        if (s->vo.cursor_autohide_delay != -1) {
             s->display_cursor = requested_state;
             CGDisplayHideCursor(kCGDirectMainDisplay);
         }
@@ -510,8 +510,8 @@ int vo_cocoa_check_events(struct vo *vo)
     int ms_time = (int) ([[NSProcessInfo processInfo] systemUptime] * 1000);
 
     // automatically hide mouse cursor
-    if (vo_fs && s->display_cursor &&
-        (ms_time - s->cursor_timer >= s->cursor_autohide_delay)) {
+    if (vo->opts->vo.fs && s->display_cursor &&
+        (ms_time - s->cursor_timer >= s->vo.cursor_autohide_delay)) {
         vo_cocoa_display_cursor(vo, 0);
         s->cursor_timer = ms_time;
     }
@@ -648,7 +648,8 @@ void create_menu()
 - (void)fullscreen
 {
     struct vo_cocoa_state *s = _vo->cocoa;
-    if (!vo_fs) {
+    struct MPOpts *opts = _vo->opts;
+    if (!opts->vo.fs) {
         update_screen_info(_vo);
         if (current_screen_has_dock_or_menubar(_vo))
             [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
@@ -657,7 +658,7 @@ void create_menu()
         [self setHasShadow:NO];
         [self setStyleMask:s->fullscreen_mask];
         [self setFrame:s->fsscreen_frame display:YES animate:NO];
-        vo_fs = VO_TRUE;
+        opts->vo.fs = true;
         vo_cocoa_display_cursor(_vo, 0);
         [self setMovableByWindowBackground: NO];
     } else {
@@ -671,7 +672,7 @@ void create_menu()
             s->out_fs_resize = NO;
         }
         [self setContentAspectRatio:s->current_video_size];
-        vo_fs = VO_FALSE;
+        opts->vo.fs = false;
         vo_cocoa_display_cursor(_vo, 1);
         [self setMovableByWindowBackground: YES];
     }
@@ -695,7 +696,7 @@ void create_menu()
 {
     // this is only valid as a starting value. it will be rewritten in the
     // -fullscreen method.
-    return !vo_fs;
+    return !_vo->opts->o_fs;
 }
 
 - (void)handleQuitEvent:(NSAppleEventDescriptor*)e
@@ -730,7 +731,7 @@ void create_menu()
 
 - (void)mouseMoved: (NSEvent *) theEvent
 {
-    if (vo_fs)
+    if (_vo->opts->vo.fs)
         vo_cocoa_display_cursor(_vo, 1);
 }
 
@@ -851,7 +852,7 @@ void create_menu()
 
 - (void)applicationWillBecomeActive:(NSNotification *)aNotification
 {
-    if (vo_fs && current_screen_has_dock_or_menubar(_vo)) {
+    if (_vo->opts->vo.fs && current_screen_has_dock_or_menubar(_vo)) {
         struct vo_cocoa_state *s = _vo->cocoa;
         [self setLevel:s->window_level];
         [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
@@ -861,7 +862,7 @@ void create_menu()
 
 - (void)applicationWillResignActive:(NSNotification *)aNotification
 {
-    if (vo_fs) {
+    if (_vo->opts->vo.fs) {
         [self setLevel:NSNormalWindowLevel];
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
     }
@@ -888,7 +889,7 @@ void create_menu()
 
 - (void)mulSize:(float)multiplier
 {
-    if (!vo_fs) {
+    if (!_vo->opts->vo.fs) {
         NSSize size = {
             .width  = _vo->aspdat.prew * multiplier,
             .height = _vo->aspdat.preh * multiplier

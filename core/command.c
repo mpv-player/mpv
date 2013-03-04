@@ -85,13 +85,13 @@ static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,
     struct MPOpts *opts = &mpctx->opts;
     struct vo *vo = mpctx->video_out;
     //remove the borders, if any, and rescale to the range [0,1],[0,1]
-    if (vo_fs) {                //we are in full-screen mode
-        if (opts->vo_screenwidth > vo->dwidth)
+    if (opts->vo.fs) {                //we are in full-screen mode
+        if (opts->vo.screenwidth > vo->dwidth)
             // there are borders along the x axis
-            ix -= (opts->vo_screenwidth - vo->dwidth) / 2;
-        if (opts->vo_screenheight > vo->dheight)
+            ix -= (opts->vo.screenwidth - vo->dwidth) / 2;
+        if (opts->vo.screenheight > vo->dheight)
             // there are borders along the y axis (usual way)
-            iy -= (opts->vo_screenheight - vo->dheight) / 2;
+            iy -= (opts->vo.screenheight - vo->dheight) / 2;
 
         if (ix < 0 || ix > vo->dwidth) {
             *dx = *dy = -1.0;
@@ -108,8 +108,8 @@ static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,
 
     mp_msg(MSGT_CPLAYER, MSGL_V,
            "\r\nrescaled coordinates: %.3f, %.3f, screen (%d x %d), vodisplay: (%d, %d), fullscreen: %d\r\n",
-           *dx, *dy, opts->vo_screenwidth, opts->vo_screenheight, vo->dwidth,
-           vo->dheight, vo_fs);
+           *dx, *dy, opts->vo.screenwidth, opts->vo.screenheight, vo->dwidth,
+           vo->dheight, opts->vo.fs);
 }
 
 // Property-option bridge.
@@ -845,19 +845,21 @@ static int mp_property_program(m_option_t *prop, int action, void *arg,
 
 
 /// Fullscreen state (RW)
-static int mp_property_fullscreen(m_option_t *prop, int action, void *arg,
+static int mp_property_fullscreen(m_option_t *prop,
+                                  int action,
+                                  void *arg,
                                   MPContext *mpctx)
 {
-
+    struct MPOpts *opts = mpctx->video_out->opts;
     if (!mpctx->video_out)
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_SET) {
-        if (vo_fs == !!*(int *) arg)
+        if (opts->vo.fs == !!*(int *) arg)
             return M_PROPERTY_OK;
         if (mpctx->video_out->config_ok)
             vo_control(mpctx->video_out, VOCTRL_FULLSCREEN, 0);
-        mpctx->opts.fullscreen = vo_fs;
+        mpctx->opts.fullscreen = opts->vo.fs;
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(prop, action, arg, mpctx);
@@ -1022,7 +1024,7 @@ static int mp_property_ontop(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
     return mp_property_vo_flag(prop, action, arg, VOCTRL_ONTOP,
-                               &mpctx->opts.vo_ontop, mpctx);
+                               &mpctx->opts.vo.ontop, mpctx);
 }
 
 /// Show window borders (RW)
@@ -1030,11 +1032,11 @@ static int mp_property_border(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
 {
     return mp_property_vo_flag(prop, action, arg, VOCTRL_BORDER,
-                               &vo_border, mpctx);
+                               &mpctx->opts.vo.border, mpctx);
 }
 
 static int mp_property_framedrop(m_option_t *prop, int action,
-                                     void *arg, MPContext *mpctx)
+                                 void *arg, MPContext *mpctx)
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
@@ -1383,15 +1385,15 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("border", mp_property_border),
     M_OPTION_PROPERTY_CUSTOM("framedrop", mp_property_framedrop),
     M_OPTION_PROPERTY_CUSTOM_("gamma", mp_property_gamma,
-                    .offset = offsetof(struct MPOpts, vo_gamma_gamma)),
+                    .offset = offsetof(struct MPOpts, gamma_gamma)),
     M_OPTION_PROPERTY_CUSTOM_("brightness", mp_property_gamma,
-                    .offset = offsetof(struct MPOpts, vo_gamma_brightness)),
+                    .offset = offsetof(struct MPOpts, gamma_brightness)),
     M_OPTION_PROPERTY_CUSTOM_("contrast", mp_property_gamma,
-                    .offset = offsetof(struct MPOpts, vo_gamma_contrast)),
+                    .offset = offsetof(struct MPOpts, gamma_contrast)),
     M_OPTION_PROPERTY_CUSTOM_("saturation", mp_property_gamma,
-                    .offset = offsetof(struct MPOpts, vo_gamma_saturation)),
+                    .offset = offsetof(struct MPOpts, gamma_saturation)),
     M_OPTION_PROPERTY_CUSTOM_("hue", mp_property_gamma,
-                    .offset = offsetof(struct MPOpts, vo_gamma_hue)),
+                    .offset = offsetof(struct MPOpts, gamma_hue)),
     M_OPTION_PROPERTY_CUSTOM("panscan", mp_property_panscan),
     M_OPTION_PROPERTY_CUSTOM_("vsync", mp_property_vsync),
     { "video-format", mp_property_video_format, CONF_TYPE_STRING,

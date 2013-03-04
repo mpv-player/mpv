@@ -529,8 +529,8 @@ const m_option_t mplayer_opts[]={
     OPT_STRINGLIST("vo", video_driver_list, 0),
     OPT_STRINGLIST("ao", audio_driver_list, 0),
     OPT_FLAG("fixed-vo", fixed_vo, CONF_GLOBAL),
-    OPT_FLAG("ontop", vo_ontop, 0),
-    {"border", &vo_border, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    OPT_FLAG("ontop", vo.ontop, 0),
+    OPT_FLAG("border", vo.border, 1),
 
     OPT_STRING("mixer", mixer_device, 0),
     OPT_STRING("mixer-channel", mixer_channel, 0),
@@ -550,30 +550,30 @@ const m_option_t mplayer_opts[]={
     OPT_INT("abs", ao_buffersize, 0),
 
     // set screen dimensions (when not detectable or virtual!=visible)
-    OPT_INTRANGE("screenw", vo_screenwidth, CONF_GLOBAL, 0, 4096),
-    OPT_INTRANGE("screenh", vo_screenheight, CONF_GLOBAL, 0, 4096),
-    OPT_GEOMETRY("geometry", vo_geometry, 0),
-    OPT_SIZE_BOX("autofit", vo_autofit, 0),
-    OPT_SIZE_BOX("autofit-larger", vo_autofit_larger, 0),
-    OPT_FLAG("force-window-position", force_window_position, 0),
+    OPT_INTRANGE("screenw", vo.screenwidth, CONF_GLOBAL, 0, 4096),
+    OPT_INTRANGE("screenh", vo.screenheight, CONF_GLOBAL, 0, 4096),
+    OPT_GEOMETRY("geometry", vo.geometry, 0),
+    OPT_SIZE_BOX("autofit", vo.autofit, 0),
+    OPT_SIZE_BOX("autofit-larger", vo.autofit_larger, 0),
+    OPT_FLAG("force-window-position", vo.force_window_position, 0),
     // vo name (X classname) and window title strings
-    OPT_STRING("name", vo_winname, 0),
-    OPT_STRING("title", vo_wintitle, 0),
+    OPT_STRING("name", vo.winname, 0),
+    OPT_STRING("title", wintitle, 0),
     // set aspect ratio of monitor - useful for 16:9 TV-out
-    OPT_FLOATRANGE("monitoraspect", force_monitor_aspect, 0, 0.0, 9.0),
-    OPT_FLOATRANGE("monitorpixelaspect", monitor_pixel_aspect, 0, 0.2, 9.0),
+    OPT_FLOATRANGE("monitoraspect", vo.force_monitor_aspect, 0, 0.0, 9.0),
+    OPT_FLOATRANGE("monitorpixelaspect", vo.monitor_pixel_aspect, 0, 0.2, 9.0),
     // start in fullscreen mode:
     OPT_FLAG("fullscreen", fullscreen, 0),
     OPT_FLAG("fs", fullscreen, 0),
     // set fullscreen switch method (workaround for buggy WMs)
-    {"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
-    {"colorkey", &vo_colorkey, CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"no-colorkey", &vo_colorkey, CONF_TYPE_STORE, 0, 0, 0x1000000, NULL},
+    OPT_INTRANGE("fsmode-dontuse", vo.fsmode, 0, 31, 4096),
+    OPT_INT("colorkey", vo.colorkey, 0),
+    OPT_INT("no-colorkey", vo.colorkey, 0x1000000),
     // wait for v-sync (gl)
-    {"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1.0, NULL},
-    OPT_FLOATRANGE("panscanrange", vo_panscanrange, 0, -19.0, 99.0),
-    OPT_FLAG("force-rgba-osd-rendering", vo_force_rgba_osd, 0),
+    OPT_FLAG("vsync", vo.vsync, 1),
+    OPT_FLOATRANGE("panscan", vo.panscan, 0, 1.0, 99.0),
+    OPT_FLOATRANGE("panscanrange", vo.panscanrange, 0, -19.0, 99.0),
+    OPT_FLAG("force-rgba-osd-rendering", force_rgba_osd, 0),
     OPT_CHOICE("colormatrix", requested_colorspace, 0,
                ({"auto", MP_CSP_AUTO},
                 {"BT.601", MP_CSP_BT_601},
@@ -588,30 +588,29 @@ const m_option_t mplayer_opts[]={
                 {"limited", MP_CSP_LEVELS_TV},
                 {"full", MP_CSP_LEVELS_PC})),
 
-    OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
+    OPT_CHOICE_OR_INT("cursor-autohide", vo.cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),
 
-    {"refreshrate",&vo_refresh_rate,CONF_TYPE_INT,CONF_RANGE, 0,100, NULL},
-    {"wid", &WinID, CONF_TYPE_INT64, 0, 0, 0, NULL},
+    OPT_INT64("wid", vo.WinID, -1),
 #ifdef CONFIG_X11
-    OPT_FLAG("stop-xscreensaver", vo_stop_screensaver, 0),
-    OPT_STRINGLIST("fstype", vo_fstype_list, 0),
+    OPT_FLAG("stop-xscreensaver", vo.stop_screensaver, 0),
+    OPT_STRINGLIST("fstype", vo.fstype_list, 0),
 #endif
     {"heartbeat-cmd", &heartbeat_cmd, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"mouseinput", &vo_nomouse_input, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    OPT_FLAG("mouseinput", vo.nomouse_input, 0),
 
-    OPT_CHOICE_OR_INT("screen", vo_screen_id, 0, 0, 32,
+    OPT_CHOICE_OR_INT("screen", vo.screen_id, 0, 0, 32,
                       ({"default", -1})),
 
-    OPT_CHOICE_OR_INT("fs-screen", vo_fsscreen_id, 0, 0, 32,
+    OPT_CHOICE_OR_INT("fs-screen", vo.fsscreen_id, 0, 0, 32,
                       ({"all", -2}, {"current", -1})),
 
-    OPT_INTRANGE("brightness", vo_gamma_brightness, 0, -100, 100),
-    OPT_INTRANGE("saturation", vo_gamma_saturation, 0, -100, 100),
-    OPT_INTRANGE("contrast", vo_gamma_contrast, 0, -100, 100),
-    OPT_INTRANGE("hue", vo_gamma_hue, 0, -100, 100),
-    OPT_INTRANGE("gamma", vo_gamma_gamma, 0, -100, 100),
-    {"keepaspect", &vo_keepaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    OPT_INTRANGE("brightness", gamma_brightness, 0, -100, 100),
+    OPT_INTRANGE("saturation", gamma_saturation, 0, -100, 100),
+    OPT_INTRANGE("contrast", gamma_contrast, 0, -100, 100),
+    OPT_INTRANGE("hue", gamma_hue, 0, -100, 100),
+    OPT_INTRANGE("gamma", gamma_gamma, 0, -100, 100),
+    OPT_FLAG("keepaspect", vo.keepaspect, 1),
 
 //---------------------- mplayer-only options ------------------------
 
@@ -676,7 +675,7 @@ const m_option_t mplayer_opts[]={
     OPT_FLAG("idle", player_idle_mode, CONF_GLOBAL),
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
     OPT_FLAG("consolecontrols", consolecontrols, CONF_GLOBAL),
-    {"mouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+    OPT_FLAG("mouse-movements", vo.enable_mouse_movements, 1),
     OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
 #ifdef CONFIG_TV
     {"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},

@@ -2309,7 +2309,7 @@ static void vo_update_window_title(struct MPContext *mpctx)
 {
     if (!mpctx->video_out)
         return;
-    char *title = mp_property_expand_string(mpctx, mpctx->opts.vo_wintitle);
+    char *title = mp_property_expand_string(mpctx, mpctx->opts.wintitle);
     talloc_free(mpctx->video_out->window_title);
     mpctx->video_out->window_title = talloc_steal(mpctx, title);
 }
@@ -3215,7 +3215,6 @@ static void run_playloop(struct MPContext *mpctx)
     double buffered_audio = -1;
     while (mpctx->sh_video) {   // never loops, for "break;" only
         struct vo *vo = mpctx->video_out;
-        vo_pts = mpctx->sh_video->timer * 90000.0;
         vo_fps = mpctx->sh_video->fps;
 
         video_left = vo->hasframe || vo->frame_loaded;
@@ -4262,7 +4261,7 @@ static bool handle_help_options(struct MPContext *mpctx)
         opt_exit = 1;
     }
 #ifdef CONFIG_X11
-    if (opts->vo_fstype_list && strcmp(opts->vo_fstype_list[0], "help") == 0) {
+    if (opts->vo.fstype_list && strcmp(opts->vo.fstype_list[0], "help") == 0) {
         fstype_help();
         mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
         opt_exit = 1;

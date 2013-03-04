@@ -1361,7 +1361,7 @@ static void resize(struct vo *vo, int x, int y)
     gl->MatrixMode(GL_PROJECTION);
     gl->LoadIdentity();
     p->ass_border_x = p->ass_border_y = 0;
-    if (aspect_scaling()) {
+    if (aspect_scaling(vo)) {
         int new_w, new_h;
         GLdouble scale_x, scale_y;
         aspect(vo, &new_w, &new_h, A_WINZOOM);
@@ -1490,7 +1490,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     if (p->scaled_osd) {
         res.w = p->image_width;
         res.h = p->image_height;
-    } else if (aspect_scaling()) {
+    } else if (aspect_scaling(vo)) {
         res.ml = res.mr = p->ass_border_x;
         res.mt = res.mb = p->ass_border_y;
     }
@@ -1821,7 +1821,7 @@ static void flip_page(struct vo *vo)
     if (p->use_glFinish)
         gl->Finish();
     p->glctx->swapGlBuffers(p->glctx);
-    if (aspect_scaling())
+    if (aspect_scaling(vo))
         gl->Clear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -2113,7 +2113,7 @@ static int preinit(struct vo *vo, const char *arg)
         .use_rectangle = -1,
         .ati_hack = -1,
         .force_pbo = -1,
-        .swap_interval = vo_vsync,
+        .swap_interval = vo->opts->vo.vsync,
         .custom_prog = NULL,
         .custom_tex = NULL,
         .custom_tlin = 1,

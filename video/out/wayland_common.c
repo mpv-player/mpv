@@ -770,8 +770,6 @@ static void destroy_display (struct vo_wayland_state *wl)
     wl_registry_destroy(wl->display->registry);
     wl_display_flush(wl->display->display);
     wl_display_disconnect(wl->display->display);
-    vo_fs = VO_FALSE;
-
 }
 
 static void create_window (struct vo_wayland_state *wl)
@@ -891,9 +889,9 @@ void vo_wayland_ontop (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
 
-    vo->opts->vo_ontop = !vo->opts->vo_ontop;
+    vo->opts->vo.ontop = !vo->opts->vo.ontop;
 
-    if (vo_fs)
+    if (vo->opts->vo.fs)
         vo_wayland_fullscreen(vo);
         /* use the already existing code to leave fullscreen mode and go into
          * toplevel mode */
@@ -920,7 +918,7 @@ void vo_wayland_fullscreen (struct vo *vo)
 
     struct wl_output *fs_output = wl->display->fs_output;
 
-    if (!vo_fs) {
+    if (!vo->opts->vo.fs) {
         wl->window->p_width = wl->window->width;
         wl->window->p_height = wl->window->height;
         wl_shell_surface_set_fullscreen(wl->window->shell_surface,
@@ -928,7 +926,7 @@ void vo_wayland_fullscreen (struct vo *vo)
                 0, fs_output);
 
         wl->window->type = TYPE_FULLSCREEN;
-        vo_fs = VO_TRUE;
+        vo->opts->vo.fs = true;
 
         hide_cursor(wl->display);
     }
@@ -938,7 +936,7 @@ void vo_wayland_fullscreen (struct vo *vo)
         ssurface_schedule_resize(wl->window, wl->window->p_width,
                                              wl->window->p_height);
         wl->window->type = TYPE_TOPLEVEL;
-        vo_fs = VO_FALSE;
+        vo->opts->vo.fs = false;
 
         show_cursor(wl->display);
     }
@@ -989,7 +987,7 @@ void vo_wayland_update_screeninfo (struct vo *vo)
     if (!wl->display->output_mode_received)
         mp_msg(MSGT_VO, MSGL_ERR, "[wayland] no output mode detected\n");
 
-    xinerama_x = xinerama_y = 0;
+    vo->xinerama_x = vo->xinerama_y = 0;
 
     int screen_id = 0;
 
@@ -998,7 +996,7 @@ void vo_wayland_update_screeninfo (struct vo *vo)
     struct vo_wayland_output *fsscreen_output = NULL;
 
     wl_list_for_each_reverse(output, &wl->display->output_list, link) {
-        if (opts->vo_fsscreen_id == screen_id)
+        if (opts->vo.fsscreen_id == screen_id)
             fsscreen_output = output;
 
         if (!first_output)
@@ -1009,19 +1007,19 @@ void vo_wayland_update_screeninfo (struct vo *vo)
 
     if (fsscreen_output) {
         wl->display->fs_output = fsscreen_output->output;
-        opts->vo_screenwidth = fsscreen_output->width;
-        opts->vo_screenheight = fsscreen_output->height;
+        opts->vo.screenwidth = fsscreen_output->width;
+        opts->vo.screenheight = fsscreen_output->height;
     }
     else {
         wl->display->fs_output = NULL; /* current output is always 0 */
 
         if (first_output) {
-            opts->vo_screenwidth = first_output->width;
-            opts->vo_screenheight = first_output->height;
+            opts->vo.screenwidth = first_output->width;
+            opts->vo.screenheight = first_output->height;
         }
     }
 
-    aspect_save_screenres(vo, opts->vo_screenwidth, opts->vo_screenheight);
+    aspect_save_screenres(vo, opts->vo.screenwidth, opts->vo.screenheight);
 }
 
 void vo_wayland_update_window_title(struct vo *vo)

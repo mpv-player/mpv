@@ -169,16 +169,16 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
 
     set_video_colorspace(sh);
 
-    if (opts->vo_gamma_gamma != 1000)
-        set_video_colors(sh, "gamma", opts->vo_gamma_gamma);
-    if (opts->vo_gamma_brightness != 1000)
-        set_video_colors(sh, "brightness", opts->vo_gamma_brightness);
-    if (opts->vo_gamma_contrast != 1000)
-        set_video_colors(sh, "contrast", opts->vo_gamma_contrast);
-    if (opts->vo_gamma_saturation != 1000)
-        set_video_colors(sh, "saturation", opts->vo_gamma_saturation);
-    if (opts->vo_gamma_hue != 1000)
-        set_video_colors(sh, "hue", opts->vo_gamma_hue);
+    if (opts->gamma_gamma != 1000)
+        set_video_colors(sh, "gamma", opts->gamma_gamma);
+    if (opts->gamma_brightness != 1000)
+        set_video_colors(sh, "brightness", opts->gamma_brightness);
+    if (opts->gamma_contrast != 1000)
+        set_video_colors(sh, "contrast", opts->gamma_contrast);
+    if (opts->gamma_saturation != 1000)
+        set_video_colors(sh, "saturation", opts->gamma_saturation);
+    if (opts->gamma_hue != 1000)
+        set_video_colors(sh, "hue", opts->gamma_hue);
 
     return 1;
 }

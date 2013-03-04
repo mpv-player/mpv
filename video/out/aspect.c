@@ -45,10 +45,10 @@ void aspect_save_screenres(struct vo *vo, int scrw, int scrh)
         scrw = (scrh * 4 + 2) / 3;
     vo->aspdat.scrw = scrw;
     vo->aspdat.scrh = scrh;
-    if (opts->force_monitor_aspect)
-        vo->monitor_par = opts->force_monitor_aspect * scrh / scrw;
+    if (opts->vo.force_monitor_aspect)
+        vo->monitor_par = opts->vo.force_monitor_aspect * scrh / scrw;
     else
-        vo->monitor_par = 1.0 / opts->monitor_pixel_aspect;
+        vo->monitor_par = 1.0 / opts->vo.monitor_pixel_aspect;
 }
 
 /* aspect is called with the source resolution and the
@@ -88,7 +88,7 @@ static void get_max_dims(struct vo *vo, int *w, int *h, int zoom)
     struct aspect_data *aspdat = &vo->aspdat;
     *w = zoom ? aspdat->scrw : aspdat->prew;
     *h = zoom ? aspdat->scrh : aspdat->preh;
-    if (zoom && WinID >= 0)
+    if (zoom && vo->opts->vo.WinID >= 0)
         zoom = A_WINZOOM;
     if (zoom == A_WINZOOM) {
         *w = vo->dwidth;
@@ -101,7 +101,7 @@ void aspect(struct vo *vo, int *srcw, int *srch, int zoom)
     int fitw;
     int fith;
     get_max_dims(vo, &fitw, &fith, zoom);
-    if (!zoom && vo->opts->vo_geometry.wh_valid) {
+    if (!zoom && vo->opts->vo.geometry.wh_valid) {
         mp_msg(MSGT_VO, MSGL_DBG2, "aspect(0) no aspect forced!\n");
         return; // the user doesn't want to fix aspect
     }
@@ -123,16 +123,16 @@ static void panscan_calc_internal(struct vo *vo, int zoom)
     get_max_dims(vo, &max_w, &max_h, zoom);
     struct MPOpts *opts = vo->opts;
 
-    if (opts->vo_panscanrange > 0) {
+    if (opts->vo.panscanrange > 0) {
         aspect(vo, &fwidth, &fheight, zoom);
         vo_panscan_area = max_h - fheight;
         if (!vo_panscan_area)
             vo_panscan_area = max_w - fwidth;
-        vo_panscan_area *= opts->vo_panscanrange;
+        vo_panscan_area *= opts->vo.panscanrange;
     } else
-        vo_panscan_area = -opts->vo_panscanrange * max_h;
+        vo_panscan_area = -opts->vo.panscanrange * max_h;
 
-    vo->panscan_amount = vo_fs || zoom == A_WINZOOM ? vo_panscan : 0;
+    vo->panscan_amount = opts->vo.fs || zoom == A_WINZOOM ? opts->vo.panscan : 0;
     vo->panscan_x = vo_panscan_area * vo->panscan_amount * vo->aspdat.asp;
     vo->panscan_y = vo_panscan_area * vo->panscan_amount;
 }

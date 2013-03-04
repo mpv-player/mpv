@@ -271,7 +271,7 @@ static bool try_create_renderer(struct vo *vo, int i, const char *driver,
     if (!is_good_renderer(&ri, driver, vc->allow_sw, NULL))
         return false;
 
-    bool xy_valid = vo->opts->vo_geometry.xy_valid;
+    bool xy_valid = vo->opts->vo.geometry.xy_valid;
 
     // then actually try
     vc->window = SDL_CreateWindow("MPV",
@@ -387,7 +387,7 @@ static void set_fullscreen(struct vo *vo, int fs)
     // toggling fullscreen might recreate the window, so better guard for this
     SDL_DisableScreenSaver();
 
-    vo_fs = fs;
+    vo->opts->vo.fs = fs;
     force_resize(vo);
 }
 
@@ -473,18 +473,18 @@ static void check_events(struct vo *vo)
     struct MPOpts *opts = vo->opts;
     SDL_Event ev;
 
-    if (opts->cursor_autohide_delay >= 0) {
+    if (opts->vo.cursor_autohide_delay >= 0) {
         if (!vc->mouse_hidden &&
-            (GetTimerMS() - vc->mouse_timer >= opts->cursor_autohide_delay)) {
+            (GetTimerMS() - vc->mouse_timer >= opts->vo.cursor_autohide_delay)) {
             SDL_ShowCursor(0);
             vc->mouse_hidden = 1;
         }
-    } else if (opts->cursor_autohide_delay == -1) {
+    } else if (opts->vo.cursor_autohide_delay == -1) {
         if (vc->mouse_hidden) {
             SDL_ShowCursor(1);
             vc->mouse_hidden = 0;
         }
-    } else if (opts->cursor_autohide_delay == -2) {
+    } else if (opts->vo.cursor_autohide_delay == -2) {
         if (!vc->mouse_hidden) {
             SDL_ShowCursor(0);
             vc->mouse_hidden = 1;
@@ -553,7 +553,7 @@ static void check_events(struct vo *vo)
             break;
         }
         case SDL_MOUSEMOTION:
-            if (opts->cursor_autohide_delay >= 0) {
+            if (opts->vo.cursor_autohide_delay >= 0) {
                 SDL_ShowCursor(1);
                 vc->mouse_hidden = 0;
                 vc->mouse_timer = GetTimerMS();
@@ -561,7 +561,7 @@ static void check_events(struct vo *vo)
             vo_mouse_movement(vo, ev.motion.x, ev.motion.y);
             break;
         case SDL_MOUSEBUTTONDOWN:
-            if (opts->cursor_autohide_delay >= 0) {
+            if (opts->vo.cursor_autohide_delay >= 0) {
                 SDL_ShowCursor(1);
                 vc->mouse_hidden = 0;
                 vc->mouse_timer = GetTimerMS();
@@ -570,7 +570,7 @@ static void check_events(struct vo *vo)
                 (MP_MOUSE_BTN0 + ev.button.button - 1) | MP_KEY_STATE_DOWN);
             break;
         case SDL_MOUSEBUTTONUP:
-            if (opts->cursor_autohide_delay >= 0) {
+            if (opts->vo.cursor_autohide_delay >= 0) {
                 SDL_ShowCursor(1);
                 vc->mouse_hidden = 0;
                 vc->mouse_timer = GetTimerMS();
@@ -771,7 +771,7 @@ static int preinit(struct vo *vo, const char *arg)
                             SDL_HINT_DEFAULT);
 
     // predefine MPV options (SDL env vars shall be overridden)
-    if (vo_vsync)
+    if (vo->opts->vo.vsync)
         SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "1",
                                 SDL_HINT_OVERRIDE);
     else
@@ -922,9 +922,9 @@ static void update_screeninfo(struct vo *vo)
         return;
     }
     struct MPOpts *opts = vo->opts;
-    opts->vo_screenwidth = mode.w;
-    opts->vo_screenheight = mode.h;
-    aspect_save_screenres(vo, opts->vo_screenwidth, opts->vo_screenheight);
+    opts->vo.screenwidth = mode.w;
+    opts->vo.screenheight = mode.h;
+    aspect_save_screenres(vo, opts->vo.screenwidth, opts->vo.screenheight);
 }
 
 static struct mp_image *get_screenshot(struct vo *vo)
@@ -981,7 +981,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
 {
     switch (request) {
     case VOCTRL_FULLSCREEN:
-        set_fullscreen(vo, !vo_fs);
+        set_fullscreen(vo, !vo->opts->vo.fs);
         return 1;
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, NULL);

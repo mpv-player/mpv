@@ -42,24 +42,7 @@
 #include "video/vfcap.h"
 #include "sub/sub.h"
 
-int xinerama_x;
-int xinerama_y;
-
-int vo_nomouse_input = 0;
-int vo_vsync = 1;
-int vo_fs = 0;
-int vo_fsmode = 0;
-float vo_panscan = 0.0f;
-int vo_refresh_rate=0;
-int vo_keepaspect=1;
-int vo_border=1;
-int64_t WinID = -1;
-
-int vo_pts=0; // for hw decoding
 float vo_fps=0;
-
-int vo_colorkey = 0x0000ff00; // default colorkey is green
-                              // (0xff000000 means that colorkey has been disabled)
 
 //
 // Externally visible list of all vo drivers
@@ -407,22 +390,22 @@ static void determine_window_geometry(struct vo *vo, int d_w, int d_h)
 {
     struct MPOpts *opts = vo->opts;
 
-    int scr_w = opts->vo_screenwidth;
-    int scr_h = opts->vo_screenheight;
+    int scr_w = opts->vo.screenwidth;
+    int scr_h = opts->vo.screenheight;
 
     // This is only for applying monitor pixel aspect
     aspect(vo, &d_w, &d_h, A_NOZOOM);
 
-    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->vo_autofit, true);
-    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->vo_autofit_larger, false);
+    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->vo.autofit, true);
+    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->vo.autofit_larger, false);
 
-    vo->dx = (int)(opts->vo_screenwidth - d_w) / 2;
-    vo->dy = (int)(opts->vo_screenheight - d_h) / 2;
+    vo->dx = (int)(opts->vo.screenwidth - d_w) / 2;
+    vo->dy = (int)(opts->vo.screenheight - d_h) / 2;
     m_geometry_apply(&vo->dx, &vo->dy, &d_w, &d_h, scr_w, scr_h,
-                     &opts->vo_geometry);
+                     &opts->vo.geometry);
 
-    vo->dx += xinerama_x;
-    vo->dy += xinerama_y;
+    vo->dx += vo->xinerama_x;
+    vo->dy += vo->xinerama_y;
     vo->dwidth = d_w;
     vo->dheight = d_h;
 }
@@ -536,7 +519,7 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
         .display_par = vo->monitor_par,
         .video_par = vo->aspdat.par,
     };
-    if (aspect_scaling()) {
+    if (aspect_scaling(vo)) {
         int scaled_width  = 0, scaled_height = 0;
         aspect(vo, &scaled_width, &scaled_height, A_WINZOOM);
         panscan_calc_windowed(vo);
@@ -581,8 +564,9 @@ const char *vo_get_window_title(struct vo *vo)
 void vo_mouse_movement(struct vo *vo, int posx, int posy)
 {
   char cmd_str[40];
-  if (!enable_mouse_movements)
+  if (!vo->opts->vo.enable_mouse_movements)
     return;
   snprintf(cmd_str, sizeof(cmd_str), "set_mouse_pos %i %i", posx, posy);
   mp_input_queue_cmd(vo->input_ctx, mp_input_parse_cmd(bstr0(cmd_str), ""));
 }
+

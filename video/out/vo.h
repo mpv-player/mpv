@@ -28,6 +28,7 @@
 
 #include "video/img_format.h"
 #include "core/mp_common.h"
+#include "core/options.h"
 
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2
@@ -260,6 +261,9 @@ struct vo {
     int dwidth;
     int dheight;
 
+    int xinerama_x;
+    int xinerama_y;
+
     int panscan_x;
     int panscan_y;
     float panscan_amount;
@@ -306,26 +310,7 @@ const char *vo_get_window_title(struct vo *vo);
 // NULL terminated array of all drivers
 extern const struct vo_driver *video_out_drivers[];
 
-extern int xinerama_x;
-extern int xinerama_y;
-
-extern int vo_vsync;
-extern int vo_fs;
-extern int vo_fsmode;
-extern float vo_panscan;
-extern int vo_refresh_rate;
-extern int vo_keepaspect;
-extern int vo_border;
-
-extern int vo_nomouse_input;
-extern int enable_mouse_movements;
-
-extern int vo_pts;
 extern float vo_fps;
-
-extern int vo_colorkey;
-
-extern int64_t WinID;
 
 struct mp_keymap {
   int from;
@@ -339,9 +324,9 @@ struct mp_osd_res;
 void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
                           struct mp_rect *out_dst, struct mp_osd_res *out_osd);
 
-static inline int aspect_scaling(void)
+static inline int aspect_scaling(struct vo *vo)
 {
-  return vo_keepaspect || vo_fs;
+  return vo->opts->vo.keepaspect || vo->opts->vo.fs;
 }
 
 #endif /* MPLAYER_VIDEO_OUT_H */

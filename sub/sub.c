@@ -158,7 +158,7 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
 
     bool formats[SUBBITMAP_COUNT];
     memcpy(formats, sub_formats, sizeof(formats));
-    if (opts->vo_force_rgba_osd)
+    if (opts->force_rgba_osd)
         formats[SUBBITMAP_LIBASS] = false;
 
     *out_imgs = (struct sub_bitmaps) {0};

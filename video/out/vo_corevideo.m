@@ -70,7 +70,7 @@ static void resize(struct vo *vo, int width, int height)
     gl->MatrixMode(GL_PROJECTION);
     gl->LoadIdentity();
     p->ass_border_x = p->ass_border_y = 0;
-    if (aspect_scaling()) {
+    if (aspect_scaling(vo)) {
         int new_w, new_h;
         GLdouble scale_x, scale_y;
 
@@ -307,7 +307,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         .video_par = vo->aspdat.par,
     };
 
-    if (aspect_scaling()) {
+    if (aspect_scaling(vo)) {
         res.ml = res.mr = p->ass_border_x;
         res.mt = res.mb = p->ass_border_y;
     }

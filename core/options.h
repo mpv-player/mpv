@@ -1,13 +1,13 @@
 #ifndef MPLAYER_OPTIONS_H
 #define MPLAYER_OPTIONS_H
 
+#include <stdbool.h>
 #include "core/m_option.h"
 
 typedef struct MPOpts {
     char **video_driver_list;
     char **audio_driver_list;
     int fixed_vo;
-    int vo_ontop;
     char *mixer_device;
     char *mixer_channel;
     int softvol;
@@ -16,37 +16,60 @@ typedef struct MPOpts {
     float softvol_max;
     int gapless_audio;
     int ao_buffersize;
-    int vo_screenwidth;
-    int vo_screenheight;
-    int vo_screen_id;
-    int vo_fsscreen_id;
-    struct m_geometry vo_geometry;
-    struct m_geometry vo_autofit;
-    struct m_geometry vo_autofit_larger;
-    int force_window_position;
-    char *vo_winname;
-    char *vo_wintitle;
-    float force_monitor_aspect;
-    float monitor_pixel_aspect;
+
+    struct output_conf {
+        int screenwidth;
+        int screenheight;
+        int ontop;
+        bool fs;
+        int vsync;
+        int screen_id;
+        int fsscreen_id;
+        int stop_screensaver;
+        char *winname;
+        char** fstype_list;
+
+        float panscan;
+        float panscanrange;
+
+        struct m_geometry geometry;
+        struct m_geometry autofit;
+        struct m_geometry autofit_larger;
+
+        int fsmode;
+        int keepaspect;
+        int border;
+
+        int colorkey;
+
+        int nomouse_input;
+        int enable_mouse_movements;
+        int cursor_autohide_delay;
+
+        int64_t WinID;
+
+        float force_monitor_aspect;
+        float monitor_pixel_aspect;
+        int force_window_position;
+    } vo;
+
+    char *wintitle;
+    int force_rgba_osd;
+
+    // ranges -100 - 100, 1000 if the vo default should be used
+    int gamma_gamma;
+    int gamma_brightness;
+    int gamma_contrast;
+    int gamma_saturation;
+    int gamma_hue;
+
     int fullscreen;
-    float vo_panscanrange;
-    int vo_force_rgba_osd;
     int requested_colorspace;
     int requested_input_range;
     int requested_output_range;
-    int cursor_autohide_delay;
-    char** vo_fstype_list;
-    int vo_stop_screensaver;
 
     char *audio_decoders;
     char *video_decoders;
-
-    // ranges -100 - 100, 1000 if the vo default should be used
-    int vo_gamma_gamma;
-    int vo_gamma_brightness;
-    int vo_gamma_contrast;
-    int vo_gamma_saturation;
-    int vo_gamma_hue;
 
     int osd_level;
     int osd_duration;

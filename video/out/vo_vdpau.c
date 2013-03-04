@@ -377,7 +377,10 @@ static void resize(struct vo *vo)
     vc->src_rect_vid.y0 = vc->flip ? src_rect.y1 : src_rect.y0;
     vc->src_rect_vid.y1 = vc->flip ? src_rect.y0 : src_rect.y1;
 
-    int flip_offset_ms = vo_fs ? vc->flip_offset_fs : vc->flip_offset_window;
+    int flip_offset_ms = vo->opts->vo.fs ?
+                         vc->flip_offset_fs :
+                         vc->flip_offset_window;
+
     vo->flip_queue_offset = flip_offset_ms / 1000.;
 
     if (vc->output_surface_width < vo->dwidth

@@ -175,12 +175,12 @@ static void check_events(struct vo *vo)
             vo_mouse_movement(vo, cev.data.mouse.x, cev.data.mouse.y);
             break;
         case CACA_EVENT_MOUSE_PRESS:
-            if (!vo_nomouse_input)
+            if (!vo->opts->vo.nomouse_input)
                 mplayer_put_key(vo->key_fifo,
                     (MP_MOUSE_BTN0 + cev.data.mouse.button - 1) | MP_KEY_STATE_DOWN);
             break;
         case CACA_EVENT_MOUSE_RELEASE:
-            if (!vo_nomouse_input)
+            if (!vo->opts->vo.nomouse_input)
                 mplayer_put_key(vo->key_fifo,
                                 MP_MOUSE_BTN0 + cev.data.mouse.button - 1);
             break;

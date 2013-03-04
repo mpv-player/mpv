@@ -544,6 +544,9 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_INT(...) \
     OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_int)
 
+#define OPT_INT64(...) \
+    OPT_GENERAL(int64_t, __VA_ARGS__, .type = &m_option_type_int64)
+
 #define OPT_RANGE_(ctype, optname, varname, flags, minval, maxval, ...) \
     OPT_GENERAL(ctype, optname, varname, (flags) | CONF_RANGE,          \
                 .min = minval, .max = maxval, __VA_ARGS__)
