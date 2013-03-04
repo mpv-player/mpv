@@ -365,6 +365,11 @@ void encode_lavc_finish(struct encode_lavc_context *ctx)
     ctx->finished = true;
 }
 
+void encode_lavc_set_video_fps(struct encode_lavc_context *ctx, float fps)
+{
+    ctx->vo_fps = fps;
+}
+
 static void encode_2pass_prepare(struct encode_lavc_context *ctx,
                                  AVDictionary **dictp,
                                  AVStream *stream, struct stream **bytebuf,
@@ -458,8 +463,8 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
 
         if (ctx->options->fps > 0)
             r = av_d2q(ctx->options->fps, ctx->options->fps * 1001 + 2);
-        else if (ctx->options->autofps && vo_fps > 0) {
-            r = av_d2q(vo_fps, vo_fps * 1001 + 2);
+        else if (ctx->options->autofps && ctx->vo_fps > 0) {
+            r = av_d2q(ctx->vo_fps, ctx->vo_fps * 1001 + 2);
             mp_msg(
                 MSGT_ENCODE, MSGL_INFO, "vo-lavc: option -ofps not specified "
                 "but -oautofps is active, using guess of %u/%u\n",

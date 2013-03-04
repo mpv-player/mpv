@@ -35,6 +35,8 @@
 struct encode_lavc_context {
     struct encode_output_conf *options;
 
+    float vo_fps;
+
     // these are processed from the options
     AVFormatContext *avc;
     AVRational timebase;

@@ -310,8 +310,6 @@ const char *vo_get_window_title(struct vo *vo);
 // NULL terminated array of all drivers
 extern const struct vo_driver *video_out_drivers[];
 
-extern float vo_fps;
-
 struct mp_keymap {
   int from;
   int to;

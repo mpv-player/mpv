@@ -42,8 +42,6 @@
 #include "video/vfcap.h"
 #include "sub/sub.h"
 
-float vo_fps=0;
-
 //
 // Externally visible list of all vo drivers
 //

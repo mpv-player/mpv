@@ -2314,6 +2314,15 @@ static void vo_update_window_title(struct MPContext *mpctx)
     mpctx->video_out->window_title = talloc_steal(mpctx, title);
 }
 
+static void update_fps(struct MPContext *mpctx)
+{
+#ifdef CONFIG_ENCODING
+    struct sh_video *sh_video = mpctx->sh_video;
+    if (mpctx->encode_lavc_ctx && sh_video)
+        encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, sh_video->fps);
+#endif
+}
+
 int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -2338,7 +2347,7 @@ int reinit_video_chain(struct MPContext *mpctx)
             mpctx->sh_video->fps = force_fps;
             mpctx->sh_video->frametime = 1.0f / mpctx->sh_video->fps;
         }
-        vo_fps = mpctx->sh_video->fps;
+        update_fps(mpctx);
 
         if (!mpctx->sh_video->fps && !force_fps && !opts->correct_pts) {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "FPS not specified in the "
@@ -2453,7 +2462,7 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         if (mpctx->sh_audio)
             mpctx->delay -= frame_time;
         // video_read_frame can change fps (e.g. for ASF video)
-        vo_fps = sh_video->fps;
+        update_fps(mpctx);
         int framedrop_type = check_framedrop(mpctx, frame_time);
 
         void *decoded_frame;
@@ -3215,7 +3224,7 @@ static void run_playloop(struct MPContext *mpctx)
     double buffered_audio = -1;
     while (mpctx->sh_video) {   // never loops, for "break;" only
         struct vo *vo = mpctx->video_out;
-        vo_fps = mpctx->sh_video->fps;
+        update_fps(mpctx);
 
         video_left = vo->hasframe || vo->frame_loaded;
         if (!vo->frame_loaded && (!mpctx->paused || mpctx->restart_playback)) {
