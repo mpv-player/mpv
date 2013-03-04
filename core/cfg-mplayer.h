@@ -527,7 +527,7 @@ const m_option_t mplayer_opts[]={
     /* name, pointer, type, flags, min, max */
 
 //---------------------- libao/libvo options ------------------------
-    OPT_STRINGLIST("vo", video_driver_list, 0),
+    OPT_STRINGLIST("vo", vo.video_driver_list, 0),
     OPT_STRINGLIST("ao", audio_driver_list, 0),
     OPT_FLAG("fixed-vo", fixed_vo, CONF_GLOBAL),
     OPT_FLAG("ontop", vo.ontop, 0),

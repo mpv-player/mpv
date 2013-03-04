@@ -328,7 +328,7 @@ static int xv_init_colorkey(struct vo *vo)
 
     /* check if colorkeying is needed */
     xv_atom = xv_intern_atom_if_exists(vo, "XV_COLORKEY");
-    if (xv_atom != None && !(vo->opts->vo.colorkey & 0xFF000000)) {
+    if (xv_atom != None && !(vo->opts->colorkey & 0xFF000000)) {
         if (ctx->xv_ck_info.source == CK_SRC_CUR) {
             int colorkey_ret;
 
@@ -342,14 +342,14 @@ static int xv_init_colorkey(struct vo *vo)
                 return 0; // error getting colorkey
             }
         } else {
-            ctx->xv_colorkey = vo->opts->vo.colorkey;
+            ctx->xv_colorkey = vo->opts->colorkey;
 
             /* check if we have to set the colorkey too */
             if (ctx->xv_ck_info.source == CK_SRC_SET) {
                 xv_atom = XInternAtom(display, "XV_COLORKEY", False);
 
                 rez = XvSetPortAttribute(display, ctx->xv_port, xv_atom,
-                                         vo->opts->vo.colorkey);
+                                         vo->opts->colorkey);
                 if (rez != Success) {
                     mp_msg(MSGT_VO, MSGL_FATAL, "[xv] Couldn't set colorkey!\n");
                     return 0; // error setting colorkey

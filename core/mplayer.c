@@ -2359,7 +2359,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     //================== Init VIDEO (codec & libvo) ==========================
     if (!opts->fixed_vo || !(mpctx->initialized_flags & INITIALIZED_VO)) {
         mpctx->video_out
-            = init_best_video_out(opts, mpctx->key_fifo, mpctx->input,
+            = init_best_video_out(&opts->vo, mpctx->key_fifo, mpctx->input,
                                   mpctx->encode_lavc_ctx);
         if (!mpctx->video_out) {
             mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, "Error opening/initializing "
@@ -3850,9 +3850,9 @@ static void play_current_file(struct MPContext *mpctx)
     load_per_extension_config(mpctx->mconfig, mpctx->filename);
     load_per_file_config(mpctx->mconfig, mpctx->filename);
 
-    if (opts->video_driver_list)
+    if (opts->vo.video_driver_list)
         load_per_output_config(mpctx->mconfig, PROFILE_CFG_VO,
-                               opts->video_driver_list[0]);
+                               opts->vo.video_driver_list[0]);
     if (opts->audio_driver_list)
         load_per_output_config(mpctx->mconfig, PROFILE_CFG_AO,
                                opts->audio_driver_list[0]);
@@ -4242,8 +4242,8 @@ static bool handle_help_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     int opt_exit = 0;
-    if (opts->video_driver_list &&
-            strcmp(opts->video_driver_list[0], "help") == 0) {
+    if (opts->vo.video_driver_list &&
+            strcmp(opts->vo.video_driver_list[0], "help") == 0) {
         list_video_out();
         opt_exit = 1;
     }

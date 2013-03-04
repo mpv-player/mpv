@@ -2113,7 +2113,7 @@ static int preinit(struct vo *vo, const char *arg)
         .use_rectangle = -1,
         .ati_hack = -1,
         .force_pbo = -1,
-        .swap_interval = vo->opts->vo.vsync,
+        .swap_interval = vo->opts->vsync,
         .custom_prog = NULL,
         .custom_tex = NULL,
         .custom_tlin = 1,

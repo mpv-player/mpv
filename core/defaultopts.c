@@ -9,7 +9,6 @@ void set_default_mplayer_options(struct MPOpts *opts)
 {
     *opts = (const struct MPOpts){
         .audio_driver_list = NULL,
-        .video_driver_list = NULL,
         .audio_decoders = "-spdif:*", // never select spdif by default
         .video_decoders = NULL,
         .fixed_vo = 1,
@@ -19,6 +18,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .mixer_init_mute = -1,
         .ao_buffersize = -1,
         .vo = {
+            .video_driver_list = NULL,
             .cursor_autohide_delay = 1000,
             .monitor_pixel_aspect = 1.0,
             .panscanrange = 1.0,

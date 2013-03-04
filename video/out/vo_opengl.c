@@ -1794,7 +1794,7 @@ static struct bstr load_file(struct gl_priv *p, void *talloc_ctx,
                              const char *filename)
 {
     struct bstr res = {0};
-    stream_t *s = open_stream(filename, p->vo->opts, NULL);
+    stream_t *s = open_stream(filename, NULL, NULL);
     if (s) {
         res = stream_read_complete(s, talloc_ctx, 1000000000, 0);
         free_stream(s);
@@ -2085,7 +2085,7 @@ static int preinit(struct vo *vo, const char *arg)
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
         .use_npot = 1,
         .use_pbo = hq,
-        .swap_interval = vo->opts->vo.vsync,
+        .swap_interval = vo->opts->vsync,
         .dither_depth = hq ? 0 : -1,
         .fbo_format = hq ? GL_RGB16 : GL_RGB,
         .use_scale_sep = 1,

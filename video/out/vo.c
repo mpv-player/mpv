@@ -293,7 +293,7 @@ static void replace_legacy_vo_name(bstr *name)
     *name = new;
 }
 
-struct vo *init_best_video_out(struct MPOpts *opts,
+struct vo *init_best_video_out(struct mp_vo_opts *opts,
                                struct mp_fifo *key_fifo,
                                struct input_ctx *input_ctx,
                                struct encode_lavc_context *encode_lavc_ctx)
@@ -386,21 +386,21 @@ static void apply_autofit(int *w, int *h, int scr_w, int scr_h,
 //       multi-monitor stuff, and possibly more.
 static void determine_window_geometry(struct vo *vo, int d_w, int d_h)
 {
-    struct MPOpts *opts = vo->opts;
+    struct mp_vo_opts *opts = vo->opts;
 
-    int scr_w = opts->vo.screenwidth;
-    int scr_h = opts->vo.screenheight;
+    int scr_w = opts->screenwidth;
+    int scr_h = opts->screenheight;
 
     // This is only for applying monitor pixel aspect
     aspect(vo, &d_w, &d_h, A_NOZOOM);
 
-    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->vo.autofit, true);
-    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->vo.autofit_larger, false);
+    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit, true);
+    apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit_larger, false);
 
-    vo->dx = (int)(opts->vo.screenwidth - d_w) / 2;
-    vo->dy = (int)(opts->vo.screenheight - d_h) / 2;
+    vo->dx = (int)(opts->screenwidth - d_w) / 2;
+    vo->dy = (int)(opts->screenheight - d_h) / 2;
     m_geometry_apply(&vo->dx, &vo->dy, &d_w, &d_h, scr_w, scr_h,
-                     &opts->vo.geometry);
+                     &opts->geometry);
 
     vo->dx += vo->xinerama_x;
     vo->dy += vo->xinerama_y;
@@ -562,7 +562,7 @@ const char *vo_get_window_title(struct vo *vo)
 void vo_mouse_movement(struct vo *vo, int posx, int posy)
 {
   char cmd_str[40];
-  if (!vo->opts->vo.enable_mouse_movements)
+  if (!vo->opts->enable_mouse_movements)
     return;
   snprintf(cmd_str, sizeof(cmd_str), "set_mouse_pos %i %i", posx, posy);
   mp_input_queue_cmd(vo->input_ctx, mp_input_parse_cmd(bstr0(cmd_str), ""));

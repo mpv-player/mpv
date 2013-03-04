@@ -4,8 +4,45 @@
 #include <stdbool.h>
 #include "core/m_option.h"
 
-typedef struct MPOpts {
+typedef struct mp_vo_opts {
     char **video_driver_list;
+
+    int screenwidth;
+    int screenheight;
+    int ontop;
+    bool fs;
+    int vsync;
+    int screen_id;
+    int fsscreen_id;
+    int stop_screensaver;
+    char *winname;
+    char** fstype_list;
+
+    float panscan;
+    float panscanrange;
+
+    struct m_geometry geometry;
+    struct m_geometry autofit;
+    struct m_geometry autofit_larger;
+
+    int fsmode;
+    int keepaspect;
+    int border;
+
+    int colorkey;
+
+    int nomouse_input;
+    int enable_mouse_movements;
+    int cursor_autohide_delay;
+
+    int64_t WinID;
+
+    float force_monitor_aspect;
+    float monitor_pixel_aspect;
+    int force_window_position;
+} mp_vo_opts;
+
+typedef struct MPOpts {
     char **audio_driver_list;
     int fixed_vo;
     char *mixer_device;
@@ -17,41 +54,7 @@ typedef struct MPOpts {
     int gapless_audio;
     int ao_buffersize;
 
-    struct output_conf {
-        int screenwidth;
-        int screenheight;
-        int ontop;
-        bool fs;
-        int vsync;
-        int screen_id;
-        int fsscreen_id;
-        int stop_screensaver;
-        char *winname;
-        char** fstype_list;
-
-        float panscan;
-        float panscanrange;
-
-        struct m_geometry geometry;
-        struct m_geometry autofit;
-        struct m_geometry autofit_larger;
-
-        int fsmode;
-        int keepaspect;
-        int border;
-
-        int colorkey;
-
-        int nomouse_input;
-        int enable_mouse_movements;
-        int cursor_autohide_delay;
-
-        int64_t WinID;
-
-        float force_monitor_aspect;
-        float monitor_pixel_aspect;
-        int force_window_position;
-    } vo;
+    mp_vo_opts vo;
 
     char *wintitle;
     int force_rgba_osd;

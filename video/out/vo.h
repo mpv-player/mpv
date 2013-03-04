@@ -244,7 +244,7 @@ struct vo {
 
     const struct vo_driver *driver;
     void *priv;
-    struct MPOpts *opts;
+    struct mp_vo_opts *opts;
     struct vo_x11_state *x11;
     struct vo_w32_state *w32;
     struct vo_cocoa_state *cocoa;
@@ -282,7 +282,7 @@ struct vo {
     char *window_title;
 };
 
-struct vo *init_best_video_out(struct MPOpts *opts,
+struct vo *init_best_video_out(struct mp_vo_opts *opts,
                                struct mp_fifo *key_fifo,
                                struct input_ctx *input_ctx,
                                struct encode_lavc_context *encode_lavc_ctx);
@@ -324,7 +324,7 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
 
 static inline int aspect_scaling(struct vo *vo)
 {
-  return vo->opts->vo.keepaspect || vo->opts->vo.fs;
+  return vo->opts->keepaspect || vo->opts->fs;
 }
 
 #endif /* MPLAYER_VIDEO_OUT_H */

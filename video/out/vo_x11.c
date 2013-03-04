@@ -349,7 +349,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     }
     if (!XMatchVisualInfo(vo->x11->display, vo->x11->screen, p->depth,
                           DirectColor, &p->vinfo)
-         || (vo->opts->vo.WinID > 0
+         || (vo->opts->WinID > 0
              && p->vinfo.visualid != XVisualIDFromVisual(p->attribs.visual)))
     {
         XMatchVisualInfo(vo->x11->display, vo->x11->screen, p->depth, TrueColor,
@@ -366,7 +366,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     vo_x11_config_vo_window(vo, &p->vinfo, vo->dx, vo->dy, vo->dwidth,
                             vo->dheight, flags, "x11");
 
-    if (vo->opts->vo.WinID > 0) {
+    if (vo->opts->WinID > 0) {
         unsigned depth, dummy_uint;
         int dummy_int;
         Window dummy_win;
@@ -445,7 +445,7 @@ static void Display_Image(struct priv *p, XImage *myximage, uint8_t *ImageData)
          p->old_vo_dheight != vo->dheight) && p->zoomFlag)
         return;
 
-    if (vo->opts->vo.WinID == 0) {
+    if (vo->opts->WinID == 0) {
         x = vo->dx;
         y = vo->dy;
     }
@@ -539,7 +539,7 @@ static void flip_page(struct vo *vo)
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
-    struct MPOpts *opts = vo->opts;
+    struct mp_vo_opts *opts = vo->opts;
     uint8_t *dst[MP_MAX_PLANES] = {NULL};
     int dstStride[MP_MAX_PLANES] = {0};
 
@@ -555,7 +555,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         p->old_vo_dwidth = vo->dwidth;
         p->old_vo_dheight = vo->dheight;
 
-        if (opts->vo.fs)
+        if (opts->fs)
             aspect(vo, &newW, &newH, A_ZOOM);
         if (sws_flags == 0)
             newW &= (~31);      // not needed but, if the user wants the FAST_BILINEAR SCALER, then its needed
