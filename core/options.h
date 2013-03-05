@@ -11,7 +11,6 @@ typedef struct mp_vo_opts {
     int screenheight;
     int ontop;
     bool fs;
-    int vsync;
     int screen_id;
     int fsscreen_id;
     int stop_screensaver;

@@ -25,7 +25,6 @@ void set_default_mplayer_options(struct MPOpts *opts)
             .fs = false,
             .screen_id = -1,
             .fsscreen_id = -1,
-            .vsync = 1,
             .stop_screensaver = 1,
             .nomouse_input = 0,
             .fsmode = 0,

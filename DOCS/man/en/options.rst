@@ -2341,9 +2341,6 @@
     Set the startup volume. A value of -1 (the default) will not change the
     volume. See also ``--softvol``.
 
---no-vsync
-    Tries to disable vsync. (Effective with some video outputs only.)
-
 --wid=<ID>
     (X11 and win32 only)
     This tells mpv to attach to an existing window. The ID is interpreted as
