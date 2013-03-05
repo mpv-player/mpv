@@ -87,28 +87,30 @@ void main() {
 }
 
 #!section frag_osd_libass
-uniform sampler2D textures[3];
+uniform sampler2D texture0;
 
 in vec2 texcoord;
 in vec4 color;
 DECLARE_FRAGPARMS
 
 void main() {
-    out_color = vec4(color.rgb, color.a * texture(textures[0], texcoord).r);
+    out_color = vec4(color.rgb, color.a * texture(texture0, texcoord).r);
 }
 
 #!section frag_osd_rgba
-uniform sampler2D textures[3];
+uniform sampler2D texture0;
 
 in vec2 texcoord;
 DECLARE_FRAGPARMS
 
 void main() {
-    out_color = texture(textures[0], texcoord);
+    out_color = texture(texture0, texcoord);
 }
 
 #!section frag_video
-uniform sampler2D textures[3];
+uniform sampler2D texture0;
+uniform sampler2D texture1;
+uniform sampler2D texture2;
 uniform vec2 textures_size[3];
 uniform sampler1D lut_c_1d;
 uniform sampler1D lut_l_1d;
@@ -313,11 +315,11 @@ vec4 sample_sharpen5(sampler2D tex, vec2 texsize, vec2 texcoord) {
 
 void main() {
 #ifdef USE_PLANAR
-    vec3 color = vec3(SAMPLE_L(textures[0], textures_size[0], texcoord).r,
-                      SAMPLE_C(textures[1], textures_size[1], texcoord).r,
-                      SAMPLE_C(textures[2], textures_size[2], texcoord).r);
+    vec3 color = vec3(SAMPLE_L(texture0, textures_size[0], texcoord).r,
+                      SAMPLE_C(texture1, textures_size[1], texcoord).r,
+                      SAMPLE_C(texture2, textures_size[2], texcoord).r);
 #else
-    vec3 color = SAMPLE_L(textures[0], textures_size[0], texcoord).rgb;
+    vec3 color = SAMPLE_L(texture0, textures_size[0], texcoord).rgb;
 #endif
 #ifdef USE_GBRP
     color.gbr = color;
