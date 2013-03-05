@@ -150,7 +150,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         }
         case WM_SIZING:
-            if (vo_keepaspect && !vo->opts->fs && vo->otps->vo.WinID < 0) {
+            if (vo->opts->keepaspect && !vo->opts->fs && vo->opts->WinID < 0) {
                 RECT *rc = (RECT*)lParam;
                 // get client area of the windows if it had the rect rc
                 // (subtracting the window borders)
@@ -215,7 +215,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         }
         case WM_LBUTTONDOWN:
-            if (!vo_nomouse_input && (vo->opts->fs || (wParam & MK_CONTROL))) {
+            if (!vo->opts->nomouse_input && (vo->opts->fs || (wParam & MK_CONTROL)))
+            {
                 mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN0 | mod_state(vo));
                 break;
             }
@@ -226,18 +227,18 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             }
             break;
         case WM_MBUTTONDOWN:
-            if (!vo_nomouse_input)
+            if (!vo->opts->nomouse_input)
                 mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN1 | mod_state(vo));
             break;
         case WM_RBUTTONDOWN:
-            if (!vo_nomouse_input)
+            if (!vo->opts->nomouse_input)
                 mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN2 | mod_state(vo));
             break;
         case WM_MOUSEMOVE:
             vo_mouse_movement(vo, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
             break;
         case WM_MOUSEWHEEL:
-            if (!vo_nomouse_input) {
+            if (!vo->opts->nomouse_input) {
                 int x = GET_WHEEL_DELTA_WPARAM(wParam);
                 if (x > 0)
                     mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN3 | mod_state(vo));
@@ -246,7 +247,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             }
             break;
         case WM_XBUTTONDOWN:
-            if (!vo_nomouse_input) {
+            if (!vo->opts->nomouse_input) {
                 int x = HIWORD(wParam);
                 if (x == 1)
                     mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN5 | mod_state(vo));
@@ -298,7 +299,7 @@ int vo_w32_check_events(struct vo *vo)
         res = GetClientRect(WIN_ID_TO_HWND(vo->opts->WinID), &r);
         if (res && (r.right != vo->dwidth || r.bottom != vo->dheight))
             MoveWindow(w32->window, 0, 0, r.right, r.bottom, FALSE);
-        if (!IsWindow(WIN_ID_TO_HWND(vo->otps->vo.WinID)))
+        if (!IsWindow(WIN_ID_TO_HWND(vo->opts->WinID)))
             // Window has probably been closed, e.g. due to program crash
             mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
     }
@@ -369,7 +370,6 @@ void w32_update_xinerama_info(struct vo *vo)
 
 static void updateScreenProperties(struct vo *vo)
 {
-    struct vo_w32_state *w32 = vo->w32;
     DEVMODE dm;
     dm.dmSize = sizeof dm;
     dm.dmDriverExtra = 0;
@@ -390,7 +390,7 @@ static DWORD update_style(struct vo *vo, DWORD style)
     const DWORD NO_FRAME = WS_POPUP;
     const DWORD FRAME = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
     style &= ~(NO_FRAME | FRAME);
-    style |= (vo_border && !vo->opts->fs) ? FRAME : NO_FRAME;
+    style |= (vo->opts->border && !vo->opts->fs) ? FRAME : NO_FRAME;
     return style;
 }
 
@@ -654,7 +654,7 @@ void vo_w32_fullscreen(struct vo *vo)
  */
 void vo_w32_border(struct vo *vo)
 {
-    vo_border = !vo_border;
+    vo->opts->border = !vo->opts->border;
     reinit_window_state(vo);
 }
 
