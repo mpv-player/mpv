@@ -70,6 +70,7 @@ struct gl_priv {
     int frames_rendered;
 };
 
+// Always called under mpgl_lock
 static void resize(struct gl_priv *p)
 {
     struct vo *vo = p->vo;
@@ -91,6 +92,8 @@ static void flip_page(struct vo *vo)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
+    mpgl_lock(p->glctx);
+
     if (p->use_glFinish)
         gl->Finish();
 
@@ -99,13 +102,19 @@ static void flip_page(struct vo *vo)
     p->frames_rendered++;
     if (p->frames_rendered > 5)
         gl_video_set_debug(p->renderer, false);
+
+    mpgl_unlock(p->glctx);
 }
 
 static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct gl_priv *p = vo->priv;
 
+    mpgl_lock(p->glctx);
+
     gl_video_draw_osd(p->renderer, osd);
+
+    mpgl_unlock(p->glctx);
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
@@ -115,8 +124,10 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     if (p->vo_flipped)
         mp_image_vflip(mpi);
 
+    mpgl_lock(p->glctx);
     gl_video_upload_image(p->renderer, mpi);
     gl_video_render_frame(p->renderer);
+    mpgl_unlock(p->glctx);
 }
 
 static int query_format(struct vo *vo, uint32_t format)
@@ -151,8 +162,12 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 {
     struct gl_priv *p = vo->priv;
 
-    if (!config_window(p, d_width, d_height, flags))
+    mpgl_lock(p->glctx);
+
+    if (!config_window(p, d_width, d_height, flags)) {
+        mpgl_unlock(p->glctx);
         return -1;
+    }
 
     gl_video_config(p->renderer, format, width, height,
                     p->vo->aspdat.prew, p->vo->aspdat.preh);
@@ -161,6 +176,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     resize(p);
 
+    mpgl_unlock(p->glctx);
+
     return 0;
 }
 
@@ -168,11 +185,13 @@ static void check_events(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
 
+    mpgl_lock(p->glctx);
     int e = p->glctx->check_events(vo);
     if (e & VO_EVENT_RESIZE)
         resize(p);
     if (e & VO_EVENT_EXPOSE)
         vo->want_redraw = true;
+    mpgl_unlock(p->glctx);
 }
 
 static bool reparse_cmdline(struct gl_priv *p, char *args)
@@ -194,8 +213,10 @@ static bool reparse_cmdline(struct gl_priv *p, char *args)
     }
 
     if (r >= 0) {
+        mpgl_lock(p->glctx);
         gl_video_set_options(p->renderer, &opts);
         resize(p);
+        mpgl_unlock(p->glctx);
     }
 
     talloc_free(cfg);
@@ -210,69 +231,95 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_ONTOP:
         if (!p->glctx->ontop)
             break;
+        mpgl_lock(p->glctx);
         p->glctx->ontop(vo);
+        mpgl_unlock(p->glctx);
         return VO_TRUE;
     case VOCTRL_PAUSE:
         if (!p->glctx->pause)
             break;
+        mpgl_lock(p->glctx);
         p->glctx->pause(vo);
+        mpgl_unlock(p->glctx);
         return VO_TRUE;
     case VOCTRL_RESUME:
         if (!p->glctx->resume)
             break;
+        mpgl_lock(p->glctx);
         p->glctx->resume(vo);
+        mpgl_unlock(p->glctx);
         return VO_TRUE;
     case VOCTRL_FULLSCREEN:
+        mpgl_lock(p->glctx);
         p->glctx->fullscreen(vo);
         resize(p);
+        mpgl_unlock(p->glctx);
         return VO_TRUE;
     case VOCTRL_BORDER:
         if (!p->glctx->border)
             break;
+        mpgl_lock(p->glctx);
         p->glctx->border(vo);
         resize(p);
+        mpgl_unlock(p->glctx);
         return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
+        mpgl_lock(p->glctx);
         resize(p);
+        mpgl_unlock(p->glctx);
         return VO_TRUE;
     case VOCTRL_GET_EQUALIZER: {
         struct voctrl_get_equalizer_args *args = data;
+        mpgl_lock(p->glctx);
         bool r = gl_video_get_equalizer(p->renderer, args->name,
                                         args->valueptr);
+        mpgl_unlock(p->glctx);
         return r ? VO_TRUE : VO_NOTIMPL;
     }
     case VOCTRL_SET_EQUALIZER: {
         struct voctrl_set_equalizer_args *args = data;
+        mpgl_lock(p->glctx);
         bool r = gl_video_set_equalizer(p->renderer, args->name, args->value);
+        mpgl_unlock(p->glctx);
         if (r)
             vo->want_redraw = true;
         return r ? VO_TRUE : VO_NOTIMPL;
     }
     case VOCTRL_SET_YUV_COLORSPACE: {
+        mpgl_lock(p->glctx);
         gl_video_set_csp_override(p->renderer, data);
+        mpgl_unlock(p->glctx);
         vo->want_redraw = true;
         return VO_TRUE;
     }
     case VOCTRL_GET_YUV_COLORSPACE:
+        mpgl_lock(p->glctx);
         gl_video_get_csp_override(p->renderer, data);
+        mpgl_unlock(p->glctx);
         return VO_TRUE;
     case VOCTRL_UPDATE_SCREENINFO:
         if (!p->glctx->update_xinerama_info)
             break;
+        mpgl_lock(p->glctx);
         p->glctx->update_xinerama_info(vo);
+        mpgl_unlock(p->glctx);
         return VO_TRUE;
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
+        mpgl_lock(p->glctx);
         if (args->full_window)
             args->out_image = glGetWindowScreenshot(p->gl);
         else
             args->out_image = gl_video_download_image(p->renderer);
+        mpgl_unlock(p->glctx);
         return true;
     }
     case VOCTRL_REDRAW_FRAME:
+        mpgl_lock(p->glctx);
         gl_video_render_frame(p->renderer);
+        mpgl_unlock(p->glctx);
         return true;
     case VOCTRL_SET_COMMAND_LINE: {
         char *arg = data;
@@ -286,9 +333,11 @@ static void uninit(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
 
-    if (p->renderer)
-        gl_video_uninit(p->renderer);
-    mpgl_uninit(p->glctx);
+    if (p->glctx) {
+        if (p->renderer)
+            gl_video_uninit(p->renderer);
+        mpgl_uninit(p->glctx);
+    }
 }
 
 static int preinit(struct vo *vo, const char *arg)
@@ -319,6 +368,8 @@ static int preinit(struct vo *vo, const char *arg)
         gl_video_set_lut3d(p->renderer, lut3d);
         talloc_free(lut3d);
     }
+
+    mpgl_unset_context(p->glctx);
 
     return 0;
 
