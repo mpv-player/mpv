@@ -570,7 +570,7 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("fsmode-dontuse", vo.fsmode, 0, 31, 4096),
     OPT_INT("colorkey", vo.colorkey, 0),
     OPT_INT("no-colorkey", vo.colorkey, 0x1000000),
-    OPT_FLOATRANGE("panscan", vo.panscan, 0, 1.0, 99.0),
+    OPT_FLOATRANGE("panscan", vo.panscan, 0, 0.0, 1.0),
     OPT_FLOATRANGE("panscanrange", vo.panscanrange, 0, -19.0, 99.0),
     OPT_FLAG("force-rgba-osd-rendering", force_rgba_osd, 0),
     OPT_CHOICE("colormatrix", requested_colorspace, 0,
