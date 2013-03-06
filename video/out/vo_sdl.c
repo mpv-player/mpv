@@ -770,6 +770,8 @@ static int preinit(struct vo *vo, const char *arg)
     // predefine SDL defaults (SDL env vars shall override)
     SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1",
                             SDL_HINT_DEFAULT);
+    SDL_SetHintWithPriority(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0",
+                            SDL_HINT_DEFAULT);
 
     // predefine MPV options (SDL env vars shall be overridden)
     SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, vc->vsync ? "1" : "0",
