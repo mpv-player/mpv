@@ -90,15 +90,30 @@ void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)
 
 int mp_codec_to_av_codec_id(const char *codec)
 {
-
+    int id = CODEC_ID_NONE;
     const AVCodecDescriptor *desc = avcodec_descriptor_get_by_name(codec);
-    return desc ? desc->id : CODEC_ID_NONE;
+    if (desc)
+        id = desc->id;
+    if (id == CODEC_ID_NONE) {
+        AVCodec *avcodec = avcodec_find_decoder_by_name(codec);
+        if (avcodec)
+            id = avcodec->id;
+    }
+    return id;
 }
 
 const char *mp_codec_from_av_codec_id(int codec_id)
 {
+    const char *name = NULL;
     const AVCodecDescriptor *desc = avcodec_descriptor_get(codec_id);
-    return desc ? desc->name : NULL;
+    if (desc)
+        name = desc->name;
+    if (!name) {
+        AVCodec *avcodec = avcodec_find_decoder(codec_id);
+        if (avcodec)
+            name = avcodec->name;
+    }
+    return name;
 }
 
 #else
