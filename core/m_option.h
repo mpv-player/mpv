@@ -563,6 +563,9 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 #define OPT_FLOAT(...) \
     OPT_GENERAL(float, __VA_ARGS__, .type = &m_option_type_float)
 
+#define OPT_DOUBLE(...) \
+    OPT_GENERAL(double, __VA_ARGS__, .type = &m_option_type_double)
+
 #define OPT_STRING(...) \
     OPT_GENERAL(char*, __VA_ARGS__, .type = &m_option_type_string)
 

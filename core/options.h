@@ -2,6 +2,7 @@
 #define MPLAYER_OPTIONS_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include "core/m_option.h"
 
 typedef struct mp_vo_opts {
@@ -83,6 +84,7 @@ typedef struct MPOpts {
     int chapter_merge_threshold;
     int quiet;
     int load_config;
+    int use_filedir_conf;
     int stream_cache_size;
     float stream_cache_min_percent;
     float stream_cache_seek_min_percent;
@@ -95,6 +97,9 @@ typedef struct MPOpts {
     int initial_audio_sync;
     int hr_seek;
     float hr_seek_demuxer_offset;
+    float audio_delay;
+    float default_max_pts_correction;
+    int ignore_start;
     int autosync;
     int softsleep;
     int frame_dropping;
@@ -103,13 +108,18 @@ typedef struct MPOpts {
     char *playing_msg;
     char *status_msg;
     char *osd_status_msg;
+    char *heartbeat_cmd;
     int player_idle_mode;
+    int slave_mode;
     int consolecontrols;
     int doubleclick_time;
     int list_properties;
     struct m_rel_time play_start;
     struct m_rel_time play_end;
     struct m_rel_time play_length;
+    int play_frames;
+    double step_sec;
+    int64_t seek_to_byte;
     int start_paused;
     int keep_open;
     int audio_id;
@@ -119,6 +129,7 @@ typedef struct MPOpts {
     char **sub_lang;
     int audio_display;
     int sub_visibility;
+    int forced_subs_only;
     char *quvi_format;
 
     char *audio_stream;
@@ -132,8 +143,11 @@ typedef struct MPOpts {
     struct image_writer_opts *screenshot_image_opts;
     char *screenshot_template;
 
+    double force_fps;
+
     int audio_output_channels;
     int audio_output_format;
+    int force_srate;
     int dtshd;
     float playback_speed;
     float drc_level;

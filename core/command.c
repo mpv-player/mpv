@@ -594,14 +594,14 @@ static int mp_property_audio_delay(m_option_t *prop, int action,
 {
     if (!(mpctx->sh_audio && mpctx->sh_video))
         return M_PROPERTY_UNAVAILABLE;
-    float delay = audio_delay;
+    float delay = mpctx->opts.audio_delay;
     switch (action) {
     case M_PROPERTY_PRINT:
         *(char **)arg = format_delay(delay);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        audio_delay = *(float *)arg;
-        mpctx->delay -= audio_delay - delay;
+        mpctx->audio_delay = mpctx->opts.audio_delay = *(float *)arg;
+        mpctx->delay -= mpctx->audio_delay - delay;
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(prop, action, arg, mpctx);
@@ -1247,12 +1247,14 @@ static int mp_property_sub_visibility(m_option_t *prop, int action,
 static int mp_property_sub_forced_only(m_option_t *prop, int action,
                                        void *arg, MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
+
     if (!vo_spudec)
         return M_PROPERTY_UNAVAILABLE;
 
     if (action == M_PROPERTY_SET) {
-        forced_subs_only = *(int *)arg;
-        spudec_set_forced_subs_only(vo_spudec, forced_subs_only);
+        opts->forced_subs_only = *(int *)arg;
+        spudec_set_forced_subs_only(vo_spudec, opts->forced_subs_only);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(prop, action, arg, mpctx);

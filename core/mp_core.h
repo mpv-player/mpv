@@ -199,6 +199,11 @@ typedef struct MPContext {
     // How much video timing has been changed to make it match the audio
     // timeline. Used for status line information only.
     double total_avsync_change;
+    // Total number of dropped frames that were "approved" to be dropped.
+    // Actual dropping depends on --framedrop and decoder internals.
+    int drop_frame_cnt;
+    // Number of frames dropped in a row.
+    int dropped_frames;
     // A-V sync difference when last frame was displayed. Kept to display
     // the same value if the status line is updated at a time where no new
     // video frame is shown.
@@ -210,6 +215,8 @@ typedef struct MPContext {
     // As video_pts, but is not reset when seeking away. (For the very short
     // period of time until a new frame is decoded and shown.)
     double last_vo_pts;
+
+    float audio_delay;
 
     // used to prevent hanging in some error cases
     unsigned int start_timestamp;
@@ -246,6 +253,8 @@ typedef struct MPContext {
     int paused;
     // step this many frames, then pause
     int step_frames;
+    // Counted down each frame, stop playback if 0 is reached. (-1 = disable)
+    int max_frames;
 
     bool paused_for_cache;
 

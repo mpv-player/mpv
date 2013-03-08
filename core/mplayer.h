@@ -23,14 +23,6 @@
 
 #include "core/mp_msg.h"
 
-extern char ** audio_fm_list;
-extern char ** video_fm_list;
-extern char ** video_driver_list;
-extern char ** audio_driver_list;
-extern float  audio_delay;
-
-extern double force_fps;
-
 struct MPContext;
 struct MPOpts;
 struct subtitle;

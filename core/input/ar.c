@@ -33,8 +33,6 @@
 #include "ar.h"
 #include "keycodes.h"
 
-extern int slave_mode;
-
 extern const double NSAppKitVersionNumber;
 
 typedef struct cookie_keycode_map {
@@ -313,9 +311,6 @@ static int is_mplayer_front(void)
             && SameProcess(&frProc, &myProc, &sameProc) == noErr) {
         if (sameProc)
             return 1;
-        // If MPlayer is running in slave mode, also check parent process.
-        if (slave_mode && GetProcessPID(&frProc, &parentPID) == noErr)
-            return parentPID==getppid();
     }
     return 0;
 }
