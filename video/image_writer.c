@@ -86,9 +86,12 @@ struct img_writer {
 
 static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
 {
-    void *outbuffer = NULL;
     int success = 0;
     AVFrame *pic = NULL;
+    AVPacket pkt = {0};
+    int got_output = 0;
+
+    av_init_packet(&pkt);
 
     struct AVCodec *codec = avcodec_find_encoder(ctx->writer->lavc_codec);
     AVCodecContext *avctx = NULL;
@@ -112,11 +115,6 @@ static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
         goto error_exit;
     }
 
-    size_t outbuffer_size = image->w * image->h * 3 * 2;
-    outbuffer = malloc(outbuffer_size);
-    if (!outbuffer)
-        goto error_exit;
-
     pic = avcodec_alloc_frame();
     if (!pic)
         goto error_exit;
@@ -125,19 +123,19 @@ static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
         pic->data[n] = image->planes[n];
         pic->linesize[n] = image->stride[n];
     }
-    int size = avcodec_encode_video(avctx, outbuffer, outbuffer_size, pic);
-    if (size < 1)
+    int ret = avcodec_encode_video2(avctx, &pkt, pic, &got_output);
+    if (ret < 0)
         goto error_exit;
 
-    fwrite(outbuffer, size, 1, fp);
+    fwrite(pkt.data, pkt.size, 1, fp);
 
-    success = 1;
+    success = !!got_output;
 error_exit:
     if (avctx)
         avcodec_close(avctx);
     av_free(avctx);
     avcodec_free_frame(&pic);
-    free(outbuffer);
+    av_free_packet(&pkt);
     return success;
 }
 
@@ -280,9 +278,8 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
         }
     }
 
-    // Caveat: - no colorspace/levels conversion done if pixel formats equal
-    //         - RGB->YUV assumes BT.601
-    //         - color levels broken in various ways thanks to libswscale
+    // Caveat: no colorspace/levels conversion done if pixel formats equal
+    //         it's unclear what colorspace/levels the target wants
     if (image->imgfmt != destfmt || is_anamorphic) {
         struct mp_image *dst = mp_image_alloc(destfmt, d_w, d_h);
         mp_image_copy_attributes(dst, image);
