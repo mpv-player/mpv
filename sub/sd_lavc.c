@@ -65,16 +65,16 @@ static int init(struct sh_sub *sh, struct osd_state *osd)
     if (sh->initialized)
         return 0;
     struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
-    enum CodecID cid = CODEC_ID_NONE;
+    enum AVCodecID cid = AV_CODEC_ID_NONE;
     switch (sh->type) {
     case 'b':
-        cid = CODEC_ID_DVB_SUBTITLE; break;
+        cid = AV_CODEC_ID_DVB_SUBTITLE; break;
     case 'p':
-        cid = CODEC_ID_HDMV_PGS_SUBTITLE; break;
+        cid = AV_CODEC_ID_HDMV_PGS_SUBTITLE; break;
     case 'x':
-        cid = CODEC_ID_XSUB; break;
+        cid = AV_CODEC_ID_XSUB; break;
     case 'v':
-        cid = CODEC_ID_DVD_SUBTITLE; break;
+        cid = AV_CODEC_ID_DVD_SUBTITLE; break;
     }
     AVCodecContext *ctx = NULL;
     AVCodec *sub_codec = avcodec_find_decoder(cid);

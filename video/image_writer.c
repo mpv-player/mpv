@@ -105,7 +105,7 @@ static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
     avctx->width = image->w;
     avctx->height = image->h;
     avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
-    if (ctx->writer->lavc_codec == CODEC_ID_PNG)
+    if (ctx->writer->lavc_codec == AV_CODEC_ID_PNG)
         avctx->compression_level = ctx->opts->png_compression;
 
     if (avcodec_open2(avctx, codec, NULL) < 0) {
@@ -208,18 +208,18 @@ static int write_jpeg(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
 #endif
 
 static const struct img_writer img_writers[] = {
-    { "png", write_lavc, .lavc_codec = CODEC_ID_PNG },
-    { "ppm", write_lavc, .lavc_codec = CODEC_ID_PPM },
+    { "png", write_lavc, .lavc_codec = AV_CODEC_ID_PNG },
+    { "ppm", write_lavc, .lavc_codec = AV_CODEC_ID_PPM },
     { "pgm", write_lavc,
-      .lavc_codec = CODEC_ID_PGM,
+      .lavc_codec = AV_CODEC_ID_PGM,
       .pixfmts = (int[]) { IMGFMT_Y8, 0 },
     },
     { "pgmyuv", write_lavc,
-      .lavc_codec = CODEC_ID_PGMYUV,
+      .lavc_codec = AV_CODEC_ID_PGMYUV,
       .pixfmts = (int[]) { IMGFMT_420P, 0 },
     },
     { "tga", write_lavc,
-      .lavc_codec = CODEC_ID_TARGA,
+      .lavc_codec = AV_CODEC_ID_TARGA,
       .pixfmts = (int[]) { IMGFMT_BGR24, IMGFMT_BGRA, IMGFMT_BGR15_LE,
                            IMGFMT_Y8, 0},
     },

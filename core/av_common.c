@@ -90,11 +90,11 @@ void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)
 
 int mp_codec_to_av_codec_id(const char *codec)
 {
-    int id = CODEC_ID_NONE;
+    int id = AV_CODEC_ID_NONE;
     const AVCodecDescriptor *desc = avcodec_descriptor_get_by_name(codec);
     if (desc)
         id = desc->id;
-    if (id == CODEC_ID_NONE) {
+    if (id == AV_CODEC_ID_NONE) {
         AVCodec *avcodec = avcodec_find_decoder_by_name(codec);
         if (avcodec)
             id = avcodec->id;
@@ -124,37 +124,37 @@ struct mp_av_codec {
 };
 
 // Some decoders have a different name from the canonical codec name, for
-// example the codec "dts" CODEC_ID_DTS has the decoder named "dca", and
+// example the codec "dts" AV_CODEC_ID_DTS has the decoder named "dca", and
 // avcodec_find_decoder_by_name("dts") would return 0. We always want the
 // canonical name.
 // On newer lavc versions, avcodec_descriptor_get_by_name("dts") will return
-// CODEC_ID_DTS, which is what we want, but for older versions we need this
+// AV_CODEC_ID_DTS, which is what we want, but for older versions we need this
 // lookup table.
 struct mp_av_codec mp_av_codec_id_list[] = {
-    {"ra_144",          CODEC_ID_RA_144},
-    {"ra_288",          CODEC_ID_RA_288},
-    {"smackaudio",      CODEC_ID_SMACKAUDIO},
-    {"dts",             CODEC_ID_DTS},
-    {"musepack7",       CODEC_ID_MUSEPACK7},
-    {"musepack8",       CODEC_ID_MUSEPACK8},
-    {"amr_nb",          CODEC_ID_AMR_NB},
-    {"amr_wb",          CODEC_ID_AMR_WB},
-    {"adpcm_g722",      CODEC_ID_ADPCM_G722},
-    {"adpcm_g726",      CODEC_ID_ADPCM_G726},
-    {"westwood_snd1",   CODEC_ID_WESTWOOD_SND1},
-    {"mp4als",          CODEC_ID_MP4ALS},
-    {"vixl",            CODEC_ID_VIXL},
-    {"flv1",            CODEC_ID_FLV1},
-    {"msmpeg4v3",       CODEC_ID_MSMPEG4V3},
-    {"jpeg2000",        CODEC_ID_JPEG2000},
-    {"ulti",            CODEC_ID_ULTI},
-    {"smackvideo",      CODEC_ID_SMACKVIDEO},
-    {"tscc",            CODEC_ID_TSCC},
-    {"cscd",            CODEC_ID_CSCD},
-    {"tgv",             CODEC_ID_TGV},
-    {"roq",             CODEC_ID_ROQ},
-    {"idcin",           CODEC_ID_IDCIN},
-    {"ws_vqa",          CODEC_ID_WS_VQA},
+    {"ra_144",          AV_CODEC_ID_RA_144},
+    {"ra_288",          AV_CODEC_ID_RA_288},
+    {"smackaudio",      AV_CODEC_ID_SMACKAUDIO},
+    {"dts",             AV_CODEC_ID_DTS},
+    {"musepack7",       AV_CODEC_ID_MUSEPACK7},
+    {"musepack8",       AV_CODEC_ID_MUSEPACK8},
+    {"amr_nb",          AV_CODEC_ID_AMR_NB},
+    {"amr_wb",          AV_CODEC_ID_AMR_WB},
+    {"adpcm_g722",      AV_CODEC_ID_ADPCM_G722},
+    {"adpcm_g726",      AV_CODEC_ID_ADPCM_G726},
+    {"westwood_snd1",   AV_CODEC_ID_WESTWOOD_SND1},
+    {"mp4als",          AV_CODEC_ID_MP4ALS},
+    {"vixl",            AV_CODEC_ID_VIXL},
+    {"flv1",            AV_CODEC_ID_FLV1},
+    {"msmpeg4v3",       AV_CODEC_ID_MSMPEG4V3},
+    {"jpeg2000",        AV_CODEC_ID_JPEG2000},
+    {"ulti",            AV_CODEC_ID_ULTI},
+    {"smackvideo",      AV_CODEC_ID_SMACKVIDEO},
+    {"tscc",            AV_CODEC_ID_TSCC},
+    {"cscd",            AV_CODEC_ID_CSCD},
+    {"tgv",             AV_CODEC_ID_TGV},
+    {"roq",             AV_CODEC_ID_ROQ},
+    {"idcin",           AV_CODEC_ID_IDCIN},
+    {"ws_vqa",          AV_CODEC_ID_WS_VQA},
     {0},
 };
 
@@ -165,7 +165,7 @@ int mp_codec_to_av_codec_id(const char *codec)
             return mp_av_codec_id_list[n].codec_id;
     }
     AVCodec *avcodec = avcodec_find_decoder_by_name(codec);
-    return avcodec ? avcodec->id : CODEC_ID_NONE;
+    return avcodec ? avcodec->id : AV_CODEC_ID_NONE;
 }
 
 const char *mp_codec_from_av_codec_id(int codec_id)

@@ -349,7 +349,7 @@ static const char *lookup_tag(const struct mp_codec_tag *mp_table,
     }
     const struct AVCodecTag *av_tags[] = {av_table, NULL};
     int id = av_codec_get_id(av_tags, tag);
-    return id == CODEC_ID_NONE ? NULL : mp_codec_from_av_codec_id(id);
+    return id == AV_CODEC_ID_NONE ? NULL : mp_codec_from_av_codec_id(id);
 }
 
 void mp_set_video_codec_from_tag(struct sh_video *sh)

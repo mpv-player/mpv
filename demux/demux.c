@@ -496,18 +496,18 @@ void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
 
 static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parser, const char *format)
 {
-    enum CodecID codec_id = mp_codec_to_av_codec_id(format);
+    enum AVCodecID codec_id = mp_codec_to_av_codec_id(format);
 
     switch (codec_id) {
-    case CODEC_ID_AAC_LATM:
-    case CODEC_ID_AC3:
-    case CODEC_ID_EAC3:
-    case CODEC_ID_DTS:
-    case CODEC_ID_FLAC:
-    case CODEC_ID_MLP:
-    case CODEC_ID_MP3:
-    case CODEC_ID_MP2:
-    case CODEC_ID_TRUEHD:
+    case AV_CODEC_ID_AAC_LATM:
+    case AV_CODEC_ID_AC3:
+    case AV_CODEC_ID_EAC3:
+    case AV_CODEC_ID_DTS:
+    case AV_CODEC_ID_FLAC:
+    case AV_CODEC_ID_MLP:
+    case AV_CODEC_ID_MP3:
+    case AV_CODEC_ID_MP2:
+    case AV_CODEC_ID_TRUEHD:
         *avctx = avcodec_alloc_context3(NULL);
         if (!*avctx)
             return;
