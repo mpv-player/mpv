@@ -138,9 +138,8 @@ SOURCES = talloc.c \
           audio/filter/af_hrtf.c \
           audio/filter/af_karaoke.c \
           audio/filter/af_lavcac3enc.c \
-          audio/filter/af_lavcresample.c \
+          audio/filter/af_lavrresample.c \
           audio/filter/af_pan.c \
-          audio/filter/af_resample.c \
           audio/filter/af_scaletempo.c \
           audio/filter/af_sinesuppress.c \
           audio/filter/af_sub.c \

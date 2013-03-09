@@ -342,6 +342,9 @@ Codecs:
   --disable-libbs2b         disable libbs2b audio filter support [autodetect]
   --disable-mpg123          disable libmpg123 MP3 decoding support [autodetect]
 
+Resampler:
+  --disable-libavresample   check for libswresample only [autodetect]
+
 Video output:
   --enable-gl              enable OpenGL video output [autodetect]
   --enable-caca            enable CACA  video output [autodetect]
@@ -416,6 +419,7 @@ _cross_compile=no
 _prefix="/usr/local"
 ffmpeg=auto
 _encoding=yes
+_disable_avresample=no
 _x11=auto
 _wayland=auto
 _xss=auto
@@ -667,6 +671,8 @@ for ac_option do
   --enable-joystick)    _joystick=yes   ;;
   --disable-joystick)   _joystick=no    ;;
   --enable-libav)       ffmpeg=yes      ;;
+  --disable-libavresample) _disable_avresample=yes ;;
+  --enable-libavresample) _disable_avresample=no   ;;
 
   --enable-lirc)        _lirc=yes       ;;
   --disable-lirc)       _lirc=no        ;;
@@ -2682,6 +2688,31 @@ fi
 echores "yes"
 
 
+_resampler=no
+echocheck "libavresample >= 1.0.0"
+if test "$_disable_avresample" = no ; then
+  if pkg_config_add "libavresample >= 1.0.0" ; then
+    _resampler=yes
+    def_resampler='#define CONFIG_LIBAVRESAMPLE'
+  fi
+fi
+echores "$_resampler"
+
+
+if test "$_resampler" = no ; then
+  echocheck "libswresample >= 0.15.100"
+  if pkg_config_add "libswresample >= 0.15.100" ; then
+    _resampler=yes
+    def_resampler='#define CONFIG_LIBSWRESAMPLE'
+  fi
+  echores "$_resampler"
+fi
+
+if test "$_resampler" = no ; then
+  die "No resampler found. Install libavresample or libswresample (FFmpeg)."
+fi
+
+
 echocheck "Libav 0.8 compatibility hack"
 if test "$_encoding" = yes && $_pkg_config "libavcodec >= 54.0.0" ; then
     echores "no"
@@ -3311,6 +3342,7 @@ $def_xv
 
 /* FFmpeg */
 $def_encoding
+$def_resampler
 
 $def_fast_64bit
 $def_pthreads

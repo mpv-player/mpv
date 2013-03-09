@@ -29,55 +29,27 @@ filter list.
 
 Available filters are:
 
-resample[=srate[:sloppy[:type]]]
-    Changes the sample rate of the audio stream. Can be used if you have a
-    fixed frequency sound card or if you are stuck with an old sound card that
-    is only capable of max 44.1kHz. This filter is automatically enabled if
-    necessary. It only supports 16-bit integer and float in native-endian
-    format as input.
-
-    <srate>
-        output sample frequency in Hz. The valid range for this parameter is
-        8000 to 192000. If the input and output sample frequency are the same
-        or if this parameter is omitted the filter is automatically unloaded.
-        A high sample frequency normally improves the audio quality,
-        especially when used in combination with other filters.
-    <sloppy>
-        Allow (1) or disallow (0) the output frequency to differ slightly from
-        the frequency given by <srate> (default: 1). Can be used if the
-        startup of the playback is extremely slow.
-    <type>
-        Select which resampling method to use.
-
-        :0: linear interpolation (fast, poor quality especially when
-            upsampling)
-        :1: polyphase filterbank and integer processing
-        :2: polyphase filterbank and floating point processing
-            (slow, best quality)
-
-    *EXAMPLE*:
-
-    ``mpv --af=resample=44100:0:0``
-        would set the output frequency of the resample filter to 44100Hz using
-        exact output frequency scaling and linear interpolation.
-
-lavcresample[=srate[:length[:linear[:count[:cutoff]]]]]
+lavrresample[=option1:option2:...]
     Changes the sample rate of the audio stream to an integer <srate> in Hz.
-    It only supports the 16-bit native-endian format.
+    Can be used if you have a fixed frequency sound card or if you are stuck
+    with an old sound card that is only capable of max 44.1kHz.
 
-    <srate>
-        the output sample rate
-    <length>
+    This filter is automatically enabled if necessary.  It only supports the
+    16-bit integer native-endian format.
+
+    srate=<srate>
+        the output sample rate (defaut: 44100)
+    length=<length>
         length of the filter with respect to the lower sampling rate (default:
         16)
-    <linear>
-        if 1 then filters will be linearly interpolated between polyphase
-        entries
-    <count>
+    phase_shift=<count>
         log2 of the number of polyphase entries (..., 10->1024, 11->2048,
         12->4096, ...) (default: 10->1024)
-    <cutoff>
+    cutoff=<cutoff>
         cutoff frequency (0.0-1.0), default set depending upon filter length
+    linear
+        if set then filters will be linearly interpolated between polyphase
+        entries (default: no)
 
 lavcac3enc[=tospdif[:bitrate[:minchn]]]
     Encode multi-channel audio to AC-3 at runtime using libavcodec. Supports
