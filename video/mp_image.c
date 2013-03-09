@@ -459,3 +459,31 @@ void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
     if (src->repeat_pict == 1)
         dst->fields |= MP_IMGFIELD_REPEAT_FIRST;
 }
+
+#if HAVE_AVUTIL_REFCOUNTING
+
+static void frame_free(void *p)
+{
+    AVFrame *frame = p;
+    av_frame_free(&frame);
+}
+
+static bool frame_is_unique(void *p)
+{
+    AVFrame *frame = p;
+    return av_frame_is_writable(frame);
+}
+
+// Create a new mp_image reference to av_frame.
+struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame)
+{
+    AVFrame *new_ref = av_frame_clone(av_frame);
+    if (!new_ref)
+        abort(); // OOM
+    struct mp_image t = {0};
+    mp_image_copy_fields_from_av_frame(&t, new_ref);
+    return mp_image_new_external_ref(&t, new_ref, NULL, NULL, frame_is_unique,
+                                     frame_free);
+}
+
+#endif /* HAVE_AVUTIL_REFCOUNTING */

@@ -115,6 +115,9 @@ SOURCES-$(VDPAU)                += video/out/vo_vdpau.c
 SOURCES-$(X11)                  += video/out/vo_x11.c video/out/x11_common.c
 SOURCES-$(XV)                   += video/out/vo_xv.c
 
+ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
+    SOURCES-yes                 += video/decode/lavc_dr1.c
+endif
 
 SOURCES = talloc.c \
           audio/format.c \
@@ -230,7 +233,6 @@ SOURCES = talloc.c \
           video/mp_image_pool.c \
           video/sws_utils.c \
           video/decode/dec_video.c \
-          video/decode/lavc_dr1.c \
           video/decode/vd.c \
           video/decode/vd_lavc.c \
           video/filter/vf.c \

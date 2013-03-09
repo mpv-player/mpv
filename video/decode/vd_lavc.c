@@ -280,11 +280,15 @@ static int init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
                 SLICE_FLAG_CODED_ORDER | SLICE_FLAG_ALLOW_FIELD;
         }
     } else {
+#if HAVE_AVUTIL_REFCOUNTING
+        avctx->refcounted_frames = 1;
+#else
         if (lavc_codec->capabilities & CODEC_CAP_DR1) {
             ctx->do_dr1            = true;
             avctx->get_buffer      = mp_codec_get_buffer;
             avctx->release_buffer  = mp_codec_release_buffer;
         }
+#endif
     }
 
     if (avctx->thread_count == 0) {
@@ -373,7 +377,9 @@ static void uninit_avctx(sh_video_t *sh)
     av_freep(&avctx);
     avcodec_free_frame(&ctx->pic);
 
+#if !HAVE_AVUTIL_REFCOUNTING
     mp_buffer_pool_free(&ctx->dr1_buffer_pool);
+#endif
 }
 
 static void uninit(sh_video_t *sh)
@@ -466,9 +472,8 @@ static void draw_slice_hwdec(struct AVCodecContext *s,
     vf->control(vf, VFCTRL_HWDEC_DECODER_RENDER, state_ptr);
 }
 
-static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
+static struct mp_image *get_surface_hwdec(struct sh_video *sh, AVFrame *pic)
 {
-    sh_video_t *sh = avctx->opaque;
     vd_ffmpeg_ctx *ctx = sh->context;
 
     /* Decoders using ffmpeg's hwaccel architecture (everything except vdpau)
@@ -484,10 +489,10 @@ static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
      */
     int imgfmt = pixfmt2imgfmt(pic->format);
     if (!IMGFMT_IS_HWACCEL(imgfmt))
-        return -1;
+        return NULL;
 
     if (init_vo(sh, pic) < 0)
-        return -1;
+        return NULL;
 
     assert(IMGFMT_IS_HWACCEL(ctx->best_csp));
 
@@ -495,11 +500,52 @@ static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
 
     struct vf_instance *vf = sh->vfilter;
     vf->control(vf, VFCTRL_HWDEC_ALLOC_SURFACE, &mpi);
+
+    if (mpi) {
+        for (int i = 0; i < 4; i++)
+            pic->data[i] = mpi->planes[i];
+    }
+
+    return mpi;
+}
+
+#if HAVE_AVUTIL_REFCOUNTING
+
+static void free_mpi(void *opaque, uint8_t *data)
+{
+    struct mp_image *mpi = opaque;
+    talloc_free(mpi);
+}
+
+static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
+{
+    sh_video_t *sh = avctx->opaque;
+
+    struct mp_image *mpi = get_surface_hwdec(sh, pic);
     if (!mpi)
         return -1;
 
-    for (int i = 0; i < 4; i++)
-        pic->data[i] = mpi->planes[i];
+    pic->buf[0] = av_buffer_create(NULL, 0, free_mpi, mpi, 0);
+
+    return 0;
+}
+
+static void setup_refcounting_hw(AVCodecContext *avctx)
+{
+    avctx->get_buffer2 = get_buffer2_hwdec;
+    avctx->refcounted_frames = 1;
+}
+
+#else /* HAVE_AVUTIL_REFCOUNTING */
+
+static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
+{
+    sh_video_t *sh = avctx->opaque;
+
+    struct mp_image *mpi = get_surface_hwdec(sh, pic);
+    if (!mpi)
+        return -1;
+
     pic->opaque = mpi;
     pic->type = FF_BUFFER_TYPE_USER;
 
@@ -530,6 +576,23 @@ static void setup_refcounting_hw(AVCodecContext *avctx)
     avctx->get_buffer = get_buffer_hwdec;
     avctx->release_buffer = release_buffer_hwdec;
 }
+
+#endif /* HAVE_AVUTIL_REFCOUNTING */
+
+#if HAVE_AVUTIL_REFCOUNTING
+
+static struct mp_image *image_from_decoder(struct sh_video *sh)
+{
+    vd_ffmpeg_ctx *ctx = sh->context;
+    AVFrame *pic = ctx->pic;
+
+    struct mp_image *img = mp_image_from_av_frame(pic);
+    av_frame_unref(pic);
+
+    return img;
+}
+
+#else /* HAVE_AVUTIL_REFCOUNTING */
 
 static void fb_ref(void *b)
 {
@@ -570,6 +633,8 @@ static struct mp_image *image_from_decoder(struct sh_video *sh)
     }
     return mpi;
 }
+
+#endif /* HAVE_AVUTIL_REFCOUNTING */
 
 static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
                   int len, int flags, double *reordered_pts,
