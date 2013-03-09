@@ -61,8 +61,7 @@
 
 static int init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec);
 static void uninit_avctx(sh_video_t *sh);
-static int get_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic);
-static void release_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic);
+static void setup_refcounting_hw(struct AVCodecContext *s);
 static void draw_slice_hwdec(struct AVCodecContext *s, const AVFrame *src,
                              int offset[4], int y, int type, int height);
 
@@ -274,17 +273,18 @@ static int init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
         ctx->do_hw_dr1         = true;
         avctx->thread_count    = 1;
         avctx->get_format      = get_format_hwdec;
-        avctx->get_buffer      = get_buffer_hwdec;
-        avctx->release_buffer  = release_buffer_hwdec;
+        setup_refcounting_hw(avctx);
         if (ctx->hwdec->api == HWDEC_VDPAU) {
             avctx->draw_horiz_band = draw_slice_hwdec;
             avctx->slice_flags =
                 SLICE_FLAG_CODED_ORDER | SLICE_FLAG_ALLOW_FIELD;
         }
-    } else if (lavc_codec->capabilities & CODEC_CAP_DR1) {
-        ctx->do_dr1            = true;
-        avctx->get_buffer      = mp_codec_get_buffer;
-        avctx->release_buffer  = mp_codec_release_buffer;
+    } else {
+        if (lavc_codec->capabilities & CODEC_CAP_DR1) {
+            ctx->do_dr1            = true;
+            avctx->get_buffer      = mp_codec_get_buffer;
+            avctx->release_buffer  = mp_codec_release_buffer;
+        }
     }
 
     if (avctx->thread_count == 0) {
@@ -525,6 +525,12 @@ static void release_buffer_hwdec(AVCodecContext *avctx, AVFrame *pic)
         pic->data[i] = NULL;
 }
 
+static void setup_refcounting_hw(AVCodecContext *avctx)
+{
+    avctx->get_buffer = get_buffer_hwdec;
+    avctx->release_buffer = release_buffer_hwdec;
+}
+
 static void fb_ref(void *b)
 {
     mp_buffer_ref(b);
@@ -538,6 +544,31 @@ static void fb_unref(void *b)
 static bool fb_is_unique(void *b)
 {
     return mp_buffer_is_unique(b);
+}
+
+static struct mp_image *image_from_decoder(struct sh_video *sh)
+{
+    vd_ffmpeg_ctx *ctx = sh->context;
+    AVFrame *pic = ctx->pic;
+
+    struct mp_image new = {0};
+    mp_image_copy_fields_from_av_frame(&new, pic);
+
+    struct mp_image *mpi;
+    if (ctx->do_hw_dr1 && pic->opaque) {
+        mpi = pic->opaque; // reordered frame
+        assert(mpi);
+        mpi = mp_image_new_ref(mpi);
+        mp_image_copy_attributes(mpi, &new);
+    } else if (ctx->do_dr1 && pic->opaque) {
+        struct FrameBuffer *fb = pic->opaque;
+        mp_buffer_ref(fb); // initial reference for mpi
+        mpi = mp_image_new_external_ref(&new, fb, fb_ref, fb_unref,
+                                        fb_is_unique, NULL);
+    } else {
+        mpi = mp_image_pool_new_copy(ctx->non_dr1_pool, &new);
+    }
+    return mpi;
 }
 
 static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
@@ -585,48 +616,11 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
     if (init_vo(sh, pic) < 0)
         return -1;
 
-    struct mp_image *mpi = NULL;
-    if (ctx->do_hw_dr1 && pic->opaque) {
-        mpi = pic->opaque; // reordered frame
-        assert(mpi);
-        mpi = mp_image_new_ref(mpi);
-    }
-
-    if (!mpi) {
-        struct mp_image new = {0};
-        mp_image_set_size(&new, pic->width, pic->height);
-        mp_image_setfmt(&new, ctx->best_csp);
-        for (int i = 0; i < 4; i++) {
-            new.planes[i] = pic->data[i];
-            new.stride[i] = pic->linesize[i];
-        }
-        if (ctx->do_dr1 && pic->opaque) {
-            struct FrameBuffer *fb = pic->opaque;
-            mp_buffer_ref(fb); // initial reference for mpi
-            mpi = mp_image_new_external_ref(&new, fb, fb_ref, fb_unref,
-                                            fb_is_unique);
-        } else {
-            mpi = mp_image_pool_get(ctx->non_dr1_pool, new.imgfmt,
-                                    new.w, new.h);
-            mp_image_copy(mpi, &new);
-        }
-    }
-
+    struct mp_image *mpi = image_from_decoder(sh);
     assert(mpi->planes[0]);
 
     mpi->colorspace = sh->colorspace;
     mpi->levels = sh->color_range;
-    mpi->qscale = pic->qscale_table;
-    mpi->qstride = pic->qstride;
-    mpi->pict_type = pic->pict_type;
-    mpi->qscale_type = pic->qscale_type;
-    mpi->fields = MP_IMGFIELD_ORDERED;
-    if (pic->interlaced_frame)
-        mpi->fields |= MP_IMGFIELD_INTERLACED;
-    if (pic->top_field_first)
-        mpi->fields |= MP_IMGFIELD_TOP_FIRST;
-    if (pic->repeat_pict == 1)
-        mpi->fields |= MP_IMGFIELD_REPEAT_FIRST;
 
     *out_image = mpi;
     return 1;

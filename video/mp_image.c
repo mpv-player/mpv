@@ -29,10 +29,11 @@
 
 #include "talloc.h"
 
-#include "video/img_format.h"
-#include "video/mp_image.h"
-#include "video/sws_utils.h"
-#include "video/memcpy_pic.h"
+#include "img_format.h"
+#include "mp_image.h"
+#include "sws_utils.h"
+#include "memcpy_pic.h"
+#include "fmt-conversion.h"
 
 struct m_refcount {
     void *arg;
@@ -41,7 +42,7 @@ struct m_refcount {
     // External refcounted object (such as libavcodec DR buffers). This assumes
     // that the actual data is managed by the external object, not by
     // m_refcount. The .ext_* calls use that external object's refcount
-    // primitives. It usually doesn't make sense to set both .free and .ext_*.
+    // primitives.
     void (*ext_ref)(void *arg);
     void (*ext_unref)(void *arg);
     bool (*ext_is_unique)(void *arg);
@@ -236,23 +237,18 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
 struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *free_arg,
                                          void (*free)(void *arg))
 {
-    struct mp_image *new = talloc_ptrtype(NULL, new);
-    talloc_set_destructor(new, mp_image_destructor);
-    *new = *img;
-
-    new->refcount = m_refcount_new();
-    new->refcount->free = free;
-    new->refcount->arg = free_arg;
-    return new;
+    return mp_image_new_external_ref(img, free_arg, NULL, NULL, NULL, free);
 }
 
 // Return a reference counted reference to img. ref/unref/is_unique are used to
 // connect to an external refcounting API. It is assumed that the new object
-// has an initial reference to that external API.
+// has an initial reference to that external API. If free is given, that is
+// called after the last unref. All function pointers are optional.
 struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
                                            void (*ref)(void *arg),
                                            void (*unref)(void *arg),
-                                           bool (*is_unique)(void *arg))
+                                           bool (*is_unique)(void *arg),
+                                           void (*free)(void *arg))
 {
     struct mp_image *new = talloc_ptrtype(NULL, new);
     talloc_set_destructor(new, mp_image_destructor);
@@ -262,6 +258,7 @@ struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
     new->refcount->ext_ref = ref;
     new->refcount->ext_unref = unref;
     new->refcount->ext_is_unique = is_unique;
+    new->refcount->free = free;
     new->refcount->arg = arg;
     return new;
 }
@@ -435,4 +432,30 @@ void mp_image_set_colorspace_details(struct mp_image *image,
         image->colorspace = MP_CSP_RGB;
         image->levels = MP_CSP_LEVELS_PC;
     }
+}
+
+// Copy properties and data of the AVFrame into the mp_image, without taking
+// care of memory management issues.
+void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
+                                        struct AVFrame *src)
+{
+    mp_image_setfmt(dst, pixfmt2imgfmt(src->format));
+    mp_image_set_size(dst, src->width, src->height);
+
+    for (int i = 0; i < 4; i++) {
+        dst->planes[i] = src->data[i];
+        dst->stride[i] = src->linesize[i];
+    }
+
+    dst->qscale = src->qscale_table;
+    dst->qstride = src->qstride;
+    dst->pict_type = src->pict_type;
+    dst->qscale_type = src->qscale_type;
+    dst->fields = MP_IMGFIELD_ORDERED;
+    if (src->interlaced_frame)
+        dst->fields |= MP_IMGFIELD_INTERLACED;
+    if (src->top_field_first)
+        dst->fields |= MP_IMGFIELD_TOP_FIRST;
+    if (src->repeat_pict == 1)
+        dst->fields |= MP_IMGFIELD_REPEAT_FIRST;
 }
