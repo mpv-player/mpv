@@ -369,8 +369,8 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
          * heuristic makes up works with subtitles in practice.
          */
         double fps;
-        if (st->r_frame_rate.num)
-            fps = av_q2d(st->r_frame_rate);
+        if (st->avg_frame_rate.num)
+            fps = av_q2d(st->avg_frame_rate);
         else
             fps = 1.0 / FFMAX(av_q2d(st->time_base),
                               av_q2d(st->codec->time_base) *
