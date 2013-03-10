@@ -453,6 +453,10 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
         update_window(vo);
     }
 
+    [s->window setContentSize:s->current_video_size keepCentered:YES];
+    [s->window setContentAspectRatio:s->current_video_size];
+    [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
+
     if (flags & VOFLAG_HIDDEN) {
         [s->window orderOut:nil];
     } else {
@@ -464,10 +468,6 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
         vo_cocoa_fullscreen(vo);
 
     vo_set_level(vo, opts->ontop);
-
-    [s->window setContentSize:s->current_video_size];
-    [s->window setContentAspectRatio:s->current_video_size];
-    [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
 
     resize_window(vo);
 
