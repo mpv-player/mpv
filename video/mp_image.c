@@ -464,6 +464,30 @@ void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
 #endif
 }
 
+// Copy properties and data of the mp_image into the AVFrame, without taking
+// care of memory management issues.
+void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
+                                      struct mp_image *src)
+{
+    dst->format = imgfmt2pixfmt(src->imgfmt);
+    dst->width = src->w;
+    dst->height = src->h;
+
+    for (int i = 0; i < 4; i++) {
+        dst->data[i] = src->planes[i];
+        dst->linesize[i] = src->stride[i];
+    }
+    dst->extended_data = dst->data;
+
+    dst->pict_type = src->pict_type;
+    if (src->fields & MP_IMGFIELD_INTERLACED)
+        dst->interlaced_frame = 1;
+    if (src->fields & MP_IMGFIELD_TOP_FIRST)
+        dst->top_field_first = 1;
+    if (src->fields & MP_IMGFIELD_REPEAT_FIRST)
+        dst->repeat_pict = 1;
+}
+
 #if HAVE_AVUTIL_REFCOUNTING
 
 static void frame_free(void *p)
@@ -488,6 +512,32 @@ struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame)
     mp_image_copy_fields_from_av_frame(&t, new_ref);
     return mp_image_new_external_ref(&t, new_ref, NULL, NULL, frame_is_unique,
                                      frame_free);
+}
+
+static void free_img(void *opaque, uint8_t *data)
+{
+    struct mp_image *img = opaque;
+    talloc_free(img);
+}
+
+// Convert the mp_image reference to a AVFrame reference.
+// Warning: img is unreferenced (i.e. free'd). This is asymmetric to
+//          mp_image_from_av_frame(). It's done this way to allow marking the
+//          resulting AVFrame as writeable if img is the only reference (in
+//          other words, it's an optimization).
+struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
+{
+    struct mp_image *new_ref = mp_image_new_ref(img); // ensure it's refcounted
+    talloc_free(img);
+    AVFrame *frame = av_frame_alloc();
+    mp_image_copy_fields_to_av_frame(frame, new_ref);
+    // Caveat: if img has shared references, and all other references disappear
+    //         at a later point, the AVFrame will still be read-only.
+    int flags = 0;
+    if (!mp_image_is_writeable(new_ref))
+        flags |= AV_BUFFER_FLAG_READONLY;
+    frame->buf[0] = av_buffer_create(NULL, 0, free_img, new_ref, flags);
+    return frame;
 }
 
 #endif /* HAVE_AVUTIL_REFCOUNTING */

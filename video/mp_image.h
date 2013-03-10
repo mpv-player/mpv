@@ -130,7 +130,10 @@ void mp_image_set_colorspace_details(struct mp_image *image,
 struct AVFrame;
 void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
                                         struct AVFrame *src);
+void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
+                                      struct mp_image *src);
 struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame);
+struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img);
 
 // align must be a power of two (align >= 1), v >= 0
 #define MP_ALIGN_UP(v, align) FFALIGN(v, align)
