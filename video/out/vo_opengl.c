@@ -1388,9 +1388,15 @@ static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
 static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct gl_priv *p = vo->priv;
+    GL *gl = p->gl;
     assert(p->osd);
 
     osd_draw(osd, p->osd_rect, osd->vo_pts, 0, p->osd->formats, draw_osd_cb, p);
+
+    // The playloop calls this last before waiting some time until it decides
+    // to call flip_page(). Tell OpenGL to start execution of the GPU commands
+    // while we sleep (this happens asynchronously).
+    gl->Flush();
 }
 
 // Disable features that are not supported with the current OpenGL version.
