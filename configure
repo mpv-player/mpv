@@ -1118,7 +1118,7 @@ cflag_check -pipe -I. && _pipe="-pipe" && echores "yes" || echores "no"
 # Checking for CFLAGS
 if test -z "$CFLAGS" ; then
   if test "$cc_vendor" = "intel" ; then
-    CFLAGS="$_opt $_debug $_pipe -fomit-frame-pointer"
+    CFLAGS="$_opt $_debug $_pipe"
     WARNFLAGS="-wd167 -wd556 -wd144"
   elif test "$cc_vendor" = "clang"; then
     CFLAGS="$_opt $_debug $_pipe"
@@ -1127,10 +1127,10 @@ if test -z "$CFLAGS" ; then
   elif test "$cc_vendor" != "gnu" ; then
     CFLAGS="$_opt $_debug $_pipe"
   else
-    CFLAGS="$_opt $_debug $_pipe -ffast-math -fomit-frame-pointer"
+    CFLAGS="$_opt $_debug $_pipe"
     WARNFLAGS="-Wall -Wno-switch -Wno-parentheses -Wpointer-arith -Wredundant-decls"
     ERRORFLAGS="-Werror-implicit-function-declaration"
-    extra_ldflags="$extra_ldflags -ffast-math"
+    extra_ldflags="$extra_ldflags"
   fi
 else
   warn_cflags=yes
