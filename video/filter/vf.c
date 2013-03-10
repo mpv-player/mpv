@@ -69,6 +69,7 @@ extern const vf_info_t vf_info_sub;
 extern const vf_info_t vf_info_yadif;
 extern const vf_info_t vf_info_stereo3d;
 extern const vf_info_t vf_info_dlopen;
+extern const vf_info_t vf_info_lavfi;
 
 // list of available filters:
 static const vf_info_t *const filter_list[] = {
@@ -84,6 +85,9 @@ static const vf_info_t *const filter_list[] = {
 
 #ifdef CONFIG_LIBPOSTPROC
     &vf_info_pp,
+#endif
+#ifdef CONFIG_VF_LAVFI
+    &vf_info_lavfi,
 #endif
 
     &vf_info_screenshot,

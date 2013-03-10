@@ -117,6 +117,8 @@ SOURCES-$(VDPAU)                += video/out/vo_vdpau.c
 SOURCES-$(X11)                  += video/out/vo_x11.c video/out/x11_common.c
 SOURCES-$(XV)                   += video/out/vo_xv.c
 
+SOURCES-$(VF_LAVFI)             += video/filter/vf_lavfi.c
+
 ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
     SOURCES-yes                 += video/decode/lavc_dr1.c
 endif

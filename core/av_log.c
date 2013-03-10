@@ -37,6 +37,10 @@
 #include <libavdevice/avdevice.h>
 #endif
 
+#ifdef CONFIG_LIBAVFILTER
+#include <libavfilter/avfilter.h>
+#endif
+
 static int av_log_level_to_mp_level(int av_level)
 {
     if (av_level > AV_LOG_VERBOSE)
@@ -118,6 +122,9 @@ void init_libav(void)
     av_register_all();
     avformat_network_init();
 
+#ifdef CONFIG_LIBAVFILTER
+    avfilter_register_all();
+#endif
 #ifdef CONFIG_LIBAVDEVICE
     avdevice_register_all();
 #endif
