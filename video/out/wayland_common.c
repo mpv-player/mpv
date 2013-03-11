@@ -411,15 +411,18 @@ static void pointer_handle_motion(void *data,
 
     display->cursor.pointer = pointer;
 
-    struct itimerspec its;
-
     if (wl->window->type == TYPE_FULLSCREEN) {
         show_cursor(display);
 
-        its.it_interval.tv_sec = 1;
-        its.it_interval.tv_nsec = 0;
-        its.it_value.tv_sec = 1;
-        its.it_value.tv_nsec = 0;
+        struct itimerspec its;
+        int ms = wl->vo->opts->cursor_autohide_delay;
+        int sec = ms / 1000;
+        ms %= 1000;
+
+        its.it_interval.tv_sec = 0;
+        its.it_interval.tv_nsec = 100 * 1000 * 1000;
+        its.it_value.tv_sec = sec;
+        its.it_value.tv_nsec = ms * 1000 * 1000;
         timerfd_settime(display->cursor.timer_fd, 0, &its, NULL);
     }
 }
