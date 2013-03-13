@@ -1447,13 +1447,6 @@ static void egl_create_window(struct vo_wayland_state *wl,
                               uint32_t width,
                               uint32_t height)
 {
-    EGLBoolean ret;
-
-    wl->window->pending_width = width;
-    wl->window->pending_height = height;
-    wl->window->width = width;
-    wl->window->height = height;
-
     egl_ctx->egl_window = wl_egl_window_create(wl->window->surface,
                                                wl->window->width,
                                                wl->window->height);
@@ -1463,12 +1456,10 @@ static void egl_create_window(struct vo_wayland_state *wl,
                                                   egl_ctx->egl_window,
                                                   NULL);
 
-    ret = eglMakeCurrent(egl_ctx->egl.dpy,
-                         egl_ctx->egl_surface,
-                         egl_ctx->egl_surface,
-                         egl_ctx->egl.ctx);
-
-    assert(ret == EGL_TRUE);
+    eglMakeCurrent(egl_ctx->egl.dpy,
+                   egl_ctx->egl_surface,
+                   egl_ctx->egl_surface,
+                   egl_ctx->egl.ctx);
 
     wl_display_dispatch_pending(wl->display->display);
 }
