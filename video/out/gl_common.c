@@ -1312,7 +1312,6 @@ static void swapGlBuffers_x11(MPGLContext *ctx)
 #include <wayland-egl.h>
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
-#include <assert.h>
 
 struct egl_context {
     EGLSurface egl_surface;
@@ -1377,13 +1376,11 @@ static bool egl_create_context(struct vo_wayland_state *wl,
                                MPGLContext *ctx)
 {
     EGLint major, minor, n;
-    EGLBoolean ret;
 
     GL *gl = ctx->gl;
     const char *eglstr = "";
 
-    egl_ctx->egl.dpy = eglGetDisplay(wl->display->display);
-    if (!egl_ctx->egl.dpy)
+    if (!(egl_ctx->egl.dpy = eglGetDisplay(wl->display->display)))
         return false;
 
     EGLint config_attribs[] = {
@@ -1398,8 +1395,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     };
 
     /* major and minor here returns the supported EGL version (e.g.: 1.4) */
-    ret = eglInitialize(egl_ctx->egl.dpy, &major, &minor);
-    if (ret != EGL_TRUE)
+    if (eglInitialize(egl_ctx->egl.dpy, &major, &minor) != EGL_TRUE)
         return false;
 
     EGLint context_attribs[] = {
@@ -1412,12 +1408,11 @@ static bool egl_create_context(struct vo_wayland_state *wl,
         EGL_NONE
     };
 
-    ret = eglBindAPI(EGL_OPENGL_API);
-    assert(ret == EGL_TRUE);
+    if (eglBindAPI(EGL_OPENGL_API) != EGL_TRUE)
+        return false;
 
-    ret = eglChooseConfig(egl_ctx->egl.dpy, config_attribs,
-            &egl_ctx->egl.conf, 1, &n);
-    assert(ret && n == 1);
+    eglChooseConfig(egl_ctx->egl.dpy, config_attribs,
+                    &egl_ctx->egl.conf, 1, &n);
 
     egl_ctx->egl.ctx = eglCreateContext(egl_ctx->egl.dpy,
                                         egl_ctx->egl.conf,
@@ -1426,12 +1421,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     if (!egl_ctx->egl.ctx)
         return false;
 
-    ret = eglMakeCurrent(egl_ctx->egl.dpy,
-                         NULL,
-                         NULL,
-                         egl_ctx->egl.ctx);
-
-    assert(ret == EGL_TRUE);
+    eglMakeCurrent(egl_ctx->egl.dpy, NULL, NULL, egl_ctx->egl.ctx);
 
     eglstr = eglQueryString(egl_ctx->egl.dpy, EGL_EXTENSIONS);
 
