@@ -2675,9 +2675,7 @@ fi
 echores "$_lcms2"
 
 
-# Test with > against Libav 0.8 versions which will NOT work rather than
-# specify minimum version, to allow (future) point releases to possibly work.
-all_libav_libs="libavutil > 51.22.0:libavcodec >= 53.35.0:libavformat > 53.20.0:libswscale >= 2.0.0"
+all_libav_libs="libavutil > 51.73.0:libavcodec > 54.34.0:libavformat > 54.19.0:libswscale >= 2.0.0"
 echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
   IFS=":"   # shell should not be used for programming
@@ -2711,37 +2709,6 @@ fi
 if test "$_resampler" = no ; then
   die "No resampler found. Install libavresample or libswresample (FFmpeg)."
 fi
-
-
-echocheck "Libav 0.8 compatibility hack"
-if test "$_encoding" = yes && $_pkg_config "libavcodec >= 54.0.0" ; then
-    echores "no"
-else
-    _encoding=no
-    echores "yes"
-fi
-
-
-echocheck "libavcodec AVCodecDescriptor API"
-_avcodec_codec_desc_api=no
-statement_check libavcodec/avcodec.h 'const AVCodecDescriptor *desc = avcodec_descriptor_get_by_name("c")' && _avcodec_codec_desc_api=yes
-if test "$_avcodec_codec_desc_api" = yes ; then
-  def_avcodec_codec_desc_api='#define HAVE_AVCODEC_CODEC_DESC_API 1'
-else
-  def_avcodec_codec_desc_api='#define HAVE_AVCODEC_CODEC_DESC_API 0'
-fi
-echores "$_avcodec_codec_desc_api"
-
-
-echocheck "libavcodec av_codec_is_decoder API"
-_avcodec_is_decoder_api=no
-statement_check libavcodec/avcodec.h 'av_codec_is_decoder(NULL)' && _avcodec_is_decoder_api=yes
-if test "$_avcodec_is_decoder_api" = yes ; then
-  def_avcodec_is_decoder_api='#define HAVE_AVCODEC_IS_DECODER_API 1'
-else
-  def_avcodec_is_decoder_api='#define HAVE_AVCODEC_IS_DECODER_API 0'
-fi
-echores "$_avcodec_is_decoder_api"
 
 
 echocheck "libavutil ref-counting API"
@@ -3253,8 +3220,6 @@ $def_vcd
 $def_mpg123
 $def_zlib
 
-$def_avcodec_codec_desc_api
-$def_avcodec_is_decoder_api
 $def_avutil_has_refcounting
 $def_libpostproc
 $def_libavdevice
