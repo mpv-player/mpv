@@ -97,6 +97,7 @@ static const struct mp_codec_tag mp_audio_codec_tags[] = {
     {MKTAG('s', 'a', 'm', 'r'), "amr_nb"},
     {MKTAG('s', 'a', 'w', 'b'), "amr_wb"},
     {MKTAG('v', 'r', 'b', 's'), "vorbis"},
+    {MKTAG('O', 'p', 'u', 's'), "opus"},
     // Special cased in ad_lavc:
     {0                        , "pcm"},
     {0x1                      , "pcm"}, // lavf: pcm_s16le
