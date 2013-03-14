@@ -21,6 +21,8 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include <libavutil/common.h>
+
 #include "config.h"
 #include "vo.h"
 #include "aspect.h"
@@ -69,22 +71,19 @@ struct priv {
     int depth, bpp;
     XWindowAttributes attribs;
 
-    int Flip_Flag;
-    int zoomFlag;
-
     uint32_t image_width;
     uint32_t image_height;
     uint32_t in_format;
     uint32_t out_format;
     int out_offset;
-    int srcW;
-    int srcH;
 
-    int old_vo_dwidth;
-    int old_vo_dheight;
+    struct mp_rect src;
+    struct mp_rect dst;
+    int src_w, src_h;
+    int dst_w, dst_h;
+    struct mp_osd_res osd;
 
     struct SwsContext *swsContext;
-    int dst_width;
 
     XVisualInfo vinfo;
     int ximage_depth;
@@ -92,35 +91,23 @@ struct priv {
     int firstTime;
 
     int current_buf;
-    int visible_buf;
     int num_buffers;
-    int total_buffers;
 
     int Shmem_Flag;
 #ifdef HAVE_SHM
     int Shm_Warned_Slow;
 
     XShmSegmentInfo Shminfo[2];
-    int gXErrorFlag;
 #endif
 };
 
-static void flip_page(struct vo *vo);
+static bool resize(struct vo *vo);
 
 static void check_events(struct vo *vo)
 {
-    struct priv *p = vo->priv;
-
     int ret = vo_x11_check_events(vo);
-
-    if (ret & VO_EVENT_RESIZE)
-        vo_x11_clearwindow(vo, vo->x11->window);
-    else if (ret & VO_EVENT_EXPOSE)
-        vo_x11_clearwindow_part(vo, vo->x11->window,
-                                    p->myximage[p->current_buf]->width,
-                                    p->myximage[p->current_buf]->height);
-    if (ret & VO_EVENT_EXPOSE)
-        vo->want_redraw = true;
+    if (ret & (VO_EVENT_EXPOSE | VO_EVENT_RESIZE))
+        resize(vo);
 }
 
 /* Scan the available visuals on this Display/Screen.  Try to find
@@ -224,14 +211,7 @@ static void getMyXImage(struct priv *p, int foo)
 
         XSync(vo->x11->display, False);
 
-        if (p->gXErrorFlag) {
-            XDestroyImage(p->myximage[foo]);
-            shmdt(p->Shminfo[foo].shmaddr);
-            mp_msg(MSGT_VO, MSGL_WARN, "Shared memory error,disabling.\n");
-            p->gXErrorFlag = 0;
-            goto shmemerror;
-        } else
-            shmctl(p->Shminfo[foo].shmid, IPC_RMID, 0);
+        shmctl(p->Shminfo[foo].shmid, IPC_RMID, 0);
 
         if (!p->firstTime) {
             mp_msg(MSGT_VO, MSGL_V, "Sharing memory.\n");
@@ -324,19 +304,9 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 {
     struct priv *p = vo->priv;
 
-    const struct fmt2Xfmtentry_s *fmte = fmt2Xfmt;
-
     mp_image_unrefp(&p->original_image);
 
-    p->Flip_Flag = flags & VOFLAG_FLIPPING;
-    p->zoomFlag = 1;
-
-    p->old_vo_dwidth = -1;
-    p->old_vo_dheight = -1;
-
     p->in_format = format;
-    p->srcW = width;
-    p->srcH = height;
 
     XGetWindowAttributes(vo->x11->display, vo->x11->rootwin, &p->attribs);
     p->depth = p->attribs.depth;
@@ -356,34 +326,50 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                          &p->vinfo);
     }
 
-    /* set image size (which is indeed neither the input nor output size),
-       if zoom is on it will be changed during draw_image anyway so we don't
-       duplicate the aspect code here
-     */
-    p->image_width = (width + 7) & (~7);
-    p->image_height = height;
-
     vo_x11_config_vo_window(vo, &p->vinfo, vo->dx, vo->dy, vo->dwidth,
                             vo->dheight, flags, "x11");
 
-    if (vo->opts->WinID > 0) {
-        unsigned depth, dummy_uint;
-        int dummy_int;
-        Window dummy_win;
-        XGetGeometry(vo->x11->display, vo->x11->window, &dummy_win, &dummy_int,
-                     &dummy_int, &dummy_uint, &dummy_uint, &dummy_uint, &depth);
-        p->depth = depth;
-    }
+    if (!resize(vo))
+        return -1;
 
-    int i;
-    for (i = 0; i < p->total_buffers; i++)
-        freeMyXImage(p, i);
+    return 0;
+}
+
+static bool resize(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+
     sws_freeContext(p->swsContext);
+    p->swsContext = NULL;
+
+    for (int i = 0; i < p->num_buffers; i++)
+        freeMyXImage(p, i);
+
+    vo_get_src_dst_rects(vo, &p->src, &p->dst, &p->osd);
+
+    p->src_w = p->src.x1 - p->src.x0;
+    p->src_h = p->src.y1 - p->src.y0;
+    p->dst_w = p->dst.x1 - p->dst.x0;
+    p->dst_h = p->dst.y1 - p->dst.y0;
+
+    // p->osd contains the parameters assuming OSD rendering in window
+    // coordinates, but OSD can only be rendered in the intersection
+    // between window and video rectangle (i.e. not into panscan borders).
+    p->osd.w = p->dst_w;
+    p->osd.h = p->dst_h;
+    p->osd.mt = FFMIN(0, p->osd.mt);
+    p->osd.mb = FFMIN(0, p->osd.mb);
+    p->osd.mr = FFMIN(0, p->osd.mr);
+    p->osd.ml = FFMIN(0, p->osd.ml);
+
+    p->image_width = (p->dst_w + 7) & (~7);
+    p->image_height = p->dst_h;
+
     p->num_buffers = 2;
-    p->total_buffers = p->num_buffers;
-    for (i = 0; i < p->total_buffers; i++)
+    for (int i = 0; i < p->num_buffers; i++)
         getMyXImage(p, i);
 
+    const struct fmt2Xfmtentry_s *fmte = fmt2Xfmt;
     while (fmte->mpfmt) {
         int depth = IMGFMT_RGB_DEPTH(fmte->mpfmt);
         /* bits_per_pixel in X seems to be set to 16 for 15 bit formats
@@ -420,47 +406,36 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 #endif
     }
 
-    /* always allocate swsContext as size could change between frames */
-    p->swsContext = sws_getContextFromCmdLine(width, height, p->in_format,
-                                              width, height, p->out_format);
+    p->swsContext = sws_getContextFromCmdLine(p->src_w, p->src_h, p->in_format,
+                                              p->dst_w, p->dst_h, p->out_format);
     if (!p->swsContext)
-        return -1;
+        return false;
 
-    p->dst_width = width;
+    if (vo->x11->window)
+        vo_x11_clearwindow(vo, vo->x11->window);
 
-    return 0;
+    vo->want_redraw = true;
+    return true;
 }
 
-static void Display_Image(struct priv *p, XImage *myximage, uint8_t *ImageData)
+static void Display_Image(struct priv *p, XImage *myximage)
 {
     struct vo *vo = p->vo;
 
     XImage *x_image = p->myximage[p->current_buf];
 
-    int x = (vo->dwidth - p->dst_width) / 2;
-    int y = (vo->dheight - x_image->height) / 2;
-
-    // do not draw if the image needs rescaling
-    if ((p->old_vo_dwidth != vo->dwidth ||
-         p->old_vo_dheight != vo->dheight) && p->zoomFlag)
-        return;
-
-    if (vo->opts->WinID == 0) {
-        x = vo->dx;
-        y = vo->dy;
-    }
     x_image->data += p->out_offset;
 #ifdef HAVE_SHM
     if (p->Shmem_Flag) {
-        XShmPutImage(vo->x11->display, vo->x11->window, vo->x11->vo_gc,
-                     x_image, 0, 0, x, y, p->dst_width, x_image->height,
+        XShmPutImage(vo->x11->display, vo->x11->window, vo->x11->vo_gc, x_image,
+                     0, 0, p->dst.x0, p->dst.y0, p->dst_w, p->dst_h,
                      True);
         vo->x11->ShmCompletionWaitCount++;
     } else
 #endif
     {
-        XPutImage(vo->x11->display, vo->x11->window, vo->x11->vo_gc,
-                  x_image, 0, 0, x, y, p->dst_width, x_image->height);
+        XPutImage(vo->x11->display, vo->x11->window, vo->x11->vo_gc, x_image,
+                  0, 0, p->dst.x0, p->dst.y0, p->dst_w, p->dst_h);
     }
     x_image->data -= p->out_offset;
 }
@@ -483,14 +458,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 
     struct mp_image img = get_x_buffer(p, p->current_buf);
 
-    struct mp_osd_res res = {
-        .w = img.w,
-        .h = img.h,
-        .display_par = vo->monitor_par,
-        .video_par = vo->aspdat.par,
-    };
-
-    osd_draw_on_image(osd, res, osd->vo_pts, 0, &img);
+    osd_draw_on_image(osd, p->osd, osd->vo_pts, 0, &img);
 }
 
 static mp_image_t *get_screenshot(struct vo *vo)
@@ -527,9 +495,7 @@ static void wait_for_completion(struct vo *vo, int max_outstanding)
 static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
-    Display_Image(p, p->myximage[p->current_buf],
-                     p->ImageData[p->current_buf]);
-    p->visible_buf = p->current_buf;
+    Display_Image(p, p->myximage[p->current_buf]);
     p->current_buf = (p->current_buf + 1) % p->num_buffers;
 
     if (!p->Shmem_Flag)
@@ -539,53 +505,21 @@ static void flip_page(struct vo *vo)
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
-    struct mp_vo_opts *opts = vo->opts;
     uint8_t *dst[MP_MAX_PLANES] = {NULL};
     int dstStride[MP_MAX_PLANES] = {0};
 
+    if (!p->swsContext)
+        return;
+
     wait_for_completion(vo, p->num_buffers - 1);
 
-    if ((p->old_vo_dwidth != vo->dwidth || p->old_vo_dheight != vo->dheight)
-        /*&& y==0 */ && p->zoomFlag)
-    {
-        int newW = vo->dwidth;
-        int newH = vo->dheight;
-        struct SwsContext *oldContext = p->swsContext;
-
-        p->old_vo_dwidth = vo->dwidth;
-        p->old_vo_dheight = vo->dheight;
-
-        if (opts->fs)
-            aspect(vo, &newW, &newH, A_ZOOM);
-        if (sws_flags == 0)
-            newW &= (~31);      // not needed but, if the user wants the FAST_BILINEAR SCALER, then its needed
-
-        p->swsContext
-            = sws_getContextFromCmdLine(p->srcW, p->srcH, p->in_format, newW,
-                                        newH, p->out_format);
-        if (p->swsContext) {
-            p->image_width = (newW + 7) & (~7);
-            p->image_height = newH;
-
-            int i;
-            for (i = 0; i < p->total_buffers; i++)
-                freeMyXImage(p, i);
-            sws_freeContext(oldContext);
-            for (i = 0; i < p->total_buffers; i++)
-                getMyXImage(p, i);
-        } else
-            p->swsContext = oldContext;
-        p->dst_width = newW;
-    }
+    struct mp_image src = *mpi;
+    mp_image_crop_rc(&src, p->src);
 
     dstStride[0] = p->image_width * ((p->bpp + 7) / 8);
     dst[0] = p->ImageData[p->current_buf];
-    if (p->Flip_Flag) {
-        dst[0] += dstStride[0] * (p->image_height - 1);
-        dstStride[0] = -dstStride[0];
-    }
-    sws_scale(p->swsContext, (const uint8_t **)mpi->planes, mpi->stride,
-              0, mpi->h, dst, dstStride);
+    sws_scale(p->swsContext, (const uint8_t **)src.planes, src.stride,
+              0, src.h, dst, dstStride);
 
     mp_image_setrefp(&p->original_image, mpi);
 }
@@ -611,10 +545,9 @@ static int query_format(struct vo *vo, uint32_t format)
         for (int n = 0; fmt2Xfmt[n].mpfmt; n++) {
             if (fmt2Xfmt[n].mpfmt == format) {
                 if (IMGFMT_RGB_DEPTH(format) == p->ximage_depth) {
-                    return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
-                           VFCAP_FLIP;
+                    return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
                 } else {
-                    return VFCAP_CSP_SUPPORTED | VFCAP_FLIP;
+                    return VFCAP_CSP_SUPPORTED;
                 }
             }
         }
@@ -706,11 +639,6 @@ static int preinit(struct vo *vo, const char *arg)
     struct priv *p = vo->priv;
     p->vo = vo;
 
-    if (arg) {
-        mp_msg(MSGT_VO, MSGL_ERR, "vo_x11: Unknown subdevice: %s\n", arg);
-        return ENOSYS;
-    }
-
     if (!vo_x11_init(vo))
         return -1;              // Can't open X11
     find_x11_depth(vo);
@@ -722,7 +650,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_FULLSCREEN:
         vo_x11_fullscreen(vo);
-        vo_x11_clearwindow(vo, vo->x11->window);
+        resize(vo);
         return VO_TRUE;
     case VOCTRL_SET_EQUALIZER:
     {
@@ -739,6 +667,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_UPDATE_SCREENINFO:
         vo_x11_update_screeninfo(vo);
+        return VO_TRUE;
+    case VOCTRL_GET_PANSCAN:
+        return VO_TRUE;
+    case VOCTRL_SET_PANSCAN:
+        resize(vo);
         return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
         return redraw_frame(vo);
@@ -759,12 +692,7 @@ const struct vo_driver video_out_x11 = {
         ""
     },
     .priv_size = sizeof(struct priv),
-    .priv_defaults = &(const struct priv) {
-        .srcW = -1,
-        .srcH = -1,
-        .old_vo_dwidth = -1,
-        .old_vo_dheight = -1,
-    },
+    .options = (const struct m_option []){{0}},
     .preinit = preinit,
     .query_format = query_format,
     .config = config,
