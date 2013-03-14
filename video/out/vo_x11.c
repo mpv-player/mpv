@@ -47,8 +47,7 @@
 #include "sub/draw_bmp.h"
 
 #include "video/sws_utils.h"
-#define MODE_RGB  0x1
-#define MODE_BGR  0x2
+#include "video/fmt-conversion.h"
 
 #include "core/mp_msg.h"
 #include "core/options.h"
@@ -514,7 +513,10 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     wait_for_completion(vo, p->num_buffers - 1);
 
     struct mp_image src = *mpi;
-    mp_image_crop_rc(&src, p->src);
+    struct mp_rect src_rc = p->src;
+    src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, src.fmt.align_x);
+    src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, src.fmt.align_y);
+    mp_image_crop_rc(&src, src_rc);
 
     dstStride[0] = p->image_width * ((p->bpp + 7) / 8);
     dst[0] = p->ImageData[p->current_buf];
@@ -553,10 +555,8 @@ static int query_format(struct vo *vo, uint32_t format)
         }
     }
 
-    switch (format) {
-    case IMGFMT_420P:
+    if (sws_isSupportedInput(imgfmt2pixfmt(format)))
         return VFCAP_CSP_SUPPORTED;
-    }
     return 0;
 }
 
