@@ -42,7 +42,6 @@
 #include <assert.h>
 #include "talloc.h"
 #include "gl_common.h"
-#include "aspect.h"
 #include "core/options.h"
 #include "sub/sub.h"
 #include "bitmap_packer.h"

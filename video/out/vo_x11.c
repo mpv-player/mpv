@@ -25,7 +25,6 @@
 
 #include "config.h"
 #include "vo.h"
-#include "aspect.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "video/vfcap.h"

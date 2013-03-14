@@ -37,7 +37,6 @@
 #include "video/img_format.h"
 #include "video/memcpy_pic.h"
 #include "core/mp_msg.h"
-#include "aspect.h"
 #include "w32_common.h"
 #include "libavutil/common.h"
 #include "sub/sub.h"

@@ -52,7 +52,6 @@
 #include "video/memcpy_pic.h"
 #include "sub/sub.h"
 #include "sub/draw_bmp.h"
-#include "aspect.h"
 #include "video/csputils.h"
 #include "core/subopt-helper.h"
 #include "osdep/timer.h"

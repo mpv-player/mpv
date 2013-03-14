@@ -44,7 +44,6 @@
 #include "talloc.h"
 #include "vo.h"
 #include "x11_common.h"
-#include "aspect.h"
 #include "video/csputils.h"
 #include "sub/sub.h"
 #include "core/m_option.h"

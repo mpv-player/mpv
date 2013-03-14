@@ -40,7 +40,6 @@
 
 #include "gl_common.h"
 #include "gl_osd.h"
-#include "aspect.h"
 #include "video/memcpy_pic.h"
 #include "pnm_loader.h"
 

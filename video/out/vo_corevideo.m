@@ -26,7 +26,6 @@
 // mplayer includes
 #import "talloc.h"
 #import "vo.h"
-#import "aspect.h"
 #import "sub/sub.h"
 #import "core/subopt-helper.h"
 

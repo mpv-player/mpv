@@ -50,7 +50,6 @@
 #include "gl_common.h"
 #include "gl_osd.h"
 #include "filter_kernels.h"
-#include "aspect.h"
 #include "video/memcpy_pic.h"
 
 static const char vo_opengl_shaders[] =
