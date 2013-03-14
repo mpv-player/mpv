@@ -264,19 +264,14 @@ struct vo {
     int xinerama_x;
     int xinerama_y;
 
-    int panscan_x;
-    int panscan_y;
-    float panscan_amount;
-    float monitor_par;
     struct aspect_data {
+        float monitor_par; // out of screen size or from options
         int orgw; // real width
         int orgh; // real height
         int prew; // prescaled width
         int preh; // prescaled height
         float par; // pixel aspect ratio out of orgw/orgh and prew/preh
-        int scrw; // horizontal resolution
-        int scrh; // vertical resolution
-        float asp;
+        float asp; // final video display aspect
     } aspdat;
 
     char *window_title;
@@ -321,10 +316,5 @@ void vo_mouse_movement(struct vo *vo, int posx, int posy);
 struct mp_osd_res;
 void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
                           struct mp_rect *out_dst, struct mp_osd_res *out_osd);
-
-static inline int aspect_scaling(struct vo *vo)
-{
-  return vo->opts->keepaspect || vo->opts->fs;
-}
 
 #endif /* MPLAYER_VIDEO_OUT_H */

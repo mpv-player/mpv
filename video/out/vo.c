@@ -308,6 +308,7 @@ struct vo *init_best_video_out(struct mp_vo_opts *opts,
         .input_ctx = input_ctx,
         .event_fd = -1,
         .registered_fd = -1,
+        .aspdat = { .monitor_par = 1 },
     };
     // first try the preferred drivers, with their optional subdevice param:
     if (vo_list && vo_list[0])
@@ -391,8 +392,7 @@ static void determine_window_geometry(struct vo *vo, int d_w, int d_h)
     int scr_w = opts->screenwidth;
     int scr_h = opts->screenheight;
 
-    // This is only for applying monitor pixel aspect
-    aspect(vo, &d_w, &d_h, A_NOZOOM);
+    aspect_calc_monitor(vo, &d_w, &d_h);
 
     apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit, true);
     apply_autofit(&d_w, &d_h, scr_w, scr_h, &opts->autofit_larger, false);
@@ -419,7 +419,6 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
                      uint32_t d_width, uint32_t d_height, uint32_t flags,
                      uint32_t format)
 {
-    panscan_init(vo);
     aspect_save_videores(vo, width, height, d_width, d_height);
 
     if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
@@ -514,15 +513,12 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
     struct mp_osd_res osd = {
         .w = vo->dwidth,
         .h = vo->dheight,
-        .display_par = vo->monitor_par,
+        .display_par = vo->aspdat.monitor_par,
         .video_par = vo->aspdat.par,
     };
-    if (aspect_scaling(vo)) {
-        int scaled_width  = 0, scaled_height = 0;
-        aspect(vo, &scaled_width, &scaled_height, A_WINZOOM);
-        panscan_calc_windowed(vo);
-        scaled_width  += vo->panscan_x;
-        scaled_height += vo->panscan_y;
+    if (vo->opts->keepaspect || vo->opts->fs) {
+        int scaled_width, scaled_height;
+        aspect_calc_panscan(vo, &scaled_width, &scaled_height);
         int border_w = vo->dwidth  - scaled_width;
         int border_h = vo->dheight - scaled_height;
         osd.ml = border_w / 2;
