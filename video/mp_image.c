@@ -318,8 +318,6 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->qscale_type = src->qscale_type;
     dst->pts = src->pts;
     if (dst->w == src->w && dst->h == src->h) {
-        dst->qstride = src->qstride;
-        dst->qscale = src->qscale;
         dst->display_w = src->display_w;
         dst->display_h = src->display_h;
     }
@@ -447,10 +445,8 @@ void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
         dst->stride[i] = src->linesize[i];
     }
 
-    dst->qscale = src->qscale_table;
-    dst->qstride = src->qstride;
     dst->pict_type = src->pict_type;
-    dst->qscale_type = src->qscale_type;
+
     dst->fields = MP_IMGFIELD_ORDERED;
     if (src->interlaced_frame)
         dst->fields |= MP_IMGFIELD_INTERLACED;
@@ -458,6 +454,14 @@ void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
         dst->fields |= MP_IMGFIELD_TOP_FIRST;
     if (src->repeat_pict == 1)
         dst->fields |= MP_IMGFIELD_REPEAT_FIRST;
+
+#if HAVE_AVUTIL_QP_API
+    dst->qscale = av_frame_get_qp_table(src, &dst->qstride, &dst->qscale_type);
+#else
+    dst->qscale = src->qscale_table;
+    dst->qstride = src->qstride;
+    dst->qscale_type = src->qscale_type;
+#endif
 }
 
 #if HAVE_AVUTIL_REFCOUNTING

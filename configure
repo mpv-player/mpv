@@ -2711,6 +2711,17 @@ if test "$_resampler" = no ; then
 fi
 
 
+echocheck "libavutil QP API"
+_avutil_has_qp_api=no
+statement_check libavutil/frame.h 'av_frame_get_qp_table(NULL, NULL, NULL)' && _avutil_has_qp_api=yes
+if test "$_avutil_has_qp_api" = yes ; then
+  def_avutil_has_qp_api='#define HAVE_AVUTIL_QP_API 1'
+else
+  def_avutil_has_qp_api='#define HAVE_AVUTIL_QP_API 0'
+fi
+echores "$_avutil_has_qp_api"
+
+
 echocheck "libavutil ref-counting API"
 _avutil_has_refcounting=no
 statement_check libavutil/frame.h 'av_frame_unref(NULL)' && _avutil_has_refcounting=yes
@@ -3221,6 +3232,7 @@ $def_mpg123
 $def_zlib
 
 $def_avutil_has_refcounting
+$def_avutil_has_qp_api
 $def_libpostproc
 $def_libavdevice
 $def_libavfilter
