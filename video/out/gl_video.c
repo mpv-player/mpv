@@ -1425,18 +1425,15 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
     return image;
 }
 
-static void draw_osd_cb(void *ctx, struct sub_bitmaps *imgs)
+static void draw_osd_cb(void *ctx, struct mpgl_osd_part *osd,
+                        struct sub_bitmaps *imgs)
 {
     struct gl_video *p = ctx;
     GL *gl = p->gl;
 
-    struct mpgl_osd_part *osd = mpgl_osd_generate(p->osd, imgs);
-    if (!osd)
-        return;
-
     assert(osd->format != SUBBITMAP_EMPTY);
 
-    if (!osd->num_vertices) {
+    if (!osd->num_vertices && imgs) {
         osd->vertices = talloc_realloc(osd, osd->vertices, struct vertex,
                                        osd->packer->count * VERTICES_PER_QUAD);
 
@@ -1476,7 +1473,7 @@ void gl_video_draw_osd(struct gl_video *p, struct osd_state *osd)
     GL *gl = p->gl;
     assert(p->osd);
 
-    osd_draw(osd, p->osd_rect, osd->vo_pts, 0, p->osd->formats, draw_osd_cb, p);
+    mpgl_osd_draw_cb(p->osd, osd, p->osd_rect, draw_osd_cb, p);
 
     // The playloop calls this last before waiting some time until it decides
     // to call flip_page(). Tell OpenGL to start execution of the GPU commands
@@ -1830,4 +1827,17 @@ static int validate_scaler_opt(const m_option_t *opt, struct bstr name,
     char s[20];
     snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
     return handle_scaler_opt(s) ? 1 : M_OPT_INVALID;
+}
+
+// Resize and redraw the contents of the window without further configuration.
+// Intended to be used in situations where the frontend can't really be
+// involved with reconfiguring the VO properly.
+// gl_video_resize() should be called when user interaction is done.
+void gl_video_resize_redraw(struct gl_video *p, int w, int h)
+{
+    p->gl->Viewport(p->vp_x, p->vp_y, w, h);
+    p->vp_w = w;
+    p->vp_h = h;
+    gl_video_render_frame(p);
+    mpgl_osd_redraw_cb(p->osd, draw_osd_cb, p);
 }

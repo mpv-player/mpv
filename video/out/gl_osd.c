@@ -202,8 +202,8 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
     return true;
 }
 
-struct mpgl_osd_part *mpgl_osd_generate(struct mpgl_osd *ctx,
-                                        struct sub_bitmaps *imgs)
+static struct mpgl_osd_part *osd_generate(struct mpgl_osd *ctx,
+                                          struct sub_bitmaps *imgs)
 {
     if (imgs->num_parts == 0 || !ctx->formats[imgs->format])
         return NULL;
@@ -241,6 +241,54 @@ void mpgl_osd_unset_gl_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p)
     gl->BindTexture(GL_TEXTURE_2D, 0);
 }
 
+static void reset(struct mpgl_osd *ctx)
+{
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        struct mpgl_osd_part *p = ctx->parts[n];
+        p->active = false;
+    }
+}
+
+struct draw_cb_closure {
+    struct mpgl_osd *ctx;
+    void (*cb)(void *ctx, struct mpgl_osd_part *part, struct sub_bitmaps *imgs);
+    void *cb_ctx;
+};
+
+static void draw_cb(void *pctx, struct sub_bitmaps *imgs)
+{
+    struct draw_cb_closure *c = pctx;
+    struct mpgl_osd_part *part = osd_generate(c->ctx, imgs);
+    if (!part)
+        return;
+    part->active = true;
+    c->cb(c->cb_ctx, part, imgs);
+}
+
+void mpgl_osd_draw_cb(struct mpgl_osd *ctx,
+                      struct osd_state *osd,
+                      struct mp_osd_res res,
+                      void (*cb)(void *ctx, struct mpgl_osd_part *part,
+                                 struct sub_bitmaps *imgs),
+                      void *cb_ctx)
+{
+    struct draw_cb_closure c = {ctx, cb, cb_ctx};
+    reset(ctx);
+    osd_draw(osd, res, osd->vo_pts, 0, ctx->formats, draw_cb, &c);
+}
+
+void mpgl_osd_redraw_cb(struct mpgl_osd *ctx,
+                        void (*cb)(void *ctx, struct mpgl_osd_part *part,
+                                   struct sub_bitmaps *imgs),
+                        void *cb_ctx)
+{
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        struct mpgl_osd_part *p = ctx->parts[n];
+        if (p->active)
+            cb(cb_ctx, p, NULL);
+    }
+}
+
 struct vertex {
     float position[2];
     uint8_t color[4];
@@ -250,7 +298,7 @@ struct vertex {
 static void draw_legacy_cb(void *pctx, struct sub_bitmaps *imgs)
 {
     struct mpgl_osd *ctx = pctx;
-    struct mpgl_osd_part *osd = mpgl_osd_generate(ctx, imgs);
+    struct mpgl_osd_part *osd = osd_generate(ctx, imgs);
     if (!osd)
         return;
 
