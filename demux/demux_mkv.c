@@ -1321,6 +1321,7 @@ static struct mkv_audio_tag {
     { MKV_A_WAVPACK,   0, mmioFOURCC('W', 'V', 'P', 'K') },
     { MKV_A_TRUEHD,    0, mmioFOURCC('T', 'R', 'H', 'D') },
     { MKV_A_FLAC,      0, mmioFOURCC('f', 'L', 'a', 'C') },
+    { MKV_A_ALAC,      0, mmioFOURCC('a', 'L', 'a', 'C') },
     { MKV_A_REAL28,    0, mmioFOURCC('2', '8', '_', '8') },
     { MKV_A_REALATRC,  0, mmioFOURCC('a', 't', 'r', 'c') },
     { MKV_A_REALCOOK,  0, mmioFOURCC('c', 'o', 'o', 'k') },
@@ -1548,6 +1549,16 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
             sh_a->codecdata = malloc(size);
             sh_a->codecdata_len = size;
             memcpy(sh_a->codecdata, ptr, size);
+        }
+    } else if (!strcmp(track->codec_id, MKV_A_ALAC)) {
+        if (track->private_size && track->private_size < 10000000) {
+            sh_a->codecdata_len = track->private_size + 12;
+            sh_a->codecdata = malloc(sh_a->codecdata_len);
+            char *data = sh_a->codecdata;
+            AV_WB32(data + 0, sh_a->codecdata_len);
+            memcpy(data + 4, "alac", 4);
+            AV_WB32(data + 8, 0);
+            memcpy(data + 12, track->private_data, track->private_size);
         }
     } else if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K') ||
                track->a_formattag == mmioFOURCC('T', 'R', 'H', 'D')) {
