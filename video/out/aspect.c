@@ -104,7 +104,6 @@ void aspect_calc_panscan(struct vo *vo, int *out_w, int *out_h)
     } else
         vo_panscan_area = -opts->panscanrange * vo->dheight;
 
-    float panscan_amount = opts->fs ? opts->panscan : 0;
-    *out_w = fwidth + vo_panscan_area * panscan_amount * vo->aspdat.asp;
-    *out_h = fheight + vo_panscan_area * panscan_amount;
+    *out_w = fwidth + vo_panscan_area * opts->panscan * vo->aspdat.asp;
+    *out_h = fheight + vo_panscan_area * opts->panscan;
 }
