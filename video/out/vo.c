@@ -516,7 +516,7 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
         .display_par = vo->aspdat.monitor_par,
         .video_par = vo->aspdat.par,
     };
-    if (vo->opts->keepaspect || vo->opts->fs) {
+    if (vo->opts->keepaspect) {
         int scaled_width, scaled_height;
         aspect_calc_panscan(vo, &scaled_width, &scaled_height);
         int border_w = vo->dwidth  - scaled_width;
