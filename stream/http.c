@@ -430,6 +430,12 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 		while( *ptr!='\r' && *ptr!='\n' ) ptr++;
 		len = ptr-hdr_ptr;
 		if( len==0 ) break;
+		if (len > 16 && !strncasecmp(hdr_ptr + 4, "icy-metaint:", 12))
+		{
+			mp_msg(MSGT_NETWORK, MSGL_WARN, "Server sent a severely broken icy-metaint HTTP header!\n");
+			hdr_ptr += 4;
+			len -= 4;
+		}
 		field = realloc(field, len+1);
 		if( field==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Memory allocation failed\n");
