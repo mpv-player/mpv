@@ -384,8 +384,7 @@ static int xv_init_colorkey(struct vo *vo)
  *
  * Also draws the black bars ( when the video doesn't fit the display in
  * fullscreen ) separately, so they don't overlap with the video area. */
-static void xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
-                             int32_t w, int32_t h)
+static void xv_draw_colorkey(struct vo *vo, const struct mp_rect *rc)
 {
     struct xvctx *ctx = vo->priv;
     struct vo_x11_state *x11 = vo->x11;
@@ -394,7 +393,8 @@ static void xv_draw_colorkey(struct vo *vo, int32_t x, int32_t y,
     {
         //less tearing than XClearWindow()
         XSetForeground(x11->display, x11->vo_gc, ctx->xv_colorkey);
-        XFillRectangle(x11->display, x11->window, x11->vo_gc, x, y, w, h);
+        XFillRectangle(x11->display, x11->window, x11->vo_gc, rc->x0, rc->y0,
+                       rc->x1 - rc->x0, rc->y1 - rc->y0);
     }
 }
 
@@ -474,10 +474,8 @@ static void resize(struct vo *vo)
 
     vo_get_src_dst_rects(vo, &ctx->src_rect, &ctx->dst_rect, &unused);
 
-    struct mp_rect *dst = &ctx->dst_rect;
-    int dw = dst->x1 - dst->x0, dh = dst->y1 - dst->y0;
-    vo_x11_clearwindow_part(vo, vo->x11->window, dw, dh);
-    xv_draw_colorkey(vo, dst->x0, dst->y0, dw, dh);
+    vo_x11_clear_background(vo, &ctx->dst_rect);
+    xv_draw_colorkey(vo, &ctx->dst_rect);
     read_xv_csp(vo);
 }
 

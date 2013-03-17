@@ -1074,36 +1074,34 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     x11->pending_vo_events &= ~VO_EVENT_RESIZE; // implicitly done by the VO
 }
 
-void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
-                             int img_width, int img_height)
+static void fill_rect(struct vo *vo, GC gc, int x0, int y0, int x1, int y1)
 {
     struct vo_x11_state *x11 = vo->x11;
-    Display *mDisplay = vo->x11->display;
-    int u_dheight, u_dwidth, left_ov, left_ov2;
 
-    if (x11->f_gc == None)
-        return;
+    x0 = FFMAX(x0, 0);
+    y0 = FFMAX(y0, 0);
+    x1 = FFMIN(x1, x11->win_width);
+    y1 = FFMIN(y1, x11->win_height);
 
-    u_dheight = x11->win_height;
-    u_dwidth = x11->win_width;
-    if ((u_dheight <= img_height) && (u_dwidth <= img_width))
-        return;
+    if (x11->window && x1 > x0 && y1 > y0)
+        XFillRectangle(x11->display, x11->window, gc, x0, y0, x1 - x0, y1 - y0);
+}
 
-    left_ov = (u_dheight - img_height) / 2;
-    left_ov2 = (u_dwidth - img_width) / 2;
+// Clear everything outside of rc with the background color
+void vo_x11_clear_background(struct vo *vo, const struct mp_rect *rc)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    GC gc = x11->f_gc;
 
-    XFillRectangle(mDisplay, vo_window, x11->f_gc, 0, 0, u_dwidth, left_ov);
-    XFillRectangle(mDisplay, vo_window, x11->f_gc, 0, u_dheight - left_ov - 1,
-                   u_dwidth, left_ov + 1);
+    int w = x11->win_width;
+    int h = x11->win_height;
 
-    if (u_dwidth > img_width) {
-        XFillRectangle(mDisplay, vo_window, x11->f_gc, 0, left_ov, left_ov2,
-                       img_height);
-        XFillRectangle(mDisplay, vo_window, x11->f_gc, u_dwidth - left_ov2 - 1,
-                       left_ov, left_ov2 + 1, img_height);
-    }
+    fill_rect(vo, gc, 0,      0,      w,      rc->y0); // top
+    fill_rect(vo, gc, 0,      rc->y1, w,      h);      // bottom
+    fill_rect(vo, gc, 0,      rc->y0, rc->x0, rc->y1); // left
+    fill_rect(vo, gc, rc->x1, rc->y0, w,      rc->y1); // right
 
-    XFlush(mDisplay);
+    XFlush(x11->display);
 }
 
 void vo_x11_clearwindow(struct vo *vo, Window vo_window)

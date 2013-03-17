@@ -409,8 +409,7 @@ static bool resize(struct vo *vo)
     if (!p->swsContext)
         return false;
 
-    if (vo->x11->window)
-        vo_x11_clearwindow(vo, vo->x11->window);
+    vo_x11_clear_background(vo, &p->dst);
 
     vo->want_redraw = true;
     return true;

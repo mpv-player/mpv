@@ -27,6 +27,7 @@
 #include "config.h"
 
 struct vo;
+struct mp_rect;
 
 struct vo_x11_state {
     Display *display;
@@ -136,8 +137,7 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis,
                              int x, int y, unsigned int width,
                              unsigned int height, int flags,
                              const char *classname);
-void vo_x11_clearwindow_part(struct vo *vo, Window vo_window,
-                             int img_width, int img_height);
+void vo_x11_clear_background(struct vo *vo, const struct mp_rect *rc);
 void vo_x11_clearwindow(struct vo *vo, Window vo_window);
 void vo_x11_ontop(struct vo *vo);
 void vo_x11_border(struct vo *vo);
