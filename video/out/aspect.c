@@ -72,12 +72,10 @@ static void aspect_calc(struct vo *vo, int *srcw, int *srch)
            fitw, fith, aspdat->monitor_par);
     *srcw = fitw;
     *srch = (float)fitw / aspdat->prew * aspdat->preh / pixelaspect;
-    *srch += *srch % 2; // round
     mp_msg(MSGT_VO, MSGL_DBG2, "aspect(1) wh: %dx%d (org: %dx%d)\n",
            *srcw, *srch, aspdat->prew, aspdat->preh);
     if (*srch > fith || *srch < aspdat->orgh) {
         int tmpw = (float)fith / aspdat->preh * aspdat->prew * pixelaspect;
-        tmpw += tmpw % 2; // round
         if (tmpw <= fitw) {
             *srch = fith;
             *srcw = tmpw;
