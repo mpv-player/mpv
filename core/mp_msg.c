@@ -111,8 +111,8 @@ int mp_msg_test(int mod, int lev)
 {
 #ifndef __MINGW32__
     if (lev == MSGL_STATUS) {
-        // skip status line output if we are not in the foreground process group
-        if (tcgetpgrp(0) != getpgrp())
+        // skip status line output if stderr is not in the fg process group
+        if (tcgetpgrp(2) != getpgrp())
             return false;
     }
 #endif
