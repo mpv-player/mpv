@@ -590,7 +590,7 @@ const m_option_t mplayer_opts[]={
     OPT_CHOICE_OR_INT("cursor-autohide", vo.cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),
 
-    OPT_INT64("wid", vo.WinID, -1),
+    OPT_INT64("wid", vo.WinID, CONF_GLOBAL),
 #ifdef CONFIG_X11
     OPT_FLAG("stop-xscreensaver", vo.stop_screensaver, 0),
     OPT_STRINGLIST("fstype", vo.fstype_list, 0),
