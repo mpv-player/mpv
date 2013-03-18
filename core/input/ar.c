@@ -304,7 +304,6 @@ static int is_mplayer_front(void)
 {
     ProcessSerialNumber myProc, frProc;
     Boolean sameProc;
-    pid_t parentPID;
 
     if (GetFrontProcess(&frProc) == noErr
             && GetCurrentProcess(&myProc) == noErr
