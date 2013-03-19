@@ -578,7 +578,7 @@ static char *get_key_combo_name(int *keys, int max)
     while (1) {
         ret = get_key_name(*keys, ret);
         if (--max && *++keys)
-            talloc_asprintf_append_buffer(ret, "-");
+            ret = talloc_asprintf_append_buffer(ret, "-");
         else
             break;
     }
