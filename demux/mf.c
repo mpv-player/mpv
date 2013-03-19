@@ -128,18 +128,18 @@ mf_t* open_mf_pattern(char * filename)
    if ( glob( fname,0,NULL,&gg ) )
     { free( mf ); free( fname ); return NULL; }
 
-   mf->nr_of_files=gg.gl_pathc;
+   mf->nr_of_files=0;
    mf->names=calloc( gg.gl_pathc, sizeof( char* ) );
-
-   mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d (%zd)\n",mf->nr_of_files, gg.gl_pathc * sizeof( char* ) );
 
    for( i=0;i < gg.gl_pathc;i++ )
     {
      if (mp_path_isdir(gg.gl_pathv[i]))
        continue;
-     mf->names[i]=strdup( gg.gl_pathv[i] );
+     mf->names[mf->nr_of_files]=strdup( gg.gl_pathv[i] );
+     mf->nr_of_files++;
 //     mp_msg( MSGT_STREAM,MSGL_DBG2,"[mf] added file %d.: %s\n",i,mf->names[i] );
     }
+   mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files);
    globfree( &gg );
    goto exit_mf;
   }

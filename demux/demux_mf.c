@@ -70,8 +70,11 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
     if (mf->streams)
         entry_stream = mf->streams[mf->curr_frame];
     struct stream *stream = entry_stream;
-    if (!stream)
-        stream = open_stream(mf->names[mf->curr_frame], demuxer->opts, NULL);
+    if (!stream) {
+        char *filename = mf->names[mf->curr_frame];
+        if (filename)
+            stream = open_stream(filename, demuxer->opts, NULL);
+    }
 
     if (stream) {
         stream_seek(stream, 0);
@@ -87,7 +90,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
         talloc_free(data.start);
     }
 
-    if (stream != entry_stream)
+    if (stream && stream != entry_stream)
         free_stream(stream);
 
     mf->curr_frame++;
