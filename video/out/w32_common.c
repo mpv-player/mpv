@@ -542,6 +542,11 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
             w32->prev_width = vo->dwidth = width;
             w32->prev_height = vo->dheight = height;
         }
+    } else {
+        RECT r;
+        GetClientRect(w32->window, &r);
+        vo->dwidth = r.right;
+        vo->dheight = r.bottom;
     }
 
     vo->opts->fs = flags & VOFLAG_FULLSCREEN;
