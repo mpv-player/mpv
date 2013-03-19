@@ -678,9 +678,9 @@ int ds_fill_buffer(demux_stream_t *ds)
             break; // EOF
         }
 
-        if (demux->type == DEMUXER_TYPE_LAVF ||
-            demux->type == DEMUXER_TYPE_MATROSKA)
-        {
+        struct sh_video *sh_video = demux->video->sh;
+
+        if (sh_video && sh_video->gsh->attached_picture) {
             if (demux->audio)
                 ds->fill_count += demux->audio->packs - apacks;
             if (demux->video && demux->video->packs > vpacks)
