@@ -649,16 +649,14 @@ static const uint8_t *find_newline(const uint8_t *buf, int len, int utf16)
         return (uint8_t *)memchr(buf, '\n', len);
     case 1:
         while (buf < end - 1) {
-            GET_UTF16(c, buf < end - 1 ? get_le16_inc(&buf) : 0, return NULL;
-                      )
+            GET_UTF16(c, buf < end - 1 ? get_le16_inc(&buf) : 0, return NULL;)
             if (buf <= end && c == '\n')
                 return buf - 1;
         }
         break;
     case 2:
         while (buf < end - 1) {
-            GET_UTF16(c, buf < end - 1 ? get_be16_inc(&buf) : 0, return NULL;
-                      )
+            GET_UTF16(c, buf < end - 1 ? get_be16_inc(&buf) : 0, return NULL;)
             if (buf <= end && c == '\n')
                 return buf - 1;
         }
@@ -666,6 +664,8 @@ static const uint8_t *find_newline(const uint8_t *buf, int len, int utf16)
     }
     return NULL;
 }
+
+#define EMPTY_STMT do{}while(0);
 
 /**
  * Copy a number of bytes, converting to UTF-8 if input is UTF-16
@@ -691,20 +691,16 @@ static int copy_characters(uint8_t *dst, int dstsize,
     case 1:
         while (src < end - 1 && dst_end - dst > 8) {
             uint8_t tmp;
-            GET_UTF16(c, src < end - 1 ? get_le16_inc(&src) : 0,;
-                      )
-            PUT_UTF8(c, tmp, *dst++ = tmp;
-                     )
+            GET_UTF16(c, src < end - 1 ? get_le16_inc(&src) : 0, EMPTY_STMT)
+            PUT_UTF8(c, tmp, *dst++ = tmp; EMPTY_STMT)
         }
         *len -= end - src;
         return dstsize - (dst_end - dst);
     case 2:
         while (src < end - 1 && dst_end - dst > 8) {
             uint8_t tmp;
-            GET_UTF16(c, src < end - 1 ? get_be16_inc(&src) : 0,;
-                      )
-            PUT_UTF8(c, tmp, *dst++ = tmp;
-                     )
+            GET_UTF16(c, src < end - 1 ? get_be16_inc(&src) : 0, EMPTY_STMT)
+            PUT_UTF8(c, tmp, *dst++ = tmp; EMPTY_STMT)
         }
         *len -= end - src;
         return dstsize - (dst_end - dst);
