@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <libavutil/common.h>
+
 /* Stuff for correct aspect scaling. */
 #include "aspect.h"
 #include "vo.h"
@@ -65,8 +67,8 @@ static void aspect_calc(struct vo *vo, int *srcw, int *srch)
     struct aspect_data *aspdat = &vo->aspdat;
     float pixelaspect = aspdat->monitor_par;
 
-    int fitw = vo->dwidth;
-    int fith = vo->dheight;
+    int fitw = FFMAX(1, vo->dwidth);
+    int fith = FFMAX(1, vo->dheight);
 
     mp_msg(MSGT_VO, MSGL_DBG2, "aspect(0) fitin: %dx%d monitor_par: %.2f\n",
            fitw, fith, aspdat->monitor_par);
