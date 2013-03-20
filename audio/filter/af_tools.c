@@ -91,7 +91,7 @@ int af_test_output(struct af_instance* af, struct mp_audio* out)
      (af->data->bps    != out->bps)    ||
      (af->data->rate   != out->rate)   ||
      (af->data->nch    != out->nch)){
-    memcpy(out,af->data,sizeof(struct mp_audio));
+    *out = *af->data;
     return AF_FALSE;
   }
   return AF_OK;

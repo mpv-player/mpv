@@ -305,7 +305,10 @@ static int control(struct af_instance* af, int cmd, void* arg)
     if (s->scale == 1.0) {
       if (s->speed_tempo && s->speed_pitch)
         return AF_DETACH;
-      memcpy(af->data, data, sizeof(struct mp_audio));
+      af->data->format = data->format;
+      af->data->nch    = data->nch;
+      af->data->rate   = data->rate;
+      af->data->bps    = data->bps;
       af->delay = 0;
       af->mul = 1;
       return af_test_output(af, data);

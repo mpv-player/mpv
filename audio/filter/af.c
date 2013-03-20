@@ -288,7 +288,6 @@ static void af_print_filter_chain(struct af_stream *s)
 int af_reinit(struct af_stream *s, struct af_instance *af)
 {
     do {
-        struct mp_audio in; // Format of the input to current filter
         int rv = 0; // Return value
 
         // Check if there are any filters left in the list
@@ -300,10 +299,7 @@ int af_reinit(struct af_stream *s, struct af_instance *af)
         }
 
         // Check if this is the first filter
-        if (!af->prev)
-            memcpy(&in, &(s->input), sizeof(struct mp_audio));
-        else
-            memcpy(&in, af->prev->data, sizeof(struct mp_audio));
+        struct mp_audio in = af->prev ? *(af->prev->data) : s->input;
         // Reset just in case...
         in.audio = NULL;
         in.len = 0;
@@ -327,10 +323,7 @@ int af_reinit(struct af_stream *s, struct af_instance *af)
                         (rv = new->control(new, AF_CONTROL_CHANNELS, &in.nch)))
                         return rv;
                     // Initialize channels filter
-                    if (!new->prev)
-                        memcpy(&in, &(s->input), sizeof(struct mp_audio));
-                    else
-                        memcpy(&in, new->prev->data, sizeof(struct mp_audio));
+                    in = new->prev ? (*new->prev->data) : s->input;
                     if (AF_OK != (rv = new->control(new, AF_CONTROL_REINIT, &in)))
                         return rv;
                 }
@@ -347,10 +340,7 @@ int af_reinit(struct af_stream *s, struct af_instance *af)
                         (rv = new->control(new, AF_CONTROL_FORMAT_FMT, &in.format)))
                         return rv;
                     // Initialize format filter
-                    if (!new->prev)
-                        memcpy(&in, &(s->input), sizeof(struct mp_audio));
-                    else
-                        memcpy(&in, new->prev->data, sizeof(struct mp_audio));
+                    in = new->prev ? (*new->prev->data) : s->input;
                     if (AF_OK != (rv = new->control(new, AF_CONTROL_REINIT, &in)))
                         return rv;
                 }
