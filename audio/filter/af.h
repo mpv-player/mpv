@@ -321,8 +321,7 @@ void af_fix_parameters(struct mp_audio *data);
  * \ingroup af_filter
  */
 #define RESIZE_LOCAL_BUFFER(a, d) \
-    ((a->data->len < \
-      af_lencalc(a->mul, d)) ? af_resize_local_buffer(a, d) : AF_OK)
+    ((a->data->len < af_lencalc(a->mul, d)) ? af_resize_local_buffer(a, d) : AF_OK)
 
 /* Some other useful macro definitions*/
 #ifndef min
