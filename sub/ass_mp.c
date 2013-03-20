@@ -267,7 +267,9 @@ void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts)
         default_font = NULL;
     }
 
+    mp_msg(MSGT_ASS, MSGL_V, "[ass] Setting up fonts...\n");
     ass_set_fonts(priv, default_font, opts->font, 1, config, 1);
+    mp_msg(MSGT_ASS, MSGL_V, "[ass] Done.\n");
 
     talloc_free(default_font);
     talloc_free(config);
