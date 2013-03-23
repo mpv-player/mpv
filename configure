@@ -2175,6 +2175,18 @@ EOF
     _gl=yes
     _gl_cocoa=yes
   fi
+
+  cat > $TMPC << EOF
+#include <GL/gl.h>
+#include <GL/glext.h>
+int main(int argc, char *argv[]) {
+  return !GL_INVALID_FRAMEBUFFER_OPERATION;
+}
+EOF
+  if ! cc_check; then
+    _gl=no
+    res_comment="missing glext.h, get from http://www.opengl.org/registry/api/glext.h"
+  fi
 else
   _gl=no
 fi
