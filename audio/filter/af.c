@@ -353,9 +353,6 @@ static int af_fix_format_conversion(struct af_stream *s,
     in.format |= af_bits2fmt(in.bps * 8);
     if (AF_OK != (rv = new->control(new, AF_CONTROL_FORMAT_FMT, &in.format)))
         return rv;
-    // Initialize format filter
-    if (AF_OK != (rv = new->control(new, AF_CONTROL_REINIT, &actual)))
-        return rv == AF_FALSE ? AF_ERROR : rv;
     if (p_af)
         *p_af = new;
     return AF_OK;
@@ -391,8 +388,6 @@ static int af_fix_channels(struct af_stream *s, struct af_instance **p_af,
         return AF_ERROR;
     if (AF_OK != (rv = new->control(new, AF_CONTROL_CHANNELS, &in.nch)))
         return rv;
-    if (AF_OK != (rv = new->control(new, AF_CONTROL_REINIT, &actual)))
-        return rv == AF_FALSE ? AF_ERROR : rv;
     if (p_af)
         *p_af = new;
     return AF_OK;
@@ -410,8 +405,10 @@ int af_reinit(struct af_stream *s)
     remove_auto_inserted_filters(s, true);
 
     struct af_instance *af = s->first;
-    while (af) {
-        int rv = 0; // Return value
+    int retry = 0;
+    while (af && retry < 5) {
+        if (retry >= 5)
+            goto negotiate_error;
 
         // Check if this is the first filter
         struct mp_audio in = af->prev ? *(af->prev->data) : s->input;
@@ -419,7 +416,7 @@ int af_reinit(struct af_stream *s)
         in.audio = NULL;
         in.len = 0;
 
-        rv = af->control(af, AF_CONTROL_REINIT, &in);
+        int rv = af->control(af, AF_CONTROL_REINIT, &in);
         switch (rv) {
         case AF_OK:
             af = af->next;
@@ -428,21 +425,15 @@ int af_reinit(struct af_stream *s)
             // Do auto insertion only if force is not specified
             if ((AF_INIT_TYPE_MASK & s->cfg.force) != AF_INIT_FORCE) {
                 int progress = 0;
-                if ((rv = af_fix_channels(s, &af, in)) < 0)
-                    return rv;
-                if (rv == AF_OK)
+                if (af_fix_channels(s, &af, in) == AF_OK)
                     progress = 1;
-                if ((rv = af_fix_format_conversion(s, &af, in)) < 0)
-                    return rv;
-                if (rv == AF_OK)
+                if (af_fix_format_conversion(s, &af, in) == AF_OK)
                     progress = 1;
-                if (!progress) { // Should _never_ happen
-                    mp_msg(
-                        MSGT_AFILTER, MSGL_ERR,
-                        "[libaf] Unable to correct audio format. "
-                        "This error should never occur, please send a bug report.\n");
-                    return AF_ERROR;
+                if (progress) {
+                    retry++;
+                    continue;
                 }
+                goto negotiate_error;
             } else {
                 mp_msg(
                     MSGT_AFILTER, MSGL_ERR,
@@ -483,6 +474,11 @@ int af_reinit(struct af_stream *s)
     af_print_filter_chain(s);
 
     return AF_OK;
+
+negotiate_error:
+    mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Unable to correct audio format. "
+           "This error should never occur, please send a bug report.\n");
+    return AF_ERROR;
 }
 
 // Uninit and remove all filters
@@ -498,23 +494,12 @@ void af_uninit(struct af_stream *s)
  */
 static int fixup_output_format(struct af_stream *s)
 {
-    if (s->output.nch != 0) {
-        struct af_instance *af = NULL;
-        if (af_fix_channels(s, &af, s->output) == AF_OK) {
-            if (AF_OK != af_reinit(s))
-                return AF_ERROR;
-        }
-    }
+    if (s->output.nch != 0)
+        af_fix_channels(s, NULL, s->output);
 
-    if (s->output.format != AF_FORMAT_UNKNOWN) {
-        struct af_instance *af = NULL;
-        if (af_fix_format_conversion(s, &af, s->output) == AF_OK) {
-            if (AF_OK != af_reinit(s))
-                return AF_ERROR;
-        }
-    }
+    if (s->output.format != AF_FORMAT_UNKNOWN)
+        af_fix_format_conversion(s, NULL, s->output);
 
-    // Re init again just in case
     if (AF_OK != af_reinit(s))
         return AF_ERROR;
 
