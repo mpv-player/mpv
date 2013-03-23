@@ -48,6 +48,7 @@
 #include "ao.h"
 #include "audio_out_internal.h"
 #include "audio/format.h"
+#include "audio/reorder_ch.h"
 
 static const ao_info_t info =
 {
@@ -789,6 +790,11 @@ static int play(void* data, int len, int flags)
   if (!(flags & AOPLAY_FINAL_CHUNK))
       len = len / ao_data.outburst * ao_data.outburst;
   num_frames = len / bytes_per_sample;
+
+  int bps = af_fmt2bits(ao_data.format) / 8;
+  reorder_channel_nch(data, AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+                            AF_CHANNEL_LAYOUT_ALSA_DEFAULT,
+                            ao_data.channels, len / bps, bps);
 
   //mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: frames=%i, len=%i\n",num_frames,len);
 
