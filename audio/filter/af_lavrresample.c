@@ -104,6 +104,12 @@ static bool needs_lavrctx_reconfigure(struct af_resample *s,
 
 }
 
+static bool test_conversion(int src_format, int dst_format)
+{
+    return af_to_avformat(src_format) != AV_SAMPLE_FMT_NONE &&
+           af_to_avformat(dst_format) != AV_SAMPLE_FMT_NONE;
+}
+
 #define ctx_opt_set_int(a,b) av_opt_set_int(s->avrctx, (a), (b), 0)
 #define ctx_opt_set_dbl(a,b) av_opt_set_double(s->avrctx, (a), (b), 0)
 
@@ -304,5 +310,6 @@ struct af_info af_info_lavrresample = {
     "Stefano Pigozzi (based on Michael Niedermayer's lavcresample)",
     "",
     AF_FLAGS_REENTRANT,
-    af_open
+    af_open,
+    .test_conversion = test_conversion,
 };

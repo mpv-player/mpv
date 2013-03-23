@@ -60,6 +60,7 @@ struct af_info {
     const char *comment;
     const int flags;
     int (*open)(struct af_instance *vf);
+    bool (*test_conversion)(int src_format, int dst_format);
 };
 
 // Linked list of audio filters

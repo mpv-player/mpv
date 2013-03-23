@@ -75,6 +75,14 @@ static int check_format(int format)
   return AF_ERROR;
 }
 
+static bool test_conversion(int src_format, int dst_format)
+{
+    // This is the fallback conversion filter, so this filter is always
+    // inserted on format mismatches if no other filter can handle it.
+    // Initializing the filter might still fail.
+    return true;
+}
+
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
@@ -147,7 +155,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
       mp_msg(MSGT_AFILTER, MSGL_ERR, "[format] %s is not a valid format\n", (char *)arg);
       return AF_ERROR;
     }
-    if(AF_OK != af->control(af,AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET,&format))
+    if(AF_OK != af->control(af, AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET,&format))
       return AF_ERROR;
     return AF_OK;
   }
@@ -301,7 +309,8 @@ struct af_info af_info_format = {
   "Anders",
   "",
   AF_FLAGS_REENTRANT,
-  af_open
+  af_open,
+  .test_conversion = test_conversion,
 };
 
 static inline uint32_t load24bit(void* data, int pos) {
