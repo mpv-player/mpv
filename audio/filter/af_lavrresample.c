@@ -58,11 +58,12 @@ struct af_resample_opts {
     int linear;
     double cutoff;
 
-    int out_rate;
     int in_rate;
-    int out_format;
     int in_format;
-    int channels;
+    int in_channels;
+    int out_rate;
+    int out_format;
+    int out_channels;
 };
 
 struct af_resample {
@@ -92,11 +93,12 @@ static bool needs_lavrctx_reconfigure(struct af_resample *s,
                                       struct mp_audio *in,
                                       struct mp_audio *out)
 {
-    return s->ctx.out_rate    != out->rate ||
-           s->ctx.in_rate     != in->rate ||
+    return s->ctx.in_rate     != in->rate ||
            s->ctx.in_format   != in->format ||
+           s->ctx.in_channels != in->nch ||
+           s->ctx.out_rate    != out->rate ||
            s->ctx.out_format  != out->format ||
-           s->ctx.channels    != out->nch ||
+           s->ctx.out_channels!= out->nch ||
            s->ctx.filter_size != s->opts.filter_size ||
            s->ctx.phase_shift != s->opts.phase_shift ||
            s->ctx.linear      != s->opts.linear ||
@@ -125,11 +127,15 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         if (((out->rate    == in->rate) || (out->rate == 0)) &&
             (out->format   == in->format) &&
-            (out->bps      == in->bps))
+            (out->bps      == in->bps) &&
+            ((out->nch     == in->nch) || out->nch == 0))
             return AF_DETACH;
 
         if (out->rate == 0)
             out->rate = in->rate;
+
+        if (out->nch == 0)
+            out->nch = in->nch;
 
         enum AVSampleFormat in_samplefmt = af_to_avformat(in->format);
         if (in_samplefmt == AV_SAMPLE_FMT_NONE) {
@@ -142,10 +148,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
             out_samplefmt = in_samplefmt;
         }
 
-        out->nch    = FFMIN(in->nch, AF_NCH);
         out->bps    = af_fmt2bits(out->format) / 8;
         in->bps     = af_fmt2bits(in->format) / 8;
-        af->mul     = (double) out->rate / in->rate;
+        af->mul     = (double) (out->rate * out->nch) / (in->rate * in->nch);
         af->delay   = out->nch * s->opts.filter_size / FFMIN(af->mul, 1);
 
         if (needs_lavrctx_reconfigure(s, in, out)) {
@@ -156,16 +161,18 @@ static int control(struct af_instance *af, int cmd, void *arg)
             s->ctx.in_rate     = in->rate;
             s->ctx.out_format  = out->format;
             s->ctx.in_format   = in->format;
-            s->ctx.channels    = out->nch;
+            s->ctx.out_channels= out->nch;
+            s->ctx.in_channels = in->nch;
             s->ctx.filter_size = s->opts.filter_size;
             s->ctx.phase_shift = s->opts.phase_shift;
             s->ctx.linear      = s->opts.linear;
             s->ctx.cutoff      = s->opts.cutoff;
 
-            int ch_layout = av_get_default_channel_layout(out->nch);
+            int in_ch_layout = av_get_default_channel_layout(in->nch);
+            int out_ch_layout = av_get_default_channel_layout(out->nch);
 
-            ctx_opt_set_int("in_channel_layout",  ch_layout);
-            ctx_opt_set_int("out_channel_layout", ch_layout);
+            ctx_opt_set_int("in_channel_layout",  in_ch_layout);
+            ctx_opt_set_int("out_channel_layout", out_ch_layout);
 
             ctx_opt_set_int("in_sample_rate",     s->ctx.in_rate);
             ctx_opt_set_int("out_sample_rate",    s->ctx.out_rate);
@@ -187,7 +194,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
 
         return ((in->format == orig_in.format) &&
-                (in->bps    == orig_in.bps)    &&
+                (in->bps    == orig_in.bps) &&
                 (in->nch    == orig_in.nch))
                ? AF_OK : AF_FALSE;
     }
@@ -197,6 +204,15 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         af->data->format = *(int*)arg;
         af->data->bps = af_fmt2bits(af->data->format)/8;
+        return AF_OK;
+    }
+    case AF_CONTROL_CHANNELS | AF_CONTROL_SET: {
+        int nch = *(int *)arg;
+
+        if (nch < 1 || nch > AF_NCH)
+            return AF_ERROR;
+
+        af->data->nch = nch;
         return AF_OK;
     }
     case AF_CONTROL_COMMAND_LINE: {

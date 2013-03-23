@@ -1562,6 +1562,9 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->ao = ao_create(opts, mpctx->input);
         mpctx->ao->samplerate = opts->force_srate;
         mpctx->ao->format = opts->audio_output_format;
+        if (mpctx->sh_audio->channels != opts->audio_output_channels &&
+            opts->audio_output_channels == 2)
+            mpctx->ao->channels = 2;
     }
     ao = mpctx->ao;
 

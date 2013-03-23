@@ -31,6 +31,8 @@
 #include "af.h"
 #include "dsp.h"
 
+#include "audio/reorder_ch.h"
+
 /* HRTF filter coefficients and adjustable parameters */
 #include "af_hrtf.h"
 
@@ -389,6 +391,12 @@ static struct mp_audio* play(struct af_instance *af, struct mp_audio *data)
     short *end = in + data->len / sizeof(short); // Loop end
     float common, left, right, diff, left_b, right_b;
     const int dblen = s->dlbuflen, hlen = s->hrflen, blen = s->basslen;
+
+    // This was written against the old mplayer channel order, which was ALSA.
+    // Feel free to fix the otuput code below to output proper order.
+    reorder_channel_nch(data->audio, AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+                        AF_CHANNEL_LAYOUT_ALSA_DEFAULT,
+                        data->nch, data->len / data->bps, data->bps);
 
     if(AF_OK != RESIZE_LOCAL_BUFFER(af, data))
 	return NULL;

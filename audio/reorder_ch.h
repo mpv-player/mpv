@@ -113,7 +113,7 @@ void reorder_channel(void *buf,
 #define AF_CHANNEL_LAYOUT_LAVC_DEFAULT         3
 #define AF_CHANNEL_LAYOUT_VORBIS_DEFAULT       4
 #define AF_CHANNEL_LAYOUT_SOURCE_NUM           5
-#define AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT AF_CHANNEL_LAYOUT_ALSA_DEFAULT
+#define AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT AF_CHANNEL_LAYOUT_LAVC_DEFAULT
 
 /// Optimized channel reorder between different audio sources and targets.
 void reorder_channel_copy_nch(void *src,

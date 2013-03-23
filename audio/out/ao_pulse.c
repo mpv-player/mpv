@@ -230,7 +230,7 @@ static int init(struct ao *ao, char *params)
         goto fail;
     }
 
-    pa_channel_map_init_auto(&map, ss.channels, PA_CHANNEL_MAP_ALSA);
+    pa_channel_map_init_auto(&map, ss.channels, PA_CHANNEL_MAP_WAVEEX);
     ao->bps = pa_bytes_per_second(&ss);
 
     if (!(priv->mainloop = pa_threaded_mainloop_new())) {

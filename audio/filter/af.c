@@ -372,15 +372,16 @@ static int af_fix_channels(struct af_stream *s, struct af_instance **p_af,
     }
     if (actual.nch == in.nch)
         return AF_FALSE;
+    const char *filter = "lavrresample";
     struct af_instance *new;
     if (af) {
-        new = af_prepend(s, af, "channels");
+        new = af_prepend(s, af, filter);
         new->auto_inserted = true;
     } else {
-        if (strcmp(s->last->info->name, "channels") == 0) {
+        if (strcmp(s->last->info->name, filter) == 0) {
             new = s->last;
         } else {
-            new = af_append(s, s->last, "channels");
+            new = af_append(s, s->last, filter);
             new->auto_inserted = true;
         }
     }
@@ -516,26 +517,6 @@ static int fixup_output_format(struct af_stream *s)
     return AF_OK;
 }
 
-/**
- * Automatic downmix to stereo in case the codec does not implement it.
- */
-static void af_downmix(struct af_stream *s)
-{
-    static const char *const downmix_strs[AF_NCH + 1] = {
-        /*                FL       FR       RL       RR          FC          LF         AL      AR */
-        [3] = "pan=2:" "0.6:0:" "0:0.6:"                     "0.4:0.4",
-        [4] = "pan=2:" "0.6:0:" "0:0.6:" "0.4:0:"  "0:0.4",
-        [5] = "pan=2:" "0.5:0:" "0:0.5:" "0.2:0:"  "0:0.2:"  "0.3:0.3",
-        [6] = "pan=2:" "0.4:0:" "0:0.4:" "0.2:0:"  "0:0.2:"  "0.3:0.3:"   "0.1:0.1",
-        [7] = "pan=2:" "0.4:0:" "0:0.4:" "0.2:0:"  "0:0.2:"  "0.3:0.3:"   "0.1:0:"    "0:0.1",
-        [8] = "pan=2:" "0.4:0:" "0:0.4:" "0.15:0:" "0:0.15:" "0.25:0.25:" "0.1:0.1:"  "0.1:0:" "0:0.1",
-    };
-    const char *af_pan_str = downmix_strs[s->input.nch];
-
-    if (af_pan_str)
-        af_append(s, s->first, af_pan_str);
-}
-
 /* Initialize the stream "s". This function creates a new filter list
    if necessary according to the values set in input and output. Input
    and output should contain the format of the current movie and the
@@ -547,7 +528,6 @@ static void af_downmix(struct af_stream *s)
    The return value is 0 if success and -1 if failure */
 int af_init(struct af_stream *s)
 {
-    struct MPOpts *opts = s->opts;
     int i = 0;
 
     // Sanity check
@@ -564,10 +544,6 @@ int af_init(struct af_stream *s)
 
     // Check if this is the first call
     if (!s->first) {
-        // Append a downmix pan filter at the beginning of the chain if needed
-        if (s->input.nch != opts->audio_output_channels
-            && opts->audio_output_channels == 2)
-            af_downmix(s);
         // Add all filters in the list (if there are any)
         if (s->cfg.list) {
             while (s->cfg.list[i]) {
