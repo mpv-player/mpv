@@ -361,6 +361,43 @@ static int af_fix_format_conversion(struct af_stream *s,
     return AF_OK;
 }
 
+// same as af_fix_format_conversion - only wrt. channels
+static int af_fix_channels(struct af_stream *s, struct af_instance **p_af,
+                           struct mp_audio in)
+{
+    int rv;
+    struct af_instance *af = p_af ? *p_af : NULL;
+    struct mp_audio actual;
+    if (af) {
+        actual = af->prev ? *af->prev->data : s->input;
+    } else {
+        actual = *s->last->data;
+    }
+    if (actual.nch == in.nch)
+        return AF_FALSE;
+    struct af_instance *new;
+    if (af) {
+        new = af_prepend(s, af, "channels");
+        new->auto_inserted = true;
+    } else {
+        if (strcmp(s->last->info->name, "channels") == 0) {
+            new = s->last;
+        } else {
+            new = af_append(s, s->last, "channels");
+            new->auto_inserted = true;
+        }
+    }
+    if (new == NULL)
+        return AF_ERROR;
+    if (AF_OK != (rv = new->control(new, AF_CONTROL_CHANNELS, &in.nch)))
+        return rv;
+    if (AF_OK != (rv = new->control(new, AF_CONTROL_REINIT, &actual)))
+        return rv == AF_FALSE ? AF_ERROR : rv;
+    if (p_af)
+        *p_af = new;
+    return AF_OK;
+}
+
 // Warning:
 // A failed af_reinit() leaves the audio chain behind in a useless, broken
 // state (for example, format filters that were tentatively inserted stay
@@ -391,23 +428,10 @@ int af_reinit(struct af_stream *s)
             // Do auto insertion only if force is not specified
             if ((AF_INIT_TYPE_MASK & s->cfg.force) != AF_INIT_FORCE) {
                 int progress = 0;
-                // Insert channels filter
-                if ((af->prev ? af->prev->data->nch : s->input.nch) != in.nch) {
-                    struct af_instance *new = NULL;
-                    // Create channels filter
-                    if (NULL == (new = af_prepend(s, af, "channels")))
-                        return AF_ERROR;
-                    new->auto_inserted = true;
-                    // Set number of output channels
-                    if (AF_OK !=
-                        (rv = new->control(new, AF_CONTROL_CHANNELS, &in.nch)))
-                        return rv;
-                    // Initialize channels filter
-                    in = new->prev ? (*new->prev->data) : s->input;
-                    if (AF_OK != (rv = new->control(new, AF_CONTROL_REINIT, &in)))
-                        return rv;
+                if ((rv = af_fix_channels(s, &af, in)) < 0)
+                    return rv;
+                if (rv == AF_OK)
                     progress = 1;
-                }
                 if ((rv = af_fix_format_conversion(s, &af, in)) < 0)
                     return rv;
                 if (rv == AF_OK)
@@ -474,21 +498,12 @@ void af_uninit(struct af_stream *s)
  */
 static int fixup_output_format(struct af_stream *s)
 {
-    // Check number of output channels fix if not OK
-    // If needed always inserted last -> easy to screw up other filters
-    if (s->output.nch && s->last->data->nch != s->output.nch) {
+    if (s->output.nch != 0) {
         struct af_instance *af = NULL;
-        if (af_is_conversion_filter(s->last))
-            af = af_prepend(s, s->last, "channels");
-        else
-            af = af_append(s, s->last, "channels");
-        af->auto_inserted = true;
-        // Init the new filter
-        if (!af ||
-            (AF_OK != af->control(af, AF_CONTROL_CHANNELS, &(s->output.nch))))
-            return AF_ERROR;
-        if (AF_OK != af_reinit(s))
-            return AF_ERROR;
+        if (af_fix_channels(s, &af, s->output) == AF_OK) {
+            if (AF_OK != af_reinit(s))
+                return AF_ERROR;
+        }
     }
 
     if (s->output.format != AF_FORMAT_UNKNOWN) {
