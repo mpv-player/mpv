@@ -33,7 +33,7 @@
 #include "osdep/io.h"
 #include "talloc.h"
 
-#define WIN_ID_TO_HWND(x) ((HWND)(uint32_t)(x))
+#define WIN_ID_TO_HWND(x) ((HWND)(intptr_t)(x))
 
 static const wchar_t classname[] = L"mpv";
 
@@ -458,7 +458,7 @@ static int reinit_window_state(struct vo *vo)
     SetWindowLong(w32->window, GWL_STYLE, style);
     add_window_borders(w32->window, &r);
 
-    mp_msg(MSGT_VO, MSGL_V, "[vo] reset window bounds: %ld:%ld:%ld:%ld\n",
+    mp_msg(MSGT_VO, MSGL_V, "[vo] reset window bounds: %d:%d:%d:%d\n",
            r.left, r.top, r.right - r.left, r.bottom - r.top);
 
     SetWindowPos(w32->window, layer, r.left, r.top, r.right - r.left,
