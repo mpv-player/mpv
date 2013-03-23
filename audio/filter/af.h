@@ -20,6 +20,7 @@
 #define MPLAYER_AF_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "config.h"
 
@@ -75,6 +76,7 @@ struct af_instance {
                    * corresponding output */
     double mul; /* length multiplier: how much does this instance change
                    the length of the buffer. */
+    bool auto_inserted; // inserted by af.c, such as conversion filters
 };
 
 // Initialization flags
@@ -161,10 +163,10 @@ void af_uninit(struct af_stream *s);
 
 /**
  * \brief  Reinit the filter list from the given filter on downwards
- * \param  Filter instance to begin the reinit from
+ * See af.c.
  * \return AF_OK on success or AF_ERROR on failure
  */
-int af_reinit(struct af_stream *s, struct af_instance *af);
+int af_reinit(struct af_stream *s);
 
 /**
  * \brief This function adds the filter "name" to the stream s.

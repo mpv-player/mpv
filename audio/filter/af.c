@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "af.h"
 
@@ -249,6 +250,17 @@ void af_remove(struct af_stream *s, struct af_instance *af)
     free(af);
 }
 
+static void remove_auto_inserted_filters(struct af_stream *s, bool dummy_only)
+{
+repeat:
+    for (struct af_instance *af = s->first; af; af = af->next) {
+        if ((af->auto_inserted && !dummy_only) || af->info == &af_info_dummy) {
+            af_remove(s, af);
+            goto repeat;
+        }
+    }
+}
+
 static void print_fmt(struct mp_audio *d)
 {
     if (d) {
@@ -285,18 +297,15 @@ static void af_print_filter_chain(struct af_stream *s)
 // state (for example, format filters that were tentatively inserted stay
 // inserted).
 // In that case, you should always rebuild the filter chain, or abort.
-int af_reinit(struct af_stream *s, struct af_instance *af)
+// Also, note that for complete reinit, fixup_output_format() must be called
+// after this function.
+int af_reinit(struct af_stream *s)
 {
-    do {
-        int rv = 0; // Return value
+    remove_auto_inserted_filters(s, true);
 
-        // Check if there are any filters left in the list
-        if (NULL == af) {
-            if (!(af = af_append(s, s->first, "dummy")))
-                return AF_UNKNOWN;
-            else
-                return AF_ERROR;
-        }
+    struct af_instance *af = s->first;
+    while (af) {
+        int rv = 0; // Return value
 
         // Check if this is the first filter
         struct mp_audio in = af->prev ? *(af->prev->data) : s->input;
@@ -334,6 +343,7 @@ int af_reinit(struct af_stream *s, struct af_instance *af)
                     // Create format filter
                     if (NULL == (new = af_prepend(s, af, "format")))
                         return AF_ERROR;
+                    new->auto_inserted = true;
                     // Set output bits per sample
                     in.format |= af_bits2fmt(in.bps * 8);
                     if (AF_OK !=
@@ -379,7 +389,15 @@ int af_reinit(struct af_stream *s, struct af_instance *af)
                    af->info->name, rv);
             return AF_ERROR;
         }
-    } while (af);
+    }
+
+    // At least one filter must exist in the chain.
+    if (!s->last) {
+        af = af_append(s, NULL, "dummy");
+        if (!af)
+            return AF_ERROR;
+        af->control(af, AF_CONTROL_REINIT, &s->input);
+    }
 
     af_print_filter_chain(s);
 
@@ -411,28 +429,29 @@ static int fixup_output_format(struct af_stream *s)
         if (!af ||
             (AF_OK != af->control(af, AF_CONTROL_CHANNELS, &(s->output.nch))))
             return AF_ERROR;
-        if (AF_OK != af_reinit(s, af))
+        if (AF_OK != af_reinit(s))
             return AF_ERROR;
     }
 
     // Check output format fix if not OK
     if (s->output.format != AF_FORMAT_UNKNOWN &&
         s->last->data->format != s->output.format) {
-        if (strcmp(s->last->info->name, "format"))
+        if (strcmp(s->last->info->name, "format")) {
             af = af_append(s, s->last, "format");
-        else
+            af->auto_inserted = true;
+        } else
             af = s->last;
         // Init the new filter
         s->output.format |= af_bits2fmt(s->output.bps * 8);
         if (!af ||
             (AF_OK != af->control(af, AF_CONTROL_FORMAT_FMT, &(s->output.format))))
             return AF_ERROR;
-        if (AF_OK != af_reinit(s, af))
+        if (AF_OK != af_reinit(s))
             return AF_ERROR;
     }
 
     // Re init again just in case
-    if (AF_OK != af_reinit(s, s->first))
+    if (AF_OK != af_reinit(s))
         return AF_ERROR;
 
     if (s->output.format == AF_FORMAT_UNKNOWN)
@@ -509,20 +528,11 @@ int af_init(struct af_stream *s)
         }
     }
 
-    // If we do not have any filters otherwise
-    // add dummy to make automatic format conversion work
-    if (!s->first && !af_append(s, s->first, "dummy"))
-        return -1;
+    remove_auto_inserted_filters(s, false);
 
     // Init filters
-    if (AF_OK != af_reinit(s, s->first))
+    if (AF_OK != af_reinit(s))
         return -1;
-
-    // make sure the chain is not empty and valid (e.g. because of AF_DETACH)
-    if (!s->first) {
-        if (!af_append(s, s->first, "dummy") || AF_OK != af_reinit(s, s->first))
-            return -1;
-    }
 
     // Check output format
     if ((AF_INIT_TYPE_MASK & s->cfg.force) != AF_INIT_FORCE) {
@@ -548,11 +558,12 @@ int af_init(struct af_stream *s)
                 // Init the new filter
                 if (!af)
                     return -1;
+                af->auto_inserted = true;
                 if (af->control(af, AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET,
                                 &(s->output.rate)) != AF_OK)
                     return -1;
             }
-            if (AF_OK != af_reinit(s, af))
+            if (AF_OK != af_reinit(s))
                 return -1;
         }
         if (AF_OK != fixup_output_format(s)) {
@@ -587,7 +598,7 @@ struct af_instance *af_add(struct af_stream *s, char *name)
         return NULL;
 
     // Reinitalize the filter list
-    if (AF_OK != af_reinit(s, s->first) ||
+    if (AF_OK != af_reinit(s) ||
         AF_OK != fixup_output_format(s)) {
         while (s->first)
             af_remove(s, s->first);

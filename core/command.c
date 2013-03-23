@@ -2274,7 +2274,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 break;
             }
             af->control(af, AF_CONTROL_COMMAND_LINE, cmd->args[1].v.s);
-            af_reinit(sh_audio->afilter, af);
+            af_reinit(sh_audio->afilter);
         }
         break;
     case MP_CMD_SHOW_CHAPTERS:
