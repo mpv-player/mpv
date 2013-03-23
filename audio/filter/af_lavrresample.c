@@ -50,6 +50,7 @@
 #include "core/mp_msg.h"
 #include "core/subopt-helper.h"
 #include "audio/filter/af.h"
+#include "audio/fmt-conversion.h"
 
 struct af_resample_opts {
     int filter_size;
@@ -59,6 +60,9 @@ struct af_resample_opts {
 
     int out_rate;
     int in_rate;
+    int out_format;
+    int in_format;
+    int channels;
 };
 
 struct af_resample {
@@ -90,6 +94,9 @@ static bool needs_lavrctx_reconfigure(struct af_resample *s,
 {
     return s->ctx.out_rate    != out->rate ||
            s->ctx.in_rate     != in->rate ||
+           s->ctx.in_format   != in->format ||
+           s->ctx.out_format  != out->format ||
+           s->ctx.channels    != out->nch ||
            s->ctx.filter_size != s->opts.filter_size ||
            s->ctx.phase_shift != s->opts.phase_shift ||
            s->ctx.linear      != s->opts.linear ||
@@ -108,12 +115,30 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
     switch (cmd) {
     case AF_CONTROL_REINIT: {
-        if ((out->rate == in->rate) || (out->rate == 0))
+        struct mp_audio orig_in = *in;
+
+        if (((out->rate    == in->rate) || (out->rate == 0)) &&
+            (out->format   == in->format) &&
+            (out->bps      == in->bps))
             return AF_DETACH;
 
+        if (out->rate == 0)
+            out->rate = in->rate;
+
+        enum AVSampleFormat in_samplefmt = af_to_avformat(in->format);
+        if (in_samplefmt == AV_SAMPLE_FMT_NONE) {
+            in->format = AF_FORMAT_FLOAT_NE;
+            in_samplefmt = af_to_avformat(in->format);
+        }
+        enum AVSampleFormat out_samplefmt = af_to_avformat(out->format);
+        if (out_samplefmt == AV_SAMPLE_FMT_NONE) {
+            out->format = in->format;
+            out_samplefmt = in_samplefmt;
+        }
+
         out->nch    = FFMIN(in->nch, AF_NCH);
-        out->format = AF_FORMAT_S16_NE;
-        out->bps    = 2;
+        out->bps    = af_fmt2bits(out->format) / 8;
+        in->bps     = af_fmt2bits(in->format) / 8;
         af->mul     = (double) out->rate / in->rate;
         af->delay   = out->nch * s->opts.filter_size / FFMIN(af->mul, 1);
 
@@ -123,6 +148,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
             s->ctx.out_rate    = out->rate;
             s->ctx.in_rate     = in->rate;
+            s->ctx.out_format  = out->format;
+            s->ctx.in_format   = in->format;
+            s->ctx.channels    = out->nch;
             s->ctx.filter_size = s->opts.filter_size;
             s->ctx.phase_shift = s->opts.phase_shift;
             s->ctx.linear      = s->opts.linear;
@@ -136,8 +164,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
             ctx_opt_set_int("in_sample_rate",     s->ctx.in_rate);
             ctx_opt_set_int("out_sample_rate",    s->ctx.out_rate);
 
-            ctx_opt_set_int("in_sample_fmt",      AV_SAMPLE_FMT_S16);
-            ctx_opt_set_int("out_sample_fmt",     AV_SAMPLE_FMT_S16);
+            ctx_opt_set_int("in_sample_fmt",      in_samplefmt);
+            ctx_opt_set_int("out_sample_fmt",     out_samplefmt);
 
             ctx_opt_set_int("filter_size",        s->ctx.filter_size);
             ctx_opt_set_int("phase_shift",        s->ctx.phase_shift);
@@ -152,13 +180,18 @@ static int control(struct af_instance *af, int cmd, void *arg)
             }
         }
 
-        int out_rate, test_output_res;
-        // hack to make af_test_output ignore the samplerate change
-        out_rate  = out->rate;
-        out->rate = in->rate;
-        test_output_res = af_test_output(af, in);
-        out->rate = out_rate;
-        return test_output_res;
+        return ((in->format == orig_in.format) &&
+                (in->bps    == orig_in.bps)    &&
+                (in->nch    == orig_in.nch))
+               ? AF_OK : AF_FALSE;
+    }
+    case AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET: {
+        if (af_to_avformat(*(int*)arg) == AV_SAMPLE_FMT_NONE)
+            return AF_FALSE;
+
+        af->data->format = *(int*)arg;
+        af->data->bps = af_fmt2bits(af->data->format)/8;
+        return AF_OK;
     }
     case AF_CONTROL_COMMAND_LINE: {
         s->opts.cutoff = 0.0;
@@ -227,10 +260,8 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
             (uint8_t **) &out->audio, out_size, out_samples,
             (uint8_t **) &in->audio,  in_size,  in_samples);
 
-    out_size  = out->bps * out_samples * out->nch;
-    in->audio = out->audio;
-    in->len   = out_size;
-    in->rate  = s->ctx.out_rate;
+    out->len = out->bps * out_samples * out->nch;
+    *data = *out;
     return data;
 }
 
@@ -244,7 +275,7 @@ static int af_open(struct af_instance *af)
     af->mul     = 1;
     af->data    = talloc_zero(s, struct mp_audio);
 
-    af->data->rate   = 44100;
+    af->data->rate   = 0;
 
     int default_filter_size = 16;
     s->opts = (struct af_resample_opts) {
