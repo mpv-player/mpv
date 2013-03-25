@@ -1880,6 +1880,29 @@
             numbers would be more intuitive, but are not easily implementable
             because container formats usually use time stamps for identifying
             frames.)
+    ``%w{X}``
+        Specify the current playback time using the format string ``X``. The
+        nested time format string is contained within ``{`` and ``}``.
+        ``%p`` is like ``%w{%H:%M:%S}``, and ``%P`` is like ``%w{%H:%M:%S.%T}``.
+
+        Valid format specifiers:
+            ``%H``
+                hour (padded with 0 to two digits)
+            ``%h``
+                hour (not padded)
+            ``%M``
+                minutes (00-59)
+            ``%m``
+                total minutes (includes hours, unlike ``%M``)
+            ``%S``
+                seconds (00-59)
+            ``%s``
+                total seconds (includes hours and minutes)
+            ``%f``
+                like ``%s``, but as float
+            ``%T``
+                milliseconds (000-999)
+
     ``%tX``
         Specify the current local date/time using the format ``X``. This format
         specifier uses the UNIX ``strftime()`` function internally, and inserts
