@@ -22,27 +22,65 @@
 #include "mpvcore/bstr.h"
 #include "mpvcore/mp_common.h"
 
-char *mp_format_time(double time, bool fractions)
+#define appendf(ptr, ...) \
+    do {(*(ptr)) = talloc_asprintf_append_buffer(*(ptr), __VA_ARGS__);} while(0)
+
+// Return a talloc'ed string formatted according to the format string in fmt.
+// On error, return NULL.
+// Valid formats:
+// %H, %h: hour (%H is padded with 0 to two digits)
+// %M: minutes from 00-59 (hours are subtracted)
+// %m: total minutes (includes hours, unlike %M)
+// %S: seconds from 00-59 (minutes and hours are subtracted)
+// %s: total seconds (includes hours and minutes)
+// %f: like %s, but as float
+// %T: milliseconds (000-999)
+char *mp_format_time_fmt(const char *fmt, double time)
 {
     if (time == MP_NOPTS_VALUE)
         return talloc_strdup(NULL, "unknown");
-    char sign[2] = {0};
-    if (time < 0) {
-        time = -time;
-        sign[0] = '-';
-    }
+    char *sign = time < 0 ? "-" : "";
+    time = time < 0 ? -time : time;
     long long int itime = time;
-    long long int h, m, s;
+    long long int h, m, tm, s;
+    int ms;
     s = itime;
+    tm = s / 60;
     h = s / 3600;
     s -= h * 3600;
     m = s / 60;
     s -= m * 60;
-    char *res = talloc_asprintf(NULL, "%s%02lld:%02lld:%02lld", sign, h, m, s);
-    if (fractions)
-        res = talloc_asprintf_append(res, ".%03d",
-                                     (int)((time - itime) * 1000));
+    ms = (time - itime) * 1000;
+    char *res = talloc_strdup(NULL, "");
+    while (*fmt) {
+        if (fmt[0] == '%') {
+            fmt++;
+            switch (fmt[0]) {
+            case 'h': appendf(&res, "%s%lld", sign, h); break;
+            case 'H': appendf(&res, "%s%02lld", sign, h); break;
+            case 'm': appendf(&res, "%s%lld", sign, tm); break;
+            case 'M': appendf(&res, "%02lld", m); break;
+            case 's': appendf(&res, "%s%lld", sign, itime); break;
+            case 'S': appendf(&res, "%02lld", s); break;
+            case 'T': appendf(&res, "%03d", ms); break;
+            case '%': appendf(&res, "%s", "%"); break;
+            default: goto error;
+            }
+            fmt++;
+        } else {
+            appendf(&res, "%c", *fmt);
+            fmt++;
+        }
+    }
     return res;
+error:
+    talloc_free(res);
+    return NULL;
+}
+
+char *mp_format_time(double time, bool fractions)
+{
+    return mp_format_time_fmt(fractions ? "%H:%M:%S.%T" : "%H:%M:%S", time);
 }
 
 // Set rc to the union of rc and rc2

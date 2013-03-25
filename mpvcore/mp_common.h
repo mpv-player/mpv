@@ -49,6 +49,7 @@ extern const char *mplayer_version;
 extern const char *mplayer_builddate;
 
 char *mp_format_time(double time, bool fractions);
+char *mp_format_time_fmt(const char *fmt, double time);
 
 struct mp_rect {
     int x0, y0;
