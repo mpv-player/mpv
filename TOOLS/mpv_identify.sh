@@ -86,6 +86,8 @@ __midentify__allprops="
     fps
     width
     height
+    dwidth
+    dheight
 
     sub
 "

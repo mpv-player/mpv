@@ -1143,6 +1143,28 @@ static int mp_property_height(m_option_t *prop, int action, void *arg,
     return m_property_int_ro(prop, action, arg, mpctx->sh_video->disp_h);
 }
 
+static int property_vo_wh(m_option_t *prop, int action, void *arg,
+                          MPContext *mpctx, bool get_w)
+{
+    struct vo *vo = mpctx->video_out;
+    if (!mpctx->sh_video && !vo || !vo->hasframe)
+        return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop, action, arg,
+                             get_w ? vo->aspdat.prew : vo->aspdat.preh);
+}
+
+static int mp_property_dwidth(m_option_t *prop, int action, void *arg,
+                                MPContext *mpctx)
+{
+    return property_vo_wh(prop, action, arg, mpctx, true);
+}
+
+static int mp_property_dheight(m_option_t *prop, int action, void *arg,
+                                 MPContext *mpctx)
+{
+    return property_vo_wh(prop, action, arg, mpctx, false);
+}
+
 /// Video fps (RO)
 static int mp_property_fps(m_option_t *prop, int action, void *arg,
                            MPContext *mpctx)
@@ -1408,6 +1430,8 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "height", mp_property_height, CONF_TYPE_INT,
       0, 0, 0, NULL },
+    { "dwidth", mp_property_dwidth, CONF_TYPE_INT },
+    { "dheight", mp_property_dheight, CONF_TYPE_INT },
     { "fps", mp_property_fps, CONF_TYPE_FLOAT,
       0, 0, 0, NULL },
     { "aspect", mp_property_aspect, CONF_TYPE_FLOAT,

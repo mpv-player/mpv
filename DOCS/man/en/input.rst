@@ -309,9 +309,11 @@ vsync                       x see ``--vsync``
 video-format                  video format (string)
 video-codec                   video codec selected for decoding
 video-bitrate                 video bitrate
-width                         video width
+width                         video width (container or decoded size)
 height                        video height
-fps                           FPS (may contain bogus values)
+fps                           container FPS (may contain bogus values)
+dwidth                        video width (after filters and aspect scaling)
+dheight                       video height
 aspect                      x video aspect
 video                       x current video track (similar to ``--vid``)
 program                     x switch TS program (write-only)
