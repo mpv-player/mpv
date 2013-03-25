@@ -3158,7 +3158,7 @@ static void run_playloop(struct MPContext *mpctx)
     bool end_is_chapter = false;
     double sleeptime = get_wakeup_period(mpctx);
     bool was_restart = mpctx->restart_playback;
-    bool new_video_frame_shown = false;
+    bool new_frame_shown = false;
 
 #ifdef CONFIG_ENCODING
     if (encode_lavc_didfail(mpctx->encode_lavc_ctx)) {
@@ -3342,20 +3342,25 @@ static void run_playloop(struct MPContext *mpctx)
         update_avsync(mpctx);
         print_status(mpctx);
         screenshot_flip(mpctx);
-        new_video_frame_shown = true;
+        new_frame_shown = true;
 
-        if (mpctx->max_frames >= 0) {
-            mpctx->max_frames--;
-            if (mpctx->max_frames <= 0)
-                mpctx->stop_play = PT_NEXT_ENTRY;
-        }
         break;
     } // video
 
+    // If no more video is available, one frame means one playloop iteration.
+    // Otherwise, one frame means one video frame.
+    if (!video_left)
+        new_frame_shown = true;
+
+    if (mpctx->max_frames >= 0) {
+        if (new_frame_shown)
+            mpctx->max_frames--;
+        if (mpctx->max_frames <= 0)
+            mpctx->stop_play = PT_NEXT_ENTRY;
+    }
+
     if (mpctx->step_frames > 0 && !mpctx->paused) {
-        // If no more video is available, one frame means one playloop iteration.
-        // Otherwise, one frame means one video frame.
-        if (!video_left || new_video_frame_shown)
+        if (new_frame_shown)
             mpctx->step_frames--;
         if (mpctx->step_frames == 0)
             pause_player(mpctx);

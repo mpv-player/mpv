@@ -651,7 +651,10 @@
     *NOTE*: Practical use of this feature is questionable. Disabled by default.
 
 --frames=<number>
-    Play/convert only first <number> frames, then quit.
+    Play/convert only first <number> video frames, then quit. For audio only,
+    run <number> iteration of the playback loop, which is most likely not what
+    you want. (This behavior also applies to the corner case when there are
+    less video frames than <number>, and audio is longer than the video.)
 
 --fullscreen, --fs
     Fullscreen playback (centers movie, and paints black bands around it).
