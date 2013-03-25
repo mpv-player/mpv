@@ -221,7 +221,7 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"audio_delay",             "add audio-delay"},
     {"switch_audio",            "cycle audio"},
     {"balance",                 "add balance"},
-    {"vo_fullscreen",           "no-osd cycle fullscreen"},
+    {"vo_fullscreen",           "cycle fullscreen"},
     {"panscan",                 "add panscan"},
     {"vo_ontop",                "cycle ontop"},
     {"vo_border",               "cycle border"},
@@ -821,7 +821,7 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
         if (bstrcasecmp(bstr_splice(str, 0, old_len),
                         (bstr) {(char *)entry->old, old_len}) == 0)
         {
-            mp_tmsg(MSGT_INPUT, MSGL_V, "Warning: command '%s' is "
+            mp_tmsg(MSGT_INPUT, MSGL_WARN, "Warning: command '%s' is "
                     "deprecated, replaced with '%s' at %s.\n",
                     entry->old, entry->new, loc);
             bstr s = bstr_cut(str, old_len);
