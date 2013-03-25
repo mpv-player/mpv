@@ -104,7 +104,7 @@ for __midentify__key in $__midentify__allprops; do
     eval unset $__midentify__nextprefix$__midentify__key
 done
 
-__midentify__output=`$MPV --playing-msg="$__midentify__propstr" --vo=null --ao=null --frames=1 "$@"`
+__midentify__output=`$MPV --playing-msg="$__midentify__propstr" --vo=null --ao=null --frames=1 --quiet "$@"`
 __midentify__fileindex=0
 __midentify__prefix=
 while :; do
