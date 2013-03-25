@@ -121,7 +121,7 @@ int mp_msg_test(int mod, int lev)
 
 static void set_msg_color(FILE* stream, int lev)
 {
-    static const unsigned char v_colors[10] = {9, 1, 3, 15, 7, 7, 2, 8, 8, 8};
+    static const int v_colors[10] = {9, 1, 3, 3, -1, -1, 2, 8, 8, 8};
     int c = v_colors[lev];
 #ifdef MP_ANNOY_ME
     /* that's only a silly color test */
@@ -138,9 +138,15 @@ static void set_msg_color(FILE* stream, int lev)
     {
 #ifdef _WIN32
         HANDLE *wstream = stream == stderr ? hSTDERR : hSTDOUT;
+        if (c == -1)
+            c = 7;
         SetConsoleTextAttribute(wstream, ansi2win32[c] | FOREGROUND_INTENSITY);
 #else
-        fprintf(stream, "\033[%d;3%dm", c >> 3, c & 7);
+        if (c == -1) {
+            fprintf(stream, "\033[0m");
+        } else {
+            fprintf(stream, "\033[%d;3%dm", c >> 3, c & 7);
+        }
 #endif
     }
 }
