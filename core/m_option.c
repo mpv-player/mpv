@@ -611,9 +611,9 @@ static char *print_double(const m_option_t *opt, const void *val)
     return talloc_asprintf(NULL, "%f", VAL(val));
 }
 
-static char *print_double_f2(const m_option_t *opt, const void *val)
+static char *print_double_f3(const m_option_t *opt, const void *val)
 {
-    return talloc_asprintf(NULL, "%.2f", VAL(val));
+    return talloc_asprintf(NULL, "%.3f", VAL(val));
 }
 
 static void add_double(const m_option_t *opt, void *val, double add, bool wrap)
@@ -639,7 +639,7 @@ const m_option_type_t m_option_type_double = {
     .size  = sizeof(double),
     .parse = parse_double,
     .print = print_double,
-    .pretty_print = print_double_f2,
+    .pretty_print = print_double_f3,
     .copy  = copy_opt,
     .clamp = clamp_double,
 };
@@ -670,9 +670,9 @@ static char *print_float(const m_option_t *opt, const void *val)
     return talloc_asprintf(NULL, "%f", VAL(val));
 }
 
-static char *print_float_f2(const m_option_t *opt, const void *val)
+static char *print_float_f3(const m_option_t *opt, const void *val)
 {
-    return talloc_asprintf(NULL, "%.2f", VAL(val));
+    return talloc_asprintf(NULL, "%.3f", VAL(val));
 }
 
 static void add_float(const m_option_t *opt, void *val, double add, bool wrap)
@@ -688,7 +688,7 @@ const m_option_type_t m_option_type_float = {
     .size  = sizeof(float),
     .parse = parse_float,
     .print = print_float,
-    .pretty_print = print_float_f2,
+    .pretty_print = print_float_f3,
     .copy  = copy_opt,
     .add = add_float,
     .clamp = clamp_float,
