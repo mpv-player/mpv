@@ -469,7 +469,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         mpctx->initialized_flags &= ~INITIALIZED_SUB;
         struct track *track = mpctx->current_track[STREAM_SUB];
         // One of these was active; they can't be both active.
-        assert(!(mpctx->sh_sub && (track && track->sh_sub)));
+        assert(!(mpctx->sh_sub && track && track->sh_sub));
         if (mpctx->sh_sub)
             sub_switchoff(mpctx->sh_sub, mpctx->osd);
         if (track && track->sh_sub)
@@ -2219,6 +2219,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         res = audio_start_sync(mpctx, playsize);
     else
         res = decode_audio(sh_audio, &ao->buffer, playsize);
+
     if (res < 0) {  // EOF, error or format change
         if (res == -2) {
             /* The format change isn't handled too gracefully. A more precise
@@ -2743,12 +2744,10 @@ static int seek(MPContext *mpctx, struct seek_params seek,
         mpctx->stop_play = KEEP_PLAYING;
     bool hr_seek = mpctx->demuxer->accurate_seek && opts->correct_pts;
     hr_seek &= seek.exact >= 0 && seek.type != MPSEEK_FACTOR;
-    hr_seek &= opts->hr_seek == 0 && seek.type == MPSEEK_ABSOLUTE
-               || opts->hr_seek > 0 || seek.exact > 0;
-    if (seek.type == MPSEEK_FACTOR
-        || seek.type == MPSEEK_ABSOLUTE
-        && seek.amount < mpctx->last_chapter_pts
-        || seek.amount < 0)
+    hr_seek &= (opts->hr_seek == 0 && seek.type == MPSEEK_ABSOLUTE) ||
+               opts->hr_seek > 0 || seek.exact > 0;
+    if (seek.type == MPSEEK_FACTOR || seek.amount < 0 ||
+        (seek.type == MPSEEK_ABSOLUTE && seek.amount < mpctx->last_chapter_pts))
         mpctx->last_chapter_seek = -2;
     if (seek.type == MPSEEK_FACTOR) {
         double len = get_time_length(mpctx);
@@ -3472,9 +3471,9 @@ static void run_playloop(struct MPContext *mpctx)
          * If the user seeks continuously (keeps arrow key down)
          * try to finish showing a frame from one location before doing
          * another seek (which could lead to unchanging display). */
-        if (mpctx->seek.type && cmd->id != MP_CMD_SEEK
-            || mpctx->restart_playback && cmd->id == MP_CMD_SEEK
-            && GetTimerMS() - mpctx->start_timestamp < 300)
+        if ((mpctx->seek.type && cmd->id != MP_CMD_SEEK) ||
+            (mpctx->restart_playback && cmd->id == MP_CMD_SEEK &&
+             GetTimerMS() - mpctx->start_timestamp < 300))
             break;
         cmd = mp_input_get_cmd(mpctx->input, 0, 0);
         run_command(mpctx, cmd);
@@ -4130,7 +4129,8 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     int uninitialize_parts = INITIALIZED_ALL;
     if (opts->fixed_vo)
         uninitialize_parts -= INITIALIZED_VO;
-    if (opts->gapless_audio && mpctx->stop_play == AT_END_OF_FILE || mpctx->encode_lavc_ctx)
+    if ((opts->gapless_audio && mpctx->stop_play == AT_END_OF_FILE) ||
+        mpctx->encode_lavc_ctx)
         uninitialize_parts -= INITIALIZED_AO;
     uninit_player(mpctx, uninitialize_parts);
 
@@ -4280,8 +4280,8 @@ static void detach_ptw32(void)
 static void osdep_preinit(int *p_argc, char ***p_argv)
 {
     char *enable_talloc = getenv("MPV_LEAK_REPORT");
-    if (*p_argc > 1 && (strcmp((*p_argv)[1], "-leak-report") == 0
-                     || strcmp((*p_argv)[1], "--leak-report") == 0))
+    if (*p_argc > 1 && (strcmp((*p_argv)[1], "-leak-report") == 0 ||
+                        strcmp((*p_argv)[1], "--leak-report") == 0))
         enable_talloc = "1";
     if (enable_talloc && strcmp(enable_talloc, "1") == 0)
         talloc_enable_leak_report();
