@@ -255,6 +255,7 @@ typedef struct MPContext {
     int step_frames;
     // Counted down each frame, stop playback if 0 is reached. (-1 = disable)
     int max_frames;
+    bool playing_msg_shown;
 
     bool paused_for_cache;
 

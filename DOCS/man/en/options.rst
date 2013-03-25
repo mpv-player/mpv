@@ -1455,7 +1455,7 @@
     *WARNING*: works with the deprecated ``mp_http://`` protocol only.
 
 --playing-msg=<string>
-    Print out a string before starting playback. The string is expanded for
+    Print out a string after starting playback. The string is expanded for
     properties, e.g. ``--playing-msg=file: ${filename}`` will print the string
     ``file:`` followed by a space and the currently played filename.
 

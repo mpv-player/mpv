@@ -3397,6 +3397,13 @@ static void run_playloop(struct MPContext *mpctx)
             update_subtitles(mpctx, a_pos);
     }
 
+    if (opts->playing_msg && !mpctx->playing_msg_shown && new_frame_shown) {
+        mpctx->playing_msg_shown = true;
+        char *msg = mp_property_expand_string(mpctx, opts->playing_msg);
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s\n", msg);
+        talloc_free(msg);
+    }
+
     /* It's possible for the user to simultaneously switch both audio
      * and video streams to "disabled" at runtime. Handle this by waiting
      * rather than immediately stopping playback due to EOF.
@@ -4013,12 +4020,6 @@ goto_enable_cache: ;
         goto terminate_playback;
     }
 
-    if (opts->playing_msg) {
-        char *msg = mp_property_expand_string(mpctx, opts->playing_msg);
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s\n", msg);
-        talloc_free(msg);
-    }
-
     // Disable the term OSD in verbose mode
     if (verbose)
         opts->term_osd = 0;
@@ -4079,6 +4080,7 @@ goto_enable_cache: ;
     mpctx->step_frames = 0;
     mpctx->total_avsync_change = 0;
     mpctx->last_chapter_seek = -2;
+    mpctx->playing_msg_shown = false;
 
     // If there's a timeline force an absolute seek to initialize state
     double startpos = rel_time_to_abs(mpctx, opts->play_start, -1);
