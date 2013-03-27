@@ -1066,7 +1066,7 @@ static int read_header_element(struct demuxer *demuxer, uint32_t id,
     default:
         res = 2;
     }
-    if (!at_filepos)
+    if (!at_filepos && id != EBML_ID_INVALID)
         ebml_read_skip(s, NULL);
     return res;
 }
