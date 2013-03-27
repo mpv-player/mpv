@@ -1278,8 +1278,10 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
     if (!track->realmedia) {
         sh_v->disp_w = track->v_width;
         sh_v->disp_h = track->v_height;
-        if (track->v_dheight)
-            sh_v->aspect = (double) track->v_dwidth / track->v_dheight;
+        uint32_t dw = track->v_dwidth ? track->v_dwidth : track->v_width;
+        uint32_t dh = track->v_dheight ? track->v_dheight : track->v_height;
+        if (dw && dh)
+            sh_v->aspect = (double) dw / dh;
     } else {
         // vd_realvid.c will set aspect to disp_w/disp_h and rederive
         // disp_w and disp_h from the RealVideo stream contents returned
