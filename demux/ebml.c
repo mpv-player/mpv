@@ -246,7 +246,7 @@ char *ebml_read_utf8(stream_t *s, uint64_t *length)
 }
 
 /*
- * Skip the next element.
+ * Skip the current element.
  */
 int ebml_read_skip(stream_t *s, uint64_t *length)
 {
@@ -262,6 +262,60 @@ int ebml_read_skip(stream_t *s, uint64_t *length)
     stream_skip(s, len);
 
     return 0;
+}
+
+/*
+ * Skip to (probable) next cluster (MATROSKA_ID_CLUSTER) element start position.
+ */
+int ebml_resync_cluster(stream_t *s)
+{
+    int64_t pos = stream_tell(s);
+    uint32_t last_4_bytes = 0;
+    mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Corrupt file detected. "
+           "Trying to resync starting from position %"PRId64"...\n", pos);
+    while (!s->eof) {
+        // Assumes MATROSKA_ID_CLUSTER is 4 bytes, with no 0 bytes.
+        if (last_4_bytes == MATROSKA_ID_CLUSTER) {
+            mp_msg(MSGT_DEMUX, MSGL_ERR,
+                   "[mkv] Cluster found at %"PRId64".\n", pos - 4);
+            stream_seek(s, pos - 4);
+            return 0;
+        }
+        last_4_bytes = (last_4_bytes << 8) | stream_read_char(s);
+        pos++;
+    }
+    return -1;
+}
+
+/*
+ * Skip the current element, or on error, call ebml_resync_cluster().
+ */
+int ebml_read_skip_or_resync_cluster(stream_t *s, uint64_t *length)
+{
+    uint64_t len;
+    int l;
+
+    len = ebml_read_length(s, &l);
+    if (len == EBML_UINT_INVALID)
+        goto resync;
+
+    if (length)
+        *length = len + l;
+
+    int64_t pos = stream_tell(s);
+    stream_skip(s, len);
+
+    // When reading corrupted elements, len will often be a random high number,
+    // and stream_skip() will set EOF.
+    if (s->eof) {
+        stream_seek(s, pos);
+        goto resync;
+    }
+
+    return 0;
+
+resync:
+    return ebml_resync_cluster(s) < 0 ? -1 : 1;
 }
 
 /*

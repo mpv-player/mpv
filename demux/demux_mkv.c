@@ -26,6 +26,7 @@
 #include <ctype.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include <assert.h>
 
 #include <libavutil/common.h>
 #include <libavutil/lzo.h>
@@ -2228,10 +2229,12 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
                 case EBML_ID_INVALID:
                     free(block);
-                    return 0;
+                    ebml_resync_cluster(s);
+                    goto find_next_cluster;
 
                 default:
-                    ebml_read_skip(s, &l);
+                    if (ebml_read_skip_or_resync_cluster(s, &l) != 0)
+                        goto find_next_cluster;
                     break;
                 }
                 mkv_d->blockgroup_size -= l + il;
@@ -2290,18 +2293,24 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
                     break;
 
                 case EBML_ID_INVALID:
-                    return 0;
+                    ebml_resync_cluster(s);
+                    goto find_next_cluster;
 
-                default:
-                    ebml_read_skip(s, &l);
+                default: ;
+                    if (ebml_read_skip_or_resync_cluster(s, &l) != 0)
+                        goto find_next_cluster;
                     break;
                 }
                 mkv_d->cluster_size -= l + il;
             }
         }
 
-        while (ebml_read_id(s, &il) != MATROSKA_ID_CLUSTER) {
-            ebml_read_skip(s, NULL);
+    find_next_cluster:
+        for (;;) {
+            uint32_t id = ebml_read_id(s, &il);
+            if (id == MATROSKA_ID_CLUSTER)
+                break;
+            ebml_read_skip_or_resync_cluster(s, NULL);
             if (s->eof)
                 return 0;
         }
