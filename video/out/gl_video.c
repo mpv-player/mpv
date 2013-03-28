@@ -103,7 +103,7 @@ struct texplane {
 };
 
 struct video_image {
-    struct texplane planes[3];
+    struct texplane planes[4];
     bool image_flipped;
 };
 
@@ -1363,13 +1363,6 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
     mp_image_t *image = mp_image_alloc(p->image_format, p->texture_w,
                                                         p->texture_h);
 
-    // NOTE about image formats with alpha plane: we don't even have the alpha
-    // anymore. We never upload it to any texture, as it would be a waste of
-    // time. On the other hand, we can't find a "similar", non-alpha image
-    // format easily. So we just leave the alpha plane of the newly allocated
-    // image as-is, and hope that the alpha is ignored by the receiver of the
-    // screenshot. (If not, code should be added to make it fully opaque.)
-
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
         gl->ActiveTexture(GL_TEXTURE0 + n);
@@ -1651,13 +1644,7 @@ static bool init_format(int fmt, struct gl_video *init)
 
     init->is_yuv = desc.flags & MP_IMGFLAG_YUV;
     init->is_linear_rgb = false;
-
-    // NOTE: we throw away the additional alpha plane, if one exists.
-    //       (2 plane formats with a 2nd alpha plane don't exist)
-    init->plane_count = FFMIN(desc.num_planes, 3);
-    assert(desc.num_planes >= init->plane_count);
-    assert(desc.num_planes <= init->plane_count + 1);
-
+    init->plane_count = desc.num_planes;
     init->image_desc = desc;
 
     return true;
