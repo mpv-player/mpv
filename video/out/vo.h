@@ -288,7 +288,7 @@ int vo_config(struct vo *vo, uint32_t width, uint32_t height,
 void list_video_out(void);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);
-int vo_draw_image(struct vo *vo, struct mp_image *mpi);
+void vo_queue_image(struct vo *vo, struct mp_image *mpi);
 int vo_redraw_frame(struct vo *vo);
 bool vo_get_want_redraw(struct vo *vo);
 int vo_get_buffered_frame(struct vo *vo, bool eof);

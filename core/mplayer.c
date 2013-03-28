@@ -2393,8 +2393,8 @@ static bool filter_output_queued_frame(struct MPContext *mpctx)
     struct vo *video_out = mpctx->video_out;
 
     struct mp_image *img = vf_chain_output_queued_frame(sh_video->vfilter);
-    if (img && video_out->config_ok)
-        vo_draw_image(video_out, img);
+    if (img)
+        vo_queue_image(video_out, img);
     talloc_free(img);
 
     return !!img;

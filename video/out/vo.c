@@ -138,21 +138,18 @@ int vo_control(struct vo *vo, uint32_t request, void *data)
     return vo->driver->control(vo, request, data);
 }
 
-// Return -1 if driver appears not to support a draw_image interface,
-// 0 otherwise (whether the driver actually drew something or not).
-int vo_draw_image(struct vo *vo, struct mp_image *mpi)
+void vo_queue_image(struct vo *vo, struct mp_image *mpi)
 {
     if (!vo->config_ok)
-        return 0;
+        return;
     if (vo->driver->buffer_frames) {
         vo->driver->draw_image(vo, mpi);
-        return 0;
+        return;
     }
     vo->frame_loaded = true;
     vo->next_pts = mpi->pts;
     assert(!vo->waiting_mpi);
     vo->waiting_mpi = mp_image_new_ref(mpi);
-    return 0;
 }
 
 int vo_redraw_frame(struct vo *vo)
