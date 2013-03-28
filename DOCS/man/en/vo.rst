@@ -319,12 +319,12 @@ opengl
         Enable use of PBOs. This is faster, but can sometimes lead to
         sporadic and temporary image corruption.
 
-    dither-depth=<n>
-        Positive non-zero values select the target bit depth. Default: 0.
+    dither-depth=<N|no|auto>
+        Set dither target depth to N. Default: auto.
 
-        \-1
+        no
             Disable any dithering done by mpv.
-        0
+        auto
             Automatic selection. If output bit depth can't be detected,
             8 bits per component are assumed.
         8
@@ -444,10 +444,10 @@ opengl-hq
 
     This is equivalent to:
 
-    | --vo=opengl:lscale=lanczos2:dither-depth=0:pbo:fbo-format=rgb16
+    | --vo=opengl:lscale=lanczos2:dither-depth=auto:pbo:fbo-format=rgb16
 
     Note that some cheaper LCDs do dithering that gravely interferes with
-    vo_opengl's dithering. Disabling dithering with ``dither-depth=-1`` helps.
+    vo_opengl's dithering. Disabling dithering with ``dither-depth=no`` helps.
 
     Unlike ``opengl``, ``opengl-hq`` makes use of FBOs by default. Sometimes you
     can achieve better quality or performance by changing the fbo-format

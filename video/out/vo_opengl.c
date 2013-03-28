@@ -390,7 +390,7 @@ const struct vo_driver video_out_opengl_hq = {
     .priv_size = sizeof(struct gl_priv),
     .options = options,
     .help_text = help_text,
-    .init_option_string = "lscale=lanczos2:dither-depth=0:pbo:fbo-format=rgb16",
+    .init_option_string = "lscale=lanczos2:dither-depth=auto:pbo:fbo-format=rgb16",
 };
 
 static const char help_text[] =
@@ -431,11 +431,11 @@ static const char help_text[] =
 "    sporadic and temporary image corruption.\n"
 "  dither-depth=<n>\n"
 "    Positive non-zero values select the target bit depth.\n"
-"    -1: Disable any dithering done by mpv.\n"
-"     0: Automatic selection. If output bit depth can't be detected,\n"
-"        8 bits per component are assumed.\n"
-"     8: Dither to 8 bit output.\n"
-"    Default: -1.\n"
+"     no:   Disable any dithering done by mpv.\n"
+"     auto: Automatic selection. If output bit depth can't be detected,\n"
+"           8 bits per component are assumed.\n"
+"     8:    Dither to 8 bit output.\n"
+"    Default: no.\n"
 "  debug\n"
 "    Check for OpenGL errors, i.e. call glGetError(). Also request a\n"
 "    debug OpenGL context.\n"
