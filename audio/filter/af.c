@@ -421,37 +421,24 @@ int af_reinit(struct af_stream *s)
             af = af->next;
             break;
         case AF_FALSE: { // Configuration filter is needed
-            // Do auto insertion only if force is not specified
-            if ((AF_INIT_TYPE_MASK & s->cfg.force) != AF_INIT_FORCE) {
-                int progress = 0;
-                if (af_fix_channels(s, &af, in) == AF_OK)
-                    progress = 1;
-                if (af_fix_format_conversion(s, &af, in) == AF_OK)
-                    progress = 1;
-                if (progress) {
-                    retry++;
-                    continue;
-                }
-                goto negotiate_error;
-            } else {
-                mp_msg(
-                    MSGT_AFILTER, MSGL_ERR,
-                    "[libaf] Automatic filter insertion disabled "
-                    "but formats do not match. Giving up.\n");
-                return AF_ERROR;
+            int progress = 0;
+            if (af_fix_channels(s, &af, in) == AF_OK)
+                progress = 1;
+            if (af_fix_format_conversion(s, &af, in) == AF_OK)
+                progress = 1;
+            if (progress) {
+                retry++;
+                continue;
             }
-            break;
+            goto negotiate_error;
         }
         case AF_DETACH: { // Filter is redundant and wants to be unloaded
-            // Do auto remove only if force is not specified
-            if ((AF_INIT_TYPE_MASK & s->cfg.force) != AF_INIT_FORCE) {
-                struct af_instance *aft = af->prev;
-                af_remove(s, af);
-                if (aft)
-                    af = aft->next;
-                else
-                    af = s->first;  // Restart configuration
-            }
+            struct af_instance *aft = af->prev;
+            af_remove(s, af);
+            if (aft)
+                af = aft->next;
+            else
+                af = s->first;  // Restart configuration
             break;
         }
         default:
@@ -558,46 +545,44 @@ int af_init(struct af_stream *s)
         return -1;
 
     // Check output format
-    if ((AF_INIT_TYPE_MASK & s->cfg.force) != AF_INIT_FORCE) {
-        struct af_instance *af = NULL; // New filter
-        // Check output frequency if not OK fix with resample
-        if (s->output.rate && s->last->data->rate != s->output.rate) {
-            // try to find a filter that can change samplrate
-            af = af_control_any_rev(s, AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET,
-                                    &(s->output.rate));
-            if (!af) {
-                char *resampler = "lavrresample";
-                if ((AF_INIT_TYPE_MASK & s->cfg.force) == AF_INIT_SLOW) {
-                    if (af_is_conversion_filter(s->first))
-                        af = af_append(s, s->first, resampler);
-                    else
-                        af = af_prepend(s, s->first, resampler);
-                } else {
-                    if (af_is_conversion_filter(s->last))
-                        af = af_prepend(s, s->last, resampler);
-                    else
-                        af = af_append(s, s->last, resampler);
-                }
-                // Init the new filter
-                if (!af)
-                    return -1;
-                af->auto_inserted = true;
-                if (af->control(af, AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET,
-                                &(s->output.rate)) != AF_OK)
-                    return -1;
+    struct af_instance *af = NULL; // New filter
+    // Check output frequency if not OK fix with resample
+    if (s->output.rate && s->last->data->rate != s->output.rate) {
+        // try to find a filter that can change samplrate
+        af = af_control_any_rev(s, AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET,
+                                &(s->output.rate));
+        if (!af) {
+            char *resampler = "lavrresample";
+            if ((AF_INIT_TYPE_MASK & s->cfg.force) == AF_INIT_SLOW) {
+                if (af_is_conversion_filter(s->first))
+                    af = af_append(s, s->first, resampler);
+                else
+                    af = af_prepend(s, s->first, resampler);
+            } else {
+                if (af_is_conversion_filter(s->last))
+                    af = af_prepend(s, s->last, resampler);
+                else
+                    af = af_append(s, s->last, resampler);
             }
-            if (AF_OK != af_reinit(s))
+            // Init the new filter
+            if (!af)
+                return -1;
+            af->auto_inserted = true;
+            if (af->control(af, AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET,
+                            &(s->output.rate)) != AF_OK)
                 return -1;
         }
-        if (AF_OK != fixup_output_format(s)) {
-            // Something is stuffed audio out will not work
-            mp_msg(
-                MSGT_AFILTER, MSGL_ERR,
-                "[libaf] Unable to setup filter system can not"
-                " meet sound-card demands, please send a bug report. \n");
-            af_uninit(s);
+        if (AF_OK != af_reinit(s))
             return -1;
-        }
+    }
+    if (AF_OK != fixup_output_format(s)) {
+        // Something is stuffed audio out will not work
+        mp_msg(
+            MSGT_AFILTER, MSGL_ERR,
+            "[libaf] Unable to setup filter system can not"
+            " meet sound-card demands, please send a bug report. \n");
+        af_uninit(s);
+        return -1;
     }
     return 0;
 }
