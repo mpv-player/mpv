@@ -233,8 +233,7 @@ volume[=v[:sc[:fast]]]
 
     This filter has a second feature: It measures the overall maximum sound
     level and prints out that level when mpv exits. This feature currently
-    only works with floating-point data, use e.g. ``--af-adv=force=5``, or use
-    ``--af=stats``.
+    only works with floating-point data.
 
     *NOTE*: This filter is not reentrant and can therefore only be enabled
     once for every audio stream.

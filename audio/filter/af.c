@@ -81,9 +81,6 @@ static struct af_info* filter_list[] = {
     NULL
 };
 
-// CPU speed
-int *af_cpu_speed = NULL;
-
 /* Find a filter in the static list of filters using it's name. This
    function is used internally */
 static struct af_info *af_find(char *name)

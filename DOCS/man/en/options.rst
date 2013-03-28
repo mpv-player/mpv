@@ -44,40 +44,6 @@
     ``--af-clr`` exist to modify a previously specified list, but you
     shouldn't need these for typical use.
 
---af-adv=<force=(0-7):list=(filters)>
-    See also ``--af``.
-    Specify advanced audio filter options:
-
-    force=<0-7>
-        Forces the insertion of audio filters to one of the following:
-
-        0
-            Use completely automatic filter insertion (currently identical to
-            1).
-        1
-            Optimize for accuracy (default).
-        2
-            Optimize for speed. *Warning*: Some features in the audio filters
-            may silently fail, and the sound quality may drop.
-        3
-            Use no automatic insertion of filters and no optimization.
-            *Warning*: It may be possible to crash mpv using this setting.
-        4
-            Use automatic insertion of filters according to 0 above, but use
-            floating point processing when possible.
-        5
-            Use automatic insertion of filters according to 1 above, but use
-            floating point processing when possible.
-        6
-            Use automatic insertion of filters according to 2 above, but use
-            floating point processing when possible.
-        7
-            Use no automatic insertion of filters according to 3 above, and
-            use floating point processing when possible.
-
-    list=<filters>
-        Same as ``--af``.
-
 --aid=<ID|auto|no>
     Select audio channel. ``auto`` selects the default, ``no`` disables audio.
     See also ``--alang``.
@@ -1946,9 +1912,8 @@
 --srate=<Hz>
     Select the output sample rate to be used (of course sound cards have
     limits on this). If the sample frequency selected is different from that
-    of the current media, the resample or lavcresample audio filter will be
-    inserted into the audio filter layer to compensate for the difference. The
-    type of resampling can be controlled by the ``--af-adv`` option.
+    of the current media, the lavrresample audio filter will be
+    inserted into the audio filter layer to compensate for the difference.
 
 --start=<relative time>
     Seek to given time position.

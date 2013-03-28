@@ -80,27 +80,8 @@ struct af_instance {
     bool auto_inserted; // inserted by af.c, such as conversion filters
 };
 
-// Initialization flags
-extern int *af_cpu_speed;
-
-#define AF_INIT_AUTO            0x00000000
-#define AF_INIT_SLOW            0x00000001
-#define AF_INIT_FAST            0x00000002
-#define AF_INIT_FORCE           0x00000003
-#define AF_INIT_TYPE_MASK       0x00000003
-
-#define AF_INIT_INT             0x00000000
-#define AF_INIT_FLOAT           0x00000004
-#define AF_INIT_FORMAT_MASK     0x00000004
-
-// Default init type
-#ifndef AF_INIT_TYPE
-#define AF_INIT_TYPE (af_cpu_speed ? *af_cpu_speed : AF_INIT_SLOW)
-#endif
-
 // Configuration switches
 struct af_cfg {
-    int force;  // Initialization type
     char **list; /* list of names of filters that are added to filter
                     list during first initialization of stream */
 };

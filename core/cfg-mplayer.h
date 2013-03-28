@@ -175,11 +175,6 @@ const m_option_t mfopts_conf[]={
 
 #include "audio/filter/af.h"
 extern struct af_cfg af_cfg; // Audio filter configuration, defined in libmpcodecs/dec_audio.c
-const m_option_t audio_filter_conf[]={
-    {"list", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-    {"force", &af_cfg.force, CONF_TYPE_INT, CONF_RANGE, 0, 7, NULL},
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
 
 extern int mp_msg_levels[MSGT_MAX];
 extern int mp_msg_level_all;
@@ -437,7 +432,6 @@ const m_option_t common_opts[] = {
     {"stereo", &fakemono, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
 
     {"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-    {"af-adv", (void *) audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
     OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
 

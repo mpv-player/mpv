@@ -41,7 +41,7 @@
 
 int fakemono = 0;
 
-struct af_cfg af_cfg = {1, NULL}; // Configuration for audio filters
+struct af_cfg af_cfg = {0}; // Configuration for audio filters
 
 static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
 {
