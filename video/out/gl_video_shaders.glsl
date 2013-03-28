@@ -319,6 +319,9 @@ vec4 sample_sharpen5(sampler2D tex, vec2 texsize, vec2 texcoord) {
 }
 
 void main() {
+#ifndef USE_CONV
+#define USE_CONV 0
+#endif
 #if USE_CONV == CONV_PLANAR
     vec3 color = vec3(SAMPLE_L(textures[0], textures_size[0], texcoord).r,
                       SAMPLE_C(textures[1], textures_size[1], texcoord).r,
