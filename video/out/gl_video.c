@@ -93,6 +93,9 @@ struct vertex {
 struct texplane {
     int w, h;
     int tex_w, tex_h;
+    GLint gl_internal_format;
+    GLenum gl_format;
+    GLenum gl_type;
     GLuint gl_texture;
     int gl_buffer;
     int buffer_size;
@@ -161,10 +164,6 @@ struct gl_video {
     int plane_bits;
     int plane_count;
 
-    GLint gl_internal_format;
-    GLenum gl_format;
-    GLenum gl_type;
-
     struct video_image image;
 
     struct fbotex indirect_fbo;         // RGB target
@@ -194,6 +193,9 @@ struct fmt_entry {
 };
 
 static const struct fmt_entry mp_to_gl_formats[] = {
+    {IMGFMT_Y8,      GL_RED,   GL_RED,  GL_UNSIGNED_BYTE},
+    {IMGFMT_Y16,     GL_R16,   GL_RED,  GL_UNSIGNED_SHORT},
+    {IMGFMT_YA8,     GL_RG,    GL_RG,   GL_UNSIGNED_BYTE},
     {IMGFMT_RGB48,   GL_RGB16, GL_RGB,  GL_UNSIGNED_SHORT},
     {IMGFMT_RGB24,   GL_RGB,   GL_RGB,  GL_UNSIGNED_BYTE},
     {IMGFMT_RGBA,    GL_RGBA,  GL_RGBA, GL_UNSIGNED_BYTE},
@@ -205,6 +207,9 @@ static const struct fmt_entry mp_to_gl_formats[] = {
     {IMGFMT_BGRA,    GL_RGBA,  GL_BGRA, GL_UNSIGNED_BYTE},
     {0},
 };
+
+static const int byte_formats[3] =
+    {0, IMGFMT_Y8, IMGFMT_Y16};
 
 static const char *osd_shaders[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = "frag_osd_libass",
@@ -1020,7 +1025,7 @@ static void init_video(struct gl_video *p)
 
     if (!p->is_yuv && (p->opts.srgb || p->use_lut_3d)) {
         p->is_linear_rgb = true;
-        p->gl_internal_format = GL_SRGB;
+        p->image.planes[0].gl_internal_format = GL_SRGB;
     }
 
     int eq_caps = MP_CSP_EQ_CAPS_GAMMA;
@@ -1048,9 +1053,10 @@ static void init_video(struct gl_video *p)
         gl->GenTextures(1, &plane->gl_texture);
         gl->BindTexture(GL_TEXTURE_2D, plane->gl_texture);
 
-        gl->TexImage2D(GL_TEXTURE_2D, 0, p->gl_internal_format,
-                        plane->tex_w, plane->tex_h, 0,
-                        p->gl_format, p->gl_type, NULL);
+        gl->TexImage2D(GL_TEXTURE_2D, 0, plane->gl_internal_format,
+                       plane->tex_w, plane->tex_h, 0,
+                       plane->gl_format, plane->gl_type, NULL);
+
         default_tex_params(gl, GL_TEXTURE_2D, GL_LINEAR);
     }
     gl->ActiveTexture(GL_TEXTURE0);
@@ -1332,8 +1338,8 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         }
         gl->ActiveTexture(GL_TEXTURE0 + n);
         gl->BindTexture(GL_TEXTURE_2D, plane->gl_texture);
-        glUploadTex(gl, GL_TEXTURE_2D, p->gl_format, p->gl_type, plane_ptr,
-                    mpi->stride[n], 0, 0, plane->w, plane->h, 0);
+        glUploadTex(gl, GL_TEXTURE_2D, plane->gl_format, plane->gl_type,
+                    plane_ptr, mpi->stride[n], 0, 0, plane->w, plane->h, 0);
     }
     gl->ActiveTexture(GL_TEXTURE0);
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -1359,9 +1365,10 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
     // screenshot. (If not, code should be added to make it fully opaque.)
 
     for (int n = 0; n < p->plane_count; n++) {
+        struct texplane *plane = &vimg->planes[n];
         gl->ActiveTexture(GL_TEXTURE0 + n);
-        gl->BindTexture(GL_TEXTURE_2D, vimg->planes[n].gl_texture);
-        glDownloadTex(gl, GL_TEXTURE_2D, p->gl_format, p->gl_type,
+        gl->BindTexture(GL_TEXTURE_2D, plane->gl_texture);
+        glDownloadTex(gl, GL_TEXTURE_2D, plane->gl_format, plane->gl_type,
                       image->planes[n], image->stride[n]);
     }
     gl->ActiveTexture(GL_TEXTURE0);
@@ -1578,52 +1585,63 @@ static bool init_format(int fmt, struct gl_video *init)
     if (!desc.id)
         return false;
 
-    init->image_format = fmt;
-    init->plane_bits = desc.plane_bits;
+    if (desc.num_planes > 4)
+        return false;
 
-    // RGB/packed formats
-    for (const struct fmt_entry *e = mp_to_gl_formats; e->mp_format; e++) {
-        if (e->mp_format == fmt) {
-            supported = true;
-            init->plane_bits = desc.bpp[0];
-            init->gl_format = e->format;
-            init->gl_internal_format = e->internal_format;
-            init->gl_type = e->type;
-            break;
-        }
-    }
+    int plane_format[4] = {0};
+
+    init->image_format = fmt;
+    init->plane_bits = desc.bpp[0];
 
     // YUV/planar formats
     if (!supported && (desc.flags & MP_IMGFLAG_YUV_P)) {
-        init->gl_format = GL_RED;
-        if (init->plane_bits == 8) {
+        int bits = desc.plane_bits;
+        if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
             supported = true;
-            init->gl_internal_format = GL_RED;
-            init->gl_type = GL_UNSIGNED_BYTE;
-        } else if (init->plane_bits <= 16 && (desc.flags & MP_IMGFLAG_NE)) {
-            supported = true;
-            init->gl_internal_format = GL_R16;
-            init->gl_type = GL_UNSIGNED_SHORT;
+            init->plane_bits = bits;
+            plane_format[0] = byte_formats[(bits + 7) / 8];
         }
     }
 
     // RGB/planar
     if (!supported && fmt == IMGFMT_GBRP) {
         supported = true;
-        init->plane_bits = 8;
-        init->gl_format = GL_RED;
-        init->gl_internal_format = GL_RED;
-        init->gl_type = GL_UNSIGNED_BYTE;
+        plane_format[0] = byte_formats[1];
+    }
+
+    // All formats in mp_to_gl_formats[] are supported
+    // If it's not in the table, it will be rejected below.
+    // Includes packed RGB and YUV formats
+    if (!supported && desc.num_planes == 1) {
+        supported = true;
+        plane_format[0] = fmt;
     }
 
     if (!supported)
         return false;
 
+    for (int p = 0; p < desc.num_planes; p++) {
+        struct texplane *plane = &init->image.planes[p];
+        if (p > 0 && !plane_format[p])
+            plane_format[p] = plane_format[0];
+        for (const struct fmt_entry *e = mp_to_gl_formats; e->mp_format; e++) {
+            if (e->mp_format == plane_format[p]) {
+                plane->gl_format = e->format;
+                plane->gl_internal_format = e->internal_format;
+                plane->gl_type = e->type;
+                goto found;
+            }
+        }
+        return false; // not found
+    found: ;
+    }
+
     init->is_yuv = desc.flags & MP_IMGFLAG_YUV;
     init->is_linear_rgb = false;
 
     // NOTE: we throw away the additional alpha plane, if one exists.
-    init->plane_count = desc.num_planes > 2 ? 3 : 1;
+    //       (2 plane formats with a 2nd alpha plane don't exist)
+    init->plane_count = FFMIN(desc.num_planes, 3);
     assert(desc.num_planes >= init->plane_count);
     assert(desc.num_planes <= init->plane_count + 1);
 
