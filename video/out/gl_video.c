@@ -703,6 +703,8 @@ static void compile_shaders(struct gl_video *p)
         shader_def(&header_conv, "USE_CONV", "CONV_NV12");
     } else if (p->plane_count > 1) {
         shader_def(&header_conv, "USE_CONV", "CONV_PLANAR");
+    } else {
+        shader_def(&header_conv, "USE_CONV", "0");
     }
 
     shader_def_opt(&header_conv, "USE_GBRP", p->image_format == IMGFMT_GBRP);
