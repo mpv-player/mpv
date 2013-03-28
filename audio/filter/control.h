@@ -98,11 +98,6 @@ typedef struct af_control_ext_s{
 
 // OPTIONAL CALLS
 
-/* Called just after creation with the af_cfg for the stream in which
-   the filter resides as input parameter this call can be used by the
-   filter to initialize itself */
-#define AF_CONTROL_POST_CREATE 		0x00000100 | AF_CONTROL_OPTIONAL
-
 // Called just before destruction of a filter
 #define AF_CONTROL_PRE_DESTROY 		0x00000200 | AF_CONTROL_OPTIONAL
 

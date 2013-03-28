@@ -87,14 +87,10 @@ static int control(struct af_instance* af, int cmd, void* arg)
     float v=0.0;
     float vol[AF_NCH];
     int   i;
-    sscanf((char*)arg,"%f:%i", &v, &s->soft);
+    sscanf((char*)arg,"%f:%i:%i", &v, &s->soft, &s->fast);
     for(i=0;i<AF_NCH;i++) vol[i]=v;
     return control(af,AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, vol);
   }
-  case AF_CONTROL_POST_CREATE:
-    s->fast = ((((struct af_cfg*)arg)->force & AF_INIT_FORMAT_MASK) ==
-      AF_INIT_FLOAT) ? 0 : 1;
-    return AF_OK;
   case AF_CONTROL_VOLUME_ON_OFF | AF_CONTROL_SET:
     memcpy(s->enable,(int*)arg,AF_NCH*sizeof(int));
     return AF_OK;
@@ -122,7 +118,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
       for(i=0;i<AF_NCH;i++)
 	m=max(m,s->max[i]);
 	af_to_dB(1, &m, &m, 10.0);
-	mp_msg(MSGT_AFILTER, MSGL_INFO, "[volume] The maximum volume was %0.2fdB \n", m);
+	mp_msg(MSGT_AFILTER, MSGL_V, "[volume] The maximum volume was %0.2fdB \n", m);
     }
     return AF_OK;
   }

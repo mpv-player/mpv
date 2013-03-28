@@ -47,16 +47,8 @@ static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
 {
     assert(!sh_audio->initialized);
     resync_audio_stream(sh_audio);
-    sh_audio->samplesize = 2;
-    sh_audio->sample_format = AF_FORMAT_S16_NE;
-    if ((af_cfg.force & AF_INIT_FORMAT_MASK) == AF_INIT_FLOAT) {
-        int fmt = AF_FORMAT_FLOAT_NE;
-        if (sh_audio->ad_driver->control(sh_audio, ADCTRL_QUERY_FORMAT,
-                                         &fmt) == CONTROL_TRUE) {
-            sh_audio->sample_format = fmt;
-            sh_audio->samplesize = 4;
-        }
-    }
+    sh_audio->samplesize = 4;
+    sh_audio->sample_format = AF_FORMAT_FLOAT_NE;
     sh_audio->audio_out_minsize = 8192; // default, preinit() may change it
     if (!sh_audio->ad_driver->preinit(sh_audio)) {
         mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Audio decoder preinit failed.\n");

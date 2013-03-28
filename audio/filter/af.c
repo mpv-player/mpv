@@ -154,9 +154,7 @@ static struct af_instance *af_create(struct af_stream *s,
     mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Adding filter %s \n", name);
 
     // Initialize the new filter
-    if (AF_OK == new->info->open(new) &&
-        AF_ERROR < new->control(new, AF_CONTROL_POST_CREATE, &s->cfg))
-    {
+    if (AF_OK == new->info->open(new)) {
         if (cmdline) {
             if (AF_ERROR >= new->control(new, AF_CONTROL_COMMAND_LINE, cmdline))
                 goto err_out;

@@ -219,7 +219,7 @@ format[=format]
         rule that are also valid format specifiers: u8, s8, floatle, floatbe,
         floatne, mpeg2, and ac3.
 
-volume[=v[:sc]]
+volume[=v[:sc[:fast]]]
     Implements software volume control. Use this filter with caution since it
     can reduce the signal to noise ratio of the sound. In most cases it is
     best to set the level for the PCM sound to max, leave this filter out and
@@ -250,6 +250,9 @@ volume[=v[:sc]]
 
         *WARNING*: This feature creates distortion and should be considered a
         last resort.
+    <fast>
+        Force S16 sample format if set to 1. Lower quality, but might be faster
+        in some situations.
 
     *EXAMPLE*:
 
