@@ -149,7 +149,7 @@ static bool create_context_x11_gl3(struct MPGLContext *ctx, bool debug)
 //  http://www.opengl.org/wiki/Tutorial:_OpenGL_3.0_Context_Creation_(GLX)
 // but also uses some of the old code.
 
-static GLXFBConfig select_fb_config(struct vo *vo, const int *attribs)
+static GLXFBConfig select_fb_config(struct vo *vo, const int *attribs, int flags)
 {
     int fbcount;
     GLXFBConfig *fbc = glXChooseFBConfig(vo->x11->display, vo->x11->screen,
@@ -160,9 +160,35 @@ static GLXFBConfig select_fb_config(struct vo *vo, const int *attribs)
     // The list in fbc is sorted (so that the first element is the best).
     GLXFBConfig fbconfig = fbc[0];
 
+    if (flags & VOFLAG_ALPHA) {
+        for (int n = 0; n < fbcount; n++) {
+            XVisualInfo *v = glXGetVisualFromFBConfig(vo->x11->display, fbc[n]);
+            // This is a heuristic at best. Note that normal 8 bit Visuals use
+            // a depth of 24, even if the pixels are padded to 32 bit. If the
+            // depth is higher than 24, the remaining bits must be alpha.
+            // Note: vinfo->bits_per_rgb appears to be useless (is always 8).
+            unsigned long mask = v->depth == 32 ?
+                (unsigned long)-1 : (1 << (unsigned long)v->depth) - 1;
+            if (mask & ~(v->red_mask | v->green_mask | v->blue_mask)) {
+                fbconfig = fbc[n];
+                break;
+            }
+        }
+    }
+
     XFree(fbc);
 
     return fbconfig;
+}
+
+static void set_glx_attrib(int *attribs, int name, int value)
+{
+    for (int n = 0; attribs[n * 2 + 0] != None; n++) {
+        if (attribs[n * 2 + 0] == name) {
+            attribs[n * 2 + 1] = value;
+            break;
+        }
+    }
 }
 
 static bool config_window_x11(struct MPGLContext *ctx, uint32_t d_width,
@@ -189,28 +215,37 @@ static bool config_window_x11(struct MPGLContext *ctx, uint32_t d_width,
         return false;
     }
 
-    const int glx_attribs_stereo_value_idx = 1; // index of GLX_STEREO + 1
     int glx_attribs[] = {
         GLX_STEREO, False,
         GLX_X_RENDERABLE, True,
         GLX_RED_SIZE, 1,
         GLX_GREEN_SIZE, 1,
         GLX_BLUE_SIZE, 1,
+        GLX_ALPHA_SIZE, 0,
         GLX_DOUBLEBUFFER, True,
         None
     };
     GLXFBConfig fbc = NULL;
+    if (flags & VOFLAG_ALPHA) {
+        set_glx_attrib(glx_attribs, GLX_ALPHA_SIZE, 1);
+        fbc = select_fb_config(vo, glx_attribs, flags);
+        if (!fbc) {
+            set_glx_attrib(glx_attribs, GLX_ALPHA_SIZE, 0);
+            flags &= ~VOFLAG_ALPHA;
+        }
+    }
     if (flags & VOFLAG_STEREO) {
-        glx_attribs[glx_attribs_stereo_value_idx] = True;
-        fbc = select_fb_config(vo, glx_attribs);
+        set_glx_attrib(glx_attribs, GLX_STEREO, True);
+        fbc = select_fb_config(vo, glx_attribs, flags);
         if (!fbc) {
             mp_msg(MSGT_VO, MSGL_ERR, "[gl] Could not find a stereo visual,"
                    " 3D will probably not work!\n");
-            glx_attribs[glx_attribs_stereo_value_idx] = False;
+            set_glx_attrib(glx_attribs, GLX_STEREO, False);
+            flags &= ~VOFLAG_STEREO;
         }
     }
     if (!fbc)
-        fbc = select_fb_config(vo, glx_attribs);
+        fbc = select_fb_config(vo, glx_attribs, flags);
     if (!fbc) {
         mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
         return false;

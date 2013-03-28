@@ -253,6 +253,7 @@ const struct m_sub_options gl_video_conf = {
                     {"rgb16f", GL_RGB16F},
                     {"rgb32f", GL_RGB32F})),
         OPT_INTRANGE("dither-depth", dither_depth, 0, -1, 16),
+        OPT_FLAG("alpha", enable_alpha, 0),
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -668,6 +669,9 @@ static void compile_shaders(struct gl_video *p)
     char *header = talloc_asprintf(tmp, "#version %d\n%s", gl->glsl_version,
                                    shader_prelude);
 
+    // Need to pass alpha through the whole chain. (Not needed for OSD shaders.)
+    shader_def_opt(&header, "USE_ALPHA", p->opts.enable_alpha);
+
     char *header_osd = talloc_strdup(tmp, header);
     shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV", p->opts.srgb &&
                                                       !p->use_lut_3d);
@@ -701,6 +705,8 @@ static void compile_shaders(struct gl_video *p)
     shader_def_opt(&header_conv, "USE_YGRAY", p->is_yuv && p->plane_count == 1);
     shader_def_opt(&header_conv, "USE_COLORMATRIX", p->is_yuv);
     shader_def_opt(&header_conv, "USE_LINEAR_CONV", convert_input_to_linear);
+    if (p->opts.enable_alpha && p->plane_count == 4)
+        shader_def(&header_conv, "USE_ALPHA_PLANE", "3");
 
     shader_def_opt(&header_final, "USE_LINEAR_CONV_INV", p->use_lut_3d);
     shader_def_opt(&header_final, "USE_GAMMA_POW", p->opts.gamma);
@@ -1550,7 +1556,7 @@ static int init_gl(struct gl_video *p)
 
     gl->BindBuffer(GL_ARRAY_BUFFER, 0);
 
-    gl->ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    gl->ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     debug_check_gl(p, "after init_gl");
 
@@ -1641,6 +1647,10 @@ static bool init_format(int fmt, struct gl_video *init)
         return false; // not found
     found: ;
     }
+
+    // Stuff like IMGFMT_420AP10. Untested, most likely insane.
+    if (desc.num_planes == 4 && (init->plane_bits % 8) != 0)
+        return false;
 
     init->is_yuv = desc.flags & MP_IMGFLAG_YUV;
     init->is_linear_rgb = false;

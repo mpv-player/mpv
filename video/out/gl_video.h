@@ -40,6 +40,7 @@ struct gl_video_opts {
     int dither_depth;
     int fbo_format;
     int stereo_mode;
+    int enable_alpha;
 };
 
 extern const struct m_sub_options gl_video_conf;
