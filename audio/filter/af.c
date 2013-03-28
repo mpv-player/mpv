@@ -523,10 +523,6 @@ int af_init(struct af_stream *s)
     s->input.audio  = s->output.audio  = NULL;
     s->input.len    = s->output.len    = 0;
 
-    // Figure out how fast the machine is
-    if (AF_INIT_AUTO == (AF_INIT_TYPE_MASK & s->cfg.force))
-        s->cfg.force = (s->cfg.force & ~AF_INIT_TYPE_MASK) | AF_INIT_TYPE;
-
     // Check if this is the first call
     if (!s->first) {
         // Add all filters in the list (if there are any)
@@ -553,17 +549,10 @@ int af_init(struct af_stream *s)
                                 &(s->output.rate));
         if (!af) {
             char *resampler = "lavrresample";
-            if ((AF_INIT_TYPE_MASK & s->cfg.force) == AF_INIT_SLOW) {
-                if (af_is_conversion_filter(s->first))
-                    af = af_append(s, s->first, resampler);
-                else
-                    af = af_prepend(s, s->first, resampler);
-            } else {
-                if (af_is_conversion_filter(s->last))
-                    af = af_prepend(s, s->last, resampler);
-                else
-                    af = af_append(s, s->last, resampler);
-            }
+            if (af_is_conversion_filter(s->first))
+                af = af_append(s, s->first, resampler);
+            else
+                af = af_prepend(s, s->first, resampler);
             // Init the new filter
             if (!af)
                 return -1;
