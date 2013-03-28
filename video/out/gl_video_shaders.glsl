@@ -332,6 +332,9 @@ void main() {
 #ifdef USE_GBRP
     color.gbr = color;
 #endif
+#ifdef USE_SWAP_UV
+    color.rbg = color;
+#endif
 #ifdef USE_YGRAY
     // NOTE: actually slightly wrong for 16 bit input video, and completely
     //       wrong for 9/10 bit input
