@@ -2437,9 +2437,13 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         update_fps(mpctx);
         int framedrop_type = check_framedrop(mpctx, frame_time);
 
-        void *decoded_frame;
-        decoded_frame = decode_video(sh_video, sh_video->ds->current, packet,
-                                     in_size, framedrop_type, sh_video->pts);
+        struct demux_packet pkt = {0};
+        if (sh_video->ds->current)
+            pkt = *sh_video->ds->current;
+        pkt.buffer = packet;
+        pkt.len = in_size;
+        void *decoded_frame = decode_video(sh_video, &pkt, framedrop_type,
+                                           sh_video->pts);
         if (decoded_frame) {
             filter_video(mpctx, decoded_frame);
         }
@@ -2495,8 +2499,6 @@ static double update_video(struct MPContext *mpctx)
             break;
         if (filter_output_queued_frame(mpctx))
             break;
-        int in_size = 0;
-        unsigned char *buf = NULL;
         pts = MP_NOPTS_VALUE;
         struct demux_packet *pkt;
         while (1) {
@@ -2507,11 +2509,8 @@ static double update_video(struct MPContext *mpctx)
              * but to indicate the absence of a frame in formats like AVI
              * that must have packets at fixed timecode intervals. */
         }
-        if (pkt) {
-            in_size = pkt->len;
-            buf = pkt->buffer;
+        if (pkt)
             pts = pkt->pts;
-        }
         if (pts != MP_NOPTS_VALUE)
             pts += mpctx->video_offset;
         if (pts >= mpctx->hrseek_pts - .005)
@@ -2519,7 +2518,7 @@ static double update_video(struct MPContext *mpctx)
         int framedrop_type = mpctx->hrseek_framedrop ? 1 :
                              check_framedrop(mpctx, sh_video->frametime);
         struct mp_image *decoded_frame =
-            decode_video(sh_video, pkt, buf, in_size, framedrop_type, pts);
+            decode_video(sh_video, pkt, framedrop_type, pts);
         if (decoded_frame) {
             determine_frame_pts(mpctx);
             filter_video(mpctx, decoded_frame);

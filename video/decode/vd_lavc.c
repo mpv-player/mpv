@@ -636,9 +636,8 @@ static struct mp_image *image_from_decoder(struct sh_video *sh)
 
 #endif /* HAVE_AVUTIL_REFCOUNTING */
 
-static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
-                  int len, int flags, double *reordered_pts,
-                  struct mp_image **out_image)
+static int decode(struct sh_video *sh, struct demux_packet *packet,
+                  int flags, double *reordered_pts, struct mp_image **out_image)
 {
     int got_picture = 0;
     int ret;
@@ -655,8 +654,8 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
         avctx->skip_frame = ctx->skip_frame;
 
     av_init_packet(&pkt);
-    pkt.data = data;
-    pkt.size = len;
+    pkt.data = packet ? packet->buffer : NULL;
+    pkt.size = packet ? packet->len : 0;
     /* Some codecs (ZeroCodec, some cases of PNG) may want keyframe info
      * from demuxer. */
     if (packet && packet->keyframe)
@@ -692,15 +691,15 @@ static int decode(struct sh_video *sh, struct demux_packet *packet, void *data,
 }
 
 static struct mp_image *decode_with_fallback(struct sh_video *sh,
-                                struct demux_packet *packet, void *data,
-                                int len, int flags, double *reordered_pts)
+                                struct demux_packet *packet,
+                                int flags, double *reordered_pts)
 {
     vd_ffmpeg_ctx *ctx = sh->context;
     if (!ctx->avctx)
         return NULL;
 
     struct mp_image *mpi = NULL;
-    int res = decode(sh, packet, data, len, flags, reordered_pts, &mpi);
+    int res = decode(sh, packet, flags, reordered_pts, &mpi);
     if (res >= 0)
         return mpi;
 
@@ -714,7 +713,7 @@ static struct mp_image *decode_with_fallback(struct sh_video *sh,
         ctx->software_fallback_decoder = NULL;
         if (init_avctx(sh, decoder, NULL)) {
             mpi = NULL;
-            decode(sh, packet, data, len, flags, reordered_pts, &mpi);
+            decode(sh, packet, flags, reordered_pts, &mpi);
             return mpi;
         }
     }

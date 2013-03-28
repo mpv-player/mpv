@@ -31,8 +31,7 @@ void uninit_video(sh_video_t *sh_video);
 
 struct demux_packet;
 void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
-                   unsigned char *start, int in_size, int drop_frame,
-                   double pts);
+                   int drop_frame, double pts);
 
 int get_video_quality_max(sh_video_t *sh_video);
 
