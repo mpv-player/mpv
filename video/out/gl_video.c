@@ -690,7 +690,12 @@ static void compile_shaders(struct gl_video *p)
     bool convert_input_to_linear = !p->is_linear_rgb &&
                                    (p->opts.srgb || p->use_lut_3d);
 
-    shader_def_opt(&header_conv, "USE_PLANAR", p->plane_count > 1);
+    if (p->image_format == IMGFMT_NV12) {
+        shader_def(&header_conv, "USE_CONV", "CONV_NV12");
+    } else if (p->plane_count > 1) {
+        shader_def(&header_conv, "USE_CONV", "CONV_PLANAR");
+    }
+
     shader_def_opt(&header_conv, "USE_GBRP", p->image_format == IMGFMT_GBRP);
     shader_def_opt(&header_conv, "USE_YGRAY", p->is_yuv && p->plane_count == 1);
     shader_def_opt(&header_conv, "USE_COLORMATRIX", p->is_yuv);
@@ -1601,6 +1606,13 @@ static bool init_format(int fmt, struct gl_video *init)
             init->plane_bits = bits;
             plane_format[0] = byte_formats[(bits + 7) / 8];
         }
+    }
+
+    // YUV/half-packed
+    if (!supported && fmt == IMGFMT_NV12) {
+        supported = true;
+        plane_format[0] = IMGFMT_Y8;
+        plane_format[1] = IMGFMT_YA8;
     }
 
     // RGB/planar

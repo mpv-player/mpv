@@ -131,6 +131,9 @@ uniform vec2 dither_size;
 in vec2 texcoord;
 DECLARE_FRAGPARMS
 
+#define CONV_NV12 1
+#define CONV_PLANAR 2
+
 vec4 sample_bilinear(sampler2D tex, vec2 texsize, vec2 texcoord) {
     return texture(tex, texcoord);
 }
@@ -316,10 +319,13 @@ vec4 sample_sharpen5(sampler2D tex, vec2 texsize, vec2 texcoord) {
 }
 
 void main() {
-#ifdef USE_PLANAR
+#if USE_CONV == CONV_PLANAR
     vec3 color = vec3(SAMPLE_L(textures[0], textures_size[0], texcoord).r,
                       SAMPLE_C(textures[1], textures_size[1], texcoord).r,
                       SAMPLE_C(textures[2], textures_size[2], texcoord).r);
+#elif USE_CONV == CONV_NV12
+    vec3 color = vec3(SAMPLE_L(textures[0], textures_size[0], texcoord).r,
+                      SAMPLE_C(textures[1], textures_size[1], texcoord).rg);
 #else
     vec3 color = SAMPLE_L(textures[0], textures_size[0], texcoord).rgb;
 #endif
