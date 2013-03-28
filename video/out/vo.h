@@ -47,7 +47,6 @@ enum mp_voctrl {
     VOCTRL_SET_PANSCAN,
     VOCTRL_SET_EQUALIZER,               // struct voctrl_set_equalizer_args
     VOCTRL_GET_EQUALIZER,               // struct voctrl_get_equalizer_args
-    VOCTRL_DUPLICATE_FRAME,
 
     /* for vdpau hardware decoding */
     VOCTRL_HWDEC_DECODER_RENDER,        // pointer to hw state
@@ -103,11 +102,6 @@ struct voctrl_screenshot_args {
     // Whether the VO rendered OSD/subtitles into out_image
     bool has_osd;
 };
-
-typedef struct {
-  int x,y;
-  int w,h;
-} mp_win_t;
 
 #define VO_TRUE		1
 #define VO_FALSE	0
