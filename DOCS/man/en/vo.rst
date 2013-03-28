@@ -398,7 +398,8 @@ opengl
         Selects the internal format of textures used for FBOs. The format can
         influence performance and quality of the video output. (FBOs are not
         always used, and typically only when using extended scalers.)
-        fmt can be one of: rgb, rgba, rgb8, rgb10, rgb16, rgb16f, rgb32f
+        fmt can be one of: rgb, rgba, rgb8, rgb10, rgb16, rgb16f, rgb32f,
+        rgba12, rgba16, rgba16f, rgba32f.
         Default: rgb.
 
     gamma

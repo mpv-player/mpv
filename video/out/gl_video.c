@@ -251,7 +251,11 @@ const struct m_sub_options gl_video_conf = {
                     {"rgb10",  GL_RGB10},
                     {"rgb16",  GL_RGB16},
                     {"rgb16f", GL_RGB16F},
-                    {"rgb32f", GL_RGB32F})),
+                    {"rgb32f", GL_RGB32F},
+                    {"rgba12", GL_RGBA12},
+                    {"rgba16", GL_RGBA16},
+                    {"rgba16f", GL_RGBA16F},
+                    {"rgba32f", GL_RGBA32F})),
         OPT_INTRANGE("dither-depth", dither_depth, 0, -1, 16),
         OPT_FLAG("alpha", enable_alpha, 0),
         {0}
