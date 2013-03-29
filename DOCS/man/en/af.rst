@@ -30,15 +30,15 @@ filter list.
 Available filters are:
 
 lavrresample[=option1:option2:...]
-    Changes the sample rate of the audio stream to an integer <srate> in Hz.
-    Can be used if you have a fixed frequency sound card or if you are stuck
-    with an old sound card that is only capable of max 44.1kHz.
+    This filter uses libavresample (or libswresample, depending on the build)
+    to change sample rate, sample format, or channel layout of the audio stream.
+    This filter is automatically enabled if the audio output doesn't support
+    the audio configuration of the file being played.
 
-    This filter is automatically enabled if necessary.  It only supports the
-    16-bit integer native-endian format.
+    It supports only the following sample formats: u8, s16ne, s32ne, floatne.
 
     srate=<srate>
-        the output sample rate (defaut: 44100)
+        the output sample rate
     length=<length>
         length of the filter with respect to the lower sampling rate (default:
         16)
