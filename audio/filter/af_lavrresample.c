@@ -67,6 +67,7 @@ struct af_resample_opts {
 };
 
 struct af_resample {
+    int allow_detach;
     struct AVAudioResampleContext *avrctx;
     struct af_resample_opts ctx;   // opts in the context
     struct af_resample_opts opts;  // opts requested by the user
@@ -128,7 +129,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (((out->rate    == in->rate) || (out->rate == 0)) &&
             (out->format   == in->format) &&
             (out->bps      == in->bps) &&
-            ((out->nch     == in->nch) || out->nch == 0))
+            ((out->nch     == in->nch) || out->nch == 0) &&
+            s->allow_detach)
             return AF_DETACH;
 
         if (out->rate == 0)
@@ -224,6 +226,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
             {"phase_shift",  OPT_ARG_INT,    &s->opts.phase_shift, NULL},
             {"linear",       OPT_ARG_BOOL,   &s->opts.linear, NULL},
             {"cutoff",       OPT_ARG_FLOAT,  &s->opts.cutoff, NULL},
+            {"detach",       OPT_ARG_BOOL,   &s->allow_detach, NULL},
             {0}
         };
 
@@ -306,6 +309,8 @@ static int af_open(struct af_instance *af)
         .cutoff      = af_resample_default_cutoff(default_filter_size),
         .phase_shift = 10,
     };
+
+    s->allow_detach = 1;
 
     s->avrctx = avresample_alloc_context();
     af->setup = s;

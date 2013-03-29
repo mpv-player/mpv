@@ -50,6 +50,11 @@ lavrresample[=option1:option2:...]
     linear
         if set then filters will be linearly interpolated between polyphase
         entries (default: no)
+    no-detach
+        don't detach if input and output audio format/rate/channels are the
+        same. You should add this option if you specify additional parameters,
+        as automatically inserted lavrresample instances will use the
+        default settings.
 
 lavcac3enc[=tospdif[:bitrate[:minchn]]]
     Encode multi-channel audio to AC-3 at runtime using libavcodec. Supports
