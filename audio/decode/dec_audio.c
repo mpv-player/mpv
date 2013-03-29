@@ -183,7 +183,7 @@ void uninit_audio(sh_audio_t *sh_audio)
     if (sh_audio->afilter) {
         mp_msg(MSGT_DECAUDIO, MSGL_V, "Uninit audio filters...\n");
         af_uninit(sh_audio->afilter);
-        free(sh_audio->afilter);
+        af_destroy(sh_audio->afilter);
         sh_audio->afilter = NULL;
     }
     if (sh_audio->initialized) {
@@ -202,10 +202,8 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
                        int *out_samplerate, int *out_channels, int *out_format)
 {
     struct af_stream *afs = sh_audio->afilter;
-    if (!afs) {
-        afs = calloc(1, sizeof(struct af_stream));
-        afs->opts = sh_audio->opts;
-    }
+    if (!afs)
+        afs = af_new(sh_audio->opts);
     // input format: same as codec's output format:
     afs->input.rate   = in_samplerate;
     afs->input.nch    = sh_audio->channels;
@@ -230,7 +228,7 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     // let's autoprobe it!
     if (0 != af_init(afs)) {
         sh_audio->afilter = NULL;
-        free(afs);
+        af_destroy(afs);
         return 0;   // failed :(
     }
 

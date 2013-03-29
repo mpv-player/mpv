@@ -91,9 +91,12 @@ struct af_stream {
     // The first and last filter in the list
     struct af_instance *first;
     struct af_instance *last;
-    // Storage for input and output data formats
+    // The user sets the input format (what the decoder outputs), and sets some
+    // or all fields in output to the output format the AO accepts.
+    // See fixup_output_format().
     struct mp_audio input;
     struct mp_audio output;
+    struct mp_audio filter_output;
     // Configuration for this stream
     struct af_cfg cfg;
     struct MPOpts *opts;
@@ -122,6 +125,9 @@ struct af_stream {
  * \{
  * \param s filter chain
  */
+
+struct af_stream *af_new(struct MPOpts *opts);
+void af_destroy(struct af_stream *s);
 
 /**
  * \brief Initialize the stream "s".
