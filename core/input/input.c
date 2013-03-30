@@ -1142,11 +1142,9 @@ static struct cmd_bind *section_find_bind_for_key(struct input_ctx *ictx,
     return bs->cmd_binds ? find_bind_for_key(bs->cmd_binds, n, keys) : NULL;
 }
 
-static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
+static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
+                                              int n, int *keys)
 {
-    if (ictx->test)
-        return handle_test(ictx, n, keys);
-
     struct cmd_bind *cmd
         = section_find_bind_for_key(ictx, false, ictx->section, n, keys);
     if (ictx->default_bindings && cmd == NULL)
@@ -1156,6 +1154,20 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
             cmd = section_find_bind_for_key(ictx, false, "default", n, keys);
         if (ictx->default_bindings && cmd == NULL)
             cmd = section_find_bind_for_key(ictx, true, "default", n, keys);
+    }
+    return cmd;
+}
+
+static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
+{
+    if (ictx->test)
+        return handle_test(ictx, n, keys);
+
+    struct cmd_bind *cmd = find_any_bind_for_key(ictx, n, keys);
+    if (cmd == NULL && n > 1) {
+        // Hitting two keys at once, and if there's no binding for this
+        // combination, the key hit last should be checked.
+        cmd = find_any_bind_for_key(ictx, 1, (int[]){keys[n - 1]});
     }
 
     if (cmd == NULL) {
