@@ -21,7 +21,6 @@
  */
 
 #include <string.h>
-#include <lcms2.h>
 
 #include "talloc.h"
 
@@ -35,6 +34,10 @@
 
 #include "gl_video.h"
 #include "gl_lcms.h"
+
+#ifdef CONFIG_LCMS2
+
+#include <lcms2.h>
 
 static bool parse_3dlut_size(const char *s, int *p1, int *p2, int *p3)
 {
@@ -72,8 +75,6 @@ const struct m_sub_options mp_icc_conf = {
         .intent = INTENT_ABSOLUTE_COLORIMETRIC,
     },
 };
-
-#ifdef CONFIG_LCMS2
 
 static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
                                 const char *msg)
@@ -202,6 +203,12 @@ error_exit:
 }
 
 #else /* CONFIG_LCMS2 */
+
+const struct m_sub_options mp_icc_conf = {
+    .opts = (m_option_t[]) { {0} },
+    .size = sizeof(struct mp_icc_opts),
+    .defaults = &(const struct mp_icc_opts) {0},
+};
 
 struct lut3d *mp_load_icc(struct mp_icc_opts *opts)
 {
