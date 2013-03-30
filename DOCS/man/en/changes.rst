@@ -121,6 +121,7 @@ Command line switches
     -ass-bottom-margin                  --vf=sub=bottom:top
     -vc ffh264vdpau (etc.)              --hwdec=vdpau
     -ac spdifac3                        --ad=spdif:ac3 (see --ad=help)
+    -afm hwac3                          --ad=spdif:ac3,spdif:dts
     -x W, -y H                          --geometry=WxH + --no-keepaspect
     -xy W                               --autofit=W
     =================================== ===================================
