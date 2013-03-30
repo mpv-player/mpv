@@ -224,7 +224,7 @@ static const char *osd_shaders[SUBBITMAP_COUNT] = {
     [SUBBITMAP_RGBA] =   "frag_osd_rgba",
 };
 
-static const const struct gl_video_opts gl_video_opts_def = {
+static const struct gl_video_opts gl_video_opts_def = {
     .npot = 1,
     .dither_depth = -1,
     .fbo_format = GL_RGB,
