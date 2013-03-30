@@ -1330,7 +1330,8 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
     if (mpctx->sh_video && opts->term_osd != 1) {
         mpctx->osd_visible = (GetTimerMS() + opts->osd_duration) | 1;
         mpctx->osd->progbar_type = type;
-        mpctx->osd->progbar_value = 256 * (val - min) / (max - min);
+        mpctx->osd->progbar_value = (val - min) / (max - min);
+        mpctx->osd->progbar_num_stops = 0;
         vo_osd_changed(OSDTYPE_PROGBAR);
         return;
     }
@@ -1345,10 +1346,30 @@ static void update_osd_bar(struct MPContext *mpctx, int type,
                            double min, double max, double val)
 {
     if (mpctx->osd->progbar_type == type) {
-        int new_value = 256 * (val - min) / (max - min);
+        float new_value = (val - min) / (max - min);
         if (new_value != mpctx->osd->progbar_value) {
             mpctx->osd->progbar_value = new_value;
             vo_osd_changed(OSDTYPE_PROGBAR);
+        }
+    }
+}
+
+static void set_osd_bar_chapters(struct MPContext *mpctx, int type)
+{
+    struct osd_state *osd = mpctx->osd;
+    osd->progbar_num_stops = 0;
+    if (osd->progbar_type == type) {
+        double len = get_time_length(mpctx);
+        if (len > 0) {
+            int num = get_chapter_count(mpctx);
+            for (int n = 0; n < num; n++) {
+                double time = chapter_start_time(mpctx, n);
+                if (time >= 0) {
+                    float pos = time / len;
+                    MP_TARRAY_APPEND(osd, osd->progbar_stops,
+                                     osd->progbar_num_stops, pos);
+                }
+            }
         }
     }
 }
@@ -1432,6 +1453,7 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_BAR) {
         set_osd_bar(mpctx, OSD_BAR_SEEK, "Position", 0, 1,
                     av_clipf(get_current_pos_ratio(mpctx), 0, 1));
+        set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_TEXT) {
         mp_osd_msg_t *msg = add_osd_msg(mpctx, OSD_MSG_TEXT, 1,

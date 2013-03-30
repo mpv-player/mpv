@@ -1315,11 +1315,18 @@
     prefixes, see ``Input command prefixes``. If you want to disable the OSD
     completely, use ``--osd-level=0``.
 
---osd-bar-align-x=<-1..1>
+--osd-bar-align-x=<-1-1>
     Position of the OSD bar. -1 is far left, 0 is centered, 1 is far right.
 
---osd-bar-align-y=<-1..1>
+--osd-bar-align-y=<-1-1>
     Position of the OSD bar. -1 is top, 0 is centered, 1 is bottom.
+
+--osd-bar-w=<1-100>
+    Width of the OSD bar, in percentage of the screen width (default: 75).
+    A value of 0.5 means the bar is half the screen wide.
+
+--osd-bar-h=<0.1-50>
+    Height of the OSD bar, in percentage of the screen height (default: 3.125).
 
 --osd-back-color=<#RRGGBB>, --sub-text-back-color=<#RRGGBB>
     See ``--osd-color``. Color used for OSD/sub text background.

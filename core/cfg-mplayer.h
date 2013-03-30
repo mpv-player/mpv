@@ -501,6 +501,8 @@ const m_option_t common_opts[] = {
     OPT_FLAG("osd-bar", osd_bar_visible, 0),
     OPT_FLOATRANGE("osd-bar-align-x", osd_bar_align_x, 0, -1.0, +1.0),
     OPT_FLOATRANGE("osd-bar-align-y", osd_bar_align_y, 0, -1.0, +1.0),
+    OPT_FLOATRANGE("osd-bar-w", osd_bar_w, 0, 1, 100),
+    OPT_FLOATRANGE("osd-bar-h", osd_bar_h, 0, 0.1, 50),
     OPT_SUBSTRUCT("osd", osd_style, osd_style_conf, 0),
     OPT_SUBSTRUCT("sub-text", sub_text_style, osd_style_conf, 0),
     {NULL, NULL, 0, 0, 0, 0, NULL}
