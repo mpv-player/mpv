@@ -21,8 +21,16 @@
  */
 
 #include <assert.h>
+#include <math.h>
+#include <stdbool.h>
+#include <string.h>
+#include <assert.h>
+
+#include <libavutil/common.h>
 
 #include "gl_video.h"
+
+#include "core/bstr.h"
 #include "gl_common.h"
 #include "gl_osd.h"
 #include "filter_kernels.h"
