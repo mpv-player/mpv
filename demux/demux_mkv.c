@@ -2310,9 +2310,9 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
             uint32_t id = ebml_read_id(s, &il);
             if (id == MATROSKA_ID_CLUSTER)
                 break;
-            ebml_read_skip_or_resync_cluster(s, NULL);
             if (s->eof)
                 return 0;
+            ebml_read_skip_or_resync_cluster(s, NULL);
         }
         mkv_d->cluster_start = stream_tell(s) - il;
         mkv_d->cluster_size = ebml_read_length(s, NULL);
