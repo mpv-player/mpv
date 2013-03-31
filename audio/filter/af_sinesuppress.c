@@ -79,18 +79,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
     s->decay = f2;
     return AF_OK;
   }
-  case AF_CONTROL_SS_FREQ | AF_CONTROL_SET:
-    s->freq = *(float*)arg;
-    return AF_OK;
-  case AF_CONTROL_SS_FREQ | AF_CONTROL_GET:
-    *(float*)arg = s->freq;
-    return AF_OK;
-  case AF_CONTROL_SS_DECAY | AF_CONTROL_SET:
-    s->decay = *(float*)arg;
-    return AF_OK;
-  case AF_CONTROL_SS_DECAY | AF_CONTROL_GET:
-    *(float*)arg = s->decay;
-    return AF_OK;
   }
   return AF_UNKNOWN;
 }

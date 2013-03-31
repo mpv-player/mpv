@@ -150,30 +150,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
     }
     return AF_OK;
   }
-  case AF_CONTROL_EQUALIZER_GAIN | AF_CONTROL_SET:{
-    float* gain = ((af_control_ext_t*)arg)->arg;
-    int    ch   = ((af_control_ext_t*)arg)->ch;
-    int    k;
-    if(ch >= AF_NCH || ch < 0)
-      return AF_ERROR;
-
-    for(k = 0 ; k<KM ; k++)
-      s->g[ch][k] = pow(10.0,clamp(gain[k],G_MIN,G_MAX)/20.0)-1.0;
-
-    return AF_OK;
-  }
-  case AF_CONTROL_EQUALIZER_GAIN | AF_CONTROL_GET:{
-    float* gain = ((af_control_ext_t*)arg)->arg;
-    int    ch   = ((af_control_ext_t*)arg)->ch;
-    int    k;
-    if(ch >= AF_NCH || ch < 0)
-      return AF_ERROR;
-
-    for(k = 0 ; k<KM ; k++)
-      gain[k] = log10(s->g[ch][k]+1.0) * 20.0;
-
-    return AF_OK;
-  }
   }
   return AF_UNKNOWN;
 }

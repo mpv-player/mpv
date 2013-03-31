@@ -69,12 +69,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
     s->mul = f;
     return AF_OK;
   }
-  case AF_CONTROL_ES_MUL | AF_CONTROL_SET:
-    s->mul = *(float*)arg;
-    return AF_OK;
-  case AF_CONTROL_ES_MUL | AF_CONTROL_GET:
-    *(float*)arg = s->mul;
-    return AF_OK;
   }
   return AF_UNKNOWN;
 }

@@ -91,26 +91,10 @@ static int control(struct af_instance* af, int cmd, void* arg)
     for(i=0;i<AF_NCH;i++) vol[i]=v;
     return control(af,AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, vol);
   }
-  case AF_CONTROL_VOLUME_ON_OFF | AF_CONTROL_SET:
-    memcpy(s->enable,(int*)arg,AF_NCH*sizeof(int));
-    return AF_OK;
-  case AF_CONTROL_VOLUME_ON_OFF | AF_CONTROL_GET:
-    memcpy((int*)arg,s->enable,AF_NCH*sizeof(int));
-    return AF_OK;
-  case AF_CONTROL_VOLUME_SOFTCLIP | AF_CONTROL_SET:
-    s->soft = *(int*)arg;
-    return AF_OK;
-  case AF_CONTROL_VOLUME_SOFTCLIP | AF_CONTROL_GET:
-    *(int*)arg = s->soft;
-    return AF_OK;
   case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET:
     return af_from_dB(AF_NCH,(float*)arg,s->level,20.0,-200.0,60.0);
   case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET:
     return af_to_dB(AF_NCH,s->level,(float*)arg,20.0);
-  case AF_CONTROL_VOLUME_PROBE | AF_CONTROL_GET:
-    return af_to_dB(AF_NCH,s->pow,(float*)arg,10.0);
-  case AF_CONTROL_VOLUME_PROBE_MAX | AF_CONTROL_GET:
-    return af_to_dB(AF_NCH,s->max,(float*)arg,10.0);
   case AF_CONTROL_PRE_DESTROY:{
     float m = 0.0;
     int i;

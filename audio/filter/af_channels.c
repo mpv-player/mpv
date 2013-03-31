@@ -213,35 +213,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
       mp_msg(MSGT_AFILTER, MSGL_V, "[channels] Changing number of channels"
 	     " to %i\n",af->data->nch);
     return AF_OK;
-  case AF_CONTROL_CHANNELS | AF_CONTROL_GET:
-    *(int*)arg = af->data->nch;
-    return AF_OK;
-  case AF_CONTROL_CHANNELS_ROUTING | AF_CONTROL_SET:{
-    int ch = ((af_control_ext_t*)arg)->ch;
-    int* route = ((af_control_ext_t*)arg)->arg;
-    s->route[ch][FR] = route[FR];
-    s->route[ch][TO] = route[TO];
-    return AF_OK;
-  }
-  case AF_CONTROL_CHANNELS_ROUTING | AF_CONTROL_GET:{
-    int ch = ((af_control_ext_t*)arg)->ch;
-    int* route = ((af_control_ext_t*)arg)->arg;
-    route[FR] = s->route[ch][FR];
-    route[TO] = s->route[ch][TO];
-    return AF_OK;
-  }
-  case AF_CONTROL_CHANNELS_NR | AF_CONTROL_SET:
-    s->nr = *(int*)arg;
-    return AF_OK;
-  case AF_CONTROL_CHANNELS_NR | AF_CONTROL_GET:
-    *(int*)arg = s->nr;
-    return AF_OK;
-  case AF_CONTROL_CHANNELS_ROUTER | AF_CONTROL_SET:
-    s->router = *(int*)arg;
-    return AF_OK;
-  case AF_CONTROL_CHANNELS_ROUTER | AF_CONTROL_GET:
-    *(int*)arg = s->router;
-    return AF_OK;
   }
   return AF_UNKNOWN;
 }
