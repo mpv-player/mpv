@@ -276,6 +276,7 @@ const m_option_t msgl_config[]={
 };
 
 extern const m_option_t lavc_decode_opts_conf[];
+extern const m_option_t ad_lavc_decode_opts_conf[];
 
 #define OPT_BASE_STRUCT struct MPOpts
 
@@ -424,8 +425,6 @@ const m_option_t common_opts[] = {
     // ignore header-specified delay (dwStart)
     OPT_FLAG("ignore-start", ignore_start, 0),
 
-    OPT_FLOATRANGE("a52drc", drc_level, 0, 0, 2),
-
 // ------------------------- codec/vfilter options --------------------
 
     // MP3-only: select stereo/left/right
@@ -466,6 +465,8 @@ const m_option_t common_opts[] = {
 
     {"lavdopts", (void *) lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     {"lavfdopts", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+
+    {"ad-lavc", (void *) ad_lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG},
 // ------------------------- subtitles options --------------------
 
     OPT_STRINGLIST("sub", sub_name, 0),

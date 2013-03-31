@@ -1,11 +1,3 @@
---a52drc=<level>
-    Select the Dynamic Range Compression level for AC-3 audio streams. <level>
-    is a float value ranging from 0 to 1, where 0 means no compression and 1
-    (which is the default) means full compression (make loud passages more
-    silent and vice versa). Values up to 2 are also accepted, but are purely
-    experimental. This option only shows an effect if the AC-3 stream contains
-    the required range compression information.
-
 --abs=<value>
     (``--ao=oss`` only) (OBSOLETE)
     Override audio driver/card buffer size detection.
@@ -36,6 +28,25 @@
 
     ``--ad=help``
         List all available decoders.
+
+--ad-lavc-ac3drc=<level>
+    Select the Dynamic Range Compression level for AC-3 audio streams. <level>
+    is a float value ranging from 0 to 1, where 0 means no compression and 1
+    (which is the default) means full compression (make loud passages more
+    silent and vice versa). Values up to 2 are also accepted, but are purely
+    experimental. This option only shows an effect if the AC-3 stream contains
+    the required range compression information.
+
+--ad-lavc-downmix=<yes|no>
+    Whether to request audio channel downmixing from the decoder (default: yes).
+    Some decoders, like AC-3, AAC and DTS, can remix audio on decoding. The
+    requested number of output channels is set with the ``--channels`` option.
+    Useful for playing surround audio on a stereo system.
+
+--ad-lavc-o=<key>=<value>[,<key>=<value>[,...]]
+    Pass AVOptions to libavcodec decoder. Note, a patch to make the o=
+    unneeded and pass all unknown options through the AVOption system is
+    welcome. A full list of AVOptions can be found in the FFmpeg manual.
 
 --af=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of audio filters to apply to the audio stream. See

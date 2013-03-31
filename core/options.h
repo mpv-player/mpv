@@ -155,7 +155,6 @@ typedef struct MPOpts {
     int force_srate;
     int dtshd;
     float playback_speed;
-    float drc_level;
     struct m_obj_settings *vf_settings;
     float movie_aspect;
     int flip;
@@ -203,6 +202,12 @@ typedef struct MPOpts {
         int bitexact;
         char *avopt;
     } lavc_param;
+
+    struct ad_lavc_param {
+        float ac3drc;
+        int downmix;
+        char *avopt;
+    } ad_lavc_param;
 
     struct lavfdopts {
         int probesize;

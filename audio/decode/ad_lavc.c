@@ -32,6 +32,7 @@
 #include "core/codecs.h"
 #include "core/mp_msg.h"
 #include "core/options.h"
+#include "core/av_opts.h"
 
 #include "ad_internal.h"
 #include "audio/reorder_ch.h"
@@ -50,6 +51,15 @@ struct priv {
     int output_left;
     int unitsize;
     int previous_data_left;  // input demuxer packet data
+};
+
+#define OPT_BASE_STRUCT struct MPOpts
+
+const m_option_t ad_lavc_decode_opts_conf[] = {
+    OPT_FLOATRANGE("ac3drc", ad_lavc_param.ac3drc, 0, 0, 2),
+    OPT_FLAG("downmix", ad_lavc_param.downmix, 0),
+    OPT_STRING("o", ad_lavc_param.avopt, 0),
+    {0}
 };
 
 struct pcm_map
@@ -190,7 +200,8 @@ static void set_from_wf(AVCodecContext *avctx, WAVEFORMATEX *wf)
 
 static int init(sh_audio_t *sh_audio, const char *decoder)
 {
-    struct MPOpts *opts = sh_audio->opts;
+    struct MPOpts *mpopts = sh_audio->opts;
+    struct ad_lavc_param *opts = &mpopts->ad_lavc_param;
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
 
@@ -216,11 +227,21 @@ static int init(sh_audio_t *sh_audio, const char *decoder)
     lavc_context->codec_type = AVMEDIA_TYPE_AUDIO;
     lavc_context->codec_id = lavc_codec->id;
 
-    lavc_context->request_channels = opts->audio_output_channels;
+    if (opts->downmix)
+        lavc_context->request_channels = mpopts->audio_output_channels;
 
     // Always try to set - option only exists for AC3 at the moment
-    av_opt_set_double(lavc_context, "drc_scale", opts->drc_level,
+    av_opt_set_double(lavc_context, "drc_scale", opts->ac3drc,
                       AV_OPT_SEARCH_CHILDREN);
+
+    if (opts->avopt) {
+        if (parse_avopts(lavc_context, opts->avopt) < 0) {
+            mp_msg(MSGT_DECVIDEO, MSGL_ERR,
+                   "ad_lavc: setting AVOptions '%s' failed.\n", opts->avopt);
+            uninit(sh_audio);
+            return 0;
+        }
+    }
 
     lavc_context->codec_tag = sh_audio->format;
     lavc_context->sample_rate = sh_audio->samplerate;
