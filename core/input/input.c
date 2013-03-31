@@ -540,7 +540,6 @@ static const m_option_t mp_input_opts[] = {
     OPT_FLAG("joystick", input.use_joystick, CONF_GLOBAL),
     OPT_FLAG("lirc", input.use_lirc, CONF_GLOBAL),
     OPT_FLAG("lircc", input.use_lircc, CONF_GLOBAL),
-    OPT_FLAG("ar", input.use_ar, CONF_GLOBAL),
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -1776,27 +1775,6 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf,
         int fd = lircc_init("mpv", NULL);
         if (fd >= 0)
             mp_input_add_cmd_fd(ictx, fd, 1, NULL, lircc_cleanup);
-    }
-#endif
-
-#ifdef CONFIG_APPLE_REMOTE
-    if (input_conf->use_ar) {
-        if (mp_input_ar_init() < 0)
-            mp_tmsg(MSGT_INPUT, MSGL_ERR, "Can't init Apple Remote.\n");
-        else
-            mp_input_add_key_fd(ictx, -1, 0, mp_input_ar_read,
-                                mp_input_ar_close, NULL);
-    }
-#endif
-
-#ifdef CONFIG_APPLE_IR
-    if (input_conf->use_ar) {
-        int fd = mp_input_appleir_init(input_conf->ar_dev);
-        if (fd < 0)
-            mp_tmsg(MSGT_INPUT, MSGL_ERR, "Can't init Apple Remote.\n");
-        else
-            mp_input_add_key_fd(ictx, fd, 1, mp_input_appleir_read,
-                                close, NULL);
     }
 #endif
 

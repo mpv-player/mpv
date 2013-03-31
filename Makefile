@@ -80,8 +80,6 @@ SOURCES-$(DUMMY_OSD)            += sub/osd_dummy.c
 SOURCES-$(LIBASS_OSD)           += sub/osd_libass.c
 
 SOURCES-$(ALSA)                 += audio/out/ao_alsa.c
-SOURCES-$(APPLE_IR)             += core/input/appleir.c
-SOURCES-$(APPLE_REMOTE)         += core/input/ar.c
 SOURCES-$(CACA)                 += video/out/vo_caca.c
 SOURCES-$(SDL)                  += audio/out/ao_sdl.c
 SOURCES-$(SDL2)                 += video/out/vo_sdl.c

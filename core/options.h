@@ -219,7 +219,6 @@ typedef struct MPOpts {
         int use_joystick;
         int use_lirc;
         int use_lircc;
-        int use_ar; // apple remote
         int default_bindings;
         int test;
     } input;

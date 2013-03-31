@@ -298,8 +298,6 @@ Optional features:
   --enable-lirc          enable LIRC (remote control) support [autodetect]
   --enable-lircc         enable LIRCCD (LIRC client daemon) input [autodetect]
   --enable-joystick      enable joystick support [disable]
-  --enable-apple-remote  enable Apple Remote input (Mac OS X only) [autodetect]
-  --enable-apple-ir      enable Apple IR Remote input (Linux only) [autodetect]
   --disable-vm           disable X video mode extensions [autodetect]
   --disable-xf86keysym   disable support for multimedia keys [autodetect]
   --enable-radio         enable radio interface [disable]
@@ -468,8 +466,6 @@ _libquvi=auto
 _joystick=no
 _lirc=auto
 _lircc=auto
-_apple_remote=auto
-_apple_ir=auto
 _termcap=auto
 _termios=auto
 _shm=auto
@@ -678,10 +674,6 @@ for ac_option do
   --disable-lirc)       _lirc=no        ;;
   --enable-lircc)       _lircc=yes      ;;
   --disable-lircc)      _lircc=no       ;;
-  --enable-apple-remote)  _apple_remote=yes ;;
-  --disable-apple-remote) _apple_remote=no  ;;
-  --enable-apple-ir)    _apple_ir=yes   ;;
-  --disable-apple-ir)   _apple_ir=no    ;;
   --enable-termcap)     _termcap=yes    ;;
   --disable-termcap)    _termcap=no     ;;
   --enable-termios)     _termios=yes    ;;
@@ -1686,59 +1678,7 @@ if test "$_macosx_bundle" = yes ; then
 fi
 echores "$_macosx_bundle"
 
-echocheck "Apple Remote"
-if test "$_apple_remote" = auto ; then
-  _apple_remote=no
-  cat > $TMPC <<EOF
-#include <stdio.h>
-#include <IOKit/IOCFPlugIn.h>
-int main(void) {
-  io_iterator_t hidObjectIterator = (io_iterator_t)NULL;
-  CFMutableDictionaryRef hidMatchDictionary;
-  IOReturn ioReturnValue;
-
-  // Set up a matching dictionary to search the I/O Registry by class.
-  // name for all HID class devices
-  hidMatchDictionary = IOServiceMatching("AppleIRController");
-
-  // Now search I/O Registry for matching devices.
-  ioReturnValue = IOServiceGetMatchingServices(kIOMasterPortDefault,
-                      hidMatchDictionary, &hidObjectIterator);
-
-  // If search is unsuccessful, return nonzero.
-  if (ioReturnValue != kIOReturnSuccess ||
-                       !IOIteratorIsValid(hidObjectIterator)) {
-    return 1;
-  }
-  return 0;
-}
-EOF
-  cc_check -framework IOKit && _apple_remote=yes
-fi
-if test "$_apple_remote" = yes ; then
-  def_apple_remote='#define CONFIG_APPLE_REMOTE 1'
-  libs_mplayer="$libs_mplayer -framework IOKit -framework Cocoa"
-else
-  def_apple_remote='#undef CONFIG_APPLE_REMOTE'
-fi
-echores "$_apple_remote"
-
 fi #if darwin
-
-if linux; then
-
-echocheck "Apple IR"
-if test "$_apple_ir" = auto ; then
-  _apple_ir=no
-  statement_check linux/input.h 'struct input_event ev; struct input_id id' && _apple_ir=yes
-fi
-if test "$_apple_ir" = yes ; then
-  def_apple_ir='#define CONFIG_APPLE_IR 1'
-else
-  def_apple_ir='#undef CONFIG_APPLE_IR'
-fi
-echores "$_apple_ir"
-fi #if linux
 
 echocheck "pkg-config"
 if $($_pkg_config --version > /dev/null 2>&1); then
@@ -3063,9 +3003,6 @@ NEED_SHMEM        = $need_shmem
 
 # features
 ALSA = $_alsa
-APPLE_IR = $_apple_ir
-APPLE_REMOTE = $_apple_remote
-AUDIO_INPUT = $_audio_input
 CACA = $_caca
 CDDA = $_cdda
 CDDB = $_cddb
@@ -3277,8 +3214,6 @@ $def_libbs2b
 
 
 /* input */
-$def_apple_ir
-$def_apple_remote
 $def_joystick
 $def_lirc
 $def_lircc
