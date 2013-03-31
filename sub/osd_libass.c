@@ -286,7 +286,7 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
 
     struct ass_draw *d = &(struct ass_draw) { .scale = 4 };
     // filled area
-    d->text = talloc_asprintf_append(d->text, "{\\pos(%f,%f)}", px, py);
+    d->text = talloc_asprintf_append(d->text, "{\\bord0\\pos(%f,%f)}", px, py);
     ass_draw_start(d);
     float pos = osd->progbar_value * width - border / 2;
     ass_draw_rect_cw(d, 0, 0, pos, height);
