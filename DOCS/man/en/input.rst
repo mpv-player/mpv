@@ -317,7 +317,7 @@ dheight                       video height
 aspect                      x video aspect
 video                       x current video track (similar to ``--vid``)
 program                     x switch TS program (write-only)
-sub                         x current subttitle track (similar to ``--sid``)
+sub                         x current subtitle track (similar to ``--sid``)
 sub-delay                   x see ``--sub-delay``
 sub-pos                     x see ``--sub-pos``
 sub-visibility              x whether current subtitle is rendered
