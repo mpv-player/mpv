@@ -3003,6 +3003,7 @@ NEED_SHMEM        = $need_shmem
 
 # features
 ALSA = $_alsa
+AUDIO_INPUT = $_audio_input
 CACA = $_caca
 CDDA = $_cdda
 CDDB = $_cddb
