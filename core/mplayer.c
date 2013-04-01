@@ -608,6 +608,16 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     exit(rc);
 }
 
+static void mk_config_dir(char *subdir)
+{
+    void *tmp = talloc_new(NULL);
+    char *confdir = talloc_steal(tmp, mp_find_user_config_file(""));
+    if (subdir)
+        confdir = mp_path_join(tmp, bstr0(confdir), bstr0(subdir));
+    mkdir(confdir, 0777);
+    talloc_free(tmp);
+}
+
 #include "cfg-mplayer.h"
 
 static int cfg_include(struct m_config *conf, char *filename)
@@ -626,26 +636,21 @@ static bool parse_cfgfiles(struct MPContext *mpctx, m_config_t *conf)
         return true;
     if (!m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf") < 0)
         return false;
-    if ((conffile = mp_find_user_config_file("")) == NULL)
-        mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Cannot find HOME directory.\n");
+    mk_config_dir(NULL);
+    if ((conffile = mp_find_user_config_file("config")) == NULL)
+        mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
+                "mp_find_user_config_file(\"config\") problem\n");
     else {
-        mkdir(conffile, 0777);
-        talloc_free(conffile);
-        if ((conffile = mp_find_user_config_file("config")) == NULL)
-            mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
-                    "mp_find_user_config_file(\"config\") problem\n");
-        else {
-            if ((conffile_fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY,
-                        0666)) != -1) {
-                mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
-                        "Creating config file: %s\n", conffile);
-                write(conffile_fd, DEF_CONFIG, sizeof(DEF_CONFIG) - 1);
-                close(conffile_fd);
-            }
-            if (m_config_parse_config_file(conf, conffile) < 0)
-                return false;
-            talloc_free(conffile);
+        if ((conffile_fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY,
+                    0666)) != -1) {
+            mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
+                    "Creating config file: %s\n", conffile);
+            write(conffile_fd, DEF_CONFIG, sizeof(DEF_CONFIG) - 1);
+            close(conffile_fd);
         }
+        if (m_config_parse_config_file(conf, conffile) < 0)
+            return false;
+        talloc_free(conffile);
     }
     return true;
 }
