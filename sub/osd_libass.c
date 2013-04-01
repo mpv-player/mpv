@@ -294,6 +294,16 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     add_osd_ass_event(obj->osd_track, d->text);
     ass_draw_reset(d);
 
+    // position marker
+    d->text = talloc_asprintf_append(d->text, "{\\bord%f\\pos(%f,%f)}",
+                                     border / 2, px, py);
+    ass_draw_start(d);
+    ass_draw_move_to(d, pos + border / 2, 0);
+    ass_draw_line_to(d, pos + border / 2, height);
+    ass_draw_stop(d);
+    add_osd_ass_event(obj->osd_track, d->text);
+    ass_draw_reset(d);
+
     d->text = talloc_asprintf_append(d->text, "{\\pos(%f,%f)}", px, py);
     ass_draw_start(d);
 
