@@ -86,7 +86,8 @@ static void egl_resize_func(struct vo_wayland_state *wl,
 
 static bool egl_create_context(struct vo_wayland_state *wl,
                                struct egl_context *egl_ctx,
-                               MPGLContext *ctx)
+                               MPGLContext *ctx,
+                               bool enable_alpha)
 {
     EGLint major, minor, n;
 
@@ -101,7 +102,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
         EGL_RED_SIZE, 1,
         EGL_GREEN_SIZE, 1,
         EGL_BLUE_SIZE, 1,
-        EGL_ALPHA_SIZE, 1,
+        EGL_ALPHA_SIZE, enable_alpha,
         EGL_DEPTH_SIZE, 1,
         EGL_RENDERABLE_TYPE, EGL_OPENGL_BIT,
         EGL_NONE
@@ -174,6 +175,7 @@ static bool config_window_wayland(struct MPGLContext *ctx,
 {
     struct egl_context * egl_ctx = ctx->priv;
     struct vo_wayland_state * wl = ctx->vo->wayland;
+    bool enable_alpha = !!(flags & VOFLAG_ALPHA);
     bool ret = false;
 
     wl->window->pending_width = d_width;
@@ -188,7 +190,7 @@ static bool config_window_wayland(struct MPGLContext *ctx,
 
     if (!egl_ctx->egl.ctx) {
         /* Create OpenGL context */
-        ret = egl_create_context(wl, egl_ctx, ctx);
+        ret = egl_create_context(wl, egl_ctx, ctx, enable_alpha);
 
         /* If successfully created the context and we don't want to hide the
          * window than also create the window immediately */
