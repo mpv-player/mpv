@@ -17,6 +17,7 @@ typedef struct mp_vo_opts {
     int stop_screensaver;
     char *winname;
     char** fstype_list;
+    int native_keyrepeat;
 
     float panscan;
     float panscanrange;

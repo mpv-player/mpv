@@ -44,6 +44,7 @@ struct vo_x11_state {
 
     XIM xim;
     XIC xic;
+    bool no_autorepeat;
 
     GC f_gc;    // used to paint background
     GC vo_gc;   // used to paint video

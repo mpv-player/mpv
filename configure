@@ -1829,7 +1829,7 @@ if test "$_x11" = auto && test "$_x11_headers" = yes ; then
     else
       _ld_tmp="$I -lXext -lX11 $_ld_pthread"
     fi
-    statement_check X11/Xutil.h 'XCreateWindow(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)' $_ld_tmp &&
+    statement_check_broken X11/Xutil.h X11/XKBlib.h 'XCreateWindow(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)' $_ld_tmp &&
       _x11=yes
     # Check that there aren't conflicting headers between ApplicationServices
     # and X11. On versions of Mac OSX prior to 10.7 the deprecated QuickDraw API
