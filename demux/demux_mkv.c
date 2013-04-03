@@ -178,6 +178,7 @@ typedef struct mkv_demuxer {
 
     uint64_t skip_to_timecode;
     int v_skip_to_keyframe, a_skip_to_keyframe;
+    bool subtitle_preroll;
 
     int num_audio_tracks;
     int num_video_tracks;
@@ -2114,6 +2115,18 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
                 track->fix_i_bps = 0;
             }
         }
+    } else if (track->type == MATROSKA_TRACK_SUBTITLE
+               && track->id == demuxer->sub->id) {
+        if (tc < mkv_d->skip_to_timecode && !mkv_d->subtitle_preroll)
+            use_this_block = 0;
+        if (use_this_block) {
+            ds = demuxer->sub;
+            if (laces > 1) {
+                mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Subtitles use Matroska "
+                    "lacing. This is abnormal and not supported.\n");
+                use_this_block = 0;
+            }
+        }
     } else if (tc < mkv_d->skip_to_timecode)
         use_this_block = 0;
     else if (track->type == MATROSKA_TRACK_VIDEO
@@ -2121,14 +2134,6 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
         ds = demuxer->video;
         if (mkv_d->v_skip_to_keyframe)
             use_this_block = keyframe;
-    } else if (track->type == MATROSKA_TRACK_SUBTITLE
-               && track->id == demuxer->sub->id) {
-        ds = demuxer->sub;
-        if (laces > 1) {
-            mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Subtitles use Matroska "
-                   "lacing. This is abnormal and not supported.\n");
-            use_this_block = 0;
-        }
     } else
         use_this_block = 0;
 
@@ -2170,6 +2175,7 @@ static int handle_block(demuxer_t *demuxer, uint8_t *block, uint64_t length,
         if (ds == demuxer->video) {
             mkv_d->v_skip_to_keyframe = 0;
             mkv_d->skip_to_timecode = 0;
+            mkv_d->subtitle_preroll = false;
         } else if (ds == demuxer->audio)
             mkv_d->a_skip_to_keyframe = 0;
 
@@ -2410,6 +2416,7 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
     if (flags & SEEK_BACKWARD)
         min_diff = -min_diff;
     min_diff = FFMAX(min_diff, 1);
+
     for (int i = 0; i < mkv_d->num_indexes; i++)
         if (seek_id < 0 || mkv_d->indexes[i].tnum == seek_id) {
             int64_t diff =
@@ -2427,8 +2434,22 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
         }
 
     if (index) {        /* We've found an entry. */
+        uint64_t seek_pos = index->filepos;
+        if (mkv_d->subtitle_preroll && demuxer->sub->id >= 0) {
+            uint64_t prev_target = 0;
+            for (int i = 0; i < mkv_d->num_indexes; i++) {
+                if (seek_id < 0 || mkv_d->indexes[i].tnum == seek_id) {
+                    uint64_t index_pos = mkv_d->indexes[i].filepos;
+                    if (index_pos > prev_target && index_pos < seek_pos)
+                        prev_target = index_pos;
+                }
+            }
+            if (prev_target)
+                seek_pos = prev_target;
+        }
+
         mkv_d->cluster_size = mkv_d->blockgroup_size = 0;
-        stream_seek(demuxer->stream, index->filepos);
+        stream_seek(demuxer->stream, seek_pos);
     }
     return index;
 }
@@ -2445,6 +2466,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
     if (demuxer->audio->id >= 0)
         a_tnum = find_track_by_num(mkv_d, demuxer->audio->id,
                                    MATROSKA_TRACK_AUDIO)->tnum;
+    mkv_d->subtitle_preroll = !!(flags & SEEK_SUBPREROLL);
     if (!(flags & (SEEK_BACKWARD | SEEK_FORWARD))) {
         if (flags & SEEK_ABSOLUTE || rel_seek_secs < 0)
             flags |= SEEK_BACKWARD;

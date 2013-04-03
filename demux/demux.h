@@ -103,6 +103,7 @@ enum timestamp_type {
 #define SEEK_FACTOR   (1 << 1)
 #define SEEK_FORWARD  (1 << 2)
 #define SEEK_BACKWARD (1 << 3)
+#define SEEK_SUBPREROLL (1 << 4)
 
 // demux_lavf can pass lavf buffers using FF_INPUT_BUFFER_PADDING_SIZE instead
 #define MP_INPUT_BUFFER_PADDING_SIZE 16

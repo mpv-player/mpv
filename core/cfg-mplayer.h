@@ -391,6 +391,7 @@ const m_option_t common_opts[] = {
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
     OPT_FLAG("extbased", extension_parsing, 0),
+    OPT_FLAG("mkv-subtitle-preroll", mkv_subtitle_preroll, 0),
 
     {"mf", (void *) mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
 #ifdef CONFIG_RADIO

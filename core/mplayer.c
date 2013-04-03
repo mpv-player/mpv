@@ -2821,6 +2821,8 @@ static int seek(MPContext *mpctx, struct seek_params seek,
         demuxer_style |= SEEK_BACKWARD;
     else if (seek.direction > 0)
         demuxer_style |= SEEK_FORWARD;
+    if (hr_seek || opts->mkv_subtitle_preroll)
+        demuxer_style |= SEEK_SUBPREROLL;
 
     if (hr_seek)
         demuxer_amount -= opts->hr_seek_demuxer_offset;

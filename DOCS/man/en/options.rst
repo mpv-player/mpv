@@ -1173,6 +1173,29 @@
     :fps=<value>:  output fps (default: 25)
     :type=<value>: input file type (available: jpeg, png, tga, sgi)
 
+--mkv-subtitle-preroll
+    Try harder to show embedded soft subtitles when seeking somewhere. Normally,
+    it can happen that the subtitle at the seek target is not shown due to how
+    some container file formats are designed. The subtitles appear only if
+    seeking before or exactly to the position a subtitle first appears. To
+    make this worse, subtitles are often timed to appear a very small amount
+    before the associated video frame, so that seeking to the video frame
+    typically does not demux the subtitle at that position.
+
+    Enabling this option makes the demuxer start reading data a bit before the
+    seek target, so that subtitles appear correctly. Note that this makes
+    seeking slower, and is not guaranteed to always work. It only works if the
+    subtitle is close enough to the seek target.
+
+    Works with the internal Matroska demuxer only. Always enabled for absolute
+    and hr-seeks, and this option changes behavior with relative or imprecise
+    seeks only.
+
+    See also ``--hr-seek-demuxer-offset`` option. This option can achieve a
+    similar effect, but only if hr-seek is active. It works with any demuxer,
+    but makes seeking much slower, as it has to decode audio and video data,
+    instead of just skipping over it.
+
 --mixer=<device>
     Use a mixer device different from the default ``/dev/mixer``. For ALSA
     this is the mixer name.
