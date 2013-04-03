@@ -1186,7 +1186,7 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
      * we want to have "a" and "A" instead of "a" and "Shift+A"; but a separate
      * shift modifier is still kept for special keys like arrow keys.
      */
-    int unmod = code & ~MP_KEY_MODIFIER_MASK;
+    int unmod = code & ~(MP_KEY_MODIFIER_MASK | MP_KEY_STATE_DOWN);
     if (unmod >= 32 && unmod < MP_KEY_BASE)
         code &= ~MP_KEY_MODIFIER_SHIFT;
 
@@ -1208,7 +1208,10 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         ictx->num_key_down++;
         ictx->last_key_down = GetTimer();
         ictx->ar_state = 0;
-        return NULL;
+        ret = NULL;
+        if (!(code & MP_NO_REPEAT_KEY))
+            ret = get_cmd_from_keys(ictx, ictx->num_key_down, ictx->key_down);
+        return ret;
     }
     // button released or press of key with no separate down/up events
     for (j = 0; j < ictx->num_key_down; j++) {
@@ -1224,6 +1227,7 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         j = ictx->num_key_down - 1;
         ictx->key_down[j] = code;
     }
+    bool emit_key = ictx->last_key_down && (code & MP_NO_REPEAT_KEY);
     if (j == ictx->num_key_down) {  // was not already down; add temporarily
         if (ictx->num_key_down > MP_MAX_KEY_DOWN) {
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many key down events "
@@ -1232,12 +1236,12 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         }
         ictx->key_down[ictx->num_key_down] = code;
         ictx->num_key_down++;
-        ictx->last_key_down = 1;
+        emit_key = true;
     }
     // Interpret only maximal point of multibutton event
-    ret = ictx->last_key_down ?
-          get_cmd_from_keys(ictx, ictx->num_key_down, ictx->key_down)
-          : NULL;
+    ret = NULL;
+    if (emit_key)
+        ret = get_cmd_from_keys(ictx, ictx->num_key_down, ictx->key_down);
     if (doubleclick) {
         ictx->key_down[j] = code - MP_MOUSE_BTN0_DBL + MP_MOUSE_BTN0;
         return ret;
@@ -1288,11 +1292,13 @@ void mp_input_feed_key(struct input_ctx *ictx, int code)
 {
     ictx->got_new_events = true;
     if (code == MP_INPUT_RELEASE_ALL) {
+        mp_msg(MSGT_INPUT, MSGL_V, "input: release all\n");
         memset(ictx->key_down, 0, sizeof(ictx->key_down));
         ictx->num_key_down = 0;
         ictx->last_key_down = 0;
         return;
     }
+    mp_msg(MSGT_INPUT, MSGL_V, "input: key code=%#x\n", code);
     struct mp_cmd *cmd = interpret_key(ictx, code);
     if (!cmd)
         return;

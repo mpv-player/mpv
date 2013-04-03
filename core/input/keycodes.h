@@ -186,8 +186,12 @@
                               MP_KEY_MODIFIER_ALT | MP_KEY_MODIFIER_META)
 
 // Use this when the key shouldn't be auto-repeated (like mouse buttons)
+// This is not a modifier, but is part of the keycode itself.
 #define MP_NO_REPEAT_KEY (1<<28)
 
+// Flag for key events. Multiple down events are idempotent. Release keys by
+// sending the key code without this flag, or by sending MP_INPUT_RELEASE_ALL
+// as key code.
 #define MP_KEY_STATE_DOWN (1<<29)
 
 #endif /* MPLAYER_KEYCODES_H */
