@@ -146,7 +146,8 @@ static int mp_property_playback_speed(m_option_t *prop, int action,
         opts->playback_speed = *(float *) arg;
         // Adjust time until next frame flip for nosound mode
         mpctx->time_frame *= orig_speed / opts->playback_speed;
-        reinit_audio_chain(mpctx);
+        if (mpctx->sh_audio)
+            reinit_audio_chain(mpctx);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_PRINT:
