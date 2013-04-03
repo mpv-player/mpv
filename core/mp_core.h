@@ -215,6 +215,8 @@ typedef struct MPContext {
     // As video_pts, but is not reset when seeking away. (For the very short
     // period of time until a new frame is decoded and shown.)
     double last_vo_pts;
+    // Video PTS, or audio PTS if video has ended.
+    double playback_pts;
 
     float audio_delay;
 

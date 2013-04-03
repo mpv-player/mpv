@@ -2694,6 +2694,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
     mpctx->total_avsync_change = 0;
     mpctx->drop_frame_cnt = 0;
     mpctx->dropped_frames = 0;
+    mpctx->playback_pts = MP_NOPTS_VALUE;
 
 #ifdef CONFIG_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
@@ -2960,16 +2961,8 @@ double get_current_time(struct MPContext *mpctx)
         return 0;
     if (demuxer->stream_pts != MP_NOPTS_VALUE)
         return demuxer->stream_pts;
-    if (!mpctx->restart_playback) {
-        double apts = playing_audio_pts(mpctx);
-        if (apts != MP_NOPTS_VALUE)
-            return apts;
-        if (mpctx->sh_video) {
-            double pts = mpctx->video_pts;
-            if (pts != MP_NOPTS_VALUE)
-                return pts;
-        }
-    }
+    if (mpctx->playback_pts != MP_NOPTS_VALUE)
+        return mpctx->playback_pts;
     if (mpctx->last_seek_pts != MP_NOPTS_VALUE)
         return mpctx->last_seek_pts;
     return 0;
@@ -3311,6 +3304,7 @@ static void run_playloop(struct MPContext *mpctx)
         struct sh_video *sh_video = mpctx->sh_video;
         mpctx->video_pts = sh_video->pts;
         mpctx->last_vo_pts = mpctx->video_pts;
+        mpctx->playback_pts = mpctx->video_pts;
         update_subtitles(mpctx, sh_video->pts);
         update_osd_msg(mpctx);
         draw_osd(mpctx);
@@ -3392,6 +3386,7 @@ static void run_playloop(struct MPContext *mpctx)
             a_pos = (written_audio_pts(mpctx) -
                      mpctx->opts.playback_speed * buffered_audio);
         }
+        mpctx->playback_pts = a_pos;
         print_status(mpctx);
 
         if (!mpctx->sh_video)
@@ -4104,6 +4099,7 @@ goto_enable_cache: ;
     mpctx->video_pts = 0;
     mpctx->last_vo_pts = MP_NOPTS_VALUE;
     mpctx->last_seek_pts = 0;
+    mpctx->playback_pts = MP_NOPTS_VALUE;
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;
     mpctx->step_frames = 0;
