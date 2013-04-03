@@ -2692,7 +2692,6 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;
     mpctx->total_avsync_change = 0;
-    mpctx->step_frames = 0;
     mpctx->drop_frame_cnt = 0;
     mpctx->dropped_frames = 0;
 
@@ -3368,25 +3367,6 @@ static void run_playloop(struct MPContext *mpctx)
         break;
     } // video
 
-    // If no more video is available, one frame means one playloop iteration.
-    // Otherwise, one frame means one video frame.
-    if (!video_left)
-        new_frame_shown = true;
-
-    if (mpctx->max_frames >= 0) {
-        if (new_frame_shown)
-            mpctx->max_frames--;
-        if (mpctx->max_frames <= 0)
-            mpctx->stop_play = PT_NEXT_ENTRY;
-    }
-
-    if (mpctx->step_frames > 0 && !mpctx->paused) {
-        if (new_frame_shown)
-            mpctx->step_frames--;
-        if (mpctx->step_frames == 0)
-            pause_player(mpctx);
-    }
-
     if (mpctx->sh_audio && (mpctx->restart_playback ? !video_left :
                             mpctx->ao->untimed && (mpctx->delay <= 0 ||
                                                    !video_left))) {
@@ -3418,13 +3398,6 @@ static void run_playloop(struct MPContext *mpctx)
             update_subtitles(mpctx, a_pos);
     }
 
-    if (opts->playing_msg && !mpctx->playing_msg_shown && new_frame_shown) {
-        mpctx->playing_msg_shown = true;
-        char *msg = mp_property_expand_string(mpctx, opts->playing_msg);
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s\n", msg);
-        talloc_free(msg);
-    }
-
     /* It's possible for the user to simultaneously switch both audio
      * and video streams to "disabled" at runtime. Handle this by waiting
      * rather than immediately stopping playback due to EOF.
@@ -3451,7 +3424,40 @@ static void run_playloop(struct MPContext *mpctx)
                         }, true);
         } else
             mpctx->stop_play = AT_END_OF_FILE;
-    } else if (!mpctx->stop_play) {
+        sleeptime = 0;
+    }
+
+    if (!mpctx->stop_play && !mpctx->restart_playback) {
+
+        // If no more video is available, one frame means one playloop iteration.
+        // Otherwise, one frame means one video frame.
+        if (!video_left)
+            new_frame_shown = true;
+
+        if (opts->playing_msg && !mpctx->playing_msg_shown && new_frame_shown) {
+            mpctx->playing_msg_shown = true;
+            char *msg = mp_property_expand_string(mpctx, opts->playing_msg);
+            mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s\n", msg);
+            talloc_free(msg);
+        }
+
+        if (mpctx->max_frames >= 0) {
+            if (new_frame_shown)
+                mpctx->max_frames--;
+            if (mpctx->max_frames <= 0)
+                mpctx->stop_play = PT_NEXT_ENTRY;
+        }
+
+        if (mpctx->step_frames > 0 && !mpctx->paused) {
+            if (new_frame_shown)
+                mpctx->step_frames--;
+            if (mpctx->step_frames == 0)
+                pause_player(mpctx);
+        }
+
+    }
+
+    if (!mpctx->stop_play) {
         double audio_sleep = 9;
         if (mpctx->sh_audio && !mpctx->paused) {
             if (mpctx->ao->untimed) {
