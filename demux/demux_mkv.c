@@ -92,6 +92,7 @@ typedef struct mkv_track {
     int type;
 
     uint32_t v_width, v_height, v_dwidth, v_dheight;
+    bool v_dwidth_set, v_dheight_set;
     double v_frate;
     uint32_t colorspace;
 
@@ -538,11 +539,13 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
     }
     if (video->n_display_width) {
         track->v_dwidth = video->display_width;
+        track->v_dwidth_set = true;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Display width: %u\n",
                track->v_dwidth);
     }
     if (video->n_display_height) {
         track->v_dheight = video->display_height;
+        track->v_dheight_set = true;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Display height: %u\n",
                track->v_dheight);
     }
@@ -1279,8 +1282,8 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
     if (!track->realmedia) {
         sh_v->disp_w = track->v_width;
         sh_v->disp_h = track->v_height;
-        uint32_t dw = track->v_dwidth ? track->v_dwidth : track->v_width;
-        uint32_t dh = track->v_dheight ? track->v_dheight : track->v_height;
+        uint32_t dw = track->v_dwidth_set ? track->v_dwidth : track->v_width;
+        uint32_t dh = track->v_dheight_set ? track->v_dheight : track->v_height;
         if (dw && dh)
             sh_v->aspect = (double) dw / dh;
     } else {
