@@ -66,14 +66,8 @@ void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)
         if (!cur)
             break;
         if (av_codec_is_decoder(cur) && cur->type == type) {
-            struct mp_decoder_entry entry = {
-                .family = "lavc",
-                .codec = mp_codec_from_av_codec_id(cur->id),
-                .decoder = cur->name,
-                .desc = cur->long_name,
-            };
-            assert(entry.family);
-            MP_TARRAY_APPEND(list, list->entries, list->num_entries, entry);
+            mp_add_decoder(list, "lavc", mp_codec_from_av_codec_id(cur->id),
+                           cur->name, cur->long_name);
         }
     }
 }
