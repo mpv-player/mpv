@@ -2435,7 +2435,7 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
 
     if (index) {        /* We've found an entry. */
         uint64_t seek_pos = index->filepos;
-        if (mkv_d->subtitle_preroll && demuxer->sub->id >= 0) {
+        if (mkv_d->subtitle_preroll) {
             uint64_t prev_target = 0;
             for (int i = 0; i < mkv_d->num_indexes; i++) {
                 if (seek_id < 0 || mkv_d->indexes[i].tnum == seek_id) {
@@ -2466,7 +2466,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
     if (demuxer->audio->id >= 0)
         a_tnum = find_track_by_num(mkv_d, demuxer->audio->id,
                                    MATROSKA_TRACK_AUDIO)->tnum;
-    mkv_d->subtitle_preroll = !!(flags & SEEK_SUBPREROLL);
+    mkv_d->subtitle_preroll = (flags & SEEK_SUBPREROLL) && demuxer->sub->id >= 0;
     if (!(flags & (SEEK_BACKWARD | SEEK_FORWARD))) {
         if (flags & SEEK_ABSOLUTE || rel_seek_secs < 0)
             flags |= SEEK_BACKWARD;
