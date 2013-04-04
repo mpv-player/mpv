@@ -36,6 +36,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
             .WinID = -1,
         },
         .wintitle = "mpv - ${media-title}",
+        .heartbeat_interval = 30.0,
         .gamma_gamma = 1000,
         .gamma_brightness = 1000,
         .gamma_contrast = 1000,

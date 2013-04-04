@@ -220,6 +220,7 @@ typedef struct MPContext {
 
     float audio_delay;
 
+    unsigned int last_heartbeat;
     // used to prevent hanging in some error cases
     unsigned int start_timestamp;
 

@@ -3243,10 +3243,11 @@ static void run_playloop(struct MPContext *mpctx)
         vo_check_events(vo);
 
         if (opts->heartbeat_cmd) {
-            static unsigned last_heartbeat;
             unsigned now = GetTimerMS();
-            if (now - last_heartbeat > 30000) {
-                last_heartbeat = now;
+            if (now - mpctx->last_heartbeat >
+                (unsigned)(opts->heartbeat_interval * 1000))
+            {
+                mpctx->last_heartbeat = now;
                 system(opts->heartbeat_cmd);
             }
         }

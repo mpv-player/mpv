@@ -786,7 +786,8 @@
 
 --heartbeat-cmd
     Command that is executed every 30 seconds during playback via *system()* -
-    i.e. using the shell.
+    i.e. using the shell. The time between the commands can be customized with
+    the ``--heartbeat-interval`` option.
 
     *NOTE*: mpv uses this command without any checking. It is your
     responsibility to ensure it does not cause security problems (e.g. make
@@ -804,6 +805,9 @@
 
     *EXAMPLE for GNOME screensaver*: ``mpv
     --heartbeat-cmd="gnome-screensaver-command -p" file``
+
+--heartbeat-interval=<sec>
+    Time between ``--heartbeat-cmd`` invocations in seconds (default: 30).
 
 --help
     Show short summary of options.
