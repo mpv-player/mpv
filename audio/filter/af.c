@@ -84,7 +84,7 @@ static struct af_info* filter_list[] = {
 static bool af_config_equals(struct mp_audio *a, struct mp_audio *b)
 {
     return a->format == b->format
-        && a->nch    == b->nch
+        && mp_chmap_equals(&a->channels, &b->channels)
         && a->rate   == b->rate;
 }
 
@@ -93,7 +93,7 @@ static void af_copy_unset_fields(struct mp_audio *dst, struct mp_audio *src)
     if (dst->format == AF_FORMAT_UNKNOWN)
         mp_audio_set_format(dst, src->format);
     if (dst->nch == 0)
-        dst->nch = src->nch;
+        mp_audio_set_channels(dst, &src->channels);
     if (dst->rate == 0)
         dst->rate = src->rate;
 }
@@ -304,8 +304,11 @@ repeat:
 static void print_fmt(struct mp_audio *d)
 {
     if (d) {
-        mp_msg(MSGT_AFILTER, MSGL_V, "%dHz/%dch/%s", d->rate, d->nch,
+        char *chstr = mp_chmap_to_str(&d->channels);
+        mp_msg(MSGT_AFILTER, MSGL_V, "%dHz/%s(%dch)/%s", d->rate,
+               chstr ? chstr : "?", d->nch,
                af_fmt2str_short(d->format));
+        talloc_free(chstr);
     } else
         mp_msg(MSGT_AFILTER, MSGL_V, "(?)");
 }
@@ -386,9 +389,9 @@ static int af_fix_channels(struct af_stream *s, struct af_instance **p_af,
     struct af_instance *af = *p_af;
     struct af_instance *prev = af->prev;
     struct mp_audio actual = *prev->data;
-    if (actual.nch == in.nch)
+    if (mp_chmap_equals(&actual.channels, &in.channels))
         return AF_FALSE;
-    if (prev->control(prev, AF_CONTROL_CHANNELS, &in.nch) == AF_OK) {
+    if (prev->control(prev, AF_CONTROL_CHANNELS, &in.channels) == AF_OK) {
         *p_af = prev;
         return AF_OK;
     }
@@ -397,7 +400,7 @@ static int af_fix_channels(struct af_stream *s, struct af_instance **p_af,
     if (new == NULL)
         return AF_ERROR;
     new->auto_inserted = true;
-    if (AF_OK != (rv = new->control(new, AF_CONTROL_CHANNELS, &in.nch)))
+    if (AF_OK != (rv = new->control(new, AF_CONTROL_CHANNELS, &in.channels)))
         return rv;
     *p_af = new;
     return AF_OK;

@@ -27,12 +27,30 @@ void mp_audio_set_format(struct mp_audio *mpa, int format)
 
 void mp_audio_set_num_channels(struct mp_audio *mpa, int num_channels)
 {
-    mpa->nch = num_channels;
+    struct mp_chmap map;
+    mp_chmap_from_channels(&map, num_channels);
+    mp_audio_set_channels(mpa, &map);
+}
+
+// Use old MPlayer/ALSA channel layout.
+void mp_audio_set_channels_old(struct mp_audio *mpa, int num_channels)
+{
+    struct mp_chmap map;
+    mp_chmap_from_channels(&map, num_channels);
+    mp_chmap_reorder_to_alsa(&map);
+    mp_audio_set_channels(mpa, &map);
+}
+
+void mp_audio_set_channels(struct mp_audio *mpa, const struct mp_chmap *chmap)
+{
+    assert(mp_chmap_is_empty(chmap) || mp_chmap_is_valid(chmap));
+    mpa->channels = *chmap;
+    mpa->nch = mpa->channels.num;
 }
 
 void mp_audio_copy_config(struct mp_audio *dst, const struct mp_audio *src)
 {
     mp_audio_set_format(dst, src->format);
-    mp_audio_set_num_channels(dst, src->nch);
+    mp_audio_set_channels(dst, &src->channels);
     dst->rate = src->rate;
 }

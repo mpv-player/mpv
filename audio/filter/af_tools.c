@@ -90,7 +90,7 @@ int af_test_output(struct af_instance* af, struct mp_audio* out)
   if((af->data->format != out->format) ||
      (af->data->bps    != out->bps)    ||
      (af->data->rate   != out->rate)   ||
-     (af->data->nch    != out->nch)){
+     !mp_chmap_equals(&af->data->channels, &out->channels)){
     *out = *af->data;
     return AF_FALSE;
   }

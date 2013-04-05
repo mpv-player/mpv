@@ -93,7 +93,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
   case AF_CONTROL_REINIT:{
     float fc;
     mp_audio_copy_config(af->data, (struct mp_audio*)arg);
-    mp_audio_set_num_channels(af->data, ((struct mp_audio*)arg)->nch*2);
+    mp_audio_set_channels_old(af->data, ((struct mp_audio*)arg)->nch*2);
     mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
 
     if (af->data->nch != 4){
@@ -242,7 +242,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data){
   // Set output data
   data->audio = af->data->audio;
   data->len   *= 2;
-  mp_audio_set_num_channels(data, af->data->nch);
+  mp_audio_set_channels_old(data, af->data->nch);
 
   return data;
 }

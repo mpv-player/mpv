@@ -19,20 +19,24 @@
 #define MP_AUDIO_H
 
 #include "format.h"
+#include "chmap.h"
 
 // Audio data chunk
 struct mp_audio {
     void *audio; // data buffer
     int len;    // buffer length (in bytes)
     int rate;   // sample rate
-    int nch;    // number of channels, use mp_audio_set_channels() to set
+    struct mp_chmap channels; // channel layout, use mp_audio_set_*() to set
     int format; // format (AF_FORMAT_...), use mp_audio_set_format() to set
     // Redundant fields, for convenience
+    int nch;    // number of channels (redundant with chmap)
     int bps;    // bytes per sample (redundant with format)
 };
 
 void mp_audio_set_format(struct mp_audio *mpa, int format);
 void mp_audio_set_num_channels(struct mp_audio *mpa, int num_channels);
+void mp_audio_set_channels_old(struct mp_audio *mpa, int num_channels);
+void mp_audio_set_channels(struct mp_audio *mpa, const struct mp_chmap *chmap);
 void mp_audio_copy_config(struct mp_audio *dst, const struct mp_audio *src);
 
 #endif

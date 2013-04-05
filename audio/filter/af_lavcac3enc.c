@@ -83,7 +83,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (data->nch > AC3_MAX_CHANNELS)
             mp_audio_set_num_channels(af->data, AC3_MAX_CHANNELS);
         else
-            mp_audio_set_num_channels(af->data, data->nch);
+            mp_audio_set_channels(af->data, &data->channels);
+        mp_chmap_reorder_to_lavc(&af->data->channels);
         test_output_res = af_test_output(af, data);
 
         s->pending_len = 0;
@@ -107,8 +108,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
             // Put sample parameters
             s->lavc_actx->channels = af->data->nch;
-            s->lavc_actx->channel_layout =
-                av_get_default_channel_layout(af->data->nch);
+            s->lavc_actx->channel_layout = mp_chmap_to_lavc(&af->data->channels);
             s->lavc_actx->sample_rate = af->data->rate;
             s->lavc_actx->bit_rate = bit_rate;
 

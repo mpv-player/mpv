@@ -120,7 +120,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 	   buf1, buf2);
 
     af->data->rate = data->rate;
-    mp_audio_set_num_channels(af->data, data->nch);
+    mp_audio_set_channels(af->data, &data->channels);
     af->mul        = (double)af->data->bps / data->bps;
 
     af->play = play; // set default

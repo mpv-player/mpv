@@ -60,10 +60,10 @@ struct af_resample_opts {
 
     int in_rate;
     int in_format;
-    int in_channels;
+    struct mp_chmap in_channels;
     int out_rate;
     int out_format;
-    int out_channels;
+    struct mp_chmap out_channels;
 };
 
 struct af_resample {
@@ -96,10 +96,10 @@ static bool needs_lavrctx_reconfigure(struct af_resample *s,
 {
     return s->ctx.in_rate     != in->rate ||
            s->ctx.in_format   != in->format ||
-           s->ctx.in_channels != in->nch ||
+           !mp_chmap_equals(&s->ctx.in_channels, &in->channels) ||
            s->ctx.out_rate    != out->rate ||
            s->ctx.out_format  != out->format ||
-           s->ctx.out_channels!= out->nch ||
+           !mp_chmap_equals(&s->ctx.out_channels, &out->channels) ||
            s->ctx.filter_size != s->opts.filter_size ||
            s->ctx.phase_shift != s->opts.phase_shift ||
            s->ctx.linear      != s->opts.linear ||
@@ -128,16 +128,15 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         if (((out->rate    == in->rate) || (out->rate == 0)) &&
             (out->format   == in->format) &&
-            (out->bps      == in->bps) &&
-            ((out->nch     == in->nch) || out->nch == 0) &&
+            (mp_chmap_equals(&out->channels, &in->channels) || out->nch == 0) &&
             s->allow_detach)
             return AF_DETACH;
 
         if (out->rate == 0)
             out->rate = in->rate;
 
-        if (out->nch == 0)
-            mp_audio_set_num_channels(out, in->nch);
+        if (mp_chmap_is_empty(&out->channels))
+            mp_audio_set_channels(out, &in->channels);
 
         enum AVSampleFormat in_samplefmt = af_to_avformat(in->format);
         if (in_samplefmt == AV_SAMPLE_FMT_NONE) {
@@ -161,15 +160,16 @@ static int control(struct af_instance *af, int cmd, void *arg)
             s->ctx.in_rate     = in->rate;
             s->ctx.out_format  = out->format;
             s->ctx.in_format   = in->format;
-            s->ctx.out_channels= out->nch;
-            s->ctx.in_channels = in->nch;
+            s->ctx.out_channels= out->channels;
+            s->ctx.in_channels = in->channels;
             s->ctx.filter_size = s->opts.filter_size;
             s->ctx.phase_shift = s->opts.phase_shift;
             s->ctx.linear      = s->opts.linear;
             s->ctx.cutoff      = s->opts.cutoff;
 
-            int in_ch_layout = av_get_default_channel_layout(in->nch);
-            int out_ch_layout = av_get_default_channel_layout(out->nch);
+            // unchecked: don't take channel reordering into account
+            uint64_t in_ch_layout = mp_chmap_to_lavc_unchecked(&in->channels);
+            uint64_t out_ch_layout = mp_chmap_to_lavc_unchecked(&out->channels);
 
             ctx_opt_set_int("in_channel_layout",  in_ch_layout);
             ctx_opt_set_int("out_channel_layout", out_ch_layout);
@@ -194,7 +194,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
 
         return ((in->format == orig_in.format) &&
-                (in->nch == orig_in.nch))
+                mp_chmap_equals(&in->channels, &orig_in.channels))
                ? AF_OK : AF_FALSE;
     }
     case AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET: {
@@ -205,12 +205,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         return AF_OK;
     }
     case AF_CONTROL_CHANNELS | AF_CONTROL_SET: {
-        int nch = *(int *)arg;
-
-        if (nch < 1 || nch > AF_NCH)
-            return AF_ERROR;
-
-        mp_audio_set_num_channels(af->data, nch);
+        mp_audio_set_channels(af->data, (struct mp_chmap *)arg);
         return AF_OK;
     }
     case AF_CONTROL_COMMAND_LINE: {

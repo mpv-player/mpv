@@ -193,21 +193,16 @@ static int control(struct af_instance* af, int cmd, void* arg)
       }
     }
 
-    if(AF_OK != af->control(af,AF_CONTROL_CHANNELS | AF_CONTROL_SET ,&nch))
+    struct mp_chmap chmap;
+    mp_chmap_from_channels(&chmap, nch);
+    if (AF_OK != af->control(af, AF_CONTROL_CHANNELS | AF_CONTROL_SET, &chmap))
       return AF_ERROR;
     return AF_OK;
   }
   case AF_CONTROL_CHANNELS | AF_CONTROL_SET:
     // Reinit must be called after this function has been called
 
-    // Sanity check
-    if(((int*)arg)[0] <= 0 || ((int*)arg)[0] > AF_NCH){
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[channels] The number of output channels must be"
-	     " between 1 and %i. Current value is %i\n",AF_NCH,((int*)arg)[0]);
-      return AF_ERROR;
-    }
-
-    mp_audio_set_num_channels(af->data, ((int*)arg)[0]);
+    mp_audio_set_channels(af->data, (struct mp_chmap *)arg);
     if(!s->router)
       mp_msg(MSGT_AFILTER, MSGL_V, "[channels] Changing number of channels"
 	     " to %i\n",af->data->nch);
@@ -247,7 +242,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
   // Set output data
   c->audio = l->audio;
   c->len   = c->len / c->nch * l->nch;
-  mp_audio_set_num_channels(c, l->nch);
+  mp_audio_set_channels(c, &l->channels);
 
   return c;
 }
