@@ -75,16 +75,15 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (AF_FORMAT_IS_AC3(data->format) || data->nch < s->min_channel_num)
             return AF_DETACH;
 
-        af->data->format = s->in_sampleformat;
-        af->data->bps = af_fmt2bits(s->in_sampleformat) / 8;
+        mp_audio_set_format(af->data, s->in_sampleformat);
         if (data->rate == 48000 || data->rate == 44100 || data->rate == 32000)
             af->data->rate = data->rate;
         else
             af->data->rate = 48000;
         if (data->nch > AC3_MAX_CHANNELS)
-            af->data->nch = AC3_MAX_CHANNELS;
+            mp_audio_set_num_channels(af->data, AC3_MAX_CHANNELS);
         else
-            af->data->nch = data->nch;
+            mp_audio_set_num_channels(af->data, data->nch);
         test_output_res = af_test_output(af, data);
 
         s->pending_len = 0;
@@ -123,9 +122,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
                    "encoder frame size %d\n", s->lavc_actx->frame_size);
             return AF_ERROR;
         }
-        af->data->format = AF_FORMAT_AC3_BE;
-        af->data->bps = 2;
-        af->data->nch = 2;
+        mp_audio_set_format(af->data, AF_FORMAT_AC3_BE);
+        mp_audio_set_num_channels(af->data, 2);
         return test_output_res;
     case AF_CONTROL_COMMAND_LINE:
         mp_msg(MSGT_AFILTER, MSGL_DBG2, "af_lavcac3enc cmdline: %s.\n", (char*)arg);
@@ -316,8 +314,8 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
         buf += len;
     }
     c->audio = l->audio;
-    c->nch   = 2;
-    c->bps   = 2;
+    mp_audio_set_num_channels(c, 2);
+    mp_audio_set_format(c, af->data->format);
     c->len   = outsize;
     mp_msg(MSGT_AFILTER, MSGL_DBG2, "play return size %d, pending %d\n",
            outsize, s->pending_len);

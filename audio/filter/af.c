@@ -84,17 +84,14 @@ static struct af_info* filter_list[] = {
 static bool af_config_equals(struct mp_audio *a, struct mp_audio *b)
 {
     return a->format == b->format
-        && a->bps    == b->bps
         && a->nch    == b->nch
         && a->rate   == b->rate;
 }
 
 static void af_copy_unset_fields(struct mp_audio *dst, struct mp_audio *src)
 {
-    if (dst->format == AF_FORMAT_UNKNOWN) {
-        dst->format = src->format;
-        dst->bps = src->bps;
-    }
+    if (dst->format == AF_FORMAT_UNKNOWN)
+        mp_audio_set_format(dst, src->format);
     if (dst->nch == 0)
         dst->nch = src->nch;
     if (dst->rate == 0)
@@ -459,9 +456,6 @@ int af_reinit(struct af_stream *s)
             af = af->next;
             break;
         case AF_FALSE: { // Configuration filter is needed
-            // Set output bits per sample (unknown why this would be needed)
-            in.format |= af_bits2fmt(in.bps * 8);
-
             if (af_fix_channels(s, &af, in) == AF_OK) {
                 retry++;
                 continue;
@@ -742,14 +736,4 @@ void af_help(void)
         }
         i++;
     }
-}
-
-void af_fix_parameters(struct mp_audio *data)
-{
-    if (data->nch < 0 || data->nch > AF_NCH) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR,
-               "Invalid number of channels %i, assuming 2.\n", data->nch);
-        data->nch = 2;
-    }
-    data->bps = af_fmt2bits(data->format) / 8;
 }

@@ -27,6 +27,7 @@
 #include "core/options.h"
 #include "audio/format.h"
 #include "audio/chmap.h"
+#include "audio/audio.h"
 #include "control.h"
 #include "core/mp_msg.h"
 
@@ -34,17 +35,6 @@ struct af_instance;
 
 // Number of channels
 #define AF_NCH MP_NUM_CHANNELS
-
-// Audio data chunk
-struct mp_audio {
-    void *audio; // data buffer
-    int len;    // buffer length
-    int rate;   // sample rate
-    int nch;    // number of channels
-    int format; // format
-    int bps;    // bytes per sample
-};
-
 
 // Flags used for defining the behavior of an audio filter
 #define AF_FLAGS_REENTRANT      0x00000000
@@ -294,15 +284,6 @@ float af_softclip(float a);
 
 /** Print a list of all available audio filters */
 void af_help(void);
-
-/**
- * \brief fill the missing parameters in the struct mp_audio structure
- * \param data structure to fill
- * \ingroup af_filter
- *
- * Currently only sets bps based on format
- */
-void af_fix_parameters(struct mp_audio *data);
 
 /** Memory reallocation macro: if a local buffer is used (i.e. if the
    filter doesn't operate on the incoming buffer this macro must be

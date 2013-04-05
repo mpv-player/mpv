@@ -54,8 +54,8 @@ static int control(struct af_instance* af, int cmd, void* arg)
     // Sanity check
     if(!arg) return AF_ERROR;
 
-    af->data->rate   = ((struct mp_audio*)arg)->rate;
-    af->data->nch    = 1;
+    mp_audio_copy_config(af->data, (struct mp_audio*)arg);
+    mp_audio_set_num_channels(af->data, 1);
 #if 0
     if (((struct mp_audio*)arg)->format == AF_FORMAT_FLOAT_NE)
     {
@@ -65,8 +65,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     }// else
 #endif
     {
-	af->data->format = AF_FORMAT_S16_NE;
-	af->data->bps = 2;
+        mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
 	af->play = play_s16;
     }
 

@@ -164,8 +164,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     }
 
     af->data->rate   = ((struct mp_audio*)arg)->rate;
-    af->data->format = ((struct mp_audio*)arg)->format;
-    af->data->bps    = ((struct mp_audio*)arg)->bps;
+    mp_audio_set_format(af->data, ((struct mp_audio*)arg)->format);
     af->mul          = (double)af->data->nch / ((struct mp_audio*)arg)->nch;
     return check_routes(s,((struct mp_audio*)arg)->nch,af->data->nch);
   case AF_CONTROL_COMMAND_LINE:{
@@ -208,7 +207,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
       return AF_ERROR;
     }
 
-    af->data->nch=((int*)arg)[0];
+    mp_audio_set_num_channels(af->data, ((int*)arg)[0]);
     if(!s->router)
       mp_msg(MSGT_AFILTER, MSGL_V, "[channels] Changing number of channels"
 	     " to %i\n",af->data->nch);
@@ -248,7 +247,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
   // Set output data
   c->audio = l->audio;
   c->len   = c->len / c->nch * l->nch;
-  c->nch   = l->nch;
+  mp_audio_set_num_channels(c, l->nch);
 
   return c;
 }

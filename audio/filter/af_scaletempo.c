@@ -302,29 +302,22 @@ static int control(struct af_instance* af, int cmd, void* arg)
            "[scaletempo] %.3f speed * %.3f scale_nominal = %.3f\n",
            s->speed, s->scale_nominal, s->scale);
 
+    mp_audio_copy_config(af->data, data);
+
     if (s->scale == 1.0) {
       if (s->speed_tempo && s->speed_pitch)
         return AF_DETACH;
-      af->data->format = data->format;
-      af->data->nch    = data->nch;
-      af->data->rate   = data->rate;
-      af->data->bps    = data->bps;
       af->delay = 0;
       af->mul = 1;
       return af_test_output(af, data);
     }
 
-    af->data->rate = data->rate;
-    af->data->nch  = data->nch;
-    if ( data->format == AF_FORMAT_S16_LE
-         || data->format == AF_FORMAT_S16_BE ) {
+    if (data->format == AF_FORMAT_S16_NE) {
       use_int = 1;
-      af->data->format  = AF_FORMAT_S16_NE;
-      af->data->bps     = bps = 2;
     } else {
-      af->data->format = AF_FORMAT_FLOAT_NE;
-      af->data->bps    = bps = 4;
+      mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
     }
+    bps = af->data->bps;
 
     frames_stride           = srate * s->ms_stride;
     s->bytes_stride         = frames_stride * bps * nch;

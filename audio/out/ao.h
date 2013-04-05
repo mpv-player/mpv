@@ -88,7 +88,7 @@ struct ao {
     int samplerate;
     int channels;
     int format;
-    int bps;
+    int bps; // bytes per second
     int outburst;
     int buffersize;
     double pts;

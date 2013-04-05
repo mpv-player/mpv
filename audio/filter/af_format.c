@@ -94,8 +94,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     int supported_ac3 = 0;
 
     // Make sure this filter isn't redundant
-    if(af->data->format == data->format &&
-       af->data->bps == data->bps)
+    if(af->data->format == data->format)
       return AF_DETACH;
 
     // A bit complex because we can convert AC3
@@ -121,7 +120,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 	   buf1, buf2);
 
     af->data->rate = data->rate;
-    af->data->nch  = data->nch;
+    mp_audio_set_num_channels(af->data, data->nch);
     af->mul        = (double)af->data->bps / data->bps;
 
     af->play = play; // set default
@@ -164,8 +163,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     if(!AF_FORMAT_IS_AC3(*(int*)arg) && AF_OK != check_format(*(int*)arg))
       return AF_ERROR;
 
-    af->data->format = *(int*)arg;
-    af->data->bps = af_fmt2bits(af->data->format)/8;
+    mp_audio_set_format(af->data, *(int*)arg);
 
     return AF_OK;
   }
@@ -194,7 +192,7 @@ static struct mp_audio* play_swapendian(struct af_instance* af, struct mp_audio*
   endian(c->audio,l->audio,len,c->bps);
 
   c->audio = l->audio;
-  c->format = l->format;
+  mp_audio_set_format(c, l->format);
 
   return c;
 }
@@ -211,9 +209,8 @@ static struct mp_audio* play_float_s16(struct af_instance* af, struct mp_audio* 
   float2int(c->audio, l->audio, len, 2);
 
   c->audio = l->audio;
+  mp_audio_set_format(c, l->format);
   c->len = len*2;
-  c->bps = 2;
-  c->format = l->format;
 
   return c;
 }
@@ -230,9 +227,8 @@ static struct mp_audio* play_s16_float(struct af_instance* af, struct mp_audio* 
   int2float(c->audio, l->audio, len, 2);
 
   c->audio = l->audio;
+  mp_audio_set_format(c, l->format);
   c->len = len*4;
-  c->bps = 4;
-  c->format = l->format;
 
   return c;
 }
@@ -284,9 +280,8 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 
   // Set output data
   c->audio  = l->audio;
+  mp_audio_set_format(c, l->format);
   c->len    = len*l->bps;
-  c->bps    = l->bps;
-  c->format = l->format;
   return c;
 }
 

@@ -205,16 +205,14 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     if (!afs)
         afs = af_new(sh_audio->opts);
     // input format: same as codec's output format:
-    afs->input.rate   = in_samplerate;
-    afs->input.nch    = sh_audio->channels;
-    afs->input.format = sh_audio->sample_format;
-    af_fix_parameters(&(afs->input));
+    afs->input.rate = in_samplerate;
+    mp_audio_set_num_channels(&afs->input, sh_audio->channels);
+    mp_audio_set_format(&afs->input, sh_audio->sample_format);
 
     // output format: same as ao driver's input format (if missing, fallback to input)
-    afs->output.rate   = *out_samplerate;
-    afs->output.nch    = *out_channels;
-    afs->output.format = *out_format;
-    af_fix_parameters(&(afs->output));
+    afs->output.rate = *out_samplerate;
+    mp_audio_set_num_channels(&afs->output, *out_channels);
+    mp_audio_set_format(&afs->output, *out_format);
 
     // filter config:
     memcpy(&afs->cfg, &af_cfg, sizeof(struct af_cfg));
@@ -284,10 +282,10 @@ static int filter_n_bytes(sh_audio_t *sh, struct bstr *outbuf, int len)
         .audio = sh->a_buffer,
         .len = len,
         .rate = sh->samplerate,
-        .nch = sh->channels,
-        .format = sh->sample_format
     };
-    af_fix_parameters(&filter_input);
+    mp_audio_set_format(&filter_input, sh->sample_format);
+    mp_audio_set_num_channels(&filter_input, sh->channels);
+
     struct mp_audio *filter_output = af_play(sh->afilter, &filter_input);
     if (!filter_output)
         return -1;

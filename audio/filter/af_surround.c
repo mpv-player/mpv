@@ -92,10 +92,9 @@ static int control(struct af_instance* af, int cmd, void* arg)
   switch(cmd){
   case AF_CONTROL_REINIT:{
     float fc;
-    af->data->rate   = ((struct mp_audio*)arg)->rate;
-    af->data->nch    = ((struct mp_audio*)arg)->nch*2;
-    af->data->format = AF_FORMAT_FLOAT_NE;
-    af->data->bps    = 4;
+    mp_audio_copy_config(af->data, (struct mp_audio*)arg);
+    mp_audio_set_num_channels(af->data, ((struct mp_audio*)arg)->nch*2);
+    mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
 
     if (af->data->nch != 4){
       mp_msg(MSGT_AFILTER, MSGL_ERR, "[surround] Only stereo input is supported.\n");
@@ -125,8 +124,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     if((af->data->format != ((struct mp_audio*)arg)->format) ||
        (af->data->bps    != ((struct mp_audio*)arg)->bps)){
-      ((struct mp_audio*)arg)->format = af->data->format;
-      ((struct mp_audio*)arg)->bps = af->data->bps;
+      mp_audio_set_format((struct mp_audio*)arg, af->data->format);
       return AF_FALSE;
     }
     return AF_OK;
@@ -244,7 +242,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data){
   // Set output data
   data->audio = af->data->audio;
   data->len   *= 2;
-  data->nch   = af->data->nch;
+  mp_audio_set_num_channels(data, af->data->nch);
 
   return data;
 }

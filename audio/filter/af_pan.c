@@ -45,15 +45,13 @@ static int control(struct af_instance* af, int cmd, void* arg)
     if(!arg) return AF_ERROR;
 
     af->data->rate   = ((struct mp_audio*)arg)->rate;
-    af->data->format = AF_FORMAT_FLOAT_NE;
-    af->data->bps    = 4;
-    af->data->nch    = s->nch ? s->nch: ((struct mp_audio*)arg)->nch;
+    mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
+    mp_audio_set_num_channels(af->data, s->nch ? s->nch: ((struct mp_audio*)arg)->nch);
     af->mul          = (double)af->data->nch / ((struct mp_audio*)arg)->nch;
 
     if((af->data->format != ((struct mp_audio*)arg)->format) ||
        (af->data->bps != ((struct mp_audio*)arg)->bps)){
-      ((struct mp_audio*)arg)->format = af->data->format;
-      ((struct mp_audio*)arg)->bps = af->data->bps;
+      mp_audio_set_format((struct mp_audio*)arg, af->data->format);
       return AF_FALSE;
     }
     return AF_OK;
@@ -178,7 +176,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
   // Set output data
   c->audio = l->audio;
   c->len   = c->len / c->nch * l->nch;
-  c->nch   = l->nch;
+  mp_audio_set_num_channels(c, l->nch);
 
   return c;
 }

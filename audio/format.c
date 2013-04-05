@@ -29,6 +29,8 @@
 int af_fmt2bits(int format)
 {
     if (AF_FORMAT_IS_AC3(format)) return 16;
+    if (format == AF_FORMAT_UNKNOWN)
+        return 0;
     return (format & AF_FORMAT_BITS_MASK)+8;
 //    return (((format & AF_FORMAT_BITS_MASK)>>3)+1) * 8;
 #if 0

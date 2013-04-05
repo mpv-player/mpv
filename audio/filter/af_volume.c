@@ -66,12 +66,10 @@ static int control(struct af_instance* af, int cmd, void* arg)
     // Sanity check
     if(!arg) return AF_ERROR;
 
-    af->data->rate   = ((struct mp_audio*)arg)->rate;
-    af->data->nch    = ((struct mp_audio*)arg)->nch;
+    mp_audio_copy_config(af->data, (struct mp_audio*)arg);
 
     if(s->fast && (((struct mp_audio*)arg)->format != (AF_FORMAT_FLOAT_NE))){
-      af->data->format = AF_FORMAT_S16_NE;
-      af->data->bps    = 2;
+      mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
     }
     else{
       // Cutoff set to 10Hz for forgetting factor
@@ -79,8 +77,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
       float t = 2.0-cos(x);
       s->time = 1.0 - (t - sqrt(t*t - 1));
       mp_msg(MSGT_AFILTER, MSGL_DBG2, "[volume] Forgetting factor = %0.5f\n",s->time);
-      af->data->format = AF_FORMAT_FLOAT_NE;
-      af->data->bps    = 4;
+      mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
     }
     return af_test_output(af,(struct mp_audio*)arg);
   case AF_CONTROL_COMMAND_LINE:{

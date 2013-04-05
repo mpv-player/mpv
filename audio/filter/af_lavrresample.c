@@ -137,21 +137,19 @@ static int control(struct af_instance *af, int cmd, void *arg)
             out->rate = in->rate;
 
         if (out->nch == 0)
-            out->nch = in->nch;
+            mp_audio_set_num_channels(out, in->nch);
 
         enum AVSampleFormat in_samplefmt = af_to_avformat(in->format);
         if (in_samplefmt == AV_SAMPLE_FMT_NONE) {
-            in->format = AF_FORMAT_FLOAT_NE;
+            mp_audio_set_format(in, AF_FORMAT_FLOAT_NE);
             in_samplefmt = af_to_avformat(in->format);
         }
         enum AVSampleFormat out_samplefmt = af_to_avformat(out->format);
         if (out_samplefmt == AV_SAMPLE_FMT_NONE) {
-            out->format = in->format;
+            mp_audio_set_format(out, in->format);
             out_samplefmt = in_samplefmt;
         }
 
-        out->bps    = af_fmt2bits(out->format) / 8;
-        in->bps     = af_fmt2bits(in->format) / 8;
         af->mul     = (double) (out->rate * out->nch) / (in->rate * in->nch);
         af->delay   = out->nch * s->opts.filter_size / FFMIN(af->mul, 1);
 
@@ -196,16 +194,14 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
 
         return ((in->format == orig_in.format) &&
-                (in->bps    == orig_in.bps) &&
-                (in->nch    == orig_in.nch))
+                (in->nch == orig_in.nch))
                ? AF_OK : AF_FALSE;
     }
     case AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET: {
         if (af_to_avformat(*(int*)arg) == AV_SAMPLE_FMT_NONE)
             return AF_FALSE;
 
-        af->data->format = *(int*)arg;
-        af->data->bps = af_fmt2bits(af->data->format)/8;
+        mp_audio_set_format(af->data, *(int*)arg);
         return AF_OK;
     }
     case AF_CONTROL_CHANNELS | AF_CONTROL_SET: {
@@ -214,7 +210,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (nch < 1 || nch > AF_NCH)
             return AF_ERROR;
 
-        af->data->nch = nch;
+        mp_audio_set_num_channels(af->data, nch);
         return AF_OK;
     }
     case AF_CONTROL_COMMAND_LINE: {

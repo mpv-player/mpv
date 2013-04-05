@@ -122,6 +122,7 @@ ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
 endif
 
 SOURCES = talloc.c \
+          audio/audio.c \
           audio/chmap.c \
           audio/fmt-conversion.c \
           audio/format.c \

@@ -48,9 +48,8 @@ static int control(struct af_instance* af, int cmd, void* arg)
     if(!arg) return AF_ERROR;
 
     af->data->rate   = ((struct mp_audio*)arg)->rate;
-    af->data->nch    = max(s->ch+1,((struct mp_audio*)arg)->nch);
-    af->data->format = AF_FORMAT_FLOAT_NE;
-    af->data->bps    = 4;
+    mp_audio_set_num_channels(af->data, max(s->ch+1,((struct mp_audio*)arg)->nch));
+    mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
 
     return af_test_output(af,(struct mp_audio*)arg);
   }
