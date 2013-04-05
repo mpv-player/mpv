@@ -153,8 +153,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         af->delay   = out->nch * s->opts.filter_size / FFMIN(af->mul, 1);
 
         if (needs_lavrctx_reconfigure(s, in, out)) {
-            if (s->avrctx)
-                avresample_close(s->avrctx);
+            avresample_close(s->avrctx);
 
             s->ctx.out_rate    = out->rate;
             s->ctx.in_rate     = in->rate;
