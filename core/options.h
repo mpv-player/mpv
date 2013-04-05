@@ -216,7 +216,6 @@ typedef struct MPOpts {
         int ar_delay;
         int ar_rate;
         char *js_dev;
-        char *ar_dev;
         char *in_file;
         int use_joystick;
         int use_lirc;

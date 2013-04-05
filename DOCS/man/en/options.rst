@@ -911,10 +911,6 @@
     Specify input configuration file other than the default
     ``~/.mpv/input.conf``.
 
---input-ar-dev=<device>
-    Device to be used for Apple IR Remote (default is autodetected, Linux
-    only).
-
 --input-ar-delay
     Delay in milliseconds before we start to autorepeat a key (0 to
     disable).
