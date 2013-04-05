@@ -443,8 +443,8 @@ int af_reinit(struct af_stream *s)
     // filter which needs no initialization.
     struct af_instance *af = s->first->next;
     int retry = 0;
-    while (af && retry < 5) {
-        if (retry >= 5)
+    while (af) {
+        if (retry >= 20)
             goto negotiate_error;
 
         // Check if this is the first filter
@@ -492,7 +492,6 @@ int af_reinit(struct af_stream *s)
             af_print_filter_chain(s, af);
             return AF_ERROR;
         }
-        retry = 0;
     }
 
     af_print_filter_chain(s, NULL);
