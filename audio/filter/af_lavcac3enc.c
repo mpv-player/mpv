@@ -233,15 +233,6 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
             src2= s->pending_data;
         }
 
-        if (c->nch >= 5) {
-            reorder_channel_nch(src2,
-                                AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
-                                AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
-                                c->nch,
-                                s->expect_len / samplesize,
-                                samplesize);
-        }
-
         void *data = (void *) src2;
         if (s->planarize) {
             void *data2 = malloc(s->expect_len);
