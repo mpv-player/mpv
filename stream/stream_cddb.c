@@ -57,7 +57,7 @@
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 #include <sys/cdio.h>
 #elif defined(__MINGW32__) || defined(__CYGWIN__)
-#include <ddk/ntddcdrm.h>
+#include <ntddcdrm.h>
 #elif defined(__bsdi__)
 #include <dvd.h>
 #elif defined(__APPLE__) || defined(__DARWIN__)
