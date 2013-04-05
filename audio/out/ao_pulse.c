@@ -209,7 +209,7 @@ static int init(struct ao *ao, char *params)
         priv->broken_pause = true;
     }
 
-    ss.channels = ao->channels;
+    ss.channels = ao->channels.num;
     ss.rate = ao->samplerate;
 
     const struct format_map *fmt_map = format_maps;
@@ -230,7 +230,9 @@ static int init(struct ao *ao, char *params)
         goto fail;
     }
 
+    mp_chmap_reorder_to_waveext(&ao->channels);
     pa_channel_map_init_auto(&map, ss.channels, PA_CHANNEL_MAP_WAVEEX);
+
     ao->bps = pa_bytes_per_second(&ss);
 
     if (!(priv->mainloop = pa_threaded_mainloop_new())) {
@@ -495,7 +497,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             const ao_control_vol_t *vol = arg;
             struct pa_cvolume volume;
 
-            pa_cvolume_reset(&volume, ao->channels);
+            pa_cvolume_reset(&volume, ao->channels.num);
             if (volume.channels != 2)
                 pa_cvolume_set(&volume, volume.channels, VOL_MP2PA(vol->left));
             else {

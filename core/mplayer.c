@@ -1564,7 +1564,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->ao->format = opts->audio_output_format;
         // Automatic downmix
         if (opts->audio_output_channels == 2 && mpctx->sh_audio->channels != 2)
-            mpctx->ao->channels = 2;
+            mp_chmap_from_channels(&mpctx->ao->channels, 2);
     }
     ao = mpctx->ao;
 
@@ -1591,7 +1591,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mp_msg(MSGT_CPLAYER, MSGL_INFO,
                "AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
                ao->driver->info->short_name,
-               ao->samplerate, ao->channels,
+               ao->samplerate, ao->channels.num,
                af_fmt2str_short(ao->format),
                af_fmt2bits(ao->format) / 8);
         mp_msg(MSGT_CPLAYER, MSGL_V, "AO: Description: %s\nAO: Author: %s\n",
@@ -2160,7 +2160,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
             ptsdiff = written_pts - mpctx->sh_video->pts - mpctx->delay
                       - mpctx->audio_delay;
         bytes = ptsdiff * bps;
-        bytes -= bytes % (ao->channels * af_fmt2bits(ao->format) / 8);
+        bytes -= bytes % (ao->channels.num * af_fmt2bits(ao->format) / 8);
 
         // ogg demuxers give packets without timing
         if (written_pts <= 1 && sh_audio->pts == MP_NOPTS_VALUE) {
@@ -2229,7 +2229,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     bool partial_fill = false;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     bool modifiable_audio_format = !(ao->format & AF_FORMAT_SPECIAL_MASK);
-    int unitsize = ao->channels * af_fmt2bits(ao->format) / 8;
+    int unitsize = ao->channels.num * af_fmt2bits(ao->format) / 8;
 
     if (mpctx->paused)
         playsize = 1;   // just initialize things (audio pts at least)

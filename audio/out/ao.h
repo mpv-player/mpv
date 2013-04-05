@@ -23,6 +23,7 @@
 
 #include "core/bstr.h"
 #include "core/mp_common.h"
+#include "audio/chmap.h"
 
 enum aocontrol {
     // _VOLUME commands take struct ao_control_vol pointer for input/output.
@@ -55,7 +56,7 @@ typedef struct ao_info {
 /* interface towards mplayer and */
 typedef struct ao_old_functions {
     int (*control)(int cmd, void *arg);
-    int (*init)(int rate, int channels, int format, int flags);
+    int (*init)(int rate, const struct mp_chmap *channels, int format, int flags);
     void (*uninit)(int immed);
     void (*reset)(void);
     int (*get_space)(void);
@@ -86,7 +87,7 @@ struct ao_driver {
 /* global data used by mplayer and plugins */
 struct ao {
     int samplerate;
-    int channels;
+    struct mp_chmap channels;
     int format;
     int bps; // bytes per second
     int outburst;

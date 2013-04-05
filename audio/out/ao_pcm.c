@@ -69,7 +69,7 @@ static void fput32le(uint32_t val, FILE *fp)
 
 static void write_wave_header(struct ao *ao, FILE *fp, uint64_t data_length)
 {
-    bool use_waveex = ao->channels >= 5 && ao->channels <= 8;
+    bool use_waveex = true;
     uint16_t fmt = ao->format == AF_FORMAT_FLOAT_LE ?
         WAV_ID_FLOAT_PCM : WAV_ID_PCM;
     uint32_t fmt_chunk_size = use_waveex ? 40 : 16;
@@ -86,30 +86,17 @@ static void write_wave_header(struct ao *ao, FILE *fp, uint64_t data_length)
     fput32le(WAV_ID_FMT, fp);
     fput32le(fmt_chunk_size, fp);
     fput16le(use_waveex ? WAV_ID_FORMAT_EXTENSIBLE : fmt, fp);
-    fput16le(ao->channels, fp);
+    fput16le(ao->channels.num, fp);
     fput32le(ao->samplerate, fp);
     fput32le(ao->bps, fp);
-    fput16le(ao->channels * (bits / 8), fp);
+    fput16le(ao->channels.num * (bits / 8), fp);
     fput16le(bits, fp);
 
     if (use_waveex) {
         // Extension chunk
         fput16le(22, fp);
         fput16le(bits, fp);
-        switch (ao->channels) {
-            case 5:
-                fput32le(0x0607, fp); // L R C Lb Rb
-                break;
-            case 6:
-                fput32le(0x060f, fp); // L R C Lb Rb LFE
-                break;
-            case 7:
-                fput32le(0x0727, fp); // L R C Cb Ls Rs LFE
-                break;
-            case 8:
-                fput32le(0x063f, fp); // L R C Lb Rb Ls Rs LFE
-                break;
-        }
+        fput32le(mp_chmap_to_waveext(&ao->channels), fp);
         // 2 bytes format + 14 bytes guid
         fput32le(fmt, fp);
         fput32le(0x00100000, fp);
@@ -159,14 +146,16 @@ static int init(struct ao *ao, char *params)
         }
     }
 
+    mp_chmap_reorder_to_waveext(&ao->channels);
+
     ao->outburst = 65536;
-    ao->bps = ao->channels * ao->samplerate * (af_fmt2bits(ao->format) / 8);
+    ao->bps = ao->channels.num * ao->samplerate * (af_fmt2bits(ao->format) / 8);
 
     mp_tmsg(MSGT_AO, MSGL_INFO, "[AO PCM] File: %s (%s)\n"
             "PCM: Samplerate: %d Hz   Channels: %d   Format: %s\n",
             priv->outputfilename,
             priv->waveheader ? "WAVE" : "RAW PCM", ao->samplerate,
-            ao->channels, af_fmt2str_short(ao->format));
+            ao->channels.num, af_fmt2str_short(ao->format));
     mp_tmsg(MSGT_AO, MSGL_INFO,
             "[AO PCM] Info: Faster dumping is achieved with -no-video\n"
             "[AO PCM] Info: To write WAVE files use -ao pcm:waveheader (default).\n");
@@ -222,13 +211,6 @@ static int play(struct ao *ao, void *data, int len, int flags)
 {
     struct priv *priv = ao->priv;
 
-    if (ao->channels == 5 || ao->channels == 6 || ao->channels == 8) {
-        int frame_size = af_fmt2bits(ao->format) / 8;
-        len -= len % (frame_size * ao->channels);
-        reorder_channel_nch(data, AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
-                            AF_CHANNEL_LAYOUT_WAVEEX_DEFAULT,
-                            ao->channels, len / frame_size, frame_size);
-    }
     fwrite(data, len, 1, priv->fp);
     priv->data_length += len;
     return len;

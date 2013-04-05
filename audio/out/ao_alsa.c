@@ -332,7 +332,8 @@ static int try_open_device(const char *device, int open_mode, int try_ac3)
     open & setup audio device
     return: 1=success 0=fail
 */
-static int init(int rate_hz, int channels, int format, int flags)
+static int init(int rate_hz, const struct mp_chmap *channels, int format,
+                int flags)
 {
     int err;
     int block;
@@ -351,7 +352,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     memset(alsa_device, 0, ALSA_DEVICE_SIZE + 1);
 
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: requested format: %d Hz, %d channels, %x\n", rate_hz,
-	channels, format);
+	ao_data.channels.num, format);
     alsa_handler = NULL;
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: using ALSA %s\n", snd_asoundlib_version());
 
@@ -359,10 +360,6 @@ static int init(int rate_hz, int channels, int format, int flags)
     delay_before_pause = 0;
 
     snd_lib_error_set_handler(alsa_error_handler);
-
-    ao_data.samplerate = rate_hz;
-    ao_data.format = format;
-    ao_data.channels = channels;
 
     switch (format)
       {
@@ -435,13 +432,13 @@ static int init(int rate_hz, int channels, int format, int flags)
      */
     if (AF_FORMAT_IS_IEC61937(format)) {
 	device.str = "iec958";
-	mp_msg(MSGT_AO,MSGL_V,"alsa-spdif-init: playing AC3/iec61937/iec958, %i channels\n", channels);
+	mp_msg(MSGT_AO,MSGL_V,"alsa-spdif-init: playing AC3/iec61937/iec958, %i channels\n", ao_data.channels.num);
     }
   else
         /* in any case for multichannel playback we should select
          * appropriate device
          */
-        switch (channels) {
+        switch (ao_data.channels.num) {
 	case 1:
 	case 2:
 	  device.str = "default";
@@ -471,7 +468,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  break;
 	default:
 	  device.str = "default";
-	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] %d channels are not supported.\n",channels);
+	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] %d channels are not supported.\n",
+                  ao_data.channels.num);
         }
     device.len = strlen(device.str);
     if (subopt_parse(ao_subdevice, subopts) != 0) {
@@ -554,13 +552,17 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  return 0;
 	}
 
+      int num_channels = ao_data.channels.num;
       if ((err = snd_pcm_hw_params_set_channels_near(alsa_handler, alsa_hwparams,
-						     &ao_data.channels)) < 0)
+						     &num_channels)) < 0)
 	{
 	  mp_tmsg(MSGT_AO,MSGL_ERR,"[AO_ALSA] Unable to set channels: %s\n",
 		 snd_strerror(err));
 	  return 0;
 	}
+      mp_chmap_from_channels(&ao_data.channels, num_channels);
+      if (!AF_FORMAT_IS_IEC61937(format))
+        mp_chmap_reorder_to_alsa(&ao_data.channels);
 
       /* workaround for buggy rate plugin (should be fixed in ALSA 1.0.11)
          prefer our own resampler, since that allows users to choose the resampler,
@@ -582,7 +584,7 @@ static int init(int rate_hz, int channels, int format, int flags)
         }
 
       bytes_per_sample = af_fmt2bits(ao_data.format) / 8;
-      bytes_per_sample *= ao_data.channels;
+      bytes_per_sample *= ao_data.channels.num;
       ao_data.bps = ao_data.samplerate * bytes_per_sample;
 
 	if ((err = snd_pcm_hw_params_set_buffer_time_near(alsa_handler, alsa_hwparams,
@@ -668,7 +670,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       alsa_can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
 
       mp_msg(MSGT_AO,MSGL_V,"alsa: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
-	     ao_data.samplerate, ao_data.channels, (int)bytes_per_sample, ao_data.buffersize,
+	     ao_data.samplerate, ao_data.channels.num, (int)bytes_per_sample, ao_data.buffersize,
 	     snd_pcm_format_description(alsa_format));
 
     } // end switch alsa_handler (spdif)
@@ -790,11 +792,6 @@ static int play(void* data, int len, int flags)
   if (!(flags & AOPLAY_FINAL_CHUNK))
       len = len / ao_data.outburst * ao_data.outburst;
   num_frames = len / bytes_per_sample;
-
-  int bps = af_fmt2bits(ao_data.format) / 8;
-  reorder_channel_nch(data, AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
-                            AF_CHANNEL_LAYOUT_ALSA_DEFAULT,
-                            ao_data.channels, len / bps, bps);
 
   //mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: frames=%i, len=%i\n",num_frames,len);
 

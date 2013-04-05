@@ -202,7 +202,8 @@ static void print_help (void)
          );
 }
 
-static int init(int rate, int channels, int format, int flags) {
+static int init(int rate, const struct mp_chmap *channels, int format, int flags)
+{
   const char **matching_ports = NULL;
   char *port_name = NULL;
   char *client_name = NULL;
@@ -222,8 +223,9 @@ static int init(int rate, int channels, int format, int flags) {
     print_help();
     return 0;
   }
-  if (channels > MAX_CHANS) {
-    mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] Invalid number of channels: %i\n", channels);
+  if (ao_data.channels.num > MAX_CHANS) {
+    mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] Invalid number of channels: %i\n",
+           ao_data.channels.num);
     goto err_out;
   }
   if (!client_name) {
@@ -249,9 +251,9 @@ static int init(int rate, int channels, int format, int flags) {
     goto err_out;
   }
   i = 1;
+  num_ports = ao_data.channels.num;
   while (matching_ports[i]) i++;
-  if (channels > i) channels = i;
-  num_ports = channels;
+  if (num_ports > i) num_ports = i;
 
   // create out output ports
   for (i = 0; i < num_ports; i++) {
@@ -281,10 +283,11 @@ static int init(int rate, int channels, int format, int flags) {
                  / (float)rate;
   callback_interval = 0;
 
-  ao_data.channels = channels;
+  mp_chmap_from_channels(&ao_data.channels, num_ports);
+  mp_chmap_reorder_to_alsa(&ao_data.channels); // what order does hack use?
   ao_data.samplerate = rate;
   ao_data.format = AF_FORMAT_FLOAT_NE;
-  ao_data.bps = channels * rate * sizeof(float);
+  ao_data.bps = ao_data.channels.num * rate * sizeof(float);
   ao_data.buffersize = CHUNK_SIZE * NUM_CHUNKS;
   ao_data.outburst = CHUNK_SIZE;
   free(matching_ports);

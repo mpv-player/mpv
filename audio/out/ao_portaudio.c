@@ -273,9 +273,11 @@ static int init(struct ao *ao, char *params)
     if (pa_device == paNoDevice)
         goto error_exit;
 
+    mp_chmap_reorder_to_alsa(&ao->channels);
+
     PaStreamParameters sp = {
         .device = pa_device,
-        .channelCount = ao->channels,
+        .channelCount = ao->channels.num,
         .suggestedLatency
             = Pa_GetDeviceInfo(pa_device)->defaultHighOutputLatency,
     };
@@ -298,7 +300,7 @@ static int init(struct ao *ao, char *params)
 
     ao->format = fmt->mp_format;
     sp.sampleFormat = fmt->pa_format;
-    priv->framelen = ao->channels * (af_fmt2bits(ao->format) / 8);
+    priv->framelen = ao->channels.num * (af_fmt2bits(ao->format) / 8);
     ao->bps = ao->samplerate * priv->framelen;
 
     if (!check_pa_ret(Pa_IsFormatSupported(NULL, &sp, ao->samplerate)))

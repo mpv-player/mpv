@@ -49,10 +49,10 @@ static int init(struct ao *ao, char *params)
     struct priv *priv = talloc_zero(ao, struct priv);
     ao->priv = priv;
     int samplesize = af_fmt2bits(ao->format) / 8;
-    ao->outburst = 256 * ao->channels * samplesize;
+    ao->outburst = 256 * ao->channels.num * samplesize;
     // A "buffer" for about 0.2 seconds of audio
     ao->buffersize = (int)(ao->samplerate * 0.2 / 256 + 1) * ao->outburst;
-    ao->bps = ao->channels * ao->samplerate * samplesize;
+    ao->bps = ao->channels.num * ao->samplerate * samplesize;
     priv->last_time = GetTimer();
 
     return 0;

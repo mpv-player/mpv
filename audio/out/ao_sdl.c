@@ -185,7 +185,7 @@ static int init(struct ao *ao, char *params)
 #endif
     }
     desired.freq = ao->samplerate;
-    desired.channels = ao->channels;
+    desired.channels = ao->channels.num;
     desired.samples = FFMIN(32768, ceil_power_of_two(ao->samplerate * buflen));
     desired.callback = audio_callback;
     desired.userdata = ao;
@@ -237,8 +237,9 @@ static int init(struct ao *ao, char *params)
     }
 
     ao->samplerate = obtained.freq;
-    ao->channels = obtained.channels;
-    ao->bps = ao->channels * ao->samplerate * bytes;
+    mp_chmap_from_channels(&ao->channels, obtained.channels);
+    mp_chmap_reorder_to_alsa(&ao->channels);
+    ao->bps = ao->channels.num * ao->samplerate * bytes;
     ao->buffersize = obtained.size * bufcnt;
     ao->outburst = obtained.size;
     priv->buffer = av_fifo_alloc(ao->buffersize);

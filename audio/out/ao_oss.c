@@ -221,12 +221,12 @@ static int control(int cmd,void *arg){
 
 // open & setup audio device
 // return: 1=success 0=fail
-static int init(int rate,int channels,int format,int flags){
+static int init(int rate,const struct mp_chmap *channels,int format,int flags){
   char *mixer_channels [SOUND_MIXER_NRDEVICES] = SOUND_DEVICE_NAMES;
   int oss_format;
   char *mdev = mixer_device, *mchan = mixer_channel;
 
-  mp_msg(MSGT_AO,MSGL_V,"ao2: %d Hz  %d chans  %s\n",rate,channels,
+  mp_msg(MSGT_AO,MSGL_V,"ao2: %d Hz  %d chans  %s\n",rate,ao_data.channels.num,
     af_fmt2str_short(format));
 
   if (ao_subdevice) {
@@ -339,25 +339,27 @@ ac3_retry:
   mp_msg(MSGT_AO,MSGL_V,"audio_setup: sample format: %s (requested: %s)\n",
     af_fmt2str_short(ao_data.format), af_fmt2str_short(format));
 
-  ao_data.channels = channels;
   if(!AF_FORMAT_IS_AC3(format)) {
+    mp_chmap_reorder_to_alsa(&ao_data.channels);
+    int reqchannels = ao_data.channels.num;
     // We only use SNDCTL_DSP_CHANNELS for >2 channels, in case some drivers don't have it
-    if (ao_data.channels > 2) {
-      if ( ioctl(audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels) == -1 ||
-	   ao_data.channels != channels ) {
-	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS] audio_setup: Failed to set audio device to %d channels.\n", channels);
+    if (reqchannels > 2) {
+      int nchannels = reqchannels;
+      if ( ioctl(audio_fd, SNDCTL_DSP_CHANNELS, &nchannels) == -1 ||
+	   nchannels != reqchannels ) {
+	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS] audio_setup: Failed to set audio device to %d channels.\n", reqchannels);
 	return 0;
       }
     }
     else {
-      int c = ao_data.channels-1;
+      int c = reqchannels-1;
       if (ioctl (audio_fd, SNDCTL_DSP_STEREO, &c) == -1) {
-	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS] audio_setup: Failed to set audio device to %d channels.\n", ao_data.channels);
+	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS] audio_setup: Failed to set audio device to %d channels.\n", reqchannels);
 	return 0;
       }
-      ao_data.channels=c+1;
+      mp_chmap_from_channels(&ao_data.channels, c + 1);
     }
-    mp_msg(MSGT_AO,MSGL_V,"audio_setup: using %d channels (requested: %d)\n", ao_data.channels, channels);
+    mp_msg(MSGT_AO,MSGL_V,"audio_setup: using %d channels (requested: %d)\n", ao_data.channels.num, reqchannels);
     // set rate
     ao_data.samplerate=rate;
     ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
@@ -403,7 +405,7 @@ ac3_retry:
 #endif
   }
 
-  ao_data.bps=ao_data.channels;
+  ao_data.bps=ao_data.channels.num;
   switch (ao_data.format & AF_FORMAT_BITS_MASK) {
   case AF_FORMAT_8BIT:
     break;
@@ -459,10 +461,10 @@ static void reset(void){
     ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
   ioctl (audio_fd, SNDCTL_DSP_SETFMT, &oss_format);
   if(!AF_FORMAT_IS_AC3(ao_data.format)) {
-    if (ao_data.channels > 2)
-      ioctl (audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels);
+    if (ao_data.channels.num > 2)
+      ioctl (audio_fd, SNDCTL_DSP_CHANNELS, &ao_data.channels.num);
     else {
-      int c = ao_data.channels-1;
+      int c = ao_data.channels.num-1;
       ioctl (audio_fd, SNDCTL_DSP_STEREO, &c);
     }
     ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);

@@ -199,7 +199,8 @@ void uninit_audio(sh_audio_t *sh_audio)
 
 
 int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
-                       int *out_samplerate, int *out_channels, int *out_format)
+                       int *out_samplerate, struct mp_chmap *out_channels,
+                       int *out_format)
 {
     struct af_stream *afs = sh_audio->afilter;
     if (!afs)
@@ -211,7 +212,7 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
 
     // output format: same as ao driver's input format (if missing, fallback to input)
     afs->output.rate = *out_samplerate;
-    mp_audio_set_num_channels(&afs->output, *out_channels);
+    mp_audio_set_channels(&afs->output, out_channels);
     mp_audio_set_format(&afs->output, *out_format);
 
     // filter config:
@@ -231,7 +232,7 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     }
 
     *out_samplerate = afs->output.rate;
-    *out_channels = afs->output.nch;
+    *out_channels = afs->output.channels;
     *out_format = afs->output.format;
 
     // ok!
