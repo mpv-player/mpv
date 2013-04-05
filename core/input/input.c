@@ -61,8 +61,6 @@
 #include <lirc/lircc.h>
 #endif
 
-#include "ar.h"
-
 #define MP_MAX_KEY_DOWN 32
 
 struct cmd_bind {
