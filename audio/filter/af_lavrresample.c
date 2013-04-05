@@ -43,6 +43,7 @@
 #define avresample_available(x) 0
 #define avresample_convert(ctx, out, out_planesize, out_samples, in, in_planesize, in_samples) \
     swr_convert(ctx, out, out_samples, (const uint8_t**)(in), in_samples)
+#define avresample_set_channel_mapping swr_set_channel_mapping
 #else
 #error "config.h broken"
 #endif
@@ -69,8 +70,14 @@ struct af_resample_opts {
 struct af_resample {
     int allow_detach;
     struct AVAudioResampleContext *avrctx;
+    struct AVAudioResampleContext *avrctx_out; // for output channel reordering
     struct af_resample_opts ctx;   // opts in the context
     struct af_resample_opts opts;  // opts requested by the user
+    // At least libswresample keeps a pointer around for this:
+    int reorder_in[MP_NUM_CHANNELS];
+    int reorder_out[MP_NUM_CHANNELS];
+    bool need_reorder_out;
+    uint8_t *reorder_buffer;
 };
 
 #ifdef CONFIG_LIBAVRESAMPLE
@@ -154,6 +161,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         if (needs_lavrctx_reconfigure(s, in, out)) {
             avresample_close(s->avrctx);
+            avresample_close(s->avrctx_out);
 
             s->ctx.out_rate    = out->rate;
             s->ctx.in_rate     = in->rate;
@@ -185,7 +193,32 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
             ctx_opt_set_dbl("cutoff",             s->ctx.cutoff);
 
-            if (avresample_open(s->avrctx) < 0) {
+            struct mp_chmap in_lavc;
+            mp_chmap_from_lavc(&in_lavc, in_ch_layout);
+            mp_chmap_get_reorder(s->reorder_in, &in->channels, &in_lavc);
+
+            struct mp_chmap out_lavc;
+            mp_chmap_from_lavc(&out_lavc, out_ch_layout);
+            mp_chmap_get_reorder(s->reorder_out, &out_lavc, &out->channels);
+            s->need_reorder_out = !mp_chmap_equals(&out_lavc, &out->channels);
+
+            // Same configuration; we just reorder.
+            av_opt_set_int(s->avrctx_out, "in_channel_layout", out_ch_layout, 0);
+            av_opt_set_int(s->avrctx_out, "out_channel_layout", out_ch_layout, 0);
+            av_opt_set_int(s->avrctx_out, "in_sample_fmt", out_samplefmt, 0);
+            av_opt_set_int(s->avrctx_out, "out_sample_fmt", out_samplefmt, 0);
+            av_opt_set_int(s->avrctx_out, "in_sample_rate", s->ctx.out_rate, 0);
+            av_opt_set_int(s->avrctx_out, "out_sample_rate", s->ctx.out_rate, 0);
+
+            // API has weird requirements, quoting avresample.h:
+            //  * This function can only be called when the allocated context is not open.
+            //  * Also, the input channel layout must have already been set.
+            avresample_set_channel_mapping(s->avrctx, s->reorder_in);
+            avresample_set_channel_mapping(s->avrctx_out, s->reorder_out);
+
+            if (avresample_open(s->avrctx) < 0 ||
+                avresample_open(s->avrctx_out) < 0)
+            {
                 mp_msg(MSGT_AFILTER, MSGL_ERR, "[lavrresample] Cannot open "
                        "Libavresample Context. \n");
                 return AF_ERROR;
@@ -246,6 +279,8 @@ static void uninit(struct af_instance *af)
         struct af_resample *s = af->setup;
         if (s->avrctx)
             avresample_close(s->avrctx);
+        if (s->avrctx_out)
+            avresample_close(s->avrctx_out);
         talloc_free(af->setup);
     }
 }
@@ -275,8 +310,18 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
             (uint8_t **) &out->audio, out_size, out_samples,
             (uint8_t **) &in->audio,  in_size,  in_samples);
 
-    out->len = out->bps * out_samples * out->nch;
     *data = *out;
+
+    if (s->need_reorder_out) {
+        if (talloc_get_size(s->reorder_buffer) < out_size)
+            s->reorder_buffer = talloc_realloc_size(s, s->reorder_buffer, out_size);
+        data->audio = s->reorder_buffer;
+        out_samples = avresample_convert(s->avrctx_out,
+                (uint8_t **) &data->audio, out_size, out_samples,
+                (uint8_t **) &out->audio, out_size, out_samples);
+    }
+
+    data->len = out->bps * out_samples * out->nch;
     return data;
 }
 
@@ -303,9 +348,10 @@ static int af_open(struct af_instance *af)
     s->allow_detach = 1;
 
     s->avrctx = avresample_alloc_context();
+    s->avrctx_out = avresample_alloc_context();
     af->setup = s;
 
-    if (s->avrctx) {
+    if (s->avrctx && s->avrctx_out) {
         return AF_OK;
     } else {
         mp_msg(MSGT_AFILTER, MSGL_ERR, "[lavrresample] Cannot initialize "
