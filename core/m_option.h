@@ -60,6 +60,7 @@ extern const m_option_type_t m_option_type_afmt;
 extern const m_option_type_t m_option_type_color;
 extern const m_option_type_t m_option_type_geometry;
 extern const m_option_type_t m_option_type_size_box;
+extern const m_option_type_t m_option_type_chmap;
 
 // Callback used by m_option_type_print_func options.
 typedef int (*m_opt_func_full_t)(const m_option_t *, const char *, const char *);
@@ -580,6 +581,9 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
 
 #define OPT_AUDIOFORMAT(...) \
     OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_afmt)
+
+#define OPT_CHMAP(...) \
+    OPT_GENERAL(struct mp_chmap, __VA_ARGS__, .type = &m_option_type_chmap)
 
 
 #define M_CHOICES(choices)                                              \

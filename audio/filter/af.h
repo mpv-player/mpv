@@ -26,15 +26,14 @@
 
 #include "core/options.h"
 #include "audio/format.h"
+#include "audio/chmap.h"
 #include "control.h"
 #include "core/mp_msg.h"
 
 struct af_instance;
 
 // Number of channels
-#ifndef AF_NCH
-#define AF_NCH 8
-#endif
+#define AF_NCH MP_NUM_CHANNELS
 
 // Audio data chunk
 struct mp_audio {
