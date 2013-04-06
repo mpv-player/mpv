@@ -23,6 +23,7 @@
 
 #include "codec_tags.h"
 
+#include "audio/chmap.h"
 #include "aviheader.h"
 #include "ms_hdr.h"
 struct MPOpts;
@@ -108,8 +109,8 @@ typedef struct sh_audio {
     int samplerate;
     int container_out_samplerate;
     int samplesize;
-    int channels;
-    int o_bps; // == samplerate*samplesize*channels   (uncompr. bytes/sec)
+    struct mp_chmap channels;
+    int o_bps; // == samplerate*samplesize*channels.num   (uncompr. bytes/sec)
     int i_bps; // == bitrate  (compressed bytes/sec)
     // in buffers:
     int audio_in_minsize;   // initial size to allocate for a_in_buffer if any

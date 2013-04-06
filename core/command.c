@@ -667,20 +667,10 @@ static int mp_property_channels(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        switch (mpctx->sh_audio->channels) {
-        case 1:
-            *(char **) arg = talloc_strdup(NULL, "mono");
-            break;
-        case 2:
-            *(char **) arg = talloc_strdup(NULL, "stereo");
-            break;
-        default:
-            *(char **) arg = talloc_asprintf(NULL, "%d channels",
-                                             mpctx->sh_audio->channels);
-        }
+        *(char **) arg = mp_chmap_to_str(&mpctx->sh_audio->channels);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(int *)arg = mpctx->sh_audio->channels;
+        *(int *)arg = mpctx->sh_audio->channels.num;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;

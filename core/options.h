@@ -150,7 +150,7 @@ typedef struct MPOpts {
 
     double force_fps;
 
-    int audio_output_channels;
+    struct mp_chmap audio_output_channels;
     int audio_output_format;
     int force_srate;
     int dtshd;

@@ -358,7 +358,7 @@ static int init(sh_audio_t *sh, const char *decoder)
         con->mean_count = 0;
 #endif
         con->vbr = (finfo.vbr != MPG123_CBR);
-        sh->channels   = channels;
+        mp_chmap_from_channels(&sh->channels, channels);
         sh->samplerate = rate;
         /* Without external force, mpg123 will always choose signed encoding,
          * and non-16-bit only on builds that don't support it.

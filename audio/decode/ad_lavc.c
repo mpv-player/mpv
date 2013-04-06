@@ -168,10 +168,16 @@ static int setup_format(sh_audio_t *sh_audio,
     else if (container_samplerate)
         samplerate = container_samplerate;
 
-    if (lavc_context->channels != sh_audio->channels ||
+    struct mp_chmap lavc_chmap;
+    mp_chmap_from_lavc(&lavc_chmap, lavc_context->channel_layout);
+    // No channel layout or layout disagrees with channel count
+    if (lavc_chmap.num != lavc_context->channels)
+        mp_chmap_from_channels(&lavc_chmap, lavc_context->channels);
+
+    if (!mp_chmap_equals(&lavc_chmap, &sh_audio->channels) ||
         samplerate != sh_audio->samplerate ||
         sample_format != sh_audio->sample_format) {
-        sh_audio->channels = lavc_context->channels;
+        sh_audio->channels = lavc_chmap;
         sh_audio->samplerate = samplerate;
         sh_audio->sample_format = sample_format;
         sh_audio->samplesize = af_fmt2bits(sh_audio->sample_format) / 8;
@@ -227,8 +233,11 @@ static int init(sh_audio_t *sh_audio, const char *decoder)
     lavc_context->codec_type = AVMEDIA_TYPE_AUDIO;
     lavc_context->codec_id = lavc_codec->id;
 
-    if (opts->downmix)
-        lavc_context->request_channels = mpopts->audio_output_channels;
+    if (opts->downmix) {
+        lavc_context->request_channels = mpopts->audio_output_channels.num;
+        lavc_context->request_channel_layout =
+            mp_chmap_to_lavc(&mpopts->audio_output_channels);
+    }
 
     // Always try to set - option only exists for AC3 at the moment
     av_opt_set_double(lavc_context, "drc_scale", opts->ac3drc,
@@ -246,6 +255,7 @@ static int init(sh_audio_t *sh_audio, const char *decoder)
     lavc_context->codec_tag = sh_audio->format;
     lavc_context->sample_rate = sh_audio->samplerate;
     lavc_context->bit_rate = sh_audio->i_bps * 8;
+    lavc_context->channel_layout = mp_chmap_to_lavc(&sh_audio->channels);
 
     if (sh_audio->wf)
         set_from_wf(lavc_context, sh_audio->wf);

@@ -25,6 +25,7 @@
 
 #include "config.h"
 #include "core/bstr.h"
+#include "audio/chmap.h"
 
 // m_option allows to parse, print and copy data of various types.
 
@@ -210,6 +211,7 @@ union m_option_value {
     struct m_color color;
     struct m_geometry geometry;
     struct m_geometry size_box;
+    struct mp_chmap chmap;
 };
 
 ////////////////////////////////////////////////////////////////////////////

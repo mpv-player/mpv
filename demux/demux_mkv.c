@@ -1393,7 +1393,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
 
     sh_a->format = track->a_formattag;
     sh_a->wf->wFormatTag = track->a_formattag;
-    sh_a->channels = track->a_channels;
+    mp_chmap_from_channels(&sh_a->channels, track->a_channels);
     sh_a->wf->nChannels = track->a_channels;
     sh_a->samplerate = (uint32_t) track->a_sfreq;
     sh_a->container_out_samplerate = track->a_osfreq;
@@ -1411,7 +1411,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
         free(sh_a->wf);
         sh_a->wf = NULL;
     } else if (track->a_formattag == 0x0001) {  /* PCM || PCM_BE */
-        sh_a->wf->nAvgBytesPerSec = sh_a->channels * sh_a->samplerate * 2;
+        sh_a->wf->nAvgBytesPerSec = sh_a->channels.num * sh_a->samplerate * 2;
         sh_a->wf->nBlockAlign = sh_a->wf->nAvgBytesPerSec;
         if (!strcmp(track->codec_id, MKV_A_PCM_BE))
             sh_a->format = mmioFOURCC('t', 'w', 'o', 's');
@@ -1583,7 +1583,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track,
         char *data = sh_a->codecdata;
         memcpy(data + 0, "TTA1", 4);
         AV_WL16(data + 4, 1);
-        AV_WL16(data + 6, sh_a->channels);
+        AV_WL16(data + 6, sh_a->channels.num);
         AV_WL16(data + 8, sh_a->wf->wBitsPerSample);
         AV_WL32(data + 10, sh_a->samplerate);
         // Bogus: last frame won't be played.

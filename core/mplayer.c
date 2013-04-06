@@ -324,7 +324,7 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
                "ID_AUDIO_RATE=%d\n", mpctx->sh_audio->samplerate);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_AUDIO_NCH=%d\n", mpctx->sh_audio->channels);
+               "ID_AUDIO_NCH=%d\n", mpctx->sh_audio->channels.num);
         start_pts = ds_get_next_pts(mpctx->sh_audio->ds);
     }
     if (video_start_pts != MP_NOPTS_VALUE) {
@@ -1563,8 +1563,11 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->ao->samplerate = opts->force_srate;
         mpctx->ao->format = opts->audio_output_format;
         // Automatic downmix
-        if (opts->audio_output_channels == 2 && mpctx->sh_audio->channels != 2)
+        if (mp_chmap_is_stereo(&opts->audio_output_channels) &&
+            !mp_chmap_is_stereo(&mpctx->sh_audio->channels))
+        {
             mp_chmap_from_channels(&mpctx->ao->channels, 2);
+        }
     }
     ao = mpctx->ao;
 

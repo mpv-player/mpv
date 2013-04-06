@@ -341,7 +341,9 @@ static void handle_stream(demuxer_t *demuxer, AVFormatContext *avfc, int i)
         sh_audio->format = codec->codec_tag;
 
         // probably unneeded
-        sh_audio->channels = codec->channels;
+        mp_chmap_from_channels(&sh_audio->channels, codec->channels);
+        if (codec->channel_layout)
+            mp_chmap_from_lavc(&sh_audio->channels, codec->channel_layout);
         sh_audio->samplerate = codec->sample_rate;
         sh_audio->i_bps = codec->bit_rate / 8;
 

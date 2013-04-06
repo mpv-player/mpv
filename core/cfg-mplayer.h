@@ -415,7 +415,7 @@ const m_option_t common_opts[] = {
     // force video/audio rate:
     OPT_DOUBLE("fps", force_fps, CONF_MIN, 0),
     OPT_INTRANGE("srate", force_srate, 0, 1000, 8*48000),
-    OPT_INTRANGE("channels", audio_output_channels, 0, 1, 8),
+    OPT_CHMAP("channels", audio_output_channels, CONF_MIN, .min = 1),
     OPT_AUDIOFORMAT("format", audio_output_format, 0),
     OPT_FLOATRANGE("speed", playback_speed, 0, 0.01, 100.0),
 

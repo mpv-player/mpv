@@ -86,7 +86,7 @@ static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
 
     sh_audio->initialized = 1;
 
-    if (!sh_audio->channels || !sh_audio->samplerate) {
+    if (mp_chmap_is_empty(&sh_audio->channels) || !sh_audio->samplerate) {
         mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Audio decoder did not specify "
                 "audio format!\n");
         uninit_audio(sh_audio); // free buffers
@@ -94,7 +94,7 @@ static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
     }
 
     if (!sh_audio->o_bps)
-        sh_audio->o_bps = sh_audio->channels * sh_audio->samplerate
+        sh_audio->o_bps = sh_audio->channels.num * sh_audio->samplerate
                           * sh_audio->samplesize;
     return 1;
 }
@@ -160,14 +160,14 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char *audio_decoders)
                sh_audio->gsh->decoder_desc);
         mp_msg(MSGT_DECAUDIO, MSGL_V,
                "AUDIO: %d Hz, %d ch, %s, %3.1f kbit/%3.2f%% (ratio: %d->%d)\n",
-               sh_audio->samplerate, sh_audio->channels,
+               sh_audio->samplerate, sh_audio->channels.num,
                af_fmt2str_short(sh_audio->sample_format),
                sh_audio->i_bps * 8 * 0.001,
                ((float) sh_audio->i_bps / sh_audio->o_bps) * 100.0,
                sh_audio->i_bps, sh_audio->o_bps);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
                "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
-               sh_audio->i_bps * 8, sh_audio->samplerate, sh_audio->channels);
+               sh_audio->i_bps * 8, sh_audio->samplerate, sh_audio->channels.num);
     } else {
         mp_msg(MSGT_DECAUDIO, MSGL_ERR,
                "Failed to initialize an audio decoder for codec '%s'.\n",
@@ -207,7 +207,7 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
         afs = af_new(sh_audio->opts);
     // input format: same as codec's output format:
     afs->input.rate = in_samplerate;
-    mp_audio_set_num_channels(&afs->input, sh_audio->channels);
+    mp_audio_set_channels(&afs->input, &sh_audio->channels);
     mp_audio_set_format(&afs->input, sh_audio->sample_format);
 
     // output format: same as ao driver's input format (if missing, fallback to input)
@@ -259,7 +259,7 @@ static int filter_n_bytes(sh_audio_t *sh, struct bstr *outbuf, int len)
 
     // Decode more bytes if needed
     int old_samplerate = sh->samplerate;
-    int old_channels = sh->channels;
+    struct mp_chmap old_channels = sh->channels;
     int old_sample_format = sh->sample_format;
     while (sh->a_buffer_len < len) {
         unsigned char *buf = sh->a_buffer + sh->a_buffer_len;
@@ -267,7 +267,7 @@ static int filter_n_bytes(sh_audio_t *sh, struct bstr *outbuf, int len)
         int maxlen = sh->a_buffer_size - sh->a_buffer_len;
         int ret = sh->ad_driver->decode_audio(sh, buf, minlen, maxlen);
         int format_change = sh->samplerate != old_samplerate
-                            || sh->channels != old_channels
+                            || !mp_chmap_equals(&sh->channels, &old_channels)
                             || sh->sample_format != old_sample_format;
         if (ret <= 0 || format_change) {
             error = format_change ? -2 : -1;
@@ -285,7 +285,7 @@ static int filter_n_bytes(sh_audio_t *sh, struct bstr *outbuf, int len)
         .rate = sh->samplerate,
     };
     mp_audio_set_format(&filter_input, sh->sample_format);
-    mp_audio_set_num_channels(&filter_input, sh->channels);
+    mp_audio_set_channels(&filter_input, &sh->channels);
 
     struct mp_audio *filter_output = af_play(sh->afilter, &filter_input);
     if (!filter_output)
@@ -314,7 +314,7 @@ int decode_audio(sh_audio_t *sh_audio, struct bstr *outbuf, int minlen)
     // Indicates that a filter seems to be buffering large amounts of data
     int huge_filter_buffer = 0;
     // Decoded audio must be cut at boundaries of this many bytes
-    int unitsize = sh_audio->channels * sh_audio->samplesize * 16;
+    int unitsize = sh_audio->channels.num * sh_audio->samplesize * 16;
 
     /* Filter output size will be about filter_multiplier times input size.
      * If some filter buffers audio in big blocks this might only hold
