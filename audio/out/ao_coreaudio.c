@@ -606,8 +606,7 @@ int device_id, display_help = 0;
 
 	ao_data.samplerate = inDesc.mSampleRate;
         mp_chmap_from_channels(&ao_data.channels, inDesc.mChannelsPerFrame);
-        // Most likely wrong, but that's what it has been set to.
-        mp_chmap_reorder_to_alsa(&ao_data.channels);
+        mp_chmap_reorder_to_waveext(&ao_data.channels);
     ao_data.bps = ao_data.samplerate * inDesc.mBytesPerFrame;
     ao_data.outburst = ao->chunk_size;
 	ao_data.buffersize = ao_data.bps;
