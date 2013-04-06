@@ -143,6 +143,50 @@ static const struct format_map {
     {AF_FORMAT_UNKNOWN, 0}
 };
 
+static const int speaker_map[][2] = {
+  {PA_CHANNEL_POSITION_MONO,                    MP_SPEAKER_ID_FC},
+  {PA_CHANNEL_POSITION_FRONT_LEFT,              MP_SPEAKER_ID_FL},
+  {PA_CHANNEL_POSITION_FRONT_RIGHT,             MP_SPEAKER_ID_FR},
+  {PA_CHANNEL_POSITION_FRONT_CENTER,            MP_SPEAKER_ID_FC},
+  {PA_CHANNEL_POSITION_REAR_CENTER,             MP_SPEAKER_ID_BC},
+  {PA_CHANNEL_POSITION_REAR_LEFT,               MP_SPEAKER_ID_BL},
+  {PA_CHANNEL_POSITION_REAR_RIGHT,              MP_SPEAKER_ID_BR},
+  {PA_CHANNEL_POSITION_LFE,                     MP_SPEAKER_ID_LFE},
+  {PA_CHANNEL_POSITION_FRONT_LEFT_OF_CENTER,    MP_SPEAKER_ID_FLC},
+  {PA_CHANNEL_POSITION_FRONT_RIGHT_OF_CENTER,   MP_SPEAKER_ID_FRC},
+  {PA_CHANNEL_POSITION_SIDE_LEFT,               MP_SPEAKER_ID_SL},
+  {PA_CHANNEL_POSITION_SIDE_RIGHT,              MP_SPEAKER_ID_SR},
+  {PA_CHANNEL_POSITION_TOP_CENTER,              MP_SPEAKER_ID_TC},
+  {PA_CHANNEL_POSITION_TOP_FRONT_LEFT,          MP_SPEAKER_ID_TFL},
+  {PA_CHANNEL_POSITION_TOP_FRONT_RIGHT,         MP_SPEAKER_ID_TFR},
+  {PA_CHANNEL_POSITION_TOP_FRONT_CENTER,        MP_SPEAKER_ID_TFC},
+  {PA_CHANNEL_POSITION_TOP_REAR_LEFT,           MP_SPEAKER_ID_TBL},
+  {PA_CHANNEL_POSITION_TOP_REAR_RIGHT,          MP_SPEAKER_ID_TBR},
+  {PA_CHANNEL_POSITION_TOP_REAR_CENTER,         MP_SPEAKER_ID_TBC},
+  {PA_CHANNEL_POSITION_INVALID,                 -1}
+};
+
+static bool chmap_pa_from_mp(pa_channel_map *dst, struct mp_chmap *src)
+{
+    if (src->num > PA_CHANNELS_MAX)
+        return false;
+    dst->channels = src->num;
+    for (int n = 0; n < src->num; n++) {
+        int mp_speaker = src->speaker[n];
+        int pa_speaker = PA_CHANNEL_POSITION_INVALID;
+        for (int i = 0; speaker_map[i][1] != -1; i++) {
+            if (speaker_map[i][1] == mp_speaker) {
+                pa_speaker = speaker_map[i][0];
+                break;
+            }
+        }
+        if (pa_speaker == PA_CHANNEL_POSITION_INVALID)
+            return false;
+        dst->map[n] = pa_speaker;
+    }
+    return true;
+}
+
 static void uninit(struct ao *ao, bool cut_audio)
 {
     struct priv *priv = ao->priv;
@@ -230,8 +274,16 @@ static int init(struct ao *ao, char *params)
         goto fail;
     }
 
-    mp_chmap_reorder_to_waveext(&ao->channels);
-    pa_channel_map_init_auto(&map, ss.channels, PA_CHANNEL_MAP_WAVEEX);
+    if (!chmap_pa_from_mp(&map, &ao->channels)) {
+        char *name = mp_chmap_to_str(&ao->channels);
+        mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Can't map %s channel layout\n",
+               name);
+        talloc_free(name);
+        // Not a really good fallback, since this doesn't trigger if the
+        // channel map is valid, but unsupported by the output device.
+        ao->channels = (struct mp_chmap) MP_CHMAP_INIT_STEREO;
+        pa_channel_map_init_stereo(&map);
+    }
 
     ao->bps = pa_bytes_per_second(&ss);
 
