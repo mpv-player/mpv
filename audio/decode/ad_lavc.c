@@ -51,6 +51,7 @@ struct priv {
     int output_left;
     int unitsize;
     int previous_data_left;  // input demuxer packet data
+    bool force_channel_map;
 };
 
 #define OPT_BASE_STRUCT struct MPOpts
@@ -155,6 +156,7 @@ static int preinit(sh_audio_t *sh)
 static int setup_format(sh_audio_t *sh_audio,
                         const AVCodecContext *lavc_context)
 {
+    struct priv *priv = sh_audio->context;
     int sample_format        =
         af_from_avformat(av_get_packed_sample_fmt(lavc_context->sample_fmt));
     bool broken_srate        = false;
@@ -173,6 +175,10 @@ static int setup_format(sh_audio_t *sh_audio,
     // No channel layout or layout disagrees with channel count
     if (lavc_chmap.num != lavc_context->channels)
         mp_chmap_from_channels(&lavc_chmap, lavc_context->channels);
+    if (priv->force_channel_map) {
+        if (lavc_chmap.num == sh_audio->channels.num)
+            lavc_chmap = sh_audio->channels;
+    }
 
     if (!mp_chmap_equals(&lavc_chmap, &sh_audio->channels) ||
         samplerate != sh_audio->samplerate ||
@@ -211,22 +217,25 @@ static int init(sh_audio_t *sh_audio, const char *decoder)
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
 
+    struct priv *ctx = talloc_zero(NULL, struct priv);
+    sh_audio->context = ctx;
+
     if (sh_audio->wf && strcmp(decoder, "pcm") == 0) {
         decoder = find_pcm_decoder(tag_map, sh_audio->format,
                                    sh_audio->wf->wBitsPerSample);
     } else if (sh_audio->wf && strcmp(decoder, "mp-pcm") == 0) {
         decoder = find_pcm_decoder(af_map, sh_audio->format, 0);
+        ctx->force_channel_map = true;
     }
 
     lavc_codec = avcodec_find_decoder_by_name(decoder);
     if (!lavc_codec) {
         mp_tmsg(MSGT_DECAUDIO, MSGL_ERR,
                 "Cannot find codec '%s' in libavcodec...\n", decoder);
+        uninit(sh_audio);
         return 0;
     }
 
-    struct priv *ctx = talloc_zero(NULL, struct priv);
-    sh_audio->context = ctx;
     lavc_context = avcodec_alloc_context3(lavc_codec);
     ctx->avctx = lavc_context;
     ctx->avframe = avcodec_alloc_frame();
