@@ -322,6 +322,39 @@ static int find_alsa_format(int af_format)
     return SND_PCM_FORMAT_UNKNOWN;
 }
 
+// Lists device names and their implied channel map.
+// The second item must be resolvable with mp_chmap_from_str().
+// Source: http://www.alsa-project.org/main/index.php/DeviceNames
+// (Speaker names are slightly different from mpv's.)
+static const char *device_channel_layouts[][2] = {
+    {"default",         "fc"},
+    {"default",         "fl-fr"},
+    {"rear",            "bl-br"},
+    {"center_lfe",      "fc-lfe"},
+    {"side",            "sl-sr"},
+    {"surround40",      "fl-fr-fc-bc"},
+    {"surround50",      "fl-fr-bl-br-fc"},
+    {"surround41",      "fl-fr-bl-br-lfe"},
+    {"surround51",      "fl-fr-bl-br-fc-lfe"},
+    {"surround71",      "fl-fr-bl-br-fc-lfe-sl-sr"},
+    {0}
+};
+
+// Find a device that contains exactly all the requested speakers.
+// Set *request to the required channel order.
+static const char *find_device(struct mp_chmap *request)
+{
+    for (int n = 0; device_channel_layouts[n][0]; n++) {
+        struct mp_chmap map = {0};
+        mp_chmap_from_str(&map, bstr0(device_channel_layouts[n][1]));
+        if (mp_chmap_equals_reordered(&map, request)) {
+            *request = map;
+            return device_channel_layouts[n][0];
+        }
+    }
+    return NULL;
+}
+
 static int try_open_device(const char *device, int open_mode, int try_ac3)
 {
     int err, len;
@@ -413,48 +446,27 @@ static int init(int rate_hz, const struct mp_chmap *channels, int format,
      * while opening the abstract alias for the spdif subdevice
      * 'iec958'
      */
+    device.str = NULL;
     if (AF_FORMAT_IS_IEC61937(format)) {
         device.str = "iec958";
         mp_msg(MSGT_AO, MSGL_V,
                "alsa-spdif-init: playing AC3/iec61937/iec958, %i channels\n",
                ao_data.channels.num);
     } else {
-        /* in any case for multichannel playback we should select
-         * appropriate device
-         */
-        switch (ao_data.channels.num) {
-        case 1:
-        case 2:
+        device.str = find_device(&ao_data.channels);
+        if (!device.str) {
+            char *name = mp_chmap_to_str(&ao_data.channels);
             device.str = "default";
-            mp_msg(MSGT_AO, MSGL_V, "alsa-init: setup for 1/2 channel(s)\n");
-            break;
-        case 4:
-            if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
-                // hack - use the converter plugin
-                device.str = "plug:surround40";
-            else
-                device.str = "surround40";
-            mp_msg(MSGT_AO, MSGL_V, "alsa-init: device set to surround40\n");
-            break;
-        case 6:
-            if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
-                device.str = "plug:surround51";
-            else
-                device.str = "surround51";
-            mp_msg(MSGT_AO, MSGL_V, "alsa-init: device set to surround51\n");
-            break;
-        case 8:
-            if (alsa_format == SND_PCM_FORMAT_FLOAT_LE)
-                device.str = "plug:surround71";
-            else
-                device.str = "surround71";
-            mp_msg(MSGT_AO, MSGL_V, "alsa-init: device set to surround71\n");
-            break;
-        default:
-            device.str = "default";
+            mp_chmap_from_channels(&ao_data.channels, ao_data.channels.num);
             mp_tmsg(MSGT_AO, MSGL_ERR,
-                    "[AO_ALSA] %d channels are not supported.\n",
-                    ao_data.channels.num);
+                    "[AO_ALSA] channel layout %s (%d ch) not supported.\n",
+                    name, ao_data.channels.num);
+            talloc_free(name);
+        }
+        if (strcmp(device.str, "default") != 0 && format == AF_FORMAT_FLOAT_NE)
+        {
+            // hack - use the converter plugin (why the heck?)
+            device.str = talloc_asprintf(global_ao, "plug:%s", device.str);
         }
     }
     device.len = strlen(device.str);
@@ -528,10 +540,8 @@ static int init(int rate_hz, const struct mp_chmap *channels, int format,
             (alsa_handler, alsa_hwparams, &num_channels);
     CHECK_ALSA_ERROR("Unable to set channels");
 
-    mp_chmap_from_channels(&ao_data.channels, num_channels);
-    if (!AF_FORMAT_IS_IEC61937(format))
-        mp_chmap_reorder_to_alsa(&ao_data.channels);
-
+    if (num_channels != ao_data.channels.num)
+        mp_chmap_from_channels(&ao_data.channels, num_channels);
 
     /* workaround for buggy rate plugin (should be fixed in ALSA 1.0.11)
         prefer our own resampler, since that allows users to choose the resampler,
