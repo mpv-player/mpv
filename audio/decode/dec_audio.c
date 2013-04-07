@@ -218,11 +218,12 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     // filter config:
     memcpy(&afs->cfg, &af_cfg, sizeof(struct af_cfg));
 
+    char *s_from = mp_audio_config_to_str(&afs->input);
+    char *s_to = mp_audio_config_to_str(&afs->output);
     mp_tmsg(MSGT_DECAUDIO, MSGL_V,
-            "Building audio filter chain for %dHz/%dch/%s -> %dHz/%dch/%s...\n",
-            afs->input.rate, afs->input.nch,
-            af_fmt2str_short(afs->input.format), afs->output.rate,
-            afs->output.nch, af_fmt2str_short(afs->output.format));
+            "Building audio filter chain for %s -> %s...\n", s_from, s_to);
+    talloc_free(s_from);
+    talloc_free(s_to);
 
     // let's autoprobe it!
     if (0 != af_init(afs)) {

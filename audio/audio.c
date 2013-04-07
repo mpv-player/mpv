@@ -17,6 +17,7 @@
 
 #include <assert.h>
 
+#include "core/mp_talloc.h"
 #include "audio.h"
 
 void mp_audio_set_format(struct mp_audio *mpa, int format)
@@ -53,4 +54,18 @@ void mp_audio_copy_config(struct mp_audio *dst, const struct mp_audio *src)
     mp_audio_set_format(dst, src->format);
     mp_audio_set_channels(dst, &src->channels);
     dst->rate = src->rate;
+}
+
+char *mp_audio_fmt_to_str(int srate, const struct mp_chmap *chmap, int format)
+{
+    char *chstr = mp_chmap_to_str(chmap);
+    char *res = talloc_asprintf(NULL, "%dHz %s %dch %s", srate, chstr,
+                                chmap->num, af_fmt2str_short(format));
+    talloc_free(chstr);
+    return res;
+}
+
+char *mp_audio_config_to_str(struct mp_audio *mpa)
+{
+    return mp_audio_fmt_to_str(mpa->rate, &mpa->channels, mpa->format);
 }

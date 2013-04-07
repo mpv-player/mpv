@@ -1593,12 +1593,10 @@ void reinit_audio_chain(struct MPContext *mpctx)
             goto init_error;
         }
         ao->buffer.start = talloc_new(ao);
-        mp_msg(MSGT_CPLAYER, MSGL_INFO,
-               "AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
-               ao->driver->info->short_name,
-               ao->samplerate, ao->channels.num,
-               af_fmt2str_short(ao->format),
-               af_fmt2bits(ao->format) / 8);
+        char *s = mp_audio_fmt_to_str(ao->samplerate, &ao->channels, ao->format);
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "AO: [%s] %s\n",
+               ao->driver->info->short_name, s);
+        talloc_free(s);
         mp_msg(MSGT_CPLAYER, MSGL_V, "AO: Description: %s\nAO: Author: %s\n",
                ao->driver->info->name, ao->driver->info->author);
         if (strlen(ao->driver->info->comment) > 0)

@@ -301,18 +301,6 @@ repeat:
     }
 }
 
-static void print_fmt(struct mp_audio *d, int msg_level)
-{
-    if (d) {
-        char *chstr = mp_chmap_to_str(&d->channels);
-        mp_msg(MSGT_AFILTER, msg_level, "%dHz/%s(%dch)/%s", d->rate,
-               chstr ? chstr : "?", d->nch,
-               af_fmt2str_short(d->format));
-        talloc_free(chstr);
-    } else
-        mp_msg(MSGT_AFILTER, msg_level, "(?)");
-}
-
 static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
                                   int msg_level)
 {
@@ -321,7 +309,11 @@ static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
     struct af_instance *af = s->first;
     while (af) {
         mp_msg(MSGT_AFILTER, msg_level, "  [%s] ", af->info->name);
-        print_fmt(af->data, msg_level);
+        if (af->data) {
+            char *info = mp_audio_config_to_str(af->data);
+            mp_msg(MSGT_AFILTER, msg_level, "%s", info);
+            talloc_free(info);
+        }
         if (af == at)
             mp_msg(MSGT_AFILTER, msg_level, " <-");
         mp_msg(MSGT_AFILTER, msg_level, "\n");
@@ -330,8 +322,9 @@ static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
     }
 
     mp_msg(MSGT_AFILTER, msg_level, "  [ao] ");
-    print_fmt(&s->output, msg_level);
-    mp_msg(MSGT_AFILTER, msg_level, "\n");
+    char *info = mp_audio_config_to_str(&s->output);
+    mp_msg(MSGT_AFILTER, msg_level, "%s\n", info);
+    talloc_free(info);
 }
 
 static const char *af_find_conversion_filter(int srcfmt, int dstfmt)
