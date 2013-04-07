@@ -490,152 +490,147 @@ static int init(int rate_hz, const struct mp_chmap *channels, int format,
 
     alsa_can_pause = 1;
 
-    if (!alsa_handler) {
-        int open_mode = block ? 0 : SND_PCM_NONBLOCK;
-        int isac3 =  AF_FORMAT_IS_IEC61937(format);
-        //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
-        err = try_open_device(alsa_device, open_mode, isac3);
-        if (err < 0) {
-            if (err != -EBUSY && !block) {
-                mp_tmsg(MSGT_AO, MSGL_INFO, "[AO_ALSA] Open in nonblock-mode "
-                        "failed, trying to open in block-mode.\n");
-                err = try_open_device(alsa_device, 0, isac3);
-            }
-            CHECK_ALSA_ERROR("Playback open error");
+    int open_mode = block ? 0 : SND_PCM_NONBLOCK;
+    int isac3 =  AF_FORMAT_IS_IEC61937(format);
+    //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
+    err = try_open_device(alsa_device, open_mode, isac3);
+    if (err < 0) {
+        if (err != -EBUSY && !block) {
+            mp_tmsg(MSGT_AO, MSGL_INFO, "[AO_ALSA] Open in nonblock-mode "
+                    "failed, trying to open in block-mode.\n");
+            err = try_open_device(alsa_device, 0, isac3);
         }
+        CHECK_ALSA_ERROR("Playback open error");
+    }
 
-        err = snd_pcm_nonblock(alsa_handler, 0);
-        if (err < 0) {
-            mp_tmsg(MSGT_AO, MSGL_ERR,
-                    "[AL_ALSA] Error setting block-mode %s.\n",
-                    snd_strerror(err));
-        } else {
-            mp_msg(MSGT_AO, MSGL_V, "alsa-init: pcm opened in blocking mode\n");
-        }
+    err = snd_pcm_nonblock(alsa_handler, 0);
+    if (err < 0) {
+        mp_tmsg(MSGT_AO, MSGL_ERR,
+                "[AL_ALSA] Error setting block-mode %s.\n",
+                snd_strerror(err));
+    } else {
+        mp_msg(MSGT_AO, MSGL_V, "alsa-init: pcm opened in blocking mode\n");
+    }
 
-        snd_pcm_hw_params_t *alsa_hwparams;
-        snd_pcm_sw_params_t *alsa_swparams;
+    snd_pcm_hw_params_t *alsa_hwparams;
+    snd_pcm_sw_params_t *alsa_swparams;
 
-        snd_pcm_hw_params_alloca(&alsa_hwparams);
-        snd_pcm_sw_params_alloca(&alsa_swparams);
+    snd_pcm_hw_params_alloca(&alsa_hwparams);
+    snd_pcm_sw_params_alloca(&alsa_swparams);
 
-        // setting hw-parameters
-        err = snd_pcm_hw_params_any(alsa_handler, alsa_hwparams);
-        CHECK_ALSA_ERROR("Unable to get initial parameters");
+    // setting hw-parameters
+    err = snd_pcm_hw_params_any(alsa_handler, alsa_hwparams);
+    CHECK_ALSA_ERROR("Unable to get initial parameters");
 
-        err = snd_pcm_hw_params_set_access
-                (alsa_handler, alsa_hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
-        CHECK_ALSA_ERROR("Unable to set access type");
+    err = snd_pcm_hw_params_set_access
+            (alsa_handler, alsa_hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
+    CHECK_ALSA_ERROR("Unable to set access type");
 
-        /* workaround for nonsupported formats
-           sets default format to S16_LE if the given formats aren't supported */
-        err = snd_pcm_hw_params_test_format
-                (alsa_handler, alsa_hwparams, alsa_format);
-        if (err < 0) {
-            mp_tmsg(MSGT_AO, MSGL_INFO, "[AO_ALSA] Format %s is not supported "
-                    "by hardware, trying default.\n", af_fmt2str_short(format));
-            alsa_format = SND_PCM_FORMAT_S16_LE;
-            if (AF_FORMAT_IS_AC3(ao_data.format))
-                ao_data.format = AF_FORMAT_AC3_LE;
-            else if (AF_FORMAT_IS_IEC61937(ao_data.format))
-                ao_data.format = AF_FORMAT_IEC61937_LE;
-            else
-                ao_data.format = AF_FORMAT_S16_LE;
-        }
+    /* workaround for nonsupported formats
+        sets default format to S16_LE if the given formats aren't supported */
+    err = snd_pcm_hw_params_test_format
+            (alsa_handler, alsa_hwparams, alsa_format);
+    if (err < 0) {
+        mp_tmsg(MSGT_AO, MSGL_INFO, "[AO_ALSA] Format %s is not supported "
+                "by hardware, trying default.\n", af_fmt2str_short(format));
+        alsa_format = SND_PCM_FORMAT_S16_LE;
+        if (AF_FORMAT_IS_AC3(ao_data.format))
+            ao_data.format = AF_FORMAT_AC3_LE;
+        else if (AF_FORMAT_IS_IEC61937(ao_data.format))
+            ao_data.format = AF_FORMAT_IEC61937_LE;
+        else
+            ao_data.format = AF_FORMAT_S16_LE;
+    }
 
-        err = snd_pcm_hw_params_set_format
-                (alsa_handler, alsa_hwparams, alsa_format);
-        CHECK_ALSA_ERROR("Unable to set format");
+    err = snd_pcm_hw_params_set_format(alsa_handler, alsa_hwparams, alsa_format);
+    CHECK_ALSA_ERROR("Unable to set format");
 
-        int num_channels = ao_data.channels.num;
-        err = snd_pcm_hw_params_set_channels_near
-                (alsa_handler, alsa_hwparams, &num_channels);
-        CHECK_ALSA_ERROR("Unable to set channels");
+    int num_channels = ao_data.channels.num;
+    err = snd_pcm_hw_params_set_channels_near
+            (alsa_handler, alsa_hwparams, &num_channels);
+    CHECK_ALSA_ERROR("Unable to set channels");
 
-        mp_chmap_from_channels(&ao_data.channels, num_channels);
-        if (!AF_FORMAT_IS_IEC61937(format))
-            mp_chmap_reorder_to_alsa(&ao_data.channels);
+    mp_chmap_from_channels(&ao_data.channels, num_channels);
+    if (!AF_FORMAT_IS_IEC61937(format))
+        mp_chmap_reorder_to_alsa(&ao_data.channels);
 
 
-        /* workaround for buggy rate plugin (should be fixed in ALSA 1.0.11)
-           prefer our own resampler, since that allows users to choose the resampler,
-           even per file if desired */
-        err = snd_pcm_hw_params_set_rate_resample
-                (alsa_handler, alsa_hwparams, 0);
-        CHECK_ALSA_ERROR("Unable to disable resampling");
+    /* workaround for buggy rate plugin (should be fixed in ALSA 1.0.11)
+        prefer our own resampler, since that allows users to choose the resampler,
+        even per file if desired */
+    err = snd_pcm_hw_params_set_rate_resample(alsa_handler, alsa_hwparams, 0);
+    CHECK_ALSA_ERROR("Unable to disable resampling");
 
-        err = snd_pcm_hw_params_set_rate_near
-                (alsa_handler, alsa_hwparams, &ao_data.samplerate, NULL);
-        CHECK_ALSA_ERROR("Unable to set samplerate-2");
+    err = snd_pcm_hw_params_set_rate_near
+            (alsa_handler, alsa_hwparams, &ao_data.samplerate, NULL);
+    CHECK_ALSA_ERROR("Unable to set samplerate-2");
 
-        bytes_per_sample = af_fmt2bits(ao_data.format) / 8;
-        bytes_per_sample *= ao_data.channels.num;
-        ao_data.bps = ao_data.samplerate * bytes_per_sample;
+    bytes_per_sample = af_fmt2bits(ao_data.format) / 8;
+    bytes_per_sample *= ao_data.channels.num;
+    ao_data.bps = ao_data.samplerate * bytes_per_sample;
 
-        err = snd_pcm_hw_params_set_buffer_time_near
-                (alsa_handler, alsa_hwparams, &(unsigned int){BUFFER_TIME}, NULL);
-        CHECK_ALSA_ERROR("Unable to set buffer time near");
+    err = snd_pcm_hw_params_set_buffer_time_near
+            (alsa_handler, alsa_hwparams, &(unsigned int){BUFFER_TIME}, NULL);
+    CHECK_ALSA_ERROR("Unable to set buffer time near");
 
-        err = snd_pcm_hw_params_set_periods_near
-                (alsa_handler, alsa_hwparams, &(unsigned int){FRAGCOUNT}, NULL);
-        CHECK_ALSA_ERROR("Unable to set periods");
+    err = snd_pcm_hw_params_set_periods_near
+            (alsa_handler, alsa_hwparams, &(unsigned int){FRAGCOUNT}, NULL);
+    CHECK_ALSA_ERROR("Unable to set periods");
 
-        /* finally install hardware parameters */
-        err = snd_pcm_hw_params(alsa_handler, alsa_hwparams);
-        CHECK_ALSA_ERROR("Unable to set hw-parameters");
+    /* finally install hardware parameters */
+    err = snd_pcm_hw_params(alsa_handler, alsa_hwparams);
+    CHECK_ALSA_ERROR("Unable to set hw-parameters");
 
-        // end setting hw-params
+    // end setting hw-params
 
-        // gets buffersize for control
-        err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &bufsize);
-        CHECK_ALSA_ERROR("Unable to get buffersize");
+    // gets buffersize for control
+    err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &bufsize);
+    CHECK_ALSA_ERROR("Unable to get buffersize");
 
-        ao_data.buffersize = bufsize * bytes_per_sample;
-        mp_msg(MSGT_AO, MSGL_V, "alsa-init: got buffersize=%i\n",
-               ao_data.buffersize);
+    ao_data.buffersize = bufsize * bytes_per_sample;
+    mp_msg(MSGT_AO, MSGL_V, "alsa-init: got buffersize=%i\n",
+            ao_data.buffersize);
 
-        err = snd_pcm_hw_params_get_period_size
-                (alsa_hwparams, &chunk_size, NULL);
-        CHECK_ALSA_ERROR("Unable to get period size");
+    err = snd_pcm_hw_params_get_period_size(alsa_hwparams, &chunk_size, NULL);
+    CHECK_ALSA_ERROR("Unable to get period size");
 
-        mp_msg(MSGT_AO, MSGL_V, "alsa-init: got period size %li\n", chunk_size);
-        ao_data.outburst = chunk_size * bytes_per_sample;
+    mp_msg(MSGT_AO, MSGL_V, "alsa-init: got period size %li\n", chunk_size);
+    ao_data.outburst = chunk_size * bytes_per_sample;
 
-        /* setting software parameters */
-        err = snd_pcm_sw_params_current(alsa_handler, alsa_swparams);
-        CHECK_ALSA_ERROR("Unable to get sw-parameters");
+    /* setting software parameters */
+    err = snd_pcm_sw_params_current(alsa_handler, alsa_swparams);
+    CHECK_ALSA_ERROR("Unable to get sw-parameters");
 
-        err = snd_pcm_sw_params_get_boundary(alsa_swparams, &boundary);
-        CHECK_ALSA_ERROR("Unable to get boundary");
+    err = snd_pcm_sw_params_get_boundary(alsa_swparams, &boundary);
+    CHECK_ALSA_ERROR("Unable to get boundary");
 
-        /* start playing when one period has been written */
-        err = snd_pcm_sw_params_set_start_threshold
-                (alsa_handler, alsa_swparams, chunk_size);
-        CHECK_ALSA_ERROR("Unable to set start threshold");
+    /* start playing when one period has been written */
+    err = snd_pcm_sw_params_set_start_threshold
+            (alsa_handler, alsa_swparams, chunk_size);
+    CHECK_ALSA_ERROR("Unable to set start threshold");
 
-        /* disable underrun reporting */
-        err = snd_pcm_sw_params_set_stop_threshold
-                (alsa_handler, alsa_swparams, boundary);
-        CHECK_ALSA_ERROR("Unable to set stop threshold");
+    /* disable underrun reporting */
+    err = snd_pcm_sw_params_set_stop_threshold
+            (alsa_handler, alsa_swparams, boundary);
+    CHECK_ALSA_ERROR("Unable to set stop threshold");
 
-        /* play silence when there is an underrun */
-        err = snd_pcm_sw_params_set_silence_size
-                (alsa_handler, alsa_swparams, boundary);
-        CHECK_ALSA_ERROR("Unable to set silence size");
+    /* play silence when there is an underrun */
+    err = snd_pcm_sw_params_set_silence_size
+            (alsa_handler, alsa_swparams, boundary);
+    CHECK_ALSA_ERROR("Unable to set silence size");
 
-        err = snd_pcm_sw_params(alsa_handler, alsa_swparams);
-        CHECK_ALSA_ERROR("Unable to get sw-parameters");
+    err = snd_pcm_sw_params(alsa_handler, alsa_swparams);
+    CHECK_ALSA_ERROR("Unable to get sw-parameters");
 
-        /* end setting sw-params */
+    /* end setting sw-params */
 
-        alsa_can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
+    alsa_can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
 
-        mp_msg(MSGT_AO, MSGL_V,
-               "alsa: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
-               ao_data.samplerate, ao_data.channels.num, (int)bytes_per_sample,
-               ao_data.buffersize, snd_pcm_format_description(alsa_format));
+    mp_msg(MSGT_AO, MSGL_V,
+            "alsa: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
+            ao_data.samplerate, ao_data.channels.num, (int)bytes_per_sample,
+            ao_data.buffersize, snd_pcm_format_description(alsa_format));
 
-    } // end switch alsa_handler (spdif)
     return 1;
 
 alsa_error:
