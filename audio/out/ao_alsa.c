@@ -287,6 +287,41 @@ static int str_maxlen(void *strp)
     return str->len <= ALSA_DEVICE_SIZE;
 }
 
+
+static const int mp_to_alsa_format[][2] = {
+    {AF_FORMAT_S8,          SND_PCM_FORMAT_S8},
+    {AF_FORMAT_U8,          SND_PCM_FORMAT_U8},
+    {AF_FORMAT_U16_LE,      SND_PCM_FORMAT_U16_LE},
+    {AF_FORMAT_U16_BE,      SND_PCM_FORMAT_U16_BE},
+    {AF_FORMAT_S16_LE,      SND_PCM_FORMAT_S16_LE},
+    {AF_FORMAT_S16_BE,      SND_PCM_FORMAT_S16_BE},
+    {AF_FORMAT_U32_LE,      SND_PCM_FORMAT_U32_LE},
+    {AF_FORMAT_U32_BE,      SND_PCM_FORMAT_U32_BE},
+    {AF_FORMAT_S32_LE,      SND_PCM_FORMAT_S32_LE},
+    {AF_FORMAT_S32_BE,      SND_PCM_FORMAT_S32_BE},
+    {AF_FORMAT_U24_LE,      SND_PCM_FORMAT_U24_3LE},
+    {AF_FORMAT_U24_BE,      SND_PCM_FORMAT_U24_3BE},
+    {AF_FORMAT_S24_LE,      SND_PCM_FORMAT_S24_3LE},
+    {AF_FORMAT_S24_BE,      SND_PCM_FORMAT_S24_3BE},
+    {AF_FORMAT_FLOAT_LE,    SND_PCM_FORMAT_FLOAT_LE},
+    {AF_FORMAT_FLOAT_BE,    SND_PCM_FORMAT_FLOAT_BE},
+    {AF_FORMAT_AC3_LE,      SND_PCM_FORMAT_S16_LE},
+    {AF_FORMAT_AC3_BE,      SND_PCM_FORMAT_S16_BE},
+    {AF_FORMAT_IEC61937_LE, SND_PCM_FORMAT_S16_LE},
+    {AF_FORMAT_IEC61937_BE, SND_PCM_FORMAT_S16_BE},
+    {AF_FORMAT_MPEG2,       SND_PCM_FORMAT_MPEG},
+    {AF_FORMAT_UNKNOWN,     SND_PCM_FORMAT_UNKNOWN},
+};
+
+static int find_alsa_format(int af_format)
+{
+    for (int n = 0; mp_to_alsa_format[n][0] != AF_FORMAT_UNKNOWN; n++) {
+        if (mp_to_alsa_format[n][0] == af_format)
+            return mp_to_alsa_format[n][1];
+    }
+    return SND_PCM_FORMAT_UNKNOWN;
+}
+
 static int try_open_device(const char *device, int open_mode, int try_ac3)
 {
     int err, len;
@@ -367,64 +402,7 @@ static int init(int rate_hz, const struct mp_chmap *channels, int format,
 
     snd_lib_error_set_handler(alsa_error_handler);
 
-    switch (format) {
-    case AF_FORMAT_S8:
-        alsa_format = SND_PCM_FORMAT_S8;
-        break;
-    case AF_FORMAT_U8:
-        alsa_format = SND_PCM_FORMAT_U8;
-        break;
-    case AF_FORMAT_U16_LE:
-        alsa_format = SND_PCM_FORMAT_U16_LE;
-        break;
-    case AF_FORMAT_U16_BE:
-        alsa_format = SND_PCM_FORMAT_U16_BE;
-        break;
-    case AF_FORMAT_AC3_LE:
-    case AF_FORMAT_S16_LE:
-    case AF_FORMAT_IEC61937_LE:
-        alsa_format = SND_PCM_FORMAT_S16_LE;
-        break;
-    case AF_FORMAT_AC3_BE:
-    case AF_FORMAT_S16_BE:
-    case AF_FORMAT_IEC61937_BE:
-        alsa_format = SND_PCM_FORMAT_S16_BE;
-        break;
-    case AF_FORMAT_U32_LE:
-        alsa_format = SND_PCM_FORMAT_U32_LE;
-        break;
-    case AF_FORMAT_U32_BE:
-        alsa_format = SND_PCM_FORMAT_U32_BE;
-        break;
-    case AF_FORMAT_S32_LE:
-        alsa_format = SND_PCM_FORMAT_S32_LE;
-        break;
-    case AF_FORMAT_S32_BE:
-        alsa_format = SND_PCM_FORMAT_S32_BE;
-        break;
-    case AF_FORMAT_U24_LE:
-        alsa_format = SND_PCM_FORMAT_U24_3LE;
-        break;
-    case AF_FORMAT_U24_BE:
-        alsa_format = SND_PCM_FORMAT_U24_3BE;
-        break;
-    case AF_FORMAT_S24_LE:
-        alsa_format = SND_PCM_FORMAT_S24_3LE;
-        break;
-    case AF_FORMAT_S24_BE:
-        alsa_format = SND_PCM_FORMAT_S24_3BE;
-        break;
-    case AF_FORMAT_FLOAT_LE:
-        alsa_format = SND_PCM_FORMAT_FLOAT_LE;
-        break;
-    case AF_FORMAT_FLOAT_BE:
-        alsa_format = SND_PCM_FORMAT_FLOAT_BE;
-        break;
-
-    default:
-        alsa_format = SND_PCM_FORMAT_MPEG; //? default should be -1
-        break;
-    }
+    alsa_format = find_alsa_format(format);
 
     //subdevice parsing
     // set defaults
