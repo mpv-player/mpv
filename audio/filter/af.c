@@ -301,36 +301,37 @@ repeat:
     }
 }
 
-static void print_fmt(struct mp_audio *d)
+static void print_fmt(struct mp_audio *d, int msg_level)
 {
     if (d) {
         char *chstr = mp_chmap_to_str(&d->channels);
-        mp_msg(MSGT_AFILTER, MSGL_V, "%dHz/%s(%dch)/%s", d->rate,
+        mp_msg(MSGT_AFILTER, msg_level, "%dHz/%s(%dch)/%s", d->rate,
                chstr ? chstr : "?", d->nch,
                af_fmt2str_short(d->format));
         talloc_free(chstr);
     } else
-        mp_msg(MSGT_AFILTER, MSGL_V, "(?)");
+        mp_msg(MSGT_AFILTER, msg_level, "(?)");
 }
 
-static void af_print_filter_chain(struct af_stream *s, struct af_instance *at)
+static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
+                                  int msg_level)
 {
-    mp_msg(MSGT_AFILTER, MSGL_V, "Audio filter chain:\n");
+    mp_msg(MSGT_AFILTER, msg_level, "Audio filter chain:\n");
 
     struct af_instance *af = s->first;
     while (af) {
-        mp_msg(MSGT_AFILTER, MSGL_V, "  [%s] ", af->info->name);
-        print_fmt(af->data);
+        mp_msg(MSGT_AFILTER, msg_level, "  [%s] ", af->info->name);
+        print_fmt(af->data, msg_level);
         if (af == at)
-            mp_msg(MSGT_AFILTER, MSGL_V, " <-");
-        mp_msg(MSGT_AFILTER, MSGL_V, "\n");
+            mp_msg(MSGT_AFILTER, msg_level, " <-");
+        mp_msg(MSGT_AFILTER, msg_level, "\n");
 
         af = af->next;
     }
 
-    mp_msg(MSGT_AFILTER, MSGL_V, "  [ao] ");
-    print_fmt(&s->output);
-    mp_msg(MSGT_AFILTER, MSGL_V, "\n");
+    mp_msg(MSGT_AFILTER, msg_level, "  [ao] ");
+    print_fmt(&s->output, msg_level);
+    mp_msg(MSGT_AFILTER, msg_level, "\n");
 }
 
 static const char *af_find_conversion_filter(int srcfmt, int dstfmt)
@@ -486,19 +487,19 @@ int af_reinit(struct af_stream *s)
             mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Reinitialization did not "
                    "work, audio filter '%s' returned error code %i\n",
                    af->info->name, rv);
-            af_print_filter_chain(s, af);
+            af_print_filter_chain(s, af, MSGL_ERR);
             return AF_ERROR;
         }
     }
 
-    af_print_filter_chain(s, NULL);
+    af_print_filter_chain(s, NULL, MSGL_V);
 
     return AF_OK;
 
 negotiate_error:
     mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Unable to correct audio format. "
            "This error should never occur, please send a bug report.\n");
-    af_print_filter_chain(s, af);
+    af_print_filter_chain(s, af, MSGL_ERR);
     return AF_ERROR;
 }
 
