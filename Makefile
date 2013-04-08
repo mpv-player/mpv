@@ -461,6 +461,9 @@ tags:
 osxbundle:
 	@TOOLS/osxbundle.py mpv
 
+osxbundle-skip-deps:
+	@TOOLS/osxbundle.py --skip-deps mpv
+
 -include $(DEP_FILES)
 
 .PHONY: all *install* *clean .version
