@@ -1237,7 +1237,10 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
         if (demuxer->ds[type]->id != index2)
             ds_free_packs(demuxer->ds[type]);
         demuxer->ds[type]->id = index2;
+    } else {
+        abort();
     }
+
     int new_id = demuxer->ds[type]->id;
     void *new = NULL;
     if (new_id >= 0) {
