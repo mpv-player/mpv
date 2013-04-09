@@ -202,8 +202,9 @@ static int imgop(int(*planeop)(unsigned char *, unsigned char *,
        int sum = 0;
        for (int p = 0; p < dst->num_planes; p++) {
            sum += planeop(dst->planes[p], src ? src->planes[p] : NULL,
-                          dst->w * (dst->fmt.bpp[p] / 8), dst->plane_h[p],
-                          dst->stride[p], src ? src->stride[p] : 0, arg);
+                          (dst->w * dst->fmt.bytes[p]) >> dst->fmt.xs[p],
+                          dst->plane_h[p], dst->stride[p],
+                          src ? src->stride[p] : 0, arg);
        }
        return sum;
    }
