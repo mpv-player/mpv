@@ -368,9 +368,6 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
     }
 }
 
-/// step size of mixer changes
-int volstep = 3;
-
 // Time used to seek external tracks to.
 static double get_main_demux_pts(struct MPContext *mpctx)
 {
@@ -1599,7 +1596,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
                 "Couldn't find matching filter/ao format!\n");
         goto init_error;
     }
-    mpctx->mixer.volstep = volstep;
+    mpctx->mixer.volstep = opts->volstep;
     mpctx->mixer.softvol = opts->softvol;
     mpctx->mixer.softvol_max = opts->softvol_max;
     mixer_reinit(&mpctx->mixer, ao);

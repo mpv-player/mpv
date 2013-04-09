@@ -16,6 +16,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .softvol_max = 200,
         .mixer_init_volume = -1,
         .mixer_init_mute = -1,
+        .volstep = 3,
         .ao_buffersize = -1,
         .vo = {
             .video_driver_list = NULL,

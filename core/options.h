@@ -50,6 +50,7 @@ typedef struct MPOpts {
     int softvol;
     float mixer_init_volume;
     int mixer_init_mute;
+    int volstep;
     float softvol_max;
     int gapless_audio;
     int ao_buffersize;
