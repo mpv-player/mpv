@@ -4021,29 +4021,6 @@ goto_enable_cache: ;
     reinit_audio_chain(mpctx);
     reinit_subs(mpctx);
 
-    //================== MAIN: ==========================
-
-    if (!mpctx->sh_video && !mpctx->sh_audio) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_FATAL,
-                "No video or audio streams selected.\n");
-#ifdef CONFIG_DVBIN
-        if (mpctx->stream->type == STREAMTYPE_DVB) {
-            int dir;
-            int v = mpctx->last_dvb_step;
-            if (v > 0)
-                dir = DVB_CHANNEL_HIGHER;
-            else
-                dir = DVB_CHANNEL_LOWER;
-
-            if (dvb_step_channel(mpctx->stream, dir)) {
-                mpctx->stop_play = PT_NEXT_ENTRY;
-                mpctx->dvbin_reopen = 1;
-            }
-        }
-#endif
-        goto terminate_playback;
-    }
-
     //================ SETUP STREAMS ==========================
 
     if (mpctx->sh_video) {
@@ -4077,6 +4054,27 @@ goto_enable_cache: ;
         mp_input_set_section(mpctx->input, "encode", MP_INPUT_NO_DEFAULT_SECTION);
 
     //==================== START PLAYING =======================
+
+    if (!mpctx->sh_video && !mpctx->sh_audio) {
+        mp_tmsg(MSGT_CPLAYER, MSGL_FATAL,
+                "No video or audio streams selected.\n");
+#ifdef CONFIG_DVBIN
+        if (mpctx->stream->type == STREAMTYPE_DVB) {
+            int dir;
+            int v = mpctx->last_dvb_step;
+            if (v > 0)
+                dir = DVB_CHANNEL_HIGHER;
+            else
+                dir = DVB_CHANNEL_LOWER;
+
+            if (dvb_step_channel(mpctx->stream, dir)) {
+                mpctx->stop_play = PT_NEXT_ENTRY;
+                mpctx->dvbin_reopen = 1;
+            }
+        }
+#endif
+        goto terminate_playback;
+    }
 
     mp_tmsg(MSGT_CPLAYER, MSGL_V, "Starting playback...\n");
 
