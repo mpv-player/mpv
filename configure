@@ -2942,6 +2942,11 @@ echores "$_lircc"
 
 #############################################################################
 
+if mingw32 ; then
+  # add this last, so that --libs from pkg-config can't override it
+  end_ldflags="$end_ldflags -mconsole"
+fi
+
 CFLAGS="$CFLAGS -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE"
 
 CXXFLAGS=" $CFLAGS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMIT_MACROS"
@@ -2984,7 +2989,7 @@ CFLAGS   = $WARNFLAGS $ERRORFLAGS $WARN_CFLAGS $CFLAGS $extra_cflags
 CXXFLAGS = $WARNFLAGS $ERRORFLAGS $CXXFLAGS $extra_cflags $extra_cxxflags
 DEPFLAGS = $DEPFLAGS
 
-EXTRALIBS          = $extra_ldflags $_ld_static $_ld_lm $extra_libs $libs_mplayer
+EXTRALIBS = $extra_ldflags $_ld_static $_ld_lm $extra_libs $libs_mplayer $end_ldflags
 
 GETCH = $_getch
 TIMER = $_timer
