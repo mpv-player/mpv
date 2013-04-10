@@ -3133,8 +3133,8 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
             unpause_player(mpctx);
     } else if (!mpctx->paused) {
         if (cache >= 0 && cache <= opts->stream_cache_pause && !idle) {
-            pause_player(mpctx);
             mpctx->paused_for_cache = true;
+            pause_player(mpctx);
         }
     }
 }
