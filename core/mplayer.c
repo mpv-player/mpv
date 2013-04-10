@@ -3877,6 +3877,17 @@ static void play_current_file(struct MPContext *mpctx)
     load_per_file_options(mpctx->mconfig, mpctx->playlist->current->params,
                           mpctx->playlist->current->num_params);
 
+    if (opts->reset_options) {
+        for (int n = 0; opts->reset_options[n]; n++) {
+            const char *opt = opts->reset_options[n];
+            if (strcmp(opt, "all") == 0) {
+                m_config_mark_all_file_local(mpctx->mconfig);
+            } else {
+                m_config_mark_file_local(mpctx->mconfig, opt);
+            }
+        }
+    }
+
     // We must enable getch2 here to be able to interrupt network connection
     // or cache filling
     if (opts->consolecontrols && !opts->slave_mode) {

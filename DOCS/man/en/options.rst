@@ -1739,6 +1739,30 @@
 --referrer=<string>
     Specify a referrer path or URL for HTTP requests.
 
+--reset-on-next-file=<all|option1,option2,...>
+    Normally, mpv will try to keep all settings when playing the next file on
+    the playlist, even if they were changed by the user during playback. (This
+    behavior is the opposite of MPlayer's, which tries to reset all settings
+    when starting next file.)
+
+    This can be changed with this option. It accepts a list of options, and
+    mpv will reset the value of these options on playback start to the initial
+    value. The initial value is either the default value, or as set by the
+    config file or command line.
+
+    In some cases, this might not work as expected. For example, ``--volume``
+    will only be reset the volume if it's explicitly set in the config file
+    or the command line.
+
+    The special name ``all`` resets as many options as possible.
+
+    *EXAMPLE*:
+
+    - ``--reset-on-next-file=fullscreen,speed`` Reset fullscreen and playback
+      speed settings if they were changed during playback.
+    - ``--reset-on-next-file=all`` Try to reset all settings that were changed
+      during playback.
+
 --reuse-socket
     (udp:// only)
     Allows a socket to be reused by other processes as soon as it is closed.

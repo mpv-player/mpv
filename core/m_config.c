@@ -258,6 +258,22 @@ void m_config_leave_file_local(struct m_config *config)
     }
 }
 
+void m_config_mark_file_local(struct m_config *config, const char *opt)
+{
+    struct m_config_option *co = m_config_get_co(config, bstr0(opt));
+    if (co) {
+        ensure_backup(config, co);
+    } else {
+        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "Option %s not found.\n", opt);
+    }
+}
+
+void m_config_mark_all_file_local(struct m_config *config)
+{
+    for (struct m_config_option *co = config->opts; co; co = co->next)
+        ensure_backup(config, co);
+}
+
 // Given an option --opt, add --no-opt (if applicable).
 static void add_negation_option(struct m_config *config,
                                 struct m_config_option *parent,

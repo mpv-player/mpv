@@ -297,6 +297,7 @@ const m_option_t common_opts[] = {
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
     OPT_FLAG("config", load_config, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
+    OPT_STRINGLIST("reset-on-next-file", reset_options, CONF_GLOBAL),
 
 // ------------------------- stream options --------------------
 
