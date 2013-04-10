@@ -3846,7 +3846,6 @@ static void play_current_file(struct MPContext *mpctx)
 
     mpctx->stop_play = 0;
     mpctx->filename = NULL;
-    mpctx->file_format = DEMUXER_TYPE_UNKNOWN;
 
     if (mpctx->playlist->current)
         mpctx->filename = mpctx->playlist->current->filename;
@@ -3921,14 +3920,15 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->resolve_result = resolve_url(stream_filename, opts);
     if (mpctx->resolve_result)
         stream_filename = mpctx->resolve_result->url;
-    mpctx->stream = open_stream(stream_filename, opts, &mpctx->file_format);
+    int file_format = DEMUXER_TYPE_UNKNOWN;
+    mpctx->stream = open_stream(stream_filename, opts, &file_format);
     if (!mpctx->stream) { // error...
         demux_was_interrupted(mpctx);
         goto terminate_playback;
     }
     mpctx->initialized_flags |= INITIALIZED_STREAM;
 
-    if (mpctx->file_format == DEMUXER_TYPE_PLAYLIST) {
+    if (file_format == DEMUXER_TYPE_PLAYLIST) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nThis looks like a playlist, but "
                "playlist support will not be used automatically.\n"
                "mpv's playlist code is unsafe and should only be used with "
@@ -3968,7 +3968,7 @@ goto_enable_cache: ;
 
     mpctx->audio_delay = opts->audio_delay;
 
-    mpctx->demuxer = demux_open(opts, mpctx->stream, mpctx->file_format,
+    mpctx->demuxer = demux_open(opts, mpctx->stream, file_format,
                                 opts->audio_id, opts->video_id, opts->sub_id,
                                 mpctx->filename);
     mpctx->master_demuxer = mpctx->demuxer;
@@ -4181,7 +4181,6 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     m_config_leave_file_local(mpctx->mconfig);
 
     mpctx->filename = NULL;
-    mpctx->file_format = DEMUXER_TYPE_UNKNOWN;
     talloc_free(mpctx->resolve_result);
     mpctx->resolve_result = NULL;
 
@@ -4373,7 +4372,6 @@ int main(int argc, char *argv[])
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){
-        .file_format = DEMUXER_TYPE_UNKNOWN,
         .last_dvb_step = 1,
         .terminal_osd_text = talloc_strdup(mpctx, ""),
         .playlist = talloc_struct(mpctx, struct playlist, {0}),

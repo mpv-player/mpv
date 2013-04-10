@@ -248,8 +248,6 @@ typedef struct MPContext {
 
     struct ass_library *ass_library;
 
-    int file_format;
-
     int last_dvb_step;
     int dvbin_reopen;
 
