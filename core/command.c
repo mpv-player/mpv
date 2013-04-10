@@ -1945,14 +1945,16 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         char *filename = cmd->args[0].v.s;
         bool append = cmd->args[1].v.i;
         struct playlist *pl = playlist_parse_file(filename);
-        if (!pl) {
+        if (pl) {
             if (!append)
                 playlist_clear(mpctx->playlist);
             playlist_transfer_entries(mpctx->playlist, pl);
             talloc_free(pl);
 
-            if (!append)
-                mpctx->stop_play = PT_NEXT_ENTRY;
+            if (!append) {
+                mpctx->playlist->current = mpctx->playlist->first;
+                mpctx->stop_play = PT_CURRENT_ENTRY;
+            }
         } else {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
                     "\nUnable to load playlist %s.\n", filename);
