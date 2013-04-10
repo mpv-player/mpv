@@ -4044,10 +4044,6 @@ goto_enable_cache: ;
         goto terminate_playback;
     }
 
-    // Disable the term OSD in verbose mode
-    if (verbose)
-        opts->term_osd = 0;
-
     //================ SETUP STREAMS ==========================
 
     if (mpctx->sh_video) {
