@@ -450,6 +450,8 @@ static void uninit_subs(struct demuxer *demuxer)
 
 void uninit_player(struct MPContext *mpctx, unsigned int mask)
 {
+    struct MPOpts *opts = &mpctx->opts;
+
     mask &= mpctx->initialized_flags;
 
     mp_msg(MSGT_CPLAYER, MSGL_DBG2, "\n*** uninit(0x%X)\n", mask);
@@ -542,8 +544,15 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
     if (mask & INITIALIZED_AO) {
         mpctx->initialized_flags &= ~INITIALIZED_AO;
-        if (mpctx->mixer.ao)
+        if (mpctx->mixer.ao) {
+            // Normally the mixer remembers volume, but do it even if the
+            // volume is set explicitly with --volume=...
+            if (opts->mixer_init_volume >= 0 && mpctx->mixer.user_set_volume)
+                mixer_getbothvolume(&mpctx->mixer, &opts->mixer_init_volume);
+            if (opts->mixer_init_mute >= 0 && mpctx->mixer.user_set_mute)
+                opts->mixer_init_mute = mixer_getmute(&mpctx->mixer);
             mixer_uninit(&mpctx->mixer);
+        }
         if (mpctx->ao)
             ao_uninit(mpctx->ao, mpctx->stop_play != AT_END_OF_FILE);
         mpctx->ao = NULL;
@@ -4148,9 +4157,6 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
 
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
 
-    // xxx handle this as INITIALIZED_CONFIG?
-    m_config_leave_file_local(mpctx->mconfig);
-
     // time to uninit all, except global stuff:
     int uninitialize_parts = INITIALIZED_ALL;
     if (opts->fixed_vo)
@@ -4159,6 +4165,9 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
         mpctx->encode_lavc_ctx)
         uninitialize_parts -= INITIALIZED_AO;
     uninit_player(mpctx, uninitialize_parts);
+
+    // xxx handle this as INITIALIZED_CONFIG?
+    m_config_leave_file_local(mpctx->mconfig);
 
     mpctx->filename = NULL;
     mpctx->file_format = DEMUXER_TYPE_UNKNOWN;
