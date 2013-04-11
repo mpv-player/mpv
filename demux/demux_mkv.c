@@ -2050,78 +2050,87 @@ struct block_info {
     uint64_t length;
     uint64_t duration;
     bool simple, keyframe;
+    uint64_t timecode;
+    mkv_track_t *track;
     uint8_t *data;
+    void *alloc;
 };
 
 static void free_block(struct block_info *block)
 {
-    free(block->data);
-    block->data = NULL;
+    free(block->alloc);
+    block->data = block->alloc = NULL;
 }
 
 static int read_block(demuxer_t *demuxer, struct block_info *block)
 {
+    mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
+    int tmp, num;
+    int16_t time;
+    int res = -1;
 
     free_block(block);
     block->length = ebml_read_length(s, NULL);
     if (block->length > 500000000)
-        goto error;
-    block->data = malloc(block->length + AV_LZO_INPUT_PADDING);
+        goto exit;
+    block->data = block->alloc = malloc(block->length + AV_LZO_INPUT_PADDING);
     demuxer->filepos = stream_tell(s);
     if (stream_read(s, block->data, block->length) != (int) block->length)
-        goto error;
-    return 1;
+        goto exit;
 
-error:
-    free_block(block);
-    return -1;
+    // Parse header of the Block element
+    /* first byte(s): track num */
+    num = ebml_read_vlen_uint(block->data, &tmp);
+    block->data += tmp;
+    /* time (relative to cluster time) */
+    time = block->data[0] << 8 | block->data[1];
+    block->data += 2;
+    block->length -= tmp + 2;
+    if (block->simple)
+        block->keyframe = block->data[0] & 0x80;
+    block->timecode = time * mkv_d->tc_scale + mkv_d->cluster_tc;
+    for (int i = 0; i < mkv_d->num_tracks; i++) {
+        if (mkv_d->tracks[i]->tnum == num) {
+            block->track = mkv_d->tracks[i];
+            break;
+        }
+    }
+    if (!block->track) {
+        res = 0;
+        goto exit;
+    }
+
+    res = 1;
+exit:
+    if (res <= 0)
+        free_block(block);
+    return res;
 }
 
 static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-    mkv_track_t *track = NULL;
     demux_stream_t *ds = NULL;
     uint64_t old_length;
-    uint64_t tc;
     uint32_t *lace_size;
-    uint8_t laces, flags;
-    int i, num, tmp, use_this_block = 1;
+    uint8_t laces;
+    int i, use_this_block = 1;
     double current_pts;
-    int16_t time;
     uint8_t *block = block_info->data;
     uint64_t length = block_info->length;
     bool keyframe = block_info->keyframe;
     uint64_t block_duration = block_info->duration;
+    uint64_t tc = block_info->timecode;
+    mkv_track_t *track = block_info->track;
 
-    /* first byte(s): track num */
-    num = ebml_read_vlen_uint(block, &tmp);
-    block += tmp;
-    /* time (relative to cluster time) */
-    time = block[0] << 8 | block[1];
-    block += 2;
-    length -= tmp + 2;
     old_length = length;
-    flags = block[0];
-    if (block_info->simple)
-        keyframe = flags & 0x80;
     if (demux_mkv_read_block_lacing(block, &length, &laces, &lace_size))
         return 0;
     block += old_length - length;
 
-    tc = time * mkv_d->tc_scale + mkv_d->cluster_tc;
     current_pts = tc / 1e9;
 
-    for (i = 0; i < mkv_d->num_tracks; i++)
-        if (mkv_d->tracks[i]->tnum == num) {
-            track = mkv_d->tracks[i];
-            break;
-        }
-    if (track == NULL) {
-        free(lace_size);
-        return 1;
-    }
     if (track->type == MATROSKA_TRACK_AUDIO
         && track->id == demuxer->audio->id) {
         ds = demuxer->audio;
