@@ -274,8 +274,11 @@ static int init(int rate, int channels, int format, int flags) {
     }
   }
   rate = jack_get_sample_rate(client);
-  jack_latency = (float)(jack_port_get_total_latency(client, ports[0]) +
-                         jack_get_buffer_size(client)) / (float)rate;
+  jack_latency_range_t jack_latency_range;
+  jack_port_get_latency_range(ports[0], JackPlaybackLatency,
+                              &jack_latency_range);
+  jack_latency = (float)(jack_latency_range.max + jack_get_buffer_size(client))
+                 / (float)rate;
   callback_interval = 0;
 
   ao_data.channels = channels;
