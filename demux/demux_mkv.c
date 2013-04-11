@@ -161,6 +161,8 @@ typedef struct mkv_demuxer {
 
     mkv_index_t *indexes;
     int num_indexes;
+    uint64_t index_max_timecode;
+    bool index_complete;
 
     int64_t *parsed_pos;
     int num_parsed_pos;
@@ -169,12 +171,6 @@ typedef struct mkv_demuxer {
     bool parsed_tags;
     bool parsed_chapters;
     bool parsed_attachments;
-
-    struct cluster_pos {
-        uint64_t filepos;
-        uint64_t timecode;
-    } *cluster_positions;
-    int num_cluster_pos;
 
     uint64_t skip_to_timecode;
     int v_skip_to_keyframe, a_skip_to_keyframe;
@@ -234,26 +230,6 @@ static mkv_track_t *find_track_by_num(struct mkv_demuxer *d, int n, int type)
 
     return NULL;
 }
-
-static void add_cluster_position(mkv_demuxer_t *mkv_d, uint64_t filepos,
-                                 uint64_t timecode)
-{
-    if (mkv_d->indexes)
-        return;
-
-    int n = mkv_d->num_cluster_pos;
-    if (n > 0 && mkv_d->cluster_positions[n-1].filepos >= filepos)
-        return;
-
-    mkv_d->cluster_positions =
-        grow_array(mkv_d->cluster_positions, mkv_d->num_cluster_pos,
-                   sizeof(*mkv_d->cluster_positions));
-    mkv_d->cluster_positions[mkv_d->num_cluster_pos++] = (struct cluster_pos){
-        .filepos = filepos,
-        .timecode = timecode,
-    };
-}
-
 
 #define AAC_SYNC_EXTENSION_TYPE 0x02b7
 static int aac_get_sample_rate_index(uint32_t sample_rate)
@@ -712,6 +688,32 @@ static int demux_mkv_read_tracks(demuxer_t *demuxer)
     return 0;
 }
 
+static void cue_index_add(demuxer_t *demuxer, int track_id, uint64_t filepos,
+                          uint64_t timecode)
+{
+    mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
+
+    mkv_d->indexes = grow_array(mkv_d->indexes, mkv_d->num_indexes,
+                                sizeof(mkv_index_t));
+    mkv_d->indexes[mkv_d->num_indexes].tnum = track_id;
+    mkv_d->indexes[mkv_d->num_indexes].timecode = timecode;
+    mkv_d->indexes[mkv_d->num_indexes].filepos = filepos;
+    mkv_d->num_indexes++;
+
+    mkv_d->index_max_timecode = FFMAX(mkv_d->index_max_timecode, timecode);
+}
+
+static void add_cluster_position(demuxer_t *demuxer, uint64_t filepos,
+                                 uint64_t timecode)
+{
+    mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
+
+    if (mkv_d->index_complete)
+        return;
+    if (timecode > mkv_d->index_max_timecode)
+        cue_index_add(demuxer, -1, filepos, timecode);
+}
+
 static int demux_mkv_read_cues(demuxer_t *demuxer)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
@@ -737,22 +739,17 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
         for (int i = 0; i < cuepoint->n_cue_track_positions; i++) {
             struct ebml_cue_track_positions *trackpos =
                 &cuepoint->cue_track_positions[i];
-            uint64_t track = trackpos->cue_track;
-            uint64_t pos = trackpos->cue_cluster_position;
-            mkv_d->indexes =
-                grow_array(mkv_d->indexes, mkv_d->num_indexes,
-                           sizeof(mkv_index_t));
-            mkv_d->indexes[mkv_d->num_indexes].tnum = track;
-            mkv_d->indexes[mkv_d->num_indexes].timecode = time;
-            mkv_d->indexes[mkv_d->num_indexes].filepos =
-                mkv_d->segment_start + pos;
+            uint64_t pos = mkv_d->segment_start + trackpos->cue_cluster_position;
+            cue_index_add(demuxer, trackpos->cue_track, pos, time);
             mp_msg(MSGT_DEMUX, MSGL_DBG2,
                    "[mkv] |+ found cue point for track %" PRIu64
-                   ": timecode %" PRIu64 ", filepos: %" PRIu64 "\n", track,
-                   time, mkv_d->segment_start + pos);
-            mkv_d->num_indexes++;
+                   ": timecode %" PRIu64 ", filepos: %" PRIu64 "\n",
+                   trackpos->cue_track, time, pos);
         }
     }
+
+    // Do not attempt to create index on the fly.
+    mkv_d->index_complete = true;
 
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] \\---- [ parsing cues ] -----------\n");
     talloc_free(parse_ctx.talloc_ctx);
@@ -1646,7 +1643,6 @@ static void mkv_free(struct demuxer *demuxer)
     for (int i = 0; i < mkv_d->num_tracks; i++)
         demux_mkv_free_trackentry(mkv_d->tracks[i]);
     free(mkv_d->indexes);
-    free(mkv_d->cluster_positions);
 }
 
 static int demux_mkv_open(demuxer_t *demuxer)
@@ -2267,8 +2263,7 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
                     if (num == EBML_UINT_INVALID)
                         return 0;
                     mkv_d->cluster_tc = num * mkv_d->tc_scale;
-                    add_cluster_position(mkv_d, mkv_d->cluster_start,
-                                         mkv_d->cluster_tc);
+                    add_cluster_position(demuxer, mkv_d->cluster_start, num);
                     break;
 
                 case MATROSKA_ID_BLOCKGROUP:
@@ -2330,27 +2325,29 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
     return 0;
 }
 
-static int seek_creating_index(struct demuxer *demuxer, float rel_seek_secs,
-                               int flags)
+static int create_index_until(struct demuxer *demuxer, uint64_t timecode)
 {
     struct mkv_demuxer *mkv_d = demuxer->priv;
     struct stream *s = demuxer->stream;
-    int64_t target_tc_ns = (int64_t) (rel_seek_secs * 1e9);
-    if (target_tc_ns < 0)
-        target_tc_ns = 0;
-    uint64_t max_filepos = 0;
-    int64_t max_tc = -1;
-    int n = mkv_d->num_cluster_pos;
-    if (n > 0) {
-        max_filepos = mkv_d->cluster_positions[n - 1].filepos;
-        max_tc = mkv_d->cluster_positions[n - 1].timecode;
-    }
 
-    if (target_tc_ns > max_tc) {
-        if ((int64_t) max_filepos > stream_tell(s))
+    if (mkv_d->index_complete)
+        return 0;
+
+    if (mkv_d->index_max_timecode * mkv_d->tc_scale < timecode) {
+        int64_t cur_filepos = stream_tell(s);
+        uint64_t max_filepos = 0;
+        for (int n = 0; n < mkv_d->num_indexes; n++) {
+            if (mkv_d->indexes[n].timecode == mkv_d->index_max_timecode) {
+                max_filepos = mkv_d->indexes[n].filepos;
+                break;
+            }
+        }
+        if ((int64_t) max_filepos > cur_filepos)
             stream_seek(s, max_filepos);
         else
-            stream_seek(s, stream_tell(s) + mkv_d->cluster_size);
+            stream_seek(s, cur_filepos + mkv_d->cluster_size);
+        mp_msg(MSGT_DEMUX, MSGL_V,
+               "[mkv] creating index until TC %" PRIu64 "\n", timecode);
         /* parse all the clusters upto target_filepos */
         while (!s->eof) {
             uint64_t start = stream_tell(s);
@@ -2361,9 +2358,8 @@ static int seek_creating_index(struct demuxer *demuxer, float rel_seek_secs,
                 while (!s->eof && stream_tell(s) < end) {
                     if (ebml_read_id(s, NULL) == MATROSKA_ID_TIMECODE) {
                         uint64_t tc = ebml_read_uint(s, NULL);
-                        tc *= mkv_d->tc_scale;
-                        add_cluster_position(mkv_d, start, tc);
-                        if (tc >= target_tc_ns)
+                        add_cluster_position(demuxer, start, tc);
+                        if (tc * mkv_d->tc_scale >= timecode)
                             goto enough_index;
                         break;
                     }
@@ -2374,29 +2370,12 @@ static int seek_creating_index(struct demuxer *demuxer, float rel_seek_secs,
             stream_seek(s, end);
         }
     enough_index:
-        if (s->eof)
-            stream_reset(s);
+        stream_seek(s, cur_filepos);
     }
-    if (!mkv_d->num_cluster_pos) {
-        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] no target for seek found\n");
+    if (!mkv_d->indexes) {
+        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] no target for seek found\n");
         return -1;
     }
-    uint64_t cluster_pos = mkv_d->cluster_positions[0].filepos;
-    /* Let's find the nearest cluster */
-    int64_t min_diff = 0xFFFFFFFFFFFFFFF;
-    for (int i = 0; i < mkv_d->num_cluster_pos; i++) {
-        int64_t diff = mkv_d->cluster_positions[i].timecode - target_tc_ns;
-        if (flags & SEEK_BACKWARD && diff < 0 && -diff < min_diff) {
-            cluster_pos = mkv_d->cluster_positions[i].filepos;
-            min_diff = -diff;
-        } else if (flags & SEEK_FORWARD
-                   && (diff < 0 ? -1 * diff : diff) < min_diff) {
-            cluster_pos = mkv_d->cluster_positions[i].filepos;
-            min_diff = diff < 0 ? -1 * diff : diff;
-        }
-    }
-    mkv_d->cluster_size = mkv_d->blockgroup_size = 0;
-    stream_seek(s, cluster_pos);
     return 0;
 }
 
@@ -2405,6 +2384,9 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
 {
     struct mkv_demuxer *mkv_d = demuxer->priv;
     struct mkv_index *index = NULL;
+
+    if (!mkv_d->index_complete)
+        seek_id = -1;
 
     /* Find the entry in the index closest to the target timecode in the
      * give direction. If there are no such entries - we're trying to seek
@@ -2485,10 +2467,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
         rel_seek_secs = FFMAX(rel_seek_secs, 0);
         int64_t target_timecode = rel_seek_secs * 1e9 + 0.5;
 
-        if (mkv_d->indexes == NULL) {   /* no index was found */
-            if (seek_creating_index(demuxer, rel_seek_secs, flags) < 0)
-                return;
-        } else {
+        if (create_index_until(demuxer, target_timecode) >= 0) {
             int seek_id = (demuxer->video->id < 0) ?
                 a_tnum : v_tnum;
             index = seek_with_cues(demuxer, seek_id, target_timecode, flags);
@@ -2514,7 +2493,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
         mkv_index_t *index = NULL;
         int i;
 
-        if (mkv_d->indexes == NULL) {   /* not implemented without index */
+        if (!mkv_d->index_complete) {   /* not implemented without index */
             mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] seek unsupported flags\n");
             return;
         }
