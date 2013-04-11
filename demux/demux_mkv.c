@@ -2252,6 +2252,7 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
             }
 
             if (stream_tell(s) < mkv_d->cluster_end) {
+                int64_t start_filepos = stream_tell(s);
                 switch (ebml_read_id(s, NULL)) {
                 case MATROSKA_ID_TIMECODE:;
                     uint64_t num = ebml_read_uint(s, NULL);
@@ -2287,6 +2288,10 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
                         return 1;
                     break;
 
+                case MATROSKA_ID_CLUSTER:
+                    mkv_d->cluster_start = start_filepos;
+                    goto next_cluster;
+
                 case EBML_ID_INVALID:
                     ebml_resync_cluster(s);
                     goto find_next_cluster;
@@ -2310,8 +2315,11 @@ static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
                 return 0;
             ebml_read_skip_or_resync_cluster(s, NULL);
         }
+    next_cluster:
         mkv_d->cluster_end = ebml_read_length(s, NULL);
-        mkv_d->cluster_end += stream_tell(s);
+        // mkv files for "streaming" can have this legally
+        if (mkv_d->cluster_end != EBML_UINT_INVALID)
+            mkv_d->cluster_end += stream_tell(s);
     }
 
     return 0;
