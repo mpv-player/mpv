@@ -73,6 +73,10 @@ static const int cook_fl2bps[COOK_FLAVORS] = {
     12016, 16408, 22911, 33506
 };
 
+enum {
+    MAX_NUM_LACES = 256,
+};
+
 typedef struct mkv_content_encoding {
     uint64_t order, type, scope;
     uint64_t comp_algo;
@@ -1782,14 +1786,12 @@ static int demux_mkv_open(demuxer_t *demuxer)
 
 static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
                                        uint8_t *laces,
-                                       uint32_t **all_lace_sizes)
+                                       uint32_t lace_size[MAX_NUM_LACES])
 {
     uint32_t total = 0;
-    uint32_t *lace_size = NULL;
     uint8_t flags;
     int i;
 
-    *all_lace_sizes = NULL;
     /* lacing flags */
     if (*size < 1)
         goto error;
@@ -1799,7 +1801,6 @@ static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
     switch ((flags & 0x06) >> 1) {
     case 0:                    /* no lacing */
         *laces = 1;
-        lace_size = calloc(*laces, sizeof(uint32_t));
         lace_size[0] = *size;
         break;
 
@@ -1811,7 +1812,6 @@ static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
         *laces = *buffer++;
         (*size)--;
         (*laces)++;
-        lace_size = calloc(*laces, sizeof(uint32_t));
 
         switch ((flags & 0x06) >> 1) {
         case 1:                /* xiph lacing */
@@ -1866,11 +1866,9 @@ static int demux_mkv_read_block_lacing(uint8_t *buffer, uint64_t *size,
         }
         break;
     }
-    *all_lace_sizes = lace_size;
     return 0;
 
  error:
-    free(lace_size);
     mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Bad input [lacing]\n");
     return 1;
 }
@@ -2090,7 +2088,7 @@ static int read_block(demuxer_t *demuxer, struct block_info *block)
 
     free_block(block);
     block->length = ebml_read_length(s, NULL);
-    if (block->length > 500000000)
+    if (block->length < 6 || block->length > 500000000)
         goto exit;
     block->data = block->alloc = malloc(block->length + AV_LZO_INPUT_PADDING);
     demuxer->filepos = stream_tell(s);
@@ -2131,7 +2129,6 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     demux_stream_t *ds = NULL;
     uint64_t old_length;
-    uint32_t *lace_size;
     uint8_t laces;
     int i, use_this_block = 1;
     double current_pts;
@@ -2141,9 +2138,10 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
     uint64_t block_duration = block_info->duration;
     uint64_t tc = block_info->timecode;
     mkv_track_t *track = block_info->track;
+    uint32_t lace_size[MAX_NUM_LACES];
 
     old_length = length;
-    if (demux_mkv_read_block_lacing(block, &length, &laces, &lace_size))
+    if (demux_mkv_read_block_lacing(block, &length, &laces, lace_size))
         return 0;
     block += old_length - length;
 
@@ -2235,11 +2233,9 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         } else if (ds == demuxer->audio)
             mkv_d->a_skip_to_keyframe = 0;
 
-        free(lace_size);
         return 1;
     }
 
-    free(lace_size);
     return 0;
 }
 
