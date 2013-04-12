@@ -1294,20 +1294,14 @@ void demuxer_sort_chapters(demuxer_t *demuxer)
 int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
                         uint64_t start, uint64_t end)
 {
-    if (!(demuxer->num_chapters % 32))
-        demuxer->chapters = talloc_realloc(demuxer, demuxer->chapters,
-                                           struct demux_chapter,
-                                           demuxer->num_chapters + 32);
-
-    demuxer->chapters[demuxer->num_chapters].original_index =
-        demuxer->num_chapters;
-    demuxer->chapters[demuxer->num_chapters].start = start;
-    demuxer->chapters[demuxer->num_chapters].end = end;
-    demuxer->chapters[demuxer->num_chapters].name = name.len ?
-        talloc_strndup(demuxer->chapters, name.start, name.len) :
-        talloc_strdup(demuxer->chapters, mp_gtext("unknown"));
-
-    demuxer->num_chapters++;
+    struct demux_chapter new = {
+        .original_index = demuxer->num_chapters,
+        .start = start,
+        .end = end,
+        .name = name.len ? bstrdup0(demuxer, name)
+                         : talloc_strdup(demuxer, mp_gtext("unknown")),
+    };
+    MP_TARRAY_APPEND(demuxer, demuxer->chapters, demuxer->num_chapters, new);
     return 0;
 }
 
