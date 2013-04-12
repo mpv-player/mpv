@@ -2091,6 +2091,8 @@ static int read_block(demuxer_t *demuxer, struct block_info *block)
     if (length > 500000000)
         goto exit;
     block->alloc = malloc(length + AV_LZO_INPUT_PADDING);
+    if (!block->alloc)
+        goto exit;
     block->data = (bstr){block->alloc, length};
     demuxer->filepos = stream_tell(s);
     if (stream_read(s, block->data.start, block->data.len) != block->data.len)
