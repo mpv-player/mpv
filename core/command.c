@@ -851,9 +851,9 @@ static int mp_property_fullscreen(m_option_t *prop,
                                   void *arg,
                                   MPContext *mpctx)
 {
-    struct mp_vo_opts *opts = mpctx->video_out->opts;
     if (!mpctx->video_out)
         return M_PROPERTY_UNAVAILABLE;
+    struct mp_vo_opts *opts = mpctx->video_out->opts;
 
     if (action == M_PROPERTY_SET) {
         if (opts->fs == !!*(int *) arg)
