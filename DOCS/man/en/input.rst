@@ -305,7 +305,6 @@ contrast                    x see ``--contrast``
 saturation                  x see ``--saturation``
 hue                         x see ``--hue``
 panscan                     x see ``--panscan``
-vsync                       x see ``--vsync``
 video-format                  video format (string)
 video-codec                   video codec selected for decoding
 video-bitrate                 video bitrate

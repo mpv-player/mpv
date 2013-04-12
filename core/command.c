@@ -1089,13 +1089,6 @@ static int mp_property_gamma(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_UNAVAILABLE;
 }
 
-/// VSync (RW)
-static int mp_property_vsync(m_option_t *prop, int action, void *arg,
-                             MPContext *mpctx)
-{
-    return mp_property_generic_option(prop, action, arg, mpctx);
-}
-
 /// Video codec tag (RO)
 static int mp_property_video_format(m_option_t *prop, int action,
                                     void *arg, MPContext *mpctx)
@@ -1420,7 +1413,6 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM_("hue", mp_property_gamma,
                     .offset = offsetof(struct MPOpts, gamma_hue)),
     M_OPTION_PROPERTY_CUSTOM("panscan", mp_property_panscan),
-    M_OPTION_PROPERTY_CUSTOM_("vsync", mp_property_vsync),
     { "video-format", mp_property_video_format, CONF_TYPE_STRING,
       0, 0, 0, NULL },
     { "video-codec", mp_property_video_codec, CONF_TYPE_STRING,
@@ -1535,7 +1527,6 @@ static struct property_osd_display {
     { "contrast", _("Contrast"), .osd_progbar = OSD_CONTRAST },
     { "saturation", _("Saturation"), .osd_progbar = OSD_SATURATION },
     { "hue", _("Hue"), .osd_progbar = OSD_HUE },
-    { "vsync", _("VSync") },
     { "angle", _("Angle") },
     // subs
     { "sub", _("Subtitles") },
