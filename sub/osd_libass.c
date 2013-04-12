@@ -54,6 +54,12 @@ void osd_init_backend(struct osd_state *osd)
 
 void osd_destroy_backend(struct osd_state *osd)
 {
+    for (int n = 0; n < MAX_OSD_PARTS; n++) {
+        struct osd_object *obj = osd->objs[n];
+        if (obj->osd_track)
+            ass_free_track(obj->osd_track);
+        obj->osd_track = NULL;
+    }
     if (osd->osd_render)
         ass_renderer_done(osd->osd_render);
     osd->osd_render = NULL;
