@@ -183,6 +183,7 @@ typedef struct demuxer_desc {
 
 typedef struct demux_chapter
 {
+    int original_index;
     uint64_t start, end;
     char *name;
 } demux_chapter_t;
@@ -394,6 +395,7 @@ int demuxer_add_chapter(struct demuxer *demuxer, struct bstr name,
                         uint64_t start, uint64_t end);
 int demuxer_seek_chapter(struct demuxer *demuxer, int chapter,
                          double *seek_pts);
+void demuxer_sort_chapters(demuxer_t *demuxer);
 
 /// Get current chapter index if available.
 int demuxer_get_current_chapter(struct demuxer *demuxer, double time_now);

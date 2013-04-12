@@ -948,6 +948,7 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
             opts->correct_pts =
                 demux_control(demuxer, DEMUXER_CTRL_CORRECT_PTS,
                             NULL) == DEMUXER_CTRL_OK;
+        demuxer_sort_chapters(demuxer);
         return demuxer;
     } else {
         // demux_mov can return playlist instead of mov
@@ -1281,10 +1282,10 @@ static int chapter_compare(const void *p1, const void *p2)
         return 1;
     else if (c1->start < c2->start)
         return -1;
-    return 0;
+    return c1->original_index > c2->original_index ? 1 :-1; // never equal
 }
 
-static void demuxer_sort_chapters(demuxer_t *demuxer)
+void demuxer_sort_chapters(demuxer_t *demuxer)
 {
     qsort(demuxer->chapters, demuxer->num_chapters,
           sizeof(struct demux_chapter), chapter_compare);
@@ -1298,6 +1299,8 @@ int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
                                            struct demux_chapter,
                                            demuxer->num_chapters + 32);
 
+    demuxer->chapters[demuxer->num_chapters].original_index =
+        demuxer->num_chapters;
     demuxer->chapters[demuxer->num_chapters].start = start;
     demuxer->chapters[demuxer->num_chapters].end = end;
     demuxer->chapters[demuxer->num_chapters].name = name.len ?
@@ -1305,12 +1308,6 @@ int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
         talloc_strdup(demuxer->chapters, mp_gtext("unknown"));
 
     demuxer->num_chapters++;
-
-    if (demuxer->num_chapters > 1
-        && demuxer->chapters[demuxer->num_chapters - 2].start
-           < demuxer->chapters[demuxer->num_chapters - 1].start)
-            demuxer_sort_chapters(demuxer);
-
     return 0;
 }
 
