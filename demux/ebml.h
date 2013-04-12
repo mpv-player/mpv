@@ -90,8 +90,8 @@ struct ebml_parse_ctx {
 
 
 uint32_t ebml_read_id (stream_t *s, int *length);
-uint64_t ebml_read_vlen_uint (uint8_t *buffer, int *length);
-int64_t ebml_read_vlen_int (uint8_t *buffer, int *length);
+uint64_t ebml_read_vlen_uint (bstr *buffer);
+int64_t ebml_read_vlen_int (bstr *buffer);
 uint64_t ebml_read_length (stream_t *s, int *length);
 uint64_t ebml_read_uint (stream_t *s, uint64_t *length);
 int64_t ebml_read_int (stream_t *s, uint64_t *length);
