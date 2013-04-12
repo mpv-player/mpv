@@ -2296,50 +2296,48 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
 
     while (1) {
         while (stream_tell(s) < mkv_d->cluster_end) {
-            if (stream_tell(s) < mkv_d->cluster_end) {
-                int64_t start_filepos = stream_tell(s);
-                switch (ebml_read_id(s, NULL)) {
-                case MATROSKA_ID_TIMECODE: {
-                    uint64_t num = ebml_read_uint(s, NULL);
-                    if (num == EBML_UINT_INVALID)
-                        goto find_next_cluster;
-                    mkv_d->cluster_tc = num * mkv_d->tc_scale;
-                    break;
-                }
-
-                case MATROSKA_ID_BLOCKGROUP: {
-                    int64_t end = ebml_read_length(s, NULL);
-                    end += stream_tell(s);
-                    int res = read_block_group(demuxer, end, block);
-                    if (res < 0)
-                        goto find_next_cluster;
-                    if (res > 0)
-                        return 1;
-                    break;
-                }
-
-                case MATROSKA_ID_SIMPLEBLOCK: {
-                    *block = (struct block_info){ .simple = true };
-                    int res = read_block(demuxer, block);
-                    if (res < 0)
-                        goto find_next_cluster;
-                    if (res > 0)
-                        return 1;
-                    break;
-                }
-
-                case MATROSKA_ID_CLUSTER:
-                    mkv_d->cluster_start = start_filepos;
-                    goto next_cluster;
-
-                case EBML_ID_INVALID:
+            int64_t start_filepos = stream_tell(s);
+            switch (ebml_read_id(s, NULL)) {
+            case MATROSKA_ID_TIMECODE: {
+                uint64_t num = ebml_read_uint(s, NULL);
+                if (num == EBML_UINT_INVALID)
                     goto find_next_cluster;
+                mkv_d->cluster_tc = num * mkv_d->tc_scale;
+                break;
+            }
 
-                default: ;
-                    if (ebml_read_skip_or_resync_cluster(s, NULL) != 0)
-                        goto find_next_cluster;
-                    break;
-                }
+            case MATROSKA_ID_BLOCKGROUP: {
+                int64_t end = ebml_read_length(s, NULL);
+                end += stream_tell(s);
+                int res = read_block_group(demuxer, end, block);
+                if (res < 0)
+                    goto find_next_cluster;
+                if (res > 0)
+                    return 1;
+                break;
+            }
+
+            case MATROSKA_ID_SIMPLEBLOCK: {
+                *block = (struct block_info){ .simple = true };
+                int res = read_block(demuxer, block);
+                if (res < 0)
+                    goto find_next_cluster;
+                if (res > 0)
+                    return 1;
+                break;
+            }
+
+            case MATROSKA_ID_CLUSTER:
+                mkv_d->cluster_start = start_filepos;
+                goto next_cluster;
+
+            case EBML_ID_INVALID:
+                goto find_next_cluster;
+
+            default: ;
+                if (ebml_read_skip_or_resync_cluster(s, NULL) != 0)
+                    goto find_next_cluster;
+                break;
             }
         }
 
