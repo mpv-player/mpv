@@ -270,7 +270,7 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf,
     return spdif_ctx->out_buffer_len;
 }
 
-static int control(sh_audio_t *sh, int cmd, void* arg, ...)
+static int control(sh_audio_t *sh, int cmd, void *arg)
 {
     unsigned char *start;
     double pts;

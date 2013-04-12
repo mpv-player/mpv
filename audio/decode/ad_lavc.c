@@ -310,7 +310,7 @@ static void uninit(sh_audio_t *sh)
     sh->context = NULL;
 }
 
-static int control(sh_audio_t *sh, int cmd, void *arg, ...)
+static int control(sh_audio_t *sh, int cmd, void *arg)
 {
     struct priv *ctx = sh->context;
     switch (cmd) {
