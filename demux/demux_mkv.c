@@ -1795,11 +1795,11 @@ static bool bstr_read_u8(bstr *buffer, uint8_t *out_u8)
     }
 }
 
-static int demux_mkv_read_block_lacing(bstr *buffer, uint8_t *laces,
+static int demux_mkv_read_block_lacing(bstr *buffer, int *laces,
                                        uint32_t lace_size[MAX_NUM_LACES])
 {
     uint32_t total = 0;
-    uint8_t flags;
+    uint8_t flags, t;
     int i;
 
     /* lacing flags */
@@ -1815,14 +1815,13 @@ static int demux_mkv_read_block_lacing(bstr *buffer, uint8_t *laces,
     case 1:                    /* xiph lacing */
     case 2:                    /* fixed-size lacing */
     case 3:                    /* EBML lacing */
-        if (!bstr_read_u8(buffer, laces))
+        if (!bstr_read_u8(buffer, &t))
             goto error;
-        (*laces)++;
+        *laces = t + 1;
 
         switch ((flags & 0x06) >> 1) {
         case 1:                /* xiph lacing */
             for (i = 0; i < *laces - 1; i++) {
-                uint8_t t;
                 lace_size[i] = 0;
                 do {
                     if (!bstr_read_u8(buffer, &t))
@@ -2134,7 +2133,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     demux_stream_t *ds = NULL;
-    uint8_t laces;
+    int laces;
     int i, use_this_block = 1;
     double current_pts;
     bstr data = block_info->data;
