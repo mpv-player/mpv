@@ -1351,6 +1351,9 @@
 --osd-back-color=<#RRGGBB>, --sub-text-back-color=<#RRGGBB>
     See ``--osd-color``. Color used for OSD/sub text background.
 
+--osd-blur=<0..20.0>, --sub-text-blur=<0..20.0>
+    Gaussian blur factor. 0 means no blur applied (default).
+
 --osd-border-color=<#RRGGBB>, --sub-text-border-color=<#RRGGBB>
     See ``--osd-color``. Color used for the OSD/sub font border.
 

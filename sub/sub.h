@@ -192,6 +192,7 @@ struct osd_style_opts {
     float spacing;
     int margin_x;
     int margin_y;
+    float blur;
 };
 
 extern const struct m_sub_options osd_style_conf;

@@ -69,6 +69,9 @@ void mp_ass_set_style(ASS_Style *style, struct osd_style_opts *opts)
     style->MarginV = opts->margin_y * scale;
     style->ScaleX = 1.;
     style->ScaleY = 1.;
+#if LIBASS_VERSION >= 0x01020000
+    style->Blur = opts->blur;
+#endif
 }
 
 ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
