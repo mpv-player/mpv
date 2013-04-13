@@ -2134,8 +2134,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     demux_stream_t *ds = NULL;
-    int laces;
-    int i, use_this_block = 1;
+    int i, laces;
     double current_pts;
     bstr data = block_info->data;
     bool keyframe = block_info->keyframe;
@@ -2143,6 +2142,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
     uint64_t tc = block_info->timecode;
     mkv_track_t *track = block_info->track;
     uint32_t lace_size[MAX_NUM_LACES];
+    bool use_this_block = tc >= mkv_d->skip_to_timecode;
 
     if (demux_mkv_read_block_lacing(&data, &laces, lace_size))
         return 0;
@@ -2153,6 +2153,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         && track->id == demuxer->audio->id) {
         ds = demuxer->audio;
 
+        use_this_block = 1;
         if (mkv_d->a_skip_to_keyframe)
             use_this_block = keyframe;
         if (mkv_d->v_skip_to_keyframe)
@@ -2173,8 +2174,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         }
     } else if (track->type == MATROSKA_TRACK_SUBTITLE
                && track->id == demuxer->sub->id) {
-        if (tc < mkv_d->skip_to_timecode && !mkv_d->subtitle_preroll)
-            use_this_block = 0;
+        use_this_block |= mkv_d->subtitle_preroll;
         if (use_this_block) {
             ds = demuxer->sub;
             if (laces > 1) {
@@ -2183,17 +2183,14 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                 use_this_block = 0;
             }
         }
-    } else if (tc < mkv_d->skip_to_timecode)
-        use_this_block = 0;
-    else if (track->type == MATROSKA_TRACK_VIDEO
+    } else if (track->type == MATROSKA_TRACK_VIDEO
              && track->id == demuxer->video->id) {
         ds = demuxer->video;
         if (mkv_d->v_skip_to_keyframe)
-            use_this_block = keyframe;
-    } else
-        use_this_block = 0;
+            use_this_block &= keyframe;
+    }
 
-    if (use_this_block) {
+    if (ds && use_this_block) {
         mkv_d->last_pts = current_pts;
         mkv_d->last_filepos = demuxer->filepos;
 
