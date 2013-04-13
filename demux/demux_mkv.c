@@ -1806,20 +1806,16 @@ static int demux_mkv_read_block_lacing(bstr *buffer, int *laces,
     if (!bstr_read_u8(buffer, &flags))
         goto error;
 
-    switch ((flags & 0x06) >> 1) {
-    case 0:                    /* no lacing */
+    int type = (flags >> 1) & 0x03;
+    if (type == 0) {           /* no lacing */
         *laces = 1;
         lace_size[0] = buffer->len;
-        break;
-
-    case 1:                    /* xiph lacing */
-    case 2:                    /* fixed-size lacing */
-    case 3:                    /* EBML lacing */
+    } else {
         if (!bstr_read_u8(buffer, &t))
             goto error;
         *laces = t + 1;
 
-        switch ((flags & 0x06) >> 1) {
+        switch (type) {
         case 1:                /* xiph lacing */
             for (i = 0; i < *laces - 1; i++) {
                 lace_size[i] = 0;
@@ -1860,7 +1856,6 @@ static int demux_mkv_read_block_lacing(bstr *buffer, int *laces,
             lace_size[i] = buffer->len - total;
             break;
         }
-        break;
     }
     return 0;
 
