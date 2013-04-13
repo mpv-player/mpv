@@ -1824,8 +1824,6 @@ static int demux_mkv_read_block_lacing(bstr *buffer, int *laces,
                         goto error;
                     lace_size[i] += t;
                 } while (t == 0xFF);
-                if (lace_size[i] > buffer->len - total || total > buffer->len)
-                    goto error;
                 total += lace_size[i];
             }
             lace_size[i] = buffer->len - total;
@@ -1849,14 +1847,22 @@ static int demux_mkv_read_block_lacing(bstr *buffer, int *laces,
                 if (snum == EBML_INT_INVALID)
                     goto error;
                 lace_size[i] = lace_size[i - 1] + snum;
-                if (lace_size[i] > buffer->len - total || total > buffer->len)
-                    goto error;
                 total += lace_size[i];
             }
             lace_size[i] = buffer->len - total;
             break;
         }
     }
+
+    total = buffer->len;
+    for (i = 0; i < *laces; i++) {
+        if (lace_size[i] > total)
+            goto error;
+        total -= lace_size[i];
+    }
+    if (total != 0)
+        goto error;
+
     return 0;
 
  error:
