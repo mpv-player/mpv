@@ -1716,8 +1716,9 @@ static int demux_mkv_open(demuxer_t *demuxer)
     while (1) {
         uint32_t id = ebml_read_id(s, NULL);
         if (s->eof) {
-            mp_tmsg(MSGT_DEMUX, MSGL_ERR, "[mkv] Unexpected end of file\n");
-            return 0;
+            mp_tmsg(MSGT_DEMUX, MSGL_WARN,
+                    "[mkv] Unexpected end of file (no clusters found)\n");
+            break;
         }
         if (id == MATROSKA_ID_CLUSTER) {
             mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |+ found cluster, headers are "
