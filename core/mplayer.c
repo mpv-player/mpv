@@ -3993,10 +3993,16 @@ goto_enable_cache: ;
                          mpctx->demuxer);
     }
 
-    if (mpctx->timeline && !mpctx->demuxer->matroska_data.ordered_chapters) {
-        // With Matroska, the "master" file dictates track layout etc.
-        // On the contrary, the EDL and CUE demuxers are empty wrappers.
+    if (mpctx->timeline) {
+        // With Matroska, the "master" file usually dictates track layout etc.
+        // On the contrary, the EDL and CUE demuxers are empty wrappers, as
+        // well as Matroska ordered chapter playlist-like files.
+        for (int n = 0; n < mpctx->num_timeline_parts; n++) {
+            if (mpctx->timeline[n].source == mpctx->demuxer)
+                goto main_is_ok;
+        }
         mpctx->demuxer = mpctx->timeline[0].source;
+    main_is_ok: ;
     }
     add_dvd_tracks(mpctx);
     add_demuxer_tracks(mpctx, mpctx->demuxer);
