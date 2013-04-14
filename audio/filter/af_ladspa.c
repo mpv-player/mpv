@@ -291,7 +291,7 @@ static int af_ladspa_parse_plugin(af_ladspa_t *setup) {
 static void* mydlopen(const char *filename, int flag) {
     char *buf;
     const char *end, *start, *ladspapath;
-    int endsinso, needslash;
+    int endsinso;
     size_t filenamelen;
     void *result = NULL;
 
@@ -324,9 +324,9 @@ static void* mydlopen(const char *filename, int flag) {
     ladspapath=getenv("LADSPA_PATH");
 
     if (ladspapath) {
-
         start=ladspapath;
         while (*start != '\0') {
+            int needslash;
             end=start;
             while ( (*end != ':') && (*end != '\0') )
                 end++;
@@ -487,7 +487,6 @@ static int af_ladspa_malloc_failed(char *myname) {
 
 static int control(struct af_instance *af, int cmd, void *arg) {
     af_ladspa_t *setup = (af_ladspa_t*) af->setup;
-    int i, r;
     float val;
 
     switch(cmd) {
@@ -536,7 +535,10 @@ static int control(struct af_instance *af, int cmd, void *arg) {
         }
         line += strlen(buf);
         setup->file = strdup(buf);
-        if (!setup->file) return af_ladspa_malloc_failed(setup->myname);
+        if (!setup->file) {
+            free(buf);
+            return af_ladspa_malloc_failed(setup->myname);
+        }
         mp_msg(MSGT_AFILTER, MSGL_V, "%s: file --> %s\n", setup->myname,
                                                         setup->file);
         if (*line != '\0') line++; /* read ':' */
@@ -552,7 +554,10 @@ static int control(struct af_instance *af, int cmd, void *arg) {
         }
         line += strlen(buf);
         setup->label = strdup(buf);
-        if (!setup->label) return af_ladspa_malloc_failed(setup->myname);
+        if (!setup->label) {
+            free(buf);
+            return af_ladspa_malloc_failed(setup->myname);
+        }
         mp_msg(MSGT_AFILTER, MSGL_V, "%s: label --> %s\n", setup->myname,
                                                                 setup->label);
 /*        if (*line != '0') line++; */ /* read ':' */
@@ -579,15 +584,14 @@ static int control(struct af_instance *af, int cmd, void *arg) {
 
         /* ninputcontrols is set by now, read control values from arg */
 
-        for(i=0; i<setup->ninputcontrols; i++) {
+        for (int i = 0; i < setup->ninputcontrols; i++) {
             if (!line || *line != ':') {
                 mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
                                         _("Not enough controls specified on the command line."));
                 return AF_ERROR;
             }
             line++;
-            r = sscanf(line, "%f", &val);
-            if (r!=1) {
+            if (sscanf(line, "%f", &val) != 1) {
                 mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: %s\n", setup->myname,
                                         _("Not enough controls specified on the command line."));
                 return AF_ERROR;
@@ -597,7 +601,7 @@ static int control(struct af_instance *af, int cmd, void *arg) {
         }
 
         mp_msg(MSGT_AFILTER, MSGL_V, "%s: input controls: ", setup->myname);
-        for(i=0; i<setup->ninputcontrols; i++) {
+        for (int i = 0; i < setup->ninputcontrols; i++) {
             mp_msg(MSGT_AFILTER, MSGL_V, "%0.4f ",
                             setup->inputcontrols[setup->inputcontrolsmap[i]]);
         }
@@ -607,7 +611,7 @@ static int control(struct af_instance *af, int cmd, void *arg) {
 
         mp_msg(MSGT_AFILTER, MSGL_V, "%s: checking boundaries of input controls\n",
                                                                 setup->myname);
-        for(i=0; i<setup->ninputcontrols; i++) {
+        for (int i = 0; i < setup->ninputcontrols; i++) {
             int p = setup->inputcontrolsmap[i];
             LADSPA_PortRangeHint hint =
                                 setup->plugin_descriptor->PortRangeHints[p];
@@ -649,8 +653,6 @@ static int control(struct af_instance *af, int cmd, void *arg) {
  */
 
 static void uninit(struct af_instance *af) {
-    int i;
-
     free(af->data);
     if (af->setup) {
         af_ladspa_t *setup = (af_ladspa_t*) af->setup;
@@ -662,7 +664,7 @@ static void uninit(struct af_instance *af) {
         }
 
         if (setup->chhandles) {
-            for(i=0; i<setup->nch; i+=setup->ninputs) {
+            for (int i = 0; i < setup->nch; i+=setup->ninputs) {
                 if (pdes->deactivate) pdes->deactivate(setup->chhandles[i]);
                 if (pdes->cleanup) pdes->cleanup(setup->chhandles[i]);
             }
@@ -679,13 +681,13 @@ static void uninit(struct af_instance *af) {
         free(setup->outputs);
 
         if (setup->inbufs) {
-            for(i=0; i<setup->nch; i++)
+            for(int i = 0; i < setup->nch; i++)
                 free(setup->inbufs[i]);
             free(setup->inbufs);
         }
 
         if (setup->outbufs) {
-            for(i=0; i<setup->nch; i++)
+            for (int i = 0; i < setup->nch; i++)
                 free(setup->outbufs[i]);
             free(setup->outbufs);
         }
