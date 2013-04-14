@@ -2591,51 +2591,6 @@ static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
 
         *((double *) arg) = (double) mkv_d->duration;
         return DEMUXER_CTRL_OK;
-
-    case DEMUXER_CTRL_SWITCH_AUDIO:;
-        int new_aid = *(int *) arg;
-        int current_aid = demuxer->audio->id;
-        if (current_aid < 0)
-            current_aid = -1;
-        if (new_aid == -1)  {   // cycle to next
-            new_aid = current_aid;
-            while (1) {
-                new_aid = (new_aid + 2) % (mkv_d->num_audio_tracks + 1) - 1;
-                if (new_aid == -1 || demuxer->a_streams[new_aid])
-                    break;
-            }
-        }
-        if (new_aid < 0 || new_aid >= mkv_d->num_audio_tracks ||
-                !demuxer->a_streams[new_aid])
-            new_aid = -2;
-        *(int *) arg = new_aid;
-        if (current_aid != new_aid)
-            ds_free_packs(demuxer->audio);
-        demuxer->audio->id = new_aid;
-        return DEMUXER_CTRL_OK;
-
-    case DEMUXER_CTRL_SWITCH_VIDEO:;
-        int new_vid = *(int *) arg;
-        int current_vid = demuxer->video->id;
-        if (current_vid < 0)
-            current_vid = -1;
-        if (new_vid == -1)  {   // cycle to next
-            new_vid = current_vid;
-            while (1) {
-                new_vid = (new_vid + 2) % (mkv_d->num_video_tracks + 1) - 1;
-                if (new_vid == -1 || demuxer->v_streams[new_vid])
-                    break;
-            }
-        }
-        if (new_vid < 0 || new_vid >= mkv_d->num_video_tracks ||
-                !demuxer->v_streams[new_vid])
-            new_vid = -2;
-        *(int *) arg = new_vid;
-        if (current_vid != new_vid)
-            ds_free_packs(demuxer->video);
-        demuxer->video->id = new_vid;
-        return DEMUXER_CTRL_OK;
-
     default:
         return DEMUXER_CTRL_NOTIMPL;
     }
