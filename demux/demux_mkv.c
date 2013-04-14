@@ -1177,6 +1177,7 @@ static const videocodec_info_t vinfo[] = {
     {MKV_V_MPEG4_AVC, mmioFOURCC('a', 'v', 'c', '1'), 1},
     {MKV_V_THEORA,    mmioFOURCC('t', 'h', 'e', 'o'), 1},
     {MKV_V_VP8,       mmioFOURCC('V', 'P', '8', '0'), 0},
+    {MKV_V_VP9,       mmioFOURCC('V', 'P', '9', '0'), 0},
     {NULL, 0, 0}
 };
 
