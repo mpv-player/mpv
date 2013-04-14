@@ -1184,7 +1184,9 @@ static const videocodec_info_t vinfo[] = {
 static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
                                 int vid)
 {
-    BITMAPINFOHEADER *bih;
+    BITMAPINFOHEADER *bih = &(BITMAPINFOHEADER){0};
+    unsigned char *extradata;
+    unsigned int extradata_size = 0;
     sh_video_t *sh_v;
     bool raw = false;
 
@@ -1196,7 +1198,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
             return 1;
 
         src = (BITMAPINFOHEADER *) track->private_data;
-        bih = calloc(1, track->private_size);
         bih->biSize = le2me_32(src->biSize);
         bih->biWidth = le2me_32(src->biWidth);
         bih->biHeight = le2me_32(src->biHeight);
@@ -1208,16 +1209,14 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
         bih->biYPelsPerMeter = le2me_32(src->biYPelsPerMeter);
         bih->biClrUsed = le2me_32(src->biClrUsed);
         bih->biClrImportant = le2me_32(src->biClrImportant);
-        memcpy(bih + 1,
-               src + 1,
-               track->private_size - sizeof(*bih));
+        extradata = track->private_data;
+        extradata_size = track->private_size - sizeof(*bih);
 
         if (track->v_width == 0)
             track->v_width = bih->biWidth;
         if (track->v_height == 0)
             track->v_height = bih->biHeight;
     } else {
-        bih = calloc(1, sizeof(*bih));
         bih->biSize = sizeof(*bih);
         bih->biWidth = track->v_width;
         bih->biHeight = track->v_height;
@@ -1229,14 +1228,13 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
                 || !strcmp(track->codec_id, MKV_V_REALV20)
                 || !strcmp(track->codec_id, MKV_V_REALV30)
                 || !strcmp(track->codec_id, MKV_V_REALV40))) {
-            unsigned char *dst, *src;
+            unsigned char *src;
             uint32_t type2;
             unsigned int cnt;
 
             src = (uint8_t *) track->private_data + RVPROPERTIES_SIZE;
 
             cnt = track->private_size - RVPROPERTIES_SIZE;
-            bih = realloc(bih, sizeof(*bih) + 8 + cnt);
             bih->biSize = 48 + cnt;
             bih->biPlanes = 1;
             type2 = AV_RB32(src - 4);
@@ -1245,9 +1243,9 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
             else
                 bih->biCompression =
                     mmioFOURCC('R', 'V', track->codec_id[9], '0');
-            dst = (unsigned char *) (bih + 1);
             // copy type1 and type2 info from rv properties
-            memcpy(dst, src - 8, 8 + cnt);
+            extradata_size = cnt + 8;
+            extradata = src - 8;
             track->realmedia = 1;
         } else if (strcmp(track->codec_id, MKV_V_UNCOMPRESSED) == 0) {
             // raw video, "like AVI" - this is a FourCC
@@ -1261,15 +1259,14 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
             if (vi->extradata && track->private_data
                 && (track->private_size > 0)) {
                 bih->biSize += track->private_size;
-                bih = realloc(bih, bih->biSize);
-                memcpy(bih + 1, track->private_data, track->private_size);
+                extradata = track->private_data;
+                extradata_size = track->private_size;
             }
             if (!vi->id) {
                 mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported "
                         "CodecID (%s) or missing/bad CodecPrivate\n"
                         "[mkv] data (track %u).\n",
                         track->codec_id, track->tnum);
-                free(bih);
                 return 1;
             }
         }
@@ -1278,7 +1275,14 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track,
     sh_v = new_sh_video(demuxer, vid);
     sh_v->gsh->demuxer_id = track->tnum;
     sh_v->gsh->title = talloc_strdup(sh_v, track->name);
-    sh_v->bih = bih;
+    sh_v->bih = malloc(sizeof(BITMAPINFOHEADER) + extradata_size);
+    if (!sh_v->bih) {
+        mp_msg(MSGT_DEMUX, MSGL_FATAL, "Memory allocation failure!\n");
+        abort();
+    }
+    *sh_v->bih = *bih;
+    if (extradata_size)
+        memcpy(sh_v->bih + 1, extradata, extradata_size);
     sh_v->format = sh_v->bih->biCompression;
     if (raw) {
         sh_v->gsh->codec = "rawvideo";
@@ -1884,9 +1888,9 @@ static double real_fix_timestamp(unsigned char *buf, unsigned int timestamp, uns
   unsigned char *s = buf + 1 + (*buf+1)*8;
   uint32_t buffer= (s[0]<<24) + (s[1]<<16) + (s[2]<<8) + s[3];
   unsigned int kf=timestamp;
-  int pict_type;
 
   if(format==mmioFOURCC('R','V','3','0') || format==mmioFOURCC('R','V','4','0')){
+    int pict_type;
     if(format==mmioFOURCC('R','V','3','0')){
       SKIP_BITS(3);
       pict_type= SHOW_BITS(2);
@@ -1962,7 +1966,6 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
     uint8_t *buffer = data.start;
     uint32_t size = data.len;
     demux_packet_t *dp;
-    int x;
 
     if ((track->a_formattag == mmioFOURCC('2', '8', '_', '8'))
         || (track->a_formattag == mmioFOURCC('c', 'o', 'o', 'k'))
@@ -1970,6 +1973,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
         || (track->a_formattag == mmioFOURCC('s', 'i', 'p', 'r'))) {
 //      if(!block_bref)
 //        spc = track->sub_packet_cnt = 0;
+        int x;
         switch (track->a_formattag) {
         case mmioFOURCC('2', '8', '_', '8'):
             for (x = 0; x < sph / 2; x++)
@@ -2140,7 +2144,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     demux_stream_t *ds = NULL;
-    int i, laces;
+    int laces;
     double current_pts;
     bstr data = block_info->data;
     bool keyframe = block_info->keyframe;
@@ -2200,17 +2204,16 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         mkv_d->last_pts = current_pts;
         mkv_d->last_filepos = demuxer->filepos;
 
-        for (i = 0; i < laces; i++) {
+        for (int i = 0; i < laces; i++) {
             bstr block = bstr_splice(data, 0, lace_size[i]);
             if (ds == demuxer->video && track->realmedia)
                 handle_realvideo(demuxer, track, block, keyframe);
             else if (ds == demuxer->audio && track->realmedia)
                 handle_realaudio(demuxer, track, block, keyframe);
             else {
-                demux_packet_t *dp;
                 bstr buffer = demux_mkv_decode(track, block, 1);
                 if (buffer.start) {
-                    dp = new_demux_packet(buffer.len);
+                    demux_packet_t *dp = new_demux_packet(buffer.len);
                     memcpy(dp->buffer, buffer.start, buffer.len);
                     if (buffer.start != block.start)
                         talloc_free(buffer.start);
