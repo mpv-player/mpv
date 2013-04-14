@@ -287,11 +287,16 @@ const char *sh_sub_type2str(int type)
     return "unknown";
 }
 
-static struct sh_stream *new_sh_stream(demuxer_t *demuxer,
-                                       enum stream_type type,
-                                       int stream_index,
-                                       int tid)
+static struct sh_stream *new_sh_stream_id(demuxer_t *demuxer,
+                                          enum stream_type type,
+                                          int stream_index,
+                                          int tid)
 {
+    if (demuxer->num_streams > MAX_SH_STREAMS) {
+        mp_msg(MSGT_DEMUXER, MSGL_WARN, "Too many streams.");
+        return NULL;
+    }
+
     struct sh_stream *sh = talloc_struct(demuxer, struct sh_stream, {
         .type = type,
         .demuxer = demuxer,
@@ -339,6 +344,17 @@ static struct sh_stream *new_sh_stream(demuxer_t *demuxer,
     return sh;
 }
 
+// This is what "modern" demuxers are supposed to use.
+struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
+{
+    int num = 0;
+    for (int n = 0; n < demuxer->num_streams; n++) {
+        if (demuxer->streams[n]->type == type)
+            num++;
+    }
+    return new_sh_stream_id(demuxer, type, demuxer->num_streams, num);
+}
+
 static void free_sh_stream(struct sh_stream *sh)
 {
     if (sh->lav_headers) {
@@ -358,7 +374,7 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
     if (demuxer->s_streams[id])
         mp_msg(MSGT_DEMUXER, MSGL_WARN, "Sub stream %i redefined\n", id);
     else {
-        new_sh_stream(demuxer, STREAM_SUB, id, sid);
+        new_sh_stream_id(demuxer, STREAM_SUB, id, sid);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
     }
     return demuxer->s_streams[id];
@@ -395,7 +411,7 @@ sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
         mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "WARNING: Audio stream header %d redefined.\n", id);
     } else {
         mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found audio stream: %d\n", id);
-        new_sh_stream(demuxer, STREAM_AUDIO, id, aid);
+        new_sh_stream_id(demuxer, STREAM_AUDIO, id, aid);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", aid);
     }
     return demuxer->a_streams[id];
@@ -424,7 +440,7 @@ sh_video_t *new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
         mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "WARNING: Video stream header %d redefined.\n", id);
     else {
         mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found video stream: %d\n", id);
-        new_sh_stream(demuxer, STREAM_VIDEO, id, vid);
+        new_sh_stream_id(demuxer, STREAM_VIDEO, id, vid);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
     }
     return demuxer->v_streams[id];
@@ -463,6 +479,15 @@ void free_demuxer(demuxer_t *demuxer)
     talloc_free(demuxer);
 }
 
+void demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
+                        demux_packet_t *dp)
+{
+    if (!demuxer_stream_is_selected(demuxer, stream)) {
+        free_demux_packet(dp);
+    } else {
+        ds_add_packet(demuxer->ds[stream->type], dp);
+    }
+}
 
 void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
 {
@@ -1259,6 +1284,16 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
         ds_free_packs(demuxer->ds[type]);
         demux_control(demuxer, DEMUXER_CTRL_SWITCHED_TRACKS, NULL);
     }
+}
+
+bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream)
+{
+    if (!stream)
+        return false;
+    int st_id = stream->tid;
+    if (stream->type == STREAM_SUB) // major braindeath
+        st_id = stream->stream_index;
+    return d->ds[stream->type]->id == st_id;
 }
 
 int demuxer_add_attachment(demuxer_t *demuxer, struct bstr name,

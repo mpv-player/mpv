@@ -311,6 +311,8 @@ void free_demuxer(struct demuxer *demuxer);
 
 struct sh_stream *ds_gsh(struct demux_stream *ds);
 
+void demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
+                        demux_packet_t *dp);
 void ds_add_packet(struct demux_stream *ds, struct demux_packet *dp);
 void ds_read_packet(struct demux_stream *ds, struct stream *stream, int len,
                     double pts, int64_t pos, bool keyframe);
@@ -418,5 +420,7 @@ int demuxer_angles_count(struct demuxer *demuxer);
 
 struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id);
+
+bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream);
 
 #endif /* MPLAYER_DEMUXER_H */

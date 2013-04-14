@@ -190,6 +190,7 @@ struct sh_video *new_sh_video_vid(struct demuxer *demuxer, int id, int vid);
 struct sh_sub *new_sh_sub_sid(struct demuxer *demuxer, int id, int sid);
 struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
                                    const char *lang);
+struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
 
 const char *sh_sub_type2str(int type);
 
