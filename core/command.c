@@ -835,10 +835,12 @@ static int mp_property_program(m_option_t *prop, int action, void *arg,
                    "Selected program contains no audio or video streams!\n");
             return M_PROPERTY_ERROR;
         }
-        mp_switch_track(mpctx, STREAM_AUDIO,
-                find_track_by_demuxer_id(mpctx, STREAM_AUDIO, prog.aid));
         mp_switch_track(mpctx, STREAM_VIDEO,
                 find_track_by_demuxer_id(mpctx, STREAM_VIDEO, prog.vid));
+        mp_switch_track(mpctx, STREAM_AUDIO,
+                find_track_by_demuxer_id(mpctx, STREAM_AUDIO, prog.aid));
+        mp_switch_track(mpctx, STREAM_SUB,
+                find_track_by_demuxer_id(mpctx, STREAM_VIDEO, prog.sid));
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
