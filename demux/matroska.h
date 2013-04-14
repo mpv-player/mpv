@@ -1,7 +1,7 @@
 /*
  * CodecID definitions for Matroska files
  *
- * see http://cvs.corecodec.org/cgi-bin/cvsweb.cgi/~checkout~/matroska/doc/website/specs/codex.html?rev=HEAD&content-type=text/html
+ * see http://www.matroska.org/technical/specs/codecid/index.html
  *
  * This file is part of MPlayer.
  *
