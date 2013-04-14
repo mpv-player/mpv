@@ -1736,7 +1736,6 @@ static int demux_mkv_open(demuxer_t *demuxer)
 {
     stream_t *s = demuxer->stream;
     mkv_demuxer_t *mkv_d;
-    mkv_track_t *track;
 
     stream_seek(s, s->start_pos);
 
@@ -1776,42 +1775,6 @@ static int demux_mkv_open(demuxer_t *demuxer)
     }
 
     display_create_tracks(demuxer);
-
-    /* select video track */
-    track = NULL;
-    if (demuxer->video->id == -1) {     /* automatically select a video track */
-        /* search for a video track that has the 'default' flag set */
-        for (int i = 0; i < mkv_d->num_tracks; i++)
-            if (mkv_d->tracks[i]->type == MATROSKA_TRACK_VIDEO
-                && mkv_d->tracks[i]->default_track) {
-                track = mkv_d->tracks[i];
-                break;
-            }
-
-        if (track == NULL)
-            /* no track has the 'default' flag set */
-            /* let's take the first video track */
-            for (int i = 0; i < mkv_d->num_tracks; i++)
-                if (mkv_d->tracks[i]->type == MATROSKA_TRACK_VIDEO
-                    && mkv_d->tracks[i]->id >= 0) {
-                    track = mkv_d->tracks[i];
-                    break;
-                }
-    } else if (demuxer->video->id != -2)        /* -2 = no video at all */
-        track = find_track_by_num(mkv_d, demuxer->video->id,
-                                  MATROSKA_TRACK_VIDEO);
-
-    if (track && demuxer->v_streams[track->id]) {
-        mp_tmsg(MSGT_DEMUX, MSGL_V, "[mkv] Will play video track %u.\n",
-                track->tnum);
-        demuxer->video->id = track->id;
-        demuxer->video->sh = demuxer->v_streams[track->id];
-    } else {
-        mp_tmsg(MSGT_DEMUX, MSGL_INFO, "[mkv] No video track found/wanted.\n");
-        demuxer->video->id = -2;
-    }
-
-    demuxer->audio->id = -2;  // wait for higher-level code to select track
 
     if (s->end_pos == 0)
         demuxer->seekable = 0;
