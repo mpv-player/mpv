@@ -288,7 +288,6 @@ struct demux_packet *new_demux_packet(size_t len);
 // data must already have suitable padding
 struct demux_packet *new_demux_packet_fromdata(void *data, size_t len);
 void resize_demux_packet(struct demux_packet *dp, size_t len);
-struct demux_packet *clone_demux_packet(struct demux_packet *pack);
 void free_demux_packet(struct demux_packet *dp);
 
 #ifndef SIZE_MAX
@@ -308,8 +307,6 @@ struct demuxer *new_demuxer(struct MPOpts *opts, struct stream *stream,
                             int type, int a_id, int v_id, int s_id,
                             char *filename);
 void free_demuxer(struct demuxer *demuxer);
-
-struct sh_stream *ds_gsh(struct demux_stream *ds);
 
 void demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
                         demux_packet_t *dp);

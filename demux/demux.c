@@ -116,8 +116,6 @@ static struct demux_packet *create_packet(size_t len)
     dp->stream_pts = MP_NOPTS_VALUE;
     dp->pos = 0;
     dp->keyframe = false;
-    dp->refcount = 1;
-    dp->master = NULL;
     dp->buffer = NULL;
     dp->avpacket = NULL;
     return dp;
@@ -159,34 +157,12 @@ void resize_demux_packet(struct demux_packet *dp, size_t len)
     dp->len = len;
 }
 
-struct demux_packet *clone_demux_packet(struct demux_packet *pack)
-{
-    struct demux_packet *dp = malloc(sizeof(struct demux_packet));
-    while (pack->master)
-        pack = pack->master;  // find the master
-    memcpy(dp, pack, sizeof(struct demux_packet));
-    dp->next = NULL;
-    dp->refcount = 0;
-    dp->master = pack;
-    pack->refcount++;
-    return dp;
-}
-
 void free_demux_packet(struct demux_packet *dp)
 {
-    if (dp->master == NULL) {  //dp is a master packet
-        dp->refcount--;
-        if (dp->refcount == 0) {
-            if (dp->avpacket)
-                talloc_free(dp->avpacket);
-            else
-                free(dp->buffer);
-            free(dp);
-        }
-        return;
-    }
-    // dp is a clone:
-    free_demux_packet(dp->master);
+    if (dp->avpacket)
+        talloc_free(dp->avpacket);
+    else
+        free(dp->buffer);
     free(dp);
 }
 
@@ -207,20 +183,6 @@ static struct demux_stream *new_demuxer_stream(struct demuxer *demuxer,
         .asf_seq = -1,
     };
     return ds;
-}
-
-struct sh_stream *ds_gsh(struct demux_stream *ds)
-{
-    // Ideally ds would have a gsh field, but since all the old demuxers set
-    // ds->sh themselves and we don't want to change them, enjoy this hack.
-    if (!ds->sh)
-        return NULL;
-    switch (ds->stream_type) {
-    case STREAM_VIDEO: return ((struct sh_video *)ds->sh)->gsh;
-    case STREAM_AUDIO: return ((struct sh_audio *)ds->sh)->gsh;
-    case STREAM_SUB: return ((struct sh_sub *)ds->sh)->gsh;
-    }
-    assert(false);
 }
 
 /**
