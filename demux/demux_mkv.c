@@ -1656,13 +1656,10 @@ static void mkv_free(struct demuxer *demuxer)
     free(mkv_d->indexes);
 }
 
-static int demux_mkv_open(demuxer_t *demuxer)
+static int read_ebml_header(demuxer_t *demuxer)
 {
     stream_t *s = demuxer->stream;
-    mkv_demuxer_t *mkv_d;
-    mkv_track_t *track;
 
-    stream_seek(s, s->start_pos);
     if (ebml_read_id(s, NULL) != EBML_ID_EBML)
         return 0;
     struct ebml_ebml ebml_master = {};
@@ -1698,20 +1695,64 @@ static int demux_mkv_open(demuxer_t *demuxer)
     }
     talloc_free(parse_ctx.talloc_ctx);
 
+    return 1;
+}
+
+static int read_mkv_segment_header(demuxer_t *demuxer)
+{
+    stream_t *s = demuxer->stream;
+    int num_skip = 0;
+    if (demuxer->params)
+        num_skip = demuxer->params->matroska_wanted_segment;
+
+    while (!s->eof) {
+        if (ebml_read_id(s, NULL) != MATROSKA_ID_SEGMENT) {
+            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] segment not found\n");
+            return 0;
+        }
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] + a segment...\n");
+        uint64_t len = ebml_read_length(s, NULL);
+        if (num_skip <= 0)
+            return 1;
+        num_skip--;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv]   (skipping)\n");
+        if (len == EBML_UINT_INVALID)
+            break;
+        if (!stream_seek(s, stream_tell(s) + len)) {
+            mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Failed to seek in file\n");
+            return 0;
+        }
+        // Segments are like concatenated Matroska files
+        if (!read_ebml_header(demuxer))
+            return 0;
+    }
+
+    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] End of file, no further segments.\n");
+    return 0;
+}
+
+static int demux_mkv_open(demuxer_t *demuxer)
+{
+    stream_t *s = demuxer->stream;
+    mkv_demuxer_t *mkv_d;
+    mkv_track_t *track;
+
+    stream_seek(s, s->start_pos);
+
+    if (!read_ebml_header(demuxer))
+        return 0;
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Found the head...\n");
 
-    if (ebml_read_id(s, NULL) != MATROSKA_ID_SEGMENT) {
-        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] but no segment :(\n");
+    if (!read_mkv_segment_header(demuxer))
         return 0;
-    }
-    ebml_read_length(s, NULL);  /* return bytes number until EOF */
-
-    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] + a segment...\n");
 
     mkv_d = talloc_zero(demuxer, struct mkv_demuxer);
     demuxer->priv = mkv_d;
     mkv_d->tc_scale = 1000000;
     mkv_d->segment_start = stream_tell(s);
+
+    if (demuxer->params && demuxer->params->matroska_was_valid)
+        *demuxer->params->matroska_was_valid = true;
 
     while (1) {
         uint32_t id = ebml_read_id(s, NULL);

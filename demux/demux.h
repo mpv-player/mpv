@@ -211,6 +211,8 @@ typedef struct demux_attachment
 
 struct demuxer_params {
     unsigned char (*matroska_wanted_uids)[16];
+    int matroska_wanted_segment;
+    bool *matroska_was_valid;
 };
 
 typedef struct demuxer {
