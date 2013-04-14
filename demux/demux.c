@@ -129,7 +129,7 @@ struct demux_packet *new_demux_packet(size_t len)
         mp_msg(MSGT_DEMUXER, MSGL_FATAL, "Memory allocation failure!\n");
         abort();
     }
-    memset(dp->buffer + len, 0, 8);
+    memset(dp->buffer + len, 0, MP_INPUT_BUFFER_PADDING_SIZE);
     return dp;
 }
 
@@ -160,7 +160,7 @@ void resize_demux_packet(struct demux_packet *dp, size_t len)
         mp_msg(MSGT_DEMUXER, MSGL_FATAL, "Memory allocation failure!\n");
         abort();
     }
-    memset(dp->buffer + len, 0, 8);
+    memset(dp->buffer + len, 0, MP_INPUT_BUFFER_PADDING_SIZE);
     dp->len = len;
 }
 
