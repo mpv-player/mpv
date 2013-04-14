@@ -1224,6 +1224,10 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
                           struct sh_stream *stream)
 {
     assert(!stream || stream->type == type);
+
+    int old_id = demuxer->ds[type]->id;
+
+    // legacy
     int index = stream ? stream->tid : -2;
     if (type == STREAM_AUDIO) {
         if (demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index)
@@ -1235,8 +1239,6 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
             demuxer->video->id = index;
     } else if (type == STREAM_SUB) {
         int index2 = stream ? stream->stream_index : -2;
-        if (demuxer->ds[type]->id != index2)
-            ds_free_packs(demuxer->ds[type]);
         demuxer->ds[type]->id = index2;
     } else {
         abort();
@@ -1252,6 +1254,11 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
         }
     }
     demuxer->ds[type]->sh = new;
+
+    if (old_id != new_id) {
+        ds_free_packs(demuxer->ds[type]);
+        demux_control(demuxer, DEMUXER_CTRL_SWITCHED_TRACKS, NULL);
+    }
 }
 
 int demuxer_add_attachment(demuxer_t *demuxer, struct bstr name,
