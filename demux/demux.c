@@ -133,11 +133,18 @@ struct demux_packet *new_demux_packet(size_t len)
     return dp;
 }
 
-// data must already have suitable padding
+// data must already have suitable padding, and does not copy the data
 struct demux_packet *new_demux_packet_fromdata(void *data, size_t len)
 {
     struct demux_packet *dp = create_packet(len);
     dp->buffer = data;
+    return dp;
+}
+
+struct demux_packet *new_demux_packet_from(void *data, size_t len)
+{
+    struct demux_packet *dp = new_demux_packet(len);
+    memcpy(dp->buffer, data, len);
     return dp;
 }
 

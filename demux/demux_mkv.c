@@ -1891,8 +1891,7 @@ static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
     demux_packet_t *dp;
     uint32_t timestamp = mkv_d->last_pts * 1000;
 
-    dp = new_demux_packet(data.len);
-    memcpy(dp->buffer, data.start, data.len);
+    dp = new_demux_packet_from(data.start, data.len);
 
     if (mkv_d->v_skip_to_keyframe) {
         dp->pts = mkv_d->last_pts;
@@ -1991,9 +1990,8 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
             track->sub_packet_cnt = 0;
             // Release all the audio packets
             for (x = 0; x < sph * w / apk_usize; x++) {
-                dp = new_demux_packet(apk_usize);
-                memcpy(dp->buffer, track->audio_buf + x * apk_usize,
-                       apk_usize);
+                dp = new_demux_packet_from(track->audio_buf + x * apk_usize,
+                                           apk_usize);
                 /* Put timestamp only on packets that correspond to original
                  * audio packets in file */
                 dp->pts = (x * apk_usize % w) ? 0 :
@@ -2004,8 +2002,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
             }
         }
     } else {                    // Not a codec that require reordering
-        dp = new_demux_packet(size);
-        memcpy(dp->buffer, buffer, size);
+        dp = new_demux_packet_from(buffer, size);
         if (track->ra_pts == mkv_d->last_pts && !mkv_d->a_skip_to_keyframe)
             dp->pts = 0;
         else
@@ -2165,8 +2162,8 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
             else {
                 bstr buffer = demux_mkv_decode(track, block, 1);
                 if (buffer.start) {
-                    demux_packet_t *dp = new_demux_packet(buffer.len);
-                    memcpy(dp->buffer, buffer.start, buffer.len);
+                    demux_packet_t *dp =
+                        new_demux_packet_from(buffer.start, buffer.len);
                     if (buffer.start != block.start)
                         talloc_free(buffer.start);
                     dp->keyframe = keyframe;
