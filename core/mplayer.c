@@ -2455,7 +2455,6 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
                                        &packet, mpctx->opts.force_fps);
         if (in_size < 0)
             return -1;
-        sh_video->timer += frame_time;
         if (mpctx->sh_audio)
             mpctx->delay -= frame_time;
         // video_read_frame can change fps (e.g. for ASF video)
@@ -2588,7 +2587,6 @@ static double update_video(struct MPContext *mpctx)
     }
     double frame_time = sh_video->pts - sh_video->last_pts;
     sh_video->last_pts = sh_video->pts;
-    sh_video->timer += frame_time;
     if (mpctx->sh_audio)
         mpctx->delay -= frame_time;
     return frame_time;
@@ -2665,11 +2663,9 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
 {
     if (mpctx->sh_video) {
         resync_video_stream(mpctx->sh_video);
-        mpctx->sh_video->timer = 0;
         vo_seek_reset(mpctx->video_out);
         if (mpctx->sh_video->vf_initialized == 1)
             vf_chain_seek_reset(mpctx->sh_video->vfilter);
-        mpctx->sh_video->timer = 0;
         mpctx->sh_video->num_buffered_pts = 0;
         mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
         mpctx->delay = 0;
@@ -4047,7 +4043,6 @@ goto_enable_cache: ;
     //================ SETUP STREAMS ==========================
 
     if (mpctx->sh_video) {
-        mpctx->sh_video->timer = 0;
         if (!opts->ignore_start)
             mpctx->audio_delay += mpctx->sh_video->stream_delay;
     }

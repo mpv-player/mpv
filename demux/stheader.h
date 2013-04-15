@@ -127,10 +127,6 @@ typedef struct sh_audio {
 
 typedef struct sh_video {
     SH_COMMON
-    float timer;     // absolute time in video stream, since last start/seek
-    // frame counters:
-    float num_frames;       // number of frames played
-    int num_frames_decoded; // number of frames decoded
     double i_pts;   // PTS for the _next_ I/P frame (internal mpeg demuxing)
     float next_frame_time;
     double last_pts;
