@@ -37,6 +37,8 @@
 
 #include "core/mp_msg.h"
 
+bool mp_msg_stdout_in_use = 0;
+
 /* maximum message length of mp_msg */
 #define MSGSIZE_MAX 6144
 
@@ -225,7 +227,8 @@ static void print_msg_module(FILE* stream, int mod)
 void mp_msg_va(int mod, int lev, const char *format, va_list va)
 {
     char tmp[MSGSIZE_MAX];
-    FILE *stream = lev == MSGL_STATUS ? stderr : stdout;
+    FILE *stream =
+        (mp_msg_stdout_in_use || (lev == MSGL_STATUS)) ? stderr : stdout;
     static int header = 1;
     // indicates if last line printed was a status line
     static int statusline;

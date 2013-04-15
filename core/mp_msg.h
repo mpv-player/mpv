@@ -142,4 +142,6 @@ void mp_msg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
 void mp_tmsg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
 #define mp_dbg mp_msg
 
+extern bool mp_msg_stdout_in_use;
+
 #endif /* MPLAYER_MP_MSG_H */

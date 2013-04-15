@@ -117,6 +117,11 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
 {
     struct encode_lavc_context *ctx;
 
+    if (options->file && (
+            !strcmp(options->file, "pipe:") ||
+            !strcmp(options->file, "pipe:1")))
+        mp_msg_stdout_in_use = 1;
+
     ctx = talloc_zero(NULL, struct encode_lavc_context);
     encode_lavc_discontinuity(ctx);
     ctx->options = options;
