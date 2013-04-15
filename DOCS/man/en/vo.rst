@@ -755,3 +755,13 @@ Available video output drivers are:
         JPEG DPI (default: 72)
     ``outdir=<dirname>``
         Specify the directory to save the image files to (default: ``./``).
+
+``wayland`` (Wayland only)
+    Wayland shared memory video output as fallback for ``opengl``.
+
+    ``default-format``
+        Use the default RGB32 format instead of an auto-detected one.
+
+    ``alpha``
+        Use a buffer format that supports videos and images with alpha
+        informations

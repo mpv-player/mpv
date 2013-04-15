@@ -1707,10 +1707,15 @@ if test "$_wayland" != no; then
  _wayland="no"
   pkg_config_add "wayland-client >= 1.0.0 wayland-egl >= 9.0.0 wayland-cursor >= 1.0.0 xkbcommon >= 0.3.0" \
   && _wayland="yes"
+fi
+if test "$_wayland" = yes; then
   res_comment=""
+  def_wayland='#define CONFIG_WAYLAND'
+  vomodules="wayland $vomodules"
 else
-  _wayland="no"
+  def_wayland='#undef CONFIG_WAYLAND'
   res_comment=""
+  novomodules="wayland $novomodules"
 fi
 echores "$_wayland"
 
