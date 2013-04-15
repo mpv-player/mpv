@@ -924,16 +924,6 @@ static void vo_x11_update_window_title(struct vo *vo)
     vo_x11_set_property_utf8(vo, x11->XA_NET_WM_ICON_NAME, title);
 }
 
-static void setup_window_params(struct vo_x11_state *x11, XVisualInfo *vis,
-                                unsigned long *mask, XSetWindowAttributes *att)
-{
-    vo_x11_create_colormap(x11, vis);
-
-    *mask = CWBorderPixel | CWColormap;
-    att->border_pixel = 0;
-    att->colormap = x11->colormap;
-}
-
 static void find_default_visual(struct vo_x11_state *x11, XVisualInfo *vis)
 {
     Display *display = x11->display;
@@ -956,9 +946,12 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis, int x, int y,
         find_default_visual(x11, vis);
     }
 
-    unsigned long xswamask;
-    XSetWindowAttributes xswa;
-    setup_window_params(x11, vis, &xswamask, &xswa);
+    vo_x11_create_colormap(x11, vis);
+    unsigned long xswamask = CWBorderPixel | CWColormap;
+    XSetWindowAttributes xswa = {
+        .border_pixel = 0,
+        .colormap = x11->colormap,
+    };
 
     Window parent = vo->opts->WinID >= 0 ? vo->opts->WinID : x11->rootwin;
 
