@@ -45,7 +45,7 @@
 #error MP_INPUT_BUFFER_PADDING_SIZE is too small!
 #endif
 
-static void clear_parser(sh_common_t *sh);
+static void clear_parser(sh_audio_t *sh);
 
 // Demuxer list
 extern const struct demuxer_desc demuxer_desc_edl;
@@ -264,34 +264,35 @@ static struct sh_stream *new_sh_stream_id(demuxer_t *demuxer,
     switch (sh->type) {
         case STREAM_VIDEO: {
             struct sh_video *sht = talloc_zero(demuxer, struct sh_video);
+            sht->gsh = sh;
+            sht->opts = sh->opts;
             sht->ds = demuxer->video;
             sh->video = sht;
-            sh->common_header = (struct sh_common *) sht;
             demuxer->v_streams[sh->stream_index] = sht;
             break;
         }
         case STREAM_AUDIO: {
             struct sh_audio *sht = talloc_zero(demuxer, struct sh_audio);
+            sht->gsh = sh;
+            sht->opts = sh->opts;
             sht->ds = demuxer->audio;
             sht->samplesize = 2;
             sht->sample_format = AF_FORMAT_S16_NE;
             sh->audio = sht;
-            sh->common_header = (struct sh_common *) sht;
             demuxer->a_streams[sh->stream_index] = sht;
             break;
         }
         case STREAM_SUB: {
             struct sh_sub *sht = talloc_zero(demuxer, struct sh_sub);
+            sht->gsh = sh;
+            sht->opts = sh->opts;
             sht->ds = demuxer->sub;
             sh->sub = sht;
-            sh->common_header = (struct sh_common *) sht;
             demuxer->s_streams[sh->stream_index] = sht;
             break;
         }
         default: assert(false);
     }
-    sh->common_header->opts = sh->opts;
-    sh->common_header->gsh = sh;
     return sh;
 }
 
@@ -346,7 +347,6 @@ static void free_sh_sub(sh_sub_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
     free(sh->extradata);
-    clear_parser((sh_common_t *)sh);
     free_sh_stream(sh->gsh);
 }
 
@@ -375,7 +375,7 @@ static void free_sh_audio(demuxer_t *demuxer, int id)
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_audio at %p\n", sh);
     free(sh->wf);
     free(sh->codecdata);
-    clear_parser((sh_common_t *)sh);
+    clear_parser(sh);
     free_sh_stream(sh->gsh);
 }
 
@@ -401,7 +401,6 @@ static void free_sh_video(sh_video_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_video at %p\n", sh);
     free(sh->bih);
-    clear_parser((sh_common_t *)sh);
     free_sh_stream(sh->gsh);
 }
 
@@ -495,7 +494,7 @@ static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parse
     }
 }
 
-static void get_parser(sh_common_t *sh, AVCodecContext **avctx, AVCodecParserContext **parser)
+static void get_parser(sh_audio_t *sh, AVCodecContext **avctx, AVCodecParserContext **parser)
 {
     *avctx  = NULL;
     *parser = NULL;
@@ -523,7 +522,7 @@ int ds_parse(demux_stream_t *ds, uint8_t **buffer, int *len, double pts, int64_t
     return av_parser_parse2(parser, avctx, buffer, len, *buffer, *len, pts, pts, pos);
 }
 
-static void clear_parser(sh_common_t *sh)
+static void clear_parser(sh_audio_t *sh)
 {
     av_parser_close(sh->parser);
     sh->parser = NULL;
