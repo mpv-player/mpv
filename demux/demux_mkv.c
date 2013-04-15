@@ -133,8 +133,6 @@ typedef struct mkv_track {
     int fix_i_bps;
     double qt_last_a_pts;
 
-    int subtitle_type;
-
     /* generic content encoding support */
     mkv_content_encoding_t *encodings;
     int num_encodings;
@@ -602,18 +600,6 @@ static void parse_trackentry(struct demuxer *demuxer,
         if (!strcmp(track->codec_id, MKV_V_MSCOMP)
             || !strcmp(track->codec_id, MKV_A_ACM))
             track->ms_compat = 1;
-        else if (!strcmp(track->codec_id, MKV_S_VOBSUB))
-            track->subtitle_type = 'v';
-        else if (!strcmp(track->codec_id, MKV_S_TEXTSSA)
-                 || !strcmp(track->codec_id, MKV_S_TEXTASS)
-                 || !strcmp(track->codec_id, MKV_S_SSA)
-                 || !strcmp(track->codec_id, MKV_S_ASS))
-            track->subtitle_type = 'a';
-        else if (!strcmp(track->codec_id, MKV_S_TEXTASCII)
-                   || !strcmp(track->codec_id, MKV_S_TEXTUTF8))
-            track->subtitle_type = 't';
-        else if (!strcmp(track->codec_id, MKV_S_PGS))
-            track->subtitle_type = 'p';
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Codec ID: %s\n",
                track->codec_id);
     } else
@@ -1571,9 +1557,28 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     return 1;
 }
 
+static const char *mkv_sub_tag[][2] = {
+    { MKV_S_VOBSUB,     "dvd_subtitle" },
+    { MKV_S_TEXTSSA,    "ass"},
+    { MKV_S_TEXTASS,    "ass"},
+    { MKV_S_SSA,        "ass"},
+    { MKV_S_ASS,        "ass"},
+    { MKV_S_TEXTASCII,  "subrip"},
+    { MKV_S_TEXTUTF8,   "subrip"},
+    { MKV_S_PGS,        "hdmv_pgs_subtitle"},
+    {0}
+};
+
 static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
 {
-    if (track->subtitle_type) {
+    const char *subtitle_type = NULL;
+    for (int n = 0; mkv_sub_tag[n][0]; n++) {
+        if (strcmp(track->codec_id, mkv_sub_tag[n][0]) == 0) {
+            subtitle_type = mkv_sub_tag[n][1];
+            break;
+        }
+    }
+    if (subtitle_type) {
         bstr in = (bstr){track->private_data, track->private_size};
         struct sh_stream *gsh = new_sh_stream(demuxer, STREAM_SUB);
         if (!gsh)
@@ -1582,7 +1587,7 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
         sh_sub_t *sh = gsh->sub;
         sh->gsh->demuxer_id = track->tnum;
         track->sh_sub = sh;
-        sh->type = track->subtitle_type;
+        sh->gsh->codec = subtitle_type;
         bstr buffer = demux_mkv_decode(track, in, 2);
         if (buffer.start && buffer.start != track->private_data) {
             talloc_free(track->private_data);

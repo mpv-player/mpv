@@ -4,6 +4,7 @@
 #include "dec_sub.h"
 
 struct sd_functions {
+    bool (*probe)(struct sh_sub *sh);
     int  (*init)(struct sh_sub *sh, struct osd_state *osd);
     void (*decode)(struct sh_sub *sh, struct osd_state *osd,
                    void *data, int data_len, double pts, double duration);

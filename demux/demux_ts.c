@@ -415,11 +415,11 @@ static void ts_add_stream(demuxer_t * demuxer, ES_stream_t *es)
  		if (sh) {
 			switch (es->type) {
 			case SPU_DVB:
-				sh->type = 'b'; break;
+				sh->gsh->codec = "dvb_subtitle"; break;
 			case SPU_DVD:
-				sh->type = 'v'; break;
+				sh->gsh->codec = "dvd_subtitle"; break;
 			case SPU_PGS:
-				sh->type = 'p'; break;
+				sh->gsh->codec = "hdmv_pgs_subtitle"; break;
         		}
 			priv->ts.streams[es->pid].id = priv->last_sid;
 			priv->ts.streams[es->pid].sh = sh;

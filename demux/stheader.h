@@ -171,7 +171,6 @@ typedef struct sh_video {
 
 typedef struct sh_sub {
     SH_COMMON
-    char type;  // t = text, v = VobSub, a = SSA/ASS, m, x, b, d, p
     bool active; // after track switch decoder may stay initialized, not active
     unsigned char *extradata;   // extra header data passed from demuxer
     int extradata_len;
@@ -188,8 +187,6 @@ struct sh_sub *new_sh_sub_sid(struct demuxer *demuxer, int id, int sid);
 struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
                                    const char *lang);
 struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
-
-const char *sh_sub_type2str(int type);
 
 // video.c:
 int video_read_properties(struct sh_video *sh_video);

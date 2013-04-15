@@ -275,10 +275,8 @@ static void print_stream(struct MPContext *mpctx, struct track *t, int id)
     if (t->title)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " '%s'", t->title);
     const char *codec = s ? s->codec : NULL;
-    if (s && t->type == STREAM_SUB)
-        codec = sh_sub_type2str(s->sub->type);
     if (t->sh_sub) // external subs hack
-        codec = sh_sub_type2str(t->sh_sub->type);
+        codec = t->sh_sub->gsh->codec;
     mp_msg(MSGT_CPLAYER, MSGL_INFO, " (%s)", codec ? codec : "<unknown>");
     if (t->is_external)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " (external)");
@@ -1724,7 +1722,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
     struct demux_stream *d_sub = sh_sub ? sh_sub->ds : NULL;
     unsigned char *packet = NULL;
     int len;
-    int type = sh_sub ? sh_sub->type : '\0';
+    const char *type = sh_sub ? sh_sub->gsh->codec : NULL;
 
     mpctx->osd->sub_offset = mpctx->video_offset;
 
@@ -1747,7 +1745,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
     }
 
     // DVD sub:
-    if (type == 'v' && !(sh_sub && sh_sub->active)) {
+    if (is_dvd_sub(type) && !(sh_sub && sh_sub->active)) {
         int timestamp;
         // Get a sub packet from the demuxer (or the vobsub.c thing, which
         // should be a demuxer, but isn't).
@@ -1808,7 +1806,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
             mp_dbg(MSGT_CPLAYER, MSGL_V, "Sub: c_pts=%5.3f s_pts=%5.3f "
                    "duration=%5.3f len=%d\n", curpts_s, subpts_s, duration,
                    len);
-            if (type == 'm') {
+            if (type && strcmp(type, "mov_text") == 0) {
                 if (len < 2)
                     continue;
                 len = FFMIN(len - 2, AV_RB16(packet));
@@ -1820,7 +1818,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 // text sub
                 if (duration < 0)
                     sub_clear_text(&mpctx->subs, MP_NOPTS_VALUE);
-                if (type == 'a') { // ssa/ass subs without libass => convert to plaintext
+                if (is_ass_sub(type)) { // ssa/ass subs without libass => convert to plaintext
                     int i;
                     unsigned char *p = packet;
                     for (i = 0; i < 8 && *p != '\0'; p++)
@@ -1977,7 +1975,7 @@ static void reinit_subs(struct MPContext *mpctx)
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 40, 0)
         broken_lavc = true;
 #endif
-        if (mpctx->sh_sub->type == 'v' && track->demuxer
+        if (is_dvd_sub(mpctx->sh_sub->gsh->codec) && track->demuxer
             && (track->demuxer->type == DEMUXER_TYPE_MPEG_PS || broken_lavc))
             init_vo_spudec(mpctx);
         else

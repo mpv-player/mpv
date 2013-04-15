@@ -387,32 +387,11 @@ static void handle_stream(demuxer_t *demuxer, int i)
     }
     case AVMEDIA_TYPE_SUBTITLE: {
         sh_sub_t *sh_sub;
-        char type;
-        if (codec->codec_id == AV_CODEC_ID_TEXT ||
-            codec->codec_id == AV_CODEC_ID_SUBRIP)
-            type = 't';
-        else if (codec->codec_id == AV_CODEC_ID_MOV_TEXT)
-            type = 'm';
-        else if (codec->codec_id == AV_CODEC_ID_SSA)
-            type = 'a';
-        else if (codec->codec_id == AV_CODEC_ID_DVD_SUBTITLE)
-            type = 'v';
-        else if (codec->codec_id == AV_CODEC_ID_XSUB)
-            type = 'x';
-        else if (codec->codec_id == AV_CODEC_ID_DVB_SUBTITLE)
-            type = 'b';
-        else if (codec->codec_id == AV_CODEC_ID_DVB_TELETEXT)
-            type = 'd';
-        else if (codec->codec_id == AV_CODEC_ID_HDMV_PGS_SUBTITLE)
-            type = 'p';
-        else
-            break;
         sh = new_sh_stream(demuxer, STREAM_SUB);
         if (!sh)
             break;
         sh_sub = sh->sub;
 
-        sh_sub->type = type;
         if (codec->extradata_size) {
             sh_sub->extradata = malloc(codec->extradata_size);
             memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
