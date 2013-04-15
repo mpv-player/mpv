@@ -102,7 +102,6 @@ typedef struct sh_common {
 
 typedef struct sh_audio {
     SH_COMMON
-    int aid;
     // output format:
     int sample_format;
     int samplerate;
@@ -134,7 +133,6 @@ typedef struct sh_audio {
 
 typedef struct sh_video {
     SH_COMMON
-    int vid;
     float timer;     // absolute time in video stream, since last start/seek
     // frame counters:
     float num_frames;       // number of frames played
@@ -173,7 +171,6 @@ typedef struct sh_video {
 
 typedef struct sh_sub {
     SH_COMMON
-    int sid;
     char type;  // t = text, v = VobSub, a = SSA/ASS, m, x, b, d, p
     bool active; // after track switch decoder may stay initialized, not active
     unsigned char *extradata;   // extra header data passed from demuxer

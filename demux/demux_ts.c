@@ -2986,7 +2986,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			{
 				sh_sub_t *sh_sub = demuxer->sub->sh;
 
-				if(sh_sub && sh_sub->sid == tss->pid)
+				if(sh_sub && sh_sub->gsh->tid == tss->pid)
 				{
 					ds = demuxer->sub;
 

@@ -279,7 +279,6 @@ static struct sh_stream *new_sh_stream_id(demuxer_t *demuxer,
     switch (sh->type) {
         case STREAM_VIDEO: {
             struct sh_video *sht = talloc_zero(demuxer, struct sh_video);
-            sht->vid = sh->tid;
             sht->ds = demuxer->video;
             sh->video = sht;
             sh->common_header = (struct sh_common *) sht;
@@ -288,7 +287,6 @@ static struct sh_stream *new_sh_stream_id(demuxer_t *demuxer,
         }
         case STREAM_AUDIO: {
             struct sh_audio *sht = talloc_zero(demuxer, struct sh_audio);
-            sht->aid = tid;
             sht->ds = demuxer->audio;
             sht->samplesize = 2;
             sht->sample_format = AF_FORMAT_S16_NE;
@@ -299,7 +297,6 @@ static struct sh_stream *new_sh_stream_id(demuxer_t *demuxer,
         }
         case STREAM_SUB: {
             struct sh_sub *sht = talloc_zero(demuxer, struct sh_sub);
-            sht->sid = tid;
             sht->ds = demuxer->sub;
             sh->sub = sht;
             sh->common_header = (struct sh_common *) sht;
