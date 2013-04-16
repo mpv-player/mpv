@@ -1578,35 +1578,35 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
             break;
         }
     }
-    if (subtitle_type) {
-        bstr in = (bstr){track->private_data, track->private_size};
-        struct sh_stream *gsh = new_sh_stream(demuxer, STREAM_SUB);
-        if (!gsh)
-            return 1;
-        track->stream = gsh;
-        sh_sub_t *sh = gsh->sub;
-        sh->gsh->demuxer_id = track->tnum;
-        track->sh_sub = sh;
-        sh->gsh->codec = subtitle_type;
-        bstr buffer = demux_mkv_decode(track, in, 2);
-        if (buffer.start && buffer.start != track->private_data) {
-            talloc_free(track->private_data);
-            talloc_steal(track, buffer.start);
-            track->private_data = buffer.start;
-            track->private_size = buffer.len;
-        }
-        sh->extradata = malloc(track->private_size);
-        memcpy(sh->extradata, track->private_data, track->private_size);
-        sh->extradata_len = track->private_size;
-        if (track->language && (strcmp(track->language, "und") != 0))
-            sh->gsh->lang = talloc_strdup(sh, track->language);
-        sh->gsh->title = talloc_strdup(sh, track->name);
-        sh->gsh->default_track = track->default_track;
-    } else {
+
+    bstr in = (bstr){track->private_data, track->private_size};
+    struct sh_stream *gsh = new_sh_stream(demuxer, STREAM_SUB);
+    if (!gsh)
+        return 1;
+    track->stream = gsh;
+    sh_sub_t *sh = gsh->sub;
+    sh->gsh->demuxer_id = track->tnum;
+    track->sh_sub = sh;
+    sh->gsh->codec = subtitle_type;
+    bstr buffer = demux_mkv_decode(track, in, 2);
+    if (buffer.start && buffer.start != track->private_data) {
+        talloc_free(track->private_data);
+        talloc_steal(track, buffer.start);
+        track->private_data = buffer.start;
+        track->private_size = buffer.len;
+    }
+    sh->extradata = malloc(track->private_size);
+    memcpy(sh->extradata, track->private_data, track->private_size);
+    sh->extradata_len = track->private_size;
+    if (track->language && (strcmp(track->language, "und") != 0))
+        sh->gsh->lang = talloc_strdup(sh, track->language);
+    sh->gsh->title = talloc_strdup(sh, track->name);
+    sh->gsh->default_track = track->default_track;
+
+    if (!subtitle_type) {
         mp_tmsg(MSGT_DEMUX, MSGL_ERR,
                 "[mkv] Subtitle type '%s' is not supported.\n",
                 track->codec_id);
-        return 1;
     }
 
     return 0;
