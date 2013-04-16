@@ -905,33 +905,30 @@ void create_menu()
 
 - (void)setCenteredContentSize:(NSSize)ns
 {
-    NSRect nf = [self frame];
-    NSRect vf = [[self screen] visibleFrame];
-    NSRect cb = [[self contentView] bounds];
-    int title_height = nf.size.height - cb.size.height;
-    double ratio = (double)ns.width / (double)ns.height;
+#define get_center(x) NSMakePoint(CGRectGetMidX((x)), CGRectGetMidY((x)))
+    NSRect of    = [self frame];
+    NSRect vf    = [[self screen] visibleFrame];
+    NSRect cb    = [[self contentView] bounds];
+    int title_h  = of.size.height - cb.size.height;
 
-    // clip the new size to the visibleFrame's size if needed
-    if (ns.width > vf.size.width || ns.height + title_height > vf.size.height) {
-        ns = vf.size;
-        ns.height -= title_height; // make space for the title bar
+    NSPoint old_center = get_center(of);
 
-        if (ns.width > ns.height) {
-            ns.height = ((double)ns.width * 1/ratio + 0.5);
-        } else {
-            ns.width = ((double)ns.height * ratio + 0.5);
-        }
-    }
+    NSRect nf =
+        NSMakeRect(vf.origin.x, vf.origin.y, ns.width, ns.height + title_h);
 
-    int dw = nf.size.width - ns.width;
-    int dh = nf.size.height - ns.height - title_height;
+    // clip frame to screens visibile frame
+    nf = CGRectIntersection(nf, vf);
 
-    nf.origin.x += dw / 2;
-    nf.origin.y += dh / 2;
+    NSPoint new_center = get_center(nf);
 
-    NSRect new_frame =
-        NSMakeRect(nf.origin.x, nf.origin.y, ns.width, ns.height + title_height);
-    [self setFrame:new_frame display:YES animate:NO];
+    int dx0 = old_center.x - new_center.x;
+    int dy0 = old_center.y - new_center.y;
+
+    nf.origin.x += dx0;
+    nf.origin.y += dy0;
+
+    [self setFrame:nf display:YES animate:NO];
+#undef get_center
 }
 
 - (void)setContentSize:(NSSize)ns keepCentered:(BOOL)keepCentered
