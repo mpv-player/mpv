@@ -201,7 +201,7 @@ static void disable_power_management(struct vo *vo)
         assertion_type = kIOPMAssertionTypePreventUserIdleDisplaySleep;
 
     IOPMAssertionCreateWithName(assertion_type, kIOPMAssertionLevelOn,
-        CFSTR("org.mplayer2.power_mgmt"), &s->power_mgmt_assertion);
+        CFSTR("io.mpv.power_management"), &s->power_mgmt_assertion);
 }
 
 int vo_cocoa_init(struct vo *vo)
