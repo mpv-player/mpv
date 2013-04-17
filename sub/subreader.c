@@ -1324,8 +1324,8 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
     static const struct subreader sr[]=
     {
 	    { sub_read_line_microdvd, NULL, "microdvd" },
-	    { sub_read_line_subrip, NULL, "subrip" },
-	    { sub_read_line_subviewer, NULL, "subviewer" },
+	    { sub_read_line_subrip, NULL, "subviewer" },
+	    { sub_read_line_subviewer, NULL, "subrip" },
 	    { sub_read_line_sami, NULL, "sami" },
 	    { sub_read_line_vplayer, NULL, "vplayer" },
 	    { sub_read_line_rt, NULL, "rt" },
@@ -1684,6 +1684,7 @@ if ((suboverlap_enabled == 2) ||
     if (return_sub == NULL) return NULL;
     subt_data = talloc_zero(NULL, sub_data);
     talloc_set_destructor(subt_data, sub_destroy);
+    subt_data->codec = srp->name;
     subt_data->filename = strdup(filename);
     subt_data->sub_uses_time = uses_time;
     subt_data->sub_num = sub_num;

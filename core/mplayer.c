@@ -275,8 +275,10 @@ static void print_stream(struct MPContext *mpctx, struct track *t, int id)
     if (t->title)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " '%s'", t->title);
     const char *codec = s ? s->codec : NULL;
-    if (t->sh_sub) // external subs hack
+    if (!codec && t->sh_sub) // external subs hack
         codec = t->sh_sub->gsh->codec;
+    if (!codec && t->subdata)
+        codec = t->subdata->codec;
     mp_msg(MSGT_CPLAYER, MSGL_INFO, " (%s)", codec ? codec : "<unknown>");
     if (t->is_external)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " (external)");
@@ -908,16 +910,21 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
         struct ass_track *asst = mp_ass_read_stream(mpctx->ass_library,
                                                     filename, sub_cp);
         bool is_native_ass = asst;
+        const char *codec = NULL;
         if (!asst) {
             subd = sub_read_file(filename, fps, &mpctx->opts);
             if (subd) {
+                codec = subd->codec;
                 asst = mp_ass_read_subdata(mpctx->ass_library, opts, subd, fps);
                 talloc_free(subd);
                 subd = NULL;
             }
         }
-        if (asst)
+        if (asst) {
             sh = sd_ass_create_from_track(asst, is_native_ass, opts);
+            if (codec)
+                sh->gsh->codec = codec;
+        }
 #endif
     } else
         subd = sub_read_file(filename, fps, &mpctx->opts);
