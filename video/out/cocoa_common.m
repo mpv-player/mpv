@@ -92,6 +92,8 @@ static bool RightAltPressed(NSEvent *event)
 - (void)fullscreen;
 - (void)mouseEvent:(NSEvent *)theEvent;
 - (void)mulSize:(float)multiplier;
+- (int)titleHeight;
+- (NSRect)clipFrame:(NSRect)frame withContentAspect:(NSSize) aspect;
 - (void)setContentSize:(NSSize)newSize keepCentered:(BOOL)keepCentered;
 @end
 
@@ -903,21 +905,47 @@ void create_menu()
     }
 }
 
+- (int)titleHeight
+{
+    NSRect of    = [self frame];
+    NSRect cb    = [[self contentView] bounds];
+    return of.size.height - cb.size.height;
+}
+
+- (NSRect)clipFrame:(NSRect)frame withContentAspect:(NSSize) aspect
+{
+    NSRect vf    = [[self screen] visibleFrame];
+    double ratio = (double)aspect.width / (double)aspect.height;
+
+    // clip frame to screens visibile frame
+    frame = CGRectIntersection(frame, vf);
+
+    NSSize s = frame.size;
+    s.height -= [self titleHeight];
+
+    if (s.width > s.height) {
+        s.width  = ((double)s.height * ratio + 0.5);
+    } else {
+        s.height = ((double)s.width * 1/ratio + 0.5);
+    }
+
+    s.height += [self titleHeight];
+    frame.size = s;
+
+    return frame;
+}
+
 - (void)setCenteredContentSize:(NSSize)ns
 {
 #define get_center(x) NSMakePoint(CGRectGetMidX((x)), CGRectGetMidY((x)))
     NSRect of    = [self frame];
     NSRect vf    = [[self screen] visibleFrame];
-    NSRect cb    = [[self contentView] bounds];
-    int title_h  = of.size.height - cb.size.height;
-
     NSPoint old_center = get_center(of);
 
-    NSRect nf =
-        NSMakeRect(vf.origin.x, vf.origin.y, ns.width, ns.height + title_h);
+    NSRect nf = NSMakeRect(vf.origin.x, vf.origin.y,
+                           ns.width, ns.height + [self titleHeight]);
 
-    // clip frame to screens visibile frame
-    nf = CGRectIntersection(nf, vf);
+    nf = [self clipFrame:nf withContentAspect:ns];
 
     NSPoint new_center = get_center(nf);
 
