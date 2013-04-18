@@ -69,7 +69,6 @@ typedef struct ao_old_functions {
 struct ao;
 
 struct ao_driver {
-    bool is_new;
     bool encode;
     const struct ao_info *info;
     const struct ao_old_functions *old_functions;

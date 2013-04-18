@@ -587,7 +587,6 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 }
 
 const struct ao_driver audio_out_pulse = {
-    .is_new = true,
     .info = &(const struct ao_info) {
         "PulseAudio audio output",
         "pulse",

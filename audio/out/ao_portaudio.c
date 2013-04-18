@@ -415,7 +415,6 @@ static void resume(struct ao *ao)
 }
 
 const struct ao_driver audio_out_portaudio = {
-    .is_new = true,
     .info = &(const struct ao_info) {
         "PortAudio",
         "portaudio",

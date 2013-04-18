@@ -217,7 +217,6 @@ static int play(struct ao *ao, void *data, int len, int flags)
 }
 
 const struct ao_driver audio_out_pcm = {
-    .is_new = true,
     .info = &(const struct ao_info) {
         "RAW PCM/WAVE file writer audio output",
         "pcm",

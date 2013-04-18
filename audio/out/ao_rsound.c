@@ -191,7 +191,6 @@ static float get_delay(struct ao *ao)
 }
 
 const struct ao_driver audio_out_rsound = {
-    .is_new    = true,
     .info      = &(const struct ao_info) {
         .name       = "RSound output driver",
         .short_name = "rsound",

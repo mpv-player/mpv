@@ -363,7 +363,6 @@ static float get_delay(struct ao *ao)
 }
 
 const struct ao_driver audio_out_sdl = {
-    .is_new = true,
     .info = &(const struct ao_info) {
         "SDL Audio",
         "sdl",
