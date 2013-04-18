@@ -320,7 +320,7 @@ opengl
         sporadic and temporary image corruption.
 
     dither-depth=<N|no|auto>
-        Set dither target depth to N. Default: auto.
+        Set dither target depth to N. Default: no.
 
         no
             Disable any dithering done by mpv.
