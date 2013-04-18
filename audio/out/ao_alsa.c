@@ -36,6 +36,7 @@
 #include <alloca.h>
 
 #include "config.h"
+#include "core/options.h"
 #include "core/subopt-helper.h"
 #include "audio/mixer.h"
 #include "core/mp_msg.h"
@@ -46,19 +47,11 @@
 #include <alsa/asoundlib.h>
 
 #include "ao.h"
-#include "audio_out_internal.h"
 #include "audio/format.h"
 #include "audio/reorder_ch.h"
 
-static const ao_info_t info =
-{
-    "ALSA-0.9.x-1.x audio output",
-    "alsa",
-    "Alex Beregszaszi, Zsolt Barat <joy@streamminister.de>",
-    "under development"
-};
-
-LIBAO_EXTERN(alsa)
+extern struct ao *global_ao;
+#define ao_data (*global_ao)
 
 static snd_pcm_t *alsa_handler;
 static snd_pcm_format_t alsa_format;
@@ -83,6 +76,9 @@ static float delay_before_pause;
         } \
     } while (0)
 
+static float get_delay(struct ao *ao);
+static int play(struct ao *ao, void *data, int len, int flags);
+
 static void alsa_error_handler(const char *file, int line, const char *function,
                                int err, const char *format, ...)
 {
@@ -103,7 +99,7 @@ static void alsa_error_handler(const char *file, int line, const char *function,
 }
 
 /* to set/get/query special features/parameters */
-static int control(int cmd, void *arg)
+static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     snd_mixer_t *handle = NULL;
     switch (cmd) {
@@ -127,10 +123,10 @@ static int control(int cmd, void *arg)
         if (AF_FORMAT_IS_IEC61937(ao_data.format))
             return CONTROL_TRUE;
 
-        if (mixer_channel) {
+        if (global_ao->opts->mixer_channel) {
             char *test_mix_index;
 
-            mix_name = strdup(mixer_channel);
+            mix_name = strdup(global_ao->opts->mixer_channel);
             if ((test_mix_index = strchr(mix_name, ','))) {
                 *test_mix_index = 0;
                 test_mix_index++;
@@ -143,8 +139,8 @@ static int control(int cmd, void *arg)
                 }
             }
         }
-        if (mixer_device)
-            card = mixer_device;
+        if (global_ao->opts->mixer_device)
+            card = global_ao->opts->mixer_device;
 
         //allocate simple id
         snd_mixer_selem_id_alloca(&sid);
@@ -153,7 +149,7 @@ static int control(int cmd, void *arg)
         snd_mixer_selem_id_set_index(sid, mix_index);
         snd_mixer_selem_id_set_name(sid, mix_name);
 
-        if (mixer_channel) {
+        if (global_ao->opts->mixer_channel) {
             free(mix_name);
             mix_name = NULL;
         }
@@ -402,10 +398,9 @@ static int try_open_device(const char *device, int open_mode, int try_ac3)
 
 /*
     open & setup audio device
-    return: 1=success 0=fail
+    return: 0=success -1=fail
  */
-static int init(int rate_hz, const struct mp_chmap *channels, int format,
-                int flags)
+static int init(struct ao *ao, char *params)
 {
     int err;
     int block;
@@ -419,14 +414,15 @@ static int init(int rate_hz, const struct mp_chmap *channels, int format,
         {NULL}
     };
 
+    global_ao = ao;
+
     char alsa_device[ALSA_DEVICE_SIZE + 1];
     // make sure alsa_device is null-terminated even when using strncpy etc.
     memset(alsa_device, 0, ALSA_DEVICE_SIZE + 1);
 
     mp_msg(MSGT_AO, MSGL_V,
-           "alsa-init: requested format: %d Hz, %d channels, %x\n", rate_hz,
-           ao_data.channels.num,
-           format);
+           "alsa-init: requested format: %d Hz, %d channels, %x\n",
+           ao->samplerate, ao->channels.num, ao->format);
     alsa_handler = NULL;
     mp_msg(MSGT_AO, MSGL_V, "alsa-init: using ALSA %s\n", snd_asoundlib_version());
 
@@ -435,7 +431,7 @@ static int init(int rate_hz, const struct mp_chmap *channels, int format,
 
     snd_lib_error_set_handler(alsa_error_handler);
 
-    alsa_format = find_alsa_format(format);
+    alsa_format = find_alsa_format(ao->format);
 
     //subdevice parsing
     // set defaults
@@ -447,7 +443,7 @@ static int init(int rate_hz, const struct mp_chmap *channels, int format,
      * 'iec958'
      */
     device.str = NULL;
-    if (AF_FORMAT_IS_IEC61937(format)) {
+    if (AF_FORMAT_IS_IEC61937(ao->format)) {
         device.str = "iec958";
         mp_msg(MSGT_AO, MSGL_V,
                "alsa-spdif-init: playing AC3/iec61937/iec958, %i channels\n",
@@ -463,14 +459,14 @@ static int init(int rate_hz, const struct mp_chmap *channels, int format,
                     name, ao_data.channels.num);
             talloc_free(name);
         }
-        if (strcmp(device.str, "default") != 0 && format == AF_FORMAT_FLOAT_NE)
+        if (strcmp(device.str, "default") != 0 && ao->format == AF_FORMAT_FLOAT_NE)
         {
             // hack - use the converter plugin (why the heck?)
             device.str = talloc_asprintf(global_ao, "plug:%s", device.str);
         }
     }
     device.len = strlen(device.str);
-    if (subopt_parse(ao_subdevice, subopts) != 0) {
+    if (subopt_parse(params, subopts) != 0) {
         print_help();
         return 0;
     }
@@ -481,7 +477,7 @@ static int init(int rate_hz, const struct mp_chmap *channels, int format,
     alsa_can_pause = 1;
 
     int open_mode = block ? 0 : SND_PCM_NONBLOCK;
-    int isac3 =  AF_FORMAT_IS_IEC61937(format);
+    int isac3 =  AF_FORMAT_IS_IEC61937(ao->format);
     //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
     err = try_open_device(alsa_device, open_mode, isac3);
     if (err < 0) {
@@ -522,7 +518,7 @@ static int init(int rate_hz, const struct mp_chmap *channels, int format,
             (alsa_handler, alsa_hwparams, alsa_format);
     if (err < 0) {
         mp_tmsg(MSGT_AO, MSGL_INFO, "[AO_ALSA] Format %s is not supported "
-                "by hardware, trying default.\n", af_fmt2str_short(format));
+                "by hardware, trying default.\n", af_fmt2str_short(ao->format));
         alsa_format = SND_PCM_FORMAT_S16_LE;
         if (AF_FORMAT_IS_AC3(ao_data.format))
             ao_data.format = AF_FORMAT_AC3_LE;
@@ -619,15 +615,15 @@ static int init(int rate_hz, const struct mp_chmap *channels, int format,
             ao_data.samplerate, ao_data.channels.num, (int)bytes_per_sample,
             ao_data.buffersize, snd_pcm_format_description(alsa_format));
 
-    return 1;
+    return 0;
 
 alsa_error:
-    return 0;
+    return -1;
 } // end init
 
 
 /* close audio device */
-static void uninit(int immed)
+static void uninit(struct ao *ao, bool immed)
 {
 
     if (alsa_handler) {
@@ -648,12 +644,12 @@ static void uninit(int immed)
 alsa_error: ;
 }
 
-static void audio_pause(void)
+static void audio_pause(struct ao *ao)
 {
     int err;
 
     if (alsa_can_pause) {
-        delay_before_pause = get_delay();
+        delay_before_pause = get_delay(ao);
         err = snd_pcm_pause(alsa_handler, 1);
         CHECK_ALSA_ERROR("pcm pause error");
         mp_msg(MSGT_AO, MSGL_V, "alsa-pause: pause supported by hardware\n");
@@ -670,7 +666,7 @@ static void audio_pause(void)
 alsa_error: ;
 }
 
-static void audio_resume(void)
+static void audio_resume(struct ao *ao)
 {
     int err;
 
@@ -689,7 +685,7 @@ static void audio_resume(void)
         CHECK_ALSA_ERROR("pcm prepare error");
         if (prepause_frames) {
             void *silence = calloc(prepause_frames, bytes_per_sample);
-            play(silence, prepause_frames * bytes_per_sample, 0);
+            play(ao, silence, prepause_frames * bytes_per_sample, 0);
             free(silence);
         }
     }
@@ -698,7 +694,7 @@ alsa_error: ;
 }
 
 /* stop playing and empty buffers (for seeking/pause) */
-static void reset(void)
+static void reset(struct ao *ao)
 {
     int err;
 
@@ -719,7 +715,7 @@ alsa_error: ;
     thanxs for marius <marius@rospot.com> for giving us the light ;)
  */
 
-static int play(void *data, int len, int flags)
+static int play(struct ao *ao, void *data, int len, int flags)
 {
     int num_frames;
     snd_pcm_sframes_t res = 0;
@@ -768,7 +764,7 @@ alsa_error:
 }
 
 /* how many byes are free in the buffer */
-static int get_space(void)
+static int get_space(struct ao *ao)
 {
     snd_pcm_status_t *status;
     int err;
@@ -788,7 +784,7 @@ alsa_error:
 }
 
 /* delay in seconds between first and last sample in buffer */
-static float get_delay(void)
+static float get_delay(struct ao *ao)
 {
     if (alsa_handler) {
         snd_pcm_sframes_t delay;
@@ -808,3 +804,22 @@ static float get_delay(void)
     } else
         return 0;
 }
+
+const struct ao_driver audio_out_alsa = {
+    .is_new = true,
+    .info = &(const struct ao_info) {
+        "ALSA-0.9.x-1.x audio output",
+        "alsa",
+        "Alex Beregszaszi, Zsolt Barat <joy@streamminister.de>",
+        "under development"
+    },
+    .init      = init,
+    .uninit    = uninit,
+    .control   = control,
+    .get_space = get_space,
+    .play      = play,
+    .get_delay = get_delay,
+    .pause     = audio_pause,
+    .resume    = audio_resume,
+    .reset     = reset,
+};
