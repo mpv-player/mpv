@@ -1074,7 +1074,7 @@ static int sub_autodetect (stream_t* st, int *uses_time, int utf16) {
 		{*uses_time=1;return SUB_MPL2;}
 	if (sscanf (line, "%d:%d:%d.%d,%d:%d:%d.%d",     &i, &i, &i, &i, &i, &i, &i, &i)==8)
 		{*uses_time=1;return SUB_SUBRIP;}
-	if (sscanf (line, "%d:%d:%d%[,.:]%d --> %d:%d:%d%[,.:]%d", &i, &i, &i, (char *)&i, &i, &i, &i, &i, (char *)&i, &i)==10)
+	if (sscanf (line, "%d:%d:%d%*1[,.:]%d --> %d:%d:%d%*1[,.:]%d", &i, &i, &i, &i, &i, &i, &i, &i) == 8)
 		{*uses_time=1;return SUB_SUBVIEWER;}
 	if (sscanf (line, "{T %d:%d:%d:%d",&i, &i, &i, &i)==4)
 		{*uses_time=1;return SUB_SUBVIEWER2;}
