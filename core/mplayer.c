@@ -3593,6 +3593,7 @@ static int match_lang(char **langs, char *lang)
  * Sort tracks based on the following criteria, and pick the first:
  * 0) track matches tid (always wins)
  * 1) track is external
+ * 1b) track was passed explicitly (is not an auto-loaded subtitle)
  * 2) earlier match in lang list
  * 3) track is marked default
  * 4) lower track number
@@ -3605,6 +3606,8 @@ static bool compare_track(struct track *t1, struct track *t2, char **langs)
 {
     if (t1->is_external != t2->is_external)
         return t1->is_external;
+    if (t1->auto_loaded != t2->auto_loaded)
+        return !t1->auto_loaded;
     int l1 = match_lang(langs, t1->lang), l2 = match_lang(langs, t2->lang);
     if (l1 != l2)
         return l1 > l2;
@@ -3687,8 +3690,11 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
     if (mpctx->opts.sub_auto) { // auto load sub file ...
         char **tmp = find_text_subtitles(&mpctx->opts, mpctx->filename);
         int nsub = MP_TALLOC_ELEMS(tmp);
-        for (int i = 0; i < nsub; i++)
-            mp_add_subtitles(mpctx, tmp[i], sub_fps, 1);
+        for (int i = 0; i < nsub; i++) {
+            struct track *track = mp_add_subtitles(mpctx, tmp[i], sub_fps, 1);
+            if (track)
+                track->auto_loaded = true;
+        }
         talloc_free(tmp);
     }
 }

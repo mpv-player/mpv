@@ -95,6 +95,7 @@ struct track {
     // If this track is from an external file (e.g. subtitle file).
     bool is_external;
     char *external_filename;
+    bool auto_loaded;
 
     // If the track's stream changes with the timeline (ordered chapters).
     bool under_timeline;
