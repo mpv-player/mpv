@@ -71,7 +71,7 @@ static struct cdda_params {
     int toc_offset;
     int no_skip;
     char *device;
-    m_span_t span;
+    int span[2];
 } cdda_dflts = {
     .search_overlap = -1,
 };
@@ -91,11 +91,9 @@ static const m_option_t cdda_params_fields[] = {
     {"noskip", ST_OFF(no_skip), CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"skip", ST_OFF(no_skip), CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"device", ST_OFF(device), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"span", ST_OFF(span), CONF_TYPE_OBJ_PARAMS, 0, 0, 0,
-     (void *)&m_span_params_def},
+    {"span", ST_OFF(span), CONF_TYPE_INT_PAIR, 0, 0, 0, NULL},
     /// For url parsing
-    {"hostname", ST_OFF(span), CONF_TYPE_OBJ_PARAMS, 0, 0, 0,
-     (void *)&m_span_params_def},
+    {"hostname", ST_OFF(span), CONF_TYPE_INT_PAIR, 0, 0, 0, NULL},
     {"port", ST_OFF(speed), CONF_TYPE_INT, M_OPT_RANGE, 1, 100, NULL},
     {"filename", ST_OFF(device), CONF_TYPE_STRING, 0, 0, 0, NULL},
     {0}
@@ -122,8 +120,7 @@ const m_option_t cdda_opts[] = {
     {"noskip", &cdda_dflts.no_skip, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"skip", &cdda_dflts.no_skip, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"device", &cdda_dflts.device, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"span", &cdda_dflts.span, CONF_TYPE_OBJ_PARAMS, 0, 0, 0,
-     (void *)&m_span_params_def},
+    {"span", &cdda_dflts.span, CONF_TYPE_INT_PAIR, 0, 0, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -435,19 +432,19 @@ static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
         cdda_speed_set(cdd, p->speed);
 
     last_track = cdda_tracks(cdd);
-    if (p->span.start > last_track)
-        p->span.start = last_track;
-    if (p->span.end < p->span.start)
-        p->span.end = p->span.start;
-    if (p->span.end > last_track)
-        p->span.end = last_track;
-    if (p->span.start)
-        priv->start_sector = cdda_track_firstsector(cdd, p->span.start);
+    if (p->span[0] > last_track)
+        p->span[0] = last_track;
+    if (p->span[1] < p->span[0])
+        p->span[1] = p->span[0];
+    if (p->span[1] > last_track)
+        p->span[1] = last_track;
+    if (p->span[0])
+        priv->start_sector = cdda_track_firstsector(cdd, p->span[0]);
     else
         priv->start_sector = cdda_disc_firstsector(cdd);
 
-    if (p->span.end)
-        priv->end_sector = cdda_track_lastsector(cdd, p->span.end);
+    if (p->span[1])
+        priv->end_sector = cdda_track_lastsector(cdd, p->span[1]);
     else
         priv->end_sector = cdda_disc_lastsector(cdd);
 

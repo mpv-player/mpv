@@ -1863,62 +1863,6 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
     return 1;
 }
 
-static int parse_obj_params(const m_option_t *opt, struct bstr name,
-                            struct bstr param, void *dst)
-{
-    char **opts;
-    int r;
-    m_obj_params_t *p = opt->priv;
-    const m_struct_t *desc;
-
-    // We need the object desc
-    if (!p)
-        return M_OPT_INVALID;
-
-    desc = p->desc;
-    r = get_obj_params(name, bstr0(desc->name), param, desc, p->separator,
-                       dst ? &opts : NULL);
-    if (r < 0)
-        return r;
-    if (!dst)
-        return 1;
-    if (!opts) // no arguments given
-        return 1;
-
-    for (r = 0; opts[r]; r += 2)
-        m_struct_set(desc, dst, opts[r], bstr0(opts[r + 1]));
-
-    return 1;
-}
-
-
-const m_option_type_t m_option_type_obj_params = {
-    .name  = "Object params",
-    .parse = parse_obj_params,
-};
-
-/// Some predefined types as a definition would be quite lengthy
-
-/// Span arguments
-static const m_span_t m_span_params_dflts = {
-    -1, -1
-};
-static const m_option_t m_span_params_fields[] = {
-    {"start", M_ST_OFF(m_span_t, start), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL},
-    {"end", M_ST_OFF(m_span_t, end), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL},
-    { NULL, NULL, 0, 0, 0, 0, NULL }
-};
-static const struct m_struct_st m_span_opts = {
-    "m_span",
-    sizeof(m_span_t),
-    &m_span_params_dflts,
-    m_span_params_fields
-};
-const m_obj_params_t m_span_params_def = {
-    &m_span_opts,
-    '-'
-};
-
 static int parse_obj_settings(struct bstr opt, struct bstr str,
                               const m_obj_list_t *list,
                               m_obj_settings_t **_ret, int ret_n)

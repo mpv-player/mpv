@@ -133,20 +133,6 @@ typedef struct {
     char separator;
 } m_obj_params_t;
 
-// Parse a set of parameters.
-/** Parameters are separated by the given separator and each one
- *  successively sets a field from the struct. The option priv field
- *  (\ref m_option::priv) must point to a \ref m_obj_params_t.
- */
-extern const m_option_type_t m_option_type_obj_params;
-
-typedef struct {
-    int start;
-    int end;
-} m_span_t;
-// Ready made settings to parse a \ref m_span_t with a start-end syntax.
-extern const m_obj_params_t m_span_params_def;
-
 struct m_opt_choice_alternatives {
     char *name;
     int value;
@@ -178,12 +164,12 @@ struct m_sub_options {
 #define CONF_TYPE_IMGFMT        (&m_option_type_imgfmt)
 #define CONF_TYPE_FOURCC        (&m_option_type_fourcc)
 #define CONF_TYPE_AFMT          (&m_option_type_afmt)
-#define CONF_TYPE_SPAN          (&m_option_type_span)
 #define CONF_TYPE_OBJ_SETTINGS_LIST (&m_option_type_obj_settings_list)
 #define CONF_TYPE_CUSTOM_URL    (&m_option_type_custom_url)
 #define CONF_TYPE_OBJ_PARAMS    (&m_option_type_obj_params)
 #define CONF_TYPE_TIME          (&m_option_type_time)
 #define CONF_TYPE_CHOICE        (&m_option_type_choice)
+#define CONF_TYPE_INT_PAIR      (&m_option_type_intpair)
 
 // Possible option values. Code is allowed to access option data without going
 // through this union. It serves for self-documentation and to get minimal
@@ -202,7 +188,6 @@ union m_option_value {
     int imgfmt;
     unsigned int fourcc;
     int afmt;
-    m_span_t span;
     m_obj_settings_t *obj_settings_list;
     double time;
     struct m_rel_time rel_time;
