@@ -701,8 +701,13 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs,
         // API by default, because there are some major issues.
         // Set max_ts==ts, so that demuxing starts from an earlier position in
         // the worst case.
-        avformat_seek_file(priv->avfc, -1, INT64_MIN,
-                           priv->last_pts, priv->last_pts, avsflags);
+        int r = avformat_seek_file(priv->avfc, -1, INT64_MIN,
+                                   priv->last_pts, priv->last_pts, avsflags);
+        // Similar issue as in the normal seeking codepath.
+        if (r < 0) {
+            avformat_seek_file(priv->avfc, -1, INT64_MIN,
+                               priv->last_pts, INT64_MAX, avsflags);
+        }
     }
 }
 
