@@ -1140,6 +1140,54 @@ const m_option_type_t m_option_type_print_func = {
 #undef VAL
 #define VAL(x) (*(char ***)(x))
 
+// Return 0 on success, otherwise error code
+// On success, set *out_name and *out_val, and advance *str
+// out_val.start is NULL if there was no parameter.
+static int split_subconf(bstr *str, bstr *out_name, bstr *out_val)
+{
+    bstr p = *str;
+    // Skip option name (until the next character that could possibly be a
+    // meta character in option parsing)
+    int optlen = bstrcspn(p, ":=,\\%\"'");
+    bstr subopt = bstr_splice(p, 0, optlen);
+    bstr subparam = {0};
+    p = bstr_cut(p, optlen);
+    if (bstr_eatstart0(&p, "=")) {
+        if (bstr_startswith0(p, "\"")) {
+            p = bstr_cut(p, 1);
+            optlen = bstrcspn(p, "\"");
+            subparam = bstr_splice(p, 0, optlen);
+            p = bstr_cut(p, optlen);
+            if (!bstr_startswith0(p, "\"")) {
+                mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                       "Terminating '\"' missing for '%.*s'\n",
+                       BSTR_P(subopt));
+                return M_OPT_INVALID;
+            }
+            p = bstr_cut(p, 1);
+        } else if (bstr_startswith0(p, "%")) {
+            p = bstr_cut(p, 1);
+            optlen = bstrtoll(p, &p, 0);
+            if (!bstr_startswith0(p, "%") || (optlen > p.len - 1)) {
+                mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                       "Invalid length %d for '%.*s'\n",
+                       optlen, BSTR_P(subopt));
+                return M_OPT_INVALID;
+            }
+            subparam = bstr_splice(p, 1, optlen + 1);
+            p = bstr_cut(p, optlen + 1);
+        } else {
+            optlen = bstrcspn(p, ":,");
+            subparam = bstr_splice(p, 0, optlen);
+            p = bstr_cut(p, optlen);
+        }
+    }
+    *str = p;
+    *out_name = subopt;
+    *out_val = subparam;
+    return 0;
+}
+
 static int parse_subconf(const m_option_t *opt, struct bstr name,
                          struct bstr param, void *dst)
 {
@@ -1152,41 +1200,10 @@ static int parse_subconf(const m_option_t *opt, struct bstr name,
     struct bstr p = param;
 
     while (p.len) {
-        int optlen = bstrcspn(p, ":=");
-        struct bstr subopt = bstr_splice(p, 0, optlen);
-        struct bstr subparam = bstr0(NULL);
-        p = bstr_cut(p, optlen);
-        if (bstr_startswith0(p, "=")) {
-            p = bstr_cut(p, 1);
-            if (bstr_startswith0(p, "\"")) {
-                p = bstr_cut(p, 1);
-                optlen = bstrcspn(p, "\"");
-                subparam = bstr_splice(p, 0, optlen);
-                p = bstr_cut(p, optlen);
-                if (!bstr_startswith0(p, "\"")) {
-                    mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                           "Terminating '\"' missing for '%.*s'\n",
-                           BSTR_P(subopt));
-                    return M_OPT_INVALID;
-                }
-                p = bstr_cut(p, 1);
-            } else if (bstr_startswith0(p, "%")) {
-                p = bstr_cut(p, 1);
-                optlen = bstrtoll(p, &p, 0);
-                if (!bstr_startswith0(p, "%") || (optlen > p.len - 1)) {
-                    mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                           "Invalid length %d for '%.*s'\n",
-                           optlen, BSTR_P(subopt));
-                    return M_OPT_INVALID;
-                }
-                subparam = bstr_splice(p, 1, optlen + 1);
-                p = bstr_cut(p, optlen + 1);
-            } else {
-                optlen = bstrcspn(p, ":");
-                subparam = bstr_splice(p, 0, optlen);
-                p = bstr_cut(p, optlen);
-            }
-        }
+        bstr subopt, subparam;
+        int r = split_subconf(&p, &subopt, &subparam);
+        if (r < 0)
+            return r;
         if (bstr_startswith0(p, ":"))
             p = bstr_cut(p, 1);
         else if (p.len > 0) {
@@ -1197,8 +1214,8 @@ static int parse_subconf(const m_option_t *opt, struct bstr name,
 
         if (dst) {
             lst = talloc_realloc(NULL, lst, char *, 2 * (nr + 2));
-            lst[2 * nr] = bstrdup0(lst, subopt);
-            lst[2 * nr + 1] = bstrdup0(lst, subparam);
+            lst[2 * nr] = bstrto0(lst, subopt);
+            lst[2 * nr + 1] = bstrto0(lst, subparam);
             memset(&lst[2 * (nr + 1)], 0, 2 * sizeof(char *));
             nr++;
         }
