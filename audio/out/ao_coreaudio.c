@@ -48,8 +48,9 @@
 #include "ao.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
-#include "libavutil/fifo.h"
 #include "core/subopt-helper.h"
+
+#include "ao_coreaudio/ca_ringbuffer_internal.h"
 
 #define ca_msg(a, b, c ...) mp_msg(a, b, "AO: [coreaudio] " c)
 
@@ -57,12 +58,13 @@ static void audio_pause(struct ao *ao);
 static void audio_resume(struct ao *ao);
 static void reset(struct ao *ao);
 
-struct ca_ringbuffer {
-    AVFifoBuffer *fifo;
-    int len;
-    int chunks;
-    int chunk_size;
-};
+static void print_buffer(struct ca_ringbuffer *buffer)
+{
+    void *tctx = talloc_new(NULL);
+    ca_msg(MSGT_AO, MSGL_V, "%s\n", ca_ringbuffer_repr(buffer, tctx));
+    talloc_free(tctx);
+}
+
 
 struct priv
 {
@@ -92,54 +94,6 @@ struct priv
 
     struct ca_ringbuffer *buffer;
 };
-
-static struct ca_ringbuffer *new_ca_ringbuffer(void *talloc_ctx, size_t chunks,
-                                               size_t chunk_size)
-{
-    struct ca_ringbuffer *buffer =
-        talloc_zero(talloc_ctx, struct ca_ringbuffer);
-
-    *buffer = (struct ca_ringbuffer) {
-        .fifo       = av_fifo_alloc(chunks * chunk_size),
-        .len        = chunks * chunk_size,
-        .chunks     = chunks,
-        .chunk_size = chunk_size,
-    };
-
-    return buffer;
-}
-
-static int ca_ringbuffer_buffered(struct ca_ringbuffer *buffer)
-{
-    return av_fifo_size(buffer->fifo);
-}
-
-static void ca_ringbuffer_reset(struct ca_ringbuffer *buffer)
-{
-    av_fifo_reset(buffer->fifo);
-}
-
-static int ca_ringbuffer_read(struct ca_ringbuffer *buffer,
-                              unsigned char *data, int len)
-{
-    int buffered = ca_ringbuffer_buffered(buffer);
-    if (len > buffered)
-        len = buffered;
-    if (data)
-        av_fifo_generic_read(buffer->fifo, data, len, NULL);
-    else
-        av_fifo_drain(buffer->fifo, len);
-    return len;
-}
-
-static int ca_ringbuffer_write(struct ca_ringbuffer *buffer,
-                              unsigned char *data, int len)
-{
-    int free = buffer->len - av_fifo_size(buffer->fifo);
-    if (len > free)
-        len = free;
-    return av_fifo_generic_write(buffer->fifo, data, len, NULL);
-}
 
 static OSStatus theRenderProc(void *inRefCon,
                               AudioUnitRenderActionFlags *inActionFlags,
@@ -668,14 +622,10 @@ static int init(struct ao *ao, char *params)
 
     ao->bps        = ao->samplerate * inDesc.mBytesPerFrame;
     ao->buffersize = ao->bps;
-    int chunk_size = maxFrames;    //*inDesc.mBytesPerFrame;
-    int chunks     = (ao->bps + chunk_size - 1) / chunk_size;
-    p->buffer      = new_ca_ringbuffer(p, chunks, chunk_size);
-    ao->outburst   = chunk_size;
+    p->buffer      = ca_ringbuffer_new2(p, ao->bps, maxFrames);
+    ao->outburst   = ca_ringbuffer_chunk_size(p->buffer);
 
-    ca_msg(MSGT_AO, MSGL_V,
-           "using %d chunks of %d bytes (buffer len %d bytes)\n",
-           p->buffer->chunks, p->buffer->chunk_size, p->buffer->len);
+    print_buffer(p->buffer);
 
     renderCallback.inputProc = theRenderProc;
     renderCallback.inputProcRefCon = ao;
@@ -908,18 +858,11 @@ static int OpenSPDIF(struct ao *ao)
 
     /* For ac3/dts, just use packet size 6144 bytes as chunk size. */
     int chunk_size = p->stream_format.mBytesPerPacket;
-    int chunks     = (ao->bps + chunk_size - 1) / chunk_size;
-    ao->outburst   = chunk_size;
     ao->buffersize = ao->bps;
+    p->buffer      = ca_ringbuffer_new2(p, ao->bps, chunk_size);
+    ao->outburst   = ca_ringbuffer_chunk_size(p->buffer);
 
-    p->buffer->chunks = (ao->bps + p->buffer->chunk_size - 1) / p->buffer->chunk_size;
-    p->buffer->len = p->buffer->chunks * p->buffer->chunk_size;
-    p->buffer = new_ca_ringbuffer(p, chunks, chunk_size);
-
-    ca_msg(MSGT_AO, MSGL_V,
-           "using %5d chunks of %d bytes (buffer len %d bytes)\n",
-           p->buffer->chunks, p->buffer->chunk_size, p->buffer->len);
-
+    print_buffer(p->buffer);
 
     /* Create IOProc callback. */
     err = AudioDeviceCreateIOProcID(p->i_selected_dev,
@@ -1193,7 +1136,7 @@ static void reset(struct ao *ao)
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    return p->buffer->len - ca_ringbuffer_buffered(p->buffer);
+    return ca_ringbuffer_available(p->buffer);
 }
 
 
