@@ -602,8 +602,10 @@ static void parse_trackentry(struct demuxer *demuxer,
             track->ms_compat = 1;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Codec ID: %s\n",
                track->codec_id);
-    } else
+    } else {
         mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Missing codec ID!\n");
+        track->codec_id = "";
+    }
 
     if (entry->n_codec_private) {
         int len = entry->codec_private.len;
