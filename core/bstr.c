@@ -82,6 +82,15 @@ int bstrcspn(struct bstr str, const char *reject)
     return i;
 }
 
+int bstrspn(struct bstr str, const char *accept)
+{
+    int i;
+    for (i = 0; i < str.len; i++)
+        if (!strchr(accept, str.start[i]))
+            break;
+    return i;
+}
+
 int bstr_find(struct bstr haystack, struct bstr needle)
 {
     for (int i = 0; i < haystack.len; i++)

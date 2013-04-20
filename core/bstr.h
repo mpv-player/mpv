@@ -58,6 +58,7 @@ int bstrcmp(struct bstr str1, struct bstr str2);
 int bstrcasecmp(struct bstr str1, struct bstr str2);
 int bstrchr(struct bstr str, int c);
 int bstrrchr(struct bstr str, int c);
+int bstrspn(struct bstr str, const char *accept);
 int bstrcspn(struct bstr str, const char *reject);
 
 int bstr_find(struct bstr haystack, struct bstr needle);
