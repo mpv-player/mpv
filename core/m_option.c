@@ -59,6 +59,14 @@ char *m_option_strerror(int code)
     }
 }
 
+int m_option_required_params(const m_option_t *opt)
+{
+    if (((opt->flags & M_OPT_OPTIONAL_PARAM) ||
+            (opt->type->flags & M_OPT_TYPE_OPTIONAL_PARAM)))
+        return 0;
+    return 1;
+}
+
 static const struct m_option *m_option_list_findb(const struct m_option *list,
                                                   struct bstr name)
 {

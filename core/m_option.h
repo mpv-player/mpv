@@ -464,6 +464,8 @@ static inline void m_option_free(const m_option_t *opt, void *dst)
         opt->type->free(dst);
 }
 
+int m_option_required_params(const m_option_t *opt);
+
 // Cause a compilation warning if typeof(expr) != type.
 // Should be used with pointer types only.
 #define MP_EXPECT_TYPE(type, expr) (0 ? (type)0 : (expr))

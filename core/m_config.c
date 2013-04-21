@@ -585,10 +585,7 @@ int m_config_option_requires_param(struct m_config *config, bstr name)
     if (opt) {
         if (bstr_endswith0(name, "-clr"))
             return 0;
-        if (((opt->flags & M_OPT_OPTIONAL_PARAM) ||
-             (opt->type->flags & M_OPT_TYPE_OPTIONAL_PARAM)))
-            return 0;
-        return 1;
+        return m_option_required_params(opt);
     }
     return M_OPT_UNKNOWN;
 }
