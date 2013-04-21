@@ -91,6 +91,8 @@ enum mp_osdtype {
     OSDTYPE_PROGBAR,
     OSDTYPE_OSD,
 
+    OSDTYPE_EXTERNAL,
+
     MAX_OSD_PARTS
 };
 
@@ -136,6 +138,8 @@ struct osd_state {
     float progbar_value;   // range 0.0-1.0
     float *progbar_stops;  // used for chapter indicators (0.0-1.0 each)
     int progbar_num_stops;
+    // OSDTYPE_EXTERNAL
+    char *external;
 
     int switch_sub_id;
 

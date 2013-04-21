@@ -16,6 +16,7 @@
 #include "m_option.h"
 #include "command.h"
 #include "input/input.h"
+#include "sub/sub.h"
 
 static const char lua_defaults[] =
 // Generated from defaults.lua
@@ -175,6 +176,18 @@ static int property_string(lua_State *L)
     return 0;
 }
 
+static int set_osd_ass(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    const char *text = luaL_checkstring(L, 1);
+    if (!mpctx->osd->external || strcmp(mpctx->osd->external, text) != 0) {
+        talloc_free(mpctx->osd->external);
+        mpctx->osd->external = talloc_strdup(mpctx->osd, text);
+        vo_osd_changed(OSDTYPE_EXTERNAL);
+    }
+    return 0;
+}
+
 // On stack: mp table
 static void add_functions(struct MPContext *mpctx)
 {
@@ -193,4 +206,7 @@ static void add_functions(struct MPContext *mpctx)
     lua_pushinteger(L, 1);
     lua_pushcclosure(L, property_string, 1);
     lua_setfield(L, -2, "property_get_string");
+
+    lua_pushcfunction(L, set_osd_ass);
+    lua_setfield(L, -2, "set_osd_ass");
 }

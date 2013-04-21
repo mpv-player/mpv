@@ -340,6 +340,23 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     ass_draw_reset(d);
 }
 
+static void update_external(struct osd_state *osd, struct osd_object *obj)
+{
+    create_osd_ass_track(osd, obj);
+    clear_obj(obj);
+
+    bstr t = bstr0(osd->external);
+    while (t.len) {
+        bstr line;
+        bstr_split_tok(t, "\n", &line, &t);
+        if (line.len) {
+            char *tmp = bstrdup0(NULL, line);
+            add_osd_ass_event(obj->osd_track, tmp);
+            talloc_free(tmp);
+        }
+    }
+}
+
 static void update_sub(struct osd_state *osd, struct osd_object *obj)
 {
     struct MPOpts *opts = osd->opts;
@@ -384,6 +401,9 @@ static void update_object(struct osd_state *osd, struct osd_object *obj)
         break;
     case OSDTYPE_PROGBAR:
         update_progbar(osd, obj);
+        break;
+    case OSDTYPE_EXTERNAL:
+        update_external(osd, obj);
         break;
     }
 }

@@ -72,4 +72,5 @@ end
 
 function mp_update()
     -- called on each playloop iteration
+    --mp.set_osd_ass("Time: {\\b1}" .. mp.property_get_string("time-pos"))
 end
