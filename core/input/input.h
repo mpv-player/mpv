@@ -83,6 +83,8 @@ enum mp_command_type {
 
     /// Video output commands
     MP_CMD_VO_CMDLINE,
+
+    MP_CMD_LUA,
 };
 
 #define MP_CMD_MAX_ARGS 10
@@ -137,7 +139,6 @@ typedef struct mp_cmd {
     bstr original;
     struct mp_cmd *queue_next;
 } mp_cmd_t;
-
 
 // Executing this command will abort playback (play something else, or quit).
 bool mp_input_is_abort_cmd(int cmd_id);

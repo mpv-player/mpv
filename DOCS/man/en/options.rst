@@ -1164,6 +1164,9 @@
     looping. If several files are specified on command line, the whole playlist
     is looped.
 
+--lua=<filename>
+    Load a Lua script.
+
 --mc=<seconds/frame>
     Maximum A-V sync correction per frame (in seconds)
 

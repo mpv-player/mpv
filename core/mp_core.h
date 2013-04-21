@@ -283,6 +283,8 @@ typedef struct MPContext {
     char *track_layout_hash;
 
     struct encode_lavc_context *encode_lavc_ctx;
+
+    struct lua_ctx *lua_ctx;
 } MPContext;
 
 

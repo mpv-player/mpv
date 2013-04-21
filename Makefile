@@ -119,6 +119,8 @@ SOURCES-$(XV)                   += video/out/vo_xv.c
 
 SOURCES-$(VF_LAVFI)             += video/filter/vf_lavfi.c
 
+SOURCES-$(LUA)                  += core/mp_lua.c
+
 ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
     SOURCES-yes                 += video/decode/lavc_dr1.c
 endif
@@ -380,6 +382,10 @@ sub/osd_libass.c: sub/osd_font.h
 sub/osd_font.h: TOOLS/file2string.pl sub/osd_font.pfb
 	./$^ >$@
 
+core/mp_lua.c: core/lua_defaults.h
+core/lua_defaults.h: TOOLS/file2string.pl core/defaults.lua
+	./$^ >$@
+
 # ./configure must be rerun if it changed
 config.mak: configure
 	@echo "############################################################"
@@ -450,6 +456,7 @@ clean:
 	-$(RM) demux/ebml_types.h demux/ebml_defs.c
 	-$(RM) video/out/gl_video_shaders.h
 	-$(RM) sub/osd_font.h
+	-$(RM) core/lua_defaults.h
 
 distclean: clean
 	-$(RM) config.log config.mak config.h TAGS tags

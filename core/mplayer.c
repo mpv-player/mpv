@@ -148,6 +148,8 @@
 #include "core/options.h"
 #include "core/defaultopts.h"
 
+#include "mp_lua.h"
+
 static const char help_text[] = _(
 "Usage:   mpv [options] [url|path/]filename\n"
 "\n"
@@ -570,6 +572,10 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 #endif
 
     mpctx->encode_lavc_ctx = NULL;
+
+#ifdef CONFIG_LUA
+    mp_lua_uninit(mpctx);
+#endif
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
     timeEndPeriod(1);
@@ -3573,6 +3579,10 @@ static void run_playloop(struct MPContext *mpctx)
 
     handle_pause_on_low_cache(mpctx);
 
+#ifdef CONFIG_LUA
+    mp_lua_update(mpctx);
+#endif
+
     mp_cmd_t *cmd;
     while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
         /* Allow running consecutive seek commands to combine them,
@@ -4560,6 +4570,12 @@ int main(int argc, char *argv[])
     mpctx->osd = osd_create(opts, mpctx->ass_library);
 
     init_input(mpctx);
+
+#ifdef CONFIG_LUA
+    // Lua user scripts can call arbitrary functions. Load them at a point
+    // where this is safe.
+    mp_lua_init(mpctx);
+#endif
 
     mpctx->playlist->current = mpctx->playlist->first;
     play_files(mpctx);

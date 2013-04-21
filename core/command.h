@@ -28,4 +28,6 @@ void property_print_help(void);
 int mp_property_do(const char* name, int action, void* val,
                    struct MPContext *mpctx);
 
+const struct m_option *mp_get_property_list(void);
+
 #endif /* MPLAYER_COMMAND_H */

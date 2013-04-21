@@ -18,5 +18,6 @@
 /demux/ebml_defs.c
 /demux/ebml_types.h
 /sub/osd_font.h
+/core/lua_defaults.h
 /DOCS/man/*/mpv.1
 

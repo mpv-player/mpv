@@ -299,6 +299,8 @@ const m_option_t common_opts[] = {
     OPT_FLAG("config", load_config, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
     OPT_STRINGLIST("reset-on-next-file", reset_options, CONF_GLOBAL),
 
+    OPT_STRING("lua", lua_file, CONF_GLOBAL),
+
 // ------------------------- stream options --------------------
 
 #ifdef CONFIG_STREAM_CACHE

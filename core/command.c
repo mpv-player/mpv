@@ -69,6 +69,8 @@
 #include "mp_fifo.h"
 #include "libavutil/avstring.h"
 
+#include "mp_lua.h"
+
 static char *format_bitrate(int rate)
 {
     return talloc_asprintf(NULL, "%d kbps", rate * 8 / 1000);
@@ -1460,6 +1462,11 @@ static const m_option_t mp_properties[] = {
     {0},
 };
 
+const struct m_option *mp_get_property_list(void)
+{
+    return mp_properties;
+}
+
 int mp_property_do(const char *name, int action, void *val,
                    struct MPContext *ctx)
 {
@@ -2286,6 +2293,16 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     case MP_CMD_SHOW_PLAYLIST:
         show_playlist_on_osd(mpctx);
+        break;
+
+    case MP_CMD_LUA:
+        if (mpctx->lua_ctx) {
+#ifdef CONFIG_LUA
+            mp_lua_run(mpctx, cmd->args[0].v.s);
+#endif
+        } else {
+            mp_msg(MSGT_CPLAYER, MSGL_WARN, "[lua] Lua not available.\n");
+        }
         break;
 
     default:

@@ -203,6 +203,8 @@ static const mp_cmd_t mp_cmds[] = {
 
   { MP_CMD_VO_CMDLINE, "vo_cmdline", { ARG_STRING } },
 
+  { MP_CMD_LUA, "lua", { ARG_STRING } },
+
   {0}
 };
 
