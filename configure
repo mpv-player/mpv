@@ -490,7 +490,7 @@ _rpath=no
 libpostproc=auto
 libavfilter=auto
 vf_lavfi=auto
-libavdevice=no
+libavdevice=auto
 _stream_cache=yes
 _priority=no
 def_dos_paths="#define HAVE_DOS_PATHS 0"
@@ -2749,7 +2749,8 @@ echores "$vf_lavfi"
 echocheck "libavdevice >= 54.0.0"
 if test "$libavdevice" = auto ; then
     libavdevice=no
-    if pkg_config_add "libavdevice >= 54.0.0" ; then
+    # Usually, libavdevice depends on libavfilter
+    if test "$libavfilter" = yes && pkg_config_add "libavdevice >= 54.0.0" ; then
         libavdevice=yes
     fi
 fi
