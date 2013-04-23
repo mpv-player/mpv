@@ -2261,9 +2261,6 @@ static int preinit(struct vo *vo, const char *arg)
             goto err_out;
         autodetectGlExtensions(vo);
     }
-    if (p->many_fmts)
-        mp_msg(MSGT_VO, MSGL_INFO, "[gl] using extended formats. "
-               "Use -vo gl:nomanyfmts if playback fails.\n");
     mp_msg(MSGT_VO, MSGL_V, "[gl] Using %d as slice height "
            "(0 means image height).\n", p->slice_height);
 
