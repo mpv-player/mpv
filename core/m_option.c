@@ -1772,7 +1772,7 @@ static int get_obj_param(bstr opt_name, bstr obj_name, const m_struct_t *desc,
         // positional fields
         if (val.len == 0) { // Empty field, count it and go on
             (*nold)++;
-            return 1;
+            return 0;
         }
         if ((*nold) >= oldmax) {
             mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: %.*s has only %d params, so you can't give more than %d unnamed params.\n",
@@ -1823,7 +1823,7 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
         if (r < 0)
             goto exit;
 
-        if (ret) {
+        if (r > 0 && ret) {
             MP_TARRAY_APPEND(NULL, args, num_args, bstrto0(NULL, fname));
             MP_TARRAY_APPEND(NULL, args, num_args, bstrto0(NULL, fval));
         }
