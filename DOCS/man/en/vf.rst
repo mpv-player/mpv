@@ -368,6 +368,7 @@ pp[=filter1[:option1[:option2...]]/[-]filter2...]
         deblocking on or off automatically depending on available CPU time.
 
 lavfi=graph[:sws_flags]
+    Filter video using ffmpeg's libavfilter.
 
     <graph>
         The libavfilter graph string. The filter must have a single video input
@@ -382,7 +383,7 @@ lavfi=graph[:sws_flags]
 
         *EXAMPLE*:
 
-        ``'--vf=lavfi=graph="gradfun=20:30"'``
+        ``'--vf=lavfi="gradfun=20:30"'``
             gradfun filter with non-sensical parameters. The ``'`` quotes are
             for the shell. Otherwise, the shell would remove the ``"`` quotes.
 

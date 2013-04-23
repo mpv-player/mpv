@@ -1148,47 +1148,64 @@ const m_option_type_t m_option_type_print_func = {
 #undef VAL
 #define VAL(x) (*(char ***)(x))
 
+// Read s sub-option name, or a positional sub-opt value.
+// Return 0 on succes, M_OPT_ error code otherwise.
+// optname is for error reporting.
+static int read_subparam(bstr optname, bstr *str, bstr *out_subparam)
+{
+    bstr p = *str;
+    bstr subparam = {0};
+
+    if (bstr_eatstart0(&p, "\"")) {
+        int optlen = bstrcspn(p, "\"");
+        subparam = bstr_splice(p, 0, optlen);
+        p = bstr_cut(p, optlen);
+        if (!bstr_startswith0(p, "\"")) {
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                   "Terminating '\"' missing for '%.*s'\n",
+                   BSTR_P(optname));
+            return M_OPT_INVALID;
+        }
+        p = bstr_cut(p, 1);
+    } else if (bstr_eatstart0(&p, "%")) {
+        int optlen = bstrtoll(p, &p, 0);
+        if (!bstr_startswith0(p, "%") || (optlen > p.len - 1)) {
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                   "Invalid length %d for '%.*s'\n",
+                   optlen, BSTR_P(optname));
+            return M_OPT_INVALID;
+        }
+        subparam = bstr_splice(p, 1, optlen + 1);
+        p = bstr_cut(p, optlen + 1);
+    } else {
+        // Skip until the next character that could possibly be a meta
+        // character in option parsing.
+        int optlen = bstrcspn(p, ":=,\\%\"'");
+        subparam = bstr_splice(p, 0, optlen);
+        p = bstr_cut(p, optlen);
+    }
+
+    *str = p;
+    *out_subparam = subparam;
+    return 0;
+}
+
 // Return 0 on success, otherwise error code
 // On success, set *out_name and *out_val, and advance *str
 // out_val.start is NULL if there was no parameter.
-static int split_subconf(bstr *str, bstr *out_name, bstr *out_val)
+// optname is for error reporting.
+static int split_subconf(bstr optname, bstr *str, bstr *out_name, bstr *out_val)
 {
     bstr p = *str;
-    // Skip option name (until the next character that could possibly be a
-    // meta character in option parsing)
-    int optlen = bstrcspn(p, ":=,\\%\"'");
-    bstr subopt = bstr_splice(p, 0, optlen);
     bstr subparam = {0};
-    p = bstr_cut(p, optlen);
+    bstr subopt;
+    int r = read_subparam(optname, &p, &subopt);
+    if (r < 0)
+        return r;
     if (bstr_eatstart0(&p, "=")) {
-        if (bstr_startswith0(p, "\"")) {
-            p = bstr_cut(p, 1);
-            optlen = bstrcspn(p, "\"");
-            subparam = bstr_splice(p, 0, optlen);
-            p = bstr_cut(p, optlen);
-            if (!bstr_startswith0(p, "\"")) {
-                mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                       "Terminating '\"' missing for '%.*s'\n",
-                       BSTR_P(subopt));
-                return M_OPT_INVALID;
-            }
-            p = bstr_cut(p, 1);
-        } else if (bstr_startswith0(p, "%")) {
-            p = bstr_cut(p, 1);
-            optlen = bstrtoll(p, &p, 0);
-            if (!bstr_startswith0(p, "%") || (optlen > p.len - 1)) {
-                mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                       "Invalid length %d for '%.*s'\n",
-                       optlen, BSTR_P(subopt));
-                return M_OPT_INVALID;
-            }
-            subparam = bstr_splice(p, 1, optlen + 1);
-            p = bstr_cut(p, optlen + 1);
-        } else {
-            optlen = bstrcspn(p, ":,");
-            subparam = bstr_splice(p, 0, optlen);
-            p = bstr_cut(p, optlen);
-        }
+        r = read_subparam(subopt, &p, &subparam);
+        if (r < 0)
+            return r;
     }
     *str = p;
     *out_name = subopt;
@@ -1209,7 +1226,7 @@ static int parse_subconf(const m_option_t *opt, struct bstr name,
 
     while (p.len) {
         bstr subopt, subparam;
-        int r = split_subconf(&p, &subopt, &subparam);
+        int r = split_subconf(name, &p, &subopt, &subparam);
         if (r < 0)
             return r;
         if (bstr_startswith0(p, ":"))
@@ -1796,7 +1813,7 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
 
     while (pstr->len > 0) {
         bstr fname, fval;
-        r = split_subconf(pstr, &fname, &fval);
+        r = split_subconf(opt_name, pstr, &fname, &fval);
         if (r < 0)
             goto exit;
         if (bstr_equals0(fname, "help"))
