@@ -474,7 +474,7 @@ opengl-old
     (no-)force-pbo
         Always uses PBOs to transfer textures even if this involves an extra
         copy. Currently this gives a little extra speed with NVidia drivers
-        and a lot more speed with ATI drivers. May need ``--no-slices`` and
+        and a lot more speed with ATI drivers. May need
         the ati-hack suboption to work correctly.
     (no-)scaled-osd
         Changes the way the OSD behaves when the size of the window changes
@@ -626,12 +626,6 @@ opengl-old
     slice-height=<0-...>
         Number of lines copied to texture in one piece (default: 0). 0 for
         whole image.
-
-        *NOTE*: If YUV colorspace is used (see `yuv` suboption), special rules
-        apply: If the decoder uses slice rendering (see ``--no-slices``), this
-        setting has no effect, the size of the slices as provided by the
-        decoder is used. If the decoder does not use slice rendering, the
-        default is 16.
     sw
         Continue even if a software renderer is detected.
 
