@@ -1276,6 +1276,8 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
     if (ictx->ar_rate > 0 && ictx->ar_state >= 0 && ictx->num_key_down > 0
         && !(ictx->key_down[ictx->num_key_down - 1] & MP_NO_REPEAT_KEY)) {
         unsigned int t = GetTimer();
+        if (ictx->last_ar + 2000000 < t)
+            ictx->last_ar = t;
         // First time : wait delay
         if (ictx->ar_state == 0
             && (t - ictx->last_key_down) >= ictx->ar_delay * 1000)
@@ -1288,12 +1290,12 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
                 return NULL;
             }
             ictx->ar_state = 1;
-            ictx->last_ar = t;
+            ictx->last_ar = ictx->last_key_down + ictx->ar_delay * 1000;
             return mp_cmd_clone(ictx->ar_cmd);
             // Then send rate / sec event
         } else if (ictx->ar_state == 1
                    && (t - ictx->last_ar) >= 1000000 / ictx->ar_rate) {
-            ictx->last_ar = t;
+            ictx->last_ar += 1000000 / ictx->ar_rate;
             return mp_cmd_clone(ictx->ar_cmd);
         }
     }
