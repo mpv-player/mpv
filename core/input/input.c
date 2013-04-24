@@ -1367,6 +1367,10 @@ static void read_key_fd(struct input_ctx *ictx, struct input_fd *key_fd)
  */
 static void read_events(struct input_ctx *ictx, int time)
 {
+    if (ictx->num_key_down) {
+        time = FFMIN(time, 1000 / ictx->ar_rate);
+        time = FFMIN(time, ictx->ar_delay);
+    }
     ictx->got_new_events = false;
     struct input_fd *key_fds = ictx->key_fds;
     struct input_fd *cmd_fds = ictx->cmd_fds;
