@@ -2546,8 +2546,8 @@ static double update_video(struct MPContext *mpctx)
             pts += mpctx->video_offset;
         if (pts >= mpctx->hrseek_pts - .005)
             mpctx->hrseek_framedrop = false;
-        int framedrop_type = mpctx->hrseek_framedrop ? 1 :
-                             check_framedrop(mpctx, sh_video->frametime);
+        int framedrop_type = mpctx->hrseek_active && mpctx->hrseek_framedrop ?
+                             1 : check_framedrop(mpctx, sh_video->frametime);
         struct mp_image *decoded_frame =
             decode_video(sh_video, pkt, framedrop_type, pts);
         if (decoded_frame) {
