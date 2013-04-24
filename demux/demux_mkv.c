@@ -2008,7 +2008,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
                 demuxer_add_packet(demuxer, track->stream, dp);
             }
         }
-    } else {                    // Not a codec that require reordering
+    } else { // Not a codec that requires reordering
         dp = new_demux_packet_from(buffer, size);
         if (track->ra_pts == mkv_d->last_pts && !mkv_d->a_skip_to_keyframe)
             dp->pts = 0;
@@ -2147,7 +2147,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         if (use_this_block) {
             if (laces > 1) {
                 mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Subtitles use Matroska "
-                    "lacing. This is abnormal and not supported.\n");
+                       "lacing. This is abnormal and not supported.\n");
                 use_this_block = 0;
             }
         }
@@ -2178,8 +2178,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                      * for packets after the first one (rather than all pts
                      * values being the same) */
                     if (i == 0 || track->default_duration)
-                        dp->pts =
-                            mkv_d->last_pts + i * track->default_duration;
+                        dp->pts = mkv_d->last_pts + i * track->default_duration;
                     dp->duration = block_duration / 1e9;
                     demuxer_add_packet(demuxer, stream, dp);
                 }
