@@ -92,8 +92,8 @@ void set_default_mplayer_options(struct MPOpts *opts)
         },
         .input = {
              .key_fifo_size = 7,
-             .ar_delay = 100,
-             .ar_rate = 8,
+             .ar_delay = 200,
+             .ar_rate = 40,
              .use_joystick = 1,
              .use_lirc = 1,
              .use_lircc = 1,
