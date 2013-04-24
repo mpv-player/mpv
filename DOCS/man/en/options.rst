@@ -1742,9 +1742,6 @@
 
     *EXAMPLE*:
 
-    - ``mpv foreman.qcif --demuxer=rawvideo --rawvideo=qcif`` Play the
-      famous "foreman" sample video.
-
     - ``mpv sample-720x576.yuv --demuxer=rawvideo --rawvideo=w=720:h=576``
       Play a raw YUV sample.
 
