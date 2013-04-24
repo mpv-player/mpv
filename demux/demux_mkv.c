@@ -2051,7 +2051,7 @@ static int read_block(demuxer_t *demuxer, struct block_info *block)
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
-    int num;
+    uint64_t num;
     int16_t time;
     uint64_t length;
     int res = -1;
