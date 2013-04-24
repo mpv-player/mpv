@@ -1277,6 +1277,12 @@
 --name
     Set the window class name for X11-based video output methods.
 
+--native-keyrepeat
+    Use system settings for keyrepeat delay and rate, instead of
+    ``--input-ar-delay`` and ``--input-ar-rate``. (Whether this applies
+    depends on the VO backend and how it handles keyboard input. Does not
+    apply to terminal input.)
+
 --avi-ni
     (Internal AVI demuxer which is not used by default only)
     Force usage of non-interleaved AVI parser (fixes playback of some bad AVI
