@@ -117,6 +117,10 @@ struct track {
     struct sub_data *subdata;
 };
 
+enum {
+    MAX_NUM_VO_PTS = 100,
+};
+
 typedef struct MPContext {
     struct MPOpts opts;
     struct m_config *mconfig;
@@ -219,6 +223,15 @@ typedef struct MPContext {
     // Video PTS, or audio PTS if video has ended.
     double playback_pts;
 
+    // History of video frames timestamps that were queued in the VO
+    // This includes even skipped frames during hr-seek
+    double vo_pts_history_pts[MAX_NUM_VO_PTS];
+    // Whether the PTS at vo_pts_history[n] is after a seek reset
+    uint64_t vo_pts_history_seek[MAX_NUM_VO_PTS];
+    uint64_t vo_pts_history_seek_ts;
+    uint64_t backstep_start_seek_ts;
+    bool backstep_active;
+
     float audio_delay;
 
     unsigned int last_heartbeat;
@@ -287,7 +300,7 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
 int reinit_video_chain(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);
-void add_step_frame(struct MPContext *mpctx);
+void add_step_frame(struct MPContext *mpctx, int dir);
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
                 int exact);
 int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts);

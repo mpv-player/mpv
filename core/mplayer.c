@@ -2404,6 +2404,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     sh_video->next_frame_time = 0;
     mpctx->restart_playback = true;
     mpctx->delay = 0;
+    mpctx->vo_pts_history_seek_ts++;
 
     // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
 
@@ -2417,6 +2418,40 @@ no_video:
     mpctx->current_track[STREAM_VIDEO] = NULL;
     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Video: no video\n");
     return 0;
+}
+
+static void add_frame_pts(struct MPContext *mpctx, double pts)
+{
+    if (pts == MP_NOPTS_VALUE || mpctx->hrseek_framedrop) {
+        mpctx->vo_pts_history_seek_ts++; // mark discontinuity
+        return;
+    }
+    for (int n = MAX_NUM_VO_PTS - 1; n >= 1; n--) {
+        mpctx->vo_pts_history_seek[n] = mpctx->vo_pts_history_seek[n - 1];
+        mpctx->vo_pts_history_pts[n] = mpctx->vo_pts_history_pts[n - 1];
+    }
+    mpctx->vo_pts_history_seek[0] = mpctx->vo_pts_history_seek_ts;
+    mpctx->vo_pts_history_pts[0] = pts;
+}
+
+static double find_previous_pts(struct MPContext *mpctx, double pts)
+{
+    for (int n = 0; n < MAX_NUM_VO_PTS - 1; n++) {
+        if (pts == mpctx->vo_pts_history_pts[n] &&
+            mpctx->vo_pts_history_seek[n] != 0 &&
+            mpctx->vo_pts_history_seek[n] == mpctx->vo_pts_history_seek[n + 1])
+        {
+            return mpctx->vo_pts_history_pts[n + 1];
+        }
+    }
+    return MP_NOPTS_VALUE;
+}
+
+static double get_last_frame_pts(struct MPContext *mpctx)
+{
+    if (mpctx->vo_pts_history_seek[0] == mpctx->vo_pts_history_seek_ts)
+        return mpctx->vo_pts_history_pts[0];
+    return MP_NOPTS_VALUE;
 }
 
 static bool filter_output_queued_frame(struct MPContext *mpctx)
@@ -2571,6 +2606,7 @@ static double update_video(struct MPContext *mpctx)
         if (pts == MP_NOPTS_VALUE)
             pts = sh_video->last_pts;
     }
+    add_frame_pts(mpctx, pts);
     if (mpctx->hrseek_active && pts < mpctx->hrseek_pts - .005) {
         vo_skip_frame(video_out);
         return 0;
@@ -2658,12 +2694,20 @@ static bool redraw_osd(struct MPContext *mpctx)
     return true;
 }
 
-void add_step_frame(struct MPContext *mpctx)
+void add_step_frame(struct MPContext *mpctx, int dir)
 {
-    mpctx->step_frames++;
-    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
-        vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
-    unpause_player(mpctx);
+    if (dir > 0) {
+        mpctx->step_frames += 1;
+        if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
+            vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
+        unpause_player(mpctx);
+    } else if (dir < 0) {
+        if (!mpctx->backstep_active && !mpctx->hrseek_active) {
+            mpctx->backstep_active = true;
+            mpctx->backstep_start_seek_ts = mpctx->vo_pts_history_seek_ts;
+            pause_player(mpctx);
+        }
+    }
 }
 
 static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
@@ -2701,6 +2745,8 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
     mpctx->drop_frame_cnt = 0;
     mpctx->dropped_frames = 0;
     mpctx->playback_pts = MP_NOPTS_VALUE;
+    mpctx->vo_pts_history_seek_ts++;
+    mpctx->backstep_active = false;
 
 #ifdef CONFIG_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
@@ -3488,7 +3534,7 @@ static void run_playloop(struct MPContext *mpctx)
                     sleeptime = 0;
                 } else if (mpctx->paused && video_left) {
                     // force redrawing OSD by framestepping
-                    add_step_frame(mpctx);
+                    add_step_frame(mpctx, 1);
                     sleeptime = 0;
                 }
             }
@@ -3523,6 +3569,46 @@ static void run_playloop(struct MPContext *mpctx)
         mp_cmd_free(cmd);
         if (mpctx->stop_play)
             break;
+    }
+
+    if (mpctx->backstep_active) {
+        double current_pts = mpctx->last_vo_pts;
+        mpctx->backstep_active = false;
+        if (mpctx->sh_video && current_pts != MP_NOPTS_VALUE) {
+            double seek_pts = find_previous_pts(mpctx, current_pts);
+            if (seek_pts != MP_NOPTS_VALUE) {
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, 1);
+            } else {
+                double last = get_last_frame_pts(mpctx);
+                if (last != MP_NOPTS_VALUE && last >= current_pts &&
+                    mpctx->backstep_start_seek_ts != mpctx->vo_pts_history_seek_ts)
+                {
+                    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Backstep failed.\n");
+                    queue_seek(mpctx, MPSEEK_ABSOLUTE, current_pts, 1);
+                } else if (!mpctx->hrseek_active) {
+                    mp_msg(MSGT_CPLAYER, MSGL_V, "Start backstep indexing.\n");
+                    // Force it to index the video up until current_pts.
+                    // The whole point is getting frames _before_ that PTS,
+                    // so apply an arbitrary offset. (In theory the offset
+                    // has to be large enough to reach the previous frame.)
+                    seek(mpctx, (struct seek_params){
+                                .type = MPSEEK_ABSOLUTE,
+                                .amount = current_pts - 1.0,
+                                }, false);
+                    // Don't leave hr-seek mode. If all goes right, hr-seek
+                    // mode is cancelled as soon as the frame before
+                    // current_pts is found during hr-seeking.
+                    // Note that current_pts should be part of the index,
+                    // otherwise we can't find the previous frame, so set the
+                    // seek target an arbitrary amount of time after it.
+                    mpctx->hrseek_pts = current_pts + 10.0;
+                    mpctx->hrseek_framedrop = false;
+                    mpctx->backstep_active = true;
+                } else {
+                    mpctx->backstep_active = true;
+                }
+            }
+        }
     }
 
     // handle -sstep
@@ -4128,6 +4214,7 @@ goto_enable_cache: ;
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;
     mpctx->step_frames = 0;
+    mpctx->backstep_active = false;
     mpctx->total_avsync_change = 0;
     mpctx->last_chapter_seek = -2;
     mpctx->playing_msg_shown = false;

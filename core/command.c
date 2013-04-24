@@ -1832,7 +1832,11 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_FRAME_STEP:
-        add_step_frame(mpctx);
+        add_step_frame(mpctx, 1);
+        break;
+
+    case MP_CMD_FRAME_BACK_STEP:
+        add_step_frame(mpctx, -1);
         break;
 
     case MP_CMD_QUIT:

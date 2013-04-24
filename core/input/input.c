@@ -128,6 +128,7 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
   { MP_CMD_STOP, "stop", },
   { MP_CMD_FRAME_STEP, "frame_step", },
+  { MP_CMD_FRAME_BACK_STEP, "frame_back_step", },
   { MP_CMD_PLAYLIST_NEXT, "playlist_next", {
       OARG_CHOICE(0, ({"weak", 0},              {"0", 0},
                       {"force", 1},             {"1", 1})),

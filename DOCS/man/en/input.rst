@@ -79,6 +79,17 @@ seek <seconds> [relative|absolute|absolute-percent|- [default-precise|exact|keyf
 frame_step
     Play one frame, then pause.
 
+frame_back_step
+    Go back by one frame, then pause. Note that this can be very slow (it tries
+    to be precise, not fast), and sometimes fails to behave as expected. How
+    well this works depends on whether precise seeking works correctly (e.g.
+    see the ``--hr-seek-demuxer-offset`` option). Video filters or other video
+    postprocessing that modifies timing of frames (e.g. deinterlacing) should
+    usually work, but might make backstepping silently behave incorrectly in
+    corner cases.
+
+    This doesn't work with audio-only playback.
+
 set <property> "<value>"
     Set the given property to the given value.
 
