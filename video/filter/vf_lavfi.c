@@ -67,6 +67,7 @@ static void destroy_graph(struct vf_instance *vf)
 {
     struct vf_priv_s *p = vf->priv;
     avfilter_graph_free(&p->graph);
+    p->in = p->out = NULL;
 }
 
 // FFmpeg and Libav have slightly different APIs, just enough to cause us
@@ -101,9 +102,8 @@ static void dar_from_sar_par(int width, int height, AVRational par,
     }
 }
 
-static int config(struct vf_instance *vf, int width, int height,
-                  int d_width, int d_height, unsigned int flags,
-                  unsigned int fmt)
+static bool recreate_graph(struct vf_instance *vf, int width, int height,
+                           int d_width, int d_height, unsigned int fmt)
 {
     void *tmp = talloc_new(NULL);
     struct vf_priv_s *p = vf->priv;
@@ -111,7 +111,7 @@ static int config(struct vf_instance *vf, int width, int height,
 
     if (bstr0(p->cfg_graph).len == 0) {
         mp_msg(MSGT_VFILTER, MSGL_FATAL, "lavfi: no filter graph set\n");
-        return 0;
+        return false;
     }
 
     destroy_graph(vf);
@@ -187,8 +187,28 @@ static int config(struct vf_instance *vf, int width, int height,
 
     assert(out->nb_inputs == 1);
     assert(in->nb_outputs == 1);
-    AVFilterLink *l_out = out->inputs[0];
-    AVFilterLink *l_in = in->outputs[0];
+
+    talloc_free(tmp);
+    return true;
+
+error:
+    mp_msg(MSGT_VFILTER, MSGL_FATAL, "Can't configure libavfilter graph.\n");
+    avfilter_graph_free(&graph);
+    talloc_free(tmp);
+    return false;
+}
+
+static int config(struct vf_instance *vf, int width, int height,
+                  int d_width, int d_height, unsigned int flags,
+                  unsigned int fmt)
+{
+    struct vf_priv_s *p = vf->priv;
+
+    if (!recreate_graph(vf, width, height, d_width, d_height, fmt))
+        return 0;
+
+    AVFilterLink *l_out = p->out->inputs[0];
+    AVFilterLink *l_in = p->in->outputs[0];
 
     p->timebase_in = l_in->time_base;
     p->timebase_out = l_out->time_base;
@@ -198,15 +218,9 @@ static int config(struct vf_instance *vf, int width, int height,
     int dw, dh;
     dar_from_sar_par(l_out->w, l_out->h, l_out->sample_aspect_ratio, &dw, &dh);
 
-    talloc_free(tmp);
     return vf_next_config(vf, l_out->w, l_out->h, dw, dh, flags,
                           pixfmt2imgfmt(l_out->format));
 
-error:
-    mp_msg(MSGT_VFILTER, MSGL_FATAL, "Can't configure libavfilter graph.\n");
-    avfilter_graph_free(&graph);
-    talloc_free(tmp);
-    return 0;
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
@@ -267,6 +281,20 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
     return 0;
 }
 
+static int control(vf_instance_t *vf, int request, void *data)
+{
+    struct vf_priv_s *p = vf->priv;
+    switch (request) {
+    case VFCTRL_SEEK_RESET:
+        if (p->graph) {
+            struct vf_format *f = &vf->fmt_in;
+            recreate_graph(vf, f->w, f->h, f->dw, f->dh, f->fmt);
+        }
+        break;
+    }
+    return vf_next_control(vf, request, data);
+}
+
 static void uninit(struct vf_instance *vf)
 {
     if (!vf->priv)
@@ -277,11 +305,10 @@ static void uninit(struct vf_instance *vf)
 
 static int vf_open(vf_instance_t *vf, char *args)
 {
-    //struct vf_priv_s *priv = vf->priv;
-
     vf->config = config;
     vf->filter_ext = filter_ext;
     vf->query_format = query_format;
+    vf->control = control;
     vf->uninit = uninit;
     return 1;
 }
