@@ -188,6 +188,17 @@ static int set_osd_ass(lua_State *L)
     return 0;
 }
 
+static int get_osd_resolution(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    int w, h;
+    osd_object_get_resolution(mpctx->osd, mpctx->osd->objs[OSDTYPE_EXTERNAL],
+                              &w, &h);
+    lua_pushnumber(L, w);
+    lua_pushnumber(L, h);
+    return 2;
+}
+
 // On stack: mp table
 static void add_functions(struct MPContext *mpctx)
 {
@@ -209,4 +220,7 @@ static void add_functions(struct MPContext *mpctx)
 
     lua_pushcfunction(L, set_osd_ass);
     lua_setfield(L, -2, "set_osd_ass");
+
+    lua_pushcfunction(L, get_osd_resolution);
+    lua_setfield(L, -2, "get_osd_resolution");
 }
