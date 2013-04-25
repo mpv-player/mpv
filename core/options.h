@@ -125,7 +125,7 @@ typedef struct MPOpts {
     int play_frames;
     double step_sec;
     int64_t seek_to_byte;
-    int start_paused;
+    int pause;
     int keep_open;
     int audio_id;
     int video_id;

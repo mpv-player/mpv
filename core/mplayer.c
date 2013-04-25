@@ -1065,7 +1065,7 @@ static void print_status(struct MPContext *mpctx)
     char *line = NULL;
 
     // Playback status
-    if (mpctx->paused_for_cache && !mpctx->paused_user) {
+    if (mpctx->paused_for_cache && !opts->pause) {
         saddf(&line, "(Buffering) ");
     } else if (mpctx->paused) {
         saddf(&line, "(Paused) ");
@@ -1429,7 +1429,7 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
     bool fractions = mpctx->opts.osd_fractions;
     int sym = mpctx->osd_function;
     if (!sym) {
-        if (mpctx->paused_for_cache && !mpctx->paused_user) {
+        if (mpctx->paused_for_cache && !mpctx->opts.pause) {
             sym = OSD_CLOCK;
         } else if (mpctx->paused || mpctx->step_frames) {
             sym = OSD_PAUSE;
@@ -2638,11 +2638,11 @@ static double update_video(struct MPContext *mpctx, double endpts)
 
 void pause_player(struct MPContext *mpctx)
 {
-    mpctx->paused_user = true;
+    mpctx->opts.pause = 1;
 
     if (mpctx->paused)
         return;
-    mpctx->paused = 1;
+    mpctx->paused = true;
     mpctx->step_frames = 0;
     mpctx->time_frame -= get_relative_time(mpctx);
     mpctx->osd_function = 0;
@@ -2664,14 +2664,14 @@ void pause_player(struct MPContext *mpctx)
 
 void unpause_player(struct MPContext *mpctx)
 {
-    mpctx->paused_user = false;
+    mpctx->opts.pause = 0;
 
     if (!mpctx->paused)
         return;
     // Don't actually unpause while cache is loading.
     if (mpctx->paused_for_cache)
         return;
-    mpctx->paused = 0;
+    mpctx->paused = false;
     mpctx->osd_function = 0;
 
     if (mpctx->ao && mpctx->sh_audio)
@@ -3201,15 +3201,15 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
     if (mpctx->paused && mpctx->paused_for_cache) {
         if (cache < 0 || cache >= opts->stream_cache_min_percent || idle) {
             mpctx->paused_for_cache = false;
-            if (!mpctx->paused_user)
+            if (!opts->pause)
                 unpause_player(mpctx);
         }
     } else {
         if (cache >= 0 && cache <= opts->stream_cache_pause && !idle) {
-            bool prev_paused_user = mpctx->paused_user;
+            bool prev_paused_user = opts->pause;
             pause_player(mpctx);
             mpctx->paused_for_cache = true;
-            mpctx->paused_user = prev_paused_user;
+            opts->pause = prev_paused_user;
         }
     }
 }
@@ -4238,6 +4238,8 @@ goto_enable_cache: ;
     mpctx->total_avsync_change = 0;
     mpctx->last_chapter_seek = -2;
     mpctx->playing_msg_shown = false;
+    mpctx->paused = false;
+    mpctx->paused_for_cache = false;
 
     // If there's a timeline force an absolute seek to initialize state
     double startpos = rel_time_to_abs(mpctx, opts->play_start, -1);
@@ -4257,14 +4259,7 @@ goto_enable_cache: ;
     mpctx->seek = (struct seek_params){ 0 };
     get_relative_time(mpctx); // reset current delta
 
-    mpctx->paused = mpctx->paused_user;
-    mpctx->paused_for_cache = false;
-    // Make sure VO knows current pause state
-    if (mpctx->sh_video)
-        vo_control(mpctx->video_out,
-                   mpctx->paused ? VOCTRL_PAUSE : VOCTRL_RESUME, NULL);
-
-    if (mpctx->opts.start_paused)
+    if (mpctx->opts.pause)
         pause_player(mpctx);
 
     while (!mpctx->stop_play)
@@ -4285,7 +4280,7 @@ goto_enable_cache: ;
 terminate_playback:  // don't jump here after ao/vo/getch initialization!
 
     if (mpctx->step_frames)
-        mpctx->paused = 1;
+        opts->pause = 1;
 
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
 

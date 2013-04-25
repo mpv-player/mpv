@@ -265,14 +265,14 @@ typedef struct MPContext {
     int last_dvb_step;
     int dvbin_reopen;
 
-    int paused;
+    bool paused;
     // step this many frames, then pause
     int step_frames;
     // Counted down each frame, stop playback if 0 is reached. (-1 = disable)
     int max_frames;
     bool playing_msg_shown;
 
-    bool paused_for_cache, paused_user;
+    bool paused_for_cache;
 
     // Set after showing warning about decoding being too slow for realtime
     // playback rate. Used to avoid showing it multiple times.
