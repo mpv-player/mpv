@@ -2606,7 +2606,7 @@ static double update_video(struct MPContext *mpctx, double endpts)
         if (pts == MP_NOPTS_VALUE)
             pts = sh_video->last_pts;
     }
-    if (endpts != MP_NOPTS_VALUE && pts < endpts)
+    if (endpts == MP_NOPTS_VALUE || pts < endpts)
         add_frame_pts(mpctx, pts);
     if (mpctx->hrseek_active && pts < mpctx->hrseek_pts - .005) {
         vo_skip_frame(video_out);
