@@ -527,7 +527,7 @@ static int mp_property_pause(m_option_t *prop, int action, void *arg,
         }
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(int *)arg = mpctx->paused;
+        *(int *)arg = mpctx->paused_user;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -2303,7 +2303,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         pause_player(mpctx);
         break;
     case 3:     // "pausing_toggle"
-        if (mpctx->paused)
+        if (mpctx->paused_user)
             unpause_player(mpctx);
         else
             pause_player(mpctx);

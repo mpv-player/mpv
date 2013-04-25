@@ -272,7 +272,7 @@ typedef struct MPContext {
     int max_frames;
     bool playing_msg_shown;
 
-    bool paused_for_cache;
+    bool paused_for_cache, paused_user;
 
     // Set after showing warning about decoding being too slow for realtime
     // playback rate. Used to avoid showing it multiple times.
