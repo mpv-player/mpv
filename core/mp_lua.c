@@ -211,6 +211,26 @@ static int get_timer(lua_State *L)
     return 1;
 }
 
+static int get_chapter_list(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    lua_newtable(L); // list
+    int num = get_chapter_count(mpctx);
+    for (int n = 0; n < num; n++) {
+        double time = chapter_start_time(mpctx, n);
+        char *name = chapter_display_name(mpctx, n);
+        lua_newtable(L); // list ch
+        lua_pushnumber(L, time); // list ch time
+        lua_setfield(L, -2, "time"); // list ch
+        lua_pushstring(L, name); // list ch name
+        lua_setfield(L, -2, "name"); // list ch
+        lua_pushinteger(L, n + 1); // list ch n1
+        lua_insert(L, -2); // list n1 ch
+        lua_settable(L, -3); // list
+    }
+    return 1;
+}
+
 // On stack: mp table
 static void add_functions(struct MPContext *mpctx)
 {
@@ -238,4 +258,7 @@ static void add_functions(struct MPContext *mpctx)
 
     lua_pushcfunction(L, get_timer);
     lua_setfield(L, -2, "get_timer");
+
+    lua_pushcfunction(L, get_chapter_list);
+    lua_setfield(L, -2, "get_chapter_list");
 }
