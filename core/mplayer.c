@@ -2549,7 +2549,7 @@ static void determine_frame_pts(struct MPContext *mpctx)
                     sh_video->codec_reordered_pts : sh_video->sorted_pts;
 }
 
-static double update_video(struct MPContext *mpctx)
+static double update_video(struct MPContext *mpctx, double endpts)
 {
     struct sh_video *sh_video = mpctx->sh_video;
     struct vo *video_out = mpctx->video_out;
@@ -2606,7 +2606,8 @@ static double update_video(struct MPContext *mpctx)
         if (pts == MP_NOPTS_VALUE)
             pts = sh_video->last_pts;
     }
-    add_frame_pts(mpctx, pts);
+    if (endpts != MP_NOPTS_VALUE && pts < endpts)
+        add_frame_pts(mpctx, pts);
     if (mpctx->hrseek_active && pts < mpctx->hrseek_pts - .005) {
         vo_skip_frame(video_out);
         return 0;
@@ -2745,8 +2746,6 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
     mpctx->drop_frame_cnt = 0;
     mpctx->dropped_frames = 0;
     mpctx->playback_pts = MP_NOPTS_VALUE;
-    mpctx->vo_pts_history_seek_ts++;
-    mpctx->backstep_active = false;
 
 #ifdef CONFIG_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
@@ -2809,6 +2808,7 @@ static int seek(MPContext *mpctx, struct seek_params seek,
                 bool timeline_fallthrough)
 {
     struct MPOpts *opts = &mpctx->opts;
+    uint64_t prev_seek_ts = mpctx->vo_pts_history_seek_ts;
 
     if (!mpctx->demuxer)
         return -1;
@@ -2914,6 +2914,14 @@ static int seek(MPContext *mpctx, struct seek_params seek,
     /* If we just reinitialized audio it doesn't need to be reset,
      * and resetting could lose audio some decoders produce during init. */
     seek_reset(mpctx, !timeline_fallthrough, !need_reset);
+
+    if (timeline_fallthrough) {
+        // Important if video reinit happens.
+        mpctx->vo_pts_history_seek_ts = prev_seek_ts;
+    } else {
+        mpctx->vo_pts_history_seek_ts++;
+        mpctx->backstep_active = false;
+    }
 
     /* Use the target time as "current position" for further relative
      * seeks etc until a new video frame has been decoded */
@@ -3266,7 +3274,7 @@ static void run_playloop(struct MPContext *mpctx)
 
         video_left = vo->hasframe || vo->frame_loaded;
         if (!vo->frame_loaded && (!mpctx->paused || mpctx->restart_playback)) {
-            double frame_time = update_video(mpctx);
+            double frame_time = update_video(mpctx, endpts);
             mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "*** ftime=%5.3f ***\n", frame_time);
             if (mpctx->sh_video->vf_initialized < 0) {
                 mp_tmsg(MSGT_CPLAYER, MSGL_FATAL,
