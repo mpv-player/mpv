@@ -17,6 +17,7 @@
 #include "command.h"
 #include "input/input.h"
 #include "sub/sub.h"
+#include "osdep/timer.h"
 
 static const char lua_defaults[] =
 // Generated from defaults.lua
@@ -25,6 +26,7 @@ static const char lua_defaults[] =
 
 struct lua_ctx {
     lua_State *state;
+    unsigned int start_time;
 };
 
 static struct MPContext *get_mpctx(lua_State *L)
@@ -72,6 +74,9 @@ void mp_lua_init(struct MPContext *mpctx)
     lua_State *L = mpctx->lua_ctx->state = luaL_newstate();
     if (!L)
         goto error_out;
+
+    // For avoiding wrap arounds and loss of precission
+    mpctx->lua_ctx->start_time = GetTimerMS();
 
     // used by get_mpctx()
     lua_pushlightuserdata(L, mpctx); // mpctx
@@ -199,6 +204,13 @@ static int get_osd_resolution(lua_State *L)
     return 2;
 }
 
+static int get_timer(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    lua_pushnumber(L, (GetTimerMS() - mpctx->lua_ctx->start_time) / 1000.0);
+    return 1;
+}
+
 // On stack: mp table
 static void add_functions(struct MPContext *mpctx)
 {
@@ -223,4 +235,7 @@ static void add_functions(struct MPContext *mpctx)
 
     lua_pushcfunction(L, get_osd_resolution);
     lua_setfield(L, -2, "get_osd_resolution");
+
+    lua_pushcfunction(L, get_timer);
+    lua_setfield(L, -2, "get_timer");
 }
