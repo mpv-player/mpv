@@ -961,6 +961,16 @@ static int control(struct vo *vo, uint32_t request, void *data)
         args->out_image = get_screenshot(vo);
         return true;
     }
+    case VOCTRL_WINDOW_TO_OSD_COORDS: {
+        float *c = data;
+        struct mp_rect *src = &ctx->src_rect;
+        struct mp_rect *dst = &ctx->dst_rect;
+        c[0] = av_clipf(c[0], dst->x0, dst->x1) - dst->x0;
+        c[1] = av_clipf(c[1], dst->y0, dst->y1) - dst->y0;
+        c[0] = c[0] / (dst->x1 - dst->x0) * (src->x1 - src->x0) + src->x0;
+        c[1] = c[1] / (dst->y1 - dst->y0) * (src->y1 - src->y0) + src->y0;
+        return VO_TRUE;
+    }
     }
     return VO_NOTIMPL;
 }

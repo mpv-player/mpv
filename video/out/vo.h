@@ -63,6 +63,7 @@ enum mp_voctrl {
     VOCTRL_GET_DEINTERLACE,
 
     VOCTRL_UPDATE_SCREENINFO,
+    VOCTRL_WINDOW_TO_OSD_COORDS,        // float[2] (x/y)
 
     VOCTRL_SET_YUV_COLORSPACE,          // struct mp_csp_details
     VOCTRL_GET_YUV_COLORSPACE,          // struct mp_csp_details

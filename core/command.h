@@ -22,6 +22,8 @@
 struct MPContext;
 struct mp_cmd;
 
+void mp_get_osd_mouse_pos(struct MPContext *mpctx, float *x, float *y);
+
 void run_command(struct MPContext *mpctx, struct mp_cmd *cmd);
 char *mp_property_expand_string(struct MPContext *mpctx, char *str);
 void property_print_help(void);

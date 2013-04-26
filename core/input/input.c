@@ -189,8 +189,6 @@ static const mp_cmd_t mp_cmds[] = {
         .v.f = 1 },
   }},
 
-  { MP_CMD_SET_MOUSE_POS, "set_mouse_pos", { ARG_INT, ARG_INT } },
-
   { MP_CMD_AF_SWITCH, "af_switch", { ARG_STRING } },
   { MP_CMD_AF_ADD, "af_add", { ARG_STRING } },
   { MP_CMD_AF_DEL, "af_del", { ARG_STRING } },
@@ -410,6 +408,7 @@ static const struct key_name key_names[] = {
   { MP_KEY_NEXT,    "XF86_NEXT" },
 
   { MP_KEY_CLOSE_WIN, "CLOSE_WIN" },
+  { MP_MOUSE_MOVE,    "MOUSE_MOVE" },
 
   { 0, NULL }
 };
@@ -475,6 +474,8 @@ struct input_ctx {
     int key_down[MP_MAX_KEY_DOWN];
     unsigned int num_key_down;
     unsigned int last_key_down;
+
+    int mouse_x, mouse_y;
 
     bool test;
 
@@ -1305,6 +1306,18 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
     return NULL;
 }
 
+static void add_key_cmd(struct input_ctx *ictx, struct mp_cmd *cmd)
+{
+    struct cmd_queue *queue = &ictx->key_cmd_queue;
+    if (queue_count_cmds(queue) >= ictx->key_fifo_size &&
+            (!mp_input_is_abort_cmd(cmd->id) || queue_has_abort_cmds(queue)))
+    {
+        talloc_free(cmd);
+        return;
+    }
+    queue_add(queue, cmd, false);
+}
+
 void mp_input_feed_key(struct input_ctx *ictx, int code)
 {
     ictx->got_new_events = true;
@@ -1319,14 +1332,18 @@ void mp_input_feed_key(struct input_ctx *ictx, int code)
     struct mp_cmd *cmd = interpret_key(ictx, code);
     if (!cmd)
         return;
-    struct cmd_queue *queue = &ictx->key_cmd_queue;
-    if (queue_count_cmds(queue) >= ictx->key_fifo_size &&
-            (!mp_input_is_abort_cmd(cmd->id) || queue_has_abort_cmds(queue)))
-    {
-        talloc_free(cmd);
+    add_key_cmd(ictx, cmd);
+}
+
+void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
+{
+    struct mp_cmd *cmd = interpret_key(ictx, MP_MOUSE_MOVE);
+    if (!cmd)
         return;
-    }
-    queue_add(queue, cmd, false);
+    cmd->mouse_move = true;
+    cmd->mouse_x = x;
+    cmd->mouse_y = y;
+    add_key_cmd(ictx, cmd);
 }
 
 static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
@@ -1502,10 +1519,21 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
     if (!ret)
         return NULL;
 
-    if (!peek_only)
+    if (!peek_only) {
         queue_remove(queue, ret);
+        if (ret->mouse_move) {
+            ictx->mouse_x = ret->mouse_x;
+            ictx->mouse_y = ret->mouse_y;
+        }
+    }
 
     return ret;
+}
+
+void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y)
+{
+    *x = ictx->mouse_x;
+    *y = ictx->mouse_y;
 }
 
 void mp_cmd_free(mp_cmd_t *cmd)

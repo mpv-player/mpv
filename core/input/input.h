@@ -59,7 +59,6 @@ enum mp_command_type {
     MP_CMD_RADIO_STEP_CHANNEL,
     MP_CMD_RADIO_SET_CHANNEL,
     MP_CMD_RADIO_SET_FREQ,
-    MP_CMD_SET_MOUSE_POS,
     MP_CMD_ADD,
     MP_CMD_CYCLE,
     MP_CMD_RADIO_STEP_FREQ,
@@ -137,6 +136,8 @@ typedef struct mp_cmd {
     int pausing;
     enum mp_on_osd on_osd;
     bstr original;
+    bool mouse_move;
+    int mouse_x, mouse_y;
     struct mp_cmd *queue_next;
 } mp_cmd_t;
 
@@ -169,6 +170,11 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
 
 // Feed a keypress (alternative to being returned from read_func above)
 void mp_input_feed_key(struct input_ctx *ictx, int code);
+
+// Update mouse position (in window coordinates).
+void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y);
+
+void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y);
 
 // As for the cmd one you usually don't need this function.
 void mp_input_rm_key_fd(struct input_ctx *ictx, int fd);
