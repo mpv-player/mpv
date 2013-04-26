@@ -321,7 +321,6 @@ const m_option_t common_opts[] = {
 #ifdef CONFIG_LIBBLURAY
     {"bluray-device",  &bluray_device,  CONF_TYPE_STRING, 0,          0,  0, NULL},
     {"bluray-angle",   &bluray_angle,   CONF_TYPE_INT,    CONF_RANGE, 0, 999, NULL},
-    {"bluray-chapter", &bluray_chapter, CONF_TYPE_INT,    CONF_RANGE, 0, 999, NULL},
 #endif /* CONFIG_LIBBLURAY */
 
 #ifdef CONFIG_NETWORKING
