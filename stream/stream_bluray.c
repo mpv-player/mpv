@@ -55,7 +55,6 @@ int   bluray_chapter = 0;
 struct bluray_priv_s {
     BLURAY *bd;
     int current_angle;
-    int current_chapter;
     int current_title;
 };
 
@@ -135,7 +134,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     }
 
     case STREAM_CTRL_GET_CURRENT_CHAPTER: {
-        *((unsigned int *) arg) = b->current_chapter;
+        *((unsigned int *) arg) = bd_get_current_chapter(b->bd);
         return 1;
     }
 
@@ -358,7 +357,6 @@ err_no_info:
     b                  = calloc(1, sizeof(struct bluray_priv_s));
     b->bd              = bd;
     b->current_angle   = angle;
-    b->current_chapter = chapter;
     b->current_title   = title;
 
     s->start_pos   = chapter_pos;
