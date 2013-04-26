@@ -47,6 +47,24 @@
 
 #define IS_LIBAV_FORK (LIBAVFILTER_VERSION_MICRO < 100)
 
+// FFmpeg and Libav have slightly different APIs, just enough to cause us
+// unnecessary pain. <Expletive deleted.>
+#if IS_LIBAV_FORK
+#define graph_parse(graph, filters, inputs, outputs, log_ctx) \
+    avfilter_graph_parse(graph, filters, inputs, outputs, log_ctx)
+#else
+#define graph_parse(graph, filters, inputs, outputs, log_ctx) \
+    avfilter_graph_parse(graph, filters, &(inputs), &(outputs), log_ctx)
+#endif
+
+// ":" is deprecated, but "|" doesn't work in earlier versions.
+#if (IS_LIBAV_FORK  && LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(3, 7, 0)) || \
+    (!IS_LIBAV_FORK && LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(3, 50, 100))
+#define FMTSEP "|"
+#else
+#define FMTSEP ":"
+#endif
+
 struct vf_priv_s {
     AVFilterGraph *graph;
     AVFilterContext *in;
@@ -71,24 +89,6 @@ static void destroy_graph(struct vf_instance *vf)
     avfilter_graph_free(&p->graph);
     p->in = p->out = NULL;
 }
-
-// FFmpeg and Libav have slightly different APIs, just enough to cause us
-// unnecessary pain. <Expletive deleted.>
-#if IS_LIBAV_FORK
-#define graph_parse(graph, filters, inputs, outputs, log_ctx) \
-    avfilter_graph_parse(graph, filters, inputs, outputs, log_ctx)
-#else
-#define graph_parse(graph, filters, inputs, outputs, log_ctx) \
-    avfilter_graph_parse(graph, filters, &(inputs), &(outputs), log_ctx)
-#endif
-
-// ":" is deprecated, but "|" doesn't work in earlier versions.
-#if (IS_LIBAV_FORK  && LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(3, 7, 0)) || \
-    (!IS_LIBAV_FORK && LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(3, 50, 100))
-#define FMTSEP "|"
-#else
-#define FMTSEP ":"
-#endif
 
 static AVRational par_from_sar_dar(int width, int height,
                                    int d_width, int d_height)
