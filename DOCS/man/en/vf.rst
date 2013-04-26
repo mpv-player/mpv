@@ -383,14 +383,21 @@ lavfi=graph[:sws_flags]
 
         *EXAMPLE*:
 
-        ``'--vf=lavfi="gradfun=20:30"'``
-            gradfun filter with non-sensical parameters. The ``'`` quotes are
-            for the shell. Otherwise, the shell would remove the ``"`` quotes.
+        ``-vf lavfi=[gradfun=20:30,vflip]``
+            gradfun filter with nonsense parameters, followed by a vflip
+            filter. (This demonstrates how libavfilter takes a graph and not
+            just a single filter.) The filter graph string is quoted with
+            ``[`` and ``]``. This requires no additional quoting or escaping
+            with some shells (like bash), while others (like zsh) require
+            additional ``"`` quotes around the option string.
+
+        ``'--vf=lavfi="gradfun=20:30,vflip"'``
+            same as before, but uses quoting that should be safe with all
+            shells. The outer ``'`` quotes make sure that the shell doesn't
+            remove the ``"`` quotes needed by mpv.
 
         ``'--vf=lavfi=graph="gradfun=radius=30:strength=20,vflip"'``
-            same as before, but uses named parameters. Also a vflip filter is
-            appended, demonstrating how libavfilter actually takes a graph
-            description and not a single filter.
+            same as before, but uses named parameters for everything.
 
     <sws_flags>
         If libavfilter inserts filters for pixel format conversion, this

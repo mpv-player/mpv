@@ -1167,6 +1167,13 @@ static int read_subparam(bstr optname, bstr *str, bstr *out_subparam)
             return M_OPT_INVALID;
         }
         p = bstr_cut(p, 1);
+    } else if (bstr_eatstart0(&p, "[")) {
+        if (!bstr_split_tok(p, "]", &subparam, &p)) {
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                   "Terminating ']' missing for '%.*s'\n",
+                   BSTR_P(optname));
+            return M_OPT_INVALID;
+        }
     } else if (bstr_eatstart0(&p, "%")) {
         int optlen = bstrtoll(p, &p, 0);
         if (!bstr_startswith0(p, "%") || (optlen > p.len - 1)) {
@@ -1180,7 +1187,7 @@ static int read_subparam(bstr optname, bstr *str, bstr *out_subparam)
     } else {
         // Skip until the next character that could possibly be a meta
         // character in option parsing.
-        int optlen = bstrcspn(p, ":=,\\%\"'");
+        int optlen = bstrcspn(p, ":=,\\%\"'[]");
         subparam = bstr_splice(p, 0, optlen);
         p = bstr_cut(p, optlen);
     }
