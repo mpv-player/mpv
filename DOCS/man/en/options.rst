@@ -885,7 +885,7 @@
 --idle
     Makes mpv wait idly instead of quitting when there is no file to play.
     Mostly useful in slave mode where mpv can be controlled through input
-    commands (see also ``--slave``).
+    commands (see also ``--slave-broken``).
 
 --idx
     Rebuilds index of files if no index was found, allowing seeking. Useful
@@ -938,7 +938,7 @@
 
 --input-file=<filename>
     Read commands from the given file. Mostly useful with a FIFO.
-    See also ``--slave``.
+    See also ``--slave-broken``.
 
     *NOTE*: When the given file is a FIFO mpv opens both ends so you
     can do several `echo "seek 10" > mp_pipe` and the pipe will stay
