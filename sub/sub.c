@@ -320,3 +320,15 @@ void osd_subs_changed(struct osd_state *osd)
             vo_osd_changed(n);
     }
 }
+
+// Translate position in OSD coordinates to whatever osd_object_get_resolution()
+// implies. With osd_libass.c, the target coordinate system is the ASS track
+// in obj->osd_track (for stuff like \pos).
+void osd_object_pos_to_native(struct osd_state *osd, struct osd_object *obj,
+                              float *x, float *y)
+{
+    int nw, nh;
+    osd_object_get_resolution(osd, obj, &nw, &nh);
+    *x = *x / obj->vo_res.w * nw;
+    *y = *y / obj->vo_res.h * nh;
+}

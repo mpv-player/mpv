@@ -204,6 +204,18 @@ static int get_osd_resolution(lua_State *L)
     return 2;
 }
 
+static int get_mouse_pos(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    float px, py;
+    mp_get_osd_mouse_pos(mpctx, &px, &py);
+    osd_object_pos_to_native(mpctx->osd, mpctx->osd->objs[OSDTYPE_EXTERNAL],
+                             &px, &py);
+    lua_pushnumber(L, px);
+    lua_pushnumber(L, py);
+    return 2;
+}
+
 static int get_timer(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
@@ -255,6 +267,9 @@ static void add_functions(struct MPContext *mpctx)
 
     lua_pushcfunction(L, get_osd_resolution);
     lua_setfield(L, -2, "get_osd_resolution");
+
+    lua_pushcfunction(L, get_mouse_pos);
+    lua_setfield(L, -2, "get_mouse_pos");
 
     lua_pushcfunction(L, get_timer);
     lua_setfield(L, -2, "get_timer");
