@@ -45,6 +45,8 @@
 #include "video/fmt-conversion.h"
 #include "vf.h"
 
+#define IS_LIBAV_FORK (LIBAVFILTER_VERSION_MICRO < 100)
+
 struct vf_priv_s {
     AVFilterGraph *graph;
     AVFilterContext *in;
@@ -72,12 +74,20 @@ static void destroy_graph(struct vf_instance *vf)
 
 // FFmpeg and Libav have slightly different APIs, just enough to cause us
 // unnecessary pain. <Expletive deleted.>
-#if LIBAVFILTER_VERSION_MICRO < 100
+#if IS_LIBAV_FORK
 #define graph_parse(graph, filters, inputs, outputs, log_ctx) \
     avfilter_graph_parse(graph, filters, inputs, outputs, log_ctx)
 #else
 #define graph_parse(graph, filters, inputs, outputs, log_ctx) \
     avfilter_graph_parse(graph, filters, &(inputs), &(outputs), log_ctx)
+#endif
+
+// ":" is deprecated, but "|" doesn't work in earlier versions.
+#if (IS_LIBAV_FORK  && LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(3, 7, 0)) || \
+    (!IS_LIBAV_FORK && LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(3, 50, 100))
+#define FMTSEP "|"
+#else
+#define FMTSEP ":"
 #endif
 
 static AVRational par_from_sar_dar(int width, int height,
@@ -133,7 +143,7 @@ static bool recreate_graph(struct vf_instance *vf, int width, int height,
         if (vf_next_query_format(vf, n)) {
             const char *name = av_get_pix_fmt_name(imgfmt2pixfmt(n));
             if (name) {
-                const char *s = fmtstr[0] ? ":" : "";
+                const char *s = fmtstr[0] ? FMTSEP : "";
                 fmtstr = talloc_asprintf_append_buffer(fmtstr, "%s%s", s, name);
             }
         }
