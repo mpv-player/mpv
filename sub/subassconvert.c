@@ -55,6 +55,11 @@ static void append_text(struct line *dst, char *fmt, ...)
     va_end(va);
 }
 
+static void append_text_n(struct line *dst, char *start, size_t length)
+{
+    append_text(dst, "%.*s", length, start);
+}
+
 static int indexof(const char *s, int c)
 {
     char *f = strchr(s, c);
@@ -88,7 +93,7 @@ static const struct tag_conv {
     {"<b>", "{\\b1}"}, {"</b>", "{\\b0}"},
     {"<u>", "{\\u1}"}, {"</u>", "{\\u0}"},
     {"<s>", "{\\s1}"}, {"</s>", "{\\s0}"},
-    {"{", "\\{"}, {"}", "\\}"},
+    {"}", "\\}"},
     {"\r\n", "\\N"}, {"\n", "\\N"}, {"\r", "\\N"},
 };
 
@@ -415,6 +420,19 @@ void subassconvert_subrip(const char *orig, char *dest, int dest_buffer_size)
                 new_line.len = len_backup;
             } else {
                 sp++;
+                line++;
+            }
+        } else if (*line == '{') {
+            char *end = strchr(line, '}');
+            if (line[1] == '\\' && end) {
+                // Likely ASS tag, pass them through
+                // Note that ASS tags like {something\an8} are legal too (i.e.
+                // the first character after '{' doesn't have to be '\'), but
+                // consider these fringe cases not worth supporting.
+                append_text_n(&new_line, line, end - line + 1);
+                line = end + 1;
+            } else {
+                append_text(&new_line, "\\{");
                 line++;
             }
         }
