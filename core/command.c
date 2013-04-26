@@ -84,37 +84,17 @@ static char *format_delay(double time)
     return talloc_asprintf(NULL, "%d ms", ROUND(time * 1000));
 }
 
-static void rescale_input_coordinates(struct MPContext *mpctx, int ix, int iy,
-                                      double *dx, double *dy)
+// Get current mouse position in OSD coordinate space.
+void mp_get_osd_mouse_pos(struct MPContext *mpctx, float *x, float *y)
 {
-    struct MPOpts *opts = &mpctx->opts;
-    struct vo *vo = mpctx->video_out;
-    //remove the borders, if any, and rescale to the range [0,1],[0,1]
-    if (opts->vo.fs) {                //we are in full-screen mode
-        if (opts->vo.screenwidth > vo->dwidth)
-            // there are borders along the x axis
-            ix -= (opts->vo.screenwidth - vo->dwidth) / 2;
-        if (opts->vo.screenheight > vo->dheight)
-            // there are borders along the y axis (usual way)
-            iy -= (opts->vo.screenheight - vo->dheight) / 2;
-
-        if (ix < 0 || ix > vo->dwidth) {
-            *dx = *dy = -1.0;
-            return;
-        }                       //we are on one of the borders
-        if (iy < 0 || iy > vo->dheight) {
-            *dx = *dy = -1.0;
-            return;
-        }                       //we are on one of the borders
-    }
-
-    *dx = (double) ix / (double) vo->dwidth;
-    *dy = (double) iy / (double) vo->dheight;
-
-    mp_msg(MSGT_CPLAYER, MSGL_V,
-           "\r\nrescaled coordinates: %.3f, %.3f, screen (%d x %d), vodisplay: (%d, %d), fullscreen: %d\r\n",
-           *dx, *dy, opts->vo.screenwidth, opts->vo.screenheight, vo->dwidth,
-           vo->dheight, opts->vo.fs);
+    int wx, wy;
+    mp_input_get_mouse_pos(mpctx->input, &wx, &wy);
+    float p[2] = {wx, wy};
+    // Raw window coordinates (VO mouse events) to OSD resolution.
+    if (mpctx->video_out)
+        vo_control(mpctx->video_out, VOCTRL_WINDOW_TO_OSD_COORDS, p);
+    *x = p[0];
+    *y = p[1];
 }
 
 // Property-option bridge.
@@ -2431,15 +2411,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_KEYDOWN_EVENTS:
         mplayer_put_key(mpctx->key_fifo, cmd->args[0].v.i);
         break;
-
-    case MP_CMD_SET_MOUSE_POS: {
-        int pointer_x, pointer_y;
-        double dx, dy;
-        pointer_x = cmd->args[0].v.i;
-        pointer_y = cmd->args[1].v.i;
-        rescale_input_coordinates(mpctx, pointer_x, pointer_y, &dx, &dy);
-        break;
-    }
 
     case MP_CMD_VO_CMDLINE:
         if (mpctx->video_out) {

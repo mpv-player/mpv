@@ -638,6 +638,7 @@ static int preinit(struct vo *vo, const char *arg)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
+    struct priv *p = vo->priv;
     switch (request) {
     case VOCTRL_SET_EQUALIZER:
     {
@@ -656,6 +657,14 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
         return redraw_frame(vo);
+    case VOCTRL_WINDOW_TO_OSD_COORDS: {
+        // OSD is rendered into the scaled image
+        float *c = data;
+        struct mp_rect *dst = &p->dst;
+        c[0] = av_clipf(c[0], dst->x0, dst->x1) - dst->x0;
+        c[1] = av_clipf(c[1], dst->y0, dst->y1) - dst->y0;
+        return VO_TRUE;
+    }
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         args->out_image = get_screenshot(vo);

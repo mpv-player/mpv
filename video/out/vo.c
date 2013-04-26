@@ -586,10 +586,7 @@ const char *vo_get_window_title(struct vo *vo)
  */
 void vo_mouse_movement(struct vo *vo, int posx, int posy)
 {
-  char cmd_str[40];
-  if (!vo->opts->enable_mouse_movements)
-    return;
-  snprintf(cmd_str, sizeof(cmd_str), "set_mouse_pos %i %i", posx, posy);
-  mp_input_queue_cmd(vo->input_ctx, mp_input_parse_cmd(bstr0(cmd_str), ""));
+    if (!vo->opts->enable_mouse_movements)
+        return;
+    mp_input_set_mouse_pos(vo->input_ctx, posx, posy);
 }
-
