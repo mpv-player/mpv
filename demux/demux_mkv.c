@@ -1147,7 +1147,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
         bih->biYPelsPerMeter = le2me_32(src->biYPelsPerMeter);
         bih->biClrUsed = le2me_32(src->biClrUsed);
         bih->biClrImportant = le2me_32(src->biClrImportant);
-        extradata = track->private_data;
+        extradata = track->private_data + sizeof(*bih);
         extradata_size = track->private_size - sizeof(*bih);
 
         if (track->v_width == 0)
