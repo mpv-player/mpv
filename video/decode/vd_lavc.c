@@ -59,7 +59,7 @@
 
 #include "core/m_option.h"
 
-static int init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec);
+static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec);
 static void uninit_avctx(sh_video_t *sh);
 static void setup_refcounting_hw(struct AVCodecContext *s);
 static void draw_slice_hwdec(struct AVCodecContext *s, const AVFrame *src,
@@ -167,16 +167,18 @@ static int init(sh_video_t *sh, const char *decoder)
         }
     }
 
-    if (!init_avctx(sh, decoder, hwdec)) {
+    init_avctx(sh, decoder, hwdec);
+    if (!ctx->avctx) {
         if (ctx->software_fallback_decoder) {
             mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Error initializing hardware "
                     "decoding, falling back to software decoding.\n");
             decoder = ctx->software_fallback_decoder;
             ctx->software_fallback_decoder = NULL;
-            if (!init_avctx(sh, decoder, NULL)) {
-                uninit(sh);
-                return 0;
-            }
+            init_avctx(sh, decoder, NULL);
+        }
+        if (!ctx->avctx) {
+            uninit(sh);
+            return 0;
         }
     }
     return 1;
@@ -240,11 +242,13 @@ static void set_from_bih(AVCodecContext *avctx, uint32_t format,
     avctx->coded_height = bih->biHeight;
 }
 
-static int init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
+static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
 {
     vd_ffmpeg_ctx *ctx = sh->context;
     struct lavc_param *lavc_param = &sh->opts->lavc_param;
     bool mp_rawvideo = false;
+
+    assert(!ctx->avctx);
 
     if (strcmp(decoder, "mp-rawvideo") == 0) {
         mp_rawvideo = true;
@@ -253,7 +257,7 @@ static int init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
 
     AVCodec *lavc_codec = avcodec_find_decoder_by_name(decoder);
     if (!lavc_codec)
-        return 0;
+        return;
 
     ctx->do_dr1 = ctx->do_hw_dr1 = 0;
     ctx->pix_fmt = PIX_FMT_NONE;
@@ -325,8 +329,8 @@ static int init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
             mp_msg(MSGT_DECVIDEO, MSGL_ERR,
                    "Your options /%s/ look like gibberish to me pal\n",
                    lavc_param->avopt);
-            uninit(sh);
-            return 0;
+            uninit_avctx(sh);
+            return;
         }
     }
 
@@ -356,9 +360,8 @@ static int init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
     if (avcodec_open2(avctx, lavc_codec, NULL) < 0) {
         mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Could not open codec.\n");
         uninit_avctx(sh);
-        return 0;
+        return;
     }
-    return 1;
 }
 
 static void uninit_avctx(sh_video_t *sh)
@@ -374,7 +377,7 @@ static void uninit_avctx(sh_video_t *sh)
         av_freep(&avctx->slice_offset);
     }
 
-    av_freep(&avctx);
+    av_freep(&ctx->avctx);
     avcodec_free_frame(&ctx->pic);
 
 #if !HAVE_AVUTIL_REFCOUNTING
@@ -711,7 +714,8 @@ static struct mp_image *decode_with_fallback(struct sh_video *sh,
                 "decoding, falling back to software decoding.\n");
         const char *decoder = ctx->software_fallback_decoder;
         ctx->software_fallback_decoder = NULL;
-        if (init_avctx(sh, decoder, NULL)) {
+        init_avctx(sh, decoder, NULL);
+        if (ctx->avctx) {
             mpi = NULL;
             decode(sh, packet, flags, reordered_pts, &mpi);
             return mpi;
