@@ -634,6 +634,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
         // always set duration for subtitles, even if AV_PKT_FLAG_KEY isn't set,
         // otherwise they will stay on screen to long if e.g. ASS is demuxed
         // from mkv
+        dp->duration = pkt->duration * av_q2d(st->time_base);
         if ((stream->type == STREAM_SUB || (pkt->flags & AV_PKT_FLAG_KEY)) &&
             pkt->convergence_duration > 0)
             dp->duration = pkt->convergence_duration * av_q2d(st->time_base);
