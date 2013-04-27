@@ -1119,7 +1119,7 @@ static void print_status(struct MPContext *mpctx)
             position, get_current_time(mpctx) - startpos) >= 0)
     {
         // encoding stats
-        saddf(&line, "%s ", lavcbuf);
+        saddf(&line, " %s", lavcbuf);
     } else
 #endif
     {
