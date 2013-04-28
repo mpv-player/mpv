@@ -924,9 +924,9 @@ void create_menu()
     s.height -= [self titleHeight];
 
     if (s.width > s.height) {
-        s.width  = ((double)s.height * ratio + 0.5);
+        s.width  = ((double)s.height * ratio);
     } else {
-        s.height = ((double)s.width * 1/ratio + 0.5);
+        s.height = ((double)s.width * 1.0/ratio);
     }
 
     s.height += [self titleHeight];
