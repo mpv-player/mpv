@@ -57,7 +57,7 @@ static void append_text(struct line *dst, char *fmt, ...)
 
 static void append_text_n(struct line *dst, char *start, size_t length)
 {
-    append_text(dst, "%.*s", length, start);
+    append_text(dst, "%.*s", (int)length, start);
 }
 
 static int indexof(const char *s, int c)
