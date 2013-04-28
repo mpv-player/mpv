@@ -102,19 +102,6 @@ ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
     return track;
 }
 
-static int check_duplicate_plaintext_event(ASS_Track *track)
-{
-    int i;
-    ASS_Event *evt = track->events + track->n_events - 1;
-
-    for (i = 0; i < track->n_events - 1; ++i)   // ignoring last event, it is the one we are comparing with
-        if (track->events[i].Start == evt->Start &&
-            track->events[i].Duration == evt->Duration &&
-            strcmp(track->events[i].Text, evt->Text) == 0)
-            return 1;
-    return 0;
-}
-
 /**
  * \brief Convert subtitle to ASS_Events for the given track
  * \param track track
@@ -158,12 +145,6 @@ static int ass_process_subtitle(ASS_Track *track, subtitle *sub)
     if (sub->lines > 0)
         p -= 2;                 // remove last "\N"
     *p = 0;
-
-    if (check_duplicate_plaintext_event(track)) {
-        ass_free_event(track, eid);
-        track->n_events--;
-        return -1;
-    }
 
     mp_msg(MSGT_ASS, MSGL_V,
            "plaintext event at %" PRId64 ", +%" PRId64 ": %s  \n",
