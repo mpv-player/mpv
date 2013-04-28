@@ -629,6 +629,8 @@ int spudec_visible(void *this){
 	     spu->now_pts < spu->end_pts &&
 	     spu->height > 0);
 //    printf("spu visible: %d  \n",ret);
+    if ((spu->forced_subs_only) && !(spu->is_forced_sub))
+        ret = 0;
     return ret;
 }
 
