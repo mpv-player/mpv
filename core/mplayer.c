@@ -1938,6 +1938,20 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
 
         while (d_sub->first) {
             double subpts_s = ds_get_next_pts(d_sub);
+            if (subpts_s == MP_NOPTS_VALUE) {
+                // Try old method of getting PTS. This is only needed in the
+                // DVD playback case with demux_mpg.
+                // XXX This is wrong, sh_video->pts can be arbitrarily
+                // much behind demuxing position. Unfortunately using
+                // d_video->pts which would have been the simplest
+                // improvement doesn't work because mpeg specific hacks
+                // in video.c set d_video->pts to 0.
+                float x = d_sub->pts - refpts_s;
+                if (x > -20 && x < 20) // prevent missing subs on pts reset
+                    subpts_s = d_sub->pts;
+                else
+                    subpts_s = curpts_s;
+            }
             if (subpts_s > curpts_s) {
                 mp_dbg(MSGT_CPLAYER, MSGL_DBG2,
                        "Sub early: c_pts=%5.3f s_pts=%5.3f\n",
