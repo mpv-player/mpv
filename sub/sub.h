@@ -86,7 +86,6 @@ struct mp_osd_res {
 enum mp_osdtype {
     OSDTYPE_SUB,
     OSDTYPE_SUBTEXT,
-    OSDTYPE_SPU,
 
     OSDTYPE_PROGBAR,
     OSDTYPE_OSD,
@@ -144,6 +143,10 @@ struct osd_state {
 
     struct MPOpts *opts;
 
+    // Video resolution used for subtitle decoding. Doesn't necessarily match
+    // the resolution of the VO, nor does it have to be the OSD resolution.
+    int sub_video_w, sub_video_h;
+
     // Internal to sub.c
     struct mp_draw_sub_cache *draw_cache;
 
@@ -151,9 +154,6 @@ struct osd_state {
     struct ass_renderer *osd_render;
     struct ass_library *osd_ass_library;
 };
-
-extern void* vo_spudec;
-extern void* vo_vobsub;
 
 // Start of OSD symbols in osd_font.pfb
 #define OSD_CODEPOINTS 0xE000

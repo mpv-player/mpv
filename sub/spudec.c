@@ -575,6 +575,13 @@ void spudec_assemble(void *this, unsigned char *packet, unsigned int len, int pt
 #endif
 }
 
+void spudec_set_changed(void *this)
+{
+  spudec_handle_t *spu = this;
+
+  spu->spu_changed = 1;
+}
+
 void spudec_reset(void *this)	// called after seek
 {
   spudec_handle_t *spu = this;
@@ -583,6 +590,7 @@ void spudec_reset(void *this)	// called after seek
   spu->now_pts = 0;
   spu->end_pts = 0;
   spu->packet_size = spu->packet_offset = 0;
+  spudec_set_changed(spu);
 }
 
 void spudec_heartbeat(void *this, unsigned int pts100)
@@ -611,7 +619,7 @@ void spudec_heartbeat(void *this, unsigned int pts100)
       spudec_process_data(spu, packet);
     }
     spudec_free_packet(packet);
-    spu->spu_changed = 1;
+    spudec_set_changed(spu);
   }
 }
 
@@ -626,10 +634,11 @@ int spudec_visible(void *this){
 
 void spudec_set_forced_subs_only(void * const this, const unsigned int flag)
 {
-  if(this){
-      ((spudec_handle_t *)this)->forced_subs_only=flag;
-      mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPU: Display only forced subs now %s\n", flag ? "enabled": "disabled");
-  }
+    spudec_handle_t *spu = this;
+    if (!!flag != !!spu->forced_subs_only) {
+        spu->forced_subs_only = !!flag;
+        spudec_set_changed(spu);
+    }
 }
 
 void spudec_get_indexed(void *this, struct mp_osd_res *dim,
@@ -738,17 +747,14 @@ static void spudec_parse_extradata(spudec_handle_t *this,
   free(buffer);
 }
 
-void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigned int frame_height, uint8_t *extradata, int extradata_len)
+void *spudec_new_scaled(unsigned int frame_width, unsigned int frame_height, uint8_t *extradata, int extradata_len)
 {
   spudec_handle_t *this = calloc(1, sizeof(spudec_handle_t));
   if (this){
     this->orig_frame_height = frame_height;
     this->orig_frame_width  = frame_width;
     // set up palette:
-    if (palette)
-      memcpy(this->global_palette, palette, sizeof(this->global_palette));
-    else
-      this->auto_palette = 1;
+    this->auto_palette = 1;
     if (extradata)
       spudec_parse_extradata(this, extradata, extradata_len);
     /* XXX Although the video frame is some size, the SPU frame is
@@ -766,11 +772,6 @@ void *spudec_new_scaled(unsigned int *palette, unsigned int frame_width, unsigne
   else
     mp_msg(MSGT_SPUDEC,MSGL_FATAL, "FATAL: spudec_init: calloc");
   return this;
-}
-
-void *spudec_new(unsigned int *palette)
-{
-    return spudec_new_scaled(palette, 0, 0, NULL, 0);
 }
 
 void spudec_free(void *this)

@@ -295,7 +295,6 @@ struct sh_sub *sd_ass_create_from_track(struct ass_track *track,
         .gsh = talloc_struct(sh, struct sh_stream, {
             .codec = codec,
         }),
-        .sd_driver = &sd_ass,
         .context = talloc_struct(sh, struct sd_ass_priv, {
             .ass_track = track,
             .vsfilter_aspect = is_ass_sub(codec),

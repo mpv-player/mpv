@@ -50,7 +50,6 @@
 #include "audio/filter/af.h"
 #include "video/decode/dec_video.h"
 #include "audio/decode/dec_audio.h"
-#include "sub/spudec.h"
 #include "core/path.h"
 #include "sub/ass_mp.h"
 #include "stream/tv.h"
@@ -1307,31 +1306,13 @@ static int mp_property_sub_visibility(m_option_t *prop, int action,
     switch (action) {
     case M_PROPERTY_SET:
         opts->sub_visibility = *(int *)arg;
-        if (vo_spudec)
-            vo_osd_changed(OSDTYPE_SPU);
+        osd_changed_all(mpctx->osd);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
         *(int *)arg = opts->sub_visibility;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-/// Show only forced subtitles (RW)
-static int mp_property_sub_forced_only(m_option_t *prop, int action,
-                                       void *arg, MPContext *mpctx)
-{
-    struct MPOpts *opts = &mpctx->opts;
-
-    if (!vo_spudec)
-        return M_PROPERTY_UNAVAILABLE;
-
-    if (action == M_PROPERTY_SET) {
-        opts->forced_subs_only = *(int *)arg;
-        spudec_set_forced_subs_only(vo_spudec, opts->forced_subs_only);
-        return M_PROPERTY_OK;
-    }
-    return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
 
@@ -1514,7 +1495,7 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("sub-pos", mp_property_sub_pos),
     { "sub-visibility", mp_property_sub_visibility, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
-    M_OPTION_PROPERTY_CUSTOM("sub-forced-only", mp_property_sub_forced_only),
+    M_OPTION_PROPERTY_CUSTOM("sub-forced-only", property_osd_helper),
     M_OPTION_PROPERTY_CUSTOM("sub-scale", property_osd_helper),
 #ifdef CONFIG_ASS
     M_OPTION_PROPERTY_CUSTOM("ass-use-margins", property_osd_helper),

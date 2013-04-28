@@ -29,6 +29,16 @@
 
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;
+extern const struct sd_functions sd_spu;
+
+static const struct sd_functions *sd_list[] = {
+#ifdef CONFIG_ASS
+    &sd_ass,
+#endif
+    &sd_lavc,
+    &sd_spu,
+    NULL
+};
 
 bool is_text_sub(const char *t)
 {
@@ -46,20 +56,20 @@ bool is_ass_sub(const char *t)
 
 bool is_dvd_sub(const char *t)
 {
-    return t && strcmp(t, "dvd_subtitle") == 0;
+    return t && (strcmp(t, "dvd_subtitle") == 0 ||
+                 strcmp(t, "dvd_subtitle_mpg") == 0);
 }
 
 void sub_init(struct sh_sub *sh, struct osd_state *osd)
 {
-    const char *format = sh->gsh->codec;
+    sh->sd_driver = NULL;
+    for (int n = 0; sd_list[n]; n++) {
+        if (sd_list[n]->supports_format(sh->gsh->codec)) {
+            sh->sd_driver = sd_list[n];
+            break;
+        }
+    }
 
-    assert(!osd->sh_sub);
-    if (sd_lavc.supports_format(format))
-        sh->sd_driver = &sd_lavc;
-#ifdef CONFIG_ASS
-    if (sd_ass.supports_format(format))
-        sh->sd_driver = &sd_ass;
-#endif
     if (sh->sd_driver) {
         if (sh->sd_driver->init(sh, osd) < 0)
             return;

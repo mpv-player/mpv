@@ -37,7 +37,6 @@
 #include "dec_sub.h"
 #include "img_convert.h"
 #include "draw_bmp.h"
-#include "spudec.h"
 #include "subreader.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
@@ -47,9 +46,6 @@ int sub_visibility=1;
 
 float sub_delay = 0;
 float sub_fps = 0;
-
-void *vo_spudec=NULL;
-void *vo_vobsub=NULL;
 
 static const struct osd_style_opts osd_style_opts_def = {
     .font = "Sans",
@@ -114,7 +110,6 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
         osd->objs[n] = obj;
     }
 
-    osd->objs[OSDTYPE_SPU]->is_sub = true;      // spudec.c
     osd->objs[OSDTYPE_SUB]->is_sub = true;      // dec_sub.c
     osd->objs[OSDTYPE_SUBTEXT]->is_sub = true;  // osd_libass.c
 
@@ -155,12 +150,6 @@ void osd_set_sub(struct osd_state *osd, const char *text)
         vo_osd_changed(OSDTYPE_SUBTEXT);
 }
 
-static bool spu_visible(struct osd_state *osd, struct osd_object *obj)
-{
-    struct MPOpts *opts = osd->opts;
-    return opts->sub_visibility && vo_spudec && spudec_visible(vo_spudec);
-}
-
 static void render_object(struct osd_state *osd, struct osd_object *obj,
                           struct mp_osd_res res, double video_pts,
                           const bool sub_formats[SUBBITMAP_COUNT],
@@ -179,10 +168,7 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
         obj->force_redraw = true;
     obj->vo_res = res;
 
-    if (obj->type == OSDTYPE_SPU) {
-        if (spu_visible(osd, obj))
-            spudec_get_indexed(vo_spudec, &obj->vo_res, out_imgs);
-    } else if (obj->type == OSDTYPE_SUB) {
+    if (obj->type == OSDTYPE_SUB) {
         if (osd->render_bitmap_subs) {
             double sub_pts = video_pts;
             if (sub_pts != MP_NOPTS_VALUE)

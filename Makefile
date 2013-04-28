@@ -230,6 +230,7 @@ SOURCES = talloc.c \
           sub/find_subfiles.c \
           sub/img_convert.c \
           sub/sd_lavc.c \
+          sub/sd_spu.c \
           sub/spudec.c \
           sub/sub.c \
           sub/subassconvert.c \

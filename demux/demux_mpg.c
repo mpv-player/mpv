@@ -523,7 +523,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 
         if(!demux->s_streams[aid]){
             sh_sub_t *sh = new_sh_sub(demux, aid);
-            if (sh) sh->gsh->codec = "dvd_subtitle";
+            if (sh) sh->gsh->codec = "dvd_subtitle_mpg";
             mp_msg(MSGT_DEMUX,MSGL_V,"==> Found subtitle: %d\n",aid);
         }
 

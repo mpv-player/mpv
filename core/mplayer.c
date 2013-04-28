@@ -95,8 +95,6 @@
 
 #include "core/codecs.h"
 
-#include "sub/spudec.h"
-
 #include "osdep/getch2.h"
 #include "osdep/timer.h"
 
@@ -552,12 +550,6 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         mp_msg(MSGT_CPLAYER, MSGL_DBG2, "\n[[[uninit getch2]]]\n");
         // restore terminal:
         getch2_disable();
-    }
-
-    if (mask & INITIALIZED_SPUDEC) {
-        mpctx->initialized_flags &= ~INITIALIZED_SPUDEC;
-        spudec_free(vo_spudec);
-        vo_spudec = NULL;
     }
 
     if (mask & INITIALIZED_VOL) {
@@ -1102,38 +1094,6 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
     return track;
-}
-
-void init_vo_spudec(struct MPContext *mpctx)
-{
-    uninit_player(mpctx, INITIALIZED_SPUDEC);
-    unsigned width, height;
-
-    // we currently can't work without video stream
-    if (!mpctx->sh_video)
-        return;
-
-    width  = mpctx->sh_video->disp_w;
-    height = mpctx->sh_video->disp_h;
-
-#ifdef CONFIG_DVDREAD
-    if (vo_spudec == NULL && mpctx->stream->type == STREAMTYPE_DVD) {
-        vo_spudec = spudec_new_scaled(((dvd_priv_t *)(mpctx->stream->priv))->
-                cur_pgc->palette, width, height, NULL, 0);
-    }
-#endif
-
-    if (vo_spudec == NULL && mpctx->sh_sub) {
-        sh_sub_t *sh = mpctx->sh_sub;
-        vo_spudec = spudec_new_scaled(NULL, width, height, sh->extradata,
-                                      sh->extradata_len);
-    }
-
-    if (vo_spudec != NULL) {
-        mpctx->initialized_flags |= INITIALIZED_SPUDEC;
-        mp_property_do("sub-forced-only", M_PROPERTY_SET,
-                       &mpctx->opts.forced_subs_only, mpctx);
-    }
 }
 
 int mp_get_cache_percent(struct MPContext *mpctx)
@@ -1867,10 +1827,6 @@ static void reset_subtitles(struct MPContext *mpctx)
     if (mpctx->sh_sub)
         sub_reset(mpctx->sh_sub, mpctx->osd);
     set_osd_subtitle(mpctx, NULL);
-    if (vo_spudec) {
-        spudec_reset(vo_spudec);
-        vo_osd_changed(OSDTYPE_SPU);
-    }
 }
 
 static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
@@ -1892,46 +1848,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
     double curpts_s = refpts_tl - mpctx->osd->sub_offset;
     double refpts_s = refpts_tl - video_offset;
 
-    // DVD sub:
-    if (is_dvd_sub(type) && !(sh_sub && sh_sub->active)) {
-        int timestamp;
-        // Get a sub packet from the demuxer (or the vobsub.c thing, which
-        // should be a demuxer, but isn't).
-        while (1) {
-            // Vobsub
-            len = 0;
-            {
-                // DVD sub
-                assert(d_sub->sh == sh_sub);
-                len = ds_get_packet_sub(d_sub, (unsigned char **)&packet);
-                if (len > 0) {
-                    // XXX This is wrong, sh_video->pts can be arbitrarily
-                    // much behind demuxing position. Unfortunately using
-                    // d_video->pts which would have been the simplest
-                    // improvement doesn't work because mpeg specific hacks
-                    // in video.c set d_video->pts to 0.
-                    float x = d_sub->pts - refpts_s;
-                    if (x > -20 && x < 20) // prevent missing subs on pts reset
-                        timestamp = 90000 * d_sub->pts;
-                    else
-                        timestamp = 90000 * curpts_s;
-                    mp_dbg(MSGT_CPLAYER, MSGL_V, "\rDVD sub: len=%d  "
-                           "v_pts=%5.3f  s_pts=%5.3f  ts=%d \n", len,
-                           refpts_s, d_sub->pts, timestamp);
-                }
-            }
-            if (len <= 0 || !packet)
-                break;
-            // create it only here, since with some broken demuxers we might
-            // type = v but no DVD sub and we currently do not change the
-            // "original frame size" ever after init, leading to wrong-sized
-            // PGS subtitles.
-            if (!vo_spudec)
-                vo_spudec = spudec_new(NULL);
-            if (timestamp >= 0)
-                spudec_assemble(vo_spudec, packet, len, timestamp);
-        }
-    } else if (d_sub && sh_sub && sh_sub->active) {
+    if (d_sub && sh_sub && sh_sub->active) {
         bool non_interleaved = is_non_interleaved(mpctx, track);
         if (non_interleaved)
             ds_get_next_pts(d_sub);
@@ -1979,11 +1896,6 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 ds_get_next_pts(d_sub);
         }
     }
-    if (vo_spudec) {
-        spudec_heartbeat(vo_spudec, 90000 * curpts_s);
-        if (spudec_changed(vo_spudec))
-            vo_osd_changed(OSDTYPE_SPU);
-    }
 
     if (!mpctx->osd->render_bitmap_subs)
         set_osd_subtitle(mpctx, sub_get_text(mpctx->osd, curpts_s));
@@ -2030,10 +1942,10 @@ static double timing_sleep(struct MPContext *mpctx, double time_frame)
 }
 
 static void set_dvdsub_fake_extradata(struct sh_sub *sh_sub, struct stream *st,
-                                      struct sh_video *sh_video)
+                                      int width, int height)
 {
 #ifdef CONFIG_DVDREAD
-    if (st->type != STREAMTYPE_DVD || !sh_video)
+    if (st->type != STREAMTYPE_DVD)
         return;
 
     struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
@@ -2042,9 +1954,12 @@ static void set_dvdsub_fake_extradata(struct sh_sub *sh_sub, struct stream *st,
     float cmatrix[3][4];
     mp_get_yuv2rgb_coeffs(&csp, cmatrix);
 
-    int width  = sh_video->disp_w;
-    int height = sh_video->disp_h;
     int *palette = ((dvd_priv_t *)st->priv)->cur_pgc->palette;
+
+    if (width == 0 || height == 0) {
+        width = 720;
+        height = 480;
+    }
 
     char *s = NULL;
     s = talloc_asprintf_append(s, "size: %dx%d\n", width, height);
@@ -2072,6 +1987,7 @@ static void reinit_subs(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     struct track *track = mpctx->current_track[STREAM_SUB];
+    struct osd_state *osd = mpctx->osd;
 
     assert(!(mpctx->initialized_flags & INITIALIZED_SUB));
 
@@ -2098,24 +2014,17 @@ static void reinit_subs(struct MPContext *mpctx)
 
     mpctx->initialized_flags |= INITIALIZED_SUB;
 
+    osd->sub_video_w = mpctx->sh_video ? mpctx->sh_video->disp_w : 0;
+    osd->sub_video_h = mpctx->sh_video ? mpctx->sh_video->disp_h : 0;
+
     if (track->sh_sub) {
-        sub_init(track->sh_sub, mpctx->osd);
+        sub_init(track->sh_sub, osd);
     } else if (track->stream) {
-        struct stream *s = track->demuxer ? track->demuxer->stream : NULL;
-        if (s && s->type == STREAMTYPE_DVD)
-            set_dvdsub_fake_extradata(mpctx->sh_sub, s, mpctx->sh_video);
-        // lavc dvdsubdec doesn't read color/resolution on Libav 9.1 and below
-        // Don't use it for new ffmpeg; spudec can't handle ffmpeg .idx demuxing
-        // (ffmpeg added .idx demuxing during lavc 54.79.100)
-        bool broken_lavc = false;
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 40, 0)
-        broken_lavc = true;
-#endif
-        if (is_dvd_sub(mpctx->sh_sub->gsh->codec) && track->demuxer
-            && (track->demuxer->type == DEMUXER_TYPE_MPEG_PS || broken_lavc))
-            init_vo_spudec(mpctx);
-        else
-            sub_init(mpctx->sh_sub, mpctx->osd);
+        if (track->demuxer && track->demuxer->stream) {
+            set_dvdsub_fake_extradata(mpctx->sh_sub, track->demuxer->stream,
+                                      osd->sub_video_w, osd->sub_video_h);
+        }
+        sub_init(mpctx->sh_sub, osd);
     }
 
     // Decides whether to use OSD path or normal subtitle rendering path.
