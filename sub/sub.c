@@ -45,8 +45,6 @@
 int sub_pos=100;
 int sub_visibility=1;
 
-subtitle* vo_sub=NULL;
-
 float sub_delay = 0;
 float sub_fps = 0;
 
@@ -103,6 +101,7 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
         .opts = opts,
         .ass_library = asslib,
         .osd_text = talloc_strdup(osd, ""),
+        .sub_text = talloc_strdup(osd, ""),
         .progbar_type = -1,
     };
 
@@ -117,7 +116,7 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
 
     osd->objs[OSDTYPE_SPU]->is_sub = true;      // spudec.c
     osd->objs[OSDTYPE_SUB]->is_sub = true;      // dec_sub.c
-    osd->objs[OSDTYPE_SUBTITLE]->is_sub = true; // osd_libass.c
+    osd->objs[OSDTYPE_SUBTEXT]->is_sub = true;  // osd_libass.c
 
     osd_init_backend(osd);
     global_osd = osd;
@@ -133,15 +132,27 @@ void osd_free(struct osd_state *osd)
     global_osd = NULL;
 }
 
-void osd_set_text(struct osd_state *osd, const char *text)
+static bool set_text(void *talloc_ctx, char **var, const char *text)
 {
     if (!text)
         text = "";
-    if (strcmp(osd->osd_text, text) == 0)
-        return;
-    talloc_free(osd->osd_text);
-    osd->osd_text = talloc_strdup(osd, text);
-    vo_osd_changed(OSDTYPE_OSD);
+    if (strcmp(*var, text) == 0)
+        return true;
+    talloc_free(*var);
+    *var = talloc_strdup(talloc_ctx, text);
+    return false;
+}
+
+void osd_set_text(struct osd_state *osd, const char *text)
+{
+    if (!set_text(osd, &osd->osd_text, text))
+        vo_osd_changed(OSDTYPE_OSD);
+}
+
+void osd_set_sub(struct osd_state *osd, const char *text)
+{
+    if (!set_text(osd, &osd->sub_text, text))
+        vo_osd_changed(OSDTYPE_SUBTEXT);
 }
 
 static bool spu_visible(struct osd_state *osd, struct osd_object *obj)
@@ -172,10 +183,12 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
         if (spu_visible(osd, obj))
             spudec_get_indexed(vo_spudec, &obj->vo_res, out_imgs);
     } else if (obj->type == OSDTYPE_SUB) {
-        double sub_pts = video_pts;
-        if (sub_pts != MP_NOPTS_VALUE)
-            sub_pts += sub_delay - osd->sub_offset;
-        sub_get_bitmaps(osd, obj->vo_res, sub_pts, out_imgs);
+        if (osd->render_bitmap_subs) {
+            double sub_pts = video_pts;
+            if (sub_pts != MP_NOPTS_VALUE)
+                sub_pts -= osd->sub_offset;
+            sub_get_bitmaps(osd, obj->vo_res, sub_pts, out_imgs);
+        }
     } else {
         osd_object_get_bitmaps(osd, obj, out_imgs);
     }

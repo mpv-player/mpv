@@ -25,9 +25,6 @@
 
 struct MPContext;
 struct MPOpts;
-struct subtitle;
-
-void set_osd_subtitle(struct MPContext *mpctx, struct subtitle *subs);
 
 struct mp_resolve_result {
     char *url;

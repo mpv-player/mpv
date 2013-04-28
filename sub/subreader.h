@@ -67,7 +67,6 @@ typedef struct subtitle {
     unsigned long end;
 
     char *text[SUB_MAX_TEXT];
-    double endpts[SUB_MAX_TEXT];
     unsigned char alignment;
 } subtitle;
 
@@ -92,10 +91,5 @@ void subcp_close (void); /* for demux_ogg.c */
 const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *preferred_language, const char *fallback);
 const char* guess_cp(struct stream *st, const char *preferred_language, const char *fallback);
 #endif
-struct MPContext;
-void find_sub(struct MPContext *mpctx, sub_data* subd,int key);
-void step_sub(sub_data *subd, float pts, int movement);
-void sub_add_text(subtitle *sub, const char *txt, int len, double endpts);
-int sub_clear_text(subtitle *sub, double pts);
 
 #endif /* MPLAYER_SUBREADER_H */

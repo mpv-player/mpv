@@ -74,6 +74,7 @@
 #include "sub/subreader.h"
 #include "sub/find_subfiles.h"
 #include "sub/dec_sub.h"
+#include "sub/sd.h"
 
 #include "core/mp_osd.h"
 #include "video/out/vo.h"
@@ -284,8 +285,6 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
     const char *codec = s ? s->codec : NULL;
     if (!codec && t->sh_sub) // external subs hack
         codec = t->sh_sub->gsh->codec;
-    if (!codec && t->subdata)
-        codec = t->subdata->codec;
     mp_msg(MSGT_CPLAYER, MSGL_INFO, " (%s)", codec ? codec : "<unknown>");
     if (t->is_external)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " (external)");
@@ -1052,38 +1051,36 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
                                float fps, int noerr)
 {
     struct MPOpts *opts = &mpctx->opts;
-    sub_data *subd = NULL;
     struct sh_sub *sh = NULL;
+    struct ass_track *asst = NULL;
+    const char *codec = NULL;
 
     if (filename == NULL)
         return NULL;
 
-    if (opts->ass_enabled) {
+    // Note: no text subtitles without libass. This is mainly because sd_ass is
+    // used for rendering. Even when showing subtitles with term-osd, going
+    // through sd_ass makes the code much simpler, as sd_ass can handle all
+    // the weird special-cases.
 #ifdef CONFIG_ASS
-        struct ass_track *asst = mp_ass_read_stream(mpctx->ass_library,
-                                                    filename, sub_cp);
-        bool is_native_ass = asst;
-        const char *codec = NULL;
-        if (!asst) {
-            subd = sub_read_file(filename, fps, &mpctx->opts);
-            if (subd) {
-                codec = subd->codec;
-                asst = mp_ass_read_subdata(mpctx->ass_library, opts, subd, fps);
-                talloc_free(subd);
-                subd = NULL;
-            }
+    if (opts->ass_enabled) {
+        asst = mp_ass_read_stream(mpctx->ass_library, filename, sub_cp);
+        codec = "ass";
+    }
+    if (!asst) {
+        sub_data *subd = sub_read_file(filename, fps, &mpctx->opts);
+        if (subd) {
+            codec = subd->codec;
+            asst = mp_ass_read_subdata(mpctx->ass_library, opts, subd, fps);
         }
-        if (asst) {
-            sh = sd_ass_create_from_track(asst, is_native_ass, opts);
-            if (codec)
-                sh->gsh->codec = codec;
-        }
+        talloc_free(subd);
+    }
+    if (asst)
+        sh = sd_ass_create_from_track(asst, codec, opts);
 #endif
-    } else
-        subd = sub_read_file(filename, fps, &mpctx->opts);
 
-
-    if (!sh && !subd) {
+    if (!sh) {
+        // Used with image subtitles.
         struct track *ext = open_external_file(mpctx, filename, NULL, 0,
                                                STREAM_SUB);
         if (ext)
@@ -1101,7 +1098,6 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
         .demuxer_id = -1,
         .is_external = true,
         .sh_sub = talloc_steal(track, sh),
-        .subdata = talloc_steal(track, subd),
         .external_filename = talloc_strdup(track, filename),
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
@@ -1545,23 +1541,16 @@ void set_osd_function(struct MPContext *mpctx, int osd_function)
 /**
  * \brief Display text subtitles on the OSD
  */
-void set_osd_subtitle(struct MPContext *mpctx, subtitle *subs)
+static void set_osd_subtitle(struct MPContext *mpctx, const char *text)
 {
-    int i;
-    vo_sub = subs;
-    vo_osd_changed(OSDTYPE_SUBTITLE);
-    if (!mpctx->sh_video) {
-        // reverse order, since newest set_osd_msg is displayed first
-        for (i = SUB_MAX_TEXT - 1; i >= 0; i--) {
-            if (!subs || i >= subs->lines || !subs->text[i])
-                rm_osd_msg(mpctx, OSD_MSG_SUB_BASE + i);
-            else {
-                // HACK: currently display time for each sub line
-                // except the last is set to 2 seconds.
-                int display_time = i == subs->lines - 1 ? 180000 : 2000;
-                set_osd_msg(mpctx, OSD_MSG_SUB_BASE + i, 1, display_time,
-                            "%s", subs->text[i]);
-            }
+    if (!text)
+        text = "";
+    if (strcmp(mpctx->osd->sub_text, text) != 0) {
+        osd_set_sub(mpctx->osd, text);
+        if (!mpctx->sh_video) {
+            rm_osd_msg(mpctx, OSD_MSG_SUB_BASE);
+            if (text && text[0])
+                set_osd_msg(mpctx, OSD_MSG_SUB_BASE, 1, INT_MAX, "%s", text);
         }
     }
 }
@@ -1877,9 +1866,7 @@ static void reset_subtitles(struct MPContext *mpctx)
 {
     if (mpctx->sh_sub)
         sub_reset(mpctx->sh_sub, mpctx->osd);
-    sub_clear_text(&mpctx->subs, MP_NOPTS_VALUE);
-    if (vo_sub)
-        set_osd_subtitle(mpctx, NULL);
+    set_osd_subtitle(mpctx, NULL);
     if (vo_spudec) {
         spudec_reset(vo_spudec);
         vo_osd_changed(OSDTYPE_SPU);
@@ -1888,33 +1875,22 @@ static void reset_subtitles(struct MPContext *mpctx)
 
 static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
 {
-    struct MPOpts *opts = &mpctx->opts;
-    struct sh_video *sh_video = mpctx->sh_video;
     struct sh_sub *sh_sub = mpctx->sh_sub;
     struct demux_stream *d_sub = sh_sub ? sh_sub->ds : NULL;
     unsigned char *packet = NULL;
     int len;
     const char *type = sh_sub ? sh_sub->gsh->codec : NULL;
 
-    mpctx->osd->sub_offset = mpctx->video_offset;
-
     struct track *track = mpctx->current_track[STREAM_SUB];
     if (!track)
         return;
 
-    if (!track->under_timeline)
-        mpctx->osd->sub_offset = 0;
+    double video_offset = track->under_timeline ? mpctx->video_offset : 0;
 
-    double refpts_s = refpts_tl - mpctx->osd->sub_offset;
-    double curpts_s = refpts_s + sub_delay;
+    mpctx->osd->sub_offset = video_offset - sub_delay;
 
-    // find sub
-    if (track->subdata) {
-        if (sub_fps == 0)
-            sub_fps = sh_video ? sh_video->fps : 25;
-        find_sub(mpctx, track->subdata, curpts_s *
-                 (track->subdata->sub_uses_time ? 100. : sub_fps));
-    }
+    double curpts_s = refpts_tl - mpctx->osd->sub_offset;
+    double refpts_s = refpts_tl - video_offset;
 
     // DVD sub:
     if (is_dvd_sub(type) && !(sh_sub && sh_sub->active)) {
@@ -1955,7 +1931,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
             if (timestamp >= 0)
                 spudec_assemble(vo_spudec, packet, len, timestamp);
         }
-    } else if (d_sub && (is_text_sub(type) || (sh_sub && sh_sub->active))) {
+    } else if (d_sub && sh_sub && sh_sub->active) {
         bool non_interleaved = is_non_interleaved(mpctx, track);
         if (non_interleaved)
             ds_get_next_pts(d_sub);
@@ -1967,7 +1943,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                        "Sub early: c_pts=%5.3f s_pts=%5.3f\n",
                        curpts_s, subpts_s);
                 // Libass handled subs can be fed to it in advance
-                if (!opts->ass_enabled || !is_text_sub(type))
+                if (!sub_accept_packets_in_advance(sh_sub))
                     break;
                 // Try to avoid demuxing whole file at once
                 if (non_interleaved && subpts_s > curpts_s + 1)
@@ -1984,41 +1960,19 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 len = FFMIN(len - 2, AV_RB16(packet));
                 packet += 2;
             }
-            if (sh_sub && sh_sub->active) {
-                sub_decode(sh_sub, mpctx->osd, packet, len, subpts_s, duration);
-            } else if (subpts_s != MP_NOPTS_VALUE) {
-                // text sub
-                if (duration < 0)
-                    sub_clear_text(&mpctx->subs, MP_NOPTS_VALUE);
-                if (is_ass_sub(type)) { // ssa/ass subs without libass => convert to plaintext
-                    int i;
-                    unsigned char *p = packet;
-                    for (i = 0; i < 8 && *p != '\0'; p++)
-                        if (*p == ',')
-                            i++;
-                    if (*p == '\0')  /* Broken line? */
-                        continue;
-                    len -= p - packet;
-                    packet = p;
-                }
-                double endpts_s = MP_NOPTS_VALUE;
-                if (subpts_s != MP_NOPTS_VALUE && duration >= 0)
-                    endpts_s = subpts_s + duration;
-                sub_add_text(&mpctx->subs, packet, len, endpts_s);
-                set_osd_subtitle(mpctx, &mpctx->subs);
-            }
+            sub_decode(sh_sub, mpctx->osd, packet, len, subpts_s, duration);
             if (non_interleaved)
                 ds_get_next_pts(d_sub);
         }
-        if (!opts->ass_enabled)
-            if (sub_clear_text(&mpctx->subs, curpts_s))
-                set_osd_subtitle(mpctx, &mpctx->subs);
     }
     if (vo_spudec) {
         spudec_heartbeat(vo_spudec, 90000 * curpts_s);
         if (spudec_changed(vo_spudec))
             vo_osd_changed(OSDTYPE_SPU);
     }
+
+    if (!mpctx->osd->render_bitmap_subs)
+        set_osd_subtitle(mpctx, sub_get_text(mpctx->osd, curpts_s));
 }
 
 static int check_framedrop(struct MPContext *mpctx, double frame_time)
@@ -2130,12 +2084,8 @@ static void reinit_subs(struct MPContext *mpctx)
 
     mpctx->initialized_flags |= INITIALIZED_SUB;
 
-    if (track->subdata || track->sh_sub) {
-#ifdef CONFIG_ASS
-        if (opts->ass_enabled && track->sh_sub)
-            sub_init(track->sh_sub, mpctx->osd);
-#endif
-        vo_osd_changed(OSDTYPE_SUBTITLE);
+    if (track->sh_sub) {
+        sub_init(track->sh_sub, mpctx->osd);
     } else if (track->stream) {
         struct stream *s = track->demuxer ? track->demuxer->stream : NULL;
         if (s && s->type == STREAMTYPE_DVD)
@@ -2153,6 +2103,12 @@ static void reinit_subs(struct MPContext *mpctx)
         else
             sub_init(mpctx->sh_sub, mpctx->osd);
     }
+
+    // Decides whether to use OSD path or normal subtitle rendering path.
+    mpctx->osd->render_bitmap_subs = true;
+    struct sh_sub *sh_sub = mpctx->osd->sh_sub;
+    if (sh_sub && sh_sub->active && sh_sub->sd_driver->get_text)
+        mpctx->osd->render_bitmap_subs = opts->ass_enabled;
 }
 
 static char *track_layout_hash(struct MPContext *mpctx)
@@ -4551,7 +4507,6 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     talloc_free(mpctx->resolve_result);
     mpctx->resolve_result = NULL;
 
-    vo_sub = NULL;
 #ifdef CONFIG_ASS
     if (mpctx->osd->ass_renderer)
         ass_renderer_done(mpctx->osd->ass_renderer);

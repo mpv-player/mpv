@@ -51,13 +51,13 @@ bool is_dvd_sub(const char *t)
 
 void sub_init(struct sh_sub *sh, struct osd_state *osd)
 {
-    struct MPOpts *opts = sh->opts;
+    const char *format = sh->gsh->codec;
 
     assert(!osd->sh_sub);
-    if (sd_lavc.probe(sh))
+    if (sd_lavc.supports_format(format))
         sh->sd_driver = &sd_lavc;
 #ifdef CONFIG_ASS
-    if (opts->ass_enabled && sd_ass.probe(sh))
+    if (sd_ass.supports_format(format))
         sh->sd_driver = &sd_ass;
 #endif
     if (sh->sd_driver) {
@@ -68,6 +68,11 @@ void sub_init(struct sh_sub *sh, struct osd_state *osd)
         sh->initialized = true;
         sh->active = true;
     }
+}
+
+bool sub_accept_packets_in_advance(struct sh_sub *sh)
+{
+    return sh->active && sh->sd_driver->accept_packets_in_advance;
 }
 
 void sub_decode(struct sh_sub *sh, struct osd_state *osd, void *data,
@@ -99,6 +104,19 @@ void sub_get_bitmaps(struct osd_state *osd, struct mp_osd_res dim, double pts,
     res->bitmap_id += osd->switch_sub_id;
     res->bitmap_pos_id += osd->switch_sub_id;
     osd->switch_sub_id = 0;
+}
+
+char *sub_get_text(struct osd_state *osd, double pts)
+{
+    struct MPOpts *opts = osd->opts;
+    char *text = NULL;
+    if (!opts->sub_visibility || !osd->sh_sub || !osd->sh_sub->active) {
+        // -
+    } else {
+        if (osd->sh_sub->sd_driver->get_text)
+            text = osd->sh_sub->sd_driver->get_text(osd->sh_sub, osd, pts);
+    }
+    return text;
 }
 
 void sub_reset(struct sh_sub *sh, struct osd_state *osd)

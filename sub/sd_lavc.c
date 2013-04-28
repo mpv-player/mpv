@@ -41,9 +41,9 @@ struct sd_lavc_priv {
     double endpts;
 };
 
-static bool probe(struct sh_sub *sh)
+static bool supports_format(const char *format)
 {
-    enum AVCodecID cid = mp_codec_to_av_codec_id(sh->gsh->codec);
+    enum AVCodecID cid = mp_codec_to_av_codec_id(format);
     // Supported codecs must be known to decode to paletted bitmaps
     switch (cid) {
     case AV_CODEC_ID_DVB_SUBTITLE:
@@ -241,7 +241,7 @@ static void uninit(struct sh_sub *sh)
 }
 
 const struct sd_functions sd_lavc = {
-    .probe = probe,
+    .supports_format = supports_format,
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,

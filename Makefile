@@ -227,7 +227,6 @@ SOURCES = talloc.c \
           stream/url.c \
           sub/dec_sub.c \
           sub/draw_bmp.c \
-          sub/find_sub.c \
           sub/find_subfiles.c \
           sub/img_convert.c \
           sub/sd_lavc.c \

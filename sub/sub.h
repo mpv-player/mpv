@@ -85,7 +85,7 @@ struct mp_osd_res {
 
 enum mp_osdtype {
     OSDTYPE_SUB,
-    OSDTYPE_SUBTITLE,
+    OSDTYPE_SUBTEXT,
     OSDTYPE_SPU,
 
     OSDTYPE_PROGBAR,
@@ -126,11 +126,14 @@ struct osd_state {
     double vo_pts;
 
     bool render_subs_in_filter;
+    bool render_bitmap_subs;
 
     bool want_redraw;
 
     // OSDTYPE_OSD
     char *osd_text;
+    // OSDTYPE_SUBTEXT
+    char *sub_text;
     // OSDTYPE_PROGBAR
     int progbar_type;      // <0: disabled, 1-255: symbol, else: no symbol
     float progbar_value;   // range 0.0-1.0
@@ -148,8 +151,6 @@ struct osd_state {
     struct ass_renderer *osd_render;
     struct ass_library *osd_ass_library;
 };
-
-extern struct subtitle* vo_sub;
 
 extern void* vo_spudec;
 extern void* vo_vobsub;
@@ -206,6 +207,7 @@ extern float sub_fps;
 
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
 void osd_set_text(struct osd_state *osd, const char *text);
+void osd_set_sub(struct osd_state *osd, const char *text);
 void vo_osd_changed(int new_value);
 void osd_changed_all(struct osd_state *osd);
 void osd_free(struct osd_state *osd);

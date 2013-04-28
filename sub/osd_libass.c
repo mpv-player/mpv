@@ -354,7 +354,7 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
 
     clear_obj(obj);
 
-    if (!(vo_sub && opts->sub_visibility))
+    if (!osd->sub_text || !osd->sub_text[0])
         return;
 
     if (!obj->osd_track)
@@ -370,15 +370,9 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
     ass_set_line_position(osd->osd_render, 100 - sub_pos);
 #endif
 
-    char *text = talloc_strdup(NULL, "");
-
-    for (int n = 0; n < vo_sub->lines; n++)
-        text = talloc_asprintf_append_buffer(text, "%s\n", vo_sub->text[n]);
-
-    char *escaped_text = mangle_ass(text);
+    char *escaped_text = mangle_ass(osd->sub_text);
     add_osd_ass_event(obj->osd_track, escaped_text);
     talloc_free(escaped_text);
-    talloc_free(text);
 }
 
 static void update_object(struct osd_state *osd, struct osd_object *obj)
@@ -387,7 +381,7 @@ static void update_object(struct osd_state *osd, struct osd_object *obj)
     case OSDTYPE_OSD:
         update_osd(osd, obj);
         break;
-    case OSDTYPE_SUBTITLE:
+    case OSDTYPE_SUBTEXT:
         update_sub(osd, obj);
         break;
     case OSDTYPE_PROGBAR:

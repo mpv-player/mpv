@@ -22,8 +22,6 @@
 #include <stdbool.h>
 
 #include "core/options.h"
-#include "sub/subreader.h"
-#include "sub/find_subfiles.h"
 #include "audio/mixer.h"
 #include "demux/demux.h"
 
@@ -112,9 +110,6 @@ struct track {
     // External text subtitle using libass subtitle renderer.
     // The sh_sub is a dummy and doesn't belong to a demuxer.
     struct sh_sub *sh_sub;
-
-    // External text subtitle using non-libass subtitle renderer.
-    struct sub_data *subdata;
 };
 
 enum {
@@ -129,7 +124,6 @@ typedef struct MPContext {
     struct osd_state *osd;
     struct mp_osd_msg *osd_msg_stack;
     char *terminal_osd_text;
-    subtitle subs; // subtitle list used when reading subtitles from demuxer
 
     int add_osd_seek_info; // bitfield of enum mp_osd_seek_info
     double osd_visible; // for the osd bar only

@@ -1684,7 +1684,7 @@ if ((suboverlap_enabled == 2) ||
     if (return_sub == NULL) return NULL;
     subt_data = talloc_zero(NULL, sub_data);
     talloc_set_destructor(subt_data, sub_destroy);
-    subt_data->codec = srp->name;
+    subt_data->codec = "text"; //srp->name;
     subt_data->filename = strdup(filename);
     subt_data->sub_uses_time = uses_time;
     subt_data->sub_num = sub_num;
@@ -1703,104 +1703,4 @@ static int sub_destroy(void *ptr)
     free( subd->subtitles );
     free( subd->filename );
     return 0;
-}
-
-#define MAX_SUBLINE 512
-/**
- * \brief parse text and append it to subtitle in sub
- * \param sub subtitle struct to add text to
- * \param txt text to parse
- * \param len length of text in txt
- * \param endpts pts at which this subtitle text should be removed again
- *
- * <> and {} are interpreted as comment delimiters, "\n", "\N", '\n', '\r'
- * and '\0' are interpreted as newlines, duplicate, leading and trailing
- * newlines are ignored.
- */
-void sub_add_text(subtitle *sub, const char *txt, int len, double endpts) {
-  int comment = 0;
-  int double_newline = 1; // ignore newlines at the beginning
-  int i, pos;
-  char *buf;
-  if (sub->lines >= SUB_MAX_TEXT) return;
-  pos = 0;
-  buf = malloc(MAX_SUBLINE + 1);
-  sub->text[sub->lines] = buf;
-  sub->endpts[sub->lines] = endpts;
-  for (i = 0; i < len && pos < MAX_SUBLINE; i++) {
-    char c = txt[i];
-    if (c == '<') comment |= 1;
-    if (c == '{') comment |= 2;
-    if (comment) {
-      if (c == '}') comment &= ~2;
-      if (c == '>') comment &= ~1;
-      continue;
-    }
-    if (pos == MAX_SUBLINE - 1) {
-      i--;
-      c = 0;
-    }
-    if (c == '\\' && i + 1 < len) {
-      c = txt[++i];
-      if (c == 'n' || c == 'N') c = 0;
-    }
-    if (c == '\n' || c == '\r') c = 0;
-    if (c) {
-      double_newline = 0;
-      buf[pos++] = c;
-    } else if (!double_newline) {
-      if (sub->lines >= SUB_MAX_TEXT - 1) {
-        mp_msg(MSGT_VO, MSGL_WARN, "Too many subtitle lines\n");
-        break;
-      }
-      double_newline = 1;
-      buf[pos] = 0;
-      sub->lines++;
-      pos = 0;
-      buf = malloc(MAX_SUBLINE + 1);
-      sub->text[sub->lines] = buf;
-      sub->endpts[sub->lines] = endpts;
-    }
-  }
-  buf[pos] = 0;
-  if (sub->lines < SUB_MAX_TEXT &&
-      strlen(sub->text[sub->lines]))
-    sub->lines++;
-  if (sub->lines > 1 &&
-      strcmp(sub->text[sub->lines-1], sub->text[sub->lines-2]) == 0) {
-    // remove duplicate lines. These can happen with some
-    // "clever" ASS effects.
-    sub->lines--;
-    sub->endpts[sub->lines-1] =
-      FFMAX(sub->endpts[sub->lines-1],
-            sub->endpts[sub->lines]);
-    free(sub->text[sub->lines]);
-  }
-}
-
-/**
- * \brief remove outdated subtitle lines.
- * \param sub subtitle struct to modify
- * \param pts current pts. All lines with endpts <= this will be removed.
- *            Use MP_NOPTS_VALUE to remove all lines
- * \return 1 if sub was modified, 0 otherwise.
- */
-int sub_clear_text(subtitle *sub, double pts) {
-  int i = 0;
-  int changed = 0;
-  while (i < sub->lines) {
-    double endpts = sub->endpts[i];
-    if (pts == MP_NOPTS_VALUE || (endpts != MP_NOPTS_VALUE && pts >= endpts)) {
-      int j;
-      free(sub->text[i]);
-      for (j = i + 1; j < sub->lines; j++) {
-        sub->text[j - 1] = sub->text[j];
-        sub->endpts[j - 1] = sub->endpts[j];
-      }
-      sub->lines--;
-      changed = 1;
-    } else
-      i++;
-  }
-  return changed;
 }

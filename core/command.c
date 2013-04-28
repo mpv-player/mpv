@@ -1307,7 +1307,6 @@ static int mp_property_sub_visibility(m_option_t *prop, int action,
     switch (action) {
     case M_PROPERTY_SET:
         opts->sub_visibility = *(int *)arg;
-        vo_osd_changed(OSDTYPE_SUBTITLE);
         if (vo_spudec)
             vo_osd_changed(OSDTYPE_SPU);
         return M_PROPERTY_OK;
@@ -1991,26 +1990,18 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SUB_STEP:
+#ifdef CONFIG_ASS
         if (sh_video) {
             int movement = cmd->args[0].v.i;
-            struct track *track = mpctx->current_track[STREAM_SUB];
-            bool available = false;
-            if (track && track->subdata) {
-                available = true;
-                step_sub(track->subdata, mpctx->video_pts, movement);
-            }
-#ifdef CONFIG_ASS
             struct ass_track *ass_track = sub_get_ass_track(mpctx->osd);
             if (ass_track) {
-                available = true;
+                set_osd_tmsg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
+                             "Sub delay: %d ms", ROUND(sub_delay * 1000));
                 sub_delay += ass_step_sub(ass_track,
                   (mpctx->video_pts + sub_delay) * 1000 + .5, movement) / 1000.;
             }
-#endif
-            if (available)
-                set_osd_tmsg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
-                             "Sub delay: %d ms", ROUND(sub_delay * 1000));
         }
+#endif
         break;
 
     case MP_CMD_OSD: {
@@ -2194,7 +2185,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             if (tv_channel_list) {
                 set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
-                //vo_osd_changed(OSDTYPE_SUBTITLE);
             }
         }
 #ifdef CONFIG_PVR
@@ -2232,7 +2222,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             if (tv_channel_list) {
                 set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
-                //vo_osd_changed(OSDTYPE_SUBTITLE);
             }
         }
 #ifdef CONFIG_PVR
@@ -2265,7 +2254,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             if (tv_channel_list) {
                 set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
-                //vo_osd_changed(OSDTYPE_SUBTITLE);
             }
         }
 #ifdef CONFIG_PVR
