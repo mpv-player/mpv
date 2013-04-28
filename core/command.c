@@ -1272,11 +1272,12 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
 static int mp_property_sub_delay(m_option_t *prop, int action, void *arg,
                                  MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        *(char **)arg = format_delay(sub_delay);
+        *(char **)arg = format_delay(opts->sub_delay);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(prop, action, arg, mpctx);
@@ -1285,10 +1286,11 @@ static int mp_property_sub_delay(m_option_t *prop, int action, void *arg,
 static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = talloc_asprintf(NULL, "%d/100", sub_pos);
+        *(char **)arg = talloc_asprintf(NULL, "%d/100", opts->sub_pos);
         return M_PROPERTY_OK;
     }
     return property_osd_helper(prop, action, arg, mpctx);
@@ -1954,9 +1956,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             struct ass_track *ass_track = sub_get_ass_track(mpctx->osd);
             if (ass_track) {
                 set_osd_tmsg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
-                             "Sub delay: %d ms", ROUND(sub_delay * 1000));
-                sub_delay += ass_step_sub(ass_track,
-                  (mpctx->video_pts + sub_delay) * 1000 + .5, movement) / 1000.;
+                             "Sub delay: %d ms", ROUND(opts->sub_delay * 1000));
+                double cur = (mpctx->video_pts + opts->sub_delay) * 1000 + .5;
+                opts->sub_delay += ass_step_sub(ass_track, cur, movement) / 1000.;
             }
         }
 #endif

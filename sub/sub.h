@@ -198,17 +198,10 @@ struct osd_style_opts {
 
 extern const struct m_sub_options osd_style_conf;
 
-extern char *sub_cp;
-extern int sub_pos;
-
-extern float sub_delay;
-extern float sub_fps;
-
-
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
 void osd_set_text(struct osd_state *osd, const char *text);
 void osd_set_sub(struct osd_state *osd, const char *text);
-void vo_osd_changed(int new_value);
+void osd_changed(struct osd_state *osd, int new_value);
 void osd_changed_all(struct osd_state *osd);
 void osd_free(struct osd_state *osd);
 

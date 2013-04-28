@@ -41,12 +41,6 @@
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
 
-int sub_pos=100;
-int sub_visibility=1;
-
-float sub_delay = 0;
-float sub_fps = 0;
-
 static const struct osd_style_opts osd_style_opts_def = {
     .font = "Sans",
     .font_size = 45,
@@ -80,8 +74,6 @@ const struct m_sub_options osd_style_conf = {
     .defaults = &osd_style_opts_def,
 };
 
-static struct osd_state *global_osd;
-
 static bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b)
 {
     return a.w == b.w && a.h == b.h && a.ml == b.ml && a.mt == b.mt
@@ -114,7 +106,6 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
     osd->objs[OSDTYPE_SUBTEXT]->is_sub = true;  // osd_libass.c
 
     osd_init_backend(osd);
-    global_osd = osd;
     return osd;
 }
 
@@ -124,7 +115,6 @@ void osd_free(struct osd_state *osd)
         return;
     osd_destroy_backend(osd);
     talloc_free(osd);
-    global_osd = NULL;
 }
 
 static bool set_text(void *talloc_ctx, char **var, const char *text)
@@ -141,13 +131,13 @@ static bool set_text(void *talloc_ctx, char **var, const char *text)
 void osd_set_text(struct osd_state *osd, const char *text)
 {
     if (!set_text(osd, &osd->osd_text, text))
-        vo_osd_changed(OSDTYPE_OSD);
+        osd_changed(osd, OSDTYPE_OSD);
 }
 
 void osd_set_sub(struct osd_state *osd, const char *text)
 {
     if (!set_text(osd, &osd->sub_text, text))
-        vo_osd_changed(OSDTYPE_SUBTEXT);
+        osd_changed(osd, OSDTYPE_SUBTEXT);
 }
 
 static void render_object(struct osd_state *osd, struct osd_object *obj,
@@ -302,9 +292,8 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
              &draw_on_image, &closure);
 }
 
-void vo_osd_changed(int new_value)
+void osd_changed(struct osd_state *osd, int new_value)
 {
-    struct osd_state *osd = global_osd;
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         if (osd->objs[n]->type == new_value)
             osd->objs[n]->force_redraw = true;
@@ -315,5 +304,5 @@ void vo_osd_changed(int new_value)
 void osd_changed_all(struct osd_state *osd)
 {
     for (int n = 0; n < MAX_OSD_PARTS; n++)
-        vo_osd_changed(n);
+        osd_changed(osd, n);
 }

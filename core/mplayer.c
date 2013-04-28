@@ -1056,7 +1056,7 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
     // the weird special-cases.
 #ifdef CONFIG_ASS
     if (opts->ass_enabled) {
-        asst = mp_ass_read_stream(mpctx->ass_library, filename, sub_cp);
+        asst = mp_ass_read_stream(mpctx->ass_library, filename, opts->sub_cp);
         codec = "ass";
     }
     if (!asst) {
@@ -1389,7 +1389,7 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
     if (mpctx->osd_visible && now >= mpctx->osd_visible) {
         mpctx->osd_visible = 0;
         mpctx->osd->progbar_type = -1; // disable
-        vo_osd_changed(OSDTYPE_PROGBAR);
+        osd_changed(mpctx->osd, OSDTYPE_PROGBAR);
     }
     if (mpctx->osd_function_visible && now >= mpctx->osd_function_visible) {
         mpctx->osd_function_visible = 0;
@@ -1448,7 +1448,7 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
         mpctx->osd->progbar_type = type;
         mpctx->osd->progbar_value = (val - min) / (max - min);
         mpctx->osd->progbar_num_stops = 0;
-        vo_osd_changed(OSDTYPE_PROGBAR);
+        osd_changed(mpctx->osd, OSDTYPE_PROGBAR);
         return;
     }
 
@@ -1465,7 +1465,7 @@ static void update_osd_bar(struct MPContext *mpctx, int type,
         float new_value = (val - min) / (max - min);
         if (new_value != mpctx->osd->progbar_value) {
             mpctx->osd->progbar_value = new_value;
-            vo_osd_changed(OSDTYPE_PROGBAR);
+            osd_changed(mpctx->osd, OSDTYPE_PROGBAR);
         }
     }
 }
@@ -1831,6 +1831,7 @@ static void reset_subtitles(struct MPContext *mpctx)
 
 static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
 {
+    struct MPOpts *opts = &mpctx->opts;
     struct sh_sub *sh_sub = mpctx->sh_sub;
     struct demux_stream *d_sub = sh_sub ? sh_sub->ds : NULL;
     unsigned char *packet = NULL;
@@ -1843,7 +1844,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
 
     double video_offset = track->under_timeline ? mpctx->video_offset : 0;
 
-    mpctx->osd->sub_offset = video_offset - sub_delay;
+    mpctx->osd->sub_offset = video_offset - opts->sub_delay;
 
     double curpts_s = refpts_tl - mpctx->osd->sub_offset;
     double refpts_s = refpts_tl - video_offset;

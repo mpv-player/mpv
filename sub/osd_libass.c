@@ -367,7 +367,7 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
     mp_ass_set_style(style, &font);
 
 #if LIBASS_VERSION >= 0x01010000
-    ass_set_line_position(osd->osd_render, 100 - sub_pos);
+    ass_set_line_position(osd->osd_render, 100 - opts->sub_pos);
 #endif
 
     char *escaped_text = mangle_ass(osd->sub_text);

@@ -84,7 +84,7 @@ ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
     track->WrapStyle = 0;
 
     if (opts->ass_styles_file && opts->ass_style_override)
-        ass_read_styles(track, opts->ass_styles_file, sub_cp);
+        ass_read_styles(track, opts->ass_styles_file, opts->sub_cp);
 
     if (track->n_styles == 0) {
         track->Kerning = true;
@@ -225,7 +225,7 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
     if (opts->ass_style_override) {
         set_use_margins = opts->ass_use_margins;
 #if LIBASS_VERSION >= 0x01010000
-        set_sub_pos = 100 - sub_pos;
+        set_sub_pos = 100 - opts->sub_pos;
 #endif
         set_line_spacing = opts->ass_line_spacing;
         set_font_scale = opts->sub_scale;
