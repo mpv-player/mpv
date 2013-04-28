@@ -1284,7 +1284,10 @@
     See ``quit_watch_later`` input command.
 
 --no-sub
-    Disables display of internal and external subtitles.
+    Don't select any subtitle when the file is loaded.
+
+--no-sub-visibility
+    Disable display of subtitles, but still select and decode them.
 
 --no-video
     Do not play video. With some demuxers this may not work. In those cases

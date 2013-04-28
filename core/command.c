@@ -1294,28 +1294,6 @@ static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
     return property_osd_helper(prop, action, arg, mpctx);
 }
 
-/// Subtitle visibility (RW)
-static int mp_property_sub_visibility(m_option_t *prop, int action,
-                                      void *arg, MPContext *mpctx)
-{
-    struct MPOpts *opts = &mpctx->opts;
-
-    if (!mpctx->sh_video)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_SET:
-        opts->sub_visibility = *(int *)arg;
-        osd_changed_all(mpctx->osd);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-        *(int *)arg = opts->sub_visibility;
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-
 #ifdef CONFIG_TV
 
 static tvi_handle_t *get_tvh(struct MPContext *mpctx)
@@ -1493,8 +1471,7 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("sid", mp_property_sub),
     M_OPTION_PROPERTY_CUSTOM("sub-delay", mp_property_sub_delay),
     M_OPTION_PROPERTY_CUSTOM("sub-pos", mp_property_sub_pos),
-    { "sub-visibility", mp_property_sub_visibility, CONF_TYPE_FLAG,
-      M_OPT_RANGE, 0, 1, NULL },
+    M_OPTION_PROPERTY_CUSTOM("sub-visibility", property_osd_helper),
     M_OPTION_PROPERTY_CUSTOM("sub-forced-only", property_osd_helper),
     M_OPTION_PROPERTY_CUSTOM("sub-scale", property_osd_helper),
 #ifdef CONFIG_ASS
