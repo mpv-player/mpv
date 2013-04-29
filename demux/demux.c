@@ -244,9 +244,9 @@ demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
 static struct sh_stream *new_sh_stream_id(demuxer_t *demuxer,
                                           enum stream_type type,
                                           int stream_index,
-                                          int tid)
+                                          int demuxer_id)
 {
-    if (demuxer->num_streams > MAX_SH_STREAMS) {
+    if (demuxer->num_streams > MAX_SH_STREAMS || stream_index > MAX_SH_STREAMS) {
         mp_msg(MSGT_DEMUXER, MSGL_WARN, "Too many streams.");
         return NULL;
     }
@@ -255,8 +255,7 @@ static struct sh_stream *new_sh_stream_id(demuxer_t *demuxer,
         .type = type,
         .demuxer = demuxer,
         .index = demuxer->num_streams,
-        .demuxer_id = tid, // may be overwritten by demuxer
-        .tid = tid,
+        .demuxer_id = demuxer_id, // may be overwritten by demuxer
         .stream_index = stream_index,
         .opts = demuxer->opts,
     });
@@ -1203,7 +1202,7 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
     int old_id = demuxer->ds[type]->id;
 
     // legacy
-    int index = stream ? stream->tid : -2;
+    int index = stream ? stream->stream_index : -2;
     if (type == STREAM_AUDIO) {
         if (demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index)
                 == DEMUXER_CTRL_NOTIMPL)
@@ -1213,8 +1212,7 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
                 == DEMUXER_CTRL_NOTIMPL)
             demuxer->video->id = index;
     } else if (type == STREAM_SUB) {
-        int index2 = stream ? stream->stream_index : -2;
-        demuxer->ds[type]->id = index2;
+        demuxer->ds[type]->id = index;
     } else {
         abort();
     }
@@ -1238,12 +1236,7 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
 
 bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream)
 {
-    if (!stream)
-        return false;
-    int st_id = stream->tid;
-    if (stream->type == STREAM_SUB) // major braindeath
-        st_id = stream->stream_index;
-    return d->ds[stream->type]->id == st_id;
+    return stream && d->ds[stream->type]->id == stream->stream_index;
 }
 
 int demuxer_add_attachment(demuxer_t *demuxer, struct bstr name,
