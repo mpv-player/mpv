@@ -97,6 +97,8 @@ void m_config_free(struct m_config *config);
 
 void m_config_enter_file_local(struct m_config *config);
 void m_config_leave_file_local(struct m_config *config);
+void m_config_mark_file_local(struct m_config *config, const char *opt);
+void m_config_mark_all_file_local(struct m_config *config);
 
 /*  Register some options to be used.
  *  \param config The config object.

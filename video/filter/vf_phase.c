@@ -205,7 +205,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 
    int pw[MP_MAX_PLANES] = {0};
    for (int p = 0; p < mpi->num_planes; p++)
-       pw[p] = (mpi->w * mpi->fmt.bpp[p] + 7) / 8;
+       pw[p] = ((mpi->w * mpi->fmt.bpp[p] + 7) / 8) >> mpi->fmt.xs[p];
 
    mode=vf->priv->mode;
 

@@ -160,7 +160,7 @@ static int setup_format(sh_audio_t *sh_audio,
     int container_samplerate = sh_audio->container_out_samplerate;
     if (!container_samplerate && sh_audio->wf)
         container_samplerate = sh_audio->wf->nSamplesPerSec;
-    if (lavc_context->codec_id == CODEC_ID_AAC
+    if (lavc_context->codec_id == AV_CODEC_ID_AAC
         && samplerate == 2 * container_samplerate)
         broken_srate = true;
     else if (container_samplerate)
@@ -310,7 +310,7 @@ static void uninit(sh_audio_t *sh)
     sh->context = NULL;
 }
 
-static int control(sh_audio_t *sh, int cmd, void *arg, ...)
+static int control(sh_audio_t *sh, int cmd, void *arg)
 {
     struct priv *ctx = sh->context;
     switch (cmd) {

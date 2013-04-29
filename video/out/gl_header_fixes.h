@@ -216,6 +216,9 @@
 #ifndef GL_PROGRAM_ERROR_STRING
 #define GL_PROGRAM_ERROR_STRING 0x8874
 #endif
+#ifndef GL_RGBA32F
+#define GL_RGBA32F 0x8814
+#endif
 /** \} */ // end of glextdefines group
 
 

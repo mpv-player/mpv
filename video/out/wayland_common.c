@@ -61,8 +61,8 @@
 
 static int lookupkey(int key);
 
-static void hide_cursor(struct vo_wayland_display * display);
-static void show_cursor(struct vo_wayland_display * display);
+static void hide_cursor(struct vo_wayland_state * wl);
+static void show_cursor(struct vo_wayland_state * wl);
 
 
 /*** wayland interface ***/
@@ -382,10 +382,14 @@ static void pointer_handle_enter(void *data,
     display->cursor.serial = serial;
     display->cursor.pointer = pointer;
 
-    if (wl->window->type == TYPE_FULLSCREEN)
-        hide_cursor(display);
+    /* Release the left button on pointer enter again
+     * because after moving the shell surface no release event is sent */
+    mplayer_put_key(wl->vo->key_fifo, MP_MOUSE_BTN0);
+
+    if (wl->window->type == TYPE_FULLSCREEN || wl->vo->opts->cursor_autohide_delay == -2)
+        hide_cursor(wl);
     else if (display->cursor.default_cursor) {
-        show_cursor(display);
+        show_cursor(wl);
     }
 }
 
@@ -407,15 +411,18 @@ static void pointer_handle_motion(void *data,
 
     display->cursor.pointer = pointer;
 
-    struct itimerspec its;
-
     if (wl->window->type == TYPE_FULLSCREEN) {
-        show_cursor(display);
+        show_cursor(wl);
 
-        its.it_interval.tv_sec = 1;
-        its.it_interval.tv_nsec = 0;
-        its.it_value.tv_sec = 1;
-        its.it_value.tv_nsec = 0;
+        struct itimerspec its;
+        int ms = wl->vo->opts->cursor_autohide_delay;
+        int sec = ms / 1000;
+        ms %= 1000;
+
+        its.it_interval.tv_sec = 0;
+        its.it_interval.tv_nsec = 100 * 1000 * 1000;
+        its.it_value.tv_sec = sec;
+        its.it_value.tv_nsec = ms * 1000 * 1000;
         timerfd_settime(display->cursor.timer_fd, 0, &its, NULL);
     }
 }
@@ -431,6 +438,10 @@ static void pointer_handle_button(void *data,
 
     mplayer_put_key(wl->vo->key_fifo, MP_MOUSE_BTN0 + (button - BTN_LEFT) |
         ((state == WL_POINTER_BUTTON_STATE_PRESSED) ? MP_KEY_STATE_DOWN : 0));
+
+    if ((button == BTN_LEFT) && (state == WL_POINTER_BUTTON_STATE_PRESSED))
+        wl_shell_surface_move(wl->window->shell_surface, wl->input->seat, serial);
+
 }
 
 static void pointer_handle_axis(void *data,
@@ -620,18 +631,20 @@ static int lookupkey(int key)
     return mpkey;
 }
 
-static void hide_cursor (struct vo_wayland_display *display)
+static void hide_cursor (struct vo_wayland_state *wl)
 {
-    if (!display->cursor.pointer)
+    struct vo_wayland_display *display = wl->display;
+    if (!display->cursor.pointer || wl->vo->opts->cursor_autohide_delay == -1)
         return;
 
     wl_pointer_set_cursor(display->cursor.pointer, display->cursor.serial,
             NULL, 0, 0);
 }
 
-static void show_cursor (struct vo_wayland_display *display)
+static void show_cursor (struct vo_wayland_state *wl)
 {
-    if (!display->cursor.pointer)
+    struct vo_wayland_display *display = wl->display;
+    if (!display->cursor.pointer || wl->vo->opts->cursor_autohide_delay == -2)
         return;
 
     struct wl_buffer *buffer;
@@ -696,10 +709,8 @@ static void cursor_timer_func(struct vo_wayland_task *task,
                               uint32_t events,
                               struct vo_wayland_state *wl)
 {
-    struct vo_wayland_display *display = wl->display;
-
     if (wl->window->type == TYPE_FULLSCREEN)
-        hide_cursor(display);
+        hide_cursor(wl);
 }
 
 static void keyboard_timer_func(struct vo_wayland_task *task,
@@ -928,7 +939,7 @@ void vo_wayland_fullscreen (struct vo *vo)
         wl->window->type = TYPE_FULLSCREEN;
         vo->opts->fs = true;
 
-        hide_cursor(wl->display);
+        hide_cursor(wl);
     }
 
     else {
@@ -938,7 +949,7 @@ void vo_wayland_fullscreen (struct vo *vo)
         wl->window->type = TYPE_TOPLEVEL;
         vo->opts->fs = false;
 
-        show_cursor(wl->display);
+        show_cursor(wl);
     }
 }
 

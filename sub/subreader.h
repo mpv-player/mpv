@@ -72,6 +72,7 @@ typedef struct subtitle {
 } subtitle;
 
 typedef struct sub_data {
+    const char *codec;
     subtitle *subtitles;
     char *filename;
     int sub_uses_time;

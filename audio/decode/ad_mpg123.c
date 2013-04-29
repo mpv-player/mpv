@@ -455,7 +455,7 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf, int minlen,
     return bytes;
 }
 
-static int control(sh_audio_t *sh, int cmd, void *arg, ...)
+static int control(sh_audio_t *sh, int cmd, void *arg)
 {
     switch (cmd) {
     case ADCTRL_RESYNC_STREAM:

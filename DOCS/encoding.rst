@@ -67,7 +67,7 @@ Typical MPEG-4 Part 10 ("AVC", "H.264") encoding, Matroska (MKV) container::
 
   mpv infile -o outfile.mkv \
     -ovc libx264 -ovcopts preset=medium,crf=23,profile=baseline \
-    -oac vorbis -oacopts qscale=3
+    -oac libvorbis -oacopts qscale=3
 
 Typical MPEG-4 Part 10 ("AVC", "H.264") encoding, MPEG-4 (MP4) container::
 

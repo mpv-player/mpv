@@ -31,8 +31,6 @@ typedef struct demux_packet {
     int64_t pos; // position in index (AVI) or file (MPG)
     unsigned char *buffer;
     bool keyframe;
-    int refcount; // counter for the master packet, if 0, buffer can be free()d
-    struct demux_packet *master; //in clones, pointer to the master packet
     struct demux_packet *next;
     struct AVPacket *avpacket;   // original libavformat packet (demux_lavf)
 } demux_packet_t;

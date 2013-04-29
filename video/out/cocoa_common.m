@@ -92,6 +92,8 @@ static bool RightAltPressed(NSEvent *event)
 - (void)fullscreen;
 - (void)mouseEvent:(NSEvent *)theEvent;
 - (void)mulSize:(float)multiplier;
+- (int)titleHeight;
+- (NSRect)clipFrame:(NSRect)frame withContentAspect:(NSSize) aspect;
 - (void)setContentSize:(NSSize)newSize keepCentered:(BOOL)keepCentered;
 @end
 
@@ -201,7 +203,7 @@ static void disable_power_management(struct vo *vo)
         assertion_type = kIOPMAssertionTypePreventUserIdleDisplaySleep;
 
     IOPMAssertionCreateWithName(assertion_type, kIOPMAssertionLevelOn,
-        CFSTR("org.mplayer2.power_mgmt"), &s->power_mgmt_assertion);
+        CFSTR("io.mpv.power_management"), &s->power_mgmt_assertion);
 }
 
 int vo_cocoa_init(struct vo *vo)
@@ -409,6 +411,9 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     [NSApp setDelegate:s->window];
     [s->window setDelegate:s->window];
 
+    [s->window setContentSize:s->current_video_size keepCentered:YES];
+    [s->window setContentAspectRatio:s->current_video_size];
+
     return 0;
 }
 
@@ -453,6 +458,8 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
         update_window(vo);
     }
 
+    [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
+
     if (flags & VOFLAG_HIDDEN) {
         [s->window orderOut:nil];
     } else {
@@ -460,14 +467,10 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
         [NSApp activateIgnoringOtherApps:YES];
     }
 
-    if (flags & VOFLAG_FULLSCREEN)
+    if (flags & VOFLAG_FULLSCREEN && !vo->opts->fs)
         vo_cocoa_fullscreen(vo);
 
     vo_set_level(vo, opts->ontop);
-
-    [s->window setContentSize:s->current_video_size];
-    [s->window setContentAspectRatio:s->current_video_size];
-    [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
 
     resize_window(vo);
 
@@ -902,35 +905,58 @@ void create_menu()
     }
 }
 
-- (void)setCenteredContentSize:(NSSize)ns
+- (int)titleHeight
 {
-    NSRect nf = [self frame];
-    NSRect vf = [[self screen] visibleFrame];
-    NSRect cb = [[self contentView] bounds];
-    int title_height = nf.size.height - cb.size.height;
-    double ratio = (double)ns.width / (double)ns.height;
+    NSRect of    = [self frame];
+    NSRect cb    = [[self contentView] bounds];
+    return of.size.height - cb.size.height;
+}
 
-    // clip the new size to the visibleFrame's size if needed
-    if (ns.width > vf.size.width || ns.height + title_height > vf.size.height) {
-        ns = vf.size;
-        ns.height -= title_height; // make space for the title bar
+- (NSRect)clipFrame:(NSRect)frame withContentAspect:(NSSize) aspect
+{
+    NSRect vf    = [[self screen] visibleFrame];
+    double ratio = (double)aspect.width / (double)aspect.height;
 
-        if (ns.width > ns.height) {
-            ns.height = ((double)ns.width * 1/ratio + 0.5);
-        } else {
-            ns.width = ((double)ns.height * ratio + 0.5);
-        }
+    // clip frame to screens visibile frame
+    frame = CGRectIntersection(frame, vf);
+
+    NSSize s = frame.size;
+    s.height -= [self titleHeight];
+
+    if (s.width > s.height) {
+        s.width  = ((double)s.height * ratio);
+    } else {
+        s.height = ((double)s.width * 1.0/ratio);
     }
 
-    int dw = nf.size.width - ns.width;
-    int dh = nf.size.height - ns.height - title_height;
+    s.height += [self titleHeight];
+    frame.size = s;
 
-    nf.origin.x += dw / 2;
-    nf.origin.y += dh / 2;
+    return frame;
+}
 
-    NSRect new_frame =
-        NSMakeRect(nf.origin.x, nf.origin.y, ns.width, ns.height + title_height);
-    [self setFrame:new_frame display:YES animate:NO];
+- (void)setCenteredContentSize:(NSSize)ns
+{
+#define get_center(x) NSMakePoint(CGRectGetMidX((x)), CGRectGetMidY((x)))
+    NSRect of    = [self frame];
+    NSRect vf    = [[self screen] visibleFrame];
+    NSPoint old_center = get_center(of);
+
+    NSRect nf = NSMakeRect(vf.origin.x, vf.origin.y,
+                           ns.width, ns.height + [self titleHeight]);
+
+    nf = [self clipFrame:nf withContentAspect:ns];
+
+    NSPoint new_center = get_center(nf);
+
+    int dx0 = old_center.x - new_center.x;
+    int dy0 = old_center.y - new_center.y;
+
+    nf.origin.x += dx0;
+    nf.origin.y += dy0;
+
+    [self setFrame:nf display:YES animate:NO];
+#undef get_center
 }
 
 - (void)setContentSize:(NSSize)ns keepCentered:(BOOL)keepCentered

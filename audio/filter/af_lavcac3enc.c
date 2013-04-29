@@ -27,7 +27,9 @@
 #include <assert.h>
 
 #include <libavcodec/avcodec.h>
+#include <libavutil/audioconvert.h>
 #include <libavutil/intreadwrite.h>
+#include <libavutil/common.h>
 #include <libavutil/mem.h>
 
 #include "config.h"
@@ -47,6 +49,7 @@ const uint16_t ac3_bitrate_tab[19] = {
 typedef struct af_ac3enc_s {
     struct AVCodec        *lavc_acodec;
     struct AVCodecContext *lavc_actx;
+    AVPacket pkt;
     bool planarize;
     int add_iec61937_header;
     int bit_rate;
@@ -105,6 +108,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
             // Put sample parameters
             s->lavc_actx->channels = af->data->nch;
+            s->lavc_actx->channel_layout =
+                av_get_default_channel_layout(af->data->nch);
             s->lavc_actx->sample_rate = af->data->rate;
             s->lavc_actx->bit_rate = bit_rate;
 
@@ -155,12 +160,13 @@ static int control(struct af_instance *af, int cmd, void *arg)
 // Deallocate memory
 static void uninit(struct af_instance* af)
 {
+    af_ac3enc_t *s = af->setup;
+
     if (af->data)
         free(af->data->audio);
     free(af->data);
-    if (af->setup) {
-        af_ac3enc_t *s = af->setup;
-        af->setup = NULL;
+    if (s) {
+        av_free_packet(&s->pkt);
         if(s->lavc_actx) {
             avcodec_close(s->lavc_actx);
             av_free(s->lavc_actx);
@@ -176,8 +182,8 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
     af_ac3enc_t *s = af->setup;
     struct mp_audio *c = data;    // Current working data
     struct mp_audio *l;
-    int len, left, outsize = 0, destsize;
-    char *buf, *src, *dest;
+    int left, outsize = 0;
+    char *buf, *src;
     int max_output_len;
     int frame_num = (data->len + s->pending_len) / s->expect_len;
     int samplesize = af_fmt2bits(s->in_sampleformat) / 8;
@@ -207,6 +213,8 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 
 
     while (left > 0) {
+        int ret;
+
         if (left + s->pending_len < s->expect_len) {
             memcpy(s->pending_data + s->pending_len, src, left);
             src += left;
@@ -215,8 +223,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
             break;
         }
 
-        dest = s->add_iec61937_header ? buf + 8 : buf;
-        destsize = (char *)l->audio + l->len - buf;
+        char *src2 = src;
 
         if (s->pending_len) {
             int needs = s->expect_len - s->pending_len;
@@ -225,58 +232,69 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
                 src += needs;
                 left -= needs;
             }
-
-            if (c->nch >= 5)
-                reorder_channel_nch(s->pending_data,
-                                    AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
-                                    AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
-                                    c->nch,
-                                    s->expect_len / samplesize, samplesize);
-
-            void *data = (void *) s->pending_data;
-            if (s->planarize) {
-                void *data2 = malloc(s->expect_len);
-                reorder_to_planar(data2, data, samplesize,
-                        c->nch, s->expect_len / samplesize / c->nch);
-                data = data2;
-            }
-
-            len = avcodec_encode_audio(s->lavc_actx, dest, destsize, data);
-
-            if (s->planarize)
-                free(data);
-
-            s->pending_len = 0;
+            src2= s->pending_data;
         }
-        else {
-            if (c->nch >= 5)
-                reorder_channel_nch(src,
-                                    AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
-                                    AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
-                                    c->nch,
-                                    s->expect_len / samplesize, samplesize);
 
-            void *data = (void *) src;
-            if (s->planarize) {
-                void *data2 = malloc(s->expect_len);
-                reorder_to_planar(data2, data, samplesize,
-                        c->nch, s->expect_len / samplesize / c->nch);
-                data = data2;
-            }
+        if (c->nch >= 5) {
+            reorder_channel_nch(src2,
+                                AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
+                                AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
+                                c->nch,
+                                s->expect_len / samplesize,
+                                samplesize);
+        }
 
-            len = avcodec_encode_audio(s->lavc_actx, dest, destsize, data);
+        void *data = (void *) src2;
+        if (s->planarize) {
+            void *data2 = malloc(s->expect_len);
+            reorder_to_planar(data2, data, samplesize,
+                    c->nch, s->expect_len / samplesize / c->nch);
+            data = data2;
+        }
 
-            if (s->planarize)
-                free(data);
+        AVFrame *frame = avcodec_alloc_frame();
+        if (!frame) {
+            mp_msg(MSGT_AFILTER, MSGL_FATAL, "[libaf] Could not allocate memory \n");
+            return NULL;
+        }
+        frame->nb_samples = AC3_FRAME_SIZE;
+        frame->format = s->lavc_actx->sample_fmt;
+        frame->channel_layout = s->lavc_actx->channel_layout;
 
+        ret = avcodec_fill_audio_frame(frame, c->nch, s->lavc_actx->sample_fmt,
+                                       (const uint8_t*)data, s->expect_len, 0);
+        if (ret < 0) {
+            mp_msg(MSGT_AFILTER, MSGL_FATAL, "[lavac3enc] Frame setup failed.\n");
+            return NULL;
+        }
+
+        int ok;
+        ret = avcodec_encode_audio2(s->lavc_actx, &s->pkt, frame, &ok);
+        if (ret < 0 || !ok) {
+            mp_msg(MSGT_AFILTER, MSGL_FATAL, "[lavac3enc] Encode failed.\n");
+            return NULL;
+        }
+
+        if (s->planarize)
+            free(data);
+
+        avcodec_free_frame(&frame);
+
+        if (s->pending_len) {
+            s->pending_len = 0;
+        } else {
             src += s->expect_len;
             left -= s->expect_len;
         }
-        mp_msg(MSGT_AFILTER, MSGL_DBG2, "avcodec_encode_audio got %d, pending %d.\n",
-               len, s->pending_len);
 
+        mp_msg(MSGT_AFILTER, MSGL_DBG2, "avcodec_encode_audio got %d, pending %d.\n",
+               s->pkt.size, s->pending_len);
+
+        int len = s->pkt.size;
+        int header_len = 0;
         if (s->add_iec61937_header) {
-            int bsmod = dest[5] & 0x7;
+            assert(s->pkt.size > 5);
+            int bsmod = s->pkt.data[5] & 0x7;
 
             AV_WB16(buf,     0xF872);   // iec 61937 syncword 1
             AV_WB16(buf + 2, 0x4E1F);   // iec 61937 syncword 2
@@ -285,8 +303,14 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
             AV_WB16(buf + 6, len << 3); // number of bits in payload
 
             memset(buf + 8 + len, 0, AC3_FRAME_SIZE * 2 * 2 - 8 - len);
+            header_len = 8;
             len = AC3_FRAME_SIZE * 2 * 2;
         }
+
+        assert(buf + len <= (char *)af->data->audio + af->data->len);
+        assert(s->pkt.size <= len - header_len);
+
+        memcpy(buf + header_len, s->pkt.data, s->pkt.size);
 
         outsize += len;
         buf += len;
@@ -359,6 +383,8 @@ static int af_open(struct af_instance* af){
     if (s->planarize)
         mp_msg(MSGT_AFILTER, MSGL_WARN,
                 "[af_lavcac3enc]: need to planarize audio data\n");
+
+    av_init_packet(&s->pkt);
 
     return AF_OK;
 }

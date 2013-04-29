@@ -37,6 +37,8 @@
 
 #include "core/mp_msg.h"
 
+bool mp_msg_stdout_in_use = 0;
+
 /* maximum message length of mp_msg */
 #define MSGSIZE_MAX 6144
 
@@ -111,8 +113,8 @@ int mp_msg_test(int mod, int lev)
 {
 #ifndef __MINGW32__
     if (lev == MSGL_STATUS) {
-        // skip status line output if we are not in the foreground process group
-        if (tcgetpgrp(0) != getpgrp())
+        // skip status line output if stderr is a tty but in background
+        if (isatty(2) && tcgetpgrp(2) != getpgrp())
             return false;
     }
 #endif
@@ -121,7 +123,7 @@ int mp_msg_test(int mod, int lev)
 
 static void set_msg_color(FILE* stream, int lev)
 {
-    static const unsigned char v_colors[10] = {9, 1, 3, 15, 7, 7, 2, 8, 8, 8};
+    static const int v_colors[10] = {9, 1, 3, 3, -1, -1, 2, 8, 8, 8};
     int c = v_colors[lev];
 #ifdef MP_ANNOY_ME
     /* that's only a silly color test */
@@ -138,9 +140,15 @@ static void set_msg_color(FILE* stream, int lev)
     {
 #ifdef _WIN32
         HANDLE *wstream = stream == stderr ? hSTDERR : hSTDOUT;
+        if (c == -1)
+            c = 7;
         SetConsoleTextAttribute(wstream, ansi2win32[c] | FOREGROUND_INTENSITY);
 #else
-        fprintf(stream, "\033[%d;3%dm", c >> 3, c & 7);
+        if (c == -1) {
+            fprintf(stream, "\033[0m");
+        } else {
+            fprintf(stream, "\033[%d;3%dm", c >> 3, c & 7);
+        }
 #endif
     }
 }
@@ -219,7 +227,8 @@ static void print_msg_module(FILE* stream, int mod)
 void mp_msg_va(int mod, int lev, const char *format, va_list va)
 {
     char tmp[MSGSIZE_MAX];
-    FILE *stream = lev == MSGL_STATUS ? stderr : stdout;
+    FILE *stream =
+        (mp_msg_stdout_in_use || (lev == MSGL_STATUS)) ? stderr : stdout;
     static int header = 1;
     // indicates if last line printed was a status line
     static int statusline;

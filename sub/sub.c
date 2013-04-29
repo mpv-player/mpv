@@ -79,6 +79,7 @@ const struct m_sub_options osd_style_conf = {
         OPT_FLOATRANGE("spacing", spacing, 0, -10, 10),
         OPT_INTRANGE("margin-x", margin_x, 0, 0, 300),
         OPT_INTRANGE("margin-y", margin_y, 0, 0, 600),
+        OPT_FLOATRANGE("blur", blur, 0, 0, 20),
         {0}
     },
     .size = sizeof(struct osd_style_opts),

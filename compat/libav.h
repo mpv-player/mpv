@@ -28,21 +28,4 @@
 #define AV_CPU_FLAG_MMX2 AV_CPU_FLAG_MMXEXT
 #endif
 
-#if (LIBAVUTIL_VERSION_MICRO < 100) || (LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 53, 100))
-#define AV_CODEC_ID_SUBRIP CODEC_ID_TEXT
-#endif
-
-#if LIBAVUTIL_VERSION_INT < AV_VERSION_INT(51, 36, 0)
-#define av_get_packed_sample_fmt(x) (x)
-#endif
-
-#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 28, 0)
-#define avcodec_free_frame av_freep
-#endif
-
-// For Libav 0.9
-#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(54, 2, 100)
-#define AV_DISPOSITION_ATTACHED_PIC      0x0400
-#endif
-
 #endif /* MPV_LIBAV_COMPAT_H */

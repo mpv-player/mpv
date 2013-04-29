@@ -79,6 +79,17 @@ seek <seconds> [relative|absolute|absolute-percent|- [default-precise|exact|keyf
 frame_step
     Play one frame, then pause.
 
+frame_back_step
+    Go back by one frame, then pause. Note that this can be very slow (it tries
+    to be precise, not fast), and sometimes fails to behave as expected. How
+    well this works depends on whether precise seeking works correctly (e.g.
+    see the ``--hr-seek-demuxer-offset`` option). Video filters or other video
+    postprocessing that modifies timing of frames (e.g. deinterlacing) should
+    usually work, but might make backstepping silently behave incorrectly in
+    corner cases.
+
+    This doesn't work with audio-only playback.
+
 set <property> "<value>"
     Set the given property to the given value.
 
@@ -305,17 +316,18 @@ contrast                    x see ``--contrast``
 saturation                  x see ``--saturation``
 hue                         x see ``--hue``
 panscan                     x see ``--panscan``
-vsync                       x see ``--vsync``
 video-format                  video format (string)
 video-codec                   video codec selected for decoding
 video-bitrate                 video bitrate
-width                         video width
+width                         video width (container or decoded size)
 height                        video height
-fps                           FPS (may contain bogus values)
+fps                           container FPS (may contain bogus values)
+dwidth                        video width (after filters and aspect scaling)
+dheight                       video height
 aspect                      x video aspect
 video                       x current video track (similar to ``--vid``)
 program                     x switch TS program (write-only)
-sub                         x current subttitle track (similar to ``--sid``)
+sub                         x current subtitle track (similar to ``--sid``)
 sub-delay                   x see ``--sub-delay``
 sub-pos                     x see ``--sub-pos``
 sub-visibility              x whether current subtitle is rendered

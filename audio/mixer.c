@@ -130,6 +130,7 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
     if (!mixer->ao || mixer->muted_using_volume)
         return;
     setvolume_internal(mixer, mixer->vol_l, mixer->vol_r);
+    mixer->user_set_volume = true;
 }
 
 void mixer_getbothvolume(mixer_t *mixer, float *b)
@@ -152,6 +153,7 @@ void mixer_setmute(struct mixer *mixer, bool mute)
         }
         mixer->muted = mute;
         mixer->muted_by_us = mute;
+        mixer->user_set_mute = true;
     }
 }
 
@@ -264,6 +266,8 @@ void mixer_reinit(struct mixer *mixer, struct ao *ao)
         mixer_setmute(mixer, true);
     if (mixer->balance != 0)
         mixer_setbalance(mixer, mixer->balance);
+    mixer->user_set_mute = false;
+    mixer->user_set_volume = false;
 }
 
 /* Called before uninitializing the audio output. The main purpose is to

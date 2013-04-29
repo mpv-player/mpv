@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <libavutil/common.h>
+
 /* Stuff for correct aspect scaling. */
 #include "aspect.h"
 #include "vo.h"
@@ -43,33 +45,39 @@ void aspect_save_screenres(struct vo *vo, int scrw, int scrh)
         scrh = (scrw * 3 + 3) / 4;
     if (scrw <= 0)
         scrw = (scrh * 4 + 2) / 3;
-    vo->aspdat.scrw = scrw;
-    vo->aspdat.scrh = scrh;
     if (opts->force_monitor_aspect)
-        vo->monitor_par = opts->force_monitor_aspect * scrh / scrw;
+        vo->aspdat.monitor_par = opts->force_monitor_aspect * scrh / scrw;
     else
-        vo->monitor_par = 1.0 / opts->monitor_pixel_aspect;
+        vo->aspdat.monitor_par = 1.0 / opts->monitor_pixel_aspect;
 }
 
-/* aspect is called with the source resolution and the
- * resolution, that the scaled image should fit into
- */
+void aspect_calc_monitor(struct vo *vo, int *w, int *h)
+{
+    float pixelaspect = vo->aspdat.monitor_par;
 
-void aspect_fit(struct vo *vo, int *srcw, int *srch, int fitw, int fith)
+    if (pixelaspect < 1) {
+        *h /= pixelaspect;
+    } else {
+        *w *= pixelaspect;
+    }
+}
+
+static void aspect_calc(struct vo *vo, int *srcw, int *srch)
 {
     struct aspect_data *aspdat = &vo->aspdat;
-    float pixelaspect = vo->monitor_par;
+    float pixelaspect = aspdat->monitor_par;
+
+    int fitw = FFMAX(1, vo->dwidth);
+    int fith = FFMAX(1, vo->dheight);
 
     mp_msg(MSGT_VO, MSGL_DBG2, "aspect(0) fitin: %dx%d monitor_par: %.2f\n",
-           fitw, fith, vo->monitor_par);
+           fitw, fith, aspdat->monitor_par);
     *srcw = fitw;
     *srch = (float)fitw / aspdat->prew * aspdat->preh / pixelaspect;
-    *srch += *srch % 2; // round
     mp_msg(MSGT_VO, MSGL_DBG2, "aspect(1) wh: %dx%d (org: %dx%d)\n",
            *srcw, *srch, aspdat->prew, aspdat->preh);
     if (*srch > fith || *srch < aspdat->orgh) {
         int tmpw = (float)fith / aspdat->preh * aspdat->prew * pixelaspect;
-        tmpw += tmpw % 2; // round
         if (tmpw <= fitw) {
             *srch = fith;
             *srcw = tmpw;
@@ -83,65 +91,21 @@ void aspect_fit(struct vo *vo, int *srcw, int *srch, int fitw, int fith)
            *srcw, *srch, aspdat->prew, aspdat->preh);
 }
 
-static void get_max_dims(struct vo *vo, int *w, int *h, int zoom)
+void aspect_calc_panscan(struct vo *vo, int *out_w, int *out_h)
 {
-    struct aspect_data *aspdat = &vo->aspdat;
-    *w = zoom ? aspdat->scrw : aspdat->prew;
-    *h = zoom ? aspdat->scrh : aspdat->preh;
-    if (zoom && vo->opts->WinID >= 0)
-        zoom = A_WINZOOM;
-    if (zoom == A_WINZOOM) {
-        *w = vo->dwidth;
-        *h = vo->dheight;
-    }
-}
-
-void aspect(struct vo *vo, int *srcw, int *srch, int zoom)
-{
-    int fitw;
-    int fith;
-    get_max_dims(vo, &fitw, &fith, zoom);
-    if (!zoom && vo->opts->geometry.wh_valid) {
-        mp_msg(MSGT_VO, MSGL_DBG2, "aspect(0) no aspect forced!\n");
-        return; // the user doesn't want to fix aspect
-    }
-    aspect_fit(vo, srcw, srch, fitw, fith);
-}
-
-void panscan_init(struct vo *vo)
-{
-    vo->panscan_x = 0;
-    vo->panscan_y = 0;
-    vo->panscan_amount = 0.0f;
-}
-
-static void panscan_calc_internal(struct vo *vo, int zoom)
-{
-    int fwidth, fheight;
-    int vo_panscan_area;
-    int max_w, max_h;
-    get_max_dims(vo, &max_w, &max_h, zoom);
     struct mp_vo_opts *opts = vo->opts;
+    int fwidth, fheight;
+    aspect_calc(vo, &fwidth, &fheight);
 
+    int vo_panscan_area;
     if (opts->panscanrange > 0) {
-        aspect(vo, &fwidth, &fheight, zoom);
-        vo_panscan_area = max_h - fheight;
+        vo_panscan_area = vo->dheight - fheight;
         if (!vo_panscan_area)
-            vo_panscan_area = max_w - fwidth;
+            vo_panscan_area = vo->dwidth - fwidth;
         vo_panscan_area *= opts->panscanrange;
     } else
-        vo_panscan_area = -opts->panscanrange * max_h;
+        vo_panscan_area = -opts->panscanrange * vo->dheight;
 
-    vo->panscan_amount = opts->fs || zoom == A_WINZOOM ? opts->panscan : 0;
-    vo->panscan_x = vo_panscan_area * vo->panscan_amount * vo->aspdat.asp;
-    vo->panscan_y = vo_panscan_area * vo->panscan_amount;
-}
-
-/**
- * vos that set vo_dwidth and v_dheight correctly should call this to update
- * vo_panscan_x and vo_panscan_y
- */
-void panscan_calc_windowed(struct vo *vo)
-{
-    panscan_calc_internal(vo, A_WINZOOM);
+    *out_w = fwidth + vo_panscan_area * opts->panscan * vo->aspdat.asp;
+    *out_h = fheight + vo_panscan_area * opts->panscan;
 }

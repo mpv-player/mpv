@@ -1,7 +1,7 @@
 /*
  * CodecID definitions for Matroska files
  *
- * see http://cvs.corecodec.org/cgi-bin/cvsweb.cgi/~checkout~/matroska/doc/website/specs/codex.html?rev=HEAD&content-type=text/html
+ * see http://www.matroska.org/technical/specs/codecid/index.html
  *
  * This file is part of MPlayer.
  *
@@ -41,6 +41,8 @@
 #define MKV_A_PCM        "A_PCM/INT/LIT"
 #define MKV_A_PCM_BE     "A_PCM/INT/BIG"
 #define MKV_A_VORBIS     "A_VORBIS"
+#define MKV_A_OPUS       "A_OPUS"
+#define MKV_A_OPUS_EXP   "A_OPUS/EXPERIMENTAL"
 #define MKV_A_ACM        "A_MS/ACM"
 #define MKV_A_REAL28     "A_REAL/28_8"
 #define MKV_A_REALATRC   "A_REAL/ATRC"
@@ -50,6 +52,7 @@
 #define MKV_A_QDMC       "A_QUICKTIME/QDMC"
 #define MKV_A_QDMC2      "A_QUICKTIME/QDM2"
 #define MKV_A_FLAC       "A_FLAC"
+#define MKV_A_ALAC       "A_ALAC"
 #define MKV_A_TTA1       "A_TTA1"
 #define MKV_A_WAVPACK    "A_WAVPACK4"
 #define MKV_A_TRUEHD     "A_TRUEHD"
@@ -72,6 +75,7 @@
 #define MKV_V_MPEG4_AVC  "V_MPEG4/ISO/AVC"
 #define MKV_V_THEORA     "V_THEORA"
 #define MKV_V_VP8        "V_VP8"
+#define MKV_V_VP9        "V_VP9"
 #define MKV_V_MJPEG      "V_MJPEG"
 #define MKV_V_UNCOMPRESSED "V_UNCOMPRESSED"
 

@@ -275,7 +275,6 @@ int init_best_video_codec(sh_video_t *sh_video, char* video_decoders)
 }
 
 void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
-                   unsigned char *start, int in_size,
                    int drop_frame, double pts)
 {
     mp_image_t *mpi = NULL;
@@ -311,8 +310,7 @@ void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
         }
     }
 
-    mpi = sh_video->vd_driver->decode(sh_video, packet, start, in_size,
-                                      drop_frame, &pts);
+    mpi = sh_video->vd_driver->decode(sh_video, packet, drop_frame, &pts);
 
     //------------------------ frame decoded. --------------------
 

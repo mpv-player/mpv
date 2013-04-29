@@ -114,16 +114,15 @@ static char **find_files(const char *original_file, const char *suffix)
 }
 
 static struct demuxer *open_demuxer(struct stream *stream,
-        struct MPContext *mpctx, char *filename, unsigned char uid_map[][16])
+        struct MPContext *mpctx, char *filename, struct demuxer_params *params)
 {
     return demux_open_withparams(&mpctx->opts, stream,
                 DEMUXER_TYPE_MATROSKA, NULL, mpctx->opts.audio_id,
-                mpctx->opts.video_id, mpctx->opts.sub_id, filename,
-                &(struct demuxer_params){.matroska_wanted_uids = uid_map});
+                mpctx->opts.video_id, mpctx->opts.sub_id, filename, params);
 }
 
 static int enable_cache(struct MPContext *mpctx, struct stream **stream,
-                        struct demuxer **demuxer, unsigned char uid_map[][16])
+                        struct demuxer **demuxer, struct demuxer_params *params)
 {
     struct MPOpts *opts = &mpctx->opts;
 
@@ -147,7 +146,7 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
                                 opts->stream_cache_min_percent,
                                 opts->stream_cache_seek_min_percent);
 
-    *demuxer = open_demuxer(*stream, mpctx, filename, uid_map);
+    *demuxer = open_demuxer(*stream, mpctx, filename, params);
     if (!*demuxer) {
         talloc_free(filename);
         free_stream(*stream);
@@ -158,6 +157,68 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
     return 1;
 }
 
+// segment = get Nth segment of a multi-segment file
+static bool check_file_seg(struct MPContext *mpctx, struct demuxer **sources,
+                           int num_sources, unsigned char uid_map[][16],
+                           char *filename, int segment)
+{
+    bool was_valid = false;
+    struct demuxer_params params = {
+        .matroska_wanted_uids = uid_map,
+        .matroska_wanted_segment = segment,
+        .matroska_was_valid = &was_valid,
+    };
+    int format = 0;
+    struct stream *s = open_stream(filename, &mpctx->opts, &format);
+    if (!s)
+        return false;
+    struct demuxer *d = open_demuxer(s, mpctx, filename, &params);
+
+    if (!d) {
+        free_stream(s);
+        return was_valid;
+    }
+    if (d->file_format == DEMUXER_TYPE_MATROSKA) {
+        for (int i = 1; i < num_sources; i++) {
+            if (sources[i])
+                continue;
+            if (!memcmp(uid_map[i], d->matroska_data.segment_uid, 16)) {
+                mp_msg(MSGT_CPLAYER, MSGL_INFO, "Match for source %d: %s\n",
+                       i, d->filename);
+
+                if (enable_cache(mpctx, &s, &d, &params) < 0)
+                    continue;
+
+                sources[i] = d;
+                return true;
+            }
+        }
+    }
+    free_demuxer(d);
+    free_stream(s);
+    return was_valid;
+}
+
+static void check_file(struct MPContext *mpctx, struct demuxer **sources,
+                       int num_sources, unsigned char uid_map[][16],
+                       char *filename, int first)
+{
+    for (int segment = first; ; segment++) {
+        if (!check_file_seg(mpctx, sources, num_sources, uid_map,
+                            filename, segment))
+            break;
+    }
+}
+
+static bool missing(struct demuxer **sources, int num_sources)
+{
+    for (int i = 0; i < num_sources; i++) {
+        if (!sources[i])
+            return true;
+    }
+    return false;
+}
+
 static int find_ordered_chapter_sources(struct MPContext *mpctx,
                                         struct demuxer **sources,
                                         int num_sources,
@@ -166,6 +227,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
     int num_filenames = 0;
     char **filenames = NULL;
     if (num_sources > 1) {
+        char *main_filename = mpctx->demuxer->filename;
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "This file references data from "
                "other sources.\n");
         if (mpctx->demuxer->stream->type != STREAMTYPE_FILE) {
@@ -174,59 +236,34 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
         } else {
             mp_msg(MSGT_CPLAYER, MSGL_INFO, "Will scan other files in the "
                    "same directory to find referenced sources.\n");
-            filenames = find_files(mpctx->demuxer->filename, ".mkv");
+            filenames = find_files(main_filename, ".mkv");
             num_filenames = MP_TALLOC_ELEMS(filenames);
         }
+        // Possibly get further segments appended to the first segment
+        check_file(mpctx, sources, num_sources, uid_map, main_filename, 1);
     }
 
-    int num_left = num_sources - 1;
-    for (int i = 0; i < num_filenames && num_left > 0; i++) {
+    for (int i = 0; i < num_filenames; i++) {
+        if (!missing(sources, num_sources))
+            break;
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "Checking file %s\n", filenames[i]);
-        int format = 0;
-        struct stream *s = open_stream(filenames[i], &mpctx->opts, &format);
-        if (!s)
-            continue;
-        struct demuxer *d = open_demuxer(s, mpctx, filenames[i], uid_map);
-
-        if (!d) {
-            free_stream(s);
-            continue;
-        }
-        if (d->file_format == DEMUXER_TYPE_MATROSKA) {
-            for (int i = 1; i < num_sources; i++) {
-                if (sources[i])
-                    continue;
-                if (!memcmp(uid_map[i], d->matroska_data.segment_uid, 16)) {
-                    mp_msg(MSGT_CPLAYER, MSGL_INFO,"Match for source %d: %s\n",
-                           i, d->filename);
-
-                    if (enable_cache(mpctx, &s, &d, uid_map) < 0)
-                        continue;
-
-                    sources[i] = d;
-                    num_left--;
-                    goto match;
-                }
-            }
-        }
-        free_demuxer(d);
-        free_stream(s);
-        continue;
-    match:
-        ;
+        check_file(mpctx, sources, num_sources, uid_map, filenames[i], 0);
     }
+
     talloc_free(filenames);
-    if (num_left) {
+    if (missing(sources, num_sources)) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "Failed to find ordered chapter part!\n"
                "There will be parts MISSING from the video!\n");
-        for (int i = 1, j = 1; i < num_sources; i++)
+        int j = 1;
+        for (int i = 1; i < num_sources; i++)
             if (sources[i]) {
                 sources[j] = sources[i];
                 memcpy(uid_map[j], uid_map[i], 16);
                 j++;
             }
+        num_sources = j;
     }
-    return num_sources - num_left;
+    return num_sources;
 }
 
 void build_ordered_chapter_timeline(struct MPContext *mpctx)

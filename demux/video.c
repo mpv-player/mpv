@@ -560,10 +560,6 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 
 //------------------------ frame decoded. --------------------
 
-    // Increase video timers:
-    sh_video->num_frames+=frame_time;
-    ++sh_video->num_frames_decoded;
-
     frame_time*=sh_video->frametime;
 
     // override frame_time for variable/unknown FPS formats:

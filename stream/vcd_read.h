@@ -29,17 +29,16 @@
 #include "core/mp_msg.h"
 #include "stream.h"
 //=================== VideoCD ==========================
-#if	defined(__linux__) || defined(sun) || defined(__bsdi__)
 
 typedef struct mp_vcd_priv_st mp_vcd_priv_t;
 
-#if	defined(__linux__)
-#include <linux/cdrom.h>
-#elif	defined(sun)
+#ifdef sun
 #include <sys/cdio.h>
 static int sun_vcd_read(mp_vcd_priv_t*, int*);
-#elif	defined(__bsdi__)
+#elif defined(__bsdi__)
 #include <dvd.h>
+#else
+#include <linux/cdrom.h>
 #endif
 
 struct mp_vcd_priv_st {
@@ -154,11 +153,11 @@ static int vcd_end_track(mp_vcd_priv_t* vcd)
 }
 
 static int vcd_read(mp_vcd_priv_t* vcd,char *mem){
-#if	defined(__linux__) || defined(__bsdi__)
+#ifndef sun
   memcpy(vcd->buf,&vcd->entry.cdte_addr.msf,sizeof(struct cdrom_msf));
   if(ioctl(vcd->fd,CDROMREADRAW,vcd->buf)==-1) return 0; // EOF?
   memcpy(mem,&vcd->buf[VCD_SECTOR_OFFS],VCD_SECTOR_DATA);
-#elif	defined(sun)
+#else
   {
     int offset;
     if (sun_vcd_read(vcd, &offset) <= 0) return 0;
@@ -180,7 +179,7 @@ static int vcd_read(mp_vcd_priv_t* vcd,char *mem){
 }
 
 
-#ifdef	sun
+#ifdef sun
 #include <sys/scsi/generic/commands.h>
 #include <sys/scsi/impl/uscsi.h>
 
@@ -250,11 +249,5 @@ static int sun_vcd_read(mp_vcd_priv_t* vcd, int *offset)
 #endif
 }
 #endif	/*sun*/
-
-#else /* __linux__ || sun || __bsdi__ */
-
-#error vcd is not yet supported on this arch...
-
-#endif
 
 #endif /* MPLAYER_VCD_READ_H */

@@ -172,19 +172,6 @@
 #define MP_MOUSE_BTN19_DBL (MP_MOUSE_BASE_DBL+19)
 #define MP_MOUSE_BTN_DBL_END (MP_MOUSE_BASE_DBL+20)
 
-// Apple Remote input module
-#define MP_AR_BASE      (MP_KEY_BASE+0xE0)
-#define MP_AR_PLAY      (MP_AR_BASE + 0)
-#define MP_AR_PLAY_HOLD (MP_AR_BASE + 1)
-#define MP_AR_NEXT      (MP_AR_BASE + 2)
-#define MP_AR_NEXT_HOLD (MP_AR_BASE + 3)
-#define MP_AR_PREV      (MP_AR_BASE + 4)
-#define MP_AR_PREV_HOLD (MP_AR_BASE + 5)
-#define MP_AR_MENU      (MP_AR_BASE + 6)
-#define MP_AR_MENU_HOLD (MP_AR_BASE + 7)
-#define MP_AR_VUP       (MP_AR_BASE + 8)
-#define MP_AR_VDOWN     (MP_AR_BASE + 9)
-
 /* Special keys */
 #define MP_KEY_INTERN (MP_KEY_BASE+0x1000)
 #define MP_KEY_CLOSE_WIN (MP_KEY_INTERN+0)
@@ -199,8 +186,12 @@
                               MP_KEY_MODIFIER_ALT | MP_KEY_MODIFIER_META)
 
 // Use this when the key shouldn't be auto-repeated (like mouse buttons)
+// This is not a modifier, but is part of the keycode itself.
 #define MP_NO_REPEAT_KEY (1<<28)
 
+// Flag for key events. Multiple down events are idempotent. Release keys by
+// sending the key code without this flag, or by sending MP_INPUT_RELEASE_ALL
+// as key code.
 #define MP_KEY_STATE_DOWN (1<<29)
 
 #endif /* MPLAYER_KEYCODES_H */

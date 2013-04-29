@@ -30,17 +30,36 @@
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;
 
+bool is_text_sub(const char *t)
+{
+    return t && (is_ass_sub(t) ||
+                 strcmp(t, "text") == 0 ||
+                 strcmp(t, "subrip") == 0 ||
+                 strcmp(t, "mov_text") == 0);
+}
+
+bool is_ass_sub(const char *t)
+{
+    return t && (strcmp(t, "ass") == 0 ||
+                 strcmp(t, "ssa") == 0);
+}
+
+bool is_dvd_sub(const char *t)
+{
+    return t && strcmp(t, "dvd_subtitle") == 0;
+}
+
 void sub_init(struct sh_sub *sh, struct osd_state *osd)
 {
     struct MPOpts *opts = sh->opts;
 
     assert(!osd->sh_sub);
+    if (sd_lavc.probe(sh))
+        sh->sd_driver = &sd_lavc;
 #ifdef CONFIG_ASS
-    if (opts->ass_enabled && is_text_sub(sh->type))
+    if (opts->ass_enabled && sd_ass.probe(sh))
         sh->sd_driver = &sd_ass;
 #endif
-    if (strchr("bpxv", sh->type))
-        sh->sd_driver = &sd_lavc;
     if (sh->sd_driver) {
         if (sh->sd_driver->init(sh, osd) < 0)
             return;

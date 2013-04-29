@@ -75,7 +75,7 @@ static bool translate_legacy_property(const char *name, char *buffer,
     }
 
     if (strcmp(old_name, buffer) != 0) {
-        mp_msg(MSGT_CPLAYER, MSGL_V, "Warning: property '%s' is deprecated, "
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Warning: property '%s' is deprecated, "
                "replaced with '%s'. Fix your input.conf!\n", old_name, buffer);
     }
 

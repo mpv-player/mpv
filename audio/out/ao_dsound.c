@@ -33,6 +33,7 @@
 #include <math.h>
 
 #include <libavutil/avutil.h>
+#include <libavutil/common.h>
 
 #include "config.h"
 #include "audio/format.h"

@@ -129,8 +129,13 @@ struct osd_state {
 
     bool want_redraw;
 
-    char *osd_text;             // OSDTYPE_OSD
-    int progbar_type, progbar_value; // OSDTYPE_PROGBAR
+    // OSDTYPE_OSD
+    char *osd_text;
+    // OSDTYPE_PROGBAR
+    int progbar_type;      // <0: disabled, 1-255: symbol, else: no symbol
+    float progbar_value;   // range 0.0-1.0
+    float *progbar_stops;  // used for chapter indicators (0.0-1.0 each)
+    int progbar_num_stops;
 
     int switch_sub_id;
 
@@ -187,6 +192,7 @@ struct osd_style_opts {
     float spacing;
     int margin_x;
     int margin_y;
+    float blur;
 };
 
 extern const struct m_sub_options osd_style_conf;

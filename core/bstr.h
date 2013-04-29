@@ -40,6 +40,12 @@ static inline char *bstrdup0(void *talloc_ctx, struct bstr str)
     return talloc_strndup(talloc_ctx, (char *)str.start, str.len);
 }
 
+// Like bstrdup0(), but always return a valid C-string.
+static inline char *bstrto0(void *talloc_ctx, struct bstr str)
+{
+    return str.start ? bstrdup0(talloc_ctx, str) : talloc_strdup(talloc_ctx, "");
+}
+
 // Return start = NULL iff that is true for the original.
 static inline struct bstr bstrdup(void *talloc_ctx, struct bstr str)
 {
@@ -58,6 +64,7 @@ int bstrcmp(struct bstr str1, struct bstr str2);
 int bstrcasecmp(struct bstr str1, struct bstr str2);
 int bstrchr(struct bstr str, int c);
 int bstrrchr(struct bstr str, int c);
+int bstrspn(struct bstr str, const char *accept);
 int bstrcspn(struct bstr str, const char *reject);
 
 int bstr_find(struct bstr haystack, struct bstr needle);

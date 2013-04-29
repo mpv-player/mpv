@@ -41,6 +41,8 @@ typedef struct mixer {
      * and needs to be restored after the driver is reinitialized. */
     const char *restore_volume;
     float balance;
+    bool user_set_mute;
+    bool user_set_volume;
 } mixer_t;
 
 void mixer_reinit(struct mixer *mixer, struct ao *ao);

@@ -103,9 +103,6 @@
     configuration files specifying a list of fallbacks may make sense. See
     `audio_outputs` for details and descriptions of available drivers.
 
---ar, --no-ar
-      Enable/disable AppleIR remote support. Enabled by default.
-
 --aspect=<ratio>
     Override movie aspect ratio, in case aspect information is incorrect or
     missing in the file being played. See also ``--no-aspect``.
@@ -299,11 +296,6 @@
     Some Blu-ray discs contain scenes that can be viewed from multiple angles.
     Here you can tell mpv which angles to use (default: 1).
 
---bluray-chapter=<ID>
-    (Blu-ray only)
-    Tells mpv which Blu-ray chapter to start the current title from
-    (default: 1).
-
 --bluray-device=<path>
     (Blu-ray only)
     Specify the Blu-ray disc location. Must be a directory with Blu-ray
@@ -323,6 +315,12 @@
     default cache size) for network streams. May be useful when playing files
     from slow media, but can also have negative effects, especially with file
     formats that require a lot of seeking, such as mp4. See also ``--no-cache``.
+
+    Note that half the cache size will be used to allow fast seeking back. This
+    is also the reason why a full cache is usually reported as 50% full. The
+    cache fill display does not include the part of the cache reserved for
+    seeking back. Likewise, when starting a file the cache will be at 100%,
+    because no space is reserved for seeking back yet.
 
 --cache-pause=<no|percentage>
     If the cache percentage goes below the specified value, pause and wait
@@ -651,7 +649,10 @@
     *NOTE*: Practical use of this feature is questionable. Disabled by default.
 
 --frames=<number>
-    Play/convert only first <number> frames, then quit.
+    Play/convert only first <number> video frames, then quit. For audio only,
+    run <number> iteration of the playback loop, which is most likely not what
+    you want. (This behavior also applies to the corner case when there are
+    less video frames than <number>, and audio is longer than the video.)
 
 --fullscreen, --fs
     Fullscreen playback (centers movie, and paints black bands around it).
@@ -786,7 +787,8 @@
 
 --heartbeat-cmd
     Command that is executed every 30 seconds during playback via *system()* -
-    i.e. using the shell.
+    i.e. using the shell. The time between the commands can be customized with
+    the ``--heartbeat-interval`` option.
 
     *NOTE*: mpv uses this command without any checking. It is your
     responsibility to ensure it does not cause security problems (e.g. make
@@ -804,6 +806,9 @@
 
     *EXAMPLE for GNOME screensaver*: ``mpv
     --heartbeat-cmd="gnome-screensaver-command -p" file``
+
+--heartbeat-interval=<sec>
+    Time between ``--heartbeat-cmd`` invocations in seconds (default: 30).
 
 --help
     Show short summary of options.
@@ -875,7 +880,7 @@
 --idle
     Makes mpv wait idly instead of quitting when there is no file to play.
     Mostly useful in slave mode where mpv can be controlled through input
-    commands (see also ``--slave``).
+    commands (see also ``--slave-broken``).
 
 --idx
     Rebuilds index of files if no index was found, allowing seeking. Useful
@@ -907,10 +912,6 @@
     Specify input configuration file other than the default
     ``~/.mpv/input.conf``.
 
---input-ar-dev=<device>
-    Device to be used for Apple IR Remote (default is autodetected, Linux
-    only).
-
 --input-ar-delay
     Delay in milliseconds before we start to autorepeat a key (0 to
     disable).
@@ -932,7 +933,7 @@
 
 --input-file=<filename>
     Read commands from the given file. Mostly useful with a FIFO.
-    See also ``--slave``.
+    See also ``--slave-broken``.
 
     *NOTE*: When the given file is a FIFO mpv opens both ends so you
     can do several `echo "seek 10" > mp_pipe` and the pipe will stay
@@ -1169,6 +1170,29 @@
     :fps=<value>:  output fps (default: 25)
     :type=<value>: input file type (available: jpeg, png, tga, sgi)
 
+--mkv-subtitle-preroll
+    Try harder to show embedded soft subtitles when seeking somewhere. Normally,
+    it can happen that the subtitle at the seek target is not shown due to how
+    some container file formats are designed. The subtitles appear only if
+    seeking before or exactly to the position a subtitle first appears. To
+    make this worse, subtitles are often timed to appear a very small amount
+    before the associated video frame, so that seeking to the video frame
+    typically does not demux the subtitle at that position.
+
+    Enabling this option makes the demuxer start reading data a bit before the
+    seek target, so that subtitles appear correctly. Note that this makes
+    seeking slower, and is not guaranteed to always work. It only works if the
+    subtitle is close enough to the seek target.
+
+    Works with the internal Matroska demuxer only. Always enabled for absolute
+    and hr-seeks, and this option changes behavior with relative or imprecise
+    seeks only.
+
+    See also ``--hr-seek-demuxer-offset`` option. This option can achieve a
+    similar effect, but only if hr-seek is active. It works with any demuxer,
+    but makes seeking much slower, as it has to decode audio and video data,
+    instead of just skipping over it.
+
 --mixer=<device>
     Use a mixer device different from the default ``/dev/mixer``. For ALSA
     this is the mixer name.
@@ -1248,6 +1272,12 @@
 --name
     Set the window class name for X11-based video output methods.
 
+--native-keyrepeat
+    Use system settings for keyrepeat delay and rate, instead of
+    ``--input-ar-delay`` and ``--input-ar-rate``. (Whether this applies
+    depends on the VO backend and how it handles keyboard input. Does not
+    apply to terminal input.)
+
 --avi-ni
     (Internal AVI demuxer which is not used by default only)
     Force usage of non-interleaved AVI parser (fixes playback of some bad AVI
@@ -1312,14 +1342,24 @@
     prefixes, see ``Input command prefixes``. If you want to disable the OSD
     completely, use ``--osd-level=0``.
 
---osd-bar-align-x=<-1..1>
+--osd-bar-align-x=<-1-1>
     Position of the OSD bar. -1 is far left, 0 is centered, 1 is far right.
 
---osd-bar-align-y=<-1..1>
+--osd-bar-align-y=<-1-1>
     Position of the OSD bar. -1 is top, 0 is centered, 1 is bottom.
+
+--osd-bar-w=<1-100>
+    Width of the OSD bar, in percentage of the screen width (default: 75).
+    A value of 0.5 means the bar is half the screen wide.
+
+--osd-bar-h=<0.1-50>
+    Height of the OSD bar, in percentage of the screen height (default: 3.125).
 
 --osd-back-color=<#RRGGBB>, --sub-text-back-color=<#RRGGBB>
     See ``--osd-color``. Color used for OSD/sub text background.
+
+--osd-blur=<0..20.0>, --sub-text-blur=<0..20.0>
+    Gaussian blur factor. 0 means no blur applied (default).
 
 --osd-border-color=<#RRGGBB>, --sub-text-border-color=<#RRGGBB>
     See ``--osd-color``. Color used for the OSD/sub font border.
@@ -1452,7 +1492,7 @@
     *WARNING*: works with the deprecated ``mp_http://`` protocol only.
 
 --playing-msg=<string>
-    Print out a string before starting playback. The string is expanded for
+    Print out a string after starting playback. The string is expanded for
     properties, e.g. ``--playing-msg=file: ${filename}`` will print the string
     ``file:`` followed by a space and the currently played filename.
 
@@ -1697,9 +1737,6 @@
 
     *EXAMPLE*:
 
-    - ``mpv foreman.qcif --demuxer=rawvideo --rawvideo=qcif`` Play the
-      famous "foreman" sample video.
-
     - ``mpv sample-720x576.yuv --demuxer=rawvideo --rawvideo=w=720:h=576``
       Play a raw YUV sample.
 
@@ -1708,6 +1745,30 @@
 
 --referrer=<string>
     Specify a referrer path or URL for HTTP requests.
+
+--reset-on-next-file=<all|option1,option2,...>
+    Normally, mpv will try to keep all settings when playing the next file on
+    the playlist, even if they were changed by the user during playback. (This
+    behavior is the opposite of MPlayer's, which tries to reset all settings
+    when starting next file.)
+
+    This can be changed with this option. It accepts a list of options, and
+    mpv will reset the value of these options on playback start to the initial
+    value. The initial value is either the default value, or as set by the
+    config file or command line.
+
+    In some cases, this might not work as expected. For example, ``--volume``
+    will only be reset the volume if it's explicitly set in the config file
+    or the command line.
+
+    The special name ``all`` resets as many options as possible.
+
+    *EXAMPLE*:
+
+    - ``--reset-on-next-file=fullscreen,speed`` Reset fullscreen and playback
+      speed settings if they were changed during playback.
+    - ``--reset-on-next-file=all`` Try to reset all settings that were changed
+      during playback.
 
 --reuse-socket
     (udp:// only)
@@ -2340,9 +2401,6 @@
 --volume=<-1-100>
     Set the startup volume. A value of -1 (the default) will not change the
     volume. See also ``--softvol``.
-
---no-vsync
-    Tries to disable vsync. (Effective with some video outputs only.)
 
 --wid=<ID>
     (X11 and win32 only)

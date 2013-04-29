@@ -21,17 +21,11 @@
 /* Stuff for correct aspect scaling. */
 
 struct vo;
-void panscan_init(struct vo *vo);
-void panscan_calc_windowed(struct vo *vo);
 
 void aspect_save_videores(struct vo *vo, int w, int h, int d_w, int d_h);
 void aspect_save_screenres(struct vo *vo, int scrw, int scrh);
 
-#define A_WINZOOM 2 ///< zoom to fill window size
-#define A_ZOOM 1
-#define A_NOZOOM 0
-
-void aspect(struct vo *vo, int *srcw, int *srch, int zoom);
-void aspect_fit(struct vo *vo, int *srcw, int *srch, int fitw, int fith);
+void aspect_calc_monitor(struct vo *vo, int *w, int *h);
+void aspect_calc_panscan(struct vo *vo, int *out_w, int *out_h);
 
 #endif /* MPLAYER_ASPECT_H */

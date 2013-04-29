@@ -340,10 +340,10 @@ void getch2_poll(void){
     if (!getch2_enabled)
         return;
 
-    // check if we are in the foreground process group
+    // check if stdin is in the foreground process group
     int newstatus = (tcgetpgrp(0) == getpgrp());
 
-    // and activate getch2 if we are, deactivate otherwise
+    // and activate getch2 if it is, deactivate otherwise
     if (newstatus)
         do_activate_getch2();
     else

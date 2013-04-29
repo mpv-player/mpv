@@ -287,8 +287,10 @@ static void draw_ass(struct mp_draw_sub_cache *cache, struct mp_rect bb,
     cspar.int_bits_out = 8;
 
     float yuv2rgb[3][4], rgb2yuv[3][4];
-    mp_get_yuv2rgb_coeffs(&cspar, yuv2rgb);
-    mp_invert_yuv2rgb(rgb2yuv, yuv2rgb);
+    if (temp->flags & MP_IMGFLAG_YUV) {
+        mp_get_yuv2rgb_coeffs(&cspar, yuv2rgb);
+        mp_invert_yuv2rgb(rgb2yuv, yuv2rgb);
+    }
 
     for (int i = 0; i < sbs->num_parts; ++i) {
         struct sub_bitmap *sb = &sbs->parts[i];

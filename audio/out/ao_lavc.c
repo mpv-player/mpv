@@ -331,6 +331,7 @@ static void fill_with_padding(void *buf, int cnt, int sz, const void *padding)
 
 // close audio device
 static int encode(struct ao *ao, double apts, void *data);
+static int play(struct ao *ao, void *data, int len, int flags);
 static void uninit(struct ao *ao, bool cut_audio)
 {
     struct priv *ac = ao->priv;
@@ -343,21 +344,31 @@ static void uninit(struct ao *ao, bool cut_audio)
     }
 
     if (ac->buffer) {
-        double pts = ao->pts + ac->offset / (double) ao->samplerate;
         if (ao->buffer.len > 0) {
-            void *paddingbuf = talloc_size(ao,
-                    ac->aframesize * ao->channels * ac->sample_size);
+            // TRICK: append aframesize-1 samples to the end, then play() will
+            // encode all it can
+            size_t extralen =
+                (ac->aframesize - 1) * ao->channels * ac->sample_size;
+            void *paddingbuf = talloc_size(ao, ao->buffer.len + extralen);
             memcpy(paddingbuf, ao->buffer.start, ao->buffer.len);
             fill_with_padding((char *) paddingbuf + ao->buffer.len,
-                              (ac->aframesize * ao->channels * ac->sample_size
-                               - ao->buffer.len) / ac->sample_size,
+                              extralen / ac->sample_size,
                               ac->sample_size, ac->sample_padding);
-            encode(ao, pts, paddingbuf);
-            pts += ac->aframesize / (double) ao->samplerate;
+            int written = play(ao, paddingbuf, ao->buffer.len + extralen, 0);
+            if (written < ao->buffer.len) {
+                mp_msg(MSGT_ENCODE, MSGL_ERR,
+                        "ao-lavc: did not write enough data at the end\n");
+            }
             talloc_free(paddingbuf);
             ao->buffer.len = 0;
         }
-        while (encode(ao, pts, NULL) > 0) ;
+
+        double outpts = ac->expected_next_pts;
+        if (!ectx->options->rawts && ectx->options->copyts)
+            outpts += ectx->discontinuity_pts_offset;
+        outpts += encode_lavc_getoffset(ectx, ac->stream);
+
+        while (encode(ao, outpts, NULL) > 0) ;
     }
 
     ao->priv = NULL;
@@ -516,11 +527,12 @@ static int play(struct ao *ao, void *data, int len, int flags)
 
     if (!encode_lavc_start(ectx)) {
         mp_msg(MSGT_ENCODE, MSGL_WARN,
-		"ao-lavc: not ready yet for encoding audio\n");
+                "ao-lavc: not ready yet for encoding audio\n");
         return 0;
     }
     if (pts == MP_NOPTS_VALUE) {
-        mp_msg(MSGT_ENCODE, MSGL_WARN, "ao-lavc: frame without pts, please report; synthesizing pts instead\n");
+        mp_msg(MSGT_ENCODE, MSGL_WARN,
+                "ao-lavc: frame without pts, please report; synthesizing pts instead\n");
         // synthesize pts from previous expected next pts
         pts = ac->expected_next_pts;
     }

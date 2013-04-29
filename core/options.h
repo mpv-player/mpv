@@ -2,6 +2,7 @@
 #define MPLAYER_OPTIONS_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include "core/m_option.h"
 
 typedef struct mp_vo_opts {
@@ -11,12 +12,12 @@ typedef struct mp_vo_opts {
     int screenheight;
     int ontop;
     bool fs;
-    int vsync;
     int screen_id;
     int fsscreen_id;
     int stop_screensaver;
     char *winname;
     char** fstype_list;
+    int native_keyrepeat;
 
     float panscan;
     float panscanrange;
@@ -43,6 +44,8 @@ typedef struct mp_vo_opts {
 } mp_vo_opts;
 
 typedef struct MPOpts {
+    char **reset_options;
+
     char **audio_driver_list;
     int fixed_vo;
     char *mixer_device;
@@ -50,6 +53,7 @@ typedef struct MPOpts {
     int softvol;
     float mixer_init_volume;
     int mixer_init_mute;
+    int volstep;
     float softvol_max;
     int gapless_audio;
     int ao_buffersize;
@@ -84,6 +88,7 @@ typedef struct MPOpts {
     int chapter_merge_threshold;
     int quiet;
     int load_config;
+    int use_filedir_conf;
     int stream_cache_size;
     float stream_cache_min_percent;
     float stream_cache_seek_min_percent;
@@ -96,6 +101,9 @@ typedef struct MPOpts {
     int initial_audio_sync;
     int hr_seek;
     float hr_seek_demuxer_offset;
+    float audio_delay;
+    float default_max_pts_correction;
+    int ignore_start;
     int autosync;
     int softsleep;
     int frame_dropping;
@@ -104,14 +112,20 @@ typedef struct MPOpts {
     char *playing_msg;
     char *status_msg;
     char *osd_status_msg;
+    char *heartbeat_cmd;
+    float heartbeat_interval;
     int player_idle_mode;
+    int slave_mode;
     int consolecontrols;
     int doubleclick_time;
     int list_properties;
     struct m_rel_time play_start;
     struct m_rel_time play_end;
     struct m_rel_time play_length;
-    int start_paused;
+    int play_frames;
+    double step_sec;
+    int64_t seek_to_byte;
+    int pause;
     int keep_open;
     int audio_id;
     int video_id;
@@ -120,6 +134,7 @@ typedef struct MPOpts {
     char **sub_lang;
     int audio_display;
     int sub_visibility;
+    int forced_subs_only;
     char *quvi_format;
 
     char *audio_stream;
@@ -129,12 +144,16 @@ typedef struct MPOpts {
     char *audio_demuxer_name;
     char *sub_demuxer_name;
     int extension_parsing;
+    int mkv_subtitle_preroll;
 
     struct image_writer_opts *screenshot_image_opts;
     char *screenshot_template;
 
+    double force_fps;
+
     int audio_output_channels;
     int audio_output_format;
+    int force_srate;
     int dtshd;
     float playback_speed;
     float drc_level;
@@ -148,6 +167,8 @@ typedef struct MPOpts {
     int osd_bar_visible;
     float osd_bar_align_x;
     float osd_bar_align_y;
+    float osd_bar_w;
+    float osd_bar_h;
     struct osd_style_opts *osd_style;
     struct osd_style_opts *sub_text_style;
     float sub_scale;
@@ -199,12 +220,10 @@ typedef struct MPOpts {
         int ar_delay;
         int ar_rate;
         char *js_dev;
-        char *ar_dev;
         char *in_file;
         int use_joystick;
         int use_lirc;
         int use_lircc;
-        int use_ar; // apple remote
         int default_bindings;
         int test;
     } input;

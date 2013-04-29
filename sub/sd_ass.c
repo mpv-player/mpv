@@ -41,6 +41,11 @@ struct sd_ass_priv {
     bool flush_on_seek;
 };
 
+static bool probe(struct sh_sub *sh)
+{
+    return is_text_sub(sh->gsh->codec);
+}
+
 static void free_last_event(ASS_Track *track)
 {
     assert(track->n_events > 0);
@@ -51,13 +56,14 @@ static void free_last_event(ASS_Track *track)
 static int init(struct sh_sub *sh, struct osd_state *osd)
 {
     struct sd_ass_priv *ctx;
+    bool ass = is_ass_sub(sh->gsh->codec);
 
     if (sh->initialized) {
         ctx = sh->context;
     } else {
         ctx = talloc_zero(NULL, struct sd_ass_priv);
         sh->context = ctx;
-        if (sh->type == 'a') {
+        if (ass) {
             ctx->ass_track = ass_new_track(osd->ass_library);
             if (sh->extradata)
                 ass_process_codec_private(ctx->ass_track, sh->extradata,
@@ -66,7 +72,7 @@ static int init(struct sh_sub *sh, struct osd_state *osd)
             ctx->ass_track = mp_ass_default_track(osd->ass_library, sh->opts);
     }
 
-    ctx->vsfilter_aspect = sh->type == 'a';
+    ctx->vsfilter_aspect = ass;
     return 0;
 }
 
@@ -77,7 +83,7 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
     struct sd_ass_priv *ctx = sh->context;
     ASS_Track *track = ctx->ass_track;
 
-    if (sh->type == 'a') { // ssa/ass subs
+    if (is_ass_sub(sh->gsh->codec)) {
         if (bstr_startswith0((bstr){data, data_len}, "Dialogue: ")) {
             // broken ffmpeg ASS packet format
             ctx->flush_on_seek = true;
@@ -177,6 +183,7 @@ static void uninit(struct sh_sub *sh)
 }
 
 const struct sd_functions sd_ass = {
+    .probe = probe,
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,
@@ -199,7 +206,9 @@ struct sh_sub *sd_ass_create_from_track(struct ass_track *track,
     talloc_set_destructor(sh, sd_ass_track_destructor);
     *sh = (struct sh_sub) {
         .opts = opts,
-        .type = 'a',
+        .gsh = talloc_struct(sh, struct sh_stream, {
+            .codec = "ass",
+        }),
         .sd_driver = &sd_ass,
         .context = talloc_struct(sh, struct sd_ass_priv, {
             .ass_track = track,

@@ -22,6 +22,7 @@
 
 #include "talloc.h"
 #include "core/mp_msg.h"
+#include "core/av_common.h"
 #include "demux/stheader.h"
 #include "sd.h"
 #include "dec_sub.h"
@@ -40,9 +41,24 @@ struct sd_lavc_priv {
     double endpts;
 };
 
-static void guess_resolution(char type, int *w, int *h)
+static bool probe(struct sh_sub *sh)
 {
-    if (type == 'v') {
+    enum AVCodecID cid = mp_codec_to_av_codec_id(sh->gsh->codec);
+    // Supported codecs must be known to decode to paletted bitmaps
+    switch (cid) {
+    case AV_CODEC_ID_DVB_SUBTITLE:
+    case AV_CODEC_ID_HDMV_PGS_SUBTITLE:
+    case AV_CODEC_ID_XSUB:
+    case AV_CODEC_ID_DVD_SUBTITLE:
+        return true;
+    default:
+        return false;
+    }
+}
+
+static void guess_resolution(enum AVCodecID type, int *w, int *h)
+{
+    if (type == AV_CODEC_ID_DVD_SUBTITLE) {
         /* XXX Although the video frame is some size, the SPU frame is
            always maximum size i.e. 720 wide and 576 or 480 high */
         // For HD files in MKV the VobSub resolution can be higher though,
@@ -65,17 +81,7 @@ static int init(struct sh_sub *sh, struct osd_state *osd)
     if (sh->initialized)
         return 0;
     struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
-    enum CodecID cid = CODEC_ID_NONE;
-    switch (sh->type) {
-    case 'b':
-        cid = CODEC_ID_DVB_SUBTITLE; break;
-    case 'p':
-        cid = CODEC_ID_HDMV_PGS_SUBTITLE; break;
-    case 'x':
-        cid = CODEC_ID_XSUB; break;
-    case 'v':
-        cid = CODEC_ID_DVD_SUBTITLE; break;
-    }
+    enum AVCodecID cid = mp_codec_to_av_codec_id(sh->gsh->codec);
     AVCodecContext *ctx = NULL;
     AVCodec *sub_codec = avcodec_find_decoder(cid);
     if (!sub_codec)
@@ -194,7 +200,7 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
                                          talloc_get_size(priv->inbitmaps));
     int inw = priv->avctx->width;
     int inh = priv->avctx->height;
-    guess_resolution(sh->type, &inw, &inh);
+    guess_resolution(priv->avctx->codec_id, &inw, &inh);
     double xscale = (double) (d.w - d.ml - d.mr) / inw;
     double yscale = (double) (d.h - d.mt - d.mb) / inh;
     for (int i = 0; i < priv->count; i++) {
@@ -235,6 +241,7 @@ static void uninit(struct sh_sub *sh)
 }
 
 const struct sd_functions sd_lavc = {
+    .probe = probe,
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,

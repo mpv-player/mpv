@@ -42,14 +42,11 @@ struct sh_stream {
     struct demuxer *demuxer;
     // Index into demuxer->streams.
     int index;
-    // The (possibly) type specific id, e.g. aid or sid.
-    int tid;
     // Index into stream array (currently one array per type, e.g. a_streams).
     int stream_index;
-    // Demuxer specific ID (always set, defaults to tid).
+    // Demuxer/format specific ID. Corresponds to the stream IDs as encoded in
+    // some file formats (e.g. MPEG), or an index chosen by demux.c.
     int demuxer_id;
-    // Abomination.
-    struct sh_common *common_header;
     // One of these is non-NULL, the others are NULL, depending on the stream
     // type.
     struct sh_audio *audio;
@@ -86,23 +83,14 @@ struct sh_stream {
     /* number of seconds stream should be delayed                       \
      * (according to dwStart or similar) */                             \
     float stream_delay;                                                 \
-    /* things needed for parsing */                                     \
-    bool needs_parsing;                                                 \
-    struct AVCodecContext *avctx;                                       \
-    struct AVCodecParserContext *parser;                                \
     /* audio: last known pts value in output from decoder               \
      * video: predicted/interpolated PTS of the current frame */        \
     double pts;                                                         \
     /* decoder context */                                               \
     void *context;                                                      \
 
-typedef struct sh_common {
-    SH_COMMON
-} sh_common_t;
-
 typedef struct sh_audio {
     SH_COMMON
-    int aid;
     // output format:
     int sample_format;
     int samplerate;
@@ -130,15 +118,14 @@ typedef struct sh_audio {
     unsigned char *codecdata;
     int codecdata_len;
     int pts_bytes;   // bytes output by decoder after last known pts
+    /* things needed for parsing */
+    bool needs_parsing;
+    struct AVCodecContext *avctx;
+    struct AVCodecParserContext *parser;
 } sh_audio_t;
 
 typedef struct sh_video {
     SH_COMMON
-    int vid;
-    float timer;     // absolute time in video stream, since last start/seek
-    // frame counters:
-    float num_frames;       // number of frames played
-    int num_frames_decoded; // number of frames decoded
     double i_pts;   // PTS for the _next_ I/P frame (internal mpeg demuxing)
     float next_frame_time;
     double last_pts;
@@ -173,8 +160,6 @@ typedef struct sh_video {
 
 typedef struct sh_sub {
     SH_COMMON
-    int sid;
-    char type;  // t = text, v = VobSub, a = SSA/ASS, m, x, b, d, p
     bool active; // after track switch decoder may stay initialized, not active
     unsigned char *extradata;   // extra header data passed from demuxer
     int extradata_len;
@@ -190,8 +175,7 @@ struct sh_video *new_sh_video_vid(struct demuxer *demuxer, int id, int vid);
 struct sh_sub *new_sh_sub_sid(struct demuxer *demuxer, int id, int sid);
 struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
                                    const char *lang);
-
-const char *sh_sub_type2str(int type);
+struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
 
 // video.c:
 int video_read_properties(struct sh_video *sh_video);

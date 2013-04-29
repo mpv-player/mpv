@@ -45,7 +45,7 @@
 #error MP_INPUT_BUFFER_PADDING_SIZE is too small!
 #endif
 
-static void clear_parser(sh_common_t *sh);
+static void clear_parser(sh_audio_t *sh);
 
 // Demuxer list
 extern const struct demuxer_desc demuxer_desc_edl;
@@ -116,8 +116,6 @@ static struct demux_packet *create_packet(size_t len)
     dp->stream_pts = MP_NOPTS_VALUE;
     dp->pos = 0;
     dp->keyframe = false;
-    dp->refcount = 1;
-    dp->master = NULL;
     dp->buffer = NULL;
     dp->avpacket = NULL;
     return dp;
@@ -131,15 +129,22 @@ struct demux_packet *new_demux_packet(size_t len)
         mp_msg(MSGT_DEMUXER, MSGL_FATAL, "Memory allocation failure!\n");
         abort();
     }
-    memset(dp->buffer + len, 0, 8);
+    memset(dp->buffer + len, 0, MP_INPUT_BUFFER_PADDING_SIZE);
     return dp;
 }
 
-// data must already have suitable padding
+// data must already have suitable padding, and does not copy the data
 struct demux_packet *new_demux_packet_fromdata(void *data, size_t len)
 {
     struct demux_packet *dp = create_packet(len);
     dp->buffer = data;
+    return dp;
+}
+
+struct demux_packet *new_demux_packet_from(void *data, size_t len)
+{
+    struct demux_packet *dp = new_demux_packet(len);
+    memcpy(dp->buffer, data, len);
     return dp;
 }
 
@@ -155,38 +160,16 @@ void resize_demux_packet(struct demux_packet *dp, size_t len)
         mp_msg(MSGT_DEMUXER, MSGL_FATAL, "Memory allocation failure!\n");
         abort();
     }
-    memset(dp->buffer + len, 0, 8);
+    memset(dp->buffer + len, 0, MP_INPUT_BUFFER_PADDING_SIZE);
     dp->len = len;
-}
-
-struct demux_packet *clone_demux_packet(struct demux_packet *pack)
-{
-    struct demux_packet *dp = malloc(sizeof(struct demux_packet));
-    while (pack->master)
-        pack = pack->master;  // find the master
-    memcpy(dp, pack, sizeof(struct demux_packet));
-    dp->next = NULL;
-    dp->refcount = 0;
-    dp->master = pack;
-    pack->refcount++;
-    return dp;
 }
 
 void free_demux_packet(struct demux_packet *dp)
 {
-    if (dp->master == NULL) {  //dp is a master packet
-        dp->refcount--;
-        if (dp->refcount == 0) {
-            if (dp->avpacket)
-                talloc_free(dp->avpacket);
-            else
-                free(dp->buffer);
-            free(dp);
-        }
-        return;
-    }
-    // dp is a clone:
-    free_demux_packet(dp->master);
+    if (dp->avpacket)
+        talloc_free(dp->avpacket);
+    else
+        free(dp->buffer);
     free(dp);
 }
 
@@ -207,20 +190,6 @@ static struct demux_stream *new_demuxer_stream(struct demuxer *demuxer,
         .asf_seq = -1,
     };
     return ds;
-}
-
-struct sh_stream *ds_gsh(struct demux_stream *ds)
-{
-    // Ideally ds would have a gsh field, but since all the old demuxers set
-    // ds->sh themselves and we don't want to change them, enjoy this hack.
-    if (!ds->sh)
-        return NULL;
-    switch (ds->stream_type) {
-    case STREAM_VIDEO: return ((struct sh_video *)ds->sh)->gsh;
-    case STREAM_AUDIO: return ((struct sh_audio *)ds->sh)->gsh;
-    case STREAM_SUB: return ((struct sh_sub *)ds->sh)->gsh;
-    }
-    assert(false);
 }
 
 /**
@@ -272,32 +241,21 @@ demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
     return d;
 }
 
-const char *sh_sub_type2str(int type)
+static struct sh_stream *new_sh_stream_id(demuxer_t *demuxer,
+                                          enum stream_type type,
+                                          int stream_index,
+                                          int demuxer_id)
 {
-    switch (type) {
-    case 't': return "text";
-    case 'm': return "movtext";
-    case 'a': return "ass";
-    case 'v': return "vobsub";
-    case 'x': return "xsub";
-    case 'b': return "dvb";
-    case 'd': return "dvb-teletext";
-    case 'p': return "hdmv pgs";
+    if (demuxer->num_streams > MAX_SH_STREAMS || stream_index > MAX_SH_STREAMS) {
+        mp_msg(MSGT_DEMUXER, MSGL_WARN, "Too many streams.");
+        return NULL;
     }
-    return "unknown";
-}
 
-static struct sh_stream *new_sh_stream(demuxer_t *demuxer,
-                                       enum stream_type type,
-                                       int stream_index,
-                                       int tid)
-{
     struct sh_stream *sh = talloc_struct(demuxer, struct sh_stream, {
         .type = type,
         .demuxer = demuxer,
         .index = demuxer->num_streams,
-        .demuxer_id = tid, // may be overwritten by demuxer
-        .tid = tid,
+        .demuxer_id = demuxer_id, // may be overwritten by demuxer
         .stream_index = stream_index,
         .opts = demuxer->opts,
     });
@@ -305,38 +263,47 @@ static struct sh_stream *new_sh_stream(demuxer_t *demuxer,
     switch (sh->type) {
         case STREAM_VIDEO: {
             struct sh_video *sht = talloc_zero(demuxer, struct sh_video);
-            sht->vid = sh->tid;
+            sht->gsh = sh;
+            sht->opts = sh->opts;
             sht->ds = demuxer->video;
             sh->video = sht;
-            sh->common_header = (struct sh_common *) sht;
             demuxer->v_streams[sh->stream_index] = sht;
             break;
         }
         case STREAM_AUDIO: {
             struct sh_audio *sht = talloc_zero(demuxer, struct sh_audio);
-            sht->aid = tid;
+            sht->gsh = sh;
+            sht->opts = sh->opts;
             sht->ds = demuxer->audio;
             sht->samplesize = 2;
             sht->sample_format = AF_FORMAT_S16_NE;
             sh->audio = sht;
-            sh->common_header = (struct sh_common *) sht;
             demuxer->a_streams[sh->stream_index] = sht;
             break;
         }
         case STREAM_SUB: {
             struct sh_sub *sht = talloc_zero(demuxer, struct sh_sub);
-            sht->sid = tid;
+            sht->gsh = sh;
+            sht->opts = sh->opts;
             sht->ds = demuxer->sub;
             sh->sub = sht;
-            sh->common_header = (struct sh_common *) sht;
             demuxer->s_streams[sh->stream_index] = sht;
             break;
         }
         default: assert(false);
     }
-    sh->common_header->opts = sh->opts;
-    sh->common_header->gsh = sh;
     return sh;
+}
+
+// This is what "modern" demuxers are supposed to use.
+struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
+{
+    int num = 0;
+    for (int n = 0; n < demuxer->num_streams; n++) {
+        if (demuxer->streams[n]->type == type)
+            num++;
+    }
+    return new_sh_stream_id(demuxer, type, demuxer->num_streams, num);
 }
 
 static void free_sh_stream(struct sh_stream *sh)
@@ -358,7 +325,7 @@ sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
     if (demuxer->s_streams[id])
         mp_msg(MSGT_DEMUXER, MSGL_WARN, "Sub stream %i redefined\n", id);
     else {
-        new_sh_stream(demuxer, STREAM_SUB, id, sid);
+        new_sh_stream_id(demuxer, STREAM_SUB, id, sid);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
     }
     return demuxer->s_streams[id];
@@ -379,7 +346,6 @@ static void free_sh_sub(sh_sub_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
     free(sh->extradata);
-    clear_parser((sh_common_t *)sh);
     free_sh_stream(sh->gsh);
 }
 
@@ -395,7 +361,7 @@ sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
         mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "WARNING: Audio stream header %d redefined.\n", id);
     } else {
         mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found audio stream: %d\n", id);
-        new_sh_stream(demuxer, STREAM_AUDIO, id, aid);
+        new_sh_stream_id(demuxer, STREAM_AUDIO, id, aid);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", aid);
     }
     return demuxer->a_streams[id];
@@ -408,7 +374,7 @@ static void free_sh_audio(demuxer_t *demuxer, int id)
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_audio at %p\n", sh);
     free(sh->wf);
     free(sh->codecdata);
-    clear_parser((sh_common_t *)sh);
+    clear_parser(sh);
     free_sh_stream(sh->gsh);
 }
 
@@ -424,7 +390,7 @@ sh_video_t *new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
         mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "WARNING: Video stream header %d redefined.\n", id);
     else {
         mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found video stream: %d\n", id);
-        new_sh_stream(demuxer, STREAM_VIDEO, id, vid);
+        new_sh_stream_id(demuxer, STREAM_VIDEO, id, vid);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
     }
     return demuxer->v_streams[id];
@@ -434,7 +400,6 @@ static void free_sh_video(sh_video_t *sh)
 {
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_video at %p\n", sh);
     free(sh->bih);
-    clear_parser((sh_common_t *)sh);
     free_sh_stream(sh->gsh);
 }
 
@@ -463,6 +428,15 @@ void free_demuxer(demuxer_t *demuxer)
     talloc_free(demuxer);
 }
 
+void demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
+                        demux_packet_t *dp)
+{
+    if (!demuxer_stream_is_selected(demuxer, stream)) {
+        free_demux_packet(dp);
+    } else {
+        ds_add_packet(demuxer->ds[stream->type], dp);
+    }
+}
 
 void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
 {
@@ -496,18 +470,18 @@ void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
 
 static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parser, const char *format)
 {
-    enum CodecID codec_id = mp_codec_to_av_codec_id(format);
+    enum AVCodecID codec_id = mp_codec_to_av_codec_id(format);
 
     switch (codec_id) {
-    case CODEC_ID_AAC_LATM:
-    case CODEC_ID_AC3:
-    case CODEC_ID_EAC3:
-    case CODEC_ID_DTS:
-    case CODEC_ID_FLAC:
-    case CODEC_ID_MLP:
-    case CODEC_ID_MP3:
-    case CODEC_ID_MP2:
-    case CODEC_ID_TRUEHD:
+    case AV_CODEC_ID_AAC_LATM:
+    case AV_CODEC_ID_AC3:
+    case AV_CODEC_ID_EAC3:
+    case AV_CODEC_ID_DTS:
+    case AV_CODEC_ID_FLAC:
+    case AV_CODEC_ID_MLP:
+    case AV_CODEC_ID_MP3:
+    case AV_CODEC_ID_MP2:
+    case AV_CODEC_ID_TRUEHD:
         *avctx = avcodec_alloc_context3(NULL);
         if (!*avctx)
             return;
@@ -519,7 +493,7 @@ static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parse
     }
 }
 
-static void get_parser(sh_common_t *sh, AVCodecContext **avctx, AVCodecParserContext **parser)
+static void get_parser(sh_audio_t *sh, AVCodecContext **avctx, AVCodecParserContext **parser)
 {
     *avctx  = NULL;
     *parser = NULL;
@@ -547,7 +521,7 @@ int ds_parse(demux_stream_t *ds, uint8_t **buffer, int *len, double pts, int64_t
     return av_parser_parse2(parser, avctx, buffer, len, *buffer, *len, pts, pts, pos);
 }
 
-static void clear_parser(sh_common_t *sh)
+static void clear_parser(sh_audio_t *sh)
 {
     av_parser_close(sh->parser);
     sh->parser = NULL;
@@ -678,9 +652,9 @@ int ds_fill_buffer(demux_stream_t *ds)
             break; // EOF
         }
 
-        if (demux->type == DEMUXER_TYPE_LAVF ||
-            demux->type == DEMUXER_TYPE_MATROSKA)
-        {
+        struct sh_video *sh_video = demux->video->sh;
+
+        if (sh_video && sh_video->gsh->attached_picture) {
             if (demux->audio)
                 ds->fill_count += demux->audio->packs - apacks;
             if (demux->video && demux->video->packs > vpacks)
@@ -948,6 +922,7 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
             opts->correct_pts =
                 demux_control(demuxer, DEMUXER_CTRL_CORRECT_PTS,
                             NULL) == DEMUXER_CTRL_OK;
+        demuxer_sort_chapters(demuxer);
         return demuxer;
     } else {
         // demux_mov can return playlist instead of mov
@@ -1223,7 +1198,11 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
                           struct sh_stream *stream)
 {
     assert(!stream || stream->type == type);
-    int index = stream ? stream->tid : -2;
+
+    int old_id = demuxer->ds[type]->id;
+
+    // legacy
+    int index = stream ? stream->stream_index : -2;
     if (type == STREAM_AUDIO) {
         if (demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index)
                 == DEMUXER_CTRL_NOTIMPL)
@@ -1233,11 +1212,11 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
                 == DEMUXER_CTRL_NOTIMPL)
             demuxer->video->id = index;
     } else if (type == STREAM_SUB) {
-        int index2 = stream ? stream->stream_index : -2;
-        if (demuxer->ds[type]->id != index2)
-            ds_free_packs(demuxer->ds[type]);
-        demuxer->ds[type]->id = index2;
+        demuxer->ds[type]->id = index;
+    } else {
+        abort();
     }
+
     int new_id = demuxer->ds[type]->id;
     void *new = NULL;
     if (new_id >= 0) {
@@ -1248,6 +1227,16 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
         }
     }
     demuxer->ds[type]->sh = new;
+
+    if (old_id != new_id) {
+        ds_free_packs(demuxer->ds[type]);
+        demux_control(demuxer, DEMUXER_CTRL_SWITCHED_TRACKS, NULL);
+    }
+}
+
+bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream)
+{
+    return stream && d->ds[stream->type]->id == stream->stream_index;
 }
 
 int demuxer_add_attachment(demuxer_t *demuxer, struct bstr name,
@@ -1278,10 +1267,10 @@ static int chapter_compare(const void *p1, const void *p2)
         return 1;
     else if (c1->start < c2->start)
         return -1;
-    return 0;
+    return c1->original_index > c2->original_index ? 1 :-1; // never equal
 }
 
-static void demuxer_sort_chapters(demuxer_t *demuxer)
+void demuxer_sort_chapters(demuxer_t *demuxer)
 {
     qsort(demuxer->chapters, demuxer->num_chapters,
           sizeof(struct demux_chapter), chapter_compare);
@@ -1290,24 +1279,14 @@ static void demuxer_sort_chapters(demuxer_t *demuxer)
 int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
                         uint64_t start, uint64_t end)
 {
-    if (!(demuxer->num_chapters % 32))
-        demuxer->chapters = talloc_realloc(demuxer, demuxer->chapters,
-                                           struct demux_chapter,
-                                           demuxer->num_chapters + 32);
-
-    demuxer->chapters[demuxer->num_chapters].start = start;
-    demuxer->chapters[demuxer->num_chapters].end = end;
-    demuxer->chapters[demuxer->num_chapters].name = name.len ?
-        talloc_strndup(demuxer->chapters, name.start, name.len) :
-        talloc_strdup(demuxer->chapters, mp_gtext("unknown"));
-
-    demuxer->num_chapters++;
-
-    if (demuxer->num_chapters > 1
-        && demuxer->chapters[demuxer->num_chapters - 2].start
-           < demuxer->chapters[demuxer->num_chapters - 1].start)
-            demuxer_sort_chapters(demuxer);
-
+    struct demux_chapter new = {
+        .original_index = demuxer->num_chapters,
+        .start = start,
+        .end = end,
+        .name = name.len ? bstrdup0(demuxer, name)
+                         : talloc_strdup(demuxer, mp_gtext("unknown")),
+    };
+    MP_TARRAY_APPEND(demuxer, demuxer->chapters, demuxer->num_chapters, new);
     return 0;
 }
 

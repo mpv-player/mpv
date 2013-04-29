@@ -64,44 +64,49 @@ uint32_t ebml_read_id(stream_t *s, int *length)
 /*
  * Read a variable length unsigned int.
  */
-uint64_t ebml_read_vlen_uint(uint8_t *buffer, int *length)
+uint64_t ebml_read_vlen_uint(bstr *buffer)
 {
     int i, j, num_ffs = 0, len_mask = 0x80;
     uint64_t num;
 
-    for (i = 0, num = *buffer++; i < 8 && !(num & len_mask); i++)
+    if (buffer->len == 0)
+        return EBML_UINT_INVALID;
+
+    for (i = 0, num = buffer->start[0]; i < 8 && !(num & len_mask); i++)
         len_mask >>= 1;
     if (i >= 8)
         return EBML_UINT_INVALID;
     j = i + 1;
-    if (length)
-        *length = j;
     if ((int) (num &= (len_mask - 1)) == len_mask - 1)
         num_ffs++;
-    while (i--) {
-        num = (num << 8) | *buffer++;
+    if (j > buffer->len)
+        return EBML_UINT_INVALID;
+    for (int n = 0; n < i; n++) {
+        num = (num << 8) | buffer->start[n + 1];
         if ((num & 0xFF) == 0xFF)
             num_ffs++;
     }
     if (j == num_ffs)
         return EBML_UINT_INVALID;
+    buffer->start += j;
+    buffer->len -= j;
     return num;
 }
 
 /*
  * Read a variable length signed int.
  */
-int64_t ebml_read_vlen_int(uint8_t *buffer, int *length)
+int64_t ebml_read_vlen_int(bstr *buffer)
 {
     uint64_t unum;
     int l;
 
     /* read as unsigned number first */
-    unum = ebml_read_vlen_uint(buffer, &l);
+    size_t len = buffer->len;
+    unum = ebml_read_vlen_uint(buffer);
     if (unum == EBML_UINT_INVALID)
         return EBML_INT_INVALID;
-    if (length)
-        *length = l;
+    l = len - buffer->len;
 
     return unum - ((1 << ((7 * l) - 1)) - 1);
 }
@@ -246,7 +251,7 @@ char *ebml_read_utf8(stream_t *s, uint64_t *length)
 }
 
 /*
- * Skip the next element.
+ * Skip the current element.
  */
 int ebml_read_skip(stream_t *s, uint64_t *length)
 {
@@ -262,6 +267,60 @@ int ebml_read_skip(stream_t *s, uint64_t *length)
     stream_skip(s, len);
 
     return 0;
+}
+
+/*
+ * Skip to (probable) next cluster (MATROSKA_ID_CLUSTER) element start position.
+ */
+int ebml_resync_cluster(stream_t *s)
+{
+    int64_t pos = stream_tell(s);
+    uint32_t last_4_bytes = 0;
+    mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Corrupt file detected. "
+           "Trying to resync starting from position %"PRId64"...\n", pos);
+    while (!s->eof) {
+        // Assumes MATROSKA_ID_CLUSTER is 4 bytes, with no 0 bytes.
+        if (last_4_bytes == MATROSKA_ID_CLUSTER) {
+            mp_msg(MSGT_DEMUX, MSGL_ERR,
+                   "[mkv] Cluster found at %"PRId64".\n", pos - 4);
+            stream_seek(s, pos - 4);
+            return 0;
+        }
+        last_4_bytes = (last_4_bytes << 8) | stream_read_char(s);
+        pos++;
+    }
+    return -1;
+}
+
+/*
+ * Skip the current element, or on error, call ebml_resync_cluster().
+ */
+int ebml_read_skip_or_resync_cluster(stream_t *s, uint64_t *length)
+{
+    uint64_t len;
+    int l;
+
+    len = ebml_read_length(s, &l);
+    if (len == EBML_UINT_INVALID)
+        goto resync;
+
+    if (length)
+        *length = len + l;
+
+    int64_t pos = stream_tell(s);
+    stream_skip(s, len);
+
+    // When reading corrupted elements, len will often be a random high number,
+    // and stream_skip() will set EOF.
+    if (s->eof) {
+        stream_seek(s, pos);
+        goto resync;
+    }
+
+    return 0;
+
+resync:
+    return ebml_resync_cluster(s) < 0 ? -1 : 1;
 }
 
 /*

@@ -367,6 +367,45 @@ pp[=filter1[:option1[:option2...]]/[-]filter2...]
         Horizontal deblocking on luminance only, and switch vertical
         deblocking on or off automatically depending on available CPU time.
 
+lavfi=graph[:sws_flags]
+    Filter video using ffmpeg's libavfilter.
+
+    <graph>
+        The libavfilter graph string. The filter must have a single video input
+        pad and a single video output pad.
+
+        See ``https://ffmpeg.org/ffmpeg-filters.html`` for syntax and available
+        filters.
+
+        *WARNING*: if you want to use the full filter syntax with this option,
+        you have to quote the filter graph in order to prevent mpv's syntax
+        and the filter graph syntax from clashing.
+
+        *EXAMPLE*:
+
+        ``-vf lavfi=[gradfun=20:30,vflip]``
+            gradfun filter with nonsense parameters, followed by a vflip
+            filter. (This demonstrates how libavfilter takes a graph and not
+            just a single filter.) The filter graph string is quoted with
+            ``[`` and ``]``. This requires no additional quoting or escaping
+            with some shells (like bash), while others (like zsh) require
+            additional ``"`` quotes around the option string.
+
+        ``'--vf=lavfi="gradfun=20:30,vflip"'``
+            same as before, but uses quoting that should be safe with all
+            shells. The outer ``'`` quotes make sure that the shell doesn't
+            remove the ``"`` quotes needed by mpv.
+
+        ``'--vf=lavfi=graph="gradfun=radius=30:strength=20,vflip"'``
+            same as before, but uses named parameters for everything.
+
+    <sws_flags>
+        If libavfilter inserts filters for pixel format conversion, this
+        option gives the flags which should be passed to libswscale. This
+        option is numeric and takes a bit-wise combination of ``SWS_`` flags.
+
+        See ``http://git.videolan.org/?p=ffmpeg.git;a=blob;f=libswscale/swscale.h``.
+
 noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]
     Adds noise.
 

@@ -297,6 +297,7 @@ const m_option_t common_opts[] = {
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
     OPT_FLAG("config", load_config, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
+    OPT_STRINGLIST("reset-on-next-file", reset_options, CONF_GLOBAL),
 
 // ------------------------- stream options --------------------
 
@@ -320,7 +321,6 @@ const m_option_t common_opts[] = {
 #ifdef CONFIG_LIBBLURAY
     {"bluray-device",  &bluray_device,  CONF_TYPE_STRING, 0,          0,  0, NULL},
     {"bluray-angle",   &bluray_angle,   CONF_TYPE_INT,    CONF_RANGE, 0, 999, NULL},
-    {"bluray-chapter", &bluray_chapter, CONF_TYPE_INT,    CONF_RANGE, 0, 999, NULL},
 #endif /* CONFIG_LIBBLURAY */
 
 #ifdef CONFIG_NETWORKING
@@ -342,16 +342,16 @@ const m_option_t common_opts[] = {
 
 // ------------------------- demuxer options --------------------
 
-    // number of frames to play/convert
-    {"frames", &play_n_frames_mf, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+    OPT_CHOICE_OR_INT("frames", play_frames, 0, 0, INT_MAX,
+                      ({"all", -1})),
 
     // seek to byte/seconds position
-    {"sb", &seek_to_byte, CONF_TYPE_INT64, CONF_MIN, 0, 0, NULL},
+    OPT_INT64("sb", seek_to_byte, 0),
     OPT_REL_TIME("start", play_start, 0),
     OPT_REL_TIME("end", play_end, 0),
     OPT_REL_TIME("length", play_length, 0),
 
-    OPT_FLAG("pause", start_paused, 0),
+    OPT_FLAG("pause", pause, 0),
     OPT_FLAG("keep-open", keep_open, 0),
 
     // AVI specific: force non-interleaved mode
@@ -391,6 +391,7 @@ const m_option_t common_opts[] = {
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
     OPT_FLAG("extbased", extension_parsing, 0),
+    OPT_FLAG("mkv-subtitle-preroll", mkv_subtitle_preroll, 0),
 
     {"mf", (void *) mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
 #ifdef CONFIG_RADIO
@@ -412,20 +413,20 @@ const m_option_t common_opts[] = {
     {"bps", &pts_from_bps, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
     // set A-V sync correction speed (0=disables it):
-    {"mc", &default_max_pts_correction, CONF_TYPE_FLOAT, CONF_RANGE, 0, 100, NULL},
+    OPT_FLOATRANGE("mc", default_max_pts_correction, 0, 0, 100),
 
     // force video/audio rate:
-    {"fps", &force_fps, CONF_TYPE_DOUBLE, CONF_MIN, 0, 0, NULL},
-    {"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000, NULL},
+    OPT_DOUBLE("fps", force_fps, CONF_MIN, 0),
+    OPT_INTRANGE("srate", force_srate, 0, 1000, 8*48000),
     OPT_INTRANGE("channels", audio_output_channels, 0, 1, 8),
     OPT_AUDIOFORMAT("format", audio_output_format, 0),
     OPT_FLOATRANGE("speed", playback_speed, 0, 0.01, 100.0),
 
     // set a-v distance
-    {"audio-delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -100.0, 100.0, NULL},
+    OPT_FLOATRANGE("audio-delay", audio_delay, 0, -100.0, 100.0),
 
     // ignore header-specified delay (dwStart)
-    {"ignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    OPT_FLAG("ignore-start", ignore_start, 0),
 
     OPT_FLOATRANGE("a52drc", drc_level, 0, 0, 2),
 
@@ -478,7 +479,7 @@ const m_option_t common_opts[] = {
     {"sub-delay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
     {"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
     OPT_FLAG("autosub", sub_auto, 0),
-    {"sub-forced-only", &forced_subs_only, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    OPT_FLAG("sub-forced-only", forced_subs_only, 0),
     // enable Closed Captioning display
     {"overlapsub", &suboverlap_enabled, CONF_TYPE_FLAG, 0, 0, 2, NULL},
     {"sub-no-text-pp", &sub_no_text_pp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -501,6 +502,8 @@ const m_option_t common_opts[] = {
     OPT_FLAG("osd-bar", osd_bar_visible, 0),
     OPT_FLOATRANGE("osd-bar-align-x", osd_bar_align_x, 0, -1.0, +1.0),
     OPT_FLOATRANGE("osd-bar-align-y", osd_bar_align_y, 0, -1.0, +1.0),
+    OPT_FLOATRANGE("osd-bar-w", osd_bar_w, 0, 1, 100),
+    OPT_FLOATRANGE("osd-bar-h", osd_bar_h, 0, 0.1, 50),
     OPT_SUBSTRUCT("osd", osd_style, osd_style_conf, 0),
     OPT_SUBSTRUCT("sub-text", sub_text_style, osd_style_conf, 0),
     {NULL, NULL, 0, 0, 0, 0, NULL}
@@ -540,7 +543,7 @@ const m_option_t mplayer_opts[]={
                 {"yes", SOFTVOL_YES},
                 {"auto", SOFTVOL_AUTO})),
     OPT_FLOATRANGE("softvol-max", softvol_max, 0, 10, 10000),
-    {"volstep", &volstep, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
+    OPT_INTRANGE("volstep", volstep, 0, 0, 100),
     OPT_FLOATRANGE("volume", mixer_init_volume, 0, -1, 10000),
     OPT_CHOICE("mute", mixer_init_mute, M_OPT_OPTIONAL_PARAM,
                ({"auto", -1},
@@ -569,10 +572,9 @@ const m_option_t mplayer_opts[]={
     // set fullscreen switch method (workaround for buggy WMs)
     OPT_INTRANGE("fsmode-dontuse", vo.fsmode, 0, 31, 4096),
     OPT_INT("colorkey", vo.colorkey, 0),
-    OPT_INT("no-colorkey", vo.colorkey, 0x1000000),
-    // wait for v-sync (gl)
-    OPT_FLAG("vsync", vo.vsync, 1),
-    OPT_FLOATRANGE("panscan", vo.panscan, 0, 1.0, 99.0),
+    OPT_FLAG_STORE("no-colorkey", vo.colorkey, 0, 0x1000000),
+    OPT_FLAG("native-keyrepeat", vo.native_keyrepeat, 0),
+    OPT_FLOATRANGE("panscan", vo.panscan, 0, 0.0, 1.0),
     OPT_FLOATRANGE("panscanrange", vo.panscanrange, 0, -19.0, 99.0),
     OPT_FLAG("force-rgba-osd-rendering", force_rgba_osd, 0),
     OPT_CHOICE("colormatrix", requested_colorspace, 0,
@@ -592,12 +594,13 @@ const m_option_t mplayer_opts[]={
     OPT_CHOICE_OR_INT("cursor-autohide", vo.cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),
 
-    OPT_INT64("wid", vo.WinID, -1),
+    OPT_INT64("wid", vo.WinID, CONF_GLOBAL),
 #ifdef CONFIG_X11
     OPT_FLAG("stop-xscreensaver", vo.stop_screensaver, 0),
     OPT_STRINGLIST("fstype", vo.fstype_list, 0),
 #endif
-    {"heartbeat-cmd", &heartbeat_cmd, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0),
+    OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
     OPT_FLAG("mouseinput", vo.nomouse_input, 0),
 
     OPT_CHOICE_OR_INT("screen", vo.screen_id, 0, 0, 32,
@@ -615,13 +618,13 @@ const m_option_t mplayer_opts[]={
 
 //---------------------- mplayer-only options ------------------------
 
-    {"use-filedir-conf", &use_filedir_conf, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+    OPT_FLAG("use-filedir-conf", use_filedir_conf, CONF_GLOBAL),
     OPT_CHOICE("osd-level", osd_level, 0,
                ({"0", 0}, {"1", 1}, {"2", 2}, {"3", 3})),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
     OPT_FLAG("osd-fractions", osd_fractions, 0),
 
-    {"sstep", &step_sec, CONF_TYPE_DOUBLE, CONF_MIN, 0, 0, NULL},
+    OPT_DOUBLE("sstep", step_sec, CONF_MIN, 0),
 
     OPT_CHOICE("framedrop", frame_dropping, 0,
                ({"no", 0},
@@ -672,7 +675,7 @@ const m_option_t mplayer_opts[]={
     OPT_STRING("status-msg", status_msg, M_OPT_PARSE_ESCAPES),
     OPT_STRING("osd-status-msg", osd_status_msg, M_OPT_PARSE_ESCAPES),
 
-    {"slave-broken", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
+    OPT_FLAG("slave-broken", slave_mode, CONF_GLOBAL),
     OPT_FLAG("idle", player_idle_mode, CONF_GLOBAL),
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
     OPT_FLAG("consolecontrols", consolecontrols, CONF_GLOBAL),

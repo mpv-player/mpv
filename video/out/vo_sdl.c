@@ -197,6 +197,7 @@ struct priv {
     // options
     int allow_sw;
     int switch_mode;
+    int vsync;
 };
 
 static bool is_good_renderer(SDL_RendererInfo *ri,
@@ -769,14 +770,12 @@ static int preinit(struct vo *vo, const char *arg)
     // predefine SDL defaults (SDL env vars shall override)
     SDL_SetHintWithPriority(SDL_HINT_RENDER_SCALE_QUALITY, "1",
                             SDL_HINT_DEFAULT);
+    SDL_SetHintWithPriority(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0",
+                            SDL_HINT_DEFAULT);
 
     // predefine MPV options (SDL env vars shall be overridden)
-    if (vo->opts->vsync)
-        SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "1",
-                                SDL_HINT_OVERRIDE);
-    else
-        SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, "0",
-                                SDL_HINT_OVERRIDE);
+    SDL_SetHintWithPriority(SDL_HINT_RENDER_VSYNC, vc->vsync ? "1" : "0",
+                            SDL_HINT_OVERRIDE);
 
     if (SDL_InitSubSystem(SDL_INIT_VIDEO)) {
         mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_Init failed\n");
@@ -1025,11 +1024,13 @@ const struct vo_driver video_out_sdl = {
     },
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
-        .renderer_index = -1
+        .renderer_index = -1,
+        .vsync = 1,
     },
     .options = (const struct m_option []){
         OPT_FLAG("sw", allow_sw, 0),
         OPT_FLAG("switch-mode", switch_mode, 0),
+        OPT_FLAG("vsync", vsync, 0),
         {NULL}
     },
     .preinit = preinit,

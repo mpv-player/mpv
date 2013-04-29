@@ -29,10 +29,11 @@
 
 #include "talloc.h"
 
-#include "video/img_format.h"
-#include "video/mp_image.h"
-#include "video/sws_utils.h"
-#include "video/memcpy_pic.h"
+#include "img_format.h"
+#include "mp_image.h"
+#include "sws_utils.h"
+#include "memcpy_pic.h"
+#include "fmt-conversion.h"
 
 struct m_refcount {
     void *arg;
@@ -41,7 +42,7 @@ struct m_refcount {
     // External refcounted object (such as libavcodec DR buffers). This assumes
     // that the actual data is managed by the external object, not by
     // m_refcount. The .ext_* calls use that external object's refcount
-    // primitives. It usually doesn't make sense to set both .free and .ext_*.
+    // primitives.
     void (*ext_ref)(void *arg);
     void (*ext_unref)(void *arg);
     bool (*ext_is_unique)(void *arg);
@@ -236,23 +237,18 @@ struct mp_image *mp_image_new_ref(struct mp_image *img)
 struct mp_image *mp_image_new_custom_ref(struct mp_image *img, void *free_arg,
                                          void (*free)(void *arg))
 {
-    struct mp_image *new = talloc_ptrtype(NULL, new);
-    talloc_set_destructor(new, mp_image_destructor);
-    *new = *img;
-
-    new->refcount = m_refcount_new();
-    new->refcount->free = free;
-    new->refcount->arg = free_arg;
-    return new;
+    return mp_image_new_external_ref(img, free_arg, NULL, NULL, NULL, free);
 }
 
 // Return a reference counted reference to img. ref/unref/is_unique are used to
 // connect to an external refcounting API. It is assumed that the new object
-// has an initial reference to that external API.
+// has an initial reference to that external API. If free is given, that is
+// called after the last unref. All function pointers are optional.
 struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
                                            void (*ref)(void *arg),
                                            void (*unref)(void *arg),
-                                           bool (*is_unique)(void *arg))
+                                           bool (*is_unique)(void *arg),
+                                           void (*free)(void *arg))
 {
     struct mp_image *new = talloc_ptrtype(NULL, new);
     talloc_set_destructor(new, mp_image_destructor);
@@ -262,6 +258,7 @@ struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
     new->refcount->ext_ref = ref;
     new->refcount->ext_unref = unref;
     new->refcount->ext_is_unique = is_unique;
+    new->refcount->free = free;
     new->refcount->arg = arg;
     return new;
 }
@@ -321,8 +318,6 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     dst->qscale_type = src->qscale_type;
     dst->pts = src->pts;
     if (dst->w == src->w && dst->h == src->h) {
-        dst->qstride = src->qstride;
-        dst->qscale = src->qscale;
         dst->display_w = src->display_w;
         dst->display_h = src->display_h;
     }
@@ -436,3 +431,113 @@ void mp_image_set_colorspace_details(struct mp_image *image,
         image->levels = MP_CSP_LEVELS_PC;
     }
 }
+
+// Copy properties and data of the AVFrame into the mp_image, without taking
+// care of memory management issues.
+void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
+                                        struct AVFrame *src)
+{
+    mp_image_setfmt(dst, pixfmt2imgfmt(src->format));
+    mp_image_set_size(dst, src->width, src->height);
+
+    for (int i = 0; i < 4; i++) {
+        dst->planes[i] = src->data[i];
+        dst->stride[i] = src->linesize[i];
+    }
+
+    dst->pict_type = src->pict_type;
+
+    dst->fields = MP_IMGFIELD_ORDERED;
+    if (src->interlaced_frame)
+        dst->fields |= MP_IMGFIELD_INTERLACED;
+    if (src->top_field_first)
+        dst->fields |= MP_IMGFIELD_TOP_FIRST;
+    if (src->repeat_pict == 1)
+        dst->fields |= MP_IMGFIELD_REPEAT_FIRST;
+
+#if HAVE_AVUTIL_QP_API
+    dst->qscale = av_frame_get_qp_table(src, &dst->qstride, &dst->qscale_type);
+#else
+    dst->qscale = src->qscale_table;
+    dst->qstride = src->qstride;
+    dst->qscale_type = src->qscale_type;
+#endif
+}
+
+// Copy properties and data of the mp_image into the AVFrame, without taking
+// care of memory management issues.
+void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
+                                      struct mp_image *src)
+{
+    dst->format = imgfmt2pixfmt(src->imgfmt);
+    dst->width = src->w;
+    dst->height = src->h;
+
+    for (int i = 0; i < 4; i++) {
+        dst->data[i] = src->planes[i];
+        dst->linesize[i] = src->stride[i];
+    }
+    dst->extended_data = dst->data;
+
+    dst->pict_type = src->pict_type;
+    if (src->fields & MP_IMGFIELD_INTERLACED)
+        dst->interlaced_frame = 1;
+    if (src->fields & MP_IMGFIELD_TOP_FIRST)
+        dst->top_field_first = 1;
+    if (src->fields & MP_IMGFIELD_REPEAT_FIRST)
+        dst->repeat_pict = 1;
+}
+
+#if HAVE_AVUTIL_REFCOUNTING
+
+static void frame_free(void *p)
+{
+    AVFrame *frame = p;
+    av_frame_free(&frame);
+}
+
+static bool frame_is_unique(void *p)
+{
+    AVFrame *frame = p;
+    return av_frame_is_writable(frame);
+}
+
+// Create a new mp_image reference to av_frame.
+struct mp_image *mp_image_from_av_frame(struct AVFrame *av_frame)
+{
+    AVFrame *new_ref = av_frame_clone(av_frame);
+    if (!new_ref)
+        abort(); // OOM
+    struct mp_image t = {0};
+    mp_image_copy_fields_from_av_frame(&t, new_ref);
+    return mp_image_new_external_ref(&t, new_ref, NULL, NULL, frame_is_unique,
+                                     frame_free);
+}
+
+static void free_img(void *opaque, uint8_t *data)
+{
+    struct mp_image *img = opaque;
+    talloc_free(img);
+}
+
+// Convert the mp_image reference to a AVFrame reference.
+// Warning: img is unreferenced (i.e. free'd). This is asymmetric to
+//          mp_image_from_av_frame(). It's done this way to allow marking the
+//          resulting AVFrame as writeable if img is the only reference (in
+//          other words, it's an optimization).
+struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
+{
+    struct mp_image *new_ref = mp_image_new_ref(img); // ensure it's refcounted
+    talloc_free(img);
+    AVFrame *frame = av_frame_alloc();
+    mp_image_copy_fields_to_av_frame(frame, new_ref);
+    // Caveat: if img has shared references, and all other references disappear
+    //         at a later point, the AVFrame will still be read-only.
+    int flags = 0;
+    if (!mp_image_is_writeable(new_ref))
+        flags |= AV_BUFFER_FLAG_READONLY;
+    frame->buf[0] = av_buffer_create(NULL, 0, free_img, new_ref, flags);
+    return frame;
+}
+
+#endif /* HAVE_AVUTIL_REFCOUNTING */
