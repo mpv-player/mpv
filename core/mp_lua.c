@@ -103,7 +103,8 @@ void mp_lua_init(struct MPContext *mpctx)
     return;
 
 error_out:
-    lua_close(mpctx->lua_ctx->state);
+    if (mpctx->lua_ctx->state)
+        lua_close(mpctx->lua_ctx->state);
     talloc_free(mpctx->lua_ctx);
     mpctx->lua_ctx = NULL;
 }
