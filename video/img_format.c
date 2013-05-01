@@ -194,12 +194,12 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
 
     desc.plane_bits = planedepth[0];
 
-    if (!(pd->flags & PIX_FMT_RGB) && fmt != PIX_FMT_MONOBLACK &&
-        fmt != PIX_FMT_PAL8)
+    if (mpfmt == IMGFMT_XYZ12_LE || mpfmt == IMGFMT_XYZ12_BE) {
+        desc.flags |= MP_IMGFLAG_XYZ;
+    } else if (!(pd->flags & PIX_FMT_RGB) && fmt != PIX_FMT_MONOBLACK &&
+               fmt != PIX_FMT_PAL8)
     {
         desc.flags |= MP_IMGFLAG_YUV;
-    } else if (mpfmt == IMGFMT_XYZ12_LE || mpfmt == IMGFMT_XYZ12_BE) {
-        desc.flags |= MP_IMGFLAG_XYZ;
     } else {
         desc.flags |= MP_IMGFLAG_RGB;
     }
