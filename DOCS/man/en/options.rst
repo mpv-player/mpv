@@ -296,11 +296,6 @@
     Some Blu-ray discs contain scenes that can be viewed from multiple angles.
     Here you can tell mpv which angles to use (default: 1).
 
---bluray-chapter=<ID>
-    (Blu-ray only)
-    Tells mpv which Blu-ray chapter to start the current title from
-    (default: 1).
-
 --bluray-device=<path>
     (Blu-ray only)
     Specify the Blu-ray disc location. Must be a directory with Blu-ray

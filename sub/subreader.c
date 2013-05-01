@@ -386,14 +386,14 @@ static subtitle *sub_ass_read_line_subviewer(stream_t *st, subtitle *current,
     int a1, a2, a3, a4, b1, b2, b3, b4, j = 0;
 
     while (!current->text[0]) {
-        char line[LINE_LEN + 1], full_line[LINE_LEN + 1], sep;
+        char line[LINE_LEN + 1], full_line[LINE_LEN + 1];
         int i;
 
         /* Parse SubRip header */
         if (!stream_read_line(st, line, LINE_LEN, utf16))
             return NULL;
-        if (sscanf(line, "%d:%d:%d%[,.:]%d --> %d:%d:%d%[,.:]%d",
-                     &a1, &a2, &a3, &sep, &a4, &b1, &b2, &b3, &sep, &b4) < 10)
+        if (sscanf(line, "%d:%d:%d%*1[,.:]%d --> %d:%d:%d%*1[,.:]%d",
+                     &a1, &a2, &a3, &a4, &b1, &b2, &b3, &b4) < 8)
             continue;
 
         current->start = a1 * 360000 + a2 * 6000 + a3 * 100 + a4 / 10;
@@ -450,7 +450,7 @@ static subtitle *sub_read_line_subviewer(stream_t *st,subtitle *current,
         return sub_ass_read_line_subviewer(st, current, args);
     while (!current->text[0]) {
 	if (!stream_read_line (st, line, LINE_LEN, utf16)) return NULL;
-	if ((len=sscanf (line, "%d:%d:%d%[,.:]%d --> %d:%d:%d%[,.:]%d",&a1,&a2,&a3,(char *)&i,&a4,&b1,&b2,&b3,(char *)&i,&b4)) < 10)
+	if ((len=sscanf (line, "%d:%d:%d%*1[,.:]%d --> %d:%d:%d%*1[,.:]%d",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4)) < 8)
 	    continue;
 	current->start = a1*360000+a2*6000+a3*100+a4/10;
 	current->end   = b1*360000+b2*6000+b3*100+b4/10;

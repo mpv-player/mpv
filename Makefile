@@ -379,7 +379,7 @@ video/out/gl_video_shaders.h: TOOLS/file2string.pl video/out/gl_video_shaders.gl
 	./$^ >$@
 
 sub/osd_libass.c: sub/osd_font.h
-sub/osd_font.h: TOOLS/file2string.pl sub/osd_font.pfb
+sub/osd_font.h: TOOLS/file2string.pl sub/osd_font.otf
 	./$^ >$@
 
 core/mp_lua.c: core/lua_defaults.h

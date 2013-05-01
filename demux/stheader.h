@@ -42,11 +42,10 @@ struct sh_stream {
     struct demuxer *demuxer;
     // Index into demuxer->streams.
     int index;
-    // The (possibly) type specific id, e.g. aid or sid.
-    int tid;
     // Index into stream array (currently one array per type, e.g. a_streams).
     int stream_index;
-    // Demuxer specific ID (always set, defaults to tid).
+    // Demuxer/format specific ID. Corresponds to the stream IDs as encoded in
+    // some file formats (e.g. MPEG), or an index chosen by demux.c.
     int demuxer_id;
     // One of these is non-NULL, the others are NULL, depending on the stream
     // type.

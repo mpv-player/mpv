@@ -408,11 +408,10 @@ int stream_read_internal(stream_t *s, void *buf, int len);
 /// Internal seek function bypassing the stream buffer
 int stream_seek_internal(stream_t *s, int64_t newpos);
 
-extern int bluray_angle;
-extern int bluray_chapter;
 extern int dvd_title;
 extern int dvd_angle;
 
+extern int bluray_angle;
 extern char *bluray_device;
 
 typedef struct {
