@@ -109,8 +109,6 @@ struct vo_wayland_input {
         xkb_mod_mask_t control_mask;
         xkb_mod_mask_t alt_mask;
     } xkb;
-
-    int modifiers;
 };
 
 struct vo_wayland_state {

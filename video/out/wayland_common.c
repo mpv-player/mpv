@@ -292,21 +292,9 @@ static void keyboard_handle_key(void *data,
 
     const xkb_keysym_t *syms;
     xkb_keysym_t sym;
-    xkb_mod_mask_t mask;
 
     code = key + 8;
     num_syms = xkb_key_get_syms(input->xkb.state, code, &syms);
-
-    mask = xkb_state_serialize_mods(input->xkb.state,
-            XKB_STATE_DEPRESSED | XKB_STATE_LATCHED);
-
-    input->modifiers = 0;
-    if (mask & input->xkb.control_mask)
-        input->modifiers |= MOD_CONTROL_MASK;
-    if (mask & input->xkb.alt_mask)
-        input->modifiers |= MOD_ALT_MASK;
-    if (mask & input->xkb.shift_mask)
-        input->modifiers |= MOD_SHIFT_MASK;
 
     sym = XKB_KEY_NoSymbol;
     if (num_syms == 1)
