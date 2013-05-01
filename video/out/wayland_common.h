@@ -121,14 +121,6 @@ struct vo_wayland_input {
     } xkb;
 
     int modifiers;
-
-    struct {
-        uint32_t sym;
-        uint32_t key;
-        uint32_t time;
-        int timer_fd;
-        struct vo_wayland_task task;
-    } repeat;
 };
 
 struct vo_wayland_state {

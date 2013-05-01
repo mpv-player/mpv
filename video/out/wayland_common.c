@@ -290,8 +290,7 @@ static void keyboard_handle_key(void *data,
     struct vo_wayland_state *wl = data;
     struct vo_wayland_input *input = wl->input;
     uint32_t code, num_syms;
-
-    struct itimerspec its = {{0, 0}, {0, 0}};
+    int mpkey;
 
     const xkb_keysym_t *syms;
     xkb_keysym_t sym;
@@ -315,35 +314,12 @@ static void keyboard_handle_key(void *data,
     if (num_syms == 1)
         sym = syms[0];
 
-    if (sym != XKB_KEY_NoSymbol && state == WL_KEYBOARD_KEY_STATE_PRESSED) {
-        int mpkey = lookupkey(sym);
-        if (mpkey)
+    if (sym != XKB_KEY_NoSymbol && (mpkey = lookupkey(sym))) {
+        if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
+            mplayer_put_key(wl->vo->key_fifo, mpkey | MP_KEY_STATE_DOWN);
+        else
             mplayer_put_key(wl->vo->key_fifo, mpkey);
     }
-
-    if (state == WL_KEYBOARD_KEY_STATE_RELEASED && key == input->repeat.key) {
-        input->repeat.sym = 0;
-        input->repeat.key = 0;
-        input->repeat.time = 0;
-    }
-    else if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
-        if (input->repeat.key == key) {
-            its.it_interval.tv_sec = 0;
-            its.it_interval.tv_nsec = 20 * 1000 * 1000;
-            its.it_value.tv_sec = 0;
-            its.it_value.tv_nsec = 100 * 1000 * 1000;
-        }
-        else {
-            input->repeat.sym = sym;
-            input->repeat.key = key;
-            input->repeat.time = time;
-            its.it_interval.tv_sec = 0;
-            its.it_interval.tv_nsec = 25 * 1000 * 1000;
-            its.it_value.tv_sec = 0;
-            its.it_value.tv_nsec = 400 * 1000 * 1000;
-        }
-    }
-    timerfd_settime(input->repeat.timer_fd, 0, &its, NULL);
 }
 
 static void keyboard_handle_modifiers(void *data,
@@ -713,23 +689,6 @@ static void cursor_timer_func(struct vo_wayland_task *task,
         hide_cursor(wl);
 }
 
-static void keyboard_timer_func(struct vo_wayland_task *task,
-                                uint32_t events,
-                                struct vo_wayland_state *wl)
-{
-    struct vo_wayland_input *input = wl->input;
-    uint64_t exp;
-
-    if (read(input->repeat.timer_fd, &exp, sizeof exp) != sizeof exp)
-        /* If we change the timer between the fd becoming
-         * readable and getting here, there'll be nothing to
-         * read and we get EAGAIN. */
-        return;
-
-    keyboard_handle_key(wl, input->keyboard, 0, input->repeat.time,
-            input->repeat.key, WL_KEYBOARD_KEY_STATE_PRESSED);
-}
-
 static bool create_display (struct vo_wayland_state *wl)
 {
     struct vo_wayland_display *d = wl->display;
@@ -842,22 +801,15 @@ static void destroy_input (struct vo_wayland_state *wl)
 static void create_timers (struct vo_wayland_state *wl)
 {
     struct vo_wayland_display *d = wl->display;
-    struct vo_wayland_input *i = wl->input;
 
     d->cursor.task.run = cursor_timer_func;
     d->cursor.timer_fd = timerfd_create(CLOCK_MONOTONIC,
                                         TFD_CLOEXEC | TFD_NONBLOCK);
     display_watch_fd(d, d->cursor.timer_fd, EPOLLIN, &d->cursor.task);
-
-    i->repeat.task.run = keyboard_timer_func;
-    i->repeat.timer_fd = timerfd_create(CLOCK_MONOTONIC,
-                                        TFD_CLOEXEC | TFD_NONBLOCK);
-    display_watch_fd(d, i->repeat.timer_fd, EPOLLIN, &i->repeat.task);
 }
 
 static void destroy_timers (struct vo_wayland_state *wl)
 {
-    close(wl->input->repeat.timer_fd);
     close(wl->display->cursor.timer_fd);
 }
 
