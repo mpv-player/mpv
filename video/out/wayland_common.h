@@ -35,15 +35,6 @@ enum vo_wayland_window_type {
 };
 
 struct vo;
-struct vo_wayland_state;
-
-struct vo_wayland_task {
-    void (*run)(struct vo_wayland_task *task,
-                uint32_t events,
-                struct vo_wayland_state *wl);
-
-    struct wl_list link;
-};
 
 struct vo_wayland_output {
     uint32_t id; /* unique name */
@@ -68,14 +59,13 @@ struct vo_wayland_display {
         struct wl_surface *surface;
 
         /* save timer and pointer for fading out */
+        int mouse_timer;
+        bool mouse_waiting_hide;
         struct wl_pointer *pointer;
         uint32_t serial;
-        int timer_fd;
-        struct vo_wayland_task task;
     } cursor;
 
-    int display_fd, epoll_fd;
-    struct vo_wayland_task display_task;
+    int display_fd;
 
     struct wl_list output_list;
     struct wl_output *fs_output; /* fullscreen output */

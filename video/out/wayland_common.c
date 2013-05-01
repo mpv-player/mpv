@@ -26,12 +26,10 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <assert.h>
-#include <fcntl.h>
+#include <poll.h>
 #include <unistd.h>
 
 #include <sys/mman.h>
-#include <sys/epoll.h>
-#include <sys/timerfd.h>
 #include <linux/input.h>
 
 #include "config.h"
@@ -387,20 +385,8 @@ static void pointer_handle_motion(void *data,
 
     display->cursor.pointer = pointer;
 
-    if (wl->window->type == TYPE_FULLSCREEN) {
+    if (wl->window->type == TYPE_FULLSCREEN)
         show_cursor(wl);
-
-        struct itimerspec its;
-        int ms = wl->vo->opts->cursor_autohide_delay;
-        int sec = ms / 1000;
-        ms %= 1000;
-
-        its.it_interval.tv_sec = 0;
-        its.it_interval.tv_nsec = 100 * 1000 * 1000;
-        its.it_value.tv_sec = sec;
-        its.it_value.tv_nsec = ms * 1000 * 1000;
-        timerfd_settime(display->cursor.timer_fd, 0, &its, NULL);
-    }
 }
 
 static void pointer_handle_button(void *data,
@@ -417,7 +403,6 @@ static void pointer_handle_button(void *data,
 
     if ((button == BTN_LEFT) && (state == WL_POINTER_BUTTON_STATE_PRESSED))
         wl_shell_surface_move(wl->window->shell_surface, wl->input->seat, serial);
-
 }
 
 static void pointer_handle_axis(void *data,
@@ -555,40 +540,6 @@ static const struct wl_registry_listener registry_listener = {
 
 /*** internal functions ***/
 
-static int set_cloexec_or_close(int fd)
-{
-    long flags;
-
-    if (fd == -1)
-        return -1;
-
-    if ((flags = fcntl(fd, F_GETFD)) == -1)
-        goto err;
-
-    if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) == -1)
-        goto err;
-
-    return fd;
-
-err:
-    close(fd);
-    return -1;
-}
-
-static int os_epoll_create_cloexec(void)
-{
-    int fd;
-
-#ifdef EPOLL_CLOEXEC
-    if ((fd = epoll_create1(EPOLL_CLOEXEC)) >= 0)
-        return fd;
-    if (errno != EINVAL)
-        return -1;
-#endif
-
-    return set_cloexec_or_close(epoll_create(1));
-}
-
 static int lookupkey(int key)
 {
     static const char *passthrough_keys
@@ -615,6 +566,7 @@ static void hide_cursor (struct vo_wayland_state *wl)
 
     wl_pointer_set_cursor(display->cursor.pointer, display->cursor.serial,
             NULL, 0, 0);
+
 }
 
 static void show_cursor (struct vo_wayland_state *wl)
@@ -634,59 +586,9 @@ static void show_cursor (struct vo_wayland_state *wl)
     wl_surface_damage(display->cursor.surface, 0, 0,
             image->width, image->height);
     wl_surface_commit(display->cursor.surface);
-}
 
-static void
-display_watch_fd(struct vo_wayland_display *display,
-                 int fd, uint32_t events, struct vo_wayland_task *task)
-{
-    struct epoll_event ep;
-
-    if (display->epoll_fd < 0) {
-        mp_msg(MSGT_VO, MSGL_WARN, "[wayland] Could not watch fd\n");
-        return;
-    }
-
-    ep.events = events;
-    ep.data.ptr = task;
-    epoll_ctl(display->epoll_fd, EPOLL_CTL_ADD, fd, &ep);
-}
-
-static void display_handle_data(struct vo_wayland_task *task,
-                                uint32_t events,
-                                struct vo_wayland_state *wl)
-{
-    struct vo_wayland_display *display = wl->display;
-    struct epoll_event ep;
-    int ret;
-
-    if (events & EPOLLERR || events & EPOLLHUP)
-        exit(-1);
-
-    if (events & EPOLLIN) {
-        ret = wl_display_dispatch(display->display);
-        if (ret == -1)
-            exit(-1);
-    }
-
-    if (events & EPOLLOUT) {
-        ret = wl_display_flush(display->display);
-        if (ret == 0) {
-            ep.events = EPOLLIN | EPOLLERR | EPOLLHUP;
-            ep.data.ptr = &display->display_task;
-            epoll_ctl(display->epoll_fd, EPOLL_CTL_MOD,
-                  display->display_fd, &ep);
-        } else if (ret == -1 && errno != EAGAIN)
-            exit(-1);
-    }
-}
-
-static void cursor_timer_func(struct vo_wayland_task *task,
-                              uint32_t events,
-                              struct vo_wayland_state *wl)
-{
-    if (wl->window->type == TYPE_FULLSCREEN)
-        hide_cursor(wl);
+    display->cursor.mouse_timer = GetTimerMS() + wl->vo->opts->cursor_autohide_delay;
+    display->cursor.mouse_waiting_hide = true;
 }
 
 static bool create_display (struct vo_wayland_state *wl)
@@ -713,11 +615,7 @@ static bool create_display (struct vo_wayland_state *wl)
     d->cursor.surface =
         wl_compositor_create_surface(d->compositor);
 
-    d->epoll_fd = os_epoll_create_cloexec();
     d->display_fd = wl_display_get_fd(d->display);
-    d->display_task.run = display_handle_data;
-    display_watch_fd(d, d->display_fd, EPOLLIN | EPOLLERR | EPOLLHUP,
-                    &d->display_task);
 
     return true;
 }
@@ -798,22 +696,6 @@ static void destroy_input (struct vo_wayland_state *wl)
     xkb_context_unref(wl->input->xkb.context);
 }
 
-static void create_timers (struct vo_wayland_state *wl)
-{
-    struct vo_wayland_display *d = wl->display;
-
-    d->cursor.task.run = cursor_timer_func;
-    d->cursor.timer_fd = timerfd_create(CLOCK_MONOTONIC,
-                                        TFD_CLOEXEC | TFD_NONBLOCK);
-    display_watch_fd(d, d->cursor.timer_fd, EPOLLIN, &d->cursor.task);
-}
-
-static void destroy_timers (struct vo_wayland_state *wl)
-{
-    close(wl->display->cursor.timer_fd);
-}
-
-
 /*** mplayer2 interface ***/
 
 int vo_wayland_init (struct vo *vo)
@@ -829,8 +711,7 @@ int vo_wayland_init (struct vo *vo)
         return false;
     }
 
-    create_timers(wl);
-    vo->event_fd = wl->display->epoll_fd;
+    vo->event_fd = wl->display->display_fd;
 
     create_window(wl);
     vo_wayland_update_window_title(vo);
@@ -840,7 +721,6 @@ int vo_wayland_init (struct vo *vo)
 void vo_wayland_uninit (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
-    destroy_timers(wl);
     destroy_input(wl);
     destroy_window(wl);
     destroy_display(wl);
@@ -907,35 +787,43 @@ void vo_wayland_fullscreen (struct vo *vo)
 
 int vo_wayland_check_events (struct vo *vo)
 {
-    struct vo_wayland_task *task;
     struct vo_wayland_state *wl = vo->wayland;
-    int i, ret, count;
-    struct epoll_event ep[16];
+    struct wl_display *dp = wl->display->display;
+    int ret;
 
-    wl_display_dispatch_pending(wl->display->display);
-
-    ret = wl_display_flush(wl->display->display);
-
-    if (ret < 0 && errno == EAGAIN) {
-        ep[0].events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP;
-        ep[0].data.ptr = NULL;
-
-        epoll_ctl(wl->display->epoll_fd, EPOLL_CTL_MOD,
-        wl->display->display_fd, &ep[0]);
-    }
-    else if (ret < 0) {
-        return 0;
+    if (wl->window->type == TYPE_FULLSCREEN &&
+        wl->display->cursor.mouse_waiting_hide &&
+        GetTimerMS() >= wl->display->cursor.mouse_timer)
+    {
+        hide_cursor(wl);
+        wl->display->cursor.mouse_waiting_hide = false;
     }
 
-    count = epoll_wait(wl->display->epoll_fd, ep, ARRAY_LENGTH(ep), 1);
+    wl_display_dispatch_pending(dp);
+    wl_display_flush(dp);
 
-    for (i = 0; i < count; i++) {
-        task = ep[i].data.ptr;
-        task->run(task, ep[i].events, wl);
+    struct pollfd fd = {
+        wl->display->display_fd,
+        POLLIN | POLLERR | POLLHUP,
+        0
+    };
+
+    /* wl_display_dispatch is blocking
+     * wl_dipslay_dispatch is non-blocking but does not read from the fd
+     *
+     * when pausing no input events get queued so we have to check if there
+     * are events to read from the file descriptor through poll */
+    if (poll(&fd, 1, 0) > 0) {
+        if (fd.revents & POLLIN)
+            wl_display_dispatch(dp);
+        if (fd.revents & POLLOUT)
+            wl_display_flush(dp);
     }
 
+    if (wl->display->cursor.mouse_waiting_hide)
+        vo->next_wakeup_time = FFMIN(vo->next_wakeup_time,
+                                     wl->display->cursor.mouse_timer);
     ret = wl->window->events;
-
     wl->window->events = 0;
 
     return ret;
