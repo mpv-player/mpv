@@ -122,6 +122,7 @@ uniform sampler3D lut_3d;
 uniform sampler2D dither;
 uniform mat4x3 colormatrix;
 uniform vec3 inv_gamma;
+uniform float input_gamma;
 uniform float conv_gamma;
 uniform float dither_quantization;
 uniform float dither_multiply;
@@ -351,11 +352,14 @@ void main() {
     //       wrong for 9/10 bit input
     color.gb = vec2(128.0/255.0);
 #endif
+#ifdef USE_INPUT_GAMMA
+    color = pow(color, vec3(input_gamma));
+#endif
 #ifdef USE_COLORMATRIX
     color = mat3(colormatrix) * color + colormatrix[3];
 #endif
-#ifdef USE_LINEAR_CONV
-    color = pow(color, vec3(1.0/0.45));
+#ifdef USE_CONV_GAMMA
+    color = pow(color, vec3(conv_gamma));
 #endif
 #ifdef USE_LINEAR_CONV_INV
     // Convert from linear RGB to gamma RGB before putting it through the 3D-LUT

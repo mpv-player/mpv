@@ -168,6 +168,8 @@ struct gl_video {
     bool is_yuv, is_rgb;
     bool is_linear_rgb;
 
+    float input_gamma, conv_gamma;
+
     // per pixel (full pixel when packed, each component when planar)
     int plane_bits;
     int plane_count;
@@ -452,6 +454,11 @@ static void update_uniforms(struct gl_video *p, GLuint program)
         .texture_bits = (p->plane_bits + 7) & ~7,
     };
     mp_csp_copy_equalizer_values(&cparams, &p->video_eq);
+    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
+        cparams.colorspace.format = MP_CSP_XYZ;
+        cparams.input_bits = 8;
+        cparams.texture_bits = 8;
+    }
 
     loc = gl->GetUniformLocation(program, "transform");
     if (loc >= 0) {
@@ -463,10 +470,15 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     loc = gl->GetUniformLocation(program, "colormatrix");
     if (loc >= 0) {
         float yuv2rgb[3][4] = {{0}};
-        if (p->is_yuv)
-            mp_get_yuv2rgb_coeffs(&cparams, yuv2rgb);
+        mp_get_yuv2rgb_coeffs(&cparams, yuv2rgb);
         gl->UniformMatrix4x3fv(loc, 1, GL_TRUE, &yuv2rgb[0][0]);
     }
+
+    gl->Uniform1f(gl->GetUniformLocation(program, "input_gamma"),
+                  p->input_gamma);
+
+    gl->Uniform1f(gl->GetUniformLocation(program, "conv_gamma"),
+                  p->conv_gamma);
 
     gl->Uniform3f(gl->GetUniformLocation(program, "inv_gamma"),
                   1.0 / cparams.rgamma,
@@ -704,8 +716,22 @@ static void compile_shaders(struct gl_video *p)
     char *header_final = talloc_strdup(tmp, "");
     char *header_sep = NULL;
 
-    bool convert_input_to_linear = !p->is_linear_rgb &&
-                                   (p->opts.srgb || p->use_lut_3d);
+    float input_gamma = 1.0;
+    float conv_gamma = 1.0;
+
+    if (p->image_desc.flags & MP_IMGFLAG_XYZ) {
+        input_gamma *= 2.6;
+        conv_gamma *= 1.0 / 2.2;
+    }
+
+    if (!p->is_linear_rgb && (p->opts.srgb || p->use_lut_3d))
+        conv_gamma *= 1.0 / 0.45;
+
+    p->input_gamma = input_gamma;
+    p->conv_gamma = conv_gamma;
+
+    bool convert_input_gamma = p->input_gamma != 1.0;
+    bool convert_input_to_linear = p->conv_gamma != 1.0;
 
     if (p->image_format == IMGFMT_NV12 || p->image_format == IMGFMT_NV21) {
         shader_def(&header_conv, "USE_CONV", "CONV_NV12");
@@ -716,8 +742,9 @@ static void compile_shaders(struct gl_video *p)
     shader_def_opt(&header_conv, "USE_GBRP", p->image_format == IMGFMT_GBRP);
     shader_def_opt(&header_conv, "USE_SWAP_UV", p->image_format == IMGFMT_NV21);
     shader_def_opt(&header_conv, "USE_YGRAY", p->is_yuv && p->plane_count == 1);
-    shader_def_opt(&header_conv, "USE_COLORMATRIX", p->is_yuv);
-    shader_def_opt(&header_conv, "USE_LINEAR_CONV", convert_input_to_linear);
+    shader_def_opt(&header_conv, "USE_INPUT_GAMMA", convert_input_gamma);
+    shader_def_opt(&header_conv, "USE_COLORMATRIX", !p->is_rgb);
+    shader_def_opt(&header_conv, "USE_CONV_GAMMA", convert_input_to_linear);
     if (p->opts.enable_alpha && p->plane_count == 4)
         shader_def(&header_conv, "USE_ALPHA_PLANE", "3");
 
@@ -745,7 +772,7 @@ static void compile_shaders(struct gl_video *p)
 
     // Don't sample from input video textures before converting the input to
     // linear light. (Unneeded when sRGB textures are used.)
-    if (convert_input_to_linear)
+    if (convert_input_gamma || convert_input_to_linear)
         use_indirect = true;
 
     // It doesn't make sense to scale the chroma with cscale in the 1. scale
@@ -1632,6 +1659,12 @@ static bool init_format(int fmt, struct gl_video *init)
     if (!supported && fmt == IMGFMT_GBRP) {
         supported = true;
         plane_format[0] = byte_formats[1];
+    }
+
+    // XYZ (same roganization as RGB packed, but requires conversion matrix)
+    if (!supported && fmt == IMGFMT_XYZ12) {
+        supported = true;
+        plane_format[0] = IMGFMT_RGB48;
     }
 
     // All formats in mp_to_gl_formats[] are supported
