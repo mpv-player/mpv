@@ -165,7 +165,7 @@ struct gl_video {
 
     struct mp_imgfmt_desc image_desc;
 
-    bool is_yuv;
+    bool is_yuv, is_rgb;
     bool is_linear_rgb;
 
     // per pixel (full pixel when packed, each component when planar)
@@ -1048,7 +1048,7 @@ static void init_video(struct gl_video *p)
 
     check_gl_features(p);
 
-    if (!p->is_yuv && (p->opts.srgb || p->use_lut_3d)) {
+    if (p->is_rgb && (p->opts.srgb || p->use_lut_3d)) {
         p->is_linear_rgb = true;
         p->image.planes[0].gl_internal_format = GL_SRGB;
     }
@@ -1666,6 +1666,7 @@ static bool init_format(int fmt, struct gl_video *init)
         return false;
 
     init->is_yuv = desc.flags & MP_IMGFLAG_YUV;
+    init->is_rgb = desc.flags & MP_IMGFLAG_RGB;
     init->is_linear_rgb = false;
     init->plane_count = desc.num_planes;
     init->image_desc = desc;
