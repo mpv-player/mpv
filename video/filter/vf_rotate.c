@@ -52,15 +52,14 @@ static void rotate(unsigned char* dst,unsigned char* src,int dststride,int srcst
 	case 2:
 	    for(x=0;x<w;x++) *((short*)(dst+x*2))=*((short*)(src+y*2+x*srcstride));
 	    break;
-	case 3:
-	    for(x=0;x<w;x++){
-		dst[x*3+0]=src[0+y*3+x*srcstride];
-		dst[x*3+1]=src[1+y*3+x*srcstride];
-		dst[x*3+2]=src[2+y*3+x*srcstride];
-	    }
-	    break;
 	case 4:
 	    for(x=0;x<w;x++) *((int*)(dst+x*4))=*((int*)(src+y*4+x*srcstride));
+        default:
+            for(x=0;x<w;x++){
+                for (int b=0;b<bpp;b++)
+                    dst[x*bpp+b]=src[b+y*bpp+x*srcstride];
+            }
+            break;
 	}
 	dst+=dststride;
     }
