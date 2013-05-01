@@ -42,7 +42,6 @@
 #define STREAMTYPE_DVD  3      // libdvdread
 #define STREAMTYPE_MEMORY  4   // read data from memory area
 #define STREAMTYPE_PLAYLIST 6  // FIXME!!! same as STREAMTYPE_FILE now
-#define STREAMTYPE_DS   8      // read from a demuxer stream
 #define STREAMTYPE_CDDA 10     // raw audio CD reader
 #define STREAMTYPE_SMB 11      // smb:// url, using libsmbclient (samba)
 #define STREAMTYPE_VCDBINCUE 12      // vcd directly from bin/cue files
@@ -393,7 +392,6 @@ stream_t *open_stream(const char *filename, struct MPOpts *options,
                       int *file_format);
 stream_t *open_output_stream(const char *filename, struct MPOpts *options);
 struct demux_stream;
-struct stream *new_ds_stream(struct demux_stream *ds);
 
 /// Set the callback to be used by libstream to check for user
 /// interruption during long blocking operations (cache filling, etc).
