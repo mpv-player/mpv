@@ -155,6 +155,7 @@ static int preferred_conversions[][2] = {
     {IMGFMT_GBRP, IMGFMT_BGR32},
     {IMGFMT_GBRP, IMGFMT_RGB32},
     {IMGFMT_PAL8, IMGFMT_BGR32},
+    {IMGFMT_XYZ12, IMGFMT_RGB48},
     {0, 0}
 };
 

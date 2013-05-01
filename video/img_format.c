@@ -111,6 +111,7 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     FMT_ENDIAN("gbrp12",        IMGFMT_GBRP12)
     FMT_ENDIAN("gbrp14",        IMGFMT_GBRP14)
     FMT_ENDIAN("gbrp16",        IMGFMT_GBRP16)
+    FMT_ENDIAN("xyz12",         IMGFMT_XYZ12)
     FMT("vdpau_mpeg1",          IMGFMT_VDPAU_MPEG1)
     FMT("vdpau_mpeg2",          IMGFMT_VDPAU_MPEG2)
     FMT("vdpau_h264",           IMGFMT_VDPAU_H264)
@@ -197,6 +198,8 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
         fmt != PIX_FMT_PAL8)
     {
         desc.flags |= MP_IMGFLAG_YUV;
+    } else if (mpfmt == IMGFMT_XYZ12_LE || mpfmt == IMGFMT_XYZ12_BE) {
+        desc.flags |= MP_IMGFLAG_XYZ;
     } else {
         desc.flags |= MP_IMGFLAG_RGB;
     }

@@ -41,6 +41,8 @@
 #define MP_IMGFLAG_YUV 0x200
 // set if it's RGB colorspace
 #define MP_IMGFLAG_RGB 0x400
+// set if it's XYZ colorspace
+#define MP_IMGFLAG_XYZ 0x800
 // set if the format is in a standard YUV format:
 // - planar and yuv colorspace
 // - chroma shift 0-2
@@ -228,6 +230,11 @@ enum mp_imgfmt {
     IMGFMT_GBRP16_LE,
     IMGFMT_GBRP16_BE,
 
+    // XYZ colorspace, similar organization to RGB48. Even though it says "12",
+    // the components are stored as 16 bit, with lower 4 bits set to 0.
+    IMGFMT_XYZ12_LE,
+    IMGFMT_XYZ12_BE,
+
     // Hardware acclerated formats. Plane data points to special data
     // structures, instead of pixel data.
 
@@ -301,6 +308,8 @@ enum mp_imgfmt {
     IMGFMT_GBRP12  = MP_SELECT_LE_BE(IMGFMT_GBRP12_LE, IMGFMT_GBRP12_BE),
     IMGFMT_GBRP14  = MP_SELECT_LE_BE(IMGFMT_GBRP14_LE, IMGFMT_GBRP14_BE),
     IMGFMT_GBRP16  = MP_SELECT_LE_BE(IMGFMT_GBRP16_LE, IMGFMT_GBRP16_BE),
+
+    IMGFMT_XYZ12   = MP_SELECT_LE_BE(IMGFMT_XYZ12_LE, IMGFMT_XYZ12_BE),
 };
 
 static inline bool IMGFMT_IS_RGB(unsigned int fmt)
