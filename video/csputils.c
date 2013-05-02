@@ -41,6 +41,7 @@ char * const mp_csp_names[MP_CSP_COUNT] = {
     "SMPTE-240M",
     "RGB",
     "XYZ",
+    "YCgCo",
 };
 
 char * const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
@@ -59,6 +60,7 @@ enum mp_csp avcol_spc_to_mp_csp(enum AVColorSpace colorspace)
 	case AVCOL_SPC_SMPTE170M: return MP_CSP_BT_601;
         case AVCOL_SPC_SMPTE240M: return MP_CSP_SMPTE_240M;
         case AVCOL_SPC_RGB:       return MP_CSP_RGB;
+        case AVCOL_SPC_YCGCO:     return MP_CSP_YCGCO;
         default:                  return MP_CSP_AUTO;
     }
 }
@@ -79,6 +81,7 @@ enum AVColorSpace mp_csp_to_avcol_spc(enum mp_csp colorspace)
         case MP_CSP_BT_601:     return AVCOL_SPC_BT470BG;
         case MP_CSP_SMPTE_240M: return AVCOL_SPC_SMPTE240M;
         case MP_CSP_RGB:        return AVCOL_SPC_RGB;
+        case MP_CSP_YCGCO:      return AVCOL_SPC_YCGCO;
         default:                return AVCOL_SPC_UNSPECIFIED;
     }
 }
@@ -188,6 +191,15 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
         };
         memcpy(m, xyz_to_rgb, sizeof(xyz_to_rgb));
         levels_in = -1;
+        break;
+    }
+    case MP_CSP_YCGCO: {
+        static const float ycgco_to_rgb[3][4] = {
+            {1,  -1,  1},
+            {1,   1,  0},
+            {1,  -1, -1},
+        };
+        memcpy(m, ycgco_to_rgb, sizeof(ycgco_to_rgb));
         break;
     }
     default:

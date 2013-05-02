@@ -41,6 +41,7 @@ enum mp_csp {
     MP_CSP_SMPTE_240M,
     MP_CSP_RGB,
     MP_CSP_XYZ,
+    MP_CSP_YCGCO,
     MP_CSP_COUNT
 };
 
