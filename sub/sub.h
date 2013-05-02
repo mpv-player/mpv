@@ -140,6 +140,7 @@ struct osd_state {
     int progbar_num_stops;
     // OSDTYPE_EXTERNAL
     char *external;
+    int external_res_x, external_res_y;
 
     int switch_sub_id;
 

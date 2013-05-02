@@ -186,5 +186,6 @@ function mp_update()
     ass:pos(x, y)
     ass:append("{\\an5}+")
 
-    mp.set_osd_ass(ass.text)
+    local w, h, aspect = mp.get_screen_size()
+    mp.set_osd_ass(h * aspect, h, ass.text)
 end

@@ -185,10 +185,14 @@ static int property_string(lua_State *L)
 static int set_osd_ass(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
-    const char *text = luaL_checkstring(L, 1);
+    int res_x = luaL_checkinteger(L, 1);
+    int res_y = luaL_checkinteger(L, 2);
+    const char *text = luaL_checkstring(L, 3);
     if (!mpctx->osd->external || strcmp(mpctx->osd->external, text) != 0) {
         talloc_free(mpctx->osd->external);
         mpctx->osd->external = talloc_strdup(mpctx->osd, text);
+        mpctx->osd->external_res_x = res_x;
+        mpctx->osd->external_res_y = res_y;
         vo_osd_changed(OSDTYPE_EXTERNAL);
     }
     return 0;
@@ -203,6 +207,18 @@ static int get_osd_resolution(lua_State *L)
     lua_pushnumber(L, w);
     lua_pushnumber(L, h);
     return 2;
+}
+
+static int get_screen_size(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    struct osd_object *obj = mpctx->osd->objs[OSDTYPE_EXTERNAL];
+    double aspect = 1.0 * obj->vo_res.w / FFMAX(obj->vo_res.h, 1) /
+                    obj->vo_res.display_par;
+    lua_pushnumber(L, obj->vo_res.w);
+    lua_pushnumber(L, obj->vo_res.h);
+    lua_pushnumber(L, aspect);
+    return 3;
 }
 
 static int get_mouse_pos(lua_State *L)
@@ -268,6 +284,9 @@ static void add_functions(struct MPContext *mpctx)
 
     lua_pushcfunction(L, get_osd_resolution);
     lua_setfield(L, -2, "get_osd_resolution");
+
+    lua_pushcfunction(L, get_screen_size);
+    lua_setfield(L, -2, "get_screen_size");
 
     lua_pushcfunction(L, get_mouse_pos);
     lua_setfield(L, -2, "get_mouse_pos");

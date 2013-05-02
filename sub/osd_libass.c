@@ -345,6 +345,16 @@ static void update_external(struct osd_state *osd, struct osd_object *obj)
     create_osd_ass_track(osd, obj);
     clear_obj(obj);
 
+    if (osd->external_res_x < 1 || osd->external_res_y < 1)
+        return;
+
+    ASS_Track *track = obj->osd_track;
+
+    // Note: maybe we should detect resize explicitly, and make libass clear
+    // its cache.
+    track->PlayResX = osd->external_res_x;
+    track->PlayResY = osd->external_res_y;
+
     bstr t = bstr0(osd->external);
     while (t.len) {
         bstr line;
