@@ -138,20 +138,14 @@ static void output_handle_mode(void *data,
                                int32_t height,
                                int32_t refresh)
 {
-    struct vo_wayland_display *d = data;
-    struct vo_wayland_output *output;
+    struct vo_wayland_output *output = data;
 
-    wl_list_for_each(output, &d->output_list, link) {
-        if (wl_output == output->output) {
-            output->width = width;
-            output->height = height;
-            if (flags)
-                output->flags = flags;
-        }
-    }
+    if (!output)
+        return;
 
-    /* one output is enough */
-    d->output_mode_received = 1;
+    output->width = width;
+    output->height = height;
+    output->flags = flags;
 }
 
 const struct wl_output_listener output_listener = {
@@ -486,7 +480,7 @@ static void registry_handle_global (void *data,
                                           &wl_output_interface,
                                           1);
 
-        wl_output_add_listener(output->output, &output_listener, d);
+        wl_output_add_listener(output->output, &output_listener, output);
         wl_list_insert(&d->output_list, &output->link);
     }
 
@@ -805,10 +799,9 @@ void vo_wayland_update_screeninfo (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
     struct mp_vo_opts *opts = vo->opts;
+    bool mode_received = false;
 
     wl_display_roundtrip(wl->display->display);
-    if (!wl->display->output_mode_received)
-        mp_msg(MSGT_VO, MSGL_ERR, "[wayland] no output mode detected\n");
 
     vo->xinerama_x = vo->xinerama_y = 0;
 
@@ -819,6 +812,11 @@ void vo_wayland_update_screeninfo (struct vo *vo)
     struct vo_wayland_output *fsscreen_output = NULL;
 
     wl_list_for_each_reverse(output, &wl->display->output_list, link) {
+        if (!output || !output->width)
+            continue;
+
+        mode_received = true;
+
         if (opts->fsscreen_id == screen_id)
             fsscreen_output = output;
 
@@ -826,6 +824,11 @@ void vo_wayland_update_screeninfo (struct vo *vo)
             first_output = output;
 
         screen_id++;
+    }
+
+    if (!mode_received) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[wayland] no output mode detected\n");
+        return;
     }
 
     if (fsscreen_output) {
