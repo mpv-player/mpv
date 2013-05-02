@@ -55,8 +55,6 @@
 #define MOD_ALT_MASK        0x02
 #define MOD_CONTROL_MASK    0x04
 
-#define ARRAY_LENGTH(a) (sizeof (a) / sizeof (a)[0])
-
 static int lookupkey(int key);
 
 static void hide_cursor(struct vo_wayland_state * wl);
@@ -250,13 +248,6 @@ static void keyboard_handle_keymap(void *data,
         input->xkb.keymap = NULL;
         return;
     }
-
-    input->xkb.control_mask =
-        1 << xkb_map_mod_get_index(input->xkb.keymap, "Control");
-    input->xkb.alt_mask =
-        1 << xkb_map_mod_get_index(input->xkb.keymap, "Mod1");
-    input->xkb.shift_mask =
-        1 << xkb_map_mod_get_index(input->xkb.keymap, "Shift");
 }
 
 static void keyboard_handle_enter(void *data,
@@ -645,9 +636,6 @@ static void create_window (struct vo_wayland_state *wl)
 
 static void destroy_window (struct vo_wayland_state *wl)
 {
-    if (wl->window->callback)
-        wl_callback_destroy(wl->window->callback);
-
     wl_shell_surface_destroy(wl->window->shell_surface);
     wl_surface_destroy(wl->window->surface);
 }

@@ -88,8 +88,6 @@ struct vo_wayland_window {
 
     struct wl_surface *surface;
     struct wl_shell_surface *shell_surface;
-    struct wl_buffer *buffer;
-    struct wl_callback *callback;
 
     int events; /* mplayer events */
 
@@ -105,9 +103,6 @@ struct vo_wayland_input {
         struct xkb_context *context;
         struct xkb_keymap *keymap;
         struct xkb_state *state;
-        xkb_mod_mask_t shift_mask;
-        xkb_mod_mask_t control_mask;
-        xkb_mod_mask_t alt_mask;
     } xkb;
 };
 
