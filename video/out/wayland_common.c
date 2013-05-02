@@ -217,15 +217,10 @@ static void keyboard_handle_keymap(void *data,
                                    int32_t fd,
                                    uint32_t size)
 {
-    struct vo_wayland_input *input = ((struct vo_wayland_state *) data)->input;
+    struct vo_wayland_input *input;
     char *map_str;
 
-    if(!data) {
-        close(fd);
-        return;
-    }
-
-    if (format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1) {
+    if(!data || format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1) {
         close(fd);
         return;
     }
@@ -236,8 +231,9 @@ static void keyboard_handle_keymap(void *data,
         return;
     }
 
-    input->xkb.keymap = xkb_map_new_from_string(input->xkb.context,
-            map_str, XKB_KEYMAP_FORMAT_TEXT_V1, 0);
+    input = ((struct vo_wayland_state *) data)->input;
+    input->xkb.keymap = xkb_keymap_new_from_buffer(input->xkb.context,
+            map_str, size, XKB_KEYMAP_FORMAT_TEXT_V1, 0);
 
     munmap(map_str, size);
     close(fd);
