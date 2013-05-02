@@ -770,16 +770,18 @@ int vo_wayland_check_events (struct vo *vo)
 
     struct pollfd fd = {
         wl->display->display_fd,
-        POLLIN | POLLERR | POLLHUP,
+        POLLIN | POLLOUT | POLLERR | POLLHUP,
         0
     };
 
     /* wl_display_dispatch is blocking
-     * wl_dipslay_dispatch is non-blocking but does not read from the fd
+     * wl_dipslay_dispatch_pending is non-blocking but does not read from the fd
      *
      * when pausing no input events get queued so we have to check if there
      * are events to read from the file descriptor through poll */
     if (poll(&fd, 1, 0) > 0) {
+        if (fd.revents & POLLERR || fd.revents & POLLHUP)
+            mp_msg(MSGT_VO, MSGL_ERR, "[wayland] error occurred on fd\n");
         if (fd.revents & POLLIN)
             wl_display_dispatch(dp);
         if (fd.revents & POLLOUT)
