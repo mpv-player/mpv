@@ -86,6 +86,8 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .ass_style_override = 1,
         .use_embedded_fonts = 1,
 
+        .hwdec_codecs = "all",
+
         .lavc_param = {
             .workaround_bugs = 1, // autodetect
             .error_concealment = 3,

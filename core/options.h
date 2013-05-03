@@ -185,6 +185,7 @@ typedef struct MPOpts {
     int ass_hinting;
 
     int hwdec_api;
+    char *hwdec_codecs;
 
     struct lavc_param {
         int workaround_bugs;

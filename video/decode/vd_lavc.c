@@ -135,6 +135,18 @@ static struct hwdec *find_hwcodec(enum hwdec_type api, const char *codec)
     return NULL;
 }
 
+static bool hwdec_codec_allowed(sh_video_t *sh, struct hwdec *hwdec)
+{
+    bstr s = bstr0(sh->opts->hwdec_codecs);
+    while (s.len) {
+        bstr item;
+        bstr_split_tok(s, ",", &item, &s);
+        if (bstr_equals0(item, "all") || bstr_equals0(item, hwdec->codec))
+            return true;
+    }
+    return false;
+}
+
 static enum AVDiscard str2AVDiscard(char *str)
 {
     if (!str)                               return AVDISCARD_DEFAULT;
@@ -155,19 +167,20 @@ static int init(sh_video_t *sh, const char *decoder)
     ctx->non_dr1_pool = talloc_steal(ctx, mp_image_pool_new(16));
 
     struct hwdec *hwdec = find_hwcodec(sh->opts->hwdec_api, decoder);
-    if (hwdec) {
+    struct hwdec *use_hwdec = NULL;
+    if (hwdec && hwdec_codec_allowed(sh, hwdec)) {
         AVCodec *lavc_hwcodec = avcodec_find_decoder_by_name(hwdec->hw_codec);
         if (lavc_hwcodec) {
             ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
             decoder = lavc_hwcodec->name;
+            use_hwdec = hwdec;
         } else {
             mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "Decoder '%s' not found in "
                     "libavcodec, using software decoding.\n", hwdec->hw_codec);
-            hwdec = NULL;
         }
     }
 
-    init_avctx(sh, decoder, hwdec);
+    init_avctx(sh, decoder, use_hwdec);
     if (!ctx->avctx) {
         if (ctx->software_fallback_decoder) {
             mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Error initializing hardware "

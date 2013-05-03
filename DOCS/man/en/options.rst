@@ -874,6 +874,18 @@
     :vda:       OSX
     :crystalhd: Broadcom Crystal HD
 
+--hwdec-codecs=<codec1,codec2,...|all>
+    Allow hardware decoding for a given list of codecs only. The default is the
+    special value ``all``, which always allows all codecs.
+
+    This is usually only needed with broken GPUs, where fallback to software
+    decoding doesn't work properly.
+
+    *EXAMPLE*:
+
+    - ``mpv --hwdec=vdpau --vo=vdpau --hwdec-codecs=h264,mpeg2video``
+       Enable vdpau decoding for h264 and mpeg2 only.
+
 --identify
     Deprecated. Use ``TOOLS/mpv_identify.sh``.
 

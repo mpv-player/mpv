@@ -449,6 +449,7 @@ const m_option_t common_opts[] = {
                 {"vdpau", 1},
                 {"vda", 2},
                 {"crystalhd", 3})),
+    OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 
     // postprocessing:
     {"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
