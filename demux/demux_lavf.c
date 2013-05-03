@@ -834,7 +834,7 @@ redo:
          * for us.
          */
         avio_flush(priv->avfc->pb);
-        av_seek_frame(priv->avfc, 0, avio_tell(priv->avfc->pb),
+        av_seek_frame(priv->avfc, 0, stream_tell(demuxer->stream),
                       AVSEEK_FLAG_BYTE);
         avio_flush(priv->avfc->pb);
         return DEMUXER_CTRL_OK;
