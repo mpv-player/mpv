@@ -101,6 +101,16 @@ const demuxer_desc_t *const demuxer_list[] = {
     NULL
 };
 
+static int packet_destroy(void *ptr)
+{
+    struct demux_packet *dp = ptr;
+    if (dp->avpacket)
+        talloc_free(dp->avpacket);
+    else
+        free(dp->buffer);
+    return 0;
+}
+
 static struct demux_packet *create_packet(size_t len)
 {
     if (len > 1000000000) {
@@ -108,16 +118,14 @@ static struct demux_packet *create_packet(size_t len)
                "over 1 GB!\n");
         abort();
     }
-    struct demux_packet *dp = malloc(sizeof(struct demux_packet));
-    dp->len = len;
-    dp->next = NULL;
-    dp->pts = MP_NOPTS_VALUE;
-    dp->duration = -1;
-    dp->stream_pts = MP_NOPTS_VALUE;
-    dp->pos = 0;
-    dp->keyframe = false;
-    dp->buffer = NULL;
-    dp->avpacket = NULL;
+    struct demux_packet *dp = talloc(NULL, struct demux_packet);
+    talloc_set_destructor(dp, packet_destroy);
+    *dp = (struct demux_packet) {
+        .len = len,
+        .pts = MP_NOPTS_VALUE,
+        .duration = -1,
+        .stream_pts = MP_NOPTS_VALUE,
+    };
     return dp;
 }
 
@@ -166,11 +174,7 @@ void resize_demux_packet(struct demux_packet *dp, size_t len)
 
 void free_demux_packet(struct demux_packet *dp)
 {
-    if (dp->avpacket)
-        talloc_free(dp->avpacket);
-    else
-        free(dp->buffer);
-    free(dp);
+    talloc_free(dp);
 }
 
 static void free_demuxer_stream(struct demux_stream *ds)
