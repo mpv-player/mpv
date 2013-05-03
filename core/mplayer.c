@@ -3249,7 +3249,7 @@ double chapter_start_time(struct MPContext *mpctx, int chapter)
     if (mpctx->chapters)
         return mpctx->chapters[chapter].start;
     if (mpctx->master_demuxer)
-        return demuxer_chapter_time(mpctx->master_demuxer, chapter, NULL);
+        return demuxer_chapter_time(mpctx->master_demuxer, chapter);
     return -1;
 }
 
