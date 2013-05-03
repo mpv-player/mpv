@@ -323,6 +323,9 @@ static int cache_execute_control(cache_vars_t *s) {
     case STREAM_CTRL_GET_LANG:
       s->control_res = s->stream->control(s->stream, s->control, (void *)&s->control_lang_arg);
       break;
+    case STREAM_CTRL_MANAGES_TIMELINE:
+      s->control_res = s->stream->control(s->stream, s->control, NULL);
+      break;
     default:
       s->control_res = STREAM_UNSUPPORTED;
       break;
@@ -659,6 +662,7 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
     case STREAM_CTRL_GET_NUM_ANGLES:
     case STREAM_CTRL_GET_ANGLE:
     case STREAM_CTRL_GET_SIZE:
+    case STREAM_CTRL_MANAGES_TIMELINE:
     case -2:
       s->control = cmd;
       break;
@@ -706,6 +710,8 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
       break;
     case STREAM_CTRL_GET_LANG:
       *(struct stream_lang_req *)arg = s->control_lang_arg;
+      break;
+    case STREAM_CTRL_MANAGES_TIMELINE:
       break;
   }
   return s->control_res;

@@ -769,3 +769,8 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
                buf, total_read
     };
 }
+
+bool stream_manages_timeline(struct stream *s)
+{
+    return stream_control(s, STREAM_CTRL_MANAGES_TIMELINE, NULL) == STREAM_OK;
+}

@@ -101,6 +101,8 @@
 #define STREAM_CTRL_GET_CACHE_FILL 16
 #define STREAM_CTRL_GET_CACHE_IDLE 17
 #define STREAM_CTRL_RECONNECT 18
+// DVD/Bluray, signal general support for GET_CURRENT_TIME etc.
+#define STREAM_CTRL_MANAGES_TIMELINE 19
 
 struct stream_lang_req {
     int type;     // STREAM_AUDIO, STREAM_SUB
@@ -405,6 +407,8 @@ int stream_check_interrupt(int time);
 int stream_read_internal(stream_t *s, void *buf, int len);
 /// Internal seek function bypassing the stream buffer
 int stream_seek_internal(stream_t *s, int64_t newpos);
+
+bool stream_manages_timeline(stream_t *s);
 
 extern int dvd_title;
 extern int dvd_angle;

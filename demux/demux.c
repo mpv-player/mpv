@@ -922,6 +922,10 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
             opts->correct_pts =
                 demux_control(demuxer, DEMUXER_CTRL_CORRECT_PTS,
                             NULL) == DEMUXER_CTRL_OK;
+        if (stream_manages_timeline(demuxer->stream)) {
+            // Incorrect, but fixes some behavior with DVD/BD
+            demuxer->ts_resets_possible = false;
+        }
         demuxer_sort_chapters(demuxer);
         return demuxer;
     } else {
@@ -1071,7 +1075,7 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
      * (nothing actually implements DEMUXER_CTRL_RESYNC now).
      */
     struct stream *stream = demuxer->stream;
-    if (stream->type == STREAMTYPE_DVD) {
+    if (stream_manages_timeline(stream)) {
         double pts;
 
         if (flags & SEEK_ABSOLUTE)

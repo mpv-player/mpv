@@ -712,6 +712,8 @@ static int control(stream_t *stream,int cmd,void* arg)
             snprintf(req->name, sizeof(req->name), "%c%c", lang >> 8, lang);
             return STREAM_OK;
         }
+        case STREAM_CTRL_MANAGES_TIMELINE:
+            return STREAM_OK;
     }
     return STREAM_UNSUPPORTED;
 }
