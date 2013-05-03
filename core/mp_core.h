@@ -303,7 +303,7 @@ void unpause_player(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx, int dir);
 void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
                 int exact);
-int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts);
+bool mp_seek_chapter(struct MPContext *mpctx, int chapter);
 double get_time_length(struct MPContext *mpctx);
 double get_start_time(struct MPContext *mpctx);
 double get_current_time(struct MPContext *mpctx);

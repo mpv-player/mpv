@@ -350,14 +350,11 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_SET: ;
         int step_all = *(int *)arg - chapter;
         chapter += step_all;
-        double next_pts = 0;
-        queue_seek(mpctx, MPSEEK_NONE, 0, 0);
-        chapter = seek_chapter(mpctx, chapter, &next_pts);
-        if (chapter >= 0) {
-            if (next_pts > -1.0)
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, next_pts, 0);
-        } else if (step_all > 0)
+        if (chapter >= get_chapter_count(mpctx) && step_all > 0) {
             mpctx->stop_play = PT_NEXT_ENTRY;
+        } else {
+            mp_seek_chapter(mpctx, chapter);
+        }
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
