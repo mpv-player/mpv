@@ -1384,17 +1384,20 @@ int demuxer_chapter_count(demuxer_t *demuxer)
 
 double demuxer_get_time_length(struct demuxer *demuxer)
 {
-    double get_time_ans;
+    double len;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) > 0)
+        return len;
     // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
-    if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
-                      (void *) &get_time_ans) > 0)
-        return get_time_ans;
+    if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH, &len) > 0)
+        return len;
     return -1;
 }
 
 double demuxer_get_start_time(struct demuxer *demuxer)
 {
     double time;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_START_TIME, &time) > 0)
+        return time;
     if (demux_control(demuxer, DEMUXER_CTRL_GET_START_TIME, &time) > 0)
         return time;
     return 0;
