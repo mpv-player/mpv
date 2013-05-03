@@ -3000,11 +3000,9 @@ double get_time_length(struct MPContext *mpctx)
     if (mpctx->timeline)
         return mpctx->timeline[mpctx->num_timeline_parts].start;
 
-    double get_time_ans;
-    // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
-    if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
-                      (void *) &get_time_ans) > 0)
-        return get_time_ans;
+    double len = demuxer_get_time_length(demuxer);
+    if (len >= 0)
+        return len;
 
     struct sh_video *sh_video = mpctx->sh_video;
     struct sh_audio *sh_audio = mpctx->sh_audio;
@@ -3042,9 +3040,7 @@ double get_start_time(struct MPContext *mpctx)
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return 0;
-    double time = 0;
-    demux_control(demuxer, DEMUXER_CTRL_GET_START_TIME, &time);
-    return time;
+    return demuxer_get_start_time(demuxer);
 }
 
 // Return playback position in 0.0-1.0 ratio, or -1 if unknown.

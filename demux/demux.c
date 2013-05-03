@@ -1382,6 +1382,24 @@ int demuxer_chapter_count(demuxer_t *demuxer)
         return demuxer->num_chapters;
 }
 
+double demuxer_get_time_length(struct demuxer *demuxer)
+{
+    double get_time_ans;
+    // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
+    if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
+                      (void *) &get_time_ans) > 0)
+        return get_time_ans;
+    return -1;
+}
+
+double demuxer_get_start_time(struct demuxer *demuxer)
+{
+    double time;
+    if (demux_control(demuxer, DEMUXER_CTRL_GET_START_TIME, &time) > 0)
+        return time;
+    return 0;
+}
+
 int demuxer_angles_count(demuxer_t *demuxer)
 {
     int ris, angles = -1;

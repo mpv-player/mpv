@@ -401,6 +401,9 @@ int demuxer_seek_chapter(struct demuxer *demuxer, int chapter,
                          double *seek_pts);
 void demuxer_sort_chapters(demuxer_t *demuxer);
 
+double demuxer_get_time_length(struct demuxer *demuxer);
+double demuxer_get_start_time(struct demuxer *demuxer);
+
 /// Get current chapter index if available.
 int demuxer_get_current_chapter(struct demuxer *demuxer, double time_now);
 /// Get chapter name by index if available.
