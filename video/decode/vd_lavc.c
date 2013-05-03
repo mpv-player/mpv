@@ -101,7 +101,7 @@ enum hwdec_type {
 
 struct hwdec {
     enum hwdec_type api;
-    char *codec, *hw_codec;
+    const char *codec, *hw_codec;
 };
 
 static const struct hwdec hwdec[] = {
@@ -271,6 +271,16 @@ static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
     avctx->codec_id = lavc_codec->id;
 
     avctx->thread_count = lavc_param->threads;
+
+    // Hack to allow explicitly selecting vdpau hw decoders
+    if (!hwdec && (lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU)) {
+        ctx->hwdec = talloc(ctx, struct hwdec);
+        *ctx->hwdec = (struct hwdec) {
+            .api = HWDEC_VDPAU,
+            .codec = sh->gsh->codec,
+            .hw_codec = decoder,
+        };
+    }
 
     if (ctx->hwdec && ctx->hwdec->api == HWDEC_VDPAU) {
         assert(lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU);
