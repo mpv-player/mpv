@@ -640,6 +640,12 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
     }
     dp->pos = demux->filepos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
+    // Use only one stream for stream_pts, otherwise PTS might be jumpy.
+    if (stream->type == STREAM_VIDEO) {
+        double pts;
+        if (stream_control(demux->stream, STREAM_CTRL_GET_CURRENT_TIME, &pts) > 0)
+            dp->stream_pts = pts;
+    }
     demuxer_add_packet(demux, stream, dp);
     return 1;
 }
