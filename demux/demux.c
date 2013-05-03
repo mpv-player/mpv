@@ -101,6 +101,8 @@ const demuxer_desc_t *const demuxer_list[] = {
     NULL
 };
 
+static void add_stream_chapters(struct demuxer *demuxer);
+
 static int packet_destroy(void *ptr)
 {
     struct demux_packet *dp = ptr;
@@ -932,6 +934,7 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
             // Doesn't work, because stream_pts is a "guess".
             demuxer->accurate_seek = false;
         }
+        add_stream_chapters(demuxer);
         demuxer_sort_chapters(demuxer);
         return demuxer;
     } else {
@@ -1298,6 +1301,20 @@ int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
     };
     MP_TARRAY_APPEND(demuxer, demuxer->chapters, demuxer->num_chapters, new);
     return 0;
+}
+
+static void add_stream_chapters(struct demuxer *demuxer)
+{
+    if (demuxer->num_chapters)
+        return;
+    int num_chapters = demuxer_chapter_count(demuxer);
+    for (int n = 0; n < num_chapters; n++) {
+        double p = n;
+        if (stream_control(demuxer->stream, STREAM_CTRL_GET_CHAPTER_TIME, &p)
+                != STREAM_OK)
+            return;
+        demuxer_add_chapter(demuxer, bstr0(""), p * 1e9, 0);
+    }
 }
 
 /**

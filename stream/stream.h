@@ -104,6 +104,7 @@
 // DVD/Bluray, signal general support for GET_CURRENT_TIME etc.
 #define STREAM_CTRL_MANAGES_TIMELINE 19
 #define STREAM_CTRL_GET_START_TIME 20
+#define STREAM_CTRL_GET_CHAPTER_TIME 21
 
 struct stream_lang_req {
     int type;     // STREAM_AUDIO, STREAM_SUB

@@ -302,10 +302,11 @@ static int cache_execute_control(cache_vars_t *s) {
   switch (s->control) {
     case STREAM_CTRL_SEEK_TO_TIME:
       needs_flush = 1;
-      double_res = s->control_double_arg;
     case STREAM_CTRL_GET_CURRENT_TIME:
     case STREAM_CTRL_GET_ASPECT_RATIO:
     case STREAM_CTRL_GET_START_TIME:
+    case STREAM_CTRL_GET_CHAPTER_TIME:
+      double_res = s->control_double_arg;
       s->control_res = s->stream->control(s->stream, s->control, &double_res);
       s->control_double_arg = double_res;
       break;
@@ -661,6 +662,10 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
     case STREAM_CTRL_GET_START_TIME:
       *(double *)arg = s->stream_start_time;
       return s->stream_start_time != MP_NOPTS_VALUE ? STREAM_OK : STREAM_UNSUPPORTED;
+    case STREAM_CTRL_GET_CHAPTER_TIME:
+      s->control_double_arg = *(double *)arg;
+      s->control = cmd;
+      break;
     case STREAM_CTRL_GET_LANG:
       s->control_lang_arg = *(struct stream_lang_req *)arg;
     case STREAM_CTRL_GET_NUM_TITLES:
@@ -705,6 +710,7 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
     case STREAM_CTRL_GET_CURRENT_TIME:
     case STREAM_CTRL_GET_ASPECT_RATIO:
     case STREAM_CTRL_GET_START_TIME:
+    case STREAM_CTRL_GET_CHAPTER_TIME:
       *(double *)arg = s->control_double_arg;
       break;
     case STREAM_CTRL_GET_NUM_TITLES:

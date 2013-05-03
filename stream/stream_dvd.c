@@ -498,7 +498,8 @@ static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *
     return chapter;
 }
 
-static void list_chapters(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_no)
+// p: in=chapter number, out=PTS
+static int get_chapter_time(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_no, double *p)
 {
     unsigned int i, cell, last_cell;
     unsigned int t=0;
@@ -507,10 +508,10 @@ static void list_chapters(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_
 
     title_no = tt_srpt->title[title_no].vts_ttn - 1;
     if(vts_file->vts_ptt_srpt->title[title_no].nr_of_ptts < 2)
-       return;
+       return 0;
     ptt = vts_file->vts_ptt_srpt->title[title_no].ptt;
 
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "CHAPTERS: ");
+    int cur = 0;
     for(i=0; i<vts_file->vts_ptt_srpt->title[title_no].nr_of_ptts; i++)
     {
         pgc = vts_file->vts_pgcit->pgci_srp[ptt[i].pgcn-1].pgc;
@@ -519,14 +520,34 @@ static void list_chapters(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_
             last_cell = pgc->program_map[ptt[i].pgn];
         else
             last_cell = 0;
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "%02d:%02d:%02d.%03d,", t/3600000, (t/60000)%60, (t/1000)%60, t%1000);
         do {
             if(!(pgc->cell_playback[cell-1].block_type == BLOCK_TYPE_ANGLE_BLOCK &&
                  pgc->cell_playback[cell-1].block_mode != BLOCK_MODE_FIRST_CELL)
-            )
+            ) {
+                if (cur == *p) {
+                    *p = t / 1000.0;
+                    return 1;
+                }
                 t += mp_dvdtimetomsec(&pgc->cell_playback[cell-1].playback_time);
+                cur++;
+            }
             cell++;
         } while(cell < last_cell);
+    }
+    return 0;
+}
+
+static void list_chapters(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_no)
+{
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "CHAPTERS: ");
+    for (int n = 0; ; n++) {
+        double p = n;
+        int r;
+        r = get_chapter_time(vts_file, tt_srpt, title_no, &p);
+        if (!r)
+            break;
+        int t = p * 1000;
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "%02d:%02d:%02d.%03d,", t/3600000, (t/60000)%60, (t/1000)%60, t%1000);
     }
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "\n");
 }
@@ -640,6 +661,13 @@ static int control(stream_t *stream,int cmd,void* arg)
             r = get_num_chapter(d->vts_file, d->tt_srpt, d->cur_title-1);
             if(! r) return STREAM_UNSUPPORTED;
             *((unsigned int *)arg) = r;
+            return 1;
+        }
+        case STREAM_CTRL_GET_CHAPTER_TIME:
+        {
+            int r;
+            r = get_chapter_time(d->vts_file, d->tt_srpt, d->cur_title-1, (double *)arg);
+            if(! r) return STREAM_UNSUPPORTED;
             return 1;
         }
         case STREAM_CTRL_SEEK_TO_CHAPTER:
