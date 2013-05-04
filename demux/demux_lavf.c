@@ -287,6 +287,8 @@ success:
 static bool matches_avinputformat_name(struct lavf_priv *priv,
                                        const char *name)
 {
+    // At least mp4 has name="mov,mp4,m4a,3gp,3g2,mj2", so we split the name
+    // on "," in general.
     const char *avifname = priv->avif->name;
     while (1) {
         const char *next = strchr(avifname, ',');
@@ -425,7 +427,8 @@ static void handle_stream(demuxer_t *demuxer, int i)
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = 1;
-        if (matches_avinputformat_name(priv, "mpeg"))
+        if (matches_avinputformat_name(priv, "mpeg") ||
+            matches_avinputformat_name(priv, "mpegts"))
             sh->demuxer_id = st->id;
         AVDictionaryEntry *title = av_dict_get(st->metadata, "title", NULL, 0);
         if (title && title->value)
