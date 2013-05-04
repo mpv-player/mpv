@@ -60,7 +60,7 @@ enum mp_csp avcol_spc_to_mp_csp(enum AVColorSpace colorspace)
 	case AVCOL_SPC_SMPTE170M: return MP_CSP_BT_601;
         case AVCOL_SPC_SMPTE240M: return MP_CSP_SMPTE_240M;
         case AVCOL_SPC_RGB:       return MP_CSP_RGB;
-        case AVCOL_SPC_YCGCO:     return MP_CSP_YCGCO;
+        case AVCOL_SPC_YCOCG:     return MP_CSP_YCGCO;
         default:                  return MP_CSP_AUTO;
     }
 }
@@ -81,7 +81,7 @@ enum AVColorSpace mp_csp_to_avcol_spc(enum mp_csp colorspace)
         case MP_CSP_BT_601:     return AVCOL_SPC_BT470BG;
         case MP_CSP_SMPTE_240M: return AVCOL_SPC_SMPTE240M;
         case MP_CSP_RGB:        return AVCOL_SPC_RGB;
-        case MP_CSP_YCGCO:      return AVCOL_SPC_YCGCO;
+        case MP_CSP_YCGCO:      return AVCOL_SPC_YCOCG;
         default:                return AVCOL_SPC_UNSPECIFIED;
     }
 }
