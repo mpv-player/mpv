@@ -3590,7 +3590,8 @@ static void run_playloop(struct MPContext *mpctx)
     if (mpctx->backstep_active) {
         double current_pts = mpctx->last_vo_pts;
         mpctx->backstep_active = false;
-        if (mpctx->sh_video && current_pts != MP_NOPTS_VALUE) {
+        bool demuxer_ok = mpctx->demuxer && mpctx->demuxer->accurate_seek;
+        if (demuxer_ok && mpctx->sh_video && current_pts != MP_NOPTS_VALUE) {
             double seek_pts = find_previous_pts(mpctx, current_pts);
             if (seek_pts != MP_NOPTS_VALUE) {
                 queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, 1);
@@ -3617,9 +3618,11 @@ static void run_playloop(struct MPContext *mpctx)
                     // Note that current_pts should be part of the index,
                     // otherwise we can't find the previous frame, so set the
                     // seek target an arbitrary amount of time after it.
-                    mpctx->hrseek_pts = current_pts + 10.0;
-                    mpctx->hrseek_framedrop = false;
-                    mpctx->backstep_active = true;
+                    if (mpctx->hrseek_active) {
+                        mpctx->hrseek_pts = current_pts + 10.0;
+                        mpctx->hrseek_framedrop = false;
+                        mpctx->backstep_active = true;
+                    }
                 } else {
                     mpctx->backstep_active = true;
                 }

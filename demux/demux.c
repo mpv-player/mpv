@@ -925,6 +925,8 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
         if (stream_manages_timeline(demuxer->stream)) {
             // Incorrect, but fixes some behavior with DVD/BD
             demuxer->ts_resets_possible = false;
+            // Doesn't work, because stream_pts is a "guess".
+            demuxer->accurate_seek = false;
         }
         demuxer_sort_chapters(demuxer);
         return demuxer;
