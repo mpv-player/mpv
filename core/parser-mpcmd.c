@@ -228,28 +228,30 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             }
         } else {
             // filename
+            void *tmp = talloc_new(NULL);
             bstr file = p.arg;
-            char *file0 = bstrdup0(NULL, p.arg);
+            char *file0 = bstrdup0(tmp, p.arg);
             // expand DVD filename entries like dvd://1-3 into component titles
             if (bstr_startswith0(file, "dvd://")) {
                 int offset = 6;
                 char *splitpos = strstr(file0 + offset, "-");
                 if (splitpos != NULL) {
-                    int start_title = strtol(file0 + offset, NULL, 10);
+                    char *endpos;
+                    int start_title = strtol(file0 + offset, &endpos, 10);
                     int end_title;
                     //entries like dvd://-2 imply start at title 1
                     if (start_title < 0) {
                         end_title = abs(start_title);
                         start_title = 1;
                     } else
-                        end_title = strtol(splitpos + 1, NULL, 10);
+                        end_title = strtol(splitpos + 1, &endpos, 10);
 
                     if (dvd_range(start_title) && dvd_range(end_title)
                             && (start_title < end_title)) {
                         for (int j = start_title; j <= end_title; j++) {
-                            char entbuf[15];
-                            snprintf(entbuf, sizeof(entbuf), "dvd://%d", j);
-                            playlist_add_file(files, entbuf);
+                            char *f = talloc_asprintf(tmp, "dvd://%d%s", j,
+                                                      endpos);
+                            playlist_add_file(files, f);
                         }
                     } else
                         mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
@@ -259,7 +261,7 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                     playlist_add_file(files, file0);
             } else
                 playlist_add_file(files, file0);
-            talloc_free(file0);
+            talloc_free(tmp);
 
             // Lock stdin if it will be used as input
             if (bstrcmp0(file, "-") == 0)
