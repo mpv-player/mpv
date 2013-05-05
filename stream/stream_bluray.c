@@ -213,13 +213,13 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
                 si = ti->clips[0].pg_streams;
                 break;
             }
-            while (count-- > 0) {
-                if (si->pid == req->id) {
-                    snprintf(req->name, sizeof(req->name), "%.4s", si->lang);
+            for (int n = 0; n < count; n++) {
+                BLURAY_STREAM_INFO *i = &si[n];
+                if (i->pid == req->id) {
+                    snprintf(req->name, sizeof(req->name), "%.4s", i->lang);
                     bd_free_title_info(ti);
                     return STREAM_OK;
                 }
-                si++;
             }
         }
         bd_free_title_info(ti);
