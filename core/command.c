@@ -471,6 +471,17 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
                 resync_audio_stream(sh_audio);
         }
         return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE: {
+        struct m_option opt = {
+            .name = prop->name,
+            .type = CONF_TYPE_INT,
+            .flags = CONF_RANGE,
+            .min = 1,
+            .max = angles,
+        };
+        *(struct m_option *)arg = opt;
+        return M_PROPERTY_OK;
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -1373,8 +1384,7 @@ static const m_option_t mp_properties[] = {
     { "chapters", mp_property_chapters, CONF_TYPE_INT,
       0, 0, 0, NULL },
     { "editions", mp_property_editions, CONF_TYPE_INT },
-    { "angle", mp_property_angle, CONF_TYPE_INT,
-      CONF_RANGE, -2, 10, NULL },
+    { "angle", mp_property_angle, &m_option_type_dummy },
     { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST,
       0, 0, 0, NULL },
     M_OPTION_PROPERTY_CUSTOM("pause", mp_property_pause),
