@@ -93,6 +93,7 @@ typedef struct {
   volatile int control_res;
   volatile double stream_time_length;
   volatile double stream_time_pos;
+  volatile double stream_start_time;
   volatile int idle;
 } cache_vars_t;
 
@@ -284,6 +285,10 @@ static int cache_execute_control(cache_vars_t *s) {
       s->stream_time_pos = pos;
     else
       s->stream_time_pos = MP_NOPTS_VALUE;
+    if (s->stream->control(s->stream, STREAM_CTRL_GET_START_TIME, &pos) == STREAM_OK)
+      s->stream_start_time = pos;
+    else
+      s->stream_start_time = MP_NOPTS_VALUE;
 #if FORKED_CACHE
     // if parent PID changed, main process was killed -> exit
     if (s->ppid != getppid()) {
@@ -653,6 +658,9 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
     case STREAM_CTRL_GET_CURRENT_TIME:
       *(double *)arg = s->stream_time_pos;
       return s->stream_time_pos != MP_NOPTS_VALUE ? STREAM_OK : STREAM_UNSUPPORTED;
+    case STREAM_CTRL_GET_START_TIME:
+      *(double *)arg = s->stream_start_time;
+      return s->stream_start_time != MP_NOPTS_VALUE ? STREAM_OK : STREAM_UNSUPPORTED;
     case STREAM_CTRL_GET_LANG:
       s->control_lang_arg = *(struct stream_lang_req *)arg;
     case STREAM_CTRL_GET_NUM_TITLES:
@@ -664,7 +672,6 @@ int cache_do_control(stream_t *stream, int cmd, void *arg) {
     case STREAM_CTRL_GET_ANGLE:
     case STREAM_CTRL_GET_SIZE:
     case STREAM_CTRL_MANAGES_TIMELINE:
-    case STREAM_CTRL_GET_START_TIME:
     case -2:
       s->control = cmd;
       break;
