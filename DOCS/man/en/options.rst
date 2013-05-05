@@ -932,7 +932,7 @@
     Number of key presses to generate per second on autorepeat.
 
 --no-input-default-bindings
-    Use the key bindings that mpv ships with by default.
+    Disable mpv default (builtin) key bindings.
 
 --input-keylist
     Prints all keys that can be bound to commands.
