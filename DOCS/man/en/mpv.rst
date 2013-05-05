@@ -90,6 +90,10 @@ p / SPACE
 q / ESC
     Stop playing and quit.
 
+Q
+    Like ``q``, but store the current playback position. Playing the same file
+    later will resume at the old playback position if possible.
+
 U
     Stop playing (and quit if ``--idle`` is not used).
 

@@ -650,6 +650,9 @@ const m_option_t mplayer_opts[]={
     {"{", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
     {"}", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
 
+    OPT_FLAG("resume-playback", position_resume, 0),
+    OPT_FLAG("save-position-on-quit", position_save_on_quit, 0),
+
     OPT_FLAG("ordered-chapters", ordered_chapters, 0),
     OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),
 

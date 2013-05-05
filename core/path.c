@@ -31,6 +31,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <errno.h>
 #include "config.h"
 #include "core/mp_msg.h"
 #include "core/path.h"
@@ -176,6 +177,19 @@ char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2)
 
     return talloc_asprintf(talloc_ctx, "%.*s%s%.*s", BSTR_P(p1),
                            have_separator ? "" : "/", BSTR_P(p2));
+}
+
+char *mp_getcwd(void *talloc_ctx)
+{
+    char *wd = talloc_array(talloc_ctx, char, 20);
+    while (getcwd(wd, talloc_get_size(wd)) == NULL) {
+        if (errno != ERANGE) {
+            talloc_free(wd);
+            return NULL;
+        }
+        wd = talloc_realloc(talloc_ctx, wd, char, talloc_get_size(wd) * 2);
+    }
+    return wd;
 }
 
 bool mp_path_exists(const char *path)

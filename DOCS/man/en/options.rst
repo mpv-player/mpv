@@ -1329,6 +1329,10 @@
     Do not play sound. With some demuxers this may not work. In those cases
     you can try ``--ao=null`` instead.
 
+--no-resume-playback
+    Do not restore playback position from ``~/.mpv/watch_later/``.
+    See ``quit_watch_later`` input command.
+
 --no-sub
     Disables display of internal and external subtitles.
 
@@ -1790,6 +1794,15 @@
     Adjust the saturation of the video signal (default: 0). You can get
     grayscale output with this option. Not supported by all video output
     drivers.
+
+--save-position-on-quit
+    Always save the current playback position on quit. When this file is
+    played again later, the player will seek to the old playback position on
+    start. This affects any form of stopping playback (quitting, going to the
+    next file).
+
+    This behavior is disabled by default, but is always available when quitting
+    the player with Shift+Q.
 
 --sb=<n>
     Seek to byte position. Useful for playback from CD-ROM images or VOB files
