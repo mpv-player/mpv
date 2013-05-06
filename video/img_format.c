@@ -185,7 +185,7 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
     // Packed RGB formats are the only formats that have less than 8 bits per
     // component, and still require endian dependent access.
     if (pd->comp[0].depth_minus1 + 1 <= 8 &&
-        !(mpfmt >= IMGFMT_RGB12_LE || mpfmt <= IMGFMT_BGR16_BE))
+        !(mpfmt >= IMGFMT_RGB12_LE && mpfmt <= IMGFMT_BGR16_BE))
     {
         desc.flags |= MP_IMGFLAG_LE | MP_IMGFLAG_BE;
     } else {
