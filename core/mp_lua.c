@@ -256,6 +256,7 @@ static int get_chapter_list(lua_State *L)
         lua_pushinteger(L, n + 1); // list ch n1
         lua_insert(L, -2); // list n1 ch
         lua_settable(L, -3); // list
+        talloc_free(name);
     }
     return 1;
 }
