@@ -1296,8 +1296,7 @@ int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
         .original_index = demuxer->num_chapters,
         .start = start,
         .end = end,
-        .name = name.len ? bstrdup0(demuxer, name)
-                         : talloc_strdup(demuxer, mp_gtext("unknown")),
+        .name = name.len ? bstrdup0(demuxer, name) : NULL,
     };
     MP_TARRAY_APPEND(demuxer, demuxer->chapters, demuxer->num_chapters, new);
     return 0;
