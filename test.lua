@@ -148,24 +148,32 @@ function draw_bar(ass)
 end
 
 local state = {
-    osd_visible = false
+    osd_visible = false,
+    moving_and_down = false,
 }
 
 -- called by input.conf bindings
 function do_mouse_move()
     state.last_osd_time = mp.get_timer()
     state.osd_visible = true
+    state.moving_and_down = false
 end
 
 function do_mouse_click()
     local b_x, b_y, b_w, b_h, _ = get_bar_location()
     local x, y = mp.get_mouse_pos()
 
+    state.moving_and_down = false
+
     if x >= b_x and y >= b_y and x <= b_x + b_w and y <= b_y + b_h then
         local duration = tonumber(mp.property_get("length"))
         local time = (x - b_x) / b_w * duration
         mp.send_command(string.format("seek %f absolute", time))
     end
+end
+
+function do_mouse_move_down()
+    state.moving_and_down = true
 end
 
 -- called by mpv on every frame
@@ -184,7 +192,12 @@ function mp_update()
 
     ass:new_event()
     ass:pos(x, y)
-    ass:append("{\\an5}+")
+    ass:append("{\\an5}")
+    if state.moving_and_down == true then
+        ass:append("-")
+    else
+        ass:append("+")
+    end
 
     local w, h, aspect = mp.get_screen_size()
     mp.set_osd_ass(h * aspect, h, ass.text)
