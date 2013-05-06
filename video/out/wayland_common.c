@@ -26,12 +26,10 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <assert.h>
-#include <fcntl.h>
+#include <poll.h>
 #include <unistd.h>
 
 #include <sys/mman.h>
-#include <sys/epoll.h>
-#include <sys/timerfd.h>
 #include <linux/input.h>
 
 #include "config.h"
@@ -56,8 +54,6 @@
 #define MOD_SHIFT_MASK      0x01
 #define MOD_ALT_MASK        0x02
 #define MOD_CONTROL_MASK    0x04
-
-#define ARRAY_LENGTH(a) (sizeof (a) / sizeof (a)[0])
 
 static int lookupkey(int key);
 
@@ -142,20 +138,14 @@ static void output_handle_mode(void *data,
                                int32_t height,
                                int32_t refresh)
 {
-    struct vo_wayland_display *d = data;
-    struct vo_wayland_output *output;
+    struct vo_wayland_output *output = data;
 
-    wl_list_for_each(output, &d->output_list, link) {
-        if (wl_output == output->output) {
-            output->width = width;
-            output->height = height;
-            if (flags)
-                output->flags = flags;
-        }
-    }
+    if (!output)
+        return;
 
-    /* one output is enough */
-    d->output_mode_received = 1;
+    output->width = width;
+    output->height = height;
+    output->flags = flags;
 }
 
 const struct wl_output_listener output_listener = {
@@ -219,15 +209,10 @@ static void keyboard_handle_keymap(void *data,
                                    int32_t fd,
                                    uint32_t size)
 {
-    struct vo_wayland_input *input = ((struct vo_wayland_state *) data)->input;
+    struct vo_wayland_input *input;
     char *map_str;
 
-    if(!data) {
-        close(fd);
-        return;
-    }
-
-    if (format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1) {
+    if(!data || format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1) {
         close(fd);
         return;
     }
@@ -238,8 +223,9 @@ static void keyboard_handle_keymap(void *data,
         return;
     }
 
-    input->xkb.keymap = xkb_map_new_from_string(input->xkb.context,
-            map_str, XKB_KEYMAP_FORMAT_TEXT_V1, 0);
+    input = ((struct vo_wayland_state *) data)->input;
+    input->xkb.keymap = xkb_keymap_new_from_buffer(input->xkb.context,
+            map_str, size, XKB_KEYMAP_FORMAT_TEXT_V1, 0);
 
     munmap(map_str, size);
     close(fd);
@@ -256,13 +242,6 @@ static void keyboard_handle_keymap(void *data,
         input->xkb.keymap = NULL;
         return;
     }
-
-    input->xkb.control_mask =
-        1 << xkb_map_mod_get_index(input->xkb.keymap, "Control");
-    input->xkb.alt_mask =
-        1 << xkb_map_mod_get_index(input->xkb.keymap, "Mod1");
-    input->xkb.shift_mask =
-        1 << xkb_map_mod_get_index(input->xkb.keymap, "Shift");
 }
 
 static void keyboard_handle_enter(void *data,
@@ -290,60 +269,24 @@ static void keyboard_handle_key(void *data,
     struct vo_wayland_state *wl = data;
     struct vo_wayland_input *input = wl->input;
     uint32_t code, num_syms;
-
-    struct itimerspec its = {{0, 0}, {0, 0}};
+    int mpkey;
 
     const xkb_keysym_t *syms;
     xkb_keysym_t sym;
-    xkb_mod_mask_t mask;
 
     code = key + 8;
     num_syms = xkb_key_get_syms(input->xkb.state, code, &syms);
-
-    mask = xkb_state_serialize_mods(input->xkb.state,
-            XKB_STATE_DEPRESSED | XKB_STATE_LATCHED);
-
-    input->modifiers = 0;
-    if (mask & input->xkb.control_mask)
-        input->modifiers |= MOD_CONTROL_MASK;
-    if (mask & input->xkb.alt_mask)
-        input->modifiers |= MOD_ALT_MASK;
-    if (mask & input->xkb.shift_mask)
-        input->modifiers |= MOD_SHIFT_MASK;
 
     sym = XKB_KEY_NoSymbol;
     if (num_syms == 1)
         sym = syms[0];
 
-    if (sym != XKB_KEY_NoSymbol && state == WL_KEYBOARD_KEY_STATE_PRESSED) {
-        int mpkey = lookupkey(sym);
-        if (mpkey)
+    if (sym != XKB_KEY_NoSymbol && (mpkey = lookupkey(sym))) {
+        if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
+            mplayer_put_key(wl->vo->key_fifo, mpkey | MP_KEY_STATE_DOWN);
+        else
             mplayer_put_key(wl->vo->key_fifo, mpkey);
     }
-
-    if (state == WL_KEYBOARD_KEY_STATE_RELEASED && key == input->repeat.key) {
-        input->repeat.sym = 0;
-        input->repeat.key = 0;
-        input->repeat.time = 0;
-    }
-    else if (state == WL_KEYBOARD_KEY_STATE_PRESSED) {
-        if (input->repeat.key == key) {
-            its.it_interval.tv_sec = 0;
-            its.it_interval.tv_nsec = 20 * 1000 * 1000;
-            its.it_value.tv_sec = 0;
-            its.it_value.tv_nsec = 100 * 1000 * 1000;
-        }
-        else {
-            input->repeat.sym = sym;
-            input->repeat.key = key;
-            input->repeat.time = time;
-            its.it_interval.tv_sec = 0;
-            its.it_interval.tv_nsec = 25 * 1000 * 1000;
-            its.it_value.tv_sec = 0;
-            its.it_value.tv_nsec = 400 * 1000 * 1000;
-        }
-    }
-    timerfd_settime(input->repeat.timer_fd, 0, &its, NULL);
 }
 
 static void keyboard_handle_modifiers(void *data,
@@ -411,20 +354,8 @@ static void pointer_handle_motion(void *data,
 
     display->cursor.pointer = pointer;
 
-    if (wl->window->type == TYPE_FULLSCREEN) {
+    if (wl->window->type == TYPE_FULLSCREEN)
         show_cursor(wl);
-
-        struct itimerspec its;
-        int ms = wl->vo->opts->cursor_autohide_delay;
-        int sec = ms / 1000;
-        ms %= 1000;
-
-        its.it_interval.tv_sec = 0;
-        its.it_interval.tv_nsec = 100 * 1000 * 1000;
-        its.it_value.tv_sec = sec;
-        its.it_value.tv_nsec = ms * 1000 * 1000;
-        timerfd_settime(display->cursor.timer_fd, 0, &its, NULL);
-    }
 }
 
 static void pointer_handle_button(void *data,
@@ -441,7 +372,6 @@ static void pointer_handle_button(void *data,
 
     if ((button == BTN_LEFT) && (state == WL_POINTER_BUTTON_STATE_PRESSED))
         wl_shell_surface_move(wl->window->shell_surface, wl->input->seat, serial);
-
 }
 
 static void pointer_handle_axis(void *data,
@@ -550,7 +480,7 @@ static void registry_handle_global (void *data,
                                           &wl_output_interface,
                                           1);
 
-        wl_output_add_listener(output->output, &output_listener, d);
+        wl_output_add_listener(output->output, &output_listener, output);
         wl_list_insert(&d->output_list, &output->link);
     }
 
@@ -579,40 +509,6 @@ static const struct wl_registry_listener registry_listener = {
 
 /*** internal functions ***/
 
-static int set_cloexec_or_close(int fd)
-{
-    long flags;
-
-    if (fd == -1)
-        return -1;
-
-    if ((flags = fcntl(fd, F_GETFD)) == -1)
-        goto err;
-
-    if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) == -1)
-        goto err;
-
-    return fd;
-
-err:
-    close(fd);
-    return -1;
-}
-
-static int os_epoll_create_cloexec(void)
-{
-    int fd;
-
-#ifdef EPOLL_CLOEXEC
-    if ((fd = epoll_create1(EPOLL_CLOEXEC)) >= 0)
-        return fd;
-    if (errno != EINVAL)
-        return -1;
-#endif
-
-    return set_cloexec_or_close(epoll_create(1));
-}
-
 static int lookupkey(int key)
 {
     static const char *passthrough_keys
@@ -639,6 +535,7 @@ static void hide_cursor (struct vo_wayland_state *wl)
 
     wl_pointer_set_cursor(display->cursor.pointer, display->cursor.serial,
             NULL, 0, 0);
+
 }
 
 static void show_cursor (struct vo_wayland_state *wl)
@@ -658,76 +555,9 @@ static void show_cursor (struct vo_wayland_state *wl)
     wl_surface_damage(display->cursor.surface, 0, 0,
             image->width, image->height);
     wl_surface_commit(display->cursor.surface);
-}
 
-static void
-display_watch_fd(struct vo_wayland_display *display,
-                 int fd, uint32_t events, struct vo_wayland_task *task)
-{
-    struct epoll_event ep;
-
-    if (display->epoll_fd < 0) {
-        mp_msg(MSGT_VO, MSGL_WARN, "[wayland] Could not watch fd\n");
-        return;
-    }
-
-    ep.events = events;
-    ep.data.ptr = task;
-    epoll_ctl(display->epoll_fd, EPOLL_CTL_ADD, fd, &ep);
-}
-
-static void display_handle_data(struct vo_wayland_task *task,
-                                uint32_t events,
-                                struct vo_wayland_state *wl)
-{
-    struct vo_wayland_display *display = wl->display;
-    struct epoll_event ep;
-    int ret;
-
-    if (events & EPOLLERR || events & EPOLLHUP)
-        exit(-1);
-
-    if (events & EPOLLIN) {
-        ret = wl_display_dispatch(display->display);
-        if (ret == -1)
-            exit(-1);
-    }
-
-    if (events & EPOLLOUT) {
-        ret = wl_display_flush(display->display);
-        if (ret == 0) {
-            ep.events = EPOLLIN | EPOLLERR | EPOLLHUP;
-            ep.data.ptr = &display->display_task;
-            epoll_ctl(display->epoll_fd, EPOLL_CTL_MOD,
-                  display->display_fd, &ep);
-        } else if (ret == -1 && errno != EAGAIN)
-            exit(-1);
-    }
-}
-
-static void cursor_timer_func(struct vo_wayland_task *task,
-                              uint32_t events,
-                              struct vo_wayland_state *wl)
-{
-    if (wl->window->type == TYPE_FULLSCREEN)
-        hide_cursor(wl);
-}
-
-static void keyboard_timer_func(struct vo_wayland_task *task,
-                                uint32_t events,
-                                struct vo_wayland_state *wl)
-{
-    struct vo_wayland_input *input = wl->input;
-    uint64_t exp;
-
-    if (read(input->repeat.timer_fd, &exp, sizeof exp) != sizeof exp)
-        /* If we change the timer between the fd becoming
-         * readable and getting here, there'll be nothing to
-         * read and we get EAGAIN. */
-        return;
-
-    keyboard_handle_key(wl, input->keyboard, 0, input->repeat.time,
-            input->repeat.key, WL_KEYBOARD_KEY_STATE_PRESSED);
+    display->cursor.mouse_timer = GetTimerMS() + wl->vo->opts->cursor_autohide_delay;
+    display->cursor.mouse_waiting_hide = true;
 }
 
 static bool create_display (struct vo_wayland_state *wl)
@@ -754,11 +584,7 @@ static bool create_display (struct vo_wayland_state *wl)
     d->cursor.surface =
         wl_compositor_create_surface(d->compositor);
 
-    d->epoll_fd = os_epoll_create_cloexec();
     d->display_fd = wl_display_get_fd(d->display);
-    d->display_task.run = display_handle_data;
-    display_watch_fd(d, d->display_fd, EPOLLIN | EPOLLERR | EPOLLHUP,
-                    &d->display_task);
 
     return true;
 }
@@ -804,9 +630,6 @@ static void create_window (struct vo_wayland_state *wl)
 
 static void destroy_window (struct vo_wayland_state *wl)
 {
-    if (wl->window->callback)
-        wl_callback_destroy(wl->window->callback);
-
     wl_shell_surface_destroy(wl->window->shell_surface);
     wl_surface_destroy(wl->window->surface);
 }
@@ -839,29 +662,6 @@ static void destroy_input (struct vo_wayland_state *wl)
     xkb_context_unref(wl->input->xkb.context);
 }
 
-static void create_timers (struct vo_wayland_state *wl)
-{
-    struct vo_wayland_display *d = wl->display;
-    struct vo_wayland_input *i = wl->input;
-
-    d->cursor.task.run = cursor_timer_func;
-    d->cursor.timer_fd = timerfd_create(CLOCK_MONOTONIC,
-                                        TFD_CLOEXEC | TFD_NONBLOCK);
-    display_watch_fd(d, d->cursor.timer_fd, EPOLLIN, &d->cursor.task);
-
-    i->repeat.task.run = keyboard_timer_func;
-    i->repeat.timer_fd = timerfd_create(CLOCK_MONOTONIC,
-                                        TFD_CLOEXEC | TFD_NONBLOCK);
-    display_watch_fd(d, i->repeat.timer_fd, EPOLLIN, &i->repeat.task);
-}
-
-static void destroy_timers (struct vo_wayland_state *wl)
-{
-    close(wl->input->repeat.timer_fd);
-    close(wl->display->cursor.timer_fd);
-}
-
-
 /*** mplayer2 interface ***/
 
 int vo_wayland_init (struct vo *vo)
@@ -877,8 +677,7 @@ int vo_wayland_init (struct vo *vo)
         return false;
     }
 
-    create_timers(wl);
-    vo->event_fd = wl->display->epoll_fd;
+    vo->event_fd = wl->display->display_fd;
 
     create_window(wl);
     vo_wayland_update_window_title(vo);
@@ -888,7 +687,6 @@ int vo_wayland_init (struct vo *vo)
 void vo_wayland_uninit (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
-    destroy_timers(wl);
     destroy_input(wl);
     destroy_window(wl);
     destroy_display(wl);
@@ -955,35 +753,45 @@ void vo_wayland_fullscreen (struct vo *vo)
 
 int vo_wayland_check_events (struct vo *vo)
 {
-    struct vo_wayland_task *task;
     struct vo_wayland_state *wl = vo->wayland;
-    int i, ret, count;
-    struct epoll_event ep[16];
+    struct wl_display *dp = wl->display->display;
+    int ret;
 
-    wl_display_dispatch_pending(wl->display->display);
-
-    ret = wl_display_flush(wl->display->display);
-
-    if (ret < 0 && errno == EAGAIN) {
-        ep[0].events = EPOLLIN | EPOLLOUT | EPOLLERR | EPOLLHUP;
-        ep[0].data.ptr = NULL;
-
-        epoll_ctl(wl->display->epoll_fd, EPOLL_CTL_MOD,
-        wl->display->display_fd, &ep[0]);
-    }
-    else if (ret < 0) {
-        return 0;
+    if (wl->window->type == TYPE_FULLSCREEN &&
+        wl->display->cursor.mouse_waiting_hide &&
+        GetTimerMS() >= wl->display->cursor.mouse_timer)
+    {
+        hide_cursor(wl);
+        wl->display->cursor.mouse_waiting_hide = false;
     }
 
-    count = epoll_wait(wl->display->epoll_fd, ep, ARRAY_LENGTH(ep), 1);
+    wl_display_dispatch_pending(dp);
+    wl_display_flush(dp);
 
-    for (i = 0; i < count; i++) {
-        task = ep[i].data.ptr;
-        task->run(task, ep[i].events, wl);
+    struct pollfd fd = {
+        wl->display->display_fd,
+        POLLIN | POLLOUT | POLLERR | POLLHUP,
+        0
+    };
+
+    /* wl_display_dispatch is blocking
+     * wl_dipslay_dispatch_pending is non-blocking but does not read from the fd
+     *
+     * when pausing no input events get queued so we have to check if there
+     * are events to read from the file descriptor through poll */
+    if (poll(&fd, 1, 0) > 0) {
+        if (fd.revents & POLLERR || fd.revents & POLLHUP)
+            mp_msg(MSGT_VO, MSGL_ERR, "[wayland] error occurred on fd\n");
+        if (fd.revents & POLLIN)
+            wl_display_dispatch(dp);
+        if (fd.revents & POLLOUT)
+            wl_display_flush(dp);
     }
 
+    if (wl->display->cursor.mouse_waiting_hide)
+        vo->next_wakeup_time = FFMIN(vo->next_wakeup_time,
+                                     wl->display->cursor.mouse_timer);
     ret = wl->window->events;
-
     wl->window->events = 0;
 
     return ret;
@@ -993,10 +801,9 @@ void vo_wayland_update_screeninfo (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
     struct mp_vo_opts *opts = vo->opts;
+    bool mode_received = false;
 
     wl_display_roundtrip(wl->display->display);
-    if (!wl->display->output_mode_received)
-        mp_msg(MSGT_VO, MSGL_ERR, "[wayland] no output mode detected\n");
 
     vo->xinerama_x = vo->xinerama_y = 0;
 
@@ -1007,6 +814,11 @@ void vo_wayland_update_screeninfo (struct vo *vo)
     struct vo_wayland_output *fsscreen_output = NULL;
 
     wl_list_for_each_reverse(output, &wl->display->output_list, link) {
+        if (!output || !output->width)
+            continue;
+
+        mode_received = true;
+
         if (opts->fsscreen_id == screen_id)
             fsscreen_output = output;
 
@@ -1014,6 +826,11 @@ void vo_wayland_update_screeninfo (struct vo *vo)
             first_output = output;
 
         screen_id++;
+    }
+
+    if (!mode_received) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[wayland] no output mode detected\n");
+        return;
     }
 
     if (fsscreen_output) {

@@ -51,6 +51,8 @@ struct bstr mp_dirname(const char *path);
  */
 char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2);
 
+char *mp_getcwd(void *talloc_ctx);
+
 bool mp_path_exists(const char *path);
 bool mp_path_isdir(const char *path);
 

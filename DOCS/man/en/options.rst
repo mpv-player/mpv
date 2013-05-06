@@ -874,6 +874,18 @@
     :vda:       OSX
     :crystalhd: Broadcom Crystal HD
 
+--hwdec-codecs=<codec1,codec2,...|all>
+    Allow hardware decoding for a given list of codecs only. The default is the
+    special value ``all``, which always allows all codecs.
+
+    This is usually only needed with broken GPUs, where fallback to software
+    decoding doesn't work properly.
+
+    *EXAMPLE*:
+
+    - ``mpv --hwdec=vdpau --vo=vdpau --hwdec-codecs=h264,mpeg2video``
+       Enable vdpau decoding for h264 and mpeg2 only.
+
 --identify
     Deprecated. Use ``TOOLS/mpv_identify.sh``.
 
@@ -920,7 +932,7 @@
     Number of key presses to generate per second on autorepeat.
 
 --no-input-default-bindings
-    Use the key bindings that mpv ships with by default.
+    Disable mpv default (builtin) key bindings.
 
 --input-keylist
     Prints all keys that can be bound to commands.
@@ -1319,6 +1331,10 @@
 --no-audio
     Do not play sound. With some demuxers this may not work. In those cases
     you can try ``--ao=null`` instead.
+
+--no-resume-playback
+    Do not restore playback position from ``~/.mpv/watch_later/``.
+    See ``quit_watch_later`` input command.
 
 --no-sub
     Disables display of internal and external subtitles.
@@ -1781,6 +1797,15 @@
     Adjust the saturation of the video signal (default: 0). You can get
     grayscale output with this option. Not supported by all video output
     drivers.
+
+--save-position-on-quit
+    Always save the current playback position on quit. When this file is
+    played again later, the player will seek to the old playback position on
+    start. This affects any form of stopping playback (quitting, going to the
+    next file).
+
+    This behavior is disabled by default, but is always available when quitting
+    the player with Shift+Q.
 
 --sb=<n>
     Seek to byte position. Useful for playback from CD-ROM images or VOB files

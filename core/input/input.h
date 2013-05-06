@@ -28,6 +28,7 @@ enum mp_command_type {
     MP_CMD_IGNORE,
     MP_CMD_SEEK,
     MP_CMD_QUIT,
+    MP_CMD_QUIT_WATCH_LATER,
     MP_CMD_PLAYLIST_NEXT,
     MP_CMD_PLAYLIST_PREV,
     MP_CMD_OSD,

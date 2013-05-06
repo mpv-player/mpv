@@ -393,7 +393,7 @@ static int config(struct vf_instance *vf,
 
             vf->priv->stride[i]= w;
             for(j=0; j<3; j++)
-                vf->priv->ref[j][i]= (char *)malloc(w*h*sizeof(uint8_t))+3*w;
+                vf->priv->ref[j][i]= (char *)malloc(w*h)+3*w;
         }
 
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
@@ -459,6 +459,7 @@ static int continue_buffered_image(struct vf_instance *vf, struct mp_image *mpi)
         filter(vf->priv, dmpi->planes, dmpi->stride, mpi->w, mpi->h, i ^ tff ^ 1, tff);
         if (i < (vf->priv->mode & 1))
             ret = 1; // more images to come
+        dmpi->pts = pts;
         vf_add_output_frame(vf, dmpi);
         break;
     }

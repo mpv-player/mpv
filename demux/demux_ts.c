@@ -1024,11 +1024,6 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 
 
 	demuxer->priv = priv;
-	if(demuxer->stream->type != STREAMTYPE_FILE)
-		demuxer->seekable = 1;
-	else
-		demuxer->seekable = 1;
-
 
 	params.atype = params.vtype = params.stype = UNKNOWN;
 	params.apid = demuxer->audio->id;

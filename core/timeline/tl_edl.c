@@ -275,7 +275,7 @@ void build_edl_timeline(struct MPContext *mpctx)
                     p->end = *t;
                 if (*t >= 0 && parts[i].duration) {
                     *t -= parts[i].duration;
-                    if (t < 0) {
+                    if (*t < 0) {
                         mp_msg(MSGT_CPLAYER, MSGL_ERR, "EDL: Negative time "
                                "on line %d!\n", parts[i].lineno);
                         goto out;

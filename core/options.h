@@ -126,6 +126,8 @@ typedef struct MPOpts {
     int play_frames;
     double step_sec;
     int64_t seek_to_byte;
+    int position_resume;
+    int position_save_on_quit;
     int pause;
     int keep_open;
     int audio_id;
@@ -186,6 +188,7 @@ typedef struct MPOpts {
     int ass_hinting;
 
     int hwdec_api;
+    char *hwdec_codecs;
 
     struct lavc_param {
         int workaround_bugs;

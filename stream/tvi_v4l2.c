@@ -1747,29 +1747,6 @@ static int get_video_framesize(priv_t *priv)
     return priv->format.fmt.pix.sizeimage;
 }
 
-//#define DOUBLESPEED
-#ifdef DOUBLESPEED
-// for testing purposes only
-static void read_doublespeed(priv_t *priv)
-{
-    char *bufx = calloc(priv->audio_in.blocksize, 2);
-    short *s;
-    short *d;
-    int i;
-
-    audio_in_read_chunk(&priv->audio_in, bufx);
-    audio_in_read_chunk(&priv->audio_in, bufx+priv->audio_in.blocksize);
-
-    s = bufx;
-    d = priv->audio_ringbuffer+priv->audio_tail*priv->audio_in.blocksize;
-    for (i = 0; i < priv->audio_in.blocksize/2; i++) {
-        *d++ = *s++;
-        *s++;
-    }
-
-}
-#endif
-
 static void *audio_grabber(void *data)
 {
     priv_t *priv = (priv_t*)data;
@@ -1788,12 +1765,8 @@ static void *audio_grabber(void *data)
 
     for (; !priv->shutdown;)
     {
-#ifdef DOUBLESPEED
-        read_doublespeed(priv);
-#else
         if (audio_in_read_chunk(&priv->audio_in, priv->audio_ringbuffer+priv->audio_tail*priv->audio_in.blocksize) < 0)
             continue;
-#endif
         pthread_mutex_lock(&priv->skew_mutex);
         if (priv->first_frame == 0) {
             // there is no first frame yet (unlikely to happen)

@@ -729,7 +729,7 @@ static int property_switch_track(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_GET:
-        *(int *) arg = track ? track->user_tid : -1;
+        *(int *) arg = track ? track->user_tid : -2;
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT:
         if (!track)
@@ -757,9 +757,8 @@ static int property_switch_track(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_SET:
         mp_switch_track(mpctx, type, mp_track_by_tid(mpctx, type, *(int *)arg));
         return M_PROPERTY_OK;
-    default:
-        return M_PROPERTY_NOT_IMPLEMENTED;
     }
+    return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
 /// Selected audio id (RW)
@@ -1285,6 +1284,19 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
 
 #endif
 
+static int mp_property_alias(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
+{
+    const char *real_property = prop->priv;
+    int r = mp_property_do(real_property, action, arg, mpctx);
+    if (action == M_PROPERTY_GET_TYPE && r >= 0) {
+        // Fix the property name
+        struct m_option *type = arg;
+        type->name = prop->name;
+    }
+    return r;
+}
+
 // Use option-to-property-bridge. (The property and option have the same names.)
 #define M_OPTION_PROPERTY(name) \
     {(name), mp_property_generic_option, &m_option_type_dummy, 0, 0, 0, (name)}
@@ -1295,6 +1307,10 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
     {(name), (handler), &m_option_type_dummy, 0, 0, 0, (name)}
 #define M_OPTION_PROPERTY_CUSTOM_(name, handler, ...) \
     {(name), (handler), &m_option_type_dummy, 0, 0, 0, (name), __VA_ARGS__}
+
+// Redirect a property name to another
+#define M_PROPERTY_ALIAS(name, real_property) \
+    {(name), mp_property_alias, &m_option_type_dummy, 0, 0, 0, (real_property)}
 
 /// All properties available in MPlayer.
 /** \ingroup Properties
@@ -1364,8 +1380,7 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "channels", mp_property_channels, CONF_TYPE_INT,
       0, 0, 0, NULL },
-    { "audio", mp_property_audio, CONF_TYPE_INT,
-      CONF_RANGE, -2, 65535, NULL },
+    M_OPTION_PROPERTY_CUSTOM("aid", mp_property_audio),
     { "balance", mp_property_balance, CONF_TYPE_FLOAT,
       M_OPT_RANGE, -1, 1, NULL },
 
@@ -1408,14 +1423,12 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "aspect", mp_property_aspect, CONF_TYPE_FLOAT,
       CONF_RANGE, 0, 10, NULL },
-    { "video", mp_property_video, CONF_TYPE_INT,
-      CONF_RANGE, -2, 65535, NULL },
+    M_OPTION_PROPERTY_CUSTOM("vid", mp_property_video),
     { "program", mp_property_program, CONF_TYPE_INT,
       CONF_RANGE, -1, 65535, NULL },
 
     // Subs
-    { "sub", mp_property_sub, CONF_TYPE_INT,
-      M_OPT_MIN, -1, 0, NULL },
+    M_OPTION_PROPERTY_CUSTOM("sid", mp_property_sub),
     M_OPTION_PROPERTY_CUSTOM("sub-delay", mp_property_sub_delay),
     M_OPTION_PROPERTY_CUSTOM("sub-pos", mp_property_sub_pos),
     { "sub-visibility", mp_property_sub_visibility, CONF_TYPE_FLAG,
@@ -1438,6 +1451,10 @@ static const m_option_t mp_properties[] = {
     { "tv-hue", mp_property_tv_color, CONF_TYPE_INT,
       M_OPT_RANGE, -100, 100, .offset = TV_COLOR_HUE },
 #endif
+
+    M_PROPERTY_ALIAS("video", "vid"),
+    M_PROPERTY_ALIAS("audio", "aid"),
+    M_PROPERTY_ALIAS("sub", "sid"),
 
     {0},
 };
@@ -1824,6 +1841,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_QUIT:
         mpctx->stop_play = PT_QUIT;
         mpctx->quit_player_rc = cmd->args[0].v.i;
+        break;
+
+    case MP_CMD_QUIT_WATCH_LATER:
+        mp_write_watch_later_conf(mpctx);
+        mpctx->stop_play = PT_QUIT;
+        mpctx->quit_player_rc = 0;
         break;
 
     case MP_CMD_PLAYLIST_NEXT:

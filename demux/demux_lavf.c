@@ -287,6 +287,8 @@ success:
 static bool matches_avinputformat_name(struct lavf_priv *priv,
                                        const char *name)
 {
+    // At least mp4 has name="mov,mp4,m4a,3gp,3g2,mj2", so we split the name
+    // on "," in general.
     const char *avifname = priv->avif->name;
     while (1) {
         const char *next = strchr(avifname, ',');
@@ -425,7 +427,8 @@ static void handle_stream(demuxer_t *demuxer, int i)
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = 1;
-        if (matches_avinputformat_name(priv, "mpeg"))
+        if (matches_avinputformat_name(priv, "mpeg") ||
+            matches_avinputformat_name(priv, "mpegts"))
             sh->demuxer_id = st->id;
         AVDictionaryEntry *title = av_dict_get(st->metadata, "title", NULL, 0);
         if (title && title->value)
@@ -641,6 +644,12 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
     }
     dp->pos = demux->filepos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
+    // Use only one stream for stream_pts, otherwise PTS might be jumpy.
+    if (stream->type == STREAM_VIDEO) {
+        double pts;
+        if (stream_control(demux->stream, STREAM_CTRL_GET_CURRENT_TIME, &pts) > 0)
+            dp->stream_pts = pts;
+    }
     demuxer_add_packet(demux, stream, dp);
     return 1;
 }
@@ -829,7 +838,7 @@ redo:
          * for us.
          */
         avio_flush(priv->avfc->pb);
-        av_seek_frame(priv->avfc, 0, avio_tell(priv->avfc->pb),
+        av_seek_frame(priv->avfc, 0, stream_tell(demuxer->stream),
                       AVSEEK_FLAG_BYTE);
         avio_flush(priv->avfc->pb);
         return DEMUXER_CTRL_OK;

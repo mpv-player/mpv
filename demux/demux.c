@@ -101,6 +101,18 @@ const demuxer_desc_t *const demuxer_list[] = {
     NULL
 };
 
+static void add_stream_chapters(struct demuxer *demuxer);
+
+static int packet_destroy(void *ptr)
+{
+    struct demux_packet *dp = ptr;
+    if (dp->avpacket)
+        talloc_free(dp->avpacket);
+    else
+        free(dp->buffer);
+    return 0;
+}
+
 static struct demux_packet *create_packet(size_t len)
 {
     if (len > 1000000000) {
@@ -108,16 +120,14 @@ static struct demux_packet *create_packet(size_t len)
                "over 1 GB!\n");
         abort();
     }
-    struct demux_packet *dp = malloc(sizeof(struct demux_packet));
-    dp->len = len;
-    dp->next = NULL;
-    dp->pts = MP_NOPTS_VALUE;
-    dp->duration = -1;
-    dp->stream_pts = MP_NOPTS_VALUE;
-    dp->pos = 0;
-    dp->keyframe = false;
-    dp->buffer = NULL;
-    dp->avpacket = NULL;
+    struct demux_packet *dp = talloc(NULL, struct demux_packet);
+    talloc_set_destructor(dp, packet_destroy);
+    *dp = (struct demux_packet) {
+        .len = len,
+        .pts = MP_NOPTS_VALUE,
+        .duration = -1,
+        .stream_pts = MP_NOPTS_VALUE,
+    };
     return dp;
 }
 
@@ -166,11 +176,7 @@ void resize_demux_packet(struct demux_packet *dp, size_t len)
 
 void free_demux_packet(struct demux_packet *dp)
 {
-    if (dp->avpacket)
-        talloc_free(dp->avpacket);
-    else
-        free(dp->buffer);
-    free(dp);
+    talloc_free(dp);
 }
 
 static void free_demuxer_stream(struct demux_stream *ds)
@@ -922,6 +928,13 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
             opts->correct_pts =
                 demux_control(demuxer, DEMUXER_CTRL_CORRECT_PTS,
                             NULL) == DEMUXER_CTRL_OK;
+        if (stream_manages_timeline(demuxer->stream)) {
+            // Incorrect, but fixes some behavior with DVD/BD
+            demuxer->ts_resets_possible = false;
+            // Doesn't work, because stream_pts is a "guess".
+            demuxer->accurate_seek = false;
+        }
+        add_stream_chapters(demuxer);
         demuxer_sort_chapters(demuxer);
         return demuxer;
     } else {
@@ -972,7 +985,7 @@ struct demuxer *demux_open_withparams(struct MPOpts *opts,
     // format, instead of reyling on libav to auto-detect the stream's format
     // correctly.
     switch (file_format) {
-    //case DEMUXER_TYPE_MPEG_PS:
+    case DEMUXER_TYPE_MPEG_PS:
     //case DEMUXER_TYPE_MPEG_TS:
     case DEMUXER_TYPE_Y4M:
     case DEMUXER_TYPE_NSV:
@@ -1071,7 +1084,7 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
      * (nothing actually implements DEMUXER_CTRL_RESYNC now).
      */
     struct stream *stream = demuxer->stream;
-    if (stream->type == STREAMTYPE_DVD) {
+    if (stream_manages_timeline(stream)) {
         double pts;
 
         if (flags & SEEK_ABSOLUTE)
@@ -1283,11 +1296,24 @@ int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
         .original_index = demuxer->num_chapters,
         .start = start,
         .end = end,
-        .name = name.len ? bstrdup0(demuxer, name)
-                         : talloc_strdup(demuxer, mp_gtext("unknown")),
+        .name = name.len ? bstrdup0(demuxer, name) : NULL,
     };
     MP_TARRAY_APPEND(demuxer, demuxer->chapters, demuxer->num_chapters, new);
     return 0;
+}
+
+static void add_stream_chapters(struct demuxer *demuxer)
+{
+    if (demuxer->num_chapters)
+        return;
+    int num_chapters = demuxer_chapter_count(demuxer);
+    for (int n = 0; n < num_chapters; n++) {
+        double p = n;
+        if (stream_control(demuxer->stream, STREAM_CTRL_GET_CHAPTER_TIME, &p)
+                != STREAM_OK)
+            return;
+        demuxer_add_chapter(demuxer, bstr0(""), p * 1e9, 0);
+    }
 }
 
 /**
@@ -1355,12 +1381,10 @@ char *demuxer_chapter_name(demuxer_t *demuxer, int chapter)
     return NULL;
 }
 
-float demuxer_chapter_time(demuxer_t *demuxer, int chapter, float *end)
+double demuxer_chapter_time(demuxer_t *demuxer, int chapter)
 {
     if (demuxer->num_chapters && demuxer->chapters && chapter >= 0
         && chapter < demuxer->num_chapters) {
-        if (end)
-            *end = demuxer->chapters[chapter].end / 1e9;
         return demuxer->chapters[chapter].start / 1e9;
     }
     return -1.0;
@@ -1376,6 +1400,27 @@ int demuxer_chapter_count(demuxer_t *demuxer)
         return num_chapters;
     } else
         return demuxer->num_chapters;
+}
+
+double demuxer_get_time_length(struct demuxer *demuxer)
+{
+    double len;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) > 0)
+        return len;
+    // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
+    if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH, &len) > 0)
+        return len;
+    return -1;
+}
+
+double demuxer_get_start_time(struct demuxer *demuxer)
+{
+    double time;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_START_TIME, &time) > 0)
+        return time;
+    if (demux_control(demuxer, DEMUXER_CTRL_GET_START_TIME, &time) > 0)
+        return time;
+    return 0;
 }
 
 int demuxer_angles_count(demuxer_t *demuxer)

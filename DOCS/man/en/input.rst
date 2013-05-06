@@ -169,6 +169,10 @@ run "<command>"
 quit [<code>]
     Exit the player using the given exit code.
 
+quit_watch_later
+    Exit player, and store current playback position. Playing that file later
+    will seek to the previous position on start.
+
 sub_add "<file>"
     Load the given subtitle file. It's not selected as current subtitle after
     loading.

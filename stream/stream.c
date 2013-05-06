@@ -331,10 +331,6 @@ int stream_read_internal(stream_t *s, void *buf, int len)
                 len = read(s->fd, buf, len);
         }
         break;
-    case STREAMTYPE_DS:
-        len = demux_read_data((demux_stream_t *)s->priv, buf, len);
-        break;
-
 
     default:
         len = s->fill_buffer ? s->fill_buffer(s, buf, len) : 0;
@@ -590,13 +586,6 @@ void free_stream(stream_t *s)
     talloc_free(s);
 }
 
-stream_t *new_ds_stream(demux_stream_t *ds)
-{
-    stream_t *s = new_stream(-1, STREAMTYPE_DS);
-    s->priv = ds;
-    return s;
-}
-
 void stream_set_interrupt_callback(int (*cb)(struct input_ctx *, int),
                                    struct input_ctx *ctx)
 {
@@ -779,4 +768,9 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
     return (struct bstr){
                buf, total_read
     };
+}
+
+bool stream_manages_timeline(struct stream *s)
+{
+    return stream_control(s, STREAM_CTRL_MANAGES_TIMELINE, NULL) == STREAM_OK;
 }

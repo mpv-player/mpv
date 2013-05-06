@@ -451,6 +451,7 @@ const m_option_t common_opts[] = {
                 {"vdpau", 1},
                 {"vda", 2},
                 {"crystalhd", 3})),
+    OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 
     // postprocessing:
     {"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -583,7 +584,8 @@ const m_option_t mplayer_opts[]={
                ({"auto", MP_CSP_AUTO},
                 {"BT.601", MP_CSP_BT_601},
                 {"BT.709", MP_CSP_BT_709},
-                {"SMPTE-240M", MP_CSP_SMPTE_240M})),
+                {"SMPTE-240M", MP_CSP_SMPTE_240M},
+                {"YCgCo", MP_CSP_YCGCO})),
     OPT_CHOICE("colormatrix-input-range", requested_input_range, 0,
                ({"auto", MP_CSP_LEVELS_AUTO},
                 {"limited", MP_CSP_LEVELS_TV},
@@ -649,6 +651,9 @@ const m_option_t mplayer_opts[]={
     {"shuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
     {"{", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
     {"}", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
+
+    OPT_FLAG("resume-playback", position_resume, 0),
+    OPT_FLAG("save-position-on-quit", position_save_on_quit, 0),
 
     OPT_FLAG("ordered-chapters", ordered_chapters, 0),
     OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),

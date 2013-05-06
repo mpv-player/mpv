@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include <assert.h>
+#include <ctype.h>
 
 #ifdef PTW32_STATIC_LIB
 #include <pthread.h>
@@ -28,6 +29,7 @@
 
 #include <libavutil/intreadwrite.h>
 #include <libavutil/attributes.h>
+#include <libavutil/md5.h>
 
 #include <libavcodec/version.h>
 
@@ -614,6 +616,16 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     exit(rc);
 }
 
+static void mk_config_dir(char *subdir)
+{
+    void *tmp = talloc_new(NULL);
+    char *confdir = talloc_steal(tmp, mp_find_user_config_file(""));
+    if (subdir)
+        confdir = mp_path_join(tmp, bstr0(confdir), bstr0(subdir));
+    mkdir(confdir, 0777);
+    talloc_free(tmp);
+}
+
 #include "cfg-mplayer.h"
 
 static int cfg_include(struct m_config *conf, char *filename)
@@ -632,26 +644,21 @@ static bool parse_cfgfiles(struct MPContext *mpctx, m_config_t *conf)
         return true;
     if (!m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf") < 0)
         return false;
-    if ((conffile = mp_find_user_config_file("")) == NULL)
-        mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "Cannot find HOME directory.\n");
+    mk_config_dir(NULL);
+    if ((conffile = mp_find_user_config_file("config")) == NULL)
+        mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
+                "mp_find_user_config_file(\"config\") problem\n");
     else {
-        mkdir(conffile, 0777);
-        talloc_free(conffile);
-        if ((conffile = mp_find_user_config_file("config")) == NULL)
-            mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
-                    "mp_find_user_config_file(\"config\") problem\n");
-        else {
-            if ((conffile_fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY,
-                        0666)) != -1) {
-                mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
-                        "Creating config file: %s\n", conffile);
-                write(conffile_fd, DEF_CONFIG, sizeof(DEF_CONFIG) - 1);
-                close(conffile_fd);
-            }
-            if (m_config_parse_config_file(conf, conffile) < 0)
-                return false;
-            talloc_free(conffile);
+        if ((conffile_fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY,
+                    0666)) != -1) {
+            mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
+                    "Creating config file: %s\n", conffile);
+            write(conffile_fd, DEF_CONFIG, sizeof(DEF_CONFIG) - 1);
+            close(conffile_fd);
         }
+        if (m_config_parse_config_file(conf, conffile) < 0)
+            return false;
+        talloc_free(conffile);
     }
     return true;
 }
@@ -762,6 +769,121 @@ static void load_per_file_config(m_config_t *conf, const char * const file,
 
         talloc_free(confpath);
     }
+}
+
+static bool might_be_an_url(bstr f)
+{
+    return bstr_find0(f, "://") >= 0;
+}
+
+#define MP_WATCH_LATER_CONF "watch_later"
+
+static char *get_playback_resume_config_filename(const char *fname)
+{
+    char *res = NULL;
+    void *tmp = talloc_new(NULL);
+    const char *realpath = fname;
+    if (!might_be_an_url(bstr0(fname))) {
+        char *cwd = mp_getcwd(tmp);
+        if (!cwd)
+            goto exit;
+        realpath = mp_path_join(tmp, bstr0(cwd), bstr0(fname));
+    }
+    uint8_t md5[16];
+    av_md5_sum(md5, realpath, strlen(realpath));
+    char *conf = talloc_strdup(tmp, "");
+    for (int i = 0; i < 16; i++)
+        conf = talloc_asprintf_append(conf, "%02X", md5[i]);
+
+    conf = talloc_asprintf(tmp, "%s/%s", MP_WATCH_LATER_CONF, conf);
+
+    res = mp_find_user_config_file(conf);
+
+exit:
+    talloc_free(tmp);
+    return res;
+}
+
+static const char *backup_properties[] = {
+    "osd-level",
+    //"loop",
+    "speed",
+    "edition",
+    "pause",
+    //"volume",
+    //"mute",
+    "audio-delay",
+    //"balance",
+    "fullscreen",
+    "colormatrix",
+    "colormatrix-input-range",
+    "colormatrix-output-range",
+    "ontop",
+    "border",
+    "gamma",
+    "brightness",
+    "contrast",
+    "saturation",
+    "hue",
+    "panscan",
+    "aid",
+    "vid",
+    "sid",
+    "sub-delay",
+    "sub-pos",
+    //"sub-visibility",
+    "sub-scale",
+    "ass-use-margins",
+    "ass-vsfilter-aspect-compat",
+    "ass-style-override",
+    0
+};
+
+void mp_write_watch_later_conf(struct MPContext *mpctx)
+{
+    void *tmp = talloc_new(NULL);
+    char *filename = mpctx->filename;
+    if (!filename)
+        goto exit;
+
+    double pos = get_current_time(mpctx);
+    int percent = get_percent_pos(mpctx);
+    if (percent < 1 || percent > 99 || pos == MP_NOPTS_VALUE)
+        goto exit;
+
+    mk_config_dir(MP_WATCH_LATER_CONF);
+
+    char *conffile = get_playback_resume_config_filename(mpctx->filename);
+    talloc_steal(tmp, conffile);
+    if (!conffile)
+        goto exit;
+
+    FILE *file = fopen(conffile, "wb");
+    if (!file)
+        goto exit;
+    fprintf(file, "start=%f\n", pos);
+    for (int i = 0; backup_properties[i]; i++) {
+        const char *pname = backup_properties[i];
+        char *tmp = NULL;
+        int r = mp_property_do(pname, M_PROPERTY_GET_STRING, &tmp, mpctx);
+        if (r == M_PROPERTY_OK)
+            fprintf(file, "%s=%s\n", pname, tmp);
+        talloc_free(tmp);
+    }
+    fclose(file);
+
+exit:
+    talloc_free(tmp);
+}
+
+static void load_playback_resume(m_config_t *conf, const char *file)
+{
+    char *fname = get_playback_resume_config_filename(file);
+    if (fname) {
+        try_load_config(conf, fname);
+        unlink(fname);
+    }
+    talloc_free(fname);
 }
 
 static void load_per_file_options(m_config_t *conf,
@@ -3006,11 +3128,9 @@ double get_time_length(struct MPContext *mpctx)
     if (mpctx->timeline)
         return mpctx->timeline[mpctx->num_timeline_parts].start;
 
-    double get_time_ans;
-    // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
-    if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,
-                      (void *) &get_time_ans) > 0)
-        return get_time_ans;
+    double len = demuxer_get_time_length(demuxer);
+    if (len >= 0)
+        return len;
 
     struct sh_video *sh_video = mpctx->sh_video;
     struct sh_audio *sh_audio = mpctx->sh_audio;
@@ -3048,9 +3168,7 @@ double get_start_time(struct MPContext *mpctx)
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
         return 0;
-    double time = 0;
-    demux_control(demuxer, DEMUXER_CTRL_GET_START_TIME, &time);
-    return time;
+    return demuxer_get_start_time(demuxer);
 }
 
 // Return playback position in 0.0-1.0 ratio, or -1 if unknown.
@@ -3137,7 +3255,7 @@ double chapter_start_time(struct MPContext *mpctx, int chapter)
     if (mpctx->chapters)
         return mpctx->chapters[chapter].start;
     if (mpctx->master_demuxer)
-        return demuxer_chapter_time(mpctx->master_demuxer, chapter, NULL);
+        return demuxer_chapter_time(mpctx->master_demuxer, chapter);
     return -1;
 }
 
@@ -3604,7 +3722,8 @@ static void run_playloop(struct MPContext *mpctx)
     if (mpctx->backstep_active) {
         double current_pts = mpctx->last_vo_pts;
         mpctx->backstep_active = false;
-        if (mpctx->sh_video && current_pts != MP_NOPTS_VALUE) {
+        bool demuxer_ok = mpctx->demuxer && mpctx->demuxer->accurate_seek;
+        if (demuxer_ok && mpctx->sh_video && current_pts != MP_NOPTS_VALUE) {
             double seek_pts = find_previous_pts(mpctx, current_pts);
             if (seek_pts != MP_NOPTS_VALUE) {
                 queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, 1);
@@ -3631,9 +3750,11 @@ static void run_playloop(struct MPContext *mpctx)
                     // Note that current_pts should be part of the index,
                     // otherwise we can't find the previous frame, so set the
                     // seek target an arbitrary amount of time after it.
-                    mpctx->hrseek_pts = current_pts + 10.0;
-                    mpctx->hrseek_framedrop = false;
-                    mpctx->backstep_active = true;
+                    if (mpctx->hrseek_active) {
+                        mpctx->hrseek_pts = current_pts + 10.0;
+                        mpctx->hrseek_framedrop = false;
+                        mpctx->backstep_active = true;
+                    }
                 } else {
                     mpctx->backstep_active = true;
                 }
@@ -3994,7 +4115,9 @@ static void play_current_file(struct MPContext *mpctx)
         load_per_output_config(mpctx->mconfig, PROFILE_CFG_AO,
                                opts->audio_driver_list[0]);
 
-    assert(mpctx->playlist->current);
+    if (opts->position_resume)
+        load_playback_resume(mpctx->mconfig, mpctx->filename);
+
     load_per_file_options(mpctx->mconfig, mpctx->playlist->current->params,
                           mpctx->playlist->current->num_params);
 
@@ -4289,6 +4412,9 @@ goto_enable_cache: ;
 
 terminate_playback:  // don't jump here after ao/vo/getch initialization!
 
+    if (opts->position_save_on_quit && mpctx->stop_play != PT_RESTART)
+        mp_write_watch_later_conf(mpctx);
+
     if (mpctx->step_frames)
         opts->pause = 1;
 
@@ -4578,6 +4704,7 @@ int main(int argc, char *argv[])
 #endif
 
     mpctx->playlist->current = mpctx->playlist->first;
+
     play_files(mpctx);
 
     exit_player(mpctx, mpctx->stop_play == PT_QUIT ? EXIT_QUIT : EXIT_EOF,

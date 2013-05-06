@@ -42,7 +42,6 @@
 #define STREAMTYPE_DVD  3      // libdvdread
 #define STREAMTYPE_MEMORY  4   // read data from memory area
 #define STREAMTYPE_PLAYLIST 6  // FIXME!!! same as STREAMTYPE_FILE now
-#define STREAMTYPE_DS   8      // read from a demuxer stream
 #define STREAMTYPE_CDDA 10     // raw audio CD reader
 #define STREAMTYPE_SMB 11      // smb:// url, using libsmbclient (samba)
 #define STREAMTYPE_VCDBINCUE 12      // vcd directly from bin/cue files
@@ -102,6 +101,10 @@
 #define STREAM_CTRL_GET_CACHE_FILL 16
 #define STREAM_CTRL_GET_CACHE_IDLE 17
 #define STREAM_CTRL_RECONNECT 18
+// DVD/Bluray, signal general support for GET_CURRENT_TIME etc.
+#define STREAM_CTRL_MANAGES_TIMELINE 19
+#define STREAM_CTRL_GET_START_TIME 20
+#define STREAM_CTRL_GET_CHAPTER_TIME 21
 
 struct stream_lang_req {
     int type;     // STREAM_AUDIO, STREAM_SUB
@@ -393,7 +396,6 @@ stream_t *open_stream(const char *filename, struct MPOpts *options,
                       int *file_format);
 stream_t *open_output_stream(const char *filename, struct MPOpts *options);
 struct demux_stream;
-struct stream *new_ds_stream(struct demux_stream *ds);
 
 /// Set the callback to be used by libstream to check for user
 /// interruption during long blocking operations (cache filling, etc).
@@ -407,6 +409,8 @@ int stream_check_interrupt(int time);
 int stream_read_internal(stream_t *s, void *buf, int len);
 /// Internal seek function bypassing the stream buffer
 int stream_seek_internal(stream_t *s, int64_t newpos);
+
+bool stream_manages_timeline(stream_t *s);
 
 extern int dvd_title;
 extern int dvd_angle;

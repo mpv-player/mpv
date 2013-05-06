@@ -40,6 +40,8 @@ char * const mp_csp_names[MP_CSP_COUNT] = {
     "BT.709 (HD)",
     "SMPTE-240M",
     "RGB",
+    "XYZ",
+    "YCgCo",
 };
 
 char * const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
@@ -58,6 +60,7 @@ enum mp_csp avcol_spc_to_mp_csp(enum AVColorSpace colorspace)
 	case AVCOL_SPC_SMPTE170M: return MP_CSP_BT_601;
         case AVCOL_SPC_SMPTE240M: return MP_CSP_SMPTE_240M;
         case AVCOL_SPC_RGB:       return MP_CSP_RGB;
+        case AVCOL_SPC_YCOCG:     return MP_CSP_YCGCO;
         default:                  return MP_CSP_AUTO;
     }
 }
@@ -78,6 +81,7 @@ enum AVColorSpace mp_csp_to_avcol_spc(enum mp_csp colorspace)
         case MP_CSP_BT_601:     return AVCOL_SPC_BT470BG;
         case MP_CSP_SMPTE_240M: return AVCOL_SPC_SMPTE240M;
         case MP_CSP_RGB:        return AVCOL_SPC_RGB;
+        case MP_CSP_YCGCO:      return AVCOL_SPC_YCOCG;
         default:                return AVCOL_SPC_UNSPECIFIED;
     }
 }
@@ -165,10 +169,39 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
     int format = params->colorspace.format;
     if (format <= MP_CSP_AUTO || format >= MP_CSP_COUNT)
         format = MP_CSP_BT_601;
+    int levels_in = params->colorspace.levels_in;
+    if (levels_in <= MP_CSP_LEVELS_AUTO || levels_in >= MP_CSP_LEVELS_COUNT)
+        levels_in = MP_CSP_LEVELS_TV;
+
     switch (format) {
     case MP_CSP_BT_601:     luma_coeffs(m, 0.299,  0.587,  0.114 ); break;
     case MP_CSP_BT_709:     luma_coeffs(m, 0.2126, 0.7152, 0.0722); break;
     case MP_CSP_SMPTE_240M: luma_coeffs(m, 0.2122, 0.7013, 0.0865); break;
+    case MP_CSP_RGB: {
+        static const float ident[3][4] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+        memcpy(m, ident, sizeof(ident));
+        levels_in = -1;
+        break;
+    }
+    case MP_CSP_XYZ: {
+        static const float xyz_to_rgb[3][4] = {
+            {3.2404542,  -1.5371385, -0.4985314},
+            {-0.9692660,  1.8760108,  0.0415560},
+            {0.0556434,  -0.2040259,  1.0572252},
+        };
+        memcpy(m, xyz_to_rgb, sizeof(xyz_to_rgb));
+        levels_in = -1;
+        break;
+    }
+    case MP_CSP_YCGCO: {
+        static const float ycgco_to_rgb[3][4] = {
+            {1,  -1,  1},
+            {1,   1,  0},
+            {1,  -1, -1},
+        };
+        memcpy(m, ycgco_to_rgb, sizeof(ycgco_to_rgb));
+        break;
+    }
     default:
         abort();
     };
@@ -183,9 +216,6 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
         m[i][COL_V] = huesin * u + huecos * m[i][COL_V];
     }
 
-    int levels_in = params->colorspace.levels_in;
-    if (levels_in <= MP_CSP_LEVELS_AUTO || levels_in >= MP_CSP_LEVELS_COUNT)
-        levels_in = MP_CSP_LEVELS_TV;
     assert(params->input_bits >= 8);
     assert(params->texture_bits >= params->input_bits);
     double s = (1 << params->input_bits-8) / ((1<<params->texture_bits)-1.);
@@ -193,10 +223,12 @@ void mp_get_yuv2rgb_coeffs(struct mp_csp_params *params, float m[3][4])
     struct yuvlevels { double ymin, ymax, cmin, cmid; }
         yuvlim =  { 16*s, 235*s, 16*s, 128*s },
         yuvfull = {  0*s, 255*s,  1*s, 128*s },  // '1' for symmetry around 128
+        anyfull = {  0*s, 255*s, -255*s/2, 0 },
         yuvlev;
     switch (levels_in) {
     case MP_CSP_LEVELS_TV: yuvlev = yuvlim; break;
     case MP_CSP_LEVELS_PC: yuvlev = yuvfull; break;
+    case -1: yuvlev = anyfull; break;
     default:
         abort();
     }

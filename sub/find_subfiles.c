@@ -69,7 +69,6 @@ static struct bstr guess_lang_from_filename(struct bstr name)
 
 struct sub_list {
     struct subfn subs[MAX_SUBTITLE_FILES];
-    int sid;
     void *ctx;
 };
 

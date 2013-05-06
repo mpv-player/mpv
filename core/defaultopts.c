@@ -53,6 +53,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .ordered_chapters = 1,
         .chapter_merge_threshold = 100,
         .load_config = 1,
+        .position_resume = 1,
         .stream_cache_min_percent = 20.0,
         .stream_cache_seek_min_percent = 50.0,
         .stream_cache_pause = 10.0,
@@ -86,6 +87,8 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .ass_vsfilter_aspect_compat = 1,
         .ass_style_override = 1,
         .use_embedded_fonts = 1,
+
+        .hwdec_codecs = "all",
 
         .lavc_param = {
             .workaround_bugs = 1, // autodetect

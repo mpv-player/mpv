@@ -62,7 +62,7 @@ static int config(struct vf_instance *vf,
 	unsigned int flags, unsigned int outfmt){
 
 	uninit(vf);
-        vf->priv->Line = malloc(width*sizeof(int));
+        vf->priv->Line = malloc(width*sizeof(unsigned int));
 
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }

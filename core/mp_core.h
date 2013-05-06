@@ -323,6 +323,7 @@ struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction);
 int mp_get_cache_percent(struct MPContext *mpctx);
+void mp_write_watch_later_conf(struct MPContext *mpctx);
 
 // timeline/tl_matroska.c
 void build_ordered_chapter_timeline(struct MPContext *mpctx);
