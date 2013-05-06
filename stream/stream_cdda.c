@@ -312,7 +312,7 @@ static int control(stream_t *stream, int cmd, void *arg)
             // returning error.
             return STREAM_OK;
         }
-        seek_sector = track <= 0 ? p->start_sector
+        seek_sector = track == 0 ? p->start_sector
                       : p->cd->disc_toc[track].dwStartSector;
         r = seek(stream, seek_sector * CDIO_CD_FRAMESIZE_RAW);
         if (r)

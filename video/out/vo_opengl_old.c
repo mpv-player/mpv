@@ -565,7 +565,7 @@ static void replace_var_char(char **text, const char *name, char replace)
 // Append template to *text. Possibly initialize *text if it's NULL.
 static void append_template(char **text, const char* template)
 {
-    if (!text)
+    if (!*text)
         *text = talloc_strdup(NULL, template);
     else
         *text = talloc_strdup_append(*text, template);

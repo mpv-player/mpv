@@ -1824,6 +1824,8 @@ static int demux_mkv_read_block_lacing(bstr *buffer, int *laces,
             }
             lace_size[i] = buffer->len - total;
             break;
+
+        default: abort();
         }
     }
 

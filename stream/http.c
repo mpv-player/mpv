@@ -187,9 +187,9 @@ static int scast_streaming_start(stream_t *stream) {
   int metaint;
   scast_data_t *scast_data;
   HTTP_header_t *http_hdr = stream->streaming_ctrl->data;
-  int is_ultravox = strcasecmp(stream->streaming_ctrl->url->protocol, "unsv") == 0;
   if (!stream || stream->fd < 0 || !http_hdr)
     return -1;
+  int is_ultravox = strcasecmp(stream->streaming_ctrl->url->protocol, "unsv") == 0;
   if (is_ultravox)
     metaint = 0;
   else {

@@ -1511,7 +1511,7 @@ if ((suboverlap_enabled == 2) ||
 	                               // from a block of sub_to_add+1 subs
 	placeholder = malloc(sizeof(int *) * counter);
 	for (i = 0; i < counter; ++i) {
-	    placeholder[i] = malloc(sizeof(int) * lines_to_add);
+	    placeholder[i] = malloc(sizeof(int) * lines_to_add + 1);
 	    for (j = 0; j < lines_to_add; ++j) {
 		placeholder[i][j] = -1;
 	    }

@@ -112,7 +112,7 @@ static int parse_line(char **ptr, char *cols[6])
 /* Loads a file into RAM */
 static char *load_file(const char *filename, int64_t * length)
 {
-    int fd = -1;
+    int fd;
     char *buffer = NULL;
 
     mp_msg(MSGT_NETWORK, MSGL_V, "Loading cookie file: %s\n", filename);

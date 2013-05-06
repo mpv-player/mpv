@@ -325,7 +325,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
 	fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
 {
-  int res, hi_lo = 0, dfd;
+  int hi_lo = 0, dfd;
   struct dvb_frontend_parameters feparams;
   struct dvb_frontend_info fe_info;
 
@@ -334,7 +334,7 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
 
 
   memset(&feparams, 0, sizeof(feparams));
-  if ( (res = ioctl(fd_frontend,FE_GET_INFO, &fe_info) < 0))
+  if ( ioctl(fd_frontend,FE_GET_INFO, &fe_info) < 0)
   {
         mp_msg(MSGT_DEMUX, MSGL_FATAL, "FE_GET_INFO FAILED\n");
         return -1;
