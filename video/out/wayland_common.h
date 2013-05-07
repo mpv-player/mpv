@@ -35,6 +35,8 @@ enum vo_wayland_window_type {
 };
 
 struct vo;
+struct vo_wayland_state;
+
 
 struct vo_wayland_output {
     uint32_t id; /* unique name */
@@ -81,17 +83,23 @@ struct vo_wayland_window {
     int32_t p_width;
     int32_t p_height;
 
-    int32_t pending_width;
-    int32_t pending_height;
-    uint32_t edges;
-    int resize_needed;
-
     struct wl_surface *surface;
     struct wl_shell_surface *shell_surface;
 
-    int events; /* mplayer events */
+    int events; /* mplayer events (VO_EVENT_RESIZE) */
 
     enum vo_wayland_window_type type; /* is fullscreen */
+
+    /* Because the egl windows have a special resize windw function we have to
+     * register it first before doing any resizing.
+     * This makes us independet from the output driver */
+    void (*resize_func) (struct vo_wayland_state *wl,
+                         uint32_t edges,
+                         int32_t width,
+                         int32_t height,
+                         void *user_data);
+
+    void *resize_func_data;
 };
 
 struct vo_wayland_input {

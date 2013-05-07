@@ -59,6 +59,10 @@ static int lookupkey(int key);
 
 static void hide_cursor(struct vo_wayland_state * wl);
 static void show_cursor(struct vo_wayland_state * wl);
+static void resize_window(struct vo_wayland_state *wl,
+                          uint32_t edges,
+                          int32_t width,
+                          int32_t height);
 
 
 /*** wayland interface ***/
@@ -71,16 +75,6 @@ static void ssurface_handle_ping(void *data,
     wl_shell_surface_pong(shell_surface, serial);
 }
 
-static void ssurface_schedule_resize(struct vo_wayland_window *window,
-                                     int32_t width,
-                                     int32_t height)
-{
-    window->pending_width = width;
-    window->pending_height = height;
-    window->resize_needed = 1;
-    window->events |= VO_EVENT_RESIZE;
-}
-
 static void ssurface_handle_configure(void *data,
                                       struct wl_shell_surface *shell_surface,
                                       uint32_t edges,
@@ -88,9 +82,7 @@ static void ssurface_handle_configure(void *data,
                                       int32_t height)
 {
     struct vo_wayland_state *wl = data;
-
-    wl->window->edges = edges;
-    ssurface_schedule_resize(wl->window, width, height);
+    resize_window(wl, edges, width, height);
 }
 
 static void ssurface_handle_popup_done(void *data,
@@ -560,6 +552,21 @@ static void show_cursor (struct vo_wayland_state *wl)
     display->cursor.mouse_waiting_hide = true;
 }
 
+static void resize_window(struct vo_wayland_state *wl,
+                          uint32_t edges,
+                          int32_t width,
+                          int32_t height)
+{
+    struct vo_wayland_window *w = wl->window;
+    if (w->resize_func && w->resize_func_data) {
+        w->resize_func(wl, edges, width, height, w->resize_func_data);
+        w->events |= VO_EVENT_RESIZE;
+    }
+    else
+        mp_msg(MSGT_VO, MSGL_WARN, "[waylnad] No resizing possible!\n");
+}
+
+
 static bool create_display (struct vo_wayland_state *wl)
 {
     struct vo_wayland_display *d = wl->display;
@@ -742,8 +749,7 @@ void vo_wayland_fullscreen (struct vo *vo)
 
     else {
         wl_shell_surface_set_toplevel(wl->window->shell_surface);
-        ssurface_schedule_resize(wl->window, wl->window->p_width,
-                                             wl->window->p_height);
+        resize_window(wl, 0, wl->window->p_width, wl->window->p_height);
         wl->window->type = TYPE_TOPLEVEL;
         vo->opts->fs = false;
 
