@@ -741,7 +741,7 @@ void create_menu()
     if (_vo->opts->fs)
         vo_cocoa_display_cursor(_vo, 1);
 
-    NSView view = self.contentView;
+    NSView *view = self.contentView;
     NSPoint loc = [view convertPoint:[theEvent locationInWindow] fromView:nil];
     NSRect bounds = [view bounds];
 
