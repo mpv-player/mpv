@@ -740,6 +740,16 @@ void create_menu()
 {
     if (_vo->opts->fs)
         vo_cocoa_display_cursor(_vo, 1);
+
+    NSView view = self.contentView;
+    NSPoint loc = [view convertPoint:[theEvent locationInWindow] fromView:nil];
+    NSRect bounds = [view bounds];
+
+    int x = loc.x;
+    int y = - loc.y + bounds.size.height; // convert to x11-like coord system
+    if (CGRectContainsPoint(bounds, NSMakePoint(x, y))) {
+        vo_mouse_movement(_vo, x, y);
+    }
 }
 
 - (void)mouseDragged:(NSEvent *)theEvent
