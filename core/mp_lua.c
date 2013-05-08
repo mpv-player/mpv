@@ -136,6 +136,44 @@ void mp_lua_update(struct MPContext *mpctx)
         report_error(L);
 }
 
+static int run_mouse_click(lua_State *L)
+{
+    bool *state = lua_touserdata(L, -1);
+    lua_getglobal(L, "mp_mouse_click");
+    if (lua_isnil(L, -1))
+        return 0;
+    lua_pushboolean(L, *state);
+    lua_call(L, 1, 0);
+    return 0;
+}
+
+void mp_lua_mouse_click(struct MPContext *mpctx, bool down)
+{
+    if (!mpctx->lua_ctx)
+        return;
+    lua_State *L = mpctx->lua_ctx->state;
+    if (lua_cpcall(L, run_mouse_click, &down) != 0)
+        report_error(L);
+}
+
+static int run_mouse_move(lua_State *L)
+{
+    lua_getglobal(L, "mp_mouse_move");
+    if (lua_isnil(L, -1))
+        return 0;
+    lua_call(L, 0, 0);
+    return 0;
+}
+
+void mp_lua_mouse_move(struct MPContext *mpctx, int x, int y)
+{
+    if (!mpctx->lua_ctx)
+        return;
+    lua_State *L = mpctx->lua_ctx->state;
+    if (lua_cpcall(L, run_mouse_move, NULL) != 0)
+        report_error(L);
+}
+
 static int send_command(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);

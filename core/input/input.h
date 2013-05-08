@@ -84,6 +84,10 @@ enum mp_command_type {
     /// Video output commands
     MP_CMD_VO_CMDLINE,
 
+    /// Internal for mouse handling
+    MP_CMD_MOUSE_CLICK,
+    MP_CMD_MOUSE_MOVE,
+
     MP_CMD_LUA,
 };
 
@@ -137,6 +141,7 @@ typedef struct mp_cmd {
     int pausing;
     enum mp_on_osd on_osd;
     bstr original;
+    bool key_up_follows;
     bool mouse_move;
     int mouse_x, mouse_y;
     struct mp_cmd *queue_next;

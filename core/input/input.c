@@ -204,6 +204,9 @@ static const mp_cmd_t mp_cmds[] = {
 
   { MP_CMD_LUA, "lua", { ARG_STRING } },
 
+  { MP_CMD_MOUSE_CLICK, "mouse_click", },
+  { MP_CMD_MOUSE_MOVE, "mouse_move", },
+
   {0}
 };
 
@@ -462,7 +465,6 @@ struct cmd_queue {
 struct input_ctx {
     // Autorepeat stuff
     short ar_state;
-    mp_cmd_t *ar_cmd;
     unsigned int last_ar;
     // Autorepeat config
     unsigned int ar_delay;
@@ -475,6 +477,7 @@ struct input_ctx {
     int key_down[MP_MAX_KEY_DOWN];
     unsigned int num_key_down;
     unsigned int last_key_down;
+    struct mp_cmd *current_down_cmd;
 
     int mouse_x, mouse_y;
 
@@ -1051,6 +1054,7 @@ static void append_bind_info(char **pmsg, struct cmd_bind *bind)
     } else {
         msg = talloc_asprintf_append(msg, " in %s", bind->location);
     }
+    talloc_free(cmd);
     *pmsg = msg;
 }
 
@@ -1077,6 +1081,8 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
 
     if (!count)
         msg = talloc_asprintf_append(msg, "(nothing)");
+
+    mp_msg(MSGT_INPUT, MSGL_V, "[input] %s\n", msg);
 
     mp_cmd_t *res = mp_input_parse_cmd(bstr0("show_text \"\""), "");
     res->args[0].v.s = talloc_steal(res, msg);
@@ -1192,6 +1198,18 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
     return ret;
 }
 
+static void release_down_cmd(struct input_ctx *ictx)
+{
+    if (ictx->current_down_cmd && ictx->current_down_cmd->key_up_follows) {
+        ictx->current_down_cmd->key_up_follows = false;
+        queue_add(&ictx->key_cmd_queue, ictx->current_down_cmd, false);
+    } else {
+        talloc_free(ictx->current_down_cmd);
+    }
+    ictx->current_down_cmd = NULL;
+    ictx->last_key_down = 0;
+    ictx->ar_state = -1;
+}
 
 static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
 {
@@ -1221,14 +1239,21 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         }
         if (j != ictx->num_key_down)
             return NULL;
+        release_down_cmd(ictx);
         ictx->key_down[ictx->num_key_down] = code;
         ictx->num_key_down++;
         ictx->last_key_down = GetTimer();
         ictx->ar_state = 0;
-        ret = NULL;
-        if (!(code & MP_NO_REPEAT_KEY))
-            ret = get_cmd_from_keys(ictx, ictx->num_key_down, ictx->key_down);
-        return ret;
+        ictx->current_down_cmd = get_cmd_from_keys(ictx, ictx->num_key_down,
+                                                   ictx->key_down);
+        if (ictx->current_down_cmd && (code & MP_KEY_EMIT_ON_UP)) {
+            ictx->current_down_cmd->key_up_follows = true;
+        }
+        // Hardcode that the command handler is aware of mouse down/up, instead
+        // of running the command on both of these events.
+        if (ictx->current_down_cmd->id == MP_CMD_MOUSE_CLICK)
+            return mp_cmd_clone(ictx->current_down_cmd);
+        return NULL;
     }
     // button released or press of key with no separate down/up events
     for (j = 0; j < ictx->num_key_down; j++) {
@@ -1244,7 +1269,7 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         j = ictx->num_key_down - 1;
         ictx->key_down[j] = code;
     }
-    bool emit_key = ictx->last_key_down && (code & MP_NO_REPEAT_KEY);
+    bool emit_key = ictx->last_key_down;
     if (j == ictx->num_key_down) {  // was not already down; add temporarily
         if (ictx->num_key_down > MP_MAX_KEY_DOWN) {
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many key down events "
@@ -1255,6 +1280,9 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         ictx->num_key_down++;
         emit_key = true;
     }
+    // This is a key up event, but the key up command is added by
+    // release_down_cmd(), not by this code.
+    emit_key &= !(code & MP_KEY_EMIT_ON_UP);
     // Interpret only maximal point of multibutton event
     ret = NULL;
     if (emit_key)
@@ -1268,10 +1296,7 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         memmove(&ictx->key_down[j], &ictx->key_down[j + 1],
                 (ictx->num_key_down - (j + 1)) * sizeof(int));
     ictx->num_key_down--;
-    ictx->last_key_down = 0;
-    ictx->ar_state = -1;
-    mp_cmd_free(ictx->ar_cmd);
-    ictx->ar_cmd = NULL;
+    release_down_cmd(ictx);
     return ret;
 }
 
@@ -1287,21 +1312,18 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
         if (ictx->ar_state == 0
             && (t - ictx->last_key_down) >= ictx->ar_delay * 1000)
         {
-            talloc_free(ictx->ar_cmd);
-            ictx->ar_cmd = get_cmd_from_keys(ictx, ictx->num_key_down,
-                                             ictx->key_down);
-            if (!ictx->ar_cmd) {
+            if (!ictx->current_down_cmd) {
                 ictx->ar_state = -1;
                 return NULL;
             }
             ictx->ar_state = 1;
             ictx->last_ar = ictx->last_key_down + ictx->ar_delay * 1000;
-            return mp_cmd_clone(ictx->ar_cmd);
+            return mp_cmd_clone(ictx->current_down_cmd);
             // Then send rate / sec event
         } else if (ictx->ar_state == 1
                    && (t - ictx->last_ar) >= 1000000 / ictx->ar_rate) {
             ictx->last_ar += 1000000 / ictx->ar_rate;
-            return mp_cmd_clone(ictx->ar_cmd);
+            return mp_cmd_clone(ictx->current_down_cmd);
         }
     }
     return NULL;
@@ -1326,7 +1348,7 @@ void mp_input_feed_key(struct input_ctx *ictx, int code)
         mp_msg(MSGT_INPUT, MSGL_V, "input: release all\n");
         memset(ictx->key_down, 0, sizeof(ictx->key_down));
         ictx->num_key_down = 0;
-        ictx->last_key_down = 0;
+        release_down_cmd(ictx);
         return;
     }
     mp_msg(MSGT_INPUT, MSGL_V, "input: key code=%#x\n", code);
@@ -1338,7 +1360,8 @@ void mp_input_feed_key(struct input_ctx *ictx, int code)
 
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
 {
-    struct mp_cmd *cmd = interpret_key(ictx, MP_MOUSE_MOVE);
+    //struct mp_cmd *cmd = interpret_key(ictx, MP_MOUSE_MOVE);
+    struct mp_cmd *cmd = mp_input_parse_cmd(bstr0("mouse_move"), "<input>");
     if (!cmd)
         return;
     cmd->mouse_move = true;
@@ -1546,6 +1569,9 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
 {
     mp_cmd_t *ret;
     int i;
+
+    if (!cmd)
+        return NULL;
 
     ret = talloc_memdup(NULL, cmd, sizeof(mp_cmd_t));
     ret->name = talloc_strdup(ret, cmd->name);
@@ -1870,7 +1896,7 @@ void mp_input_uninit(struct input_ctx *ictx)
     }
     clear_queue(&ictx->key_cmd_queue);
     clear_queue(&ictx->control_cmd_queue);
-    talloc_free(ictx->ar_cmd);
+    talloc_free(ictx->current_down_cmd);
     talloc_free(ictx);
 }
 

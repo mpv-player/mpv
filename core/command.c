@@ -2299,6 +2299,22 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         }
         break;
 
+    case MP_CMD_MOUSE_CLICK:
+        if (mpctx->lua_ctx) {
+#ifdef CONFIG_LUA
+            mp_lua_mouse_click(mpctx, cmd->key_up_follows);
+#endif
+        }
+        break;
+
+    case MP_CMD_MOUSE_MOVE:
+        if (mpctx->lua_ctx) {
+#ifdef CONFIG_LUA
+            mp_lua_mouse_move(mpctx, cmd->mouse_x, cmd->mouse_y);
+#endif
+        }
+        break;
+
     default:
         mp_msg(MSGT_CPLAYER, MSGL_V,
                "Received unknown cmd %s\n", cmd->name);

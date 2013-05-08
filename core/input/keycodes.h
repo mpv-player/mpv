@@ -126,7 +126,7 @@
 
 
 // Mouse events from VOs
-#define MP_MOUSE_BASE ((MP_KEY_BASE+0xA0)|MP_NO_REPEAT_KEY)
+#define MP_MOUSE_BASE ((MP_KEY_BASE+0xA0)|MP_NO_REPEAT_KEY|MP_KEY_EMIT_ON_UP)
 #define MP_MOUSE_BTN0 (MP_MOUSE_BASE+0)
 #define MP_MOUSE_BTN1 (MP_MOUSE_BASE+1)
 #define MP_MOUSE_BTN2 (MP_MOUSE_BASE+2)
@@ -187,13 +187,19 @@
 #define MP_KEY_MODIFIER_MASK (MP_KEY_MODIFIER_SHIFT | MP_KEY_MODIFIER_CTRL | \
                               MP_KEY_MODIFIER_ALT | MP_KEY_MODIFIER_META)
 
-// Use this when the key shouldn't be auto-repeated (like mouse buttons)
-// This is not a modifier, but is part of the keycode itself.
-#define MP_NO_REPEAT_KEY (1<<28)
-
 // Flag for key events. Multiple down events are idempotent. Release keys by
 // sending the key code without this flag, or by sending MP_INPUT_RELEASE_ALL
 // as key code.
-#define MP_KEY_STATE_DOWN (1<<29)
+#define MP_KEY_STATE_DOWN      (1<<26)
+
+// The following flags are not modifiers, but are part of the keycode itself.
+
+// Emit a command even on key-up (normally key-up is ignored). The command
+// handling code has to ignore unwanted commands specifically.
+#define MP_KEY_EMIT_ON_UP      (1<<27)
+
+// Use this when the key shouldn't be auto-repeated (like mouse buttons)
+// Also means both key-down key-up events produce emit bound commands.
+#define MP_NO_REPEAT_KEY       (1<<28)
 
 #endif /* MPLAYER_KEYCODES_H */
