@@ -1246,14 +1246,9 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         ictx->ar_state = 0;
         ictx->current_down_cmd = get_cmd_from_keys(ictx, ictx->num_key_down,
                                                    ictx->key_down);
-        if (ictx->current_down_cmd && (code & MP_KEY_EMIT_ON_UP)) {
+        if (ictx->current_down_cmd && (code & MP_KEY_EMIT_ON_UP))
             ictx->current_down_cmd->key_up_follows = true;
-        }
-        // Hardcode that the command handler is aware of mouse down/up, instead
-        // of running the command on both of these events.
-        if (ictx->current_down_cmd->id == MP_CMD_MOUSE_CLICK)
-            return mp_cmd_clone(ictx->current_down_cmd);
-        return NULL;
+        return mp_cmd_clone(ictx->current_down_cmd);
     }
     // button released or press of key with no separate down/up events
     for (j = 0; j < ictx->num_key_down; j++) {
