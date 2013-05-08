@@ -663,7 +663,6 @@ void create_menu()
         [self setFrame:s->fsscreen_frame display:YES animate:NO];
         opts->fs = true;
         vo_cocoa_display_cursor(_vo, 0);
-        [self setMovableByWindowBackground: NO];
     } else {
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
         [self setHasShadow:YES];
@@ -677,7 +676,6 @@ void create_menu()
         [self setContentAspectRatio:s->current_video_size];
         opts->fs = false;
         vo_cocoa_display_cursor(_vo, 1);
-        [self setMovableByWindowBackground: YES];
     }
 }
 
@@ -693,17 +691,6 @@ void create_menu()
     // otherwise we are in trouble if the
     // MP_KEY_CLOSE_WIN handler is disabled
     return NO;
-}
-
-- (BOOL)isMovableByWindowBackground
-{
-    // this is only valid as a starting value. it will be rewritten in the
-    // -fullscreen method.
-    if (_vo) {
-        return !_vo->opts->fs;
-    } else {
-        return NO;
-    }
 }
 
 - (void)handleQuitEvent:(NSAppleEventDescriptor*)e
