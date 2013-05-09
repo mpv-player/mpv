@@ -76,7 +76,6 @@ struct af_resample {
     // At least libswresample keeps a pointer around for this:
     int reorder_in[MP_NUM_CHANNELS];
     int reorder_out[MP_NUM_CHANNELS];
-    bool need_reorder_out;
     uint8_t *reorder_buffer;
 };
 
@@ -174,9 +173,18 @@ static int control(struct af_instance *af, int cmd, void *arg)
             s->ctx.linear      = s->opts.linear;
             s->ctx.cutoff      = s->opts.cutoff;
 
-            // unchecked: don't take channel reordering into account
-            uint64_t in_ch_layout = mp_chmap_to_lavc_unchecked(&in->channels);
-            uint64_t out_ch_layout = mp_chmap_to_lavc_unchecked(&out->channels);
+            struct mp_chmap map_in = in->channels;
+            struct mp_chmap map_out = out->channels;
+
+            // Try not to do any remixing if at least one is "unknown".
+            if (mp_chmap_is_unknown(&map_in) || mp_chmap_is_unknown(&map_out)) {
+                mp_chmap_set_unknown(&map_in, map_in.num);
+                mp_chmap_set_unknown(&map_out, map_out.num);
+            }
+
+            // unchecked: don't take any channel reordering into account
+            uint64_t in_ch_layout = mp_chmap_to_lavc_unchecked(&map_in);
+            uint64_t out_ch_layout = mp_chmap_to_lavc_unchecked(&map_out);
 
             ctx_opt_set_int("in_channel_layout",  in_ch_layout);
             ctx_opt_set_int("out_channel_layout", out_ch_layout);
@@ -195,12 +203,11 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
             struct mp_chmap in_lavc;
             mp_chmap_from_lavc(&in_lavc, in_ch_layout);
-            mp_chmap_get_reorder(s->reorder_in, &in->channels, &in_lavc);
+            mp_chmap_get_reorder(s->reorder_in, &map_in, &in_lavc);
 
             struct mp_chmap out_lavc;
             mp_chmap_from_lavc(&out_lavc, out_ch_layout);
-            mp_chmap_get_reorder(s->reorder_out, &out_lavc, &out->channels);
-            s->need_reorder_out = !mp_chmap_equals(&out_lavc, &out->channels);
+            mp_chmap_get_reorder(s->reorder_out, &out_lavc, &map_out);
 
             // Same configuration; we just reorder.
             av_opt_set_int(s->avrctx_out, "in_channel_layout", out_ch_layout, 0);
@@ -285,6 +292,15 @@ static void uninit(struct af_instance *af)
     }
 }
 
+static bool needs_reorder(int *reorder, int num_ch)
+{
+    for (int n = 0; n < num_ch; n++) {
+        if (reorder[n] != n)
+            return true;
+    }
+    return false;
+}
+
 static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 {
     struct af_resample *s = af->setup;
@@ -312,7 +328,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 
     *data = *out;
 
-    if (s->need_reorder_out) {
+    if (needs_reorder(s->reorder_out, out->nch)) {
         if (talloc_get_size(s->reorder_buffer) < out_size)
             s->reorder_buffer = talloc_realloc_size(s, s->reorder_buffer, out_size);
         data->audio = s->reorder_buffer;
