@@ -357,25 +357,24 @@
 --cdrom-device=<path>
     Specify the CD-ROM device (default: ``/dev/cdrom``).
 
---channels=<number>
+--channels=<number|layout>
     Request the number of playback channels (default: 2). mpv asks the
     decoder to decode the audio into as many channels as specified. Then it is
     up to the decoder to fulfill the requirement. This is usually only
-    important when playing videos with AC-3 audio (like DVDs). In that case
-    liba52 does the decoding by default and correctly downmixes the audio into
-    the requested number of channels. To directly control the number of output
-    channels independently of how many channels are decoded, use the channels
-    filter (``--af=channels``).
+    important when playing videos with AC-3, AAC or DTS audio. In that case
+    libavcodec downmixes the audio into the requested number of channels if
+    possible.
 
     *NOTE*: This option is honored by codecs (AC-3 only), filters (surround)
     and audio output drivers (OSS at least).
 
-    Available options are:
+    The ``--channels`` option either takes a channel number or an explicit
+    channel layout. Channel numbers refer to default layouts, e.g. 2 channels
+    refer to stereo, 6 refers to 5.1.
 
-    :2: stereo
-    :4: surround
-    :6: full 5.1
-    :8: full 7.1
+    See ``--channels=help`` output for defined default layouts. This also
+    lists speaker names, which can be used to express arbitrary channel
+    layouts (e.g. ``fl-fr-lfe`` is 2.1).
 
 --chapter=<start[-end]>
     Specify which chapter to start playing at. Optionally specify which
