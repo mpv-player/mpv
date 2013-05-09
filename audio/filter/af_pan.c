@@ -34,6 +34,15 @@ typedef struct af_pan_s
   float level[AF_NCH][AF_NCH];	// Gain level for each channel
 }af_pan_t;
 
+static void set_channels(struct mp_audio *mpa, int num)
+{
+    struct mp_chmap map;
+    // "unknown" channel layouts make it easier to pass through audio data,
+    // without triggering remixing.
+    mp_chmap_set_unknown(&map, num);
+    mp_audio_set_channels(mpa, &map);
+}
+
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
@@ -46,7 +55,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     af->data->rate   = ((struct mp_audio*)arg)->rate;
     mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
-    mp_audio_set_num_channels(af->data, s->nch ? s->nch: ((struct mp_audio*)arg)->nch);
+    set_channels(af->data, s->nch ? s->nch: ((struct mp_audio*)arg)->nch);
     af->mul          = (double)af->data->nch / ((struct mp_audio*)arg)->nch;
 
     if((af->data->format != ((struct mp_audio*)arg)->format) ||
@@ -176,7 +185,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
   // Set output data
   c->audio = l->audio;
   c->len   = c->len / c->nch * l->nch;
-  mp_audio_set_num_channels(c, l->nch);
+  set_channels(c, l->nch);
 
   return c;
 }
