@@ -29,6 +29,7 @@ extern struct af_info af_info_dummy;
 extern struct af_info af_info_delay;
 extern struct af_info af_info_channels;
 extern struct af_info af_info_format;
+extern struct af_info af_info_force;
 extern struct af_info af_info_volume;
 extern struct af_info af_info_equalizer;
 extern struct af_info af_info_pan;
@@ -52,6 +53,7 @@ static struct af_info* filter_list[] = {
     &af_info_dummy,
     &af_info_delay,
     &af_info_channels,
+    &af_info_force,
     &af_info_volume,
     &af_info_equalizer,
     &af_info_pan,

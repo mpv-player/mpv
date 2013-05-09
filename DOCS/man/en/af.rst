@@ -210,6 +210,34 @@ channels=nch[:nr:from1:to1:from2:to2:from3:to3:...]
         Would change the number of channels to 6 and set up 4 routes that copy
         channel 0 to channels 0 to 3. Channel 4 and 5 will contain silence.
 
+force=in-format:in-srate:in-channels:out-format:out-srate:out-channels
+    Force a specific audio format/configuration without actually changing the
+    audio data. Keep in mind that the filter system might auto-insert actual
+    conversion filters before or after this filter if needed.
+
+    All parameters are optional. The ``in-`` variants restrict what the filter
+    accepts as input. The ``out-`` variants change the audio format, without
+    actually doing a conversion. The data will be 'reinterpreted' by the
+    filters or audio outputs following this filter.
+
+    <in-format>
+        Force conversion to this format. See ``format`` filter for valid audio
+        format values.
+
+    <in-srate>
+        Force conversion to a specific sample rate. The rate is an integer,
+        48000 for example.
+
+    <in-channels>
+        Force mixing to a specific channel layout. See ``--channels`` option
+        for possible values.
+
+    <out-format>
+
+    <out-srate>
+
+    <out-channels>
+
 format[=format]
     Convert between different sample formats. Automatically enabled when
     needed by the sound card or another filter. See also ``--format``.
@@ -292,6 +320,11 @@ pan=n[:L00:L01:L02:...L10:L11:L12:...Ln0:Ln1:Ln2:...]
         Would give 3 channel output leaving channels 0 and 1 intact, and mix
         channels 0 and 1 into output channel 2 (which could be sent to a
         subwoofer for example).
+
+    *NOTE*: if you just want to force remixing to a certain output channel
+    layout, it's easier to use the ``force`` filter. For example,
+    ``mpv '--af=force=channels=5.1' '--channels=5.1'`` would always force
+    remixing audio to 5.1 and output it like this.
 
 sub[=fc:ch]
     Adds a subwoofer channel to the audio stream. The audio data used for

@@ -56,6 +56,12 @@ void mp_audio_copy_config(struct mp_audio *dst, const struct mp_audio *src)
     dst->rate = src->rate;
 }
 
+bool mp_audio_config_equals(const struct mp_audio *a, const struct mp_audio *b)
+{
+    return a->format == b->format && a->rate == b->rate &&
+           mp_chmap_equals(&a->channels, &b->channels);
+}
+
 char *mp_audio_fmt_to_str(int srate, const struct mp_chmap *chmap, int format)
 {
     char *chstr = mp_chmap_to_str(chmap);

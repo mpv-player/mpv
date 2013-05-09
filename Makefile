@@ -139,6 +139,7 @@ SOURCES = talloc.c \
           audio/filter/af_dummy.c \
           audio/filter/af_equalizer.c \
           audio/filter/af_extrastereo.c \
+          audio/filter/af_force.c \
           audio/filter/af_format.c \
           audio/filter/af_hrtf.c \
           audio/filter/af_karaoke.c \
