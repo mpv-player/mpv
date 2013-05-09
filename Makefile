@@ -124,6 +124,7 @@ endif
 SOURCES = talloc.c \
           audio/audio.c \
           audio/chmap.c \
+          audio/chmap_sel.c \
           audio/fmt-conversion.c \
           audio/format.c \
           audio/mixer.c \

@@ -100,6 +100,17 @@ static const struct mp_chmap default_layouts[MP_NUM_CHANNELS + 1] = {
     MP_CHMAP8(FL, FR, FC, LFE, BL, BR, SL, SR), // 7.1
 };
 
+// The channel order was lavc/waveex, but differs from lavc for 5, 6 and 8
+// channels. 3 and 7 channels were likely undefined (no ALSA support).
+static const char *mplayer_layouts[MP_NUM_CHANNELS + 1] = {
+    [1] = "mono",
+    [2] = "stereo",
+    [4] = "4.0",
+    [5] = "5.0(alsa)",
+    [6] = "5.1(alsa)",
+    [8] = "7.1(alsa)",
+};
+
 // Returns true if speakers are mapped uniquely, and there's at least 1 channel.
 bool mp_chmap_is_valid(const struct mp_chmap *src)
 {
@@ -189,6 +200,19 @@ void mp_chmap_from_channels(struct mp_chmap *dst, int num_channels)
         *dst = (struct mp_chmap) {0};
     } else {
         *dst = default_layouts[num_channels];
+    }
+}
+
+// Try to do what mplayer/mplayer2/mpv did before channel layouts were
+// introduced, i.e. get the old default channel order.
+void mp_chmap_from_channels_alsa(struct mp_chmap *dst, int num_channels)
+{
+    if (num_channels < 0 || num_channels > MP_NUM_CHANNELS) {
+        *dst = (struct mp_chmap) {0};
+    } else {
+        mp_chmap_from_str(dst, bstr0(mplayer_layouts[num_channels]));
+        if (!dst->num)
+            mp_chmap_from_channels(dst, num_channels);
     }
 }
 
@@ -312,22 +336,6 @@ void mp_chmap_reorder_to_lavc(struct mp_chmap *map)
         return;
     uint64_t mask = mp_chmap_to_lavc_unchecked(map);
     mp_chmap_from_lavc(map, mask);
-}
-
-// Try to do what mplayer/mplayer2/mpv did before channel layouts were
-// introduced, i.e. get the old default channel order.
-void mp_chmap_reorder_to_alsa(struct mp_chmap *map)
-{
-    // The channel order was lavc/waveex, but differs from lavc for 5, 6 and 8
-    // channels. 3 and 7 channels were likely undefined (no ALSA support).
-    mp_chmap_from_channels(map, map->num);
-    if (map->num == 5) {
-        mp_chmap_from_str(map, bstr0("5.0(alsa)"));
-    } else if (map->num == 6) {
-        mp_chmap_from_str(map, bstr0("5.1(alsa)"));
-    } else if (map->num == 8) {
-        mp_chmap_from_str(map, bstr0("7.1(alsa)"));
-    }
 }
 
 // Get reordering array for from->to reordering. from->to must have the same set

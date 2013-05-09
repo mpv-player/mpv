@@ -250,7 +250,17 @@ void ao_resume(struct ao *ao)
         ao->driver->resume(ao);
 }
 
+bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
+                         struct mp_chmap *map)
+{
+    return mp_chmap_sel_adjust(s, map);
+}
 
+bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
+                          struct mp_chmap *map, int num)
+{
+    return mp_chmap_sel_get_def(s, map, num);
+}
 
 int old_ao_init(struct ao *ao, char *params)
 {

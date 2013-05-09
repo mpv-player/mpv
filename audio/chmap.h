@@ -104,6 +104,7 @@ void mp_chmap_reorder_norm(struct mp_chmap *map);
 
 void mp_chmap_from_channels(struct mp_chmap *dst, int num_channels);
 void mp_chmap_set_unknown(struct mp_chmap *dst, int num_channels);
+void mp_chmap_from_channels_alsa(struct mp_chmap *dst, int num_channels);
 
 void mp_chmap_remove_useless_channels(struct mp_chmap *map,
                                       const struct mp_chmap *requested);
@@ -114,8 +115,6 @@ void mp_chmap_from_lavc(struct mp_chmap *dst, uint64_t src);
 
 bool mp_chmap_is_lavc(const struct mp_chmap *src);
 void mp_chmap_reorder_to_lavc(struct mp_chmap *map);
-
-void mp_chmap_reorder_to_alsa(struct mp_chmap *map);
 
 void mp_chmap_get_reorder(int dst[MP_NUM_CHANNELS], const struct mp_chmap *from,
                           const struct mp_chmap *to);
@@ -129,5 +128,7 @@ void mp_chmap_print_help(int msgt, int msgl);
 #define mp_chmap_from_waveext mp_chmap_from_lavc
 #define mp_chmap_is_waveext mp_chmap_is_lavc
 #define mp_chmap_reorder_to_waveext mp_chmap_reorder_to_lavc
+
+#define mp_chmap_reorder_to_alsa(x) mp_chmap_from_channels_alsa((x), (x)->num)
 
 #endif

@@ -24,6 +24,7 @@
 #include "core/bstr.h"
 #include "core/mp_common.h"
 #include "audio/chmap.h"
+#include "audio/chmap_sel.h"
 
 enum aocontrol {
     // _VOLUME commands take struct ao_control_vol pointer for input/output.
@@ -120,6 +121,11 @@ int ao_get_space(struct ao *ao);
 void ao_reset(struct ao *ao);
 void ao_pause(struct ao *ao);
 void ao_resume(struct ao *ao);
+
+bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
+                         struct mp_chmap *map);
+bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
+                          struct mp_chmap *map, int num);
 
 int old_ao_control(struct ao *ao, enum aocontrol cmd, void *arg);
 int old_ao_init(struct ao *ao, char *params);

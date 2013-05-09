@@ -37,8 +37,7 @@ void mp_audio_set_num_channels(struct mp_audio *mpa, int num_channels)
 void mp_audio_set_channels_old(struct mp_audio *mpa, int num_channels)
 {
     struct mp_chmap map;
-    mp_chmap_from_channels(&map, num_channels);
-    mp_chmap_reorder_to_alsa(&map);
+    mp_chmap_from_channels_alsa(&map, num_channels);
     mp_audio_set_channels(mpa, &map);
 }
 
