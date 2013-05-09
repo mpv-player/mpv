@@ -160,6 +160,13 @@ static int init(struct ao *ao, char *params)
         return -1;
     }
 
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_waveext_def(&sel);
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels)) {
+        uninit(ao, true);
+        return -1;
+    }
+
     SDL_AudioSpec desired, obtained;
 
     int bytes = 0;
@@ -236,9 +243,12 @@ static int init(struct ao *ao, char *params)
             return -1;
     }
 
+    if (!ao_chmap_sel_get_def(ao, &sel, &ao->channels, obtained.channels)) {
+        uninit(ao, true);
+        return -1;
+    }
+
     ao->samplerate = obtained.freq;
-    mp_chmap_from_channels(&ao->channels, obtained.channels);
-    mp_chmap_reorder_to_alsa(&ao->channels);
     ao->bps = ao->channels.num * ao->samplerate * bytes;
     ao->buffersize = obtained.size * bufcnt;
     ao->outburst = obtained.size;

@@ -129,6 +129,4 @@ void mp_chmap_print_help(int msgt, int msgl);
 #define mp_chmap_is_waveext mp_chmap_is_lavc
 #define mp_chmap_reorder_to_waveext mp_chmap_reorder_to_lavc
 
-#define mp_chmap_reorder_to_alsa(x) mp_chmap_from_channels_alsa((x), (x)->num)
-
 #endif

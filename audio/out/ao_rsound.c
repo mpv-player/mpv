@@ -121,7 +121,13 @@ static int init(struct ao *ao, char *params)
         free(port);
     }
 
-    mp_chmap_reorder_to_alsa(&ao->channels);
+    // Actual channel layout unknown.
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_waveext_def(&sel);
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels)) {
+        rsd_free(priv->rd);
+        return -1;
+    }
 
     rsd_set_param(priv->rd, RSD_SAMPLERATE, &ao->samplerate);
     rsd_set_param(priv->rd, RSD_CHANNELS, &ao->channels.num);

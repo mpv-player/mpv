@@ -499,6 +499,11 @@ int device_id, display_help = 0;
     // Save selected device id
     ao->i_selected_dev = devid_def;
 
+    struct mp_chmap_sel chmap_sel = {0};
+    mp_chmap_sel_add_waveext(&chmap_sel);
+    if (!ao_chmap_sel_adjust(&ao_data, &ao_data.channels, &chmap_sel))
+        goto err_out;
+
 	// Build Description for the input format
 	inDesc.mSampleRate=rate;
 	inDesc.mFormatID=ao->b_supports_digital ? kAudioFormat60958AC3 : kAudioFormatLinearPCM;
@@ -605,8 +610,8 @@ int device_id, display_help = 0;
 	ao->chunk_size = maxFrames;//*inDesc.mBytesPerFrame;
 
 	ao_data.samplerate = inDesc.mSampleRate;
-        mp_chmap_from_channels(&ao_data.channels, inDesc.mChannelsPerFrame);
-        mp_chmap_reorder_to_waveext(&ao_data.channels);
+        if (!ao_chmap_sel_get_def(&ao_data, &chmap_sel, &ao_data.channels, inDesc.mChannelsPerFrame))
+            goto err_out2;
     ao_data.bps = ao_data.samplerate * inDesc.mBytesPerFrame;
     ao_data.outburst = ao->chunk_size;
 	ao_data.buffersize = ao_data.bps;
@@ -838,7 +843,7 @@ static int OpenSPDIF(void)
     ao->chunk_size = ao->stream_format.mBytesPerPacket;
 
     ao_data.samplerate = ao->stream_format.mSampleRate;
-    // Applies default ordering; ok becazse AC3 data is always in mpv internal channel order
+    // Applies default ordering; ok because AC3 data is always in mpv internal channel order
     mp_chmap_from_channels(&ao_data.channels, ao->stream_format.mChannelsPerFrame);
     ao_data.bps = ao_data.samplerate * (ao->stream_format.mBytesPerPacket/ao->stream_format.mFramesPerPacket);
     ao_data.outburst = ao->chunk_size;

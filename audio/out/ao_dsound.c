@@ -390,18 +390,14 @@ static int init(int rate, const struct mp_chmap *channels, int format, int flags
 	DSBUFFERDESC dsbpridesc;
 	DSBUFFERDESC dsbdesc;
 
-	//check if the channel count and format is supported in general
-	if (ao_data.channels.num > 8) {
-                // More than 8 channels might just work, but needs testing
-		UninitDirectSound();
-		mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: > 8 channel audio not yet supported\n");
-		return 0;
-	}
-
-	if (AF_FORMAT_IS_AC3(format))
+	if (AF_FORMAT_IS_AC3(format)) {
 		format = AF_FORMAT_AC3_NE;
-        else
-                mp_chmap_reorder_to_waveext(&ao_data.channels);
+        } else {
+                struct mp_chmap_sel sel = {0};
+                mp_chmap_sel_add_waveext(&sel);
+                if (!ao_chmap_sel_adjust(&ao_data, &sel, &ao_data.channels))
+                        return 0;
+        }
 	switch(format){
 		case AF_FORMAT_AC3_NE:
 		case AF_FORMAT_S24_LE:

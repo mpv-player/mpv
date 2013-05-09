@@ -187,6 +187,15 @@ static bool chmap_pa_from_mp(pa_channel_map *dst, struct mp_chmap *src)
     return true;
 }
 
+static bool select_chmap(struct ao *ao, pa_channel_map *dst)
+{
+    struct mp_chmap_sel sel = {0};
+    for (int n = 0; speaker_map[n][1] != -1; n++)
+        mp_chmap_sel_add_speaker(&sel, speaker_map[n][1]);
+    return ao_chmap_sel_adjust(ao, &sel, &ao->channels) &&
+           chmap_pa_from_mp(dst, &ao->channels);
+}
+
 static void uninit(struct ao *ao, bool cut_audio)
 {
     struct priv *priv = ao->priv;
@@ -301,16 +310,8 @@ static int init(struct ao *ao, char *params)
         goto fail;
     }
 
-    if (!chmap_pa_from_mp(&map, &ao->channels)) {
-        char *name = mp_chmap_to_str(&ao->channels);
-        mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Can't map %s channel layout\n",
-               name);
-        talloc_free(name);
-        // Not a really good fallback, since this doesn't trigger if the
-        // channel map is valid, but unsupported by the output device.
-        ao->channels = (struct mp_chmap) MP_CHMAP_INIT_STEREO;
-        pa_channel_map_init_stereo(&map);
-    }
+    if (!select_chmap(ao, &map))
+        goto fail;
 
     ao->bps = pa_bytes_per_second(&ss);
 

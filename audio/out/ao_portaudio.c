@@ -273,7 +273,11 @@ static int init(struct ao *ao, char *params)
     if (pa_device == paNoDevice)
         goto error_exit;
 
-    mp_chmap_reorder_to_alsa(&ao->channels);
+    // The actual channel order probably depends on the platform.
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_waveext_def(&sel);
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+        goto error_exit;
 
     PaStreamParameters sp = {
         .device = pa_device,

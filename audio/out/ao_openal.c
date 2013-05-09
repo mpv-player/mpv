@@ -53,7 +53,7 @@ static const ao_info_t info =
 
 LIBAO_EXTERN(openal)
 
-#define MAX_CHANS 8
+#define MAX_CHANS MP_NUM_CHANNELS
 #define NUM_BUF 128
 #define CHUNK_SIZE 512
 static ALuint buffers[MAX_CHANS][NUM_BUF];
@@ -151,11 +151,11 @@ static int init(int rate, const struct mp_chmap *channels, int format,
     list_devices();
     goto err_out;
   }
-  if (ao_data.channels.num > MAX_CHANS) {
-    mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] Invalid number of channels: %i\n",
-           ao_data.channels.num);
+  struct mp_chmap_sel sel = {0};
+  for (i = 0; speaker_pos[i].id != -1; i++)
+    mp_chmap_sel_add_speaker(&sel, speaker_pos[i].id);
+  if (!ao_chmap_sel_adjust(&ao_data, &sel, &ao_data.channels))
     goto err_out;
-  }
   struct speaker speakers[MAX_CHANS];
   for (i = 0; i < ao_data.channels.num; i++) {
     speakers[i].id = -1;

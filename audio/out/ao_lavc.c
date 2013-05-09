@@ -102,6 +102,10 @@ static int init(struct ao *ao, char *params)
 
     ac->stream->codec->sample_rate = ao->samplerate;
 
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_any(&sel);
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+        return -1;
     mp_chmap_reorder_to_lavc(&ao->channels);
     ac->stream->codec->channels = ao->channels.num;
     ac->stream->codec->channel_layout = mp_chmap_to_lavc(&ao->channels);

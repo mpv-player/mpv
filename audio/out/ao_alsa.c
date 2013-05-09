@@ -330,22 +330,35 @@ static const char *device_channel_layouts[][2] = {
     {"surround41",      "fl-fr-bl-br-lfe"},
     {"surround51",      "fl-fr-bl-br-fc-lfe"},
     {"surround71",      "fl-fr-bl-br-fc-lfe-sl-sr"},
-    {0}
 };
 
-// Find a device that contains exactly all the requested speakers.
-// Set *request to the required channel order.
-static const char *find_device(struct mp_chmap *request)
+#define ARRAY_LEN(x) (sizeof(x) / sizeof((x)[0]))
+
+#define NUM_ALSA_CHMAPS ARRAY_LEN(device_channel_layouts)
+
+static const char *select_chmap(struct ao *ao)
 {
-    for (int n = 0; device_channel_layouts[n][0]; n++) {
-        struct mp_chmap map = {0};
-        mp_chmap_from_str(&map, bstr0(device_channel_layouts[n][1]));
-        if (mp_chmap_equals_reordered(&map, request)) {
-            *request = map;
+    struct mp_chmap_sel sel = {0};
+    struct mp_chmap maps[NUM_ALSA_CHMAPS];
+    for (int n = 0; n < NUM_ALSA_CHMAPS; n++) {
+        mp_chmap_from_str(&maps[n], bstr0(device_channel_layouts[n][1]));
+        mp_chmap_sel_add_map(&sel, &maps[n]);
+    };
+
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+        return NULL;
+
+    for (int n = 0; n < NUM_ALSA_CHMAPS; n++) {
+        if (mp_chmap_equals(&ao->channels, &maps[n]))
             return device_channel_layouts[n][0];
-        }
     }
-    return NULL;
+
+    char *name = mp_chmap_to_str(&ao->channels);
+    mp_tmsg(MSGT_AO, MSGL_ERR,
+            "[AO_ALSA] channel layout %s (%d ch) not supported.\n",
+            name, ao->channels.num);
+    talloc_free(name);
+    return "default";
 }
 
 static int try_open_device(struct ao *ao, const char *device, int open_mode,
@@ -449,16 +462,7 @@ static int init(struct ao *ao, char *params)
                "alsa-spdif-init: playing AC3/iec61937/iec958, %i channels\n",
                ao->channels.num);
     } else {
-        device.str = find_device(&ao->channels);
-        if (!device.str) {
-            char *name = mp_chmap_to_str(&ao->channels);
-            device.str = "default";
-            mp_chmap_from_channels(&ao->channels, ao->channels.num);
-            mp_tmsg(MSGT_AO, MSGL_ERR,
-                    "[AO_ALSA] channel layout %s (%d ch) not supported.\n",
-                    name, ao->channels.num);
-            talloc_free(name);
-        }
+        device.str = select_chmap(ao);
         if (strcmp(device.str, "default") != 0 && ao->format == AF_FORMAT_FLOAT_NE)
         {
             // hack - use the converter plugin (why the heck?)
@@ -535,8 +539,11 @@ static int init(struct ao *ao, char *params)
             (p->alsa, alsa_hwparams, &num_channels);
     CHECK_ALSA_ERROR("Unable to set channels");
 
-    if (num_channels != ao->channels.num)
-        mp_chmap_from_channels(&ao->channels, num_channels);
+    if (num_channels != ao->channels.num) {
+        mp_tmsg(MSGT_AO, MSGL_ERR,
+                "[AO_ALSA] Couldn't get requested number of channels.\n");
+        mp_chmap_from_channels_alsa(&ao->channels, num_channels);
+    }
 
     /* workaround for buggy rate plugin (should be fixed in ALSA 1.0.11)
         prefer our own resampler, since that allows users to choose the resampler,

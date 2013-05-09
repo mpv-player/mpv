@@ -340,7 +340,10 @@ ac3_retry:
     af_fmt2str_short(ao_data.format), af_fmt2str_short(format));
 
   if(!AF_FORMAT_IS_AC3(format)) {
-    mp_chmap_reorder_to_alsa(&ao_data.channels);
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_alsa_def(&sel);
+    if (!ao_chmap_sel_adjust(&ao_data, &sel, &ao_data.channels))
+      return 0;
     int reqchannels = ao_data.channels.num;
     // We only use SNDCTL_DSP_CHANNELS for >2 channels, in case some drivers don't have it
     if (reqchannels > 2) {
@@ -357,7 +360,8 @@ ac3_retry:
 	mp_tmsg(MSGT_AO,MSGL_ERR,"[AO OSS] audio_setup: Failed to set audio device to %d channels.\n", reqchannels);
 	return 0;
       }
-      mp_chmap_from_channels(&ao_data.channels, c + 1);
+      if (!ao_chmap_sel_get_def(&ao_data, &sel, &ao_data.channels, c + 1))
+        return 0;
     }
     mp_msg(MSGT_AO,MSGL_V,"audio_setup: using %d channels (requested: %d)\n", ao_data.channels.num, reqchannels);
     // set rate

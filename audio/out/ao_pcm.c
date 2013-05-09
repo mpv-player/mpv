@@ -146,7 +146,10 @@ static int init(struct ao *ao, char *params)
         }
     }
 
-    mp_chmap_reorder_to_waveext(&ao->channels);
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_waveext(&sel);
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+        return -1;
 
     ao->outburst = 65536;
     ao->bps = ao->channels.num * ao->samplerate * (af_fmt2bits(ao->format) / 8);
