@@ -253,6 +253,33 @@ static int init(struct ao *ao, char *params)
         priv->broken_pause = true;
     }
 
+    if (!(priv->mainloop = pa_threaded_mainloop_new())) {
+        mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Failed to allocate main loop\n");
+        goto fail;
+    }
+
+    if (!(priv->context = pa_context_new(pa_threaded_mainloop_get_api(
+                                 priv->mainloop), PULSE_CLIENT_NAME))) {
+        mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Failed to allocate context\n");
+        goto fail;
+    }
+
+    pa_context_set_state_callback(priv->context, context_state_cb, ao);
+
+    if (pa_context_connect(priv->context, host, 0, NULL) < 0)
+        goto fail;
+
+    pa_threaded_mainloop_lock(priv->mainloop);
+
+    if (pa_threaded_mainloop_start(priv->mainloop) < 0)
+        goto unlock_and_fail;
+
+    /* Wait until the context is ready */
+    pa_threaded_mainloop_wait(priv->mainloop);
+
+    if (pa_context_get_state(priv->context) != PA_CONTEXT_READY)
+        goto unlock_and_fail;
+
     ss.channels = ao->channels.num;
     ss.rate = ao->samplerate;
 
@@ -286,33 +313,6 @@ static int init(struct ao *ao, char *params)
     }
 
     ao->bps = pa_bytes_per_second(&ss);
-
-    if (!(priv->mainloop = pa_threaded_mainloop_new())) {
-        mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Failed to allocate main loop\n");
-        goto fail;
-    }
-
-    if (!(priv->context = pa_context_new(pa_threaded_mainloop_get_api(
-                                 priv->mainloop), PULSE_CLIENT_NAME))) {
-        mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Failed to allocate context\n");
-        goto fail;
-    }
-
-    pa_context_set_state_callback(priv->context, context_state_cb, ao);
-
-    if (pa_context_connect(priv->context, host, 0, NULL) < 0)
-        goto fail;
-
-    pa_threaded_mainloop_lock(priv->mainloop);
-
-    if (pa_threaded_mainloop_start(priv->mainloop) < 0)
-        goto unlock_and_fail;
-
-    /* Wait until the context is ready */
-    pa_threaded_mainloop_wait(priv->mainloop);
-
-    if (pa_context_get_state(priv->context) != PA_CONTEXT_READY)
-        goto unlock_and_fail;
 
     if (!(priv->stream = pa_stream_new(priv->context, "audio stream", &ss,
                                        &map)))
