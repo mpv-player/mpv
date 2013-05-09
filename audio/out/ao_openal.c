@@ -109,17 +109,29 @@ static void list_devices(void) {
   }
 }
 
+struct speaker {
+    int id;
+    float pos[3];
+};
+
+static const struct speaker speaker_pos[] = {
+    {MP_SPEAKER_ID_FL,   {-1, 0, 0.5}},
+    {MP_SPEAKER_ID_FR,   { 1, 0, 0.5}},
+    {MP_SPEAKER_ID_FC,   { 0, 0,   1}},
+    {MP_SPEAKER_ID_LFE,  { 0, 0, 0.1}},
+    {MP_SPEAKER_ID_BL,   {-1, 0,  -1}},
+    {MP_SPEAKER_ID_BR,   { 1, 0,  -1}},
+    {MP_SPEAKER_ID_BC,   { 0, 0,  -1}},
+    {MP_SPEAKER_ID_SL,   {-1, 0,   0}},
+    {MP_SPEAKER_ID_SR,   { 1, 0,   0}},
+    {-1},
+};
+
 static int init(int rate, const struct mp_chmap *channels, int format,
                 int flags)
 {
   float position[3] = {0, 0, 0};
   float direction[6] = {0, 0, 1, 0, -1, 0};
-  float sppos[MAX_CHANS][3] = {
-    {-1, 0, 0.5}, {1, 0, 0.5},
-    {-1, 0,  -1}, {1, 0,  -1},
-    {0,  0,   1}, {0, 0, 0.1},
-    {-1, 0,   0}, {1, 0,   0},
-  };
   ALCdevice *dev = NULL;
   ALCcontext *ctx = NULL;
   ALCint freq = 0;
@@ -144,6 +156,18 @@ static int init(int rate, const struct mp_chmap *channels, int format,
            ao_data.channels.num);
     goto err_out;
   }
+  struct speaker speakers[MAX_CHANS];
+  for (i = 0; i < ao_data.channels.num; i++) {
+    speakers[i].id = -1;
+    for (int n = 0; speaker_pos[n].id >= 0; n++) {
+      if (speaker_pos[n].id == ao_data.channels.speaker[i])
+        speakers[i] = speaker_pos[n];
+    }
+    if (speakers[i].id < 0) {
+      mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] Unknown channel layout\n");
+      goto err_out;
+    }
+  }
   dev = alcOpenDevice(device);
   if (!dev) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] could not open device\n");
@@ -158,11 +182,9 @@ static int init(int rate, const struct mp_chmap *channels, int format,
     cur_buf[i] = 0;
     unqueue_buf[i] = 0;
     alGenBuffers(NUM_BUF, buffers[i]);
-    alSourcefv(sources[i], AL_POSITION, sppos[i]);
+    alSourcefv(sources[i], AL_POSITION, speakers[i].pos);
     alSource3f(sources[i], AL_VELOCITY, 0, 0, 0);
   }
-  if (ao_data.channels.num == 1)
-    alSource3f(sources[0], AL_POSITION, 0, 0, 1);
   alcGetIntegerv(dev, ALC_FREQUENCY, 1, &freq);
   if (alcGetError(dev) == ALC_NO_ERROR && freq)
     rate = freq;
@@ -171,7 +193,6 @@ static int init(int rate, const struct mp_chmap *channels, int format,
   ao_data.bps = ao_data.channels.num * rate * 2;
   ao_data.buffersize = CHUNK_SIZE * NUM_BUF;
   ao_data.outburst = ao_data.channels.num * CHUNK_SIZE;
-  mp_chmap_reorder_to_alsa(&ao_data.channels); // sppos[][] matrix is for ALSA
   tmpbuf = malloc(CHUNK_SIZE);
   free(device);
   return 1;
