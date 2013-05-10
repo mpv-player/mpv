@@ -543,6 +543,11 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
         s->window_title =
             [[NSString alloc] initWithUTF8String:vo_get_window_title(vo)];
         [s->window setTitle: s->window_title];
+
+        if (opts->native_fs) {
+            [s->window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
+            [NSApp setPresentationOptions:NSFullScreenWindowMask];
+        }
     });
 
     [vo->cocoa->glContext makeCurrentContext];
@@ -686,32 +691,46 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     struct vo_cocoa_state *s = self.videoOutput->cocoa;
     struct mp_vo_opts *opts = self.videoOutput->opts;
 
+    if (opts->native_fs) {
+        if (!opts->fs) {
+            [self setContentResizeIncrements:NSMakeSize(1, 1)];
+        } else {
+            [self setContentAspectRatio:s->current_video_size];
+        }
+
+        [self toggleFullScreen:nil];
+    } else {
+        if (!opts->fs) {
+            update_screen_info(self.videoOutput);
+            if (current_screen_has_dock_or_menubar(self.videoOutput))
+                [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
+                    NSApplicationPresentationHideMenuBar];
+            s->windowed_frame = [self frame];
+            [self setHasShadow:NO];
+            [self setStyleMask:s->fullscreen_mask];
+            [self setFrame:s->fsscreen_frame display:YES animate:NO];
+            [self setMovableByWindowBackground: NO];
+        } else {
+            [NSApp setPresentationOptions:NSApplicationPresentationDefault];
+            [self setHasShadow:YES];
+            [self setStyleMask:s->windowed_mask];
+            [self setTitle:s->window_title];
+            [self setFrame:s->windowed_frame display:YES animate:NO];
+            if (s->out_fs_resize) {
+                [self setContentSize:s->current_video_size keepCentered:YES];
+                s->out_fs_resize = NO;
+            }
+            [self setContentAspectRatio:s->current_video_size];
+            [self setMovableByWindowBackground: YES];
+        }
+    }
+
     if (!opts->fs) {
-        update_screen_info(self.videoOutput);
-        if (current_screen_has_dock_or_menubar(self.videoOutput))
-            [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
-                NSApplicationPresentationHideMenuBar];
-        s->windowed_frame = [self frame];
-        [self setHasShadow:NO];
-        [self setStyleMask:s->fullscreen_mask];
-        [self setFrame:s->fsscreen_frame display:YES animate:NO];
         opts->fs = VO_TRUE;
         vo_cocoa_display_cursor(self.videoOutput, 0);
-        [self setMovableByWindowBackground: NO];
     } else {
-        [NSApp setPresentationOptions:NSApplicationPresentationDefault];
-        [self setHasShadow:YES];
-        [self setStyleMask:s->windowed_mask];
-        [self setTitle:s->window_title];
-        [self setFrame:s->windowed_frame display:YES animate:NO];
-        if (s->out_fs_resize) {
-            [self setContentSize:s->current_video_size keepCentered:YES];
-            s->out_fs_resize = NO;
-        }
-        [self setContentAspectRatio:s->current_video_size];
         opts->fs = false;
         vo_cocoa_display_cursor(self.videoOutput, 1);
-        [self setMovableByWindowBackground: YES];
     }
 
     resize_window(self.videoOutput);

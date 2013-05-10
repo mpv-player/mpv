@@ -611,6 +611,10 @@ const m_option_t mplayer_opts[]={
     OPT_CHOICE_OR_INT("fs-screen", vo.fsscreen_id, 0, 0, 32,
                       ({"all", -2}, {"current", -1})),
 
+#ifdef CONFIG_COCOA
+    OPT_FLAG("native-fs", vo.native_fs, 0),
+#endif
+
     OPT_INTRANGE("brightness", gamma_brightness, 0, -100, 100),
     OPT_INTRANGE("saturation", gamma_saturation, 0, -100, 100),
     OPT_INTRANGE("contrast", gamma_contrast, 0, -100, 100),

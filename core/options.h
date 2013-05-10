@@ -41,6 +41,8 @@ typedef struct mp_vo_opts {
     float force_monitor_aspect;
     float monitor_pixel_aspect;
     int force_window_position;
+
+    int native_fs;
 } mp_vo_opts;
 
 typedef struct MPOpts {
