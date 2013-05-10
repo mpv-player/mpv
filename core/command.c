@@ -328,6 +328,19 @@ static int mp_property_time_pos(m_option_t *prop, int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_remaining(m_option_t *prop, int action,
+                                 void *arg, MPContext *mpctx)
+{
+    double len = get_time_length(mpctx);
+    double pos = get_current_time(mpctx);
+    double start = get_start_time(mpctx);
+
+    if (!(int)len)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_double_ro(prop, action, arg, len - (pos - start));
+}
+
 /// Current chapter (RW)
 static int mp_property_chapter(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
@@ -1373,6 +1386,7 @@ static const m_option_t mp_properties[] = {
       M_OPT_RANGE, 0, 100, NULL },
     { "time-pos", mp_property_time_pos, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
+    { "time-remaining", mp_property_remaining, CONF_TYPE_TIME },
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
       M_OPT_MIN, 0, 0, NULL },
     M_OPTION_PROPERTY_CUSTOM("edition", mp_property_edition),
