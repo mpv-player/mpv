@@ -742,6 +742,15 @@ void create_menu()
 - (void)mouseDragged:(NSEvent *)theEvent
 {
     [self mouseEvent: theEvent];
+    NSView *view = self.contentView;
+    NSPoint loc = [view convertPoint:[theEvent locationInWindow] fromView:nil];
+    NSRect bounds = [view bounds];
+
+    int x = loc.x;
+    int y = - loc.y + bounds.size.height; // convert to x11-like coord system
+    if (CGRectContainsPoint(bounds, NSMakePoint(x, y))) {
+        vo_mouse_movement(_vo, x, y);
+    }
 }
 
 - (void)mouseDown:(NSEvent *)theEvent
