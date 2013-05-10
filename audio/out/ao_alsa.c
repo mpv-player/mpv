@@ -444,8 +444,6 @@ static int init(struct ao *ao, char *params)
 
     snd_lib_error_set_handler(alsa_error_handler);
 
-    p->alsa_fmt = find_alsa_format(ao->format);
-
     //subdevice parsing
     // set defaults
     block = 1;
@@ -516,8 +514,12 @@ static int init(struct ao *ao, char *params)
             (p->alsa, alsa_hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
     CHECK_ALSA_ERROR("Unable to set access type");
 
-    /* workaround for nonsupported formats
-        sets default format to S16_LE if the given formats aren't supported */
+    p->alsa_fmt = find_alsa_format(ao->format);
+    if (p->alsa_fmt == SND_PCM_FORMAT_UNKNOWN) {
+        p->alsa_fmt = SND_PCM_FORMAT_S16;
+        ao->format = AF_FORMAT_S16_NE;
+    }
+
     err = snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt);
     if (err < 0) {
         mp_tmsg(MSGT_AO, MSGL_INFO, "[AO_ALSA] Format %s is not supported "
