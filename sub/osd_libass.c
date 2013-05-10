@@ -104,6 +104,7 @@ static ASS_Event *add_osd_ass_event(ASS_Track *track, const char *text)
     event->Start = 0;
     event->Duration = 100;
     event->Style = track->default_style;
+    event->ReadOrder = n;
     assert(event->Text == NULL);
     if (text)
         event->Text = strdup(text);
