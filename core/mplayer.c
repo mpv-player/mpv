@@ -3119,6 +3119,14 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
     abort();
 }
 
+static void execute_queued_seek(struct MPContext *mpctx)
+{
+    if (mpctx->seek.type) {
+        seek(mpctx, mpctx->seek, false);
+        mpctx->seek = (struct seek_params){0};
+    }
+}
+
 double get_time_length(struct MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->demuxer;
@@ -3268,33 +3276,42 @@ int get_chapter_count(struct MPContext *mpctx)
     return 0;
 }
 
-int seek_chapter(struct MPContext *mpctx, int chapter, double *seek_pts)
+// Seek to a given chapter. Tries to queue the seek, but might seek immediately
+// in some cases. Returns success, no matter if seek is queued or immediate.
+bool mp_seek_chapter(struct MPContext *mpctx, int chapter)
 {
-    mpctx->last_chapter_seek = -2;
-    if (mpctx->chapters) {
-        if (chapter >= mpctx->num_chapters)
-            return -1;
-        if (chapter < 0)
-            chapter = 0;
-        *seek_pts = mpctx->chapters[chapter].start;
-        mpctx->last_chapter_seek = chapter;
-        mpctx->last_chapter_pts = *seek_pts;
-        return chapter;
-    }
+    int num = get_chapter_count(mpctx);
+    if (num == 0)
+        return false;
+    if (chapter < 0 || chapter >= num)
+        return false;
 
-    if (mpctx->master_demuxer) {
-        int res = demuxer_seek_chapter(mpctx->master_demuxer, chapter, seek_pts);
+    mpctx->last_chapter_seek = -2;
+
+    double pts;
+    if (mpctx->chapters) {
+        pts = mpctx->chapters[chapter].start;
+        goto do_seek;
+    } else if (mpctx->master_demuxer) {
+        int res = demuxer_seek_chapter(mpctx->master_demuxer, chapter, &pts);
         if (res >= 0) {
-            if (*seek_pts == -1)
-                seek_reset(mpctx, true, true);  // for DVD
-            else {
-                mpctx->last_chapter_seek = res;
-                mpctx->last_chapter_pts = *seek_pts;
+            if (pts == -1) {
+                // for DVD/BD - seek happened via stream layer
+                seek_reset(mpctx, true, true);
+                mpctx->seek = (struct seek_params){0};
+                return true;
             }
+            chapter = res;
+            goto do_seek;
         }
-        return res;
     }
-    return -1;
+    return false;
+
+do_seek:
+    queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, 0);
+    mpctx->last_chapter_seek = chapter;
+    mpctx->last_chapter_pts = pts;
+    return true;
 }
 
 static void update_avsync(struct MPContext *mpctx)
@@ -3782,10 +3799,7 @@ static void run_playloop(struct MPContext *mpctx)
         }
     }
 
-    if (mpctx->seek.type) {
-        seek(mpctx, mpctx->seek, false);
-        mpctx->seek = (struct seek_params){ 0 };
-    }
+    execute_queued_seek(mpctx);
 }
 
 
@@ -4373,23 +4387,19 @@ goto_enable_cache: ;
     mpctx->playing_msg_shown = false;
     mpctx->paused = false;
     mpctx->paused_for_cache = false;
+    mpctx->seek = (struct seek_params){ 0 };
 
     // If there's a timeline force an absolute seek to initialize state
     double startpos = rel_time_to_abs(mpctx, opts->play_start, -1);
     if (startpos != -1 || mpctx->timeline) {
         queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, 0);
-        seek(mpctx, mpctx->seek, false);
+        execute_queued_seek(mpctx);
     }
     if (opts->chapterrange[0] > 0) {
-        double pts;
-        if (seek_chapter(mpctx, opts->chapterrange[0] - 1, &pts) >= 0
-            && pts > -1.0) {
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, pts, 0);
-            seek(mpctx, mpctx->seek, false);
-        }
+        if (mp_seek_chapter(mpctx, opts->chapterrange[0] - 1))
+            execute_queued_seek(mpctx);
     }
 
-    mpctx->seek = (struct seek_params){ 0 };
     get_relative_time(mpctx); // reset current delta
 
     if (mpctx->opts.pause)

@@ -39,49 +39,52 @@ struct egl_context {
 };
 
 static void egl_resize_func(struct vo_wayland_state *wl,
-                            struct egl_context *ctx)
+                            uint32_t edges,
+                            int32_t width,
+                            int32_t height,
+                            void *user_data)
 {
-    int32_t x, y, scaled_height;
-    double ratio;
-    int minimum_size = 50;
+    struct vo_wayland_window *w = wl->window;
+    struct egl_context *ctx = user_data;
+    int32_t minimum_size = 150;
+    int32_t x, y;
 
-    if (wl->window->pending_width < minimum_size)
-        wl->window->pending_width = minimum_size;
-    if (wl->window->pending_height < minimum_size)
-        wl->window->pending_height = minimum_size;
+    /* get the real window size of the window */
+    wl_egl_window_get_attached_size(ctx->egl_window,
+                                    &wl->window->width,
+                                    &wl->window->height);
 
-    ratio = (double) wl->vo->aspdat.orgw / wl->vo->aspdat.orgh;
-    scaled_height = wl->window->pending_height * ratio;
-    if (wl->window->pending_width > scaled_height) {
-        wl->window->pending_height = wl->window->pending_width / ratio;
-    } else {
-        wl->window->pending_width = scaled_height;
-    }
+    if (width < minimum_size)
+        width = minimum_size;
+    if (height < minimum_size)
+        height = minimum_size;
 
-    if (wl->window->edges & WL_SHELL_SURFACE_RESIZE_LEFT)
-        x = wl->window->width - wl->window->pending_width;
+    /* if only the height is changed we have to calculate the width
+     * in any other case we calculate the height */
+    if (edges == WL_SHELL_SURFACE_RESIZE_BOTTOM ||
+        edges == WL_SHELL_SURFACE_RESIZE_TOP)
+        width = wl->vo->aspdat.asp * height;
+    else
+        height = (1 / wl->vo->aspdat.asp) * width;
+
+    if (edges & WL_SHELL_SURFACE_RESIZE_LEFT)
+        x = w->width - width;
     else
         x = 0;
 
-    if (wl->window->edges & WL_SHELL_SURFACE_RESIZE_TOP)
-        y = wl->window->height - wl->window->pending_height;
+    if (edges & WL_SHELL_SURFACE_RESIZE_TOP)
+        y = w->height - height;
     else
         y = 0;
 
-    wl_egl_window_resize(ctx->egl_window,
-            wl->window->pending_width,
-            wl->window->pending_height,
-            x, y);
+    wl_egl_window_resize(ctx->egl_window, width, height, x, y);
 
-    wl->window->width = wl->window->pending_width;
-    wl->window->height = wl->window->pending_height;
+    w->width = width;
+    w->height = height;
 
     /* set size for mplayer */
-    wl->vo->dwidth = wl->window->pending_width;
-    wl->vo->dheight = wl->window->pending_height;
-    wl->window->events |= VO_EVENT_RESIZE;
-    wl->window->edges = 0;
-    wl->window->resize_needed = 0;
+    wl->vo->dwidth = width;
+    wl->vo->dheight = height;
 }
 
 static bool egl_create_context(struct vo_wayland_state *wl,
@@ -166,6 +169,7 @@ static void egl_create_window(struct vo_wayland_state *wl,
                    egl_ctx->egl.ctx);
 
     wl_display_dispatch_pending(wl->display->display);
+
 }
 
 static bool config_window_wayland(struct MPGLContext *ctx,
@@ -178,8 +182,8 @@ static bool config_window_wayland(struct MPGLContext *ctx,
     bool enable_alpha = !!(flags & VOFLAG_ALPHA);
     bool ret = false;
 
-    wl->window->pending_width = d_width;
-    wl->window->pending_height = d_height;
+    wl->window->resize_func = egl_resize_func;
+    wl->window->resize_func_data = (void*) egl_ctx;
     wl->window->width = d_width;
     wl->window->height = d_height;
 
@@ -202,7 +206,7 @@ static bool config_window_wayland(struct MPGLContext *ctx,
     else {
         /* If the window exists just resize it */
         if (egl_ctx->egl_window)
-            egl_resize_func(wl, egl_ctx);
+            egl_resize_func(wl, 0, d_width, d_height, egl_ctx);
 
         else {
             /* If the context exists and the hidden flag is unset then
@@ -231,18 +235,7 @@ static void releaseGlContext_wayland(MPGLContext *ctx)
 static void swapGlBuffers_wayland(MPGLContext *ctx)
 {
     struct egl_context * egl_ctx = ctx->priv;
-    struct vo_wayland_state *wl = ctx->vo->wayland;
-
     eglSwapBuffers(egl_ctx->egl.dpy, egl_ctx->egl_surface);
-
-    /* resize window after the buffers have swapped
-     * makes resizing more fluid */
-    if (wl->window->resize_needed) {
-        wl_egl_window_get_attached_size(egl_ctx->egl_window,
-            &wl->window->width,
-            &wl->window->height);
-        egl_resize_func(wl, egl_ctx);
-    }
 }
 
 void mpgl_set_backend_wayland(MPGLContext *ctx)

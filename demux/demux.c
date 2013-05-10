@@ -1327,22 +1327,22 @@ static void add_stream_chapters(struct demuxer *demuxer)
 
 int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, double *seek_pts)
 {
-    int ris;
+    int ris = STREAM_UNSUPPORTED;
 
-    if (!demuxer->num_chapters || !demuxer->chapters) {
-        demux_flush(demuxer);
-
+    if (demuxer->num_chapters == 0)
         ris = stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_CHAPTER,
                              &chapter);
-        if (ris != STREAM_UNSUPPORTED)
-            demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
+
+    if (ris != STREAM_UNSUPPORTED) {
+        demux_flush(demuxer);
+        demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
 
         // exit status may be ok, but main() doesn't have to seek itself
         // (because e.g. dvds depend on sectors, not on pts)
         *seek_pts = -1.0;
 
-        return ris != STREAM_UNSUPPORTED ? chapter : -1;
-    } else {  // chapters structure is set in the demuxer
+        return chapter;
+    } else {
         if (chapter >= demuxer->num_chapters)
             return -1;
         if (chapter < 0)

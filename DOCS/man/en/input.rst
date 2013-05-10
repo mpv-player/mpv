@@ -284,6 +284,7 @@ length                        length of the current file in seconds
 avsync                        last A/V synchronization difference
 percent-pos                 x position in current file (0-100)
 time-pos                    x position in current file in seconds
+time-remaining                estimated remaining length of the file in seconds
 chapter                     x current chapter number
 edition                     x current MKV edition number
 titles                        number of DVD titles

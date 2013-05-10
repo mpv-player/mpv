@@ -310,6 +310,19 @@ static int mp_property_time_pos(m_option_t *prop, int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_remaining(m_option_t *prop, int action,
+                                 void *arg, MPContext *mpctx)
+{
+    double len = get_time_length(mpctx);
+    double pos = get_current_time(mpctx);
+    double start = get_start_time(mpctx);
+
+    if (!(int)len)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return m_property_double_ro(prop, action, arg, len - (pos - start));
+}
+
 /// Current chapter (RW)
 static int mp_property_chapter(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
@@ -332,14 +345,11 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_SET: ;
         int step_all = *(int *)arg - chapter;
         chapter += step_all;
-        double next_pts = 0;
-        queue_seek(mpctx, MPSEEK_NONE, 0, 0);
-        chapter = seek_chapter(mpctx, chapter, &next_pts);
-        if (chapter >= 0) {
-            if (next_pts > -1.0)
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, next_pts, 0);
-        } else if (step_all > 0)
+        if (chapter >= get_chapter_count(mpctx) && step_all > 0) {
             mpctx->stop_play = PT_NEXT_ENTRY;
+        } else {
+            mp_seek_chapter(mpctx, chapter);
+        }
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -453,6 +463,17 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
                 resync_audio_stream(sh_audio);
         }
         return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE: {
+        struct m_option opt = {
+            .name = prop->name,
+            .type = CONF_TYPE_INT,
+            .flags = CONF_RANGE,
+            .min = 1,
+            .max = angles,
+        };
+        *(struct m_option *)arg = opt;
+        return M_PROPERTY_OK;
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -1347,6 +1368,7 @@ static const m_option_t mp_properties[] = {
       M_OPT_RANGE, 0, 100, NULL },
     { "time-pos", mp_property_time_pos, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
+    { "time-remaining", mp_property_remaining, CONF_TYPE_TIME },
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
       M_OPT_MIN, 0, 0, NULL },
     M_OPTION_PROPERTY_CUSTOM("edition", mp_property_edition),
@@ -1355,8 +1377,7 @@ static const m_option_t mp_properties[] = {
     { "chapters", mp_property_chapters, CONF_TYPE_INT,
       0, 0, 0, NULL },
     { "editions", mp_property_editions, CONF_TYPE_INT },
-    { "angle", mp_property_angle, CONF_TYPE_INT,
-      CONF_RANGE, -2, 10, NULL },
+    { "angle", mp_property_angle, &m_option_type_dummy },
     { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST,
       0, 0, 0, NULL },
     M_OPTION_PROPERTY_CUSTOM("pause", mp_property_pause),
