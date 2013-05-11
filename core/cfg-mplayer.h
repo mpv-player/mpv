@@ -635,6 +635,7 @@ const m_option_t mplayer_opts[]={
     OPT_FLAG("untimed", untimed, 0),
 
     OPT_STRING("stream-capture", stream_capture, 0),
+    OPT_STRING("stream-dump", stream_dump, 0),
 
 #ifdef CONFIG_LIRC
     {"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},

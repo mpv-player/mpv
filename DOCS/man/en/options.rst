@@ -1537,6 +1537,10 @@
     interrupted. Note that, due to cache latencies, captured data may begin and
     end somewhat delayed compared to what you see displayed.
 
+--stream-dump=<filename>
+    Same as ``--stream-capture``, but don't start playback. Instead, the full
+    file is dumped.
+
 --playlist=<filename>
     Play files according to a playlist file (ASX, Winamp, SMIL, or
     one-file-per-line format).
