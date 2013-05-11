@@ -89,7 +89,7 @@ end
 
 function draw_bar(ass)
     local duration = tonumber(mp.property_get("length"))
-    local pos = tonumber(mp.property_get("time-pos")) / duration
+    local pos = tonumber(mp.property_get("ratio-pos"))
 
     local x, y, w, h, border = get_bar_location()
 
@@ -166,8 +166,8 @@ function mp_mouse_click(down)
 
     if x >= b_x and y >= b_y and x <= b_x + b_w and y <= b_y + b_h then
         local duration = tonumber(mp.property_get("length"))
-        local time = (x - b_x) / b_w * duration
-        mp.send_command(string.format("seek %f absolute", time))
+        local time = (x - b_x) / b_w * 100
+        mp.send_command(string.format("seek %f absolute-percent", time))
     end
 end
 
