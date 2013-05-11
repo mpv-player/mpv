@@ -593,6 +593,7 @@ int cache_stream_fill_buffer(stream_t *s){
   s->buf_len=len;
   s->pos+=len;
 //  printf("[%d]",len);fflush(stdout);
+  stream_capture_write(s);
   return len;
 
 }

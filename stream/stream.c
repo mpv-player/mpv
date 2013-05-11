@@ -41,6 +41,7 @@
 #include <winsock2.h>
 #endif
 
+#include "core/bstr.h"
 #include "core/mp_msg.h"
 #include "osdep/shmem.h"
 #include "osdep/timer.h"
@@ -312,6 +313,37 @@ static int stream_reconnect(stream_t *s)
     return 0;
 }
 
+void stream_set_capture_file(stream_t *s, const char *filename)
+{
+    if (!bstr_equals(bstr0(s->capture_filename), bstr0(filename))) {
+        if (s->capture_file)
+            fclose(s->capture_file);
+        talloc_free(s->capture_filename);
+        s->capture_file = NULL;
+        s->capture_filename = NULL;
+        if (filename) {
+            s->capture_file = fopen(filename, "wb");
+            if (s->capture_file) {
+                s->capture_filename = talloc_strdup(NULL, filename);
+            } else {
+                mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
+                        "Error opening capture file: %s\n", strerror(errno));
+            }
+        }
+    }
+}
+
+void stream_capture_write(stream_t *s)
+{
+    if (s->capture_file) {
+        if (fwrite(s->buffer, s->buf_len, 1, s->capture_file) < 1) {
+            mp_tmsg(MSGT_GLOBAL, MSGL_ERR, "Error writing capture file: %s\n",
+                    strerror(errno));
+            stream_set_capture_file(s, NULL);
+        }
+    }
+}
+
 int stream_read_internal(stream_t *s, void *buf, int len)
 {
     int orig_len = len;
@@ -367,6 +399,7 @@ int stream_fill_buffer(stream_t *s)
     s->buf_pos = 0;
     s->buf_len = len;
 //  printf("[%d]",len);fflush(stdout);
+    stream_capture_write(s);
     return len;
 }
 
@@ -566,6 +599,7 @@ void free_stream(stream_t *s)
 #ifdef CONFIG_STREAM_CACHE
     cache_uninit(s);
 #endif
+    stream_set_capture_file(s, NULL);
 
     if (s->close)
         s->close(s);

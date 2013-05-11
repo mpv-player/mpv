@@ -341,6 +341,7 @@ sub-scale                   x subtitle font size multiplicator
 ass-use-margins             x see ``--ass-use-margins``
 ass-vsfilter-aspect-compat  x see ``--ass-vsfilter-aspect-compat``
 ass-style-override          x see ``--ass-style-override``
+stream-capture              x a filename, see ``--capture``
 tv-brightness               x
 tv-contrast                 x
 tv-saturation               x

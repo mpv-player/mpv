@@ -85,6 +85,7 @@ typedef struct MPOpts {
     int osd_fractions;
     char *vobsub_name;
     int untimed;
+    char *stream_capture;
     int loop_times;
     int ordered_chapters;
     int chapter_merge_threshold;

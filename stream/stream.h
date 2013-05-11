@@ -188,6 +188,9 @@ typedef struct stream {
     unsigned char buffer[STREAM_BUFFER_SIZE >
                          STREAM_MAX_SECTOR_SIZE ? STREAM_BUFFER_SIZE :
                          STREAM_MAX_SECTOR_SIZE];
+
+    FILE *capture_file;
+    char *capture_filename;
 } stream_t;
 
 #ifdef CONFIG_NETWORKING
@@ -196,6 +199,9 @@ typedef struct stream {
 
 int stream_fill_buffer(stream_t *s);
 int stream_seek_long(stream_t *s, int64_t pos);
+
+void stream_set_capture_file(stream_t *s, const char *filename);
+void stream_capture_write(stream_t *s);
 
 #ifdef CONFIG_STREAM_CACHE
 int stream_enable_cache_percent(stream_t *stream, int64_t stream_cache_size,

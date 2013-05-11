@@ -1528,6 +1528,15 @@
     Print out a custom string during playback instead of the standard status
     line. Expands properties. See ``--playing-msg``.
 
+--stream-capture=<filename>
+    Allows capturing the primary stream (not additional audio tracks or other
+    kind of streams) into the given file. Capturing can also be started and
+    stopped changing the filename with the ``stream-capture`` slave property.
+    Generally this will not produce usable results for anything else than MPEG
+    or raw streams, unless capturing includes the file headers and is not
+    interrupted. Note that, due to cache latencies, captured data may begin and
+    end somewhat delayed compared to what you see displayed.
+
 --playlist=<filename>
     Play files according to a playlist file (ASX, Winamp, SMIL, or
     one-file-per-line format).

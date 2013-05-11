@@ -197,6 +197,20 @@ static int mp_property_stream_path(m_option_t *prop, int action, void *arg,
     return m_property_strdup_ro(prop, action, arg, stream->url);
 }
 
+static int mp_property_stream_capture(m_option_t *prop, int action,
+                                      void *arg, MPContext *mpctx)
+{
+    if (!mpctx->stream)
+        return M_PROPERTY_UNAVAILABLE;
+
+    if (action == M_PROPERTY_SET) {
+        char *filename = *(char **)arg;
+        stream_set_capture_file(mpctx->stream, filename);
+        // fall through to mp_property_generic_option
+    }
+    return mp_property_generic_option(prop, action, arg, mpctx);
+}
+
 /// Demuxer name (RO)
 static int mp_property_demuxer(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
@@ -1357,6 +1371,7 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "stream-path", mp_property_stream_path, CONF_TYPE_STRING,
       0, 0, 0, NULL },
+    M_OPTION_PROPERTY_CUSTOM("stream-capture", mp_property_stream_capture),
     { "demuxer", mp_property_demuxer, CONF_TYPE_STRING,
       0, 0, 0, NULL },
     { "stream-pos", mp_property_stream_pos, CONF_TYPE_INT64,

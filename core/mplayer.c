@@ -4233,6 +4233,8 @@ goto_enable_cache: ;
         if (demux_was_interrupted(mpctx))
             goto terminate_playback;
 
+    stream_set_capture_file(mpctx->stream, opts->stream_capture);
+
     //============ Open DEMUXERS --- DETECT file type =======================
 
     mpctx->audio_delay = opts->audio_delay;
