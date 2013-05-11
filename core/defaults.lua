@@ -74,3 +74,79 @@ function mp_update()
     -- called on each playloop iteration
     --mp.set_osd_ass("Time: {\\b1}" .. mp.property_get_string("time-pos"))
 end
+
+local ass_mt = {}
+ass_mt.__index = ass_mt
+
+local function ass_new()
+    return setmetatable({ scale = 4, text = "" }, ass_mt)
+end
+
+package.loaded["assdraw"] = {ass_new = ass_new}
+
+function ass_mt.new_event(ass)
+    -- osd_libass.c adds an event per line
+    if #ass.text > 0 then
+        ass.text = ass.text .. "\n"
+    end
+end
+
+function ass_mt.draw_start(ass)
+    ass.text = string.format("%s{\\p%d}", ass.text, ass.scale)
+end
+
+function ass_mt.draw_stop(ass)
+    ass.text = ass.text .. "{\\p0}"
+end
+
+function ass_mt.coord(ass, x, y)
+    local scale = math.pow(2, ass.scale - 1)
+    local ix = math.ceil(x * scale)
+    local iy = math.ceil(y * scale)
+    ass.text = string.format("%s %d %d", ass.text, ix, iy)
+end
+
+function ass_mt.append(ass, s)
+    ass.text = ass.text .. s
+    --state.append_calls = state.append_calls + 1
+end
+
+function ass_mt.pos(ass, x, y)
+    ass:append(string.format("{\\pos(%f,%f)}", x, y))
+end
+
+function ass_mt.an(ass, an)
+    ass:append(string.format("{\\an%d}", an))
+end
+
+function ass_mt.move_to(ass, x, y)
+    ass:append(" m")
+    ass:coord(x, y)
+end
+
+function ass_mt.line_to(ass, x, y)
+    ass:append(" l")
+    ass:coord(x, y)
+end
+
+function ass_mt.bezier_curve(ass, x1, y1, x2, y2, x3, y3)
+    ass:append(" b")
+    ass:coord(x1, y1)
+    ass:coord(x2, y2)
+    ass:coord(x3, y3)
+end
+
+
+function ass_mt.rect_ccw(ass, x0, y0, x1, y1)
+    ass:move_to(x0, y0)
+    ass:line_to(x0, y1)
+    ass:line_to(x1, y1)
+    ass:line_to(x1, y0)
+end
+
+function ass_mt.rect_cw(ass, x0, y0, x1, y1)
+    ass:move_to(x0, y0)
+    ass:line_to(x1, y0)
+    ass:line_to(x1, y1)
+    ass:line_to(x0, y1)
+end
