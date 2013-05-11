@@ -141,8 +141,10 @@ function draw_bar_simple(ass, x, y, w, h, style)
         end
     end
     
-    -- the filling
-    ass:rect_cw(fill_offset, fill_offset, xp, h - fill_offset)
+    -- the filling, draw it only if positive
+    if pos > 0 then
+	    ass:rect_cw(fill_offset, fill_offset, xp, h - fill_offset)
+    end
     
     -- remember where the bar is for seeking
     local b_x, b_y, b_w, b_h = x - (w/2) + fill_offset, y - h + fill_offset, (w - (2*fill_offset)), (h - (2*fill_offset))
@@ -360,8 +362,7 @@ function osc_init ()
     	draw_bar_simple(ass, posX, posY+pos_offsetY-30, pos_offsetX*2, 17, osc_styles.timecodes)
     end
     local down_cmd = function ()
-    
-		-- Ignore identical seeks
+    	-- Ignore identical seeks
 		if state.last_mouse_pos == mp.get_mouse_pos() then
 		else
 			state.last_mouse_pos = mp.get_mouse_pos()
