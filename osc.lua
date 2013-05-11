@@ -2,22 +2,6 @@
 -- frame: size of the containing area
 -- obj: size of the object that should be positioned inside the area
 -- margin: min. distance from object to frame (as long as -1 <= align <= +1)
-function get_align(align, frame, obj, margin)
-    frame = frame - margin * 2
-    return margin + frame / 2 - obj / 2 + (frame - obj) / 2 * align
-end
-
-local state = {
-    osd_visible = false,
-    mouse_down = false,
-    last_mouse_pos,
-    bar_location,
-    mouse_down_counter = 0,
-    active_button = 0,
-    rightTC_trem = false,
-    mp_screen_size,
-    append_calls = 0,
-}
 
 local ass_mt = {}
 ass_mt.__index = ass_mt
@@ -105,10 +89,28 @@ local osc_geo = {
 	osc_r = 10,
 	osc_p = 15,
 	
-	-- calculated by OSC INIT
+	-- calculated by osc_init
 	posX, posY = 0,0, 									-- position of the controler
 	pos_offsetX, pos_offsetY = 0,0, 					-- vertical/horizontal position offset for contents aligned at the borders of the box
 }
+
+
+local state = {
+    osd_visible = false,
+    mouse_down = false,
+    last_mouse_pos,
+    bar_location,
+    mouse_down_counter = 0,
+    active_button = 0,
+    rightTC_trem = false,
+    mp_screen_size,
+    append_calls = 0,
+}
+
+function get_align(align, frame, obj, margin)
+    frame = frame - margin * 2
+    return margin + frame / 2 - obj / 2 + (frame - obj) / 2 * align
+end
 
 function draw_bar_simple(ass, x, y, w, h, style)
     local duration = tonumber(mp.property_get("length"))
@@ -120,10 +122,6 @@ function draw_bar_simple(ass, x, y, w, h, style)
     local fill_offset = border + gap
     local xp = (pos * (w - (2*fill_offset))) + fill_offset
     
-    --ass:new_event()
-    --ass:pos(x, y)
-    --ass:append("{\\an2}")
-    --ass:append(style)
     ass:draw_start()
     -- the box
     ass:rect_cw(0, 0, w, h);
@@ -200,11 +198,6 @@ end
 
 function render_elements(ass)
 
-	-- fetch values
-	--local osc_w, osc_h, osc_r, osc_p = osc_geo.osc_w, osc_geo.osc_h, osc_geo.osc_r, osc_geo.osc_p
-	--local pos_offsetX, pos_offsetY = osc_geo.pos_offsetX, osc_geo.pos_offsetY
-	--local posX, posY = osc_geo.posX, osc_geo.posY
-	
 	for n = 1, #elements do
 		
 		local element = elements[n]
@@ -518,5 +511,5 @@ function mp_update()
     
     local w, h, aspect = mp.get_screen_size()
     mp.set_osd_ass(osc_geo.playresy * aspect, osc_geo.playresy, ass.text)
-    print(ass.text)
+    
 end
