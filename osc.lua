@@ -276,6 +276,7 @@ end
 local osc_styles = {
 	bigButtons = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnWebdings}",
 	bigButtonsDown = "{\\bord0\\1c&H999999\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnWebdings}",
+	bigButtonsDisab = "{\\bord0\\1c&HFFFFFF\\1a&H88&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnWebdings}",
 	timecodes = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs25\\fnArial}",
 	box = "{\\bord1\\1c&H000000\\1a&H64&\\3c&HFFFFFF\\3a&H00&}",
 }
@@ -346,13 +347,26 @@ function osc_init ()
     local down_cmd = function () mp.send_command("no-osd seek 10 relative keyframes") end
     register_element(posX+60, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtons, osc_styles.bigButtonsDown, "", down_cmd, nil, true)
     
-    --prev
-    local up_cmd = function () mp.send_command("add chapter -1") end
-    register_element(posX-120, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtons, osc_styles.bigButtonsDown, "", nil, up_cmd, false)
-    
-    --next
-    local up_cmd = function () mp.send_command("add chapter 1") end
-    register_element(posX+120, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtons, osc_styles.bigButtonsDown, "", nil, up_cmd, false)
+    -- do we have chapters?
+    if (#mp.get_chapter_list()) > 0 then
+	    
+	    --prev
+	    local up_cmd = function () mp.send_command("add chapter -1") end
+	    register_element(posX-120, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtons, osc_styles.bigButtonsDown, "", nil, up_cmd, false)
+	    
+	    --next
+	    local up_cmd = function () mp.send_command("add chapter 1") end
+	    register_element(posX+120, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtons, osc_styles.bigButtonsDown, "", nil, up_cmd, false)
+	    
+	else -- if not, render buttons as disabled and don't attach functions
+		
+	    --prev
+	    register_element(posX-120, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtonsDisab, osc_styles.bigButtonsDisab, "", nil, nil, false)
+	    
+	    --next
+	    register_element(posX+120, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtonsDisab, osc_styles.bigButtonsDisab, "", nil, nil, false)
+	
+	end
     
     -- 
     -- Seekbar
