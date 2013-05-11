@@ -348,8 +348,8 @@ Video output:
   --enable-gl              enable OpenGL video output [autodetect]
   --enable-caca            enable CACA  video output [autodetect]
   --enable-direct3d        enable Direct3D video output [autodetect]
-  --enable-sdl             enable SDL audio output [autodetect]
-  --enable-sdl2            enable SDL 2.0+ audio and video output [autodetect]
+  --enable-sdl             enable SDL audio output [disable]
+  --enable-sdl2            enable SDL 2.0+ audio and video output [disable]
   --enable-xv              enable Xv video output [autodetect]
   --enable-vdpau           enable VDPAU acceleration [autodetect]
   --enable-vm              enable XF86VidMode support [autodetect]
@@ -425,8 +425,8 @@ _xss=auto
 _xv=auto
 _vdpau=auto
 _direct3d=auto
-_sdl=auto
-_sdl2=auto
+_sdl=no
+_sdl2=no
 _dsound=auto
 _mng=auto
 _jpeg=auto
