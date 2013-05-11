@@ -150,12 +150,6 @@ function draw_bar_simple(ass, x, y, w, h, style)
     local b_x, b_y, b_w, b_h = x - (w/2) + fill_offset, y - h + fill_offset, (w - (2*fill_offset)), (h - (2*fill_offset))
     state.bar_location = {b_x=b_x, b_y=b_y, b_w=b_w, b_h=b_h}
 		
-	--ass:new_event()
-	--ass:append("1 b_x:" .. b_x .. " b_y:" .. b_y .. " b_w:" .. b_w .. " b_h:" .. b_h)
-    
-    --ass:new_event()
-	--ass:append("state.bar_location:" .. state.bar_location)
-    
 end
 
 
