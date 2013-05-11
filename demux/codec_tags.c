@@ -102,6 +102,7 @@ static const struct mp_codec_tag mp_audio_codec_tags[] = {
     {0x1                      , "pcm"}, // lavf: pcm_s16le
     {0x3                      , "pcm"}, // lavf: pcm_f32le
     {0xfffe                   , "pcm"},
+    {MKTAG('t', 'w', 'o', 's'), "pcm"},
     // ------- internal mplayer FourCCs ------
     {MKTAG('O', 'p', 'u', 's'), "opus"}, // demux_mkv.c
     {MKTAG('a', 'L', 'a', 'C'), "alac"}, // demux_mkv.c
