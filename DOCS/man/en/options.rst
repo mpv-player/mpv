@@ -717,7 +717,7 @@
     Use OSX's Mission Control's fullscreen feature instead of the custom one
     provided by mpv. This can potentially break a lot of stuff like
     ``--geometry`` and is disabled by default. On the other hand it provides
-    a more 'OS X-like' user exeprience.
+    a more 'OS X-like' user experience.
 
 --gamma=<-100-100>
     Adjust the gamma of the video signal (default: 0). Not supported by all
