@@ -42,7 +42,7 @@ function draw_bar_simple(ass, x, y, w, h, style)
 	local duration = tonumber(mp.property_get("length"))
 	if not (mp.property_get("length") == nil) then
 		
-	    pos = tonumber(mp.property_get("time-pos")) / duration
+	    pos = tonumber(mp.property_get("ratio-pos"))
 		--local pos = tonumber(mp.property_get("percent-pos")) / 100
     end
         
@@ -269,8 +269,8 @@ function osc_init ()
 		local title = mp.property_get_string("media-title")
 		if not (title == nil) then
 			
-			if #title > 85 then
-				title = string.format("{\\fscx%f}", (85 / #title) * 100) ..title
+			if #title > 80 then
+				title = string.format("{\\fscx%f}", (80 / #title) * 100) ..title
 			end
 			
 			ass:append(title)
@@ -317,11 +317,11 @@ function osc_init ()
     if (#mp.get_chapter_list()) > 0 then
 	    
 	    --prev
-	    local up_cmd = function () mp.send_command("add chapter -1") mp.send_command("show_chapters") end
+	    local up_cmd = function () mp.send_command("add chapter -1") end
 	    register_element(posX-120, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", nil, up_cmd, false)
 	    
 	    --next
-	    local up_cmd = function () mp.send_command("add chapter 1") mp.send_command("show_chapters") end
+	    local up_cmd = function () mp.send_command("add chapter 1") end
 	    register_element(posX+120, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", nil, up_cmd, false)
 	    
 	else -- if not, render buttons as disabled and don't attach functions
