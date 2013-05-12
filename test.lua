@@ -1,3 +1,5 @@
+local assdraw = require 'assdraw'
+
 -- align: -1 .. +1
 -- frame: size of the containing area
 -- obj: size of the object that should be positioned inside the area
@@ -5,67 +7,6 @@
 function get_align(align, frame, obj, margin)
     frame = frame - margin * 2
     return margin + frame / 2 - obj / 2 + (frame - obj) / 2 * align
-end
-
-local ass_mt = {}
-ass_mt.__index = ass_mt
-
-function ass_new()
-    return setmetatable({ scale = 4, text = "" }, ass_mt)
-end
-
-function ass_mt.new_event(ass)
-    -- osd_libass.c adds an event per line
-    if #ass.text > 0 then
-        ass.text = ass.text .. "\n"
-    end
-end
-
-function ass_mt.draw_start(ass)
-    ass.text = string.format("%s{\\p%d}", ass.text, ass.scale)
-end
-
-function ass_mt.draw_stop(ass)
-    ass.text = ass.text .. "{\\p0}"
-end
-
-function ass_mt.coord(ass, x, y)
-    local scale = math.pow(2, ass.scale - 1)
-    local ix = math.ceil(x * scale)
-    local iy = math.ceil(y * scale)
-    ass.text = string.format("%s %d %d", ass.text, ix, iy)
-end
-
-function ass_mt.append(ass, s)
-    ass.text = ass.text .. s
-end
-
-function ass_mt.pos(ass, x, y)
-    ass:append(string.format("{\\pos(%f,%f)}", x, y))
-end
-
-function ass_mt.move_to(ass, x, y)
-    ass:append(" m")
-    ass:coord(x, y)
-end
-
-function ass_mt.line_to(ass, x, y)
-    ass:append(" l")
-    ass:coord(x, y)
-end
-
-function ass_mt.rect_ccw(ass, x0, y0, x1, y1)
-    ass:move_to(x0, y0)
-    ass:line_to(x0, y1)
-    ass:line_to(x1, y1)
-    ass:line_to(x1, y0)
-end
-
-function ass_mt.rect_cw(ass, x0, y0, x1, y1)
-    ass:move_to(x0, y0)
-    ass:line_to(x1, y0)
-    ass:line_to(x1, y1)
-    ass:line_to(x0, y1)
 end
 
 function get_bar_location()
@@ -89,7 +30,7 @@ end
 
 function draw_bar(ass)
     local duration = tonumber(mp.property_get("length"))
-    local pos = tonumber(mp.property_get("time-pos")) / duration
+    local pos = tonumber(mp.property_get("ratio-pos"))
 
     local x, y, w, h, border = get_bar_location()
 
@@ -166,14 +107,14 @@ function mp_mouse_click(down)
 
     if x >= b_x and y >= b_y and x <= b_x + b_w and y <= b_y + b_h then
         local duration = tonumber(mp.property_get("length"))
-        local time = (x - b_x) / b_w * duration
-        mp.send_command(string.format("seek %f absolute", time))
+        local time = (x - b_x) / b_w * 100
+        mp.send_command(string.format("seek %f absolute-percent", time))
     end
 end
 
 -- called by mpv on every frame
 function mp_update()
-    local ass = ass_new()
+    local ass = assdraw.ass_new()
 
     local x, y = mp.get_mouse_pos()
     local now = mp.get_timer()

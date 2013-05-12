@@ -292,6 +292,24 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_ratio_pos(m_option_t *prop, int action,
+                                   void *arg, MPContext *mpctx)
+{
+    if (!mpctx->num_sources)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_SET: ;
+        double pos = *(double *)arg;
+        queue_seek(mpctx, MPSEEK_FACTOR, pos, 0);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET:
+        *(double *)arg = get_current_pos_ratio(mpctx);
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 /// Current position in seconds (RW)
 static int mp_property_time_pos(m_option_t *prop, int action,
                                 void *arg, MPContext *mpctx)
@@ -1366,6 +1384,8 @@ static const m_option_t mp_properties[] = {
     { "avsync", mp_property_avsync, CONF_TYPE_DOUBLE },
     { "percent-pos", mp_property_percent_pos, CONF_TYPE_INT,
       M_OPT_RANGE, 0, 100, NULL },
+    { "ratio-pos", mp_property_ratio_pos, CONF_TYPE_DOUBLE,
+      M_OPT_RANGE, 0, 1, NULL },
     { "time-pos", mp_property_time_pos, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
     { "time-remaining", mp_property_remaining, CONF_TYPE_TIME },
