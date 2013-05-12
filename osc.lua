@@ -1,7 +1,4 @@
--- align: -1 .. +1
--- frame: size of the containing area
--- obj: size of the object that should be positioned inside the area
--- margin: min. distance from object to frame (as long as -1 <= align <= +1)
+
 
 local ass_mt = {}
 ass_mt.__index = ass_mt
@@ -81,17 +78,17 @@ end
 
 local osc_geo = {
 	-- static
-	playresx = 1280,									-- canvas size X
-	playresy = 720,										-- canvas size Y
-	valign = 1,											-- vertical alignment, -1 (top) to 1 (bottom)
-	osc_w = 550,										-- width, height, corner-radius, padding of the box
+	playresx = 1280,						-- canvas size X
+	playresy = 720,							-- canvas size Y
+	valign = 1,								-- vertical alignment, -1 (top) to 1 (bottom)
+	osc_w = 550,							-- width, height, corner-radius, padding of the box
 	osc_h = 150,
 	osc_r = 10,
 	osc_p = 15,
 	
 	-- calculated by osc_init
-	posX, posY = 0,0, 									-- position of the controler
-	pos_offsetX, pos_offsetY = 0,0, 					-- vertical/horizontal position offset for contents aligned at the borders of the box
+	posX, posY = 0,0, 						-- position of the controler
+	pos_offsetX, pos_offsetY = 0,0, 		-- vertical/horizontal position offset for contents aligned at the borders of the box
 }
 
 
@@ -107,15 +104,25 @@ local state = {
     append_calls = 0,
 }
 
+-- align: -1 .. +1
+-- frame: size of the containing area
+-- obj: size of the object that should be positioned inside the area
+-- margin: min. distance from object to frame (as long as -1 <= align <= +1)
 function get_align(align, frame, obj, margin)
     frame = frame - margin * 2
     return margin + frame / 2 - obj / 2 + (frame - obj) / 2 * align
 end
 
 function draw_bar_simple(ass, x, y, w, h, style)
-    local duration = tonumber(mp.property_get("length"))
-    local pos = tonumber(mp.property_get("time-pos")) / duration
-    
+	local pos = 0
+	if not (mp.property_get("length") == nil) then
+		local duration = tonumber(mp.property_get("length"))
+	    pos = tonumber(mp.property_get("time-pos")) / duration
+	else
+		
+    	--local pos = tonumber(mp.property_get("percent-pos")) / 100
+    end
+        
     -- thickness of border and gap between border and filling bar
     local border, gap = 1, 2
     
@@ -135,8 +142,8 @@ function draw_bar_simple(ass, x, y, w, h, style)
     	if chapters[n].time > 0 then
 	        local s = (chapters[n].time / duration * (w - (2*fill_offset))) + fill_offset
 	        	
-	        	ass:rect_cw(s - 1, 1, s, 2);
-	        	ass:rect_cw(s - 1, h - 2, s, h - 1);
+	        ass:rect_cw(s - 1, 1, s, 2);
+	        ass:rect_cw(s - 1, h - 2, s, h - 1);
 	        
         end
     end
@@ -212,7 +219,11 @@ function render_elements(ass)
 			
 			
 			if mX >= bX1 and mX <= bX2 and mY >= bY1 and mY <= bY2 then
-				style = element.styleB
+				if element.styleB == nil then
+				else
+					style = style .. element.styleB
+				end
+				
 				if element.down_cmd == nil then
 				elseif element.down_repeat == false then
 					element.down_cmd()
@@ -275,9 +286,10 @@ end
 
 local osc_styles = {
 	bigButtons = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnWebdings}",
-	bigButtonsDown = "{\\bord0\\1c&H999999\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnWebdings}",
-	bigButtonsDisab = "{\\bord0\\1c&HFFFFFF\\1a&H88&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnWebdings}",
+	elementDown = "{\\1c&H999999}",
+	elementDisab = "{\\1a&H88&}",
 	timecodes = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs25\\fnArial}",
+	vidtitle = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs12\\fnArial}",
 	box = "{\\bord1\\1c&H000000\\1a&H64&\\3c&HFFFFFF\\3a&H00&}",
 }
 
@@ -323,10 +335,16 @@ function osc_init ()
 	    ass:draw_stop()
     end
 	register_element(posX, posY, 5, 0, 0, osc_styles.box, osc_styles.box, contentF, nil, nil, false)
+	
+	-- title
+	local contentF = function (ass) return ass:append(mp.property_get_string("media-title")) end
+    register_element(posX, posY - pos_offsetY - 10, 8, 0, 0, osc_styles.vidtitle, nil, contentF, nil, nil, false)
 
 	--
 	-- Big buttons
 	-- 
+	
+	local bbposY = posY - pos_offsetY + 10
 	
     --play/pause
     local contentF = function (ass) 
@@ -337,34 +355,33 @@ function osc_init ()
     	end
     end
     local up_cmd = function () mp.send_command("no-osd cycle pause") end
-    register_element(posX, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtons, osc_styles.bigButtonsDown, contentF, nil, up_cmd, false)
+    register_element(posX, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, contentF, nil, up_cmd, false)
     
     --skipback
     local down_cmd = function () mp.send_command("no-osd seek -5 relative keyframes") end
-    register_element(posX-60, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtons, osc_styles.bigButtonsDown, "", down_cmd, nil, true)
+    register_element(posX-60, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", down_cmd, nil, true)
     
     --skipfrwd
     local down_cmd = function () mp.send_command("no-osd seek 10 relative keyframes") end
-    register_element(posX+60, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtons, osc_styles.bigButtonsDown, "", down_cmd, nil, true)
+    register_element(posX+60, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", down_cmd, nil, true)
     
     -- do we have chapters?
     if (#mp.get_chapter_list()) > 0 then
 	    
 	    --prev
 	    local up_cmd = function () mp.send_command("add chapter -1") end
-	    register_element(posX-120, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtons, osc_styles.bigButtonsDown, "", nil, up_cmd, false)
+	    register_element(posX-120, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", nil, up_cmd, false)
 	    
 	    --next
 	    local up_cmd = function () mp.send_command("add chapter 1") end
-	    register_element(posX+120, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtons, osc_styles.bigButtonsDown, "", nil, up_cmd, false)
+	    register_element(posX+120, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", nil, up_cmd, false)
 	    
 	else -- if not, render buttons as disabled and don't attach functions
-		
 	    --prev
-	    register_element(posX-120, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtonsDisab, osc_styles.bigButtonsDisab, "", nil, nil, false)
+	    register_element(posX-120, bbposY, 8, 40, 40, (osc_styles.bigButtons .. osc_styles.elementDisab), nil, "", nil, nil, false)
 	    
 	    --next
-	    register_element(posX+120, posY - pos_offsetY, 8, 40, 40, osc_styles.bigButtonsDisab, osc_styles.bigButtonsDisab, "", nil, nil, false)
+	    register_element(posX+120, bbposY, 8, 40, 40, (osc_styles.bigButtons .. osc_styles.elementDisab), nil, "", nil, nil, false)
 	
 	end
     
@@ -372,9 +389,11 @@ function osc_init ()
     -- Seekbar
     -- 
     
+    -- do we have a usuable duration?
     local contentF = function (ass) 
-    	draw_bar_simple(ass, posX, posY+pos_offsetY-30, pos_offsetX*2, 17, osc_styles.timecodes)
-    end
+	    	draw_bar_simple(ass, posX, posY+pos_offsetY-30, pos_offsetX*2, 17, osc_styles.timecodes)
+	end
+    
     local down_cmd = function ()
     	-- Ignore identical seeks
 		if state.last_mouse_pos == mp.get_mouse_pos() then
@@ -393,7 +412,12 @@ function osc_init ()
 	    
 	    end
     end
-    register_element(posX, posY+pos_offsetY-30, 2, pos_offsetX*2, 17, osc_styles.timecodes, osc_styles.timecodes, contentF, down_cmd, nil, false)
+    -- do we have a usuable duration?
+    if (not (mp.property_get("length") == nil)) and (tonumber(mp.property_get("length")) > 0) then
+	    register_element(posX, posY+pos_offsetY-30, 2, pos_offsetX*2, 17, osc_styles.timecodes, nil, contentF, down_cmd, nil, false)
+	else
+		register_element(posX, posY+pos_offsetY-30, 2, pos_offsetX*2, 17, (osc_styles.timecodes .. osc_styles.elementDisab), nil, contentF, nil, nil, false)
+	end
     
     --
     -- Timecodes
@@ -401,7 +425,7 @@ function osc_init ()
     
     -- left (current pos)
     local contentF = function (ass) return ass:append(mp.property_get_string("time-pos")) end
-    register_element(posX - pos_offsetX, posY + pos_offsetY, 1, 110, 25, osc_styles.timecodes, osc_styles.timecodes, contentF, nil, nil, false)
+    register_element(posX - pos_offsetX, posY + pos_offsetY, 1, 110, 25, osc_styles.timecodes, nil, contentF, nil, nil, false)
     
     -- right (total/remaining time)
     local contentF = function (ass)
@@ -412,7 +436,10 @@ function osc_init ()
     	end
     end
     local up_cmd = function () state.rightTC_trem = not state.rightTC_trem end
-    register_element(posX + pos_offsetX, posY + pos_offsetY, 3, 110, 25, osc_styles.timecodes, osc_styles.timecodes, contentF, nil, up_cmd, false)
+    -- do we have a usuable duration?
+    if (not (mp.property_get("length") == nil)) and (tonumber(mp.property_get("length")) > 0) then
+	    register_element(posX + pos_offsetX, posY + pos_offsetY, 3, 110, 25, osc_styles.timecodes, nil, contentF, nil, up_cmd, false)
+	end
 	
 end
 
