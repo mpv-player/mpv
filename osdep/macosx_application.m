@@ -120,7 +120,11 @@ static pthread_t playback_thread_id;
 
 - (void)stopPlayback
 {
-    mplayer_put_key(app.keyFIFO, MP_KEY_CLOSE_WIN);
+    if (app.keyFIFO) {
+        mplayer_put_key(app.keyFIFO, MP_KEY_CLOSE_WIN);
+    } else {
+        terminate_cocoa_application();
+    }
 }
 
 - (void)registerMenuItem:(NSMenuItem*)menuItem forKey:(MPMenuKey)key
