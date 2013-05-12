@@ -501,7 +501,7 @@ int device_id, display_help = 0;
 
     struct mp_chmap_sel chmap_sel = {0};
     mp_chmap_sel_add_waveext(&chmap_sel);
-    if (!ao_chmap_sel_adjust(&ao_data, &ao_data.channels, &chmap_sel))
+    if (!ao_chmap_sel_adjust(&ao_data, &chmap_sel, &ao_data.channels))
         goto err_out;
 
 	// Build Description for the input format
