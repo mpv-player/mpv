@@ -53,8 +53,7 @@
 #define AF_FORMAT_16BIT		(1<<3)
 #define AF_FORMAT_24BIT		(2<<3)
 #define AF_FORMAT_32BIT		(3<<3)
-#define AF_FORMAT_40BIT		(4<<3)
-#define AF_FORMAT_48BIT		(5<<3)
+#define AF_FORMAT_64BIT		(4<<3)
 #define AF_FORMAT_BITS_MASK	(7<<3)
 
 // Special flags refering to non pcm data (note: 1<<6, 2<<6, 5<<6 unused)
@@ -85,6 +84,9 @@
 #define AF_FORMAT_FLOAT_LE	(AF_FORMAT_F|AF_FORMAT_32BIT|AF_FORMAT_LE)
 #define AF_FORMAT_FLOAT_BE	(AF_FORMAT_F|AF_FORMAT_32BIT|AF_FORMAT_BE)
 
+#define AF_FORMAT_DOUBLE_LE     (AF_FORMAT_F|AF_FORMAT_64BIT|AF_FORMAT_LE)
+#define AF_FORMAT_DOUBLE_BE     (AF_FORMAT_F|AF_FORMAT_64BIT|AF_FORMAT_BE)
+
 #define AF_FORMAT_AC3_LE	(AF_FORMAT_AC3|AF_FORMAT_16BIT|AF_FORMAT_LE)
 #define AF_FORMAT_AC3_BE	(AF_FORMAT_AC3|AF_FORMAT_16BIT|AF_FORMAT_BE)
 
@@ -99,6 +101,7 @@
 #define AF_FORMAT_U32_NE AF_FORMAT_U32_BE
 #define AF_FORMAT_S32_NE AF_FORMAT_S32_BE
 #define AF_FORMAT_FLOAT_NE AF_FORMAT_FLOAT_BE
+#define AF_FORMAT_DOUBLE_NE AF_FORMAT_DOUBLE_BE
 #define AF_FORMAT_AC3_NE AF_FORMAT_AC3_BE
 #define AF_FORMAT_IEC61937_NE AF_FORMAT_IEC61937_BE
 #else
@@ -109,6 +112,7 @@
 #define AF_FORMAT_U32_NE AF_FORMAT_U32_LE
 #define AF_FORMAT_S32_NE AF_FORMAT_S32_LE
 #define AF_FORMAT_FLOAT_NE AF_FORMAT_FLOAT_LE
+#define AF_FORMAT_DOUBLE_NE AF_FORMAT_DOUBLE_LE
 #define AF_FORMAT_AC3_NE AF_FORMAT_AC3_LE
 #define AF_FORMAT_IEC61937_NE AF_FORMAT_IEC61937_LE
 #endif
@@ -127,7 +131,6 @@ extern const struct af_fmt_entry af_fmtstr_table[];
 
 int af_str2fmt_short(bstr str);
 int af_fmt2bits(int format);
-int af_bits2fmt(int bits);
 char* af_fmt2str(int format, char* str, int size);
 const char* af_fmt2str_short(int format);
 

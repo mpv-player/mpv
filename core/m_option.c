@@ -1604,6 +1604,48 @@ const m_option_type_t m_option_type_afmt = {
     .copy  = copy_opt,
 };
 
+#include "audio/chmap.h"
+
+static int parse_chmap(const m_option_t *opt, struct bstr name,
+                       struct bstr param, void *dst)
+{
+    // min>0: at least min channels, min=0: empty ok, min=-1: invalid ok
+    int min_ch = (opt->flags & M_OPT_MIN) ? opt->min : 1;
+
+    if (bstr_equals0(param, "help")) {
+        mp_chmap_print_help(MSGT_CFGPARSER, MSGL_INFO);
+        return M_OPT_EXIT - 1;
+    }
+
+    if (param.len == 0 && min_ch >= 1)
+        return M_OPT_MISSING_PARAM;
+
+    struct mp_chmap res = {0};
+    if (!mp_chmap_from_str(&res, param)) {
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+               "Error parsing channel layout: %.*s\n", BSTR_P(param));
+        return M_OPT_INVALID;
+    }
+
+    if ((min_ch > 0 && !mp_chmap_is_valid(&res)) ||
+        (min_ch >= 0 && mp_chmap_is_empty(&res)))
+    {
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+               "Invalid channel layout: %.*s\n", BSTR_P(param));
+        return M_OPT_INVALID;
+    }
+
+    *(struct mp_chmap *)dst = res;
+
+    return 1;
+}
+
+const m_option_type_t m_option_type_chmap = {
+    .name  = "Audio channels or channel map",
+    .size  = sizeof(struct mp_chmap *),
+    .parse = parse_chmap,
+    .copy  = copy_opt,
+};
 
 static int parse_timestring(struct bstr str, double *time, char endchar)
 {

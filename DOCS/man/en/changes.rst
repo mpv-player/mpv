@@ -124,6 +124,7 @@ Command line switches
     -afm hwac3                          --ad=spdif:ac3,spdif:dts
     -x W, -y H                          --geometry=WxH + --no-keepaspect
     -xy W                               --autofit=W
+    -a52drc level                       --ad-lavc-ac3drc=level
     =================================== ===================================
 
 *NOTE*: ``-opt val`` becomes ``--opt=val``.

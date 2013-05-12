@@ -48,11 +48,17 @@ static int init(struct ao *ao, char *params)
 {
     struct priv *priv = talloc_zero(ao, struct priv);
     ao->priv = priv;
+
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_any(&sel);
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+        return -1;
+
     int samplesize = af_fmt2bits(ao->format) / 8;
-    ao->outburst = 256 * ao->channels * samplesize;
+    ao->outburst = 256 * ao->channels.num * samplesize;
     // A "buffer" for about 0.2 seconds of audio
     ao->buffersize = (int)(ao->samplerate * 0.2 / 256 + 1) * ao->outburst;
-    ao->bps = ao->channels * ao->samplerate * samplesize;
+    ao->bps = ao->channels.num * ao->samplerate * samplesize;
     priv->last_time = GetTimer();
 
     return 0;
@@ -110,7 +116,6 @@ static float get_delay(struct ao *ao)
 }
 
 const struct ao_driver audio_out_null = {
-    .is_new = true,
     .info = &(const struct ao_info) {
         "Null audio output",
         "null",

@@ -52,10 +52,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     for(i=0;i<af->data->nch;i++)
       free(s->q[i]);
 
-    af->data->rate   = ((struct mp_audio*)arg)->rate;
-    af->data->nch    = ((struct mp_audio*)arg)->nch;
-    af->data->format = ((struct mp_audio*)arg)->format;
-    af->data->bps    = ((struct mp_audio*)arg)->bps;
+    mp_audio_copy_config(af->data, (struct mp_audio*)arg);
 
     // Allocate new delay queues
     for(i=0;i<af->data->nch;i++){

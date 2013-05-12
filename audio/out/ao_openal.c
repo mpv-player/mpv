@@ -53,7 +53,7 @@ static const ao_info_t info =
 
 LIBAO_EXTERN(openal)
 
-#define MAX_CHANS 8
+#define MAX_CHANS MP_NUM_CHANNELS
 #define NUM_BUF 128
 #define CHUNK_SIZE 512
 static ALuint buffers[MAX_CHANS][NUM_BUF];
@@ -109,15 +109,29 @@ static void list_devices(void) {
   }
 }
 
-static int init(int rate, int channels, int format, int flags) {
+struct speaker {
+    int id;
+    float pos[3];
+};
+
+static const struct speaker speaker_pos[] = {
+    {MP_SPEAKER_ID_FL,   {-1, 0, 0.5}},
+    {MP_SPEAKER_ID_FR,   { 1, 0, 0.5}},
+    {MP_SPEAKER_ID_FC,   { 0, 0,   1}},
+    {MP_SPEAKER_ID_LFE,  { 0, 0, 0.1}},
+    {MP_SPEAKER_ID_BL,   {-1, 0,  -1}},
+    {MP_SPEAKER_ID_BR,   { 1, 0,  -1}},
+    {MP_SPEAKER_ID_BC,   { 0, 0,  -1}},
+    {MP_SPEAKER_ID_SL,   {-1, 0,   0}},
+    {MP_SPEAKER_ID_SR,   { 1, 0,   0}},
+    {-1},
+};
+
+static int init(int rate, const struct mp_chmap *channels, int format,
+                int flags)
+{
   float position[3] = {0, 0, 0};
   float direction[6] = {0, 0, 1, 0, -1, 0};
-  float sppos[MAX_CHANS][3] = {
-    {-1, 0, 0.5}, {1, 0, 0.5},
-    {-1, 0,  -1}, {1, 0,  -1},
-    {0,  0,   1}, {0, 0, 0.1},
-    {-1, 0,   0}, {1, 0,   0},
-  };
   ALCdevice *dev = NULL;
   ALCcontext *ctx = NULL;
   ALCint freq = 0;
@@ -137,9 +151,22 @@ static int init(int rate, int channels, int format, int flags) {
     list_devices();
     goto err_out;
   }
-  if (channels > MAX_CHANS) {
-    mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] Invalid number of channels: %i\n", channels);
+  struct mp_chmap_sel sel = {0};
+  for (i = 0; speaker_pos[i].id != -1; i++)
+    mp_chmap_sel_add_speaker(&sel, speaker_pos[i].id);
+  if (!ao_chmap_sel_adjust(&ao_data, &sel, &ao_data.channels))
     goto err_out;
+  struct speaker speakers[MAX_CHANS];
+  for (i = 0; i < ao_data.channels.num; i++) {
+    speakers[i].id = -1;
+    for (int n = 0; speaker_pos[n].id >= 0; n++) {
+      if (speaker_pos[n].id == ao_data.channels.speaker[i])
+        speakers[i] = speaker_pos[n];
+    }
+    if (speakers[i].id < 0) {
+      mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] Unknown channel layout\n");
+      goto err_out;
+    }
   }
   dev = alcOpenDevice(device);
   if (!dev) {
@@ -150,25 +177,22 @@ static int init(int rate, int channels, int format, int flags) {
   alcMakeContextCurrent(ctx);
   alListenerfv(AL_POSITION, position);
   alListenerfv(AL_ORIENTATION, direction);
-  alGenSources(channels, sources);
-  for (i = 0; i < channels; i++) {
+  alGenSources(ao_data.channels.num, sources);
+  for (i = 0; i < ao_data.channels.num; i++) {
     cur_buf[i] = 0;
     unqueue_buf[i] = 0;
     alGenBuffers(NUM_BUF, buffers[i]);
-    alSourcefv(sources[i], AL_POSITION, sppos[i]);
+    alSourcefv(sources[i], AL_POSITION, speakers[i].pos);
     alSource3f(sources[i], AL_VELOCITY, 0, 0, 0);
   }
-  if (channels == 1)
-    alSource3f(sources[0], AL_POSITION, 0, 0, 1);
-  ao_data.channels = channels;
   alcGetIntegerv(dev, ALC_FREQUENCY, 1, &freq);
   if (alcGetError(dev) == ALC_NO_ERROR && freq)
     rate = freq;
   ao_data.samplerate = rate;
   ao_data.format = AF_FORMAT_S16_NE;
-  ao_data.bps = channels * rate * 2;
+  ao_data.bps = ao_data.channels.num * rate * 2;
   ao_data.buffersize = CHUNK_SIZE * NUM_BUF;
-  ao_data.outburst = channels * CHUNK_SIZE;
+  ao_data.outburst = ao_data.channels.num * CHUNK_SIZE;
   tmpbuf = malloc(CHUNK_SIZE);
   free(device);
   return 1;
@@ -200,7 +224,7 @@ static void uninit(int immed) {
 static void unqueue_buffers(void) {
   ALint p;
   int s;
-  for (s = 0;  s < ao_data.channels; s++) {
+  for (s = 0;  s < ao_data.channels.num; s++) {
     int till_wrap = NUM_BUF - unqueue_buf[s];
     alGetSourcei(sources[s], AL_BUFFERS_PROCESSED, &p);
     if (p >= till_wrap) {
@@ -219,7 +243,7 @@ static void unqueue_buffers(void) {
  * \brief stop playing and empty buffers (for seeking/pause)
  */
 static void reset(void) {
-  alSourceStopv(ao_data.channels, sources);
+  alSourceStopv(ao_data.channels.num, sources);
   unqueue_buffers();
 }
 
@@ -227,14 +251,14 @@ static void reset(void) {
  * \brief stop playing, keep buffers (for pause)
  */
 static void audio_pause(void) {
-  alSourcePausev(ao_data.channels, sources);
+  alSourcePausev(ao_data.channels.num, sources);
 }
 
 /**
  * \brief resume playing, after audio_pause()
  */
 static void audio_resume(void) {
-  alSourcePlayv(ao_data.channels, sources);
+  alSourcePlayv(ao_data.channels.num, sources);
 }
 
 static int get_space(void) {
@@ -243,7 +267,7 @@ static int get_space(void) {
   alGetSourcei(sources[0], AL_BUFFERS_QUEUED, &queued);
   queued = NUM_BUF - queued - 3;
   if (queued < 0) return 0;
-  return queued * CHUNK_SIZE * ao_data.channels;
+  return queued * CHUNK_SIZE * ao_data.channels.num;
 }
 
 /**
@@ -254,22 +278,22 @@ static int play(void *data, int len, int flags) {
   int i, j, k;
   int ch;
   int16_t *d = data;
-  len /= ao_data.channels * CHUNK_SIZE;
+  len /= ao_data.channels.num * CHUNK_SIZE;
   for (i = 0; i < len; i++) {
-    for (ch = 0; ch < ao_data.channels; ch++) {
-      for (j = 0, k = ch; j < CHUNK_SIZE / 2; j++, k += ao_data.channels)
+    for (ch = 0; ch < ao_data.channels.num; ch++) {
+      for (j = 0, k = ch; j < CHUNK_SIZE / 2; j++, k += ao_data.channels.num)
         tmpbuf[j] = d[k];
       alBufferData(buffers[ch][cur_buf[ch]], AL_FORMAT_MONO16, tmpbuf,
                      CHUNK_SIZE, ao_data.samplerate);
       alSourceQueueBuffers(sources[ch], 1, &buffers[ch][cur_buf[ch]]);
       cur_buf[ch] = (cur_buf[ch] + 1) % NUM_BUF;
     }
-    d += ao_data.channels * CHUNK_SIZE / 2;
+    d += ao_data.channels.num * CHUNK_SIZE / 2;
   }
   alGetSourcei(sources[0], AL_SOURCE_STATE, &state);
   if (state != AL_PLAYING) // checked here in case of an underrun
-    alSourcePlayv(ao_data.channels, sources);
-  return len * ao_data.channels * CHUNK_SIZE;
+    alSourcePlayv(ao_data.channels.num, sources);
+  return len * ao_data.channels.num * CHUNK_SIZE;
 }
 
 static float get_delay(void) {

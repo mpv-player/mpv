@@ -29,24 +29,17 @@
 int af_fmt2bits(int format)
 {
     if (AF_FORMAT_IS_AC3(format)) return 16;
-    return (format & AF_FORMAT_BITS_MASK)+8;
-//    return (((format & AF_FORMAT_BITS_MASK)>>3)+1) * 8;
-#if 0
+    if (format == AF_FORMAT_UNKNOWN)
+        return 0;
     switch(format & AF_FORMAT_BITS_MASK)
     {
 	case AF_FORMAT_8BIT: return 8;
 	case AF_FORMAT_16BIT: return 16;
 	case AF_FORMAT_24BIT: return 24;
 	case AF_FORMAT_32BIT: return 32;
-	case AF_FORMAT_48BIT: return 48;
+	case AF_FORMAT_64BIT: return 64;
     }
-#endif
-    return -1;
-}
-
-int af_bits2fmt(int bits)
-{
-    return (bits/8 - 1) << 3;
+    return 0;
 }
 
 /* Convert format to str input str is a buffer for the
@@ -94,6 +87,9 @@ const struct af_fmt_entry af_fmtstr_table[] = {
     { "floatle", AF_FORMAT_FLOAT_LE },
     { "floatbe", AF_FORMAT_FLOAT_BE },
     { "floatne", AF_FORMAT_FLOAT_NE },
+    { "doublele", AF_FORMAT_DOUBLE_LE },
+    { "doublebe", AF_FORMAT_DOUBLE_BE },
+    { "doublene", AF_FORMAT_DOUBLE_NE },
 
     {0}
 };

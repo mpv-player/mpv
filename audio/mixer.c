@@ -217,7 +217,7 @@ void mixer_setbalance(mixer_t *mixer, float val)
                            AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val))
         return;
 
-    if (val == 0 || mixer->ao->channels < 2)
+    if (val == 0 || mixer->ao->channels.num < 2)
         return;
 
     if (!(af_pan_balance = af_add(mixer->afilter, "pan"))) {

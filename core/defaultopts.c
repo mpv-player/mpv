@@ -4,6 +4,7 @@
 #include "defaultopts.h"
 #include "core/options.h"
 #include "audio/mixer.h"
+#include "audio/chmap.h"
 
 void set_default_mplayer_options(struct MPOpts *opts)
 {
@@ -72,10 +73,9 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .audio_display = 1,
         .sub_visibility = 1,
         .extension_parsing = 1,
-        .audio_output_channels = 2,
+        .audio_output_channels = MP_CHMAP_INIT_STEREO,
         .audio_output_format = -1,  // AF_FORMAT_UNKNOWN
         .playback_speed = 1.,
-        .drc_level = 1.,
         .movie_aspect = -1.,
         .sub_auto = 1,
         .osd_bar_visible = 1,
@@ -92,6 +92,10 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .lavc_param = {
             .workaround_bugs = 1, // autodetect
             .error_concealment = 3,
+        },
+        .ad_lavc_param = {
+            .ac3drc = 1.,
+            .downmix = 1,
         },
         .input = {
              .key_fifo_size = 7,

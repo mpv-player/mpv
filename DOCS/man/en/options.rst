@@ -1,11 +1,3 @@
---a52drc=<level>
-    Select the Dynamic Range Compression level for AC-3 audio streams. <level>
-    is a float value ranging from 0 to 1, where 0 means no compression and 1
-    (which is the default) means full compression (make loud passages more
-    silent and vice versa). Values up to 2 are also accepted, but are purely
-    experimental. This option only shows an effect if the AC-3 stream contains
-    the required range compression information.
-
 --abs=<value>
     (``--ao=oss`` only) (OBSOLETE)
     Override audio driver/card buffer size detection.
@@ -37,46 +29,31 @@
     ``--ad=help``
         List all available decoders.
 
+--ad-lavc-ac3drc=<level>
+    Select the Dynamic Range Compression level for AC-3 audio streams. <level>
+    is a float value ranging from 0 to 1, where 0 means no compression and 1
+    (which is the default) means full compression (make loud passages more
+    silent and vice versa). Values up to 2 are also accepted, but are purely
+    experimental. This option only shows an effect if the AC-3 stream contains
+    the required range compression information.
+
+--ad-lavc-downmix=<yes|no>
+    Whether to request audio channel downmixing from the decoder (default: yes).
+    Some decoders, like AC-3, AAC and DTS, can remix audio on decoding. The
+    requested number of output channels is set with the ``--channels`` option.
+    Useful for playing surround audio on a stereo system.
+
+--ad-lavc-o=<key>=<value>[,<key>=<value>[,...]]
+    Pass AVOptions to libavcodec decoder. Note, a patch to make the o=
+    unneeded and pass all unknown options through the AVOption system is
+    welcome. A full list of AVOptions can be found in the FFmpeg manual.
+
 --af=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of audio filters to apply to the audio stream. See
     `audio_filters` for details and descriptions of the available filters.
     The option variants ``--af-add``, ``--af-pre``, ``--af-del`` and
     ``--af-clr`` exist to modify a previously specified list, but you
     shouldn't need these for typical use.
-
---af-adv=<force=(0-7):list=(filters)>
-    See also ``--af``.
-    Specify advanced audio filter options:
-
-    force=<0-7>
-        Forces the insertion of audio filters to one of the following:
-
-        0
-            Use completely automatic filter insertion (currently identical to
-            1).
-        1
-            Optimize for accuracy (default).
-        2
-            Optimize for speed. *Warning*: Some features in the audio filters
-            may silently fail, and the sound quality may drop.
-        3
-            Use no automatic insertion of filters and no optimization.
-            *Warning*: It may be possible to crash mpv using this setting.
-        4
-            Use automatic insertion of filters according to 0 above, but use
-            floating point processing when possible.
-        5
-            Use automatic insertion of filters according to 1 above, but use
-            floating point processing when possible.
-        6
-            Use automatic insertion of filters according to 2 above, but use
-            floating point processing when possible.
-        7
-            Use no automatic insertion of filters according to 3 above, and
-            use floating point processing when possible.
-
-    list=<filters>
-        Same as ``--af``.
 
 --aid=<ID|auto|no>
     Select audio channel. ``auto`` selects the default, ``no`` disables audio.
@@ -381,25 +358,24 @@
 --cdrom-device=<path>
     Specify the CD-ROM device (default: ``/dev/cdrom``).
 
---channels=<number>
+--channels=<number|layout>
     Request the number of playback channels (default: 2). mpv asks the
     decoder to decode the audio into as many channels as specified. Then it is
     up to the decoder to fulfill the requirement. This is usually only
-    important when playing videos with AC-3 audio (like DVDs). In that case
-    liba52 does the decoding by default and correctly downmixes the audio into
-    the requested number of channels. To directly control the number of output
-    channels independently of how many channels are decoded, use the channels
-    filter (``--af=channels``).
+    important when playing videos with AC-3, AAC or DTS audio. In that case
+    libavcodec downmixes the audio into the requested number of channels if
+    possible.
 
     *NOTE*: This option is honored by codecs (AC-3 only), filters (surround)
     and audio output drivers (OSS at least).
 
-    Available options are:
+    The ``--channels`` option either takes a channel number or an explicit
+    channel layout. Channel numbers refer to default layouts, e.g. 2 channels
+    refer to stereo, 6 refers to 5.1.
 
-    :2: stereo
-    :4: surround
-    :6: full 5.1
-    :8: full 7.1
+    See ``--channels=help`` output for defined default layouts. This also
+    lists speaker names, which can be used to express arbitrary channel
+    layouts (e.g. ``fl-fr-lfe`` is 2.1).
 
 --chapter=<start[-end]>
     Specify which chapter to start playing at. Optionally specify which
@@ -1985,9 +1961,8 @@
 --srate=<Hz>
     Select the output sample rate to be used (of course sound cards have
     limits on this). If the sample frequency selected is different from that
-    of the current media, the resample or lavcresample audio filter will be
-    inserted into the audio filter layer to compensate for the difference. The
-    type of resampling can be controlled by the ``--af-adv`` option.
+    of the current media, the lavrresample audio filter will be
+    inserted into the audio filter layer to compensate for the difference.
 
 --start=<relative time>
     Seek to given time position.

@@ -50,7 +50,7 @@ static const ao_info_t info =
 LIBAO_EXTERN(jack)
 
 //! maximum number of channels supported, avoids lots of mallocs
-#define MAX_CHANS 8
+#define MAX_CHANS MP_NUM_CHANNELS
 static jack_port_t *ports[MAX_CHANS];
 static int num_ports; ///< Number of used ports == number of channels
 static jack_client_t *client;
@@ -202,7 +202,8 @@ static void print_help (void)
          );
 }
 
-static int init(int rate, int channels, int format, int flags) {
+static int init(int rate, const struct mp_chmap *channels, int format, int flags)
+{
   const char **matching_ports = NULL;
   char *port_name = NULL;
   char *client_name = NULL;
@@ -222,10 +223,12 @@ static int init(int rate, int channels, int format, int flags) {
     print_help();
     return 0;
   }
-  if (channels > MAX_CHANS) {
-    mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] Invalid number of channels: %i\n", channels);
+
+  struct mp_chmap_sel sel = {0};
+  mp_chmap_sel_add_waveext(&sel);
+  if (!ao_chmap_sel_adjust(&ao_data, &sel, &ao_data.channels))
     goto err_out;
-  }
+
   if (!client_name) {
     client_name = malloc(40);
     sprintf(client_name, "mpv [%d]", getpid());
@@ -249,9 +252,9 @@ static int init(int rate, int channels, int format, int flags) {
     goto err_out;
   }
   i = 1;
+  num_ports = ao_data.channels.num;
   while (matching_ports[i]) i++;
-  if (channels > i) channels = i;
-  num_ports = channels;
+  if (num_ports > i) num_ports = i;
 
   // create out output ports
   for (i = 0; i < num_ports; i++) {
@@ -281,10 +284,12 @@ static int init(int rate, int channels, int format, int flags) {
                  / (float)rate;
   callback_interval = 0;
 
-  ao_data.channels = channels;
+  if (!ao_chmap_sel_get_def(&ao_data, &sel, &ao_data.channels, num_ports))
+    goto err_out;
+
   ao_data.samplerate = rate;
   ao_data.format = AF_FORMAT_FLOAT_NE;
-  ao_data.bps = channels * rate * sizeof(float);
+  ao_data.bps = ao_data.channels.num * rate * sizeof(float);
   ao_data.buffersize = CHUNK_SIZE * NUM_CHUNKS;
   ao_data.outburst = CHUNK_SIZE;
   free(matching_ports);

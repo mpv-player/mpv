@@ -250,14 +250,24 @@ void ao_resume(struct ao *ao)
         ao->driver->resume(ao);
 }
 
+bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
+                         struct mp_chmap *map)
+{
+    return mp_chmap_sel_adjust(s, map);
+}
 
+bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
+                          struct mp_chmap *map, int num)
+{
+    return mp_chmap_sel_get_def(s, map, num);
+}
 
 int old_ao_init(struct ao *ao, char *params)
 {
     assert(!global_ao);
     global_ao = ao;
     ao_subdevice = params ? talloc_strdup(ao, params) : NULL;
-    if (ao->driver->old_functions->init(ao->samplerate, ao->channels,
+    if (ao->driver->old_functions->init(ao->samplerate, &ao->channels,
                                         ao->format, 0) == 0) {
         global_ao = NULL;
         return -1;

@@ -101,7 +101,14 @@ static int init(struct ao *ao, char *params)
     ac->stream->codec->time_base.den = ao->samplerate;
 
     ac->stream->codec->sample_rate = ao->samplerate;
-    ac->stream->codec->channels = ao->channels;
+
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_any(&sel);
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+        return -1;
+    mp_chmap_reorder_to_lavc(&ao->channels);
+    ac->stream->codec->channels = ao->channels.num;
+    ac->stream->codec->channel_layout = mp_chmap_to_lavc(&ao->channels);
 
     ac->stream->codec->sample_fmt = AV_SAMPLE_FMT_NONE;
 
@@ -243,36 +250,6 @@ out_takefirst:
 
     ac->stream->codec->bits_per_raw_sample = ac->sample_size * 8;
 
-    switch (ao->channels) {
-    case 1:
-        ac->stream->codec->channel_layout = AV_CH_LAYOUT_MONO;
-        break;
-    case 2:
-        ac->stream->codec->channel_layout = AV_CH_LAYOUT_STEREO;
-        break;
-    /* someone please check if these are what mplayer normally assumes
-       case 3:
-        ac->stream->codec->channel_layout = AV_CH_LAYOUT_SURROUND;
-        break;
-       case 4:
-        ac->stream->codec->channel_layout = AV_CH_LAYOUT_2_2;
-        break;
-     */
-    case 5:
-        ac->stream->codec->channel_layout = AV_CH_LAYOUT_5POINT0;
-        break;
-    case 6:
-        ac->stream->codec->channel_layout = AV_CH_LAYOUT_5POINT1;
-        break;
-    case 8:
-        ac->stream->codec->channel_layout = AV_CH_LAYOUT_7POINT1;
-        break;
-    default:
-        mp_msg(MSGT_ENCODE, MSGL_ERR,
-               "ao-lavc: unknown channel layout; hoping for the best\n");
-        break;
-    }
-
     if (encode_lavc_open_codec(ao->encode_lavc_ctx, ac->stream) < 0)
         return -1;
 
@@ -282,11 +259,12 @@ out_takefirst:
 
     if (ac->pcmhack) {
         ac->aframesize = 16384; // "enough"
-        ac->buffer_size = ac->aframesize * ac->pcmhack * ao->channels * 2 + 200;
+        ac->buffer_size =
+            ac->aframesize * ac->pcmhack * ao->channels.num * 2 + 200;
     } else {
         ac->aframesize = ac->stream->codec->frame_size;
-        ac->buffer_size = ac->aframesize * ac->sample_size * ao->channels * 2 +
-                          200;
+        ac->buffer_size =
+            ac->aframesize * ac->sample_size * ao->channels.num * 2 + 200;
     }
     if (ac->buffer_size < FF_MIN_BUFFER_SIZE)
         ac->buffer_size = FF_MIN_BUFFER_SIZE;
@@ -304,10 +282,10 @@ out_takefirst:
     ac->offset_left = ac->offset;
 
     //fill_ao_data:
-    ao->outburst = ac->aframesize * ac->sample_size * ao->channels *
-                   ac->framecount;
+    ao->outburst =
+        ac->aframesize * ac->sample_size * ao->channels.num * ac->framecount;
     ao->buffersize = ao->outburst * 2;
-    ao->bps = ao->channels * ao->samplerate * ac->sample_size;
+    ao->bps = ao->channels.num * ao->samplerate * ac->sample_size;
     ao->untimed = true;
     ao->priv = ac;
 
@@ -348,7 +326,7 @@ static void uninit(struct ao *ao, bool cut_audio)
             // TRICK: append aframesize-1 samples to the end, then play() will
             // encode all it can
             size_t extralen =
-                (ac->aframesize - 1) * ao->channels * ac->sample_size;
+                (ac->aframesize - 1) * ao->channels.num * ac->sample_size;
             void *paddingbuf = talloc_size(ao, ao->buffer.len + extralen);
             memcpy(paddingbuf, ao->buffer.start, ao->buffer.len);
             fill_with_padding((char *) paddingbuf + ao->buffer.len,
@@ -392,12 +370,6 @@ static int encode(struct ao *ao, double apts, void *data)
     int status, gotpacket;
 
     ac->aframecount++;
-    if (data && (ao->channels == 5 || ao->channels == 6 || ao->channels == 8)) {
-        reorder_channel_nch(data, AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
-                            AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
-                            ao->channels,
-                            ac->aframesize * ao->channels, ac->sample_size);
-    }
 
     if (data)
         ectx->audio_pts_offset = realapts - apts;
@@ -411,12 +383,18 @@ static int encode(struct ao *ao, double apts, void *data)
         frame->nb_samples = ac->aframesize;
 
         if (ac->planarize) {
-            void *data2 = talloc_size(ao, ac->aframesize * ao->channels * ac->sample_size);
-            reorder_to_planar(data2, data, ac->sample_size, ao->channels, ac->aframesize);
+            void *data2 = talloc_size(ao, ac->aframesize * ao->channels.num *
+                                      ac->sample_size);
+            reorder_to_planar(data2, data, ac->sample_size, ao->channels.num,
+                              ac->aframesize);
             data = data2;
         }
 
-        if (avcodec_fill_audio_frame(frame, ao->channels, ac->stream->codec->sample_fmt, data, ac->aframesize * ao->channels * ac->sample_size, 1)) {
+        size_t audiolen = ac->aframesize * ao->channels.num * ac->sample_size;
+        if (avcodec_fill_audio_frame(frame, ao->channels.num,
+                                     ac->stream->codec->sample_fmt, data,
+                                     audiolen, 1))
+        {
             mp_msg(MSGT_ENCODE, MSGL_ERR, "ao-lavc: error filling\n");
             return -1;
         }
@@ -523,7 +501,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
     double pts = ao->pts;
     double outpts;
 
-    len /= ac->sample_size * ao->channels;
+    len /= ac->sample_size * ao->channels.num;
 
     if (!encode_lavc_start(ectx)) {
         mp_msg(MSGT_ENCODE, MSGL_WARN,
@@ -593,7 +571,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
             if (ac->offset_left <= -len) {
                 // skip whole frame
                 ac->offset_left += len;
-                return len * ac->sample_size * ao->channels;
+                return len * ac->sample_size * ao->channels.num;
             } else {
                 // skip part of this frame, buffer/encode the rest
                 bufpos -= ac->offset_left;
@@ -604,11 +582,11 @@ static int play(struct ao *ao, void *data, int len, int flags)
             // make a temporary buffer, filled with zeroes at the start
             // (don't worry, only happens once)
 
-            paddingbuf = talloc_size(ac, ac->sample_size * ao->channels *
+            paddingbuf = talloc_size(ac, ac->sample_size * ao->channels.num *
                                          (ac->offset_left + len));
             fill_with_padding(paddingbuf, ac->offset_left, ac->sample_size,
                               ac->sample_padding);
-            data = (char *) paddingbuf + ac->sample_size * ao->channels *
+            data = (char *) paddingbuf + ac->sample_size * ao->channels.num *
                                          ac->offset_left;
             bufpos -= ac->offset_left; // yes, negative!
             ptsoffset += ac->offset_left;
@@ -651,7 +629,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
     while (len - bufpos >= ac->aframesize) {
         encode(ao,
                outpts + (bufpos + ptsoffset) / (double) ao->samplerate + encode_lavc_getoffset(ectx, ac->stream),
-               (char *) data + ac->sample_size * bufpos * ao->channels);
+               (char *) data + ac->sample_size * bufpos * ao->channels.num);
         bufpos += ac->aframesize;
     }
 
@@ -667,11 +645,10 @@ static int play(struct ao *ao, void *data, int len, int flags)
             ectx->next_in_pts = nextpts;
     }
 
-    return bufpos * ac->sample_size * ao->channels;
+    return bufpos * ac->sample_size * ao->channels.num;
 }
 
 const struct ao_driver audio_out_lavc = {
-    .is_new = true,
     .encode = true,
     .info = &(const struct ao_info) {
         "audio encoding using libavcodec",

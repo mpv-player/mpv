@@ -1,8 +1,4 @@
 /*
- * common functions for reordering audio channels
- *
- * Copyright (C) 2007 Ulion <ulion A gmail P com>
- *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -20,14 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MPLAYER_REORDER_CH_H
-#define MPLAYER_REORDER_CH_H
+#ifndef MPLAYER_SAMPLE_FMT_CONVERSION_H
+#define MPLAYER_SAMPLE_FMT_CONVERSION_H
 
-#include <inttypes.h>
+enum AVSampleFormat af_to_avformat(int fmt);
+int af_from_avformat(enum AVSampleFormat sample_fmt);
 
-void reorder_to_planar(void *restrict out, const void *restrict in,
-                       size_t size, size_t nchan, size_t nmemb);
-void reorder_to_packed(uint8_t *out, uint8_t **in,
-                       size_t size, size_t nchan, size_t nmemb);
-
-#endif /* MPLAYER_REORDER_CH_H */
+#endif /* MPLAYER_SAMPLE_FMT_CONVERSION_H */

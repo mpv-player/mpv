@@ -19,6 +19,7 @@
 #ifndef MPLAYER_DEC_AUDIO_H
 #define MPLAYER_DEC_AUDIO_H
 
+#include "audio/chmap.h"
 #include "demux/stheader.h"
 
 struct bstr;
@@ -33,6 +34,7 @@ void skip_audio_frame(sh_audio_t *sh_audio);
 void uninit_audio(sh_audio_t *sh_audio);
 
 int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
-                       int *out_samplerate, int *out_channels, int *out_format);
+                       int *out_samplerate, struct mp_chmap *out_channels,
+                       int *out_format);
 
 #endif /* MPLAYER_DEC_AUDIO_H */

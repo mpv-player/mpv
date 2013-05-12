@@ -330,7 +330,7 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
                "ID_AUDIO_RATE=%d\n", mpctx->sh_audio->samplerate);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_AUDIO_NCH=%d\n", mpctx->sh_audio->channels);
+               "ID_AUDIO_NCH=%d\n", mpctx->sh_audio->channels.num);
         start_pts = ds_get_next_pts(mpctx->sh_audio->ds);
     }
     if (video_start_pts != MP_NOPTS_VALUE) {
@@ -1700,6 +1700,12 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->ao = ao_create(opts, mpctx->input);
         mpctx->ao->samplerate = opts->force_srate;
         mpctx->ao->format = opts->audio_output_format;
+        // Automatic downmix
+        if (mp_chmap_is_stereo(&opts->audio_output_channels) &&
+            !mp_chmap_is_stereo(&mpctx->sh_audio->channels))
+        {
+            mp_chmap_from_channels(&mpctx->ao->channels, 2);
+        }
     }
     ao = mpctx->ao;
 
@@ -1716,6 +1722,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
     if (!ao->initialized) {
         ao->buffersize = opts->ao_buffersize;
         ao->encode_lavc_ctx = mpctx->encode_lavc_ctx;
+        mp_chmap_remove_useless_channels(&ao->channels,
+                                         &opts->audio_output_channels);
         ao_init(ao, opts->audio_driver_list);
         if (!ao->initialized) {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
@@ -1723,12 +1731,10 @@ void reinit_audio_chain(struct MPContext *mpctx)
             goto init_error;
         }
         ao->buffer.start = talloc_new(ao);
-        mp_msg(MSGT_CPLAYER, MSGL_INFO,
-               "AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
-               ao->driver->info->short_name,
-               ao->samplerate, ao->channels,
-               af_fmt2str_short(ao->format),
-               af_fmt2bits(ao->format) / 8);
+        char *s = mp_audio_fmt_to_str(ao->samplerate, &ao->channels, ao->format);
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "AO: [%s] %s\n",
+               ao->driver->info->short_name, s);
+        talloc_free(s);
         mp_msg(MSGT_CPLAYER, MSGL_V, "AO: Description: %s\nAO: Author: %s\n",
                ao->driver->info->name, ao->driver->info->author);
         if (strlen(ao->driver->info->comment) > 0)
@@ -2295,7 +2301,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
             ptsdiff = written_pts - mpctx->sh_video->pts - mpctx->delay
                       - mpctx->audio_delay;
         bytes = ptsdiff * bps;
-        bytes -= bytes % (ao->channels * af_fmt2bits(ao->format) / 8);
+        bytes -= bytes % (ao->channels.num * af_fmt2bits(ao->format) / 8);
 
         // ogg demuxers give packets without timing
         if (written_pts <= 1 && sh_audio->pts == MP_NOPTS_VALUE) {
@@ -2364,7 +2370,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     bool partial_fill = false;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     bool modifiable_audio_format = !(ao->format & AF_FORMAT_SPECIAL_MASK);
-    int unitsize = ao->channels * af_fmt2bits(ao->format) / 8;
+    int unitsize = ao->channels.num * af_fmt2bits(ao->format) / 8;
 
     if (mpctx->paused)
         playsize = 1;   // just initialize things (audio pts at least)

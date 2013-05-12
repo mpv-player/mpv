@@ -34,6 +34,15 @@ typedef struct af_pan_s
   float level[AF_NCH][AF_NCH];	// Gain level for each channel
 }af_pan_t;
 
+static void set_channels(struct mp_audio *mpa, int num)
+{
+    struct mp_chmap map;
+    // "unknown" channel layouts make it easier to pass through audio data,
+    // without triggering remixing.
+    mp_chmap_set_unknown(&map, num);
+    mp_audio_set_channels(mpa, &map);
+}
+
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
@@ -45,15 +54,13 @@ static int control(struct af_instance* af, int cmd, void* arg)
     if(!arg) return AF_ERROR;
 
     af->data->rate   = ((struct mp_audio*)arg)->rate;
-    af->data->format = AF_FORMAT_FLOAT_NE;
-    af->data->bps    = 4;
-    af->data->nch    = s->nch ? s->nch: ((struct mp_audio*)arg)->nch;
+    mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
+    set_channels(af->data, s->nch ? s->nch: ((struct mp_audio*)arg)->nch);
     af->mul          = (double)af->data->nch / ((struct mp_audio*)arg)->nch;
 
     if((af->data->format != ((struct mp_audio*)arg)->format) ||
        (af->data->bps != ((struct mp_audio*)arg)->bps)){
-      ((struct mp_audio*)arg)->format = af->data->format;
-      ((struct mp_audio*)arg)->bps = af->data->bps;
+      mp_audio_set_format((struct mp_audio*)arg, af->data->format);
       return AF_FALSE;
     }
     return AF_OK;
@@ -109,13 +116,10 @@ static int control(struct af_instance* af, int cmd, void* arg)
     // Sanity check
     if(((int*)arg)[0] <= 0 || ((int*)arg)[0] > AF_NCH){
       mp_msg(MSGT_AFILTER, MSGL_ERR, "[pan] The number of output channels must be"
-	     " between 1 and %i. Current value is %i\n",AF_NCH,((int*)arg)[0]);
+            " between 1 and %i. Current value is %i\n",AF_NCH,((int*)arg)[0]);
       return AF_ERROR;
     }
     s->nch=((int*)arg)[0];
-    return AF_OK;
-  case AF_CONTROL_PAN_NOUT | AF_CONTROL_GET:
-    *(int*)arg = af->data->nch;
     return AF_OK;
   case AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET:{
     float val = *(float*)arg;
@@ -181,7 +185,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
   // Set output data
   c->audio = l->audio;
   c->len   = c->len / c->nch * l->nch;
-  c->nch   = l->nch;
+  set_channels(c, l->nch);
 
   return c;
 }
