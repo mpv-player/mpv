@@ -86,6 +86,10 @@ function draw_bar(ass)
     end
 
     ass:draw_stop()
+
+    ass:new_event()
+    ass:append(string.format("%s / %s", mp.property_get("playlist-pos"),
+                                        mp.property_get("playlist-count")))
 end
 
 local state = {

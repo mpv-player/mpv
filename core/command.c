@@ -1323,6 +1323,44 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
 
 #endif
 
+static int count_playlist_pos(struct playlist *pl, struct playlist_entry *e)
+{
+    struct playlist_entry *cur = pl->first;
+    int pos = 0;
+    if (!e)
+        return -1;
+    while (cur && cur != e) {
+        cur = cur->next;
+        pos++;
+    }
+    return cur == e ? pos : -1;
+}
+
+static int mp_property_playlist_pos(m_option_t *prop, int action, void *arg,
+                                    MPContext *mpctx)
+{
+    if (action == M_PROPERTY_GET) {
+        struct playlist *pl = mpctx->playlist;
+        int pos = count_playlist_pos(pl, pl->current);
+        if (pos < 0)
+            return M_PROPERTY_UNAVAILABLE;
+        *(int *)arg = pos;
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_playlist_count(m_option_t *prop, int action, void *arg,
+                                      MPContext *mpctx)
+{
+    if (action == M_PROPERTY_GET) {
+        struct playlist *pl = mpctx->playlist;
+        *(int *)arg = count_playlist_pos(pl, pl->last) + 1;
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_alias(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
@@ -1404,6 +1442,9 @@ static const m_option_t mp_properties[] = {
     { "cache", mp_property_cache, CONF_TYPE_INT },
     M_OPTION_PROPERTY("pts-association-mode"),
     M_OPTION_PROPERTY("hr-seek"),
+
+    { "playlist-pos", mp_property_playlist_pos, CONF_TYPE_INT },
+    { "playlist-count", mp_property_playlist_count, CONF_TYPE_INT },
 
     // Audio
     { "volume", mp_property_volume, CONF_TYPE_FLOAT,

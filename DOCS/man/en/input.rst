@@ -346,4 +346,6 @@ tv-brightness               x
 tv-contrast                 x
 tv-saturation               x
 tv-hue                      x
+playlist-pos                  current position on playlist
+playlist-count                number of total playlist entries
 =========================== = ==================================================
