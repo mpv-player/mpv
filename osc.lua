@@ -154,7 +154,6 @@ function render_elements(ass)
 					element.down_cmd()
 				end
 				state.mouse_down_counter = state.mouse_down_counter + 1
-				--print("\n Oink! " .. mp.get_timer().."\n")
 			end
 			
 		end
@@ -258,7 +257,7 @@ function osc_init ()
 	    if osc_r > 0 then ass:bezier_curve(0, 0, 0, 0, osc_r, 0) end -- top left corner
 	    ass:draw_stop()
     end
-	register_element(posX, posY, 5, 0, 0, osc_styles.box, osc_styles.box, contentF, nil, nil, false)
+	register_element(posX, posY, 5, 0, 0, osc_styles.box, nil, contentF, nil, nil, false)
 	
 	--
 	-- Title
@@ -270,7 +269,7 @@ function osc_init ()
 		if not (title == nil) then
 			
 			if #title > 80 then
-				title = string.format("{\\fscx%f}", (80 / #title) * 100) ..title
+				title = string.format("{\\fscx%f}", (80 / #title) * 100) .. title
 			end
 			
 			ass:append(title)
@@ -352,10 +351,9 @@ function osc_init ()
 		    local x, y = mp.get_mouse_pos()
 
 		    if x >= b_x and y >= b_y and x <= b_x + b_w and y <= b_y + b_h then
-		        local duration = tonumber(mp.property_get("length"))
-		        local time = (x - b_x) / b_w * duration
+		        local time = (x - b_x) / b_w * 100
 	
-		        mp.send_command(string.format("no-osd seek %f absolute keyframes", time))
+		        mp.send_command(string.format("no-osd seek %f absolute-percent keyframes", time))
 		    end
 	    
 	    end
@@ -386,7 +384,7 @@ function osc_init ()
     local up_cmd = function () state.rightTC_trem = not state.rightTC_trem end
     -- do we have a usuable duration?
     if (not (mp.property_get("length") == nil)) and (tonumber(mp.property_get("length")) > 0) then
-	    register_element(posX + pos_offsetX, posY + pos_offsetY, 3, 110, 25, osc_styles.timecodes, nil, contentF, nil, up_cmd, false)
+	    register_element(posX + pos_offsetX, posY + pos_offsetY, 3, 110, 25, osc_styles.timecodes, osc_styles.elementDown, contentF, nil, up_cmd, false)
 	end
 	
 end
