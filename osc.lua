@@ -78,7 +78,6 @@ end
 
 local osc_geo = {
 	-- static
-	playresx = 1280,						-- canvas size X
 	playresy = 720,							-- canvas size Y
 	valign = 1,								-- vertical alignment, -1 (top) to 1 (bottom)
 	osc_w = 550,							-- width, height, corner-radius, padding of the box
@@ -87,6 +86,7 @@ local osc_geo = {
 	osc_p = 15,
 	
 	-- calculated by osc_init
+	playresx = 0,							-- canvas size X
 	posX, posY = 0,0, 						-- position of the controler
 	pos_offsetX, pos_offsetY = 0,0, 		-- vertical/horizontal position offset for contents aligned at the borders of the box
 }
@@ -115,12 +115,11 @@ end
 
 function draw_bar_simple(ass, x, y, w, h, style)
 	local pos = 0
+	local duration = tonumber(mp.property_get("length"))
 	if not (mp.property_get("length") == nil) then
-		local duration = tonumber(mp.property_get("length"))
-	    pos = tonumber(mp.property_get("time-pos")) / duration
-	else
 		
-    	--local pos = tonumber(mp.property_get("percent-pos")) / 100
+	    pos = tonumber(mp.property_get("time-pos")) / duration
+		--local pos = tonumber(mp.property_get("percent-pos")) / 100
     end
         
     -- thickness of border and gap between border and filling bar
@@ -139,7 +138,7 @@ function draw_bar_simple(ass, x, y, w, h, style)
     -- chapter nibbles
     local chapters = mp.get_chapter_list()
     for n = 1, #chapters do
-    	if chapters[n].time > 0 then
+    	if chapters[n].time > 0 and chapters[n].time < duration then
 	        local s = (chapters[n].time / duration * (w - (2*fill_offset))) + fill_offset
 	        	
 	        ass:rect_cw(s - 1, 1, s, 2);
@@ -164,17 +163,17 @@ end
 function get_hitbox_coords(x, y, an, w, h)
 	
 	local alignments = {
-	  [1] = function (z) return x, y-h, x+w, y end,
-	  [2] = function (z) return x-(w/2), y-h, x+(w/2), y end,
-	  [3] = function (z) return x-w, y-h, x, y end,
+	  [1] = function () return x, y-h, x+w, y end,
+	  [2] = function () return x-(w/2), y-h, x+(w/2), y end,
+	  [3] = function () return x-w, y-h, x, y end,
 	  
-	  [4] = function (z) return x, y-(h/2), x+w, y+(h/2) end,
-	  [5] = function (z) return x-(w/2), y-(h/2), x+(w/2), y+(h/2) end,
-	  [6] = function (z) return x-w, y-(h/2), x, y+(h/2) end,
+	  [4] = function () return x, y-(h/2), x+w, y+(h/2) end,
+	  [5] = function () return x-(w/2), y-(h/2), x+(w/2), y+(h/2) end,
+	  [6] = function () return x-w, y-(h/2), x, y+(h/2) end,
 	  
-	  [7] = function (z) return x, y, x+w, y+h end,
-	  [8] = function (z) return x-(w/2), y, x+(w/2), y+h end,
-	  [9] = function (z) return x-w, y, x, y+h end,
+	  [7] = function () return x, y, x+w, y+h end,
+	  [8] = function () return x-(w/2), y, x+(w/2), y+h end,
+	  [9] = function () return x-w, y, x, y+h end,
 
 	}
 	
@@ -288,14 +287,15 @@ local osc_styles = {
 	bigButtons = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnWebdings}",
 	elementDown = "{\\1c&H999999}",
 	elementDisab = "{\\1a&H88&}",
-	timecodes = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs25\\fnArial}",
-	vidtitle = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs12\\fnArial}",
+	timecodes = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs25\\fnsans-serif}",
+	vidtitle = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs12\\fnsans-serif}",
 	box = "{\\bord1\\1c&H000000\\1a&H64&\\3c&HFFFFFF\\3a&H00&}",
 }
 
 
 -- OSC INIT
 function osc_init ()
+	
 	-- kill old Elements
 	elements = {}
 	
@@ -308,7 +308,7 @@ function osc_init ()
 	-- vertical/horizontal position offset for contents aligned at the borders of the box
 	osc_geo.pos_offsetX, osc_geo.pos_offsetY = (osc_geo.osc_w - (2*osc_geo.osc_p)) / 2, (osc_geo.osc_h - (2*osc_geo.osc_p)) / 2
 
-	--local playresx, playresy = mp.get_osd_resolution() -- Not avaiable here, so hardcode it
+	-- position of the controller according to video aspect and valignment
 	osc_geo.posX, osc_geo.posY = math.floor(osc_geo.playresx/2), math.floor(get_align(osc_geo.valign, osc_geo.playresy, osc_geo.osc_h, 10))
 	
 	
@@ -325,20 +325,44 @@ function osc_init ()
     	ass:draw_start()
 	    ass:move_to(osc_r, 0)
 	    ass:line_to(osc_w - osc_r, 0) -- top line
-	    ass:bezier_curve(osc_w, 0, osc_w, 0, osc_w, osc_r) -- top right corner
+	    if osc_r > 0 then ass:bezier_curve(osc_w, 0, osc_w, 0, osc_w, osc_r) end -- top right corner
 	    ass:line_to(osc_w, osc_h - osc_r) -- right line
-	    ass:bezier_curve(osc_w, osc_h, osc_w, osc_h, osc_w - osc_r, osc_h) -- bottom right corner
+	    if osc_r > 0 then ass:bezier_curve(osc_w, osc_h, osc_w, osc_h, osc_w - osc_r, osc_h) end -- bottom right corner
 	    ass:line_to(osc_r, osc_h) -- bottom line
-	    ass:bezier_curve(0, osc_h, 0, osc_h, 0, osc_h - osc_r) -- bottom left corner
+	    if osc_r > 0 then ass:bezier_curve(0, osc_h, 0, osc_h, 0, osc_h - osc_r) end -- bottom left corner
 	    ass:line_to(0, osc_r) -- left line
-	    ass:bezier_curve(0, 0, 0, 0, osc_r, 0) -- top left corner
+	    if osc_r > 0 then ass:bezier_curve(0, 0, 0, 0, osc_r, 0) end -- top left corner
 	    ass:draw_stop()
     end
 	register_element(posX, posY, 5, 0, 0, osc_styles.box, osc_styles.box, contentF, nil, nil, false)
 	
+	--
+	-- Title
+	-- 
+	
 	-- title
-	local contentF = function (ass) return ass:append(mp.property_get_string("media-title")) end
+	local contentF = function (ass)
+		local title = mp.property_get_string("media-title")
+		if not (title == nil) then
+			
+			if #title > 85 then
+				title = string.format("{\\fscx%f}", (85 / #title) * 100) ..title
+			end
+			
+			ass:append(title)
+		else
+			ass:append("mpv")
+		end
+	end
     register_element(posX, posY - pos_offsetY - 10, 8, 0, 0, osc_styles.vidtitle, nil, contentF, nil, nil, false)
+    
+    -- playlist prev
+	local up_cmd = function () mp.send_command("playlist_prev weak") end
+	register_element(posX - pos_offsetX, posY - pos_offsetY - 10, 7, 12, 12, osc_styles.vidtitle, osc_styles.elementDown, "◀", nil, up_cmd, false)
+	
+	-- playlist next
+	local up_cmd = function () mp.send_command("playlist_next weak") end
+	register_element(posX + pos_offsetX, posY - pos_offsetY - 10, 9, 12, 12, osc_styles.vidtitle, osc_styles.elementDown, "▶", nil, up_cmd, false)
 
 	--
 	-- Big buttons
@@ -369,11 +393,11 @@ function osc_init ()
     if (#mp.get_chapter_list()) > 0 then
 	    
 	    --prev
-	    local up_cmd = function () mp.send_command("add chapter -1") end
+	    local up_cmd = function () mp.send_command("add chapter -1") mp.send_command("show_chapters") end
 	    register_element(posX-120, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", nil, up_cmd, false)
 	    
 	    --next
-	    local up_cmd = function () mp.send_command("add chapter 1") end
+	    local up_cmd = function () mp.send_command("add chapter 1") mp.send_command("show_chapters") end
 	    register_element(posX+120, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", nil, up_cmd, false)
 	    
 	else -- if not, render buttons as disabled and don't attach functions
@@ -430,9 +454,9 @@ function osc_init ()
     -- right (total/remaining time)
     local contentF = function (ass)
     	if state.rightTC_trem == true then
-    		return ass:append(mp.property_get_string("time-remaining"))
+    		ass:append(mp.property_get_string("time-remaining"))
     	else
-    		return ass:append(mp.property_get_string("length"))
+    		ass:append(mp.property_get_string("length"))
     	end
     end
     local up_cmd = function () state.rightTC_trem = not state.rightTC_trem end
