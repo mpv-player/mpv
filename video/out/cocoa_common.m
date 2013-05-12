@@ -178,6 +178,8 @@ struct vo_cocoa_state {
     CGFloat accumulated_scroll;
 
     NSRecursiveLock *lock;
+
+    bool enable_resize_redraw;
     void (*resize_redraw)(struct vo *vo, int w, int h);
 
     struct vo_cocoa_input_queue *input_queue;
@@ -202,6 +204,7 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .accumulated_scroll = 0,
         .lock = [[NSRecursiveLock alloc] init],
         .input_queue = vo_cocoa_input_queue_init(s),
+        .enable_resize_redraw = NO,
     };
     if (!vo->opts->border) s->windowed_mask = NSBorderlessWindowMask;
 
@@ -500,11 +503,12 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
                            uint32_t d_height, uint32_t flags,
                            int gl3profile)
 {
+    struct vo_cocoa_state *s = vo->cocoa;
+    struct mp_vo_opts *opts = vo->opts;
     __block int rv = 0;
-    dispatch_sync(dispatch_get_main_queue(), ^{
-        struct vo_cocoa_state *s = vo->cocoa;
-        struct mp_vo_opts *opts = vo->opts;
+    s->enable_resize_redraw = NO;
 
+    dispatch_sync(dispatch_get_main_queue(), ^{
         if (vo->config_count > 0) {
             NSPoint origin = [s->window frame].origin;
             vo->dx = origin.x;
@@ -551,6 +555,7 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
     });
 
     [vo->cocoa->glContext makeCurrentContext];
+    s->enable_resize_redraw = YES;
 
     return rv;
 }
@@ -558,7 +563,7 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
 static bool resize_callback_registered(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    return s->resize_redraw;
+    return s->enable_resize_redraw && !!s->resize_redraw;
 }
 
 void vo_cocoa_set_current_context(struct vo *vo, bool current)
