@@ -329,6 +329,14 @@ static void af_print_filter_chain(struct af_stream *s, struct af_instance *at,
     talloc_free(info);
 }
 
+static int af_count_filters(struct af_stream *s)
+{
+    int count = 0;
+    for (struct af_instance *af = s->first; af; af = af->next)
+        count++;
+    return count;
+}
+
 static const char *af_find_conversion_filter(int srcfmt, int dstfmt)
 {
     for (int n = 0; filter_list[n]; n++) {
@@ -438,9 +446,10 @@ int af_reinit(struct af_stream *s)
     // Start with the second filter, as the first filter is the special input
     // filter which needs no initialization.
     struct af_instance *af = s->first->next;
+    int max_retry = af_count_filters(s) * 4; // up to 4 retries per filter
     int retry = 0;
     while (af) {
-        if (retry >= 20)
+        if (retry >= max_retry)
             goto negotiate_error;
 
         // Check if this is the first filter
