@@ -34,6 +34,7 @@
 
 #if defined(CONFIG_LIBAVRESAMPLE)
 #include <libavresample/avresample.h>
+#define USE_SET_CHANNEL_MAPPING HAVE_AVRESAMPLE_SET_CHANNEL_MAPPING
 #elif defined(CONFIG_LIBSWRESAMPLE)
 #include <libswresample/swresample.h>
 #define AVAudioResampleContext SwrContext
@@ -44,6 +45,7 @@
 #define avresample_convert(ctx, out, out_planesize, out_samples, in, in_planesize, in_samples) \
     swr_convert(ctx, out, out_samples, (const uint8_t**)(in), in_samples)
 #define avresample_set_channel_mapping swr_set_channel_mapping
+#define USE_SET_CHANNEL_MAPPING 1
 #else
 #error "config.h broken"
 #endif
@@ -52,6 +54,7 @@
 #include "core/subopt-helper.h"
 #include "audio/filter/af.h"
 #include "audio/fmt-conversion.h"
+#include "audio/reorder_ch.h"
 
 struct af_resample_opts {
     int filter_size;
@@ -217,11 +220,13 @@ static int control(struct af_instance *af, int cmd, void *arg)
             av_opt_set_int(s->avrctx_out, "in_sample_rate", s->ctx.out_rate, 0);
             av_opt_set_int(s->avrctx_out, "out_sample_rate", s->ctx.out_rate, 0);
 
+#if USE_SET_CHANNEL_MAPPING
             // API has weird requirements, quoting avresample.h:
             //  * This function can only be called when the allocated context is not open.
             //  * Also, the input channel layout must have already been set.
             avresample_set_channel_mapping(s->avrctx, s->reorder_in);
             avresample_set_channel_mapping(s->avrctx_out, s->reorder_out);
+#endif
 
             if (avresample_open(s->avrctx) < 0 ||
                 avresample_open(s->avrctx_out) < 0)
@@ -322,12 +327,17 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
                                           s->ctx.out_rate, s->ctx.in_rate,
                                           AV_ROUND_UP);
 
+#if USE_SET_CHANNEL_MAPPING
+    reorder_channels(data->audio, s->reorder_in, data->bps, data->nch, in_samples);
+#endif
+
     out_samples = avresample_convert(s->avrctx,
             (uint8_t **) &out->audio, out_size, out_samples,
             (uint8_t **) &in->audio,  in_size,  in_samples);
 
     *data = *out;
 
+#if USE_SET_CHANNEL_MAPPING
     if (needs_reorder(s->reorder_out, out->nch)) {
         if (talloc_get_size(s->reorder_buffer) < out_size)
             s->reorder_buffer = talloc_realloc_size(s, s->reorder_buffer, out_size);
@@ -336,6 +346,9 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
                 (uint8_t **) &data->audio, out_size, out_samples,
                 (uint8_t **) &out->audio, out_size, out_samples);
     }
+#else
+    reorder_channels(data->audio, s->reorder_out, out->bps, out->nch, out_samples);
+#endif
 
     data->len = out->bps * out_samples * out->nch;
     return data;
