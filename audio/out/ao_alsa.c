@@ -325,7 +325,7 @@ static const char *device_channel_layouts[][2] = {
     {"rear",            "bl-br"},
     {"center_lfe",      "fc-lfe"},
     {"side",            "sl-sr"},
-    {"surround40",      "fl-fr-fc-bc"},
+    {"surround40",      "fl-fr-bl-br"},
     {"surround50",      "fl-fr-bl-br-fc"},
     {"surround41",      "fl-fr-bl-br-lfe"},
     {"surround51",      "fl-fr-bl-br-fc-lfe"},
