@@ -102,10 +102,12 @@ static const struct mp_chmap default_layouts[MP_NUM_CHANNELS + 1] = {
 
 // The channel order was lavc/waveex, but differs from lavc for 5, 6 and 8
 // channels. 3 and 7 channels were likely undefined (no ALSA support).
+// I'm not sure about the 4 channel case: ALSA uses "quad", while the ffmpeg
+// default layout is "4.0".
 static const char *mplayer_layouts[MP_NUM_CHANNELS + 1] = {
     [1] = "mono",
     [2] = "stereo",
-    [4] = "4.0",
+    [4] = "quad",
     [5] = "5.0(alsa)",
     [6] = "5.1(alsa)",
     [8] = "7.1(alsa)",

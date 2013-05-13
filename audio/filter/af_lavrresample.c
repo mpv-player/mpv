@@ -327,7 +327,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
                                           s->ctx.out_rate, s->ctx.in_rate,
                                           AV_ROUND_UP);
 
-#if USE_SET_CHANNEL_MAPPING
+#if !USE_SET_CHANNEL_MAPPING
     reorder_channels(data->audio, s->reorder_in, data->bps, data->nch, in_samples);
 #endif
 
