@@ -529,7 +529,7 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
 
         if (flags & VOFLAG_HIDDEN) {
             [s->window orderOut:nil];
-        } else {
+        } else if (![s->window isVisible]) {
             [s->window makeKeyAndOrderFront:nil];
             [NSApp activateIgnoringOtherApps:YES];
         }
