@@ -517,7 +517,16 @@ static struct mp_image *get_surface_hwdec(struct sh_video *sh, AVFrame *pic)
     if (!IMGFMT_IS_HWACCEL(imgfmt))
         return NULL;
 
-    if (init_vo(sh, pic) < 0)
+    // Video with non mod-16 width/height will have allocation sizes that are
+    // rounded up. This conflicts with our video size change detection and
+    // leads to an endless loop. On the other hand, vdpau seems to round up
+    // frame allocations internally. So use the original video resolution
+    // instead.
+    AVFrame pic_resized = *pic;
+    pic_resized.width = ctx->avctx->width;
+    pic_resized.height = ctx->avctx->height;
+
+    if (init_vo(sh, &pic_resized) < 0)
         return NULL;
 
     assert(IMGFMT_IS_HWACCEL(ctx->best_csp));
