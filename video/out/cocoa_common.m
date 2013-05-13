@@ -698,14 +698,19 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
     if (opts->native_fs) {
         if (!opts->fs) {
+            opts->fs = VO_TRUE;
             [self setContentResizeIncrements:NSMakeSize(1, 1)];
+            vo_cocoa_display_cursor(self.videoOutput, 0);
         } else {
+            opts->fs = VO_FALSE;
             [self setContentAspectRatio:s->current_video_size];
+            vo_cocoa_display_cursor(self.videoOutput, 1);
         }
 
         [self toggleFullScreen:nil];
     } else {
         if (!opts->fs) {
+            opts->fs = VO_TRUE;
             update_screen_info(self.videoOutput);
             if (current_screen_has_dock_or_menubar(self.videoOutput))
                 [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
@@ -714,8 +719,9 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
             [self setHasShadow:NO];
             [self setStyleMask:s->fullscreen_mask];
             [self setFrame:s->fsscreen_frame display:YES animate:NO];
-            [self setMovableByWindowBackground: NO];
+            vo_cocoa_display_cursor(self.videoOutput, 0);
         } else {
+            opts->fs = VO_FALSE;
             [NSApp setPresentationOptions:NSApplicationPresentationDefault];
             [self setHasShadow:YES];
             [self setStyleMask:s->windowed_mask];
@@ -726,16 +732,8 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
                 s->out_fs_resize = NO;
             }
             [self setContentAspectRatio:s->current_video_size];
-            [self setMovableByWindowBackground: YES];
+            vo_cocoa_display_cursor(self.videoOutput, 1);
         }
-    }
-
-    if (!opts->fs) {
-        opts->fs = VO_TRUE;
-        vo_cocoa_display_cursor(self.videoOutput, 0);
-    } else {
-        opts->fs = false;
-        vo_cocoa_display_cursor(self.videoOutput, 1);
     }
 
     resize_window(self.videoOutput);
@@ -758,12 +756,10 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (BOOL)isMovableByWindowBackground
 {
-    // this is only valid as a starting value. it will be rewritten in the
-    // -fullscreen method.
     if (self.videoOutput) {
         return !self.videoOutput->opts->fs;
     } else {
-        return NO;
+        return YES;
     }
 }
 
