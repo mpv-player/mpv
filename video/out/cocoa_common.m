@@ -714,7 +714,6 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
             [self setHasShadow:NO];
             [self setStyleMask:s->fullscreen_mask];
             [self setFrame:s->fsscreen_frame display:YES animate:NO];
-            [self setMovableByWindowBackground: NO];
         } else {
             [NSApp setPresentationOptions:NSApplicationPresentationDefault];
             [self setHasShadow:YES];
@@ -726,7 +725,6 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
                 s->out_fs_resize = NO;
             }
             [self setContentAspectRatio:s->current_video_size];
-            [self setMovableByWindowBackground: YES];
         }
     }
 
