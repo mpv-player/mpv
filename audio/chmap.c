@@ -75,7 +75,8 @@ static const char *std_layout_names[][2] = {
     {"6.0",             "fl-fr-fc-bc-sl-sr"},
     {"6.0(front)",      "fl-fr-flc-frc-sl-sr"},
     {"hexagonal",       "fl-fr-fc-bl-br-bc"},
-    {"6.1",             "fl-fr-fc-lfe-bl-br-bc"},
+    {"6.1",             "fl-fr-fc-lfe-bc-sl-sr"},
+    {"6.1(back)",       "fl-fr-fc-lfe-bl-br-bc"}, // lavc calls this "6.1" too
     {"6.1(front)",      "fl-fr-lfe-flc-frc-sl-sr"},
     {"7.0",             "fl-fr-fc-bl-br-sl-sr"},
     {"7.0(front)",      "fl-fr-fc-flc-frc-sl-sr"},
@@ -96,7 +97,7 @@ static const struct mp_chmap default_layouts[MP_NUM_CHANNELS + 1] = {
     MP_CHMAP4(FL, FR, FC, BC),                  // 4.0
     MP_CHMAP5(FL, FR, FC, BL,  BR),             // 5.0
     MP_CHMAP6(FL, FR, FC, LFE, BL, BR),         // 5.1
-    MP_CHMAP7(FL, FR, FC, LFE, BL, BR, BC),     // 6.1
+    MP_CHMAP7(FL, FR, FC, LFE, BC, SL, SR),     // 6.1
     MP_CHMAP8(FL, FR, FC, LFE, BL, BR, SL, SR), // 7.1
 };
 
