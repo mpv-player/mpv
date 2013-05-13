@@ -208,6 +208,7 @@ end
 
 local osc_styles = {
 	bigButtons = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnWebdings}",
+	smallButtons = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs20\\fnWebdings}",
 	elementDown = "{\\1c&H999999}",
 	elementDisab = "{\\1a&H88&}",
 	timecodes = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs25\\fnsans-serif}",
@@ -279,58 +280,105 @@ function osc_init ()
 	end
     register_element(posX, posY - pos_offsetY - 10, 8, 0, 0, osc_styles.vidtitle, nil, contentF, nil, nil, false)
     
-    -- playlist prev
-	local up_cmd = function () mp.send_command("playlist_prev weak") end
-	register_element(posX - pos_offsetX, posY - pos_offsetY - 10, 7, 12, 12, osc_styles.vidtitle, osc_styles.elementDown, "◀", nil, up_cmd, false)
-	
-	-- playlist next
-	local up_cmd = function () mp.send_command("playlist_next weak") end
-	register_element(posX + pos_offsetX, posY - pos_offsetY - 10, 9, 12, 12, osc_styles.vidtitle, osc_styles.elementDown, "▶", nil, up_cmd, false)
+    -- If we have more than one playlist entry, render playlist navigation buttons
+    if tonumber(mp.property_get("playlist-count")) > 1 then
+    	-- playlist prev
+		local up_cmd = function () mp.send_command("playlist_prev weak") end
+		register_element(posX - pos_offsetX, posY - pos_offsetY - 10, 7, 12, 12, osc_styles.vidtitle, osc_styles.elementDown, "◀", nil, up_cmd, false)
+		
+		-- playlist next
+		local up_cmd = function () mp.send_command("playlist_next weak") end
+		register_element(posX + pos_offsetX, posY - pos_offsetY - 10, 9, 12, 12, osc_styles.vidtitle, osc_styles.elementDown, "▶", nil, up_cmd, false)
+	end
 
 	--
 	-- Big buttons
 	-- 
 	
-	local bbposY = posY - pos_offsetY + 10
+	local bbposY = posY - pos_offsetY + 35
 	
     --play/pause
     local contentF = function (ass) 
     	if mp.property_get("pause") == "yes" then
-    		ass:append("{\\fscx150}{\\fscx100}")
+    		ass:append("{\\fscx150}")
     	else
     		ass:append("")
     	end
     end
     local up_cmd = function () mp.send_command("no-osd cycle pause") end
-    register_element(posX, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, contentF, nil, up_cmd, false)
+    register_element(posX, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, contentF, nil, up_cmd, false)
     
     --skipback
     local down_cmd = function () mp.send_command("no-osd seek -5 relative keyframes") end
-    register_element(posX-60, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", down_cmd, nil, true)
+    register_element(posX-60, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", down_cmd, nil, true)
     
     --skipfrwd
     local down_cmd = function () mp.send_command("no-osd seek 10 relative keyframes") end
-    register_element(posX+60, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", down_cmd, nil, true)
+    register_element(posX+60, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", down_cmd, nil, true)
     
     -- do we have chapters?
     if (#mp.get_chapter_list()) > 0 then
 	    
 	    --prev
 	    local up_cmd = function () mp.send_command("add chapter -1") end
-	    register_element(posX-120, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", nil, up_cmd, false)
+	    register_element(posX-120, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", nil, up_cmd, false)
 	    
 	    --next
 	    local up_cmd = function () mp.send_command("add chapter 1") end
-	    register_element(posX+120, bbposY, 8, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", nil, up_cmd, false)
+	    register_element(posX+120, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", nil, up_cmd, false)
 	    
 	else -- if not, render buttons as disabled and don't attach functions
 	    --prev
-	    register_element(posX-120, bbposY, 8, 40, 40, (osc_styles.bigButtons .. osc_styles.elementDisab), nil, "", nil, nil, false)
+	    register_element(posX-120, bbposY, 5, 40, 40, (osc_styles.bigButtons .. osc_styles.elementDisab), nil, "", nil, nil, false)
 	    
 	    --next
-	    register_element(posX+120, bbposY, 8, 40, 40, (osc_styles.bigButtons .. osc_styles.elementDisab), nil, "", nil, nil, false)
+	    register_element(posX+120, bbposY, 5, 40, 40, (osc_styles.bigButtons .. osc_styles.elementDisab), nil, "", nil, nil, false)
 	
 	end
+	
+	--
+	-- Smaller buttons
+	-- 
+	
+	--cycle audio tracks
+    local contentF = function (ass)
+    	local aid = ""
+    	if (mp.property_get("audio") == "no") then
+    		aid = "X"
+    	else
+    		aid = tonumber(mp.property_get("audio")) + 1
+    	end    		
+    	ass:append(" " .. aid)
+    end
+    local up_cmd = function () mp.send_command("add audio") end
+    register_element(posX-pos_offsetX, bbposY, 1, 50, 18, osc_styles.smallButtons, osc_styles.elementDown, contentF, nil, up_cmd, false)
+    
+   	--cycle sub tracks
+    local contentF = function (ass)
+    	local sid = ""
+    	if (mp.property_get("sub") == "no") then
+    		sid = "X"
+    	else
+    		sid = tonumber(mp.property_get("sub")) + 1
+    	end
+    	ass:append("==" .. sid)
+    end
+    local up_cmd = function () mp.send_command("add sub") end
+    register_element(posX-pos_offsetX, bbposY, 7, 50, 18, osc_styles.smallButtons, osc_styles.elementDown, contentF, nil, up_cmd, false)
+
+	
+	
+	--toggle FS
+    local contentF = function (ass)
+    	if mp.property_get("fullscreen") == "yes" then
+    		ass:append("")
+    	else
+    		ass:append("")
+    	end
+    end
+    local up_cmd = function () mp.send_command("no-osd cycle fullscreen") end
+    register_element(posX+pos_offsetX, bbposY, 6, 18, 18, osc_styles.smallButtons, osc_styles.elementDown, contentF, nil, up_cmd, false)
+	
     
     -- 
     -- Seekbar
@@ -355,7 +403,6 @@ function osc_init ()
 	
 		        mp.send_command(string.format("no-osd seek %f absolute-percent keyframes", time))
 		    end
-	    
 	    end
     end
     -- do we have a usuable duration?
