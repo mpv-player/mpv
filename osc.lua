@@ -2,7 +2,8 @@ local assdraw = require 'assdraw'
 
 local osc_geo = {
 	-- static
-	playresy = 720,							-- canvas size Y
+	scale = 1,								-- scaling of the controller
+	vidscale = true,						-- scale the controller with the video? don't use false, currently causes bugs with libass
 	valign = 1,								-- vertical alignment, -1 (top) to 1 (bottom)
 	osc_w = 550,							-- width, height, corner-radius, padding of the box
 	osc_h = 150,
@@ -10,6 +11,7 @@ local osc_geo = {
 	osc_p = 15,
 	
 	-- calculated by osc_init
+	playresy = 0,							-- canvas size Y
 	playresx = 0,							-- canvas size X
 	posX, posY = 0,0, 						-- position of the controler
 	pos_offsetX, pos_offsetY = 0,0, 		-- vertical/horizontal position offset for contents aligned at the borders of the box
@@ -223,8 +225,14 @@ function osc_init ()
 	-- kill old Elements
 	elements = {}
 	
-	-- set vertical resolution acording to display aspect
+	-- set canvas resolution acording to display aspect and scaleing setting
+	local baseResY = 720
 	local display_w, display_h, display_aspect = mp.get_screen_size()
+	if osc_geo.vidscale == true then
+		osc_geo.playresy = baseResY * osc_geo.scale
+	else
+		osc_geo.playresy = display_h * osc_geo.scale
+	end
 	osc_geo.playresx = osc_geo.playresy * display_aspect
 	
 
@@ -423,7 +431,7 @@ function osc_init ()
     -- right (total/remaining time)
     local contentF = function (ass)
     	if state.rightTC_trem == true then
-    		ass:append(mp.property_get_string("time-remaining"))
+    		ass:append("-" ..mp.property_get_string("time-remaining"))
     	else
     		ass:append(mp.property_get_string("length"))
     	end
@@ -516,7 +524,7 @@ function mp_update()
     
     --state.append_calls = 0
     
-    local osd_time = 1
+    local osd_time = 10
     if state.osd_visible and now - state.last_osd_time < osd_time then
         draw_osc(ass)
         state.osd_visible = true
