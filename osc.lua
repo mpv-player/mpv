@@ -348,7 +348,7 @@ function osc_init ()
     	else
     		aid = tonumber(mp.property_get("audio")) + 1
     	end    		
-    	ass:append(" " .. aid)
+    	ass:append("" .. aid)
     end
     local up_cmd = function () mp.send_command("add audio") end
     register_element(posX-pos_offsetX, bbposY, 1, 50, 18, osc_styles.smallButtons, osc_styles.elementDown, contentF, nil, up_cmd, false)
