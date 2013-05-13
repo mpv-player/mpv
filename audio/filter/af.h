@@ -20,31 +20,21 @@
 #define MPLAYER_AF_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "config.h"
 
 #include "core/options.h"
 #include "audio/format.h"
+#include "audio/chmap.h"
+#include "audio/audio.h"
 #include "control.h"
 #include "core/mp_msg.h"
 
 struct af_instance;
 
 // Number of channels
-#ifndef AF_NCH
-#define AF_NCH 8
-#endif
-
-// Audio data chunk
-struct mp_audio {
-    void *audio; // data buffer
-    int len;    // buffer length
-    int rate;   // sample rate
-    int nch;    // number of channels
-    int format; // format
-    int bps;    // bytes per sample
-};
-
+#define AF_NCH MP_NUM_CHANNELS
 
 // Flags used for defining the behavior of an audio filter
 #define AF_FLAGS_REENTRANT      0x00000000
@@ -59,6 +49,7 @@ struct af_info {
     const char *comment;
     const int flags;
     int (*open)(struct af_instance *vf);
+    bool (*test_conversion)(int src_format, int dst_format);
 };
 
 // Linked list of audio filters
@@ -75,29 +66,11 @@ struct af_instance {
                    * corresponding output */
     double mul; /* length multiplier: how much does this instance change
                    the length of the buffer. */
+    bool auto_inserted; // inserted by af.c, such as conversion filters
 };
-
-// Initialization flags
-extern int *af_cpu_speed;
-
-#define AF_INIT_AUTO            0x00000000
-#define AF_INIT_SLOW            0x00000001
-#define AF_INIT_FAST            0x00000002
-#define AF_INIT_FORCE           0x00000003
-#define AF_INIT_TYPE_MASK       0x00000003
-
-#define AF_INIT_INT             0x00000000
-#define AF_INIT_FLOAT           0x00000004
-#define AF_INIT_FORMAT_MASK     0x00000004
-
-// Default init type
-#ifndef AF_INIT_TYPE
-#define AF_INIT_TYPE (af_cpu_speed ? *af_cpu_speed : AF_INIT_SLOW)
-#endif
 
 // Configuration switches
 struct af_cfg {
-    int force;  // Initialization type
     char **list; /* list of names of filters that are added to filter
                     list during first initialization of stream */
 };
@@ -107,9 +80,12 @@ struct af_stream {
     // The first and last filter in the list
     struct af_instance *first;
     struct af_instance *last;
-    // Storage for input and output data formats
+    // The user sets the input format (what the decoder outputs), and sets some
+    // or all fields in output to the output format the AO accepts.
+    // See fixup_output_format().
     struct mp_audio input;
     struct mp_audio output;
+    struct mp_audio filter_output;
     // Configuration for this stream
     struct af_cfg cfg;
     struct MPOpts *opts;
@@ -139,6 +115,9 @@ struct af_stream {
  * \param s filter chain
  */
 
+struct af_stream *af_new(struct MPOpts *opts);
+void af_destroy(struct af_stream *s);
+
 /**
  * \brief Initialize the stream "s".
  * \return 0 on success, -1 on failure
@@ -161,10 +140,10 @@ void af_uninit(struct af_stream *s);
 
 /**
  * \brief  Reinit the filter list from the given filter on downwards
- * \param  Filter instance to begin the reinit from
+ * See af.c.
  * \return AF_OK on success or AF_ERROR on failure
  */
-int af_reinit(struct af_stream *s, struct af_instance *af);
+int af_reinit(struct af_stream *s);
 
 /**
  * \brief This function adds the filter "name" to the stream s.
@@ -306,23 +285,13 @@ float af_softclip(float a);
 /** Print a list of all available audio filters */
 void af_help(void);
 
-/**
- * \brief fill the missing parameters in the struct mp_audio structure
- * \param data structure to fill
- * \ingroup af_filter
- *
- * Currently only sets bps based on format
- */
-void af_fix_parameters(struct mp_audio *data);
-
 /** Memory reallocation macro: if a local buffer is used (i.e. if the
    filter doesn't operate on the incoming buffer this macro must be
    called to ensure the buffer is big enough.
  * \ingroup af_filter
  */
 #define RESIZE_LOCAL_BUFFER(a, d) \
-    ((a->data->len < \
-      af_lencalc(a->mul, d)) ? af_resize_local_buffer(a, d) : AF_OK)
+    ((a->data->len < af_lencalc(a->mul, d)) ? af_resize_local_buffer(a, d) : AF_OK)
 
 /* Some other useful macro definitions*/
 #ifndef min

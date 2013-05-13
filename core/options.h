@@ -41,6 +41,8 @@ typedef struct mp_vo_opts {
     float force_monitor_aspect;
     float monitor_pixel_aspect;
     int force_window_position;
+
+    int native_fs;
 } mp_vo_opts;
 
 typedef struct MPOpts {
@@ -84,6 +86,8 @@ typedef struct MPOpts {
     int osd_fractions;
     char *vobsub_name;
     int untimed;
+    char *stream_capture;
+    char *stream_dump;
     int loop_times;
     int ordered_chapters;
     int chapter_merge_threshold;
@@ -154,12 +158,11 @@ typedef struct MPOpts {
 
     double force_fps;
 
-    int audio_output_channels;
+    struct mp_chmap audio_output_channels;
     int audio_output_format;
     int force_srate;
     int dtshd;
     float playback_speed;
-    float drc_level;
     struct m_obj_settings *vf_settings;
     float movie_aspect;
     int flip;
@@ -208,6 +211,12 @@ typedef struct MPOpts {
         int bitexact;
         char *avopt;
     } lavc_param;
+
+    struct ad_lavc_param {
+        float ac3drc;
+        int downmix;
+        char *avopt;
+    } ad_lavc_param;
 
     struct lavfdopts {
         int probesize;

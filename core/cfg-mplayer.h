@@ -175,11 +175,6 @@ const m_option_t mfopts_conf[]={
 
 #include "audio/filter/af.h"
 extern struct af_cfg af_cfg; // Audio filter configuration, defined in libmpcodecs/dec_audio.c
-const m_option_t audio_filter_conf[]={
-    {"list", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-    {"force", &af_cfg.force, CONF_TYPE_INT, CONF_RANGE, 0, 7, NULL},
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
 
 extern int mp_msg_levels[MSGT_MAX];
 extern int mp_msg_level_all;
@@ -281,6 +276,7 @@ const m_option_t msgl_config[]={
 };
 
 extern const m_option_t lavc_decode_opts_conf[];
+extern const m_option_t ad_lavc_decode_opts_conf[];
 
 #define OPT_BASE_STRUCT struct MPOpts
 
@@ -420,7 +416,7 @@ const m_option_t common_opts[] = {
     // force video/audio rate:
     OPT_DOUBLE("fps", force_fps, CONF_MIN, 0),
     OPT_INTRANGE("srate", force_srate, 0, 1000, 8*48000),
-    OPT_INTRANGE("channels", audio_output_channels, 0, 1, 8),
+    OPT_CHMAP("channels", audio_output_channels, CONF_MIN, .min = 1),
     OPT_AUDIOFORMAT("format", audio_output_format, 0),
     OPT_FLOATRANGE("speed", playback_speed, 0, 0.01, 100.0),
 
@@ -430,15 +426,12 @@ const m_option_t common_opts[] = {
     // ignore header-specified delay (dwStart)
     OPT_FLAG("ignore-start", ignore_start, 0),
 
-    OPT_FLOATRANGE("a52drc", drc_level, 0, 0, 2),
-
 // ------------------------- codec/vfilter options --------------------
 
     // MP3-only: select stereo/left/right
     {"stereo", &fakemono, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
 
     {"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-    {"af-adv", (void *) audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
     OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
 
@@ -474,6 +467,8 @@ const m_option_t common_opts[] = {
 
     {"lavdopts", (void *) lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     {"lavfdopts", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+
+    {"ad-lavc", (void *) ad_lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG},
 // ------------------------- subtitles options --------------------
 
     OPT_STRINGLIST("sub", sub_name, 0),
@@ -613,6 +608,10 @@ const m_option_t mplayer_opts[]={
     OPT_CHOICE_OR_INT("fs-screen", vo.fsscreen_id, 0, 0, 32,
                       ({"all", -2}, {"current", -1})),
 
+#ifdef CONFIG_COCOA
+    OPT_FLAG("native-fs", vo.native_fs, 0),
+#endif
+
     OPT_INTRANGE("brightness", gamma_brightness, 0, -100, 100),
     OPT_INTRANGE("saturation", gamma_saturation, 0, -100, 100),
     OPT_INTRANGE("contrast", gamma_contrast, 0, -100, 100),
@@ -636,6 +635,9 @@ const m_option_t mplayer_opts[]={
                 {"hard", 2})),
 
     OPT_FLAG("untimed", untimed, 0),
+
+    OPT_STRING("stream-capture", stream_capture, 0),
+    OPT_STRING("stream-dump", stream_dump, 0),
 
 #ifdef CONFIG_LIRC
     {"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},

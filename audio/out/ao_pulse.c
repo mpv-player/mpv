@@ -143,6 +143,59 @@ static const struct format_map {
     {AF_FORMAT_UNKNOWN, 0}
 };
 
+static const int speaker_map[][2] = {
+  {PA_CHANNEL_POSITION_MONO,                    MP_SPEAKER_ID_FC},
+  {PA_CHANNEL_POSITION_FRONT_LEFT,              MP_SPEAKER_ID_FL},
+  {PA_CHANNEL_POSITION_FRONT_RIGHT,             MP_SPEAKER_ID_FR},
+  {PA_CHANNEL_POSITION_FRONT_CENTER,            MP_SPEAKER_ID_FC},
+  {PA_CHANNEL_POSITION_REAR_CENTER,             MP_SPEAKER_ID_BC},
+  {PA_CHANNEL_POSITION_REAR_LEFT,               MP_SPEAKER_ID_BL},
+  {PA_CHANNEL_POSITION_REAR_RIGHT,              MP_SPEAKER_ID_BR},
+  {PA_CHANNEL_POSITION_LFE,                     MP_SPEAKER_ID_LFE},
+  {PA_CHANNEL_POSITION_FRONT_LEFT_OF_CENTER,    MP_SPEAKER_ID_FLC},
+  {PA_CHANNEL_POSITION_FRONT_RIGHT_OF_CENTER,   MP_SPEAKER_ID_FRC},
+  {PA_CHANNEL_POSITION_SIDE_LEFT,               MP_SPEAKER_ID_SL},
+  {PA_CHANNEL_POSITION_SIDE_RIGHT,              MP_SPEAKER_ID_SR},
+  {PA_CHANNEL_POSITION_TOP_CENTER,              MP_SPEAKER_ID_TC},
+  {PA_CHANNEL_POSITION_TOP_FRONT_LEFT,          MP_SPEAKER_ID_TFL},
+  {PA_CHANNEL_POSITION_TOP_FRONT_RIGHT,         MP_SPEAKER_ID_TFR},
+  {PA_CHANNEL_POSITION_TOP_FRONT_CENTER,        MP_SPEAKER_ID_TFC},
+  {PA_CHANNEL_POSITION_TOP_REAR_LEFT,           MP_SPEAKER_ID_TBL},
+  {PA_CHANNEL_POSITION_TOP_REAR_RIGHT,          MP_SPEAKER_ID_TBR},
+  {PA_CHANNEL_POSITION_TOP_REAR_CENTER,         MP_SPEAKER_ID_TBC},
+  {PA_CHANNEL_POSITION_INVALID,                 -1}
+};
+
+static bool chmap_pa_from_mp(pa_channel_map *dst, struct mp_chmap *src)
+{
+    if (src->num > PA_CHANNELS_MAX)
+        return false;
+    dst->channels = src->num;
+    for (int n = 0; n < src->num; n++) {
+        int mp_speaker = src->speaker[n];
+        int pa_speaker = PA_CHANNEL_POSITION_INVALID;
+        for (int i = 0; speaker_map[i][1] != -1; i++) {
+            if (speaker_map[i][1] == mp_speaker) {
+                pa_speaker = speaker_map[i][0];
+                break;
+            }
+        }
+        if (pa_speaker == PA_CHANNEL_POSITION_INVALID)
+            return false;
+        dst->map[n] = pa_speaker;
+    }
+    return true;
+}
+
+static bool select_chmap(struct ao *ao, pa_channel_map *dst)
+{
+    struct mp_chmap_sel sel = {0};
+    for (int n = 0; speaker_map[n][1] != -1; n++)
+        mp_chmap_sel_add_speaker(&sel, speaker_map[n][1]);
+    return ao_chmap_sel_adjust(ao, &sel, &ao->channels) &&
+           chmap_pa_from_mp(dst, &ao->channels);
+}
+
 static void uninit(struct ao *ao, bool cut_audio)
 {
     struct priv *priv = ao->priv;
@@ -209,30 +262,6 @@ static int init(struct ao *ao, char *params)
         priv->broken_pause = true;
     }
 
-    ss.channels = ao->channels;
-    ss.rate = ao->samplerate;
-
-    const struct format_map *fmt_map = format_maps;
-    while (fmt_map->mp_format != ao->format) {
-        if (fmt_map->mp_format == AF_FORMAT_UNKNOWN) {
-            mp_msg(MSGT_AO, MSGL_V,
-                   "AO: [pulse] Unsupported format, using default\n");
-            fmt_map = format_maps;
-            break;
-        }
-        fmt_map++;
-    }
-    ao->format = fmt_map->mp_format;
-    ss.format = fmt_map->pa_format;
-
-    if (!pa_sample_spec_valid(&ss)) {
-        mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Invalid sample spec\n");
-        goto fail;
-    }
-
-    pa_channel_map_init_auto(&map, ss.channels, PA_CHANNEL_MAP_ALSA);
-    ao->bps = pa_bytes_per_second(&ss);
-
     if (!(priv->mainloop = pa_threaded_mainloop_new())) {
         mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Failed to allocate main loop\n");
         goto fail;
@@ -259,6 +288,32 @@ static int init(struct ao *ao, char *params)
 
     if (pa_context_get_state(priv->context) != PA_CONTEXT_READY)
         goto unlock_and_fail;
+
+    ss.channels = ao->channels.num;
+    ss.rate = ao->samplerate;
+
+    const struct format_map *fmt_map = format_maps;
+    while (fmt_map->mp_format != ao->format) {
+        if (fmt_map->mp_format == AF_FORMAT_UNKNOWN) {
+            mp_msg(MSGT_AO, MSGL_V,
+                   "AO: [pulse] Unsupported format, using default\n");
+            fmt_map = format_maps;
+            break;
+        }
+        fmt_map++;
+    }
+    ao->format = fmt_map->mp_format;
+    ss.format = fmt_map->pa_format;
+
+    if (!pa_sample_spec_valid(&ss)) {
+        mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Invalid sample spec\n");
+        goto fail;
+    }
+
+    if (!select_chmap(ao, &map))
+        goto fail;
+
+    ao->bps = pa_bytes_per_second(&ss);
 
     if (!(priv->stream = pa_stream_new(priv->context, "audio stream", &ss,
                                        &map)))
@@ -495,7 +550,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             const ao_control_vol_t *vol = arg;
             struct pa_cvolume volume;
 
-            pa_cvolume_reset(&volume, ao->channels);
+            pa_cvolume_reset(&volume, ao->channels.num);
             if (volume.channels != 2)
                 pa_cvolume_set(&volume, volume.channels, VOL_MP2PA(vol->left));
             else {
@@ -533,7 +588,6 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 }
 
 const struct ao_driver audio_out_pulse = {
-    .is_new = true,
     .info = &(const struct ao_info) {
         "PulseAudio audio output",
         "pulse",

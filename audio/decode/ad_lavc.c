@@ -32,9 +32,11 @@
 #include "core/codecs.h"
 #include "core/mp_msg.h"
 #include "core/options.h"
+#include "core/av_opts.h"
 
 #include "ad_internal.h"
 #include "audio/reorder_ch.h"
+#include "audio/fmt-conversion.h"
 
 #include "compat/mpbswap.h"
 #include "compat/libav.h"
@@ -49,6 +51,16 @@ struct priv {
     int output_left;
     int unitsize;
     int previous_data_left;  // input demuxer packet data
+    bool force_channel_map;
+};
+
+#define OPT_BASE_STRUCT struct MPOpts
+
+const m_option_t ad_lavc_decode_opts_conf[] = {
+    OPT_FLOATRANGE("ac3drc", ad_lavc_param.ac3drc, 0, 0, 2),
+    OPT_FLAG("downmix", ad_lavc_param.downmix, 0),
+    OPT_STRING("o", ad_lavc_param.avopt, 0),
+    {0}
 };
 
 struct pcm_map
@@ -144,17 +156,9 @@ static int preinit(sh_audio_t *sh)
 static int setup_format(sh_audio_t *sh_audio,
                         const AVCodecContext *lavc_context)
 {
-    int sample_format = sh_audio->sample_format;
-    switch (av_get_packed_sample_fmt(lavc_context->sample_fmt)) {
-    case AV_SAMPLE_FMT_U8:  sample_format = AF_FORMAT_U8;       break;
-    case AV_SAMPLE_FMT_S16: sample_format = AF_FORMAT_S16_NE;   break;
-    case AV_SAMPLE_FMT_S32: sample_format = AF_FORMAT_S32_NE;   break;
-    case AV_SAMPLE_FMT_FLT: sample_format = AF_FORMAT_FLOAT_NE; break;
-    default:
-        mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Unsupported sample format\n");
-        sample_format = AF_FORMAT_UNKNOWN;
-    }
-
+    struct priv *priv = sh_audio->context;
+    int sample_format        =
+        af_from_avformat(av_get_packed_sample_fmt(lavc_context->sample_fmt));
     bool broken_srate        = false;
     int samplerate           = lavc_context->sample_rate;
     int container_samplerate = sh_audio->container_out_samplerate;
@@ -166,10 +170,20 @@ static int setup_format(sh_audio_t *sh_audio,
     else if (container_samplerate)
         samplerate = container_samplerate;
 
-    if (lavc_context->channels != sh_audio->channels ||
+    struct mp_chmap lavc_chmap;
+    mp_chmap_from_lavc(&lavc_chmap, lavc_context->channel_layout);
+    // No channel layout or layout disagrees with channel count
+    if (lavc_chmap.num != lavc_context->channels)
+        mp_chmap_from_channels(&lavc_chmap, lavc_context->channels);
+    if (priv->force_channel_map) {
+        if (lavc_chmap.num == sh_audio->channels.num)
+            lavc_chmap = sh_audio->channels;
+    }
+
+    if (!mp_chmap_equals(&lavc_chmap, &sh_audio->channels) ||
         samplerate != sh_audio->samplerate ||
         sample_format != sh_audio->sample_format) {
-        sh_audio->channels = lavc_context->channels;
+        sh_audio->channels = lavc_chmap;
         sh_audio->samplerate = samplerate;
         sh_audio->sample_format = sample_format;
         sh_audio->samplesize = af_fmt2bits(sh_audio->sample_format) / 8;
@@ -198,41 +212,59 @@ static void set_from_wf(AVCodecContext *avctx, WAVEFORMATEX *wf)
 
 static int init(sh_audio_t *sh_audio, const char *decoder)
 {
-    struct MPOpts *opts = sh_audio->opts;
+    struct MPOpts *mpopts = sh_audio->opts;
+    struct ad_lavc_param *opts = &mpopts->ad_lavc_param;
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
+
+    struct priv *ctx = talloc_zero(NULL, struct priv);
+    sh_audio->context = ctx;
 
     if (sh_audio->wf && strcmp(decoder, "pcm") == 0) {
         decoder = find_pcm_decoder(tag_map, sh_audio->format,
                                    sh_audio->wf->wBitsPerSample);
     } else if (sh_audio->wf && strcmp(decoder, "mp-pcm") == 0) {
         decoder = find_pcm_decoder(af_map, sh_audio->format, 0);
+        ctx->force_channel_map = true;
     }
 
     lavc_codec = avcodec_find_decoder_by_name(decoder);
     if (!lavc_codec) {
         mp_tmsg(MSGT_DECAUDIO, MSGL_ERR,
                 "Cannot find codec '%s' in libavcodec...\n", decoder);
+        uninit(sh_audio);
         return 0;
     }
 
-    struct priv *ctx = talloc_zero(NULL, struct priv);
-    sh_audio->context = ctx;
     lavc_context = avcodec_alloc_context3(lavc_codec);
     ctx->avctx = lavc_context;
     ctx->avframe = avcodec_alloc_frame();
     lavc_context->codec_type = AVMEDIA_TYPE_AUDIO;
     lavc_context->codec_id = lavc_codec->id;
 
-    lavc_context->request_channels = opts->audio_output_channels;
+    if (opts->downmix) {
+        lavc_context->request_channels = mpopts->audio_output_channels.num;
+        lavc_context->request_channel_layout =
+            mp_chmap_to_lavc(&mpopts->audio_output_channels);
+    }
 
     // Always try to set - option only exists for AC3 at the moment
-    av_opt_set_double(lavc_context, "drc_scale", opts->drc_level,
+    av_opt_set_double(lavc_context, "drc_scale", opts->ac3drc,
                       AV_OPT_SEARCH_CHILDREN);
+
+    if (opts->avopt) {
+        if (parse_avopts(lavc_context, opts->avopt) < 0) {
+            mp_msg(MSGT_DECVIDEO, MSGL_ERR,
+                   "ad_lavc: setting AVOptions '%s' failed.\n", opts->avopt);
+            uninit(sh_audio);
+            return 0;
+        }
+    }
 
     lavc_context->codec_tag = sh_audio->format;
     lavc_context->sample_rate = sh_audio->samplerate;
     lavc_context->bit_rate = sh_audio->i_bps * 8;
+    lavc_context->channel_layout = mp_chmap_to_lavc(&sh_audio->channels);
 
     if (sh_audio->wf)
         set_from_wf(lavc_context, sh_audio->wf);
@@ -279,13 +311,9 @@ static int init(sh_audio_t *sh_audio, const char *decoder)
     if (sh_audio->wf && sh_audio->wf->nAvgBytesPerSec)
         sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
 
-    switch (av_get_packed_sample_fmt(lavc_context->sample_fmt)) {
-    case AV_SAMPLE_FMT_U8:
-    case AV_SAMPLE_FMT_S16:
-    case AV_SAMPLE_FMT_S32:
-    case AV_SAMPLE_FMT_FLT:
-        break;
-    default:
+    int af_sample_fmt =
+        af_from_avformat(av_get_packed_sample_fmt(lavc_context->sample_fmt));
+    if (af_sample_fmt == AF_FORMAT_UNKNOWN) {
         uninit(sh_audio);
         return 0;
     }
@@ -442,13 +470,6 @@ static int decode_audio(sh_audio_t *sh_audio, unsigned char *buf, int minlen,
         memcpy(buf, priv->output, size);
         priv->output += size;
         priv->output_left -= size;
-        if (avctx->channels >= 5) {
-            int samplesize = av_get_bytes_per_sample(avctx->sample_fmt);
-            reorder_channel_nch(buf, AF_CHANNEL_LAYOUT_LAVC_DEFAULT,
-                                AF_CHANNEL_LAYOUT_MPLAYER_DEFAULT,
-                                avctx->channels,
-                                size / samplesize, samplesize);
-        }
         if (len < 0)
             len = size;
         else

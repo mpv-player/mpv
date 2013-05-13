@@ -66,12 +66,10 @@ static int control(struct af_instance* af, int cmd, void* arg)
     // Sanity check
     if(!arg) return AF_ERROR;
 
-    af->data->rate   = ((struct mp_audio*)arg)->rate;
-    af->data->nch    = ((struct mp_audio*)arg)->nch;
+    mp_audio_copy_config(af->data, (struct mp_audio*)arg);
 
     if(s->fast && (((struct mp_audio*)arg)->format != (AF_FORMAT_FLOAT_NE))){
-      af->data->format = AF_FORMAT_S16_NE;
-      af->data->bps    = 2;
+      mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
     }
     else{
       // Cutoff set to 10Hz for forgetting factor
@@ -79,42 +77,21 @@ static int control(struct af_instance* af, int cmd, void* arg)
       float t = 2.0-cos(x);
       s->time = 1.0 - (t - sqrt(t*t - 1));
       mp_msg(MSGT_AFILTER, MSGL_DBG2, "[volume] Forgetting factor = %0.5f\n",s->time);
-      af->data->format = AF_FORMAT_FLOAT_NE;
-      af->data->bps    = 4;
+      mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
     }
     return af_test_output(af,(struct mp_audio*)arg);
   case AF_CONTROL_COMMAND_LINE:{
     float v=0.0;
     float vol[AF_NCH];
     int   i;
-    sscanf((char*)arg,"%f:%i", &v, &s->soft);
+    sscanf((char*)arg,"%f:%i:%i", &v, &s->soft, &s->fast);
     for(i=0;i<AF_NCH;i++) vol[i]=v;
     return control(af,AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, vol);
   }
-  case AF_CONTROL_POST_CREATE:
-    s->fast = ((((struct af_cfg*)arg)->force & AF_INIT_FORMAT_MASK) ==
-      AF_INIT_FLOAT) ? 0 : 1;
-    return AF_OK;
-  case AF_CONTROL_VOLUME_ON_OFF | AF_CONTROL_SET:
-    memcpy(s->enable,(int*)arg,AF_NCH*sizeof(int));
-    return AF_OK;
-  case AF_CONTROL_VOLUME_ON_OFF | AF_CONTROL_GET:
-    memcpy((int*)arg,s->enable,AF_NCH*sizeof(int));
-    return AF_OK;
-  case AF_CONTROL_VOLUME_SOFTCLIP | AF_CONTROL_SET:
-    s->soft = *(int*)arg;
-    return AF_OK;
-  case AF_CONTROL_VOLUME_SOFTCLIP | AF_CONTROL_GET:
-    *(int*)arg = s->soft;
-    return AF_OK;
   case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET:
     return af_from_dB(AF_NCH,(float*)arg,s->level,20.0,-200.0,60.0);
   case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET:
     return af_to_dB(AF_NCH,s->level,(float*)arg,20.0);
-  case AF_CONTROL_VOLUME_PROBE | AF_CONTROL_GET:
-    return af_to_dB(AF_NCH,s->pow,(float*)arg,10.0);
-  case AF_CONTROL_VOLUME_PROBE_MAX | AF_CONTROL_GET:
-    return af_to_dB(AF_NCH,s->max,(float*)arg,10.0);
   case AF_CONTROL_PRE_DESTROY:{
     float m = 0.0;
     int i;
@@ -122,7 +99,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
       for(i=0;i<AF_NCH;i++)
 	m=max(m,s->max[i]);
 	af_to_dB(1, &m, &m, 10.0);
-	mp_msg(MSGT_AFILTER, MSGL_INFO, "[volume] The maximum volume was %0.2fdB \n", m);
+	mp_msg(MSGT_AFILTER, MSGL_V, "[volume] The maximum volume was %0.2fdB \n", m);
     }
     return AF_OK;
   }

@@ -412,7 +412,7 @@ static void print_help(void)
     free(devids);
 }
 
-static int init(int rate,int channels,int format,int flags)
+static int init(int rate,const struct mp_chmap *channels,int format,int flags)
 {
 AudioStreamBasicDescription inDesc;
 AudioComponentDescription desc;
@@ -439,7 +439,7 @@ int device_id, display_help = 0;
             return 0;
     }
 
-    ao_msg(MSGT_AO,MSGL_V, "init([%dHz][%dch][%s][%d])\n", rate, channels, af_fmt2str_short(format), flags);
+    ao_msg(MSGT_AO,MSGL_V, "init([%dHz][%dch][%s][%d])\n", rate, ao_data.channels.num, af_fmt2str_short(format), flags);
 
     ao = calloc(1, sizeof(ao_coreaudio_t));
 
@@ -499,10 +499,15 @@ int device_id, display_help = 0;
     // Save selected device id
     ao->i_selected_dev = devid_def;
 
+    struct mp_chmap_sel chmap_sel = {0};
+    mp_chmap_sel_add_waveext(&chmap_sel);
+    if (!ao_chmap_sel_adjust(&ao_data, &chmap_sel, &ao_data.channels))
+        goto err_out;
+
 	// Build Description for the input format
 	inDesc.mSampleRate=rate;
 	inDesc.mFormatID=ao->b_supports_digital ? kAudioFormat60958AC3 : kAudioFormatLinearPCM;
-	inDesc.mChannelsPerFrame=channels;
+	inDesc.mChannelsPerFrame=ao_data.channels.num;
 	inDesc.mBitsPerChannel=af_fmt2bits(format);
 
     if((format&AF_FORMAT_POINT_MASK)==AF_FORMAT_F) {
@@ -521,7 +526,7 @@ int device_id, display_help = 0;
         inDesc.mFormatFlags |= kAudioFormatFlagIsBigEndian;
 
     inDesc.mFramesPerPacket = 1;
-    ao->packetSize = inDesc.mBytesPerPacket = inDesc.mBytesPerFrame = inDesc.mFramesPerPacket*channels*(inDesc.mBitsPerChannel/8);
+    ao->packetSize = inDesc.mBytesPerPacket = inDesc.mBytesPerFrame = inDesc.mFramesPerPacket*ao_data.channels.num*(inDesc.mBitsPerChannel/8);
     print_format(MSGL_V, "source:",&inDesc);
 
     if (ao->b_supports_digital)
@@ -605,7 +610,8 @@ int device_id, display_help = 0;
 	ao->chunk_size = maxFrames;//*inDesc.mBytesPerFrame;
 
 	ao_data.samplerate = inDesc.mSampleRate;
-	ao_data.channels = inDesc.mChannelsPerFrame;
+        if (!ao_chmap_sel_get_def(&ao_data, &chmap_sel, &ao_data.channels, inDesc.mChannelsPerFrame))
+            goto err_out2;
     ao_data.bps = ao_data.samplerate * inDesc.mBytesPerFrame;
     ao_data.outburst = ao->chunk_size;
 	ao_data.buffersize = ao_data.bps;
@@ -837,7 +843,8 @@ static int OpenSPDIF(void)
     ao->chunk_size = ao->stream_format.mBytesPerPacket;
 
     ao_data.samplerate = ao->stream_format.mSampleRate;
-    ao_data.channels = ao->stream_format.mChannelsPerFrame;
+    // Applies default ordering; ok because AC3 data is always in mpv internal channel order
+    mp_chmap_from_channels(&ao_data.channels, ao->stream_format.mChannelsPerFrame);
     ao_data.bps = ao_data.samplerate * (ao->stream_format.mBytesPerPacket/ao->stream_format.mFramesPerPacket);
     ao_data.outburst = ao->chunk_size;
     ao_data.buffersize = ao_data.bps;
@@ -1073,7 +1080,6 @@ static OSStatus RenderCallbackSPDIF( AudioDeviceID inDevice,
 static int play(void* output_samples,int num_bytes,int flags)
 {
     int wrote, b_digital;
-    SInt32 exit_reason;
 
     // Check whether we need to reset the digital output stream.
     if (ao->b_digital && ao->b_stream_format_changed)
@@ -1102,10 +1108,6 @@ static int play(void* output_samples,int num_bytes,int flags)
 
     wrote=write_buffer(output_samples, num_bytes);
     audio_resume();
-
-    do {
-        exit_reason = CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0, true);
-    } while (exit_reason == kCFRunLoopRunHandledSource);
 
     return wrote;
 }

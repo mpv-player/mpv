@@ -164,8 +164,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     }
 
     af->data->rate   = ((struct mp_audio*)arg)->rate;
-    af->data->format = ((struct mp_audio*)arg)->format;
-    af->data->bps    = ((struct mp_audio*)arg)->bps;
+    mp_audio_set_format(af->data, ((struct mp_audio*)arg)->format);
     af->mul          = (double)af->data->nch / ((struct mp_audio*)arg)->nch;
     return check_routes(s,((struct mp_audio*)arg)->nch,af->data->nch);
   case AF_CONTROL_COMMAND_LINE:{
@@ -194,53 +193,19 @@ static int control(struct af_instance* af, int cmd, void* arg)
       }
     }
 
-    if(AF_OK != af->control(af,AF_CONTROL_CHANNELS | AF_CONTROL_SET ,&nch))
+    struct mp_chmap chmap;
+    mp_chmap_from_channels(&chmap, nch);
+    if (AF_OK != af->control(af, AF_CONTROL_CHANNELS | AF_CONTROL_SET, &chmap))
       return AF_ERROR;
     return AF_OK;
   }
   case AF_CONTROL_CHANNELS | AF_CONTROL_SET:
     // Reinit must be called after this function has been called
 
-    // Sanity check
-    if(((int*)arg)[0] <= 0 || ((int*)arg)[0] > AF_NCH){
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[channels] The number of output channels must be"
-	     " between 1 and %i. Current value is %i\n",AF_NCH,((int*)arg)[0]);
-      return AF_ERROR;
-    }
-
-    af->data->nch=((int*)arg)[0];
+    mp_audio_set_channels(af->data, (struct mp_chmap *)arg);
     if(!s->router)
       mp_msg(MSGT_AFILTER, MSGL_V, "[channels] Changing number of channels"
 	     " to %i\n",af->data->nch);
-    return AF_OK;
-  case AF_CONTROL_CHANNELS | AF_CONTROL_GET:
-    *(int*)arg = af->data->nch;
-    return AF_OK;
-  case AF_CONTROL_CHANNELS_ROUTING | AF_CONTROL_SET:{
-    int ch = ((af_control_ext_t*)arg)->ch;
-    int* route = ((af_control_ext_t*)arg)->arg;
-    s->route[ch][FR] = route[FR];
-    s->route[ch][TO] = route[TO];
-    return AF_OK;
-  }
-  case AF_CONTROL_CHANNELS_ROUTING | AF_CONTROL_GET:{
-    int ch = ((af_control_ext_t*)arg)->ch;
-    int* route = ((af_control_ext_t*)arg)->arg;
-    route[FR] = s->route[ch][FR];
-    route[TO] = s->route[ch][TO];
-    return AF_OK;
-  }
-  case AF_CONTROL_CHANNELS_NR | AF_CONTROL_SET:
-    s->nr = *(int*)arg;
-    return AF_OK;
-  case AF_CONTROL_CHANNELS_NR | AF_CONTROL_GET:
-    *(int*)arg = s->nr;
-    return AF_OK;
-  case AF_CONTROL_CHANNELS_ROUTER | AF_CONTROL_SET:
-    s->router = *(int*)arg;
-    return AF_OK;
-  case AF_CONTROL_CHANNELS_ROUTER | AF_CONTROL_GET:
-    *(int*)arg = s->router;
     return AF_OK;
   }
   return AF_UNKNOWN;
@@ -277,7 +242,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
   // Set output data
   c->audio = l->audio;
   c->len   = c->len / c->nch * l->nch;
-  c->nch   = l->nch;
+  mp_audio_set_channels(c, &l->channels);
 
   return c;
 }

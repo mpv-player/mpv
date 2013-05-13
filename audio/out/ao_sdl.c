@@ -160,6 +160,13 @@ static int init(struct ao *ao, char *params)
         return -1;
     }
 
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_waveext_def(&sel);
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels)) {
+        uninit(ao, true);
+        return -1;
+    }
+
     SDL_AudioSpec desired, obtained;
 
     int bytes = 0;
@@ -185,7 +192,7 @@ static int init(struct ao *ao, char *params)
 #endif
     }
     desired.freq = ao->samplerate;
-    desired.channels = ao->channels;
+    desired.channels = ao->channels.num;
     desired.samples = FFMIN(32768, ceil_power_of_two(ao->samplerate * buflen));
     desired.callback = audio_callback;
     desired.userdata = ao;
@@ -236,9 +243,13 @@ static int init(struct ao *ao, char *params)
             return -1;
     }
 
+    if (!ao_chmap_sel_get_def(ao, &sel, &ao->channels, obtained.channels)) {
+        uninit(ao, true);
+        return -1;
+    }
+
     ao->samplerate = obtained.freq;
-    ao->channels = obtained.channels;
-    ao->bps = ao->channels * ao->samplerate * bytes;
+    ao->bps = ao->channels.num * ao->samplerate * bytes;
     ao->buffersize = obtained.size * bufcnt;
     ao->outburst = obtained.size;
     priv->buffer = av_fifo_alloc(ao->buffersize);
@@ -362,7 +373,6 @@ static float get_delay(struct ao *ao)
 }
 
 const struct ao_driver audio_out_sdl = {
-    .is_new = true,
     .info = &(const struct ao_info) {
         "SDL Audio",
         "sdl",

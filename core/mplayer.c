@@ -86,6 +86,10 @@
 #include "video/out/x11_common.h"
 #endif
 
+#ifdef CONFIG_COCOA
+#include "osdep/macosx_application.h"
+#endif
+
 #include "audio/out/ao.h"
 
 #include "core/codecs.h"
@@ -328,7 +332,7 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
                "ID_AUDIO_RATE=%d\n", mpctx->sh_audio->samplerate);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_AUDIO_NCH=%d\n", mpctx->sh_audio->channels);
+               "ID_AUDIO_NCH=%d\n", mpctx->sh_audio->channels.num);
         start_pts = ds_get_next_pts(mpctx->sh_audio->ds);
     }
     if (video_start_pts != MP_NOPTS_VALUE) {
@@ -613,7 +617,14 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 
     talloc_free(mpctx);
 
+#ifdef CONFIG_COCOA
+    terminate_cocoa_application();
+    // never reach here:
+    // terminate calls exit itself, just silence compiler warning
+    exit(0);
+#else
     exit(rc);
+#endif
 }
 
 static void mk_config_dir(char *subdir)
@@ -1695,6 +1706,12 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->ao = ao_create(opts, mpctx->input);
         mpctx->ao->samplerate = opts->force_srate;
         mpctx->ao->format = opts->audio_output_format;
+        // Automatic downmix
+        if (mp_chmap_is_stereo(&opts->audio_output_channels) &&
+            !mp_chmap_is_stereo(&mpctx->sh_audio->channels))
+        {
+            mp_chmap_from_channels(&mpctx->ao->channels, 2);
+        }
     }
     ao = mpctx->ao;
 
@@ -1711,6 +1728,8 @@ void reinit_audio_chain(struct MPContext *mpctx)
     if (!ao->initialized) {
         ao->buffersize = opts->ao_buffersize;
         ao->encode_lavc_ctx = mpctx->encode_lavc_ctx;
+        mp_chmap_remove_useless_channels(&ao->channels,
+                                         &opts->audio_output_channels);
         ao_init(ao, opts->audio_driver_list);
         if (!ao->initialized) {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
@@ -1718,12 +1737,10 @@ void reinit_audio_chain(struct MPContext *mpctx)
             goto init_error;
         }
         ao->buffer.start = talloc_new(ao);
-        mp_msg(MSGT_CPLAYER, MSGL_INFO,
-               "AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
-               ao->driver->info->short_name,
-               ao->samplerate, ao->channels,
-               af_fmt2str_short(ao->format),
-               af_fmt2bits(ao->format) / 8);
+        char *s = mp_audio_fmt_to_str(ao->samplerate, &ao->channels, ao->format);
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "AO: [%s] %s\n",
+               ao->driver->info->short_name, s);
+        talloc_free(s);
         mp_msg(MSGT_CPLAYER, MSGL_V, "AO: Description: %s\nAO: Author: %s\n",
                ao->driver->info->name, ao->driver->info->author);
         if (strlen(ao->driver->info->comment) > 0)
@@ -2290,7 +2307,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
             ptsdiff = written_pts - mpctx->sh_video->pts - mpctx->delay
                       - mpctx->audio_delay;
         bytes = ptsdiff * bps;
-        bytes -= bytes % (ao->channels * af_fmt2bits(ao->format) / 8);
+        bytes -= bytes % (ao->channels.num * af_fmt2bits(ao->format) / 8);
 
         // ogg demuxers give packets without timing
         if (written_pts <= 1 && sh_audio->pts == MP_NOPTS_VALUE) {
@@ -2359,7 +2376,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     bool partial_fill = false;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     bool modifiable_audio_format = !(ao->format & AF_FORMAT_SPECIAL_MASK);
-    int unitsize = ao->channels * af_fmt2bits(ao->format) / 8;
+    int unitsize = ao->channels.num * af_fmt2bits(ao->format) / 8;
 
     if (mpctx->paused)
         playsize = 1;   // just initialize things (audio pts at least)
@@ -3802,7 +3819,6 @@ static void run_playloop(struct MPContext *mpctx)
     execute_queued_seek(mpctx);
 }
 
-
 static int read_keys(void *ctx, int fd)
 {
     if (getch2(ctx))
@@ -3926,6 +3942,10 @@ static void init_input(struct MPContext *mpctx)
         mp_input_add_key_fd(mpctx->input, 0, 1, read_keys, NULL, mpctx->key_fifo);
     // Set the libstream interrupt callback
     stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
+
+#ifdef CONFIG_COCOA
+    cocoa_set_state(mpctx->input, mpctx->key_fifo);
+#endif
 }
 
 static void open_subtitles_from_options(struct MPContext *mpctx)
@@ -4095,6 +4115,35 @@ static void idle_loop(struct MPContext *mpctx)
     }
 }
 
+static void stream_dump(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    char *filename = opts->stream_dump;
+    stream_t *stream = mpctx->stream;
+    assert(stream && filename);
+
+    stream_set_capture_file(stream, filename);
+
+    while (mpctx->stop_play == KEEP_PLAYING && !stream->eof) {
+        if (!opts->quiet && ((stream->pos / (1024 * 1024)) % 2) == 1) {
+            uint64_t pos = stream->pos - stream->start_pos;
+            uint64_t end = stream->end_pos - stream->start_pos;
+            char *line = talloc_asprintf(NULL, "Dumping %lld/%lld...",
+                (long long int)pos, (long long int)end);
+            write_status_line(mpctx, line);
+            talloc_free(line);
+        }
+        stream_fill_buffer(stream);
+        for (;;) {
+            mp_cmd_t *cmd = mp_input_get_cmd(mpctx->input, 0, false);
+            if (!cmd)
+                break;
+            run_command(mpctx, cmd);
+            talloc_free(cmd);
+        }
+    }
+}
+
 // Start playing the current playlist entry.
 // Handle initialization and deinitialization.
 static void play_current_file(struct MPContext *mpctx)
@@ -4211,6 +4260,11 @@ static void play_current_file(struct MPContext *mpctx)
     }
     mpctx->stream->start_pos += opts->seek_to_byte;
 
+    if (opts->stream_dump && opts->stream_dump[0]) {
+        stream_dump(mpctx);
+        goto terminate_playback;
+    }
+
     // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
 #ifdef CONFIG_DVBIN
 goto_enable_cache: ;
@@ -4222,6 +4276,8 @@ goto_enable_cache: ;
     if (res == 0)
         if (demux_was_interrupted(mpctx))
             goto terminate_playback;
+
+    stream_set_capture_file(mpctx->stream, opts->stream_capture);
 
     //============ Open DEMUXERS --- DETECT file type =======================
 
@@ -4623,7 +4679,7 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
 /* This preprocessor directive is a hack to generate a mplayer-nomain.o object
  * file for some tools to link against. */
 #ifndef DISABLE_MAIN
-int main(int argc, char *argv[])
+static int mpv_main(int argc, char *argv[])
 {
     osdep_preinit(&argc, &argv);
 
@@ -4722,4 +4778,14 @@ int main(int argc, char *argv[])
 
     return 1;
 }
+
+int main(int argc, char *argv[])
+{
+#ifdef CONFIG_COCOA
+    cocoa_main(mpv_main, argc, argv);
+#else
+    mpv_main(argc, argv);
+#endif
+}
+
 #endif /* DISABLE_MAIN */

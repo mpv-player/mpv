@@ -96,10 +96,8 @@ static int control(struct af_instance* af, int cmd, void* arg)
     // Sanity check
     if(!arg) return AF_ERROR;
 
-    af->data->rate   = ((struct mp_audio*)arg)->rate;
-    af->data->nch    = ((struct mp_audio*)arg)->nch;
-    af->data->format = AF_FORMAT_FLOAT_NE;
-    af->data->bps    = 4;
+    mp_audio_copy_config(af->data, (struct mp_audio*)arg);
+    mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
 
     // Calculate number of active filters
     s->K=KM;
@@ -148,30 +146,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
 	  pow(10.0,clamp(g[j],G_MIN,G_MAX)/20.0)-1.0;
       }
     }
-    return AF_OK;
-  }
-  case AF_CONTROL_EQUALIZER_GAIN | AF_CONTROL_SET:{
-    float* gain = ((af_control_ext_t*)arg)->arg;
-    int    ch   = ((af_control_ext_t*)arg)->ch;
-    int    k;
-    if(ch >= AF_NCH || ch < 0)
-      return AF_ERROR;
-
-    for(k = 0 ; k<KM ; k++)
-      s->g[ch][k] = pow(10.0,clamp(gain[k],G_MIN,G_MAX)/20.0)-1.0;
-
-    return AF_OK;
-  }
-  case AF_CONTROL_EQUALIZER_GAIN | AF_CONTROL_GET:{
-    float* gain = ((af_control_ext_t*)arg)->arg;
-    int    ch   = ((af_control_ext_t*)arg)->ch;
-    int    k;
-    if(ch >= AF_NCH || ch < 0)
-      return AF_ERROR;
-
-    for(k = 0 ; k<KM ; k++)
-      gain[k] = log10(s->g[ch][k]+1.0) * 20.0;
-
     return AF_OK;
   }
   }

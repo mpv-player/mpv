@@ -20,11 +20,12 @@
 #define MPLAYER_AUDIO_OUT_INTERNAL_H
 
 #include "core/options.h"
+#include "ao.h"
 
 // prototypes:
 //static ao_info_t info;
 static int control(int cmd, void *arg);
-static int init(int rate,int channels,int format,int flags);
+static int init(int rate,const struct mp_chmap *channels,int format,int flags);
 static void uninit(int immed);
 static void reset(void);
 static int get_space(void);

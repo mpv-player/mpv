@@ -179,6 +179,20 @@ static int mp_property_stream_path(m_option_t *prop, int action, void *arg,
     return m_property_strdup_ro(prop, action, arg, stream->url);
 }
 
+static int mp_property_stream_capture(m_option_t *prop, int action,
+                                      void *arg, MPContext *mpctx)
+{
+    if (!mpctx->stream)
+        return M_PROPERTY_UNAVAILABLE;
+
+    if (action == M_PROPERTY_SET) {
+        char *filename = *(char **)arg;
+        stream_set_capture_file(mpctx->stream, filename);
+        // fall through to mp_property_generic_option
+    }
+    return mp_property_generic_option(prop, action, arg, mpctx);
+}
+
 /// Demuxer name (RO)
 static int mp_property_demuxer(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
@@ -684,20 +698,10 @@ static int mp_property_channels(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        switch (mpctx->sh_audio->channels) {
-        case 1:
-            *(char **) arg = talloc_strdup(NULL, "mono");
-            break;
-        case 2:
-            *(char **) arg = talloc_strdup(NULL, "stereo");
-            break;
-        default:
-            *(char **) arg = talloc_asprintf(NULL, "%d channels",
-                                             mpctx->sh_audio->channels);
-        }
+        *(char **) arg = mp_chmap_to_str(&mpctx->sh_audio->channels);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(int *)arg = mpctx->sh_audio->channels;
+        *(int *)arg = mpctx->sh_audio->channels.num;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -1405,6 +1409,7 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "stream-path", mp_property_stream_path, CONF_TYPE_STRING,
       0, 0, 0, NULL },
+    M_OPTION_PROPERTY_CUSTOM("stream-capture", mp_property_stream_capture),
     { "demuxer", mp_property_demuxer, CONF_TYPE_STRING,
       0, 0, 0, NULL },
     { "stream-pos", mp_property_stream_pos, CONF_TYPE_INT64,
@@ -2358,7 +2363,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 break;
             }
             af->control(af, AF_CONTROL_COMMAND_LINE, cmd->args[1].v.s);
-            af_reinit(sh_audio->afilter, af);
+            af_reinit(sh_audio->afilter);
         }
         break;
     case MP_CMD_SHOW_CHAPTERS:

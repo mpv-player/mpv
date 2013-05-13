@@ -121,8 +121,16 @@ static int init(struct ao *ao, char *params)
         free(port);
     }
 
+    // Actual channel layout unknown.
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_waveext_def(&sel);
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels)) {
+        rsd_free(priv->rd);
+        return -1;
+    }
+
     rsd_set_param(priv->rd, RSD_SAMPLERATE, &ao->samplerate);
-    rsd_set_param(priv->rd, RSD_CHANNELS, &ao->channels);
+    rsd_set_param(priv->rd, RSD_CHANNELS, &ao->channels.num);
 
     int rsd_format = set_format(ao);
     rsd_set_param(priv->rd, RSD_FORMAT, &rsd_format);
@@ -132,7 +140,7 @@ static int init(struct ao *ao, char *params)
         return -1;
     }
 
-    ao->bps = ao->channels * ao->samplerate * af_fmt2bits(ao->format) / 8;
+    ao->bps = ao->channels.num * ao->samplerate * af_fmt2bits(ao->format) / 8;
 
     return 0;
 }
@@ -189,7 +197,6 @@ static float get_delay(struct ao *ao)
 }
 
 const struct ao_driver audio_out_rsound = {
-    .is_new    = true,
     .info      = &(const struct ao_info) {
         .name       = "RSound output driver",
         .short_name = "rsound",

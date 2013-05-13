@@ -41,12 +41,10 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
   switch(cmd){
   case AF_CONTROL_REINIT:
-    af->data->nch    = data->nch;
-    af->data->format = AF_FORMAT_S16_NE;
-    af->data->bps    = 2;
-    af->data->rate   = data->rate;
+    mp_audio_copy_config(af->data, data);
+    mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
 
-    return AF_OK;
+    return af_test_output(af, data);
   case AF_CONTROL_COMMAND_LINE:
     sscanf((char*)arg,"%lf", &s->delta);
     return AF_OK;

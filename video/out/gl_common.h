@@ -26,6 +26,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #include "config.h"
 #include "core/mp_msg.h"
@@ -111,6 +112,7 @@ typedef struct MPGLContext {
     int (*vo_init)(struct vo *vo);
     void (*vo_uninit)(struct vo *vo);
     void (*releaseGlContext)(struct MPGLContext *);
+    void (*set_current)(struct MPGLContext *, bool current);
 
     // Resize the window, or create a new window if there isn't one yet.
     // On the first call, it creates a GL context according to what's specified
@@ -129,12 +131,25 @@ typedef struct MPGLContext {
     void (*border)(struct vo *vo);
     void (*update_xinerama_info)(struct vo *vo);
 
+    // An optional function to register a resize callback in the backend that
+    // can be called on separate thread to handle resize events immediately
+    // (without waiting for vo_check_events, which will come later for the
+    // proper resize)
+    void (*register_resize_callback)(struct vo *vo,
+                                     void (*cb)(struct vo *vo, int w, int h));
+
     // For free use by the backend.
     void *priv;
 } MPGLContext;
 
 MPGLContext *mpgl_init(struct vo *vo, const char *backend_name);
 void mpgl_uninit(MPGLContext *ctx);
+
+void mpgl_lock(MPGLContext *ctx);
+void mpgl_unlock(MPGLContext *ctx);
+void mpgl_set_context(MPGLContext *ctx);
+void mpgl_unset_context(MPGLContext *ctx);
+bool mpgl_is_thread_safe(MPGLContext *ctx);
 
 // Create a VO window and create a GL context on it.
 // (Calls config_window_gl3 or config_window+setGlWindow.)

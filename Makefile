@@ -45,10 +45,10 @@ SOURCES-$(LIBBS2B)              += audio/filter/af_bs2b.c
 SOURCES-$(LIBPOSTPROC)          += video/filter/vf_pp.c
 SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
-SOURCES-$(MACOSX_FINDER)        += osdep/macosx_finder_args.m
 SOURCES-$(MACOSX_BUNDLE)        += osdep/macosx_bundle.m
 SOURCES-$(COCOA)                += video/out/osx_common.m \
-                                   video/out/cocoa_common.m
+                                   video/out/cocoa_common.m \
+                                   osdep/macosx_application.m
 SOURCES-$(MNG)                  += demux/demux_mng.c
 SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
 
@@ -126,6 +126,10 @@ ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
 endif
 
 SOURCES = talloc.c \
+          audio/audio.c \
+          audio/chmap.c \
+          audio/chmap_sel.c \
+          audio/fmt-conversion.c \
           audio/format.c \
           audio/mixer.c \
           audio/reorder_ch.c \
@@ -140,6 +144,7 @@ SOURCES = talloc.c \
           audio/filter/af_dummy.c \
           audio/filter/af_equalizer.c \
           audio/filter/af_extrastereo.c \
+          audio/filter/af_force.c \
           audio/filter/af_format.c \
           audio/filter/af_hrtf.c \
           audio/filter/af_karaoke.c \

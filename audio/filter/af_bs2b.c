@@ -105,9 +105,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         format           = ((struct mp_audio*)arg)->format;
         af->data->rate   = ((struct mp_audio*)arg)->rate;
-        af->data->nch    = 2;     // bs2b is useful only for 2ch audio
-        af->data->bps    = ((struct mp_audio*)arg)->bps;
-        af->data->format = format;
+        mp_audio_set_num_channels(af->data, 2);     // bs2b is useful only for 2ch audio
+        mp_audio_set_format(af->data, format);
 
         /* check for formats supported by libbs2b
            and assign corresponding handlers */
@@ -162,8 +161,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
                 break;
             default:
                 af->play = play_f;
-                af->data->format = AF_FORMAT_FLOAT_NE;
-                af->data->bps = 4;
+                mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
                 break;
         }
 

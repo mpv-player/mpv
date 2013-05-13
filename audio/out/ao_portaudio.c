@@ -273,9 +273,15 @@ static int init(struct ao *ao, char *params)
     if (pa_device == paNoDevice)
         goto error_exit;
 
+    // The actual channel order probably depends on the platform.
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_waveext_def(&sel);
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+        goto error_exit;
+
     PaStreamParameters sp = {
         .device = pa_device,
-        .channelCount = ao->channels,
+        .channelCount = ao->channels.num,
         .suggestedLatency
             = Pa_GetDeviceInfo(pa_device)->defaultHighOutputLatency,
     };
@@ -298,7 +304,7 @@ static int init(struct ao *ao, char *params)
 
     ao->format = fmt->mp_format;
     sp.sampleFormat = fmt->pa_format;
-    priv->framelen = ao->channels * (af_fmt2bits(ao->format) / 8);
+    priv->framelen = ao->channels.num * (af_fmt2bits(ao->format) / 8);
     ao->bps = ao->samplerate * priv->framelen;
 
     if (!check_pa_ret(Pa_IsFormatSupported(NULL, &sp, ao->samplerate)))
@@ -413,7 +419,6 @@ static void resume(struct ao *ao)
 }
 
 const struct ao_driver audio_out_portaudio = {
-    .is_new = true,
     .info = &(const struct ao_info) {
         "PortAudio",
         "portaudio",

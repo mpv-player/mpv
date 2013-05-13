@@ -299,7 +299,7 @@ static int control(struct af_instance *af, int cmd, void* arg)
 		   af->data->rate);
 	    return AF_ERROR;
 	}
-	af->data->nch    = ((struct mp_audio*)arg)->nch;
+	mp_audio_set_channels_old(af->data, ((struct mp_audio*)arg)->nch);
 	    if(af->data->nch == 2) {
  	       /* 2 channel input */
  	       if(s->decode_mode != HRTF_MIX_MATRIX2CH) {
@@ -308,13 +308,12 @@ static int control(struct af_instance *af, int cmd, void* arg)
 	       }
 	    }
 	    else if (af->data->nch < 5)
-	      af->data->nch = 5;
-	af->data->format = AF_FORMAT_S16_NE;
-	af->data->bps    = 2;
+	      mp_audio_set_channels_old(af->data, 5);
+        mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
 	test_output_res = af_test_output(af, (struct mp_audio*)arg);
 	af->mul = 2.0 / af->data->nch;
 	// after testing input set the real output format
-	af->data->nch = 2;
+        mp_audio_set_num_channels(af->data, 2);
 	s->print_flag = 1;
 	return test_output_res;
     case AF_CONTROL_COMMAND_LINE:
@@ -566,7 +565,7 @@ static struct mp_audio* play(struct af_instance *af, struct mp_audio *data)
     /* Set output data */
     data->audio = af->data->audio;
     data->len   = data->len / data->nch * 2;
-    data->nch   = 2;
+    mp_audio_set_num_channels(data, 2);
 
     return data;
 }

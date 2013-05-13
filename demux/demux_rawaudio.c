@@ -31,12 +31,12 @@
 #include "audio/format.h"
 
 
-static int channels = 2;
+static struct mp_chmap channels = MP_CHMAP_INIT_STEREO;
 static int samplerate = 44100;
 static int format = AF_FORMAT_S16_NE;
 
 const m_option_t demux_rawaudio_opts[] = {
-  { "channels", &channels, CONF_TYPE_INT,CONF_RANGE,1,8, NULL },
+  { "channels", &channels, &m_option_type_chmap, CONF_MIN, 1 },
   { "rate", &samplerate, CONF_TYPE_INT,CONF_RANGE,1000,8*48000, NULL },
   { "format", &format, CONF_TYPE_AFMT, 0, 0, 0, NULL },
   {NULL, NULL, 0, 0, 0, 0, NULL}
@@ -55,11 +55,12 @@ static demuxer_t* demux_rawaudio_open(demuxer_t* demuxer) {
   sh_audio->format = format;
   sh_audio->wf = w = malloc(sizeof(*w));
   w->wFormatTag = 0;
-  w->nChannels = sh_audio->channels = channels;
+  sh_audio->channels = channels;
+  w->nChannels = sh_audio->channels.num;
   w->nSamplesPerSec = sh_audio->samplerate = samplerate;
   int samplesize = (af_fmt2bits(format) + 7) / 8;
-  w->nAvgBytesPerSec = samplerate * samplesize * channels;
-  w->nBlockAlign = channels * samplesize;
+  w->nAvgBytesPerSec = samplerate * samplesize * w->nChannels;
+  w->nBlockAlign = w->nChannels * samplesize;
   w->wBitsPerSample = 8 * samplesize;
   w->cbSize = 0;
 
@@ -105,7 +106,7 @@ static void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
   else
     pos = base + (rel_seek_secs*sh_audio->i_bps);
 
-  pos -= (pos % (sh_audio->channels * sh_audio->samplesize) );
+  pos -= (pos % (sh_audio->channels.num * sh_audio->samplesize) );
   stream_seek(s,pos);
 //  printf("demux_rawaudio: streamtell=%d\n",(int)stream_tell(demuxer->stream));
 }

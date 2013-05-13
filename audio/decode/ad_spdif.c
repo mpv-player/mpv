@@ -148,19 +148,20 @@ static int init(sh_audio_t *sh, const char *decoder)
     }
     sh->ds->buffer_pos -= in_size;
 
+    int num_channels = 0;
     switch (lavf_ctx->streams[0]->codec->codec_id) {
     case AV_CODEC_ID_AAC:
         spdif_ctx->iec61937_packet_size = 16384;
         sh->sample_format               = AF_FORMAT_IEC61937_LE;
         sh->samplerate                  = srate;
-        sh->channels                    = 2;
+        num_channels                    = 2;
         sh->i_bps                       = bps;
         break;
     case AV_CODEC_ID_AC3:
         spdif_ctx->iec61937_packet_size = 6144;
         sh->sample_format               = AF_FORMAT_AC3_LE;
         sh->samplerate                  = srate;
-        sh->channels                    = 2;
+        num_channels                    = 2;
         sh->i_bps                       = bps;
         break;
     case AV_CODEC_ID_DTS:
@@ -175,13 +176,13 @@ static int init(sh_audio_t *sh, const char *decoder)
             spdif_ctx->iec61937_packet_size = 32768;
             sh->sample_format               = AF_FORMAT_IEC61937_LE;
             sh->samplerate                  = 192000; // DTS core require 48000
-            sh->channels                    = 2*4;
+            num_channels                    = 2*4;
             sh->i_bps                       = bps;
         } else {
             spdif_ctx->iec61937_packet_size = 32768;
             sh->sample_format               = AF_FORMAT_AC3_LE;
             sh->samplerate                  = srate;
-            sh->channels                    = 2;
+            num_channels                    = 2;
             sh->i_bps                       = bps;
         }
         break;
@@ -189,26 +190,28 @@ static int init(sh_audio_t *sh, const char *decoder)
         spdif_ctx->iec61937_packet_size = 24576;
         sh->sample_format               = AF_FORMAT_IEC61937_LE;
         sh->samplerate                  = 192000;
-        sh->channels                    = 2;
+        num_channels                    = 2;
         sh->i_bps                       = bps;
         break;
     case AV_CODEC_ID_MP3:
         spdif_ctx->iec61937_packet_size = 4608;
         sh->sample_format               = AF_FORMAT_MPEG2;
         sh->samplerate                  = srate;
-        sh->channels                    = 2;
+        num_channels                    = 2;
         sh->i_bps                       = bps;
         break;
     case AV_CODEC_ID_TRUEHD:
         spdif_ctx->iec61937_packet_size = 61440;
         sh->sample_format               = AF_FORMAT_IEC61937_LE;
         sh->samplerate                  = 192000;
-        sh->channels                    = 8;
+        num_channels                    = 8;
         sh->i_bps                       = bps;
         break;
     default:
         break;
     }
+    if (num_channels)
+        mp_chmap_from_channels(&sh->channels, num_channels);
 
     return 1;
 
