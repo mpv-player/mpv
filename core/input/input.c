@@ -1350,6 +1350,10 @@ void mp_input_feed_key(struct input_ctx *ictx, int code)
     struct mp_cmd *cmd = interpret_key(ictx, code);
     if (!cmd)
         return;
+    if (cmd->key_up_follows && cmd->id != MP_CMD_MOUSE_CLICK) {
+        talloc_free(cmd);
+        return;
+    }
     add_key_cmd(ictx, cmd);
 }
 
