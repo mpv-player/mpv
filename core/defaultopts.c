@@ -49,6 +49,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .osd_bar_align_y = 0.5,
         .osd_bar_w = 75.0,
         .osd_bar_h = 3.125,
+        .osd_scale = 1,
         .loop_times = -1,
         .ordered_chapters = 1,
         .chapter_merge_threshold = 100,

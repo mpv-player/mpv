@@ -624,6 +624,7 @@ const m_option_t mplayer_opts[]={
                ({"0", 0}, {"1", 1}, {"2", 2}, {"3", 3})),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
     OPT_FLAG("osd-fractions", osd_fractions, 0),
+    OPT_FLOATRANGE("osd-scale", osd_scale, 0, 0, 100),
 
     OPT_DOUBLE("sstep", step_sec, CONF_MIN, 0),
 

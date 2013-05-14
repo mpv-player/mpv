@@ -147,10 +147,18 @@ static char *mangle_ass(const char *in)
 
 static void update_osd(struct osd_state *osd, struct osd_object *obj)
 {
+    struct MPOpts *opts = osd->opts;
+
     create_osd_ass_track(osd, obj);
     clear_obj(obj);
     if (!osd->osd_text[0])
         return;
+
+    struct osd_style_opts font = *opts->osd_style;
+    font.font_size *= opts->osd_scale;
+
+    ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
+    mp_ass_set_style(style, &font);
 
     char *text = mangle_ass(osd->osd_text);
     add_osd_ass_event(obj->osd_track, text);
