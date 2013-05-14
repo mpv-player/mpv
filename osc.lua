@@ -209,8 +209,10 @@ end
 
 
 local osc_styles = {
-	bigButtons = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnWebdings}",
-	smallButtons = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs20\\fnWebdings}",
+	bigButtons = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnosd-font}",
+	smallButtonsL = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs20\\fnosd-font}",
+	smallButtonsR = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs30\\fnosd-font}",
+
 	elementDown = "{\\1c&H999999}",
 	elementDisab = "{\\1a&H88&}",
 	timecodes = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs25\\fnsans-serif}",
@@ -308,9 +310,9 @@ function osc_init ()
     --play/pause
     local contentF = function (ass) 
     	if mp.property_get("pause") == "yes" then
-    		ass:append("{\\fscx150}")
+    		ass:append("\238\132\129")
     	else
-    		ass:append("")
+    		ass:append("\238\128\130")
     	end
     end
     local up_cmd = function () mp.send_command("no-osd cycle pause") end
@@ -318,29 +320,29 @@ function osc_init ()
     
     --skipback
     local down_cmd = function () mp.send_command("no-osd seek -5 relative keyframes") end
-    register_element(posX-60, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", down_cmd, nil, true)
+    register_element(posX-60, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "\238\128\132", down_cmd, nil, true)
     
     --skipfrwd
     local down_cmd = function () mp.send_command("no-osd seek 10 relative keyframes") end
-    register_element(posX+60, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", down_cmd, nil, true)
+    register_element(posX+60, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "\238\128\133", down_cmd, nil, true)
     
     -- do we have chapters?
     if (#mp.get_chapter_list()) > 0 then
 	    
 	    --prev
 	    local up_cmd = function () mp.send_command("add chapter -1") end
-	    register_element(posX-120, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", nil, up_cmd, false)
+	    register_element(posX-120, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "\238\132\132", nil, up_cmd, false)
 	    
 	    --next
 	    local up_cmd = function () mp.send_command("add chapter 1") end
-	    register_element(posX+120, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "", nil, up_cmd, false)
+	    register_element(posX+120, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "\238\132\133", nil, up_cmd, false)
 	    
 	else -- if not, render buttons as disabled and don't attach functions
 	    --prev
-	    register_element(posX-120, bbposY, 5, 40, 40, (osc_styles.bigButtons .. osc_styles.elementDisab), nil, "", nil, nil, false)
+	    register_element(posX-120, bbposY, 5, 40, 40, (osc_styles.bigButtons .. osc_styles.elementDisab), nil, "\238\132\132", nil, nil, false)
 	    
 	    --next
-	    register_element(posX+120, bbposY, 5, 40, 40, (osc_styles.bigButtons .. osc_styles.elementDisab), nil, "", nil, nil, false)
+	    register_element(posX+120, bbposY, 5, 40, 40, (osc_styles.bigButtons .. osc_styles.elementDisab), nil, "\238\132\133", nil, nil, false)
 	
 	end
 	
@@ -356,10 +358,10 @@ function osc_init ()
     	else
     		aid = tonumber(mp.property_get("audio")) + 1
     	end    		
-    	ass:append("" .. aid)
+    	ass:append("\238\132\134 {\\fs17}" .. aid)
     end
     local up_cmd = function () mp.send_command("add audio") end
-    register_element(posX-pos_offsetX, bbposY, 1, 50, 18, osc_styles.smallButtons, osc_styles.elementDown, contentF, nil, up_cmd, false)
+    register_element(posX-pos_offsetX, bbposY, 1, 40, 18, osc_styles.smallButtonsL, osc_styles.elementDown, contentF, nil, up_cmd, false)
     
    	--cycle sub tracks
     local contentF = function (ass)
@@ -369,23 +371,23 @@ function osc_init ()
     	else
     		sid = tonumber(mp.property_get("sub")) + 1
     	end
-    	ass:append("==" .. sid)
+    	ass:append("\238\132\135 {\\fs17}" .. sid)
     end
     local up_cmd = function () mp.send_command("add sub") end
-    register_element(posX-pos_offsetX, bbposY, 7, 50, 18, osc_styles.smallButtons, osc_styles.elementDown, contentF, nil, up_cmd, false)
+    register_element(posX-pos_offsetX, bbposY, 7, 40, 18, osc_styles.smallButtonsL, osc_styles.elementDown, contentF, nil, up_cmd, false)
 
 	
 	
 	--toggle FS
     local contentF = function (ass)
     	if mp.property_get("fullscreen") == "yes" then
-    		ass:append("")
+    		ass:append("\238\132\137")
     	else
-    		ass:append("")
+    		ass:append("\238\132\136")
     	end
     end
     local up_cmd = function () mp.send_command("no-osd cycle fullscreen") end
-    register_element(posX+pos_offsetX, bbposY, 6, 18, 18, osc_styles.smallButtons, osc_styles.elementDown, contentF, nil, up_cmd, false)
+    register_element(posX+pos_offsetX, bbposY, 6, 25, 25, osc_styles.smallButtonsR, osc_styles.elementDown, contentF, nil, up_cmd, false)
 	
     
     -- 
@@ -524,7 +526,7 @@ function mp_update()
     
     --state.append_calls = 0
     
-    local osd_time = 10
+    local osd_time = 1
     if state.osd_visible and now - state.last_osd_time < osd_time then
         draw_osc(ass)
         state.osd_visible = true
