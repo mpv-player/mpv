@@ -41,9 +41,9 @@ end
 
 function draw_bar_simple(ass, x, y, w, h, style)
 	local pos = 0
-	local duration = tonumber(mp.property_get("length"))
+	local duration = 0
 	if not (mp.property_get("length") == nil) then
-		
+		duration = tonumber(mp.property_get("length"))
 	    pos = tonumber(mp.property_get("ratio-pos"))
 		--local pos = tonumber(mp.property_get("percent-pos")) / 100
     end
