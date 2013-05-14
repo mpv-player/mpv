@@ -3,14 +3,14 @@ local assdraw = require 'assdraw'
 local osc_geo = {
 	-- static
 	scale = 1,								-- scaling of the controller
-	vidscale = true,						-- scale the controller with the video? don't use false, currently causes bugs with libass
+	vidscale = true,						-- scale the controller with the video? don't use false, currently causes glitches
 	valign = 1,								-- vertical alignment, -1 (top) to 1 (bottom)
 	osc_w = 550,							-- width, height, corner-radius, padding of the box
 	osc_h = 150,
 	osc_r = 10,
 	osc_p = 15,
 	
-	-- calculated by osc_init
+	-- calculated by osc_init()
 	playresy = 0,							-- canvas size Y
 	playresx = 0,							-- canvas size X
 	posX, posY = 0,0, 						-- position of the controler
@@ -27,7 +27,6 @@ local state = {
     active_button = 0,
     rightTC_trem = false,
     mp_screen_size,
-    append_calls = 0,
 }
 
 -- align: -1 .. +1
@@ -288,7 +287,8 @@ function osc_init ()
 			ass:append("mpv")
 		end
 	end
-    register_element(posX, posY - pos_offsetY - 10, 8, 0, 0, osc_styles.vidtitle, nil, contentF, nil, nil, false)
+	local up_cmd = function () mp.send_command("show_text ${media-title}") end
+    register_element(posX, posY - pos_offsetY - 10, 8, 496, 12, osc_styles.vidtitle, osc_styles.elementDown, contentF, nil, up_cmd, false)
     
     -- If we have more than one playlist entry, render playlist navigation buttons
     if tonumber(mp.property_get("playlist-count")) > 1 then
