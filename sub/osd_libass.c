@@ -37,14 +37,12 @@ static const char osd_font_pfb[] =
 #include "mpvcore/options.h"
 
 
-// NOTE: \fs-5 to reduce the size of the symbols in relation to normal text.
-//       Done because libass doesn't center characters that are too high.
-#define ASS_USE_OSD_FONT "{\\fnOSD\\fs-5}"
+#define ASS_USE_OSD_FONT "{\\fnmpv-osd-symbols}"
 
 void osd_init_backend(struct osd_state *osd)
 {
     osd->osd_ass_library = mp_ass_init(osd->opts);
-    ass_add_font(osd->osd_ass_library, "OSD", (void *)osd_font_pfb,
+    ass_add_font(osd->osd_ass_library, "mpv-osd-symbols", (void *)osd_font_pfb,
                  sizeof(osd_font_pfb) - 1);
 
     osd->osd_render = ass_renderer_init(osd->osd_ass_library);
