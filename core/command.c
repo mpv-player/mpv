@@ -1361,6 +1361,7 @@ static int mp_property_alias(m_option_t *prop, int action, void *arg,
 static const m_option_t mp_properties[] = {
     // General
     M_OPTION_PROPERTY("osd-level"),
+    M_OPTION_PROPERTY_CUSTOM("osd-scale", property_osd_helper),
     M_OPTION_PROPERTY("loop"),
     M_OPTION_PROPERTY_CUSTOM("speed", mp_property_playback_speed),
     { "filename", mp_property_filename, CONF_TYPE_STRING,

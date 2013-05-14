@@ -268,6 +268,7 @@ option.
 Name                        W Comment
 =========================== = ==================================================
 osd-level                   x see ``--osd-level``
+osd-scale                   x osd font size multiplicator, see ``--osd-scale``
 loop                        x see ``--loop``
 speed                       x see ``--speed``
 filename                      currently played file (path stripped)

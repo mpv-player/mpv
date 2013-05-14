@@ -1443,6 +1443,9 @@
 
     Default: 10.
 
+--osd-scale=<factor>
+    OSD font size multiplicator, multiplied with ``--osd-font-size`` value.
+
 --osd-shadow-color=<#RRGGBB>, --sub-text-shadow-color=<#RRGGBB>
     See ``--osd-color``. Color used for OSD/sub text shadow.
 
