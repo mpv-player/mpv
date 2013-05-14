@@ -313,10 +313,8 @@ void vo_osd_changed(int new_value)
     osd->want_redraw = true;
 }
 
-void osd_subs_changed(struct osd_state *osd)
+void osd_changed_all(struct osd_state *osd)
 {
-    for (int n = 0; n < MAX_OSD_PARTS; n++) {
-        if (osd->objs[n]->is_sub)
-            vo_osd_changed(n);
-    }
+    for (int n = 0; n < MAX_OSD_PARTS; n++)
+        vo_osd_changed(n);
 }

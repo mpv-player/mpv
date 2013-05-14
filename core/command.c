@@ -1212,16 +1212,16 @@ static int mp_property_aspect(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-// For subtitle related properties using the generic option bridge.
+// For OSD and subtitle related properties using the generic option bridge.
 // - Fail as unavailable if no video is active
 // - Trigger OSD state update when property is set
-static int property_sub_helper(m_option_t *prop, int action, void *arg,
+static int property_osd_helper(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_SET)
-        osd_subs_changed(mpctx->osd);
+        osd_changed_all(mpctx->osd);
     return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
@@ -1255,7 +1255,7 @@ static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
         *(char **)arg = talloc_asprintf(NULL, "%d/100", sub_pos);
         return M_PROPERTY_OK;
     }
-    return property_sub_helper(prop, action, arg, mpctx);
+    return property_osd_helper(prop, action, arg, mpctx);
 }
 
 /// Subtitle visibility (RW)
@@ -1478,11 +1478,11 @@ static const m_option_t mp_properties[] = {
     { "sub-visibility", mp_property_sub_visibility, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
     M_OPTION_PROPERTY_CUSTOM("sub-forced-only", mp_property_sub_forced_only),
-    M_OPTION_PROPERTY_CUSTOM("sub-scale", property_sub_helper),
+    M_OPTION_PROPERTY_CUSTOM("sub-scale", property_osd_helper),
 #ifdef CONFIG_ASS
-    M_OPTION_PROPERTY_CUSTOM("ass-use-margins", property_sub_helper),
-    M_OPTION_PROPERTY_CUSTOM("ass-vsfilter-aspect-compat", property_sub_helper),
-    M_OPTION_PROPERTY_CUSTOM("ass-style-override", property_sub_helper),
+    M_OPTION_PROPERTY_CUSTOM("ass-use-margins", property_osd_helper),
+    M_OPTION_PROPERTY_CUSTOM("ass-vsfilter-aspect-compat", property_osd_helper),
+    M_OPTION_PROPERTY_CUSTOM("ass-style-override", property_osd_helper),
 #endif
 
 #ifdef CONFIG_TV

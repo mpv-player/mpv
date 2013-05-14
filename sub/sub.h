@@ -207,7 +207,7 @@ extern float sub_fps;
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
 void osd_set_text(struct osd_state *osd, const char *text);
 void vo_osd_changed(int new_value);
-void osd_subs_changed(struct osd_state *osd);
+void osd_changed_all(struct osd_state *osd);
 void osd_free(struct osd_state *osd);
 
 enum mp_osd_draw_flags {
