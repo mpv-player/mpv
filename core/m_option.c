@@ -1635,7 +1635,8 @@ static int parse_chmap(const m_option_t *opt, struct bstr name,
         return M_OPT_INVALID;
     }
 
-    *(struct mp_chmap *)dst = res;
+    if (dst)
+        *(struct mp_chmap *)dst = res;
 
     return 1;
 }
