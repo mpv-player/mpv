@@ -4711,16 +4711,20 @@ static int mpv_main(int argc, char *argv[])
     print_libav_versions();
 
     if (!parse_cfgfiles(mpctx, mpctx->mconfig))
-        exit_player(mpctx, EXIT_NONE, 1);
-
-    if (!m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
-                                        argc, argv))
-    {
         exit_player(mpctx, EXIT_ERROR, 1);
+
+    int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
+                                           argc, argv);
+    if (r < 0) {
+        if (r <= M_OPT_EXIT) {
+            exit_player(mpctx, EXIT_NONE, 0);
+        } else {
+            exit_player(mpctx, EXIT_ERROR, 1);
+        }
     }
 
     if (handle_help_options(mpctx))
-        exit_player(mpctx, EXIT_NONE, 1);
+        exit_player(mpctx, EXIT_NONE, 0);
 
     mp_msg(MSGT_CPLAYER, MSGL_V, "Configuration: " CONFIGURATION "\n");
     mp_tmsg(MSGT_CPLAYER, MSGL_V, "Command line:");
