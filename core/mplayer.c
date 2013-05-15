@@ -4566,6 +4566,13 @@ static void print_version(int always)
            "%s (C) 2000-2013 mpv/MPlayer/mplayer2 projects\n built on %s\n", mplayer_version, mplayer_builddate);
 }
 
+static int print_version_opt(const m_option_t *opt, const char *name,
+                             const char *param)
+{
+    print_version(true);
+    exit(0);
+}
+
 static bool handle_help_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;

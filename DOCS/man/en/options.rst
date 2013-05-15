@@ -2401,6 +2401,9 @@
 
     *NOTE*: See ``--vd=help`` for a full list of available decoders.
 
+--version
+    Print version string and exit.
+
 --vf=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of video filters to apply to the video stream. See
     `video_filters` for details and descriptions of the available filters.

@@ -55,6 +55,9 @@ extern const m_option_t cdda_opts[];
 extern int sws_flags;
 extern const char pp_help[];
 
+static int print_version_opt(const m_option_t *opt, const char *name,
+                             const char *param);
+
 #ifdef CONFIG_RADIO
 const m_option_t radioopts_conf[]={
     {"device", &stream_radio_defaults.device, CONF_TYPE_STRING, 0, 0 ,0, NULL},
@@ -699,6 +702,7 @@ const m_option_t mplayer_opts[]={
     {"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},
     {"help", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {"h", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
+    {"version", (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
 
 #ifdef CONFIG_ENCODING
     OPT_STRING("o", encode_output.file, CONF_GLOBAL),
