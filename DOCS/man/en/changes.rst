@@ -168,7 +168,12 @@ input.conf and slave commands
     |                                | syntax slightly changed.               |
     +--------------------------------+----------------------------------------+
     | osd_show_text                  | Now does the same as                   |
-    |                                | osd_show_property_text.                |
+    |                                | osd_show_property_text. Use the raw    |
+    |                                | prefix to disable property expansion.  |
+    +--------------------------------+----------------------------------------+
+    | show_tracks                    | show_text ${track-list}                |
+    +--------------------------------+----------------------------------------+
+    | show_chapters                  | show_text ${chapter-list}              |
     +--------------------------------+----------------------------------------+
 
 Other

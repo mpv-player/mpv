@@ -81,10 +81,6 @@ enum mp_command_type {
     /// Video filter commands
     MP_CMD_VF,
 
-    MP_CMD_SHOW_CHAPTERS,
-    MP_CMD_SHOW_TRACKS,
-    MP_CMD_SHOW_PLAYLIST,
-
     /// Video output commands
     MP_CMD_VO_CMDLINE,
 };

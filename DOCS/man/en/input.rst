@@ -213,13 +213,6 @@ show_progress
     Show the progress bar, the elapsed time and the total duration of the file
     on the OSD.
 
-show_chapters
-    Show a list of chapters on the OSD.
-
-show_tracks
-    Show a list of video/audio/subtitle tracks on the OSD.
-
-
 Input commands that are possibly subject to change
 --------------------------------------------------
 
@@ -270,7 +263,6 @@ vf set|add|toggle|del "filter1=params,filter2,..."
     - ``a vf set flip`` turn video upside-down on the ``a`` key
     - ``b vf set ""`` remove all video filters on ``b``
     - ``c vf toggle lavfi=gradfun`` toggle debanding on ``c``
-
 
 Undocumented commands: tv_start_scan, tv_step_channel, tv_step_norm,
 tv_step_chanlist, tv_set_channel, tv_last_channel, tv_set_freq, tv_step_freq,
@@ -401,4 +393,7 @@ tv-brightness               x
 tv-contrast                 x
 tv-saturation               x
 tv-hue                      x
+track-list                    list of audio/video/sub tracks, cur. entr. marked
+chapter-list                  list of chapters, current entry marked
+playlist                      playlist, current entry marked
 =========================== = ==================================================

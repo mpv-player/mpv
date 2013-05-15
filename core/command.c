@@ -393,6 +393,38 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_list_chapters(m_option_t *prop, int action, void *arg,
+                                     MPContext *mpctx)
+{
+    if (action == M_PROPERTY_GET) {
+        int count = get_chapter_count(mpctx);
+        int cur = mpctx->num_sources ? get_current_chapter(mpctx) : -1;
+        char *res = NULL;
+        int n;
+
+        if (count < 1) {
+            res = talloc_asprintf_append(res, "No chapters.");
+        }
+
+        for (n = 0; n < count; n++) {
+            char *name = chapter_display_name(mpctx, n);
+            double t = chapter_start_time(mpctx, n);
+            char* time = mp_format_time(t, false);
+            res = talloc_asprintf_append(res, "%s", time);
+            talloc_free(time);
+            char *m1 = "> ", *m2 = " <";
+            if (n != cur)
+                m1 = m2 = "";
+            res = talloc_asprintf_append(res, "   %s%s%s\n", m1, name, m2);
+            talloc_free(name);
+        }
+
+        *(char **)arg = res;
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_edition(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
@@ -830,6 +862,60 @@ static int property_switch_track(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(prop, action, arg, mpctx);
+}
+
+static const char *track_type_name(enum stream_type t)
+{
+    switch (t) {
+    case STREAM_VIDEO: return "Video";
+    case STREAM_AUDIO: return "Audio";
+    case STREAM_SUB: return "Sub";
+    }
+    return NULL;
+}
+
+static int property_list_tracks(m_option_t *prop, int action, void *arg,
+                                MPContext *mpctx, enum stream_type type)
+{
+    if (action == M_PROPERTY_GET) {
+        char *res = NULL;
+
+        for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+            for (int n = 0; n < mpctx->num_tracks; n++) {
+                struct track *track = mpctx->tracks[n];
+                if (track->type != type)
+                    continue;
+
+                bool selected = mpctx->current_track[track->type] == track;
+                res = talloc_asprintf_append(res, "%s: ",
+                                             track_type_name(track->type));
+                if (selected)
+                    res = talloc_asprintf_append(res, "> ");
+                res = talloc_asprintf_append(res, "(%d) ", track->user_tid);
+                if (track->title)
+                    res = talloc_asprintf_append(res, "'%s' ", track->title);
+                if (track->lang)
+                    res = talloc_asprintf_append(res, "(%s) ", track->lang);
+                if (track->is_external)
+                    res = talloc_asprintf_append(res, "(external) ");
+                if (selected)
+                    res = talloc_asprintf_append(res, "<");
+                res = talloc_asprintf_append(res, "\n");
+            }
+
+            res = talloc_asprintf_append(res, "\n");
+        }
+
+        struct demuxer *demuxer = mpctx->master_demuxer;
+        if (demuxer && demuxer->num_editions > 1)
+            res = talloc_asprintf_append(res, "\nEdition: %d of %d\n",
+                                        demuxer->edition + 1,
+                                        demuxer->num_editions);
+
+        *(char **)arg = res;
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
 /// Selected audio id (RW)
@@ -1347,6 +1433,27 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
 
 #endif
 
+static int mp_property_playlist(m_option_t *prop, int action, void *arg,
+                                MPContext *mpctx)
+{
+    if (action == M_PROPERTY_GET) {
+        char *res = talloc_strdup(NULL, "");
+
+        for (struct playlist_entry *e = mpctx->playlist->first; e; e = e->next)
+        {
+            if (mpctx->playlist->current == e) {
+                res = talloc_asprintf_append(res, "> %s <\n", e->filename);
+            } else {
+                res = talloc_asprintf_append(res, "%s\n", e->filename);
+            }
+        }
+
+        *(char **)arg = res;
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_alias(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
@@ -1430,6 +1537,10 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY("hr-seek"),
     { "clock", mp_property_clock, CONF_TYPE_STRING,
       0, 0, 0, NULL },
+
+    { "chapter-list", mp_property_list_chapters, CONF_TYPE_STRING },
+    { "track-list", property_list_tracks, CONF_TYPE_STRING },
+    { "playlist", mp_property_playlist, CONF_TYPE_STRING },
 
     // Audio
     { "volume", mp_property_volume, CONF_TYPE_FLOAT,
@@ -1697,101 +1808,6 @@ static const char *property_error_string(int error_value)
         return "PROPERTY_UNKNOWN";
     }
     return "UNKNOWN";
-}
-
-static void show_chapters_on_osd(MPContext *mpctx)
-{
-    int count = get_chapter_count(mpctx);
-    int cur = mpctx->num_sources ? get_current_chapter(mpctx) : -1;
-    char *res = NULL;
-    int n;
-
-    if (count < 1) {
-        res = talloc_asprintf_append(res, "No chapters.");
-    }
-
-    for (n = 0; n < count; n++) {
-        char *name = chapter_display_name(mpctx, n);
-        double t = chapter_start_time(mpctx, n);
-        char* time = mp_format_time(t, false);
-        res = talloc_asprintf_append(res, "%s", time);
-        talloc_free(time);
-        char *m1 = "> ", *m2 = " <";
-        if (n != cur)
-            m1 = m2 = "";
-        res = talloc_asprintf_append(res, "   %s%s%s\n", m1, name, m2);
-        talloc_free(name);
-    }
-
-    set_osd_msg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts.osd_duration, "%s", res);
-    talloc_free(res);
-}
-
-static const char *track_type_name(enum stream_type t)
-{
-    switch (t) {
-    case STREAM_VIDEO: return "Video";
-    case STREAM_AUDIO: return "Audio";
-    case STREAM_SUB: return "Sub";
-    }
-    return NULL;
-}
-
-static void show_tracks_on_osd(MPContext *mpctx)
-{
-    struct MPOpts *opts = &mpctx->opts;
-    char *res = NULL;
-
-    for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
-        for (int n = 0; n < mpctx->num_tracks; n++) {
-            struct track *track = mpctx->tracks[n];
-            if (track->type != type)
-                continue;
-
-            bool selected = mpctx->current_track[track->type] == track;
-            res = talloc_asprintf_append(res, "%s: ", track_type_name(track->type));
-            if (selected)
-                res = talloc_asprintf_append(res, "> ");
-            res = talloc_asprintf_append(res, "(%d) ", track->user_tid);
-            if (track->title)
-                res = talloc_asprintf_append(res, "'%s' ", track->title);
-            if (track->lang)
-                res = talloc_asprintf_append(res, "(%s) ", track->lang);
-            if (track->is_external)
-                res = talloc_asprintf_append(res, "(external) ");
-            if (selected)
-                res = talloc_asprintf_append(res, "<");
-            res = talloc_asprintf_append(res, "\n");
-        }
-
-        res = talloc_asprintf_append(res, "\n");
-    }
-
-    struct demuxer *demuxer = mpctx->master_demuxer;
-    if (demuxer && demuxer->num_editions > 1)
-        res = talloc_asprintf_append(res, "\nEdition: %d of %d\n",
-                                     demuxer->edition + 1,
-                                     demuxer->num_editions);
-
-    set_osd_msg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration, "%s", res);
-    talloc_free(res);
-}
-
-static void show_playlist_on_osd(MPContext *mpctx)
-{
-    struct MPOpts *opts = &mpctx->opts;
-    char *res = NULL;
-
-    for (struct playlist_entry *e = mpctx->playlist->first; e; e = e->next) {
-        if (mpctx->playlist->current == e) {
-            res = talloc_asprintf_append(res, "> %s <\n", e->filename);
-        } else {
-            res = talloc_asprintf_append(res, "%s\n", e->filename);
-        }
-    }
-
-    set_osd_msg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration, "%s", res);
-    talloc_free(res);
 }
 
 static void change_video_filters(MPContext *mpctx, const char *cmd,
@@ -2379,15 +2395,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     case MP_CMD_VF:
         change_video_filters(mpctx, cmd->args[0].v.s, cmd->args[1].v.s);
-        break;
-    case MP_CMD_SHOW_CHAPTERS:
-        show_chapters_on_osd(mpctx);
-        break;
-    case MP_CMD_SHOW_TRACKS:
-        show_tracks_on_osd(mpctx);
-        break;
-    case MP_CMD_SHOW_PLAYLIST:
-        show_playlist_on_osd(mpctx);
         break;
 
     default:

@@ -204,10 +204,6 @@ static const mp_cmd_t mp_cmds[] = {
 
   { MP_CMD_VF, "vf", { ARG_STRING, ARG_STRING } },
 
-  { MP_CMD_SHOW_CHAPTERS, "show_chapters", },
-  { MP_CMD_SHOW_TRACKS, "show_tracks", },
-  { MP_CMD_SHOW_PLAYLIST, "show_playlist", },
-
   { MP_CMD_VO_CMDLINE, "vo_cmdline", { ARG_STRING } },
 
   {0}
@@ -258,8 +254,12 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"osd_show_text",           "show_text"},
     {"osd_show_property_text",  "show_text"},
     {"osd_show_progression",    "show_progress"},
-    {"show_chapters_osd",       "show_chapters"},
-    {"show_tracks_osd",         "show_tracks"},
+    {"show_chapters_osd",       "show_text ${chapter-list}"},
+    {"!show_chapters",          "show_text ${chapter-list}"},
+    {"show_tracks_osd",         "show_text ${track-list}"},
+    {"!show_tracks",            "show_text ${track-list}"},
+    {"!show_playlist",          "show_text ${playlist}"},
+
     // Approximate (can fail if user added additional whitespace)
     {"pt_step 1",               "playlist_next"},
     {"pt_step -1",              "playlist_prev"},
@@ -826,14 +826,15 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
 
     str = bstr_lstrip(str);
     for (const struct legacy_cmd *entry = legacy_cmds; entry->old; entry++) {
-        size_t old_len = strlen(entry->old);
-        if (bstrcasecmp(bstr_splice(str, 0, old_len),
-                        (bstr) {(char *)entry->old, old_len}) == 0)
-        {
-            mp_tmsg(MSGT_INPUT, MSGL_WARN, "Warning: command '%s' is "
-                    "deprecated, replaced with '%s' at %s.\n",
-                    entry->old, entry->new, loc);
-            bstr s = bstr_cut(str, old_len);
+        bstr old = bstr0(entry->old);
+        bool silent = bstr_eatstart0(&old, "!");
+        if (bstrcasecmp(bstr_splice(str, 0, old.len), old) == 0) {
+            if (!silent) {
+                mp_tmsg(MSGT_INPUT, MSGL_WARN, "Warning: command '%.*s' is "
+                        "deprecated, replaced with '%s' at %s.\n",
+                        BSTR_P(old), entry->new, loc);
+            }
+            bstr s = bstr_cut(str, old.len);
             str = bstr0(talloc_asprintf(tmp, "%s%.*s", entry->new, BSTR_P(s)));
             start = str;
             break;
