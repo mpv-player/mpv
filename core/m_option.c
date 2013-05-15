@@ -75,9 +75,9 @@ static const struct m_option *m_option_list_findb(const struct m_option *list,
         if ((list[i].type->flags & M_OPT_TYPE_ALLOW_WILDCARD)
                 && bstr_endswith0(lname, "*")) {
             lname.len--;
-            if (bstrcasecmp(bstr_splice(name, 0, lname.len), lname) == 0)
+            if (bstrcmp(bstr_splice(name, 0, lname.len), lname) == 0)
                 return &list[i];
-        } else if (bstrcasecmp(lname, name) == 0)
+        } else if (bstrcmp(lname, name) == 0)
             return &list[i];
     }
     return NULL;
@@ -112,12 +112,12 @@ static int parse_flag(const m_option_t *opt, struct bstr name,
                       struct bstr param, void *dst)
 {
     if (param.len) {
-        if (!bstrcasecmp0(param, "yes")) {
+        if (!bstrcmp0(param, "yes")) {
             if (dst)
                 VAL(dst) = opt->max;
             return 1;
         }
-        if (!bstrcasecmp0(param, "no")) {
+        if (!bstrcmp0(param, "no")) {
             if (dst)
                 VAL(dst) = opt->min;
             return 1;
@@ -167,7 +167,7 @@ const m_option_type_t m_option_type_flag = {
 static int parse_store(const m_option_t *opt, struct bstr name,
                        struct bstr param, void *dst)
 {
-    if (param.len == 0 || bstrcasecmp0(param, "yes") == 0) {
+    if (param.len == 0 || bstrcmp0(param, "yes") == 0) {
         if (dst)
             VAL(dst) = opt->max;
         return 0;
@@ -195,7 +195,7 @@ const m_option_type_t m_option_type_store = {
 static int parse_store_float(const m_option_t *opt, struct bstr name,
                              struct bstr param, void *dst)
 {
-    if (param.len == 0 || bstrcasecmp0(param, "yes") == 0) {
+    if (param.len == 0 || bstrcmp0(param, "yes") == 0) {
         if (dst)
             VAL(dst) = opt->max;
         return 0;
@@ -426,7 +426,7 @@ static int parse_choice(const struct m_option *opt, struct bstr name,
 {
     struct m_opt_choice_alternatives *alt = opt->priv;
     for ( ; alt->name; alt++)
-        if (!bstrcasecmp0(param, alt->name))
+        if (!bstrcmp0(param, alt->name))
             break;
     if (!alt->name) {
         if (param.len == 0)
@@ -968,13 +968,13 @@ static int parse_str_list(const m_option_t *opt, struct bstr name,
     int len = strlen(opt->name);
     if (opt->name[len - 1] == '*' && (name.len > len - 1)) {
         struct bstr suffix = bstr_cut(name, len - 1);
-        if (bstrcasecmp0(suffix, "-add") == 0)
+        if (bstrcmp0(suffix, "-add") == 0)
             op = OP_ADD;
-        else if (bstrcasecmp0(suffix, "-pre") == 0)
+        else if (bstrcmp0(suffix, "-pre") == 0)
             op = OP_PRE;
-        else if (bstrcasecmp0(suffix, "-del") == 0)
+        else if (bstrcmp0(suffix, "-del") == 0)
             op = OP_DEL;
-        else if (bstrcasecmp0(suffix, "-clr") == 0)
+        else if (bstrcmp0(suffix, "-clr") == 0)
             op = OP_CLR;
         else
             return M_OPT_UNKNOWN;
@@ -2089,13 +2089,13 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
 
     if (opt->name[len - 1] == '*' && (name.len > len - 1)) {
         struct bstr suffix = bstr_cut(name, len - 1);
-        if (bstrcasecmp0(suffix, "-add") == 0)
+        if (bstrcmp0(suffix, "-add") == 0)
             op = OP_ADD;
-        else if (bstrcasecmp0(suffix, "-pre") == 0)
+        else if (bstrcmp0(suffix, "-pre") == 0)
             op = OP_PRE;
-        else if (bstrcasecmp0(suffix, "-del") == 0)
+        else if (bstrcmp0(suffix, "-del") == 0)
             op = OP_DEL;
-        else if (bstrcasecmp0(suffix, "-clr") == 0)
+        else if (bstrcmp0(suffix, "-clr") == 0)
             op = OP_CLR;
         else {
             char prefix[len];
