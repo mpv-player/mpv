@@ -4773,9 +4773,9 @@ static int mpv_main(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
 #ifdef CONFIG_COCOA
-    cocoa_main(mpv_main, argc, argv);
+    return cocoa_main(mpv_main, argc, argv);
 #else
-    mpv_main(argc, argv);
+    return mpv_main(argc, argv);
 #endif
 }
 
