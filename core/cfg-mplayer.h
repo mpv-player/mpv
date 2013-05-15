@@ -703,6 +703,7 @@ const m_option_t mplayer_opts[]={
     {"help", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {"h", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {"version", (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
+    {"V",       (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
 
 #ifdef CONFIG_ENCODING
     OPT_STRING("o", encode_output.file, CONF_GLOBAL),

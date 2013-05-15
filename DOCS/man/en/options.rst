@@ -2401,7 +2401,7 @@
 
     *NOTE*: See ``--vd=help`` for a full list of available decoders.
 
---version
+--version, -V
     Print version string and exit.
 
 --vf=<filter1[=parameter1:parameter2:...],filter2,...>
