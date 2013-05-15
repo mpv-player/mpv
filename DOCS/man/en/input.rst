@@ -213,13 +213,6 @@ show_progress
     Show the progress bar, the elapsed time and the total duration of the file
     on the OSD.
 
-show_chapters
-    Show a list of chapters on the OSD.
-
-show_tracks
-    Show a list of video/audio/subtitle tracks on the OSD.
-
-
 
 Undocumented commands: tv_start_scan, tv_step_channel, tv_step_norm,
 tv_step_chanlist, tv_set_channel, tv_last_channel, tv_set_freq, tv_step_freq,
@@ -287,9 +280,10 @@ ratio-pos                   x position in current file (0.0-1.0)
 time-pos                    x position in current file in seconds
 time-remaining                estimated remaining length of the file in seconds
 chapter                     x current chapter number
+chapters                      number of chapters
+chapter-list                  chapter list as string, current entries marked
 edition                     x current MKV edition number
 titles                        number of DVD titles
-chapters                      number of chapters
 editions                      number of MKV editions
 angle                       x current DVD angle
 metadata                      metadata key/value pairs
@@ -349,4 +343,6 @@ tv-saturation               x
 tv-hue                      x
 playlist-pos                  current position on playlist
 playlist-count                number of total playlist entries
+playlist                      playlist as string, current entries marked
+track-list                    list of audio/video/sub tracks, cur. entr. marked
 =========================== = ==================================================
