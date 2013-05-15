@@ -675,6 +675,30 @@ void vo_w32_ontop(struct vo *vo)
     reinit_window_state(vo);
 }
 
+int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
+{
+    switch (request) {
+    case VOCTRL_CHECK_EVENTS:
+        *events |= vo_w32_check_events(vo);
+        return VO_TRUE;
+    case VOCTRL_FULLSCREEN:
+        vo_w32_fullscreen(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    case VOCTRL_ONTOP:
+        vo_w32_ontop(vo);
+        return VO_TRUE;
+    case VOCTRL_BORDER:
+        vo_w32_border(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    case VOCTRL_UPDATE_SCREENINFO:
+        w32_update_xinerama_info(vo);
+        return VO_TRUE;
+    }
+    return VO_NOTIMPL;
+}
+
 /**
  * \brief Uninitialize w32_common framework.
  *

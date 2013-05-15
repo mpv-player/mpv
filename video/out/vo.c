@@ -235,7 +235,9 @@ void vo_check_events(struct vo *vo)
         vo->registered_fd = -1;
         return;
     }
-    vo->driver->check_events(vo);
+    if (vo->driver->check_events)
+        vo->driver->check_events(vo);
+    vo_control(vo, VOCTRL_CHECK_EVENTS, NULL);
 }
 
 // Return the amount of time vo_check_events() should be called in milliseconds.

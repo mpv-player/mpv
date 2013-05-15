@@ -143,6 +143,7 @@ void vo_x11_clearwindow(struct vo *vo, Window vo_window);
 void vo_x11_ontop(struct vo *vo);
 void vo_x11_border(struct vo *vo);
 void vo_x11_update_screeninfo(struct vo *vo);
+int vo_x11_control(struct vo *vo, int *events, int request, void *arg);
 
 double vo_x11_vm_get_fps(struct vo *vo);
 

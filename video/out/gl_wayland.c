@@ -244,11 +244,8 @@ void mpgl_set_backend_wayland(MPGLContext *ctx)
     ctx->config_window = config_window_wayland;
     ctx->releaseGlContext = releaseGlContext_wayland;
     ctx->swapGlBuffers = swapGlBuffers_wayland;
-    ctx->update_xinerama_info = vo_wayland_update_screeninfo;
-    ctx->border = vo_wayland_border;
     ctx->check_events = vo_wayland_check_events;
-    ctx->fullscreen = vo_wayland_fullscreen;
-    ctx->ontop = vo_wayland_ontop;
+    ctx->vo_control = vo_wayland_control;
     ctx->vo_init = vo_wayland_init;
     ctx->vo_uninit = vo_wayland_uninit;
 }

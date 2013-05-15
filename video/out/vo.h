@@ -36,6 +36,8 @@
 enum mp_voctrl {
     /* signal a device reset seek */
     VOCTRL_RESET = 1,
+    /* Handle input and redraw events, called by vo_check_events() */
+    VOCTRL_CHECK_EVENTS,
     /* used to switch to fullscreen */
     VOCTRL_FULLSCREEN,
     /* signal a device pause */

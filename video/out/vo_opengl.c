@@ -192,19 +192,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     return 0;
 }
 
-static void check_events(struct vo *vo)
-{
-    struct gl_priv *p = vo->priv;
-
-    mpgl_lock(p->glctx);
-    int e = p->glctx->check_events(vo);
-    if (e & VO_EVENT_RESIZE)
-        resize(p);
-    if (e & VO_EVENT_EXPOSE)
-        vo->want_redraw = true;
-    mpgl_unlock(p->glctx);
-}
-
 static bool reparse_cmdline(struct gl_priv *p, char *args)
 {
     struct m_config *cfg = NULL;
@@ -239,41 +226,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct gl_priv *p = vo->priv;
 
     switch (request) {
-    case VOCTRL_ONTOP:
-        if (!p->glctx->ontop)
-            break;
-        mpgl_lock(p->glctx);
-        p->glctx->ontop(vo);
-        mpgl_unlock(p->glctx);
-        return VO_TRUE;
-    case VOCTRL_PAUSE:
-        if (!p->glctx->pause)
-            break;
-        mpgl_lock(p->glctx);
-        p->glctx->pause(vo);
-        mpgl_unlock(p->glctx);
-        return VO_TRUE;
-    case VOCTRL_RESUME:
-        if (!p->glctx->resume)
-            break;
-        mpgl_lock(p->glctx);
-        p->glctx->resume(vo);
-        mpgl_unlock(p->glctx);
-        return VO_TRUE;
-    case VOCTRL_FULLSCREEN:
-        mpgl_lock(p->glctx);
-        p->glctx->fullscreen(vo);
-        resize(p);
-        mpgl_unlock(p->glctx);
-        return VO_TRUE;
-    case VOCTRL_BORDER:
-        if (!p->glctx->border)
-            break;
-        mpgl_lock(p->glctx);
-        p->glctx->border(vo);
-        resize(p);
-        mpgl_unlock(p->glctx);
-        return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
@@ -310,13 +262,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         gl_video_get_csp_override(p->renderer, data);
         mpgl_unlock(p->glctx);
         return VO_TRUE;
-    case VOCTRL_UPDATE_SCREENINFO:
-        if (!p->glctx->update_xinerama_info)
-            break;
-        mpgl_lock(p->glctx);
-        p->glctx->update_xinerama_info(vo);
-        mpgl_unlock(p->glctx);
-        return VO_TRUE;
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         mpgl_lock(p->glctx);
@@ -337,7 +282,17 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return reparse_cmdline(p, arg);
     }
     }
-    return VO_NOTIMPL;
+
+    mpgl_lock(p->glctx);
+    int events = 0;
+    int r = p->glctx->vo_control(vo, &events, request, data);
+    if (events & VO_EVENT_RESIZE)
+        resize(p);
+    if (events & VO_EVENT_EXPOSE)
+        vo->want_redraw = true;
+    mpgl_unlock(p->glctx);
+
+    return r;
 }
 
 static void uninit(struct vo *vo)
@@ -428,7 +383,6 @@ const struct vo_driver video_out_opengl = {
     .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
-    .check_events = check_events,
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),
     .options = options,
@@ -449,7 +403,6 @@ const struct vo_driver video_out_opengl_hq = {
     .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
-    .check_events = check_events,
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),
     .options = options,

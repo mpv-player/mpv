@@ -1750,17 +1750,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     return 0;
 }
 
-static void check_events(struct vo *vo)
-{
-    struct gl_priv *p = vo->priv;
-
-    int e = p->glctx->check_events(vo);
-    if (e & VO_EVENT_RESIZE)
-        resize(vo, vo->dwidth, vo->dheight);
-    if (e & VO_EVENT_EXPOSE)
-        vo->want_redraw = true;
-}
-
 static void do_render(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
@@ -2276,21 +2265,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct gl_priv *p = vo->priv;
 
     switch (request) {
-    case VOCTRL_ONTOP:
-        if (!p->glctx->ontop)
-            break;
-        p->glctx->ontop(vo);
-        return VO_TRUE;
-    case VOCTRL_FULLSCREEN:
-        p->glctx->fullscreen(vo);
-        resize(vo, vo->dwidth, vo->dheight);
-        return VO_TRUE;
-    case VOCTRL_BORDER:
-        if (!p->glctx->border)
-            break;
-        p->glctx->border(vo);
-        resize(vo, vo->dwidth, vo->dheight);
-        return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
@@ -2325,24 +2299,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_GET_YUV_COLORSPACE:
         *(struct mp_csp_details *)data = p->colorspace;
         return VO_TRUE;
-    case VOCTRL_UPDATE_SCREENINFO:
-        if (!p->glctx->update_xinerama_info)
-            break;
-        p->glctx->update_xinerama_info(vo);
-        return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
         do_render(vo);
         return true;
-    case VOCTRL_PAUSE:
-        if (!p->glctx->pause)
-            break;
-        p->glctx->pause(vo);
-        return VO_TRUE;
-    case VOCTRL_RESUME:
-        if (!p->glctx->resume)
-            break;
-        p->glctx->resume(vo);
-        return VO_TRUE;
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         if (args->full_window)
@@ -2352,7 +2311,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     }
     }
-    return VO_NOTIMPL;
+
+    int events = 0;
+    int r = p->glctx->vo_control(vo, &events, request, data);
+    if (events & VO_EVENT_RESIZE)
+        resize(vo, vo->dwidth, vo->dheight);
+    if (events & VO_EVENT_EXPOSE)
+        vo->want_redraw = true;
+
+    return r;
 }
 
 const struct vo_driver video_out_opengl_old = {
@@ -2369,6 +2336,5 @@ const struct vo_driver video_out_opengl_old = {
     .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
-    .check_events = check_events,
     .uninit = uninit,
 };

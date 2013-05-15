@@ -862,3 +862,26 @@ void vo_wayland_update_window_title(struct vo *vo)
     wl_shell_surface_set_title(w->shell_surface, vo_get_window_title(vo));
 }
 
+int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
+{
+    switch (request) {
+    case VOCTRL_CHECK_EVENTS:
+        *events |= vo_wayland_check_events(vo);
+        return VO_TRUE;
+    case VOCTRL_FULLSCREEN:
+        vo_wayland_fullscreen(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    case VOCTRL_ONTOP:
+        vo_wayland_ontop(vo);
+        return VO_TRUE;
+    case VOCTRL_BORDER:
+        vo_wayland_border(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    case VOCTRL_UPDATE_SCREENINFO:
+        vo_wayland_update_screeninfo(vo);
+        return VO_TRUE;
+    }
+    return VO_NOTIMPL;
+}

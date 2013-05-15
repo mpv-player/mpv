@@ -62,14 +62,9 @@ void mpgl_set_backend_cocoa(MPGLContext *ctx)
     ctx->releaseGlContext = releaseGlContext_cocoa;
     ctx->swapGlBuffers = swapGlBuffers_cocoa;
     ctx->check_events = vo_cocoa_check_events;
-    ctx->update_xinerama_info = vo_cocoa_update_xinerama_info;
-    ctx->fullscreen = vo_cocoa_fullscreen;
-    ctx->ontop = vo_cocoa_ontop;
     ctx->vo_init = vo_cocoa_init;
-    ctx->pause = vo_cocoa_pause;
-    ctx->resume = vo_cocoa_resume;
     ctx->register_resize_callback = vo_cocoa_register_resize_callback;
     ctx->vo_uninit = vo_cocoa_uninit;
-    ctx->set_current = set_current_cocoa;
+    ctx->vo_control = vo_cocoa_control;
     ctx->set_current = set_current_cocoa;
 }

@@ -43,6 +43,7 @@ void vo_cocoa_fullscreen(struct vo *vo);
 void vo_cocoa_ontop(struct vo *vo);
 void vo_cocoa_pause(struct vo *vo);
 void vo_cocoa_resume(struct vo *vo);
+int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg);
 
 void vo_cocoa_register_resize_callback(struct vo *vo,
                                        void (*cb)(struct vo *vo, int w, int h));

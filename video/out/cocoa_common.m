@@ -657,6 +657,32 @@ void vo_cocoa_fullscreen(struct vo *vo)
     }
 }
 
+int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
+{
+    switch (request) {
+    case VOCTRL_CHECK_EVENTS:
+        *events |= vo_cocoa_check_events(vo);
+        return VO_TRUE;
+    case VOCTRL_FULLSCREEN:
+        vo_cocoa_fullscreen(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    case VOCTRL_ONTOP:
+        vo_cocoa_ontop(vo);
+        return VO_TRUE;
+    case VOCTRL_UPDATE_SCREENINFO:
+        vo_cocoa_update_xinerama_info(vo);
+        return VO_TRUE;
+    case VOCTRL_PAUSE:
+        vo_cocoa_pause(vo);
+        return VO_TRUE;
+    case VOCTRL_RESUME:
+        vo_cocoa_resume(vo);
+        return VO_TRUE;
+    }
+    return VO_NOTIMPL;
+}
+
 int vo_cocoa_swap_interval(int enabled)
 {
     [[NSOpenGLContext currentContext] setValues:&enabled

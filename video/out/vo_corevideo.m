@@ -138,14 +138,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     return 0;
 }
 
-static void check_events(struct vo *vo)
-{
-    struct priv *p = vo->priv;
-    int e = p->mpglctx->check_events(vo);
-    if (e & VO_EVENT_RESIZE)
-        resize(vo);
-}
-
 static void prepare_texture(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -359,30 +351,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
     switch (request) {
-        case VOCTRL_ONTOP:
-            p->mpglctx->ontop(vo);
-            return VO_TRUE;
-        case VOCTRL_PAUSE:
-            if (!p->mpglctx->pause)
-                break;
-            p->mpglctx->pause(vo);
-            return VO_TRUE;
-        case VOCTRL_RESUME:
-            if (!p->mpglctx->resume)
-                break;
-            p->mpglctx->resume(vo);
-            return VO_TRUE;
-        case VOCTRL_FULLSCREEN:
-            p->mpglctx->fullscreen(vo);
-            resize(vo);
-            return VO_TRUE;
         case VOCTRL_GET_PANSCAN:
             return VO_TRUE;
         case VOCTRL_SET_PANSCAN:
             resize(vo);
-            return VO_TRUE;
-        case VOCTRL_UPDATE_SCREENINFO:
-            p->mpglctx->update_xinerama_info(vo);
             return VO_TRUE;
         case VOCTRL_REDRAW_FRAME:
             do_render(vo);
@@ -403,7 +375,13 @@ static int control(struct vo *vo, uint32_t request, void *data)
             return VO_TRUE;
         }
     }
-    return VO_NOTIMPL;
+
+    int events = 0;
+    int r = p->mpglctx->vo_control(vo, &events, request, data);
+    if (events & VO_EVENT_RESIZE)
+        resize(vo);
+
+    return r;
 }
 
 const struct vo_driver video_out_corevideo = {
@@ -420,7 +398,6 @@ const struct vo_driver video_out_corevideo = {
     .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
-    .check_events = check_events,
     .uninit = uninit,
     .priv_size = sizeof(struct priv),
 };

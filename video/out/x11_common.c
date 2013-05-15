@@ -1385,6 +1385,30 @@ void vo_x11_border(struct vo *vo)
     vo_x11_decoration(vo, vo->opts->border && !vo->opts->fs);
 }
 
+int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
+{
+    switch (request) {
+    case VOCTRL_CHECK_EVENTS:
+        *events |= vo_x11_check_events(vo);
+        return VO_TRUE;
+    case VOCTRL_FULLSCREEN:
+        vo_x11_fullscreen(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    case VOCTRL_ONTOP:
+        vo_x11_ontop(vo);
+        return VO_TRUE;
+    case VOCTRL_BORDER:
+        vo_x11_border(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    case VOCTRL_UPDATE_SCREENINFO:
+        vo_x11_update_screeninfo(vo);
+        return VO_TRUE;
+    }
+    return VO_NOTIMPL;
+}
+
 static void xscreensaver_heartbeat(struct vo_x11_state *x11)
 {
     unsigned int time = GetTimerMS();
