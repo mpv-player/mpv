@@ -181,11 +181,14 @@ static int mp_property_media_title(m_option_t *prop, int action, void *arg,
     char *name = NULL;
     if (mpctx->resolve_result)
         name = mpctx->resolve_result->title;
-    if (name && name[0]) {
+    if (name && name[0])
         return m_property_strdup_ro(prop, action, arg, name);
-    } else {
-        return mp_property_filename(prop, action, arg, mpctx);
+    if (mpctx->master_demuxer) {
+        name = demux_info_get(mpctx->master_demuxer, "title");
+        if (name && name[0])
+            return m_property_strdup_ro(prop, action, arg, name);
     }
+    return mp_property_filename(prop, action, arg, mpctx);
 }
 
 static int mp_property_stream_path(m_option_t *prop, int action, void *arg,
