@@ -336,7 +336,7 @@ static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p)
  * vo_screenwidth
  * vo_screenheight
  */
-void w32_update_xinerama_info(struct vo *vo)
+static void w32_update_xinerama_info(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
     struct mp_vo_opts *opts = vo->opts;
@@ -647,7 +647,7 @@ int vo_w32_init(struct vo *vo)
  * event in addition or not.
  */
 
-void vo_w32_fullscreen(struct vo *vo)
+static void vo_w32_fullscreen(struct vo *vo)
 {
     vo->opts->fs = !vo->opts->fs;
     reinit_window_state(vo);
@@ -658,7 +658,7 @@ void vo_w32_fullscreen(struct vo *vo)
  *
  * Should be called on VOCTRL_BORDER event.
  */
-void vo_w32_border(struct vo *vo)
+static void vo_w32_border(struct vo *vo)
 {
     vo->opts->border = !vo->opts->border;
     reinit_window_state(vo);
@@ -669,7 +669,7 @@ void vo_w32_border(struct vo *vo)
  *
  * Should be called on VOCTRL_ONTOP event.
  */
-void vo_w32_ontop(struct vo *vo)
+static void vo_w32_ontop(struct vo *vo)
 {
     vo->opts->ontop = !vo->opts->ontop;
     reinit_window_state(vo);
