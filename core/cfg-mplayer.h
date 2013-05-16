@@ -533,7 +533,7 @@ const m_option_t mplayer_opts[]={
     OPT_STRINGLIST("ao", audio_driver_list, 0),
     OPT_FLAG("fixed-vo", fixed_vo, CONF_GLOBAL),
     OPT_FLAG("ontop", vo.ontop, 0),
-    OPT_FLAG("border", vo.border, 1),
+    OPT_FLAG("border", vo.border, 0),
 
     OPT_STRING("mixer", mixer_device, 0),
     OPT_STRING("mixer-channel", mixer_channel, 0),
@@ -618,7 +618,7 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("contrast", gamma_contrast, 0, -100, 100),
     OPT_INTRANGE("hue", gamma_hue, 0, -100, 100),
     OPT_INTRANGE("gamma", gamma_gamma, 0, -100, 100),
-    OPT_FLAG("keepaspect", vo.keepaspect, 1),
+    OPT_FLAG("keepaspect", vo.keepaspect, 0),
 
 //---------------------- mplayer-only options ------------------------
 
@@ -690,7 +690,7 @@ const m_option_t mplayer_opts[]={
     OPT_FLAG("idle", player_idle_mode, CONF_GLOBAL),
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
     OPT_FLAG("consolecontrols", consolecontrols, CONF_GLOBAL),
-    OPT_FLAG("mouse-movements", vo.enable_mouse_movements, 1),
+    OPT_FLAG("mouse-movements", vo.enable_mouse_movements, CONF_GLOBAL),
     OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
 #ifdef CONFIG_TV
     {"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
