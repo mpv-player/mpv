@@ -24,7 +24,7 @@ local state = {
     last_mouse_pos,
     bar_location,
     mouse_down_counter = 0,
-    active_button = 0,
+    active_button = nil,					-- nil = none, 0 = background, 1+ = see elements[]
     rightTC_trem = false,
     mp_screen_size,
 }
@@ -184,26 +184,49 @@ function any_button_down()
 			state.active_button = n
 		end
     end
+    
+    -- if state.active_button is till nil, user must have clicked outside the controller -> 0
+    if state.active_button == nil then
+    	state.active_button = 0
+    end
 end
 
 -- Did mouse go up on the same button?
 function any_button_up()
-
-	local mX, mY = mp.get_mouse_pos()
-	for n = 1, #elements do
-		
-		if elements[n].up_cmd == nil then
-		-- Ignore if button doesn't have a up_cmd
-		else
-			local bX1, bY1, bX2, bY2 = get_hitbox_coords(elements[n].x, elements[n].y, elements[n].an, elements[n].w, elements[n].h)
+	if not (state.active_button == nil) then
 	
-			if mX >= bX1 and mX <= bX2 and mY >= bY1 and mY <= bY2 and state.active_button == n then
+		local n = state.active_button
+		
+		if n == 0 and not (mouse_over_osc()) then
+			--click on background
+			hide_osc()		
+		elseif n > 0 and not (elements[n].up_cmd == nil) then
+			local bX1, bY1, bX2, bY2 = get_hitbox_coords(elements[n].x, elements[n].y, elements[n].an, elements[n].w, elements[n].h)
+			local mX, mY = mp.get_mouse_pos()
+			
+			if mX >= bX1 and mX <= bX2 and mY >= bY1 and mY <= bY2 then
 				--print("up on button #" .. n .. "    \n")
 				elements[n].up_cmd()
 			end
-		end		
-    end
-    state.active_button = 0
+		end
+
+		--[[
+		local mX, mY = mp.get_mouse_pos()
+		for n = 1, #elements do
+		
+			-- Ignore if button doesn't have a up_cmd
+			if not (elements[n].up_cmd == nil) then
+				local bX1, bY1, bX2, bY2 = get_hitbox_coords(elements[n].x, elements[n].y, elements[n].an, elements[n].w, elements[n].h)
+		
+				if mX >= bX1 and mX <= bX2 and mY >= bY1 and mY <= bY2 and state.active_button == n then
+					--print("up on button #" .. n .. "    \n")
+					elements[n].up_cmd()
+				end
+			end		
+	    end
+	    --]]
+	end
+    state.active_button = nil
 end
 
 
@@ -267,7 +290,7 @@ function osc_init ()
 	    if osc_r > 0 then ass:bezier_curve(0, 0, 0, 0, osc_r, 0) end -- top left corner
 	    ass:draw_stop()
     end
-	register_element(posX, posY, 5, 0, 0, osc_styles.box, nil, contentF, nil, nil, false)
+	register_element(posX, posY, 5, osc_w, osc_h, osc_styles.box, nil, contentF, nil, nil, false)
 	
 	--
 	-- Title
@@ -469,6 +492,10 @@ function show_osc()
     state.osd_visible = true
 end
 
+function hide_osc()
+    state.osd_visible = false
+end
+
 -- called by input.conf bindings
 function mp_mouse_move()
 	show_osc()
@@ -527,6 +554,7 @@ function mp_update()
     --state.append_calls = 0
     
     local osd_time = 1
+    
     if state.osd_visible and now - state.last_osd_time < osd_time then
         draw_osc(ass)
         state.osd_visible = true
@@ -537,7 +565,11 @@ function mp_update()
     --ass:new_event()
     --local playresx, playresy = mp.get_osd_resolution()
     --ass:append("get_osd_resolution: X:" .. playresx .. " Y:" .. playresy)
-        
+    --if state.active_button == nil then
+    --	ass:append("state.active_button: " .. "nil")
+    --else
+    --    ass:append("state.active_button: " .. state.active_button)
+	--end        
     --ass:append("Rendertime: " .. mp.get_timer() - now .. "   state.append_calls: " .. state.append_calls)
     
     --[[
