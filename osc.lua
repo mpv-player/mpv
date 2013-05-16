@@ -34,8 +34,7 @@ local state = {
 -- obj: size of the object that should be positioned inside the area
 -- margin: min. distance from object to frame (as long as -1 <= align <= +1)
 function get_align(align, frame, obj, margin)
-    frame = frame - margin * 2
-    return margin + frame / 2 - obj / 2 + (frame - obj) / 2 * align
+    return (frame / 2) + (((frame / 2) - margin - (obj / 2)) * align)
 end
 
 function draw_bar_simple(ass, x, y, w, h, style)
@@ -265,7 +264,7 @@ function osc_init ()
 	osc_geo.pos_offsetX, osc_geo.pos_offsetY = (osc_geo.osc_w - (2*osc_geo.osc_p)) / 2, (osc_geo.osc_h - (2*osc_geo.osc_p)) / 2
 
 	-- position of the controller according to video aspect and valignment
-	osc_geo.posX, osc_geo.posY = math.floor(osc_geo.playresx/2), math.floor(get_align(osc_geo.valign, osc_geo.playresy, osc_geo.osc_h, 10))
+	osc_geo.posX, osc_geo.posY = math.floor(osc_geo.playresx/2), math.floor(get_align(osc_geo.valign, osc_geo.playresy, osc_geo.osc_h, 0))
 	
 	
 	-- fetch values
@@ -498,6 +497,7 @@ end
 
 -- called by input.conf bindings
 function mp_mouse_move()
+	--print "\nI like to move it, move it!\n"
 	show_osc()
 end
 
@@ -510,8 +510,6 @@ function mp_mouse_click(down)
 		mouse_up();
 	end
 	
-	
-
 	state.mouse_down = down
 	mp_update()
 end
