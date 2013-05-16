@@ -64,6 +64,7 @@ static void resize_window(struct vo_wayland_state *wl,
                           int32_t width,
                           int32_t height);
 
+static void vo_wayland_fullscreen (struct vo *vo);
 
 /*** wayland interface ***/
 
@@ -687,8 +688,7 @@ int vo_wayland_init (struct vo *vo)
     vo->event_fd = wl->display->display_fd;
 
     create_window(wl);
-    vo_wayland_update_window_title(vo);
-    return 1;
+    return true;
 }
 
 void vo_wayland_uninit (struct vo *vo)
@@ -701,7 +701,7 @@ void vo_wayland_uninit (struct vo *vo)
     vo->wayland = NULL;
 }
 
-void vo_wayland_ontop (struct vo *vo)
+static void vo_wayland_ontop (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
 
@@ -715,7 +715,7 @@ void vo_wayland_ontop (struct vo *vo)
         wl_shell_surface_set_toplevel(wl->window->shell_surface);
 }
 
-void vo_wayland_border (struct vo *vo)
+static void vo_wayland_border (struct vo *vo)
 {
     /* wayland clienst have to do the decorations themself
      * (client side decorations) but there is no such code implement nor
@@ -726,7 +726,7 @@ void vo_wayland_border (struct vo *vo)
      */
 }
 
-void vo_wayland_fullscreen (struct vo *vo)
+static void vo_wayland_fullscreen (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
     if (!wl->window || !wl->display->shell)
@@ -757,7 +757,7 @@ void vo_wayland_fullscreen (struct vo *vo)
     }
 }
 
-int vo_wayland_check_events (struct vo *vo)
+static int vo_wayland_check_events (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
     struct wl_display *dp = wl->display->display;
@@ -803,7 +803,7 @@ int vo_wayland_check_events (struct vo *vo)
     return ret;
 }
 
-void vo_wayland_update_screeninfo (struct vo *vo)
+static void vo_wayland_update_screeninfo (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
     struct mp_vo_opts *opts = vo->opts;
@@ -856,12 +856,6 @@ void vo_wayland_update_screeninfo (struct vo *vo)
     aspect_save_screenres(vo, opts->screenwidth, opts->screenheight);
 }
 
-void vo_wayland_update_window_title(struct vo *vo)
-{
-    struct vo_wayland_window *w = vo->wayland->window;
-    wl_shell_surface_set_title(w->shell_surface, vo_get_window_title(vo));
-}
-
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
 {
     switch (request) {
@@ -884,4 +878,18 @@ int vo_wayland_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     return VO_NOTIMPL;
+}
+
+bool vo_wayland_config(struct vo *vo, uint32_t d_width, uint32_t d_height, uint32_t flags)
+{
+    struct vo_wayland_window *w = vo->wayland->window;
+
+    w->width = d_width;
+    w->height = d_height;
+
+    if ((VOFLAG_FULLSCREEN & flags) && w->type != TYPE_FULLSCREEN)
+        vo_wayland_fullscreen(vo);
+
+    wl_shell_surface_set_title(w->shell_surface, vo_get_window_title(vo));
+    return true;
 }

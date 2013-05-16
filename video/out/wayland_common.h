@@ -124,12 +124,7 @@ struct vo_wayland_state {
 
 int vo_wayland_init(struct vo *vo);
 void vo_wayland_uninit(struct vo *vo);
-void vo_wayland_ontop(struct vo *vo);
-void vo_wayland_border(struct vo *vo);
-void vo_wayland_fullscreen(struct vo *vo);
-void vo_wayland_update_screeninfo(struct vo *vo);
-int vo_wayland_check_events(struct vo *vo);
-void vo_wayland_update_window_title(struct vo *vo);
+bool vo_wayland_config(struct vo *vo, uint32_t d_width, uint32_t d_height, uint32_t flags);
 int vo_wayland_control(struct vo *vo, int *events, int request, void *arg);
 
 #endif /* MPLAYER_WAYLAND_COMMON_H */
