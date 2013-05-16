@@ -168,7 +168,7 @@ struct vo_cocoa_state {
     int display_cursor;
     int cursor_timer;
     int vo_cursor_autohide_delay;
-    int last_hidden_config;
+    bool will_make_front;
 
     bool did_resize;
     bool did_async_resize;
@@ -201,7 +201,7 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .out_fs_resize = NO,
         .display_cursor = 1,
         .vo_cursor_autohide_delay = vo->opts->cursor_autohide_delay,
-        .last_hidden_config = -1,
+        .will_make_front = YES,
         .power_mgmt_assertion = kIOPMNullAssertionID,
         .accumulated_scroll = 0,
         .lock = [[NSLock alloc] init],
@@ -529,11 +529,11 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
 
         [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
 
+
         if (flags & VOFLAG_HIDDEN) {
             [s->window orderOut:nil];
-            s->last_hidden_config = vo->config_count;
-        } else if (![s->window isVisible] &&
-                   s->last_hidden_config == vo->config_count) {
+        } else if (![s->window isVisible] && s->will_make_front) {
+            s->will_make_front = NO;
             [s->window makeKeyAndOrderFront:nil];
             [NSApp activateIgnoringOtherApps:YES];
         }
