@@ -4,7 +4,8 @@ local osc_geo = {
 	-- static
 	scale = 1,								-- scaling of the controller
 	vidscale = true,						-- scale the controller with the video? don't use false, currently causes glitches
-	valign = 1,								-- vertical alignment, -1 (top) to 1 (bottom)
+	valign = 0.95,								-- vertical alignment, -1 (top) to 1 (bottom)
+	halign = 0,								-- vertical alignment, -1 (left) to 1 (right)
 	osc_w = 550,							-- width, height, corner-radius, padding of the box
 	osc_h = 150,
 	osc_r = 10,
@@ -19,7 +20,7 @@ local osc_geo = {
 
 
 local state = {
-    osd_visible = false,
+    osc_visible = false,
     mouse_down = false,
     last_mouse_pos,
     bar_location,
@@ -264,7 +265,7 @@ function osc_init ()
 	osc_geo.pos_offsetX, osc_geo.pos_offsetY = (osc_geo.osc_w - (2*osc_geo.osc_p)) / 2, (osc_geo.osc_h - (2*osc_geo.osc_p)) / 2
 
 	-- position of the controller according to video aspect and valignment
-	osc_geo.posX, osc_geo.posY = math.floor(osc_geo.playresx/2), math.floor(get_align(osc_geo.valign, osc_geo.playresy, osc_geo.osc_h, 0))
+	osc_geo.posX, osc_geo.posY = math.floor(get_align(osc_geo.halign, osc_geo.playresx, osc_geo.osc_w, 0)), math.floor(get_align(osc_geo.valign, osc_geo.playresy, osc_geo.osc_h, 0))
 	
 	
 	-- fetch values
@@ -455,7 +456,7 @@ function osc_init ()
     -- right (total/remaining time)
     local contentF = function (ass)
     	if state.rightTC_trem == true then
-    		ass:append("-" ..mp.property_get_string("time-remaining"))
+    		ass:append("-" .. mp.property_get_string("time-remaining"))
     	else
     		ass:append(mp.property_get_string("length"))
     	end
@@ -488,11 +489,11 @@ end
 
 function show_osc()
 	state.last_osd_time = mp.get_timer()
-    state.osd_visible = true
+    state.osc_visible = true
 end
 
 function hide_osc()
-    state.osd_visible = false
+    state.osc_visible = false
 end
 
 -- called by input.conf bindings
@@ -522,7 +523,7 @@ end
 
 function mouse_down()
 	--mp.send_command("set pause yes")
-	if state.osd_visible == true then
+	if state.osc_visible == true then
 		any_button_down()
 	end
 end
@@ -553,11 +554,11 @@ function mp_update()
     
     local osd_time = 1
     
-    if state.osd_visible and now - state.last_osd_time < osd_time then
+    if state.osc_visible and now - state.last_osd_time < osd_time then
         draw_osc(ass)
-        state.osd_visible = true
+        state.osc_visible = true
     else
-        state.osd_visible = false
+        state.osc_visible = false
     end
     
     --ass:new_event()
