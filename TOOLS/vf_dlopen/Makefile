@@ -19,7 +19,7 @@
 # 02110-1301 USA
 #
 
-FILTERS = showqscale telecine tile rectangle
+FILTERS = showqscale telecine tile rectangle framestep
 COMMON = filterutils.o
 
 OBJECTS = $(patsubst %,%.o,$(FILTERS)) $(COMMON)
@@ -28,7 +28,7 @@ OUT = $(patsubst %,%.so,$(FILTERS))
 
 CFLAGS ?= -Wall -Wextra -O3 -march=native -mtune=native -ffast-math
 
-CPPFLAGS += -I../../libmpcodecs
+CPPFLAGS += -I../../video/filter
 CFLAGS += -fPIC
 LDFLAGS += -shared -fPIC
 
