@@ -417,11 +417,6 @@ static int reinit_window_state(struct vo *vo)
         layer = HWND_TOPMOST;
 
     // xxx not sure if this can trigger any unwanted messages (WM_MOVE/WM_SIZE)
-    if (vo->opts->fs) {
-        while (ShowCursor(0) >= 0) /**/ ;
-    } else {
-        while (ShowCursor(1) < 0) /**/ ;
-    }
     updateScreenProperties(vo);
 
     if (vo->opts->fs) {
@@ -695,6 +690,12 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_SCREENINFO:
         w32_update_xinerama_info(vo);
         return VO_TRUE;
+    case VOCTRL_SET_CURSOR_VISIBILITY:
+        if (*(bool *)arg) {
+            while (ShowCursor(1) < 0) { }
+        } else {
+            while (ShowCursor(0) >= 0) { }
+        }
     }
     return VO_NOTIMPL;
 }
@@ -712,7 +713,7 @@ void vo_w32_uninit(struct vo *vo)
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: uninit\n");
     if (!w32)
         return;
-    ShowCursor(1);
+    while (ShowCursor(1) < 0) { }
     DestroyWindow(w32->window);
     UnregisterClassW(classname, 0);
     talloc_free(w32);
