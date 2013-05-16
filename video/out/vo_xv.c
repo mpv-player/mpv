@@ -657,16 +657,6 @@ static struct mp_image get_xv_buffer(struct vo *vo, int buf_index)
     return img;
 }
 
-static void check_events(struct vo *vo)
-{
-    int e = vo_x11_check_events(vo);
-
-    if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) {
-        resize(vo);
-        vo->want_redraw = true;
-    }
-}
-
 static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct xvctx *ctx = vo->priv;
@@ -696,7 +686,7 @@ static void wait_for_completion(struct vo *vo, int max_outstanding)
                 ctx->Shm_Warned_Slow = 1;
             }
             usec_sleep(1000);
-            check_events(vo);
+            vo_x11_check_events(vo);
         }
     }
 #endif
@@ -921,9 +911,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     switch (request) {
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
-    case VOCTRL_FULLSCREEN:
-        vo_x11_fullscreen(vo);
-        /* indended, fallthrough to update panscan on fullscreen/windowed switch */
     case VOCTRL_SET_PANSCAN:
         resize(vo);
         return VO_TRUE;
@@ -948,12 +935,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         read_xv_csp(vo);
         *cspc = ctx->cached_csp;
         return true;
-    case VOCTRL_ONTOP:
-        vo_x11_ontop(vo);
-        return VO_TRUE;
-    case VOCTRL_UPDATE_SCREENINFO:
-        vo_x11_update_screeninfo(vo);
-        return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
         return redraw_frame(vo);
     case VOCTRL_SCREENSHOT: {
@@ -962,7 +943,13 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     }
     }
-    return VO_NOTIMPL;
+    int events = 0;
+    int r = vo_x11_control(vo, &events, request, data);
+    if (events & (VO_EVENT_EXPOSE | VO_EVENT_RESIZE)) {
+        resize(vo);
+        vo->want_redraw = true;
+    }
+    return r;
 }
 
 const struct vo_driver video_out_xv = {
@@ -974,6 +961,5 @@ const struct vo_driver video_out_xv = {
     .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
-    .check_events = check_events,
     .uninit = uninit
 };

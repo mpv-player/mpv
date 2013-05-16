@@ -128,6 +128,7 @@ typedef struct
 } MotifWmHints;
 
 static void vo_x11_update_geometry(struct vo *vo);
+static void vo_x11_fullscreen(struct vo *vo);
 static int vo_x11_get_fs_type(struct vo *vo);
 static void xscreensaver_heartbeat(struct vo_x11_state *x11);
 static void saver_on(struct vo_x11_state *x11);
@@ -371,7 +372,7 @@ static void init_atoms(struct vo_x11_state *x11)
     x11->XA_NET_WM_CM = XInternAtom(x11->display, buf, False);
 }
 
-void vo_x11_update_screeninfo(struct vo *vo)
+static void vo_x11_update_screeninfo(struct vo *vo)
 {
     struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
@@ -1275,7 +1276,7 @@ static void vo_x11_update_geometry(struct vo *vo)
     }
 }
 
-void vo_x11_fullscreen(struct vo *vo)
+static void vo_x11_fullscreen(struct vo *vo)
 {
     struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
@@ -1371,7 +1372,7 @@ void vo_x11_fullscreen(struct vo *vo)
     x11->pos_changed_during_fs = false;
 }
 
-void vo_x11_ontop(struct vo *vo)
+static void vo_x11_ontop(struct vo *vo)
 {
     struct mp_vo_opts *opts = vo->opts;
     opts->ontop = !opts->ontop;
@@ -1379,7 +1380,7 @@ void vo_x11_ontop(struct vo *vo)
     vo_x11_setlayer(vo, vo->x11->window, opts->ontop);
 }
 
-void vo_x11_border(struct vo *vo)
+static void vo_x11_border(struct vo *vo)
 {
     vo->opts->border = !vo->opts->border;
     vo_x11_decoration(vo, vo->opts->border && !vo->opts->fs);

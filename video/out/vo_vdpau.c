@@ -867,20 +867,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     return 0;
 }
 
-static void check_events(struct vo *vo)
-{
-    if (handle_preemption(vo) < 0)
-        return;
-
-    int e = vo_x11_check_events(vo);
-
-    if (e & VO_EVENT_RESIZE)
-        resize(vo);
-    else if (e & VO_EVENT_EXPOSE) {
-        vo->want_redraw = true;
-    }
-}
-
 static struct bitmap_packer *make_packer(struct vo *vo, VdpRGBAFormat format)
 {
     struct vdpctx *vc = vo->priv;
@@ -1554,14 +1540,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     case VOCTRL_HWDEC_DECODER_RENDER:
         return decoder_render(vo, data);
-    case VOCTRL_BORDER:
-        vo_x11_border(vo);
-        checked_resize(vo);
-        return VO_TRUE;
-    case VOCTRL_FULLSCREEN:
-        vo_x11_fullscreen(vo);
-        checked_resize(vo);
-        return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
@@ -1585,12 +1563,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_GET_YUV_COLORSPACE:
         *(struct mp_csp_details *)data = vc->colorspace;
         return true;
-    case VOCTRL_ONTOP:
-        vo_x11_ontop(vo);
-        return VO_TRUE;
-    case VOCTRL_UPDATE_SCREENINFO:
-        vo_x11_update_screeninfo(vo);
-        return VO_TRUE;
     case VOCTRL_NEWFRAME:
         vc->deint_queue_pos = next_deint_queue_pos(vo, true);
         if (status_ok(vo))
@@ -1617,7 +1589,17 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     }
     }
-    return VO_NOTIMPL;
+
+    int events = 0;
+    int r = vo_x11_control(vo, &events, request, data);
+
+    if (events & VO_EVENT_RESIZE) {
+        checked_resize(vo);
+    } else if (events & VO_EVENT_EXPOSE) {
+        vo->want_redraw = true;
+    }
+
+    return r;
 }
 
 #define OPT_BASE_STRUCT struct vdpctx
@@ -1638,7 +1620,6 @@ const struct vo_driver video_out_vdpau = {
     .get_buffered_frame = set_next_frame_info,
     .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,
-    .check_events = check_events,
     .uninit = uninit,
     .priv_size = sizeof(struct vdpctx),
     .options = (const struct m_option []){
