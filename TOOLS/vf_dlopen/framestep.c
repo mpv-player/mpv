@@ -41,12 +41,6 @@ typedef struct {
     int step, pos;
 } framestep_data_t;
 
-static int framestep_config(struct vf_dlopen_context *ctx)
-{
-    (void) ctx;
-    return 1;
-}
-
 static int framestep_put_image(struct vf_dlopen_context *ctx)
 {
     framestep_data_t *framestep = ctx->priv;
@@ -80,7 +74,7 @@ static int framestep_put_image(struct vf_dlopen_context *ctx)
 
 void framestep_uninit(struct vf_dlopen_context *ctx)
 {
-    (void) ctx;
+    free(ctx->priv);
 }
 
 int vf_dlopen_getcontext(struct vf_dlopen_context *ctx, int argc, const char **argv)
@@ -96,7 +90,6 @@ int vf_dlopen_getcontext(struct vf_dlopen_context *ctx, int argc, const char **a
     framestep->step = atoi(argv[0]);
 
     ctx->priv = framestep;
-    ctx->config = framestep_config;
     ctx->put_image = framestep_put_image;
     ctx->uninit = framestep_uninit;
 
