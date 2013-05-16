@@ -282,6 +282,11 @@ static int query_format(struct vo *vo, uint32_t format)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
+    switch (request) {
+    case VOCTRL_CHECK_EVENTS:
+        check_events(vo);
+        return VO_TRUE;
+    }
     return VO_NOTIMPL;
 }
 
@@ -298,6 +303,5 @@ const struct vo_driver video_out_caca = {
     .control = control,
     .draw_image = draw_image,
     .flip_page = flip_page,
-    .check_events = check_events,
     .uninit = uninit,
 };

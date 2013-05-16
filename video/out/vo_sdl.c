@@ -979,6 +979,9 @@ static int get_eq(struct vo *vo, const char *name, int *value)
 static int control(struct vo *vo, uint32_t request, void *data)
 {
     switch (request) {
+    case VOCTRL_CHECK_EVENTS:
+        check_events(vo);
+        return 1;
     case VOCTRL_FULLSCREEN:
         set_fullscreen(vo, !vo->opts->fs);
         return 1;
@@ -1039,7 +1042,6 @@ const struct vo_driver video_out_sdl = {
     .control = control,
     .draw_image = draw_image,
     .uninit = uninit,
-    .check_events = check_events,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
 };

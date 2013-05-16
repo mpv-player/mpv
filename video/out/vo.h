@@ -198,12 +198,6 @@ struct vo_driver {
     void (*flip_page_timed)(struct vo *vo, unsigned int pts_us, int duration);
 
     /*
-     * This func is called after every frames to handle keyboard and
-     * other events. It's called in PAUSE mode too!
-     */
-    void (*check_events)(struct vo *vo);
-
-    /*
      * Closes driver. Should restore the original state of the system.
      */
     void (*uninit)(struct vo *vo);

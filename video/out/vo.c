@@ -235,8 +235,6 @@ void vo_check_events(struct vo *vo)
         vo->registered_fd = -1;
         return;
     }
-    if (vo->driver->check_events)
-        vo->driver->check_events(vo);
     vo_control(vo, VOCTRL_CHECK_EVENTS, NULL);
 }
 
