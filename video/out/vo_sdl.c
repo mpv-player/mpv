@@ -190,7 +190,6 @@ struct priv {
         int num_targets;
         int targets_size;
     } osd_surfaces[MAX_OSD_PARTS];
-    unsigned int mouse_timer;
     int mouse_hidden;
     int brightness, contrast;
 
@@ -470,27 +469,7 @@ static void flip_page(struct vo *vo)
 
 static void check_events(struct vo *vo)
 {
-    struct priv *vc = vo->priv;
-    struct mp_vo_opts *opts = vo->opts;
     SDL_Event ev;
-
-    if (opts->cursor_autohide_delay >= 0) {
-        if (!vc->mouse_hidden &&
-            (GetTimerMS() - vc->mouse_timer >= opts->cursor_autohide_delay)) {
-            SDL_ShowCursor(0);
-            vc->mouse_hidden = 1;
-        }
-    } else if (opts->cursor_autohide_delay == -1) {
-        if (vc->mouse_hidden) {
-            SDL_ShowCursor(1);
-            vc->mouse_hidden = 0;
-        }
-    } else if (opts->cursor_autohide_delay == -2) {
-        if (!vc->mouse_hidden) {
-            SDL_ShowCursor(0);
-            vc->mouse_hidden = 1;
-        }
-    }
 
     while (SDL_PollEvent(&ev)) {
         switch (ev.type) {
@@ -554,28 +533,13 @@ static void check_events(struct vo *vo)
             break;
         }
         case SDL_MOUSEMOTION:
-            if (opts->cursor_autohide_delay >= 0) {
-                SDL_ShowCursor(1);
-                vc->mouse_hidden = 0;
-                vc->mouse_timer = GetTimerMS();
-            }
             vo_mouse_movement(vo, ev.motion.x, ev.motion.y);
             break;
         case SDL_MOUSEBUTTONDOWN:
-            if (opts->cursor_autohide_delay >= 0) {
-                SDL_ShowCursor(1);
-                vc->mouse_hidden = 0;
-                vc->mouse_timer = GetTimerMS();
-            }
             mplayer_put_key(vo->key_fifo,
                 (MP_MOUSE_BTN0 + ev.button.button - 1) | MP_KEY_STATE_DOWN);
             break;
         case SDL_MOUSEBUTTONUP:
-            if (opts->cursor_autohide_delay >= 0) {
-                SDL_ShowCursor(1);
-                vc->mouse_hidden = 0;
-                vc->mouse_timer = GetTimerMS();
-            }
             mplayer_put_key(vo->key_fifo,
                             (MP_MOUSE_BTN0 + ev.button.button - 1));
             break;
@@ -793,9 +757,6 @@ static int preinit(struct vo *vo, const char *arg)
     // we don't have proper event handling
     vo->wakeup_period = 0.02;
 
-    // initialize the autohide timer properly
-    vc->mouse_timer = GetTimerMS();
-
     return 0;
 }
 
@@ -1012,6 +973,9 @@ static int control(struct vo *vo, uint32_t request, void *data)
             args->out_image = get_screenshot(vo);
         return true;
     }
+    case VOCTRL_SET_CURSOR_VISIBILITY:
+        SDL_ShowCursor(*(bool *)data);
+        return true;
     }
     return VO_NOTIMPL;
 }
