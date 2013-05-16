@@ -491,6 +491,8 @@ struct input_ctx {
     // events sources. If yes, the sources may have more queued.
     bool got_new_events;
 
+    unsigned int last_mouse_event;
+
     struct input_fd key_fds[MP_MAX_KEY_FD];
     unsigned int num_key_fd;
 
@@ -1315,6 +1317,9 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
 void mp_input_feed_key(struct input_ctx *ictx, int code)
 {
     ictx->got_new_events = true;
+    int unmod = code & ~(MP_KEY_MODIFIER_MASK | MP_KEY_STATE_DOWN);
+    if (unmod >= MP_MOUSE_BASE && unmod <= MP_MOUSE_BTN_END)
+        ictx->last_mouse_event = GetTimerMS();
     if (code == MP_INPUT_RELEASE_ALL) {
         mp_msg(MSGT_INPUT, MSGL_V, "input: release all\n");
         memset(ictx->key_down, 0, sizeof(ictx->key_down));
@@ -1383,6 +1388,7 @@ static void read_events(struct input_ctx *ictx, int time)
         time = FFMIN(time, 1000 / ictx->ar_rate);
         time = FFMIN(time, ictx->ar_delay);
     }
+    time = FFMAX(time, 0);
     ictx->got_new_events = false;
     struct input_fd *key_fds = ictx->key_fds;
     struct input_fd *cmd_fds = ictx->cmd_fds;
@@ -1419,12 +1425,9 @@ static void read_events(struct input_ctx *ictx, int time)
         FD_SET(cmd_fds[i].fd, &fds);
     }
     struct timeval tv, *time_val;
-    if (time >= 0) {
-        tv.tv_sec = time / 1000;
-        tv.tv_usec = (time % 1000) * 1000;
-        time_val = &tv;
-    } else
-        time_val = NULL;
+    tv.tv_sec = time / 1000;
+    tv.tv_usec = (time % 1000) * 1000;
+    time_val = &tv;
     if (select(max_fd + 1, &fds, NULL, NULL, time_val) < 0) {
         if (errno != EINTR)
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Select error: %s\n",
@@ -1432,7 +1435,7 @@ static void read_events(struct input_ctx *ictx, int time)
         FD_ZERO(&fds);
     }
 #else
-    if (time)
+    if (time > 0)
         usec_sleep(time * 1000);
 #endif
 
@@ -1479,6 +1482,8 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
     ictx->got_new_events = true;
     if (!cmd)
         return 0;
+    if (cmd->id == MP_CMD_SET_MOUSE_POS)
+        ictx->last_mouse_event = GetTimerMS();
     queue_add(&ictx->control_cmd_queue, cmd, false);
     return 1;
 }
@@ -1907,4 +1912,9 @@ int mp_input_check_interrupt(struct input_ctx *ictx, int time)
             return false;
         read_all_events(ictx, time);
     }
+}
+
+unsigned int mp_input_get_last_mouse_event_time(struct input_ctx *ictx)
+{
+    return ictx->last_mouse_event;
 }

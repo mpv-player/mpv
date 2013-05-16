@@ -235,6 +235,13 @@ typedef struct MPContext {
     float audio_delay;
 
     unsigned int last_heartbeat;
+
+    unsigned int mouse_timer;
+    unsigned int mouse_last_time;
+    int mouse_waiting_hide;
+
+    unsigned int next_wakup_time;
+
     // used to prevent hanging in some error cases
     unsigned int start_timestamp;
 

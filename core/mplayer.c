@@ -2555,6 +2555,10 @@ int reinit_video_chain(struct MPContext *mpctx)
                     "the selected video_out (-vo) device.\n");
             goto err_out;
         }
+        if (opts->vo.cursor_autohide_delay != -1) {
+            vo_control(mpctx->video_out, VOCTRL_SET_CURSOR_VISIBILITY,
+                       &(bool){false});
+        }
         mpctx->initialized_flags |= INITIALIZED_VO;
     }
 
@@ -3503,6 +3507,27 @@ static void run_playloop(struct MPContext *mpctx)
         // ================================================================
         vo_check_events(vo);
 
+        unsigned int mouse_last_time =
+            mp_input_get_last_mouse_event_time(mpctx->input);
+        if (mpctx->mouse_last_time != mouse_last_time) {
+            mpctx->mouse_last_time = mouse_last_time;
+            if (opts->vo.cursor_autohide_delay > -1) {
+                vo_control(vo, VOCTRL_SET_CURSOR_VISIBILITY, &(bool){true});
+                if (opts->vo.cursor_autohide_delay >= 0) {
+                    mpctx->mouse_waiting_hide = 1;
+                    mpctx->mouse_timer =
+                        GetTimerMS() + opts->vo.cursor_autohide_delay;
+                }
+            }
+        }
+
+        if (mpctx->mouse_waiting_hide == 1 &&
+            GetTimerMS() >= mpctx->mouse_timer)
+        {
+            vo_control(vo, VOCTRL_SET_CURSOR_VISIBILITY, &(bool){false});
+            mpctx->mouse_waiting_hide = 2;
+        }
+
         if (opts->heartbeat_cmd) {
             unsigned now = GetTimerMS();
             if (now - mpctx->last_heartbeat >
@@ -3751,6 +3776,10 @@ static void run_playloop(struct MPContext *mpctx)
             if (mpctx->sh_video) {
                 unsigned int vo_sleep = vo_get_sleep_time(mpctx->video_out);
                 sleep_ms = FFMIN(sleep_ms, vo_sleep);
+                if (mpctx->mouse_waiting_hide) {
+                    vo_sleep = mpctx->mouse_timer - GetTimerMS();
+                    sleep_ms = FFMIN(sleep_ms, vo_sleep);
+                }
             }
             mp_input_get_cmd(mpctx->input, sleep_ms, true);
         }
