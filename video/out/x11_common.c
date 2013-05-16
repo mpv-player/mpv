@@ -177,34 +177,39 @@ static void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action)
     }
 }
 
-static void vo_hidecursor(struct vo *vo, Display *disp, Window win)
+static void vo_set_cursor_hidden(struct vo *vo, bool cursor_hidden)
 {
     Cursor no_ptr;
     Pixmap bm_no;
     XColor black, dummy;
     Colormap colormap;
     const char bm_no_data[] = {0, 0, 0, 0, 0, 0, 0, 0};
+    struct vo_x11_state *x11 = vo->x11;
+    Display *disp = x11->display;
+    Window win = x11->window;
 
-    if (vo->opts->WinID == 0)
+    if (cursor_hidden == x11->mouse_cursor_hidden)
+        return;
+
+    x11->mouse_cursor_hidden = cursor_hidden;
+
+    if (vo->opts->WinID == 0 || win == 0)
         return;                 // do not hide if playing on the root window
 
-    colormap = DefaultColormap(disp, DefaultScreen(disp));
-    if (!XAllocNamedColor(disp, colormap, "black", &black, &dummy))
-        return; // color alloc failed, give up
-    bm_no = XCreateBitmapFromData(disp, win, bm_no_data, 8, 8);
-    no_ptr = XCreatePixmapCursor(disp, bm_no, bm_no, &black, &black, 0, 0);
-    XDefineCursor(disp, win, no_ptr);
-    XFreeCursor(disp, no_ptr);
-    if (bm_no != None)
-        XFreePixmap(disp, bm_no);
-    XFreeColors(disp, colormap, &black.pixel, 1, 0);
-}
-
-static void vo_showcursor(struct vo *vo, Display *disp, Window win)
-{
-    if (vo->opts->WinID == 0)
-        return;
-    XDefineCursor(disp, win, 0);
+    if (x11->mouse_cursor_hidden) {
+        colormap = DefaultColormap(disp, DefaultScreen(disp));
+        if (!XAllocNamedColor(disp, colormap, "black", &black, &dummy))
+            return; // color alloc failed, give up
+        bm_no = XCreateBitmapFromData(disp, win, bm_no_data, 8, 8);
+        no_ptr = XCreatePixmapCursor(disp, bm_no, bm_no, &black, &black, 0, 0);
+        XDefineCursor(disp, win, no_ptr);
+        XFreeCursor(disp, no_ptr);
+        if (bm_no != None)
+            XFreePixmap(disp, bm_no);
+        XFreeColors(disp, colormap, &black.pixel, 1, 0);
+    } else {
+        XDefineCursor(x11->display, x11->window, 0);
+    }
 }
 
 static int x11_errorhandler(Display *display, XErrorEvent *event)
@@ -641,7 +646,7 @@ void vo_x11_uninit(struct vo *vo)
 
     saver_on(x11);
     if (x11->window != None)
-        vo_showcursor(vo, x11->display, x11->window);
+        vo_set_cursor_hidden(vo, false);
 
     if (x11->f_gc != None)
         XFreeGC(vo->x11->display, x11->f_gc);
@@ -675,20 +680,6 @@ void vo_x11_uninit(struct vo *vo)
     vo->x11 = NULL;
 }
 
-static void vo_x11_unhide_cursor(struct vo *vo)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    struct mp_vo_opts *opts = vo->opts;
-
-    if (opts->cursor_autohide_delay > -2) {
-        vo_showcursor(vo, x11->display, x11->window);
-        if (opts->cursor_autohide_delay >= 0) {
-            x11->mouse_waiting_hide = 1;
-            x11->mouse_timer = GetTimerMS() + opts->cursor_autohide_delay;
-        }
-    }
-}
-
 static void update_vo_size(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -705,11 +696,6 @@ int vo_x11_check_events(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     Display *display = vo->x11->display;
     XEvent Event;
-
-    if (x11->mouse_waiting_hide && GetTimerMS() >= x11->mouse_timer) {
-        vo_hidecursor(vo, display, x11->window);
-        x11->mouse_waiting_hide = 0;
-    }
 
     xscreensaver_heartbeat(vo->x11);
 
@@ -772,16 +758,13 @@ int vo_x11_check_events(struct vo *vo)
         }
         case MotionNotify:
             vo_mouse_movement(vo, Event.xmotion.x, Event.xmotion.y);
-            vo_x11_unhide_cursor(vo);
             break;
         case ButtonPress:
-            vo_x11_unhide_cursor(vo);
             mplayer_put_key(vo->key_fifo,
                             (MP_MOUSE_BTN0 + Event.xbutton.button - 1)
                             | MP_KEY_STATE_DOWN);
             break;
         case ButtonRelease:
-            vo_x11_unhide_cursor(vo);
             mplayer_put_key(vo->key_fifo,
                             MP_MOUSE_BTN0 + Event.xbutton.button - 1);
             break;
@@ -814,9 +797,6 @@ int vo_x11_check_events(struct vo *vo)
             break;
         }
     }
-
-    if (x11->mouse_waiting_hide)
-        vo->next_wakeup_time = FFMIN(vo->next_wakeup_time, x11->mouse_timer);
 
     update_vo_size(vo);
     if (vo->opts->WinID >= 0 && (x11->pending_vo_events & VO_EVENT_RESIZE)) {
@@ -984,7 +964,10 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     x11->vo_gc = XCreateGC(x11->display, x11->window, 0, NULL);
     XSetForeground(x11->display, x11->f_gc, 0);
 
-    vo_hidecursor(vo, x11->display, x11->window);
+    if (x11->mouse_cursor_hidden) {
+        x11->mouse_cursor_hidden = false;
+        vo_set_cursor_hidden(vo, true);
+    }
     x11->xic = XCreateIC(x11->xim,
                          XNInputStyle, XIMPreeditNone | XIMStatusNone,
                          XNClientWindow, x11->window,
@@ -1405,6 +1388,9 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_UPDATE_SCREENINFO:
         vo_x11_update_screeninfo(vo);
+        return VO_TRUE;
+    case VOCTRL_SET_CURSOR_VISIBILITY:
+        vo_set_cursor_hidden(vo, !(*(bool *)arg));
         return VO_TRUE;
     }
     return VO_NOTIMPL;

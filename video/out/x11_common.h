@@ -57,8 +57,7 @@ struct vo_x11_state {
     int fs_layer;
 
     XSizeHints vo_hint;
-    unsigned int mouse_timer;
-    int mouse_waiting_hide;
+    bool mouse_cursor_hidden;
     int orig_layer;
     int old_gravity;
 
