@@ -26,35 +26,27 @@
 #include "config.h"
 #include "timer.h"
 
-int usec_sleep(int usec_delay)
+void mp_sleep_us(int64_t us)
 {
+    if (us < 0)
+        return;
 #ifdef HAVE_NANOSLEEP
     struct timespec ts;
-    ts.tv_sec  =  usec_delay / 1000000;
-    ts.tv_nsec = (usec_delay % 1000000) * 1000;
-    return nanosleep(&ts, NULL);
+    ts.tv_sec  =  us / 1000000;
+    ts.tv_nsec = (us % 1000000) * 1000;
+    nanosleep(&ts, NULL);
 #else
-    return usleep(usec_delay);
+    usleep(us);
 #endif
 }
 
-// Returns current time in microseconds
-unsigned int GetTimer(void)
+uint64_t mp_raw_time_us(void)
 {
-  struct timeval tv;
-  gettimeofday(&tv,NULL);
-  return tv.tv_sec * 1000000 + tv.tv_usec;
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    return tv.tv_sec * 1000000LL + tv.tv_usec;
 }
 
-// Returns current time in milliseconds
-unsigned int GetTimerMS(void)
-{
-  struct timeval tv;
-  gettimeofday(&tv,NULL);
-  return tv.tv_sec * 1000 + tv.tv_usec / 1000;
-}
-
-// Initialize timer, must be called at least once at start
-void InitTimer(void)
+void mp_raw_time_init(void)
 {
 }

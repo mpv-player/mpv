@@ -4722,19 +4722,16 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
     atexit(detach_ptw32);
 #endif
 
-    InitTimer();
-    srand(GetTimerMS());
-
 #if defined(__MINGW32__) || defined(__CYGWIN__)
     // stop Windows from showing all kinds of annoying error dialogs
     SetErrorMode(0x8003);
-    // request 1ms timer resolution
-    timeBeginPeriod(1);
 #endif
 
 #ifdef HAVE_TERMCAP
     load_termcap(NULL); // load key-codes
 #endif
+
+    mp_time_init();
 }
 
 /* This preprocessor directive is a hack to generate a mplayer-nomain.o object

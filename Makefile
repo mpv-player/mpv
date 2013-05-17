@@ -215,8 +215,9 @@ SOURCES = talloc.c \
           demux/extension.c \
           demux/mf.c \
           demux/video.c \
-          osdep/numcores.c \
           osdep/io.c \
+          osdep/numcores.c \
+          osdep/timer.c \
           stream/stream.c \
           stream/stream_avdevice.c \
           stream/stream_file.c \
