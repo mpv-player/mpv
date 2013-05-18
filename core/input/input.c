@@ -794,16 +794,6 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
     bstr start = str;
     void *tmp = talloc_new(NULL);
 
-    if (eat_token(&str, "pausing")) {
-        pausing = 1;
-    } else if (eat_token(&str, "pausing_keep")) {
-        pausing = 2;
-    } else if (eat_token(&str, "pausing_toggle")) {
-        pausing = 3;
-    } else if (eat_token(&str, "pausing_keep_force")) {
-        pausing = 4;
-    }
-
     str = bstr_lstrip(str);
     for (const struct legacy_cmd *entry = legacy_cmds; entry->old; entry++) {
         size_t old_len = strlen(entry->old);
@@ -820,16 +810,28 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
         }
     }
 
-    if (eat_token(&str, "no-osd")) {
-        on_osd = MP_ON_OSD_NO;
-    } else if (eat_token(&str, "osd-bar")) {
-        on_osd = MP_ON_OSD_BAR;
-    } else if (eat_token(&str, "osd-msg")) {
-        on_osd = MP_ON_OSD_MSG;
-    } else if (eat_token(&str, "osd-msg-bar")) {
-        on_osd = MP_ON_OSD_MSG | MP_ON_OSD_BAR;
-    } else if (eat_token(&str, "osd-auto")) {
-        // default
+    while (1) {
+        if (eat_token(&str, "pausing")) {
+            pausing = 1;
+        } else if (eat_token(&str, "pausing_keep")) {
+            pausing = 2;
+        } else if (eat_token(&str, "pausing_toggle")) {
+            pausing = 3;
+        } else if (eat_token(&str, "pausing_keep_force")) {
+            pausing = 4;
+        } else if (eat_token(&str, "no-osd")) {
+            on_osd = MP_ON_OSD_NO;
+        } else if (eat_token(&str, "osd-bar")) {
+            on_osd = MP_ON_OSD_BAR;
+        } else if (eat_token(&str, "osd-msg")) {
+            on_osd = MP_ON_OSD_MSG;
+        } else if (eat_token(&str, "osd-msg-bar")) {
+            on_osd = MP_ON_OSD_MSG | MP_ON_OSD_BAR;
+        } else if (eat_token(&str, "osd-auto")) {
+            // default
+        } else {
+            break;
+        }
     }
 
     int cmd_idx = 0;
