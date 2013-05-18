@@ -220,13 +220,27 @@ show_tracks
     Show a list of video/audio/subtitle tracks on the OSD.
 
 
+Input commands that are possibly subject to change
+--------------------------------------------------
+
+af_switch "filter1=params,filter2,..."
+    Replace the current filter chain with the given list.
+
+af_add "filter1=params,filter2,..."
+    Add the given list of audio filters to the audio filter chain.
+
+af_del "filter1,filter2,..."
+    Remove the given list of audio filters.
+
+af_clr
+    Remove all audio filters. (Conversion filters will be re-added
+    automatically if needed.)
 
 Undocumented commands: tv_start_scan, tv_step_channel, tv_step_norm,
 tv_step_chanlist, tv_set_channel, tv_last_channel, tv_set_freq, tv_step_freq,
 tv_set_norm, dvb_set_channel, radio_step_channel, radio_set_channel,
 radio_set_freq, radio_step_freq (all of these should be replaced by properties),
-stop (questionable use), get_property (?), af_switch, af_add, af_del,
-af_clr, af_cmdline, vo_cmdline (experimental).
+stop (questionable use), get_property (?), af_cmdline, vo_cmdline (experimental).
 
 Input command prefixes
 ----------------------
