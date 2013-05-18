@@ -772,7 +772,7 @@ static int control(sh_video_t *sh, int cmd, void *arg)
             delay += avctx->thread_count - 1;
         *(int *)arg = delay;
         return CONTROL_TRUE;
-    case VDCTRL_RESET_ASPECT:
+    case VDCTRL_REINIT_VO:
         if (ctx->vo_initialized)
             ctx->vo_initialized = false;
         init_vo(sh, ctx->pic);

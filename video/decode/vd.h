@@ -42,7 +42,7 @@ extern const vd_functions_t *const mpcodecs_vd_drivers[];
 
 #define VDCTRL_RESYNC_STREAM 8 // reset decode state after seeking
 #define VDCTRL_QUERY_UNSEEN_FRAMES 9 // current decoder lag
-#define VDCTRL_RESET_ASPECT 10 // reinit filter/VO chain for new aspect ratio
+#define VDCTRL_REINIT_VO 10 // reinit filter/VO chain
 
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int outfmt);
 
