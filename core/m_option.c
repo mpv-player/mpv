@@ -1987,76 +1987,96 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
     return 1;
 }
 
+static int obj_settings_list_num_items(m_obj_settings_t *obj_list)
+{
+    int num = 0;
+    while (obj_list && obj_list[num].name)
+        num++;
+    return num;
+}
+
+static void obj_settings_free_item(m_obj_settings_t *item)
+{
+    talloc_free(item->name);
+    free_str_list(&(item->attribs));
+}
+
+static void del_obj_settings_list_at(m_obj_settings_t **p_obj_list, int idx)
+{
+    m_obj_settings_t *obj_list = *p_obj_list;
+    int num = obj_settings_list_num_items(obj_list);
+
+    assert(idx >= 0 && idx < num);
+
+    obj_settings_free_item(&obj_list[idx]);
+
+    // Note: the NULL-terminating element is moved down as part of this
+    memmove(&obj_list[idx], &obj_list[idx + 1],
+            sizeof(m_obj_settings_t) * (num - idx));
+
+    *p_obj_list = talloc_realloc(NULL, obj_list, struct m_obj_settings, num);
+}
+
 static int obj_settings_list_del(struct bstr opt_name, struct bstr param,
                                  void *dst)
 {
-    char **str_list = NULL;
-    int r, i, idx_max = 0;
-    char *rem_id = "_removed_marker_";
-    char name[100];
-    assert(opt_name.len < 100);
-    memcpy(name, opt_name.start, opt_name.len);
-    name[opt_name.len] = 0;
-    const m_option_t list_opt = {
-        name, NULL, CONF_TYPE_STRING_LIST,
-        0, 0, 0, NULL
-    };
     m_obj_settings_t *obj_list = dst ? VAL(dst) : NULL;
+    int r = 1;
 
     if (dst && !obj_list) {
         mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %.*s: the list is empty.\n",
                BSTR_P(opt_name));
         return 1;
-    } else if (obj_list) {
-        for (idx_max = 0; obj_list[idx_max].name != NULL; idx_max++)
-            /* NOP */;
     }
 
-    r = m_option_parse(&list_opt, opt_name, param, &str_list);
-    if (r < 0 || !str_list)
-        return r;
+    int idx_max = obj_settings_list_num_items(obj_list);
+    bool *mark_del = talloc_zero_array(NULL, bool, idx_max);
 
-    for (r = 0; str_list[r]; r++) {
-        int id;
-        char *endptr;
-        id = strtol(str_list[r], &endptr, 0);
-        if (endptr == str_list[r]) {
-            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: invalid parameter. We need a list of integers which are the indices of the elements to remove.\n", BSTR_P(opt_name));
-            m_option_free(&list_opt, &str_list);
-            return M_OPT_INVALID;
+    while (param.len) {
+        bstr item;
+        bstr_split_tok(param, ",", &item, &param);
+
+        for (int n = 0; n < idx_max; n++) {
+            if (!mark_del[n] && bstr_equals0(item, obj_list[n].name)) {
+                mark_del[n] = true;
+                goto found;
+            }
         }
-        if (!obj_list)
-            continue;
-        if (id >= idx_max || id < -idx_max) {
+
+        bstr rest;
+        long long id = bstrtoll(item, &rest, 0);
+        if (rest.len == item.len) {
             mp_msg(MSGT_CFGPARSER, MSGL_WARN,
-                   "Option %.*s: Index %d is out of range.\n",
+                   "Option %.*s: item %.*s not found.\n",
+                   BSTR_P(opt_name), BSTR_P(item));
+            continue;
+        }
+
+        if (id < 0)
+            id = idx_max + id;
+
+        if (id < 0 || id >= idx_max) {
+            mp_msg(MSGT_CFGPARSER, MSGL_WARN,
+                   "Option %.*s: Index %lld is out of range.\n",
                    BSTR_P(opt_name), id);
             continue;
         }
-        if (id < 0)
-            id = idx_max + id;
-        talloc_free(obj_list[id].name);
-        free_str_list(&(obj_list[id].attribs));
-        obj_list[id].name = rem_id;
+
+        mark_del[id] = true;
+
+    found: ;
     }
 
-    if (!dst) {
-        m_option_free(&list_opt, &str_list);
-        return 1;
-    }
-
-    for (i = 0; obj_list[i].name; i++) {
-        while (obj_list[i].name == rem_id) {
-            memmove(&obj_list[i], &obj_list[i + 1],
-                    sizeof(m_obj_settings_t) * (idx_max - i));
-            idx_max--;
+    if (dst) {
+        for (int n = idx_max - 1; n >= 0; n--) {
+            if (mark_del[n])
+                del_obj_settings_list_at(&obj_list, n);
         }
+        VAL(dst) = obj_list;
     }
-    obj_list = talloc_realloc(NULL, obj_list, struct m_obj_settings,
-                              idx_max + 1);
-    VAL(dst) = obj_list;
 
-    return 1;
+    talloc_free(mark_del);
+    return r;
 }
 
 static void free_obj_settings_list(void *dst)
@@ -2068,10 +2088,8 @@ static void free_obj_settings_list(void *dst)
         return;
 
     d = VAL(dst);
-    for (n = 0; d[n].name; n++) {
-        talloc_free(d[n].name);
-        free_str_list(&(d[n].attribs));
-    }
+    for (n = 0; d[n].name; n++)
+        obj_settings_free_item(&d[n]);
     talloc_free(d);
     VAL(dst) = NULL;
 }
@@ -2110,7 +2128,8 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
                    " Prepend the given list to the current list\n\n"
                    "  %s-del x,y,...\n"
                    " Remove the given elements. Take the list element index (starting from 0).\n"
-                   " Negative index can be used (i.e. -1 is the last element)\n\n"
+                   " Negative index can be used (i.e. -1 is the last element).\n"
+                   " Filter names work as well.\n\n"
                    "  %s-clr\n"
                    " Clear the current list.\n",
                    BSTR_P(name), BSTR_P(suffix), prefix, prefix, prefix, prefix);
