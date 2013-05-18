@@ -773,9 +773,7 @@ static int control(sh_video_t *sh, int cmd, void *arg)
         *(int *)arg = delay;
         return CONTROL_TRUE;
     case VDCTRL_REINIT_VO:
-        if (ctx->vo_initialized)
-            ctx->vo_initialized = false;
-        init_vo(sh, ctx->pic);
+        mpcodecs_config_vo(sh, sh->disp_w, sh->disp_h, ctx->best_csp);
         return true;
     }
     return CONTROL_UNKNOWN;
