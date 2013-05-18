@@ -298,6 +298,7 @@ double playing_audio_pts(struct MPContext *mpctx);
 struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
                                float fps, int noerr);
 int reinit_video_chain(struct MPContext *mpctx);
+int reinit_video_filters(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);
 void unpause_player(struct MPContext *mpctx);
 void add_step_frame(struct MPContext *mpctx, int dir);

@@ -1775,6 +1775,42 @@ static void show_playlist_on_osd(MPContext *mpctx)
     talloc_free(res);
 }
 
+static void change_video_filters(MPContext *mpctx, const char *cmd,
+                                 const char *arg)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    struct m_config *conf = mpctx->mconfig;
+    struct m_obj_settings *old_vf_settings = NULL;
+    bool success = false;
+    bool need_refresh = false;
+    double refresh_pts = mpctx->last_vo_pts;
+
+    // The option parser is used to modify the filter list itself.
+    char optname[20];
+    snprintf(optname, sizeof(optname), "vf-%s", cmd);
+    const struct m_option *type = m_config_get_option(conf, bstr0(optname));
+
+    // Backup old settings, in case it fails
+    m_option_copy(type, &old_vf_settings, &opts->vf_settings);
+
+    if (m_config_set_option0(conf, optname, arg) >= 0) {
+        need_refresh = true;
+        success = reinit_video_filters(mpctx) >= 0;
+    }
+
+    if (!success) {
+        m_option_copy(type, &opts->vf_settings, &old_vf_settings);
+        if (need_refresh)
+            reinit_video_filters(mpctx);
+    }
+    m_option_free(type, &old_vf_settings);
+
+    // Try to refresh the video by doing a precise seek to the currently
+    // displayed frame.
+    if (need_refresh && opts->pause)
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, refresh_pts, 1);
+}
+
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -2289,6 +2325,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             af_uninit(mpctx->mixer.afilter);
             af_init(mpctx->mixer.afilter);
         }
+        /* fallthrough */
     case MP_CMD_AF_ADD:
     case MP_CMD_AF_DEL: {
         if (!sh_audio)
@@ -2330,6 +2367,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             af->control(af, AF_CONTROL_COMMAND_LINE, cmd->args[1].v.s);
             af_reinit(sh_audio->afilter);
         }
+        break;
+    case MP_CMD_VF:
+        change_video_filters(mpctx, cmd->args[0].v.s, cmd->args[1].v.s);
         break;
     case MP_CMD_SHOW_CHAPTERS:
         show_chapters_on_osd(mpctx);

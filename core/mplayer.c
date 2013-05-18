@@ -2466,6 +2466,39 @@ static void update_fps(struct MPContext *mpctx)
 #endif
 }
 
+static void recreate_video_filters(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    struct sh_video *sh_video = mpctx->sh_video;
+    assert(sh_video);
+
+    vf_uninit_filter_chain(sh_video->vfilter);
+
+    char *vf_arg[] = {
+        "_oldargs_", (char *)mpctx->video_out, NULL
+    };
+    sh_video->vfilter = vf_open_filter(opts, NULL, "vo", vf_arg);
+
+    sh_video->vfilter = append_filters(sh_video->vfilter, opts->vf_settings);
+
+    struct vf_instance *vf = sh_video->vfilter;
+    mpctx->osd->render_subs_in_filter
+        = vf->control(vf, VFCTRL_INIT_OSD, NULL) == VO_TRUE;
+}
+
+int reinit_video_filters(struct MPContext *mpctx)
+{
+    struct sh_video *sh_video = mpctx->sh_video;
+
+    if (!sh_video)
+        return -2;
+
+    recreate_video_filters(mpctx);
+    video_reinit_vo(sh_video);
+
+    return sh_video->vf_initialized > 0 ? 0 : -1;
+}
+
 int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -2518,18 +2551,7 @@ int reinit_video_chain(struct MPContext *mpctx)
                        STREAM_CTRL_GET_ASPECT_RATIO, &ar) != STREAM_UNSUPPORTED)
         mpctx->sh_video->stream_aspect = ar;
 
-    {
-        char *vf_arg[] = {
-            "_oldargs_", (char *)mpctx->video_out, NULL
-        };
-        sh_video->vfilter = vf_open_filter(opts, NULL, "vo", vf_arg);
-    }
-
-    sh_video->vfilter = append_filters(sh_video->vfilter, opts->vf_settings);
-
-    struct vf_instance *vf = sh_video->vfilter;
-    mpctx->osd->render_subs_in_filter
-        = vf->control(vf, VFCTRL_INIT_OSD, NULL) == VO_TRUE;
+    recreate_video_filters(mpctx);
 
     init_best_video_codec(sh_video, opts->video_decoders);
 

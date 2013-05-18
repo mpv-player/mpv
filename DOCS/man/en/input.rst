@@ -236,6 +236,37 @@ af_clr
     Remove all audio filters. (Conversion filters will be re-added
     automatically if needed.)
 
+vf set|add|toggle|del "filter1=params,filter2,..."
+    Change video filter chain.
+
+    The first argument decides what happens:
+
+    set
+        Overwrite the previous filter chain with the new one.
+
+    add
+        Append the new filter chain to the previous one.
+
+    toggle
+        Check if the given filter (with the exact parameters) is already
+        in the video chain. If yes, remove the filter. If no, add the filter.
+        (If several filters are passed to the command, this is done for
+        each filter.)
+
+    del
+        Remove the given filters from the video chain. Unlike in the other
+        cases, the second parameter is a comma separated list of filter names
+        or integer indexes. ``0`` would denote the first filter. Negative
+        indexes start from the last filter, and ``-1`` denotes the last
+        filter.
+
+    *EXAMPLE for input.conf*:
+
+    - ``a vf set flip`` turn video upside-down on the ``a`` key
+    - ``b vf set ""`` remove all video filters on ``b``
+    - ``c vf toggle lavfi=gradfun`` toggle debanding on ``c``
+
+
 Undocumented commands: tv_start_scan, tv_step_channel, tv_step_norm,
 tv_step_chanlist, tv_set_channel, tv_last_channel, tv_set_freq, tv_step_freq,
 tv_set_norm, dvb_set_channel, radio_step_channel, radio_set_channel,

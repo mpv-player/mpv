@@ -78,6 +78,9 @@ enum mp_command_type {
     MP_CMD_AF_CLR,
     MP_CMD_AF_CMDLINE,
 
+    /// Video filter commands
+    MP_CMD_VF,
+
     MP_CMD_SHOW_CHAPTERS,
     MP_CMD_SHOW_TRACKS,
     MP_CMD_SHOW_PLAYLIST,
