@@ -352,8 +352,6 @@ static void uninit(struct vf_instance *vf)
 {
     if (!vf->priv) return;
     av_free(vf->priv->buf);
-    free(vf->priv);
-    vf->priv = NULL;
 }
 
 static int vf_open(vf_instance_t *vf, char *args)
