@@ -1821,6 +1821,19 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     bool msg_osd = auto_osd || (cmd->on_osd & MP_ON_OSD_MSG);
     bool bar_osd = auto_osd || (cmd->on_osd & MP_ON_OSD_BAR);
     int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
+
+    if (!cmd->raw_args) {
+        for (int n = 0; n < cmd->nargs; n++) {
+            if (cmd->args[n].type.type == CONF_TYPE_STRING) {
+                cmd->args[n].v.s =
+                    mp_property_expand_string(mpctx, cmd->args[n].v.s);
+                if (!cmd->args[n].v.s)
+                    return;
+                talloc_steal(cmd, cmd->args[n].v.s);
+            }
+        }
+    }
+
     switch (cmd->id) {
     case MP_CMD_SEEK: {
         double v = cmd->args[0].v.d;
@@ -1985,23 +1998,15 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_PRINT_TEXT: {
-        char *txt = mp_property_expand_string(mpctx, cmd->args[0].v.s);
-        if (txt) {
-            mp_msg(MSGT_GLOBAL, MSGL_INFO, "%s\n", txt);
-            talloc_free(txt);
-        }
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "%s\n", cmd->args[0].v.s);
         break;
     }
 
     case MP_CMD_SHOW_TEXT: {
-        char *txt = mp_property_expand_string(mpctx, cmd->args[0].v.s);
-        if (txt) {
-            // if no argument supplied use default osd_duration, else <arg> ms.
-            set_osd_msg(mpctx, OSD_MSG_TEXT, cmd->args[2].v.i,
-                        (cmd->args[1].v.i < 0 ? osd_duration : cmd->args[1].v.i),
-                        "%s", txt);
-            talloc_free(txt);
-        }
+        // if no argument supplied use default osd_duration, else <arg> ms.
+        set_osd_msg(mpctx, OSD_MSG_TEXT, cmd->args[2].v.i,
+                    (cmd->args[1].v.i < 0 ? osd_duration : cmd->args[1].v.i),
+                    "%s", cmd->args[0].v.s);
         break;
     }
 
@@ -2284,11 +2289,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_RUN:
 #ifndef __MINGW32__
         if (!fork()) {
-            char *s = mp_property_expand_string(mpctx, cmd->args[0].v.s);
-            if (s) {
-                execl("/bin/sh", "sh", "-c", s, NULL);
-                talloc_free(s);
-            }
+            execl("/bin/sh", "sh", "-c", cmd->args[0].v.s, NULL);
             exit(0);
         }
 #endif

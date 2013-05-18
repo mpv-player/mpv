@@ -790,6 +790,7 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
 {
     int pausing = 0;
     int on_osd = MP_ON_OSD_AUTO;
+    bool raw_args = false;
     struct mp_cmd *cmd = NULL;
     bstr start = str;
     void *tmp = talloc_new(NULL);
@@ -829,6 +830,10 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
             on_osd = MP_ON_OSD_MSG | MP_ON_OSD_BAR;
         } else if (eat_token(&str, "osd-auto")) {
             // default
+        } else if (eat_token(&str, "raw")) {
+            raw_args = true;
+        } else if (eat_token(&str, "expand-properties")) {
+            // default
         } else {
             break;
         }
@@ -851,6 +856,7 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
     *cmd = mp_cmds[cmd_idx];
     cmd->pausing = pausing;
     cmd->on_osd = on_osd;
+    cmd->raw_args = raw_args;
 
     for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
         struct mp_cmd_arg *cmdarg = &cmd->args[i];

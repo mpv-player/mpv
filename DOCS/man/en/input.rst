@@ -289,10 +289,14 @@ osd-msg
     value as text.
 osd-msg-bar
     Combine osd-bar and osd-msg.
+raw
+    Don't expand properties in string arguments. (Like ``"${property-name}"``.)
+expand-properties (default)
+    All string arguments are expanded like in ``--playing-msg``.
 
 
-
-All of these are still overridden by the global ``--osd-level`` settings.
+All of the osd prefixes are still overridden by the global ``--osd-level``
+settings.
 
 Undocumented prefixes: pausing, pausing_keep, pausing_toggle,
 pausing_keep_force. (Should these be made official?)

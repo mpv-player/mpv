@@ -137,6 +137,7 @@ typedef struct mp_cmd {
     struct mp_cmd_arg args[MP_CMD_MAX_ARGS];
     int nargs;
     int pausing;
+    bool raw_args;
     enum mp_on_osd on_osd;
     bstr original;
     struct mp_cmd *queue_next;
