@@ -2205,7 +2205,7 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
         num++;
     }
 
-    if (op != OP_NONE && param.len == 0)
+    if (op != OP_NONE && num == 0)
         return M_OPT_MISSING_PARAM;
 
     if (dst) {
