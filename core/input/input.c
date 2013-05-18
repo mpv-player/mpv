@@ -865,9 +865,7 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
         cmd->nargs++;
         str = bstr_lstrip(str);
         bstr arg = {0};
-        if (cmdarg->type.type == &m_option_type_string &&
-            bstr_eatstart0(&str, "\""))
-        {
+        if (bstr_eatstart0(&str, "\"")) {
             if (!read_escaped_string(tmp, &str, &arg)) {
                 mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
                         "has broken string escapes.\n", cmd->name, i + 1);
