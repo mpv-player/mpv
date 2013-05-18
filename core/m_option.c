@@ -2177,9 +2177,6 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
         return obj_settings_list_del(name, param, dst);
     }
 
-    if (param.len == 0)
-        return M_OPT_MISSING_PARAM;
-
     if (!bstrcmp0(param, "help")) {
         m_obj_list_t *ol = opt->priv;
         mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Available video filters:\n");
@@ -2207,8 +2204,9 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
             return M_OPT_INVALID;
         num++;
     }
-    if (num == 0)
-        return M_OPT_INVALID;
+
+    if (op != OP_NONE && param.len == 0)
+        return M_OPT_MISSING_PARAM;
 
     if (dst) {
         m_obj_settings_t *list = VAL(dst);
