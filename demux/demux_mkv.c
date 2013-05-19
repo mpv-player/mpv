@@ -203,7 +203,7 @@ static bool is_parsed_header(struct mkv_demuxer *mkv_d, int64_t pos)
     int low = 0;
     int high = mkv_d->num_parsed_pos;
     while (high > low + 1) {
-        int mid = high + low >> 1;
+        int mid = (high + low) >> 1;
         if (mkv_d->parsed_pos[mid] > pos)
             high = mid;
         else

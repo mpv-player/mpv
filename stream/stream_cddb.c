@@ -879,14 +879,13 @@ cd_info_t *cddb_parse_xmcd(char *xmcd_file)
         // Ignore comments
         if (ptr[0] != '#') {
             // Search for the album title
-            if (xmcd_parse_dtitle(cd_info, ptr))
-                ;
-            // Search for the genre
-            else if (xmcd_parse_dgenre(cd_info, ptr))
-                ;
-            // Search for a track title
-            else if (xmcd_parse_ttitle(cd_info, ptr))
-                ;
+            if (!xmcd_parse_dtitle(cd_info, ptr)) {
+                // Search for the genre
+                if (!xmcd_parse_dgenre(cd_info, ptr)) {
+                    // Search for a track title
+                    xmcd_parse_ttitle(cd_info, ptr);
+                }
+            }
         }
         if (ptr2[1] == '\n')
             ptr2++;

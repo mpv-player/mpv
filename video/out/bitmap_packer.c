@@ -150,9 +150,9 @@ int packer_pack(struct bitmap_packer *packer)
     xmax = FFMAX(0, xmax - packer->padding);
     ymax = FFMAX(0, ymax - packer->padding);
     if (xmax > packer->w)
-        packer->w = 1 << av_log2(xmax - 1) + 1;
+        packer->w = 1 << (av_log2(xmax - 1) + 1);
     if (ymax > packer->h)
-        packer->h = 1 << av_log2(ymax - 1) + 1;
+        packer->h = 1 << (av_log2(ymax - 1) + 1);
     while (1) {
         int used_width = 0;
         int y = pack_rectangles(in, packer->result, packer->count,
