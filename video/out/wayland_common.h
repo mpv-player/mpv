@@ -60,9 +60,8 @@ struct vo_wayland_display {
         struct wl_cursor_theme *theme;
         struct wl_surface *surface;
 
-        /* save timer and pointer for fading out */
-        int mouse_timer;
-        bool mouse_waiting_hide;
+        /* pointer for fading out */
+        bool visible;
         struct wl_pointer *pointer;
         uint32_t serial;
     } cursor;
