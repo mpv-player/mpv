@@ -35,6 +35,10 @@
  * usage: -vf dlopen=./framestep.so:5
  *
  * outputs every 5th frame
+ *
+ * usage: -vf dlopen=./framestep.so:5:3
+ *
+ * outputs every 5th frame, starting with frame index 3 (default: 0)
  */
 
 typedef struct {
@@ -46,10 +50,10 @@ static int framestep_put_image(struct vf_dlopen_context *ctx)
     framestep_data_t *framestep = ctx->priv;
 
     // stepping
-    ++framestep->pos;
-    if (framestep->pos < framestep->step)
+    --framestep->pos;
+    if (framestep->pos >= 0)
         return 0;
-    framestep->pos = 0;
+    framestep->pos += framestep->step;
 
     // copying
     assert(ctx->inpic.planes == ctx->outpic[0].planes);
@@ -81,13 +85,14 @@ int vf_dlopen_getcontext(struct vf_dlopen_context *ctx, int argc, const char **a
 {
     VF_DLOPEN_CHECK_VERSION(ctx);
 
-    if (argc != 1)
+    if (argc != 1 && argc != 2)
         return -1;
 
     framestep_data_t *framestep = malloc(sizeof(framestep_data_t));
     memset(framestep, 0, sizeof(*framestep));
 
     framestep->step = atoi(argv[0]);
+    framestep->pos = (argc >= 2) ? atoi(argv[1]) : 0;
 
     ctx->priv = framestep;
     ctx->put_image = framestep_put_image;
