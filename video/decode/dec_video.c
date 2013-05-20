@@ -47,8 +47,6 @@
 
 // ===================================================================
 
-#include "core/cpudetect.h"
-
 int field_dominance = -1;
 
 int divx_quality = 0;
@@ -314,14 +312,6 @@ void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
     mpi = sh_video->vd_driver->decode(sh_video, packet, drop_frame, &pts);
 
     //------------------------ frame decoded. --------------------
-
-#if HAVE_MMX
-    // some codecs are broken, and doesn't restore MMX state :(
-    // it happens usually with broken/damaged files.
-    if (gCpuCaps.hasMMX) {
-        __asm__ volatile("emms\n\t":::"memory");
-    }
-#endif
 
     if (!mpi || drop_frame) {
         talloc_free(mpi);
