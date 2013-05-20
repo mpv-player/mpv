@@ -14,16 +14,16 @@ branches:
 before_install: ./travis-deps libass-stable $LIBAV
 script: ./configure && make
 
+notifications-policy: &notifications-policy
+  on_success: change
+  n_failure: always
+
 notifications:
   email:
     recipients:
       - mpv-team@googlegroups.com
-    email:
-      on_success: change
-      n_failure: always
+    <<: *notifications-policy
   irc:
     channels:
       - "irc.freenode.org#mpv-player-dev"
-    email:
-      on_success: change
-      n_failure: always
+    <<: *notifications-policy
