@@ -131,8 +131,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 
 //===========================================================================//
 
-extern int divx_quality;
-
 static const unsigned int fmt_list[]={
     IMGFMT_420P,
     IMGFMT_444P,

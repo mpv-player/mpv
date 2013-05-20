@@ -165,6 +165,8 @@ typedef struct MPOpts {
     struct m_obj_settings *vf_settings;
     float movie_aspect;
     int flip;
+    int field_dominance;
+    int divx_quality;
     int vd_use_dr1;
     char **sub_name;
     char **sub_paths;

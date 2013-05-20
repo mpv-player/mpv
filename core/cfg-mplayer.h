@@ -448,7 +448,7 @@ const m_option_t common_opts[] = {
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 
     // postprocessing:
-    {"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
+    OPT_INT("pp", divx_quality, 0),
 #ifdef CONFIG_LIBPOSTPROC
     {"pphelp", (void *) &pp_help, CONF_TYPE_PRINT, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
 #endif
@@ -463,8 +463,8 @@ const m_option_t common_opts[] = {
 
     // use (probably completely broken) decoder direct rendering
     OPT_FLAG("dr1", vd_use_dr1, 0),
-    {"field-dominance", &field_dominance, CONF_TYPE_CHOICE, 0,
-     M_CHOICES(({"auto", -1}, {"top", 0}, {"bottom", 1}))},
+    OPT_CHOICE("field-dominance", field_dominance, 0,
+               ({"auto", -1}, {"top", 0}, {"bottom", 1})),
 
     {"lavdopts", (void *) lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     {"lavfdopts", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
