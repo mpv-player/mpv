@@ -167,7 +167,6 @@ typedef struct MPOpts {
     int flip;
     int field_dominance;
     int divx_quality;
-    int vd_use_dr1;
     char **sub_name;
     char **sub_paths;
     int sub_auto;

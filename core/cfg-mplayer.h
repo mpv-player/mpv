@@ -461,8 +461,6 @@ const m_option_t common_opts[] = {
 
     OPT_FLAG_CONSTANTS("flip", flip, 0, 0, 1),
 
-    // use (probably completely broken) decoder direct rendering
-    OPT_FLAG("dr1", vd_use_dr1, 0),
     OPT_CHOICE("field-dominance", field_dominance, 0,
                ({"auto", -1}, {"top", 0}, {"bottom", 1})),
 
