@@ -2198,7 +2198,7 @@ fi #if win32; then
 
 
 echocheck "SDL 2.0"
-if test "$_sdl2" = auto ; then
+if test "$_sdl2" = yes ; then
   pkg_config_add 'sdl2' && _sdl2=yes
 fi
 if test "$_sdl2" = yes ; then
@@ -2212,7 +2212,7 @@ else
   def_sdl2='#undef CONFIG_SDL2'
   echores "$_sdl2"
   echocheck "SDL"
-  if test "$_sdl" = auto ; then
+  if test "$_sdl" = yes ; then
     pkg_config_add 'sdl' && _sdl=yes
   fi
   if test "$_sdl" = yes ; then
