@@ -2033,15 +2033,20 @@ static bool obj_setting_equals(m_obj_settings_t *a, m_obj_settings_t *b)
 {
     if (strcmp(a->name, b->name) != 0)
         return false;
-    for (int n = 0; ; n += 2) {
-        if (!a->attribs[n] && !b->attribs[n])
-            return true;
-        if (!a->attribs[n] || !b->attribs[n])
-            return false;
+
+    int a_attr_count = 0;
+    while (a->attribs && a->attribs[a_attr_count])
+        a_attr_count++;
+    int b_attr_count = 0;
+    while (b->attribs && b->attribs[b_attr_count])
+        b_attr_count++;
+    if (a_attr_count != b_attr_count)
+        return false;
+    for (int n = 0; n < a_attr_count; n++) {
         if (strcmp(a->attribs[n], b->attribs[n]) != 0)
             return false;
     }
-    abort();
+    return true;
 }
 
 static int obj_settings_list_del(struct bstr opt_name, struct bstr param,
