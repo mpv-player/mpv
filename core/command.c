@@ -2461,6 +2461,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         } else {
             mp_msg(MSGT_CPLAYER, MSGL_WARN, "[lua] Lua not available.\n");
         }
+        break;
+
     case MP_CMD_VF:
         change_video_filters(mpctx, cmd->args[0].v.s, cmd->args[1].v.s);
         break;
