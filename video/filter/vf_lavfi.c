@@ -177,13 +177,9 @@ static bool recreate_graph(struct vf_instance *vf, int width, int height,
 
     outputs->name    = av_strdup("in");
     outputs->filter_ctx = in;
-    outputs->pad_idx = 0;
-    outputs->next    = NULL;
 
     inputs->name    = av_strdup("out");
     inputs->filter_ctx = f_format;
-    inputs->pad_idx = 0;
-    inputs->next    = NULL;
 
     if (graph_parse(graph, p->cfg_graph, inputs, outputs, NULL) < 0)
         goto error;
