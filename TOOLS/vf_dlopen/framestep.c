@@ -50,6 +50,8 @@ static int framestep_put_image(struct vf_dlopen_context *ctx)
     framestep_data_t *framestep = ctx->priv;
 
     // stepping
+    if (framestep->pos < 0)
+        return 0;
     --framestep->pos;
     if (framestep->pos >= 0)
         return 0;
