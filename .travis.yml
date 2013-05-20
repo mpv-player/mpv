@@ -16,7 +16,7 @@ script: ./configure && make
 
 notifications-policy: &notifications-policy
   on_success: change
-  n_failure: always
+  on_failure: always
 
 notifications:
   email:
