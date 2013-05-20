@@ -2047,8 +2047,9 @@ static bool obj_setting_equals(m_obj_settings_t *a, m_obj_settings_t *b)
 static int obj_settings_list_del(struct bstr opt_name, struct bstr param,
                                  void *dst)
 {
-    m_obj_settings_t *obj_list = dst ? VAL(dst) : NULL;
-    int r = 1;
+    if (!dst)
+        return 1; // for profiles; pretend all is ok
+    m_obj_settings_t *obj_list = VAL(dst);
 
     if (dst && !obj_list) {
         mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %.*s: the list is empty.\n",
@@ -2103,7 +2104,7 @@ static int obj_settings_list_del(struct bstr opt_name, struct bstr param,
     }
 
     talloc_free(mark_del);
-    return r;
+    return 1;
 }
 
 static void free_obj_settings_list(void *dst)
