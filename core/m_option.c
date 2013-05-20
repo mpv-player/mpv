@@ -75,9 +75,9 @@ static const struct m_option *m_option_list_findb(const struct m_option *list,
         if ((list[i].type->flags & M_OPT_TYPE_ALLOW_WILDCARD)
                 && bstr_endswith0(lname, "*")) {
             lname.len--;
-            if (bstrcasecmp(bstr_splice(name, 0, lname.len), lname) == 0)
+            if (bstrcmp(bstr_splice(name, 0, lname.len), lname) == 0)
                 return &list[i];
-        } else if (bstrcasecmp(lname, name) == 0)
+        } else if (bstrcmp(lname, name) == 0)
             return &list[i];
     }
     return NULL;
@@ -112,12 +112,12 @@ static int parse_flag(const m_option_t *opt, struct bstr name,
                       struct bstr param, void *dst)
 {
     if (param.len) {
-        if (!bstrcasecmp0(param, "yes")) {
+        if (!bstrcmp0(param, "yes")) {
             if (dst)
                 VAL(dst) = opt->max;
             return 1;
         }
-        if (!bstrcasecmp0(param, "no")) {
+        if (!bstrcmp0(param, "no")) {
             if (dst)
                 VAL(dst) = opt->min;
             return 1;
@@ -167,7 +167,7 @@ const m_option_type_t m_option_type_flag = {
 static int parse_store(const m_option_t *opt, struct bstr name,
                        struct bstr param, void *dst)
 {
-    if (param.len == 0 || bstrcasecmp0(param, "yes") == 0) {
+    if (param.len == 0 || bstrcmp0(param, "yes") == 0) {
         if (dst)
             VAL(dst) = opt->max;
         return 0;
@@ -195,7 +195,7 @@ const m_option_type_t m_option_type_store = {
 static int parse_store_float(const m_option_t *opt, struct bstr name,
                              struct bstr param, void *dst)
 {
-    if (param.len == 0 || bstrcasecmp0(param, "yes") == 0) {
+    if (param.len == 0 || bstrcmp0(param, "yes") == 0) {
         if (dst)
             VAL(dst) = opt->max;
         return 0;
@@ -426,7 +426,7 @@ static int parse_choice(const struct m_option *opt, struct bstr name,
 {
     struct m_opt_choice_alternatives *alt = opt->priv;
     for ( ; alt->name; alt++)
-        if (!bstrcasecmp0(param, alt->name))
+        if (!bstrcmp0(param, alt->name))
             break;
     if (!alt->name) {
         if (param.len == 0)
@@ -843,6 +843,7 @@ const m_option_type_t m_option_type_string = {
 #define OP_PRE 2
 #define OP_DEL 3
 #define OP_CLR 4
+#define OP_TOGGLE 5
 
 static void free_str_list(void *dst)
 {
@@ -968,13 +969,13 @@ static int parse_str_list(const m_option_t *opt, struct bstr name,
     int len = strlen(opt->name);
     if (opt->name[len - 1] == '*' && (name.len > len - 1)) {
         struct bstr suffix = bstr_cut(name, len - 1);
-        if (bstrcasecmp0(suffix, "-add") == 0)
+        if (bstrcmp0(suffix, "-add") == 0)
             op = OP_ADD;
-        else if (bstrcasecmp0(suffix, "-pre") == 0)
+        else if (bstrcmp0(suffix, "-pre") == 0)
             op = OP_PRE;
-        else if (bstrcasecmp0(suffix, "-del") == 0)
+        else if (bstrcmp0(suffix, "-del") == 0)
             op = OP_DEL;
-        else if (bstrcasecmp0(suffix, "-clr") == 0)
+        else if (bstrcmp0(suffix, "-clr") == 0)
             op = OP_CLR;
         else
             return M_OPT_UNKNOWN;
@@ -1635,7 +1636,8 @@ static int parse_chmap(const m_option_t *opt, struct bstr name,
         return M_OPT_INVALID;
     }
 
-    *(struct mp_chmap *)dst = res;
+    if (dst)
+        *(struct mp_chmap *)dst = res;
 
     return 1;
 }
@@ -1986,76 +1988,122 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
     return 1;
 }
 
+static int obj_settings_list_num_items(m_obj_settings_t *obj_list)
+{
+    int num = 0;
+    while (obj_list && obj_list[num].name)
+        num++;
+    return num;
+}
+
+static void obj_settings_free_item(m_obj_settings_t *item)
+{
+    talloc_free(item->name);
+    free_str_list(&(item->attribs));
+}
+
+static void del_obj_settings_list_at(m_obj_settings_t **p_obj_list, int idx)
+{
+    m_obj_settings_t *obj_list = *p_obj_list;
+    int num = obj_settings_list_num_items(obj_list);
+
+    assert(idx >= 0 && idx < num);
+
+    obj_settings_free_item(&obj_list[idx]);
+
+    // Note: the NULL-terminating element is moved down as part of this
+    memmove(&obj_list[idx], &obj_list[idx + 1],
+            sizeof(m_obj_settings_t) * (num - idx));
+
+    *p_obj_list = talloc_realloc(NULL, obj_list, struct m_obj_settings, num);
+}
+
+// memory referenced by *item is not copied
+static void append_obj_settings_list(m_obj_settings_t **p_obj_list,
+                                     m_obj_settings_t *item)
+{
+    int num = obj_settings_list_num_items(*p_obj_list);
+    *p_obj_list = talloc_realloc(NULL, *p_obj_list, struct m_obj_settings,
+                                 num + 2);
+    (*p_obj_list)[num] = *item;
+    (*p_obj_list)[num + 1] = (m_obj_settings_t){0};
+}
+
+static bool obj_setting_equals(m_obj_settings_t *a, m_obj_settings_t *b)
+{
+    if (strcmp(a->name, b->name) != 0)
+        return false;
+    for (int n = 0; ; n += 2) {
+        if (!a->attribs[n] && !b->attribs[n])
+            return true;
+        if (!a->attribs[n] || !b->attribs[n])
+            return false;
+        if (strcmp(a->attribs[n], b->attribs[n]) != 0)
+            return false;
+    }
+    abort();
+}
+
 static int obj_settings_list_del(struct bstr opt_name, struct bstr param,
                                  void *dst)
 {
-    char **str_list = NULL;
-    int r, i, idx_max = 0;
-    char *rem_id = "_removed_marker_";
-    char name[100];
-    assert(opt_name.len < 100);
-    memcpy(name, opt_name.start, opt_name.len);
-    name[opt_name.len] = 0;
-    const m_option_t list_opt = {
-        name, NULL, CONF_TYPE_STRING_LIST,
-        0, 0, 0, NULL
-    };
     m_obj_settings_t *obj_list = dst ? VAL(dst) : NULL;
+    int r = 1;
 
     if (dst && !obj_list) {
         mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %.*s: the list is empty.\n",
                BSTR_P(opt_name));
         return 1;
-    } else if (obj_list) {
-        for (idx_max = 0; obj_list[idx_max].name != NULL; idx_max++)
-            /* NOP */;
     }
 
-    r = m_option_parse(&list_opt, opt_name, param, &str_list);
-    if (r < 0 || !str_list)
-        return r;
+    int idx_max = obj_settings_list_num_items(obj_list);
+    bool *mark_del = talloc_zero_array(NULL, bool, idx_max);
 
-    for (r = 0; str_list[r]; r++) {
-        int id;
-        char *endptr;
-        id = strtol(str_list[r], &endptr, 0);
-        if (endptr == str_list[r]) {
-            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: invalid parameter. We need a list of integers which are the indices of the elements to remove.\n", BSTR_P(opt_name));
-            m_option_free(&list_opt, &str_list);
-            return M_OPT_INVALID;
+    while (param.len) {
+        bstr item;
+        bstr_split_tok(param, ",", &item, &param);
+
+        for (int n = 0; n < idx_max; n++) {
+            if (!mark_del[n] && bstr_equals0(item, obj_list[n].name)) {
+                mark_del[n] = true;
+                goto found;
+            }
         }
-        if (!obj_list)
-            continue;
-        if (id >= idx_max || id < -idx_max) {
+
+        bstr rest;
+        long long id = bstrtoll(item, &rest, 0);
+        if (rest.len == item.len) {
             mp_msg(MSGT_CFGPARSER, MSGL_WARN,
-                   "Option %.*s: Index %d is out of range.\n",
+                   "Option %.*s: item %.*s not found.\n",
+                   BSTR_P(opt_name), BSTR_P(item));
+            continue;
+        }
+
+        if (id < 0)
+            id = idx_max + id;
+
+        if (id < 0 || id >= idx_max) {
+            mp_msg(MSGT_CFGPARSER, MSGL_WARN,
+                   "Option %.*s: Index %lld is out of range.\n",
                    BSTR_P(opt_name), id);
             continue;
         }
-        if (id < 0)
-            id = idx_max + id;
-        talloc_free(obj_list[id].name);
-        free_str_list(&(obj_list[id].attribs));
-        obj_list[id].name = rem_id;
+
+        mark_del[id] = true;
+
+    found: ;
     }
 
-    if (!dst) {
-        m_option_free(&list_opt, &str_list);
-        return 1;
-    }
-
-    for (i = 0; obj_list[i].name; i++) {
-        while (obj_list[i].name == rem_id) {
-            memmove(&obj_list[i], &obj_list[i + 1],
-                    sizeof(m_obj_settings_t) * (idx_max - i));
-            idx_max--;
+    if (dst) {
+        for (int n = idx_max - 1; n >= 0; n--) {
+            if (mark_del[n])
+                del_obj_settings_list_at(&obj_list, n);
         }
+        VAL(dst) = obj_list;
     }
-    obj_list = talloc_realloc(NULL, obj_list, struct m_obj_settings,
-                              idx_max + 1);
-    VAL(dst) = obj_list;
 
-    return 1;
+    talloc_free(mark_del);
+    return r;
 }
 
 static void free_obj_settings_list(void *dst)
@@ -2067,10 +2115,8 @@ static void free_obj_settings_list(void *dst)
         return;
 
     d = VAL(dst);
-    for (n = 0; d[n].name; n++) {
-        talloc_free(d[n].name);
-        free_str_list(&(d[n].attribs));
-    }
+    for (n = 0; d[n].name; n++)
+        obj_settings_free_item(&d[n]);
     talloc_free(d);
     VAL(dst) = NULL;
 }
@@ -2079,23 +2125,25 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
                                    struct bstr param, void *dst)
 {
     int len = strlen(opt->name);
-    m_obj_settings_t *res = NULL, *queue = NULL, *head = NULL;
+    m_obj_settings_t *res = NULL;
     int op = OP_NONE;
 
-    // We need the objects list
-    if (!opt->priv)
-        return M_OPT_INVALID;
+    assert(opt->priv);
 
     if (opt->name[len - 1] == '*' && (name.len > len - 1)) {
         struct bstr suffix = bstr_cut(name, len - 1);
-        if (bstrcasecmp0(suffix, "-add") == 0)
+        if (bstrcmp0(suffix, "-add") == 0)
             op = OP_ADD;
-        else if (bstrcasecmp0(suffix, "-pre") == 0)
+        else if (bstrcmp0(suffix, "-set") == 0)
+            op = OP_NONE;
+        else if (bstrcmp0(suffix, "-pre") == 0)
             op = OP_PRE;
-        else if (bstrcasecmp0(suffix, "-del") == 0)
+        else if (bstrcmp0(suffix, "-del") == 0)
             op = OP_DEL;
-        else if (bstrcasecmp0(suffix, "-clr") == 0)
+        else if (bstrcmp0(suffix, "-clr") == 0)
             op = OP_CLR;
+        else if (bstrcmp0(suffix, "-toggle") == 0)
+            op = OP_TOGGLE;
         else {
             char prefix[len];
             strncpy(prefix, opt->name, len - 1);
@@ -2103,49 +2151,30 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
             mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                    "Option %.*s: unknown postfix %.*s\n"
                    "Supported postfixes are:\n"
+                   "  %s-set\n"
+                   " Overwrite the old list with the given list\n\n"
                    "  %s-add\n"
                    " Append the given list to the current list\n\n"
                    "  %s-pre\n"
                    " Prepend the given list to the current list\n\n"
                    "  %s-del x,y,...\n"
                    " Remove the given elements. Take the list element index (starting from 0).\n"
-                   " Negative index can be used (i.e. -1 is the last element)\n\n"
+                   " Negative index can be used (i.e. -1 is the last element).\n"
+                   " Filter names work as well.\n\n"
                    "  %s-clr\n"
                    " Clear the current list.\n",
-                   BSTR_P(name), BSTR_P(suffix), prefix, prefix, prefix, prefix);
+                   BSTR_P(name), BSTR_P(suffix), prefix, prefix, prefix, prefix, prefix);
 
             return M_OPT_UNKNOWN;
         }
     }
 
-    // Clear the list ??
     if (op == OP_CLR) {
         if (dst)
             free_obj_settings_list(dst);
         return 0;
-    }
-
-    if (param.len == 0)
-        return M_OPT_MISSING_PARAM;
-
-    switch (op) {
-    case OP_ADD:
-        if (dst)
-            head = VAL(dst);
-        break;
-    case OP_PRE:
-        if (dst)
-            queue = VAL(dst);
-        break;
-    case OP_DEL:
+    } else if (op == OP_DEL) {
         return obj_settings_list_del(name, param, dst);
-    case OP_NONE:
-        if (dst && VAL(dst))
-            free_obj_settings_list(dst);
-        break;
-    default:
-        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: FIXME\n", BSTR_P(name));
-        return M_OPT_UNKNOWN;
     }
 
     if (!bstrcmp0(param, "help")) {
@@ -2159,43 +2188,60 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
         return M_OPT_EXIT - 1;
     }
 
-    int n = 0;
+    if (op == OP_NONE) {
+        if (dst && VAL(dst))
+            free_obj_settings_list(dst);
+    }
+
+    int num = 0;
     while (param.len > 0) {
-        int r = parse_obj_settings(name, &param, opt->priv, dst ? &res : NULL, n);
+        int r = parse_obj_settings(name, &param, opt->priv,
+                                   dst ? &res : NULL, num);
         if (r < 0)
             return r;
-        char sep[2] = {OPTION_LIST_SEPARATOR, 0};
+        const char sep[2] = {OPTION_LIST_SEPARATOR, 0};
         if (param.len > 0 && !bstr_eatstart0(&param, sep))
             return M_OPT_INVALID;
-        n++;
+        num++;
     }
-    if (n == 0)
-        return M_OPT_INVALID;
 
-    if (((opt->flags & M_OPT_MIN) && (n < opt->min)) ||
-        ((opt->flags & M_OPT_MAX) && (n > opt->max)))
-        return M_OPT_OUT_OF_RANGE;
+    if (op != OP_NONE && num == 0)
+        return M_OPT_MISSING_PARAM;
 
     if (dst) {
-        if (queue) {
-            int qsize;
-            for (qsize = 0; queue[qsize].name; qsize++)
-                /* NOP */;
+        m_obj_settings_t *list = VAL(dst);
+        if (op == OP_PRE) {
+            int qsize = obj_settings_list_num_items(list);
             res = talloc_realloc(NULL, res, struct m_obj_settings,
-                                 qsize + n + 1);
-            memcpy(&res[n], queue, (qsize + 1) * sizeof(m_obj_settings_t));
-            n += qsize;
-            talloc_free(queue);
-        }
-        if (head) {
-            int hsize;
-            for (hsize = 0; head[hsize].name; hsize++)
-                /* NOP */;
-            head = talloc_realloc(NULL, head, struct m_obj_settings,
-                                  hsize + n + 1);
-            memcpy(&head[hsize], res, (n + 1) * sizeof(m_obj_settings_t));
+                                 qsize + num + 1);
+            memcpy(&res[num], list, (qsize + 1) * sizeof(m_obj_settings_t));
+            talloc_free(list);
+        } else if (op == OP_ADD) {
+            m_obj_settings_t *list = VAL(dst);
+            int hsize = obj_settings_list_num_items(list);
+            list = talloc_realloc(NULL, list, struct m_obj_settings,
+                                  hsize + num + 1);
+            memcpy(&list[hsize], res, (num + 1) * sizeof(m_obj_settings_t));
             talloc_free(res);
-            res = head;
+            res = list;
+        } else if (op == OP_TOGGLE) {
+            for (int n = 0; res && res[n].name; n++) {
+                int found = -1;
+                for (int i = 0; list && list[i].name; i++) {
+                    if (obj_setting_equals(&list[i], &res[n])) {
+                        found = i;
+                        break;
+                    }
+                }
+                if (found < 0) {
+                    append_obj_settings_list(&list, &res[n]);
+                } else {
+                    del_obj_settings_list_at(&list, found);
+                    obj_settings_free_item(&res[n]);
+                }
+            }
+            talloc_free(res);
+            res = list;
         }
         VAL(dst) = res;
     }

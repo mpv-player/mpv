@@ -394,15 +394,9 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
     return 0;
 }
 
-static void uninit(vf_instance_t *vf)
-{
-    free(vf->priv);
-}
-
 static int vf_open(vf_instance_t *vf, char *args)
 {
     vf->config          = config;
-    vf->uninit          = uninit;
     vf->filter          = filter;
     vf->query_format    = query_format;
 

@@ -357,6 +357,9 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] | + duration: %.3fs\n",
                mkv_d->duration);
     }
+    if (info.n_title) {
+        demux_info_add_bstr(demuxer, bstr0("title"), info.title);
+    }
     if (info.n_segment_uid) {
         int len = info.segment_uid.len;
         if (len != sizeof(demuxer->matroska_data.segment_uid)) {

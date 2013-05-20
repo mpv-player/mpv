@@ -163,11 +163,14 @@ static int mp_property_media_title(m_option_t *prop, int action, void *arg,
     char *name = NULL;
     if (mpctx->resolve_result)
         name = mpctx->resolve_result->title;
-    if (name && name[0]) {
+    if (name && name[0])
         return m_property_strdup_ro(prop, action, arg, name);
-    } else {
-        return mp_property_filename(prop, action, arg, mpctx);
+    if (mpctx->master_demuxer) {
+        name = demux_info_get(mpctx->master_demuxer, "title");
+        if (name && name[0])
+            return m_property_strdup_ro(prop, action, arg, name);
     }
+    return mp_property_filename(prop, action, arg, mpctx);
 }
 
 static int mp_property_stream_path(m_option_t *prop, int action, void *arg,
@@ -1288,7 +1291,7 @@ static int mp_property_aspect(m_option_t *prop, int action, void *arg,
         if (f < 0.1)
             f = (float)mpctx->sh_video->disp_w / mpctx->sh_video->disp_h;
         mpctx->opts.movie_aspect = f;
-        video_reset_aspect(mpctx->sh_video);
+        video_reinit_vo(mpctx->sh_video);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET:
@@ -1298,16 +1301,16 @@ static int mp_property_aspect(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-// For subtitle related properties using the generic option bridge.
+// For OSD and subtitle related properties using the generic option bridge.
 // - Fail as unavailable if no video is active
 // - Trigger OSD state update when property is set
-static int property_sub_helper(m_option_t *prop, int action, void *arg,
+static int property_osd_helper(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_SET)
-        osd_subs_changed(mpctx->osd);
+        osd_changed_all(mpctx->osd);
     return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
@@ -1341,7 +1344,7 @@ static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
         *(char **)arg = talloc_asprintf(NULL, "%d/100", sub_pos);
         return M_PROPERTY_OK;
     }
-    return property_sub_helper(prop, action, arg, mpctx);
+    return property_osd_helper(prop, action, arg, mpctx);
 }
 
 /// Subtitle visibility (RW)
@@ -1506,6 +1509,7 @@ static int mp_property_alias(m_option_t *prop, int action, void *arg,
 static const m_option_t mp_properties[] = {
     // General
     M_OPTION_PROPERTY("osd-level"),
+    M_OPTION_PROPERTY_CUSTOM("osd-scale", property_osd_helper),
     M_OPTION_PROPERTY("loop"),
     M_OPTION_PROPERTY_CUSTOM("speed", mp_property_playback_speed),
     { "filename", mp_property_filename, CONF_TYPE_STRING,
@@ -1632,11 +1636,11 @@ static const m_option_t mp_properties[] = {
     { "sub-visibility", mp_property_sub_visibility, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
     M_OPTION_PROPERTY_CUSTOM("sub-forced-only", mp_property_sub_forced_only),
-    M_OPTION_PROPERTY_CUSTOM("sub-scale", property_sub_helper),
+    M_OPTION_PROPERTY_CUSTOM("sub-scale", property_osd_helper),
 #ifdef CONFIG_ASS
-    M_OPTION_PROPERTY_CUSTOM("ass-use-margins", property_sub_helper),
-    M_OPTION_PROPERTY_CUSTOM("ass-vsfilter-aspect-compat", property_sub_helper),
-    M_OPTION_PROPERTY_CUSTOM("ass-style-override", property_sub_helper),
+    M_OPTION_PROPERTY_CUSTOM("ass-use-margins", property_osd_helper),
+    M_OPTION_PROPERTY_CUSTOM("ass-vsfilter-aspect-compat", property_osd_helper),
+    M_OPTION_PROPERTY_CUSTOM("ass-style-override", property_osd_helper),
 #endif
 
 #ifdef CONFIG_TV
@@ -1835,6 +1839,70 @@ static const char *property_error_string(int error_value)
     return "UNKNOWN";
 }
 
+static void show_chapters_on_osd(MPContext *mpctx)
+{
+    int count = get_chapter_count(mpctx);
+    int cur = mpctx->num_sources ? get_current_chapter(mpctx) : -1;
+    char *res = NULL;
+    int n;
+
+    if (count < 1) {
+        res = talloc_asprintf_append(res, "No chapters.");
+    }
+
+    for (n = 0; n < count; n++) {
+        char *name = chapter_display_name(mpctx, n);
+        double t = chapter_start_time(mpctx, n);
+        char* time = mp_format_time(t, false);
+        res = talloc_asprintf_append(res, "%s", time);
+        talloc_free(time);
+        char *m1 = "> ", *m2 = " <";
+        if (n != cur)
+            m1 = m2 = "";
+        res = talloc_asprintf_append(res, "   %s%s%s\n", m1, name, m2);
+        talloc_free(name);
+    }
+
+    set_osd_msg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts.osd_duration, "%s", res);
+    talloc_free(res);
+}
+
+static void change_video_filters(MPContext *mpctx, const char *cmd,
+                                 const char *arg)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    struct m_config *conf = mpctx->mconfig;
+    struct m_obj_settings *old_vf_settings = NULL;
+    bool success = false;
+    bool need_refresh = false;
+    double refresh_pts = mpctx->last_vo_pts;
+
+    // The option parser is used to modify the filter list itself.
+    char optname[20];
+    snprintf(optname, sizeof(optname), "vf-%s", cmd);
+    const struct m_option *type = m_config_get_option(conf, bstr0(optname));
+
+    // Backup old settings, in case it fails
+    m_option_copy(type, &old_vf_settings, &opts->vf_settings);
+
+    if (m_config_set_option0(conf, optname, arg) >= 0) {
+        need_refresh = true;
+        success = reinit_video_filters(mpctx) >= 0;
+    }
+
+    if (!success) {
+        m_option_copy(type, &opts->vf_settings, &old_vf_settings);
+        if (need_refresh)
+            reinit_video_filters(mpctx);
+    }
+    m_option_free(type, &old_vf_settings);
+
+    // Try to refresh the video by doing a precise seek to the currently
+    // displayed frame.
+    if (need_refresh && opts->pause)
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, refresh_pts, 1);
+}
+
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -1845,6 +1913,19 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     bool msg_osd = auto_osd || (cmd->on_osd & MP_ON_OSD_MSG);
     bool bar_osd = auto_osd || (cmd->on_osd & MP_ON_OSD_BAR);
     int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
+
+    if (!cmd->raw_args) {
+        for (int n = 0; n < cmd->nargs; n++) {
+            if (cmd->args[n].type.type == CONF_TYPE_STRING) {
+                cmd->args[n].v.s =
+                    mp_property_expand_string(mpctx, cmd->args[n].v.s);
+                if (!cmd->args[n].v.s)
+                    return;
+                talloc_steal(cmd, cmd->args[n].v.s);
+            }
+        }
+    }
+
     switch (cmd->id) {
     case MP_CMD_SEEK: {
         double v = cmd->args[0].v.d;
@@ -2009,23 +2090,15 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_PRINT_TEXT: {
-        char *txt = mp_property_expand_string(mpctx, cmd->args[0].v.s);
-        if (txt) {
-            mp_msg(MSGT_GLOBAL, MSGL_INFO, "%s\n", txt);
-            talloc_free(txt);
-        }
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "%s\n", cmd->args[0].v.s);
         break;
     }
 
     case MP_CMD_SHOW_TEXT: {
-        char *txt = mp_property_expand_string(mpctx, cmd->args[0].v.s);
-        if (txt) {
-            // if no argument supplied use default osd_duration, else <arg> ms.
-            set_osd_msg(mpctx, OSD_MSG_TEXT, cmd->args[2].v.i,
-                        (cmd->args[1].v.i < 0 ? osd_duration : cmd->args[1].v.i),
-                        "%s", txt);
-            talloc_free(txt);
-        }
+        // if no argument supplied use default osd_duration, else <arg> ms.
+        set_osd_msg(mpctx, OSD_MSG_TEXT, cmd->args[2].v.i,
+                    (cmd->args[1].v.i < 0 ? osd_duration : cmd->args[1].v.i),
+                    "%s", cmd->args[0].v.s);
         break;
     }
 
@@ -2308,11 +2381,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_RUN:
 #ifndef __MINGW32__
         if (!fork()) {
-            char *s = mp_property_expand_string(mpctx, cmd->args[0].v.s);
-            if (s) {
-                execl("/bin/sh", "sh", "-c", s, NULL);
-                talloc_free(s);
-            }
+            execl("/bin/sh", "sh", "-c", cmd->args[0].v.s, NULL);
             exit(0);
         }
 #endif
@@ -2340,6 +2409,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             af_uninit(mpctx->mixer.afilter);
             af_init(mpctx->mixer.afilter);
         }
+        /* fallthrough */
     case MP_CMD_AF_ADD:
     case MP_CMD_AF_DEL: {
         if (!sh_audio)
@@ -2391,6 +2461,11 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         } else {
             mp_msg(MSGT_CPLAYER, MSGL_WARN, "[lua] Lua not available.\n");
         }
+    case MP_CMD_VF:
+        change_video_filters(mpctx, cmd->args[0].v.s, cmd->args[1].v.s);
+        break;
+    case MP_CMD_SHOW_CHAPTERS:
+        show_chapters_on_osd(mpctx);
         break;
 
     case MP_CMD_MOUSE_CLICK:

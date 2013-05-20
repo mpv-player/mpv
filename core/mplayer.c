@@ -2472,6 +2472,39 @@ static void update_fps(struct MPContext *mpctx)
 #endif
 }
 
+static void recreate_video_filters(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    struct sh_video *sh_video = mpctx->sh_video;
+    assert(sh_video);
+
+    vf_uninit_filter_chain(sh_video->vfilter);
+
+    char *vf_arg[] = {
+        "_oldargs_", (char *)mpctx->video_out, NULL
+    };
+    sh_video->vfilter = vf_open_filter(opts, NULL, "vo", vf_arg);
+
+    sh_video->vfilter = append_filters(sh_video->vfilter, opts->vf_settings);
+
+    struct vf_instance *vf = sh_video->vfilter;
+    mpctx->osd->render_subs_in_filter
+        = vf->control(vf, VFCTRL_INIT_OSD, NULL) == VO_TRUE;
+}
+
+int reinit_video_filters(struct MPContext *mpctx)
+{
+    struct sh_video *sh_video = mpctx->sh_video;
+
+    if (!sh_video)
+        return -2;
+
+    recreate_video_filters(mpctx);
+    video_reinit_vo(sh_video);
+
+    return sh_video->vf_initialized > 0 ? 0 : -1;
+}
+
 int reinit_video_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -2524,18 +2557,7 @@ int reinit_video_chain(struct MPContext *mpctx)
                        STREAM_CTRL_GET_ASPECT_RATIO, &ar) != STREAM_UNSUPPORTED)
         mpctx->sh_video->stream_aspect = ar;
 
-    {
-        char *vf_arg[] = {
-            "_oldargs_", (char *)mpctx->video_out, NULL
-        };
-        sh_video->vfilter = vf_open_filter(opts, NULL, "vo", vf_arg);
-    }
-
-    sh_video->vfilter = append_filters(sh_video->vfilter, opts->vf_settings);
-
-    struct vf_instance *vf = sh_video->vfilter;
-    mpctx->osd->render_subs_in_filter
-        = vf->control(vf, VFCTRL_INIT_OSD, NULL) == VO_TRUE;
+    recreate_video_filters(mpctx);
 
     init_best_video_codec(sh_video, opts->video_decoders);
 
@@ -4576,6 +4598,13 @@ static void print_version(int always)
            "%s (C) 2000-2013 mpv/MPlayer/mplayer2 projects\n built on %s\n", mplayer_version, mplayer_builddate);
 }
 
+static int print_version_opt(const m_option_t *opt, const char *name,
+                             const char *param)
+{
+    print_version(true);
+    exit(0);
+}
+
 static bool handle_help_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -4714,16 +4743,20 @@ static int mpv_main(int argc, char *argv[])
     print_libav_versions();
 
     if (!parse_cfgfiles(mpctx, mpctx->mconfig))
-        exit_player(mpctx, EXIT_NONE, 1);
-
-    if (!m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
-                                        argc, argv))
-    {
         exit_player(mpctx, EXIT_ERROR, 1);
+
+    int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
+                                           argc, argv);
+    if (r < 0) {
+        if (r <= M_OPT_EXIT) {
+            exit_player(mpctx, EXIT_NONE, 0);
+        } else {
+            exit_player(mpctx, EXIT_ERROR, 1);
+        }
     }
 
     if (handle_help_options(mpctx))
-        exit_player(mpctx, EXIT_NONE, 1);
+        exit_player(mpctx, EXIT_NONE, 0);
 
     mp_msg(MSGT_CPLAYER, MSGL_V, "Configuration: " CONFIGURATION "\n");
     mp_tmsg(MSGT_CPLAYER, MSGL_V, "Command line:");
@@ -4782,9 +4815,9 @@ static int mpv_main(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
 #ifdef CONFIG_COCOA
-    cocoa_main(mpv_main, argc, argv);
+    return cocoa_main(mpv_main, argc, argv);
 #else
-    mpv_main(argc, argv);
+    return mpv_main(argc, argv);
 #endif
 }
 

@@ -162,9 +162,9 @@ void resync_video_stream(sh_video_t *sh_video)
     sh_video->prev_sorted_pts = MP_NOPTS_VALUE;
 }
 
-void video_reset_aspect(struct sh_video *sh_video)
+void video_reinit_vo(struct sh_video *sh_video)
 {
-    sh_video->vd_driver->control(sh_video, VDCTRL_RESET_ASPECT, NULL);
+    sh_video->vd_driver->control(sh_video, VDCTRL_REINIT_VO, NULL);
 }
 
 int get_current_video_decoder_lag(sh_video_t *sh_video)
@@ -184,6 +184,7 @@ void uninit_video(sh_video_t *sh_video)
     mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Uninit video.\n");
     sh_video->vd_driver->uninit(sh_video);
     vf_uninit_filter_chain(sh_video->vfilter);
+    sh_video->vfilter = NULL;
     talloc_free(sh_video->gsh->decoder_desc);
     sh_video->gsh->decoder_desc = NULL;
     sh_video->initialized = 0;

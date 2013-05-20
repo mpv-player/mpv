@@ -506,7 +506,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
 
 static void uninit(struct vf_instance *vf){
     if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
-    free(vf->priv);
 }
 
 static int vf_open(vf_instance_t *vf, char *args){

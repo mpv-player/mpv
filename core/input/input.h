@@ -77,6 +77,13 @@ enum mp_command_type {
     MP_CMD_AF_CLR,
     MP_CMD_AF_CMDLINE,
 
+    /// Video filter commands
+    MP_CMD_VF,
+
+    MP_CMD_SHOW_CHAPTERS,
+    MP_CMD_SHOW_TRACKS,
+    MP_CMD_SHOW_PLAYLIST,
+
     /// Video output commands
     MP_CMD_VO_CMDLINE,
 
@@ -135,6 +142,7 @@ typedef struct mp_cmd {
     struct mp_cmd_arg args[MP_CMD_MAX_ARGS];
     int nargs;
     int pausing;
+    bool raw_args;
     enum mp_on_osd on_osd;
     bstr original;
     bool key_up_follows;

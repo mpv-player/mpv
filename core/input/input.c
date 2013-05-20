@@ -196,6 +196,12 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_AF_CLR, "af_clr", },
   { MP_CMD_AF_CMDLINE, "af_cmdline", { ARG_STRING, ARG_STRING } },
 
+  { MP_CMD_VF, "vf", { ARG_STRING, ARG_STRING } },
+
+  { MP_CMD_SHOW_CHAPTERS, "show_chapters", },
+  { MP_CMD_SHOW_TRACKS, "show_tracks", },
+  { MP_CMD_SHOW_PLAYLIST, "show_playlist", },
+
   { MP_CMD_VO_CMDLINE, "vo_cmdline", { ARG_STRING } },
 
   { MP_CMD_LUA, "lua", { ARG_STRING } },
@@ -794,19 +800,10 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
 {
     int pausing = 0;
     int on_osd = MP_ON_OSD_AUTO;
+    bool raw_args = false;
     struct mp_cmd *cmd = NULL;
     bstr start = str;
     void *tmp = talloc_new(NULL);
-
-    if (eat_token(&str, "pausing")) {
-        pausing = 1;
-    } else if (eat_token(&str, "pausing_keep")) {
-        pausing = 2;
-    } else if (eat_token(&str, "pausing_toggle")) {
-        pausing = 3;
-    } else if (eat_token(&str, "pausing_keep_force")) {
-        pausing = 4;
-    }
 
     str = bstr_lstrip(str);
     for (const struct legacy_cmd *entry = legacy_cmds; entry->old; entry++) {
@@ -824,16 +821,32 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
         }
     }
 
-    if (eat_token(&str, "no-osd")) {
-        on_osd = MP_ON_OSD_NO;
-    } else if (eat_token(&str, "osd-bar")) {
-        on_osd = MP_ON_OSD_BAR;
-    } else if (eat_token(&str, "osd-msg")) {
-        on_osd = MP_ON_OSD_MSG;
-    } else if (eat_token(&str, "osd-msg-bar")) {
-        on_osd = MP_ON_OSD_MSG | MP_ON_OSD_BAR;
-    } else if (eat_token(&str, "osd-auto")) {
-        // default
+    while (1) {
+        if (eat_token(&str, "pausing")) {
+            pausing = 1;
+        } else if (eat_token(&str, "pausing_keep")) {
+            pausing = 2;
+        } else if (eat_token(&str, "pausing_toggle")) {
+            pausing = 3;
+        } else if (eat_token(&str, "pausing_keep_force")) {
+            pausing = 4;
+        } else if (eat_token(&str, "no-osd")) {
+            on_osd = MP_ON_OSD_NO;
+        } else if (eat_token(&str, "osd-bar")) {
+            on_osd = MP_ON_OSD_BAR;
+        } else if (eat_token(&str, "osd-msg")) {
+            on_osd = MP_ON_OSD_MSG;
+        } else if (eat_token(&str, "osd-msg-bar")) {
+            on_osd = MP_ON_OSD_MSG | MP_ON_OSD_BAR;
+        } else if (eat_token(&str, "osd-auto")) {
+            // default
+        } else if (eat_token(&str, "raw")) {
+            raw_args = true;
+        } else if (eat_token(&str, "expand-properties")) {
+            // default
+        } else {
+            break;
+        }
     }
 
     int cmd_idx = 0;
@@ -853,6 +866,7 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
     *cmd = mp_cmds[cmd_idx];
     cmd->pausing = pausing;
     cmd->on_osd = on_osd;
+    cmd->raw_args = raw_args;
 
     for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
         struct mp_cmd_arg *cmdarg = &cmd->args[i];
@@ -861,9 +875,7 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
         cmd->nargs++;
         str = bstr_lstrip(str);
         bstr arg = {0};
-        if (cmdarg->type.type == &m_option_type_string &&
-            bstr_eatstart0(&str, "\""))
-        {
+        if (bstr_eatstart0(&str, "\"")) {
             if (!read_escaped_string(tmp, &str, &arg)) {
                 mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
                         "has broken string escapes.\n", cmd->name, i + 1);

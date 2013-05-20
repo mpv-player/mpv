@@ -501,6 +501,9 @@ void vf_uninit_filter(vf_instance_t *vf)
     if (vf->uninit)
         vf->uninit(vf);
     vf_forget_frames(vf);
+    const m_struct_t *st = vf->info->opts;
+    if (st)
+        m_struct_free(st, vf->priv);
     talloc_free(vf);
 }
 

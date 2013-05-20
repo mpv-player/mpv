@@ -126,6 +126,8 @@ static void flip_page(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
+    (p->frame)++;
+
     void *t = talloc_new(NULL);
     char *filename = talloc_asprintf(t, "%08d.%s", p->frame,
                                      image_writer_file_ext(p->opts));
@@ -138,8 +140,6 @@ static void flip_page(struct vo *vo)
 
     talloc_free(t);
     mp_image_unrefp(&p->current);
-
-    (p->frame)++;
 }
 
 static int query_format(struct vo *vo, uint32_t fmt)

@@ -102,9 +102,10 @@ static void mp_image_alloc_planes(struct mp_image *mpi)
 
     size_t plane_size[MP_MAX_PLANES];
     for (int n = 0; n < MP_MAX_PLANES; n++) {
+        int alloc_h = MP_ALIGN_UP(mpi->h, 32) >> mpi->fmt.ys[n];
         int line_bytes = (mpi->plane_w[n] * mpi->fmt.bpp[n] + 7) / 8;
         mpi->stride[n] = FFALIGN(line_bytes, SWS_MIN_BYTE_ALIGN);
-        plane_size[n] = mpi->stride[n] * mpi->plane_h[n];
+        plane_size[n] = mpi->stride[n] * alloc_h;
     }
     if (mpi->imgfmt == IMGFMT_PAL8)
         plane_size[1] = MP_PALETTE_SIZE;

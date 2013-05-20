@@ -213,13 +213,64 @@ show_progress
     Show the progress bar, the elapsed time and the total duration of the file
     on the OSD.
 
+show_chapters
+    Show a list of chapters on the OSD.
+
+show_tracks
+    Show a list of video/audio/subtitle tracks on the OSD.
+
+
+Input commands that are possibly subject to change
+--------------------------------------------------
+
+af_switch "filter1=params,filter2,..."
+    Replace the current filter chain with the given list.
+
+af_add "filter1=params,filter2,..."
+    Add the given list of audio filters to the audio filter chain.
+
+af_del "filter1,filter2,..."
+    Remove the given list of audio filters.
+
+af_clr
+    Remove all audio filters. (Conversion filters will be re-added
+    automatically if needed.)
+
+vf set|add|toggle|del "filter1=params,filter2,..."
+    Change video filter chain.
+
+    The first argument decides what happens:
+
+    set
+        Overwrite the previous filter chain with the new one.
+
+    add
+        Append the new filter chain to the previous one.
+
+    toggle
+        Check if the given filter (with the exact parameters) is already
+        in the video chain. If yes, remove the filter. If no, add the filter.
+        (If several filters are passed to the command, this is done for
+        each filter.)
+
+    del
+        Remove the given filters from the video chain. Unlike in the other
+        cases, the second parameter is a comma separated list of filter names
+        or integer indexes. ``0`` would denote the first filter. Negative
+        indexes start from the last filter, and ``-1`` denotes the last
+        filter.
+
+    *EXAMPLE for input.conf*:
+
+    - ``a vf set flip`` turn video upside-down on the ``a`` key
+    - ``b vf set ""`` remove all video filters on ``b``
+    - ``c vf toggle lavfi=gradfun`` toggle debanding on ``c``
 
 Undocumented commands: tv_start_scan, tv_step_channel, tv_step_norm,
 tv_step_chanlist, tv_set_channel, tv_last_channel, tv_set_freq, tv_step_freq,
 tv_set_norm, dvb_set_channel, radio_step_channel, radio_set_channel,
 radio_set_freq, radio_step_freq (all of these should be replaced by properties),
-stop (questionable use), get_property (?), af_switch, af_add, af_del,
-af_clr, af_cmdline, vo_cmdline (experimental).
+stop (questionable use), get_property (?), af_cmdline, vo_cmdline (experimental).
 
 Input command prefixes
 ----------------------
@@ -237,10 +288,14 @@ osd-msg
     value as text.
 osd-msg-bar
     Combine osd-bar and osd-msg.
+raw
+    Don't expand properties in string arguments. (Like ``"${property-name}"``.)
+expand-properties (default)
+    All string arguments are expanded like in ``--playing-msg``.
 
 
-
-All of these are still overridden by the global ``--osd-level`` settings.
+All of the osd prefixes are still overridden by the global ``--osd-level``
+settings.
 
 Undocumented prefixes: pausing, pausing_keep, pausing_toggle,
 pausing_keep_force. (Should these be made official?)
@@ -261,6 +316,7 @@ option.
 Name                        W Comment
 =========================== = ==================================================
 osd-level                   x see ``--osd-level``
+osd-scale                   x osd font size multiplicator, see ``--osd-scale``
 loop                        x see ``--loop``
 speed                       x see ``--speed``
 filename                      currently played file (path stripped)

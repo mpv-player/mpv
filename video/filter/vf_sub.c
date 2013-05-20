@@ -141,16 +141,10 @@ static int control(vf_instance_t *vf, int request, void *data)
     return vf_next_control(vf, request, data);
 }
 
-static void uninit(struct vf_instance *vf)
-{
-    free(vf->priv);
-}
-
 static int vf_open(vf_instance_t *vf, char *args)
 {
     vf->config = config;
     vf->query_format = query_format;
-    vf->uninit    = uninit;
     vf->control   = control;
     vf->filter    = filter;
     return 1;

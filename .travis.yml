@@ -1,0 +1,29 @@
+language: c
+
+env:
+  - LIBAV=libav-stable
+  - LIBAV=libav-git
+  - LIBAV=ffmpeg-stable
+  - LIBAV=ffmpeg-git
+compiler:
+  - clang
+branches:
+  only:
+    - master
+
+before_install: ./travis-deps libass-stable $LIBAV
+script: ./configure && make
+
+notifications-policy: &notifications-policy
+  on_success: change
+  on_failure: always
+
+notifications:
+  email:
+    recipients:
+      - mpv-team@googlegroups.com
+    <<: *notifications-policy
+  irc:
+    channels:
+      - "irc.freenode.org#mpv-player-dev"
+    <<: *notifications-policy
