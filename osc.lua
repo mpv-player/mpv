@@ -1,11 +1,13 @@
 local assdraw = require 'assdraw'
 
 local osc_geo = {
-	-- static
+	-- user-safe
 	scale = 1,								-- scaling of the controller
 	vidscale = true,						-- scale the controller with the video? don't use false, currently causes glitches
-	valign = 0.95,								-- vertical alignment, -1 (top) to 1 (bottom)
+	valign = 0.85,							-- vertical alignment, -1 (top) to 1 (bottom)
 	halign = 0,								-- vertical alignment, -1 (left) to 1 (right)
+	
+	-- not user-safe
 	osc_w = 550,							-- width, height, corner-radius, padding of the box
 	osc_h = 150,
 	osc_r = 10,
@@ -30,15 +32,15 @@ local state = {
     mp_screen_size,
 }
 
--- align: -1 .. +1
--- frame: size of the containing area
--- obj: size of the object that should be positioned inside the area
+-- align:  -1 .. +1
+-- frame:  size of the containing area
+-- obj:    size of the object that should be positioned inside the area
 -- margin: min. distance from object to frame (as long as -1 <= align <= +1)
 function get_align(align, frame, obj, margin)
     return (frame / 2) + (((frame / 2) - margin - (obj / 2)) * align)
 end
 
-function draw_bar_simple(ass, x, y, w, h, style)
+function draw_bar_simple(ass, x, y, w, h)
 	local pos = 0
 	local duration = 0
 	if not (mp.property_get("length") == nil) then
@@ -419,13 +421,12 @@ function osc_init ()
     
     -- do we have a usuable duration?
     local contentF = function (ass) 
-	    	draw_bar_simple(ass, posX, posY+pos_offsetY-30, pos_offsetX*2, 17, osc_styles.timecodes)
+	    	draw_bar_simple(ass, posX, posY+pos_offsetY-30, pos_offsetX*2, 17)
 	end
     
     local down_cmd = function ()
     	-- Ignore identical seeks
-		if state.last_mouse_pos == mp.get_mouse_pos() then
-		else
+		if not (state.last_mouse_pos == mp.get_mouse_pos()) then
 			state.last_mouse_pos = mp.get_mouse_pos()
 			
 	    	local b_x, b_y, b_w, b_h = state.bar_location.b_x, state.bar_location.b_y, state.bar_location.b_w, state.bar_location.b_h
@@ -519,11 +520,12 @@ function mouse_up()
 	--mp.send_command("set pause no")
 	state.mouse_down_counter = 0
 	any_button_up()
+	state.last_mouse_pos = nil
 end
 
 function mouse_down()
 	--mp.send_command("set pause yes")
-	if state.osc_visible == true then
+	if state.osc_visible then
 		any_button_down()
 	end
 end
@@ -546,7 +548,7 @@ function mp_update()
     
     local now = mp.get_timer()
     
-    if mouse_over_osc() == true or state.mouse_down == true then
+    if mouse_over_osc() or state.mouse_down then
     	show_osc()
     end
     
