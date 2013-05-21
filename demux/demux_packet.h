@@ -32,6 +32,7 @@ typedef struct demux_packet {
     unsigned char *buffer;
     bool keyframe;
     struct demux_packet *next;
+    void *allocation;
     struct AVPacket *avpacket;   // original libavformat packet (demux_lavf)
 } demux_packet_t;
 
