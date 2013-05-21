@@ -315,10 +315,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
 
 static void free_sh_stream(struct sh_stream *sh)
 {
-    if (sh->lav_headers) {
-        avcodec_close(sh->lav_headers);
-        av_free(sh->lav_headers);
-    }
 }
 
 sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
