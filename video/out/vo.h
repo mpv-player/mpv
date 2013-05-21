@@ -175,7 +175,6 @@ struct vo_driver {
     int (*control)(struct vo *vo, uint32_t request, void *data);
 
     void (*draw_image)(struct vo *vo, struct mp_image *mpi);
-    void (*draw_image_pts)(struct vo *vo, struct mp_image *mpi, double pts);
 
     /*
      * Get extra frames from the VO, such as those added by VDPAU
