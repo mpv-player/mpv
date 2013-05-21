@@ -1180,7 +1180,10 @@ static int get_term_width(void)
 
 static void write_status_line(struct MPContext *mpctx, const char *line)
 {
-    if (erase_to_end_of_line) {
+    struct MPOpts *opts = &mpctx->opts;
+    if (!opts->consolecontrols) {
+        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "%s\n", line);
+    } else if (erase_to_end_of_line) {
         mp_msg(MSGT_STATUSLINE, MSGL_STATUS,
                "%s%s\r", line, erase_to_end_of_line);
     } else {
