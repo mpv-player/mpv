@@ -1072,17 +1072,16 @@ static OSStatus RenderCallbackSPDIF(AudioDeviceID inDevice,
     struct ao *ao  = threadGlobals;
     struct priv *p = ao->priv;
     int amt = ca_ringbuffer_buffered(p->buffer);
-    int req = outOutputData->mBuffers[p->i_stream_index].mDataByteSize;
+    AudioBuffer ca_buffer = outOutputData->mBuffers[p->i_stream_index];
+    int req = ca_buffer.mDataByteSize;
 
     if (amt > req)
         amt = req;
     if (amt) {
         if (p->b_muted) {
-            ca_ringbuffer_read(p->buffer,
-                (unsigned char *)outOutputData->mBuffers[p->i_stream_index].mData,
-                amt);
-        } else {
             ca_ringbuffer_read(p->buffer, NULL, amt);
+        } else {
+            ca_ringbuffer_read(p->buffer, (unsigned char *)ca_buffer.mData, amt);
         }
     }
 
