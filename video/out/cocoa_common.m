@@ -809,7 +809,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     }
 }
 
-- (void)mouseMoved: (NSEvent *) theEvent
+- (void)signalMouseMovement:(NSEvent *)theEvent
 {
     NSView *view = self.contentView;
     NSPoint loc = [view convertPoint:[theEvent locationInWindow] fromView:nil];
@@ -822,9 +822,14 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     }
 }
 
+- (void)mouseMoved:(NSEvent *)theEvent
+{
+    [self signalMouseMovement:theEvent];
+}
+
 - (void)mouseDragged:(NSEvent *)theEvent
 {
-    [self mouseEvent: theEvent];
+    [self signalMouseMovement:theEvent];
 }
 
 - (void)mouseDown:(NSEvent *)theEvent
