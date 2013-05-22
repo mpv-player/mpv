@@ -260,6 +260,11 @@ vf set|add|toggle|del "filter1=params,filter2,..."
         indexes start from the last filter, and ``-1`` denotes the last
         filter.
 
+    You can assign labels to filter by prefixing them with ``@name:`` (where
+    ``name`` is a user-chosen arbitrary identifiers). Labels can be used to
+    refer to filters by name in all of the filter chain modification commands.
+    For ``add``, using an already used label will replace the existing filter.
+
     *EXAMPLE for input.conf*:
 
     - ``a vf set flip`` turn video upside-down on the ``a`` key
