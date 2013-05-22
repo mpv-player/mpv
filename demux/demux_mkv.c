@@ -174,6 +174,7 @@ typedef struct mkv_demuxer {
     bool parsed_tags;
     bool parsed_chapters;
     bool parsed_attachments;
+    bool parsed_cues;
 
     uint64_t skip_to_timecode;
     int v_skip_to_keyframe, a_skip_to_keyframe;
@@ -1016,10 +1017,11 @@ static int read_header_element(struct demuxer *demuxer, uint32_t id,
         return demux_mkv_read_tracks(demuxer);
 
     case MATROSKA_ID_CUES:
-        if (is_parsed_header(mkv_d, pos))
+        if (mkv_d->parsed_cues)
             break;
         if (at_filepos && !seek_pos_id(s, at_filepos, id))
             return -1;
+        mkv_d->parsed_cues = true;
         return demux_mkv_read_cues(demuxer);
 
     case MATROSKA_ID_TAGS:
