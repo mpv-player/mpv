@@ -83,26 +83,39 @@ char *mp_find_user_config_file(const char *filename)
     static char *config_dir = ".mpv";
 #endif
 #if defined(__MINGW32__) || defined(__CYGWIN__)
+    char *temp = NULL;
     char exedir[260];
+    /* Hack to get fonts etc. loaded outside of Cygwin environment. */
+    int i, imax = 0;
+    int len = (int)GetModuleFileNameA(NULL, exedir, 260);
+    for (i = 0; i < len; i++)
+        if (exedir[i] == '\\') {
+            exedir[i] = '/';
+            imax = i;
+        }
+    exedir[imax] = '\0';
+
+    if (filename)
+        temp = mp_path_join(NULL, bstr0(exedir), bstr0(filename));
+
+    if (temp && mp_path_exists(temp) && !mp_path_isdir(temp)) {
+        homedir = exedir;
+        config_dir = "";
+    }
+    else
 #endif
     if ((homedir = getenv("MPV_HOME")) != NULL) {
         config_dir = "";
     } else if ((homedir = getenv("HOME")) == NULL) {
 #if defined(__MINGW32__) || defined(__CYGWIN__)
-    /* Hack to get fonts etc. loaded outside of Cygwin environment. */
-        int i, imax = 0;
-        int len = (int)GetModuleFileNameA(NULL, exedir, 260);
-        for (i = 0; i < len; i++)
-            if (exedir[i] == '\\') {
-                exedir[i] = '/';
-                imax = i;
-            }
-        exedir[imax] = '\0';
         homedir = exedir;
 #else
         return NULL;
 #endif
     }
+#if defined(__MINGW32__) || defined(__CYGWIN__)
+    talloc_free(temp);
+#endif
 
     if (filename) {
         char * temp = mp_path_join(NULL, bstr0(homedir), bstr0(config_dir));
