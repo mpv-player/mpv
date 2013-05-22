@@ -1446,6 +1446,9 @@
 
     Default: 10.
 
+--osd-scale=<factor>
+    OSD font size multiplicator, multiplied with ``--osd-font-size`` value.
+
 --osd-shadow-color=<#RRGGBB>, --sub-text-shadow-color=<#RRGGBB>
     See ``--osd-color``. Color used for OSD/sub text shadow.
 
@@ -2400,6 +2403,9 @@
     operate on different codec lists.
 
     *NOTE*: See ``--vd=help`` for a full list of available decoders.
+
+--version, -V
+    Print version string and exit.
 
 --vf=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of video filters to apply to the video stream. See

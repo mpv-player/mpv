@@ -2664,8 +2664,8 @@ fi
 
 
 if test "$_resampler" = no ; then
-  echocheck "libswresample >= 0.15.100"
-  if pkg_config_add "libswresample >= 0.15.100" ; then
+  echocheck "libswresample >= 0.17.102"
+  if pkg_config_add "libswresample >= 0.17.102" ; then
     _resampler=yes
     def_resampler='#define CONFIG_LIBSWRESAMPLE'
   fi

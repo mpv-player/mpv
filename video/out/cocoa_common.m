@@ -168,6 +168,7 @@ struct vo_cocoa_state {
     int display_cursor;
     int cursor_timer;
     int vo_cursor_autohide_delay;
+    bool will_make_front;
 
     bool did_resize;
     bool did_async_resize;
@@ -177,7 +178,7 @@ struct vo_cocoa_state {
 
     CGFloat accumulated_scroll;
 
-    NSRecursiveLock *lock;
+    NSLock *lock;
 
     bool enable_resize_redraw;
     void (*resize_redraw)(struct vo *vo, int w, int h);
@@ -200,9 +201,10 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .out_fs_resize = NO,
         .display_cursor = 1,
         .vo_cursor_autohide_delay = vo->opts->cursor_autohide_delay,
+        .will_make_front = YES,
         .power_mgmt_assertion = kIOPMNullAssertionID,
         .accumulated_scroll = 0,
-        .lock = [[NSRecursiveLock alloc] init],
+        .lock = [[NSLock alloc] init],
         .input_queue = vo_cocoa_input_queue_init(s),
         .enable_resize_redraw = NO,
     };
@@ -527,9 +529,11 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
 
         [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
 
+
         if (flags & VOFLAG_HIDDEN) {
             [s->window orderOut:nil];
-        } else {
+        } else if (![s->window isVisible] && s->will_make_front) {
+            s->will_make_front = NO;
             [s->window makeKeyAndOrderFront:nil];
             [NSApp activateIgnoringOtherApps:YES];
         }
@@ -635,17 +639,22 @@ int vo_cocoa_check_events(struct vo *vo)
 
 void vo_cocoa_fullscreen(struct vo *vo)
 {
-    // This is the secondary thread, unlock since we are going to invoke a
-    // method synchronously on the GUI thread using Cocoa.
-    vo_cocoa_set_current_context(vo, false);
+    if (![NSThread isMainThread]) {
+        // This is the secondary thread, unlock since we are going to invoke a
+        // method synchronously on the GUI thread using Cocoa.
+        vo_cocoa_set_current_context(vo, false);
+    }
 
     struct vo_cocoa_state *s = vo->cocoa;
     [s->window performSelectorOnMainThread:@selector(fullscreen)
                                 withObject:nil
                              waitUntilDone:YES];
 
-    // Now lock again!
-    vo_cocoa_set_current_context(vo, true);
+
+    if (![NSThread isMainThread]) {
+        // Now lock again!
+        vo_cocoa_set_current_context(vo, true);
+    }
 }
 
 int vo_cocoa_swap_interval(int enabled)
@@ -698,14 +707,19 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
     if (opts->native_fs) {
         if (!opts->fs) {
+            opts->fs = VO_TRUE;
             [self setContentResizeIncrements:NSMakeSize(1, 1)];
+            vo_cocoa_display_cursor(self.videoOutput, 0);
         } else {
+            opts->fs = VO_FALSE;
             [self setContentAspectRatio:s->current_video_size];
+            vo_cocoa_display_cursor(self.videoOutput, 1);
         }
 
         [self toggleFullScreen:nil];
     } else {
         if (!opts->fs) {
+            opts->fs = VO_TRUE;
             update_screen_info(self.videoOutput);
             if (current_screen_has_dock_or_menubar(self.videoOutput))
                 [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
@@ -714,7 +728,9 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
             [self setHasShadow:NO];
             [self setStyleMask:s->fullscreen_mask];
             [self setFrame:s->fsscreen_frame display:YES animate:NO];
+            vo_cocoa_display_cursor(self.videoOutput, 0);
         } else {
+            opts->fs = VO_FALSE;
             [NSApp setPresentationOptions:NSApplicationPresentationDefault];
             [self setHasShadow:YES];
             [self setStyleMask:s->windowed_mask];
@@ -725,15 +741,8 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
                 s->out_fs_resize = NO;
             }
             [self setContentAspectRatio:s->current_video_size];
+            vo_cocoa_display_cursor(self.videoOutput, 1);
         }
-    }
-
-    if (!opts->fs) {
-        opts->fs = VO_TRUE;
-        vo_cocoa_display_cursor(self.videoOutput, 0);
-    } else {
-        opts->fs = false;
-        vo_cocoa_display_cursor(self.videoOutput, 1);
     }
 
     resize_window(self.videoOutput);

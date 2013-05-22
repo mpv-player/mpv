@@ -206,7 +206,7 @@ static pthread_t playback_thread_id;
     [self.files enumerateObjectsUsingBlock:^(id obj, NSUInteger i, BOOL *_){
         const char *file = [escape_loadfile_name(obj) UTF8String];
         const char *append = (i == 0) ? "" : " append";
-        char *cmd = talloc_asprintf(ctx, "loadfile \"%s\"%s", file, append);
+        char *cmd = talloc_asprintf(ctx, "raw loadfile \"%s\"%s", file, append);
         mp_cmd_t *cmdt = mp_input_parse_cmd(bstr0(cmd), "");
         mp_input_queue_cmd(self.inputContext, cmdt);
     }];

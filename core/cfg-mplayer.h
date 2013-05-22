@@ -55,6 +55,9 @@ extern const m_option_t cdda_opts[];
 extern int sws_flags;
 extern const char pp_help[];
 
+static int print_version_opt(const m_option_t *opt, const char *name,
+                             const char *param);
+
 #ifdef CONFIG_RADIO
 const m_option_t radioopts_conf[]={
     {"device", &stream_radio_defaults.device, CONF_TYPE_STRING, 0, 0 ,0, NULL},
@@ -532,7 +535,7 @@ const m_option_t mplayer_opts[]={
     OPT_STRINGLIST("ao", audio_driver_list, 0),
     OPT_FLAG("fixed-vo", fixed_vo, CONF_GLOBAL),
     OPT_FLAG("ontop", vo.ontop, 0),
-    OPT_FLAG("border", vo.border, 1),
+    OPT_FLAG("border", vo.border, 0),
 
     OPT_STRING("mixer", mixer_device, 0),
     OPT_STRING("mixer-channel", mixer_channel, 0),
@@ -617,7 +620,7 @@ const m_option_t mplayer_opts[]={
     OPT_INTRANGE("contrast", gamma_contrast, 0, -100, 100),
     OPT_INTRANGE("hue", gamma_hue, 0, -100, 100),
     OPT_INTRANGE("gamma", gamma_gamma, 0, -100, 100),
-    OPT_FLAG("keepaspect", vo.keepaspect, 1),
+    OPT_FLAG("keepaspect", vo.keepaspect, 0),
 
 //---------------------- mplayer-only options ------------------------
 
@@ -626,6 +629,7 @@ const m_option_t mplayer_opts[]={
                ({"0", 0}, {"1", 1}, {"2", 2}, {"3", 3})),
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
     OPT_FLAG("osd-fractions", osd_fractions, 0),
+    OPT_FLOATRANGE("osd-scale", osd_scale, 0, 0, 100),
 
     OPT_DOUBLE("sstep", step_sec, CONF_MIN, 0),
 
@@ -688,7 +692,7 @@ const m_option_t mplayer_opts[]={
     OPT_FLAG("idle", player_idle_mode, CONF_GLOBAL),
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
     OPT_FLAG("consolecontrols", consolecontrols, CONF_GLOBAL),
-    OPT_FLAG("mouse-movements", vo.enable_mouse_movements, 1),
+    OPT_FLAG("mouse-movements", vo.enable_mouse_movements, CONF_GLOBAL),
     OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
 #ifdef CONFIG_TV
     {"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
@@ -700,6 +704,8 @@ const m_option_t mplayer_opts[]={
     {"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},
     {"help", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {"h", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
+    {"version", (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
+    {"V",       (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
 
 #ifdef CONFIG_ENCODING
     OPT_STRING("o", encode_output.file, CONF_GLOBAL),

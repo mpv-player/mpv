@@ -310,7 +310,6 @@ static void uninit(struct vf_instance *vf)
     if (!vf->priv)
         return;
     destroy_graph(vf);
-    free(vf->priv);
 }
 
 static int vf_open(vf_instance_t *vf, char *args)

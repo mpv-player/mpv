@@ -442,9 +442,9 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
         if ((co->opt->type->flags & M_OPT_TYPE_ALLOW_WILDCARD)
                 && bstr_endswith0(coname, "*")) {
             coname.len--;
-            if (bstrcasecmp(bstr_splice(name, 0, coname.len), coname) == 0)
+            if (bstrcmp(bstr_splice(name, 0, coname.len), coname) == 0)
                 return co;
-        } else if (bstrcasecmp(coname, name) == 0)
+        } else if (bstrcmp(coname, name) == 0)
             return co;
     }
     return NULL;

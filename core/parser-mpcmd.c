@@ -118,9 +118,11 @@ static bool parse_flag(bstr name, bstr f)
     return !!val;
 }
 
-bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
-                                    int argc, char **argv)
+// returns M_OPT_... error code
+int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
+                                   int argc, char **argv)
 {
+    int ret = M_OPT_UNKNOWN;
     int mode = 0;
     struct playlist_entry *local_start = NULL;
     bool shuffle = false;
@@ -139,8 +141,10 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
             int r;
             r = m_config_set_option_ext(config, p.arg, p.param,
                                         mode == LOCAL ? M_SETOPT_CHECK_ONLY : 0);
-            if (r <= M_OPT_EXIT)
+            if (r <= M_OPT_EXIT) {
+                ret = r;
                 goto err_out;
+            }
             if (r < 0) {
                 mp_tmsg(MSGT_CFGPARSER, MSGL_FATAL,
                         "Setting commandline option --%.*s=%.*s failed.\n",
@@ -276,15 +280,13 @@ bool m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
     if (shuffle)
         playlist_shuffle(files);
 
-    talloc_free(local_params);
-    assert(!config->file_local_mode);
-    return true;
+    ret = 0; // success
 
 err_out:
     talloc_free(local_params);
     if (config->file_local_mode)
         m_config_leave_file_local(config);
-    return false;
+    return ret;
 }
 
 extern int mp_msg_levels[];
