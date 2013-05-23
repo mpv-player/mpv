@@ -71,6 +71,9 @@
 
 #include "mp_lua.h"
 
+static void change_video_filters(MPContext *mpctx, const char *cmd,
+                                 const char *arg);
+
 static char *format_bitrate(int rate)
 {
     return talloc_asprintf(NULL, "%d kbps", rate * 8 / 1000);
@@ -977,21 +980,52 @@ static int mp_property_fullscreen(m_option_t *prop,
     return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
+#define VF_DEINTERLACE_LABEL "deinterlace"
+
+#ifdef CONFIG_VF_LAVFI
+#define VF_DEINTERLACE "@" VF_DEINTERLACE_LABEL ":lavfi=yadif"
+#else
+#define VF_DEINTERLACE "@" VF_DEINTERLACE_LABEL ":yadif"
+#endif
+
+static int get_deinterlacing(struct MPContext *mpctx)
+{
+    vf_instance_t *vf = mpctx->sh_video->vfilter;
+    int enabled = 0;
+    if (vf->control(vf, VFCTRL_GET_DEINTERLACE, &enabled) != CONTROL_OK)
+        enabled = -1;
+    if (enabled < 0) {
+        // vf_lavfi doesn't support VFCTRL_GET_DEINTERLACE
+        if (vf_find_by_label(vf, VF_DEINTERLACE_LABEL))
+            enabled = 1;
+    }
+    return enabled;
+}
+
+static void set_deinterlacing(struct MPContext *mpctx, bool enable)
+{
+    vf_instance_t *vf = mpctx->sh_video->vfilter;
+    if (vf_find_by_label(vf, VF_DEINTERLACE_LABEL)) {
+        if (!enable)
+            change_video_filters(mpctx, "del", VF_DEINTERLACE);
+    } else {
+        int arg = enable;
+        if (vf->control(vf, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
+            change_video_filters(mpctx, "add", VF_DEINTERLACE);
+    }
+}
+
 static int mp_property_deinterlace(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
 {
     if (!mpctx->sh_video || !mpctx->sh_video->vfilter)
         return M_PROPERTY_UNAVAILABLE;
-    vf_instance_t *vf = mpctx->sh_video->vfilter;
-    int enabled = 0;
-    if (vf->control(vf, VFCTRL_GET_DEINTERLACE, &enabled) != CONTROL_OK)
-        return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_GET:
-        *(int *)arg = !!enabled;
+        *(int *)arg = get_deinterlacing(mpctx) > 0;
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        vf->control(vf, VFCTRL_SET_DEINTERLACE, arg);
+        set_deinterlacing(mpctx, *(int *)arg);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;

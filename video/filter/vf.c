@@ -487,11 +487,24 @@ vf_instance_t *append_filters(vf_instance_t *last,
             //printf("Open filter %s\n",vf_settings[i].name);
             vf = vf_open_filter(opts, last, vf_settings[i].name,
                                 vf_settings[i].attribs);
-            if (vf)
+            if (vf) {
+                if (vf_settings[i].label)
+                    vf->label = talloc_strdup(vf, vf_settings[i].label);
                 last = vf;
+            }
         }
     }
     return last;
+}
+
+vf_instance_t *vf_find_by_label(vf_instance_t *chain, const char *label)
+{
+    while (chain) {
+        if (chain->label && label && strcmp(chain->label, label) == 0)
+            return chain;
+        chain = chain->next;
+    }
+    return NULL;
 }
 
 //============================================================================

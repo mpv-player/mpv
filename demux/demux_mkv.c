@@ -166,6 +166,7 @@ typedef struct mkv_demuxer {
     mkv_index_t *indexes;
     int num_indexes;
     bool index_complete;
+    uint64_t deferred_cues;
 
     int64_t *parsed_pos;
     int num_parsed_pos;
@@ -174,6 +175,7 @@ typedef struct mkv_demuxer {
     bool parsed_tags;
     bool parsed_chapters;
     bool parsed_attachments;
+    bool parsed_cues;
 
     uint64_t skip_to_timecode;
     int v_skip_to_keyframe, a_skip_to_keyframe;
@@ -203,7 +205,7 @@ static bool is_parsed_header(struct mkv_demuxer *mkv_d, int64_t pos)
     int low = 0;
     int high = mkv_d->num_parsed_pos;
     while (high > low + 1) {
-        int mid = high + low >> 1;
+        int mid = (high + low) >> 1;
         if (mkv_d->parsed_pos[mid] > pos)
             high = mid;
         else
@@ -720,6 +722,9 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     struct ebml_parse_ctx parse_ctx = {};
     if (ebml_read_element(s, &parse_ctx, &cues, &ebml_cues_desc) < 0)
         return -1;
+
+    mkv_d->num_indexes = 0;
+
     for (int i = 0; i < cues.n_cue_point; i++) {
         struct ebml_cue_point *cuepoint = &cues.cue_point[i];
         if (cuepoint->n_cue_time != 1 || !cuepoint->n_cue_track_positions) {
@@ -745,6 +750,26 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] \\---- [ parsing cues ] -----------\n");
     talloc_free(parse_ctx.talloc_ctx);
     return 0;
+}
+
+static void read_deferred_cues(demuxer_t *demuxer)
+{
+    mkv_demuxer_t *mkv_d = demuxer->priv;
+    stream_t *s = demuxer->stream;
+
+    if (mkv_d->deferred_cues) {
+        int64_t pos = mkv_d->deferred_cues;
+        mkv_d->deferred_cues = 0;
+        if (!stream_seek(s, pos)) {
+            mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Failed to seek to cues\n");
+            return;
+        }
+        if (ebml_read_id(s, NULL) != MATROSKA_ID_CUES) {
+            mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Expected element not found\n");
+            return;
+        }
+        demux_mkv_read_cues(demuxer);
+    }
 }
 
 static int demux_mkv_read_chapters(struct demuxer *demuxer)
@@ -1016,10 +1041,15 @@ static int read_header_element(struct demuxer *demuxer, uint32_t id,
         return demux_mkv_read_tracks(demuxer);
 
     case MATROSKA_ID_CUES:
-        if (is_parsed_header(mkv_d, pos))
+        if (mkv_d->parsed_cues)
             break;
-        if (at_filepos && !seek_pos_id(s, at_filepos, id))
-            return -1;
+        if (at_filepos) {
+            // Read cues when they are needed, to avoid seeking on opening.
+            mkv_d->deferred_cues = at_filepos;
+            return 1;
+        }
+        mkv_d->parsed_cues = true;
+        mkv_d->deferred_cues = 0;
         return demux_mkv_read_cues(demuxer);
 
     case MATROSKA_ID_TAGS:
@@ -1119,6 +1149,7 @@ static const videocodec_info_t vinfo[] = {
     {MKV_V_THEORA,    mmioFOURCC('t', 'h', 'e', 'o'), 1},
     {MKV_V_VP8,       mmioFOURCC('V', 'P', '8', '0'), 0},
     {MKV_V_VP9,       mmioFOURCC('V', 'P', '9', '0'), 0},
+    {MKV_V_DIRAC,     mmioFOURCC('d', 'r', 'a', 'c'), 0},
     {NULL, 0, 0}
 };
 
@@ -2361,6 +2392,8 @@ static int create_index_until(struct demuxer *demuxer, uint64_t timecode)
     struct mkv_demuxer *mkv_d = demuxer->priv;
     struct stream *s = demuxer->stream;
 
+    read_deferred_cues(demuxer);
+
     if (mkv_d->index_complete)
         return 0;
 
@@ -2459,6 +2492,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
                            float audio_delay, int flags)
 {
     mkv_demuxer_t *mkv_d = demuxer->priv;
+    int64_t old_pos = stream_tell(demuxer->stream);
     uint64_t v_tnum = -1;
     uint64_t a_tnum = -1;
     bool st_active[STREAM_TYPE_COUNT] = {0};
@@ -2498,6 +2532,9 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
                 index = seek_with_cues(demuxer, -1, target_timecode, flags);
         }
 
+        if (!index)
+            stream_seek(demuxer->stream, old_pos);
+
         if (st_active[STREAM_VIDEO])
             mkv_d->v_skip_to_keyframe = 1;
         if (flags & SEEK_FORWARD)
@@ -2516,8 +2553,11 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
         mkv_index_t *index = NULL;
         int i;
 
+        read_deferred_cues(demuxer);
+
         if (!mkv_d->index_complete) {   /* not implemented without index */
             mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] seek unsupported flags\n");
+            stream_seek(s, old_pos);
             return;
         }
 
@@ -2530,8 +2570,10 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
                             || (mkv_d->indexes[i].filepos < index->filepos))))
                     index = &mkv_d->indexes[i];
 
-        if (!index)
+        if (!index) {
+            stream_seek(s, old_pos);
             return;
+        }
 
         mkv_d->cluster_end = 0;
         stream_seek(s, index->filepos);

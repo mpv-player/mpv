@@ -254,21 +254,22 @@ static double get_play_end_pts(struct MPContext *mpctx)
     return MP_NOPTS_VALUE;
 }
 
-static void print_stream(struct MPContext *mpctx, struct track *t, int id)
+static void print_stream(struct MPContext *mpctx, struct track *t)
 {
     struct sh_stream *s = t->stream;
     const char *tname = "?";
     const char *selopt = "?";
     const char *langopt = "?";
+    const char *iid = NULL;
     switch (t->type) {
     case STREAM_VIDEO:
-        tname = "Video"; selopt = "vid"; langopt = NULL;
+        tname = "Video"; selopt = "vid"; langopt = NULL; iid = "VID";
         break;
     case STREAM_AUDIO:
-        tname = "Audio"; selopt = "aid"; langopt = "alang";
+        tname = "Audio"; selopt = "aid"; langopt = "alang"; iid = "AID";
         break;
     case STREAM_SUB:
-        tname = "Subs"; selopt = "sid"; langopt = "slang";
+        tname = "Subs"; selopt = "sid"; langopt = "slang"; iid = "SID";
         break;
     }
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "[stream] %-5s %3s",
@@ -291,6 +292,15 @@ static void print_stream(struct MPContext *mpctx, struct track *t, int id)
     if (t->is_external)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " (external)");
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
+    // legacy compatibility
+    if (!iid)
+        return;
+    int id = t->user_tid;
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_%s_ID=%d\n", iid, id);
+    if (t->title)
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_%s_%d_NAME=%s\n", iid, id, t->title);
+    if (t->lang)
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_%s_%d_LANG=%s\n", iid, id, t->lang);
 }
 
 static void print_file_properties(struct MPContext *mpctx, const char *filename)
@@ -371,7 +381,7 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
     for (int t = 0; t < STREAM_TYPE_COUNT; t++) {
         for (int n = 0; n < mpctx->num_tracks; n++)
             if (mpctx->tracks[n]->type == t)
-                print_stream(mpctx, mpctx->tracks[n], n);
+                print_stream(mpctx, mpctx->tracks[n]);
     }
 }
 
@@ -1176,7 +1186,10 @@ static int get_term_width(void)
 
 static void write_status_line(struct MPContext *mpctx, const char *line)
 {
-    if (erase_to_end_of_line) {
+    struct MPOpts *opts = &mpctx->opts;
+    if (!opts->consolecontrols) {
+        mp_msg(MSGT_STATUSLINE, MSGL_STATUS, "%s\n", line);
+    } else if (erase_to_end_of_line) {
         mp_msg(MSGT_STATUSLINE, MSGL_STATUS,
                "%s%s\r", line, erase_to_end_of_line);
     } else {

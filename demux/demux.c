@@ -106,10 +106,8 @@ static void add_stream_chapters(struct demuxer *demuxer);
 static int packet_destroy(void *ptr)
 {
     struct demux_packet *dp = ptr;
-    if (dp->avpacket)
-        talloc_free(dp->avpacket);
-    else
-        free(dp->buffer);
+    talloc_free(dp->avpacket);
+    free(dp->allocation);
     return 0;
 }
 
@@ -140,6 +138,7 @@ struct demux_packet *new_demux_packet(size_t len)
         abort();
     }
     memset(dp->buffer + len, 0, MP_INPUT_BUFFER_PADDING_SIZE);
+    dp->allocation = dp->buffer;
     return dp;
 }
 
@@ -165,6 +164,7 @@ void resize_demux_packet(struct demux_packet *dp, size_t len)
                "over 1 GB!\n");
         abort();
     }
+    assert(dp->allocation);
     dp->buffer = realloc(dp->buffer, len + MP_INPUT_BUFFER_PADDING_SIZE);
     if (!dp->buffer) {
         mp_msg(MSGT_DEMUXER, MSGL_FATAL, "Memory allocation failure!\n");
@@ -172,6 +172,7 @@ void resize_demux_packet(struct demux_packet *dp, size_t len)
     }
     memset(dp->buffer + len, 0, MP_INPUT_BUFFER_PADDING_SIZE);
     dp->len = len;
+    dp->allocation = dp->buffer;
 }
 
 void free_demux_packet(struct demux_packet *dp)
@@ -228,8 +229,8 @@ demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
     d->seekable = 1;
     d->synced = 0;
     d->filepos = -1;
-    d->audio = new_demuxer_stream(d, STREAM_VIDEO, a_id);
-    d->video = new_demuxer_stream(d, STREAM_AUDIO, v_id);
+    d->audio = new_demuxer_stream(d, STREAM_AUDIO, a_id);
+    d->video = new_demuxer_stream(d, STREAM_VIDEO, v_id);
     d->sub = new_demuxer_stream(d, STREAM_SUB, s_id);
     d->ds[STREAM_VIDEO] = d->video;
     d->ds[STREAM_AUDIO] = d->audio;
@@ -314,10 +315,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
 
 static void free_sh_stream(struct sh_stream *sh)
 {
-    if (sh->lav_headers) {
-        avcodec_close(sh->lav_headers);
-        av_free(sh->lav_headers);
-    }
 }
 
 sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
@@ -808,10 +805,16 @@ int ds_get_packet_sub(demux_stream_t *ds, unsigned char **start)
 
 struct demux_packet *ds_get_packet2(struct demux_stream *ds, bool repeat_last)
 {
-    // This shouldn't get used together with partial reads
-    assert(ds->buffer_pos == 0 || ds->buffer_pos >= ds->buffer_size);
     if (!repeat_last)
         ds_fill_buffer(ds);
+    // This shouldn't get used together with partial reads
+    // However, some old demuxers return parsed packets with an offset in
+    // -correct-pts mode (at least mpegts).
+    // Not all old demuxers will actually work.
+    if (ds->buffer_pos < ds->buffer_size) {
+        ds->current->buffer += ds->buffer_pos;
+        ds->buffer_size -= ds->buffer_pos;
+    }
     ds->buffer_pos = ds->buffer_size;
     return ds->current;
 }

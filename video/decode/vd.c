@@ -72,7 +72,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
     mp_msg(MSGT_DECVIDEO, MSGL_V, "VDec: vo config request - %d x %d (%s)\n",
            w, h, vo_format_name(out_fmt));
 
-    if (get_video_quality_max(sh) <= 0 && divx_quality) {
+    if (get_video_quality_max(sh) <= 0 && opts->divx_quality) {
         // user wants postprocess but no pp filter yet:
         sh->vfilter = vf = vf_open_filter(opts, vf, "pp", NULL);
     }

@@ -1519,7 +1519,7 @@ double vo_x11_vm_get_fps(struct vo *vo)
     return 1e3 * clock / modeline.htotal / modeline.vtotal;
 }
 #else /* CONFIG_XF86VM */
-double vo_vm_get_fps(struct vo *vo)
+double vo_x11_vm_get_fps(struct vo *vo)
 {
     return 0;
 }

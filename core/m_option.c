@@ -1786,6 +1786,151 @@ static int find_obj_desc(struct bstr name, const m_obj_list_t *l,
     return 0;
 }
 
+static void obj_setting_free(m_obj_settings_t *item)
+{
+    talloc_free(item->name);
+    talloc_free(item->label);
+    free_str_list(&(item->attribs));
+}
+
+// If at least one item has a label, compare labels only - otherwise ignore them.
+static bool obj_setting_equals(m_obj_settings_t *a, m_obj_settings_t *b)
+{
+    bstr la = bstr0(a->label), lb = bstr0(b->label);
+    if (la.len || lb.len)
+        return bstr_equals(la, lb);
+    if (strcmp(a->name, b->name) != 0)
+        return false;
+
+    int a_attr_count = 0;
+    while (a->attribs && a->attribs[a_attr_count])
+        a_attr_count++;
+    int b_attr_count = 0;
+    while (b->attribs && b->attribs[b_attr_count])
+        b_attr_count++;
+    if (a_attr_count != b_attr_count)
+        return false;
+    for (int n = 0; n < a_attr_count; n++) {
+        if (strcmp(a->attribs[n], b->attribs[n]) != 0)
+            return false;
+    }
+    return true;
+}
+
+static int obj_settings_list_num_items(m_obj_settings_t *obj_list)
+{
+    int num = 0;
+    while (obj_list && obj_list[num].name)
+        num++;
+    return num;
+}
+
+static void obj_settings_list_del_at(m_obj_settings_t **p_obj_list, int idx)
+{
+    m_obj_settings_t *obj_list = *p_obj_list;
+    int num = obj_settings_list_num_items(obj_list);
+
+    assert(idx >= 0 && idx < num);
+
+    obj_setting_free(&obj_list[idx]);
+
+    // Note: the NULL-terminating element is moved down as part of this
+    memmove(&obj_list[idx], &obj_list[idx + 1],
+            sizeof(m_obj_settings_t) * (num - idx));
+
+    *p_obj_list = talloc_realloc(NULL, obj_list, struct m_obj_settings, num);
+}
+
+// Insert such that *p_obj_list[idx] is set to item.
+// If idx < 0, set idx = count + idx + 1 (i.e. -1 inserts it as last element).
+// Memory referenced by *item is not copied.
+static void obj_settings_list_insert_at(m_obj_settings_t **p_obj_list, int idx,
+                                        m_obj_settings_t *item)
+{
+    int num = obj_settings_list_num_items(*p_obj_list);
+    if (idx < 0)
+        idx = num + idx + 1;
+    assert(idx >= 0 && idx <= num);
+    *p_obj_list = talloc_realloc(NULL, *p_obj_list, struct m_obj_settings,
+                                 num + 2);
+    memmove(*p_obj_list + idx + 1, *p_obj_list + idx,
+            (num - idx) * sizeof(m_obj_settings_t));
+    (*p_obj_list)[idx] = *item;
+    (*p_obj_list)[num + 1] = (m_obj_settings_t){0};
+}
+
+static int obj_settings_list_find_by_label(m_obj_settings_t *obj_list,
+                                           bstr label)
+{
+    for (int n = 0; obj_list && obj_list[n].name; n++) {
+        if (label.len && bstr_equals0(label, obj_list[n].label))
+            return n;
+    }
+    return -1;
+}
+
+static int obj_settings_list_find_by_label0(m_obj_settings_t *obj_list,
+                                            const char *label)
+{
+    return obj_settings_list_find_by_label(obj_list, bstr0(label));
+}
+
+static int obj_settings_find_by_content(m_obj_settings_t *obj_list,
+                                        m_obj_settings_t *item)
+{
+    for (int n = 0; obj_list && obj_list[n].name; n++) {
+        if (obj_setting_equals(&obj_list[n], item))
+            return n;
+    }
+    return -1;
+}
+
+static void free_obj_settings_list(void *dst)
+{
+    int n;
+    m_obj_settings_t *d;
+
+    if (!dst || !VAL(dst))
+        return;
+
+    d = VAL(dst);
+    for (n = 0; d[n].name; n++)
+        obj_setting_free(&d[n]);
+    talloc_free(d);
+    VAL(dst) = NULL;
+}
+
+static void copy_obj_settings_list(const m_option_t *opt, void *dst,
+                                   const void *src)
+{
+    m_obj_settings_t *d, *s;
+    int n;
+
+    if (!(dst && src))
+        return;
+
+    s = VAL(src);
+
+    if (VAL(dst))
+        free_obj_settings_list(dst);
+    if (!s)
+        return;
+
+    for (n = 0; s[n].name; n++)
+        /* NOP */;
+    d = talloc_array(NULL, struct m_obj_settings, n + 1);
+    for (n = 0; s[n].name; n++) {
+        d[n].name = talloc_strdup(NULL, s[n].name);
+        d[n].label = talloc_strdup(NULL, s[n].label);
+        d[n].attribs = NULL;
+        copy_str_list(NULL, &(d[n].attribs), &(s[n].attribs));
+    }
+    d[n].name = NULL;
+    d[n].label = NULL;
+    d[n].attribs = NULL;
+    VAL(dst) = d;
+}
+
 // Consider -vf a=b=c:d=e. This verifies "b"="c" and "d"="e" and that the
 // option names/values are correct. Try to determine whether an option
 // without '=' sets a flag, or whether it's a positional argument.
@@ -1932,12 +2077,20 @@ print_help: ;
 // Parse one item, e.g. -vf a=b:c:d,e=f:g => parse a=b:c:d into "a" and "b:c:d"
 static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
                               const m_obj_list_t *list,
-                              m_obj_settings_t **_ret, int ret_n)
+                              m_obj_settings_t **_ret)
 {
     int r;
     char **plist = NULL;
     const m_struct_t *desc;
-    m_obj_settings_t *ret = _ret ? *_ret : NULL;
+    bstr label = {0};
+
+    if (bstr_eatstart0(pstr, "@")) {
+        if (!bstr_split_tok(*pstr, ":", &label, pstr)) {
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                   "Option %.*s: ':' expected after label.\n", BSTR_P(opt));
+            return M_OPT_INVALID;
+        }
+    }
 
     bool has_param = false;
     int idx = bstrspn(*pstr, NAMECH);
@@ -1979,146 +2132,64 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
     if (!_ret)
         return 1;
 
-    ret = talloc_realloc(NULL, ret, struct m_obj_settings, ret_n + 2);
-    memset(&ret[ret_n], 0, 2 * sizeof(m_obj_settings_t));
-    ret[ret_n].name = bstrto0(NULL, str);
-    ret[ret_n].attribs = plist;
-
-    *_ret = ret;
+    m_obj_settings_t item = {
+        .name = bstrto0(NULL, str),
+        .label = bstrdup0(NULL, label),
+        .attribs = plist,
+    };
+    obj_settings_list_insert_at(_ret, -1, &item);
     return 1;
 }
 
-static int obj_settings_list_num_items(m_obj_settings_t *obj_list)
+// Parse a single entry for -vf-del (return 0 if not applicable)
+// mark_del is bounded by the number of items in dst
+static int parse_obj_settings_del(struct bstr opt_name, struct bstr *param,
+                                  void *dst, bool *mark_del)
 {
-    int num = 0;
-    while (obj_list && obj_list[num].name)
-        num++;
-    return num;
-}
-
-static void obj_settings_free_item(m_obj_settings_t *item)
-{
-    talloc_free(item->name);
-    free_str_list(&(item->attribs));
-}
-
-static void del_obj_settings_list_at(m_obj_settings_t **p_obj_list, int idx)
-{
-    m_obj_settings_t *obj_list = *p_obj_list;
-    int num = obj_settings_list_num_items(obj_list);
-
-    assert(idx >= 0 && idx < num);
-
-    obj_settings_free_item(&obj_list[idx]);
-
-    // Note: the NULL-terminating element is moved down as part of this
-    memmove(&obj_list[idx], &obj_list[idx + 1],
-            sizeof(m_obj_settings_t) * (num - idx));
-
-    *p_obj_list = talloc_realloc(NULL, obj_list, struct m_obj_settings, num);
-}
-
-// memory referenced by *item is not copied
-static void append_obj_settings_list(m_obj_settings_t **p_obj_list,
-                                     m_obj_settings_t *item)
-{
-    int num = obj_settings_list_num_items(*p_obj_list);
-    *p_obj_list = talloc_realloc(NULL, *p_obj_list, struct m_obj_settings,
-                                 num + 2);
-    (*p_obj_list)[num] = *item;
-    (*p_obj_list)[num + 1] = (m_obj_settings_t){0};
-}
-
-static bool obj_setting_equals(m_obj_settings_t *a, m_obj_settings_t *b)
-{
-    if (strcmp(a->name, b->name) != 0)
-        return false;
-    for (int n = 0; ; n += 2) {
-        if (!a->attribs[n] && !b->attribs[n])
-            return true;
-        if (!a->attribs[n] || !b->attribs[n])
-            return false;
-        if (strcmp(a->attribs[n], b->attribs[n]) != 0)
-            return false;
-    }
-    abort();
-}
-
-static int obj_settings_list_del(struct bstr opt_name, struct bstr param,
-                                 void *dst)
-{
-    m_obj_settings_t *obj_list = dst ? VAL(dst) : NULL;
-    int r = 1;
-
-    if (dst && !obj_list) {
-        mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %.*s: the list is empty.\n",
-               BSTR_P(opt_name));
+    bstr s = *param;
+    if (bstr_eatstart0(&s, "@")) {
+        // '@name:' -> parse as normal filter entry
+        // '@name,' or '@name<end>' -> parse here
+        int idx = bstrspn(s, NAMECH);
+        bstr label = bstr_splice(s, 0, idx);
+        s = bstr_cut(s, idx);
+        if (bstr_startswith0(s, ":"))
+            return 0;
+        if (dst) {
+            int label_index = obj_settings_list_find_by_label(VAL(dst), label);
+            if (label_index >= 0) {
+                mark_del[label_index] = true;
+            } else {
+                mp_msg(MSGT_CFGPARSER, MSGL_WARN,
+                        "Option %.*s: item label @%.*s not found.\n",
+                        BSTR_P(opt_name), BSTR_P(label));
+            }
+        }
+        *param = s;
         return 1;
     }
 
-    int idx_max = obj_settings_list_num_items(obj_list);
-    bool *mark_del = talloc_zero_array(NULL, bool, idx_max);
-
-    while (param.len) {
-        bstr item;
-        bstr_split_tok(param, ",", &item, &param);
-
-        for (int n = 0; n < idx_max; n++) {
-            if (!mark_del[n] && bstr_equals0(item, obj_list[n].name)) {
-                mark_del[n] = true;
-                goto found;
-            }
-        }
-
-        bstr rest;
-        long long id = bstrtoll(item, &rest, 0);
-        if (rest.len == item.len) {
-            mp_msg(MSGT_CFGPARSER, MSGL_WARN,
-                   "Option %.*s: item %.*s not found.\n",
-                   BSTR_P(opt_name), BSTR_P(item));
-            continue;
-        }
-
-        if (id < 0)
-            id = idx_max + id;
-
-        if (id < 0 || id >= idx_max) {
-            mp_msg(MSGT_CFGPARSER, MSGL_WARN,
-                   "Option %.*s: Index %lld is out of range.\n",
-                   BSTR_P(opt_name), id);
-            continue;
-        }
-
-        mark_del[id] = true;
-
-    found: ;
-    }
+    bstr rest;
+    long long id = bstrtoll(s, &rest, 0);
+    if (rest.len == s.len)
+        return 0;
 
     if (dst) {
-        for (int n = idx_max - 1; n >= 0; n--) {
-            if (mark_del[n])
-                del_obj_settings_list_at(&obj_list, n);
+        int num = obj_settings_list_num_items(VAL(dst));
+        if (id < 0)
+            id = num + id;
+
+        if (id >= 0 && id < num) {
+            mark_del[id] = true;
+        } else {
+            mp_msg(MSGT_CFGPARSER, MSGL_WARN,
+                    "Option %.*s: Index %lld is out of range.\n",
+                    BSTR_P(opt_name), id);
         }
-        VAL(dst) = obj_list;
     }
 
-    talloc_free(mark_del);
-    return r;
-}
-
-static void free_obj_settings_list(void *dst)
-{
-    int n;
-    m_obj_settings_t *d;
-
-    if (!dst || !VAL(dst))
-        return;
-
-    d = VAL(dst);
-    for (n = 0; d[n].name; n++)
-        obj_settings_free_item(&d[n]);
-    talloc_free(d);
-    VAL(dst) = NULL;
+    *param = rest;
+    return 1;
 }
 
 static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
@@ -2127,6 +2198,8 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
     int len = strlen(opt->name);
     m_obj_settings_t *res = NULL;
     int op = OP_NONE;
+    bool *mark_del = NULL;
+    int num_items = obj_settings_list_num_items(dst ? VAL(dst) : 0);
 
     assert(opt->priv);
 
@@ -2169,14 +2242,6 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
         }
     }
 
-    if (op == OP_CLR) {
-        if (dst)
-            free_obj_settings_list(dst);
-        return 0;
-    } else if (op == OP_DEL) {
-        return obj_settings_list_del(name, param, dst);
-    }
-
     if (!bstrcmp0(param, "help")) {
         m_obj_list_t *ol = opt->priv;
         mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Available video filters:\n");
@@ -2188,95 +2253,98 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
         return M_OPT_EXIT - 1;
     }
 
-    if (op == OP_NONE) {
-        if (dst && VAL(dst))
+    if (op == OP_CLR) {
+        if (dst)
             free_obj_settings_list(dst);
+        return 0;
+    } else if (op == OP_DEL) {
+        mark_del = talloc_zero_array(NULL, bool, num_items + 1);
     }
 
-    int num = 0;
+    if (op != OP_NONE && param.len == 0)
+        return M_OPT_MISSING_PARAM;
+
     while (param.len > 0) {
-        int r = parse_obj_settings(name, &param, opt->priv,
-                                   dst ? &res : NULL, num);
+        int r = 0;
+        if (op == OP_DEL)
+            r = parse_obj_settings_del(name, &param, dst, mark_del);
+        if (r == 0) {
+            r = parse_obj_settings(name, &param, opt->priv,
+                                   dst ? &res : NULL);
+        }
         if (r < 0)
             return r;
         const char sep[2] = {OPTION_LIST_SEPARATOR, 0};
         if (param.len > 0 && !bstr_eatstart0(&param, sep))
             return M_OPT_INVALID;
-        num++;
     }
-
-    if (op != OP_NONE && num == 0)
-        return M_OPT_MISSING_PARAM;
 
     if (dst) {
         m_obj_settings_t *list = VAL(dst);
         if (op == OP_PRE) {
-            int qsize = obj_settings_list_num_items(list);
-            res = talloc_realloc(NULL, res, struct m_obj_settings,
-                                 qsize + num + 1);
-            memcpy(&res[num], list, (qsize + 1) * sizeof(m_obj_settings_t));
-            talloc_free(list);
-        } else if (op == OP_ADD) {
-            m_obj_settings_t *list = VAL(dst);
-            int hsize = obj_settings_list_num_items(list);
-            list = talloc_realloc(NULL, list, struct m_obj_settings,
-                                  hsize + num + 1);
-            memcpy(&list[hsize], res, (num + 1) * sizeof(m_obj_settings_t));
-            talloc_free(res);
-            res = list;
-        } else if (op == OP_TOGGLE) {
+            int prepend_counter = 0;
             for (int n = 0; res && res[n].name; n++) {
-                int found = -1;
-                for (int i = 0; list && list[i].name; i++) {
-                    if (obj_setting_equals(&list[i], &res[n])) {
-                        found = i;
-                        break;
-                    }
-                }
-                if (found < 0) {
-                    append_obj_settings_list(&list, &res[n]);
+                int label = obj_settings_list_find_by_label0(list, res[n].label);
+                if (label < 0) {
+                    obj_settings_list_insert_at(&list, prepend_counter, &res[n]);
+                    prepend_counter++;
                 } else {
-                    del_obj_settings_list_at(&list, found);
-                    obj_settings_free_item(&res[n]);
+                    // Prefer replacement semantics, instead of actually
+                    // prepending.
+                    obj_setting_free(&list[label]);
+                    list[label] = res[n];
                 }
             }
             talloc_free(res);
-            res = list;
+        } else if (op == OP_ADD) {
+            for (int n = 0; res && res[n].name; n++) {
+                int label = obj_settings_list_find_by_label0(list, res[n].label);
+                if (label < 0) {
+                    obj_settings_list_insert_at(&list, -1, &res[n]);
+                } else {
+                    // Prefer replacement semantics, instead of actually
+                    // appending.
+                    obj_setting_free(&list[label]);
+                    list[label] = res[n];
+                }
+            }
+            talloc_free(res);
+        } else if (op == OP_TOGGLE) {
+            for (int n = 0; res && res[n].name; n++) {
+                int found = obj_settings_find_by_content(list, &res[n]);
+                if (found < 0) {
+                    obj_settings_list_insert_at(&list, -1, &res[n]);
+                } else {
+                    obj_settings_list_del_at(&list, found);
+                    obj_setting_free(&res[n]);
+                }
+            }
+            talloc_free(res);
+        } else if (op == OP_DEL) {
+            for (int n = num_items - 1; n >= 0; n--) {
+                if (mark_del[n])
+                    obj_settings_list_del_at(&list, n);
+            }
+            for (int n = 0; res && res[n].name; n++) {
+                int found = obj_settings_find_by_content(list, &res[n]);
+                if (found < 0) {
+                    mp_msg(MSGT_CFGPARSER, MSGL_WARN,
+                           "Option %.*s: Item bot found\n", BSTR_P(name));
+                } else {
+                    obj_settings_list_del_at(&list, found);
+                }
+            }
+            free_obj_settings_list(&res);
+        } else {
+            assert(op == OP_NONE);
+            free_obj_settings_list(&list);
+            list = res;
         }
-        VAL(dst) = res;
+        VAL(dst) = list;
     }
+
+    talloc_free(mark_del);
     return 1;
-}
-
-static void copy_obj_settings_list(const m_option_t *opt, void *dst,
-                                   const void *src)
-{
-    m_obj_settings_t *d, *s;
-    int n;
-
-    if (!(dst && src))
-        return;
-
-    s = VAL(src);
-
-    if (VAL(dst))
-        free_obj_settings_list(dst);
-    if (!s)
-        return;
-
-
-
-    for (n = 0; s[n].name; n++)
-        /* NOP */;
-    d = talloc_array(NULL, struct m_obj_settings, n + 1);
-    for (n = 0; s[n].name; n++) {
-        d[n].name = talloc_strdup(NULL, s[n].name);
-        d[n].attribs = NULL;
-        copy_str_list(NULL, &(d[n].attribs), &(s[n].attribs));
-    }
-    d[n].name = NULL;
-    d[n].attribs = NULL;
-    VAL(dst) = d;
 }
 
 const m_option_type_t m_option_type_obj_settings_list = {

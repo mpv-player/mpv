@@ -423,9 +423,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
 
     if (sh) {
         sh->codec = mp_codec_from_av_codec_id(codec->codec_id);
-        sh->lav_headers = avcodec_alloc_context3(codec->codec);
-        assert(sh->lav_headers);
-        avcodec_copy_context(sh->lav_headers, codec);
+        sh->lav_headers = codec;
 
         if (st->disposition & AV_DISPOSITION_DEFAULT)
             sh->default_track = 1;

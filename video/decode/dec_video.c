@@ -45,13 +45,6 @@
 
 #include "video/decode/dec_video.h"
 
-// ===================================================================
-
-#include "core/cpudetect.h"
-
-int field_dominance = -1;
-
-int divx_quality = 0;
 
 int get_video_quality_max(sh_video_t *sh_video)
 {
@@ -315,22 +308,14 @@ void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
 
     //------------------------ frame decoded. --------------------
 
-#if HAVE_MMX
-    // some codecs are broken, and doesn't restore MMX state :(
-    // it happens usually with broken/damaged files.
-    if (gCpuCaps.hasMMX) {
-        __asm__ volatile("emms\n\t":::"memory");
-    }
-#endif
-
     if (!mpi || drop_frame) {
         talloc_free(mpi);
         return NULL;            // error / skipped frame
     }
 
-    if (field_dominance == 0)
+    if (opts->field_dominance == 0)
         mpi->fields |= MP_IMGFIELD_TOP_FIRST;
-    else if (field_dominance == 1)
+    else if (opts->field_dominance == 1)
         mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
 
     double prevpts = sh_video->codec_reordered_pts;

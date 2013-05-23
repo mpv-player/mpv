@@ -110,6 +110,8 @@ typedef struct {
 typedef struct m_obj_settings {
     // Type of the object.
     char *name;
+    // Optional user-defined name.
+    char *label;
     // NULL terminated array of parameter/value pairs.
     char **attribs;
 } m_obj_settings_t;
