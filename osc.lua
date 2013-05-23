@@ -29,7 +29,8 @@ local state = {
     mouse_down_counter = 0,
     active_button = nil,					-- nil = none, 0 = background, 1+ = see elements[]
     rightTC_trem = false,
-    mp_screen_size,
+    mp_screen_sizeX, 
+    mp_screen_sizeY,
 }
 
 -- align:  -1 .. +1
@@ -533,13 +534,12 @@ end
 
 -- called by mpv on every frame
 function mp_update()
+	local current_screen_sizeX, current_screen_sizeY = mp.get_screen_size()
 
-	if state.mp_screen_size == mp.get_screen_size() then
-	-- nothing changed
-	else
+	if not (state.mp_screen_sizeX == current_screen_sizeX and state.mp_screen_sizeY == current_screen_sizeY) then
 	-- display changed, reinit everything
 		osc_init()
-		state.mp_screen_size = mp.get_screen_size()
+		state.mp_screen_sizeX, state.mp_screen_sizeY = current_screen_sizeX, current_screen_sizeY
 	end
 	
 	local ass = assdraw.ass_new()
