@@ -3969,7 +3969,7 @@ static void init_input(struct MPContext *mpctx)
     stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
 
 #ifdef CONFIG_COCOA
-    cocoa_set_state(mpctx->input, mpctx->key_fifo);
+    cocoa_set_input_context(mpctx->input);
 #endif
 }
 

@@ -49,7 +49,7 @@ void cocoa_run_runloop(void);
 void cocoa_stop_runloop(void);
 void cocoa_post_fake_event(void);
 
-void cocoa_set_state(struct input_ctx *input_context, struct mp_fifo *key_fifo);
+void cocoa_set_input_context(struct input_ctx *input_context);
 
 void macosx_finder_args_preinit(int *argc, char ***argv);
 
