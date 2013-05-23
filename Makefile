@@ -84,8 +84,7 @@ SOURCES-$(ALSA)                 += audio/out/ao_alsa.c
 SOURCES-$(CACA)                 += video/out/vo_caca.c
 SOURCES-$(SDL)                  += audio/out/ao_sdl.c
 SOURCES-$(SDL2)                 += video/out/vo_sdl.c
-SOURCES-$(COREAUDIO)            += audio/out/ao_coreaudio.c \
-                                   audio/out/ao_coreaudio/ca_ringbuffer.c
+SOURCES-$(COREAUDIO)            += audio/out/ao_coreaudio.c
 SOURCES-$(COREVIDEO)            += video/out/vo_corevideo.m
 SOURCES-$(DIRECT3D)             += video/out/vo_direct3d.c \
                                    video/out/w32_common.c
@@ -180,6 +179,7 @@ SOURCES = talloc.c \
           core/mp_common.c \
           core/mp_fifo.c \
           core/mp_msg.c \
+          core/mp_ring.c \
           core/mplayer.c \
           core/options.c \
           core/parser-cfg.c \

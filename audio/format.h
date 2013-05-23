@@ -132,6 +132,7 @@ extern const struct af_fmt_entry af_fmtstr_table[];
 int af_str2fmt_short(bstr str);
 int af_fmt2bits(int format);
 char* af_fmt2str(int format, char* str, int size);
+int af_fmt_seconds_to_bytes(int format, float seconds, int channels);
 const char* af_fmt2str_short(int format);
 
 #endif /* MPLAYER_AF_FORMAT_H */
