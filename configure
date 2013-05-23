@@ -329,6 +329,7 @@ Optional features:
   --disable-libavdevice  enable libavdevice demuxers [autodetect]
   --disable-libavfilter  enable libavfilter [autodetect]
   --disable-vf-lavfi     enable vf_lavfi libavfilter bridge [audodetect]
+  --disable-af-lavfi     enable af_lavfi libavfilter bridge [audodetect]
 
 Codecs:
   --enable-mng              enable MNG input support [autodetect]
@@ -487,6 +488,7 @@ _rpath=no
 libpostproc=auto
 libavfilter=auto
 vf_lavfi=auto
+af_lavfi=auto
 libavdevice=auto
 _stream_cache=yes
 _priority=no
@@ -703,6 +705,8 @@ for ac_option do
   --disable-libavfilter) libavfilter=no ;;
   --enable-vf-lavfi)    vf_lavfi=auto ;;
   --disable-vf-lavfi)   vf_lavfi=no ;;
+  --enable-af-lavfi)    af_lavfi=auto ;;
+  --disable-af-lavfi)   af_lavfi=no ;;
 
   --enable-enca)        _enca=yes       ;;
   --disable-enca)       _enca=no        ;;
@@ -2750,6 +2754,31 @@ fi
 echores "$vf_lavfi"
 
 
+echocheck "libavutil av_opt_set_int_list() API"
+_avutil_has_opt_set_int_list=no
+statement_check libavutil/opt.h 'av_opt_set_int_list(0,0,(int*)0,0,0)' && _avutil_has_opt_set_int_list=yes
+echores "$_avutil_has_opt_set_int_list"
+
+
+echocheck "using libavfilter through af_lavfi"
+if test "$af_lavfi" = auto ; then
+    af_lavfi=no
+    if test "$libavfilter" = yes ; then
+        if test "$_avutil_has_opt_set_int_list" = no ; then
+            res_comment="libavutil too old"
+        else
+            af_lavfi=yes
+        fi
+    fi
+fi
+if test "$af_lavfi" = yes ; then
+    def_af_lavfi='#define CONFIG_AF_LAVFI 1'
+else
+    def_af_lavfi='#undef CONFIG_AF_LAVFI'
+fi
+echores "$af_lavfi"
+
+
 echocheck "libavdevice >= 54.0.0"
 if test "$libavdevice" = auto ; then
     libavdevice=no
@@ -3087,6 +3116,7 @@ LIBPOSTPROC = $libpostproc
 LIBAVDEVICE = $libavdevice
 LIBAVFILTER = $libavfilter
 VF_LAVFI = $vf_lavfi
+AF_LAVFI = $af_lavfi
 LIBSMBCLIENT = $_smb
 LIBQUVI = $_libquvi
 LIBTHEORA = $_theora
@@ -3242,6 +3272,7 @@ $def_libpostproc
 $def_libavdevice
 $def_libavfilter
 $def_vf_lavfi
+$def_af_lavfi
 
 
 /* Audio output drivers */

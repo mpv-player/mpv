@@ -550,3 +550,13 @@ scaletempo[=option1:option2:...]
         Would playback audio file at 1.2x normal speed, with audio at normal
         pitch. Changing playback speed, would change pitch, leaving audio
         tempo at 1.2x.
+
+lavfi=graph
+    Filter audio using ffmpeg's libavfilter.
+
+    <graph>
+        Libavfilter graph. See ``lavfi`` video filter for details - the graph
+        syntax is the same.
+
+        Warning: due to shortcomings in the current ``-af`` option parser code,
+        the filter graph must not contain any ``,``.

@@ -48,6 +48,7 @@ extern struct af_info af_info_sinesuppress;
 extern struct af_info af_info_karaoke;
 extern struct af_info af_info_scaletempo;
 extern struct af_info af_info_bs2b;
+extern struct af_info af_info_lavfi;
 
 static struct af_info* filter_list[] = {
     &af_info_dummy,
@@ -77,6 +78,9 @@ static struct af_info* filter_list[] = {
     &af_info_scaletempo,
 #ifdef CONFIG_LIBBS2B
     &af_info_bs2b,
+#endif
+#ifdef CONFIG_AF_LAVFI
+    &af_info_lavfi,
 #endif
     // Must come last, because it's the fallback format conversion filter
     &af_info_format,
