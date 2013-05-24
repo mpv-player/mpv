@@ -603,9 +603,6 @@ void stream_reset(stream_t *s)
         s->buf_pos = s->buf_len = 0;
         s->eof = 0;
     }
-    if (s->control)
-        s->control(s, STREAM_CTRL_RESET, NULL);
-    //stream_seek(s,0);
 }
 
 int stream_control(stream_t *s, int cmd, void *arg)
