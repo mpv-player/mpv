@@ -61,6 +61,8 @@ const m_option_t lavfdopts_conf[] = {
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
+// Should correspond to IO_BUFFER_SIZE in libavformat/aviobuf.c (not public)
+// libavformat (almost) always reads data in blocks of this size.
 #define BIO_BUFFER_SIZE 32768
 
 typedef struct lavf_priv {
@@ -524,6 +526,10 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
                "LAVF_header: av_find_stream_info() failed\n");
         return NULL;
     }
+
+    mp_msg(MSGT_HEADER, MSGL_V, "demux_lavf: avformat_find_stream_info() "
+           "finished after %"PRId64" bytes.\n", stream_tell(demuxer->stream));
+
     /* Add metadata. */
     while ((t = av_dict_get(avfc->metadata, "", t,
                             AV_DICT_IGNORE_SUFFIX)))
