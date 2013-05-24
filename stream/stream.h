@@ -58,6 +58,9 @@
 #define STREAM_BUFFER_SIZE 2048
 #define STREAM_MAX_SECTOR_SIZE (8 * 1024)
 
+// Max buffer for initial probe.
+#define STREAM_MAX_BUFFER_SIZE (2 * 1024 * 1024)
+
 /// atm it will always use mode == STREAM_READ
 /// streams that use the new api should check the mode at open
 #define STREAM_READ  0
@@ -184,14 +187,14 @@ typedef struct stream {
     char *lavf_type; // name of expected demuxer type for lavf
     struct MPOpts *opts;
     streaming_ctrl_t *streaming_ctrl;
-    unsigned char buffer[STREAM_BUFFER_SIZE >
-                         STREAM_MAX_SECTOR_SIZE ? STREAM_BUFFER_SIZE :
-                         STREAM_MAX_SECTOR_SIZE];
 
     FILE *capture_file;
     char *capture_filename;
 
     struct stream *uncached_stream;
+
+    // Includes additional padding in case sizes get rounded up by sector size.
+    unsigned char buffer[];
 } stream_t;
 
 #ifdef CONFIG_NETWORKING
@@ -199,6 +202,7 @@ typedef struct stream {
 #endif
 
 int stream_fill_buffer(stream_t *s);
+void stream_unread_buffer(stream_t *s, void *buffer, size_t buffer_size);
 
 void stream_set_capture_file(stream_t *s, const char *filename);
 void stream_capture_write(stream_t *s);

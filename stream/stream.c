@@ -52,6 +52,9 @@
 #include "core/m_option.h"
 #include "core/m_struct.h"
 
+// Includes additional padding in case sizes get rounded up by sector size.
+#define TOTAL_BUFFER_SIZE (STREAM_MAX_BUFFER_SIZE + STREAM_MAX_SECTOR_SIZE)
+
 /// We keep these 2 for the gui atm, but they will be removed.
 char *cdrom_device = NULL;
 char *dvd_device = NULL;
@@ -352,6 +355,7 @@ void stream_capture_write(stream_t *s)
 int stream_read_unbuffered(stream_t *s, void *buf, int len)
 {
     int orig_len = len;
+    s->buf_pos = s->buf_len = 0;
     // we will retry even if we already reached EOF previously.
     switch (s->type) {
     case STREAMTYPE_STREAM:
@@ -394,6 +398,26 @@ eof_out:
     s->eof = 0;
     s->pos += len;
     return len;
+}
+
+// This works like stdio's ungetc(), but for more than one byte. Rewind the
+// file position by buffer_size, and make all future reads/buffer fills read
+// from the given buffer, until the buffer is exhausted or a seek outside of
+// the buffer happens.
+// You can unread at most STREAM_MAX_BUFFER_SIZE bytes.
+void stream_unread_buffer(stream_t *s, void *buffer, size_t buffer_size)
+{
+    assert(stream_tell(s) >= buffer_size); // can't unread to before file start
+    assert(buffer_size <= STREAM_MAX_BUFFER_SIZE);
+    // Need to include the remaining buffer to ensure no data is lost.
+    int remainder = s->buf_len - s->buf_pos;
+    // Successive buffer unreading might trigger this.
+    assert(buffer_size + remainder <= TOTAL_BUFFER_SIZE);
+    memmove(&s->buffer[buffer_size], &s->buffer[s->buf_pos], remainder);
+    memcpy(s->buffer, buffer, buffer_size);
+    s->buf_pos = 0;
+    s->buf_len = buffer_size + remainder;
+    s->eof = 0;
 }
 
 int stream_fill_buffer(stream_t *s)
@@ -625,7 +649,8 @@ void stream_update_size(stream_t *s)
 
 static stream_t *new_stream(void)
 {
-    stream_t *s = talloc_zero(NULL, stream_t);
+    stream_t *s = talloc_size(NULL, sizeof(stream_t) + TOTAL_BUFFER_SIZE);
+    memset(s, 0, sizeof(stream_t));
 
 #if HAVE_WINSOCK2_H
     {
