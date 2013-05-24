@@ -108,7 +108,6 @@
 #ifdef CONFIG_DVBIN
 #include "stream/dvbin.h"
 #endif
-#include "stream/cache2.h"
 
 //**************************************************************************//
 //             Playtree
@@ -934,13 +933,13 @@ static int find_new_tid(struct MPContext *mpctx, enum stream_type t)
 // Map stream number (as used by libdvdread) to MPEG IDs (as used by demuxer).
 static int map_id_from_demuxer(struct demuxer *d, enum stream_type type, int id)
 {
-    if (d->stream->type == STREAMTYPE_DVD && type == STREAM_SUB)
+    if (d->stream->uncached_type == STREAMTYPE_DVD && type == STREAM_SUB)
         id = id & 0x1F;
     return id;
 }
 static int map_id_to_demuxer(struct demuxer *d, enum stream_type type, int id)
 {
-    if (d->stream->type == STREAMTYPE_DVD && type == STREAM_SUB)
+    if (d->stream->uncached_type == STREAMTYPE_DVD && type == STREAM_SUB)
         id = id | 0x20;
     return id;
 }
@@ -3918,7 +3917,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     struct stream *stream = open_stream(filename, &mpctx->opts, &format);
     if (!stream)
         goto err_out;
-    stream_enable_cache_percent(stream, stream_cache,
+    stream_enable_cache_percent(&stream, stream_cache,
                                 opts->stream_cache_min_percent,
                                 opts->stream_cache_seek_min_percent);
     // deal with broken demuxers: preselect streams
@@ -4203,10 +4202,7 @@ static void play_current_file(struct MPContext *mpctx)
     }
 
     // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
-#ifdef CONFIG_DVBIN
-goto_enable_cache: ;
-#endif
-    int res = stream_enable_cache_percent(mpctx->stream,
+    int res = stream_enable_cache_percent(&mpctx->stream,
                                           opts->stream_cache_size,
                                           opts->stream_cache_min_percent,
                                           opts->stream_cache_seek_min_percent);
@@ -4215,6 +4211,10 @@ goto_enable_cache: ;
             goto terminate_playback;
 
     stream_set_capture_file(mpctx->stream, opts->stream_capture);
+
+#ifdef CONFIG_DVBIN
+goto_reopen_demuxer: ;
+#endif
 
     //============ Open DEMUXERS --- DETECT file type =======================
 
@@ -4402,9 +4402,8 @@ goto_enable_cache: ;
     if (mpctx->dvbin_reopen) {
         mpctx->stop_play = 0;
         uninit_player(mpctx, INITIALIZED_ALL - (INITIALIZED_STREAM | INITIALIZED_GETCH2 | (opts->fixed_vo ? INITIALIZED_VO : 0)));
-        cache_uninit(mpctx->stream);
         mpctx->dvbin_reopen = 0;
-        goto goto_enable_cache;
+        goto goto_reopen_demuxer;
     }
 #endif
 
