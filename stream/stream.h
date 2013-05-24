@@ -40,7 +40,6 @@
 #define STREAMTYPE_VCD  1      // raw mode-2 CDROM reading, 2324 bytes/sector
 #define STREAMTYPE_STREAM 2    // same as FILE but no seeking (for net/stdin)
 #define STREAMTYPE_DVD  3      // libdvdread
-#define STREAMTYPE_MEMORY  4   // read data from memory area
 #define STREAMTYPE_PLAYLIST 6  // FIXME!!! same as STREAMTYPE_FILE now
 #define STREAMTYPE_CDDA 10     // raw audio CD reader
 #define STREAMTYPE_SMB 11      // smb:// url, using libsmbclient (samba)
@@ -328,9 +327,7 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
 void stream_reset(stream_t *s);
 int stream_control(stream_t *s, int cmd, void *arg);
 void stream_update_size(stream_t *s);
-stream_t *new_stream(int fd, int type);
 void free_stream(stream_t *s);
-stream_t *new_memory_stream(unsigned char *data, int len);
 stream_t *open_stream(const char *filename, struct MPOpts *options,
                       int *file_format);
 stream_t *open_output_stream(const char *filename, struct MPOpts *options);

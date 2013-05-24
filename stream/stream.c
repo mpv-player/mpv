@@ -137,6 +137,8 @@ static const stream_info_t *const auto_open_streams[] = {
     NULL
 };
 
+static stream_t *new_stream(int fd, int type);
+
 static stream_t *open_stream_plugin(const stream_info_t *sinfo,
                                     const char *filename,
                                     int mode, struct MPOpts *options,
@@ -626,26 +628,7 @@ void stream_update_size(stream_t *s)
     }
 }
 
-stream_t *new_memory_stream(unsigned char *data, int len)
-{
-    stream_t *s;
-
-    if (len < 0)
-        return NULL;
-    s = calloc(1, sizeof(stream_t) + len);
-    s->fd = -1;
-    s->type = STREAMTYPE_MEMORY;
-    s->buf_pos = 0;
-    s->buf_len = len;
-    s->start_pos = 0;
-    s->end_pos = len;
-    stream_reset(s);
-    s->pos = len;
-    memcpy(s->buffer, data, len);
-    return s;
-}
-
-stream_t *new_stream(int fd, int type)
+static stream_t *new_stream(int fd, int type)
 {
     stream_t *s = talloc_zero(NULL, stream_t);
 
