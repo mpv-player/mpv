@@ -299,30 +299,6 @@ inline static unsigned int stream_read_int24(stream_t *s)
     return y;
 }
 
-inline static int stream_read(stream_t *s, char *mem, int total)
-{
-    int len = total;
-    while (len > 0) {
-        int x;
-        x = s->buf_len - s->buf_pos;
-        if (x == 0) {
-            if (!cache_stream_fill_buffer(s))
-                return total - len;                      // EOF
-            x = s->buf_len - s->buf_pos;
-        }
-        if (s->buf_pos > s->buf_len)
-            mp_msg(MSGT_DEMUX, MSGL_WARN,
-                   "stream_read: WARNING! s->buf_pos>s->buf_len\n");
-        if (x > len)
-            x = len;
-        memcpy(mem, &s->buffer[s->buf_pos], x);
-        s->buf_pos += x;
-        mem += x;
-        len -= x;
-    }
-    return total;
-}
-
 unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
                                 int utf16);
 
@@ -336,52 +312,9 @@ inline static int64_t stream_tell(stream_t *s)
     return s->pos + s->buf_pos - s->buf_len;
 }
 
-inline static int stream_seek(stream_t *s, int64_t pos)
-{
-
-    mp_dbg(MSGT_DEMUX, MSGL_DBG3, "seek to 0x%llX\n", (long long)pos);
-
-    if (pos < 0) {
-        mp_msg(MSGT_DEMUX, MSGL_ERR,
-               "Invalid seek to negative position %llx!\n",
-               (long long)pos);
-        pos = 0;
-    }
-    if (pos < s->pos) {
-        int64_t x = pos - (s->pos - s->buf_len);
-        if (x >= 0) {
-            s->buf_pos = x;
-            s->eof = 0;
-//      putchar('*');fflush(stdout);
-            return 1;
-        }
-    }
-
-    return cache_stream_seek_long(s, pos);
-}
-
-inline static int stream_skip(stream_t *s, int64_t len)
-{
-    if (len < 0 ||
-        (len > 2 * STREAM_BUFFER_SIZE && (s->flags & MP_STREAM_SEEK_FW))) {
-        // negative or big skip!
-        return stream_seek(s, stream_tell(s) + len);
-    }
-    while (len > 0) {
-        int x = s->buf_len - s->buf_pos;
-        if (x == 0) {
-            if (!cache_stream_fill_buffer(s))
-                return 0;                        // EOF
-            x = s->buf_len - s->buf_pos;
-        }
-        if (x > len)
-            x = len;
-        //memcpy(mem,&s->buf[s->buf_pos],x);
-        s->buf_pos += x;
-        len -= x;
-    }
-    return 1;
-}
+int stream_skip(stream_t *s, int64_t len);
+int stream_seek(stream_t *s, int64_t pos);
+int stream_read(stream_t *s, char *mem, int total);
 
 struct MPOpts;
 /*
