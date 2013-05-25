@@ -19,6 +19,7 @@
  */
 
 #include <windows.h>
+#include <sys/time.h>
 #include <mmsystem.h>
 #include "timer.h"
 
@@ -36,7 +37,9 @@ void mp_sleep_us(int64_t us)
 
 uint64_t mp_raw_time_us(void)
 {
-    return timeGetTime() * 1000;
+    struct timeval tv;
+    gettimeofday(&tv,NULL);
+    return tv.tv_sec * 1000000LL + tv.tv_usec;
 }
 
 void mp_raw_time_init(void)
