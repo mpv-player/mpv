@@ -90,7 +90,7 @@ SOURCES-$(DIRECT3D)             += video/out/vo_direct3d.c \
 SOURCES-$(DSOUND)               += audio/out/ao_dsound.c
 SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
                                    video/out/vo_opengl.c video/out/gl_lcms.c \
-                                   video/out/gl_video.c \
+                                   video/out/gl_video.c video/out/dither.c \
                                    video/out/vo_opengl_old.c \
                                    video/out/pnm_loader.c
 

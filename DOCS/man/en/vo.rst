@@ -342,6 +342,24 @@ opengl
         detected. Often, LCD panels will do dithering on their own, which
         conflicts with vo_opengl's dithering, and leads to ugly output.
 
+    dither-size=<2-8>
+        Set the size of the dither matrix (default: 6). The actual size of
+        the matrix is ``(N^2) x (N^2)`` for an option value of ``N``, so a
+        value of 6 gives a size of 64x64. The matrix is generated at startup
+        time, and a large matrix can take rather long to compute (seconds).
+
+        Used for ``fruit`` dithering only.
+
+    dither=<fruit|ordered|no>
+        Select dithering algorithm (default: fruit).
+
+    temporal-dither
+        Enable temporal dithering. (Only active if dithering is enabled in
+        general.) This changes between 8 different dithering pattern on each
+        frame by changing the orientation of the tiled dithering matrix.
+        Unfortunately, this can lead to flicker on LCD displays, since these
+        have a high reaction time.
+
     debug
         Check for OpenGL errors, i.e. call glGetError(). Also request a
         debug OpenGL context (which does nothing with current graphics drivers

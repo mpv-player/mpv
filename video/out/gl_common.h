@@ -305,6 +305,8 @@ struct GL {
     void (GLAPIENTRY *Uniform3f)(GLint, GLfloat, GLfloat, GLfloat);
     void (GLAPIENTRY *Uniform4f)(GLint, GLfloat, GLfloat, GLfloat, GLfloat);
     void (GLAPIENTRY *Uniform1i)(GLint, GLint);
+    void (GLAPIENTRY *UniformMatrix2fv)(GLint, GLsizei, GLboolean,
+                                        const GLfloat *);
     void (GLAPIENTRY *UniformMatrix3fv)(GLint, GLsizei, GLboolean,
                                         const GLfloat *);
     void (GLAPIENTRY *UniformMatrix4x3fv)(GLint, GLsizei, GLboolean,
