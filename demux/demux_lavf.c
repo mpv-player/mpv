@@ -47,7 +47,7 @@
 #include "core/m_option.h"
 
 #define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
-#define PROBE_BUF_SIZE (2 * 1024 * 1024)
+#define PROBE_BUF_SIZE FFMIN(STREAM_MAX_BUFFER_SIZE, 2 * 1024 * 1024)
 
 #define OPT_BASE_STRUCT struct MPOpts
 
@@ -190,18 +190,15 @@ static int lavf_check_file(demuxer_t *demuxer)
 {
     struct MPOpts *opts = demuxer->opts;
     struct lavfdopts *lavfdopts = &opts->lavfdopts;
-    AVProbeData avpd;
+    struct stream *s = demuxer->stream;
     lavf_priv_t *priv;
-    int probe_data_size = 0;
-    int read_size = INITIAL_PROBE_SIZE;
-    int score;
 
     assert(!demuxer->priv);
     demuxer->priv = talloc_zero(NULL, lavf_priv_t);
     priv = demuxer->priv;
     priv->autoselect_sub = -1;
 
-    priv->filename = demuxer->stream->url;
+    priv->filename = s->url;
     if (!priv->filename) {
         priv->filename = "mp:unknown";
         mp_msg(MSGT_DEMUX, MSGL_WARN, "Stream url is not set!\n");
@@ -210,7 +207,7 @@ static int lavf_check_file(demuxer_t *demuxer)
     priv->filename = remove_prefix(priv->filename, prefixes);
 
     char *avdevice_format = NULL;
-    if (demuxer->stream->type == STREAMTYPE_AVDEVICE) {
+    if (s->type == STREAMTYPE_AVDEVICE) {
         // always require filename in the form "format:filename"
         char *sep = strchr(priv->filename, ':');
         if (!sep) {
@@ -237,7 +234,7 @@ static int lavf_check_file(demuxer_t *demuxer)
 
     const char *format = lavfdopts->format;
     if (!format)
-        format = demuxer->stream->lavf_type;
+        format = s->lavf_type;
     if (!format)
         format = avdevice_format;
     if (format) {
@@ -262,38 +259,43 @@ static int lavf_check_file(demuxer_t *demuxer)
     if (lavfdopts->probescore)
         min_probe = lavfdopts->probescore;
 
-    avpd.buf = av_mallocz(FFMAX(BIO_BUFFER_SIZE, PROBE_BUF_SIZE) +
-                          FF_INPUT_BUFFER_PADDING_SIZE);
-    do {
-        read_size = stream_read(demuxer->stream, avpd.buf + probe_data_size,
-                                read_size);
-        if (read_size < 0) {
-            av_free(avpd.buf);
-            return 0;
-        }
-        probe_data_size += read_size;
-        avpd.filename = priv->filename;
-        avpd.buf_size = probe_data_size;
+    AVProbeData avpd = {
+        .filename = priv->filename,
+        .buf_size = 0,
+        .buf = av_mallocz(PROBE_BUF_SIZE + FF_INPUT_BUFFER_PADDING_SIZE),
+    };
 
-        score = 0;
-        priv->avif = av_probe_input_format2(&avpd, probe_data_size > 0, &score);
+    while (avpd.buf_size < PROBE_BUF_SIZE) {
+        int nsize = av_clip(avpd.buf_size * 2, INITIAL_PROBE_SIZE,
+                            PROBE_BUF_SIZE);
+        int read_size = stream_read(s, avpd.buf + avpd.buf_size,
+                                    nsize - avpd.buf_size);
+        if (read_size <= 0)
+            break;
+
+        avpd.buf_size += read_size;
+
+        int score = 0;
+        priv->avif = av_probe_input_format2(&avpd, avpd.buf_size > 0, &score);
 
         if (priv->avif) {
             mp_msg(MSGT_HEADER, MSGL_V, "Found '%s' at score=%d size=%d.\n",
-                   priv->avif->name, score, probe_data_size);
-        }
+                   priv->avif->name, score, avpd.buf_size);
 
-        if (priv->avif && score >= min_probe)
+            if (score >= min_probe)
                 break;
-        if (priv->avif && expected_format) {
-            if (strcmp(priv->avif->name, expected_format) == 0 &&
-                score >= expected_format_probescore)
-                break;
+
+            if (expected_format) {
+                if (strcmp(priv->avif->name, expected_format) == 0 &&
+                    score >= expected_format_probescore)
+                    break;
+            }
         }
 
         priv->avif = NULL;
-        read_size = FFMIN(2 * read_size, PROBE_BUF_SIZE - probe_data_size);
-    } while (read_size > 0 && probe_data_size < PROBE_BUF_SIZE);
+    }
+
+    stream_unread_buffer(s, avpd.buf, avpd.buf_size);
     av_free(avpd.buf);
 
     if (!priv->avif) {
