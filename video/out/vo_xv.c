@@ -685,7 +685,7 @@ static void wait_for_completion(struct vo *vo, int max_outstanding)
                                            " for XShm completion events...\n");
                 ctx->Shm_Warned_Slow = 1;
             }
-            usec_sleep(1000);
+            mp_sleep_us(1000);
             vo_x11_check_events(vo);
         }
     }

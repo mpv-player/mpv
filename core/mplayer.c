@@ -2029,7 +2029,7 @@ static double timing_sleep(struct MPContext *mpctx, double time_frame)
     struct MPOpts *opts = &mpctx->opts;
     double margin = opts->softsleep ? 0.011 : 0;
     while (time_frame > margin) {
-        usec_sleep(1000000 * (time_frame - margin));
+        mp_sleep_us(1000000 * (time_frame - margin));
         time_frame -= get_relative_time(mpctx);
     }
     if (opts->softsleep) {

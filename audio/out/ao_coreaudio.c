@@ -1019,7 +1019,7 @@ static int AudioStreamChangeFormat( AudioStreamID i_stream_id, AudioStreamBasicD
         AudioStreamBasicDescription actual_format;
         int j;
         for (j = 0; !stream_format_changed && j < 50; ++j)
-            usec_sleep(10000);
+            mp_sleep_us(10000);
         if (stream_format_changed)
             stream_format_changed = 0;
         else
@@ -1143,7 +1143,7 @@ static void uninit(int immed)
   if (!immed) {
     long long timeleft=(1000000LL*av_fifo_size(ao->buffer))/ao_data.bps;
     ao_msg(MSGT_AO,MSGL_DBG2, "%d bytes left @%d bps (%d usec)\n", av_fifo_size(ao->buffer), ao_data.bps, (int)timeleft);
-    usec_sleep((int)timeleft);
+    mp_sleep_us((int)timeleft);
   }
 
   if (!ao->b_digital) {

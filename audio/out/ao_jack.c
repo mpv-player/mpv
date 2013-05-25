@@ -311,10 +311,10 @@ err_out:
 // close audio device
 static void uninit(int immed) {
   if (!immed)
-    usec_sleep(get_delay() * 1000 * 1000);
+    mp_sleep_us(get_delay() * 1000 * 1000);
   // HACK, make sure jack doesn't loop-output dirty buffers
   reset();
-  usec_sleep(100 * 1000);
+  mp_sleep_us(100 * 1000);
   jack_client_close(client);
   av_fifo_free(buffer);
   buffer = NULL;

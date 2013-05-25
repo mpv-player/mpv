@@ -441,9 +441,9 @@ static void cache_mainloop(cache_vars_t *s) {
 #endif
             if (sleep_count < INITIAL_FILL_USLEEP_COUNT) {
                 sleep_count++;
-                usec_sleep(INITIAL_FILL_USLEEP_TIME);
+                mp_sleep_us(INITIAL_FILL_USLEEP_TIME);
             } else
-                usec_sleep(FILL_USLEEP_TIME); // idle
+                mp_sleep_us(FILL_USLEEP_TIME); // idle
 #if FORKED_CACHE
             sa.sa_handler = SIG_IGN;
             sigaction(SIGUSR1, &sa, NULL);

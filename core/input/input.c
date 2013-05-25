@@ -1436,7 +1436,7 @@ static void read_events(struct input_ctx *ictx, int time)
     }
 #else
     if (time > 0)
-        usec_sleep(time * 1000);
+        mp_sleep_us(time * 1000);
 #endif
 
 

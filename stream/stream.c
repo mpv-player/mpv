@@ -295,7 +295,7 @@ static int stream_reconnect(stream_t *s)
                "Connection lost! Attempting to reconnect...\n");
 
         if (retry)
-            usec_sleep(RECONNECT_SLEEP_MS * 1000);
+            mp_sleep_us(RECONNECT_SLEEP_MS * 1000);
 
         s->eof = 1;
         stream_reset(s);
@@ -630,7 +630,7 @@ void stream_set_interrupt_callback(int (*cb)(struct input_ctx *, int),
 int stream_check_interrupt(int time)
 {
     if (!stream_check_interrupt_cb) {
-        usec_sleep(time * 1000);
+        mp_sleep_us(time * 1000);
         return 0;
     }
     return stream_check_interrupt_cb(stream_check_interrupt_ctx, time);

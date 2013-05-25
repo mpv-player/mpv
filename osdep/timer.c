@@ -42,12 +42,6 @@ double mp_time_sec(void)
     return mp_time_us() / (double)(1000 * 1000);
 }
 
-int usec_sleep(int usec_delay)
-{
-    mp_sleep_us(usec_delay);
-    return 0;
-}
-
 #if 0
 #include <stdio.h>
 

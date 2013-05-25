@@ -211,7 +211,7 @@ static void uninit(int immed) {
     ALint state;
     alGetSourcei(sources[0], AL_SOURCE_STATE, &state);
     while (state == AL_PLAYING) {
-      usec_sleep(10000);
+      mp_sleep_us(10000);
       alGetSourcei(sources[0], AL_SOURCE_STATE, &state);
     }
   }

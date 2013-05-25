@@ -531,7 +531,7 @@ static void audio_resume(void)
 static void uninit(int immed)
 {
 	if (!immed)
-		usec_sleep(get_delay() * 1000000);
+		mp_sleep_us(get_delay() * 1000000);
 	reset();
 
 	DestroyBuffer();

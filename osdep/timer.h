@@ -38,7 +38,4 @@ uint64_t mp_raw_time_us(void);
 // Sleep in microseconds.
 void mp_sleep_us(int64_t us);
 
-// Legacy timer functions. These can wrap.
-int usec_sleep(int usec_delay);
-
 #endif /* MPLAYER_TIMER_H */
