@@ -35,6 +35,7 @@ struct gl_video_opts {
     int srgb;
     int scale_sep;
     int fancy_downscaling;
+    int scaler_resizes_only;
     int npot;
     int pbo;
     int dither_depth;

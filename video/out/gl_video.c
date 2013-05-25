@@ -251,6 +251,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_STRING_VALIDATE("cscale", scalers[1], 0, validate_scaler_opt),
         OPT_FLOAT("lparam1", scaler_params[0], 0),
         OPT_FLOAT("lparam2", scaler_params[1], 0),
+        OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
         OPT_FLAG("indirect", indirect, 0),
         OPT_FLAG("scale-sep", scale_sep, 0),
@@ -985,6 +986,22 @@ static void recreate_osd(struct gl_video *p)
     p->osd->use_pbo = p->opts.pbo;
 }
 
+static bool does_resize(struct mp_rect src, struct mp_rect dst)
+{
+    return src.x1 - src.x0 != dst.x1 - dst.x0 ||
+           src.y1 - src.y0 != dst.y1 - dst.y0;
+}
+
+static const char *expected_scaler(struct gl_video *p, int unit)
+{
+    if (p->opts.scaler_resizes_only && unit == 0 &&
+        !does_resize(p->src_rect, p->dst_rect))
+    {
+        return "bilinear";
+    }
+    return p->opts.scalers[unit];
+}
+
 static void reinit_rendering(struct gl_video *p)
 {
     mp_msg(MSGT_VO, MSGL_V, "[gl] Reinit rendering.\n");
@@ -995,6 +1012,9 @@ static void reinit_rendering(struct gl_video *p)
 
     if (!p->image.planes[0].gl_texture)
         return;
+
+    for (int n = 0; n < 2; n++)
+        p->scalers[n].name = expected_scaler(p, n);
 
     init_dither(p);
 
@@ -1287,6 +1307,10 @@ static void check_resize(struct gl_video *p)
             need_scaler_reinit |= (tkernel.size != old.size);
             need_scaler_update |= (tkernel.inv_scale != old.inv_scale);
         }
+    }
+    for (int n = 0; n < 2; n++) {
+        if (strcmp(p->scalers[n].name, expected_scaler(p, n)) != 0)
+            need_scaler_reinit = true;
     }
     if (need_scaler_reinit) {
         reinit_rendering(p);

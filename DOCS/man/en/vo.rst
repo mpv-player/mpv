@@ -291,6 +291,14 @@ opengl
     lparam2=<value>
         See ``lparam1``.
 
+    scaler-resizes-only
+        Disable the scaler if the video image is not resized. In that case,
+        ``bilinear`` is used instead whatever is set with ``lscale``. Bilinear
+        will reproduce the source image perfectly if no scaling is performed.
+        Note that this option never affects ``cscale``, although the different
+        processing chain might do chroma scaling differently if ``lscale`` is
+        disabled.
+
     stereo=<value>
         Select a method for stereo display. You may have to use ``--aspect`` to
         fix the aspect value. Experimental, do not expect too much from it.
