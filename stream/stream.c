@@ -138,6 +138,7 @@ static const stream_info_t *const auto_open_streams[] = {
 };
 
 static stream_t *new_stream(void);
+static int stream_seek_unbuffered(stream_t *s, int64_t newpos);
 
 static stream_t *open_stream_plugin(const stream_info_t *sinfo,
                                     const char *filename,
@@ -186,6 +187,9 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
         talloc_free(s);
         return NULL;
     }
+
+    if (!s->read_chunk)
+        s->read_chunk = 4 * (s->sector_size ? s->sector_size : STREAM_BUFFER_SIZE);
 
     if (s->streaming && !s->cache_size) {
         // Set default cache size to use if user does not specify it.
@@ -337,10 +341,10 @@ void stream_set_capture_file(stream_t *s, const char *filename)
     }
 }
 
-void stream_capture_write(stream_t *s)
+static void stream_capture_write(stream_t *s, void *buf, size_t len)
 {
-    if (s->capture_file) {
-        if (fwrite(s->buffer, s->buf_len, 1, s->capture_file) < 1) {
+    if (s->capture_file && len > 0) {
+        if (fwrite(buf, len, 1, s->capture_file) < 1) {
             mp_tmsg(MSGT_GLOBAL, MSGL_ERR, "Error writing capture file: %s\n",
                     strerror(errno));
             stream_set_capture_file(s, NULL);
@@ -352,7 +356,7 @@ void stream_capture_write(stream_t *s)
 // s->buffer, but into buf[0..len] instead.
 // Returns < 0 on error, 0 on EOF, and length of bytes read on success.
 // Partial reads are possible, even if EOF is not reached.
-int stream_read_unbuffered(stream_t *s, void *buf, int len)
+static int stream_read_unbuffered(stream_t *s, void *buf, int len)
 {
     int orig_len = len;
     s->buf_pos = s->buf_len = 0;
@@ -397,6 +401,7 @@ eof_out:
     // This e.g. avoids issues with eof getting stuck when lavf seeks in MPEG-TS
     s->eof = 0;
     s->pos += len;
+    stream_capture_write(s, buf, len);
     return len;
 }
 
@@ -427,8 +432,6 @@ int stream_fill_buffer(stream_t *s)
         return 0;
     s->buf_pos = 0;
     s->buf_len = len;
-//  printf("[%d]",len);fflush(stdout);
-    stream_capture_write(s);
     return len;
 }
 
@@ -480,7 +483,7 @@ int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
 }
 
 // Seek function bypassing the local stream buffer.
-int stream_seek_unbuffered(stream_t *s, int64_t newpos)
+static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 {
     if (newpos == 0 || newpos != s->pos) {
         switch (s->type) {
@@ -720,10 +723,16 @@ int stream_enable_cache_percent(stream_t **stream, int64_t stream_cache_size,
                                 float stream_cache_min_percent,
                                 float stream_cache_seek_min_percent)
 {
-    return stream_enable_cache(stream, stream_cache_size * 1024,
-                               stream_cache_size * 1024 *
+
+    if (stream_cache_size == -1)
+        stream_cache_size = (*stream)->cache_size;
+
+    stream_cache_size = stream_cache_size * 1024; // input is in KiB
+
+    return stream_enable_cache(stream, stream_cache_size,
+                               stream_cache_size *
                                (stream_cache_min_percent / 100.0),
-                               stream_cache_size * 1024 *
+                               stream_cache_size *
                                (stream_cache_seek_min_percent / 100.0));
 }
 
@@ -756,7 +765,6 @@ int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
     cache->opts = orig->opts;
     cache->sector_size = orig->sector_size;
     cache->read_chunk = orig->read_chunk;
-    cache->cache_size = orig->cache_size;
     cache->start_pos = orig->start_pos;
     cache->end_pos = orig->end_pos;
 

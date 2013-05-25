@@ -174,7 +174,7 @@ typedef struct stream {
     int uncached_type; // like (uncached_stream ? uncached_stream->type : type)
     int flags; // MP_STREAM_SEEK_* or'ed flags
     int sector_size; // sector size (seek will be aligned on this size if non 0)
-    int read_chunk; // maximum amount of data to read at once to limit latency (0 for default)
+    int read_chunk; // maximum amount of data to read at once to limit latency
     unsigned int buf_pos, buf_len;
     int64_t pos, start_pos, end_pos;
     int eof;
@@ -205,7 +205,6 @@ int stream_fill_buffer(stream_t *s);
 void stream_unread_buffer(stream_t *s, void *buffer, size_t buffer_size);
 
 void stream_set_capture_file(stream_t *s, const char *filename);
-void stream_capture_write(stream_t *s);
 
 int stream_enable_cache_percent(stream_t **stream, int64_t stream_cache_size,
                                 float stream_cache_min_percent,
@@ -329,9 +328,6 @@ void stream_set_interrupt_callback(int (*cb)(struct input_ctx *, int),
 /// Call the interrupt checking callback if there is one and
 /// wait for time milliseconds
 int stream_check_interrupt(int time);
-
-int stream_read_unbuffered(stream_t *s, void *buf, int len);
-int stream_seek_unbuffered(stream_t *s, int64_t newpos);
 
 bool stream_manages_timeline(stream_t *s);
 
