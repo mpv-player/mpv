@@ -460,7 +460,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 }
 
-static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
+static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
 {
 }
 

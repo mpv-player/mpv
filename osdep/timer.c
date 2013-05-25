@@ -42,16 +42,6 @@ double mp_time_sec(void)
     return mp_time_us() / (double)(1000 * 1000);
 }
 
-unsigned int GetTimer(void)
-{
-    return mp_time_us();
-}
-
-unsigned int GetTimerMS(void)
-{
-    return (mp_time_us() + 500) / 1000;
-}
-
 int usec_sleep(int usec_delay)
 {
     mp_sleep_us(usec_delay);

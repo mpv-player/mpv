@@ -132,9 +132,10 @@ typedef struct MPContext {
     subtitle subs; // subtitle list used when reading subtitles from demuxer
 
     int add_osd_seek_info; // bitfield of enum mp_osd_seek_info
-    unsigned int osd_visible; // for the osd bar only
+    double osd_visible; // for the osd bar only
     int osd_function;
-    unsigned int osd_function_visible;
+    double osd_function_visible;
+    double osd_last_update;
 
     struct playlist *playlist;
     char *filename; // currently playing file
@@ -196,11 +197,11 @@ typedef struct MPContext {
     // by the audio CPU usage meter.
     double delay;
     // AV sync: time until next frame should be shown
-    float time_frame;
+    double time_frame;
     // How long the last vo flip() call took. Used to adjust timing with
     // the goal of making flip() calls finish (rather than start) at the
     // specified time.
-    float last_vo_flip_duration;
+    double last_vo_flip_duration;
     // How much video timing has been changed to make it match the audio
     // timeline. Used for status line information only.
     double total_avsync_change;
@@ -232,23 +233,21 @@ typedef struct MPContext {
     uint64_t backstep_start_seek_ts;
     bool backstep_active;
 
-    float audio_delay;
+    double audio_delay;
 
-    unsigned int last_heartbeat;
+    double last_heartbeat;
 
-    unsigned int mouse_timer;
-    unsigned int mouse_last_time;
+    double mouse_timer;
+    unsigned int mouse_event_ts;
     int mouse_waiting_hide;
 
-    unsigned int next_wakup_time;
-
     // used to prevent hanging in some error cases
-    unsigned int start_timestamp;
+    double start_timestamp;
 
     // Timestamp from the last time some timing functions read the
     // current time, in (occasionally wrapping) microseconds. Used
     // to turn a new time value to a delta from last time.
-    unsigned int last_time;
+    int64_t last_time;
 
     // Used to communicate the parameters of a seek between parts
     struct seek_params {

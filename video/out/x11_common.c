@@ -1398,10 +1398,10 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
 
 static void xscreensaver_heartbeat(struct vo_x11_state *x11)
 {
-    unsigned int time = GetTimerMS();
+    double time = mp_time_sec();
 
     if (x11->display && x11->screensaver_off &&
-        (time - x11->screensaver_time_last) > 30000)
+        (time - x11->screensaver_time_last) > 30)
     {
         x11->screensaver_time_last = time;
 

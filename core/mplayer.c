@@ -207,10 +207,10 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
                                         char *demuxer_name, int stream_cache,
                                         enum stream_type filter);
 
-static float get_relative_time(struct MPContext *mpctx)
+static double get_relative_time(struct MPContext *mpctx)
 {
-    unsigned int new_time = GetTimer();
-    unsigned int delta = new_time - mpctx->last_time;
+    int64_t new_time = mp_time_us();
+    int64_t delta = new_time - mpctx->last_time;
     mpctx->last_time = new_time;
     return delta * 0.000001;
 }
@@ -1329,13 +1329,14 @@ struct mp_osd_msg {
     /// Message text.
     char *msg;
     int id, level, started;
-    /// Display duration in ms.
-    unsigned time;
+    /// Display duration in seconds.
+    double time;
     // Show full OSD for duration of message instead of msg
     // (osd_show_progression command)
     bool show_position;
 };
 
+// time is in ms
 static mp_osd_msg_t *add_osd_msg(struct MPContext *mpctx, int id, int level,
                                  int time)
 {
@@ -1345,7 +1346,7 @@ static mp_osd_msg_t *add_osd_msg(struct MPContext *mpctx, int id, int level,
         .msg = "",
         .id = id,
         .level = level,
-        .time = time,
+        .time = time / 1000.0,
     });
     mpctx->osd_msg_stack = msg;
     return msg;
@@ -1415,32 +1416,25 @@ static mp_osd_msg_t *get_osd_msg(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     mp_osd_msg_t *msg, *prev, *last = NULL;
-    static unsigned last_update = 0;
-    unsigned now = GetTimerMS();
-    unsigned diff;
+    double now = mp_time_sec();
+    double diff;
     char hidden_dec_done = 0;
 
-    if (mpctx->osd_visible) {
-        // 36000000 means max timed visibility is 1 hour into the future, if
-        // the difference is greater assume it's wrapped around from below 0
-        if (mpctx->osd_visible - now > 36000000) {
-            mpctx->osd_visible = 0;
-            mpctx->osd->progbar_type = -1; // disable
-            vo_osd_changed(OSDTYPE_PROGBAR);
-        }
+    if (mpctx->osd_visible && now >= mpctx->osd_visible) {
+        mpctx->osd_visible = 0;
+        mpctx->osd->progbar_type = -1; // disable
+        vo_osd_changed(OSDTYPE_PROGBAR);
     }
-    if (mpctx->osd_function_visible) {
-        if (mpctx->osd_function_visible - now > 36000000) {
-            mpctx->osd_function_visible = 0;
-            mpctx->osd_function = 0;
-        }
+    if (mpctx->osd_function_visible && now >= mpctx->osd_function_visible) {
+        mpctx->osd_function_visible = 0;
+        mpctx->osd_function = 0;
     }
 
-    if (!last_update)
-        last_update = now;
-    diff = now >= last_update ? now - last_update : 0;
+    if (!mpctx->osd_last_update)
+        mpctx->osd_last_update = now;
+    diff = now >= mpctx->osd_last_update ? now - mpctx->osd_last_update : 0;
 
-    last_update = now;
+    mpctx->osd_last_update = now;
 
     // Look for the first message in the stack with high enough level.
     for (msg = mpctx->osd_msg_stack; msg; last = msg, msg = prev) {
@@ -1484,7 +1478,7 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
         return;
 
     if (mpctx->sh_video && opts->term_osd != 1) {
-        mpctx->osd_visible = (GetTimerMS() + opts->osd_duration) | 1;
+        mpctx->osd_visible = mp_time_sec() + opts->osd_duration / 1000.0;
         mpctx->osd->progbar_type = type;
         mpctx->osd->progbar_value = (val - min) / (max - min);
         mpctx->osd->progbar_num_stops = 0;
@@ -1535,7 +1529,7 @@ void set_osd_function(struct MPContext *mpctx, int osd_function)
     struct MPOpts *opts = &mpctx->opts;
 
     mpctx->osd_function = osd_function;
-    mpctx->osd_function_visible = (GetTimerMS() + opts->osd_duration) | 1;
+    mpctx->osd_function_visible = mp_time_sec() + opts->osd_duration / 1000.0;
 }
 
 /**
@@ -2028,12 +2022,12 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
     return 0;
 }
 
-static float timing_sleep(struct MPContext *mpctx, float time_frame)
+static double timing_sleep(struct MPContext *mpctx, double time_frame)
 {
     // assume kernel HZ=100 for softsleep, works with larger HZ but with
     // unnecessarily high CPU usage
     struct MPOpts *opts = &mpctx->opts;
-    float margin = opts->softsleep ? 0.011 : 0;
+    double margin = opts->softsleep ? 0.011 : 0;
     while (time_frame > margin) {
         usec_sleep(1000000 * (time_frame - margin));
         time_frame -= get_relative_time(mpctx);
@@ -3129,7 +3123,7 @@ static int seek(MPContext *mpctx, struct seek_params seek,
                                  : mpctx->timeline[mpctx->timeline_part].start;
     }
 
-    mpctx->start_timestamp = GetTimerMS();
+    mpctx->start_timestamp = mp_time_sec();
 
     return 0;
 }
@@ -3507,32 +3501,29 @@ static void run_playloop(struct MPContext *mpctx)
         // ================================================================
         vo_check_events(vo);
 
-        unsigned int mouse_last_time =
-            mp_input_get_last_mouse_event_time(mpctx->input);
-        if (mpctx->mouse_last_time != mouse_last_time) {
-            mpctx->mouse_last_time = mouse_last_time;
+        double mouse_event_ts = mp_input_get_mouse_event_counter(mpctx->input);
+        if (mpctx->mouse_event_ts != mouse_event_ts) {
+            mpctx->mouse_event_ts = mouse_event_ts;
             if (opts->vo.cursor_autohide_delay > -1) {
                 vo_control(vo, VOCTRL_SET_CURSOR_VISIBILITY, &(bool){true});
                 if (opts->vo.cursor_autohide_delay >= 0) {
                     mpctx->mouse_waiting_hide = 1;
                     mpctx->mouse_timer =
-                        GetTimerMS() + opts->vo.cursor_autohide_delay;
+                        mp_time_sec() + opts->vo.cursor_autohide_delay / 1000.0;
                 }
             }
         }
 
         if (mpctx->mouse_waiting_hide == 1 &&
-            GetTimerMS() >= mpctx->mouse_timer)
+            mp_time_sec() >= mpctx->mouse_timer)
         {
             vo_control(vo, VOCTRL_SET_CURSOR_VISIBILITY, &(bool){false});
             mpctx->mouse_waiting_hide = 2;
         }
 
         if (opts->heartbeat_cmd) {
-            unsigned now = GetTimerMS();
-            if (now - mpctx->last_heartbeat >
-                (unsigned)(opts->heartbeat_interval * 1000))
-            {
+            double now = mp_time_sec();
+            if (now - mpctx->last_heartbeat > opts->heartbeat_interval) {
                 mpctx->last_heartbeat = now;
                 system(opts->heartbeat_cmd);
             }
@@ -3602,12 +3593,12 @@ static void run_playloop(struct MPContext *mpctx)
             mpctx->time_frame = timing_sleep(mpctx, mpctx->time_frame);
         mpctx->time_frame += vo->flip_queue_offset;
 
-        unsigned int t2 = GetTimer();
+        int64_t t2 = mp_time_us();
         /* Playing with playback speed it's possible to get pathological
          * cases with mpctx->time_frame negative enough to cause an
          * overflow in pts_us calculation, thus the FFMAX. */
         double time_frame = FFMAX(mpctx->time_frame, -1);
-        unsigned int pts_us = mpctx->last_time + time_frame * 1e6;
+        int64_t pts_us = mpctx->last_time + time_frame * 1e6;
         int duration = -1;
         double pts2 = vo->next_pts2;
         if (pts2 != MP_NOPTS_VALUE && opts->correct_pts &&
@@ -3625,7 +3616,7 @@ static void run_playloop(struct MPContext *mpctx)
         }
         vo_flip_page(vo, pts_us | 1, duration);
 
-        mpctx->last_vo_flip_duration = (GetTimer() - t2) * 0.000001;
+        mpctx->last_vo_flip_duration = (mp_time_us() - t2) * 0.000001;
         if (vo->driver->flip_page_timed) {
             // No need to adjust sync based on flip speed
             mpctx->last_vo_flip_duration = 0;
@@ -3788,7 +3779,7 @@ static void run_playloop(struct MPContext *mpctx)
          * another seek (which could lead to unchanging display). */
         if ((mpctx->seek.type && cmd->id != MP_CMD_SEEK) ||
             (mpctx->restart_playback && cmd->id == MP_CMD_SEEK &&
-             GetTimerMS() - mpctx->start_timestamp < 300))
+             mp_time_sec() - mpctx->start_timestamp < 0.3))
             break;
         cmd = mp_input_get_cmd(mpctx->input, 0, 0);
         run_command(mpctx, cmd);

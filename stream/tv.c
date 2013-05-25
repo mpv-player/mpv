@@ -130,7 +130,7 @@ static void tv_scan(tvi_handle_t *tvh)
     }
 
     scan = tvh->scan;
-    now=GetTimer();
+    now=(unsigned int)mp_time_us();
     if (!scan) {
         scan=calloc(1,sizeof(tv_scan_t));
         tvh->scan=scan;

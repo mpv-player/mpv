@@ -40,7 +40,7 @@ struct vo_x11_state {
 
     int screensaver_off;
     int dpms_disabled;
-    unsigned int screensaver_time_last;
+    double screensaver_time_last;
 
     XIM xim;
     XIC xic;

@@ -209,7 +209,7 @@ void mp_input_set_section(struct input_ctx *ictx, char *name, int flags);
 char *mp_input_get_section(struct input_ctx *ictx);
 
 // Used to detect mouse movement.
-unsigned int mp_input_get_last_mouse_event_time(struct input_ctx *ictx);
+unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx);
 
 // Initialize the input system
 struct input_conf;

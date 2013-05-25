@@ -29,7 +29,7 @@
 #include "ao.h"
 
 struct priv {
-    unsigned last_time;
+    double last_time;
     float buffered_bytes;
 };
 
@@ -37,8 +37,8 @@ static void drain(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 
-    unsigned now = GetTimer();
-    priv->buffered_bytes -= (now - priv->last_time) / 1e6 * ao->bps;
+    double now = mp_time_sec();
+    priv->buffered_bytes -= (now - priv->last_time) * ao->bps;
     if (priv->buffered_bytes < 0)
         priv->buffered_bytes = 0;
     priv->last_time = now;
@@ -59,7 +59,7 @@ static int init(struct ao *ao, char *params)
     // A "buffer" for about 0.2 seconds of audio
     ao->buffersize = (int)(ao->samplerate * 0.2 / 256 + 1) * ao->outburst;
     ao->bps = ao->channels.num * ao->samplerate * samplesize;
-    priv->last_time = GetTimer();
+    priv->last_time = mp_time_sec();
 
     return 0;
 }
