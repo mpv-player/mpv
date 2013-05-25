@@ -38,6 +38,7 @@
 #include "core/mp_msg.h"
 #include "core/m_option.h"
 #include "core/m_struct.h"
+#include "core/av_opts.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -77,6 +78,7 @@ struct vf_priv_s {
     // options
     char *cfg_graph;
     int64_t cfg_sws_flags;
+    char *cfg_avopts;
 };
 
 static const struct vf_priv_s vf_priv_dflt = {
@@ -130,6 +132,12 @@ static bool recreate_graph(struct vf_instance *vf, int width, int height,
     AVFilterGraph *graph = avfilter_graph_alloc();
     if (!graph)
         goto error;
+
+    if (parse_avopts(graph, p->cfg_avopts) < 0) {
+        mp_msg(MSGT_VFILTER, MSGL_FATAL, "lavfi: could not set opts: '%s'\n",
+               p->cfg_avopts);
+        goto error;
+    }
 
     AVFilterInOut *outputs = avfilter_inout_alloc();
     AVFilterInOut *inputs  = avfilter_inout_alloc();
@@ -323,6 +331,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 static const m_option_t vf_opts_fields[] = {
     {"graph", ST_OFF(cfg_graph), CONF_TYPE_STRING, CONF_MIN, 1},
     {"sws_flags", ST_OFF(cfg_sws_flags), CONF_TYPE_INT64},
+    {"o", ST_OFF(cfg_avopts), CONF_TYPE_STRING},
     {0}
 };
 

@@ -367,7 +367,7 @@ pp[=filter1[:option1[:option2...]]/[-]filter2...]
         Horizontal deblocking on luminance only, and switch vertical
         deblocking on or off automatically depending on available CPU time.
 
-lavfi=graph[:sws_flags]
+lavfi=graph[:sws_flags[:o=opts]]
     Filter video using ffmpeg's libavfilter.
 
     <graph>
@@ -405,6 +405,14 @@ lavfi=graph[:sws_flags]
         option is numeric and takes a bit-wise combination of ``SWS_`` flags.
 
         See ``http://git.videolan.org/?p=ffmpeg.git;a=blob;f=libswscale/swscale.h``.
+
+    <o>
+        Set AVFilterGraph options. These should be documented by ffmpeg.
+
+        *EXAMPLE*:
+
+        ``'--vf=lavfi=yadif:o="threads=2,thread_type=slice"'``
+            forces a specific threading configuration.
 
 noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]
     Adds noise.
