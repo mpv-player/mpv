@@ -75,6 +75,7 @@ struct priv {
 
 static float get_delay(struct ao *ao);
 static int play(struct ao *ao, void *data, int len, int flags);
+static void uninit(struct ao *ao, bool immed);
 
 static void alsa_error_handler(const char *file, int line, const char *function,
                                int err, const char *format, ...)
@@ -436,13 +437,10 @@ static int init(struct ao *ao, char *params)
     mp_msg(MSGT_AO, MSGL_V,
            "alsa-init: requested format: %d Hz, %d channels, %x\n",
            ao->samplerate, ao->channels.num, ao->format);
-    p->alsa = NULL;
-    mp_msg(MSGT_AO, MSGL_V, "alsa-init: using ALSA %s\n", snd_asoundlib_version());
+
 
     p->prepause_frames = 0;
     p->delay_before_pause = 0;
-
-    snd_lib_error_set_handler(alsa_error_handler);
 
     //subdevice parsing
     // set defaults
@@ -477,6 +475,9 @@ static int init(struct ao *ao, char *params)
     mp_msg(MSGT_AO, MSGL_V, "alsa-init: using device %s\n", alsa_device);
 
     p->can_pause = 1;
+
+    mp_msg(MSGT_AO, MSGL_V, "alsa-init: using ALSA %s\n", snd_asoundlib_version());
+    snd_lib_error_set_handler(alsa_error_handler);
 
     int open_mode = block ? 0 : SND_PCM_NONBLOCK;
     int isac3 =  AF_FORMAT_IS_IEC61937(ao->format);
@@ -626,6 +627,7 @@ static int init(struct ao *ao, char *params)
     return 0;
 
 alsa_error:
+    uninit(ao, true);
     return -1;
 } // end init
 
@@ -644,13 +646,12 @@ static void uninit(struct ao *ao, bool immed)
         err = snd_pcm_close(p->alsa);
         CHECK_ALSA_ERROR("pcm close error");
 
-        p->alsa = NULL;
         mp_msg(MSGT_AO, MSGL_V, "alsa-uninit: pcm closed\n");
-    } else {
-        mp_tmsg(MSGT_AO, MSGL_ERR, "[AO_ALSA] No handler defined!\n");
     }
 
-alsa_error: ;
+alsa_error:
+    p->alsa = NULL;
+    snd_lib_error_set_handler(NULL);
 }
 
 static void audio_pause(struct ao *ao)
