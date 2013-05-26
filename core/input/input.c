@@ -1529,8 +1529,9 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
     ictx->got_new_events = true;
     if (!cmd)
         return 0;
-    if (cmd->id == MP_CMD_SET_MOUSE_POS)
-        ictx->mouse_event_counter++;
+    // TODO: find out what to do
+    // if (cmd->id == MP_CMD_SET_MOUSE_POS)
+    //     ictx->mouse_event_counter++;
     queue_add(&ictx->control_cmd_queue, cmd, false);
     return 1;
 }

@@ -76,7 +76,7 @@ void mp_lua_init(struct MPContext *mpctx)
         goto error_out;
 
     // For avoiding wrap arounds and loss of precission
-    mpctx->lua_ctx->start_time = GetTimerMS();
+    mpctx->lua_ctx->start_time = mp_time_us();
 
     // used by get_mpctx()
     lua_pushlightuserdata(L, mpctx); // mpctx
@@ -274,7 +274,7 @@ static int get_mouse_pos(lua_State *L)
 static int get_timer(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
-    lua_pushnumber(L, (GetTimerMS() - mpctx->lua_ctx->start_time) / 1000.0);
+    lua_pushnumber(L, (mp_time_us() - mpctx->lua_ctx->start_time) / 1000.0);
     return 1;
 }
 
