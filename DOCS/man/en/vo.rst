@@ -342,13 +342,13 @@ opengl
         detected. Often, LCD panels will do dithering on their own, which
         conflicts with vo_opengl's dithering, and leads to ugly output.
 
-    dither-size=<2-8>
+    dither-size-fruit=<2-8>
         Set the size of the dither matrix (default: 6). The actual size of
         the matrix is ``(N^2) x (N^2)`` for an option value of ``N``, so a
         value of 6 gives a size of 64x64. The matrix is generated at startup
         time, and a large matrix can take rather long to compute (seconds).
 
-        Used for ``fruit`` dithering only.
+        Used in ``dither=fruit`` mode only.
 
     dither=<fruit|ordered|no>
         Select dithering algorithm (default: fruit).
