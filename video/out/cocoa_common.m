@@ -722,8 +722,9 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
             opts->fs = VO_TRUE;
             update_screen_info(self.videoOutput);
             if (current_screen_has_dock_or_menubar(self.videoOutput))
-                [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
-                    NSApplicationPresentationHideMenuBar];
+                [NSApp setPresentationOptions:
+                    NSApplicationPresentationAutoHideDock|
+                    NSApplicationPresentationAutoHideMenuBar];
             s->windowed_frame = [self frame];
             [self setHasShadow:NO];
             [self setStyleMask:s->fullscreen_mask];
