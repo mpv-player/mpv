@@ -1386,6 +1386,7 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
     cmd->mouse_x = x;
     cmd->mouse_y = y;
     add_key_cmd(ictx, cmd);
+    ictx->mouse_event_counter++;
 }
 
 static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
@@ -1529,9 +1530,6 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
     ictx->got_new_events = true;
     if (!cmd)
         return 0;
-    // TODO: find out what to do
-    // if (cmd->id == MP_CMD_SET_MOUSE_POS)
-    //     ictx->mouse_event_counter++;
     queue_add(&ictx->control_cmd_queue, cmd, false);
     return 1;
 }
