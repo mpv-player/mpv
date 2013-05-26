@@ -276,6 +276,13 @@ void init_cocoa_application(void)
     [NSApp setDelegate:app];
     [app initialize_menu];
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+
+    atexit_b(^{
+        // Because activation policy has just been set to behave like a real
+        // application, that policy must be reset on exit to prevent, among
+        // other things, the menubar created here from remaining on screen.
+        [NSApp setActivationPolicy:NSApplicationActivationPolicyProhibited];
+    });
 }
 
 void terminate_cocoa_application(void)
