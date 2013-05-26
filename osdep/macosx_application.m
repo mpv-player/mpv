@@ -86,6 +86,9 @@ static pthread_t playback_thread_id;
                       action:@selector(hide:) keyEquivalent: @"h"];
     [self menuItemWithParent:menu title:@"Quit mpv"
                       action:@selector(stopPlayback) keyEquivalent: @"q"];
+    [self menuItemWithParent:menu title:@"Quit mpv & remember position"
+                      action:@selector(stopPlaybackAndRememberPosition)
+               keyEquivalent: @"Q"];
     return [menu autorelease];
 }
 
@@ -120,12 +123,24 @@ static pthread_t playback_thread_id;
 
 - (void)stopPlayback
 {
-    if (app.keyFIFO) {
-        mplayer_put_key(app.keyFIFO, MP_KEY_CLOSE_WIN);
+    [self stop:"quit"];
+}
+
+- (void)stopPlaybackAndRememberPosition
+{
+    [self stop:"quit_watch_later"];
+}
+
+- (void)stop:(char *)cmd
+{
+    if (self.inputContext) {
+        mp_cmd_t *cmdt = mp_input_parse_cmd(bstr0(cmd), "");
+        mp_input_queue_cmd(self.inputContext, cmdt);
     } else {
         terminate_cocoa_application();
     }
 }
+
 
 - (void)registerMenuItem:(NSMenuItem*)menuItem forKey:(MPMenuKey)key
 {
@@ -261,6 +276,13 @@ void init_cocoa_application(void)
     [NSApp setDelegate:app];
     [app initialize_menu];
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
+
+    atexit_b(^{
+        // Because activation policy has just been set to behave like a real
+        // application, that policy must be reset on exit to prevent, among
+        // other things, the menubar created here from remaining on screen.
+        [NSApp setActivationPolicy:NSApplicationActivationPolicyProhibited];
+    });
 }
 
 void terminate_cocoa_application(void)
@@ -295,12 +317,10 @@ void cocoa_stop_runloop(void)
     cocoa_post_fake_event();
 }
 
-void cocoa_set_state(struct input_ctx *input_context,
-                     struct mp_fifo *key_fifo)
+void cocoa_set_input_context(struct input_ctx *input_context)
 {
     [NSApp setDelegate:app];
-    app.inputContext        = input_context;
-    app.keyFIFO             = key_fifo;
+    app.inputContext = input_context;
 }
 
 void cocoa_post_fake_event(void)

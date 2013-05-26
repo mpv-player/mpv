@@ -1295,12 +1295,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     d3d_priv *priv = vo->priv;
 
     switch (request) {
-    case VOCTRL_FULLSCREEN:
-        vo_w32_fullscreen(vo);
-        resize_d3d(priv);
-        return VO_TRUE;
-    case VOCTRL_RESET:
-        return VO_NOTIMPL;
     case VOCTRL_REDRAW_FRAME:
         d3d_draw_frame(priv);
         return VO_TRUE;
@@ -1331,15 +1325,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return mp_csp_equalizer_get(&priv->video_eq, args->name, args->valueptr)
                >= 0 ? VO_TRUE : VO_NOTIMPL;
     }
-    case VOCTRL_ONTOP:
-        vo_w32_ontop(vo);
-        return VO_TRUE;
-    case VOCTRL_BORDER:
-        vo_w32_border(vo);
-        return VO_TRUE;
-    case VOCTRL_UPDATE_SCREENINFO:
-        w32_update_xinerama_info(vo);
-        return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
         calc_fs_rect(priv);
         priv->vo->want_redraw = true;
@@ -1355,7 +1340,17 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return !!args->out_image;
     }
     }
-    return VO_NOTIMPL;
+
+    int events = 0;
+    int r = vo_w32_control(vo, &events, request, data);
+
+    if (events & VO_EVENT_RESIZE)
+        resize_d3d(priv);
+
+    if (events & VO_EVENT_EXPOSE)
+        vo->want_redraw = true;
+
+    return r;
 }
 
 /** @brief libvo Callback: Configre the Direct3D adapter.
@@ -1442,20 +1437,6 @@ static void uninit(struct vo *vo)
     if (priv->d3d9_dll)
         FreeLibrary(priv->d3d9_dll);
     priv->d3d9_dll = NULL;
-}
-
-/** @brief libvo Callback: Handles video window events.
- */
-static void check_events(struct vo *vo)
-{
-    d3d_priv *priv = vo->priv;
-
-    int flags = vo_w32_check_events(vo);
-    if (flags & VO_EVENT_RESIZE)
-        resize_d3d(priv);
-
-    if (flags & VO_EVENT_EXPOSE)
-        vo->want_redraw = true;
 }
 
 // Lock buffers and fill out to point to them.
@@ -1827,7 +1808,6 @@ const struct vo_driver video_out_direct3d = {
     .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
-    .check_events = check_events,
     .uninit = uninit,
 };
 
@@ -1845,6 +1825,5 @@ const struct vo_driver video_out_direct3d_shaders = {
     .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
-    .check_events = check_events,
     .uninit = uninit,
 };

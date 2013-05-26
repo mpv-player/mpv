@@ -307,11 +307,8 @@ void mpgl_set_backend_x11(MPGLContext *ctx)
     ctx->config_window = config_window_x11;
     ctx->releaseGlContext = releaseGlContext_x11;
     ctx->swapGlBuffers = swapGlBuffers_x11;
-    ctx->update_xinerama_info = vo_x11_update_screeninfo;
-    ctx->border = vo_x11_border;
     ctx->check_events = vo_x11_check_events;
-    ctx->fullscreen = vo_x11_fullscreen;
-    ctx->ontop = vo_x11_ontop;
     ctx->vo_init = vo_x11_init;
     ctx->vo_uninit = vo_x11_uninit;
+    ctx->vo_control = vo_x11_control;
 }

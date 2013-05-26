@@ -367,7 +367,7 @@ pp[=filter1[:option1[:option2...]]/[-]filter2...]
         Horizontal deblocking on luminance only, and switch vertical
         deblocking on or off automatically depending on available CPU time.
 
-lavfi=graph[:sws_flags]
+lavfi=graph[:sws_flags[:o=opts]]
     Filter video using ffmpeg's libavfilter.
 
     <graph>
@@ -406,6 +406,14 @@ lavfi=graph[:sws_flags]
 
         See ``http://git.videolan.org/?p=ffmpeg.git;a=blob;f=libswscale/swscale.h``.
 
+    <o>
+        Set AVFilterGraph options. These should be documented by ffmpeg.
+
+        *EXAMPLE*:
+
+        ``'--vf=lavfi=yadif:o="threads=2,thread_type=slice"'``
+            forces a specific threading configuration.
+
 noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]
     Adds noise.
 
@@ -416,6 +424,9 @@ noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]
     :a:       averaged temporal noise (smoother, but a lot slower)
     :h:       high quality (slightly better looking, slightly slower)
     :p:       mix random noise with a (semi)regular pattern
+
+    *NOTE*: deprecated. Use libavfilter's ``noise`` filter through
+    ``-vf lavfi`` instead.
 
 hqdn3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]
     This filter aims to reduce image noise producing smooth images and making
@@ -430,6 +441,9 @@ hqdn3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]
     <chroma_tmp>
         chroma temporal strength (default:
         ``luma_tmp*chroma_spatial/luma_spatial``)
+
+    *NOTE*: deprecated. Use libavfilter's ``hqdn3d`` filter through
+    ``-vf lavfi`` instead.
 
 eq[=gamma:contrast:brightness:saturation:rg:gg:bg:weight]
     Software equalizer that uses lookup tables (slow),
@@ -491,8 +505,14 @@ unsharp[=l|cWxH:amount[:l|cWxH:amount]]
         :<0: blur
         :>0: sharpen
 
+    *NOTE*: deprecated. Use libavfilter's ``unsharp`` filter through
+    ``-vf lavfi`` instead.
+
 swapuv
     Swap U & V plane.
+
+    *NOTE*: deprecated. Use libavfilter's ``swapuv`` filter through
+    ``-vf lavfi`` instead.
 
 pullup[=jl:jr:jt:jb:sb:mp]
     Third-generation pulldown reversal (inverse telecine) filter, capable of
@@ -654,6 +674,14 @@ yadif=[mode[:enabled=yes|no]]
         :no:  Filter is not active, but can be deactivated with the ``D`` key
               (or any other key that toggles the ``deinterlace`` property).
 
+    *NOTE*: deprecated. Use libavfilter's ``yadif`` filter through
+    ``-vf lavfi`` instead.
+
+    This filter, or libavfilter's implementation if available, is automatically
+    inserted when using the ``D`` key (or any other key that toggles the
+    ``deinterlace`` property), assuming the video output does not have native
+    deinterlacing support.
+
 down3dright[=lines]
     Reposition and resize stereoscopic images. Extracts both stereo fields and
     places them side by side, resizing them to maintain the original movie
@@ -679,6 +707,9 @@ delogo[=x:y:w:h:t]
         You can specify a text file to load the coordinates from.  Each line
         must have a timestamp (in seconds, and in ascending order) and the
         "x:y:w:h:t" coordinates (*t* can be omitted).
+
+    *NOTE*: deprecated. Use libavfilter's ``delogo`` or ``removelogo`` filters
+    through ``-vf lavfi`` instead.
 
 screenshot
     Optional filter for screenshot support. This is only needed if the video
@@ -773,6 +804,9 @@ stereo3d[=in:out]
         mr or mono_right
             mono output (right eye only)
 
+    *NOTE*: deprecated. Use libavfilter's ``stereo3d`` filter through
+    ``-vf lavfi`` instead.
+
 gradfun[=strength[:radius]]
     Fix the banding artifacts that are sometimes introduced into nearly flat
     regions by truncation to 8bit colordepth. Interpolates the gradients that
@@ -790,6 +824,9 @@ gradfun[=strength[:radius]]
         Neighborhood to fit the gradient to. Larger radius makes for smoother
         gradients, but also prevents the filter from modifying pixels near
         detailed regions (default: 16).
+
+    *NOTE*: deprecated. Use libavfilter's ``gradfun`` filter through
+    ``-vf lavfi`` instead.
 
 dlopen=dll[:a0[:a1[:a2[:a3]]]]
     Loads an external library to filter the image. The library interface

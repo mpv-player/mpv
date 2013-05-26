@@ -220,6 +220,9 @@ void mp_input_set_section(struct input_ctx *ictx, char *name, int flags);
 // Get current input section
 char *mp_input_get_section(struct input_ctx *ictx);
 
+// Used to detect mouse movement.
+unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx);
+
 // Initialize the input system
 struct input_conf;
 struct input_ctx *mp_input_init(struct input_conf *input_conf,

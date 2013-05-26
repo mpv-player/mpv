@@ -269,7 +269,7 @@ int encode_lavc_start(struct encode_lavc_context *ctx)
         }
     }
 
-    ctx->t0 = GetTimerMS();
+    ctx->t0 = mp_time_sec();
 
     mp_msg(MSGT_ENCODE, MSGL_INFO, "Opening muxer: %s [%s]\n",
             ctx->avc->oformat->long_name, ctx->avc->oformat->name);
@@ -997,6 +997,7 @@ int encode_lavc_getstatus(struct encode_lavc_context *ctx,
                           char *buf, int bufsize,
                           float relative_position, float playback_time)
 {
+    double now = mp_time_sec();
     float minutes, megabytes, fps, x;
     float f = FFMAX(0.0001, relative_position);
     if (!ctx)
@@ -1004,10 +1005,10 @@ int encode_lavc_getstatus(struct encode_lavc_context *ctx,
 
     CHECK_FAIL(ctx, -1);
 
-    minutes = (GetTimerMS() - ctx->t0) / 60000.0 * (1 - f) / f;
+    minutes = (now - ctx->t0) / 60.0 * (1 - f) / f;
     megabytes = ctx->avc->pb ? (avio_size(ctx->avc->pb) / 1048576.0 / f) : 0;
-    fps = ctx->frames / ((GetTimerMS() - ctx->t0) / 1000.0);
-    x = playback_time / ((GetTimerMS() - ctx->t0) / 1000.0);
+    fps = ctx->frames / ((now - ctx->t0));
+    x = playback_time / ((now - ctx->t0));
     if (ctx->frames)
         snprintf(buf, bufsize, "{%.1f%% %.1fmin %.1ffps %.1fMB}",
                  relative_position * 100.0, minutes, fps, megabytes);

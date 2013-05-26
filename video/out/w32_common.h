@@ -53,11 +53,8 @@ struct vo;
 
 int vo_w32_init(struct vo *vo);
 void vo_w32_uninit(struct vo *vo);
-void vo_w32_ontop(struct vo *vo);
-void vo_w32_border(struct vo *vo);
-void vo_w32_fullscreen(struct vo *vo);
+int vo_w32_control(struct vo *vo, int *events, int request, void *arg);
 int vo_w32_check_events(struct vo *vo);
 int vo_w32_config(struct vo *vo, uint32_t, uint32_t, uint32_t);
-void w32_update_xinerama_info(struct vo *vo);
 
 #endif /* MPLAYER_W32_COMMON_H */

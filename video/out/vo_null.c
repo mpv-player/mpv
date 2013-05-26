@@ -56,10 +56,6 @@ static void uninit(struct vo *vo)
 {
 }
 
-static void check_events(struct vo *vo)
-{
-}
-
 static int preinit(struct vo *vo, const char *arg)
 {
     if (arg) {
@@ -87,6 +83,5 @@ const struct vo_driver video_out_null = {
     .control = control,
     .draw_image = draw_image,
     .flip_page = flip_page,
-    .check_events = check_events,
     .uninit = uninit,
 };

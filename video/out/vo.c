@@ -228,28 +228,13 @@ void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration)
 
 void vo_check_events(struct vo *vo)
 {
-    vo->next_wakeup_time = GetTimerMS() + 60 * 1000;
     if (!vo->config_ok) {
         if (vo->registered_fd != -1)
             mp_input_rm_key_fd(vo->input_ctx, vo->registered_fd);
         vo->registered_fd = -1;
         return;
     }
-    vo->driver->check_events(vo);
-}
-
-// Return the amount of time vo_check_events() should be called in milliseconds.
-// Note: video timing is completely separate from this.
-unsigned int vo_get_sleep_time(struct vo *vo)
-{
-    unsigned int sleep = 60 * 1000;
-    if (vo->config_ok && vo->next_wakeup_time) {
-        unsigned int now = GetTimerMS();
-        sleep = 0;
-        if (vo->next_wakeup_time >= now)
-            sleep = vo->next_wakeup_time - now;
-    }
-    return sleep;
+    vo_control(vo, VOCTRL_CHECK_EVENTS, NULL);
 }
 
 void vo_seek_reset(struct vo *vo)

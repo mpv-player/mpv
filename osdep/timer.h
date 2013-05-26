@@ -19,10 +19,23 @@
 #ifndef MPLAYER_TIMER_H
 #define MPLAYER_TIMER_H
 
-void InitTimer(void);
-unsigned int GetTimer(void);
-unsigned int GetTimerMS(void);
+#include <inttypes.h>
 
-int usec_sleep(int usec_delay);
+// Initialize timer, must be called at least once at start.
+void mp_time_init(void);
+
+// Return time in microseconds. Never wraps. Never returns 0 or negative values.
+int64_t mp_time_us(void);
+
+// Return time in seconds. Can have down to 1 microsecond resolution, but will
+// be much worse when casted to float.
+double mp_time_sec(void);
+
+// Provided by OS specific functions (timer-linux.c)
+void mp_raw_time_init(void);
+uint64_t mp_raw_time_us(void);
+
+// Sleep in microseconds.
+void mp_sleep_us(int64_t us);
 
 #endif /* MPLAYER_TIMER_H */

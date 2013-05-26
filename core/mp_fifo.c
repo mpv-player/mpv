@@ -31,7 +31,7 @@ struct mp_fifo {
     struct MPOpts *opts;
     struct input_ctx *input;
     int last_key_down;
-    unsigned last_down_time;
+    double last_down_time;
 };
 
 struct mp_fifo *mp_fifo_create(struct input_ctx *input, struct MPOpts *opts)
@@ -50,7 +50,7 @@ static void put_double(struct mp_fifo *fifo, int code)
 
 void mplayer_put_key(struct mp_fifo *fifo, int code)
 {
-    unsigned now = GetTimerMS();
+    double now = mp_time_sec();
     int doubleclick_time = fifo->opts->doubleclick_time;
     // ignore system-doubleclick if we generate these events ourselves
     if (doubleclick_time
@@ -61,7 +61,7 @@ void mplayer_put_key(struct mp_fifo *fifo, int code)
     if (code & MP_KEY_STATE_DOWN) {
         code &= ~MP_KEY_STATE_DOWN;
         if (fifo->last_key_down == code
-            && now - fifo->last_down_time < doubleclick_time)
+            && now - fifo->last_down_time < doubleclick_time / 1000.0)
             put_double(fifo, code);
         fifo->last_key_down = code;
         fifo->last_down_time = now;

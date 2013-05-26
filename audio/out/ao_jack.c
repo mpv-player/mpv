@@ -170,7 +170,7 @@ static int outputaudio(jack_nframes_t nframes, void *arg) {
     if (read_buffer(bufs, nframes, num_ports) < nframes)
       underrun = 1;
   if (estimate) {
-    float now = (float)GetTimer() / 1000000.0;
+    float now = mp_time_us() / 1000000.0;
     float diff = callback_time + callback_interval - now;
     if ((diff > -0.002) && (diff < 0.002))
       callback_time += callback_interval;
@@ -311,10 +311,10 @@ err_out:
 // close audio device
 static void uninit(int immed) {
   if (!immed)
-    usec_sleep(get_delay() * 1000 * 1000);
+    mp_sleep_us(get_delay() * 1000 * 1000);
   // HACK, make sure jack doesn't loop-output dirty buffers
   reset();
-  usec_sleep(100 * 1000);
+  mp_sleep_us(100 * 1000);
   jack_client_close(client);
   av_fifo_free(buffer);
   buffer = NULL;
@@ -361,7 +361,7 @@ static float get_delay(void) {
   int buffered = av_fifo_size(buffer); // could be less
   float in_jack = jack_latency;
   if (estimate && callback_interval > 0) {
-    float elapsed = (float)GetTimer() / 1000000.0 - callback_time;
+    float elapsed = mp_time_us() / 1000000.0 - callback_time;
     in_jack += callback_interval - elapsed;
     if (in_jack < 0) in_jack = 0;
   }

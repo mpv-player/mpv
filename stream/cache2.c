@@ -264,7 +264,7 @@ static int cache_execute_control(cache_vars_t *s) {
   unsigned uint_res;
   uint64_t uint64_res;
   int needs_flush = 0;
-  static unsigned last;
+  static double last;
   int quit = s->control == -2;
   uint64_t old_pos = s->stream->pos;
   int old_eof = s->stream->eof;
@@ -275,7 +275,7 @@ static int cache_execute_control(cache_vars_t *s) {
     s->control = -1;
     return !quit;
   }
-  if (GetTimerMS() - last > 99) {
+  if (mp_time_sec() - last > 0.099) {
     double len, pos;
     if (s->stream->control(s->stream, STREAM_CTRL_GET_TIME_LENGTH, &len) == STREAM_OK)
       s->stream_time_length = len;
@@ -296,7 +296,7 @@ static int cache_execute_control(cache_vars_t *s) {
       return 0;
     }
 #endif
-    last = GetTimerMS();
+    last = mp_time_sec();
   }
   if (s->control == -1) return 1;
   switch (s->control) {
@@ -441,9 +441,9 @@ static void cache_mainloop(cache_vars_t *s) {
 #endif
             if (sleep_count < INITIAL_FILL_USLEEP_COUNT) {
                 sleep_count++;
-                usec_sleep(INITIAL_FILL_USLEEP_TIME);
+                mp_sleep_us(INITIAL_FILL_USLEEP_TIME);
             } else
-                usec_sleep(FILL_USLEEP_TIME); // idle
+                mp_sleep_us(FILL_USLEEP_TIME); // idle
 #if FORKED_CACHE
             sa.sa_handler = SIG_IGN;
             sigaction(SIGUSR1, &sa, NULL);

@@ -471,7 +471,9 @@ struct cmd_queue {
 struct input_ctx {
     // Autorepeat stuff
     short ar_state;
-    unsigned int last_ar;
+    int64_t last_ar;
+    mp_cmd_t *ar_cmd;
+
     // Autorepeat config
     unsigned int ar_delay;
     unsigned int ar_rate;
@@ -482,7 +484,7 @@ struct input_ctx {
     // these are the keys currently down
     int key_down[MP_MAX_KEY_DOWN];
     unsigned int num_key_down;
-    unsigned int last_key_down;
+    int64_t last_key_down;
     struct mp_cmd *current_down_cmd;
 
     int mouse_x, mouse_y;
@@ -500,6 +502,8 @@ struct input_ctx {
     // Used to track whether we managed to read something while checking
     // events sources. If yes, the sources may have more queued.
     bool got_new_events;
+
+    unsigned int mouse_event_counter;
 
     struct input_fd key_fds[MP_MAX_KEY_FD];
     unsigned int num_key_fd;
@@ -1254,7 +1258,7 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         release_down_cmd(ictx);
         ictx->key_down[ictx->num_key_down] = code;
         ictx->num_key_down++;
-        ictx->last_key_down = GetTimer();
+        ictx->last_key_down = mp_time_us();
         ictx->ar_state = 0;
         ictx->current_down_cmd = get_cmd_from_keys(ictx, ictx->num_key_down,
                                                    ictx->key_down);
@@ -1312,7 +1316,7 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
     // No input : autorepeat ?
     if (ictx->ar_rate > 0 && ictx->ar_state >= 0 && ictx->num_key_down > 0
         && !(ictx->key_down[ictx->num_key_down - 1] & MP_NO_REPEAT_KEY)) {
-        unsigned int t = GetTimer();
+        int64_t t = mp_time_us();
         if (ictx->last_ar + 2000000 < t)
             ictx->last_ar = t;
         // First time : wait delay
@@ -1351,6 +1355,9 @@ static void add_key_cmd(struct input_ctx *ictx, struct mp_cmd *cmd)
 void mp_input_feed_key(struct input_ctx *ictx, int code)
 {
     ictx->got_new_events = true;
+    int unmod = code & ~(MP_KEY_MODIFIER_MASK | MP_KEY_STATE_DOWN);
+    if (unmod >= MP_MOUSE_BASE && unmod <= MP_MOUSE_BTN_END)
+        ictx->mouse_event_counter++;
     if (code == MP_INPUT_RELEASE_ALL) {
         mp_msg(MSGT_INPUT, MSGL_V, "input: release all\n");
         memset(ictx->key_down, 0, sizeof(ictx->key_down));
@@ -1428,6 +1435,7 @@ static void read_events(struct input_ctx *ictx, int time)
         time = FFMIN(time, 1000 / ictx->ar_rate);
         time = FFMIN(time, ictx->ar_delay);
     }
+    time = FFMAX(time, 0);
     ictx->got_new_events = false;
     struct input_fd *key_fds = ictx->key_fds;
     struct input_fd *cmd_fds = ictx->cmd_fds;
@@ -1464,12 +1472,9 @@ static void read_events(struct input_ctx *ictx, int time)
         FD_SET(cmd_fds[i].fd, &fds);
     }
     struct timeval tv, *time_val;
-    if (time >= 0) {
-        tv.tv_sec = time / 1000;
-        tv.tv_usec = (time % 1000) * 1000;
-        time_val = &tv;
-    } else
-        time_val = NULL;
+    tv.tv_sec = time / 1000;
+    tv.tv_usec = (time % 1000) * 1000;
+    time_val = &tv;
     if (select(max_fd + 1, &fds, NULL, NULL, time_val) < 0) {
         if (errno != EINTR)
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Select error: %s\n",
@@ -1477,8 +1482,8 @@ static void read_events(struct input_ctx *ictx, int time)
         FD_ZERO(&fds);
     }
 #else
-    if (time)
-        usec_sleep(time * 1000);
+    if (time > 0)
+        mp_sleep_us(time * 1000);
 #endif
 
 
@@ -1524,6 +1529,8 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
     ictx->got_new_events = true;
     if (!cmd)
         return 0;
+    if (cmd->id == MP_CMD_SET_MOUSE_POS)
+        ictx->mouse_event_counter++;
     queue_add(&ictx->control_cmd_queue, cmd, false);
     return 1;
 }
@@ -1966,4 +1973,9 @@ int mp_input_check_interrupt(struct input_ctx *ictx, int time)
             return false;
         read_all_events(ictx, time);
     }
+}
+
+unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
+{
+    return ictx->mouse_event_counter;
 }

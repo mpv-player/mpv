@@ -90,7 +90,7 @@ SOURCES-$(DIRECT3D)             += video/out/vo_direct3d.c \
 SOURCES-$(DSOUND)               += audio/out/ao_dsound.c
 SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
                                    video/out/vo_opengl.c video/out/gl_lcms.c \
-                                   video/out/gl_video.c \
+                                   video/out/gl_video.c video/out/dither.c \
                                    video/out/vo_opengl_old.c \
                                    video/out/pnm_loader.c
 
@@ -118,6 +118,7 @@ SOURCES-$(X11)                  += video/out/vo_x11.c video/out/x11_common.c
 SOURCES-$(XV)                   += video/out/vo_xv.c
 
 SOURCES-$(VF_LAVFI)             += video/filter/vf_lavfi.c
+SOURCES-$(AF_LAVFI)             += audio/filter/af_lavfi.c
 
 SOURCES-$(LUA)                  += core/mp_lua.c
 
@@ -216,8 +217,9 @@ SOURCES = talloc.c \
           demux/extension.c \
           demux/mf.c \
           demux/video.c \
-          osdep/numcores.c \
           osdep/io.c \
+          osdep/numcores.c \
+          osdep/timer.c \
           stream/stream.c \
           stream/stream_avdevice.c \
           stream/stream_file.c \

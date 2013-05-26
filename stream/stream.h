@@ -40,7 +40,6 @@
 #define STREAMTYPE_VCD  1      // raw mode-2 CDROM reading, 2324 bytes/sector
 #define STREAMTYPE_STREAM 2    // same as FILE but no seeking (for net/stdin)
 #define STREAMTYPE_DVD  3      // libdvdread
-#define STREAMTYPE_MEMORY  4   // read data from memory area
 #define STREAMTYPE_PLAYLIST 6  // FIXME!!! same as STREAMTYPE_FILE now
 #define STREAMTYPE_CDDA 10     // raw audio CD reader
 #define STREAMTYPE_SMB 11      // smb:// url, using libsmbclient (samba)
@@ -82,7 +81,6 @@
 
 #define MAX_STREAM_PROTOCOLS 20
 
-#define STREAM_CTRL_RESET 0
 #define STREAM_CTRL_GET_TIME_LENGTH 1
 #define STREAM_CTRL_SEEK_TO_CHAPTER 2
 #define STREAM_CTRL_GET_CURRENT_CHAPTER 3
@@ -299,30 +297,6 @@ inline static unsigned int stream_read_int24(stream_t *s)
     return y;
 }
 
-inline static int stream_read(stream_t *s, char *mem, int total)
-{
-    int len = total;
-    while (len > 0) {
-        int x;
-        x = s->buf_len - s->buf_pos;
-        if (x == 0) {
-            if (!cache_stream_fill_buffer(s))
-                return total - len;                      // EOF
-            x = s->buf_len - s->buf_pos;
-        }
-        if (s->buf_pos > s->buf_len)
-            mp_msg(MSGT_DEMUX, MSGL_WARN,
-                   "stream_read: WARNING! s->buf_pos>s->buf_len\n");
-        if (x > len)
-            x = len;
-        memcpy(mem, &s->buffer[s->buf_pos], x);
-        s->buf_pos += x;
-        mem += x;
-        len -= x;
-    }
-    return total;
-}
-
 unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
                                 int utf16);
 
@@ -336,52 +310,9 @@ inline static int64_t stream_tell(stream_t *s)
     return s->pos + s->buf_pos - s->buf_len;
 }
 
-inline static int stream_seek(stream_t *s, int64_t pos)
-{
-
-    mp_dbg(MSGT_DEMUX, MSGL_DBG3, "seek to 0x%llX\n", (long long)pos);
-
-    if (pos < 0) {
-        mp_msg(MSGT_DEMUX, MSGL_ERR,
-               "Invalid seek to negative position %llx!\n",
-               (long long)pos);
-        pos = 0;
-    }
-    if (pos < s->pos) {
-        int64_t x = pos - (s->pos - s->buf_len);
-        if (x >= 0) {
-            s->buf_pos = x;
-            s->eof = 0;
-//      putchar('*');fflush(stdout);
-            return 1;
-        }
-    }
-
-    return cache_stream_seek_long(s, pos);
-}
-
-inline static int stream_skip(stream_t *s, int64_t len)
-{
-    if (len < 0 ||
-        (len > 2 * STREAM_BUFFER_SIZE && (s->flags & MP_STREAM_SEEK_FW))) {
-        // negative or big skip!
-        return stream_seek(s, stream_tell(s) + len);
-    }
-    while (len > 0) {
-        int x = s->buf_len - s->buf_pos;
-        if (x == 0) {
-            if (!cache_stream_fill_buffer(s))
-                return 0;                        // EOF
-            x = s->buf_len - s->buf_pos;
-        }
-        if (x > len)
-            x = len;
-        //memcpy(mem,&s->buf[s->buf_pos],x);
-        s->buf_pos += x;
-        len -= x;
-    }
-    return 1;
-}
+int stream_skip(stream_t *s, int64_t len);
+int stream_seek(stream_t *s, int64_t pos);
+int stream_read(stream_t *s, char *mem, int total);
 
 struct MPOpts;
 /*
@@ -395,9 +326,7 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
 void stream_reset(stream_t *s);
 int stream_control(stream_t *s, int cmd, void *arg);
 void stream_update_size(stream_t *s);
-stream_t *new_stream(int fd, int type);
 void free_stream(stream_t *s);
-stream_t *new_memory_stream(unsigned char *data, int len);
 stream_t *open_stream(const char *filename, struct MPOpts *options,
                       int *file_format);
 stream_t *open_output_stream(const char *filename, struct MPOpts *options);

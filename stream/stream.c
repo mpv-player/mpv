@@ -137,6 +137,8 @@ static const stream_info_t *const auto_open_streams[] = {
     NULL
 };
 
+static stream_t *new_stream(int fd, int type);
+
 static stream_t *open_stream_plugin(const stream_info_t *sinfo,
                                     const char *filename,
                                     int mode, struct MPOpts *options,
@@ -295,7 +297,7 @@ static int stream_reconnect(stream_t *s)
                "Connection lost! Attempting to reconnect...\n");
 
         if (retry)
-            usec_sleep(RECONNECT_SLEEP_MS * 1000);
+            mp_sleep_us(RECONNECT_SLEEP_MS * 1000);
 
         s->eof = 1;
         stream_reset(s);
@@ -401,6 +403,30 @@ int stream_fill_buffer(stream_t *s)
 //  printf("[%d]",len);fflush(stdout);
     stream_capture_write(s);
     return len;
+}
+
+int stream_read(stream_t *s, char *mem, int total)
+{
+    int len = total;
+    while (len > 0) {
+        int x;
+        x = s->buf_len - s->buf_pos;
+        if (x == 0) {
+            if (!cache_stream_fill_buffer(s))
+                return total - len;                      // EOF
+            x = s->buf_len - s->buf_pos;
+        }
+        if (s->buf_pos > s->buf_len)
+            mp_msg(MSGT_DEMUX, MSGL_WARN,
+                   "stream_read: WARNING! s->buf_pos>s->buf_len\n");
+        if (x > len)
+            x = len;
+        memcpy(mem, &s->buffer[s->buf_pos], x);
+        s->buf_pos += x;
+        mem += x;
+        len -= x;
+    }
+    return total;
 }
 
 int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
@@ -523,6 +549,52 @@ int stream_seek_long(stream_t *s, int64_t pos)
     return 1;
 }
 
+int stream_seek(stream_t *s, int64_t pos)
+{
+
+    mp_dbg(MSGT_DEMUX, MSGL_DBG3, "seek to 0x%llX\n", (long long)pos);
+
+    if (pos < 0) {
+        mp_msg(MSGT_DEMUX, MSGL_ERR,
+               "Invalid seek to negative position %llx!\n",
+               (long long)pos);
+        pos = 0;
+    }
+    if (pos < s->pos) {
+        int64_t x = pos - (s->pos - s->buf_len);
+        if (x >= 0) {
+            s->buf_pos = x;
+            s->eof = 0;
+//      putchar('*');fflush(stdout);
+            return 1;
+        }
+    }
+
+    return cache_stream_seek_long(s, pos);
+}
+
+int stream_skip(stream_t *s, int64_t len)
+{
+    if (len < 0 ||
+        (len > 2 * STREAM_BUFFER_SIZE && (s->flags & MP_STREAM_SEEK_FW))) {
+        // negative or big skip!
+        return stream_seek(s, stream_tell(s) + len);
+    }
+    while (len > 0) {
+        int x = s->buf_len - s->buf_pos;
+        if (x == 0) {
+            if (!cache_stream_fill_buffer(s))
+                return 0;                        // EOF
+            x = s->buf_len - s->buf_pos;
+        }
+        if (x > len)
+            x = len;
+        //memcpy(mem,&s->buf[s->buf_pos],x);
+        s->buf_pos += x;
+        len -= x;
+    }
+    return 1;
+}
 
 void stream_reset(stream_t *s)
 {
@@ -531,9 +603,6 @@ void stream_reset(stream_t *s)
         s->buf_pos = s->buf_len = 0;
         s->eof = 0;
     }
-    if (s->control)
-        s->control(s, STREAM_CTRL_RESET, NULL);
-    //stream_seek(s,0);
 }
 
 int stream_control(stream_t *s, int cmd, void *arg)
@@ -556,26 +625,7 @@ void stream_update_size(stream_t *s)
     }
 }
 
-stream_t *new_memory_stream(unsigned char *data, int len)
-{
-    stream_t *s;
-
-    if (len < 0)
-        return NULL;
-    s = calloc(1, sizeof(stream_t) + len);
-    s->fd = -1;
-    s->type = STREAMTYPE_MEMORY;
-    s->buf_pos = 0;
-    s->buf_len = len;
-    s->start_pos = 0;
-    s->end_pos = len;
-    stream_reset(s);
-    s->pos = len;
-    memcpy(s->buffer, data, len);
-    return s;
-}
-
-stream_t *new_stream(int fd, int type)
+static stream_t *new_stream(int fd, int type)
 {
     stream_t *s = talloc_zero(NULL, stream_t);
 
@@ -630,7 +680,7 @@ void stream_set_interrupt_callback(int (*cb)(struct input_ctx *, int),
 int stream_check_interrupt(int time)
 {
     if (!stream_check_interrupt_cb) {
-        usec_sleep(time * 1000);
+        mp_sleep_us(time * 1000);
         return 0;
     }
     return stream_check_interrupt_cb(stream_check_interrupt_ctx, time);

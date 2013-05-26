@@ -64,6 +64,7 @@ static void resize_window(struct vo_wayland_state *wl,
                           int32_t width,
                           int32_t height);
 
+static void vo_wayland_fullscreen (struct vo *vo);
 
 /*** wayland interface ***/
 
@@ -320,12 +321,7 @@ static void pointer_handle_enter(void *data,
     /* Release the left button on pointer enter again
      * because after moving the shell surface no release event is sent */
     mplayer_put_key(wl->vo->key_fifo, MP_MOUSE_BTN0);
-
-    if (wl->window->type == TYPE_FULLSCREEN || wl->vo->opts->cursor_autohide_delay == -2)
-        hide_cursor(wl);
-    else if (display->cursor.default_cursor) {
-        show_cursor(wl);
-    }
+    show_cursor(wl);
 }
 
 static void pointer_handle_leave(void *data,
@@ -342,12 +338,11 @@ static void pointer_handle_motion(void *data,
                                   wl_fixed_t sy_w)
 {
     struct vo_wayland_state *wl = data;
-    struct vo_wayland_display * display = wl->display;
 
-    display->cursor.pointer = pointer;
+    wl->display->cursor.pointer = pointer;
 
-    if (wl->window->type == TYPE_FULLSCREEN)
-        show_cursor(wl);
+    vo_mouse_movement(wl->vo, wl_fixed_to_int(sx_w),
+                              wl_fixed_to_int(sy_w));
 }
 
 static void pointer_handle_button(void *data,
@@ -522,18 +517,17 @@ static int lookupkey(int key)
 static void hide_cursor (struct vo_wayland_state *wl)
 {
     struct vo_wayland_display *display = wl->display;
-    if (!display->cursor.pointer || wl->vo->opts->cursor_autohide_delay == -1)
+    if (!display->cursor.pointer)
         return;
 
     wl_pointer_set_cursor(display->cursor.pointer, display->cursor.serial,
             NULL, 0, 0);
-
 }
 
 static void show_cursor (struct vo_wayland_state *wl)
 {
     struct vo_wayland_display *display = wl->display;
-    if (!display->cursor.pointer || wl->vo->opts->cursor_autohide_delay == -2)
+    if (!display->cursor.pointer)
         return;
 
     struct wl_buffer *buffer;
@@ -547,9 +541,6 @@ static void show_cursor (struct vo_wayland_state *wl)
     wl_surface_damage(display->cursor.surface, 0, 0,
             image->width, image->height);
     wl_surface_commit(display->cursor.surface);
-
-    display->cursor.mouse_timer = GetTimerMS() + wl->vo->opts->cursor_autohide_delay;
-    display->cursor.mouse_waiting_hide = true;
 }
 
 static void resize_window(struct vo_wayland_state *wl,
@@ -687,8 +678,7 @@ int vo_wayland_init (struct vo *vo)
     vo->event_fd = wl->display->display_fd;
 
     create_window(wl);
-    vo_wayland_update_window_title(vo);
-    return 1;
+    return true;
 }
 
 void vo_wayland_uninit (struct vo *vo)
@@ -701,7 +691,7 @@ void vo_wayland_uninit (struct vo *vo)
     vo->wayland = NULL;
 }
 
-void vo_wayland_ontop (struct vo *vo)
+static void vo_wayland_ontop (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
 
@@ -715,7 +705,7 @@ void vo_wayland_ontop (struct vo *vo)
         wl_shell_surface_set_toplevel(wl->window->shell_surface);
 }
 
-void vo_wayland_border (struct vo *vo)
+static void vo_wayland_border (struct vo *vo)
 {
     /* wayland clienst have to do the decorations themself
      * (client side decorations) but there is no such code implement nor
@@ -726,7 +716,7 @@ void vo_wayland_border (struct vo *vo)
      */
 }
 
-void vo_wayland_fullscreen (struct vo *vo)
+static void vo_wayland_fullscreen (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
     if (!wl->window || !wl->display->shell)
@@ -743,8 +733,6 @@ void vo_wayland_fullscreen (struct vo *vo)
 
         wl->window->type = TYPE_FULLSCREEN;
         vo->opts->fs = true;
-
-        hide_cursor(wl);
     }
 
     else {
@@ -752,24 +740,14 @@ void vo_wayland_fullscreen (struct vo *vo)
         resize_window(wl, 0, wl->window->p_width, wl->window->p_height);
         wl->window->type = TYPE_TOPLEVEL;
         vo->opts->fs = false;
-
-        show_cursor(wl);
     }
 }
 
-int vo_wayland_check_events (struct vo *vo)
+static int vo_wayland_check_events (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
     struct wl_display *dp = wl->display->display;
     int ret;
-
-    if (wl->window->type == TYPE_FULLSCREEN &&
-        wl->display->cursor.mouse_waiting_hide &&
-        GetTimerMS() >= wl->display->cursor.mouse_timer)
-    {
-        hide_cursor(wl);
-        wl->display->cursor.mouse_waiting_hide = false;
-    }
 
     wl_display_dispatch_pending(dp);
     wl_display_flush(dp);
@@ -794,16 +772,13 @@ int vo_wayland_check_events (struct vo *vo)
             wl_display_flush(dp);
     }
 
-    if (wl->display->cursor.mouse_waiting_hide)
-        vo->next_wakeup_time = FFMIN(vo->next_wakeup_time,
-                                     wl->display->cursor.mouse_timer);
     ret = wl->window->events;
     wl->window->events = 0;
 
     return ret;
 }
 
-void vo_wayland_update_screeninfo (struct vo *vo)
+static void vo_wayland_update_screeninfo (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
     struct mp_vo_opts *opts = vo->opts;
@@ -856,9 +831,55 @@ void vo_wayland_update_screeninfo (struct vo *vo)
     aspect_save_screenres(vo, opts->screenwidth, opts->screenheight);
 }
 
-void vo_wayland_update_window_title(struct vo *vo)
+int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
 {
-    struct vo_wayland_window *w = vo->wayland->window;
-    wl_shell_surface_set_title(w->shell_surface, vo_get_window_title(vo));
+    struct vo_wayland_state *wl = vo->wayland;
+    wl_display_dispatch_pending(wl->display->display);
+
+    switch (request) {
+    case VOCTRL_CHECK_EVENTS:
+        *events |= vo_wayland_check_events(vo);
+        return VO_TRUE;
+    case VOCTRL_FULLSCREEN:
+        vo_wayland_fullscreen(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    case VOCTRL_ONTOP:
+        vo_wayland_ontop(vo);
+        return VO_TRUE;
+    case VOCTRL_BORDER:
+        vo_wayland_border(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    case VOCTRL_UPDATE_SCREENINFO:
+        vo_wayland_update_screeninfo(vo);
+        return VO_TRUE;
+    case VOCTRL_SET_CURSOR_VISIBILITY:
+        if (*(bool *)arg) {
+            if (!wl->display->cursor.visible)
+                show_cursor(wl);
+        }
+        else {
+            if (wl->display->cursor.visible)
+                hide_cursor(wl);
+        }
+        wl->display->cursor.visible = *(bool *)arg;
+        return VO_TRUE;
+    }
+    return VO_NOTIMPL;
 }
 
+bool vo_wayland_config (struct vo *vo, uint32_t d_width,
+                        uint32_t d_height, uint32_t flags)
+{
+    struct vo_wayland_window *w = vo->wayland->window;
+
+    w->width = d_width;
+    w->height = d_height;
+
+    if ((VOFLAG_FULLSCREEN & flags) && w->type != TYPE_FULLSCREEN)
+        vo_wayland_fullscreen(vo);
+
+    wl_shell_surface_set_title(w->shell_surface, vo_get_window_title(vo));
+    return true;
+}

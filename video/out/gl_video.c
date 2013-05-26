@@ -37,6 +37,7 @@
 #include "aspect.h"
 #include "video/memcpy_pic.h"
 #include "bitmap_packer.h"
+#include "dither.h"
 
 static const char vo_opengl_shaders[] =
 // Generated from gl_video_shaders.glsl
@@ -192,6 +193,10 @@ struct gl_video {
 
     int frames_rendered;
 
+    // Cached because computing it can take relatively long
+    int last_dither_matrix_size;
+    float *last_dither_matrix;
+
     void *scratch;
 };
 
@@ -229,6 +234,7 @@ static const char *osd_shaders[SUBBITMAP_COUNT] = {
 static const struct gl_video_opts gl_video_opts_def = {
     .npot = 1,
     .dither_depth = -1,
+    .dither_size = 6,
     .fbo_format = GL_RGB,
     .scale_sep = 1,
     .scalers = { "bilinear", "bilinear" },
@@ -251,6 +257,7 @@ const struct m_sub_options gl_video_conf = {
         OPT_STRING_VALIDATE("cscale", scalers[1], 0, validate_scaler_opt),
         OPT_FLOAT("lparam1", scaler_params[0], 0),
         OPT_FLOAT("lparam2", scaler_params[1], 0),
+        OPT_FLAG("scaler-resizes-only", scaler_resizes_only, 0),
         OPT_FLAG("fancy-downscaling", fancy_downscaling, 0),
         OPT_FLAG("indirect", indirect, 0),
         OPT_FLAG("scale-sep", scale_sep, 0),
@@ -268,6 +275,10 @@ const struct m_sub_options gl_video_conf = {
                     {"rgba32f", GL_RGBA32F})),
         OPT_CHOICE_OR_INT("dither-depth", dither_depth, 0, -1, 16,
                           ({"no", -1}, {"auto", 0})),
+        OPT_CHOICE("dither", dither_algo, 0,
+                   ({"fruit", 0}, {"ordered", 1}, {"no", -1})),
+        OPT_INTRANGE("dither-size-fruit", dither_size, 0, 2, 8),
+        OPT_FLAG("temporal-dither", temporal_dither, 0),
         OPT_FLAG("alpha", enable_alpha, 0),
         {0}
     },
@@ -753,6 +764,7 @@ static void compile_shaders(struct gl_video *p)
     shader_def_opt(&header_final, "USE_3DLUT", p->use_lut_3d);
     shader_def_opt(&header_final, "USE_SRGB", p->opts.srgb);
     shader_def_opt(&header_final, "USE_DITHER", p->dither_texture != 0);
+    shader_def_opt(&header_final, "USE_TEMPORAL_DITHER", p->opts.temporal_dither);
 
     if (p->opts.scale_sep && p->scalers[0].kernel) {
         header_sep = talloc_strdup(tmp, "");
@@ -925,18 +937,6 @@ static void init_scaler(struct gl_video *p, struct scaler *scaler)
     debug_check_gl(p, "after initializing scaler");
 }
 
-static void make_dither_matrix(unsigned char *m, int size)
-{
-    m[0] = 0;
-    for (int sz = 1; sz < size; sz *= 2) {
-        int offset[] = {sz*size, sz, sz * (size+1), 0};
-        for (int i = 0; i < 4; i++)
-            for (int y = 0; y < sz * size; y += size)
-                for (int x = 0; x < sz; x++)
-                    m[x+y+offset[i]] = m[x+y] * 4 + (3-i) * 256/size/size;
-    }
-}
-
 static void init_dither(struct gl_video *p)
 {
     GL *gl = p->gl;
@@ -946,30 +946,54 @@ static void init_dither(struct gl_video *p)
     if (p->opts.dither_depth > 0)
         dst_depth = p->opts.dither_depth;
 
-    if (p->opts.dither_depth < 0)
+    if (p->opts.dither_depth < 0 || p->opts.dither_algo < 0)
         return;
 
     mp_msg(MSGT_VO, MSGL_V, "[gl] Dither to %d.\n", dst_depth);
 
+    int tex_size;
+    void *tex_data;
+    GLenum tex_type;
+    unsigned char temp[256];
+
+    if (p->opts.dither_algo == 0) {
+        int sizeb = p->opts.dither_size;
+        int size = 1 << sizeb;
+
+        if (p->last_dither_matrix_size != size) {
+            p->last_dither_matrix = talloc_realloc(p, p->last_dither_matrix,
+                                                   float, size * size);
+            mp_make_fruit_dither_matrix(p->last_dither_matrix, sizeb);
+            p->last_dither_matrix_size = size;
+        }
+
+        tex_size = size;
+        tex_type = GL_FLOAT;
+        tex_data = p->last_dither_matrix;
+    } else {
+        assert(sizeof(temp) >= 8 * 8);
+        mp_make_ordered_dither_matrix(temp, 8);
+
+        tex_size = 8;
+        tex_type = GL_UNSIGNED_BYTE;
+        tex_data = temp;
+    }
+
     // This defines how many bits are considered significant for output on
-    // screen. The superfluous bits will be used for rounded according to the
+    // screen. The superfluous bits will be used for rounding according to the
     // dither matrix. The precision of the source implicitly decides how many
     // dither patterns can be visible.
     p->dither_quantization = (1 << dst_depth) - 1;
-    int size = 8;
-    p->dither_multiply = p->dither_quantization + 1.0 / (size*size);
-    unsigned char dither[256];
-    make_dither_matrix(dither, size);
-
-    p->dither_size = size;
+    p->dither_multiply = p->dither_quantization + 1.0 / (tex_size * tex_size);
+    p->dither_size = tex_size;
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_DITHER);
     gl->GenTextures(1, &p->dither_texture);
     gl->BindTexture(GL_TEXTURE_2D, p->dither_texture);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
     gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RED, size, size, 0, GL_RED,
-                   GL_UNSIGNED_BYTE, dither);
+    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RED, tex_size, tex_size, 0, GL_RED,
+                   tex_type, tex_data);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -985,6 +1009,22 @@ static void recreate_osd(struct gl_video *p)
     p->osd->use_pbo = p->opts.pbo;
 }
 
+static bool does_resize(struct mp_rect src, struct mp_rect dst)
+{
+    return src.x1 - src.x0 != dst.x1 - dst.x0 ||
+           src.y1 - src.y0 != dst.y1 - dst.y0;
+}
+
+static const char *expected_scaler(struct gl_video *p, int unit)
+{
+    if (p->opts.scaler_resizes_only && unit == 0 &&
+        !does_resize(p->src_rect, p->dst_rect))
+    {
+        return "bilinear";
+    }
+    return p->opts.scalers[unit];
+}
+
 static void reinit_rendering(struct gl_video *p)
 {
     mp_msg(MSGT_VO, MSGL_V, "[gl] Reinit rendering.\n");
@@ -995,6 +1035,9 @@ static void reinit_rendering(struct gl_video *p)
 
     if (!p->image.planes[0].gl_texture)
         return;
+
+    for (int n = 0; n < 2; n++)
+        p->scalers[n].name = expected_scaler(p, n);
 
     init_dither(p);
 
@@ -1144,6 +1187,25 @@ static void uninit_video(struct gl_video *p)
     fbotex_uninit(p, &p->scale_sep_fbo);
 }
 
+static void change_dither_trafo(struct gl_video *p)
+{
+    GL *gl = p->gl;
+    int program = p->final_program;
+
+    int phase = p->frames_rendered % 8u;
+    float r = phase * (M_PI / 2); // rotate
+    float m = phase < 4 ? 1 : -1; // mirror
+
+    gl->UseProgram(program);
+
+    float matrix[2][2] = {{cos(r),     -sin(r)    },
+                          {sin(r) * m,  cos(r) * m}};
+    gl->UniformMatrix2fv(gl->GetUniformLocation(program, "dither_trafo"),
+                         1, GL_TRUE, &matrix[0][0]);
+
+    gl->UseProgram(0);
+}
+
 static void render_to_fbo(struct gl_video *p, struct fbotex *fbo, int w, int h,
                           int tex_w, int tex_h)
 {
@@ -1185,6 +1247,9 @@ void gl_video_render_frame(struct gl_video *p)
     struct vertex vb[VERTICES_PER_QUAD];
     struct video_image *vimg = &p->image;
     bool is_flipped = vimg->image_flipped;
+
+    if (p->opts.temporal_dither)
+        change_dither_trafo(p);
 
     if (p->dst_rect.x0 > p->vp_x || p->dst_rect.y0 > p->vp_y
         || p->dst_rect.x1 < p->vp_x + p->vp_w
@@ -1254,6 +1319,8 @@ void gl_video_render_frame(struct gl_video *p)
 
     gl->UseProgram(0);
 
+    p->frames_rendered++;
+
     debug_check_gl(p, "after video rendering");
 }
 
@@ -1287,6 +1354,10 @@ static void check_resize(struct gl_video *p)
             need_scaler_reinit |= (tkernel.size != old.size);
             need_scaler_update |= (tkernel.inv_scale != old.inv_scale);
         }
+    }
+    for (int n = 0; n < 2; n++) {
+        if (strcmp(p->scalers[n].name, expected_scaler(p, n)) != 0)
+            need_scaler_reinit = true;
     }
     if (need_scaler_reinit) {
         reinit_rendering(p);
@@ -1515,6 +1586,14 @@ static void check_gl_features(struct gl_video *p)
                 disabled[n_disabled++]
                     = have_float_tex ? "scaler (FBO)" : "scaler (float tex.)";
             }
+        }
+    }
+
+    if (!have_float_tex && p->opts.dither_depth >= 0) {
+        // only fruit dithering uses float textures
+        if (p->opts.dither_algo == 0) {
+            p->opts.dither_depth = -1;
+            disabled[n_disabled++] = "dithering (float tex.)";
         }
     }
 

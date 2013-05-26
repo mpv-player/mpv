@@ -101,13 +101,6 @@ struct priv {
 
 static bool resize(struct vo *vo);
 
-static void check_events(struct vo *vo)
-{
-    int ret = vo_x11_check_events(vo);
-    if (ret & (VO_EVENT_EXPOSE | VO_EVENT_RESIZE))
-        resize(vo);
-}
-
 /* Scan the available visuals on this Display/Screen.  Try to find
  * the 'best' available TrueColor visual that has a decent color
  * depth (at least 15bit).  If there are multiple visuals with depth
@@ -482,8 +475,8 @@ static void wait_for_completion(struct vo *vo, int max_outstanding)
                                            " for XShm completion events...\n");
                 ctx->Shm_Warned_Slow = 1;
             }
-            usec_sleep(1000);
-            check_events(vo);
+            mp_sleep_us(1000);
+            vo_x11_check_events(vo);
         }
     }
 #endif
@@ -647,10 +640,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
 {
     struct priv *p = vo->priv;
     switch (request) {
-    case VOCTRL_FULLSCREEN:
-        vo_x11_fullscreen(vo);
-        resize(vo);
-        return VO_TRUE;
     case VOCTRL_SET_EQUALIZER:
     {
         struct voctrl_set_equalizer_args *args = data;
@@ -661,12 +650,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         struct voctrl_get_equalizer_args *args = data;
         return vo_x11_get_equalizer(vo, args->name, args->valueptr);
     }
-    case VOCTRL_ONTOP:
-        vo_x11_ontop(vo);
-        return VO_TRUE;
-    case VOCTRL_UPDATE_SCREENINFO:
-        vo_x11_update_screeninfo(vo);
-        return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
@@ -688,7 +671,12 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     }
     }
-    return VO_NOTIMPL;
+
+    int events = 0;
+    int r = vo_x11_control(vo, &events, request, data);
+    if (events & (VO_EVENT_EXPOSE | VO_EVENT_RESIZE))
+        resize(vo);
+    return r;
 }
 
 const struct vo_driver video_out_x11 = {
@@ -707,6 +695,5 @@ const struct vo_driver video_out_x11 = {
     .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
-    .check_events = check_events,
     .uninit = uninit,
 };

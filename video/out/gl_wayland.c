@@ -184,13 +184,9 @@ static bool config_window_wayland(struct MPGLContext *ctx,
 
     wl->window->resize_func = egl_resize_func;
     wl->window->resize_func_data = (void*) egl_ctx;
-    wl->window->width = d_width;
-    wl->window->height = d_height;
 
-    vo_wayland_update_window_title(ctx->vo);
-
-    if ((VOFLAG_FULLSCREEN & flags) && wl->window->type != TYPE_FULLSCREEN)
-        vo_wayland_fullscreen(ctx->vo);
+    if (!vo_wayland_config(ctx->vo, d_width, d_height, flags))
+        return false;
 
     if (!egl_ctx->egl.ctx) {
         /* Create OpenGL context */
@@ -244,11 +240,7 @@ void mpgl_set_backend_wayland(MPGLContext *ctx)
     ctx->config_window = config_window_wayland;
     ctx->releaseGlContext = releaseGlContext_wayland;
     ctx->swapGlBuffers = swapGlBuffers_wayland;
-    ctx->update_xinerama_info = vo_wayland_update_screeninfo;
-    ctx->border = vo_wayland_border;
-    ctx->check_events = vo_wayland_check_events;
-    ctx->fullscreen = vo_wayland_fullscreen;
-    ctx->ontop = vo_wayland_ontop;
+    ctx->vo_control = vo_wayland_control;
     ctx->vo_init = vo_wayland_init;
     ctx->vo_uninit = vo_wayland_uninit;
 }

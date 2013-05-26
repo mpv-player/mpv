@@ -36,6 +36,8 @@
 enum mp_voctrl {
     /* signal a device reset seek */
     VOCTRL_RESET = 1,
+    /* Handle input and redraw events, called by vo_check_events() */
+    VOCTRL_CHECK_EVENTS,
     /* used to switch to fullscreen */
     VOCTRL_FULLSCREEN,
     /* signal a device pause */
@@ -58,6 +60,8 @@ enum mp_voctrl {
 
     VOCTRL_ONTOP,
     VOCTRL_BORDER,
+
+    VOCTRL_SET_CURSOR_VISIBILITY,       // bool
 
     VOCTRL_SET_DEINTERLACE,
     VOCTRL_GET_DEINTERLACE,
@@ -192,15 +196,13 @@ struct vo_driver {
 
     /*
      * Blit/Flip buffer to the screen. Must be called after each frame!
+     * pts_us is the frame presentation time, linked to mp_time_us().
+     * pts_us is 0 if the frame should be presented immediately.
+     * duration is estimated time in us until the next frame is shown.
+     * duration is -1 if it is unknown or unset.
      */
     void (*flip_page)(struct vo *vo);
-    void (*flip_page_timed)(struct vo *vo, unsigned int pts_us, int duration);
-
-    /*
-     * This func is called after every frames to handle keyboard and
-     * other events. It's called in PAUSE mode too!
-     */
-    void (*check_events)(struct vo *vo);
+    void (*flip_page_timed)(struct vo *vo, int64_t pts_us, int duration);
 
     /*
      * Closes driver. Should restore the original state of the system.
@@ -239,9 +241,6 @@ struct vo {
     double wakeup_period; // if > 0, this sets the maximum wakeup period for event polling
 
     double flip_queue_offset; // queue flip events at most this much in advance
-
-    unsigned int next_wakeup_time; // deadline for next vo_check_events() call,
-                                   // in GetTimerMS() units (set by VO)
 
     const struct vo_driver *driver;
     void *priv;
@@ -297,7 +296,6 @@ void vo_new_frame_imminent(struct vo *vo);
 void vo_draw_osd(struct vo *vo, struct osd_state *osd);
 void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration);
 void vo_check_events(struct vo *vo);
-unsigned int vo_get_sleep_time(struct vo *vo);
 void vo_seek_reset(struct vo *vo);
 void vo_destroy(struct vo *vo);
 

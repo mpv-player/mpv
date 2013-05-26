@@ -153,7 +153,7 @@ static void uninit(struct ao *ao, bool cut_audio)
      * guaranteed by backend drivers, so we approximate this behavior.
      */
     if (!cut_audio)
-        usec_sleep(rsd_delay_ms(priv->rd) * 1000);
+        mp_sleep_us(rsd_delay_ms(priv->rd) * 1000);
 
     rsd_stop(priv->rd);
     rsd_free(priv->rd);

@@ -165,9 +165,6 @@ struct vo_cocoa_state {
 
     struct aspect_data aspdat;
 
-    int display_cursor;
-    int cursor_timer;
-    int vo_cursor_autohide_delay;
     bool will_make_front;
 
     bool did_resize;
@@ -199,8 +196,6 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .fullscreen_mask = NSBorderlessWindowMask,
         .windowed_frame = {{0,0},{0,0}},
         .out_fs_resize = NO,
-        .display_cursor = 1,
-        .vo_cursor_autohide_delay = vo->opts->cursor_autohide_delay,
         .will_make_front = YES,
         .power_mgmt_assertion = kIOPMNullAssertionID,
         .accumulated_scroll = 0,
@@ -275,11 +270,20 @@ int vo_cocoa_init(struct vo *vo)
     return 1;
 }
 
+static void vo_cocoa_set_cursor_visibility(bool visible)
+{
+    if (visible) {
+        CGDisplayShowCursor(kCGDirectMainDisplay);
+    } else {
+        CGDisplayHideCursor(kCGDirectMainDisplay);
+    }
+}
+
 void vo_cocoa_uninit(struct vo *vo)
 {
     dispatch_sync(dispatch_get_main_queue(), ^{
         struct vo_cocoa_state *s = vo->cocoa;
-        CGDisplayShowCursor(kCGDirectMainDisplay);
+        vo_cocoa_set_cursor_visibility(true);
         enable_power_management(vo);
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
 
@@ -596,34 +600,9 @@ void vo_cocoa_swap_buffers(struct vo *vo)
     }
 }
 
-static void vo_cocoa_display_cursor(struct vo *vo, int requested_state)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    if (requested_state) {
-        if (!vo->opts->fs || s->vo_cursor_autohide_delay > -2) {
-            s->display_cursor = requested_state;
-            CGDisplayShowCursor(kCGDirectMainDisplay);
-        }
-    } else {
-        if (s->vo_cursor_autohide_delay != -1) {
-            s->display_cursor = requested_state;
-            CGDisplayHideCursor(kCGDirectMainDisplay);
-        }
-    }
-}
-
 int vo_cocoa_check_events(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-
-    int ms_time = (int) ([[NSProcessInfo processInfo] systemUptime] * 1000);
-
-    // automatically hide mouse cursor
-    if (vo->opts->fs && s->display_cursor &&
-        (ms_time - s->cursor_timer >= s->vo_cursor_autohide_delay)) {
-        vo_cocoa_display_cursor(vo, 0);
-        s->cursor_timer = ms_time;
-    }
 
     int key = cocoa_sync_get_key(s->input_queue);
     if (key >= 0) mplayer_put_key(vo->key_fifo, key);
@@ -655,6 +634,38 @@ void vo_cocoa_fullscreen(struct vo *vo)
         // Now lock again!
         vo_cocoa_set_current_context(vo, true);
     }
+}
+
+int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
+{
+    switch (request) {
+    case VOCTRL_CHECK_EVENTS:
+        *events |= vo_cocoa_check_events(vo);
+        return VO_TRUE;
+    case VOCTRL_FULLSCREEN:
+        vo_cocoa_fullscreen(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    case VOCTRL_ONTOP:
+        vo_cocoa_ontop(vo);
+        return VO_TRUE;
+    case VOCTRL_UPDATE_SCREENINFO:
+        vo_cocoa_update_xinerama_info(vo);
+        return VO_TRUE;
+    case VOCTRL_SET_CURSOR_VISIBILITY: {
+        bool visible = *(bool *)arg;
+        if (vo->opts->fs)
+            vo_cocoa_set_cursor_visibility(visible);
+        return VO_TRUE;
+    }
+    case VOCTRL_PAUSE:
+        vo_cocoa_pause(vo);
+        return VO_TRUE;
+    case VOCTRL_RESUME:
+        vo_cocoa_resume(vo);
+        return VO_TRUE;
+    }
+    return VO_NOTIMPL;
 }
 
 int vo_cocoa_swap_interval(int enabled)
@@ -708,29 +719,30 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     if (opts->native_fs) {
         if (!opts->fs) {
             opts->fs = VO_TRUE;
+            vo_cocoa_set_cursor_visibility(false);
             [self setContentResizeIncrements:NSMakeSize(1, 1)];
-            vo_cocoa_display_cursor(self.videoOutput, 0);
         } else {
-            opts->fs = VO_FALSE;
+            vo_cocoa_set_cursor_visibility(true);
             [self setContentAspectRatio:s->current_video_size];
-            vo_cocoa_display_cursor(self.videoOutput, 1);
         }
 
         [self toggleFullScreen:nil];
     } else {
         if (!opts->fs) {
             opts->fs = VO_TRUE;
+            vo_cocoa_set_cursor_visibility(false);
             update_screen_info(self.videoOutput);
             if (current_screen_has_dock_or_menubar(self.videoOutput))
-                [NSApp setPresentationOptions:NSApplicationPresentationHideDock|
-                    NSApplicationPresentationHideMenuBar];
+                [NSApp setPresentationOptions:
+                    NSApplicationPresentationAutoHideDock|
+                    NSApplicationPresentationAutoHideMenuBar];
             s->windowed_frame = [self frame];
             [self setHasShadow:NO];
             [self setStyleMask:s->fullscreen_mask];
             [self setFrame:s->fsscreen_frame display:YES animate:NO];
-            vo_cocoa_display_cursor(self.videoOutput, 0);
         } else {
             opts->fs = VO_FALSE;
+            vo_cocoa_set_cursor_visibility(true);
             [NSApp setPresentationOptions:NSApplicationPresentationDefault];
             [self setHasShadow:YES];
             [self setStyleMask:s->windowed_mask];
@@ -741,7 +753,6 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
                 s->out_fs_resize = NO;
             }
             [self setContentAspectRatio:s->current_video_size];
-            vo_cocoa_display_cursor(self.videoOutput, 1);
         }
     }
 
@@ -789,11 +800,8 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     }
 }
 
-- (void)mouseMoved: (NSEvent *) theEvent
+- (void)signalMouseMovement:(NSEvent *)theEvent
 {
-    if (self.videoOutput->opts->fs)
-        vo_cocoa_display_cursor(self.videoOutput, 1);
-
     NSView *view = self.contentView;
     NSPoint loc = [view convertPoint:[theEvent locationInWindow] fromView:nil];
     NSRect bounds = [view bounds];
@@ -805,17 +813,14 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     }
 }
 
+- (void)mouseMoved:(NSEvent *)theEvent
+{
+    [self signalMouseMovement:theEvent];
+}
+
 - (void)mouseDragged:(NSEvent *)theEvent
 {
-    NSView *view = self.contentView;
-    NSPoint loc = [view convertPoint:[theEvent locationInWindow] fromView:nil];
-    NSRect bounds = [view bounds];
-
-    int x = loc.x;
-    int y = - loc.y + bounds.size.height; // convert to x11-like coord system
-    if (CGRectContainsPoint(bounds, NSMakePoint(x, y))) {
-        vo_mouse_movement(self.videoOutput, x, y);
-    }
+    [self signalMouseMovement:theEvent];
 }
 
 - (void)mouseDown:(NSEvent *)theEvent

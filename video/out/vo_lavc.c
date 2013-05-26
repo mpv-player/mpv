@@ -460,11 +460,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 }
 
-static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
-{
-}
-
-static void check_events(struct vo *vo)
+static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
 {
 }
 
@@ -524,7 +520,6 @@ const struct vo_driver video_out_lavc = {
     .config = config,
     .control = control,
     .uninit = uninit,
-    .check_events = check_events,
     .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,

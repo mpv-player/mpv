@@ -28,6 +28,10 @@
 
 int parse_avopts(void *v, char *str){
     char *start;
+
+    if (!str)
+        return 0;
+
     start= str= strdup(str);
 
     while(str && *str){

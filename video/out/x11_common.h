@@ -40,7 +40,7 @@ struct vo_x11_state {
 
     int screensaver_off;
     int dpms_disabled;
-    unsigned int screensaver_time_last;
+    double screensaver_time_last;
 
     XIM xim;
     XIC xic;
@@ -57,8 +57,7 @@ struct vo_x11_state {
     int fs_layer;
 
     XSizeHints vo_hint;
-    unsigned int mouse_timer;
-    int mouse_waiting_hide;
+    bool mouse_cursor_hidden;
     int orig_layer;
     int old_gravity;
 
@@ -129,7 +128,6 @@ struct vo_x11_state {
 int vo_x11_init(struct vo *vo);
 void vo_x11_uninit(struct vo *vo);
 int vo_x11_check_events(struct vo *vo);
-void vo_x11_fullscreen(struct vo *vo);
 uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value);
 uint32_t vo_x11_get_equalizer(struct vo *vo, const char *name, int *value);
 bool vo_x11_screen_is_composited(struct vo *vo);
@@ -140,9 +138,7 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis,
                              const char *classname);
 void vo_x11_clear_background(struct vo *vo, const struct mp_rect *rc);
 void vo_x11_clearwindow(struct vo *vo, Window vo_window);
-void vo_x11_ontop(struct vo *vo);
-void vo_x11_border(struct vo *vo);
-void vo_x11_update_screeninfo(struct vo *vo);
+int vo_x11_control(struct vo *vo, int *events, int request, void *arg);
 
 double vo_x11_vm_get_fps(struct vo *vo);
 

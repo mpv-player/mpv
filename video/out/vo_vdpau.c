@@ -97,13 +97,13 @@ struct vdpctx {
     bool                               is_preempted;
     bool                               preemption_acked;
     bool                               preemption_user_notified;
-    unsigned int                       last_preemption_retry_fail;
+    double                             last_preemption_retry_fail;
     VdpGetProcAddress                 *vdp_get_proc_address;
 
     VdpPresentationQueueTarget         flip_target;
     VdpPresentationQueue               flip_queue;
     uint64_t                           last_vdp_time;
-    unsigned int                       last_sync_update;
+    uint64_t                           last_sync_update;
 
     VdpOutputSurface                   output_surfaces[MAX_OUTPUT_SURFACES];
     VdpOutputSurface                   screenshot_surface;
@@ -181,15 +181,15 @@ struct vdpctx {
 
 static bool status_ok(struct vo *vo);
 
-static int change_vdptime_sync(struct vdpctx *vc, unsigned int *t)
+static int change_vdptime_sync(struct vdpctx *vc, int64_t *t)
 {
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
     VdpTime vdp_time;
     vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
     CHECK_ST_ERROR("Error when calling vdp_presentation_queue_get_time");
-    unsigned int t1 = *t;
-    unsigned int t2 = GetTimer();
+    uint64_t t1 = *t;
+    uint64_t t2 = mp_time_us();
     uint64_t old = vc->last_vdp_time + (t1 - vc->last_sync_update) * 1000ULL;
     if (vdp_time > old) {
         if (vdp_time > old + (t2 - t1) * 1000ULL)
@@ -209,7 +209,7 @@ static uint64_t sync_vdptime(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 
-    unsigned int t = GetTimer();
+    uint64_t t = mp_time_us();
     if (t - vc->last_sync_update > 5000000)
         change_vdptime_sync(vc, &t);
     uint64_t now = (t - vc->last_sync_update) * 1000ULL + vc->last_vdp_time;
@@ -218,10 +218,10 @@ static uint64_t sync_vdptime(struct vo *vo)
     return now;
 }
 
-static uint64_t convert_to_vdptime(struct vo *vo, unsigned int t)
+static uint64_t convert_to_vdptime(struct vo *vo, uint64_t t)
 {
     struct vdpctx *vc = vo->priv;
-    return (int)(t - vc->last_sync_update) * 1000LL + vc->last_vdp_time;
+    return (t - vc->last_sync_update) * 1000LL + vc->last_vdp_time;
 }
 
 static int render_video_to_output_surface(struct vo *vo,
@@ -513,7 +513,7 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
     vdp_st = vdp->presentation_queue_get_time(vc->flip_queue, &vdp_time);
     CHECK_ST_ERROR("Error when calling vdp_presentation_queue_get_time");
     vc->last_vdp_time = vdp_time;
-    vc->last_sync_update = GetTimer();
+    vc->last_sync_update = mp_time_us();
 
     vc->vsync_interval = 1;
     if (vc->composite_detect && vo_x11_screen_is_composited(vo)) {
@@ -822,11 +822,11 @@ static int handle_preemption(struct vo *vo)
     }
     /* Trying to initialize seems to be quite slow, so only try once a
      * second to avoid using 100% CPU. */
-    if (vc->last_preemption_retry_fail
-        && GetTimerMS() - vc->last_preemption_retry_fail < 1000)
+    if (vc->last_preemption_retry_fail &&
+        mp_time_sec() - vc->last_preemption_retry_fail < 1.0)
         return -1;
     if (win_x11_init_vdpau_procs(vo) < 0 || initialize_vdpau_objects(vo) < 0) {
-        vc->last_preemption_retry_fail = GetTimerMS() | 1;
+        vc->last_preemption_retry_fail = mp_time_sec();
         return -1;
     }
     vc->last_preemption_retry_fail = 0;
@@ -865,20 +865,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         return -1;
 
     return 0;
-}
-
-static void check_events(struct vo *vo)
-{
-    if (handle_preemption(vo) < 0)
-        return;
-
-    int e = vo_x11_check_events(vo);
-
-    if (e & VO_EVENT_RESIZE)
-        resize(vo);
-    else if (e & VO_EVENT_EXPOSE) {
-        vo->want_redraw = true;
-    }
 }
 
 static struct bitmap_packer *make_packer(struct vo *vo, VdpRGBAFormat format)
@@ -1116,7 +1102,7 @@ static inline uint64_t prev_vs2(struct vdpctx *vc, uint64_t ts, int shift)
     return ts - offset;
 }
 
-static void flip_page_timed(struct vo *vo, unsigned int pts_us, int duration)
+static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
@@ -1554,14 +1540,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     case VOCTRL_HWDEC_DECODER_RENDER:
         return decoder_render(vo, data);
-    case VOCTRL_BORDER:
-        vo_x11_border(vo);
-        checked_resize(vo);
-        return VO_TRUE;
-    case VOCTRL_FULLSCREEN:
-        vo_x11_fullscreen(vo);
-        checked_resize(vo);
-        return VO_TRUE;
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:
@@ -1585,12 +1563,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_GET_YUV_COLORSPACE:
         *(struct mp_csp_details *)data = vc->colorspace;
         return true;
-    case VOCTRL_ONTOP:
-        vo_x11_ontop(vo);
-        return VO_TRUE;
-    case VOCTRL_UPDATE_SCREENINFO:
-        vo_x11_update_screeninfo(vo);
-        return VO_TRUE;
     case VOCTRL_NEWFRAME:
         vc->deint_queue_pos = next_deint_queue_pos(vo, true);
         if (status_ok(vo))
@@ -1617,7 +1589,17 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return true;
     }
     }
-    return VO_NOTIMPL;
+
+    int events = 0;
+    int r = vo_x11_control(vo, &events, request, data);
+
+    if (events & VO_EVENT_RESIZE) {
+        checked_resize(vo);
+    } else if (events & VO_EVENT_EXPOSE) {
+        vo->want_redraw = true;
+    }
+
+    return r;
 }
 
 #define OPT_BASE_STRUCT struct vdpctx
@@ -1638,7 +1620,6 @@ const struct vo_driver video_out_vdpau = {
     .get_buffered_frame = set_next_frame_info,
     .draw_osd = draw_osd,
     .flip_page_timed = flip_page_timed,
-    .check_events = check_events,
     .uninit = uninit,
     .priv_size = sizeof(struct vdpctx),
     .options = (const struct m_option []){
