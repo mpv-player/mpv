@@ -179,6 +179,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     if (!mp_image_is_writeable(mpi)) {
         dmpi = vf_alloc_out_image(vf);
         mp_image_copy_attributes(dmpi, mpi);
+        mp_image_copy(dmpi, mpi);
     }
 
     if (vf->priv->timed_rect)
@@ -193,13 +194,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     if (dmpi != mpi)
         talloc_free(mpi);
     return dmpi;
-}
-
-static void uninit(struct vf_instance *vf){
-    if(!vf->priv) return;
-
-    free(vf->priv);
-    vf->priv=NULL;
 }
 
 //===========================================================================//
@@ -290,7 +284,6 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->filter=filter;
     vf->query_format=query_format;
-    vf->uninit=uninit;
 
     if (vf->priv->file) {
         if (load_timed_rectangles(vf->priv))
@@ -305,7 +298,6 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_420P);
     if(!vf->priv->outfmt)
     {
-        uninit(vf);
         return 0; // no csp match :(
     }
 
