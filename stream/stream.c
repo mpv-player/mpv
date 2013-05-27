@@ -432,28 +432,38 @@ int stream_fill_buffer(stream_t *s)
     return len;
 }
 
+// Read between 1..buf_size bytes of data, return how much data has been read.
+// Return <= 0 on EOF, error, of if buf_size was 0.
+int stream_read_partial(stream_t *s, char *buf, int buf_size)
+{
+    assert(s->buf_pos <= s->buf_len);
+    assert(buf_size >= 0);
+    if (s->buf_pos == s->buf_len && buf_size > 0) {
+        s->buf_pos = s->buf_len = 0;
+        // Do a direct read, but only if there's no sector alignment requirement
+        // Also, small reads will be more efficient with buffering & copying
+        if (!s->sector_size && buf_size >= STREAM_BUFFER_SIZE)
+            return stream_read_unbuffered(s, buf, buf_size);
+        if (!stream_fill_buffer(s))
+            return 0;
+    }
+    int len = FFMIN(buf_size, s->buf_len - s->buf_pos);
+    memcpy(buf, &s->buffer[s->buf_pos], len);
+    s->buf_pos += len;
+    return len;
+}
+
 int stream_read(stream_t *s, char *mem, int total)
 {
     int len = total;
     while (len > 0) {
-        int x;
-        x = s->buf_len - s->buf_pos;
-        if (x == 0) {
-            if (!stream_fill_buffer(s))
-                return total - len;                      // EOF
-            x = s->buf_len - s->buf_pos;
-        }
-        if (s->buf_pos > s->buf_len)
-            mp_msg(MSGT_DEMUX, MSGL_WARN,
-                   "stream_read: WARNING! s->buf_pos>s->buf_len\n");
-        if (x > len)
-            x = len;
-        memcpy(mem, &s->buffer[s->buf_pos], x);
-        s->buf_pos += x;
-        mem += x;
-        len -= x;
+        int read = stream_read_partial(s, mem, len);
+        if (read <= 0)
+            break; // EOF
+        mem += read;
+        len -= read;
     }
-    return total;
+    return total - len;
 }
 
 int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
