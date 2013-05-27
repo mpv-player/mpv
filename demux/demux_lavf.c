@@ -93,6 +93,7 @@ struct format_hack {
 
 static const struct format_hack format_hacks[] = {
     {"aac", "audio/aacp", 25, 0.5},
+    {"mp3", "audio/mpeg", 25, 0.5},
     {0}
 };
 
