@@ -100,6 +100,9 @@ void set_default_mplayer_options(struct MPOpts *opts)
             .ac3drc = 1.,
             .downmix = 1,
         },
+        .lavfdopts = {
+            .allow_mimetype = 1,
+        },
         .input = {
              .key_fifo_size = 7,
              .ar_delay = 200,

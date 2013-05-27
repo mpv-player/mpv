@@ -55,6 +55,7 @@ const m_option_t lavfdopts_conf[] = {
     OPT_INTRANGE("probesize", lavfdopts.probesize, 0, 32, INT_MAX),
     OPT_STRING("format", lavfdopts.format, 0),
     OPT_INTRANGE("analyzeduration", lavfdopts.analyzeduration, 0, 0, INT_MAX),
+    OPT_FLAG("allow-mimetype", lavfdopts.allow_mimetype, 0),
     OPT_INTRANGE("probescore", lavfdopts.probescore, 0, 0, 100),
     OPT_STRING("cryptokey", lavfdopts.cryptokey, 0),
     OPT_STRING("o", lavfdopts.avopt, 0),
@@ -218,7 +219,7 @@ static int lavf_check_file(demuxer_t *demuxer)
         format = demuxer->stream->lavf_type;
     if (!format)
         format = avdevice_format;
-    if (!format && demuxer->stream->mime_type)
+    if (!format && lavfdopts->allow_mimetype && demuxer->stream->mime_type)
         format = (char *)find_demuxer_from_mime_type(demuxer->stream->mime_type);
     if (format) {
         if (strcmp(format, "help") == 0) {

@@ -1113,6 +1113,12 @@
         format detection less reliable. Can be used to force auto-detected
         libavformat demuxers, even if libavformat considers the detection not
         reliable enough. (Default: 26.)
+    allow-mimetype=<yes|no>
+        Allow deriving the format from the HTTP mimetype (default: yes). Set
+        this to no in case playing things from http mysteriously fails, even
+        though the same files work from local disk.
+
+        This is default in order to reduce latency when opening http streams.
     format=<value>
         Force a specific libavformat demuxer.
     o=<key>=<value>[,<key>=<value>[,...]]
