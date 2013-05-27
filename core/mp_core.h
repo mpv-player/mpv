@@ -31,7 +31,7 @@
 
 #define INITIALIZED_VO      1
 #define INITIALIZED_AO      2
-
+#define INITIALIZED_VOL     4
 #define INITIALIZED_GETCH2  8
 #define INITIALIZED_SPUDEC  32
 #define INITIALIZED_STREAM  64

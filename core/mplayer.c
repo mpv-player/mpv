@@ -557,21 +557,27 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         vo_spudec = NULL;
     }
 
-    if (mask & INITIALIZED_AO) {
-        mpctx->initialized_flags &= ~INITIALIZED_AO;
+    if (mask & INITIALIZED_VOL) {
+        mpctx->initialized_flags &= ~INITIALIZED_VOL;
         if (mpctx->mixer.ao) {
             // Normally the mixer remembers volume, but do it even if the
-            // volume is set explicitly with --volume=...
+            // volume is set explicitly with --volume=... (so that the same
+            // volume is restored on reinit)
             if (opts->mixer_init_volume >= 0 && mpctx->mixer.user_set_volume)
                 mixer_getbothvolume(&mpctx->mixer, &opts->mixer_init_volume);
             if (opts->mixer_init_mute >= 0 && mpctx->mixer.user_set_mute)
                 opts->mixer_init_mute = mixer_getmute(&mpctx->mixer);
-            mixer_uninit(&mpctx->mixer);
         }
+    }
+
+    if (mask & INITIALIZED_AO) {
+        mpctx->initialized_flags &= ~INITIALIZED_AO;
+        if (mpctx->mixer.ao)
+            mixer_uninit(&mpctx->mixer);
+        mpctx->mixer.ao = NULL;
         if (mpctx->ao)
             ao_uninit(mpctx->ao, mpctx->stop_play != AT_END_OF_FILE);
         mpctx->ao = NULL;
-        mpctx->mixer.ao = NULL;
     }
 }
 
@@ -1693,7 +1699,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     struct ao *ao;
     init_demux_stream(mpctx, STREAM_AUDIO);
     if (!mpctx->sh_audio) {
-        uninit_player(mpctx, INITIALIZED_AO);
+        uninit_player(mpctx, INITIALIZED_VOL | INITIALIZED_AO);
         goto no_audio;
     }
     if (!(mpctx->initialized_flags & INITIALIZED_ACODEC)) {
@@ -1759,11 +1765,20 @@ void reinit_audio_chain(struct MPContext *mpctx)
     mpctx->mixer.softvol = opts->softvol;
     mpctx->mixer.softvol_max = opts->softvol_max;
     mixer_reinit(&mpctx->mixer, ao);
+    if (!(mpctx->initialized_flags & INITIALIZED_VOL)) {
+        if (opts->mixer_init_volume >= 0) {
+            mixer_setvolume(&mpctx->mixer, opts->mixer_init_volume,
+                            opts->mixer_init_volume);
+        }
+        if (opts->mixer_init_mute >= 0)
+            mixer_setmute(&mpctx->mixer, opts->mixer_init_mute);
+        mpctx->initialized_flags |= INITIALIZED_VOL;
+    }
     mpctx->syncing_audio = true;
     return;
 
 init_error:
-    uninit_player(mpctx, INITIALIZED_ACODEC | INITIALIZED_AO);
+    uninit_player(mpctx, INITIALIZED_ACODEC | INITIALIZED_AO | INITIALIZED_VOL);
     cleanup_demux_stream(mpctx, STREAM_AUDIO);
 no_audio:
     mpctx->current_track[STREAM_AUDIO] = NULL;
@@ -2165,7 +2180,7 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
         uninit_player(mpctx, INITIALIZED_VCODEC |
                         (mpctx->opts.fixed_vo && track ? 0 : INITIALIZED_VO));
     } else if (type == STREAM_AUDIO) {
-        uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
+        uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC | INITIALIZED_VOL);
     } else if (type == STREAM_SUB) {
         uninit_player(mpctx, INITIALIZED_SUB);
     }
@@ -2405,7 +2420,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
              * while displaying video, then doing the output format switch.
              */
             if (!mpctx->opts.gapless_audio)
-                uninit_player(mpctx, INITIALIZED_AO);
+                uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_VOL);
             reinit_audio_chain(mpctx);
             return -1;
         } else if (res == ASYNC_PLAY_DONE)
@@ -2942,7 +2957,7 @@ static bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
     enum stop_play_reason orig_stop_play = mpctx->stop_play;
     if (!mpctx->sh_video && mpctx->stop_play == KEEP_PLAYING)
         mpctx->stop_play = AT_END_OF_FILE;  // let audio uninit drain data
-    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts.fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts.gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_ACODEC | INITIALIZED_SUB);
+    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts.fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts.gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_VOL | INITIALIZED_ACODEC | INITIALIZED_SUB);
     mpctx->stop_play = orig_stop_play;
 
     mpctx->demuxer = n->source;
@@ -4404,11 +4419,6 @@ goto_enable_cache: ;
             mpctx->audio_delay += mpctx->sh_video->stream_delay;
     }
     if (mpctx->sh_audio) {
-        if (opts->mixer_init_volume >= 0)
-            mixer_setvolume(&mpctx->mixer, opts->mixer_init_volume,
-                            opts->mixer_init_volume);
-        if (opts->mixer_init_mute >= 0)
-            mixer_setmute(&mpctx->mixer, opts->mixer_init_mute);
         if (!opts->ignore_start)
             mpctx->audio_delay -= mpctx->sh_audio->stream_delay;
     }
