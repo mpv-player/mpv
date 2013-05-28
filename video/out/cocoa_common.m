@@ -60,7 +60,6 @@ static bool RightAltPressed(NSEvent *event)
 - (BOOL)canBecomeKeyWindow;
 - (BOOL)canBecomeMainWindow;
 - (void)fullscreen;
-- (void)mouseEvent:(NSEvent *)theEvent;
 - (void)mulSize:(float)multiplier;
 - (int)titleHeight;
 - (NSRect)clipFrame:(NSRect)frame withContentAspect:(NSSize) aspect;
@@ -69,6 +68,8 @@ static bool RightAltPressed(NSEvent *event)
 @end
 
 @interface GLMPlayerOpenGLView : NSView
+@property(nonatomic, assign) struct vo *videoOutput;
+- (void)mouseEvent:(NSEvent *)theEvent;
 @end
 
 struct vo_cocoa_input_queue {
@@ -115,29 +116,21 @@ static int cocoa_sync_get_key(struct vo_cocoa_input_queue *iq)
 
 struct vo_cocoa_state {
     GLMPlayerWindow *window;
+    GLMPlayerOpenGLView *view;
     NSOpenGLContext *glContext;
     NSOpenGLPixelFormat *pixelFormat;
 
     NSSize current_video_size;
     NSSize previous_video_size;
 
-    NSRect screen_frame;
-    NSRect fsscreen_frame;
-    NSScreen *screen_handle;
-
-    NSInteger windowed_mask;
-    NSInteger fullscreen_mask;
-
-    NSRect windowed_frame;
-
-    NSString *window_title;
+    NSScreen *current_screen;
+    NSScreen *fs_screen;
 
     NSInteger window_level;
 
     struct aspect_data aspdat;
 
     bool will_make_front;
-
     bool did_resize;
     bool did_async_resize;
     bool out_fs_resize;
@@ -147,7 +140,6 @@ struct vo_cocoa_state {
     CGFloat accumulated_scroll;
 
     NSLock *lock;
-
     bool enable_resize_redraw;
     void (*resize_redraw)(struct vo *vo, int w, int h);
 
@@ -162,10 +154,6 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .did_async_resize = NO,
         .current_video_size = {0,0},
         .previous_video_size = {0,0},
-        .windowed_mask = NSTitledWindowMask|NSClosableWindowMask|
-            NSMiniaturizableWindowMask|NSResizableWindowMask,
-        .fullscreen_mask = NSBorderlessWindowMask,
-        .windowed_frame = {{0,0},{0,0}},
         .out_fs_resize = NO,
         .will_make_front = YES,
         .power_mgmt_assertion = kIOPMNullAssertionID,
@@ -174,16 +162,13 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .input_queue = vo_cocoa_input_queue_init(s),
         .enable_resize_redraw = NO,
     };
-    if (!vo->opts->border) s->windowed_mask = NSBorderlessWindowMask;
-
     return s;
 }
 
 static NSRect to_pixels(struct vo *vo, NSRect frame)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    NSView *view = [s->window contentView];
-    return [view convertRectToBacking: frame];
+    return [s->view convertRectToBacking: frame];
 }
 
 void *vo_cocoa_glgetaddr(const char *s)
@@ -268,14 +253,6 @@ void vo_cocoa_register_resize_callback(struct vo *vo,
     s->resize_redraw = cb;
 }
 
-static int current_screen_has_dock_or_menubar(struct vo *vo)
-{
-    struct vo_cocoa_state *s = vo->cocoa;
-    NSRect f  = s->screen_frame;
-    NSRect vf = [s->screen_handle visibleFrame];
-    return f.size.height > vf.size.height || f.size.width > vf.size.width;
-}
-
 static int get_screen_handle(int identifier, NSWindow *window, NSScreen **screen) {
     NSArray *screens  = [NSScreen screens];
     int n_of_displays = [screens count];
@@ -302,34 +279,30 @@ static void update_screen_info(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     struct mp_vo_opts *opts = vo->opts;
-    NSScreen *ws, *fss;
-
-    get_screen_handle(opts->screen_id, s->window, &ws);
-    s->screen_frame = [ws frame];
-
-    get_screen_handle(opts->fsscreen_id, s->window, &fss);
-    s->fsscreen_frame = [fss frame];
+    get_screen_handle(opts->screen_id, s->window, &s->current_screen);
+    get_screen_handle(opts->fsscreen_id, s->window, &s->fs_screen);
 }
 
-void vo_cocoa_update_xinerama_info(struct vo *vo)
+static void vo_cocoa_update_screen_info(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     struct mp_vo_opts *opts = vo->opts;
 
     update_screen_info(vo);
-    aspect_save_screenres(vo, s->screen_frame.size.width,
-                              s->screen_frame.size.height);
-    opts->screenwidth = s->screen_frame.size.width;
-    opts->screenheight = s->screen_frame.size.height;
-    vo->xinerama_x = s->screen_frame.origin.x;
-    vo->xinerama_y = s->screen_frame.origin.y;
+
+    NSRect r = [s->current_screen frame];
+
+    aspect_save_screenres(vo, r.size.width, r.size.height);
+    opts->screenwidth  = r.size.width;
+    opts->screenheight = r.size.height;
+    vo->xinerama_x     = r.origin.x;
+    vo->xinerama_y     = r.origin.y;
 }
 
 static void resize_window(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    NSView *view = [s->window contentView];
-    NSRect frame = to_pixels(vo, [view frame]);
+    NSRect frame = to_pixels(vo, [s->view frame]);
     vo->dwidth  = frame.size.width;
     vo->dheight = frame.size.height;
     [s->glContext update];
@@ -370,16 +343,22 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
                                           d_width, d_height);
     const NSRect glview_rect = NSMakeRect(0, 0, 100, 100);
 
+    int window_mask = 0;
+    if (vo->opts->border) {
+        window_mask = NSTitledWindowMask|NSClosableWindowMask|
+                      NSMiniaturizableWindowMask|NSResizableWindowMask;
+    } else {
+        window_mask = NSBorderlessWindowMask;
+    }
+
     s->window =
         [[GLMPlayerWindow alloc] initWithContentRect:window_rect
-                                           styleMask:s->windowed_mask
+                                           styleMask:window_mask
                                              backing:NSBackingStoreBuffered
                                                defer:NO];
 
-    GLMPlayerOpenGLView *glView =
-        [[GLMPlayerOpenGLView alloc] initWithFrame:glview_rect];
-
-    [glView setWantsBestResolutionOpenGLSurface:YES];
+    s->view = [[GLMPlayerOpenGLView alloc] initWithFrame:glview_rect];
+    [s->view setWantsBestResolutionOpenGLSurface:YES];
 
     int i = 0;
     NSOpenGLPixelFormatAttribute attr[32];
@@ -411,11 +390,12 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     cocoa_register_menu_item_action(MPM_ZOOM,     @selector(performZoom:));
 
     [s->window setRestorable:NO];
-    [s->window setContentView:glView];
-    [glView release];
+    [s->window setContentView:s->view];
+    [s->view release];
     [s->window setAcceptsMouseMovedEvents:YES];
-    [s->glContext setView:glView];
+    [s->glContext setView:s->view];
     s->window.videoOutput = vo;
+    s->view.videoOutput   = vo;
 
     [s->window setDelegate:s->window];
     [s->window makeMainWindow];
@@ -426,21 +406,25 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     return 0;
 }
 
+static void resize_window_from_stored_size(struct vo *vo)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    [s->window setContentSize:s->current_video_size keepCentered:YES];
+    [s->window setContentAspectRatio:s->current_video_size];
+}
+
 static void update_window(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
-    if (s->current_video_size.width  != s->previous_video_size.width ||
-        s->current_video_size.height != s->previous_video_size.height) {
+    if (!CGSizeEqualToSize(s->current_video_size, s->previous_video_size)) {
         if (vo->opts->fs) {
             // we will resize as soon as we get out of fullscreen
             s->out_fs_resize = YES;
         } else {
             // only if we are not in fullscreen and the video size did
             // change we resize the window and set a new aspect ratio
-            [s->window setContentSize:s->current_video_size
-                         keepCentered:YES];
-            [s->window setContentAspectRatio:s->current_video_size];
+            resize_window_from_stored_size(vo);
         }
     }
 }
@@ -486,7 +470,6 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
 
         [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
 
-
         if (flags & VOFLAG_HIDDEN) {
             [s->window orderOut:nil];
         } else if (![s->window isVisible] && s->will_make_front) {
@@ -502,12 +485,8 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
 
         resize_window(vo);
 
-        if (s->window_title)
-            [s->window_title release];
-
-        s->window_title =
-            [[NSString alloc] initWithUTF8String:vo_get_window_title(vo)];
-        [s->window setTitle: s->window_title];
+        [s->window setTitle:
+            [NSString stringWithUTF8String:vo_get_window_title(vo)]];
 
         if (opts->native_fs) {
             [s->window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
@@ -603,7 +582,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         vo_cocoa_ontop(vo);
         return VO_TRUE;
     case VOCTRL_UPDATE_SCREENINFO:
-        vo_cocoa_update_xinerama_info(vo);
+        vo_cocoa_update_screen_info(vo);
         return VO_TRUE;
     case VOCTRL_SET_CURSOR_VISIBILITY: {
         bool visible = *(bool *)arg;
@@ -682,31 +661,30 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         [self toggleFullScreen:nil];
     } else {
         if (!opts->fs) {
-            opts->fs = VO_TRUE;
+            NSDictionary *fsopts = @{
+                NSFullScreenModeWindowLevel :
+                    @(NSFloatingWindowLevel),
+                NSFullScreenModeAllScreens :
+                    @NO,
+                NSFullScreenModeApplicationPresentationOptions :
+                    @(NSApplicationPresentationAutoHideDock |
+                      NSApplicationPresentationAutoHideMenuBar)
+            };
+
+            [s->view enterFullScreenMode:s->fs_screen withOptions:fsopts];
             vo_cocoa_set_cursor_visibility(false);
-            update_screen_info(self.videoOutput);
-            if (current_screen_has_dock_or_menubar(self.videoOutput))
-                [NSApp setPresentationOptions:
-                    NSApplicationPresentationAutoHideDock|
-                    NSApplicationPresentationAutoHideMenuBar];
-            s->windowed_frame = [self frame];
-            [self setHasShadow:NO];
-            [self setStyleMask:s->fullscreen_mask];
-            [self setFrame:s->fsscreen_frame display:YES animate:NO];
+            opts->fs = VO_TRUE;
         } else {
-            opts->fs = VO_FALSE;
+            [s->view exitFullScreenModeWithOptions:nil];
             vo_cocoa_set_cursor_visibility(true);
-            [NSApp setPresentationOptions:NSApplicationPresentationDefault];
-            [self setHasShadow:YES];
-            [self setStyleMask:s->windowed_mask];
-            [self setTitle:s->window_title];
-            [self setFrame:s->windowed_frame display:YES animate:NO];
-            if (s->out_fs_resize) {
-                [self setContentSize:s->current_video_size keepCentered:YES];
-                s->out_fs_resize = NO;
-            }
-            [self setContentAspectRatio:s->current_video_size];
+            [self makeFirstResponder:s->view];
+            opts->fs = VO_FALSE;
         }
+    }
+
+    if (!opts->fs && s->out_fs_resize) {
+        resize_window_from_stored_size(self.videoOutput);
+        s->out_fs_resize = NO;
     }
 
     resize_window(self.videoOutput);
@@ -714,9 +692,6 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (BOOL)canBecomeMainWindow { return YES; }
 - (BOOL)canBecomeKeyWindow { return YES; }
-- (BOOL)acceptsFirstResponder { return YES; }
-- (BOOL)becomeFirstResponder { return YES; }
-- (BOOL)resignFirstResponder { return YES; }
 - (BOOL)windowShouldClose:(id)sender
 {
     struct vo_cocoa_state *s = self.videoOutput->cocoa;
@@ -733,148 +708,6 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         return !self.videoOutput->opts->fs;
     } else {
         return YES;
-    }
-}
-
-- (void)keyDown:(NSEvent *)theEvent
-{
-    struct vo_cocoa_state *s = self.videoOutput->cocoa;
-    NSString *chars;
-
-    if (RightAltPressed(theEvent))
-        chars = [theEvent characters];
-    else
-        chars = [theEvent charactersIgnoringModifiers];
-
-    int key = convert_key([theEvent keyCode], *[chars UTF8String]);
-
-    if (key > -1) {
-        if ([theEvent modifierFlags] & NSShiftKeyMask)
-            key |= MP_KEY_MODIFIER_SHIFT;
-        if ([theEvent modifierFlags] & NSControlKeyMask)
-            key |= MP_KEY_MODIFIER_CTRL;
-        if (LeftAltPressed(theEvent))
-            key |= MP_KEY_MODIFIER_ALT;
-        if ([theEvent modifierFlags] & NSCommandKeyMask)
-            key |= MP_KEY_MODIFIER_META;
-
-        cocoa_async_put_key(s->input_queue, key);
-    }
-}
-
-- (void)signalMouseMovement:(NSEvent *)theEvent
-{
-    NSView *view = self.contentView;
-    NSPoint loc = [view convertPoint:[theEvent locationInWindow] fromView:nil];
-    NSRect bounds = [view bounds];
-
-    int x = loc.x;
-    int y = - loc.y + bounds.size.height; // convert to x11-like coord system
-    if (CGRectContainsPoint(bounds, NSMakePoint(x, y))) {
-        vo_mouse_movement(self.videoOutput, x, y);
-    }
-}
-
-- (void)mouseMoved:(NSEvent *)theEvent
-{
-    [self signalMouseMovement:theEvent];
-}
-
-- (void)mouseDragged:(NSEvent *)theEvent
-{
-    [self signalMouseMovement:theEvent];
-}
-
-- (void)mouseDown:(NSEvent *)theEvent
-{
-    [self mouseEvent: theEvent];
-}
-
-- (void)mouseUp:(NSEvent *)theEvent
-{
-    [self mouseEvent: theEvent];
-}
-
-- (void)rightMouseDown:(NSEvent *)theEvent
-{
-    [self mouseEvent: theEvent];
-}
-
-- (void)rightMouseUp:(NSEvent *)theEvent
-{
-    [self mouseEvent: theEvent];
-}
-
-- (void)otherMouseDown:(NSEvent *)theEvent
-{
-    [self mouseEvent: theEvent];
-}
-
-- (void)otherMouseUp:(NSEvent *)theEvent
-{
-    [self mouseEvent: theEvent];
-}
-
-- (void)scrollWheel:(NSEvent *)theEvent
-{
-    struct vo_cocoa_state *s = self.videoOutput->cocoa;
-
-    CGFloat delta;
-    // Use the dimention with the most delta as the scrolling one
-    if (FFABS([theEvent deltaY]) > FFABS([theEvent deltaX])) {
-        delta = [theEvent deltaY];
-    } else {
-        delta = - [theEvent deltaX];
-    }
-
-    if ([theEvent hasPreciseScrollingDeltas]) {
-        s->accumulated_scroll += delta;
-        static const CGFloat threshold = 10;
-        while (s->accumulated_scroll >= threshold) {
-            s->accumulated_scroll -= threshold;
-            cocoa_async_put_key(s->input_queue, MP_MOUSE_BTN3);
-        }
-        while (s->accumulated_scroll <= -threshold) {
-            s->accumulated_scroll += threshold;
-            cocoa_async_put_key(s->input_queue, MP_MOUSE_BTN4);
-        }
-    } else {
-        if (delta > 0)
-            cocoa_async_put_key(s->input_queue, MP_MOUSE_BTN3);
-        else
-            cocoa_async_put_key(s->input_queue, MP_MOUSE_BTN4);
-    }
-}
-
-- (void)mouseEvent:(NSEvent *)theEvent
-{
-    if ([theEvent buttonNumber] >= 0 && [theEvent buttonNumber] <= 9) {
-        struct vo_cocoa_state *s = self.videoOutput->cocoa;
-        int buttonNumber = [theEvent buttonNumber];
-        // Fix to mplayer defined button order: left, middle, right
-        if (buttonNumber == 1)  buttonNumber = 2;
-        else if (buttonNumber == 2) buttonNumber = 1;
-        switch ([theEvent type]) {
-            case NSLeftMouseDown:
-            case NSRightMouseDown:
-            case NSOtherMouseDown:
-                cocoa_async_put_key(
-                    s->input_queue,
-                    (MP_MOUSE_BTN0 + buttonNumber) | MP_KEY_STATE_DOWN);
-                // Looks like Cocoa doesn't create MouseUp events when we are
-                // doing the second click in a double click. Put in the key_fifo
-                // the key that would be put from the MouseUp handling code.
-                if([theEvent clickCount] == 2)
-                    cocoa_async_put_key(s->input_queue,
-                                        MP_MOUSE_BTN0 + buttonNumber);
-                break;
-            case NSLeftMouseUp:
-            case NSRightMouseUp:
-            case NSOtherMouseUp:
-                cocoa_async_put_key(s->input_queue,
-                                    MP_MOUSE_BTN0 + buttonNumber);
-                break;
-        }
     }
 }
 
@@ -960,10 +793,125 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 @end
 
 @implementation GLMPlayerOpenGLView
+@synthesize videoOutput = _video_output;
+- (BOOL)acceptsFirstResponder { return YES; }
+- (BOOL)becomeFirstResponder { return YES; }
+- (BOOL)resignFirstResponder { return YES; }
+
+ - (void)keyDown:(NSEvent *)theEvent
+{
+    struct vo_cocoa_state *s = self.videoOutput->cocoa;
+    NSString *chars;
+
+    if (RightAltPressed(theEvent))
+        chars = [theEvent characters];
+    else
+        chars = [theEvent charactersIgnoringModifiers];
+
+    int key = convert_key([theEvent keyCode], *[chars UTF8String]);
+
+    if (key > -1) {
+        if ([theEvent modifierFlags] & NSShiftKeyMask)
+            key |= MP_KEY_MODIFIER_SHIFT;
+        if ([theEvent modifierFlags] & NSControlKeyMask)
+            key |= MP_KEY_MODIFIER_CTRL;
+        if (LeftAltPressed(theEvent))
+            key |= MP_KEY_MODIFIER_ALT;
+        if ([theEvent modifierFlags] & NSCommandKeyMask)
+            key |= MP_KEY_MODIFIER_META;
+
+        cocoa_async_put_key(s->input_queue, key);
+    }
+}
+
+- (void)signalMouseMovement:(NSEvent *)theEvent
+{
+    NSPoint loc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    NSRect bounds = [self bounds];
+
+    int x = loc.x;
+    int y = - loc.y + bounds.size.height; // convert to x11-like coord system
+    if (CGRectContainsPoint(bounds, NSMakePoint(x, y))) {
+        vo_mouse_movement(self.videoOutput, x, y);
+    }
+}
+
+- (void)mouseMoved:(NSEvent *)evt     { [self signalMouseMovement:evt]; }
+- (void)mouseDragged:(NSEvent *)evt   { [self signalMouseMovement:evt]; }
+- (void)mouseDown:(NSEvent *)evt      { [self mouseEvent:evt]; }
+- (void)mouseUp:(NSEvent *)evt        { [self mouseEvent:evt]; }
+- (void)rightMouseDown:(NSEvent *)evt { [self mouseEvent:evt]; }
+- (void)rightMouseUp:(NSEvent *)evt   { [self mouseEvent:evt]; }
+- (void)otherMouseDown:(NSEvent *)evt { [self mouseEvent:evt]; }
+- (void)otherMouseUp:(NSEvent *)evt   { [self mouseEvent:evt]; }
+
+- (void)scrollWheel:(NSEvent *)theEvent
+{
+    struct vo_cocoa_state *s = self.videoOutput->cocoa;
+
+    CGFloat delta;
+    // Use the dimention with the most delta as the scrolling one
+    if (FFABS([theEvent deltaY]) > FFABS([theEvent deltaX])) {
+        delta = [theEvent deltaY];
+    } else {
+        delta = - [theEvent deltaX];
+    }
+
+    if ([theEvent hasPreciseScrollingDeltas]) {
+        s->accumulated_scroll += delta;
+        static const CGFloat threshold = 10;
+        while (s->accumulated_scroll >= threshold) {
+            s->accumulated_scroll -= threshold;
+            cocoa_async_put_key(s->input_queue, MP_MOUSE_BTN3);
+        }
+        while (s->accumulated_scroll <= -threshold) {
+            s->accumulated_scroll += threshold;
+            cocoa_async_put_key(s->input_queue, MP_MOUSE_BTN4);
+        }
+    } else {
+        if (delta > 0)
+            cocoa_async_put_key(s->input_queue, MP_MOUSE_BTN3);
+        else
+            cocoa_async_put_key(s->input_queue, MP_MOUSE_BTN4);
+    }
+}
+
+- (void)mouseEvent:(NSEvent *)theEvent
+{
+    if ([theEvent buttonNumber] >= 0 && [theEvent buttonNumber] <= 9) {
+        struct vo_cocoa_state *s = self.videoOutput->cocoa;
+        int buttonNumber = [theEvent buttonNumber];
+        // Fix to mplayer defined button order: left, middle, right
+        if (buttonNumber == 1)  buttonNumber = 2;
+        else if (buttonNumber == 2) buttonNumber = 1;
+        switch ([theEvent type]) {
+            case NSLeftMouseDown:
+            case NSRightMouseDown:
+            case NSOtherMouseDown:
+                cocoa_async_put_key(
+                    s->input_queue,
+                    (MP_MOUSE_BTN0 + buttonNumber) | MP_KEY_STATE_DOWN);
+                // Looks like Cocoa doesn't create MouseUp events when we are
+                // doing the second click in a double click. Put in the key_fifo
+                // the key that would be put from the MouseUp handling code.
+                if([theEvent clickCount] == 2)
+                    cocoa_async_put_key(s->input_queue,
+                                        MP_MOUSE_BTN0 + buttonNumber);
+                break;
+            case NSLeftMouseUp:
+            case NSRightMouseUp:
+            case NSOtherMouseUp:
+                cocoa_async_put_key(s->input_queue,
+                                    MP_MOUSE_BTN0 + buttonNumber);
+                break;
+        }
+    }
+}
+
 - (void)drawRect: (NSRect)rect
 {
-    GLMPlayerWindow *window = (GLMPlayerWindow *)[self window];
-    struct vo *vo = [window videoOutput];
+    struct vo *vo = [self videoOutput];
+
     if (vo && resize_callback_registered(vo)) {
         NSSize size = to_pixels(vo, [self bounds]).size;
         resize_redraw(vo, size.width, size.height);
