@@ -114,24 +114,3 @@ int convert_key(unsigned key, unsigned charcode)
         return mpkey;
     return charcode;
 }
-
-struct escape_couple {
-    NSString *in;
-    NSString *out;
-};
-
-static struct escape_couple escapes[] = {
-    { @"\\", @"\\\\" },
-    { @"\"", @"\\\"" },
-    { NULL, NULL }
-};
-
-NSString *escape_loadfile_name(NSString *input)
-{
-    for (int i = 0; escapes[i].out; i++) {
-        input = [input stringByReplacingOccurrencesOfString:escapes[i].in
-                                                 withString:escapes[i].out];
-    }
-
-    return input;
-}

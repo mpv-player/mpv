@@ -46,7 +46,7 @@ SOURCES-$(LIBPOSTPROC)          += video/filter/vf_pp.c
 SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
 SOURCES-$(MACOSX_BUNDLE)        += osdep/macosx_bundle.m
-SOURCES-$(COCOA)                += video/out/osx_common.m \
+SOURCES-$(COCOA)                += video/out/osx_common.c \
                                    video/out/cocoa_common.m \
                                    osdep/macosx_application.m
 SOURCES-$(MNG)                  += demux/demux_mng.c

@@ -19,9 +19,6 @@
 #ifndef MPLAYER_OSX_COMMON_H
 #define MPLAYER_OSX_COMMON_H
 
-struct vo;
-
 int convert_key(unsigned key, unsigned charcode);
-NSString *escape_loadfile_name(NSString *input);
 
 #endif /* MPLAYER_OSX_COMMON_H */
