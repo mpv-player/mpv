@@ -420,7 +420,6 @@ function osc_init ()
     -- Seekbar
     -- 
     
-    -- do we have a usuable duration?
     local contentF = function (ass) 
 	    	draw_bar_simple(ass, posX, posY+pos_offsetY-30, pos_offsetX*2, 17)
 	end
