@@ -214,7 +214,7 @@ static void disable_power_management(struct vo *vo)
     IOPMAssertionCreateWithName(
             kIOPMAssertionTypePreventUserIdleDisplaySleep,
             kIOPMAssertionLevelOn,
-            CFSTR("io.mpv.power_management"),
+            CFSTR("io.mpv.video_playing_back"),
             &s->power_mgmt_assertion);
 }
 
