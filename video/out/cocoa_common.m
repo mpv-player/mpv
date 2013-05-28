@@ -41,18 +41,6 @@
 
 #include "osdep/macosx_application.h"
 
-#ifndef NSOpenGLPFAOpenGLProfile
-#define NSOpenGLPFAOpenGLProfile 99
-#endif
-
-#ifndef NSOpenGLProfileVersionLegacy
-#define NSOpenGLProfileVersionLegacy 0x1000
-#endif
-
-#ifndef NSOpenGLProfileVersion3_2Core
-#define NSOpenGLProfileVersion3_2Core 0x3200
-#endif
-
 #define NSLeftAlternateKeyMask  (0x000020 | NSAlternateKeyMask)
 #define NSRightAlternateKeyMask (0x000040 | NSAlternateKeyMask)
 
@@ -67,23 +55,6 @@ static bool RightAltPressed(NSEvent *event)
     return ([event modifierFlags] & NSRightAlternateKeyMask) ==
             NSRightAlternateKeyMask;
 }
-
-// add methods not available on OSX versions prior to 10.7
-#ifndef MAC_OS_X_VERSION_10_7
-@interface NSView (IntroducedInLion)
-- (NSRect)convertRectToBacking:(NSRect)aRect;
-- (void)setWantsBestResolutionOpenGLSurface:(BOOL)aBool;
-@end
-@interface NSEvent (IntroducedInLion)
-- (BOOL)hasPreciseScrollingDeltas;
-@end
-#endif
-
-// add power management assertion not available on OSX versions prior to 10.7
-#ifndef kIOPMAssertionTypePreventUserIdleDisplaySleep
-#define kIOPMAssertionTypePreventUserIdleDisplaySleep \
-    CFSTR("PreventUserIdleDisplaySleep")
-#endif
 
 @interface GLMPlayerWindow : NSWindow <NSWindowDelegate>
 - (BOOL)canBecomeKeyWindow;
@@ -208,23 +179,11 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
     return s;
 }
 
-static bool supports_hidpi(NSView *view)
-{
-    SEL hdpi_selector = @selector(setWantsBestResolutionOpenGLSurface:);
-    return is_osx_version_at_least(10, 7, 0) && view &&
-           [view respondsToSelector:hdpi_selector];
-}
-
 static NSRect to_pixels(struct vo *vo, NSRect frame)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     NSView *view = [s->window contentView];
-
-    if (supports_hidpi(view)) {
-        return [view convertRectToBacking: frame];
-    } else {
-        return frame;
-    }
+    return [view convertRectToBacking: frame];
 }
 
 void *vo_cocoa_glgetaddr(const char *s)
@@ -252,13 +211,11 @@ static void disable_power_management(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     if (s->power_mgmt_assertion) return;
-
-    CFStringRef assertion_type = kIOPMAssertionTypeNoDisplaySleep;
-    if (is_osx_version_at_least(10, 7, 0))
-        assertion_type = kIOPMAssertionTypePreventUserIdleDisplaySleep;
-
-    IOPMAssertionCreateWithName(assertion_type, kIOPMAssertionLevelOn,
-        CFSTR("io.mpv.power_management"), &s->power_mgmt_assertion);
+    IOPMAssertionCreateWithName(
+            kIOPMAssertionTypePreventUserIdleDisplaySleep,
+            kIOPMAssertionLevelOn,
+            CFSTR("io.mpv.power_management"),
+            &s->power_mgmt_assertion);
 }
 
 int vo_cocoa_init(struct vo *vo)
@@ -422,19 +379,15 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     GLMPlayerOpenGLView *glView =
         [[GLMPlayerOpenGLView alloc] initWithFrame:glview_rect];
 
-    // check for HiDPI support and enable it (available on 10.7 +)
-    if (supports_hidpi(glView))
-        [glView setWantsBestResolutionOpenGLSurface:YES];
+    [glView setWantsBestResolutionOpenGLSurface:YES];
 
     int i = 0;
     NSOpenGLPixelFormatAttribute attr[32];
-    if (is_osx_version_at_least(10, 7, 0)) {
-      attr[i++] = NSOpenGLPFAOpenGLProfile;
-      if (gl3profile) {
-          attr[i++] = NSOpenGLProfileVersion3_2Core;
-      } else {
-          attr[i++] = NSOpenGLProfileVersionLegacy;
-      }
+    attr[i++] = NSOpenGLPFAOpenGLProfile;
+    if (gl3profile) {
+        attr[i++] = NSOpenGLProfileVersion3_2Core;
+    } else {
+        attr[i++] = NSOpenGLProfileVersionLegacy;
     }
     attr[i++] = NSOpenGLPFADoubleBuffer; // double buffered
     attr[i] = (NSOpenGLPixelFormatAttribute)0;
@@ -874,8 +827,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         delta = - [theEvent deltaX];
     }
 
-    if (is_osx_version_at_least(10, 7, 0) &&
-        [theEvent hasPreciseScrollingDeltas]) {
+    if ([theEvent hasPreciseScrollingDeltas]) {
         s->accumulated_scroll += delta;
         static const CGFloat threshold = 10;
         while (s->accumulated_scroll >= threshold) {

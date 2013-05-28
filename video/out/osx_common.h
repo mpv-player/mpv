@@ -22,7 +22,6 @@
 struct vo;
 
 int convert_key(unsigned key, unsigned charcode);
-int is_osx_version_at_least(int majorv, int minorv, int bugfixv);
 NSString *escape_loadfile_name(NSString *input);
 
 #endif /* MPLAYER_OSX_COMMON_H */

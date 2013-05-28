@@ -115,50 +115,6 @@ int convert_key(unsigned key, unsigned charcode)
     return charcode;
 }
 
-/**
- * Checks at runtime that OSX version is the same or newer than the one
- * provided as input.
- * Currently reads SystemVersion.plist file since Gestalt was deprecated.
- * This is supposedly the current way supported by Apple engineers. More info:
- * http://stackoverflow.com/a/11072974/499456
- */
-int is_osx_version_at_least(int majorv, int minorv, int bugfixv)
-{
-    // Initialize cache
-    static int c_majorv = -1, c_minorv = -1, c_bugfixv = -1;
-
-    // If version cache is empty, fill it
-    if (c_majorv < 0 && c_minorv < 0 && c_bugfixv < 0) {
-        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-        NSString *plist = @"/System/Library/CoreServices/SystemVersion.plist";
-        NSDictionary *dict = [NSDictionary dictionaryWithContentsOfFile:plist];
-        NSString *version = [dict objectForKey:@"ProductVersion"];
-        NSArray *components = [version componentsSeparatedByString:@"."];
-
-        // All the  above code just sends messages to nil. If anything failed,
-        // we just end up with an invalid components array.
-        if ([components count] != 3) {
-            mp_msg(MSGT_VO, MSGL_ERR, "[osx] Failed to get your system version. "
-                    "Please open a bug report.\n");
-            [pool release];
-            return -1;
-        }
-
-        c_majorv  = [[components objectAtIndex:0] intValue];
-        c_minorv  = [[components objectAtIndex:1] intValue];
-        c_bugfixv = [[components objectAtIndex:2] intValue];
-
-        [pool release];
-    }
-
-    if(c_majorv > majorv ||
-        (c_majorv == majorv && (c_minorv > minorv ||
-            (c_minorv == minorv && c_bugfixv >= bugfixv))))
-        return 1;
-    else
-        return 0;
-}
-
 struct escape_couple {
     NSString *in;
     NSString *out;
