@@ -223,7 +223,8 @@ typedef struct MPOpts {
     struct lavfdopts {
         int probesize;
         int probescore;
-        int analyzeduration;
+        float analyzeduration;
+        int allow_mimetype;
         char *format;
         char *cryptokey;
         char *avopt;

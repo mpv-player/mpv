@@ -54,7 +54,8 @@
 const m_option_t lavfdopts_conf[] = {
     OPT_INTRANGE("probesize", lavfdopts.probesize, 0, 32, INT_MAX),
     OPT_STRING("format", lavfdopts.format, 0),
-    OPT_INTRANGE("analyzeduration", lavfdopts.analyzeduration, 0, 0, INT_MAX),
+    OPT_FLOATRANGE("analyzeduration", lavfdopts.analyzeduration, 0, 0, 3600),
+    OPT_FLAG("allow-mimetype", lavfdopts.allow_mimetype, 0),
     OPT_INTRANGE("probescore", lavfdopts.probescore, 0, 0, 100),
     OPT_STRING("cryptokey", lavfdopts.cryptokey, 0),
     OPT_STRING("o", lavfdopts.avopt, 0),
@@ -67,6 +68,7 @@ const m_option_t lavfdopts_conf[] = {
 
 typedef struct lavf_priv {
     char *filename;
+    const struct format_hack *format_hack;
     AVInputFormat *avif;
     AVFormatContext *avfc;
     AVIOContext *pb;
@@ -82,16 +84,24 @@ typedef struct lavf_priv {
     char *mime_type;
 } lavf_priv_t;
 
-static const char *map_demuxer_mime_type[][2] = {
-    {"audio/aacp", "aac"},
+struct format_hack {
+    const char *ff_name;
+    const char *mime_type;
+    int probescore;
+    float analyzeduration;
+};
+
+static const struct format_hack format_hacks[] = {
+    {"aac", "audio/aacp", 25, 0.5},
+    {"mp3", "audio/mpeg", 25, 0.5},
     {0}
 };
 
-static const char *find_demuxer_from_mime_type(char *mime_type)
+static const struct format_hack *find_format_from_mime_type(char *mime_type)
 {
-    for (int n = 0; map_demuxer_mime_type[n][0]; n++) {
-        if (strcasecmp(map_demuxer_mime_type[n][0], mime_type) == 0)
-            return map_demuxer_mime_type[n][1];
+    for (int n = 0; format_hacks[n].ff_name; n++) {
+        if (strcasecmp(format_hacks[n].mime_type, mime_type) == 0)
+            return &format_hacks[n];
     }
     return NULL;
 }
@@ -213,13 +223,23 @@ static int lavf_check_file(demuxer_t *demuxer)
         priv->filename = sep + 1;
     }
 
-    char *format = lavfdopts->format;
+    const char *expected_format = NULL;
+    int expected_format_probescore = AVPROBE_SCORE_MAX;
+    char *mime_type = demuxer->stream->mime_type;
+
+    if (lavfdopts->allow_mimetype && mime_type) {
+        priv->format_hack = find_format_from_mime_type(mime_type);
+        if (priv->format_hack) {
+            expected_format = priv->format_hack->ff_name;
+            expected_format_probescore = priv->format_hack->probescore;
+        }
+    }
+
+    const char *format = lavfdopts->format;
     if (!format)
         format = demuxer->stream->lavf_type;
     if (!format)
         format = avdevice_format;
-    if (!format && demuxer->stream->mime_type)
-        format = (char *)find_demuxer_from_mime_type(demuxer->stream->mime_type);
     if (format) {
         if (strcmp(format, "help") == 0) {
             list_formats();
@@ -264,7 +284,12 @@ static int lavf_check_file(demuxer_t *demuxer)
         }
 
         if (priv->avif && score >= min_probe)
-            break;
+                break;
+        if (priv->avif && expected_format) {
+            if (strcmp(priv->avif->name, expected_format) == 0 &&
+                score >= expected_format_probescore)
+                break;
+        }
 
         priv->avif = NULL;
         read_size = FFMIN(2 * read_size, PROBE_BUF_SIZE - probe_data_size);
@@ -456,6 +481,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     AVFormatContext *avfc;
     AVDictionaryEntry *t = NULL;
     lavf_priv_t *priv = demuxer->priv;
+    float analyze_duration = 0;
     int i;
 
     // do not allow forcing the demuxer
@@ -486,11 +512,16 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
                    "demux_lavf, couldn't set option probesize to %u\n",
                    lavfdopts->probesize);
     }
-    if (lavfdopts->analyzeduration) {
+
+    if (priv->format_hack && priv->format_hack->analyzeduration)
+        analyze_duration = priv->format_hack->analyzeduration;
+    if (lavfdopts->analyzeduration)
+        analyze_duration = lavfdopts->analyzeduration;
+    if (analyze_duration > 0) {
         if (av_opt_set_int(avfc, "analyzeduration",
-                           lavfdopts->analyzeduration * AV_TIME_BASE, 0) < 0)
+                           analyze_duration * AV_TIME_BASE, 0) < 0)
             mp_msg(MSGT_HEADER, MSGL_ERR, "demux_lavf, couldn't set option "
-                   "analyzeduration to %u\n", lavfdopts->analyzeduration);
+                   "analyzeduration to %f\n", analyze_duration);
     }
 
     if (lavfdopts->avopt) {
