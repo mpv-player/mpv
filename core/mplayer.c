@@ -443,8 +443,12 @@ static void preselect_demux_streams(struct MPContext *mpctx)
 {
     // Disable all streams, just to be sure no unwanted streams are selected.
     for (int n = 0; n < mpctx->num_sources; n++) {
-        for (int type = 0; type < STREAM_TYPE_COUNT; type++)
-            demuxer_switch_track(mpctx->sources[n], type, NULL);
+        for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
+            struct track *track = mpctx->current_track[type];
+            if (!(track && track->demuxer == mpctx->sources[n] &&
+                  demuxer_stream_is_selected(track->demuxer, track->stream)))
+                demuxer_switch_track(mpctx->sources[n], type, NULL);
+        }
     }
 
     for (int type = 0; type < STREAM_TYPE_COUNT; type++) {

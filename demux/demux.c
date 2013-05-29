@@ -1214,6 +1214,10 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
 {
     assert(!stream || stream->type == type);
 
+    // don't flush buffers if stream is already selected
+    if (stream && demuxer_stream_is_selected(demuxer, stream))
+        return;
+
     int old_id = demuxer->ds[type]->id;
 
     // legacy
