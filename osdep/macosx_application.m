@@ -28,7 +28,6 @@
 #include "video/out/osx_common.h"
 
 static Application *app;
-static NSAutoreleasePool *pool;
 static pthread_t playback_thread_id;
 
 @interface Application (PrivateMethods)
@@ -258,31 +257,35 @@ struct playback_thread_ctx {
 
 static void *playback_thread(void *ctx_obj)
 {
-    struct playback_thread_ctx *ctx = (struct playback_thread_ctx*) ctx_obj;
-    ctx->mpv_main(*ctx->argc, *ctx->argv);
-    cocoa_stop_runloop();
-    pthread_exit(NULL);
+    @autoreleasepool {
+        struct playback_thread_ctx *ctx = (struct playback_thread_ctx*) ctx_obj;
+        ctx->mpv_main(*ctx->argc, *ctx->argv);
+        cocoa_stop_runloop();
+        pthread_exit(NULL);
+    }
 }
 
 int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
 {
-    struct playback_thread_ctx ctx = {0};
-    ctx.mpv_main = mpv_main;
-    ctx.argc     = &argc;
-    ctx.argv     = &argv;
+    @autoreleasepool {
+        struct playback_thread_ctx ctx = {0};
+        ctx.mpv_main = mpv_main;
+        ctx.argc     = &argc;
+        ctx.argv     = &argv;
 
-    init_cocoa_application();
-    macosx_finder_args_preinit(&argc, &argv);
-    pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
-    cocoa_run_runloop();
+        init_cocoa_application();
+        macosx_finder_args_preinit(&argc, &argv);
+        pthread_create(&playback_thread_id, NULL, playback_thread, &ctx);
+        cocoa_run_runloop();
 
-    // This should never be reached: cocoa_run_runloop blocks until the process
-    // is quit
-    mp_msg(MSGT_CPLAYER, MSGL_ERR, "There was either a problem initializing "
-           "Cocoa or the Runloop was stopped unexpectedly. Please report this "
-           "issues to a developer.\n");
-    pthread_join(playback_thread_id, NULL);
-    return 1;
+        // This should never be reached: cocoa_run_runloop blocks until the
+        // process is quit
+        mp_msg(MSGT_CPLAYER, MSGL_ERR, "There was either a problem "
+               "initializing Cocoa or the Runloop was stopped unexpectedly. "
+               "Please report this issues to a developer.\n");
+        pthread_join(playback_thread_id, NULL);
+        return 1;
+    }
 }
 
 void cocoa_register_menu_item_action(MPMenuKey key, void* action)
@@ -311,17 +314,6 @@ void terminate_cocoa_application(void)
     [NSApp hide:app];
     [NSApp terminate:app];
 }
-
-void cocoa_autorelease_pool_alloc(void)
-{
-    pool = [[NSAutoreleasePool alloc] init];
-}
-
-void cocoa_autorelease_pool_drain(void)
-{
-    [pool drain];
-}
-
 
 void cocoa_run_runloop()
 {

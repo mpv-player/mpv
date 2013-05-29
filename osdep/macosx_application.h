@@ -41,8 +41,6 @@ void cocoa_register_menu_item_action(MPMenuKey key, void* action);
 // initializes Cocoa application
 void init_cocoa_application(void);
 void terminate_cocoa_application(void);
-void cocoa_autorelease_pool_alloc(void);
-void cocoa_autorelease_pool_drain(void);
 
 // Runs the Cocoa Main Event Loop
 void cocoa_run_runloop(void);
