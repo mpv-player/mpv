@@ -58,22 +58,16 @@ static pthread_t playback_thread_id;
 @synthesize keyFIFO = _key_fifo;
 @synthesize menuItems = _menu_items;
 
-struct escape_couple {
-    NSString *in;
-    NSString *out;
-};
-
-static struct escape_couple escapes[] = {
-    { @"\\", @"\\\\" },
-    { @"\"", @"\\\"" },
-    { NULL, NULL }
-};
-
 static NSString *escape_loadfile_name(NSString *input)
 {
-    for (int i = 0; escapes[i].out; i++) {
-        input = [input stringByReplacingOccurrencesOfString:escapes[i].in
-                                                 withString:escapes[i].out];
+    NSArray *mappings = @[
+        @{ @"in": @"\\", @"out": @"\\\\" },
+        @{ @"in": @"\"", @"out": @"\\\"" },
+    ];
+
+    for (NSDictionary *mapping in mappings) {
+        input = [input stringByReplacingOccurrencesOfString:mapping[@"in"]
+                                                 withString:mapping[@"out"]];
     }
 
     return input;
