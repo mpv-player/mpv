@@ -363,15 +363,13 @@ static void macosx_redirect_output_to_logfile(const char *filename)
 static bool psn_matches_current_process(char *psn_arg_to_check)
 {
     ProcessSerialNumber psn;
-    size_t psn_length = 5+10+1+10;
-    char psn_arg[psn_length+1];
-
     GetCurrentProcess(&psn);
-    snprintf(psn_arg, 5+10+1+10+1, "-psn_%u_%u",
-             psn.highLongOfPSN, psn.lowLongOfPSN);
-    psn_arg[psn_length]=0;
 
-    return strcmp(psn_arg, psn_arg_to_check) == 0;
+    NSString *in_psn   = [NSString stringWithUTF8String:psn_arg_to_check];
+    NSString *real_psn = [NSString stringWithFormat:@"-psn_%u_%u",
+                                   psn.highLongOfPSN, psn.lowLongOfPSN];
+
+    return [real_psn isEqualToString:in_psn];
 }
 
 void macosx_finder_args_preinit(int *argc, char ***argv)
