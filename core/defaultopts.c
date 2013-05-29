@@ -92,10 +92,6 @@ void set_default_mplayer_options(struct MPOpts *opts)
 
         .hwdec_codecs = "all",
 
-        .lavc_param = {
-            .workaround_bugs = 1, // autodetect
-            .error_concealment = 3,
-        },
         .ad_lavc_param = {
             .ac3drc = 1.,
             .downmix = 1,

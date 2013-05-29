@@ -73,14 +73,7 @@ static void uninit(struct sh_video *sh);
 #define OPT_BASE_STRUCT struct MPOpts
 
 const m_option_t lavc_decode_opts_conf[] = {
-    OPT_INTRANGE("bug", lavc_param.workaround_bugs, 0, -1, 999999),
-    OPT_FLAG("gray", lavc_param.gray, 0),
-    OPT_INTRANGE("idct", lavc_param.idct_algo, 0, 0, 99),
-    OPT_INTRANGE("ec", lavc_param.error_concealment, 0, 0, 99),
     OPT_INTRANGE("debug", lavc_param.debug, 0, 0, 9999999),
-    OPT_INTRANGE("vismv", lavc_param.vismv, 0, 0, 9999999),
-    OPT_INTRANGE("st", lavc_param.skip_top, 0, 0, 999),
-    OPT_INTRANGE("sb", lavc_param.skip_bottom, 0, 0, 999),
     OPT_FLAG_CONSTANTS("fast", lavc_param.fast, 0, 0, CODEC_FLAG2_FAST),
     OPT_STRING("skiploopfilter", lavc_param.skip_loop_filter_str, 0),
     OPT_STRING("skipidct", lavc_param.skip_idct_str, 0),
@@ -331,18 +324,10 @@ static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
 
     avctx->flags |= lavc_param->bitexact;
 
-    avctx->workaround_bugs = lavc_param->workaround_bugs;
-    if (lavc_param->gray)
-        avctx->flags |= CODEC_FLAG_GRAY;
     avctx->flags2 |= lavc_param->fast;
-    avctx->idct_algo = lavc_param->idct_algo;
-    avctx->error_concealment = lavc_param->error_concealment;
     avctx->debug = lavc_param->debug;
     if (lavc_param->debug)
         av_log_set_level(AV_LOG_DEBUG);
-    avctx->debug_mv = lavc_param->vismv;
-    avctx->skip_top   = lavc_param->skip_top;
-    avctx->skip_bottom = lavc_param->skip_bottom;
     avctx->skip_loop_filter = str2AVDiscard(lavc_param->skip_loop_filter_str);
     avctx->skip_idct = str2AVDiscard(lavc_param->skip_idct_str);
     avctx->skip_frame = str2AVDiscard(lavc_param->skip_frame_str);

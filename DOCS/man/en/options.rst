@@ -985,25 +985,6 @@
         Only use bit-exact algorithms in all decoding steps (for codec
         testing).
 
-    bug=<value>
-        Manually work around encoder bugs.
-
-        :0:    nothing
-        :1:    autodetect bugs (default)
-        :2:    (msmpeg4v3): some old lavc generated msmpeg4v3 files (no
-               autodetection)
-        :4:    (mpeg4): Xvid interlacing bug (autodetected if fourcc==XVIX)
-        :8:    (mpeg4): UMP4 (autodetected if fourcc==UMP4)
-        :16:   (mpeg4): padding bug (autodetected)
-        :32:   (mpeg4): illegal vlc bug (autodetected per fourcc)
-        :64:   (mpeg4): Xvid and DivX qpel bug (autodetected per
-               fourcc/version)
-        :128:  (mpeg4): old standard qpel (autodetected per fourcc/version)
-        :256:  (mpeg4): another qpel bug (autodetected per fourcc/version)
-        :512:  (mpeg4): direct-qpel-blocksize bug (autodetected per
-               fourcc/version)
-        :1024: (mpeg4): edge padding bug (autodetected per fourcc/version)
-
     debug=<value>
         Display debugging information.
 
@@ -1025,22 +1006,12 @@
                  greener.
         :0x4000: Visualize block types.
 
-    ec=<value>
-        Set error concealment strategy.
-
-        :1: Use strong deblock filter for damaged MBs.
-        :2: iterative motion vector (MV) search (slow)
-        :3: all (default)
-
     fast (MPEG-2, MPEG-4, and H.264 only)
         Enable optimizations which do not comply to the specification and
         might potentially cause problems, like simpler dequantization, simpler
         motion compensation, assuming use of the default quantization matrix,
         assuming YUV 4:2:0 and skipping a few checks to detect damaged
         bitstreams.
-
-    gray
-        grayscale only decoding (a bit faster than with color)
 
     idct=<0-99>
         For best decoding quality use the same IDCT algorithm for decoding and
@@ -1051,13 +1022,11 @@
         unneeded and pass all unknown options through the AVOption system is
         welcome. A full list of AVOptions can be found in the FFmpeg manual.
 
+        Some options which used to be direct options can be set with this
+        mechanism, like ``bug``, ``gray``, ``idct``, ``ec``, ``vismv``,
+        ``skip_top`` (was ``st``), ``skip_bottom`` (was ``sb``).
+
         *EXAMPLE*: ``o=debug=pict``
-
-    sb=<number> (MPEG-2 only)
-        Skip the given number of macroblock rows at the bottom.
-
-    st=<number> (MPEG-2 only)
-        Skip the given number of macroblock rows at the top.
 
     skiploopfilter=<skipvalue> (H.264 only)
         Skips the loop filter (AKA deblocking) during H.264 decoding. Since
@@ -1089,14 +1058,6 @@
         Number of threads to use for decoding. Whether threading is actually
         supported depends on codec. 0 means autodetect number of cores on the
         machine and use that, up to the maximum of 16. (default: 0)
-
-    vismv=<value>
-        Visualize motion vectors.
-
-        :0: disabled
-        :1: Visualize forward predicted MVs of P-frames.
-        :2: Visualize forward predicted MVs of B-frames.
-        :4: Visualize backward predicted MVs of B-frames.
 
 
 --lavfdopts=<option1:option2:...>

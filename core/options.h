@@ -195,15 +195,7 @@ typedef struct MPOpts {
     char *hwdec_codecs;
 
     struct lavc_param {
-        int workaround_bugs;
-        int error_resilience;
-        int error_concealment;
-        int gray;
-        int idct_algo;
         int debug;
-        int vismv;
-        int skip_top;
-        int skip_bottom;
         int fast;
         char *skip_loop_filter_str;
         char *skip_idct_str;
