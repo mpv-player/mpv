@@ -462,8 +462,10 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
         update_state_sizes(s, d_width, d_height);
 
         if (!(s->window || s->glContext)) {
-            if (create_window(vo, d_width, d_height, flags, gl3profile) < 0)
+            if (create_window(vo, d_width, d_height, flags, gl3profile) < 0) {
                 rv = -1;
+                return;
+            }
         } else {
             update_window(vo);
         }
