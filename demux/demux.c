@@ -742,8 +742,7 @@ void ds_free_packs(demux_stream_t *ds)
     }
     if (ds->asf_packet) {
         // free unfinished .asf fragments:
-        free(ds->asf_packet->buffer);
-        free(ds->asf_packet);
+        free_demux_packet(ds->asf_packet);
         ds->asf_packet = NULL;
     }
     ds->first = ds->last = NULL;
