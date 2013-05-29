@@ -20,7 +20,7 @@ local osc_geo = {
 	pos_offsetX, pos_offsetY = 0,0, 		-- vertical/horizontal position offset for contents aligned at the borders of the box
 }
 
-
+-- internal states, do not touch
 local state = {
     osc_visible = false,
     mouse_down = false,
@@ -256,9 +256,9 @@ function osc_init ()
 	local baseResY = 720
 	local display_w, display_h, display_aspect = mp.get_screen_size()
 	if osc_geo.vidscale == true then
-		osc_geo.playresy = baseResY * osc_geo.scale
+		osc_geo.playresy = baseResY / osc_geo.scale
 	else
-		osc_geo.playresy = display_h * osc_geo.scale
+		osc_geo.playresy = display_h / osc_geo.scale
 	end
 	osc_geo.playresx = osc_geo.playresy * display_aspect
 	
