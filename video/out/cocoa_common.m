@@ -645,51 +645,73 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         s->did_resize = YES;
     }
 }
+- (void)toggleMissionControlFullScreen:(BOOL)willBeFullscreen
+{
+    struct vo_cocoa_state *s = self.videoOutput->cocoa;
+
+    if (willBeFullscreen) {
+        [self setContentResizeIncrements:NSMakeSize(1, 1)];
+    } else {
+        [self setContentAspectRatio:s->current_video_size];
+    }
+
+    [self toggleFullScreen:nil];
+}
+- (void)toggleViewFullscreen:(BOOL)willBeFullscreen
+{
+    struct vo_cocoa_state *s = self.videoOutput->cocoa;
+
+    if (willBeFullscreen) {
+        NSDictionary *fsopts = @{
+            NSFullScreenModeWindowLevel :
+                @(NSFloatingWindowLevel),
+            NSFullScreenModeAllScreens :
+                @NO,
+            NSFullScreenModeApplicationPresentationOptions :
+                @(NSApplicationPresentationHideDock |
+                  NSApplicationPresentationAutoHideMenuBar)
+        };
+
+        [s->view enterFullScreenMode:s->fs_screen withOptions:fsopts];
+    } else {
+        [s->view exitFullScreenModeWithOptions:nil];
+        [self makeFirstResponder:s->view];
+    }
+}
 - (void)fullscreen
 {
     struct vo_cocoa_state *s = self.videoOutput->cocoa;
-    struct mp_vo_opts *opts = self.videoOutput->opts;
+    struct mp_vo_opts *opts  = self.videoOutput->opts;
 
+    vo_cocoa_update_screen_info(self.videoOutput);
+
+    // Go use the fullscreen API selected by the user. View-based or Mission
+    // Control.
     if (opts->native_fs) {
-        if (!opts->fs) {
-            vo_cocoa_set_cursor_visibility(false);
-            [self setContentResizeIncrements:NSMakeSize(1, 1)];
-            opts->fs = VO_TRUE;
-        } else {
-            vo_cocoa_set_cursor_visibility(true);
-            [self setContentAspectRatio:s->current_video_size];
-            opts->fs = VO_FALSE;
-        }
-
-        [self toggleFullScreen:nil];
+        [self toggleMissionControlFullScreen:!opts->fs];
     } else {
-        if (!opts->fs) {
-            NSDictionary *fsopts = @{
-                NSFullScreenModeWindowLevel :
-                    @(NSFloatingWindowLevel),
-                NSFullScreenModeAllScreens :
-                    @NO,
-                NSFullScreenModeApplicationPresentationOptions :
-                    @(NSApplicationPresentationAutoHideDock |
-                      NSApplicationPresentationAutoHideMenuBar)
-            };
-
-            [s->view enterFullScreenMode:s->fs_screen withOptions:fsopts];
-            vo_cocoa_set_cursor_visibility(false);
-            opts->fs = VO_TRUE;
-        } else {
-            [s->view exitFullScreenModeWithOptions:nil];
-            vo_cocoa_set_cursor_visibility(true);
-            [self makeFirstResponder:s->view];
-            opts->fs = VO_FALSE;
-        }
+        [self toggleViewFullscreen:!opts->fs];
     }
 
+    // Do common work such as setting mouse visibility and actually setting
+    // the new fullscreen state
+    if (!opts->fs) {
+        vo_cocoa_set_cursor_visibility(false);
+        opts->fs = VO_TRUE;
+    } else {
+        vo_cocoa_set_cursor_visibility(true);
+        opts->fs = VO_FALSE;
+    }
+
+    // Change window size if the core attempted to change it while we were in
+    // fullscreen. For example config() might have been called as a result of
+    // a new file changing the window size.
     if (!opts->fs && s->out_fs_resize) {
         resize_window_from_stored_size(self.videoOutput);
         s->out_fs_resize = NO;
     }
 
+    // Make the core aware of the view size change.
     resize_window(self.videoOutput);
 }
 
