@@ -150,7 +150,7 @@ vec4 calcweights(float s) {
     vec4 t = vec4(-0.5, 0.1666, 0.3333, -0.3333) * s + vec4(1, 0, -0.5, 0.5);
     t = t * s + vec4(0, 0, -0.5, 0.5);
     t = t * s + vec4(-0.6666, 0, 0.8333, 0.1666);
-    vec2 a = vec2(1 / t.z, 1 / t.w);
+    vec2 a = vec2(1, 1) / vec2(t.z, t.w);
     t.xy = t.xy * a + vec2(1, 1);
     t.x = t.x + s;
     t.y = t.y - s;
