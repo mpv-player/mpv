@@ -69,6 +69,7 @@ static bool RightAltPressed(NSEvent *event)
 
 @interface GLMPlayerOpenGLView : NSView
 @property(nonatomic, assign) struct vo *videoOutput;
+- (BOOL)containsCurrentMouseLocation;
 - (void)mouseEvent:(NSEvent *)theEvent;
 @end
 
@@ -572,6 +573,8 @@ void vo_cocoa_fullscreen(struct vo *vo)
 
 int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 {
+    struct vo_cocoa_state *s = vo->cocoa;
+
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
         *events |= vo_cocoa_check_events(vo);
@@ -588,7 +591,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_SET_CURSOR_VISIBILITY: {
         bool visible = *(bool *)arg;
-        if (vo->opts->fs)
+        if (vo->opts->fs && [s->view containsCurrentMouseLocation])
             vo_cocoa_set_cursor_visibility(visible);
         return VO_TRUE;
     }
@@ -668,7 +671,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
             NSFullScreenModeAllScreens :
                 @NO,
             NSFullScreenModeApplicationPresentationOptions :
-                @(NSApplicationPresentationHideDock |
+                @(NSApplicationPresentationAutoHideDock |
                   NSApplicationPresentationAutoHideMenuBar)
         };
 
@@ -849,15 +852,24 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     }
 }
 
-- (void)signalMouseMovement:(NSEvent *)theEvent
+- (NSPoint) mouseLocation
 {
-    NSPoint loc = [self convertPoint:[theEvent locationInWindow] fromView:nil];
-    NSRect bounds = [self bounds];
+    NSPoint mLoc = [NSEvent mouseLocation];
+    NSPoint wLoc = [self.window convertScreenToBase:mLoc];
+    return [self convertPoint:wLoc fromView:nil];
+}
 
-    int x = loc.x;
-    int y = - loc.y + bounds.size.height; // convert to x11-like coord system
-    if (CGRectContainsPoint(bounds, NSMakePoint(x, y))) {
-        vo_mouse_movement(self.videoOutput, x, y);
+- (BOOL)containsCurrentMouseLocation
+{
+    return CGRectContainsPoint([self bounds], [self mouseLocation]);
+}
+
+- (void)signalMouseMovement:(NSEvent *)event
+{
+    if ([self containsCurrentMouseLocation]) {
+        NSPoint loc = [self mouseLocation];
+        loc.y = - loc.y + [self bounds].size.height;
+        vo_mouse_movement(self.videoOutput, loc.x, loc.y);
     }
 }
 
