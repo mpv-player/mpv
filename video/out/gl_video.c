@@ -156,7 +156,7 @@ struct gl_video {
 
     GLuint dither_texture;
     float dither_quantization;
-    float dither_multiply;
+    float dither_center;
     int dither_size;
 
     uint32_t image_w, image_h;
@@ -522,8 +522,8 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     gl->Uniform1i(gl->GetUniformLocation(program, "dither"), TEXUNIT_DITHER);
     gl->Uniform1f(gl->GetUniformLocation(program, "dither_quantization"),
                   p->dither_quantization);
-    gl->Uniform1f(gl->GetUniformLocation(program, "dither_multiply"),
-                  p->dither_multiply);
+    gl->Uniform1f(gl->GetUniformLocation(program, "dither_center"),
+                  p->dither_center);
 
     float sparam1 = p->opts.scaler_params[0];
     gl->Uniform1f(gl->GetUniformLocation(program, "filter_param1"),
@@ -953,6 +953,7 @@ static void init_dither(struct gl_video *p)
 
     int tex_size;
     void *tex_data;
+    GLint tex_iformat;
     GLenum tex_type;
     unsigned char temp[256];
 
@@ -968,6 +969,7 @@ static void init_dither(struct gl_video *p)
         }
 
         tex_size = size;
+        tex_iformat = GL_R16;
         tex_type = GL_FLOAT;
         tex_data = p->last_dither_matrix;
     } else {
@@ -975,6 +977,7 @@ static void init_dither(struct gl_video *p)
         mp_make_ordered_dither_matrix(temp, 8);
 
         tex_size = 8;
+        tex_iformat = GL_RED;
         tex_type = GL_UNSIGNED_BYTE;
         tex_data = temp;
     }
@@ -984,7 +987,7 @@ static void init_dither(struct gl_video *p)
     // dither matrix. The precision of the source implicitly decides how many
     // dither patterns can be visible.
     p->dither_quantization = (1 << dst_depth) - 1;
-    p->dither_multiply = p->dither_quantization + 1.0 / (tex_size * tex_size);
+    p->dither_center = 0.5 / (tex_size * tex_size);
     p->dither_size = tex_size;
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_DITHER);
@@ -992,7 +995,7 @@ static void init_dither(struct gl_video *p)
     gl->BindTexture(GL_TEXTURE_2D, p->dither_texture);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
     gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RED, tex_size, tex_size, 0, GL_RED,
+    gl->TexImage2D(GL_TEXTURE_2D, 0, tex_iformat, tex_size, tex_size, 0, GL_RED,
                    tex_type, tex_data);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1586,14 +1589,6 @@ static void check_gl_features(struct gl_video *p)
                 disabled[n_disabled++]
                     = have_float_tex ? "scaler (FBO)" : "scaler (float tex.)";
             }
-        }
-    }
-
-    if (!have_float_tex && p->opts.dither_depth >= 0) {
-        // only fruit dithering uses float textures
-        if (p->opts.dither_algo == 0) {
-            p->opts.dither_depth = -1;
-            disabled[n_disabled++] = "dithering (float tex.)";
         }
     }
 

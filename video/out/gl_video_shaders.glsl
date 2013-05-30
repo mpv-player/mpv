@@ -126,7 +126,7 @@ uniform vec3 inv_gamma;
 uniform float input_gamma;
 uniform float conv_gamma;
 uniform float dither_quantization;
-uniform float dither_multiply;
+uniform float dither_center;
 uniform float filter_param1;
 uniform vec2 dither_size;
 
@@ -382,7 +382,8 @@ void main() {
     dither_pos = dither_trafo * dither_pos;
 #endif
     float dither_value = texture(dither, dither_pos).r;
-    color = floor(color * dither_multiply + dither_value ) / dither_quantization;
+    color = floor(color * dither_quantization + dither_value + dither_center) /
+                dither_quantization;
 #endif
 #ifdef USE_ALPHA
     out_color = vec4(color, alpha);
