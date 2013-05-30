@@ -1341,6 +1341,14 @@ static struct mkv_audio_tag {
     { NULL },
 };
 
+static void copy_audio_private_data(sh_audio_t *sh, mkv_track_t *track)
+{
+    if (!track->ms_compat && track->private_size) {
+        sh->codecdata = malloc(track->private_size);
+        sh->codecdata_len = track->private_size;
+        memcpy(sh->codecdata, track->private_data, track->private_size);
+    }
+}
 
 static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 {
@@ -1424,46 +1432,47 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         sh_a->wf->nBlockAlign = 1486;
         track->fix_i_bps = 1;
         track->qt_last_a_pts = 0.0;
-        goto copy_private_data;
+        copy_audio_private_data(sh_a, track);
     } else if (track->a_formattag == mmioFOURCC('M', 'P', '4', 'A')) {
         int profile, srate_idx;
 
         sh_a->wf->nAvgBytesPerSec = 16000;
         sh_a->wf->nBlockAlign = 1024;
 
-        if (!strcmp(track->codec_id, MKV_A_AAC) && track->private_data)
-            goto copy_private_data;
-
-        /* Recreate the 'private data' */
-        /* which faad2 uses in its initialization */
-        srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
-        if (!strncmp(&track->codec_id[12], "MAIN", 4))
-            profile = 0;
-        else if (!strncmp(&track->codec_id[12], "LC", 2))
-            profile = 1;
-        else if (!strncmp(&track->codec_id[12], "SSR", 3))
-            profile = 2;
-        else
-            profile = 3;
-        sh_a->codecdata = malloc(5);
-        sh_a->codecdata[0] = ((profile + 1) << 3) | ((srate_idx & 0xE) >> 1);
-        sh_a->codecdata[1] =
-            ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
-
-        if (strstr(track->codec_id, "SBR") != NULL) {
-            /* HE-AAC (aka SBR AAC) */
-            sh_a->codecdata_len = 5;
-
-            sh_a->samplerate *= 2;
-            sh_a->wf->nSamplesPerSec *= 2;
-            srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
-            sh_a->codecdata[2] = AAC_SYNC_EXTENSION_TYPE >> 3;
-            sh_a->codecdata[3] = ((AAC_SYNC_EXTENSION_TYPE & 0x07) << 5) | 5;
-            sh_a->codecdata[4] = (1 << 7) | (srate_idx << 3);
-            track->default_duration = 1024.0 / (sh_a->samplerate / 2);
+        if (!strcmp(track->codec_id, MKV_A_AAC) && track->private_data) {
+            copy_audio_private_data(sh_a, track);
         } else {
-            sh_a->codecdata_len = 2;
-            track->default_duration = 1024.0 / sh_a->samplerate;
+            /* Recreate the 'private data' */
+            /* which faad2 uses in its initialization */
+            srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
+            if (!strncmp(&track->codec_id[12], "MAIN", 4))
+                profile = 0;
+            else if (!strncmp(&track->codec_id[12], "LC", 2))
+                profile = 1;
+            else if (!strncmp(&track->codec_id[12], "SSR", 3))
+                profile = 2;
+            else
+                profile = 3;
+            sh_a->codecdata = malloc(5);
+            sh_a->codecdata[0] = ((profile + 1) << 3) | ((srate_idx & 0xE) >> 1);
+            sh_a->codecdata[1] =
+                ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
+
+            if (strstr(track->codec_id, "SBR") != NULL) {
+                /* HE-AAC (aka SBR AAC) */
+                sh_a->codecdata_len = 5;
+
+                sh_a->samplerate *= 2;
+                sh_a->wf->nSamplesPerSec *= 2;
+                srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
+                sh_a->codecdata[2] = AAC_SYNC_EXTENSION_TYPE >> 3;
+                sh_a->codecdata[3] = ((AAC_SYNC_EXTENSION_TYPE & 0x07) << 5) | 5;
+                sh_a->codecdata[4] = (1 << 7) | (srate_idx << 3);
+                track->default_duration = 1024.0 / (sh_a->samplerate / 2);
+            } else {
+                sh_a->codecdata_len = 2;
+                track->default_duration = 1024.0 / sh_a->samplerate;
+            }
         }
     } else if (track->a_formattag == mmioFOURCC('v', 'r', 'b', 's')) {
         /* VORBIS */
@@ -1572,12 +1581,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         }
     } else if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K') ||
                track->a_formattag == mmioFOURCC('T', 'R', 'H', 'D')) {
-    copy_private_data:
-        if (!track->ms_compat && track->private_size) {
-            sh_a->codecdata = malloc(track->private_size);
-            sh_a->codecdata_len = track->private_size;
-            memcpy(sh_a->codecdata, track->private_data, track->private_size);
-        }
+        copy_audio_private_data(sh_a, track);
     } else if (track->a_formattag == mmioFOURCC('T', 'T', 'A', '1')) {
         sh_a->codecdata_len = 30;
         sh_a->codecdata = calloc(1, sh_a->codecdata_len);
