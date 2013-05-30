@@ -652,12 +652,13 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
     if (opts->native_fs) {
         if (!opts->fs) {
-            opts->fs = VO_TRUE;
             vo_cocoa_set_cursor_visibility(false);
             [self setContentResizeIncrements:NSMakeSize(1, 1)];
+            opts->fs = VO_TRUE;
         } else {
             vo_cocoa_set_cursor_visibility(true);
             [self setContentAspectRatio:s->current_video_size];
+            opts->fs = VO_FALSE;
         }
 
         [self toggleFullScreen:nil];
