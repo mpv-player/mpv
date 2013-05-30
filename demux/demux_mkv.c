@@ -33,6 +33,8 @@
 #include <libavutil/intreadwrite.h>
 #include <libavutil/avstring.h>
 
+#include <libavcodec/version.h>
+
 #include "config.h"
 
 #if CONFIG_ZLIB
@@ -72,6 +74,17 @@ static const int cook_fl2bps[COOK_FLAVORS] = {
     4005, 4005, 5513, 5513, 8010, 12059, 1550, 8010, 12059, 5513,
     12016, 16408, 22911, 33506
 };
+
+#define IS_LIBAV_FORK (LIBAVCODEC_VERSION_MICRO < 100)
+
+// Both of these versions were bumped by unrelated commits.
+#if (IS_LIBAV_FORK  && LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 7,  1)) || \
+    (!IS_LIBAV_FORK && LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 12, 101))
+#define NEED_WAVPACK_PARSE 1
+#else
+#define NEED_WAVPACK_PARSE 0
+#endif
+
 
 enum {
     MAX_NUM_LACES = 256,
@@ -2140,12 +2153,14 @@ fail:
 static void mkv_parse_packet(mkv_track_t *track, bstr *buffer)
 {
     if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K')) {
+#if NEED_WAVPACK_PARSE
         int size = buffer->len;
         uint8_t *parsed;
         if (libav_parse_wavpack(track, buffer->start, &parsed, &size) >= 0) {
             buffer->start = parsed;
             buffer->len = size;
         }
+#endif
     }
 }
 
