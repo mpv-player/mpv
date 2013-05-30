@@ -2075,6 +2075,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
     }
 }
 
+#if NEED_WAVPACK_PARSE
 // Copied from libavformat/matroskadec.c (FFmpeg 310f9dd / 2013-05-30)
 // Originally added with Libav commit 9b6f47c
 // License: LGPL v2.1 or later
@@ -2153,6 +2154,7 @@ fail:
     talloc_free(dst);
     return -1;
 }
+#endif
 
 static void mkv_parse_packet(mkv_track_t *track, bstr *buffer)
 {
