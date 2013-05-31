@@ -762,6 +762,13 @@ static int parse_str(const m_option_t *opt, struct bstr name,
         goto exit;
     }
 
+    m_opt_string_validate_fn validate = opt->priv;
+    if (validate) {
+        r = validate(opt, name, param);
+        if (r < 0)
+            goto exit;
+    }
+
     if (opt->flags & M_OPT_PARSE_ESCAPES) {
         char *res = unescape_string(tmp, param);
         if (!res) {
