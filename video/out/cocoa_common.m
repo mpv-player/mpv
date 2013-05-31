@@ -863,8 +863,14 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (NSPoint) mouseLocation
 {
+    struct vo_cocoa_state *s = self.videoOutput->cocoa;
     NSPoint mLoc = [NSEvent mouseLocation];
-    NSPoint wLoc = [self.window convertScreenToBase:mLoc];
+    // Always use the "windowed" `s->window` to do hit detection since using
+    // self.window which points to and instance of NSFullScreenWindow while in
+    // fullscreen results in the cursor being reported to be *inside* the view
+    // even when accessing MenuBar and Dock. This results in the mouse behing
+    // autohidden upon inactivity on those case which is terrible, terrible UX.
+    NSPoint wLoc = [s->window convertScreenToBase:mLoc];
     return [self convertPoint:wLoc fromView:nil];
 }
 
