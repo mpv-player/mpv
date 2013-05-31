@@ -358,6 +358,7 @@ void main() {
 #endif
 #ifdef USE_COLORMATRIX
     color = mat3(colormatrix) * color + colormatrix[3];
+    color = clamp(color, 0, 1);
 #endif
 #ifdef USE_CONV_GAMMA
     color = pow(color, vec3(conv_gamma));
