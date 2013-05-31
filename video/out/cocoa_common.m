@@ -213,11 +213,16 @@ int vo_cocoa_init(struct vo *vo)
     return 1;
 }
 
-static void vo_cocoa_set_cursor_visibility(bool visible)
+static void vo_cocoa_set_cursor_visibility(struct vo *vo, bool visible)
 {
+    struct vo_cocoa_state *s = vo->cocoa;
+
     if (visible) {
+        // show cursor unconditionally
         CGDisplayShowCursor(kCGDirectMainDisplay);
-    } else {
+    } else if (vo->opts->fs && [s->view containsCurrentMouseLocation]) {
+        // only hide cursor if in fullscreen and the video view contains the
+        // mouse location
         CGDisplayHideCursor(kCGDirectMainDisplay);
     }
 }
@@ -226,7 +231,7 @@ void vo_cocoa_uninit(struct vo *vo)
 {
     dispatch_sync(dispatch_get_main_queue(), ^{
         struct vo_cocoa_state *s = vo->cocoa;
-        vo_cocoa_set_cursor_visibility(true);
+        vo_cocoa_set_cursor_visibility(vo, true);
         enable_power_management(vo);
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
 
@@ -573,8 +578,6 @@ void vo_cocoa_fullscreen(struct vo *vo)
 
 int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
 {
-    struct vo_cocoa_state *s = vo->cocoa;
-
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
         *events |= vo_cocoa_check_events(vo);
@@ -591,8 +594,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_SET_CURSOR_VISIBILITY: {
         bool visible = *(bool *)arg;
-        if (vo->opts->fs && [s->view containsCurrentMouseLocation])
-            vo_cocoa_set_cursor_visibility(visible);
+        vo_cocoa_set_cursor_visibility(vo, visible);
         return VO_TRUE;
     }
     case VOCTRL_PAUSE:
@@ -708,11 +710,11 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     // Do common work such as setting mouse visibility and actually setting
     // the new fullscreen state
     if (!opts->fs) {
-        vo_cocoa_set_cursor_visibility(false);
         opts->fs = VO_TRUE;
+        vo_cocoa_set_cursor_visibility(self.videoOutput, false);
     } else {
-        vo_cocoa_set_cursor_visibility(true);
         opts->fs = VO_FALSE;
+        vo_cocoa_set_cursor_visibility(self.videoOutput, true);
     }
 
     // Change window size if the core attempted to change it while we were in
@@ -863,20 +865,20 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (NSPoint) mouseLocation
 {
-    struct vo_cocoa_state *s = self.videoOutput->cocoa;
     NSPoint mLoc = [NSEvent mouseLocation];
-    // Always use the "windowed" `s->window` to do hit detection since using
-    // self.window which points to and instance of NSFullScreenWindow while in
-    // fullscreen results in the cursor being reported to be *inside* the view
-    // even when accessing MenuBar and Dock. This results in the mouse behing
-    // autohidden upon inactivity on those case which is terrible, terrible UX.
-    NSPoint wLoc = [s->window convertScreenToBase:mLoc];
+    NSPoint wLoc = [self.window convertScreenToBase:mLoc];
     return [self convertPoint:wLoc fromView:nil];
 }
 
 - (BOOL)containsCurrentMouseLocation
 {
-    return CGRectContainsPoint([self bounds], [self mouseLocation]);
+    NSRect vF   = [[self.window screen] visibleFrame];
+    NSRect vFR  = [self.window convertRectFromScreen:vF];
+    NSRect vFRV = [self convertRect:vFR fromView:nil];
+
+    // clip bounds to current visibleFrame
+    NSRect clippedBounds = CGRectIntersection([self bounds], vFRV);
+    return CGRectContainsPoint(clippedBounds, [self mouseLocation]);
 }
 
 - (void)signalMouseMovement:(NSEvent *)event
