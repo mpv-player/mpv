@@ -676,8 +676,17 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         };
 
         [s->view enterFullScreenMode:s->fs_screen withOptions:fsopts];
+
+        // The original "windowed" window will staty around since sending a
+        // view fullscreen wraps it in another window. This is noticeable when
+        // sending the View fullscreen to another screen. Make it go away
+        // manually.
+        [s->window orderOut:self];
     } else {
         [s->view exitFullScreenModeWithOptions:nil];
+
+        // Show the "windowed" window again.
+        [s->window makeKeyAndOrderFront:self];
         [self makeFirstResponder:s->view];
     }
 }
