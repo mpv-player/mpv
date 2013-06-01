@@ -40,37 +40,34 @@ static bool supports_format(const char *format)
     return is_dvd_sub(format);
 }
 
-static int init(struct sh_sub *sh, struct osd_state *osd)
+static int init(struct sd *sd)
 {
-    if (sh->initialized)
-        return 0;
-    void *spudec = spudec_new_scaled(osd->sub_video_w, osd->sub_video_h,
-                                     sh->extradata, sh->extradata_len);
+    void *spudec = spudec_new_scaled(sd->sub_video_w, sd->sub_video_h,
+                                     sd->extradata, sd->extradata_len);
     if (!spudec)
         return -1;
     struct sd_spu_priv *priv = talloc_zero(NULL, struct sd_spu_priv);
     priv->spudec = spudec;
-    sh->context = priv;
+    sd->priv = priv;
     return 0;
 }
 
-static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
-                   int data_len, double pts, double duration)
+static void decode(struct sd *sd, struct demux_packet *packet)
 {
-    struct sd_spu_priv *priv = sh->context;
+    struct sd_spu_priv *priv = sd->priv;
 
-    if (pts < 0 || data_len == 0)
+    if (packet->pts < 0 || packet->len == 0)
         return;
 
-    spudec_assemble(priv->spudec, data, data_len, pts * 90000);
+    spudec_assemble(priv->spudec, packet->buffer, packet->len,
+                    packet->pts * 90000);
 }
 
-static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
-                        struct mp_osd_res d, double pts,
+static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
                         struct sub_bitmaps *res)
 {
-    struct MPOpts *opts = sh->opts;
-    struct sd_spu_priv *priv = sh->context;
+    struct MPOpts *opts = sd->opts;
+    struct sd_spu_priv *priv = sd->priv;
 
     spudec_set_forced_subs_only(priv->spudec, opts->forced_subs_only);
     spudec_heartbeat(priv->spudec, pts * 90000);
@@ -79,16 +76,16 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
         spudec_get_indexed(priv->spudec, &d, res);
 }
 
-static void reset(struct sh_sub *sh, struct osd_state *osd)
+static void reset(struct sd *sd)
 {
-    struct sd_spu_priv *priv = sh->context;
+    struct sd_spu_priv *priv = sd->priv;
 
     spudec_reset(priv->spudec);
 }
 
-static void uninit(struct sh_sub *sh)
+static void uninit(struct sd *sd)
 {
-    struct sd_spu_priv *priv = sh->context;
+    struct sd_spu_priv *priv = sd->priv;
 
     spudec_free(priv->spudec);
     talloc_free(priv);
@@ -100,6 +97,5 @@ const struct sd_functions sd_spu = {
     .decode = decode,
     .get_bitmaps = get_bitmaps,
     .reset = reset,
-    .switch_off = reset,
     .uninit = uninit,
 };

@@ -40,95 +40,136 @@ static const struct sd_functions *sd_list[] = {
     NULL
 };
 
-void sub_init(struct sh_sub *sh, struct osd_state *osd)
+struct dec_sub {
+    struct MPOpts *opts;
+    struct sd init_sd;
+
+    struct sd *sd;
+};
+
+struct dec_sub *sub_create(struct MPOpts *opts)
 {
-    sh->sd_driver = NULL;
+    struct dec_sub *sub = talloc_zero(NULL, struct dec_sub);
+    sub->opts = opts;
+    return sub;
+}
+
+void sub_destroy(struct dec_sub *sub)
+{
+    if (!sub)
+        return;
+    if (sub->sd && sub->sd->driver->uninit)
+        sub->sd->driver->uninit(sub->sd);
+    talloc_free(sub->sd);
+    talloc_free(sub);
+}
+
+bool sub_is_initialized(struct dec_sub *sub)
+{
+    return !!sub->sd;
+}
+
+struct sd *sub_get_sd(struct dec_sub *sub)
+{
+    return sub->sd;
+}
+
+void sub_set_video_res(struct dec_sub *sub, int w, int h)
+{
+    sub->init_sd.sub_video_w = w;
+    sub->init_sd.sub_video_h = h;
+}
+
+void sub_set_extradata(struct dec_sub *sub, void *data, int data_len)
+{
+    sub->init_sd.extradata = data_len ? talloc_memdup(sub, data, data_len) : NULL;
+    sub->init_sd.extradata_len = data_len;
+}
+
+void sub_set_ass_renderer(struct dec_sub *sub, struct ass_library *ass_library,
+                          struct ass_renderer *ass_renderer)
+{
+    sub->init_sd.ass_library = ass_library;
+    sub->init_sd.ass_renderer = ass_renderer;
+}
+
+static int sub_init_decoder(struct dec_sub *sub, struct sd *sd)
+{
+    sd->driver = NULL;
     for (int n = 0; sd_list[n]; n++) {
-        if (sd_list[n]->supports_format(sh->gsh->codec)) {
-            sh->sd_driver = sd_list[n];
+        if (sd_list[n]->supports_format(sd->codec)) {
+            sd->driver = sd_list[n];
             break;
         }
     }
 
-    if (sh->sd_driver) {
-        if (sh->sd_driver->init(sh, osd) < 0)
-            return;
-        osd->sh_sub = sh;
-        osd->switch_sub_id++;
-        sh->initialized = true;
-        sh->active = true;
+    if (!sd->driver)
+        return -1;
+
+    if (sd->driver->init(sd) < 0)
+        return -1;
+
+    return 0;
+}
+
+void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh)
+{
+    assert(!sub->sd);
+    if (sh->extradata && !sub->init_sd.extradata)
+        sub_set_extradata(sub, sh->extradata, sh->extradata_len);
+    struct sd *sd = talloc(NULL, struct sd);
+    *sd = sub->init_sd;
+    sd->opts = sub->opts;
+    sd->codec = sh->gsh->codec;
+    sd->ass_track = sh->track;
+    if (sub_init_decoder(sub, sd) < 0) {
+        talloc_free(sd);
+        sd = NULL;
     }
+    sub->sd = sd;
 }
 
-bool sub_accept_packets_in_advance(struct sh_sub *sh)
+bool sub_accept_packets_in_advance(struct dec_sub *sub)
 {
-    return sh->active && sh->sd_driver->accept_packets_in_advance;
+    return sub->sd && sub->sd->driver->accept_packets_in_advance;
 }
 
-void sub_decode(struct sh_sub *sh, struct osd_state *osd, void *data,
-                int data_len, double pts, double duration)
+void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
 {
-    if (sh->active && sh->sd_driver->decode)
-        sh->sd_driver->decode(sh, osd, data, data_len, pts, duration);
+    if (sub->sd)
+        sub->sd->driver->decode(sub->sd, packet);
 }
 
-void sub_get_bitmaps(struct osd_state *osd, struct mp_osd_res dim, double pts,
+void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
                      struct sub_bitmaps *res)
 {
-    struct MPOpts *opts = osd->opts;
+    struct MPOpts *opts = sub->opts;
 
     *res = (struct sub_bitmaps) {0};
-    if (!opts->sub_visibility || !osd->sh_sub || !osd->sh_sub->active) {
-        /* Change ID in case we just switched from visible subtitles
-         * to current state. Hopefully, unnecessarily claiming that
-         * things may have changed is harmless for empty contents.
-         * Increase osd-> values ahead so that _next_ returned id
-         * is also guaranteed to differ from this one.
-         */
-        osd->switch_sub_id++;
-    } else {
-        if (osd->sh_sub->sd_driver->get_bitmaps)
-            osd->sh_sub->sd_driver->get_bitmaps(osd->sh_sub, osd, dim, pts, res);
+    if (sub->sd && opts->sub_visibility) {
+        if (sub->sd->driver->get_bitmaps)
+            sub->sd->driver->get_bitmaps(sub->sd, dim, pts, res);
     }
-
-    res->bitmap_id += osd->switch_sub_id;
-    res->bitmap_pos_id += osd->switch_sub_id;
-    osd->switch_sub_id = 0;
 }
 
-char *sub_get_text(struct osd_state *osd, double pts)
+bool sub_has_get_text(struct dec_sub *sub)
 {
-    struct MPOpts *opts = osd->opts;
+    return sub->sd && sub->sd->driver->get_text;
+}
+
+char *sub_get_text(struct dec_sub *sub, double pts)
+{
+    struct MPOpts *opts = sub->opts;
     char *text = NULL;
-    if (!opts->sub_visibility || !osd->sh_sub || !osd->sh_sub->active) {
-        // -
-    } else {
-        if (osd->sh_sub->sd_driver->get_text)
-            text = osd->sh_sub->sd_driver->get_text(osd->sh_sub, osd, pts);
+    if (sub->sd && opts->sub_visibility) {
+        if (sub->sd->driver->get_text)
+            text = sub->sd->driver->get_text(sub->sd, pts);
     }
     return text;
 }
 
-void sub_reset(struct sh_sub *sh, struct osd_state *osd)
+void sub_reset(struct dec_sub *sub)
 {
-    if (sh->active && sh->sd_driver->reset)
-        sh->sd_driver->reset(sh, osd);
-}
-
-void sub_switchoff(struct sh_sub *sh, struct osd_state *osd)
-{
-    if (sh->active && sh->sd_driver->switch_off) {
-        assert(osd->sh_sub == sh);
-        sh->sd_driver->switch_off(sh, osd);
-        osd->sh_sub = NULL;
-    }
-    sh->active = false;
-}
-
-void sub_uninit(struct sh_sub *sh)
-{
-    assert (!sh->active);
-    if (sh->initialized && sh->sd_driver->uninit)
-        sh->sd_driver->uninit(sh);
-    sh->initialized = false;
+    if (sub->sd && sub->sd->driver->reset)
+        sub->sd->driver->reset(sub->sd);
 }

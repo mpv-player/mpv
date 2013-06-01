@@ -69,39 +69,39 @@ static void free_last_event(ASS_Track *track)
     track->n_events--;
 }
 
-static int init(struct sh_sub *sh, struct osd_state *osd)
+static int init(struct sd *sd)
 {
-    struct sd_ass_priv *ctx;
-    bool ass = is_ass_sub(sh->gsh->codec);
+    if (!sd->ass_library || !sd->ass_renderer)
+        return -1;
 
-    if (sh->initialized) {
-        ctx = sh->context;
-    } else {
-        ctx = talloc_zero(NULL, struct sd_ass_priv);
-        sh->context = ctx;
-        if (sh->track) {
-            ctx->ass_track = sh->track;
-        } else if (ass) {
-            ctx->ass_track = ass_new_track(osd->ass_library);
-            if (sh->extradata)
-                ass_process_codec_private(ctx->ass_track, sh->extradata,
-                                          sh->extradata_len);
-        } else
-            ctx->ass_track = mp_ass_default_track(osd->ass_library, sh->opts);
-    }
+    bool ass = is_ass_sub(sd->codec);
+    struct sd_ass_priv *ctx = talloc_zero(NULL, struct sd_ass_priv);
+    sd->priv = ctx;
+    if (sd->ass_track) {
+        ctx->ass_track = sd->ass_track;
+    } else if (ass) {
+        ctx->ass_track = ass_new_track(sd->ass_library);
+        if (sd->extradata)
+            ass_process_codec_private(ctx->ass_track, sd->extradata,
+                                      sd->extradata_len);
+    } else
+        ctx->ass_track = mp_ass_default_track(sd->ass_library, sd->opts);
 
     ctx->vsfilter_aspect = ass;
     return 0;
 }
 
-static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
-                   int data_len, double pts, double duration)
+static void decode(struct sd *sd, struct demux_packet *packet)
 {
+    void *data = packet->buffer;
+    int data_len = packet->len;
+    double pts = packet->pts;
+    double duration = packet->duration;
     unsigned char *text = data;
-    struct sd_ass_priv *ctx = sh->context;
+    struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
 
-    if (is_ass_sub(sh->gsh->codec)) {
+    if (is_ass_sub(sd->codec)) {
         if (bstr_startswith0((bstr){data, data_len}, "Dialogue: ")) {
             // broken ffmpeg ASS packet format
             ctx->flush_on_seek = true;
@@ -158,14 +158,13 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
     event->Text = strdup(buf);
 }
 
-static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
-                        struct mp_osd_res dim, double pts,
+static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
                         struct sub_bitmaps *res)
 {
-    struct sd_ass_priv *ctx = sh->context;
-    struct MPOpts *opts = osd->opts;
+    struct sd_ass_priv *ctx = sd->priv;
+    struct MPOpts *opts = sd->opts;
 
-    if (pts == MP_NOPTS_VALUE)
+    if (pts == MP_NOPTS_VALUE || !sd->ass_renderer)
         return;
 
     double scale = dim.display_par;
@@ -173,7 +172,7 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
                          ? opts->ass_vsfilter_aspect_compat : 1;
     if (ctx->vsfilter_aspect && use_vs_aspect)
         scale = scale * dim.video_par;
-    ASS_Renderer *renderer = osd->ass_renderer;
+    ASS_Renderer *renderer = sd->ass_renderer;
     mp_ass_configure(renderer, opts, &dim);
     ass_set_aspect_ratio(renderer, scale, 1);
     mp_ass_render_frame(renderer, ctx->ass_track, pts * 1000 + .5,
@@ -234,9 +233,9 @@ static void ass_to_plaintext(struct buf *b, const char *in)
     }
 }
 
-static char *get_text(struct sh_sub *sh, struct osd_state *osd, double pts)
+static char *get_text(struct sd *sd, double pts)
 {
-    struct sd_ass_priv *ctx = sh->context;
+    struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
 
     if (pts == MP_NOPTS_VALUE)
@@ -264,9 +263,9 @@ static char *get_text(struct sh_sub *sh, struct osd_state *osd, double pts)
     return ctx->last_text;
 }
 
-static void reset(struct sh_sub *sh, struct osd_state *osd)
+static void reset(struct sd *sd)
 {
-    struct sd_ass_priv *ctx = sh->context;
+    struct sd_ass_priv *ctx = sd->priv;
     if (ctx->incomplete_event)
         free_last_event(ctx->ass_track);
     ctx->incomplete_event = false;
@@ -275,11 +274,11 @@ static void reset(struct sh_sub *sh, struct osd_state *osd)
     ctx->flush_on_seek = false;
 }
 
-static void uninit(struct sh_sub *sh)
+static void uninit(struct sd *sd)
 {
-    struct sd_ass_priv *ctx = sh->context;
+    struct sd_ass_priv *ctx = sd->priv;
 
-    if (sh->track != ctx->ass_track)
+    if (sd->ass_track != ctx->ass_track)
         ass_free_track(ctx->ass_track);
     talloc_free(ctx);
 }
@@ -292,15 +291,14 @@ const struct sd_functions sd_ass = {
     .get_bitmaps = get_bitmaps,
     .get_text = get_text,
     .reset = reset,
-    .switch_off = reset,
     .uninit = uninit,
 };
 
-struct ass_track *sub_get_ass_track(struct osd_state *osd)
+struct ass_track *sub_get_ass_track(struct dec_sub *sub)
 {
-    struct sh_sub *sh = osd ? osd->sh_sub : NULL;
-    if (sh && sh->sd_driver == &sd_ass && sh->context) {
-        struct sd_ass_priv *ctx = sh->context;
+    struct sd *sd = sub_get_sd(sub);
+    if (sd && sd->driver == &sd_ass && sd->priv) {
+        struct sd_ass_priv *ctx = sd->priv;
         return ctx->ass_track;
     }
     return NULL;

@@ -159,11 +159,11 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
     obj->vo_res = res;
 
     if (obj->type == OSDTYPE_SUB) {
-        if (osd->render_bitmap_subs) {
+        if (osd->render_bitmap_subs && osd->dec_sub) {
             double sub_pts = video_pts;
             if (sub_pts != MP_NOPTS_VALUE)
                 sub_pts -= osd->sub_offset;
-            sub_get_bitmaps(osd, obj->vo_res, sub_pts, out_imgs);
+            sub_get_bitmaps(osd->dec_sub, obj->vo_res, sub_pts, out_imgs);
         }
     } else {
         osd_object_get_bitmaps(osd, obj, out_imgs);

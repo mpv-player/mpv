@@ -1951,9 +1951,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_SUB_STEP:
 #ifdef CONFIG_ASS
-        if (sh_video) {
+        if (mpctx->osd->dec_sub) {
             int movement = cmd->args[0].v.i;
-            struct ass_track *ass_track = sub_get_ass_track(mpctx->osd);
+            struct ass_track *ass_track = sub_get_ass_track(mpctx->osd->dec_sub);
             if (ass_track) {
                 set_osd_tmsg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
                              "Sub delay: %d ms", ROUND(opts->sub_delay * 1000));

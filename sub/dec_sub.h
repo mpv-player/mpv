@@ -9,20 +9,36 @@
 struct sh_sub;
 struct ass_track;
 struct MPOpts;
+struct demux_packet;
+struct ass_library;
+struct ass_renderer;
 
-bool sub_accept_packets_in_advance(struct sh_sub *sh);
-void sub_decode(struct sh_sub *sh, struct osd_state *osd, void *data,
-                int data_len, double pts, double duration);
-void sub_get_bitmaps(struct osd_state *osd, struct mp_osd_res dim, double pts,
+struct dec_sub;
+struct sd;
+
+struct dec_sub *sub_create(struct MPOpts *opts);
+void sub_destroy(struct dec_sub *sub);
+
+void sub_set_video_res(struct dec_sub *sub, int w, int h);
+void sub_set_extradata(struct dec_sub *sub, void *data, int data_len);
+void sub_set_ass_renderer(struct dec_sub *sub, struct ass_library *ass_library,
+                          struct ass_renderer *ass_renderer);
+void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh);
+
+bool sub_is_initialized(struct dec_sub *sub);
+
+bool sub_accept_packets_in_advance(struct dec_sub *sub);
+void sub_decode(struct dec_sub *sub, struct demux_packet *packet);
+void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
                      struct sub_bitmaps *res);
-char *sub_get_text(struct osd_state *osd, double pts);
-void sub_init(struct sh_sub *sh, struct osd_state *osd);
-void sub_reset(struct sh_sub *sh, struct osd_state *osd);
-void sub_switchoff(struct sh_sub *sh, struct osd_state *osd);
-void sub_uninit(struct sh_sub *sh);
+bool sub_has_get_text(struct dec_sub *sub);
+char *sub_get_text(struct dec_sub *sub, double pts);
+void sub_reset(struct dec_sub *sub);
+
+struct sd *sub_get_sd(struct dec_sub *sub);
 
 #ifdef CONFIG_ASS
-struct ass_track *sub_get_ass_track(struct osd_state *osd);
+struct ass_track *sub_get_ass_track(struct dec_sub *sub);
 #endif
 
 #endif

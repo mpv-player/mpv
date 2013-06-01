@@ -120,7 +120,6 @@ struct osd_state {
 
     struct ass_library *ass_library;
     struct ass_renderer *ass_renderer;
-    struct sh_sub *sh_sub;
     double sub_offset;
     double vo_pts;
 
@@ -138,14 +137,10 @@ struct osd_state {
     float progbar_value;   // range 0.0-1.0
     float *progbar_stops;  // used for chapter indicators (0.0-1.0 each)
     int progbar_num_stops;
-
-    int switch_sub_id;
+    // OSDTYPE_SUB
+    struct dec_sub *dec_sub;
 
     struct MPOpts *opts;
-
-    // Video resolution used for subtitle decoding. Doesn't necessarily match
-    // the resolution of the VO, nor does it have to be the OSD resolution.
-    int sub_video_w, sub_video_h;
 
     // Internal to sub.c
     struct mp_draw_sub_cache *draw_cache;

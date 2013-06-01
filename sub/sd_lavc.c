@@ -81,12 +81,10 @@ static void guess_resolution(enum AVCodecID type, int *w, int *h)
     }
 }
 
-static int init(struct sh_sub *sh, struct osd_state *osd)
+static int init(struct sd *sd)
 {
-    if (sh->initialized)
-        return 0;
     struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
-    enum AVCodecID cid = mp_codec_to_av_codec_id(sh->gsh->codec);
+    enum AVCodecID cid = mp_codec_to_av_codec_id(sd->codec);
     AVCodecContext *ctx = NULL;
     AVCodec *sub_codec = avcodec_find_decoder(cid);
     if (!sub_codec)
@@ -94,12 +92,12 @@ static int init(struct sh_sub *sh, struct osd_state *osd)
     ctx = avcodec_alloc_context3(sub_codec);
     if (!ctx)
         goto error;
-    ctx->extradata_size = sh->extradata_len;
-    ctx->extradata = sh->extradata;
+    ctx->extradata_size = sd->extradata_len;
+    ctx->extradata = sd->extradata;
     if (avcodec_open2(ctx, sub_codec, NULL) < 0)
         goto error;
     priv->avctx = ctx;
-    sh->context = priv;
+    sd->priv = priv;
     return 0;
 
  error:
@@ -126,18 +124,19 @@ static void clear(struct sd_lavc_priv *priv)
     priv->have_sub = false;
 }
 
-static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
-                   int data_len, double pts, double duration)
+static void decode(struct sd *sd, struct demux_packet *packet)
 {
-    struct sd_lavc_priv *priv = sh->context;
+    struct sd_lavc_priv *priv = sd->priv;
     AVCodecContext *ctx = priv->avctx;
+    double pts = packet->pts;
+    double duration = packet->duration;
     AVSubtitle sub;
     AVPacket pkt;
 
     clear(priv);
     av_init_packet(&pkt);
-    pkt.data = data;
-    pkt.size = data_len;
+    pkt.data = packet->buffer;
+    pkt.size = packet->len;
     pkt.pts = pts * 1000;
     if (duration >= 0)
         pkt.convergence_duration = duration * 1000;
@@ -189,11 +188,10 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
     }
 }
 
-static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
-                        struct mp_osd_res d, double pts,
+static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
                         struct sub_bitmaps *res)
 {
-    struct sd_lavc_priv *priv = sh->context;
+    struct sd_lavc_priv *priv = sd->priv;
 
     if (priv->pts != MP_NOPTS_VALUE && pts < priv->pts)
         return;
@@ -225,9 +223,9 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
     res->scaled = xscale != 1 || yscale != 1;
 }
 
-static void reset(struct sh_sub *sh, struct osd_state *osd)
+static void reset(struct sd *sd)
 {
-    struct sd_lavc_priv *priv = sh->context;
+    struct sd_lavc_priv *priv = sd->priv;
 
     if (priv->pts == MP_NOPTS_VALUE)
         clear(priv);
@@ -235,9 +233,9 @@ static void reset(struct sh_sub *sh, struct osd_state *osd)
     avcodec_flush_buffers(priv->avctx);
 }
 
-static void uninit(struct sh_sub *sh)
+static void uninit(struct sd *sd)
 {
-    struct sd_lavc_priv *priv = sh->context;
+    struct sd_lavc_priv *priv = sd->priv;
 
     clear(priv);
     avcodec_close(priv->avctx);
@@ -251,6 +249,5 @@ const struct sd_functions sd_lavc = {
     .decode = decode,
     .get_bitmaps = get_bitmaps,
     .reset = reset,
-    .switch_off = reset,
     .uninit = uninit,
 };
