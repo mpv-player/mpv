@@ -1833,10 +1833,6 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
 {
     struct MPOpts *opts = &mpctx->opts;
     struct sh_sub *sh_sub = mpctx->sh_sub;
-    struct demux_stream *d_sub = sh_sub ? sh_sub->ds : NULL;
-    unsigned char *packet = NULL;
-    int len;
-    const char *type = sh_sub ? sh_sub->gsh->codec : NULL;
 
     struct track *track = mpctx->current_track[STREAM_SUB];
     if (!track)
@@ -1849,12 +1845,16 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
     double curpts_s = refpts_tl - mpctx->osd->sub_offset;
     double refpts_s = refpts_tl - video_offset;
 
-    if (d_sub && sh_sub && sh_sub->active) {
+    if (sh_sub && sh_sub->active) {
+        struct demux_stream *d_sub = sh_sub->ds;
+        const char *type = sh_sub->gsh->codec;
         bool non_interleaved = is_non_interleaved(mpctx, track);
-        if (non_interleaved)
-            ds_get_next_pts(d_sub);
 
-        while (d_sub->first) {
+        while (1) {
+            if (non_interleaved)
+                ds_get_next_pts(d_sub);
+            if (!d_sub->first)
+                break;
             double subpts_s = ds_get_next_pts(d_sub);
             if (subpts_s == MP_NOPTS_VALUE) {
                 // Try old method of getting PTS. This is only needed in the
@@ -1882,7 +1882,8 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                     break;
             }
             double duration = d_sub->first->duration;
-            len = ds_get_packet_sub(d_sub, &packet);
+            unsigned char *packet = NULL;
+            int len = ds_get_packet_sub(d_sub, &packet);
             mp_dbg(MSGT_CPLAYER, MSGL_V, "Sub: c_pts=%5.3f s_pts=%5.3f "
                    "duration=%5.3f len=%d\n", curpts_s, subpts_s, duration,
                    len);
@@ -1893,8 +1894,6 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 packet += 2;
             }
             sub_decode(sh_sub, mpctx->osd, packet, len, subpts_s, duration);
-            if (non_interleaved)
-                ds_get_next_pts(d_sub);
         }
     }
 

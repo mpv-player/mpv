@@ -29,6 +29,12 @@ struct sd_spu_priv {
     void *spudec;
 };
 
+static bool is_dvd_sub(const char *t)
+{
+    return t && (strcmp(t, "dvd_subtitle") == 0 ||
+                 strcmp(t, "dvd_subtitle_mpg") == 0);
+}
+
 static bool supports_format(const char *format)
 {
     return is_dvd_sub(format);

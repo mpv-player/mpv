@@ -10,10 +10,6 @@ struct sh_sub;
 struct ass_track;
 struct MPOpts;
 
-bool is_text_sub(const char *t);
-bool is_ass_sub(const char *t);
-bool is_dvd_sub(const char *t);
-
 bool sub_accept_packets_in_advance(struct sh_sub *sh);
 void sub_decode(struct sh_sub *sh, struct osd_state *osd, void *data,
                 int data_len, double pts, double duration);

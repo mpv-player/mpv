@@ -40,26 +40,6 @@ static const struct sd_functions *sd_list[] = {
     NULL
 };
 
-bool is_text_sub(const char *t)
-{
-    return t && (is_ass_sub(t) ||
-                 strcmp(t, "text") == 0 ||
-                 strcmp(t, "subrip") == 0 ||
-                 strcmp(t, "mov_text") == 0);
-}
-
-bool is_ass_sub(const char *t)
-{
-    return t && (strcmp(t, "ass") == 0 ||
-                 strcmp(t, "ssa") == 0);
-}
-
-bool is_dvd_sub(const char *t)
-{
-    return t && (strcmp(t, "dvd_subtitle") == 0 ||
-                 strcmp(t, "dvd_subtitle_mpg") == 0);
-}
-
 void sub_init(struct sh_sub *sh, struct osd_state *osd)
 {
     sh->sd_driver = NULL;

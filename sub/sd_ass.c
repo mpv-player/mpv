@@ -43,6 +43,20 @@ struct sd_ass_priv {
     char last_text[500];
 };
 
+static bool is_ass_sub(const char *t)
+{
+    return t && (strcmp(t, "ass") == 0 ||
+                 strcmp(t, "ssa") == 0);
+}
+
+static bool is_text_sub(const char *t)
+{
+    return t && (is_ass_sub(t) ||
+                 strcmp(t, "text") == 0 ||
+                 strcmp(t, "subrip") == 0 ||
+                 strcmp(t, "mov_text") == 0);
+}
+
 static bool supports_format(const char *format)
 {
     return is_text_sub(format);
