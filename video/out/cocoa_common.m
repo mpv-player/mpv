@@ -131,7 +131,6 @@ struct vo_cocoa_state {
 
     struct aspect_data aspdat;
 
-    bool will_make_front;
     bool did_resize;
     bool did_async_resize;
     bool out_fs_resize;
@@ -156,7 +155,6 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .current_video_size = {0,0},
         .previous_video_size = {0,0},
         .out_fs_resize = NO,
-        .will_make_front = YES,
         .power_mgmt_assertion = kIOPMNullAssertionID,
         .accumulated_scroll = 0,
         .lock = [[NSLock alloc] init],
@@ -341,16 +339,23 @@ static void update_state_sizes(struct vo_cocoa_state *s,
     s->current_video_size = NSMakeSize(d_width, d_height);
 }
 
-static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
-                         uint32_t flags, int gl3profile)
+static void resize_window_from_stored_size(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    const NSRect window_rect = NSMakeRect(vo->xinerama_x, vo->xinerama_y,
-                                          d_width, d_height);
-    const NSRect glview_rect = NSMakeRect(0, 0, 100, 100);
+    [s->window setContentSize:s->current_video_size keepCentered:YES];
+    [s->window setContentAspectRatio:s->current_video_size];
+}
+
+static void create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
+                         uint32_t flags)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    struct mp_vo_opts *opts  = vo->opts;
+
+    const NSRect contentRect = NSMakeRect(0, 0, d_width, d_height);
 
     int window_mask = 0;
-    if (vo->opts->border) {
+    if (opts->border) {
         window_mask = NSTitledWindowMask|NSClosableWindowMask|
                       NSMiniaturizableWindowMask|NSResizableWindowMask;
     } else {
@@ -358,36 +363,13 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     }
 
     s->window =
-        [[GLMPlayerWindow alloc] initWithContentRect:window_rect
+        [[GLMPlayerWindow alloc] initWithContentRect:contentRect
                                            styleMask:window_mask
                                              backing:NSBackingStoreBuffered
                                                defer:NO];
 
-    s->view = [[GLMPlayerOpenGLView alloc] initWithFrame:glview_rect];
+    s->view = [[GLMPlayerOpenGLView alloc] initWithFrame:contentRect];
     [s->view setWantsBestResolutionOpenGLSurface:YES];
-
-    int i = 0;
-    NSOpenGLPixelFormatAttribute attr[32];
-    attr[i++] = NSOpenGLPFAOpenGLProfile;
-    if (gl3profile) {
-        attr[i++] = NSOpenGLProfileVersion3_2Core;
-    } else {
-        attr[i++] = NSOpenGLProfileVersionLegacy;
-    }
-    attr[i++] = NSOpenGLPFADoubleBuffer; // double buffered
-    attr[i] = (NSOpenGLPixelFormatAttribute)0;
-
-    s->pixelFormat =
-        [[[NSOpenGLPixelFormat alloc] initWithAttributes:attr] autorelease];
-    if (!s->pixelFormat) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-            "[cocoa] Invalid pixel format attribute "
-            "(GL3 not supported?)\n");
-        return -1;
-    }
-    s->glContext =
-        [[NSOpenGLContext alloc] initWithFormat:s->pixelFormat
-                                   shareContext:nil];
 
     cocoa_register_menu_item_action(MPM_H_SIZE,   @selector(halfSize));
     cocoa_register_menu_item_action(MPM_N_SIZE,   @selector(normalSize));
@@ -406,17 +388,57 @@ static int create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     [s->window setDelegate:s->window];
     [s->window makeMainWindow];
 
-    [s->window setContentSize:s->current_video_size keepCentered:YES];
-    [s->window setContentAspectRatio:s->current_video_size];
+    [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
+    [s->window makeKeyAndOrderFront:nil];
+    [NSApp activateIgnoringOtherApps:YES];
 
-    return 0;
+    if (flags & VOFLAG_FULLSCREEN)
+        vo_cocoa_fullscreen(vo);
+
+    vo_set_level(vo, opts->ontop);
+
+    if (opts->native_fs) {
+        [s->window setCollectionBehavior:
+            NSWindowCollectionBehaviorFullScreenPrimary];
+        [NSApp setPresentationOptions:NSFullScreenWindowMask];
+    }
 }
 
-static void resize_window_from_stored_size(struct vo *vo)
+static NSOpenGLPixelFormatAttribute get_nsopengl_profile(int gl3profile) {
+    if (gl3profile) {
+        return NSOpenGLProfileVersion3_2Core;
+    } else {
+        return NSOpenGLProfileVersionLegacy;
+    }
+}
+
+static int create_gl_context(struct vo *vo, int gl3profile)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    [s->window setContentSize:s->current_video_size keepCentered:YES];
-    [s->window setContentAspectRatio:s->current_video_size];
+
+    NSOpenGLPixelFormatAttribute attr[] = {
+        NSOpenGLPFAOpenGLProfile,
+        get_nsopengl_profile(gl3profile),
+        NSOpenGLPFADoubleBuffer,
+        0
+    };
+
+    s->pixelFormat =
+        [[[NSOpenGLPixelFormat alloc] initWithAttributes:attr] autorelease];
+
+    if (!s->pixelFormat) {
+        mp_msg(MSGT_VO, MSGL_ERR,
+            "[cocoa] Trying to build invalid OpenGL pixel format\n");
+        return -1;
+    }
+
+    s->glContext =
+        [[NSOpenGLContext alloc] initWithFormat:s->pixelFormat
+                                   shareContext:nil];
+
+    [s->glContext makeCurrentContext];
+
+    return 0;
 }
 
 static void update_window(struct vo *vo)
@@ -433,6 +455,11 @@ static void update_window(struct vo *vo)
             resize_window_from_stored_size(vo);
         }
     }
+
+    [s->window setTitle:
+        [NSString stringWithUTF8String:vo_get_window_title(vo)]];
+
+    resize_window(vo);
 }
 
 static void resize_redraw(struct vo *vo, int width, int height)
@@ -453,59 +480,48 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
                            int gl3profile)
 {
     struct vo_cocoa_state *s = vo->cocoa;
-    struct mp_vo_opts *opts = vo->opts;
-    __block int rv = 0;
+    __block int ctxok = 0;
     s->enable_resize_redraw = NO;
 
     dispatch_sync(dispatch_get_main_queue(), ^{
-        if (vo->config_count > 0) {
-            NSPoint origin = [s->window frame].origin;
-            vo->dx = origin.x;
-            vo->dy = origin.y;
-        }
-
         s->aspdat = vo->aspdat;
         update_state_sizes(s, d_width, d_height);
 
-        if (!(s->window || s->glContext)) {
-            if (create_window(vo, d_width, d_height, flags, gl3profile) < 0) {
-                rv = -1;
-                return;
+        if (flags & VOFLAG_HIDDEN) {
+            // This is certainly the first execution of vo_config_window and
+            // is called in order for an OpenGL based VO to perform detection
+            // of OpenGL extensions. On OSX to accomplish this task we are
+            // allowed only create a OpenGL context without attaching it to
+            // a drawable.
+            ctxok = create_gl_context(vo, gl3profile);
+            if (ctxok < 0) return;
+        } else if (!s->glContext || !s->window) {
+            // Either glContext+Window or Window alone are not created.
+            // Handle each of them independently. This is to handle correctly
+            // both VOs like vo_corevideo who skip the the OpenGL detection
+            // phase completly and generic OpenGL VOs who use VOFLAG_HIDDEN.
+            if (!s->glContext) {
+                ctxok = create_gl_context(vo, gl3profile);
+                if (ctxok < 0) return;
             }
-        } else {
+
+            if (!s->window)
+                create_window(vo, d_width, d_height, flags);
+        }
+
+        if (s->window) {
+            // Everything is properly initialized
             update_window(vo);
         }
-
-        [s->window setFrameOrigin:NSMakePoint(vo->dx, vo->dy)];
-
-        if (flags & VOFLAG_HIDDEN) {
-            [s->window orderOut:nil];
-        } else if (![s->window isVisible] && s->will_make_front) {
-            s->will_make_front = NO;
-            [s->window makeKeyAndOrderFront:nil];
-            [NSApp activateIgnoringOtherApps:YES];
-        }
-
-        if (flags & VOFLAG_FULLSCREEN && !vo->opts->fs)
-            vo_cocoa_fullscreen(vo);
-
-        vo_set_level(vo, opts->ontop);
-
-        resize_window(vo);
-
-        [s->window setTitle:
-            [NSString stringWithUTF8String:vo_get_window_title(vo)]];
-
-        if (opts->native_fs) {
-            [s->window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
-            [NSApp setPresentationOptions:NSFullScreenWindowMask];
-        }
     });
+
+    if (ctxok < 0)
+        return ctxok;
 
     [vo->cocoa->glContext makeCurrentContext];
     s->enable_resize_redraw = YES;
 
-    return rv;
+    return 0;
 }
 
 static bool resize_callback_registered(struct vo *vo)
