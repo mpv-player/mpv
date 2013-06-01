@@ -44,6 +44,8 @@ struct sd_functions {
     void (*reset)(struct sd *sd);
     void (*uninit)(struct sd *sd);
 
+    void (*fix_events)(struct sd *sd);
+
     // decoder
     void (*get_bitmaps)(struct sd *sd, struct mp_osd_res dim, double pts,
                         struct sub_bitmaps *res);

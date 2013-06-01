@@ -254,6 +254,12 @@ static char *get_text(struct sd *sd, double pts)
     return ctx->last_text;
 }
 
+static void fix_events(struct sd *sd)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    ctx->flush_on_seek = false;
+}
+
 static void reset(struct sd *sd)
 {
     struct sd_ass_priv *ctx = sd->priv;
@@ -281,6 +287,7 @@ const struct sd_functions sd_ass = {
     .decode = decode,
     .get_bitmaps = get_bitmaps,
     .get_text = get_text,
+    .fix_events = fix_events,
     .reset = reset,
     .uninit = uninit,
 };

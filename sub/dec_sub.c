@@ -35,6 +35,7 @@ extern const struct sd_functions sd_spu;
 extern const struct sd_functions sd_movtext;
 extern const struct sd_functions sd_srt;
 extern const struct sd_functions sd_microdvd;
+extern const struct sd_functions sd_lavc_conv;
 
 static const struct sd_functions *sd_list[] = {
 #ifdef CONFIG_ASS
@@ -45,6 +46,7 @@ static const struct sd_functions *sd_list[] = {
     &sd_movtext,
     &sd_srt,
     &sd_microdvd,
+    &sd_lavc_conv,
     NULL
 };
 
@@ -158,6 +160,14 @@ static void read_sub_data(struct dec_sub *sub, struct sub_data *subdata)
 
         sub_decode(sub, &pkt);
     }
+
+    struct sd *sd = sub_get_last_sd(sub);
+    // Hack for broken FFmpeg packet format: make sd_ass keep the subtitle
+    // events on reset(), even though broken FFmpeg ASS packets were received
+    // (from sd_lavc_conv.c). Normally, these events are removed on seek/reset,
+    // but this is obviously unwanted in this case.
+    if (sd && sd->driver->fix_events)
+        sd->driver->fix_events(sd);
 
     talloc_free(temp);
 }
