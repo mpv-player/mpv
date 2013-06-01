@@ -71,6 +71,7 @@ static bool RightAltPressed(NSEvent *event)
 @property(nonatomic, assign) struct vo *videoOutput;
 - (BOOL)containsCurrentMouseLocation;
 - (void)mouseEvent:(NSEvent *)theEvent;
+@property(nonatomic, assign, getter=hasMouseDown) BOOL mouseDown;
 @end
 
 struct vo_cocoa_input_queue {
@@ -218,7 +219,9 @@ static void vo_cocoa_set_cursor_visibility(struct vo *vo, bool visible)
     if (visible) {
         // show cursor unconditionally
         CGDisplayShowCursor(kCGDirectMainDisplay);
-    } else if (vo->opts->fs && [s->view containsCurrentMouseLocation]) {
+    } else if (vo->opts->fs &&
+               [s->view containsCurrentMouseLocation] &&
+               ![s->view hasMouseDown]) {
         // only hide cursor if in fullscreen and the video view contains the
         // mouse location
         CGDisplayHideCursor(kCGDirectMainDisplay);
@@ -849,6 +852,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 @implementation GLMPlayerOpenGLView
 @synthesize videoOutput = _video_output;
+@synthesize mouseDown = _mouse_down;
 - (BOOL)acceptsFirstResponder { return YES; }
 - (BOOL)becomeFirstResponder { return YES; }
 - (BOOL)resignFirstResponder { return YES; }
@@ -961,18 +965,22 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
                 cocoa_async_put_key(
                     s->input_queue,
                     (MP_MOUSE_BTN0 + buttonNumber) | MP_KEY_STATE_DOWN);
+                self.mouseDown = YES;
                 // Looks like Cocoa doesn't create MouseUp events when we are
                 // doing the second click in a double click. Put in the key_fifo
                 // the key that would be put from the MouseUp handling code.
-                if([theEvent clickCount] == 2)
+                if([theEvent clickCount] == 2) {
                     cocoa_async_put_key(s->input_queue,
                                         MP_MOUSE_BTN0 + buttonNumber);
+                    self.mouseDown = NO;
+                }
                 break;
             case NSLeftMouseUp:
             case NSRightMouseUp:
             case NSOtherMouseUp:
                 cocoa_async_put_key(s->input_queue,
                                     MP_MOUSE_BTN0 + buttonNumber);
+                self.mouseDown = NO;
                 break;
         }
     }
