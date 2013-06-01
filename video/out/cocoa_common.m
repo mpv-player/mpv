@@ -74,6 +74,11 @@ static bool RightAltPressed(NSEvent *event)
 @property(nonatomic, assign, getter=hasMouseDown) BOOL mouseDown;
 @end
 
+@interface NSScreen (mpvadditions)
+- (BOOL)hasDock;
+- (BOOL)hasMenubar;
+@end
+
 struct vo_cocoa_input_queue {
     NSMutableArray *fifo;
 };
@@ -686,14 +691,19 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     struct vo_cocoa_state *s = self.videoOutput->cocoa;
 
     if (willBeFullscreen) {
+        NSApplicationPresentationOptions popts =
+            NSApplicationPresentationDefault;
+
+        if ([s->fs_screen hasMenubar])
+            popts |= NSApplicationPresentationAutoHideMenuBar;
+
+        if ([s->fs_screen hasDock])
+            popts |= NSApplicationPresentationAutoHideDock;
+
         NSDictionary *fsopts = @{
-            NSFullScreenModeWindowLevel :
-                @(NSFloatingWindowLevel),
-            NSFullScreenModeAllScreens :
-                @NO,
-            NSFullScreenModeApplicationPresentationOptions :
-                @(NSApplicationPresentationAutoHideDock |
-                  NSApplicationPresentationAutoHideMenuBar)
+            NSFullScreenModeWindowLevel : @(NSFloatingWindowLevel),
+            NSFullScreenModeAllScreens  : @NO,
+            NSFullScreenModeApplicationPresentationOptions : @(popts)
         };
 
         [s->view enterFullScreenMode:s->fs_screen withOptions:fsopts];
@@ -997,5 +1007,25 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         [[NSColor clearColor] set];
         NSRectFill([self bounds]);
     }
+}
+@end
+
+@implementation NSScreen (mpvadditions)
+- (BOOL)hasDock
+{
+    NSRect vF = [self visibleFrame];
+    NSRect f  = [self frame];
+    return
+        // The visible frame's width is smaller: dock is on left or right end
+        // of this method's receiver.
+        vF.size.width < f.size.width ||
+        // The visible frame's veritical origin is bigger is smaller: dock is
+        // on the bottom of this method's receiver.
+        vF.origin.y > f.origin.y;
+
+}
+- (BOOL)hasMenubar
+{
+    return [self isEqual: [NSScreen screens][0]];
 }
 @end
