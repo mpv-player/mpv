@@ -1858,7 +1858,6 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
 
     if (!track->preloaded) {
         struct demux_stream *d_sub = sh_sub->ds;
-        const char *type = sh_sub->gsh->codec;
         bool non_interleaved = is_non_interleaved(mpctx, track);
 
         while (1) {
@@ -1898,12 +1897,6 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
             mp_dbg(MSGT_CPLAYER, MSGL_V, "Sub: c_pts=%5.3f s_pts=%5.3f "
                    "duration=%5.3f len=%d\n", curpts_s, subpts_s, duration,
                    len);
-            if (type && strcmp(type, "mov_text") == 0) {
-                if (len < 2)
-                    continue;
-                len = FFMIN(len - 2, AV_RB16(packet));
-                packet += 2;
-            }
             struct demux_packet pkt = {
                 .buffer = packet,
                 .len = len,

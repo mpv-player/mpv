@@ -53,8 +53,7 @@ static bool is_text_sub(const char *t)
 {
     return t && (is_ass_sub(t) ||
                  strcmp(t, "text") == 0 ||
-                 strcmp(t, "subrip") == 0 ||
-                 strcmp(t, "mov_text") == 0);
+                 strcmp(t, "subrip") == 0);
 }
 
 static bool supports_format(const char *format)
@@ -296,7 +295,7 @@ const struct sd_functions sd_ass = {
 
 struct ass_track *sub_get_ass_track(struct dec_sub *sub)
 {
-    struct sd *sd = sub_get_sd(sub);
+    struct sd *sd = sub_get_last_sd(sub);
     if (sd && sd->driver == &sd_ass && sd->priv) {
         struct sd_ass_priv *ctx = sd->priv;
         return ctx->ass_track;

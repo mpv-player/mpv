@@ -26,6 +26,14 @@ struct sd {
     // Shared renderer for ASS - done to avoid reloading embedded fonts.
     struct ass_library *ass_library;
     struct ass_renderer *ass_renderer;
+
+    // Set by sub converter
+    const char *output_codec;
+    char *output_extradata;
+    int output_extradata_len;
+
+    // Internal buffer for sd_conv_* functions
+    struct sd_conv_buffer *sd_conv_buffer;
 };
 
 struct sd_functions {
@@ -33,11 +41,22 @@ struct sd_functions {
     bool (*supports_format)(const char *format);
     int  (*init)(struct sd *sd);
     void (*decode)(struct sd *sd, struct demux_packet *packet);
+    void (*reset)(struct sd *sd);
+    void (*uninit)(struct sd *sd);
+
+    // decoder
     void (*get_bitmaps)(struct sd *sd, struct mp_osd_res dim, double pts,
                         struct sub_bitmaps *res);
     char *(*get_text)(struct sd *sd, double pts);
-    void (*reset)(struct sd *sd);
-    void (*uninit)(struct sd *sd);
+
+    // converter
+    struct demux_packet *(*get_converted)(struct sd *sd);
 };
+
+void sd_conv_add_packet(struct sd *sd, void *data, int data_len, double pts,
+                        double duration);
+struct demux_packet *sd_conv_def_get_converted(struct sd *sd);
+void sd_conv_def_reset(struct sd *sd);
+void sd_conv_def_uninit(struct sd *sd);
 
 #endif

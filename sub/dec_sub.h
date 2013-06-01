@@ -35,7 +35,7 @@ bool sub_has_get_text(struct dec_sub *sub);
 char *sub_get_text(struct dec_sub *sub, double pts);
 void sub_reset(struct dec_sub *sub);
 
-struct sd *sub_get_sd(struct dec_sub *sub);
+struct sd *sub_get_last_sd(struct dec_sub *sub);
 
 #ifdef CONFIG_ASS
 struct ass_track *sub_get_ass_track(struct dec_sub *sub);
