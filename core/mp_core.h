@@ -103,12 +103,9 @@ struct track {
     // Invariant: (!demuxer && !stream) || stream->demuxer == demuxer
     struct sh_stream *stream;
 
-    // NOTE: demuxer subtitles, i.e. if stream!=NULL, do not use the following
-    //       fields. The data is stored in stream->sub this case.
-
-    // External text subtitle using libass subtitle renderer.
-    // The sh_sub is a dummy and doesn't belong to a demuxer.
-    struct sh_sub *sh_sub;
+    // For external subtitles, which are read fully on init. Do not attempt
+    // to read packets from them.
+    bool preloaded;
 };
 
 enum {

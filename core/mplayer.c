@@ -281,8 +281,6 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
     if (t->title)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " '%s'", t->title);
     const char *codec = s ? s->codec : NULL;
-    if (!codec && t->sh_sub) // external subs hack
-        codec = t->sh_sub->gsh->codec;
     mp_msg(MSGT_CPLAYER, MSGL_INFO, " (%s)", codec ? codec : "<unknown>");
     if (t->is_external)
         mp_msg(MSGT_CPLAYER, MSGL_INFO, " (external)");
@@ -482,13 +480,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
     if (mask & INITIALIZED_SUB) {
         mpctx->initialized_flags &= ~INITIALIZED_SUB;
-        struct track *track = mpctx->current_track[STREAM_SUB];
-        // One of these was active; they can't be both active.
-        assert(!(mpctx->sh_sub && track && track->sh_sub));
         if (mpctx->sh_sub)
             sub_switchoff(mpctx->sh_sub, mpctx->osd);
-        if (track && track->sh_sub)
-            sub_switchoff(track->sh_sub, mpctx->osd);
         cleanup_demux_stream(mpctx, STREAM_SUB);
         reset_subtitles(mpctx);
     }
@@ -1039,11 +1032,19 @@ static void add_dvd_tracks(struct MPContext *mpctx)
 #endif
 }
 
+#ifdef CONFIG_ASS
+static int free_ass_track(void *ptr)
+{
+    struct ass_track *track = *(struct ass_track **)ptr;
+    ass_free_track(track);
+    return 1;
+}
+#endif
+
 struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
                                float fps, int noerr)
 {
     struct MPOpts *opts = &mpctx->opts;
-    struct sh_sub *sh = NULL;
     struct ass_track *asst = NULL;
     const char *codec = NULL;
 
@@ -1067,33 +1068,37 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
         }
         talloc_free(subd);
     }
-    if (asst)
-        sh = sd_ass_create_from_track(asst, codec, opts);
+    if (asst) {
+        struct demuxer *d = new_sub_pseudo_demuxer(opts);
+        assert(d->num_streams == 1);
+        struct sh_stream *s = d->streams[0];
+        assert(s->type == STREAM_SUB);
+
+        s->sub->track = asst;
+        s->codec = codec;
+
+        struct ass_track **pptr = talloc(s, struct ass_track*);
+        *pptr = asst;
+        talloc_set_destructor(pptr, free_ass_track);
+
+        struct track *t = add_stream_track(mpctx, s, false);
+        t->is_external = true;
+        t->preloaded = true;
+        t->title = talloc_strdup(t, filename);
+        t->external_filename = talloc_strdup(t, filename);
+        MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, d);
+        return t;
+    }
 #endif
 
-    if (!sh) {
-        // Used with image subtitles.
-        struct track *ext = open_external_file(mpctx, filename, NULL, 0,
-                                               STREAM_SUB);
-        if (ext)
-            return ext;
-        mp_tmsg(MSGT_CPLAYER, noerr ? MSGL_WARN : MSGL_ERR,
-                "Cannot load subtitles: %s\n", filename);
-        return NULL;
-    }
+    // Used with libavformat subtitles.
+    struct track *ext = open_external_file(mpctx, filename, NULL, 0, STREAM_SUB);
+    if (ext)
+        return ext;
 
-    struct track *track = talloc_ptrtype(NULL, track);
-    *track = (struct track) {
-        .type = STREAM_SUB,
-        .title = talloc_strdup(track, filename),
-        .user_tid = find_new_tid(mpctx, STREAM_SUB),
-        .demuxer_id = -1,
-        .is_external = true,
-        .sh_sub = talloc_steal(track, sh),
-        .external_filename = talloc_strdup(track, filename),
-    };
-    MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
-    return track;
+    mp_tmsg(MSGT_CPLAYER, noerr ? MSGL_WARN : MSGL_ERR,
+            "Cannot load subtitles: %s\n", filename);
+    return NULL;
 }
 
 int mp_get_cache_percent(struct MPContext *mpctx)
@@ -1845,7 +1850,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
     double curpts_s = refpts_tl - mpctx->osd->sub_offset;
     double refpts_s = refpts_tl - video_offset;
 
-    if (sh_sub && sh_sub->active) {
+    if (sh_sub && sh_sub->active && !track->preloaded) {
         struct demux_stream *d_sub = sh_sub->ds;
         const char *type = sh_sub->gsh->codec;
         bool non_interleaved = is_non_interleaved(mpctx, track);
@@ -2017,9 +2022,7 @@ static void reinit_subs(struct MPContext *mpctx)
     osd->sub_video_w = mpctx->sh_video ? mpctx->sh_video->disp_w : 0;
     osd->sub_video_h = mpctx->sh_video ? mpctx->sh_video->disp_h : 0;
 
-    if (track->sh_sub) {
-        sub_init(track->sh_sub, osd);
-    } else if (track->stream) {
+    if (track->stream) {
         if (track->demuxer && track->demuxer->stream) {
             set_dvdsub_fake_extradata(mpctx->sh_sub, track->demuxer->stream,
                                       osd->sub_video_w, osd->sub_video_h);

@@ -79,7 +79,9 @@ static int init(struct sh_sub *sh, struct osd_state *osd)
     } else {
         ctx = talloc_zero(NULL, struct sd_ass_priv);
         sh->context = ctx;
-        if (ass) {
+        if (sh->track) {
+            ctx->ass_track = sh->track;
+        } else if (ass) {
             ctx->ass_track = ass_new_track(osd->ass_library);
             if (sh->extradata)
                 ass_process_codec_private(ctx->ass_track, sh->extradata,
@@ -277,7 +279,8 @@ static void uninit(struct sh_sub *sh)
 {
     struct sd_ass_priv *ctx = sh->context;
 
-    ass_free_track(ctx->ass_track);
+    if (sh->track != ctx->ass_track)
+        ass_free_track(ctx->ass_track);
     talloc_free(ctx);
 }
 
@@ -292,31 +295,6 @@ const struct sd_functions sd_ass = {
     .switch_off = reset,
     .uninit = uninit,
 };
-
-static int sd_ass_track_destructor(void *ptr)
-{
-    uninit(ptr);
-    return 1;
-}
-
-struct sh_sub *sd_ass_create_from_track(struct ass_track *track,
-                                        const char *codec, struct MPOpts *opts)
-{
-    struct sh_sub *sh = talloc(NULL, struct sh_sub);
-    talloc_set_destructor(sh, sd_ass_track_destructor);
-    *sh = (struct sh_sub) {
-        .opts = opts,
-        .gsh = talloc_struct(sh, struct sh_stream, {
-            .codec = codec,
-        }),
-        .context = talloc_struct(sh, struct sd_ass_priv, {
-            .ass_track = track,
-            .vsfilter_aspect = is_ass_sub(codec),
-        }),
-        .initialized = true,
-    };
-    return sh;
-}
 
 struct ass_track *sub_get_ass_track(struct osd_state *osd)
 {

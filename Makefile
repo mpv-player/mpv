@@ -205,6 +205,7 @@ SOURCES = talloc.c \
           demux/demux_mf.c \
           demux/demux_mkv.c \
           demux/demux_mpg.c \
+          demux/demux_sub.c \
           demux/demux_ts.c \
           demux/mp3_hdr.c \
           demux/parse_es.c \

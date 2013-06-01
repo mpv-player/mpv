@@ -164,6 +164,7 @@ typedef struct sh_sub {
     bool active; // after track switch decoder may stay initialized, not active
     unsigned char *extradata;   // extra header data passed from demuxer
     int extradata_len;
+    struct ass_track *track; // loaded by libass
     const struct sd_functions *sd_driver;
 } sh_sub_t;
 

@@ -77,6 +77,7 @@ enum demuxer_type {
     DEMUXER_TYPE_END,
 
     DEMUXER_TYPE_PLAYLIST,
+    DEMUXER_TYPE_SUB,
 };
 
 enum timestamp_type {
@@ -304,9 +305,9 @@ static inline void *realloc_struct(void *ptr, size_t nmemb, size_t size)
     return realloc(ptr, nmemb * size);
 }
 
-struct demuxer *new_demuxer(struct MPOpts *opts, struct stream *stream,
-                            int type, int a_id, int v_id, int s_id,
-                            char *filename);
+demuxer_t *new_sub_pseudo_demuxer(struct MPOpts *opts);
+
+
 void free_demuxer(struct demuxer *demuxer);
 
 void demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
