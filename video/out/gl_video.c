@@ -632,12 +632,15 @@ static void bind_attrib_locs(GL *gl, GLuint program)
     gl->BindAttribLocation(program, VERTEX_ATTRIB_TEXCOORD, "vertex_texcoord");
 }
 
+#define PRELUDE_END "// -- prelude end\n"
+
 static GLuint create_program(GL *gl, const char *name, const char *header,
                              const char *vertex, const char *frag)
 {
-    mp_msg(MSGT_VO, MSGL_V, "[gl] compiling shader program '%s'\n", name);
-    mp_msg(MSGT_VO, MSGL_V, "[gl] header:\n");
-    mp_log_source(MSGT_VO, MSGL_V, header);
+    mp_msg(MSGT_VO, MSGL_V, "[gl] compiling shader program '%s', header:\n", name);
+    const char *real_header = strstr(header, PRELUDE_END);
+    real_header = real_header ? real_header + strlen(PRELUDE_END) : header;
+    mp_log_source(MSGT_VO, MSGL_V, real_header);
     GLuint prog = gl->CreateProgram();
     prog_create_shader(gl, prog, GL_VERTEX_SHADER, header, vertex);
     prog_create_shader(gl, prog, GL_FRAGMENT_SHADER, header, frag);
@@ -703,8 +706,8 @@ static void compile_shaders(struct gl_video *p)
     char *shader_prelude = get_section(tmp, src, "prelude");
     char *s_video = get_section(tmp, src, "frag_video");
 
-    char *header = talloc_asprintf(tmp, "#version %d\n%s", gl->glsl_version,
-                                   shader_prelude);
+    char *header = talloc_asprintf(tmp, "#version %d\n%s%s", gl->glsl_version,
+                                   shader_prelude, PRELUDE_END);
 
     // Need to pass alpha through the whole chain. (Not needed for OSD shaders.)
     shader_def_opt(&header, "USE_ALPHA", p->opts.enable_alpha);
