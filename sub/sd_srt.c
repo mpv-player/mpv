@@ -25,11 +25,11 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <libavutil/common.h>
 
 #include "core/mp_msg.h"
-#include "subassconvert.h"
 #include "core/bstr.h"
-#include "libavutil/common.h"
+#include "sd.h"
 
 struct line {
     char *buf;
@@ -273,7 +273,7 @@ static int read_attr(char **s, struct bstr *attr, struct bstr *val)
     return 0;
 }
 
-void subassconvert_subrip(const char *orig, char *dest, int dest_buffer_size)
+static void convert_subrip(const char *orig, char *dest, int dest_buffer_size)
 {
     /* line is not const to avoid warnings with strtol, etc.
      * orig content won't be changed */
@@ -436,3 +436,31 @@ void subassconvert_subrip(const char *orig, char *dest, int dest_buffer_size)
     }
     new_line.buf[new_line.len] = 0;
 }
+
+static bool supports_format(const char *format)
+{
+    return format && (strcmp(format, "subrip") == 0 ||
+                      strcmp(format, "text") == 0);
+}
+
+static int init(struct sd *sd)
+{
+    sd->output_codec = "ass-text";
+    return 0;
+}
+
+static void decode(struct sd *sd, struct demux_packet *packet)
+{
+    char dest[SD_MAX_LINE_LEN];
+    // Assume input buffer is padded with 0
+    convert_subrip(packet->buffer, dest, sizeof(dest));
+    sd_conv_add_packet(sd, dest, strlen(dest), packet->pts, packet->duration);
+}
+
+const struct sd_functions sd_srt = {
+    .supports_format = supports_format,
+    .init = init,
+    .decode = decode,
+    .get_converted = sd_conv_def_get_converted,
+    .reset = sd_conv_def_reset,
+};

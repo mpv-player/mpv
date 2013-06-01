@@ -59,4 +59,6 @@ struct demux_packet *sd_conv_def_get_converted(struct sd *sd);
 void sd_conv_def_reset(struct sd *sd);
 void sd_conv_def_uninit(struct sd *sd);
 
+#define SD_MAX_LINE_LEN 1000
+
 #endif

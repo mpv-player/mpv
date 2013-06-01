@@ -70,6 +70,7 @@ typedef struct sub_data {
     int sub_uses_time;
     int sub_num;          // number of subtitle structs
     int sub_errs;
+    double fallback_fps;
 } sub_data;
 
 struct MPOpts;

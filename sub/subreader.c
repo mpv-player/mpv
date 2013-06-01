@@ -32,7 +32,6 @@
 #include "core/mp_msg.h"
 #include "subreader.h"
 #include "core/mp_common.h"
-#include "subassconvert.h"
 #include "core/options.h"
 #include "stream/stream.h"
 #include "libavutil/common.h"
@@ -299,7 +298,6 @@ static subtitle *sub_read_line_microdvd(stream_t *st,subtitle *current,
     int utf16 = args->utf16;
     char line[LINE_LEN+1];
     char line2[LINE_LEN+1];
-    char *p;
 
     do {
 	if (!stream_read_line (st, line, LINE_LEN, utf16)) return NULL;
@@ -310,13 +308,7 @@ static subtitle *sub_read_line_microdvd(stream_t *st,subtitle *current,
 		      "{%ld}{%ld}%[^\r\n]",
 		      &(current->start), &(current->end), line2) < 3));
 
-    if (args->opts->ass_enabled) {
-        subassconvert_microdvd(line2, line, LINE_LEN + 1);
-        p = line;
-    } else
-        p = line2;
-
-    return set_multiline_text(current, p, 0);
+    return set_multiline_text(current, line2, 0);
 }
 
 static subtitle *sub_read_line_mpl2(stream_t *st,subtitle *current,
@@ -370,8 +362,8 @@ static subtitle *sub_read_line_subrip(stream_t* st, subtitle *current,
     return current;
 }
 
-static subtitle *sub_ass_read_line_subviewer(stream_t *st, subtitle *current,
-                                             struct readline_args *args)
+static subtitle *sub_read_line_subviewer(stream_t *st, subtitle *current,
+                                         struct readline_args *args)
 {
     int utf16 = args->utf16;
     int a1, a2, a3, a4, b1, b2, b3, b4, j = 0;
@@ -417,70 +409,10 @@ static subtitle *sub_ass_read_line_subviewer(stream_t *st, subtitle *current,
             j += len;
         }
 
-        /* Use the ASS/SSA converter to transform the whole lines */
         if (full_line[0]) {
-            char converted_line[LINE_LEN + 1];
-            subassconvert_subrip(full_line, converted_line, LINE_LEN + 1);
-            current->text[0] = strdup(converted_line);
+            current->text[0] = strdup(full_line);
             current->lines = 1;
         }
-    }
-    return current;
-}
-
-static subtitle *sub_read_line_subviewer(stream_t *st,subtitle *current,
-                                         struct readline_args *args)
-{
-    int utf16 = args->utf16;
-    char line[LINE_LEN+1];
-    int a1,a2,a3,a4,b1,b2,b3,b4;
-    char *p=NULL;
-    int i,len;
-
-    if (args->opts->ass_enabled)
-        return sub_ass_read_line_subviewer(st, current, args);
-    while (!current->text[0]) {
-	if (!stream_read_line (st, line, LINE_LEN, utf16)) return NULL;
-	if ((len=sscanf (line, "%d:%d:%d%*1[,.:]%d --> %d:%d:%d%*1[,.:]%d",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4)) < 8)
-	    continue;
-	current->start = a1*360000+a2*6000+a3*100+a4/10;
-	current->end   = b1*360000+b2*6000+b3*100+b4/10;
-	for (i=0; i<SUB_MAX_TEXT;) {
-	    int blank = 1;
-	    if (!stream_read_line (st, line, LINE_LEN, utf16)) break;
-	    len=0;
-	    for (p=line; *p!='\n' && *p!='\r' && *p; p++,len++)
-		if (*p != ' ' && *p != '\t')
-		    blank = 0;
-	    if (len && !blank) {
-                int j=0,skip=0;
-		char *curptr=current->text[i]=malloc (len+1);
-		if (!current->text[i]) return ERR;
-		//strncpy (current->text[i], line, len); current->text[i][len]='\0';
-                for(; j<len; j++) {
-		    /* let's filter html tags ::atmos */
-		    if(line[j]=='>') {
-			skip=0;
-			continue;
-		    }
-		    if(line[j]=='<') {
-			skip=1;
-			continue;
-		    }
-		    if(skip) {
-			continue;
-		    }
-		    *curptr=line[j];
-		    curptr++;
-		}
-		*curptr='\0';
-
-		i++;
-	    } else {
-		break;
-	    }
-	}
-	current->lines=i;
     }
     return current;
 }
@@ -673,20 +605,6 @@ static subtitle *sub_read_line_ssa(stream_t *st,subtitle *current,
 	current->lines++;
 
 	return current;
-}
-
-static void sub_pp_ssa(subtitle *sub)
-{
-    for (int i = 0; i < sub->lines; i++) {
-        char *s, *d;
-        s = d = sub->text[i];
-        while (1) {
-            while (*s == '{')
-                while (*s && *s++ != '}');
-            if (!(*d++ = *s++))
-                break;
-        }
-    }
 }
 
 /*
@@ -1238,6 +1156,7 @@ struct subreader {
                        struct readline_args *args);
     void       (*post)(subtitle *dest);
     const char *name;
+    const char *codec_name;
 };
 
 #ifdef CONFIG_ENCA
@@ -1313,13 +1232,13 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
     int uses_time = 0, sub_num = 0, sub_errs = 0;
     static const struct subreader sr[]=
     {
-	    { sub_read_line_microdvd, NULL, "microdvd" },
+	    { sub_read_line_microdvd, NULL, "microdvd", "microdvd" },
 	    { sub_read_line_subrip, NULL, "subviewer" },
-	    { sub_read_line_subviewer, NULL, "subrip" },
+	    { sub_read_line_subviewer, NULL, "subrip", "subrip" },
 	    { sub_read_line_sami, NULL, "sami" },
 	    { sub_read_line_vplayer, NULL, "vplayer" },
 	    { sub_read_line_rt, NULL, "rt" },
-	    { sub_read_line_ssa, sub_pp_ssa, "ssa" },
+	    { sub_read_line_ssa, NULL, "ssa", "ass-text" },
 	    { sub_read_line_pjs, NULL, "pjs" },
 	    { sub_read_line_mpsub, NULL, "mpsub" },
 	    { sub_read_line_aqt, NULL, "aqt" },
@@ -1678,12 +1597,13 @@ if ((opts->suboverlap_enabled == 2) ||
     if (return_sub == NULL) return NULL;
     subt_data = talloc_zero(NULL, sub_data);
     talloc_set_destructor(subt_data, sub_destroy);
-    subt_data->codec = "text"; //srp->name;
+    subt_data->codec = srp->codec_name ? srp->codec_name : "text";
     subt_data->filename = strdup(filename);
     subt_data->sub_uses_time = uses_time;
     subt_data->sub_num = sub_num;
     subt_data->sub_errs = sub_errs;
     subt_data->subtitles = return_sub;
+    subt_data->fallback_fps = fps;
     return subt_data;
 }
 

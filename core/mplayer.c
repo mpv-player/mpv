@@ -1036,10 +1036,12 @@ static void add_dvd_tracks(struct MPContext *mpctx)
 }
 
 #ifdef CONFIG_ASS
-static int free_ass_track(void *ptr)
+static int free_sub_data(void *ptr)
 {
-    struct ass_track *track = *(struct ass_track **)ptr;
-    ass_free_track(track);
+    struct sh_sub *sh_sub = *(struct sh_sub **)ptr;
+    if (sh_sub->track)
+        ass_free_track(sh_sub->track);
+    talloc_free(sh_sub->sub_data);
     return 1;
 }
 #endif
@@ -1049,7 +1051,7 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
 {
     struct MPOpts *opts = &mpctx->opts;
     struct ass_track *asst = NULL;
-    const char *codec = NULL;
+    sub_data *subd = NULL;
 
     if (filename == NULL)
         return NULL;
@@ -1059,30 +1061,23 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
     // through sd_ass makes the code much simpler, as sd_ass can handle all
     // the weird special-cases.
 #ifdef CONFIG_ASS
-    if (opts->ass_enabled) {
+    if (opts->ass_enabled)
         asst = mp_ass_read_stream(mpctx->ass_library, filename, opts->sub_cp);
-        codec = "ass";
-    }
-    if (!asst) {
-        sub_data *subd = sub_read_file(filename, fps, &mpctx->opts);
-        if (subd) {
-            codec = subd->codec;
-            asst = mp_ass_read_subdata(mpctx->ass_library, opts, subd, fps);
-        }
-        talloc_free(subd);
-    }
-    if (asst) {
+    if (!asst)
+        subd = sub_read_file(filename, fps, &mpctx->opts);
+    if (asst || subd) {
         struct demuxer *d = new_sub_pseudo_demuxer(opts);
         assert(d->num_streams == 1);
         struct sh_stream *s = d->streams[0];
         assert(s->type == STREAM_SUB);
 
+        s->codec = asst ? "ass" : subd->codec;
         s->sub->track = asst;
-        s->codec = codec;
+        s->sub->sub_data = subd;
 
-        struct ass_track **pptr = talloc(d, struct ass_track*);
-        *pptr = asst;
-        talloc_set_destructor(pptr, free_ass_track);
+        struct sh_sub **pptr = talloc(d, struct sh_sub*);
+        *pptr = s->sub;
+        talloc_set_destructor(pptr, free_sub_data);
 
         struct track *t = add_stream_track(mpctx, s, false);
         t->is_external = true;

@@ -27,12 +27,10 @@
 #include "core/options.h"
 #include "core/mp_common.h"
 #include "core/mp_msg.h"
-#include "demux/stheader.h"
 #include "sub.h"
 #include "dec_sub.h"
 #include "ass_mp.h"
 #include "sd.h"
-#include "subassconvert.h"
 
 struct sd_ass_priv {
     struct ass_track *ass_track;
@@ -43,22 +41,17 @@ struct sd_ass_priv {
     char last_text[500];
 };
 
-static bool is_ass_sub(const char *t)
+static bool is_native_ass(const char *t)
 {
-    return t && (strcmp(t, "ass") == 0 ||
-                 strcmp(t, "ssa") == 0);
-}
-
-static bool is_text_sub(const char *t)
-{
-    return t && (is_ass_sub(t) ||
-                 strcmp(t, "text") == 0 ||
-                 strcmp(t, "subrip") == 0);
+    return strcmp(t, "ass") == 0 || strcmp(t, "ssa") == 0;
 }
 
 static bool supports_format(const char *format)
 {
-    return is_text_sub(format);
+    // ass-text is produced by converters and the subreader.c ssa parser; this
+    // format has ASS tags, but doesn't start with any prelude, nor does it
+    // have extradata.
+    return format && (is_native_ass(format) || strcmp(format, "ass-text") == 0);
 }
 
 static void free_last_event(ASS_Track *track)
@@ -73,18 +66,20 @@ static int init(struct sd *sd)
     if (!sd->ass_library || !sd->ass_renderer)
         return -1;
 
-    bool ass = is_ass_sub(sd->codec);
+    bool ass = is_native_ass(sd->codec);
     struct sd_ass_priv *ctx = talloc_zero(NULL, struct sd_ass_priv);
     sd->priv = ctx;
     if (sd->ass_track) {
         ctx->ass_track = sd->ass_track;
     } else if (ass) {
         ctx->ass_track = ass_new_track(sd->ass_library);
-        if (sd->extradata)
-            ass_process_codec_private(ctx->ass_track, sd->extradata,
-                                      sd->extradata_len);
     } else
         ctx->ass_track = mp_ass_default_track(sd->ass_library, sd->opts);
+
+    if (sd->extradata) {
+        ass_process_codec_private(ctx->ass_track, sd->extradata,
+                                  sd->extradata_len);
+    }
 
     ctx->vsfilter_aspect = ass;
     return 0;
@@ -99,8 +94,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     unsigned char *text = data;
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
-
-    if (is_ass_sub(sd->codec)) {
+    if (is_native_ass(sd->codec)) {
         if (bstr_startswith0((bstr){data, data_len}, "Dialogue: ")) {
             // broken ffmpeg ASS packet format
             ctx->flush_on_seek = true;
@@ -138,12 +132,10 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         return;
     }
  not_all_whitespace:;
-    char buf[500];
-    subassconvert_subrip(text, buf, sizeof(buf));
     for (int i = 0; i < track->n_events; i++)
         if (track->events[i].Start == ipts
             && (duration <= 0 || track->events[i].Duration == iduration)
-            && strcmp(track->events[i].Text, buf) == 0)
+            && strcmp(track->events[i].Text, text) == 0)
             return;   // We've already added this subtitle
     if (duration <= 0) {
         iduration = 10000;
@@ -154,7 +146,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     event->Start = ipts;
     event->Duration = iduration;
     event->Style = track->default_style;
-    event->Text = strdup(buf);
+    event->Text = strdup(text);
 }
 
 static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
