@@ -114,9 +114,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     AVPacket pkt;
     int ret, got_sub;
 
-    av_init_packet(&pkt);
-    pkt.data = packet->buffer;
-    pkt.size = packet->len;
+    mp_set_av_packet(&pkt, packet);
     pkt.pts = packet->pts == MP_NOPTS_VALUE ? AV_NOPTS_VALUE : packet->pts * ts;
     pkt.duration = packet->duration * ts;
 
@@ -136,7 +134,6 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         }
     }
 
-    av_free_packet(&pkt);
     avsubtitle_free(&sub);
 }
 
