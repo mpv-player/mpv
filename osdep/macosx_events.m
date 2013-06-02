@@ -20,6 +20,9 @@
 // Carbon header is included but Carbon is NOT linked to mpv's binary. This
 // file only needs this include to use the keycode definitions in keymap.
 #import <Carbon/Carbon.h>
+
+// Media keys definitions
+#import <IOKit/hidsystem/ev_keymap.h>
 #import <Cocoa/Cocoa.h>
 
 #include "talloc.h"
@@ -106,6 +109,22 @@ void cocoa_put_key(int keycode)
 - (NSArray *) keyEquivalents
 {
     return @[@"h", @"q", @"Q", @"0", @"1", @"2"];
+}
+- (void)handleMediaKey:(int)key
+{
+    switch (key) {
+        case NX_KEYTYPE_PLAY:
+            cocoa_put_key(MP_KEY_PLAY);
+            break;
+
+        case NX_KEYTYPE_FAST:
+            cocoa_put_key(MP_KEY_NEXT);
+            break;
+
+        case NX_KEYTYPE_REWIND:
+            cocoa_put_key(MP_KEY_PREV);
+            break;
+    }
 }
 - (NSEvent*)handleKeyDown:(NSEvent *)event
 {

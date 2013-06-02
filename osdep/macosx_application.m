@@ -120,7 +120,19 @@ static NSString *escape_loadfile_name(NSString *input)
 
 - (void)sendEvent:(NSEvent *)event
 {
-    [super sendEvent:event];
+    if ([event type] == NSSystemDefined && [event subtype] == 8) {
+        // It's a media key! Handle it specially. The magic numbers are reverse
+        // engineered and found on several blog posts. Unfortunately there is
+        // no public API for this. F-bomb.
+        int code  = (([event data1] & 0xFFFF0000) >> 16);
+        int flags = ([event data1] & 0x0000FFFF);
+        int down  = (((flags & 0xFF00) >> 8)) == 0xA;
+
+        if (down)
+            [self.eventsResponder handleMediaKey:code];
+    } else {
+        [super sendEvent:event];
+    }
 
     if (self.inputContext)
         mp_input_wakeup(self.inputContext);

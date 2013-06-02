@@ -27,6 +27,7 @@ struct cocoa_input_queue;
 @end
 
 @interface EventsResponder : NSResponder
+- (void)handleMediaKey:(int)key;
 - (NSEvent *)handleKeyDown:(NSEvent *)event;
 @end
 
