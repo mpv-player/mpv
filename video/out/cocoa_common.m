@@ -149,7 +149,6 @@ static void disable_power_management(struct vo *vo)
 int vo_cocoa_init(struct vo *vo)
 {
     vo->cocoa = vo_cocoa_init_state(vo);
-    vo->wakeup_period = 0.02;
     disable_power_management(vo);
 
     return 1;

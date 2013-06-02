@@ -118,6 +118,14 @@ static NSString *escape_loadfile_name(NSString *input)
 @synthesize eventsResponder = _events_responder;
 @synthesize menuItems = _menu_items;
 
+- (void)sendEvent:(NSEvent *)event
+{
+    [super sendEvent:event];
+
+    if (self.inputContext)
+        mp_input_wakeup(self.inputContext);
+}
+
 - (id)init
 {
     if (self = [super init]) {
