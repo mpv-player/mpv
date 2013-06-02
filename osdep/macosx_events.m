@@ -92,8 +92,9 @@ static int convert_key(unsigned key, unsigned charcode)
 void cocoa_check_events(void)
 {
     Application *app = mpv_shared_app();
-    int key = [app.iqueue pop];
-    if (key >= 0) mplayer_put_key(app.keyFIFO, key);
+    int key;
+    while ((key = [app.iqueue pop]) >= 0)
+        mplayer_put_key(app.keyFIFO, key);
 }
 
 void cocoa_put_key(int keycode)
