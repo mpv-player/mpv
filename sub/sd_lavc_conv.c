@@ -22,6 +22,8 @@
 #include <libavutil/intreadwrite.h>
 #include <libavutil/common.h>
 
+#include "config.h"
+
 #include "talloc.h"
 #include "core/mp_msg.h"
 #include "core/av_common.h"
@@ -35,8 +37,22 @@ static bool supports_format(const char *format)
 {
     enum AVCodecID cid = mp_codec_to_av_codec_id(format);
     const AVCodecDescriptor *desc = avcodec_descriptor_get(cid);
+    if (!desc)
+        return false;
+#if HAVE_AV_CODEC_PROP_TEXT_SUB
     // These are documented to support AVSubtitleRect->ass.
-    return desc && (desc->props & AV_CODEC_PROP_TEXT_SUB);
+    return desc->props & AV_CODEC_PROP_TEXT_SUB;
+#else
+    const char *whitelist[] =
+        {"text", "ass", "ssa", "mov_text", "srt", "subrip", "microdvd", "mpl2",
+         "jacosub", "pjs", "sami",  "realtext", "subviewer", "subviewer1",
+         "vplayer", "webvtt", 0};
+    for (int n = 0; whitelist[n]; n++) {
+        if (strcmp(format, whitelist[n]) == 0)
+            return true;
+    }
+    return false;
+#endif
 }
 
 static int init(struct sd *sd)
