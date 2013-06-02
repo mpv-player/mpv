@@ -1,24 +1,27 @@
 /*
- * This file is part of MPlayer.
+ * Cocoa Application Event Handling
  *
- * MPlayer is free software; you can redistribute it and/or modify
+ * This file is part of mpv.
+ *
+ * mplayer2 is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * MPlayer is distributed in the hope that it will be useful,
+ * mplayer2 is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License along
- * with MPlayer; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MPLAYER_OSX_COMMON_H
-#define MPLAYER_OSX_COMMON_H
+#ifndef MACOSX_EVENTS_H
+#define MACOSX_EVENTS_H
+#include "core/input/keycodes.h"
 
-int convert_key(unsigned key, unsigned charcode);
+void cocoa_put_key(int keycode);
+void cocoa_check_events(void);
 
-#endif /* MPLAYER_OSX_COMMON_H */
+#endif

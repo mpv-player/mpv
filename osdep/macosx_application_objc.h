@@ -19,16 +19,30 @@
 #import <Cocoa/Cocoa.h>
 #include "osdep/macosx_application.h"
 
-@interface Application : NSObject<NSApplicationDelegate>
+struct cocoa_input_queue;
+
+@interface InputQueue : NSObject
+- (void)push:(int)keycode;
+- (int) pop;
+@end
+
+@interface EventsResponder : NSResponder
+- (NSEvent *)handleKeyDown:(NSEvent *)event;
+@end
+
+@interface Application : NSApplication
 - (void)initialize_menu;
 - (void)registerSelector:(SEL)selector forKey:(MPMenuKey)key;
 - (void)stopPlayback;
 
 @property(nonatomic, assign) struct input_ctx *inputContext;
 @property(nonatomic, assign) struct mp_fifo *keyFIFO;
+@property(nonatomic, retain) InputQueue *iqueue;
+@property(nonatomic, retain) EventsResponder *eventsResponder;
 @property(nonatomic, retain) NSMutableDictionary *menuItems;
 @property(nonatomic, retain) NSArray *files;
 @property(nonatomic, retain) NSMutableArray *argumentsList;
 @property(nonatomic, assign) BOOL willStopOnOpenEvent;
 @end
 
+Application *mpv_shared_app(void);

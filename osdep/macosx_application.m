@@ -20,14 +20,11 @@
 #include "talloc.h"
 
 #include "core/mp_msg.h"
-#include "core/mp_fifo.h"
 #include "core/input/input.h"
 #include "core/input/keycodes.h"
 
 #include "osdep/macosx_application_objc.h"
-#include "video/out/osx_common.h"
 
-static Application *app;
 static pthread_t playback_thread_id;
 
 @interface Application (PrivateMethods)
@@ -49,14 +46,51 @@ static pthread_t playback_thread_id;
 - (void)setAppleMenu:(NSMenu *)aMenu;
 @end
 
-@implementation Application
-@synthesize files = _files;
-@synthesize argumentsList = _arguments_list;
-@synthesize willStopOnOpenEvent = _will_stop_on_open_event;
+@implementation InputQueue {
+    NSMutableArray *_fifo;
+}
 
-@synthesize inputContext = _input_context;
-@synthesize keyFIFO = _key_fifo;
-@synthesize menuItems = _menu_items;
+- (id)init
+{
+    if (self = [super init]) {
+        self->_fifo = [[NSMutableArray alloc] init];
+    }
+
+    return self;
+}
+
+- (void)push:(int)keycode
+{
+    @synchronized (_fifo) {
+        [_fifo addObject:[NSNumber numberWithInt:keycode]];
+    }
+}
+
+- (int)pop
+{
+    int r = -1;
+
+    @synchronized (_fifo) {
+        if ([_fifo count] > 0) {
+            r = [[_fifo objectAtIndex:0] intValue];
+            [_fifo removeObjectAtIndex:0];
+        }
+    }
+
+    return r;
+}
+
+- (void)dealloc
+{
+    [self->_fifo release];
+    [super dealloc];
+}
+@end
+
+Application *mpv_shared_app(void)
+{
+    return (Application *)[Application sharedApplication];
+}
 
 static NSString *escape_loadfile_name(NSString *input)
 {
@@ -73,13 +107,32 @@ static NSString *escape_loadfile_name(NSString *input)
     return input;
 }
 
+@implementation Application
+@synthesize files = _files;
+@synthesize argumentsList = _arguments_list;
+@synthesize willStopOnOpenEvent = _will_stop_on_open_event;
+
+@synthesize inputContext = _input_context;
+@synthesize keyFIFO = _key_fifo;
+@synthesize iqueue = _iqueue;
+@synthesize eventsResponder = _events_responder;
+@synthesize menuItems = _menu_items;
+
 - (id)init
 {
     if (self = [super init]) {
         self.menuItems = [[[NSMutableDictionary alloc] init] autorelease];
         self.files = nil;
         self.argumentsList = [[[NSMutableArray alloc] init] autorelease];
+        self.iqueue = [[[InputQueue alloc] init] autorelease];
+        self.eventsResponder = [[[EventsResponder alloc] init] autorelease];
         self.willStopOnOpenEvent = NO;
+
+        [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask
+                                              handler:^(NSEvent *event) {
+            return [self.eventsResponder handleKeyDown:event];
+        }];
+
     }
 
     return self;
@@ -129,23 +182,23 @@ static NSString *escape_loadfile_name(NSString *input)
     [NSApp setMainMenu:main_menu];
     [NSApp setAppleMenu:[self appleMenuWithMainMenu:main_menu]];
 
-    [app mainMenuItemWithParent:main_menu child:[self movieMenu]];
-    [app mainMenuItemWithParent:main_menu child:[self windowMenu]];
+    [NSApp mainMenuItemWithParent:main_menu child:[self movieMenu]];
+    [NSApp mainMenuItemWithParent:main_menu child:[self windowMenu]];
 }
 
 #undef _R
 
 - (void)stopPlayback
 {
-    [self stop:"quit"];
+    [self stopMPV:"quit"];
 }
 
 - (void)stopPlaybackAndRememberPosition
 {
-    [self stop:"quit_watch_later"];
+    [self stopMPV:"quit_watch_later"];
 }
 
-- (void)stop:(char *)cmd
+- (void)stopMPV:(char *)cmd
 {
     if (self.inputContext) {
         mp_cmd_t *cmdt = mp_input_parse_cmd(bstr0(cmd), "");
@@ -206,6 +259,7 @@ static NSString *escape_loadfile_name(NSString *input)
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames
 {
+    Application *app = mpv_shared_app();
     NSMutableArray *filesToOpen = [[[NSMutableArray alloc] init] autorelease];
 
     [filenames enumerateObjectsUsingBlock:^(id obj, NSUInteger i, BOOL *_) {
@@ -284,15 +338,14 @@ int cocoa_main(mpv_main_fn mpv_main, int argc, char *argv[])
 
 void cocoa_register_menu_item_action(MPMenuKey key, void* action)
 {
-    [app registerSelector:(SEL)action forKey:key];
+    [NSApp registerSelector:(SEL)action forKey:key];
 }
 
 void init_cocoa_application(void)
 {
-    NSApp = [NSApplication sharedApplication];
-    app = [[Application alloc] init];
-    [NSApp setDelegate:app];
-    [app initialize_menu];
+    NSApp = mpv_shared_app();
+    [NSApp setDelegate:NSApp];
+    [NSApp initialize_menu];
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
 
     atexit_b(^{
@@ -305,8 +358,8 @@ void init_cocoa_application(void)
 
 void terminate_cocoa_application(void)
 {
-    [NSApp hide:app];
-    [NSApp terminate:app];
+    [NSApp hide:NSApp];
+    [NSApp terminate:NSApp];
 }
 
 void cocoa_run_runloop()
@@ -326,8 +379,12 @@ void cocoa_stop_runloop(void)
 
 void cocoa_set_input_context(struct input_ctx *input_context)
 {
-    [NSApp setDelegate:app];
-    app.inputContext = input_context;
+    mpv_shared_app().inputContext = input_context;
+}
+
+void cocoa_set_key_fifo(struct mp_fifo *key_fifo)
+{
+    mpv_shared_app().keyFIFO = key_fifo;
 }
 
 void cocoa_post_fake_event(void)
@@ -346,7 +403,7 @@ void cocoa_post_fake_event(void)
 
 static void macosx_wait_fileopen_events()
 {
-    app.willStopOnOpenEvent = YES;
+    mpv_shared_app().willStopOnOpenEvent = YES;
     cocoa_run_runloop(); // block until done
 }
 
@@ -374,6 +431,8 @@ static bool psn_matches_current_process(char *psn_arg_to_check)
 
 void macosx_finder_args_preinit(int *argc, char ***argv)
 {
+    Application *app = mpv_shared_app();
+
     if (*argc==2 && psn_matches_current_process((*argv)[1])) {
         macosx_redirect_output_to_logfile("mpv");
         macosx_wait_fileopen_events();

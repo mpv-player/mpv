@@ -3999,6 +3999,7 @@ static void init_input(struct MPContext *mpctx)
 
 #ifdef CONFIG_COCOA
     cocoa_set_input_context(mpctx->input);
+    cocoa_set_key_fifo(mpctx->key_fifo);
 #endif
 }
 

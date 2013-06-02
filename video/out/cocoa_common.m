@@ -34,27 +34,10 @@
 #include "core/mp_fifo.h"
 #include "talloc.h"
 
-#include "core/input/input.h"
-#include "core/input/keycodes.h"
-#include "osx_common.h"
 #include "core/mp_msg.h"
 
 #include "osdep/macosx_application.h"
-
-#define NSLeftAlternateKeyMask  (0x000020 | NSAlternateKeyMask)
-#define NSRightAlternateKeyMask (0x000040 | NSAlternateKeyMask)
-
-static bool LeftAltPressed(NSEvent *event)
-{
-    return ([event modifierFlags] & NSLeftAlternateKeyMask) ==
-            NSLeftAlternateKeyMask;
-}
-
-static bool RightAltPressed(NSEvent *event)
-{
-    return ([event modifierFlags] & NSRightAlternateKeyMask) ==
-            NSRightAlternateKeyMask;
-}
+#include "osdep/macosx_events.h"
 
 @interface GLMPlayerWindow : NSWindow <NSWindowDelegate>
 - (BOOL)canBecomeKeyWindow;
@@ -78,48 +61,6 @@ static bool RightAltPressed(NSEvent *event)
 - (BOOL)hasDock;
 - (BOOL)hasMenubar;
 @end
-
-struct vo_cocoa_input_queue {
-    NSMutableArray *fifo;
-};
-
-static int vo_cocoa_input_queue_free(void *ptr)
-{
-    struct vo_cocoa_input_queue *iq = ptr;
-    [iq->fifo release];
-    return 0;
-}
-
-static struct vo_cocoa_input_queue *vo_cocoa_input_queue_init(void *talloc_ctx)
-{
-    struct vo_cocoa_input_queue *iq = talloc_ptrtype(talloc_ctx, iq);
-    *iq = (struct vo_cocoa_input_queue) {
-        .fifo  = [[NSMutableArray alloc] init],
-    };
-    talloc_set_destructor(iq, vo_cocoa_input_queue_free);
-    return iq;
-}
-
-static void cocoa_async_put_key(struct vo_cocoa_input_queue *iq, int key)
-{
-    @synchronized (iq->fifo) {
-        [iq->fifo addObject:[NSNumber numberWithInt:key]];
-    }
-}
-
-static int cocoa_sync_get_key(struct vo_cocoa_input_queue *iq)
-{
-    int r = -1;
-
-    @synchronized (iq->fifo) {
-        if ([iq->fifo count] > 0) {
-            r = [[iq->fifo objectAtIndex:0] intValue];
-            [iq->fifo removeObjectAtIndex:0];
-        }
-    }
-
-    return r;
-}
 
 struct vo_cocoa_state {
     GLMPlayerWindow *window;
@@ -148,8 +89,6 @@ struct vo_cocoa_state {
     NSLock *lock;
     bool enable_resize_redraw;
     void (*resize_redraw)(struct vo *vo, int w, int h);
-
-    struct vo_cocoa_input_queue *input_queue;
 };
 
 static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
@@ -164,7 +103,6 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .power_mgmt_assertion = kIOPMNullAssertionID,
         .accumulated_scroll = 0,
         .lock = [[NSLock alloc] init],
-        .input_queue = vo_cocoa_input_queue_init(s),
         .enable_resize_redraw = NO,
     };
     return s;
@@ -568,9 +506,6 @@ int vo_cocoa_check_events(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
-    int key = cocoa_sync_get_key(s->input_queue);
-    if (key >= 0) mplayer_put_key(vo->key_fifo, key);
-
     if (s->did_resize) {
         s->did_resize = NO;
         resize_window(vo);
@@ -762,8 +697,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 - (BOOL)canBecomeKeyWindow { return YES; }
 - (BOOL)windowShouldClose:(id)sender
 {
-    struct vo_cocoa_state *s = self.videoOutput->cocoa;
-    cocoa_async_put_key(s->input_queue, MP_KEY_CLOSE_WIN);
+    cocoa_put_key(MP_KEY_CLOSE_WIN);
     // We have to wait for MPlayer to handle this,
     // otherwise we are in trouble if the
     // MP_KEY_CLOSE_WIN handler is disabled
@@ -867,32 +801,6 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 - (BOOL)becomeFirstResponder { return YES; }
 - (BOOL)resignFirstResponder { return YES; }
 
- - (void)keyDown:(NSEvent *)theEvent
-{
-    struct vo_cocoa_state *s = self.videoOutput->cocoa;
-    NSString *chars;
-
-    if (RightAltPressed(theEvent))
-        chars = [theEvent characters];
-    else
-        chars = [theEvent charactersIgnoringModifiers];
-
-    int key = convert_key([theEvent keyCode], *[chars UTF8String]);
-
-    if (key > -1) {
-        if ([theEvent modifierFlags] & NSShiftKeyMask)
-            key |= MP_KEY_MODIFIER_SHIFT;
-        if ([theEvent modifierFlags] & NSControlKeyMask)
-            key |= MP_KEY_MODIFIER_CTRL;
-        if (LeftAltPressed(theEvent))
-            key |= MP_KEY_MODIFIER_ALT;
-        if ([theEvent modifierFlags] & NSCommandKeyMask)
-            key |= MP_KEY_MODIFIER_META;
-
-        cocoa_async_put_key(s->input_queue, key);
-    }
-}
-
 - (NSPoint) mouseLocation
 {
     NSPoint mLoc = [NSEvent mouseLocation];
@@ -946,24 +854,23 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         static const CGFloat threshold = 10;
         while (s->accumulated_scroll >= threshold) {
             s->accumulated_scroll -= threshold;
-            cocoa_async_put_key(s->input_queue, MP_MOUSE_BTN3);
+            cocoa_put_key(MP_MOUSE_BTN3);
         }
         while (s->accumulated_scroll <= -threshold) {
             s->accumulated_scroll += threshold;
-            cocoa_async_put_key(s->input_queue, MP_MOUSE_BTN4);
+            cocoa_put_key(MP_MOUSE_BTN4);
         }
     } else {
         if (delta > 0)
-            cocoa_async_put_key(s->input_queue, MP_MOUSE_BTN3);
+            cocoa_put_key(MP_MOUSE_BTN3);
         else
-            cocoa_async_put_key(s->input_queue, MP_MOUSE_BTN4);
+            cocoa_put_key(MP_MOUSE_BTN4);
     }
 }
 
 - (void)mouseEvent:(NSEvent *)theEvent
 {
     if ([theEvent buttonNumber] >= 0 && [theEvent buttonNumber] <= 9) {
-        struct vo_cocoa_state *s = self.videoOutput->cocoa;
         int buttonNumber = [theEvent buttonNumber];
         // Fix to mplayer defined button order: left, middle, right
         if (buttonNumber == 1)  buttonNumber = 2;
@@ -972,24 +879,20 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
             case NSLeftMouseDown:
             case NSRightMouseDown:
             case NSOtherMouseDown:
-                cocoa_async_put_key(
-                    s->input_queue,
-                    (MP_MOUSE_BTN0 + buttonNumber) | MP_KEY_STATE_DOWN);
+                cocoa_put_key((MP_MOUSE_BTN0 + buttonNumber) | MP_KEY_STATE_DOWN);
                 self.mouseDown = YES;
                 // Looks like Cocoa doesn't create MouseUp events when we are
                 // doing the second click in a double click. Put in the key_fifo
                 // the key that would be put from the MouseUp handling code.
                 if([theEvent clickCount] == 2) {
-                    cocoa_async_put_key(s->input_queue,
-                                        MP_MOUSE_BTN0 + buttonNumber);
+                    cocoa_put_key(MP_MOUSE_BTN0 + buttonNumber);
                     self.mouseDown = NO;
                 }
                 break;
             case NSLeftMouseUp:
             case NSRightMouseUp:
             case NSOtherMouseUp:
-                cocoa_async_put_key(s->input_queue,
-                                    MP_MOUSE_BTN0 + buttonNumber);
+                cocoa_put_key(MP_MOUSE_BTN0 + buttonNumber);
                 self.mouseDown = NO;
                 break;
         }

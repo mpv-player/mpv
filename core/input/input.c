@@ -61,6 +61,10 @@
 #include <lirc/lircc.h>
 #endif
 
+#ifdef CONFIG_COCOA
+#include "osdep/macosx_events.h"
+#endif
+
 #define MP_MAX_KEY_DOWN 4
 
 struct cmd_bind {
@@ -1474,6 +1478,9 @@ static void read_all_fd_events(struct input_ctx *ictx, int time)
 static void read_all_events(struct input_ctx *ictx, int time)
 {
     getch2_poll();
+#ifdef CONFIG_COCOA
+    cocoa_check_events();
+#endif
     read_all_fd_events(ictx, time);
 }
 
