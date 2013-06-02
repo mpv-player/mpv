@@ -1885,18 +1885,15 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 if (non_interleaved && subpts_s > curpts_s + 1)
                     break;
             }
-            double duration = d_sub->first->duration;
-            unsigned char *packet = NULL;
-            int len = ds_get_packet_sub(d_sub, &packet);
+            struct demux_packet pkt;
+            struct demux_packet *orig = ds_get_packet_sub(d_sub);
+            if (!orig)
+                break;
+            pkt = *orig;
+            pkt.pts = subpts_s;
             mp_dbg(MSGT_CPLAYER, MSGL_V, "Sub: c_pts=%5.3f s_pts=%5.3f "
-                   "duration=%5.3f len=%d\n", curpts_s, subpts_s, duration,
-                   len);
-            struct demux_packet pkt = {
-                .buffer = packet,
-                .len = len,
-                .pts = subpts_s,
-                .duration = duration,
-            };
+                   "duration=%5.3f len=%d\n", curpts_s, pkt.pts, pkt.duration,
+                   pkt.len);
             sub_decode(dec_sub, &pkt);
         }
     }

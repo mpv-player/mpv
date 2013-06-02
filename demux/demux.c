@@ -801,20 +801,20 @@ int ds_get_packet_pts(demux_stream_t *ds, unsigned char **start, double *pts)
     return len;
 }
 
-int ds_get_packet_sub(demux_stream_t *ds, unsigned char **start)
+struct demux_packet *ds_get_packet_sub(demux_stream_t *ds)
 {
-    int len;
     if (ds->buffer_pos >= ds->buffer_size) {
-        *start = NULL;
         if (!ds->packs)
-            return -1;  // no sub
+            return NULL;  // no sub
         if (!ds_fill_buffer(ds))
-            return -1;  // EOF
+            return NULL;  // EOF
     }
-    len = ds->buffer_size - ds->buffer_pos;
-    *start = &ds->buffer[ds->buffer_pos];
-    ds->buffer_pos += len;
-    return len;
+    if (ds->buffer_pos < ds->buffer_size) {
+        ds->current->buffer += ds->buffer_pos;
+        ds->buffer_size -= ds->buffer_pos;
+    }
+    ds->buffer_pos = ds->buffer_size;
+    return ds->current;
 }
 
 struct demux_packet *ds_get_packet2(struct demux_stream *ds, bool repeat_last)
