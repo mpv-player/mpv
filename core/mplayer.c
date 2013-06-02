@@ -1061,8 +1061,7 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
     // through sd_ass makes the code much simpler, as sd_ass can handle all
     // the weird special-cases.
 #ifdef CONFIG_ASS
-    if (opts->ass_enabled)
-        asst = mp_ass_read_stream(mpctx->ass_library, filename, opts->sub_cp);
+    asst = mp_ass_read_stream(mpctx->ass_library, filename, opts->sub_cp);
     if (!asst)
         subd = sub_read_file(filename, fps, &mpctx->opts);
     if (asst || subd) {

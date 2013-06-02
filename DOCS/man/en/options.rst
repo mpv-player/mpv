@@ -90,13 +90,11 @@
     - ``--aspect=16:9`` or ``--aspect=1.7777``
 
 --ass, --no-ass
-    Render ASS subtitles natively, and convert text subtitles in other formats
-    to ASS internally (enabled by default).
+    Render ASS subtitles natively (enabled by default).
 
-    If ``--no-ass`` is specified, all subtitles are converted to plain text
-    internally. All tags and style declarations are stripped and ignored. The
-    subtitle renderer uses the font style as specified by the ``--sub-text-``
-    options instead.
+    If ``--no-ass`` is specified, all tags and style declarations are stripped
+    and ignored on display. The subtitle renderer uses the font style as 
+    specified by the ``--sub-text-`` options instead.
 
     *NOTE*: Using ``--no-ass`` may lead to incorrect or completely broken
     rendering of ASS/SSA subtitles. It can sometimes be useful to forcibly
