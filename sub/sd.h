@@ -16,6 +16,10 @@ struct sd {
     char *extradata;
     int extradata_len;
 
+    // Set to !=NULL if the input packets are being converted from another
+    // format.
+    const char *converted_from;
+
     // Video resolution used for subtitle decoding. Doesn't necessarily match
     // the resolution of the VO, nor does it have to be the OSD resolution.
     int sub_video_w, sub_video_h;

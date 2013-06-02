@@ -224,6 +224,7 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh)
         }
         init_sd = (struct sd) {
             .codec = sd->output_codec,
+            .converted_from = sd->codec,
             .extradata = sd->output_extradata,
             .extradata_len = sd->output_extradata_len,
             .ass_library = sub->init_sd.ass_library,

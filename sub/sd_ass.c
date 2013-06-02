@@ -67,6 +67,7 @@ static int init(struct sd *sd)
         return -1;
 
     bool ass = is_native_ass(sd->codec);
+    bool is_converted = sd->converted_from != NULL;
     struct sd_ass_priv *ctx = talloc_zero(NULL, struct sd_ass_priv);
     sd->priv = ctx;
     if (sd->ass_track) {
@@ -81,7 +82,7 @@ static int init(struct sd *sd)
                                   sd->extradata_len);
     }
 
-    ctx->vsfilter_aspect = ass;
+    ctx->vsfilter_aspect = !is_converted;
     return 0;
 }
 
