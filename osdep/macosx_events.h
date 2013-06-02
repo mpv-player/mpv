@@ -23,5 +23,7 @@
 
 void cocoa_put_key(int keycode);
 void cocoa_check_events(void);
+void cocoa_start_apple_remote(void);
+void cocoa_stop_apple_remote(void);
 
 #endif

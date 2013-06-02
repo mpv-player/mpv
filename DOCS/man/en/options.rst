@@ -80,6 +80,9 @@
     configuration files specifying a list of fallbacks may make sense. See
     `audio_outputs` for details and descriptions of available drivers.
 
+--ar, --no-ar
+    Enable/disable AppleIR remote support. Enabled by default.
+
 --aspect=<ratio>
     Override movie aspect ratio, in case aspect information is incorrect or
     missing in the file being played. See also ``--no-aspect``.

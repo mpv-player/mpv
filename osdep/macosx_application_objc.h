@@ -17,6 +17,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "ar/HIDRemote.h"
 #include "osdep/macosx_application.h"
 
 struct cocoa_input_queue;
@@ -26,9 +27,12 @@ struct cocoa_input_queue;
 - (int) pop;
 @end
 
-@interface EventsResponder : NSResponder
+@interface EventsResponder : NSObject <HIDRemoteDelegate>
 - (void)handleMediaKey:(int)key;
 - (NSEvent *)handleKeyDown:(NSEvent *)event;
+- (void)startAppleRemote;
+- (void)stopAppleRemote;
+@property(nonatomic, retain) HIDRemote *remote;
 @end
 
 @interface Application : NSApplication

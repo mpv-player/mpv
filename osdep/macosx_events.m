@@ -3,12 +3,12 @@
  *
  * This file is part of mpv.
  *
- * mplayer2 is free software; you can redistribute it and/or modify
+ * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
- * mplayer2 is distributed in the hope that it will be useful,
+ * mpv is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
@@ -92,6 +92,18 @@ static int convert_key(unsigned key, unsigned charcode)
     return charcode;
 }
 
+void cocoa_start_apple_remote(void)
+{
+    Application *app = mpv_shared_app();
+    [app.eventsResponder startAppleRemote];
+}
+
+void cocoa_stop_apple_remote(void)
+{
+    Application *app = mpv_shared_app();
+    [app.eventsResponder stopAppleRemote];
+}
+
 void cocoa_check_events(void)
 {
     Application *app = mpv_shared_app();
@@ -106,6 +118,23 @@ void cocoa_put_key(int keycode)
 }
 
 @implementation EventsResponder
+- (void)startAppleRemote
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.remote = [[[HIDRemote alloc] init] autorelease];
+        if (self.remote) {
+            [self.remote setDelegate:self];
+            [self.remote startRemoteControl:kHIDRemoteModeExclusiveAuto];
+        }
+    });
+
+}
+- (void)stopAppleRemote
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self.remote stopRemoteControl];
+    });
+}
 - (NSArray *) keyEquivalents
 {
     return @[@"h", @"q", @"Q", @"0", @"1", @"2"];
@@ -157,5 +186,33 @@ void cocoa_put_key(int keycode)
     }
 
     return nil;
+}
+- (void)hidRemote:(HIDRemote *)remote
+    eventWithButton:(HIDRemoteButtonCode)buttonCode
+          isPressed:(BOOL)isPressed
+ fromHardwareWithAttributes:(NSMutableDictionary *)attributes
+{
+    if (!isPressed) return;
+
+    NSDictionary *keymap = @{
+        @(kHIDRemoteButtonCodePlay):       @(MP_AR_PLAY),
+        @(kHIDRemoteButtonCodePlayHold):   @(MP_AR_PLAY_HOLD),
+        @(kHIDRemoteButtonCodeCenter):     @(MP_AR_CENTER),
+        @(kHIDRemoteButtonCodeCenterHold): @(MP_AR_CENTER_HOLD),
+        @(kHIDRemoteButtonCodeLeft):       @(MP_AR_PREV),
+        @(kHIDRemoteButtonCodeLeftHold):   @(MP_AR_PREV_HOLD),
+        @(kHIDRemoteButtonCodeRight):      @(MP_AR_NEXT),
+        @(kHIDRemoteButtonCodeRightHold):  @(MP_AR_NEXT_HOLD),
+        @(kHIDRemoteButtonCodeMenu):       @(MP_AR_MENU),
+        @(kHIDRemoteButtonCodeMenuHold):   @(MP_AR_MENU_HOLD),
+        @(kHIDRemoteButtonCodeUp):         @(MP_AR_VUP),
+        @(kHIDRemoteButtonCodeUpHold):     @(MP_AR_VUP_HOLD),
+        @(kHIDRemoteButtonCodeDown):       @(MP_AR_VDOWN),
+        @(kHIDRemoteButtonCodeDownHold):   @(MP_AR_VDOWN_HOLD),
+    };
+
+    int key = [keymap[@(buttonCode)] intValue];
+    if (key > 0)
+        cocoa_put_key(key);
 }
 @end

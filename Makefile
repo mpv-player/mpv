@@ -48,7 +48,8 @@ SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 SOURCES-$(MACOSX_BUNDLE)        += osdep/macosx_bundle.m
 SOURCES-$(COCOA)                += video/out/cocoa_common.m \
                                    osdep/macosx_application.m \
-                                   osdep/macosx_events.m
+                                   osdep/macosx_events.m \
+                                   osdep/ar/HIDRemote.m
 SOURCES-$(MNG)                  += demux/demux_mng.c
 SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
 

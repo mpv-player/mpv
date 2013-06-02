@@ -601,7 +601,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     timeEndPeriod(1);
 #endif
 
-    mp_input_uninit(mpctx->input);
+    mp_input_uninit(mpctx->input, &mpctx->opts.input);
 
     osd_free(mpctx->osd);
 

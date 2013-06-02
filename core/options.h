@@ -231,6 +231,9 @@ typedef struct MPOpts {
         int use_joystick;
         int use_lirc;
         int use_lircc;
+#ifdef CONFIG_COCOA
+        int use_ar;
+#endif
         int default_bindings;
         int test;
     } input;
