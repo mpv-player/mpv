@@ -224,6 +224,16 @@ static void ass_to_plaintext(struct buf *b, const char *in)
     }
 }
 
+// Empty string counts as whitespace. Reads s[len-1] even if there are \0s.
+static bool is_whitespace_only(char *s, int len)
+{
+    for (int n = 0; n < len; n++) {
+        if (s[n] != ' ' && s[n] != '\t')
+            return false;
+    }
+    return true;
+}
+
 static char *get_text(struct sd *sd, double pts)
 {
     struct sd_ass_priv *ctx = sd->priv;
@@ -240,8 +250,10 @@ static char *get_text(struct sd *sd, double pts)
         double end = (event->Start + event->Duration) / 1000.0;
         if (pts >= start && pts < end) {
             if (event->Text) {
+                int start = b.len;
                 ass_to_plaintext(&b, event->Text);
-                append(&b, '\n');
+                if (!is_whitespace_only(&b.start[b.len], b.len - start))
+                    append(&b, '\n');
             }
         }
     }
