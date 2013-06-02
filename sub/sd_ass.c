@@ -132,11 +132,13 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         return;
     }
  not_all_whitespace:;
-    for (int i = 0; i < track->n_events; i++)
-        if (track->events[i].Start == ipts
-            && (duration <= 0 || track->events[i].Duration == iduration)
-            && strcmp(track->events[i].Text, text) == 0)
-            return;   // We've already added this subtitle
+    if (!sd->no_remove_duplicates) {
+        for (int i = 0; i < track->n_events; i++)
+            if (track->events[i].Start == ipts
+                && (duration <= 0 || track->events[i].Duration == iduration)
+                && strcmp(track->events[i].Text, text) == 0)
+                return;   // We've already added this subtitle
+    }
     if (duration <= 0) {
         iduration = 10000;
         ctx->incomplete_event = true;
