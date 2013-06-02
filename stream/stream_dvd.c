@@ -1051,7 +1051,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     stream->close = stream_dvd_close;
     stream->start_pos = (int64_t)d->cur_pack*2048;
     stream->end_pos = (int64_t)(d->cur_pgc->cell_playback[d->last_cell-1].last_sector)*2048;
-    *file_format = DEMUXER_TYPE_MPEG_PS;
     mp_msg(MSGT_DVD,MSGL_V,"DVD start=%d end=%d  \n",d->cur_pack,d->cur_pgc->cell_playback[d->last_cell-1].last_sector);
     stream->priv = (void*)d;
     return STREAM_OK;

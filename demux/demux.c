@@ -987,7 +987,7 @@ struct demuxer *demux_open_withparams(struct MPOpts *opts,
     // format, instead of reyling on libav to auto-detect the stream's format
     // correctly.
     switch (file_format) {
-    case DEMUXER_TYPE_MPEG_PS:
+    //case DEMUXER_TYPE_MPEG_PS:
     //case DEMUXER_TYPE_MPEG_TS:
     case DEMUXER_TYPE_Y4M:
     case DEMUXER_TYPE_NSV:
