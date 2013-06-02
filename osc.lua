@@ -4,7 +4,7 @@ local osc_geo = {
 	-- user-safe
 	scale = 1,								-- scaling of the controller
 	vidscale = true,						-- scale the controller with the video? don't use false, currently causes glitches
-	valign = 0.85,							-- vertical alignment, -1 (top) to 1 (bottom)
+	valign = 0.8,							-- vertical alignment, -1 (top) to 1 (bottom)
 	halign = 0,								-- vertical alignment, -1 (left) to 1 (right)
 	
 	-- not user-safe
