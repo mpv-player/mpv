@@ -115,6 +115,17 @@ void sub_set_ass_renderer(struct dec_sub *sub, struct ass_library *ass_library,
     sub->init_sd.ass_renderer = ass_renderer;
 }
 
+static void print_chain(struct dec_sub *sub)
+{
+    mp_msg(MSGT_OSD, MSGL_V, "Subtitle filter chain: ");
+    for (int n = 0; n < sub->num_sd; n++) {
+        struct sd *sd = sub->sd[n];
+        mp_msg(MSGT_OSD, MSGL_V, "%s%s (%s)", n > 0 ? " -> " : "", 
+               sd->driver->name, sd->codec);
+    }
+    mp_msg(MSGT_OSD, MSGL_V, "\n");
+}
+
 // Subtitles read with subreader.c
 static void read_sub_data(struct dec_sub *sub, struct sub_data *subdata)
 {
@@ -218,6 +229,7 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh)
         sub->num_sd++;
         // Try adding new converters until a decoder is reached
         if (sd->driver->get_bitmaps || sd->driver->get_text) {
+            print_chain(sub);
             if (sh->sub_data)
                 read_sub_data(sub, sh->sub_data);
             return;

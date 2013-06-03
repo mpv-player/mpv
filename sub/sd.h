@@ -45,6 +45,7 @@ struct sd {
 };
 
 struct sd_functions {
+    const char *name;
     bool accept_packets_in_advance;
     bool (*supports_format)(const char *format);
     int  (*init)(struct sd *sd);

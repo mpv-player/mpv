@@ -329,6 +329,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
 }
 
 const struct sd_functions sd_microdvd = {
+    .name = "microdvd",
     .supports_format = supports_format,
     .init = init,
     .decode = decode,

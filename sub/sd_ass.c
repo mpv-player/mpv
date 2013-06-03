@@ -300,6 +300,7 @@ static void uninit(struct sd *sd)
 }
 
 const struct sd_functions sd_ass = {
+    .name = "ass",
     .accept_packets_in_advance = true,
     .supports_format = supports_format,
     .init = init,

@@ -244,6 +244,7 @@ static void uninit(struct sd *sd)
 }
 
 const struct sd_functions sd_lavc = {
+    .name = "lavc",
     .supports_format = supports_format,
     .init = init,
     .decode = decode,

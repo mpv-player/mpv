@@ -92,6 +92,7 @@ static void uninit(struct sd *sd)
 }
 
 const struct sd_functions sd_spu = {
+    .name = "spu",
     .supports_format = supports_format,
     .init = init,
     .decode = decode,
