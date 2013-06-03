@@ -551,7 +551,9 @@ static const m_option_t mp_input_opts[] = {
     OPT_FLAG("joystick", input.use_joystick, CONF_GLOBAL),
     OPT_FLAG("lirc", input.use_lirc, CONF_GLOBAL),
     OPT_FLAG("lircc", input.use_lircc, CONF_GLOBAL),
+#ifdef CONFIG_COCOA
     OPT_FLAG("ar", input.use_ar, CONF_GLOBAL),
+#endif
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
