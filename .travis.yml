@@ -10,6 +10,7 @@ compiler:
 branches:
   only:
     - master
+    - ci
 
 before_install: ./travis-deps libass-stable $LIBAV
 script: ./configure && make
