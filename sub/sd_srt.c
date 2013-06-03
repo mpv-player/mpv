@@ -437,6 +437,12 @@ static void convert_subrip(const char *orig, char *dest, int dest_buffer_size)
     new_line.buf[new_line.len] = 0;
 }
 
+static const char *srt_ass_extradata =
+    "[Script Info]\n"
+    "ScriptType: v4.00+\n"
+    "PlayResX: 384\n"
+    "PlayResY: 288\n";
+
 static bool supports_format(const char *format)
 {
     return format && (strcmp(format, "subrip") == 0 ||
@@ -446,6 +452,8 @@ static bool supports_format(const char *format)
 static int init(struct sd *sd)
 {
     sd->output_codec = "ass-text";
+    sd->output_extradata = (char *)srt_ass_extradata;
+    sd->output_extradata_len = strlen(sd->output_extradata);
     return 0;
 }
 

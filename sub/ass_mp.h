@@ -27,7 +27,8 @@
 #include "config.h"
 #include "subreader.h"
 
-// font sizes and explicit tags in subassconvert.c assume this size (?)
+// This is probably arbitrary.
+// sd_lavc_conv might indirectly still assume this PlayResY, though.
 #define MP_ASS_FONT_PLAYRESY 288
 
 #define MP_ASS_RGBA(r, g, b, a) \
