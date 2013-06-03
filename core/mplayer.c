@@ -1515,6 +1515,8 @@ static void set_osd_subtitle(struct MPContext *mpctx, const char *text)
                 set_osd_msg(mpctx, OSD_MSG_SUB_BASE, 1, INT_MAX, "%s", text);
         }
     }
+    if (!text[0])
+        rm_osd_msg(mpctx, OSD_MSG_SUB_BASE);
 }
 
 // sym == mpctx->osd_function
@@ -1898,7 +1900,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
         }
     }
 
-    if (!mpctx->osd->render_bitmap_subs)
+    if (!mpctx->osd->render_bitmap_subs || !mpctx->sh_video)
         set_osd_subtitle(mpctx, sub_get_text(dec_sub, curpts_s));
 }
 
@@ -2481,7 +2483,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     mpctx->delay = 0;
     mpctx->vo_pts_history_seek_ts++;
 
-    // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
+    reset_subtitles(mpctx);
 
     return 1;
 
