@@ -63,24 +63,28 @@ static void free_last_event(ASS_Track *track)
 
 static int init(struct sd *sd)
 {
+    struct MPOpts *opts = sd->opts;
     if (!sd->ass_library || !sd->ass_renderer)
         return -1;
 
-    bool ass = is_native_ass(sd->codec);
     bool is_converted = sd->converted_from != NULL;
+
     struct sd_ass_priv *ctx = talloc_zero(NULL, struct sd_ass_priv);
     sd->priv = ctx;
     if (sd->ass_track) {
         ctx->ass_track = sd->ass_track;
-    } else if (ass) {
+    } else {
         ctx->ass_track = ass_new_track(sd->ass_library);
-    } else
-        ctx->ass_track = mp_ass_default_track(sd->ass_library, sd->opts);
+        if (!is_converted)
+            ctx->ass_track->track_type = TRACK_TYPE_ASS;
+    }
 
     if (sd->extradata) {
         ass_process_codec_private(ctx->ass_track, sd->extradata,
                                   sd->extradata_len);
     }
+
+    mp_ass_add_default_styles(ctx->ass_track, opts);
 
     ctx->vsfilter_aspect = !is_converted;
     return 0;
