@@ -38,7 +38,9 @@
 #include "stream/stream.h"
 #include "core/options.h"
 
-void mp_ass_set_style(ASS_Style *style, struct osd_style_opts *opts)
+// res_y should be track->PlayResY
+// It determines scaling of font sizes and more.
+void mp_ass_set_style(ASS_Style *style, int res_y, struct osd_style_opts *opts)
 {
     if (opts->font) {
         free(style->FontName);
@@ -46,9 +48,9 @@ void mp_ass_set_style(ASS_Style *style, struct osd_style_opts *opts)
         style->treat_fontname_as_pattern = 1;
     }
 
-    // libass_font_size = FontSize * (window_height / MP_ASS_FONT_PLAYRESY)
-    // scale translates parameters from PlayResY=720 to MP_ASS_FONT_PLAYRESY
-    double scale = MP_ASS_FONT_PLAYRESY / 720.0;
+    // libass_font_size = FontSize * (window_height / res_y)
+    // scale translates parameters from PlayResY=720 to res_y
+    double scale = res_y / 720.0;
 
     style->FontSize = opts->font_size * scale;
     style->PrimaryColour = MP_ASS_COLOR(opts->color);
@@ -74,30 +76,39 @@ void mp_ass_set_style(ASS_Style *style, struct osd_style_opts *opts)
 #endif
 }
 
-ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
+// Add default styles, if the track does not have any styles yet.
+// Apply style overrides if the user provides any.
+void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts)
 {
-    ASS_Track *track = ass_new_track(library);
-
-    track->track_type = TRACK_TYPE_ASS;
-    track->Timer = 100.;
-    track->PlayResY = MP_ASS_FONT_PLAYRESY;
-    track->WrapStyle = 0;
-
     if (opts->ass_styles_file && opts->ass_style_override)
         ass_read_styles(track, opts->ass_styles_file, opts->sub_cp);
 
     if (track->n_styles == 0) {
+        if (!track->PlayResY) {
+            track->PlayResY = MP_ASS_FONT_PLAYRESY;
+            track->PlayResX = track->PlayResY * 4 / 3;
+        }
         track->Kerning = true;
         int sid = ass_alloc_style(track);
         track->default_style = sid;
         ASS_Style *style = track->styles + sid;
         style->Name = strdup("Default");
         style->Alignment = 2;
-        mp_ass_set_style(style, opts->sub_text_style);
+        mp_ass_set_style(style, track->PlayResY, opts->sub_text_style);
     }
 
     if (opts->ass_style_override)
         ass_process_force_style(track);
+}
+
+ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
+{
+    ASS_Track *track = ass_new_track(library);
+
+    track->track_type = TRACK_TYPE_ASS;
+    track->Timer = 100.;
+
+    mp_ass_add_default_styles(track, opts);
 
     return track;
 }

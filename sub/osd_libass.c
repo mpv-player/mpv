@@ -89,7 +89,7 @@ static void create_osd_ass_track(struct osd_state *osd, struct osd_object *obj)
         ASS_Style *style = track->styles + sid;
         style->Alignment = 5; // top-title, left
         style->Name = strdup("OSD");
-        mp_ass_set_style(style, osd->opts->osd_style);
+        mp_ass_set_style(style, MP_ASS_FONT_PLAYRESY, osd->opts->osd_style);
         // Set to neutral base direction, as opposed to VSFilter LTR default
         style->Encoding = -1;
     }
@@ -158,7 +158,7 @@ static void update_osd(struct osd_state *osd, struct osd_object *obj)
     font.font_size *= opts->osd_scale;
 
     ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
-    mp_ass_set_style(style, &font);
+    mp_ass_set_style(style, obj->osd_track->PlayResY, &font);
 
     char *text = mangle_ass(osd->osd_text);
     add_osd_ass_event(obj->osd_track, text);
@@ -364,7 +364,7 @@ static void update_sub(struct osd_state *osd, struct osd_object *obj)
     font.font_size *= opts->sub_scale;
 
     ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
-    mp_ass_set_style(style, &font);
+    mp_ass_set_style(style, obj->osd_track->PlayResY, &font);
 
 #if LIBASS_VERSION >= 0x01010000
     ass_set_line_position(osd->osd_render, 100 - opts->sub_pos);
