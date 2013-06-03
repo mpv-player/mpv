@@ -39,21 +39,9 @@
 #include "audio/format.h"
 #include "ao.h"
 #include "audio/reorder_ch.h"
-#include "audio_out_internal.h"
 #include "core/mp_msg.h"
 #include "osdep/timer.h"
 #include "core/subopt-helper.h"
-
-
-static const ao_info_t info =
-{
-    "Windows DirectSound audio output",
-    "dsound",
-    "Gabor Szecsi <deje@miki.hu>",
-    ""
-};
-
-LIBAO_EXTERN(dsound)
 
 /**
 \todo use the definitions from the win32 api headers when they define these
@@ -103,6 +91,8 @@ static int underrun_check = 0;            ///0 or last reported free space (unde
 static int device_num = 0;                ///wanted device number
 static GUID device;                       ///guid of the device
 static int audio_volume;
+
+static float get_delay(struct ao *ao);
 
 /***************************************************************************************/
 
@@ -296,7 +286,7 @@ static void DestroyBuffer(void)
 \param len length of the data to copy in bytes
 \return number of copyed bytes
 */
-static int write_buffer(unsigned char *data, int len)
+static int write_buffer(struct ao *ao, unsigned char *data, int len)
 {
     HRESULT res;
     LPVOID lpvPtr1;
@@ -318,7 +308,7 @@ static int write_buffer(unsigned char *data, int len)
 
 
     if (SUCCEEDED(res)) {
-        if (!AF_FORMAT_IS_AC3(ao_data.format)) {
+        if (!AF_FORMAT_IS_AC3(ao->format)) {
             memcpy(lpvPtr1, data, dwBytes1);
             if (lpvPtr2 != NULL)
                 memcpy(lpvPtr2, (char *)data + dwBytes1, dwBytes2);
@@ -358,9 +348,9 @@ static int write_buffer(unsigned char *data, int len)
 \brief handle control commands
 \param cmd command
 \param arg argument
-\return CONTROL_OK or -1 in case the command can't be handled
+\return CONTROL_OK or CONTROL_UNKNOWN in case the command is not supported
 */
-static int control(int cmd, void *arg)
+static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     DWORD volume;
     switch (cmd) {
@@ -379,7 +369,7 @@ static int control(int cmd, void *arg)
         return CONTROL_OK;
     }
     }
-    return -1;
+    return CONTROL_UNKNOWN;
 }
 
 /**
@@ -388,31 +378,31 @@ static int control(int cmd, void *arg)
 \param channels number of channels
 \param format format
 \param flags unused
-\return 1=success 0=fail
+\return 0=success -1=fail
 */
-static int init(int rate, const struct mp_chmap *channels, int format, int flags)
+static int init(struct ao *ao, char *params)
 {
     int res;
     if (!InitDirectSound())
-        return 0;
+        return -1;
 
-    global_ao->no_persistent_volume = true;
+    ao->no_persistent_volume = true;
     audio_volume = 100;
 
     // ok, now create the buffers
     WAVEFORMATEXTENSIBLE wformat;
     DSBUFFERDESC dsbpridesc;
     DSBUFFERDESC dsbdesc;
+    int format = ao->format;
+    int rate = ao->samplerate;
 
     if (AF_FORMAT_IS_AC3(format))
         format = AF_FORMAT_AC3_NE;
     else {
-        struct mp_chmap_sel sel = {
-            0
-        };
+        struct mp_chmap_sel sel = {0};
         mp_chmap_sel_add_waveext(&sel);
-        if (!ao_chmap_sel_adjust(&ao_data, &sel, &ao_data.channels))
-            return 0;
+        if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+            return -1;
     }
     switch (format) {
     case AF_FORMAT_AC3_NE:
@@ -426,30 +416,30 @@ static int init(int rate, const struct mp_chmap *channels, int format, int flags
                af_fmt2str_short(format));
         format = AF_FORMAT_S16_LE;
     }
-    //fill global ao_data
-    ao_data.samplerate = rate;
-    ao_data.format = format;
-    ao_data.bps = ao_data.channels.num * rate * (af_fmt2bits(format) >> 3);
-    if (ao_data.buffersize == -1)
-        ao_data.buffersize = ao_data.bps;                            // space for 1 sec
+    //set our audio parameters
+    ao->samplerate = rate;
+    ao->format = format;
+    ao->bps = ao->channels.num * rate * (af_fmt2bits(format) >> 3);
+    if (ao->buffersize == -1)
+        ao->buffersize = ao->bps;                            // space for 1 sec
     mp_msg(MSGT_AO, MSGL_V,
            "ao_dsound: Samplerate:%iHz Channels:%i Format:%s\n", rate,
-           ao_data.channels.num, af_fmt2str_short(format));
+           ao->channels.num, af_fmt2str_short(format));
     mp_msg(MSGT_AO, MSGL_V, "ao_dsound: Buffersize:%d bytes (%d msec)\n",
-           ao_data.buffersize, ao_data.buffersize / ao_data.bps * 1000);
+           ao->buffersize, ao->buffersize / ao->bps * 1000);
 
     //fill waveformatex
     ZeroMemory(&wformat, sizeof(WAVEFORMATEXTENSIBLE));
-    wformat.Format.cbSize = (ao_data.channels.num > 2)
+    wformat.Format.cbSize = (ao->channels.num > 2)
                     ? sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX) : 0;
-    wformat.Format.nChannels = ao_data.channels.num;
+    wformat.Format.nChannels = ao->channels.num;
     wformat.Format.nSamplesPerSec = rate;
     if (AF_FORMAT_IS_AC3(format)) {
         wformat.Format.wFormatTag = WAVE_FORMAT_DOLBY_AC3_SPDIF;
         wformat.Format.wBitsPerSample = 16;
         wformat.Format.nBlockAlign = 4;
     } else {
-        wformat.Format.wFormatTag = (ao_data.channels.num > 2)
+        wformat.Format.wFormatTag = (ao->channels.num > 2)
                                     ? WAVE_FORMAT_EXTENSIBLE : WAVE_FORMAT_PCM;
         wformat.Format.wBitsPerSample = af_fmt2bits(format);
         wformat.Format.nBlockAlign = wformat.Format.nChannels *
@@ -470,8 +460,8 @@ static int init(int rate, const struct mp_chmap *channels, int format, int flags
                       | DSBCAPS_GLOBALFOCUS       /** Allows background playing */
                       | DSBCAPS_CTRLVOLUME;       /** volume control enabled */
 
-    if (ao_data.channels.num > 2) {
-        wformat.dwChannelMask = mp_chmap_to_waveext(&ao_data.channels);
+    if (ao->channels.num > 2) {
+        wformat.dwChannelMask = mp_chmap_to_waveext(&ao->channels);
         wformat.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
         wformat.Samples.wValidBitsPerSample = wformat.Format.wBitsPerSample;
         // Needed for 5.1 on emu101k - shit soundblaster
@@ -480,12 +470,12 @@ static int init(int rate, const struct mp_chmap *channels, int format, int flags
     wformat.Format.nAvgBytesPerSec = wformat.Format.nSamplesPerSec *
                                      wformat.Format.nBlockAlign;
 
-    dsbdesc.dwBufferBytes = ao_data.buffersize;
+    dsbdesc.dwBufferBytes = ao->buffersize;
     dsbdesc.lpwfxFormat = (WAVEFORMATEX *)&wformat;
     buffer_size = dsbdesc.dwBufferBytes;
     write_offset = 0;
     min_free_space = wformat.Format.nBlockAlign;
-    ao_data.outburst = wformat.Format.nBlockAlign * 512;
+    ao->outburst = wformat.Format.nBlockAlign * 512;
 
     // create primary buffer and set its format
 
@@ -495,7 +485,7 @@ static int init(int rate, const struct mp_chmap *channels, int format, int flags
         mp_msg(MSGT_AO, MSGL_ERR,
                "ao_dsound: cannot create primary buffer (%s)\n",
                dserr2str(res));
-        return 0;
+        return -1;
     }
     res = IDirectSoundBuffer_SetFormat(hdspribuf, (WAVEFORMATEX *)&wformat);
     if (res != DS_OK) {
@@ -520,11 +510,11 @@ static int init(int rate, const struct mp_chmap *channels, int format, int flags
             mp_msg(MSGT_AO, MSGL_ERR,
                    "ao_dsound: cannot create secondary (stream)buffer (%s)\n",
                    dserr2str(res));
-            return 0;
+            return -1;
         }
     }
     mp_msg(MSGT_AO, MSGL_V, "ao_dsound: secondary (stream)buffer created\n");
-    return 1;
+    return 0;
 }
 
 
@@ -532,7 +522,7 @@ static int init(int rate, const struct mp_chmap *channels, int format, int flags
 /**
 \brief stop playing and empty buffers (for seeking/pause)
 */
-static void reset(void)
+static void reset(struct ao *ao)
 {
     IDirectSoundBuffer_Stop(hdsbuf);
     // reset directsound buffer
@@ -544,7 +534,7 @@ static void reset(void)
 /**
 \brief stop playing, keep buffers (for pause)
 */
-static void audio_pause(void)
+static void audio_pause(struct ao *ao)
 {
     IDirectSoundBuffer_Stop(hdsbuf);
 }
@@ -552,7 +542,7 @@ static void audio_pause(void)
 /**
 \brief resume playing, after audio_pause()
 */
-static void audio_resume(void)
+static void audio_resume(struct ao *ao)
 {
     IDirectSoundBuffer_Play(hdsbuf, 0, 0, DSBPLAY_LOOPING);
 }
@@ -561,18 +551,18 @@ static void audio_resume(void)
 \brief close audio device
 \param immed stop playback immediately
 */
-static void uninit(int immed)
+static void uninit(struct ao *ao, bool immed)
 {
     if (!immed)
-        mp_sleep_us(get_delay() * 1000000);
-    reset();
+        mp_sleep_us(get_delay(ao) * 1000000);
+    reset(ao);
 
     DestroyBuffer();
     UninitDirectSound();
 }
 
 // return exact number of free (safe to write) bytes
-static int check_free_buffer_size(void)
+static int check_free_buffer_size(struct ao *ao)
 {
     int space;
     DWORD play_offset;
@@ -594,7 +584,7 @@ static int check_free_buffer_size(void)
     if (space < underrun_check) {
         // there's no useful data in the buffers
         space = buffer_size;
-        reset();
+        reset(ao);
     }
     underrun_check = space;
     return space;
@@ -604,9 +594,9 @@ static int check_free_buffer_size(void)
    \brief find out how many bytes can be written into the audio buffer without
    \return free space in bytes, has to return 0 if the buffer is almost full
  */
-static int get_space(void)
+static int get_space(struct ao *ao)
 {
-    int space = check_free_buffer_size();
+    int space = check_free_buffer_size(ao);
     if (space < min_free_space)
         return 0;
     return space - min_free_space;
@@ -616,26 +606,45 @@ static int get_space(void)
 \brief play 'len' bytes of 'data'
 \param data pointer to the data to play
 \param len size in bytes of the data buffer, gets rounded down to outburst*n
+           NOTE: outburst stuff might be outdated/deprecated
 \param flags currently unused
 \return number of played bytes
 */
-static int play(void *data, int len, int flags)
+static int play(struct ao *ao, void *data, int len, int flags)
 {
-    int space = check_free_buffer_size();
+    int space = check_free_buffer_size(ao);
     if (space < len)
         len = space;
 
     if (!(flags & AOPLAY_FINAL_CHUNK))
-        len = (len / ao_data.outburst) * ao_data.outburst;
-    return write_buffer(data, len);
+        len = (len / ao->outburst) * ao->outburst;
+    return write_buffer(ao, data, len);
 }
 
 /**
 \brief get the delay between the first and last sample in the buffer
 \return delay in seconds
 */
-static float get_delay(void)
+static float get_delay(struct ao *ao)
 {
-    int space = check_free_buffer_size();
-    return (float)(buffer_size - space) / (float)ao_data.bps;
+    int space = check_free_buffer_size(ao);
+    return (float)(buffer_size - space) / (float)ao->bps;
 }
+
+const struct ao_driver audio_out_dsound = {
+    .info = &(const struct ao_info) {
+        "Windows DirectSound audio output",
+        "dsound",
+        "Gabor Szecsi <deje@miki.hu>",
+        ""
+    },
+    .init      = init,
+    .uninit    = uninit,
+    .control   = control,
+    .get_space = get_space,
+    .play      = play,
+    .get_delay = get_delay,
+    .pause     = audio_pause,
+    .resume    = audio_resume,
+    .reset     = reset,
+};
