@@ -38,7 +38,9 @@
 #include "stream/stream.h"
 #include "core/options.h"
 
-void mp_ass_set_style(ASS_Style *style, struct osd_style_opts *opts)
+// res_y should be track->PlayResY
+// It determines scaling of font sizes and more.
+void mp_ass_set_style(ASS_Style *style, int res_y, struct osd_style_opts *opts)
 {
     if (opts->font) {
         free(style->FontName);
@@ -46,9 +48,9 @@ void mp_ass_set_style(ASS_Style *style, struct osd_style_opts *opts)
         style->treat_fontname_as_pattern = 1;
     }
 
-    // libass_font_size = FontSize * (window_height / MP_ASS_FONT_PLAYRESY)
-    // scale translates parameters from PlayResY=720 to MP_ASS_FONT_PLAYRESY
-    double scale = MP_ASS_FONT_PLAYRESY / 720.0;
+    // libass_font_size = FontSize * (window_height / res_y)
+    // scale translates parameters from PlayResY=720 to res_y
+    double scale = res_y / 720.0;
 
     style->FontSize = opts->font_size * scale;
     style->PrimaryColour = MP_ASS_COLOR(opts->color);
@@ -74,129 +76,40 @@ void mp_ass_set_style(ASS_Style *style, struct osd_style_opts *opts)
 #endif
 }
 
-ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
+// Add default styles, if the track does not have any styles yet.
+// Apply style overrides if the user provides any.
+void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts)
 {
-    ASS_Track *track = ass_new_track(library);
-
-    track->track_type = TRACK_TYPE_ASS;
-    track->Timer = 100.;
-    track->PlayResY = MP_ASS_FONT_PLAYRESY;
-    track->WrapStyle = 0;
-
     if (opts->ass_styles_file && opts->ass_style_override)
-        ass_read_styles(track, opts->ass_styles_file, sub_cp);
+        ass_read_styles(track, opts->ass_styles_file, opts->sub_cp);
 
     if (track->n_styles == 0) {
+        if (!track->PlayResY) {
+            track->PlayResY = MP_ASS_FONT_PLAYRESY;
+            track->PlayResX = track->PlayResY * 4 / 3;
+        }
         track->Kerning = true;
         int sid = ass_alloc_style(track);
         track->default_style = sid;
         ASS_Style *style = track->styles + sid;
         style->Name = strdup("Default");
         style->Alignment = 2;
-        mp_ass_set_style(style, opts->sub_text_style);
+        mp_ass_set_style(style, track->PlayResY, opts->sub_text_style);
     }
 
     if (opts->ass_style_override)
         ass_process_force_style(track);
-
-    return track;
 }
 
-static int check_duplicate_plaintext_event(ASS_Track *track)
+ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
 {
-    int i;
-    ASS_Event *evt = track->events + track->n_events - 1;
+    ASS_Track *track = ass_new_track(library);
 
-    for (i = 0; i < track->n_events - 1; ++i)   // ignoring last event, it is the one we are comparing with
-        if (track->events[i].Start == evt->Start &&
-            track->events[i].Duration == evt->Duration &&
-            strcmp(track->events[i].Text, evt->Text) == 0)
-            return 1;
-    return 0;
-}
+    track->track_type = TRACK_TYPE_ASS;
+    track->Timer = 100.;
 
-/**
- * \brief Convert subtitle to ASS_Events for the given track
- * \param track track
- * \param sub subtitle to convert
- * \return event id
- * note: assumes that subtitle is _not_ fps-based; caller must manually correct
- *   Start and Duration in other case.
- **/
-static int ass_process_subtitle(ASS_Track *track, subtitle *sub)
-{
-    int eid;
-    ASS_Event *event;
-    int len = 0, j;
-    char *p;
-    char *end;
+    mp_ass_add_default_styles(track, opts);
 
-    eid = ass_alloc_event(track);
-    event = track->events + eid;
-
-    event->Start = sub->start * 10;
-    event->Duration = (sub->end - sub->start) * 10;
-    event->Style = track->default_style;
-
-    for (j = 0; j < sub->lines; ++j)
-        len += sub->text[j] ? strlen(sub->text[j]) : 0;
-
-    len += 2 * sub->lines;      // '\N', including the one after the last line
-    len += 6;                   // {\anX}
-    len += 1;                   // '\0'
-
-    event->Text = malloc(len);
-    end = event->Text + len;
-    p = event->Text;
-
-    if (sub->alignment)
-        p += snprintf(p, end - p, "{\\an%d}", sub->alignment);
-
-    for (j = 0; j < sub->lines; ++j)
-        p += snprintf(p, end - p, "%s\\N", sub->text[j]);
-
-    if (sub->lines > 0)
-        p -= 2;                 // remove last "\N"
-    *p = 0;
-
-    if (check_duplicate_plaintext_event(track)) {
-        ass_free_event(track, eid);
-        track->n_events--;
-        return -1;
-    }
-
-    mp_msg(MSGT_ASS, MSGL_V,
-           "plaintext event at %" PRId64 ", +%" PRId64 ": %s  \n",
-           (int64_t) event->Start, (int64_t) event->Duration, event->Text);
-
-    return eid;
-}
-
-
-/**
- * \brief Convert subdata to ASS_Track
- * \param subdata subtitles struct from subreader
- * \param fps video framerate
- * \return newly allocated ASS_Track, filled with subtitles from subdata
- */
-ASS_Track *mp_ass_read_subdata(ASS_Library *library, struct MPOpts *opts,
-                               sub_data *subdata, double fps)
-{
-    ASS_Track *track;
-    int i;
-
-    track = mp_ass_default_track(library, opts);
-    track->name = subdata->filename ? strdup(subdata->filename) : 0;
-
-    for (i = 0; i < subdata->sub_num; ++i) {
-        int eid = ass_process_subtitle(track, subdata->subtitles + i);
-        if (eid < 0)
-            continue;
-        if (!subdata->sub_uses_time) {
-            track->events[eid].Start *= 100. / fps;
-            track->events[eid].Duration *= 100. / fps;
-        }
-    }
     return track;
 }
 
@@ -244,7 +157,7 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
     if (opts->ass_style_override) {
         set_use_margins = opts->ass_use_margins;
 #if LIBASS_VERSION >= 0x01010000
-        set_sub_pos = 100 - sub_pos;
+        set_sub_pos = 100 - opts->sub_pos;
 #endif
         set_line_spacing = opts->ass_line_spacing;
         set_font_scale = opts->sub_scale;

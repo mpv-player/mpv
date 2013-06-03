@@ -671,11 +671,8 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
     if (ts != AV_NOPTS_VALUE) {
         dp->pts = ts * av_q2d(st->time_base);
         priv->last_pts = dp->pts * AV_TIME_BASE;
-        // always set duration for subtitles, even if AV_PKT_FLAG_KEY isn't set,
-        // otherwise they will stay on screen to long if e.g. ASS is demuxed
-        // from mkv
-        if ((stream->type == STREAM_SUB || (pkt->flags & AV_PKT_FLAG_KEY)) &&
-            pkt->convergence_duration > 0)
+        dp->duration = pkt->duration * av_q2d(st->time_base);
+        if (pkt->convergence_duration > 0)
             dp->duration = pkt->convergence_duration * av_q2d(st->time_base);
     }
     dp->pos = demux->filepos;

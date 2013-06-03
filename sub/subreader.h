@@ -24,10 +24,6 @@
 
 #include "config.h"
 
-extern int suboverlap_enabled;
-extern int sub_no_text_pp;  // disable text post-processing
-extern int sub_match_fuzziness;
-
 // subtitle formats
 #define SUB_INVALID   -1
 #define SUB_MICRODVD  0
@@ -44,9 +40,6 @@ extern int sub_match_fuzziness;
 #define SUB_SUBRIP09 11
 #define SUB_JACOSUB  12
 #define SUB_MPL2     13
-
-// One of the SUB_* constant above
-extern int sub_format;
 
 #define SUB_MAX_TEXT 12
 #define SUB_ALIGNMENT_BOTTOMLEFT       1
@@ -67,7 +60,6 @@ typedef struct subtitle {
     unsigned long end;
 
     char *text[SUB_MAX_TEXT];
-    double endpts[SUB_MAX_TEXT];
     unsigned char alignment;
 } subtitle;
 
@@ -78,24 +70,10 @@ typedef struct sub_data {
     int sub_uses_time;
     int sub_num;          // number of subtitle structs
     int sub_errs;
+    double fallback_fps;
 } sub_data;
 
 struct MPOpts;
 sub_data* sub_read_file (char *filename, float pts, struct MPOpts *opts);
-subtitle* subcp_recode (subtitle *sub);
-// enca_fd is the file enca uses to determine the codepage.
-// setting to NULL disables enca.
-struct stream;
-void subcp_open (struct stream *st); /* for demux_ogg.c */
-void subcp_close (void); /* for demux_ogg.c */
-#ifdef CONFIG_ENCA
-const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *preferred_language, const char *fallback);
-const char* guess_cp(struct stream *st, const char *preferred_language, const char *fallback);
-#endif
-struct MPContext;
-void find_sub(struct MPContext *mpctx, sub_data* subd,int key);
-void step_sub(sub_data *subd, float pts, int movement);
-void sub_add_text(subtitle *sub, const char *txt, int len, double endpts);
-int sub_clear_text(subtitle *sub, double pts);
 
 #endif /* MPLAYER_SUBREADER_H */

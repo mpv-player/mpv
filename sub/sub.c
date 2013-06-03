@@ -37,21 +37,9 @@
 #include "dec_sub.h"
 #include "img_convert.h"
 #include "draw_bmp.h"
-#include "spudec.h"
 #include "subreader.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
-
-int sub_pos=100;
-int sub_visibility=1;
-
-subtitle* vo_sub=NULL;
-
-float sub_delay = 0;
-float sub_fps = 0;
-
-void *vo_spudec=NULL;
-void *vo_vobsub=NULL;
 
 static const struct osd_style_opts osd_style_opts_def = {
     .font = "Sans",
@@ -86,8 +74,6 @@ const struct m_sub_options osd_style_conf = {
     .defaults = &osd_style_opts_def,
 };
 
-static struct osd_state *global_osd;
-
 static bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b)
 {
     return a.w == b.w && a.h == b.h && a.ml == b.ml && a.mt == b.mt
@@ -103,6 +89,7 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
         .opts = opts,
         .ass_library = asslib,
         .osd_text = talloc_strdup(osd, ""),
+        .sub_text = talloc_strdup(osd, ""),
         .progbar_type = -1,
     };
 
@@ -115,12 +102,10 @@ struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
         osd->objs[n] = obj;
     }
 
-    osd->objs[OSDTYPE_SPU]->is_sub = true;      // spudec.c
     osd->objs[OSDTYPE_SUB]->is_sub = true;      // dec_sub.c
-    osd->objs[OSDTYPE_SUBTITLE]->is_sub = true; // osd_libass.c
+    osd->objs[OSDTYPE_SUBTEXT]->is_sub = true;  // osd_libass.c
 
     osd_init_backend(osd);
-    global_osd = osd;
     return osd;
 }
 
@@ -130,24 +115,29 @@ void osd_free(struct osd_state *osd)
         return;
     osd_destroy_backend(osd);
     talloc_free(osd);
-    global_osd = NULL;
+}
+
+static bool set_text(void *talloc_ctx, char **var, const char *text)
+{
+    if (!text)
+        text = "";
+    if (strcmp(*var, text) == 0)
+        return true;
+    talloc_free(*var);
+    *var = talloc_strdup(talloc_ctx, text);
+    return false;
 }
 
 void osd_set_text(struct osd_state *osd, const char *text)
 {
-    if (!text)
-        text = "";
-    if (strcmp(osd->osd_text, text) == 0)
-        return;
-    talloc_free(osd->osd_text);
-    osd->osd_text = talloc_strdup(osd, text);
-    vo_osd_changed(OSDTYPE_OSD);
+    if (!set_text(osd, &osd->osd_text, text))
+        osd_changed(osd, OSDTYPE_OSD);
 }
 
-static bool spu_visible(struct osd_state *osd, struct osd_object *obj)
+void osd_set_sub(struct osd_state *osd, const char *text)
 {
-    struct MPOpts *opts = osd->opts;
-    return opts->sub_visibility && vo_spudec && spudec_visible(vo_spudec);
+    if (!set_text(osd, &osd->sub_text, text))
+        osd_changed(osd, OSDTYPE_SUBTEXT);
 }
 
 static void render_object(struct osd_state *osd, struct osd_object *obj,
@@ -168,14 +158,13 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
         obj->force_redraw = true;
     obj->vo_res = res;
 
-    if (obj->type == OSDTYPE_SPU) {
-        if (spu_visible(osd, obj))
-            spudec_get_indexed(vo_spudec, &obj->vo_res, out_imgs);
-    } else if (obj->type == OSDTYPE_SUB) {
-        double sub_pts = video_pts;
-        if (sub_pts != MP_NOPTS_VALUE)
-            sub_pts += sub_delay - osd->sub_offset;
-        sub_get_bitmaps(osd, obj->vo_res, sub_pts, out_imgs);
+    if (obj->type == OSDTYPE_SUB) {
+        if (osd->render_bitmap_subs && osd->dec_sub) {
+            double sub_pts = video_pts;
+            if (sub_pts != MP_NOPTS_VALUE)
+                sub_pts -= osd->sub_offset;
+            sub_get_bitmaps(osd->dec_sub, obj->vo_res, sub_pts, out_imgs);
+        }
     } else {
         osd_object_get_bitmaps(osd, obj, out_imgs);
     }
@@ -303,9 +292,8 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
              &draw_on_image, &closure);
 }
 
-void vo_osd_changed(int new_value)
+void osd_changed(struct osd_state *osd, int new_value)
 {
-    struct osd_state *osd = global_osd;
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         if (osd->objs[n]->type == new_value)
             osd->objs[n]->force_redraw = true;
@@ -316,5 +304,5 @@ void vo_osd_changed(int new_value)
 void osd_changed_all(struct osd_state *osd)
 {
     for (int n = 0; n < MAX_OSD_PARTS; n++)
-        vo_osd_changed(n);
+        osd_changed(osd, n);
 }

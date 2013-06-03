@@ -83,7 +83,6 @@ typedef struct MPOpts {
     int osd_level;
     int osd_duration;
     int osd_fractions;
-    char *vobsub_name;
     int untimed;
     char *stream_capture;
     char *stream_dump;
@@ -140,8 +139,16 @@ typedef struct MPOpts {
     char **sub_lang;
     int audio_display;
     int sub_visibility;
+    int sub_pos;
+    float sub_delay;
+    float sub_fps;
     int forced_subs_only;
     char *quvi_format;
+
+    // subreader.c
+    int suboverlap_enabled;
+    char *sub_cp;
+    int sub_no_text_pp;
 
     char *audio_stream;
     int audio_stream_cache;
@@ -170,6 +177,7 @@ typedef struct MPOpts {
     char **sub_name;
     char **sub_paths;
     int sub_auto;
+    int sub_match_fuzziness;
     int osd_bar_visible;
     float osd_bar_align_x;
     float osd_bar_align_y;

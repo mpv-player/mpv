@@ -66,6 +66,7 @@ extern const demuxer_desc_t demuxer_desc_mpeg_es;
 extern const demuxer_desc_t demuxer_desc_mpeg4_es;
 extern const demuxer_desc_t demuxer_desc_h264_es;
 extern const demuxer_desc_t demuxer_desc_mpeg_ts;
+extern const demuxer_desc_t demuxer_desc_sub;
 
 /* Please do not add any new demuxers here. If you want to implement a new
  * demuxer, add it to libavformat, except for wrappers around external
@@ -95,6 +96,8 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_mpeg_ts,
     // auto-probe last, because it checks file-extensions only
     &demuxer_desc_mf,
+    // no auto-probe
+    &demuxer_desc_sub,
     /* Please do not add any new demuxers here. If you want to implement a new
      * demuxer, add it to libavformat, except for wrappers around external
      * libraries and demuxers requiring binary support. */
@@ -217,8 +220,8 @@ static const demuxer_desc_t *get_demuxer_desc_from_type(int file_format)
 }
 
 
-demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
-                       int a_id, int v_id, int s_id, char *filename)
+static demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
+                              int a_id, int v_id, int s_id, char *filename)
 {
     struct demuxer *d = talloc_zero(NULL, struct demuxer);
     d->stream = stream;
@@ -245,6 +248,18 @@ demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
     if (filename) // Filename hack for avs_check_file
         d->filename = strdup(filename);
     stream_seek(stream, stream->start_pos);
+    return d;
+}
+
+// for demux_sub.c
+demuxer_t *new_sub_pseudo_demuxer(struct MPOpts *opts)
+{
+    struct stream *s = open_stream("null://", NULL, NULL);
+    assert(s);
+    struct demuxer *d = new_demuxer(opts, s, DEMUXER_TYPE_SUB,
+                                    -1, -1, -1, NULL);
+    new_sh_stream(d, STREAM_SUB);
+    talloc_steal(d, s);
     return d;
 }
 
@@ -786,20 +801,20 @@ int ds_get_packet_pts(demux_stream_t *ds, unsigned char **start, double *pts)
     return len;
 }
 
-int ds_get_packet_sub(demux_stream_t *ds, unsigned char **start)
+struct demux_packet *ds_get_packet_sub(demux_stream_t *ds)
 {
-    int len;
     if (ds->buffer_pos >= ds->buffer_size) {
-        *start = NULL;
         if (!ds->packs)
-            return -1;  // no sub
+            return NULL;  // no sub
         if (!ds_fill_buffer(ds))
-            return -1;  // EOF
+            return NULL;  // EOF
     }
-    len = ds->buffer_size - ds->buffer_pos;
-    *start = &ds->buffer[ds->buffer_pos];
-    ds->buffer_pos += len;
-    return len;
+    if (ds->buffer_pos < ds->buffer_size) {
+        ds->current->buffer += ds->buffer_pos;
+        ds->buffer_size -= ds->buffer_pos;
+    }
+    ds->buffer_pos = ds->buffer_size;
+    return ds->current;
 }
 
 struct demux_packet *ds_get_packet2(struct demux_stream *ds, bool repeat_last)

@@ -673,17 +673,8 @@ static int decode(struct sh_video *sh, struct demux_packet *packet,
     else
         avctx->skip_frame = ctx->skip_frame;
 
-    av_init_packet(&pkt);
-    pkt.data = packet ? packet->buffer : NULL;
-    pkt.size = packet ? packet->len : 0;
-    /* Some codecs (ZeroCodec, some cases of PNG) may want keyframe info
-     * from demuxer. */
-    if (packet && packet->keyframe)
-        pkt.flags |= AV_PKT_FLAG_KEY;
-    if (packet && packet->avpacket) {
-        pkt.side_data = packet->avpacket->side_data;
-        pkt.side_data_elems = packet->avpacket->side_data_elems;
-    }
+    mp_set_av_packet(&pkt, packet);
+
     // The avcodec opaque field stupidly supports only int64_t type
     union pts { int64_t i; double d; };
     avctx->reordered_opaque = (union pts){.d = *reordered_pts}.i;

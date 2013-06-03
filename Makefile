@@ -206,6 +206,7 @@ SOURCES = talloc.c \
           demux/demux_mf.c \
           demux/demux_mkv.c \
           demux/demux_mpg.c \
+          demux/demux_sub.c \
           demux/demux_ts.c \
           demux/mp3_hdr.c \
           demux/parse_es.c \
@@ -228,13 +229,16 @@ SOURCES = talloc.c \
           stream/url.c \
           sub/dec_sub.c \
           sub/draw_bmp.c \
-          sub/find_sub.c \
           sub/find_subfiles.c \
           sub/img_convert.c \
           sub/sd_lavc.c \
+          sub/sd_lavc_conv.c \
+          sub/sd_microdvd.c \
+          sub/sd_movtext.c \
+          sub/sd_spu.c \
+          sub/sd_srt.c \
           sub/spudec.c \
           sub/sub.c \
-          sub/subassconvert.c \
           sub/subreader.c \
           video/csputils.c \
           video/fmt-conversion.c \
