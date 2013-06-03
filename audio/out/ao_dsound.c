@@ -77,20 +77,24 @@ typedef struct {
 } WAVEFORMATEXTENSIBLE, *PWAVEFORMATEXTENSIBLE;
 #endif
 
-static HINSTANCE hdsound_dll = NULL;      ///handle to the dll
-static LPDIRECTSOUND hds = NULL;          ///direct sound object
-static LPDIRECTSOUNDBUFFER hdspribuf = NULL; ///primary direct sound buffer
-static LPDIRECTSOUNDBUFFER hdsbuf = NULL; ///secondary direct sound buffer (stream buffer)
-static int buffer_size = 0;               ///size in bytes of the direct sound buffer
-static int write_offset = 0;              ///offset of the write cursor in the direct sound buffer
-static int min_free_space = 0;            ///if the free space is below this value get_space() will return 0
-                                          ///there will always be at least this amout of free space to prevent
-                                          ///get_space() from returning wrong values when buffer is 100% full.
-                                          ///will be replaced with nBlockAlign in init()
-static int underrun_check = 0;            ///0 or last reported free space (underrun detection)
-static int device_num = 0;                ///wanted device number
-static GUID device;                       ///guid of the device
-static int audio_volume;
+struct priv {
+    HINSTANCE hdsound_dll;          ///handle to the dll
+    LPDIRECTSOUND hds;              ///direct sound object
+    LPDIRECTSOUNDBUFFER hdspribuf;  ///primary direct sound buffer
+    LPDIRECTSOUNDBUFFER hdsbuf;     ///secondary direct sound buffer (stream buffer)
+    int buffer_size;                ///size in bytes of the direct sound buffer
+    int write_offset;               ///offset of the write cursor in the direct sound buffer
+    int min_free_space;             ///if the free space is below this value get_space() will return 0
+                                    ///there will always be at least this amout of free space to prevent
+                                    ///get_space() from returning wrong values when buffer is 100% full.
+                                    ///will be replaced with nBlockAlign in init()
+    int underrun_check;             ///0 or last reported free space (underrun detection)
+    int device_num;                 ///wanted device number
+    GUID device;                    ///guid of the device
+    int audio_volume;
+
+    int device_index;
+};
 
 static float get_delay(struct ao *ao);
 
@@ -130,17 +134,19 @@ static char * dserr2str(int err)
 /**
 \brief uninitialize direct sound
 */
-static void UninitDirectSound(void)
+static void UninitDirectSound(struct ao *ao)
 {
+    struct priv *p = ao->priv;
+
     // finally release the DirectSound object
-    if (hds) {
-        IDirectSound_Release(hds);
-        hds = NULL;
+    if (p->hds) {
+        IDirectSound_Release(p->hds);
+        p->hds = NULL;
     }
     // free DSOUND.DLL
-    if (hdsound_dll) {
-        FreeLibrary(hdsound_dll);
-        hdsound_dll = NULL;
+    if (p->hdsound_dll) {
+        FreeLibrary(p->hdsound_dll);
+        p->hdsound_dll = NULL;
     }
     mp_msg(MSGT_AO, MSGL_V, "ao_dsound: DirectSound uninitialized\n");
 }
@@ -167,15 +173,17 @@ static void print_help(void)
 static BOOL CALLBACK DirectSoundEnum(LPGUID guid, LPCSTR desc, LPCSTR module,
                                      LPVOID context)
 {
-    int *device_index = context;
-    mp_msg(MSGT_AO, MSGL_V, "%i %s ", *device_index, desc);
-    if (device_num == *device_index) {
+    struct ao *ao = context;
+    struct priv *p = ao->priv;
+
+    mp_msg(MSGT_AO, MSGL_V, "%i %s ", p->device_index, desc);
+    if (p->device_num == p->device_index) {
         mp_msg(MSGT_AO, MSGL_V, "<--");
         if (guid)
-            memcpy(&device, guid, sizeof(GUID));
+            memcpy(&p->device, guid, sizeof(GUID));
     }
     mp_msg(MSGT_AO, MSGL_V, "\n");
-    (*device_index)++;
+    p->device_index++;
     return TRUE;
 }
 
@@ -184,50 +192,52 @@ static BOOL CALLBACK DirectSoundEnum(LPGUID guid, LPCSTR desc, LPCSTR module,
 \brief initilize direct sound
 \return 0 if error, 1 if ok
 */
-static int InitDirectSound(void)
+static int InitDirectSound(struct ao *ao, char *params)
 {
+    struct priv *p = ao->priv;
+
     DSCAPS dscaps;
 
     // initialize directsound
     HRESULT (WINAPI *OurDirectSoundCreate)(LPGUID, LPDIRECTSOUND *, LPUNKNOWN);
     HRESULT (WINAPI *OurDirectSoundEnumerate)(LPDSENUMCALLBACKA, LPVOID);
-    int device_index = 0;
+    p->device_index = 0;
     const opt_t subopts[] = {
-        {"device", OPT_ARG_INT, &device_num, NULL},
+        {"device", OPT_ARG_INT, &p->device_num, NULL},
         {NULL}
     };
-    if (subopt_parse(ao_subdevice, subopts) != 0) {
+    if (subopt_parse(params, subopts) != 0) {
         print_help();
         return 0;
     }
 
-    hdsound_dll = LoadLibrary("DSOUND.DLL");
-    if (hdsound_dll == NULL) {
+    p->hdsound_dll = LoadLibrary("DSOUND.DLL");
+    if (p->hdsound_dll == NULL) {
         mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: cannot load DSOUND.DLL\n");
         return 0;
     }
-    OurDirectSoundCreate = (void *)GetProcAddress(hdsound_dll,
+    OurDirectSoundCreate = (void *)GetProcAddress(p->hdsound_dll,
                                                   "DirectSoundCreate");
-    OurDirectSoundEnumerate = (void *)GetProcAddress(hdsound_dll,
+    OurDirectSoundEnumerate = (void *)GetProcAddress(p->hdsound_dll,
                                                      "DirectSoundEnumerateA");
 
     if (OurDirectSoundCreate == NULL || OurDirectSoundEnumerate == NULL) {
         mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: GetProcAddress FAILED\n");
-        FreeLibrary(hdsound_dll);
+        FreeLibrary(p->hdsound_dll);
         return 0;
     }
 
-    // Enumerate all directsound devices
+    // Enumerate all directsound p->devices
     mp_msg(MSGT_AO, MSGL_V, "ao_dsound: Output Devices:\n");
-    OurDirectSoundEnumerate(DirectSoundEnum, &device_index);
+    OurDirectSoundEnumerate(DirectSoundEnum, ao);
 
     // Create the direct sound object
-    if (FAILED(OurDirectSoundCreate((device_num) ? &device : NULL, &hds,
-                                   NULL)))
+    if (FAILED(OurDirectSoundCreate((p->device_num) ? &p->device : NULL,
+                                    &p->hds, NULL)))
     {
         mp_msg(MSGT_AO, MSGL_ERR,
                "ao_dsound: cannot create a DirectSound device\n");
-        FreeLibrary(hdsound_dll);
+        FreeLibrary(p->hdsound_dll);
         return 0;
     }
 
@@ -241,20 +251,20 @@ static int InitDirectSound(void)
      * sound without any video, and so what window handle should we use ???
      * The hack for now is to use the Desktop window handle - it seems to be
      * working */
-    if (IDirectSound_SetCooperativeLevel(hds, GetDesktopWindow(),
+    if (IDirectSound_SetCooperativeLevel(p->hds, GetDesktopWindow(),
                                          DSSCL_EXCLUSIVE))
     {
         mp_msg(MSGT_AO, MSGL_ERR,
                "ao_dsound: cannot set direct sound cooperative level\n");
-        IDirectSound_Release(hds);
-        FreeLibrary(hdsound_dll);
+        IDirectSound_Release(p->hds);
+        FreeLibrary(p->hdsound_dll);
         return 0;
     }
     mp_msg(MSGT_AO, MSGL_V, "ao_dsound: DirectSound initialized\n");
 
     memset(&dscaps, 0, sizeof(DSCAPS));
     dscaps.dwSize = sizeof(DSCAPS);
-    if (DS_OK == IDirectSound_GetCaps(hds, &dscaps)) {
+    if (DS_OK == IDirectSound_GetCaps(p->hds, &dscaps)) {
         if (dscaps.dwFlags & DSCAPS_EMULDRIVER)
             mp_msg(MSGT_AO, MSGL_V,
                    "ao_dsound: DirectSound is emulated, waveOut may give better performance\n");
@@ -268,15 +278,17 @@ static int InitDirectSound(void)
 /**
 \brief destroy the direct sound buffer
 */
-static void DestroyBuffer(void)
+static void DestroyBuffer(struct ao *ao)
 {
-    if (hdsbuf) {
-        IDirectSoundBuffer_Release(hdsbuf);
-        hdsbuf = NULL;
+    struct priv *p = ao->priv;
+
+    if (p->hdsbuf) {
+        IDirectSoundBuffer_Release(p->hdsbuf);
+        p->hdsbuf = NULL;
     }
-    if (hdspribuf) {
-        IDirectSoundBuffer_Release(hdspribuf);
-        hdspribuf = NULL;
+    if (p->hdspribuf) {
+        IDirectSoundBuffer_Release(p->hdspribuf);
+        p->hdspribuf = NULL;
     }
 }
 
@@ -288,21 +300,22 @@ static void DestroyBuffer(void)
 */
 static int write_buffer(struct ao *ao, unsigned char *data, int len)
 {
+    struct priv *p = ao->priv;
     HRESULT res;
     LPVOID lpvPtr1;
     DWORD dwBytes1;
     LPVOID lpvPtr2;
     DWORD dwBytes2;
 
-    underrun_check = 0;
+    p->underrun_check = 0;
 
     // Lock the buffer
-    res = IDirectSoundBuffer_Lock(hdsbuf, write_offset, len, &lpvPtr1, &dwBytes1,
-                                  &lpvPtr2, &dwBytes2, 0);
+    res = IDirectSoundBuffer_Lock(p->hdsbuf, p->write_offset, len, &lpvPtr1,
+                                  &dwBytes1, &lpvPtr2, &dwBytes2, 0);
     // If the buffer was lost, restore and retry lock.
     if (DSERR_BUFFERLOST == res) {
-        IDirectSoundBuffer_Restore(hdsbuf);
-        res = IDirectSoundBuffer_Lock(hdsbuf, write_offset, len, &lpvPtr1,
+        IDirectSoundBuffer_Restore(p->hdsbuf);
+        res = IDirectSoundBuffer_Lock(p->hdsbuf, p->write_offset, len, &lpvPtr1,
                                       &dwBytes1, &lpvPtr2, &dwBytes2, 0);
     }
 
@@ -313,28 +326,28 @@ static int write_buffer(struct ao *ao, unsigned char *data, int len)
             if (lpvPtr2 != NULL)
                 memcpy(lpvPtr2, (char *)data + dwBytes1, dwBytes2);
 
-            write_offset += dwBytes1 + dwBytes2;
-            if (write_offset >= buffer_size)
-                write_offset = dwBytes2;
+            p->write_offset += dwBytes1 + dwBytes2;
+            if (p->write_offset >= p->buffer_size)
+                p->write_offset = dwBytes2;
         } else {
             // Write to pointers without reordering.
             memcpy(lpvPtr1, data, dwBytes1);
             if (NULL != lpvPtr2)
                 memcpy(lpvPtr2, data + dwBytes1, dwBytes2);
-            write_offset += dwBytes1 + dwBytes2;
-            if (write_offset >= buffer_size)
-                write_offset = dwBytes2;
+            p->write_offset += dwBytes1 + dwBytes2;
+            if (p->write_offset >= p->buffer_size)
+                p->write_offset = dwBytes2;
         }
 
         // Release the data back to DirectSound.
-        res = IDirectSoundBuffer_Unlock(hdsbuf, lpvPtr1, dwBytes1, lpvPtr2,
+        res = IDirectSoundBuffer_Unlock(p->hdsbuf, lpvPtr1, dwBytes1, lpvPtr2,
                                         dwBytes2);
         if (SUCCEEDED(res)) {
             // Success.
             DWORD status;
-            IDirectSoundBuffer_GetStatus(hdsbuf, &status);
+            IDirectSoundBuffer_GetStatus(p->hdsbuf, &status);
             if (!(status & DSBSTATUS_PLAYING))
-                res = IDirectSoundBuffer_Play(hdsbuf, 0, 0, DSBPLAY_LOOPING);
+                res = IDirectSoundBuffer_Play(p->hdsbuf, 0, 0, DSBPLAY_LOOPING);
             return dwBytes1 + dwBytes2;
         }
     }
@@ -352,20 +365,21 @@ static int write_buffer(struct ao *ao, unsigned char *data, int len)
 */
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
+    struct priv *p = ao->priv;
     DWORD volume;
     switch (cmd) {
     case AOCONTROL_GET_VOLUME: {
         ao_control_vol_t *vol = (ao_control_vol_t *)arg;
-        vol->left = vol->right = audio_volume;
+        vol->left = vol->right = p->audio_volume;
         return CONTROL_OK;
     }
     case AOCONTROL_SET_VOLUME: {
         ao_control_vol_t *vol = (ao_control_vol_t *)arg;
-        volume = audio_volume = vol->right;
+        volume = p->audio_volume = vol->right;
         if (volume < 1)
             volume = 1;
         volume = (DWORD)(log10(volume) * 5000.0) - 10000;
-        IDirectSoundBuffer_SetVolume(hdsbuf, volume);
+        IDirectSoundBuffer_SetVolume(p->hdsbuf, volume);
         return CONTROL_OK;
     }
     }
@@ -382,12 +396,16 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 */
 static int init(struct ao *ao, char *params)
 {
+    struct priv *p = talloc_zero(ao, struct priv);
     int res;
-    if (!InitDirectSound())
+
+    ao->priv = p;
+
+    if (!InitDirectSound(ao, params))
         return -1;
 
     ao->no_persistent_volume = true;
-    audio_volume = 100;
+    p->audio_volume = 100;
 
     // ok, now create the buffers
     WAVEFORMATEXTENSIBLE wformat;
@@ -472,22 +490,22 @@ static int init(struct ao *ao, char *params)
 
     dsbdesc.dwBufferBytes = ao->buffersize;
     dsbdesc.lpwfxFormat = (WAVEFORMATEX *)&wformat;
-    buffer_size = dsbdesc.dwBufferBytes;
-    write_offset = 0;
-    min_free_space = wformat.Format.nBlockAlign;
+    p->buffer_size = dsbdesc.dwBufferBytes;
+    p->write_offset = 0;
+    p->min_free_space = wformat.Format.nBlockAlign;
     ao->outburst = wformat.Format.nBlockAlign * 512;
 
     // create primary buffer and set its format
 
-    res = IDirectSound_CreateSoundBuffer(hds, &dsbpridesc, &hdspribuf, NULL);
+    res = IDirectSound_CreateSoundBuffer(p->hds, &dsbpridesc, &p->hdspribuf, NULL);
     if (res != DS_OK) {
-        UninitDirectSound();
+        UninitDirectSound(ao);
         mp_msg(MSGT_AO, MSGL_ERR,
                "ao_dsound: cannot create primary buffer (%s)\n",
                dserr2str(res));
         return -1;
     }
-    res = IDirectSoundBuffer_SetFormat(hdspribuf, (WAVEFORMATEX *)&wformat);
+    res = IDirectSoundBuffer_SetFormat(p->hdspribuf, (WAVEFORMATEX *)&wformat);
     if (res != DS_OK) {
         mp_msg(MSGT_AO, MSGL_WARN,
                "ao_dsound: cannot set primary buffer format (%s), using "
@@ -498,15 +516,15 @@ static int init(struct ao *ao, char *params)
 
     // now create the stream buffer
 
-    res = IDirectSound_CreateSoundBuffer(hds, &dsbdesc, &hdsbuf, NULL);
+    res = IDirectSound_CreateSoundBuffer(p->hds, &dsbdesc, &p->hdsbuf, NULL);
     if (res != DS_OK) {
         if (dsbdesc.dwFlags & DSBCAPS_LOCHARDWARE) {
             // Try without DSBCAPS_LOCHARDWARE
             dsbdesc.dwFlags &= ~DSBCAPS_LOCHARDWARE;
-            res = IDirectSound_CreateSoundBuffer(hds, &dsbdesc, &hdsbuf, NULL);
+            res = IDirectSound_CreateSoundBuffer(p->hds, &dsbdesc, &p->hdsbuf, NULL);
         }
         if (res != DS_OK) {
-            UninitDirectSound();
+            UninitDirectSound(ao);
             mp_msg(MSGT_AO, MSGL_ERR,
                    "ao_dsound: cannot create secondary (stream)buffer (%s)\n",
                    dserr2str(res));
@@ -524,11 +542,13 @@ static int init(struct ao *ao, char *params)
 */
 static void reset(struct ao *ao)
 {
-    IDirectSoundBuffer_Stop(hdsbuf);
+    struct priv *p = ao->priv;
+
+    IDirectSoundBuffer_Stop(p->hdsbuf);
     // reset directsound buffer
-    IDirectSoundBuffer_SetCurrentPosition(hdsbuf, 0);
-    write_offset = 0;
-    underrun_check = 0;
+    IDirectSoundBuffer_SetCurrentPosition(p->hdsbuf, 0);
+    p->write_offset = 0;
+    p->underrun_check = 0;
 }
 
 /**
@@ -536,7 +556,9 @@ static void reset(struct ao *ao)
 */
 static void audio_pause(struct ao *ao)
 {
-    IDirectSoundBuffer_Stop(hdsbuf);
+    struct priv *p = ao->priv;
+
+    IDirectSoundBuffer_Stop(p->hdsbuf);
 }
 
 /**
@@ -544,7 +566,9 @@ static void audio_pause(struct ao *ao)
 */
 static void audio_resume(struct ao *ao)
 {
-    IDirectSoundBuffer_Play(hdsbuf, 0, 0, DSBPLAY_LOOPING);
+    struct priv *p = ao->priv;
+
+    IDirectSoundBuffer_Play(p->hdsbuf, 0, 0, DSBPLAY_LOOPING);
 }
 
 /**
@@ -557,36 +581,37 @@ static void uninit(struct ao *ao, bool immed)
         mp_sleep_us(get_delay(ao) * 1000000);
     reset(ao);
 
-    DestroyBuffer();
-    UninitDirectSound();
+    DestroyBuffer(ao);
+    UninitDirectSound(ao);
 }
 
 // return exact number of free (safe to write) bytes
 static int check_free_buffer_size(struct ao *ao)
 {
+    struct priv *p = ao->priv;
     int space;
     DWORD play_offset;
-    IDirectSoundBuffer_GetCurrentPosition(hdsbuf, &play_offset, NULL);
-    space = buffer_size - (write_offset - play_offset);
+    IDirectSoundBuffer_GetCurrentPosition(p->hdsbuf, &play_offset, NULL);
+    space = p->buffer_size - (p->write_offset - play_offset);
     // |              | <-- const --> |                |                 |
-    // buffer start   play_cursor     write_cursor     write_offset      buffer end
+    // buffer start   play_cursor     write_cursor     p->write_offset   buffer end
     // play_cursor is the actual postion of the play cursor
     // write_cursor is the position after which it is assumed to be save to write data
-    // write_offset is the postion where we actually write the data to
-    if (space > buffer_size)
-        space -= buffer_size;                        // write_offset < play_offset
+    // p->write_offset is the postion where we actually write the data to
+    if (space > p->buffer_size)
+        space -= p->buffer_size;                        // p->write_offset < play_offset
     // Check for buffer underruns. An underrun happens if DirectSound
-    // started to play old data beyond the current write_offset. Detect this
+    // started to play old data beyond the current p->write_offset. Detect this
     // by checking whether the free space shrinks, even though no data was
     // written (i.e. no write_buffer). Doesn't always work, but the only
     // reason we need this is to deal with the situation when playback ends,
     // and the buffer is only half-filled.
-    if (space < underrun_check) {
+    if (space < p->underrun_check) {
         // there's no useful data in the buffers
-        space = buffer_size;
+        space = p->buffer_size;
         reset(ao);
     }
-    underrun_check = space;
+    p->underrun_check = space;
     return space;
 }
 
@@ -596,10 +621,12 @@ static int check_free_buffer_size(struct ao *ao)
  */
 static int get_space(struct ao *ao)
 {
+    struct priv *p = ao->priv;
+
     int space = check_free_buffer_size(ao);
-    if (space < min_free_space)
+    if (space < p->min_free_space)
         return 0;
-    return space - min_free_space;
+    return space - p->min_free_space;
 }
 
 /**
@@ -627,8 +654,10 @@ static int play(struct ao *ao, void *data, int len, int flags)
 */
 static float get_delay(struct ao *ao)
 {
+    struct priv *p = ao->priv;
+
     int space = check_free_buffer_size(ao);
-    return (float)(buffer_size - space) / (float)ao->bps;
+    return (float)(p->buffer_size - space) / (float)ao->bps;
 }
 
 const struct ao_driver audio_out_dsound = {
