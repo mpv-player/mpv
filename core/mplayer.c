@@ -1527,10 +1527,24 @@ static void saddf_osd_function_sym(char **buffer, int sym)
     saddf(buffer, "%s ", temp);
 }
 
-static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
+// Append current time in a simple clock format [hh:mm]
+static void sadd_osd_time(char **buffer)
+{
+     char outstr[8];
+     time_t t = time(NULL);
+     struct tm *tmp = localtime(&t);
+
+     if ((tmp != NULL) && (strftime(outstr, sizeof(outstr), "[%k:%M]", tmp) == 7))
+         saddf(buffer, outstr);
+}
+
+static void sadd_osd_status(char **buffer, struct MPContext *mpctx, int osd_level)
 {
     bool fractions = mpctx->opts.osd_fractions;
     int sym = mpctx->osd_function;
+    bool full = osd_level == 3;
+    bool time = osd_level == 4;
+
     if (!sym) {
         if (mpctx->paused_for_cache && !mpctx->opts.pause) {
             sym = OSD_CLOCK;
@@ -1541,11 +1555,14 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
         }
     }
     saddf_osd_function_sym(buffer, sym);
+
     char *custom_msg = mpctx->opts.osd_status_msg;
     if (custom_msg && full) {
         char *text = mp_property_expand_string(mpctx, custom_msg);
         *buffer = talloc_strdup_append(*buffer, text);
         talloc_free(text);
+    } else if (time) {
+        sadd_osd_time(buffer);
     } else {
         sadd_hhmmssff(buffer, get_current_time(mpctx), fractions);
         if (full) {
@@ -1556,6 +1573,8 @@ static void sadd_osd_status(char **buffer, struct MPContext *mpctx, bool full)
             if (cache >= 0)
                 saddf(buffer, " Cache: %d%%", cache);
         }
+        saddf(buffer, "   ");
+        sadd_osd_time(buffer);
     }
 }
 
@@ -1636,7 +1655,7 @@ static void update_osd_msg(struct MPContext *mpctx)
         char *text = NULL;
 
         if (osd_level >= 2)
-            sadd_osd_status(&text, mpctx, osd_level == 3);
+            sadd_osd_status(&text, mpctx, osd_level);
 
         osd_set_text(osd, text);
         talloc_free(text);
