@@ -27,7 +27,8 @@
 #include "config.h"
 #include "subreader.h"
 
-// font sizes and explicit tags in subassconvert.c assume this size (?)
+// This is probably arbitrary.
+// sd_lavc_conv might indirectly still assume this PlayResY, though.
 #define MP_ASS_FONT_PLAYRESY 288
 
 #define MP_ASS_RGBA(r, g, b, a) \
@@ -44,11 +45,11 @@ struct MPOpts;
 struct mp_osd_res;
 struct osd_style_opts;
 
-void mp_ass_set_style(ASS_Style *style, struct osd_style_opts *opts);
+void mp_ass_set_style(ASS_Style *style, int res_y, struct osd_style_opts *opts);
+
+void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts);
 
 ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts);
-ASS_Track *mp_ass_read_subdata(ASS_Library *library, struct MPOpts *opts,
-                               sub_data *subdata, double fps);
 ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
                               char *charset);
 

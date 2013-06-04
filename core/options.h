@@ -84,7 +84,6 @@ typedef struct MPOpts {
     int osd_level;
     int osd_duration;
     int osd_fractions;
-    char *vobsub_name;
     int untimed;
     char *stream_capture;
     char *stream_dump;
@@ -141,8 +140,16 @@ typedef struct MPOpts {
     char **sub_lang;
     int audio_display;
     int sub_visibility;
+    int sub_pos;
+    float sub_delay;
+    float sub_fps;
     int forced_subs_only;
     char *quvi_format;
+
+    // subreader.c
+    int suboverlap_enabled;
+    char *sub_cp;
+    int sub_no_text_pp;
 
     char *audio_stream;
     int audio_stream_cache;
@@ -171,6 +178,7 @@ typedef struct MPOpts {
     char **sub_name;
     char **sub_paths;
     int sub_auto;
+    int sub_match_fuzziness;
     int osd_bar_visible;
     float osd_bar_align_x;
     float osd_bar_align_y;
@@ -196,15 +204,7 @@ typedef struct MPOpts {
     char *hwdec_codecs;
 
     struct lavc_param {
-        int workaround_bugs;
-        int error_resilience;
-        int error_concealment;
-        int gray;
-        int idct_algo;
         int debug;
-        int vismv;
-        int skip_top;
-        int skip_bottom;
         int fast;
         char *skip_loop_filter_str;
         char *skip_idct_str;
@@ -240,6 +240,9 @@ typedef struct MPOpts {
         int use_joystick;
         int use_lirc;
         int use_lircc;
+#ifdef CONFIG_COCOA
+        int use_ar;
+#endif
         int default_bindings;
         int test;
     } input;

@@ -46,9 +46,10 @@ SOURCES-$(LIBPOSTPROC)          += video/filter/vf_pp.c
 SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
 SOURCES-$(MACOSX_BUNDLE)        += osdep/macosx_bundle.m
-SOURCES-$(COCOA)                += video/out/osx_common.m \
-                                   video/out/cocoa_common.m \
-                                   osdep/macosx_application.m
+SOURCES-$(COCOA)                += video/out/cocoa_common.m \
+                                   osdep/macosx_application.m \
+                                   osdep/macosx_events.m \
+                                   osdep/ar/HIDRemote.m
 SOURCES-$(MNG)                  += demux/demux_mng.c
 SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
 
@@ -207,6 +208,7 @@ SOURCES = talloc.c \
           demux/demux_mf.c \
           demux/demux_mkv.c \
           demux/demux_mpg.c \
+          demux/demux_sub.c \
           demux/demux_ts.c \
           demux/mp3_hdr.c \
           demux/parse_es.c \
@@ -229,13 +231,16 @@ SOURCES = talloc.c \
           stream/url.c \
           sub/dec_sub.c \
           sub/draw_bmp.c \
-          sub/find_sub.c \
           sub/find_subfiles.c \
           sub/img_convert.c \
           sub/sd_lavc.c \
+          sub/sd_lavc_conv.c \
+          sub/sd_microdvd.c \
+          sub/sd_movtext.c \
+          sub/sd_spu.c \
+          sub/sd_srt.c \
           sub/spudec.c \
           sub/sub.c \
-          sub/subassconvert.c \
           sub/subreader.c \
           video/csputils.c \
           video/fmt-conversion.c \

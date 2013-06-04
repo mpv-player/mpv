@@ -77,6 +77,7 @@ enum demuxer_type {
     DEMUXER_TYPE_END,
 
     DEMUXER_TYPE_PLAYLIST,
+    DEMUXER_TYPE_SUB,
 };
 
 enum timestamp_type {
@@ -304,9 +305,9 @@ static inline void *realloc_struct(void *ptr, size_t nmemb, size_t size)
     return realloc(ptr, nmemb * size);
 }
 
-struct demuxer *new_demuxer(struct MPOpts *opts, struct stream *stream,
-                            int type, int a_id, int v_id, int s_id,
-                            char *filename);
+demuxer_t *new_sub_pseudo_demuxer(struct MPOpts *opts);
+
+
 void free_demuxer(struct demuxer *demuxer);
 
 void demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
@@ -343,7 +344,7 @@ void ds_free_packs(struct demux_stream *ds);
 int ds_get_packet(struct demux_stream *ds, unsigned char **start);
 int ds_get_packet_pts(struct demux_stream *ds, unsigned char **start,
                       double *pts);
-int ds_get_packet_sub(struct demux_stream *ds, unsigned char **start);
+struct demux_packet *ds_get_packet_sub(demux_stream_t *ds);
 struct demux_packet *ds_get_packet2(struct demux_stream *ds, bool repeat_last);
 double ds_get_next_pts(struct demux_stream *ds);
 int ds_parse(struct demux_stream *sh, uint8_t **buffer, int *len, double pts,

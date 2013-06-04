@@ -74,6 +74,7 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .sub_id = -1,
         .audio_display = 1,
         .sub_visibility = 1,
+        .sub_pos = 100,
         .extension_parsing = 1,
         .audio_output_channels = MP_CHMAP_INIT_STEREO,
         .audio_output_format = -1,  // AF_FORMAT_UNKNOWN
@@ -89,13 +90,10 @@ void set_default_mplayer_options(struct MPOpts *opts)
         .ass_vsfilter_aspect_compat = 1,
         .ass_style_override = 1,
         .use_embedded_fonts = 1,
+        .suboverlap_enabled = 1,
 
         .hwdec_codecs = "all",
 
-        .lavc_param = {
-            .workaround_bugs = 1, // autodetect
-            .error_concealment = 3,
-        },
         .ad_lavc_param = {
             .ac3drc = 1.,
             .downmix = 1,
@@ -110,6 +108,9 @@ void set_default_mplayer_options(struct MPOpts *opts)
              .use_joystick = 1,
              .use_lirc = 1,
              .use_lircc = 1,
+#ifdef CONFIG_COCOA
+             .use_ar = 1,
+#endif
              .default_bindings = 1,
          }
     };

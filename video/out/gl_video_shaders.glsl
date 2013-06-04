@@ -126,7 +126,7 @@ uniform vec3 inv_gamma;
 uniform float input_gamma;
 uniform float conv_gamma;
 uniform float dither_quantization;
-uniform float dither_multiply;
+uniform float dither_center;
 uniform float filter_param1;
 uniform vec2 dither_size;
 
@@ -150,7 +150,7 @@ vec4 calcweights(float s) {
     vec4 t = vec4(-0.5, 0.1666, 0.3333, -0.3333) * s + vec4(1, 0, -0.5, 0.5);
     t = t * s + vec4(0, 0, -0.5, 0.5);
     t = t * s + vec4(-0.6666, 0, 0.8333, 0.1666);
-    vec2 a = vec2(1 / t.z, 1 / t.w);
+    vec2 a = vec2(1, 1) / vec2(t.z, t.w);
     t.xy = t.xy * a + vec2(1, 1);
     t.x = t.x + s;
     t.y = t.y - s;
@@ -358,6 +358,7 @@ void main() {
 #endif
 #ifdef USE_COLORMATRIX
     color = mat3(colormatrix) * color + colormatrix[3];
+    color = clamp(color, 0, 1);
 #endif
 #ifdef USE_CONV_GAMMA
     color = pow(color, vec3(conv_gamma));
@@ -382,7 +383,8 @@ void main() {
     dither_pos = dither_trafo * dither_pos;
 #endif
     float dither_value = texture(dither, dither_pos).r;
-    color = floor(color * dither_multiply + dither_value ) / dither_quantization;
+    color = floor(color * dither_quantization + dither_value + dither_center) /
+                dither_quantization;
 #endif
 #ifdef USE_ALPHA
     out_color = vec4(color, alpha);

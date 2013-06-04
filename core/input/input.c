@@ -61,6 +61,10 @@
 #include <lirc/lircc.h>
 #endif
 
+#ifdef CONFIG_COCOA
+#include "osdep/macosx_events.h"
+#endif
+
 #define MP_MAX_KEY_DOWN 4
 
 struct cmd_bind {
@@ -397,6 +401,21 @@ static const struct key_name key_names[] = {
   { MP_JOY_BTN8,        "JOY_BTN8" },
   { MP_JOY_BTN9,        "JOY_BTN9" },
 
+  { MP_AR_PLAY,         "AR_PLAY" },
+  { MP_AR_PLAY_HOLD,    "AR_PLAY_HOLD" },
+  { MP_AR_CENTER,       "AR_CENTER" },
+  { MP_AR_CENTER_HOLD,  "AR_CENTER_HOLD" },
+  { MP_AR_NEXT,         "AR_NEXT" },
+  { MP_AR_NEXT_HOLD,    "AR_NEXT_HOLD" },
+  { MP_AR_PREV,         "AR_PREV" },
+  { MP_AR_PREV_HOLD,    "AR_PREV_HOLD" },
+  { MP_AR_MENU,         "AR_MENU" },
+  { MP_AR_MENU_HOLD,    "AR_MENU_HOLD" },
+  { MP_AR_VUP,          "AR_VUP" },
+  { MP_AR_VUP_HOLD,     "AR_VUP_HOLD" },
+  { MP_AR_VDOWN,        "AR_VDOWN" },
+  { MP_AR_VDOWN_HOLD,   "AR_VDOWN_HOLD" },
+
   { MP_KEY_POWER,       "POWER" },
   { MP_KEY_MENU,        "MENU" },
   { MP_KEY_PLAY,        "PLAY" },
@@ -544,6 +563,9 @@ static const m_option_t mp_input_opts[] = {
     OPT_FLAG("joystick", input.use_joystick, CONF_GLOBAL),
     OPT_FLAG("lirc", input.use_lirc, CONF_GLOBAL),
     OPT_FLAG("lircc", input.use_lircc, CONF_GLOBAL),
+#ifdef CONFIG_COCOA
+    OPT_FLAG("ar", input.use_ar, CONF_GLOBAL),
+#endif
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -1522,6 +1544,9 @@ static void read_all_fd_events(struct input_ctx *ictx, int time)
 static void read_all_events(struct input_ctx *ictx, int time)
 {
     getch2_poll();
+#ifdef CONFIG_COCOA
+    cocoa_check_events();
+#endif
     read_all_fd_events(ictx, time);
 }
 
@@ -1863,6 +1888,12 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf,
     }
 #endif
 
+#ifdef CONFIG_COCOA
+    if (input_conf->use_ar) {
+        cocoa_start_apple_remote();
+    }
+#endif
+
     if (input_conf->in_file) {
         int mode = O_RDONLY;
 #ifndef __MINGW32__
@@ -1894,10 +1925,16 @@ static void clear_queue(struct cmd_queue *queue)
     }
 }
 
-void mp_input_uninit(struct input_ctx *ictx)
+void mp_input_uninit(struct input_ctx *ictx, struct input_conf *input_conf)
 {
     if (!ictx)
         return;
+
+#ifdef CONFIG_COCOA
+    if (input_conf->use_ar) {
+        cocoa_stop_apple_remote();
+    }
+#endif
 
     for (int i = 0; i < ictx->num_key_fd; i++) {
         if (ictx->key_fds[i].close_func)

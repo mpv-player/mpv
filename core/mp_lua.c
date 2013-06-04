@@ -231,7 +231,7 @@ static int set_osd_ass(lua_State *L)
         mpctx->osd->external = talloc_strdup(mpctx->osd, text);
         mpctx->osd->external_res_x = res_x;
         mpctx->osd->external_res_y = res_y;
-        vo_osd_changed(OSDTYPE_EXTERNAL);
+        osd_changed(mpctx->osd, OSDTYPE_EXTERNAL);
     }
     return 0;
 }

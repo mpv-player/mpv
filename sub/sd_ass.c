@@ -17,21 +17,20 @@
  */
 
 #include <stdlib.h>
-#include <ass/ass.h>
 #include <assert.h>
 #include <string.h>
+
+#include <ass/ass.h>
 
 #include "talloc.h"
 
 #include "core/options.h"
 #include "core/mp_common.h"
 #include "core/mp_msg.h"
-#include "demux/stheader.h"
 #include "sub.h"
 #include "dec_sub.h"
 #include "ass_mp.h"
 #include "sd.h"
-#include "subassconvert.h"
 
 struct sd_ass_priv {
     struct ass_track *ass_track;
@@ -39,11 +38,20 @@ struct sd_ass_priv {
     bool incomplete_event;
     struct sub_bitmap *parts;
     bool flush_on_seek;
+    char last_text[500];
 };
 
-static bool probe(struct sh_sub *sh)
+static bool is_native_ass(const char *t)
 {
-    return is_text_sub(sh->gsh->codec);
+    return strcmp(t, "ass") == 0 || strcmp(t, "ssa") == 0;
+}
+
+static bool supports_format(const char *format)
+{
+    // ass-text is produced by converters and the subreader.c ssa parser; this
+    // format has ASS tags, but doesn't start with any prelude, nor does it
+    // have extradata.
+    return format && (is_native_ass(format) || strcmp(format, "ass-text") == 0);
 }
 
 static void free_last_event(ASS_Track *track)
@@ -53,37 +61,45 @@ static void free_last_event(ASS_Track *track)
     track->n_events--;
 }
 
-static int init(struct sh_sub *sh, struct osd_state *osd)
+static int init(struct sd *sd)
 {
-    struct sd_ass_priv *ctx;
-    bool ass = is_ass_sub(sh->gsh->codec);
+    struct MPOpts *opts = sd->opts;
+    if (!sd->ass_library || !sd->ass_renderer)
+        return -1;
 
-    if (sh->initialized) {
-        ctx = sh->context;
+    bool is_converted = sd->converted_from != NULL;
+
+    struct sd_ass_priv *ctx = talloc_zero(NULL, struct sd_ass_priv);
+    sd->priv = ctx;
+    if (sd->ass_track) {
+        ctx->ass_track = sd->ass_track;
     } else {
-        ctx = talloc_zero(NULL, struct sd_ass_priv);
-        sh->context = ctx;
-        if (ass) {
-            ctx->ass_track = ass_new_track(osd->ass_library);
-            if (sh->extradata)
-                ass_process_codec_private(ctx->ass_track, sh->extradata,
-                                          sh->extradata_len);
-        } else
-            ctx->ass_track = mp_ass_default_track(osd->ass_library, sh->opts);
+        ctx->ass_track = ass_new_track(sd->ass_library);
+        if (!is_converted)
+            ctx->ass_track->track_type = TRACK_TYPE_ASS;
     }
 
-    ctx->vsfilter_aspect = ass;
+    if (sd->extradata) {
+        ass_process_codec_private(ctx->ass_track, sd->extradata,
+                                  sd->extradata_len);
+    }
+
+    mp_ass_add_default_styles(ctx->ass_track, opts);
+
+    ctx->vsfilter_aspect = !is_converted;
     return 0;
 }
 
-static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
-                   int data_len, double pts, double duration)
+static void decode(struct sd *sd, struct demux_packet *packet)
 {
+    void *data = packet->buffer;
+    int data_len = packet->len;
+    double pts = packet->pts;
+    double duration = packet->duration;
     unsigned char *text = data;
-    struct sd_ass_priv *ctx = sh->context;
+    struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
-
-    if (is_ass_sub(sh->gsh->codec)) {
+    if (is_native_ass(sd->codec)) {
         if (bstr_startswith0((bstr){data, data_len}, "Dialogue: ")) {
             // broken ffmpeg ASS packet format
             ctx->flush_on_seek = true;
@@ -121,13 +137,13 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
         return;
     }
  not_all_whitespace:;
-    char buf[500];
-    subassconvert_subrip(text, buf, sizeof(buf));
-    for (int i = 0; i < track->n_events; i++)
-        if (track->events[i].Start == ipts
-            && (duration <= 0 || track->events[i].Duration == iduration)
-            && strcmp(track->events[i].Text, buf) == 0)
-            return;   // We've already added this subtitle
+    if (!sd->no_remove_duplicates) {
+        for (int i = 0; i < track->n_events; i++)
+            if (track->events[i].Start == ipts
+                && (duration <= 0 || track->events[i].Duration == iduration)
+                && strcmp(track->events[i].Text, text) == 0)
+                return;   // We've already added this subtitle
+    }
     if (duration <= 0) {
         iduration = 10000;
         ctx->incomplete_event = true;
@@ -137,17 +153,16 @@ static void decode(struct sh_sub *sh, struct osd_state *osd, void *data,
     event->Start = ipts;
     event->Duration = iduration;
     event->Style = track->default_style;
-    event->Text = strdup(buf);
+    event->Text = strdup(text);
 }
 
-static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
-                        struct mp_osd_res dim, double pts,
+static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
                         struct sub_bitmaps *res)
 {
-    struct sd_ass_priv *ctx = sh->context;
-    struct MPOpts *opts = osd->opts;
+    struct sd_ass_priv *ctx = sd->priv;
+    struct MPOpts *opts = sd->opts;
 
-    if (pts == MP_NOPTS_VALUE)
+    if (pts == MP_NOPTS_VALUE || !sd->ass_renderer)
         return;
 
     double scale = dim.display_par;
@@ -155,7 +170,7 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
                          ? opts->ass_vsfilter_aspect_compat : 1;
     if (ctx->vsfilter_aspect && use_vs_aspect)
         scale = scale * dim.video_par;
-    ASS_Renderer *renderer = osd->ass_renderer;
+    ASS_Renderer *renderer = sd->ass_renderer;
     mp_ass_configure(renderer, opts, &dim);
     ass_set_aspect_ratio(renderer, scale, 1);
     mp_ass_render_frame(renderer, ctx->ass_track, pts * 1000 + .5,
@@ -163,9 +178,110 @@ static void get_bitmaps(struct sh_sub *sh, struct osd_state *osd,
     talloc_steal(ctx, ctx->parts);
 }
 
-static void reset(struct sh_sub *sh, struct osd_state *osd)
+struct buf {
+    char *start;
+    int size;
+    int len;
+};
+
+static void append(struct buf *b, char c)
 {
-    struct sd_ass_priv *ctx = sh->context;
+    if (b->len < b->size) {
+        b->start[b->len] = c;
+        b->len++;
+    }
+}
+
+static void ass_to_plaintext(struct buf *b, const char *in)
+{
+    bool in_tag = false;
+    bool in_drawing = false;
+    while (*in) {
+        if (in_tag) {
+            if (in[0] == '}') {
+                in += 1;
+                in_tag = false;
+            } else if (in[0] == '\\' && in[1] == 'p') {
+                in += 2;
+                // skip text between \pN and \p0 tags
+                if (in[0] == '0') {
+                    in_drawing = false;
+                } else if (in[0] >= '1' && in[0] <= '9') {
+                    in_drawing = true;
+                }
+            } else {
+                in += 1;
+            }
+        } else {
+            if (in[0] == '\\' && (in[1] == 'N' || in[1] == 'n')) {
+                in += 2;
+                append(b, '\n');
+            } else if (in[0] == '\\' && in[1] == 'h') {
+                in += 2;
+                append(b, ' ');
+            } else if (in[0] == '{') {
+                in += 1;
+                in_tag = true;
+            } else {
+                if (!in_drawing)
+                    append(b, in[0]);
+                in += 1;
+            }
+        }
+    }
+}
+
+// Empty string counts as whitespace. Reads s[len-1] even if there are \0s.
+static bool is_whitespace_only(char *s, int len)
+{
+    for (int n = 0; n < len; n++) {
+        if (s[n] != ' ' && s[n] != '\t')
+            return false;
+    }
+    return true;
+}
+
+static char *get_text(struct sd *sd, double pts)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    ASS_Track *track = ctx->ass_track;
+
+    if (pts == MP_NOPTS_VALUE)
+        return NULL;
+
+    struct buf b = {ctx->last_text, sizeof(ctx->last_text) - 1};
+
+    for (int i = 0; i < track->n_events; ++i) {
+        ASS_Event *event = track->events + i;
+        double start = event->Start / 1000.0;
+        double end = (event->Start + event->Duration) / 1000.0;
+        if (pts >= start && pts < end) {
+            if (event->Text) {
+                int start = b.len;
+                ass_to_plaintext(&b, event->Text);
+                if (!is_whitespace_only(&b.start[b.len], b.len - start))
+                    append(&b, '\n');
+            }
+        }
+    }
+
+    b.start[b.len] = '\0';
+
+    if (b.len > 0 && b.start[b.len - 1] == '\n')
+        b.start[b.len - 1] = '\0';
+
+    return ctx->last_text;
+}
+
+static void fix_events(struct sd *sd)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    ctx->flush_on_seek = false;
+}
+
+static void reset(struct sd *sd)
+{
+    struct sd_ass_priv *ctx = sd->priv;
     if (ctx->incomplete_event)
         free_last_event(ctx->ass_track);
     ctx->incomplete_event = false;
@@ -174,56 +290,33 @@ static void reset(struct sh_sub *sh, struct osd_state *osd)
     ctx->flush_on_seek = false;
 }
 
-static void uninit(struct sh_sub *sh)
+static void uninit(struct sd *sd)
 {
-    struct sd_ass_priv *ctx = sh->context;
+    struct sd_ass_priv *ctx = sd->priv;
 
-    ass_free_track(ctx->ass_track);
+    if (sd->ass_track != ctx->ass_track)
+        ass_free_track(ctx->ass_track);
     talloc_free(ctx);
 }
 
 const struct sd_functions sd_ass = {
-    .probe = probe,
+    .name = "ass",
+    .accept_packets_in_advance = true,
+    .supports_format = supports_format,
     .init = init,
     .decode = decode,
     .get_bitmaps = get_bitmaps,
+    .get_text = get_text,
+    .fix_events = fix_events,
     .reset = reset,
-    .switch_off = reset,
     .uninit = uninit,
 };
 
-static int sd_ass_track_destructor(void *ptr)
+struct ass_track *sub_get_ass_track(struct dec_sub *sub)
 {
-    uninit(ptr);
-    return 1;
-}
-
-struct sh_sub *sd_ass_create_from_track(struct ass_track *track,
-                                        bool vsfilter_aspect,
-                                        struct MPOpts *opts)
-{
-    struct sh_sub *sh = talloc(NULL, struct sh_sub);
-    talloc_set_destructor(sh, sd_ass_track_destructor);
-    *sh = (struct sh_sub) {
-        .opts = opts,
-        .gsh = talloc_struct(sh, struct sh_stream, {
-            .codec = "ass",
-        }),
-        .sd_driver = &sd_ass,
-        .context = talloc_struct(sh, struct sd_ass_priv, {
-            .ass_track = track,
-            .vsfilter_aspect = vsfilter_aspect,
-        }),
-        .initialized = true,
-    };
-    return sh;
-}
-
-struct ass_track *sub_get_ass_track(struct osd_state *osd)
-{
-    struct sh_sub *sh = osd ? osd->sh_sub : NULL;
-    if (sh && sh->sd_driver == &sd_ass && sh->context) {
-        struct sd_ass_priv *ctx = sh->context;
+    struct sd *sd = sub_get_last_sd(sub);
+    if (sd && sd->driver == &sd_ass && sd->priv) {
+        struct sd_ass_priv *ctx = sd->priv;
         return ctx->ass_track;
     }
     return NULL;

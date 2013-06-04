@@ -228,7 +228,7 @@ struct input_conf;
 struct input_ctx *mp_input_init(struct input_conf *input_conf,
                                 bool load_default_conf);
 
-void mp_input_uninit(struct input_ctx *ictx);
+void mp_input_uninit(struct input_ctx *ictx, struct input_conf *input_conf);
 
 struct m_config;
 void mp_input_register_options(struct m_config *cfg);
