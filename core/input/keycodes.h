@@ -191,9 +191,9 @@
 
 // Apple Media Keys input module
 #define MP_MK_BASE        (MP_KEY_BASE+0xF0)
-#define MP_MK_PLAY        (MP_AR_BASE + 0)
-#define MP_MK_PREV        (MP_AR_BASE + 1)
-#define MP_MK_NEXT        (MP_AR_BASE + 2)
+#define MP_MK_PLAY        (MP_MK_BASE + 0)
+#define MP_MK_PREV        (MP_MK_BASE + 1)
+#define MP_MK_NEXT        (MP_MK_BASE + 2)
 
 /* Special keys */
 #define MP_KEY_INTERN (MP_KEY_BASE+0x1000)
