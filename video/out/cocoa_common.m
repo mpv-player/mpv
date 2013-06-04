@@ -705,11 +705,8 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (BOOL)isMovableByWindowBackground
 {
-    if (self.videoOutput) {
-        return !self.videoOutput->opts->fs;
-    } else {
-        return YES;
-    }
+    // figure out what to do here
+    return NO;
 }
 
 - (void)normalSize { [self mulSize:1.0f]; }
