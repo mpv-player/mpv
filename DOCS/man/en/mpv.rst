@@ -166,6 +166,9 @@ S
 I
     Show filename on the OSD.
 
+O
+    Show current time on the OSD.
+
 P
     Show progression bar, elapsed time and total duration on the OSD.
 
