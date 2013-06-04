@@ -168,14 +168,15 @@ void cocoa_put_key(int keycode)
 
 @implementation EventsResponder {
     CFMachPortRef _mk_tap_port;
+    HIDRemote *_remote;
 }
 - (void)startAppleRemote
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.remote = [[[HIDRemote alloc] init] autorelease];
-        if (self.remote) {
-            [self.remote setDelegate:self];
-            [self.remote startRemoteControl:kHIDRemoteModeExclusiveAuto];
+        self->_remote = [[HIDRemote alloc] init];
+        if (self->_remote) {
+            [self->_remote setDelegate:self];
+            [self->_remote startRemoteControl:kHIDRemoteModeExclusiveAuto];
         }
     });
 
@@ -183,7 +184,8 @@ void cocoa_put_key(int keycode)
 - (void)stopAppleRemote
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.remote stopRemoteControl];
+        [self->_remote stopRemoteControl];
+        [self->_remote release];
     });
 }
 - (void)restartMediaKeys

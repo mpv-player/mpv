@@ -17,8 +17,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "ar/HIDRemote.h"
 #include "osdep/macosx_application.h"
+#import "ar/HIDRemote.h"
 
 struct cocoa_input_queue;
 
@@ -35,7 +35,6 @@ struct cocoa_input_queue;
 - (void)startMediaKeys;
 - (void)restartMediaKeys;
 - (void)stopMediaKeys;
-@property(nonatomic, retain) HIDRemote *remote;
 @end
 
 @interface Application : NSApplication
