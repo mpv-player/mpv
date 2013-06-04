@@ -747,6 +747,14 @@ static int control(stream_t *stream,int cmd,void* arg)
         }
         case STREAM_CTRL_MANAGES_TIMELINE:
             return STREAM_OK;
+        case STREAM_CTRL_GET_DVD_INFO:
+        {
+            struct stream_dvd_info_req *req = arg;
+            memset(req, 0, sizeof(*req));
+            req->num_subs = dvd_number_of_subs(stream);
+            memcpy(req->palette, d->cur_pgc->palette, sizeof(req->palette));
+            return STREAM_OK;
+        }
     }
     return STREAM_UNSUPPORTED;
 }

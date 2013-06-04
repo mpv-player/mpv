@@ -103,11 +103,17 @@
 #define STREAM_CTRL_MANAGES_TIMELINE 19
 #define STREAM_CTRL_GET_START_TIME 20
 #define STREAM_CTRL_GET_CHAPTER_TIME 21
+#define STREAM_CTRL_GET_DVD_INFO 22
 
 struct stream_lang_req {
     int type;     // STREAM_AUDIO, STREAM_SUB
     int id;
     char name[50];
+};
+
+struct stream_dvd_info_req {
+    unsigned int palette[16];
+    int num_subs;
 };
 
 typedef enum {

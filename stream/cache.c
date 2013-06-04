@@ -90,6 +90,7 @@ typedef struct {
     volatile uint64_t control_uint_arg;
     volatile double control_double_arg;
     volatile struct stream_lang_req control_lang_arg;
+    volatile struct stream_dvd_info_req control_dvd_info_arg;
     volatile int control_res;
     volatile double stream_time_length;
     volatile double stream_time_pos;
@@ -351,6 +352,10 @@ static int cache_execute_control(cache_vars_t *s)
     case STREAM_CTRL_GET_LANG:
         s->control_res = s->stream->control(s->stream, s->control,
                                             (void *)&s->control_lang_arg);
+        break;
+    case STREAM_CTRL_GET_DVD_INFO:
+        s->control_res = s->stream->control(s->stream, s->control,
+                                            (void *)&s->control_dvd_info_arg);
         break;
     case STREAM_CTRL_MANAGES_TIMELINE:
         s->control_res = s->stream->control(s->stream, s->control, NULL);
@@ -737,6 +742,8 @@ int cache_do_control(stream_t *stream, int cmd, void *arg)
         break;
     case STREAM_CTRL_GET_LANG:
         s->control_lang_arg = *(struct stream_lang_req *)arg;
+    case STREAM_CTRL_GET_DVD_INFO:
+        s->control_dvd_info_arg = *(struct stream_dvd_info_req *)arg;
     case STREAM_CTRL_GET_NUM_TITLES:
     case STREAM_CTRL_GET_NUM_CHAPTERS:
     case STREAM_CTRL_GET_CURRENT_TITLE:
@@ -796,6 +803,9 @@ int cache_do_control(stream_t *stream, int cmd, void *arg)
         break;
     case STREAM_CTRL_GET_LANG:
         *(struct stream_lang_req *)arg = s->control_lang_arg;
+        break;
+    case STREAM_CTRL_GET_DVD_INFO:
+        *(struct stream_dvd_info_req *)arg = s->control_dvd_info_arg;
         break;
     case STREAM_CTRL_MANAGES_TIMELINE:
         break;

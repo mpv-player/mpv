@@ -137,10 +137,6 @@
 #include "demux/demux.h"
 #include "demux/stheader.h"
 
-#ifdef CONFIG_DVDREAD
-#include "stream/stream_dvd.h"
-#endif
-
 #include "audio/filter/af.h"
 #include "audio/decode/dec_audio.h"
 #include "video/decode/dec_video.h"
@@ -1013,9 +1009,9 @@ static void add_dvd_tracks(struct MPContext *mpctx)
 #ifdef CONFIG_DVDREAD
     struct demuxer *demuxer = mpctx->demuxer;
     struct stream *stream = demuxer->stream;
-    if (stream->type == STREAMTYPE_DVD) {
-        int n_subs = dvd_number_of_subs(stream);
-        for (int n = 0; n < n_subs; n++) {
+    struct stream_dvd_info_req info;
+    if (stream_control(stream, STREAM_CTRL_GET_DVD_INFO, &info) > 0) {
+        for (int n = 0; n < info.num_subs; n++) {
             struct track *track = talloc_ptrtype(NULL, track);
             *track = (struct track) {
                 .type = STREAM_SUB,
@@ -1946,7 +1942,11 @@ static void set_dvdsub_fake_extradata(struct dec_sub *dec_sub, struct stream *st
                                       int width, int height)
 {
 #ifdef CONFIG_DVDREAD
-    if (st->type != STREAMTYPE_DVD)
+    if (!st)
+        return;
+
+    struct stream_dvd_info_req info;
+    if (stream_control(st, STREAM_CTRL_GET_DVD_INFO, &info) < 0)
         return;
 
     struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
@@ -1954,8 +1954,6 @@ static void set_dvdsub_fake_extradata(struct dec_sub *dec_sub, struct stream *st
     csp.int_bits_out = 8;
     float cmatrix[3][4];
     mp_get_yuv2rgb_coeffs(&csp, cmatrix);
-
-    int *palette = ((dvd_priv_t *)st->priv)->cur_pgc->palette;
 
     if (width == 0 || height == 0) {
         width = 720;
@@ -1966,7 +1964,7 @@ static void set_dvdsub_fake_extradata(struct dec_sub *dec_sub, struct stream *st
     s = talloc_asprintf_append(s, "size: %dx%d\n", width, height);
     s = talloc_asprintf_append(s, "palette: ");
     for (int i = 0; i < 16; i++) {
-        int color = palette[i];
+        int color = info.palette[i];
         int c[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
         mp_map_int_color(cmatrix, 8, c);
         color = (c[2] << 16) | (c[1] << 8) | c[0];
