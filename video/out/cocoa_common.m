@@ -623,45 +623,10 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 - (void)toggleViewFullscreen:(BOOL)willBeFullscreen
 {
     struct vo_cocoa_state *s = self.videoOutput->cocoa;
-<<<<<<< HEAD
-    cocoa_async_put_key(s->input_queue, MP_KEY_CLOSE_WIN);
-    // We have to wait for MPlayer to handle this,
-    // otherwise we are in trouble if the
-    // MP_KEY_CLOSE_WIN handler is disabled
-    return NO;
-}
-
-- (void)keyDown:(NSEvent *)theEvent
-{
-    struct vo_cocoa_state *s = self.videoOutput->cocoa;
-    NSString *chars;
-||||||| merged common ancestors
-    cocoa_async_put_key(s->input_queue, MP_KEY_CLOSE_WIN);
-    // We have to wait for MPlayer to handle this,
-    // otherwise we are in trouble if the
-    // MP_KEY_CLOSE_WIN handler is disabled
-    return NO;
-}
-
-- (BOOL)isMovableByWindowBackground
-{
-    if (self.videoOutput) {
-        return !self.videoOutput->opts->fs;
-    } else {
-        return YES;
-    }
-}
-
-- (void)keyDown:(NSEvent *)theEvent
-{
-    struct vo_cocoa_state *s = self.videoOutput->cocoa;
-    NSString *chars;
-=======
 
     if (willBeFullscreen) {
         NSApplicationPresentationOptions popts =
             NSApplicationPresentationDefault;
->>>>>>> master
 
         if ([s->fs_screen hasMenubar])
             popts |= NSApplicationPresentationAutoHideMenuBar;
