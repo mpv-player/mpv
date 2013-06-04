@@ -33,9 +33,9 @@
 #define OSD_MSG_PROPERTY                0x100
 #define OSD_MSG_SUB_BASE                0x1000
 
-#define MAX_OSD_LEVEL 3
+#define MAX_OSD_LEVEL 4
 #define MAX_TERM_OSD_LEVEL 1
-#define OSD_LEVEL_INVISIBLE 4
+#define OSD_LEVEL_INVISIBLE MAX_OSD_LEVEL + 1
 
 #define OSD_BAR_SEEK 256
 

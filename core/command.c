@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <time.h>
 
 #include "config.h"
 #include "talloc.h"
@@ -577,6 +578,18 @@ static int mp_property_cache(m_option_t *prop, int action, void *arg,
     if (cache < 0)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(prop, action, arg, cache);
+}
+
+static int mp_property_clock(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
+{
+    char outstr[6];
+    time_t t = time(NULL);
+    struct tm *tmp = localtime(&t);
+   
+    if ((tmp != NULL) && (strftime(outstr, sizeof(outstr), "%k:%M", tmp) == 5))
+        return m_property_strdup_ro(prop, action, arg, outstr);
+    return M_PROPERTY_UNAVAILABLE;
 }
 
 /// Volume (RW)
@@ -1405,6 +1418,8 @@ static const m_option_t mp_properties[] = {
     { "cache", mp_property_cache, CONF_TYPE_INT },
     M_OPTION_PROPERTY("pts-association-mode"),
     M_OPTION_PROPERTY("hr-seek"),
+    { "clock", mp_property_clock, CONF_TYPE_STRING,
+      0, 0, 0, NULL },
 
     // Audio
     { "volume", mp_property_volume, CONF_TYPE_FLOAT,
@@ -1544,6 +1559,7 @@ static struct property_osd_display {
     { "pts-association-mode", "PTS association mode" },
     { "hr-seek", "hr-seek" },
     { "speed", _("Speed") },
+    { "clock", _("Clock") },
     // audio
     { "volume", _("Volume"), .osd_progbar = OSD_VOLUME },
     { "mute", _("Mute") },

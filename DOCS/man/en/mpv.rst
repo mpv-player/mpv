@@ -131,7 +131,8 @@ w and e
     Decrease/increase pan-and-scan range.
 
 o
-    Toggle OSD states: none / seek / seek + timer / seek + timer + total time.
+    Toggle OSD states: none / seek / seek + timer /
+    seek + timer + total time / seek + clock.
 
 d
     Toggle frame dropping states: none / skip display / skip decoding (see
@@ -165,6 +166,9 @@ S
 
 I
     Show filename on the OSD.
+
+O
+    Show current time on the OSD.
 
 P
     Show progression bar, elapsed time and total duration on the OSD.
