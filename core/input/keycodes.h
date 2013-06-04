@@ -189,6 +189,12 @@
 #define MP_AR_VDOWN       (MP_AR_BASE + 12)
 #define MP_AR_VDOWN_HOLD  (MP_AR_BASE + 13)
 
+// Apple Media Keys input module
+#define MP_MK_BASE        (MP_KEY_BASE+0xF0)
+#define MP_MK_PLAY        (MP_AR_BASE + 0)
+#define MP_MK_PREV        (MP_AR_BASE + 1)
+#define MP_MK_NEXT        (MP_AR_BASE + 2)
+
 /* Special keys */
 #define MP_KEY_INTERN (MP_KEY_BASE+0x1000)
 #define MP_KEY_CLOSE_WIN (MP_KEY_INTERN+0)

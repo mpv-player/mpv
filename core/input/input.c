@@ -409,6 +409,10 @@ static const struct key_name key_names[] = {
   { MP_AR_VDOWN,        "AR_VDOWN" },
   { MP_AR_VDOWN_HOLD,   "AR_VDOWN_HOLD" },
 
+  { MP_MK_PLAY,         "MK_PLAY" },
+  { MP_MK_PREV,         "MK_PREV" },
+  { MP_MK_NEXT,         "MK_NEXT" },
+
   { MP_KEY_POWER,       "POWER" },
   { MP_KEY_MENU,        "MENU" },
   { MP_KEY_PLAY,        "PLAY" },
@@ -553,6 +557,7 @@ static const m_option_t mp_input_opts[] = {
     OPT_FLAG("lircc", input.use_lircc, CONF_GLOBAL),
 #ifdef CONFIG_COCOA
     OPT_FLAG("ar", input.use_ar, CONF_GLOBAL),
+    OPT_FLAG("media-keys", input.use_media_keys, CONF_GLOBAL),
 #endif
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -1830,7 +1835,11 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf,
 
 #ifdef CONFIG_COCOA
     if (input_conf->use_ar) {
-        cocoa_start_apple_remote();
+        cocoa_init_apple_remote();
+    }
+
+    if (input_conf->use_media_keys) {
+        cocoa_init_media_keys();
     }
 #endif
 
@@ -1872,7 +1881,11 @@ void mp_input_uninit(struct input_ctx *ictx, struct input_conf *input_conf)
 
 #ifdef CONFIG_COCOA
     if (input_conf->use_ar) {
-        cocoa_stop_apple_remote();
+        cocoa_uninit_apple_remote();
+    }
+
+    if (input_conf->use_media_keys) {
+        cocoa_uninit_media_keys();
     }
 #endif
 

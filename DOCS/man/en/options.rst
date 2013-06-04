@@ -1125,6 +1125,9 @@
 --mc=<seconds/frame>
     Maximum A-V sync correction per frame (in seconds)
 
+--media-keys, --no-media-keys
+      OSX only: Enabled by default. Enables/disable media keys support.
+
 --mf=<option1:option2:...>
     Used when decoding from multiple PNG or JPEG files with ``mf://``.
 

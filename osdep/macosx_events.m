@@ -92,16 +92,65 @@ static int convert_key(unsigned key, unsigned charcode)
     return charcode;
 }
 
-void cocoa_start_apple_remote(void)
+void cocoa_init_apple_remote(void)
 {
     Application *app = mpv_shared_app();
     [app.eventsResponder startAppleRemote];
 }
 
-void cocoa_stop_apple_remote(void)
+void cocoa_uninit_apple_remote(void)
 {
     Application *app = mpv_shared_app();
     [app.eventsResponder stopAppleRemote];
+}
+
+static CGEventRef tap_event_callback(CGEventTapProxy proxy, CGEventType type,
+                                     CGEventRef event, void *ctx)
+{
+    EventsResponder *responder = ctx;
+
+    if (type == kCGEventTapDisabledByTimeout) {
+        // The Mach Port receiving the taps became unresponsive for some
+        // reason, restart listening on it.
+        [responder restartMediaKeys];
+        return event;
+    }
+
+    if (type == kCGEventTapDisabledByUserInput)
+        return event;
+
+    NSEvent *nse = [NSEvent eventWithCGEvent:event];
+
+    if ([nse type] != NSSystemDefined || [nse subtype] != 8)
+        // This is not a media key
+        return event;
+
+    // It's a media key! Handle it specially. The magic numbers are reverse
+    // engineered and found on several blog posts. Unfortunately there is
+    // no public API for this. F-bomb.
+    int code  = (([nse data1] & 0xFFFF0000) >> 16);
+    int flags = ([nse data1] & 0x0000FFFF);
+    int down  = (((flags & 0xFF00) >> 8)) == 0xA;
+
+    if (down && [responder handleMediaKey:code]) {
+        // Handled this event, return nil so that it is removed from the
+        // global queue.
+        return nil;
+    } else {
+        // Was a media key but we were not interested in it. Leave it in the
+        // global queue by returning the original event.
+        return event;
+    }
+}
+
+void cocoa_init_media_keys(void) {
+    Application *app = mpv_shared_app();
+    [app.eventsResponder startMediaKeys];
+}
+
+void cocoa_uninit_media_keys(void) {
+    Application *app = mpv_shared_app();
+    [app.eventsResponder stopMediaKeys];
 }
 
 void cocoa_check_events(void)
@@ -117,7 +166,9 @@ void cocoa_put_key(int keycode)
     [mpv_shared_app().iqueue push:keycode];
 }
 
-@implementation EventsResponder
+@implementation EventsResponder {
+    CFMachPortRef _mk_tap_port;
+}
 - (void)startAppleRemote
 {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -135,24 +186,56 @@ void cocoa_put_key(int keycode)
         [self.remote stopRemoteControl];
     });
 }
+- (void)restartMediaKeys
+{
+    CGEventTapEnable(self->_mk_tap_port, true);
+}
+- (void)startMediaKeys
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        // Install a Quartz Event Tap. This will notify mpv through the
+        // returned Mach Port and cause mpv to execute the `tap_event_callback`
+        // function.
+        self->_mk_tap_port = CGEventTapCreate(kCGSessionEventTap,
+            kCGHeadInsertEventTap,
+            kCGEventTapOptionDefault,
+            CGEventMaskBit(NX_SYSDEFINED),
+            tap_event_callback,
+            self);
+
+        assert(self->_mk_tap_port != nil);
+
+        NSMachPort *port = (NSMachPort *)self->_mk_tap_port;
+        [[NSRunLoop mainRunLoop] addPort:port forMode:NSRunLoopCommonModes];
+    });
+}
+- (void)stopMediaKeys
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSMachPort *port = (NSMachPort *)self->_mk_tap_port;
+        [[NSRunLoop mainRunLoop] removePort:port forMode:NSRunLoopCommonModes];
+        CFRelease(self->_mk_tap_port);
+        self->_mk_tap_port = nil;
+    });
+}
 - (NSArray *) keyEquivalents
 {
     return @[@"h", @"q", @"Q", @"0", @"1", @"2"];
 }
-- (void)handleMediaKey:(int)key
+- (BOOL)handleMediaKey:(int)key
 {
-    switch (key) {
-        case NX_KEYTYPE_PLAY:
-            cocoa_put_key(MP_KEY_PLAY);
-            break;
+    NSDictionary *keymap = @{
+        @(NX_KEYTYPE_PLAY):    @(MP_MK_PLAY),
+        @(NX_KEYTYPE_REWIND):  @(MP_MK_PREV),
+        @(NX_KEYTYPE_FAST):    @(MP_MK_NEXT),
+    };
 
-        case NX_KEYTYPE_FAST:
-            cocoa_put_key(MP_KEY_NEXT);
-            break;
-
-        case NX_KEYTYPE_REWIND:
-            cocoa_put_key(MP_KEY_PREV);
-            break;
+    int mpkey = [keymap[@(key)] intValue];
+    if (mpkey > 0) {
+        cocoa_put_key(mpkey);
+        return YES;
+    } else {
+        return NO;
     }
 }
 - (NSEvent*)handleKeyDown:(NSEvent *)event

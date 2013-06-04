@@ -241,6 +241,7 @@ typedef struct MPOpts {
         int use_lircc;
 #ifdef CONFIG_COCOA
         int use_ar;
+        int use_media_keys;
 #endif
         int default_bindings;
         int test;
