@@ -194,7 +194,7 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
 
     if (s->type <= -2)
         mp_msg(MSGT_OPEN, MSGL_WARN, "Warning streams need a type !!!!\n");
-    if (s->flags & MP_STREAM_SEEK && !s->seek)
+    if (!s->seek)
         s->flags &= ~MP_STREAM_SEEK;
     if (s->seek && !(s->flags & MP_STREAM_SEEK))
         s->flags |= MP_STREAM_SEEK;
