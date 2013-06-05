@@ -512,13 +512,9 @@ int stream_seek_long(stream_t *s, int64_t pos)
     else
         newpos = pos & (~((int64_t)STREAM_BUFFER_SIZE - 1));
 
-    if (mp_msg_test(MSGT_STREAM, MSGL_DBG3)) {
-        mp_msg(
-            MSGT_STREAM, MSGL_DBG3,
-            "s->pos=%" PRIX64 "  newpos=%" PRIX64 "  new_bufpos=%" PRIX64
-            "  buflen=%X  \n",
-            (int64_t)s->pos, (int64_t)newpos, (int64_t)pos, s->buf_len);
-    }
+    mp_msg(MSGT_STREAM, MSGL_DBG3, "s->pos=%" PRIX64 "  newpos=%" PRIX64
+           "  new_bufpos=%" PRIX64 "  buflen=%X  \n",
+           (int64_t)s->pos, (int64_t)newpos, (int64_t)pos, s->buf_len);
     pos -= newpos;
 
     res = stream_seek_internal(s, newpos);
