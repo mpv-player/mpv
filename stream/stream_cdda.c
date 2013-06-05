@@ -196,6 +196,9 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
     int16_t *buf;
     int i;
 
+    if (max_len < CDIO_CD_FRAMESIZE_RAW)
+        return -1;
+
     if ((p->sector < p->start_sector) || (p->sector > p->end_sector)) {
         s->eof = 1;
         return 0;

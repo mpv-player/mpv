@@ -79,6 +79,8 @@ static const struct m_struct_st stream_opts = {
 static int fill_buffer(stream_t *s, char* buffer, int max_len){
   if(s->pos > s->end_pos) /// don't past end of current track
     return 0;
+  if (max_len < VCD_SECTOR_DATA)
+    return -1;
   return vcd_read(s->priv,buffer);
 }
 
