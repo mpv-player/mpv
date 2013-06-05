@@ -57,10 +57,6 @@
 #define STREAM_BUFFER_SIZE 2048
 #define STREAM_MAX_SECTOR_SIZE (8 * 1024)
 
-#define VCD_SECTOR_SIZE 2352
-#define VCD_SECTOR_OFFS 24
-#define VCD_SECTOR_DATA 2324
-
 /// atm it will always use mode == STREAM_READ
 /// streams that use the new api should check the mode at open
 #define STREAM_READ  0

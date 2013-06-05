@@ -55,7 +55,6 @@
 #include "cache2.h"
 
 /// We keep these 2 for the gui atm, but they will be removed.
-int vcd_track = 0;
 char *cdrom_device = NULL;
 char *dvd_device = NULL;
 int dvd_title = 0;

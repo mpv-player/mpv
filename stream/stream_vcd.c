@@ -37,6 +37,10 @@
 
 #include "talloc.h"
 
+#define VCD_SECTOR_SIZE 2352
+#define VCD_SECTOR_OFFS 24
+#define VCD_SECTOR_DATA 2324
+
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include "vcd_read_fbsd.h"
 #elif defined(__APPLE__)
