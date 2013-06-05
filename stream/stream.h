@@ -290,15 +290,6 @@ inline static uint64_t stream_read_qword_le(stream_t *s)
     return y;
 }
 
-inline static unsigned int stream_read_int24(stream_t *s)
-{
-    unsigned int y;
-    y = stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    return y;
-}
-
 unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
                                 int utf16);
 
