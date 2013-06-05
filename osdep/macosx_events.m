@@ -232,13 +232,7 @@ void cocoa_put_key(int keycode)
         @(NX_KEYTYPE_FAST):    @(MP_MK_NEXT),
     };
 
-    int mpkey = [keymap[@(key)] intValue];
-    if (mpkey > 0) {
-        cocoa_put_key(mpkey);
-        return YES;
-    } else {
-        return NO;
-    }
+    return [self handleKey:key withMapping:keymap];
 }
 - (NSEvent*)handleKeyDown:(NSEvent *)event
 {
@@ -296,8 +290,16 @@ void cocoa_put_key(int keycode)
         @(kHIDRemoteButtonCodeDownHold):   @(MP_AR_VDOWN_HOLD),
     };
 
-    int key = [keymap[@(buttonCode)] intValue];
-    if (key > 0)
-        cocoa_put_key(key);
+    [self handleKey:buttonCode withMapping:keymap];
+}
+-(BOOL)handleKey:(int)key withMapping:(NSDictionary *)mapping
+{
+    int mpkey = [mapping[@(key)] intValue];
+    if (mpkey > 0) {
+        cocoa_put_key(mpkey);
+        return YES;
+    } else {
+        return NO;
+    }
 }
 @end
