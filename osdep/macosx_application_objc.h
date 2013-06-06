@@ -28,7 +28,7 @@ struct cocoa_input_queue;
 @end
 
 @interface EventsResponder : NSObject <HIDRemoteDelegate>
-- (BOOL)handleMediaKey:(int)key;
+- (BOOL)handleMediaKey:(NSEvent *)event;
 - (NSEvent *)handleKeyDown:(NSEvent *)event;
 - (void)startAppleRemote;
 - (void)stopAppleRemote;
