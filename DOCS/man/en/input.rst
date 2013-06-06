@@ -130,6 +130,17 @@ screenshot [subtitles|video|window|- [single|each-frame]]
         Take a screenshot each frame. Issue this command again to stop taking
         screenshots.
 
+screenshot "<filename>" [subtitles|video|window]
+    Take a screenshot and save it to a given file. Note that the file will be
+    saved in the format as set by ``--screenshot-format``, regardless of what
+    extension the given filename might have.
+
+    The second argument is as in ``screenshot``.
+
+    This never shows anything on OSD. If the file already exists, or if
+    taking the screenshot or if there is an error writing the fie, the command
+    fails silently.
+
 playlist_next [weak|force]
     Go to the next entry on the playlist.
 

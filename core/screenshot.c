@@ -278,15 +278,11 @@ static void add_subs(struct MPContext *mpctx, struct mp_image *image)
                       OSD_DRAW_SUB_ONLY, image);
 }
 
-static void screenshot_save(struct MPContext *mpctx, struct mp_image *image,
-                            bool with_subs)
+static void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
 
     struct image_writer_opts *opts = mpctx->opts.screenshot_image_opts;
-
-    if (with_subs)
-        add_subs(mpctx, image);
 
     char *filename = gen_fname(ctx, image_writer_file_ext(opts));
     if (filename) {
@@ -295,29 +291,14 @@ static void screenshot_save(struct MPContext *mpctx, struct mp_image *image,
             screenshot_msg(ctx, SMSG_ERR, "Error writing screenshot!");
         talloc_free(filename);
     }
-
-    talloc_free(image);
 }
 
-void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
-                        bool osd)
+static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
 {
+    struct mp_image *image = NULL;
     if (mpctx->video_out && mpctx->video_out->config_ok) {
-        screenshot_ctx *ctx = mpctx->screenshot_ctx;
-
         if (mode == MODE_SUBTITLES && mpctx->osd->render_subs_in_filter)
             mode = 0;
-
-        if (each_frame) {
-            ctx->each_frame = !ctx->each_frame;
-            if (!ctx->each_frame)
-                return;
-        } else {
-            ctx->each_frame = false;
-        }
-
-        ctx->mode = mode;
-        ctx->osd = osd;
 
         struct voctrl_screenshot_args args =
                             { .full_window = (mode == MODE_FULL_WINDOW) };
@@ -328,14 +309,57 @@ void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
         if (!args.out_image)
             vo_control(mpctx->video_out, VOCTRL_SCREENSHOT, &args);
 
-        if (args.out_image) {
-            if (args.has_osd)
-                mode = 0;
-            screenshot_save(mpctx, args.out_image, mode == MODE_SUBTITLES);
-        } else {
-            screenshot_msg(ctx, SMSG_ERR, "Taking screenshot failed.");
+        image = args.out_image;
+        if (image) {
+            if (mode == MODE_SUBTITLES && !args.has_osd)
+                add_subs(mpctx, image);
         }
     }
+    return image;
+}
+
+int screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode)
+{
+    struct image_writer_opts *opts = mpctx->opts.screenshot_image_opts;
+
+    if (mp_path_exists(filename))
+        return -1;
+    struct mp_image *image = screenshot_get(mpctx, mode);
+    if (!image)
+        return -1;
+    int r = write_image(image, opts, filename);
+    talloc_free(image);
+    return r ? 0 : -1;
+}
+
+void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
+                        bool osd)
+{
+    screenshot_ctx *ctx = mpctx->screenshot_ctx;
+
+    if (mode == MODE_SUBTITLES && mpctx->osd->render_subs_in_filter)
+        mode = 0;
+
+    if (each_frame) {
+        ctx->each_frame = !ctx->each_frame;
+        if (!ctx->each_frame)
+            return;
+    } else {
+        ctx->each_frame = false;
+    }
+
+    ctx->mode = mode;
+    ctx->osd = osd;
+
+    struct mp_image *image = screenshot_get(mpctx, mode);
+
+    if (image) {
+        screenshot_save(mpctx, image);
+    } else {
+        screenshot_msg(ctx, SMSG_ERR, "Taking screenshot failed.");
+    }
+
+    talloc_free(image);
 }
 
 void screenshot_flip(struct MPContext *mpctx)

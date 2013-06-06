@@ -2360,6 +2360,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         screenshot_request(mpctx, cmd->args[0].v.i, cmd->args[1].v.i, msg_osd);
         break;
 
+    case MP_CMD_SCREENSHOT_TO_FILE:
+        screenshot_to_file(mpctx, cmd->args[0].v.s, cmd->args[1].v.i);
+        break;
+
     case MP_CMD_RUN:
 #ifndef __MINGW32__
         if (!fork()) {
