@@ -304,7 +304,8 @@ static int stream_reconnect(stream_t *s)
             return 0;
 
         s->eof = 1;
-        stream_reset(s);
+        s->pos = 0;
+        s->buf_pos = s->buf_len = 0;
 
         // Some streams (internal http.c) don't support STREAM_CTRL_RECONNECT,
         // but do it when trying to seek.
@@ -523,6 +524,7 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
             }
         }
     }
+    s->eof = 0; // EOF reset when seek succeeds.
     return -1;
 }
 
@@ -561,7 +563,6 @@ static int stream_seek_long(stream_t *s, int64_t pos)
             break; // EOF
     }
 
-    s->eof = 0; // EOF reset when seek succeeds.
     while (stream_fill_buffer(s) > 0) {
         if (pos <= s->buf_len) {
             s->buf_pos = pos; // byte position in sector
@@ -621,15 +622,6 @@ int stream_skip(stream_t *s, int64_t len)
         len -= x;
     }
     return 1;
-}
-
-void stream_reset(stream_t *s)
-{
-    if (s->eof) {
-        s->pos = 0;
-        s->buf_pos = s->buf_len = 0;
-        s->eof = 0;
-    }
 }
 
 int stream_control(stream_t *s, int cmd, void *arg)

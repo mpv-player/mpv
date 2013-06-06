@@ -307,7 +307,6 @@ struct MPOpts;
  */
 struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
                                  int max_size, int padding_bytes);
-void stream_reset(stream_t *s);
 int stream_control(stream_t *s, int cmd, void *arg);
 void stream_update_size(stream_t *s);
 void free_stream(stream_t *s);

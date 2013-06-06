@@ -143,7 +143,6 @@ static int64_t mp_seek(void *opaque, int64_t pos, int whence)
         return -1;
     current_pos = stream_tell(stream);
     if (stream_seek(stream, pos) == 0) {
-        stream_reset(stream);
         stream_seek(stream, current_pos);
         return -1;
     }
