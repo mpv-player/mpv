@@ -298,10 +298,10 @@ static int stream_reconnect(stream_t *s)
     int64_t pos = s->pos;
     for (int retry = 0; retry < MAX_RECONNECT_RETRIES; retry++) {
         mp_msg(MSGT_STREAM, MSGL_WARN,
-               "Connection lost! Attempting to reconnect...\n");
+               "Connection lost! Attempting to reconnect (%d)...\n", retry + 1);
 
-        if (retry)
-            mp_sleep_us(RECONNECT_SLEEP_MS * 1000);
+        if (stream_check_interrupt(retry ? RECONNECT_SLEEP_MS : 0))
+            return 0;
 
         s->eof = 1;
         stream_reset(s);
