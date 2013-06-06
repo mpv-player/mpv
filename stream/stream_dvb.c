@@ -541,7 +541,6 @@ int dvb_set_channel(stream_t *stream, int card, int n)
 
 	stream->buf_pos = stream->buf_len = 0;
 	stream->pos = 0;
-	stream->eof = 0;
 
 	if(channel->freq != priv->last_freq)
 		if (! dvb_tune(priv, channel->freq, channel->pol, channel->srate, channel->diseqc, channel->tone,

@@ -200,7 +200,6 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
         return -1;
 
     if ((p->sector < p->start_sector) || (p->sector > p->end_sector)) {
-        s->eof = 1;
         return 0;
     }
 
@@ -237,7 +236,6 @@ static int seek(stream_t *s, int64_t newpos)
     s->pos = newpos;
     sec = s->pos / CDIO_CD_FRAMESIZE_RAW;
     if (s->pos < 0 || sec > p->end_sector) {
-        s->eof = 1;
         p->sector = p->end_sector + 1;
         return 0;
     }

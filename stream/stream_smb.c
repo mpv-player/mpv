@@ -88,7 +88,6 @@ static int control(stream_t *s, int cmd, void *arg) {
 static int seek(stream_t *s,int64_t newpos) {
   s->pos = newpos;
   if(smbc_lseek(s->fd,s->pos,SEEK_SET)<0) {
-    s->eof=1;
     return 0;
   }
   return 1;

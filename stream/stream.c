@@ -397,7 +397,6 @@ eof_out:
         return 0;
     }
     // When reading succeeded we are obviously not at eof.
-    // This e.g. avoids issues with eof getting stuck when lavf seeks in MPEG-TS
     s->eof = 0;
     s->pos += len;
     stream_capture_write(s, buf, len);
@@ -421,7 +420,6 @@ void stream_unread_buffer(stream_t *s, void *buffer, size_t buffer_size)
     memcpy(s->buffer, buffer, buffer_size);
     s->buf_pos = 0;
     s->buf_len = buffer_size + remainder;
-    s->eof = 0;
 }
 
 int stream_fill_buffer(stream_t *s)
