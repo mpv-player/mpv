@@ -530,7 +530,6 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 // Unlike stream_seek_unbuffered(), it still fills the local buffer.
 static int stream_seek_long(stream_t *s, int64_t pos)
 {
-    int64_t newpos = 0;
     int64_t oldpos = s->pos;
     s->buf_pos = s->buf_len = 0;
     s->eof = 0;
@@ -541,10 +540,9 @@ static int stream_seek_long(stream_t *s, int64_t pos)
         return 1;
     }
 
+    int64_t newpos = pos;
     if (s->sector_size)
         newpos = (pos / s->sector_size) * s->sector_size;
-    else
-        newpos = pos & (~((int64_t)STREAM_BUFFER_SIZE - 1));
 
     mp_msg(MSGT_STREAM, MSGL_DBG3, "s->pos=%" PRIX64 "  newpos=%" PRIX64
            "  new_bufpos=%" PRIX64 "  buflen=%X  \n",
