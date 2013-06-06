@@ -308,11 +308,10 @@ int ebml_read_skip_or_resync_cluster(stream_t *s, uint64_t *length)
         *length = len + l;
 
     int64_t pos = stream_tell(s);
-    stream_skip(s, len);
 
     // When reading corrupted elements, len will often be a random high number,
-    // and stream_skip() will set EOF.
-    if (s->eof) {
+    // and stream_skip() will fail when skipping past EOF.
+    if (!stream_skip(s, len)) {
         stream_seek(s, pos);
         goto resync;
     }

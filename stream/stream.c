@@ -530,10 +530,10 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 // Unlike stream_seek_unbuffered(), it still fills the local buffer.
 static int stream_seek_long(stream_t *s, int64_t pos)
 {
-    int res;
     int64_t newpos = 0;
-
+    int64_t oldpos = s->pos;
     s->buf_pos = s->buf_len = 0;
+    s->eof = 0;
 
     if (s->mode == STREAM_WRITE) {
         if (!s->seek || !s->seek(s, pos))
@@ -552,9 +552,10 @@ static int stream_seek_long(stream_t *s, int64_t pos)
 
     pos -= newpos;
 
-    res = stream_seek_unbuffered(s, newpos);
-    if (res >= 0)
-        return res;
+    if (stream_seek_unbuffered(s, newpos) >= 0) {
+        s->pos = oldpos;
+        return 0;
+    }
 
     while (s->pos < newpos) {
         if (stream_fill_buffer(s) <= 0)
@@ -564,6 +565,7 @@ static int stream_seek_long(stream_t *s, int64_t pos)
     while (stream_fill_buffer(s) > 0) {
         if (pos <= s->buf_len) {
             s->buf_pos = pos; // byte position in sector
+            s->eof = 0;
             return 1;
         }
         pos -= s->buf_len;
@@ -572,6 +574,7 @@ static int stream_seek_long(stream_t *s, int64_t pos)
     s->pos += pos;
     s->buf_pos = 0;
     s->buf_len = 0;
+    s->eof = 0; // eof should be set only on read
 
     mp_msg(MSGT_STREAM, MSGL_V,
            "stream_seek: Seek to/past EOF: no buffer preloaded.\n");
@@ -589,7 +592,7 @@ int stream_seek(stream_t *s, int64_t pos)
         pos = 0;
     }
     if (pos < s->pos) {
-        int64_t x = pos - (s->pos - s->buf_len);
+        int64_t x = pos - (s->pos - (int)s->buf_len);
         if (x >= 0) {
             s->buf_pos = x;
             s->eof = 0;
@@ -602,10 +605,19 @@ int stream_seek(stream_t *s, int64_t pos)
 
 int stream_skip(stream_t *s, int64_t len)
 {
-    if (len < 0 ||
-        (len > 2 * STREAM_BUFFER_SIZE && (s->flags & MP_STREAM_SEEK_FW))) {
-        // negative or big skip!
-        return stream_seek(s, stream_tell(s) + len);
+    int64_t target = stream_tell(s) + len;
+    if (len < 0)
+        return stream_seek(s, target);
+    if (len > 2 * STREAM_BUFFER_SIZE && (s->flags & MP_STREAM_SEEK_FW)) {
+        // Seek to 1 byte before target - this is the only way to distinguish
+        // skip-to-EOF and skip-past-EOF in general. Successful seeking means
+        // absolutely nothing, so test by doing a real read of the last byte.
+        int r = stream_seek(s, target - 1);
+        if (r) {
+            stream_read_char(s);
+            return !stream_eof(s);
+        }
+        return r;
     }
     while (len > 0) {
         int x = s->buf_len - s->buf_pos;
