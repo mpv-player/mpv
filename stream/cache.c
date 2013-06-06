@@ -64,6 +64,7 @@ struct priv {
     int64_t back_size;      // keep back_size amount of old bytes for backward seek
     int64_t fill_limit;     // we should fill buffer only if space>=fill_limit
     int64_t seek_limit;     // keep filling cache if distance is less that seek limit
+    struct byte_meta *bm;   // additional per-byte metadata
 
     // Owned by the main thread
     stream_t *cache;        // wrapper stream, used by demuxer etc.
@@ -90,7 +91,6 @@ struct priv {
 
     // Cached STREAM_CTRLs
     double stream_time_length;
-    double stream_time_pos;
     double stream_start_time;
     int64_t stream_size;
     bool stream_manages_timeline;
@@ -98,7 +98,15 @@ struct priv {
     int stream_cache_fill;
 };
 
+// Store additional per-byte metadata. Since per-byte would be way too
+// inefficient, store it only for every BYTE_META_CHUNK_SIZE byte.
+struct byte_meta {
+    float stream_pts;
+};
+
 enum {
+    BYTE_META_CHUNK_SIZE = 16 * 1024,
+
     CACHE_INTERRUPTED = -1,
 
     CACHE_CTRL_NONE = 0,
@@ -252,6 +260,17 @@ static bool cache_fill(struct priv *s)
     len = stream_read_partial(s->stream, &s->buffer[pos], space);
     pthread_mutex_lock(&s->mutex);
 
+    int m1 = pos / BYTE_META_CHUNK_SIZE;
+    int m2 = (s->buffer_size + pos - 1) % s->buffer_size / BYTE_META_CHUNK_SIZE;
+    if (m1 != m2) {
+        double pts;
+        if (stream_control(s->stream, STREAM_CTRL_GET_CURRENT_TIME, &pts) <= 0)
+            pts = MP_NOPTS_VALUE;
+        s->bm[m1] = (struct byte_meta) {
+            .stream_pts = pts,
+        };
+    }
+
     s->max_filepos += len;
     if (pos + len == s->buffer_size)
         s->offset += s->buffer_size; // wrap...
@@ -270,9 +289,6 @@ static void update_cached_controls(struct priv *s)
     s->stream_time_length = 0;
     if (stream_control(s->stream, STREAM_CTRL_GET_TIME_LENGTH, &d) == STREAM_OK)
         s->stream_time_length = d;
-    s->stream_time_pos = MP_NOPTS_VALUE;
-    if (stream_control(s->stream, STREAM_CTRL_GET_CURRENT_TIME, &d) == STREAM_OK)
-        s->stream_time_pos = d;
     s->stream_start_time = MP_NOPTS_VALUE;
     if (stream_control(s->stream, STREAM_CTRL_GET_START_TIME, &d) == STREAM_OK)
         s->stream_start_time = d;
@@ -300,10 +316,6 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
     case STREAM_CTRL_GET_TIME_LENGTH:
         *(double *)arg = s->stream_time_length;
         return s->stream_time_length ? STREAM_OK : STREAM_UNSUPPORTED;
-    case STREAM_CTRL_GET_CURRENT_TIME:
-        *(double *)arg = s->stream_time_pos;
-        return s->stream_time_pos !=
-               MP_NOPTS_VALUE ? STREAM_OK : STREAM_UNSUPPORTED;
     case STREAM_CTRL_GET_START_TIME:
         *(double *)arg = s->stream_start_time;
         return s->stream_start_time !=
@@ -313,6 +325,20 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
         return STREAM_OK;
     case STREAM_CTRL_MANAGES_TIMELINE:
         return s->stream_manages_timeline ? STREAM_OK : STREAM_UNSUPPORTED;
+    case STREAM_CTRL_GET_CURRENT_TIME: {
+        if (s->read_filepos >= s->min_filepos &&
+            s->read_filepos <= s->max_filepos)
+        {
+            int64_t pos = s->read_filepos - s->offset;
+            if (pos < 0)
+                pos += s->buffer_size;
+            else if (pos >= s->buffer_size)
+                pos -= s->buffer_size;
+            *(double *)arg = s->bm[pos / BYTE_META_CHUNK_SIZE].stream_pts;
+            return STREAM_OK;
+        }
+        break;
+    }
     }
     return STREAM_ERROR;
 }
@@ -496,8 +522,12 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
     s->back_size = s->buffer_size / 2;
 
     s->buffer = malloc(s->buffer_size);
-    if (!s->buffer) {
+    s->bm = malloc((s->buffer_size / BYTE_META_CHUNK_SIZE + 1) *
+                   sizeof(struct byte_meta));
+    if (!s->buffer || !s->bm) {
         mp_msg(MSGT_CACHE, MSGL_ERR, "Failed to allocate cache buffer.\n");
+        free(s->buffer);
+        free(s->bm);
         talloc_free(s);
         return -1;
     }
