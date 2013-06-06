@@ -570,8 +570,7 @@ static int stream_seek_long(stream_t *s, int64_t pos)
         }
         pos -= s->buf_len;
     }
-    // Fill failed, but seek still is a success.
-    s->pos += pos;
+    // Fill failed, but seek still is a success (partially).
     s->buf_pos = 0;
     s->buf_len = 0;
     s->eof = 0; // eof should be set only on read
@@ -615,7 +614,7 @@ int stream_skip(stream_t *s, int64_t len)
         int r = stream_seek(s, target - 1);
         if (r) {
             stream_read_char(s);
-            return !stream_eof(s);
+            return !stream_eof(s) && stream_tell(s) == target;
         }
         return r;
     }
