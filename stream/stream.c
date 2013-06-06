@@ -289,8 +289,6 @@ stream_t *open_output_stream(const char *filename, struct MPOpts *options)
     return open_stream_full(filename, STREAM_WRITE, options, NULL);
 }
 
-//=================== STREAMER =========================
-
 static int stream_reconnect(stream_t *s)
 {
 #define MAX_RECONNECT_RETRIES 5
@@ -486,12 +484,11 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
     if (newpos == 0 || newpos != s->pos) {
         switch (s->type) {
         case STREAMTYPE_STREAM:
-            //s->pos=newpos; // real seek
             // Some streaming protocol allow to seek backward and forward
             // A function call that return -1 can tell that the protocol
             // doesn't support seeking.
 #ifdef CONFIG_NETWORKING
-            if (s->seek) { // new stream seek is much cleaner than streaming_ctrl one
+            if (s->seek) {
                 if (!s->seek(s, newpos)) {
                     mp_tmsg(MSGT_STREAM, MSGL_ERR, "Seek failed\n");
                     return 0;
@@ -525,9 +522,6 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
                 return 0;
             }
         }
-//   putchar('.');fflush(stdout);
-//} else {
-//   putchar('%');fflush(stdout);
     }
     return -1;
 }
@@ -538,8 +532,6 @@ static int stream_seek_long(stream_t *s, int64_t pos)
 {
     int res;
     int64_t newpos = 0;
-
-//  if( mp_msg_test(MSGT_STREAM,MSGL_DBG3) ) printf("seek_long to 0x%X\n",(unsigned int)pos);
 
     s->buf_pos = s->buf_len = 0;
 
@@ -557,6 +549,7 @@ static int stream_seek_long(stream_t *s, int64_t pos)
     mp_msg(MSGT_STREAM, MSGL_DBG3, "s->pos=%" PRIX64 "  newpos=%" PRIX64
            "  new_bufpos=%" PRIX64 "  buflen=%X  \n",
            (int64_t)s->pos, (int64_t)newpos, (int64_t)pos, s->buf_len);
+
     pos -= newpos;
 
     res = stream_seek_unbuffered(s, newpos);
@@ -565,7 +558,7 @@ static int stream_seek_long(stream_t *s, int64_t pos)
 
     while (s->pos < newpos) {
         if (stream_fill_buffer(s) <= 0)
-            break;                      // EOF
+            break; // EOF
     }
 
     s->eof = 0; // EOF reset when seek succeeds.
@@ -576,7 +569,7 @@ static int stream_seek_long(stream_t *s, int64_t pos)
         }
         pos -= s->buf_len;
     }
-// Fill failed, but seek still is a success.
+    // Fill failed, but seek still is a success.
     s->pos += pos;
     s->buf_pos = 0;
     s->buf_len = 0;
@@ -592,8 +585,7 @@ int stream_seek(stream_t *s, int64_t pos)
     mp_dbg(MSGT_DEMUX, MSGL_DBG3, "seek to 0x%llX\n", (long long)pos);
 
     if (pos < 0) {
-        mp_msg(MSGT_DEMUX, MSGL_ERR,
-               "Invalid seek to negative position %llx!\n",
+        mp_msg(MSGT_DEMUX, MSGL_ERR, "Invalid seek to negative position %llx!\n",
                (long long)pos);
         pos = 0;
     }
@@ -602,7 +594,6 @@ int stream_seek(stream_t *s, int64_t pos)
         if (x >= 0) {
             s->buf_pos = x;
             s->eof = 0;
-//      putchar('*');fflush(stdout);
             return 1;
         }
     }
@@ -621,12 +612,11 @@ int stream_skip(stream_t *s, int64_t len)
         int x = s->buf_len - s->buf_pos;
         if (x == 0) {
             if (!stream_fill_buffer(s))
-                return 0;                        // EOF
+                return 0; // EOF
             x = s->buf_len - s->buf_pos;
         }
         if (x > len)
             x = len;
-        //memcpy(mem,&s->buf[s->buf_pos],x);
         s->buf_pos += x;
         len -= x;
     }

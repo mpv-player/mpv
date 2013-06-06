@@ -61,20 +61,17 @@
 // Max buffer for initial probe.
 #define STREAM_MAX_BUFFER_SIZE (2 * 1024 * 1024)
 
-/// atm it will always use mode == STREAM_READ
-/// streams that use the new api should check the mode at open
+
+// stream->mode
 #define STREAM_READ  0
 #define STREAM_WRITE 1
-/// Seek flags, if not mannualy set and s->seek isn't NULL
-/// MP_STREAM_SEEK is automaticly set
+
+// stream->flags
 #define MP_STREAM_SEEK_BW  2
 #define MP_STREAM_SEEK_FW  4
 #define MP_STREAM_SEEK  (MP_STREAM_SEEK_BW | MP_STREAM_SEEK_FW)
 
-//////////// Open return code
 #define STREAM_REDIRECTED -2
-/// This can't open the requested protocol (used by stream wich have a
-/// * protocol when they don't know the requested protocol)
 #define STREAM_UNSUPPORTED -1
 #define STREAM_ERROR 0
 #define STREAM_OK    1
@@ -121,6 +118,7 @@ typedef enum {
     streaming_playing_e
 } streaming_status;
 
+// All this is for legacy http streams (and other things using tcp/udp)
 typedef struct streaming_control {
     URL_t *url;
     streaming_status status;
@@ -144,9 +142,7 @@ typedef struct stream_info_st {
     const char *name;
     const char *author;
     const char *comment;
-    /// mode isn't used atm (ie always READ) but it shouldn't be ignored
-    /// opts is at least in it's defaults settings and may have been
-    /// altered by url parsing if enabled and the options string parsing.
+    // opts is set from ->opts
     int (*open)(struct stream *st, int mode, void *opts, int *file_format);
     const char *protocols[MAX_STREAM_PROTOCOLS];
     const void *opts;
