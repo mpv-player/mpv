@@ -428,11 +428,9 @@ void stream_unread_buffer(stream_t *s, void *buffer, size_t buffer_size)
 int stream_fill_buffer(stream_t *s)
 {
     int len = stream_read_unbuffered(s, s->buffer, STREAM_BUFFER_SIZE);
-    if (len <= 0)
-        return 0;
     s->buf_pos = 0;
-    s->buf_len = len;
-    return len;
+    s->buf_len = len < 0 ? 0 : len;
+    return s->buf_len;
 }
 
 // Read between 1..buf_size bytes of data, return how much data has been read.
