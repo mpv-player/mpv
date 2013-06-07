@@ -56,7 +56,6 @@ static volatile float callback_time = 0;
 #define CHUNK_SIZE (16 * 1024)
 //! number of "virtual" chunks the buffer consists of
 #define NUM_CHUNKS 8
-#define BUFFSIZE (NUM_CHUNKS * CHUNK_SIZE)
 
 //! buffer for audio data
 static AVFifoBuffer *buffer;
@@ -159,7 +158,7 @@ static int outputaudio(jack_nframes_t nframes, void *arg)
     int i;
     for (i = 0; i < num_ports; i++)
         bufs[i] = jack_port_get_buffer(ports[i], nframes);
-    if (paused || underrun)
+    if (paused || underrun || !buffer)
         silence(bufs, nframes, num_ports);
     else if (read_buffer(bufs, nframes, num_ports) < nframes)
         underrun = 1;
@@ -239,7 +238,6 @@ static int init(struct ao *ao, char *params)
         mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] cannot open server\n");
         goto err_out;
     }
-    buffer = av_fifo_alloc(BUFFSIZE);
     jack_set_process_callback(client, outputaudio, ao);
 
     // list matching ports if connections should be made
@@ -296,8 +294,10 @@ static int init(struct ao *ao, char *params)
 
     ao->format = AF_FORMAT_FLOAT_NE;
     ao->bps = ao->channels.num * ao->samplerate * sizeof(float);
-    ao->buffersize = CHUNK_SIZE * NUM_CHUNKS;
-    ao->outburst = CHUNK_SIZE;
+    int unitsize = ao->channels.num * sizeof(float);
+    ao->outburst = CHUNK_SIZE / unitsize * unitsize;
+    ao->buffersize = NUM_CHUNKS * ao->outburst;
+    buffer = av_fifo_alloc(ao->buffersize);
     free(matching_ports);
     free(port_name);
     free(client_name);
