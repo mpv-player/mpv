@@ -172,7 +172,6 @@ SOURCES = talloc.c \
           core/codecs.c \
           core/command.c \
           core/cpudetect.c \
-          core/defaultopts.c \
           core/m_config.c \
           core/m_option.c \
           core/m_property.c \

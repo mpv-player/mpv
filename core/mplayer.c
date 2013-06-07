@@ -151,7 +151,6 @@
 
 #include "core/mp_core.h"
 #include "core/options.h"
-#include "core/defaultopts.h"
 
 static const char help_text[] = _(
 "Usage:   mpv [options] [url|path/]filename\n"
@@ -4629,6 +4628,7 @@ static int mpv_main(int argc, char *argv[])
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){
+        .opts = mp_default_opts,
         .last_dvb_step = 1,
         .terminal_osd_text = talloc_strdup(mpctx, ""),
         .playlist = talloc_struct(mpctx, struct playlist, {0}),
@@ -4639,7 +4639,6 @@ static int mpv_main(int argc, char *argv[])
     screenshot_init(mpctx);
 
     struct MPOpts *opts = &mpctx->opts;
-    set_default_mplayer_options(opts);
     // Create the config context and register the options
     mpctx->mconfig = m_config_new(opts, cfg_include);
     m_config_register_options(mpctx->mconfig, mplayer_opts);
