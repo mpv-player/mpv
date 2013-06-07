@@ -41,17 +41,17 @@
 
 static const ao_info_t info =
 {
-  "JACK audio output",
-  "jack",
-  "Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>",
-  "based on ao_sdl.c"
+    "JACK audio output",
+    "jack",
+    "Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>",
+    "based on ao_sdl.c"
 };
 
 LIBAO_EXTERN(jack)
 
 //! maximum number of channels supported, avoids lots of mallocs
 #define MAX_CHANS MP_NUM_CHANNELS
-static jack_port_t *ports[MAX_CHANS];
+static jack_port_t * ports[MAX_CHANS];
 static int num_ports; ///< Number of used ports == number of channels
 static jack_client_t *client;
 static float jack_latency;
@@ -80,33 +80,36 @@ static AVFifoBuffer *buffer;
  *
  * If there is not enough room, the buffer is filled up
  */
-static int write_buffer(unsigned char* data, int len) {
-  int free = av_fifo_space(buffer);
-  if (len > free) len = free;
-  return av_fifo_generic_write(buffer, data, len, NULL);
+static int write_buffer(unsigned char *data, int len)
+{
+    int free = av_fifo_space(buffer);
+    if (len > free)
+        len = free;
+    return av_fifo_generic_write(buffer, data, len, NULL);
 }
 
 static void silence(float **bufs, int cnt, int num_bufs);
 
 struct deinterleave {
-  float **bufs;
-  int num_bufs;
-  int cur_buf;
-  int pos;
+    float **bufs;
+    int num_bufs;
+    int cur_buf;
+    int pos;
 };
 
-static void deinterleave(void *info, void *src, int len) {
-  struct deinterleave *di = info;
-  float *s = src;
-  int i;
-  len /= sizeof(float);
-  for (i = 0; i < len; i++) {
-    di->bufs[di->cur_buf++][di->pos] = s[i];
-    if (di->cur_buf >= di->num_bufs) {
-      di->cur_buf = 0;
-      di->pos++;
+static void deinterleave(void *info, void *src, int len)
+{
+    struct deinterleave *di = info;
+    float *s = src;
+    int i;
+    len /= sizeof(float);
+    for (i = 0; i < len; i++) {
+        di->bufs[di->cur_buf++][di->pos] = s[i];
+        if (di->cur_buf >= di->num_bufs) {
+            di->cur_buf = 0;
+            di->pos++;
+        }
     }
-  }
 }
 
 /**
@@ -122,21 +125,26 @@ static void deinterleave(void *info, void *src, int len) {
  * If there is not enough data in the buffer remaining parts will be filled
  * with silence.
  */
-static int read_buffer(float **bufs, int cnt, int num_bufs) {
-  struct deinterleave di = {bufs, num_bufs, 0, 0};
-  int buffered = av_fifo_size(buffer);
-  if (cnt * sizeof(float) * num_bufs > buffered) {
-    silence(bufs, cnt, num_bufs);
-    cnt = buffered / sizeof(float) / num_bufs;
-  }
-  av_fifo_generic_read(buffer, &di, cnt * num_bufs * sizeof(float), deinterleave);
-  return cnt;
+static int read_buffer(float **bufs, int cnt, int num_bufs)
+{
+    struct deinterleave di = {
+        bufs, num_bufs, 0, 0
+    };
+    int buffered = av_fifo_size(buffer);
+    if (cnt * sizeof(float) * num_bufs > buffered) {
+        silence(bufs, cnt, num_bufs);
+        cnt = buffered / sizeof(float) / num_bufs;
+    }
+    av_fifo_generic_read(buffer, &di, cnt * num_bufs * sizeof(float),
+                         deinterleave);
+    return cnt;
 }
 
 // end ring buffer stuff
 
-static int control(int cmd, void *arg) {
-  return CONTROL_UNKNOWN;
+static int control(int cmd, void *arg)
+{
+    return CONTROL_UNKNOWN;
 }
 
 /**
@@ -145,10 +153,11 @@ static int control(int cmd, void *arg) {
  * \param cnt number of samples in each buffer
  * \param num_bufs number of buffers
  */
-static void silence(float **bufs, int cnt, int num_bufs) {
-  int i;
-  for (i = 0; i < num_bufs; i++)
-    memset(bufs[i], 0, cnt * sizeof(float));
+static void silence(float **bufs, int cnt, int num_bufs)
+{
+    int i;
+    for (i = 0; i < num_bufs; i++)
+        memset(bufs[i], 0, cnt * sizeof(float));
 }
 
 /**
@@ -159,217 +168,233 @@ static void silence(float **bufs, int cnt, int num_bufs) {
  *
  * Write silence into buffers if paused or an underrun occured
  */
-static int outputaudio(jack_nframes_t nframes, void *arg) {
-  float *bufs[MAX_CHANS];
-  int i;
-  for (i = 0; i < num_ports; i++)
-    bufs[i] = jack_port_get_buffer(ports[i], nframes);
-  if (paused || underrun)
-    silence(bufs, nframes, num_ports);
-  else
-    if (read_buffer(bufs, nframes, num_ports) < nframes)
-      underrun = 1;
-  if (estimate) {
-    float now = mp_time_us() / 1000000.0;
-    float diff = callback_time + callback_interval - now;
-    if ((diff > -0.002) && (diff < 0.002))
-      callback_time += callback_interval;
-    else
-      callback_time = now;
-    callback_interval = (float)nframes / (float)ao_data.samplerate;
-  }
-  return 0;
+static int outputaudio(jack_nframes_t nframes, void *arg)
+{
+    float *bufs[MAX_CHANS];
+    int i;
+    for (i = 0; i < num_ports; i++)
+        bufs[i] = jack_port_get_buffer(ports[i], nframes);
+    if (paused || underrun)
+        silence(bufs, nframes, num_ports);
+    else if (read_buffer(bufs, nframes, num_ports) < nframes)
+        underrun = 1;
+    if (estimate) {
+        float now = mp_time_us() / 1000000.0;
+        float diff = callback_time + callback_interval - now;
+        if ((diff > -0.002) && (diff < 0.002))
+            callback_time += callback_interval;
+        else
+            callback_time = now;
+        callback_interval = (float)nframes / (float)ao_data.samplerate;
+    }
+    return 0;
 }
 
 /**
  * \brief print suboption usage help
  */
-static void print_help (void)
+static void print_help(void)
 {
-  mp_msg (MSGT_AO, MSGL_FATAL,
-           "\n-ao jack commandline help:\n"
-           "Example: mpv -ao jack:port=myout\n"
-           "  connects mpv to the jack ports named myout\n"
-           "\nOptions:\n"
-           "  connect\n"
-           "    Automatically connect to output ports\n"
-           "  port=<port name>\n"
-           "    Connects to the given ports instead of the default physical ones\n"
-           "  name=<client name>\n"
-           "    Client name to pass to JACK\n"
-           "  estimate\n"
-           "    Estimates the amount of data in buffers (experimental)\n"
-           "  autostart\n"
-           "    Automatically start JACK server if necessary\n"
-         );
+    mp_msg(
+        MSGT_AO, MSGL_FATAL,
+        "\n-ao jack commandline help:\n"
+        "Example: mpv -ao jack:port=myout\n"
+        "  connects mpv to the jack ports named myout\n"
+        "\nOptions:\n"
+        "  connect\n"
+        "    Automatically connect to output ports\n"
+        "  port=<port name>\n"
+        "    Connects to the given ports instead of the default physical ones\n"
+        "  name=<client name>\n"
+        "    Client name to pass to JACK\n"
+        "  estimate\n"
+        "    Estimates the amount of data in buffers (experimental)\n"
+        "  autostart\n"
+        "    Automatically start JACK server if necessary\n"
+        );
 }
 
-static int init(int rate, const struct mp_chmap *channels, int format, int flags)
+static int init(int rate, const struct mp_chmap *channels, int format,
+                int flags)
 {
-  const char **matching_ports = NULL;
-  char *port_name = NULL;
-  char *client_name = NULL;
-  int autostart = 0;
-  int connect = 1;
-  const opt_t subopts[] = {
-    {"port", OPT_ARG_MSTRZ, &port_name, NULL},
-    {"name", OPT_ARG_MSTRZ, &client_name, NULL},
-    {"estimate", OPT_ARG_BOOL, &estimate, NULL},
-    {"autostart", OPT_ARG_BOOL, &autostart, NULL},
-    {"connect", OPT_ARG_BOOL, &connect, NULL},
-    {NULL}
-  };
-  jack_options_t open_options = JackUseExactName;
-  int port_flags = JackPortIsInput;
-  int i;
-  estimate = 1;
-  if (subopt_parse(ao_subdevice, subopts) != 0) {
-    print_help();
-    return 0;
-  }
-
-  struct mp_chmap_sel sel = {0};
-  mp_chmap_sel_add_waveext(&sel);
-  if (!ao_chmap_sel_adjust(&ao_data, &sel, &ao_data.channels))
-    goto err_out;
-
-  if (!client_name) {
-    client_name = malloc(40);
-    sprintf(client_name, "mpv [%d]", getpid());
-  }
-  if (!autostart)
-    open_options |= JackNoStartServer;
-  client = jack_client_open(client_name, open_options, NULL);
-  if (!client) {
-    mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] cannot open server\n");
-    goto err_out;
-  }
-  buffer = av_fifo_alloc(BUFFSIZE);
-  jack_set_process_callback(client, outputaudio, 0);
-
-  // list matching ports if connections should be made
-  if (connect) {
-    if (!port_name)
-      port_flags |= JackPortIsPhysical;
-    matching_ports = jack_get_ports(client, port_name, NULL, port_flags);
-    if (!matching_ports || !matching_ports[0]) {
-      mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] no physical ports available\n");
-      goto err_out;
+    const char **matching_ports = NULL;
+    char *port_name = NULL;
+    char *client_name = NULL;
+    int autostart = 0;
+    int connect = 1;
+    const opt_t subopts[] = {
+        {"port", OPT_ARG_MSTRZ, &port_name, NULL},
+        {"name", OPT_ARG_MSTRZ, &client_name, NULL},
+        {"estimate", OPT_ARG_BOOL, &estimate, NULL},
+        {"autostart", OPT_ARG_BOOL, &autostart, NULL},
+        {"connect", OPT_ARG_BOOL, &connect, NULL},
+        {NULL}
+    };
+    jack_options_t open_options = JackUseExactName;
+    int port_flags = JackPortIsInput;
+    int i;
+    estimate = 1;
+    if (subopt_parse(ao_subdevice, subopts) != 0) {
+        print_help();
+        return 0;
     }
-    i = 1;
-    num_ports = ao_data.channels.num;
-    while (matching_ports[i]) i++;
-    if (num_ports > i) num_ports = i;
-  }
 
-  // create out output ports
-  for (i = 0; i < num_ports; i++) {
-    char pname[30];
-    snprintf(pname, 30, "out_%d", i);
-    ports[i] = jack_port_register(client, pname, JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
-    if (!ports[i]) {
-      mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] not enough ports available\n");
-      goto err_out;
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_waveext(&sel);
+    if (!ao_chmap_sel_adjust(&ao_data, &sel, &ao_data.channels))
+        goto err_out;
+
+    if (!client_name) {
+        client_name = malloc(40);
+        sprintf(client_name, "mpv [%d]", getpid());
     }
-  }
-  if (jack_activate(client)) {
-    mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] activate failed\n");
-    goto err_out;
-  }
-  for (i = 0; i < num_ports; i++) {
-    if (jack_connect(client, jack_port_name(ports[i]), matching_ports[i])) {
-      mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] connecting failed\n");
-      goto err_out;
+    if (!autostart)
+        open_options |= JackNoStartServer;
+    client = jack_client_open(client_name, open_options, NULL);
+    if (!client) {
+        mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] cannot open server\n");
+        goto err_out;
     }
-  }
-  rate = jack_get_sample_rate(client);
-  jack_latency_range_t jack_latency_range;
-  jack_port_get_latency_range(ports[0], JackPlaybackLatency,
-                              &jack_latency_range);
-  jack_latency = (float)(jack_latency_range.max + jack_get_buffer_size(client))
-                 / (float)rate;
-  callback_interval = 0;
+    buffer = av_fifo_alloc(BUFFSIZE);
+    jack_set_process_callback(client, outputaudio, 0);
 
-  if (!ao_chmap_sel_get_def(&ao_data, &sel, &ao_data.channels, num_ports))
-    goto err_out;
+    // list matching ports if connections should be made
+    if (connect) {
+        if (!port_name)
+            port_flags |= JackPortIsPhysical;
+        matching_ports = jack_get_ports(client, port_name, NULL, port_flags);
+        if (!matching_ports || !matching_ports[0]) {
+            mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] no physical ports available\n");
+            goto err_out;
+        }
+        i = 1;
+        num_ports = ao_data.channels.num;
+        while (matching_ports[i])
+            i++;
+        if (num_ports > i)
+            num_ports = i;
+    }
 
-  ao_data.samplerate = rate;
-  ao_data.format = AF_FORMAT_FLOAT_NE;
-  ao_data.bps = ao_data.channels.num * rate * sizeof(float);
-  ao_data.buffersize = CHUNK_SIZE * NUM_CHUNKS;
-  ao_data.outburst = CHUNK_SIZE;
-  free(matching_ports);
-  free(port_name);
-  free(client_name);
-  return 1;
+    // create out output ports
+    for (i = 0; i < num_ports; i++) {
+        char pname[30];
+        snprintf(pname, 30, "out_%d", i);
+        ports[i] =
+            jack_port_register(client, pname, JACK_DEFAULT_AUDIO_TYPE,
+                               JackPortIsOutput,
+                               0);
+        if (!ports[i]) {
+            mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] not enough ports available\n");
+            goto err_out;
+        }
+    }
+    if (jack_activate(client)) {
+        mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] activate failed\n");
+        goto err_out;
+    }
+    for (i = 0; i < num_ports; i++) {
+        if (jack_connect(client, jack_port_name(ports[i]),
+                         matching_ports[i])) {
+            mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] connecting failed\n");
+            goto err_out;
+        }
+    }
+    rate = jack_get_sample_rate(client);
+    jack_latency_range_t jack_latency_range;
+    jack_port_get_latency_range(ports[0], JackPlaybackLatency,
+                                &jack_latency_range);
+    jack_latency = (float)(jack_latency_range.max + jack_get_buffer_size(client))
+                   / (float)rate;
+    callback_interval = 0;
+
+    if (!ao_chmap_sel_get_def(&ao_data, &sel, &ao_data.channels, num_ports))
+        goto err_out;
+
+    ao_data.samplerate = rate;
+    ao_data.format = AF_FORMAT_FLOAT_NE;
+    ao_data.bps = ao_data.channels.num * rate * sizeof(float);
+    ao_data.buffersize = CHUNK_SIZE * NUM_CHUNKS;
+    ao_data.outburst = CHUNK_SIZE;
+    free(matching_ports);
+    free(port_name);
+    free(client_name);
+    return 1;
 
 err_out:
-  free(matching_ports);
-  free(port_name);
-  free(client_name);
-  if (client)
-    jack_client_close(client);
-  av_fifo_free(buffer);
-  buffer = NULL;
-  return 0;
+    free(matching_ports);
+    free(port_name);
+    free(client_name);
+    if (client)
+        jack_client_close(client);
+    av_fifo_free(buffer);
+    buffer = NULL;
+    return 0;
 }
 
 // close audio device
-static void uninit(int immed) {
-  if (!immed)
-    mp_sleep_us(get_delay() * 1000 * 1000);
-  // HACK, make sure jack doesn't loop-output dirty buffers
-  reset();
-  mp_sleep_us(100 * 1000);
-  jack_client_close(client);
-  av_fifo_free(buffer);
-  buffer = NULL;
+static void uninit(int immed)
+{
+    if (!immed)
+        mp_sleep_us(get_delay() * 1000 * 1000);
+    // HACK, make sure jack doesn't loop-output dirty buffers
+    reset();
+    mp_sleep_us(100 * 1000);
+    jack_client_close(client);
+    av_fifo_free(buffer);
+    buffer = NULL;
 }
 
 /**
  * \brief stop playing and empty buffers (for seeking/pause)
  */
-static void reset(void) {
-  paused = 1;
-  av_fifo_reset(buffer);
-  paused = 0;
+static void reset(void)
+{
+    paused = 1;
+    av_fifo_reset(buffer);
+    paused = 0;
 }
 
 /**
  * \brief stop playing, keep buffers (for pause)
  */
-static void audio_pause(void) {
-  paused = 1;
+static void audio_pause(void)
+{
+    paused = 1;
 }
 
 /**
  * \brief resume playing, after audio_pause()
  */
-static void audio_resume(void) {
-  paused = 0;
+static void audio_resume(void)
+{
+    paused = 0;
 }
 
-static int get_space(void) {
-  return av_fifo_space(buffer);
+static int get_space(void)
+{
+    return av_fifo_space(buffer);
 }
 
 /**
  * \brief write data into buffer and reset underrun flag
  */
-static int play(void *data, int len, int flags) {
-  if (!(flags & AOPLAY_FINAL_CHUNK))
-    len -= len % ao_data.outburst;
-  underrun = 0;
-  return write_buffer(data, len);
+static int play(void *data, int len, int flags)
+{
+    if (!(flags & AOPLAY_FINAL_CHUNK))
+        len -= len % ao_data.outburst;
+    underrun = 0;
+    return write_buffer(data, len);
 }
 
-static float get_delay(void) {
-  int buffered = av_fifo_size(buffer); // could be less
-  float in_jack = jack_latency;
-  if (estimate && callback_interval > 0) {
-    float elapsed = mp_time_us() / 1000000.0 - callback_time;
-    in_jack += callback_interval - elapsed;
-    if (in_jack < 0) in_jack = 0;
-  }
-  return (float)buffered / (float)ao_data.bps + in_jack;
+static float get_delay(void)
+{
+    int buffered = av_fifo_size(buffer); // could be less
+    float in_jack = jack_latency;
+    if (estimate && callback_interval > 0) {
+        float elapsed = mp_time_us() / 1000000.0 - callback_time;
+        in_jack += callback_interval - elapsed;
+        if (in_jack < 0)
+            in_jack = 0;
+    }
+    return (float)buffered / (float)ao_data.bps + in_jack;
 }
