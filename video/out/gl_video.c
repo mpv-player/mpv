@@ -1848,17 +1848,19 @@ bool gl_video_check_format(int mp_format)
     return init_format(mp_format, NULL);
 }
 
-void gl_video_config(struct gl_video *p, int format, int w, int h, int dw, int dh)
+void gl_video_config(struct gl_video *p, struct mp_image_params *params)
 {
-    if (p->image_format != format || p->image_w != w || p->image_h != h) {
+    if (p->image_format != params->imgfmt || p->image_w != params->w ||
+        p->image_h != params->h)
+    {
         uninit_video(p);
-        p->image_w = w;
-        p->image_h = h;
-        init_format(format, p);
+        p->image_w = params->w;
+        p->image_h = params->h;
+        init_format(params->imgfmt, p);
         init_video(p);
     }
-    p->image_dw = dw;
-    p->image_dh = dh;
+    p->image_dw = params->d_w;
+    p->image_dh = params->d_h;
 }
 
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b)

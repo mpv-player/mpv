@@ -44,6 +44,6 @@ extern const vd_functions_t *const mpcodecs_vd_drivers[];
 #define VDCTRL_QUERY_UNSEEN_FRAMES 9 // current decoder lag
 #define VDCTRL_REINIT_VO 10 // reinit filter/VO chain
 
-int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int outfmt);
+int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params);
 
 #endif /* MPLAYER_VD_H */

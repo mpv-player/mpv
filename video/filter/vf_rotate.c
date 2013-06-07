@@ -65,21 +65,24 @@ static void rotate(unsigned char* dst,unsigned char* src,int dststride,int srcst
     }
 }
 
-static int config(struct vf_instance *vf, int width, int height,
-                  int d_width, int d_height,
-                  unsigned int flags, unsigned int outfmt)
+static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags)
 {
     if (vf->priv->direction & 4) {
-        if (width < height)
+        if (p->w < p->h)
             vf->priv->direction &= 3;
     }
     if (vf->priv->direction & 4)
-        return vf_next_config(vf, width, height, d_width, d_height, flags, outfmt);
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(outfmt);
-    int a_w = MP_ALIGN_DOWN(width, desc.align_x);
-    int a_h = MP_ALIGN_DOWN(height, desc.align_y);
-    vf_rescale_dsize(&d_width, &d_height, width, height, a_w, a_h);
-    return vf_next_config(vf, a_h, a_w, d_height, d_width, flags, outfmt);
+        return vf_next_reconfig(vf, p, flags);
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->imgfmt);
+    int a_w = MP_ALIGN_DOWN(p->w, desc.align_x);
+    int a_h = MP_ALIGN_DOWN(p->h, desc.align_y);
+    vf_rescale_dsize(&p->d_w, &p->d_h, p->w, p->h, a_w, a_h);
+    p->w = a_h;
+    p->h = a_w;
+    int t = p->d_w;
+    p->d_w = p->d_h;
+    p->d_h = t;
+    return vf_next_reconfig(vf, p, flags);
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
@@ -113,7 +116,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 }
 
 static int vf_open(vf_instance_t *vf, char *args){
-    vf->config=config;
+    vf->reconfig=reconfig;
     vf->filter=filter;
     vf->query_format=query_format;
     vf->priv=malloc(sizeof(struct vf_priv_s));

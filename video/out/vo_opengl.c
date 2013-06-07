@@ -163,15 +163,13 @@ static void video_resize_redraw_callback(struct vo *vo, int w, int h)
 
 }
 
-static int config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  uint32_t format)
+static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct gl_priv *p = vo->priv;
 
     mpgl_lock(p->glctx);
 
-    if (!config_window(p, d_width, d_height, flags)) {
+    if (!config_window(p, vo->dwidth, vo->dheight, flags)) {
         mpgl_unlock(p->glctx);
         return -1;
     }
@@ -180,8 +178,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         p->glctx->register_resize_callback(vo, video_resize_redraw_callback);
     }
 
-    gl_video_config(p->renderer, format, width, height,
-                    p->vo->aspdat.prew, p->vo->aspdat.preh);
+    gl_video_config(p->renderer, params);
 
     p->vo_flipped = !!(flags & VOFLAG_FLIPPING);
 
@@ -378,7 +375,7 @@ const struct vo_driver video_out_opengl = {
     },
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .draw_osd = draw_osd,
@@ -398,7 +395,7 @@ const struct vo_driver video_out_opengl_hq = {
     },
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .draw_osd = draw_osd,

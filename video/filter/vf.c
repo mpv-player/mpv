@@ -125,16 +125,17 @@ const m_obj_list_t vf_obj_list = {
 // the last vf_config call.
 struct mp_image *vf_alloc_out_image(struct vf_instance *vf)
 {
+    struct mp_image_params *p = &vf->fmt_out.params;
     assert(vf->fmt_out.configured);
-    return mp_image_pool_get(vf->out_pool, vf->fmt_out.fmt,
-                             vf->fmt_out.w, vf->fmt_out.h);
+    return mp_image_pool_get(vf->out_pool, p->imgfmt, p->w, p->h);
 }
 
 void vf_make_out_image_writeable(struct vf_instance *vf, struct mp_image *img)
 {
+    struct mp_image_params *p = &vf->fmt_out.params;
     assert(vf->fmt_out.configured);
-    assert(vf->fmt_out.fmt == img->imgfmt);
-    assert(vf->fmt_out.w == img->w && vf->fmt_out.h == img->h);
+    assert(p->imgfmt == img->imgfmt);
+    assert(p->w == img->w && p->h == img->h);
     mp_image_pool_make_writeable(vf->out_pool, img);
 }
 
@@ -156,10 +157,11 @@ static struct mp_image *vf_default_filter(struct vf_instance *vf,
 static void print_fmt(int msglevel, struct vf_format *fmt)
 {
     if (fmt && fmt->configured) {
-        mp_msg(MSGT_VFILTER, msglevel, "%dx%d", fmt->w, fmt->h);
-        if (fmt->w != fmt->dw || fmt->h != fmt->dh)
-            mp_msg(MSGT_VFILTER, msglevel, "->%dx%d", fmt->dw, fmt->dh);
-        mp_msg(MSGT_VFILTER, msglevel, " %s %#x", mp_imgfmt_to_name(fmt->fmt),
+        struct mp_image_params *p = &fmt->params;
+        mp_msg(MSGT_VFILTER, msglevel, "%dx%d", p->w, p->h);
+        if (p->w != p->d_w || p->h != p->d_h)
+            mp_msg(MSGT_VFILTER, msglevel, "->%dx%d", p->d_w, p->d_h);
+        mp_msg(MSGT_VFILTER, msglevel, " %s %#x", mp_imgfmt_to_name(p->imgfmt),
                fmt->flags);
     } else {
         mp_msg(MSGT_VFILTER, msglevel, "???");
@@ -366,9 +368,10 @@ static struct mp_image *vf_dequeue_output_frame(struct vf_instance *vf)
 // Return >= 0 on success, < 0 on failure (even if output frames were produced)
 int vf_filter_frame(struct vf_instance *vf, struct mp_image *img)
 {
+    struct mp_image_params *p = &vf->fmt_in.params;
     assert(vf->fmt_in.configured);
-    assert(img->w == vf->fmt_in.w && img->h == vf->fmt_in.h);
-    assert(img->imgfmt == vf->fmt_in.fmt);
+    assert(img->w == p->w && img->h == p->h);
+    assert(img->imgfmt == p->imgfmt);
 
     if (vf->filter_ext) {
         return vf->filter_ext(vf, img);
@@ -410,54 +413,73 @@ void vf_chain_seek_reset(struct vf_instance *vf)
         vf_forget_frames(cur);
 }
 
-int vf_config_wrapper(struct vf_instance *vf,
-                      int width, int height, int d_width, int d_height,
-                      unsigned int flags, unsigned int outfmt)
+int vf_reconfig_wrapper(struct vf_instance *vf, struct mp_image_params *p,
+                        int flags)
 {
     vf_forget_frames(vf);
     mp_image_pool_clear(vf->out_pool);
 
-    vf->fmt_in = vf->fmt_out = (struct vf_format){0};
+    vf->fmt_in = (struct vf_format) {
+        .params = *p,
+        .flags = flags,
+    };
+    vf->fmt_out = (struct vf_format){0};
 
-    int r = vf->config(vf, width, height, d_width, d_height, flags, outfmt);
-    if (r) {
-        vf->fmt_in = (struct vf_format) {
-            .configured = 1,
-            .w = width,    .h = height,
-            .dw = d_width, .dh = d_height,
-            .flags = flags,
-            .fmt = outfmt,
-        };
-        vf->fmt_out = vf->next ? vf->next->fmt_in : (struct vf_format){0};
+    int r;
+    if (vf->reconfig) {
+        r = vf->reconfig(vf, p, flags);
+    } else {
+        r = vf->config(vf, p->w, p->h, p->d_w, p->d_h, flags, p->imgfmt);
+        r = r ? 0 : -1;
+    }
+    if (r >= 0) {
+        vf->fmt_in.configured = 1;
+        if (vf->next)
+            vf->fmt_out = vf->next->fmt_in;
     }
     return r;
+}
+
+int vf_next_reconfig(struct vf_instance *vf, struct mp_image_params *p,
+                     int outflags)
+{
+    struct MPOpts *opts = vf->opts;
+    int flags = vf->next->query_format(vf->next, p->imgfmt);
+    if (!flags) {
+        // hmm. colorspace mismatch!!!
+        // let's insert the 'scale' filter, it does the job for us:
+        vf_instance_t *vf2;
+        if (vf->next->info == &vf_info_scale)
+            return -1;                                // scale->scale
+        vf2 = vf_open_filter(opts, vf->next, "scale", NULL);
+        if (!vf2)
+            return -1;      // shouldn't happen!
+        vf->next = vf2;
+        flags = vf->next->query_format(vf->next, p->imgfmt);
+        if (!flags) {
+            mp_tmsg(MSGT_VFILTER, MSGL_ERR, "Cannot find matching colorspace, "
+                    "even by inserting 'scale' :(\n");
+            return -1; // FAIL
+        }
+    }
+    return vf_reconfig_wrapper(vf->next, p, outflags);
 }
 
 int vf_next_config(struct vf_instance *vf,
                    int width, int height, int d_width, int d_height,
                    unsigned int voflags, unsigned int outfmt)
 {
-    struct MPOpts *opts = vf->opts;
-    int flags = vf->next->query_format(vf->next, outfmt);
-    if (!flags) {
-        // hmm. colorspace mismatch!!!
-        // let's insert the 'scale' filter, it does the job for us:
-        vf_instance_t *vf2;
-        if (vf->next->info == &vf_info_scale)
-            return 0;                                // scale->scale
-        vf2 = vf_open_filter(opts, vf->next, "scale", NULL);
-        if (!vf2)
-            return 0;      // shouldn't happen!
-        vf->next = vf2;
-        flags = vf->next->query_format(vf->next, outfmt);
-        if (!flags) {
-            mp_tmsg(MSGT_VFILTER, MSGL_ERR, "Cannot find matching colorspace, "
-                    "even by inserting 'scale' :(\n");
-            return 0; // FAIL
-        }
-    }
-    return vf_config_wrapper(vf->next, width, height, d_width, d_height,
-                             voflags, outfmt);
+    struct mp_image_params p = {
+        .imgfmt = outfmt,
+        .w = width,
+        .h = height,
+        .d_w = d_width,
+        .d_h = d_height,
+        .colorspace = vf->fmt_in.params.colorspace,
+        .colorlevels = vf->fmt_in.params.colorlevels,
+    };
+    int r = vf_reconfig_wrapper(vf->next, &p, voflags);
+    return r < 0 ? 0 : 1;
 }
 
 int vf_next_control(struct vf_instance *vf, int request, void *data)

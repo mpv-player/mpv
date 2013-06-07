@@ -406,21 +406,34 @@ static int event_fd_callback(void *ctx, int fd)
     return MP_INPUT_NOTHING;
 }
 
-int vo_config(struct vo *vo, uint32_t width, uint32_t height,
-                     uint32_t d_width, uint32_t d_height, uint32_t flags,
-                     uint32_t format)
+int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
-    aspect_save_videores(vo, width, height, d_width, d_height);
+    int d_width = params->d_w;
+    int d_height = params->d_h;
+    aspect_save_videores(vo, params->w, params->h, d_width, d_height);
 
     if (vo_control(vo, VOCTRL_UPDATE_SCREENINFO, NULL) == VO_TRUE) {
-        determine_window_geometry(vo, d_width, d_height);
+        determine_window_geometry(vo, params->d_w, params->d_h);
         d_width = vo->dwidth;
         d_height = vo->dheight;
     }
+    vo->dwidth = d_width;
+    vo->dheight = d_height;
 
-    int ret = vo->driver->config(vo, width, height, d_width, d_height, flags,
-                                 format);
-    vo->config_ok = (ret == 0);
+    struct mp_image_params p2 = *params;
+    p2.d_w = vo->aspdat.prew;
+    p2.d_h = vo->aspdat.preh;
+
+    int ret;
+    if (vo->driver->reconfig) {
+        ret = vo->driver->reconfig(vo, &p2, flags);
+    } else {
+        // Old config() takes window size, while reconfig() takes aspect (!)
+        ret = vo->driver->config(vo, p2.w, p2.h, d_width, d_height, flags,
+                                 p2.imgfmt);
+        ret = ret ? -1 : 0;
+    }
+    vo->config_ok = (ret >= 0);
     vo->config_count += vo->config_ok;
     if (vo->registered_fd == -1 && vo->event_fd != -1 && vo->config_ok) {
         mp_input_add_key_fd(vo->input_ctx, vo->event_fd, 1, event_fd_callback,
