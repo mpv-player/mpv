@@ -180,6 +180,7 @@ SOURCES = talloc.c \
           core/mp_fifo.c \
           core/mp_msg.c \
           core/mplayer.c \
+          core/options.c \
           core/parser-cfg.c \
           core/parser-mpcmd.c \
           core/path.c \

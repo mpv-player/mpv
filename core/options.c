@@ -33,14 +33,16 @@
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 #include "video/csputils.h"
+#include "sub/sub.h"
+#include "audio/mixer.h"
+#include "audio/filter/af.h"
+#include "audio/decode/dec_audio.h"
+#include "mp_core.h"
 
 extern char *lirc_configfile;
 
 extern int mp_msg_color;
 extern int mp_msg_module;
-
-/* defined in dec_video.c */
-extern int field_dominance;
 
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int fakemono;
@@ -55,11 +57,17 @@ extern const m_option_t cdda_opts[];
 extern int sws_flags;
 extern const char pp_help[];
 
+extern const char mp_help_text[];
+
 static int print_version_opt(const m_option_t *opt, const char *name,
-                             const char *param);
+                             const char *param)
+{
+    mp_print_version(true);
+    exit(0);
+}
 
 #ifdef CONFIG_RADIO
-const m_option_t radioopts_conf[]={
+static const m_option_t radioopts_conf[]={
     {"device", &stream_radio_defaults.device, CONF_TYPE_STRING, 0, 0 ,0, NULL},
     {"driver", &stream_radio_defaults.driver, CONF_TYPE_STRING, 0, 0 ,0, NULL},
     {"channels", &stream_radio_defaults.channels, CONF_TYPE_STRING_LIST, 0, 0 ,0, NULL},
@@ -72,7 +80,7 @@ const m_option_t radioopts_conf[]={
 #endif /* CONFIG_RADIO */
 
 #ifdef CONFIG_TV
-const m_option_t tvopts_conf[]={
+static const m_option_t tvopts_conf[]={
     {"immediatemode", &stream_tv_defaults.immediate, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
     {"audio", &stream_tv_defaults.noaudio, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"audiorate", &stream_tv_defaults.audiorate, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -130,7 +138,7 @@ extern int pvr_param_bitrate_peak;
 extern char *pvr_param_stream_type;
 
 #ifdef CONFIG_PVR
-const m_option_t pvropts_conf[]={
+static const m_option_t pvropts_conf[]={
     {"aspect", &pvr_param_aspect_ratio, CONF_TYPE_INT, 0, 1, 4, NULL},
     {"arate", &pvr_param_sample_rate, CONF_TYPE_INT, 0, 32000, 48000, NULL},
     {"alayer", &pvr_param_audio_layer, CONF_TYPE_INT, 0, 1, 2, NULL},
@@ -154,7 +162,7 @@ extern float sws_lum_gblur;
 extern float sws_chr_sharpen;
 extern float sws_lum_sharpen;
 
-const m_option_t scaler_filter_conf[]={
+static const m_option_t scaler_filter_conf[]={
     {"lgb", &sws_lum_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
     {"cgb", &sws_chr_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
     {"cvs", &sws_chr_vshift, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -168,21 +176,18 @@ extern char *dvd_device, *cdrom_device;
 
 extern double mf_fps;
 extern char * mf_type;
-extern m_obj_list_t vf_obj_list;
+extern const m_obj_list_t vf_obj_list;
 
-const m_option_t mfopts_conf[]={
+static const m_option_t mfopts_conf[]={
     {"fps", &mf_fps, CONF_TYPE_DOUBLE, 0, 0, 0, NULL},
     {"type", &mf_type, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-#include "audio/filter/af.h"
-extern struct af_cfg af_cfg; // Audio filter configuration, defined in libmpcodecs/dec_audio.c
-
 extern int mp_msg_levels[MSGT_MAX];
 extern int mp_msg_level_all;
 
-const m_option_t msgl_config[]={
+static const m_option_t msgl_config[]={
     { "all", &mp_msg_level_all, CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL},
 
     { "global", &mp_msg_levels[MSGT_GLOBAL], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
@@ -278,12 +283,29 @@ const m_option_t msgl_config[]={
 
 };
 
-extern const m_option_t lavc_decode_opts_conf[];
-extern const m_option_t ad_lavc_decode_opts_conf[];
+#ifdef CONFIG_TV
+static const m_option_t tvscan_conf[]={
+    {"autostart", &stream_tv_defaults.scan, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"threshold", &stream_tv_defaults.scan_threshold, CONF_TYPE_INT, CONF_RANGE, 1, 100, NULL},
+    {"period", &stream_tv_defaults.scan_period, CONF_TYPE_FLOAT, CONF_RANGE, 0.1, 2.0, NULL},
+    {NULL, NULL, 0, 0, 0, 0, NULL}
+};
+#endif
 
 #define OPT_BASE_STRUCT struct MPOpts
 
-const m_option_t common_opts[] = {
+extern const struct m_sub_options image_writer_conf;
+
+static const m_option_t screenshot_conf[] = {
+    OPT_SUBSTRUCT("", screenshot_image_opts, image_writer_conf, 0),
+    OPT_STRING("template", screenshot_template, 0),
+    {0},
+};
+
+extern const m_option_t lavc_decode_opts_conf[];
+extern const m_option_t ad_lavc_decode_opts_conf[];
+
+const m_option_t mp_opts[] = {
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, CONF_GLOBAL),
     {"really-quiet", &verbose, CONF_TYPE_STORE, CONF_GLOBAL|CONF_PRE_PARSE, 0, -10, NULL},
@@ -434,7 +456,7 @@ const m_option_t common_opts[] = {
 
     {"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
-    OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
+    OPT_SETTINGSLIST("vf*", vf_settings, 0, (void *) &vf_obj_list),
 
     OPT_STRING("ad", audio_decoders, 0),
     OPT_STRING("vd", video_decoders, 0),
@@ -504,28 +526,6 @@ const m_option_t common_opts[] = {
     OPT_FLOATRANGE("osd-bar-h", osd_bar_h, 0, 0.1, 50),
     OPT_SUBSTRUCT("osd", osd_style, osd_style_conf, 0),
     OPT_SUBSTRUCT("sub-text", sub_text_style, osd_style_conf, 0),
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
-
-#ifdef CONFIG_TV
-const m_option_t tvscan_conf[]={
-    {"autostart", &stream_tv_defaults.scan, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"threshold", &stream_tv_defaults.scan_threshold, CONF_TYPE_INT, CONF_RANGE, 1, 100, NULL},
-    {"period", &stream_tv_defaults.scan_period, CONF_TYPE_FLOAT, CONF_RANGE, 0.1, 2.0, NULL},
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
-#endif
-
-extern const struct m_sub_options image_writer_conf;
-
-const m_option_t screenshot_conf[] = {
-    OPT_SUBSTRUCT("", screenshot_image_opts, image_writer_conf, 0),
-    OPT_STRING("template", screenshot_template, 0),
-    {0},
-};
-
-const m_option_t mplayer_opts[]={
-    /* name, pointer, type, flags, min, max */
 
 //---------------------- libao/libvo options ------------------------
     OPT_STRINGLIST("vo", vo.video_driver_list, 0),
@@ -699,8 +699,8 @@ const m_option_t mplayer_opts[]={
 
     OPT_FLAG("list-properties", list_properties, CONF_GLOBAL),
     {"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},
-    {"help", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
-    {"h", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
+    {"help", (void *) mp_help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
+    {"h", (void *) mp_help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {"version", (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
     {"V",       (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
 
@@ -727,7 +727,7 @@ const m_option_t mplayer_opts[]={
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-static const struct MPOpts mp_default_opts = {
+const struct MPOpts mp_default_opts = {
     .reset_options = (char **)(const char *[]){"pause", NULL},
     .audio_driver_list = NULL,
     .audio_decoders = "-spdif:*", // never select spdif by default

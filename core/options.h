@@ -268,4 +268,7 @@ typedef struct MPOpts {
     } encode_output;
 } MPOpts;
 
+extern const m_option_t mp_opts[];
+extern const struct MPOpts mp_default_opts;
+
 #endif

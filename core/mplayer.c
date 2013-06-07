@@ -141,6 +141,7 @@
 #include "stream/stream_dvd.h"
 #endif
 
+#include "audio/filter/af.h"
 #include "audio/decode/dec_audio.h"
 #include "video/decode/dec_video.h"
 #include "video/mp_image.h"
@@ -152,7 +153,7 @@
 #include "core/mp_core.h"
 #include "core/options.h"
 
-static const char help_text[] = _(
+const char mp_help_text[] = _(
 "Usage:   mpv [options] [url|path/]filename\n"
 "\n"
 "Basic options: (complete list in the man page)\n"
@@ -198,8 +199,6 @@ static const char av_desync_help_text[] = _(
 
 #include "core/mp_common.h"
 #include "core/command.h"
-
-#include "core/options.c"
 
 static void reset_subtitles(struct MPContext *mpctx);
 static void reinit_subs(struct MPContext *mpctx);
@@ -4504,17 +4503,10 @@ static void play_files(struct MPContext *mpctx)
     }
 }
 
-static void print_version(int always)
+void mp_print_version(int always)
 {
     mp_msg(MSGT_CPLAYER, always ? MSGL_INFO : MSGL_V,
            "%s (C) 2000-2013 mpv/MPlayer/mplayer2 projects\n built on %s\n", mplayer_version, mplayer_builddate);
-}
-
-static int print_version_opt(const m_option_t *opt, const char *name,
-                             const char *param)
-{
-    print_version(true);
-    exit(0);
 }
 
 static bool handle_help_options(struct MPContext *mpctx)
@@ -4641,14 +4633,13 @@ static int mpv_main(int argc, char *argv[])
     struct MPOpts *opts = &mpctx->opts;
     // Create the config context and register the options
     mpctx->mconfig = m_config_new(opts, cfg_include);
-    m_config_register_options(mpctx->mconfig, mplayer_opts);
-    m_config_register_options(mpctx->mconfig, common_opts);
+    m_config_register_options(mpctx->mconfig, mp_opts);
     mp_input_register_options(mpctx->mconfig);
 
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, argc, argv);
 
-    print_version(false);
+    mp_print_version(false);
     print_libav_versions();
 
     if (!parse_cfgfiles(mpctx, mpctx->mconfig))
@@ -4674,8 +4665,8 @@ static int mpv_main(int argc, char *argv[])
     mp_msg(MSGT_CPLAYER, MSGL_V, "\n");
 
     if (!mpctx->playlist->first && !opts->player_idle_mode) {
-        print_version(true);
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", mp_gtext(help_text));
+        mp_print_version(true);
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", mp_gtext(mp_help_text));
         exit_player(mpctx, EXIT_NONE, 0);
     }
 
