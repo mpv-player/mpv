@@ -996,7 +996,7 @@ static int parse_str_list(const m_option_t *opt, struct bstr name,
     }
 
     // All other ops need a param
-    if (param.len == 0)
+    if (param.len == 0 && op != OP_NONE)
         return M_OPT_MISSING_PARAM;
 
     // custom type for "profile" calls this but uses ->priv for something else
@@ -1009,7 +1009,7 @@ static int parse_str_list(const m_option_t *opt, struct bstr name,
         str = bstr_cut(str, 1);
         n++;
     }
-    if (n == 0)
+    if (n == 0 && op != OP_NONE)
         return M_OPT_INVALID;
     if (((opt->flags & M_OPT_MIN) && (n < opt->min)) ||
         ((opt->flags & M_OPT_MAX) && (n > opt->max)))
@@ -1046,6 +1046,9 @@ static int parse_str_list(const m_option_t *opt, struct bstr name,
     if (VAL(dst))
         free_str_list(dst);
     VAL(dst) = res;
+
+    if (!res[0])
+        free_str_list(dst);
 
     return 1;
 }
