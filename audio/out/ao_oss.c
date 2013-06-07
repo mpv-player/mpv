@@ -60,40 +60,46 @@ struct priv {
     int audio_delay_method;
 };
 
-static int format2oss(int format)
-{
-    switch (format) {
-    case AF_FORMAT_U8: return AFMT_U8;
-    case AF_FORMAT_S8: return AFMT_S8;
-    case AF_FORMAT_U16_LE: return AFMT_U16_LE;
-    case AF_FORMAT_U16_BE: return AFMT_U16_BE;
-    case AF_FORMAT_S16_LE: return AFMT_S16_LE;
-    case AF_FORMAT_S16_BE: return AFMT_S16_BE;
+static int format_table[][2] = {
+    {AFMT_U8,           AF_FORMAT_U8},
+    {AFMT_S8,           AF_FORMAT_S8},
+    {AFMT_U16_LE,       AF_FORMAT_U16_LE},
+    {AFMT_U16_BE,       AF_FORMAT_U16_BE},
+    {AFMT_S16_LE,       AF_FORMAT_S16_LE},
+    {AFMT_S16_BE,       AF_FORMAT_S16_BE},
 #ifdef AFMT_S24_PACKED
-    case AF_FORMAT_S24_LE: return AFMT_S24_PACKED;
+    {AFMT_S24_PACKED,   AF_FORMAT_S24_LE},
 #endif
 #ifdef AFMT_U32_LE
-    case AF_FORMAT_U32_LE: return AFMT_U32_LE;
+    {AFMT_U32_LE,       AF_FORMAT_U32_LE},
 #endif
 #ifdef AFMT_U32_BE
-    case AF_FORMAT_U32_BE: return AFMT_U32_BE;
+    {AFMT_U32_BE,       AF_FORMAT_U32_BE},
 #endif
 #ifdef AFMT_S32_LE
-    case AF_FORMAT_S32_LE: return AFMT_S32_LE;
+    {AFMT_S32_LE,       AF_FORMAT_S32_LE},
 #endif
 #ifdef AFMT_S32_BE
-    case AF_FORMAT_S32_BE: return AFMT_S32_BE;
+    {AFMT_S32_BE,       AF_FORMAT_S32_BE},
 #endif
 #ifdef AFMT_FLOAT
-    case AF_FORMAT_FLOAT_NE: return AFMT_FLOAT;
+    {AFMT_FLOAT,        AF_FORMAT_FLOAT_NE},
 #endif
-        // SPECIALS
+    // SPECIALS
 #ifdef AFMT_MPEG
-    case AF_FORMAT_MPEG2: return AFMT_MPEG;
+    {AFMT_MPEG,         AF_FORMAT_MPEG2},
 #endif
 #ifdef AFMT_AC3
-    case AF_FORMAT_AC3_NE: return AFMT_AC3;
+    {AFMT_AC3,          AF_FORMAT_AC3_NE},
 #endif
+    {-1, -1}
+};
+
+static int format2oss(int format)
+{
+    for (int n = 0; format_table[n][0] != -1; n++) {
+        if (format_table[n][1] == format)
+            return format_table[n][0];
     }
     mp_msg(MSGT_AO, MSGL_V, "OSS: Unknown/not supported internal format: %s\n",
            af_fmt2str_short(format));
@@ -102,38 +108,9 @@ static int format2oss(int format)
 
 static int oss2format(int format)
 {
-    switch (format) {
-    case AFMT_U8: return AF_FORMAT_U8;
-    case AFMT_S8: return AF_FORMAT_S8;
-    case AFMT_U16_LE: return AF_FORMAT_U16_LE;
-    case AFMT_U16_BE: return AF_FORMAT_U16_BE;
-    case AFMT_S16_LE: return AF_FORMAT_S16_LE;
-    case AFMT_S16_BE: return AF_FORMAT_S16_BE;
-#ifdef AFMT_S24_PACKED
-    case AFMT_S24_PACKED: return AF_FORMAT_S24_LE;
-#endif
-#ifdef AFMT_U32_LE
-    case AFMT_U32_LE: return AF_FORMAT_U32_LE;
-#endif
-#ifdef AFMT_U32_BE
-    case AFMT_U32_BE: return AF_FORMAT_U32_BE;
-#endif
-#ifdef AFMT_S32_LE
-    case AFMT_S32_LE: return AF_FORMAT_S32_LE;
-#endif
-#ifdef AFMT_S32_BE
-    case AFMT_S32_BE: return AF_FORMAT_S32_BE;
-#endif
-#ifdef AFMT_FLOAT
-    case AFMT_FLOAT: return AF_FORMAT_FLOAT_NE;
-#endif
-        // SPECIALS
-#ifdef AFMT_MPEG
-    case AFMT_MPEG: return AF_FORMAT_MPEG2;
-#endif
-#ifdef AFMT_AC3
-    case AFMT_AC3: return AF_FORMAT_AC3_NE;
-#endif
+    for (int n = 0; format_table[n][0] != -1; n++) {
+        if (format_table[n][0] == format)
+            return format_table[n][1];
     }
     mp_tmsg(MSGT_GLOBAL, MSGL_ERR, "[AO OSS] Unknown/Unsupported OSS format: %x.\n",
             format);
