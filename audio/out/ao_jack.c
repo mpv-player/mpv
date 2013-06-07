@@ -40,16 +40,6 @@
 
 //! maximum number of channels supported, avoids lots of mallocs
 #define MAX_CHANS MP_NUM_CHANNELS
-static jack_port_t * ports[MAX_CHANS];
-static int num_ports; ///< Number of used ports == number of channels
-static jack_client_t *client;
-static float jack_latency;
-static int estimate;
-static volatile int paused = 0; ///< set if paused
-static volatile int underrun = 0; ///< signals if an underrun occured
-
-static volatile float callback_interval = 0;
-static volatile float callback_time = 0;
 
 //! size of one chunk, if this is too small MPlayer will start to "stutter"
 //! after a short time of playback
@@ -57,8 +47,18 @@ static volatile float callback_time = 0;
 //! number of "virtual" chunks the buffer consists of
 #define NUM_CHUNKS 8
 
-//! buffer for audio data
-static AVFifoBuffer *buffer;
+struct priv {
+    jack_port_t * ports[MAX_CHANS];
+    int num_ports; // Number of used ports == number of channels
+    jack_client_t *client;
+    float jack_latency;
+    int estimate;
+    volatile int paused;
+    volatile int underrun; // signals if an underrun occured
+    volatile float callback_interval;
+    volatile float callback_time;
+    AVFifoBuffer *buffer; // buffer for audio data
+};
 
 /**
  * \brief insert len bytes into buffer
@@ -68,7 +68,7 @@ static AVFifoBuffer *buffer;
  *
  * If there is not enough room, the buffer is filled up
  */
-static int write_buffer(unsigned char *data, int len)
+static int write_buffer(AVFifoBuffer *buffer, unsigned char *data, int len)
 {
     int free = av_fifo_space(buffer);
     if (len > free)
@@ -113,7 +113,7 @@ static void deinterleave(void *info, void *src, int len)
  * If there is not enough data in the buffer remaining parts will be filled
  * with silence.
  */
-static int read_buffer(float **bufs, int cnt, int num_bufs)
+static int read_buffer(AVFifoBuffer *buffer, float **bufs, int cnt, int num_bufs)
 {
     struct deinterleave di = {
         bufs, num_bufs, 0, 0
@@ -154,22 +154,23 @@ static void silence(float **bufs, int cnt, int num_bufs)
 static int outputaudio(jack_nframes_t nframes, void *arg)
 {
     struct ao *ao = arg;
+    struct priv *p = ao->priv;
     float *bufs[MAX_CHANS];
     int i;
-    for (i = 0; i < num_ports; i++)
-        bufs[i] = jack_port_get_buffer(ports[i], nframes);
-    if (paused || underrun || !buffer)
-        silence(bufs, nframes, num_ports);
-    else if (read_buffer(bufs, nframes, num_ports) < nframes)
-        underrun = 1;
-    if (estimate) {
+    for (i = 0; i < p->num_ports; i++)
+        bufs[i] = jack_port_get_buffer(p->ports[i], nframes);
+    if (p->paused || p->underrun || !p->buffer)
+        silence(bufs, nframes, p->num_ports);
+    else if (read_buffer(p->buffer, bufs, nframes, p->num_ports) < nframes)
+        p->underrun = 1;
+    if (p->estimate) {
         float now = mp_time_us() / 1000000.0;
-        float diff = callback_time + callback_interval - now;
+        float diff = p->callback_time + p->callback_interval - now;
         if ((diff > -0.002) && (diff < 0.002))
-            callback_time += callback_interval;
+            p->callback_time += p->callback_interval;
         else
-            callback_time = now;
-        callback_interval = (float)nframes / (float)ao->samplerate;
+            p->callback_time = now;
+        p->callback_interval = (float)nframes / (float)ao->samplerate;
     }
     return 0;
 }
@@ -205,10 +206,11 @@ static int init(struct ao *ao, char *params)
     char *client_name = NULL;
     int autostart = 0;
     int connect = 1;
+    struct priv *p = talloc_zero(ao, struct priv);
     const opt_t subopts[] = {
         {"port", OPT_ARG_MSTRZ, &port_name, NULL},
         {"name", OPT_ARG_MSTRZ, &client_name, NULL},
-        {"estimate", OPT_ARG_BOOL, &estimate, NULL},
+        {"estimate", OPT_ARG_BOOL, &p->estimate, NULL},
         {"autostart", OPT_ARG_BOOL, &autostart, NULL},
         {"connect", OPT_ARG_BOOL, &connect, NULL},
         {NULL}
@@ -216,7 +218,8 @@ static int init(struct ao *ao, char *params)
     jack_options_t open_options = JackUseExactName;
     int port_flags = JackPortIsInput;
     int i;
-    estimate = 1;
+    ao->priv = p;
+    p->estimate = 1;
     if (subopt_parse(params, subopts) != 0) {
         print_help();
         return -1;
@@ -233,63 +236,63 @@ static int init(struct ao *ao, char *params)
     }
     if (!autostart)
         open_options |= JackNoStartServer;
-    client = jack_client_open(client_name, open_options, NULL);
-    if (!client) {
+    p->client = jack_client_open(client_name, open_options, NULL);
+    if (!p->client) {
         mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] cannot open server\n");
         goto err_out;
     }
-    jack_set_process_callback(client, outputaudio, ao);
+    jack_set_process_callback(p->client, outputaudio, ao);
 
     // list matching ports if connections should be made
     if (connect) {
         if (!port_name)
             port_flags |= JackPortIsPhysical;
-        matching_ports = jack_get_ports(client, port_name, NULL, port_flags);
+        matching_ports = jack_get_ports(p->client, port_name, NULL, port_flags);
         if (!matching_ports || !matching_ports[0]) {
             mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] no physical ports available\n");
             goto err_out;
         }
         i = 1;
-        num_ports = ao->channels.num;
+        p->num_ports = ao->channels.num;
         while (matching_ports[i])
             i++;
-        if (num_ports > i)
-            num_ports = i;
+        if (p->num_ports > i)
+            p->num_ports = i;
     }
 
     // create out output ports
-    for (i = 0; i < num_ports; i++) {
+    for (i = 0; i < p->num_ports; i++) {
         char pname[30];
         snprintf(pname, 30, "out_%d", i);
-        ports[i] =
-            jack_port_register(client, pname, JACK_DEFAULT_AUDIO_TYPE,
-                               JackPortIsOutput,
-                               0);
-        if (!ports[i]) {
+        p->ports[i] =
+            jack_port_register(p->client, pname, JACK_DEFAULT_AUDIO_TYPE,
+                               JackPortIsOutput, 0);
+        if (!p->ports[i]) {
             mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] not enough ports available\n");
             goto err_out;
         }
     }
-    if (jack_activate(client)) {
+    if (jack_activate(p->client)) {
         mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] activate failed\n");
         goto err_out;
     }
-    for (i = 0; i < num_ports; i++) {
-        if (jack_connect(client, jack_port_name(ports[i]),
-                         matching_ports[i])) {
+    for (i = 0; i < p->num_ports; i++) {
+        if (jack_connect(p->client, jack_port_name(p->ports[i]),
+                         matching_ports[i]))
+        {
             mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] connecting failed\n");
             goto err_out;
         }
     }
-    ao->samplerate = jack_get_sample_rate(client);
+    ao->samplerate = jack_get_sample_rate(p->client);
     jack_latency_range_t jack_latency_range;
-    jack_port_get_latency_range(ports[0], JackPlaybackLatency,
+    jack_port_get_latency_range(p->ports[0], JackPlaybackLatency,
                                 &jack_latency_range);
-    jack_latency = (float)(jack_latency_range.max + jack_get_buffer_size(client))
-                   / (float)ao->samplerate;
-    callback_interval = 0;
+    p->jack_latency = (float)(jack_latency_range.max + jack_get_buffer_size(p->client))
+                      / (float)ao->samplerate;
+    p->callback_interval = 0;
 
-    if (!ao_chmap_sel_get_def(ao, &sel, &ao->channels, num_ports))
+    if (!ao_chmap_sel_get_def(ao, &sel, &ao->channels, p->num_ports))
         goto err_out;
 
     ao->format = AF_FORMAT_FLOAT_NE;
@@ -297,7 +300,7 @@ static int init(struct ao *ao, char *params)
     int unitsize = ao->channels.num * sizeof(float);
     ao->outburst = CHUNK_SIZE / unitsize * unitsize;
     ao->buffersize = NUM_CHUNKS * ao->outburst;
-    buffer = av_fifo_alloc(ao->buffersize);
+    p->buffer = av_fifo_alloc(ao->buffersize);
     free(matching_ports);
     free(port_name);
     free(client_name);
@@ -307,20 +310,20 @@ err_out:
     free(matching_ports);
     free(port_name);
     free(client_name);
-    if (client)
-        jack_client_close(client);
-    av_fifo_free(buffer);
-    buffer = NULL;
+    if (p->client)
+        jack_client_close(p->client);
+    av_fifo_free(p->buffer);
     return -1;
 }
 
 static float get_delay(struct ao *ao)
 {
-    int buffered = av_fifo_size(buffer); // could be less
-    float in_jack = jack_latency;
-    if (estimate && callback_interval > 0) {
-        float elapsed = mp_time_us() / 1000000.0 - callback_time;
-        in_jack += callback_interval - elapsed;
+    struct priv *p = ao->priv;
+    int buffered = av_fifo_size(p->buffer); // could be less
+    float in_jack = p->jack_latency;
+    if (p->estimate && p->callback_interval > 0) {
+        float elapsed = mp_time_us() / 1000000.0 - p->callback_time;
+        in_jack += p->callback_interval - elapsed;
         if (in_jack < 0)
             in_jack = 0;
     }
@@ -332,22 +335,23 @@ static float get_delay(struct ao *ao)
  */
 static void reset(struct ao *ao)
 {
-    paused = 1;
-    av_fifo_reset(buffer);
-    paused = 0;
+    struct priv *p = ao->priv;
+    p->paused = 1;
+    av_fifo_reset(p->buffer);
+    p->paused = 0;
 }
 
 // close audio device
 static void uninit(struct ao *ao, bool immed)
 {
+    struct priv *p = ao->priv;
     if (!immed)
         mp_sleep_us(get_delay(ao) * 1000 * 1000);
     // HACK, make sure jack doesn't loop-output dirty buffers
     reset(ao);
     mp_sleep_us(100 * 1000);
-    jack_client_close(client);
-    av_fifo_free(buffer);
-    buffer = NULL;
+    jack_client_close(p->client);
+    av_fifo_free(p->buffer);
 }
 
 /**
@@ -355,7 +359,8 @@ static void uninit(struct ao *ao, bool immed)
  */
 static void audio_pause(struct ao *ao)
 {
-    paused = 1;
+    struct priv *p = ao->priv;
+    p->paused = 1;
 }
 
 /**
@@ -363,12 +368,14 @@ static void audio_pause(struct ao *ao)
  */
 static void audio_resume(struct ao *ao)
 {
-    paused = 0;
+    struct priv *p = ao->priv;
+    p->paused = 0;
 }
 
 static int get_space(struct ao *ao)
 {
-    return av_fifo_space(buffer);
+    struct priv *p = ao->priv;
+    return av_fifo_space(p->buffer);
 }
 
 /**
@@ -376,10 +383,11 @@ static int get_space(struct ao *ao)
  */
 static int play(struct ao *ao, void *data, int len, int flags)
 {
+    struct priv *p = ao->priv;
     if (!(flags & AOPLAY_FINAL_CHUNK))
         len -= len % ao->outburst;
-    underrun = 0;
-    return write_buffer(data, len);
+    p->underrun = 0;
+    return write_buffer(p->buffer, data, len);
 }
 
 const struct ao_driver audio_out_jack = {
