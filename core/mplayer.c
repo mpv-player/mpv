@@ -199,6 +199,8 @@ static const char av_desync_help_text[] = _(
 #include "core/mp_common.h"
 #include "core/command.h"
 
+#include "core/options.c"
+
 static void reset_subtitles(struct MPContext *mpctx);
 static void reinit_subs(struct MPContext *mpctx);
 static struct track *open_external_file(struct MPContext *mpctx, char *filename,
@@ -636,8 +638,6 @@ static void mk_config_dir(char *subdir)
     mkdir(confdir, 0777);
     talloc_free(tmp);
 }
-
-#include "cfg-mplayer.h"
 
 static int cfg_include(struct m_config *conf, char *filename)
 {
