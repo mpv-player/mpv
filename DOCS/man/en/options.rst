@@ -1741,6 +1741,8 @@
     behavior is the opposite of MPlayer's, which tries to reset all settings
     when starting next file.)
 
+    Default: ``--reset-on-next-file=pause`` (only the pause mode is reset).
+
     This can be changed with this option. It accepts a list of options, and
     mpv will reset the value of these options on playback start to the initial
     value. The initial value is either the default value, or as set by the
@@ -1758,6 +1760,7 @@
       speed settings if they were changed during playback.
     - ``--reset-on-next-file=all`` Try to reset all settings that were changed
       during playback.
+    - ``--reset-on-next-file=""`` Don't reset pause mode.
 
 --reuse-socket
     (udp:// only)

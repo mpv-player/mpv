@@ -8,7 +8,9 @@
 
 void set_default_mplayer_options(struct MPOpts *opts)
 {
+    static const char *reset_options[] = {"pause", NULL};
     *opts = (const struct MPOpts){
+        .reset_options = (char **)reset_options,
         .audio_driver_list = NULL,
         .audio_decoders = "-spdif:*", // never select spdif by default
         .video_decoders = NULL,
