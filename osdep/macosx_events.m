@@ -92,16 +92,72 @@ static int convert_key(unsigned key, unsigned charcode)
     return charcode;
 }
 
-void cocoa_start_apple_remote(void)
+void cocoa_init_apple_remote(void)
 {
     Application *app = mpv_shared_app();
     [app.eventsResponder startAppleRemote];
 }
 
-void cocoa_stop_apple_remote(void)
+void cocoa_uninit_apple_remote(void)
 {
     Application *app = mpv_shared_app();
     [app.eventsResponder stopAppleRemote];
+}
+
+static int mk_code(NSEvent *event)
+{
+    return (([event data1] & 0xFFFF0000) >> 16);
+}
+
+static int mk_flags(NSEvent *event)
+{
+    return ([event data1] & 0x0000FFFF);
+}
+
+static  int mk_down(NSEvent *event) {
+    return (((mk_flags(event) & 0xFF00) >> 8)) == 0xA;
+}
+
+static CGEventRef tap_event_callback(CGEventTapProxy proxy, CGEventType type,
+                                     CGEventRef event, void *ctx)
+{
+    EventsResponder *responder = ctx;
+
+    if (type == kCGEventTapDisabledByTimeout) {
+        // The Mach Port receiving the taps became unresponsive for some
+        // reason, restart listening on it.
+        [responder restartMediaKeys];
+        return event;
+    }
+
+    if (type == kCGEventTapDisabledByUserInput)
+        return event;
+
+    NSEvent *nse = [NSEvent eventWithCGEvent:event];
+
+    if ([nse type] != NSSystemDefined || [nse subtype] != 8)
+        // This is not a media key
+        return event;
+
+    if (mk_down(nse) && [responder handleMediaKey:nse]) {
+        // Handled this event, return nil so that it is removed from the
+        // global queue.
+        return nil;
+    } else {
+        // Was a media key but we were not interested in it. Leave it in the
+        // global queue by returning the original event.
+        return event;
+    }
+}
+
+void cocoa_init_media_keys(void) {
+    Application *app = mpv_shared_app();
+    [app.eventsResponder startMediaKeys];
+}
+
+void cocoa_uninit_media_keys(void) {
+    Application *app = mpv_shared_app();
+    [app.eventsResponder stopMediaKeys];
 }
 
 void cocoa_check_events(void)
@@ -117,14 +173,17 @@ void cocoa_put_key(int keycode)
     [mpv_shared_app().iqueue push:keycode];
 }
 
-@implementation EventsResponder
+@implementation EventsResponder {
+    CFMachPortRef _mk_tap_port;
+    HIDRemote *_remote;
+}
 - (void)startAppleRemote
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        self.remote = [[[HIDRemote alloc] init] autorelease];
-        if (self.remote) {
-            [self.remote setDelegate:self];
-            [self.remote startRemoteControl:kHIDRemoteModeExclusiveAuto];
+        self->_remote = [[HIDRemote alloc] init];
+        if (self->_remote) {
+            [self->_remote setDelegate:self];
+            [self->_remote startRemoteControl:kHIDRemoteModeExclusiveAuto];
         }
     });
 
@@ -132,29 +191,71 @@ void cocoa_put_key(int keycode)
 - (void)stopAppleRemote
 {
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.remote stopRemoteControl];
+        [self->_remote stopRemoteControl];
+        [self->_remote release];
     });
 }
+- (void)restartMediaKeys
+{
+    CGEventTapEnable(self->_mk_tap_port, true);
+}
+- (void)startMediaKeys
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        // Install a Quartz Event Tap. This will notify mpv through the
+        // returned Mach Port and cause mpv to execute the `tap_event_callback`
+        // function.
+        self->_mk_tap_port = CGEventTapCreate(kCGSessionEventTap,
+            kCGHeadInsertEventTap,
+            kCGEventTapOptionDefault,
+            CGEventMaskBit(NX_SYSDEFINED),
+            tap_event_callback,
+            self);
+
+        assert(self->_mk_tap_port != nil);
+
+        NSMachPort *port = (NSMachPort *)self->_mk_tap_port;
+        [[NSRunLoop mainRunLoop] addPort:port forMode:NSRunLoopCommonModes];
+    });
+}
+- (void)stopMediaKeys
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        NSMachPort *port = (NSMachPort *)self->_mk_tap_port;
+        [[NSRunLoop mainRunLoop] removePort:port forMode:NSRunLoopCommonModes];
+        CFRelease(self->_mk_tap_port);
+        self->_mk_tap_port = nil;
+    });
+}
+
 - (NSArray *) keyEquivalents
 {
     return @[@"h", @"q", @"Q", @"0", @"1", @"2"];
 }
-- (void)handleMediaKey:(int)key
+
+- (BOOL)isAppKeyEquivalent:(NSString *)eq withEvent:(NSEvent *)event
 {
-    switch (key) {
-        case NX_KEYTYPE_PLAY:
-            cocoa_put_key(MP_KEY_PLAY);
-            break;
+    if ([event modifierFlags] & NSCommandKeyMask)
+        for(NSString *c in [self keyEquivalents])
+            if ([eq isEqualToString:c])
+                return YES;
 
-        case NX_KEYTYPE_FAST:
-            cocoa_put_key(MP_KEY_NEXT);
-            break;
-
-        case NX_KEYTYPE_REWIND:
-            cocoa_put_key(MP_KEY_PREV);
-            break;
-    }
+    return NO;
 }
+
+- (BOOL)handleMediaKey:(NSEvent *)event
+{
+    NSDictionary *keymap = @{
+        @(NX_KEYTYPE_PLAY):    @(MP_MK_PLAY),
+        @(NX_KEYTYPE_REWIND):  @(MP_MK_PREV),
+        @(NX_KEYTYPE_FAST):    @(MP_MK_NEXT),
+    };
+
+    return [self handleKey:mk_code(event)
+                  withMask:[self keyModifierMask:event]
+                andMapping:keymap];
+}
+
 - (NSEvent*)handleKeyDown:(NSEvent *)event
 {
     NSString *chars;
@@ -167,26 +268,17 @@ void cocoa_put_key(int keycode)
     int key = convert_key([event keyCode], *[chars UTF8String]);
 
     if (key > -1) {
-        if ([event modifierFlags] & NSShiftKeyMask)
-            key |= MP_KEY_MODIFIER_SHIFT;
-        if ([event modifierFlags] & NSControlKeyMask)
-            key |= MP_KEY_MODIFIER_CTRL;
-        if (LeftAltPressed(event))
-            key |= MP_KEY_MODIFIER_ALT;
-        if ([event modifierFlags] & NSCommandKeyMask) {
+        if ([self isAppKeyEquivalent:chars withEvent:event])
             // propagate the event in case this is a menu key equivalent
-            for(NSString *c in [self keyEquivalents])
-                if ([chars isEqualToString:c])
-                    return event;
+            return event;
 
-            key |= MP_KEY_MODIFIER_META;
-        }
-
+        key |= [self keyModifierMask:event];
         cocoa_put_key(key);
     }
 
     return nil;
 }
+
 - (void)hidRemote:(HIDRemote *)remote
     eventWithButton:(HIDRemoteButtonCode)buttonCode
           isPressed:(BOOL)isPressed
@@ -211,8 +303,32 @@ void cocoa_put_key(int keycode)
         @(kHIDRemoteButtonCodeDownHold):   @(MP_AR_VDOWN_HOLD),
     };
 
-    int key = [keymap[@(buttonCode)] intValue];
-    if (key > 0)
-        cocoa_put_key(key);
+    [self handleKey:buttonCode withMask:0 andMapping:keymap];
+}
+
+- (int)keyModifierMask:(NSEvent *)event
+{
+    int mask = 0;
+    if ([event modifierFlags] & NSShiftKeyMask)
+        mask |= MP_KEY_MODIFIER_SHIFT;
+    if ([event modifierFlags] & NSControlKeyMask)
+        mask |= MP_KEY_MODIFIER_CTRL;
+    if (LeftAltPressed(event))
+        mask |= MP_KEY_MODIFIER_ALT;
+    if ([event modifierFlags] & NSCommandKeyMask)
+        mask |= MP_KEY_MODIFIER_META;
+
+    return mask;
+}
+
+-(BOOL)handleKey:(int)key withMask:(int)mask andMapping:(NSDictionary *)mapping
+{
+    int mpkey = [mapping[@(key)] intValue];
+    if (mpkey > 0) {
+        cocoa_put_key(mpkey | mask);
+        return YES;
+    } else {
+        return NO;
+    }
 }
 @end

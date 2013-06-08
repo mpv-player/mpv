@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <time.h>
 
 #include "config.h"
 #include "talloc.h"
@@ -567,6 +568,16 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
         *(char ***)arg = slist;
         return M_PROPERTY_OK;
     }
+    case M_PROPERTY_PRINT: {
+        char **list = demuxer->info;
+        char *res = NULL;
+        for (int n = 0; list[n]; n += 2) {
+            res = talloc_asprintf_append_buffer(res, "%s: %s\n",
+                                                list[n], list[n + 1]);
+        }
+        *(char **)arg = res;
+        return M_PROPERTY_OK;
+    }
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
         char *meta = demux_info_get(demuxer, ka->key);
@@ -609,6 +620,18 @@ static int mp_property_cache(m_option_t *prop, int action, void *arg,
     if (cache < 0)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(prop, action, arg, cache);
+}
+
+static int mp_property_clock(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
+{
+    char outstr[6];
+    time_t t = time(NULL);
+    struct tm *tmp = localtime(&t);
+
+    if ((tmp != NULL) && (strftime(outstr, sizeof(outstr), "%k:%M", tmp) == 5))
+        return m_property_strdup_ro(prop, action, arg, outstr);
+    return M_PROPERTY_UNAVAILABLE;
 }
 
 /// Volume (RW)
@@ -1552,6 +1575,12 @@ static const m_option_t mp_properties[] = {
     { "cache", mp_property_cache, CONF_TYPE_INT },
     M_OPTION_PROPERTY("pts-association-mode"),
     M_OPTION_PROPERTY("hr-seek"),
+    { "clock", mp_property_clock, CONF_TYPE_STRING,
+      0, 0, 0, NULL },
+
+    { "chapter-list", mp_property_list_chapters, CONF_TYPE_STRING },
+    { "track-list", property_list_tracks, CONF_TYPE_STRING },
+    { "playlist", mp_property_playlist, CONF_TYPE_STRING },
 
     { "playlist-pos", mp_property_playlist_pos, CONF_TYPE_INT },
     { "playlist-count", mp_property_playlist_count, CONF_TYPE_INT },
@@ -1703,6 +1732,7 @@ static struct property_osd_display {
     { "pts-association-mode", "PTS association mode" },
     { "hr-seek", "hr-seek" },
     { "speed", _("Speed") },
+    { "clock", _("Clock") },
     // audio
     { "volume", _("Volume"), .osd_progbar = OSD_VOLUME },
     { "mute", _("Mute") },
@@ -1830,34 +1860,6 @@ static const char *property_error_string(int error_value)
         return "PROPERTY_UNKNOWN";
     }
     return "UNKNOWN";
-}
-
-static void show_chapters_on_osd(MPContext *mpctx)
-{
-    int count = get_chapter_count(mpctx);
-    int cur = mpctx->num_sources ? get_current_chapter(mpctx) : -1;
-    char *res = NULL;
-    int n;
-
-    if (count < 1) {
-        res = talloc_asprintf_append(res, "No chapters.");
-    }
-
-    for (n = 0; n < count; n++) {
-        char *name = chapter_display_name(mpctx, n);
-        double t = chapter_start_time(mpctx, n);
-        char* time = mp_format_time(t, false);
-        res = talloc_asprintf_append(res, "%s", time);
-        talloc_free(time);
-        char *m1 = "> ", *m2 = " <";
-        if (n != cur)
-            m1 = m2 = "";
-        res = talloc_asprintf_append(res, "   %s%s%s\n", m1, name, m2);
-        talloc_free(name);
-    }
-
-    set_osd_msg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts.osd_duration, "%s", res);
-    talloc_free(res);
 }
 
 static void change_video_filters(MPContext *mpctx, const char *cmd,
@@ -2451,9 +2453,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_VF:
         change_video_filters(mpctx, cmd->args[0].v.s, cmd->args[1].v.s);
-        break;
-    case MP_CMD_SHOW_CHAPTERS:
-        show_chapters_on_osd(mpctx);
         break;
 
     case MP_CMD_MOUSE_CLICK:

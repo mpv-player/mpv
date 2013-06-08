@@ -208,10 +208,6 @@ static const mp_cmd_t mp_cmds[] = {
 
   { MP_CMD_VF, "vf", { ARG_STRING, ARG_STRING } },
 
-  { MP_CMD_SHOW_CHAPTERS, "show_chapters", },
-  { MP_CMD_SHOW_TRACKS, "show_tracks", },
-  { MP_CMD_SHOW_PLAYLIST, "show_playlist", },
-
   { MP_CMD_VO_CMDLINE, "vo_cmdline", { ARG_STRING } },
 
   { MP_CMD_LUA, "lua", { ARG_STRING } },
@@ -268,10 +264,10 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"osd_show_property_text",  "show_text"},
     {"osd_show_progression",    "show_progress"},
     {"show_chapters_osd",       "show_text ${chapter-list}"},
-    {"show_chapters",           "show_text ${chapter-list}"},
+    {"!show_chapters",          "show_text ${chapter-list}"},
     {"show_tracks_osd",         "show_text ${track-list}"},
-    {"show_tracks",             "show_text ${track-list}"},
-    {"show_playlist",           "show_text ${playlist}"},
+    {"!show_tracks",            "show_text ${track-list}"},
+    {"!show_playlist",          "show_text ${playlist}"},
 
     // Approximate (can fail if user added additional whitespace)
     {"pt_step 1",               "playlist_next"},
@@ -422,6 +418,10 @@ static const struct key_name key_names[] = {
   { MP_AR_VDOWN,        "AR_VDOWN" },
   { MP_AR_VDOWN_HOLD,   "AR_VDOWN_HOLD" },
 
+  { MP_MK_PLAY,         "MK_PLAY" },
+  { MP_MK_PREV,         "MK_PREV" },
+  { MP_MK_NEXT,         "MK_NEXT" },
+
   { MP_KEY_POWER,       "POWER" },
   { MP_KEY_MENU,        "MENU" },
   { MP_KEY_PLAY,        "PLAY" },
@@ -571,6 +571,7 @@ static const m_option_t mp_input_opts[] = {
     OPT_FLAG("lircc", input.use_lircc, CONF_GLOBAL),
 #ifdef CONFIG_COCOA
     OPT_FLAG("ar", input.use_ar, CONF_GLOBAL),
+    OPT_FLAG("media-keys", input.use_media_keys, CONF_GLOBAL),
 #endif
     { NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -839,14 +840,15 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
 
     str = bstr_lstrip(str);
     for (const struct legacy_cmd *entry = legacy_cmds; entry->old; entry++) {
-        size_t old_len = strlen(entry->old);
-        if (bstrcasecmp(bstr_splice(str, 0, old_len),
-                        (bstr) {(char *)entry->old, old_len}) == 0)
-        {
-            mp_tmsg(MSGT_INPUT, MSGL_WARN, "Warning: command '%s' is "
-                    "deprecated, replaced with '%s' at %s.\n",
-                    entry->old, entry->new, loc);
-            bstr s = bstr_cut(str, old_len);
+        bstr old = bstr0(entry->old);
+        bool silent = bstr_eatstart0(&old, "!");
+        if (bstrcasecmp(bstr_splice(str, 0, old.len), old) == 0) {
+            if (!silent) {
+                mp_tmsg(MSGT_INPUT, MSGL_WARN, "Warning: command '%.*s' is "
+                        "deprecated, replaced with '%s' at %s.\n",
+                        BSTR_P(old), entry->new, loc);
+            }
+            bstr s = bstr_cut(str, old.len);
             str = bstr0(talloc_asprintf(tmp, "%s%.*s", entry->new, BSTR_P(s)));
             start = str;
             break;
@@ -1896,7 +1898,11 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf,
 
 #ifdef CONFIG_COCOA
     if (input_conf->use_ar) {
-        cocoa_start_apple_remote();
+        cocoa_init_apple_remote();
+    }
+
+    if (input_conf->use_media_keys) {
+        cocoa_init_media_keys();
     }
 #endif
 
@@ -1938,7 +1944,11 @@ void mp_input_uninit(struct input_ctx *ictx, struct input_conf *input_conf)
 
 #ifdef CONFIG_COCOA
     if (input_conf->use_ar) {
-        cocoa_stop_apple_remote();
+        cocoa_uninit_apple_remote();
+    }
+
+    if (input_conf->use_media_keys) {
+        cocoa_uninit_media_keys();
     }
 #endif
 

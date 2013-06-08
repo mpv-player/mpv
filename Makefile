@@ -174,7 +174,6 @@ SOURCES = talloc.c \
           core/codecs.c \
           core/command.c \
           core/cpudetect.c \
-          core/defaultopts.c \
           core/m_config.c \
           core/m_option.c \
           core/m_property.c \
@@ -183,6 +182,7 @@ SOURCES = talloc.c \
           core/mp_fifo.c \
           core/mp_msg.c \
           core/mplayer.c \
+          core/options.c \
           core/parser-cfg.c \
           core/parser-mpcmd.c \
           core/path.c \

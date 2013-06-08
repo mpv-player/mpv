@@ -33,14 +33,16 @@
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 #include "video/csputils.h"
+#include "sub/sub.h"
+#include "audio/mixer.h"
+#include "audio/filter/af.h"
+#include "audio/decode/dec_audio.h"
+#include "mp_core.h"
 
 extern char *lirc_configfile;
 
 extern int mp_msg_color;
 extern int mp_msg_module;
-
-/* defined in dec_video.c */
-extern int field_dominance;
 
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int fakemono;
@@ -55,11 +57,17 @@ extern const m_option_t cdda_opts[];
 extern int sws_flags;
 extern const char pp_help[];
 
+extern const char mp_help_text[];
+
 static int print_version_opt(const m_option_t *opt, const char *name,
-                             const char *param);
+                             const char *param)
+{
+    mp_print_version(true);
+    exit(0);
+}
 
 #ifdef CONFIG_RADIO
-const m_option_t radioopts_conf[]={
+static const m_option_t radioopts_conf[]={
     {"device", &stream_radio_defaults.device, CONF_TYPE_STRING, 0, 0 ,0, NULL},
     {"driver", &stream_radio_defaults.driver, CONF_TYPE_STRING, 0, 0 ,0, NULL},
     {"channels", &stream_radio_defaults.channels, CONF_TYPE_STRING_LIST, 0, 0 ,0, NULL},
@@ -72,7 +80,7 @@ const m_option_t radioopts_conf[]={
 #endif /* CONFIG_RADIO */
 
 #ifdef CONFIG_TV
-const m_option_t tvopts_conf[]={
+static const m_option_t tvopts_conf[]={
     {"immediatemode", &stream_tv_defaults.immediate, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
     {"audio", &stream_tv_defaults.noaudio, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"audiorate", &stream_tv_defaults.audiorate, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -130,7 +138,7 @@ extern int pvr_param_bitrate_peak;
 extern char *pvr_param_stream_type;
 
 #ifdef CONFIG_PVR
-const m_option_t pvropts_conf[]={
+static const m_option_t pvropts_conf[]={
     {"aspect", &pvr_param_aspect_ratio, CONF_TYPE_INT, 0, 1, 4, NULL},
     {"arate", &pvr_param_sample_rate, CONF_TYPE_INT, 0, 32000, 48000, NULL},
     {"alayer", &pvr_param_audio_layer, CONF_TYPE_INT, 0, 1, 2, NULL},
@@ -154,7 +162,7 @@ extern float sws_lum_gblur;
 extern float sws_chr_sharpen;
 extern float sws_lum_sharpen;
 
-const m_option_t scaler_filter_conf[]={
+static const m_option_t scaler_filter_conf[]={
     {"lgb", &sws_lum_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
     {"cgb", &sws_chr_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
     {"cvs", &sws_chr_vshift, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -168,21 +176,18 @@ extern char *dvd_device, *cdrom_device;
 
 extern double mf_fps;
 extern char * mf_type;
-extern m_obj_list_t vf_obj_list;
+extern const m_obj_list_t vf_obj_list;
 
-const m_option_t mfopts_conf[]={
+static const m_option_t mfopts_conf[]={
     {"fps", &mf_fps, CONF_TYPE_DOUBLE, 0, 0, 0, NULL},
     {"type", &mf_type, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-#include "audio/filter/af.h"
-extern struct af_cfg af_cfg; // Audio filter configuration, defined in libmpcodecs/dec_audio.c
-
 extern int mp_msg_levels[MSGT_MAX];
 extern int mp_msg_level_all;
 
-const m_option_t msgl_config[]={
+static const m_option_t msgl_config[]={
     { "all", &mp_msg_level_all, CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL},
 
     { "global", &mp_msg_levels[MSGT_GLOBAL], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
@@ -278,12 +283,29 @@ const m_option_t msgl_config[]={
 
 };
 
-extern const m_option_t lavc_decode_opts_conf[];
-extern const m_option_t ad_lavc_decode_opts_conf[];
+#ifdef CONFIG_TV
+static const m_option_t tvscan_conf[]={
+    {"autostart", &stream_tv_defaults.scan, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"threshold", &stream_tv_defaults.scan_threshold, CONF_TYPE_INT, CONF_RANGE, 1, 100, NULL},
+    {"period", &stream_tv_defaults.scan_period, CONF_TYPE_FLOAT, CONF_RANGE, 0.1, 2.0, NULL},
+    {NULL, NULL, 0, 0, 0, 0, NULL}
+};
+#endif
 
 #define OPT_BASE_STRUCT struct MPOpts
 
-const m_option_t common_opts[] = {
+extern const struct m_sub_options image_writer_conf;
+
+static const m_option_t screenshot_conf[] = {
+    OPT_SUBSTRUCT("", screenshot_image_opts, image_writer_conf, 0),
+    OPT_STRING("template", screenshot_template, 0),
+    {0},
+};
+
+extern const m_option_t lavc_decode_opts_conf[];
+extern const m_option_t ad_lavc_decode_opts_conf[];
+
+const m_option_t mp_opts[] = {
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, CONF_GLOBAL),
     {"really-quiet", &verbose, CONF_TYPE_STORE, CONF_GLOBAL|CONF_PRE_PARSE, 0, -10, NULL},
@@ -436,7 +458,7 @@ const m_option_t common_opts[] = {
 
     {"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
-    OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
+    OPT_SETTINGSLIST("vf*", vf_settings, 0, (void *) &vf_obj_list),
 
     OPT_STRING("ad", audio_decoders, 0),
     OPT_STRING("vd", video_decoders, 0),
@@ -506,28 +528,6 @@ const m_option_t common_opts[] = {
     OPT_FLOATRANGE("osd-bar-h", osd_bar_h, 0, 0.1, 50),
     OPT_SUBSTRUCT("osd", osd_style, osd_style_conf, 0),
     OPT_SUBSTRUCT("sub-text", sub_text_style, osd_style_conf, 0),
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
-
-#ifdef CONFIG_TV
-const m_option_t tvscan_conf[]={
-    {"autostart", &stream_tv_defaults.scan, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"threshold", &stream_tv_defaults.scan_threshold, CONF_TYPE_INT, CONF_RANGE, 1, 100, NULL},
-    {"period", &stream_tv_defaults.scan_period, CONF_TYPE_FLOAT, CONF_RANGE, 0.1, 2.0, NULL},
-    {NULL, NULL, 0, 0, 0, 0, NULL}
-};
-#endif
-
-extern const struct m_sub_options image_writer_conf;
-
-const m_option_t screenshot_conf[] = {
-    OPT_SUBSTRUCT("", screenshot_image_opts, image_writer_conf, 0),
-    OPT_STRING("template", screenshot_template, 0),
-    {0},
-};
-
-const m_option_t mplayer_opts[]={
-    /* name, pointer, type, flags, min, max */
 
 //---------------------- libao/libvo options ------------------------
     OPT_STRINGLIST("vo", vo.video_driver_list, 0),
@@ -701,8 +701,8 @@ const m_option_t mplayer_opts[]={
 
     OPT_FLAG("list-properties", list_properties, CONF_GLOBAL),
     {"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},
-    {"help", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
-    {"h", (void *) help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
+    {"help", (void *) mp_help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
+    {"h", (void *) mp_help_text, CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
     {"version", (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
     {"V",       (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
 
@@ -727,6 +727,115 @@ const m_option_t mplayer_opts[]={
 #endif
 
     {NULL, NULL, 0, 0, 0, 0, NULL}
+};
+
+const struct MPOpts mp_default_opts = {
+    .reset_options = (char **)(const char *[]){"pause", NULL},
+    .audio_driver_list = NULL,
+    .audio_decoders = "-spdif:*", // never select spdif by default
+    .video_decoders = NULL,
+    .fixed_vo = 1,
+    .softvol = SOFTVOL_AUTO,
+    .softvol_max = 200,
+    .mixer_init_volume = -1,
+    .mixer_init_mute = -1,
+    .volstep = 3,
+    .ao_buffersize = -1,
+    .vo = {
+        .video_driver_list = NULL,
+        .cursor_autohide_delay = 1000,
+        .monitor_pixel_aspect = 1.0,
+        .panscanrange = 1.0,
+        .fs = false,
+        .screen_id = -1,
+        .fsscreen_id = -1,
+        .stop_screensaver = 1,
+        .nomouse_input = 0,
+        .enable_mouse_movements = 1,
+        .fsmode = 0,
+        .panscan = 0.0f,
+        .keepaspect = 1,
+        .border = 1,
+        .colorkey = 0x0000ff00, // default colorkey is green
+                    // (0xff000000 means that colorkey has been disabled)
+        .WinID = -1,
+    },
+    .wintitle = "mpv - ${media-title}",
+    .heartbeat_interval = 30.0,
+    .gamma_gamma = 1000,
+    .gamma_brightness = 1000,
+    .gamma_contrast = 1000,
+    .gamma_saturation = 1000,
+    .gamma_hue = 1000,
+    .osd_level = 1,
+    .osd_duration = 1000,
+    .osd_bar_align_y = 0.5,
+    .osd_bar_w = 75.0,
+    .osd_bar_h = 3.125,
+    .osd_scale = 1,
+    .loop_times = -1,
+    .ordered_chapters = 1,
+    .chapter_merge_threshold = 100,
+    .load_config = 1,
+    .position_resume = 1,
+    .stream_cache_min_percent = 20.0,
+    .stream_cache_seek_min_percent = 50.0,
+    .stream_cache_pause = 10.0,
+    .chapterrange = {-1, -1},
+    .edition_id = -1,
+    .default_max_pts_correction = -1,
+    .user_correct_pts = -1,
+    .initial_audio_sync = 1,
+    .term_osd = 2,
+    .consolecontrols = 1,
+    .doubleclick_time = 300,
+    .play_frames = -1,
+    .keep_open = 0,
+    .audio_id = -1,
+    .video_id = -1,
+    .sub_id = -1,
+    .audio_display = 1,
+    .sub_visibility = 1,
+    .sub_pos = 100,
+    .extension_parsing = 1,
+    .audio_output_channels = MP_CHMAP_INIT_STEREO,
+    .audio_output_format = -1,  // AF_FORMAT_UNKNOWN
+    .playback_speed = 1.,
+    .movie_aspect = -1.,
+    .field_dominance = -1,
+    .sub_auto = 1,
+    .osd_bar_visible = 1,
+#ifdef CONFIG_ASS
+    .ass_enabled = 1,
+#endif
+    .sub_scale = 1,
+    .ass_vsfilter_aspect_compat = 1,
+    .ass_style_override = 1,
+    .use_embedded_fonts = 1,
+    .suboverlap_enabled = 1,
+
+    .hwdec_codecs = "all",
+
+    .ad_lavc_param = {
+        .ac3drc = 1.,
+        .downmix = 1,
+    },
+    .lavfdopts = {
+        .allow_mimetype = 1,
+    },
+    .input = {
+        .key_fifo_size = 7,
+        .ar_delay = 200,
+        .ar_rate = 40,
+        .use_joystick = 1,
+        .use_lirc = 1,
+        .use_lircc = 1,
+#ifdef CONFIG_COCOA
+        .use_ar = 1,
+        .use_media_keys = 1,
+#endif
+        .default_bindings = 1,
+    },
 };
 
 #endif /* MPLAYER_CFG_MPLAYER_H */

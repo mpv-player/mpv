@@ -175,7 +175,7 @@ playlist_clear
 
 run "<command>"
     Run the given command with ``/bin/sh -c``. The string is expanded like in
-    ``--playing-msg``.
+    property_expansion_.
 
 quit [<code>]
     Exit the player using the given exit code.
@@ -207,13 +207,13 @@ osd [<level>]
     (see ``--osd-level`` for valid values).
 
 print_text "<string>"
-    Print text to stdout. The string can contain properties, which are expanded
-    like in ``--playing-msg``.
+    Print text to stdout. The string can contain properties (see
+    property_expansion_).
 
 show_text "<string>" [<duration>|- [<level>]]
     Show text on the OSD. The string can contain properties, which are expanded
-    like in ``--playing-msg``. This can be used to show playback time, filename,
-    and so on.
+    as described in property_expansion_. This can be used to show playback
+    time, filename, and so on.
 
     <duration> is the time in ms to show the message. By default, it uses the
     same value as ``--osd-duration``.
@@ -223,13 +223,6 @@ show_text "<string>" [<duration>|- [<level>]]
 show_progress
     Show the progress bar, the elapsed time and the total duration of the file
     on the OSD.
-
-show_chapters
-    Show a list of chapters on the OSD.
-
-show_tracks
-    Show a list of video/audio/subtitle tracks on the OSD.
-
 
 Input commands that are possibly subject to change
 --------------------------------------------------
@@ -307,7 +300,7 @@ osd-msg-bar
 raw
     Don't expand properties in string arguments. (Like ``"${property-name}"``.)
 expand-properties (default)
-    All string arguments are expanded like in ``--playing-msg``.
+    All string arguments are expanded as described in property_expansion_.
 
 
 All of the osd prefixes are still overridden by the global ``--osd-level``
@@ -322,11 +315,11 @@ Properties
 Properties are used to set mpv options during runtime, or to query arbitrary
 information. They can be manipulated with the ``set``/``add``/``cycle``
 commands, and retrieved with ``show_text``, or anything else that uses property
-expansion. (See ``--playing-msg`` how properties are expanded.)
+expansion. (See property_expansion_.)
 
-``W`` indicates whether the property is generally writeable. If an option
-is referenced, the property should take/return exactly the same values as the
-option.
+The ``W`` column indicates whether the property is generally writeable. If an
+option is referenced, the property should take/return exactly the same values
+as the option.
 
 =========================== = ==================================================
 Name                        W Comment
@@ -372,7 +365,8 @@ audio-codec                   audio codec selected for decoding
 audio-bitrate                 audio bitrate
 samplerate                    audio samplerate
 channels                      number of audio channels
-audio                       x current audio track (similar to ``--aid``)
+aid                         x current audio track (similar to ``--aid``)
+audio                       x alias for ``aid``
 balance                     x audio channel balance
 fullscreen                  x see ``--fullscreen``
 deinterlace                 x deinterlacing, if available (bool)
@@ -397,9 +391,11 @@ fps                           container FPS (may contain bogus values)
 dwidth                        video width (after filters and aspect scaling)
 dheight                       video height
 aspect                      x video aspect
-video                       x current video track (similar to ``--vid``)
+vid                         x current video track (similar to ``--vid``)
+video                       x alias for ``vid``
 program                     x switch TS program (write-only)
-sub                         x current subtitle track (similar to ``--sid``)
+sid                         x current subtitle track (similar to ``--sid``)
+sub                         x alias for ``sid``
 sub-delay                   x see ``--sub-delay``
 sub-pos                     x see ``--sub-pos``
 sub-visibility              x whether current subtitle is rendered
@@ -415,6 +411,76 @@ tv-saturation               x
 tv-hue                      x
 playlist-pos                  current position on playlist
 playlist-count                number of total playlist entries
-playlist                      playlist as string, current entries marked
+playlist                      playlist, current entry marked
 track-list                    list of audio/video/sub tracks, cur. entr. marked
+chapter-list                  list of chapters, current entry marked
 =========================== = ==================================================
+
+.. _property_expansion:
+
+Property expansion
+------------------
+
+All string arguments to input commands as well as certain options (like
+``--playing-msg``) are subject to property expansion.
+
+*EXAMPLE for input.conf*:
+
+- ``i show_text "Filename: ${filename}"`` shows the filename of the current file
+  when pressing the ``i`` key
+
+Within ``input.conf``, property expansion can be inhibited by putting the
+``raw`` prefix in front of commands.
+
+The following expansions are supported:
+
+\${NAME}
+    Expands to the value of the property ``NAME``. If retrieving the property
+    fails, expand to an error string. (Use ``${NAME:}`` with a trailing
+    ``:`` to expand to an empty string instead.)
+    If ``NAME`` is prefixed with ``=``, expand to the raw value of the property
+    (see below).
+\${NAME:STR}
+    Expands to the value of the property ``NAME``, or ``STR`` if the
+    property can't be retrieved. ``STR`` is expanded recursively.
+\${!NAME:STR}
+    Expands to ``STR`` (recursively) if the property ``NAME`` can't be
+    retrieved.
+\${?NAME:STR}
+    Expands to ``STR`` (recursively) if the property ``NAME`` is available.
+\$\$
+    Expands to ``$``.
+\$}
+    Expands to ``}``. (To produce this character inside recursive
+    expansion.)
+\$>
+    Disable property expansion and special handling of ``$`` for the rest
+    of the string.
+
+In places where property expansion is allowed, C-style escapes are often
+accepted as well. Example:
+
+- ``\n`` becomes a newline character
+- ``\\`` expands to ``\``
+
+Raw and formatted properties
+----------------------------
+
+Normally, properties are formatted as human readable text, meant to be
+displayed on OSD or on the terminal. It is possible to retrieve an unformatted
+(raw) value from a property by prefixing its name with ``=``. These raw values
+can be parsed by scripts, and follow the same conventions as the options
+associated with the properties.
+
+*EXAMPLE*:
+
+- ``${time-pos}`` expands to ``00:14:23`` (if playback position is at 15 minutes
+  32 seconds)
+- ``${=time-pos}`` expands to ``863.4`` (same time, plus 400 milliseconds -
+  milliseconds are normally not shown in the formatted case)
+
+Sometimes, the difference in amount of information carried by raw and formatted
+property values can be rather big. In some cases, raw values have more
+information, like higher precision than seconds with ``time-pos``. Sometimes
+it's the other way around, e.g. ``aid`` shows track title and language in the
+formatted case, but only the track number if it's raw.

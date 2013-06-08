@@ -242,6 +242,7 @@ typedef struct MPOpts {
         int use_lircc;
 #ifdef CONFIG_COCOA
         int use_ar;
+        int use_media_keys;
 #endif
         int default_bindings;
         int test;
@@ -267,5 +268,8 @@ typedef struct MPOpts {
         int audio_first;
     } encode_output;
 } MPOpts;
+
+extern const m_option_t mp_opts[];
+extern const struct MPOpts mp_default_opts;
 
 #endif

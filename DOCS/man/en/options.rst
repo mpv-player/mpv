@@ -1128,6 +1128,9 @@
 --mc=<seconds/frame>
     Maximum A-V sync correction per frame (in seconds)
 
+--media-keys, --no-media-keys
+      OSX only: Enabled by default. Enables/disable media keys support.
+
 --mf=<option1:option2:...>
     Used when decoding from multiple PNG or JPEG files with ``mf://``.
 
@@ -1440,7 +1443,7 @@
     Show a custom string during playback instead of the standard status text.
     This overrides the status text used for ``--osd-level=3``, when using the
     ``show_progress`` command (by default mapped to ``P``), or in some
-    non-default cases when seeking. Expands properties. See ``--playing-msg``.
+    non-default cases when seeking. Expands properties. See property_expansion_.
 
 --overlapsub
     Allows the next subtitle to be displayed while the current one is still
@@ -1472,38 +1475,11 @@
     properties, e.g. ``--playing-msg=file: ${filename}`` will print the string
     ``file:`` followed by a space and the currently played filename.
 
-    The following expansions are supported:
-
-    \${NAME}
-        Expands to the value of the property ``NAME``. If ``NAME`` starts with
-        ``=``, use the raw value of the property. If retrieving the property
-        fails, expand to an error string. (Use ``${NAME:}`` with a trailing
-        ``:`` to expand to an empty string instead.)
-    \${NAME:STR}
-        Expands to the value of the property ``NAME``, or ``STR`` if the
-        property can't be retrieved. ``STR`` is expanded recursively.
-    \${!NAME:STR}
-        Expands to ``STR`` (recursively) if the property ``NAME`` can't be
-        retrieved.
-    \${?NAME:STR}
-        Expands to ``STR`` (recursively) if the property ``NAME`` is available.
-    \$\$
-        Expands to ``$``.
-    \$}
-        Expands to ``}``. (To produce this character inside recursive
-        expansion.)
-    \$>
-        Disable property expansion and special handling of ``$`` for the rest
-        of the string.
-
-    This option also parses C-style escapes. Example:
-
-    - ``\n`` becomes a newline character
-    - ``\\`` expands to ``\``
+    See property_expansion_.
 
 --status-msg=<string>
     Print out a custom string during playback instead of the standard status
-    line. Expands properties. See ``--playing-msg``.
+    line. Expands properties. See property_expansion_.
 
 --stream-capture=<filename>
     Allows capturing the primary stream (not additional audio tracks or other
@@ -1741,6 +1717,8 @@
     behavior is the opposite of MPlayer's, which tries to reset all settings
     when starting next file.)
 
+    Default: ``--reset-on-next-file=pause`` (only the pause mode is reset).
+
     This can be changed with this option. It accepts a list of options, and
     mpv will reset the value of these options on playback start to the initial
     value. The initial value is either the default value, or as set by the
@@ -1758,6 +1736,7 @@
       speed settings if they were changed during playback.
     - ``--reset-on-next-file=all`` Try to reset all settings that were changed
       during playback.
+    - ``--reset-on-next-file=""`` Don't reset pause mode.
 
 --reuse-socket
     (udp:// only)
@@ -2139,8 +2118,8 @@
     the line used for the OSD and clear it (default: ``^[[A\r^[[K``).
 
 --title=<string>
-    Set the window title. Properties are expanded on playback start
-    (see ``--playing-msg``).
+    Set the window title. Properties are expanded on playback start.
+    (See property_expansion_.)
 
 --tv=<option1:option2:...>
     This option tunes various properties of the TV capture module. For
