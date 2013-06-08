@@ -87,6 +87,12 @@ struct mp_csp_params {
     .rgamma = 1, .ggamma = 1, .bgamma = 1,                      \
     .texture_bits = 8, .input_bits = 8}
 
+enum mp_chroma_location {
+    MP_CHROMA_AUTO,
+    MP_CHROMA_LEFT,     // mpeg2/4, h264
+    MP_CHROMA_CENTER,   // mpeg1, jpeg
+};
+
 enum mp_csp_equalizer_param {
     MP_CSP_EQ_BRIGHTNESS,
     MP_CSP_EQ_CONTRAST,
@@ -135,6 +141,10 @@ enum AVColorSpace mp_csp_to_avcol_spc(enum mp_csp colorspace);
 enum AVColorRange mp_csp_levels_to_avcol_range(enum mp_csp_levels range);
 
 enum mp_csp mp_csp_guess_colorspace(int width, int height);
+
+enum mp_chroma_location avchroma_location_to_mp(enum AVChromaLocation loc);
+
+void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y);
 
 void mp_gen_gamma_map(unsigned char *map, int size, float gamma);
 #define ROW_R 0

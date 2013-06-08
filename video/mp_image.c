@@ -324,6 +324,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
     if ((dst->flags & MP_IMGFLAG_YUV) == (src->flags & MP_IMGFLAG_YUV)) {
         dst->colorspace = src->colorspace;
         dst->levels = src->levels;
+        dst->chroma_location = src->chroma_location;
     }
     if (dst->imgfmt == IMGFMT_PAL8 && src->imgfmt == IMGFMT_PAL8) {
         if (dst->planes[1] && src->planes[1])

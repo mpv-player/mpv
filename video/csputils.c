@@ -100,6 +100,25 @@ enum mp_csp mp_csp_guess_colorspace(int width, int height)
     return width >= 1280 || height > 576 ? MP_CSP_BT_709 : MP_CSP_BT_601;
 }
 
+enum mp_chroma_location avchroma_location_to_mp(enum AVChromaLocation loc)
+{
+    switch (loc) {
+    case AVCHROMA_LOC_LEFT:             return MP_CHROMA_LEFT;
+    case AVCHROMA_LOC_CENTER:           return MP_CHROMA_CENTER;
+    default:                            return MP_CHROMA_AUTO;
+    }
+}
+
+// Return location of chroma samples relative to luma samples. 0/0 means
+// centered. Other possible values are -1 (top/left) and +1 (right/bottom).
+void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y)
+{
+    *x = 0;
+    *y = 0;
+    if (loc == MP_CHROMA_LEFT)
+        *x = -1;
+}
+
 /**
  * \brief little helper function to create a lookup table for gamma
  * \param map buffer to create map into

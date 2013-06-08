@@ -43,6 +43,7 @@ struct mp_image_params {
     int d_w, d_h;               // define display aspect ratio (never 0/0)
     enum mp_csp colorspace;
     enum mp_csp_levels colorlevels;
+    enum mp_chroma_location chroma_location;
 };
 
 /* Memory management:
@@ -90,6 +91,8 @@ typedef struct mp_image {
 
     enum mp_csp colorspace;
     enum mp_csp_levels levels;
+    enum mp_chroma_location chroma_location;
+
     /* only inside filter chain */
     double pts;
     /* memory management */

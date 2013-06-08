@@ -477,6 +477,7 @@ int vf_next_config(struct vf_instance *vf,
         .d_h = d_height,
         .colorspace = vf->fmt_in.params.colorspace,
         .colorlevels = vf->fmt_in.params.colorlevels,
+        .chroma_location = vf->fmt_in.params.chroma_location,
     };
     int r = vf_reconfig_wrapper(vf->next, &p, voflags);
     return r < 0 ? 0 : 1;

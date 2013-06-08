@@ -114,6 +114,7 @@ void main() {
 #!section frag_video
 uniform sampler2D textures[4];
 uniform vec2 textures_size[4];
+uniform vec2 chroma_center_offset;
 uniform sampler1D lut_c_1d;
 uniform sampler1D lut_l_1d;
 uniform sampler2D lut_c_2d;
@@ -321,17 +322,18 @@ vec4 sample_sharpen5(sampler2D tex, vec2 texsize, vec2 texcoord) {
 }
 
 void main() {
+    vec2 chr_texcoord = texcoord + chroma_center_offset;
 #ifndef USE_CONV
 #define USE_CONV 0
 #endif
 #if USE_CONV == CONV_PLANAR
     vec3 color = vec3(SAMPLE_L(textures[0], textures_size[0], texcoord).r,
-                      SAMPLE_C(textures[1], textures_size[1], texcoord).r,
-                      SAMPLE_C(textures[2], textures_size[2], texcoord).r);
+                      SAMPLE_C(textures[1], textures_size[1], chr_texcoord).r,
+                      SAMPLE_C(textures[2], textures_size[2], chr_texcoord).r);
     float alpha = 1.0;
 #elif USE_CONV == CONV_NV12
     vec3 color = vec3(SAMPLE_L(textures[0], textures_size[0], texcoord).r,
-                      SAMPLE_C(textures[1], textures_size[1], texcoord).rg);
+                      SAMPLE_C(textures[1], textures_size[1], chr_texcoord).rg);
     float alpha = 1.0;
 #else
     vec4 acolor = SAMPLE_L(textures[0], textures_size[0], texcoord);

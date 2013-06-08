@@ -446,6 +446,8 @@ static int init_vo(sh_video_t *sh, AVFrame *frame)
             .d_h = height,
             .colorspace = avcol_spc_to_mp_csp(ctx->avctx->colorspace),
             .colorlevels = avcol_range_to_mp_csp_levels(ctx->avctx->color_range),
+            .chroma_location =
+                avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
         };
 
         if (mpcodecs_reconfig_vo(sh, &ctx->image_params) < 0)
@@ -701,6 +703,7 @@ static int decode(struct sh_video *sh, struct demux_packet *packet,
 
     mpi->colorspace = ctx->image_params.colorspace;
     mpi->levels = ctx->image_params.colorlevels;
+    mpi->chroma_location = ctx->image_params.chroma_location;
 
     *out_image = mpi;
     return 1;
