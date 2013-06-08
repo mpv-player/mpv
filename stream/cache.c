@@ -21,14 +21,18 @@
 // cache is being slow.
 #define CACHE_WAIT_TIME 0.5
 
-// Time in seconds the cache updates "cached" controls, and retries reading if
-// stream EOF has reached (in case the stream is actually readable again, for
-// example if data has been appended to a file). Note that this timeout will
-// expire all the time if the player is paused.
+// The time the cache sleeps in idle mode. This controls how often the cache
+// retries reading from the stream after EOF has reached (in case the stream is
+// actually readable again, for example if data has been appended to a file).
+// Note that if this timeout is too low, the player will waste too much CPU
+// when player is paused.
 #define CACHE_IDLE_SLEEP_TIME 1.0
 
-// Time in seconds when waiting for prefill
-#define CACHE_PREFILL_SLEEP_TIME 0.2
+// Time in seconds the cache updates "cached" controls. Note that idle mode
+// will block the cache from doing this, and this timeout is honored only if
+// the cache is active.
+#define CACHE_UPDATE_CONTROLS_TIME 0.1
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -133,26 +137,26 @@ static int cond_timed_wait(pthread_cond_t *cond, pthread_mutex_t *mutex,
 
 // Used by the main thread to wakeup the cache thread, and to wait for the
 // cache thread. The cache mutex has to be locked when calling this function.
-// *time should be set to 0 on the first call.
+// *retries should be set to 0 on the first call.
 // Returns CACHE_INTERRUPTED if the caller is supposed to abort.
-static int cache_wakeup_and_wait(struct priv *s, double *time)
+static int cache_wakeup_and_wait(struct priv *s, int *retries)
 {
-    double now = mp_time_sec();
-
-    if (!*time)
-        *time = now;
-
-    if (now - *time >= 0.1) {
-        mp_msg(MSGT_CACHE, MSGL_WARN,
-               "Cache not responding! [performance issue]\n");
-        *time = now;
-    }
-
     if (stream_check_interrupt(0))
         return CACHE_INTERRUPTED;
 
+    // Print a "more severe" warning after waiting 1 second and no new data
+    // (time calculation assumes the number of spurious wakeups is very low)
+    if ((*retries) * CACHE_WAIT_TIME >= 1.0) {
+        mp_msg(MSGT_CACHE, MSGL_ERR, "Cache keeps not responding.\n");
+    } else if (*retries > 0) {
+        mp_msg(MSGT_CACHE, MSGL_WARN,
+               "Cache is not responding - slow/stuck network connection?\n");
+    }
+    (*retries) += 1;
+
     pthread_cond_signal(&s->wakeup);
     cond_timed_wait(&s->wakeup, &s->mutex, CACHE_WAIT_TIME);
+
     return 0;
 }
 
@@ -167,17 +171,16 @@ static void cache_drop_contents(struct priv *s)
 // mutex must be held, but is sometimes temporarily dropped
 static int cache_read(struct priv *s, unsigned char *buf, int size)
 {
-    double time = 0;
-
     if (size <= 0)
         return 0;
 
+    int retry = 0;
     while (s->read_filepos >= s->max_filepos ||
            s->read_filepos < s->min_filepos)
     {
         if (s->eof && s->read_filepos >= s->max_filepos)
             return 0;
-        if (cache_wakeup_and_wait(s, &time) == CACHE_INTERRUPTED)
+        if (cache_wakeup_and_wait(s, &retry) == CACHE_INTERRUPTED)
             return 0;
     }
 
@@ -386,7 +389,7 @@ static void *cache_thread(void *arg)
     update_cached_controls(s);
     double last = mp_time_sec();
     while (s->control != CACHE_CTRL_QUIT) {
-        if (mp_time_sec() - last > 0.099) {
+        if (mp_time_sec() - last > CACHE_UPDATE_CONTROLS_TIME) {
             update_cached_controls(s);
             last = mp_time_sec();
         }
@@ -448,7 +451,6 @@ static int cache_seek(stream_t *cache, int64_t pos)
 static int cache_control(stream_t *cache, int cmd, void *arg)
 {
     struct priv *s = cache->priv;
-    double time = 0;
     int r = STREAM_ERROR;
 
     assert(cmd > 0);
@@ -461,8 +463,9 @@ static int cache_control(stream_t *cache, int cmd, void *arg)
 
     s->control = cmd;
     s->control_arg = arg;
+    int retry = 0;
     while (s->control != CACHE_CTRL_NONE) {
-        if (cache_wakeup_and_wait(s, &time) == CACHE_INTERRUPTED) {
+        if (cache_wakeup_and_wait(s, &retry) == CACHE_INTERRUPTED) {
             s->eof = 1;
             r = STREAM_UNSUPPORTED;
             goto done;
@@ -561,6 +564,8 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
 
     // wait until cache is filled at least prefill_init %
     for (;;) {
+        if (stream_check_interrupt(0))
+            return 0;
         int64_t fill;
         int idle;
         if (stream_control(s->cache, STREAM_CTRL_GET_CACHE_FILL, &fill) < 0)
@@ -573,8 +578,12 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
             break;
         if (idle)
             break;    // file is smaller than prefill size
-        if (stream_check_interrupt(CACHE_PREFILL_SLEEP_TIME * 1000))
-            return 0;
+        // Wake up if the cache is done reading some data (or on timeout/abort)
+        pthread_mutex_lock(&s->mutex);
+        s->control = CACHE_CTRL_PING;
+        pthread_cond_signal(&s->wakeup);
+        cache_wakeup_and_wait(s, &(int){0});
+        pthread_mutex_unlock(&s->mutex);
     }
     mp_msg(MSGT_CACHE, MSGL_STATUS, "\n");
     return 1;
