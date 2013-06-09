@@ -405,7 +405,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     // lastframeipts: pts of last ENCODED frame
     // now we want to go forward in time until at least lastframeipts + mindeltapts
     // so let's just assume this frame took place at this time or later
-    if (frameipts >= vc->lastframeipts && frameipts < vc->lastframeipts + vc->mindeltapts) {
+    if (frameipts > vc->lastframeipts && frameipts < vc->lastframeipts + vc->mindeltapts) {
         frameipts = vc->lastframeipts + vc->mindeltapts;
         vc->lastpts = frameipts * timeunit - encode_lavc_getoffset(ectx, vc->stream);
     }
