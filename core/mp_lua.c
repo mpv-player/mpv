@@ -136,41 +136,30 @@ void mp_lua_update(struct MPContext *mpctx)
         report_error(L);
 }
 
-static int run_mouse_click(lua_State *L)
+struct dispatch_args {
+    int id;
+    char *event;
+};
+
+static int run_script_dispatch(lua_State *L)
 {
-    bool *state = lua_touserdata(L, -1);
-    lua_getglobal(L, "mp_mouse_click");
+    struct dispatch_args *args = lua_touserdata(L, -1);
+    lua_getglobal(L, "mp_script_dispatch");
     if (lua_isnil(L, -1))
         return 0;
-    lua_pushboolean(L, *state);
-    lua_call(L, 1, 0);
+    lua_pushinteger(L, args->id);
+    lua_pushstring(L, args->event);
+    lua_call(L, 2, 0);
     return 0;
 }
 
-void mp_lua_mouse_click(struct MPContext *mpctx, bool down)
+void mp_lua_script_dispatch(struct MPContext *mpctx, int id, char *event)
 {
     if (!mpctx->lua_ctx)
         return;
     lua_State *L = mpctx->lua_ctx->state;
-    if (lua_cpcall(L, run_mouse_click, &down) != 0)
-        report_error(L);
-}
-
-static int run_mouse_move(lua_State *L)
-{
-    lua_getglobal(L, "mp_mouse_move");
-    if (lua_isnil(L, -1))
-        return 0;
-    lua_call(L, 0, 0);
-    return 0;
-}
-
-void mp_lua_mouse_move(struct MPContext *mpctx, int x, int y)
-{
-    if (!mpctx->lua_ctx)
-        return;
-    lua_State *L = mpctx->lua_ctx->state;
-    if (lua_cpcall(L, run_mouse_move, NULL) != 0)
+    struct dispatch_args args = {id, event};
+    if (lua_cpcall(L, run_script_dispatch, &args) != 0)
         report_error(L);
 }
 
@@ -299,6 +288,43 @@ static int get_chapter_list(lua_State *L)
     return 1;
 }
 
+static int input_define_section(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    char *section = (char *)luaL_checkstring(L, 1);
+    char *contents = (char *)luaL_checkstring(L, 2);
+    mp_input_define_section(mpctx->input, section, "<script>", contents, true);
+    return 0;
+}
+
+static int input_enable_section(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    char *section = (char *)luaL_checkstring(L, 1);
+    mp_input_enable_section(mpctx->input, section, 0);
+    return 0;
+}
+
+static int input_disable_section(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    char *section = (char *)luaL_checkstring(L, 1);
+    mp_input_disable_section(mpctx->input, section);
+    return 0;
+}
+
+static int input_set_section_mouse_area(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    char *section = (char *)luaL_checkstring(L, 1);
+    int x0 = luaL_checkinteger(L, 2);
+    int y0 = luaL_checkinteger(L, 3);
+    int x1 = luaL_checkinteger(L, 4);
+    int y1 = luaL_checkinteger(L, 5);
+    mp_input_set_section_mouse_area(mpctx->input, section, x0, y0, x1, y1);
+    return 0;
+}
+
 // On stack: mp table
 static void add_functions(struct MPContext *mpctx)
 {
@@ -335,4 +361,16 @@ static void add_functions(struct MPContext *mpctx)
 
     lua_pushcfunction(L, get_chapter_list);
     lua_setfield(L, -2, "get_chapter_list");
+
+    lua_pushcfunction(L, input_define_section);
+    lua_setfield(L, -2, "input_define_section");
+
+    lua_pushcfunction(L, input_enable_section);
+    lua_setfield(L, -2, "input_enable_section");
+
+    lua_pushcfunction(L, input_disable_section);
+    lua_setfield(L, -2, "input_disable_section");
+
+    lua_pushcfunction(L, input_set_section_mouse_area);
+    lua_setfield(L, -2, "input_set_section_mouse_area");
 }

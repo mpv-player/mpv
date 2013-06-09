@@ -84,9 +84,8 @@ enum mp_command_type {
     /// Video output commands
     MP_CMD_VO_CMDLINE,
 
-    /// Internal for mouse handling
-    MP_CMD_MOUSE_CLICK,
-    MP_CMD_MOUSE_MOVE,
+    /// Internal for Lua scripts
+    MP_CMD_SCRIPT_DISPATCH,
 
     MP_CMD_LUA,
 };
@@ -114,10 +113,10 @@ enum mp_on_osd {
 };
 
 enum mp_input_section_flags {
-    // If a key binding is not defined in the current section, search the
-    // default section for it ("default" refers to bindings with no section
-    // specified, not to the default input.conf aka builtin key bindings)
-    MP_INPUT_NO_DEFAULT_SECTION = 1,
+    // If a key binding is not defined in the current section, do not search the
+    // other sections for it (like the default section). Instead, an unbound
+    // key warning will be printed.
+    MP_INPUT_EXCLUSIVE = 1,
 };
 
 struct input_ctx;
@@ -210,15 +209,57 @@ void mp_cmd_free(struct mp_cmd *cmd);
 // This creates a copy of a command (used by the auto repeat stuff).
 struct mp_cmd *mp_cmd_clone(struct mp_cmd *cmd);
 
-// Set current input section
+// Set current input section. The section is appended on top of the list of
+// active sections, so its bindings are considered first. If the section was
+// already active, it's moved to the top as well.
+// name==NULL will behave as if name=="default"
 // flags is a bitfield of enum mp_input_section_flags values
-void mp_input_set_section(struct input_ctx *ictx, char *name, int flags);
+void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags);
 
-// Get current input section
-char *mp_input_get_section(struct input_ctx *ictx);
+// Undo mp_input_enable_section().
+// name==NULL will behave as if name=="default"
+void mp_input_disable_section(struct input_ctx *ictx, char *name);
+
+// Like mp_input_set_section(ictx, ..., 0) for all sections.
+void mp_input_disable_all_sections(struct input_ctx *ictx);
+
+// Set the contents of an input section.
+//  name: name of the section, for mp_input_set_section() etc.
+//  location: location string (like filename) for error reporting
+//  contents: list of keybindings, like input.conf
+//            a value of NULL deletes the section
+//  builtin: create as builtin section; this means if the user defines bindings
+//           using "{name}", they won't be ignored or overwritten - instead,
+//           they are preferred to the bindings defined with this call
+// If the section already exists, its bindings are removed and replaced.
+void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
+                             char *contents, bool builtin);
+
+// Define where on the screen the named input section should receive.
+// Setting a rectangle of size 0 unsets the mouse area.
+// A rectangle with negative size disables mouse input for this section.
+void mp_input_set_section_mouse_area(struct input_ctx *ictx, char *name,
+                                     int x0, int y0, int x1, int y1);
 
 // Used to detect mouse movement.
 unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx);
+
+// Test whether there is any input section which wants to receive events.
+// Note that the mouse event should be delivered, even if this returns false.
+// However, the VO is free to use some of the events for other things instead,
+// such as dragging the window on click.
+bool mp_input_test_mouse(struct input_ctx *ictx, int x, int y);
+
+struct mp_mouse_area;
+
+// Free with talloc_free().
+struct mp_mouse_area *mp_mouse_area_create(void);
+
+// Copy the currently defined mouse area into dst.
+void mp_input_get_mouse_area(struct input_ctx *ictx, struct mp_mouse_area *dst);
+
+// Like mp_input_test(), but on a mouse area from mp_input_get_mouse_area().
+bool mp_mouse_area_test(struct mp_mouse_area *ma, int x, int y);
 
 // Initialize the input system
 struct input_conf;

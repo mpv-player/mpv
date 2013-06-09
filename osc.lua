@@ -498,12 +498,12 @@ function hide_osc()
 end
 
 -- called by input.conf bindings
-function mp_mouse_move()
+function mouse_move()
 	--print "\nI like to move it, move it!\n"
 	show_osc()
 end
 
-function mp_mouse_click(down)
+function mouse_click(down)
 
 	-- Build our own mouse_down/up events
 	if down == true and state.mouse_down == false then
@@ -590,3 +590,10 @@ function mp_update()
     mp.set_osd_ass(osc_geo.playresy * aspect, osc_geo.playresy, ass.text)
     
 end
+
+set_key_bindings {
+    {"mouse_btn0", function(e) mouse_click(false) end,
+                   function(e) mouse_click(true)  end},
+    {"mouse_move", mouse_move},
+}
+enable_key_bindings()

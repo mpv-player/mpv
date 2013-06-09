@@ -571,12 +571,12 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_PRINT: {
         char **list = demuxer->info;
         char *res = NULL;
-        for (int n = 0; list[n]; n += 2) {
+        for (int n = 0; list && list[n]; n += 2) {
             res = talloc_asprintf_append_buffer(res, "%s: %s\n",
                                                 list[n], list[n + 1]);
         }
         *(char **)arg = res;
-        return M_PROPERTY_OK;
+        return res ? M_PROPERTY_OK : M_PROPERTY_UNAVAILABLE;
     }
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
@@ -2455,18 +2455,11 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         change_video_filters(mpctx, cmd->args[0].v.s, cmd->args[1].v.s);
         break;
 
-    case MP_CMD_MOUSE_CLICK:
+    case MP_CMD_SCRIPT_DISPATCH:
         if (mpctx->lua_ctx) {
 #ifdef CONFIG_LUA
-            mp_lua_mouse_click(mpctx, cmd->key_up_follows);
-#endif
-        }
-        break;
-
-    case MP_CMD_MOUSE_MOVE:
-        if (mpctx->lua_ctx) {
-#ifdef CONFIG_LUA
-            mp_lua_mouse_move(mpctx, cmd->mouse_x, cmd->mouse_y);
+            mp_lua_script_dispatch(mpctx, cmd->args[0].v.i,
+                            cmd->key_up_follows ? "keyup_follows" : "press");
 #endif
         }
         break;

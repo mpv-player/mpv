@@ -4330,13 +4330,6 @@ goto_enable_cache: ;
                 mpctx->sh_video->fps, mpctx->sh_video->frametime);
     }
 
-    mp_input_set_section(mpctx->input, NULL, 0);
-    //TODO: add desired (stream-based) sections here
-    if (mpctx->master_demuxer->type == DEMUXER_TYPE_TV)
-        mp_input_set_section(mpctx->input, "tv", 0);
-    if (mpctx->encode_lavc_ctx)
-        mp_input_set_section(mpctx->input, "encode", MP_INPUT_NO_DEFAULT_SECTION);
-
     //==================== START PLAYING =======================
 
     if (!mpctx->sh_video && !mpctx->sh_audio) {
@@ -4684,6 +4677,8 @@ static int mpv_main(int argc, char *argv[])
     set_priority();
 #endif
 
+    init_input(mpctx);
+
 #ifdef CONFIG_ENCODING
     if (opts->encode_output.file) {
         mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output);
@@ -4695,6 +4690,7 @@ static int mpv_main(int argc, char *argv[])
         m_config_set_option0(mpctx->mconfig, "ao", "lavc");
         m_config_set_option0(mpctx->mconfig, "fixed-vo", "yes");
         m_config_set_option0(mpctx->mconfig, "gapless-audio", "yes");
+        mp_input_enable_section(mpctx->input, "encode", MP_INPUT_EXCLUSIVE);
     }
 #endif
 
@@ -4703,8 +4699,6 @@ static int mpv_main(int argc, char *argv[])
 #endif
 
     mpctx->osd = osd_create(opts, mpctx->ass_library);
-
-    init_input(mpctx);
 
 #ifdef CONFIG_LUA
     // Lua user scripts can call arbitrary functions. Load them at a point
