@@ -48,6 +48,7 @@ struct priv {
     double lastpts;
     int64_t lastipts;
     int64_t lastframeipts;
+    int64_t mindeltapts;
     double expected_next_pts;
     mp_image_t *lastimg;
     int lastimg_wants_osd;
@@ -317,6 +318,11 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
             vc->worst_time_base = vc->stream->time_base;
             vc->worst_time_base_is_stream = 1;
         }
+        if (ectx->options->maxfps)
+            vc->mindeltapts = ceil(vc->worst_time_base.den /
+                    (vc->worst_time_base.num * ectx->options->maxfps));
+        else
+            vc->mindeltapts = 0;
 
         // NOTE: we use the following "axiom" of av_rescale_q:
         // if time base A is worse than time base B, then
@@ -391,6 +397,16 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         mp_msg(MSGT_ENCODE, MSGL_INFO, "vo-lavc: -oneverdrop increased pts by %d\n",
                (int) (vc->lastipts - frameipts + 1));
         frameipts = vc->lastipts + 1;
+        vc->lastpts = frameipts * timeunit - encode_lavc_getoffset(ectx, vc->stream);
+    }
+
+    // lastipts: pts of last vo frame
+    // frameipts: pts of current vo frame
+    // lastframeipts: pts of last ENCODED frame
+    // now we want to go forward in time until at least lastframeipts + mindeltapts
+    // so let's just assume this frame took place at this time or later
+    if (frameipts >= vc->lastframeipts && frameipts < vc->lastframeipts + vc->mindeltapts) {
+        frameipts = vc->lastframeipts + vc->mindeltapts;
         vc->lastpts = frameipts * timeunit - encode_lavc_getoffset(ectx, vc->stream);
     }
 

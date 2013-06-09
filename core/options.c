@@ -709,6 +709,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("of", encode_output.format, CONF_GLOBAL),
     OPT_STRINGLIST("ofopts*", encode_output.fopts, CONF_GLOBAL),
     OPT_FLOATRANGE("ofps", encode_output.fps, CONF_GLOBAL, 0.0, 1000000.0),
+    OPT_FLOATRANGE("omaxfps", encode_output.maxfps, CONF_GLOBAL, 0.0, 1000000.0),
     OPT_STRING("ovc", encode_output.vcodec, CONF_GLOBAL),
     OPT_STRINGLIST("ovcopts*", encode_output.vopts, CONF_GLOBAL),
     OPT_STRING("oac", encode_output.acodec, CONF_GLOBAL),
