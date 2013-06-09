@@ -22,6 +22,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <assert.h>
+#include <time.h>
 
 #include "config.h"
 #include "talloc.h"
@@ -50,7 +51,6 @@
 #include "audio/filter/af.h"
 #include "video/decode/dec_video.h"
 #include "audio/decode/dec_audio.h"
-#include "sub/spudec.h"
 #include "core/path.h"
 #include "sub/ass_mp.h"
 #include "stream/tv.h"
@@ -568,6 +568,16 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
         *(char ***)arg = slist;
         return M_PROPERTY_OK;
     }
+    case M_PROPERTY_PRINT: {
+        char **list = demuxer->info;
+        char *res = NULL;
+        for (int n = 0; list && list[n]; n += 2) {
+            res = talloc_asprintf_append_buffer(res, "%s: %s\n",
+                                                list[n], list[n + 1]);
+        }
+        *(char **)arg = res;
+        return res ? M_PROPERTY_OK : M_PROPERTY_UNAVAILABLE;
+    }
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
         char *meta = demux_info_get(demuxer, ka->key);
@@ -610,6 +620,18 @@ static int mp_property_cache(m_option_t *prop, int action, void *arg,
     if (cache < 0)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(prop, action, arg, cache);
+}
+
+static int mp_property_clock(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
+{
+    char outstr[6];
+    time_t t = time(NULL);
+    struct tm *tmp = localtime(&t);
+
+    if ((tmp != NULL) && (strftime(outstr, sizeof(outstr), "%k:%M", tmp) == 5))
+        return m_property_strdup_ro(prop, action, arg, outstr);
+    return M_PROPERTY_UNAVAILABLE;
 }
 
 /// Volume (RW)
@@ -1359,11 +1381,12 @@ static int mp_property_sub(m_option_t *prop, int action, void *arg,
 static int mp_property_sub_delay(m_option_t *prop, int action, void *arg,
                                  MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        *(char **)arg = format_delay(sub_delay);
+        *(char **)arg = format_delay(opts->sub_delay);
         return M_PROPERTY_OK;
     }
     return mp_property_generic_option(prop, action, arg, mpctx);
@@ -1372,55 +1395,15 @@ static int mp_property_sub_delay(m_option_t *prop, int action, void *arg,
 static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
+    struct MPOpts *opts = &mpctx->opts;
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = talloc_asprintf(NULL, "%d/100", sub_pos);
+        *(char **)arg = talloc_asprintf(NULL, "%d/100", opts->sub_pos);
         return M_PROPERTY_OK;
     }
     return property_osd_helper(prop, action, arg, mpctx);
 }
-
-/// Subtitle visibility (RW)
-static int mp_property_sub_visibility(m_option_t *prop, int action,
-                                      void *arg, MPContext *mpctx)
-{
-    struct MPOpts *opts = &mpctx->opts;
-
-    if (!mpctx->sh_video)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_SET:
-        opts->sub_visibility = *(int *)arg;
-        vo_osd_changed(OSDTYPE_SUBTITLE);
-        if (vo_spudec)
-            vo_osd_changed(OSDTYPE_SPU);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-        *(int *)arg = opts->sub_visibility;
-        return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-/// Show only forced subtitles (RW)
-static int mp_property_sub_forced_only(m_option_t *prop, int action,
-                                       void *arg, MPContext *mpctx)
-{
-    struct MPOpts *opts = &mpctx->opts;
-
-    if (!vo_spudec)
-        return M_PROPERTY_UNAVAILABLE;
-
-    if (action == M_PROPERTY_SET) {
-        opts->forced_subs_only = *(int *)arg;
-        spudec_set_forced_subs_only(vo_spudec, opts->forced_subs_only);
-        return M_PROPERTY_OK;
-    }
-    return mp_property_generic_option(prop, action, arg, mpctx);
-}
-
 
 #ifdef CONFIG_TV
 
@@ -1592,6 +1575,12 @@ static const m_option_t mp_properties[] = {
     { "cache", mp_property_cache, CONF_TYPE_INT },
     M_OPTION_PROPERTY("pts-association-mode"),
     M_OPTION_PROPERTY("hr-seek"),
+    { "clock", mp_property_clock, CONF_TYPE_STRING,
+      0, 0, 0, NULL },
+
+    { "chapter-list", mp_property_list_chapters, CONF_TYPE_STRING },
+    { "track-list", property_list_tracks, CONF_TYPE_STRING },
+    { "playlist", mp_property_playlist, CONF_TYPE_STRING },
 
     { "playlist-pos", mp_property_playlist_pos, CONF_TYPE_INT },
     { "playlist-count", mp_property_playlist_count, CONF_TYPE_INT },
@@ -1667,9 +1656,8 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("sid", mp_property_sub),
     M_OPTION_PROPERTY_CUSTOM("sub-delay", mp_property_sub_delay),
     M_OPTION_PROPERTY_CUSTOM("sub-pos", mp_property_sub_pos),
-    { "sub-visibility", mp_property_sub_visibility, CONF_TYPE_FLAG,
-      M_OPT_RANGE, 0, 1, NULL },
-    M_OPTION_PROPERTY_CUSTOM("sub-forced-only", mp_property_sub_forced_only),
+    M_OPTION_PROPERTY_CUSTOM("sub-visibility", property_osd_helper),
+    M_OPTION_PROPERTY_CUSTOM("sub-forced-only", property_osd_helper),
     M_OPTION_PROPERTY_CUSTOM("sub-scale", property_osd_helper),
 #ifdef CONFIG_ASS
     M_OPTION_PROPERTY_CUSTOM("ass-use-margins", property_osd_helper),
@@ -1744,6 +1732,7 @@ static struct property_osd_display {
     { "pts-association-mode", "PTS association mode" },
     { "hr-seek", "hr-seek" },
     { "speed", _("Speed") },
+    { "clock", _("Clock") },
     // audio
     { "volume", _("Volume"), .osd_progbar = OSD_VOLUME },
     { "mute", _("Mute") },
@@ -1871,34 +1860,6 @@ static const char *property_error_string(int error_value)
         return "PROPERTY_UNKNOWN";
     }
     return "UNKNOWN";
-}
-
-static void show_chapters_on_osd(MPContext *mpctx)
-{
-    int count = get_chapter_count(mpctx);
-    int cur = mpctx->num_sources ? get_current_chapter(mpctx) : -1;
-    char *res = NULL;
-    int n;
-
-    if (count < 1) {
-        res = talloc_asprintf_append(res, "No chapters.");
-    }
-
-    for (n = 0; n < count; n++) {
-        char *name = chapter_display_name(mpctx, n);
-        double t = chapter_start_time(mpctx, n);
-        char* time = mp_format_time(t, false);
-        res = talloc_asprintf_append(res, "%s", time);
-        talloc_free(time);
-        char *m1 = "> ", *m2 = " <";
-        if (n != cur)
-            m1 = m2 = "";
-        res = talloc_asprintf_append(res, "   %s%s%s\n", m1, name, m2);
-        talloc_free(name);
-    }
-
-    set_osd_msg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts.osd_duration, "%s", res);
-    talloc_free(res);
 }
 
 static void change_video_filters(MPContext *mpctx, const char *cmd,
@@ -2083,26 +2044,18 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SUB_STEP:
-        if (sh_video) {
-            int movement = cmd->args[0].v.i;
-            struct track *track = mpctx->current_track[STREAM_SUB];
-            bool available = false;
-            if (track && track->subdata) {
-                available = true;
-                step_sub(track->subdata, mpctx->video_pts, movement);
-            }
 #ifdef CONFIG_ASS
-            struct ass_track *ass_track = sub_get_ass_track(mpctx->osd);
+        if (mpctx->osd->dec_sub) {
+            int movement = cmd->args[0].v.i;
+            struct ass_track *ass_track = sub_get_ass_track(mpctx->osd->dec_sub);
             if (ass_track) {
-                available = true;
-                sub_delay += ass_step_sub(ass_track,
-                  (mpctx->video_pts + sub_delay) * 1000 + .5, movement) / 1000.;
-            }
-#endif
-            if (available)
                 set_osd_tmsg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
-                             "Sub delay: %d ms", ROUND(sub_delay * 1000));
+                             "Sub delay: %d ms", ROUND(opts->sub_delay * 1000));
+                double cur = (mpctx->video_pts + opts->sub_delay) * 1000 + .5;
+                opts->sub_delay += ass_step_sub(ass_track, cur, movement) / 1000.;
+            }
         }
+#endif
         break;
 
     case MP_CMD_OSD: {
@@ -2286,7 +2239,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             if (tv_channel_list) {
                 set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
-                //vo_osd_changed(OSDTYPE_SUBTITLE);
             }
         }
 #ifdef CONFIG_PVR
@@ -2324,7 +2276,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             if (tv_channel_list) {
                 set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
-                //vo_osd_changed(OSDTYPE_SUBTITLE);
             }
         }
 #ifdef CONFIG_PVR
@@ -2357,7 +2308,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             if (tv_channel_list) {
                 set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
-                //vo_osd_changed(OSDTYPE_SUBTITLE);
             }
         }
 #ifdef CONFIG_PVR
@@ -2410,6 +2360,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_SCREENSHOT:
         screenshot_request(mpctx, cmd->args[0].v.i, cmd->args[1].v.i, msg_osd);
+        break;
+
+    case MP_CMD_SCREENSHOT_TO_FILE:
+        screenshot_to_file(mpctx, cmd->args[0].v.s, cmd->args[1].v.i);
         break;
 
     case MP_CMD_RUN:
@@ -2500,22 +2454,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_VF:
         change_video_filters(mpctx, cmd->args[0].v.s, cmd->args[1].v.s);
         break;
-    case MP_CMD_SHOW_CHAPTERS:
-        show_chapters_on_osd(mpctx);
-        break;
 
-    case MP_CMD_MOUSE_CLICK:
+    case MP_CMD_SCRIPT_DISPATCH:
         if (mpctx->lua_ctx) {
 #ifdef CONFIG_LUA
-            mp_lua_mouse_click(mpctx, cmd->key_up_follows);
-#endif
-        }
-        break;
-
-    case MP_CMD_MOUSE_MOVE:
-        if (mpctx->lua_ctx) {
-#ifdef CONFIG_LUA
-            mp_lua_mouse_move(mpctx, cmd->mouse_x, cmd->mouse_y);
+            mp_lua_script_dispatch(mpctx, cmd->args[0].v.i,
+                            cmd->key_up_follows ? "keyup_follows" : "press");
 #endif
         }
         break;

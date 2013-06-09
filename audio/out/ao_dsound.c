@@ -39,21 +39,9 @@
 #include "audio/format.h"
 #include "ao.h"
 #include "audio/reorder_ch.h"
-#include "audio_out_internal.h"
 #include "core/mp_msg.h"
 #include "osdep/timer.h"
 #include "core/subopt-helper.h"
-
-
-static const ao_info_t info =
-{
-	"Windows DirectSound audio output",
-	"dsound",
-	"Gabor Szecsi <deje@miki.hu>",
-	""
-};
-
-LIBAO_EXTERN(dsound)
 
 /**
 \todo use the definitions from the win32 api headers when they define these
@@ -62,7 +50,9 @@ LIBAO_EXTERN(dsound)
 #define WAVE_FORMAT_DOLBY_AC3_SPDIF 0x0092
 #define WAVE_FORMAT_EXTENSIBLE 0xFFFE
 
-static const GUID KSDATAFORMAT_SUBTYPE_PCM = {0x1,0x0000,0x0010, {0x80,0x00,0x00,0xaa,0x00,0x38,0x9b,0x71}};
+static const GUID KSDATAFORMAT_SUBTYPE_PCM = {
+    0x1, 0x0000, 0x0010, {0x80, 0x00, 0x00, 0xaa, 0x00, 0x38, 0x9b, 0x71}
+};
 
 #if 0
 #define DSSPEAKER_HEADPHONE         0x00000001
@@ -75,32 +65,38 @@ static const GUID KSDATAFORMAT_SUBTYPE_PCM = {0x1,0x0000,0x0010, {0x80,0x00,0x00
 
 #ifndef _WAVEFORMATEXTENSIBLE_
 typedef struct {
-    WAVEFORMATEX    Format;
+    WAVEFORMATEX Format;
     union {
         WORD wValidBitsPerSample;       /* bits of precision  */
         WORD wSamplesPerBlock;          /* valid if wBitsPerSample==0 */
         WORD wReserved;                 /* If neither applies, set to zero. */
     } Samples;
-    DWORD           dwChannelMask;      /* which channels are */
+    DWORD dwChannelMask;                /* which channels are */
                                         /* present in stream  */
-    GUID            SubFormat;
+    GUID SubFormat;
 } WAVEFORMATEXTENSIBLE, *PWAVEFORMATEXTENSIBLE;
 #endif
 
-static HINSTANCE hdsound_dll = NULL;      ///handle to the dll
-static LPDIRECTSOUND hds = NULL;          ///direct sound object
-static LPDIRECTSOUNDBUFFER hdspribuf = NULL; ///primary direct sound buffer
-static LPDIRECTSOUNDBUFFER hdsbuf = NULL; ///secondary direct sound buffer (stream buffer)
-static int buffer_size = 0;               ///size in bytes of the direct sound buffer
-static int write_offset = 0;              ///offset of the write cursor in the direct sound buffer
-static int min_free_space = 0;            ///if the free space is below this value get_space() will return 0
-                                          ///there will always be at least this amout of free space to prevent
-                                          ///get_space() from returning wrong values when buffer is 100% full.
-                                          ///will be replaced with nBlockAlign in init()
-static int underrun_check = 0;            ///0 or last reported free space (underrun detection)
-static int device_num = 0;                ///wanted device number
-static GUID device;                       ///guid of the device
-static int audio_volume;
+struct priv {
+    HINSTANCE hdsound_dll;          ///handle to the dll
+    LPDIRECTSOUND hds;              ///direct sound object
+    LPDIRECTSOUNDBUFFER hdspribuf;  ///primary direct sound buffer
+    LPDIRECTSOUNDBUFFER hdsbuf;     ///secondary direct sound buffer (stream buffer)
+    int buffer_size;                ///size in bytes of the direct sound buffer
+    int write_offset;               ///offset of the write cursor in the direct sound buffer
+    int min_free_space;             ///if the free space is below this value get_space() will return 0
+                                    ///there will always be at least this amout of free space to prevent
+                                    ///get_space() from returning wrong values when buffer is 100% full.
+                                    ///will be replaced with nBlockAlign in init()
+    int underrun_check;             ///0 or last reported free space (underrun detection)
+    int device_num;                 ///wanted device number
+    GUID device;                    ///guid of the device
+    int audio_volume;
+
+    int device_index;
+};
+
+static float get_delay(struct ao *ao);
 
 /***************************************************************************************/
 
@@ -111,46 +107,48 @@ static int audio_volume;
 */
 static char * dserr2str(int err)
 {
-	switch (err) {
-		case DS_OK: return "DS_OK";
-		case DS_NO_VIRTUALIZATION: return "DS_NO_VIRTUALIZATION";
-		case DSERR_ALLOCATED: return "DS_NO_VIRTUALIZATION";
-		case DSERR_CONTROLUNAVAIL: return "DSERR_CONTROLUNAVAIL";
-		case DSERR_INVALIDPARAM: return "DSERR_INVALIDPARAM";
-		case DSERR_INVALIDCALL: return "DSERR_INVALIDCALL";
-		case DSERR_GENERIC: return "DSERR_GENERIC";
-		case DSERR_PRIOLEVELNEEDED: return "DSERR_PRIOLEVELNEEDED";
-		case DSERR_OUTOFMEMORY: return "DSERR_OUTOFMEMORY";
-		case DSERR_BADFORMAT: return "DSERR_BADFORMAT";
-		case DSERR_UNSUPPORTED: return "DSERR_UNSUPPORTED";
-		case DSERR_NODRIVER: return "DSERR_NODRIVER";
-		case DSERR_ALREADYINITIALIZED: return "DSERR_ALREADYINITIALIZED";
-		case DSERR_NOAGGREGATION: return "DSERR_NOAGGREGATION";
-		case DSERR_BUFFERLOST: return "DSERR_BUFFERLOST";
-		case DSERR_OTHERAPPHASPRIO: return "DSERR_OTHERAPPHASPRIO";
-		case DSERR_UNINITIALIZED: return "DSERR_UNINITIALIZED";
-		case DSERR_NOINTERFACE: return "DSERR_NOINTERFACE";
-		case DSERR_ACCESSDENIED: return "DSERR_ACCESSDENIED";
-		default: return "unknown";
-	}
+    switch (err) {
+    case DS_OK:                         return "DS_OK";
+    case DS_NO_VIRTUALIZATION:          return "DS_NO_VIRTUALIZATION";
+    case DSERR_ALLOCATED:               return "DS_NO_VIRTUALIZATION";
+    case DSERR_CONTROLUNAVAIL:          return "DSERR_CONTROLUNAVAIL";
+    case DSERR_INVALIDPARAM:            return "DSERR_INVALIDPARAM";
+    case DSERR_INVALIDCALL:             return "DSERR_INVALIDCALL";
+    case DSERR_GENERIC:                 return "DSERR_GENERIC";
+    case DSERR_PRIOLEVELNEEDED:         return "DSERR_PRIOLEVELNEEDED";
+    case DSERR_OUTOFMEMORY:             return "DSERR_OUTOFMEMORY";
+    case DSERR_BADFORMAT:               return "DSERR_BADFORMAT";
+    case DSERR_UNSUPPORTED:             return "DSERR_UNSUPPORTED";
+    case DSERR_NODRIVER:                return "DSERR_NODRIVER";
+    case DSERR_ALREADYINITIALIZED:      return "DSERR_ALREADYINITIALIZED";
+    case DSERR_NOAGGREGATION:           return "DSERR_NOAGGREGATION";
+    case DSERR_BUFFERLOST:              return "DSERR_BUFFERLOST";
+    case DSERR_OTHERAPPHASPRIO:         return "DSERR_OTHERAPPHASPRIO";
+    case DSERR_UNINITIALIZED:           return "DSERR_UNINITIALIZED";
+    case DSERR_NOINTERFACE:             return "DSERR_NOINTERFACE";
+    case DSERR_ACCESSDENIED:            return "DSERR_ACCESSDENIED";
+    }
+    return "unknown";
 }
 
 /**
 \brief uninitialize direct sound
 */
-static void UninitDirectSound(void)
+static void UninitDirectSound(struct ao *ao)
 {
+    struct priv *p = ao->priv;
+
     // finally release the DirectSound object
-    if (hds) {
-    	IDirectSound_Release(hds);
-    	hds = NULL;
+    if (p->hds) {
+        IDirectSound_Release(p->hds);
+        p->hds = NULL;
     }
     // free DSOUND.DLL
-    if (hdsound_dll) {
-    	FreeLibrary(hdsound_dll);
-    	hdsound_dll = NULL;
+    if (p->hdsound_dll) {
+        FreeLibrary(p->hdsound_dll);
+        p->hdsound_dll = NULL;
     }
-	mp_msg(MSGT_AO, MSGL_V, "ao_dsound: DirectSound uninitialized\n");
+    mp_msg(MSGT_AO, MSGL_V, "ao_dsound: DirectSound uninitialized\n");
 }
 
 /**
@@ -158,7 +156,7 @@ static void UninitDirectSound(void)
 */
 static void print_help(void)
 {
-  mp_msg(MSGT_AO, MSGL_FATAL,
+    mp_msg(MSGT_AO, MSGL_FATAL,
            "\n-ao dsound commandline help:\n"
            "Example: mpv -ao dsound:device=1\n"
            "  sets 1st device\n"
@@ -172,18 +170,20 @@ static void print_help(void)
 \brief enumerate direct sound devices
 \return TRUE to continue with the enumeration
 */
-static BOOL CALLBACK DirectSoundEnum(LPGUID guid,LPCSTR desc,LPCSTR module,LPVOID context)
+static BOOL CALLBACK DirectSoundEnum(LPGUID guid, LPCSTR desc, LPCSTR module,
+                                     LPVOID context)
 {
-    int* device_index=context;
-    mp_msg(MSGT_AO, MSGL_V,"%i %s ",*device_index,desc);
-    if(device_num==*device_index){
-        mp_msg(MSGT_AO, MSGL_V,"<--");
-        if(guid){
-            memcpy(&device,guid,sizeof(GUID));
-        }
+    struct ao *ao = context;
+    struct priv *p = ao->priv;
+
+    mp_msg(MSGT_AO, MSGL_V, "%i %s ", p->device_index, desc);
+    if (p->device_num == p->device_index) {
+        mp_msg(MSGT_AO, MSGL_V, "<--");
+        if (guid)
+            memcpy(&p->device, guid, sizeof(GUID));
     }
-    mp_msg(MSGT_AO, MSGL_V,"\n");
-    (*device_index)++;
+    mp_msg(MSGT_AO, MSGL_V, "\n");
+    p->device_index++;
     return TRUE;
 }
 
@@ -192,90 +192,104 @@ static BOOL CALLBACK DirectSoundEnum(LPGUID guid,LPCSTR desc,LPCSTR module,LPVOI
 \brief initilize direct sound
 \return 0 if error, 1 if ok
 */
-static int InitDirectSound(void)
+static int InitDirectSound(struct ao *ao, char *params)
 {
-	DSCAPS dscaps;
+    struct priv *p = ao->priv;
 
-	// initialize directsound
+    DSCAPS dscaps;
+
+    // initialize directsound
     HRESULT (WINAPI *OurDirectSoundCreate)(LPGUID, LPDIRECTSOUND *, LPUNKNOWN);
-	HRESULT (WINAPI *OurDirectSoundEnumerate)(LPDSENUMCALLBACKA, LPVOID);
-	int device_index=0;
-	const opt_t subopts[] = {
-	  {"device", OPT_ARG_INT, &device_num,NULL},
-	  {NULL}
-	};
-	if (subopt_parse(ao_subdevice, subopts) != 0) {
-		print_help();
-		return 0;
-	}
+    HRESULT (WINAPI *OurDirectSoundEnumerate)(LPDSENUMCALLBACKA, LPVOID);
+    p->device_index = 0;
+    const opt_t subopts[] = {
+        {"device", OPT_ARG_INT, &p->device_num, NULL},
+        {NULL}
+    };
+    if (subopt_parse(params, subopts) != 0) {
+        print_help();
+        return 0;
+    }
 
-	hdsound_dll = LoadLibrary("DSOUND.DLL");
-	if (hdsound_dll == NULL) {
-		mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: cannot load DSOUND.DLL\n");
-		return 0;
-	}
-	OurDirectSoundCreate = (void*)GetProcAddress(hdsound_dll, "DirectSoundCreate");
-	OurDirectSoundEnumerate = (void*)GetProcAddress(hdsound_dll, "DirectSoundEnumerateA");
+    p->hdsound_dll = LoadLibrary("DSOUND.DLL");
+    if (p->hdsound_dll == NULL) {
+        mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: cannot load DSOUND.DLL\n");
+        return 0;
+    }
+    OurDirectSoundCreate = (void *)GetProcAddress(p->hdsound_dll,
+                                                  "DirectSoundCreate");
+    OurDirectSoundEnumerate = (void *)GetProcAddress(p->hdsound_dll,
+                                                     "DirectSoundEnumerateA");
 
-	if (OurDirectSoundCreate == NULL || OurDirectSoundEnumerate == NULL) {
-		mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: GetProcAddress FAILED\n");
-		FreeLibrary(hdsound_dll);
-		return 0;
-	}
+    if (OurDirectSoundCreate == NULL || OurDirectSoundEnumerate == NULL) {
+        mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: GetProcAddress FAILED\n");
+        FreeLibrary(p->hdsound_dll);
+        return 0;
+    }
 
-	// Enumerate all directsound devices
-	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Output Devices:\n");
-	OurDirectSoundEnumerate(DirectSoundEnum,&device_index);
+    // Enumerate all directsound p->devices
+    mp_msg(MSGT_AO, MSGL_V, "ao_dsound: Output Devices:\n");
+    OurDirectSoundEnumerate(DirectSoundEnum, ao);
 
-	// Create the direct sound object
-	if FAILED(OurDirectSoundCreate((device_num)?&device:NULL, &hds, NULL )) {
-		mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: cannot create a DirectSound device\n");
-		FreeLibrary(hdsound_dll);
-		return 0;
-	}
+    // Create the direct sound object
+    if (FAILED(OurDirectSoundCreate((p->device_num) ? &p->device : NULL,
+                                    &p->hds, NULL)))
+    {
+        mp_msg(MSGT_AO, MSGL_ERR,
+               "ao_dsound: cannot create a DirectSound device\n");
+        FreeLibrary(p->hdsound_dll);
+        return 0;
+    }
 
-	/* Set DirectSound Cooperative level, ie what control we want over Windows
-	 * sound device. In our case, DSSCL_EXCLUSIVE means that we can modify the
-	 * settings of the primary buffer, but also that only the sound of our
-	 * application will be hearable when it will have the focus.
-	 * !!! (this is not really working as intended yet because to set the
-	 * cooperative level you need the window handle of your application, and
-	 * I don't know of any easy way to get it. Especially since we might play
-	 * sound without any video, and so what window handle should we use ???
-	 * The hack for now is to use the Desktop window handle - it seems to be
-	 * working */
-	if (IDirectSound_SetCooperativeLevel(hds, GetDesktopWindow(), DSSCL_EXCLUSIVE)) {
-		mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: cannot set direct sound cooperative level\n");
-		IDirectSound_Release(hds);
-		FreeLibrary(hdsound_dll);
-		return 0;
-	}
-	mp_msg(MSGT_AO, MSGL_V, "ao_dsound: DirectSound initialized\n");
+    /* Set DirectSound Cooperative level, ie what control we want over Windows
+     * sound device. In our case, DSSCL_EXCLUSIVE means that we can modify the
+     * settings of the primary buffer, but also that only the sound of our
+     * application will be hearable when it will have the focus.
+     * !!! (this is not really working as intended yet because to set the
+     * cooperative level you need the window handle of your application, and
+     * I don't know of any easy way to get it. Especially since we might play
+     * sound without any video, and so what window handle should we use ???
+     * The hack for now is to use the Desktop window handle - it seems to be
+     * working */
+    if (IDirectSound_SetCooperativeLevel(p->hds, GetDesktopWindow(),
+                                         DSSCL_EXCLUSIVE))
+    {
+        mp_msg(MSGT_AO, MSGL_ERR,
+               "ao_dsound: cannot set direct sound cooperative level\n");
+        IDirectSound_Release(p->hds);
+        FreeLibrary(p->hdsound_dll);
+        return 0;
+    }
+    mp_msg(MSGT_AO, MSGL_V, "ao_dsound: DirectSound initialized\n");
 
-	memset(&dscaps, 0, sizeof(DSCAPS));
-	dscaps.dwSize = sizeof(DSCAPS);
-	if (DS_OK == IDirectSound_GetCaps(hds, &dscaps)) {
-		if (dscaps.dwFlags & DSCAPS_EMULDRIVER) mp_msg(MSGT_AO, MSGL_V, "ao_dsound: DirectSound is emulated, waveOut may give better performance\n");
-	} else {
-		mp_msg(MSGT_AO, MSGL_V, "ao_dsound: cannot get device capabilities\n");
-	}
+    memset(&dscaps, 0, sizeof(DSCAPS));
+    dscaps.dwSize = sizeof(DSCAPS);
+    if (DS_OK == IDirectSound_GetCaps(p->hds, &dscaps)) {
+        if (dscaps.dwFlags & DSCAPS_EMULDRIVER)
+            mp_msg(MSGT_AO, MSGL_V,
+                   "ao_dsound: DirectSound is emulated, waveOut may give better performance\n");
+    } else {
+        mp_msg(MSGT_AO, MSGL_V, "ao_dsound: cannot get device capabilities\n");
+    }
 
-	return 1;
+    return 1;
 }
 
 /**
 \brief destroy the direct sound buffer
 */
-static void DestroyBuffer(void)
+static void DestroyBuffer(struct ao *ao)
 {
-	if (hdsbuf) {
-		IDirectSoundBuffer_Release(hdsbuf);
-		hdsbuf = NULL;
-	}
-	if (hdspribuf) {
-		IDirectSoundBuffer_Release(hdspribuf);
-		hdspribuf = NULL;
-	}
+    struct priv *p = ao->priv;
+
+    if (p->hdsbuf) {
+        IDirectSoundBuffer_Release(p->hdsbuf);
+        p->hdsbuf = NULL;
+    }
+    if (p->hdspribuf) {
+        IDirectSoundBuffer_Release(p->hdspribuf);
+        p->hdspribuf = NULL;
+    }
 }
 
 /**
@@ -284,59 +298,61 @@ static void DestroyBuffer(void)
 \param len length of the data to copy in bytes
 \return number of copyed bytes
 */
-static int write_buffer(unsigned char *data, int len)
+static int write_buffer(struct ao *ao, unsigned char *data, int len)
 {
-  HRESULT res;
-  LPVOID lpvPtr1;
-  DWORD dwBytes1;
-  LPVOID lpvPtr2;
-  DWORD dwBytes2;
+    struct priv *p = ao->priv;
+    HRESULT res;
+    LPVOID lpvPtr1;
+    DWORD dwBytes1;
+    LPVOID lpvPtr2;
+    DWORD dwBytes2;
 
-  underrun_check = 0;
+    p->underrun_check = 0;
 
-  // Lock the buffer
-  res = IDirectSoundBuffer_Lock(hdsbuf,write_offset, len, &lpvPtr1, &dwBytes1, &lpvPtr2, &dwBytes2, 0);
-  // If the buffer was lost, restore and retry lock.
-  if (DSERR_BUFFERLOST == res)
-  {
-    IDirectSoundBuffer_Restore(hdsbuf);
-	res = IDirectSoundBuffer_Lock(hdsbuf,write_offset, len, &lpvPtr1, &dwBytes1, &lpvPtr2, &dwBytes2, 0);
-  }
+    // Lock the buffer
+    res = IDirectSoundBuffer_Lock(p->hdsbuf, p->write_offset, len, &lpvPtr1,
+                                  &dwBytes1, &lpvPtr2, &dwBytes2, 0);
+    // If the buffer was lost, restore and retry lock.
+    if (DSERR_BUFFERLOST == res) {
+        IDirectSoundBuffer_Restore(p->hdsbuf);
+        res = IDirectSoundBuffer_Lock(p->hdsbuf, p->write_offset, len, &lpvPtr1,
+                                      &dwBytes1, &lpvPtr2, &dwBytes2, 0);
+    }
 
 
-  if (SUCCEEDED(res))
-  {
-  	if (!AF_FORMAT_IS_AC3(ao_data.format)) {
+    if (SUCCEEDED(res)) {
+        if (!AF_FORMAT_IS_AC3(ao->format)) {
             memcpy(lpvPtr1, data, dwBytes1);
             if (lpvPtr2 != NULL)
                 memcpy(lpvPtr2, (char *)data + dwBytes1, dwBytes2);
 
-  	    write_offset+=dwBytes1+dwBytes2;
-  	    if(write_offset>=buffer_size)
-                write_offset=dwBytes2;
-  	} else {
-  	    // Write to pointers without reordering.
-	memcpy(lpvPtr1,data,dwBytes1);
-    if (NULL != lpvPtr2 )memcpy(lpvPtr2,data+dwBytes1,dwBytes2);
-	write_offset+=dwBytes1+dwBytes2;
-    if(write_offset>=buffer_size)write_offset=dwBytes2;
-  	}
+            p->write_offset += dwBytes1 + dwBytes2;
+            if (p->write_offset >= p->buffer_size)
+                p->write_offset = dwBytes2;
+        } else {
+            // Write to pointers without reordering.
+            memcpy(lpvPtr1, data, dwBytes1);
+            if (NULL != lpvPtr2)
+                memcpy(lpvPtr2, data + dwBytes1, dwBytes2);
+            p->write_offset += dwBytes1 + dwBytes2;
+            if (p->write_offset >= p->buffer_size)
+                p->write_offset = dwBytes2;
+        }
 
-   // Release the data back to DirectSound.
-    res = IDirectSoundBuffer_Unlock(hdsbuf,lpvPtr1,dwBytes1,lpvPtr2,dwBytes2);
-    if (SUCCEEDED(res))
-    {
-	  // Success.
-	  DWORD status;
-	  IDirectSoundBuffer_GetStatus(hdsbuf, &status);
-      if (!(status & DSBSTATUS_PLAYING)){
-	    res = IDirectSoundBuffer_Play(hdsbuf, 0, 0, DSBPLAY_LOOPING);
-	  }
-	  return dwBytes1+dwBytes2;
+        // Release the data back to DirectSound.
+        res = IDirectSoundBuffer_Unlock(p->hdsbuf, lpvPtr1, dwBytes1, lpvPtr2,
+                                        dwBytes2);
+        if (SUCCEEDED(res)) {
+            // Success.
+            DWORD status;
+            IDirectSoundBuffer_GetStatus(p->hdsbuf, &status);
+            if (!(status & DSBSTATUS_PLAYING))
+                res = IDirectSoundBuffer_Play(p->hdsbuf, 0, 0, DSBPLAY_LOOPING);
+            return dwBytes1 + dwBytes2;
+        }
     }
-  }
-  // Lock, Unlock, or Restore failed.
-  return 0;
+    // Lock, Unlock, or Restore failed.
+    return 0;
 }
 
 /***************************************************************************************/
@@ -345,28 +361,29 @@ static int write_buffer(unsigned char *data, int len)
 \brief handle control commands
 \param cmd command
 \param arg argument
-\return CONTROL_OK or -1 in case the command can't be handled
+\return CONTROL_OK or CONTROL_UNKNOWN in case the command is not supported
 */
-static int control(int cmd, void *arg)
+static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
-	DWORD volume;
-	switch (cmd) {
-		case AOCONTROL_GET_VOLUME: {
-			ao_control_vol_t* vol = (ao_control_vol_t*)arg;
-			vol->left = vol->right = audio_volume;
-			return CONTROL_OK;
-		}
-		case AOCONTROL_SET_VOLUME: {
-			ao_control_vol_t* vol = (ao_control_vol_t*)arg;
-			volume = audio_volume = vol->right;
-			if (volume < 1)
-				volume = 1;
-			volume = (DWORD)(log10(volume) * 5000.0) - 10000;
-			IDirectSoundBuffer_SetVolume(hdsbuf, volume);
-			return CONTROL_OK;
-		}
-	}
-	return -1;
+    struct priv *p = ao->priv;
+    DWORD volume;
+    switch (cmd) {
+    case AOCONTROL_GET_VOLUME: {
+        ao_control_vol_t *vol = (ao_control_vol_t *)arg;
+        vol->left = vol->right = p->audio_volume;
+        return CONTROL_OK;
+    }
+    case AOCONTROL_SET_VOLUME: {
+        ao_control_vol_t *vol = (ao_control_vol_t *)arg;
+        volume = p->audio_volume = vol->right;
+        if (volume < 1)
+            volume = 1;
+        volume = (DWORD)(log10(volume) * 5000.0) - 10000;
+        IDirectSoundBuffer_SetVolume(p->hdsbuf, volume);
+        return CONTROL_OK;
+    }
+    }
+    return CONTROL_UNKNOWN;
 }
 
 /**
@@ -375,123 +392,147 @@ static int control(int cmd, void *arg)
 \param channels number of channels
 \param format format
 \param flags unused
-\return 1=success 0=fail
+\return 0=success -1=fail
 */
-static int init(int rate, const struct mp_chmap *channels, int format, int flags)
+static int init(struct ao *ao, char *params)
 {
+    struct priv *p = talloc_zero(ao, struct priv);
     int res;
-	if (!InitDirectSound()) return 0;
 
-        global_ao->no_persistent_volume = true;
-	audio_volume = 100;
+    ao->priv = p;
 
-	// ok, now create the buffers
-	WAVEFORMATEXTENSIBLE wformat;
-	DSBUFFERDESC dsbpridesc;
-	DSBUFFERDESC dsbdesc;
+    if (!InitDirectSound(ao, params))
+        return -1;
 
-	if (AF_FORMAT_IS_AC3(format)) {
-		format = AF_FORMAT_AC3_NE;
-        } else {
-                struct mp_chmap_sel sel = {0};
-                mp_chmap_sel_add_waveext(&sel);
-                if (!ao_chmap_sel_adjust(&ao_data, &sel, &ao_data.channels))
-                        return 0;
+    ao->no_persistent_volume = true;
+    p->audio_volume = 100;
+
+    // ok, now create the buffers
+    WAVEFORMATEXTENSIBLE wformat;
+    DSBUFFERDESC dsbpridesc;
+    DSBUFFERDESC dsbdesc;
+    int format = ao->format;
+    int rate = ao->samplerate;
+
+    if (AF_FORMAT_IS_AC3(format))
+        format = AF_FORMAT_AC3_NE;
+    else {
+        struct mp_chmap_sel sel = {0};
+        mp_chmap_sel_add_waveext(&sel);
+        if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+            return -1;
+    }
+    switch (format) {
+    case AF_FORMAT_AC3_NE:
+    case AF_FORMAT_S24_LE:
+    case AF_FORMAT_S16_LE:
+    case AF_FORMAT_U8:
+        break;
+    default:
+        mp_msg(MSGT_AO, MSGL_V,
+               "ao_dsound: format %s not supported defaulting to Signed 16-bit Little-Endian\n",
+               af_fmt2str_short(format));
+        format = AF_FORMAT_S16_LE;
+    }
+    //set our audio parameters
+    ao->samplerate = rate;
+    ao->format = format;
+    ao->bps = ao->channels.num * rate * (af_fmt2bits(format) >> 3);
+    if (ao->buffersize == -1)
+        ao->buffersize = ao->bps;                            // space for 1 sec
+    mp_msg(MSGT_AO, MSGL_V,
+           "ao_dsound: Samplerate:%iHz Channels:%i Format:%s\n", rate,
+           ao->channels.num, af_fmt2str_short(format));
+    mp_msg(MSGT_AO, MSGL_V, "ao_dsound: Buffersize:%d bytes (%d msec)\n",
+           ao->buffersize, ao->buffersize / ao->bps * 1000);
+
+    //fill waveformatex
+    ZeroMemory(&wformat, sizeof(WAVEFORMATEXTENSIBLE));
+    wformat.Format.cbSize = (ao->channels.num > 2)
+                    ? sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX) : 0;
+    wformat.Format.nChannels = ao->channels.num;
+    wformat.Format.nSamplesPerSec = rate;
+    if (AF_FORMAT_IS_AC3(format)) {
+        wformat.Format.wFormatTag = WAVE_FORMAT_DOLBY_AC3_SPDIF;
+        wformat.Format.wBitsPerSample = 16;
+        wformat.Format.nBlockAlign = 4;
+    } else {
+        wformat.Format.wFormatTag = (ao->channels.num > 2)
+                                    ? WAVE_FORMAT_EXTENSIBLE : WAVE_FORMAT_PCM;
+        wformat.Format.wBitsPerSample = af_fmt2bits(format);
+        wformat.Format.nBlockAlign = wformat.Format.nChannels *
+                                     (wformat.Format.wBitsPerSample >> 3);
+    }
+
+    // fill in primary sound buffer descriptor
+    memset(&dsbpridesc, 0, sizeof(DSBUFFERDESC));
+    dsbpridesc.dwSize = sizeof(DSBUFFERDESC);
+    dsbpridesc.dwFlags       = DSBCAPS_PRIMARYBUFFER;
+    dsbpridesc.dwBufferBytes = 0;
+    dsbpridesc.lpwfxFormat   = NULL;
+
+    // fill in the secondary sound buffer (=stream buffer) descriptor
+    memset(&dsbdesc, 0, sizeof(DSBUFFERDESC));
+    dsbdesc.dwSize = sizeof(DSBUFFERDESC);
+    dsbdesc.dwFlags = DSBCAPS_GETCURRENTPOSITION2 /** Better position accuracy */
+                      | DSBCAPS_GLOBALFOCUS       /** Allows background playing */
+                      | DSBCAPS_CTRLVOLUME;       /** volume control enabled */
+
+    if (ao->channels.num > 2) {
+        wformat.dwChannelMask = mp_chmap_to_waveext(&ao->channels);
+        wformat.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
+        wformat.Samples.wValidBitsPerSample = wformat.Format.wBitsPerSample;
+        // Needed for 5.1 on emu101k - shit soundblaster
+        dsbdesc.dwFlags |= DSBCAPS_LOCHARDWARE;
+    }
+    wformat.Format.nAvgBytesPerSec = wformat.Format.nSamplesPerSec *
+                                     wformat.Format.nBlockAlign;
+
+    dsbdesc.dwBufferBytes = ao->buffersize;
+    dsbdesc.lpwfxFormat = (WAVEFORMATEX *)&wformat;
+    p->buffer_size = dsbdesc.dwBufferBytes;
+    p->write_offset = 0;
+    p->min_free_space = wformat.Format.nBlockAlign;
+    ao->outburst = wformat.Format.nBlockAlign * 512;
+
+    // create primary buffer and set its format
+
+    res = IDirectSound_CreateSoundBuffer(p->hds, &dsbpridesc, &p->hdspribuf, NULL);
+    if (res != DS_OK) {
+        UninitDirectSound(ao);
+        mp_msg(MSGT_AO, MSGL_ERR,
+               "ao_dsound: cannot create primary buffer (%s)\n",
+               dserr2str(res));
+        return -1;
+    }
+    res = IDirectSoundBuffer_SetFormat(p->hdspribuf, (WAVEFORMATEX *)&wformat);
+    if (res != DS_OK) {
+        mp_msg(MSGT_AO, MSGL_WARN,
+               "ao_dsound: cannot set primary buffer format (%s), using "
+               "standard setting (bad quality)", dserr2str(res));
+    }
+
+    mp_msg(MSGT_AO, MSGL_V, "ao_dsound: primary buffer created\n");
+
+    // now create the stream buffer
+
+    res = IDirectSound_CreateSoundBuffer(p->hds, &dsbdesc, &p->hdsbuf, NULL);
+    if (res != DS_OK) {
+        if (dsbdesc.dwFlags & DSBCAPS_LOCHARDWARE) {
+            // Try without DSBCAPS_LOCHARDWARE
+            dsbdesc.dwFlags &= ~DSBCAPS_LOCHARDWARE;
+            res = IDirectSound_CreateSoundBuffer(p->hds, &dsbdesc, &p->hdsbuf, NULL);
         }
-	switch(format){
-		case AF_FORMAT_AC3_NE:
-		case AF_FORMAT_S24_LE:
-		case AF_FORMAT_S16_LE:
-		case AF_FORMAT_U8:
-			break;
-		default:
-			mp_msg(MSGT_AO, MSGL_V,"ao_dsound: format %s not supported defaulting to Signed 16-bit Little-Endian\n",af_fmt2str_short(format));
-			format=AF_FORMAT_S16_LE;
-	}
-	//fill global ao_data
-	ao_data.samplerate = rate;
-	ao_data.format = format;
-	ao_data.bps = ao_data.channels.num * rate * (af_fmt2bits(format)>>3);
-	if(ao_data.buffersize==-1) ao_data.buffersize = ao_data.bps; // space for 1 sec
-	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Samplerate:%iHz Channels:%i Format:%s\n", rate, ao_data.channels.num, af_fmt2str_short(format));
-	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Buffersize:%d bytes (%d msec)\n", ao_data.buffersize, ao_data.buffersize / ao_data.bps * 1000);
-
-	//fill waveformatex
-	ZeroMemory(&wformat, sizeof(WAVEFORMATEXTENSIBLE));
-	wformat.Format.cbSize          = (ao_data.channels.num > 2) ? sizeof(WAVEFORMATEXTENSIBLE)-sizeof(WAVEFORMATEX) : 0;
-	wformat.Format.nChannels       = ao_data.channels.num;
-	wformat.Format.nSamplesPerSec  = rate;
-	if (AF_FORMAT_IS_AC3(format)) {
-		wformat.Format.wFormatTag      = WAVE_FORMAT_DOLBY_AC3_SPDIF;
-		wformat.Format.wBitsPerSample  = 16;
-		wformat.Format.nBlockAlign     = 4;
-	} else {
-		wformat.Format.wFormatTag      = (ao_data.channels.num > 2) ? WAVE_FORMAT_EXTENSIBLE : WAVE_FORMAT_PCM;
-		wformat.Format.wBitsPerSample  = af_fmt2bits(format);
-		wformat.Format.nBlockAlign     = wformat.Format.nChannels * (wformat.Format.wBitsPerSample >> 3);
-	}
-
-	// fill in primary sound buffer descriptor
-	memset(&dsbpridesc, 0, sizeof(DSBUFFERDESC));
-	dsbpridesc.dwSize = sizeof(DSBUFFERDESC);
-	dsbpridesc.dwFlags       = DSBCAPS_PRIMARYBUFFER;
-	dsbpridesc.dwBufferBytes = 0;
-	dsbpridesc.lpwfxFormat   = NULL;
-
-
-	// fill in the secondary sound buffer (=stream buffer) descriptor
-	memset(&dsbdesc, 0, sizeof(DSBUFFERDESC));
-	dsbdesc.dwSize = sizeof(DSBUFFERDESC);
-	dsbdesc.dwFlags = DSBCAPS_GETCURRENTPOSITION2 /** Better position accuracy */
-	                | DSBCAPS_GLOBALFOCUS         /** Allows background playing */
-	                | DSBCAPS_CTRLVOLUME;         /** volume control enabled */
-
-	if (ao_data.channels.num > 2) {
-		wformat.dwChannelMask = mp_chmap_to_waveext(&ao_data.channels);
-		wformat.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
-		wformat.Samples.wValidBitsPerSample = wformat.Format.wBitsPerSample;
-		// Needed for 5.1 on emu101k - shit soundblaster
-		dsbdesc.dwFlags |= DSBCAPS_LOCHARDWARE;
-	}
-	wformat.Format.nAvgBytesPerSec = wformat.Format.nSamplesPerSec * wformat.Format.nBlockAlign;
-
-	dsbdesc.dwBufferBytes = ao_data.buffersize;
-	dsbdesc.lpwfxFormat = (WAVEFORMATEX *)&wformat;
-	buffer_size = dsbdesc.dwBufferBytes;
-	write_offset = 0;
-	min_free_space = wformat.Format.nBlockAlign;
-	ao_data.outburst = wformat.Format.nBlockAlign * 512;
-
-	// create primary buffer and set its format
-
-	res = IDirectSound_CreateSoundBuffer( hds, &dsbpridesc, &hdspribuf, NULL );
-	if ( res != DS_OK ) {
-		UninitDirectSound();
-		mp_msg(MSGT_AO, MSGL_ERR,"ao_dsound: cannot create primary buffer (%s)\n", dserr2str(res));
-		return 0;
-	}
-	res = IDirectSoundBuffer_SetFormat( hdspribuf, (WAVEFORMATEX *)&wformat );
-	if ( res != DS_OK ) mp_msg(MSGT_AO, MSGL_WARN,"ao_dsound: cannot set primary buffer format (%s), using standard setting (bad quality)", dserr2str(res));
-
-	mp_msg(MSGT_AO, MSGL_V, "ao_dsound: primary buffer created\n");
-
-	// now create the stream buffer
-
-	res = IDirectSound_CreateSoundBuffer(hds, &dsbdesc, &hdsbuf, NULL);
-	if (res != DS_OK) {
-		if (dsbdesc.dwFlags & DSBCAPS_LOCHARDWARE) {
-			// Try without DSBCAPS_LOCHARDWARE
-			dsbdesc.dwFlags &= ~DSBCAPS_LOCHARDWARE;
-			res = IDirectSound_CreateSoundBuffer(hds, &dsbdesc, &hdsbuf, NULL);
-		}
-		if (res != DS_OK) {
-			UninitDirectSound();
-			mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: cannot create secondary (stream)buffer (%s)\n", dserr2str(res));
-			return 0;
-		}
-	}
-	mp_msg(MSGT_AO, MSGL_V, "ao_dsound: secondary (stream)buffer created\n");
-	return 1;
+        if (res != DS_OK) {
+            UninitDirectSound(ao);
+            mp_msg(MSGT_AO, MSGL_ERR,
+                   "ao_dsound: cannot create secondary (stream)buffer (%s)\n",
+                   dserr2str(res));
+            return -1;
+        }
+    }
+    mp_msg(MSGT_AO, MSGL_V, "ao_dsound: secondary (stream)buffer created\n");
+    return 0;
 }
 
 
@@ -499,107 +540,140 @@ static int init(int rate, const struct mp_chmap *channels, int format, int flags
 /**
 \brief stop playing and empty buffers (for seeking/pause)
 */
-static void reset(void)
+static void reset(struct ao *ao)
 {
-	IDirectSoundBuffer_Stop(hdsbuf);
-	// reset directsound buffer
-	IDirectSoundBuffer_SetCurrentPosition(hdsbuf, 0);
-	write_offset=0;
-	underrun_check=0;
+    struct priv *p = ao->priv;
+
+    IDirectSoundBuffer_Stop(p->hdsbuf);
+    // reset directsound buffer
+    IDirectSoundBuffer_SetCurrentPosition(p->hdsbuf, 0);
+    p->write_offset = 0;
+    p->underrun_check = 0;
 }
 
 /**
 \brief stop playing, keep buffers (for pause)
 */
-static void audio_pause(void)
+static void audio_pause(struct ao *ao)
 {
-	IDirectSoundBuffer_Stop(hdsbuf);
+    struct priv *p = ao->priv;
+
+    IDirectSoundBuffer_Stop(p->hdsbuf);
 }
 
 /**
 \brief resume playing, after audio_pause()
 */
-static void audio_resume(void)
+static void audio_resume(struct ao *ao)
 {
-	IDirectSoundBuffer_Play(hdsbuf, 0, 0, DSBPLAY_LOOPING);
+    struct priv *p = ao->priv;
+
+    IDirectSoundBuffer_Play(p->hdsbuf, 0, 0, DSBPLAY_LOOPING);
 }
 
 /**
 \brief close audio device
 \param immed stop playback immediately
 */
-static void uninit(int immed)
+static void uninit(struct ao *ao, bool immed)
 {
-	if (!immed)
-		mp_sleep_us(get_delay() * 1000000);
-	reset();
+    if (!immed)
+        mp_sleep_us(get_delay(ao) * 1000000);
+    reset(ao);
 
-	DestroyBuffer();
-	UninitDirectSound();
+    DestroyBuffer(ao);
+    UninitDirectSound(ao);
 }
 
 // return exact number of free (safe to write) bytes
-static int check_free_buffer_size(void)
+static int check_free_buffer_size(struct ao *ao)
 {
-	int space;
-	DWORD play_offset;
-	IDirectSoundBuffer_GetCurrentPosition(hdsbuf,&play_offset,NULL);
-	space=buffer_size-(write_offset-play_offset);
-	//                |                                                      | <-- const --> |                |                 |
-	//                buffer start                                           play_cursor     write_cursor     write_offset      buffer end
-	// play_cursor is the actual postion of the play cursor
-	// write_cursor is the position after which it is assumed to be save to write data
-	// write_offset is the postion where we actually write the data to
-	if(space > buffer_size)space -= buffer_size; // write_offset < play_offset
-	// Check for buffer underruns. An underrun happens if DirectSound
-	// started to play old data beyond the current write_offset. Detect this
-	// by checking whether the free space shrinks, even though no data was
-	// written (i.e. no write_buffer). Doesn't always work, but the only
-	// reason we need this is to deal with the situation when playback ends,
-	// and the buffer is only half-filled.
-	if (space < underrun_check) {
-		// there's no useful data in the buffers
-		space = buffer_size;
-		reset();
-	}
-	underrun_check = space;
-	return space;
+    struct priv *p = ao->priv;
+    int space;
+    DWORD play_offset;
+    IDirectSoundBuffer_GetCurrentPosition(p->hdsbuf, &play_offset, NULL);
+    space = p->buffer_size - (p->write_offset - play_offset);
+    // |              | <-- const --> |                |                 |
+    // buffer start   play_cursor     write_cursor     p->write_offset   buffer end
+    // play_cursor is the actual postion of the play cursor
+    // write_cursor is the position after which it is assumed to be save to write data
+    // p->write_offset is the postion where we actually write the data to
+    if (space > p->buffer_size)
+        space -= p->buffer_size;                        // p->write_offset < play_offset
+    // Check for buffer underruns. An underrun happens if DirectSound
+    // started to play old data beyond the current p->write_offset. Detect this
+    // by checking whether the free space shrinks, even though no data was
+    // written (i.e. no write_buffer). Doesn't always work, but the only
+    // reason we need this is to deal with the situation when playback ends,
+    // and the buffer is only half-filled.
+    if (space < p->underrun_check) {
+        // there's no useful data in the buffers
+        space = p->buffer_size;
+        reset(ao);
+    }
+    p->underrun_check = space;
+    return space;
 }
 
 /**
-\brief find out how many bytes can be written into the audio buffer without
-\return free space in bytes, has to return 0 if the buffer is almost full
-*/
-static int get_space(void)
+   \brief find out how many bytes can be written into the audio buffer without
+   \return free space in bytes, has to return 0 if the buffer is almost full
+ */
+static int get_space(struct ao *ao)
 {
-	int space = check_free_buffer_size();
-	if(space < min_free_space)return 0;
-	return space-min_free_space;
+    struct priv *p = ao->priv;
+
+    int space = check_free_buffer_size(ao);
+    if (space < p->min_free_space)
+        return 0;
+    return space - p->min_free_space;
 }
 
 /**
 \brief play 'len' bytes of 'data'
 \param data pointer to the data to play
 \param len size in bytes of the data buffer, gets rounded down to outburst*n
+           NOTE: outburst stuff might be outdated/deprecated
 \param flags currently unused
 \return number of played bytes
 */
-static int play(void* data, int len, int flags)
+static int play(struct ao *ao, void *data, int len, int flags)
 {
-	int space = check_free_buffer_size();
-	if(space < len) len = space;
+    int space = check_free_buffer_size(ao);
+    if (space < len)
+        len = space;
 
-	if (!(flags & AOPLAY_FINAL_CHUNK))
-	len = (len / ao_data.outburst) * ao_data.outburst;
-	return write_buffer(data, len);
+    if (!(flags & AOPLAY_FINAL_CHUNK))
+        len = (len / ao->outburst) * ao->outburst;
+    return write_buffer(ao, data, len);
 }
 
 /**
 \brief get the delay between the first and last sample in the buffer
 \return delay in seconds
 */
-static float get_delay(void)
+static float get_delay(struct ao *ao)
 {
-	int space = check_free_buffer_size();
-	return (float)(buffer_size - space) / (float)ao_data.bps;
+    struct priv *p = ao->priv;
+
+    int space = check_free_buffer_size(ao);
+    return (float)(p->buffer_size - space) / (float)ao->bps;
 }
+
+const struct ao_driver audio_out_dsound = {
+    .info = &(const struct ao_info) {
+        "Windows DirectSound audio output",
+        "dsound",
+        "Gabor Szecsi <deje@miki.hu>",
+        ""
+    },
+    .init      = init,
+    .uninit    = uninit,
+    .control   = control,
+    .get_space = get_space,
+    .play      = play,
+    .get_delay = get_delay,
+    .pause     = audio_pause,
+    .resume    = audio_resume,
+    .reset     = reset,
+};

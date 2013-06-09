@@ -161,10 +161,11 @@ typedef struct sh_video {
 
 typedef struct sh_sub {
     SH_COMMON
-    bool active; // after track switch decoder may stay initialized, not active
     unsigned char *extradata;   // extra header data passed from demuxer
     int extradata_len;
-    const struct sd_functions *sd_driver;
+    struct ass_track *track;    // loaded by libass
+    struct sub_data *sub_data;  // loaded by subreader.c
+    struct dec_sub *dec_sub;    // decoder context
 } sh_sub_t;
 
 // demuxer.c:

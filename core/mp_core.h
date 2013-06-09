@@ -22,8 +22,6 @@
 #include <stdbool.h>
 
 #include "core/options.h"
-#include "sub/subreader.h"
-#include "sub/find_subfiles.h"
 #include "audio/mixer.h"
 #include "demux/demux.h"
 
@@ -31,9 +29,8 @@
 
 #define INITIALIZED_VO      1
 #define INITIALIZED_AO      2
-
+#define INITIALIZED_VOL     4
 #define INITIALIZED_GETCH2  8
-#define INITIALIZED_SPUDEC  32
 #define INITIALIZED_STREAM  64
 #define INITIALIZED_DEMUXER 512
 #define INITIALIZED_ACODEC  1024
@@ -106,15 +103,9 @@ struct track {
     // Invariant: (!demuxer && !stream) || stream->demuxer == demuxer
     struct sh_stream *stream;
 
-    // NOTE: demuxer subtitles, i.e. if stream!=NULL, do not use the following
-    //       fields. The data is stored in stream->sub this case.
-
-    // External text subtitle using libass subtitle renderer.
-    // The sh_sub is a dummy and doesn't belong to a demuxer.
-    struct sh_sub *sh_sub;
-
-    // External text subtitle using non-libass subtitle renderer.
-    struct sub_data *subdata;
+    // For external subtitles, which are read fully on init. Do not attempt
+    // to read packets from them.
+    bool preloaded;
 };
 
 enum {
@@ -129,7 +120,6 @@ typedef struct MPContext {
     struct osd_state *osd;
     struct mp_osd_msg *osd_msg_stack;
     char *terminal_osd_text;
-    subtitle subs; // subtitle list used when reading subtitles from demuxer
 
     int add_osd_seek_info; // bitfield of enum mp_osd_seek_info
     double osd_visible; // for the osd bar only
@@ -301,7 +291,6 @@ extern int forced_subs_only;
 
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 void reinit_audio_chain(struct MPContext *mpctx);
-void init_vo_spudec(struct MPContext *mpctx);
 double playing_audio_pts(struct MPContext *mpctx);
 struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
                                float fps, int noerr);
@@ -331,6 +320,8 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction);
 int mp_get_cache_percent(struct MPContext *mpctx);
 void mp_write_watch_later_conf(struct MPContext *mpctx);
+
+void mp_print_version(int always);
 
 // timeline/tl_matroska.c
 void build_ordered_chapter_timeline(struct MPContext *mpctx);

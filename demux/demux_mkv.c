@@ -33,6 +33,8 @@
 #include <libavutil/intreadwrite.h>
 #include <libavutil/avstring.h>
 
+#include <libavcodec/version.h>
+
 #include "config.h"
 
 #if CONFIG_ZLIB
@@ -72,6 +74,17 @@ static const int cook_fl2bps[COOK_FLAVORS] = {
     4005, 4005, 5513, 5513, 8010, 12059, 1550, 8010, 12059, 5513,
     12016, 16408, 22911, 33506
 };
+
+#define IS_LIBAV_FORK (LIBAVCODEC_VERSION_MICRO < 100)
+
+// Both of these versions were bumped by unrelated commits.
+#if (IS_LIBAV_FORK  && LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 7,  1)) || \
+    (!IS_LIBAV_FORK && LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 12, 101))
+#define NEED_WAVPACK_PARSE 1
+#else
+#define NEED_WAVPACK_PARSE 0
+#endif
+
 
 enum {
     MAX_NUM_LACES = 256,
@@ -1328,6 +1341,14 @@ static struct mkv_audio_tag {
     { NULL },
 };
 
+static void copy_audio_private_data(sh_audio_t *sh, mkv_track_t *track)
+{
+    if (!track->ms_compat && track->private_size) {
+        sh->codecdata = malloc(track->private_size);
+        sh->codecdata_len = track->private_size;
+        memcpy(sh->codecdata, track->private_data, track->private_size);
+    }
+}
 
 static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
 {
@@ -1411,46 +1432,47 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         sh_a->wf->nBlockAlign = 1486;
         track->fix_i_bps = 1;
         track->qt_last_a_pts = 0.0;
-        goto copy_private_data;
+        copy_audio_private_data(sh_a, track);
     } else if (track->a_formattag == mmioFOURCC('M', 'P', '4', 'A')) {
         int profile, srate_idx;
 
         sh_a->wf->nAvgBytesPerSec = 16000;
         sh_a->wf->nBlockAlign = 1024;
 
-        if (!strcmp(track->codec_id, MKV_A_AAC) && track->private_data)
-            goto copy_private_data;
-
-        /* Recreate the 'private data' */
-        /* which faad2 uses in its initialization */
-        srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
-        if (!strncmp(&track->codec_id[12], "MAIN", 4))
-            profile = 0;
-        else if (!strncmp(&track->codec_id[12], "LC", 2))
-            profile = 1;
-        else if (!strncmp(&track->codec_id[12], "SSR", 3))
-            profile = 2;
-        else
-            profile = 3;
-        sh_a->codecdata = malloc(5);
-        sh_a->codecdata[0] = ((profile + 1) << 3) | ((srate_idx & 0xE) >> 1);
-        sh_a->codecdata[1] =
-            ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
-
-        if (strstr(track->codec_id, "SBR") != NULL) {
-            /* HE-AAC (aka SBR AAC) */
-            sh_a->codecdata_len = 5;
-
-            sh_a->samplerate *= 2;
-            sh_a->wf->nSamplesPerSec *= 2;
-            srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
-            sh_a->codecdata[2] = AAC_SYNC_EXTENSION_TYPE >> 3;
-            sh_a->codecdata[3] = ((AAC_SYNC_EXTENSION_TYPE & 0x07) << 5) | 5;
-            sh_a->codecdata[4] = (1 << 7) | (srate_idx << 3);
-            track->default_duration = 1024.0 / (sh_a->samplerate / 2);
+        if (!strcmp(track->codec_id, MKV_A_AAC) && track->private_data) {
+            copy_audio_private_data(sh_a, track);
         } else {
-            sh_a->codecdata_len = 2;
-            track->default_duration = 1024.0 / sh_a->samplerate;
+            /* Recreate the 'private data' */
+            /* which faad2 uses in its initialization */
+            srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
+            if (!strncmp(&track->codec_id[12], "MAIN", 4))
+                profile = 0;
+            else if (!strncmp(&track->codec_id[12], "LC", 2))
+                profile = 1;
+            else if (!strncmp(&track->codec_id[12], "SSR", 3))
+                profile = 2;
+            else
+                profile = 3;
+            sh_a->codecdata = malloc(5);
+            sh_a->codecdata[0] = ((profile + 1) << 3) | ((srate_idx & 0xE) >> 1);
+            sh_a->codecdata[1] =
+                ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
+
+            if (strstr(track->codec_id, "SBR") != NULL) {
+                /* HE-AAC (aka SBR AAC) */
+                sh_a->codecdata_len = 5;
+
+                sh_a->samplerate *= 2;
+                sh_a->wf->nSamplesPerSec *= 2;
+                srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
+                sh_a->codecdata[2] = AAC_SYNC_EXTENSION_TYPE >> 3;
+                sh_a->codecdata[3] = ((AAC_SYNC_EXTENSION_TYPE & 0x07) << 5) | 5;
+                sh_a->codecdata[4] = (1 << 7) | (srate_idx << 3);
+                track->default_duration = 1024.0 / (sh_a->samplerate / 2);
+            } else {
+                sh_a->codecdata_len = 2;
+                track->default_duration = 1024.0 / sh_a->samplerate;
+            }
         }
     } else if (track->a_formattag == mmioFOURCC('v', 'r', 'b', 's')) {
         /* VORBIS */
@@ -1559,12 +1581,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         }
     } else if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K') ||
                track->a_formattag == mmioFOURCC('T', 'R', 'H', 'D')) {
-    copy_private_data:
-        if (!track->ms_compat && track->private_size) {
-            sh_a->codecdata = malloc(track->private_size);
-            sh_a->codecdata_len = track->private_size;
-            memcpy(sh_a->codecdata, track->private_data, track->private_size);
-        }
+        copy_audio_private_data(sh_a, track);
     } else if (track->a_formattag == mmioFOURCC('T', 'T', 'A', '1')) {
         sh_a->codecdata_len = 30;
         sh_a->codecdata = calloc(1, sh_a->codecdata_len);
@@ -2058,6 +2075,101 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
     }
 }
 
+#if NEED_WAVPACK_PARSE
+// Copied from libavformat/matroskadec.c (FFmpeg 310f9dd / 2013-05-30)
+// Originally added with Libav commit 9b6f47c
+// License: LGPL v2.1 or later
+// Author header: The FFmpeg Project (this function still came from Libav)
+// Modified to use talloc, removed ffmpeg/libav specific error codes.
+static int libav_parse_wavpack(mkv_track_t *track, uint8_t *src,
+                               uint8_t **pdst, int *size)
+{
+    uint8_t *dst = NULL;
+    int dstlen   = 0;
+    int srclen   = *size;
+    uint32_t samples;
+    uint16_t ver;
+    int offset = 0;
+
+    if (srclen < 12 || track->private_size < 2)
+        return -1;
+
+    ver = AV_RL16(track->private_data);
+
+    samples = AV_RL32(src);
+    src    += 4;
+    srclen -= 4;
+
+    while (srclen >= 8) {
+        int multiblock;
+        uint32_t blocksize;
+        uint8_t *tmp;
+
+        uint32_t flags = AV_RL32(src);
+        uint32_t crc   = AV_RL32(src + 4);
+        src    += 8;
+        srclen -= 8;
+
+        multiblock = (flags & 0x1800) != 0x1800;
+        if (multiblock) {
+            if (srclen < 4)
+                goto fail;
+            blocksize = AV_RL32(src);
+            src    += 4;
+            srclen -= 4;
+        } else
+            blocksize = srclen;
+
+        if (blocksize > srclen)
+            goto fail;
+
+        tmp = talloc_realloc(NULL, dst, uint8_t, dstlen + blocksize + 32);
+        if (!tmp)
+            goto fail;
+        dst     = tmp;
+        dstlen += blocksize + 32;
+
+        AV_WL32(dst + offset,      MKTAG('w', 'v', 'p', 'k')); // tag
+        AV_WL32(dst + offset + 4,  blocksize + 24);         // blocksize - 8
+        AV_WL16(dst + offset + 8,  ver);                    // version
+        AV_WL16(dst + offset + 10, 0);                      // track/index_no
+        AV_WL32(dst + offset + 12, 0);                      // total samples
+        AV_WL32(dst + offset + 16, 0);                      // block index
+        AV_WL32(dst + offset + 20, samples);                // number of samples
+        AV_WL32(dst + offset + 24, flags);                  // flags
+        AV_WL32(dst + offset + 28, crc);                    // crc
+        memcpy (dst + offset + 32, src, blocksize);         // block data
+
+        src    += blocksize;
+        srclen -= blocksize;
+        offset += blocksize + 32;
+    }
+
+    *pdst = dst;
+    *size = dstlen;
+
+    return 0;
+
+fail:
+    talloc_free(dst);
+    return -1;
+}
+#endif
+
+static void mkv_parse_packet(mkv_track_t *track, bstr *buffer)
+{
+    if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K')) {
+#if NEED_WAVPACK_PARSE
+        int size = buffer->len;
+        uint8_t *parsed;
+        if (libav_parse_wavpack(track, buffer->start, &parsed, &size) >= 0) {
+            buffer->start = parsed;
+            buffer->len = size;
+        }
+#endif
+    }
+}
+
 struct block_info {
     uint64_t duration;
     bool simple, keyframe;
@@ -2204,6 +2316,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                 handle_realaudio(demuxer, track, block, keyframe);
             else {
                 bstr buffer = demux_mkv_decode(track, block, 1);
+                mkv_parse_packet(track, &buffer);
                 if (buffer.start) {
                     demux_packet_t *dp =
                         new_demux_packet_from(buffer.start, buffer.len);

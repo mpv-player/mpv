@@ -85,8 +85,7 @@ struct mp_osd_res {
 
 enum mp_osdtype {
     OSDTYPE_SUB,
-    OSDTYPE_SUBTITLE,
-    OSDTYPE_SPU,
+    OSDTYPE_SUBTEXT,
 
     OSDTYPE_PROGBAR,
     OSDTYPE_OSD,
@@ -123,16 +122,18 @@ struct osd_state {
 
     struct ass_library *ass_library;
     struct ass_renderer *ass_renderer;
-    struct sh_sub *sh_sub;
     double sub_offset;
     double vo_pts;
 
     bool render_subs_in_filter;
+    bool render_bitmap_subs;
 
     bool want_redraw;
 
     // OSDTYPE_OSD
     char *osd_text;
+    // OSDTYPE_SUBTEXT
+    char *sub_text;
     // OSDTYPE_PROGBAR
     int progbar_type;      // <0: disabled, 1-255: symbol, else: no symbol
     float progbar_value;   // range 0.0-1.0
@@ -141,8 +142,8 @@ struct osd_state {
     // OSDTYPE_EXTERNAL
     char *external;
     int external_res_x, external_res_y;
-
-    int switch_sub_id;
+    // OSDTYPE_SUB
+    struct dec_sub *dec_sub;
 
     struct MPOpts *opts;
 
@@ -153,11 +154,6 @@ struct osd_state {
     struct ass_renderer *osd_render;
     struct ass_library *osd_ass_library;
 };
-
-extern struct subtitle* vo_sub;
-
-extern void* vo_spudec;
-extern void* vo_vobsub;
 
 // Start of OSD symbols in osd_font.pfb
 #define OSD_CODEPOINTS 0xE000
@@ -202,16 +198,10 @@ struct osd_style_opts {
 
 extern const struct m_sub_options osd_style_conf;
 
-extern char *sub_cp;
-extern int sub_pos;
-
-extern float sub_delay;
-extern float sub_fps;
-
-
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
 void osd_set_text(struct osd_state *osd, const char *text);
-void vo_osd_changed(int new_value);
+void osd_set_sub(struct osd_state *osd, const char *text);
+void osd_changed(struct osd_state *osd, int new_value);
 void osd_changed_all(struct osd_state *osd);
 void osd_free(struct osd_state *osd);
 

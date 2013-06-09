@@ -75,6 +75,84 @@ function mp_update()
     --mp.set_osd_ass("Time: {\\b1}" .. mp.property_get_string("time-pos"))
 end
 
+local callbacks = {}
+-- ideally, each script would have its own section, so that they don't conflict
+local section = "script"
+
+-- Set the list of key bindings. These will override the user's bindings, so
+-- you should use this sparingly.
+-- A call to this function will remove all bindings previously set with this
+-- function. For example, set_key_bindings({}) would remove all script defined
+-- key bindings.
+-- Note: the bindings are not active by default. Use enable_key_bindings().
+--
+-- list is an array of key bindings, where each entry is an array as follow:
+--      {key, callback}
+--      {key, callback, callback_down}
+-- key is the key string as used in input.conf, like "ctrl+a"
+-- callback is a Lua function that is called when the key binding is used.
+-- callback_down can be given too, and is called when a mouse button is pressed
+-- if the key is a mouse button. (The normal callback will be for mouse button
+-- down.)
+--
+-- callback can be a string too, in which case the following will be added like
+-- an input.conf line: key .. " " .. callback
+-- (And callback_down is ignored.)
+function set_key_bindings(list)
+    local cfg = ""
+    for i = 1, #list do
+        local entry = list[i]
+        local key = entry[1]
+        local cb = entry[2]
+        local cb_down = entry[3]
+        if type(cb) == "function" then
+            callbacks[#callbacks + 1] = {press=cb, before_press=cb_down}
+            cfg = cfg .. key .. " script_dispatch " .. #callbacks .. "\n"
+        else
+            cfg = cfg .. key .. " " .. cb .. "\n"
+        end
+    end
+    mp.input_define_section(section, cfg)
+end
+
+function enable_key_bindings()
+    mp.input_enable_section(section)
+end
+
+function disable_key_bindings()
+    mp.input_disable_section(section)
+end
+
+function set_mouse_area(x0, y0, x1, y1)
+    mp.input_set_section_mouse_area(section, x0, y0, x1, y1)
+end
+
+--[[
+set_key_bindings {
+    {"a", function(e) print("\nkey a") end},
+    {"b", function(e) print("\nkey b") end},
+    {"d", function(e) print("\ndisable input") disable_key_bindings() end},
+    {"mouse_btn0", function(e) print("\nmouse up") end,
+                   function(e) print("\nmouse down") end},
+    {"mouse_btn2", function(e) print("\nright mouse up") end,
+                   function(e) print("\nright mouse down") end},
+    {"mouse_move", function(e) print("\nmouse move") end},
+}
+enable_key_bindings()
+set_mouse_area(50, 50, 500, 500)
+--]]
+
+function mp_script_dispatch(id, event)
+    local cb = callbacks[id]
+    if cb then
+        if event == "press" and cb.press then
+            cb.press()
+        elseif event == "keyup_follows" and cb.before_press then
+            cb.before_press()
+        end
+    end
+end
+
 local ass_mt = {}
 ass_mt.__index = ass_mt
 

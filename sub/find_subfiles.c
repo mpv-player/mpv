@@ -12,7 +12,6 @@
 #include "core/mp_common.h"
 #include "sub/find_subfiles.h"
 #include "sub/sub.h"
-#include "sub/subreader.h"
 
 static struct bstr strip_ext(struct bstr str)
 {
@@ -119,9 +118,9 @@ static void append_dir_subtitles(struct MPOpts *opts,
         // does it end with a subtitle extension?
 #ifdef CONFIG_ICONV
 #ifdef CONFIG_ENCA
-        int i = (sub_cp && strncasecmp(sub_cp, "enca", 4) != 0) ? 3 : 0;
+        int i = (opts->sub_cp && strncasecmp(opts->sub_cp, "enca", 4) != 0) ? 3 : 0;
 #else
-        int i = sub_cp ? 3 : 0;
+        int i = opts->sub_cp ? 3 : 0;
 #endif
 #else
         int i = 0;
@@ -153,12 +152,12 @@ static void append_dir_subtitles(struct MPOpts *opts,
         if (!prio && bstrcmp(tmp_fname_trim, f_fname_trim) == 0)
             prio = 3; // matches the movie name
         if (!prio && bstr_find(tmp_fname_trim, f_fname_trim) >= 0
-            && sub_match_fuzziness >= 1)
+            && opts->sub_match_fuzziness >= 1)
             prio = 2; // contains the movie name
         if (!prio) {
             // doesn't contain the movie name
             // don't try in the mplayer subtitle directory
-            if (!limit_fuzziness && sub_match_fuzziness >= 2) {
+            if (!limit_fuzziness && opts->sub_match_fuzziness >= 2) {
                 prio = 1;
             }
         }

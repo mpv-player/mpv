@@ -2,18 +2,74 @@
 #define MPLAYER_SD_H
 
 #include "dec_sub.h"
+#include "demux/demux_packet.h"
+
+struct sd {
+    struct MPOpts *opts;
+
+    const struct sd_functions *driver;
+    void *priv;
+
+    const char *codec;
+
+    // Extra header data passed from demuxer
+    char *extradata;
+    int extradata_len;
+
+    // Set to !=NULL if the input packets are being converted from another
+    // format.
+    const char *converted_from;
+
+    // Video resolution used for subtitle decoding. Doesn't necessarily match
+    // the resolution of the VO, nor does it have to be the OSD resolution.
+    int sub_video_w, sub_video_h;
+
+    // Make sd_ass use an existing track
+    struct ass_track *ass_track;
+
+    // Shared renderer for ASS - done to avoid reloading embedded fonts.
+    struct ass_library *ass_library;
+    struct ass_renderer *ass_renderer;
+
+    // If false, try to remove multiple subtitles.
+    // (Only for decoders which have accept_packets_in_advance set.)
+    bool no_remove_duplicates;
+
+    // Set by sub converter
+    const char *output_codec;
+    char *output_extradata;
+    int output_extradata_len;
+
+    // Internal buffer for sd_conv_* functions
+    struct sd_conv_buffer *sd_conv_buffer;
+};
 
 struct sd_functions {
-    bool (*probe)(struct sh_sub *sh);
-    int  (*init)(struct sh_sub *sh, struct osd_state *osd);
-    void (*decode)(struct sh_sub *sh, struct osd_state *osd,
-                   void *data, int data_len, double pts, double duration);
-    void (*get_bitmaps)(struct sh_sub *sh, struct osd_state *osd,
-                        struct mp_osd_res dim, double pts,
+    const char *name;
+    bool accept_packets_in_advance;
+    bool (*supports_format)(const char *format);
+    int  (*init)(struct sd *sd);
+    void (*decode)(struct sd *sd, struct demux_packet *packet);
+    void (*reset)(struct sd *sd);
+    void (*uninit)(struct sd *sd);
+
+    void (*fix_events)(struct sd *sd);
+
+    // decoder
+    void (*get_bitmaps)(struct sd *sd, struct mp_osd_res dim, double pts,
                         struct sub_bitmaps *res);
-    void (*reset)(struct sh_sub *sh, struct osd_state *osd);
-    void (*switch_off)(struct sh_sub *sh, struct osd_state *osd);
-    void (*uninit)(struct sh_sub *sh);
+    char *(*get_text)(struct sd *sd, double pts);
+
+    // converter
+    struct demux_packet *(*get_converted)(struct sd *sd);
 };
+
+void sd_conv_add_packet(struct sd *sd, void *data, int data_len, double pts,
+                        double duration);
+struct demux_packet *sd_conv_def_get_converted(struct sd *sd);
+void sd_conv_def_reset(struct sd *sd);
+void sd_conv_def_uninit(struct sd *sd);
+
+#define SD_MAX_LINE_LEN 1000
 
 #endif

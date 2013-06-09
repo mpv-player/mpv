@@ -156,7 +156,7 @@ struct gl_video {
 
     GLuint dither_texture;
     float dither_quantization;
-    float dither_multiply;
+    float dither_center;
     int dither_size;
 
     uint32_t image_w, image_h;
@@ -387,7 +387,8 @@ static void write_quad(struct vertex *va,
 #undef COLOR_INIT
 }
 
-static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h)
+static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
+                        GLenum iformat)
 {
     GL *gl = p->gl;
     bool res = true;
@@ -406,7 +407,7 @@ static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h)
     gl->GenFramebuffers(1, &fbo->fbo);
     gl->GenTextures(1, &fbo->texture);
     gl->BindTexture(GL_TEXTURE_2D, fbo->texture);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, p->opts.fbo_format,
+    gl->TexImage2D(GL_TEXTURE_2D, 0, iformat,
                    fbo->tex_w, fbo->tex_h, 0,
                    GL_RGB, GL_UNSIGNED_BYTE, NULL);
     default_tex_params(gl, GL_TEXTURE_2D, GL_LINEAR);
@@ -522,8 +523,8 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     gl->Uniform1i(gl->GetUniformLocation(program, "dither"), TEXUNIT_DITHER);
     gl->Uniform1f(gl->GetUniformLocation(program, "dither_quantization"),
                   p->dither_quantization);
-    gl->Uniform1f(gl->GetUniformLocation(program, "dither_multiply"),
-                  p->dither_multiply);
+    gl->Uniform1f(gl->GetUniformLocation(program, "dither_center"),
+                  p->dither_center);
 
     float sparam1 = p->opts.scaler_params[0];
     gl->Uniform1f(gl->GetUniformLocation(program, "filter_param1"),
@@ -631,12 +632,15 @@ static void bind_attrib_locs(GL *gl, GLuint program)
     gl->BindAttribLocation(program, VERTEX_ATTRIB_TEXCOORD, "vertex_texcoord");
 }
 
+#define PRELUDE_END "// -- prelude end\n"
+
 static GLuint create_program(GL *gl, const char *name, const char *header,
                              const char *vertex, const char *frag)
 {
-    mp_msg(MSGT_VO, MSGL_V, "[gl] compiling shader program '%s'\n", name);
-    mp_msg(MSGT_VO, MSGL_V, "[gl] header:\n");
-    mp_log_source(MSGT_VO, MSGL_V, header);
+    mp_msg(MSGT_VO, MSGL_V, "[gl] compiling shader program '%s', header:\n", name);
+    const char *real_header = strstr(header, PRELUDE_END);
+    real_header = real_header ? real_header + strlen(PRELUDE_END) : header;
+    mp_log_source(MSGT_VO, MSGL_V, real_header);
     GLuint prog = gl->CreateProgram();
     prog_create_shader(gl, prog, GL_VERTEX_SHADER, header, vertex);
     prog_create_shader(gl, prog, GL_FRAGMENT_SHADER, header, frag);
@@ -702,8 +706,8 @@ static void compile_shaders(struct gl_video *p)
     char *shader_prelude = get_section(tmp, src, "prelude");
     char *s_video = get_section(tmp, src, "frag_video");
 
-    char *header = talloc_asprintf(tmp, "#version %d\n%s", gl->glsl_version,
-                                   shader_prelude);
+    char *header = talloc_asprintf(tmp, "#version %d\n%s%s", gl->glsl_version,
+                                   shader_prelude, PRELUDE_END);
 
     // Need to pass alpha through the whole chain. (Not needed for OSD shaders.)
     shader_def_opt(&header, "USE_ALPHA", p->opts.enable_alpha);
@@ -953,6 +957,7 @@ static void init_dither(struct gl_video *p)
 
     int tex_size;
     void *tex_data;
+    GLint tex_iformat;
     GLenum tex_type;
     unsigned char temp[256];
 
@@ -968,6 +973,7 @@ static void init_dither(struct gl_video *p)
         }
 
         tex_size = size;
+        tex_iformat = GL_R16;
         tex_type = GL_FLOAT;
         tex_data = p->last_dither_matrix;
     } else {
@@ -975,6 +981,7 @@ static void init_dither(struct gl_video *p)
         mp_make_ordered_dither_matrix(temp, 8);
 
         tex_size = 8;
+        tex_iformat = GL_RED;
         tex_type = GL_UNSIGNED_BYTE;
         tex_data = temp;
     }
@@ -984,7 +991,7 @@ static void init_dither(struct gl_video *p)
     // dither matrix. The precision of the source implicitly decides how many
     // dither patterns can be visible.
     p->dither_quantization = (1 << dst_depth) - 1;
-    p->dither_multiply = p->dither_quantization + 1.0 / (tex_size * tex_size);
+    p->dither_center = 0.5 / (tex_size * tex_size);
     p->dither_size = tex_size;
 
     gl->ActiveTexture(GL_TEXTURE0 + TEXUNIT_DITHER);
@@ -992,7 +999,7 @@ static void init_dither(struct gl_video *p)
     gl->BindTexture(GL_TEXTURE_2D, p->dither_texture);
     gl->PixelStorei(GL_UNPACK_ALIGNMENT, 1);
     gl->PixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RED, tex_size, tex_size, 0, GL_RED,
+    gl->TexImage2D(GL_TEXTURE_2D, 0, tex_iformat, tex_size, tex_size, 0, GL_RED,
                    tex_type, tex_data);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -1048,7 +1055,8 @@ static void reinit_rendering(struct gl_video *p)
     update_all_uniforms(p);
 
     if (p->indirect_program && !p->indirect_fbo.fbo)
-        fbotex_init(p, &p->indirect_fbo, p->texture_w, p->texture_h);
+        fbotex_init(p, &p->indirect_fbo, p->texture_w, p->texture_h,
+                    p->opts.fbo_format);
 
     recreate_osd(p);
 }
@@ -1333,7 +1341,8 @@ static void update_window_sized_objects(struct gl_video *p)
             // Round up to an arbitrary alignment to make window resizing or
             // panscan controls smoother (less texture reallocations).
             int height = FFALIGN(h, 256);
-            fbotex_init(p, &p->scale_sep_fbo, p->image_w, height);
+            fbotex_init(p, &p->scale_sep_fbo, p->image_w, height,
+                        p->opts.fbo_format);
         }
         p->scale_sep_fbo.vp_w = p->image_w;
         p->scale_sep_fbo.vp_h = h;
@@ -1552,6 +1561,48 @@ void gl_video_draw_osd(struct gl_video *p, struct osd_state *osd)
     gl->Flush();
 }
 
+static bool test_fbo(struct gl_video *p, GLenum format)
+{
+    static const float vals[] = {
+        127 / 255.0f,                   // full 8 bit integer
+        32767 / 65535.0f,               // full 16 bit integer
+        0xFFFFFF / (float)(1 << 25),    // float mantissa
+        2,                              // out of range value
+    };
+    static const char *val_names[] = {
+        "8-bit precision",
+        "16-bit precision",
+        "full float",
+        "out of range value (2)",
+    };
+
+    GL *gl = p->gl;
+    bool success = false;
+    struct fbotex fbo = {0};
+    gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    gl->PixelStorei(GL_PACK_ALIGNMENT, 1);
+    gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
+    if (fbotex_init(p, &fbo, 16, 16, format)) {
+        gl->BindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
+        gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
+        for (int i = 0; i < 4; i++) {
+            float p = -1;
+            float val = vals[i];
+            gl->ClearColor(val, 0.0f, 0.0f, 1.0f);
+            gl->Clear(GL_COLOR_BUFFER_BIT);
+            gl->ReadPixels(0, 0, 1, 1, GL_RED, GL_FLOAT, &p);
+            mp_msg(MSGT_VO, MSGL_V, "   %s: %a\n", val_names[i], val - p);
+        }
+        gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
+        glCheckError(gl, "after FBO read");
+        success = true;
+    }
+    fbotex_uninit(p, &fbo);
+    glCheckError(gl, "FBO test");
+    gl->ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    return success;
+}
+
 // Disable features that are not supported with the current OpenGL version.
 static void check_gl_features(struct gl_video *p)
 {
@@ -1568,9 +1619,17 @@ static void check_gl_features(struct gl_video *p)
     int n_disabled = 0;
 
     if (have_fbo) {
-        struct fbotex fbo = {0};
-        have_fbo = fbotex_init(p, &fbo, 16, 16);
-        fbotex_uninit(p, &fbo);
+        mp_msg(MSGT_VO, MSGL_V, "Testing user-set FBO format\n");
+        have_fbo = test_fbo(p, p->opts.fbo_format);
+    }
+
+    // fruit dithering mode and the 3D lut use this texture format
+    if ((p->opts.dither_depth >= 0 && p->opts.dither_algo == 0) ||
+        p->use_lut_3d)
+    {
+        // doesn't disalbe anything; it's just for the log
+        mp_msg(MSGT_VO, MSGL_V, "Testing GL_R16 FBO (dithering/LUT)\n");
+        test_fbo(p, GL_R16);
     }
 
     // Disable these only if the user didn't disable scale-sep on the command
@@ -1586,14 +1645,6 @@ static void check_gl_features(struct gl_video *p)
                 disabled[n_disabled++]
                     = have_float_tex ? "scaler (FBO)" : "scaler (float tex.)";
             }
-        }
-    }
-
-    if (!have_float_tex && p->opts.dither_depth >= 0) {
-        // only fruit dithering uses float textures
-        if (p->opts.dither_algo == 0) {
-            p->opts.dither_depth = -1;
-            disabled[n_disabled++] = "dithering (float tex.)";
         }
     }
 

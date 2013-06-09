@@ -100,11 +100,9 @@ static void init_priv (struct asf_priv* asf){
 static void demux_asf_append_to_packet(demux_packet_t* dp,unsigned char *data,int len,int offs)
 {
   if(dp->len!=offs && offs!=-1) mp_msg(MSGT_DEMUX,MSGL_V,"warning! fragment.len=%d BUT next fragment offset=%d  \n",dp->len,offs);
-  dp->buffer=realloc(dp->buffer,dp->len+len+MP_INPUT_BUFFER_PADDING_SIZE);
-  memcpy(dp->buffer+dp->len,data,len);
-  memset(dp->buffer+dp->len+len, 0, MP_INPUT_BUFFER_PADDING_SIZE);
-  mp_dbg(MSGT_DEMUX,MSGL_DBG4,"data appended! %d+%d\n",dp->len,len);
-  dp->len+=len;
+  size_t old_len = dp->len;
+  resize_demux_packet(dp, dp->len + len);
+  memcpy(dp->buffer + old_len, data, len);
 }
 
 static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,int id,int seq,uint64_t time,unsigned short dur,int offs,int keyframe){

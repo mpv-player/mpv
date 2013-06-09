@@ -186,15 +186,25 @@ audio/out/:
     why buggy audio drivers can have a bad influence on playback quality.
 
 sub/:
-    A big mess. Contains subtitle rendering (parts of it), OSD rendering,
-    subtitle loading.
+    Contains subtitle rendering, OSD rendering, and parts of subtitle loading.
 
-    There are about 3 types of subtitles: image subs, ASS subs, text subs. Also,
-    there are 3 rendering methods: image subs, libass, internal subtitle
-    renderer. Also, subtitles can come from demuxers or external files. All the
-    possible combinations create weird special cases, e.g. taking a text
-    subtitle event from the demuxer and converting it to ass for display is
-    different from loading a text subtitle and converting it to ass.
+    sub.c/.h is actually the OSD code. It queries dec_sub.c to retrieve
+    decoded/rendered subtitles. osd_libass.c is the actual implementation of
+    the OSD text renderer (which uses libass, and takes care of all the tricky
+    fontconfig/freetype API usage and text layouting).
+
+    Subtitles are loaded either via libass (for .ass), subreader.c (the old
+    MPlayer subtitle loader code), or libavformat demuxers. The subtitles are
+    then passed to dec_sub.c and the subtitle decoders in sd_*.c. All text
+    subtitles are rendered by sd_ass.c. If text subtitles are not in the ASS
+    format, subtitle converters are inserted, for example sd_srt.c, which is
+    used to convert SRT->ASS. sd_srt.c is also used as general converter for
+    text->ASS (to prevent interpretation of text as ASS tags).
+
+    subreader.c should eventually go away. It should be replaced by either
+    libavformat's demuxers, or by mpv native demuxers for more common formats
+    like SRT. See commit message of commit 92ae48d what needs to be done to
+    replace subreader.c completely and why.
 
 core/timeline/:
     A timeline is the abstraction used by mplayer.c to combine several files

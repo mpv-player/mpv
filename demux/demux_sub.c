@@ -15,19 +15,24 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MP_AVCOMMON_H
-#define MP_AVCOMMON_H
+// Note: not a real demuxer. The frontend has its own code to open subtitle
+//       code, and then creates a new dummy demuxer with new_sub_demuxer().
+//       But eventually, all subtitles should be opened this way, and this
+//       file can be removed.
 
-#include <libavutil/avutil.h>
-#include <libavcodec/avcodec.h>
+#include "demux.h"
 
-struct mp_decoder_list;
-struct demux_packet;
+static int dummy_fill_buffer(struct demuxer *demuxer, struct demux_stream *ds)
+{
+    return 0;
+}
 
-void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st);
-void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt);
-void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type);
-int mp_codec_to_av_codec_id(const char *codec);
-const char *mp_codec_from_av_codec_id(int codec_id);
-
-#endif
+const struct demuxer_desc demuxer_desc_sub = {
+    .info = "External subtitles pseudo demuxer",
+    .name = "sub",
+    .shortdesc = "sub",
+    .author = "",
+    .comment = "",
+    .type = DEMUXER_TYPE_SUB,
+    .fill_buffer = dummy_fill_buffer,
+};

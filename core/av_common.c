@@ -18,8 +18,10 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
+#include <libavcodec/avcodec.h>
 
 #include "core/mp_talloc.h"
+#include "demux/demux_packet.h"
 #include "av_common.h"
 #include "codecs.h"
 
@@ -56,6 +58,24 @@ void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st)
     avctx->channel_layout           = st->channel_layout;
     avctx->audio_service_type       = st->audio_service_type;
     avctx->bits_per_coded_sample    = st->bits_per_coded_sample;
+}
+
+// Set dst from mpkt. Note that dst is not refcountable.
+// mpkt can be NULL to generate empty packets (used to flush delayed data).
+// Does not set pts or duration fields.
+void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt)
+{
+    av_init_packet(dst);
+    dst->data = mpkt ? mpkt->buffer : NULL;
+    dst->size = mpkt ? mpkt->len : 0;
+    /* Some codecs (ZeroCodec, some cases of PNG) may want keyframe info
+     * from demuxer. */
+    if (mpkt && mpkt->keyframe)
+        dst->flags |= AV_PKT_FLAG_KEY;
+    if (mpkt && mpkt->avpacket) {
+        dst->side_data = mpkt->avpacket->side_data;
+        dst->side_data_elems = mpkt->avpacket->side_data_elems;
+    }
 }
 
 void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)

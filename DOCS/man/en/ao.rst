@@ -56,6 +56,10 @@ jack
     (no-)autostart
         Automatically start jackd if necessary (default: disabled). Note that
         this seems unreliable and will spam stdout with server messages.
+    (no-)connect
+        Automatically create connections to output ports (default: enabled).
+        When enabled, the maximum number of output channels will be limited to
+        the number of available output ports.
 
 coreaudio (Mac OS X only)
     native Mac OS X audio output driver

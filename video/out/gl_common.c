@@ -830,10 +830,10 @@ mp_image_t *glGetWindowScreenshot(GL *gl)
     gl->GetIntegerv(GL_VIEWPORT, vp);
     mp_image_t *image = mp_image_alloc(IMGFMT_RGB24, vp[2], vp[3]);
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-    gl->PixelStorei(GL_PACK_ALIGNMENT, 0);
+    gl->PixelStorei(GL_PACK_ALIGNMENT, 1);
     gl->PixelStorei(GL_PACK_ROW_LENGTH, 0);
     gl->ReadBuffer(GL_FRONT);
-    //flip image while reading
+    //flip image while reading (and also avoid stride-related trouble)
     for (int y = 0; y < vp[3]; y++) {
         gl->ReadPixels(vp[0], vp[1] + vp[3] - y - 1, vp[2], 1,
                        GL_RGB, GL_UNSIGNED_BYTE,

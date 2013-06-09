@@ -402,13 +402,10 @@ static int decode_new_packet(struct sh_audio *sh)
     }
 
     AVPacket pkt;
-    av_init_packet(&pkt);
+    mp_set_av_packet(&pkt, mpkt);
     pkt.data = start;
     pkt.size = insize;
-    if (mpkt && mpkt->avpacket) {
-        pkt.side_data = mpkt->avpacket->side_data;
-        pkt.side_data_elems = mpkt->avpacket->side_data_elems;
-    }
+
     if (pts != MP_NOPTS_VALUE && !packet_already_used) {
         sh->pts = pts;
         sh->pts_bytes = 0;
