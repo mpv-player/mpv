@@ -395,12 +395,15 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 
     // never-drop mode
-    if (ectx->options->neverdrop && frameipts <= vc->lastipts) {
+    if (ectx->options->neverdrop) {
         int64_t step = vc->mindeltapts ? vc->mindeltapts : 1;
-        mp_msg(MSGT_ENCODE, MSGL_INFO, "vo-lavc: -oneverdrop increased pts by %d\n",
-               (int) (vc->lastipts - frameipts + step));
-        frameipts = vc->lastipts + step;
-        vc->lastpts = frameipts * timeunit - encode_lavc_getoffset(ectx, vc->stream);
+        if (frameipts < vc->lastipts + step) {
+            mp_msg(MSGT_ENCODE, MSGL_INFO,
+                   "vo-lavc: -oneverdrop increased pts by %d\n",
+                   (int) (vc->lastipts - frameipts + step));
+            frameipts = vc->lastipts + step;
+            vc->lastpts = frameipts * timeunit - encode_lavc_getoffset(ectx, vc->stream);
+        }
     }
 
     if (vc->lastipts != MP_NOPTS_VALUE) {
