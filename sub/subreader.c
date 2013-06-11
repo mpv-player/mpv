@@ -1098,7 +1098,6 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps,
 	subtitle* nextsub;
 	int i = sub_num;
 	unsigned long subfms = (sub_uses_time ? 100 : fps) * subtime;
-	unsigned long overlap = (sub_uses_time ? 100 : fps) / 5; // 0.2s
 
 	n=m=0;
 	if (i)	for (;;){
@@ -1110,15 +1109,6 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps,
 		if (!--i) break;
 		nextsub = sub + 1;
 	    if(block){
-		if ((sub->end > nextsub->start) && (sub->end <= nextsub->start + overlap)) {
-		    // these subtitles overlap for less than 0.2 seconds
-		    // and would result in very short overlapping subtitle
-		    // so let's fix the problem here, before overlapping code
-		    // get its hands on them
-		    unsigned delta = sub->end - nextsub->start, half = delta / 2;
-		    sub->end -= half + 1;
-		    nextsub->start += delta - half;
-		}
 		if (sub->end >= nextsub->start){
 			sub->end = nextsub->start - 1;
 			if (sub->end - sub->start > subfms)
@@ -1127,23 +1117,6 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps,
 				n++;
 		}
 	    }
-
-		/* Theory:
-		 * Movies are often converted from FILM (24 fps)
-		 * to PAL (25) by simply speeding it up, so we
-		 * to multiply the original timestmaps by
-		 * (Movie's FPS / Subtitle's (guessed) FPS)
-		 * so eg. for 23.98 fps movie and PAL time based
-		 * subtitles we say -subfps 25 and we're fine!
-		 */
-
-		/* timed sub fps correction ::atmos */
-		/* the frame-based case is handled in mpcommon.c
-		 * where find_sub is called */
-		if(sub_uses_time && sub_fps) {
-			sub->start *= sub_fps/fps;
-			sub->end   *= sub_fps/fps;
-		}
 
 		sub = nextsub;
 		m = 0;
@@ -1225,8 +1198,8 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
 {
     int utf16;
     stream_t* fd;
-    int n_max, n_first, i, j, sub_first, sub_orig;
-    subtitle *first, *second, *sub, *return_sub, *alloced_sub = NULL;
+    int n_max, i, j;
+    subtitle *first, *sub, *return_sub, *alloced_sub = NULL;
     sub_data *subt_data;
     int uses_time = 0, sub_num = 0, sub_errs = 0;
     static const struct subreader sr[]=
@@ -1376,222 +1349,9 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
 	return NULL;
     }
 
-    // we do overlap if the user forced it (suboverlap_enable == 2) or
-    // the user didn't forced no-overlapsub and the format is Jacosub or Ssa.
-    // this is because usually overlapping subtitles are found in these formats,
-    // while in others they are probably result of bad timing
-if ((opts->suboverlap_enabled == 2) ||
-    ((opts->suboverlap_enabled) && ((sub_format == SUB_JACOSUB) || (sub_format == SUB_SSA)))) {
-    adjust_subs_time(first, 6.0, fps, opts->sub_fps, 0, sub_num, uses_time);/*~6 secs AST*/
-// here we manage overlapping subtitles
-    sub_orig = sub_num;
-    n_first = sub_num;
-    sub_num = 0;
-    second = NULL;
-    // for each subtitle in first[] we deal with its 'block' of
-    // bonded subtitles
-    for (sub_first = 0; sub_first < n_first; ++sub_first) {
-	unsigned long global_start = first[sub_first].start,
-		global_end = first[sub_first].end, local_start, local_end;
-	int lines_to_add = first[sub_first].lines, sub_to_add = 0,
-		**placeholder = NULL, higher_line = 0, counter, start_block_sub = sub_num;
-	char real_block = 1;
-
-	// here we find the number of subtitles inside the 'block'
-	// and its span interval. this works well only with sorted
-	// subtitles
-	while ((sub_first + sub_to_add + 1 < n_first) && (first[sub_first + sub_to_add + 1].start < global_end)) {
-	    ++sub_to_add;
-	    lines_to_add += first[sub_first + sub_to_add].lines;
-	    if (first[sub_first + sub_to_add].start < global_start) {
-		global_start = first[sub_first + sub_to_add].start;
-	    }
-	    if (first[sub_first + sub_to_add].end > global_end) {
-		global_end = first[sub_first + sub_to_add].end;
-	    }
-	}
-
-        /* Avoid n^2 memory use for the "placeholder" data structure
-         * below with subtitles that have a huge number of
-         * consecutive overlapping lines. */
-        lines_to_add = FFMIN(lines_to_add, SUB_MAX_TEXT);
-
-	// we need a structure to keep trace of the screen lines
-	// used by the subs, a 'placeholder'
-	counter = 2 * sub_to_add + 1;  // the maximum number of subs derived
-	                               // from a block of sub_to_add+1 subs
-	placeholder = malloc(sizeof(int *) * counter);
-	for (i = 0; i < counter; ++i) {
-	    placeholder[i] = malloc(sizeof(int) * lines_to_add + 1);
-	    for (j = 0; j < lines_to_add; ++j) {
-		placeholder[i][j] = -1;
-	    }
-	}
-
-	counter = 0;
-	local_end = global_start - 1;
-	do {
-	    int ls;
-
-	    // here we find the beginning and the end of a new
-	    // subtitle in the block
-	    local_start = local_end + 1;
-	    local_end   = global_end;
-	    for (j = 0; j <= sub_to_add; ++j) {
-		if ((first[sub_first + j].start - 1 > local_start) && (first[sub_first + j].start - 1 < local_end)) {
-		    local_end = first[sub_first + j].start - 1;
-		} else if ((first[sub_first + j].end > local_start) && (first[sub_first + j].end < local_end)) {
-		    local_end = first[sub_first + j].end;
-		}
-	    }
-            // here we allocate the screen lines to subs we must
-	    // display in current local_start-local_end interval.
-	    // if the subs were yet presents in the previous interval
-	    // they keep the same lines, otherside they get unused lines
-	    for (j = 0; j <= sub_to_add; ++j) {
-		if ((first[sub_first + j].start <= local_end) && (first[sub_first + j].end > local_start)) {
-		    unsigned long sub_lines = first[sub_first + j].lines, fragment_length = lines_to_add + 1,
-			tmp = 0;
-		    char boolean = 0;
-		    int fragment_position = -1;
-
-		    // if this is not the first new sub of the block
-		    // we find if this sub was present in the previous
-		    // new sub
-		    if (counter)
-			for (i = 0; i < lines_to_add; ++i) {
-			    if (placeholder[counter - 1][i] == sub_first + j) {
-				placeholder[counter][i] = sub_first + j;
-				boolean = 1;
-			    }
-			}
-		    if (boolean)
-			continue;
-
-		    // we are looking for the shortest among all groups of
-		    // sequential blank lines whose length is greater than or
-		    // equal to sub_lines. we store in fragment_position the
-		    // position of the shortest group, in fragment_length its
-		    // length, and in tmp the length of the group currently
-		    // examinated
-		    for (i = 0; i < lines_to_add; ++i) {
-			if (placeholder[counter][i] == -1) {
-			    // placeholder[counter][i] is part of the current group
-			    // of blank lines
-			    ++tmp;
-			} else {
-			    if (tmp == sub_lines) {
-				// current group's size fits exactly the one we
-				// need, so we stop looking
-				fragment_position = i - tmp;
-				tmp = 0;
-				break;
-			    }
-			    if ((tmp) && (tmp > sub_lines) && (tmp < fragment_length)) {
-				// current group is the best we found till here,
-				// but is still bigger than the one we are looking
-				// for, so we keep on looking
-				fragment_length = tmp;
-				fragment_position = i - tmp;
-				tmp = 0;
-			    } else {
-				// current group doesn't fit at all, so we forget it
-				tmp = 0;
-			    }
-			}
-		    }
-		    if (tmp) {
-			// last screen line is blank, a group ends with it
-			if ((tmp >= sub_lines) && (tmp < fragment_length)) {
-			    fragment_position = i - tmp;
-			}
-		    }
-		    if (fragment_position == -1) {
-			// it was not possible to find free screen line(s) for a subtitle,
-			// usually this means a bug in the code; however we do not overlap
-			mp_msg(MSGT_SUBREADER, MSGL_WARN, "SUB: we could not find a suitable position for an overlapping subtitle\n");
-			higher_line = SUB_MAX_TEXT + 1;
-			break;
-		    } else {
-			for (tmp = 0; tmp < sub_lines; ++tmp) {
-			    placeholder[counter][fragment_position + tmp] = sub_first + j;
-			}
-		    }
-		}
-	    }
-	    for (j = higher_line + 1; j < lines_to_add; ++j) {
-		if (placeholder[counter][j] != -1)
-		    higher_line = j;
-		else
-		    break;
-	    }
-	    if (higher_line >= SUB_MAX_TEXT) {
-		// the 'block' has too much lines, so we don't overlap the
-		// subtitles
-		second = realloc(second, (sub_num + sub_to_add + 1) * sizeof(subtitle));
-		for (j = 0; j <= sub_to_add; ++j) {
-		    int ls;
-		    memset(&second[sub_num + j], '\0', sizeof(subtitle));
-		    second[sub_num + j].start = first[sub_first + j].start;
-		    second[sub_num + j].end   = first[sub_first + j].end;
-		    second[sub_num + j].lines = first[sub_first + j].lines;
-		    second[sub_num + j].alignment = first[sub_first + j].alignment;
-		    for (ls = 0; ls < second[sub_num + j].lines; ls++) {
-			second[sub_num + j].text[ls] = strdup(first[sub_first + j].text[ls]);
-		    }
-		}
-		sub_num += sub_to_add + 1;
-		sub_first += sub_to_add;
-		real_block = 0;
-		break;
-	    }
-
-	    // we read the placeholder structure and create the new
-	    // subs.
-	    second = realloc(second, (sub_num + 1) * sizeof(subtitle));
-	    memset(&second[sub_num], '\0', sizeof(subtitle));
-	    second[sub_num].start = local_start;
-	    second[sub_num].end   = local_end;
-	    second[sub_num].alignment = first[sub_first].alignment;
-	    n_max = (lines_to_add < SUB_MAX_TEXT) ? lines_to_add : SUB_MAX_TEXT;
-	    for (i = 0, j = 0; j < n_max; ++j) {
-		if (placeholder[counter][j] != -1) {
-		    int lines = first[placeholder[counter][j]].lines;
-		    for (ls = 0; ls < lines; ++ls) {
-			second[sub_num].text[i++] = strdup(first[placeholder[counter][j]].text[ls]);
-		    }
-		    j += lines - 1;
-		} else {
-		    second[sub_num].text[i++] = strdup(" ");
-		}
-	    }
-	    ++sub_num;
-	    ++counter;
-	} while (local_end < global_end);
-	if (real_block)
-	    for (i = 0; i < counter; ++i)
-		second[start_block_sub + i].lines = higher_line + 1;
-
-	counter = 2 * sub_to_add + 1;
-	for (i = 0; i < counter; ++i) {
-	    free(placeholder[i]);
-	}
-	free(placeholder);
-	sub_first += sub_to_add;
-    }
-
-    for (j = sub_orig - 1; j >= 0; --j) {
-	for (i = first[j].lines - 1; i >= 0; --i) {
-	    free(first[j].text[i]);
-	}
-    }
-    free(first);
-
-    return_sub = second;
-} else { //if(suboverlap_enabled)
     adjust_subs_time(first, 6.0, fps, opts->sub_fps, 1, sub_num, uses_time);/*~6 secs AST*/
     return_sub = first;
-}
+
     if (return_sub == NULL) return NULL;
     subt_data = talloc_zero(NULL, sub_data);
     talloc_set_destructor(subt_data, sub_destroy);
