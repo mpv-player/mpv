@@ -2010,7 +2010,8 @@ static void reinit_subs(struct MPContext *mpctx)
     if (!mpctx->sh_sub->dec_sub)
         mpctx->sh_sub->dec_sub = sub_create(opts);
 
-    if (track->demuxer && !track->stream) {
+    assert(track->demuxer);
+    if (!track->stream) {
         // Lazily added DVD track - we must not miss the first subtitle packet,
         // which makes the demuxer create the sh_stream, and contains the first
         // subtitle event.
@@ -2025,7 +2026,6 @@ static void reinit_subs(struct MPContext *mpctx)
 
         return;
     }
-    assert(track->demuxer && track->stream);
 
     mpctx->initialized_flags |= INITIALIZED_SUB;
 
