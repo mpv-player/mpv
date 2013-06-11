@@ -571,12 +571,12 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_PRINT: {
         char **list = demuxer->info;
         char *res = NULL;
-        for (int n = 0; list[n]; n += 2) {
+        for (int n = 0; list && list[n]; n += 2) {
             res = talloc_asprintf_append_buffer(res, "%s: %s\n",
                                                 list[n], list[n + 1]);
         }
         *(char **)arg = res;
-        return M_PROPERTY_OK;
+        return res ? M_PROPERTY_OK : M_PROPERTY_UNAVAILABLE;
     }
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
