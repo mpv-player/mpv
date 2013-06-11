@@ -266,7 +266,8 @@ static void vo_set_level(struct vo *vo, int ontop)
         s->window_level = NSNormalWindowLevel;
     }
 
-    [s->window setLevel:s->window_level];
+    [[s->view window] setLevel:s->window_level];
+    [s->window        setLevel:s->window_level];
 }
 
 void vo_cocoa_ontop(struct vo *vo)
@@ -635,7 +636,6 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
             popts |= NSApplicationPresentationAutoHideDock;
 
         NSDictionary *fsopts = @{
-            NSFullScreenModeWindowLevel : @(s->window_level),
             NSFullScreenModeAllScreens  : @NO,
             NSFullScreenModeApplicationPresentationOptions : @(popts)
         };
