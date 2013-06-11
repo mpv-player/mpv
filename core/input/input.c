@@ -1737,7 +1737,7 @@ static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
         mp_msg(MSGT_INPUT, MSGL_ERR, "Can't open input config file %s.\n", file);
         return 0;
     }
-    bstr res = stream_read_complete(s, NULL, 1000000, 0);
+    bstr res = stream_read_complete(s, NULL, 1000000);
     free_stream(s);
     mp_msg(MSGT_INPUT, MSGL_V, "Parsing input config file %s\n", file);
     int n_binds = parse_config(ictx, false, res, file);

@@ -122,7 +122,7 @@ ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
     if (!s)
         // Stream code should have printed an error already
         return NULL;
-    struct bstr content = stream_read_complete(s, NULL, 100000000, 1);
+    struct bstr content = stream_read_complete(s, NULL, 100000000);
     if (content.start == NULL)
         mp_tmsg(MSGT_ASS, MSGL_ERR, "Refusing to load subtitle file "
                 "larger than 100 MB: %s\n", fname);

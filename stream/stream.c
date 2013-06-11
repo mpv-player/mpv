@@ -898,20 +898,27 @@ unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
     return mem;
 }
 
+// Read the rest of the stream into memory (current pos to EOF), and return it.
+//  talloc_ctx: used as talloc parent for the returned allocation
+//  max_size: must be set to >0. If the file is larger than that, it is treated
+//            as error. This is a minor robustness measure.
+//  returns: stream contents, or .start/.len set to NULL on error
+// If the file was empty, but no error happened, .start will be non-NULL and
+// .len will be 0.
+// For convenience, the returned buffer is padded with a 0 byte. The padding
+// is not included in the returned length.
 struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
-                                 int max_size, int padding_bytes)
+                                 int max_size)
 {
     if (max_size > 1000000000)
         abort();
 
     int bufsize;
     int total_read = 0;
-    int padding = FFMAX(padding_bytes, 1);
+    int padding = 1;
     char *buf = NULL;
     if (s->end_pos > max_size)
-        return (struct bstr){
-                   NULL, 0
-        };
+        return (struct bstr){NULL, 0};
     if (s->end_pos > 0)
         bufsize = s->end_pos + padding;
     else
@@ -924,16 +931,13 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
             break;
         if (bufsize > max_size) {
             talloc_free(buf);
-            return (struct bstr){
-                       NULL, 0
-            };
+            return (struct bstr){NULL, 0};
         }
         bufsize = FFMIN(bufsize + (bufsize >> 1), max_size + padding);
     }
     buf = talloc_realloc_size(talloc_ctx, buf, total_read + padding);
-    return (struct bstr){
-               buf, total_read
-    };
+    memset(&buf[total_read], 0, padding);
+    return (struct bstr){buf, total_read};
 }
 
 bool stream_manages_timeline(struct stream *s)

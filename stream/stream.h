@@ -299,14 +299,9 @@ int stream_read(stream_t *s, char *mem, int total);
 int stream_read_partial(stream_t *s, char *buf, int buf_size);
 
 struct MPOpts;
-/*
- * Return allocated buffer for all data until EOF.
- * If amount of data would be more than max_size return NULL as data ptr.
- * Make the allocated buffer padding_bytes larger than the data read.
- * Write number of bytes read at *amount_read.
- */
+
 struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
-                                 int max_size, int padding_bytes);
+                                 int max_size);
 int stream_control(stream_t *s, int cmd, void *arg);
 void stream_update_size(stream_t *s);
 void free_stream(stream_t *s);

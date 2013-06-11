@@ -404,7 +404,7 @@ static void encode_2pass_prepare(struct encode_lavc_context *ctx,
                 set_to_avdictionary(dictp, "flags", "-pass2");
             } else {
                 struct bstr content = stream_read_complete(*bytebuf, NULL,
-                                                           1000000000, 1);
+                                                           1000000000);
                 if (content.start == NULL) {
                     mp_msg(MSGT_ENCODE, MSGL_WARN, "%s: could not read '%s', "
                            "disabling 2-pass encoding at pass 1\n",

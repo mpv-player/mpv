@@ -34,7 +34,7 @@ static int try_open_file(struct demuxer *demuxer)
     if (strncmp(buf, header, len))
         return 0;
     stream_seek(s, 0);
-    demuxer->file_contents = stream_read_complete(s, demuxer, 1000000, 0);
+    demuxer->file_contents = stream_read_complete(s, demuxer, 1000000);
     if (demuxer->file_contents.start == NULL)
         return 0;
     return DEMUXER_TYPE_EDL;
