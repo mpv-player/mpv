@@ -48,6 +48,8 @@ struct priv {
     double lastpts;
     int64_t lastipts;
     int64_t lastframeipts;
+    int64_t lastencodedipts;
+    int64_t mindeltapts;
     double expected_next_pts;
     mp_image_t *lastimg;
     int lastimg_wants_osd;
@@ -136,6 +138,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     vc->lastipts = MP_NOPTS_VALUE;
     vc->lastframeipts = MP_NOPTS_VALUE;
+    vc->lastencodedipts = MP_NOPTS_VALUE;
 
     if (pix_fmt == PIX_FMT_NONE)
         goto error;  /* imgfmt2pixfmt already prints something */
@@ -317,6 +320,11 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
             vc->worst_time_base = vc->stream->time_base;
             vc->worst_time_base_is_stream = 1;
         }
+        if (ectx->options->maxfps)
+            vc->mindeltapts = ceil(vc->worst_time_base.den /
+                    (vc->worst_time_base.num * ectx->options->maxfps));
+        else
+            vc->mindeltapts = 0;
 
         // NOTE: we use the following "axiom" of av_rescale_q:
         // if time base A is worse than time base B, then
@@ -387,11 +395,15 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     }
 
     // never-drop mode
-    if (ectx->options->neverdrop && frameipts <= vc->lastipts) {
-        mp_msg(MSGT_ENCODE, MSGL_INFO, "vo-lavc: -oneverdrop increased pts by %d\n",
-               (int) (vc->lastipts - frameipts + 1));
-        frameipts = vc->lastipts + 1;
-        vc->lastpts = frameipts * timeunit - encode_lavc_getoffset(ectx, vc->stream);
+    if (ectx->options->neverdrop) {
+        int64_t step = vc->mindeltapts ? vc->mindeltapts : 1;
+        if (frameipts < vc->lastipts + step) {
+            mp_msg(MSGT_ENCODE, MSGL_INFO,
+                   "vo-lavc: -oneverdrop increased pts by %d\n",
+                   (int) (vc->lastipts - frameipts + step));
+            frameipts = vc->lastipts + step;
+            vc->lastpts = frameipts * timeunit - encode_lavc_getoffset(ectx, vc->stream);
+        }
     }
 
     if (vc->lastipts != MP_NOPTS_VALUE) {
@@ -402,26 +414,36 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
             int64_t thisduration = vc->harddup ? 1 : (frameipts - vc->lastipts);
             AVPacket packet;
 
-            avcodec_get_frame_defaults(frame);
+            // we will ONLY encode this frame if it can be encoded at at least
+            // vc->mindeltapts after the last encoded frame!
+            int64_t skipframes =
+                vc->lastencodedipts + vc->mindeltapts - vc->lastipts;
+            if (skipframes < 0)
+                skipframes = 0;
 
-            // this is a nop, unless the worst time base is the STREAM time base
-            frame->pts = av_rescale_q(vc->lastipts, vc->worst_time_base,
-                                      avc->time_base);
+            if (thisduration > skipframes) {
+                avcodec_get_frame_defaults(frame);
 
-            for (i = 0; i < 4; i++) {
-                frame->data[i] = vc->lastimg->planes[i];
-                frame->linesize[i] = vc->lastimg->stride[i];
+                // this is a nop, unless the worst time base is the STREAM time base
+                frame->pts = av_rescale_q(vc->lastipts + skipframes,
+                                          vc->worst_time_base, avc->time_base);
+
+                for (i = 0; i < 4; i++) {
+                    frame->data[i] = vc->lastimg->planes[i];
+                    frame->linesize[i] = vc->lastimg->stride[i];
+                }
+                frame->quality = avc->global_quality;
+
+                av_init_packet(&packet);
+                packet.data = vc->buffer;
+                packet.size = vc->buffer_size;
+                size = encode_video(vo, frame, &packet);
+                write_packet(vo, size, &packet);
+                ++vc->lastdisplaycount;
+                vc->lastencodedipts = vc->lastipts + skipframes;
             }
-            frame->quality = avc->global_quality;
-
-            av_init_packet(&packet);
-            packet.data = vc->buffer;
-            packet.size = vc->buffer_size;
-            size = encode_video(vo, frame, &packet);
-            write_packet(vo, size, &packet);
 
             vc->lastipts += thisduration;
-            ++vc->lastdisplaycount;
         }
 
         avcodec_free_frame(&frame);

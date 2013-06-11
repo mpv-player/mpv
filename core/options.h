@@ -253,6 +253,7 @@ typedef struct MPOpts {
         char *format;
         char **fopts;
         float fps;
+        float maxfps;
         char *vcodec;
         char **vopts;
         char *acodec;

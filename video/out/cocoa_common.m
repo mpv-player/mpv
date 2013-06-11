@@ -635,7 +635,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
             popts |= NSApplicationPresentationAutoHideDock;
 
         NSDictionary *fsopts = @{
-            NSFullScreenModeWindowLevel : @(NSFloatingWindowLevel),
+            NSFullScreenModeWindowLevel : @(s->window_level),
             NSFullScreenModeAllScreens  : @NO,
             NSFullScreenModeApplicationPresentationOptions : @(popts)
         };

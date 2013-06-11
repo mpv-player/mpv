@@ -45,6 +45,11 @@ You can encode files from one format/codec to another using this facility.
     specified - use --ofps or --oautofps to force CFR encoding in these
     cases.
 
+--omaxfps=<float value>
+    Specifies the minimum distance of adjacent frames (default: 0, which means
+    unset). Content of lower frame rate is not readjusted to this frame rate;
+    content of higher frame rate is decimated to this frame rate.
+
 --oharddup
     If set, the frame rate given by --ofps is attained not by skipping time
     codes, but by duplicating frames (constant frame rate mode).
