@@ -38,6 +38,7 @@
 #include "audio/filter/af.h"
 #include "audio/decode/dec_audio.h"
 #include "mp_core.h"
+#include "osdep/priority.h"
 
 extern char *lirc_configfile;
 

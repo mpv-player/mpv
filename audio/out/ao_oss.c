@@ -119,8 +119,9 @@ static int oss2format(int format)
 
 
 #ifdef SNDCTL_DSP_GETPLAYVOL
-static int volume_oss4(ao_control_vol_t *vol, int cmd)
+static int volume_oss4(struct ao *ao, ao_control_vol_t *vol, int cmd)
 {
+    struct priv *p = ao->priv;
     int v;
 
     if (p->audio_fd < 0)
@@ -155,7 +156,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
 #ifdef SNDCTL_DSP_GETPLAYVOL
         // Try OSS4 first
-        if (volume_oss4(vol, cmd) == CONTROL_OK)
+        if (volume_oss4(ao, vol, cmd) == CONTROL_OK)
             return CONTROL_OK;
 #endif
 
