@@ -2036,12 +2036,22 @@ static void reinit_subs(struct MPContext *mpctx)
     if (!sub_is_initialized(dec_sub)) {
         int w = mpctx->sh_video ? mpctx->sh_video->disp_w : 0;
         int h = mpctx->sh_video ? mpctx->sh_video->disp_h : 0;
+        float fps = mpctx->sh_video ? mpctx->sh_video->fps : 25;
 
         set_dvdsub_fake_extradata(dec_sub, track->demuxer->stream, w, h);
         sub_set_video_res(dec_sub, w, h);
+        sub_set_video_fps(dec_sub, fps);
         sub_set_ass_renderer(dec_sub, mpctx->osd->ass_library,
                              mpctx->osd->ass_renderer);
         sub_init_from_sh(dec_sub, sh_sub);
+
+        // Don't do this if the file has video/audio streams. Don't do it even
+        // if it has only sub streams, because reading packets will change the
+        // demuxer position.
+        if (!track->preloaded && track->is_external) {
+            demux_seek(track->demuxer, 0, 0, SEEK_ABSOLUTE);
+            track->preloaded = sub_read_all_packets(dec_sub, sh_sub);
+        }
     }
 
     mpctx->osd->dec_sub = dec_sub;

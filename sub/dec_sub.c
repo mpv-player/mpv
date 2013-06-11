@@ -21,7 +21,7 @@
 #include <assert.h>
 
 #include "config.h"
-#include "demux/stheader.h"
+#include "demux/demux.h"
 #include "sd.h"
 #include "sub.h"
 #include "dec_sub.h"
@@ -56,8 +56,15 @@ struct dec_sub {
     struct MPOpts *opts;
     struct sd init_sd;
 
+    double video_fps;
+
     struct sd *sd[MAX_NUM_SD];
     int num_sd;
+};
+
+struct packet_list {
+    struct demux_packet **packets;
+    int num_packets;
 };
 
 struct dec_sub *sub_create(struct MPOpts *opts)
@@ -100,6 +107,11 @@ void sub_set_video_res(struct dec_sub *sub, int w, int h)
 {
     sub->init_sd.sub_video_w = w;
     sub->init_sd.sub_video_h = h;
+}
+
+void sub_set_video_fps(struct dec_sub *sub, double fps)
+{
+    sub->video_fps = fps;
 }
 
 void sub_set_extradata(struct dec_sub *sub, void *data, int data_len)
@@ -247,6 +259,52 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh)
     sub_uninit(sub);
     mp_msg(MSGT_OSD, MSGL_ERR, "Could not find subtitle decoder for format '%s'.\n",
            sh->gsh->codec ? sh->gsh->codec : "<unknown>");
+}
+
+static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
+{
+    struct sd *sd = sub_get_last_sd(sub);
+    assert(sd);
+
+    sd->no_remove_duplicates = true;
+
+    for (int n = 0; n < subs->num_packets; n++)
+        sub_decode(sub, subs->packets[n]);
+
+    // Hack for broken FFmpeg packet format: make sd_ass keep the subtitle
+    // events on reset(), even if broken FFmpeg ASS packets were received
+    // (from sd_lavc_conv.c). Normally, these events are removed on seek/reset,
+    // but this is obviously unwanted in this case.
+    if (sd->driver->fix_events)
+        sd->driver->fix_events(sd);
+
+    sd->no_remove_duplicates = false;
+}
+
+// Read all packets from the demuxer and decode/add them. Returns false if
+// there are circumstances which makes this not possible.
+bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
+{
+    if (!sub_accept_packets_in_advance(sub) || sh->track)
+        return false;
+
+    void *tmp = talloc_new(NULL);
+    struct packet_list subs = {0};
+
+    for (;;) {
+        ds_get_next_pts(sh->ds);
+        struct demux_packet *pkt = ds_get_packet_sub(sh->ds);
+        if (!pkt)
+            break;
+        pkt = demux_copy_packet(pkt);
+        talloc_steal(tmp, pkt);
+        MP_TARRAY_APPEND(tmp, subs.packets, subs.num_packets, pkt);
+    }
+
+    add_sub_list(sub, &subs);
+
+    talloc_free(tmp);
+    return true;
 }
 
 bool sub_accept_packets_in_advance(struct dec_sub *sub)
