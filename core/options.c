@@ -496,9 +496,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("autosub", sub_auto, 0),
     OPT_FLAG("sub-visibility", sub_visibility, 0),
     OPT_FLAG("sub-forced-only", forced_subs_only, 0),
-    // enable Closed Captioning display
-    OPT_FLAG_CONSTANTS("overlapsub", suboverlap_enabled, 0, 0, 2),
-    OPT_FLAG_STORE("sub-no-text-pp", sub_no_text_pp, 0, 1),
+    OPT_FLAG_CONSTANTS("sub-fix-timing", suboverlap_enabled, 0, 1, 0),
     OPT_CHOICE("autosub-match", sub_match_fuzziness, 0,
                ({"exact", 0}, {"fuzzy", 1}, {"all", 2})),
     OPT_INTRANGE("sub-pos", sub_pos, 0, 0, 100),
@@ -804,7 +802,7 @@ const struct MPOpts mp_default_opts = {
     .ass_vsfilter_aspect_compat = 1,
     .ass_style_override = 1,
     .use_embedded_fonts = 1,
-    .suboverlap_enabled = 1,
+    .suboverlap_enabled = 0,
 
     .hwdec_codecs = "all",
 

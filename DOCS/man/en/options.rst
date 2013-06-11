@@ -1447,11 +1447,6 @@
     ``show_progress`` command (by default mapped to ``P``), or in some
     non-default cases when seeking. Expands properties. See property_expansion_.
 
---overlapsub
-    Allows the next subtitle to be displayed while the current one is still
-    visible (default is to enable the support only for specific formats). This
-    only matters for subtitles loaded with ``-sub``.
-
 --panscan=<0.0-1.0>
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9
     movie to make it fit a 4:3 display without black bands). The range
@@ -1996,14 +1991,16 @@
     Use/display these subtitle files. Only one file can be displayed at the
     same time.
 
+--sub-fix-timing, --no-sub-fix-timing
+    By default, external text subtitles are preprocessed to remove minor gaps
+    or overlaps between subtitles (if the difference is smaller than 200 ms,
+    the gap or overlap is removed). This does not affect image subtitles,
+    subtitles muxed with audio/video, or subtitles in the ASS format.
+
 --sub-demuxer=<[+]name>
     Force subtitle demuxer type for ``--subfile``. Using a '+' before the name
     will force it, this will skip some checks! Give the demuxer name as
     printed by ``--sub-demuxer=help``.
-
---sub-no-text-pp
-    Disables any kind of text post processing done after loading the
-    subtitles. Used for debug purposes.
 
 --sub-paths=<path1:path2:...>
     Specify extra directories where to search for subtitles matching the

@@ -261,6 +261,43 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh)
            sh->gsh->codec ? sh->gsh->codec : "<unknown>");
 }
 
+static void multiply_timings(struct packet_list *subs, double factor)
+{
+    for (int n = 0; n < subs->num_packets; n++) {
+        struct demux_packet *pkt = subs->packets[n];
+        if (pkt->pts != MP_NOPTS_VALUE)
+            pkt->pts *= factor;
+        if (pkt->duration > 0)
+            pkt->duration *= factor;
+    }
+}
+
+// Remove overlaps and fill gaps between adjacent subtitle packets. This is done
+// by adjusting the duration of the earlier packet. If the gaps or overlap are
+// larger than the threshold, or if the durations are close to the threshold,
+// don't change the events.
+// The algorithm is maximally naive and doesn't work if there are multiple
+// overlapping lines. (It's not worth the trouble.)
+static void fix_overlaps_and_gaps(struct packet_list *subs)
+{
+    double threshold = 0.2;     // up to 200 ms overlaps or gaps are removed
+    double keep = threshold * 2;// don't change timings if durations are smaller
+    for (int i = 0; i < subs->num_packets - 1; i++) {
+        struct demux_packet *cur = subs->packets[i];
+        struct demux_packet *next = subs->packets[i + 1];
+        if (cur->pts != MP_NOPTS_VALUE && cur->duration > 0 &&
+            next->pts != MP_NOPTS_VALUE && next->duration > 0)
+        {
+            double end = cur->pts + cur->duration;
+            if (fabs(next->pts - end) <= threshold && cur->duration >= keep &&
+                next->duration >= keep)
+            {
+                cur->duration = next->pts - cur->pts;
+            }
+        }
+    }
+}
+
 static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
 {
     struct sd *sd = sub_get_last_sd(sub);
@@ -285,6 +322,8 @@ static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
 // there are circumstances which makes this not possible.
 bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
 {
+    struct MPOpts *opts = sub->opts;
+
     if (!sub_accept_packets_in_advance(sub) || sh->track)
         return false;
 
@@ -300,6 +339,12 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
         talloc_steal(tmp, pkt);
         MP_TARRAY_APPEND(tmp, subs.packets, subs.num_packets, pkt);
     }
+
+    if (opts->sub_fps && sub->video_fps)
+        multiply_timings(&subs, opts->sub_fps / sub->video_fps);
+
+    if (!opts->suboverlap_enabled)
+        fix_overlaps_and_gaps(&subs);
 
     add_sub_list(sub, &subs);
 
