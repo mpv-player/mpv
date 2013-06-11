@@ -40,11 +40,6 @@ static int try_open_file(struct demuxer *demuxer)
     return DEMUXER_TYPE_EDL;
 }
 
-static int dummy_fill_buffer(struct demuxer *demuxer, struct demux_stream *ds)
-{
-    return 0;
-}
-
 const struct demuxer_desc demuxer_desc_edl = {
     .info = "EDL file demuxer",
     .name = "edl",
@@ -54,5 +49,4 @@ const struct demuxer_desc demuxer_desc_edl = {
     .type = DEMUXER_TYPE_EDL,
     .safe_check = true,
     .check_file = try_open_file,       // no separate .open
-    .fill_buffer = dummy_fill_buffer,
 };

@@ -599,7 +599,7 @@ static bool demux_check_queue_full(demuxer_t *demux)
 int demux_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 {
     // Note: parameter 'ds' can be NULL!
-    return demux->desc->fill_buffer(demux, ds);
+    return demux->desc->fill_buffer ? demux->desc->fill_buffer(demux, ds) : 0;
 }
 
 // return value:
