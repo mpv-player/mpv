@@ -1408,11 +1408,6 @@ static bool get_image(struct gl_video *p, struct mp_image *mpi)
     if (!p->opts.pbo)
         return false;
 
-    // We don't support alpha planes. (Disabling PBOs with normal draw calls is
-    // an undesired, but harmless side-effect.)
-    if (mpi->num_planes != p->plane_count)
-        return false;
-
     struct video_image *vimg = &p->image;
 
     for (int n = 0; n < p->plane_count; n++) {
@@ -1441,7 +1436,7 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     GL *gl = p->gl;
     int n;
 
-    assert(mpi->num_planes >= p->plane_count);
+    assert(mpi->num_planes == p->plane_count);
 
     struct video_image *vimg = &p->image;
 
