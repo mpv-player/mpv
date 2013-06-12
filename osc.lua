@@ -6,6 +6,7 @@ local osc_geo = {
 	vidscale = true,						-- scale the controller with the video? don't use false, currently causes glitches
 	valign = 0.8,							-- vertical alignment, -1 (top) to 1 (bottom)
 	halign = 0,								-- vertical alignment, -1 (left) to 1 (right)
+	iAmAProgrammer = false,					-- start counting stuff at 0
 	
 	-- not user-safe
 	osc_w = 550,							-- width, height, corner-radius, padding of the box
@@ -380,9 +381,13 @@ function osc_init ()
     local contentF = function (ass)
     	local aid = ""
     	if (mp.property_get("audio") == "no") then
-    		aid = "X"
+    		aid = "–"
     	else
-    		aid = tonumber(mp.property_get("audio")) + 1
+    		if (osc_geo.iAmAProgrammer == true) then
+    			aid = tonumber(mp.property_get("audio"))
+    		else
+    			aid = tonumber(mp.property_get("audio")) + 1
+    		end
     	end    		
     	ass:append("\238\132\134 {\\fs17}" .. aid)
     end
@@ -393,9 +398,13 @@ function osc_init ()
     local contentF = function (ass)
     	local sid = ""
     	if (mp.property_get("sub") == "no") then
-    		sid = "X"
+    		sid = "–"
     	else
-    		sid = tonumber(mp.property_get("sub")) + 1
+    		if (osc_geo.iAmAProgrammer == true) then
+    			sid = tonumber(mp.property_get("sub"))
+    		else
+    			sid = tonumber(mp.property_get("sub")) + 1
+    		end
     	end
     	ass:append("\238\132\135 {\\fs17}" .. sid)
     end
