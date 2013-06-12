@@ -45,9 +45,6 @@ extern char *lirc_configfile;
 extern int mp_msg_color;
 extern int mp_msg_module;
 
-/* from dec_audio, currently used for ac3surround decoder only */
-extern int fakemono;
-
 extern int dvd_speed; /* stream/stream_dvd.c */
 
 /* defined in demux: */
@@ -451,9 +448,6 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("ignore-start", ignore_start, 0),
 
 // ------------------------- codec/vfilter options --------------------
-
-    // MP3-only: select stereo/left/right
-    {"stereo", &fakemono, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
 
     {"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 

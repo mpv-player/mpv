@@ -1973,13 +1973,6 @@
 
     *NOTE*: without ``--hr-seek``, skipping will snap to keyframes.
 
---stereo=<mode>
-    Select type of MP2/MP3 stereo output.
-
-    :0: stereo
-    :1: left channel
-    :2: right channel
-
 --stop-xscreensaver
     (X11 only)
     Turns off xscreensaver at startup and turns it on again on exit. If your
