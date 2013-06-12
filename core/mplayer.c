@@ -841,7 +841,7 @@ static const char *backup_properties[] = {
     "sid",
     "sub-delay",
     "sub-pos",
-    //"sub-visibility",
+    "sub-visibility",
     "sub-scale",
     "ass-use-margins",
     "ass-vsfilter-aspect-compat",
