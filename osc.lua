@@ -6,6 +6,7 @@ local osc_geo = {
 	vidscale = true,						-- scale the controller with the video? don't use false, currently causes glitches
 	valign = 0.8,							-- vertical alignment, -1 (top) to 1 (bottom)
 	halign = 0,								-- vertical alignment, -1 (left) to 1 (right)
+	deadzonedist = 0.2, 					-- distance between OSC and deadzone
 	iAmAProgrammer = false,					-- start counting stuff at 0
 	
 	-- not user-safe
@@ -189,7 +190,7 @@ function any_button_down()
 		end
     end
     
-    -- if state.active_button is till nil, user must have clicked outside the controller -> 0
+    -- if state.active_button is still nil, user must have clicked outside the controller -> 0
     if state.active_button == nil then
     	state.active_button = 0
     end
@@ -203,7 +204,7 @@ function any_button_up()
 		
 		if n == 0 and not (mouse_over_osc()) then
 			--click on background
-			hide_osc()		
+			--hide_osc()		
 		elseif n > 0 and not (elements[n].up_cmd == nil) then
 			local bX1, bY1, bX2, bY2 = get_hitbox_coords(elements[n].x, elements[n].y, elements[n].an, elements[n].w, elements[n].h)
 			local mX, mY = mp.get_mouse_pos()
@@ -213,22 +214,6 @@ function any_button_up()
 				elements[n].up_cmd()
 			end
 		end
-
-		--[[
-		local mX, mY = mp.get_mouse_pos()
-		for n = 1, #elements do
-		
-			-- Ignore if button doesn't have a up_cmd
-			if not (elements[n].up_cmd == nil) then
-				local bX1, bY1, bX2, bY2 = get_hitbox_coords(elements[n].x, elements[n].y, elements[n].an, elements[n].w, elements[n].h)
-		
-				if mX >= bX1 and mX <= bX2 and mY >= bY1 and mY <= bY2 and state.active_button == n then
-					--print("up on button #" .. n .. "    \n")
-					elements[n].up_cmd()
-				end
-			end		
-	    end
-	    --]]
 	end
     state.active_button = nil
 end
@@ -249,7 +234,7 @@ local osc_styles = {
 
 -- OSC INIT
 function osc_init ()
-	
+	print "\nINIT, bitch!\n"
 	-- kill old Elements
 	elements = {}
 	
@@ -509,7 +494,26 @@ end
 -- called by input.conf bindings
 function mouse_move()
 	--print "\nI like to move it, move it!\n"
-	show_osc()
+	local mX, mY = mp.get_mouse_pos()
+	if osc_geo.valign > 0 then
+		-- deadzone above OSC
+		if mY <= get_align(1 - osc_geo.deadzonedist, osc_geo.posY - (osc_geo.osc_h / 2), 0, 0) then
+			hide_osc()
+			--print("\nhide: " .. mY .. " ".. get_align(1 - osc_geo.deadzonedist, osc_geo.posY - (osc_geo.osc_h / 2), 0, 0))
+		else
+			show_osc()
+			--print("\nshow")
+		end
+	else
+		-- deadzone below OSC
+		if mY >= (osc_geo.posY + (osc_geo.osc_h / 2)) + get_align(-1 + osc_geo.deadzonedist, osc_geo.playresy - (osc_geo.posY + (osc_geo.osc_h / 2)), 0, 0) then
+			hide_osc()
+		else
+			show_osc()
+		end
+	end
+
+	--show_osc()
 end
 
 function mouse_click(down)
@@ -556,12 +560,22 @@ function mp_update()
     
     local now = mp.get_timer()
     
-    if mouse_over_osc() or state.mouse_down then
-    	show_osc()
-    end
+    
+    
     
     --state.append_calls = 0
     
+    if state.osc_visible then
+        draw_osc(ass)
+    end
+
+
+    --[[ Old show handling
+
+	if mouse_over_osc() or state.mouse_down then
+    	show_osc()
+    end
+
     local osd_time = 1
     
     if state.osc_visible and now - state.last_osd_time < osd_time then
@@ -570,10 +584,12 @@ function mp_update()
     else
         state.osc_visible = false
     end
+    --]]
     
     --ass:new_event()
-    --local playresx, playresy = mp.get_osd_resolution()
-    --ass:append("get_osd_resolution: X:" .. playresx .. " Y:" .. playresy)
+    --mp.get_osd_resolution()
+    local playresx, playresy = mp.get_osd_resolution()
+    ass:append("{get_osd_resolution: X:" .. playresx .. " Y:" .. playresy .. "}")
     --if state.active_button == nil then
     --	ass:append("state.active_button: " .. "nil")
     --else
@@ -581,8 +597,9 @@ function mp_update()
 	--end        
     --ass:append("Rendertime: " .. mp.get_timer() - now .. "   state.append_calls: " .. state.append_calls)
     
-    --[[
+    
 
+    --[[
     ass:new_event()
     ass:pos(x, y)
     ass:append("{\\an5}")
@@ -591,10 +608,14 @@ function mp_update()
     else
         ass:append("+")
     end
-    --]]
     -- set canvas size
     --mp.set_osd_ass(osc_geo.playresx, osc_geo.playresy, ass.text)
+    --]]
     
+    -- make sure there is something in ass so that mp.set_osd_ass won't fail
+    --ass:new_event()
+    --ass:append("blah")
+
     local w, h, aspect = mp.get_screen_size()
     mp.set_osd_ass(osc_geo.playresy * aspect, osc_geo.playresy, ass.text)
     
