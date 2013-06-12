@@ -210,7 +210,7 @@ static void write_packet(struct vo *vo, int size, AVPacket *packet)
                                        vc->stream->codec->time_base,
                                        vc->stream->time_base);
         } else {
-            mp_msg(MSGT_ENCODE, MSGL_WARN, "vo-lavc: codec did not provide pts\n");
+            mp_msg(MSGT_ENCODE, MSGL_V, "vo-lavc: codec did not provide pts\n");
             packet->pts = av_rescale_q(vc->lastipts, vc->worst_time_base,
                                        vc->stream->time_base);
         }
