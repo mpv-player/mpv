@@ -2692,7 +2692,7 @@ static double update_video(struct MPContext *mpctx, double endpts)
     if (sh_video->last_pts == MP_NOPTS_VALUE)
         sh_video->last_pts = sh_video->pts;
     else if (sh_video->last_pts > sh_video->pts) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Decreasing video pts: %f < %f\n",
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Decreasing video pts: %f < %f\n",
                sh_video->pts, sh_video->last_pts);
         /* If the difference in pts is small treat it as jitter around the
          * right value (possibly caused by incorrect timestamp ordering) and
@@ -2703,6 +2703,11 @@ static double update_video(struct MPContext *mpctx, double endpts)
             sh_video->last_pts = sh_video->pts;
         else
             sh_video->pts = sh_video->last_pts;
+    } else if (sh_video->pts >= sh_video->last_pts + 60) {
+        // Assume a PTS difference >= 60 seconds is a discontinuity.
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Jump in video pts: %f -> %f\n",
+               sh_video->last_pts, sh_video->pts);
+        sh_video->last_pts = sh_video->pts;
     }
     double frame_time = sh_video->pts - sh_video->last_pts;
     sh_video->last_pts = sh_video->pts;
