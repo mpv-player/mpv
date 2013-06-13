@@ -116,10 +116,18 @@ int encode_lavc_oformat_flags(struct encode_lavc_context *ctx)
 struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
 {
     struct encode_lavc_context *ctx;
+    const char *filename = options->file;
 
-    if (options->file && (
-            !strcmp(options->file, "pipe:") ||
-            !strcmp(options->file, "pipe:1")))
+    // STUPID STUPID STUPID STUPID avio
+    // does not support "-" as file name to mean stdin/stdout
+    // ffmpeg.c works around this too, the same way
+    if (!strcmp(filename, "-"))
+        filename = "pipe:1";
+
+    if (filename && (
+            !strcmp(filename, "/dev/stdout") ||
+            !strcmp(filename, "pipe:") ||
+            !strcmp(filename, "pipe:1")))
         mp_msg_stdout_in_use = 1;
 
     ctx = talloc_zero(NULL, struct encode_lavc_context);
@@ -133,7 +141,7 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
         const char *in = ctx->options->format;
         while (*in) {
             tok = av_get_token(&in, ",");
-            ctx->avc->oformat = av_guess_format(tok, ctx->options->file, NULL);
+            ctx->avc->oformat = av_guess_format(tok, filename, NULL);
             av_free(tok);
             if (ctx->avc->oformat)
                 break;
@@ -141,14 +149,14 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
                 ++in;
         }
     } else
-        ctx->avc->oformat = av_guess_format(NULL, ctx->options->file, NULL);
+        ctx->avc->oformat = av_guess_format(NULL, filename, NULL);
 
     if (!ctx->avc->oformat) {
         encode_lavc_fail(ctx, "encode-lavc: format not found\n");
         return NULL;
     }
 
-    av_strlcpy(ctx->avc->filename, ctx->options->file,
+    av_strlcpy(ctx->avc->filename, filename,
                sizeof(ctx->avc->filename));
 
     ctx->foptions = NULL;
