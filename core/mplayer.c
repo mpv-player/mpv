@@ -2474,6 +2474,12 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     mpctx->initialized_flags |= INITIALIZED_VCODEC;
 
+    vo_control(mpctx->video_out, opts->pause ? VOCTRL_RESTORE_SCREENSAVER
+                                             : VOCTRL_KILL_SCREENSAVER, NULL);
+
+    vo_control(mpctx->video_out, mpctx->paused ? VOCTRL_PAUSE
+                                               : VOCTRL_RESUME, NULL);
+
     sh_video->last_pts = MP_NOPTS_VALUE;
     sh_video->num_buffered_pts = 0;
     sh_video->next_frame_time = 0;
@@ -2486,8 +2492,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     return 1;
 
 err_out:
-    if (!opts->fixed_vo)
-        uninit_player(mpctx, INITIALIZED_VO);
+    uninit_player(mpctx, INITIALIZED_VO);
     cleanup_demux_stream(mpctx, STREAM_VIDEO);
 no_video:
     mpctx->current_track[STREAM_VIDEO] = NULL;
@@ -2720,6 +2725,9 @@ void pause_player(struct MPContext *mpctx)
 {
     mpctx->opts.pause = 1;
 
+    if (mpctx->video_out)
+        vo_control(mpctx->video_out, VOCTRL_RESTORE_SCREENSAVER, NULL);
+
     if (mpctx->paused)
         return;
     mpctx->paused = true;
@@ -2746,6 +2754,9 @@ void unpause_player(struct MPContext *mpctx)
 {
     mpctx->opts.pause = 0;
 
+    if (mpctx->video_out)
+        vo_control(mpctx->video_out, VOCTRL_KILL_SCREENSAVER, NULL);
+
     if (!mpctx->paused)
         return;
     // Don't actually unpause while cache is loading.
@@ -2756,8 +2767,7 @@ void unpause_player(struct MPContext *mpctx)
 
     if (mpctx->ao && mpctx->sh_audio)
         ao_resume(mpctx->ao);
-    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok
-        && !mpctx->step_frames)
+    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);      // resume video
     (void)get_relative_time(mpctx);     // ignore time that passed during pause
 }
@@ -2786,8 +2796,6 @@ void add_step_frame(struct MPContext *mpctx, int dir)
 {
     if (dir > 0) {
         mpctx->step_frames += 1;
-        if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
-            vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
         unpause_player(mpctx);
     } else if (dir < 0) {
         if (!mpctx->backstep_active && !mpctx->hrseek_active) {
@@ -4155,8 +4163,6 @@ static void play_current_file(struct MPContext *mpctx)
     if (opts->ass_style_override)
         ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
 #endif
-    if (mpctx->video_out && mpctx->video_out->config_ok)
-        vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);
 
     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Playing %s.\n", mpctx->filename);
 

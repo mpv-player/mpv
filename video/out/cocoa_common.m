@@ -149,7 +149,6 @@ static void disable_power_management(struct vo *vo)
 int vo_cocoa_init(struct vo *vo)
 {
     vo->cocoa = vo_cocoa_init_state(vo);
-    disable_power_management(vo);
 
     return 1;
 }
@@ -556,10 +555,10 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         vo_cocoa_set_cursor_visibility(vo, visible);
         return VO_TRUE;
     }
-    case VOCTRL_PAUSE:
+    case VOCTRL_RESTORE_SCREENSAVER:
         vo_cocoa_pause(vo);
         return VO_TRUE;
-    case VOCTRL_RESUME:
+    case VOCTRL_KILL_SCREENSAVER:
         vo_cocoa_resume(vo);
         return VO_TRUE;
     }
