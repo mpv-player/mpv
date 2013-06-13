@@ -89,6 +89,7 @@ SOURCES-$(COREVIDEO)            += video/out/vo_corevideo.m
 SOURCES-$(DIRECT3D)             += video/out/vo_direct3d.c \
                                    video/out/w32_common.c
 SOURCES-$(DSOUND)               += audio/out/ao_dsound.c
+SOURCES-$(WASAPI0)              += audio/out/ao_wasapi0.c
 SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
                                    video/out/vo_opengl.c video/out/gl_lcms.c \
                                    video/out/gl_video.c video/out/dither.c \
