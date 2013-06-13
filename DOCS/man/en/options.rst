@@ -781,7 +781,7 @@
     ``-vo=null``).
 
     This can be "misused" to disable screensavers that do not support the
-    proper X API (see also ``--stop-xscreensaver``). If you think this is too
+    proper X API (see also ``--stop-screensaver``). If you think this is too
     complicated, ask the author of the screensaver program to support the
     proper X APIs.
 
@@ -1973,11 +1973,13 @@
 
     *NOTE*: without ``--hr-seek``, skipping will snap to keyframes.
 
---stop-xscreensaver
-    (X11 only)
-    Turns off xscreensaver at startup and turns it on again on exit. If your
-    screensaver supports neither the XSS nor XResetScreenSaver API please use
-    ``--heartbeat-cmd`` instead.
+--stop-screensaver, --no-stop-screensaver
+    Turns off the screensaver (or screen blanker and similar mechanisms) at
+    startup and turns it on again on exit. (Default: yes)
+
+    This is not supported on all video outputs or platforms. Sometimes it is
+    implemented, but doesn't work (happens often on GNOME). You might be able
+    to to work this around using ``--heartbeat-cmd`` instead.
 
 --sub=<subtitlefile1,subtitlefile2,...>
     Use/display these subtitle files. Only one file can be displayed at the

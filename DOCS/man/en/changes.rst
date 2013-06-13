@@ -127,6 +127,7 @@ Command line switches
     -a52drc level                       --ad-lavc-ac3drc=level
     -dumpstream                         --stream-dump=<filename>
     -capture                            --stream-capture=<filename>
+    -stop-xscreensaver                  --stop-screensaver
     =================================== ===================================
 
 *NOTE*: ``-opt val`` becomes ``--opt=val``.

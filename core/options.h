@@ -14,7 +14,6 @@ typedef struct mp_vo_opts {
     bool fs;
     int screen_id;
     int fsscreen_id;
-    int stop_screensaver;
     char *winname;
     char** fstype_list;
     int native_keyrepeat;
@@ -72,6 +71,7 @@ typedef struct MPOpts {
     int gamma_saturation;
     int gamma_hue;
 
+    int stop_screensaver;
     int fullscreen;
     int requested_colorspace;
     int requested_input_range;

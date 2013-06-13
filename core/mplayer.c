@@ -2474,7 +2474,8 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     mpctx->initialized_flags |= INITIALIZED_VCODEC;
 
-    vo_control(mpctx->video_out, opts->pause ? VOCTRL_RESTORE_SCREENSAVER
+    bool saver_state = opts->pause || !opts->stop_screensaver;
+    vo_control(mpctx->video_out, saver_state ? VOCTRL_RESTORE_SCREENSAVER
                                              : VOCTRL_KILL_SCREENSAVER, NULL);
 
     vo_control(mpctx->video_out, mpctx->paused ? VOCTRL_PAUSE
@@ -2754,7 +2755,7 @@ void unpause_player(struct MPContext *mpctx)
 {
     mpctx->opts.pause = 0;
 
-    if (mpctx->video_out)
+    if (mpctx->video_out && mpctx->opts.stop_screensaver)
         vo_control(mpctx->video_out, VOCTRL_KILL_SCREENSAVER, NULL);
 
     if (!mpctx->paused)

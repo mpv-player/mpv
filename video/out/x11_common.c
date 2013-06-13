@@ -496,9 +496,6 @@ int vo_x11_init(struct vo *vo)
 
     fstype_dump(x11->fs_type);
 
-    if (opts->stop_screensaver)
-        saver_off(x11);
-
     vo->event_fd = ConnectionNumber(x11->display);
 
     return 1;
@@ -1371,6 +1368,7 @@ static void vo_x11_border(struct vo *vo)
 
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
 {
+    struct vo_x11_state *x11 = vo->x11;
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
         *events |= vo_x11_check_events(vo);
@@ -1391,6 +1389,12 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_SET_CURSOR_VISIBILITY:
         vo_set_cursor_hidden(vo, !(*(bool *)arg));
+        return VO_TRUE;
+    case VOCTRL_KILL_SCREENSAVER:
+        saver_off(x11);
+        return VO_TRUE;
+    case VOCTRL_RESTORE_SCREENSAVER:
+        saver_on(x11);
         return VO_TRUE;
     }
     return VO_NOTIMPL;

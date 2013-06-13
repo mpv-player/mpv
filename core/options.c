@@ -587,10 +587,10 @@ const m_option_t mp_opts[] = {
 
     OPT_CHOICE_OR_INT("cursor-autohide", vo.cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),
+    OPT_FLAG("stop-screensaver", stop_screensaver, 0),
 
     OPT_INT64("wid", vo.WinID, CONF_GLOBAL),
 #ifdef CONFIG_X11
-    OPT_FLAG("stop-xscreensaver", vo.stop_screensaver, 0),
     OPT_STRINGLIST("fstype", vo.fstype_list, 0),
 #endif
     OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0),
@@ -743,7 +743,6 @@ const struct MPOpts mp_default_opts = {
         .fs = false,
         .screen_id = -1,
         .fsscreen_id = -1,
-        .stop_screensaver = 1,
         .nomouse_input = 0,
         .enable_mouse_movements = 1,
         .fsmode = 0,
@@ -756,6 +755,7 @@ const struct MPOpts mp_default_opts = {
     },
     .wintitle = "mpv - ${media-title}",
     .heartbeat_interval = 30.0,
+    .stop_screensaver = 1,
     .gamma_gamma = 1000,
     .gamma_brightness = 1000,
     .gamma_contrast = 1000,
