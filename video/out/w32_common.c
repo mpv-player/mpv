@@ -174,10 +174,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         case WM_SYSCOMMAND:
             switch (wParam) {
-                case SC_SCREENSAVE:
-                case SC_MONITORPOWER:
+            case SC_SCREENSAVE:
+            case SC_MONITORPOWER:
+                if (w32->disable_screensaver) {
                     mp_msg(MSGT_VO, MSGL_V, "vo: win32: killing screensaver\n");
                     return 0;
+                }
+                break;
             }
             break;
         case WM_KEYDOWN:
@@ -672,6 +675,7 @@ static void vo_w32_ontop(struct vo *vo)
 
 int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
 {
+    struct vo_w32_state *w32 = vo->w32;
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
         *events |= vo_w32_check_events(vo);
@@ -696,6 +700,12 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
         } else {
             while (ShowCursor(0) >= 0) { }
         }
+    case VOCTRL_KILL_SCREENSAVER:
+        w32->disable_screensaver = true;
+        break;
+    case VOCTRL_RESTORE_SCREENSAVER:
+        w32->disable_screensaver = false;
+        break;
     }
     return VO_NOTIMPL;
 }
