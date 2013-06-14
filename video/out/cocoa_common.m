@@ -184,16 +184,6 @@ void vo_cocoa_uninit(struct vo *vo)
     });
 }
 
-void vo_cocoa_pause(struct vo *vo)
-{
-    enable_power_management(vo);
-}
-
-void vo_cocoa_resume(struct vo *vo)
-{
-    disable_power_management(vo);
-}
-
 void vo_cocoa_register_resize_callback(struct vo *vo,
                                        void (*cb)(struct vo *vo, int w, int h))
 {
@@ -556,10 +546,10 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     }
     case VOCTRL_RESTORE_SCREENSAVER:
-        vo_cocoa_pause(vo);
+        enable_power_management(vo);
         return VO_TRUE;
     case VOCTRL_KILL_SCREENSAVER:
-        vo_cocoa_resume(vo);
+        disable_power_management(vo);
         return VO_TRUE;
     }
     return VO_NOTIMPL;
