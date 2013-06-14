@@ -1783,7 +1783,7 @@ static bool init_format(int fmt, struct gl_video *init)
         plane_format[0] = byte_formats[1];
     }
 
-    // XYZ (same roganization as RGB packed, but requires conversion matrix)
+    // XYZ (same organization as RGB packed, but requires conversion matrix)
     if (!supported && fmt == IMGFMT_XYZ12) {
         supported = true;
         plane_format[0] = IMGFMT_RGB48;
