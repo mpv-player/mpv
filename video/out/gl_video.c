@@ -1236,7 +1236,8 @@ static void render_to_fbo(struct gl_video *p, struct fbotex *fbo,
 
 }
 
-static void handle_pass(struct gl_video *p, struct fbotex **source,
+// *chain contains the source, and is overwritten with a copy of the result
+static void handle_pass(struct gl_video *p, struct fbotex *chain,
                         struct fbotex *fbo, GLuint program)
 {
     GL *gl = p->gl;
@@ -1244,12 +1245,12 @@ static void handle_pass(struct gl_video *p, struct fbotex **source,
     if (!program)
         return;
 
-    gl->BindTexture(GL_TEXTURE_2D, (*source)->texture);
+    gl->BindTexture(GL_TEXTURE_2D, chain->texture);
     gl->UseProgram(program);
-    render_to_fbo(p, fbo, (*source)->vp_x, (*source)->vp_y,
-                  (*source)->vp_w, (*source)->vp_h,
-                  (*source)->tex_w, (*source)->tex_h);
-    *source = fbo;
+    render_to_fbo(p, fbo, chain->vp_x, chain->vp_y,
+                  chain->vp_w, chain->vp_h,
+                  chain->tex_w, chain->tex_h);
+    *chain = *fbo;
 }
 
 void gl_video_render_frame(struct gl_video *p)
@@ -1274,35 +1275,31 @@ void gl_video_render_frame(struct gl_video *p)
 
     set_image_textures(p, vimg);
 
-    struct fbotex dummy = {
+    struct fbotex chain = {
         .vp_w = p->image_w,
         .vp_h = p->image_h,
         .tex_w = p->texture_w,
         .tex_h = p->texture_h,
         .texture = vimg->planes[0].gl_texture,
     };
-    struct fbotex *source = &dummy;
 
-    handle_pass(p, &source, &p->indirect_fbo, p->indirect_program);
+    handle_pass(p, &chain, &p->indirect_fbo, p->indirect_program);
 
     // Clip to visible height so that separate scaling scales the visible part
     // only (and the target FBO texture can have a bounded size).
     // Don't clamp width; too hard to get correct final scaling on l/r borders.
-    dummy = *source;
-    source = &dummy;
-    source->vp_y = p->src_rect.y0,
-    source->vp_h = p->src_rect.y1 - p->src_rect.y0,
+    chain.vp_y = p->src_rect.y0,
+    chain.vp_h = p->src_rect.y1 - p->src_rect.y0,
 
-    handle_pass(p, &source, &p->scale_sep_fbo, p->scale_sep_program);
+    handle_pass(p, &chain, &p->scale_sep_fbo, p->scale_sep_program);
 
-    gl->BindTexture(GL_TEXTURE_2D, source->texture);
+    gl->BindTexture(GL_TEXTURE_2D, chain.texture);
     gl->UseProgram(p->final_program);
 
-    float final_texw = source->tex_w;
-    float final_texh = source->tex_h;
-
-    struct mp_rect src = {p->src_rect.x0, source->vp_y,
-                          p->src_rect.x1, source->vp_y + source->vp_h};
+    struct mp_rect src = {p->src_rect.x0, chain.vp_y,
+                          p->src_rect.x1, chain.vp_y + chain.vp_h};
+    int src_texw = chain.tex_w;
+    int src_texh = chain.tex_h;
 
     if (p->opts.stereo_mode) {
         int w = src.x1 - src.x0;
@@ -1315,7 +1312,7 @@ void gl_video_render_frame(struct gl_video *p)
                    p->dst_rect.x1, p->dst_rect.y1,
                    src.x0 / 2, src.y0,
                    src.x0 / 2 + w / 2, src.y1,
-                   final_texw, final_texh,
+                   src_texw, src_texh,
                    NULL, is_flipped);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
 
@@ -1326,7 +1323,7 @@ void gl_video_render_frame(struct gl_video *p)
                    p->dst_rect.x1, p->dst_rect.y1,
                    src.x0 / 2 + imgw / 2, src.y0,
                    src.x0 / 2 + imgw / 2 + w / 2, src.y1,
-                   final_texw, final_texh,
+                   src_texw, src_texh,
                    NULL, is_flipped);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
 
@@ -1337,7 +1334,7 @@ void gl_video_render_frame(struct gl_video *p)
                    p->dst_rect.x1, p->dst_rect.y1,
                    src.x0, src.y0,
                    src.x1, src.y1,
-                   final_texw, final_texh,
+                   src_texw, src_texh,
                    NULL, is_flipped);
         draw_triangles(p, vb, VERTICES_PER_QUAD);
     }
