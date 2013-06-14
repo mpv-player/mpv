@@ -488,13 +488,17 @@ static void clamp_size(int size, int *start, int *end)
 
 static void src_dst_split_scaling(int src_size, int dst_size,
                                   int scaled_src_size,
+                                  float zoom, float align, float pan,
                                   int *src_start, int *src_end,
                                   int *dst_start, int *dst_end,
                                   int *osd_margin_a, int *osd_margin_b)
 {
+    scaled_src_size += zoom * src_size;
+    align = (align + 1) / 2;
+
     *src_start = 0;
     *src_end = src_size;
-    *dst_start = (dst_size - scaled_src_size) / 2;
+    *dst_start = (dst_size - scaled_src_size) * align + pan * scaled_src_size;
     *dst_end = *dst_start + scaled_src_size;
 
     // Distance of screen frame to video
@@ -543,9 +547,11 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
         int scaled_width, scaled_height;
         aspect_calc_panscan(vo, &scaled_width, &scaled_height);
         src_dst_split_scaling(src_w, vo->dwidth, scaled_width,
+                              opts->zoom, opts->align_x, opts->pan_x,
                               &src.x0, &src.x1, &dst.x0, &dst.x1,
                               &osd.ml, &osd.mr);
         src_dst_split_scaling(src_h, vo->dheight, scaled_height,
+                              opts->zoom, opts->align_y, opts->pan_y,
                               &src.y0, &src.y1, &dst.y0, &dst.y1,
                               &osd.mt, &osd.mb);
     }

@@ -452,6 +452,11 @@ Name                            W Comment
 ``aspect``                      x video aspect
 ``vid``                         x current video track (similar to ``--vid``)
 ``video``                       x alias for ``vid``
+``video-align-x``               x see ``--video-align-x``
+``video-align-y``               x see ``--video-align-y``
+``video-pan-x``                 x see ``--video-pan-x``
+``video-pan-y``                 x see ``--video-pan-y``
+``video-zoom``                  x see ``--video-zoom``
 ``program``                     x switch TS program (write-only)
 ``sid``                         x current subtitle track (similar to ``--sid``)
 ``sub``                         x alias for ``sid``

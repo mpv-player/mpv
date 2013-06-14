@@ -2458,6 +2458,39 @@
 ``--vid=<ID|auto|no>``
     Select video channel. ``auto`` selects the default, ``no`` disables video.
 
+``--video-align-x=<-1-1>``, ``--video-align-y=<-1-1>``
+    Moves the video rectangle within the black borders, which are usually added
+    to pad the video to screen if video and screen aspect ratios are different.
+    ``--video-align-y=-1`` would move the video to the top of the screen
+    (leaving a border only on the bottom), a value of ``0`` centers it
+    (default), and a value of ``-1`` would put the video at the bottom of the
+    screen.
+
+    If video and screen aspect match perfectly, these options do nothing.
+
+    This option is disabled if the ``--no-keepaspect`` option is used.
+
+``--video-pan-x=<value>``, ``--video-pan-y=<value>``
+    Moves the displayed video rectangle by the given value in the X or Y
+    direction. The unit is in fractions of the size of the scaled video (the
+    full size, even if parts of the video are not visible due to panscan or
+    other options).
+
+    For example, displaying a 1280x720 video fullscreen on a 1680x1050 screen
+    with ``--video-pan-x=-0.1`` would move the video 168 pixels to the left
+    (making 128 pixels of the source video invisible).
+
+    This option is disabled if the ``--no-keepaspect`` option is used.
+
+``--video-zoom=<value>``
+    Adjust the video display scale factor by the given value. The unit is in
+    fractions of original video size.
+
+    For example, given a 1280x720 video, ``--video-zoom=-0.1`` would make the
+    video by 128 pixels smaller in X direction, and 72 pixels in Y direction.
+
+    This option is disabled if the ``--no-keepaspect`` option is used.
+
 ``--vo=<driver1[:suboption1[=value]:...],driver2,...[,]>``
     Specify a priority list of video output drivers to be used. For
     interactive use, one would normally specify a single one to use, but in
