@@ -1485,14 +1485,6 @@
     controls how much of the image is cropped. May not work with all video
     output drivers.
 
-``--panscanrange=<-19.0-99.0>``
-    (experimental)
-    Change the range of the pan-and-scan functionality (default: 1). Positive
-    values mean multiples of the default range. Negative numbers mean you can
-    zoom in up to a factor of ``--panscanrange=+1``. E.g. ``--panscanrange=-3``
-    allows a zoom factor of up to 4. This feature is experimental. Do not
-    report bugs unless you are using ``--vo=opengl``.
-
 ``--playing-msg=<string>``
     Print out a string after starting playback. The string is expanded for
     properties, e.g. ``--playing-msg=file: ${filename}`` will print the string

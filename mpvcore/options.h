@@ -19,7 +19,6 @@ typedef struct mp_vo_opts {
     int native_keyrepeat;
 
     float panscan;
-    float panscanrange;
 
     struct m_geometry geometry;
     struct m_geometry autofit;
