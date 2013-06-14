@@ -230,11 +230,13 @@ reinit:
     LeaveCriticalSection(&state->buffer_lock);
     state->hTask = state->VistaBlob.pAvSetMmThreadCharacteristicsW(L"Pro Audio",
                    &state->taskIndex);
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: fix_format OK at %lld!\n",
+    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: fix_format OK at %lld buffer block size!\n",
            state->buffer_block_size);
     return 0;
 exit_label:
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: fix_format fails with %lx!\n", hr);
+    mp_msg(MSGT_AO, MSGL_V,
+           "ao-wasapi: fix_format fails with %lx, failed to determine buffer block size!\n",
+           hr);
     LeaveCriticalSection(&state->buffer_lock);
     SetEvent(state->fatal_error);
     return 1;
@@ -309,14 +311,13 @@ static void thread_feed(wasapi0_state *state)
         hr = IAudioRenderClient_ReleaseBuffer(state->pRenderClient,
                                               state->bufferFrameCount, AUDCLNT_BUFFERFLAGS_SILENT);
         EXIT_ON_ERROR(hr)
-        goto exit_label;
     }
     hr = IAudioRenderClient_ReleaseBuffer(state->pRenderClient,
                                           state->bufferFrameCount, 0);
     EXIT_ON_ERROR(hr)
     return;
 exit_label:
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: thread_feed fails with %lx!\n", hr);
+    mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_feed fails with %lx!\n", hr);
     return;
 }
 
@@ -541,7 +542,6 @@ static int init(struct ao *ao, char *params)
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
-    if(!ao || !ao->priv || !arg) return -1;
     struct wasapi0_state* state = (struct wasapi0_state *)ao->priv;
     if(!(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_VOLUME))
         return CONTROL_UNKNOWN; /* hw does not support volume controls in exclusive mode */
