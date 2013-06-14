@@ -466,25 +466,53 @@ static void print_video_rect(struct vo *vo, struct mp_rect src,
            dst.x0, dst.y0, vo->dwidth - dst.x1, vo->dheight - dst.y1);
 }
 
-static void src_dst_split_scaling(int src_size, int dst_size,
-                                  int scaled_src_size, int *src_start,
-                                  int *src_end, int *dst_start, int *dst_end)
+// Clamp [start, end) to range [0, size) with various fallbacks.
+static void clamp_size(int size, int *start, int *end)
 {
-    if (scaled_src_size > dst_size) {
-        int border = src_size * (scaled_src_size - dst_size) / scaled_src_size;
-        // round to a multiple of 2, this is at least needed for vo_direct3d
-        // and ATI cards
-        border = (border / 2 + 1) & ~1;
-        *src_start = border;
-        *src_end   = src_size - border;
-        *dst_start = 0;
-        *dst_end   = dst_size;
-    } else {
-        *src_start = 0;
-        *src_end   = src_size;
-        *dst_start = (dst_size - scaled_src_size) / 2;
-        *dst_end   = *dst_start + scaled_src_size;
+    *start = FFMAX(0, *start);
+    *end = FFMIN(size, *end);
+    if (*start >= *end) {
+        *start = 0;
+        *end = 1;
     }
+}
+
+// Round source to a multiple of 2, this is at least needed for vo_direct3d
+// and ATI cards.
+#define VID_SRC_ROUND_UP(x) (((x) + 1) & ~1)
+
+static void src_dst_split_scaling(int src_size, int dst_size,
+                                  int scaled_src_size,
+                                  int *src_start, int *src_end,
+                                  int *dst_start, int *dst_end,
+                                  int *osd_margin_a, int *osd_margin_b)
+{
+    *src_start = 0;
+    *src_end = src_size;
+    *dst_start = (dst_size - scaled_src_size) / 2;
+    *dst_end = *dst_start + scaled_src_size;
+
+    // Distance of screen frame to video
+    *osd_margin_a = *dst_start;
+    *osd_margin_b = dst_size - *dst_end;
+
+    // Clip to screen
+    int s_src = *src_end - *src_start;
+    int s_dst = *dst_end - *dst_start;
+    if (*dst_start < 0) {
+        int border = -(*dst_start) * s_src / s_dst;
+        *src_start += VID_SRC_ROUND_UP(border);
+        *dst_start = 0;
+    }
+    if (*dst_end > dst_size) {
+        int border = (*dst_end - dst_size) * s_src / s_dst;
+        *src_end -= VID_SRC_ROUND_UP(border);
+        *dst_end = dst_size;
+    }
+
+    // For sanity: avoid bothering VOs with corner cases
+    clamp_size(src_size, src_start, src_end);
+    clamp_size(dst_size, dst_start, dst_end);
 }
 
 // Calculate the appropriate source and destination rectangle to
@@ -495,6 +523,7 @@ static void src_dst_split_scaling(int src_size, int dst_size,
 void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
                           struct mp_rect *out_dst, struct mp_osd_res *out_osd)
 {
+    struct mp_vo_opts *opts = vo->opts;
     int src_w = vo->aspdat.orgw;
     int src_h = vo->aspdat.orgh;
     struct mp_rect dst = {0, 0, vo->dwidth, vo->dheight};
@@ -505,19 +534,15 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
         .display_par = vo->aspdat.monitor_par,
         .video_par = vo->aspdat.par,
     };
-    if (vo->opts->keepaspect) {
+    if (opts->keepaspect) {
         int scaled_width, scaled_height;
         aspect_calc_panscan(vo, &scaled_width, &scaled_height);
-        int border_w = vo->dwidth  - scaled_width;
-        int border_h = vo->dheight - scaled_height;
-        osd.ml = border_w / 2;
-        osd.mt = border_h / 2;
-        osd.mr = border_w - osd.ml;
-        osd.mb = border_h - osd.mt;
         src_dst_split_scaling(src_w, vo->dwidth, scaled_width,
-                              &src.x0, &src.x1, &dst.x0, &dst.x1);
+                              &src.x0, &src.x1, &dst.x0, &dst.x1,
+                              &osd.ml, &osd.mr);
         src_dst_split_scaling(src_h, vo->dheight, scaled_height,
-                              &src.y0, &src.y1, &dst.y0, &dst.y1);
+                              &src.y0, &src.y1, &dst.y0, &dst.y1,
+                              &osd.mt, &osd.mb);
     }
 
     *out_src = src;
