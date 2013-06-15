@@ -474,6 +474,13 @@ static void add_new_streams(demuxer_t *demuxer)
         handle_stream(demuxer, priv->num_streams);
 }
 
+static void add_metadata(demuxer_t *demuxer, AVDictionary *metadata)
+{
+    AVDictionaryEntry *t = NULL;
+    while ((t = av_dict_get(metadata, "", t, AV_DICT_IGNORE_SUFFIX)))
+        demux_info_add(demuxer, t->key, t->value);
+}
+
 static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
 {
     struct MPOpts *opts = demuxer->opts;
@@ -561,11 +568,6 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     mp_msg(MSGT_HEADER, MSGL_V, "demux_lavf: avformat_find_stream_info() "
            "finished after %"PRId64" bytes.\n", stream_tell(demuxer->stream));
 
-    /* Add metadata. */
-    while ((t = av_dict_get(avfc->metadata, "", t,
-                            AV_DICT_IGNORE_SUFFIX)))
-        demux_info_add(demuxer, t->key, t->value);
-
     for (i = 0; i < avfc->nb_chapters; i++) {
         AVChapter *c = avfc->chapters[i];
         uint64_t start = av_rescale_q(c->start, c->time_base,
@@ -578,6 +580,17 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     }
 
     add_new_streams(demuxer);
+
+    add_metadata(demuxer, avfc->metadata);
+
+    // Often useful with OGG audio-only files, which have metadata in the audio
+    // track metadata instead of the main metadata.
+    if (demuxer->num_streams == 1) {
+        for (int n = 0; n < priv->num_streams; n++) {
+            if (priv->streams[n])
+                add_metadata(demuxer, avfc->streams[n]->metadata);
+        }
+    }
 
     if (avfc->nb_programs) {
         int p;
