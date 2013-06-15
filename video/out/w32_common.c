@@ -570,12 +570,10 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
  */
 int vo_w32_init(struct vo *vo)
 {
-    struct vo_w32_state *w32 = vo->w32;
-    if (w32 && w32->window)
-        return 1;
+    assert(!vo->w32);
 
-    if (!w32)
-        w32 = vo->w32 = talloc_zero(vo, struct vo_w32_state);
+    struct vo_w32_state *w32 = talloc_zero(vo, struct vo_w32_state);
+    vo->w32 = w32;
 
     HINSTANCE hInstance = GetModuleHandleW(NULL);
 
