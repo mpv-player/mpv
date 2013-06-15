@@ -110,8 +110,8 @@ struct voctrl_screenshot_args {
     bool has_osd;
 };
 
-#define VO_TRUE		1
-#define VO_FALSE	0
+#define VO_TRUE         true
+#define VO_FALSE        false
 #define VO_ERROR	-1
 #define VO_NOTAVAIL	-2
 #define VO_NOTIMPL	-3
