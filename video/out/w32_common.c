@@ -700,12 +700,13 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
         } else {
             while (ShowCursor(0) >= 0) { }
         }
+        return VO_TRUE;
     case VOCTRL_KILL_SCREENSAVER:
         w32->disable_screensaver = true;
-        break;
+        return VO_TRUE;
     case VOCTRL_RESTORE_SCREENSAVER:
         w32->disable_screensaver = false;
-        break;
+        return VO_TRUE;
     }
     return VO_NOTIMPL;
 }
