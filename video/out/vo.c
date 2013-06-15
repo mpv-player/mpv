@@ -26,6 +26,8 @@
 
 #include <unistd.h>
 
+#include <libavutil/common.h>
+
 #include "talloc.h"
 
 #include "config.h"
