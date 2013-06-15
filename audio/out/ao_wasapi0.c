@@ -71,6 +71,9 @@ typedef struct wasapi0_state {
     DWORD vol_hw_support, status;
     float audio_volume;
 
+    /* Prints, for in case line buffers are disabled */
+    CRITICAL_SECTION print_lock;
+
     /* Buffers */
     CRITICAL_SECTION buffer_lock;
     size_t buffer_block_size; /* Size of each block in bytes */
@@ -130,6 +133,78 @@ exit_label:
     return 1;
 }
 
+static const char *explain_err(const HRESULT hr)
+{
+    switch(hr) {
+    case S_OK:
+        return "S_OK";
+    case AUDCLNT_E_NOT_INITIALIZED:
+        return "AUDCLNT_E_NOT_INITIALIZED";
+    case AUDCLNT_E_ALREADY_INITIALIZED:
+        return "AUDCLNT_E_ALREADY_INITIALIZED";
+    case AUDCLNT_E_WRONG_ENDPOINT_TYPE:
+        return "AUDCLNT_E_WRONG_ENDPOINT_TYPE";
+    case AUDCLNT_E_DEVICE_INVALIDATED:
+        return "AUDCLNT_E_DEVICE_INVALIDATED";
+    case AUDCLNT_E_NOT_STOPPED:
+        return "AUDCLNT_E_NOT_STOPPED";
+    case AUDCLNT_E_BUFFER_TOO_LARGE:
+        return "AUDCLNT_E_BUFFER_TOO_LARGE";
+    case AUDCLNT_E_OUT_OF_ORDER:
+        return "AUDCLNT_E_OUT_OF_ORDER";
+    case AUDCLNT_E_UNSUPPORTED_FORMAT:
+        return "AUDCLNT_E_UNSUPPORTED_FORMAT";
+    case AUDCLNT_E_INVALID_SIZE:
+        return "AUDCLNT_E_INVALID_SIZE";
+    case AUDCLNT_E_DEVICE_IN_USE:
+        return "AUDCLNT_E_DEVICE_IN_USE";
+    case AUDCLNT_E_BUFFER_OPERATION_PENDING:
+        return "AUDCLNT_E_BUFFER_OPERATION_PENDING";
+    case AUDCLNT_E_THREAD_NOT_REGISTERED:
+        return "AUDCLNT_E_THREAD_NOT_REGISTERED";
+    case AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED:
+        return "AUDCLNT_E_EXCLUSIVE_MODE_NOT_ALLOWED";
+    case AUDCLNT_E_ENDPOINT_CREATE_FAILED:
+        return "AUDCLNT_E_ENDPOINT_CREATE_FAILED";
+    case AUDCLNT_E_SERVICE_NOT_RUNNING:
+        return "AUDCLNT_E_SERVICE_NOT_RUNNING";
+    case AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED:
+        return "AUDCLNT_E_EVENTHANDLE_NOT_EXPECTED";
+    case AUDCLNT_E_EXCLUSIVE_MODE_ONLY:
+        return "AUDCLNT_E_EXCLUSIVE_MODE_ONLY";
+    case AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL:
+        return "AUDCLNT_E_BUFDURATION_PERIOD_NOT_EQUAL";
+    case AUDCLNT_E_EVENTHANDLE_NOT_SET:
+        return "AUDCLNT_E_EVENTHANDLE_NOT_SET";
+    case AUDCLNT_E_INCORRECT_BUFFER_SIZE:
+        return "AUDCLNT_E_INCORRECT_BUFFER_SIZE";
+    case AUDCLNT_E_BUFFER_SIZE_ERROR:
+        return "AUDCLNT_E_BUFFER_SIZE_ERROR";
+    case AUDCLNT_E_CPUUSAGE_EXCEEDED:
+        return "AUDCLNT_E_CPUUSAGE_EXCEEDED";
+    case AUDCLNT_E_BUFFER_ERROR:
+        return "AUDCLNT_E_BUFFER_ERROR";
+    case AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED:
+        return "AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED";
+    case AUDCLNT_E_INVALID_DEVICE_PERIOD:
+        return "AUDCLNT_E_INVALID_DEVICE_PERIOD";
+    case AUDCLNT_E_INVALID_STREAM_FLAG:
+        return "AUDCLNT_E_INVALID_STREAM_FLAG";
+    case AUDCLNT_E_ENDPOINT_OFFLOAD_NOT_CAPABLE:
+        return "AUDCLNT_E_ENDPOINT_OFFLOAD_NOT_CAPABLE";
+    case AUDCLNT_E_RESOURCES_INVALIDATED:
+        return "AUDCLNT_E_RESOURCES_INVALIDATED";
+    case AUDCLNT_S_BUFFER_EMPTY:
+        return "AUDCLNT_S_BUFFER_EMPTY";
+    case AUDCLNT_S_THREAD_ALREADY_REGISTERED:
+        return "AUDCLNT_S_THREAD_ALREADY_REGISTERED";
+    case AUDCLNT_S_POSITION_STALLED:
+        return "AUDCLNT_S_POSITION_STALLED";
+    default:
+        return "<Unknown>";
+    }
+}
+
 static int enum_formats(struct ao * const ao)
 {
     WAVEFORMATEXTENSIBLE wformat;
@@ -137,9 +212,23 @@ static int enum_formats(struct ao * const ao)
     int bytes_per_sample;
     if(!ao || !ao->priv ) return -1;
     struct wasapi0_state* state = (struct wasapi0_state *)ao->priv;
+    int retry_with_stereo = 0;
 
-    bytes_per_sample = af_fmt2bits(ao->format)/8;
-    mp_msg(MSGT_AO, MSGL_V,"samplerate %d\n", ao->samplerate);
+    /* as far as testing shows, only PCM 16/24LE (44100Hz - 192kHz) is supported
+     * Tested on Realtek High Definition Audio, (Realtek Semiconductor Corp. 6.0.1.6312)
+     * Drivers dated 2/18/2011
+     */
+    switch(ao->format) {
+    case AF_FORMAT_S24_LE:
+        bytes_per_sample = 3;
+        break;
+    case AF_FORMAT_S16_LE:
+        bytes_per_sample = 2;
+        break;
+    default:
+        bytes_per_sample = 0;/* unsupported, fail it */
+    }
+
     wformat.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE; /* Only PCM is supported */
     wformat.Format.nChannels = ao->channels.num;
     wformat.Format.nSamplesPerSec = ao->samplerate;
@@ -157,9 +246,13 @@ static int enum_formats(struct ao * const ao)
         state->format = wformat;
         ao->bps = wformat.Format.nAvgBytesPerSec;
         return 0;
-    } else { /* Try default, 16bit @ 44.1kHz stereo */
-        mp_chmap_from_channels(&ao->channels, 2);
-        wformat.Format.nChannels = 2;
+    } else { /* Try default, 16bit @ 44.1kHz */
+        EnterCriticalSection(&state->print_lock);
+        mp_msg(MSGT_AO, MSGL_ERR,
+               "IAudioClient::IsFormatSupported failed with %s, trying 16LE at 44100Hz\n",
+               explain_err(hr));
+        LeaveCriticalSection(&state->print_lock);
+retry_stereo:
         bytes_per_sample = 2;
         wformat.Format.nSamplesPerSec = 44100;
         wformat.Format.nAvgBytesPerSec = wformat.Format.nChannels * bytes_per_sample *
@@ -175,10 +268,28 @@ static int enum_formats(struct ao * const ao)
             ao->format = AF_FORMAT_S16_LE;
             state->format = wformat;
             return 0;
+            /* Poor quality hardware? Try stereo mode */
+        } else if(!retry_with_stereo) {
+            EnterCriticalSection(&state->print_lock);
+            mp_msg(MSGT_AO, MSGL_ERR,
+                   "IAudioClient::IsFormatSupported failed with %s, trying Stereo\n",
+                   explain_err(hr));
+            LeaveCriticalSection(&state->print_lock);
+            retry_with_stereo = 1;
+            mp_chmap_from_channels(&ao->channels, 2);
+            struct mp_chmap_sel sel = {0};
+            mp_chmap_sel_add_waveext(&sel);
+            if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+                return -1;
+            wformat.Format.nChannels = 2;
+            wformat.dwChannelMask = mp_chmap_to_waveext(&ao->channels);
+            goto retry_stereo;
         }
     }
-    mp_msg(MSGT_AO, MSGL_ERR, "IAudioClient::IsFormatSupported failed with %lx\n",
-           hr);
+    EnterCriticalSection(&state->print_lock);
+    mp_msg(MSGT_AO, MSGL_ERR, "IAudioClient::IsFormatSupported failed with %s\n",
+           explain_err(hr));
+    LeaveCriticalSection(&state->print_lock);
     return -1;
 }
 
@@ -230,13 +341,17 @@ reinit:
     LeaveCriticalSection(&state->buffer_lock);
     state->hTask = state->VistaBlob.pAvSetMmThreadCharacteristicsW(L"Pro Audio",
                    &state->taskIndex);
+    EnterCriticalSection(&state->print_lock);
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: fix_format OK at %lld buffer block size!\n",
            state->buffer_block_size);
+    LeaveCriticalSection(&state->print_lock);
     return 0;
 exit_label:
+    EnterCriticalSection(&state->print_lock);
     mp_msg(MSGT_AO, MSGL_V,
            "ao-wasapi: fix_format fails with %lx, failed to determine buffer block size!\n",
            hr);
+    LeaveCriticalSection(&state->print_lock);
     LeaveCriticalSection(&state->buffer_lock);
     SetEvent(state->fatal_error);
     return 1;
@@ -270,11 +385,15 @@ static int thread_init(struct ao *ao)
     state->init_ret = enum_formats(ao); /* Probe support formats */
     if(state->init_ret) goto exit_label;
     fix_format(state); /* now that we're sure what format to use */
+    EnterCriticalSection(&state->print_lock);
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: thread_init OK!\n");
+    LeaveCriticalSection(&state->print_lock);
     SetEvent(state->init_done);
     return state->init_ret;
 exit_label:
+    EnterCriticalSection(&state->print_lock);
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: thread_init fails!\n");
+    LeaveCriticalSection(&state->print_lock);
     state->init_ret = -1;
     SetEvent(state->init_done);
     return -1;
@@ -317,7 +436,9 @@ static void thread_feed(wasapi0_state *state)
     EXIT_ON_ERROR(hr)
     return;
 exit_label:
+    EnterCriticalSection(&state->print_lock);
     mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_feed fails with %lx!\n", hr);
+    LeaveCriticalSection(&state->print_lock);
     return;
 }
 
@@ -373,7 +494,9 @@ static unsigned int __stdcall ThreadLoop(void *lpParameter)
     if(!ao || !ao->priv ) return -1;
     struct wasapi0_state* state = (struct wasapi0_state *)ao->priv;
     if(thread_init(ao)) {
+        EnterCriticalSection(&state->print_lock);
         mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_init failed!\n");
+        LeaveCriticalSection(&state->print_lock);
         goto exit_label;
     }
 
@@ -381,8 +504,9 @@ static unsigned int __stdcall ThreadLoop(void *lpParameter)
     HANDLE playcontrol[] = {state->hUninit,state->hPause,state->hReset,
                             state->hGetvol, state->hSetvol, state->hPlay, state->hFeed,NULL
                            };
-
+    EnterCriticalSection(&state->print_lock);
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: Entering dispatch loop!\n");
+    LeaveCriticalSection(&state->print_lock);
     while(1) { /* watch events, poll at least every 2 seconds */
         waitstatus = WaitForMultipleObjects(7,playcontrol,FALSE,2000);
         switch(waitstatus) {
@@ -450,6 +574,7 @@ static void uninit(struct ao *ao, bool immed)
     if(state->VistaBlob.hAvrt)
         FreeLibrary(state->VistaBlob.hAvrt);
     DeleteCriticalSection(&state->buffer_lock);
+    DeleteCriticalSection(&state->print_lock);
     ao->priv = NULL;
 }
 
@@ -518,6 +643,7 @@ static int init(struct ao *ao, char *params)
     state->fatal_error = CreateEventW(NULL,TRUE,FALSE,NULL);
     state->hFeed = CreateEvent(NULL,FALSE,FALSE,NULL); /* for wasapi event mode */
     InitializeCriticalSection(&state->buffer_lock);
+    InitializeCriticalSection(&state->print_lock);
     if(!state->init_done || !state->fatal_error || !state->hPlay || !state->hPause
             || !state->hFeed || !state->hReset || !state->hGetvol || !state->hSetvol
             || !state->hDoneVol) {
@@ -644,7 +770,7 @@ const struct ao_driver audio_out_wasapi0 = {
         "Windows WASAPI audio output (event mode)",
         "wasapi0",
         "Jonathan Yong <10walls@gmail.com>",
-        "0.2 Beta"
+        ""
     },
     .init      = init,
     .uninit    = uninit,
