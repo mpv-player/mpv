@@ -1791,6 +1791,12 @@
     to write a screenshot. Too high compression might occupy enough CPU time to
     interrupt playback. The default is 7.
 
+--screenshot-png-filter=<0-5>
+    Set the filter applied prior to PNG compression. 0 is none, 1 is "sub", 2 is
+    "up", 3 is "average", 4 is "Paeth", and 5 is "mixed". This affects the level
+    of compression that can be achieved. For most images, "mixed" achieves the
+    best compression ratio, hence it is the default.
+
 --screenshot-template=<template>
     Specify the filename template used to save screenshots. The template
     specifies the filename without file extension, and can contain format

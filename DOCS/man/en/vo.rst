@@ -708,6 +708,9 @@ image
 
     png-compression=<0-9>
         PNG compression factor (speed vs. file size tradeoff) (default: 7)
+    png-filter=<0-5>
+        Filter applied prior to PNG compression (0 = none; 1 = sub; 2 = up;
+        3 = average; 4 = Paeth; 5 = mixed) (default: 5)
     jpeg-quality=<0-100>
         JPEG quality factor (default: 90)
     [no-]jpeg-progressive

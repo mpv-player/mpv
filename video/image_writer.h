@@ -21,6 +21,7 @@ struct mp_csp_details;
 struct image_writer_opts {
     char *format;
     int png_compression;
+    int png_filter;
     int jpeg_quality;
     int jpeg_optimize;
     int jpeg_smooth;
