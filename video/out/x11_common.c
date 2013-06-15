@@ -915,6 +915,9 @@ static void vo_x11_update_window_title(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
 
+    if (!x11->window)
+        return;
+
     const char *title = vo_get_window_title(vo);
     vo_x11_set_property_string(vo, XA_WM_NAME, title);
     vo_x11_set_property_string(vo, XA_WM_ICON_NAME, title);
@@ -970,6 +973,8 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis, int x, int y,
                          XNClientWindow, x11->window,
                          XNFocusWindow, x11->window,
                          NULL);
+
+    vo_x11_update_window_title(vo);
 }
 
 static void vo_x11_map_window(struct vo *vo, int x, int y, int w, int h)
@@ -1022,7 +1027,6 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     if (flags & VOFLAG_HIDDEN)
         return;
 
-    vo_x11_update_window_title(vo);
     if (opts->ontop)
         vo_x11_setlayer(vo, x11->window, opts->ontop);
 
@@ -1395,6 +1399,9 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_RESTORE_SCREENSAVER:
         saver_on(x11);
+        return VO_TRUE;
+    case VOCTRL_UPDATE_WINDOW_TITLE:
+        vo_x11_update_window_title(vo);
         return VO_TRUE;
     }
     return VO_NOTIMPL;

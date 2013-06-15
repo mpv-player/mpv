@@ -60,6 +60,7 @@ enum mp_voctrl {
 
     VOCTRL_ONTOP,
     VOCTRL_BORDER,
+    VOCTRL_UPDATE_WINDOW_TITLE,         // char*
 
     VOCTRL_SET_CURSOR_VISIBILITY,       // bool
 

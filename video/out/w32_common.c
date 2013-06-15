@@ -407,10 +407,6 @@ static int reinit_window_state(struct vo *vo)
     if (vo->opts->WinID >= 0)
         return 1;
 
-    wchar_t *title = mp_from_utf8(NULL, vo_get_window_title(vo));
-    SetWindowTextW(w32->window, title);
-    talloc_free(title);
-
     bool toggle_fs = w32->current_fs != vo->opts->fs;
     w32->current_fs = vo->opts->fs;
 
@@ -705,6 +701,12 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_RESTORE_SCREENSAVER:
         w32->disable_screensaver = false;
         return VO_TRUE;
+    case VOCTRL_UPDATE_WINDOW_TITLE: {
+        wchar_t *title = mp_from_utf8(NULL, (char *)arg);
+        SetWindowTextW(w32->window, title);
+        talloc_free(title);
+        return VO_TRUE;
+    }
     }
     return VO_NOTIMPL;
 }
