@@ -279,7 +279,6 @@ static int init(struct ao *ao, char *params)
         goto err_out;
 
     ao->format = AF_FORMAT_FLOAT_NE;
-    ao->bps = ao->channels.num * ao->samplerate * sizeof(float);
     int unitsize = ao->channels.num * sizeof(float);
     ao->outburst = CHUNK_SIZE / unitsize * unitsize;
     ao->buffersize = NUM_CHUNKS * ao->outburst;

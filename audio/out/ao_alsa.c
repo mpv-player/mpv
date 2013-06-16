@@ -560,7 +560,6 @@ static int init(struct ao *ao, char *params)
 
     p->bytes_per_sample = af_fmt2bits(ao->format) / 8;
     p->bytes_per_sample *= ao->channels.num;
-    ao->bps = ao->samplerate * p->bytes_per_sample;
 
     err = snd_pcm_hw_params_set_buffer_time_near
             (p->alsa, alsa_hwparams, &(unsigned int){BUFFER_TIME}, NULL);

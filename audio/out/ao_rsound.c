@@ -140,8 +140,6 @@ static int init(struct ao *ao, char *params)
         return -1;
     }
 
-    ao->bps = ao->channels.num * ao->samplerate * af_fmt2bits(ao->format) / 8;
-
     return 0;
 }
 

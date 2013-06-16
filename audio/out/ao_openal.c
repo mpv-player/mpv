@@ -188,7 +188,6 @@ static int init(struct ao *ao, char *params)
     if (alcGetError(dev) == ALC_NO_ERROR && freq)
         ao->samplerate = freq;
     ao->format = AF_FORMAT_S16_NE;
-    ao->bps = ao->channels.num * ao->samplerate * 2;
     ao->buffersize = CHUNK_SIZE * NUM_BUF;
     ao->outburst = ao->channels.num * CHUNK_SIZE;
     tmpbuf = malloc(CHUNK_SIZE);

@@ -285,7 +285,6 @@ out_takefirst:
     ao->outburst =
         ac->aframesize * ac->sample_size * ao->channels.num * ac->framecount;
     ao->buffersize = ao->outburst * 2;
-    ao->bps = ao->channels.num * ao->samplerate * ac->sample_size;
     ao->untimed = true;
     ao->priv = ac;
 

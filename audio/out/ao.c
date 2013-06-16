@@ -25,6 +25,7 @@
 
 #include "config.h"
 #include "ao.h"
+#include "audio/format.h"
 
 #include "core/mp_msg.h"
 
@@ -115,7 +116,11 @@ static bool ao_try_init(struct ao *ao, char *params)
 {
     if (ao->driver->encode != !!ao->encode_lavc_ctx)
         return false;
-    return ao->driver->init(ao, params) >= 0;
+    if (ao->driver->init(ao, params) < 0)
+        return false;
+    ao->bps = ao->channels.num * ao->samplerate * af_fmt2bits(ao->format) / 8;
+    ao->initialized = true;
+    return true;
 }
 
 void ao_init(struct ao *ao, char **ao_list)
@@ -156,11 +161,8 @@ void ao_init(struct ao *ao, char **ao_list)
         if (audio_out) {
             // name matches, try it
             ao->driver = audio_out;
-            if (ao_try_init(ao, params)) {
-                ao->driver = audio_out;
-                ao->initialized = true;
+            if (ao_try_init(ao, params))
                 return;
-            }
             mp_tmsg(MSGT_AO, MSGL_WARN,
                     "Failed to initialize audio driver '%s'\n", ao_name);
             talloc_free_children(ao);
@@ -182,11 +184,8 @@ void ao_init(struct ao *ao, char **ao_list)
         const struct ao_driver *audio_out = audio_out_drivers[i];
         ao->driver = audio_out;
         ao->probing = true;
-        if (ao_try_init(ao, NULL)) {
-            ao->initialized = true;
-            ao->driver = audio_out;
+        if (ao_try_init(ao, NULL))
             return;
-        }
         talloc_free_children(ao);
         *ao = backup;
     }
