@@ -127,14 +127,4 @@ bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
 bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
                           struct mp_chmap *map, int num);
 
-int old_ao_control(struct ao *ao, enum aocontrol cmd, void *arg);
-int old_ao_init(struct ao *ao, char *params);
-void old_ao_uninit(struct ao *ao, bool cut_audio);
-void old_ao_reset(struct ao*ao);
-int old_ao_get_space(struct ao *ao);
-int old_ao_play(struct ao *ao, void *data, int len, int flags);
-float old_ao_get_delay(struct ao *ao);
-void old_ao_pause(struct ao *ao);
-void old_ao_resume(struct ao *ao);
-
 #endif /* MPLAYER_AUDIO_OUT_H */
