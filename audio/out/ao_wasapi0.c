@@ -562,22 +562,6 @@ static void closehandles(struct ao *ao)
     if(state->hDoneVol) CloseHandle(state->hDoneVol);
 }
 
-static void uninit(struct ao *ao, bool immed)
-{
-    struct wasapi0_state* state = (struct wasapi0_state *)ao->priv;
-    state->immed = immed;
-    SetEvent(state->hUninit);
-    /* wait up to 10 seconds */
-    if(WaitForSingleObject(state->threadLoop, 10000) == WAIT_TIMEOUT) {
-        SetEvent(state->fatal_error);
-    }
-    if(state->VistaBlob.hAvrt)
-        FreeLibrary(state->VistaBlob.hAvrt);
-    DeleteCriticalSection(&state->buffer_lock);
-    DeleteCriticalSection(&state->print_lock);
-    ao->priv = NULL;
-}
-
 static int get_space(struct ao *ao)
 {
     int ret = 0;
@@ -625,10 +609,28 @@ static int setup_buffers(struct wasapi0_state* state)
     return 0;
 }
 
+static void uninit(struct ao *ao, bool immed)
+{
+    struct wasapi0_state* state = (struct wasapi0_state *)ao->priv;
+    state->immed = immed;
+    SetEvent(state->hUninit);
+    /* wait up to 10 seconds */
+    if(WaitForSingleObject(state->threadLoop, 10000) == WAIT_TIMEOUT) {
+        SetEvent(state->fatal_error);
+    }
+    if(state->VistaBlob.hAvrt)
+        FreeLibrary(state->VistaBlob.hAvrt);
+    free_buffers(state);
+    DeleteCriticalSection(&state->buffer_lock);
+    DeleteCriticalSection(&state->print_lock);
+    talloc_free(ao);
+    ao->priv = NULL;
+}
+
 static int init(struct ao *ao, char *params)
 {
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi0: init!\n");
-    struct wasapi0_state *state = calloc(1, sizeof(struct wasapi0_state));
+    struct wasapi0_state *state = talloc_zero(ao, struct wasapi0_state);
     if(!state) return -1;
     ao->priv = (void *)state;
     fill_VistaBlob(state);
