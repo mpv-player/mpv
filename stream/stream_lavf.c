@@ -60,7 +60,6 @@ static int seek(stream_t *s, int64_t newpos)
         return -1;
     s->pos = newpos;
     if (avio_seek(avio, s->pos, SEEK_SET) < 0) {
-        s->eof = 1;
         return 0;
     }
     return 1;

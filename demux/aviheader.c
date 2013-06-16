@@ -479,7 +479,6 @@ if (priv->isodml && (index_mode==-1 || index_mode==0 || index_mode==1)) {
 
     // read the standard indices
     for (cx = &priv->suidx[0], i=0; i<priv->suidx_size; cx++, i++) {
-	stream_reset(demuxer->stream);
 	for (j=0; j<cx->nEntriesInUse; j++) {
 	    int ret1, ret2;
 	    memset(&cx->stdidx[j], 0, 32);
@@ -543,7 +542,6 @@ if (priv->isodml && (index_mode==-1 || index_mode==0 || index_mode==1)) {
     {
 	uint32_t id;
 	uint32_t db = 0;
-	stream_reset (demuxer->stream);
 
 	// find out the video stream id. I have seen files with 01db.
 	for (idx = &((AVIINDEXENTRY *)priv->idx)[0], i=0; i<priv->idx_size; i++, idx++){
@@ -590,7 +588,6 @@ freeout:
 if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
   int idx_pos = 0;
   // build index for file:
-  stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,demuxer->movi_start);
 
   priv->idx_size=0;

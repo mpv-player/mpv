@@ -25,6 +25,7 @@
 
 #include "config.h"
 #include "ao.h"
+#include "audio/format.h"
 
 #include "core/mp_msg.h"
 
@@ -106,8 +107,7 @@ void list_audio_out(void)
 struct ao *ao_create(struct MPOpts *opts, struct input_ctx *input)
 {
     struct ao *r = talloc(NULL, struct ao);
-    *r = (struct ao){.outburst = 512, .buffersize = -1,
-                     .opts = opts, .input_ctx = input };
+    *r = (struct ao){.opts = opts, .input_ctx = input };
     return r;
 }
 
@@ -115,7 +115,11 @@ static bool ao_try_init(struct ao *ao, char *params)
 {
     if (ao->driver->encode != !!ao->encode_lavc_ctx)
         return false;
-    return ao->driver->init(ao, params) >= 0;
+    if (ao->driver->init(ao, params) < 0)
+        return false;
+    ao->bps = ao->channels.num * ao->samplerate * af_fmt2bits(ao->format) / 8;
+    ao->initialized = true;
+    return true;
 }
 
 void ao_init(struct ao *ao, char **ao_list)
@@ -156,11 +160,8 @@ void ao_init(struct ao *ao, char **ao_list)
         if (audio_out) {
             // name matches, try it
             ao->driver = audio_out;
-            if (ao_try_init(ao, params)) {
-                ao->driver = audio_out;
-                ao->initialized = true;
+            if (ao_try_init(ao, params))
                 return;
-            }
             mp_tmsg(MSGT_AO, MSGL_WARN,
                     "Failed to initialize audio driver '%s'\n", ao_name);
             talloc_free_children(ao);
@@ -182,11 +183,8 @@ void ao_init(struct ao *ao, char **ao_list)
         const struct ao_driver *audio_out = audio_out_drivers[i];
         ao->driver = audio_out;
         ao->probing = true;
-        if (ao_try_init(ao, NULL)) {
-            ao->initialized = true;
-            ao->driver = audio_out;
+        if (ao_try_init(ao, NULL))
             return;
-        }
         talloc_free_children(ao);
         *ao = backup;
     }
@@ -260,58 +258,4 @@ bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,
                           struct mp_chmap *map, int num)
 {
     return mp_chmap_sel_get_def(s, map, num);
-}
-
-int old_ao_init(struct ao *ao, char *params)
-{
-    assert(!global_ao);
-    global_ao = ao;
-    ao_subdevice = params ? talloc_strdup(ao, params) : NULL;
-    if (ao->driver->old_functions->init(ao->samplerate, &ao->channels,
-                                        ao->format, 0) == 0) {
-        global_ao = NULL;
-        return -1;
-    }
-    return 0;
-}
-
-void old_ao_uninit(struct ao *ao, bool cut_audio)
-{
-    ao->driver->old_functions->uninit(cut_audio);
-    global_ao = NULL;
-}
-
-int old_ao_play(struct ao *ao, void *data, int len, int flags)
-{
-    return ao->driver->old_functions->play(data, len, flags);
-}
-
-int old_ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
-{
-    return ao->driver->old_functions->control(cmd, arg);
-}
-
-float old_ao_get_delay(struct ao *ao)
-{
-    return ao->driver->old_functions->get_delay();
-}
-
-int old_ao_get_space(struct ao *ao)
-{
-    return ao->driver->old_functions->get_space();
-}
-
-void old_ao_reset(struct ao *ao)
-{
-    ao->driver->old_functions->reset();
-}
-
-void old_ao_pause(struct ao *ao)
-{
-    ao->driver->old_functions->pause();
-}
-
-void old_ao_resume(struct ao *ao)
-{
-    ao->driver->old_functions->resume();
 }

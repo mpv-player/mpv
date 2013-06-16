@@ -19,7 +19,7 @@
 # 02110-1301 USA
 #
 
-FILTERS = showqscale telecine tile rectangle framestep
+FILTERS = showqscale telecine tile rectangle framestep ildetect
 COMMON = filterutils.o
 
 OBJECTS = $(patsubst %,%.o,$(FILTERS)) $(COMMON)

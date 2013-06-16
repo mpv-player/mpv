@@ -37,6 +37,10 @@
 
 #include "talloc.h"
 
+#define VCD_SECTOR_SIZE 2352
+#define VCD_SECTOR_OFFS 24
+#define VCD_SECTOR_DATA 2324
+
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
 #include "vcd_read_fbsd.h"
 #elif defined(__APPLE__)
@@ -79,6 +83,8 @@ static const struct m_struct_st stream_opts = {
 static int fill_buffer(stream_t *s, char* buffer, int max_len){
   if(s->pos > s->end_pos) /// don't past end of current track
     return 0;
+  if (max_len < VCD_SECTOR_DATA)
+    return -1;
   return vcd_read(s->priv,buffer);
 }
 

@@ -456,7 +456,6 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
       demuxer->video->id=-1; // autodetect
   }
 
-  stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,demuxer->movi_start);
   if(priv->idx_size>1){
     // decide index format:

@@ -275,23 +275,8 @@ read_next:
 
       if(d->angle_seek) {
         int i,skip=0;
-#if defined(__GNUC__) && ( defined(__sparc__) || defined(hpux) )
-        // workaround for a bug in the sparc/hpux version of gcc 2.95.X ... 3.2,
-        // it generates incorrect code for unaligned access to a packed
-        // structure member, resulting in an mplayer crash with a SIGBUS
-        // signal.
-        //
-        // See also gcc problem report PR c/7847:
-        // http://gcc.gnu.org/cgi-bin/gnatsweb.pl?database=gcc&cmd=view+audit-trail&pr=7847
-        for(i=0;i<9;i++) {	// check if all values zero:
-          __typeof__(d->dsi_pack.sml_agli.data[i].address) tmp_addr;
-          memcpy(&tmp_addr,&d->dsi_pack.sml_agli.data[i].address,sizeof(tmp_addr));
-          if((skip=tmp_addr)!=0) break;
-        }
-#else
         for(i=0;i<9;i++)	// check if all values zero:
           if((skip=d->dsi_pack.sml_agli.data[i].address)!=0) break;
-#endif
         if(skip && skip!=0x7fffffff) {
           // sml_agli table has valid data (at least one non-zero):
          d->cur_pack=d->dsi_pack.dsi_gi.nv_pck_lbn+
@@ -747,6 +732,14 @@ static int control(stream_t *stream,int cmd,void* arg)
         }
         case STREAM_CTRL_MANAGES_TIMELINE:
             return STREAM_OK;
+        case STREAM_CTRL_GET_DVD_INFO:
+        {
+            struct stream_dvd_info_req *req = arg;
+            memset(req, 0, sizeof(*req));
+            req->num_subs = dvd_number_of_subs(stream);
+            memcpy(req->palette, d->cur_pgc->palette, sizeof(req->palette));
+            return STREAM_OK;
+        }
     }
     return STREAM_UNSUPPORTED;
 }

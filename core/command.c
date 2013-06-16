@@ -629,7 +629,7 @@ static int mp_property_clock(m_option_t *prop, int action, void *arg,
     time_t t = time(NULL);
     struct tm *tmp = localtime(&t);
 
-    if ((tmp != NULL) && (strftime(outstr, sizeof(outstr), "%k:%M", tmp) == 5))
+    if ((tmp != NULL) && (strftime(outstr, sizeof(outstr), "%H:%M", tmp) == 5))
         return m_property_strdup_ro(prop, action, arg, outstr);
     return M_PROPERTY_UNAVAILABLE;
 }

@@ -169,26 +169,25 @@ static int init(struct ao *ao, char *params)
 
     SDL_AudioSpec desired, obtained;
 
-    int bytes = 0;
     switch (ao->format) {
-        case AF_FORMAT_U8: desired.format = AUDIO_U8; bytes = 1; break;
-        case AF_FORMAT_S8: desired.format = AUDIO_S8; bytes = 1; break;
-        case AF_FORMAT_U16_LE: desired.format = AUDIO_U16LSB; bytes = 2; break;
-        case AF_FORMAT_U16_BE: desired.format = AUDIO_U16MSB; bytes = 2; break;
+        case AF_FORMAT_U8: desired.format = AUDIO_U8; break;
+        case AF_FORMAT_S8: desired.format = AUDIO_S8; break;
+        case AF_FORMAT_U16_LE: desired.format = AUDIO_U16LSB; break;
+        case AF_FORMAT_U16_BE: desired.format = AUDIO_U16MSB; break;
         default:
-        case AF_FORMAT_S16_LE: desired.format = AUDIO_S16LSB; bytes = 2; break;
-        case AF_FORMAT_S16_BE: desired.format = AUDIO_S16MSB; bytes = 2; break;
+        case AF_FORMAT_S16_LE: desired.format = AUDIO_S16LSB; break;
+        case AF_FORMAT_S16_BE: desired.format = AUDIO_S16MSB; break;
 #ifdef AUDIO_S32LSB
-        case AF_FORMAT_S32_LE: desired.format = AUDIO_S32LSB; bytes = 4; break;
+        case AF_FORMAT_S32_LE: desired.format = AUDIO_S32LSB; break;
 #endif
 #ifdef AUDIO_S32MSB
-        case AF_FORMAT_S32_BE: desired.format = AUDIO_S32MSB; bytes = 4; break;
+        case AF_FORMAT_S32_BE: desired.format = AUDIO_S32MSB; break;
 #endif
 #ifdef AUDIO_F32LSB
-        case AF_FORMAT_FLOAT_LE: desired.format = AUDIO_F32LSB; bytes = 4; break;
+        case AF_FORMAT_FLOAT_LE: desired.format = AUDIO_F32LSB; break;
 #endif
 #ifdef AUDIO_F32MSB
-        case AF_FORMAT_FLOAT_BE: desired.format = AUDIO_F32MSB; bytes = 4; break;
+        case AF_FORMAT_FLOAT_BE: desired.format = AUDIO_F32MSB; break;
 #endif
     }
     desired.freq = ao->samplerate;
@@ -217,23 +216,23 @@ static int init(struct ao *ao, char *params)
            (int) obtained.format, (int) obtained.samples);
 
     switch (obtained.format) {
-        case AUDIO_U8: ao->format = AF_FORMAT_U8; bytes = 1; break;
-        case AUDIO_S8: ao->format = AF_FORMAT_S8; bytes = 1; break;
-        case AUDIO_S16LSB: ao->format = AF_FORMAT_S16_LE; bytes = 2; break;
-        case AUDIO_S16MSB: ao->format = AF_FORMAT_S16_BE; bytes = 2; break;
-        case AUDIO_U16LSB: ao->format = AF_FORMAT_U16_LE; bytes = 2; break;
-        case AUDIO_U16MSB: ao->format = AF_FORMAT_U16_BE; bytes = 2; break;
+        case AUDIO_U8: ao->format = AF_FORMAT_U8; break;
+        case AUDIO_S8: ao->format = AF_FORMAT_S8; break;
+        case AUDIO_S16LSB: ao->format = AF_FORMAT_S16_LE; break;
+        case AUDIO_S16MSB: ao->format = AF_FORMAT_S16_BE; break;
+        case AUDIO_U16LSB: ao->format = AF_FORMAT_U16_LE; break;
+        case AUDIO_U16MSB: ao->format = AF_FORMAT_U16_BE; break;
 #ifdef AUDIO_S32LSB
-        case AUDIO_S32LSB: ao->format = AF_FORMAT_S32_LE; bytes = 4; break;
+        case AUDIO_S32LSB: ao->format = AF_FORMAT_S32_LE; break;
 #endif
 #ifdef AUDIO_S32MSB
-        case AUDIO_S32MSB: ao->format = AF_FORMAT_S32_BE; bytes = 4; break;
+        case AUDIO_S32MSB: ao->format = AF_FORMAT_S32_BE; break;
 #endif
 #ifdef AUDIO_F32LSB
-        case AUDIO_F32LSB: ao->format = AF_FORMAT_FLOAT_LE; bytes = 4; break;
+        case AUDIO_F32LSB: ao->format = AF_FORMAT_FLOAT_LE; break;
 #endif
 #ifdef AUDIO_F32MSB
-        case AUDIO_F32MSB: ao->format = AF_FORMAT_FLOAT_BE; bytes = 4; break;
+        case AUDIO_F32MSB: ao->format = AF_FORMAT_FLOAT_BE; break;
 #endif
         default:
             if (!ao->probing)
@@ -249,10 +248,7 @@ static int init(struct ao *ao, char *params)
     }
 
     ao->samplerate = obtained.freq;
-    ao->bps = ao->channels.num * ao->samplerate * bytes;
-    ao->buffersize = obtained.size * bufcnt;
-    ao->outburst = obtained.size;
-    priv->buffer = av_fifo_alloc(ao->buffersize);
+    priv->buffer = av_fifo_alloc(obtained.size * bufcnt);
     priv->buffer_mutex = SDL_CreateMutex();
     if (!priv->buffer_mutex) {
         mp_msg(MSGT_AO, MSGL_ERR, "[sdl] SDL_CreateMutex failed\n");

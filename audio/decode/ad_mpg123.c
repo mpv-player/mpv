@@ -46,10 +46,6 @@ LIBAD_EXTERN(mpg123)
 /* Switch for updating bitrate info of VBR files. Not essential. */
 #define AD_MPG123_MEAN_BITRATE
 
-/* Funny thing, that. I assume I shall use it for selecting mpg123 channels.
- * Please correct me if I guessed wrong. */
-extern int fakemono;
-
 struct ad_mpg123_context {
     mpg123_handle *handle;
 #ifdef AD_MPG123_MEAN_BITRATE
@@ -67,7 +63,7 @@ struct ad_mpg123_context {
  * parameters. */
 static int preinit(sh_audio_t *sh)
 {
-    int err, flag;
+    int err;
     struct ad_mpg123_context *con;
     /* Assumption: You always call preinit + init + uninit, on every file.
      * But you stop at preinit in case it fails.
@@ -81,13 +77,6 @@ static int preinit(sh_audio_t *sh)
     /* Auto-choice of optimized decoder (first argument NULL). */
     con->handle = mpg123_new(NULL, &err);
     if (!con->handle)
-        goto bad_end;
-
-    /* Guessing here: Default value triggers forced upmix of mono to stereo. */
-    flag = fakemono == 0 ? MPG123_FORCE_STEREO :
-           fakemono == 1 ? MPG123_MONO_LEFT    :
-           fakemono == 2 ? MPG123_MONO_RIGHT   : 0;
-    if (mpg123_param(con->handle, MPG123_ADD_FLAGS, flag, 0.0) != MPG123_OK)
         goto bad_end;
 
     /* Basic settings.

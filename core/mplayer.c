@@ -108,7 +108,6 @@
 #ifdef CONFIG_DVBIN
 #include "stream/dvbin.h"
 #endif
-#include "stream/cache2.h"
 
 //**************************************************************************//
 //             Playtree
@@ -136,10 +135,6 @@
 #include "stream/stream.h"
 #include "demux/demux.h"
 #include "demux/stheader.h"
-
-#ifdef CONFIG_DVDREAD
-#include "stream/stream_dvd.h"
-#endif
 
 #include "audio/filter/af.h"
 #include "audio/decode/dec_audio.h"
@@ -847,7 +842,7 @@ static const char *backup_properties[] = {
     "sid",
     "sub-delay",
     "sub-pos",
-    //"sub-visibility",
+    "sub-visibility",
     "sub-scale",
     "ass-use-margins",
     "ass-vsfilter-aspect-compat",
@@ -944,13 +939,13 @@ static int find_new_tid(struct MPContext *mpctx, enum stream_type t)
 // Map stream number (as used by libdvdread) to MPEG IDs (as used by demuxer).
 static int map_id_from_demuxer(struct demuxer *d, enum stream_type type, int id)
 {
-    if (d->stream->type == STREAMTYPE_DVD && type == STREAM_SUB)
+    if (d->stream->uncached_type == STREAMTYPE_DVD && type == STREAM_SUB)
         id = id & 0x1F;
     return id;
 }
 static int map_id_to_demuxer(struct demuxer *d, enum stream_type type, int id)
 {
-    if (d->stream->type == STREAMTYPE_DVD && type == STREAM_SUB)
+    if (d->stream->uncached_type == STREAMTYPE_DVD && type == STREAM_SUB)
         id = id | 0x20;
     return id;
 }
@@ -1019,9 +1014,9 @@ static void add_dvd_tracks(struct MPContext *mpctx)
 #ifdef CONFIG_DVDREAD
     struct demuxer *demuxer = mpctx->demuxer;
     struct stream *stream = demuxer->stream;
-    if (stream->type == STREAMTYPE_DVD) {
-        int n_subs = dvd_number_of_subs(stream);
-        for (int n = 0; n < n_subs; n++) {
+    struct stream_dvd_info_req info;
+    if (stream_control(stream, STREAM_CTRL_GET_DVD_INFO, &info) > 0) {
+        for (int n = 0; n < info.num_subs; n++) {
             struct track *track = talloc_ptrtype(NULL, track);
             *track = (struct track) {
                 .type = STREAM_SUB,
@@ -1123,6 +1118,22 @@ static bool mp_get_cache_idle(struct MPContext *mpctx)
     return idle;
 }
 
+static void vo_update_window_title(struct MPContext *mpctx)
+{
+    if (!mpctx->video_out)
+        return;
+    char *title = mp_property_expand_string(mpctx, mpctx->opts.wintitle);
+    if (!mpctx->video_out->window_title ||
+        strcmp(title, mpctx->video_out->window_title))
+    {
+        talloc_free(mpctx->video_out->window_title);
+        mpctx->video_out->window_title = talloc_steal(mpctx, title);
+        vo_control(mpctx->video_out, VOCTRL_UPDATE_WINDOW_TITLE, title);
+    } else {
+        talloc_free(title);
+    }
+}
+
 #define saddf(var, ...) (*(var) = talloc_asprintf_append((*var), __VA_ARGS__))
 
 // append time in the hh:mm:ss format (plus fractions if wanted)
@@ -1169,6 +1180,8 @@ static void print_status(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     sh_video_t * const sh_video = mpctx->sh_video;
+
+    vo_update_window_title(mpctx);
 
     if (opts->quiet)
         return;
@@ -1694,7 +1707,6 @@ void reinit_audio_chain(struct MPContext *mpctx)
         goto init_error;
     }
     if (!ao->initialized) {
-        ao->buffersize = opts->ao_buffersize;
         ao->encode_lavc_ctx = mpctx->encode_lavc_ctx;
         mp_chmap_remove_useless_channels(&ao->channels,
                                          &opts->audio_output_channels);
@@ -1952,7 +1964,11 @@ static void set_dvdsub_fake_extradata(struct dec_sub *dec_sub, struct stream *st
                                       int width, int height)
 {
 #ifdef CONFIG_DVDREAD
-    if (st->type != STREAMTYPE_DVD)
+    if (!st)
+        return;
+
+    struct stream_dvd_info_req info;
+    if (stream_control(st, STREAM_CTRL_GET_DVD_INFO, &info) < 0)
         return;
 
     struct mp_csp_params csp = MP_CSP_PARAMS_DEFAULTS;
@@ -1960,8 +1976,6 @@ static void set_dvdsub_fake_extradata(struct dec_sub *dec_sub, struct stream *st
     csp.int_bits_out = 8;
     float cmatrix[3][4];
     mp_get_yuv2rgb_coeffs(&csp, cmatrix);
-
-    int *palette = ((dvd_priv_t *)st->priv)->cur_pgc->palette;
 
     if (width == 0 || height == 0) {
         width = 720;
@@ -1972,7 +1986,7 @@ static void set_dvdsub_fake_extradata(struct dec_sub *dec_sub, struct stream *st
     s = talloc_asprintf_append(s, "size: %dx%d\n", width, height);
     s = talloc_asprintf_append(s, "palette: ");
     for (int i = 0; i < 16; i++) {
-        int color = palette[i];
+        int color = info.palette[i];
         int c[3] = {(color >> 16) & 0xff, (color >> 8) & 0xff, color & 0xff};
         mp_map_int_color(cmatrix, 8, c);
         color = (c[2] << 16) | (c[1] << 8) | c[0];
@@ -2364,15 +2378,6 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     return -partial_fill;
 }
 
-static void vo_update_window_title(struct MPContext *mpctx)
-{
-    if (!mpctx->video_out)
-        return;
-    char *title = mp_property_expand_string(mpctx, mpctx->opts.wintitle);
-    talloc_free(mpctx->video_out->window_title);
-    mpctx->video_out->window_title = talloc_steal(mpctx, title);
-}
-
 static void update_fps(struct MPContext *mpctx)
 {
 #ifdef CONFIG_ENCODING
@@ -2480,6 +2485,13 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     mpctx->initialized_flags |= INITIALIZED_VCODEC;
 
+    bool saver_state = opts->pause || !opts->stop_screensaver;
+    vo_control(mpctx->video_out, saver_state ? VOCTRL_RESTORE_SCREENSAVER
+                                             : VOCTRL_KILL_SCREENSAVER, NULL);
+
+    vo_control(mpctx->video_out, mpctx->paused ? VOCTRL_PAUSE
+                                               : VOCTRL_RESUME, NULL);
+
     sh_video->last_pts = MP_NOPTS_VALUE;
     sh_video->num_buffered_pts = 0;
     sh_video->next_frame_time = 0;
@@ -2492,8 +2504,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     return 1;
 
 err_out:
-    if (!opts->fixed_vo)
-        uninit_player(mpctx, INITIALIZED_VO);
+    uninit_player(mpctx, INITIALIZED_VO);
     cleanup_demux_stream(mpctx, STREAM_VIDEO);
 no_video:
     mpctx->current_track[STREAM_VIDEO] = NULL;
@@ -2698,7 +2709,7 @@ static double update_video(struct MPContext *mpctx, double endpts)
     if (sh_video->last_pts == MP_NOPTS_VALUE)
         sh_video->last_pts = sh_video->pts;
     else if (sh_video->last_pts > sh_video->pts) {
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Decreasing video pts: %f < %f\n",
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Decreasing video pts: %f < %f\n",
                sh_video->pts, sh_video->last_pts);
         /* If the difference in pts is small treat it as jitter around the
          * right value (possibly caused by incorrect timestamp ordering) and
@@ -2709,6 +2720,11 @@ static double update_video(struct MPContext *mpctx, double endpts)
             sh_video->last_pts = sh_video->pts;
         else
             sh_video->pts = sh_video->last_pts;
+    } else if (sh_video->pts >= sh_video->last_pts + 60) {
+        // Assume a PTS difference >= 60 seconds is a discontinuity.
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Jump in video pts: %f -> %f\n",
+               sh_video->last_pts, sh_video->pts);
+        sh_video->last_pts = sh_video->pts;
     }
     double frame_time = sh_video->pts - sh_video->last_pts;
     sh_video->last_pts = sh_video->pts;
@@ -2720,6 +2736,9 @@ static double update_video(struct MPContext *mpctx, double endpts)
 void pause_player(struct MPContext *mpctx)
 {
     mpctx->opts.pause = 1;
+
+    if (mpctx->video_out)
+        vo_control(mpctx->video_out, VOCTRL_RESTORE_SCREENSAVER, NULL);
 
     if (mpctx->paused)
         return;
@@ -2747,6 +2766,9 @@ void unpause_player(struct MPContext *mpctx)
 {
     mpctx->opts.pause = 0;
 
+    if (mpctx->video_out && mpctx->opts.stop_screensaver)
+        vo_control(mpctx->video_out, VOCTRL_KILL_SCREENSAVER, NULL);
+
     if (!mpctx->paused)
         return;
     // Don't actually unpause while cache is loading.
@@ -2757,8 +2779,7 @@ void unpause_player(struct MPContext *mpctx)
 
     if (mpctx->ao && mpctx->sh_audio)
         ao_resume(mpctx->ao);
-    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok
-        && !mpctx->step_frames)
+    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);      // resume video
     (void)get_relative_time(mpctx);     // ignore time that passed during pause
 }
@@ -2787,8 +2808,6 @@ void add_step_frame(struct MPContext *mpctx, int dir)
 {
     if (dir > 0) {
         mpctx->step_frames += 1;
-        if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
-            vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
         unpause_player(mpctx);
     } else if (dir < 0) {
         if (!mpctx->backstep_active && !mpctx->hrseek_active) {
@@ -3930,7 +3949,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     struct stream *stream = open_stream(filename, &mpctx->opts, &format);
     if (!stream)
         goto err_out;
-    stream_enable_cache_percent(stream, stream_cache,
+    stream_enable_cache_percent(&stream, stream_cache,
                                 opts->stream_cache_min_percent,
                                 opts->stream_cache_seek_min_percent);
     // deal with broken demuxers: preselect streams
@@ -4160,8 +4179,6 @@ static void play_current_file(struct MPContext *mpctx)
     if (opts->ass_style_override)
         ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
 #endif
-    if (mpctx->video_out && mpctx->video_out->config_ok)
-        vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);
 
     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Playing %s.\n", mpctx->filename);
 
@@ -4215,10 +4232,7 @@ static void play_current_file(struct MPContext *mpctx)
     }
 
     // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
-#ifdef CONFIG_DVBIN
-goto_enable_cache: ;
-#endif
-    int res = stream_enable_cache_percent(mpctx->stream,
+    int res = stream_enable_cache_percent(&mpctx->stream,
                                           opts->stream_cache_size,
                                           opts->stream_cache_min_percent,
                                           opts->stream_cache_seek_min_percent);
@@ -4227,6 +4241,10 @@ goto_enable_cache: ;
             goto terminate_playback;
 
     stream_set_capture_file(mpctx->stream, opts->stream_capture);
+
+#ifdef CONFIG_DVBIN
+goto_reopen_demuxer: ;
+#endif
 
     //============ Open DEMUXERS --- DETECT file type =======================
 
@@ -4407,9 +4425,8 @@ goto_enable_cache: ;
     if (mpctx->dvbin_reopen) {
         mpctx->stop_play = 0;
         uninit_player(mpctx, INITIALIZED_ALL - (INITIALIZED_STREAM | INITIALIZED_GETCH2 | (opts->fixed_vo ? INITIALIZED_VO : 0)));
-        cache_uninit(mpctx->stream);
         mpctx->dvbin_reopen = 0;
-        goto goto_enable_cache;
+        goto goto_reopen_demuxer;
     }
 #endif
 

@@ -149,7 +149,6 @@ static void disable_power_management(struct vo *vo)
 int vo_cocoa_init(struct vo *vo)
 {
     vo->cocoa = vo_cocoa_init_state(vo);
-    disable_power_management(vo);
 
     return 1;
 }
@@ -183,16 +182,6 @@ void vo_cocoa_uninit(struct vo *vo)
         [s->glContext release];
         s->glContext = nil;
     });
-}
-
-void vo_cocoa_pause(struct vo *vo)
-{
-    enable_power_management(vo);
-}
-
-void vo_cocoa_resume(struct vo *vo)
-{
-    disable_power_management(vo);
 }
 
 void vo_cocoa_register_resize_callback(struct vo *vo,
@@ -387,6 +376,12 @@ static int create_gl_context(struct vo *vo, int gl3profile)
     return 0;
 }
 
+static void cocoa_set_window_title(struct vo *vo, const char *title)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    [s->window setTitle: [NSString stringWithUTF8String:title]];
+}
+
 static void update_window(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -402,8 +397,7 @@ static void update_window(struct vo *vo)
         }
     }
 
-    [s->window setTitle:
-        [NSString stringWithUTF8String:vo_get_window_title(vo)]];
+    cocoa_set_window_title(vo, vo_get_window_title(vo));
 
     resize_window(vo);
 }
@@ -556,11 +550,15 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         vo_cocoa_set_cursor_visibility(vo, visible);
         return VO_TRUE;
     }
-    case VOCTRL_PAUSE:
-        vo_cocoa_pause(vo);
+    case VOCTRL_UPDATE_WINDOW_TITLE: {
+        cocoa_set_window_title(vo, (const char *) arg);
         return VO_TRUE;
-    case VOCTRL_RESUME:
-        vo_cocoa_resume(vo);
+    }
+    case VOCTRL_RESTORE_SCREENSAVER:
+        enable_power_management(vo);
+        return VO_TRUE;
+    case VOCTRL_KILL_SCREENSAVER:
+        disable_power_management(vo);
         return VO_TRUE;
     }
     return VO_NOTIMPL;

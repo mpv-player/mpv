@@ -313,8 +313,6 @@ static int init(struct ao *ao, char *params)
     if (!select_chmap(ao, &map))
         goto fail;
 
-    ao->bps = pa_bytes_per_second(&ss);
-
     if (!(priv->stream = pa_stream_new(priv->context, "audio stream", &ss,
                                        &map)))
         goto unlock_and_fail;

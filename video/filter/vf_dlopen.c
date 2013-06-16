@@ -48,7 +48,7 @@
 static struct vf_priv_s {
     const char *cfg_dllname;
     int cfg_argc;
-    const char *cfg_argv[4];
+    const char *cfg_argv[16];
     void *dll;
     struct vf_dlopen_context filter;
 
@@ -292,6 +292,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 
 static int vf_open(vf_instance_t *vf, char *args)
 {
+    int i;
     if (!vf->priv->cfg_dllname) {
         mp_msg(MSGT_VFILTER, MSGL_ERR,
                "usage: -vf dlopen=filename.so:function:args\n");
@@ -318,10 +319,15 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->priv->filter.minor_version = VF_DLOPEN_MINOR_VERSION;
 
     // count arguments
-    for (vf->priv->cfg_argc = 0;
-         vf->priv->cfg_argc < sizeof(vf->priv->cfg_argv) / sizeof(vf->priv->cfg_argv[0]) && vf->priv->cfg_argv[vf->priv->cfg_argc];
-         ++vf->priv->cfg_argc)
+    for (vf->priv->cfg_argc = sizeof(vf->priv->cfg_argv) / sizeof(vf->priv->cfg_argv[0]);
+         vf->priv->cfg_argc > 0 && !vf->priv->cfg_argv[vf->priv->cfg_argc - 1];
+         --vf->priv->cfg_argc)
         ;
+
+    // fix empty arguments
+    for (i = 0; i < vf->priv->cfg_argc; ++i)
+        if (vf->priv->cfg_argv[i] == NULL)
+            vf->priv->cfg_argv[i] = talloc_strdup (vf->priv, "");
 
     if (func(&vf->priv->filter, vf->priv->cfg_argc, vf->priv->cfg_argv) < 0) {
         mp_msg(MSGT_VFILTER, MSGL_ERR,
@@ -352,6 +358,18 @@ static m_option_t vf_opts_fields[] = {
     {"a1", ST_OFF(cfg_argv[1]), CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"a2", ST_OFF(cfg_argv[2]), CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"a3", ST_OFF(cfg_argv[3]), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"a4", ST_OFF(cfg_argv[4]), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"a5", ST_OFF(cfg_argv[5]), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"a6", ST_OFF(cfg_argv[6]), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"a7", ST_OFF(cfg_argv[7]), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"a8", ST_OFF(cfg_argv[8]), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"a9", ST_OFF(cfg_argv[9]), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"a10", ST_OFF(cfg_argv[10]), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"a11", ST_OFF(cfg_argv[11]), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"a12", ST_OFF(cfg_argv[12]), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"a13", ST_OFF(cfg_argv[13]), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"a14", ST_OFF(cfg_argv[14]), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"a15", ST_OFF(cfg_argv[15]), CONF_TYPE_STRING, 0, 0, 0, NULL},
     { NULL, NULL, 0, 0, 0, 0, NULL }
 };
 

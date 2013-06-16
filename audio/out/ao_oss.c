@@ -58,6 +58,8 @@ struct priv {
     int oss_mixer_channel;
     audio_buf_info zz;
     int audio_delay_method;
+    int buffersize;
+    int outburst;
 };
 
 static int format_table[][2] = {
@@ -206,6 +208,8 @@ static int init(struct ao *ao, char *params)
         .oss_mixer_device = mdev ? mdev : PATH_DEV_MIXER,
         .oss_mixer_channel = SOUND_MIXER_PCM,
         .audio_delay_method = 2,
+        .buffersize = -1,
+        .outburst = 512,
     };
     ao->priv = p;
 
@@ -363,29 +367,28 @@ ac3_retry:
                 "support SNDCTL_DSP_GETOSPACE\n");
         if (ioctl(p->audio_fd, SNDCTL_DSP_GETBLKSIZE, &r) == -1)
             mp_msg(MSGT_AO, MSGL_V, "audio_setup: %d bytes/frag (config.h)\n",
-                   ao->outburst);
+                   p->outburst);
         else {
-            ao->outburst = r;
+            p->outburst = r;
             mp_msg(MSGT_AO, MSGL_V, "audio_setup: %d bytes/frag (GETBLKSIZE)\n",
-                   ao->outburst);
+                   p->outburst);
         }
     } else {
         mp_msg(MSGT_AO, MSGL_V,
                "audio_setup: frags: %3d/%d  (%d bytes/frag)  free: %6d\n",
                p->zz.fragments, p->zz.fragstotal, p->zz.fragsize, p->zz.bytes);
-        if (ao->buffersize == -1)
-            ao->buffersize = p->zz.bytes;
-        ao->outburst = p->zz.fragsize;
+        p->buffersize = p->zz.bytes;
+        p->outburst = p->zz.fragsize;
     }
 
-    if (ao->buffersize == -1) {
+    if (p->buffersize == -1) {
         // Measuring buffer size:
         void *data;
-        ao->buffersize = 0;
+        p->buffersize = 0;
 #ifdef HAVE_AUDIO_SELECT
-        data = malloc(ao->outburst);
-        memset(data, 0, ao->outburst);
-        while (ao->buffersize < 0x40000) {
+        data = malloc(p->outburst);
+        memset(data, 0, p->outburst);
+        while (p->buffersize < 0x40000) {
             fd_set rfds;
             struct timeval tv;
             FD_ZERO(&rfds);
@@ -394,11 +397,11 @@ ac3_retry:
             tv.tv_usec = 0;
             if (!select(p->audio_fd + 1, NULL, &rfds, NULL, &tv))
                 break;
-            write(p->audio_fd, data, ao->outburst);
-            ao->buffersize += ao->outburst;
+            write(p->audio_fd, data, p->outburst);
+            p->buffersize += p->outburst;
         }
         free(data);
-        if (ao->buffersize == 0) {
+        if (p->buffersize == 0) {
             mp_tmsg(MSGT_AO, MSGL_ERR, "[AO OSS]\n   ***  Your audio driver "
                     "DOES NOT support select()  ***\n Recompile mpv with "
                     "#undef HAVE_AUDIO_SELECT in config.h !\n\n");
@@ -408,7 +411,7 @@ ac3_retry:
     }
 
     ao->bps = ao->channels.num * (af_fmt2bits(ao->format) / 8);
-    ao->outburst -= ao->outburst % ao->bps; // round down
+    p->outburst -= p->outburst % ao->bps; // round down
     ao->bps *= ao->samplerate;
 
     return 0;
@@ -479,7 +482,7 @@ static void reset(struct ao *ao)
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    int playsize = ao->outburst;
+    int playsize = p->outburst;
 
 #ifdef SNDCTL_DSP_GETOSPACE
     if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &p->zz) != -1) {
@@ -503,7 +506,7 @@ static int get_space(struct ao *ao)
     }
 #endif
 
-    return ao->outburst;
+    return p->outburst;
 }
 
 // stop playing, keep buffers (for pause)
@@ -522,9 +525,9 @@ static int play(struct ao *ao, void *data, int len, int flags)
     struct priv *p = ao->priv;
     if (len == 0)
         return len;
-    if (len > ao->outburst || !(flags & AOPLAY_FINAL_CHUNK)) {
-        len /= ao->outburst;
-        len *= ao->outburst;
+    if (len > p->outburst || !(flags & AOPLAY_FINAL_CHUNK)) {
+        len /= p->outburst;
+        len *= p->outburst;
     }
     len = write(p->audio_fd, data, len);
     return len;
@@ -560,12 +563,12 @@ static float get_delay(struct ao *ao)
     if (p->audio_delay_method == 1) {
         // SNDCTL_DSP_GETOSPACE
         if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &p->zz) != -1) {
-            return ((float)(ao->buffersize -
+            return ((float)(p->buffersize -
                             p->zz.bytes)) / (float)ao->bps;
         }
         p->audio_delay_method = 0; // fallback if not supported
     }
-    return ((float)ao->buffersize) / (float)ao->bps;
+    return ((float)p->buffersize) / (float)ao->bps;
 }
 
 const struct ao_driver audio_out_oss = {

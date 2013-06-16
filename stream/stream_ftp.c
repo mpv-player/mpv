@@ -337,7 +337,6 @@ static int seek(stream_t *s,int64_t newpos) {
   char rsp_txt[256];
 
   if(s->pos > s->end_pos) {
-    s->eof=1;
     return 0;
   }
 
@@ -376,7 +375,6 @@ static int seek(stream_t *s,int64_t newpos) {
     resp = readresp(p,rsp_txt);
     if(resp != 4 && resp != 2) {
       mp_msg(MSGT_OPEN,MSGL_ERR, "[ftp] Server didn't abort correctly: %s\n",rsp_txt);
-      s->eof = 1;
       return 0;
     }
     // Send the ABOR command

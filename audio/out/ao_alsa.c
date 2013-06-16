@@ -57,6 +57,8 @@ struct priv {
     int can_pause;
     snd_pcm_sframes_t prepause_frames;
     float delay_before_pause;
+    int buffersize;
+    int outburst;
 };
 
 #define BUFFER_TIME 500000  // 0.5 s
@@ -560,7 +562,6 @@ static int init(struct ao *ao, char *params)
 
     p->bytes_per_sample = af_fmt2bits(ao->format) / 8;
     p->bytes_per_sample *= ao->channels.num;
-    ao->bps = ao->samplerate * p->bytes_per_sample;
 
     err = snd_pcm_hw_params_set_buffer_time_near
             (p->alsa, alsa_hwparams, &(unsigned int){BUFFER_TIME}, NULL);
@@ -580,15 +581,15 @@ static int init(struct ao *ao, char *params)
     err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &bufsize);
     CHECK_ALSA_ERROR("Unable to get buffersize");
 
-    ao->buffersize = bufsize * p->bytes_per_sample;
+    p->buffersize = bufsize * p->bytes_per_sample;
     mp_msg(MSGT_AO, MSGL_V, "alsa-init: got buffersize=%i\n",
-            ao->buffersize);
+           p->buffersize);
 
     err = snd_pcm_hw_params_get_period_size(alsa_hwparams, &chunk_size, NULL);
     CHECK_ALSA_ERROR("Unable to get period size");
 
     mp_msg(MSGT_AO, MSGL_V, "alsa-init: got period size %li\n", chunk_size);
-    ao->outburst = chunk_size * p->bytes_per_sample;
+    p->outburst = chunk_size * p->bytes_per_sample;
 
     /* setting software parameters */
     err = snd_pcm_sw_params_current(p->alsa, alsa_swparams);
@@ -622,7 +623,7 @@ static int init(struct ao *ao, char *params)
     mp_msg(MSGT_AO, MSGL_V,
             "alsa: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
             ao->samplerate, ao->channels.num, (int)p->bytes_per_sample,
-            ao->buffersize, snd_pcm_format_description(p->alsa_fmt));
+            p->buffersize, snd_pcm_format_description(p->alsa_fmt));
 
     return 0;
 
@@ -734,7 +735,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
     int num_frames;
     snd_pcm_sframes_t res = 0;
     if (!(flags & AOPLAY_FINAL_CHUNK))
-        len = len / ao->outburst * ao->outburst;
+        len = len / p->outburst * p->outburst;
     num_frames = len / p->bytes_per_sample;
 
     //mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: frames=%i, len=%i\n",num_frames,len);
@@ -790,8 +791,8 @@ static int get_space(struct ao *ao)
     CHECK_ALSA_ERROR("cannot get pcm status");
 
     unsigned space = snd_pcm_status_get_avail(status) * p->bytes_per_sample;
-    if (space > ao->buffersize) // Buffer underrun?
-        space = ao->buffersize;
+    if (space > p->buffersize) // Buffer underrun?
+        space = p->buffersize;
     return space;
 
 alsa_error:

@@ -46,6 +46,7 @@
 const struct image_writer_opts image_writer_opts_defaults = {
     .format = "jpg",
     .png_compression = 7,
+    .png_filter = 5,
     .jpeg_quality = 90,
     .jpeg_optimize = 100,
     .jpeg_smooth = 0,
@@ -65,6 +66,7 @@ const struct m_sub_options image_writer_conf = {
         OPT_FLAG("jpeg-progressive", jpeg_progressive, 0),
         OPT_FLAG("jpeg-baseline", jpeg_baseline, 0),
         OPT_INTRANGE("png-compression", png_compression, 0, 0, 9),
+        OPT_INTRANGE("png-filter", png_filter, 0, 0, 5),
         OPT_STRING("format", format, 0),
         {0},
     },
@@ -105,8 +107,10 @@ static int write_lavc(struct image_writer_ctx *ctx, mp_image_t *image, FILE *fp)
     avctx->width = image->w;
     avctx->height = image->h;
     avctx->pix_fmt = imgfmt2pixfmt(image->imgfmt);
-    if (ctx->writer->lavc_codec == AV_CODEC_ID_PNG)
+    if (ctx->writer->lavc_codec == AV_CODEC_ID_PNG) {
         avctx->compression_level = ctx->opts->png_compression;
+        avctx->prediction_method = ctx->opts->png_filter;
+    }
 
     if (avcodec_open2(avctx, codec, NULL) < 0) {
      print_open_fail:

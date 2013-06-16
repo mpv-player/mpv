@@ -939,6 +939,8 @@ static int get_eq(struct vo *vo, const char *name, int *value)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
+    struct priv *vc = vo->priv;
+
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
         check_events(vo);
@@ -975,6 +977,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
     case VOCTRL_SET_CURSOR_VISIBILITY:
         SDL_ShowCursor(*(bool *)data);
+        return true;
+    case VOCTRL_UPDATE_WINDOW_TITLE:
+        if (vc->window)
+            SDL_SetWindowTitle(vc->window, vo_get_window_title(vo));
         return true;
     }
     return VO_NOTIMPL;

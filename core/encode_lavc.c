@@ -116,10 +116,18 @@ int encode_lavc_oformat_flags(struct encode_lavc_context *ctx)
 struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
 {
     struct encode_lavc_context *ctx;
+    const char *filename = options->file;
 
-    if (options->file && (
-            !strcmp(options->file, "pipe:") ||
-            !strcmp(options->file, "pipe:1")))
+    // STUPID STUPID STUPID STUPID avio
+    // does not support "-" as file name to mean stdin/stdout
+    // ffmpeg.c works around this too, the same way
+    if (!strcmp(filename, "-"))
+        filename = "pipe:1";
+
+    if (filename && (
+            !strcmp(filename, "/dev/stdout") ||
+            !strcmp(filename, "pipe:") ||
+            !strcmp(filename, "pipe:1")))
         mp_msg_stdout_in_use = 1;
 
     ctx = talloc_zero(NULL, struct encode_lavc_context);
@@ -133,7 +141,7 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
         const char *in = ctx->options->format;
         while (*in) {
             tok = av_get_token(&in, ",");
-            ctx->avc->oformat = av_guess_format(tok, ctx->options->file, NULL);
+            ctx->avc->oformat = av_guess_format(tok, filename, NULL);
             av_free(tok);
             if (ctx->avc->oformat)
                 break;
@@ -141,14 +149,14 @@ struct encode_lavc_context *encode_lavc_init(struct encode_output_conf *options)
                 ++in;
         }
     } else
-        ctx->avc->oformat = av_guess_format(NULL, ctx->options->file, NULL);
+        ctx->avc->oformat = av_guess_format(NULL, filename, NULL);
 
     if (!ctx->avc->oformat) {
         encode_lavc_fail(ctx, "encode-lavc: format not found\n");
         return NULL;
     }
 
-    av_strlcpy(ctx->avc->filename, ctx->options->file,
+    av_strlcpy(ctx->avc->filename, filename,
                sizeof(ctx->avc->filename));
 
     ctx->foptions = NULL;
@@ -471,8 +479,8 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
         else if (ctx->options->autofps && ctx->vo_fps > 0) {
             r = av_d2q(ctx->vo_fps, ctx->vo_fps * 1001 + 2);
             mp_msg(
-                MSGT_ENCODE, MSGL_INFO, "vo-lavc: option -ofps not specified "
-                "but -oautofps is active, using guess of %u/%u\n",
+                MSGT_ENCODE, MSGL_INFO, "vo-lavc: option --ofps not specified "
+                "but --oautofps is active, using guess of %u/%u\n",
                 (unsigned)r.num, (unsigned)r.den);
         } else {
             // we want to handle:
@@ -485,7 +493,7 @@ AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx,
             r.num = 24000;
             r.den = 1;
             mp_msg(
-                MSGT_ENCODE, MSGL_INFO, "vo-lavc: option -ofps not specified "
+                MSGT_ENCODE, MSGL_INFO, "vo-lavc: option --ofps not specified "
                 "and fps could not be inferred, using guess of %u/%u\n",
                 (unsigned)r.num, (unsigned)r.den);
         }
@@ -610,7 +618,7 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx, AVStream *stream)
                        "- Codec implementation in ffmpeg/libav is not finished yet.\n"
                        "     Try updating ffmpeg or libav.\n"
                        "- Bad picture quality, blocks, blurriness.\n"
-                       "     Experiment with codec settings (-ovcopts) to maybe still get the\n"
+                       "     Experiment with codec settings (--ovcopts) to maybe still get the\n"
                        "     desired quality output at the expense of bitrate.\n"
                        "- Slow compression.\n"
                        "     Bear with it.\n"
@@ -646,7 +654,7 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx, AVStream *stream)
                        "- Codec implementation in ffmpeg/libav is not finished yet.\n"
                        "     Try updating ffmpeg or libav.\n"
                        "- Bad sound quality, noise, clicking, whistles, choppiness.\n"
-                       "     Experiment with codec settings (-oacopts) to maybe still get the\n"
+                       "     Experiment with codec settings (--oacopts) to maybe still get the\n"
                        "     desired quality output at the expense of bitrate.\n"
                        "- Slow compression.\n"
                        "     Bear with it.\n"
@@ -859,7 +867,7 @@ bool encode_lavc_showhelp(struct MPOpts *opts)
         AVOutputFormat *c = NULL;
         mp_msg(MSGT_ENCODE, MSGL_INFO, "Available output formats:\n");
         while ((c = av_oformat_next(c)))
-            mp_msg(MSGT_ENCODE, MSGL_INFO, "  -of %-13s %s\n", c->name,
+            mp_msg(MSGT_ENCODE, MSGL_INFO, "  --of=%-13s %s\n", c->name,
                    c->long_name ? c->long_name : "");
         av_free(c);
     }
@@ -868,16 +876,16 @@ bool encode_lavc_showhelp(struct MPOpts *opts)
         AVOutputFormat *format = NULL;
         mp_msg(MSGT_ENCODE, MSGL_INFO,
                "Available output format ctx->options:\n");
-        encode_lavc_printoptions(c, "  -ofopts ", "          ", NULL,
+        encode_lavc_printoptions(c, "  --ofopts=", "           ", NULL,
                                  AV_OPT_FLAG_ENCODING_PARAM,
                                  AV_OPT_FLAG_ENCODING_PARAM);
         av_free(c);
         while ((format = av_oformat_next(format))) {
             if (format->priv_class) {
-                mp_msg(MSGT_ENCODE, MSGL_INFO, "Additionally, for -of %s:\n",
+                mp_msg(MSGT_ENCODE, MSGL_INFO, "Additionally, for --of=%s:\n",
                        format->name);
-                encode_lavc_printoptions(&format->priv_class, "  -ofopts ",
-                                         "          ", NULL,
+                encode_lavc_printoptions(&format->priv_class, "  --ofopts=",
+                                         "           ", NULL,
                                          AV_OPT_FLAG_ENCODING_PARAM,
                                          AV_OPT_FLAG_ENCODING_PARAM);
             }
@@ -889,7 +897,7 @@ bool encode_lavc_showhelp(struct MPOpts *opts)
         mp_msg(MSGT_ENCODE, MSGL_INFO,
                "Available output video codec ctx->options:\n");
         encode_lavc_printoptions(
-            c, "  -ovcopts ", "           ", NULL,
+            c, "  --ovcopts=", "            ", NULL,
             AV_OPT_FLAG_ENCODING_PARAM |
             AV_OPT_FLAG_VIDEO_PARAM,
             AV_OPT_FLAG_ENCODING_PARAM |
@@ -904,11 +912,11 @@ bool encode_lavc_showhelp(struct MPOpts *opts)
                 strcmp(opts->encode_output.vcodec, codec->name) != 0)
                 continue;
             if (codec->priv_class) {
-                mp_msg(MSGT_ENCODE, MSGL_INFO, "Additionally, for -ovc %s:\n",
+                mp_msg(MSGT_ENCODE, MSGL_INFO, "Additionally, for --ovc=%s:\n",
                        codec->name);
                 encode_lavc_printoptions(
-                    &codec->priv_class, "  -ovcopts ",
-                    "           ", NULL,
+                    &codec->priv_class, "  --ovcopts=",
+                    "            ", NULL,
                     AV_OPT_FLAG_ENCODING_PARAM |
                     AV_OPT_FLAG_VIDEO_PARAM,
                     AV_OPT_FLAG_ENCODING_PARAM |
@@ -922,7 +930,7 @@ bool encode_lavc_showhelp(struct MPOpts *opts)
         mp_msg(MSGT_ENCODE, MSGL_INFO,
                "Available output audio codec ctx->options:\n");
         encode_lavc_printoptions(
-            c, "  -oacopts ", "           ", NULL,
+            c, "  --oacopts=", "            ", NULL,
             AV_OPT_FLAG_ENCODING_PARAM |
             AV_OPT_FLAG_AUDIO_PARAM,
             AV_OPT_FLAG_ENCODING_PARAM |
@@ -937,10 +945,10 @@ bool encode_lavc_showhelp(struct MPOpts *opts)
                 strcmp(opts->encode_output.acodec, codec->name) != 0)
                 continue;
             if (codec->priv_class) {
-                mp_msg(MSGT_ENCODE, MSGL_INFO, "Additionally, for -oac %s:\n",
+                mp_msg(MSGT_ENCODE, MSGL_INFO, "Additionally, for --oac=%s:\n",
                        codec->name);
                 encode_lavc_printoptions(
-                    &codec->priv_class, "  -oacopts ",
+                    &codec->priv_class, "  --oacopts=",
                     "           ", NULL,
                     AV_OPT_FLAG_ENCODING_PARAM |
                     AV_OPT_FLAG_AUDIO_PARAM,
@@ -957,7 +965,7 @@ bool encode_lavc_showhelp(struct MPOpts *opts)
                 continue;
             if (c->type != AVMEDIA_TYPE_VIDEO)
                 continue;
-            mp_msg(MSGT_ENCODE, MSGL_INFO, "  -ovc %-12s %s\n", c->name,
+            mp_msg(MSGT_ENCODE, MSGL_INFO, "  --ovc=%-12s %s\n", c->name,
                    c->long_name ? c->long_name : "");
         }
         av_free(c);
@@ -970,7 +978,7 @@ bool encode_lavc_showhelp(struct MPOpts *opts)
                 continue;
             if (c->type != AVMEDIA_TYPE_AUDIO)
                 continue;
-            mp_msg(MSGT_ENCODE, MSGL_INFO, "  -oac %-12s %s\n", c->name,
+            mp_msg(MSGT_ENCODE, MSGL_INFO, "  --oac=%-12s %s\n", c->name,
                    c->long_name ? c->long_name : "");
         }
         av_free(c);

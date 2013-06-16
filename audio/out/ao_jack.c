@@ -34,7 +34,7 @@
 #include "osdep/timer.h"
 #include "core/subopt-helper.h"
 
-#include "libavutil/fifo.h"
+#include "core/mp_ring.h"
 
 #include <jack/jack.h>
 
@@ -51,30 +51,15 @@ struct priv {
     jack_port_t * ports[MAX_CHANS];
     int num_ports; // Number of used ports == number of channels
     jack_client_t *client;
+    int outburst;
     float jack_latency;
     int estimate;
     volatile int paused;
     volatile int underrun; // signals if an underrun occured
     volatile float callback_interval;
     volatile float callback_time;
-    AVFifoBuffer *buffer; // buffer for audio data
+    struct mp_ring *ring; // buffer for audio data
 };
-
-/**
- * \brief insert len bytes into buffer
- * \param data data to insert
- * \param len length of data
- * \return number of bytes inserted into buffer
- *
- * If there is not enough room, the buffer is filled up
- */
-static int write_buffer(AVFifoBuffer *buffer, unsigned char *data, int len)
-{
-    int free = av_fifo_space(buffer);
-    if (len > free)
-        len = free;
-    return av_fifo_generic_write(buffer, data, len, NULL);
-}
 
 static void silence(float **bufs, int cnt, int num_bufs);
 
@@ -113,18 +98,17 @@ static void deinterleave(void *info, void *src, int len)
  * If there is not enough data in the buffer remaining parts will be filled
  * with silence.
  */
-static int read_buffer(AVFifoBuffer *buffer, float **bufs, int cnt, int num_bufs)
+static int read_buffer(struct mp_ring *ring, float **bufs, int cnt, int num_bufs)
 {
     struct deinterleave di = {
         bufs, num_bufs, 0, 0
     };
-    int buffered = av_fifo_size(buffer);
+    int buffered = mp_ring_buffered(ring);
     if (cnt * sizeof(float) * num_bufs > buffered) {
         silence(bufs, cnt, num_bufs);
         cnt = buffered / sizeof(float) / num_bufs;
     }
-    av_fifo_generic_read(buffer, &di, cnt * num_bufs * sizeof(float),
-                         deinterleave);
+    mp_ring_read_cb(ring, &di, cnt * num_bufs * sizeof(float), deinterleave);
     return cnt;
 }
 
@@ -159,9 +143,9 @@ static int outputaudio(jack_nframes_t nframes, void *arg)
     int i;
     for (i = 0; i < p->num_ports; i++)
         bufs[i] = jack_port_get_buffer(p->ports[i], nframes);
-    if (p->paused || p->underrun || !p->buffer)
+    if (p->paused || p->underrun || !p->ring)
         silence(bufs, nframes, p->num_ports);
-    else if (read_buffer(p->buffer, bufs, nframes, p->num_ports) < nframes)
+    else if (read_buffer(p->ring, bufs, nframes, p->num_ports) < nframes)
         p->underrun = 1;
     if (p->estimate) {
         float now = mp_time_us() / 1000000.0;
@@ -296,11 +280,9 @@ static int init(struct ao *ao, char *params)
         goto err_out;
 
     ao->format = AF_FORMAT_FLOAT_NE;
-    ao->bps = ao->channels.num * ao->samplerate * sizeof(float);
     int unitsize = ao->channels.num * sizeof(float);
-    ao->outburst = CHUNK_SIZE / unitsize * unitsize;
-    ao->buffersize = NUM_CHUNKS * ao->outburst;
-    p->buffer = av_fifo_alloc(ao->buffersize);
+    p->outburst = CHUNK_SIZE / unitsize * unitsize;
+    p->ring = mp_ring_new(p, NUM_CHUNKS * p->outburst);
     free(matching_ports);
     free(port_name);
     free(client_name);
@@ -312,14 +294,13 @@ err_out:
     free(client_name);
     if (p->client)
         jack_client_close(p->client);
-    av_fifo_free(p->buffer);
     return -1;
 }
 
 static float get_delay(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    int buffered = av_fifo_size(p->buffer); // could be less
+    int buffered = mp_ring_buffered(p->ring); // could be less
     float in_jack = p->jack_latency;
     if (p->estimate && p->callback_interval > 0) {
         float elapsed = mp_time_us() / 1000000.0 - p->callback_time;
@@ -337,7 +318,7 @@ static void reset(struct ao *ao)
 {
     struct priv *p = ao->priv;
     p->paused = 1;
-    av_fifo_reset(p->buffer);
+    mp_ring_reset(p->ring);
     p->paused = 0;
 }
 
@@ -351,7 +332,6 @@ static void uninit(struct ao *ao, bool immed)
     reset(ao);
     mp_sleep_us(100 * 1000);
     jack_client_close(p->client);
-    av_fifo_free(p->buffer);
 }
 
 /**
@@ -375,7 +355,7 @@ static void audio_resume(struct ao *ao)
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    return av_fifo_space(p->buffer);
+    return mp_ring_available(p->ring);
 }
 
 /**
@@ -385,9 +365,9 @@ static int play(struct ao *ao, void *data, int len, int flags)
 {
     struct priv *p = ao->priv;
     if (!(flags & AOPLAY_FINAL_CHUNK))
-        len -= len % ao->outburst;
+        len -= len % p->outburst;
     p->underrun = 0;
-    return write_buffer(p->buffer, data, len);
+    return mp_ring_write(p->ring, data, len);
 }
 
 const struct ao_driver audio_out_jack = {

@@ -1,7 +1,3 @@
---abs=<value>
-    (``--ao=oss`` only) (OBSOLETE)
-    Override audio driver/card buffer size detection.
-
 --ad=<[+|-]family1:(*|decoder1),[+|-]family2:(*|decoder2),...[-]>
     Specify a priority list of audio decoders to be used, according to their
     family and decoder name. Entries like ``family:*`` prioritize all decoders
@@ -287,12 +283,15 @@
     Adjust the brightness of the video signal (default: 0). Not supported by
     all video output drivers.
 
---cache=<kBytes>
-    Enable caching of the input stream (if not already enabled) and set the
-    size of the cache in kilobytes. Caching is enabled by default (with a
-    default cache size) for network streams. May be useful when playing files
-    from slow media, but can also have negative effects, especially with file
-    formats that require a lot of seeking, such as mp4. See also ``--no-cache``.
+--cache=<kBytes|no|auto>
+    Set the size of the cache in kilobytes, disable it with ``no``, or
+    automatically enable it if needed with ``auto`` (default: ``auto``).
+    With ``auto``, the cache will usually be enabled for network streams,
+    using a default size.
+
+    May be useful when playing files from slow media, but can also have
+    negative effects, especially with file formats that require a lot of
+    seeking, such as mp4.
 
     Note that half the cache size will be used to allow fast seeking back. This
     is also the reason why a full cache is usually reported as 50% full. The
@@ -318,6 +317,12 @@
     size from the current position, mpv will wait for the cache to be
     filled to this position rather than performing a stream seek (default:
     50).
+
+    This matters for small forward seeks. With slow streams (especially http
+    streams) there is a tradeoff between skipping the data between current
+    position and seek destination, or performing an actual seek. Depending
+    on the situation, either of these might be slower than the other method.
+    This option allows control over this.
 
 --cdda=<option1:option2>
     This option can be used to tune the CD Audio reading feature of mpv.
@@ -781,7 +786,7 @@
     ``-vo=null``).
 
     This can be "misused" to disable screensavers that do not support the
-    proper X API (see also ``--stop-xscreensaver``). If you think this is too
+    proper X API (see also ``--stop-screensaver``). If you think this is too
     complicated, ask the author of the screensaver program to support the
     proper X APIs.
 
@@ -1794,6 +1799,12 @@
     to write a screenshot. Too high compression might occupy enough CPU time to
     interrupt playback. The default is 7.
 
+--screenshot-png-filter=<0-5>
+    Set the filter applied prior to PNG compression. 0 is none, 1 is "sub", 2 is
+    "up", 3 is "average", 4 is "Paeth", and 5 is "mixed". This affects the level
+    of compression that can be achieved. For most images, "mixed" achieves the
+    best compression ratio, hence it is the default.
+
 --screenshot-template=<template>
     Specify the filename template used to save screenshots. The template
     specifies the filename without file extension, and can contain format
@@ -1976,18 +1987,13 @@
 
     *NOTE*: without ``--hr-seek``, skipping will snap to keyframes.
 
---stereo=<mode>
-    Select type of MP2/MP3 stereo output.
+--stop-screensaver, --no-stop-screensaver
+    Turns off the screensaver (or screen blanker and similar mechanisms) at
+    startup and turns it on again on exit. (Default: yes)
 
-    :0: stereo
-    :1: left channel
-    :2: right channel
-
---stop-xscreensaver
-    (X11 only)
-    Turns off xscreensaver at startup and turns it on again on exit. If your
-    screensaver supports neither the XSS nor XResetScreenSaver API please use
-    ``--heartbeat-cmd`` instead.
+    This is not supported on all video outputs or platforms. Sometimes it is
+    implemented, but doesn't work (happens often on GNOME). You might be able
+    to to work this around using ``--heartbeat-cmd`` instead.
 
 --sub=<subtitlefile1,subtitlefile2,...>
     Use/display these subtitle files. Only one file can be displayed at the
@@ -2120,6 +2126,9 @@
 --title=<string>
     Set the window title. Properties are expanded on playback start.
     (See property_expansion_.)
+
+    *NOTE*: There is a danger of this causing significant CPU usage,
+    depending on the properties used and the window manager.
 
 --tv=<option1:option2:...>
     This option tunes various properties of the TV capture module. For

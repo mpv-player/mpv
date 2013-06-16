@@ -174,10 +174,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         case WM_SYSCOMMAND:
             switch (wParam) {
-                case SC_SCREENSAVE:
-                case SC_MONITORPOWER:
+            case SC_SCREENSAVE:
+            case SC_MONITORPOWER:
+                if (w32->disable_screensaver) {
                     mp_msg(MSGT_VO, MSGL_V, "vo: win32: killing screensaver\n");
                     return 0;
+                }
+                break;
             }
             break;
         case WM_KEYDOWN:
@@ -404,10 +407,6 @@ static int reinit_window_state(struct vo *vo)
     if (vo->opts->WinID >= 0)
         return 1;
 
-    wchar_t *title = mp_from_utf8(NULL, vo_get_window_title(vo));
-    SetWindowTextW(w32->window, title);
-    talloc_free(title);
-
     bool toggle_fs = w32->current_fs != vo->opts->fs;
     w32->current_fs = vo->opts->fs;
 
@@ -567,12 +566,10 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
  */
 int vo_w32_init(struct vo *vo)
 {
-    struct vo_w32_state *w32 = vo->w32;
-    if (w32 && w32->window)
-        return 1;
+    assert(!vo->w32);
 
-    if (!w32)
-        w32 = vo->w32 = talloc_zero(vo, struct vo_w32_state);
+    struct vo_w32_state *w32 = talloc_zero(vo, struct vo_w32_state);
+    vo->w32 = w32;
 
     HINSTANCE hInstance = GetModuleHandleW(NULL);
 
@@ -672,6 +669,7 @@ static void vo_w32_ontop(struct vo *vo)
 
 int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
 {
+    struct vo_w32_state *w32 = vo->w32;
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
         *events |= vo_w32_check_events(vo);
@@ -696,6 +694,19 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
         } else {
             while (ShowCursor(0) >= 0) { }
         }
+        return VO_TRUE;
+    case VOCTRL_KILL_SCREENSAVER:
+        w32->disable_screensaver = true;
+        return VO_TRUE;
+    case VOCTRL_RESTORE_SCREENSAVER:
+        w32->disable_screensaver = false;
+        return VO_TRUE;
+    case VOCTRL_UPDATE_WINDOW_TITLE: {
+        wchar_t *title = mp_from_utf8(NULL, (char *)arg);
+        SetWindowTextW(w32->window, title);
+        talloc_free(title);
+        return VO_TRUE;
+    }
     }
     return VO_NOTIMPL;
 }

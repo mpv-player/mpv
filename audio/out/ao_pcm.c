@@ -151,7 +151,6 @@ static int init(struct ao *ao, char *params)
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         return -1;
 
-    ao->outburst = 65536;
     ao->bps = ao->channels.num * ao->samplerate * (af_fmt2bits(ao->format) / 8);
 
     mp_tmsg(MSGT_AO, MSGL_INFO, "[AO PCM] File: %s (%s)\n"
@@ -207,7 +206,7 @@ static void uninit(struct ao *ao, bool cut_audio)
 
 static int get_space(struct ao *ao)
 {
-    return ao->outburst;
+    return 65536;
 }
 
 static int play(struct ao *ao, void *data, int len, int flags)

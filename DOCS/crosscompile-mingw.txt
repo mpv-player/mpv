@@ -55,5 +55,6 @@ make
 # This should work. For some reason, the resulting .exe will depend on the DLL
 # /opt/mingw/usr/i686-w64-mingw32/bin/libwinpthread-1.dll because pthreads-w32
 # folks don't like static linking. How to enable static linking is left as
-# exercise for the reader. Passsing --disable-pthreads to mpv's configure will
-# get rid of the dependency, but may disable some features.
+# exercise to the reader. Passsing --disable-pthreads to mpv's configure will
+# get rid of the dependency, but may disable some features (such as the stream
+# cache).

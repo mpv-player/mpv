@@ -495,9 +495,7 @@ libavdevice=auto
 _stream_cache=yes
 _priority=no
 def_dos_paths="#define HAVE_DOS_PATHS 0"
-def_stream_cache="#define CONFIG_STREAM_CACHE 1"
 def_priority="#undef CONFIG_PRIORITY"
-def_pthread_cache="#undef PTHREAD_CACHE"
 need_shmem=yes
 _build_man=auto
 for ac_option do
@@ -1457,14 +1455,14 @@ else
 fi
 echores "$_pthreads"
 
-if cygwin ; then
-  if test "$_pthreads" = yes ; then
-    def_pthread_cache="#define PTHREAD_CACHE 1"
-  else
-    _stream_cache=no
-    def_stream_cache="#undef CONFIG_STREAM_CACHE"
-  fi
+echocheck "stream cache"
+_stream_cache="$_pthreads"
+if test "$_stream_cache" = yes ; then
+  def_stream_cache='#define CONFIG_STREAM_CACHE'
+else
+  def_stream_cache='#undef CONFIG_STREAM_CACHE'
 fi
+echores "$_stream_cache"
 
 echocheck "rpath"
 if test "$_rpath" = yes ; then
@@ -3268,7 +3266,6 @@ $def_priority
 
 /* configurable options */
 $def_stream_cache
-$def_pthread_cache
 
 
 /* CPU stuff */

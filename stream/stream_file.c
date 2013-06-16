@@ -55,8 +55,6 @@ static const struct m_struct_st stream_opts = {
 
 static int fill_buffer(stream_t *s, char* buffer, int max_len){
   int r = read(s->fd,buffer,max_len);
-  // We are certain this is EOF, do not retry
-  if (max_len && r == 0) s->eof = 1;
   return (r <= 0) ? -1 : r;
 }
 
@@ -76,7 +74,6 @@ static int write_buffer(stream_t *s, char* buffer, int len) {
 static int seek(stream_t *s,int64_t newpos) {
   s->pos = newpos;
   if(lseek(s->fd,s->pos,SEEK_SET)<0) {
-    s->eof=1;
     return 0;
   }
   return 1;
@@ -89,7 +86,7 @@ static int seek_forward(stream_t *s,int64_t newpos) {
   }
   while(s->pos<newpos){
     int len=s->fill_buffer(s,s->buffer,STREAM_BUFFER_SIZE);
-    if(len<=0){ s->eof=1; s->buf_pos=s->buf_len=0; break; } // EOF
+    if(len<=0){ s->buf_pos=s->buf_len=0; break; } // EOF
     s->buf_pos=0;
     s->buf_len=len;
     s->pos+=len;

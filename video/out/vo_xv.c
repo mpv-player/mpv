@@ -477,6 +477,8 @@ static void resize(struct vo *vo)
     vo_x11_clear_background(vo, &ctx->dst_rect);
     xv_draw_colorkey(vo, &ctx->dst_rect);
     read_xv_csp(vo);
+
+    vo->want_redraw = true;
 }
 
 /*
@@ -955,10 +957,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     }
     int events = 0;
     int r = vo_x11_control(vo, &events, request, data);
-    if (events & (VO_EVENT_EXPOSE | VO_EVENT_RESIZE)) {
+    if (events & (VO_EVENT_EXPOSE | VO_EVENT_RESIZE))
         resize(vo);
-        vo->want_redraw = true;
-    }
     return r;
 }
 

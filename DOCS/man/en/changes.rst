@@ -64,7 +64,7 @@ General changes for mplayer2 to mpv
 * Encoding functionality (replacement for mencoder, see ``DOCS/encoding.rst``)
 * Remove ``--vo=gif89a``, ``--vo=md5sum``, ``--vo=yuv4mpeg``, as encoding can
   handle these use cases. For yuv4mpeg, for example, use:
-  ``mpv input.mkv -o output.y4m --no-audio``.
+  ``mpv input.mkv -o output.y4m --no-audio --oautofps --oneverdrop``.
 * Image subtitles (DVDs etc.) are rendered in color and use more correct
   positioning (color can be disabled with ``--sub-gray``)
 * General code cleanups
@@ -127,6 +127,7 @@ Command line switches
     -a52drc level                       --ad-lavc-ac3drc=level
     -dumpstream                         --stream-dump=<filename>
     -capture                            --stream-capture=<filename>
+    -stop-xscreensaver                  --stop-screensaver
     =================================== ===================================
 
 *NOTE*: ``-opt val`` becomes ``--opt=val``.
