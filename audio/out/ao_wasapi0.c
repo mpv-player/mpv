@@ -319,6 +319,11 @@ reinit:
                                  NULL);
     /* something about buffer sizes on Win7, fixme might loop forever */
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
+        EnterCriticalSection(&state->print_lock);
+        mp_msg(MSGT_AO, MSGL_ERR,
+               "IAudioClient::Initialize negotiation failed with %s, used %lld * 100ns\n",
+               explain_err(hr),state->defaultRequestedDuration);
+        LeaveCriticalSection(&state->print_lock);
         if (offset > 10.0) goto exit_label; /* is 10 enough to break out of the loop?*/
         IAudioClient_GetBufferSize(state->pAudioClient,&state->bufferFrameCount);
         state->defaultRequestedDuration = (REFERENCE_TIME)((BUFFER_TIME /
@@ -338,24 +343,25 @@ reinit:
     EXIT_ON_ERROR(hr)
     if(!state->hFeed) goto exit_label;
     hr = IAudioClient_SetEventHandle(state->pAudioClient,state->hFeed);
-    EXIT_ON_ERROR(hr);
+    EXIT_ON_ERROR(hr)
     hr = IAudioClient_GetBufferSize(state->pAudioClient,&state->bufferFrameCount);
-    EXIT_ON_ERROR(hr);
+    EXIT_ON_ERROR(hr)
     state->buffer_block_size = state->format.Format.nBlockAlign *
                                state->bufferFrameCount;
     LeaveCriticalSection(&state->buffer_lock);
     state->hTask = state->VistaBlob.pAvSetMmThreadCharacteristicsW(L"Pro Audio",
                    &state->taskIndex);
     EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: fix_format OK at %lld buffer block size!\n",
+    mp_msg(MSGT_AO, MSGL_V,
+           "ao-wasapi: fix_format OK, using %lld byte buffer block size!\n",
            state->buffer_block_size);
     LeaveCriticalSection(&state->print_lock);
     return 0;
 exit_label:
     EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_V,
-           "ao-wasapi: fix_format fails with %lx, failed to determine buffer block size!\n",
-           hr);
+    mp_msg(MSGT_AO, MSGL_ERR,
+           "ao-wasapi: fix_format fails with %s, failed to determine buffer block size!\n",
+           explain_err(hr));
     LeaveCriticalSection(&state->print_lock);
     LeaveCriticalSection(&state->buffer_lock);
     SetEvent(state->fatal_error);
@@ -389,15 +395,16 @@ static int thread_init(struct ao *ao)
 
     state->init_ret = enum_formats(ao); /* Probe support formats */
     if(state->init_ret) goto exit_label;
-    fix_format(state); /* now that we're sure what format to use */
-    EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: thread_init OK!\n");
-    LeaveCriticalSection(&state->print_lock);
-    SetEvent(state->init_done);
-    return state->init_ret;
+    if(!fix_format(state)) { /* now that we're sure what format to use */
+        EnterCriticalSection(&state->print_lock);
+        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: thread_init OK!\n");
+        LeaveCriticalSection(&state->print_lock);
+        SetEvent(state->init_done);
+        return state->init_ret;
+    }
 exit_label:
     EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: thread_init fails!\n");
+    mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_init failed!\n");
     LeaveCriticalSection(&state->print_lock);
     state->init_ret = -1;
     SetEvent(state->init_done);
@@ -499,9 +506,6 @@ static unsigned int __stdcall ThreadLoop(void *lpParameter)
     if(!ao || !ao->priv ) return -1;
     struct wasapi0_state* state = (struct wasapi0_state *)ao->priv;
     if(thread_init(ao)) {
-        EnterCriticalSection(&state->print_lock);
-        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_init failed!\n");
-        LeaveCriticalSection(&state->print_lock);
         goto exit_label;
     }
 
@@ -550,7 +554,7 @@ static unsigned int __stdcall ThreadLoop(void *lpParameter)
         }
     }
 exit_label:
-    return 0;
+    return state->init_ret;
 }
 
 static void closehandles(struct ao *ao)
