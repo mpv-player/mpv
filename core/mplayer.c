@@ -3578,8 +3578,10 @@ static void run_playloop(struct MPContext *mpctx)
     update_osd_msg(mpctx);
 
     // The cache status is part of the status line. Possibly update it.
-    if (mpctx->paused && mp_get_cache_percent(mpctx) >= 0)
+    if (mpctx->paused && mp_get_cache_percent(mpctx) >= 0){
         print_status(mpctx);
+        vo_update_window_title(mpctx);
+    }
 
     if (!video_left && (!mpctx->paused || was_restart)) {
         double a_pos = 0;
@@ -3589,6 +3591,7 @@ static void run_playloop(struct MPContext *mpctx)
         }
         mpctx->playback_pts = a_pos;
         print_status(mpctx);
+        vo_update_window_title(mpctx);
 
         if (!mpctx->sh_video)
             update_subtitles(mpctx, a_pos);
