@@ -639,6 +639,8 @@ static int get_space(struct ao *ao)
 */
 static int play(struct ao *ao, void *data, int len, int flags)
 {
+    struct priv *p = ao->priv;
+
     int space = check_free_buffer_size(ao);
     if (space < len)
         len = space;
