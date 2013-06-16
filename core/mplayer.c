@@ -2363,9 +2363,13 @@ static void vo_update_window_title(struct MPContext *mpctx)
     if (!mpctx->video_out)
         return;
     char *title = mp_property_expand_string(mpctx, mpctx->opts.wintitle);
-    talloc_free(mpctx->video_out->window_title);
-    mpctx->video_out->window_title = talloc_steal(mpctx, title);
-    vo_control(mpctx->video_out, VOCTRL_UPDATE_WINDOW_TITLE, title);
+    if(!mpctx->video_out->window_title || strcmp(title, mpctx->video_out->window_title)){
+        talloc_free(mpctx->video_out->window_title);
+        mpctx->video_out->window_title = talloc_steal(mpctx, title);
+        vo_control(mpctx->video_out, VOCTRL_UPDATE_WINDOW_TITLE, title);
+    }else{
+        talloc_free(title);
+    }
 }
 
 static void update_fps(struct MPContext *mpctx)
@@ -3551,6 +3555,7 @@ static void run_playloop(struct MPContext *mpctx)
         }
         update_avsync(mpctx);
         print_status(mpctx);
+        vo_update_window_title(mpctx);
         screenshot_flip(mpctx);
         new_frame_shown = true;
 
@@ -3573,8 +3578,10 @@ static void run_playloop(struct MPContext *mpctx)
     update_osd_msg(mpctx);
 
     // The cache status is part of the status line. Possibly update it.
-    if (mpctx->paused && mp_get_cache_percent(mpctx) >= 0)
+    if (mpctx->paused && mp_get_cache_percent(mpctx) >= 0){
         print_status(mpctx);
+        vo_update_window_title(mpctx);
+    }
 
     if (!video_left && (!mpctx->paused || was_restart)) {
         double a_pos = 0;
@@ -3584,6 +3591,7 @@ static void run_playloop(struct MPContext *mpctx)
         }
         mpctx->playback_pts = a_pos;
         print_status(mpctx);
+        vo_update_window_title(mpctx);
 
         if (!mpctx->sh_video)
             update_subtitles(mpctx, a_pos);
