@@ -376,6 +376,12 @@ static int create_gl_context(struct vo *vo, int gl3profile)
     return 0;
 }
 
+static void cocoa_set_window_title(struct vo *vo, const char *title)
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    [s->window setTitle: [NSString stringWithUTF8String:title]];
+}
+
 static void update_window(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
@@ -391,8 +397,7 @@ static void update_window(struct vo *vo)
         }
     }
 
-    [s->window setTitle:
-        [NSString stringWithUTF8String:vo_get_window_title(vo)]];
+    cocoa_set_window_title(vo, vo_get_window_title(vo));
 
     resize_window(vo);
 }
@@ -543,6 +548,10 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_SET_CURSOR_VISIBILITY: {
         bool visible = *(bool *)arg;
         vo_cocoa_set_cursor_visibility(vo, visible);
+        return VO_TRUE;
+    }
+    case VOCTRL_UPDATE_WINDOW_TITLE: {
+        cocoa_set_window_title(vo, (const char *) arg);
         return VO_TRUE;
     }
     case VOCTRL_RESTORE_SCREENSAVER:
