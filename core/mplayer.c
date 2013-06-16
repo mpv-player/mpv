@@ -1117,6 +1117,22 @@ static bool mp_get_cache_idle(struct MPContext *mpctx)
     return idle;
 }
 
+static void vo_update_window_title(struct MPContext *mpctx)
+{
+    if (!mpctx->video_out)
+        return;
+    char *title = mp_property_expand_string(mpctx, mpctx->opts.wintitle);
+    if (!mpctx->video_out->window_title ||
+        strcmp(title, mpctx->video_out->window_title))
+    {
+        talloc_free(mpctx->video_out->window_title);
+        mpctx->video_out->window_title = talloc_steal(mpctx, title);
+        vo_control(mpctx->video_out, VOCTRL_UPDATE_WINDOW_TITLE, title);
+    } else {
+        talloc_free(title);
+    }
+}
+
 #define saddf(var, ...) (*(var) = talloc_asprintf_append((*var), __VA_ARGS__))
 
 // append time in the hh:mm:ss format (plus fractions if wanted)
@@ -1163,6 +1179,8 @@ static void print_status(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     sh_video_t * const sh_video = mpctx->sh_video;
+
+    vo_update_window_title(mpctx);
 
     if (opts->quiet)
         return;
@@ -2356,16 +2374,6 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     }
 
     return -partial_fill;
-}
-
-static void vo_update_window_title(struct MPContext *mpctx)
-{
-    if (!mpctx->video_out)
-        return;
-    char *title = mp_property_expand_string(mpctx, mpctx->opts.wintitle);
-    talloc_free(mpctx->video_out->window_title);
-    mpctx->video_out->window_title = talloc_steal(mpctx, title);
-    vo_control(mpctx->video_out, VOCTRL_UPDATE_WINDOW_TITLE, title);
 }
 
 static void update_fps(struct MPContext *mpctx)

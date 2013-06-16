@@ -2119,6 +2119,9 @@
     Set the window title. Properties are expanded on playback start.
     (See property_expansion_.)
 
+    *NOTE*: There is a danger of this causing significant CPU usage,
+    depending on the properties used and the window manager.
+
 --tv=<option1:option2:...>
     This option tunes various properties of the TV capture module. For
     watching TV with mpv, use ``tv://`` or ``tv://<channel_number>`` or
