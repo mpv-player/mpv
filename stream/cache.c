@@ -119,6 +119,13 @@ enum {
     CACHE_CTRL_PING = -2,
 };
 
+static int64_t mp_clipi64(int64_t val, int64_t min, int64_t max)
+{
+    val = FFMIN(val, max);
+    val = FFMAX(val, min);
+    return val;
+}
+
 // pthread_cond_timedwait() with a relative timeout in seconds
 static int cond_timed_wait(pthread_cond_t *cond, pthread_mutex_t *mutex,
                            double timeout)
@@ -229,7 +236,7 @@ static bool cache_fill(struct priv *s)
     }
 
     // number of buffer bytes which should be preserved in backwards direction
-    int64_t back = av_clip64(read - s->min_filepos, 0, s->back_size);
+    int64_t back = mp_clipi64(read - s->min_filepos, 0, s->back_size);
 
     // number of buffer bytes that are valid and can be read
     int64_t newb = FFMAX(s->max_filepos - read, 0);
