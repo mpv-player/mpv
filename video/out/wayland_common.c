@@ -865,6 +865,9 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
         }
         wl->display->cursor.visible = *(bool *)arg;
         return VO_TRUE;
+    case VOCTRL_UPDATE_WINDOW_TITLE:
+        wl_shell_surface_set_title(wl->window->shell_surface, (char *) arg);
+        return VO_TRUE;
     }
     return VO_NOTIMPL;
 }
@@ -880,6 +883,5 @@ bool vo_wayland_config (struct vo *vo, uint32_t d_width,
     if ((VOFLAG_FULLSCREEN & flags) && w->type != TYPE_FULLSCREEN)
         vo_wayland_fullscreen(vo);
 
-    wl_shell_surface_set_title(w->shell_surface, vo_get_window_title(vo));
     return true;
 }
