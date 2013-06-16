@@ -131,7 +131,14 @@ static int cond_timed_wait(pthread_cond_t *cond, pthread_mutex_t *mutex,
                            double timeout)
 {
     struct timespec ts;
+#if _POSIX_TIMERS > 0
     clock_gettime(CLOCK_REALTIME, &ts);
+#else
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    ts.tv_sec = tv.tv_sec;
+    ts.tv_nsec = tv.tv_usec * 1000UL;
+#endif
     unsigned long seconds = (int)timeout;
     unsigned long nsecs = (timeout - seconds) * 1000000000UL;
     if (nsecs + ts.tv_nsec >= 1000000000UL) {
