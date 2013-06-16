@@ -283,12 +283,15 @@
     Adjust the brightness of the video signal (default: 0). Not supported by
     all video output drivers.
 
---cache=<kBytes>
-    Enable caching of the input stream (if not already enabled) and set the
-    size of the cache in kilobytes. Caching is enabled by default (with a
-    default cache size) for network streams. May be useful when playing files
-    from slow media, but can also have negative effects, especially with file
-    formats that require a lot of seeking, such as mp4. See also ``--no-cache``.
+--cache=<kBytes|no|auto>
+    Set the size of the cache in kilobytes, disable it with ``no``, or
+    automatically enable it if needed with ``auto`` (default: ``auto``).
+    With ``auto``, the cache will usually be enabled for network streams,
+    using a default size.
+
+    May be useful when playing files from slow media, but can also have
+    negative effects, especially with file formats that require a lot of
+    seeking, such as mp4.
 
     Note that half the cache size will be used to allow fast seeking back. This
     is also the reason why a full cache is usually reported as 50% full. The
@@ -314,6 +317,12 @@
     size from the current position, mpv will wait for the cache to be
     filled to this position rather than performing a stream seek (default:
     50).
+
+    This matters for small forward seeks. With slow streams (especially http
+    streams) there is a tradeoff between skipping the data between current
+    position and seek destination, or performing an actual seek. Depending
+    on the situation, either of these might be slower than the other method.
+    This option allows control over this.
 
 --cdda=<option1:option2>
     This option can be used to tune the CD Audio reading feature of mpv.

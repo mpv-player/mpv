@@ -53,28 +53,25 @@
 #define STREAMTYPE_RADIO 19
 #define STREAMTYPE_BLURAY 20
 #define STREAMTYPE_AVDEVICE 21
+#define STREAMTYPE_CACHE 22
 
 #define STREAM_BUFFER_SIZE 2048
 #define STREAM_MAX_SECTOR_SIZE (8 * 1024)
 
-#define VCD_SECTOR_SIZE 2352
-#define VCD_SECTOR_OFFS 24
-#define VCD_SECTOR_DATA 2324
+// Max buffer for initial probe.
+#define STREAM_MAX_BUFFER_SIZE (2 * 1024 * 1024)
 
-/// atm it will always use mode == STREAM_READ
-/// streams that use the new api should check the mode at open
+
+// stream->mode
 #define STREAM_READ  0
 #define STREAM_WRITE 1
-/// Seek flags, if not mannualy set and s->seek isn't NULL
-/// MP_STREAM_SEEK is automaticly set
+
+// stream->flags
 #define MP_STREAM_SEEK_BW  2
 #define MP_STREAM_SEEK_FW  4
 #define MP_STREAM_SEEK  (MP_STREAM_SEEK_BW | MP_STREAM_SEEK_FW)
 
-//////////// Open return code
 #define STREAM_REDIRECTED -2
-/// This can't open the requested protocol (used by stream wich have a
-/// * protocol when they don't know the requested protocol)
 #define STREAM_UNSUPPORTED -1
 #define STREAM_ERROR 0
 #define STREAM_OK    1
@@ -103,6 +100,7 @@
 #define STREAM_CTRL_MANAGES_TIMELINE 19
 #define STREAM_CTRL_GET_START_TIME 20
 #define STREAM_CTRL_GET_CHAPTER_TIME 21
+#define STREAM_CTRL_GET_DVD_INFO 22
 
 struct stream_lang_req {
     int type;     // STREAM_AUDIO, STREAM_SUB
@@ -110,11 +108,17 @@ struct stream_lang_req {
     char name[50];
 };
 
+struct stream_dvd_info_req {
+    unsigned int palette[16];
+    int num_subs;
+};
+
 typedef enum {
     streaming_stopped_e,
     streaming_playing_e
 } streaming_status;
 
+// All this is for legacy http streams (and other things using tcp/udp)
 typedef struct streaming_control {
     URL_t *url;
     streaming_status status;
@@ -138,9 +142,7 @@ typedef struct stream_info_st {
     const char *name;
     const char *author;
     const char *comment;
-    /// mode isn't used atm (ie always READ) but it shouldn't be ignored
-    /// opts is at least in it's defaults settings and may have been
-    /// altered by url parsing if enabled and the options string parsing.
+    // opts is set from ->opts
     int (*open)(struct stream *st, int mode, void *opts, int *file_format);
     const char *protocols[MAX_STREAM_PROTOCOLS];
     const void *opts;
@@ -165,30 +167,30 @@ typedef struct stream {
 
     int fd; // file descriptor, see man open(2)
     int type; // see STREAMTYPE_*
-    int flags;
+    int uncached_type; // like (uncached_stream ? uncached_stream->type : type)
+    int flags; // MP_STREAM_SEEK_* or'ed flags
     int sector_size; // sector size (seek will be aligned on this size if non 0)
-    int read_chunk; // maximum amount of data to read at once to limit latency (0 for default)
+    int read_chunk; // maximum amount of data to read at once to limit latency
     unsigned int buf_pos, buf_len;
     int64_t pos, start_pos, end_pos;
     int eof;
     int mode; //STREAM_READ or STREAM_WRITE
     bool streaming;     // known to be a network stream if true
     int cache_size;     // cache size in KB to use if enabled
-    bool cached;        // cache active
-    unsigned int cache_pid;
-    void *cache_data;
     void *priv; // used for DVD, TV, RTSP etc
     char *url; // strdup() of filename/url
     char *mime_type; // when HTTP streaming is used
     char *lavf_type; // name of expected demuxer type for lavf
     struct MPOpts *opts;
     streaming_ctrl_t *streaming_ctrl;
-    unsigned char buffer[STREAM_BUFFER_SIZE >
-                         STREAM_MAX_SECTOR_SIZE ? STREAM_BUFFER_SIZE :
-                         STREAM_MAX_SECTOR_SIZE];
 
     FILE *capture_file;
     char *capture_filename;
+
+    struct stream *uncached_stream;
+
+    // Includes additional padding in case sizes get rounded up by sector size.
+    unsigned char buffer[];
 } stream_t;
 
 #ifdef CONFIG_NETWORKING
@@ -196,36 +198,26 @@ typedef struct stream {
 #endif
 
 int stream_fill_buffer(stream_t *s);
-int stream_seek_long(stream_t *s, int64_t pos);
+void stream_unread_buffer(stream_t *s, void *buffer, size_t buffer_size);
 
 void stream_set_capture_file(stream_t *s, const char *filename);
-void stream_capture_write(stream_t *s);
 
-#ifdef CONFIG_STREAM_CACHE
-int stream_enable_cache_percent(stream_t *stream, int64_t stream_cache_size,
+int stream_enable_cache_percent(stream_t **stream, int64_t stream_cache_size,
                                 float stream_cache_min_percent,
                                 float stream_cache_seek_min_percent);
-int stream_enable_cache(stream_t *stream, int64_t size, int64_t min,
-                        int64_t prefill);
-int cache_stream_fill_buffer(stream_t *s);
-int cache_stream_seek_long(stream_t *s, int64_t pos);
-#else
-// no cache, define wrappers:
-#define cache_stream_fill_buffer(x) stream_fill_buffer(x)
-#define cache_stream_seek_long(x, y) stream_seek_long(x, y)
-#define stream_enable_cache(x, y, z, w) 1
-#define stream_enable_cache_percent(x, y, z, w) 1
-#endif
+int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
+                        int64_t seek_limit);
+
+// Internal
+int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
+                      int64_t min, int64_t seek_limit);
+
 int stream_write_buffer(stream_t *s, unsigned char *buf, int len);
 
 inline static int stream_read_char(stream_t *s)
 {
     return (s->buf_pos < s->buf_len) ? s->buffer[s->buf_pos++] :
-           (cache_stream_fill_buffer(s) ? s->buffer[s->buf_pos++] : -256);
-//  if(s->buf_pos<s->buf_len) return s->buffer[s->buf_pos++];
-//  stream_fill_buffer(s);
-//  if(s->buf_pos<s->buf_len) return s->buffer[s->buf_pos++];
-//  return 0; // EOF
+           (stream_fill_buffer(s) ? s->buffer[s->buf_pos++] : -256);
 }
 
 inline static unsigned int stream_read_word(stream_t *s)
@@ -288,15 +280,6 @@ inline static uint64_t stream_read_qword_le(stream_t *s)
     return y;
 }
 
-inline static unsigned int stream_read_int24(stream_t *s)
-{
-    unsigned int y;
-    y = stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    y = (y << 8) | stream_read_char(s);
-    return y;
-}
-
 unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
                                 int utf16);
 
@@ -313,6 +296,7 @@ inline static int64_t stream_tell(stream_t *s)
 int stream_skip(stream_t *s, int64_t len);
 int stream_seek(stream_t *s, int64_t pos);
 int stream_read(stream_t *s, char *mem, int total);
+int stream_read_partial(stream_t *s, char *buf, int buf_size);
 
 struct MPOpts;
 /*
@@ -323,7 +307,6 @@ struct MPOpts;
  */
 struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
                                  int max_size, int padding_bytes);
-void stream_reset(stream_t *s);
 int stream_control(stream_t *s, int cmd, void *arg);
 void stream_update_size(stream_t *s);
 void free_stream(stream_t *s);
@@ -340,10 +323,6 @@ void stream_set_interrupt_callback(int (*cb)(struct input_ctx *, int),
 /// Call the interrupt checking callback if there is one and
 /// wait for time milliseconds
 int stream_check_interrupt(int time);
-/// Internal read function bypassing the stream buffer
-int stream_read_internal(stream_t *s, void *buf, int len);
-/// Internal seek function bypassing the stream buffer
-int stream_seek_internal(stream_t *s, int64_t newpos);
 
 bool stream_manages_timeline(stream_t *s);
 

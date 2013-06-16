@@ -1212,7 +1212,6 @@ static const char* guess_cp(stream_t *st, const char *preferred_language, const 
     detected_sub_cp = guess_buffer_cp(buffer, buflen, preferred_language, fallback);
 
     free(buffer);
-    stream_reset(st);
     stream_seek(st,0);
 
     return detected_sub_cp;
@@ -1255,7 +1254,6 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
     int sub_format = SUB_INVALID;
     for (utf16 = 0; sub_format == SUB_INVALID && utf16 < 3; utf16++) {
         sub_format=sub_autodetect (fd, &uses_time, utf16);
-        stream_reset(fd);
         stream_seek(fd,0);
     }
     utf16--;

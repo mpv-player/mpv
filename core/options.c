@@ -322,7 +322,8 @@ const m_option_t mp_opts[] = {
 
 #ifdef CONFIG_STREAM_CACHE
     OPT_CHOICE_OR_INT("cache", stream_cache_size, 0, 32, 0x7fffffff,
-                      ({"no", -1}),
+                      ({"no", 0},
+                       {"auto", -1}),
                       OPTDEF_INT(-1)),
     OPT_FLOATRANGE("cache-min", stream_cache_min_percent, 0, 0, 99),
     OPT_FLOATRANGE("cache-seek-min", stream_cache_seek_min_percent, 0, 0, 99),

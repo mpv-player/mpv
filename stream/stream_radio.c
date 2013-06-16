@@ -923,19 +923,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         return STREAM_ERROR;
     }
 
-#if defined(CONFIG_RADIO_CAPTURE) && defined(CONFIG_STREAM_CACHE)
-    if(priv->do_capture){
-        //5 second cache
-        if(!stream_enable_cache(stream,5*priv->audio_in.samplerate*priv->audio_in.channels*
-                priv->audio_in.bytes_per_sample,2*priv->audio_in.samplerate*priv->audio_in.channels*
-                priv->audio_in.bytes_per_sample,priv->audio_in.blocksize)) {
-            mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] Call to stream_enable_cache failed: %s\n",strerror(errno));
-            close_s(stream);
-            return STREAM_ERROR;
-        }
-    }
-#endif
-
     set_volume(priv,priv->radio_param->volume);
 
     return STREAM_OK;

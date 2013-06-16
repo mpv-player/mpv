@@ -141,7 +141,7 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
         return -1;
     }
 
-    stream_enable_cache_percent(*stream,
+    stream_enable_cache_percent(stream,
                                 opts->stream_cache_size,
                                 opts->stream_cache_min_percent,
                                 opts->stream_cache_seek_min_percent);
@@ -230,7 +230,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
         char *main_filename = mpctx->demuxer->filename;
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "This file references data from "
                "other sources.\n");
-        if (mpctx->demuxer->stream->type != STREAMTYPE_FILE) {
+        if (mpctx->demuxer->stream->uncached_type != STREAMTYPE_FILE) {
             mp_msg(MSGT_CPLAYER, MSGL_WARN, "Playback source is not a "
                    "normal disk file. Will not search for related files.\n");
         } else {

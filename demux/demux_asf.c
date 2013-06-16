@@ -628,7 +628,6 @@ static demuxer_t* demux_open_asf(demuxer_t* demuxer)
     init_priv(asf);
     if (!read_asf_header(demuxer,asf))
         return NULL;
-    stream_reset(demuxer->stream);
     stream_seek(demuxer->stream,demuxer->movi_start);
 //    demuxer->idx_pos=0;
 //    demuxer->endpos=avi_header.movi_end;

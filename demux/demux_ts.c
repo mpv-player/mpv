@@ -470,7 +470,6 @@ static int ts_check_file(demuxer_t * demuxer)
 		if(_read < buf_size-1)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_V, "COULDN'T READ ENOUGH DATA, EXITING TS_CHECK\n");
-			stream_reset(demuxer->stream);
 			return 0;
 		}
 
@@ -992,9 +991,6 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	demuxer->type= DEMUXER_TYPE_MPEG_TS;
         demuxer->ts_resets_possible = true;
 
-
-	stream_reset(demuxer->stream);
-
 	packet_size = ts_check_file(demuxer);
 	if(!packet_size)
 	    return NULL;
@@ -1079,7 +1075,6 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
                     start_pos - priv->ts.packet_size;
 	demuxer->movi_start = start_pos;
 	demuxer->reference_clock = MP_NOPTS_VALUE;
-	stream_reset(demuxer->stream);
 	stream_seek(demuxer->stream, start_pos);	//IF IT'S FROM A PIPE IT WILL FAIL, BUT WHO CARES?
 
 
