@@ -17,16 +17,11 @@ testfun()
 {
     ${MPV:-mpv} "$@" \
         -vf dlopen="$MYDIR/ildetect.so" \
-        -o /dev/null -of nut -ovc rawvideo -no-audio \
-        | grep "^ildetect:"
+        -o /dev/null -of rawvideo -ofopts-clr -ovc rawvideo -ovcopts-clr -no-audio \
+        | tee /dev/stderr | grep "^ildetect:"
 }
 
 out=`testfun "$@"`
-echo
-echo
-echo "$out"
-echo
-echo
 case "$out" in
     *"probably: PROGRESSIVE"*)
         ${MPV:-mpv} "$@"
