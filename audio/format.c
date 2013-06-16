@@ -110,11 +110,11 @@ static bool af_fmt_valid(int format)
     return (format & AF_FORMAT_MASK) == format;
 }
 
-int af_fmt_seconds_to_bytes(int format, float seconds, int channels)
+int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int samplerate)
 {
     int bps      = (af_fmt2bits(format) / 8);
     int framelen = channels * bps;
-    int bytes    = seconds  * bps;
+    int bytes    = seconds  * bps * samplerate;
     if (bytes % framelen)
         bytes += framelen - (bytes % framelen);
     return bytes;

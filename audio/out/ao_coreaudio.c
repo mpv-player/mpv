@@ -94,6 +94,12 @@ struct priv
     struct mp_ring *buffer;
 };
 
+static int get_ring_size(struct ao *ao)
+{
+    return af_fmt_seconds_to_bytes(
+            ao->format, 0.5, ao->channels.num, ao->samplerate);
+}
+
 static OSStatus theRenderProc(void *inRefCon,
                               AudioUnitRenderActionFlags *inActionFlags,
                               const AudioTimeStamp *inTimeStamp,
@@ -621,8 +627,7 @@ static int init(struct ao *ao, char *params)
 
     ao->bps        = ao->samplerate * inDesc.mBytesPerFrame;
     ao->buffersize = ao->bps;
-    int bufbytes   = af_fmt_seconds_to_bytes(ao->format, 0.5, ao->channels.num);
-    p->buffer      = mp_ring_new(p, bufbytes);
+    p->buffer      = mp_ring_new(p, get_ring_size(ao));
     ao->outburst   = maxFrames;
 
     print_buffer(p->buffer);
@@ -859,8 +864,7 @@ static int OpenSPDIF(struct ao *ao)
     /* For ac3/dts, just use packet size 6144 bytes as chunk size. */
     int chunk_size = p->stream_format.mBytesPerPacket;
     ao->buffersize = ao->bps;
-    int bufbytes   = af_fmt_seconds_to_bytes(ao->format, 0.5, ao->channels.num);
-    p->buffer      = mp_ring_new(p, bufbytes);
+    p->buffer      = mp_ring_new(p, get_ring_size(ao));
     ao->outburst   = chunk_size;
 
     print_buffer(p->buffer);

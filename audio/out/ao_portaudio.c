@@ -91,7 +91,8 @@ static bool check_pa_ret(int ret)
 
 static int seconds_to_bytes(struct ao *ao, double seconds)
 {
-    return af_fmt_seconds_to_bytes(ao->format, seconds, ao->channels.num);
+    return af_fmt_seconds_to_bytes(ao->format, seconds, ao->channels.num,
+                                   ao->samplerate);
 }
 
 static int to_int(const char *s, int return_on_error)
