@@ -205,14 +205,45 @@ static const char *explain_err(const HRESULT hr)
     }
 }
 
+static void set_format(WAVEFORMATEXTENSIBLE *wformat, WORD bytepersample,
+                       DWORD samplerate, WORD channels, DWORD chanmask)
+{
+    wformat->Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE; /* Only PCM is supported */
+    wformat->Format.nChannels = channels;
+    wformat->Format.nSamplesPerSec = samplerate;
+    wformat->Format.nAvgBytesPerSec = wformat->Format.nChannels * bytepersample *
+                                      wformat->Format.nSamplesPerSec;
+    wformat->Format.nBlockAlign = wformat->Format.nChannels * bytepersample;
+    wformat->Format.wBitsPerSample = bytepersample * 8;
+    wformat->Format.cbSize =
+        22; /* must be at least 22 for WAVE_FORMAT_EXTENSIBLE */
+    wformat->SubFormat = local_KSDATAFORMAT_SUBTYPE_PCM;
+    wformat->Samples.wValidBitsPerSample = wformat->Format.wBitsPerSample;
+    wformat->dwChannelMask = chanmask;
+}
+
+static HRESULT check_support(struct wasapi0_state* state,
+                             const WAVEFORMATEXTENSIBLE *wformat)
+{
+    HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
+                 AUDCLNT_SHAREMODE_EXCLUSIVE, &(wformat->Format), NULL);
+    if(hr != S_OK) {
+        EnterCriticalSection(&state->print_lock);
+        mp_msg(MSGT_AO, MSGL_ERR,
+               "IAudioClient::IsFormatSupported failed with %s (%d at %ldHz %dchannels, channelmask = %lx)\n",
+               explain_err(hr),wformat->Format.wBitsPerSample, wformat->Format.nSamplesPerSec,
+               wformat->Format.nChannels, wformat->dwChannelMask);
+        LeaveCriticalSection(&state->print_lock);
+    }
+    return hr;
+}
+
 static int enum_formats(struct ao * const ao)
 {
     WAVEFORMATEXTENSIBLE wformat;
-    DWORD hr;
+    DWORD chanmask;
     int bytes_per_sample;
-    if(!ao || !ao->priv ) return -1;
     struct wasapi0_state* state = (struct wasapi0_state *)ao->priv;
-    int retry_with_stereo = 0;
 
     /* as far as testing shows, only PCM 16/24LE (44100Hz - 192kHz) is supported
      * Tested on Realtek High Definition Audio, (Realtek Semiconductor Corp. 6.0.1.6312)
@@ -229,67 +260,41 @@ static int enum_formats(struct ao * const ao)
         bytes_per_sample = 0;/* unsupported, fail it */
     }
 
-    wformat.Format.wFormatTag = WAVE_FORMAT_EXTENSIBLE; /* Only PCM is supported */
-    wformat.Format.nChannels = ao->channels.num;
-    wformat.Format.nSamplesPerSec = ao->samplerate;
-    wformat.Format.nAvgBytesPerSec = wformat.Format.nChannels * bytes_per_sample *
-                                     wformat.Format.nSamplesPerSec;
-    wformat.Format.nBlockAlign = wformat.Format.nChannels * bytes_per_sample;
-    wformat.Format.wBitsPerSample = bytes_per_sample * 8;
-    wformat.Format.cbSize = 22; /* must be at least 22 for WAVE_FORMAT_EXTENSIBLE */
-    wformat.SubFormat = local_KSDATAFORMAT_SUBTYPE_PCM;
-    wformat.Samples.wValidBitsPerSample = wformat.Format.wBitsPerSample;
-    wformat.dwChannelMask = mp_chmap_to_waveext(&ao->channels);
+    chanmask = mp_chmap_to_waveext(&ao->channels);
+    set_format(&wformat,bytes_per_sample,ao->samplerate,ao->channels.num,chanmask);
     /* See if chosen format works */
-    if((hr = IAudioClient_IsFormatSupported(state->pAudioClient,
-                                            AUDCLNT_SHAREMODE_EXCLUSIVE, &(wformat.Format), NULL)) == S_OK) {
+    if(check_support(state,&wformat) == S_OK) {
         state->format = wformat;
         ao->bps = wformat.Format.nAvgBytesPerSec;
         return 0;
     } else { /* Try default, 16bit @ 44.1kHz */
         EnterCriticalSection(&state->print_lock);
-        mp_msg(MSGT_AO, MSGL_ERR,
-               "IAudioClient::IsFormatSupported failed with %s, trying 16LE at 44100Hz\n",
-               explain_err(hr));
+        mp_msg(MSGT_AO, MSGL_WARN,"Trying 16LE at 44100Hz\n");
         LeaveCriticalSection(&state->print_lock);
-retry_stereo:
-        bytes_per_sample = 2;
-        wformat.Format.nSamplesPerSec = 44100;
-        wformat.Format.nAvgBytesPerSec = wformat.Format.nChannels * bytes_per_sample *
-                                         wformat.Format.nSamplesPerSec;
-        wformat.Format.nBlockAlign = wformat.Format.nChannels * bytes_per_sample;
-        wformat.Format.wBitsPerSample = 16;
-        wformat.Samples.wValidBitsPerSample = wformat.Format.wBitsPerSample;
-        wformat.dwChannelMask = mp_chmap_to_waveext(&ao->channels);
-        if((hr = IAudioClient_IsFormatSupported(state->pAudioClient,
-                                                AUDCLNT_SHAREMODE_EXCLUSIVE, &(wformat.Format), NULL)) == S_OK) {
+        set_format(&wformat,2,44100,ao->channels.num,chanmask);
+        if(check_support(state,&wformat) == S_OK) {
             ao->samplerate = wformat.Format.nSamplesPerSec;
             ao->bps = wformat.Format.nAvgBytesPerSec;
             ao->format = AF_FORMAT_S16_LE;
             state->format = wformat;
             return 0;
-            /* Poor quality hardware? Try stereo mode */
-        } else if(!retry_with_stereo) {
+        } else { /* Poor quality hardware? Try stereo mode */
             EnterCriticalSection(&state->print_lock);
-            mp_msg(MSGT_AO, MSGL_ERR,
-                   "IAudioClient::IsFormatSupported failed with %s, trying Stereo\n",
-                   explain_err(hr));
+            mp_msg(MSGT_AO, MSGL_WARN,"Trying Stereo\n");
             LeaveCriticalSection(&state->print_lock);
-            retry_with_stereo = 1;
             mp_chmap_from_channels(&ao->channels, 2);
-            struct mp_chmap_sel sel = {0};
-            mp_chmap_sel_add_waveext(&sel);
-            if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
-                return -1;
             wformat.Format.nChannels = 2;
-            wformat.dwChannelMask = mp_chmap_to_waveext(&ao->channels);
-            goto retry_stereo;
+            set_format(&wformat,2,44100,ao->channels.num,
+                       mp_chmap_to_waveext(&ao->channels));
+            if(check_support(state,&wformat) == S_OK) {
+                ao->samplerate = wformat.Format.nSamplesPerSec;
+                ao->bps = wformat.Format.nAvgBytesPerSec;
+                ao->format = AF_FORMAT_S16_LE;
+                state->format = wformat;
+                return 0;
+            }
         }
     }
-    EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_ERR, "IAudioClient::IsFormatSupported failed with %s\n",
-           explain_err(hr));
-    LeaveCriticalSection(&state->print_lock);
     return -1;
 }
 
@@ -611,6 +616,7 @@ static int setup_buffers(struct wasapi0_state* state)
 
 static void uninit(struct ao *ao, bool immed)
 {
+    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi0: uninit!\n");
     struct wasapi0_state* state = (struct wasapi0_state *)ao->priv;
     state->immed = immed;
     SetEvent(state->hUninit);
@@ -621,15 +627,21 @@ static void uninit(struct ao *ao, bool immed)
     if(state->VistaBlob.hAvrt)
         FreeLibrary(state->VistaBlob.hAvrt);
     free_buffers(state);
+    closehandles(ao);
     DeleteCriticalSection(&state->buffer_lock);
     DeleteCriticalSection(&state->print_lock);
-    talloc_free(ao);
+    talloc_free(state);
     ao->priv = NULL;
+    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi0: uninit END!\n");
 }
 
 static int init(struct ao *ao, char *params)
 {
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi0: init!\n");
+    struct mp_chmap_sel sel = {0};
+    mp_chmap_sel_add_waveext(&sel);
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+        return -1;
     struct wasapi0_state *state = talloc_zero(ao, struct wasapi0_state);
     if(!state) return -1;
     ao->priv = (void *)state;
