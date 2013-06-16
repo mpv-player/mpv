@@ -184,13 +184,17 @@ static int il_put_image(struct vf_dlopen_context *ctx)
             double avgcombed = totalcombedframes / (double) totalpixels;
 
             if (il->lastcombed >= 0) {
+                if (il->lastcombed < il->no_threshold ||
+                        il->lastcombed > il->yes_threshold)
+                    if (avgcombed < il->no_threshold ||
+                            avgcombed > il->yes_threshold)
+                        ++il->numdecidedadjacentframes;
                 if (il->lastcombed > il->yes_threshold &&
                         avgcombed < il->no_threshold)
                     ++il->numjumpingadjacentframes;
                 if (il->lastcombed < il->no_threshold &&
                         avgcombed > il->yes_threshold)
                     ++il->numjumpingadjacentframes;
-                ++il->numdecidedadjacentframes;
             }
 
             il->lastcombed = avgcombed;
