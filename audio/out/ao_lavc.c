@@ -72,7 +72,7 @@ static int init(struct ao *ao, char *params)
 
     if (!encode_lavc_available(ao->encode_lavc_ctx)) {
         mp_msg(MSGT_ENCODE, MSGL_ERR,
-               "ao-lavc: the option -o (output file) must be specified\n");
+               "ao-lavc: the option --o (output file) must be specified\n");
         return -1;
     }
 
