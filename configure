@@ -1451,12 +1451,14 @@ else
 fi
 echores "$_pthreads"
 
+echocheck "stream cache"
 _stream_cache="$_pthreads"
 if test "$_stream_cache" = yes ; then
   def_stream_cache='#define CONFIG_STREAM_CACHE'
 else
   def_stream_cache='#undef CONFIG_STREAM_CACHE'
 fi
+echores "$_stream_cache"
 
 echocheck "rpath"
 if test "$_rpath" = yes ; then
