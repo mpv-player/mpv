@@ -292,6 +292,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 
 static int vf_open(vf_instance_t *vf, char *args)
 {
+    int i;
     if (!vf->priv->cfg_dllname) {
         mp_msg(MSGT_VFILTER, MSGL_ERR,
                "usage: -vf dlopen=filename.so:function:args\n");
