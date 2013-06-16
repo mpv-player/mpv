@@ -1706,7 +1706,6 @@ void reinit_audio_chain(struct MPContext *mpctx)
         goto init_error;
     }
     if (!ao->initialized) {
-        ao->buffersize = opts->ao_buffersize;
         ao->encode_lavc_ctx = mpctx->encode_lavc_ctx;
         mp_chmap_remove_useless_channels(&ao->channels,
                                          &opts->audio_output_channels);

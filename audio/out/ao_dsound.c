@@ -94,6 +94,8 @@ struct priv {
     int audio_volume;
 
     int device_index;
+
+    int outburst;                   ///play in multiple of chunks of this size
 };
 
 static float get_delay(struct ao *ao);
@@ -438,13 +440,12 @@ static int init(struct ao *ao, char *params)
     ao->samplerate = rate;
     ao->format = format;
     ao->bps = ao->channels.num * rate * (af_fmt2bits(format) >> 3);
-    if (ao->buffersize == -1)
-        ao->buffersize = ao->bps;                            // space for 1 sec
+    int buffersize = ao->bps; // space for 1 sec
     mp_msg(MSGT_AO, MSGL_V,
            "ao_dsound: Samplerate:%iHz Channels:%i Format:%s\n", rate,
            ao->channels.num, af_fmt2str_short(format));
     mp_msg(MSGT_AO, MSGL_V, "ao_dsound: Buffersize:%d bytes (%d msec)\n",
-           ao->buffersize, ao->buffersize / ao->bps * 1000);
+           buffersize, buffersize / ao->bps * 1000);
 
     //fill waveformatex
     ZeroMemory(&wformat, sizeof(WAVEFORMATEXTENSIBLE));
@@ -488,12 +489,12 @@ static int init(struct ao *ao, char *params)
     wformat.Format.nAvgBytesPerSec = wformat.Format.nSamplesPerSec *
                                      wformat.Format.nBlockAlign;
 
-    dsbdesc.dwBufferBytes = ao->buffersize;
+    dsbdesc.dwBufferBytes = buffersize;
     dsbdesc.lpwfxFormat = (WAVEFORMATEX *)&wformat;
     p->buffer_size = dsbdesc.dwBufferBytes;
     p->write_offset = 0;
     p->min_free_space = wformat.Format.nBlockAlign;
-    ao->outburst = wformat.Format.nBlockAlign * 512;
+    p->outburst = wformat.Format.nBlockAlign * 512;
 
     // create primary buffer and set its format
 
@@ -633,7 +634,6 @@ static int get_space(struct ao *ao)
 \brief play 'len' bytes of 'data'
 \param data pointer to the data to play
 \param len size in bytes of the data buffer, gets rounded down to outburst*n
-           NOTE: outburst stuff might be outdated/deprecated
 \param flags currently unused
 \return number of played bytes
 */
@@ -644,7 +644,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
         len = space;
 
     if (!(flags & AOPLAY_FINAL_CHUNK))
-        len = (len / ao->outburst) * ao->outburst;
+        len = (len / p->outburst) * p->outburst;
     return write_buffer(ao, data, len);
 }
 

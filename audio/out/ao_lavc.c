@@ -281,10 +281,6 @@ out_takefirst:
                  encode_lavc_getoffset(ao->encode_lavc_ctx, ac->stream);
     ac->offset_left = ac->offset;
 
-    //fill_ao_data:
-    ao->outburst =
-        ac->aframesize * ac->sample_size * ao->channels.num * ac->framecount;
-    ao->buffersize = ao->outburst * 2;
     ao->untimed = true;
     ao->priv = ac;
 
@@ -354,7 +350,9 @@ static void uninit(struct ao *ao, bool cut_audio)
 // return: how many bytes can be played without blocking
 static int get_space(struct ao *ao)
 {
-    return ao->outburst;
+    struct priv *ac = ao->priv;
+
+    return ac->aframesize * ac->sample_size * ao->channels.num * ac->framecount;
 }
 
 // must get exactly ac->aframesize amount of data
@@ -487,7 +485,7 @@ static int encode(struct ao *ao, double apts, void *data)
 }
 
 // plays 'len' bytes of 'data'
-// it should round it down to outburst*n
+// it should round it down to frame sizes
 // return: number of bytes played
 static int play(struct ao *ao, void *data, int len, int flags)
 {

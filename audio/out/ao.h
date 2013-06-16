@@ -89,13 +89,11 @@ struct ao {
     int samplerate;
     struct mp_chmap channels;
     int format;
-    int bps; // bytes per second
-    int outburst;
-    int buffersize;
-    double pts;
+    int bps;                    // bytes per second
+    double pts;                 // some mplayer.c state (why is this here?)
     struct bstr buffer;
     int buffer_playable_size;
-    bool probing;
+    bool probing;               // if true, don't fail loudly on init
     bool initialized;
     bool untimed;
     bool no_persistent_volume;  // the AO does the equivalent of af_volume

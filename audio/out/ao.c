@@ -107,8 +107,7 @@ void list_audio_out(void)
 struct ao *ao_create(struct MPOpts *opts, struct input_ctx *input)
 {
     struct ao *r = talloc(NULL, struct ao);
-    *r = (struct ao){.outburst = 512, .buffersize = -1,
-                     .opts = opts, .input_ctx = input };
+    *r = (struct ao){.opts = opts, .input_ctx = input };
     return r;
 }
 

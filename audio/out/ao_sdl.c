@@ -248,9 +248,7 @@ static int init(struct ao *ao, char *params)
     }
 
     ao->samplerate = obtained.freq;
-    ao->buffersize = obtained.size * bufcnt;
-    ao->outburst = obtained.size;
-    priv->buffer = av_fifo_alloc(ao->buffersize);
+    priv->buffer = av_fifo_alloc(obtained.size * bufcnt);
     priv->buffer_mutex = SDL_CreateMutex();
     if (!priv->buffer_mutex) {
         mp_msg(MSGT_AO, MSGL_ERR, "[sdl] SDL_CreateMutex failed\n");

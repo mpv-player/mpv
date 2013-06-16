@@ -626,9 +626,7 @@ static int init(struct ao *ao, char *params)
         goto err_out2;
 
     ao->bps        = ao->samplerate * inDesc.mBytesPerFrame;
-    ao->buffersize = ao->bps;
     p->buffer      = mp_ring_new(p, get_ring_size(ao));
-    ao->outburst   = maxFrames;
 
     print_buffer(p->buffer);
 
@@ -861,11 +859,7 @@ static int OpenSPDIF(struct ao *ao)
                   (p->stream_format.mBytesPerPacket /
                    p->stream_format.mFramesPerPacket);
 
-    /* For ac3/dts, just use packet size 6144 bytes as chunk size. */
-    int chunk_size = p->stream_format.mBytesPerPacket;
-    ao->buffersize = ao->bps;
     p->buffer      = mp_ring_new(p, get_ring_size(ao));
-    ao->outburst   = chunk_size;
 
     print_buffer(p->buffer);
 

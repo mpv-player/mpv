@@ -51,6 +51,7 @@ struct priv {
     jack_port_t * ports[MAX_CHANS];
     int num_ports; // Number of used ports == number of channels
     jack_client_t *client;
+    int outburst;
     float jack_latency;
     int estimate;
     volatile int paused;
@@ -280,9 +281,8 @@ static int init(struct ao *ao, char *params)
 
     ao->format = AF_FORMAT_FLOAT_NE;
     int unitsize = ao->channels.num * sizeof(float);
-    ao->outburst = CHUNK_SIZE / unitsize * unitsize;
-    ao->buffersize = NUM_CHUNKS * ao->outburst;
-    p->ring = mp_ring_new(p, ao->buffersize);
+    p->outburst = CHUNK_SIZE / unitsize * unitsize;
+    p->ring = mp_ring_new(p, NUM_CHUNKS * p->outburst);
     free(matching_ports);
     free(port_name);
     free(client_name);
@@ -365,7 +365,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
 {
     struct priv *p = ao->priv;
     if (!(flags & AOPLAY_FINAL_CHUNK))
-        len -= len % ao->outburst;
+        len -= len % p->outburst;
     p->underrun = 0;
     return mp_ring_write(p->ring, data, len);
 }

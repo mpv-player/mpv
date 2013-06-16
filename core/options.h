@@ -57,7 +57,6 @@ typedef struct MPOpts {
     int volstep;
     float softvol_max;
     int gapless_audio;
-    int ao_buffersize;
 
     mp_vo_opts vo;
 

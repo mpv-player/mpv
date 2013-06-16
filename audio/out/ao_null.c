@@ -31,6 +31,8 @@
 struct priv {
     double last_time;
     float buffered_bytes;
+    int buffersize;
+    int outburst;
 };
 
 static void drain(struct ao *ao)
@@ -55,9 +57,9 @@ static int init(struct ao *ao, char *params)
         return -1;
 
     int samplesize = af_fmt2bits(ao->format) / 8;
-    ao->outburst = 256 * ao->channels.num * samplesize;
+    priv->outburst = 256 * ao->channels.num * samplesize;
     // A "buffer" for about 0.2 seconds of audio
-    ao->buffersize = (int)(ao->samplerate * 0.2 / 256 + 1) * ao->outburst;
+    priv->buffersize = (int)(ao->samplerate * 0.2 / 256 + 1) * priv->outburst;
     priv->last_time = mp_time_sec();
 
     return 0;
@@ -92,18 +94,18 @@ static int get_space(struct ao *ao)
     struct priv *priv = ao->priv;
 
     drain(ao);
-    return ao->buffersize - priv->buffered_bytes;
+    return priv->buffersize - priv->buffered_bytes;
 }
 
 static int play(struct ao *ao, void *data, int len, int flags)
 {
     struct priv *priv = ao->priv;
 
-    int maxbursts = (ao->buffersize - priv->buffered_bytes) / ao->outburst;
-    int playbursts = len / ao->outburst;
+    int maxbursts = (priv->buffersize - priv->buffered_bytes) / priv->outburst;
+    int playbursts = len / priv->outburst;
     int bursts = playbursts > maxbursts ? maxbursts : playbursts;
-    priv->buffered_bytes += bursts * ao->outburst;
-    return bursts * ao->outburst;
+    priv->buffered_bytes += bursts * priv->outburst;
+    return bursts * priv->outburst;
 }
 
 static float get_delay(struct ao *ao)

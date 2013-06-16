@@ -543,8 +543,6 @@ const m_option_t mp_opts[] = {
                 {"no", 0},
                 {"yes", 1}, {"", 1})),
     OPT_FLAG("gapless-audio", gapless_audio, 0),
-    // override audio buffer size (used only by -ao oss/win32, obsolete)
-    OPT_INT("abs", ao_buffersize, 0),
 
     // set screen dimensions (when not detectable or virtual!=visible)
     OPT_INTRANGE("screenw", vo.screenwidth, CONF_GLOBAL, 0, 4096),
@@ -734,7 +732,6 @@ const struct MPOpts mp_default_opts = {
     .mixer_init_volume = -1,
     .mixer_init_mute = -1,
     .volstep = 3,
-    .ao_buffersize = -1,
     .vo = {
         .video_driver_list = NULL,
         .cursor_autohide_delay = 1000,
