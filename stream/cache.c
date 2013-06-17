@@ -152,25 +152,27 @@ static int cond_timed_wait(pthread_cond_t *cond, pthread_mutex_t *mutex,
 
 // Used by the main thread to wakeup the cache thread, and to wait for the
 // cache thread. The cache mutex has to be locked when calling this function.
-// *retries should be set to 0 on the first call.
+// *retry_time should be set to 0 on the first call.
 // Returns CACHE_INTERRUPTED if the caller is supposed to abort.
-static int cache_wakeup_and_wait(struct priv *s, int *retries)
+static int cache_wakeup_and_wait(struct priv *s, double *retry_time)
 {
     if (stream_check_interrupt(0))
         return CACHE_INTERRUPTED;
 
     // Print a "more severe" warning after waiting 1 second and no new data
-    // (time calculation assumes the number of spurious wakeups is very low)
-    if ((*retries) * CACHE_WAIT_TIME >= 1.0) {
+    if ((*retry_time) * CACHE_WAIT_TIME >= 1.0) {
         mp_msg(MSGT_CACHE, MSGL_ERR, "Cache keeps not responding.\n");
-    } else if (*retries > 0) {
+    } else if (*retry_time > 0.1) {
         mp_msg(MSGT_CACHE, MSGL_WARN,
                "Cache is not responding - slow/stuck network connection?\n");
     }
-    (*retries) += 1;
+
+    double start = mp_time_sec();
 
     pthread_cond_signal(&s->wakeup);
     cond_timed_wait(&s->wakeup, &s->mutex, CACHE_WAIT_TIME);
+
+    *retry_time += mp_time_sec() - start;
 
     return 0;
 }
@@ -189,7 +191,7 @@ static int cache_read(struct priv *s, unsigned char *buf, int size)
     if (size <= 0)
         return 0;
 
-    int retry = 0;
+    double retry = 0;
     while (s->read_filepos >= s->max_filepos ||
            s->read_filepos < s->min_filepos)
     {
@@ -478,7 +480,7 @@ static int cache_control(stream_t *cache, int cmd, void *arg)
 
     s->control = cmd;
     s->control_arg = arg;
-    int retry = 0;
+    double retry = 0;
     while (s->control != CACHE_CTRL_NONE) {
         if (cache_wakeup_and_wait(s, &retry) == CACHE_INTERRUPTED) {
             s->eof = 1;
@@ -597,7 +599,7 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
         pthread_mutex_lock(&s->mutex);
         s->control = CACHE_CTRL_PING;
         pthread_cond_signal(&s->wakeup);
-        cache_wakeup_and_wait(s, &(int){0});
+        cache_wakeup_and_wait(s, &(double){0});
         pthread_mutex_unlock(&s->mutex);
     }
     mp_msg(MSGT_CACHE, MSGL_STATUS, "\n");
