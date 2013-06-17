@@ -100,30 +100,16 @@ static int get_ring_size(struct ao *ao)
             ao->format, 0.5, ao->channels.num, ao->samplerate);
 }
 
-static OSStatus theRenderProc(void *inRefCon,
-                              AudioUnitRenderActionFlags *inActionFlags,
-                              const AudioTimeStamp *inTimeStamp,
-                              UInt32 inBusNumber, UInt32 inNumFrames,
-                              AudioBufferList *ioData)
+static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
+                              const AudioTimeStamp *ts, UInt32 bus,
+                              UInt32 frames, AudioBufferList *buffer_list)
 {
-    struct ao *ao  = inRefCon;
-    struct priv *p = ao->priv;
+    struct ao *ao   = ctx;
+    struct priv *p  = ao->priv;
+    int requested   = frames * p->packetSize;
+    AudioBuffer buf = buffer_list->mBuffers[0];
 
-    int buffered  = mp_ring_buffered(p->buffer);
-    int requested = inNumFrames * p->packetSize;
-
-    if (buffered > requested)
-        buffered = requested;
-
-    if (buffered) {
-        mp_ring_read(p->buffer,
-                           (unsigned char *)ioData->mBuffers[0].mData,
-                           buffered);
-    } else {
-        audio_pause(ao);
-    }
-
-    ioData->mBuffers[0].mDataByteSize = buffered;
+    buf.mDataByteSize = mp_ring_read(p->buffer, buf.mData, requested);
 
     return noErr;
 }
@@ -630,7 +616,7 @@ static int init(struct ao *ao, char *params)
 
     print_buffer(p->buffer);
 
-    renderCallback.inputProc = theRenderProc;
+    renderCallback.inputProc = render_cb_lpcm;
     renderCallback.inputProcRefCon = ao;
     err = AudioUnitSetProperty(p->theOutputUnit,
                                kAudioUnitProperty_SetRenderCallback,
