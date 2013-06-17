@@ -374,6 +374,8 @@ static void convert_subrip(const char *orig, char *dest, int dest_buffer_size)
                     if (!found) {
                         // Remove the leading '#'
                         bstr_eatstart(&val, bstr0("#"));
+                        // Sometimes there are two '#'
+                        bstr_eatstart(&val, bstr0("#"));
 
                         // Parse RRGGBB format
                         tag->color = bstrtoll(val, &val, 16) & 0x00ffffff;
