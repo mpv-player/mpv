@@ -494,7 +494,6 @@ _stream_cache=yes
 _priority=no
 def_dos_paths="#define HAVE_DOS_PATHS 0"
 def_priority="#undef CONFIG_PRIORITY"
-need_shmem=yes
 _build_man=auto
 for ac_option do
   case "$ac_option" in
@@ -894,7 +893,6 @@ fi
 
 if mingw32 ; then
   _getch=getch2-win.c
-  need_shmem=no
   extra_cflags="$extra_cflags -D__USE_MINGW_ANSI_STDIO=1"
   # Hack for missing BYTE_ORDER declarations in <sys/types.h>.
   # (For some reason, they are in <sys/param.h>, but we don't bother switching
@@ -3084,7 +3082,6 @@ $(mak_enable "$arch_all"    "$arch"    ARCH)
 $(mak_enable "$subarch_all" "$subarch" ARCH)
 
 NEED_GLOB         = $need_glob
-NEED_SHMEM        = $need_shmem
 
 # features
 ALSA = $_alsa

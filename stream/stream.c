@@ -43,7 +43,6 @@
 
 #include "core/bstr.h"
 #include "core/mp_msg.h"
-#include "osdep/shmem.h"
 #include "osdep/timer.h"
 #include "network.h"
 #include "stream.h"
