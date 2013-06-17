@@ -428,7 +428,11 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                 frame->pts = av_rescale_q(vc->lastipts + skipframes,
                                           vc->worst_time_base, avc->time_base);
 
+                enum AVPictureType savetype = frame->pict_type;
                 mp_image_copy_fields_to_av_frame(frame, vc->lastimg);
+                frame->pict_type = savetype;
+                    // keep this at avcodec_get_frame_defaults default
+
                 frame->quality = avc->global_quality;
 
                 av_init_packet(&packet);
