@@ -618,8 +618,9 @@ function mp_update()
 end
 
 set_key_bindings {
-    {"mouse_btn0", function(e) mouse_click(false) end,
-                   function(e) mouse_click(true)  end},
-    {"mouse_move", mouse_move},
+    {"mouse_btn0",      function(e) mouse_click(false) end,
+                        function(e) mouse_click(true)  end},
+    {"mouse_move",      mouse_move},
+    {"mouse_btn0_dbl",  "ignore"},
 }
 enable_key_bindings()
