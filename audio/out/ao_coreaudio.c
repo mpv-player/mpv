@@ -51,7 +51,7 @@
 #include "core/subopt-helper.h"
 #include "core/mp_ring.h"
 
-#define ca_msg(a, b, c ...) mp_msg(a, b, "AO: [coreaudio] " c)
+#define ca_msg(a, b ...) mp_msg(MSGT_AO, a, "AO: [coreaudio] " b)
 
 static void audio_pause(struct ao *ao);
 static void audio_resume(struct ao *ao);
@@ -60,7 +60,7 @@ static void reset(struct ao *ao);
 static void print_buffer(struct mp_ring *buffer)
 {
     void *tctx = talloc_new(NULL);
-    ca_msg(MSGT_AO, MSGL_V, "%s\n", mp_ring_repr(buffer, tctx));
+    ca_msg(MSGL_V, "%s\n", mp_ring_repr(buffer, tctx));
     talloc_free(tctx);
 }
 
@@ -157,7 +157,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             control_vol->left = control_vol->right = vol * 100.0 / 4.0;
             return CONTROL_TRUE;
         } else {
-            ca_msg(MSGT_AO, MSGL_WARN,
+            ca_msg(MSGL_WARN,
                    "could not get HAL output volume: [%4.4s]\n", (char *)&err);
             return CONTROL_FALSE;
         }
@@ -187,7 +187,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             // printf("SET VOL=%f\n", vol);
             return CONTROL_TRUE;
         } else {
-            ca_msg(MSGT_AO, MSGL_WARN,
+            ca_msg(MSGL_WARN,
                    "could not set HAL output volume: [%4.4s]\n", (char *)&err);
             return CONTROL_FALSE;
         }
@@ -203,7 +203,7 @@ static void print_format(int lev, const char *str,
                          const AudioStreamBasicDescription *f)
 {
     uint32_t flags = (uint32_t) f->mFormatFlags;
-    ca_msg(MSGT_AO, lev,
+    ca_msg(lev,
            "%s %7.1fHz %" PRIu32 "bit [%c%c%c%c][%" PRIu32 "][%" PRIu32 "][%" PRIu32 "][%" PRIu32 "][%" PRIu32 "] %s %s %s%s%s%s\n",
            str, f->mSampleRate, f->mBitsPerChannel,
            (int)(f->mFormatID & 0xff000000) >> 24,
@@ -356,7 +356,7 @@ static void print_help(void)
     AudioDeviceID *devids;
     char *device_name;
 
-    mp_msg(MSGT_AO, MSGL_FATAL,
+    ca_msg(MSGL_FATAL,
            "\n-ao coreaudio commandline help:\n"
            "Example: mpv -ao coreaudio:device_id=266\n"
            "    open Core Audio with output device ID 266.\n"
@@ -373,7 +373,7 @@ static void print_help(void)
                                                (void **)&devids);
 
     if (!i_param_size) {
-        mp_msg(MSGT_AO, MSGL_FATAL, "Failed to get list of output devices.\n");
+        ca_msg(MSGL_FATAL, "Failed to get list of output devices.\n");
         return;
     }
 
@@ -384,15 +384,11 @@ static void print_help(void)
                                      &device_name);
 
         if (err == noErr) {
-            mp_msg(MSGT_AO, MSGL_FATAL, "%s (id: %" PRIu32 ")\n", device_name,
-                   devids[i]);
+            ca_msg(MSGL_FATAL, "%s (id: %" PRIu32 ")\n", device_name, devids[i]);
             free(device_name);
         } else
-            mp_msg(MSGT_AO, MSGL_FATAL, "Unknown (id: %" PRIu32 ")\n",
-                   devids[i]);
+            ca_msg(MSGL_FATAL, "Unknown (id: %" PRIu32 ")\n", devids[i]);
     }
-
-    mp_msg(MSGT_AO, MSGL_FATAL, "\n");
 
     free(devids);
 }
@@ -428,7 +424,7 @@ static int init(struct ao *ao, char *params)
             return 0;
     }
 
-    ca_msg(MSGT_AO, MSGL_V, "init([%dHz][%dch][%s][%d])\n",
+    ca_msg(MSGL_V, "init([%dHz][%dch][%s][%d])\n",
         ao->samplerate, ao->channels.num, af_fmt2str_short(ao->format), 0);
 
     p->i_selected_dev = 0;
@@ -451,7 +447,7 @@ static int init(struct ao *ao, char *params)
                                kAudioHardwarePropertyDefaultOutputDevice,
                                sizeof(UInt32), &devid_def);
         if (err != noErr) {
-            ca_msg(MSGT_AO, MSGL_WARN,
+            ca_msg(MSGL_WARN,
                    "could not get default audio device: [%4.4s]\n",
                    (char *)&err);
             goto err_out;
@@ -465,13 +461,13 @@ static int init(struct ao *ao, char *params)
                                  kAudioObjectPropertyName,
                                  &psz_name);
     if (err != noErr) {
-        ca_msg(MSGT_AO, MSGL_WARN,
+        ca_msg(MSGL_WARN,
                "could not get default audio device name: [%4.4s]\n",
                (char *)&err);
         goto err_out;
     }
 
-    ca_msg(MSGT_AO, MSGL_V,
+    ca_msg(MSGL_V,
            "got audio output device ID: %" PRIu32 " Name: %s\n", devid_def,
            psz_name);
 
@@ -479,7 +475,7 @@ static int init(struct ao *ao, char *params)
     if (AF_FORMAT_IS_AC3(ao->format)) {
         if (AudioDeviceSupportsDigital(devid_def))
             p->b_supports_digital = 1;
-        ca_msg(MSGT_AO, MSGL_V,
+        ca_msg(MSGL_V,
                "probe default audio output device about support for digital s/pdif output: %d\n",
                p->b_supports_digital);
     }
@@ -529,11 +525,11 @@ static int init(struct ao *ao, char *params)
                                kAudioDevicePropertyDeviceIsAlive,
                                sizeof(UInt32), &b_alive);
         if (err != noErr)
-            ca_msg(MSGT_AO, MSGL_WARN,
+            ca_msg(MSGL_WARN,
                    "could not check whether device is alive: [%4.4s]\n",
                    (char *)&err);
         if (!b_alive)
-            ca_msg(MSGT_AO, MSGL_WARN, "device is not alive\n");
+            ca_msg(MSGL_WARN, "device is not alive\n");
 
         /* S/PDIF output need device in HogMode. */
         err = GetAudioProperty(p->i_selected_dev,
@@ -541,14 +537,14 @@ static int init(struct ao *ao, char *params)
                                sizeof(pid_t), &p->i_hog_pid);
         if (err != noErr) {
             /* This is not a fatal error. Some drivers simply don't support this property. */
-            ca_msg(MSGT_AO, MSGL_WARN,
+            ca_msg(MSGL_WARN,
                    "could not check whether device is hogged: [%4.4s]\n",
                    (char *)&err);
             p->i_hog_pid = -1;
         }
 
         if (p->i_hog_pid != -1 && p->i_hog_pid != getpid()) {
-            ca_msg(MSGT_AO, MSGL_WARN,
+            ca_msg(MSGL_WARN,
                    "Selected audio device is exclusively in use by another program.\n");
             goto err_out;
         }
@@ -567,13 +563,13 @@ static int init(struct ao *ao, char *params)
 
     comp = AudioComponentFindNext(NULL, &desc);      //Finds an component that meets the desc spec's
     if (comp == NULL) {
-        ca_msg(MSGT_AO, MSGL_WARN, "Unable to find Output Unit component\n");
+        ca_msg(MSGL_WARN, "Unable to find Output Unit component\n");
         goto err_out;
     }
 
     err = AudioComponentInstanceNew(comp, &(p->theOutputUnit));      //gains access to the services provided by the component
     if (err) {
-        ca_msg(MSGT_AO, MSGL_WARN,
+        ca_msg(MSGL_WARN,
                "Unable to open Output Unit component: [%4.4s]\n", (char *)&err);
         goto err_out;
     }
@@ -581,7 +577,7 @@ static int init(struct ao *ao, char *params)
     // Initialize AudioUnit
     err = AudioUnitInitialize(p->theOutputUnit);
     if (err) {
-        ca_msg(MSGT_AO, MSGL_WARN,
+        ca_msg(MSGL_WARN,
                "Unable to initialize Output Unit component: [%4.4s]\n",
                (char *)&err);
         goto err_out1;
@@ -593,7 +589,7 @@ static int init(struct ao *ao, char *params)
                                kAudioUnitScope_Input, 0, &inDesc, size);
 
     if (err) {
-        ca_msg(MSGT_AO, MSGL_WARN, "Unable to set the input format: [%4.4s]\n",
+        ca_msg(MSGL_WARN, "Unable to set the input format: [%4.4s]\n",
                (char *)&err);
         goto err_out2;
     }
@@ -604,7 +600,7 @@ static int init(struct ao *ao, char *params)
                                kAudioUnitScope_Input, 0, &maxFrames, &size);
 
     if (err) {
-        ca_msg(MSGT_AO, MSGL_WARN,
+        ca_msg(MSGL_WARN,
                "AudioUnitGetProperty returned [%4.4s] when getting kAudioDevicePropertyBufferSize\n",
                (char *)&err);
         goto err_out2;
@@ -634,7 +630,7 @@ static int init(struct ao *ao, char *params)
                                kAudioUnitScope_Input, 0, &renderCallback,
                                sizeof(AURenderCallbackStruct));
     if (err) {
-        ca_msg(MSGT_AO, MSGL_WARN,
+        ca_msg(MSGL_WARN,
                "Unable to set the render callback: [%4.4s]\n", (char *)&err);
         goto err_out2;
     }
@@ -674,7 +670,7 @@ static int OpenSPDIF(struct ao *ao)
                            kAudioDevicePropertyHogMode,
                            sizeof(p->i_hog_pid), &p->i_hog_pid);
     if (err != noErr) {
-        ca_msg(MSGT_AO, MSGL_WARN, "failed to set hogmode: [%4.4s]\n",
+        ca_msg(MSGL_WARN, "failed to set hogmode: [%4.4s]\n",
                (char *)&err);
         p->i_hog_pid = -1;
         goto err_out;
@@ -701,7 +697,7 @@ static int OpenSPDIF(struct ao *ao)
             p->b_changed_mixing = 1;
         }
         if (err != noErr) {
-            ca_msg(MSGT_AO, MSGL_WARN, "failed to set mixmode: [%4.4s]\n",
+            ca_msg(MSGL_WARN, "failed to set mixmode: [%4.4s]\n",
                    (char *)&err);
             goto err_out;
         }
@@ -714,13 +710,13 @@ static int OpenSPDIF(struct ao *ao)
                                          (void **)&p_streams);
 
     if (!i_param_size) {
-        ca_msg(MSGT_AO, MSGL_WARN, "could not get number of streams.\n");
+        ca_msg(MSGL_WARN, "could not get number of streams.\n");
         goto err_out;
     }
 
     i_streams = i_param_size / sizeof(AudioStreamID);
 
-    ca_msg(MSGT_AO, MSGL_V, "current device stream number: %d\n", i_streams);
+    ca_msg(MSGL_V, "current device stream number: %d\n", i_streams);
 
     for (i = 0; i < i_streams && p->i_stream_index < 0; ++i) {
         /* Find a stream with a cac3 stream. */
@@ -732,7 +728,7 @@ static int OpenSPDIF(struct ao *ao)
                                                    (void **)&p_format_list);
 
         if (!i_param_size) {
-            ca_msg(MSGT_AO, MSGL_WARN,
+            ca_msg(MSGL_WARN,
                    "Could not get number of stream formats.\n");
             continue;
         }
@@ -766,7 +762,7 @@ static int OpenSPDIF(struct ao *ao)
                                        sizeof(p->sfmt_revert),
                                        &p->sfmt_revert);
                 if (err != noErr) {
-                    ca_msg(MSGT_AO, MSGL_WARN,
+                    ca_msg(MSGL_WARN,
                            "Could not retrieve the original stream format: [%4.4s]\n",
                            (char *)&err);
                     free(p_format_list);
@@ -811,7 +807,7 @@ static int OpenSPDIF(struct ao *ao)
     free(p_streams);
 
     if (p->i_stream_index < 0) {
-        ca_msg(MSGT_AO, MSGL_WARN,
+        ca_msg(MSGL_WARN,
                "Cannot find any digital output stream format when OpenSPDIF().\n");
         goto err_out;
     }
@@ -830,7 +826,7 @@ static int OpenSPDIF(struct ao *ao)
                                          DeviceListener,
                                          NULL);
     if (err != noErr)
-        ca_msg(MSGT_AO, MSGL_WARN,
+        ca_msg(MSGL_WARN,
                "AudioDeviceAddPropertyListener for kAudioDevicePropertyDeviceHasChanged failed: [%4.4s]\n",
                (char *)&err);
 
@@ -846,7 +842,7 @@ static int OpenSPDIF(struct ao *ao)
 
     if (p->stream_format.mFormatFlags & kAudioFormatFlagIsBigEndian)
 #endif
-        ca_msg(MSGT_AO, MSGL_WARN,
+        ca_msg(MSGL_WARN,
                "Output stream has non-native byte order, digital output may fail.\n");
 
 
@@ -867,7 +863,7 @@ static int OpenSPDIF(struct ao *ao)
                                     &p->renderCallback);
 
     if (err != noErr || p->renderCallback == NULL) {
-        ca_msg(MSGT_AO, MSGL_WARN, "AudioDeviceAddIOProc failed: [%4.4s]\n",
+        ca_msg(MSGL_WARN, "AudioDeviceAddIOProc failed: [%4.4s]\n",
                (char *)&err);
         goto err_out1;
     }
@@ -887,7 +883,7 @@ err_out:
                                kAudioDevicePropertySupportsMixing,
                                sizeof(int), &b_mix);
         if (err != noErr)
-            ca_msg(MSGT_AO, MSGL_WARN, "failed to set mixmode: [%4.4s]\n",
+            ca_msg(MSGL_WARN, "failed to set mixmode: [%4.4s]\n",
                    (char *)&err);
     }
     if (p->i_hog_pid == getpid()) {
@@ -896,7 +892,7 @@ err_out:
                                kAudioDevicePropertyHogMode,
                                sizeof(p->i_hog_pid), &p->i_hog_pid);
         if (err != noErr)
-            ca_msg(MSGT_AO, MSGL_WARN, "Could not release hogmode: [%4.4s]\n",
+            ca_msg(MSGL_WARN, "Could not release hogmode: [%4.4s]\n",
                    (char *)&err);
     }
     return CONTROL_FALSE;
@@ -919,7 +915,7 @@ static int AudioDeviceSupportsDigital(AudioDeviceID i_dev_id)
                                          (void **)&p_streams);
 
     if (!i_param_size) {
-        ca_msg(MSGT_AO, MSGL_WARN, "could not get number of streams.\n");
+        ca_msg(MSGL_WARN, "could not get number of streams.\n");
         return CONTROL_FALSE;
     }
 
@@ -949,7 +945,7 @@ static int AudioStreamSupportsDigital(AudioStreamID i_stream_id)
                                                (void **)&p_format_list);
 
     if (!i_param_size) {
-        ca_msg(MSGT_AO, MSGL_WARN, "Could not get number of stream formats.\n");
+        ca_msg(MSGL_WARN, "Could not get number of stream formats.\n");
         return CONTROL_FALSE;
     }
 
@@ -994,7 +990,7 @@ static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
                                          StreamListener,
                                          (void *)&stream_format_changed);
     if (err != noErr) {
-        ca_msg(MSGT_AO, MSGL_WARN,
+        ca_msg(MSGL_WARN,
                "AudioStreamAddPropertyListener failed: [%4.4s]\n",
                (char *)&err);
         return CONTROL_FALSE;
@@ -1005,7 +1001,7 @@ static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
                            kAudioStreamPropertyPhysicalFormat,
                            sizeof(AudioStreamBasicDescription), &change_format);
     if (err != noErr) {
-        ca_msg(MSGT_AO, MSGL_WARN, "could not set the stream format: [%4.4s]\n",
+        ca_msg(MSGL_WARN, "could not set the stream format: [%4.4s]\n",
                (char *)&err);
         return CONTROL_FALSE;
     }
@@ -1022,7 +1018,7 @@ static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
         if (stream_format_changed)
             stream_format_changed = 0;
         else
-            ca_msg(MSGT_AO, MSGL_V, "reached timeout\n");
+            ca_msg(MSGL_V, "reached timeout\n");
 
         err = GetAudioProperty(i_stream_id,
                                kAudioStreamPropertyPhysicalFormat,
@@ -1045,7 +1041,7 @@ static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
                                             StreamListener,
                                             (void *)&stream_format_changed);
     if (err != noErr) {
-        ca_msg(MSGT_AO, MSGL_WARN,
+        ca_msg(MSGL_WARN,
                "AudioStreamRemovePropertyListener failed: [%4.4s]\n",
                (char *)&err);
         return CONTROL_FALSE;
@@ -1065,19 +1061,19 @@ static int play(struct ao *ao, void *output_samples, int num_bytes, int flags)
         b_digital = AudioStreamSupportsDigital(p->i_stream_id);
         if (b_digital) {
             /* Current stream supports digital format output, let's set it. */
-            ca_msg(MSGT_AO, MSGL_V,
+            ca_msg(MSGL_V,
                    "Detected current stream supports digital, try to restore digital output...\n");
 
             if (!AudioStreamChangeFormat(p->i_stream_id, p->stream_format))
-                ca_msg(MSGT_AO, MSGL_WARN,
+                ca_msg(MSGL_WARN,
                        "Restoring digital output failed.\n");
             else {
-                ca_msg(MSGT_AO, MSGL_WARN,
+                ca_msg(MSGL_WARN,
                        "Restoring digital output succeeded.\n");
                 reset(ao);
             }
         } else
-            ca_msg(MSGT_AO, MSGL_V,
+            ca_msg(MSGL_V,
                    "Detected current stream does not support digital.\n");
     }
 
@@ -1120,7 +1116,7 @@ static void uninit(struct ao *ao, bool immed)
     if (!immed) {
         long long timeleft =
             (1000000LL * mp_ring_buffered(p->buffer)) / ao->bps;
-        ca_msg(MSGT_AO, MSGL_DBG2, "%d bytes left @%d bps (%d usec)\n",
+        ca_msg(MSGL_DBG2, "%d bytes left @%d bps (%d usec)\n",
                 mp_ring_buffered(p->buffer), ao->bps, (int)timeleft);
         mp_sleep_us((int)timeleft);
     }
@@ -1133,14 +1129,14 @@ static void uninit(struct ao *ao, bool immed)
         /* Stop device. */
         err = AudioDeviceStop(p->i_selected_dev, p->renderCallback);
         if (err != noErr)
-            ca_msg(MSGT_AO, MSGL_WARN, "AudioDeviceStop failed: [%4.4s]\n",
+            ca_msg(MSGL_WARN, "AudioDeviceStop failed: [%4.4s]\n",
                    (char *)&err);
 
         /* Remove IOProc callback. */
         err =
             AudioDeviceDestroyIOProcID(p->i_selected_dev, p->renderCallback);
         if (err != noErr)
-            ca_msg(MSGT_AO, MSGL_WARN,
+            ca_msg(MSGL_WARN,
                    "AudioDeviceRemoveIOProc failed: [%4.4s]\n", (char *)&err);
 
         if (p->b_revert)
@@ -1164,7 +1160,7 @@ static void uninit(struct ao *ao, bool immed)
                                        sizeof(UInt32), &b_mix);
             }
             if (err != noErr)
-                ca_msg(MSGT_AO, MSGL_WARN, "failed to set mixmode: [%4.4s]\n",
+                ca_msg(MSGL_WARN, "failed to set mixmode: [%4.4s]\n",
                        (char *)&err);
         }
         if (p->i_hog_pid == getpid()) {
@@ -1173,7 +1169,7 @@ static void uninit(struct ao *ao, bool immed)
                                    kAudioDevicePropertyHogMode,
                                    sizeof(p->i_hog_pid), &p->i_hog_pid);
             if (err != noErr)
-                ca_msg(MSGT_AO, MSGL_WARN,
+                ca_msg(MSGL_WARN,
                        "Could not release hogmode: [%4.4s]\n", (char *)&err);
         }
     }
@@ -1189,12 +1185,12 @@ static void audio_pause(struct ao *ao)
     if (!p->b_digital) {
         err = AudioOutputUnitStop(p->theOutputUnit);
         if (err != noErr)
-            ca_msg(MSGT_AO, MSGL_WARN, "AudioOutputUnitStop returned [%4.4s]\n",
+            ca_msg(MSGL_WARN, "AudioOutputUnitStop returned [%4.4s]\n",
                    (char *)&err);
     } else {
         err = AudioDeviceStop(p->i_selected_dev, p->renderCallback);
         if (err != noErr)
-            ca_msg(MSGT_AO, MSGL_WARN, "AudioDeviceStop failed: [%4.4s]\n",
+            ca_msg(MSGL_WARN, "AudioDeviceStop failed: [%4.4s]\n",
                    (char *)&err);
     }
     p->paused = 1;
@@ -1214,12 +1210,12 @@ static void audio_resume(struct ao *ao)
     if (!p->b_digital) {
         err = AudioOutputUnitStart(p->theOutputUnit);
         if (err != noErr)
-            ca_msg(MSGT_AO, MSGL_WARN,
+            ca_msg(MSGL_WARN,
                    "AudioOutputUnitStart returned [%4.4s]\n", (char *)&err);
     } else {
         err = AudioDeviceStart(p->i_selected_dev, p->renderCallback);
         if (err != noErr)
-            ca_msg(MSGT_AO, MSGL_WARN, "AudioDeviceStart failed: [%4.4s]\n",
+            ca_msg(MSGL_WARN, "AudioDeviceStart failed: [%4.4s]\n",
                    (char *)&err);
     }
     p->paused = 0;
@@ -1235,7 +1231,7 @@ static OSStatus StreamListener(AudioObjectID inObjectID,
 {
     for (int i = 0; i < inNumberAddresses; ++i) {
         if (inAddresses[i].mSelector == kAudioStreamPropertyPhysicalFormat) {
-            ca_msg(MSGT_AO, MSGL_WARN,
+            ca_msg(MSGL_WARN,
                    "got notify kAudioStreamPropertyPhysicalFormat changed.\n");
             if (inClientData)
                 *(volatile int *)inClientData = 1;
@@ -1255,7 +1251,7 @@ static OSStatus DeviceListener(AudioObjectID inObjectID,
 
     for (int i = 0; i < inNumberAddresses; ++i) {
         if (inAddresses[i].mSelector == kAudioDevicePropertyDeviceHasChanged) {
-            ca_msg(MSGT_AO, MSGL_WARN,
+            ca_msg(MSGL_WARN,
                    "got notify kAudioDevicePropertyDeviceHasChanged.\n");
             p->b_stream_format_changed = 1;
             break;
