@@ -881,7 +881,7 @@ fi
 
 if win32 ; then
   _exesuf=".exe"
-  extra_cflags="$extra_cflags -fno-common -DWINVER=0x0500"
+  extra_cflags="$extra_cflags -fno-common"
   # -lwinmm is always needed for osdep/timer-win2.c
   libs_mplayer="$libs_mplayer -lwinmm"
   _pe_executable=yes
