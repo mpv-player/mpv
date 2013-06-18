@@ -110,7 +110,7 @@ struct byte_meta {
 };
 
 enum {
-    BYTE_META_CHUNK_SIZE = 16 * 1024,
+    BYTE_META_CHUNK_SIZE = 8 * 1024,
 
     CACHE_INTERRUPTED = -1,
 
@@ -152,25 +152,27 @@ static int cond_timed_wait(pthread_cond_t *cond, pthread_mutex_t *mutex,
 
 // Used by the main thread to wakeup the cache thread, and to wait for the
 // cache thread. The cache mutex has to be locked when calling this function.
-// *retries should be set to 0 on the first call.
+// *retry_time should be set to 0 on the first call.
 // Returns CACHE_INTERRUPTED if the caller is supposed to abort.
-static int cache_wakeup_and_wait(struct priv *s, int *retries)
+static int cache_wakeup_and_wait(struct priv *s, double *retry_time)
 {
     if (stream_check_interrupt(0))
         return CACHE_INTERRUPTED;
 
     // Print a "more severe" warning after waiting 1 second and no new data
-    // (time calculation assumes the number of spurious wakeups is very low)
-    if ((*retries) * CACHE_WAIT_TIME >= 1.0) {
+    if ((*retry_time) * CACHE_WAIT_TIME >= 1.0) {
         mp_msg(MSGT_CACHE, MSGL_ERR, "Cache keeps not responding.\n");
-    } else if (*retries > 0) {
+    } else if (*retry_time > 0.1) {
         mp_msg(MSGT_CACHE, MSGL_WARN,
                "Cache is not responding - slow/stuck network connection?\n");
     }
-    (*retries) += 1;
+
+    double start = mp_time_sec();
 
     pthread_cond_signal(&s->wakeup);
     cond_timed_wait(&s->wakeup, &s->mutex, CACHE_WAIT_TIME);
+
+    *retry_time += mp_time_sec() - start;
 
     return 0;
 }
@@ -179,7 +181,7 @@ static int cache_wakeup_and_wait(struct priv *s, int *retries)
 static void cache_drop_contents(struct priv *s)
 {
     s->offset = s->min_filepos = s->max_filepos = s->read_filepos;
-    s->eof = 0;
+    s->eof = false;
 }
 
 // Runs in the main thread
@@ -189,7 +191,7 @@ static int cache_read(struct priv *s, unsigned char *buf, int size)
     if (size <= 0)
         return 0;
 
-    int retry = 0;
+    double retry = 0;
     while (s->read_filepos >= s->max_filepos ||
            s->read_filepos < s->min_filepos)
     {
@@ -278,15 +280,13 @@ static bool cache_fill(struct priv *s)
     len = stream_read_partial(s->stream, &s->buffer[pos], space);
     pthread_mutex_lock(&s->mutex);
 
-    int m1 = pos / BYTE_META_CHUNK_SIZE;
-    int m2 = (s->buffer_size + pos - 1) % s->buffer_size / BYTE_META_CHUNK_SIZE;
-    if (m1 != m2) {
-        double pts;
-        if (stream_control(s->stream, STREAM_CTRL_GET_CURRENT_TIME, &pts) <= 0)
-            pts = MP_NOPTS_VALUE;
-        s->bm[m1] = (struct byte_meta) {
-            .stream_pts = pts,
-        };
+    double pts;
+    if (stream_control(s->stream, STREAM_CTRL_GET_CURRENT_TIME, &pts) <= 0)
+        pts = MP_NOPTS_VALUE;
+    for (int64_t b_pos = pos; b_pos < pos + len + BYTE_META_CHUNK_SIZE;
+         b_pos += BYTE_META_CHUNK_SIZE)
+    {
+        s->bm[b_pos / BYTE_META_CHUNK_SIZE] = (struct byte_meta){.stream_pts = pts};
     }
 
     s->max_filepos += len;
@@ -345,17 +345,20 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
         return s->stream_manages_timeline ? STREAM_OK : STREAM_UNSUPPORTED;
     case STREAM_CTRL_GET_CURRENT_TIME: {
         if (s->read_filepos >= s->min_filepos &&
-            s->read_filepos <= s->max_filepos)
+            s->read_filepos <= s->max_filepos &&
+            s->min_filepos < s->max_filepos)
         {
-            int64_t pos = s->read_filepos - s->offset;
+            int64_t fpos = FFMIN(s->read_filepos, s->max_filepos - 1);
+            int64_t pos = fpos - s->offset;
             if (pos < 0)
                 pos += s->buffer_size;
             else if (pos >= s->buffer_size)
                 pos -= s->buffer_size;
-            *(double *)arg = s->bm[pos / BYTE_META_CHUNK_SIZE].stream_pts;
-            return STREAM_OK;
+            double pts = s->bm[pos / BYTE_META_CHUNK_SIZE].stream_pts;
+            *(double *)arg = pts;
+            return pts == MP_NOPTS_VALUE ? STREAM_UNSUPPORTED : STREAM_OK;
         }
-        break;
+        return STREAM_UNSUPPORTED;
     }
     }
     return STREAM_ERROR;
@@ -388,7 +391,6 @@ static void cache_execute_control(struct priv *s)
     } else if (pos_changed || (ok && control_needs_flush(s->control))) {
         mp_msg(MSGT_CACHE, MSGL_V, "Dropping cache due to control()\n");
         s->read_filepos = stream_tell(s->stream);
-        s->eof = false;
         s->control_flush = true;
         cache_drop_contents(s);
     }
@@ -478,7 +480,7 @@ static int cache_control(stream_t *cache, int cmd, void *arg)
 
     s->control = cmd;
     s->control_arg = arg;
-    int retry = 0;
+    double retry = 0;
     while (s->control != CACHE_CTRL_NONE) {
         if (cache_wakeup_and_wait(s, &retry) == CACHE_INTERRUPTED) {
             s->eof = 1;
@@ -535,12 +537,12 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
     struct priv *s = talloc_zero(NULL, struct priv);
 
     //64kb min_size
-    s->buffer_size = FFMAX(size, 64 * 1024);
-    s->fill_limit = 16 * 1024;
+    s->fill_limit = FFMAX(16 * 1024, BYTE_META_CHUNK_SIZE * 2);
+    s->buffer_size = FFMAX(size, s->fill_limit * 4);
     s->back_size = s->buffer_size / 2;
 
     s->buffer = malloc(s->buffer_size);
-    s->bm = malloc((s->buffer_size / BYTE_META_CHUNK_SIZE + 1) *
+    s->bm = malloc((s->buffer_size / BYTE_META_CHUNK_SIZE + 2) *
                    sizeof(struct byte_meta));
     if (!s->buffer || !s->bm) {
         mp_msg(MSGT_CACHE, MSGL_ERR, "Failed to allocate cache buffer.\n");
@@ -597,7 +599,7 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
         pthread_mutex_lock(&s->mutex);
         s->control = CACHE_CTRL_PING;
         pthread_cond_signal(&s->wakeup);
-        cache_wakeup_and_wait(s, &(int){0});
+        cache_wakeup_and_wait(s, &(double){0});
         pthread_mutex_unlock(&s->mutex);
     }
     mp_msg(MSGT_CACHE, MSGL_STATUS, "\n");
