@@ -278,7 +278,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *vc = vo->priv;
     struct encode_lavc_context *ectx = vo->encode_lavc_ctx;
-    int i, size;
+    int size;
     AVFrame *frame;
     AVCodecContext *avc;
     int64_t frameipts;
