@@ -368,7 +368,8 @@ Audio output:
   --disable-jack         disable JACK audio output [autodetect]
   --enable-openal        enable OpenAL audio output [disable]
   --disable-coreaudio    disable CoreAudio audio output [autodetect]
-  --disable-dsound        disable DirectSound audio output [autodetect]
+  --disable-dsound       disable DirectSound audio output [autodetect]
+  --disable-wasapi0      disable WASAPI (event mode) audio output [autodetect]
   --disable-select       disable using select() on the audio device [enable]
 
 Localization options:
@@ -427,6 +428,7 @@ _direct3d=auto
 _sdl=no
 _sdl2=no
 _dsound=auto
+_wasapi0=auto
 _mng=auto
 _jpeg=auto
 _gl=auto
@@ -594,6 +596,8 @@ for ac_option do
   --disable-sdl2)       _sdl2=no        ;;
   --enable-dsound)      _dsound=yes     ;;
   --disable-dsound)     _dsound=no      ;;
+  --enable-waspi0)      _waspi0=yes     ;;
+  --disable-waspi0)     _waspi0=no      ;;
   --enable-mng)         _mng=yes        ;;
   --disable-mng)        _mng=no         ;;
   --enable-jpeg)        _jpeg=yes       ;;
@@ -881,7 +885,7 @@ fi
 
 if win32 ; then
   _exesuf=".exe"
-  extra_cflags="$extra_cflags -fno-common -DWINVER=0x0500"
+  extra_cflags="$extra_cflags -fno-common"
   # -lwinmm is always needed for osdep/timer-win2.c
   libs_mplayer="$libs_mplayer -lwinmm"
   _pe_executable=yes
@@ -2193,8 +2197,47 @@ else
 fi
 echores "$_dsound"
 
-
+echocheck "WASAPI"
 fi #if win32; then
+if test "$_wasapi0" = auto ; then
+  _wasapi0=no
+
+cat > $TMPC << EOF
+#define COBJMACROS 1
+#define _WIN32_WINNT 0x600
+#include <malloc.h>
+#include <stdlib.h>
+#include <process.h>
+#include <initguid.h>
+#include <audioclient.h>
+#include <endpointvolume.h>
+#include <mmdeviceapi.h>
+#include <avrt.h>
+    const GUID *check1[] = {
+      &IID_IAudioClient,
+      &IID_IAudioRenderClient,
+      &IID_IAudioClient,
+      &IID_IAudioEndpointVolume,
+    };
+int main(void) {
+    return 0;
+}
+EOF
+
+if cc_check "-lole32 -lavrt"; then
+  _wasapi0="yes"
+fi
+
+fi
+if test "$_wasapi0" = yes ; then
+  def_wasapi0='#define CONFIG_WASAPI0 1'
+  aomodules="wasap0 $aomodules"
+  libs_mplayer="$libs_mplayer -lole32 -lavrt"
+else
+  def_wasapi0='#undef CONFIG_WASAPI0'
+  noaomodules="wasaip0 $noaomodules"
+fi
+echores "$_wasapi0"
 
 
 echocheck "SDL 2.0"
@@ -3096,6 +3139,7 @@ DIRECT3D = $_direct3d
 SDL = $_sdl
 SDL2 = $_sdl2
 DSOUND = $_dsound
+WASAPI0 = $_wasapi0
 DVBIN = $_dvbin
 DVDREAD = $_dvdread
 DXR3 = $_dxr3
@@ -3337,6 +3381,7 @@ $def_direct3d
 $def_sdl
 $def_sdl2
 $def_dsound
+$def_wasapi0
 $def_dvb
 $def_dvbin
 $def_gl
