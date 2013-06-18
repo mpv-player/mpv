@@ -29,7 +29,6 @@
 #include "core/mp_msg.h"
 
 #include "osdep/timer.h"
-#include "osdep/shmem.h"
 
 #include "stream/stream.h"
 #include "demux/demux.h"
