@@ -756,6 +756,9 @@ int vo_x11_check_events(struct vo *vo)
         case MotionNotify:
             vo_mouse_movement(vo, Event.xmotion.x, Event.xmotion.y);
             break;
+        case LeaveNotify:
+            mplayer_put_key(vo->key_fifo, MP_KEY_MOUSE_LEAVE);
+            break;
         case ButtonPress:
             mplayer_put_key(vo->key_fifo,
                             (MP_MOUSE_BTN0 + Event.xbutton.button - 1)
@@ -987,10 +990,10 @@ static void vo_x11_map_window(struct vo *vo, int x, int y, int w, int h)
         vo_x11_decoration(vo, 0);
     // map window
     vo_x11_selectinput_witherr(vo, x11->display, x11->window,
-                               StructureNotifyMask |
+                               StructureNotifyMask | ExposureMask |
                                KeyPressMask | KeyReleaseMask |
                                ButtonPressMask | ButtonReleaseMask |
-                               PointerMotionMask | ExposureMask);
+                               PointerMotionMask | LeaveWindowMask);
     XMapWindow(x11->display, x11->window);
     vo_x11_clearwindow(vo, x11->window);
 }
