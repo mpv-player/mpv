@@ -24,6 +24,7 @@
 #include "core/input/keycodes.h"
 
 #include "osdep/macosx_application_objc.h"
+#include "osdep/macosx_compat.h"
 
 static pthread_t playback_thread_id;
 
