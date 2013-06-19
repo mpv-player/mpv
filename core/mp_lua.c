@@ -253,10 +253,11 @@ static int get_mouse_pos(lua_State *L)
     struct MPContext *mpctx = get_mpctx(L);
     float px, py;
     mp_get_osd_mouse_pos(mpctx, &px, &py);
-    osd_object_pos_to_native(mpctx->osd, mpctx->osd->objs[OSDTYPE_EXTERNAL],
-                             &px, &py);
-    lua_pushnumber(L, px);
-    lua_pushnumber(L, py);
+    double sw, sh;
+    osd_object_get_scale_factor(mpctx->osd, mpctx->osd->objs[OSDTYPE_EXTERNAL],
+                                &sw, &sh);
+    lua_pushnumber(L, px * sw);
+    lua_pushnumber(L, py * sh);
     return 2;
 }
 
@@ -316,11 +317,16 @@ static int input_disable_section(lua_State *L)
 static int input_set_section_mouse_area(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
+
+    double sw, sh;
+    struct osd_object *obj = mpctx->osd->objs[OSDTYPE_EXTERNAL];
+    osd_object_get_scale_factor(mpctx->osd, obj, &sw, &sh);
+
     char *section = (char *)luaL_checkstring(L, 1);
-    int x0 = luaL_checkinteger(L, 2);
-    int y0 = luaL_checkinteger(L, 3);
-    int x1 = luaL_checkinteger(L, 4);
-    int y1 = luaL_checkinteger(L, 5);
+    int x0 = luaL_checkinteger(L, 2) / sw;
+    int y0 = luaL_checkinteger(L, 3) / sh;
+    int x1 = luaL_checkinteger(L, 4) / sw;
+    int y1 = luaL_checkinteger(L, 5) / sh;
     mp_input_set_section_mouse_area(mpctx->input, section, x0, y0, x1, y1);
     return 0;
 }

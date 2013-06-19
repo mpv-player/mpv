@@ -224,8 +224,8 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
                          double video_pts, int draw_flags,
                          struct mp_image_pool *pool, struct mp_image *dest);
 
-void osd_object_pos_to_native(struct osd_state *osd, struct osd_object *obj,
-                              float *x, float *y);
+void osd_object_get_scale_factor(struct osd_state *osd, struct osd_object *obj,
+                                 double *sw, double *sh);
 
 // defined in osd_libass.c and osd_dummy.c
 
