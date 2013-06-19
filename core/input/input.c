@@ -2169,5 +2169,9 @@ int mp_input_check_interrupt(struct input_ctx *ictx, int time)
 
 unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
 {
+    // Make the frontend always display the mouse cursor (as long as it's not
+    // forced invisible) if mouse input is desired.
+    if (mp_input_test_mouse_active(ictx, ictx->mouse_x, ictx->mouse_y))
+        ictx->mouse_event_counter++;
     return ictx->mouse_event_counter;
 }
