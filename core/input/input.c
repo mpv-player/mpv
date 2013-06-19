@@ -1140,7 +1140,7 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
     for (struct cmd_bind_section *bs = ictx->cmd_bind_sections;
          bs; bs = bs->next)
     {
-        for (struct cmd_bind *bind = bs->cmd_binds; bind->cmd; bind++) {
+        for (struct cmd_bind *bind = bs->cmd_binds; bind && bind->cmd; bind++) {
             if (bind_matches_key(bind, n, keys)) {
                 count++;
                 msg = talloc_asprintf_append(msg, "%d. ", count);
