@@ -489,25 +489,11 @@ end
 -- called by input.conf bindings
 function mouse_move()
     --print "\nI like to move it, move it!\n"
-    local mX, mY = mp.get_mouse_pos()
-    if osc_geo.valign > 0 then
-        -- deadzone above OSC
-        if mY <= get_align(1 - osc_geo.deadzonedist, osc_geo.posY - (osc_geo.osc_h / 2), 0, 0) then
-            hide_osc()
-            --print("\nhide: " .. mY .. " ".. get_align(1 - osc_geo.deadzonedist, osc_geo.posY - (osc_geo.osc_h / 2), 0, 0))
-        else
-            show_osc()
-            --print("\nshow")
-        end
-    else
-        -- deadzone below OSC
-        if mY >= (osc_geo.posY + (osc_geo.osc_h / 2)) + get_align(-1 + osc_geo.deadzonedist, osc_geo.playresy - (osc_geo.posY + (osc_geo.osc_h / 2)), 0, 0) then
-            hide_osc()
-        else
-            show_osc()
-        end
-    end
-    --show_osc()
+    show_osc()
+end
+
+function mouse_leave()
+    hide_osc()
 end
 
 function mouse_click(down)
@@ -537,7 +523,6 @@ function mouse_down()
     end
 end
 
-
 -- called by mpv on every frame
 function mp_update()
     local current_screen_sizeX, current_screen_sizeY = mp.get_screen_size()
@@ -547,6 +532,18 @@ function mp_update()
         osc_init()
         state.mp_screen_sizeX, state.mp_screen_sizeY = current_screen_sizeX, current_screen_sizeY
     end
+
+    local area_y0, area_y1
+    if osc_geo.valign > 0 then
+        -- deadzone above OSC
+        area_y0 = get_align(1 - osc_geo.deadzonedist, osc_geo.posY - (osc_geo.osc_h / 2), 0, 0)
+        area_y1 = state.mp_screen_sizeY
+    else
+        -- deadzone below OSC
+        area_y0 = 0
+        area_y1 = (osc_geo.posY + (osc_geo.osc_h / 2)) + get_align(-1 + osc_geo.deadzonedist, osc_geo.playresy - (osc_geo.posY + (osc_geo.osc_h / 2)), 0, 0)
+    end
+    set_mouse_area(0, area_y0, state.mp_screen_sizeX, area_y1)
 
     local ass = assdraw.ass_new()
 
@@ -621,6 +618,7 @@ set_key_bindings {
     {"mouse_btn0",      function(e) mouse_click(false) end,
                         function(e) mouse_click(true)  end},
     {"mouse_move",      mouse_move},
+    {"mouse_leave",     mouse_leave},
     {"mouse_btn0_dbl",  "ignore"},
 }
 enable_key_bindings()
