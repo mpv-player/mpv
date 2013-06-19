@@ -3429,7 +3429,7 @@ static void run_playloop(struct MPContext *mpctx)
         // ================================================================
         vo_check_events(vo);
 
-        double mouse_event_ts = mp_input_get_mouse_event_counter(mpctx->input);
+        unsigned mouse_event_ts = mp_input_get_mouse_event_counter(mpctx->input);
         if (mpctx->mouse_event_ts != mouse_event_ts) {
             mpctx->mouse_event_ts = mouse_event_ts;
             if (opts->vo.cursor_autohide_delay > -1) {
