@@ -114,6 +114,25 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
     return noErr;
 }
 
+static OSStatus render_cb_digital(
+        AudioDeviceID device, const AudioTimeStamp *ts,
+        const void *in_data, const AudioTimeStamp *in_ts,
+        AudioBufferList *out_data, const AudioTimeStamp *out_ts, void *ctx)
+{
+    struct ao *ao   = ctx;
+    struct priv *p  = ao->priv;
+    AudioBuffer buf = out_data->mBuffers[p->i_stream_index];
+    int requested   = buf.mDataByteSize;
+
+    if (p->b_muted) {
+        mp_ring_drain(p->buffer, requested);
+    } else {
+        buf.mDataByteSize = mp_ring_read(p->buffer, buf.mData, requested);
+    }
+
+    return noErr;
+}
+
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
     struct priv *p = ao->priv;
@@ -321,13 +340,6 @@ static int AudioStreamSupportsDigital(AudioStreamID i_stream_id);
 static int OpenSPDIF(struct ao *ao);
 static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
                                    AudioStreamBasicDescription change_format);
-static OSStatus RenderCallbackSPDIF(AudioDeviceID inDevice,
-                                    const AudioTimeStamp *inNow,
-                                    const void *inInputData,
-                                    const AudioTimeStamp *inInputTime,
-                                    AudioBufferList *outOutputData,
-                                    const AudioTimeStamp *inOutputTime,
-                                    void *threadGlobals);
 static OSStatus StreamListener(AudioObjectID inObjectID,
                                UInt32 inNumberAddresses,
                                const AudioObjectPropertyAddress inAddresses[],
@@ -851,7 +863,7 @@ static int OpenSPDIF(struct ao *ao)
 
     /* Create IOProc callback. */
     err = AudioDeviceCreateIOProcID(p->i_selected_dev,
-                                    (AudioDeviceIOProc)RenderCallbackSPDIF,
+                                    (AudioDeviceIOProc)render_cb_digital,
                                     (void *)ao,
                                     &p->renderCallback);
 
@@ -1042,37 +1054,6 @@ static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
 
     return CONTROL_TRUE;
 }
-
-/*****************************************************************************
-* RenderCallbackSPDIF: callback for SPDIF audio output
-*****************************************************************************/
-static OSStatus RenderCallbackSPDIF(AudioDeviceID inDevice,
-                                    const AudioTimeStamp *inNow,
-                                    const void *inInputData,
-                                    const AudioTimeStamp *inInputTime,
-                                    AudioBufferList *outOutputData,
-                                    const AudioTimeStamp *inOutputTime,
-                                    void *threadGlobals)
-{
-    struct ao *ao  = threadGlobals;
-    struct priv *p = ao->priv;
-    int amt = mp_ring_buffered(p->buffer);
-    AudioBuffer ca_buffer = outOutputData->mBuffers[p->i_stream_index];
-    int req = ca_buffer.mDataByteSize;
-
-    if (amt > req)
-        amt = req;
-    if (amt) {
-        if (p->b_muted) {
-            mp_ring_read(p->buffer, NULL, amt);
-        } else {
-            mp_ring_read(p->buffer, (unsigned char *)ca_buffer.mData, amt);
-        }
-    }
-
-    return noErr;
-}
-
 
 static int play(struct ao *ao, void *output_samples, int num_bytes, int flags)
 {
