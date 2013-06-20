@@ -14,6 +14,7 @@ esac
 : ${ILDETECT_MPV:=$MPV}
 : ${ILDETECT_MPVFLAGS:=--start=35% --length=35}
 : ${ILDETECT_DRY_RUN:=}
+: ${ILDETECT_QUIET:=}
 : ${MAKE:=make}
 
 # exit status:
@@ -33,7 +34,8 @@ testfun()
         --vf=dlopen="$MYDIR/ildetect.so" \
         --o= --vo=null --no-audio --untimed \
         $ILDETECT_MPVFLAGS \
-        | tee /dev/stderr | grep "^ildetect:"
+        | { if [ -n "$ILDETECT_QUIET" ]; then cat; else tee /dev/stderr; fi } \
+        | grep "^ildetect:"
 }
 
 out=`testfun "$@"`
@@ -45,10 +47,21 @@ case "$out" in
         exit 0
         ;;
     *"probably: TELECINED"*)
-        [ -n "$ILDETECT_DRY_RUN" ] || $ILDETECT_MPV "$@" -vf-pre pullup
-        r=$?
-        [ $r -eq 0 ] || exit $(($r | 16))
-        exit 1
+        out2=`ILDETECT_MPVFLAGS="$ILDETECT_MPVFLAGS --vf-pre=pullup,scale" testfun "$@"`
+        case "$out2" in
+            *"probably: TELECINED"*|*"probably: INTERLACED"*)
+                [ -n "$ILDETECT_DRY_RUN" ] || $ILDETECT_MPV "$@" -vf-pre yadif
+                r=$?
+                [ $r -eq 0 ] || exit $(($r | 16))
+                exit 2
+                ;;
+            *)
+                [ -n "$ILDETECT_DRY_RUN" ] || $ILDETECT_MPV "$@" -vf-pre pullup
+                r=$?
+                [ $r -eq 0 ] || exit $(($r | 16))
+                exit 1
+                ;;
+        esac
         ;;
     *"probably: INTERLACED"*)
         [ -n "$ILDETECT_DRY_RUN" ] || $ILDETECT_MPV "$@" -vf-pre yadif
