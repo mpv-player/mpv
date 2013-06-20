@@ -38,6 +38,28 @@ static struct MPContext *get_mpctx(lua_State *L)
     return ctx;
 }
 
+static int wrap_cpcall(lua_State *L)
+{
+    lua_CFunction fn = lua_touserdata(L, -1);
+    lua_pop(L, 1);
+    return fn(L);
+}
+
+// Call the given function fn under a Lua error handler (similar to lua_cpcall).
+// Pass the given number of args from the Lua stack to fn.
+// Returns 0 (and empty stack) on success.
+// Returns LUA_ERR[RUN|MEM|ERR] otherwise, with the error value on the stack.
+static int mp_cpcall(lua_State *L, lua_CFunction fn, int args)
+{
+    // Don't use lua_pushcfunction() - it allocates memory on Lua 5.1.
+    // Instead, emulate C closures by making wrap_cpcall call fn.
+    lua_pushlightuserdata(L, fn); // args... fn
+    // Will always succeed if mp_lua_init() set it up correctly.
+    lua_getfield(L, LUA_REGISTRYINDEX, "wrap_cpcall"); // args... fn wrap_cpcall
+    lua_insert(L, -(args + 2)); // wrap_cpcall args... fn
+    return lua_pcall(L, args + 1, 0, 0);
+}
+
 static void report_error(lua_State *L)
 {
     const char *err = lua_tostring(L, -1);
@@ -81,6 +103,9 @@ void mp_lua_init(struct MPContext *mpctx)
     // used by get_mpctx()
     lua_pushlightuserdata(L, mpctx); // mpctx
     lua_setfield(L, LUA_REGISTRYINDEX, "mpctx"); // -
+
+    lua_pushcfunction(L, wrap_cpcall); // closure
+    lua_setfield(L, LUA_REGISTRYINDEX, "wrap_cpcall"); // -
 
     luaL_openlibs(L);
 
@@ -132,7 +157,7 @@ void mp_lua_update(struct MPContext *mpctx)
     if (!mpctx->lua_ctx)
         return;
     lua_State *L = mpctx->lua_ctx->state;
-    if (lua_cpcall(L, run_update, NULL) != 0)
+    if (mp_cpcall(L, run_update, 0) != 0)
         report_error(L);
 }
 
@@ -143,12 +168,13 @@ struct dispatch_args {
 
 static int run_script_dispatch(lua_State *L)
 {
-    struct dispatch_args *args = lua_touserdata(L, -1);
+    int id = lua_tointeger(L, 1);
+    const char *event = lua_tostring(L, 2);
     lua_getglobal(L, "mp_script_dispatch");
     if (lua_isnil(L, -1))
         return 0;
-    lua_pushinteger(L, args->id);
-    lua_pushstring(L, args->event);
+    lua_pushinteger(L, id);
+    lua_pushstring(L, event);
     lua_call(L, 2, 0);
     return 0;
 }
@@ -158,8 +184,9 @@ void mp_lua_script_dispatch(struct MPContext *mpctx, int id, char *event)
     if (!mpctx->lua_ctx)
         return;
     lua_State *L = mpctx->lua_ctx->state;
-    struct dispatch_args args = {id, event};
-    if (lua_cpcall(L, run_script_dispatch, &args) != 0)
+    lua_pushinteger(L, id);
+    lua_pushstring(L, event);
+    if (mp_cpcall(L, run_script_dispatch, 2) != 0)
         report_error(L);
 }
 
