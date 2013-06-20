@@ -1229,19 +1229,11 @@ static void print_status(struct MPContext *mpctx)
     }
 
 #ifdef CONFIG_ENCODING
-    double startpos = rel_time_to_abs(mpctx, opts->play_start, 0);
-    double endpos = rel_time_to_abs(mpctx, opts->play_end, -1);
-    float position = (get_current_time(mpctx) - startpos) /
-                     (get_time_length(mpctx) - startpos);
-    if (endpos != -1)
-        position = max(position, (get_current_time(mpctx) - startpos)
-                               / (endpos - startpos));
-    if (opts->play_frames > 0)
-        position = max(position,
-                       1.0 - mpctx->max_frames / (double) opts->play_frames);
+    double position = get_current_pos_ratio(mpctx);
+    // TODO rescale this to take --start, --end, --length, --frames into account
     char lavcbuf[80];
     if (encode_lavc_getstatus(mpctx->encode_lavc_ctx, lavcbuf, sizeof(lavcbuf),
-            position, get_current_time(mpctx) - startpos) >= 0)
+            position) >= 0)
     {
         // encoding stats
         saddf(&line, " %s", lavcbuf);

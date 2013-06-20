@@ -739,6 +739,9 @@ int encode_lavc_write_frame(struct encode_lavc_context *ctx, AVPacket *packet)
         break;
     case AVMEDIA_TYPE_AUDIO:
         ctx->abytes += packet->size;
+        ctx->audioseconds += packet->duration
+            * (double)ctx->avc->streams[packet->stream_index]->time_base.num
+            / (double)ctx->avc->streams[packet->stream_index]->time_base.den;
         break;
     default:
         break;
@@ -1003,7 +1006,7 @@ double encode_lavc_getoffset(struct encode_lavc_context *ctx, AVStream *stream)
 
 int encode_lavc_getstatus(struct encode_lavc_context *ctx,
                           char *buf, int bufsize,
-                          float relative_position, float playback_time)
+                          float relative_position)
 {
     double now = mp_time_sec();
     float minutes, megabytes, fps, x;
@@ -1015,14 +1018,17 @@ int encode_lavc_getstatus(struct encode_lavc_context *ctx,
 
     minutes = (now - ctx->t0) / 60.0 * (1 - f) / f;
     megabytes = ctx->avc->pb ? (avio_size(ctx->avc->pb) / 1048576.0 / f) : 0;
-    fps = ctx->frames / ((now - ctx->t0));
-    x = playback_time / ((now - ctx->t0));
+    fps = ctx->frames / (now - ctx->t0);
+    x = ctx->audioseconds / (now - ctx->t0);
     if (ctx->frames)
-        snprintf(buf, bufsize, "{%.1f%% %.1fmin %.1ffps %.1fMB}",
-                 relative_position * 100.0, minutes, fps, megabytes);
+        snprintf(buf, bufsize, "{%.1fmin %.1ffps %.1fMB}",
+                 minutes, fps, megabytes);
+    else if (ctx->audioseconds)
+        snprintf(buf, bufsize, "{%.1fmin %.2fx %.1fMB}",
+                 minutes, x, megabytes);
     else
-        snprintf(buf, bufsize, "{%.1f%% %.1fmin %.2fx %.1fMB}",
-                 relative_position * 100.0, minutes, x, megabytes);
+        snprintf(buf, bufsize, "{%.1fmin %.1fMB}",
+                 minutes, megabytes);
     buf[bufsize - 1] = 0;
     return 0;
 }
