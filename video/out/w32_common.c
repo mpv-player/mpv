@@ -123,6 +123,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
     if (!vo)
         return DefWindowProcW(hWnd, message, wParam, lParam);
     struct vo_w32_state *w32 = vo->w32;
+    int mouse_button = 0;
 
     switch (message) {
         case WM_ERASEBKGND: // no need to erase background seperately
@@ -217,47 +218,54 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             }
             break;
         }
-        case WM_LBUTTONDOWN:
-            if (!vo->opts->nomouse_input && (vo->opts->fs || (wParam & MK_CONTROL)))
-            {
-                mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN0 | mod_state(vo));
-                break;
-            }
-            if (!vo->opts->fs) {
-                ReleaseCapture();
-                SendMessage(hWnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
-                return 0;
-            }
-            break;
-        case WM_MBUTTONDOWN:
-            if (!vo->opts->nomouse_input)
-                mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN1 | mod_state(vo));
-            break;
-        case WM_RBUTTONDOWN:
-            if (!vo->opts->nomouse_input)
-                mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN2 | mod_state(vo));
-            break;
         case WM_MOUSEMOVE:
             vo_mouse_movement(vo, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
             break;
-        case WM_MOUSEWHEEL:
-            if (!vo->opts->nomouse_input) {
-                int x = GET_WHEEL_DELTA_WPARAM(wParam);
-                if (x > 0)
-                    mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN3 | mod_state(vo));
-                else
-                    mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN4 | mod_state(vo));
-            }
+        case WM_LBUTTONDOWN:
+            mouse_button = MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN;
             break;
+        case WM_LBUTTONUP:
+            mouse_button = MP_MOUSE_BTN0;
+            break;
+        case WM_MBUTTONDOWN:
+            mouse_button = MP_MOUSE_BTN1 | MP_KEY_STATE_DOWN;
+            break;
+        case WM_MBUTTONUP:
+            mouse_button = MP_MOUSE_BTN1;
+            break;
+        case WM_RBUTTONDOWN:
+            mouse_button = MP_MOUSE_BTN2 | MP_KEY_STATE_DOWN;
+            break;
+        case WM_RBUTTONUP:
+            mouse_button = MP_MOUSE_BTN2;
+            break;
+        case WM_MOUSEWHEEL: {
+            int x = GET_WHEEL_DELTA_WPARAM(wParam);
+            mouse_button = x > 0 ? MP_MOUSE_BTN3 : MP_MOUSE_BTN4;
+            break;
+        }
         case WM_XBUTTONDOWN:
-            if (!vo->opts->nomouse_input) {
-                int x = HIWORD(wParam);
-                if (x == 1)
-                    mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN5 | mod_state(vo));
-                else // if (x == 2)
-                    mplayer_put_key(vo->key_fifo, MP_MOUSE_BTN6 | mod_state(vo));
-            }
+            mouse_button = HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
+            mouse_button |= MP_KEY_STATE_DOWN;
             break;
+        case WM_XBUTTONUP:
+            mouse_button = HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
+            break;
+    }
+
+    if (mouse_button && !vo->opts->nomouse_input) {
+        int x = GET_X_LPARAM(lParam);
+        int y = GET_Y_LPARAM(lParam);
+        mouse_button |= mod_state(vo);
+        if (mouse_button == (MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN) &&
+            !vo->opts->fs)
+        {
+            // Window dragging hack
+            ReleaseCapture();
+            SendMessage(hWnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+            return 0;
+        }
+        mplayer_put_key(vo->key_fifo, mouse_button);
     }
 
     return DefWindowProcW(hWnd, message, wParam, lParam);
