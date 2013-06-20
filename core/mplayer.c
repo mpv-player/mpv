@@ -4684,12 +4684,12 @@ static int mpv_main(int argc, char *argv[])
 #endif
 
 #ifdef CONFIG_ENCODING
-    if (opts->encode_output.file) {
+    if (opts->encode_output.file && *opts->encode_output.file) {
         mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output);
-	if(!mpctx->encode_lavc_ctx) {
+        if(!mpctx->encode_lavc_ctx) {
             mp_msg(MSGT_VO, MSGL_INFO, "Encoding initialization failed.");
             exit_player(mpctx, EXIT_ERROR, 1);
-	}
+        }
         m_config_set_option0(mpctx->mconfig, "vo", "lavc");
         m_config_set_option0(mpctx->mconfig, "ao", "lavc");
         m_config_set_option0(mpctx->mconfig, "fixed-vo", "yes");
