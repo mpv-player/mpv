@@ -12,7 +12,7 @@ esac
 : ${MPV:=mpv}
 : ${ILDETECT_MPV:=$MPV}
 : ${ILDETECT_MPV:=$MPV}
-: ${ILDETECT_MPVFLAGS:=-start 40 -end 60}
+: ${ILDETECT_MPVFLAGS:=--start=35% --length=35}
 : ${ILDETECT_DRY_RUN:=}
 : ${MAKE:=make}
 
