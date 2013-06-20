@@ -38,6 +38,7 @@
 
 #include "osdep/macosx_application.h"
 #include "osdep/macosx_events.h"
+#include "osdep/macosx_compat.h"
 
 @interface GLMPlayerWindow : NSWindow <NSWindowDelegate>
 - (BOOL)canBecomeKeyWindow;

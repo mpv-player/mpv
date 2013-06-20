@@ -63,6 +63,7 @@ struct encode_lavc_context {
     struct stream *twopass_bytebuffer_v;
     double t0;
     unsigned int frames;
+    double audioseconds;
 
     bool expect_video;
     bool expect_audio;

@@ -30,8 +30,10 @@
 #include "core/mp_fifo.h"
 // doesn't make much sense, but needed to access keymap functionality
 #include "video/out/vo.h"
-#include "osdep/macosx_events.h"
+
 #import  "osdep/macosx_application_objc.h"
+#include "osdep/macosx_events.h"
+#include "osdep/macosx_compat.h"
 
 #define NSLeftAlternateKeyMask  (0x000020 | NSAlternateKeyMask)
 #define NSRightAlternateKeyMask (0x000040 | NSAlternateKeyMask)
