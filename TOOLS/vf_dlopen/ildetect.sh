@@ -30,8 +30,8 @@ $MAKE -C "$MYDIR" ildetect.so || exit 15
 testfun()
 {
     $ILDETECT_MPV "$@" \
-        -vf dlopen="$MYDIR/ildetect.so" \
-        -o /dev/null -of rawvideo -ofopts-clr -ovc rawvideo -ovcopts-clr -no-audio \
+        --vf=dlopen="$MYDIR/ildetect.so" \
+        --o= --vo=null --no-audio --untimed \
         $ILDETECT_MPVFLAGS \
         | tee /dev/stderr | grep "^ildetect:"
 }
