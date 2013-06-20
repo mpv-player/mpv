@@ -137,7 +137,7 @@ static const stream_info_t *const auto_open_streams[] = {
     NULL
 };
 
-static stream_t *new_stream(void);
+static stream_t *new_stream(size_t min_size);
 static int stream_seek_unbuffered(stream_t *s, int64_t newpos);
 
 static stream_t *open_stream_plugin(const stream_info_t *sinfo,
@@ -167,7 +167,7 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
             }
         }
     }
-    s = new_stream();
+    s = new_stream(0);
     s->opts = options;
     s->url = strdup(filename);
     s->flags |= mode;
@@ -647,9 +647,10 @@ void stream_update_size(stream_t *s)
     }
 }
 
-static stream_t *new_stream(void)
+static stream_t *new_stream(size_t min_size)
 {
-    stream_t *s = talloc_size(NULL, sizeof(stream_t) + TOTAL_BUFFER_SIZE);
+    min_size = FFMAX(min_size, TOTAL_BUFFER_SIZE);
+    stream_t *s = talloc_size(NULL, sizeof(stream_t) + min_size);
     memset(s, 0, sizeof(stream_t));
 
 #if HAVE_WINSOCK2_H
@@ -706,6 +707,20 @@ int stream_check_interrupt(int time)
     return stream_check_interrupt_cb(stream_check_interrupt_ctx, time);
 }
 
+stream_t *open_memory_stream(void *data, int len)
+{
+    assert(len >= 0);
+    stream_t *s = new_stream(len);
+
+    s->buf_pos = 0;
+    s->buf_len = len;
+    s->start_pos = 0;
+    s->end_pos = len;
+    s->pos = len;
+    memcpy(s->buffer, data, len);
+    return s;
+}
+
 int stream_enable_cache_percent(stream_t **stream, int64_t stream_cache_size,
                                 float stream_cache_min_percent,
                                 float stream_cache_seek_min_percent)
@@ -738,7 +753,7 @@ int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
     // Can't handle a loaded buffer.
     orig->buf_len = orig->buf_pos = 0;
 
-    stream_t *cache = new_stream();
+    stream_t *cache = new_stream(0);
     cache->type = STREAMTYPE_CACHE;
     cache->uncached_type = orig->type;
     cache->uncached_stream = orig;

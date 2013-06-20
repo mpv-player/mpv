@@ -308,6 +308,7 @@ void free_stream(stream_t *s);
 stream_t *open_stream(const char *filename, struct MPOpts *options,
                       int *file_format);
 stream_t *open_output_stream(const char *filename, struct MPOpts *options);
+stream_t *open_memory_stream(void *data, int len);
 struct demux_stream;
 
 /// Set the callback to be used by libstream to check for user
