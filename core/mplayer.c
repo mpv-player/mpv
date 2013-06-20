@@ -71,7 +71,7 @@
 #include "core/mplayer.h"
 #include "core/m_property.h"
 
-#include "sub/subreader.h"
+#include "demux/subreader.h"
 #include "sub/find_subfiles.h"
 #include "sub/dec_sub.h"
 #include "sub/sd.h"

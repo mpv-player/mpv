@@ -208,6 +208,7 @@ SOURCES = talloc.c \
           demux/demux_mkv.c \
           demux/demux_mpg.c \
           demux/demux_sub.c \
+          demux/demux_subreader.c \
           demux/demux_ts.c \
           demux/mp3_hdr.c \
           demux/parse_es.c \
@@ -240,7 +241,6 @@ SOURCES = talloc.c \
           sub/sd_srt.c \
           sub/spudec.c \
           sub/sub.c \
-          sub/subreader.c \
           video/csputils.c \
           video/fmt-conversion.c \
           video/image_writer.c \

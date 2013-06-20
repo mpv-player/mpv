@@ -33,7 +33,6 @@
 #include "core/mp_msg.h"
 #include "core/path.h"
 #include "ass_mp.h"
-#include "subreader.h"
 #include "sub/sub.h"
 #include "stream/stream.h"
 #include "core/options.h"

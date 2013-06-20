@@ -37,7 +37,6 @@
 #include "dec_sub.h"
 #include "img_convert.h"
 #include "draw_bmp.h"
-#include "subreader.h"
 #include "video/mp_image.h"
 #include "video/mp_image_pool.h"
 

@@ -25,7 +25,6 @@
 #include <stdbool.h>
 
 #include "config.h"
-#include "subreader.h"
 
 // This is probably arbitrary.
 // sd_lavc_conv might indirectly still assume this PlayResY, though.

@@ -25,7 +25,7 @@
 #include "sd.h"
 #include "sub.h"
 #include "dec_sub.h"
-#include "subreader.h"
+#include "demux/subreader.h"
 #include "core/options.h"
 #include "core/mp_msg.h"
 
