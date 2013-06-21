@@ -4289,6 +4289,14 @@ goto_reopen_demuxer: ;
     if (mpctx->timeline)
         timeline_set_part(mpctx, mpctx->timeline_part, true);
 
+    // Decide correct-pts mode based on first segment of video track
+    opts->correct_pts = opts->user_correct_pts;
+    if (opts->correct_pts < 0) {
+        opts->correct_pts =
+            demux_control(mpctx->demuxer, DEMUXER_CTRL_CORRECT_PTS,
+                          NULL) == DEMUXER_CTRL_OK;
+    }
+
     mpctx->initialized_flags |= INITIALIZED_DEMUXER;
 
     add_subtitle_fonts_from_sources(mpctx);

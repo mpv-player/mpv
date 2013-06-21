@@ -981,11 +981,6 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
             demuxer = demux2;
         }
         demuxer->file_format = fformat;
-        opts->correct_pts = opts->user_correct_pts;
-        if (opts->correct_pts < 0)
-            opts->correct_pts =
-                demux_control(demuxer, DEMUXER_CTRL_CORRECT_PTS,
-                            NULL) == DEMUXER_CTRL_OK;
         if (stream_manages_timeline(demuxer->stream)) {
             // Incorrect, but fixes some behavior with DVD/BD
             demuxer->ts_resets_possible = false;
