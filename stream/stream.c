@@ -379,7 +379,9 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
     default:
         len = s->fill_buffer ? s->fill_buffer(s, buf, len) : 0;
     }
-    if (len <= 0) {
+    if (len < 0)
+        len = 0;
+    if (len == 0) {
         // do not retry if this looks like proper eof
         if (s->eof || (s->end_pos && s->pos == s->end_pos))
             goto eof_out;
@@ -426,12 +428,12 @@ int stream_fill_buffer(stream_t *s)
 {
     int len = stream_read_unbuffered(s, s->buffer, STREAM_BUFFER_SIZE);
     s->buf_pos = 0;
-    s->buf_len = len < 0 ? 0 : len;
+    s->buf_len = len;
     return s->buf_len;
 }
 
 // Read between 1..buf_size bytes of data, return how much data has been read.
-// Return <= 0 on EOF, error, of if buf_size was 0.
+// Return 0 on EOF, error, of if buf_size was 0.
 int stream_read_partial(stream_t *s, char *buf, int buf_size)
 {
     assert(s->buf_pos <= s->buf_len);
