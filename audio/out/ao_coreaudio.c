@@ -124,11 +124,10 @@ static OSStatus render_cb_digital(
     AudioBuffer buf = out_data->mBuffers[p->i_stream_index];
     int requested   = buf.mDataByteSize;
 
-    if (p->b_muted) {
+    if (p->b_muted)
         mp_ring_drain(p->buffer, requested);
-    } else {
-        buf.mDataByteSize = mp_ring_read(p->buffer, buf.mData, requested);
-    }
+    else
+        mp_ring_read(p->buffer, buf.mData, requested);
 
     return noErr;
 }
