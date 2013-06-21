@@ -1235,19 +1235,10 @@ static void print_status(struct MPContext *mpctx)
     }
 
 #ifdef CONFIG_ENCODING
-    double startpos = rel_time_to_abs(mpctx, opts->play_start, 0);
-    double endpos = rel_time_to_abs(mpctx, opts->play_end, -1);
-    float position = (get_current_time(mpctx) - startpos) /
-                     (get_time_length(mpctx) - startpos);
-    if (endpos != -1)
-        position = max(position, (get_current_time(mpctx) - startpos)
-                               / (endpos - startpos));
-    if (opts->play_frames > 0)
-        position = max(position,
-                       1.0 - mpctx->max_frames / (double) opts->play_frames);
+    double position = get_current_pos_ratio(mpctx, true);
     char lavcbuf[80];
     if (encode_lavc_getstatus(mpctx->encode_lavc_ctx, lavcbuf, sizeof(lavcbuf),
-            position, get_current_time(mpctx) - startpos) >= 0)
+            position) >= 0)
     {
         // encoding stats
         saddf(&line, " %s", lavcbuf);
@@ -1582,7 +1573,7 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
 {
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_BAR) {
         set_osd_bar(mpctx, OSD_BAR_SEEK, "Position", 0, 1,
-                    av_clipf(get_current_pos_ratio(mpctx), 0, 1));
+                    av_clipf(get_current_pos_ratio(mpctx, false), 0, 1));
         set_osd_bar_chapters(mpctx, OSD_BAR_SEEK);
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_TEXT) {
@@ -1623,7 +1614,7 @@ static void update_osd_msg(struct MPContext *mpctx)
 
     add_seek_osd_messages(mpctx);
     update_osd_bar(mpctx, OSD_BAR_SEEK, 0, 1,
-                   av_clipf(get_current_pos_ratio(mpctx), 0, 1));
+                   av_clipf(get_current_pos_ratio(mpctx, false), 0, 1));
 
     // Look if we have a msg
     mp_osd_msg_t *msg = get_osd_msg(mpctx);
@@ -3152,7 +3143,7 @@ double get_start_time(struct MPContext *mpctx)
 }
 
 // Return playback position in 0.0-1.0 ratio, or -1 if unknown.
-double get_current_pos_ratio(struct MPContext *mpctx)
+double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
 {
     struct demuxer *demuxer = mpctx->demuxer;
     if (!demuxer)
@@ -3160,6 +3151,19 @@ double get_current_pos_ratio(struct MPContext *mpctx)
     double ans = -1;
     double start = get_start_time(mpctx);
     double len = get_time_length(mpctx);
+    if (use_range) {
+        double startpos = rel_time_to_abs(mpctx, mpctx->opts.play_start,
+                MP_NOPTS_VALUE);
+        double endpos = get_play_end_pts(mpctx);
+        if (endpos == MP_NOPTS_VALUE || endpos > start + len)
+            endpos = start + len;
+        if (startpos == MP_NOPTS_VALUE || startpos < start)
+            startpos = start;
+        if (endpos < startpos)
+            endpos = startpos;
+        start = startpos;
+        len = endpos - startpos;
+    }
     double pos = get_current_time(mpctx);
     if (len > 0 && !demuxer->ts_resets_possible) {
         ans = av_clipf((pos - start) / len, 0, 1);
@@ -3170,12 +3174,17 @@ double get_current_pos_ratio(struct MPContext *mpctx)
         if (len > 0)
             ans = av_clipf((double)(pos - demuxer->movi_start) / len, 0, 1);
     }
+    if (use_range) {
+        if (mpctx->opts.play_frames > 0)
+            ans = max(ans, 1.0 -
+                    mpctx->max_frames / (double) mpctx->opts.play_frames);
+    }
     return ans;
 }
 
 int get_percent_pos(struct MPContext *mpctx)
 {
-    return av_clip(get_current_pos_ratio(mpctx) * 100, 0, 100);
+    return av_clip(get_current_pos_ratio(mpctx, false) * 100, 0, 100);
 }
 
 // -2 is no chapters, -1 is before first chapter
@@ -4697,12 +4706,12 @@ static int mpv_main(int argc, char *argv[])
     init_input(mpctx);
 
 #ifdef CONFIG_ENCODING
-    if (opts->encode_output.file) {
+    if (opts->encode_output.file && *opts->encode_output.file) {
         mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output);
-	if(!mpctx->encode_lavc_ctx) {
+        if(!mpctx->encode_lavc_ctx) {
             mp_msg(MSGT_VO, MSGL_INFO, "Encoding initialization failed.");
             exit_player(mpctx, EXIT_ERROR, 1);
-	}
+        }
         m_config_set_option0(mpctx->mconfig, "vo", "lavc");
         m_config_set_option0(mpctx->mconfig, "ao", "lavc");
         m_config_set_option0(mpctx->mconfig, "fixed-vo", "yes");
