@@ -466,6 +466,40 @@ int stream_read(stream_t *s, char *mem, int total)
     return total - len;
 }
 
+// Read ahead at most len bytes without changing the read position. Return a
+// pointer to the internal buffer, starting from the current read position.
+// Can read ahead at most STREAM_MAX_BUFFER_SIZE bytes.
+// The returned buffer becomes invalid on the next stream call, and you must
+// not write to it.
+struct bstr stream_peek(stream_t *s, int len)
+{
+    assert(len >= 0);
+    assert(len <= STREAM_MAX_BUFFER_SIZE);
+    // Logically like: stream_read(); stream_unread_buffer(); return buffer;
+    if (s->buf_len - s->buf_pos < len) {
+        // Move to front to guarantee we really can read up to max size.
+        int buf_valid = s->buf_len - s->buf_pos;
+        memmove(s->buffer, &s->buffer[s->buf_pos], buf_valid);
+        // Fill rest of the buffer.
+        while (buf_valid < len) {
+            int chunk = len - buf_valid;
+            if (s->sector_size)
+                chunk = STREAM_BUFFER_SIZE;
+            assert(buf_valid + chunk <= TOTAL_BUFFER_SIZE);
+            int read = stream_read_unbuffered(s, &s->buffer[buf_valid], chunk);
+            if (read == 0)
+                break; // EOF
+            buf_valid += read;
+        }
+        s->buf_pos = 0;
+        s->buf_len = buf_valid;
+        if (s->buf_len)
+            s->eof = 0;
+    }
+    return (bstr){.start = &s->buffer[s->buf_pos],
+                  .len = FFMIN(len, s->buf_len - s->buf_pos)};
+}
+
 int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
 {
     int rd;
