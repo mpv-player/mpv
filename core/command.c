@@ -324,7 +324,7 @@ static int mp_property_ratio_pos(m_option_t *prop, int action,
         queue_seek(mpctx, MPSEEK_FACTOR, pos, 0);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(double *)arg = get_current_pos_ratio(mpctx);
+        *(double *)arg = get_current_pos_ratio(mpctx, false);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;

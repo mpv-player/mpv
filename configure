@@ -3004,7 +3004,10 @@ fi
 if test "$lua" = auto && pkg_config_add "lua5.1 >= 5.1.0" ; then # debian
   lua=yes
 fi
-if test "$lua" = auto && pkg_config_add "lua >= 5.1.0 lua < 5.2.0" ; then
+if test "$lua" = auto && pkg_config_add "lua5.2 >= 5.2.0" ; then # debian
+  lua=yes
+fi
+if test "$lua" = auto && pkg_config_add "lua >= 5.1.0" ; then
   lua=yes
 fi
 if test "$lua" = auto ; then

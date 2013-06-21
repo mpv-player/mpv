@@ -441,8 +441,9 @@ static const struct key_name key_names[] = {
   { MP_KEY_PREV,    "XF86_PREV" },
   { MP_KEY_NEXT,    "XF86_NEXT" },
 
-  { MP_KEY_CLOSE_WIN,  "CLOSE_WIN" },
-  { MP_KEY_MOUSE_MOVE, "MOUSE_MOVE" },
+  { MP_KEY_CLOSE_WIN,   "CLOSE_WIN" },
+  { MP_KEY_MOUSE_MOVE,  "MOUSE_MOVE" },
+  { MP_KEY_MOUSE_LEAVE, "MOUSE_LEAVE" },
 
   { 0, NULL }
 };
@@ -529,6 +530,7 @@ struct input_ctx {
 
     // Mouse position on the consumer side (as command.c sees it)
     int mouse_x, mouse_y;
+    char *mouse_section; // last section to receive mouse event
 
     // Mouse position on the producer side (as the VO sees it)
     // Unlike mouse_x/y, this can be used to resolve mouse click bindings.
@@ -1138,7 +1140,7 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
     for (struct cmd_bind_section *bs = ictx->cmd_bind_sections;
          bs; bs = bs->next)
     {
-        for (struct cmd_bind *bind = bs->cmd_binds; bind->cmd; bind++) {
+        for (struct cmd_bind *bind = bs->cmd_binds; bind && bind->cmd; bind++) {
             if (bind_matches_key(bind, n, keys)) {
                 count++;
                 msg = talloc_asprintf_append(msg, "%d. ", count);
@@ -1214,8 +1216,21 @@ static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
 }
 
 static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
+                                              char *force_section,
                                               int n, int *keys)
 {
+    if (force_section) {
+        for (int b = 0; b < 2; b++) {
+            bool builtin = !!b;
+            struct cmd_bind_section *bs = get_bind_section(ictx, builtin,
+                                                           bstr0(force_section));
+            struct cmd_bind *cmd = find_bind_for_key(bs->cmd_binds, n, keys);
+            if (cmd)
+                return cmd;
+        }
+        return NULL;
+    }
+
     for (int i = ictx->num_active_sections - 1; i >= 0; i--) {
         struct active_section *as = &ictx->active_sections[i];
         bstr name = bstr0(as->name);
@@ -1238,19 +1253,21 @@ static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
         if (as->flags & MP_INPUT_EXCLUSIVE)
             break;
     }
+
     return NULL;
 }
 
-static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
+static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
+                                   int n, int *keys)
 {
     if (ictx->test)
         return handle_test(ictx, n, keys);
 
-    struct cmd_bind *cmd = find_any_bind_for_key(ictx, n, keys);
+    struct cmd_bind *cmd = find_any_bind_for_key(ictx, force_section, n, keys);
     if (cmd == NULL && n > 1) {
         // Hitting two keys at once, and if there's no binding for this
         // combination, the key hit last should be checked.
-        cmd = find_any_bind_for_key(ictx, 1, (int[]){keys[n - 1]});
+        cmd = find_any_bind_for_key(ictx, force_section, 1, (int[]){keys[n - 1]});
     }
 
     if (cmd == NULL) {
@@ -1261,7 +1278,9 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, int n, int *keys)
         return NULL;
     }
     mp_cmd_t *ret = mp_input_parse_cmd(bstr0(cmd->cmd), cmd->location);
-    if (!ret) {
+    if (ret) {
+        ret->input_section = cmd->owner->section;
+    } else {
         char *key_buf = get_key_combo_name(keys, n);
         mp_tmsg(MSGT_INPUT, MSGL_ERR,
                 "Invalid command for bound key '%s': '%s'\n", key_buf, cmd->cmd);
@@ -1287,9 +1306,6 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
 {
     unsigned int j;
     mp_cmd_t *ret;
-
-    if (code == MP_KEY_MOUSE_MOVE)
-        return get_cmd_from_keys(ictx, 1, (int[]){code});
 
     /* On normal keyboards shift changes the character code of non-special
      * keys, so don't count the modifier separately for those. In other words
@@ -1319,7 +1335,7 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         ictx->num_key_down++;
         ictx->last_key_down = mp_time_us();
         ictx->ar_state = 0;
-        ictx->current_down_cmd = get_cmd_from_keys(ictx, ictx->num_key_down,
+        ictx->current_down_cmd = get_cmd_from_keys(ictx, NULL, ictx->num_key_down,
                                                    ictx->key_down);
         if (ictx->current_down_cmd && (code & MP_KEY_EMIT_ON_UP))
             ictx->current_down_cmd->key_up_follows = true;
@@ -1356,7 +1372,7 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
     // Interpret only maximal point of multibutton event
     ret = NULL;
     if (emit_key)
-        ret = get_cmd_from_keys(ictx, ictx->num_key_down, ictx->key_down);
+        ret = get_cmd_from_keys(ictx, NULL, ictx->num_key_down, ictx->key_down);
     if (doubleclick) {
         ictx->key_down[j] = code - MP_MOUSE_BTN0_DBL + MP_MOUSE_BTN0;
         return ret;
@@ -1449,12 +1465,34 @@ void mp_input_feed_key(struct input_ctx *ictx, int code)
     add_key_cmd(ictx, cmd);
 }
 
+static void trigger_mouse_leave(struct input_ctx *ictx, char *new_section)
+{
+    if (!new_section)
+        new_section = "default";
+
+    char *old = ictx->mouse_section;
+    ictx->mouse_section = new_section;
+
+    if (old && strcmp(old, ictx->mouse_section) != 0) {
+        struct mp_cmd *cmd =
+            get_cmd_from_keys(ictx, old, 1, (int[]){MP_KEY_MOUSE_LEAVE});
+        if (cmd)
+            add_key_cmd(ictx, cmd);
+    }
+}
+
+
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
 {
     ictx->mouse_event_counter++;
     ictx->mouse_vo_x = x;
     ictx->mouse_vo_y = y;
-    struct mp_cmd *cmd = interpret_key(ictx, MP_KEY_MOUSE_MOVE);
+
+    struct mp_cmd *cmd =
+        get_cmd_from_keys(ictx, NULL, 1, (int[]){MP_KEY_MOUSE_MOVE});
+
+    trigger_mouse_leave(ictx, cmd ? cmd->input_section : NULL);
+
     if (!cmd)
         return;
     cmd->mouse_move = true;
@@ -2162,5 +2200,9 @@ int mp_input_check_interrupt(struct input_ctx *ictx, int time)
 
 unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
 {
+    // Make the frontend always display the mouse cursor (as long as it's not
+    // forced invisible) if mouse input is desired.
+    if (mp_input_test_mouse(ictx, ictx->mouse_x, ictx->mouse_y))
+        ictx->mouse_event_counter++;
     return ictx->mouse_event_counter;
 }

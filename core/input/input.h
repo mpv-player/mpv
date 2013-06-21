@@ -141,6 +141,7 @@ typedef struct mp_cmd {
     bool raw_args;
     enum mp_on_osd on_osd;
     bstr original;
+    char *input_section;
     bool key_up_follows;
     bool mouse_move;
     int mouse_x, mouse_y;
