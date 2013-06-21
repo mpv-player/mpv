@@ -198,7 +198,6 @@ typedef struct stream {
 #endif
 
 int stream_fill_buffer(stream_t *s);
-void stream_unread_buffer(stream_t *s, void *buffer, size_t buffer_size);
 
 void stream_set_capture_file(stream_t *s, const char *filename);
 

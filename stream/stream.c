@@ -405,25 +405,6 @@ eof_out:
     return len;
 }
 
-// This works like stdio's ungetc(), but for more than one byte. Rewind the
-// file position by buffer_size, and make all future reads/buffer fills read
-// from the given buffer, until the buffer is exhausted or a seek outside of
-// the buffer happens.
-// You can unread at most STREAM_MAX_BUFFER_SIZE bytes.
-void stream_unread_buffer(stream_t *s, void *buffer, size_t buffer_size)
-{
-    assert(stream_tell(s) >= buffer_size); // can't unread to before file start
-    assert(buffer_size <= STREAM_MAX_BUFFER_SIZE);
-    // Need to include the remaining buffer to ensure no data is lost.
-    int remainder = s->buf_len - s->buf_pos;
-    // Successive buffer unreading might trigger this.
-    assert(buffer_size + remainder <= TOTAL_BUFFER_SIZE);
-    memmove(&s->buffer[buffer_size], &s->buffer[s->buf_pos], remainder);
-    memcpy(s->buffer, buffer, buffer_size);
-    s->buf_pos = 0;
-    s->buf_len = buffer_size + remainder;
-}
-
 int stream_fill_buffer(stream_t *s)
 {
     int len = stream_read_unbuffered(s, s->buffer, STREAM_BUFFER_SIZE);
@@ -475,7 +456,6 @@ struct bstr stream_peek(stream_t *s, int len)
 {
     assert(len >= 0);
     assert(len <= STREAM_MAX_BUFFER_SIZE);
-    // Logically like: stream_read(); stream_unread_buffer(); return buffer;
     if (s->buf_len - s->buf_pos < len) {
         // Move to front to guarantee we really can read up to max size.
         int buf_valid = s->buf_len - s->buf_pos;
