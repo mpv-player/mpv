@@ -183,12 +183,6 @@ static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
 
 static void print_help(void)
 {
-    OSStatus err;
-    UInt32 i_param_size;
-    int num_devices;
-    AudioDeviceID *devids;
-    char *device_name;
-
     ca_msg(MSGL_FATAL,
            "\n-ao coreaudio commandline help:\n"
            "Example: mpv -ao coreaudio:device_id=266\n"
@@ -201,29 +195,31 @@ static void print_help(void)
            "\n"
            "Available output devices:\n");
 
-    i_param_size = GetGlobalAudioPropertyArray(kAudioObjectSystemObject,
-                                               kAudioHardwarePropertyDevices,
-                                               (void **)&devids);
-
-    if (!i_param_size) {
+    AudioDeviceID *devs;
+    uint32_t devs_size =
+        GetGlobalAudioPropertyArray(kAudioObjectSystemObject,
+                                    kAudioHardwarePropertyDevices,
+                                    (void **)&devs);
+    if (!devs_size) {
         ca_msg(MSGL_FATAL, "Failed to get list of output devices.\n");
         return;
     }
 
-    num_devices = i_param_size / sizeof(AudioDeviceID);
+    int devs_n = devs_size / sizeof(AudioDeviceID);
 
-    for (int i = 0; i < num_devices; ++i) {
-        err = GetAudioPropertyString(devids[i], kAudioObjectPropertyName,
-                                     &device_name);
+    for (int i = 0; i < devs_n; ++i) {
+        char *name;
+        OSStatus err =
+            GetAudioPropertyString(devs[i], kAudioObjectPropertyName, &name);
 
         if (err == noErr) {
-            ca_msg(MSGL_FATAL, "%s (id: %" PRIu32 ")\n", device_name, devids[i]);
-            free(device_name);
+            ca_msg(MSGL_FATAL, "%s (id: %" PRIu32 ")\n", name, devs[i]);
+            free(name);
         } else
-            ca_msg(MSGL_FATAL, "Unknown (id: %" PRIu32 ")\n", devids[i]);
+            ca_msg(MSGL_FATAL, "Unknown (id: %" PRIu32 ")\n", devs[i]);
     }
 
-    free(devids);
+    free(devs);
 }
 
 static int init(struct ao *ao, char *params)
@@ -240,7 +236,7 @@ static int init(struct ao *ao, char *params)
     UInt32 size, maxFrames, b_alive;
     char *psz_name;
     AudioDeviceID devid_def = 0;
-    int device_id, display_help = 0;
+    int device_id = 0, display_help = 0;
 
     const opt_t subopts[] = {
         {"device_id", OPT_ARG_INT, &device_id, NULL},
@@ -248,14 +244,13 @@ static int init(struct ao *ao, char *params)
         {NULL}
     };
 
-    // set defaults
-    device_id = 0;
-
-    if (subopt_parse(ao_subdevice, subopts) != 0 || display_help) {
+    if (subopt_parse(params, subopts) != 0) {
         print_help();
-        if (!display_help)
-            return 0;
+        return 0;
     }
+
+    if (display_help)
+        print_help();
 
     ca_msg(MSGL_V, "init([%dHz][%dch][%s][%d])\n",
         ao->samplerate, ao->channels.num, af_fmt2str_short(ao->format), 0);
