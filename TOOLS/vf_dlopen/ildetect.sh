@@ -15,6 +15,7 @@ esac
 : ${ILDETECT_MPVFLAGS:=--start=35% --length=35}
 : ${ILDETECT_DRY_RUN:=}
 : ${ILDETECT_QUIET:=}
+: ${ILDETECT_RUN_INTERLACED_ONLY:=}
 : ${MAKE:=make}
 
 # exit status:
@@ -41,7 +42,9 @@ testfun()
 out=`testfun "$@"`
 case "$out" in
     *"probably: PROGRESSIVE"*)
-        [ -n "$ILDETECT_DRY_RUN" ] || $ILDETECT_MPV "$@"
+        [ -n "$ILDETECT_DRY_RUN" ] || \
+            [ -n "$ILDETECT_RUN_INTERLACED_ONLY" ] || \
+            $ILDETECT_MPV "$@"
         r=$?
         [ $r -eq 0 ] || exit $(($r | 16))
         exit 0
@@ -50,13 +53,15 @@ case "$out" in
         out2=`ILDETECT_MPVFLAGS="$ILDETECT_MPVFLAGS --vf-pre=pullup,scale" testfun "$@"`
         case "$out2" in
             *"probably: TELECINED"*|*"probably: INTERLACED"*)
-                [ -n "$ILDETECT_DRY_RUN" ] || $ILDETECT_MPV "$@" -vf-pre yadif
+                [ -n "$ILDETECT_DRY_RUN" ] || \
+                    $ILDETECT_MPV "$@" -vf-pre yadif
                 r=$?
                 [ $r -eq 0 ] || exit $(($r | 16))
                 exit 2
                 ;;
             *)
-                [ -n "$ILDETECT_DRY_RUN" ] || $ILDETECT_MPV "$@" -vf-pre pullup
+                [ -n "$ILDETECT_DRY_RUN" ] || \
+                    $ILDETECT_MPV "$@" -vf-pre pullup
                 r=$?
                 [ $r -eq 0 ] || exit $(($r | 16))
                 exit 1
@@ -64,7 +69,8 @@ case "$out" in
         esac
         ;;
     *"probably: INTERLACED"*)
-        [ -n "$ILDETECT_DRY_RUN" ] || $ILDETECT_MPV "$@" -vf-pre yadif
+        [ -n "$ILDETECT_DRY_RUN" ] || \
+            $ILDETECT_MPV "$@" -vf-pre yadif
         r=$?
         [ $r -eq 0 ] || exit $(($r | 16))
         exit 2
