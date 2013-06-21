@@ -164,7 +164,6 @@ typedef struct sh_sub {
     unsigned char *extradata;   // extra header data passed from demuxer
     int extradata_len;
     struct ass_track *track;    // loaded by libass
-    struct sub_data *sub_data;  // loaded by subreader.c
     struct dec_sub *dec_sub;    // decoder context
 } sh_sub_t;
 

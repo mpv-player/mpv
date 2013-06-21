@@ -68,6 +68,7 @@ extern const demuxer_desc_t demuxer_desc_mpeg4_es;
 extern const demuxer_desc_t demuxer_desc_h264_es;
 extern const demuxer_desc_t demuxer_desc_mpeg_ts;
 extern const demuxer_desc_t demuxer_desc_sub;
+extern const demuxer_desc_t demuxer_desc_subreader;
 
 /* Please do not add any new demuxers here. If you want to implement a new
  * demuxer, add it to libavformat, except for wrappers around external
@@ -83,6 +84,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 #endif
     &demuxer_desc_matroska,
     &demuxer_desc_lavf,
+    &demuxer_desc_subreader,
     &demuxer_desc_avi,
     &demuxer_desc_asf,
 #ifdef CONFIG_MNG

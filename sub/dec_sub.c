@@ -25,7 +25,6 @@
 #include "sd.h"
 #include "sub.h"
 #include "dec_sub.h"
-#include "demux/subreader.h"
 #include "core/options.h"
 #include "core/mp_msg.h"
 
@@ -138,68 +137,6 @@ static void print_chain(struct dec_sub *sub)
     mp_msg(MSGT_OSD, MSGL_V, "\n");
 }
 
-// Subtitles read with subreader.c
-static void read_sub_data(struct dec_sub *sub, struct sub_data *subdata)
-{
-    assert(sub_accept_packets_in_advance(sub));
-    char *temp = NULL;
-
-    struct sd *sd = sub_get_last_sd(sub);
-
-    sd->no_remove_duplicates = true;
-
-    for (int i = 0; i < subdata->sub_num; i++) {
-        subtitle *st = &subdata->subtitles[i];
-        // subdata is in 10 ms ticks, pts is in seconds
-        double t = subdata->sub_uses_time ? 0.01 : (1 / subdata->fallback_fps);
-
-        int len = 0;
-        for (int j = 0; j < st->lines; j++)
-            len += st->text[j] ? strlen(st->text[j]) : 0;
-
-        len += 2 * st->lines;   // '\N', including the one after the last line
-        len += 6;               // {\anX}
-        len += 1;               // '\0'
-
-        if (talloc_get_size(temp) < len) {
-            talloc_free(temp);
-            temp = talloc_array(NULL, char, len);
-        }
-
-        char *p = temp;
-        char *end = p + len;
-
-        if (st->alignment)
-            p += snprintf(p, end - p, "{\\an%d}", st->alignment);
-
-        for (int j = 0; j < st->lines; j++)
-            p += snprintf(p, end - p, "%s\\N", st->text[j]);
-
-        if (st->lines > 0)
-            p -= 2;             // remove last "\N"
-        *p = 0;
-
-        struct demux_packet pkt = {0};
-        pkt.pts = st->start * t;
-        pkt.duration = (st->end - st->start) * t;
-        pkt.buffer = temp;
-        pkt.len = strlen(temp);
-
-        sub_decode(sub, &pkt);
-    }
-
-    // Hack for broken FFmpeg packet format: make sd_ass keep the subtitle
-    // events on reset(), even though broken FFmpeg ASS packets were received
-    // (from sd_lavc_conv.c). Normally, these events are removed on seek/reset,
-    // but this is obviously unwanted in this case.
-    if (sd && sd->driver->fix_events)
-        sd->driver->fix_events(sd);
-
-    sd->no_remove_duplicates = false;
-
-    talloc_free(temp);
-}
-
 static int sub_init_decoder(struct dec_sub *sub, struct sd *sd)
 {
     sd->driver = NULL;
@@ -242,8 +179,6 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh)
         // Try adding new converters until a decoder is reached
         if (sd->driver->get_bitmaps || sd->driver->get_text) {
             print_chain(sub);
-            if (sh->sub_data)
-                read_sub_data(sub, sh->sub_data);
             return;
         }
         init_sd = (struct sd) {

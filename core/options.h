@@ -147,7 +147,6 @@ typedef struct MPOpts {
     // subreader.c
     int suboverlap_enabled;
     char *sub_cp;
-    int sub_no_text_pp;
 
     char *audio_stream;
     int audio_stream_cache;

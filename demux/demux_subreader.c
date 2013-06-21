@@ -28,14 +28,15 @@
 #include <dirent.h>
 #include <ctype.h>
 
+#include <libavutil/common.h>
+#include <libavutil/avstring.h>
+
 #include "config.h"
 #include "core/mp_msg.h"
-#include "subreader.h"
 #include "core/mp_common.h"
 #include "core/options.h"
 #include "stream/stream.h"
-#include "libavutil/common.h"
-#include "libavutil/avstring.h"
+#include "demux/demux.h"
 
 #ifdef CONFIG_ENCA
 #include <enca.h>
@@ -47,6 +48,54 @@
 #include <iconv.h>
 #endif
 
+// subtitle formats
+#define SUB_INVALID   -1
+#define SUB_MICRODVD  0
+#define SUB_SUBRIP    1
+#define SUB_SUBVIEWER 2
+#define SUB_SAMI      3
+#define SUB_VPLAYER   4
+#define SUB_RT        5
+#define SUB_SSA       6
+#define SUB_PJS       7
+#define SUB_MPSUB     8
+#define SUB_AQTITLE   9
+#define SUB_SUBVIEWER2 10
+#define SUB_SUBRIP09 11
+#define SUB_JACOSUB  12
+#define SUB_MPL2     13
+
+#define SUB_MAX_TEXT 12
+#define SUB_ALIGNMENT_BOTTOMLEFT       1
+#define SUB_ALIGNMENT_BOTTOMCENTER     2
+#define SUB_ALIGNMENT_BOTTOMRIGHT      3
+#define SUB_ALIGNMENT_MIDDLELEFT       4
+#define SUB_ALIGNMENT_MIDDLECENTER     5
+#define SUB_ALIGNMENT_MIDDLERIGHT      6
+#define SUB_ALIGNMENT_TOPLEFT          7
+#define SUB_ALIGNMENT_TOPCENTER        8
+#define SUB_ALIGNMENT_TOPRIGHT         9
+
+typedef struct subtitle {
+
+    int lines;
+
+    unsigned long start;
+    unsigned long end;
+
+    char *text[SUB_MAX_TEXT];
+    unsigned char alignment;
+} subtitle;
+
+typedef struct sub_data {
+    const char *codec;
+    subtitle *subtitles;
+    int sub_uses_time;
+    int sub_num;          // number of subtitle structs
+    int sub_errs;
+    double fallback_fps;
+} sub_data;
+
 // Parameter struct for the format-specific readline functions
 struct readline_args {
     int utf16;
@@ -57,6 +106,8 @@ struct readline_args {
     float mpsub_multiplier;
     float mpsub_position;
     int sub_slacktime;
+
+    int uses_time;
 
     /*
     Some subtitling formats, namely AQT and Subrip09, define the end of a
@@ -171,7 +222,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current,
                 sami_add_line(current, text, &p);
 		s += 4;
 	    }
-	    else if ((*s == '{') && !args->opts->sub_no_text_pp) { state = 5; ++s; continue; }
+	    else if ((*s == '{')) { state = 5; ++s; continue; }
 	    else if (*s == '<') { state = 4; }
 	    else if (!strncasecmp (s, "&nbsp;", 6)) { *p++ = ' '; s += 6; }
 	    else if (*s == '\t') { *p++ = ' '; s++; }
@@ -197,7 +248,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current,
 	    if (s) { s++; state = 3; continue; }
 	    break;
        case 5: /* get rid of {...} text, but read the alignment code */
-	    if ((*s == '\\') && (*(s + 1) == 'a') && !args->opts->sub_no_text_pp) {
+	    if ((*s == '\\') && (*(s + 1) == 'a')) {
                if (stristr(s, "\\a1") != NULL) {
                    current->alignment = SUB_ALIGNMENT_BOTTOMLEFT;
                    s = s + 3;
@@ -1130,6 +1181,7 @@ struct subreader {
     void       (*post)(subtitle *dest);
     const char *name;
     const char *codec_name;
+    struct readline_args args;
 };
 
 #ifdef CONFIG_ENCA
@@ -1192,16 +1244,9 @@ static const char* guess_cp(stream_t *st, const char *preferred_language, const 
 #undef MAX_GUESS_BUFFER_SIZE
 #endif
 
-static int sub_destroy(void *ptr);
-
-sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
+static bool subreader_autodetect(stream_t *fd, struct MPOpts *opts,
+                                 struct subreader *out)
 {
-    int utf16;
-    stream_t* fd;
-    int n_max, i, j;
-    subtitle *first, *sub, *return_sub, *alloced_sub = NULL;
-    sub_data *subt_data;
-    int uses_time = 0, sub_num = 0, sub_errs = 0;
     static const struct subreader sr[]=
     {
 	    { sub_read_line_microdvd, NULL, "microdvd", "microdvd" },
@@ -1221,42 +1266,46 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
     };
     const struct subreader *srp;
 
-    if(filename==NULL) return NULL; //qnx segfault
-    fd=open_stream (filename, NULL, NULL); if (!fd) return NULL;
-
     int sub_format = SUB_INVALID;
+    int utf16;
+    int uses_time = 0;
     for (utf16 = 0; sub_format == SUB_INVALID && utf16 < 3; utf16++) {
         sub_format=sub_autodetect (fd, &uses_time, utf16);
         stream_seek(fd,0);
     }
     utf16--;
 
-    struct readline_args args = {utf16, opts};
-    args.sub_slacktime = 20000; //20 sec
-    args.mpsub_multiplier = (uses_time ? 100.0 : 1.0);
-
     if (sub_format==SUB_INVALID) {
-        mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: Could not determine file format\n");
-        free_stream(fd);
-        return NULL;
+        mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: Could not determine file format\n");
+        return false;
     }
     srp=sr+sub_format;
     mp_msg(MSGT_SUBREADER, MSGL_V, "SUB: Detected subtitle file format: %s\n", srp->name);
 
+    *out = *srp;
+    out->args = (struct readline_args) {
+        .utf16 = utf16,
+        .opts = opts,
+        .sub_slacktime = 20000, //20 sec
+        .mpsub_multiplier = (uses_time ? 100.0 : 1.0),
+        .uses_time = uses_time,
+    };
+
+    return true;
+}
+
+static sub_data* sub_read_file(stream_t *fd, struct subreader *srp)
+{
+    struct MPOpts *opts = fd->opts;
+    float fps = 23.976;
+    int n_max, i, j;
+    subtitle *first, *sub, *return_sub, *alloced_sub = NULL;
+    sub_data *subt_data;
+    int sub_num = 0, sub_errs = 0;
+    struct readline_args args = srp->args;
+
 #ifdef CONFIG_ICONV
-    iconv_t icdsc = (iconv_t)(-1);
-    {
-	    int l,k;
-	    k = -1;
-	    if ((l=strlen(filename))>4){
-		    char *exts[] = {".utf", ".utf8", ".utf-8" };
-		    for (k=3;--k>=0;)
-			if (l >= strlen(exts[k]) && !strcasecmp(filename+(l - strlen(exts[k])), exts[k])){
-			    break;
-			}
-	    }
-	    if (k<0) icdsc = subcp_open(fd, opts->sub_cp);
-    }
+    iconv_t icdsc = subcp_open(fd, opts->sub_cp);
 #endif
 
     sub_num=0;n_max=32;
@@ -1287,11 +1336,10 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
 #endif
 	  free(first);
 	  free(alloced_sub);
-          free_stream(fd);
 	  return NULL;
 	 }
         // Apply any post processing that needs recoding first
-        if ((sub!=ERR) && !args.opts->sub_no_text_pp && srp->post) srp->post(sub);
+        if ((sub!=ERR) && srp->post) srp->post(sub);
 	if(!sub_num || (first[sub_num - 1].start <= sub->start)){
 	    first[sub_num].start = sub->start;
   	    first[sub_num].end   = sub->end;
@@ -1333,8 +1381,6 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
         if(sub==ERR) ++sub_errs; else ++sub_num; // Error vs. Valid
     }
 
-    free_stream(fd);
-
 #ifdef CONFIG_ICONV
     subcp_close(icdsc);
 #endif
@@ -1349,15 +1395,13 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
 	return NULL;
     }
 
-    adjust_subs_time(first, 6.0, fps, opts->sub_fps, 1, sub_num, uses_time);/*~6 secs AST*/
+    adjust_subs_time(first, 6.0, fps, opts->sub_fps, 1, sub_num, args.uses_time);/*~6 secs AST*/
     return_sub = first;
 
     if (return_sub == NULL) return NULL;
     subt_data = talloc_zero(NULL, sub_data);
-    talloc_set_destructor(subt_data, sub_destroy);
     subt_data->codec = srp->codec_name ? srp->codec_name : "text";
-    subt_data->filename = strdup(filename);
-    subt_data->sub_uses_time = uses_time;
+    subt_data->sub_uses_time = args.uses_time;
     subt_data->sub_num = sub_num;
     subt_data->sub_errs = sub_errs;
     subt_data->subtitles = return_sub;
@@ -1365,14 +1409,145 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
     return subt_data;
 }
 
-static int sub_destroy(void *ptr)
+static void subdata_free(sub_data *subd)
 {
-    sub_data *subd = ptr;
     int i, j;
     for (i = 0; i < subd->sub_num; i++)
         for (j = 0; j < subd->subtitles[i].lines; j++)
             free( subd->subtitles[i].text[j] );
     free( subd->subtitles );
-    free( subd->filename );
-    return 0;
+    talloc_free(subd);
 }
+
+struct priv {
+    struct demux_packet **pkts;
+    int num_pkts;
+    int current;
+    struct sh_stream *sh;
+};
+
+static void add_sub_data(struct demuxer *demuxer, struct sub_data *subdata)
+{
+    struct priv *priv = demuxer->priv;
+
+    for (int i = 0; i < subdata->sub_num; i++) {
+        subtitle *st = &subdata->subtitles[i];
+        // subdata is in 10 ms ticks, pts is in seconds
+        double t = subdata->sub_uses_time ? 0.01 : (1 / subdata->fallback_fps);
+
+        int len = 0;
+        for (int j = 0; j < st->lines; j++)
+            len += st->text[j] ? strlen(st->text[j]) : 0;
+
+        len += 2 * st->lines;   // '\N', including the one after the last line
+        len += 6;               // {\anX}
+        len += 1;               // '\0'
+
+        char *data = talloc_array(NULL, char, len);
+
+        char *p = data;
+        char *end = p + len;
+
+        if (st->alignment)
+            p += snprintf(p, end - p, "{\\an%d}", st->alignment);
+
+        for (int j = 0; j < st->lines; j++)
+            p += snprintf(p, end - p, "%s\\N", st->text[j]);
+
+        if (st->lines > 0)
+            p -= 2;             // remove last "\N"
+        *p = 0;
+
+        struct demux_packet *pkt = talloc_ptrtype(priv, pkt);
+        *pkt = (struct demux_packet) {
+            .pts = st->start * t,
+            .duration = (st->end - st->start) * t,
+            .buffer = talloc_steal(pkt, data),
+            .len = strlen(data),
+        };
+
+        MP_TARRAY_APPEND(priv, priv->pkts, priv->num_pkts, pkt);
+    }
+}
+
+static struct stream *read_probe_stream(struct stream *s, int max)
+{
+    // Very roundabout, but only needed for initial probing.
+    bstr probe = stream_peek(s, max);
+    return open_memory_stream(probe.start, probe.len);
+}
+
+#define PROBE_SIZE FFMIN(32 * 1024, STREAM_MAX_BUFFER_SIZE)
+
+static int d_check_file(struct demuxer *demuxer)
+{
+    struct stream *ps = read_probe_stream(demuxer->stream, PROBE_SIZE);
+
+    struct subreader sr;
+    bool res = subreader_autodetect(ps, demuxer->opts, &sr);
+
+    free_stream(ps);
+
+    if (!res)
+        return 0;
+
+    sub_data *sd = sub_read_file(demuxer->stream, &sr);
+    if (!sd)
+        return 0;
+
+    struct priv *p = talloc_zero(demuxer, struct priv);
+    demuxer->priv = p;
+
+    p->sh = new_sh_stream(demuxer, STREAM_SUB);
+    p->sh->codec = sd->codec;
+
+    add_sub_data(demuxer, sd);
+    subdata_free(sd);
+
+    demuxer->accurate_seek = true;
+
+    return DEMUXER_TYPE_SUBREADER;
+}
+
+static int d_fill_buffer(struct demuxer *demuxer, struct demux_stream *ds)
+{
+    struct priv *p = demuxer->priv;
+    struct demux_packet *dp = demux_packet_list_fill(p->pkts, p->num_pkts,
+                                                     &p->current);
+    return demuxer_add_packet(demuxer, p->sh, dp);
+}
+
+static void d_seek(struct demuxer *demuxer, float secs, float audio_delay,
+                   int flags)
+{
+    struct priv *p = demuxer->priv;
+    demux_packet_list_seek(p->pkts, p->num_pkts, &p->current, secs, flags);
+}
+
+static int d_control(struct demuxer *demuxer, int cmd, void *arg)
+{
+    struct priv *p = demuxer->priv;
+    switch (cmd) {
+    case DEMUXER_CTRL_CORRECT_PTS:
+        return DEMUXER_CTRL_OK;
+    case DEMUXER_CTRL_GET_TIME_LENGTH:
+        *((double *) arg) = demux_packet_list_duration(p->pkts, p->num_pkts);
+        return DEMUXER_CTRL_OK;
+    default:
+        return DEMUXER_CTRL_NOTIMPL;
+    }
+}
+
+const struct demuxer_desc demuxer_desc_subreader = {
+    .info = "Deprecated MPlayer subtitle reader",
+    .name = "subreader",
+    .shortdesc = "Deprecated Subreader",
+    .author = "",
+    .comment = "",
+    .type = DEMUXER_TYPE_SUBREADER,
+    .safe_check = 1,
+    .check_file = d_check_file,
+    .fill_buffer = d_fill_buffer,
+    .seek = d_seek,
+    .control = d_control,
+};

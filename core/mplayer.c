@@ -71,7 +71,6 @@
 #include "core/mplayer.h"
 #include "core/m_property.h"
 
-#include "demux/subreader.h"
 #include "sub/find_subfiles.h"
 #include "sub/dec_sub.h"
 #include "sub/sd.h"
@@ -1044,7 +1043,6 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
 {
     struct MPOpts *opts = &mpctx->opts;
     struct ass_track *asst = NULL;
-    sub_data *subd = NULL;
 
     if (filename == NULL)
         return NULL;
@@ -1055,17 +1053,14 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
     // the weird special-cases.
 #ifdef CONFIG_ASS
     asst = mp_ass_read_stream(mpctx->ass_library, filename, opts->sub_cp);
-    if (!asst)
-        subd = sub_read_file(filename, fps, &mpctx->opts);
-    if (asst || subd) {
+    if (asst) {
         struct demuxer *d = new_sub_pseudo_demuxer(opts);
         assert(d->num_streams == 1);
         struct sh_stream *s = d->streams[0];
         assert(s->type == STREAM_SUB);
 
-        s->codec = asst ? "ass" : subd->codec;
+        s->codec = "ass";
         s->sub->track = asst;
-        s->sub->sub_data = subd;
 
         struct sh_sub **pptr = talloc(d, struct sh_sub*);
         *pptr = s->sub;
