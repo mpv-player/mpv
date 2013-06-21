@@ -482,13 +482,16 @@ void free_demuxer(demuxer_t *demuxer)
     talloc_free(demuxer);
 }
 
-void demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
-                        demux_packet_t *dp)
+// Returns the same value as demuxer->fill_buffer: 1 ok, 0 EOF/not selected.
+int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
+                       demux_packet_t *dp)
 {
-    if (!demuxer_stream_is_selected(demuxer, stream)) {
+    if (!dp || !demuxer_stream_is_selected(demuxer, stream)) {
         free_demux_packet(dp);
+        return 0;
     } else {
         ds_add_packet(demuxer->ds[stream->type], dp);
+        return 1;
     }
 }
 
@@ -1517,4 +1520,70 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle)
     demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
 
     return angle;
+}
+
+static int packet_sort_compare(const void *p1, const void *p2)
+{
+    struct demux_packet *c1 = *(struct demux_packet **)p1;
+    struct demux_packet *c2 = *(struct demux_packet **)p2;
+
+    if (c1->pts > c2->pts)
+        return 1;
+    else if (c1->pts < c2->pts)
+        return -1;
+    return 0;
+}
+
+void demux_packet_list_sort(struct demux_packet **pkts, int num_pkts)
+{
+    qsort(pkts, num_pkts, sizeof(struct demux_packet *), packet_sort_compare);
+}
+
+void demux_packet_list_seek(struct demux_packet **pkts, int num_pkts,
+                            int *current, float rel_seek_secs, int flags)
+{
+    double ref_time = 0;
+    if (*current >= 0 && *current < num_pkts) {
+        ref_time = pkts[*current]->pts;
+    } else if (*current == num_pkts && num_pkts > 0) {
+        ref_time = pkts[num_pkts - 1]->pts + pkts[num_pkts - 1]->duration;
+    }
+
+    if (flags & SEEK_ABSOLUTE)
+        ref_time = 0;
+
+    if (flags & SEEK_FACTOR) {
+        ref_time += demux_packet_list_duration(pkts, num_pkts) * rel_seek_secs;
+    } else {
+        ref_time += rel_seek_secs;
+    }
+
+    // Could do binary search, but it's probably not worth the complexity.
+    int last_index = 0;
+    for (int n = 0; n < num_pkts; n++) {
+        if (pkts[n]->pts > ref_time)
+            break;
+        last_index = n;
+    }
+    *current = last_index;
+}
+
+double demux_packet_list_duration(struct demux_packet **pkts, int num_pkts)
+{
+    if (num_pkts > 0)
+        return pkts[num_pkts - 1]->pts + pkts[num_pkts - 1]->duration;
+    return 0;
+}
+
+struct demux_packet *demux_packet_list_fill(struct demux_packet **pkts,
+                                            int num_pkts, int *current)
+{
+    if (*current < 0)
+        *current = 0;
+    if (*current >= num_pkts)
+        return NULL;
+    struct demux_packet *new = talloc(NULL, struct demux_packet);
+    *new = *pkts[*current];
+    *current += 1;
+    return new;
 }
