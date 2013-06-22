@@ -68,7 +68,8 @@
 #define MP_MAX_KEY_DOWN 4
 
 struct cmd_bind {
-    int input[MP_MAX_KEY_DOWN + 1];
+    int keys[MP_MAX_KEY_DOWN];
+    int num_keys;
     char *cmd;
     char *location;     // filename/line number of definition
     bool is_builtin;
@@ -1109,7 +1110,7 @@ static int read_wakeup(void *ctx, int fd)
     return MP_INPUT_NOTHING;
 }
 
-static bool bind_matches_key(struct cmd_bind *bind, int n, int *keys);
+static bool bind_matches_key(struct cmd_bind *bind, int n, const int *keys);
 
 static void append_bind_info(char **pmsg, struct cmd_bind *bind)
 {
@@ -1160,16 +1161,15 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
     return res;
 }
 
-static bool bind_matches_key(struct cmd_bind *bind, int n, int *keys)
+static bool bind_matches_key(struct cmd_bind *bind, int num_keys, const int *keys)
 {
-    int found = 1, s;
-    for (s = 0; s < n && bind->input[s] != 0; s++) {
-        if (bind->input[s] != keys[s]) {
-            found = 0;
-            break;
-        }
+    if (bind->num_keys != num_keys)
+        return false;
+    for (int i = 0; i < num_keys; i++) {
+        if (bind->keys[i] != keys[i])
+            return false;
     }
-    return found && bind->input[s] == 0 && s == n;
+    return true;
 }
 
 static struct cmd_bind *find_bind_for_key(struct cmd_bind *binds, int n,
@@ -1745,7 +1745,7 @@ found:
     return -1;
 }
 
-static int get_input_from_name(char *name, int *keys)
+static int get_input_from_name(char *name, int *out_num_keys, int *keys)
 {
     char *end, *ptr;
     int n = 0;
@@ -1767,24 +1767,24 @@ static int get_input_from_name(char *name, int *keys)
         else
             break;
     }
-    keys[n] = 0;
+    *out_num_keys = n;
     return 1;
 }
 
 static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
-                      const int keys[MP_MAX_KEY_DOWN + 1], bstr command,
+                      const int *keys, int num_keys, bstr command,
                       const char *loc)
 {
-    int i = 0, j;
+    int i = 0;
     struct cmd_bind *bind = NULL;
     struct cmd_bind_section *bind_section = get_bind_section(ictx, section);
+
+    assert(num_keys <= MP_MAX_KEY_DOWN);
 
     if (bind_section->cmd_binds) {
         for (i = 0; bind_section->cmd_binds[i].cmd != NULL; i++) {
             struct cmd_bind *b = &bind_section->cmd_binds[i];
-            for (j = 0; b->input[j] == keys[j] && keys[j] != 0; j++)
-                /* NOTHING */;
-            if (keys[j] == 0 && b->input[j] == 0 && b->is_builtin == builtin) {
+            if (bind_matches_key(b, num_keys, keys) && b->is_builtin == builtin) {
                 bind = b;
                 break;
             }
@@ -1803,7 +1803,8 @@ static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
     bind->location = talloc_strdup(bind_section->cmd_binds, loc);
     bind->owner = bind_section;
     bind->is_builtin = builtin;
-    memcpy(bind->input, keys, (MP_MAX_KEY_DOWN + 1) * sizeof(int));
+    bind->num_keys = num_keys;
+    memcpy(bind->keys, keys, num_keys * sizeof(bind->keys[0]));
 }
 
 // restrict_section: every entry is forced to this section name
@@ -1811,7 +1812,7 @@ static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
 static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
                         const char *location, const char *restrict_section)
 {
-    int n_binds = 0, keys[MP_MAX_KEY_DOWN + 1];
+    int n_binds = 0;
     int line_no = 0;
     char *cur_loc = NULL;
 
@@ -1836,7 +1837,9 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
             continue;
         }
         char *name = bstrdup0(NULL, keyname);
-        if (!get_input_from_name(name, keys)) {
+        int keys[MP_MAX_KEY_DOWN];
+        int num_keys = 0;
+        if (!get_input_from_name(name, &num_keys, keys)) {
             talloc_free(name);
             mp_tmsg(MSGT_INPUT, MSGL_ERR,
                     "Unknown key '%.*s' at %s\n", BSTR_P(keyname), cur_loc);
@@ -1855,7 +1858,7 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
             }
         }
 
-        bind_keys(ictx, builtin, section, keys, command, cur_loc);
+        bind_keys(ictx, builtin, section, keys, num_keys, command, cur_loc);
         n_binds++;
 
         // Print warnings if invalid commands are encountered.
