@@ -482,7 +482,8 @@ struct input_fd {
 };
 
 struct cmd_bind_section {
-    struct cmd_bind *cmd_binds;
+    struct cmd_bind *binds;
+    int num_binds;
     char *section;
     struct mp_rect mouse_area;  // set at runtime, if at all
     bool mouse_area_set;        // mouse_area is valid and should be tested
@@ -1129,11 +1130,11 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
     for (struct cmd_bind_section *bs = ictx->cmd_bind_sections;
          bs; bs = bs->next)
     {
-        for (struct cmd_bind *bind = bs->cmd_binds; bind && bind->cmd; bind++) {
-            if (bind_matches_key(bind, n, keys)) {
+        for (int i = 0; i < bs->num_binds; i++) {
+            if (bind_matches_key(&bs->binds[i], n, keys)) {
                 count++;
                 msg = talloc_asprintf_append(msg, "%d. ", count);
-                append_bind_info(&msg, bind);
+                append_bind_info(&msg, &bs->binds[i]);
                 msg = talloc_asprintf_append(msg, "\n");
             }
         }
@@ -1158,23 +1159,6 @@ static bool bind_matches_key(struct cmd_bind *bind, int num_keys, const int *key
             return false;
     }
     return true;
-}
-
-static struct cmd_bind *find_bind_for_key(struct cmd_bind *binds, int n,
-                                          int *keys)
-{
-    if (n <= 0 || !binds)
-        return NULL;
-
-    // Prefer user-defined keys over builtin bindings
-    for (int builtin = 0; builtin < 2; builtin++) {
-        for (int j = 0; binds[j].cmd != NULL; j++) {
-            if (binds[j].is_builtin == (bool)builtin &&
-                bind_matches_key(&binds[j], n, keys))
-                return &binds[j];
-        }
-    }
-    return NULL;
 }
 
 static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
@@ -1206,10 +1190,22 @@ static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
 
 static struct cmd_bind *find_bind_for_key_section(struct input_ctx *ictx,
                                                   char *section,
-                                                  int n, int *keys)
+                                                  int num_keys, int *keys)
 {
     struct cmd_bind_section *bs = get_bind_section(ictx, bstr0(section));
-    return find_bind_for_key(bs->cmd_binds, n, keys);
+
+    if (!num_keys || !bs->num_binds)
+        return NULL;
+
+    // Prefer user-defined keys over builtin bindings
+    for (int builtin = 0; builtin < 2; builtin++) {
+        for (int n = 0; n < bs->num_binds; n++) {
+            if (bs->binds[n].is_builtin == (bool)builtin &&
+                bind_matches_key(&bs->binds[n], num_keys, keys))
+                return &bs->binds[n];
+        }
+    }
+    return NULL;
 }
 
 static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
@@ -1757,39 +1753,44 @@ static int get_input_from_name(char *name, int *out_num_keys, int *keys)
     return 1;
 }
 
+static void bind_dealloc(struct cmd_bind *bind)
+{
+    talloc_free(bind->cmd);
+    talloc_free(bind->location);
+}
+
 static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
                       const int *keys, int num_keys, bstr command,
                       const char *loc)
 {
-    int i = 0;
+    struct cmd_bind_section *bs = get_bind_section(ictx, section);
     struct cmd_bind *bind = NULL;
-    struct cmd_bind_section *bind_section = get_bind_section(ictx, section);
 
     assert(num_keys <= MP_MAX_KEY_DOWN);
 
-    if (bind_section->cmd_binds) {
-        for (i = 0; bind_section->cmd_binds[i].cmd != NULL; i++) {
-            struct cmd_bind *b = &bind_section->cmd_binds[i];
-            if (bind_matches_key(b, num_keys, keys) && b->is_builtin == builtin) {
-                bind = b;
-                break;
-            }
+    for (int n = 0; n < bs->num_binds; n++) {
+        struct cmd_bind *b = &bs->binds[n];
+        if (bind_matches_key(b, num_keys, keys) && b->is_builtin == builtin) {
+            bind = b;
+            break;
         }
     }
 
     if (!bind) {
-        bind_section->cmd_binds = talloc_realloc(bind_section,
-                                                 bind_section->cmd_binds,
-                                                 struct cmd_bind, i + 2);
-        memset(&bind_section->cmd_binds[i], 0, 2 * sizeof(struct cmd_bind));
-        bind = &bind_section->cmd_binds[i];
+        struct cmd_bind empty = {{0}};
+        MP_TARRAY_APPEND(bs, bs->binds, bs->num_binds, empty);
+        bind = &bs->binds[bs->num_binds - 1];
     }
-    talloc_free(bind->cmd);
-    bind->cmd = bstrdup0(bind_section->cmd_binds, command);
-    bind->location = talloc_strdup(bind_section->cmd_binds, loc);
-    bind->owner = bind_section;
-    bind->is_builtin = builtin;
-    bind->num_keys = num_keys;
+
+    bind_dealloc(bind);
+
+    *bind = (struct cmd_bind) {
+        .cmd = bstrdup0(bs->binds, command),
+        .location = talloc_strdup(bs->binds, loc),
+        .owner = bs,
+        .is_builtin = builtin,
+        .num_keys = num_keys,
+    };
     memcpy(bind->keys, keys, num_keys * sizeof(bind->keys[0]));
 }
 
@@ -1942,22 +1943,15 @@ bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y)
     return mp_input_test_mouse_active(ictx, x, y);
 }
 
-static void remove_binds(struct cmd_bind *binds, bool builtin)
+// builtin: if true, remove all builtin binds, else remove all user binds
+static void remove_binds(struct cmd_bind_section *bs, bool builtin)
 {
-    if (!binds)
-        return;
-    int count;
-    for (int n = 0; binds[n].cmd; n++)
-        count++;
-    int n = 0;
-    while (binds[n].cmd) {
-        if (binds[n].is_builtin == builtin) {
-            talloc_free(binds[n].cmd);
-            talloc_free(binds[n].location);
-            // Remove by swapping in the last item (or the terminator)
-            binds[n] = binds[count - 1];
-        } else {
-            n++;
+    for (int n = bs->num_binds - 1; n >= 0; n--) {
+        if (bs->binds[n].is_builtin == builtin) {
+            bind_dealloc(&bs->binds[n]);
+            assert(bs->num_binds >= 1);
+            bs->binds[n] = bs->binds[bs->num_binds - 1];
+            bs->num_binds--;
         }
     }
 }
@@ -1973,8 +1967,8 @@ void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
         // Disable:
         mp_input_disable_section(ictx, name);
         // Delete:
-        struct cmd_bind_section *s = get_bind_section(ictx, bstr0(name));
-        remove_binds(s->cmd_binds, builtin);
+        struct cmd_bind_section *bs = get_bind_section(ictx, bstr0(name));
+        remove_binds(bs, builtin);
     }
 }
 
