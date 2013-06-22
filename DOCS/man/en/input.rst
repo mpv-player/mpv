@@ -275,6 +275,21 @@ vf set|add|toggle|del "filter1=params,filter2,..."
     - ``b vf set ""`` remove all video filters on ``b``
     - ``c vf toggle lavfi=gradfun`` toggle debanding on ``c``
 
+enable_section "<section>" [default|exclusive]
+    Enable all key bindings in the named input section.
+
+    The enabled input sections form a stack. Bindings in sections on the top of
+    the stack are preferred to lower sections. This command puts the section
+    on top of the stack. If the section was already on the stack, it's
+    implicitly removed beforehand. (A section can't be on the stack twice.)
+
+    If ``exclusive`` is specified as second argument, all sections below the
+    newly enabled section are disabled. They will be re-enabled as soon as
+    all exclusive above them are removed.
+
+disable_section "<section>"
+    Disable the named input section. Undoes ``enable_section``.
+
 Undocumented commands: tv_start_scan, tv_step_channel, tv_step_norm,
 tv_step_chanlist, tv_set_channel, tv_last_channel, tv_set_freq, tv_step_freq,
 tv_set_norm, dvb_set_channel, radio_step_channel, radio_set_channel,
