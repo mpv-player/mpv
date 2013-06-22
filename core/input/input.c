@@ -194,6 +194,13 @@ static const mp_cmd_t mp_cmds[] = {
         .v.f = 1 },
   }},
 
+  { MP_CMD_ENABLE_INPUT_SECTION,  "enable_section",  {
+      ARG_STRING,
+      OARG_CHOICE(0, ({"default", 0},
+                      {"exclusive", 1})),
+  }},
+  { MP_CMD_DISABLE_INPUT_SECTION, "disable_section", { ARG_STRING } },
+
   { MP_CMD_AF_SWITCH, "af_switch", { ARG_STRING } },
   { MP_CMD_AF_ADD, "af_add", { ARG_STRING } },
   { MP_CMD_AF_DEL, "af_del", { ARG_STRING } },

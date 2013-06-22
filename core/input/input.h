@@ -67,6 +67,9 @@ enum mp_command_type {
     MP_CMD_TV_START_SCAN,
     MP_CMD_STOP,
 
+    MP_CMD_ENABLE_INPUT_SECTION,
+    MP_CMD_DISABLE_INPUT_SECTION,
+
     /// DVB commands
     MP_CMD_DVB_SET_CHANNEL = 5101,
 

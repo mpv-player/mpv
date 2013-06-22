@@ -2412,6 +2412,15 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         mplayer_put_key(mpctx->key_fifo, cmd->args[0].v.i);
         break;
 
+    case MP_CMD_ENABLE_INPUT_SECTION:
+        mp_input_enable_section(mpctx->input, cmd->args[0].v.s,
+                                cmd->args[1].v.i == 1 ? MP_INPUT_EXCLUSIVE : 0);
+        break;
+
+    case MP_CMD_DISABLE_INPUT_SECTION:
+        mp_input_disable_section(mpctx->input, cmd->args[0].v.s);
+        break;
+
     case MP_CMD_VO_CMDLINE:
         if (mpctx->video_out) {
             char *s = cmd->args[0].v.s;
