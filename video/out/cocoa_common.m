@@ -31,6 +31,7 @@
 #include "vo.h"
 #include "aspect.h"
 
+#include "core/input/input.h"
 #include "talloc.h"
 
 #include "core/mp_msg.h"
@@ -52,6 +53,7 @@
 
 @interface GLMPlayerOpenGLView : NSView
 @property(nonatomic, assign) struct vo *videoOutput;
+- (void)recalcDraggableState;
 - (BOOL)containsCurrentMouseLocation;
 - (void)mouseEvent:(NSEvent *)theEvent;
 @property(nonatomic, assign, getter=hasMouseDown) BOOL mouseDown;
@@ -399,6 +401,7 @@ static void update_window(struct vo *vo)
         }
     }
 
+    [s->view recalcDraggableState];
     cocoa_set_window_title(vo, vo_get_window_title(vo));
 
     vo_cocoa_fullscreen(vo);
@@ -691,6 +694,8 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         vo_cocoa_set_cursor_visibility(self.videoOutput, true);
     }
 
+    [s->view recalcDraggableState];
+
     // Change window size if the core attempted to change it while we were in
     // fullscreen. For example config() might have been called as a result of
     // a new file changing the window size.
@@ -712,15 +717,6 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     // otherwise we are in trouble if the
     // MP_KEY_CLOSE_WIN handler is disabled
     return NO;
-}
-
-- (BOOL)isMovableByWindowBackground
-{
-    if (self.videoOutput) {
-        return !self.videoOutput->opts->fullscreen;
-    } else {
-        return YES;
-    }
 }
 
 - (void)normalSize { [self mulSize:1.0f]; }
@@ -811,11 +807,17 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 - (BOOL)becomeFirstResponder { return YES; }
 - (BOOL)resignFirstResponder { return YES; }
 
-- (NSPoint) mouseLocation
+- (NSPoint)mouseLocation
 {
-    NSPoint mLoc = [NSEvent mouseLocation];
-    NSPoint wLoc = [self.window convertScreenToBase:mLoc];
+    NSPoint wLoc = [self.window mouseLocationOutsideOfEventStream];
     return [self convertPoint:wLoc fromView:nil];
+}
+
+- (NSPoint)mouseLocationUpperLeft
+{
+    NSPoint loc = [self mouseLocation];
+    loc.y = - loc.y + [self bounds].size.height;
+    return loc;
 }
 
 - (BOOL)containsCurrentMouseLocation
@@ -829,12 +831,26 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     return CGRectContainsPoint(clippedBounds, [self mouseLocation]);
 }
 
+- (void)recalcDraggableState
+{
+    struct vo *vo = self.videoOutput;
+    BOOL movable  = NO;
+
+    if (!vo->opts->fullscreen) {
+        NSPoint loc = [self mouseLocationUpperLeft];
+        movable = !mp_input_test_dragging(vo->input_ctx, loc.x, loc.y);
+    }
+
+    [self.window setMovableByWindowBackground:movable];
+}
+
+
 - (void)signalMouseMovement:(NSEvent *)event
 {
     if ([self containsCurrentMouseLocation]) {
-        NSPoint loc = [self mouseLocation];
-        loc.y = - loc.y + [self bounds].size.height;
+        NSPoint loc = [self mouseLocationUpperLeft];
         vo_mouse_movement(self.videoOutput, loc.x, loc.y);
+        [self recalcDraggableState];
     }
 }
 
