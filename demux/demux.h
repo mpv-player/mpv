@@ -72,13 +72,13 @@ enum demuxer_type {
     DEMUXER_TYPE_EDL,
     DEMUXER_TYPE_CUE,
     DEMUXER_TYPE_SUBREADER,
+    DEMUXER_TYPE_LIBASS,
 
     /* Values after this are for internal use and can not be selected
      * as demuxer type by the user (-demuxer option). */
     DEMUXER_TYPE_END,
 
     DEMUXER_TYPE_PLAYLIST,
-    DEMUXER_TYPE_SUB,
 };
 
 enum timestamp_type {
@@ -217,6 +217,7 @@ struct demuxer_params {
     unsigned char (*matroska_wanted_uids)[16];
     int matroska_wanted_segment;
     bool *matroska_was_valid;
+    struct ass_library *ass_library;
 };
 
 typedef struct demuxer {
@@ -306,9 +307,6 @@ static inline void *realloc_struct(void *ptr, size_t nmemb, size_t size)
     }
     return realloc(ptr, nmemb * size);
 }
-
-demuxer_t *new_sub_pseudo_demuxer(struct MPOpts *opts);
-
 
 void free_demuxer(struct demuxer *demuxer);
 

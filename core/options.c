@@ -406,7 +406,6 @@ const m_option_t mp_opts[] = {
     // demuxer.c - select audio/sub file/demuxer
     OPT_STRING("audiofile", audio_stream, 0),
     OPT_INTRANGE("audiofile-cache", audio_stream_cache, 0, 50, 65536),
-    OPT_STRING("subfile", sub_stream, 0),
     OPT_STRING("demuxer", demuxer_name, 0),
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),

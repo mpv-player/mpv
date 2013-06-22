@@ -1998,8 +1998,7 @@
     subtitles muxed with audio/video, or subtitles in the ASS format.
 
 --sub-demuxer=<[+]name>
-    Force subtitle demuxer type for ``--subfile``. Using a '+' before the name
-    will force it, this will skip some checks! Give the demuxer name as
+    Force subtitle demuxer type for ``--sub``. Give the demuxer name as
     printed by ``--sub-demuxer=help``.
 
 --sub-paths=<path1:path2:...>
@@ -2045,14 +2044,6 @@
 
 --sub-delay=<sec>
     Delays subtitles by <sec> seconds. Can be negative.
-
---subfile=<filename>
-    Open the given file with a demuxer, and use its subtitle streams. Same as
-    ``--audiofile``, but for subtitle streams.
-
-    *NOTE*: use ``--sub`` for subtitle files. This option is useless, unless
-    you want to force libavformat subtitle parsers instead of libass or
-    internal subtitle parsers.
 
 --subfps=<rate>
     Specify the framerate of the subtitle file (default: movie fps).

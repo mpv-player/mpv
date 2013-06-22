@@ -37,7 +37,8 @@ SOURCES-$(DVDREAD)              += stream/stream_dvd.c \
 SOURCES-$(FTP)                  += stream/stream_ftp.c
 SOURCES-$(HAVE_SYS_MMAN_H)      += audio/filter/af_export.c osdep/mmap_anon.c
 SOURCES-$(LADSPA)               += audio/filter/af_ladspa.c
-SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c
+SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c \
+                                   demux/demux_libass.c
 
 SOURCES-$(LIBBLURAY)            += stream/stream_bluray.c
 SOURCES-$(LIBBS2B)              += audio/filter/af_bs2b.c
@@ -207,7 +208,6 @@ SOURCES = talloc.c \
           demux/demux_mf.c \
           demux/demux_mkv.c \
           demux/demux_mpg.c \
-          demux/demux_sub.c \
           demux/demux_subreader.c \
           demux/demux_ts.c \
           demux/mp3_hdr.c \

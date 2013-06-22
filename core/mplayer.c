@@ -196,9 +196,6 @@ static const char av_desync_help_text[] = _(
 
 static void reset_subtitles(struct MPContext *mpctx);
 static void reinit_subs(struct MPContext *mpctx);
-static struct track *open_external_file(struct MPContext *mpctx, char *filename,
-                                        char *demuxer_name, int stream_cache,
-                                        enum stream_type filter);
 
 static double get_relative_time(struct MPContext *mpctx)
 {
@@ -981,6 +978,9 @@ static struct track *add_stream_track(struct MPContext *mpctx,
     };
     MP_TARRAY_APPEND(mpctx, mpctx->tracks, mpctx->num_tracks, track);
 
+    if (stream->type == STREAM_SUB)
+        track->preloaded = !!stream->sub->track;
+
     // Needed for DVD and Blu-ray.
     if (!track->lang) {
         struct stream_lang_req req = {
@@ -1025,65 +1025,6 @@ static void add_dvd_tracks(struct MPContext *mpctx)
         }
     }
 #endif
-}
-
-#ifdef CONFIG_ASS
-static int free_sub_data(void *ptr)
-{
-    struct sh_sub *sh_sub = *(struct sh_sub **)ptr;
-    if (sh_sub->track)
-        ass_free_track(sh_sub->track);
-    talloc_free(sh_sub->sub_data);
-    return 1;
-}
-#endif
-
-struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
-                               float fps, int noerr)
-{
-    struct MPOpts *opts = &mpctx->opts;
-    struct ass_track *asst = NULL;
-
-    if (filename == NULL)
-        return NULL;
-
-    // Note: no text subtitles without libass. This is mainly because sd_ass is
-    // used for rendering. Even when showing subtitles with term-osd, going
-    // through sd_ass makes the code much simpler, as sd_ass can handle all
-    // the weird special-cases.
-#ifdef CONFIG_ASS
-    asst = mp_ass_read_stream(mpctx->ass_library, filename, opts->sub_cp);
-    if (asst) {
-        struct demuxer *d = new_sub_pseudo_demuxer(opts);
-        assert(d->num_streams == 1);
-        struct sh_stream *s = d->streams[0];
-        assert(s->type == STREAM_SUB);
-
-        s->codec = "ass";
-        s->sub->track = asst;
-
-        struct sh_sub **pptr = talloc(d, struct sh_sub*);
-        *pptr = s->sub;
-        talloc_set_destructor(pptr, free_sub_data);
-
-        struct track *t = add_stream_track(mpctx, s, false);
-        t->is_external = true;
-        t->preloaded = true;
-        t->title = talloc_strdup(t, filename);
-        t->external_filename = talloc_strdup(t, filename);
-        MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, d);
-        return t;
-    }
-#endif
-
-    // Used with libavformat subtitles.
-    struct track *ext = open_external_file(mpctx, filename, NULL, 0, STREAM_SUB);
-    if (ext)
-        return ext;
-
-    mp_tmsg(MSGT_CPLAYER, noerr ? MSGL_WARN : MSGL_ERR,
-            "Cannot load subtitles: %s\n", filename);
-    return NULL;
 }
 
 int mp_get_cache_percent(struct MPContext *mpctx)
@@ -3916,16 +3857,15 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
     // after reading video params we should load subtitles because
     // we know fps so now we can adjust subtitle time to ~6 seconds AST
     // check .sub
-    double sub_fps = mpctx->sh_video ? mpctx->sh_video->fps : 25;
     if (mpctx->opts.sub_name) {
         for (int i = 0; mpctx->opts.sub_name[i] != NULL; ++i)
-            mp_add_subtitles(mpctx, mpctx->opts.sub_name[i], sub_fps, 0);
+            mp_add_subtitles(mpctx, mpctx->opts.sub_name[i], 0);
     }
     if (mpctx->opts.sub_auto) { // auto load sub file ...
         char **tmp = find_text_subtitles(&mpctx->opts, mpctx->filename);
         int nsub = MP_TALLOC_ELEMS(tmp);
         for (int i = 0; i < nsub; i++) {
-            struct track *track = mp_add_subtitles(mpctx, tmp[i], sub_fps, 1);
+            struct track *track = mp_add_subtitles(mpctx, tmp[i], 1);
             if (track)
                 track->auto_loaded = true;
         }
@@ -3955,9 +3895,12 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     case STREAM_SUB: ss = -1; break;
     }
     vs = -1; // avi can't go without video
+    struct demuxer_params params = {
+        .ass_library = mpctx->ass_library, // demux_libass requires it
+    };
     struct demuxer *demuxer =
         demux_open_withparams(&mpctx->opts, stream, format, demuxer_name,
-                              as, vs, ss, filename, NULL);
+                              as, vs, ss, filename, &params);
     if (!demuxer) {
         free_stream(stream);
         goto err_out;
@@ -3995,12 +3938,11 @@ static void open_audiofiles_from_options(struct MPContext *mpctx)
                        opts->audio_stream_cache, STREAM_AUDIO);
 }
 
-// Just for -subfile. open_subtitles_from_options handles -sub text sub files.
-static void open_subfiles_from_options(struct MPContext *mpctx)
+struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename, int noerr)
 {
     struct MPOpts *opts = &mpctx->opts;
-    open_external_file(mpctx, opts->sub_stream, opts->sub_demuxer_name,
-                       0, STREAM_SUB);
+    return open_external_file(mpctx, filename, opts->sub_demuxer_name, 0,
+                              STREAM_SUB);
 }
 
 static void print_timeline(struct MPContext *mpctx)
@@ -4303,7 +4245,6 @@ goto_reopen_demuxer: ;
 
     open_subtitles_from_options(mpctx);
     open_audiofiles_from_options(mpctx);
-    open_subfiles_from_options(mpctx);
 
     check_previous_track_selection(mpctx);
 

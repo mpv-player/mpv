@@ -2281,7 +2281,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_SUB_ADD:
         if (sh_video) {
-            mp_add_subtitles(mpctx, cmd->args[0].v.s, sh_video->fps, 0);
+            mp_add_subtitles(mpctx, cmd->args[0].v.s, 0);
         }
         break;
 
@@ -2296,8 +2296,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         struct track *sub = mp_track_by_tid(mpctx, STREAM_SUB, cmd->args[0].v.i);
         if (sh_video && sub && sub->is_external && sub->external_filename)
         {
-            struct track *nsub = mp_add_subtitles(mpctx, sub->external_filename,
-                                                  sh_video->fps, 0);
+            struct track *nsub = mp_add_subtitles(mpctx, sub->external_filename, 0);
             if (nsub) {
                 mp_remove_track(mpctx, sub);
                 mp_switch_track(mpctx, nsub->type, nsub);
