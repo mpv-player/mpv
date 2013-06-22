@@ -71,6 +71,7 @@ struct cmd_bind {
     int input[MP_MAX_KEY_DOWN + 1];
     char *cmd;
     char *location;     // filename/line number of definition
+    bool is_builtin;
     struct cmd_bind_section *owner;
 };
 
@@ -484,7 +485,6 @@ struct input_fd {
 
 struct cmd_bind_section {
     struct cmd_bind *cmd_binds;
-    bool is_builtin;
     char *section;
     struct mp_rect mouse_area;  // set at runtime, if at all
     bool mouse_area_set;        // mouse_area is valid and should be tested
@@ -492,7 +492,7 @@ struct cmd_bind_section {
 };
 
 #define MAX_ACTIVE_SECTIONS 5
-#define MAX_MOUSE_AREA_RCS (MAX_ACTIVE_SECTIONS * 2)
+#define MAX_MOUSE_AREA_RCS MAX_ACTIVE_SECTIONS
 
 struct mp_mouse_area
 {
@@ -1123,7 +1123,7 @@ static void append_bind_info(char **pmsg, struct cmd_bind *bind)
         msg = talloc_asprintf_append(msg, " in section {%s}",
                                      bind->owner->section);
     msg = talloc_asprintf_append(msg, " in %s", bind->location);
-    if (bind->owner->is_builtin)
+    if (bind->is_builtin)
         msg = talloc_asprintf_append(msg, " (default)");
     talloc_free(cmd);
     *pmsg = msg;
@@ -1175,27 +1175,29 @@ static bool bind_matches_key(struct cmd_bind *bind, int n, int *keys)
 static struct cmd_bind *find_bind_for_key(struct cmd_bind *binds, int n,
                                           int *keys)
 {
-    int j;
-
     if (n <= 0 || !binds)
         return NULL;
-    for (j = 0; binds[j].cmd != NULL; j++) {
-        if (bind_matches_key(&binds[j], n, keys))
-            break;
+
+    // Prefer user-defined keys over builtin bindings
+    for (int builtin = 0; builtin < 2; builtin++) {
+        for (int j = 0; binds[j].cmd != NULL; j++) {
+            if (binds[j].is_builtin == (bool)builtin &&
+                bind_matches_key(&binds[j], n, keys))
+                return &binds[j];
+        }
     }
-    return binds[j].cmd ? &binds[j] : NULL;
+    return NULL;
 }
 
 static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
-                                                 bool builtin, bstr section)
+                                                 bstr section)
 {
     struct cmd_bind_section *bind_section = ictx->cmd_bind_sections;
 
     if (section.len == 0)
         section = bstr0("default");
     while (bind_section) {
-        if (bstrcmp0(section, bind_section->section) == 0
-            && builtin == bind_section->is_builtin)
+        if (bstrcmp0(section, bind_section->section) == 0)
             return bind_section;
         if (bind_section->next == NULL)
             break;
@@ -1210,47 +1212,39 @@ static struct cmd_bind_section *get_bind_section(struct input_ctx *ictx,
     }
     *bind_section = (struct cmd_bind_section) {
         .section = bstrdup0(bind_section, section),
-        .is_builtin = builtin,
     };
     return bind_section;
+}
+
+static struct cmd_bind *find_bind_for_key_section(struct input_ctx *ictx,
+                                                  char *section,
+                                                  int n, int *keys)
+{
+    struct cmd_bind_section *bs = get_bind_section(ictx, bstr0(section));
+    return find_bind_for_key(bs->cmd_binds, n, keys);
 }
 
 static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
                                               char *force_section,
                                               int n, int *keys)
 {
-    if (force_section) {
-        for (int b = 0; b < 2; b++) {
-            bool builtin = !!b;
-            struct cmd_bind_section *bs = get_bind_section(ictx, builtin,
-                                                           bstr0(force_section));
-            struct cmd_bind *cmd = find_bind_for_key(bs->cmd_binds, n, keys);
-            if (cmd)
-                return cmd;
-        }
-        return NULL;
-    }
+    if (force_section)
+        return find_bind_for_key_section(ictx, force_section, n, keys);
 
     for (int i = ictx->num_active_sections - 1; i >= 0; i--) {
-        struct active_section *as = &ictx->active_sections[i];
-        bstr name = bstr0(as->name);
-        for (int b = 0; b < 2; b++) {
-            bool builtin = !!b;
-            struct cmd_bind_section *bs = get_bind_section(ictx, builtin, name);
+        struct active_section *s = &ictx->active_sections[i];
+        struct cmd_bind *bind = find_bind_for_key_section(ictx, s->name, n, keys);
+        if (bind) {
+            struct cmd_bind_section *bs = bind->owner;
             for (int i = 0; i < n; i++) {
-                if (MP_KEY_DEPENDS_ON_MOUSE_POS(keys[i]) &&
-                    bs->mouse_area_set &&
-                    !test_rect(&bs->mouse_area,
-                               ictx->mouse_vo_x,
-                               ictx->mouse_vo_y))
+                if (MP_KEY_DEPENDS_ON_MOUSE_POS(keys[i]) && bs->mouse_area_set &&
+                    !test_rect(&bs->mouse_area, ictx->mouse_vo_x, ictx->mouse_vo_y))
                     goto skip;
             }
-            struct cmd_bind *cmd = find_bind_for_key(bs->cmd_binds, n, keys);
-            if (cmd)
-                return cmd;
-            skip: ;
+            return bind;
         }
-        if (as->flags & MP_INPUT_EXCLUSIVE)
+    skip: ;
+        if (s->flags & MP_INPUT_EXCLUSIVE)
             break;
     }
 
@@ -1783,16 +1777,15 @@ static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
 {
     int i = 0, j;
     struct cmd_bind *bind = NULL;
-    struct cmd_bind_section *bind_section = NULL;
-
-    bind_section = get_bind_section(ictx, builtin, section);
+    struct cmd_bind_section *bind_section = get_bind_section(ictx, section);
 
     if (bind_section->cmd_binds) {
         for (i = 0; bind_section->cmd_binds[i].cmd != NULL; i++) {
-            for (j = 0; bind_section->cmd_binds[i].input[j] == keys[j] && keys[j] != 0; j++)
+            struct cmd_bind *b = &bind_section->cmd_binds[i];
+            for (j = 0; b->input[j] == keys[j] && keys[j] != 0; j++)
                 /* NOTHING */;
-            if (keys[j] == 0 && bind_section->cmd_binds[i].input[j] == 0 ) {
-                bind = &bind_section->cmd_binds[i];
+            if (keys[j] == 0 && b->input[j] == 0 && b->is_builtin == builtin) {
+                bind = b;
                 break;
             }
         }
@@ -1809,6 +1802,7 @@ static void bind_keys(struct input_ctx *ictx, bool builtin, bstr section,
     bind->cmd = bstrdup0(bind_section->cmd_binds, command);
     bind->location = talloc_strdup(bind_section->cmd_binds, loc);
     bind->owner = bind_section;
+    bind->is_builtin = builtin;
     memcpy(bind->input, keys, (MP_MAX_KEY_DOWN + 1) * sizeof(int));
 }
 
@@ -1895,10 +1889,17 @@ static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
     return 1;
 }
 
+// If name is NULL, return "default".
+// Return a statically allocated name of the section (i.e. return value never
+// gets deallocated).
+static char *normalize_section(struct input_ctx *ictx, char *name)
+{
+    return get_bind_section(ictx, bstr0(name))->section;
+}
+
 void mp_input_disable_section(struct input_ctx *ictx, char *name)
 {
-    struct cmd_bind_section *s = get_bind_section(ictx, false, bstr0(name));
-    name = s->section; // get allocated name, reduce NULL to "default"
+    name = normalize_section(ictx, name);
 
     // Remove old section, or make sure it's on top if re-enabled
     for (int i = ictx->num_active_sections - 1; i >= 0; i--) {
@@ -1913,8 +1914,7 @@ void mp_input_disable_section(struct input_ctx *ictx, char *name)
 
 void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
 {
-    struct cmd_bind_section *s = get_bind_section(ictx, false, bstr0(name));
-    name = s->section; // get allocated name, reduce NULL to "default"
+    name = normalize_section(ictx, name);
 
     mp_input_disable_section(ictx, name);
 
@@ -1932,11 +1932,9 @@ void mp_input_disable_all_sections(struct input_ctx *ictx)
 void mp_input_set_section_mouse_area(struct input_ctx *ictx, char *name,
                                      int x0, int y0, int x1, int y1)
 {
-    for (int b = 0; b < 2; b++) {
-        struct cmd_bind_section *s = get_bind_section(ictx, !!b, bstr0(name));
-        s->mouse_area = (struct mp_rect){x0, y0, x1, y1};
-        s->mouse_area_set = x0 != x1 && y0 != y1;
-    }
+    struct cmd_bind_section *s = get_bind_section(ictx, bstr0(name));
+    s->mouse_area = (struct mp_rect){x0, y0, x1, y1};
+    s->mouse_area_set = x0 != x1 && y0 != y1;
 }
 
 struct mp_mouse_area *mp_mouse_area_create(void)
@@ -1949,11 +1947,9 @@ void mp_input_get_mouse_area(struct input_ctx *ictx, struct mp_mouse_area *dst)
     dst->num_rc = 0;
     for (int i = 0; i < ictx->num_active_sections; i++) {
         char *name = ictx->active_sections[i].name;
-        for (int b = 0; b < 2; b++) {
-            struct cmd_bind_section *s = get_bind_section(ictx, !!b, bstr0(name));
-            if (s->mouse_area_set && dst->num_rc < MAX_MOUSE_AREA_RCS)
-                dst->rc[dst->num_rc++] = s->mouse_area;
-        }
+        struct cmd_bind_section *s = get_bind_section(ictx, bstr0(name));
+        if (s->mouse_area_set && dst->num_rc < MAX_MOUSE_AREA_RCS)
+            dst->rc[dst->num_rc++] = s->mouse_area;
     }
 }
 
@@ -1974,6 +1970,26 @@ bool mp_input_test_mouse(struct input_ctx *ictx, int x, int y)
     return mp_mouse_area_test(&ma, x, y);
 }
 
+static void remove_binds(struct cmd_bind *binds, bool builtin)
+{
+    if (!binds)
+        return;
+    int count;
+    for (int n = 0; binds[n].cmd; n++)
+        count++;
+    int n = 0;
+    while (binds[n].cmd) {
+        if (binds[n].is_builtin == builtin) {
+            talloc_free(binds[n].cmd);
+            talloc_free(binds[n].location);
+            // Remove by swapping in the last item (or the terminator)
+            binds[n] = binds[count - 1];
+        } else {
+            n++;
+        }
+    }
+}
+
 void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
                              char *contents, bool builtin)
 {
@@ -1985,10 +2001,8 @@ void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
         // Disable:
         mp_input_disable_section(ictx, name);
         // Delete:
-        struct cmd_bind_section *s = get_bind_section(ictx, builtin, bstr0(name));
-        talloc_free(s->cmd_binds);
-        s->cmd_binds = NULL;
-        // Could remove the section itself too, but that's not really necessary.
+        struct cmd_bind_section *s = get_bind_section(ictx, bstr0(name));
+        remove_binds(s->cmd_binds, builtin);
     }
 }
 
