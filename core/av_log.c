@@ -97,10 +97,15 @@ static int extract_msg_type_from_ctx(void *ptr)
     return MSGT_FIXME;
 }
 
+#if LIBAVCODEC_VERSION_MICRO >= 100
+#define LIB_PREFIX "ffmpeg"
+#else
+#define LIB_PREFIX "libav"
+#endif
+
 static void mp_msg_av_log_callback(void *ptr, int level, const char *fmt,
                                    va_list vl)
 {
-    static bool print_prefix = 1;
     AVClass *avc = ptr ? *(AVClass **)ptr : NULL;
     int mp_level = av_log_level_to_mp_level(level);
     int type = extract_msg_type_from_ctx(ptr);
@@ -108,9 +113,8 @@ static void mp_msg_av_log_callback(void *ptr, int level, const char *fmt,
     if (!mp_msg_test(type, mp_level))
         return;
 
-    if (print_prefix && avc)
-        mp_msg(type, mp_level, "[%s @ %p]", avc->item_name(ptr), avc);
-    print_prefix = fmt[strlen(fmt) - 1] == '\n';
+    mp_msg(type, mp_level, "[%s/%s] ", LIB_PREFIX,
+           avc ? avc->item_name(ptr) : "?");
 
     mp_msg_va(type, mp_level, fmt, vl);
 }
