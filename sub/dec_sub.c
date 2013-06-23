@@ -312,7 +312,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
 
     // Can't run auto-detection on movtext packets: it's the only codec that
     // even though it decodes to text has binary input data.
-    if (opts->sub_cp && strcmp(codec, "movtext") != 0)
+    if (opts->sub_cp && !sh->is_utf8 && strcmp(codec, "movtext") != 0)
         sub->charset = guess_sub_cp(&subs, opts->sub_cp);
 
     if (sub->charset)

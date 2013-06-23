@@ -1348,6 +1348,7 @@ static int d_check_file(struct demuxer *demuxer)
     p->sh = new_sh_stream(demuxer, STREAM_SUB);
     p->sh->codec = sd->codec;
     p->sh->sub->frame_based = !sd->sub_uses_time;
+    p->sh->sub->is_utf8 = sr.args.utf16 != 0; // converted from utf-16 -> utf-8
 
     add_sub_data(demuxer, sd);
     subdata_free(sd);
