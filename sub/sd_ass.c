@@ -275,8 +275,11 @@ static char *get_text(struct sd *sd, double pts)
             if (event->Text) {
                 int start = b.len;
                 ass_to_plaintext(&b, event->Text);
-                if (!is_whitespace_only(&b.start[b.len], b.len - start))
+                if (is_whitespace_only(&b.start[start], b.len - start)) {
+                    b.len = start;
+                } else {
                     append(&b, '\n');
+                }
             }
         }
     }
