@@ -38,15 +38,7 @@
 #include "stream/stream.h"
 #include "demux/demux.h"
 
-#ifdef CONFIG_ENCA
-#include <enca.h>
-#endif
-
 #define ERR ((void *) -1)
-
-#ifdef CONFIG_ICONV
-#include <iconv.h>
-#endif
 
 // subtitle formats
 #define SUB_INVALID   -1
@@ -1069,79 +1061,6 @@ static int sub_autodetect (stream_t* st, int *uses_time, int utf16) {
     return SUB_INVALID;  // too many bad lines
 }
 
-#ifdef CONFIG_ICONV
-static const char* guess_cp(stream_t *st, const char *preferred_language, const char *fallback);
-
-static iconv_t	subcp_open (stream_t *st, const char *sub_cp)
-{
-        iconv_t icdsc = (iconv_t)(-1);
-	char *tocp = "UTF-8";
-
-	if (sub_cp){
-		const char *cp_tmp = sub_cp;
-#ifdef CONFIG_ENCA
-		char enca_lang[3], enca_fallback[100];
-		if (sscanf(sub_cp, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
-		     || sscanf(sub_cp, "ENCA:%2s:%99s", enca_lang, enca_fallback) == 2) {
-		  if (st && st->flags & MP_STREAM_SEEK ) {
-		    cp_tmp = guess_cp(st, enca_lang, enca_fallback);
-		  } else {
-		    cp_tmp = enca_fallback;
-		    if (st)
-		      mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: enca failed, stream must be seekable.\n");
-		  }
-		}
-#endif
-		if ((icdsc = iconv_open (tocp, cp_tmp)) != (iconv_t)(-1)){
-			mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: opened iconv descriptor.\n");
-		} else
-			mp_msg(MSGT_SUBREADER,MSGL_ERR,"SUB: error opening iconv descriptor.\n");
-	}
-	return icdsc;
-}
-
-static void	subcp_close (iconv_t icdsc)
-{
-	if (icdsc != (iconv_t)(-1)){
-		(void) iconv_close (icdsc);
-	   	mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: closed iconv descriptor.\n");
-	}
-}
-
-static subtitle* subcp_recode (iconv_t icdsc, subtitle *sub)
-{
-	int l=sub->lines;
-	size_t ileft, oleft;
-	char *op, *ip, *ot;
-	if(icdsc == (iconv_t)(-1)) return sub;
-
-	while (l){
-		ip = sub->text[--l];
-		ileft = strlen(ip);
-		oleft = 4 * ileft;
-
-		if (!(ot = malloc(oleft + 1)))
-                    abort();
-		op = ot;
-		if (iconv(icdsc, &ip, &ileft,
-			  &op, &oleft) == (size_t)(-1)) {
-			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line.\n");
-			free(ot);
-			continue;
-		}
-		// In some stateful encodings, we must clear the state to handle the last character
-		if (iconv(icdsc, NULL, NULL,
-			  &op, &oleft) == (size_t)(-1)) {
-			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line, can't clear encoding state.\n");
-		}
-		*op='\0' ;
-		free (sub->text[l]);
-		sub->text[l] = ot;
-	}
-	return sub;
-}
-#endif
-
 static void adjust_subs_time(subtitle* sub, float subtime, float fps,
                              float sub_fps, int block,
                              int sub_num, int sub_uses_time) {
@@ -1183,66 +1102,6 @@ struct subreader {
     const char *codec_name;
     struct readline_args args;
 };
-
-#ifdef CONFIG_ENCA
-static const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *preferred_language, const char *fallback)
-{
-    const char **languages;
-    size_t langcnt;
-    EncaAnalyser analyser;
-    EncaEncoding encoding;
-    const char *detected_sub_cp = NULL;
-    int i;
-
-    languages = enca_get_languages(&langcnt);
-    mp_msg(MSGT_SUBREADER, MSGL_V, "ENCA supported languages: ");
-    for (i = 0; i < langcnt; i++) {
-	mp_msg(MSGT_SUBREADER, MSGL_V, "%s ", languages[i]);
-    }
-    mp_msg(MSGT_SUBREADER, MSGL_V, "\n");
-
-    for (i = 0; i < langcnt; i++) {
-	if (strcasecmp(languages[i], preferred_language) != 0) continue;
-	analyser = enca_analyser_alloc(languages[i]);
-	encoding = enca_analyse_const(analyser, buffer, buflen);
-	enca_analyser_free(analyser);
-	if (encoding.charset != ENCA_CS_UNKNOWN) {
-	    detected_sub_cp = enca_charset_name(encoding.charset, ENCA_NAME_STYLE_ICONV);
-	    break;
-	}
-    }
-
-    free(languages);
-
-    if (!detected_sub_cp) {
-	detected_sub_cp = fallback;
-	mp_msg(MSGT_SUBREADER, MSGL_INFO, "ENCA detection failed: fallback to %s\n", fallback);
-    }else{
-	mp_msg(MSGT_SUBREADER, MSGL_INFO, "ENCA detected charset: %s\n", detected_sub_cp);
-    }
-
-    return detected_sub_cp;
-}
-
-#define MAX_GUESS_BUFFER_SIZE (256*1024)
-static const char* guess_cp(stream_t *st, const char *preferred_language, const char *fallback)
-{
-    size_t buflen;
-    unsigned char *buffer;
-    const char *detected_sub_cp = NULL;
-
-    buffer = malloc(MAX_GUESS_BUFFER_SIZE);
-    buflen = stream_read(st,buffer, MAX_GUESS_BUFFER_SIZE);
-
-    detected_sub_cp = guess_buffer_cp(buffer, buflen, preferred_language, fallback);
-
-    free(buffer);
-    stream_seek(st,0);
-
-    return detected_sub_cp;
-}
-#undef MAX_GUESS_BUFFER_SIZE
-#endif
 
 static bool subreader_autodetect(stream_t *fd, struct MPOpts *opts,
                                  struct subreader *out)
@@ -1304,10 +1163,6 @@ static sub_data* sub_read_file(stream_t *fd, struct subreader *srp)
     int sub_num = 0, sub_errs = 0;
     struct readline_args args = srp->args;
 
-#ifdef CONFIG_ICONV
-    iconv_t icdsc = subcp_open(fd, opts->sub_cp);
-#endif
-
     sub_num=0;n_max=32;
     first=malloc(n_max*sizeof(subtitle));
     if (!first)
@@ -1326,14 +1181,9 @@ static sub_data* sub_read_file(stream_t *fd, struct subreader *srp)
 	memset(sub, '\0', sizeof(subtitle));
         sub=srp->read(fd, sub, &args);
         if(!sub) break;   // EOF
-#ifdef CONFIG_ICONV
-	if (sub!=ERR) sub=subcp_recode(icdsc, sub);
-#endif
+
 	if ( sub == ERR )
 	 {
-#ifdef CONFIG_ICONV
-          subcp_close(icdsc);
-#endif
 	  free(first);
 	  free(alloced_sub);
 	  return NULL;
@@ -1381,9 +1231,6 @@ static sub_data* sub_read_file(stream_t *fd, struct subreader *srp)
         if(sub==ERR) ++sub_errs; else ++sub_num; // Error vs. Valid
     }
 
-#ifdef CONFIG_ICONV
-    subcp_close(icdsc);
-#endif
     free(alloced_sub);
 
 //    printf ("SUB: Subtitle format %s time.\n", uses_time?"uses":"doesn't use");
