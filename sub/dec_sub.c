@@ -199,6 +199,57 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh)
            sh->gsh->codec ? sh->gsh->codec : "<unknown>");
 }
 
+static struct demux_packet *get_decoded_packet(struct sd *sd)
+{
+    return sd->driver->get_converted ? sd->driver->get_converted(sd) : NULL;
+}
+
+static void decode_chain(struct sd **sd, int num_sd, struct demux_packet *packet)
+{
+    if (num_sd == 0)
+        return;
+    struct sd *dec = sd[0];
+    dec->driver->decode(dec, packet);
+    if (num_sd > 1) {
+        while (1) {
+            struct demux_packet *next = get_decoded_packet(dec);
+            if (!next)
+                break;
+            decode_chain(sd + 1, num_sd - 1, next);
+        }
+    }
+}
+
+static struct demux_packet *recode_packet(struct demux_packet *in,
+                                          const char *charset)
+{
+    struct demux_packet *pkt = NULL;
+    bstr in_buf = {in->buffer, in->len};
+    bstr conv = mp_iconv_to_utf8(in_buf, charset, MP_ICONV_VERBOSE);
+    if (conv.start && conv.start != in_buf.start) {
+        pkt = talloc_ptrtype(NULL, pkt);
+        talloc_steal(pkt, conv.start);
+        *pkt = (struct demux_packet) {
+            .buffer = conv.start,
+            .len = conv.len,
+            .pts = in->pts,
+            .duration = in->duration,
+            .avpacket = in->avpacket, // questionable, but gives us sidedata
+        };
+    }
+    return pkt;
+}
+
+void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
+{
+    if (sub->num_sd > 0) {
+        struct demux_packet *recoded = NULL;
+        if (sub->charset)
+            recoded = recode_packet(packet, sub->charset);
+        decode_chain(sub->sd, sub->num_sd, recoded ? recoded : packet);
+    }
+}
+
 static const char *guess_sub_cp(struct packet_list *subs, const char *usercp)
 {
     if (!mp_charset_requires_guess(usercp))
@@ -339,51 +390,6 @@ bool sub_accept_packets_in_advance(struct dec_sub *sub)
     // Converters are assumed to always accept packets in advance
     struct sd *sd = sub_get_last_sd(sub);
     return sd && sd->driver->accept_packets_in_advance;
-}
-
-static void decode_next(struct dec_sub *sub, int n, struct demux_packet *packet)
-{
-    struct sd *sd = sub->sd[n];
-    sd->driver->decode(sd, packet);
-    if (n + 1 >= sub->num_sd || !sd->driver->get_converted)
-        return;
-    while (1) {
-        struct demux_packet *next =
-            sd->driver->get_converted ? sd->driver->get_converted(sd) : NULL;
-        if (!next)
-            break;
-        decode_next(sub, n + 1, next);
-    }
-}
-
-static struct demux_packet *recode_packet(struct demux_packet *in,
-                                          const char *charset)
-{
-    struct demux_packet *pkt = NULL;
-    bstr in_buf = {in->buffer, in->len};
-    bstr conv = mp_iconv_to_utf8(in_buf, charset, MP_ICONV_VERBOSE);
-    if (conv.start && conv.start != in_buf.start) {
-        pkt = talloc_ptrtype(NULL, pkt);
-        talloc_steal(pkt, conv.start);
-        *pkt = (struct demux_packet) {
-            .buffer = conv.start,
-            .len = conv.len,
-            .pts = in->pts,
-            .duration = in->duration,
-            .avpacket = in->avpacket, // questionable, but gives us sidedata
-        };
-    }
-    return pkt;
-}
-
-void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
-{
-    if (sub->num_sd > 0) {
-        struct demux_packet *recoded = NULL;
-        if (sub->charset)
-            recoded = recode_packet(packet, sub->charset);
-        decode_next(sub, 0, recoded ? recoded : packet);
-    }
 }
 
 void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
