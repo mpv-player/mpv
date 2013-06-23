@@ -76,6 +76,7 @@ static bool check_ca_st(int level, OSStatus code, const char *message)
     } while (0)
 
 #define CHECK_CA_ERROR(message) CHECK_CA_ERROR_L(coreaudio_error, message)
+#define CHECK_CA_WARN(message)  check_ca_st(MSGL_WARN, err, message)
 
 static void ca_print_asbd(const char *description,
                           const AudioStreamBasicDescription *asbd)
@@ -206,6 +207,17 @@ static Boolean IsAudioPropertySettable(AudioObjectID id,
     return AudioObjectIsPropertySettable(id, &p_addr, outData);
 }
 
+static int AudioFormatIsDigital(AudioStreamBasicDescription asbd)
+{
+    switch (asbd.mFormatID)
+    case 'IAC3':
+    case 'iac3':
+    case  kAudioFormat60958AC3:
+    case  kAudioFormatAC3:
+        return CONTROL_OK;
+    return CONTROL_FALSE;
+}
+
 static int AudioStreamSupportsDigital(AudioStreamID stream)
 {
     AudioStreamRangedDescription *formats = NULL;
@@ -225,14 +237,10 @@ static int AudioStreamSupportsDigital(AudioStreamID stream)
     for (int i = 0; i < n_formats; ++i) {
         AudioStreamBasicDescription asbd = formats[i].mFormat;
         ca_print_asbd("supported format:", &(asbd));
-
-        switch (asbd.mFormatID)
-        case 'IAC3':
-        case 'iac3':
-        case  kAudioFormat60958AC3:
-        case  kAudioFormatAC3:
+        if (AudioFormatIsDigital(asbd)) {
             free(formats);
-            return CONTROL_OK;
+            return CONTROL_TRUE;
+        }
     }
 
     free(formats);
