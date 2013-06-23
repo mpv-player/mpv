@@ -31,13 +31,15 @@ must kill **mpv** externally to make it exit.)
 General input command syntax
 ----------------------------
 
-`[Shift+][Ctrl+][Alt+][Meta+]<key> [<prefixes>] <command> (<argument>)*`
+`[Shift+][Ctrl+][Alt+][Meta+]<key> [{<section>}] [<prefixes>] <command> (<argument>)*`
 
 Newlines always start a new binding. ``#`` starts a comment (outside of quoted
 string arguments). To bind commands to the ``#`` key, ``SHARP`` can be used.
 
 <key> is either the literal character the key produces (ASCII or unicode
 character), or a symbol name.
+
+<section> (braced with ``{`` and ``}``) is the input section for this command.
 
 Arguments are separated by whitespace. This applies even to string arguments.
 For this reason, string arguments should be quoted with ``"``. Inside quotes,
@@ -323,6 +325,24 @@ settings.
 
 Undocumented prefixes: pausing, pausing_keep, pausing_toggle,
 pausing_keep_force. (Should these be made official?)
+
+Input sections
+--------------
+
+Input sections group a set of bindings, and enable or disable them at once.
+In ``input.conf``, each key binding is assigned to an input section, rather
+than actually having explicit text sections.
+
+Also see ``enable_section`` and ``disable_section`` commands.
+
+Predefined bindings:
+
+default
+    Bindings without input section are implicitly assigned to this section. It
+    is enabled by default during normal playback.
+encode
+    Section which is active in encoding mode. It is enabled exclusively, so
+    that bindings in the ``default`` sections are ignored.
 
 Properties
 ----------
