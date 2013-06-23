@@ -348,8 +348,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
         return false;
 
     const char *codec = sh->gsh->codec ? sh->gsh->codec : "";
-    void *tmp = talloc_new(NULL);
-    struct packet_list subs = {0};
+    struct packet_list *subs = talloc_zero(NULL, struct packet_list);
 
     for (;;) {
         ds_get_next_pts(sh->ds);
@@ -357,31 +356,31 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
         if (!pkt)
             break;
         pkt = demux_copy_packet(pkt);
-        talloc_steal(tmp, pkt);
-        MP_TARRAY_APPEND(tmp, subs.packets, subs.num_packets, pkt);
+        talloc_steal(subs, pkt);
+        MP_TARRAY_APPEND(subs, subs->packets, subs->num_packets, pkt);
     }
 
     // Can't run auto-detection on movtext packets: it's the only codec that
     // even though it decodes to text has binary input data.
     if (opts->sub_cp && !sh->is_utf8 && strcmp(codec, "movtext") != 0)
-        sub->charset = guess_sub_cp(&subs, opts->sub_cp);
+        sub->charset = guess_sub_cp(subs, opts->sub_cp);
 
     if (sub->charset)
         mp_msg(MSGT_OSD, MSGL_INFO, "Using subtitle charset: %s\n", sub->charset);
 
     // 23.976 FPS is used as default timebase for frame based formats
     if (sub->video_fps && sh->frame_based)
-        multiply_timings(&subs, sub->video_fps / 23.976);
+        multiply_timings(subs, sub->video_fps / 23.976);
 
     if (opts->sub_fps && sub->video_fps)
-        multiply_timings(&subs, opts->sub_fps / sub->video_fps);
+        multiply_timings(subs, opts->sub_fps / sub->video_fps);
 
     if (!opts->suboverlap_enabled)
-        fix_overlaps_and_gaps(&subs);
+        fix_overlaps_and_gaps(subs);
 
-    add_sub_list(sub, &subs);
+    add_sub_list(sub, subs);
 
-    talloc_free(tmp);
+    talloc_free(subs);
     return true;
 }
 
