@@ -316,6 +316,52 @@ static int get_chapter_list(lua_State *L)
     return 1;
 }
 
+static const char *stream_type(enum stream_type t)
+{
+    switch (t) {
+    case STREAM_VIDEO: return "video";
+    case STREAM_AUDIO: return "audio";
+    case STREAM_SUB:   return "sub";
+    default:           return "unknown";
+    }
+}
+
+static int get_track_list(lua_State *L)
+{
+    struct MPContext *mpctx = get_mpctx(L);
+    lua_newtable(L); // list
+    for (int n = 0; n < mpctx->num_tracks; n++) {
+        struct track *track = mpctx->tracks[n];
+        lua_newtable(L); // list track
+
+        lua_pushstring(L, stream_type(track->type));
+        lua_setfield(L, -2, "type");
+        lua_pushinteger(L, track->user_tid);
+        lua_setfield(L, -2, "id");
+        lua_pushboolean(L, track->default_track);
+        lua_setfield(L, -2, "default");
+        lua_pushboolean(L, track->attached_picture);
+        lua_setfield(L, -2, "attached_picture");
+        if (track->lang) {
+            lua_pushstring(L, track->lang);
+            lua_setfield(L, -2, "language");
+        }
+        lua_pushboolean(L, track->is_external);
+        lua_setfield(L, -2, "external");
+        if (track->external_filename) {
+            lua_pushstring(L, track->external_filename);
+            lua_setfield(L, -2, "external_filename");
+        }
+        lua_pushboolean(L, track->auto_loaded);
+        lua_setfield(L, -2, "auto_loaded");
+
+        lua_pushinteger(L, n + 1); // list track n1
+        lua_insert(L, -2); // list n1 track
+        lua_settable(L, -3); // list
+    }
+    return 1;
+}
+
 static int input_define_section(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
@@ -394,6 +440,9 @@ static void add_functions(struct MPContext *mpctx)
 
     lua_pushcfunction(L, get_chapter_list);
     lua_setfield(L, -2, "get_chapter_list");
+
+    lua_pushcfunction(L, get_track_list);
+    lua_setfield(L, -2, "get_track_list");
 
     lua_pushcfunction(L, input_define_section);
     lua_setfield(L, -2, "input_define_section");

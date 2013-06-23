@@ -70,6 +70,19 @@ end
 
 --dump_properties()
 
+function dump_tracks()
+    local tracks = mp.get_track_list()
+    local t = {}
+    for i = 1, #tracks do
+        local track = tracks[i]
+        t[#t + 1] = {"-"}
+        for name, val in pairs(track) do
+            t[#t + 1] = {name, val}
+        end
+    end
+    print_ascii_table(t)
+end
+
 function mp_update()
     -- called on each playloop iteration
     --mp.set_osd_ass("Time: {\\b1}" .. mp.property_get_string("time-pos"))
