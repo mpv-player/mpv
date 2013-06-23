@@ -42,7 +42,8 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         return;
     len = FFMIN(len - 2, AV_RB16(data));
     data += 2;
-    sd_conv_add_packet(sd, data, len, packet->pts, packet->duration);
+    if (len > 0)
+        sd_conv_add_packet(sd, data, len, packet->pts, packet->duration);
 }
 
 const struct sd_functions sd_movtext = {

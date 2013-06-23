@@ -32,6 +32,10 @@
 #include "ass_mp.h"
 #include "sd.h"
 
+// Enable code that treats subtitle events with duration 0 specially, and
+// adjust their duration so that they will disappear with the next event.
+#define INCOMPLETE_EVENTS 0
+
 struct sd_ass_priv {
     struct ass_track *ass_track;
     bool vsfilter_aspect;
@@ -114,6 +118,7 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     }
     long long ipts = pts * 1000 + 0.5;
     long long iduration = duration * 1000 + 0.5;
+#if INCOMPLETE_EVENTS
     if (ctx->incomplete_event) {
         ctx->incomplete_event = false;
         ASS_Event *event = track->events + track->n_events - 1;
@@ -144,6 +149,21 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         iduration = 10000;
         ctx->incomplete_event = true;
     }
+#else
+    if (duration <= 0) {
+        mp_msg(MSGT_SUBREADER, MSGL_WARN, "Subtitle without duration or "
+               "duration set to 0 at pts %f, ignored\n", pts);
+        return;
+    }
+    if (!sd->no_remove_duplicates) {
+        for (int i = 0; i < track->n_events; i++) {
+            if (track->events[i].Start == ipts
+                && (track->events[i].Duration == iduration)
+                && strcmp(track->events[i].Text, text) == 0)
+                return;   // We've already added this subtitle
+        }
+    }
+#endif
     int eid = ass_alloc_event(track);
     ASS_Event *event = track->events + eid;
     event->Start = ipts;
