@@ -240,14 +240,20 @@ static struct demux_packet *recode_packet(struct demux_packet *in,
     return pkt;
 }
 
-void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
+static void decode_chain_recode(struct dec_sub *sub, struct sd **sd, int num_sd,
+                                struct demux_packet *packet)
 {
-    if (sub->num_sd > 0) {
+    if (num_sd > 0) {
         struct demux_packet *recoded = NULL;
         if (sub->charset)
             recoded = recode_packet(packet, sub->charset);
-        decode_chain(sub->sd, sub->num_sd, recoded ? recoded : packet);
+        decode_chain(sd, num_sd, recoded ? recoded : packet);
     }
+}
+
+void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
+{
+    decode_chain_recode(sub, sub->sd, sub->num_sd, packet);
 }
 
 static const char *guess_sub_cp(struct packet_list *subs, const char *usercp)
@@ -318,7 +324,7 @@ static void fix_overlaps_and_gaps(struct packet_list *subs)
     }
 }
 
-static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
+static void add_sub_list(struct dec_sub *sub, int at, struct packet_list *subs)
 {
     struct sd *sd = sub_get_last_sd(sub);
     assert(sd);
@@ -326,7 +332,7 @@ static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
     sd->no_remove_duplicates = true;
 
     for (int n = 0; n < subs->num_packets; n++)
-        sub_decode(sub, subs->packets[n]);
+        decode_chain_recode(sub, sub->sd + at, sub->num_sd - at, subs->packets[n]);
 
     // Hack for broken FFmpeg packet format: make sd_ass keep the subtitle
     // events on reset(), even if broken FFmpeg ASS packets were received
@@ -338,31 +344,52 @@ static void add_sub_list(struct dec_sub *sub, struct packet_list *subs)
     sd->no_remove_duplicates = false;
 }
 
+static void add_packet(struct packet_list *subs, struct demux_packet *pkt)
+{
+    pkt = demux_copy_packet(pkt);
+    talloc_steal(subs, pkt);
+    MP_TARRAY_APPEND(subs, subs->packets, subs->num_packets, pkt);
+}
+
 // Read all packets from the demuxer and decode/add them. Returns false if
 // there are circumstances which makes this not possible.
 bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
 {
     struct MPOpts *opts = sub->opts;
 
-    if (!sub_accept_packets_in_advance(sub) || sh->track)
+    if (!sub_accept_packets_in_advance(sub) || sh->track || sub->num_sd < 1)
         return false;
 
-    const char *codec = sh->gsh->codec ? sh->gsh->codec : "";
     struct packet_list *subs = talloc_zero(NULL, struct packet_list);
+
+    // In some cases, we want to put the packets through a decoder first.
+    // Preprocess until sub->sd[preprocess].
+    int preprocess = 0;
+
+    // movtext is currently the only subtitle format that has text output,
+    // but binary input. Do charset conversion after converting to text.
+    if (sub->sd[0]->driver == &sd_movtext)
+        preprocess = 1;
 
     for (;;) {
         ds_get_next_pts(sh->ds);
         struct demux_packet *pkt = ds_get_packet_sub(sh->ds);
         if (!pkt)
             break;
-        pkt = demux_copy_packet(pkt);
-        talloc_steal(subs, pkt);
-        MP_TARRAY_APPEND(subs, subs->packets, subs->num_packets, pkt);
+        if (preprocess) {
+            decode_chain(sub->sd, preprocess, pkt);
+            while (1) {
+                pkt = get_decoded_packet(sub->sd[preprocess - 1]);
+                if (!pkt)
+                    break;
+                add_packet(subs, pkt);
+            }
+        } else {
+            add_packet(subs, pkt);
+        }
     }
 
-    // Can't run auto-detection on movtext packets: it's the only codec that
-    // even though it decodes to text has binary input data.
-    if (opts->sub_cp && !sh->is_utf8 && strcmp(codec, "movtext") != 0)
+    if (opts->sub_cp && !sh->is_utf8)
         sub->charset = guess_sub_cp(subs, opts->sub_cp);
 
     if (sub->charset)
@@ -378,7 +405,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
     if (!opts->suboverlap_enabled)
         fix_overlaps_and_gaps(subs);
 
-    add_sub_list(sub, subs);
+    add_sub_list(sub, preprocess, subs);
 
     talloc_free(subs);
     return true;
