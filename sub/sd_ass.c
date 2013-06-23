@@ -41,17 +41,14 @@ struct sd_ass_priv {
     char last_text[500];
 };
 
-static bool is_native_ass(const char *t)
-{
-    return strcmp(t, "ass") == 0 || strcmp(t, "ssa") == 0;
-}
-
 static bool supports_format(const char *format)
 {
     // ass-text is produced by converters and the subreader.c ssa parser; this
     // format has ASS tags, but doesn't start with any prelude, nor does it
     // have extradata.
-    return format && (is_native_ass(format) || strcmp(format, "ass-text") == 0);
+    return format && (strcmp(format, "ass") == 0 ||
+                      strcmp(format, "ssa") == 0 ||
+                      strcmp(format, "ass-text") == 0);
 }
 
 static void free_last_event(ASS_Track *track)
@@ -64,7 +61,7 @@ static void free_last_event(ASS_Track *track)
 static int init(struct sd *sd)
 {
     struct MPOpts *opts = sd->opts;
-    if (!sd->ass_library || !sd->ass_renderer)
+    if (!sd->ass_library || !sd->ass_renderer || !sd->codec)
         return -1;
 
     bool is_converted = sd->converted_from != NULL;
@@ -99,16 +96,15 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     unsigned char *text = data;
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
-    if (is_native_ass(sd->codec)) {
-        if (bstr_startswith0((bstr){data, data_len}, "Dialogue: ")) {
-            // broken ffmpeg ASS packet format
-            ctx->flush_on_seek = true;
-            ass_process_data(track, data, data_len);
-        } else {
-            ass_process_chunk(track, data, data_len,
-                              (long long)(pts*1000 + 0.5),
-                              (long long)(duration*1000 + 0.5));
-        }
+    if (strcmp(sd->codec, "ass") == 0) {
+        ass_process_chunk(track, data, data_len,
+                          (long long)(pts*1000 + 0.5),
+                          (long long)(duration*1000 + 0.5));
+        return;
+    } else if (strcmp(sd->codec, "ssa") == 0) {
+        // broken ffmpeg ASS packet format
+        ctx->flush_on_seek = true;
+        ass_process_data(track, data, data_len);
         return;
     }
     // plaintext subs
