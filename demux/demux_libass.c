@@ -23,10 +23,11 @@
 
 #include "core/options.h"
 #include "core/mp_msg.h"
+#include "core/charset_conv.h"
 #include "stream/stream.h"
 #include "demux.h"
 
-#define PROBE_SIZE (4 * 1024)
+#define PROBE_SIZE (8 * 1024)
 
 struct priv {
     ASS_Track *track;
@@ -34,6 +35,7 @@ struct priv {
 
 static int d_check_file(struct demuxer *demuxer)
 {
+    const char *user_cp = demuxer->opts->sub_cp;
     struct stream *s = demuxer->stream;
     // Older versions of libass will behave strange if renderer and track
     // library handles mismatch, so make sure everything uses a global handle.
@@ -53,7 +55,13 @@ static int d_check_file(struct demuxer *demuxer)
     memcpy(tmp, buf.start, buf.len);
     buf.start = tmp;
     buf.start[buf.len] = '\0';
-    ASS_Track *track = ass_read_memory(lib, buf.start, buf.len, NULL);
+    bstr cbuf =
+        mp_charset_guess_and_conv_to_utf8(buf, user_cp,  MP_ICONV_ALLOW_CUTOFF);
+    if (cbuf.start == NULL)
+        cbuf = buf;
+    ASS_Track *track = ass_read_memory(lib, cbuf.start, cbuf.len, NULL);
+    if (cbuf.start != buf.start)
+        talloc_free(cbuf.start);
     talloc_free(buf.start);
     if (!track)
         return 0;
@@ -67,7 +75,12 @@ static int d_check_file(struct demuxer *demuxer)
                 "larger than 100 MB: %s\n", demuxer->filename);
         return 0;
     }
-    track = ass_read_memory(lib, buf.start, buf.len, NULL);
+    cbuf = mp_charset_guess_and_conv_to_utf8(buf, user_cp,  MP_ICONV_VERBOSE);
+    if (cbuf.start == NULL)
+        cbuf = buf;
+    track = ass_read_memory(lib, cbuf.start, cbuf.len, NULL);
+    if (cbuf.start != buf.start)
+        talloc_free(cbuf.start);
     talloc_free(buf.start);
     if (!track)
         return 0;
