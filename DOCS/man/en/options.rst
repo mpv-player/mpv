@@ -2031,9 +2031,9 @@
     ``--subcp=enca:<language>:<fallback codepage>``
 
     You can specify your language using a two letter language code to make
-    ENCA detect the codepage automatically. If unsure, enter anything and
-    watch mpv ``-v`` output for available languages. Fallback codepage
-    specifies the codepage to use, when autodetection fails.
+    ENCA detect the codepage automatically. If unsure, enter anything (if the
+    language is invalid, mpv will complain and list valid languages).
+    Fallback codepage specifies the codepage to use if autodetection fails.
 
     *EXAMPLE*:
 
@@ -2041,6 +2041,8 @@
       are Czech, fall back on latin 2, if the detection fails.
     - ``--subcp=enca:pl:cp1250`` guess the encoding for Polish, fall back on
       cp1250.
+    - ``--subcp=enca:pl`` guess the encoding for Polish, fall back on UTF-8.
+    - ``--subcp=enca`` try universal detection, fall back on UTF-8.
 
 --sub-delay=<sec>
     Delays subtitles by <sec> seconds. Can be negative.

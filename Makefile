@@ -170,6 +170,7 @@ SOURCES = talloc.c \
           core/av_log.c \
           core/av_opts.c \
           core/bstr.c \
+          core/charset_conv.c \
           core/codecs.c \
           core/command.c \
           core/cpudetect.c \

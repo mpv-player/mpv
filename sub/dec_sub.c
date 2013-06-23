@@ -18,6 +18,7 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <assert.h>
 
 #include "config.h"
@@ -27,6 +28,7 @@
 #include "dec_sub.h"
 #include "core/options.h"
 #include "core/mp_msg.h"
+#include "core/charset_conv.h"
 
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;
@@ -56,6 +58,7 @@ struct dec_sub {
     struct sd init_sd;
 
     double video_fps;
+    const char *charset;
 
     struct sd *sd[MAX_NUM_SD];
     int num_sd;
@@ -196,6 +199,37 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh)
            sh->gsh->codec ? sh->gsh->codec : "<unknown>");
 }
 
+static const char *guess_sub_cp(struct packet_list *subs, const char *usercp)
+{
+    if (!mp_charset_requires_guess(usercp))
+        return usercp;
+
+    // Concat all subs into a buffer. We can't probably do much better without
+    // having the original data (which we don't, not anymore).
+    int max_size = 2 * 1024 * 1024;
+    const char *sep = "\n\n"; // In utf-16: U+0A0A GURMUKHI LETTER UU
+    int sep_len = strlen(sep);
+    int num_pkt = 0;
+    int size = 0;
+    for (int n = 0; n < subs->num_packets; n++) {
+        struct demux_packet *pkt = subs->packets[n];
+        if (size + pkt->len > max_size)
+            break;
+        size += pkt->len + sep_len;
+        num_pkt++;
+    }
+    bstr text = {talloc_size(NULL, size), 0};
+    for (int n = 0; n < num_pkt; n++) {
+        struct demux_packet *pkt = subs->packets[n];
+        memcpy(text.start + text.len, pkt->buffer, pkt->len);
+        memcpy(text.start + text.len + pkt->len, sep, sep_len);
+        text.len += pkt->len + sep_len;
+    }
+    const char *guess = mp_charset_guess(text, usercp);
+    talloc_free(text.start);
+    return guess;
+}
+
 static void multiply_timings(struct packet_list *subs, double factor)
 {
     for (int n = 0; n < subs->num_packets; n++) {
@@ -262,6 +296,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
     if (!sub_accept_packets_in_advance(sub) || sh->track)
         return false;
 
+    const char *codec = sh->gsh->codec ? sh->gsh->codec : "";
     void *tmp = talloc_new(NULL);
     struct packet_list subs = {0};
 
@@ -274,6 +309,14 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
         talloc_steal(tmp, pkt);
         MP_TARRAY_APPEND(tmp, subs.packets, subs.num_packets, pkt);
     }
+
+    // Can't run auto-detection on movtext packets: it's the only codec that
+    // even though it decodes to text has binary input data.
+    if (opts->sub_cp && strcmp(codec, "movtext") != 0)
+        sub->charset = guess_sub_cp(&subs, opts->sub_cp);
+
+    if (sub->charset)
+        mp_msg(MSGT_OSD, MSGL_INFO, "Using subtitle charset: %s\n", sub->charset);
 
     // 23.976 FPS is used as default timebase for frame based formats
     if (sub->video_fps && sh->frame_based)
@@ -313,10 +356,34 @@ static void decode_next(struct dec_sub *sub, int n, struct demux_packet *packet)
     }
 }
 
+static struct demux_packet *recode_packet(struct demux_packet *in,
+                                          const char *charset)
+{
+    struct demux_packet *pkt = NULL;
+    bstr in_buf = {in->buffer, in->len};
+    bstr conv = mp_iconv_to_utf8(in_buf, charset, MP_ICONV_VERBOSE);
+    if (conv.start && conv.start != in_buf.start) {
+        pkt = talloc_ptrtype(NULL, pkt);
+        talloc_steal(pkt, conv.start);
+        *pkt = (struct demux_packet) {
+            .buffer = conv.start,
+            .len = conv.len,
+            .pts = in->pts,
+            .duration = in->duration,
+            .avpacket = in->avpacket, // questionable, but gives us sidedata
+        };
+    }
+    return pkt;
+}
+
 void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
 {
-    if (sub->num_sd > 0)
-        decode_next(sub, 0, packet);
+    if (sub->num_sd > 0) {
+        struct demux_packet *recoded = NULL;
+        if (sub->charset)
+            recoded = recode_packet(packet, sub->charset);
+        decode_next(sub, 0, recoded ? recoded : packet);
+    }
 }
 
 void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,
