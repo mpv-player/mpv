@@ -163,6 +163,7 @@ typedef struct sh_sub {
     SH_COMMON
     unsigned char *extradata;   // extra header data passed from demuxer
     int extradata_len;
+    int frame_based;            // timestamps are frame-based
     struct ass_track *track;    // loaded by libass
     struct dec_sub *dec_sub;    // decoder context
 } sh_sub_t;

@@ -275,6 +275,10 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
         MP_TARRAY_APPEND(tmp, subs.packets, subs.num_packets, pkt);
     }
 
+    // 23.976 FPS is used as default timebase for frame based formats
+    if (sub->video_fps && sh->frame_based)
+        multiply_timings(&subs, sub->video_fps / 23.976);
+
     if (opts->sub_fps && sub->video_fps)
         multiply_timings(&subs, opts->sub_fps / sub->video_fps);
 

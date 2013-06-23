@@ -1500,6 +1500,7 @@ static int d_check_file(struct demuxer *demuxer)
 
     p->sh = new_sh_stream(demuxer, STREAM_SUB);
     p->sh->codec = sd->codec;
+    p->sh->sub->frame_based = !sd->sub_uses_time;
 
     add_sub_data(demuxer, sd);
     subdata_free(sd);
