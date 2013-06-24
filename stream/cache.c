@@ -99,6 +99,7 @@ struct priv {
     double stream_start_time;
     int64_t stream_size;
     bool stream_manages_timeline;
+    unsigned int stream_num_chapters;
     int stream_cache_idle;
     int stream_cache_fill;
 };
@@ -303,6 +304,7 @@ static bool cache_fill(struct priv *s)
 
 static void update_cached_controls(struct priv *s)
 {
+    unsigned int ui;
     double d;
     s->stream_time_length = 0;
     if (stream_control(s->stream, STREAM_CTRL_GET_TIME_LENGTH, &d) == STREAM_OK)
@@ -313,6 +315,9 @@ static void update_cached_controls(struct priv *s)
     s->stream_manages_timeline = false;
     if (stream_control(s->stream, STREAM_CTRL_MANAGES_TIMELINE, NULL) == STREAM_OK)
         s->stream_manages_timeline = true;
+    s->stream_num_chapters = 0;
+    if (stream_control(s->stream, STREAM_CTRL_GET_NUM_CHAPTERS, &ui) == STREAM_OK)
+        s->stream_num_chapters = ui;
     stream_update_size(s->stream);
     s->stream_size = s->stream->end_pos;
 }
@@ -343,6 +348,9 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
         return STREAM_OK;
     case STREAM_CTRL_MANAGES_TIMELINE:
         return s->stream_manages_timeline ? STREAM_OK : STREAM_UNSUPPORTED;
+    case STREAM_CTRL_GET_NUM_CHAPTERS:
+        *(unsigned int *)arg = s->stream_num_chapters;
+        return STREAM_OK;
     case STREAM_CTRL_GET_CURRENT_TIME: {
         if (s->read_filepos >= s->min_filepos &&
             s->read_filepos <= s->max_filepos &&
@@ -477,6 +485,8 @@ static int cache_control(stream_t *cache, int cmd, void *arg)
     r = cache_get_cached_control(cache, cmd, arg);
     if (r != STREAM_ERROR)
         goto done;
+
+    mp_msg(MSGT_CACHE, MSGL_V, "[cache] blocking for STREAM_CTRL %d\n", cmd);
 
     s->control = cmd;
     s->control_arg = arg;

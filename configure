@@ -1747,6 +1747,7 @@ EOF
 fi
 if test "$_cocoa" = yes ; then
   libs_mplayer="$libs_mplayer -framework IOKit -framework Cocoa -framework OpenGL"
+  extra_ldflags="$extra_ldflags -fobjc-arc" # needed for OS X 10.7
   def_cocoa='#define CONFIG_COCOA 1'
 else
   def_cocoa='#undef CONFIG_COCOA'
