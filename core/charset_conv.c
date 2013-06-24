@@ -31,6 +31,10 @@
 #include <enca.h>
 #endif
 
+#ifdef CONFIG_LIBGUESS
+#include <libguess.h>
+#endif
+
 #ifdef CONFIG_ICONV
 #include <iconv.h>
 #endif
@@ -67,7 +71,8 @@ bool mp_charset_requires_guess(const char *user_cp)
 {
     bstr res[2] = {{0}};
     split_colon(user_cp, 2, res);
-    return bstrcasecmp0(res[0], "enca") == 0;
+    return bstrcasecmp0(res[0], "enca") == 0 ||
+           bstrcasecmp0(res[0], "guess") == 0;
 }
 
 #ifdef CONFIG_ENCA
@@ -102,6 +107,23 @@ static const char *enca_guess(bstr buf, const char *language)
 }
 #endif
 
+#ifdef CONFIG_LIBGUESS
+static const char *libguess_guess(bstr buf, const char *language)
+{
+    if (libguess_validate_utf8(buf.start, buf.len))
+        return "UTF-8";
+
+    if (!language || !language[0] || strcmp(language, "help") == 0) {
+        mp_msg(MSGT_SUBREADER, MSGL_ERR, "libguess needs a language: "
+               "japanese taiwanese chinese korean russian arabic turkish "
+               "greek hebrew polish baltic\n");
+        return NULL;
+    }
+
+    return libguess_determine_encoding(buf.start, buf.len, language);
+}
+#endif
+
 // Runs charset auto-detection on the input buffer, and returns the result.
 // If auto-detection fails, NULL is returned.
 // If user_cp doesn't refer to any known auto-detection (for example because
@@ -125,6 +147,10 @@ const char *mp_charset_guess(bstr buf, const char *user_cp)
 #ifdef CONFIG_ENCA
     if (bstrcasecmp0(type, "enca") == 0)
         res = enca_guess(buf, lang);
+#endif
+#ifdef CONFIG_LIBGUESS
+    if (bstrcasecmp0(type, "guess") == 0)
+        res = libguess_guess(buf, lang);
 #endif
 
     if (res) {

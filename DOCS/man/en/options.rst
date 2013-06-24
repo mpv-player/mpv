@@ -2044,6 +2044,15 @@
     - ``--subcp=enca:pl`` guess the encoding for Polish, fall back on UTF-8.
     - ``--subcp=enca`` try universal detection, fall back on UTF-8.
 
+    If the player was compiled with libguess support you can use it with:
+
+    ``--subcp=guess:<language>:<fallback codepage>``
+
+    Note that libguess always needs a language. There is no universal detection
+    mode. Use ``--subcp=guess:help`` to get a list of languages (like with ENCA,
+    it will be printed only if the conversion code is somehow called, for
+    example when loading an external subtitle).
+
 --sub-delay=<sec>
     Delays subtitles by <sec> seconds. Can be negative.
 
