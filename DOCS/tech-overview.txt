@@ -186,25 +186,31 @@ audio/out/:
     why buggy audio drivers can have a bad influence on playback quality.
 
 sub/:
-    Contains subtitle rendering, OSD rendering, and parts of subtitle loading.
+    Contains subtitle and OSD rendering.
 
     sub.c/.h is actually the OSD code. It queries dec_sub.c to retrieve
     decoded/rendered subtitles. osd_libass.c is the actual implementation of
     the OSD text renderer (which uses libass, and takes care of all the tricky
     fontconfig/freetype API usage and text layouting).
 
-    Subtitles are loaded either via libass (for .ass), subreader.c (the old
-    MPlayer subtitle loader code), or libavformat demuxers. The subtitles are
-    then passed to dec_sub.c and the subtitle decoders in sd_*.c. All text
-    subtitles are rendered by sd_ass.c. If text subtitles are not in the ASS
-    format, subtitle converters are inserted, for example sd_srt.c, which is
-    used to convert SRT->ASS. sd_srt.c is also used as general converter for
-    text->ASS (to prevent interpretation of text as ASS tags).
+    Subtitle loading is now in demux/ instead. demux_libass.c wraps loading
+    .ass subtitles via libass. demux_lavf.c loads most subtitle types via
+    FFmpeg. demux_subreader.c is the old MPlayer code. It's used as last
+    fallback, or to handle some text subtitle types on Libav. (It also can
+    load UTF-16 encoded subtitles without requiring the use of -subcp.)
+    demux_subreader.c should eventually go away (maybe).
 
-    subreader.c should eventually go away. It should be replaced by either
-    libavformat's demuxers, or by mpv native demuxers for more common formats
-    like SRT. See commit message of commit 92ae48d what needs to be done to
-    replace subreader.c completely and why.
+    The subtitles are passed to dec_sub.c and the subtitle decoders in sd_*.c
+    as they are demuxed. All text subtitles are rendered by sd_ass.c. If text
+    subtitles are not in the ASS format, subtitle converters are inserted, for
+    example sd_srt.c, which is used to convert SRT->ASS. sd_srt.c is also used
+    as general converter for text->ASS (to prevent interpretation of text as
+    ASS tags).
+
+    Text subtitles can be preloaded, in which case they are read fully as soon
+    as the subtitle is selected, and then effectively stored in an ASS_Track.
+    It's used for external text subtitles, and required to make codepage
+    detection as well as timing postprocessing work.
 
 core/timeline/:
     A timeline is the abstraction used by mplayer.c to combine several files

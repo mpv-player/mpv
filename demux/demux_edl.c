@@ -34,15 +34,10 @@ static int try_open_file(struct demuxer *demuxer)
     if (strncmp(buf, header, len))
         return 0;
     stream_seek(s, 0);
-    demuxer->file_contents = stream_read_complete(s, demuxer, 1000000, 0);
+    demuxer->file_contents = stream_read_complete(s, demuxer, 1000000);
     if (demuxer->file_contents.start == NULL)
         return 0;
     return DEMUXER_TYPE_EDL;
-}
-
-static int dummy_fill_buffer(struct demuxer *demuxer, struct demux_stream *ds)
-{
-    return 0;
 }
 
 const struct demuxer_desc demuxer_desc_edl = {
@@ -54,5 +49,4 @@ const struct demuxer_desc demuxer_desc_edl = {
     .type = DEMUXER_TYPE_EDL,
     .safe_check = true,
     .check_file = try_open_file,       // no separate .open
-    .fill_buffer = dummy_fill_buffer,
 };

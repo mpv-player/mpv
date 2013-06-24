@@ -290,8 +290,7 @@ extern int forced_subs_only;
 void uninit_player(struct MPContext *mpctx, unsigned int mask);
 void reinit_audio_chain(struct MPContext *mpctx);
 double playing_audio_pts(struct MPContext *mpctx);
-struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename,
-                               float fps, int noerr);
+struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename, int noerr);
 int reinit_video_chain(struct MPContext *mpctx);
 int reinit_video_filters(struct MPContext *mpctx);
 void pause_player(struct MPContext *mpctx);

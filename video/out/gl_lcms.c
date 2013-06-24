@@ -87,7 +87,7 @@ static struct bstr load_file(void *talloc_ctx, const char *filename)
     struct bstr res = {0};
     stream_t *s = open_stream(filename, NULL, NULL);
     if (s) {
-        res = stream_read_complete(s, talloc_ctx, 1000000000, 0);
+        res = stream_read_complete(s, talloc_ctx, 1000000000);
         free_stream(s);
     }
     return res;

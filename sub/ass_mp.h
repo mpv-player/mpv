@@ -25,7 +25,6 @@
 #include <stdbool.h>
 
 #include "config.h"
-#include "subreader.h"
 
 // This is probably arbitrary.
 // sd_lavc_conv might indirectly still assume this PlayResY, though.
@@ -50,8 +49,6 @@ void mp_ass_set_style(ASS_Style *style, int res_y, struct osd_style_opts *opts);
 void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts);
 
 ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts);
-ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
-                              char *charset);
 
 struct MPOpts;
 void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,

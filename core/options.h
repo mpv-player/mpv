@@ -141,17 +141,16 @@ typedef struct MPOpts {
     int sub_pos;
     float sub_delay;
     float sub_fps;
+    float sub_speed;
     int forced_subs_only;
     char *quvi_format;
 
     // subreader.c
     int suboverlap_enabled;
     char *sub_cp;
-    int sub_no_text_pp;
 
     char *audio_stream;
     int audio_stream_cache;
-    char *sub_stream;
     char *demuxer_name;
     char *audio_demuxer_name;
     char *sub_demuxer_name;

@@ -1447,11 +1447,6 @@
     ``show_progress`` command (by default mapped to ``P``), or in some
     non-default cases when seeking. Expands properties. See property_expansion_.
 
---overlapsub
-    Allows the next subtitle to be displayed while the current one is still
-    visible (default is to enable the support only for specific formats). This
-    only matters for subtitles loaded with ``-sub``.
-
 --panscan=<0.0-1.0>
     Enables pan-and-scan functionality (cropping the sides of e.g. a 16:9
     movie to make it fit a 4:3 display without black bands). The range
@@ -1996,14 +1991,15 @@
     Use/display these subtitle files. Only one file can be displayed at the
     same time.
 
---sub-demuxer=<[+]name>
-    Force subtitle demuxer type for ``--subfile``. Using a '+' before the name
-    will force it, this will skip some checks! Give the demuxer name as
-    printed by ``--sub-demuxer=help``.
+--sub-fix-timing, --no-sub-fix-timing
+    By default, external text subtitles are preprocessed to remove minor gaps
+    or overlaps between subtitles (if the difference is smaller than 200 ms,
+    the gap or overlap is removed). This does not affect image subtitles,
+    subtitles muxed with audio/video, or subtitles in the ASS format.
 
---sub-no-text-pp
-    Disables any kind of text post processing done after loading the
-    subtitles. Used for debug purposes.
+--sub-demuxer=<[+]name>
+    Force subtitle demuxer type for ``--sub``. Give the demuxer name as
+    printed by ``--sub-demuxer=help``.
 
 --sub-paths=<path1:path2:...>
     Specify extra directories where to search for subtitles matching the
@@ -2035,9 +2031,9 @@
     ``--subcp=enca:<language>:<fallback codepage>``
 
     You can specify your language using a two letter language code to make
-    ENCA detect the codepage automatically. If unsure, enter anything and
-    watch mpv ``-v`` output for available languages. Fallback codepage
-    specifies the codepage to use, when autodetection fails.
+    ENCA detect the codepage automatically. If unsure, enter anything (if the
+    language is invalid, mpv will complain and list valid languages).
+    Fallback codepage specifies the codepage to use if autodetection fails.
 
     *EXAMPLE*:
 
@@ -2045,23 +2041,28 @@
       are Czech, fall back on latin 2, if the detection fails.
     - ``--subcp=enca:pl:cp1250`` guess the encoding for Polish, fall back on
       cp1250.
+    - ``--subcp=enca:pl`` guess the encoding for Polish, fall back on UTF-8.
+    - ``--subcp=enca`` try universal detection, fall back on UTF-8.
+
+    If the player was compiled with libguess support you can use it with:
+
+    ``--subcp=guess:<language>:<fallback codepage>``
+
+    Note that libguess always needs a language. There is no universal detection
+    mode. Use ``--subcp=guess:help`` to get a list of languages (like with ENCA,
+    it will be printed only if the conversion code is somehow called, for
+    example when loading an external subtitle).
 
 --sub-delay=<sec>
     Delays subtitles by <sec> seconds. Can be negative.
-
---subfile=<filename>
-    Open the given file with a demuxer, and use its subtitle streams. Same as
-    ``--audiofile``, but for subtitle streams.
-
-    *NOTE*: use ``--sub`` for subtitle files. This option is useless, unless
-    you want to force libavformat subtitle parsers instead of libass or
-    internal subtitle parsers.
 
 --subfps=<rate>
     Specify the framerate of the subtitle file (default: movie fps).
 
     *NOTE*: <rate> > movie fps speeds the subtitles up for frame-based
     subtitle files and slows them down for time-based ones.
+
+    Also see ``--sub-speed`` option.
 
 --sub-gauss=<0.0-3.0>
     Apply gaussian blur to image subtitles (default: 0). This can help making
@@ -2088,6 +2089,16 @@
 
     *NOTE*: this affects ASS subtitles as well, and may lead to incorrect
     subtitle rendering. Use with care, or use ``--sub-text-font-size`` instead.
+
+--sub-speed=<0.1-10.0>
+    Multiply the subtitle event timestamps with the given value. Can be used
+    to fix the playback speed for frame-based subtitle formats. Works for
+    external text subtitles only.
+
+    *EXAMPLE*:
+
+    - ``--sub-speed=25/23.976`` play frame based subtitles, which have been
+      loaded assuming a framerate of 23.976, at 25 FPS.
 
 --sws=<n>
     Specify the software scaler algorithm to be used with ``--vf=scale``. This

@@ -37,7 +37,8 @@ SOURCES-$(DVDREAD)              += stream/stream_dvd.c \
 SOURCES-$(FTP)                  += stream/stream_ftp.c
 SOURCES-$(HAVE_SYS_MMAN_H)      += audio/filter/af_export.c osdep/mmap_anon.c
 SOURCES-$(LADSPA)               += audio/filter/af_ladspa.c
-SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c
+SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c \
+                                   demux/demux_libass.c
 
 SOURCES-$(LIBBLURAY)            += stream/stream_bluray.c
 SOURCES-$(LIBBS2B)              += audio/filter/af_bs2b.c
@@ -169,6 +170,7 @@ SOURCES = talloc.c \
           core/av_log.c \
           core/av_opts.c \
           core/bstr.c \
+          core/charset_conv.c \
           core/codecs.c \
           core/command.c \
           core/cpudetect.c \
@@ -207,7 +209,7 @@ SOURCES = talloc.c \
           demux/demux_mf.c \
           demux/demux_mkv.c \
           demux/demux_mpg.c \
-          demux/demux_sub.c \
+          demux/demux_subreader.c \
           demux/demux_ts.c \
           demux/mp3_hdr.c \
           demux/parse_es.c \
@@ -234,13 +236,13 @@ SOURCES = talloc.c \
           sub/img_convert.c \
           sub/sd_lavc.c \
           sub/sd_lavc_conv.c \
+          sub/sd_lavf_srt.c \
           sub/sd_microdvd.c \
           sub/sd_movtext.c \
           sub/sd_spu.c \
           sub/sd_srt.c \
           sub/spudec.c \
           sub/sub.c \
-          sub/subreader.c \
           video/csputils.c \
           video/fmt-conversion.c \
           video/image_writer.c \

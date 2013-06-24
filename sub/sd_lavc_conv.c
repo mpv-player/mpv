@@ -87,7 +87,7 @@ static int init(struct sd *sd)
     avctx->time_base = (AVRational) {1, 1000};
     priv->avctx = avctx;
     sd->priv = priv;
-    sd->output_codec = "ass";
+    sd->output_codec = "ssa";
     sd->output_extradata = avctx->subtitle_header;
     sd->output_extradata_len = avctx->subtitle_header_size;
     if (sd->output_extradata) {
