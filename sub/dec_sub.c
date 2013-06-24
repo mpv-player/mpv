@@ -36,6 +36,7 @@ extern const struct sd_functions sd_spu;
 extern const struct sd_functions sd_movtext;
 extern const struct sd_functions sd_srt;
 extern const struct sd_functions sd_microdvd;
+extern const struct sd_functions sd_lavf_srt;
 extern const struct sd_functions sd_lavc_conv;
 
 static const struct sd_functions *sd_list[] = {
@@ -47,6 +48,7 @@ static const struct sd_functions *sd_list[] = {
     &sd_movtext,
     &sd_srt,
     &sd_microdvd,
+    &sd_lavf_srt,
     &sd_lavc_conv,
     NULL
 };
@@ -134,7 +136,7 @@ static void print_chain(struct dec_sub *sub)
     mp_msg(MSGT_OSD, MSGL_V, "Subtitle filter chain: ");
     for (int n = 0; n < sub->num_sd; n++) {
         struct sd *sd = sub->sd[n];
-        mp_msg(MSGT_OSD, MSGL_V, "%s%s (%s)", n > 0 ? " -> " : "", 
+        mp_msg(MSGT_OSD, MSGL_V, "%s%s (%s)", n > 0 ? " -> " : "",
                sd->driver->name, sd->codec);
     }
     mp_msg(MSGT_OSD, MSGL_V, "\n");
@@ -369,6 +371,10 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
     // movtext is currently the only subtitle format that has text output,
     // but binary input. Do charset conversion after converting to text.
     if (sub->sd[0]->driver == &sd_movtext)
+        preprocess = 1;
+
+    // Broken Libav libavformat srt packet format (fix timestamps first).
+    if (sub->sd[0]->driver == &sd_lavf_srt)
         preprocess = 1;
 
     for (;;) {
