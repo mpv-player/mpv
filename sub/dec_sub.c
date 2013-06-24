@@ -401,12 +401,19 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
     if (sub->charset)
         mp_msg(MSGT_OSD, MSGL_INFO, "Using subtitle charset: %s\n", sub->charset);
 
+    double sub_speed = 1.0;
+
     // 23.976 FPS is used as default timebase for frame based formats
     if (sub->video_fps && sh->frame_based)
-        multiply_timings(subs, sub->video_fps / 23.976);
+        sub_speed *= sub->video_fps / 23.976;
 
     if (opts->sub_fps && sub->video_fps)
-        multiply_timings(subs, opts->sub_fps / sub->video_fps);
+        sub_speed *= opts->sub_fps / sub->video_fps;
+
+    sub_speed *= opts->sub_speed;
+
+    if (sub_speed != 1.0)
+        multiply_timings(subs, sub_speed);
 
     if (!opts->suboverlap_enabled)
         fix_overlaps_and_gaps(subs);

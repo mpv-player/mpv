@@ -141,6 +141,7 @@ typedef struct MPOpts {
     int sub_pos;
     float sub_delay;
     float sub_fps;
+    float sub_speed;
     int forced_subs_only;
     char *quvi_format;
 

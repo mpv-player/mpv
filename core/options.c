@@ -492,6 +492,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("subcp", sub_cp, 0),
     OPT_FLOAT("sub-delay", sub_delay, 0),
     OPT_FLOAT("subfps", sub_fps, 0),
+    OPT_FLOAT("sub-speed", sub_speed, 0),
     OPT_FLAG("autosub", sub_auto, 0),
     OPT_FLAG("sub-visibility", sub_visibility, 0),
     OPT_FLAG("sub-forced-only", forced_subs_only, 0),
@@ -786,6 +787,7 @@ const struct MPOpts mp_default_opts = {
     .audio_display = 1,
     .sub_visibility = 1,
     .sub_pos = 100,
+    .sub_speed = 1.0,
     .extension_parsing = 1,
     .audio_output_channels = MP_CHMAP_INIT_STEREO,
     .audio_output_format = -1,  // AF_FORMAT_UNKNOWN

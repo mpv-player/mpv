@@ -2062,6 +2062,8 @@
     *NOTE*: <rate> > movie fps speeds the subtitles up for frame-based
     subtitle files and slows them down for time-based ones.
 
+    Also see ``--sub-speed`` option.
+
 --sub-gauss=<0.0-3.0>
     Apply gaussian blur to image subtitles (default: 0). This can help making
     pixelated DVD/Vobsubs look nicer. A value other than 0 also switches to
@@ -2087,6 +2089,16 @@
 
     *NOTE*: this affects ASS subtitles as well, and may lead to incorrect
     subtitle rendering. Use with care, or use ``--sub-text-font-size`` instead.
+
+--sub-speed=<0.1-10.0>
+    Multiply the subtitle event timestamps with the given value. Can be used
+    to fix the playback speed for frame-based subtitle formats. Works for
+    external text subtitles only.
+
+    *EXAMPLE*:
+
+    - ``--sub-speed=25/23.976`` play frame based subtitles, which have been
+      loaded assuming a framerate of 23.976, at 25 FPS.
 
 --sws=<n>
     Specify the software scaler algorithm to be used with ``--vf=scale``. This
