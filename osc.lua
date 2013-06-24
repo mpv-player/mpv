@@ -26,7 +26,7 @@ local osc_geo = {
 local state = {
     osc_visible = false,
     mouse_down = false,
-    last_mouse_pos,
+    last_mouse_posX,
     bar_location,
     mouse_down_counter = 0,
     active_button = nil,                    -- nil = none, 0 = background, 1+ = see elements[]
@@ -357,7 +357,21 @@ function osc_init ()
     -- Smaller buttons
     --
 
+    --get video/audio/sub track counts
+    local tracktable = mp.get_track_list()
+    local videotracks, audiotracks, subtracks = 0, 0, 0
+    for n = 1, #tracktable do
+        if tracktable[n].type == "video" then
+            videotracks = videotracks + 1
+        elseif tracktable[n].type == "audio" then
+            audiotracks = audiotracks + 1
+        elseif tracktable[n].type == "sub" then
+            subtracks = subtracks + 1
+        end
+    end
+
     --cycle audio tracks
+    
     local contentF = function (ass)
         local aid = ""
         if (mp.property_get("audio") == "no") then
@@ -369,12 +383,17 @@ function osc_init ()
                 aid = tonumber(mp.property_get("audio")) + 1
             end
         end
-        ass:append("\238\132\134 {\\fs17}" .. aid)
+        ass:append("\238\132\134 {\\fs17}" .. aid .. "/" .. audiotracks)
     end
-    local up_cmd = function () mp.send_command("add audio") end
-    register_element(posX-pos_offsetX, bbposY, 1, 40, 18, osc_styles.smallButtonsL, osc_styles.elementDown, contentF, nil, up_cmd, false)
+    if audiotracks > 0 then -- do we have any?
+        local up_cmd = function () mp.send_command("add audio") end
+        register_element(posX-pos_offsetX, bbposY, 1, 70, 18, osc_styles.smallButtonsL, osc_styles.elementDown, contentF, nil, up_cmd, false)
+    else
+        register_element(posX-pos_offsetX, bbposY, 1, 70, 18, (osc_styles.smallButtonsL .. osc_styles.elementDown), nil, contentF, nil, nil, false)
+    end
 
-       --cycle sub tracks
+    --cycle sub tracks
+    
     local contentF = function (ass)
         local sid = ""
         if (mp.property_get("sub") == "no") then
@@ -386,10 +405,14 @@ function osc_init ()
                 sid = tonumber(mp.property_get("sub")) + 1
             end
         end
-        ass:append("\238\132\135 {\\fs17}" .. sid)
+        ass:append("\238\132\135 {\\fs17}" .. sid .. "/" .. subtracks)
     end
-    local up_cmd = function () mp.send_command("add sub") end
-    register_element(posX-pos_offsetX, bbposY, 7, 40, 18, osc_styles.smallButtonsL, osc_styles.elementDown, contentF, nil, up_cmd, false)
+    if subtracks > 0 then -- do we have any?
+        local up_cmd = function () mp.send_command("add sub") end
+        register_element(posX-pos_offsetX, bbposY, 7, 70, 18, osc_styles.smallButtonsL, osc_styles.elementDown, contentF, nil, up_cmd, false)
+    else
+        register_element(posX-pos_offsetX, bbposY, 7, 70, 18, (osc_styles.smallButtonsL .. osc_styles.elementDown), nil, contentF, nil, nil, false)
+    end
 
 
 
@@ -415,8 +438,8 @@ function osc_init ()
 
     local down_cmd = function ()
         -- Ignore identical seeks
-        if not (state.last_mouse_pos == mp.get_mouse_pos()) then
-            state.last_mouse_pos = mp.get_mouse_pos()
+        if not (state.last_mouse_posX == mp.get_mouse_pos()) then
+            state.last_mouse_posX = mp.get_mouse_pos()
 
             local b_x, b_y, b_w, b_h = state.bar_location.b_x, state.bar_location.b_y, state.bar_location.b_w, state.bar_location.b_h
             local x, y = mp.get_mouse_pos()
