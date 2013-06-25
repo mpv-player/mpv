@@ -33,7 +33,6 @@
 #include "core/mp_msg.h"
 #include "core/path.h"
 #include "ass_mp.h"
-#include "subreader.h"
 #include "sub/sub.h"
 #include "stream/stream.h"
 #include "core/options.h"
@@ -110,34 +109,6 @@ ASS_Track *mp_ass_default_track(ASS_Library *library, struct MPOpts *opts)
 
     mp_ass_add_default_styles(track, opts);
 
-    return track;
-}
-
-ASS_Track *mp_ass_read_stream(ASS_Library *library, const char *fname,
-                              char *charset)
-{
-    ASS_Track *track;
-
-    struct stream *s = open_stream(fname, NULL, NULL);
-    if (!s)
-        // Stream code should have printed an error already
-        return NULL;
-    struct bstr content = stream_read_complete(s, NULL, 100000000, 1);
-    if (content.start == NULL)
-        mp_tmsg(MSGT_ASS, MSGL_ERR, "Refusing to load subtitle file "
-                "larger than 100 MB: %s\n", fname);
-    free_stream(s);
-    if (content.len == 0) {
-        talloc_free(content.start);
-        return NULL;
-    }
-    content.start[content.len] = 0;
-    track = ass_read_memory(library, content.start, content.len, charset);
-    if (track) {
-        free(track->name);
-        track->name = strdup(fname);
-    }
-    talloc_free(content.start);
     return track;
 }
 

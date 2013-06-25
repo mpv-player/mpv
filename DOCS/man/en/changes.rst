@@ -128,6 +128,7 @@ Command line switches
     -dumpstream                         --stream-dump=<filename>
     -capture                            --stream-capture=<filename>
     -stop-xscreensaver                  --stop-screensaver
+    -subfile                            --sub
     =================================== ===================================
 
 *NOTE*: ``-opt val`` becomes ``--opt=val``.

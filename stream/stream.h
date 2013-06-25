@@ -198,7 +198,6 @@ typedef struct stream {
 #endif
 
 int stream_fill_buffer(stream_t *s);
-void stream_unread_buffer(stream_t *s, void *buffer, size_t buffer_size);
 
 void stream_set_capture_file(stream_t *s, const char *filename);
 
@@ -297,22 +296,19 @@ int stream_skip(stream_t *s, int64_t len);
 int stream_seek(stream_t *s, int64_t pos);
 int stream_read(stream_t *s, char *mem, int total);
 int stream_read_partial(stream_t *s, char *buf, int buf_size);
+struct bstr stream_peek(stream_t *s, int len);
 
 struct MPOpts;
-/*
- * Return allocated buffer for all data until EOF.
- * If amount of data would be more than max_size return NULL as data ptr.
- * Make the allocated buffer padding_bytes larger than the data read.
- * Write number of bytes read at *amount_read.
- */
+
 struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
-                                 int max_size, int padding_bytes);
+                                 int max_size);
 int stream_control(stream_t *s, int cmd, void *arg);
 void stream_update_size(stream_t *s);
 void free_stream(stream_t *s);
 stream_t *open_stream(const char *filename, struct MPOpts *options,
                       int *file_format);
 stream_t *open_output_stream(const char *filename, struct MPOpts *options);
+stream_t *open_memory_stream(void *data, int len);
 struct demux_stream;
 
 /// Set the callback to be used by libstream to check for user

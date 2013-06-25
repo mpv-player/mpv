@@ -78,7 +78,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
 
     if (stream) {
         stream_seek(stream, 0);
-        bstr data = stream_read_complete(stream, NULL, MF_MAX_FILE_SIZE, 0);
+        bstr data = stream_read_complete(stream, NULL, MF_MAX_FILE_SIZE);
         if (data.len) {
             demux_packet_t *dp = new_demux_packet(data.len);
             memcpy(dp->buffer, data.start, data.len);

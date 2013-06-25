@@ -559,13 +559,13 @@ function mp_update()
     if osc_geo.valign > 0 then
         -- deadzone above OSC
         area_y0 = get_align(1 - osc_geo.deadzonedist, osc_geo.posY - (osc_geo.osc_h / 2), 0, 0)
-        area_y1 = state.mp_screen_sizeY
+        area_y1 = osc_geo.playresy
     else
         -- deadzone below OSC
         area_y0 = 0
         area_y1 = (osc_geo.posY + (osc_geo.osc_h / 2)) + get_align(-1 + osc_geo.deadzonedist, osc_geo.playresy - (osc_geo.posY + (osc_geo.osc_h / 2)), 0, 0)
     end
-    set_mouse_area(0, area_y0, state.mp_screen_sizeX, area_y1)
+    set_mouse_area(0, area_y0, osc_geo.playresx, area_y1)
 
     local ass = assdraw.ass_new()
 
