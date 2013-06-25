@@ -93,6 +93,7 @@ struct format_hack {
 
 static const struct format_hack format_hacks[] = {
     {"aac", "audio/aacp", 25, 0.5},
+    {"aac", "audio/aac",  25, 0.5},
     {"mp3", "audio/mpeg", 25, 0.5},
     {0}
 };
@@ -267,12 +268,11 @@ static int lavf_check_file(demuxer_t *demuxer)
     while (avpd.buf_size < PROBE_BUF_SIZE) {
         int nsize = av_clip(avpd.buf_size * 2, INITIAL_PROBE_SIZE,
                             PROBE_BUF_SIZE);
-        int read_size = stream_read(s, avpd.buf + avpd.buf_size,
-                                    nsize - avpd.buf_size);
-        if (read_size <= 0)
+        bstr buf = stream_peek(s, nsize);
+        if (buf.len <= avpd.buf_size)
             break;
-
-        avpd.buf_size += read_size;
+        memcpy(avpd.buf, buf.start, buf.len);
+        avpd.buf_size = buf.len;
 
         int score = 0;
         priv->avif = av_probe_input_format2(&avpd, avpd.buf_size > 0, &score);
@@ -294,7 +294,6 @@ static int lavf_check_file(demuxer_t *demuxer)
         priv->avif = NULL;
     }
 
-    stream_unread_buffer(s, avpd.buf, avpd.buf_size);
     av_free(avpd.buf);
 
     if (!priv->avif) {

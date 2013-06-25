@@ -293,6 +293,7 @@ Installation directories:
 Optional features:
   --disable-encoding     disable encoding functionality [enable]
   --disable-lua          disable Lua scripting support [autodetect]
+  --disable-libguess     disable libguess [autodetect]
   --enable-termcap       use termcap database for key codes [autodetect]
   --enable-termios       use termios database for key codes [autodetect]
   --disable-iconv        disable iconv for encoding conversion [autodetect]
@@ -466,6 +467,7 @@ networking=yes
 _winsock2_h=auto
 _smb=auto
 _libquvi=auto
+_libguess=auto
 _joystick=no
 _lirc=auto
 _lircc=auto
@@ -668,6 +670,8 @@ for ac_option do
   --disable-smb)        _smb=no ;;
   --enable-libquvi)     _libquvi=yes    ;;
   --disable-libquvi)    _libquvi=no     ;;
+  --enable-libguess)    _libguess=yes   ;;
+  --disable-libguess)   _libguess=no    ;;
   --enable-joystick)    _joystick=yes   ;;
   --disable-joystick)   _joystick=no    ;;
   --enable-libav)       ffmpeg=yes      ;;
@@ -1689,6 +1693,21 @@ else
   _pkg_config=false
   echores "no"
 fi
+
+
+echocheck "libguess support"
+if test "$_libguess" = auto ; then
+    _libguess=no
+    if pkg_config_add 'libguess >= 1.0' ; then
+        _libguess=yes
+    fi
+fi
+if test "$_libguess" = yes; then
+    def_libguess="#define CONFIG_LIBGUESS 1"
+else
+    def_libguess="#undef CONFIG_LIBGUESS"
+fi
+echores "$_libguess"
 
 
 echocheck "Samba support (libsmbclient)"
@@ -3203,6 +3222,7 @@ VF_LAVFI = $vf_lavfi
 AF_LAVFI = $af_lavfi
 LIBSMBCLIENT = $_smb
 LIBQUVI = $_libquvi
+LIBGUESS = $_libguess
 LIBTHEORA = $_theora
 LIRC = $_lirc
 MACOSX_BUNDLE = $_macosx_bundle
@@ -3401,6 +3421,7 @@ $def_inet_pton
 $def_networking
 $def_smb
 $def_libquvi
+$def_libguess
 $def_socklen_t
 $def_vstream
 

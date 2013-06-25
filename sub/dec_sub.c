@@ -18,16 +18,17 @@
 
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <assert.h>
 
 #include "config.h"
-#include "demux/stheader.h"
+#include "demux/demux.h"
 #include "sd.h"
 #include "sub.h"
 #include "dec_sub.h"
-#include "subreader.h"
 #include "core/options.h"
 #include "core/mp_msg.h"
+#include "core/charset_conv.h"
 
 extern const struct sd_functions sd_ass;
 extern const struct sd_functions sd_lavc;
@@ -35,6 +36,7 @@ extern const struct sd_functions sd_spu;
 extern const struct sd_functions sd_movtext;
 extern const struct sd_functions sd_srt;
 extern const struct sd_functions sd_microdvd;
+extern const struct sd_functions sd_lavf_srt;
 extern const struct sd_functions sd_lavc_conv;
 
 static const struct sd_functions *sd_list[] = {
@@ -46,6 +48,7 @@ static const struct sd_functions *sd_list[] = {
     &sd_movtext,
     &sd_srt,
     &sd_microdvd,
+    &sd_lavf_srt,
     &sd_lavc_conv,
     NULL
 };
@@ -56,8 +59,16 @@ struct dec_sub {
     struct MPOpts *opts;
     struct sd init_sd;
 
+    double video_fps;
+    const char *charset;
+
     struct sd *sd[MAX_NUM_SD];
     int num_sd;
+};
+
+struct packet_list {
+    struct demux_packet **packets;
+    int num_packets;
 };
 
 struct dec_sub *sub_create(struct MPOpts *opts)
@@ -102,6 +113,11 @@ void sub_set_video_res(struct dec_sub *sub, int w, int h)
     sub->init_sd.sub_video_h = h;
 }
 
+void sub_set_video_fps(struct dec_sub *sub, double fps)
+{
+    sub->video_fps = fps;
+}
+
 void sub_set_extradata(struct dec_sub *sub, void *data, int data_len)
 {
     sub->init_sd.extradata = data_len ? talloc_memdup(sub, data, data_len) : NULL;
@@ -120,72 +136,10 @@ static void print_chain(struct dec_sub *sub)
     mp_msg(MSGT_OSD, MSGL_V, "Subtitle filter chain: ");
     for (int n = 0; n < sub->num_sd; n++) {
         struct sd *sd = sub->sd[n];
-        mp_msg(MSGT_OSD, MSGL_V, "%s%s (%s)", n > 0 ? " -> " : "", 
+        mp_msg(MSGT_OSD, MSGL_V, "%s%s (%s)", n > 0 ? " -> " : "",
                sd->driver->name, sd->codec);
     }
     mp_msg(MSGT_OSD, MSGL_V, "\n");
-}
-
-// Subtitles read with subreader.c
-static void read_sub_data(struct dec_sub *sub, struct sub_data *subdata)
-{
-    assert(sub_accept_packets_in_advance(sub));
-    char *temp = NULL;
-
-    struct sd *sd = sub_get_last_sd(sub);
-
-    sd->no_remove_duplicates = true;
-
-    for (int i = 0; i < subdata->sub_num; i++) {
-        subtitle *st = &subdata->subtitles[i];
-        // subdata is in 10 ms ticks, pts is in seconds
-        double t = subdata->sub_uses_time ? 0.01 : (1 / subdata->fallback_fps);
-
-        int len = 0;
-        for (int j = 0; j < st->lines; j++)
-            len += st->text[j] ? strlen(st->text[j]) : 0;
-
-        len += 2 * st->lines;   // '\N', including the one after the last line
-        len += 6;               // {\anX}
-        len += 1;               // '\0'
-
-        if (talloc_get_size(temp) < len) {
-            talloc_free(temp);
-            temp = talloc_array(NULL, char, len);
-        }
-
-        char *p = temp;
-        char *end = p + len;
-
-        if (st->alignment)
-            p += snprintf(p, end - p, "{\\an%d}", st->alignment);
-
-        for (int j = 0; j < st->lines; j++)
-            p += snprintf(p, end - p, "%s\\N", st->text[j]);
-
-        if (st->lines > 0)
-            p -= 2;             // remove last "\N"
-        *p = 0;
-
-        struct demux_packet pkt = {0};
-        pkt.pts = st->start * t;
-        pkt.duration = (st->end - st->start) * t;
-        pkt.buffer = temp;
-        pkt.len = strlen(temp);
-
-        sub_decode(sub, &pkt);
-    }
-
-    // Hack for broken FFmpeg packet format: make sd_ass keep the subtitle
-    // events on reset(), even though broken FFmpeg ASS packets were received
-    // (from sd_lavc_conv.c). Normally, these events are removed on seek/reset,
-    // but this is obviously unwanted in this case.
-    if (sd && sd->driver->fix_events)
-        sd->driver->fix_events(sd);
-
-    sd->no_remove_duplicates = false;
-
-    talloc_free(temp);
 }
 
 static int sub_init_decoder(struct dec_sub *sub, struct sd *sd)
@@ -230,8 +184,6 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh)
         // Try adding new converters until a decoder is reached
         if (sd->driver->get_bitmaps || sd->driver->get_text) {
             print_chain(sub);
-            if (sh->sub_data)
-                read_sub_data(sub, sh->sub_data);
             return;
         }
         init_sd = (struct sd) {
@@ -249,32 +201,245 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh)
            sh->gsh->codec ? sh->gsh->codec : "<unknown>");
 }
 
-bool sub_accept_packets_in_advance(struct dec_sub *sub)
+static struct demux_packet *get_decoded_packet(struct sd *sd)
 {
-    // Converters are assumed to always accept packets in advance
-    struct sd *sd = sub_get_last_sd(sub);
-    return sd && sd->driver->accept_packets_in_advance;
+    return sd->driver->get_converted ? sd->driver->get_converted(sd) : NULL;
 }
 
-static void decode_next(struct dec_sub *sub, int n, struct demux_packet *packet)
+static void decode_chain(struct sd **sd, int num_sd, struct demux_packet *packet)
 {
-    struct sd *sd = sub->sd[n];
-    sd->driver->decode(sd, packet);
-    if (n + 1 >= sub->num_sd || !sd->driver->get_converted)
+    if (num_sd == 0)
         return;
-    while (1) {
-        struct demux_packet *next =
-            sd->driver->get_converted ? sd->driver->get_converted(sd) : NULL;
-        if (!next)
-            break;
-        decode_next(sub, n + 1, next);
+    struct sd *dec = sd[0];
+    dec->driver->decode(dec, packet);
+    if (num_sd > 1) {
+        while (1) {
+            struct demux_packet *next = get_decoded_packet(dec);
+            if (!next)
+                break;
+            decode_chain(sd + 1, num_sd - 1, next);
+        }
+    }
+}
+
+static struct demux_packet *recode_packet(struct demux_packet *in,
+                                          const char *charset)
+{
+    struct demux_packet *pkt = NULL;
+    bstr in_buf = {in->buffer, in->len};
+    bstr conv = mp_iconv_to_utf8(in_buf, charset, MP_ICONV_VERBOSE);
+    if (conv.start && conv.start != in_buf.start) {
+        pkt = talloc_ptrtype(NULL, pkt);
+        talloc_steal(pkt, conv.start);
+        *pkt = (struct demux_packet) {
+            .buffer = conv.start,
+            .len = conv.len,
+            .pts = in->pts,
+            .duration = in->duration,
+            .avpacket = in->avpacket, // questionable, but gives us sidedata
+        };
+    }
+    return pkt;
+}
+
+static void decode_chain_recode(struct dec_sub *sub, struct sd **sd, int num_sd,
+                                struct demux_packet *packet)
+{
+    if (num_sd > 0) {
+        struct demux_packet *recoded = NULL;
+        if (sub->charset)
+            recoded = recode_packet(packet, sub->charset);
+        decode_chain(sd, num_sd, recoded ? recoded : packet);
     }
 }
 
 void sub_decode(struct dec_sub *sub, struct demux_packet *packet)
 {
-    if (sub->num_sd > 0)
-        decode_next(sub, 0, packet);
+    decode_chain_recode(sub, sub->sd, sub->num_sd, packet);
+}
+
+static const char *guess_sub_cp(struct packet_list *subs, const char *usercp)
+{
+    if (!mp_charset_requires_guess(usercp))
+        return usercp;
+
+    // Concat all subs into a buffer. We can't probably do much better without
+    // having the original data (which we don't, not anymore).
+    int max_size = 2 * 1024 * 1024;
+    const char *sep = "\n\n"; // In utf-16: U+0A0A GURMUKHI LETTER UU
+    int sep_len = strlen(sep);
+    int num_pkt = 0;
+    int size = 0;
+    for (int n = 0; n < subs->num_packets; n++) {
+        struct demux_packet *pkt = subs->packets[n];
+        if (size + pkt->len > max_size)
+            break;
+        size += pkt->len + sep_len;
+        num_pkt++;
+    }
+    bstr text = {talloc_size(NULL, size), 0};
+    for (int n = 0; n < num_pkt; n++) {
+        struct demux_packet *pkt = subs->packets[n];
+        memcpy(text.start + text.len, pkt->buffer, pkt->len);
+        memcpy(text.start + text.len + pkt->len, sep, sep_len);
+        text.len += pkt->len + sep_len;
+    }
+    const char *guess = mp_charset_guess(text, usercp);
+    talloc_free(text.start);
+    return guess;
+}
+
+static void multiply_timings(struct packet_list *subs, double factor)
+{
+    for (int n = 0; n < subs->num_packets; n++) {
+        struct demux_packet *pkt = subs->packets[n];
+        if (pkt->pts != MP_NOPTS_VALUE)
+            pkt->pts *= factor;
+        if (pkt->duration > 0)
+            pkt->duration *= factor;
+    }
+}
+
+// Remove overlaps and fill gaps between adjacent subtitle packets. This is done
+// by adjusting the duration of the earlier packet. If the gaps or overlap are
+// larger than the threshold, or if the durations are close to the threshold,
+// don't change the events.
+// The algorithm is maximally naive and doesn't work if there are multiple
+// overlapping lines. (It's not worth the trouble.)
+static void fix_overlaps_and_gaps(struct packet_list *subs)
+{
+    double threshold = 0.2;     // up to 200 ms overlaps or gaps are removed
+    double keep = threshold * 2;// don't change timings if durations are smaller
+    for (int i = 0; i < subs->num_packets - 1; i++) {
+        struct demux_packet *cur = subs->packets[i];
+        struct demux_packet *next = subs->packets[i + 1];
+        if (cur->pts != MP_NOPTS_VALUE && cur->duration > 0 &&
+            next->pts != MP_NOPTS_VALUE && next->duration > 0)
+        {
+            double end = cur->pts + cur->duration;
+            if (fabs(next->pts - end) <= threshold && cur->duration >= keep &&
+                next->duration >= keep)
+            {
+                cur->duration = next->pts - cur->pts;
+            }
+        }
+    }
+}
+
+static void add_sub_list(struct dec_sub *sub, int at, struct packet_list *subs)
+{
+    struct sd *sd = sub_get_last_sd(sub);
+    assert(sd);
+
+    sd->no_remove_duplicates = true;
+
+    for (int n = 0; n < subs->num_packets; n++)
+        decode_chain_recode(sub, sub->sd + at, sub->num_sd - at, subs->packets[n]);
+
+    // Hack for broken FFmpeg packet format: make sd_ass keep the subtitle
+    // events on reset(), even if broken FFmpeg ASS packets were received
+    // (from sd_lavc_conv.c). Normally, these events are removed on seek/reset,
+    // but this is obviously unwanted in this case.
+    if (sd->driver->fix_events)
+        sd->driver->fix_events(sd);
+
+    sd->no_remove_duplicates = false;
+}
+
+static void add_packet(struct packet_list *subs, struct demux_packet *pkt)
+{
+    pkt = demux_copy_packet(pkt);
+    talloc_steal(subs, pkt);
+    MP_TARRAY_APPEND(subs, subs->packets, subs->num_packets, pkt);
+}
+
+// Read all packets from the demuxer and decode/add them. Returns false if
+// there are circumstances which makes this not possible.
+bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
+{
+    struct MPOpts *opts = sub->opts;
+
+    if (!sub_accept_packets_in_advance(sub) || sh->track || sub->num_sd < 1)
+        return false;
+
+    struct packet_list *subs = talloc_zero(NULL, struct packet_list);
+
+    // In some cases, we want to put the packets through a decoder first.
+    // Preprocess until sub->sd[preprocess].
+    int preprocess = 0;
+
+    // movtext is currently the only subtitle format that has text output,
+    // but binary input. Do charset conversion after converting to text.
+    if (sub->sd[0]->driver == &sd_movtext)
+        preprocess = 1;
+
+    // Broken Libav libavformat srt packet format (fix timestamps first).
+    if (sub->sd[0]->driver == &sd_lavf_srt)
+        preprocess = 1;
+
+    for (;;) {
+        ds_get_next_pts(sh->ds);
+        struct demux_packet *pkt = ds_get_packet_sub(sh->ds);
+        if (!pkt)
+            break;
+        if (preprocess) {
+            decode_chain(sub->sd, preprocess, pkt);
+            while (1) {
+                pkt = get_decoded_packet(sub->sd[preprocess - 1]);
+                if (!pkt)
+                    break;
+                add_packet(subs, pkt);
+            }
+        } else {
+            add_packet(subs, pkt);
+        }
+    }
+
+    if (opts->sub_cp && !sh->is_utf8)
+        sub->charset = guess_sub_cp(subs, opts->sub_cp);
+
+    if (sub->charset)
+        mp_msg(MSGT_OSD, MSGL_INFO, "Using subtitle charset: %s\n", sub->charset);
+
+    double sub_speed = 1.0;
+
+    // 23.976 FPS is used as default timebase for frame based formats
+    if (sub->video_fps && sh->frame_based)
+        sub_speed *= sub->video_fps / 23.976;
+
+    if (opts->sub_fps && sub->video_fps)
+        sub_speed *= opts->sub_fps / sub->video_fps;
+
+    sub_speed *= opts->sub_speed;
+
+    if (sub_speed != 1.0)
+        multiply_timings(subs, sub_speed);
+
+    if (!opts->suboverlap_enabled)
+        fix_overlaps_and_gaps(subs);
+
+    if (sh->gsh->codec && strcmp(sh->gsh->codec, "microdvd") == 0) {
+        // The last subtitle event in MicroDVD subs can have duration unset,
+        // which means show the subtitle until end of video.
+        // See FFmpeg FATE MicroDVD_capability_tester.sub
+        if (subs->num_packets) {
+            struct demux_packet *last = subs->packets[subs->num_packets - 1];
+            if (last->duration <= 0)
+                last->duration = 10; // arbitrary
+        }
+    }
+
+    add_sub_list(sub, preprocess, subs);
+
+    talloc_free(subs);
+    return true;
+}
+
+bool sub_accept_packets_in_advance(struct dec_sub *sub)
+{
+    // Converters are assumed to always accept packets in advance
+    struct sd *sd = sub_get_last_sd(sub);
+    return sd && sd->driver->accept_packets_in_advance;
 }
 
 void sub_get_bitmaps(struct dec_sub *sub, struct mp_osd_res dim, double pts,

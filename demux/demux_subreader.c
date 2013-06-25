@@ -28,24 +28,65 @@
 #include <dirent.h>
 #include <ctype.h>
 
+#include <libavutil/common.h>
+#include <libavutil/avstring.h>
+
 #include "config.h"
 #include "core/mp_msg.h"
-#include "subreader.h"
 #include "core/mp_common.h"
 #include "core/options.h"
 #include "stream/stream.h"
-#include "libavutil/common.h"
-#include "libavutil/avstring.h"
-
-#ifdef CONFIG_ENCA
-#include <enca.h>
-#endif
+#include "demux/demux.h"
 
 #define ERR ((void *) -1)
 
-#ifdef CONFIG_ICONV
-#include <iconv.h>
-#endif
+// subtitle formats
+#define SUB_INVALID   -1
+#define SUB_MICRODVD  0
+#define SUB_SUBRIP    1
+#define SUB_SUBVIEWER 2
+#define SUB_SAMI      3
+#define SUB_VPLAYER   4
+#define SUB_RT        5
+#define SUB_SSA       6
+#define SUB_PJS       7
+#define SUB_MPSUB     8
+#define SUB_AQTITLE   9
+#define SUB_SUBVIEWER2 10
+#define SUB_SUBRIP09 11
+#define SUB_JACOSUB  12
+#define SUB_MPL2     13
+
+#define SUB_MAX_TEXT 12
+#define SUB_ALIGNMENT_BOTTOMLEFT       1
+#define SUB_ALIGNMENT_BOTTOMCENTER     2
+#define SUB_ALIGNMENT_BOTTOMRIGHT      3
+#define SUB_ALIGNMENT_MIDDLELEFT       4
+#define SUB_ALIGNMENT_MIDDLECENTER     5
+#define SUB_ALIGNMENT_MIDDLERIGHT      6
+#define SUB_ALIGNMENT_TOPLEFT          7
+#define SUB_ALIGNMENT_TOPCENTER        8
+#define SUB_ALIGNMENT_TOPRIGHT         9
+
+typedef struct subtitle {
+
+    int lines;
+
+    unsigned long start;
+    unsigned long end;
+
+    char *text[SUB_MAX_TEXT];
+    unsigned char alignment;
+} subtitle;
+
+typedef struct sub_data {
+    const char *codec;
+    subtitle *subtitles;
+    int sub_uses_time;
+    int sub_num;          // number of subtitle structs
+    int sub_errs;
+    double fallback_fps;
+} sub_data;
 
 // Parameter struct for the format-specific readline functions
 struct readline_args {
@@ -57,6 +98,8 @@ struct readline_args {
     float mpsub_multiplier;
     float mpsub_position;
     int sub_slacktime;
+
+    int uses_time;
 
     /*
     Some subtitling formats, namely AQT and Subrip09, define the end of a
@@ -171,7 +214,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current,
                 sami_add_line(current, text, &p);
 		s += 4;
 	    }
-	    else if ((*s == '{') && !args->opts->sub_no_text_pp) { state = 5; ++s; continue; }
+	    else if ((*s == '{')) { state = 5; ++s; continue; }
 	    else if (*s == '<') { state = 4; }
 	    else if (!strncasecmp (s, "&nbsp;", 6)) { *p++ = ' '; s += 6; }
 	    else if (*s == '\t') { *p++ = ' '; s++; }
@@ -197,7 +240,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current,
 	    if (s) { s++; state = 3; continue; }
 	    break;
        case 5: /* get rid of {...} text, but read the alignment code */
-	    if ((*s == '\\') && (*(s + 1) == 'a') && !args->opts->sub_no_text_pp) {
+	    if ((*s == '\\') && (*(s + 1) == 'a')) {
                if (stristr(s, "\\a1") != NULL) {
                    current->alignment = SUB_ALIGNMENT_BOTTOMLEFT;
                    s = s + 3;
@@ -1018,79 +1061,6 @@ static int sub_autodetect (stream_t* st, int *uses_time, int utf16) {
     return SUB_INVALID;  // too many bad lines
 }
 
-#ifdef CONFIG_ICONV
-static const char* guess_cp(stream_t *st, const char *preferred_language, const char *fallback);
-
-static iconv_t	subcp_open (stream_t *st, const char *sub_cp)
-{
-        iconv_t icdsc = (iconv_t)(-1);
-	char *tocp = "UTF-8";
-
-	if (sub_cp){
-		const char *cp_tmp = sub_cp;
-#ifdef CONFIG_ENCA
-		char enca_lang[3], enca_fallback[100];
-		if (sscanf(sub_cp, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
-		     || sscanf(sub_cp, "ENCA:%2s:%99s", enca_lang, enca_fallback) == 2) {
-		  if (st && st->flags & MP_STREAM_SEEK ) {
-		    cp_tmp = guess_cp(st, enca_lang, enca_fallback);
-		  } else {
-		    cp_tmp = enca_fallback;
-		    if (st)
-		      mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: enca failed, stream must be seekable.\n");
-		  }
-		}
-#endif
-		if ((icdsc = iconv_open (tocp, cp_tmp)) != (iconv_t)(-1)){
-			mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: opened iconv descriptor.\n");
-		} else
-			mp_msg(MSGT_SUBREADER,MSGL_ERR,"SUB: error opening iconv descriptor.\n");
-	}
-	return icdsc;
-}
-
-static void	subcp_close (iconv_t icdsc)
-{
-	if (icdsc != (iconv_t)(-1)){
-		(void) iconv_close (icdsc);
-	   	mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: closed iconv descriptor.\n");
-	}
-}
-
-static subtitle* subcp_recode (iconv_t icdsc, subtitle *sub)
-{
-	int l=sub->lines;
-	size_t ileft, oleft;
-	char *op, *ip, *ot;
-	if(icdsc == (iconv_t)(-1)) return sub;
-
-	while (l){
-		ip = sub->text[--l];
-		ileft = strlen(ip);
-		oleft = 4 * ileft;
-
-		if (!(ot = malloc(oleft + 1)))
-                    abort();
-		op = ot;
-		if (iconv(icdsc, &ip, &ileft,
-			  &op, &oleft) == (size_t)(-1)) {
-			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line.\n");
-			free(ot);
-			continue;
-		}
-		// In some stateful encodings, we must clear the state to handle the last character
-		if (iconv(icdsc, NULL, NULL,
-			  &op, &oleft) == (size_t)(-1)) {
-			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line, can't clear encoding state.\n");
-		}
-		*op='\0' ;
-		free (sub->text[l]);
-		sub->text[l] = ot;
-	}
-	return sub;
-}
-#endif
-
 static void adjust_subs_time(subtitle* sub, float subtime, float fps,
                              float sub_fps, int block,
                              int sub_num, int sub_uses_time) {
@@ -1098,7 +1068,6 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps,
 	subtitle* nextsub;
 	int i = sub_num;
 	unsigned long subfms = (sub_uses_time ? 100 : fps) * subtime;
-	unsigned long overlap = (sub_uses_time ? 100 : fps) / 5; // 0.2s
 
 	n=m=0;
 	if (i)	for (;;){
@@ -1110,15 +1079,6 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps,
 		if (!--i) break;
 		nextsub = sub + 1;
 	    if(block){
-		if ((sub->end > nextsub->start) && (sub->end <= nextsub->start + overlap)) {
-		    // these subtitles overlap for less than 0.2 seconds
-		    // and would result in very short overlapping subtitle
-		    // so let's fix the problem here, before overlapping code
-		    // get its hands on them
-		    unsigned delta = sub->end - nextsub->start, half = delta / 2;
-		    sub->end -= half + 1;
-		    nextsub->start += delta - half;
-		}
 		if (sub->end >= nextsub->start){
 			sub->end = nextsub->start - 1;
 			if (sub->end - sub->start > subfms)
@@ -1127,23 +1087,6 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps,
 				n++;
 		}
 	    }
-
-		/* Theory:
-		 * Movies are often converted from FILM (24 fps)
-		 * to PAL (25) by simply speeding it up, so we
-		 * to multiply the original timestmaps by
-		 * (Movie's FPS / Subtitle's (guessed) FPS)
-		 * so eg. for 23.98 fps movie and PAL time based
-		 * subtitles we say -subfps 25 and we're fine!
-		 */
-
-		/* timed sub fps correction ::atmos */
-		/* the frame-based case is handled in mpcommon.c
-		 * where find_sub is called */
-		if(sub_uses_time && sub_fps) {
-			sub->start *= sub_fps/fps;
-			sub->end   *= sub_fps/fps;
-		}
 
 		sub = nextsub;
 		m = 0;
@@ -1157,78 +1100,12 @@ struct subreader {
     void       (*post)(subtitle *dest);
     const char *name;
     const char *codec_name;
+    struct readline_args args;
 };
 
-#ifdef CONFIG_ENCA
-static const char* guess_buffer_cp(unsigned char* buffer, int buflen, const char *preferred_language, const char *fallback)
+static bool subreader_autodetect(stream_t *fd, struct MPOpts *opts,
+                                 struct subreader *out)
 {
-    const char **languages;
-    size_t langcnt;
-    EncaAnalyser analyser;
-    EncaEncoding encoding;
-    const char *detected_sub_cp = NULL;
-    int i;
-
-    languages = enca_get_languages(&langcnt);
-    mp_msg(MSGT_SUBREADER, MSGL_V, "ENCA supported languages: ");
-    for (i = 0; i < langcnt; i++) {
-	mp_msg(MSGT_SUBREADER, MSGL_V, "%s ", languages[i]);
-    }
-    mp_msg(MSGT_SUBREADER, MSGL_V, "\n");
-
-    for (i = 0; i < langcnt; i++) {
-	if (strcasecmp(languages[i], preferred_language) != 0) continue;
-	analyser = enca_analyser_alloc(languages[i]);
-	encoding = enca_analyse_const(analyser, buffer, buflen);
-	enca_analyser_free(analyser);
-	if (encoding.charset != ENCA_CS_UNKNOWN) {
-	    detected_sub_cp = enca_charset_name(encoding.charset, ENCA_NAME_STYLE_ICONV);
-	    break;
-	}
-    }
-
-    free(languages);
-
-    if (!detected_sub_cp) {
-	detected_sub_cp = fallback;
-	mp_msg(MSGT_SUBREADER, MSGL_INFO, "ENCA detection failed: fallback to %s\n", fallback);
-    }else{
-	mp_msg(MSGT_SUBREADER, MSGL_INFO, "ENCA detected charset: %s\n", detected_sub_cp);
-    }
-
-    return detected_sub_cp;
-}
-
-#define MAX_GUESS_BUFFER_SIZE (256*1024)
-static const char* guess_cp(stream_t *st, const char *preferred_language, const char *fallback)
-{
-    size_t buflen;
-    unsigned char *buffer;
-    const char *detected_sub_cp = NULL;
-
-    buffer = malloc(MAX_GUESS_BUFFER_SIZE);
-    buflen = stream_read(st,buffer, MAX_GUESS_BUFFER_SIZE);
-
-    detected_sub_cp = guess_buffer_cp(buffer, buflen, preferred_language, fallback);
-
-    free(buffer);
-    stream_seek(st,0);
-
-    return detected_sub_cp;
-}
-#undef MAX_GUESS_BUFFER_SIZE
-#endif
-
-static int sub_destroy(void *ptr);
-
-sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
-{
-    int utf16;
-    stream_t* fd;
-    int n_max, n_first, i, j, sub_first, sub_orig;
-    subtitle *first, *second, *sub, *return_sub, *alloced_sub = NULL;
-    sub_data *subt_data;
-    int uses_time = 0, sub_num = 0, sub_errs = 0;
     static const struct subreader sr[]=
     {
 	    { sub_read_line_microdvd, NULL, "microdvd", "microdvd" },
@@ -1248,43 +1125,43 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
     };
     const struct subreader *srp;
 
-    if(filename==NULL) return NULL; //qnx segfault
-    fd=open_stream (filename, NULL, NULL); if (!fd) return NULL;
-
     int sub_format = SUB_INVALID;
+    int utf16;
+    int uses_time = 0;
     for (utf16 = 0; sub_format == SUB_INVALID && utf16 < 3; utf16++) {
         sub_format=sub_autodetect (fd, &uses_time, utf16);
         stream_seek(fd,0);
     }
     utf16--;
 
-    struct readline_args args = {utf16, opts};
-    args.sub_slacktime = 20000; //20 sec
-    args.mpsub_multiplier = (uses_time ? 100.0 : 1.0);
-
     if (sub_format==SUB_INVALID) {
-        mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: Could not determine file format\n");
-        free_stream(fd);
-        return NULL;
+        mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: Could not determine file format\n");
+        return false;
     }
     srp=sr+sub_format;
     mp_msg(MSGT_SUBREADER, MSGL_V, "SUB: Detected subtitle file format: %s\n", srp->name);
 
-#ifdef CONFIG_ICONV
-    iconv_t icdsc = (iconv_t)(-1);
-    {
-	    int l,k;
-	    k = -1;
-	    if ((l=strlen(filename))>4){
-		    char *exts[] = {".utf", ".utf8", ".utf-8" };
-		    for (k=3;--k>=0;)
-			if (l >= strlen(exts[k]) && !strcasecmp(filename+(l - strlen(exts[k])), exts[k])){
-			    break;
-			}
-	    }
-	    if (k<0) icdsc = subcp_open(fd, opts->sub_cp);
-    }
-#endif
+    *out = *srp;
+    out->args = (struct readline_args) {
+        .utf16 = utf16,
+        .opts = opts,
+        .sub_slacktime = 20000, //20 sec
+        .mpsub_multiplier = (uses_time ? 100.0 : 1.0),
+        .uses_time = uses_time,
+    };
+
+    return true;
+}
+
+static sub_data* sub_read_file(stream_t *fd, struct subreader *srp)
+{
+    struct MPOpts *opts = fd->opts;
+    float fps = 23.976;
+    int n_max, i, j;
+    subtitle *first, *sub, *return_sub, *alloced_sub = NULL;
+    sub_data *subt_data;
+    int sub_num = 0, sub_errs = 0;
+    struct readline_args args = srp->args;
 
     sub_num=0;n_max=32;
     first=malloc(n_max*sizeof(subtitle));
@@ -1304,21 +1181,15 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
 	memset(sub, '\0', sizeof(subtitle));
         sub=srp->read(fd, sub, &args);
         if(!sub) break;   // EOF
-#ifdef CONFIG_ICONV
-	if (sub!=ERR) sub=subcp_recode(icdsc, sub);
-#endif
+
 	if ( sub == ERR )
 	 {
-#ifdef CONFIG_ICONV
-          subcp_close(icdsc);
-#endif
 	  free(first);
 	  free(alloced_sub);
-          free_stream(fd);
 	  return NULL;
 	 }
         // Apply any post processing that needs recoding first
-        if ((sub!=ERR) && !args.opts->sub_no_text_pp && srp->post) srp->post(sub);
+        if ((sub!=ERR) && srp->post) srp->post(sub);
 	if(!sub_num || (first[sub_num - 1].start <= sub->start)){
 	    first[sub_num].start = sub->start;
   	    first[sub_num].end   = sub->end;
@@ -1360,11 +1231,6 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
         if(sub==ERR) ++sub_errs; else ++sub_num; // Error vs. Valid
     }
 
-    free_stream(fd);
-
-#ifdef CONFIG_ICONV
-    subcp_close(icdsc);
-#endif
     free(alloced_sub);
 
 //    printf ("SUB: Subtitle format %s time.\n", uses_time?"uses":"doesn't use");
@@ -1376,228 +1242,13 @@ sub_data* sub_read_file(char *filename, float fps, struct MPOpts *opts)
 	return NULL;
     }
 
-    // we do overlap if the user forced it (suboverlap_enable == 2) or
-    // the user didn't forced no-overlapsub and the format is Jacosub or Ssa.
-    // this is because usually overlapping subtitles are found in these formats,
-    // while in others they are probably result of bad timing
-if ((opts->suboverlap_enabled == 2) ||
-    ((opts->suboverlap_enabled) && ((sub_format == SUB_JACOSUB) || (sub_format == SUB_SSA)))) {
-    adjust_subs_time(first, 6.0, fps, opts->sub_fps, 0, sub_num, uses_time);/*~6 secs AST*/
-// here we manage overlapping subtitles
-    sub_orig = sub_num;
-    n_first = sub_num;
-    sub_num = 0;
-    second = NULL;
-    // for each subtitle in first[] we deal with its 'block' of
-    // bonded subtitles
-    for (sub_first = 0; sub_first < n_first; ++sub_first) {
-	unsigned long global_start = first[sub_first].start,
-		global_end = first[sub_first].end, local_start, local_end;
-	int lines_to_add = first[sub_first].lines, sub_to_add = 0,
-		**placeholder = NULL, higher_line = 0, counter, start_block_sub = sub_num;
-	char real_block = 1;
-
-	// here we find the number of subtitles inside the 'block'
-	// and its span interval. this works well only with sorted
-	// subtitles
-	while ((sub_first + sub_to_add + 1 < n_first) && (first[sub_first + sub_to_add + 1].start < global_end)) {
-	    ++sub_to_add;
-	    lines_to_add += first[sub_first + sub_to_add].lines;
-	    if (first[sub_first + sub_to_add].start < global_start) {
-		global_start = first[sub_first + sub_to_add].start;
-	    }
-	    if (first[sub_first + sub_to_add].end > global_end) {
-		global_end = first[sub_first + sub_to_add].end;
-	    }
-	}
-
-        /* Avoid n^2 memory use for the "placeholder" data structure
-         * below with subtitles that have a huge number of
-         * consecutive overlapping lines. */
-        lines_to_add = FFMIN(lines_to_add, SUB_MAX_TEXT);
-
-	// we need a structure to keep trace of the screen lines
-	// used by the subs, a 'placeholder'
-	counter = 2 * sub_to_add + 1;  // the maximum number of subs derived
-	                               // from a block of sub_to_add+1 subs
-	placeholder = malloc(sizeof(int *) * counter);
-	for (i = 0; i < counter; ++i) {
-	    placeholder[i] = malloc(sizeof(int) * lines_to_add + 1);
-	    for (j = 0; j < lines_to_add; ++j) {
-		placeholder[i][j] = -1;
-	    }
-	}
-
-	counter = 0;
-	local_end = global_start - 1;
-	do {
-	    int ls;
-
-	    // here we find the beginning and the end of a new
-	    // subtitle in the block
-	    local_start = local_end + 1;
-	    local_end   = global_end;
-	    for (j = 0; j <= sub_to_add; ++j) {
-		if ((first[sub_first + j].start - 1 > local_start) && (first[sub_first + j].start - 1 < local_end)) {
-		    local_end = first[sub_first + j].start - 1;
-		} else if ((first[sub_first + j].end > local_start) && (first[sub_first + j].end < local_end)) {
-		    local_end = first[sub_first + j].end;
-		}
-	    }
-            // here we allocate the screen lines to subs we must
-	    // display in current local_start-local_end interval.
-	    // if the subs were yet presents in the previous interval
-	    // they keep the same lines, otherside they get unused lines
-	    for (j = 0; j <= sub_to_add; ++j) {
-		if ((first[sub_first + j].start <= local_end) && (first[sub_first + j].end > local_start)) {
-		    unsigned long sub_lines = first[sub_first + j].lines, fragment_length = lines_to_add + 1,
-			tmp = 0;
-		    char boolean = 0;
-		    int fragment_position = -1;
-
-		    // if this is not the first new sub of the block
-		    // we find if this sub was present in the previous
-		    // new sub
-		    if (counter)
-			for (i = 0; i < lines_to_add; ++i) {
-			    if (placeholder[counter - 1][i] == sub_first + j) {
-				placeholder[counter][i] = sub_first + j;
-				boolean = 1;
-			    }
-			}
-		    if (boolean)
-			continue;
-
-		    // we are looking for the shortest among all groups of
-		    // sequential blank lines whose length is greater than or
-		    // equal to sub_lines. we store in fragment_position the
-		    // position of the shortest group, in fragment_length its
-		    // length, and in tmp the length of the group currently
-		    // examinated
-		    for (i = 0; i < lines_to_add; ++i) {
-			if (placeholder[counter][i] == -1) {
-			    // placeholder[counter][i] is part of the current group
-			    // of blank lines
-			    ++tmp;
-			} else {
-			    if (tmp == sub_lines) {
-				// current group's size fits exactly the one we
-				// need, so we stop looking
-				fragment_position = i - tmp;
-				tmp = 0;
-				break;
-			    }
-			    if ((tmp) && (tmp > sub_lines) && (tmp < fragment_length)) {
-				// current group is the best we found till here,
-				// but is still bigger than the one we are looking
-				// for, so we keep on looking
-				fragment_length = tmp;
-				fragment_position = i - tmp;
-				tmp = 0;
-			    } else {
-				// current group doesn't fit at all, so we forget it
-				tmp = 0;
-			    }
-			}
-		    }
-		    if (tmp) {
-			// last screen line is blank, a group ends with it
-			if ((tmp >= sub_lines) && (tmp < fragment_length)) {
-			    fragment_position = i - tmp;
-			}
-		    }
-		    if (fragment_position == -1) {
-			// it was not possible to find free screen line(s) for a subtitle,
-			// usually this means a bug in the code; however we do not overlap
-			mp_msg(MSGT_SUBREADER, MSGL_WARN, "SUB: we could not find a suitable position for an overlapping subtitle\n");
-			higher_line = SUB_MAX_TEXT + 1;
-			break;
-		    } else {
-			for (tmp = 0; tmp < sub_lines; ++tmp) {
-			    placeholder[counter][fragment_position + tmp] = sub_first + j;
-			}
-		    }
-		}
-	    }
-	    for (j = higher_line + 1; j < lines_to_add; ++j) {
-		if (placeholder[counter][j] != -1)
-		    higher_line = j;
-		else
-		    break;
-	    }
-	    if (higher_line >= SUB_MAX_TEXT) {
-		// the 'block' has too much lines, so we don't overlap the
-		// subtitles
-		second = realloc(second, (sub_num + sub_to_add + 1) * sizeof(subtitle));
-		for (j = 0; j <= sub_to_add; ++j) {
-		    int ls;
-		    memset(&second[sub_num + j], '\0', sizeof(subtitle));
-		    second[sub_num + j].start = first[sub_first + j].start;
-		    second[sub_num + j].end   = first[sub_first + j].end;
-		    second[sub_num + j].lines = first[sub_first + j].lines;
-		    second[sub_num + j].alignment = first[sub_first + j].alignment;
-		    for (ls = 0; ls < second[sub_num + j].lines; ls++) {
-			second[sub_num + j].text[ls] = strdup(first[sub_first + j].text[ls]);
-		    }
-		}
-		sub_num += sub_to_add + 1;
-		sub_first += sub_to_add;
-		real_block = 0;
-		break;
-	    }
-
-	    // we read the placeholder structure and create the new
-	    // subs.
-	    second = realloc(second, (sub_num + 1) * sizeof(subtitle));
-	    memset(&second[sub_num], '\0', sizeof(subtitle));
-	    second[sub_num].start = local_start;
-	    second[sub_num].end   = local_end;
-	    second[sub_num].alignment = first[sub_first].alignment;
-	    n_max = (lines_to_add < SUB_MAX_TEXT) ? lines_to_add : SUB_MAX_TEXT;
-	    for (i = 0, j = 0; j < n_max; ++j) {
-		if (placeholder[counter][j] != -1) {
-		    int lines = first[placeholder[counter][j]].lines;
-		    for (ls = 0; ls < lines; ++ls) {
-			second[sub_num].text[i++] = strdup(first[placeholder[counter][j]].text[ls]);
-		    }
-		    j += lines - 1;
-		} else {
-		    second[sub_num].text[i++] = strdup(" ");
-		}
-	    }
-	    ++sub_num;
-	    ++counter;
-	} while (local_end < global_end);
-	if (real_block)
-	    for (i = 0; i < counter; ++i)
-		second[start_block_sub + i].lines = higher_line + 1;
-
-	counter = 2 * sub_to_add + 1;
-	for (i = 0; i < counter; ++i) {
-	    free(placeholder[i]);
-	}
-	free(placeholder);
-	sub_first += sub_to_add;
-    }
-
-    for (j = sub_orig - 1; j >= 0; --j) {
-	for (i = first[j].lines - 1; i >= 0; --i) {
-	    free(first[j].text[i]);
-	}
-    }
-    free(first);
-
-    return_sub = second;
-} else { //if(suboverlap_enabled)
-    adjust_subs_time(first, 6.0, fps, opts->sub_fps, 1, sub_num, uses_time);/*~6 secs AST*/
+    adjust_subs_time(first, 6.0, fps, opts->sub_fps, 1, sub_num, args.uses_time);/*~6 secs AST*/
     return_sub = first;
-}
+
     if (return_sub == NULL) return NULL;
     subt_data = talloc_zero(NULL, sub_data);
-    talloc_set_destructor(subt_data, sub_destroy);
     subt_data->codec = srp->codec_name ? srp->codec_name : "text";
-    subt_data->filename = strdup(filename);
-    subt_data->sub_uses_time = uses_time;
+    subt_data->sub_uses_time = args.uses_time;
     subt_data->sub_num = sub_num;
     subt_data->sub_errs = sub_errs;
     subt_data->subtitles = return_sub;
@@ -1605,14 +1256,147 @@ if ((opts->suboverlap_enabled == 2) ||
     return subt_data;
 }
 
-static int sub_destroy(void *ptr)
+static void subdata_free(sub_data *subd)
 {
-    sub_data *subd = ptr;
     int i, j;
     for (i = 0; i < subd->sub_num; i++)
         for (j = 0; j < subd->subtitles[i].lines; j++)
             free( subd->subtitles[i].text[j] );
     free( subd->subtitles );
-    free( subd->filename );
-    return 0;
+    talloc_free(subd);
 }
+
+struct priv {
+    struct demux_packet **pkts;
+    int num_pkts;
+    int current;
+    struct sh_stream *sh;
+};
+
+static void add_sub_data(struct demuxer *demuxer, struct sub_data *subdata)
+{
+    struct priv *priv = demuxer->priv;
+
+    for (int i = 0; i < subdata->sub_num; i++) {
+        subtitle *st = &subdata->subtitles[i];
+        // subdata is in 10 ms ticks, pts is in seconds
+        double t = subdata->sub_uses_time ? 0.01 : (1 / subdata->fallback_fps);
+
+        int len = 0;
+        for (int j = 0; j < st->lines; j++)
+            len += st->text[j] ? strlen(st->text[j]) : 0;
+
+        len += 2 * st->lines;   // '\N', including the one after the last line
+        len += 6;               // {\anX}
+        len += 1;               // '\0'
+
+        char *data = talloc_array(NULL, char, len);
+
+        char *p = data;
+        char *end = p + len;
+
+        if (st->alignment)
+            p += snprintf(p, end - p, "{\\an%d}", st->alignment);
+
+        for (int j = 0; j < st->lines; j++)
+            p += snprintf(p, end - p, "%s\\N", st->text[j]);
+
+        if (st->lines > 0)
+            p -= 2;             // remove last "\N"
+        *p = 0;
+
+        struct demux_packet *pkt = talloc_ptrtype(priv, pkt);
+        *pkt = (struct demux_packet) {
+            .pts = st->start * t,
+            .duration = (st->end - st->start) * t,
+            .buffer = talloc_steal(pkt, data),
+            .len = strlen(data),
+        };
+
+        MP_TARRAY_APPEND(priv, priv->pkts, priv->num_pkts, pkt);
+    }
+}
+
+static struct stream *read_probe_stream(struct stream *s, int max)
+{
+    // Very roundabout, but only needed for initial probing.
+    bstr probe = stream_peek(s, max);
+    return open_memory_stream(probe.start, probe.len);
+}
+
+#define PROBE_SIZE FFMIN(32 * 1024, STREAM_MAX_BUFFER_SIZE)
+
+static int d_check_file(struct demuxer *demuxer)
+{
+    struct stream *ps = read_probe_stream(demuxer->stream, PROBE_SIZE);
+
+    struct subreader sr;
+    bool res = subreader_autodetect(ps, demuxer->opts, &sr);
+
+    free_stream(ps);
+
+    if (!res)
+        return 0;
+
+    sub_data *sd = sub_read_file(demuxer->stream, &sr);
+    if (!sd)
+        return 0;
+
+    struct priv *p = talloc_zero(demuxer, struct priv);
+    demuxer->priv = p;
+
+    p->sh = new_sh_stream(demuxer, STREAM_SUB);
+    p->sh->codec = sd->codec;
+    p->sh->sub->frame_based = !sd->sub_uses_time;
+    p->sh->sub->is_utf8 = sr.args.utf16 != 0; // converted from utf-16 -> utf-8
+
+    add_sub_data(demuxer, sd);
+    subdata_free(sd);
+
+    demuxer->accurate_seek = true;
+
+    return DEMUXER_TYPE_SUBREADER;
+}
+
+static int d_fill_buffer(struct demuxer *demuxer, struct demux_stream *ds)
+{
+    struct priv *p = demuxer->priv;
+    struct demux_packet *dp = demux_packet_list_fill(p->pkts, p->num_pkts,
+                                                     &p->current);
+    return demuxer_add_packet(demuxer, p->sh, dp);
+}
+
+static void d_seek(struct demuxer *demuxer, float secs, float audio_delay,
+                   int flags)
+{
+    struct priv *p = demuxer->priv;
+    demux_packet_list_seek(p->pkts, p->num_pkts, &p->current, secs, flags);
+}
+
+static int d_control(struct demuxer *demuxer, int cmd, void *arg)
+{
+    struct priv *p = demuxer->priv;
+    switch (cmd) {
+    case DEMUXER_CTRL_CORRECT_PTS:
+        return DEMUXER_CTRL_OK;
+    case DEMUXER_CTRL_GET_TIME_LENGTH:
+        *((double *) arg) = demux_packet_list_duration(p->pkts, p->num_pkts);
+        return DEMUXER_CTRL_OK;
+    default:
+        return DEMUXER_CTRL_NOTIMPL;
+    }
+}
+
+const struct demuxer_desc demuxer_desc_subreader = {
+    .info = "Deprecated MPlayer subtitle reader",
+    .name = "subreader",
+    .shortdesc = "Deprecated Subreader",
+    .author = "",
+    .comment = "",
+    .type = DEMUXER_TYPE_SUBREADER,
+    .safe_check = 1,
+    .check_file = d_check_file,
+    .fill_buffer = d_fill_buffer,
+    .seek = d_seek,
+    .control = d_control,
+};

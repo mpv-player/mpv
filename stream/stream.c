@@ -136,7 +136,7 @@ static const stream_info_t *const auto_open_streams[] = {
     NULL
 };
 
-static stream_t *new_stream(void);
+static stream_t *new_stream(size_t min_size);
 static int stream_seek_unbuffered(stream_t *s, int64_t newpos);
 
 static stream_t *open_stream_plugin(const stream_info_t *sinfo,
@@ -166,7 +166,7 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
             }
         }
     }
-    s = new_stream();
+    s = new_stream(0);
     s->opts = options;
     s->url = strdup(filename);
     s->flags |= mode;
@@ -378,7 +378,9 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
     default:
         len = s->fill_buffer ? s->fill_buffer(s, buf, len) : 0;
     }
-    if (len <= 0) {
+    if (len < 0)
+        len = 0;
+    if (len == 0) {
         // do not retry if this looks like proper eof
         if (s->eof || (s->end_pos && s->pos == s->end_pos))
             goto eof_out;
@@ -402,35 +404,16 @@ eof_out:
     return len;
 }
 
-// This works like stdio's ungetc(), but for more than one byte. Rewind the
-// file position by buffer_size, and make all future reads/buffer fills read
-// from the given buffer, until the buffer is exhausted or a seek outside of
-// the buffer happens.
-// You can unread at most STREAM_MAX_BUFFER_SIZE bytes.
-void stream_unread_buffer(stream_t *s, void *buffer, size_t buffer_size)
-{
-    assert(stream_tell(s) >= buffer_size); // can't unread to before file start
-    assert(buffer_size <= STREAM_MAX_BUFFER_SIZE);
-    // Need to include the remaining buffer to ensure no data is lost.
-    int remainder = s->buf_len - s->buf_pos;
-    // Successive buffer unreading might trigger this.
-    assert(buffer_size + remainder <= TOTAL_BUFFER_SIZE);
-    memmove(&s->buffer[buffer_size], &s->buffer[s->buf_pos], remainder);
-    memcpy(s->buffer, buffer, buffer_size);
-    s->buf_pos = 0;
-    s->buf_len = buffer_size + remainder;
-}
-
 int stream_fill_buffer(stream_t *s)
 {
     int len = stream_read_unbuffered(s, s->buffer, STREAM_BUFFER_SIZE);
     s->buf_pos = 0;
-    s->buf_len = len < 0 ? 0 : len;
+    s->buf_len = len;
     return s->buf_len;
 }
 
 // Read between 1..buf_size bytes of data, return how much data has been read.
-// Return <= 0 on EOF, error, of if buf_size was 0.
+// Return 0 on EOF, error, of if buf_size was 0.
 int stream_read_partial(stream_t *s, char *buf, int buf_size)
 {
     assert(s->buf_pos <= s->buf_len);
@@ -461,6 +444,39 @@ int stream_read(stream_t *s, char *mem, int total)
         len -= read;
     }
     return total - len;
+}
+
+// Read ahead at most len bytes without changing the read position. Return a
+// pointer to the internal buffer, starting from the current read position.
+// Can read ahead at most STREAM_MAX_BUFFER_SIZE bytes.
+// The returned buffer becomes invalid on the next stream call, and you must
+// not write to it.
+struct bstr stream_peek(stream_t *s, int len)
+{
+    assert(len >= 0);
+    assert(len <= STREAM_MAX_BUFFER_SIZE);
+    if (s->buf_len - s->buf_pos < len) {
+        // Move to front to guarantee we really can read up to max size.
+        int buf_valid = s->buf_len - s->buf_pos;
+        memmove(s->buffer, &s->buffer[s->buf_pos], buf_valid);
+        // Fill rest of the buffer.
+        while (buf_valid < len) {
+            int chunk = len - buf_valid;
+            if (s->sector_size)
+                chunk = STREAM_BUFFER_SIZE;
+            assert(buf_valid + chunk <= TOTAL_BUFFER_SIZE);
+            int read = stream_read_unbuffered(s, &s->buffer[buf_valid], chunk);
+            if (read == 0)
+                break; // EOF
+            buf_valid += read;
+        }
+        s->buf_pos = 0;
+        s->buf_len = buf_valid;
+        if (s->buf_len)
+            s->eof = 0;
+    }
+    return (bstr){.start = &s->buffer[s->buf_pos],
+                  .len = FFMIN(len, s->buf_len - s->buf_pos)};
 }
 
 int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
@@ -646,9 +662,10 @@ void stream_update_size(stream_t *s)
     }
 }
 
-static stream_t *new_stream(void)
+static stream_t *new_stream(size_t min_size)
 {
-    stream_t *s = talloc_size(NULL, sizeof(stream_t) + TOTAL_BUFFER_SIZE);
+    min_size = FFMAX(min_size, TOTAL_BUFFER_SIZE);
+    stream_t *s = talloc_size(NULL, sizeof(stream_t) + min_size);
     memset(s, 0, sizeof(stream_t));
 
 #if HAVE_WINSOCK2_H
@@ -705,6 +722,20 @@ int stream_check_interrupt(int time)
     return stream_check_interrupt_cb(stream_check_interrupt_ctx, time);
 }
 
+stream_t *open_memory_stream(void *data, int len)
+{
+    assert(len >= 0);
+    stream_t *s = new_stream(len);
+
+    s->buf_pos = 0;
+    s->buf_len = len;
+    s->start_pos = 0;
+    s->end_pos = len;
+    s->pos = len;
+    memcpy(s->buffer, data, len);
+    return s;
+}
+
 int stream_enable_cache_percent(stream_t **stream, int64_t stream_cache_size,
                                 float stream_cache_min_percent,
                                 float stream_cache_seek_min_percent)
@@ -737,7 +768,7 @@ int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
     // Can't handle a loaded buffer.
     orig->buf_len = orig->buf_pos = 0;
 
-    stream_t *cache = new_stream();
+    stream_t *cache = new_stream(0);
     cache->type = STREAMTYPE_CACHE;
     cache->uncached_type = orig->type;
     cache->uncached_stream = orig;
@@ -897,20 +928,27 @@ unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
     return mem;
 }
 
+// Read the rest of the stream into memory (current pos to EOF), and return it.
+//  talloc_ctx: used as talloc parent for the returned allocation
+//  max_size: must be set to >0. If the file is larger than that, it is treated
+//            as error. This is a minor robustness measure.
+//  returns: stream contents, or .start/.len set to NULL on error
+// If the file was empty, but no error happened, .start will be non-NULL and
+// .len will be 0.
+// For convenience, the returned buffer is padded with a 0 byte. The padding
+// is not included in the returned length.
 struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
-                                 int max_size, int padding_bytes)
+                                 int max_size)
 {
     if (max_size > 1000000000)
         abort();
 
     int bufsize;
     int total_read = 0;
-    int padding = FFMAX(padding_bytes, 1);
+    int padding = 1;
     char *buf = NULL;
     if (s->end_pos > max_size)
-        return (struct bstr){
-                   NULL, 0
-        };
+        return (struct bstr){NULL, 0};
     if (s->end_pos > 0)
         bufsize = s->end_pos + padding;
     else
@@ -923,16 +961,13 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
             break;
         if (bufsize > max_size) {
             talloc_free(buf);
-            return (struct bstr){
-                       NULL, 0
-            };
+            return (struct bstr){NULL, 0};
         }
         bufsize = FFMIN(bufsize + (bufsize >> 1), max_size + padding);
     }
     buf = talloc_realloc_size(talloc_ctx, buf, total_read + padding);
-    return (struct bstr){
-               buf, total_read
-    };
+    memset(&buf[total_read], 0, padding);
+    return (struct bstr){buf, total_read};
 }
 
 bool stream_manages_timeline(struct stream *s)

@@ -40,7 +40,8 @@
 
 #include "audio/format.h"
 
-#include "libavcodec/avcodec.h"
+#include <libavcodec/avcodec.h>
+
 #if MP_INPUT_BUFFER_PADDING_SIZE < FF_INPUT_BUFFER_PADDING_SIZE
 #error MP_INPUT_BUFFER_PADDING_SIZE is too small!
 #endif
@@ -66,7 +67,8 @@ extern const demuxer_desc_t demuxer_desc_mpeg_es;
 extern const demuxer_desc_t demuxer_desc_mpeg4_es;
 extern const demuxer_desc_t demuxer_desc_h264_es;
 extern const demuxer_desc_t demuxer_desc_mpeg_ts;
-extern const demuxer_desc_t demuxer_desc_sub;
+extern const demuxer_desc_t demuxer_desc_libass;
+extern const demuxer_desc_t demuxer_desc_subreader;
 
 /* Please do not add any new demuxers here. If you want to implement a new
  * demuxer, add it to libavformat, except for wrappers around external
@@ -80,8 +82,10 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef CONFIG_TV
     &demuxer_desc_tv,
 #endif
+    &demuxer_desc_libass,
     &demuxer_desc_matroska,
     &demuxer_desc_lavf,
+    &demuxer_desc_subreader,
     &demuxer_desc_avi,
     &demuxer_desc_asf,
 #ifdef CONFIG_MNG
@@ -96,8 +100,6 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_mpeg_ts,
     // auto-probe last, because it checks file-extensions only
     &demuxer_desc_mf,
-    // no auto-probe
-    &demuxer_desc_sub,
     /* Please do not add any new demuxers here. If you want to implement a new
      * demuxer, add it to libavformat, except for wrappers around external
      * libraries and demuxers requiring binary support. */
@@ -183,6 +185,41 @@ void free_demux_packet(struct demux_packet *dp)
     talloc_free(dp);
 }
 
+static int destroy_avpacket(void *pkt)
+{
+    av_free_packet(pkt);
+    return 0;
+}
+
+struct demux_packet *demux_copy_packet(struct demux_packet *dp)
+{
+    struct demux_packet *new = NULL;
+    // No av_copy_packet() in Libav
+#if LIBAVCODEC_VERSION_MICRO >= 100
+    if (dp->avpacket) {
+        assert(dp->buffer == dp->avpacket->data);
+        assert(dp->len == dp->avpacket->size);
+        AVPacket *newavp = talloc_zero(NULL, AVPacket);
+        talloc_set_destructor(newavp, destroy_avpacket);
+        av_init_packet(newavp);
+        if (av_copy_packet(newavp, dp->avpacket) < 0)
+            abort();
+        new = new_demux_packet_fromdata(newavp->data, newavp->size);
+        new->avpacket = newavp;
+    }
+#endif
+    if (!new) {
+        new = new_demux_packet(dp->len);
+        memcpy(new->buffer, dp->buffer, new->len);
+    }
+    new->pts = dp->pts;
+    new->duration = dp->duration;
+    new->stream_pts = dp->stream_pts;
+    new->pos = dp->pos;
+    new->keyframe = dp->keyframe;
+    return new;
+}
+
 static void free_demuxer_stream(struct demux_stream *ds)
 {
     ds_free_packs(ds);
@@ -248,18 +285,6 @@ static demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
     if (filename) // Filename hack for avs_check_file
         d->filename = strdup(filename);
     stream_seek(stream, stream->start_pos);
-    return d;
-}
-
-// for demux_sub.c
-demuxer_t *new_sub_pseudo_demuxer(struct MPOpts *opts)
-{
-    struct stream *s = open_stream("null://", NULL, NULL);
-    assert(s);
-    struct demuxer *d = new_demuxer(opts, s, DEMUXER_TYPE_SUB,
-                                    -1, -1, -1, NULL);
-    new_sh_stream(d, STREAM_SUB);
-    talloc_steal(d, s);
     return d;
 }
 
@@ -446,13 +471,16 @@ void free_demuxer(demuxer_t *demuxer)
     talloc_free(demuxer);
 }
 
-void demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
-                        demux_packet_t *dp)
+// Returns the same value as demuxer->fill_buffer: 1 ok, 0 EOF/not selected.
+int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
+                       demux_packet_t *dp)
 {
-    if (!demuxer_stream_is_selected(demuxer, stream)) {
+    if (!dp || !demuxer_stream_is_selected(demuxer, stream)) {
         free_demux_packet(dp);
+        return 0;
     } else {
         ds_add_packet(demuxer->ds[stream->type], dp);
+        return 1;
     }
 }
 
@@ -599,7 +627,7 @@ static bool demux_check_queue_full(demuxer_t *demux)
 int demux_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 {
     // Note: parameter 'ds' can be NULL!
-    return demux->desc->fill_buffer(demux, ds);
+    return demux->desc->fill_buffer ? demux->desc->fill_buffer(demux, ds) : 0;
 }
 
 // return value:
@@ -940,11 +968,6 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
             demuxer = demux2;
         }
         demuxer->file_format = fformat;
-        opts->correct_pts = opts->user_correct_pts;
-        if (opts->correct_pts < 0)
-            opts->correct_pts =
-                demux_control(demuxer, DEMUXER_CTRL_CORRECT_PTS,
-                            NULL) == DEMUXER_CTRL_OK;
         if (stream_manages_timeline(demuxer->stream)) {
             // Incorrect, but fixes some behavior with DVD/BD
             demuxer->ts_resets_possible = false;
@@ -1481,4 +1504,70 @@ int demuxer_set_angle(demuxer_t *demuxer, int angle)
     demux_control(demuxer, DEMUXER_CTRL_RESYNC, NULL);
 
     return angle;
+}
+
+static int packet_sort_compare(const void *p1, const void *p2)
+{
+    struct demux_packet *c1 = *(struct demux_packet **)p1;
+    struct demux_packet *c2 = *(struct demux_packet **)p2;
+
+    if (c1->pts > c2->pts)
+        return 1;
+    else if (c1->pts < c2->pts)
+        return -1;
+    return 0;
+}
+
+void demux_packet_list_sort(struct demux_packet **pkts, int num_pkts)
+{
+    qsort(pkts, num_pkts, sizeof(struct demux_packet *), packet_sort_compare);
+}
+
+void demux_packet_list_seek(struct demux_packet **pkts, int num_pkts,
+                            int *current, float rel_seek_secs, int flags)
+{
+    double ref_time = 0;
+    if (*current >= 0 && *current < num_pkts) {
+        ref_time = pkts[*current]->pts;
+    } else if (*current == num_pkts && num_pkts > 0) {
+        ref_time = pkts[num_pkts - 1]->pts + pkts[num_pkts - 1]->duration;
+    }
+
+    if (flags & SEEK_ABSOLUTE)
+        ref_time = 0;
+
+    if (flags & SEEK_FACTOR) {
+        ref_time += demux_packet_list_duration(pkts, num_pkts) * rel_seek_secs;
+    } else {
+        ref_time += rel_seek_secs;
+    }
+
+    // Could do binary search, but it's probably not worth the complexity.
+    int last_index = 0;
+    for (int n = 0; n < num_pkts; n++) {
+        if (pkts[n]->pts > ref_time)
+            break;
+        last_index = n;
+    }
+    *current = last_index;
+}
+
+double demux_packet_list_duration(struct demux_packet **pkts, int num_pkts)
+{
+    if (num_pkts > 0)
+        return pkts[num_pkts - 1]->pts + pkts[num_pkts - 1]->duration;
+    return 0;
+}
+
+struct demux_packet *demux_packet_list_fill(struct demux_packet **pkts,
+                                            int num_pkts, int *current)
+{
+    if (*current < 0)
+        *current = 0;
+    if (*current >= num_pkts)
+        return NULL;
+    struct demux_packet *new = talloc(NULL, struct demux_packet);
+    *new = *pkts[*current];
+    *current += 1;
+    return new;
 }
