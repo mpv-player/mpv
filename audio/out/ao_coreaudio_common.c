@@ -310,3 +310,22 @@ static OSStatus ca_device_listener(AudioObjectID object, uint32_t n_addresses,
     return ca_property_listener(kAudioDevicePropertyDeviceHasChanged,
                                 object, n_addresses, addresses, data);
 }
+
+static OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid) {
+    *pid = getpid();
+    OSStatus err = SetAudioProperty(device, kAudioDevicePropertyHogMode,
+                                    sizeof(*pid), pid);
+    if (err != noErr)
+        *pid = -1;
+
+    return err;
+}
+
+static OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid) {
+    if (*pid == getpid()) {
+        *pid = -1;
+        return SetAudioProperty(device, kAudioDevicePropertyHogMode,
+                                sizeof(*pid), &pid);
+    }
+    return noErr;
+}

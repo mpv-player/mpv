@@ -431,16 +431,8 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
 
     p->b_digital = 1;
 
-    d->i_hog_pid = getpid();
-
-    err = SetAudioProperty(p->i_selected_dev,
-                           kAudioDevicePropertyHogMode,
-                           sizeof(d->i_hog_pid), &d->i_hog_pid);
-
-    if (! CHECK_CA_WARN("faild to set hogmode")) {
-        d->i_hog_pid = -1;
-        goto coreaudio_error;
-    }
+    err = ca_lock_device(p->i_selected_dev, &d->i_hog_pid);
+    CHECK_CA_ERROR("faild to set hogmode");
 
     p_addr = (AudioObjectPropertyAddress) {
         .mSelector = kAudioDevicePropertySupportsMixing,
@@ -586,15 +578,8 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     return CONTROL_TRUE;
 
 coreaudio_error:
-    if (d->i_hog_pid == getpid()) {
-        d->i_hog_pid = -1;
-        err = SetAudioProperty(p->i_selected_dev,
-                               kAudioDevicePropertyHogMode,
-                               sizeof(d->i_hog_pid), &d->i_hog_pid);
-        if (err != noErr)
-            ca_msg(MSGL_WARN, "Could not release hogmode: [%4.4s]\n",
-                   (char *)&err);
-    }
+    err = ca_unlock_device(p->i_selected_dev, &d->i_hog_pid);
+    CHECK_CA_WARN("can't release hog mode");
     return CONTROL_FALSE;
 }
 
@@ -793,15 +778,9 @@ static void uninit(struct ao *ao, bool immed)
                 ca_msg(MSGL_WARN, "failed to set mixmode: [%4.4s]\n",
                        (char *)&err);
         }
-        if (d->i_hog_pid == getpid()) {
-            d->i_hog_pid = -1;
-            err = SetAudioProperty(p->i_selected_dev,
-                                   kAudioDevicePropertyHogMode,
-                                   sizeof(d->i_hog_pid), &d->i_hog_pid);
-            if (err != noErr)
-                ca_msg(MSGL_WARN,
-                       "Could not release hogmode: [%4.4s]\n", (char *)&err);
-        }
+
+        err = ca_unlock_device(p->i_selected_dev, &d->i_hog_pid);
+        CHECK_CA_WARN("can't release hog mode");
     }
 }
 
