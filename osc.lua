@@ -433,7 +433,7 @@ function osc_init ()
     --
 
     local contentF = function (ass)
-            draw_bar_simple(ass, posX, posY+pos_offsetY-30, pos_offsetX*2, 17)
+        draw_bar_simple(ass, posX, posY+pos_offsetY-30, pos_offsetX*2, 17)
     end
 
     local down_cmd = function ()
@@ -441,11 +441,10 @@ function osc_init ()
         if not (state.last_mouse_posX == mp.get_mouse_pos()) then
             state.last_mouse_posX = mp.get_mouse_pos()
 
-            local b_x, b_y, b_w, b_h = state.bar_location.b_x, state.bar_location.b_y, state.bar_location.b_w, state.bar_location.b_h
-            local x, y = mp.get_mouse_pos()
+            local b_x, b_w = state.bar_location.b_x, state.bar_location.b_w
 
-            if x >= b_x and y >= b_y and x <= b_x + b_w and y <= b_y + b_h then
-                local time = (x - b_x) / b_w * 100
+            if state.last_mouse_posX >= b_x and state.last_mouse_posX <= b_x + b_w then
+                local time = (state.last_mouse_posX - b_x) / b_w * 100
 
                 mp.send_command(string.format("no-osd seek %f absolute-percent keyframes", time))
             end
