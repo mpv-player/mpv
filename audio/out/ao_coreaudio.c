@@ -614,13 +614,8 @@ static void uninit(struct ao *ao, bool immed)
     struct priv *p = ao->priv;
     OSStatus err = noErr;
 
-    if (!immed) {
-        long long timeleft =
-            (1000000LL * mp_ring_buffered(p->buffer)) / ao->bps;
-        ca_msg(MSGL_DBG2, "%d bytes left @%d bps (%d usec)\n",
-                mp_ring_buffered(p->buffer), ao->bps, (int)timeleft);
-        mp_sleep_us((int)timeleft);
-    }
+    if (!immed)
+        mp_sleep_us(get_delay(ao) * 1000000);
 
     if (!p->b_digital) {
         AudioOutputUnitStop(p->theOutputUnit);
@@ -628,18 +623,12 @@ static void uninit(struct ao *ao, bool immed)
         AudioComponentInstanceDispose(p->theOutputUnit);
     } else {
         struct priv_d *d = p->digital;
-        /* Stop device. */
-        err = AudioDeviceStop(p->i_selected_dev, d->renderCallback);
-        if (err != noErr)
-            ca_msg(MSGL_WARN, "AudioDeviceStop failed: [%4.4s]\n",
-                   (char *)&err);
 
-        /* Remove IOProc callback. */
-        err =
-            AudioDeviceDestroyIOProcID(p->i_selected_dev, d->renderCallback);
-        if (err != noErr)
-            ca_msg(MSGL_WARN,
-                   "AudioDeviceRemoveIOProc failed: [%4.4s]\n", (char *)&err);
+        err = AudioDeviceStop(p->i_selected_dev, d->renderCallback);
+        CHECK_CA_WARN("failed to stop audio device");
+
+        err = AudioDeviceDestroyIOProcID(p->i_selected_dev, d->renderCallback);
+        CHECK_CA_WARN("failed to remove device render callback");
 
         err = ca_enable_mixing(p->i_selected_dev, d->changed_mixing);
         CHECK_CA_WARN("can't re-enable mixing");
