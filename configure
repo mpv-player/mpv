@@ -598,8 +598,8 @@ for ac_option do
   --disable-sdl2)       _sdl2=no        ;;
   --enable-dsound)      _dsound=yes     ;;
   --disable-dsound)     _dsound=no      ;;
-  --enable-waspi0)      _waspi0=yes     ;;
-  --disable-waspi0)     _waspi0=no      ;;
+  --enable-wasapi0)      _wasapi0=yes     ;;
+  --disable-wasapi0)     _wasapi0=no      ;;
   --enable-mng)         _mng=yes        ;;
   --disable-mng)        _mng=no         ;;
   --enable-jpeg)        _jpeg=yes       ;;
@@ -2243,18 +2243,18 @@ int main(void) {
 }
 EOF
 
-if cc_check "-lole32 -lavrt"; then
+if cc_check "-lole32"; then
   _wasapi0="yes"
 fi
 
 fi
 if test "$_wasapi0" = yes ; then
   def_wasapi0='#define CONFIG_WASAPI0 1'
-  aomodules="wasap0 $aomodules"
-  libs_mplayer="$libs_mplayer -lole32 -lavrt"
+  aomodules="wasapi0 $aomodules"
+  libs_mplayer="$libs_mplayer -lole32"
 else
   def_wasapi0='#undef CONFIG_WASAPI0'
-  noaomodules="wasaip0 $noaomodules"
+  noaomodules="wasapi0 $noaomodules"
 fi
 echores "$_wasapi0"
 
