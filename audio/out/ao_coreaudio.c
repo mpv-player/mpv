@@ -74,7 +74,7 @@ struct priv
     AudioUnit theOutputUnit;
 
     int packetSize;
-    int paused;
+    bool paused;
 
     struct mp_ring *buffer;
     struct priv_d *digital;
@@ -584,7 +584,6 @@ static int play(struct ao *ao, void *output_samples, int num_bytes, int flags)
     return wrote;
 }
 
-/* set variables and buffer to initial state */
 static void reset(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -592,19 +591,16 @@ static void reset(struct ao *ao)
     mp_ring_reset(p->buffer);
 }
 
-
-/* return available space */
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
     return mp_ring_available(p->buffer);
 }
 
-
-/* return delay until audio is played */
 static float get_delay(struct ao *ao)
 {
-    // inaccurate, should also contain the data buffered e.g. by the OS
+    // FIXME: should also report the delay of coreaudio itself (hardware +
+    // internal buffers)
     struct priv *p = ao->priv;
     return mp_ring_buffered(p->buffer) / (float)ao->bps;
 }
@@ -638,30 +634,26 @@ static void uninit(struct ao *ao, bool immed)
     }
 }
 
-/* stop playing, keep buffers (for pause) */
 static void audio_pause(struct ao *ao)
 {
     struct priv *p = ao->priv;
     OSErr err = noErr;
 
-    /* Stop callback. */
+    if (p->paused)
+        return;
+
     if (!p->b_digital) {
         err = AudioOutputUnitStop(p->theOutputUnit);
-        if (err != noErr)
-            ca_msg(MSGL_WARN, "AudioOutputUnitStop returned [%4.4s]\n",
-                   (char *)&err);
+        CHECK_CA_WARN("can't stop audio unit");
     } else {
         struct priv_d *d = p->digital;
         err = AudioDeviceStop(p->i_selected_dev, d->renderCallback);
-        if (err != noErr)
-            ca_msg(MSGL_WARN, "AudioDeviceStop failed: [%4.4s]\n",
-                   (char *)&err);
+        CHECK_CA_WARN("can't stop digital device");
     }
-    p->paused = 1;
+
+    p->paused = true;
 }
 
-
-/* resume playing, after audio_pause() */
 static void audio_resume(struct ao *ao)
 {
     struct priv *p = ao->priv;
@@ -670,25 +662,21 @@ static void audio_resume(struct ao *ao)
     if (!p->paused)
         return;
 
-    /* Start callback. */
     if (!p->b_digital) {
         err = AudioOutputUnitStart(p->theOutputUnit);
-        if (err != noErr)
-            ca_msg(MSGL_WARN,
-                   "AudioOutputUnitStart returned [%4.4s]\n", (char *)&err);
+        CHECK_CA_WARN("can't start audio unit");
     } else {
         struct priv_d *d = p->digital;
         err = AudioDeviceStart(p->i_selected_dev, d->renderCallback);
-        if (err != noErr)
-            ca_msg(MSGL_WARN, "AudioDeviceStart failed: [%4.4s]\n",
-                   (char *)&err);
+        CHECK_CA_WARN("can't start digital device");
     }
-    p->paused = 0;
+
+    p->paused = false;
 }
 
 const struct ao_driver audio_out_coreaudio = {
     .info = &(const struct ao_info) {
-        "CoreAudio (Native OS X Audio Output)",
+        "CoreAudio (OS X Audio Output)",
         "coreaudio",
         "Timothy J. Wood, Dan Christiansen, Chris Roccati & Stefano Pigozzi",
         "",
