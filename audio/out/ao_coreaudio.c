@@ -523,8 +523,6 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
                                          (void *)stream_format_changed);
     CHECK_CA_ERROR("cannot install format change listener during init");
 
-    /* FIXME: If output stream is not native byte-order, we need change endian somewhere. */
-    /*        Although there's no such case reported.                                     */
 #if BYTE_ORDER == BIG_ENDIAN
     if (!(p->stream_format.mFormatFlags & kAudioFormatFlagIsBigEndian))
 #else
