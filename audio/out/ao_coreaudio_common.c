@@ -331,6 +331,57 @@ static OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid) {
     return noErr;
 }
 
+static OSStatus ca_change_mixing(AudioDeviceID device, uint32_t val,
+                                 bool *changed) {
+    *changed = false;
+
+    AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
+        .mSelector = kAudioDevicePropertySupportsMixing,
+        .mScope    = kAudioObjectPropertyScopeGlobal,
+        .mElement  = kAudioObjectPropertyElementMaster,
+    };
+
+    if (AudioObjectHasProperty(device, &p_addr)) {
+        OSStatus err;
+        Boolean writeable = 0;
+        err = IsAudioPropertySettable(device, kAudioDevicePropertySupportsMixing,
+                                      &writeable);
+
+        if (!CHECK_CA_WARN("can't tell if mixing property is settable")) {
+            return err;
+        }
+
+        if (!writeable)
+            return noErr;
+
+        err = SetAudioProperty(device, kAudioDevicePropertySupportsMixing,
+                               sizeof(uint32_t), &val);
+        if (err != noErr)
+            return err;
+
+        if (!CHECK_CA_WARN("can't set mix mode")) {
+            return err;
+        }
+
+        *changed = true;
+    }
+
+    return noErr;
+}
+
+static OSStatus ca_disable_mixing(AudioDeviceID device, bool *changed) {
+    return ca_change_mixing(device, 0, changed);
+}
+
+static OSStatus ca_enable_mixing(AudioDeviceID device, bool changed) {
+    if (changed) {
+        bool dont_care = false;
+        return ca_change_mixing(device, 1, &dont_care);
+    }
+
+    return noErr;
+}
+
 static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
                                    AudioStreamBasicDescription change_format)
 {

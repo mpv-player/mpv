@@ -58,7 +58,7 @@ struct priv_d {
     AudioStreamID i_stream_id;              /* The StreamID that has a cac3 streamformat */
     int i_stream_index;                     /* The index of i_stream_id in an AudioBufferList */
     AudioStreamBasicDescription stream_format; /* The format we changed the stream to */
-    int b_changed_mixing;                   /* Whether we need to set the mixing mode back */
+    bool changed_mixing;                   /* Whether we need to set the mixing mode back */
     int b_stream_format_changed;            /* Flag for main thread to reset stream's format to digital and reset buffer */
     int b_muted;                            /* Are we muted in digital mode? */
 };
@@ -257,7 +257,7 @@ static int init(struct ao *ao, char *params)
         .i_hog_pid = -1,
         .i_stream_id = 0,
         .i_stream_index = -1,
-        .b_changed_mixing = 0,
+        .changed_mixing = false,
     };
 
     p->digital = d;
@@ -431,31 +431,10 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     p->b_digital = 1;
 
     err = ca_lock_device(p->i_selected_dev, &d->i_hog_pid);
-    CHECK_CA_ERROR("faild to set hogmode");
+    CHECK_CA_WARN("failed to set hogmode");
 
-    p_addr = (AudioObjectPropertyAddress) {
-        .mSelector = kAudioDevicePropertySupportsMixing,
-        .mScope    = kAudioObjectPropertyScopeGlobal,
-        .mElement  = kAudioObjectPropertyElementMaster,
-    };
-
-    /* Set mixable to false if we are allowed to. */
-    if (AudioObjectHasProperty(p->i_selected_dev, &p_addr)) {
-        Boolean b_writeable = 0;
-
-        err = IsAudioPropertySettable(p->i_selected_dev,
-                                      kAudioDevicePropertySupportsMixing,
-                                      &b_writeable);
-
-        if (b_writeable) {
-            uint32_t mix = 0;
-            err = SetAudioProperty(p->i_selected_dev,
-                                   kAudioDevicePropertySupportsMixing,
-                                   sizeof(uint32_t), &mix);
-            CHECK_CA_ERROR("failed to set mixmode");
-            d->b_changed_mixing = 1;
-        }
-    }
+    err = ca_disable_mixing(p->i_selected_dev, &d->changed_mixing);
+    CHECK_CA_WARN("failed to disable mixing");
 
     AudioStreamID *streams = NULL;
     /* Get a list of all the streams on this device. */
@@ -672,26 +651,8 @@ static void uninit(struct ao *ao, bool immed)
             ca_msg(MSGL_WARN,
                    "AudioDeviceRemoveIOProc failed: [%4.4s]\n", (char *)&err);
 
-        if (d->b_changed_mixing) {
-            UInt32 b_mix;
-            Boolean b_writeable = 0;
-            /* Revert mixable to true if we are allowed to. */
-            err = IsAudioPropertySettable(p->i_selected_dev,
-                                          kAudioDevicePropertySupportsMixing,
-                                          &b_writeable);
-            err = GetAudioProperty(p->i_selected_dev,
-                                   kAudioDevicePropertySupportsMixing,
-                                   sizeof(UInt32), &b_mix);
-            if (err == noErr && b_writeable) {
-                b_mix = 1;
-                err = SetAudioProperty(p->i_selected_dev,
-                                       kAudioDevicePropertySupportsMixing,
-                                       sizeof(UInt32), &b_mix);
-            }
-            if (err != noErr)
-                ca_msg(MSGL_WARN, "failed to set mixmode: [%4.4s]\n",
-                       (char *)&err);
-        }
+        err = ca_enable_mixing(p->i_selected_dev, d->changed_mixing);
+        CHECK_CA_WARN("can't re-enable mixing");
 
         err = ca_unlock_device(p->i_selected_dev, &d->i_hog_pid);
         CHECK_CA_WARN("can't release hog mode");
