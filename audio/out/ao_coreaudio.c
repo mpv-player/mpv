@@ -38,6 +38,7 @@
 
 #include "ao.h"
 #include "audio/format.h"
+#include "osdep/timer.h"
 #include "core/subopt-helper.h"
 #include "core/mp_ring.h"
 
@@ -563,29 +564,20 @@ coreaudio_error:
 
 static int play(struct ao *ao, void *output_samples, int num_bytes, int flags)
 {
-    struct priv *p = ao->priv;
+    struct priv *p   = ao->priv;
     struct priv_d *d = p->digital;
 
     // Check whether we need to reset the digital output stream.
     if (p->b_digital && d->b_stream_format_changed) {
         d->b_stream_format_changed = 0;
-        int b_digital = AudioStreamSupportsDigital(d->i_stream_id);
-        if (b_digital) {
-            /* Current stream supports digital format output, let's set it. */
-            ca_msg(MSGL_V,
-                   "Detected current stream supports digital, try to restore digital output...\n");
-
-            if (!AudioStreamChangeFormat(d->i_stream_id, d->stream_format))
-                ca_msg(MSGL_WARN,
-                       "Restoring digital output failed.\n");
-            else {
-                ca_msg(MSGL_WARN,
-                       "Restoring digital output succeeded.\n");
+        if (AudioStreamSupportsDigital(d->i_stream_id)) {
+            if (!AudioStreamChangeFormat(d->i_stream_id, d->stream_format)) {
+                ca_msg(MSGL_WARN, "can't restore digital output\n");
+            } else {
+                ca_msg(MSGL_WARN, "Restoring digital output succeeded.\n");
                 reset(ao);
             }
-        } else
-            ca_msg(MSGL_V,
-                   "Detected current stream does not support digital.\n");
+        }
     }
 
     int wrote = mp_ring_write(p->buffer, output_samples, num_bytes);
