@@ -38,7 +38,6 @@
 
 #include "ao.h"
 #include "audio/format.h"
-#include "osdep/timer.h"
 #include "core/subopt-helper.h"
 #include "core/mp_ring.h"
 
@@ -581,91 +580,6 @@ coreaudio_error:
     err = ca_unlock_device(p->i_selected_dev, &d->i_hog_pid);
     CHECK_CA_WARN("can't release hog mode");
     return CONTROL_FALSE;
-}
-
-/*****************************************************************************
-* AudioStreamChangeFormat: Change i_stream_id to change_format
-*****************************************************************************/
-static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
-                                   AudioStreamBasicDescription change_format)
-{
-    OSStatus err = noErr;
-    int i;
-    AudioObjectPropertyAddress p_addr;
-
-    static volatile int stream_format_changed;
-    stream_format_changed = 0;
-
-    ca_print_asbd("setting stream format:", &change_format);
-
-    /* Install the callback. */
-    p_addr.mSelector = kAudioStreamPropertyPhysicalFormat;
-    p_addr.mScope    = kAudioObjectPropertyScopeGlobal;
-    p_addr.mElement  = kAudioObjectPropertyElementMaster;
-
-    err = AudioObjectAddPropertyListener(i_stream_id,
-                                         &p_addr,
-                                         ca_stream_listener,
-                                         (void *)&stream_format_changed);
-    if (err != noErr) {
-        ca_msg(MSGL_WARN,
-               "AudioStreamAddPropertyListener failed: [%4.4s]\n",
-               (char *)&err);
-        return CONTROL_FALSE;
-    }
-
-    /* Change the format. */
-    err = SetAudioProperty(i_stream_id,
-                           kAudioStreamPropertyPhysicalFormat,
-                           sizeof(AudioStreamBasicDescription), &change_format);
-    if (err != noErr) {
-        ca_msg(MSGL_WARN, "could not set the stream format: [%4.4s]\n",
-               (char *)&err);
-        return CONTROL_FALSE;
-    }
-
-    /* The AudioStreamSetProperty is not only asynchronious,
-     * it is also not Atomic, in its behaviour.
-     * Therefore we check 5 times before we really give up.
-     * FIXME: failing isn't actually implemented yet. */
-    for (i = 0; i < 5; ++i) {
-        AudioStreamBasicDescription actual_format;
-        int j;
-        for (j = 0; !stream_format_changed && j < 50; ++j)
-            mp_sleep_us(10000);
-        if (stream_format_changed)
-            stream_format_changed = 0;
-        else
-            ca_msg(MSGL_V, "reached timeout\n");
-
-        err = GetAudioProperty(i_stream_id,
-                               kAudioStreamPropertyPhysicalFormat,
-                               sizeof(AudioStreamBasicDescription),
-                               &actual_format);
-
-        ca_print_asbd("actual format in use:", &actual_format);
-        if (actual_format.mSampleRate == change_format.mSampleRate &&
-            actual_format.mFormatID == change_format.mFormatID &&
-            actual_format.mFramesPerPacket == change_format.mFramesPerPacket) {
-            /* The right format is now active. */
-            break;
-        }
-        /* We need to check again. */
-    }
-
-    /* Removing the property listener. */
-    err = AudioObjectRemovePropertyListener(i_stream_id,
-                                            &p_addr,
-                                            ca_stream_listener,
-                                            (void *)&stream_format_changed);
-    if (err != noErr) {
-        ca_msg(MSGL_WARN,
-               "AudioStreamRemovePropertyListener failed: [%4.4s]\n",
-               (char *)&err);
-        return CONTROL_FALSE;
-    }
-
-    return CONTROL_TRUE;
 }
 
 static int play(struct ao *ao, void *output_samples, int num_bytes, int flags)

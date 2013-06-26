@@ -26,6 +26,7 @@
 #include <AudioUnit/AudioUnit.h>
 #include <inttypes.h>
 #include <stdbool.h>
+#include "osdep/timer.h"
 #include "core/mp_msg.h"
 
 #define ca_msg(a, b ...) mp_msg(MSGT_AO, a, "AO: [coreaudio] " b)
@@ -329,3 +330,76 @@ static OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid) {
     }
     return noErr;
 }
+
+static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
+                                   AudioStreamBasicDescription change_format)
+{
+    OSStatus err = noErr;
+    AudioObjectPropertyAddress p_addr;
+    volatile int stream_format_changed = 0;
+
+    ca_print_asbd("setting stream format:", &change_format);
+
+    /* Install the callback. */
+    p_addr = (AudioObjectPropertyAddress) {
+        .mSelector = kAudioStreamPropertyPhysicalFormat,
+        .mScope    = kAudioObjectPropertyScopeGlobal,
+        .mElement  = kAudioObjectPropertyElementMaster,
+    };
+
+    err = AudioObjectAddPropertyListener(i_stream_id,
+                                         &p_addr,
+                                         ca_stream_listener,
+                                         (void *)&stream_format_changed);
+    if (!CHECK_CA_WARN("can't add property listener during format change")) {
+        return CONTROL_FALSE;
+    }
+
+    /* Change the format. */
+    err = SetAudioProperty(i_stream_id,
+                           kAudioStreamPropertyPhysicalFormat,
+                           sizeof(AudioStreamBasicDescription), &change_format);
+    if (!CHECK_CA_WARN("error changing physical format")) {
+        return CONTROL_FALSE;
+    }
+
+    /* The AudioStreamSetProperty is not only asynchronious,
+     * it is also not Atomic, in its behaviour.
+     * Therefore we check 5 times before we really give up. */
+    bool format_set = CONTROL_FALSE;
+    for (int i = 0; !format_set && i < 5; ++i) {
+        for (int j = 0; !stream_format_changed && j < 50; ++j)
+            mp_sleep_us(10000);
+
+        if (stream_format_changed) {
+            stream_format_changed = 0;
+        } else {
+            ca_msg(MSGL_V, "reached timeout\n");
+        }
+
+        AudioStreamBasicDescription actual_format;
+        err = GetAudioProperty(i_stream_id,
+                               kAudioStreamPropertyPhysicalFormat,
+                               sizeof(AudioStreamBasicDescription),
+                               &actual_format);
+
+        ca_print_asbd("actual format in use:", &actual_format);
+        if (actual_format.mSampleRate == change_format.mSampleRate &&
+            actual_format.mFormatID == change_format.mFormatID &&
+            actual_format.mFramesPerPacket == change_format.mFramesPerPacket) {
+            format_set = CONTROL_TRUE;
+        }
+    }
+
+    err = AudioObjectRemovePropertyListener(i_stream_id,
+                                            &p_addr,
+                                            ca_stream_listener,
+                                            (void *)&stream_format_changed);
+
+    if (!CHECK_CA_WARN("can't remove property listener")) {
+        return CONTROL_FALSE;
+    }
+
+    return format_set;
+}
+
