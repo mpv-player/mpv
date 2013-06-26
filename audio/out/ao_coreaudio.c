@@ -445,7 +445,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
                                  (void **)&streams);
 
     if (!size) {
-        ca_msg(MSGL_WARN, "could not get number of streams.");
+        ca_msg(MSGL_WARN, "could not get number of streams\n");
         goto coreaudio_error;
     }
 
@@ -463,7 +463,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
                                                (void **)&formats);
 
             if (!size) {
-                ca_msg(MSGL_WARN, "could not get number of stream formats.\n");
+                ca_msg(MSGL_WARN, "could not get number of stream formats\n");
                 continue; // try next one
             }
 
@@ -503,7 +503,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     free(streams);
 
     if (d->i_stream_index < 0) {
-        ca_msg(MSGL_WARN, "can't find any digital output stream format");
+        ca_msg(MSGL_WARN, "can't find any digital output stream format\n");
         goto coreaudio_error;
     }
 
@@ -533,7 +533,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
         ao->format = AF_FORMAT_AC3_LE;
     else if (d->stream_format.mFormatFlags & kAudioFormatFlagIsBigEndian)
         ca_msg(MSGL_WARN,
-               "Stream has non-native byte order, digital output may fail");
+               "stream has non-native byte order, digital output may fail\n");
 #endif
 
     ao->samplerate = d->stream_format.mSampleRate;
@@ -574,7 +574,7 @@ static int play(struct ao *ao, void *output_samples, int num_bytes, int flags)
             if (!AudioStreamChangeFormat(d->i_stream_id, d->stream_format)) {
                 ca_msg(MSGL_WARN, "can't restore digital output\n");
             } else {
-                ca_msg(MSGL_WARN, "Restoring digital output succeeded.\n");
+                ca_msg(MSGL_WARN, "restoring digital output succeeded.\n");
                 reset(ao);
             }
         }

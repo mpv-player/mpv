@@ -286,7 +286,7 @@ static OSStatus ca_property_listener(AudioObjectPropertySelector selector,
 
     for (int i = 0; i < n_addresses; ++i) {
         if (addresses[i].mSelector == selector) {
-            ca_msg(MSGL_WARN, "event: property %s changed",
+            ca_msg(MSGL_WARN, "event: property %s changed\n",
                               fourcc_repr(talloc_ctx, selector));
             if (data) *(volatile int *)data = 1;
             break;
