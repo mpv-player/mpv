@@ -227,6 +227,7 @@ SOURCES = talloc.c \
           stream/stream_avdevice.c \
           stream/stream_file.c \
           stream/stream_lavf.c \
+          stream/stream_memory.c \
           stream/stream_mf.c \
           stream/stream_null.c \
           stream/url.c \
