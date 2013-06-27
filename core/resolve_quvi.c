@@ -21,7 +21,7 @@
 #include "talloc.h"
 #include "core/mp_msg.h"
 #include "core/options.h"
-#include "mplayer.h"
+#include "resolve.h"
 
 struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
 {

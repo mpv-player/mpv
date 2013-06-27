@@ -107,7 +107,7 @@ SOURCES-$(GL_WAYLAND)           += video/out/wayland_common.c \
 
 SOURCES-$(JACK)                 += audio/out/ao_jack.c
 SOURCES-$(JOYSTICK)             += core/input/joystick.c
-SOURCES-$(LIBQUVI)              += core/quvi.c
+SOURCES-$(LIBQUVI)              += core/resolve_quvi.c
 SOURCES-$(LIRC)                 += core/input/lirc.c
 SOURCES-$(OPENAL)               += audio/out/ao_openal.c
 SOURCES-$(OSS)                  += audio/out/ao_oss.c

@@ -68,7 +68,7 @@
 
 #include "core/m_option.h"
 #include "core/m_config.h"
-#include "core/mplayer.h"
+#include "core/resolve.h"
 #include "core/m_property.h"
 
 #include "sub/find_subfiles.h"

@@ -16,12 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MPLAYER_MPLAYER_H
-#define MPLAYER_MPLAYER_H
-
-#include <stdlib.h>
-
-#include "core/mp_msg.h"
+#ifndef MP_RESOLVE_H
+#define MP_RESOLVE_H
 
 struct MPContext;
 struct MPOpts;
@@ -33,4 +29,4 @@ struct mp_resolve_result {
 
 struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts);
 
-#endif /* MPLAYER_MPLAYER_H */
+#endif

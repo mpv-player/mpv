@@ -31,7 +31,7 @@
 #include "stream/stream.h"
 #include "demux/demux.h"
 #include "demux/stheader.h"
-#include "mplayer.h"
+#include "resolve.h"
 #include "playlist.h"
 #include "playlist_parser.h"
 #include "sub/sub.h"
