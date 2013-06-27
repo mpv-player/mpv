@@ -73,7 +73,6 @@ struct priv
     /* AudioUnit */
     AudioUnit theOutputUnit;
 
-    int packetSize;
     bool paused;
 
     struct mp_ring *buffer;
@@ -92,8 +91,9 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
 {
     struct ao *ao   = ctx;
     struct priv *p  = ao->priv;
-    int requested   = frames * p->packetSize;
+
     AudioBuffer buf = buffer_list->mBuffers[0];
+    int requested   = buf.mDataByteSize;
 
     buf.mDataByteSize = mp_ring_read(p->buffer, buf.mData, requested);
 
@@ -318,7 +318,7 @@ static int init(struct ao *ao, char *params)
         asbd.mFormatFlags |= kAudioFormatFlagIsBigEndian;
 
     asbd.mFramesPerPacket = 1;
-    p->packetSize = asbd.mBytesPerPacket = asbd.mBytesPerFrame =
+    asbd.mBytesPerPacket = asbd.mBytesPerFrame =
         asbd.mFramesPerPacket * asbd.mChannelsPerFrame *
         (asbd.mBitsPerChannel / 8);
 
