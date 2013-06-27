@@ -1567,11 +1567,24 @@
     Video format/quality that is directly passed to libquvi (default: ``best``).
     This is used when opening links to streaming sites like YouTube. The
     interpretation of this value is highly specific to the streaming site and
-    the video. The only well defined values that work on all sites are ``best``
+    the video.
+
+    libquvi 0.4.x:
+
+    The only well defined values that work on all sites are ``best``
     (best quality/highest bandwidth, default), and ``default`` (lowest quality).
 
     The quvi command line tool can be used to find out which formats are
     supported for a given URL: ``quvi --query-formats URL``.
+
+    libquvi 0.9.x:
+
+    The following explanations are relevant:
+    ``http://quvi.sourceforge.net/doc/0.9/glossary_termino.html#m_stream_id``
+
+    With 0.9.x, the ``quvi-format`` property can be used at runtime to cycle
+    through the list of formats. Unfortunately, this resets the playback
+    position and is slow too.
 
 --radio=<option1:option2:...>
     These options set various parameters of the radio capture module. For

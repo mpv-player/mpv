@@ -25,6 +25,27 @@ struct MPOpts;
 struct mp_resolve_result {
     char *url;
     char *title;
+
+    struct mp_resolve_src **srcs;
+    int num_srcs;
+
+    double start_time;
+
+    struct mp_resolve_sub **subs;
+    int num_subs;
+
+    struct playlist *playlist;
+};
+
+struct mp_resolve_src {
+    char *url;
+    char *encid;     // indicates quality level, contents are libquvi specific
+};
+
+struct mp_resolve_sub {
+    char *url;
+    char *data;
+    char *lang;
 };
 
 struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts);

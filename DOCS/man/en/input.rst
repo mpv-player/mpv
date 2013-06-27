@@ -399,6 +399,7 @@ tv-hue                      x
 track-list                    list of audio/video/sub tracks, cur. entr. marked
 chapter-list                  list of chapters, current entry marked
 playlist                      playlist, current entry marked
+quvi-format                 x see ``--quvi-format``
 =========================== = ==================================================
 
 .. _property_expansion:

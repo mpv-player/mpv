@@ -3890,6 +3890,9 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     if (!filename)
         return NULL;
     int format = 0;
+    char *disp_filename = filename;
+    if (strncmp(disp_filename, "memory://", 9) == 0)
+        disp_filename = "memory://"; // avoid noise
     struct stream *stream = open_stream(filename, &mpctx->opts, &format);
     if (!stream)
         goto err_out;
@@ -3920,7 +3923,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
         if (stream->type == filter) {
             struct track *t = add_stream_track(mpctx, stream, false);
             t->is_external = true;
-            t->title = talloc_strdup(t, filename);
+            t->title = talloc_strdup(t, disp_filename);
             t->external_filename = talloc_strdup(t, filename);
             first = t;
         }
@@ -3928,7 +3931,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     if (!first) {
         free_demuxer(demuxer);
         mp_msg(MSGT_CPLAYER, MSGL_WARN, "No streams added from file %s.\n",
-               filename);
+               disp_filename);
         goto err_out;
     }
     MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, demuxer);
@@ -3936,7 +3939,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
 
 err_out:
     mp_msg(MSGT_CPLAYER, MSGL_ERR, "Can not open external file %s.\n",
-           filename);
+           disp_filename);
     return false;
 }
 
@@ -3952,6 +3955,25 @@ struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename, int noer
     struct MPOpts *opts = &mpctx->opts;
     return open_external_file(mpctx, filename, opts->sub_demuxer_name, 0,
                               STREAM_SUB);
+}
+
+static void open_subtitles_from_resolve(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    struct mp_resolve_result *res = mpctx->resolve_result;
+    if (!res)
+        return;
+    for (int n = 0; n < res->num_subs; n++) {
+        struct mp_resolve_sub *sub = res->subs[n];
+        char *s = talloc_strdup(NULL, sub->url);
+        if (!s)
+            s = talloc_asprintf(NULL, "memory://%s", sub->data);
+        struct track *t =
+            open_external_file(mpctx, s, opts->sub_demuxer_name, 0, STREAM_SUB);
+        talloc_free(s);
+        if (t)
+            t->lang = talloc_strdup(t, sub->lang);
+    }
 }
 
 static void print_timeline(struct MPContext *mpctx)
@@ -4005,7 +4027,7 @@ static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
 static struct mp_resolve_result *resolve_url(const char *filename,
                                              struct MPOpts *opts)
 {
-#ifdef CONFIG_LIBQUVI
+#if defined(CONFIG_LIBQUVI) || defined(CONFIG_LIBQUVI9)
     return mp_resolve_quvi(filename, opts);
 #else
     return NULL;
@@ -4138,8 +4160,17 @@ static void play_current_file(struct MPContext *mpctx)
 
     char *stream_filename = mpctx->filename;
     mpctx->resolve_result = resolve_url(stream_filename, opts);
-    if (mpctx->resolve_result)
+    if (mpctx->resolve_result) {
+        if (mpctx->resolve_result->playlist) {
+            // Replace entry with playlist contents
+            playlist_transfer_entries(mpctx->playlist,
+                                      mpctx->resolve_result->playlist);
+            if (mpctx->playlist->current)
+                playlist_remove(mpctx->playlist, mpctx->playlist->current);
+            goto terminate_playback;
+        }
         stream_filename = mpctx->resolve_result->url;
+    }
     int file_format = DEMUXER_TYPE_UNKNOWN;
     mpctx->stream = open_stream(stream_filename, opts, &file_format);
     if (!mpctx->stream) { // error...
@@ -4253,6 +4284,7 @@ goto_reopen_demuxer: ;
     add_subtitle_fonts_from_sources(mpctx);
 
     open_subtitles_from_options(mpctx);
+    open_subtitles_from_resolve(mpctx);
     open_audiofiles_from_options(mpctx);
 
     check_previous_track_selection(mpctx);
@@ -4364,6 +4396,12 @@ goto_reopen_demuxer: ;
     double startpos = rel_time_to_abs(mpctx, opts->play_start, -1);
     if (startpos != -1 || mpctx->timeline) {
         queue_seek(mpctx, MPSEEK_ABSOLUTE, startpos, 0);
+        execute_queued_seek(mpctx);
+    }
+    if (startpos == -1 && mpctx->resolve_result &&
+        mpctx->resolve_result->start_time > 0)
+    {
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->resolve_result->start_time, 0);
         execute_queued_seek(mpctx);
     }
     if (opts->chapterrange[0] > 0) {

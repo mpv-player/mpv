@@ -311,6 +311,7 @@ Optional features:
   --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
   --enable-libquvi       enable libquvi [autodetect]
+  --disable-libquvi9     disable libquvi 0.9.x [autodetect]
   --enable-lcms2         enable LCMS2 support [autodetect]
   --disable-vcd          disable VCD support [autodetect]
   --disable-bluray       disable Blu-ray support [autodetect]
@@ -466,6 +467,7 @@ networking=yes
 _winsock2_h=auto
 _smb=auto
 _libquvi=auto
+_libquvi9=auto
 _libguess=auto
 _joystick=no
 _lirc=auto
@@ -668,6 +670,8 @@ for ac_option do
   --disable-smb)        _smb=no ;;
   --enable-libquvi)     _libquvi=yes    ;;
   --disable-libquvi)    _libquvi=no     ;;
+  --enable-libquvi9)    _libquvi9=yes    ;;
+  --disable-libquvi9)   _libquvi9=no     ;;
   --enable-libguess)    _libguess=yes   ;;
   --disable-libguess)   _libguess=no    ;;
   --enable-joystick)    _joystick=yes   ;;
@@ -1727,7 +1731,26 @@ else
 fi
 echores "$_smb"
 
+
+echocheck "libquvi 0.9.0 support"
+if test "$_libquvi9" = auto ; then
+    _libquvi9=no
+    if pkg_config_add 'libquvi-0.9 >= 0.9.0' ; then
+        _libquvi9=yes
+    fi
+fi
+if test "$_libquvi9" = yes; then
+    def_libquvi9="#define CONFIG_LIBQUVI9 1"
+else
+    def_libquvi9="#undef CONFIG_LIBQUVI9"
+fi
+echores "$_libquvi9"
+
 echocheck "libquvi support"
+if test "$_libquvi9" = yes ; then
+    _libquvi=no
+    res_comment="using libquvi 0.9.x"
+fi
 if test "$_libquvi" = auto ; then
     _libquvi=no
     if pkg_config_add 'libquvi >= 0.4.1' ; then
@@ -3190,6 +3213,7 @@ VF_LAVFI = $vf_lavfi
 AF_LAVFI = $af_lavfi
 LIBSMBCLIENT = $_smb
 LIBQUVI = $_libquvi
+LIBQUVI9 = $_libquvi9
 LIBGUESS = $_libguess
 LIBTHEORA = $_theora
 LIRC = $_lirc
@@ -3389,6 +3413,7 @@ $def_inet_pton
 $def_networking
 $def_smb
 $def_libquvi
+$def_libquvi9
 $def_libguess
 $def_socklen_t
 $def_vstream
