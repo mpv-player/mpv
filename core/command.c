@@ -55,7 +55,6 @@
 #include "video/decode/dec_video.h"
 #include "audio/decode/dec_audio.h"
 #include "core/path.h"
-#include "sub/ass_mp.h"
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 #include "stream/pvr.h"
@@ -2087,18 +2086,18 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SUB_STEP:
-#ifdef CONFIG_ASS
         if (mpctx->osd->dec_sub) {
-            int movement = cmd->args[0].v.i;
-            struct ass_track *ass_track = sub_get_ass_track(mpctx->osd->dec_sub);
-            if (ass_track) {
+            double a[2];
+            a[0] = mpctx->video_pts - mpctx->osd->video_offset + opts->sub_delay;
+            a[1] = cmd->args[0].v.i;
+            if (sub_control(mpctx->osd->dec_sub, SD_CTRL_SUB_STEP, a) > 0) {
+                opts->sub_delay += a[0];
+
+                osd_changed_all(mpctx->osd);
                 set_osd_tmsg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
                              "Sub delay: %d ms", ROUND(opts->sub_delay * 1000));
-                double cur = (mpctx->video_pts + opts->sub_delay) * 1000 + .5;
-                opts->sub_delay += ass_step_sub(ass_track, cur, movement) / 1000.;
             }
         }
-#endif
         break;
 
     case MP_CMD_OSD: {

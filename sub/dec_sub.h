@@ -16,6 +16,10 @@ struct ass_renderer;
 struct dec_sub;
 struct sd;
 
+enum sd_ctrl {
+    SD_CTRL_SUB_STEP,
+};
+
 struct dec_sub *sub_create(struct MPOpts *opts);
 void sub_destroy(struct dec_sub *sub);
 
@@ -37,10 +41,6 @@ bool sub_has_get_text(struct dec_sub *sub);
 char *sub_get_text(struct dec_sub *sub, double pts);
 void sub_reset(struct dec_sub *sub);
 
-struct sd *sub_get_last_sd(struct dec_sub *sub);
-
-#ifdef CONFIG_ASS
-struct ass_track *sub_get_ass_track(struct dec_sub *sub);
-#endif
+int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg);
 
 #endif

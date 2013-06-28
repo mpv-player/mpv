@@ -318,6 +318,20 @@ static void uninit(struct sd *sd)
     talloc_free(ctx);
 }
 
+static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    switch (cmd) {
+    case SD_CTRL_SUB_STEP: {
+        double *a = arg;
+        a[0] = ass_step_sub(ctx->ass_track, a[0] * 1000 + .5, a[1]) / 1000.0;
+        return CONTROL_OK;
+    }
+    default:
+        return CONTROL_UNKNOWN;
+    }
+}
+
 const struct sd_functions sd_ass = {
     .name = "ass",
     .accept_packets_in_advance = true,
@@ -327,16 +341,7 @@ const struct sd_functions sd_ass = {
     .get_bitmaps = get_bitmaps,
     .get_text = get_text,
     .fix_events = fix_events,
+    .control = control,
     .reset = reset,
     .uninit = uninit,
 };
-
-struct ass_track *sub_get_ass_track(struct dec_sub *sub)
-{
-    struct sd *sd = sub_get_last_sd(sub);
-    if (sd && sd->driver == &sd_ass && sd->priv) {
-        struct sd_ass_priv *ctx = sd->priv;
-        return ctx->ass_track;
-    }
-    return NULL;
-}
