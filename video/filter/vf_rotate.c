@@ -73,6 +73,8 @@ static int config(struct vf_instance *vf, int width, int height,
         if (width < height)
             vf->priv->direction &= 3;
     }
+    if (vf->priv->direction & 4)
+        return vf_next_config(vf, width, height, d_width, d_height, flags, outfmt);
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(outfmt);
     int a_w = MP_ALIGN_DOWN(width, desc.align_x);
     int a_h = MP_ALIGN_DOWN(height, desc.align_y);
