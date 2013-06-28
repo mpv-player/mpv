@@ -991,37 +991,12 @@
         Only use bit-exact algorithms in all decoding steps (for codec
         testing).
 
-    debug=<value>
-        Display debugging information.
-
-        :0:      disabled
-        :1:      picture info
-        :2:      rate control
-        :4:      bitstream
-        :8:      macroblock (MB) type
-        :16:     per-block quantization parameter (QP)
-        :32:     motion vector
-        :0x0040: motion vector visualization
-        :0x0080: macroblock (MB) skip
-        :0x0100: startcode
-        :0x0200: PTS
-        :0x0400: error resilience
-        :0x0800: memory management control operations (H.264)
-        :0x1000: bugs
-        :0x2000: Visualize quantization parameter (QP), lower QP are tinted
-                 greener.
-        :0x4000: Visualize block types.
-
     fast (MPEG-2, MPEG-4, and H.264 only)
         Enable optimizations which do not comply to the specification and
         might potentially cause problems, like simpler dequantization, simpler
         motion compensation, assuming use of the default quantization matrix,
         assuming YUV 4:2:0 and skipping a few checks to detect damaged
         bitstreams.
-
-    idct=<0-99>
-        For best decoding quality use the same IDCT algorithm for decoding and
-        encoding. This may come at a price in accuracy, though.
 
     o=<key>=<value>[,<key>=<value>[,...]]
         Pass AVOptions to libavcodec decoder. Note, a patch to make the o=
@@ -1030,7 +1005,7 @@
 
         Some options which used to be direct options can be set with this
         mechanism, like ``bug``, ``gray``, ``idct``, ``ec``, ``vismv``,
-        ``skip_top`` (was ``st``), ``skip_bottom`` (was ``sb``).
+        ``skip_top`` (was ``st``), ``skip_bottom`` (was ``sb``), ``debug``.
 
         *EXAMPLE*: ``o=debug=pict``
 
