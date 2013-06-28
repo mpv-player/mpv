@@ -481,10 +481,11 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE("field-dominance", field_dominance, 0,
                ({"auto", -1}, {"top", 0}, {"bottom", 1})),
 
-    {"lavdopts", (void *) lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-    {"lavfdopts", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-
+    {"vd-lavc", (void *) lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG},
     {"ad-lavc", (void *) ad_lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG},
+
+    {"demuxer-lavf", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG},
+
 // ------------------------- subtitles options --------------------
 
     OPT_STRINGLIST("sub", sub_name, 0),

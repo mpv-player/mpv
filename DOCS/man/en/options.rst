@@ -507,6 +507,45 @@
     Force demuxer type. Use a '+' before the name to force it, this will skip
     some checks! Give the demuxer name as printed by ``--demuxer=help``.
 
+--demuxer-lavf-analyzeduration=<value>
+    Maximum length in seconds to analyze the stream properties.
+
+--demuxer-lavf-probescore=<1-100>
+    Minimum required libavformat probe score. Lower values will require
+    less data to be loaded (makes streams start faster), but makes file
+    format detection less reliable. Can be used to force auto-detected
+    libavformat demuxers, even if libavformat considers the detection not
+    reliable enough. (Default: 26.)
+
+--demuxer-lavf-allow-mimetype=<yes|no>
+    Allow deriving the format from the HTTP mimetype (default: yes). Set
+    this to no in case playing things from http mysteriously fails, even
+    though the same files work from local disk.
+
+    This is default in order to reduce latency when opening http streams.
+
+--demuxer-lavf-format=<value>
+    Force a specific libavformat demuxer.
+
+--demuxer-lavf-o=<key>=<value>[,<key>=<value>[,...]]
+    Pass AVOptions to libavformat demuxer.
+
+    Note, a patch to make the *o=* unneeded and pass all unknown options
+    through the AVOption system is welcome. A full list of AVOptions can
+    be found in the FFmpeg manual. Note that some options may conflict
+    with mpv options.
+
+    *EXAMPLE*: ``--demuxer-lavf-o=fflags=+ignidx``
+
+--demuxer-lavf-probesize=<value>
+    Maximum amount of data to probe during the detection phase. In the
+    case of MPEG-TS this value identifies the maximum number of TS packets
+    to scan.
+
+--demuxer-lavf-cryptokey=<hexstring>
+    Encryption key the demuxer should use. This is the raw binary data of
+    the key converted to a hexadecimal string.
+
 --doubleclick-time=<milliseconds>
     Time in milliseconds to recognize two consecutive button presses as a
     double-click (default: 300).
@@ -978,107 +1017,6 @@
     to a very large value is that if you hold down a key triggering some
     particularly slow command then the player may be unresponsive while it
     processes all the queued commands.
-
---lavdopts=<option1:option2:...>
-    Specify libavcodec decoding parameters. Separate multiple options with a
-    colon.
-
-    *EXAMPLE*: ``--lavdopts=gray:skiploopfilter=all:skipframe=nonref``
-
-    Available options are:
-
-    bitexact
-        Only use bit-exact algorithms in all decoding steps (for codec
-        testing).
-
-    fast (MPEG-2, MPEG-4, and H.264 only)
-        Enable optimizations which do not comply to the specification and
-        might potentially cause problems, like simpler dequantization, simpler
-        motion compensation, assuming use of the default quantization matrix,
-        assuming YUV 4:2:0 and skipping a few checks to detect damaged
-        bitstreams.
-
-    o=<key>=<value>[,<key>=<value>[,...]]
-        Pass AVOptions to libavcodec decoder. Note, a patch to make the o=
-        unneeded and pass all unknown options through the AVOption system is
-        welcome. A full list of AVOptions can be found in the FFmpeg manual.
-
-        Some options which used to be direct options can be set with this
-        mechanism, like ``bug``, ``gray``, ``idct``, ``ec``, ``vismv``,
-        ``skip_top`` (was ``st``), ``skip_bottom`` (was ``sb``), ``debug``.
-
-        *EXAMPLE*: ``o=debug=pict``
-
-    skiploopfilter=<skipvalue> (H.264 only)
-        Skips the loop filter (AKA deblocking) during H.264 decoding. Since
-        the filtered frame is supposed to be used as reference for decoding
-        dependent frames this has a worse effect on quality than not doing
-        deblocking on e.g. MPEG-2 video. But at least for high bitrate HDTV
-        this provides a big speedup with no visible quality loss.
-
-        <skipvalue> can be one of the following:
-
-        :none:    Never skip.
-        :default: Skip useless processing steps (e.g. 0 size packets in AVI).
-        :nonref:  Skip frames that are not referenced (i.e. not used for
-                  decoding other frames, the error cannot "build up").
-        :bidir:   Skip B-Frames.
-        :nonkey:  Skip all frames except keyframes.
-        :all:     Skip all frames.
-
-    skipidct=<skipvalue> (MPEG-1/2 only)
-        Skips the IDCT step. This degrades quality a lot of in almost all
-        cases (see skiploopfilter for available skip values).
-
-    skipframe=<skipvalue>
-        Skips decoding of frames completely. Big speedup, but jerky motion and
-        sometimes bad artifacts (see skiploopfilter for available skip
-        values).
-
-    threads=<0-16>
-        Number of threads to use for decoding. Whether threading is actually
-        supported depends on codec. 0 means autodetect number of cores on the
-        machine and use that, up to the maximum of 16. (default: 0)
-
-
---lavfdopts=<option1:option2:...>
-    Specify parameters for libavformat demuxers (``--demuxer=lavf``). Separate
-    multiple options with a colon.
-
-    Available suboptions are:
-
-    analyzeduration=<value>
-        Maximum length in seconds to analyze the stream properties.
-    probescore=<1-100>
-        Minimum required libavformat probe score. Lower values will require
-        less data to be loaded (makes streams start faster), but makes file
-        format detection less reliable. Can be used to force auto-detected
-        libavformat demuxers, even if libavformat considers the detection not
-        reliable enough. (Default: 26.)
-    allow-mimetype=<yes|no>
-        Allow deriving the format from the HTTP mimetype (default: yes). Set
-        this to no in case playing things from http mysteriously fails, even
-        though the same files work from local disk.
-
-        This is default in order to reduce latency when opening http streams.
-    format=<value>
-        Force a specific libavformat demuxer.
-    o=<key>=<value>[,<key>=<value>[,...]]
-        Pass AVOptions to libavformat demuxer.
-
-        Note, a patch to make the *o=* unneeded and pass all unknown options
-        through the AVOption system is welcome. A full list of AVOptions can
-        be found in the FFmpeg manual. Note that some options may conflict
-        with mpv options.
-
-        *EXAMPLE*: ``o=fflags=+ignidx``
-    probesize=<value>
-        Maximum amount of data to probe during the detection phase. In the
-        case of MPEG-TS this value identifies the maximum number of TS packets
-        to scan.
-    cryptokey=<hexstring>
-        Encryption key the demuxer should use. This is the raw binary data of
-        the key converted to a hexadecimal string.
 
 --length=<relative time>
     Stop after a given time relative to the start time.
@@ -2345,6 +2283,59 @@
     operate on different codec lists.
 
     *NOTE*: See ``--vd=help`` for a full list of available decoders.
+
+--vd-lavc-bitexact
+    Only use bit-exact algorithms in all decoding steps (for codec
+    testing).
+
+--vd-lavc-fast (MPEG-2, MPEG-4, and H.264 only)
+    Enable optimizations which do not comply to the specification and
+    might potentially cause problems, like simpler dequantization, simpler
+    motion compensation, assuming use of the default quantization matrix,
+    assuming YUV 4:2:0 and skipping a few checks to detect damaged
+    bitstreams.
+
+--vd-lavc-o=<key>=<value>[,<key>=<value>[,...]]
+    Pass AVOptions to libavcodec decoder. Note, a patch to make the o=
+    unneeded and pass all unknown options through the AVOption system is
+    welcome. A full list of AVOptions can be found in the FFmpeg manual.
+
+    Some options which used to be direct options can be set with this
+    mechanism, like ``bug``, ``gray``, ``idct``, ``ec``, ``vismv``,
+    ``skip_top`` (was ``st``), ``skip_bottom`` (was ``sb``), ``debug``.
+
+    *EXAMPLE*: ``--vd--lavc-o=debug=pict``
+
+--vd-lavc-skiploopfilter=<skipvalue> (H.264 only)
+    Skips the loop filter (AKA deblocking) during H.264 decoding. Since
+    the filtered frame is supposed to be used as reference for decoding
+    dependent frames this has a worse effect on quality than not doing
+    deblocking on e.g. MPEG-2 video. But at least for high bitrate HDTV
+    this provides a big speedup with no visible quality loss.
+
+    <skipvalue> can be one of the following:
+
+    :none:    Never skip.
+    :default: Skip useless processing steps (e.g. 0 size packets in AVI).
+    :nonref:  Skip frames that are not referenced (i.e. not used for
+                decoding other frames, the error cannot "build up").
+    :bidir:   Skip B-Frames.
+    :nonkey:  Skip all frames except keyframes.
+    :all:     Skip all frames.
+
+--vd-lavc-skipidct=<skipvalue> (MPEG-1/2 only)
+    Skips the IDCT step. This degrades quality a lot of in almost all
+    cases (see skiploopfilter for available skip values).
+
+--vd-lavc-skipframe=<skipvalue>
+    Skips decoding of frames completely. Big speedup, but jerky motion and
+    sometimes bad artifacts (see skiploopfilter for available skip
+    values).
+
+--vd-lavc-threads=<0-16>
+    Number of threads to use for decoding. Whether threading is actually
+    supported depends on codec. 0 means autodetect number of cores on the
+    machine and use that, up to the maximum of 16. (default: 0)
 
 --version, -V
     Print version string and exit.

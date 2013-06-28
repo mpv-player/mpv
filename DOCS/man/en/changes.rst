@@ -129,6 +129,8 @@ Command line switches
     -capture                            --stream-capture=<filename>
     -stop-xscreensaver                  --stop-screensaver
     -subfile                            --sub
+    -lavdopts ...                       --vd-lavc-...
+    -lavfdopts                          --demuxer-lavf-...
     =================================== ===================================
 
 *NOTE*: ``-opt val`` becomes ``--opt=val``.
