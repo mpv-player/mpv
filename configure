@@ -1732,25 +1732,7 @@ fi
 echores "$_smb"
 
 
-echocheck "libquvi 0.9.0 support"
-if test "$_libquvi9" = auto ; then
-    _libquvi9=no
-    if pkg_config_add 'libquvi-0.9 >= 0.9.0' ; then
-        _libquvi9=yes
-    fi
-fi
-if test "$_libquvi9" = yes; then
-    def_libquvi9="#define CONFIG_LIBQUVI9 1"
-else
-    def_libquvi9="#undef CONFIG_LIBQUVI9"
-fi
-echores "$_libquvi9"
-
 echocheck "libquvi support"
-if test "$_libquvi9" = yes ; then
-    _libquvi=no
-    res_comment="using libquvi 0.9.x"
-fi
 if test "$_libquvi" = auto ; then
     _libquvi=no
     if pkg_config_add 'libquvi >= 0.4.1' ; then
@@ -1763,6 +1745,24 @@ else
     def_libquvi="#undef CONFIG_LIBQUVI"
 fi
 echores "$_libquvi"
+
+echocheck "libquvi 0.9.x support"
+if test "$_libquvi" = yes ; then
+    _libquvi9=no
+    res_comment="using libquvi 0.4.x"
+fi
+if test "$_libquvi9" = auto ; then
+    _libquvi9=no
+    if pkg_config_add 'libquvi-0.9 >= 0.9.0' ; then
+        _libquvi9=yes
+    fi
+fi
+if test "$_libquvi9" = yes; then
+    def_libquvi9="#define CONFIG_LIBQUVI9 1"
+else
+    def_libquvi9="#undef CONFIG_LIBQUVI9"
+fi
+echores "$_libquvi9"
 
 #########
 # VIDEO #
