@@ -27,8 +27,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "libavcodec/avcodec.h"
-
 /* NOTE: the csp and levels AUTO values are converted to specific ones
  * above vf/vo level. At least vf_scale relies on all valid settings being
  * nonzero at vf/vo level.
@@ -132,17 +130,17 @@ int mp_csp_equalizer_set(struct mp_csp_equalizer *eq, const char *property,
 int mp_csp_equalizer_get(struct mp_csp_equalizer *eq, const char *property,
                          int *out_value);
 
-enum mp_csp avcol_spc_to_mp_csp(enum AVColorSpace colorspace);
+enum mp_csp avcol_spc_to_mp_csp(int avcolorspace);
 
-enum mp_csp_levels avcol_range_to_mp_csp_levels(enum AVColorRange range);
+enum mp_csp_levels avcol_range_to_mp_csp_levels(int avrange);
 
-enum AVColorSpace mp_csp_to_avcol_spc(enum mp_csp colorspace);
+int mp_csp_to_avcol_spc(enum mp_csp colorspace);
 
-enum AVColorRange mp_csp_levels_to_avcol_range(enum mp_csp_levels range);
+int mp_csp_levels_to_avcol_range(enum mp_csp_levels range);
 
 enum mp_csp mp_csp_guess_colorspace(int width, int height);
 
-enum mp_chroma_location avchroma_location_to_mp(enum AVChromaLocation loc);
+enum mp_chroma_location avchroma_location_to_mp(int avloc);
 
 void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y);
 

@@ -31,6 +31,7 @@
 #include <math.h>
 #include <assert.h>
 #include <libavutil/common.h>
+#include <libavcodec/avcodec.h>
 
 #include "csputils.h"
 
@@ -52,12 +53,12 @@ char * const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
     "gamma",
 };
 
-enum mp_csp avcol_spc_to_mp_csp(enum AVColorSpace colorspace)
+enum mp_csp avcol_spc_to_mp_csp(int avcolorspace)
 {
-    switch (colorspace) {
+    switch (avcolorspace) {
         case AVCOL_SPC_BT709:     return MP_CSP_BT_709;
         case AVCOL_SPC_BT470BG:   return MP_CSP_BT_601;
-	case AVCOL_SPC_SMPTE170M: return MP_CSP_BT_601;
+        case AVCOL_SPC_SMPTE170M: return MP_CSP_BT_601;
         case AVCOL_SPC_SMPTE240M: return MP_CSP_SMPTE_240M;
         case AVCOL_SPC_RGB:       return MP_CSP_RGB;
         case AVCOL_SPC_YCOCG:     return MP_CSP_YCGCO;
@@ -65,16 +66,16 @@ enum mp_csp avcol_spc_to_mp_csp(enum AVColorSpace colorspace)
     }
 }
 
-enum mp_csp_levels avcol_range_to_mp_csp_levels(enum AVColorRange range)
+enum mp_csp_levels avcol_range_to_mp_csp_levels(int avrange)
 {
-    switch (range) {
+    switch (avrange) {
         case AVCOL_RANGE_MPEG: return MP_CSP_LEVELS_TV;
         case AVCOL_RANGE_JPEG: return MP_CSP_LEVELS_PC;
         default:               return MP_CSP_LEVELS_AUTO;
     }
 }
 
-enum AVColorSpace mp_csp_to_avcol_spc(enum mp_csp colorspace)
+int mp_csp_to_avcol_spc(enum mp_csp colorspace)
 {
     switch (colorspace) {
         case MP_CSP_BT_709:     return AVCOL_SPC_BT709;
@@ -86,7 +87,7 @@ enum AVColorSpace mp_csp_to_avcol_spc(enum mp_csp colorspace)
     }
 }
 
-enum AVColorRange mp_csp_levels_to_avcol_range(enum mp_csp_levels range)
+int mp_csp_levels_to_avcol_range(enum mp_csp_levels range)
 {
     switch (range) {
         case MP_CSP_LEVELS_TV: return AVCOL_RANGE_MPEG;
@@ -100,9 +101,9 @@ enum mp_csp mp_csp_guess_colorspace(int width, int height)
     return width >= 1280 || height > 576 ? MP_CSP_BT_709 : MP_CSP_BT_601;
 }
 
-enum mp_chroma_location avchroma_location_to_mp(enum AVChromaLocation loc)
+enum mp_chroma_location avchroma_location_to_mp(int avloc)
 {
-    switch (loc) {
+    switch (avloc) {
     case AVCHROMA_LOC_LEFT:             return MP_CHROMA_LEFT;
     case AVCHROMA_LOC_CENTER:           return MP_CHROMA_CENTER;
     default:                            return MP_CHROMA_AUTO;

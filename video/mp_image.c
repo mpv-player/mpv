@@ -26,6 +26,7 @@
 #include <libavutil/mem.h>
 #include <libavutil/common.h>
 #include <libavutil/bswap.h>
+#include <libavcodec/avcodec.h>
 
 #include "talloc.h"
 
