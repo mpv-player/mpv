@@ -322,11 +322,14 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
 
     switch (action) {
     case M_PROPERTY_SET: ;
-        int pos = *(int *)arg;
+        double pos = *(double *)arg;
         queue_seek(mpctx, MPSEEK_FACTOR, pos / 100.0, 0);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(int *)arg = get_percent_pos(mpctx);
+        *(double *)arg = get_current_pos_ratio(mpctx, false) * 100.0;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_PRINT:
+        *(char **)arg = talloc_asprintf(NULL, "%d", get_percent_pos(mpctx));
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -1623,7 +1626,7 @@ static const m_option_t mp_properties[] = {
     { "length", mp_property_length, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
     { "avsync", mp_property_avsync, CONF_TYPE_DOUBLE },
-    { "percent-pos", mp_property_percent_pos, CONF_TYPE_INT,
+    { "percent-pos", mp_property_percent_pos, CONF_TYPE_DOUBLE,
       M_OPT_RANGE, 0, 100, NULL },
     { "time-pos", mp_property_time_pos, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
