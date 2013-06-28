@@ -250,6 +250,7 @@ static void decode_chain_recode(struct dec_sub *sub, struct sd **sd, int num_sd,
         if (sub->charset)
             recoded = recode_packet(packet, sub->charset);
         decode_chain(sd, num_sd, recoded ? recoded : packet);
+        talloc_free(recoded);
     }
 }
 
