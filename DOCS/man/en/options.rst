@@ -546,6 +546,43 @@
     Encryption key the demuxer should use. This is the raw binary data of
     the key converted to a hexadecimal string.
 
+--demuxer-rawaudio-channels=<value>
+    Number of channels (or channel layout) if ``--demuxer=rawaudio`` is used
+    (default: stereo).
+
+--demuxer-rawaudio-format=<value>
+    Sample format for ``--demuxer=rawaudio`` (default: s16le).
+
+--demuxer-rawaudio-rate=<value>
+    Sample rate for ``--demuxer=rawaudio`` (default: 44KHz).
+
+--demuxer-rawvideo-fps=<value>
+    Rate in frames per second for ``--demuxer=rawvideo`` (default: 25.0).
+
+--demuxer-rawvideo-w=<value>, --demuxer-rawvideo-h=<value>
+    Image dimension in pixels for ``--demuxer=rawvideo``.
+
+    *EXAMPLE*:
+
+    - ``mpv sample-720x576.yuv --demuxer=rawvideo --demuxer-rawvideo=w=720:h=576``
+      Play a raw YUV sample.
+
+--demuxer-rawvideo-format=<value>
+    Colorspace (fourcc) in hex or string for ``--demuxer=rawvideo``
+    (default: YV12).
+
+--demuxer-rawvideo-mp-format=<value>
+    Colorspace by internal video format for ``--demuxer=rawvideo``. Use
+    ``--demuxer-rawvideo-mp-format=help`` for a list of possible formats.
+
+--demuxer-rawvideo-codec=<value>
+    Set the video codec instead of selecting the rawvideo codec when using
+    ``--demuxer=rawvideo``. This uses the same values as codec names in
+    ``--vd`` (but it doesn't accept decoder names).
+
+--demuxer-rawvideo-size=<value>
+    Frame size in bytes when using ``--demuxer=rawvideo``.
+
 --doubleclick-time=<milliseconds>
     Time in milliseconds to recognize two consecutive button presses as a
     double-click (default: 300).
@@ -1580,40 +1617,6 @@
 
     achannels=<value> (radio capture only)
         Number of audio channels to capture.
-
---rawaudio=<option1:option2:...>
-    This option lets you play raw audio files. You have to use
-    ``--demuxer=rawaudio`` as well. It may also be used to play audio CDs
-    which are not 44kHz 16-bit stereo.
-
-    Available options are:
-
-    :channels=<value>:   number of channels
-    :rate=<value>:       rate in samples per second
-    :format=<value>:     mpv audio format (e.g. s16le)
-
---rawvideo=<option1:option2:...>
-    This option lets you play raw video files. You have to use
-    ``--demuxer=rawvideo`` as well.
-
-    Available options are:
-
-    :fps=<value>:                  rate in frames per second (default: 25.0)
-    :w=<value>:                    image width in pixels
-    :h=<value>:                    image height in pixels
-    :format=<value>:               colorspace (fourcc) in hex or string
-                                   constant.
-    :mp-format=<value>:            colorspace by internal video format
-                                   Use ``--rawvideo=mp-format=help``
-                                   for a list of possible formats.
-    :codec:                        set the video codec (instead of selecting
-                                   the rawvideo codec)
-    :size=<value>:                 frame size in Bytes
-
-    *EXAMPLE*:
-
-    - ``mpv sample-720x576.yuv --demuxer=rawvideo --rawvideo=w=720:h=576``
-      Play a raw YUV sample.
 
 --really-quiet
     Display even less output and status messages than with ``--quiet``.

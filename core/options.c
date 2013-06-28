@@ -396,9 +396,6 @@ const m_option_t mp_opts[] = {
 
     OPT_STRING("quvi-format", quvi_format, 0),
 
-    { "rawaudio", (void *)&demux_rawaudio_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-    { "rawvideo", (void *)&demux_rawvideo_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-
 #ifdef CONFIG_CDDA
     { "cdda", (void *)&cdda_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
@@ -485,6 +482,8 @@ const m_option_t mp_opts[] = {
     {"ad-lavc", (void *) ad_lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG},
 
     {"demuxer-lavf", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG},
+    {"demuxer-rawaudio", (void *)&demux_rawaudio_opts, CONF_TYPE_SUBCONFIG},
+    {"demuxer-rawvideo", (void *)&demux_rawvideo_opts, CONF_TYPE_SUBCONFIG},
 
 // ------------------------- subtitles options --------------------
 
