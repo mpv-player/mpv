@@ -1782,12 +1782,10 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
     assert(track && sh_sub);
     struct dec_sub *dec_sub = sh_sub->dec_sub;
 
-    double video_offset = track->under_timeline ? mpctx->video_offset : 0;
+    mpctx->osd->video_offset = track->under_timeline ? mpctx->video_offset : 0;
 
-    mpctx->osd->sub_offset = video_offset - opts->sub_delay;
-
-    double curpts_s = refpts_tl - mpctx->osd->sub_offset;
-    double refpts_s = refpts_tl - video_offset;
+    double refpts_s = refpts_tl - mpctx->osd->video_offset;
+    double curpts_s = refpts_s + opts->sub_delay;
 
     if (!track->preloaded) {
         struct demux_stream *d_sub = sh_sub->ds;
@@ -2729,6 +2727,8 @@ static bool redraw_osd(struct MPContext *mpctx)
     if (vo_redraw_frame(vo) < 0)
         return false;
 
+    if (mpctx->sh_video)
+        update_subtitles(mpctx, mpctx->sh_video->pts);
     draw_osd(mpctx);
 
     vo_flip_page(vo, 0, -1);
