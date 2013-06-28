@@ -4521,6 +4521,16 @@ static void play_files(struct MPContext *mpctx)
     }
 }
 
+// Abort current playback and set the given entry to play next.
+// e must be on the mpctx->playlist.
+void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
+{
+    assert(playlist_entry_to_index(mpctx->playlist, e) >= 0);
+    mpctx->playlist->current = e;
+    mpctx->playlist->current_was_replaced = false;
+    mpctx->stop_play = PT_CURRENT_ENTRY;
+}
+
 void mp_print_version(int always)
 {
     mp_msg(MSGT_CPLAYER, always ? MSGL_INFO : MSGL_V,

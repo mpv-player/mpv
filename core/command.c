@@ -1494,6 +1494,53 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
 
 #endif
 
+static int mp_property_playlist_pos(m_option_t *prop, int action, void *arg,
+                                    MPContext *mpctx)
+{
+    struct playlist *pl = mpctx->playlist;
+    if (!pl->first)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_GET: {
+        int pos = playlist_entry_to_index(pl, pl->current);
+        if (pos < 0)
+            return M_PROPERTY_UNAVAILABLE;
+        *(int *)arg = pos;
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_SET: {
+        struct playlist_entry *e = playlist_entry_from_index(pl, *(int *)arg);
+        if (!e)
+            return M_PROPERTY_ERROR;
+        mp_set_playlist_entry(mpctx, e);
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE: {
+        struct m_option opt = {
+            .name = prop->name,
+            .type = CONF_TYPE_INT,
+            .flags = CONF_RANGE,
+            .min = 0,
+            .max = playlist_entry_count(pl) - 1,
+        };
+        *(struct m_option *)arg = opt;
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_playlist_count(m_option_t *prop, int action, void *arg,
+                                      MPContext *mpctx)
+{
+    if (action == M_PROPERTY_GET) {
+        *(int *)arg = playlist_entry_count(mpctx->playlist);
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_playlist(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx)
 {
@@ -1602,7 +1649,10 @@ static const m_option_t mp_properties[] = {
 
     { "chapter-list", mp_property_list_chapters, CONF_TYPE_STRING },
     { "track-list", property_list_tracks, CONF_TYPE_STRING },
+
     { "playlist", mp_property_playlist, CONF_TYPE_STRING },
+    { "playlist-pos", mp_property_playlist_pos, CONF_TYPE_INT },
+    { "playlist-count", mp_property_playlist_count, CONF_TYPE_INT },
 
     // Audio
     { "volume", mp_property_volume, CONF_TYPE_FLOAT,
@@ -2108,11 +2158,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
         playlist_add(mpctx->playlist, playlist_entry_new(filename));
 
-        if (!append) {
-            mpctx->playlist->current = mpctx->playlist->first;
-            mpctx->playlist->current_was_replaced = false;
-            mpctx->stop_play = PT_CURRENT_ENTRY;
-        }
+        if (!append)
+            mp_set_playlist_entry(mpctx, mpctx->playlist->first);
         break;
     }
 
@@ -2126,10 +2173,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             playlist_transfer_entries(mpctx->playlist, pl);
             talloc_free(pl);
 
-            if (!append) {
-                mpctx->playlist->current = mpctx->playlist->first;
-                mpctx->stop_play = PT_CURRENT_ENTRY;
-            }
+            if (!append && mpctx->playlist->first)
+                mp_set_playlist_entry(mpctx, mpctx->playlist->first);
         } else {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
                     "\nUnable to load playlist %s.\n", filename);

@@ -396,9 +396,11 @@ tv-brightness               x
 tv-contrast                 x
 tv-saturation               x
 tv-hue                      x
+playlist-pos                  current position on playlist
+playlist-count                number of total playlist entries
+playlist                      playlist, current entry marked
 track-list                    list of audio/video/sub tracks, cur. entr. marked
 chapter-list                  list of chapters, current entry marked
-playlist                      playlist, current entry marked
 quvi-format                 x see ``--quvi-format``
 =========================== = ==================================================
 
