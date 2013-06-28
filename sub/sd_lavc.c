@@ -23,6 +23,7 @@
 #include "talloc.h"
 #include "core/mp_msg.h"
 #include "core/av_common.h"
+#include "core/options.h"
 #include "demux/stheader.h"
 #include "sd.h"
 #include "dec_sub.h"
@@ -126,6 +127,7 @@ static void clear(struct sd_lavc_priv *priv)
 
 static void decode(struct sd *sd, struct demux_packet *packet)
 {
+    struct MPOpts *opts = sd->opts;
     struct sd_lavc_priv *priv = sd->priv;
     AVCodecContext *ctx = priv->avctx;
     double pts = packet->pts;
@@ -157,6 +159,9 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     if (sub.num_rects > 0) {
         switch (sub.rects[0]->type) {
         case SUBTITLE_BITMAP:
+            priv->count = 0;
+            priv->pts = pts;
+            priv->endpts = endpts;
             priv->inbitmaps = talloc_array(priv, struct sub_bitmap,
                                            sub.num_rects);
             priv->imgs = talloc_array(priv, struct osd_bmp_indexed,
@@ -165,6 +170,9 @@ static void decode(struct sd *sd, struct demux_packet *packet)
                 struct AVSubtitleRect *r = sub.rects[i];
                 struct sub_bitmap *b = &priv->inbitmaps[i];
                 struct osd_bmp_indexed *img = &priv->imgs[i];
+                if (!(r->flags & AV_SUBTITLE_FLAG_FORCED) &&
+                    opts->forced_subs_only)
+                    continue;
                 img->bitmap = r->pict.data[0];
                 assert(r->nb_colors > 0);
                 assert(r->nb_colors * 4 <= sizeof(img->palette));
@@ -175,10 +183,8 @@ static void decode(struct sd *sd, struct demux_packet *packet)
                 b->h = r->h;
                 b->x = r->x;
                 b->y = r->y;
+                priv->count++;
             }
-            priv->count = sub.num_rects;
-            priv->pts = pts;
-            priv->endpts = endpts;
             break;
         default:
             mp_msg(MSGT_SUBREADER, MSGL_ERR, "sd_lavc: unsupported subtitle "
