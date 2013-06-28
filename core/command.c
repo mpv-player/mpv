@@ -1433,7 +1433,7 @@ static int mp_property_sub_delay(m_option_t *prop, int action, void *arg,
         *(char **)arg = format_delay(opts->sub_delay);
         return M_PROPERTY_OK;
     }
-    return mp_property_generic_option(prop, action, arg, mpctx);
+    return property_osd_helper(prop, action, arg, mpctx);
 }
 
 static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
