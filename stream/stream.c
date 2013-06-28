@@ -78,6 +78,7 @@ extern const stream_info_t stream_info_vstream;
 extern const stream_info_t stream_info_smb;
 
 extern const stream_info_t stream_info_null;
+extern const stream_info_t stream_info_memory;
 extern const stream_info_t stream_info_mf;
 extern const stream_info_t stream_info_ffmpeg;
 extern const stream_info_t stream_info_avdevice;
@@ -130,6 +131,7 @@ static const stream_info_t *const auto_open_streams[] = {
     &stream_info_bluray,
 #endif
 
+    &stream_info_memory,
     &stream_info_null,
     &stream_info_mf,
     &stream_info_file,
@@ -725,14 +727,9 @@ int stream_check_interrupt(int time)
 stream_t *open_memory_stream(void *data, int len)
 {
     assert(len >= 0);
-    stream_t *s = new_stream(len);
-
-    s->buf_pos = 0;
-    s->buf_len = len;
-    s->start_pos = 0;
-    s->end_pos = len;
-    s->pos = len;
-    memcpy(s->buffer, data, len);
+    stream_t *s = open_stream("memory://", NULL, NULL);
+    assert(s);
+    stream_control(s, STREAM_CTRL_SET_CONTENTS, &(bstr){data, len});
     return s;
 }
 

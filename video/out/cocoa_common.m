@@ -84,6 +84,7 @@ struct vo_cocoa_state {
     bool did_resize;
     bool did_async_resize;
     bool out_fs_resize;
+    bool want_redraw;
 
     IOPMAssertionID power_mgmt_assertion;
 
@@ -100,6 +101,7 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
     *s = (struct vo_cocoa_state){
         .did_resize = NO,
         .did_async_resize = NO,
+        .want_redraw = NO,
         .current_video_size = {0,0},
         .previous_video_size = {0,0},
         .out_fs_resize = NO,
@@ -510,6 +512,11 @@ int vo_cocoa_check_events(struct vo *vo)
         return VO_EVENT_RESIZE;
     }
 
+    if (s->want_redraw) {
+        s->want_redraw = NO;
+        vo->want_redraw = true;
+    }
+
     return 0;
 }
 
@@ -918,10 +925,18 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     struct vo *vo = [self videoOutput];
 
     if (vo && resize_callback_registered(vo)) {
-        NSSize size = to_pixels(vo, [self bounds]).size;
-        resize_redraw(vo, size.width, size.height);
+        if ([self inLiveResize]) {
+            NSSize size = to_pixels(vo, [self bounds]).size;
+            resize_redraw(vo, size.width, size.height);
+        } else {
+            // If not in live resize window was probably resized from
+            // fullscreen toggle or resize. Make sure we invoke a real repaint
+            // ASAP so that the displayed image is correct.
+            struct vo_cocoa_state *s = vo->cocoa;
+            s->want_redraw = YES;
+        }
     } else {
-        [[NSColor clearColor] set];
+        [[NSColor blackColor] set];
         NSRectFill([self bounds]);
     }
 }

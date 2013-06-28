@@ -73,7 +73,6 @@ static void uninit(struct sh_video *sh);
 #define OPT_BASE_STRUCT struct MPOpts
 
 const m_option_t lavc_decode_opts_conf[] = {
-    OPT_INTRANGE("debug", lavc_param.debug, 0, 0, 9999999),
     OPT_FLAG_CONSTANTS("fast", lavc_param.fast, 0, 0, CODEC_FLAG2_FAST),
     OPT_STRING("skiploopfilter", lavc_param.skip_loop_filter_str, 0),
     OPT_STRING("skipidct", lavc_param.skip_idct_str, 0),
@@ -325,9 +324,6 @@ static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
     avctx->flags |= lavc_param->bitexact;
 
     avctx->flags2 |= lavc_param->fast;
-    avctx->debug = lavc_param->debug;
-    if (lavc_param->debug)
-        av_log_set_level(AV_LOG_DEBUG);
     avctx->skip_loop_filter = str2AVDiscard(lavc_param->skip_loop_filter_str);
     avctx->skip_idct = str2AVDiscard(lavc_param->skip_idct_str);
     avctx->skip_frame = str2AVDiscard(lavc_param->skip_frame_str);
