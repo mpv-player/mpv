@@ -327,7 +327,8 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
         dst->levels = src->levels;
     }
     if (dst->imgfmt == IMGFMT_PAL8 && src->imgfmt == IMGFMT_PAL8) {
-        memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
+        if (dst->planes[1] && src->planes[1])
+            memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
     }
 }
 
