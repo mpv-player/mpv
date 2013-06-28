@@ -44,6 +44,16 @@
     unneeded and pass all unknown options through the AVOption system is
     welcome. A full list of AVOptions can be found in the FFmpeg manual.
 
+--ad-spdif-dtshd=<yes|no>, --dtshd, --no-dtshd
+    When using DTS passthrough, output any DTS-HD track as-is.
+    With ``ad-spdif-dtshd=no`` (the default) only the DTS Core parts will be
+    output.
+
+    DTS-HD tracks can be sent over HDMI but not over the original
+    coax/toslink S/PDIF system.
+
+    ``--dtshd`` and ``--no-dtshd`` are deprecated aliases.
+
 --af=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of audio filters to apply to the audio stream. See
     `audio_filters` for details and descriptions of the available filters.
@@ -507,16 +517,110 @@
     Force demuxer type. Use a '+' before the name to force it, this will skip
     some checks! Give the demuxer name as printed by ``--demuxer=help``.
 
+--demuxer-lavf-analyzeduration=<value>
+    Maximum length in seconds to analyze the stream properties.
+
+--demuxer-lavf-probescore=<1-100>
+    Minimum required libavformat probe score. Lower values will require
+    less data to be loaded (makes streams start faster), but makes file
+    format detection less reliable. Can be used to force auto-detected
+    libavformat demuxers, even if libavformat considers the detection not
+    reliable enough. (Default: 26.)
+
+--demuxer-lavf-allow-mimetype=<yes|no>
+    Allow deriving the format from the HTTP mimetype (default: yes). Set
+    this to no in case playing things from http mysteriously fails, even
+    though the same files work from local disk.
+
+    This is default in order to reduce latency when opening http streams.
+
+--demuxer-lavf-format=<value>
+    Force a specific libavformat demuxer.
+
+--demuxer-lavf-o=<key>=<value>[,<key>=<value>[,...]]
+    Pass AVOptions to libavformat demuxer.
+
+    Note, a patch to make the *o=* unneeded and pass all unknown options
+    through the AVOption system is welcome. A full list of AVOptions can
+    be found in the FFmpeg manual. Note that some options may conflict
+    with mpv options.
+
+    *EXAMPLE*: ``--demuxer-lavf-o=fflags=+ignidx``
+
+--demuxer-lavf-probesize=<value>
+    Maximum amount of data to probe during the detection phase. In the
+    case of MPEG-TS this value identifies the maximum number of TS packets
+    to scan.
+
+--demuxer-lavf-cryptokey=<hexstring>
+    Encryption key the demuxer should use. This is the raw binary data of
+    the key converted to a hexadecimal string.
+
+--demuxer-mkv-subtitle-preroll, --mkv-subtitle-preroll
+    Try harder to show embedded soft subtitles when seeking somewhere. Normally,
+    it can happen that the subtitle at the seek target is not shown due to how
+    some container file formats are designed. The subtitles appear only if
+    seeking before or exactly to the position a subtitle first appears. To
+    make this worse, subtitles are often timed to appear a very small amount
+    before the associated video frame, so that seeking to the video frame
+    typically does not demux the subtitle at that position.
+
+    Enabling this option makes the demuxer start reading data a bit before the
+    seek target, so that subtitles appear correctly. Note that this makes
+    seeking slower, and is not guaranteed to always work. It only works if the
+    subtitle is close enough to the seek target.
+
+    Works with the internal Matroska demuxer only. Always enabled for absolute
+    and hr-seeks, and this option changes behavior with relative or imprecise
+    seeks only.
+
+    See also ``--hr-seek-demuxer-offset`` option. This option can achieve a
+    similar effect, but only if hr-seek is active. It works with any demuxer,
+    but makes seeking much slower, as it has to decode audio and video data,
+    instead of just skipping over it.
+
+    ``--mkv-subtitle-preroll`` is a deprecated alias.
+
+--demuxer-rawaudio-channels=<value>
+    Number of channels (or channel layout) if ``--demuxer=rawaudio`` is used
+    (default: stereo).
+
+--demuxer-rawaudio-format=<value>
+    Sample format for ``--demuxer=rawaudio`` (default: s16le).
+
+--demuxer-rawaudio-rate=<value>
+    Sample rate for ``--demuxer=rawaudio`` (default: 44KHz).
+
+--demuxer-rawvideo-fps=<value>
+    Rate in frames per second for ``--demuxer=rawvideo`` (default: 25.0).
+
+--demuxer-rawvideo-w=<value>, --demuxer-rawvideo-h=<value>
+    Image dimension in pixels for ``--demuxer=rawvideo``.
+
+    *EXAMPLE*:
+
+    - ``mpv sample-720x576.yuv --demuxer=rawvideo --demuxer-rawvideo=w=720:h=576``
+      Play a raw YUV sample.
+
+--demuxer-rawvideo-format=<value>
+    Colorspace (fourcc) in hex or string for ``--demuxer=rawvideo``
+    (default: YV12).
+
+--demuxer-rawvideo-mp-format=<value>
+    Colorspace by internal video format for ``--demuxer=rawvideo``. Use
+    ``--demuxer-rawvideo-mp-format=help`` for a list of possible formats.
+
+--demuxer-rawvideo-codec=<value>
+    Set the video codec instead of selecting the rawvideo codec when using
+    ``--demuxer=rawvideo``. This uses the same values as codec names in
+    ``--vd`` (but it doesn't accept decoder names).
+
+--demuxer-rawvideo-size=<value>
+    Frame size in bytes when using ``--demuxer=rawvideo``.
+
 --doubleclick-time=<milliseconds>
     Time in milliseconds to recognize two consecutive button presses as a
     double-click (default: 300).
-
---dtshd, --no-dtshd
-    When using DTS passthrough, output any DTS-HD track as-is.
-    With ``--no-dtshd`` (the default) only the DTS Core parts will be output.
-
-    DTS-HD tracks can be sent over HDMI but not over the original
-    coax/toslink S/PDIF system.
 
 --dvbin=<options>
     Pass the following parameters to the DVB input module, in order to
@@ -979,132 +1083,6 @@
     particularly slow command then the player may be unresponsive while it
     processes all the queued commands.
 
---lavdopts=<option1:option2:...>
-    Specify libavcodec decoding parameters. Separate multiple options with a
-    colon.
-
-    *EXAMPLE*: ``--lavdopts=gray:skiploopfilter=all:skipframe=nonref``
-
-    Available options are:
-
-    bitexact
-        Only use bit-exact algorithms in all decoding steps (for codec
-        testing).
-
-    debug=<value>
-        Display debugging information.
-
-        :0:      disabled
-        :1:      picture info
-        :2:      rate control
-        :4:      bitstream
-        :8:      macroblock (MB) type
-        :16:     per-block quantization parameter (QP)
-        :32:     motion vector
-        :0x0040: motion vector visualization
-        :0x0080: macroblock (MB) skip
-        :0x0100: startcode
-        :0x0200: PTS
-        :0x0400: error resilience
-        :0x0800: memory management control operations (H.264)
-        :0x1000: bugs
-        :0x2000: Visualize quantization parameter (QP), lower QP are tinted
-                 greener.
-        :0x4000: Visualize block types.
-
-    fast (MPEG-2, MPEG-4, and H.264 only)
-        Enable optimizations which do not comply to the specification and
-        might potentially cause problems, like simpler dequantization, simpler
-        motion compensation, assuming use of the default quantization matrix,
-        assuming YUV 4:2:0 and skipping a few checks to detect damaged
-        bitstreams.
-
-    idct=<0-99>
-        For best decoding quality use the same IDCT algorithm for decoding and
-        encoding. This may come at a price in accuracy, though.
-
-    o=<key>=<value>[,<key>=<value>[,...]]
-        Pass AVOptions to libavcodec decoder. Note, a patch to make the o=
-        unneeded and pass all unknown options through the AVOption system is
-        welcome. A full list of AVOptions can be found in the FFmpeg manual.
-
-        Some options which used to be direct options can be set with this
-        mechanism, like ``bug``, ``gray``, ``idct``, ``ec``, ``vismv``,
-        ``skip_top`` (was ``st``), ``skip_bottom`` (was ``sb``).
-
-        *EXAMPLE*: ``o=debug=pict``
-
-    skiploopfilter=<skipvalue> (H.264 only)
-        Skips the loop filter (AKA deblocking) during H.264 decoding. Since
-        the filtered frame is supposed to be used as reference for decoding
-        dependent frames this has a worse effect on quality than not doing
-        deblocking on e.g. MPEG-2 video. But at least for high bitrate HDTV
-        this provides a big speedup with no visible quality loss.
-
-        <skipvalue> can be one of the following:
-
-        :none:    Never skip.
-        :default: Skip useless processing steps (e.g. 0 size packets in AVI).
-        :nonref:  Skip frames that are not referenced (i.e. not used for
-                  decoding other frames, the error cannot "build up").
-        :bidir:   Skip B-Frames.
-        :nonkey:  Skip all frames except keyframes.
-        :all:     Skip all frames.
-
-    skipidct=<skipvalue> (MPEG-1/2 only)
-        Skips the IDCT step. This degrades quality a lot of in almost all
-        cases (see skiploopfilter for available skip values).
-
-    skipframe=<skipvalue>
-        Skips decoding of frames completely. Big speedup, but jerky motion and
-        sometimes bad artifacts (see skiploopfilter for available skip
-        values).
-
-    threads=<0-16>
-        Number of threads to use for decoding. Whether threading is actually
-        supported depends on codec. 0 means autodetect number of cores on the
-        machine and use that, up to the maximum of 16. (default: 0)
-
-
---lavfdopts=<option1:option2:...>
-    Specify parameters for libavformat demuxers (``--demuxer=lavf``). Separate
-    multiple options with a colon.
-
-    Available suboptions are:
-
-    analyzeduration=<value>
-        Maximum length in seconds to analyze the stream properties.
-    probescore=<1-100>
-        Minimum required libavformat probe score. Lower values will require
-        less data to be loaded (makes streams start faster), but makes file
-        format detection less reliable. Can be used to force auto-detected
-        libavformat demuxers, even if libavformat considers the detection not
-        reliable enough. (Default: 26.)
-    allow-mimetype=<yes|no>
-        Allow deriving the format from the HTTP mimetype (default: yes). Set
-        this to no in case playing things from http mysteriously fails, even
-        though the same files work from local disk.
-
-        This is default in order to reduce latency when opening http streams.
-    format=<value>
-        Force a specific libavformat demuxer.
-    o=<key>=<value>[,<key>=<value>[,...]]
-        Pass AVOptions to libavformat demuxer.
-
-        Note, a patch to make the *o=* unneeded and pass all unknown options
-        through the AVOption system is welcome. A full list of AVOptions can
-        be found in the FFmpeg manual. Note that some options may conflict
-        with mpv options.
-
-        *EXAMPLE*: ``o=fflags=+ignidx``
-    probesize=<value>
-        Maximum amount of data to probe during the detection phase. In the
-        case of MPEG-TS this value identifies the maximum number of TS packets
-        to scan.
-    cryptokey=<hexstring>
-        Encryption key the demuxer should use. This is the raw binary data of
-        the key converted to a hexadecimal string.
-
 --length=<relative time>
     Stop after a given time relative to the start time.
     See ``--start`` for valid option values and examples.
@@ -1143,29 +1121,6 @@
 
     :fps=<value>:  output fps (default: 25)
     :type=<value>: input file type (available: jpeg, png, tga, sgi)
-
---mkv-subtitle-preroll
-    Try harder to show embedded soft subtitles when seeking somewhere. Normally,
-    it can happen that the subtitle at the seek target is not shown due to how
-    some container file formats are designed. The subtitles appear only if
-    seeking before or exactly to the position a subtitle first appears. To
-    make this worse, subtitles are often timed to appear a very small amount
-    before the associated video frame, so that seeking to the video frame
-    typically does not demux the subtitle at that position.
-
-    Enabling this option makes the demuxer start reading data a bit before the
-    seek target, so that subtitles appear correctly. Note that this makes
-    seeking slower, and is not guaranteed to always work. It only works if the
-    subtitle is close enough to the seek target.
-
-    Works with the internal Matroska demuxer only. Always enabled for absolute
-    and hr-seeks, and this option changes behavior with relative or imprecise
-    seeks only.
-
-    See also ``--hr-seek-demuxer-offset`` option. This option can achieve a
-    similar effect, but only if hr-seek is active. It works with any demuxer,
-    but makes seeking much slower, as it has to decode audio and video data,
-    instead of just skipping over it.
 
 --mixer=<device>
     Use a mixer device different from the default ``/dev/mixer``. For ALSA
@@ -1615,11 +1570,24 @@
     Video format/quality that is directly passed to libquvi (default: ``best``).
     This is used when opening links to streaming sites like YouTube. The
     interpretation of this value is highly specific to the streaming site and
-    the video. The only well defined values that work on all sites are ``best``
+    the video.
+
+    libquvi 0.4.x:
+
+    The only well defined values that work on all sites are ``best``
     (best quality/highest bandwidth, default), and ``default`` (lowest quality).
 
     The quvi command line tool can be used to find out which formats are
     supported for a given URL: ``quvi --query-formats URL``.
+
+    libquvi 0.9.x:
+
+    The following explanations are relevant:
+    ``http://quvi.sourceforge.net/doc/0.9/glossary_termino.html#m_stream_id``
+
+    With 0.9.x, the ``quvi-format`` property can be used at runtime to cycle
+    through the list of formats. Unfortunately, this resets the playback
+    position and is slow too.
 
 --radio=<option1:option2:...>
     These options set various parameters of the radio capture module. For
@@ -1670,40 +1638,6 @@
 
     achannels=<value> (radio capture only)
         Number of audio channels to capture.
-
---rawaudio=<option1:option2:...>
-    This option lets you play raw audio files. You have to use
-    ``--demuxer=rawaudio`` as well. It may also be used to play audio CDs
-    which are not 44kHz 16-bit stereo.
-
-    Available options are:
-
-    :channels=<value>:   number of channels
-    :rate=<value>:       rate in samples per second
-    :format=<value>:     mpv audio format (e.g. s16le)
-
---rawvideo=<option1:option2:...>
-    This option lets you play raw video files. You have to use
-    ``--demuxer=rawvideo`` as well.
-
-    Available options are:
-
-    :fps=<value>:                  rate in frames per second (default: 25.0)
-    :w=<value>:                    image width in pixels
-    :h=<value>:                    image height in pixels
-    :format=<value>:               colorspace (fourcc) in hex or string
-                                   constant.
-    :mp-format=<value>:            colorspace by internal video format
-                                   Use ``--rawvideo=mp-format=help``
-                                   for a list of possible formats.
-    :codec:                        set the video codec (instead of selecting
-                                   the rawvideo codec)
-    :size=<value>:                 frame size in Bytes
-
-    *EXAMPLE*:
-
-    - ``mpv sample-720x576.yuv --demuxer=rawvideo --rawvideo=w=720:h=576``
-      Play a raw YUV sample.
 
 --really-quiet
     Display even less output and status messages than with ``--quiet``.
@@ -2373,6 +2307,59 @@
     operate on different codec lists.
 
     *NOTE*: See ``--vd=help`` for a full list of available decoders.
+
+--vd-lavc-bitexact
+    Only use bit-exact algorithms in all decoding steps (for codec
+    testing).
+
+--vd-lavc-fast (MPEG-2, MPEG-4, and H.264 only)
+    Enable optimizations which do not comply to the specification and
+    might potentially cause problems, like simpler dequantization, simpler
+    motion compensation, assuming use of the default quantization matrix,
+    assuming YUV 4:2:0 and skipping a few checks to detect damaged
+    bitstreams.
+
+--vd-lavc-o=<key>=<value>[,<key>=<value>[,...]]
+    Pass AVOptions to libavcodec decoder. Note, a patch to make the o=
+    unneeded and pass all unknown options through the AVOption system is
+    welcome. A full list of AVOptions can be found in the FFmpeg manual.
+
+    Some options which used to be direct options can be set with this
+    mechanism, like ``bug``, ``gray``, ``idct``, ``ec``, ``vismv``,
+    ``skip_top`` (was ``st``), ``skip_bottom`` (was ``sb``), ``debug``.
+
+    *EXAMPLE*: ``--vd--lavc-o=debug=pict``
+
+--vd-lavc-skiploopfilter=<skipvalue> (H.264 only)
+    Skips the loop filter (AKA deblocking) during H.264 decoding. Since
+    the filtered frame is supposed to be used as reference for decoding
+    dependent frames this has a worse effect on quality than not doing
+    deblocking on e.g. MPEG-2 video. But at least for high bitrate HDTV
+    this provides a big speedup with no visible quality loss.
+
+    <skipvalue> can be one of the following:
+
+    :none:    Never skip.
+    :default: Skip useless processing steps (e.g. 0 size packets in AVI).
+    :nonref:  Skip frames that are not referenced (i.e. not used for
+                decoding other frames, the error cannot "build up").
+    :bidir:   Skip B-Frames.
+    :nonkey:  Skip all frames except keyframes.
+    :all:     Skip all frames.
+
+--vd-lavc-skipidct=<skipvalue> (MPEG-1/2 only)
+    Skips the IDCT step. This degrades quality a lot of in almost all
+    cases (see skiploopfilter for available skip values).
+
+--vd-lavc-skipframe=<skipvalue>
+    Skips decoding of frames completely. Big speedup, but jerky motion and
+    sometimes bad artifacts (see skiploopfilter for available skip
+    values).
+
+--vd-lavc-threads=<0-16>
+    Number of threads to use for decoding. Whether threading is actually
+    supported depends on codec. 0 means autodetect number of cores on the
+    machine and use that, up to the maximum of 16. (default: 0)
 
 --version, -V
     Print version string and exit.

@@ -16,12 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef MPLAYER_MPLAYER_H
-#define MPLAYER_MPLAYER_H
-
-#include <stdlib.h>
-
-#include "core/mp_msg.h"
+#ifndef MP_RESOLVE_H
+#define MP_RESOLVE_H
 
 struct MPContext;
 struct MPOpts;
@@ -29,8 +25,29 @@ struct MPOpts;
 struct mp_resolve_result {
     char *url;
     char *title;
+
+    struct mp_resolve_src **srcs;
+    int num_srcs;
+
+    double start_time;
+
+    struct mp_resolve_sub **subs;
+    int num_subs;
+
+    struct playlist *playlist;
+};
+
+struct mp_resolve_src {
+    char *url;
+    char *encid;     // indicates quality level, contents are libquvi specific
+};
+
+struct mp_resolve_sub {
+    char *url;
+    char *data;
+    char *lang;
 };
 
 struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts);
 
-#endif /* MPLAYER_MPLAYER_H */
+#endif

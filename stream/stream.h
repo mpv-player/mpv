@@ -40,6 +40,7 @@
 #define STREAMTYPE_VCD  1      // raw mode-2 CDROM reading, 2324 bytes/sector
 #define STREAMTYPE_STREAM 2    // same as FILE but no seeking (for net/stdin)
 #define STREAMTYPE_DVD  3      // libdvdread
+#define STREAMTYPE_MEMORY 4
 #define STREAMTYPE_PLAYLIST 6  // FIXME!!! same as STREAMTYPE_FILE now
 #define STREAMTYPE_CDDA 10     // raw audio CD reader
 #define STREAMTYPE_SMB 11      // smb:// url, using libsmbclient (samba)
@@ -101,6 +102,7 @@
 #define STREAM_CTRL_GET_START_TIME 20
 #define STREAM_CTRL_GET_CHAPTER_TIME 21
 #define STREAM_CTRL_GET_DVD_INFO 22
+#define STREAM_CTRL_SET_CONTENTS 23
 
 struct stream_lang_req {
     int type;     // STREAM_AUDIO, STREAM_SUB

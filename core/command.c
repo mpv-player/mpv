@@ -24,6 +24,9 @@
 #include <assert.h>
 #include <time.h>
 
+#include <libavutil/avstring.h>
+#include <libavutil/common.h>
+
 #include "config.h"
 #include "talloc.h"
 #include "command.h"
@@ -31,7 +34,7 @@
 #include "stream/stream.h"
 #include "demux/demux.h"
 #include "demux/stheader.h"
-#include "mplayer.h"
+#include "resolve.h"
 #include "playlist.h"
 #include "playlist_parser.h"
 #include "sub/sub.h"
@@ -67,7 +70,6 @@
 
 #include "core/mp_core.h"
 #include "mp_fifo.h"
-#include "libavutil/avstring.h"
 
 #include "mp_lua.h"
 
@@ -462,6 +464,65 @@ static int mp_property_edition(m_option_t *prop, int action, void *arg,
     }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static struct mp_resolve_src *find_source(struct mp_resolve_result *res,
+                                          char *url)
+{
+    if (res->num_srcs == 0)
+        return NULL;
+
+    int src = 0;
+    for (int n = 0; n < res->num_srcs; n++) {
+        if (strcmp(res->srcs[n]->url, res->url) == 0) {
+            src = n;
+            break;
+        }
+    }
+    return res->srcs[src];
+}
+
+static int mp_property_quvi_format(m_option_t *prop, int action, void *arg,
+                                   MPContext *mpctx)
+{
+    struct mp_resolve_result *res = mpctx->resolve_result;
+    if (!res || !res->num_srcs)
+        return M_PROPERTY_UNAVAILABLE;
+
+    struct mp_resolve_src *cur = find_source(res, res->url);
+    if (!cur)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(char **)arg = talloc_strdup(NULL, cur->encid);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET: {
+        mpctx->stop_play = PT_RESTART;
+        break;
+    }
+    case M_PROPERTY_SWITCH: {
+        struct m_property_switch_arg *sarg = arg;
+        int pos = 0;
+        for (int n = 0; n < res->num_srcs; n++) {
+            if (res->srcs[n] == cur) {
+                pos = n;
+                break;
+            }
+        }
+        pos += sarg->inc;
+        if (pos < 0 || pos >= res->num_srcs) {
+            if (sarg->wrap) {
+                pos = (res->num_srcs + pos) % res->num_srcs;
+            } else {
+                pos = av_clip(pos, 0, res->num_srcs);
+            }
+        }
+        char *arg = res->srcs[pos]->encid;
+        return mp_property_quvi_format(prop, M_PROPERTY_SET, &arg, mpctx);
+    }
+    }
+    return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
 /// Number of titles in file
@@ -1563,6 +1624,7 @@ static const m_option_t mp_properties[] = {
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
       M_OPT_MIN, 0, 0, NULL },
     M_OPTION_PROPERTY_CUSTOM("edition", mp_property_edition),
+    M_OPTION_PROPERTY_CUSTOM("quvi-format", mp_property_quvi_format),
     { "titles", mp_property_titles, CONF_TYPE_INT,
       0, 0, 0, NULL },
     { "chapters", mp_property_chapters, CONF_TYPE_INT,

@@ -180,13 +180,19 @@ void playlist_add_base_path(struct playlist *pl, bstr base_path)
     }
 }
 
-// Move all entries from source_pl to pl, appending them at the end of pl.
-// source_pl will be empty, and all entries have changed ownership to pl.
+// Move all entries from source_pl to pl, appending them after the current entry
+// of pl. source_pl will be empty, and all entries have changed ownership to pl.
 void playlist_transfer_entries(struct playlist *pl, struct playlist *source_pl)
 {
+    struct playlist_entry *add_after = pl->current;
+    if (pl->current && pl->current_was_replaced)
+        add_after = pl->current->next;
+    if (!add_after)
+        add_after = pl->last;
+
     while (source_pl->first) {
         struct playlist_entry *e = source_pl->first;
         playlist_unlink(source_pl, e);
-        playlist_add(pl, e);
+        playlist_insert(pl, add_after, e);
     }
 }

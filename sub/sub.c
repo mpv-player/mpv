@@ -31,7 +31,6 @@
 
 #include "talloc.h"
 #include "core/options.h"
-#include "core/mplayer.h"
 #include "core/mp_msg.h"
 #include "sub.h"
 #include "dec_sub.h"

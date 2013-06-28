@@ -202,7 +202,6 @@ typedef struct MPOpts {
     char *hwdec_codecs;
 
     struct lavc_param {
-        int debug;
         int fast;
         char *skip_loop_filter_str;
         char *skip_idct_str;

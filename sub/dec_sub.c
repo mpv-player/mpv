@@ -250,6 +250,7 @@ static void decode_chain_recode(struct dec_sub *sub, struct sd **sd, int num_sd,
         if (sub->charset)
             recoded = recode_packet(packet, sub->charset);
         decode_chain(sd, num_sd, recoded ? recoded : packet);
+        talloc_free(recoded);
     }
 }
 
@@ -398,7 +399,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
     if (opts->sub_cp && !sh->is_utf8)
         sub->charset = guess_sub_cp(subs, opts->sub_cp);
 
-    if (sub->charset)
+    if (sub->charset && sub->charset[0])
         mp_msg(MSGT_OSD, MSGL_INFO, "Using subtitle charset: %s\n", sub->charset);
 
     double sub_speed = 1.0;
