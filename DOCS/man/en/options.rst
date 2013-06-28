@@ -44,6 +44,16 @@
     unneeded and pass all unknown options through the AVOption system is
     welcome. A full list of AVOptions can be found in the FFmpeg manual.
 
+--ad-spdif-dtshd=<yes|no>, --dtshd, --no-dtshd
+    When using DTS passthrough, output any DTS-HD track as-is.
+    With ``ad-spdif-dtshd=no`` (the default) only the DTS Core parts will be
+    output.
+
+    DTS-HD tracks can be sent over HDMI but not over the original
+    coax/toslink S/PDIF system.
+
+    ``--dtshd`` and ``--no-dtshd`` are deprecated aliases.
+
 --af=<filter1[=parameter1:parameter2:...],filter2,...>
     Specify a list of audio filters to apply to the audio stream. See
     `audio_filters` for details and descriptions of the available filters.
@@ -546,6 +556,31 @@
     Encryption key the demuxer should use. This is the raw binary data of
     the key converted to a hexadecimal string.
 
+--demuxer-mkv-subtitle-preroll, --mkv-subtitle-preroll
+    Try harder to show embedded soft subtitles when seeking somewhere. Normally,
+    it can happen that the subtitle at the seek target is not shown due to how
+    some container file formats are designed. The subtitles appear only if
+    seeking before or exactly to the position a subtitle first appears. To
+    make this worse, subtitles are often timed to appear a very small amount
+    before the associated video frame, so that seeking to the video frame
+    typically does not demux the subtitle at that position.
+
+    Enabling this option makes the demuxer start reading data a bit before the
+    seek target, so that subtitles appear correctly. Note that this makes
+    seeking slower, and is not guaranteed to always work. It only works if the
+    subtitle is close enough to the seek target.
+
+    Works with the internal Matroska demuxer only. Always enabled for absolute
+    and hr-seeks, and this option changes behavior with relative or imprecise
+    seeks only.
+
+    See also ``--hr-seek-demuxer-offset`` option. This option can achieve a
+    similar effect, but only if hr-seek is active. It works with any demuxer,
+    but makes seeking much slower, as it has to decode audio and video data,
+    instead of just skipping over it.
+
+    ``--mkv-subtitle-preroll`` is a deprecated alias.
+
 --demuxer-rawaudio-channels=<value>
     Number of channels (or channel layout) if ``--demuxer=rawaudio`` is used
     (default: stereo).
@@ -586,13 +621,6 @@
 --doubleclick-time=<milliseconds>
     Time in milliseconds to recognize two consecutive button presses as a
     double-click (default: 300).
-
---dtshd, --no-dtshd
-    When using DTS passthrough, output any DTS-HD track as-is.
-    With ``--no-dtshd`` (the default) only the DTS Core parts will be output.
-
-    DTS-HD tracks can be sent over HDMI but not over the original
-    coax/toslink S/PDIF system.
 
 --dvbin=<options>
     Pass the following parameters to the DVB input module, in order to
@@ -1090,29 +1118,6 @@
 
     :fps=<value>:  output fps (default: 25)
     :type=<value>: input file type (available: jpeg, png, tga, sgi)
-
---mkv-subtitle-preroll
-    Try harder to show embedded soft subtitles when seeking somewhere. Normally,
-    it can happen that the subtitle at the seek target is not shown due to how
-    some container file formats are designed. The subtitles appear only if
-    seeking before or exactly to the position a subtitle first appears. To
-    make this worse, subtitles are often timed to appear a very small amount
-    before the associated video frame, so that seeking to the video frame
-    typically does not demux the subtitle at that position.
-
-    Enabling this option makes the demuxer start reading data a bit before the
-    seek target, so that subtitles appear correctly. Note that this makes
-    seeking slower, and is not guaranteed to always work. It only works if the
-    subtitle is close enough to the seek target.
-
-    Works with the internal Matroska demuxer only. Always enabled for absolute
-    and hr-seeks, and this option changes behavior with relative or imprecise
-    seeks only.
-
-    See also ``--hr-seek-demuxer-offset`` option. This option can achieve a
-    similar effect, but only if hr-seek is active. It works with any demuxer,
-    but makes seeking much slower, as it has to decode audio and video data,
-    instead of just skipping over it.
 
 --mixer=<device>
     Use a mixer device different from the default ``/dev/mixer``. For ALSA

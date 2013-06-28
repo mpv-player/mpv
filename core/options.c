@@ -407,7 +407,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
     OPT_FLAG("extbased", extension_parsing, 0),
-    OPT_FLAG("mkv-subtitle-preroll", mkv_subtitle_preroll, 0),
 
     {"mf", (void *) mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
 #ifdef CONFIG_RADIO
@@ -452,7 +451,9 @@ const m_option_t mp_opts[] = {
 
     OPT_STRING("ad", audio_decoders, 0),
     OPT_STRING("vd", video_decoders, 0),
-    OPT_FLAG("dtshd", dtshd, 0),
+
+    OPT_FLAG("ad-spdif-dtshd", dtshd, 0),
+    OPT_FLAG("dtshd", dtshd, 0), // old alias
 
     OPT_CHOICE("hwdec", hwdec_api, 0,
                ({"no", 0},
@@ -484,6 +485,9 @@ const m_option_t mp_opts[] = {
     {"demuxer-lavf", (void *) lavfdopts_conf, CONF_TYPE_SUBCONFIG},
     {"demuxer-rawaudio", (void *)&demux_rawaudio_opts, CONF_TYPE_SUBCONFIG},
     {"demuxer-rawvideo", (void *)&demux_rawvideo_opts, CONF_TYPE_SUBCONFIG},
+
+    OPT_FLAG("demuxer-mkv-subtitle-preroll", mkv_subtitle_preroll, 0),
+    OPT_FLAG("mkv-subtitle-preroll", mkv_subtitle_preroll, 0), // old alias
 
 // ------------------------- subtitles options --------------------
 
