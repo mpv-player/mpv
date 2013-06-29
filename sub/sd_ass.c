@@ -264,14 +264,13 @@ static char *get_text(struct sd *sd, double pts)
 
     if (pts == MP_NOPTS_VALUE)
         return NULL;
+    long long ipts = pts * 1000 + 0.5;
 
     struct buf b = {ctx->last_text, sizeof(ctx->last_text) - 1};
 
     for (int i = 0; i < track->n_events; ++i) {
         ASS_Event *event = track->events + i;
-        double start = event->Start / 1000.0;
-        double end = (event->Start + event->Duration) / 1000.0;
-        if (pts >= start && pts < end) {
+        if (ipts >= event->Start && ipts < event->Start + event->Duration) {
             if (event->Text) {
                 int start = b.len;
                 ass_to_plaintext(&b, event->Text);
