@@ -180,6 +180,9 @@ void vo_cocoa_uninit(struct vo *vo)
         enable_power_management(vo);
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
 
+        if (vo->opts->fs)
+            [[s->view window] release];
+
         [s->window release];
         s->window = nil;
         [s->glContext release];
