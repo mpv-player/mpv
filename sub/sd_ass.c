@@ -264,14 +264,13 @@ static char *get_text(struct sd *sd, double pts)
 
     if (pts == MP_NOPTS_VALUE)
         return NULL;
+    long long ipts = pts * 1000 + 0.5;
 
     struct buf b = {ctx->last_text, sizeof(ctx->last_text) - 1};
 
     for (int i = 0; i < track->n_events; ++i) {
         ASS_Event *event = track->events + i;
-        double start = event->Start / 1000.0;
-        double end = (event->Start + event->Duration) / 1000.0;
-        if (pts >= start && pts < end) {
+        if (ipts >= event->Start && ipts < event->Start + event->Duration) {
             if (event->Text) {
                 int start = b.len;
                 ass_to_plaintext(&b, event->Text);
@@ -318,6 +317,20 @@ static void uninit(struct sd *sd)
     talloc_free(ctx);
 }
 
+static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
+{
+    struct sd_ass_priv *ctx = sd->priv;
+    switch (cmd) {
+    case SD_CTRL_SUB_STEP: {
+        double *a = arg;
+        a[0] = ass_step_sub(ctx->ass_track, a[0] * 1000 + .5, a[1]) / 1000.0;
+        return CONTROL_OK;
+    }
+    default:
+        return CONTROL_UNKNOWN;
+    }
+}
+
 const struct sd_functions sd_ass = {
     .name = "ass",
     .accept_packets_in_advance = true,
@@ -327,16 +340,7 @@ const struct sd_functions sd_ass = {
     .get_bitmaps = get_bitmaps,
     .get_text = get_text,
     .fix_events = fix_events,
+    .control = control,
     .reset = reset,
     .uninit = uninit,
 };
-
-struct ass_track *sub_get_ass_track(struct dec_sub *sub)
-{
-    struct sd *sd = sub_get_last_sd(sub);
-    if (sd && sd->driver == &sd_ass && sd->priv) {
-        struct sd_ass_priv *ctx = sd->priv;
-        return ctx->ass_track;
-    }
-    return NULL;
-}

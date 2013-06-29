@@ -249,21 +249,12 @@ void mp_input_set_section_mouse_area(struct input_ctx *ictx, char *name,
 unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx);
 
 // Test whether there is any input section which wants to receive events.
-// Note that the mouse event should be delivered, even if this returns false.
-// However, the VO is free to use some of the events for other things instead,
-// such as dragging the window on click.
-bool mp_input_test_mouse(struct input_ctx *ictx, int x, int y);
+// Note that the mouse event is always delivered, even if this returns false.
+bool mp_input_test_mouse_active(struct input_ctx *ictx, int x, int y);
 
-struct mp_mouse_area;
-
-// Free with talloc_free().
-struct mp_mouse_area *mp_mouse_area_create(void);
-
-// Copy the currently defined mouse area into dst.
-void mp_input_get_mouse_area(struct input_ctx *ictx, struct mp_mouse_area *dst);
-
-// Like mp_input_test(), but on a mouse area from mp_input_get_mouse_area().
-bool mp_mouse_area_test(struct mp_mouse_area *ma, int x, int y);
+// Whether input.c wants mouse drag events at this mouse position. If this
+// returns false, some VOs will initiate window dragging.
+bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y);
 
 // Initialize the input system
 struct input_conf;

@@ -102,7 +102,7 @@ bool sub_is_initialized(struct dec_sub *sub)
     return !!sub->num_sd;
 }
 
-struct sd *sub_get_last_sd(struct dec_sub *sub)
+static struct sd *sub_get_last_sd(struct dec_sub *sub)
 {
     return sub->num_sd ? sub->sd[sub->num_sd - 1] : NULL;
 }
@@ -480,6 +480,18 @@ void sub_reset(struct dec_sub *sub)
         if (sub->sd[n]->driver->reset)
             sub->sd[n]->driver->reset(sub->sd[n]);
     }
+}
+
+int sub_control(struct dec_sub *sub, enum sd_ctrl cmd, void *arg)
+{
+    for (int n = 0; n < sub->num_sd; n++) {
+        if (sub->sd[n]->driver->control) {
+            int r = sub->sd[n]->driver->control(sub->sd[n], cmd, arg);
+            if (r != CONTROL_UNKNOWN)
+                return r;
+        }
+    }
+    return CONTROL_UNKNOWN;
 }
 
 #define MAX_PACKETS 10

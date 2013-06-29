@@ -196,3 +196,36 @@ void playlist_transfer_entries(struct playlist *pl, struct playlist *source_pl)
         playlist_insert(pl, add_after, e);
     }
 }
+
+// Return number of entries between list start and e.
+// Return -1 if e is not on the list, or if e is NULL.
+int playlist_entry_to_index(struct playlist *pl, struct playlist_entry *e)
+{
+    struct playlist_entry *cur = pl->first;
+    int pos = 0;
+    if (!e)
+        return -1;
+    while (cur && cur != e) {
+        cur = cur->next;
+        pos++;
+    }
+    return cur == e ? pos : -1;
+}
+
+int playlist_entry_count(struct playlist *pl)
+{
+    return playlist_entry_to_index(pl, pl->last) + 1;
+}
+
+// Return entry for which playlist_entry_to_index() would return index.
+// Return NULL if not found.
+struct playlist_entry *playlist_entry_from_index(struct playlist *pl, int index)
+{
+    struct playlist_entry *e = pl->first;
+    for (int n = 0; ; n++) {
+        if (!e || n == index)
+            return e;
+        e = e->next;
+    }
+}
+

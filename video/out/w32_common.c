@@ -258,7 +258,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         int y = GET_Y_LPARAM(lParam);
         mouse_button |= mod_state(vo);
         if (mouse_button == (MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN) &&
-            !vo->opts->fs && !mp_input_test_mouse(vo->input_ctx, x, y))
+            !vo->opts->fs && !mp_input_test_dragging(vo->input_ctx, x, y))
         {
             // Window dragging hack
             ReleaseCapture();

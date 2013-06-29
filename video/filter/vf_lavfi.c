@@ -301,8 +301,8 @@ static int control(vf_instance_t *vf, int request, void *data)
     switch (request) {
     case VFCTRL_SEEK_RESET:
         if (p->graph) {
-            struct vf_format *f = &vf->fmt_in;
-            recreate_graph(vf, f->w, f->h, f->dw, f->dh, f->fmt);
+            struct mp_image_params *f = &vf->fmt_in.params;
+            recreate_graph(vf, f->w, f->h, f->d_w, f->d_h, f->imgfmt);
         }
         break;
     }

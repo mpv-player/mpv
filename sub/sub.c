@@ -160,7 +160,7 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
         if (osd->render_bitmap_subs && osd->dec_sub) {
             double sub_pts = video_pts;
             if (sub_pts != MP_NOPTS_VALUE)
-                sub_pts -= osd->sub_offset;
+                sub_pts -= osd->video_offset - opts->sub_delay;
             sub_get_bitmaps(osd->dec_sub, obj->vo_res, sub_pts, out_imgs);
         }
     } else {

@@ -122,7 +122,7 @@ struct osd_state {
 
     struct ass_library *ass_library;
     struct ass_renderer *ass_renderer;
-    double sub_offset;
+    double video_offset;
     double vo_pts;
 
     bool render_subs_in_filter;

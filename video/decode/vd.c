@@ -50,16 +50,22 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
     NULL
 };
 
-int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
+int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
 {
     struct MPOpts *opts = sh->opts;
     vf_instance_t *vf = sh->vfilter;
     int vocfg_flags = 0;
+    struct mp_image_params p = *params;
 
-    if (w)
-        sh->disp_w = w;
-    if (h)
-        sh->disp_h = h;
+    if (!p.w || !p.h) {
+        // ideally, this should be dead code
+        mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Unknown size, using container size.\n");
+        p.w = sh->disp_w;
+        p.h = sh->disp_h;
+    } else {
+        sh->disp_w = p.w;
+        sh->disp_h = p.h;
+    }
 
     mp_msg(MSGT_DECVIDEO, MSGL_V,
            "VIDEO:  %dx%d  %5.3f fps  %5.1f kbps (%4.1f kB/s)\n",
@@ -67,10 +73,10 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
            sh->i_bps / 1000.0);
 
     if (!sh->disp_w || !sh->disp_h)
-        return 0;
+        return -1;
 
     mp_msg(MSGT_DECVIDEO, MSGL_V, "VDec: vo config request - %d x %d (%s)\n",
-           w, h, vo_format_name(out_fmt));
+           p.w, p.h, vo_format_name(p.imgfmt));
 
     if (get_video_quality_max(sh) <= 0 && opts->divx_quality) {
         // user wants postprocess but no pp filter yet:
@@ -78,17 +84,17 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
     }
 
     // check if libvo and codec has common outfmt (no conversion):
+    int flags = 0;
     for (;;) {
         mp_msg(MSGT_VFILTER, MSGL_V, "Trying filter chain:\n");
         vf_print_filter_chain(MSGL_V, vf);
 
-        int flags = vf->query_format(vf, out_fmt);
+        flags = vf->query_format(vf, p.imgfmt);
         mp_msg(MSGT_CPLAYER, MSGL_DBG2, "vo_debug: query(%s) returned 0x%X \n",
-               vo_format_name(out_fmt), flags);
+               vo_format_name(p.imgfmt), flags);
         if ((flags & VFCAP_CSP_SUPPORTED_BY_HW)
             || (flags & VFCAP_CSP_SUPPORTED))
         {
-            sh->output_flags = flags;
             break;
         }
         // TODO: no match - we should use conversion...
@@ -104,16 +110,13 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
         mp_tmsg(MSGT_VFILTER, MSGL_WARN, "Attempted filter chain:\n");
         vf_print_filter_chain(MSGL_WARN, vf);
         sh->vf_initialized = -1;
-        return 0;               // failed
+        return -1;               // failed
     }
-    sh->outfmt = out_fmt;
-    mp_msg(MSGT_CPLAYER, MSGL_V, "VDec: using %s as output csp\n",
-           vo_format_name(out_fmt));
     sh->vfilter = vf;
 
     // autodetect flipping
     bool flip = opts->flip;
-    if (flip && !(sh->output_flags & VFCAP_FLIP)) {
+    if (flip && !(flags & VFCAP_FLIP)) {
         // we need to flip, but no flipping filter avail.
         vf_add_before_vo(&vf, "flip", NULL);
         sh->vfilter = vf;
@@ -147,25 +150,30 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ASPECT=%1.4f\n", sh->aspect);
     }
 
+    p.d_w = d_w;
+    p.d_h = d_h;
+
     vocfg_flags = (opts->fullscreen ? VOFLAG_FULLSCREEN : 0) |
                   (flip ? VOFLAG_FLIPPING : 0);
 
     // Time to config libvo!
     mp_msg(MSGT_CPLAYER, MSGL_V,
            "VO Config (%dx%d->%dx%d,flags=%d,0x%X)\n", sh->disp_w,
-           sh->disp_h, d_w, d_h, vocfg_flags, out_fmt);
+           sh->disp_h, d_w, d_h, vocfg_flags, p.imgfmt);
 
-    if (vf_config_wrapper(vf, sh->disp_w, sh->disp_h, d_w, d_h, vocfg_flags,
-                          out_fmt) == 0) {
+    if (vf_reconfig_wrapper(vf, &p, vocfg_flags) < 0) {
         mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "FATAL: Cannot initialize video driver.\n");
         sh->vf_initialized = -1;
-        return 0;
+        return -1;
     }
 
     mp_tmsg(MSGT_VFILTER, MSGL_V, "Video filter chain:\n");
     vf_print_filter_chain(MSGL_V, vf);
 
     sh->vf_initialized = 1;
+
+    sh->colorspace = p.colorspace;
+    sh->color_range = p.colorlevels;
 
     set_video_colorspace(sh);
 
@@ -180,5 +188,5 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int out_fmt)
     if (opts->gamma_hue != 1000)
         set_video_colors(sh, "hue", opts->gamma_hue);
 
-    return 1;
+    return 0;
 }
