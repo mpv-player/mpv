@@ -1346,7 +1346,8 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
     }
     // This is a key up event, but the key up command is added by
     // release_down_cmd(), not by this code.
-    emit_key &= !(code & MP_KEY_EMIT_ON_UP);
+    if ((code & MP_KEY_EMIT_ON_UP) && ictx->current_down_cmd)
+        emit_key = false;
     // Interpret only maximal point of multibutton event
     ret = NULL;
     if (emit_key)
