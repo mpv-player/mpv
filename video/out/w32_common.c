@@ -705,9 +705,11 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_KILL_SCREENSAVER:
         w32->disable_screensaver = true;
+        SetThreadExecutionState(ES_CONTINUOUS | ES_DISPLAY_REQUIRED);
         return VO_TRUE;
     case VOCTRL_RESTORE_SCREENSAVER:
         w32->disable_screensaver = false;
+        SetThreadExecutionState(ES_CONTINUOUS);
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE: {
         wchar_t *title = mp_from_utf8(NULL, (char *)arg);
@@ -733,6 +735,7 @@ void vo_w32_uninit(struct vo *vo)
     if (!w32)
         return;
     while (ShowCursor(1) < 0) { }
+    SetThreadExecutionState(ES_CONTINUOUS);
     DestroyWindow(w32->window);
     UnregisterClassW(classname, 0);
     talloc_free(w32);
