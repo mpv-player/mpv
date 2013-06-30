@@ -157,7 +157,7 @@
     Enables placing toptitles and subtitles in black borders when they are
     available.
 
-``--ass-vsfilter-aspect-compat``
+``--ass-vsfilter-aspect-compat=<yes|no>``
     Stretch SSA/ASS subtitles when playing anamorphic videos for compatibility
     with traditional VSFilter behavior. This switch has no effect when the
     video is stored with square pixels.
@@ -173,6 +173,15 @@
     behavior (undesirable but expected by many existing scripts).
 
     Enabled by default.
+
+``--ass-vsfilter-blur-compat=<yes|no>``
+    Scale ``\blur`` tags by video resolution instead of script resolution
+    (enabled by default). This is bug in VSFilter, which according to some,
+    can't be fixed anymore in the name of compatibility.
+
+    Note that this uses the actual video resolution for calculating the
+    offset scale factor, not what the video filter chain or the video output
+    use.
 
 ``--ass-vsfilter-color-compat=<basic|full|force-601|no``
     Mangle colors like (xy-)vsfilter do (default: basic). Historically, VSFilter

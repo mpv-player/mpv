@@ -196,6 +196,15 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
         scale = scale * dim.video_par;
     mp_ass_configure(renderer, opts, &dim);
     ass_set_aspect_ratio(renderer, scale, 1);
+#if LIBASS_VERSION >= 0x01020000
+    if (!ctx->is_converted && (!opts->ass_style_override ||
+                               opts->ass_vsfilter_blur_compat))
+    {
+        ass_set_storage_size(renderer, ctx->video_params.w, ctx->video_params.h);
+    } else {
+        ass_set_storage_size(renderer, 0, 0);
+    }
+#endif
     mp_ass_render_frame(renderer, ctx->ass_track, pts * 1000 + .5,
                         &ctx->parts, res);
     talloc_steal(ctx, ctx->parts);

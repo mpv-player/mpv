@@ -191,6 +191,7 @@ typedef struct MPOpts {
     int ass_use_margins;
     int ass_vsfilter_aspect_compat;
     int ass_vsfilter_color_compat;
+    int ass_vsfilter_blur_compat;
     int use_embedded_fonts;
     char **ass_force_style_list;
     char *ass_styles_file;
