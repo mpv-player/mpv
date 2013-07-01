@@ -217,7 +217,7 @@ static void print_help(void)
 
     int devs_n = devs_size / sizeof(AudioDeviceID);
 
-    for (int i = 0; i < devs_n; ++i) {
+    for (int i = 0; i < devs_n; i++) {
         char *name;
         OSStatus err =
             GetAudioPropertyString(devs[i], kAudioObjectPropertyName, &name);
@@ -461,8 +461,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
 
     int streams_n = size / sizeof(AudioStreamID);
 
-    // TODO: ++i is quite fishy in here. Investigate!
-    for (int i = 0; i < streams_n && d->stream_idx < 0; ++i) {
+    for (int i = 0; i < streams_n && d->stream_idx < 0; i++) {
         bool digital = AudioStreamSupportsDigital(streams[i]);
 
         if (digital) {
@@ -485,8 +484,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
             d->stream = streams[i];
             d->stream_idx = i;
 
-            // TODO: ++j is fishy. was like this in the original code. Investigate!
-            for (int j = 0; j < formats_n; ++j)
+            for (int j = 0; j < formats_n; j++)
                 if (AudioFormatIsDigital(asbd)) {
                     // select the digital format that has exactly the same
                     // samplerate. If an exact match cannot be found, select

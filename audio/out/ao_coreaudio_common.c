@@ -235,7 +235,7 @@ static int AudioStreamSupportsDigital(AudioStreamID stream)
     }
 
     const int n_formats = size / sizeof(AudioStreamRangedDescription);
-    for (int i = 0; i < n_formats; ++i) {
+    for (int i = 0; i < n_formats; i++) {
         AudioStreamBasicDescription asbd = formats[i].mFormat;
         ca_print_asbd("supported format:", &(asbd));
         if (AudioFormatIsDigital(asbd)) {
@@ -264,7 +264,7 @@ static int AudioDeviceSupportsDigital(AudioDeviceID device)
     }
 
     const int n_streams = size / sizeof(AudioStreamID);
-    for (int i = 0; i < n_streams; ++i) {
+    for (int i = 0; i < n_streams; i++) {
         if (AudioStreamSupportsDigital(streams[i])) {
             free(streams);
             return CONTROL_OK;
@@ -280,11 +280,9 @@ static OSStatus ca_property_listener(AudioObjectPropertySelector selector,
                                      const AudioObjectPropertyAddress addresses[],
                                      void *data)
 {
-    // TODO: ++i seems wrong in this context. Check out if it was a programmer
-    // mistake
     void *talloc_ctx = talloc_new(NULL);
 
-    for (int i = 0; i < n_addresses; ++i) {
+    for (int i = 0; i < n_addresses; i++) {
         if (addresses[i].mSelector == selector) {
             ca_msg(MSGL_WARN, "event: property %s changed\n",
                               fourcc_repr(talloc_ctx, selector));
@@ -418,8 +416,8 @@ static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
      * it is also not Atomic, in its behaviour.
      * Therefore we check 5 times before we really give up. */
     bool format_set = CONTROL_FALSE;
-    for (int i = 0; !format_set && i < 5; ++i) {
-        for (int j = 0; !stream_format_changed && j < 50; ++j)
+    for (int i = 0; !format_set && i < 5; i++) {
+        for (int j = 0; !stream_format_changed && j < 50; j++)
             mp_sleep_us(10000);
 
         if (stream_format_changed) {
