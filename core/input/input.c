@@ -1324,6 +1324,7 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         if (ictx->key_down[j] == code)
             break;
     }
+    bool emit_key = false;
     bool doubleclick = MP_KEY_IS_MOUSE_BTN_DBL(code);
     if (doubleclick) {
         int btn = code - MP_MOUSE_BTN0_DBL + MP_MOUSE_BTN0;
@@ -1332,8 +1333,8 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
             return NULL;
         j = ictx->num_key_down - 1;
         ictx->key_down[j] = code;
+        emit_key = true;
     }
-    bool emit_key = ictx->last_key_down;
     if (j == ictx->num_key_down) {  // was not already down; add temporarily
         if (ictx->num_key_down > MP_MAX_KEY_DOWN) {
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many key down events "
