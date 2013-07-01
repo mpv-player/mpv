@@ -430,7 +430,6 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     struct priv *p = ao->priv;
     struct priv_d *d = p->digital;
     OSStatus err = noErr;
-    AudioObjectPropertyAddress p_addr;
     uint32_t size;
 
     uint32_t is_alive = 1;
@@ -524,17 +523,8 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     if (!AudioStreamChangeFormat(d->stream, d->stream_asbd))
         goto coreaudio_error;
 
-    p_addr = (AudioObjectPropertyAddress) {
-        .mSelector = kAudioDevicePropertyDeviceHasChanged,
-        .mScope    = kAudioObjectPropertyScopeGlobal,
-        .mElement  = kAudioObjectPropertyElementMaster,
-    };
-
-    const int *stream_asdb_changed = &(d->stream_asbd_changed);
-    err = AudioObjectAddPropertyListener(p->device,
-                                         &p_addr,
-                                         ca_device_listener,
-                                         (void *)stream_asdb_changed);
+    void *changed = (void *) &(d->stream_asbd_changed);
+    err = ca_enable_device_listener(p->device, changed);
     CHECK_CA_ERROR("cannot install format change listener during init");
 
 #if BYTE_ORDER == BIG_ENDIAN
@@ -633,6 +623,10 @@ static void uninit(struct ao *ao, bool immed)
         AudioComponentInstanceDispose(p->audio_unit);
     } else {
         struct priv_d *d = p->digital;
+
+        void *changed = (void *) &(d->stream_asbd_changed);
+        err = ca_disable_device_listener(p->device, changed);
+        CHECK_CA_WARN("can't remove device listener, this may cause a crash");
 
         err = AudioDeviceStop(p->device, d->render_cb);
         CHECK_CA_WARN("failed to stop audio device");

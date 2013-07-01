@@ -380,6 +380,32 @@ static OSStatus ca_enable_mixing(AudioDeviceID device, bool changed) {
     return noErr;
 }
 
+static OSStatus ca_change_device_listening(AudioDeviceID device,
+                                           void *flag, bool enabled)
+{
+    AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
+        .mSelector = kAudioDevicePropertyDeviceHasChanged,
+        .mScope    = kAudioObjectPropertyScopeGlobal,
+        .mElement  = kAudioObjectPropertyElementMaster,
+    };
+
+    if (enabled) {
+        return AudioObjectAddPropertyListener(
+            device, &p_addr, ca_device_listener, flag);
+    } else {
+        return AudioObjectRemovePropertyListener(
+            device, &p_addr, ca_device_listener, flag);
+    }
+}
+
+static OSStatus ca_enable_device_listener(AudioDeviceID device, void *flag) {
+    return ca_change_device_listening(device, flag, true);
+}
+
+static OSStatus ca_disable_device_listener(AudioDeviceID device, void *flag) {
+    return ca_change_device_listening(device, flag, false);
+}
+
 static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
                                    AudioStreamBasicDescription change_format)
 {
