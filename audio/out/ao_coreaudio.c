@@ -193,8 +193,8 @@ static int AudioStreamChangeFormat(AudioStreamID stream,
 
 static void print_help(void)
 {
-    ca_msg(MSGL_FATAL,
-           "\n-ao coreaudio commandline help:\n"
+    char *help = talloc_strdup(NULL,
+           " -ao coreaudio commandline help:\n"
            "Example: mpv -ao coreaudio:device_id=266\n"
            "    open Core Audio with output device ID 266.\n"
            "\nOptions:\n"
@@ -212,7 +212,7 @@ static void print_help(void)
                                     (void **)&devs);
     if (!devs_size) {
         ca_msg(MSGL_FATAL, "Failed to get list of output devices.\n");
-        return;
+        goto coreaudio_out;
     }
 
     int devs_n = devs_size / sizeof(AudioDeviceID);
@@ -223,13 +223,19 @@ static void print_help(void)
             GetAudioPropertyString(devs[i], kAudioObjectPropertyName, &name);
 
         if (err == noErr) {
-            ca_msg(MSGL_FATAL, "%s (id: %" PRIu32 ")\n", name, devs[i]);
+            help = talloc_asprintf_append(help,
+                    "%s (id: %" PRIu32 ")\n", name, devs[i]);
             free(name);
         } else
-            ca_msg(MSGL_FATAL, "Unknown (id: %" PRIu32 ")\n", devs[i]);
+            help = talloc_asprintf_append(help,
+                    "Unknown (id: %" PRIu32 ")\n", devs[i]);
     }
 
     free(devs);
+
+coreaudio_out:
+    ca_msg(MSGL_FATAL, "%s", help);
+    talloc_free(help);
 }
 
 static int init_lpcm(struct ao *ao, AudioStreamBasicDescription asbd);
