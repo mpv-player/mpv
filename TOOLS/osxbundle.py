@@ -5,6 +5,7 @@ import re
 import shutil
 import sys
 from optparse import OptionParser
+from textwrap import dedent
 
 def sh(command):
     return os.popen(command).read()
@@ -69,8 +70,16 @@ def cp_dylibs(target_file, dest_dir):
         try:
             shutil.copy(dylib_path, dylib_dest_path)
         except IOError:
-            sys.exit("%s uses library %s which is not available anymore" % \
-                     (target_file, dylib_path) )
+            if re.match("dylib$", target_file):
+                reinstall_what = target_file
+            else:
+                reinstall_what = dylib_path
+
+            sys.exit(dedent("""\
+                %s uses library %s which is not available anymore.
+                This is most likely because you uninstalled %s.
+                Please reinstall %s to fix it's dependencies.""" % \
+                   (target_file, dylib_path, dylib_path, reinstall_what) ))
 
         os.chmod(dylib_dest_path, 0o755)
         cp_dylibs(dylib_dest_path, dest_dir)

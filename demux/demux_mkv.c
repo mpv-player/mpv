@@ -1487,6 +1487,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     } else if (!strcmp(track->codec_id, MKV_A_OPUS)
                || !strcmp(track->codec_id, MKV_A_OPUS_EXP)) {
         sh_a->format = mmioFOURCC('O', 'p', 'u', 's');
+        copy_audio_private_data(sh_a, track);
     } else if (!strncmp(track->codec_id, MKV_A_REALATRC, 7)) {
         if (track->private_size < RAPROPERTIES4_SIZE)
             goto error;
