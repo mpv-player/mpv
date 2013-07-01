@@ -225,19 +225,19 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             mouse_button = MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN;
             break;
         case WM_LBUTTONUP:
-            mouse_button = MP_MOUSE_BTN0;
+            mouse_button = MP_MOUSE_BTN0 | MP_KEY_STATE_UP;
             break;
         case WM_MBUTTONDOWN:
             mouse_button = MP_MOUSE_BTN1 | MP_KEY_STATE_DOWN;
             break;
         case WM_MBUTTONUP:
-            mouse_button = MP_MOUSE_BTN1;
+            mouse_button = MP_MOUSE_BTN1 | MP_KEY_STATE_UP;
             break;
         case WM_RBUTTONDOWN:
             mouse_button = MP_MOUSE_BTN2 | MP_KEY_STATE_DOWN;
             break;
         case WM_RBUTTONUP:
-            mouse_button = MP_MOUSE_BTN2;
+            mouse_button = MP_MOUSE_BTN2 | MP_KEY_STATE_UP;
             break;
         case WM_MOUSEWHEEL: {
             int x = GET_WHEEL_DELTA_WPARAM(wParam);
@@ -250,6 +250,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         case WM_XBUTTONUP:
             mouse_button = HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
+            mouse_button |= MP_KEY_STATE_UP;
             break;
     }
 

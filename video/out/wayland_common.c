@@ -278,7 +278,7 @@ static void keyboard_handle_key(void *data,
         if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
             mplayer_put_key(wl->vo->key_fifo, mpkey | MP_KEY_STATE_DOWN);
         else
-            mplayer_put_key(wl->vo->key_fifo, mpkey);
+            mplayer_put_key(wl->vo->key_fifo, mpkey | MP_KEY_STATE_UP);
     }
 }
 
@@ -320,7 +320,7 @@ static void pointer_handle_enter(void *data,
 
     /* Release the left button on pointer enter again
      * because after moving the shell surface no release event is sent */
-    mplayer_put_key(wl->vo->key_fifo, MP_MOUSE_BTN0);
+    mplayer_put_key(wl->vo->key_fifo, MP_MOUSE_BTN0 | MP_KEY_STATE_UP);
     show_cursor(wl);
 }
 
@@ -355,7 +355,8 @@ static void pointer_handle_button(void *data,
     struct vo_wayland_state *wl = data;
 
     mplayer_put_key(wl->vo->key_fifo, MP_MOUSE_BTN0 + (button - BTN_LEFT) |
-        ((state == WL_POINTER_BUTTON_STATE_PRESSED) ? MP_KEY_STATE_DOWN : 0));
+        ((state == WL_POINTER_BUTTON_STATE_PRESSED)
+            ? MP_KEY_STATE_DOWN : MP_KEY_STATE_UP));
 
     if ((button == BTN_LEFT) && (state == WL_POINTER_BUTTON_STATE_PRESSED))
         wl_shell_surface_move(wl->window->shell_surface, wl->input->seat, serial);

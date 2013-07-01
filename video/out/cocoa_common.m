@@ -893,14 +893,14 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
                 // doing the second click in a double click. Put in the key_fifo
                 // the key that would be put from the MouseUp handling code.
                 if([theEvent clickCount] == 2) {
-                    cocoa_put_key(MP_MOUSE_BTN0 + buttonNumber);
+                    cocoa_put_key((MP_MOUSE_BTN0 + buttonNumber) | MP_KEY_STATE_UP);
                     self.mouseDown = NO;
                 }
                 break;
             case NSLeftMouseUp:
             case NSRightMouseUp:
             case NSOtherMouseUp:
-                cocoa_put_key(MP_MOUSE_BTN0 + buttonNumber);
+                cocoa_put_key((MP_MOUSE_BTN0 + buttonNumber) | MP_KEY_STATE_UP);
                 self.mouseDown = NO;
                 break;
         }

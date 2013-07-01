@@ -766,7 +766,8 @@ int vo_x11_check_events(struct vo *vo)
             break;
         case ButtonRelease:
             mplayer_put_key(vo->key_fifo,
-                            MP_MOUSE_BTN0 + Event.xbutton.button - 1);
+                            (MP_MOUSE_BTN0 + Event.xbutton.button - 1)
+                            | MP_KEY_STATE_UP);
             break;
         case PropertyNotify: {
             char *name = XGetAtomName(display, Event.xproperty.atom);

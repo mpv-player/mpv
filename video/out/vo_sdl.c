@@ -541,7 +541,7 @@ static void check_events(struct vo *vo)
             break;
         case SDL_MOUSEBUTTONUP:
             mplayer_put_key(vo->key_fifo,
-                            (MP_MOUSE_BTN0 + ev.button.button - 1));
+                (MP_MOUSE_BTN0 + ev.button.button - 1) | MP_KEY_STATE_UP);
             break;
         case SDL_MOUSEWHEEL:
             break;

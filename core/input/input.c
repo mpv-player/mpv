@@ -624,7 +624,7 @@ static char *get_key_name(int key, char *ret)
 static char *get_key_combo_name(int *keys, int max)
 {
     char *ret = talloc_strdup(NULL, "");
-    while (1) {
+    while (max > 0) {
         ret = get_key_name(*keys, ret);
         if (--max && *++keys)
             ret = talloc_asprintf_append_buffer(ret, "-");
@@ -1280,36 +1280,52 @@ static void release_down_cmd(struct input_ctx *ictx)
     ictx->ar_state = -1;
 }
 
+static int find_key_down(struct input_ctx *ictx, int code)
+{
+    code &= ~(MP_KEY_STATE_UP | MP_KEY_STATE_DOWN);
+    for (int j = 0; j < ictx->num_key_down; j++) {
+        if (ictx->key_down[j] == code)
+            return j;
+    }
+    return -1;
+}
+
+static void remove_key_down(struct input_ctx *ictx, int code)
+{
+    int index = find_key_down(ictx, code);
+    if (index >= 0) {
+        memmove(&ictx->key_down[index], &ictx->key_down[index + 1],
+                (ictx->num_key_down - (index + 1)) * sizeof(int));
+        ictx->num_key_down -= 1;
+    }
+}
+
 static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
 {
-    unsigned int j;
-    mp_cmd_t *ret;
-
     /* On normal keyboards shift changes the character code of non-special
      * keys, so don't count the modifier separately for those. In other words
      * we want to have "a" and "A" instead of "a" and "Shift+A"; but a separate
      * shift modifier is still kept for special keys like arrow keys.
      */
-    int unmod = code & ~(MP_KEY_MODIFIER_MASK | MP_KEY_STATE_DOWN);
+    int unmod = code & ~MP_KEY_MODIFIER_MASK;
     if (unmod >= 32 && unmod < MP_KEY_BASE)
         code &= ~MP_KEY_MODIFIER_SHIFT;
 
+    if (!(code & MP_KEY_STATE_UP) && ictx->num_key_down >= MP_MAX_KEY_DOWN) {
+        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many key down events "
+                "at the same time\n");
+        return NULL;
+    }
+
+    bool key_was_down = find_key_down(ictx, code) >= 0;
+
     if (code & MP_KEY_STATE_DOWN) {
-        if (ictx->num_key_down >= MP_MAX_KEY_DOWN) {
-            mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many key down events "
-                    "at the same time\n");
-            return NULL;
-        }
-        code &= ~MP_KEY_STATE_DOWN;
         // Check if we don't already have this key as pushed
-        for (j = 0; j < ictx->num_key_down; j++) {
-            if (ictx->key_down[j] == code)
-                break;
-        }
-        if (j != ictx->num_key_down)
+        if (key_was_down)
             return NULL;
+        // Cancel current down-event (there can be only one)
         release_down_cmd(ictx);
-        ictx->key_down[ictx->num_key_down] = code;
+        ictx->key_down[ictx->num_key_down] = code & ~MP_KEY_STATE_DOWN;
         ictx->num_key_down++;
         ictx->last_key_down = mp_time_us();
         ictx->ar_state = 0;
@@ -1318,52 +1334,35 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         if (ictx->current_down_cmd && (code & MP_KEY_EMIT_ON_UP))
             ictx->current_down_cmd->key_up_follows = true;
         return mp_cmd_clone(ictx->current_down_cmd);
-    }
-    // button released or press of key with no separate down/up events
-    for (j = 0; j < ictx->num_key_down; j++) {
-        if (ictx->key_down[j] == code)
-            break;
-    }
-    bool emit_key = false;
-    bool doubleclick = MP_KEY_IS_MOUSE_BTN_DBL(code);
-    if (doubleclick) {
-        int btn = code - MP_MOUSE_BTN0_DBL + MP_MOUSE_BTN0;
-        if (!ictx->num_key_down
-            || ictx->key_down[ictx->num_key_down - 1] != btn)
-            return NULL;
-        j = ictx->num_key_down - 1;
-        ictx->key_down[j] = code;
-        emit_key = true;
-    }
-    if (j == ictx->num_key_down) {  // was not already down; add temporarily
-        if (ictx->num_key_down > MP_MAX_KEY_DOWN) {
-            mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many key down events "
-                    "at the same time\n");
-            return NULL;
+    } else if (code & MP_KEY_STATE_UP) {
+        if (key_was_down) {
+            remove_key_down(ictx, code);
+            release_down_cmd(ictx);
         }
-        ictx->key_down[ictx->num_key_down] = code;
-        ictx->num_key_down++;
-        emit_key = true;
+        return NULL;
+    } else {
+        // Press of key with no separate down/up events
+        if (key_was_down) {
+            // Mixing press events and up/down with the same key is not allowed
+            mp_tmsg(MSGT_INPUT, MSGL_WARN, "Mixing key presses and up/down.\n");
+        }
+        // Add temporarily (include ongoing down/up events)
+        int num_key_down = ictx->num_key_down;
+        int key_down[MP_MAX_KEY_DOWN];
+        memcpy(key_down, ictx->key_down, num_key_down * sizeof(int));
+        // Assume doubleclick events never use down/up, while button events do
+        if (MP_KEY_IS_MOUSE_BTN_DBL(code)) {
+            // Don't emit "MOUSE_BTN0+MOUSE_BTN0_DBL", just "MOUSE_BTN0_DBL"
+            int btn = code - MP_MOUSE_BTN0_DBL + MP_MOUSE_BTN0;
+            if (!num_key_down || key_down[num_key_down - 1] != btn)
+                return NULL;
+            key_down[num_key_down - 1] = code;
+        } else {
+            key_down[num_key_down] = code;
+            num_key_down++;
+        }
+        return get_cmd_from_keys(ictx, NULL, num_key_down, key_down);
     }
-    // This is a key up event, but the key up command is added by
-    // release_down_cmd(), not by this code.
-    if ((code & MP_KEY_EMIT_ON_UP) && ictx->current_down_cmd)
-        emit_key = false;
-    // Interpret only maximal point of multibutton event
-    ret = NULL;
-    if (emit_key)
-        ret = get_cmd_from_keys(ictx, NULL, ictx->num_key_down, ictx->key_down);
-    if (doubleclick) {
-        ictx->key_down[j] = code - MP_MOUSE_BTN0_DBL + MP_MOUSE_BTN0;
-        return ret;
-    }
-    // Remove the key
-    if (j + 1 < ictx->num_key_down)
-        memmove(&ictx->key_down[j], &ictx->key_down[j + 1],
-                (ictx->num_key_down - (j + 1)) * sizeof(int));
-    ictx->num_key_down--;
-    release_down_cmd(ictx);
-    return ret;
 }
 
 static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
@@ -1419,16 +1418,15 @@ static bool key_updown_ok(enum mp_command_type cmd)
 void mp_input_feed_key(struct input_ctx *ictx, int code)
 {
     ictx->got_new_events = true;
-    int unmod = code & ~(MP_KEY_MODIFIER_MASK | MP_KEY_STATE_DOWN);
-    if (MP_KEY_DEPENDS_ON_MOUSE_POS(unmod))
-        ictx->mouse_event_counter++;
     if (code == MP_INPUT_RELEASE_ALL) {
         mp_msg(MSGT_INPUT, MSGL_V, "input: release all\n");
-        memset(ictx->key_down, 0, sizeof(ictx->key_down));
         ictx->num_key_down = 0;
         release_down_cmd(ictx);
         return;
     }
+    int unmod = code & ~MP_KEY_MODIFIER_MASK;
+    if (MP_KEY_DEPENDS_ON_MOUSE_POS(unmod))
+        ictx->mouse_event_counter++;
     mp_msg(MSGT_INPUT, MSGL_V, "input: key code=%#x\n", code);
     struct mp_cmd *cmd = interpret_key(ictx, code);
     if (!cmd)

@@ -53,9 +53,8 @@ void mplayer_put_key(struct mp_fifo *fifo, int code)
     double now = mp_time_sec();
     int doubleclick_time = fifo->opts->doubleclick_time;
     // ignore system-doubleclick if we generate these events ourselves
-    if (doubleclick_time
-        && (code & ~MP_KEY_STATE_DOWN) >= MP_MOUSE_BTN0_DBL
-        && (code & ~MP_KEY_STATE_DOWN) < MP_MOUSE_BTN_DBL_END)
+    int unmod = code & ~MP_KEY_MODIFIER_MASK;
+    if (doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
         return;
     mp_input_feed_key(fifo->input, code);
     if (code & MP_KEY_STATE_DOWN) {
