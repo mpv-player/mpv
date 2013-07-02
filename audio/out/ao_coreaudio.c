@@ -152,7 +152,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
                                     kAudioUnitScope_Global, 0, &vol);
 
         CHECK_CA_ERROR("could not get HAL output volume");
-        control_vol->left = control_vol->right = vol * 100.0 / 4.0;
+        control_vol->left = control_vol->right = vol * 100.0;
         return CONTROL_TRUE;
 
     case AOCONTROL_SET_VOLUME:
@@ -174,7 +174,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             return CONTROL_TRUE;
         }
 
-        vol = (control_vol->left + control_vol->right) * 4.0 / 200.0;
+        vol = (control_vol->left + control_vol->right) / 200.0;
         err = AudioUnitSetParameter(p->audio_unit, kHALOutputParam_Volume,
                                     kAudioUnitScope_Global, 0, vol, 0);
 
