@@ -329,6 +329,8 @@ static void pointer_handle_leave(void *data,
                                  uint32_t serial,
                                  struct wl_surface *surface)
 {
+    struct vo_wayland_state *wl = data;
+    mplayer_put_key(wl->vo->key_fifo, MP_KEY_MOUSE_LEAVE);
 }
 
 static void pointer_handle_motion(void *data,
