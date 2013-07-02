@@ -54,7 +54,6 @@
 #include <fcntl.h>
 
 #include "core/bstr.h"
-#include "core/mp_fifo.h"
 #include "core/input/input.h"
 #include "core/input/keycodes.h"
 #include "getch2.h"
@@ -156,7 +155,7 @@ void get_screen_size(void){
 #endif
 }
 
-bool getch2(struct mp_fifo *fifo)
+bool getch2(struct input_ctx *input_ctx)
 {
     int retval = read(0, &getch2_buf[getch2_len], BUF_LEN-getch2_len);
     /* Return false on EOF to stop running select() on the FD, as it'd
@@ -281,7 +280,7 @@ bool getch2(struct mp_fifo *fifo)
         getch2_len -= len;
         for (i = 0; i < getch2_len; i++)
             getch2_buf[i] = getch2_buf[len+i];
-        mplayer_put_key(fifo, code);
+        mp_input_put_key(input_ctx, code);
     }
     return true;
 }

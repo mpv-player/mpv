@@ -32,7 +32,7 @@
 
 #include "core/input/input.h"
 #include "core/input/keycodes.h"
-#include "core/mp_fifo.h"
+#include "core/input/input.h"
 #include "core/mp_msg.h"
 #include "core/options.h"
 
@@ -484,7 +484,7 @@ static void check_events(struct vo *vo)
             }
             break;
         case SDL_QUIT:
-            mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
+            mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
             break;
         case SDL_TEXTINPUT: {
             int sdl_mod = SDL_GetModState();
@@ -500,7 +500,7 @@ static void check_events(struct vo *vo)
             struct bstr t = {
                 ev.text.text, strlen(ev.text.text)
             };
-            mplayer_put_key_utf8(vo->key_fifo, mpv_mod, t);
+            mp_input_put_key_utf8(vo->input_ctx, mpv_mod, t);
             break;
         }
         case SDL_KEYDOWN: {
@@ -528,7 +528,7 @@ static void check_events(struct vo *vo)
                     keycode |= MP_KEY_MODIFIER_ALT;
                 if (ev.key.keysym.mod & (KMOD_LGUI | KMOD_RGUI))
                     keycode |= MP_KEY_MODIFIER_META;
-                mplayer_put_key(vo->key_fifo, keycode);
+                mp_input_put_key(vo->input_ctx, keycode);
             }
             break;
         }
@@ -536,11 +536,11 @@ static void check_events(struct vo *vo)
             vo_mouse_movement(vo, ev.motion.x, ev.motion.y);
             break;
         case SDL_MOUSEBUTTONDOWN:
-            mplayer_put_key(vo->key_fifo,
+            mp_input_put_key(vo->input_ctx,
                 (MP_MOUSE_BTN0 + ev.button.button - 1) | MP_KEY_STATE_DOWN);
             break;
         case SDL_MOUSEBUTTONUP:
-            mplayer_put_key(vo->key_fifo,
+            mp_input_put_key(vo->input_ctx,
                 (MP_MOUSE_BTN0 + ev.button.button - 1) | MP_KEY_STATE_UP);
             break;
         case SDL_MOUSEWHEEL:

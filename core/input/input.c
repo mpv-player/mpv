@@ -38,7 +38,6 @@
 #include "osdep/getch2.h"
 
 #include "input.h"
-#include "core/mp_fifo.h"
 #include "keycodes.h"
 #include "osdep/timer.h"
 #include "core/mp_msg.h"

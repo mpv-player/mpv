@@ -68,7 +68,6 @@
 #include "screenshot.h"
 
 #include "core/mp_core.h"
-#include "mp_fifo.h"
 
 static void change_video_filters(MPContext *mpctx, const char *cmd,
                                  const char *arg);

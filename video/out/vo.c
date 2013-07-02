@@ -37,7 +37,6 @@
 #include "vo.h"
 #include "aspect.h"
 #include "core/input/input.h"
-#include "core/mp_fifo.h"
 #include "core/m_config.h"
 #include "core/mp_msg.h"
 #include "video/mp_image.h"

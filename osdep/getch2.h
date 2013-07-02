@@ -49,8 +49,8 @@ void getch2_disable(void);
 void getch2_poll(void);
 
 /* Read a character or a special key code (see keycodes.h) */
-struct mp_fifo;
-bool getch2(struct mp_fifo *fifo);
+struct input_ctx;
+bool getch2(struct input_ctx *ictx);
 
 #if defined(__MINGW32__)
 // slave cmd function for Windows
