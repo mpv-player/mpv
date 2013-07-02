@@ -2180,6 +2180,29 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
+    case MP_CMD_PLAYLIST_REMOVE: {
+        struct playlist_entry *e = playlist_entry_from_index(mpctx->playlist,
+                                                             cmd->args[0].v.i);
+        if (e) {
+            // Can't play a removed entry
+            if (mpctx->playlist->current == e)
+                mpctx->stop_play = PT_CURRENT_ENTRY;
+            playlist_remove(mpctx->playlist, e);
+        }
+        break;
+    }
+
+    case MP_CMD_PLAYLIST_MOVE: {
+        struct playlist_entry *e1 = playlist_entry_from_index(mpctx->playlist,
+                                                              cmd->args[0].v.i);
+        struct playlist_entry *e2 = playlist_entry_from_index(mpctx->playlist,
+                                                              cmd->args[1].v.i);
+        if (e1) {
+            playlist_move(mpctx->playlist, e1, e2);
+        }
+        break;
+    }
+
     case MP_CMD_STOP:
         // Go back to the starting point.
         mpctx->stop_play = PT_STOP;

@@ -183,6 +183,8 @@ static const mp_cmd_t mp_cmds[] = {
                       {"append", 1},           {"1", 1})),
   }},
   { MP_CMD_PLAYLIST_CLEAR, "playlist_clear", },
+  { MP_CMD_PLAYLIST_REMOVE, "playlist_remove", { ARG_INT } },
+  { MP_CMD_PLAYLIST_MOVE, "playlist_move", { ARG_INT, ARG_INT } },
   { MP_CMD_RUN, "run", { ARG_STRING } },
 
   { MP_CMD_KEYDOWN_EVENTS, "key_down_event", { ARG_INT } },

@@ -164,6 +164,17 @@ loadlist "<playlist>" [replace|append]
 playlist_clear
     Clear the playlist, except the currently played file.
 
+playlist_remove <index>
+    Remove the playlist entry at the given index. Index values start counting
+    with 0. You can't remove the entry for the currently played file.
+
+playlist_move <index1> <index2>
+    Move the playlist entry at index1, so that it takes the place of the
+    entry index2. (Paradoxically, the moved playlist entry will not have
+    the index value index2 after moving if index1 was lower than index2,
+    because index2 refers to the target entry, not the index the entry
+    will have after moving.)
+
 run "<command>"
     Run the given command with ``/bin/sh -c``. The string is expanded like in
     property_expansion_.

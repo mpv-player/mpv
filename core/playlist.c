@@ -114,6 +114,20 @@ void playlist_clear(struct playlist *pl)
     pl->current_was_replaced = false;
 }
 
+// Moves entry such that entry->prev = at (even if at is NULL)
+void playlist_move(struct playlist *pl, struct playlist_entry *entry,
+                   struct playlist_entry *at)
+{
+    struct playlist_entry *save_current = pl->current;
+    bool save_replaced = pl->current_was_replaced;
+
+    playlist_unlink(pl, entry);
+    playlist_insert(pl, at ? at->prev : pl->last, entry);
+
+    pl->current = save_current;
+    pl->current_was_replaced = save_replaced;
+}
+
 void playlist_add_file(struct playlist *pl, const char *filename)
 {
     playlist_add(pl, playlist_entry_new(filename));

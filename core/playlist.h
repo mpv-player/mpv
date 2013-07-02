@@ -58,6 +58,9 @@ void playlist_add(struct playlist *pl, struct playlist_entry *add);
 void playlist_remove(struct playlist *pl, struct playlist_entry *entry);
 void playlist_clear(struct playlist *pl);
 
+void playlist_move(struct playlist *pl, struct playlist_entry *entry,
+                   struct playlist_entry *at);
+
 void playlist_add_file(struct playlist *pl, const char *filename);
 void playlist_shuffle(struct playlist *pl);
 struct playlist_entry *playlist_get_next(struct playlist *pl, int direction);
