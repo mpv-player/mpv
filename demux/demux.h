@@ -93,6 +93,7 @@ enum timestamp_type {
 #define DEMUXER_CTRL_OK 1
 #define DEMUXER_CTRL_GUESS 2
 
+#define DEMUXER_CTRL_UPDATE_INFO 8
 #define DEMUXER_CTRL_SWITCHED_TRACKS 9
 #define DEMUXER_CTRL_GET_TIME_LENGTH 10
 #define DEMUXER_CTRL_GET_START_TIME 11
@@ -385,6 +386,8 @@ int demux_info_add_bstr(struct demuxer *demuxer, struct bstr opt,
                         struct bstr param);
 char *demux_info_get(struct demuxer *demuxer, const char *opt);
 int demux_info_print(struct demuxer *demuxer);
+void demux_info_update(struct demuxer *demuxer);
+
 int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 
 void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,

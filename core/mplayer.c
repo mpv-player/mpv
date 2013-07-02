@@ -3643,6 +3643,11 @@ static void run_playloop(struct MPContext *mpctx)
             mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
     }
 
+    if (mp_time_sec() > mpctx->last_metadata_update + 2) {
+        demux_info_update(mpctx->demuxer);
+        mpctx->last_metadata_update = mp_time_sec();
+    }
+
     //================= Keyboard events, SEEKing ====================
 
     handle_pause_on_low_cache(mpctx);

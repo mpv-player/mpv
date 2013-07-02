@@ -103,6 +103,7 @@
 #define STREAM_CTRL_GET_CHAPTER_TIME 21
 #define STREAM_CTRL_GET_DVD_INFO 22
 #define STREAM_CTRL_SET_CONTENTS 23
+#define STREAM_CTRL_GET_METADATA 24
 
 struct stream_lang_req {
     int type;     // STREAM_AUDIO, STREAM_SUB

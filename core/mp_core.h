@@ -226,6 +226,7 @@ typedef struct MPContext {
     double audio_delay;
 
     double last_heartbeat;
+    double last_metadata_update;
 
     double mouse_timer;
     unsigned int mouse_event_ts;
