@@ -524,6 +524,7 @@ static void cache_uninit(stream_t *cache)
     pthread_mutex_destroy(&s->mutex);
     pthread_cond_destroy(&s->wakeup);
     free(s->buffer);
+    free(s->bm);
     talloc_free(s);
 }
 
