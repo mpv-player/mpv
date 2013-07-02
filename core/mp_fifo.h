@@ -20,13 +20,21 @@
 #define MPLAYER_MP_FIFO_H
 
 #include "core/bstr.h"
+#include "core/input/input.h"
 
 struct mp_fifo;
-void mplayer_put_key(struct mp_fifo *fifo, int code);
-void mplayer_put_key_utf8(struct mp_fifo *fifo, int mods, struct bstr code);
-// Can be freed with talloc_free()
 struct input_ctx;
-struct MPOpts;
-struct mp_fifo *mp_fifo_create(struct input_ctx *input, struct MPOpts *opts);
+
+// New code should use the wrapped functions directly.
+
+static inline void mplayer_put_key(struct mp_fifo *fifo, int code)
+{
+    mp_input_put_key((struct input_ctx *)fifo, code);
+}
+
+static inline void mplayer_put_key_utf8(struct mp_fifo *fifo, int mods, struct bstr t)
+{
+    mp_input_put_key_utf8((struct input_ctx *)fifo, mods, t);
+}
 
 #endif /* MPLAYER_MP_FIFO_H */

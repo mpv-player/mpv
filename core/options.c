@@ -686,7 +686,6 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
     OPT_FLAG("consolecontrols", consolecontrols, CONF_GLOBAL),
     OPT_FLAG("mouse-movements", vo.enable_mouse_movements, CONF_GLOBAL),
-    OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
 #ifdef CONFIG_TV
     {"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif /* CONFIG_TV */
@@ -782,7 +781,6 @@ const struct MPOpts mp_default_opts = {
     .initial_audio_sync = 1,
     .term_osd = 2,
     .consolecontrols = 1,
-    .doubleclick_time = 300,
     .play_frames = -1,
     .keep_open = 0,
     .audio_id = -1,
@@ -820,6 +818,7 @@ const struct MPOpts mp_default_opts = {
     },
     .input = {
         .key_fifo_size = 7,
+        .doubleclick_time = 300,
         .ar_delay = 200,
         .ar_rate = 40,
         .use_joystick = 1,

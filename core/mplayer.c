@@ -588,8 +588,6 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     mpctx->ass_library = NULL;
 #endif
 
-    talloc_free(mpctx->key_fifo);
-
     if (how != EXIT_NONE) {
         const char *reason;
         switch (how) {
@@ -2384,9 +2382,8 @@ int reinit_video_chain(struct MPContext *mpctx)
     double ar = -1.0;
     //================== Init VIDEO (codec & libvo) ==========================
     if (!opts->fixed_vo || !(mpctx->initialized_flags & INITIALIZED_VO)) {
-        mpctx->video_out
-            = init_best_video_out(&opts->vo, mpctx->key_fifo, mpctx->input,
-                                  mpctx->encode_lavc_ctx);
+        mpctx->video_out = init_best_video_out(&opts->vo, mpctx->input,
+                                               mpctx->encode_lavc_ctx);
         if (!mpctx->video_out) {
             mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, "Error opening/initializing "
                     "the selected video_out (-vo) device.\n");
@@ -3736,13 +3733,6 @@ static void run_playloop(struct MPContext *mpctx)
     execute_queued_seek(mpctx);
 }
 
-static int read_keys(void *ctx, int fd)
-{
-    if (getch2(ctx))
-        return MP_INPUT_NOTHING;
-    return MP_INPUT_DEAD;
-}
-
 static bool attachment_is_font(struct demux_attachment *att)
 {
     if (!att->name || !att->type || !att->data || !att->data_size)
@@ -3849,20 +3839,26 @@ static void check_previous_track_selection(struct MPContext *mpctx)
     talloc_free(h);
 }
 
+static int read_keys(void *ctx, int fd)
+{
+    if (getch2(ctx))
+        return MP_INPUT_NOTHING;
+    return MP_INPUT_DEAD;
+}
+
 static void init_input(struct MPContext *mpctx)
 {
     mpctx->input = mp_input_init(&mpctx->opts.input, mpctx->opts.load_config);
-    mpctx->key_fifo = mp_fifo_create(mpctx->input, &mpctx->opts);
     if (mpctx->opts.slave_mode)
         mp_input_add_cmd_fd(mpctx->input, 0, USE_FD0_CMD_SELECT, MP_INPUT_SLAVE_CMD_FUNC, NULL);
     else if (mpctx->opts.consolecontrols)
-        mp_input_add_key_fd(mpctx->input, 0, 1, read_keys, NULL, mpctx->key_fifo);
+        mp_input_add_key_fd(mpctx->input, 0, 1, read_keys, NULL, mpctx->input);
     // Set the libstream interrupt callback
     stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
 
 #ifdef CONFIG_COCOA
     cocoa_set_input_context(mpctx->input);
-    cocoa_set_key_fifo(mpctx->key_fifo);
+    cocoa_set_key_fifo((struct mp_fifo *)mpctx->input);
 #endif
 }
 

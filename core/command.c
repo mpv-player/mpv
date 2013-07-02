@@ -2431,7 +2431,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_KEYDOWN_EVENTS:
-        mplayer_put_key(mpctx->key_fifo, cmd->args[0].v.i);
+        mp_input_put_key(mpctx->input, cmd->args[0].v.i);
         break;
 
     case MP_CMD_ENABLE_INPUT_SECTION:

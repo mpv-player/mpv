@@ -291,7 +291,6 @@ struct vo {
 };
 
 struct vo *init_best_video_out(struct mp_vo_opts *opts,
-                               struct mp_fifo *key_fifo,
                                struct input_ctx *input_ctx,
                                struct encode_lavc_context *encode_lavc_ctx);
 int vo_reconfig(struct vo *vo, struct mp_image_params *p, int flags);

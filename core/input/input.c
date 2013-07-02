@@ -520,6 +520,10 @@ struct input_ctx {
     int64_t last_key_down;
     struct mp_cmd *current_down_cmd;
 
+    int doubleclick_time;
+    int last_doubleclick_key_down;
+    double last_doubleclick_time;
+
     // Mouse position on the consumer side (as command.c sees it)
     int mouse_x, mouse_y;
     char *mouse_section; // last section to receive mouse event
@@ -580,6 +584,7 @@ static const m_option_t input_conf[] = {
 
 static const m_option_t mp_input_opts[] = {
     { "input", (void *)&input_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+    OPT_INTRANGE("doubleclick-time", input.doubleclick_time, 0, 0, 1000),
     OPT_FLAG("joystick", input.use_joystick, CONF_GLOBAL),
     OPT_FLAG("lirc", input.use_lirc, CONF_GLOBAL),
     OPT_FLAG("lircc", input.use_lircc, CONF_GLOBAL),
@@ -1417,7 +1422,7 @@ static bool key_updown_ok(enum mp_command_type cmd)
     }
 }
 
-void mp_input_feed_key(struct input_ctx *ictx, int code)
+static void mp_input_feed_key(struct input_ctx *ictx, int code)
 {
     ictx->got_new_events = true;
     if (code == MP_INPUT_RELEASE_ALL) {
@@ -1441,6 +1446,38 @@ void mp_input_feed_key(struct input_ctx *ictx, int code)
         return;
     }
     add_key_cmd(ictx, cmd);
+}
+
+void mp_input_put_key(struct input_ctx *ictx, int code)
+{
+    double now = mp_time_sec();
+    int doubleclick_time = ictx->doubleclick_time;
+    // ignore system-doubleclick if we generate these events ourselves
+    int unmod = code & ~MP_KEY_MODIFIER_MASK;
+    if (doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
+        return;
+    mp_input_feed_key(ictx, code);
+    if (code & MP_KEY_STATE_DOWN) {
+        code &= ~MP_KEY_STATE_DOWN;
+        if (ictx->last_doubleclick_key_down == code
+            && now - ictx->last_doubleclick_time < doubleclick_time / 1000.0)
+        {
+            if (code >= MP_MOUSE_BTN0 && code <= MP_MOUSE_BTN2)
+                mp_input_feed_key(ictx, code - MP_MOUSE_BTN0 + MP_MOUSE_BTN0_DBL);
+        }
+        ictx->last_doubleclick_key_down = code;
+        ictx->last_doubleclick_time = now;
+    }
+}
+
+void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t)
+{
+    while (t.len) {
+        int code = bstr_decode_utf8(t, &t);
+        if (code < 0)
+            break;
+        mp_input_put_key(ictx, code | mods);
+    }
 }
 
 static void trigger_mouse_leave(struct input_ctx *ictx, char *new_section)
@@ -1980,6 +2017,7 @@ struct input_ctx *mp_input_init(struct input_conf *input_conf,
     struct input_ctx *ictx = talloc_ptrtype(NULL, ictx);
     *ictx = (struct input_ctx){
         .key_fifo_size = input_conf->key_fifo_size,
+        .doubleclick_time = input_conf->doubleclick_time,
         .ar_state = -1,
         .ar_delay = input_conf->ar_delay,
         .ar_rate = input_conf->ar_rate,

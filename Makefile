@@ -180,7 +180,6 @@ SOURCES = talloc.c \
           core/m_property.c \
           core/m_struct.c \
           core/mp_common.c \
-          core/mp_fifo.c \
           core/mp_msg.c \
           core/mp_ring.c \
           core/mplayer.c \

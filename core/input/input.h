@@ -175,8 +175,13 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
                         int read_func(void *ctx, int fd),
                         int close_func(int fd), void *ctx);
 
-// Feed a keypress (alternative to being returned from read_func above)
-void mp_input_feed_key(struct input_ctx *ictx, int code);
+// Process keyboard input. code is a key code from keycodes.h, possibly
+// with modifiers applied. MP_INPUT_RELEASE_ALL is also a valid value.
+void mp_input_put_key(struct input_ctx *ictx, int code);
+
+// Like mp_input_put_key(), but process all UTF-8 characters in the given
+// string as key events.
+void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t);
 
 // Update mouse position (in window coordinates).
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y);
