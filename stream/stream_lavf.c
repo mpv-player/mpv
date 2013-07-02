@@ -30,7 +30,11 @@
 #include "network.h"
 #include "cookies.h"
 
+#include "core/bstr.h"
+#include "core/mp_talloc.h"
+
 static int open_f(stream_t *stream, int mode, void *opts, int *file_format);
+static char **read_icy(stream_t *stream);
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
@@ -99,6 +103,12 @@ static int control(stream_t *s, int cmd, void *arg)
         if (ts >= 0)
             return 1;
         break;
+    case STREAM_CTRL_GET_METADATA: {
+        *(char ***)arg = read_icy(s);
+        if (!*(char ***)arg)
+            break;
+        return 1;
+    }
     case STREAM_CTRL_RECONNECT: {
         if (avio && avio->write_flag)
             break; // don't bother with this
@@ -109,6 +119,15 @@ static int control(stream_t *s, int cmd, void *arg)
     }
     }
     return STREAM_UNSUPPORTED;
+}
+
+static bool mp_avio_has_opts(AVIOContext *avio)
+{
+#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 0, 0)
+    return avio->av_class != NULL;
+#else
+    return false;
+#endif
 }
 
 static const char * const prefix[] = { "lavf://", "ffmpeg://" };
@@ -179,6 +198,7 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     if (strlen(cust_headers))
         av_dict_set(&dict, "headers", cust_headers, 0);
 #endif
+    av_dict_set(&dict, "icy", "1", 0);
 
     int err = avio_open2(&avio, filename, flags, NULL, &dict);
     if (err < 0) {
@@ -188,13 +208,13 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
         goto out;
     }
 
-#if LIBAVFORMAT_VERSION_INT >= AV_VERSION_INT(54, 0, 0)
-    if (avio->av_class) {
+    if (mp_avio_has_opts(avio)) {
         uint8_t *mt = NULL;
-        if (av_opt_get(avio, "mime_type", AV_OPT_SEARCH_CHILDREN, &mt) >= 0)
+        if (av_opt_get(avio, "mime_type", AV_OPT_SEARCH_CHILDREN, &mt) >= 0) {
             stream->mime_type = talloc_strdup(stream, mt);
+            av_free(mt);
+        }
     }
-#endif
 
     char *rtmp[] = {"rtmp:", "rtmpt:", "rtmpe:", "rtmpte:", "rtmps:"};
     for (int i = 0; i < FF_ARRAY_ELEMS(rtmp); i++)
@@ -223,6 +243,71 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
 out:
     av_dict_free(&dict);
     talloc_free(temp);
+    return res;
+}
+
+static void append_meta(char ***info, int *num_info, bstr name, bstr val)
+{
+    if (name.len && val.len) {
+        char *cname = talloc_asprintf(*info, "%.*s", BSTR_P(name));
+        char *cval = talloc_asprintf(*info, "%.*s", BSTR_P(val));
+        MP_TARRAY_APPEND(NULL, *info, *num_info, cname);
+        MP_TARRAY_APPEND(NULL, *info, *num_info, cval);
+    }
+}
+
+static char **read_icy(stream_t *s)
+{
+    AVIOContext *avio = s->priv;
+
+    if (!mp_avio_has_opts(avio))
+        return NULL;
+
+    uint8_t *icy_header = NULL;
+    if (av_opt_get(avio, "icy_metadata_headers", AV_OPT_SEARCH_CHILDREN,
+                   &icy_header) < 0)
+        icy_header = NULL;
+
+    uint8_t *icy_packet;
+    if (av_opt_get(avio, "icy_metadata_packet", AV_OPT_SEARCH_CHILDREN,
+                   &icy_packet) < 0)
+        icy_packet = NULL;
+
+    char **res = NULL;
+
+    if ((!icy_header || !icy_header[0]) && (!icy_packet || !icy_packet[0]))
+        goto done;
+
+    res = talloc_new(NULL);
+    int num_res = 0;
+    bstr header = bstr0(icy_header);
+    while (header.len) {
+        bstr line = bstr_strip_linebreaks(bstr_getline(header, &header));
+        bstr name, val;
+        if (bstr_split_tok(line, ": ", &name, &val)) {
+            bstr_eatstart0(&name, "icy-");
+            append_meta(&res, &num_res, name, val);
+        }
+    }
+
+    bstr packet = bstr0(icy_packet);
+    bstr head = bstr0("StreamTitle='");
+    int i = bstr_find(packet, head);
+    if (i >= 0) {
+        packet = bstr_cut(packet, i + head.len);
+        int end = bstrchr(packet, '\'');
+        packet = bstr_splice(packet, 0, end);
+        append_meta(&res, &num_res, bstr0("title"), packet);
+    }
+
+    if (res) {
+        MP_TARRAY_APPEND(NULL, res, num_res, NULL);
+        MP_TARRAY_APPEND(NULL, res, num_res, NULL);
+    }
+
+done:
+    av_free(icy_header);
+    av_free(icy_packet);
     return res;
 }
 
