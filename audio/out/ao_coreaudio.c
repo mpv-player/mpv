@@ -308,16 +308,18 @@ static int init(struct ao *ao, char *params)
     // Save selected device id
     p->device = selected_device;
 
-    struct mp_chmap_sel chmap_sel = {0};
-    mp_chmap_sel_add_waveext(&chmap_sel);
-    if (!ao_chmap_sel_adjust(ao, &chmap_sel, &ao->channels))
-        goto coreaudio_error;
-
     bool supports_digital = false;
     /* Probe whether device support S/PDIF stream output if input is AC3 stream. */
     if (AF_FORMAT_IS_AC3(ao->format)) {
         if (AudioDeviceSupportsDigital(selected_device))
             supports_digital = true;
+    }
+
+    if (!supports_digital) {
+        struct mp_chmap_sel chmap_sel = {0};
+        mp_chmap_sel_add_waveext(&chmap_sel);
+        if (!ao_chmap_sel_adjust(ao, &chmap_sel, &ao->channels))
+            goto coreaudio_error;
     }
 
     // Build ASBD for the input format
