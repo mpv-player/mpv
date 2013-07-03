@@ -182,6 +182,9 @@ void vo_cocoa_uninit(struct vo *vo)
         enable_power_management(vo);
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
 
+        if (vo->opts->fs)
+            [[s->view window] release];
+
         [s->window release];
         s->window = nil;
         [s->glContext release];
@@ -833,7 +836,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
     if (!vo->opts->fs) {
         NSPoint loc = [self mouseLocationUpperLeft];
-        movable = !mp_input_test_mouse(vo->input_ctx, loc.x, loc.y);
+        movable = !mp_input_test_dragging(vo->input_ctx, loc.x, loc.y);
     }
 
     [self.window setMovableByWindowBackground:movable];

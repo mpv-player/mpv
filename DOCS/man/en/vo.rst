@@ -465,6 +465,10 @@ opengl
         that when using FBO indirections (such as with ``opengl-hq``), a FBO
         format with alpha must be specified with the ``fbo-format`` option.
 
+    chroma-location=<auto|center|left>
+        Set the YUV chroma sample location. auto means use the bitstream
+        flags (default: auto).
+
 opengl-hq
     Same as ``opengl``, but with default settings for high quality rendering.
 

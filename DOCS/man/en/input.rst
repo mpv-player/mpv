@@ -376,7 +376,6 @@ stream-time-pos             x time position in source stream (also see time-pos)
 length                        length of the current file in seconds
 avsync                        last A/V synchronization difference
 percent-pos                 x position in current file (0-100)
-ratio-pos                   x position in current file (0.0-1.0)
 time-pos                    x position in current file in seconds
 time-remaining                estimated remaining length of the file in seconds
 chapter                     x current chapter number

@@ -1788,12 +1788,10 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
     assert(track && sh_sub);
     struct dec_sub *dec_sub = sh_sub->dec_sub;
 
-    double video_offset = track->under_timeline ? mpctx->video_offset : 0;
+    mpctx->osd->video_offset = track->under_timeline ? mpctx->video_offset : 0;
 
-    mpctx->osd->sub_offset = video_offset - opts->sub_delay;
-
-    double curpts_s = refpts_tl - mpctx->osd->sub_offset;
-    double refpts_s = refpts_tl - video_offset;
+    double refpts_s = refpts_tl - mpctx->osd->video_offset;
+    double curpts_s = refpts_s + opts->sub_delay;
 
     if (!track->preloaded) {
         struct demux_stream *d_sub = sh_sub->ds;
@@ -2735,6 +2733,8 @@ static bool redraw_osd(struct MPContext *mpctx)
     if (vo_redraw_frame(vo) < 0)
         return false;
 
+    if (mpctx->sh_video)
+        update_subtitles(mpctx, mpctx->sh_video->pts);
     draw_osd(mpctx);
 
     vo_flip_page(vo, 0, -1);
@@ -4522,6 +4522,16 @@ static void play_files(struct MPContext *mpctx)
         if (!mpctx->playlist->current && !mpctx->opts.player_idle_mode)
             break;
     }
+}
+
+// Abort current playback and set the given entry to play next.
+// e must be on the mpctx->playlist.
+void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
+{
+    assert(playlist_entry_to_index(mpctx->playlist, e) >= 0);
+    mpctx->playlist->current = e;
+    mpctx->playlist->current_was_replaced = false;
+    mpctx->stop_play = PT_CURRENT_ENTRY;
 }
 
 void mp_print_version(int always)

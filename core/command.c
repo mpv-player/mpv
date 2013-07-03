@@ -55,7 +55,6 @@
 #include "video/decode/dec_video.h"
 #include "audio/decode/dec_audio.h"
 #include "core/path.h"
-#include "sub/ass_mp.h"
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 #include "stream/pvr.h"
@@ -304,29 +303,14 @@ static int mp_property_percent_pos(m_option_t *prop, int action,
 
     switch (action) {
     case M_PROPERTY_SET: ;
-        int pos = *(int *)arg;
+        double pos = *(double *)arg;
         queue_seek(mpctx, MPSEEK_FACTOR, pos / 100.0, 0);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(int *)arg = get_percent_pos(mpctx);
+        *(double *)arg = get_current_pos_ratio(mpctx, false) * 100.0;
         return M_PROPERTY_OK;
-    }
-    return M_PROPERTY_NOT_IMPLEMENTED;
-}
-
-static int mp_property_ratio_pos(m_option_t *prop, int action,
-                                   void *arg, MPContext *mpctx)
-{
-    if (!mpctx->num_sources)
-        return M_PROPERTY_UNAVAILABLE;
-
-    switch (action) {
-    case M_PROPERTY_SET: ;
-        double pos = *(double *)arg;
-        queue_seek(mpctx, MPSEEK_FACTOR, pos, 0);
-        return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-        *(double *)arg = get_current_pos_ratio(mpctx, false);
+    case M_PROPERTY_PRINT:
+        *(char **)arg = talloc_asprintf(NULL, "%d", get_percent_pos(mpctx));
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -1450,7 +1434,7 @@ static int mp_property_sub_delay(m_option_t *prop, int action, void *arg,
         *(char **)arg = format_delay(opts->sub_delay);
         return M_PROPERTY_OK;
     }
-    return mp_property_generic_option(prop, action, arg, mpctx);
+    return property_osd_helper(prop, action, arg, mpctx);
 }
 
 static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
@@ -1494,29 +1478,39 @@ static int mp_property_tv_color(m_option_t *prop, int action, void *arg,
 
 #endif
 
-static int count_playlist_pos(struct playlist *pl, struct playlist_entry *e)
-{
-    struct playlist_entry *cur = pl->first;
-    int pos = 0;
-    if (!e)
-        return -1;
-    while (cur && cur != e) {
-        cur = cur->next;
-        pos++;
-    }
-    return cur == e ? pos : -1;
-}
-
 static int mp_property_playlist_pos(m_option_t *prop, int action, void *arg,
                                     MPContext *mpctx)
 {
-    if (action == M_PROPERTY_GET) {
-        struct playlist *pl = mpctx->playlist;
-        int pos = count_playlist_pos(pl, pl->current);
+    struct playlist *pl = mpctx->playlist;
+    if (!pl->first)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_GET: {
+        int pos = playlist_entry_to_index(pl, pl->current);
         if (pos < 0)
             return M_PROPERTY_UNAVAILABLE;
         *(int *)arg = pos;
         return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_SET: {
+        struct playlist_entry *e = playlist_entry_from_index(pl, *(int *)arg);
+        if (!e)
+            return M_PROPERTY_ERROR;
+        mp_set_playlist_entry(mpctx, e);
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_GET_TYPE: {
+        struct m_option opt = {
+            .name = prop->name,
+            .type = CONF_TYPE_INT,
+            .flags = CONF_RANGE,
+            .min = 0,
+            .max = playlist_entry_count(pl) - 1,
+        };
+        *(struct m_option *)arg = opt;
+        return M_PROPERTY_OK;
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -1525,8 +1519,7 @@ static int mp_property_playlist_count(m_option_t *prop, int action, void *arg,
                                       MPContext *mpctx)
 {
     if (action == M_PROPERTY_GET) {
-        struct playlist *pl = mpctx->playlist;
-        *(int *)arg = count_playlist_pos(pl, pl->last) + 1;
+        *(int *)arg = playlist_entry_count(mpctx->playlist);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -1614,10 +1607,8 @@ static const m_option_t mp_properties[] = {
     { "length", mp_property_length, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
     { "avsync", mp_property_avsync, CONF_TYPE_DOUBLE },
-    { "percent-pos", mp_property_percent_pos, CONF_TYPE_INT,
+    { "percent-pos", mp_property_percent_pos, CONF_TYPE_DOUBLE,
       M_OPT_RANGE, 0, 100, NULL },
-    { "ratio-pos", mp_property_ratio_pos, CONF_TYPE_DOUBLE,
-      M_OPT_RANGE, 0, 1, NULL },
     { "time-pos", mp_property_time_pos, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
     { "time-remaining", mp_property_remaining, CONF_TYPE_TIME },
@@ -1642,7 +1633,10 @@ static const m_option_t mp_properties[] = {
 
     { "chapter-list", mp_property_list_chapters, CONF_TYPE_STRING },
     { "track-list", property_list_tracks, CONF_TYPE_STRING },
+
     { "playlist", mp_property_playlist, CONF_TYPE_STRING },
+    { "playlist-pos", mp_property_playlist_pos, CONF_TYPE_INT },
+    { "playlist-count", mp_property_playlist_count, CONF_TYPE_INT },
 
     { "playlist-pos", mp_property_playlist_pos, CONF_TYPE_INT },
     { "playlist-count", mp_property_playlist_count, CONF_TYPE_INT },
@@ -2106,18 +2100,18 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SUB_STEP:
-#ifdef CONFIG_ASS
         if (mpctx->osd->dec_sub) {
-            int movement = cmd->args[0].v.i;
-            struct ass_track *ass_track = sub_get_ass_track(mpctx->osd->dec_sub);
-            if (ass_track) {
+            double a[2];
+            a[0] = mpctx->video_pts - mpctx->osd->video_offset + opts->sub_delay;
+            a[1] = cmd->args[0].v.i;
+            if (sub_control(mpctx->osd->dec_sub, SD_CTRL_SUB_STEP, a) > 0) {
+                opts->sub_delay += a[0];
+
+                osd_changed_all(mpctx->osd);
                 set_osd_tmsg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
                              "Sub delay: %d ms", ROUND(opts->sub_delay * 1000));
-                double cur = (mpctx->video_pts + opts->sub_delay) * 1000 + .5;
-                opts->sub_delay += ass_step_sub(ass_track, cur, movement) / 1000.;
             }
         }
-#endif
         break;
 
     case MP_CMD_OSD: {
@@ -2160,11 +2154,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
         playlist_add(mpctx->playlist, playlist_entry_new(filename));
 
-        if (!append) {
-            mpctx->playlist->current = mpctx->playlist->first;
-            mpctx->playlist->current_was_replaced = false;
-            mpctx->stop_play = PT_CURRENT_ENTRY;
-        }
+        if (!append)
+            mp_set_playlist_entry(mpctx, mpctx->playlist->first);
         break;
     }
 
@@ -2178,10 +2169,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             playlist_transfer_entries(mpctx->playlist, pl);
             talloc_free(pl);
 
-            if (!append) {
-                mpctx->playlist->current = mpctx->playlist->first;
-                mpctx->stop_play = PT_CURRENT_ENTRY;
-            }
+            if (!append && mpctx->playlist->first)
+                mp_set_playlist_entry(mpctx, mpctx->playlist->first);
         } else {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
                     "\nUnable to load playlist %s.\n", filename);

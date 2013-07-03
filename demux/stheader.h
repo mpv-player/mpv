@@ -149,9 +149,7 @@ typedef struct sh_video {
     int colorspace;       // mp_csp
     int color_range;      // mp_csp_levels
     // output driver/filters: (set by libmpcodecs core)
-    unsigned int outfmt;
     struct vf_instance *vfilter;  // video filter chain
-    int output_flags;       // query_format() results for output filters+vo
     const struct vd_functions *vd_driver;
     int vf_initialized;   // -1 failed, 0 not done, 1 done
     // win32-compatible codec parameters:

@@ -54,6 +54,7 @@ struct sd_functions {
     void (*uninit)(struct sd *sd);
 
     void (*fix_events)(struct sd *sd);
+    int (*control)(struct sd *sd, enum sd_ctrl cmd, void *arg);
 
     // decoder
     void (*get_bitmaps)(struct sd *sd, struct mp_osd_res dim, double pts,

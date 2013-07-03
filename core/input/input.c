@@ -501,13 +501,6 @@ struct cmd_bind_section {
 };
 
 #define MAX_ACTIVE_SECTIONS 5
-#define MAX_MOUSE_AREA_RCS MAX_ACTIVE_SECTIONS
-
-struct mp_mouse_area
-{
-    struct mp_rect rc[MAX_MOUSE_AREA_RCS];
-    int num_rc;
-};
 
 struct active_section {
     char *name;
@@ -522,7 +515,6 @@ struct input_ctx {
     // Autorepeat stuff
     short ar_state;
     int64_t last_ar;
-    mp_cmd_t *ar_cmd;
 
     // Autorepeat config
     unsigned int ar_delay;
@@ -1948,37 +1940,20 @@ void mp_input_set_section_mouse_area(struct input_ctx *ictx, char *name,
     s->mouse_area_set = x0 != x1 && y0 != y1;
 }
 
-struct mp_mouse_area *mp_mouse_area_create(void)
+bool mp_input_test_mouse_active(struct input_ctx *ictx, int x, int y)
 {
-    return talloc_zero(NULL, struct mp_mouse_area);
-}
-
-void mp_input_get_mouse_area(struct input_ctx *ictx, struct mp_mouse_area *dst)
-{
-    dst->num_rc = 0;
     for (int i = 0; i < ictx->num_active_sections; i++) {
         char *name = ictx->active_sections[i].name;
         struct cmd_bind_section *s = get_bind_section(ictx, bstr0(name));
-        if (s->mouse_area_set && dst->num_rc < MAX_MOUSE_AREA_RCS)
-            dst->rc[dst->num_rc++] = s->mouse_area;
-    }
-}
-
-// Like mp_input_test(), but on a mouse area from mp_input_get_mouse_area().
-bool mp_mouse_area_test(struct mp_mouse_area *ma, int x, int y)
-{
-    for (int n = 0; n < ma->num_rc; n++) {
-        if (test_rect(&ma->rc[n], x, y))
+        if (s->mouse_area_set && test_rect(&s->mouse_area, x, y))
             return true;
     }
     return false;
 }
 
-bool mp_input_test_mouse(struct input_ctx *ictx, int x, int y)
+bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y)
 {
-    struct mp_mouse_area ma;
-    mp_input_get_mouse_area(ictx, &ma);
-    return mp_mouse_area_test(&ma, x, y);
+    return mp_input_test_mouse_active(ictx, x, y);
 }
 
 // builtin: if true, remove all builtin binds, else remove all user binds
@@ -2220,7 +2195,7 @@ unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
 {
     // Make the frontend always display the mouse cursor (as long as it's not
     // forced invisible) if mouse input is desired.
-    if (mp_input_test_mouse(ictx, ictx->mouse_x, ictx->mouse_y))
+    if (mp_input_test_mouse_active(ictx, ictx->mouse_x, ictx->mouse_y))
         ictx->mouse_event_counter++;
     return ictx->mouse_event_counter;
 }

@@ -36,21 +36,28 @@ typedef struct vf_info {
     const char *author;
     const char *comment;
     int (*vf_open)(struct vf_instance *vf, char *args);
-    // Ptr to a struct dscribing the options
+    // Ptr to a struct describing the options
     const void *opts;
 } vf_info_t;
 
 struct vf_format {
     int configured;
-    int w, h, dw, dh, flags, fmt;
+    struct mp_image_params params;
+    int flags;
 };
 
 typedef struct vf_instance {
     const vf_info_t *info;
-    // funcs:
+
     int (*config)(struct vf_instance *vf,
                   int width, int height, int d_width, int d_height,
                   unsigned int flags, unsigned int outfmt);
+
+    // Alternative to config() (can pass more image parameters)
+    // Note: the callee is allowed to write *params.
+    int (*reconfig)(struct vf_instance *vf, struct mp_image_params *params,
+                    int flags);
+
     int (*control)(struct vf_instance *vf, int request, void *data);
     int (*query_format)(struct vf_instance *vf, unsigned int fmt);
 
@@ -131,6 +138,9 @@ int vf_next_config(struct vf_instance *vf,
 int vf_next_control(struct vf_instance *vf, int request, void *data);
 int vf_next_query_format(struct vf_instance *vf, unsigned int fmt);
 
+int vf_next_reconfig(struct vf_instance *vf, struct mp_image_params *params,
+                     int flags);
+
 struct m_obj_settings;
 vf_instance_t *append_filters(vf_instance_t *last,
                               struct m_obj_settings *vf_settings);
@@ -140,9 +150,8 @@ vf_instance_t *vf_find_by_label(vf_instance_t *chain, const char *label);
 void vf_uninit_filter(vf_instance_t *vf);
 void vf_uninit_filter_chain(vf_instance_t *vf);
 
-int vf_config_wrapper(struct vf_instance *vf,
-                      int width, int height, int d_width, int d_height,
-                      unsigned int flags, unsigned int outfmt);
+int vf_reconfig_wrapper(struct vf_instance *vf, struct mp_image_params *params,
+                        int flags);
 void vf_print_filter_chain(int msglevel, struct vf_instance *vf);
 
 void vf_rescale_dsize(int *d_width, int *d_height, int old_w, int old_h,

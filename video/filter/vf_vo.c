@@ -37,22 +37,18 @@ struct vf_priv_s {
 };
 #define video_out (vf->priv->vo)
 
-static int config(struct vf_instance *vf,
-                  int width, int height, int d_width, int d_height,
-                  unsigned int flags, unsigned int outfmt)
+static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags)
 {
-
-    if ((width <= 0) || (height <= 0) || (d_width <= 0) || (d_height <= 0)) {
+    if (p->w <= 0 || p->h <= 0 || p->d_w <= 0 || p->d_h <= 0) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "VO: invalid dimensions!\n");
-        return 0;
+        return -1;
     }
 
     const vo_info_t *info = video_out->driver->info;
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "VO: [%s] %dx%d => %dx%d %s %s%s\n",
            info->short_name,
-           width, height,
-           d_width, d_height,
-           vo_format_name(outfmt),
+           p->w, p->h, p->d_w, p->d_h,
+           vo_format_name(p->imgfmt),
            (flags & VOFLAG_FULLSCREEN) ? " [fs]" : "",
            (flags & VOFLAG_FLIPPING) ? " [flip]" : "");
     mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Description: %s\n", info->name);
@@ -60,10 +56,7 @@ static int config(struct vf_instance *vf,
     if (info->comment && strlen(info->comment) > 0)
         mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Comment: %s\n", info->comment);
 
-    if (vo_config(video_out, width, height, d_width, d_height, flags, outfmt))
-        return 0;
-
-    return 1;
+    return vo_reconfig(video_out, p, flags);
 }
 
 static int control(struct vf_instance *vf, int request, void *data)
@@ -120,7 +113,7 @@ static void uninit(struct vf_instance *vf)
 
 static int vf_open(vf_instance_t *vf, char *args)
 {
-    vf->config = config;
+    vf->reconfig = reconfig;
     vf->control = control;
     vf->query_format = query_format;
     vf->uninit = uninit;
