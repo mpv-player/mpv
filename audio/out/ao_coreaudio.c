@@ -187,9 +187,6 @@ coreaudio_error:
     return CONTROL_ERROR;
 }
 
-static int AudioStreamChangeFormat(AudioStreamID stream,
-                                   AudioStreamBasicDescription change_format);
-
 static void print_help(void)
 {
     char *help = talloc_strdup(NULL,
