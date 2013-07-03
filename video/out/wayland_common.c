@@ -36,7 +36,6 @@
 #include "core/bstr.h"
 #include "core/options.h"
 #include "core/mp_msg.h"
-#include "core/mp_fifo.h"
 #include "libavutil/common.h"
 #include "talloc.h"
 
