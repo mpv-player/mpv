@@ -78,7 +78,6 @@ struct priv_d {
 
 struct priv {
     AudioDeviceID device;   // selected device
-    bool supports_digital;  // selected device supports digital mode?
     bool is_digital;        // running in digital mode?
 
     AudioUnit audio_unit;   // AudioUnit for lpcm output
@@ -263,7 +262,6 @@ static int init(struct ao *ao, char *params)
     struct priv *p = talloc_zero(ao, struct priv);
     *p = (struct priv) {
         .device = 0,
-        .supports_digital = false,
         .is_digital = 0,
     };
 
@@ -315,10 +313,17 @@ static int init(struct ao *ao, char *params)
     if (!ao_chmap_sel_adjust(ao, &chmap_sel, &ao->channels))
         goto coreaudio_error;
 
+    bool supports_digital = false;
+    /* Probe whether device support S/PDIF stream output if input is AC3 stream. */
+    if (AF_FORMAT_IS_AC3(ao->format)) {
+        if (AudioDeviceSupportsDigital(selected_device))
+            supports_digital = true;
+    }
+
     // Build ASBD for the input format
     AudioStreamBasicDescription asbd;
     asbd.mSampleRate       = ao->samplerate;
-    asbd.mFormatID         = p->supports_digital ?
+    asbd.mFormatID         = supports_digital ?
                              kAudioFormat60958AC3 : kAudioFormatLinearPCM;
     asbd.mChannelsPerFrame = ao->channels.num;
     asbd.mBitsPerChannel   = af_fmt2bits(ao->format);
@@ -340,13 +345,7 @@ static int init(struct ao *ao, char *params)
 
     ca_print_asbd("source format:", &asbd);
 
-    /* Probe whether device support S/PDIF stream output if input is AC3 stream. */
-    if (AF_FORMAT_IS_AC3(ao->format)) {
-        if (AudioDeviceSupportsDigital(selected_device))
-            p->supports_digital = true;
-    }
-
-    if (p->supports_digital)
+    if (supports_digital)
         return init_digital(ao, asbd);
     else
         return init_lpcm(ao, asbd);
