@@ -48,7 +48,6 @@ struct vo_wayland_output {
 };
 
 struct vo_wayland_display {
-    struct wl_output *output;
     struct wl_display *display;
     struct wl_registry *registry;
     struct wl_compositor *compositor;
@@ -73,7 +72,6 @@ struct vo_wayland_display {
     int output_mode_received;
 
     uint32_t formats;
-    uint32_t mask;
 };
 
 struct vo_wayland_window {
