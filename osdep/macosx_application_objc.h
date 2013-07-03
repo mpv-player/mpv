@@ -43,7 +43,6 @@ struct cocoa_input_queue;
 - (void)stopPlayback;
 
 @property(nonatomic, assign) struct input_ctx *inputContext;
-@property(nonatomic, assign) struct mp_fifo *keyFIFO;
 @property(nonatomic, retain) InputQueue *iqueue;
 @property(nonatomic, retain) EventsResponder *eventsResponder;
 @property(nonatomic, retain) NSMutableDictionary *menuItems;
