@@ -557,7 +557,7 @@ static void resize_window(struct vo_wayland_state *wl,
         w->events |= VO_EVENT_RESIZE;
     }
     else
-        mp_msg(MSGT_VO, MSGL_WARN, "[waylnad] No resizing possible!\n");
+        mp_msg(MSGT_VO, MSGL_WARN, "[wayland] No resizing possible!\n");
 }
 
 
