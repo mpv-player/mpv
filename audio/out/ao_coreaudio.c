@@ -350,7 +350,7 @@ static int init(struct ao *ao, char *params)
         return init_lpcm(ao, asbd);
 
 coreaudio_error:
-    return CONTROL_FALSE;
+    return CONTROL_ERROR;
 }
 
 static int init_lpcm(struct ao *ao, AudioStreamBasicDescription asbd)
@@ -436,7 +436,7 @@ coreaudio_error_audiounit:
 coreaudio_error_component:
     AudioComponentInstanceDispose(p->audio_unit);
 coreaudio_error:
-    return CONTROL_FALSE;
+    return CONTROL_ERROR;
 }
 
 static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
@@ -574,7 +574,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
 coreaudio_error:
     err = ca_unlock_device(p->device, &d->hog_pid);
     CHECK_CA_WARN("can't release hog mode");
-    return CONTROL_FALSE;
+    return CONTROL_ERROR;
 }
 
 static int play(struct ao *ao, void *output_samples, int num_bytes, int flags)
