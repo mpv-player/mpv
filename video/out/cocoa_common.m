@@ -31,7 +31,6 @@
 #include "vo.h"
 #include "aspect.h"
 
-#include "core/mp_fifo.h"
 #include "talloc.h"
 
 #include "core/mp_msg.h"

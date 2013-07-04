@@ -262,7 +262,6 @@ struct vo {
     struct vo_w32_state *w32;
     struct vo_cocoa_state *cocoa;
     struct vo_wayland_state *wayland;
-    struct mp_fifo *key_fifo;
     struct encode_lavc_context *encode_lavc_ctx;
     struct input_ctx *input_ctx;
     int event_fd;  // check_events() should be called when this has input

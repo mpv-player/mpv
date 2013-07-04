@@ -292,7 +292,6 @@ struct vo *init_best_video_out(struct mp_vo_opts *opts,
     struct vo *vo = talloc_ptrtype(NULL, vo);
     struct vo initial_values = {
         .opts = opts,
-        .key_fifo = (struct mp_fifo *)input_ctx,
         .encode_lavc_ctx = encode_lavc_ctx,
         .input_ctx = input_ctx,
         .event_fd = -1,
