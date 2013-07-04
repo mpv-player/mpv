@@ -432,6 +432,8 @@ int stream_read_partial(stream_t *s, char *buf, int buf_size)
     int len = FFMIN(buf_size, s->buf_len - s->buf_pos);
     memcpy(buf, &s->buffer[s->buf_pos], len);
     s->buf_pos += len;
+    if (len > 0)
+        s->eof = 0;
     return len;
 }
 
@@ -445,7 +447,10 @@ int stream_read(stream_t *s, char *mem, int total)
         mem += read;
         len -= read;
     }
-    return total - len;
+    total -= len;
+    if (total > 0)
+        s->eof = 0;
+    return total;
 }
 
 // Read ahead at most len bytes without changing the read position. Return a
