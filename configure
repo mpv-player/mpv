@@ -310,7 +310,7 @@ Optional features:
   --disable-networking   disable networking [enable]
   --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
-  --enable-libquvi       enable libquvi [autodetect]
+  --disable-libquvi4     disable libquvi 0.4.x [autodetect]
   --disable-libquvi9     disable libquvi 0.9.x [autodetect]
   --enable-lcms2         enable LCMS2 support [autodetect]
   --disable-vcd          disable VCD support [autodetect]
@@ -466,7 +466,7 @@ _pvr=auto
 networking=yes
 _winsock2_h=auto
 _smb=auto
-_libquvi=auto
+_libquvi4=auto
 _libquvi9=auto
 _libguess=auto
 _joystick=no
@@ -668,8 +668,8 @@ for ac_option do
   --disable-winsock2_h) _winsock2_h=no  ;;
   --enable-smb)         _smb=yes        ;;
   --disable-smb)        _smb=no ;;
-  --enable-libquvi)     _libquvi=yes    ;;
-  --disable-libquvi)    _libquvi=no     ;;
+  --enable-libquvi4)    _libquvi4=yes    ;;
+  --disable-libquvi4)   _libquvi4=no     ;;
   --enable-libquvi9)    _libquvi9=yes    ;;
   --disable-libquvi9)   _libquvi9=no     ;;
   --enable-libguess)    _libguess=yes   ;;
@@ -1732,22 +1732,22 @@ fi
 echores "$_smb"
 
 
-echocheck "libquvi support"
-if test "$_libquvi" = auto ; then
-    _libquvi=no
+echocheck "libquvi 0.4.x support"
+if test "$_libquvi4" = auto ; then
+    _libquvi4=no
     if pkg_config_add 'libquvi >= 0.4.1' ; then
-        _libquvi=yes
+        _libquvi4=yes
     fi
 fi
-if test "$_libquvi" = yes; then
-    def_libquvi="#define CONFIG_LIBQUVI 1"
+if test "$_libquvi4" = yes; then
+    def_libquvi4="#define CONFIG_LIBQUVI 1"
 else
-    def_libquvi="#undef CONFIG_LIBQUVI"
+    def_libquvi4="#undef CONFIG_LIBQUVI"
 fi
-echores "$_libquvi"
+echores "$_libquvi4"
 
 echocheck "libquvi 0.9.x support"
-if test "$_libquvi" = yes ; then
+if test "$_libquvi4" = yes ; then
     _libquvi9=no
     res_comment="using libquvi 0.4.x"
 fi
@@ -3212,7 +3212,7 @@ LIBAVFILTER = $libavfilter
 VF_LAVFI = $vf_lavfi
 AF_LAVFI = $af_lavfi
 LIBSMBCLIENT = $_smb
-LIBQUVI = $_libquvi
+LIBQUVI = $_libquvi4
 LIBQUVI9 = $_libquvi9
 LIBGUESS = $_libguess
 LIBTHEORA = $_theora
@@ -3412,7 +3412,7 @@ $def_inet_aton
 $def_inet_pton
 $def_networking
 $def_smb
-$def_libquvi
+$def_libquvi4
 $def_libquvi9
 $def_libguess
 $def_socklen_t
