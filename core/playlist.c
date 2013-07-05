@@ -208,6 +208,7 @@ void playlist_transfer_entries(struct playlist *pl, struct playlist *source_pl)
         struct playlist_entry *e = source_pl->first;
         playlist_unlink(source_pl, e);
         playlist_insert(pl, add_after, e);
+        add_after = e;
     }
 }
 
