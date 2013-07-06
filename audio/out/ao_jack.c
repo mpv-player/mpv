@@ -43,7 +43,7 @@
 
 //! size of one chunk, if this is too small MPlayer will start to "stutter"
 //! after a short time of playback
-#define CHUNK_SIZE (16 * 1024)
+#define CHUNK_SIZE (24 * 1024)
 //! number of "virtual" chunks the buffer consists of
 #define NUM_CHUNKS 8
 
@@ -281,7 +281,7 @@ static int init(struct ao *ao, char *params)
 
     ao->format = AF_FORMAT_FLOAT_NE;
     int unitsize = ao->channels.num * sizeof(float);
-    p->outburst = CHUNK_SIZE / unitsize * unitsize;
+    p->outburst = (CHUNK_SIZE + unitsize - 1) / unitsize * unitsize;
     p->ring = mp_ring_new(p, NUM_CHUNKS * p->outburst);
     free(matching_ports);
     free(port_name);
