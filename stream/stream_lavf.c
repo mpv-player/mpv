@@ -21,6 +21,7 @@
 #include <libavutil/opt.h>
 
 #include "config.h"
+#include "core/options.h"
 #include "core/mp_msg.h"
 #include "stream.h"
 #include "core/m_option.h"
@@ -178,7 +179,6 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
         filename = talloc_asprintf(temp, "mmsh://%.*s", BSTR_P(b_filename));
     }
 
-#ifdef CONFIG_NETWORKING
     // HTTP specific options (other protocols ignore them)
     if (network_useragent)
         av_dict_set(&dict, "user-agent", network_useragent, 0);
@@ -197,7 +197,6 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     }
     if (strlen(cust_headers))
         av_dict_set(&dict, "headers", cust_headers, 0);
-#endif
     av_dict_set(&dict, "icy", "1", 0);
 
     int err = avio_open2(&avio, filename, flags, NULL, &dict);

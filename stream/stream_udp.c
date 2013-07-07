@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "core/options.h"
 #include "stream.h"
 #include "url.h"
 #include "udp.h"

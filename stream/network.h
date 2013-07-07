@@ -61,16 +61,6 @@ typedef struct {
 
 extern const mime_struct_t mime_type_table[];
 
-extern char **network_http_header_fields;
-
-extern char *network_username;
-extern char *network_password;
-extern int   network_bandwidth;
-extern char *network_useragent;
-extern char *network_referrer;
-extern int   network_cookies_enabled;
-extern char *cookies_file;
-
 extern int network_prefer_ipv4;
 extern int network_ipv4_only_proxy;
 extern int reuse_socket;

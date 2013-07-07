@@ -40,6 +40,14 @@
 #include "mp_core.h"
 #include "osdep/priority.h"
 
+char *network_username=NULL;
+char *network_password=NULL;
+int   network_bandwidth=0;
+int   network_cookies_enabled = 0;
+char *network_useragent="MPlayer 1.1-4.7";
+char *network_referrer=NULL;
+char **network_http_header_fields=NULL;
+
 extern char *lirc_configfile;
 
 extern int mp_msg_color;
@@ -343,7 +351,6 @@ const m_option_t mp_opts[] = {
     {"bluray-angle",   &bluray_angle,   CONF_TYPE_INT,    CONF_RANGE, 0, 999, NULL},
 #endif /* CONFIG_LIBBLURAY */
 
-#ifdef CONFIG_NETWORKING
     {"user", &network_username, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"passwd", &network_password, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"bandwidth", &network_bandwidth, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
@@ -358,7 +365,6 @@ const m_option_t mp_opts[] = {
 #ifdef HAVE_AF_INET6
     {"prefer-ipv6", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #endif /* HAVE_AF_INET6 */
-#endif /* CONFIG_NETWORKING */
 
 // ------------------------- demuxer options --------------------
 

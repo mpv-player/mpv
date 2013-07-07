@@ -35,6 +35,7 @@
 
 #include "http.h"
 #include "url.h"
+#include "core/options.h"
 #include "core/mp_msg.h"
 
 #include "stream.h"
