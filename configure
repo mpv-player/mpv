@@ -996,13 +996,16 @@ if test "$_as" = auto ; then
 fi
 
 def_fast_64bit='#define HAVE_FAST_64BIT 0'
-arch_all='X86 IA64 SPARC ARM AVR32 SH4 PPC ALPHA MIPS PA_RISC S390 S390X VAX BFIN XTENSA TOMI GENERIC'
-subarch_all='X86_32 X86_64 PPC64'
+def_arch_x86='#define ARCH_X86 0'
+def_arch_x86_32='#define ARCH_X86_32 0'
+def_arch_x86_64='#define ARCH_X86_64 0'
+
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
     arch='x86'
     subarch='x86_32'
-    proc=i486
+    def_arch_x86='#define ARCH_X86 1'
+    def_arch_x86_32='#define ARCH_X86_32 1'
     ;;
 
   ia64)
@@ -1013,6 +1016,8 @@ case "$host_arch" in
   x86_64|amd64)
     arch='x86'
     subarch='x86_64'
+    def_arch_x86='#define ARCH_X86 1'
+    def_arch_x86_64='#define ARCH_X86_64 1'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
     ;;
 
@@ -2886,16 +2891,6 @@ CXXFLAGS=" $CFLAGS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMI
 
 # DO NOT ADD ANY TESTS THAT USE LINKER FLAGS HERE (like cc_check).
 
-mak_enable () {
-list=$(echo $1 | tr '[a-z]' '[A-Z]')
-item=$(echo $2 | tr '[a-z]' '[A-Z]')
-nprefix=$3;
-for part in $list; do
-  if $(echo $item | grep -q -E "(^| )$part($| )"); then
-    echo "${nprefix}_$part = yes"
-  fi
-done
-}
 
 #############################################################################
 echo "Creating config.mak"
@@ -2931,10 +2926,6 @@ BUILD_MAN = $_build_man
 
 EXESUF      = $_exesuf
 EXESUFS_ALL = .exe
-
-ARCH = $arch
-$(mak_enable "$arch_all"    "$arch"    ARCH)
-$(mak_enable "$subarch_all" "$subarch" ARCH)
 
 NEED_GLOB         = $need_glob
 
@@ -3016,20 +3007,6 @@ EOF
 
 #############################################################################
 
-ff_config_enable () {
-list=$(echo $1 | tr '[a-z]' '[A-Z]')
-item=$(echo $2 | tr '[a-z]' '[A-Z]')
-_nprefix=$3;
-test -z "$_nprefix" && _nprefix='CONFIG'
-for part in $list; do
-  if $(echo $item | grep -q -E "(^| )$part($| )"); then
-    echo "#define ${_nprefix}_$part 1"
-  else
-    echo "#define ${_nprefix}_$part 0"
-  fi
-done
-}
-
 echo "Creating config.h"
 cat > $TMPH << EOF
 /*----------------------------------------------------------------------------
@@ -3087,8 +3064,10 @@ $def_stream_cache
 
 /* CPU stuff */
 $def_ebx_available
-$(ff_config_enable "$arch_all" "$arch" "ARCH")
-$(ff_config_enable "$subarch_all" "$subarch" "ARCH")
+
+$def_arch_x86
+$def_arch_x86_32
+$def_arch_x86_64
 
 #define HAVE_MMX ARCH_X86
 #define HAVE_MMX2 ARCH_X86
