@@ -316,8 +316,6 @@ Optional features:
   --disable-dvdread      disable libdvdread [autodetect]
   --disable-enca         disable ENCA charset oracle library [autodetect]
   --enable-macosx-bundle enable Mac OS X bundle file locations [autodetect]
-  --disable-inet6        disable IPv6 support [autodetect]
-  --disable-gethostbyname2  gethostbyname2 part of the C library [autodetect]
   --disable-pthreads     disable Posix threads support [autodetect]
   --disable-libass       disable subtitle rendering with libass [autodetect]
   --disable-libass-osd   disable OSD rendering with libass [autodetect]
@@ -475,8 +473,6 @@ _corevideo=auto
 _cocoa=auto
 _macosx_bundle=auto
 _enca=auto
-_inet6=auto
-_gethostbyname2=auto
 _pthreads=auto
 _ass=auto
 _libass_osd=auto
@@ -699,12 +695,6 @@ for ac_option do
 
   --enable-enca)        _enca=yes       ;;
   --disable-enca)       _enca=no        ;;
-
-  --enable-inet6)       _inet6=yes      ;;
-  --disable-inet6)      _inet6=no       ;;
-
-  --enable-gethostbyname2)      _gethostbyname2=yes     ;;
-  --disable-gethostbyname2)     _gethostbyname2=no      ;;
 
   --enable-coreaudio) _coreaudio=yes ;;
   --disable-coreaudio) _coreaudio=no ;;
@@ -1012,81 +1002,66 @@ case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
     arch='x86'
     subarch='x86_32'
-    iproc=486
     proc=i486
     ;;
 
   ia64)
     arch='ia64'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
-    iproc='ia64'
     ;;
 
   x86_64|amd64)
     arch='x86'
     subarch='x86_64'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
-    iproc='x86_64'
     ;;
 
   sparc|sparc64)
     arch='sparc'
-    iproc='sparc'
     ;;
 
   arm*)
     arch='arm'
-    iproc='arm'
     ;;
 
   avr32)
     arch='avr32'
-    iproc='avr32'
     ;;
 
   sh|sh4)
     arch='sh4'
-    iproc='sh4'
     ;;
 
   ppc|ppc64|powerpc|powerpc64)
     arch='ppc'
-    iproc='ppc'
     ;;
 
   alpha*)
     arch='alpha'
-    iproc='alpha'
     ;;
 
   mips*)
     arch='mips'
-    iproc='mips'
     ;;
 
   hppa)
     arch='pa_risc'
-    iproc='PA-RISC'
     ;;
 
   s390)
     arch='s390'
-    iproc='390'
     ;;
 
   s390x)
     arch='s390x'
-    iproc='390x'
     ;;
 
   vax)
     arch='vax'
-    iproc='vax'
     ;;
 
   xtensa)
     arch='xtensa'
-    iproc='xtensa'
     ;;
 
   generic)
@@ -1258,8 +1233,6 @@ fi
 echores "$_dl"
 
 
-def_threads='#define HAVE_THREADS 0'
-
 echocheck "pthread"
 if linux ; then
   THREAD_CFLAGS=-D_REENTRANT
@@ -1292,7 +1265,6 @@ fi
 if test "$_pthreads" = yes ; then
   test "$_ld_pthread" && res_comment="using $_ld_pthread"
   def_pthreads='#define HAVE_PTHREADS 1'
-  def_threads='#define HAVE_THREADS 1'
   extra_cflags="$extra_cflags $THREAD_CFLAGS"
 else
   res_comment="v4l2 disabled"
@@ -2981,7 +2953,6 @@ DSOUND = $_dsound
 WASAPI0 = $_wasapi0
 DVBIN = $_dvbin
 DVDREAD = $_dvdread
-DXR3 = $_dxr3
 GL = $_gl
 GL_COCOA = $_gl_cocoa
 GL_WIN32 = $_gl_win32
@@ -3009,7 +2980,6 @@ LIBSMBCLIENT = $_smb
 LIBQUVI = $_libquvi4
 LIBQUVI9 = $_libquvi9
 LIBGUESS = $_libguess
-LIBTHEORA = $_theora
 LIRC = $_lirc
 MACOSX_BUNDLE = $_macosx_bundle
 MNG = $_mng
@@ -3093,15 +3063,12 @@ $def_winsock2_h
 
 
 /* system functions */
-$def_gethostbyname2
 $def_glob
 $def_nanosleep
 $def_posix_select
 $def_select
 $def_setmode
 $def_shm
-$def_sysi86
-$def_sysi86_iv
 $def_termcap
 $def_termios
 
@@ -3119,7 +3086,6 @@ $def_stream_cache
 
 
 /* CPU stuff */
-#define __CPU__ $iproc
 $def_ebx_available
 $(ff_config_enable "$arch_all" "$arch" "ARCH")
 $(ff_config_enable "$subarch_all" "$subarch" "ARCH")
@@ -3134,16 +3100,7 @@ $(ff_config_enable "$subarch_all" "$subarch" "ARCH")
 #define DEFAULT_CDROM_DEVICE "$default_cdrom_device"
 #define DEFAULT_DVD_DEVICE   "$default_dvd_device"
 $def_bluray
-$def_bsdi_dvd
 $def_cdda
-$def_cdio
-$def_cdrom
-$def_dvd
-$def_dvd_bsd
-$def_dvd_darwin
-$def_dvd_linux
-$def_dvd_openbsd
-$def_dvdio
 $def_dvdread
 $def_vcd
 
@@ -3241,8 +3198,6 @@ $def_avresample_has_set_channel_mapping
 
 $def_fast_64bit
 $def_pthreads
-$def_threads
-$def_xform_asm
 
 #define HAVE_INLINE_ASM 1
 
