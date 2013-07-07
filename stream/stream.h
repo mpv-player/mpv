@@ -37,7 +37,6 @@
 #define STREAMTYPE_DUMMY -1    // for placeholders, when the actual reading is handled in the demuxer
 #define STREAMTYPE_FILE 0      // read from seekable file
 #define STREAMTYPE_VCD  1      // raw mode-2 CDROM reading, 2324 bytes/sector
-#define STREAMTYPE_STREAM 2    // same as FILE but no seeking (for net/stdin)
 #define STREAMTYPE_DVD  3      // libdvdread
 #define STREAMTYPE_MEMORY 4
 #define STREAMTYPE_PLAYLIST 6  // FIXME!!! same as STREAMTYPE_FILE now

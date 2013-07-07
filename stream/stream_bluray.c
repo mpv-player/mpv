@@ -407,7 +407,7 @@ err_no_info:
 
     s->end_pos     = title_size;
     s->sector_size = BLURAY_SECTOR_SIZE;
-    s->flags       = mode | MP_STREAM_SEEK;
+    s->flags       = MP_STREAM_SEEK;
     s->priv        = b;
     s->type        = STREAMTYPE_BLURAY;
     s->url         = strdup("br://");

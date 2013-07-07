@@ -162,7 +162,6 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
         /* This is handled as a special demuxer, without a separate
          * stream layer. demux_lavf will do all the real work.
          */
-        stream->type = STREAMTYPE_STREAM;
         stream->seek = NULL;
         *file_format = DEMUXER_TYPE_LAVF;
         stream->lavf_type = "rtsp";
@@ -226,10 +225,8 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
         stream->end_pos = size;
     stream->type = STREAMTYPE_FILE;
     stream->seek = seek;
-    if (!avio->seekable) {
-        stream->type = STREAMTYPE_STREAM;
+    if (!avio->seekable)
         stream->seek = NULL;
-    }
     stream->fill_buffer = fill_buffer;
     stream->write_buffer = write_buffer;
     stream->control = control;

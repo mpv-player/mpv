@@ -160,7 +160,8 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     s = new_stream(0);
     s->opts = options;
     s->url = strdup(filename);
-    s->flags |= mode;
+    s->flags = 0;
+    s->mode = mode;
     *ret = sinfo->open(s, mode, arg, file_format);
     if ((*ret) != STREAM_OK) {
         free(s->url);
@@ -340,16 +341,12 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
     int orig_len = len;
     s->buf_pos = s->buf_len = 0;
     // we will retry even if we already reached EOF previously.
-    switch (s->type) {
-    case STREAMTYPE_STREAM:
-        if (s->fill_buffer)
-            len = s->fill_buffer(s, buf, len);
-        else
-            len = read(s->fd, buf, len);
-        break;
-
-    default:
-        len = s->fill_buffer ? s->fill_buffer(s, buf, len) : 0;
+    if (s->fill_buffer) {
+        len = s->fill_buffer(s, buf, len);
+    } else if (s->fd >= 0) {
+        len = read(s->fd, buf, len);
+    } else {
+        len = 0;
     }
     if (len < 0)
         len = 0;
@@ -474,33 +471,18 @@ int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
 static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 {
     if (newpos == 0 || newpos != s->pos) {
-        switch (s->type) {
-        case STREAMTYPE_STREAM:
-            // Some streaming protocol allow to seek backward and forward
-            // A function call that return -1 can tell that the protocol
-            // doesn't support seeking.
-            if (s->seek) {
-                if (!s->seek(s, newpos)) {
-                    mp_tmsg(MSGT_STREAM, MSGL_ERR, "Seek failed\n");
-                    return 0;
-                }
-                break;
-            }
-            if (newpos < s->pos) {
-                mp_tmsg(MSGT_STREAM, MSGL_INFO,
-                        "Cannot seek backward in linear streams!\n");
-                return 1;
-            }
-            break;
-        default:
-            // This should at the beginning as soon as all streams are converted
-            if (!s->seek)
-                return 0;
-            // Now seek
-            if (!s->seek(s, newpos)) {
-                mp_tmsg(MSGT_STREAM, MSGL_ERR, "Seek failed\n");
-                return 0;
-            }
+        if (!s->seek || !(s->flags & MP_STREAM_SEEK)) {
+            mp_tmsg(MSGT_STREAM, MSGL_ERR, "Can not seek in this stream\n");
+            return 0;
+        }
+        if (newpos < s->pos && !(s->flags & MP_STREAM_SEEK_BW)) {
+            mp_tmsg(MSGT_STREAM, MSGL_ERR,
+                    "Cannot seek backward in linear streams!\n");
+            return 1;
+        }
+        if (s->seek(s, newpos) <= 0) {
+            mp_tmsg(MSGT_STREAM, MSGL_ERR, "Seek failed\n");
+            return 0;
         }
     }
     s->eof = 0; // EOF reset when seek succeeds.
