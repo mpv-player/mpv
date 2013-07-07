@@ -479,6 +479,13 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
             // Some streaming protocol allow to seek backward and forward
             // A function call that return -1 can tell that the protocol
             // doesn't support seeking.
+            if (s->seek) {
+                if (!s->seek(s, newpos)) {
+                    mp_tmsg(MSGT_STREAM, MSGL_ERR, "Seek failed\n");
+                    return 0;
+                }
+                break;
+            }
             if (newpos < s->pos) {
                 mp_tmsg(MSGT_STREAM, MSGL_INFO,
                         "Cannot seek backward in linear streams!\n");
