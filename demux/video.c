@@ -33,10 +33,6 @@
 #include "demux.h"
 #include "stheader.h"
 
-int video_read_properties(sh_video_t *sh_video){
-return 1;
-}
-
 int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** start,int force_fps){
     demux_stream_t *d_video=sh_video->ds;
     demuxer_t *demuxer=d_video->demuxer;

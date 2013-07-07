@@ -2357,25 +2357,20 @@ int reinit_video_chain(struct MPContext *mpctx)
         goto no_video;
     }
 
-    if (!video_read_properties(mpctx->sh_video)) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Video: Cannot read properties.\n");
-        goto err_out;
-    } else {
-        mp_tmsg(MSGT_CPLAYER, MSGL_V, "[V] filefmt:%d  fourcc:0x%X  "
-                "size:%dx%d  fps:%5.3f  ftime:=%6.4f\n",
-                mpctx->master_demuxer->file_format, mpctx->sh_video->format,
-                mpctx->sh_video->disp_w, mpctx->sh_video->disp_h,
-                mpctx->sh_video->fps, mpctx->sh_video->frametime);
-        if (opts->force_fps) {
-            mpctx->sh_video->fps = opts->force_fps;
-            mpctx->sh_video->frametime = 1.0f / mpctx->sh_video->fps;
-        }
-        update_fps(mpctx);
+    mp_tmsg(MSGT_CPLAYER, MSGL_V, "[V] filefmt:%d  fourcc:0x%X  "
+            "size:%dx%d  fps:%5.3f  ftime:=%6.4f\n",
+            mpctx->master_demuxer->file_format, mpctx->sh_video->format,
+            mpctx->sh_video->disp_w, mpctx->sh_video->disp_h,
+            mpctx->sh_video->fps, mpctx->sh_video->frametime);
+    if (opts->force_fps) {
+        mpctx->sh_video->fps = opts->force_fps;
+        mpctx->sh_video->frametime = 1.0f / mpctx->sh_video->fps;
+    }
+    update_fps(mpctx);
 
-        if (!mpctx->sh_video->fps && !opts->force_fps && !opts->correct_pts) {
-            mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "FPS not specified in the "
-                    "header or invalid, use the -fps option.\n");
-        }
+    if (!mpctx->sh_video->fps && !opts->force_fps && !opts->correct_pts) {
+        mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "FPS not specified in the "
+                "header or invalid, use the -fps option.\n");
     }
 
     double ar = -1.0;

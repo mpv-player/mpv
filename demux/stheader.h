@@ -164,7 +164,6 @@ typedef struct sh_sub {
 struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
 
 // video.c:
-int video_read_properties(struct sh_video *sh_video);
 int video_read_frame(struct sh_video *sh_video, float *frame_time_ptr,
                      unsigned char **start, int force_fps);
 
