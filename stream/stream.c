@@ -37,14 +37,9 @@
 
 #include "config.h"
 
-#if HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
-
 #include "core/bstr.h"
 #include "core/mp_msg.h"
 #include "osdep/timer.h"
-#include "network.h"
 #include "stream.h"
 #include "demux/demux.h"
 
@@ -96,12 +91,6 @@ static const stream_info_t *const auto_open_streams[] = {
 #endif
     &stream_info_ffmpeg, // use for rstp:// before http fallback
     &stream_info_avdevice,
-#ifdef CONFIG_NETWORKING
-    &stream_info_http1,
-    &stream_info_asf,
-    &stream_info_udp,
-    &stream_info_http2,
-#endif
 #ifdef CONFIG_DVBIN
     &stream_info_dvb,
 #endif
@@ -174,16 +163,6 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     s->flags |= mode;
     *ret = sinfo->open(s, mode, arg, file_format);
     if ((*ret) != STREAM_OK) {
-#ifdef CONFIG_NETWORKING
-        if (*ret == STREAM_REDIRECTED && redirected_url) {
-            if (s->streaming_ctrl && s->streaming_ctrl->url
-                && s->streaming_ctrl->url->url)
-                *redirected_url = strdup(s->streaming_ctrl->url->url);
-            else
-                *redirected_url = NULL;
-        }
-        streaming_ctrl_free(s->streaming_ctrl);
-#endif
         free(s->url);
         talloc_free(s);
         return NULL;
@@ -363,18 +342,10 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
     // we will retry even if we already reached EOF previously.
     switch (s->type) {
     case STREAMTYPE_STREAM:
-        if (s->streaming_ctrl != NULL && s->streaming_ctrl->streaming_read) {
-            len = s->streaming_ctrl->streaming_read(s->fd, buf, len,
-                                                    s->streaming_ctrl);
-            if (s->streaming_ctrl->status == streaming_stopped_e &&
-                (!s->end_pos || s->pos == s->end_pos))
-                s->eof = 1;
-        } else {
-            if (s->fill_buffer)
-                len = s->fill_buffer(s, buf, len);
-            else
-                len = read(s->fd, buf, len);
-        }
+        if (s->fill_buffer)
+            len = s->fill_buffer(s, buf, len);
+        else
+            len = read(s->fd, buf, len);
         break;
 
     default:
@@ -508,25 +479,6 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
             // Some streaming protocol allow to seek backward and forward
             // A function call that return -1 can tell that the protocol
             // doesn't support seeking.
-#ifdef CONFIG_NETWORKING
-            if (s->seek) {
-                if (!s->seek(s, newpos)) {
-                    mp_tmsg(MSGT_STREAM, MSGL_ERR, "Seek failed\n");
-                    return 0;
-                }
-                break;
-            }
-
-            if (s->streaming_ctrl != NULL &&
-                s->streaming_ctrl->streaming_seek) {
-                if (s->streaming_ctrl->streaming_seek(s->fd, newpos,
-                                                      s->streaming_ctrl) < 0) {
-                    mp_tmsg(MSGT_STREAM, MSGL_INFO, "Stream not seekable!\n");
-                    return 1;
-                }
-                break;
-            }
-#endif
             if (newpos < s->pos) {
                 mp_tmsg(MSGT_STREAM, MSGL_INFO,
                         "Cannot seek backward in linear streams!\n");
@@ -675,14 +627,6 @@ static stream_t *new_stream(size_t min_size)
     stream_t *s = talloc_size(NULL, sizeof(stream_t) + min_size);
     memset(s, 0, sizeof(stream_t));
 
-#if HAVE_WINSOCK2_H
-    {
-        WSADATA wsdata;
-        int temp = WSAStartup(0x0202, &wsdata); // there might be a better place for this (-> later)
-        mp_msg(MSGT_STREAM, MSGL_V, "WINSOCK2 init: %i\n", temp);
-    }
-#endif
-
     s->fd = -2;
     s->type = -2;
     return s;
@@ -695,18 +639,8 @@ void free_stream(stream_t *s)
     if (s->close)
         s->close(s);
     if (s->fd > 0) {
-        /* on unix we define closesocket to close
-           on windows however we have to distinguish between
-           network socket and file */
-        if (s->url && strstr(s->url, "://"))
-            closesocket(s->fd);
-        else
-            close(s->fd);
+        close(s->fd);
     }
-#if HAVE_WINSOCK2_H
-    mp_msg(MSGT_STREAM, MSGL_V, "WINSOCK2 uninit\n");
-    WSACleanup(); // there might be a better place for this (-> later)
-#endif
     free(s->url);
     if (s->uncached_stream)
         free_stream(s->uncached_stream);

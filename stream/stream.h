@@ -21,7 +21,6 @@
 
 #include "config.h"
 #include "core/mp_msg.h"
-#include "url.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -116,29 +115,6 @@ struct stream_dvd_info_req {
     int num_subs;
 };
 
-typedef enum {
-    streaming_stopped_e,
-    streaming_playing_e
-} streaming_status;
-
-// All this is for legacy http streams (and other things using tcp/udp)
-typedef struct streaming_control {
-    URL_t *url;
-    streaming_status status;
-    char *buffer;
-    unsigned int buffer_size;
-    unsigned int buffer_pos;
-    unsigned int bandwidth;     // The downstream available
-    int (*streaming_read)(int fd, char *buffer, int buffer_size,
-                          struct streaming_control *stream_ctrl);
-    int (*streaming_seek)(int fd, int64_t pos,
-                          struct streaming_control *stream_ctrl);
-    void *data;
-    // hacks for asf
-    int *audio_id_ptr;
-    int *video_id_ptr;
-} streaming_ctrl_t;
-
 struct stream;
 typedef struct stream_info_st {
     const char *info;
@@ -185,7 +161,6 @@ typedef struct stream {
     char *mime_type; // when HTTP streaming is used
     char *lavf_type; // name of expected demuxer type for lavf
     struct MPOpts *opts;
-    streaming_ctrl_t *streaming_ctrl;
 
     FILE *capture_file;
     char *capture_filename;
@@ -195,10 +170,6 @@ typedef struct stream {
     // Includes additional padding in case sizes get rounded up by sector size.
     unsigned char buffer[];
 } stream_t;
-
-#ifdef CONFIG_NETWORKING
-#include "network.h"
-#endif
 
 int stream_fill_buffer(stream_t *s);
 

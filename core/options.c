@@ -40,8 +40,6 @@
 #include "mp_core.h"
 #include "osdep/priority.h"
 
-char *network_username=NULL;
-char *network_password=NULL;
 int   network_bandwidth=0;
 int   network_cookies_enabled = 0;
 char *network_useragent="MPlayer 1.1-4.7";
@@ -351,20 +349,11 @@ const m_option_t mp_opts[] = {
     {"bluray-angle",   &bluray_angle,   CONF_TYPE_INT,    CONF_RANGE, 0, 999, NULL},
 #endif /* CONFIG_LIBBLURAY */
 
-    {"user", &network_username, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"passwd", &network_password, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"bandwidth", &network_bandwidth, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
     {"http-header-fields", &network_http_header_fields, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
     {"user-agent", &network_useragent, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"referrer", &network_referrer, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"cookies", &network_cookies_enabled, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"cookies-file", &cookies_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"prefer-ipv4", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"ipv4-only-proxy", &network_ipv4_only_proxy, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"reuse-socket", &reuse_socket, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#ifdef HAVE_AF_INET6
-    {"prefer-ipv6", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-#endif /* HAVE_AF_INET6 */
 
 // ------------------------- demuxer options --------------------
 

@@ -33,8 +33,8 @@
 
 #include "osdep/io.h"
 
+#include "core/options.h"
 #include "cookies.h"
-#include "http.h"
 #include "core/mp_msg.h"
 
 #define MAX_COOKIES 20
@@ -70,24 +70,6 @@ static char *col_dup(const char *src)
     dst[length] = 0;
 
     return dst;
-}
-
-static int right_hand_strcmp(const char *cookie_domain, const char *url_domain)
-{
-    int c_l;
-    int u_l;
-
-    c_l = strlen(cookie_domain);
-    u_l = strlen(url_domain);
-
-    if (c_l > u_l)
-	return -1;
-    return strcmp(cookie_domain, url_domain + u_l - c_l);
-}
-
-static int left_hand_strcmp(const char *cookie_path, const char *url_path)
-{
-    return strncmp(cookie_path, url_path, strlen(cookie_path));
 }
 
 /* Finds the start of all the columns */
@@ -194,72 +176,6 @@ static struct cookie_list_type *load_cookies(void)
 	return load_cookies_from(cookies_file, NULL);
 
     return NULL;
-}
-
-/* Take an HTTP_header_t, and insert the correct headers. The cookie files are read if necessary. */
-void
-cookies_set(HTTP_header_t * http_hdr, const char *domain, const char *url)
-{
-    int found_cookies = 0;
-    struct cookie_list_type *cookies[MAX_COOKIES];
-    struct cookie_list_type *list, *start;
-    int i;
-    char *path;
-    char *buf;
-
-    path = strchr(url, '/');
-    if (!path)
-	path = "";
-
-    if (!cookie_list)
-	cookie_list = load_cookies();
-
-
-    list = start = cookie_list;
-
-    /* Find which cookies we want, removing duplicates. Cookies with the longest domain, then longest path take priority */
-    while (list) {
-	/* Check the cookie domain and path. Also, we never send "secure" cookies. These should only be sent over HTTPS. */
-	if ((right_hand_strcmp(list->domain, domain) == 0)
-	    && (left_hand_strcmp(list->path, path) == 0) && !list->secure) {
-	    int replacing = 0;
-	    for (i = 0; i < found_cookies; i++) {
-		if (strcmp(list->name, cookies[i]->name) == 0) {
-		    replacing = 0;
-		    if (strlen(list->domain) <= strlen(cookies[i]->domain)) {
-			cookies[i] = list;
-		    } else if (strlen(list->path) <= strlen(cookies[i]->path)) {
-			cookies[i] = list;
-		    }
-		}
-	    }
-	    if (found_cookies > MAX_COOKIES) {
-		/* Cookie jar overflow! */
-		break;
-	    }
-	    if (!replacing)
-		cookies[found_cookies++] = list;
-	}
-	list = list->next;
-    }
-
-
-    buf = strdup("Cookie:");
-
-    for (i = 0; i < found_cookies; i++) {
-	char *nbuf;
-
-	nbuf = malloc(strlen(buf) + strlen(" ") + strlen(cookies[i]->name) +
-		    strlen("=") + strlen(cookies[i]->value) + strlen(";") + 1);
-	sprintf(nbuf, "%s %s=%s;", buf, cookies[i]->name,
-		 cookies[i]->value);
-	free(buf);
-	buf = nbuf;
-    }
-
-    if (found_cookies)
-	http_set_field(http_hdr, buf);
-    free(buf);
 }
 
 // Return a cookies string as expected by lavf (libavformat/http.c). The format

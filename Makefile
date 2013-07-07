@@ -28,13 +28,11 @@ SOURCES_AUDIO_INPUT-$(OSS)      += stream/ai_oss.c
 SOURCES-$(AUDIO_INPUT)          += $(SOURCES_AUDIO_INPUT-yes)
 SOURCES-$(CDDA)                 += stream/stream_cdda.c \
                                    stream/cdinfo.c
-SOURCES-$(CDDB)                 += stream/stream_cddb.c
 SOURCES-$(DVBIN)                += stream/dvb_tune.c \
                                    stream/stream_dvb.c
 SOURCES-$(DVDREAD)              += stream/stream_dvd.c \
                                    stream/stream_dvd_common.c
 
-SOURCES-$(FTP)                  += stream/stream_ftp.c
 SOURCES-$(HAVE_SYS_MMAN_H)      += audio/filter/af_export.c osdep/mmap_anon.c
 SOURCES-$(LADSPA)               += audio/filter/af_ladspa.c
 SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c \
@@ -56,14 +54,6 @@ SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
 
 SOURCES-$(NEED_GETTIMEOFDAY)    += osdep/gettimeofday.c
 SOURCES-$(NEED_GLOB)            += osdep/glob-win.c
-SOURCES-$(NETWORKING)           += stream/asf_mmst_streaming.c \
-                                   stream/asf_streaming.c \
-                                   stream/cookies.c \
-                                   stream/http.c \
-                                   stream/network.c \
-                                   stream/udp.c \
-                                   stream/tcp.c \
-                                   stream/stream_udp.c \
 
 SOURCES-$(PRIORITY)             += osdep/priority.c
 SOURCES-$(PVR)                  += stream/stream_pvr.c
@@ -223,6 +213,7 @@ SOURCES = talloc.c \
           osdep/io.c \
           osdep/numcores.c \
           osdep/timer.c \
+          stream/cookies.c \
           stream/stream.c \
           stream/stream_avdevice.c \
           stream/stream_file.c \
@@ -230,7 +221,6 @@ SOURCES = talloc.c \
           stream/stream_memory.c \
           stream/stream_mf.c \
           stream/stream_null.c \
-          stream/url.c \
           sub/dec_sub.c \
           sub/draw_bmp.c \
           sub/find_subfiles.c \

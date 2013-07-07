@@ -307,8 +307,6 @@ Optional features:
   --disable-tv           disable TV interface (TV/DVB grabbers) [enable]
   --disable-tv-v4l2      disable Video4Linux2 TV interface [autodetect]
   --disable-pvr          disable Video4Linux2 MPEG PVR [autodetect]
-  --disable-networking   disable networking [enable]
-  --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
   --disable-libquvi4     disable libquvi 0.4.x [autodetect]
   --disable-libquvi9     disable libquvi 0.9.x [autodetect]
@@ -316,12 +314,10 @@ Optional features:
   --disable-vcd          disable VCD support [autodetect]
   --disable-bluray       disable Blu-ray support [autodetect]
   --disable-dvdread      disable libdvdread [autodetect]
-  --disable-cddb         disable cddb [autodetect]
   --disable-enca         disable ENCA charset oracle library [autodetect]
   --enable-macosx-bundle enable Mac OS X bundle file locations [autodetect]
   --disable-inet6        disable IPv6 support [autodetect]
   --disable-gethostbyname2  gethostbyname2 part of the C library [autodetect]
-  --disable-ftp          disable FTP support [enabled]
   --disable-vstream      disable TiVo vstream client support [autodetect]
   --disable-pthreads     disable Posix threads support [autodetect]
   --disable-libass       disable subtitle rendering with libass [autodetect]
@@ -463,8 +459,6 @@ _radio_v4l2=auto
 _tv=yes
 _tv_v4l2=auto
 _pvr=auto
-networking=yes
-_winsock2_h=auto
 _smb=auto
 _libquvi4=auto
 _libquvi9=auto
@@ -477,7 +471,6 @@ _termios=auto
 _shm=auto
 _gettext=no
 _cdda=auto
-_cddb=auto
 _coreaudio=auto
 _corevideo=auto
 _cocoa=auto
@@ -485,7 +478,6 @@ _macosx_bundle=auto
 _enca=auto
 _inet6=auto
 _gethostbyname2=auto
-_ftp=auto
 _vstream=auto
 _pthreads=auto
 _ass=auto
@@ -662,10 +654,6 @@ for ac_option do
   --disable-radio-v4l2) _radio_v4l2=no  ;;
   --enable-pvr)         _pvr=yes        ;;
   --disable-pvr)        _pvr=no         ;;
-  --enable-networking)     networking=yes    ;;
-  --disable-networking)    networking=no     ;;
-  --enable-winsock2_h)  _winsock2_h=yes ;;
-  --disable-winsock2_h) _winsock2_h=no  ;;
   --enable-smb)         _smb=yes        ;;
   --disable-smb)        _smb=no ;;
   --enable-libquvi4)    _libquvi4=yes    ;;
@@ -692,10 +680,6 @@ for ac_option do
   --disable-shm)        _shm=no         ;;
   --enable-select)      _select=yes     ;;
   --disable-select)     _select=no      ;;
-  --enable-cddb)        _cddb=yes       ;;
-  --disable-cddb)       _cddb=no        ;;
-  --enable-ftp)         _ftp=yes        ;;
-  --disable-ftp)        _ftp=no         ;;
   --enable-vstream)     _vstream=yes    ;;
   --disable-vstream)    _vstream=no     ;;
   --enable-pthreads)    _pthreads=yes   ;;
@@ -1245,146 +1229,6 @@ else
   def_nanosleep='#undef HAVE_NANOSLEEP'
 fi
 echores "$_nanosleep"
-
-
-echocheck "socklib"
-# for Solaris (socket stuff is in -lsocket, gethostbyname and friends in -lnsl):
-cat > $TMPC << EOF
-#include <netdb.h>
-#include <sys/socket.h>
-int main(void) { gethostbyname(0); socket(AF_INET, SOCK_STREAM, 0); return 0; }
-EOF
-_socklib=no
-for _ld_tmp in "" "-lsocket -lbind" "-lsocket -ldnet" "-lsocket -lnsl" "-lnsl" "-lsocket" ; do
-  cc_check $_ld_tmp && _ld_sock="$_ld_tmp" && _socklib=yes && break
-done
-test $_socklib = yes && test $_winsock2_h = auto && _winsock2_h=no
-if test $_winsock2_h = auto ; then
-  _winsock2_h=no
-  statement_check winsock2.h 'gethostbyname(0)' -lws2_32 && _ld_sock="-lws2_32" && _winsock2_h=yes
-fi
-test "$_ld_sock" && res_comment="using $_ld_sock"
-echores "$_socklib"
-
-
-if test $_winsock2_h = yes ; then
-  _ld_sock="-lws2_32"
-  def_winsock2_h='#define HAVE_WINSOCK2_H 1'
-else
-  def_winsock2_h='#define HAVE_WINSOCK2_H 0'
-fi
-
-
-echocheck "inet_pton()"
-def_inet_pton='#define HAVE_INET_PTON 0'
-inet_pton=no
-for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
-  statement_check arpa/inet.h 'inet_pton(0, 0, 0)' $_ld_tmp && inet_pton=yes && break
-done
-if test $inet_pton = yes ; then
-  test "$_ld_tmp" && res_comment="using $_ld_tmp"
-  def_inet_pton='#define HAVE_INET_PTON 1'
-fi
-echores "$inet_pton"
-
-
-echocheck "inet_aton()"
-def_inet_aton='#define HAVE_INET_ATON 0'
-inet_aton=no
-for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
-  statement_check arpa/inet.h 'inet_aton(0, 0)' $_ld_tmp && inet_aton=yes && break
-done
-if test $inet_aton = yes ; then
-  test "$_ld_tmp" && res_comment="using $_ld_tmp"
-  def_inet_aton='#define HAVE_INET_ATON 1'
-fi
-echores "$inet_aton"
-
-
-echocheck "socklen_t"
-_socklen_t=no
-for header in "sys/socket.h" "ws2tcpip.h" "sys/types.h" ; do
-  statement_check $header 'socklen_t v = 0' && _socklen_t=yes && break
-done
-if test "$_socklen_t" = yes ; then
-  def_socklen_t='#define HAVE_SOCKLEN_T 1'
-else
-  def_socklen_t='#define HAVE_SOCKLEN_T 0'
-fi
-echores "$_socklen_t"
-
-
-echocheck "closesocket()"
-_closesocket=no
-statement_check winsock2.h 'closesocket(~0)' $_ld_sock && _closesocket=yes
-if test "$_closesocket" = yes ; then
-  def_closesocket='#define HAVE_CLOSESOCKET 1'
-else
-  def_closesocket='#define HAVE_CLOSESOCKET 0'
-fi
-echores "$_closesocket"
-
-
-echocheck "networking"
-test $_winsock2_h = no && test $inet_pton = no &&
-  test $inet_aton = no && networking=no
-if test "$networking" = yes ; then
-  def_network='#define CONFIG_NETWORK 1'
-  def_networking='#define CONFIG_NETWORKING 1'
-  libs_mplayer="$libs_mplayer $_ld_sock"
-  inputmodules="networking $inputmodules"
-else
-  noinputmodules="networking $noinputmodules"
-  def_network='#define CONFIG_NETWORK 0'
-  def_networking='#undef CONFIG_NETWORKING'
-fi
-echores "$networking"
-
-
-echocheck "inet6"
-if test "$_inet6" = auto ; then
-  cat > $TMPC << EOF
-#include <sys/types.h>
-#if !defined(_WIN32)
-#include <sys/socket.h>
-#include <netinet/in.h>
-#else
-#include <ws2tcpip.h>
-#endif
-int main(void) { struct sockaddr_in6 six; socket(AF_INET6, SOCK_STREAM, AF_INET6); return 0; }
-EOF
-  _inet6=no
-  if cc_check $_ld_sock ; then
-    _inet6=yes
-  fi
-fi
-if test "$_inet6" = yes ; then
-  def_inet6='#define HAVE_AF_INET6 1'
-else
-  def_inet6='#undef HAVE_AF_INET6'
-fi
-echores "$_inet6"
-
-
-echocheck "gethostbyname2"
-if test "$_gethostbyname2" = auto ; then
-cat > $TMPC << EOF
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-int main(void) { gethostbyname2("", AF_INET); return 0; }
-EOF
-  _gethostbyname2=no
-  if cc_check ; then
-    _gethostbyname2=yes
-  fi
-fi
-if test "$_gethostbyname2" = yes ; then
-  def_gethostbyname2='#define HAVE_GETHOSTBYNAME2 1'
-else
-  def_gethostbyname2='#undef HAVE_GETHOSTBYNAME2'
-fi
-echores "$_gethostbyname2"
 
 
 echocheck "mman.h"
@@ -2585,7 +2429,6 @@ fi
 if test "$_libcdio" = yes ; then
     _cdda='yes'
     def_cdda='#define CONFIG_CDDA 1'
-    test $_cddb = auto && test $networking = yes && _cddb=yes
     inputmodules="cdda $inputmodules"
 else
     _libcdio=no
@@ -2594,15 +2437,6 @@ else
     noinputmodules="cdda $noinputmodules"
 fi
 echores "$_libcdio"
-
-if test "$_cddb" = yes ; then
-    def_cddb='#define CONFIG_CDDB 1'
-    inputmodules="cddb $inputmodules"
-else
-    _cddb=no
-    def_cddb='#undef CONFIG_CDDB'
-    noinputmodules="cddb $noinputmodules"
-fi
 
 
 echocheck "SSA/ASS support"
@@ -2999,19 +2833,6 @@ fi
 echores "$_pvr"
 
 
-echocheck "ftp"
-if test "$_ftp" = "auto" ; then
-test "$networking" = "yes" && _ftp=yes
-fi
-if test "$_ftp" = yes ; then
-  def_ftp='#define CONFIG_FTP 1'
-  inputmodules="ftp $inputmodules"
-else
-  noinputmodules="ftp $noinputmodules"
-  def_ftp='#undef CONFIG_FTP'
-fi
-echores "$_ftp"
-
 echocheck "vstream client"
 if test "$_vstream" = auto ; then
   _vstream=no
@@ -3175,7 +2996,6 @@ ALSA = $_alsa
 AUDIO_INPUT = $_audio_input
 CACA = $_caca
 CDDA = $_cdda
-CDDB = $_cddb
 COCOA = $_cocoa
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
@@ -3187,7 +3007,6 @@ WASAPI0 = $_wasapi0
 DVBIN = $_dvbin
 DVDREAD = $_dvdread
 DXR3 = $_dxr3
-FTP = $_ftp
 GL = $_gl
 GL_COCOA = $_gl_cocoa
 GL_WIN32 = $_gl_win32
@@ -3220,7 +3039,6 @@ LIRC = $_lirc
 MACOSX_BUNDLE = $_macosx_bundle
 MNG = $_mng
 MPG123 = $_mpg123
-NETWORKING = $networking
 OPENAL = $_openal
 OSS = $_ossaudio
 PE_EXECUTABLE = $_pe_executable
@@ -3344,7 +3162,6 @@ $(ff_config_enable "$subarch_all" "$subarch" "ARCH")
 $def_bluray
 $def_bsdi_dvd
 $def_cdda
-$def_cddb
 $def_cdio
 $def_cdrom
 $def_dvd
@@ -3405,17 +3222,10 @@ $def_ass
 $def_enca
 
 /* networking */
-$def_closesocket
-$def_ftp
-$def_inet6
-$def_inet_aton
-$def_inet_pton
-$def_networking
 $def_smb
 $def_libquvi4
 $def_libquvi9
 $def_libguess
-$def_socklen_t
 $def_vstream
 
 $def_lcms2

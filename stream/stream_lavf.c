@@ -28,7 +28,6 @@
 #include "core/m_struct.h"
 #include "demux/demux.h"
 
-#include "network.h"
 #include "cookies.h"
 
 #include "core/bstr.h"
@@ -317,7 +316,7 @@ const stream_info_t stream_info_ffmpeg = {
   "",
   open_f,
   { "lavf", "ffmpeg", "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh",
-    "mmshttp", NULL },
+    "mmshttp", "udp", "ftp", NULL },
   NULL,
   1 // Urls are an option string
 };

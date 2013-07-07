@@ -24,10 +24,6 @@
 #ifndef MPLAYER_COOKIES_H
 #define MPLAYER_COOKIES_H
 
-#include "http.h"
-
-void cookies_set(HTTP_header_t * http_hdr, const char *hostname,
-                 const char *url);
 char *cookies_lavf(void);
 
 #endif /* MPLAYER_COOKIES_H */

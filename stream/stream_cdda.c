@@ -340,11 +340,10 @@ static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
     int offset = p->toc_offset;
     cdrom_drive_t *cdd = NULL;
     cdda_priv *priv;
-    cd_info_t *cd_info, *cddb_info = NULL;
+    cd_info_t *cd_info;
     unsigned int audiolen = 0;
     int last_track;
     int i;
-    char *xmcd_file = NULL;
 
     if (m != STREAM_READ) {
         m_struct_free(&stream_opts, opts);
@@ -358,18 +357,6 @@ static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
             p->device = talloc_strdup(NULL, DEFAULT_CDROM_DEVICE);
     }
 
-#ifdef CONFIG_CDDB
-    // cdd_identify returns -1 if it cannot read the TOC,
-    // in which case there is no point in calling cddb_resolve
-    if (cdd_identify(p->device) >= 0 && strncmp(st->url, "cddb", 4) == 0) {
-        i = cddb_resolve(p->device, &xmcd_file);
-        if (i == 0) {
-            cddb_info = cddb_parse_xmcd(xmcd_file);
-            free(xmcd_file);
-        }
-    }
-#endif
-
 #if defined(__NetBSD__)
     cdd = cdda_identify_scsi(p->device, p->device, 0, NULL);
 #else
@@ -379,7 +366,6 @@ static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
     if (!cdd) {
         mp_tmsg(MSGT_OPEN, MSGL_ERR, "Can't open CDDA device.\n");
         m_struct_free(&stream_opts, opts);
-        free(cddb_info);
         return STREAM_ERROR;
     }
 
@@ -392,7 +378,6 @@ static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
         mp_tmsg(MSGT_OPEN, MSGL_ERR, "Can't open disc.\n");
         cdda_close(cdd);
         m_struct_free(&stream_opts, opts);
-        free(cddb_info);
         return STREAM_ERROR;
     }
 
@@ -455,7 +440,6 @@ static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
         free(priv);
         cd_info_free(cd_info);
         m_struct_free(&stream_opts, opts);
-        free(cddb_info);
         return STREAM_ERROR;
     }
 
@@ -484,14 +468,6 @@ static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
     paranoia_seek(priv->cdp, priv->start_sector, SEEK_SET);
     priv->sector = priv->start_sector;
 
-#ifdef CONFIG_CDDB
-    if (cddb_info) {
-        cd_info_free(cd_info);
-        priv->cd_info = cddb_info;
-        cd_info_debug(cddb_info);
-    }
-#endif
-
     st->priv = priv;
     st->start_pos = priv->start_sector * CDIO_CD_FRAMESIZE_RAW;
     st->end_pos = (priv->end_sector + 1) * CDIO_CD_FRAMESIZE_RAW;
@@ -518,11 +494,7 @@ const stream_info_t stream_info_cdda = {
     "Albeu",
     "",
     open_cdda,
-    {"cdda",
-#ifdef CONFIG_CDDB
-     "cddb",
-#endif
-     NULL },
+    {"cdda", NULL },
     &stream_opts,
     .opts_url = 1,
 };

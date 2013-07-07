@@ -268,9 +268,6 @@ typedef struct MPOpts {
 
 // Should be moved into MPOpts
 extern char **network_http_header_fields;
-extern char *network_username;
-extern char *network_password;
-extern int   network_bandwidth;
 extern char *network_useragent;
 extern char *network_referrer;
 extern int   network_cookies_enabled;

@@ -1051,12 +1051,6 @@
     work (key bindings that normally quit will be shown on OSD only, just
     like any other binding).
 
---ipv4-only-proxy
-    Skip any HTTP proxy for IPv6 addresses. It will still be used for IPv4
-    connections.
-
-    *WARNING*: works with the deprecated ``mp_http://`` protocol only.
-
 --joystick, --no-joystick
     Enable/disable joystick support. Enabled by default.
 
@@ -1416,12 +1410,6 @@
     allows a zoom factor of up to 4. This feature is experimental. Do not
     report bugs unless you are using ``--vo=opengl``.
 
---passwd=<password>
-    Used with some network protocols. Specify password for HTTP authentication.
-    See also ``--user``.
-
-    *WARNING*: works with the deprecated ``mp_http://`` protocol only.
-
 --playing-msg=<string>
     Print out a string after starting playback. The string is expanded for
     properties, e.g. ``--playing-msg=file: ${filename}`` will print the string
@@ -1465,16 +1453,6 @@
 
 --pphelp
     See also ``--vf=pp``.
-
---prefer-ipv4
-    Use IPv4 on network connections. Falls back on IPv6 automatically.
-
-    *WARNING*: works with the deprecated ``mp_http://`` protocol only.
-
---prefer-ipv6
-    Use IPv6 on network connections. Falls back on IPv4 automatically.
-
-    *WARNING*: works with the deprecated ``mp_http://`` protocol only.
 
 --priority=<prio>
     (Windows only.)
@@ -2283,12 +2261,6 @@
     file that is being played.
 
     *WARNING*: May be dangerous if playing from untrusted media.
-
---user=<username>
-    Used with some network protocols.
-    Specify username for HTTP authentication. See also ``--passwd``.
-
-    *WARNING*: works with the deprecated ``mp_http://`` protocol only.
 
 --user-agent=<string>
     Use <string> as user agent for HTTP streaming.
