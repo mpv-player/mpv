@@ -288,12 +288,11 @@ static int stream_reconnect(stream_t *s)
         s->pos = 0;
         s->buf_pos = s->buf_len = 0;
 
-        // Some streams (internal http.c) don't support STREAM_CTRL_RECONNECT,
-        // but do it when trying to seek.
-        if (s->control) {
-            if (s->control(s, STREAM_CTRL_RECONNECT, NULL) == STREAM_ERROR)
-                continue;
-        }
+        int r = stream_control(s, STREAM_CTRL_RECONNECT, NULL);
+        if (r == STREAM_UNSUPPORTED)
+            return 0;
+        if (r != STREAM_OK)
+            continue;
 
         if (stream_seek_unbuffered(s, pos) < 0 && s->pos == pos)
             return 1;
@@ -470,7 +469,7 @@ int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
 // Seek function bypassing the local stream buffer.
 static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 {
-    if (newpos == 0 || newpos != s->pos) {
+    if (newpos != s->pos) {
         if (!s->seek || !(s->flags & MP_STREAM_SEEK)) {
             mp_tmsg(MSGT_STREAM, MSGL_ERR, "Can not seek in this stream\n");
             return 0;
