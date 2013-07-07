@@ -708,7 +708,8 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     funcs = tvh->functions;
     demuxer->priv=tvh;
 
-    sh_video = new_sh_video(demuxer, 0);
+    struct sh_stream *sh_v = new_sh_stream(demuxer, STREAM_VIDEO);
+    sh_video = sh_v->video;
 
     /* get IMAGE FORMAT */
     int fourcc;
@@ -786,7 +787,8 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
 		goto no_audio;
 	}
 
-	sh_audio = new_sh_audio(demuxer, 0);
+	struct sh_stream *sh_a = new_sh_stream(demuxer, STREAM_AUDIO);
+	sh_audio = sh_a->audio;
 
 	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_SAMPLERATE,
                    &sh_audio->samplerate);

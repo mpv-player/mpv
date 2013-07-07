@@ -57,6 +57,7 @@ const m_option_t demux_rawvideo_opts[] = {
 
 
 static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
+  struct sh_stream *sh;
   sh_video_t* sh_video;
 
   if(!width || !height){
@@ -113,7 +114,8 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
     imgsize = width * height * bpp / 8;
   }
 
-  sh_video = new_sh_video(demuxer,0);
+  sh = new_sh_stream(demuxer, STREAM_VIDEO);
+  sh_video = sh->video;
   sh_video->gsh->codec=decoder;
   sh_video->format=imgfmt;
   sh_video->fps=fps;

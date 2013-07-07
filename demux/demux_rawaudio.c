@@ -44,13 +44,15 @@ const m_option_t demux_rawaudio_opts[] = {
 
 
 static demuxer_t* demux_rawaudio_open(demuxer_t* demuxer) {
+  struct sh_stream *sh;
   sh_audio_t* sh_audio;
   WAVEFORMATEX* w;
 
   if ((format & AF_FORMAT_SPECIAL_MASK) != 0)
       return NULL;
 
-  sh_audio = new_sh_audio(demuxer,0);
+  sh = new_sh_stream(demuxer, STREAM_AUDIO);
+  sh_audio = sh->audio;
   sh_audio->gsh->codec = "mp-pcm";
   sh_audio->format = format;
   sh_audio->wf = w = malloc(sizeof(*w));

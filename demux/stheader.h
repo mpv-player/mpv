@@ -161,11 +161,6 @@ typedef struct sh_sub {
 } sh_sub_t;
 
 // demuxer.c:
-#define new_sh_audio(d, i) new_sh_audio_aid(d, i, i)
-struct sh_audio *new_sh_audio_aid(struct demuxer *demuxer, int id, int aid);
-#define new_sh_video(d, i) new_sh_video_vid(d, i, i)
-struct sh_video *new_sh_video_vid(struct demuxer *demuxer, int id, int vid);
-#define new_sh_sub(d, i) new_sh_sub_sid(d, i, i)
 struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
 
 // video.c:

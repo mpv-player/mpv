@@ -343,24 +343,6 @@ static void free_sh_sub(sh_sub_t *sh)
     free_sh_stream(sh->gsh);
 }
 
-sh_audio_t *new_sh_audio_aid(demuxer_t *demuxer, int id, int aid)
-{
-    if (id > MAX_A_STREAMS - 1 || id < 0) {
-        mp_msg(MSGT_DEMUXER, MSGL_WARN,
-               "Requested audio stream id overflow (%d > %d)\n", id,
-               MAX_A_STREAMS);
-        return NULL;
-    }
-    if (demuxer->a_streams[id]) {
-        mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "WARNING: Audio stream header %d redefined.\n", id);
-    } else {
-        mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found audio stream: %d\n", id);
-        new_sh_stream_id(demuxer, STREAM_AUDIO, id, aid);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", aid);
-    }
-    return demuxer->a_streams[id];
-}
-
 static void free_sh_audio(demuxer_t *demuxer, int id)
 {
     sh_audio_t *sh = demuxer->a_streams[id];
@@ -369,24 +351,6 @@ static void free_sh_audio(demuxer_t *demuxer, int id)
     free(sh->wf);
     free(sh->codecdata);
     free_sh_stream(sh->gsh);
-}
-
-sh_video_t *new_sh_video_vid(demuxer_t *demuxer, int id, int vid)
-{
-    if (id > MAX_V_STREAMS - 1 || id < 0) {
-        mp_msg(MSGT_DEMUXER, MSGL_WARN,
-               "Requested video stream id overflow (%d > %d)\n", id,
-               MAX_V_STREAMS);
-        return NULL;
-    }
-    if (demuxer->v_streams[id])
-        mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "WARNING: Video stream header %d redefined.\n", id);
-    else {
-        mp_tmsg(MSGT_DEMUXER, MSGL_V, "==> Found video stream: %d\n", id);
-        new_sh_stream_id(demuxer, STREAM_VIDEO, id, vid);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
-    }
-    return demuxer->v_streams[id];
 }
 
 static void free_sh_video(sh_video_t *sh)

@@ -206,7 +206,8 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   demuxer->movi_end = mf->nr_of_files - 1;
 
   // create a new video stream header
-  sh_video = new_sh_video(demuxer, 0);
+  struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
+  sh_video = sh->video;
   // make sure the demuxer knows about the new video stream header
   // (even though new_sh_video() ought to take care of it)
   demuxer->video->sh = sh_video;
