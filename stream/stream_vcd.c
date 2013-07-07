@@ -232,7 +232,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   stream->seek = seek;
   stream->control = control;
   stream->close = close_s;
-  *file_format = DEMUXER_TYPE_MPEG_PS;
+  *file_format = DEMUXER_TYPE_LAVF; // mpegps
 
   m_struct_free(&stream_opts,opts);
   return STREAM_OK;

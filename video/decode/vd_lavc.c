@@ -345,10 +345,7 @@ static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
     avctx->coded_width  = sh->disp_w;
     avctx->coded_height = sh->disp_h;
 
-    // demux_avi only
-    avctx->stream_codec_tag = sh->video.fccHandler;
-
-    // demux_mkv, demux_avi, demux_asf
+    // demux_mkv
     if (sh->bih)
         set_from_bih(avctx, sh->format, sh->bih);
 

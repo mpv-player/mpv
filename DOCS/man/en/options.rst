@@ -1198,19 +1198,9 @@
     depends on the VO backend and how it handles keyboard input. Does not
     apply to terminal input.)
 
---avi-ni
-    (Internal AVI demuxer which is not used by default only)
-    Force usage of non-interleaved AVI parser (fixes playback of some bad AVI
-    files).
-
 --no-aspect
     Ignore aspect ratio information from video file and assume the video has
     square pixels. See also ``--aspect``.
-
---no-bps
-    (Internal AVI demuxer which is not used by default only)
-    Do not use average byte/second value for A-V sync. Helps with some AVI
-    files with broken header.
 
 --no-cache
     Turn off input stream caching. See ``--cache``.

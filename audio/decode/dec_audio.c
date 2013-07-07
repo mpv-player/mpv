@@ -21,6 +21,8 @@
 #include <unistd.h>
 #include <assert.h>
 
+#include <libavutil/mem.h>
+
 #include "demux/codec_tags.h"
 
 #include "config.h"

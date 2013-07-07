@@ -739,7 +739,7 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 	stream->close = dvbin_close;
 	m_struct_free(&stream_opts, opts);
 
-	*file_format = DEMUXER_TYPE_MPEG_TS;
+	*file_format = DEMUXER_TYPE_LAVF; // TS
 
 	return STREAM_OK;
 }

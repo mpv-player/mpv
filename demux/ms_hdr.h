@@ -22,6 +22,14 @@
 #include <sys/types.h>
 #include "config.h"
 
+#include "compat/mpbswap.h"
+
+#ifndef mmioFOURCC
+#define mmioFOURCC( ch0, ch1, ch2, ch3 )                                     \
+    ( (uint32_t)(uint8_t)(ch0) | ( (uint32_t)(uint8_t)(ch1) << 8 ) |         \
+    ( (uint32_t)(uint8_t)(ch2) << 16 ) | ( (uint32_t)(uint8_t)(ch3) << 24 ) )
+#endif
+
 #ifndef _WAVEFORMATEX_
 #define _WAVEFORMATEX_
 typedef struct __attribute__((__packed__)) _WAVEFORMATEX {

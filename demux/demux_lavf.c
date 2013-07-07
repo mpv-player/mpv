@@ -510,7 +510,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
         if (opts->user_correct_pts != 0)
             avfc->flags |= AVFMT_FLAG_GENPTS;
     }
-    if (index_mode == 0)
+    if (opts->index_mode == 0)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
 
     if (lavfdopts->probesize) {

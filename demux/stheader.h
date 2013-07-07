@@ -24,7 +24,6 @@
 #include "codec_tags.h"
 
 #include "audio/chmap.h"
-#include "aviheader.h"
 #include "ms_hdr.h"
 struct MPOpts;
 struct demuxer;
@@ -113,7 +112,6 @@ typedef struct sh_audio {
     struct af_stream *afilter;          // the audio filter stream
     const struct ad_functions *ad_driver;
     // win32-compatible codec parameters:
-    AVIStreamHeader audio;
     WAVEFORMATEX *wf;
     // note codec extradata may be either under "wf" or "codecdata"
     unsigned char *codecdata;
@@ -153,7 +151,6 @@ typedef struct sh_video {
     const struct vd_functions *vd_driver;
     int vf_initialized;   // -1 failed, 0 not done, 1 done
     // win32-compatible codec parameters:
-    AVIStreamHeader video;
     BITMAPINFOHEADER *bih;
 } sh_video_t;
 
@@ -173,9 +170,6 @@ struct sh_audio *new_sh_audio_aid(struct demuxer *demuxer, int id, int aid);
 #define new_sh_video(d, i) new_sh_video_vid(d, i, i)
 struct sh_video *new_sh_video_vid(struct demuxer *demuxer, int id, int vid);
 #define new_sh_sub(d, i) new_sh_sub_sid(d, i, i)
-struct sh_sub *new_sh_sub_sid(struct demuxer *demuxer, int id, int sid);
-struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
-                                   const char *lang);
 struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
 
 // video.c:

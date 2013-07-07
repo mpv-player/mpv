@@ -722,10 +722,11 @@ static void add_block_position(demuxer_t *demuxer, struct mkv_track *track,
 
 static int demux_mkv_read_cues(demuxer_t *demuxer)
 {
+    struct MPOpts *opts = demuxer->opts;
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
 
-    if (index_mode == 0 || index_mode == 2) {
+    if (opts->index_mode == 0 || opts->index_mode == 2) {
         ebml_read_skip(s, NULL);
         return 0;
     }

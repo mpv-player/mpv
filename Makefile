@@ -185,24 +185,14 @@ SOURCES = talloc.c \
           core/timeline/tl_edl.c \
           core/timeline/tl_matroska.c \
           core/timeline/tl_cue.c \
-          demux/asfheader.c \
-          demux/aviheader.c \
-          demux/aviprint.c \
           demux/codec_tags.c \
           demux/demux.c \
-          demux/demux_asf.c \
-          demux/demux_avi.c \
           demux/demux_edl.c \
           demux/demux_cue.c \
           demux/demux_lavf.c \
           demux/demux_mf.c \
           demux/demux_mkv.c \
-          demux/demux_mpg.c \
           demux/demux_subreader.c \
-          demux/demux_ts.c \
-          demux/mp3_hdr.c \
-          demux/parse_es.c \
-          demux/mpeg_hdr.c \
           demux/demux_rawaudio.c \
           demux/demux_rawvideo.c \
           demux/ebml.c \

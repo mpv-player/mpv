@@ -32,42 +32,17 @@
 
 struct MPOpts;
 
-#if (__GNUC__ >= 3)
-#define likely(x) __builtin_expect((x) != 0, 1)
-#define unlikely(x) __builtin_expect((x) != 0, 0)
-#else
-#define likely(x) (x)
-#define unlikely(x) (x)
-#endif
-
 #define MAX_PACKS 4096
 #define MAX_PACK_BYTES 0x8000000  // 128 MiB
 
 enum demuxer_type {
     DEMUXER_TYPE_UNKNOWN = 0,
-    DEMUXER_TYPE_MPEG_PS,
-    DEMUXER_TYPE_AVI,
-    DEMUXER_TYPE_AVI_NI,
-    DEMUXER_TYPE_AVI_NINI,
-    DEMUXER_TYPE_ASF,
     DEMUXER_TYPE_TV,
-    DEMUXER_TYPE_Y4M,
     DEMUXER_TYPE_MF,
     DEMUXER_TYPE_RAWAUDIO,
     DEMUXER_TYPE_RAWVIDEO,
-    DEMUXER_TYPE_MPEG_ES,
-    DEMUXER_TYPE_MPEG4_ES,
-    DEMUXER_TYPE_H264_ES,
-    DEMUXER_TYPE_MPEG_PES,
-    DEMUXER_TYPE_MPEG_GXF,
-    DEMUXER_TYPE_GIF,
-    DEMUXER_TYPE_MPEG_TS,
     DEMUXER_TYPE_MATROSKA,
     DEMUXER_TYPE_LAVF,
-    DEMUXER_TYPE_NSV,
-    DEMUXER_TYPE_AVS,
-    DEMUXER_TYPE_AAC,
-    DEMUXER_TYPE_MPC,
     DEMUXER_TYPE_MNG,
     DEMUXER_TYPE_EDL,
     DEMUXER_TYPE_CUE,
@@ -134,20 +109,9 @@ typedef struct demux_stream {
     demux_packet_t *current; // needed for refcounting of the buffer
     int id;               // stream ID  (for multiple audio/video streams)
     struct demuxer *demuxer; // parent demuxer structure (stream handler)
-// ---- asf -----
-    struct demux_packet *asf_packet; // read asf fragments here
-    int asf_seq;
 // ---- stream header ----
     void *sh;              // points to sh_audio or sh_video
 } demux_stream_t;
-
-typedef struct demuxer_info {
-    char *name;
-    char *author;
-    char *encoder;
-    char *comments;
-    char *copyright;
-} demuxer_info_t;
 
 #define MAX_SH_STREAMS 256
 #define MAX_A_STREAMS MAX_SH_STREAMS
@@ -300,15 +264,6 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp);
 #define SIZE_MAX ((size_t)-1)
 #endif
 
-static inline void *realloc_struct(void *ptr, size_t nmemb, size_t size)
-{
-    if (nmemb > SIZE_MAX / size) {
-        free(ptr);
-        return NULL;
-    }
-    return realloc(ptr, nmemb * size);
-}
-
 void free_demuxer(struct demuxer *demuxer);
 
 int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
@@ -330,17 +285,6 @@ static inline int ds_tell_pts(struct demux_stream *ds)
     return (ds->pts_bytes - ds->buffer_size) + ds->buffer_pos;
 }
 
-int demux_read_data(struct demux_stream *ds, unsigned char *mem, int len);
-int demux_pattern_3(struct demux_stream *ds, unsigned char *mem, int maxlen,
-                    int *read, uint32_t pattern);
-
-#define demux_peekc(ds) ( \
-        (likely(ds->buffer_pos<ds->buffer_size)) ? ds->buffer[ds->buffer_pos] \
-        : ((unlikely(!ds_fill_buffer(ds))) ? (-1) : ds->buffer[ds->buffer_pos]))
-#define demux_getc(ds) ( \
-        (likely(ds->buffer_pos<ds->buffer_size)) ? ds->buffer[ds->buffer_pos++] \
-        : ((unlikely(!ds_fill_buffer(ds))) ? (-1) : ds->buffer[ds->buffer_pos++]))
-
 void ds_free_packs(struct demux_stream *ds);
 int ds_get_packet(struct demux_stream *ds, unsigned char **start);
 int ds_get_packet_pts(struct demux_stream *ds, unsigned char **start,
@@ -351,16 +295,6 @@ double ds_get_next_pts(struct demux_stream *ds);
 int ds_parse(struct demux_stream *sh, uint8_t **buffer, int *len, double pts,
              int64_t pos);
 void ds_clear_parser(struct demux_stream *sh);
-
-static inline int avi_stream_id(unsigned int id)
-{
-    unsigned char a, b;
-    a = id - '0';
-    b = (id >> 8) - '0';
-    if (a>9 || b>9)
-        return 100;          // invalid ID
-    return a * 10 + b;
-}
 
 struct demuxer *demux_open(struct MPOpts *opts, struct stream *stream,
                            int file_format, int aid, int vid, int sid,
@@ -375,11 +309,6 @@ struct demuxer *demux_open_withparams(struct MPOpts *opts,
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, float rel_seek_secs, float audio_delay,
                int flags);
-
-// AVI demuxer params:
-extern int index_mode;  // -1=untouched  0=don't use index  1=use (generate) index
-extern int force_ni;
-extern int pts_from_bps;
 
 int demux_info_add(struct demuxer *demuxer, const char *opt, const char *param);
 int demux_info_add_bstr(struct demuxer *demuxer, struct bstr opt,

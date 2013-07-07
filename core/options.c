@@ -25,6 +25,7 @@
 
 #include <stddef.h>
 #include <sys/types.h>
+#include <limits.h>
 
 #include "core/options.h"
 #include "config.h"
@@ -369,12 +370,9 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("pause", pause, 0),
     OPT_FLAG("keep-open", keep_open, 0),
 
-    // AVI specific: force non-interleaved mode
-    {"avi-ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-
     // AVI and Ogg only: (re)build index at startup
-    {"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1, NULL},
-    {"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2, NULL},
+    OPT_FLAG_CONSTANTS("idx", index_mode, 0, -1, 1),
+    OPT_FLAG_STORE("forceidx", index_mode, 0, 2),
 
     // select audio/video/subtitle stream
     OPT_TRACKCHOICE("aid", audio_id),
@@ -418,9 +416,6 @@ const m_option_t mp_opts[] = {
 #endif
 
 // ------------------------- a-v sync options --------------------
-
-    // AVI specific: A-V sync mode (bps vs. interleaving)
-    {"bps", &pts_from_bps, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
     // set A-V sync correction speed (0=disables it):
     OPT_FLOATRANGE("mc", default_max_pts_correction, 0, 0, 100),
@@ -803,6 +798,8 @@ const struct MPOpts mp_default_opts = {
     .suboverlap_enabled = 0,
 
     .hwdec_codecs = "all",
+
+    .index_mode = -1,
 
     .ad_lavc_param = {
         .ac3drc = 1.,

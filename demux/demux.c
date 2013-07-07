@@ -55,18 +55,9 @@ extern const demuxer_desc_t demuxer_desc_rawaudio;
 extern const demuxer_desc_t demuxer_desc_rawvideo;
 extern const demuxer_desc_t demuxer_desc_tv;
 extern const demuxer_desc_t demuxer_desc_mf;
-extern const demuxer_desc_t demuxer_desc_avi;
-extern const demuxer_desc_t demuxer_desc_asf;
 extern const demuxer_desc_t demuxer_desc_matroska;
 extern const demuxer_desc_t demuxer_desc_lavf;
 extern const demuxer_desc_t demuxer_desc_mng;
-extern const demuxer_desc_t demuxer_desc_mpeg_ps;
-extern const demuxer_desc_t demuxer_desc_mpeg_pes;
-extern const demuxer_desc_t demuxer_desc_mpeg_gxf;
-extern const demuxer_desc_t demuxer_desc_mpeg_es;
-extern const demuxer_desc_t demuxer_desc_mpeg4_es;
-extern const demuxer_desc_t demuxer_desc_h264_es;
-extern const demuxer_desc_t demuxer_desc_mpeg_ts;
 extern const demuxer_desc_t demuxer_desc_libass;
 extern const demuxer_desc_t demuxer_desc_subreader;
 
@@ -86,18 +77,9 @@ const demuxer_desc_t *const demuxer_list[] = {
     &demuxer_desc_matroska,
     &demuxer_desc_lavf,
     &demuxer_desc_subreader,
-    &demuxer_desc_avi,
-    &demuxer_desc_asf,
 #ifdef CONFIG_MNG
     &demuxer_desc_mng,
 #endif
-    &demuxer_desc_mpeg_ps,
-    &demuxer_desc_mpeg_pes,
-    &demuxer_desc_mpeg_gxf,
-    &demuxer_desc_mpeg_es,
-    &demuxer_desc_mpeg4_es,
-    &demuxer_desc_h264_es,
-    &demuxer_desc_mpeg_ts,
     // auto-probe last, because it checks file-extensions only
     &demuxer_desc_mf,
     /* Please do not add any new demuxers here. If you want to implement a new
@@ -234,7 +216,6 @@ static struct demux_stream *new_demuxer_stream(struct demuxer *demuxer,
         .stream_type = type,
         .id = id,
         .demuxer = demuxer,
-        .asf_seq = -1,
     };
     return ds;
 }
@@ -355,34 +336,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
 
 static void free_sh_stream(struct sh_stream *sh)
 {
-}
-
-sh_sub_t *new_sh_sub_sid(demuxer_t *demuxer, int id, int sid)
-{
-    if (id > MAX_S_STREAMS - 1 || id < 0) {
-        mp_msg(MSGT_DEMUXER, MSGL_WARN,
-               "Requested sub stream id overflow (%d > %d)\n", id,
-               MAX_S_STREAMS);
-        return NULL;
-    }
-    if (demuxer->s_streams[id])
-        mp_msg(MSGT_DEMUXER, MSGL_WARN, "Sub stream %i redefined\n", id);
-    else {
-        new_sh_stream_id(demuxer, STREAM_SUB, id, sid);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
-    }
-    return demuxer->s_streams[id];
-}
-
-struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
-                                   const char *lang)
-{
-    struct sh_sub *sh = new_sh_sub_sid(demuxer, id, sid);
-    if (lang && lang[0] && strcmp(lang, "und")) {
-        sh->gsh->lang = talloc_strdup(sh, lang);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sid, lang);
-    }
-    return sh;
 }
 
 static void free_sh_sub(sh_sub_t *sh)
@@ -610,9 +563,7 @@ static bool demux_check_queue_full(demuxer_t *demux)
                 "packet queue (video: %d packets in %d bytes, audio: %d "
                 "packets in %d bytes).\n", vpacks, vbytes, apacks, abytes);
         mp_tmsg(MSGT_DEMUXER, MSGL_HINT, "Maybe you are playing a non-"
-                "interleaved stream/file or the codec failed?\nFor AVI files, "
-                "try to force non-interleaved mode with the "
-                "--demuxer=avi --avi-ni options.\n");
+                "interleaved stream/file or the codec failed?\n");
     }
 
     demux->warned_queue_overflow = true;
@@ -716,65 +667,6 @@ int ds_fill_buffer(demux_stream_t *ds)
     return 0;
 }
 
-int demux_read_data(demux_stream_t *ds, unsigned char *mem, int len)
-{
-    int x;
-    int bytes = 0;
-    while (len > 0) {
-        x = ds->buffer_size - ds->buffer_pos;
-        if (x == 0) {
-            if (!ds_fill_buffer(ds))
-                return bytes;
-        } else {
-            if (x > len)
-                x = len;
-            if (mem)
-                memcpy(mem + bytes, &ds->buffer[ds->buffer_pos], x);
-            bytes += x;
-            len -= x;
-            ds->buffer_pos += x;
-        }
-    }
-    return bytes;
-}
-
-/**
- * \brief read data until the given 3-byte pattern is encountered, up to maxlen
- * \param mem memory to read data into, may be NULL to discard data
- * \param maxlen maximum number of bytes to read
- * \param read number of bytes actually read
- * \param pattern pattern to search for (lowest 8 bits are ignored)
- * \return whether pattern was found
- */
-int demux_pattern_3(demux_stream_t *ds, unsigned char *mem, int maxlen,
-                    int *read, uint32_t pattern)
-{
-    register uint32_t head = 0xffffff00;
-    register uint32_t pat = pattern & 0xffffff00;
-    int total_len = 0;
-    do {
-        register unsigned char *ds_buf = &ds->buffer[ds->buffer_size];
-        int len = ds->buffer_size - ds->buffer_pos;
-        register long pos = -len;
-        if (unlikely(pos >= 0)) { // buffer is empty
-            ds_fill_buffer(ds);
-            continue;
-        }
-        do {
-            head |= ds_buf[pos];
-            head <<= 8;
-        } while (++pos && head != pat);
-        len += pos;
-        if (total_len + len > maxlen)
-            len = maxlen - total_len;
-        len = demux_read_data(ds, mem ? &mem[total_len] : NULL, len);
-        total_len += len;
-    } while ((head != pat || total_len < 3) && total_len < maxlen && !ds->eof);
-    if (read)
-        *read = total_len;
-    return total_len >= 3 && head == pat;
-}
-
 void ds_free_packs(demux_stream_t *ds)
 {
     demux_packet_t *dp = ds->first;
@@ -782,11 +674,6 @@ void ds_free_packs(demux_stream_t *ds)
         demux_packet_t *dn = dp->next;
         free_demux_packet(dp);
         dp = dn;
-    }
-    if (ds->asf_packet) {
-        // free unfinished .asf fragments:
-        free_demux_packet(ds->asf_packet);
-        ds->asf_packet = NULL;
     }
     ds->first = ds->last = NULL;
     ds->packs = 0; // !!!!!
@@ -1019,22 +906,6 @@ struct demuxer *demux_open_withparams(struct MPOpts *opts,
     if (demuxer_type)
         file_format = demuxer_type;
 
-    // Some code (e.g. dvd stuff, network code, or extension.c) explicitly
-    // request certain file formats. The list of formats are always handled by
-    // libavformat.
-    // Maybe attempts should be made to convert the mplayer format to the libav
-    // format, instead of reyling on libav to auto-detect the stream's format
-    // correctly.
-    switch (file_format) {
-    //case DEMUXER_TYPE_MPEG_PS:
-    //case DEMUXER_TYPE_MPEG_TS:
-    case DEMUXER_TYPE_Y4M:
-    case DEMUXER_TYPE_NSV:
-    case DEMUXER_TYPE_AAC:
-    case DEMUXER_TYPE_MPC:
-        file_format = DEMUXER_TYPE_LAVF;
-    }
-
     // If somebody requested a demuxer check it
     if (file_format) {
         desc = get_demuxer_desc_from_type(file_format);
@@ -1099,14 +970,7 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
                int flags)
 {
     if (!demuxer->seekable) {
-        if (demuxer->file_format == DEMUXER_TYPE_AVI)
-            mp_tmsg(MSGT_SEEK, MSGL_WARN, "Cannot seek in raw AVI streams. (Index required, try with the -idx switch.)\n");
-#ifdef CONFIG_TV
-        else if (demuxer->file_format == DEMUXER_TYPE_TV)
-            mp_tmsg(MSGT_SEEK, MSGL_WARN, "TV input is not seekable! (Seeking will probably be for changing channels ;)\n");
-#endif
-        else
-            mp_tmsg(MSGT_SEEK, MSGL_WARN, "Cannot seek in this file.\n");
+        mp_tmsg(MSGT_SEEK, MSGL_WARN, "Cannot seek in this file.\n");
         return 0;
     }
 
