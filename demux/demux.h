@@ -275,11 +275,6 @@ void ds_read_packet(struct demux_stream *ds, struct stream *stream, int len,
 int demux_fill_buffer(struct demuxer *demux, struct demux_stream *ds);
 int ds_fill_buffer(struct demux_stream *ds);
 
-static inline int64_t ds_tell(struct demux_stream *ds)
-{
-    return (ds->dpos - ds->buffer_size) + ds->buffer_pos;
-}
-
 static inline int ds_tell_pts(struct demux_stream *ds)
 {
     return (ds->pts_bytes - ds->buffer_size) + ds->buffer_pos;
