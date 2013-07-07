@@ -1217,13 +1217,6 @@ else
 fi
 echores "$_mman"
 
-_mman_has_map_failed=no
-statement_check sys/mman.h 'void *p = MAP_FAILED' && _mman_has_map_failed=yes
-if test "$_mman_has_map_failed" = yes ; then
-  def_mman_has_map_failed=''
-else
-  def_mman_has_map_failed='#define MAP_FAILED ((void *) -1)'
-fi
 
 echocheck "dynamic loader"
 _dl=no

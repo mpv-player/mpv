@@ -33,7 +33,7 @@ SOURCES-$(DVBIN)                += stream/dvb_tune.c \
 SOURCES-$(DVDREAD)              += stream/stream_dvd.c \
                                    stream/stream_dvd_common.c
 
-SOURCES-$(HAVE_SYS_MMAN_H)      += audio/filter/af_export.c osdep/mmap_anon.c
+SOURCES-$(HAVE_SYS_MMAN_H)      += audio/filter/af_export.c
 SOURCES-$(LADSPA)               += audio/filter/af_ladspa.c
 SOURCES-$(LIBASS)               += sub/ass_mp.c sub/sd_ass.c \
                                    demux/demux_libass.c
