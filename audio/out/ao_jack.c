@@ -188,6 +188,7 @@ static int init(struct ao *ao, char *params)
     const char **matching_ports = NULL;
     char *port_name = NULL;
     char *client_name = NULL;
+    char *stdlayout = NULL;
     int autostart = 0;
     int connect = 1;
     struct priv *p = talloc_zero(ao, struct priv);
@@ -197,6 +198,7 @@ static int init(struct ao *ao, char *params)
         {"estimate", OPT_ARG_BOOL, &p->estimate, NULL},
         {"autostart", OPT_ARG_BOOL, &autostart, NULL},
         {"connect", OPT_ARG_BOOL, &connect, NULL},
+        {"std-channel-layout", OPT_ARG_MSTRZ, &stdlayout, NULL},
         {NULL}
     };
     jack_options_t open_options = JackUseExactName;
@@ -210,7 +212,23 @@ static int init(struct ao *ao, char *params)
     }
 
     struct mp_chmap_sel sel = {0};
-    mp_chmap_sel_add_waveext(&sel);
+
+    if (stdlayout) {
+        if (strcmp(stdlayout, "waveext") == 0) {
+            mp_chmap_sel_add_waveext(&sel);
+        } else if (strcmp(stdlayout, "alsa") == 0) {
+            mp_chmap_sel_add_alsa_def(&sel);
+        } else if (strcmp(stdlayout, "any") == 0) {
+            mp_chmap_sel_add_any(&sel);
+        } else {
+            mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] std-channel-layout suboption "
+                   "expects 'alsa' or 'waveext' as value.\n");
+            goto err_out;
+        }
+    } else {
+        mp_chmap_sel_add_waveext(&sel);
+    }
+
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         goto err_out;
 
@@ -286,12 +304,14 @@ static int init(struct ao *ao, char *params)
     free(matching_ports);
     free(port_name);
     free(client_name);
+    free(stdlayout);
     return 0;
 
 err_out:
     free(matching_ports);
     free(port_name);
     free(client_name);
+    free(stdlayout);
     if (p->client)
         jack_client_close(p->client);
     return -1;

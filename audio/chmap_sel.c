@@ -70,6 +70,7 @@ void mp_chmap_sel_add_waveext(struct mp_chmap_sel *s)
     s->allow_waveext = true;
 }
 
+// Classic ALSA-based MPlayer layouts.
 void mp_chmap_sel_add_alsa_def(struct mp_chmap_sel *s)
 {
     for (int n = 0; n < MP_NUM_CHANNELS; n++) {

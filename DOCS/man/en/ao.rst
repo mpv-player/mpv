@@ -60,6 +60,21 @@ jack
         Automatically create connections to output ports (default: enabled).
         When enabled, the maximum number of output channels will be limited to
         the number of available output ports.
+    std-channel-layout=alsa|waveext|any
+        Select the standard channel layout (default: alsa). JACK itself has no
+        notion of channel layouts (i.e. assigning which speaker a given
+        channel is supposed to map to) - it just takes whatever the application
+        outputs, and reroutes it to whatever the user defines. This means the
+        user and the application is in charge of dealing with the channel
+        layout. ``alsa`` uses the old MPlayer layout, which is inspired by
+        ALSA's standard layouts. In this mode, ao_jack will refuse to play 3
+        or 7 channels (because these don't really have a defined meaning in
+        MPlayer). ``waveext`` uses WAVE_FORMAT_EXTENSIBLE order, which even
+        though it was defined by Microsoft, is the standard on many systems.
+        The value ``any`` makes JACK accept whatever comes from the audio
+        filter chain, regardless of channel layout and without reordering. This
+        mode is probably not very useful, other than debugging or when used
+        with fixed setups.
 
 coreaudio (Mac OS X only)
     native Mac OS X audio output driver
