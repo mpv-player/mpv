@@ -1271,6 +1271,22 @@ else
 fi
 echores "$_pthreads"
 
+if test "$_pthreads" = yes ; then
+
+# Cargo-cult for -lrt, which is needed on not so recent glibc version for
+# clock_gettime. It's documented as required before before glibc 2.17, which
+# was released in december 2012. On newer glibc versions or on other systems,
+# this will hopefully do nothing.
+echocheck "linking with -lrt"
+_rt=no
+cc_check "-lrt" && _rt=yes
+if test "$_rt" = yes ; then
+  _ld_pthread="$_ld_pthread -lrt"
+fi
+echores "$_rt"
+
+fi
+
 echocheck "stream cache"
 _stream_cache="$_pthreads"
 if test "$_stream_cache" = yes ; then
