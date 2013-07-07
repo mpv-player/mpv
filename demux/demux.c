@@ -267,14 +267,17 @@ static demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
     return d;
 }
 
-static struct sh_stream *new_sh_stream_id(demuxer_t *demuxer,
-                                          enum stream_type type,
-                                          int stream_index,
-                                          int demuxer_id)
+struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
 {
-    if (demuxer->num_streams > MAX_SH_STREAMS || stream_index > MAX_SH_STREAMS) {
+    if (demuxer->num_streams > MAX_SH_STREAMS) {
         mp_msg(MSGT_DEMUXER, MSGL_WARN, "Too many streams.");
         return NULL;
+    }
+
+    int demuxer_id = 0;
+    for (int n = 0; n < demuxer->num_streams; n++) {
+        if (demuxer->streams[n]->type == type)
+            demuxer_id++;
     }
 
     struct sh_stream *sh = talloc_struct(demuxer, struct sh_stream, {
@@ -282,7 +285,7 @@ static struct sh_stream *new_sh_stream_id(demuxer_t *demuxer,
         .demuxer = demuxer,
         .index = demuxer->num_streams,
         .demuxer_id = demuxer_id, // may be overwritten by demuxer
-        .stream_index = stream_index,
+        .stream_index = demuxer->num_streams,
         .opts = demuxer->opts,
     });
     MP_TARRAY_APPEND(demuxer, demuxer->streams, demuxer->num_streams, sh);
@@ -319,17 +322,6 @@ static struct sh_stream *new_sh_stream_id(demuxer_t *demuxer,
         default: assert(false);
     }
     return sh;
-}
-
-// This is what "modern" demuxers are supposed to use.
-struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
-{
-    int num = 0;
-    for (int n = 0; n < demuxer->num_streams; n++) {
-        if (demuxer->streams[n]->type == type)
-            num++;
-    }
-    return new_sh_stream_id(demuxer, type, demuxer->num_streams, num);
 }
 
 static void free_sh_stream(struct sh_stream *sh)
