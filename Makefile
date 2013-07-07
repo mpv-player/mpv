@@ -66,7 +66,6 @@ SOURCES-$(TV)                   += stream/stream_tv.c stream/tv.c \
 
 SOURCES-$(TV_V4L2)              += stream/tvi_v4l2.c stream/audio_in.c
 SOURCES-$(VCD)                  += stream/stream_vcd.c
-SOURCES-$(VSTREAM)              += stream/stream_vstream.c
 SOURCES-$(DUMMY_OSD)            += sub/osd_dummy.c
 SOURCES-$(LIBASS_OSD)           += sub/osd_libass.c
 

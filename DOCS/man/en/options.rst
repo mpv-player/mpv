@@ -1225,7 +1225,7 @@
     same files from system wide configuration directories.
 
     Loading of some configuration files is not affected by this option, such
-    as configuration files for cddb, DVB code and fontconfig.
+    as configuration files for DVB code and fontconfig.
 
     *NOTE*: Files explicitly requested by command line options, like
     ``--include`` or ``--use-filedir-conf``, will still be loaded.

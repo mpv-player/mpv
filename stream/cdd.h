@@ -53,8 +53,4 @@ cd_track_t*	cd_info_get_track(cd_info_t *cd_info, unsigned int track_nb);
 
 void 		cd_info_debug(cd_info_t *cd_info);
 
-int             cdd_identify(const char *dev);
-int             cddb_resolve(const char *dev, char **xmcd_file);
-cd_info_t*      cddb_parse_xmcd(char *xmcd_file);
-
 #endif /* MPLAYER_CDD_H */

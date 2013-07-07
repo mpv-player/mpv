@@ -318,7 +318,6 @@ Optional features:
   --enable-macosx-bundle enable Mac OS X bundle file locations [autodetect]
   --disable-inet6        disable IPv6 support [autodetect]
   --disable-gethostbyname2  gethostbyname2 part of the C library [autodetect]
-  --disable-vstream      disable TiVo vstream client support [autodetect]
   --disable-pthreads     disable Posix threads support [autodetect]
   --disable-libass       disable subtitle rendering with libass [autodetect]
   --disable-libass-osd   disable OSD rendering with libass [autodetect]
@@ -478,7 +477,6 @@ _macosx_bundle=auto
 _enca=auto
 _inet6=auto
 _gethostbyname2=auto
-_vstream=auto
 _pthreads=auto
 _ass=auto
 _libass_osd=auto
@@ -680,8 +678,6 @@ for ac_option do
   --disable-shm)        _shm=no         ;;
   --enable-select)      _select=yes     ;;
   --disable-select)     _select=no      ;;
-  --enable-vstream)     _vstream=yes    ;;
-  --disable-vstream)    _vstream=no     ;;
   --enable-pthreads)    _pthreads=yes   ;;
   --disable-pthreads)   _pthreads=no    ;;
   --enable-libass)      _ass=yes        ;;
@@ -2833,27 +2829,6 @@ fi
 echores "$_pvr"
 
 
-echocheck "vstream client"
-if test "$_vstream" = auto ; then
-  _vstream=no
-  cat > $TMPC <<EOF
-#include <vstream-client.h>
-void vstream_error(const char *format, ... ) {}
-int main(void) { vstream_start(); return 0; }
-EOF
-  cc_check -lvstream-client && _vstream=yes
-fi
-if test "$_vstream" = yes ; then
-  def_vstream='#define CONFIG_VSTREAM 1'
-  inputmodules="vstream $inputmodules"
-  libs_mplayer="$libs_mplayer -lvstream-client"
-else
-  noinputmodules="vstream $noinputmodules"
-  def_vstream='#undef CONFIG_VSTREAM'
-fi
-echores "$_vstream"
-
-
 echocheck "encoding"
 if test "$_encoding" = yes ; then
     def_encoding="#define CONFIG_ENCODING 1"
@@ -3054,7 +3029,6 @@ TV = $_tv
 TV_V4L2 = $_tv_v4l2
 VCD = $_vcd
 VDPAU = $_vdpau
-VSTREAM = $_vstream
 X11 = $_x11
 WAYLAND = $_wayland
 XV = $_xv
@@ -3226,7 +3200,6 @@ $def_smb
 $def_libquvi4
 $def_libquvi9
 $def_libguess
-$def_vstream
 
 $def_lcms2
 
