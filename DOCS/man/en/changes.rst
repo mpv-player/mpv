@@ -8,7 +8,7 @@ MPlayer (also called mplayer, mplayer-svn, mplayer1). Many changes
 have been made. Some changes are incompatible, or completely change how the
 player behaves.
 
-General changes for mplayer-svn to mplayer2
+General Changes for MPlayer-svn to mplayer2
 -------------------------------------------
 
 * Removal of the internal GUI, MEncoder, OSD menu
@@ -34,8 +34,8 @@ General changes for mplayer-svn to mplayer2
 * General code cleanups
 * Many more changes
 
-General changes for mplayer2 to mpv
-----------------------------------------
+General Changes for mplayer2 to mpv
+-----------------------------------
 
 * Removal of lots of unneeded code to encourage developer activity (less
   obscure scary zombie code that kills any desire for hacking the codebase)
@@ -70,14 +70,15 @@ General changes for mplayer2 to mpv
 * General code cleanups
 * Many more changes
 
-Detailed listing of user-visible changes
+Detailed Listing of User-visible Changes
 ----------------------------------------
 
 This listing is about changed command line switches, slave commands, and similar
 things. Completely removed features are not listed.
 
-Command line switches
+Command Line Switches
 ~~~~~~~~~~~~~~~~~~~~~
+
 * There is a new command line syntax, which is generally preferred over the old
   syntax. ``-optname optvalue`` becomes ``--optname=optvalue``.
 
@@ -137,7 +138,7 @@ Command line switches
 
 *NOTE*: ``-opt val`` becomes ``--opt=val``.
 
-input.conf and slave commands
+input.conf and Slave Commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * Table of renamed input commands:
@@ -200,7 +201,7 @@ Other
   compatible. If you're a developer of a slave mode application, contact us,
   and a new and better protocol can be developed.
 
-Policy for removed features
+Policy for Removed Features
 ---------------------------
 
 Features are a good thing, because they make users happy. As such, it is
@@ -214,7 +215,7 @@ feature you relied on was removed, and you want it back. Though it might be
 rejected in the worst case, it's much more likely that it will be either added
 back, or that a better solution will be implemented.
 
-Why this fork?
+Why this Fork?
 --------------
 
 * mplayer-svn wants to maintain old code, even if it's very bad code. It seems

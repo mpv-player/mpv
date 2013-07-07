@@ -28,7 +28,7 @@ commands they're bound to on the OSD, instead of running the commands:
 (Commands which normally close the player will not work in this mode, and you
 must kill **mpv** externally to make it exit.)
 
-General input command syntax
+General Input Command Syntax
 ----------------------------
 
 `[Shift+][Ctrl+][Alt+][Meta+]<key> [{<section>}] [<prefixes>] <command> (<argument>)*`
@@ -47,7 +47,7 @@ C style escaping can be used.
 
 Optional arguments can be skipped with ``-``.
 
-List of input commands
+List of Input Commands
 ----------------------
 
 ignore
@@ -226,7 +226,7 @@ show_progress
     Show the progress bar, the elapsed time and the total duration of the file
     on the OSD.
 
-Input commands that are possibly subject to change
+Input Commands that are Possibly Subject to Change
 --------------------------------------------------
 
 af_switch "filter1=params,filter2,..."
@@ -298,7 +298,7 @@ tv_set_norm, dvb_set_channel, radio_step_channel, radio_set_channel,
 radio_set_freq, radio_step_freq (all of these should be replaced by properties),
 stop (questionable use), get_property (?), af_cmdline, vo_cmdline (experimental).
 
-Input command prefixes
+Input Command Prefixes
 ----------------------
 
 osd-auto (default)
@@ -326,7 +326,7 @@ settings.
 Undocumented prefixes: pausing, pausing_keep, pausing_toggle,
 pausing_keep_force. (Should these be made official?)
 
-Input sections
+Input Sections
 --------------
 
 Input sections group a set of bindings, and enable or disable them at once.
@@ -453,7 +453,7 @@ quvi-format                 x see ``--quvi-format``
 
 .. _property_expansion:
 
-Property expansion
+Property Expansion
 ------------------
 
 All string arguments to input commands as well as certain options (like
@@ -498,7 +498,7 @@ accepted as well. Example:
 - ``\n`` becomes a newline character
 - ``\\`` expands to ``\``
 
-Raw and formatted properties
+Raw and Formatted Properties
 ----------------------------
 
 Normally, properties are formatted as human readable text, meant to be

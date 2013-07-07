@@ -6,13 +6,13 @@ a movie player
 ##############
 
 :Author: wm4
-:Date: 2012-11-29
+:Date: 2013-07-07
 :Copyright: GPLv3
 :Version: git
 :Manual section: 1
 :Manual group: multimedia
 
-Synopsis
+SYNOPSIS
 ========
 
 | **mpv** [options] [file|URL|-]
@@ -51,7 +51,7 @@ mpv has a fully configurable, command-driven control layer which allows you
 to control mpv using keyboard, mouse, joystick or remote control (with
 LIRC). See the ``--input-`` options for ways to customize it.
 
-keyboard control
+Keyboard Control
 ----------------
 
 LEFT and RIGHT
@@ -237,7 +237,7 @@ n
 u
     Change channel list.
 
-mouse control
+Mouse Control
 -------------
 
 button 3 and button 4
@@ -246,7 +246,7 @@ button 3 and button 4
 button 5 and button 6
     Decrease/increase volume.
 
-joystick control
+Joystick Control
 ----------------
 
 left and right
@@ -286,7 +286,7 @@ the *XXX* option or if *XXX* is compiled in.
 | Or in a script:
 | `mpv --ao=pcm:file=%\`expr length "$NAME"\`%"$NAME" test.avi`
 
-Per-file options
+Per-File Options
 ----------------
 
 When playing multiple files, any option given on the command line usually
@@ -331,7 +331,7 @@ The option ``--a`` is never reset here.
 CONFIGURATION FILES
 ===================
 
-Location and syntax
+Location and Syntax
 -------------------
 
 You can put all of the options in configuration files which will be read every
@@ -351,7 +351,7 @@ setting them to *no*. Even suboptions can be specified in this way.
 | # Use quotes for text that can contain spaces:
 | status-msg="Time: ${time-pos}"
 
-Putting command line options into the configuration file
+Putting Command Line Options into the Configuration File
 --------------------------------------------------------
 
 Almost all command line options can be put into the configuration file. Here
@@ -369,7 +369,7 @@ is a small guide:
 | -opt "has spaces"    | opt="has spaces"         |
 +----------------------+--------------------------+
 
-File specific configuration files
+File Specific Configuration Files
 ---------------------------------
 
 You can also write file-specific configuration files. If you wish to have a
@@ -431,7 +431,7 @@ OPTIONS
 
 .. include:: input.rst
 
-Taking screenshots
+TAKING SCREENSHOTS
 ==================
 
 Screenshots of the currently played file can be taken using the 'screenshot'
@@ -596,7 +596,7 @@ FILES
 
 
 EXAMPLES OF MPV USAGE
-=========================
+=====================
 
 Quickstart Blu-ray playing:
     - ``mpv bd:////path/to/disc``
