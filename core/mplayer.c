@@ -3890,20 +3890,12 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     stream_enable_cache_percent(&stream, stream_cache,
                                 opts->stream_cache_min_percent,
                                 opts->stream_cache_seek_min_percent);
-    // deal with broken demuxers: preselect streams
-    int vs = -2, as = -2, ss = -2;
-    switch (filter) {
-    case STREAM_VIDEO: vs = -1; break;
-    case STREAM_AUDIO: as = -1; break;
-    case STREAM_SUB: ss = -1; break;
-    }
-    vs = -1; // avi can't go without video
     struct demuxer_params params = {
         .ass_library = mpctx->ass_library, // demux_libass requires it
     };
     struct demuxer *demuxer =
         demux_open_withparams(&mpctx->opts, stream, format, demuxer_name,
-                              as, vs, ss, filename, &params);
+                              filename, &params);
     if (!demuxer) {
         free_stream(stream);
         goto err_out;
@@ -4219,7 +4211,6 @@ goto_reopen_demuxer: ;
     mpctx->audio_delay = opts->audio_delay;
 
     mpctx->demuxer = demux_open(opts, mpctx->stream, file_format,
-                                opts->audio_id, opts->video_id, opts->sub_id,
                                 mpctx->filename);
     mpctx->master_demuxer = mpctx->demuxer;
 

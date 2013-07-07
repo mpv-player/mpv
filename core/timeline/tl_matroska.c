@@ -117,8 +117,7 @@ static struct demuxer *open_demuxer(struct stream *stream,
         struct MPContext *mpctx, char *filename, struct demuxer_params *params)
 {
     return demux_open_withparams(&mpctx->opts, stream,
-                DEMUXER_TYPE_MATROSKA, NULL, mpctx->opts.audio_id,
-                mpctx->opts.video_id, mpctx->opts.sub_id, filename, params);
+                DEMUXER_TYPE_MATROSKA, NULL, filename, params);
 }
 
 static int enable_cache(struct MPContext *mpctx, struct stream **stream,

@@ -280,13 +280,11 @@ struct demux_packet *ds_get_packet2(struct demux_stream *ds, bool repeat_last);
 double ds_get_next_pts(struct demux_stream *ds);
 
 struct demuxer *demux_open(struct MPOpts *opts, struct stream *stream,
-                           int file_format, int aid, int vid, int sid,
-                           char *filename);
+                           int file_format, char *filename);
 
 struct demuxer *demux_open_withparams(struct MPOpts *opts,
                                       struct stream *stream, int file_format,
-                                      char *force_format, int audio_id,
-                                      int video_id, int sub_id, char *filename,
+                                      char *force_format, char *filename,
                                       struct demuxer_params *params);
 
 void demux_flush(struct demuxer *demuxer);

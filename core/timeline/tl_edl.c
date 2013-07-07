@@ -360,9 +360,6 @@ void build_edl_timeline(struct MPContext *mpctx)
         if (!s)
             goto openfail;
         struct demuxer *d = demux_open(&mpctx->opts, s, format,
-                                       mpctx->opts.audio_id,
-                                       mpctx->opts.video_id,
-                                       mpctx->opts.sub_id,
                                        edl_ids[i].filename);
         if (!d) {
             free_stream(s);
