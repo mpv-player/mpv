@@ -46,8 +46,6 @@
 #error MP_INPUT_BUFFER_PADDING_SIZE is too small!
 #endif
 
-static void clear_parser(sh_audio_t *sh);
-
 // Demuxer list
 extern const struct demuxer_desc demuxer_desc_edl;
 extern const struct demuxer_desc demuxer_desc_cue;
@@ -370,7 +368,6 @@ static void free_sh_audio(demuxer_t *demuxer, int id)
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_audio at %p\n", sh);
     free(sh->wf);
     free(sh->codecdata);
-    clear_parser(sh);
     free_sh_stream(sh->gsh);
 }
 
@@ -465,73 +462,6 @@ void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
            (ds == ds->demuxer->audio) ? "d_audio" : "d_video", dp->len,
            dp->pts, (unsigned int) dp->pos, ds->demuxer->audio->packs,
            ds->demuxer->video->packs);
-}
-
-static void allocate_parser(AVCodecContext **avctx, AVCodecParserContext **parser, const char *format)
-{
-    enum AVCodecID codec_id = mp_codec_to_av_codec_id(format);
-
-    switch (codec_id) {
-    case AV_CODEC_ID_AAC_LATM:
-    case AV_CODEC_ID_AC3:
-    case AV_CODEC_ID_EAC3:
-    case AV_CODEC_ID_DTS:
-    case AV_CODEC_ID_FLAC:
-    case AV_CODEC_ID_MLP:
-    case AV_CODEC_ID_MP3:
-    case AV_CODEC_ID_MP2:
-    case AV_CODEC_ID_TRUEHD:
-        *avctx = avcodec_alloc_context3(NULL);
-        if (!*avctx)
-            return;
-        *parser = av_parser_init(codec_id);
-        if (!*parser)
-            av_freep(avctx);
-        break;
-    default: ;
-    }
-}
-
-static void get_parser(sh_audio_t *sh, AVCodecContext **avctx, AVCodecParserContext **parser)
-{
-    *avctx  = NULL;
-    *parser = NULL;
-
-    if (!sh || !sh->needs_parsing)
-        return;
-
-    *avctx  = sh->avctx;
-    *parser = sh->parser;
-    if (*parser)
-        return;
-
-    allocate_parser(avctx, parser, sh->gsh->codec);
-    sh->avctx  = *avctx;
-    sh->parser = *parser;
-}
-
-int ds_parse(demux_stream_t *ds, uint8_t **buffer, int *len, double pts, int64_t pos)
-{
-    AVCodecContext *avctx;
-    AVCodecParserContext *parser;
-    get_parser(ds->sh, &avctx, &parser);
-    if (!parser)
-        return *len;
-    return av_parser_parse2(parser, avctx, buffer, len, *buffer, *len, pts, pts, pos);
-}
-
-static void clear_parser(sh_audio_t *sh)
-{
-    av_parser_close(sh->parser);
-    sh->parser = NULL;
-    av_freep(&sh->avctx);
-}
-
-void ds_clear_parser(demux_stream_t *ds)
-{
-    if (!ds->sh)
-        return;
-    clear_parser(ds->sh);
 }
 
 void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len,

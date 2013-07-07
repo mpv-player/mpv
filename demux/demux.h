@@ -292,9 +292,6 @@ int ds_get_packet_pts(struct demux_stream *ds, unsigned char **start,
 struct demux_packet *ds_get_packet_sub(demux_stream_t *ds);
 struct demux_packet *ds_get_packet2(struct demux_stream *ds, bool repeat_last);
 double ds_get_next_pts(struct demux_stream *ds);
-int ds_parse(struct demux_stream *sh, uint8_t **buffer, int *len, double pts,
-             int64_t pos);
-void ds_clear_parser(struct demux_stream *sh);
 
 struct demuxer *demux_open(struct MPOpts *opts, struct stream *stream,
                            int file_format, int aid, int vid, int sid,

@@ -117,10 +117,6 @@ typedef struct sh_audio {
     unsigned char *codecdata;
     int codecdata_len;
     int pts_bytes;   // bytes output by decoder after last known pts
-    /* things needed for parsing */
-    bool needs_parsing;
-    struct AVCodecContext *avctx;
-    struct AVCodecParserContext *parser;
 } sh_audio_t;
 
 typedef struct sh_video {

@@ -344,7 +344,6 @@ static int control(sh_audio_t *sh, int cmd, void *arg)
     switch (cmd) {
     case ADCTRL_RESYNC_STREAM:
         avcodec_flush_buffers(ctx->avctx);
-        ds_clear_parser(sh->ds);
         ctx->previous_data_left = 0;
         ctx->output_left = 0;
         return CONTROL_TRUE;
@@ -384,10 +383,7 @@ static int decode_new_packet(struct sh_audio *sh)
     if (!mpkt) {
         assert(!priv->previous_data_left);
         start = NULL;
-        insize = 0;
-        ds_parse(sh->ds, &start, &insize, pts, 0);
-        if (insize <= 0)
-            return -1;  // error or EOF
+        return -1;  // error or EOF
     } else {
         assert(mpkt->len >= priv->previous_data_left);
         if (!priv->previous_data_left) {
@@ -396,8 +392,7 @@ static int decode_new_packet(struct sh_audio *sh)
         }
         insize = priv->previous_data_left;
         start = mpkt->buffer + mpkt->len - priv->previous_data_left;
-        int consumed = ds_parse(sh->ds, &start, &insize, pts, 0);
-        priv->previous_data_left -= consumed;
+        priv->previous_data_left -= insize;
         priv->previous_data_left = FFMAX(priv->previous_data_left, 0);
     }
 
@@ -420,7 +415,7 @@ static int decode_new_packet(struct sh_audio *sh)
         return -1;
     }
     // The "insize >= ret" test is sanity check against decoder overreads
-    if (!sh->parser && insize >= ret)
+    if (insize >= ret)
         priv->previous_data_left = insize - ret;
     if (!got_frame)
         return 0;

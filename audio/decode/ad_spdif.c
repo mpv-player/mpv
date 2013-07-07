@@ -132,20 +132,8 @@ static int init(sh_audio_t *sh, const char *decoder)
         pts = MP_NOPTS_VALUE;
         x = 0;
     }
-    ds_parse(sh->ds, &start, &x, pts, 0);
     srate = 48000;    //fake value
     bps   = 768000/8; //fake value
-    if (x && sh->avctx) { // we have parser and large enough buffer
-        if (sh->avctx->sample_rate < 44100) {
-            mp_msg(MSGT_DECAUDIO,MSGL_INFO,
-                   "This stream sample_rate[%d Hz] may be broken. "
-                   "Force reset 48000Hz.\n",
-                   sh->avctx->sample_rate);
-            srate = 48000; //fake value
-        } else
-            srate = sh->avctx->sample_rate;
-        bps = sh->avctx->bit_rate/8;
-    }
     sh->ds->buffer_pos -= in_size;
 
     int num_channels = 0;
@@ -239,14 +227,10 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf,
             break;
         x = ds_get_packet_pts(sh->ds, &start, &pts);
         if (x <= 0) {
-            x = 0;
-            ds_parse(sh->ds, &start, &x, MP_NOPTS_VALUE, 0);
-            if (x == 0)
-                continue; // END_NOT_FOUND
-            in_size = x;
+            continue; // END_NOT_FOUND
         } else {
             in_size = x;
-            consumed = ds_parse(sh->ds, &start, &x, pts, 0);
+            consumed = x;
             if (x == 0) {
                 mp_msg(MSGT_DECAUDIO,MSGL_V,
                        "start[%p] in_size[%d] consumed[%d] x[%d].\n",
