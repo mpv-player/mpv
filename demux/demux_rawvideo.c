@@ -127,14 +127,11 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
   demuxer->movi_start = demuxer->stream->start_pos;
   demuxer->movi_end = demuxer->stream->end_pos;
 
-  demuxer->video->sh = sh_video;
-  sh_video->ds = demuxer->video;
-
   return demuxer;
 }
 
 static int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
-  sh_video_t* sh = demuxer->video->sh;
+  sh_video_t* sh = demuxer->video->gsh->video;
   int64_t pos;
   if(demuxer->stream->eof) return 0;
   if(ds!=demuxer->video) return 0;
@@ -145,7 +142,7 @@ static int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
 
 static void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
   stream_t* s = demuxer->stream;
-  sh_video_t* sh_video = demuxer->video->sh;
+  sh_video_t* sh_video = demuxer->video->gsh->video;
   int64_t pos;
 
   pos = (flags & SEEK_ABSOLUTE) ? demuxer->movi_start : stream_tell(s);

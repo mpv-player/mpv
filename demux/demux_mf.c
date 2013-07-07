@@ -208,9 +208,6 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   // create a new video stream header
   struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
   sh_video = sh->video;
-  // make sure the demuxer knows about the new video stream header
-  // (even though new_sh_video() ought to take care of it)
-  demuxer->video->sh = sh_video;
 
   sh_video->gsh->codec = probe_format(mf);
   if (!sh_video->gsh->codec) {

@@ -1962,9 +1962,8 @@ static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
     } else
         dp->pts =
             real_fix_timestamp(dp->buffer, timestamp,
-                               ((sh_video_t *) demuxer->video->sh)->bih->
-                               biCompression, &track->rv_kf_base,
-                               &track->rv_kf_pts, NULL);
+                               demuxer->video->gsh->video->bih->biCompression,
+                               &track->rv_kf_base, &track->rv_kf_pts, NULL);
     dp->pos = demuxer->filepos;
     dp->keyframe = keyframe;
 
@@ -2047,8 +2046,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
         if (track->sub_packet_cnt == 0)
             track->audio_filepos = demuxer->filepos;
         if (++(track->sub_packet_cnt) == sph) {
-            int apk_usize =
-                ((sh_audio_t *) demuxer->audio->sh)->wf->nBlockAlign;
+            int apk_usize = demuxer->audio->gsh->audio->wf->nBlockAlign;
             track->sub_packet_cnt = 0;
             // Release all the audio packets
             for (x = 0; x < sph * w / apk_usize; x++) {

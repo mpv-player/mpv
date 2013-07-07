@@ -207,12 +207,11 @@ static void free_demuxer_stream(struct demux_stream *ds)
 }
 
 static struct demux_stream *new_demuxer_stream(struct demuxer *demuxer,
-                                               enum stream_type type, int id)
+                                               enum stream_type type)
 {
     demux_stream_t *ds = malloc(sizeof(demux_stream_t));
     *ds = (demux_stream_t) {
         .stream_type = type,
-        .id = id,
         .demuxer = demuxer,
     };
     return ds;
@@ -248,9 +247,9 @@ static demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
     d->seekable = 1;
     d->synced = 0;
     d->filepos = -1;
-    d->audio = new_demuxer_stream(d, STREAM_AUDIO, a_id);
-    d->video = new_demuxer_stream(d, STREAM_VIDEO, v_id);
-    d->sub = new_demuxer_stream(d, STREAM_SUB, s_id);
+    d->audio = new_demuxer_stream(d, STREAM_AUDIO);
+    d->video = new_demuxer_stream(d, STREAM_VIDEO);
+    d->sub = new_demuxer_stream(d, STREAM_SUB);
     d->ds[STREAM_VIDEO] = d->video;
     d->ds[STREAM_AUDIO] = d->audio;
     d->ds[STREAM_SUB] = d->sub;
@@ -285,7 +284,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
         .demuxer = demuxer,
         .index = demuxer->num_streams,
         .demuxer_id = demuxer_id, // may be overwritten by demuxer
-        .stream_index = demuxer->num_streams,
         .opts = demuxer->opts,
     });
     MP_TARRAY_APPEND(demuxer, demuxer->streams, demuxer->num_streams, sh);
@@ -296,7 +294,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
             sht->opts = sh->opts;
             sht->ds = demuxer->video;
             sh->video = sht;
-            demuxer->v_streams[sh->stream_index] = sht;
             break;
         }
         case STREAM_AUDIO: {
@@ -307,7 +304,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
             sht->samplesize = 2;
             sht->sample_format = AF_FORMAT_S16_NE;
             sh->audio = sht;
-            demuxer->a_streams[sh->stream_index] = sht;
             break;
         }
         case STREAM_SUB: {
@@ -316,7 +312,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
             sht->opts = sh->opts;
             sht->ds = demuxer->sub;
             sh->sub = sht;
-            demuxer->s_streams[sh->stream_index] = sht;
             break;
         }
         default: assert(false);
@@ -324,51 +319,41 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
     return sh;
 }
 
-static void free_sh_stream(struct sh_stream *sh)
-{
-}
-
 static void free_sh_sub(sh_sub_t *sh)
 {
-    mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_sub at %p\n", sh);
     free(sh->extradata);
-    free_sh_stream(sh->gsh);
 }
 
-static void free_sh_audio(demuxer_t *demuxer, int id)
+static void free_sh_audio(sh_audio_t *sh)
 {
-    sh_audio_t *sh = demuxer->a_streams[id];
-    demuxer->a_streams[id] = NULL;
-    mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_audio at %p\n", sh);
     free(sh->wf);
     free(sh->codecdata);
-    free_sh_stream(sh->gsh);
 }
 
 static void free_sh_video(sh_video_t *sh)
 {
-    mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing sh_video at %p\n", sh);
     free(sh->bih);
-    free_sh_stream(sh->gsh);
+}
+
+static void free_sh_stream(struct sh_stream *sh)
+{
+    switch (sh->type) {
+    case STREAM_AUDIO: free_sh_audio(sh->audio); break;
+    case STREAM_VIDEO: free_sh_video(sh->video); break;
+    case STREAM_SUB:   free_sh_sub(sh->sub);     break;
+    default: abort();
+    }
 }
 
 void free_demuxer(demuxer_t *demuxer)
 {
-    int i;
     mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing %s demuxer at %p\n",
            demuxer->desc->shortdesc, demuxer);
     if (demuxer->desc->close)
         demuxer->desc->close(demuxer);
     // free streams:
-    for (i = 0; i < MAX_A_STREAMS; i++)
-        if (demuxer->a_streams[i])
-            free_sh_audio(demuxer, i);
-    for (i = 0; i < MAX_V_STREAMS; i++)
-        if (demuxer->v_streams[i])
-            free_sh_video(demuxer->v_streams[i]);
-    for (i = 0; i < MAX_S_STREAMS; i++)
-        if (demuxer->s_streams[i])
-            free_sh_sub(demuxer->s_streams[i]);
+    for (int n = 0; n < demuxer->num_streams; n++)
+        free_sh_stream(demuxer->streams[n]);
     // free demuxers:
     free_demuxer_stream(demuxer->audio);
     free_demuxer_stream(demuxer->video);
@@ -535,9 +520,7 @@ int ds_fill_buffer(demux_stream_t *ds)
             break; // EOF
         }
 
-        struct sh_video *sh_video = demux->video->sh;
-
-        if (sh_video && sh_video->gsh->attached_picture) {
+        if (demux->video->gsh && demux->video->gsh->attached_picture) {
             if (demux->audio)
                 ds->fill_count += demux->audio->packs - apacks;
             if (demux->video && demux->video->packs > vpacks)
@@ -1015,48 +998,19 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
 {
     assert(!stream || stream->type == type);
 
-    // don't flush buffers if stream is already selected
-    if (stream && demuxer_stream_is_selected(demuxer, stream))
+    // don't flush buffers if stream is already selected / none are selected
+    if (demuxer->ds[type]->gsh == stream)
         return;
 
-    int old_id = demuxer->ds[type]->id;
+    demuxer->ds[type]->gsh = stream;
 
-    // legacy
-    int index = stream ? stream->stream_index : -2;
-    if (type == STREAM_AUDIO) {
-        if (demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index)
-                == DEMUXER_CTRL_NOTIMPL)
-            demuxer->audio->id = index;
-    } else if (type == STREAM_VIDEO) {
-        if (demux_control(demuxer, DEMUXER_CTRL_SWITCH_VIDEO, &index)
-                == DEMUXER_CTRL_NOTIMPL)
-            demuxer->video->id = index;
-    } else if (type == STREAM_SUB) {
-        demuxer->ds[type]->id = index;
-    } else {
-        abort();
-    }
-
-    int new_id = demuxer->ds[type]->id;
-    void *new = NULL;
-    if (new_id >= 0) {
-        switch (type) {
-        case STREAM_VIDEO: new = demuxer->v_streams[new_id]; break;
-        case STREAM_AUDIO: new = demuxer->a_streams[new_id]; break;
-        case STREAM_SUB: new = demuxer->s_streams[new_id]; break;
-        }
-    }
-    demuxer->ds[type]->sh = new;
-
-    if (old_id != new_id) {
-        ds_free_packs(demuxer->ds[type]);
-        demux_control(demuxer, DEMUXER_CTRL_SWITCHED_TRACKS, NULL);
-    }
+    ds_free_packs(demuxer->ds[type]);
+    demux_control(demuxer, DEMUXER_CTRL_SWITCHED_TRACKS, NULL);
 }
 
 bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream)
 {
-    return stream && d->ds[stream->type]->id == stream->stream_index;
+    return stream && d->ds[stream->type]->gsh == stream;
 }
 
 int demuxer_add_attachment(demuxer_t *demuxer, struct bstr name,

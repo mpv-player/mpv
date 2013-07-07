@@ -42,8 +42,6 @@ struct sh_stream {
     struct demuxer *demuxer;
     // Index into demuxer->streams.
     int index;
-    // Index into stream array (currently one array per type, e.g. a_streams).
-    int stream_index;
     // Demuxer/format specific ID. Corresponds to the stream IDs as encoded in
     // some file formats (e.g. MPEG), or an index chosen by demux.c.
     int demuxer_id;

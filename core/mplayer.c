@@ -375,7 +375,7 @@ static double get_main_demux_pts(struct MPContext *mpctx)
     if (mpctx->demuxer) {
         for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
             struct demux_stream *ds = mpctx->demuxer->ds[type];
-            if (ds->sh && main_new_pos == MP_NOPTS_VALUE) {
+            if (ds->gsh && main_new_pos == MP_NOPTS_VALUE) {
                 demux_fill_buffer(mpctx->demuxer, ds);
                 if (ds->first)
                     main_new_pos = ds->first->pts;
@@ -445,11 +445,11 @@ static void preselect_demux_streams(struct MPContext *mpctx)
 
 static void uninit_subs(struct demuxer *demuxer)
 {
-    for (int i = 0; i < MAX_S_STREAMS; i++) {
-        struct sh_sub *sh = demuxer->s_streams[i];
-        if (sh) {
-            sub_destroy(sh->dec_sub);
-            sh->dec_sub = NULL;
+    for (int i = 0; i < demuxer->num_streams; i++) {
+        struct sh_stream *sh = demuxer->streams[i];
+        if (sh->sub) {
+            sub_destroy(sh->sub->dec_sub);
+            sh->sub->dec_sub = NULL;
         }
     }
 }
@@ -1937,9 +1937,6 @@ static void reinit_subs(struct MPContext *mpctx)
         // Lazily added DVD track - we must not miss the first subtitle packet,
         // which makes the demuxer create the sh_stream, and contains the first
         // subtitle event.
-
-        // demux_mpg - maps IDs directly to the logical stream number
-        track->demuxer->sub->id = track->demuxer_id;
 
         // demux_lavf - IDs are essentially random, have to use MPEG IDs
         int id = map_id_to_demuxer(track->demuxer, track->type,

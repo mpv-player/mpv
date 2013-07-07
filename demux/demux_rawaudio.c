@@ -69,15 +69,11 @@ static demuxer_t* demux_rawaudio_open(demuxer_t* demuxer) {
   demuxer->movi_start = demuxer->stream->start_pos;
   demuxer->movi_end = demuxer->stream->end_pos;
 
-  demuxer->audio->id = 0;
-  demuxer->audio->sh = sh_audio;
-  sh_audio->ds = demuxer->audio;
-
   return demuxer;
 }
 
 static int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
-  sh_audio_t* sh_audio = demuxer->audio->sh;
+  sh_audio_t* sh_audio = demuxer->audio->gsh->audio;
   int l = sh_audio->wf->nAvgBytesPerSec;
   int64_t spos = stream_tell(demuxer->stream);
   demux_packet_t*  dp;
@@ -98,7 +94,7 @@ static int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
 
 static void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
   stream_t* s = demuxer->stream;
-  sh_audio_t* sh_audio = demuxer->audio->sh;
+  sh_audio_t* sh_audio = demuxer->audio->gsh->audio;
   int64_t base,pos;
 
   base = (flags & SEEK_ABSOLUTE) ? demuxer->movi_start : stream_tell(s);

@@ -426,11 +426,6 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
     struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
     sh_video = sh->video;
 
-    // Make sure the demuxer knows about the new video stream header
-    // (even though new_sh_video() ought to take care of it).
-    // (Thanks to demux_gif.c for this.)
-    demuxer->video->sh = sh_video;
-
     // Make sure that the video demuxer stream header knows about its
     // parent video demuxer stream (this is getting wacky), or else
     // video_read_properties() will choke.

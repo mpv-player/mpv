@@ -739,20 +739,12 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
         tvh->tv_param->noaudio = 1;
         }
 
-    /* disable TV audio if -nosound is present */
-    if (!demuxer->audio || demuxer->audio->id == -2) {
-        tvh->tv_param->noaudio = 1;
-    }
-
     /* set width */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &sh_video->disp_w);
 
     /* set height */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &sh_video->disp_h);
 
-    demuxer->video->sh = sh_video;
-    sh_video->ds = demuxer->video;
-    demuxer->video->id = 0;
     demuxer->seekable = 0;
 
     /* here comes audio init */
@@ -818,10 +810,6 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
 	mp_tmsg(MSGT_DECVIDEO, MSGL_V, "  TV audio: %d channels, %d bits, %d Hz\n",
           sh_audio->wf->nChannels, sh_audio->wf->wBitsPerSample,
           sh_audio->wf->nSamplesPerSec);
-
-	demuxer->audio->sh = sh_audio;
-	sh_audio->ds = demuxer->audio;
-	demuxer->audio->id = 0;
     }
 no_audio:
 

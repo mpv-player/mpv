@@ -107,16 +107,12 @@ typedef struct demux_stream {
     demux_packet_t *first; // read to current buffer from here
     demux_packet_t *last; // append new packets from input stream to here
     demux_packet_t *current; // needed for refcounting of the buffer
-    int id;               // stream ID  (for multiple audio/video streams)
     struct demuxer *demuxer; // parent demuxer structure (stream handler)
 // ---- stream header ----
-    void *sh;              // points to sh_audio or sh_video
+    struct sh_stream *gsh;
 } demux_stream_t;
 
 #define MAX_SH_STREAMS 256
-#define MAX_A_STREAMS MAX_SH_STREAMS
-#define MAX_V_STREAMS MAX_SH_STREAMS
-#define MAX_S_STREAMS MAX_SH_STREAMS
 
 struct demuxer;
 
@@ -219,11 +215,6 @@ typedef struct demuxer {
     struct demux_stream *audio; // audio buffer/demuxer
     struct demux_stream *video; // video buffer/demuxer
     struct demux_stream *sub;   // dvd subtitle buffer/demuxer
-
-    // stream headers:
-    struct sh_audio *a_streams[MAX_SH_STREAMS];
-    struct sh_video *v_streams[MAX_SH_STREAMS];
-    struct sh_sub   *s_streams[MAX_SH_STREAMS];
 
     struct sh_stream **streams;
     int num_streams;
