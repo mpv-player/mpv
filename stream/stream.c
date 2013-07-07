@@ -375,7 +375,8 @@ eof_out:
 
 int stream_fill_buffer(stream_t *s)
 {
-    int len = stream_read_unbuffered(s, s->buffer, STREAM_BUFFER_SIZE);
+    int len = s->sector_size ? s->sector_size : STREAM_BUFFER_SIZE;
+    len = stream_read_unbuffered(s, s->buffer, len);
     s->buf_pos = 0;
     s->buf_len = len;
     return s->buf_len;
