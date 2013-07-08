@@ -171,6 +171,12 @@ static const mp_cmd_t mp_cmds[] = {
       OARG_CHOICE(0, ({"single", 0},
                       {"each-frame", 1})),
   }},
+  { MP_CMD_SCREENSHOT_TO_FILE, "screenshot_to_file", {
+      ARG_STRING,
+      OARG_CHOICE(2, ({"video", 0},
+                      {"window", 1},
+                      {"subtitles", 2})),
+  }},
   { MP_CMD_LOADFILE, "loadfile", {
       ARG_STRING,
       OARG_CHOICE(0, ({"replace", 0},          {"0", 0},

@@ -140,6 +140,19 @@ List of Input Commands
         Take a screenshot each frame. Issue this command again to stop taking
         screenshots.
 
+``screenshot_to_file "<filename>" [subtitles|video|window]``
+    Take a screenshot and save it to a given file. The format of the file will
+    be guessed by the extension (and ``--screenshot-format`` is ignored - the
+    behavior when the extension is missing or unknown is arbitrary).
+
+    The second argument is like the first argument to ``screenshot``.
+
+    This command tries to never overwrite files. If the file already exists,
+    it fails.
+
+    Like all input command parameters, the filename is subject to property
+    expansion as described in `Property Expansion`_.
+
 ``playlist_next [weak|force]``
     Go to the next entry on the playlist.
 

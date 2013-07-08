@@ -34,6 +34,12 @@ void screenshot_init(struct MPContext *mpctx);
 void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,
                         bool osd);
 
+// filename: where to store the screenshot; doesn't try to find an alternate
+//           name if the file already exists
+// mode, osd: same as in screenshot_request()
+void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
+                        bool osd);
+
 // Called by the playback core code when a new frame is displayed.
 void screenshot_flip(struct MPContext *mpctx);
 

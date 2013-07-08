@@ -164,6 +164,17 @@ struct bstr mp_dirname(const char *path)
     return ret;
 }
 
+char *mp_splitext(const char *path, bstr *root)
+{
+    assert(path);
+    const char *split = strrchr(path, '.');
+    if (!split)
+        split = path + strlen(path);
+    if (root)
+        *root = (bstr){.start = (char *)path, .len = path - split};
+    return (char *)split;
+}
+
 char *mp_path_join(void *talloc_ctx, struct bstr p1, struct bstr p2)
 {
     if (p1.len == 0)
