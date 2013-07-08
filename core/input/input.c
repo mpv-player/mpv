@@ -1034,6 +1034,7 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
         *list = (struct mp_cmd) {
             .id = MP_CMD_COMMAND_LIST,
             .name = "list",
+            .original = bstrdup(list, str),
         };
         list->args[0].v.p = cmd;
         while (cmd) {
@@ -1773,6 +1774,17 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
     for (i = 0; i < MP_CMD_MAX_ARGS; i++) {
         if (cmd->args[i].type.type == &m_option_type_string)
             ret->args[i].v.s = talloc_strdup(ret, cmd->args[i].v.s);
+    }
+
+    if (cmd->id == MP_CMD_COMMAND_LIST) {
+        bool first = true;
+        for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next) {
+            sub = mp_cmd_clone(sub);
+            talloc_steal(cmd, sub);
+            if (first)
+                cmd->args[0].v.p = sub;
+            first = false;
+        }
     }
 
     return ret;
