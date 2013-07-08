@@ -1279,7 +1279,7 @@ if test "$_pthreads" = yes ; then
 # this will hopefully do nothing.
 echocheck "linking with -lrt"
 _rt=no
-cc_check "-lrt" && _rt=yes
+cc_check "$_ld_pthread -lrt" && _rt=yes
 if test "$_rt" = yes ; then
   _ld_pthread="$_ld_pthread -lrt"
 fi
