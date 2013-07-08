@@ -808,7 +808,7 @@ static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
     bstr t = bstr_lstrip(str);
     int next = bstrcspn(t, WHITESPACE "#");
     // Handle comments
-    if (t.start[next] == '#')
+    if (t.len && t.start[next] == '#')
         t = bstr_splice(t, 0, next);
     if (!t.len)
         return false;
@@ -852,13 +852,16 @@ error:
     return false;
 }
 
-mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
+// If dest is non-NULL when calling this function, append the command to the
+// list formed by dest->queue_next, otherwise just set *dest = new_cmd;
+static int parse_cmd(struct mp_cmd **dest, bstr str, const char *loc)
 {
     int pausing = 0;
     int on_osd = MP_ON_OSD_AUTO;
     bool raw_args = false;
     struct mp_cmd *cmd = NULL;
     bstr start = str;
+    bstr next = {0};
     void *tmp = talloc_new(NULL);
 
     str = bstr_lstrip(str);
@@ -929,8 +932,13 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
         struct mp_cmd_arg *cmdarg = &cmd->args[i];
         if (!cmdarg->type.type)
             break;
-        cmd->nargs++;
         str = bstr_lstrip(str);
+        if (eat_token(&str, ";")) {
+            next = str;
+            str.len = 0;
+            break;
+        }
+        cmd->nargs++;
         bstr arg = {0};
         if (bstr_eatstart0(&str, "\"")) {
             if (!read_escaped_string(tmp, &str, &arg)) {
@@ -962,6 +970,11 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
             cmdarg->v.s = talloc_steal(cmd, cmdarg->v.s);
     }
 
+    if (eat_token(&str, ";")) {
+        next = str;
+        str.len = 0;
+    }
+
     bstr dummy;
     if (read_token(str, &dummy, &dummy)) {
         mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s has trailing unused "
@@ -986,14 +999,50 @@ mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
     bstr orig = (bstr) {start.start, str.start - start.start};
     cmd->original = bstrdup(cmd, bstr_strip(orig));
 
+    while (*dest)
+        dest = &(*dest)->queue_next;
+    *dest = cmd;
+
+    next = bstr_strip(next);
+    if (next.len) {
+        if (parse_cmd(dest, next, loc) < 0) {
+            *dest = NULL;
+            goto error;
+        }
+    }
+
     talloc_free(tmp);
-    return cmd;
+    return 1;
 
 error:
     mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command was defined at %s.\n", loc);
     talloc_free(cmd);
     talloc_free(tmp);
-    return NULL;
+    return -1;
+}
+
+mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
+{
+    struct mp_cmd *cmd = NULL;
+    if (parse_cmd(&cmd, str, loc) < 0) {
+        assert(!cmd);
+    }
+    // Other input.c code uses queue_next for its own purposes, so explicitly
+    // wrap lists in a pseudo-command.
+    if (cmd && cmd->queue_next) {
+        struct mp_cmd *list = talloc_ptrtype(NULL, list);
+        *list = (struct mp_cmd) {
+            .id = MP_CMD_COMMAND_LIST,
+            .name = "list",
+        };
+        list->args[0].v.p = cmd;
+        while (cmd) {
+            talloc_steal(list, cmd);
+            cmd = cmd->queue_next;
+        }
+        cmd = list;
+    }
+    return cmd;
 }
 
 #define MP_CMD_MAX_SIZE 4096

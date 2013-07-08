@@ -87,6 +87,9 @@ enum mp_command_type {
 
     /// Video output commands
     MP_CMD_VO_CMDLINE,
+
+    // Internal
+    MP_CMD_COMMAND_LIST, // list of sub-commands in args[0].v.p
 };
 
 #define MP_CMD_MAX_ARGS 10
@@ -128,6 +131,7 @@ struct mp_cmd_arg {
         float f;
         double d;
         char *s;
+        void *p;
     } v;
 };
 

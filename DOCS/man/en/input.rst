@@ -29,7 +29,7 @@ must kill **mpv** externally to make it exit.)
 General Input Command Syntax
 ----------------------------
 
-``[Shift+][Ctrl+][Alt+][Meta+]<key> [{<section>}] [<prefixes>] <command> (<argument>)*``
+``[Shift+][Ctrl+][Alt+][Meta+]<key> [{<section>}] [<prefixes>] <command> (<argument>)* [; <command>]``
 
 Newlines always start a new binding. ``#`` starts a comment (outside of quoted
 string arguments). To bind commands to the ``#`` key, ``SHARP`` can be used.
@@ -45,6 +45,15 @@ For this reason, string arguments should be quoted with ``"``. Inside quotes,
 C-style escaping can be used.
 
 Optional arguments can be skipped with ``-``.
+
+You can bind multiple commands to one key. For example:
+
+| a show_text "command 1" ; show_text "command 2"
+
+Note that some magic is disabled for keys: seek commands inside lists are not
+coalesced (seeking will appear slower), and no check is done for abort commands
+(so these commands can't be used to abort playback if the network cache is
+stuck).
 
 List of Input Commands
 ----------------------
