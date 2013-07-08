@@ -78,9 +78,6 @@ struct sh_stream {
     /* usually a FourCC, exact meaning depends on gsh->format */        \
     unsigned int format;                                                \
     int initialized;                                                    \
-    /* number of seconds stream should be delayed                       \
-     * (according to dwStart or similar) */                             \
-    float stream_delay;                                                 \
     /* audio: last known pts value in output from decoder               \
      * video: predicted/interpolated PTS of the current frame */        \
     double pts;                                                         \

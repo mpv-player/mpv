@@ -4298,15 +4298,6 @@ goto_reopen_demuxer: ;
 
     //================ SETUP STREAMS ==========================
 
-    if (mpctx->sh_video) {
-        if (!opts->ignore_start)
-            mpctx->audio_delay += mpctx->sh_video->stream_delay;
-    }
-    if (mpctx->sh_audio) {
-        if (!opts->ignore_start)
-            mpctx->audio_delay -= mpctx->sh_audio->stream_delay;
-    }
-
     if (opts->force_fps && mpctx->sh_video) {
         mpctx->sh_video->fps = opts->force_fps;
         mpctx->sh_video->frametime = 1.0f / mpctx->sh_video->fps;

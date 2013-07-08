@@ -430,9 +430,6 @@ const m_option_t mp_opts[] = {
     // set a-v distance
     OPT_FLOATRANGE("audio-delay", audio_delay, 0, -100.0, 100.0),
 
-    // ignore header-specified delay (dwStart)
-    OPT_FLAG("ignore-start", ignore_start, 0),
-
 // ------------------------- codec/vfilter options --------------------
 
     {"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},

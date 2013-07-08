@@ -105,7 +105,6 @@ typedef struct MPOpts {
     float hr_seek_demuxer_offset;
     float audio_delay;
     float default_max_pts_correction;
-    int ignore_start;
     int autosync;
     int softsleep;
     int frame_dropping;

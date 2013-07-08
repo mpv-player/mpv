@@ -1044,11 +1044,6 @@
         This option only works if the underlying media supports seeking
         (i.e. not with stdin, pipe, etc).
 
-``--ignore-start``
-    Matters with the builtin AVI demuxer only, which is not enabled by default.
-    Ignore the specified starting time for streams in AVI files. This
-    nullifies stream delays.
-
 ``--include=<configuration-file>``
     Specify configuration file to be parsed after the default ones.
 
