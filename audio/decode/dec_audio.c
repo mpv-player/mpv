@@ -55,15 +55,6 @@ static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
         return 0;
     }
 
-    /* allocate audio in buffer: */
-    if (sh_audio->audio_in_minsize > 0) {
-        sh_audio->a_in_buffer_size = sh_audio->audio_in_minsize;
-        mp_tmsg(MSGT_DECAUDIO, MSGL_V,
-                "dec_audio: Allocating %d bytes for input buffer.\n",
-                sh_audio->a_in_buffer_size);
-        sh_audio->a_in_buffer = av_mallocz(sh_audio->a_in_buffer_size);
-    }
-
     const int base_size = 65536;
     // At least 64 KiB plus rounding up to next decodable unit size
     sh_audio->a_buffer_size = base_size + sh_audio->audio_out_minsize;
@@ -194,7 +185,6 @@ void uninit_audio(sh_audio_t *sh_audio)
     talloc_free(sh_audio->gsh->decoder_desc);
     sh_audio->gsh->decoder_desc = NULL;
     av_freep(&sh_audio->a_buffer);
-    av_freep(&sh_audio->a_in_buffer);
 }
 
 
@@ -370,7 +360,6 @@ void decode_audio_prepend_bytes(struct bstr *outbuf, int count, int byte)
 
 void resync_audio_stream(sh_audio_t *sh_audio)
 {
-    sh_audio->a_in_buffer_len = 0;      // clear audio input buffer
     sh_audio->pts = MP_NOPTS_VALUE;
     if (!sh_audio->initialized)
         return;

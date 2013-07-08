@@ -94,11 +94,6 @@ typedef struct sh_audio {
     struct mp_chmap channels;
     int o_bps; // == samplerate*samplesize*channels.num   (uncompr. bytes/sec)
     int i_bps; // == bitrate  (compressed bytes/sec)
-    // in buffers:
-    int audio_in_minsize;   // initial size to allocate for a_in_buffer if any
-    char *a_in_buffer;      // input buffer used by some decoders
-    int a_in_buffer_len;
-    int a_in_buffer_size;
     // decoder buffers:
     int audio_out_minsize;  // minimal output from decoder may be this much
     char *a_buffer;         // buffer for decoder output

@@ -1708,11 +1708,9 @@ static double written_audio_pts(struct MPContext *mpctx)
             return a_pts;
 
         // ds_tell_pts returns bytes read after last timestamp from
-        // demuxing layer, decoder might use sh_audio->a_in_buffer for bytes
-        // it has read but not decoded
+        // demuxing layer
         if (sh_audio->i_bps)
-            a_pts += (ds_tell_pts(d_audio) - sh_audio->a_in_buffer_len) /
-                     (double)sh_audio->i_bps;
+            a_pts += ds_tell_pts(d_audio) / (double)sh_audio->i_bps;
     }
     // Now a_pts hopefully holds the pts for end of audio from decoder.
     // Substract data in buffers between decoder and audio out.
