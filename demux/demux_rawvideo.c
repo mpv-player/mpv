@@ -131,12 +131,21 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
 }
 
 static int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
-  sh_video_t* sh = demuxer->video->gsh->video;
-  int64_t pos;
-  if(demuxer->stream->eof) return 0;
-  if(ds!=demuxer->video) return 0;
-  pos = stream_tell(demuxer->stream);
-  ds_read_packet(ds,demuxer->stream,imgsize,(pos/imgsize)*sh->frametime,pos,0x10);
+  int64_t spos = stream_tell(demuxer->stream);
+  demux_packet_t*  dp;
+  int size;
+
+  if(demuxer->stream->eof)
+    return 0;
+
+  dp = new_demux_packet(imgsize);
+  dp->pos = (spos - demuxer->movi_start);
+  dp->pts = dp->pos / (float)(imgsize);
+
+  size = stream_read(demuxer->stream, dp->buffer, imgsize);
+  resize_demux_packet(dp, size);
+  ds_add_packet(ds, dp);
+
   return 1;
 }
 

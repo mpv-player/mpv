@@ -254,8 +254,6 @@ void free_demuxer(struct demuxer *demuxer);
 int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
                        demux_packet_t *dp);
 void ds_add_packet(struct demux_stream *ds, struct demux_packet *dp);
-void ds_read_packet(struct demux_stream *ds, struct stream *stream, int len,
-                    double pts, int64_t pos, bool keyframe);
 
 int demux_fill_buffer(struct demuxer *demux, struct demux_stream *ds);
 int ds_fill_buffer(struct demux_stream *ds);

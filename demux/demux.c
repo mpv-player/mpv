@@ -403,19 +403,6 @@ void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
            ds->demuxer->video->packs);
 }
 
-void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len,
-                    double pts, int64_t pos, bool keyframe)
-{
-    demux_packet_t *dp = new_demux_packet(len);
-    len = stream_read(stream, dp->buffer, len);
-    resize_demux_packet(dp, len);
-    dp->pts = pts;
-    dp->pos = pos;
-    dp->keyframe = keyframe;
-    // append packet to DS stream:
-    ds_add_packet(ds, dp);
-}
-
 static bool demux_check_queue_full(demuxer_t *demux)
 {
     int apacks = demux->audio ? demux->audio->packs : 0;
