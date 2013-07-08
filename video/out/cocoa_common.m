@@ -31,13 +31,7 @@
 #include "vo.h"
 #include "aspect.h"
 
-<<<<<<< HEAD
 #include "core/input/input.h"
-#include "core/mp_fifo.h"
-||||||| merged common ancestors
-#include "core/mp_fifo.h"
-=======
->>>>>>> master
 #include "talloc.h"
 
 #include "core/mp_msg.h"
