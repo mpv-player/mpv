@@ -2468,7 +2468,7 @@ if test "$_zlib" = yes ; then
   def_zlib='#define CONFIG_ZLIB 1'
   libs_mplayer="$libs_mplayer -lz"
 else
-  def_zlib='#define CONFIG_ZLIB 0'
+  die "Unable to find development files for libass."
 fi
 echores "$_zlib"
 
