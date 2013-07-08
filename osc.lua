@@ -108,9 +108,16 @@ function get_hitbox_coords(x, y, an, w, h)
     return alignments[an]()
 end
 
-local elements = {}
-
 function register_element(x, y, an, w, h, styleA, styleB, content, down_cmd, up_cmd, down_repeat)
+    -- x, y         position
+    -- an           alignment (see ASS standard)
+    -- w, h         size of hitbox
+    -- styleA       main style
+    -- styleB       additional styles to be appended on mouse_down
+    -- content      what the element should display, can be a string of a function
+    -- down_cmd     function to be run when the mouse goes or stays down on the element
+    -- up_cmd       function to be run when the mouse goes up on the element (use this for normal button behaviour)
+    -- down_repeat  boolean, true if the down_cmd function should be run repeatedly with a small delay or false on every render pass
 
     local element = {
         x = x,
@@ -465,16 +472,17 @@ function osc_init ()
     register_element(posX - pos_offsetX, posY + pos_offsetY, 1, 110, 25, osc_styles.timecodes, nil, contentF, nil, nil, false)
 
     -- right (total/remaining time)
-    local contentF = function (ass)
-        if state.rightTC_trem == true then
-            ass:append("-" .. mp.property_get_string("time-remaining"))
-        else
-            ass:append(mp.property_get_string("length"))
-        end
-    end
-    local up_cmd = function () state.rightTC_trem = not state.rightTC_trem end
     -- do we have a usuable duration?
     if (not (mp.property_get("length") == nil)) and (tonumber(mp.property_get("length")) > 0) then
+        local contentF = function (ass)
+            if state.rightTC_trem == true then
+                ass:append("-" .. mp.property_get_string("time-remaining"))
+            else
+                ass:append(mp.property_get_string("length"))
+            end
+        end
+        local up_cmd = function () state.rightTC_trem = not state.rightTC_trem end
+    
         register_element(posX + pos_offsetX, posY + pos_offsetY, 3, 110, 25, osc_styles.timecodes, osc_styles.elementDown, contentF, nil, up_cmd, false)
     end
 
@@ -531,14 +539,13 @@ function mouse_click(down)
 end
 
 function mouse_up()
-    --mp.send_command("set pause no")
+    show_osc()
     state.mouse_down_counter = 0
     any_button_up()
-    state.last_mouse_pos = nil
+    state.last_mouse_posX = nil
 end
 
 function mouse_down()
-    --mp.send_command("set pause yes")
     if state.osc_visible then
         any_button_down()
     end
@@ -621,7 +628,7 @@ function mp_update()
         ass:append("-")
     else
         ass:append("+")
-    end
+    end 
     -- set canvas size
     --mp.set_osd_ass(osc_geo.playresx, osc_geo.playresy, ass.text)
     --]]
