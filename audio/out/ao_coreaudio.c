@@ -504,7 +504,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
             d->stream_idx = i;
 
             for (int j = 0; j < formats_n; j++)
-                if (AudioFormatIsDigital(asbd)) {
+                if (AudioFormatIsDigital(formats[j].mFormat)) {
                     // select the digital format that has exactly the same
                     // samplerate. If an exact match cannot be found, select
                     // the format with highest samplerate as backup.
