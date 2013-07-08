@@ -1,3 +1,9 @@
+..
+    Hint: To generate a nicely formatted XeLaTeX document from this file, use
+    rst2xetex --use-latex-docinfo --use-latex-toc --hyperlink-color=MidnightBlue --latex-preamble="\usepackage[usenames,dvipsnames]{xcolor}\usepackage{fullpage}\setmainfont{Droid Sans}\setsansfont{Linux Biolinum O}\setmonofont[HyphenChar=None]{DejaVu Sans Mono}" mpv.rst
+
+    You might want to put the .. contents:: directive below to generate a TOC.
+
 mpv
 ###
 
@@ -6,7 +12,7 @@ a movie player
 ##############
 
 :Author: wm4
-:Date: 2013-07-07
+:Date: 2013-07-08
 :Copyright: GPLv3
 :Version: git
 :Manual section: 1
@@ -83,7 +89,7 @@ ENTER
 p / SPACE
     Pause (pressing again unpauses).
 
-.
+\.
     Step forward. Pressing once will pause movie, every consecutive press will
     play one frame and then go into pause mode again.
 
@@ -275,58 +281,61 @@ is the same as ``--no-fs``.
 If an option is marked as *(XXX only)*, it will only work in combination with
 the *XXX* option or if *XXX* is compiled in.
 
-| *NOTE*: The suboption parser (used for example for ``--ao=pcm`` suboptions)
-  supports a special kind of string-escaping intended for use with external
-  GUIs.
-| It has the following format:
-| %n%string\_of\_length\_n
+.. note::
 
-| *EXAMPLES*:
-| `mpv --ao=pcm:file=%10%C:test.wav test.avi`
-| Or in a script:
-| `mpv --ao=pcm:file=%\`expr length "$NAME"\`%"$NAME" test.avi`
+    The suboption parser (used for example for ``--ao=pcm`` suboptions)
+    supports a special kind of string-escaping intended for use with external
+    GUIs.
+
+It has the following format::
+
+    %n%string_of_length_n
+
+.. admonition:: Examples
+
+    ``mpv --ao=pcm:file=%10%C:test.wav test.avi``
+
+    Or in a script:
+
+    ``mpv --ao=pcm:file=%`expr length "$NAME"`%"$NAME" test.avi``
 
 Per-File Options
 ----------------
 
 When playing multiple files, any option given on the command line usually
-affects all files. Example:
+affects all files. Example::
 
-`mpv --a file1.mkv --b file2.mkv --c`
+    mpv --a file1.mkv --b file2.mkv --c
 
-+-----------+-------------------------+
-| File      | Active options          |
-+===========+=========================+
-| file1.mkv | --a --b --c             |
-+-----------+-------------------------+
-| file2.mkv | --a --b --c             |
-+-----------+-------------------------+
+=============== ===========================
+File            Active options
+=============== ===========================
+file1.mkv       ``--a --b --c``
+file2.mkv       ``--a --b --c``
+=============== ===========================
 
-Also, if any option is changed at runtime (via input commands), they aren't
+Also, if any option is changed at runtime (via input commands), they are not
 reset when a new file is played.
 
-Sometimes, it's useful to change options per-file. This can be achieved by
-adding the special per-file markers `--{` and `--}`. (Note that you must
-escape these on some shells.) Example:
+Sometimes, it is useful to change options per-file. This can be achieved by
+adding the special per-file markers ``--{`` and ``--}``. (Note that you must
+escape these on some shells.) Example::
 
-`mpv --a file1.mkv --b --\\\{ --c file2.mkv --d file3.mkv --e --\\\} file4.mkv --f`
+    mpv --a file1.mkv --b --\{ --c file2.mkv --d file3.mkv --e --\} file4.mkv --f
 
-+-----------+-------------------------+
-| File      | Active options          |
-+===========+=========================+
-| file1.mkv | --a --b --f             |
-+-----------+-------------------------+
-| file2.mkv | --a --b --f --c --d --e |
-+-----------+-------------------------+
-| file3.mkv | --a --b --f --c --d --e |
-+-----------+-------------------------+
-| file4.mkv | --a --b --f             |
-+-----------+-------------------------+
+=============== ===========================
+File            Active options
+=============== ===========================
+file1.mkv       ``--a --b --f``
+file2.mkv       ``--a --b --f --c --d --e``
+file3.mkv       ``--a --b --f --c --d --e``
+file4.mkv       ``--a --b --f``
+=============== ===========================
 
 Additionally, any file-local option changed at runtime is reset when the current
-file stops playing. If option ``--c`` is changed during playback of `file2.mkv`,
-it's reset when advancing to `file3.mkv`. This only affects file-local options.
-The option ``--a`` is never reset here.
+file stops playing. If option ``--c`` is changed during playback of
+``file2.mkv``, it is reset when advancing to ``file3.mkv``. This only affects
+file-local options. The option ``--a`` is never reset here.
 
 CONFIGURATION FILES
 ===================
@@ -335,21 +344,23 @@ Location and Syntax
 -------------------
 
 You can put all of the options in configuration files which will be read every
-time mpv is run. The system-wide configuration file 'mpv.conf' is in
-your configuration directory (e.g. ``/etc/mpv`` or
-``/usr/local/etc/mpv``), the user specific one is ``~/.mpv/config``.
-User specific options override system-wide options and options given on the
+time mpv is run. The system-wide configuration file 'mpv.conf' is in your
+configuration directory (e.g. ``/etc/mpv`` or ``/usr/local/etc/mpv``), the
+user-specific one is ``~/.mpv/config``.
+User-specific options override system-wide options and options given on the
 command line override either. The syntax of the configuration files is
-``option=<value>``, everything after a *#* is considered a comment. Options
+``option=<value>``; everything after a *#* is considered a comment. Options
 that work without values can be enabled by setting them to *yes* and disabled by
 setting them to *no*. Even suboptions can be specified in this way.
 
-*EXAMPLE CONFIGURATION FILE:*
+.. admonition:: Example configuration file
 
-| # Use opengl video output by default.
-| vo=opengl
-| # Use quotes for text that can contain spaces:
-| status-msg="Time: ${time-pos}"
+    ::
+
+        # Use opengl video output by default.
+        vo=opengl
+        # Use quotes for text that can contain spaces:
+        status-msg="Time: ${time-pos}"
 
 Putting Command Line Options into the Configuration File
 --------------------------------------------------------
@@ -357,19 +368,16 @@ Putting Command Line Options into the Configuration File
 Almost all command line options can be put into the configuration file. Here
 is a small guide:
 
-+----------------------+--------------------------+
-| Option               | Configuration file entry |
-+======================+==========================+
-| --flag               | flag                     |
-+----------------------+--------------------------+
-| -opt val             | opt=val                  |
-+----------------------+--------------------------+
-| --opt=val            | opt=val                  |
-+----------------------+--------------------------+
-| -opt "has spaces"    | opt="has spaces"         |
-+----------------------+--------------------------+
+======================= ========================
+Option                  Configuration file entry
+======================= ========================
+``--flag``              ``flag``
+``-opt val``            ``opt=val``
+``--opt=val``           ``opt=val``
+``-opt "has spaces"``   ``opt="has spaces"``
+======================= ========================
 
-File Specific Configuration Files
+File-specific Configuration Files
 ---------------------------------
 
 You can also write file-specific configuration files. If you wish to have a
@@ -388,30 +396,32 @@ as the file played and then tries to load any file-specific configuration.
 Profiles
 --------
 
-To ease working with different configurations profiles can be defined in the
-configuration files. A profile starts with its name between square brackets,
-e.g. *[my-profile]*. All following options will be part of the profile. A
-description (shown by ``--profile=help``) can be defined with the profile-desc
-option. To end the profile, start another one or use the profile name
-*default* to continue with normal options.
+To ease working with different configurations, profiles can be defined in the
+configuration files. A profile starts with its name in square brackets,
+e.g. ``[my-profile]``. All following options will be part of the profile. A
+description (shown by ``--profile=help``) can be defined with the
+``profile-desc`` option. To end the profile, start another one or use the
+profile name ``default`` to continue with normal options.
 
-*EXAMPLE MPV PROFILE:*
+.. admonition:: Example mpv profile
 
-| [vo.vdpau]
-| # Use hardware decoding (this might break playback of some h264 files)
-| hwdec=vdpau
-|
-| [protocol.dvd]
-| profile-desc="profile for dvd:// streams"
-| vf=pp=hb/vb/dr/al/fd
-| alang=en
-|
-| [extension.flv]
-| profile-desc="profile for .flv files"
-| flip=yes
-|
-| [ao.alsa]
-| device=spdif
+    ::
+
+        [vo.vdpau]
+        # Use hardware decoding (this might break playback of some h264 files)
+        hwdec=vdpau
+
+        [protocol.dvd]
+        profile-desc="profile for dvd:// streams"
+        vf=pp=hb/vb/dr/al/fd
+        alang=en
+
+        [extension.flv]
+        profile-desc="profile for .flv files"
+        flip=yes
+
+        [ao.alsa]
+        device=spdif
 
 
 OPTIONS
@@ -440,7 +450,7 @@ input mode command, which is by default bound to the ``s`` key. Files named
 available number - no files will be overwritten.
 
 A screenshot will usually contain the unscaled video contents at the end of the
-video filter chain and subtitles. By default the ``S`` takes screenshots without
+video filter chain and subtitles. By default, ``S`` takes screenshots without
 subtitles, while ``s`` includes subtitles.
 
 The ``screenshot`` video filter is not required when using a recommended GUI
@@ -470,8 +480,8 @@ behavior of mpv.
 
 libaf:
     ``LADSPA_PATH``
-        If ``LADSPA_PATH`` is set, it searches for the specified file. If it
-        is not set, you must supply a fully specified pathname.
+        Specifies the search path for LADSPA plugins. If it is unset, fully
+        qualified path names must be used.
 
         FIXME: This is also mentioned in the ladspa section.
 
@@ -483,12 +493,12 @@ libdvdcss:
         subdirectory is created named after the DVD's title or manufacturing
         date. If ``DVDCSS_CACHE`` is not set or is empty, libdvdcss will use
         the default value which is ``${HOME}/.dvdcss/`` under Unix and
-        ``C:\Documents and Settings\$USER\Application Data\dvdcss\`` under
-        Win32. The special value "off" disables caching.
+        the roaming application data directory (``%APPDATA%``) under
+        Windows. The special value "off" disables caching.
 
     ``DVDCSS_METHOD``
         Sets the authentication and decryption method that libdvdcss will use
-        to read scrambled discs. Can be one of title, key or disc.
+        to read scrambled discs. Can be one of ``title``, ``key`` or ``disc``.
 
         key
            is the default method. libdvdcss will use a set of calculated
@@ -590,9 +600,6 @@ FILES
 
 ``~/.mpv/input.conf``
     input bindings (see ``--input-keylist`` for the full list)
-
-``~/.mpv/DVDkeys/``
-    cached CSS keys
 
 
 EXAMPLES OF MPV USAGE

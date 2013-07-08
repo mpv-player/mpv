@@ -2420,6 +2420,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         screenshot_request(mpctx, cmd->args[0].v.i, cmd->args[1].v.i, msg_osd);
         break;
 
+    case MP_CMD_SCREENSHOT_TO_FILE:
+        screenshot_to_file(mpctx, cmd->args[0].v.s, cmd->args[1].v.i, msg_osd);
+        break;
+
     case MP_CMD_RUN:
 #ifndef __MINGW32__
         if (!fork()) {
@@ -2506,6 +2510,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_VF:
         change_video_filters(mpctx, cmd->args[0].v.s, cmd->args[1].v.s);
         break;
+
+    case MP_CMD_COMMAND_LIST: {
+        for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next)
+            run_command(mpctx, sub);
+        break;
+    }
 
     default:
         mp_msg(MSGT_CPLAYER, MSGL_V,

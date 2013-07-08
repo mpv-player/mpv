@@ -40,6 +40,13 @@ char *mp_find_user_config_file(const char *filename);
 
 char *mp_basename(const char *path);
 
+/* Return file extension, including the '.'. If root is not NULL, set it to the
+ * part of the path without extension. So: path == root + returnvalue
+ * Don't consider it a file extension if the only '.' is the first character.
+ * Return "" if no extension.
+ */
+char *mp_splitext(const char *path, bstr *root);
+
 /* Return struct bstr referencing directory part of path, or if that
  * would be empty, ".".
  */

@@ -91,28 +91,31 @@ void main() {
 }
 
 #!section frag_osd_libass
-uniform sampler2D textures[3];
+uniform sampler2D texture0;
 
 in vec2 texcoord;
 in vec4 color;
 DECLARE_FRAGPARMS
 
 void main() {
-    out_color = vec4(color.rgb, color.a * texture(textures[0], texcoord).r);
+    out_color = vec4(color.rgb, color.a * texture(texture0, texcoord).r);
 }
 
 #!section frag_osd_rgba
-uniform sampler2D textures[3];
+uniform sampler2D texture0;
 
 in vec2 texcoord;
 DECLARE_FRAGPARMS
 
 void main() {
-    out_color = texture(textures[0], texcoord);
+    out_color = texture(texture0, texcoord);
 }
 
 #!section frag_video
-uniform sampler2D textures[4];
+uniform sampler2D texture0;
+uniform sampler2D texture1;
+uniform sampler2D texture2;
+uniform sampler2D texture3;
 uniform vec2 textures_size[4];
 uniform vec2 chroma_center_offset;
 uniform sampler1D lut_c_1d;
@@ -327,22 +330,22 @@ void main() {
 #define USE_CONV 0
 #endif
 #if USE_CONV == CONV_PLANAR
-    vec3 color = vec3(SAMPLE_L(textures[0], textures_size[0], texcoord).r,
-                      SAMPLE_C(textures[1], textures_size[1], chr_texcoord).r,
-                      SAMPLE_C(textures[2], textures_size[2], chr_texcoord).r);
+    vec3 color = vec3(SAMPLE_L(texture0, textures_size[0], texcoord).r,
+                      SAMPLE_C(texture1, textures_size[1], chr_texcoord).r,
+                      SAMPLE_C(texture2, textures_size[2], chr_texcoord).r);
     float alpha = 1.0;
 #elif USE_CONV == CONV_NV12
-    vec3 color = vec3(SAMPLE_L(textures[0], textures_size[0], texcoord).r,
-                      SAMPLE_C(textures[1], textures_size[1], chr_texcoord).rg);
+    vec3 color = vec3(SAMPLE_L(texture0, textures_size[0], texcoord).r,
+                      SAMPLE_C(texture1, textures_size[1], chr_texcoord).rg);
     float alpha = 1.0;
 #else
-    vec4 acolor = SAMPLE_L(textures[0], textures_size[0], texcoord);
+    vec4 acolor = SAMPLE_L(texture0, textures_size[0], texcoord);
     vec3 color = acolor.rgb;
     float alpha = acolor.a;
 #endif
 #ifdef USE_ALPHA_PLANE
-    alpha = SAMPLE_L(textures[USE_ALPHA_PLANE],
-                     textures_size[USE_ALPHA_PLANE], texcoord).r;
+    alpha = SAMPLE_L(texture3,
+                     textures_size[3], texcoord).r;
 #endif
 #ifdef USE_GBRP
     color.gbr = color;

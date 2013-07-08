@@ -36,6 +36,7 @@ enum mp_command_type {
     MP_CMD_TV_STEP_NORM,
     MP_CMD_TV_STEP_CHANNEL_LIST,
     MP_CMD_SCREENSHOT,
+    MP_CMD_SCREENSHOT_TO_FILE,
     MP_CMD_LOADFILE,
     MP_CMD_LOADLIST,
     MP_CMD_PLAYLIST_CLEAR,
@@ -87,6 +88,9 @@ enum mp_command_type {
 
     /// Video output commands
     MP_CMD_VO_CMDLINE,
+
+    // Internal
+    MP_CMD_COMMAND_LIST, // list of sub-commands in args[0].v.p
 };
 
 #define MP_CMD_MAX_ARGS 10
@@ -128,6 +132,7 @@ struct mp_cmd_arg {
         float f;
         double d;
         char *s;
+        void *p;
     } v;
 };
 
