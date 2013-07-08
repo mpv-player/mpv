@@ -37,6 +37,10 @@
 
 #include <linux/types.h>
 
+#ifdef CONFIG_RADIO_V4L2
+#include <linux/videodev2.h>
+#endif
+
 #include "stream.h"
 #include "demux/demux.h"
 #include "core/m_struct.h"

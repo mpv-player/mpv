@@ -43,7 +43,7 @@
 #include "core/input/keycodes.h"
 #include "core/input/input.h"
 #include "core/mp_msg.h"
-#include "core/mp_fifo.h"
+#include "core/input/input.h"
 
 /* caca stuff */
 static caca_canvas_t  *canvas;
@@ -169,20 +169,20 @@ static void check_events(struct vo *vo)
             resize();
             break;
         case CACA_EVENT_QUIT:
-            mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
+            mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
             break;
         case CACA_EVENT_MOUSE_MOTION:
             vo_mouse_movement(vo, cev.data.mouse.x, cev.data.mouse.y);
             break;
         case CACA_EVENT_MOUSE_PRESS:
             if (!vo->opts->nomouse_input)
-                mplayer_put_key(vo->key_fifo,
+                mp_input_put_key(vo->input_ctx,
                     (MP_MOUSE_BTN0 + cev.data.mouse.button - 1) | MP_KEY_STATE_DOWN);
             break;
         case CACA_EVENT_MOUSE_RELEASE:
             if (!vo->opts->nomouse_input)
-                mplayer_put_key(vo->key_fifo,
-                                MP_MOUSE_BTN0 + cev.data.mouse.button - 1);
+                mp_input_put_key(vo->input_ctx,
+                    (MP_MOUSE_BTN0 + cev.data.mouse.button - 1) | MP_KEY_STATE_UP);
             break;
         case CACA_EVENT_KEY_PRESS:
         {
@@ -191,7 +191,7 @@ static void check_events(struct vo *vo)
             const char *msg_name;
 
             if (mpkey)
-                mplayer_put_key(vo->key_fifo, mpkey);
+                mp_input_put_key(vo->input_ctx, mpkey);
             else
             switch (key) {
             case 'd':
@@ -228,7 +228,7 @@ static void check_events(struct vo *vo)
 
             default:
                 if (key <= 255)
-                    mplayer_put_key(vo->key_fifo, key);
+                    mp_input_put_key(vo->input_ctx, key);
                 break;
             }
         }

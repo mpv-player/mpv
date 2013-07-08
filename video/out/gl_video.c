@@ -507,7 +507,7 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     for (int n = 0; n < p->plane_count; n++) {
         char textures_n[32];
         char textures_size_n[32];
-        snprintf(textures_n, sizeof(textures_n), "textures[%d]", n);
+        snprintf(textures_n, sizeof(textures_n), "texture%d", n);
         snprintf(textures_size_n, sizeof(textures_size_n), "textures_size[%d]", n);
 
         gl->Uniform1i(gl->GetUniformLocation(program, textures_n), n);

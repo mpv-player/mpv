@@ -73,27 +73,6 @@ typedef struct tv_param_s {
       Will help if video freezes but audio does not.
       May not work with -vo directx and -vf crop combination.
     */
-    int hidden_video_renderer;
-    /**
-      For VIVO cards VP pin have to be rendered too.
-      This tweak will cause VidePort pin stream to be terminated with video renderer
-      instead of removing it from graph.
-      Use if your card have vp pin and video is still choppy.
-      May not work with -vo directx and -vf crop combination.
-    */
-    int hidden_vp_renderer;
-    /**
-      Use system clock as sync source instead of default graph clock (usually the clock
-      from one of live sources in graph.
-    */
-    int system_clock;
-    /**
-      Some audio cards creates audio chunks with about 0.5 sec size.
-      This can cause choppy video when using mplayer with immediatemode=0
-      Use followingtweak to decrease audio chunk sizes.
-      It will create audio chunks with time length equal to one video frame time.
-    */
-    int normalize_audio_chunks;
 } tv_param_t;
 
 extern tv_param_t stream_tv_defaults;

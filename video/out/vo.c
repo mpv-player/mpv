@@ -37,7 +37,6 @@
 #include "vo.h"
 #include "aspect.h"
 #include "core/input/input.h"
-#include "core/mp_fifo.h"
 #include "core/m_config.h"
 #include "core/mp_msg.h"
 #include "video/mp_image.h"
@@ -285,7 +284,6 @@ static void replace_legacy_vo_name(bstr *name)
 }
 
 struct vo *init_best_video_out(struct mp_vo_opts *opts,
-                               struct mp_fifo *key_fifo,
                                struct input_ctx *input_ctx,
                                struct encode_lavc_context *encode_lavc_ctx)
 {
@@ -294,7 +292,6 @@ struct vo *init_best_video_out(struct mp_vo_opts *opts,
     struct vo *vo = talloc_ptrtype(NULL, vo);
     struct vo initial_values = {
         .opts = opts,
-        .key_fifo = key_fifo,
         .encode_lavc_ctx = encode_lavc_ctx,
         .input_ctx = input_ctx,
         .event_fd = -1,

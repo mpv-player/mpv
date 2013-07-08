@@ -26,7 +26,7 @@
 #include "core/bstr.h"
 #include "core/options.h"
 #include "core/mp_msg.h"
-#include "core/mp_fifo.h"
+#include "core/input/input.h"
 #include "libavutil/common.h"
 #include "x11_common.h"
 #include "talloc.h"
@@ -639,7 +639,7 @@ void vo_x11_uninit(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     assert(x11);
 
-    mplayer_put_key(vo->key_fifo, MP_INPUT_RELEASE_ALL);
+    mp_input_put_key(vo->input_ctx, MP_INPUT_RELEASE_ALL);
 
     saver_on(x11);
     if (x11->window != None)
@@ -730,17 +730,17 @@ int vo_x11_check_events(struct vo *vo)
                                             sizeof(buf), &keySym, &status);
                 int mpkey = vo_x11_lookupkey(keySym);
                 if (mpkey) {
-                    mplayer_put_key(vo->key_fifo, mpkey | modifiers);
+                    mp_input_put_key(vo->input_ctx, mpkey | modifiers);
                 } else if (status == XLookupChars || status == XLookupBoth) {
                     struct bstr t = { buf, len };
-                    mplayer_put_key_utf8(vo->key_fifo, modifiers, t);
+                    mp_input_put_key_utf8(vo->input_ctx, modifiers, t);
                 }
             } else {
                 XLookupString(&Event.xkey, buf, sizeof(buf), &keySym,
                               &x11->compose_status);
                 int mpkey = vo_x11_lookupkey(keySym);
                 if (mpkey)
-                    mplayer_put_key(vo->key_fifo, mpkey | modifiers);
+                    mp_input_put_key(vo->input_ctx, mpkey | modifiers);
             }
             break;
         }
@@ -750,23 +750,24 @@ int vo_x11_check_events(struct vo *vo)
         case KeyRelease:
         {
             if (x11->no_autorepeat)
-                mplayer_put_key(vo->key_fifo, MP_INPUT_RELEASE_ALL);
+                mp_input_put_key(vo->input_ctx, MP_INPUT_RELEASE_ALL);
             break;
         }
         case MotionNotify:
             vo_mouse_movement(vo, Event.xmotion.x, Event.xmotion.y);
             break;
         case LeaveNotify:
-            mplayer_put_key(vo->key_fifo, MP_KEY_MOUSE_LEAVE);
+            mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
             break;
         case ButtonPress:
-            mplayer_put_key(vo->key_fifo,
-                            (MP_MOUSE_BTN0 + Event.xbutton.button - 1)
-                            | MP_KEY_STATE_DOWN);
+            mp_input_put_key(vo->input_ctx,
+                             (MP_MOUSE_BTN0 + Event.xbutton.button - 1)
+                             | MP_KEY_STATE_DOWN);
             break;
         case ButtonRelease:
-            mplayer_put_key(vo->key_fifo,
-                            MP_MOUSE_BTN0 + Event.xbutton.button - 1);
+            mp_input_put_key(vo->input_ctx,
+                             (MP_MOUSE_BTN0 + Event.xbutton.button - 1)
+                             | MP_KEY_STATE_UP);
             break;
         case PropertyNotify: {
             char *name = XGetAtomName(display, Event.xproperty.atom);
@@ -782,12 +783,12 @@ int vo_x11_check_events(struct vo *vo)
             break;
         case DestroyNotify:
             mp_msg(MSGT_VO, MSGL_WARN, "Our window was destroyed, exiting\n");
-            mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
+            mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
             break;
         case ClientMessage:
             if (Event.xclient.message_type == x11->XAWM_PROTOCOLS &&
                 Event.xclient.data.l[0] == x11->XAWM_DELETE_WINDOW)
-                mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
+                mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
             break;
         default:
             if (Event.type == x11->ShmCompletionEvent) {

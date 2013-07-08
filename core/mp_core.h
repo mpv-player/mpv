@@ -115,7 +115,6 @@ enum {
 typedef struct MPContext {
     struct MPOpts opts;
     struct m_config *mconfig;
-    struct mp_fifo *key_fifo;
     struct input_ctx *input;
     struct osd_state *osd;
     struct mp_osd_msg *osd_msg_stack;
@@ -226,6 +225,7 @@ typedef struct MPContext {
     double audio_delay;
 
     double last_heartbeat;
+    double last_metadata_update;
 
     double mouse_timer;
     unsigned int mouse_event_ts;

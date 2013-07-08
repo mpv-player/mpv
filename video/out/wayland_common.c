@@ -36,7 +36,6 @@
 #include "core/bstr.h"
 #include "core/options.h"
 #include "core/mp_msg.h"
-#include "core/mp_fifo.h"
 #include "libavutil/common.h"
 #include "talloc.h"
 
@@ -276,9 +275,9 @@ static void keyboard_handle_key(void *data,
 
     if (sym != XKB_KEY_NoSymbol && (mpkey = lookupkey(sym))) {
         if (state == WL_KEYBOARD_KEY_STATE_PRESSED)
-            mplayer_put_key(wl->vo->key_fifo, mpkey | MP_KEY_STATE_DOWN);
+            mp_input_put_key(wl->vo->input_ctx, mpkey | MP_KEY_STATE_DOWN);
         else
-            mplayer_put_key(wl->vo->key_fifo, mpkey);
+            mp_input_put_key(wl->vo->input_ctx, mpkey | MP_KEY_STATE_UP);
     }
 }
 
@@ -320,7 +319,7 @@ static void pointer_handle_enter(void *data,
 
     /* Release the left button on pointer enter again
      * because after moving the shell surface no release event is sent */
-    mplayer_put_key(wl->vo->key_fifo, MP_MOUSE_BTN0);
+    mp_input_put_key(wl->vo->input_ctx, MP_MOUSE_BTN0 | MP_KEY_STATE_UP);
     show_cursor(wl);
 }
 
@@ -329,6 +328,8 @@ static void pointer_handle_leave(void *data,
                                  uint32_t serial,
                                  struct wl_surface *surface)
 {
+    struct vo_wayland_state *wl = data;
+    mp_input_put_key(wl->vo->input_ctx, MP_KEY_MOUSE_LEAVE);
 }
 
 static void pointer_handle_motion(void *data,
@@ -354,8 +355,9 @@ static void pointer_handle_button(void *data,
 {
     struct vo_wayland_state *wl = data;
 
-    mplayer_put_key(wl->vo->key_fifo, MP_MOUSE_BTN0 + (button - BTN_LEFT) |
-        ((state == WL_POINTER_BUTTON_STATE_PRESSED) ? MP_KEY_STATE_DOWN : 0));
+    mp_input_put_key(wl->vo->input_ctx, MP_MOUSE_BTN0 + (button - BTN_LEFT) |
+        ((state == WL_POINTER_BUTTON_STATE_PRESSED)
+            ? MP_KEY_STATE_DOWN : MP_KEY_STATE_UP));
 
     if ((button == BTN_LEFT) && (state == WL_POINTER_BUTTON_STATE_PRESSED))
         wl_shell_surface_move(wl->window->shell_surface, wl->input->seat, serial);
@@ -371,9 +373,9 @@ static void pointer_handle_axis(void *data,
 
     if (axis == WL_POINTER_AXIS_VERTICAL_SCROLL) {
         if (value > 0)
-            mplayer_put_key(wl->vo->key_fifo, MP_MOUSE_BTN4);
+            mp_input_put_key(wl->vo->input_ctx, MP_MOUSE_BTN4);
         if (value < 0)
-            mplayer_put_key(wl->vo->key_fifo, MP_MOUSE_BTN3);
+            mp_input_put_key(wl->vo->input_ctx, MP_MOUSE_BTN3);
     }
 }
 
@@ -554,7 +556,7 @@ static void resize_window(struct vo_wayland_state *wl,
         w->events |= VO_EVENT_RESIZE;
     }
     else
-        mp_msg(MSGT_VO, MSGL_WARN, "[waylnad] No resizing possible!\n");
+        mp_msg(MSGT_VO, MSGL_WARN, "[wayland] No resizing possible!\n");
 }
 
 

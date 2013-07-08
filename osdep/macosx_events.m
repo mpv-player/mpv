@@ -27,7 +27,6 @@
 
 #include "talloc.h"
 #include "core/input/input.h"
-#include "core/mp_fifo.h"
 // doesn't make much sense, but needed to access keymap functionality
 #include "video/out/vo.h"
 
@@ -167,7 +166,7 @@ void cocoa_check_events(void)
     Application *app = mpv_shared_app();
     int key;
     while ((key = [app.iqueue pop]) >= 0)
-        mplayer_put_key(app.keyFIFO, key);
+        mp_input_put_key(app.inputContext, key);
 }
 
 void cocoa_put_key(int keycode)
@@ -179,6 +178,7 @@ void cocoa_put_key(int keycode)
     CFMachPortRef _mk_tap_port;
     HIDRemote *_remote;
 }
+
 - (void)startAppleRemote
 {
     dispatch_async(dispatch_get_main_queue(), ^{

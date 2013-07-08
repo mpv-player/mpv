@@ -68,7 +68,6 @@
 #include "screenshot.h"
 
 #include "core/mp_core.h"
-#include "mp_fifo.h"
 
 #include "mp_lua.h"
 
@@ -2194,6 +2193,29 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
+    case MP_CMD_PLAYLIST_REMOVE: {
+        struct playlist_entry *e = playlist_entry_from_index(mpctx->playlist,
+                                                             cmd->args[0].v.i);
+        if (e) {
+            // Can't play a removed entry
+            if (mpctx->playlist->current == e)
+                mpctx->stop_play = PT_CURRENT_ENTRY;
+            playlist_remove(mpctx->playlist, e);
+        }
+        break;
+    }
+
+    case MP_CMD_PLAYLIST_MOVE: {
+        struct playlist_entry *e1 = playlist_entry_from_index(mpctx->playlist,
+                                                              cmd->args[0].v.i);
+        struct playlist_entry *e2 = playlist_entry_from_index(mpctx->playlist,
+                                                              cmd->args[1].v.i);
+        if (e1) {
+            playlist_move(mpctx->playlist, e1, e2);
+        }
+        break;
+    }
+
     case MP_CMD_STOP:
         // Go back to the starting point.
         mpctx->stop_play = PT_STOP;
@@ -2413,7 +2435,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_SCREENSHOT_TO_FILE:
-        screenshot_to_file(mpctx, cmd->args[0].v.s, cmd->args[1].v.i);
+        screenshot_to_file(mpctx, cmd->args[0].v.s, cmd->args[1].v.i, msg_osd);
         break;
 
     case MP_CMD_RUN:
@@ -2426,7 +2448,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_KEYDOWN_EVENTS:
-        mplayer_put_key(mpctx->key_fifo, cmd->args[0].v.i);
+        mp_input_put_key(mpctx->input, cmd->args[0].v.i);
         break;
 
     case MP_CMD_ENABLE_INPUT_SECTION:
@@ -2522,6 +2544,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #endif
         }
         break;
+
+    case MP_CMD_COMMAND_LIST: {
+        for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next)
+            run_command(mpctx, sub);
+        break;
+    }
 
     default:
         mp_msg(MSGT_CPLAYER, MSGL_V,

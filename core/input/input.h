@@ -40,6 +40,8 @@ enum mp_command_type {
     MP_CMD_LOADFILE,
     MP_CMD_LOADLIST,
     MP_CMD_PLAYLIST_CLEAR,
+    MP_CMD_PLAYLIST_REMOVE,
+    MP_CMD_PLAYLIST_MOVE,
     MP_CMD_SUB_STEP,
     MP_CMD_TV_SET_CHANNEL,
     MP_CMD_TV_LAST_CHANNEL,
@@ -91,6 +93,9 @@ enum mp_command_type {
     MP_CMD_SCRIPT_DISPATCH,
 
     MP_CMD_LUA,
+
+    // Internal
+    MP_CMD_COMMAND_LIST, // list of sub-commands in args[0].v.p
 };
 
 #define MP_CMD_MAX_ARGS 10
@@ -132,6 +137,7 @@ struct mp_cmd_arg {
         float f;
         double d;
         char *s;
+        void *p;
     } v;
 };
 
@@ -178,8 +184,13 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int fd, int select,
                         int read_func(void *ctx, int fd),
                         int close_func(int fd), void *ctx);
 
-// Feed a keypress (alternative to being returned from read_func above)
-void mp_input_feed_key(struct input_ctx *ictx, int code);
+// Process keyboard input. code is a key code from keycodes.h, possibly
+// with modifiers applied. MP_INPUT_RELEASE_ALL is also a valid value.
+void mp_input_put_key(struct input_ctx *ictx, int code);
+
+// Like mp_input_put_key(), but process all UTF-8 characters in the given
+// string as key events.
+void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t);
 
 // Update mouse position (in window coordinates).
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y);

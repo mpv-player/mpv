@@ -30,7 +30,6 @@
 #include <windows.h>
 #include "core/input/keycodes.h"
 #include "core/input/input.h"
-#include "core/mp_fifo.h"
 #include "getch2.h"
 
 int mp_input_slave_cmd_func(int fd,char* dest,int size){
@@ -158,11 +157,11 @@ static int getch2_internal(void)
 	return -1;
 }
 
-bool getch2(struct mp_fifo *fifo)
+bool getch2(struct input_ctx *ctx)
 {
     int r = getch2_internal();
     if (r >= 0)
-	mplayer_put_key(fifo, r);
+	mp_input_put_key(ctx, r);
     return true;
 }
 

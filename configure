@@ -308,22 +308,15 @@ Optional features:
   --disable-tv           disable TV interface (TV/DVB grabbers) [enable]
   --disable-tv-v4l2      disable Video4Linux2 TV interface [autodetect]
   --disable-pvr          disable Video4Linux2 MPEG PVR [autodetect]
-  --disable-networking   disable networking [enable]
-  --enable-winsock2_h    enable winsock2_h [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
-  --enable-libquvi       enable libquvi [autodetect]
+  --disable-libquvi4     disable libquvi 0.4.x [autodetect]
   --disable-libquvi9     disable libquvi 0.9.x [autodetect]
   --enable-lcms2         enable LCMS2 support [autodetect]
   --disable-vcd          disable VCD support [autodetect]
   --disable-bluray       disable Blu-ray support [autodetect]
   --disable-dvdread      disable libdvdread [autodetect]
-  --disable-cddb         disable cddb [autodetect]
   --disable-enca         disable ENCA charset oracle library [autodetect]
   --enable-macosx-bundle enable Mac OS X bundle file locations [autodetect]
-  --disable-inet6        disable IPv6 support [autodetect]
-  --disable-gethostbyname2  gethostbyname2 part of the C library [autodetect]
-  --disable-ftp          disable FTP support [enabled]
-  --disable-vstream      disable TiVo vstream client support [autodetect]
   --disable-pthreads     disable Posix threads support [autodetect]
   --disable-libass       disable subtitle rendering with libass [autodetect]
   --disable-libass-osd   disable OSD rendering with libass [autodetect]
@@ -464,10 +457,8 @@ _radio_v4l2=auto
 _tv=yes
 _tv_v4l2=auto
 _pvr=auto
-networking=yes
-_winsock2_h=auto
 _smb=auto
-_libquvi=auto
+_libquvi4=auto
 _libquvi9=auto
 _libguess=auto
 _joystick=no
@@ -478,16 +469,11 @@ _termios=auto
 _shm=auto
 _gettext=no
 _cdda=auto
-_cddb=auto
 _coreaudio=auto
 _corevideo=auto
 _cocoa=auto
 _macosx_bundle=auto
 _enca=auto
-_inet6=auto
-_gethostbyname2=auto
-_ftp=auto
-_vstream=auto
 _pthreads=auto
 _ass=auto
 _libass_osd=auto
@@ -664,14 +650,10 @@ for ac_option do
   --disable-radio-v4l2) _radio_v4l2=no  ;;
   --enable-pvr)         _pvr=yes        ;;
   --disable-pvr)        _pvr=no         ;;
-  --enable-networking)     networking=yes    ;;
-  --disable-networking)    networking=no     ;;
-  --enable-winsock2_h)  _winsock2_h=yes ;;
-  --disable-winsock2_h) _winsock2_h=no  ;;
   --enable-smb)         _smb=yes        ;;
   --disable-smb)        _smb=no ;;
-  --enable-libquvi)     _libquvi=yes    ;;
-  --disable-libquvi)    _libquvi=no     ;;
+  --enable-libquvi4)    _libquvi4=yes    ;;
+  --disable-libquvi4)   _libquvi4=no     ;;
   --enable-libquvi9)    _libquvi9=yes    ;;
   --disable-libquvi9)   _libquvi9=no     ;;
   --enable-libguess)    _libguess=yes   ;;
@@ -696,12 +678,6 @@ for ac_option do
   --disable-shm)        _shm=no         ;;
   --enable-select)      _select=yes     ;;
   --disable-select)     _select=no      ;;
-  --enable-cddb)        _cddb=yes       ;;
-  --disable-cddb)       _cddb=no        ;;
-  --enable-ftp)         _ftp=yes        ;;
-  --disable-ftp)        _ftp=no         ;;
-  --enable-vstream)     _vstream=yes    ;;
-  --disable-vstream)    _vstream=no     ;;
   --enable-pthreads)    _pthreads=yes   ;;
   --disable-pthreads)   _pthreads=no    ;;
   --enable-libass)      _ass=yes        ;;
@@ -723,12 +699,6 @@ for ac_option do
 
   --enable-enca)        _enca=yes       ;;
   --disable-enca)       _enca=no        ;;
-
-  --enable-inet6)       _inet6=yes      ;;
-  --disable-inet6)      _inet6=no       ;;
-
-  --enable-gethostbyname2)      _gethostbyname2=yes     ;;
-  --disable-gethostbyname2)     _gethostbyname2=no      ;;
 
   --enable-coreaudio) _coreaudio=yes ;;
   --disable-coreaudio) _coreaudio=no ;;
@@ -1030,87 +1000,77 @@ if test "$_as" = auto ; then
 fi
 
 def_fast_64bit='#define HAVE_FAST_64BIT 0'
-arch_all='X86 IA64 SPARC ARM AVR32 SH4 PPC ALPHA MIPS PA_RISC S390 S390X VAX BFIN XTENSA TOMI GENERIC'
-subarch_all='X86_32 X86_64 PPC64'
+def_arch_x86='#define ARCH_X86 0'
+def_arch_x86_32='#define ARCH_X86_32 0'
+def_arch_x86_64='#define ARCH_X86_64 0'
+
 case "$host_arch" in
   i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
     arch='x86'
     subarch='x86_32'
-    iproc=486
-    proc=i486
+    def_arch_x86='#define ARCH_X86 1'
+    def_arch_x86_32='#define ARCH_X86_32 1'
     ;;
 
   ia64)
     arch='ia64'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
-    iproc='ia64'
     ;;
 
   x86_64|amd64)
     arch='x86'
     subarch='x86_64'
+    def_arch_x86='#define ARCH_X86 1'
+    def_arch_x86_64='#define ARCH_X86_64 1'
     def_fast_64bit='#define HAVE_FAST_64BIT 1'
-    iproc='x86_64'
     ;;
 
   sparc|sparc64)
     arch='sparc'
-    iproc='sparc'
     ;;
 
   arm*)
     arch='arm'
-    iproc='arm'
     ;;
 
   avr32)
     arch='avr32'
-    iproc='avr32'
     ;;
 
   sh|sh4)
     arch='sh4'
-    iproc='sh4'
     ;;
 
   ppc|ppc64|powerpc|powerpc64)
     arch='ppc'
-    iproc='ppc'
     ;;
 
   alpha*)
     arch='alpha'
-    iproc='alpha'
     ;;
 
   mips*)
     arch='mips'
-    iproc='mips'
     ;;
 
   hppa)
     arch='pa_risc'
-    iproc='PA-RISC'
     ;;
 
   s390)
     arch='s390'
-    iproc='390'
     ;;
 
   s390x)
     arch='s390x'
-    iproc='390x'
     ;;
 
   vax)
     arch='vax'
-    iproc='vax'
     ;;
 
   xtensa)
     arch='xtensa'
-    iproc='xtensa'
     ;;
 
   generic)
@@ -1251,146 +1211,6 @@ fi
 echores "$_nanosleep"
 
 
-echocheck "socklib"
-# for Solaris (socket stuff is in -lsocket, gethostbyname and friends in -lnsl):
-cat > $TMPC << EOF
-#include <netdb.h>
-#include <sys/socket.h>
-int main(void) { gethostbyname(0); socket(AF_INET, SOCK_STREAM, 0); return 0; }
-EOF
-_socklib=no
-for _ld_tmp in "" "-lsocket -lbind" "-lsocket -ldnet" "-lsocket -lnsl" "-lnsl" "-lsocket" ; do
-  cc_check $_ld_tmp && _ld_sock="$_ld_tmp" && _socklib=yes && break
-done
-test $_socklib = yes && test $_winsock2_h = auto && _winsock2_h=no
-if test $_winsock2_h = auto ; then
-  _winsock2_h=no
-  statement_check winsock2.h 'gethostbyname(0)' -lws2_32 && _ld_sock="-lws2_32" && _winsock2_h=yes
-fi
-test "$_ld_sock" && res_comment="using $_ld_sock"
-echores "$_socklib"
-
-
-if test $_winsock2_h = yes ; then
-  _ld_sock="-lws2_32"
-  def_winsock2_h='#define HAVE_WINSOCK2_H 1'
-else
-  def_winsock2_h='#define HAVE_WINSOCK2_H 0'
-fi
-
-
-echocheck "inet_pton()"
-def_inet_pton='#define HAVE_INET_PTON 0'
-inet_pton=no
-for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
-  statement_check arpa/inet.h 'inet_pton(0, 0, 0)' $_ld_tmp && inet_pton=yes && break
-done
-if test $inet_pton = yes ; then
-  test "$_ld_tmp" && res_comment="using $_ld_tmp"
-  def_inet_pton='#define HAVE_INET_PTON 1'
-fi
-echores "$inet_pton"
-
-
-echocheck "inet_aton()"
-def_inet_aton='#define HAVE_INET_ATON 0'
-inet_aton=no
-for _ld_tmp in "$_ld_sock" "$_ld_sock -lresolv" ; do
-  statement_check arpa/inet.h 'inet_aton(0, 0)' $_ld_tmp && inet_aton=yes && break
-done
-if test $inet_aton = yes ; then
-  test "$_ld_tmp" && res_comment="using $_ld_tmp"
-  def_inet_aton='#define HAVE_INET_ATON 1'
-fi
-echores "$inet_aton"
-
-
-echocheck "socklen_t"
-_socklen_t=no
-for header in "sys/socket.h" "ws2tcpip.h" "sys/types.h" ; do
-  statement_check $header 'socklen_t v = 0' && _socklen_t=yes && break
-done
-if test "$_socklen_t" = yes ; then
-  def_socklen_t='#define HAVE_SOCKLEN_T 1'
-else
-  def_socklen_t='#define HAVE_SOCKLEN_T 0'
-fi
-echores "$_socklen_t"
-
-
-echocheck "closesocket()"
-_closesocket=no
-statement_check winsock2.h 'closesocket(~0)' $_ld_sock && _closesocket=yes
-if test "$_closesocket" = yes ; then
-  def_closesocket='#define HAVE_CLOSESOCKET 1'
-else
-  def_closesocket='#define HAVE_CLOSESOCKET 0'
-fi
-echores "$_closesocket"
-
-
-echocheck "networking"
-test $_winsock2_h = no && test $inet_pton = no &&
-  test $inet_aton = no && networking=no
-if test "$networking" = yes ; then
-  def_network='#define CONFIG_NETWORK 1'
-  def_networking='#define CONFIG_NETWORKING 1'
-  libs_mplayer="$libs_mplayer $_ld_sock"
-  inputmodules="networking $inputmodules"
-else
-  noinputmodules="networking $noinputmodules"
-  def_network='#define CONFIG_NETWORK 0'
-  def_networking='#undef CONFIG_NETWORKING'
-fi
-echores "$networking"
-
-
-echocheck "inet6"
-if test "$_inet6" = auto ; then
-  cat > $TMPC << EOF
-#include <sys/types.h>
-#if !defined(_WIN32)
-#include <sys/socket.h>
-#include <netinet/in.h>
-#else
-#include <ws2tcpip.h>
-#endif
-int main(void) { struct sockaddr_in6 six; socket(AF_INET6, SOCK_STREAM, AF_INET6); return 0; }
-EOF
-  _inet6=no
-  if cc_check $_ld_sock ; then
-    _inet6=yes
-  fi
-fi
-if test "$_inet6" = yes ; then
-  def_inet6='#define HAVE_AF_INET6 1'
-else
-  def_inet6='#undef HAVE_AF_INET6'
-fi
-echores "$_inet6"
-
-
-echocheck "gethostbyname2"
-if test "$_gethostbyname2" = auto ; then
-cat > $TMPC << EOF
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-int main(void) { gethostbyname2("", AF_INET); return 0; }
-EOF
-  _gethostbyname2=no
-  if cc_check ; then
-    _gethostbyname2=yes
-  fi
-fi
-if test "$_gethostbyname2" = yes ; then
-  def_gethostbyname2='#define HAVE_GETHOSTBYNAME2 1'
-else
-  def_gethostbyname2='#undef HAVE_GETHOSTBYNAME2'
-fi
-echores "$_gethostbyname2"
-
-
 echocheck "mman.h"
 _mman=no
 statement_check sys/mman.h 'mmap(0, 0, 0, 0, 0, 0)' && _mman=yes
@@ -1401,13 +1221,6 @@ else
 fi
 echores "$_mman"
 
-_mman_has_map_failed=no
-statement_check sys/mman.h 'void *p = MAP_FAILED' && _mman_has_map_failed=yes
-if test "$_mman_has_map_failed" = yes ; then
-  def_mman_has_map_failed=''
-else
-  def_mman_has_map_failed='#define MAP_FAILED ((void *) -1)'
-fi
 
 echocheck "dynamic loader"
 _dl=no
@@ -1421,8 +1234,6 @@ else
 fi
 echores "$_dl"
 
-
-def_threads='#define HAVE_THREADS 0'
 
 echocheck "pthread"
 if linux ; then
@@ -1456,7 +1267,6 @@ fi
 if test "$_pthreads" = yes ; then
   test "$_ld_pthread" && res_comment="using $_ld_pthread"
   def_pthreads='#define HAVE_PTHREADS 1'
-  def_threads='#define HAVE_THREADS 1'
   extra_cflags="$extra_cflags $THREAD_CFLAGS"
 else
   res_comment="v4l2 disabled"
@@ -1464,6 +1274,22 @@ else
   _tv_v4l2=no
 fi
 echores "$_pthreads"
+
+if test "$_pthreads" = yes ; then
+
+# Cargo-cult for -lrt, which is needed on not so recent glibc version for
+# clock_gettime. It's documented as required before before glibc 2.17, which
+# was released in december 2012. On newer glibc versions or on other systems,
+# this will hopefully do nothing.
+echocheck "linking with -lrt"
+_rt=no
+cc_check "$_ld_pthread -lrt" && _rt=yes
+if test "$_rt" = yes ; then
+  _ld_pthread="$_ld_pthread -lrt"
+fi
+echores "$_rt"
+
+fi
 
 echocheck "stream cache"
 _stream_cache="$_pthreads"
@@ -1736,22 +1562,22 @@ fi
 echores "$_smb"
 
 
-echocheck "libquvi support"
-if test "$_libquvi" = auto ; then
-    _libquvi=no
+echocheck "libquvi 0.4.x support"
+if test "$_libquvi4" = auto ; then
+    _libquvi4=no
     if pkg_config_add 'libquvi >= 0.4.1' ; then
-        _libquvi=yes
+        _libquvi4=yes
     fi
 fi
-if test "$_libquvi" = yes; then
-    def_libquvi="#define CONFIG_LIBQUVI 1"
+if test "$_libquvi4" = yes; then
+    def_libquvi4="#define CONFIG_LIBQUVI 1"
 else
-    def_libquvi="#undef CONFIG_LIBQUVI"
+    def_libquvi4="#undef CONFIG_LIBQUVI"
 fi
-echores "$_libquvi"
+echores "$_libquvi4"
 
 echocheck "libquvi 0.9.x support"
-if test "$_libquvi" = yes ; then
+if test "$_libquvi4" = yes ; then
     _libquvi9=no
     res_comment="using libquvi 0.4.x"
 fi
@@ -2589,7 +2415,6 @@ fi
 if test "$_libcdio" = yes ; then
     _cdda='yes'
     def_cdda='#define CONFIG_CDDA 1'
-    test $_cddb = auto && test $networking = yes && _cddb=yes
     inputmodules="cdda $inputmodules"
 else
     _libcdio=no
@@ -2598,15 +2423,6 @@ else
     noinputmodules="cdda $noinputmodules"
 fi
 echores "$_libcdio"
-
-if test "$_cddb" = yes ; then
-    def_cddb='#define CONFIG_CDDB 1'
-    inputmodules="cddb $inputmodules"
-else
-    _cddb=no
-    def_cddb='#undef CONFIG_CDDB'
-    noinputmodules="cddb $noinputmodules"
-fi
 
 
 echocheck "SSA/ASS support"
@@ -2656,7 +2472,7 @@ if test "$_zlib" = yes ; then
   def_zlib='#define CONFIG_ZLIB 1'
   libs_mplayer="$libs_mplayer -lz"
 else
-  def_zlib='#define CONFIG_ZLIB 0'
+  die "Unable to find development files for zlib."
 fi
 echores "$_zlib"
 
@@ -3003,40 +2819,6 @@ fi
 echores "$_pvr"
 
 
-echocheck "ftp"
-if test "$_ftp" = "auto" ; then
-test "$networking" = "yes" && _ftp=yes
-fi
-if test "$_ftp" = yes ; then
-  def_ftp='#define CONFIG_FTP 1'
-  inputmodules="ftp $inputmodules"
-else
-  noinputmodules="ftp $noinputmodules"
-  def_ftp='#undef CONFIG_FTP'
-fi
-echores "$_ftp"
-
-echocheck "vstream client"
-if test "$_vstream" = auto ; then
-  _vstream=no
-  cat > $TMPC <<EOF
-#include <vstream-client.h>
-void vstream_error(const char *format, ... ) {}
-int main(void) { vstream_start(); return 0; }
-EOF
-  cc_check -lvstream-client && _vstream=yes
-fi
-if test "$_vstream" = yes ; then
-  def_vstream='#define CONFIG_VSTREAM 1'
-  inputmodules="vstream $inputmodules"
-  libs_mplayer="$libs_mplayer -lvstream-client"
-else
-  noinputmodules="vstream $noinputmodules"
-  def_vstream='#undef CONFIG_VSTREAM'
-fi
-echores "$_vstream"
-
-
 # Note: Lua has no official .pc file, so there are different OS-specific ones.
 # Also, we support luajit, which is compatible to 5.1.
 echocheck "Lua >= 5.1.0"
@@ -3149,16 +2931,6 @@ CXXFLAGS=" $CFLAGS -D__STDC_CONSTANT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_LIMI
 
 # DO NOT ADD ANY TESTS THAT USE LINKER FLAGS HERE (like cc_check).
 
-mak_enable () {
-list=$(echo $1 | tr '[a-z]' '[A-Z]')
-item=$(echo $2 | tr '[a-z]' '[A-Z]')
-nprefix=$3;
-for part in $list; do
-  if $(echo $item | grep -q -E "(^| )$part($| )"); then
-    echo "${nprefix}_$part = yes"
-  fi
-done
-}
 
 #############################################################################
 echo "Creating config.mak"
@@ -3195,10 +2967,6 @@ BUILD_MAN = $_build_man
 EXESUF      = $_exesuf
 EXESUFS_ALL = .exe
 
-ARCH = $arch
-$(mak_enable "$arch_all"    "$arch"    ARCH)
-$(mak_enable "$subarch_all" "$subarch" ARCH)
-
 NEED_GLOB         = $need_glob
 
 # features
@@ -3206,7 +2974,6 @@ ALSA = $_alsa
 AUDIO_INPUT = $_audio_input
 CACA = $_caca
 CDDA = $_cdda
-CDDB = $_cddb
 COCOA = $_cocoa
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
@@ -3217,8 +2984,6 @@ DSOUND = $_dsound
 WASAPI0 = $_wasapi0
 DVBIN = $_dvbin
 DVDREAD = $_dvdread
-DXR3 = $_dxr3
-FTP = $_ftp
 GL = $_gl
 GL_COCOA = $_gl_cocoa
 GL_WIN32 = $_gl_win32
@@ -3244,15 +3009,13 @@ LIBAVFILTER = $libavfilter
 VF_LAVFI = $vf_lavfi
 AF_LAVFI = $af_lavfi
 LIBSMBCLIENT = $_smb
-LIBQUVI = $_libquvi
+LIBQUVI = $_libquvi4
 LIBQUVI9 = $_libquvi9
 LIBGUESS = $_libguess
-LIBTHEORA = $_theora
 LIRC = $_lirc
 MACOSX_BUNDLE = $_macosx_bundle
 MNG = $_mng
 MPG123 = $_mpg123
-NETWORKING = $networking
 OPENAL = $_openal
 OSS = $_ossaudio
 PE_EXECUTABLE = $_pe_executable
@@ -3268,7 +3031,6 @@ TV = $_tv
 TV_V4L2 = $_tv_v4l2
 VCD = $_vcd
 VDPAU = $_vdpau
-VSTREAM = $_vstream
 X11 = $_x11
 WAYLAND = $_wayland
 XV = $_xv
@@ -3285,20 +3047,6 @@ HAVE_SHM        = $_shm
 EOF
 
 #############################################################################
-
-ff_config_enable () {
-list=$(echo $1 | tr '[a-z]' '[A-Z]')
-item=$(echo $2 | tr '[a-z]' '[A-Z]')
-_nprefix=$3;
-test -z "$_nprefix" && _nprefix='CONFIG'
-for part in $list; do
-  if $(echo $item | grep -q -E "(^| )$part($| )"); then
-    echo "#define ${_nprefix}_$part 1"
-  else
-    echo "#define ${_nprefix}_$part 0"
-  fi
-done
-}
 
 echo "Creating config.h"
 cat > $TMPH << EOF
@@ -3333,15 +3081,12 @@ $def_winsock2_h
 
 
 /* system functions */
-$def_gethostbyname2
 $def_glob
 $def_nanosleep
 $def_posix_select
 $def_select
 $def_setmode
 $def_shm
-$def_sysi86
-$def_sysi86_iv
 $def_termcap
 $def_termios
 
@@ -3359,10 +3104,11 @@ $def_stream_cache
 
 
 /* CPU stuff */
-#define __CPU__ $iproc
 $def_ebx_available
-$(ff_config_enable "$arch_all" "$arch" "ARCH")
-$(ff_config_enable "$subarch_all" "$subarch" "ARCH")
+
+$def_arch_x86
+$def_arch_x86_32
+$def_arch_x86_64
 
 #define HAVE_MMX ARCH_X86
 #define HAVE_MMX2 ARCH_X86
@@ -3374,17 +3120,7 @@ $(ff_config_enable "$subarch_all" "$subarch" "ARCH")
 #define DEFAULT_CDROM_DEVICE "$default_cdrom_device"
 #define DEFAULT_DVD_DEVICE   "$default_dvd_device"
 $def_bluray
-$def_bsdi_dvd
 $def_cdda
-$def_cddb
-$def_cdio
-$def_cdrom
-$def_dvd
-$def_dvd_bsd
-$def_dvd_darwin
-$def_dvd_linux
-$def_dvd_openbsd
-$def_dvdio
 $def_dvdread
 $def_vcd
 
@@ -3437,18 +3173,10 @@ $def_ass
 $def_enca
 
 /* networking */
-$def_closesocket
-$def_ftp
-$def_inet6
-$def_inet_aton
-$def_inet_pton
-$def_networking
 $def_smb
-$def_libquvi
+$def_libquvi4
 $def_libquvi9
 $def_libguess
-$def_socklen_t
-$def_vstream
 
 $def_lcms2
 $def_lua
@@ -3491,8 +3219,6 @@ $def_avresample_has_set_channel_mapping
 
 $def_fast_64bit
 $def_pthreads
-$def_threads
-$def_xform_asm
 
 #define HAVE_INLINE_ASM 1
 

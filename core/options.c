@@ -40,6 +40,12 @@
 #include "mp_core.h"
 #include "osdep/priority.h"
 
+int   network_bandwidth=0;
+int   network_cookies_enabled = 0;
+char *network_useragent="MPlayer 1.1-4.7";
+char *network_referrer=NULL;
+char **network_http_header_fields=NULL;
+
 extern char *lirc_configfile;
 
 extern int mp_msg_color;
@@ -345,22 +351,11 @@ const m_option_t mp_opts[] = {
     {"bluray-angle",   &bluray_angle,   CONF_TYPE_INT,    CONF_RANGE, 0, 999, NULL},
 #endif /* CONFIG_LIBBLURAY */
 
-#ifdef CONFIG_NETWORKING
-    {"user", &network_username, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"passwd", &network_password, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"bandwidth", &network_bandwidth, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
     {"http-header-fields", &network_http_header_fields, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
     {"user-agent", &network_useragent, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"referrer", &network_referrer, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"cookies", &network_cookies_enabled, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"cookies-file", &cookies_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"prefer-ipv4", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"ipv4-only-proxy", &network_ipv4_only_proxy, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"reuse-socket", &reuse_socket, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#ifdef HAVE_AF_INET6
-    {"prefer-ipv6", &network_prefer_ipv4, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-#endif /* HAVE_AF_INET6 */
-#endif /* CONFIG_NETWORKING */
 
 // ------------------------- demuxer options --------------------
 
@@ -688,7 +683,6 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
     OPT_FLAG("consolecontrols", consolecontrols, CONF_GLOBAL),
     OPT_FLAG("mouse-movements", vo.enable_mouse_movements, CONF_GLOBAL),
-    OPT_INTRANGE("doubleclick-time", doubleclick_time, 0, 0, 1000),
 #ifdef CONFIG_TV
     {"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif /* CONFIG_TV */
@@ -784,7 +778,6 @@ const struct MPOpts mp_default_opts = {
     .initial_audio_sync = 1,
     .term_osd = 2,
     .consolecontrols = 1,
-    .doubleclick_time = 300,
     .play_frames = -1,
     .keep_open = 0,
     .audio_id = -1,
@@ -822,6 +815,7 @@ const struct MPOpts mp_default_opts = {
     },
     .input = {
         .key_fifo_size = 7,
+        .doubleclick_time = 300,
         .ar_delay = 200,
         .ar_rate = 40,
         .use_joystick = 1,

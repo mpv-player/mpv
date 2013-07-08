@@ -40,7 +40,7 @@
 #include "video/mp_image_pool.h"
 
 static const struct osd_style_opts osd_style_opts_def = {
-    .font = "Sans",
+    .font = "sans-serif",
     .font_size = 45,
     .color = {255, 255, 255, 255},
     .border_color = {0, 0, 0, 255},

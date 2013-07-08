@@ -114,7 +114,6 @@ static NSString *escape_loadfile_name(NSString *input)
 @synthesize willStopOnOpenEvent = _will_stop_on_open_event;
 
 @synthesize inputContext = _input_context;
-@synthesize keyFIFO = _key_fifo;
 @synthesize iqueue = _iqueue;
 @synthesize eventsResponder = _events_responder;
 @synthesize menuItems = _menu_items;
@@ -389,11 +388,6 @@ void cocoa_stop_runloop(void)
 void cocoa_set_input_context(struct input_ctx *input_context)
 {
     mpv_shared_app().inputContext = input_context;
-}
-
-void cocoa_set_key_fifo(struct mp_fifo *key_fifo)
-{
-    mpv_shared_app().keyFIFO = key_fifo;
 }
 
 void cocoa_post_fake_event(void)

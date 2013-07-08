@@ -79,14 +79,14 @@ static void makegauss(struct ctx *k, unsigned int sizeb)
     for (index_t c = 0; c < k->size2; c++)
         k->gauss[c] = 0;
 
-    long double sigma = -logl(1.5 / UINT64_MAX * gauss_size2) / k->gauss_radius;
+    double sigma = -log(1.5 / UINT64_MAX * gauss_size2) / k->gauss_radius;
 
     for (index_t gy = 0; gy <= k->gauss_radius; gy++) {
         for (index_t gx = 0; gx <= gy; gx++) {
             int cx = (int)gx - k->gauss_radius;
             int cy = (int)gy - k->gauss_radius;
             int sq = cx * cx + cy * cy;
-            long double e = expl(-sqrtl(sq) * sigma);
+            double e = exp(-sqrt(sq) * sigma);
             uint64_t v = e / gauss_size2 * UINT64_MAX;
             k->gauss[XY(k, gx, gy)] =
                 k->gauss[XY(k, gy, gx)] =

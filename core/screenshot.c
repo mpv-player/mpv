@@ -318,18 +318,34 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
     return image;
 }
 
-int screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode)
+void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
+                        bool osd)
 {
-    struct image_writer_opts *opts = mpctx->opts.screenshot_image_opts;
+    screenshot_ctx *ctx = mpctx->screenshot_ctx;
+    struct image_writer_opts opts = *mpctx->opts.screenshot_image_opts;
+    bool old_osd = ctx->osd;
+    ctx->osd = osd;
 
-    if (mp_path_exists(filename))
-        return -1;
+    if (mp_path_exists(filename)) {
+        screenshot_msg(ctx, SMSG_ERR, "Screenshot: file '%s' already exists.",
+                       filename);
+        goto end;
+    }
+    char *ext = mp_splitext(filename, NULL);
+    if (ext)
+        opts.format = ext + 1; // omit '.'
     struct mp_image *image = screenshot_get(mpctx, mode);
-    if (!image)
-        return -1;
-    int r = write_image(image, opts, filename);
+    if (!image) {
+        screenshot_msg(ctx, SMSG_ERR, "Taking screenshot failed.");
+        goto end;
+    }
+    screenshot_msg(ctx, SMSG_OK, "Screenshot: '%s'", filename);
+    if (!write_image(image, &opts, filename))
+        screenshot_msg(ctx, SMSG_ERR, "Error writing screenshot!");
     talloc_free(image);
-    return r ? 0 : -1;
+
+end:
+    ctx->osd = old_osd;
 }
 
 void screenshot_request(struct MPContext *mpctx, int mode, bool each_frame,

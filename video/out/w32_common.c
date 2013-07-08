@@ -29,7 +29,7 @@
 #include "vo.h"
 #include "aspect.h"
 #include "w32_common.h"
-#include "core/mp_fifo.h"
+#include "core/input/input.h"
 #include "osdep/io.h"
 #include "talloc.h"
 
@@ -171,7 +171,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             }
             break;
         case WM_CLOSE:
-            mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
+            mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
             break;
         case WM_SYSCOMMAND:
             switch (wParam) {
@@ -188,7 +188,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         case WM_SYSKEYDOWN: {
             int mpkey = lookup_keymap_table(vk_map, wParam);
             if (mpkey)
-                mplayer_put_key(vo->key_fifo, mpkey | mod_state(vo));
+                mp_input_put_key(vo->input_ctx, mpkey | mod_state(vo));
             if (wParam == VK_F10)
                 return 0;
             break;
@@ -211,7 +211,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                 && !key_state(vo, VK_RETURN))
                 code = code - 1 + (mods & MP_KEY_MODIFIER_SHIFT ? 'A' : 'a');
             if (code >= 32 && code < (1<<21)) {
-                mplayer_put_key(vo->key_fifo, code | mods);
+                mp_input_put_key(vo->input_ctx, code | mods);
                 // At least with Alt+char, not calling DefWindowProcW stops
                 // Windows from emitting a beep.
                 return 0;
@@ -225,19 +225,19 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             mouse_button = MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN;
             break;
         case WM_LBUTTONUP:
-            mouse_button = MP_MOUSE_BTN0;
+            mouse_button = MP_MOUSE_BTN0 | MP_KEY_STATE_UP;
             break;
         case WM_MBUTTONDOWN:
             mouse_button = MP_MOUSE_BTN1 | MP_KEY_STATE_DOWN;
             break;
         case WM_MBUTTONUP:
-            mouse_button = MP_MOUSE_BTN1;
+            mouse_button = MP_MOUSE_BTN1 | MP_KEY_STATE_UP;
             break;
         case WM_RBUTTONDOWN:
             mouse_button = MP_MOUSE_BTN2 | MP_KEY_STATE_DOWN;
             break;
         case WM_RBUTTONUP:
-            mouse_button = MP_MOUSE_BTN2;
+            mouse_button = MP_MOUSE_BTN2 | MP_KEY_STATE_UP;
             break;
         case WM_MOUSEWHEEL: {
             int x = GET_WHEEL_DELTA_WPARAM(wParam);
@@ -250,6 +250,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         case WM_XBUTTONUP:
             mouse_button = HIWORD(wParam) == 1 ? MP_MOUSE_BTN5 : MP_MOUSE_BTN6;
+            mouse_button |= MP_KEY_STATE_UP;
             break;
     }
 
@@ -265,7 +266,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             SendMessage(hWnd, WM_NCLBUTTONDOWN, HTCAPTION, 0);
             return 0;
         }
-        mplayer_put_key(vo->key_fifo, mouse_button);
+        mp_input_put_key(vo->input_ctx, mouse_button);
     }
 
     return DefWindowProcW(hWnd, message, wParam, lParam);
@@ -312,7 +313,7 @@ int vo_w32_check_events(struct vo *vo)
             MoveWindow(w32->window, 0, 0, r.right, r.bottom, FALSE);
         if (!IsWindow(WIN_ID_TO_HWND(vo->opts->WinID)))
             // Window has probably been closed, e.g. due to program crash
-            mplayer_put_key(vo->key_fifo, MP_KEY_CLOSE_WIN);
+            mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
     }
 
     return w32->event_flags;

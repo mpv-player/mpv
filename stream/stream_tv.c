@@ -72,11 +72,7 @@ tv_param_t stream_tv_defaults = {
     -1,            //gain
     0,             //scan_autostart
     50,            //scan_threshold
-    0.5,            //scan_period
-    0,             //hidden_video_renderer;
-    0,             //hidden_vp_renderer;
-    0,             //system_clock;
-    0              //normalize_audio_chunks;
+    0.5,           //scan_period
 };
 
 #define ST_OFF(f) M_ST_OFF(tv_param_t,f)

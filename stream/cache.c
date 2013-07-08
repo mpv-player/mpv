@@ -31,7 +31,7 @@
 // Time in seconds the cache updates "cached" controls. Note that idle mode
 // will block the cache from doing this, and this timeout is honored only if
 // the cache is active.
-#define CACHE_UPDATE_CONTROLS_TIME 0.1
+#define CACHE_UPDATE_CONTROLS_TIME 2.0
 
 
 #include <stdio.h>
@@ -43,6 +43,7 @@
 #include <assert.h>
 #include <pthread.h>
 #include <time.h>
+#include <sys/time.h>
 
 #include <libavutil/common.h>
 
@@ -102,6 +103,7 @@ struct priv {
     unsigned int stream_num_chapters;
     int stream_cache_idle;
     int stream_cache_fill;
+    char **stream_metadata;
 };
 
 // Store additional per-byte metadata. Since per-byte would be way too
@@ -306,6 +308,7 @@ static void update_cached_controls(struct priv *s)
 {
     unsigned int ui;
     double d;
+    char **m;
     s->stream_time_length = 0;
     if (stream_control(s->stream, STREAM_CTRL_GET_TIME_LENGTH, &d) == STREAM_OK)
         s->stream_time_length = d;
@@ -318,6 +321,10 @@ static void update_cached_controls(struct priv *s)
     s->stream_num_chapters = 0;
     if (stream_control(s->stream, STREAM_CTRL_GET_NUM_CHAPTERS, &ui) == STREAM_OK)
         s->stream_num_chapters = ui;
+    if (stream_control(s->stream, STREAM_CTRL_GET_METADATA, &m) == STREAM_OK) {
+        talloc_free(s->stream_metadata);
+        s->stream_metadata = talloc_steal(s, m);
+    }
     stream_update_size(s->stream);
     s->stream_size = s->stream->end_pos;
 }
@@ -365,6 +372,21 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
             double pts = s->bm[pos / BYTE_META_CHUNK_SIZE].stream_pts;
             *(double *)arg = pts;
             return pts == MP_NOPTS_VALUE ? STREAM_UNSUPPORTED : STREAM_OK;
+        }
+        return STREAM_UNSUPPORTED;
+    }
+    case STREAM_CTRL_GET_METADATA: {
+        if (s->stream_metadata && s->stream_metadata[0]) {
+            char **m = talloc_new(NULL);
+            int num_m = 0;
+            for (int n = 0; s->stream_metadata[n]; n++) {
+                char *t = talloc_strdup(m, s->stream_metadata[n]);
+                MP_TARRAY_APPEND(NULL, m, num_m, t);
+            }
+            MP_TARRAY_APPEND(NULL, m, num_m, NULL);
+            MP_TARRAY_APPEND(NULL, m, num_m, NULL);
+            *(char ***)arg = m;
+            return STREAM_OK;
         }
         return STREAM_UNSUPPORTED;
     }
@@ -524,6 +546,7 @@ static void cache_uninit(stream_t *cache)
     pthread_mutex_destroy(&s->mutex);
     pthread_cond_destroy(&s->wakeup);
     free(s->buffer);
+    free(s->bm);
     talloc_free(s);
 }
 

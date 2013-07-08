@@ -120,7 +120,6 @@ typedef struct MPOpts {
     int player_idle_mode;
     int slave_mode;
     int consolecontrols;
-    int doubleclick_time;
     int list_properties;
     struct m_rel_time play_start;
     struct m_rel_time play_end;
@@ -229,6 +228,7 @@ typedef struct MPOpts {
 
     struct input_conf {
         char *config_file;
+        int doubleclick_time;
         int key_fifo_size;
         int ar_delay;
         int ar_rate;
@@ -266,6 +266,13 @@ typedef struct MPOpts {
         int audio_first;
     } encode_output;
 } MPOpts;
+
+// Should be moved into MPOpts
+extern char **network_http_header_fields;
+extern char *network_useragent;
+extern char *network_referrer;
+extern int   network_cookies_enabled;
+extern char *cookies_file;
 
 extern const m_option_t mp_opts[];
 extern const struct MPOpts mp_default_opts;

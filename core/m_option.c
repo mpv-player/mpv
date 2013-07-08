@@ -29,6 +29,7 @@
 #include <limits.h>
 #include <inttypes.h>
 #include <unistd.h>
+#include <ctype.h>
 #include <assert.h>
 
 #include <libavutil/common.h>
@@ -38,7 +39,6 @@
 #include "core/mp_common.h"
 #include "core/m_option.h"
 #include "core/mp_msg.h"
-#include "stream/url.h"
 
 char *m_option_strerror(int code)
 {
@@ -2366,6 +2366,38 @@ const m_option_type_t m_option_type_obj_settings_list = {
     .free  = free_obj_settings_list,
 };
 
+
+/* Replace escape sequences in an URL (or a part of an URL) */
+/* works like strcpy(), but without return argument,
+   except that outbuf == inbuf is allowed */
+static void url_unescape_string(char *outbuf, const char *inbuf)
+{
+    unsigned char c,c1,c2;
+    int i,len=strlen(inbuf);
+    for (i=0;i<len;i++) {
+        c = inbuf[i];
+        if (c == '%' && i<len-2) { //must have 2 more chars
+            c1 = toupper(inbuf[i+1]); // we need uppercase characters
+            c2 = toupper(inbuf[i+2]);
+            if (((c1>='0' && c1<='9') || (c1>='A' && c1<='F')) &&
+                ((c2>='0' && c2<='9') || (c2>='A' && c2<='F')) )
+            {
+                if (c1>='0' && c1<='9')
+                    c1-='0';
+                else
+                    c1-='A'-10;
+                if (c2>='0' && c2<='9')
+                    c2-='0';
+                else
+                    c2-='A'-10;
+                c = (c1<<4) + c2;
+                i=i+2; //only skip next 2 chars if valid esc
+            }
+        }
+        *outbuf++ = c;
+    }
+    *outbuf++='\0'; //add nullterm to string
+}
 
 static int parse_custom_url(const m_option_t *opt, struct bstr name,
                             struct bstr url, void *dst)

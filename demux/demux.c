@@ -82,7 +82,9 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef CONFIG_TV
     &demuxer_desc_tv,
 #endif
+#ifdef CONFIG_LIBASS
     &demuxer_desc_libass,
+#endif
     &demuxer_desc_matroska,
     &demuxer_desc_lavf,
     &demuxer_desc_subreader,
@@ -976,6 +978,7 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
         }
         add_stream_chapters(demuxer);
         demuxer_sort_chapters(demuxer);
+        demux_info_update(demuxer);
         return demuxer;
     } else {
         // demux_mov can return playlist instead of mov
@@ -1225,6 +1228,18 @@ char *demux_info_get(demuxer_t *demuxer, const char *opt)
     }
 
     return NULL;
+}
+
+void demux_info_update(struct demuxer *demuxer)
+{
+    demux_control(demuxer, DEMUXER_CTRL_UPDATE_INFO, NULL);
+    // Take care of stream metadata as well
+    char **meta;
+    if (stream_control(demuxer->stream, STREAM_CTRL_GET_METADATA, &meta) > 0) {
+        for (int n = 0; meta[n + 0]; n += 2)
+            demux_info_add(demuxer, meta[n + 0], meta[n + 1]);
+        talloc_free(meta);
+    }
 }
 
 int demux_control(demuxer_t *demuxer, int cmd, void *arg)
