@@ -96,10 +96,6 @@ typedef struct demux_stream {
     double pts;            // current buffer's pts
     int pts_bytes;         // number of bytes read after last pts stamp
     int eof;               // end of demuxed stream? (true if all buffer empty)
-    int64_t pos;               // position in the input stream (file)
-    int64_t dpos;              // position in the demuxed stream
-    int pack_no;           // serial number of packet
-    bool keyframe;         // keyframe flag of current packet
 //---------------
     int fill_count;        // number of unsuccessful tries to get a packet
     int packs;            // number of packets in buffer
@@ -189,9 +185,7 @@ typedef struct demuxer {
     int64_t movi_end;
     struct stream *stream;
     double stream_pts;     // current stream pts, if applicable (e.g. dvd)
-    double reference_clock;
     char *filename;  // Needed by avs_check_file
-    int synced;      // stream synced (used by mpeg)
     enum demuxer_type type;
     /* Normally the file_format field is just a copy of the type field above.
      * There are 2 exceptions I noticed. Internal demux_avi may force

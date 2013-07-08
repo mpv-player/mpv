@@ -116,7 +116,6 @@ typedef struct sh_audio {
 
 typedef struct sh_video {
     SH_COMMON
-    double i_pts;   // PTS for the _next_ I/P frame (internal mpeg demuxing)
     float next_frame_time;
     double last_pts;
     double buffered_pts[32];

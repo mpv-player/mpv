@@ -346,7 +346,6 @@ static int demux_mng_fill_buffer(demuxer_t * demuxer,
     // Set position and timing information in demuxer video and demuxer packet.
     //  - Time must be time of next frame and always be > 0 for the variable
     //    frame time mechanism (GIF, MATROSKA, MNG) in video.c to work.
-    demuxer->video->dpos++;
     dp->pts = (float)mng_priv->show_next_time_ms / 1000.0f + MNG_START_PTS;
     dp->pos = stream_tell(demuxer->stream);
     ds_add_packet(demuxer->video, dp);

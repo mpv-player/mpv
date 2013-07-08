@@ -197,8 +197,6 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
     new->pts = dp->pts;
     new->duration = dp->duration;
     new->stream_pts = dp->stream_pts;
-    new->pos = dp->pos;
-    new->keyframe = dp->keyframe;
     return new;
 }
 
@@ -243,11 +241,9 @@ static demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
     struct demuxer *d = talloc_zero(NULL, struct demuxer);
     d->stream = stream;
     d->stream_pts = MP_NOPTS_VALUE;
-    d->reference_clock = MP_NOPTS_VALUE;
     d->movi_start = stream->start_pos;
     d->movi_end = stream->end_pos;
     d->seekable = 1;
-    d->synced = 0;
     d->filepos = -1;
     d->audio = new_demuxer_stream(d, STREAM_AUDIO);
     d->video = new_demuxer_stream(d, STREAM_VIDEO);
@@ -475,9 +471,6 @@ int ds_fill_buffer(demux_stream_t *ds)
             ds->buffer = p->buffer;
             ds->buffer_pos = 0;
             ds->buffer_size = p->len;
-            ds->pos = p->pos;
-            ds->dpos += p->len; // !!!
-            ++ds->pack_no;
             if (p->pts != MP_NOPTS_VALUE) {
                 ds->pts = p->pts;
                 ds->pts_bytes = 0;
@@ -485,7 +478,6 @@ int ds_fill_buffer(demux_stream_t *ds)
             ds->pts_bytes += p->len;    // !!!
             if (p->stream_pts != MP_NOPTS_VALUE)
                 demux->stream_pts = p->stream_pts;
-            ds->keyframe = p->keyframe;
             // unlink packet:
             ds->bytes -= p->len;
             ds->current = p;
