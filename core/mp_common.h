@@ -42,7 +42,6 @@
 #define CONTROL_NA -3
 
 extern const char *mplayer_version;
-extern const char *mplayer_builddate;
 
 char *mp_format_time(double time, bool fractions);
 
