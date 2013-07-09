@@ -861,7 +861,9 @@ if darwin; then
   _timer=timer-darwin.c
 fi
 
+_win32=no
 if win32 ; then
+  _win32=yes
   _exesuf=".exe"
   extra_cflags="$extra_cflags -fno-common"
   # -lwinmm is always needed for osdep/timer-win2.c
@@ -2493,7 +2495,9 @@ echores "$_mpg123"
 echocheck "LADSPA plugin support"
 if test "$_ladspa" = auto ; then
   _ladspa=no
-  statement_check ladspa.h 'LADSPA_Descriptor ld = {0}' && _ladspa=yes
+  if test "$_dl" = yes ; then
+    statement_check ladspa.h 'LADSPA_Descriptor ld = {0}' && _ladspa=yes
+  fi
 fi
 if test "$_ladspa" = yes; then
   def_ladspa="#define CONFIG_LADSPA 1"
@@ -2947,6 +2951,7 @@ COCOA = $_cocoa
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
 DIRECT3D = $_direct3d
+DL = $_dl
 SDL = $_sdl
 SDL2 = $_sdl2
 DSOUND = $_dsound
@@ -2999,6 +3004,7 @@ TV = $_tv
 TV_V4L2 = $_tv_v4l2
 VCD = $_vcd
 VDPAU = $_vdpau
+WIN32 = $_win32
 X11 = $_x11
 WAYLAND = $_wayland
 XV = $_xv

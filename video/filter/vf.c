@@ -109,7 +109,9 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_sub,
     &vf_info_yadif,
     &vf_info_stereo3d,
+#if defined(HAVE_LIBDL) || defined(_WIN32)
     &vf_info_dlopen,
+#endif
     NULL
 };
 

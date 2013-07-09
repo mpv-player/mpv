@@ -116,6 +116,11 @@ ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
     SOURCES-yes                 += video/decode/lavc_dr1.c
 endif
 
+SOURCES-$(DL)                   += video/filter/vf_dlopen.c
+ifeq ($(DL),no)
+    SOURCES-$(WIN32)            += video/filter/vf_dlopen.c
+endif
+
 SOURCES = talloc.c \
           audio/audio.c \
           audio/chmap.c \
@@ -248,7 +253,6 @@ SOURCES = talloc.c \
           video/filter/vf_crop.c \
           video/filter/vf_delogo.c \
           video/filter/vf_divtc.c \
-          video/filter/vf_dlopen.c \
           video/filter/vf_down3dright.c \
           video/filter/vf_dsize.c \
           video/filter/vf_eq.c \
