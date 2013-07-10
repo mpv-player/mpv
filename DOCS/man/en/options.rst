@@ -309,7 +309,7 @@
     Set the size of the cache in kilobytes, disable it with ``no``, or
     automatically enable it if needed with ``auto`` (default: ``auto``).
     With ``auto``, the cache will usually be enabled for network streams,
-    using a default size.
+    using the size set by ``--cache-default``.
 
     May be useful when playing files from slow media, but can also have
     negative effects, especially with file formats that require a lot of
@@ -320,6 +320,11 @@
     cache fill display does not include the part of the cache reserved for
     seeking back. Likewise, when starting a file the cache will be at 100%,
     because no space is reserved for seeking back yet.
+
+``--cache-default=<kBytes|no>``
+    Set the size of the cache in kilobytes (default: 320 KB). Using ``no``
+    will not automatically enable the cache e.h. when playing from a network
+    stream. Note that using ``--cache`` will always override this option.
 
 ``--cache-pause=<no|percentage>``
     If the cache percentage goes below the specified value, pause and wait

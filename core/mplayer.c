@@ -3896,6 +3896,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     if (!stream)
         goto err_out;
     stream_enable_cache_percent(&stream, stream_cache,
+                                opts->stream_cache_def_size,
                                 opts->stream_cache_min_percent,
                                 opts->stream_cache_seek_min_percent);
     // deal with broken demuxers: preselect streams
@@ -4210,6 +4211,7 @@ static void play_current_file(struct MPContext *mpctx)
     // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
     int res = stream_enable_cache_percent(&mpctx->stream,
                                           opts->stream_cache_size,
+                                          opts->stream_cache_def_size,
                                           opts->stream_cache_min_percent,
                                           opts->stream_cache_seek_min_percent);
     if (res == 0)

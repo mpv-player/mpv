@@ -172,11 +172,6 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     if (!s->read_chunk)
         s->read_chunk = 4 * (s->sector_size ? s->sector_size : STREAM_BUFFER_SIZE);
 
-    if (s->streaming && !s->cache_size) {
-        // Set default cache size to use if user does not specify it.
-        s->cache_size = 320;
-    }
-
     if (s->type <= -2)
         mp_msg(MSGT_OPEN, MSGL_WARN, "Warning streams need a type !!!!\n");
     if (!s->seek)
@@ -661,16 +656,22 @@ stream_t *open_memory_stream(void *data, int len)
     return s;
 }
 
+static int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
+                               int64_t seek_limit);
+
+/**
+ * \return 1 on success, 0 if the function was interrupted and -1 on error, or
+ *         if the cache is disabled
+ */
 int stream_enable_cache_percent(stream_t **stream, int64_t stream_cache_size,
+                                int64_t stream_cache_def_size,
                                 float stream_cache_min_percent,
                                 float stream_cache_seek_min_percent)
 {
-
     if (stream_cache_size == -1)
-        stream_cache_size = (*stream)->cache_size;
+        stream_cache_size = (*stream)->streaming ? stream_cache_def_size : 0;
 
     stream_cache_size = stream_cache_size * 1024; // input is in KiB
-
     return stream_enable_cache(stream, stream_cache_size,
                                stream_cache_size *
                                (stream_cache_min_percent / 100.0),
@@ -678,12 +679,8 @@ int stream_enable_cache_percent(stream_t **stream, int64_t stream_cache_size,
                                (stream_cache_seek_min_percent / 100.0));
 }
 
-/**
- * \return 1 on success, 0 if the function was interrupted and -1 on error, or
- *         if the cache is disabled
- */
-int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
-                        int64_t seek_limit)
+static int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
+                               int64_t seek_limit)
 {
     stream_t *orig = *stream;
 

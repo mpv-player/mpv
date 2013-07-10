@@ -154,7 +154,6 @@ typedef struct stream {
     int eof;
     int mode; //STREAM_READ or STREAM_WRITE
     bool streaming;     // known to be a network stream if true
-    int cache_size;     // cache size in KB to use if enabled
     void *priv; // used for DVD, TV, RTSP etc
     char *url; // strdup() of filename/url
     char *mime_type; // when HTTP streaming is used
@@ -175,10 +174,9 @@ int stream_fill_buffer(stream_t *s);
 void stream_set_capture_file(stream_t *s, const char *filename);
 
 int stream_enable_cache_percent(stream_t **stream, int64_t stream_cache_size,
+                                int64_t stream_cache_def_size,
                                 float stream_cache_min_percent,
                                 float stream_cache_seek_min_percent);
-int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
-                        int64_t seek_limit);
 
 // Internal
 int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
