@@ -379,6 +379,7 @@ Miscellaneous options:
   --enable-static        build a statically linked binary
   --with-install=PATH    path to a custom install program
   --disable-manpage      do not build and install manpage [auto]
+  --disable-build-date   do not include binary compile time
 
 Advanced options:
   --enable-shm              enable shm [autodetect]
@@ -487,6 +488,7 @@ _priority=no
 def_dos_paths="#define HAVE_DOS_PATHS 0"
 def_priority="#undef CONFIG_PRIORITY"
 _build_man=auto
+_build_date=yes
 for ac_option do
   case "$ac_option" in
   --help|-help|-h)
@@ -708,6 +710,8 @@ for ac_option do
   --enable-manpage) _build_man=yes ;;
   --disable-manpage) _build_man=no ;;
 
+  --enable-build-date) _build_date=yes ;;
+  --disable-build-date) _build_date=no ;;
   *)
     echo "Unknown parameter: $ac_option" >&2
     exit 1
@@ -901,6 +905,16 @@ else
     _build_man=no
 fi
 echores "$_build_man"
+
+echocheck "whether to print binary build date"
+if test "$_build_date" = yes ; then
+    _build_yes=yes
+else
+    _build_date=no
+    extra_cflags="$extra_cflags -DNO_BUILD_TIMESTAMPS"
+fi
+echores "$_build_date"
+
 
 
 TMPC="$mplayer_tmpdir/tmp.c"
