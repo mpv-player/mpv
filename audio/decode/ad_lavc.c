@@ -50,7 +50,6 @@ struct priv {
     uint8_t *output_packed; // used by deplanarize to store packed audio samples
     int output_left;
     int unitsize;
-    int previous_data_left;  // input demuxer packet data
     bool force_channel_map;
 };
 
@@ -344,7 +343,6 @@ static int control(sh_audio_t *sh, int cmd, void *arg)
     switch (cmd) {
     case ADCTRL_RESYNC_STREAM:
         avcodec_flush_buffers(ctx->avctx);
-        ctx->previous_data_left = 0;
         ctx->output_left = 0;
         return CONTROL_TRUE;
     }
@@ -374,35 +372,15 @@ static int decode_new_packet(struct sh_audio *sh)
 {
     struct priv *priv = sh->context;
     AVCodecContext *avctx = priv->avctx;
-    double pts = MP_NOPTS_VALUE;
-    int insize;
-    bool packet_already_used = priv->previous_data_left;
-    struct demux_packet *mpkt = ds_get_packet2(sh->ds,
-                                               priv->previous_data_left);
-    unsigned char *start;
-    if (!mpkt) {
-        assert(!priv->previous_data_left);
-        start = NULL;
+    struct demux_packet *mpkt = ds_get_packet2(sh->ds, false);
+    if (!mpkt)
         return -1;  // error or EOF
-    } else {
-        assert(mpkt->len >= priv->previous_data_left);
-        if (!priv->previous_data_left) {
-            priv->previous_data_left = mpkt->len;
-            pts = mpkt->pts;
-        }
-        insize = priv->previous_data_left;
-        start = mpkt->buffer + mpkt->len - priv->previous_data_left;
-        priv->previous_data_left -= insize;
-        priv->previous_data_left = FFMAX(priv->previous_data_left, 0);
-    }
 
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt);
-    pkt.data = start;
-    pkt.size = insize;
 
-    if (pts != MP_NOPTS_VALUE && !packet_already_used) {
-        sh->pts = pts;
+    if (mpkt->pts != MP_NOPTS_VALUE) {
+        sh->pts = mpkt->pts;
         sh->pts_bytes = 0;
     }
     int got_frame = 0;
@@ -414,9 +392,6 @@ static int decode_new_packet(struct sh_audio *sh)
         mp_msg(MSGT_DECAUDIO, MSGL_V, "lavc_audio: error\n");
         return -1;
     }
-    // The "insize >= ret" test is sanity check against decoder overreads
-    if (insize >= ret)
-        priv->previous_data_left = insize - ret;
     if (!got_frame)
         return 0;
     uint64_t unitsize = (uint64_t)av_get_bytes_per_sample(avctx->sample_fmt) *
@@ -433,7 +408,7 @@ static int decode_new_packet(struct sh_audio *sh)
     } else {
         priv->output = priv->avframe->data[0];
     }
-    mp_dbg(MSGT_DECAUDIO, MSGL_DBG2, "Decoded %d -> %d  \n", insize,
+    mp_dbg(MSGT_DECAUDIO, MSGL_DBG2, "Decoded %d -> %d  \n", mpkt->len,
            priv->output_left);
     return 0;
 }
