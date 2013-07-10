@@ -617,6 +617,14 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         s->did_resize = YES;
     }
 }
+
+- (void)windowDidChangeBackingProperties:(NSNotification *)notification {
+    if (self.videoOutput) {
+        struct vo_cocoa_state *s = self.videoOutput->cocoa;
+        s->did_resize = YES;
+    }
+}
+
 - (void)toggleMissionControlFullScreen:(BOOL)willBeFullscreen
 {
     struct vo_cocoa_state *s = self.videoOutput->cocoa;
