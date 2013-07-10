@@ -82,7 +82,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef CONFIG_TV
     &demuxer_desc_tv,
 #endif
-#ifdef CONFIG_LIBASS
+#ifdef CONFIG_ASS
     &demuxer_desc_libass,
 #endif
     &demuxer_desc_matroska,
