@@ -2483,6 +2483,69 @@ static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
     filter_output_queued_frame(mpctx);
 }
 
+
+static int video_read_frame(sh_video_t *sh_video, float *frame_time_ptr,
+                            unsigned char **start, int force_fps)
+{
+    demux_stream_t *d_video = sh_video->ds;
+    demuxer_t *demuxer = d_video->demuxer;
+    float frame_time = 1;
+    float pts1 = d_video->pts;
+    int in_size = 0;
+
+    *start = NULL;
+
+    // frame-based file formats: (AVI,ASF,MOV)
+    in_size = ds_get_packet(d_video, start);
+    if (in_size < 0)
+        return -1; // EOF
+
+    frame_time *= sh_video->frametime;
+
+    // override frame_time for variable/unknown FPS formats:
+    if (!force_fps) {
+        switch (demuxer->file_format) {
+        case DEMUXER_TYPE_MATROSKA:
+        case DEMUXER_TYPE_MNG:
+            if (d_video->pts > 0 && pts1 > 0 && d_video->pts>pts1)
+                frame_time = d_video->pts-pts1;
+            break;
+        case DEMUXER_TYPE_TV: {
+            double next_pts = ds_get_next_pts(d_video);
+            double d= (next_pts != MP_NOPTS_VALUE) ? next_pts - d_video->pts : d_video->pts-pts1;
+            if (d >= 0) {
+                if(d > 0){
+                    if ((int)sh_video->fps == 1000)
+                        mp_msg(MSGT_CPLAYER,MSGL_V,"\navg. framerate: %d fps             \n",(int)(1.0f/d));
+                    sh_video->frametime = d; // 1ms
+                    sh_video->fps = 1.0f/d;
+                }
+                frame_time = d;
+            } else {
+                mp_msg(MSGT_CPLAYER,MSGL_WARN,"\nInvalid frame duration value (%5.3f/%5.3f => %5.3f). Defaulting to %5.3f sec.\n",d_video->pts,next_pts,d,frame_time);
+                // frame_time = 1/25.0;
+            }
+            break;
+        }
+        case DEMUXER_TYPE_LAVF:
+            if ((int)sh_video->fps == 1000 || (int)sh_video->fps <= 1) {
+                double next_pts = ds_get_next_pts(d_video);
+                double d = (next_pts != MP_NOPTS_VALUE) ? next_pts - d_video->pts : d_video->pts - pts1;
+                if(d>=0){
+                    frame_time = d;
+                }
+            }
+            break;
+        }
+    }
+
+    sh_video->pts = d_video->pts;
+
+    if (frame_time_ptr)
+        *frame_time_ptr=frame_time;
+    return in_size;
+}
+
 static double update_video_nocorrect_pts(struct MPContext *mpctx)
 {
     struct sh_video *sh_video = mpctx->sh_video;

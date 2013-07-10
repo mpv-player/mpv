@@ -198,7 +198,6 @@ SOURCES = talloc.c \
           demux/ebml.c \
           demux/extension.c \
           demux/mf.c \
-          demux/video.c \
           osdep/io.c \
           osdep/numcores.c \
           osdep/timer.c \
