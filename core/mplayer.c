@@ -467,6 +467,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         if (mpctx->sh_video)
             uninit_video(mpctx->sh_video);
         cleanup_demux_stream(mpctx, STREAM_VIDEO);
+        mpctx->sync_audio_to_video = false;
     }
 
     if (mask & INITIALIZED_DEMUXER) {
@@ -946,7 +947,7 @@ static struct track *add_stream_track(struct MPContext *mpctx,
         .demuxer_id = stream->demuxer_id,
         .title = stream->title,
         .default_track = stream->default_track,
-        .attached_picture = stream->attached_picture,
+        .attached_picture = stream->attached_picture != NULL,
         .lang = stream->lang,
         .under_timeline = under_timeline,
         .demuxer = stream->demuxer,
@@ -1134,7 +1135,7 @@ static void print_status(struct MPContext *mpctx)
         saddf(&line, " x%4.2f", opts->playback_speed);
 
     // A-V sync
-    if (mpctx->sh_audio && sh_video) {
+    if (mpctx->sh_audio && sh_video && mpctx->sync_audio_to_video) {
         if (mpctx->last_av_difference != MP_NOPTS_VALUE)
             saddf(&line, " A-V:%7.3f", mpctx->last_av_difference);
         else
@@ -2173,7 +2174,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         playsize = ao_get_space(ao);
 
     // Coming here with hrseek_active still set means audio-only
-    if (!mpctx->sh_video)
+    if (!mpctx->sh_video || !mpctx->sync_audio_to_video)
         mpctx->syncing_audio = false;
     if (!opts->initial_audio_sync || !modifiable_audio_format) {
         mpctx->syncing_audio = false;
@@ -2353,6 +2354,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     sh_video->num_buffered_pts = 0;
     sh_video->next_frame_time = 0;
     mpctx->restart_playback = true;
+    mpctx->sync_audio_to_video = !sh_video->gsh->attached_picture;
     mpctx->delay = 0;
     mpctx->vo_pts_history_seek_ts++;
 
@@ -2365,6 +2367,7 @@ err_out:
     cleanup_demux_stream(mpctx, STREAM_VIDEO);
 no_video:
     mpctx->current_track[STREAM_VIDEO] = NULL;
+    mpctx->sync_audio_to_video = false;
     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Video: no video\n");
     return 0;
 }
@@ -2414,6 +2417,15 @@ static bool filter_output_queued_frame(struct MPContext *mpctx)
     talloc_free(img);
 
     return !!img;
+}
+
+static bool load_next_vo_frame(struct MPContext *mpctx, bool eof)
+{
+    if (vo_get_buffered_frame(mpctx->video_out, eof) >= 0)
+        return true;
+    if (filter_output_queued_frame(mpctx))
+        return true;
+    return false;
 }
 
 static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
@@ -2467,12 +2479,9 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
 {
     struct sh_video *sh_video = mpctx->sh_video;
     double frame_time = 0;
-    struct vo *video_out = mpctx->video_out;
     while (1) {
         // In nocorrect-pts mode there is no way to properly time these frames
-        if (vo_get_buffered_frame(video_out, 0) >= 0)
-            break;
-        if (filter_output_queued_frame(mpctx))
+        if (load_next_vo_frame(mpctx, false))
             break;
         frame_time = sh_video->next_frame_time;
         if (mpctx->restart_playback)
@@ -2495,6 +2504,23 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         break;
     }
     return frame_time;
+}
+
+static double update_video_attached_pic(struct MPContext *mpctx)
+{
+    struct sh_video *sh_video = mpctx->sh_video;
+
+    // Try to decode the picture multiple times, until it is displayed.
+    if (mpctx->video_out->hasframe)
+        return -1;
+
+    struct mp_image *decoded_frame =
+            decode_video(sh_video, sh_video->gsh->attached_picture, 0, 0);
+    if (decoded_frame)
+        filter_video(mpctx, decoded_frame);
+    load_next_vo_frame(mpctx, true);
+    mpctx->sh_video->pts = MP_NOPTS_VALUE;
+    return 0;
 }
 
 static void determine_frame_pts(struct MPContext *mpctx)
@@ -2537,15 +2563,16 @@ static double update_video(struct MPContext *mpctx, double endpts)
     if (!mpctx->opts.correct_pts)
         return update_video_nocorrect_pts(mpctx);
 
+    if (sh_video->gsh->attached_picture)
+        return update_video_attached_pic(mpctx);
+
     double pts;
 
     while (1) {
-        if (vo_get_buffered_frame(video_out, false) >= 0)
-            break;
-        if (filter_output_queued_frame(mpctx))
+        if (load_next_vo_frame(mpctx, false))
             break;
         pts = MP_NOPTS_VALUE;
-        struct demux_packet *pkt;
+        struct demux_packet *pkt = NULL;
         while (1) {
             pkt = demux_read_packet(mpctx->sh_video->gsh);
             if (!pkt || pkt->len)
@@ -2570,7 +2597,7 @@ static double update_video(struct MPContext *mpctx, double endpts)
             determine_frame_pts(mpctx);
             filter_video(mpctx, decoded_frame);
         } else if (!pkt) {
-            if (vo_get_buffered_frame(video_out, true) < 0)
+            if (!load_next_vo_frame(mpctx, true))
                 return -1;
         }
         break;
@@ -2580,6 +2607,8 @@ static double update_video(struct MPContext *mpctx, double endpts)
         return 0;
 
     pts = video_out->next_pts;
+    if (sh_video->gsh->attached_picture)
+        pts = mpctx->last_seek_pts;
     if (pts == MP_NOPTS_VALUE) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "Video pts after filters MISSING\n");
         // Try to use decoder pts from before filters
@@ -3458,10 +3487,12 @@ static void run_playloop(struct MPContext *mpctx)
             mpctx->time_frame -= get_relative_time(mpctx);
         }
         if (mpctx->restart_playback) {
-            mpctx->syncing_audio = true;
-            if (mpctx->sh_audio)
-                fill_audio_out_buffers(mpctx, endpts);
-            mpctx->restart_playback = false;
+            if (mpctx->sync_audio_to_video) {
+                mpctx->syncing_audio = true;
+                if (mpctx->sh_audio)
+                    fill_audio_out_buffers(mpctx, endpts);
+                mpctx->restart_playback = false;
+            }
             mpctx->time_frame = 0;
             get_relative_time(mpctx);
         }
@@ -3472,6 +3503,8 @@ static void run_playloop(struct MPContext *mpctx)
 
         break;
     } // video
+
+    video_left &= mpctx->sync_audio_to_video; // force no-video semantics
 
     if (mpctx->sh_audio && (mpctx->restart_playback ? !video_left :
                             mpctx->ao->untimed && (mpctx->delay <= 0 ||

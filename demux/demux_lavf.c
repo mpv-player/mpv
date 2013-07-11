@@ -351,7 +351,8 @@ static void select_tracks(struct demuxer *demuxer, int start)
     for (int n = start; n < priv->num_streams; n++) {
         struct sh_stream *stream = priv->streams[n];
         AVStream *st = priv->avfc->streams[n];
-        bool selected = stream && demuxer_stream_is_selected(demuxer, stream);
+        bool selected = stream && demuxer_stream_is_selected(demuxer, stream) &&
+                        !stream->attached_picture;
         st->discard = selected ? AVDISCARD_DEFAULT : AVDISCARD_ALL;
     }
 }
@@ -388,8 +389,12 @@ static void handle_stream(demuxer_t *demuxer, int i)
             break;
         sh_video_t *sh_video = sh->video;
 
-        if (st->disposition & AV_DISPOSITION_ATTACHED_PIC)
-            sh_video->gsh->attached_picture = true;
+        if (st->disposition & AV_DISPOSITION_ATTACHED_PIC) {
+            sh->attached_picture = new_demux_packet_from(st->attached_pic.data,
+                                                         st->attached_pic.size);
+            sh->attached_picture->pts = 0;
+            talloc_steal(sh, sh->attached_picture);
+        }
 
         sh_video->format = codec->codec_tag;
         sh_video->disp_w = codec->width;
@@ -679,8 +684,6 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     dp->avpacket = pkt;
 
     int64_t ts = priv->use_dts ? pkt->dts : pkt->pts;
-    if (ts == AV_NOPTS_VALUE && (st->disposition & AV_DISPOSITION_ATTACHED_PIC))
-        ts = 0;
     if (ts != AV_NOPTS_VALUE) {
         dp->pts = ts * av_q2d(st->time_base);
         priv->last_pts = dp->pts * AV_TIME_BASE;

@@ -92,7 +92,6 @@ const demuxer_desc_t *const demuxer_list[] = {
 struct demux_stream {
     int selected;          // user wants packets from this stream
     int eof;               // end of demuxed stream? (true if all buffer empty)
-    int fill_count;        // number of unsuccessful tries to get a packet
     int packs;            // number of packets in buffer
     int bytes;            // total bytes of packets in buffer
     struct demux_packet *head;
@@ -441,16 +440,6 @@ overflow:
     return true;
 }
 
-static bool need_coverart_hack(struct demuxer *demux)
-{
-    for (int n = 0; n < demux->num_streams; n++) {
-        struct sh_stream *sh = demux->streams[n];
-        if (sh->attached_picture && sh->ds->selected)
-            return true;
-    }
-    return false;
-}
-
 // return value:
 //     0 = EOF or no stream found or invalid type
 //     1 = successfully read a packet
@@ -476,31 +465,14 @@ static void ds_get_packets(struct sh_stream *sh)
              * despite the eof flag then it's better to clear it to avoid
              * weird behavior. */
             ds->eof = 0;
-            ds->fill_count = 0;
             return;
         }
-        // avoid buffering too far ahead in e.g. badly interleaved files
-        // or when one stream is shorter, without breaking large audio
-        // delay with well interleaved files.
-        // This needs to be enough for at least 1 second of packets
-        // since libavformat mov demuxer does not try to interleave
-        // with more than 1s precision.
-        if (ds->fill_count > 80)
-            break;
 
         if (demux_check_queue_full(demux))
             break;
 
-        int apacks = count_packs(demux, STREAM_AUDIO);
-        int vpacks = count_packs(demux, STREAM_VIDEO);
-
         if (!demux_fill_buffer(demux))
             break; // EOF
-
-        if (need_coverart_hack(demux)) {
-            ds->fill_count += count_packs(demux, STREAM_AUDIO) - apacks;
-            ds->fill_count += count_packs(demux, STREAM_VIDEO) - vpacks;
-        }
     }
     mp_msg(MSGT_DEMUXER, MSGL_V, "ds_get_packets: EOF reached (stream: %s)\n",
            stream_type_name(sh->type));

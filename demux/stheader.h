@@ -61,7 +61,9 @@ struct sh_stream {
     char *title;
     char *lang;                 // language code
     bool default_track;         // container default track flag
-    bool attached_picture;      // stream is a picture (such as album art)
+
+    // stream is a picture (such as album art)
+    struct demux_packet *attached_picture;
 
     // Human readable description of the running decoder, or NULL
     char *decoder_desc;
