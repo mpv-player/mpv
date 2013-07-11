@@ -315,6 +315,9 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
         }
         default: assert(false);
     }
+
+    sh->ds->selected = demuxer->stream_autoselect;
+
     return sh;
 }
 
@@ -913,16 +916,27 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
 {
     assert(!stream || stream->type == type);
 
-    // don't flush buffers if stream is already selected / none are selected
     for (int n = 0; n < demuxer->num_streams; n++) {
         struct sh_stream *cur = demuxer->streams[n];
-        bool select = cur == stream;
-        if (cur->type == type && cur->ds->selected != select) {
-            cur->ds->selected = select;
-            ds_free_packs(cur->ds);
-            demux_control(demuxer, DEMUXER_CTRL_SWITCHED_TRACKS, NULL);
-        }
+        if (cur->type == type)
+            demuxer_select_track(demuxer, cur, cur == stream);
     }
+}
+
+void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
+                          bool selected)
+{
+    // don't flush buffers if stream is already selected / unselected
+    if (stream->ds->selected != selected) {
+        stream->ds->selected = selected;
+        ds_free_packs(stream->ds);
+        demux_control(demuxer, DEMUXER_CTRL_SWITCHED_TRACKS, NULL);
+    }
+}
+
+void demuxer_enable_autoselect(struct demuxer *demuxer)
+{
+    demuxer->stream_autoselect = true;
 }
 
 bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream)

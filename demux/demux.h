@@ -77,7 +77,6 @@ enum timestamp_type {
 #define DEMUXER_CTRL_SWITCH_VIDEO 14
 #define DEMUXER_CTRL_IDENTIFY_PROGRAM 15
 #define DEMUXER_CTRL_CORRECT_PTS 16
-#define DEMUXER_CTRL_AUTOSELECT_SUBTITLE 17
 
 #define SEEK_ABSOLUTE (1 << 0)
 #define SEEK_FACTOR   (1 << 1)
@@ -185,6 +184,7 @@ typedef struct demuxer {
 
     struct sh_stream **streams;
     int num_streams;
+    bool stream_autoselect;
 
     int num_editions;
     int edition;
@@ -255,6 +255,9 @@ int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 
 void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
                           struct sh_stream *stream);
+void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
+                          bool selected);
+void demuxer_enable_autoselect(struct demuxer *demuxer);
 
 int demuxer_type_by_filename(char *filename);
 

@@ -913,12 +913,6 @@ static int map_id_from_demuxer(struct demuxer *d, enum stream_type type, int id)
         id = id & 0x1F;
     return id;
 }
-static int map_id_to_demuxer(struct demuxer *d, enum stream_type type, int id)
-{
-    if (d->stream->uncached_type == STREAMTYPE_DVD && type == STREAM_SUB)
-        id = id | 0x20;
-    return id;
-}
 
 static struct track *add_stream_track(struct MPContext *mpctx,
                                       struct sh_stream *stream,
@@ -937,7 +931,9 @@ static struct track *add_stream_track(struct MPContext *mpctx,
             track->stream = stream;
             track->demuxer_id = stream->demuxer_id;
             // Initialize lazily selected track
-            if (track == mpctx->current_track[STREAM_SUB])
+            bool selected = track == mpctx->current_track[STREAM_SUB];
+            demuxer_select_track(track->demuxer, stream, selected);
+            if (selected)
                 reinit_subs(mpctx);
             return track;
         }
@@ -973,6 +969,8 @@ static struct track *add_stream_track(struct MPContext *mpctx,
             track->lang = talloc_strdup(track, req.name);
     }
 
+    demuxer_select_track(track->demuxer, stream, false);
+
     return track;
 }
 
@@ -1004,6 +1002,7 @@ static void add_dvd_tracks(struct MPContext *mpctx)
             track->lang = talloc_strdup(track, req.name);
         }
     }
+    demuxer_enable_autoselect(demuxer);
 #endif
 }
 
@@ -1885,18 +1884,9 @@ static void reinit_subs(struct MPContext *mpctx)
         mpctx->sh_sub->dec_sub = sub_create(opts);
 
     assert(track->demuxer);
-    if (!track->stream) {
-        // Lazily added DVD track - we must not miss the first subtitle packet,
-        // which makes the demuxer create the sh_stream, and contains the first
-        // subtitle event.
-
-        // demux_lavf - IDs are essentially random, have to use MPEG IDs
-        int id = map_id_to_demuxer(track->demuxer, track->type,
-                                   track->demuxer_id);
-        demux_control(track->demuxer, DEMUXER_CTRL_AUTOSELECT_SUBTITLE, &id);
-
+    // Lazily added DVD track - will be created on first sub packet
+    if (!track->stream)
         return;
-    }
 
     mpctx->initialized_flags |= INITIALIZED_SUB;
 

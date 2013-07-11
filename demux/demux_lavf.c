@@ -73,7 +73,6 @@ typedef struct lavf_priv {
     AVFormatContext *avfc;
     AVIOContext *pb;
     uint8_t buffer[BIO_BUFFER_SIZE];
-    int autoselect_sub;
     int64_t last_pts;
     struct sh_stream **streams; // NULL for unknown streams
     int num_streams;
@@ -196,7 +195,6 @@ static int lavf_check_file(demuxer_t *demuxer)
     assert(!demuxer->priv);
     demuxer->priv = talloc_zero(NULL, lavf_priv_t);
     priv = demuxer->priv;
-    priv->autoselect_sub = -1;
 
     priv->filename = s->url;
     if (!priv->filename) {
@@ -427,7 +425,6 @@ static void handle_stream(demuxer_t *demuxer, int i)
             memcpy(sh_sub->extradata, codec->extradata, codec->extradata_size);
             sh_sub->extradata_len = codec->extradata_size;
         }
-        st->discard = AVDISCARD_DEFAULT;
         break;
     }
     case AVMEDIA_TYPE_ATTACHMENT: {
@@ -463,6 +460,9 @@ static void handle_stream(demuxer_t *demuxer, int i)
         if (lang && lang->value)
             sh->lang = talloc_strdup(sh, lang->value);
     }
+
+    bool selected = demuxer_stream_is_selected(demuxer, sh);
+    st->discard = selected ? AVDISCARD_DEFAULT : AVDISCARD_ALL;
 }
 
 // Add any new streams that might have been added
@@ -657,13 +657,6 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     AVStream *st = priv->avfc->streams[pkt->stream_index];
     struct sh_stream *stream = priv->streams[pkt->stream_index];
 
-    if (stream && stream->type == STREAM_SUB &&
-        stream->demuxer_id == priv->autoselect_sub)
-    {
-        priv->autoselect_sub = -1;
-        demuxer_switch_track(demux, STREAM_SUB, stream);
-    }
-
     if (!demuxer_stream_is_selected(demux, stream)) {
         talloc_free(pkt);
         return 1;
@@ -799,16 +792,11 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
         for (int n = 0; n < priv->num_streams; n++) {
             struct sh_stream *stream = priv->streams[n];
             AVStream *st = priv->avfc->streams[n];
-            if (stream && stream->type != STREAM_SUB) {
+            if (stream) {
                 bool selected = demuxer_stream_is_selected(demuxer, stream);
                 st->discard = selected ? AVDISCARD_DEFAULT : AVDISCARD_ALL;
             }
         }
-        return DEMUXER_CTRL_OK;
-    }
-    case DEMUXER_CTRL_AUTOSELECT_SUBTITLE:
-    {
-        priv->autoselect_sub = *((int *)arg);
         return DEMUXER_CTRL_OK;
     }
     case DEMUXER_CTRL_IDENTIFY_PROGRAM:
