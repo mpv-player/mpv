@@ -164,7 +164,6 @@ static void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
   pos/=imgsize;
   stream_seek(s,pos*imgsize);
   //sh_video->timer=pos * sh_video->frametime;
-  demuxer->video->pts = pos * sh_video->frametime;
 //  printf("demux_rawvideo: streamtell=%d\n",(int)stream_tell(demuxer->stream));
 }
 

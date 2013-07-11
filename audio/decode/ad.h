@@ -44,7 +44,4 @@ extern const ad_functions_t * const mpcodecs_ad_drivers[];
 
 #define ADCTRL_RESYNC_STREAM 1   // resync, called after seeking
 
-// fallback if ADCTRL_SKIP not implemented: ds_fill_buffer(sh_audio->ds);
-#define ADCTRL_SKIP_FRAME 2      // skip block/frame, called while seeking
-
 #endif /* MPLAYER_AD_H */

@@ -372,9 +372,11 @@ static int decode_new_packet(struct sh_audio *sh)
 {
     struct priv *priv = sh->context;
     AVCodecContext *avctx = priv->avctx;
-    struct demux_packet *mpkt = ds_get_packet2(sh->ds, false);
+    struct demux_packet *mpkt = demux_read_packet(sh->gsh);
     if (!mpkt)
         return -1;  // error or EOF
+
+    int in_len = mpkt->len;
 
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt);
@@ -385,6 +387,7 @@ static int decode_new_packet(struct sh_audio *sh)
     }
     int got_frame = 0;
     int ret = avcodec_decode_audio4(avctx, priv->avframe, &got_frame, &pkt);
+    talloc_free(mpkt);
     // LATM may need many packets to find mux info
     if (ret == AVERROR(EAGAIN))
         return 0;
@@ -408,7 +411,7 @@ static int decode_new_packet(struct sh_audio *sh)
     } else {
         priv->output = priv->avframe->data[0];
     }
-    mp_dbg(MSGT_DECAUDIO, MSGL_DBG2, "Decoded %d -> %d  \n", mpkt->len,
+    mp_dbg(MSGT_DECAUDIO, MSGL_DBG2, "Decoded %d -> %d  \n", in_len,
            priv->output_left);
     return 0;
 }

@@ -288,8 +288,6 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
 
 static void print_file_properties(struct MPContext *mpctx, const char *filename)
 {
-    double start_pts = MP_NOPTS_VALUE;
-    double video_start_pts = MP_NOPTS_VALUE;
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILENAME=%s\n",
            filename);
     if (mpctx->sh_video) {
@@ -310,7 +308,6 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
                "ID_VIDEO_FPS=%5.3f\n", mpctx->sh_video->fps);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
                "ID_VIDEO_ASPECT=%1.4f\n", mpctx->sh_video->aspect);
-        video_start_pts = ds_get_next_pts(mpctx->sh_video->ds);
     }
     if (mpctx->sh_audio) {
         /* Assume FOURCC if all bytes >= 0x20 (' ') */
@@ -326,17 +323,7 @@ static void print_file_properties(struct MPContext *mpctx, const char *filename)
                "ID_AUDIO_RATE=%d\n", mpctx->sh_audio->samplerate);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
                "ID_AUDIO_NCH=%d\n", mpctx->sh_audio->channels.num);
-        start_pts = ds_get_next_pts(mpctx->sh_audio->ds);
     }
-    if (video_start_pts != MP_NOPTS_VALUE) {
-        if (start_pts == MP_NOPTS_VALUE || !mpctx->sh_audio ||
-            (mpctx->sh_video && video_start_pts < start_pts))
-            start_pts = video_start_pts;
-    }
-    if (start_pts != MP_NOPTS_VALUE)
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_START_TIME=%.2f\n", start_pts);
-    else
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_START_TIME=unknown\n");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO,
            "ID_LENGTH=%.2f\n", get_time_length(mpctx));
     int chapter_count = get_chapter_count(mpctx);
@@ -375,11 +362,8 @@ static double get_main_demux_pts(struct MPContext *mpctx)
     if (mpctx->demuxer) {
         for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
             struct demux_stream *ds = mpctx->demuxer->ds[type];
-            if (ds->gsh && main_new_pos == MP_NOPTS_VALUE) {
-                demux_fill_buffer(mpctx->demuxer, ds);
-                if (ds->first)
-                    main_new_pos = ds->first->pts;
-            }
+            if (ds->gsh && main_new_pos == MP_NOPTS_VALUE)
+                main_new_pos = demux_get_next_pts(ds->gsh);
         }
     }
     return main_new_pos;
@@ -1703,14 +1687,14 @@ static double written_audio_pts(struct MPContext *mpctx)
         // ratio is not constant for every audio packet or if it is constant
         // but not accurately known in sh_audio->i_bps.
 
-        a_pts = d_audio->pts;
+        a_pts = d_audio->last_pts;
         if (a_pts == MP_NOPTS_VALUE)
             return a_pts;
 
         // ds_tell_pts returns bytes read after last timestamp from
         // demuxing layer
         if (sh_audio->i_bps)
-            a_pts += ds_tell_pts(d_audio) / (double)sh_audio->i_bps;
+            a_pts += d_audio->last_pts_bytes / (double)sh_audio->i_bps;
     }
     // Now a_pts hopefully holds the pts for end of audio from decoder.
     // Substract data in buffers between decoder and audio out.
@@ -1783,15 +1767,14 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
     double curpts_s = refpts_s + opts->sub_delay;
 
     if (!track->preloaded) {
-        struct demux_stream *d_sub = sh_sub->ds;
         bool non_interleaved = is_non_interleaved(mpctx, track);
 
         while (1) {
-            if (non_interleaved)
-                ds_get_next_pts(d_sub);
-            if (!d_sub->first)
+            if (!non_interleaved && !demux_has_packet(sh_sub->gsh))
                 break;
-            double subpts_s = ds_get_next_pts(d_sub);
+            double subpts_s = demux_get_next_pts(sh_sub->gsh);
+            if (!demux_has_packet(sh_sub->gsh))
+                break;
             if (subpts_s > curpts_s) {
                 mp_dbg(MSGT_CPLAYER, MSGL_DBG2,
                        "Sub early: c_pts=%5.3f s_pts=%5.3f\n",
@@ -1803,11 +1786,12 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 if (non_interleaved && subpts_s > curpts_s + 1)
                     break;
             }
-            struct demux_packet *pkt = ds_get_packet_sub(d_sub);
+            struct demux_packet *pkt = demux_read_packet(sh_sub->gsh);
             mp_dbg(MSGT_CPLAYER, MSGL_V, "Sub: c_pts=%5.3f s_pts=%5.3f "
                    "duration=%5.3f len=%d\n", curpts_s, pkt->pts, pkt->duration,
                    pkt->len);
             sub_decode(dec_sub, pkt);
+            talloc_free(pkt);
         }
     }
 
@@ -2465,28 +2449,24 @@ static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
 }
 
 
-static int video_read_frame(sh_video_t *sh_video,
-                            unsigned char **start, int force_fps)
+static struct demux_packet *video_read_frame(struct MPContext *mpctx)
 {
+    sh_video_t *sh_video = mpctx->sh_video;
     demux_stream_t *d_video = sh_video->ds;
     demuxer_t *demuxer = d_video->demuxer;
-    float pts1 = d_video->pts;
-    int in_size = 0;
+    float pts1 = d_video->last_pts;
 
-    *start = NULL;
-
-    // frame-based file formats: (AVI,ASF,MOV)
-    in_size = ds_get_packet(d_video, start);
-    if (in_size < 0)
-        return -1; // EOF
+    struct demux_packet *pkt = demux_read_packet(sh_video->gsh);
+    if (!pkt)
+        return NULL; // EOF
 
     float frame_time = sh_video->frametime;
 
     // override frame_time for variable/unknown FPS formats:
-    if (!force_fps) {
-        double next_pts = ds_get_next_pts(d_video);
-        double d = next_pts == MP_NOPTS_VALUE ? d_video->pts - pts1
-                                              : next_pts - d_video->pts;
+    if (!mpctx->opts.force_fps) {
+        double next_pts = demux_get_next_pts(sh_video->gsh);
+        double d = next_pts == MP_NOPTS_VALUE ? d_video->last_pts - pts1
+                                              : next_pts - d_video->last_pts;
         if (d >= 0) {
             if (demuxer->file_format == DEMUXER_TYPE_TV) {
                 if (d > 0) {
@@ -2501,10 +2481,10 @@ static int video_read_frame(sh_video_t *sh_video,
         }
     }
 
-    sh_video->pts = d_video->pts;
+    sh_video->pts = d_video->last_pts;
 
     sh_video->next_frame_time = frame_time;
-    return in_size;
+    return pkt;
 }
 
 static double update_video_nocorrect_pts(struct MPContext *mpctx)
@@ -2518,15 +2498,11 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
             break;
         if (filter_output_queued_frame(mpctx))
             break;
-        unsigned char *packet = NULL;
         frame_time = sh_video->next_frame_time;
         if (mpctx->restart_playback)
             frame_time = 0;
-        int in_size = 0;
-        while (!in_size)
-            in_size = video_read_frame(sh_video,
-                                       &packet, mpctx->opts.force_fps);
-        if (in_size < 0)
+        struct demux_packet *pkt = video_read_frame(mpctx);
+        if (!pkt)
             return -1;
         if (mpctx->sh_audio)
             mpctx->delay -= frame_time;
@@ -2534,13 +2510,9 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         update_fps(mpctx);
         int framedrop_type = check_framedrop(mpctx, frame_time);
 
-        struct demux_packet pkt = {0};
-        if (sh_video->ds->current)
-            pkt = *sh_video->ds->current;
-        pkt.buffer = packet;
-        pkt.len = in_size;
-        void *decoded_frame = decode_video(sh_video, &pkt, framedrop_type,
+        void *decoded_frame = decode_video(sh_video, pkt, framedrop_type,
                                            sh_video->pts);
+        talloc_free(pkt);
         if (decoded_frame) {
             filter_video(mpctx, decoded_frame);
         }
@@ -2599,12 +2571,13 @@ static double update_video(struct MPContext *mpctx, double endpts)
         pts = MP_NOPTS_VALUE;
         struct demux_packet *pkt;
         while (1) {
-            pkt = ds_get_packet2(mpctx->sh_video->ds, false);
+            pkt = demux_read_packet(mpctx->sh_video->gsh);
             if (!pkt || pkt->len)
                 break;
             /* Packets with size 0 are assumed to not correspond to frames,
              * but to indicate the absence of a frame in formats like AVI
              * that must have packets at fixed timecode intervals. */
+            talloc_free(pkt);
         }
         if (pkt)
             pts = pkt->pts;
@@ -2616,6 +2589,7 @@ static double update_video(struct MPContext *mpctx, double endpts)
                              1 : check_framedrop(mpctx, sh_video->frametime);
         struct mp_image *decoded_frame =
             decode_video(sh_video, pkt, framedrop_type, pts);
+        talloc_free(pkt);
         if (decoded_frame) {
             determine_frame_pts(mpctx);
             filter_video(mpctx, decoded_frame);
@@ -2773,7 +2747,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
         // Not all demuxers set d_video->pts during seek, so this value
         // (which was used by at least vobsub code below) may be completely
         // wrong (probably 0).
-        mpctx->sh_video->pts = mpctx->sh_video->ds->pts + mpctx->video_offset;
+        mpctx->sh_video->pts = mpctx->sh_video->ds->last_pts + mpctx->video_offset;
         mpctx->video_pts = mpctx->sh_video->pts;
     }
 

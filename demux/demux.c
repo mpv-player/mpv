@@ -375,26 +375,16 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
 
 void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
 {
-    // demux API can't handle 0-sized packets, but at least some vobsubs
-    // generate them. Skipping them seems to work fine. Not skipping them will
-    // stop demuxing with external vobsubs. See FATE sub/vobsub.{idx,sub} at
-    // pts=185.91.
-    if (dp->len == 0 && ds->stream_type == STREAM_SUB) {
-        mp_dbg(MSGT_DEMUXER, MSGL_INFO, "Discarding empty subtitle packet.\n");
-        free_demux_packet(dp);
-        return;
-    }
-
     // append packet to DS stream:
     ++ds->packs;
     ds->bytes += dp->len;
-    if (ds->last) {
+    if (ds->tail) {
         // next packet in stream
-        ds->last->next = dp;
-        ds->last = dp;
+        ds->tail->next = dp;
+        ds->tail = dp;
     } else {
         // first packet in stream
-        ds->first = ds->last = dp;
+        ds->head = ds->tail = dp;
     }
     mp_dbg(MSGT_DEMUXER, MSGL_DBG2,
            "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%u  [packs: A=%d V=%d]\n",
@@ -440,38 +430,18 @@ int demux_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 // return value:
 //     0 = EOF
 //     1 = successful
-int ds_fill_buffer(demux_stream_t *ds)
+static int ds_get_packets(demux_stream_t *ds)
 {
+    if (!ds)
+        return 0;
     demuxer_t *demux = ds->demuxer;
-    if (ds->current)
-        free_demux_packet(ds->current);
-    ds->current = NULL;
-    mp_dbg(MSGT_DEMUXER, MSGL_DBG3, "ds_fill_buffer (%s) called\n",
+    mp_dbg(MSGT_DEMUXER, MSGL_DBG3, "ds_get_packets (%s) called\n",
            ds == demux->audio ? "d_audio" : ds == demux->video ? "d_video" :
            ds == demux->sub   ? "d_sub"   : "unknown");
     while (1) {
         int apacks = demux->audio ? demux->audio->packs : 0;
         int vpacks = demux->video ? demux->video->packs : 0;
         if (ds->packs) {
-            demux_packet_t *p = ds->first;
-            // copy useful data:
-            ds->buffer = p->buffer;
-            ds->buffer_pos = 0;
-            ds->buffer_size = p->len;
-            if (p->pts != MP_NOPTS_VALUE) {
-                ds->pts = p->pts;
-                ds->pts_bytes = 0;
-            }
-            ds->pts_bytes += p->len;    // !!!
-            if (p->stream_pts != MP_NOPTS_VALUE)
-                demux->stream_pts = p->stream_pts;
-            // unlink packet:
-            ds->bytes -= p->len;
-            ds->current = p;
-            ds->first = p->next;
-            if (!ds->first)
-                ds->last = NULL;
-            --ds->packs;
             /* The code below can set ds->eof to 1 when another stream runs
              * out of buffer space. That makes sense because in that situation
              * the calling code should not count on being able to demux more
@@ -497,7 +467,7 @@ int ds_fill_buffer(demux_stream_t *ds)
 
         if (!demux_fill_buffer(demux, ds)) {
             mp_dbg(MSGT_DEMUXER, MSGL_DBG2,
-                   "ds_fill_buffer()->demux_fill_buffer() failed\n");
+                   "ds_get_packets()->demux_fill_buffer() failed\n");
             break; // EOF
         }
 
@@ -508,10 +478,8 @@ int ds_fill_buffer(demux_stream_t *ds)
                 ds->fill_count++;
         }
     }
-    ds->buffer_pos = ds->buffer_size = 0;
-    ds->buffer = NULL;
     mp_msg(MSGT_DEMUXER, MSGL_V,
-           "ds_fill_buffer: EOF reached (stream: %s)  \n",
+           "ds_get_packets: EOF reached (stream: %s)  \n",
            ds == demux->audio ? "audio" : "video");
     ds->eof = 1;
     return 0;
@@ -519,100 +487,76 @@ int ds_fill_buffer(demux_stream_t *ds)
 
 void ds_free_packs(demux_stream_t *ds)
 {
-    demux_packet_t *dp = ds->first;
+    demux_packet_t *dp = ds->head;
     while (dp) {
         demux_packet_t *dn = dp->next;
         free_demux_packet(dp);
         dp = dn;
     }
-    ds->first = ds->last = NULL;
+    ds->head = ds->tail = NULL;
     ds->packs = 0; // !!!!!
     ds->bytes = 0;
-    if (ds->current)
-        free_demux_packet(ds->current);
-    ds->current = NULL;
-    ds->buffer = NULL;
-    ds->buffer_pos = ds->buffer_size;
-    ds->pts = MP_NOPTS_VALUE;
-    ds->pts_bytes = 0;
+    ds->last_pts = MP_NOPTS_VALUE;
+    ds->last_pts_bytes = 0;
 }
 
-int ds_get_packet(demux_stream_t *ds, unsigned char **start)
+static struct demux_stream *ds_from_sh(struct sh_stream *sh)
 {
-    int len;
-    if (ds->buffer_pos >= ds->buffer_size) {
-        if (!ds_fill_buffer(ds)) {
-            // EOF
-            *start = NULL;
-            return -1;
+    for (int n = 0; n < STREAM_TYPE_COUNT; n++) {
+        if (sh->demuxer->ds[n]->gsh == sh)
+            return sh->demuxer->ds[n];
+    }
+    return NULL;
+}
+
+// Read a packet from the given stream. The returned packet belongs to the
+// caller, who has to free it with talloc_free(). Might block. Returns NULL
+// on EOF.
+struct demux_packet *demux_read_packet(struct sh_stream *sh)
+{
+    struct demux_stream *ds = ds_from_sh(sh);
+    if (ds) {
+        ds_get_packets(ds);
+        struct demux_packet *pkt = ds->head;
+        if (pkt) {
+            ds->head = pkt->next;
+            pkt->next = NULL;
+            if (!ds->head)
+                ds->tail = NULL;
+            ds->bytes -= pkt->len;
+            ds->packs--;
+
+            if (pkt->pts != MP_NOPTS_VALUE) {
+                ds->last_pts = pkt->pts;
+                ds->last_pts_bytes = 0;
+            } else {
+                ds->last_pts_bytes += pkt->len;
+            }
+
+            if (pkt->stream_pts != MP_NOPTS_VALUE)
+                sh->demuxer->stream_pts = pkt->stream_pts;
+
+            return pkt;
         }
     }
-    len = ds->buffer_size - ds->buffer_pos;
-    *start = &ds->buffer[ds->buffer_pos];
-    ds->buffer_pos += len;
-    return len;
+    return NULL;
 }
 
-int ds_get_packet_pts(demux_stream_t *ds, unsigned char **start, double *pts)
+// Return the pts of the next packet that demux_read_packet() would return.
+// Might block. Sometimes used to force a packet read, without removing any
+// packets from the queue.
+double demux_get_next_pts(struct sh_stream *sh)
 {
-    int len;
-    *pts = MP_NOPTS_VALUE;
-    len = ds_get_packet(ds, start);
-    if (len < 0)
-        return len;
-    // Return pts unless this read starts from the middle of a packet
-    if (len == ds->buffer_pos)
-        *pts = ds->current->pts;
-    return len;
+    struct demux_stream *ds = ds_from_sh(sh);
+    ds_get_packets(ds);
+    return ds && ds->head ? ds->head->pts : MP_NOPTS_VALUE;
 }
 
-struct demux_packet *ds_get_packet_sub(demux_stream_t *ds)
+// Return whether a packet is queued. Never blocks, never forces any reads.
+bool demux_has_packet(struct sh_stream *sh)
 {
-    if (ds->buffer_pos >= ds->buffer_size) {
-        if (!ds->packs)
-            return NULL;  // no sub
-        if (!ds_fill_buffer(ds))
-            return NULL;  // EOF
-    }
-    if (ds->buffer_pos < ds->buffer_size) {
-        ds->current->buffer += ds->buffer_pos;
-        ds->buffer_size -= ds->buffer_pos;
-    }
-    ds->buffer_pos = ds->buffer_size;
-    return ds->current;
-}
-
-struct demux_packet *ds_get_packet2(struct demux_stream *ds, bool repeat_last)
-{
-    if (!repeat_last)
-        ds_fill_buffer(ds);
-    // This shouldn't get used together with partial reads
-    // However, some old demuxers return parsed packets with an offset in
-    // -correct-pts mode (at least mpegts).
-    // Not all old demuxers will actually work.
-    if (ds->buffer_pos < ds->buffer_size) {
-        ds->current->buffer += ds->buffer_pos;
-        ds->buffer_size -= ds->buffer_pos;
-    }
-    ds->buffer_pos = ds->buffer_size;
-    return ds->current;
-}
-
-double ds_get_next_pts(demux_stream_t *ds)
-{
-    demuxer_t *demux = ds->demuxer;
-    // if we have not read from the "current" packet, consider it
-    // as the next, otherwise we never get the pts for the first packet.
-    while (!ds->first && (!ds->current || ds->buffer_pos)) {
-        if (demux_check_queue_full(demux))
-            return MP_NOPTS_VALUE;
-        if (!demux_fill_buffer(demux, ds))
-            return MP_NOPTS_VALUE;
-    }
-    // take pts from "current" if we never read from it.
-    if (ds->current && !ds->buffer_pos)
-        return ds->current->pts;
-    return ds->first->pts;
+    struct demux_stream *ds = ds_from_sh(sh);
+    return ds && ds->head;
 }
 
 // ====================================================================

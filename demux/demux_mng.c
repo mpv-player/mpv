@@ -38,14 +38,6 @@
 #include <libmng.h>
 
 /**
- * \brief some small fixed start time > 0
- *
- * Start time must be > 0 for the variable frame time mechanism
- * (GIF, MATROSKA, MNG) in video.c to work for the first frame.
- */
-#define MNG_START_PTS 0.01f
-
-/**
  * \brief private context structure
  *
  * This structure is used as private data for MPlayer demuxer
@@ -346,7 +338,7 @@ static int demux_mng_fill_buffer(demuxer_t * demuxer,
     // Set position and timing information in demuxer video and demuxer packet.
     //  - Time must be time of next frame and always be > 0 for the variable
     //    frame time mechanism (GIF, MATROSKA, MNG) in video.c to work.
-    dp->pts = (float)mng_priv->show_next_time_ms / 1000.0f + MNG_START_PTS;
+    dp->pts = (float)mng_priv->show_next_time_ms / 1000.0f;
     dp->pos = stream_tell(demuxer->stream);
     ds_add_packet(demuxer->video, dp);
 
@@ -446,11 +438,6 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
     sh_video->bih->biHeight      = mng_priv->height;
     sh_video->bih->biBitCount    = 32;
     sh_video->bih->biPlanes      = 1;
-
-    // Set start time to something > 0.
-    //  - This is required for the variable frame time mechanism
-    //    (GIF, MATROSKA, MNG) in video.c to work for the first frame.
-    sh_video->ds->pts = MNG_START_PTS;
 
     // set private data in demuxer and return demuxer
     demuxer->priv = mng_priv;

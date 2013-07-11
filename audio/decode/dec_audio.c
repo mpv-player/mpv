@@ -365,14 +365,3 @@ void resync_audio_stream(sh_audio_t *sh_audio)
         return;
     sh_audio->ad_driver->control(sh_audio, ADCTRL_RESYNC_STREAM, NULL);
 }
-
-void skip_audio_frame(sh_audio_t *sh_audio)
-{
-    if (!sh_audio->initialized)
-        return;
-    if (sh_audio->ad_driver->control(sh_audio, ADCTRL_SKIP_FRAME, NULL)
-        == CONTROL_TRUE)
-        return;
-    // default skip code:
-    ds_fill_buffer(sh_audio->ds);       // skip block
-}

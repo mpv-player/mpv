@@ -90,19 +90,15 @@ enum timestamp_type {
 
 typedef struct demux_stream {
     enum stream_type stream_type;
-    int buffer_pos;        // current buffer position
-    int buffer_size;       // current buffer size
-    unsigned char *buffer; // current buffer, never free() it, always use free_demux_packet(buffer_ref);
-    double pts;            // current buffer's pts
-    int pts_bytes;         // number of bytes read after last pts stamp
+    double last_pts;       // pts of the last packet that was read
+    int last_pts_bytes;    // number of bytes read after last pts stamp
     int eof;               // end of demuxed stream? (true if all buffer empty)
 //---------------
     int fill_count;        // number of unsuccessful tries to get a packet
     int packs;            // number of packets in buffer
     int bytes;            // total bytes of packets in buffer
-    demux_packet_t *first; // read to current buffer from here
-    demux_packet_t *last; // append new packets from input stream to here
-    demux_packet_t *current; // needed for refcounting of the buffer
+    struct demux_packet *head;
+    struct demux_packet *tail;
     struct demuxer *demuxer; // parent demuxer structure (stream handler)
 // ---- stream header ----
     struct sh_stream *gsh;
@@ -256,20 +252,12 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
 void ds_add_packet(struct demux_stream *ds, struct demux_packet *dp);
 
 int demux_fill_buffer(struct demuxer *demux, struct demux_stream *ds);
-int ds_fill_buffer(struct demux_stream *ds);
-
-static inline int ds_tell_pts(struct demux_stream *ds)
-{
-    return (ds->pts_bytes - ds->buffer_size) + ds->buffer_pos;
-}
 
 void ds_free_packs(struct demux_stream *ds);
-int ds_get_packet(struct demux_stream *ds, unsigned char **start);
-int ds_get_packet_pts(struct demux_stream *ds, unsigned char **start,
-                      double *pts);
-struct demux_packet *ds_get_packet_sub(demux_stream_t *ds);
-struct demux_packet *ds_get_packet2(struct demux_stream *ds, bool repeat_last);
-double ds_get_next_pts(struct demux_stream *ds);
+
+struct demux_packet *demux_read_packet(struct sh_stream *sh);
+double demux_get_next_pts(struct sh_stream *sh);
+bool demux_has_packet(struct sh_stream *sh);
 
 struct demuxer *demux_open(struct MPOpts *opts, struct stream *stream,
                            int file_format, char *filename);
