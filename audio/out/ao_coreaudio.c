@@ -560,8 +560,6 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     if (!is_alive)
         ca_msg(MSGL_WARN, "device is not alive\n");
 
-    d->stream_asbd = asbd;
-
     p->is_digital = 1;
 
     err = ca_lock_device(p->device, &d->hog_pid);
@@ -612,8 +610,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
                     // select the digital format that has exactly the same
                     // samplerate. If an exact match cannot be found, select
                     // the format with highest samplerate as backup.
-                    if (formats[j].mFormat.mSampleRate ==
-                        d->stream_asbd.mSampleRate) {
+                    if (formats[j].mFormat.mSampleRate == asbd.mSampleRate) {
                         req_rate_format = j;
                         break;
                     } else if (max_rate_format < 0 ||
