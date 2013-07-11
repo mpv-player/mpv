@@ -43,13 +43,13 @@ const m_option_t demux_rawaudio_opts[] = {
 };
 
 
-static demuxer_t* demux_rawaudio_open(demuxer_t* demuxer) {
+static int demux_rawaudio_open(demuxer_t* demuxer) {
   struct sh_stream *sh;
   sh_audio_t* sh_audio;
   WAVEFORMATEX* w;
 
   if ((format & AF_FORMAT_SPECIAL_MASK) != 0)
-      return NULL;
+      return -1;
 
   sh = new_sh_stream(demuxer, STREAM_AUDIO);
   sh_audio = sh->audio;
@@ -69,7 +69,7 @@ static demuxer_t* demux_rawaudio_open(demuxer_t* demuxer) {
   demuxer->movi_start = demuxer->stream->start_pos;
   demuxer->movi_end = demuxer->stream->end_pos;
 
-  return demuxer;
+  return 0;
 }
 
 static int demux_rawaudio_fill_buffer(demuxer_t* demuxer)
@@ -110,16 +110,13 @@ static void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
 }
 
 const demuxer_desc_t demuxer_desc_rawaudio = {
-  "Raw audio demuxer",
-  "rawaudio",
-  "rawaudio",
-  "?",
-  "",
-  DEMUXER_TYPE_RAWAUDIO,
-  0, // no autodetect
-  NULL,
-  demux_rawaudio_fill_buffer,
-  demux_rawaudio_open,
-  NULL,
-  demux_rawaudio_seek,
+    .info = "Raw audio demuxer",
+    .name = "rawaudio",
+    .shortdesc = "rawaudio",
+    .author = "?",
+    .comment = "",
+    .type = DEMUXER_TYPE_RAWAUDIO,
+    .fill_buffer = demux_rawaudio_fill_buffer,
+    .open = demux_rawaudio_open,
+    .seek = demux_rawaudio_seek,
 };

@@ -41,7 +41,7 @@ static int d_check_file(struct demuxer *demuxer)
     // library handles mismatch, so make sure everything uses a global handle.
     ASS_Library *lib = demuxer->params ? demuxer->params->ass_library : NULL;
     if (!lib)
-        return 0;
+        return -1;
 
     // Probe by loading a part of the beginning of the file with libass.
     // Incomplete scripts are usually ok, and we hope libass is not verbose
@@ -64,7 +64,7 @@ static int d_check_file(struct demuxer *demuxer)
         talloc_free(cbuf.start);
     talloc_free(buf.start);
     if (!track)
-        return 0;
+        return -1;
     ass_free_track(track);
 
     // Actually load the full thing.
@@ -73,7 +73,7 @@ static int d_check_file(struct demuxer *demuxer)
     if (!buf.start) {
         mp_tmsg(MSGT_ASS, MSGL_ERR, "Refusing to load subtitle file "
                 "larger than 100 MB: %s\n", demuxer->filename);
-        return 0;
+        return -1;
     }
     cbuf = mp_charset_guess_and_conv_to_utf8(buf, user_cp,  MP_ICONV_VERBOSE);
     if (cbuf.start == NULL)
@@ -83,7 +83,7 @@ static int d_check_file(struct demuxer *demuxer)
         talloc_free(cbuf.start);
     talloc_free(buf.start);
     if (!track)
-        return 0;
+        return -1;
 
     track->name = strdup(demuxer->filename);
 
@@ -96,7 +96,7 @@ static int d_check_file(struct demuxer *demuxer)
     sh->sub->track = track;
     sh->codec = "ass";
 
-    return DEMUXER_TYPE_LIBASS;
+    return 0;
 }
 
 static void d_close(struct demuxer *demuxer)

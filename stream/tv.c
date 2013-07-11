@@ -701,7 +701,7 @@ static int tv_uninit(tvi_handle_t *tvh)
     return res;
 }
 
-static demuxer_t* demux_open_tv(demuxer_t *demuxer)
+static int demux_open_tv(demuxer_t *demuxer)
 {
     tvi_handle_t *tvh;
     sh_video_t *sh_video;
@@ -709,14 +709,14 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     const tvi_functions_t *funcs;
 
     demuxer->priv=NULL;
-    if(!(tvh=tv_begin(demuxer->stream->priv))) return NULL;
-    if (!tvh->functions->init(tvh->priv)) return NULL;
+    if(!(tvh=tv_begin(demuxer->stream->priv))) return -1;
+    if (!tvh->functions->init(tvh->priv)) return -1;
 
     tvh->demuxer = demuxer;
 
     if (!open_tv(tvh)){
 	tv_uninit(tvh);
-	return NULL;
+	return -1;
     }
     funcs = tvh->functions;
     demuxer->priv=tvh;
@@ -827,7 +827,7 @@ no_audio:
     if(!(funcs->start(tvh->priv))){
 	// start failed :(
 	tv_uninit(tvh);
-	return NULL;
+	return -1;
     }
 
     /* set color eq */
@@ -840,7 +840,7 @@ no_audio:
         if(funcs->control(tvh->priv,TVI_CONTROL_VID_SET_GAIN,&tvh->tv_param->gain)!=TVI_CONTROL_TRUE)
             mp_msg(MSGT_TV,MSGL_WARN,"Unable to set gain control!\n");
 
-    return demuxer;
+    return 0;
 }
 
 static void demux_close_tv(demuxer_t *demuxer)
@@ -1094,17 +1094,13 @@ int tv_step_chanlist(tvi_handle_t *tvh)
 }
 
 demuxer_desc_t demuxer_desc_tv = {
-  "Tv card demuxer",
-  "tv",
-  "TV",
-  "Alex Beregszaszi, Charles R. Henrich",
-  "?",
-  DEMUXER_TYPE_TV,
-  0, // no autodetect
-  NULL,
-  demux_tv_fill_buffer,
-  demux_open_tv,
-  demux_close_tv,
-  NULL,
-  NULL
+    .info = "Tv card demuxer",
+    .name = "tv",
+    .shortdesc = "TV",
+    .author = "Alex Beregszaszi, Charles R. Henrich",
+    .comment = "?",
+    .type = DEMUXER_TYPE_TV,
+    .fill_buffer = demux_tv_fill_buffer,
+    .open = demux_open_tv,
+    .close = demux_close_tv,
 };

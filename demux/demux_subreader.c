@@ -1336,11 +1336,11 @@ static int d_check_file(struct demuxer *demuxer)
     free_stream(ps);
 
     if (!res)
-        return 0;
+        return -1;
 
     sub_data *sd = sub_read_file(demuxer->stream, &sr);
     if (!sd)
-        return 0;
+        return -1;
 
     struct priv *p = talloc_zero(demuxer, struct priv);
     demuxer->priv = p;
@@ -1355,7 +1355,7 @@ static int d_check_file(struct demuxer *demuxer)
 
     demuxer->accurate_seek = true;
 
-    return DEMUXER_TYPE_SUBREADER;
+    return 0;
 }
 
 static int d_fill_buffer(struct demuxer *demuxer)

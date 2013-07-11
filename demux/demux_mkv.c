@@ -1759,11 +1759,11 @@ static int demux_mkv_open(demuxer_t *demuxer)
     stream_seek(s, s->start_pos);
 
     if (!read_ebml_header(demuxer))
-        return 0;
+        return -1;
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Found the head...\n");
 
     if (!read_mkv_segment_header(demuxer))
-        return 0;
+        return -1;
 
     mkv_d = talloc_zero(demuxer, struct mkv_demuxer);
     demuxer->priv = mkv_d;
@@ -1788,7 +1788,7 @@ static int demux_mkv_open(demuxer_t *demuxer)
         }
         int res = read_header_element(demuxer, id, 0);
         if (res <= -2)
-            return 0;
+            return -1;
         if (res < 0)
             break;
     }
@@ -1805,7 +1805,7 @@ static int demux_mkv_open(demuxer_t *demuxer)
 
     demuxer->accurate_seek = true;
 
-    return DEMUXER_TYPE_MATROSKA;
+    return 0;
 }
 
 static bool bstr_read_u8(bstr *buffer, uint8_t *out_u8)
@@ -2718,17 +2718,16 @@ static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
 }
 
 const demuxer_desc_t demuxer_desc_matroska = {
-    "Matroska demuxer",
-    "mkv",
-    "Matroska",
-    "Aurelien Jacobs",
-    "",
-    DEMUXER_TYPE_MATROSKA,
-    1,                          // safe autodetect
-    demux_mkv_open,
-    demux_mkv_fill_buffer,
-    NULL,
-    mkv_free,
-    demux_mkv_seek,
-    demux_mkv_control
+    .info = "Matroska demuxer",
+    .name = "mkv",
+    .shortdesc = "Matroska",
+    .author = "Aurelien Jacobs",
+    .comment = "",
+    .type = DEMUXER_TYPE_MATROSKA,
+    .safe_check = 1,                          // safe autodetect
+    .check_file = demux_mkv_open,
+    .fill_buffer = demux_mkv_fill_buffer,
+    .close = mkv_free,
+    .seek = demux_mkv_seek,
+    .control = demux_mkv_control
 };

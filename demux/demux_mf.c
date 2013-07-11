@@ -187,14 +187,15 @@ static mf_t *open_mf(demuxer_t *demuxer)
 static int demux_check_file(demuxer_t *demuxer)
 {
     if (demuxer->stream->type == STREAMTYPE_MF)
-        return DEMUXER_TYPE_MF;
+        return 0;
     mf_t *mf = open_mf(demuxer);
     bool ok = mf && probe_format(mf);
     free_mf(mf);
-    return ok ? DEMUXER_TYPE_MF : 0;
+    return ok ? 0 : -1;
 }
 
-static demuxer_t* demux_open_mf(demuxer_t* demuxer){
+static int demux_open_mf(demuxer_t* demuxer)
+{
   sh_video_t   *sh_video = NULL;
 
   mf_t *mf = open_mf(demuxer);
@@ -223,11 +224,11 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   mf->sh = sh_video;
   demuxer->priv=(void*)mf;
 
-  return demuxer;
+  return 0;
 
 error:
   free_mf(mf);
-  return NULL;
+  return -1;
 }
 
 static void demux_close_mf(demuxer_t* demuxer) {
@@ -253,17 +254,17 @@ static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg) {
 }
 
 const demuxer_desc_t demuxer_desc_mf = {
-  "mf demuxer",
-  "mf",
-  "MF",
-  "?",
-  "multiframe?, pictures demuxer",
-  DEMUXER_TYPE_MF,
-  1,
-  demux_check_file,
-  demux_mf_fill_buffer,
-  demux_open_mf,
-  demux_close_mf,
-  demux_seek_mf,
-  demux_control_mf
+    .info = "mf demuxer",
+    .name = "mf",
+    .shortdesc = "MF",
+    .author = "?",
+    .comment = "multiframe?, pictures demuxer",
+    .type = DEMUXER_TYPE_MF,
+    .safe_check = 1,
+    .check_file = demux_check_file,
+    .fill_buffer = demux_mf_fill_buffer,
+    .open = demux_open_mf,
+    .close = demux_close_mf,
+    .seek = demux_seek_mf,
+    .control = demux_control_mf,
 };

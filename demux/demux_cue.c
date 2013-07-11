@@ -35,16 +35,16 @@ static int try_open_file(struct demuxer *demuxer)
     char buf[PROBE_SIZE];
     int len = stream_read(s, buf, sizeof(buf));
     if (len <= 0)
-        return 0;
+        return -1;
     if (!mp_probe_cue((struct bstr) { buf, len }))
-        return 0;
+        return -1;
     stream_seek(s, 0);
     demuxer->file_contents = stream_read_complete(s, demuxer, 1000000);
     if (demuxer->file_contents.start == NULL)
-        return 0;
+        return -1;
     if (!mp_probe_cue((struct bstr) { buf, len }))
-        return 0;
-    return DEMUXER_TYPE_CUE;
+        return -1;
+    return 0;
 }
 
 const struct demuxer_desc demuxer_desc_cue = {

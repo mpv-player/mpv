@@ -72,7 +72,7 @@ const demuxer_desc_t *const demuxer_list[] = {
 #ifdef CONFIG_TV
     &demuxer_desc_tv,
 #endif
-#ifdef CONFIG_LIBASS
+#ifdef CONFIG_ASS
     &demuxer_desc_libass,
 #endif
     &demuxer_desc_matroska,
@@ -594,16 +594,14 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
                                        struct demuxer_params *params)
 {
     struct demuxer *demuxer;
-    int fformat;
+    int fformat = desc->type;
     mp_msg(MSGT_DEMUXER, MSGL_V, "Trying demuxer: %s\n", desc->name);
     demuxer = new_demuxer(opts, stream, desc->type, filename);
     demuxer->params = params;
-    if (desc->check_file)
-        fformat = desc->check_file(demuxer);
-    else
-        fformat = desc->type;
-    if (force)
-        fformat = desc->type;
+    if (!force) {
+        if (desc->check_file)
+            fformat = desc->check_file(demuxer) >= 0 ? fformat : 0;
+    }
     if (fformat == 0)
         goto fail;
     if (fformat == desc->type) {
@@ -614,15 +612,12 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
             mp_tmsg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s\n",
                     desc->shortdesc);
         if (demuxer->desc->open) {
-            struct demuxer *demux2 = demuxer->desc->open(demuxer);
-            if (!demux2) {
+            int ret = demuxer->desc->open(demuxer);
+            if (ret < 0) {
                 mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "Opening as detected format "
                         "\"%s\" failed.\n", desc->shortdesc);
                 goto fail;
             }
-            /* At least demux_mov can return a demux_demuxers instance
-             * from open() instead of the original fed in. */
-            demuxer = demux2;
         }
         demuxer->file_format = fformat;
         if (stream_manages_timeline(demuxer->stream)) {

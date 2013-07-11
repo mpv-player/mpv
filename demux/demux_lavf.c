@@ -211,7 +211,7 @@ static int lavf_check_file(demuxer_t *demuxer)
         if (!sep) {
             mp_msg(MSGT_DEMUX, MSGL_FATAL,
                    "Must specify filename in 'format:filename' form\n");
-            return 0;
+            return -1;
         }
         avdevice_format = talloc_strndup(priv, priv->filename,
                                          sep - priv->filename);
@@ -238,12 +238,12 @@ static int lavf_check_file(demuxer_t *demuxer)
     if (format) {
         if (strcmp(format, "help") == 0) {
             list_formats();
-            return 0;
+            return -1;
         }
         priv->avif = av_find_input_format(format);
         if (!priv->avif) {
             mp_msg(MSGT_DEMUX, MSGL_FATAL, "Unknown lavf format %s\n", format);
-            return 0;
+            return -1;
         }
         mp_msg(MSGT_DEMUX, MSGL_INFO, "Forced lavf %s demuxer\n",
                priv->avif->long_name);
@@ -297,7 +297,7 @@ static int lavf_check_file(demuxer_t *demuxer)
     if (!priv->avif) {
         mp_msg(MSGT_HEADER, MSGL_V,
                "No format found, try lowering probescore.\n");
-        return 0;
+        return -1;
     }
 
 success:
@@ -306,7 +306,7 @@ success:
     if (!demuxer->filetype)
         demuxer->filetype = priv->avif->name;
 
-    return DEMUXER_TYPE_LAVF;
+    return 0;
 }
 
 static bool matches_avinputformat_name(struct lavf_priv *priv,
@@ -493,7 +493,7 @@ static void add_metadata(demuxer_t *demuxer, AVDictionary *metadata)
         demux_info_add(demuxer, t->key, t->value);
 }
 
-static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
+static int demux_open_lavf(demuxer_t *demuxer)
 {
     struct MPOpts *opts = demuxer->opts;
     struct lavfdopts *lavfdopts = &opts->lavfdopts;
@@ -505,7 +505,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
 
     // do not allow forcing the demuxer
     if (!priv->avif)
-        return NULL;
+        return -1;
 
     stream_seek(demuxer->stream, 0);
 
@@ -548,7 +548,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
             mp_msg(MSGT_HEADER, MSGL_ERR,
                    "Your options /%s/ look like gibberish to me pal\n",
                    lavfdopts->avopt);
-            return NULL;
+            return -1;
         }
     }
 
@@ -567,14 +567,14 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
     if (avformat_open_input(&avfc, priv->filename, priv->avif, NULL) < 0) {
         mp_msg(MSGT_HEADER, MSGL_ERR,
                "LAVF_header: avformat_open_input() failed\n");
-        return NULL;
+        return -1;
     }
 
     priv->avfc = avfc;
     if (avformat_find_stream_info(avfc, NULL) < 0) {
         mp_msg(MSGT_HEADER, MSGL_ERR,
                "LAVF_header: av_find_stream_info() failed\n");
-        return NULL;
+        return -1;
     }
 
     mp_msg(MSGT_HEADER, MSGL_V, "demux_lavf: avformat_find_stream_info() "
@@ -640,7 +640,7 @@ static demuxer_t *demux_open_lavf(demuxer_t *demuxer)
 #endif
     demuxer->accurate_seek = !priv->seek_by_bytes;
 
-    return demuxer;
+    return 0;
 }
 
 static int destroy_avpacket(void *pkt)
@@ -899,17 +899,17 @@ static void demux_close_lavf(demuxer_t *demuxer)
 
 
 const demuxer_desc_t demuxer_desc_lavf = {
-    "libavformat demuxer",
-    "lavf",
-    "libavformat",
-    "Michael Niedermayer",
-    "supports many formats, requires libavformat",
-    DEMUXER_TYPE_LAVF,
-    1,
-    lavf_check_file,
-    demux_lavf_fill_buffer,
-    demux_open_lavf,
-    demux_close_lavf,
-    demux_seek_lavf,
-    demux_lavf_control
+    .info = "libavformat demuxer",
+    .name = "lavf",
+    .shortdesc = "libavformat",
+    .author = "Michael Niedermayer",
+    .comment = "supports many formats, requires libavformat",
+    .type = DEMUXER_TYPE_LAVF,
+    .safe_check = 1,
+    .check_file = lavf_check_file,
+    .fill_buffer = demux_lavf_fill_buffer,
+    .open = demux_open_lavf,
+    .close = demux_close_lavf,
+    .seek = demux_seek_lavf,
+    .control = demux_lavf_control,
 };

@@ -105,19 +105,15 @@ typedef struct demuxer_desc {
     // If 1 detection is safe and fast, do it before file extension check
     int safe_check;
 
-    // Check if can demux the file, return DEMUXER_TYPE_xxx on success
-    // Mandatory if safe_check == 1, else optional
+    // Return 0 on success, otherwise -1
     int (*check_file)(struct demuxer *demuxer);
-    /// Get packets from file, return 0 on eof. Mandatory
-    int (*fill_buffer)(struct demuxer *demuxer);
-    /// Open the demuxer, return demuxer on success, NULL on failure
-    struct demuxer *(*open)(struct demuxer *demuxer); // Optional
-    /// Close the demuxer
-    void (*close)(struct demuxer *demuxer); // Optional
-    // Seek. Optional
+    // Open the demuxer, return 0 on success, otherwise -1
+    int (*open)(struct demuxer *demuxer);
+    // The following functions are all optional
+    int (*fill_buffer)(struct demuxer *demuxer); // 0 on EOF, otherwise 1
+    void (*close)(struct demuxer *demuxer);
     void (*seek)(struct demuxer *demuxer, float rel_seek_secs,
                  float audio_delay, int flags);
-    // Various control functions. Optional
     int (*control)(struct demuxer *demuxer, int cmd, void *arg);
 } demuxer_desc_t;
 

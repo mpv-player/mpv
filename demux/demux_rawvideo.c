@@ -56,13 +56,13 @@ const m_option_t demux_rawvideo_opts[] = {
 };
 
 
-static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
+static int demux_rawvideo_open(demuxer_t* demuxer) {
   struct sh_stream *sh;
   sh_video_t* sh_video;
 
   if(!width || !height){
       mp_msg(MSGT_DEMUX,MSGL_ERR,"rawvideo: width or height not specified!\n");
-      return 0;
+      return -1;
   }
 
   const char *decoder = "rawvideo";
@@ -109,7 +109,7 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
     }
     if (!bpp) {
       mp_msg(MSGT_DEMUX,MSGL_ERR,"rawvideo: img size not specified and unknown format!\n");
-      return 0;
+      return -1;
     }
     imgsize = width * height * bpp / 8;
   }
@@ -126,7 +126,7 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
   demuxer->movi_start = demuxer->stream->start_pos;
   demuxer->movi_end = demuxer->stream->end_pos;
 
-  return demuxer;
+  return 0;
 }
 
 static int demux_rawvideo_fill_buffer(demuxer_t* demuxer)
@@ -166,17 +166,13 @@ static void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
 
 
 const demuxer_desc_t demuxer_desc_rawvideo = {
-  "Raw video demuxer",
-  "rawvideo",
-  "rawvideo",
-  "?",
-  "",
-  DEMUXER_TYPE_RAWVIDEO,
-  0, // no autodetect
-  NULL,
-  demux_rawvideo_fill_buffer,
-  demux_rawvideo_open,
-  NULL,
-  demux_rawvideo_seek,
-  NULL
+    .info = "Raw video demuxer",
+    .name = "rawvideo",
+    .shortdesc = "rawvideo",
+    .author = "?",
+    .comment = "",
+    .type = DEMUXER_TYPE_RAWVIDEO,
+    .fill_buffer = demux_rawvideo_fill_buffer,
+    .open = demux_rawvideo_open,
+    .seek = demux_rawvideo_seek,
 };

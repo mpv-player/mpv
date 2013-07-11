@@ -263,10 +263,10 @@ static int demux_mng_check_file(demuxer_t *demuxer)
 {
     char buf[4];
     if (stream_read(demuxer->stream, buf, 4) != 4)
-        return 0;
+        return -1;
     if (memcmp(buf, "\x8AMNG", 4))
-        return 0;
-    return DEMUXER_TYPE_MNG;
+        return -1;
+    return 0;
 }
 
 /**
@@ -343,12 +343,7 @@ static int demux_mng_fill_buffer(demuxer_t * demuxer)
     return 1;
 }
 
-/**
- * \brief MPlayer callback: Open MNG stream.
- * \param[in] demuxer demuxer structure
- * \return demuxer structure on success, \p NULL on error
- */
-static demuxer_t * demux_mng_open(demuxer_t * demuxer)
+static int demux_mng_open(demuxer_t * demuxer)
 {
     mng_priv_t * mng_priv;
     mng_handle h_mng;
@@ -368,7 +363,7 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
         mp_msg(MSGT_DEMUX, MSGL_ERR,
                "demux_mng: could not initialize MNG image instance\n");
         free(mng_priv);
-        return NULL;
+        return -1;
     }
 
     // MNG image handle into private data
@@ -388,7 +383,7 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
                "demux_mng: could not set MNG callbacks\n");
         mng_cleanup(&h_mng);
         free(mng_priv);
-        return NULL;
+        return -1;
     }
 
     // start reading MNG data
@@ -399,7 +394,7 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
                "mng_retcode %d\n", mng_ret);
         mng_cleanup(&h_mng);
         free(mng_priv);
-        return NULL;
+        return -1;
     }
 
     // check that MNG header is processed now
@@ -408,7 +403,7 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
                "demux_mng: internal error: header not processed\n");
         mng_cleanup(&h_mng);
         free(mng_priv);
-        return NULL;
+        return -1;
     }
 
     // create a new video stream header
@@ -432,7 +427,7 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
 
     // set private data in demuxer and return demuxer
     demuxer->priv = mng_priv;
-    return demuxer;
+    return 0;
 }
 
 /**
@@ -569,17 +564,17 @@ static int demux_mng_control(demuxer_t * demuxer, int cmd, void * arg)
 }
 
 const demuxer_desc_t demuxer_desc_mng = {
-    "MNG demuxer",
-    "mng",
-    "MNG",
-    "Stefan Schuermans <stefan@blinkenarea.org>",
-    "MNG files, using libmng",
-    DEMUXER_TYPE_MNG,
-    0, // unsafe autodetect (only checking magic at beginning of stream)
-    demux_mng_check_file,
-    demux_mng_fill_buffer,
-    demux_mng_open,
-    demux_mng_close,
-    demux_mng_seek,
-    demux_mng_control
+    .info = "MNG demuxer",
+    .name = "mng",
+    .shortdesc = "MNG",
+    .author = "Stefan Schuermans <stefan@blinkenarea.org>",
+    .comment = "MNG files, using libmng",
+    .type = DEMUXER_TYPE_MNG,
+    .safe_check = 0, // unsafe autodetect (only checking magic at beginning of stream)
+    .check_file = demux_mng_check_file,
+    .fill_buffer = demux_mng_fill_buffer,
+    .open = demux_mng_open,
+    .close = demux_mng_close,
+    .seek = demux_mng_seek,
+    .control = demux_mng_control,
 };
