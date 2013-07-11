@@ -317,6 +317,7 @@ struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id);
 
 bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream);
+bool demuxer_stream_has_packets_queued(struct demuxer *d, struct sh_stream *stream);
 
 void demux_packet_list_sort(struct demux_packet **pkts, int num_pkts);
 void demux_packet_list_seek(struct demux_packet **pkts, int num_pkts,

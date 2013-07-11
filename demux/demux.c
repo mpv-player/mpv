@@ -559,6 +559,13 @@ bool demux_has_packet(struct sh_stream *sh)
     return ds && ds->head;
 }
 
+// Same as demux_has_packet, but to be called internally by demuxers, as
+// opposed to the user of the demuxer.
+bool demuxer_stream_has_packets_queued(struct demuxer *d, struct sh_stream *stream)
+{
+    return demux_has_packet(stream);
+}
+
 // ====================================================================
 
 void demuxer_help(void)

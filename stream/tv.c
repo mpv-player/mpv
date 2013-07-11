@@ -215,10 +215,23 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
     tvi_handle_t *tvh=(tvi_handle_t*)(demux->priv);
     demux_packet_t* dp;
     unsigned int len=0;
+    struct sh_stream *want_audio = NULL, *want_video = NULL;
+
+    for (int n = 0; n < demux->num_streams; n++) {
+        struct sh_stream *sh = demux->streams[n];
+        if (!demuxer_stream_has_packets_queued(demux, sh) &&
+            demuxer_stream_is_selected(demux, sh))
+        {
+            if (sh->type == STREAM_AUDIO)
+                want_audio = sh;
+            if (sh->type == STREAM_VIDEO)
+                want_video = sh;
+        }
+    }
 
     /* ================== ADD AUDIO PACKET =================== */
 
-    if (ds==demux->audio && tvh->tv_param->noaudio == 0 &&
+    if (want_audio && tvh->tv_param->noaudio == 0 &&
         tvh->functions->control(tvh->priv,
                                 TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
         {
@@ -227,19 +240,19 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
         dp=new_demux_packet(len);
         dp->keyframe = true;
         dp->pts=tvh->functions->grab_audio_frame(tvh->priv, dp->buffer,len);
-        ds_add_packet(demux->audio,dp);
+        demuxer_add_packet(demux, want_audio, dp);
         }
 
     /* ================== ADD VIDEO PACKET =================== */
 
-    if (ds==demux->video && tvh->functions->control(tvh->priv,
+    if (want_video && tvh->functions->control(tvh->priv,
                             TVI_CONTROL_IS_VIDEO, 0) == TVI_CONTROL_TRUE)
         {
 		len = tvh->functions->get_video_framesize(tvh->priv);
        	dp=new_demux_packet(len);
         dp->keyframe = true;
   		dp->pts=tvh->functions->grab_video_frame(tvh->priv, dp->buffer, len);
-   		ds_add_packet(demux->video,dp);
+   		demuxer_add_packet(demux, want_video, dp);
 	 }
 
     if (tvh->tv_param->scan) tv_scan(tvh);
