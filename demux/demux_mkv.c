@@ -1283,7 +1283,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     if (track->v_frate == 0.0)
         track->v_frate = 25.0;
     sh_v->fps = track->v_frate;
-    sh_v->frametime = 1 / track->v_frate;
     sh_v->aspect = 0;
     if (!track->realmedia) {
         sh_v->disp_w = track->v_width;

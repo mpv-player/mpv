@@ -1793,6 +1793,8 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
     {
         float delay = opts->playback_speed * ao_get_delay(mpctx->ao);
         float d = delay - mpctx->delay;
+        if (frame_time < 0)
+            frame_time = mpctx->sh_video->fps > 0 ? 1.0 / mpctx->sh_video->fps : 0;
         // we should avoid dropping too many frames in sequence unless we
         // are too late. and we allow 100ms A-V delay here:
         if (d < -mpctx->dropped_frames * frame_time - 0.100 && !mpctx->paused
@@ -2305,14 +2307,12 @@ int reinit_video_chain(struct MPContext *mpctx)
     }
 
     mp_tmsg(MSGT_CPLAYER, MSGL_V, "[V] filefmt:%d  fourcc:0x%X  "
-            "size:%dx%d  fps:%5.3f  ftime:=%6.4f\n",
+            "size:%dx%d  fps:%5.3f\n",
             mpctx->master_demuxer->file_format, mpctx->sh_video->format,
             mpctx->sh_video->disp_w, mpctx->sh_video->disp_h,
-            mpctx->sh_video->fps, mpctx->sh_video->frametime);
-    if (opts->force_fps) {
+            mpctx->sh_video->fps);
+    if (opts->force_fps)
         mpctx->sh_video->fps = opts->force_fps;
-        mpctx->sh_video->frametime = 1.0f / mpctx->sh_video->fps;
-    }
     update_fps(mpctx);
 
     if (!mpctx->sh_video->fps && !opts->force_fps && !opts->correct_pts) {
@@ -2449,7 +2449,7 @@ static struct demux_packet *video_read_frame(struct MPContext *mpctx)
     if (pkt->pts != MP_NOPTS_VALUE)
         sh_video->last_pts = pkt->pts;
 
-    float frame_time = sh_video->frametime;
+    float frame_time = sh_video->fps > 0 ? 1.0f / sh_video->fps : 0;
 
     // override frame_time for variable/unknown FPS formats:
     if (!mpctx->opts.force_fps) {
@@ -2458,10 +2458,8 @@ static struct demux_packet *video_read_frame(struct MPContext *mpctx)
                                               : next_pts - sh_video->last_pts;
         if (d >= 0) {
             if (demuxer->file_format == DEMUXER_TYPE_TV) {
-                if (d > 0) {
-                    sh_video->frametime = d;
+                if (d > 0)
                     sh_video->fps = 1.0f / d;
-                }
                 frame_time = d;
             } else {
                 if ((int)sh_video->fps <= 1)
@@ -2574,7 +2572,7 @@ static double update_video(struct MPContext *mpctx, double endpts)
         if (pts >= mpctx->hrseek_pts - .005)
             mpctx->hrseek_framedrop = false;
         int framedrop_type = mpctx->hrseek_active && mpctx->hrseek_framedrop ?
-                             1 : check_framedrop(mpctx, sh_video->frametime);
+                             1 : check_framedrop(mpctx, -1);
         struct mp_image *decoded_frame =
             decode_video(sh_video, pkt, framedrop_type, pts);
         talloc_free(pkt);
@@ -4281,10 +4279,8 @@ goto_reopen_demuxer: ;
 
     if (opts->force_fps && mpctx->sh_video) {
         mpctx->sh_video->fps = opts->force_fps;
-        mpctx->sh_video->frametime = 1.0f / mpctx->sh_video->fps;
         mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
-                "FPS forced to be %5.3f  (ftime: %5.3f).\n",
-                mpctx->sh_video->fps, mpctx->sh_video->frametime);
+                "FPS forced to be %5.3f.\n", mpctx->sh_video->fps);
     }
 
     //==================== START PLAYING =======================

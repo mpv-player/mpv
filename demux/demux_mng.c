@@ -421,7 +421,6 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
 
     // set framerate to some value (MNG does not have a fixed framerate)
     sh_video->fps       = 5.0f;
-    sh_video->frametime = 1.0f / sh_video->fps;
 
     // set video frame parameters
     sh_video->bih                = calloc(1, sizeof(*sh_video->bih));

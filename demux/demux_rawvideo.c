@@ -119,7 +119,6 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
   sh_video->gsh->codec=decoder;
   sh_video->format=imgfmt;
   sh_video->fps=fps;
-  sh_video->frametime=1.0/fps;
   sh_video->disp_w=width;
   sh_video->disp_h=height;
   sh_video->i_bps=fps*imgsize;

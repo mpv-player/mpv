@@ -219,7 +219,6 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   sh_video->disp_w = 0;
   sh_video->disp_h = 0;
   sh_video->fps = mf_fps;
-  sh_video->frametime = 1 / sh_video->fps;
 
   mf->sh = sh_video;
   demuxer->priv=(void*)mf;

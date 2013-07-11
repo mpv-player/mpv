@@ -402,7 +402,6 @@ static void handle_stream(demuxer_t *demuxer, int i)
                               av_q2d(st->codec->time_base) *
                               st->codec->ticks_per_frame);
         sh_video->fps = fps;
-        sh_video->frametime = 1 / fps;
         if (st->sample_aspect_ratio.num)
             sh_video->aspect = codec->width  * st->sample_aspect_ratio.num
                     / (float)(codec->height * st->sample_aspect_ratio.den);

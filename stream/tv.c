@@ -743,8 +743,6 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     if (tvh->tv_param->fps != -1.0f)
         sh_video->fps = tvh->tv_param->fps;
 
-    sh_video->frametime = 1.0f/sh_video->fps;
-
     /* If playback only mode, go to immediate mode, fail silently */
     if(tvh->tv_param->immediate == 1)
         {
