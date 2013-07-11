@@ -242,8 +242,7 @@ static const demuxer_desc_t *get_demuxer_desc_from_type(int file_format)
 }
 
 
-static demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
-                              char *filename)
+static demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type)
 {
     struct demuxer *d = talloc_zero(NULL, struct demuxer);
     d->stream = stream;
@@ -259,8 +258,8 @@ static demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
             mp_msg(MSGT_DEMUXER, MSGL_ERR,
                    "BUG! Invalid demuxer type in new_demuxer(), "
                    "big troubles ahead.\n");
-    if (filename) // Filename hack for avs_check_file
-        d->filename = strdup(filename);
+    if (stream->url)
+        d->filename = strdup(stream->url);
     stream_seek(stream, stream->start_pos);
     return d;
 }
@@ -590,13 +589,12 @@ static int get_demuxer_type_from_name(char *demuxer_name, int *force)
 static struct demuxer *open_given_type(struct MPOpts *opts,
                                        const struct demuxer_desc *desc,
                                        struct stream *stream, bool force,
-                                       char *filename,
                                        struct demuxer_params *params)
 {
     struct demuxer *demuxer;
     int fformat = desc->type;
     mp_msg(MSGT_DEMUXER, MSGL_V, "Trying demuxer: %s\n", desc->name);
-    demuxer = new_demuxer(opts, stream, desc->type, filename);
+    demuxer = new_demuxer(opts, stream, desc->type);
     demuxer->params = params;
     if (!force) {
         if (desc->check_file)
@@ -644,20 +642,20 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
                    "BUG: recursion to nonexistent file format\n");
             return NULL;
         }
-        return open_given_type(opts, desc, stream, false, filename, params);
+        return open_given_type(opts, desc, stream, false, params);
     }
  fail:
     free_demuxer(demuxer);
     return NULL;
 }
 
-struct demuxer *demux_open_withparams(struct MPOpts *opts,
-                                      struct stream *stream, int file_format,
-                                      char *force_format, char *filename,
-                                      struct demuxer_params *params)
+struct demuxer *demux_open(struct stream *stream, char *force_format,
+                           struct demuxer_params *params, struct MPOpts *opts)
 {
     struct demuxer *demuxer = NULL;
     const struct demuxer_desc *desc;
+    if (!force_format)
+        force_format = opts->demuxer_name;
 
     int force = 0;
     int demuxer_type;
@@ -666,6 +664,7 @@ struct demuxer *demux_open_withparams(struct MPOpts *opts,
                force_format);
         return NULL;
     }
+    int file_format = 0;
     if (demuxer_type)
         file_format = demuxer_type;
 
@@ -675,13 +674,13 @@ struct demuxer *demux_open_withparams(struct MPOpts *opts,
         if (!desc)
             // should only happen with obsolete -demuxer 99 numeric format
             return NULL;
-        return open_given_type(opts, desc, stream, force, filename, params);
+        return open_given_type(opts, desc, stream, force, params);
     }
 
     // Test demuxers with safe file checks
     for (int i = 0; (desc = demuxer_list[i]); i++) {
         if (desc->safe_check) {
-            demuxer = open_given_type(opts, desc, stream, false, filename, params);
+            demuxer = open_given_type(opts, desc, stream, false, params);
             if (demuxer)
                 return demuxer;
         }
@@ -690,10 +689,10 @@ struct demuxer *demux_open_withparams(struct MPOpts *opts,
     // Ok. We're over the stable detectable fileformats, the next ones are
     // a bit fuzzy. So by default (extension_parsing==1) try extension-based
     // detection first:
-    if (filename && opts->extension_parsing == 1) {
-        desc = get_demuxer_desc_from_type(demuxer_type_by_filename(filename));
+    if (stream->url && opts->extension_parsing == 1) {
+        desc = get_demuxer_desc_from_type(demuxer_type_by_filename(stream->url));
         if (desc)
-            demuxer = open_given_type(opts, desc, stream, false, filename, params);
+            demuxer = open_given_type(opts, desc, stream, false, params);
         if (demuxer)
             return demuxer;
     }
@@ -701,20 +700,13 @@ struct demuxer *demux_open_withparams(struct MPOpts *opts,
     // Finally try detection for demuxers with unsafe checks
     for (int i = 0; (desc = demuxer_list[i]); i++) {
         if (!desc->safe_check && desc->check_file) {
-            demuxer = open_given_type(opts, desc, stream, false, filename, params);
+            demuxer = open_given_type(opts, desc, stream, false, params);
             if (demuxer)
                 return demuxer;
         }
     }
 
     return NULL;
-}
-
-struct demuxer *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
-                           char *filename)
-{
-    return demux_open_withparams(opts, vs, file_format, opts->demuxer_name,
-                                 filename, NULL);
 }
 
 void demux_flush(demuxer_t *demuxer)

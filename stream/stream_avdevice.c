@@ -26,15 +26,15 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
     return -1;
 }
 
-static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
+static int open_f(stream_t *stream, int mode, void *opts)
 {
     if (mode != STREAM_READ)
         return STREAM_ERROR;
 
     stream->fill_buffer = fill_buffer;
     stream->type = STREAMTYPE_AVDEVICE;
+    stream->demuxer = "lavf";
 
-    *file_format = DEMUXER_TYPE_LAVF;
     return STREAM_OK;
 }
 

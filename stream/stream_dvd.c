@@ -745,7 +745,8 @@ static int control(stream_t *stream,int cmd,void* arg)
 }
 
 
-static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
+static int open_s(stream_t *stream,int mode, void* opts)
+{
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
   int k;
 
@@ -1059,7 +1060,7 @@ fail:
   return STREAM_UNSUPPORTED;
 }
 
-static int ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
+static int ifo_stream_open (stream_t *stream, int mode, void *opts)
 {
     char* filename;
     struct stream_priv_s *spriv;
@@ -1085,7 +1086,7 @@ static int ifo_stream_open (stream_t *stream, int mode, void *opts, int *file_fo
     free(stream->url);
     stream->url=strdup("dvd://");
 
-    return open_s(stream, mode, spriv, file_format);
+    return open_s(stream, mode, spriv);
 }
 
 const stream_info_t stream_info_dvd = {

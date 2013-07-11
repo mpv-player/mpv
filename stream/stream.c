@@ -131,10 +131,8 @@ static stream_t *new_stream(size_t min_size);
 static int stream_seek_unbuffered(stream_t *s, int64_t newpos);
 
 static stream_t *open_stream_plugin(const stream_info_t *sinfo,
-                                    const char *filename,
-                                    int mode, struct MPOpts *options,
-                                    int *file_format, int *ret,
-                                    char **redirected_url)
+                                    const char *filename, int mode,
+                                    struct MPOpts *options, int *ret)
 {
     void *arg = NULL;
     stream_t *s;
@@ -162,7 +160,7 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     s->url = strdup(filename);
     s->flags = 0;
     s->mode = mode;
-    *ret = sinfo->open(s, mode, arg, file_format);
+    *ret = sinfo->open(s, mode, arg);
     if ((*ret) != STREAM_OK) {
         free(s->url);
         talloc_free(s);
@@ -201,20 +199,13 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
 
 
 static stream_t *open_stream_full(const char *filename, int mode,
-                                  struct MPOpts *options, int *file_format)
+                                  struct MPOpts *options)
 {
     int i, j, l, r;
     const stream_info_t *sinfo;
     stream_t *s;
-    char *redirected_url = NULL;
 
     assert(filename);
-
-    int dummy;
-    if (!file_format)
-        file_format = &dummy;
-
-    *file_format = DEMUXER_TYPE_UNKNOWN;
 
     for (i = 0; auto_open_streams[i]; i++) {
         sinfo = auto_open_streams[i];
@@ -230,22 +221,10 @@ static stream_t *open_stream_full(const char *filename, int mode,
             if ((l == 0 && !strstr(filename, "://")) ||
                 ((strncasecmp(sinfo->protocols[j], filename, l) == 0) &&
                  (strncmp("://", filename + l, 3) == 0))) {
-                *file_format = DEMUXER_TYPE_UNKNOWN;
-                s =
-                    open_stream_plugin(sinfo, filename, mode, options,
-                                       file_format,
-                                       &r,
-                                       &redirected_url);
+                s = open_stream_plugin(sinfo, filename, mode, options, &r);
                 if (s)
                     return s;
-                if (r == STREAM_REDIRECTED && redirected_url) {
-                    mp_msg(MSGT_OPEN, MSGL_V, "[%s] open %s redirected to %s\n",
-                           sinfo->info, filename, redirected_url);
-                    s = open_stream_full(redirected_url, mode, options,
-                                         file_format);
-                    free(redirected_url);
-                    return s;
-                } else if (r != STREAM_UNSUPPORTED) {
+                if (r != STREAM_UNSUPPORTED) {
                     mp_tmsg(MSGT_OPEN, MSGL_ERR, "Failed to open %s.\n",
                             filename);
                     return NULL;
@@ -259,15 +238,14 @@ static stream_t *open_stream_full(const char *filename, int mode,
     return NULL;
 }
 
-stream_t *open_stream(const char *filename, struct MPOpts *options,
-                      int *file_format)
+struct stream *stream_open(const char *filename, struct MPOpts *options)
 {
-    return open_stream_full(filename, STREAM_READ, options, file_format);
+    return open_stream_full(filename, STREAM_READ, options);
 }
 
 stream_t *open_output_stream(const char *filename, struct MPOpts *options)
 {
-    return open_stream_full(filename, STREAM_WRITE, options, NULL);
+    return open_stream_full(filename, STREAM_WRITE, options);
 }
 
 static int stream_reconnect(stream_t *s)
@@ -655,7 +633,7 @@ int stream_check_interrupt(int time)
 stream_t *open_memory_stream(void *data, int len)
 {
     assert(len >= 0);
-    stream_t *s = open_stream("memory://", NULL, NULL);
+    stream_t *s = stream_open("memory://", NULL);
     assert(s);
     stream_control(s, STREAM_CTRL_SET_CONTENTS, &(bstr){data, len});
     return s;

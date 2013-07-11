@@ -97,13 +97,13 @@ tv_stream_close (stream_t *stream)
   stream->priv=NULL;
 }
 static int
-tv_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
+tv_stream_open (stream_t *stream, int mode, void *opts)
 {
 
   stream->type = STREAMTYPE_TV;
   stream->priv = opts;
   stream->close=tv_stream_close;
-  *file_format =  DEMUXER_TYPE_TV;
+  stream->demuxer = "tv";
 
   return STREAM_OK;
 }

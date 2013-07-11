@@ -110,7 +110,8 @@ static int control(stream_t *s, int cmd, void *arg) {
   return STREAM_UNSUPPORTED;
 }
 
-static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
+static int open_f(stream_t *stream,int mode, void* opts)
+{
   int f;
   mode_t m = 0;
   int64_t len;

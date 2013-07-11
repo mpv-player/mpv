@@ -29,10 +29,10 @@
 #include "demux/demux.h"
 
 static int
-mf_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
+mf_stream_open (stream_t *stream, int mode, void *opts)
 {
   stream->type = STREAMTYPE_MF;
-  *file_format = DEMUXER_TYPE_MF;
+  stream->demuxer = "lavf";
 
   return STREAM_OK;
 }

@@ -23,7 +23,8 @@
 
 #include "stream.h"
 
-static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
+static int open_s(stream_t *stream,int mode, void* opts)
+{
   stream->type = STREAMTYPE_DUMMY;
 
   return 1;

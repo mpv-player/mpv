@@ -3882,11 +3882,10 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     struct MPOpts *opts = &mpctx->opts;
     if (!filename)
         return NULL;
-    int format = 0;
     char *disp_filename = filename;
     if (strncmp(disp_filename, "memory://", 9) == 0)
         disp_filename = "memory://"; // avoid noise
-    struct stream *stream = open_stream(filename, &mpctx->opts, &format);
+    struct stream *stream = stream_open(filename, &mpctx->opts);
     if (!stream)
         goto err_out;
     stream_enable_cache_percent(&stream, stream_cache,
@@ -3896,8 +3895,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
         .ass_library = mpctx->ass_library, // demux_libass requires it
     };
     struct demuxer *demuxer =
-        demux_open_withparams(&mpctx->opts, stream, format, demuxer_name,
-                              filename, &params);
+        demux_open(stream, demuxer_name, &params, &mpctx->opts);
     if (!demuxer) {
         free_stream(stream);
         goto err_out;
@@ -4156,36 +4154,13 @@ static void play_current_file(struct MPContext *mpctx)
         }
         stream_filename = mpctx->resolve_result->url;
     }
-    int file_format = DEMUXER_TYPE_UNKNOWN;
-    mpctx->stream = open_stream(stream_filename, opts, &file_format);
+    mpctx->stream = stream_open(stream_filename, opts);
     if (!mpctx->stream) { // error...
         demux_was_interrupted(mpctx);
         goto terminate_playback;
     }
     mpctx->initialized_flags |= INITIALIZED_STREAM;
 
-    if (file_format == DEMUXER_TYPE_PLAYLIST) {
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, "\nThis looks like a playlist, but "
-               "playlist support will not be used automatically.\n"
-               "mpv's playlist code is unsafe and should only be used with "
-               "trusted sources.\nPlayback will probably fail.\n\n");
-#if 0
-        // Handle playlist
-        mp_msg(MSGT_CPLAYER, MSGL_WARN, "Parsing playlist %s...\n",
-               mpctx->filename);
-        bool empty = true;
-        struct playlist *pl = playlist_parse(mpctx->stream);
-        if (pl) {
-            empty = pl->first == NULL;
-            playlist_transfer_entries(mpctx->playlist, pl);
-            talloc_free(pl);
-        }
-        if (empty)
-            mp_msg(MSGT_CPLAYER, MSGL_ERR, "Playlist was invalid or empty!\n");
-        mpctx->stop_play = PT_NEXT_ENTRY;
-        goto terminate_playback;
-#endif
-    }
     mpctx->stream->start_pos += opts->seek_to_byte;
 
     if (opts->stream_dump && opts->stream_dump[0]) {
@@ -4212,8 +4187,7 @@ goto_reopen_demuxer: ;
 
     mpctx->audio_delay = opts->audio_delay;
 
-    mpctx->demuxer = demux_open(opts, mpctx->stream, file_format,
-                                mpctx->filename);
+    mpctx->demuxer = demux_open(mpctx->stream, NULL, NULL, opts);
     mpctx->master_demuxer = mpctx->demuxer;
 
     if (!mpctx->demuxer) {

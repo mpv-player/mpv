@@ -1555,7 +1555,7 @@ pvr_stream_read (stream_t *stream, char *buffer, int size)
 }
 
 static int
-pvr_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
+pvr_stream_open (stream_t *stream, int mode, void *opts)
 {
   struct v4l2_capability vcap;
   struct v4l2_ext_controls ctrls;

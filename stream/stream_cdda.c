@@ -333,7 +333,7 @@ static int control(stream_t *stream, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
+static int open_cdda(stream_t *st, int m, void *opts)
 {
     struct cdda_params *p = (struct cdda_params *)opts;
     int mode = p->paranoia_mode;
@@ -479,7 +479,7 @@ static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
     st->control = control;
     st->close = close_cdda;
 
-    *file_format = DEMUXER_TYPE_RAWAUDIO;
+    st->demuxer = "rawaudio";
 
     m_struct_free(&stream_opts, opts);
 

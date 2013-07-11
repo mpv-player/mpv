@@ -115,7 +115,8 @@ static void close_f(stream_t *s){
   smbc_close(s->fd);
 }
 
-static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
+static int open_f (stream_t *stream, int mode, void *opts)
+{
   char *filename;
   mode_t m = 0;
   int64_t len;

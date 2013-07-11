@@ -659,7 +659,7 @@ static int dvb_streaming_start(stream_t *stream, struct stream_priv_s *opts, int
 
 
 
-static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
+static int dvb_open(stream_t *stream, int mode, void *opts)
 {
 	// I don't force  the file format bacause, although it's almost always TS,
 	// there are some providers that stream an IP multicast with M$ Mpeg4 inside
@@ -739,7 +739,7 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 	stream->close = dvbin_close;
 	m_struct_free(&stream_opts, opts);
 
-	*file_format = DEMUXER_TYPE_LAVF; // TS
+	stream->demuxer = "lavf:mpegts";
 
 	return STREAM_OK;
 }

@@ -70,7 +70,6 @@
 #define MP_STREAM_SEEK_FW  4
 #define MP_STREAM_SEEK  (MP_STREAM_SEEK_BW | MP_STREAM_SEEK_FW)
 
-#define STREAM_REDIRECTED -2
 #define STREAM_UNSUPPORTED -1
 #define STREAM_ERROR 0
 #define STREAM_OK    1
@@ -121,7 +120,7 @@ typedef struct stream_info_st {
     const char *author;
     const char *comment;
     // opts is set from ->opts
-    int (*open)(struct stream *st, int mode, void *opts, int *file_format);
+    int (*open)(struct stream *st, int mode, void *opts);
     const char *protocols[MAX_STREAM_PROTOCOLS];
     const void *opts;
     int opts_url; /* If this is 1 we will parse the url as an option string
@@ -158,6 +157,7 @@ typedef struct stream {
     void *priv; // used for DVD, TV, RTSP etc
     char *url; // strdup() of filename/url
     char *mime_type; // when HTTP streaming is used
+    char *demuxer; // request demuxer to be used
     char *lavf_type; // name of expected demuxer type for lavf
     struct MPOpts *opts;
 
@@ -278,8 +278,7 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
 int stream_control(stream_t *s, int cmd, void *arg);
 void stream_update_size(stream_t *s);
 void free_stream(stream_t *s);
-stream_t *open_stream(const char *filename, struct MPOpts *options,
-                      int *file_format);
+struct stream *stream_open(const char *filename, struct MPOpts *options);
 stream_t *open_output_stream(const char *filename, struct MPOpts *options);
 stream_t *open_memory_stream(void *data, int len);
 struct demux_stream;

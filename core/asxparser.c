@@ -451,7 +451,6 @@ asx_parse_ref(ASX_Parser_t* parser, char** attribs) {
 static void asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs) {
   char *href;
   stream_t* stream;
-  int f=DEMUXER_TYPE_UNKNOWN;
 
   if(parser->deep > 0)
     return;
@@ -461,7 +460,7 @@ static void asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs
     asx_warning_attrib_required(parser,"ENTRYREF" ,"HREF" );
     return;
   }
-  stream=open_stream(href,0,&f);
+  stream=stream_open(href, NULL);
   if(!stream) {
     mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Can't open playlist %s\n",href);
     free(href);

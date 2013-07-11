@@ -1969,7 +1969,7 @@ static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
                "Input config file %s not found.\n", file);
         return 0;
     }
-    stream_t *s = open_stream(file, NULL, NULL);
+    stream_t *s = stream_open(file, NULL);
     if (!s) {
         mp_msg(MSGT_INPUT, MSGL_ERR, "Can't open input config file %s.\n", file);
         return 0;

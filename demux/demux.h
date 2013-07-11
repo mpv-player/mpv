@@ -230,13 +230,8 @@ bool demux_stream_eof(struct sh_stream *sh);
 
 struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
 
-struct demuxer *demux_open(struct MPOpts *opts, struct stream *stream,
-                           int file_format, char *filename);
-
-struct demuxer *demux_open_withparams(struct MPOpts *opts,
-                                      struct stream *stream, int file_format,
-                                      char *force_format, char *filename,
-                                      struct demuxer_params *params);
+struct demuxer *demux_open(struct stream *stream, char *force_format,
+                           struct demuxer_params *params, struct MPOpts *opts);
 
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, float rel_seek_secs, float audio_delay,

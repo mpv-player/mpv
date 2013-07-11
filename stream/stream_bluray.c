@@ -291,8 +291,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static int bluray_stream_open(stream_t *s, int mode,
-                              void *opts, int *file_format)
+static int bluray_stream_open(stream_t *s, int mode, void *opts)
 {
     struct stream_priv_s *p = opts;
     struct bluray_priv_s *b;

@@ -699,10 +699,7 @@ err_out:
 
 struct playlist *playlist_parse_file(const char *file)
 {
-  stream_t *stream;
-  int f=DEMUXER_TYPE_PLAYLIST;
-
-  stream = open_stream(file, 0, &f);
+  stream_t *stream = stream_open(file, NULL);
   if(!stream) {
       mp_msg(MSGT_PLAYTREE,MSGL_ERR,
              "Error while opening playlist file %s: %s\n",
