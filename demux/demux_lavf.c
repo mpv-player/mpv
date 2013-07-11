@@ -345,6 +345,17 @@ static void parse_cryptokey(AVFormatContext *avfc, const char *str)
         *key++ = (char2int(str[0]) << 4) | char2int(str[1]);
 }
 
+static void select_tracks(struct demuxer *demuxer, int start)
+{
+    lavf_priv_t *priv = demuxer->priv;
+    for (int n = start; n < priv->num_streams; n++) {
+        struct sh_stream *stream = priv->streams[n];
+        AVStream *st = priv->avfc->streams[n];
+        bool selected = stream && demuxer_stream_is_selected(demuxer, stream);
+        st->discard = selected ? AVDISCARD_DEFAULT : AVDISCARD_ALL;
+    }
+}
+
 static void handle_stream(demuxer_t *demuxer, int i)
 {
     lavf_priv_t *priv = demuxer->priv;
@@ -352,8 +363,6 @@ static void handle_stream(demuxer_t *demuxer, int i)
     AVStream *st = avfc->streams[i];
     AVCodecContext *codec = st->codec;
     struct sh_stream *sh = NULL;
-
-    st->discard = AVDISCARD_ALL;
 
     switch (codec->codec_type) {
     case AVMEDIA_TYPE_AUDIO: {
@@ -461,8 +470,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
             sh->lang = talloc_strdup(sh, lang->value);
     }
 
-    bool selected = demuxer_stream_is_selected(demuxer, sh);
-    st->discard = selected ? AVDISCARD_DEFAULT : AVDISCARD_ALL;
+    select_tracks(demuxer, i);
 }
 
 // Add any new streams that might have been added
@@ -789,14 +797,7 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 
     case DEMUXER_CTRL_SWITCHED_TRACKS:
     {
-        for (int n = 0; n < priv->num_streams; n++) {
-            struct sh_stream *stream = priv->streams[n];
-            AVStream *st = priv->avfc->streams[n];
-            if (stream) {
-                bool selected = demuxer_stream_is_selected(demuxer, stream);
-                st->discard = selected ? AVDISCARD_DEFAULT : AVDISCARD_ALL;
-            }
-        }
+        select_tracks(demuxer, 0);
         return DEMUXER_CTRL_OK;
     }
     case DEMUXER_CTRL_IDENTIFY_PROGRAM:
