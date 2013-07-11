@@ -1711,21 +1711,21 @@ double playing_audio_pts(struct MPContext *mpctx)
     return pts - mpctx->opts.playback_speed *ao_get_delay(mpctx->ao);
 }
 
-// When reading subtitles from a demuxer, and we don't read video or audio
-// from the demuxer, we must explicitly read subtitle packets. (Normally,
-// subs are interleaved with video and audio, so we get them automatically.)
-static bool is_non_interleaved(struct MPContext *mpctx, struct track *track)
+// When reading subtitles from a demuxer, and we read video or audio from the
+// demuxer, we should not explicitly read subtitle packets. (With external
+// subs, we have to.)
+static bool is_interleaved(struct MPContext *mpctx, struct track *track)
 {
     if (track->is_external || !track->demuxer)
-        return true;
+        return false;
 
     struct demuxer *demuxer = track->demuxer;
     for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
         struct track *other = mpctx->current_track[type];
         if (other && other != track && other->demuxer && other->demuxer == demuxer)
-            return false;
+            return true;
     }
-    return true;
+    return false;
 }
 
 static void reset_subtitles(struct MPContext *mpctx)
@@ -1753,10 +1753,10 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
     double curpts_s = refpts_s + opts->sub_delay;
 
     if (!track->preloaded) {
-        bool non_interleaved = is_non_interleaved(mpctx, track);
+        bool interleaved = is_interleaved(mpctx, track);
 
         while (1) {
-            if (!non_interleaved && !demux_has_packet(sh_sub->gsh))
+            if (interleaved && !demux_has_packet(sh_sub->gsh))
                 break;
             double subpts_s = demux_get_next_pts(sh_sub->gsh);
             if (!demux_has_packet(sh_sub->gsh))
@@ -1769,7 +1769,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
                 if (!sub_accept_packets_in_advance(dec_sub))
                     break;
                 // Try to avoid demuxing whole file at once
-                if (non_interleaved && subpts_s > curpts_s + 1)
+                if (subpts_s > curpts_s + 1 && !interleaved)
                     break;
             }
             struct demux_packet *pkt = demux_read_packet(sh_sub->gsh);
