@@ -801,7 +801,7 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
             AVStream *st = priv->avfc->streams[n];
             if (stream && stream->type != STREAM_SUB) {
                 bool selected = demuxer_stream_is_selected(demuxer, stream);
-                st->discard = selected ? AVDISCARD_NONE : AVDISCARD_ALL;
+                st->discard = selected ? AVDISCARD_DEFAULT : AVDISCARD_ALL;
             }
         }
         return DEMUXER_CTRL_OK;
