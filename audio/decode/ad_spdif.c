@@ -220,12 +220,14 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf,
             sh->pts       = mpkt->pts;
             sh->pts_bytes = 0;
         }
+        int out_len = spdif_ctx->out_buffer_len;
         int ret = lavf_ctx->oformat->write_packet(lavf_ctx, &pkt);
+        avio_flush(lavf_ctx->pb);
+        sh->pts_bytes += spdif_ctx->out_buffer_len - out_len;
         talloc_free(mpkt);
         if (ret < 0)
             break;
     }
-    sh->pts_bytes += spdif_ctx->out_buffer_len;
     return spdif_ctx->out_buffer_len;
 }
 
