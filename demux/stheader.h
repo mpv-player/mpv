@@ -92,7 +92,6 @@ typedef struct sh_audio {
     int container_out_samplerate;
     int samplesize;
     struct mp_chmap channels;
-    int o_bps; // == samplerate*samplesize*channels.num   (uncompr. bytes/sec)
     int i_bps; // == bitrate  (compressed bytes/sec)
     // decoder buffers:
     int audio_out_minsize;  // minimal output from decoder may be this much

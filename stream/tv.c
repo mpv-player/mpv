@@ -794,7 +794,7 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
         sh_audio->gsh->codec = "mp-pcm";
 	sh_audio->format = audio_format;
 
-	sh_audio->i_bps = sh_audio->o_bps =
+	sh_audio->i_bps =
 	    sh_audio->samplerate * sh_audio->samplesize *
 	    sh_audio->channels.num;
 

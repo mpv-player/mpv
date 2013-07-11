@@ -84,9 +84,6 @@ static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
         return 0;
     }
 
-    if (!sh_audio->o_bps)
-        sh_audio->o_bps = sh_audio->channels.num * sh_audio->samplerate
-                          * sh_audio->samplesize;
     return 1;
 }
 
@@ -150,12 +147,9 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char *audio_decoders)
         mp_msg(MSGT_DECAUDIO, MSGL_INFO, "Selected audio codec: %s\n",
                sh_audio->gsh->decoder_desc);
         mp_msg(MSGT_DECAUDIO, MSGL_V,
-               "AUDIO: %d Hz, %d ch, %s, %3.1f kbit/%3.2f%% (ratio: %d->%d)\n",
+               "AUDIO: %d Hz, %d ch, %s\n",
                sh_audio->samplerate, sh_audio->channels.num,
-               af_fmt2str_short(sh_audio->sample_format),
-               sh_audio->i_bps * 8 * 0.001,
-               ((float) sh_audio->i_bps / sh_audio->o_bps) * 100.0,
-               sh_audio->i_bps, sh_audio->o_bps);
+               af_fmt2str_short(sh_audio->sample_format));
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
                "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
                sh_audio->i_bps * 8, sh_audio->samplerate, sh_audio->channels.num);
