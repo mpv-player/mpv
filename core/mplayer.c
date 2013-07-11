@@ -1668,36 +1668,18 @@ static double written_audio_pts(struct MPContext *mpctx)
     sh_audio_t *sh_audio = mpctx->sh_audio;
     if (!sh_audio)
         return MP_NOPTS_VALUE;
-    demux_stream_t *d_audio = mpctx->sh_audio->ds;
     // first calculate the end pts of audio that has been output by decoder
     double a_pts = sh_audio->pts;
-    if (a_pts != MP_NOPTS_VALUE)
-        // Good, decoder supports new way of calculating audio pts.
-        // sh_audio->pts is the timestamp of the latest input packet with
-        // known pts that the decoder has decoded. sh_audio->pts_bytes is
-        // the amount of bytes the decoder has written after that timestamp.
-        a_pts += sh_audio->pts_bytes / (double) sh_audio->o_bps;
-    else {
-        // Decoder doesn't support new way of calculating pts (or we're
-        // being called before it has decoded anything with known timestamp).
-        // Use the old method of audio pts calculation: take the timestamp
-        // of last packet with known pts the decoder has read data from,
-        // and add amount of bytes read after the beginning of that packet
-        // divided by input bps. This will be inaccurate if the input/output
-        // ratio is not constant for every audio packet or if it is constant
-        // but not accurately known in sh_audio->i_bps.
+    if (a_pts == MP_NOPTS_VALUE)
+        return MP_NOPTS_VALUE;
 
-        a_pts = d_audio->last_pts;
-        if (a_pts == MP_NOPTS_VALUE)
-            return a_pts;
+    // sh_audio->pts is the timestamp of the latest input packet with
+    // known pts that the decoder has decoded. sh_audio->pts_bytes is
+    // the amount of bytes the decoder has written after that timestamp.
+    a_pts += sh_audio->pts_bytes / (double) sh_audio->o_bps;
 
-        // ds_tell_pts returns bytes read after last timestamp from
-        // demuxing layer
-        if (sh_audio->i_bps)
-            a_pts += d_audio->last_pts_bytes / (double)sh_audio->i_bps;
-    }
     // Now a_pts hopefully holds the pts for end of audio from decoder.
-    // Substract data in buffers between decoder and audio out.
+    // Subtract data in buffers between decoder and audio out.
 
     // Decoded but not filtered
     a_pts -= sh_audio->a_buffer_len / (double)sh_audio->o_bps;
