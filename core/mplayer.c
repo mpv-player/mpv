@@ -2742,13 +2742,10 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
             vf_chain_seek_reset(mpctx->sh_video->vfilter);
         mpctx->sh_video->num_buffered_pts = 0;
         mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
+        mpctx->sh_video->pts = MP_NOPTS_VALUE;
+        mpctx->video_pts = MP_NOPTS_VALUE;
         mpctx->delay = 0;
         mpctx->time_frame = 0;
-        // Not all demuxers set d_video->pts during seek, so this value
-        // (which was used by at least vobsub code below) may be completely
-        // wrong (probably 0).
-        mpctx->sh_video->pts = mpctx->sh_video->ds->last_pts + mpctx->video_offset;
-        mpctx->video_pts = mpctx->sh_video->pts;
     }
 
     if (mpctx->sh_audio && reset_ac) {
