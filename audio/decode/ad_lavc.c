@@ -24,6 +24,7 @@
 
 #include <libavcodec/avcodec.h>
 #include <libavutil/opt.h>
+#include <libavutil/common.h>
 
 #include "talloc.h"
 
@@ -51,6 +52,7 @@ struct priv {
     int output_left;
     int unitsize;
     bool force_channel_map;
+    struct demux_packet *packet;
 };
 
 #define OPT_BASE_STRUCT struct MPOpts
@@ -344,6 +346,8 @@ static int control(sh_audio_t *sh, int cmd, void *arg)
     case ADCTRL_RESYNC_STREAM:
         avcodec_flush_buffers(ctx->avctx);
         ctx->output_left = 0;
+        talloc_free(ctx->packet);
+        ctx->packet = NULL;
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
@@ -372,9 +376,13 @@ static int decode_new_packet(struct sh_audio *sh)
 {
     struct priv *priv = sh->context;
     AVCodecContext *avctx = priv->avctx;
-    struct demux_packet *mpkt = demux_read_packet(sh->gsh);
+    struct demux_packet *mpkt = priv->packet;
+    if (!mpkt)
+        mpkt = demux_read_packet(sh->gsh);
     if (!mpkt)
         return -1;  // error or EOF
+
+    priv->packet = talloc_steal(priv, mpkt);
 
     int in_len = mpkt->len;
 
@@ -387,7 +395,16 @@ static int decode_new_packet(struct sh_audio *sh)
     }
     int got_frame = 0;
     int ret = avcodec_decode_audio4(avctx, priv->avframe, &got_frame, &pkt);
-    talloc_free(mpkt);
+    if (ret > 0) {
+        ret = FFMIN(ret, mpkt->len); // sanity check against decoder overreads
+        mpkt->buffer += ret;
+        mpkt->len    -= ret;
+        mpkt->pts = MP_NOPTS_VALUE; // don't reset PTS next time
+    }
+    if (mpkt->len == 0 || ret <= 0) {
+        talloc_free(mpkt);
+        priv->packet = NULL;
+    }
     // LATM may need many packets to find mux info
     if (ret == AVERROR(EAGAIN))
         return 0;
