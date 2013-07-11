@@ -68,6 +68,9 @@ struct sh_stream {
 
     // shouldn't exist type of stuff
     struct MPOpts *opts;
+
+    // Internal to demux.c
+    struct demux_stream *ds;
 };
 
 #define SH_COMMON                                                       \

@@ -183,13 +183,6 @@ typedef struct demuxer {
     enum timestamp_type timestamp_type;
     bool warned_queue_overflow;
 
-    struct demux_stream *ds[STREAM_TYPE_COUNT]; // video/audio/sub buffers
-
-    // These correspond to ds[], e.g.: audio == ds[STREAM_AUDIO]
-    struct demux_stream *audio; // audio buffer/demuxer
-    struct demux_stream *video; // video buffer/demuxer
-    struct demux_stream *sub;   // dvd subtitle buffer/demuxer
-
     struct sh_stream **streams;
     int num_streams;
 

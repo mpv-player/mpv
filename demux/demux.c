@@ -89,21 +89,31 @@ const demuxer_desc_t *const demuxer_list[] = {
     NULL
 };
 
-typedef struct demux_stream {
-    enum stream_type stream_type;
+struct demux_stream {
+    int selected;          // user wants packets from this stream
     int eof;               // end of demuxed stream? (true if all buffer empty)
-//---------------
     int fill_count;        // number of unsuccessful tries to get a packet
     int packs;            // number of packets in buffer
     int bytes;            // total bytes of packets in buffer
     struct demux_packet *head;
     struct demux_packet *tail;
-    struct demuxer *demuxer; // parent demuxer structure (stream handler)
-// ---- stream header ----
-    struct sh_stream *gsh;
-} demux_stream_t;
+};
 
 static void add_stream_chapters(struct demuxer *demuxer);
+
+static void ds_free_packs(struct demux_stream *ds)
+{
+    demux_packet_t *dp = ds->head;
+    while (dp) {
+        demux_packet_t *dn = dp->next;
+        free_demux_packet(dp);
+        dp = dn;
+    }
+    ds->head = ds->tail = NULL;
+    ds->packs = 0; // !!!!!
+    ds->bytes = 0;
+    ds->eof = 0;
+}
 
 static int packet_destroy(void *ptr)
 {
@@ -215,36 +225,6 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
     return new;
 }
 
-static void ds_free_packs(demux_stream_t *ds)
-{
-    demux_packet_t *dp = ds->head;
-    while (dp) {
-        demux_packet_t *dn = dp->next;
-        free_demux_packet(dp);
-        dp = dn;
-    }
-    ds->head = ds->tail = NULL;
-    ds->packs = 0; // !!!!!
-    ds->bytes = 0;
-}
-
-static void free_demuxer_stream(struct demux_stream *ds)
-{
-    ds_free_packs(ds);
-    free(ds);
-}
-
-static struct demux_stream *new_demuxer_stream(struct demuxer *demuxer,
-                                               enum stream_type type)
-{
-    demux_stream_t *ds = malloc(sizeof(demux_stream_t));
-    *ds = (demux_stream_t) {
-        .stream_type = type,
-        .demuxer = demuxer,
-    };
-    return ds;
-}
-
 /**
  * Get demuxer description structure for a given demuxer type
  *
@@ -273,12 +253,6 @@ static demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type,
     d->movi_end = stream->end_pos;
     d->seekable = 1;
     d->filepos = -1;
-    d->audio = new_demuxer_stream(d, STREAM_AUDIO);
-    d->video = new_demuxer_stream(d, STREAM_VIDEO);
-    d->sub = new_demuxer_stream(d, STREAM_SUB);
-    d->ds[STREAM_VIDEO] = d->video;
-    d->ds[STREAM_AUDIO] = d->audio;
-    d->ds[STREAM_SUB] = d->sub;
     d->type = type;
     d->opts = opts;
     if (type)
@@ -305,13 +279,15 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
             demuxer_id++;
     }
 
-    struct sh_stream *sh = talloc_struct(demuxer, struct sh_stream, {
+    struct sh_stream *sh = talloc_ptrtype(demuxer, sh);
+    *sh = (struct sh_stream) {
         .type = type,
         .demuxer = demuxer,
         .index = demuxer->num_streams,
         .demuxer_id = demuxer_id, // may be overwritten by demuxer
         .opts = demuxer->opts,
-    });
+        .ds = talloc_zero(sh, struct demux_stream),
+    };
     MP_TARRAY_APPEND(demuxer, demuxer->streams, demuxer->num_streams, sh);
     switch (sh->type) {
         case STREAM_VIDEO: {
@@ -360,6 +336,8 @@ static void free_sh_video(sh_video_t *sh)
 
 static void free_sh_stream(struct sh_stream *sh)
 {
+    ds_free_packs(sh->ds);
+
     switch (sh->type) {
     case STREAM_AUDIO: free_sh_audio(sh->audio); break;
     case STREAM_VIDEO: free_sh_video(sh->video); break;
@@ -377,18 +355,47 @@ void free_demuxer(demuxer_t *demuxer)
     // free streams:
     for (int n = 0; n < demuxer->num_streams; n++)
         free_sh_stream(demuxer->streams[n]);
-    // free demuxers:
-    free_demuxer_stream(demuxer->audio);
-    free_demuxer_stream(demuxer->video);
-    free_demuxer_stream(demuxer->sub);
     free(demuxer->filename);
     talloc_free(demuxer);
 }
 
-static void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
+static const char *stream_type_name(enum stream_type type)
 {
-    // append packet to DS stream:
-    ++ds->packs;
+    switch (type) {
+    case STREAM_VIDEO:  return "video";
+    case STREAM_AUDIO:  return "audio";
+    case STREAM_SUB:    return "sub";
+    default:            return "unknown";
+    }
+}
+
+static int count_packs(struct demuxer *demux, enum stream_type type)
+{
+    int c = 0;
+    for (int n = 0; n < demux->num_streams; n++)
+        c += demux->streams[n]->type == type ? demux->streams[n]->ds->packs : 0;
+    return c;
+}
+
+static int count_bytes(struct demuxer *demux, enum stream_type type)
+{
+    int c = 0;
+    for (int n = 0; n < demux->num_streams; n++)
+        c += demux->streams[n]->type == type ? demux->streams[n]->ds->bytes : 0;
+    return c;
+}
+
+// Returns the same value as demuxer->fill_buffer: 1 ok, 0 EOF/not selected.
+int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
+                       demux_packet_t *dp)
+{
+    struct demux_stream *ds = stream ? stream->ds : NULL;
+    if (!ds || !ds->selected) {
+        talloc_free(dp);
+        return 0;
+    }
+
+    ds->packs++;
     ds->bytes += dp->len;
     if (ds->tail) {
         // next packet in stream
@@ -399,47 +406,46 @@ static void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
         ds->head = ds->tail = dp;
     }
     mp_dbg(MSGT_DEMUXER, MSGL_DBG2,
-           "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%u  [packs: A=%d V=%d]\n",
-           (ds == ds->demuxer->audio) ? "d_audio" : "d_video", dp->len,
-           dp->pts, (unsigned int) dp->pos, ds->demuxer->audio->packs,
-           ds->demuxer->video->packs);
-}
-
-// Returns the same value as demuxer->fill_buffer: 1 ok, 0 EOF/not selected.
-int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
-                       demux_packet_t *dp)
-{
-    if (!dp || !demuxer_stream_is_selected(demuxer, stream)) {
-        free_demux_packet(dp);
-        return 0;
-    } else {
-        ds_add_packet(demuxer->ds[stream->type], dp);
-        return 1;
-    }
+           "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%"PRIu64" "
+           "[packs: A=%d V=%d S=%d]\n", stream_type_name(stream->type),
+           dp->len, dp->pts, dp->pos, count_packs(demuxer, STREAM_AUDIO),
+           count_packs(demuxer, STREAM_VIDEO), count_packs(demuxer, STREAM_SUB));
+    return 1;
 }
 
 static bool demux_check_queue_full(demuxer_t *demux)
 {
-    int apacks = demux->audio ? demux->audio->packs : 0;
-    int abytes = demux->audio ? demux->audio->bytes : 0;
-    int vpacks = demux->video ? demux->video->packs : 0;
-    int vbytes = demux->video ? demux->video->bytes : 0;
+    for (int n = 0; n < demux->num_streams; n++) {
+        struct sh_stream *sh = demux->streams[n];
+        if (sh->ds->packs > MAX_PACKS || sh->ds->bytes > MAX_PACK_BYTES)
+            goto overflow;
+    }
+    return false;
 
-    if (apacks < MAX_PACKS && abytes < MAX_PACK_BYTES &&
-        vpacks < MAX_PACKS && vbytes < MAX_PACK_BYTES)
-        return false;
+overflow:
 
     if (!demux->warned_queue_overflow) {
         mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "\nToo many packets in the demuxer "
                 "packet queue (video: %d packets in %d bytes, audio: %d "
-                "packets in %d bytes).\n", vpacks, vbytes, apacks, abytes);
+                "packets in %d bytes, sub: %d packets in %d bytes).\n",
+                count_packs(demux, STREAM_VIDEO), count_bytes(demux, STREAM_VIDEO),
+                count_packs(demux, STREAM_AUDIO), count_bytes(demux, STREAM_AUDIO),
+                count_packs(demux, STREAM_SUB), count_bytes(demux, STREAM_SUB));
         mp_tmsg(MSGT_DEMUXER, MSGL_HINT, "Maybe you are playing a non-"
                 "interleaved stream/file or the codec failed?\n");
     }
-
     demux->warned_queue_overflow = true;
-
     return true;
+}
+
+static bool need_coverart_hack(struct demuxer *demux)
+{
+    for (int n = 0; n < demux->num_streams; n++) {
+        struct sh_stream *sh = demux->streams[n];
+        if (sh->attached_picture && sh->ds->selected)
+            return true;
+    }
+    return false;
 }
 
 // return value:
@@ -451,21 +457,14 @@ static int demux_fill_buffer(demuxer_t *demux)
     return demux->desc->fill_buffer ? demux->desc->fill_buffer(demux) : 0;
 }
 
-// return value:
-//     0 = EOF
-//     1 = successful
-static int ds_get_packets(demux_stream_t *ds)
+static void ds_get_packets(struct sh_stream *sh)
 {
-    if (!ds)
-        return 0;
-    demuxer_t *demux = ds->demuxer;
+    struct demux_stream *ds = sh->ds;
+    demuxer_t *demux = sh->demuxer;
     mp_dbg(MSGT_DEMUXER, MSGL_DBG3, "ds_get_packets (%s) called\n",
-           ds == demux->audio ? "d_audio" : ds == demux->video ? "d_video" :
-           ds == demux->sub   ? "d_sub"   : "unknown");
+           stream_type_name(sh->type));
     while (1) {
-        int apacks = demux->audio ? demux->audio->packs : 0;
-        int vpacks = demux->video ? demux->video->packs : 0;
-        if (ds->packs) {
+        if (ds->head) {
             /* The code below can set ds->eof to 1 when another stream runs
              * out of buffer space. That makes sense because in that situation
              * the calling code should not count on being able to demux more
@@ -475,7 +474,7 @@ static int ds_get_packets(demux_stream_t *ds)
              * weird behavior. */
             ds->eof = 0;
             ds->fill_count = 0;
-            return 1;
+            return;
         }
         // avoid buffering too far ahead in e.g. badly interleaved files
         // or when one stream is shorter, without breaking large audio
@@ -489,33 +488,20 @@ static int ds_get_packets(demux_stream_t *ds)
         if (demux_check_queue_full(demux))
             break;
 
-        if (!demux_fill_buffer(demux)) {
-            mp_dbg(MSGT_DEMUXER, MSGL_DBG2,
-                   "ds_get_packets()->demux_fill_buffer() failed\n");
+        int apacks = count_packs(demux, STREAM_AUDIO);
+        int vpacks = count_packs(demux, STREAM_VIDEO);
+
+        if (!demux_fill_buffer(demux))
             break; // EOF
-        }
 
-        if (demux->video->gsh && demux->video->gsh->attached_picture) {
-            if (demux->audio)
-                ds->fill_count += demux->audio->packs - apacks;
-            if (demux->video && demux->video->packs > vpacks)
-                ds->fill_count++;
+        if (need_coverart_hack(demux)) {
+            ds->fill_count += count_packs(demux, STREAM_AUDIO) - apacks;
+            ds->fill_count += count_packs(demux, STREAM_VIDEO) - vpacks;
         }
     }
-    mp_msg(MSGT_DEMUXER, MSGL_V,
-           "ds_get_packets: EOF reached (stream: %s)  \n",
-           ds == demux->audio ? "audio" : "video");
+    mp_msg(MSGT_DEMUXER, MSGL_V, "ds_get_packets: EOF reached (stream: %s)\n",
+           stream_type_name(sh->type));
     ds->eof = 1;
-    return 0;
-}
-
-static struct demux_stream *ds_from_sh(struct sh_stream *sh)
-{
-    for (int n = 0; n < STREAM_TYPE_COUNT; n++) {
-        if (sh->demuxer->ds[n]->gsh == sh)
-            return sh->demuxer->ds[n];
-    }
-    return NULL;
 }
 
 // Read a packet from the given stream. The returned packet belongs to the
@@ -523,9 +509,9 @@ static struct demux_stream *ds_from_sh(struct sh_stream *sh)
 // on EOF.
 struct demux_packet *demux_read_packet(struct sh_stream *sh)
 {
-    struct demux_stream *ds = ds_from_sh(sh);
+    struct demux_stream *ds = sh ? sh->ds : NULL;
     if (ds) {
-        ds_get_packets(ds);
+        ds_get_packets(sh);
         struct demux_packet *pkt = ds->head;
         if (pkt) {
             ds->head = pkt->next;
@@ -549,16 +535,18 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh)
 // packets from the queue.
 double demux_get_next_pts(struct sh_stream *sh)
 {
-    struct demux_stream *ds = ds_from_sh(sh);
-    ds_get_packets(ds);
-    return ds && ds->head ? ds->head->pts : MP_NOPTS_VALUE;
+    if (sh) {
+        ds_get_packets(sh);
+        if (sh->ds->head)
+            return sh->ds->head->pts;
+    }
+    return MP_NOPTS_VALUE;
 }
 
 // Return whether a packet is queued. Never blocks, never forces any reads.
 bool demux_has_packet(struct sh_stream *sh)
 {
-    struct demux_stream *ds = ds_from_sh(sh);
-    return ds && ds->head;
+    return sh && sh->ds->head;
 }
 
 // Same as demux_has_packet, but to be called internally by demuxers, as
@@ -571,8 +559,7 @@ bool demuxer_stream_has_packets_queued(struct demuxer *d, struct sh_stream *stre
 // Return whether EOF was returned with an earlier packet read.
 bool demux_stream_eof(struct sh_stream *sh)
 {
-    struct demux_stream *ds = ds_from_sh(sh);
-    return !ds || ds->eof;
+    return !sh || sh->ds->eof;
 }
 
 // ====================================================================
@@ -762,9 +749,9 @@ struct demuxer *demux_open(struct MPOpts *opts, stream_t *vs, int file_format,
 
 void demux_flush(demuxer_t *demuxer)
 {
-    ds_free_packs(demuxer->video);
-    ds_free_packs(demuxer->audio);
-    ds_free_packs(demuxer->sub);
+    for (int n = 0; n < demuxer->num_streams; n++)
+        ds_free_packs(demuxer->streams[n]->ds);
+    demuxer->warned_queue_overflow = false;
 }
 
 int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
@@ -780,10 +767,6 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
 
     // clear demux buffers:
     demux_flush(demuxer);
-    demuxer->video->eof = 0;
-    demuxer->audio->eof = 0;
-    demuxer->sub->eof = 0;
-    demuxer->warned_queue_overflow = false;
 
     /* HACK: assume any demuxer used with these streams can cope with
      * the stream layer suddenly seeking to a different position under it
@@ -931,18 +914,20 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
     assert(!stream || stream->type == type);
 
     // don't flush buffers if stream is already selected / none are selected
-    if (demuxer->ds[type]->gsh == stream)
-        return;
-
-    demuxer->ds[type]->gsh = stream;
-
-    ds_free_packs(demuxer->ds[type]);
-    demux_control(demuxer, DEMUXER_CTRL_SWITCHED_TRACKS, NULL);
+    for (int n = 0; n < demuxer->num_streams; n++) {
+        struct sh_stream *cur = demuxer->streams[n];
+        bool select = cur == stream;
+        if (cur->type == type && cur->ds->selected != select) {
+            cur->ds->selected = select;
+            ds_free_packs(cur->ds);
+            demux_control(demuxer, DEMUXER_CTRL_SWITCHED_TRACKS, NULL);
+        }
+    }
 }
 
 bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream)
 {
-    return stream && d->ds[stream->type]->gsh == stream;
+    return stream && stream->ds->selected;
 }
 
 int demuxer_add_attachment(demuxer_t *demuxer, struct bstr name,
