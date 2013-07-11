@@ -658,11 +658,11 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
     AVStream *st = priv->avfc->streams[pkt->stream_index];
     struct sh_stream *stream = priv->streams[pkt->stream_index];
 
-    if (stream && stream->type == STREAM_SUB && !demux->sub->gsh &&
+    if (stream && stream->type == STREAM_SUB &&
         stream->demuxer_id == priv->autoselect_sub)
     {
         priv->autoselect_sub = -1;
-        demux->sub->gsh = stream;
+        demuxer_switch_track(demux, STREAM_SUB, stream);
     }
 
     if (!demuxer_stream_is_selected(demux, stream)) {
@@ -809,7 +809,6 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
     }
     case DEMUXER_CTRL_AUTOSELECT_SUBTITLE:
     {
-        demuxer->sub->gsh = NULL;
         priv->autoselect_sub = *((int *)arg);
         return DEMUXER_CTRL_OK;
     }
