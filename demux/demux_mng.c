@@ -272,11 +272,9 @@ static int demux_mng_check_file(demuxer_t *demuxer)
 /**
  * \brief MPlayer callback: Fill buffer from MNG stream.
  * \param[in] demuxer demuxer structure
- * \param[in] ds demuxer stream
  * \return \p 1 on success, \p 0 on error
  */
-static int demux_mng_fill_buffer(demuxer_t * demuxer,
-                                 demux_stream_t * ds)
+static int demux_mng_fill_buffer(demuxer_t * demuxer)
 {
     mng_priv_t * mng_priv = demuxer->priv;
     mng_handle h_mng = mng_priv->h_mng;
@@ -340,7 +338,7 @@ static int demux_mng_fill_buffer(demuxer_t * demuxer,
     //    frame time mechanism (GIF, MATROSKA, MNG) in video.c to work.
     dp->pts = (float)mng_priv->show_next_time_ms / 1000.0f;
     dp->pos = stream_tell(demuxer->stream);
-    ds_add_packet(demuxer->video, dp);
+    demuxer_add_packet(demuxer, demuxer->streams[0], dp);
 
     return 1;
 }
@@ -416,12 +414,6 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
     // create a new video stream header
     struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
     sh_video = sh->video;
-
-    // Make sure that the video demuxer stream header knows about its
-    // parent video demuxer stream (this is getting wacky), or else
-    // video_read_properties() will choke.
-    // (Thanks to demux_gif.c for this.)
-    sh_video->ds = demuxer->video;
 
     // set format of pixels in video packets
     sh_video->gsh->codec = "rawvideo";

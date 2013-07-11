@@ -130,7 +130,8 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
   return demuxer;
 }
 
-static int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
+static int demux_rawvideo_fill_buffer(demuxer_t* demuxer)
+{
   int64_t spos = stream_tell(demuxer->stream);
   demux_packet_t*  dp;
   int size;
@@ -144,27 +145,24 @@ static int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
 
   size = stream_read(demuxer->stream, dp->buffer, imgsize);
   resize_demux_packet(dp, size);
-  ds_add_packet(ds, dp);
+  demuxer_add_packet(demuxer, demuxer->streams[0], dp);
 
   return 1;
 }
 
 static void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
   stream_t* s = demuxer->stream;
-  sh_video_t* sh_video = demuxer->video->gsh->video;
   int64_t pos;
 
   pos = (flags & SEEK_ABSOLUTE) ? demuxer->movi_start : stream_tell(s);
   if(flags & SEEK_FACTOR)
     pos += ((demuxer->movi_end - demuxer->movi_start)*rel_seek_secs);
   else
-    pos += (rel_seek_secs*sh_video->i_bps);
+    pos += (rel_seek_secs*fps*imgsize);
   if(pos < 0) pos = 0;
   if(demuxer->movi_end && pos > demuxer->movi_end) pos = (demuxer->movi_end-imgsize);
   pos/=imgsize;
   stream_seek(s,pos*imgsize);
-  //sh_video->timer=pos * sh_video->frametime;
-//  printf("demux_rawvideo: streamtell=%d\n",(int)stream_tell(demuxer->stream));
 }
 
 

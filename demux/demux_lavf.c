@@ -637,7 +637,7 @@ static int destroy_avpacket(void *pkt)
     return 0;
 }
 
-static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds)
+static int demux_lavf_fill_buffer(demuxer_t *demux)
 {
     lavf_priv_t *priv = demux->priv;
     demux_packet_t *dp;

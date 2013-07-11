@@ -17,6 +17,7 @@
  * with MPlayer; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#define DEMUX_PRIV(x) x
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -87,6 +88,20 @@ const demuxer_desc_t *const demuxer_list[] = {
      * libraries and demuxers requiring binary support. */
     NULL
 };
+
+typedef struct demux_stream {
+    enum stream_type stream_type;
+    int eof;               // end of demuxed stream? (true if all buffer empty)
+//---------------
+    int fill_count;        // number of unsuccessful tries to get a packet
+    int packs;            // number of packets in buffer
+    int bytes;            // total bytes of packets in buffer
+    struct demux_packet *head;
+    struct demux_packet *tail;
+    struct demuxer *demuxer; // parent demuxer structure (stream handler)
+// ---- stream header ----
+    struct sh_stream *gsh;
+} demux_stream_t;
 
 static void add_stream_chapters(struct demuxer *demuxer);
 
@@ -200,6 +215,19 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
     return new;
 }
 
+static void ds_free_packs(demux_stream_t *ds)
+{
+    demux_packet_t *dp = ds->head;
+    while (dp) {
+        demux_packet_t *dn = dp->next;
+        free_demux_packet(dp);
+        dp = dn;
+    }
+    ds->head = ds->tail = NULL;
+    ds->packs = 0; // !!!!!
+    ds->bytes = 0;
+}
+
 static void free_demuxer_stream(struct demux_stream *ds)
 {
     ds_free_packs(ds);
@@ -290,7 +318,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
             struct sh_video *sht = talloc_zero(demuxer, struct sh_video);
             sht->gsh = sh;
             sht->opts = sh->opts;
-            sht->ds = demuxer->video;
             sh->video = sht;
             break;
         }
@@ -298,7 +325,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
             struct sh_audio *sht = talloc_zero(demuxer, struct sh_audio);
             sht->gsh = sh;
             sht->opts = sh->opts;
-            sht->ds = demuxer->audio;
             sht->samplesize = 2;
             sht->sample_format = AF_FORMAT_S16_NE;
             sh->audio = sht;
@@ -308,7 +334,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
             struct sh_sub *sht = talloc_zero(demuxer, struct sh_sub);
             sht->gsh = sh;
             sht->opts = sh->opts;
-            sht->ds = demuxer->sub;
             sh->sub = sht;
             break;
         }
@@ -360,20 +385,7 @@ void free_demuxer(demuxer_t *demuxer)
     talloc_free(demuxer);
 }
 
-// Returns the same value as demuxer->fill_buffer: 1 ok, 0 EOF/not selected.
-int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
-                       demux_packet_t *dp)
-{
-    if (!dp || !demuxer_stream_is_selected(demuxer, stream)) {
-        free_demux_packet(dp);
-        return 0;
-    } else {
-        ds_add_packet(demuxer->ds[stream->type], dp);
-        return 1;
-    }
-}
-
-void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
+static void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
 {
     // append packet to DS stream:
     ++ds->packs;
@@ -391,6 +403,19 @@ void ds_add_packet(demux_stream_t *ds, demux_packet_t *dp)
            (ds == ds->demuxer->audio) ? "d_audio" : "d_video", dp->len,
            dp->pts, (unsigned int) dp->pos, ds->demuxer->audio->packs,
            ds->demuxer->video->packs);
+}
+
+// Returns the same value as demuxer->fill_buffer: 1 ok, 0 EOF/not selected.
+int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
+                       demux_packet_t *dp)
+{
+    if (!dp || !demuxer_stream_is_selected(demuxer, stream)) {
+        free_demux_packet(dp);
+        return 0;
+    } else {
+        ds_add_packet(demuxer->ds[stream->type], dp);
+        return 1;
+    }
 }
 
 static bool demux_check_queue_full(demuxer_t *demux)
@@ -421,10 +446,9 @@ static bool demux_check_queue_full(demuxer_t *demux)
 //     0 = EOF or no stream found or invalid type
 //     1 = successfully read a packet
 
-int demux_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
+static int demux_fill_buffer(demuxer_t *demux)
 {
-    // Note: parameter 'ds' can be NULL!
-    return demux->desc->fill_buffer ? demux->desc->fill_buffer(demux, ds) : 0;
+    return demux->desc->fill_buffer ? demux->desc->fill_buffer(demux) : 0;
 }
 
 // return value:
@@ -465,7 +489,7 @@ static int ds_get_packets(demux_stream_t *ds)
         if (demux_check_queue_full(demux))
             break;
 
-        if (!demux_fill_buffer(demux, ds)) {
+        if (!demux_fill_buffer(demux)) {
             mp_dbg(MSGT_DEMUXER, MSGL_DBG2,
                    "ds_get_packets()->demux_fill_buffer() failed\n");
             break; // EOF
@@ -483,21 +507,6 @@ static int ds_get_packets(demux_stream_t *ds)
            ds == demux->audio ? "audio" : "video");
     ds->eof = 1;
     return 0;
-}
-
-void ds_free_packs(demux_stream_t *ds)
-{
-    demux_packet_t *dp = ds->head;
-    while (dp) {
-        demux_packet_t *dn = dp->next;
-        free_demux_packet(dp);
-        dp = dn;
-    }
-    ds->head = ds->tail = NULL;
-    ds->packs = 0; // !!!!!
-    ds->bytes = 0;
-    ds->last_pts = MP_NOPTS_VALUE;
-    ds->last_pts_bytes = 0;
 }
 
 static struct demux_stream *ds_from_sh(struct sh_stream *sh)
@@ -525,13 +534,6 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh)
                 ds->tail = NULL;
             ds->bytes -= pkt->len;
             ds->packs--;
-
-            if (pkt->pts != MP_NOPTS_VALUE) {
-                ds->last_pts = pkt->pts;
-                ds->last_pts_bytes = 0;
-            } else {
-                ds->last_pts_bytes += pkt->len;
-            }
 
             if (pkt->stream_pts != MP_NOPTS_VALUE)
                 sh->demuxer->stream_pts = pkt->stream_pts;
@@ -564,6 +566,13 @@ bool demux_has_packet(struct sh_stream *sh)
 bool demuxer_stream_has_packets_queued(struct demuxer *d, struct sh_stream *stream)
 {
     return demux_has_packet(stream);
+}
+
+// Return whether EOF was returned with an earlier packet read.
+bool demux_stream_eof(struct sh_stream *sh)
+{
+    struct demux_stream *ds = ds_from_sh(sh);
+    return !ds || ds->eof;
 }
 
 // ====================================================================

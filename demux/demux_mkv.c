@@ -1962,7 +1962,7 @@ static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
     } else
         dp->pts =
             real_fix_timestamp(dp->buffer, timestamp,
-                               demuxer->video->gsh->video->bih->biCompression,
+                               track->stream->video->bih->biCompression,
                                &track->rv_kf_base, &track->rv_kf_pts, NULL);
     dp->pos = demuxer->filepos;
     dp->keyframe = keyframe;
@@ -2046,7 +2046,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
         if (track->sub_packet_cnt == 0)
             track->audio_filepos = demuxer->filepos;
         if (++(track->sub_packet_cnt) == sph) {
-            int apk_usize = demuxer->audio->gsh->audio->wf->nBlockAlign;
+            int apk_usize = track->stream->audio->wf->nBlockAlign;
             track->sub_packet_cnt = 0;
             // Release all the audio packets
             for (x = 0; x < sph * w / apk_usize; x++) {
@@ -2465,7 +2465,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
     }
 }
 
-static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
+static int demux_mkv_fill_buffer(demuxer_t *demuxer)
 {
     for (;;) {
         int res;
@@ -2657,7 +2657,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
                                             : 0;
         mkv_d->a_skip_to_keyframe = 1;
 
-        demux_mkv_fill_buffer(demuxer, NULL);
+        demux_mkv_fill_buffer(demuxer);
     } else if ((demuxer->movi_end <= 0) || !(flags & SEEK_ABSOLUTE))
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] seek unsupported flags\n");
     else {
@@ -2696,7 +2696,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
         mkv_d->skip_to_timecode = index->timecode * mkv_d->tc_scale;
         mkv_d->a_skip_to_keyframe = 1;
 
-        demux_mkv_fill_buffer(demuxer, NULL);
+        demux_mkv_fill_buffer(demuxer);
     }
 }
 

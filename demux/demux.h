@@ -88,22 +88,6 @@ enum timestamp_type {
 // demux_lavf can pass lavf buffers using FF_INPUT_BUFFER_PADDING_SIZE instead
 #define MP_INPUT_BUFFER_PADDING_SIZE 16
 
-typedef struct demux_stream {
-    enum stream_type stream_type;
-    double last_pts;       // pts of the last packet that was read
-    int last_pts_bytes;    // number of bytes read after last pts stamp
-    int eof;               // end of demuxed stream? (true if all buffer empty)
-//---------------
-    int fill_count;        // number of unsuccessful tries to get a packet
-    int packs;            // number of packets in buffer
-    int bytes;            // total bytes of packets in buffer
-    struct demux_packet *head;
-    struct demux_packet *tail;
-    struct demuxer *demuxer; // parent demuxer structure (stream handler)
-// ---- stream header ----
-    struct sh_stream *gsh;
-} demux_stream_t;
-
 #define MAX_SH_STREAMS 256
 
 struct demuxer;
@@ -126,7 +110,7 @@ typedef struct demuxer_desc {
     // Mandatory if safe_check == 1, else optional
     int (*check_file)(struct demuxer *demuxer);
     /// Get packets from file, return 0 on eof. Mandatory
-    int (*fill_buffer)(struct demuxer *demuxer, struct demux_stream *ds);
+    int (*fill_buffer)(struct demuxer *demuxer);
     /// Open the demuxer, return demuxer on success, NULL on failure
     struct demuxer *(*open)(struct demuxer *demuxer); // Optional
     /// Close the demuxer
@@ -249,15 +233,11 @@ void free_demuxer(struct demuxer *demuxer);
 
 int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
                        demux_packet_t *dp);
-void ds_add_packet(struct demux_stream *ds, struct demux_packet *dp);
-
-int demux_fill_buffer(struct demuxer *demux, struct demux_stream *ds);
-
-void ds_free_packs(struct demux_stream *ds);
 
 struct demux_packet *demux_read_packet(struct sh_stream *sh);
 double demux_get_next_pts(struct sh_stream *sh);
 bool demux_has_packet(struct sh_stream *sh);
+bool demux_stream_eof(struct sh_stream *sh);
 
 struct demuxer *demux_open(struct MPOpts *opts, struct stream *stream,
                            int file_format, char *filename);

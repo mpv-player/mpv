@@ -360,10 +360,9 @@ static double get_main_demux_pts(struct MPContext *mpctx)
 {
     double main_new_pos = MP_NOPTS_VALUE;
     if (mpctx->demuxer) {
-        for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
-            struct demux_stream *ds = mpctx->demuxer->ds[type];
-            if (ds->gsh && main_new_pos == MP_NOPTS_VALUE)
-                main_new_pos = demux_get_next_pts(ds->gsh);
+        for (int n = 0; n < mpctx->demuxer->num_streams; n++) {
+            if (main_new_pos == MP_NOPTS_VALUE)
+                main_new_pos = demux_get_next_pts(mpctx->demuxer->streams[n]);
         }
     }
     return main_new_pos;
@@ -1789,7 +1788,9 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
 {
     struct MPOpts *opts = &mpctx->opts;
     // check for frame-drop:
-    if (mpctx->sh_audio && !mpctx->ao->untimed && !mpctx->sh_audio->ds->eof) {
+    if (mpctx->sh_audio && !mpctx->ao->untimed &&
+        !demux_stream_eof(mpctx->sh_audio->gsh))
+    {
         float delay = opts->playback_speed * ao_get_delay(mpctx->ao);
         float d = delay - mpctx->delay;
         // we should avoid dropping too many frames in sequence unless we
@@ -2205,7 +2206,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
             return -1;
         } else if (res == ASYNC_PLAY_DONE)
             return 0;
-        else if (mpctx->sh_audio->ds->eof)
+        else if (demux_stream_eof(mpctx->sh_audio->gsh))
             audio_eof = true;
     }
 
@@ -2338,7 +2339,7 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     vo_update_window_title(mpctx);
 
-    if (stream_control(mpctx->sh_video->ds->demuxer->stream,
+    if (stream_control(mpctx->sh_video->gsh->demuxer->stream,
                        STREAM_CTRL_GET_ASPECT_RATIO, &ar) != STREAM_UNSUPPORTED)
         mpctx->sh_video->stream_aspect = ar;
 
@@ -2438,21 +2439,23 @@ static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
 static struct demux_packet *video_read_frame(struct MPContext *mpctx)
 {
     sh_video_t *sh_video = mpctx->sh_video;
-    demux_stream_t *d_video = sh_video->ds;
-    demuxer_t *demuxer = d_video->demuxer;
-    float pts1 = d_video->last_pts;
+    demuxer_t *demuxer = sh_video->gsh->demuxer;
+    float pts1 = sh_video->last_pts;
 
     struct demux_packet *pkt = demux_read_packet(sh_video->gsh);
     if (!pkt)
         return NULL; // EOF
+
+    if (pkt->pts != MP_NOPTS_VALUE)
+        sh_video->last_pts = pkt->pts;
 
     float frame_time = sh_video->frametime;
 
     // override frame_time for variable/unknown FPS formats:
     if (!mpctx->opts.force_fps) {
         double next_pts = demux_get_next_pts(sh_video->gsh);
-        double d = next_pts == MP_NOPTS_VALUE ? d_video->last_pts - pts1
-                                              : next_pts - d_video->last_pts;
+        double d = next_pts == MP_NOPTS_VALUE ? sh_video->last_pts - pts1
+                                              : next_pts - sh_video->last_pts;
         if (d >= 0) {
             if (demuxer->file_format == DEMUXER_TYPE_TV) {
                 if (d > 0) {
@@ -2467,8 +2470,7 @@ static struct demux_packet *video_read_frame(struct MPContext *mpctx)
         }
     }
 
-    sh_video->pts = d_video->last_pts;
-
+    sh_video->pts = sh_video->last_pts;
     sh_video->next_frame_time = frame_time;
     return pkt;
 }
@@ -2515,7 +2517,7 @@ static void determine_frame_pts(struct MPContext *mpctx)
     if (opts->user_pts_assoc_mode)
         sh_video->pts_assoc_mode = opts->user_pts_assoc_mode;
     else if (sh_video->pts_assoc_mode == 0) {
-        if (mpctx->sh_video->ds->demuxer->timestamp_type == TIMESTAMP_TYPE_PTS
+        if (mpctx->sh_video->gsh->demuxer->timestamp_type == TIMESTAMP_TYPE_PTS
             && sh_video->codec_reordered_pts != MP_NOPTS_VALUE)
             sh_video->pts_assoc_mode = 1;
         else

@@ -1358,7 +1358,7 @@ static int d_check_file(struct demuxer *demuxer)
     return DEMUXER_TYPE_SUBREADER;
 }
 
-static int d_fill_buffer(struct demuxer *demuxer, struct demux_stream *ds)
+static int d_fill_buffer(struct demuxer *demuxer)
 {
     struct priv *p = demuxer->priv;
     struct demux_packet *dp = demux_packet_list_fill(p->pkts, p->num_pkts,

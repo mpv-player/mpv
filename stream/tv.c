@@ -210,7 +210,7 @@ static void tv_scan(tvi_handle_t *tvh)
 */
 /* fill demux->video and demux->audio */
 
-static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
+static int demux_tv_fill_buffer(demuxer_t *demux)
 {
     tvi_handle_t *tvh=(tvi_handle_t*)(demux->priv);
     demux_packet_t* dp;

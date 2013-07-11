@@ -70,11 +70,9 @@ struct sh_stream {
     struct MPOpts *opts;
 };
 
-
 #define SH_COMMON                                                       \
     struct sh_stream *gsh;                                              \
     struct MPOpts *opts;                                                \
-    struct demux_stream *ds;                                            \
     /* usually a FourCC, exact meaning depends on gsh->format */        \
     unsigned int format;                                                \
     int initialized;                                                    \

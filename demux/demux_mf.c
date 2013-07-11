@@ -61,7 +61,8 @@ static void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,float audio_del
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
+static int demux_mf_fill_buffer(demuxer_t *demuxer)
+{
     mf_t *mf = demuxer->priv;
     if (mf->curr_frame >= mf->nr_of_files)
         return 0;
@@ -85,7 +86,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
             dp->pts = mf->curr_frame / mf->sh->fps;
             dp->pos = mf->curr_frame;
             dp->keyframe = true;
-            ds_add_packet(demuxer->video, dp);
+            demuxer_add_packet(demuxer, demuxer->streams[0], dp);
         }
         talloc_free(data.start);
     }
@@ -214,11 +215,6 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] file type was not set! (try -mf type=ext)\n" );
     goto error;
   }
-
-  // make sure that the video demuxer stream header knows about its
-  // parent video demuxer stream (this is getting wacky), or else
-  // video_read_properties() will choke
-  sh_video->ds = demuxer->video;
 
   sh_video->disp_w = 0;
   sh_video->disp_h = 0;
