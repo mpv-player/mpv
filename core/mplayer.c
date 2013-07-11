@@ -4528,7 +4528,7 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
 void mp_print_version(int always)
 {
     mp_msg(MSGT_CPLAYER, always ? MSGL_INFO : MSGL_V,
-           "%s (C) 2000-2013 mpv/MPlayer/mplayer2 projects\n built on %s\n", mplayer_version, mplayer_builddate);
+           "%s (C) 2000-2013 mpv/MPlayer/mplayer2 projects\n", mplayer_version);
 }
 
 static bool handle_help_options(struct MPContext *mpctx)
