@@ -392,7 +392,7 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
                        demux_packet_t *dp)
 {
     struct demux_stream *ds = stream ? stream->ds : NULL;
-    if (!ds || !ds->selected) {
+    if (!dp || !ds || !ds->selected) {
         talloc_free(dp);
         return 0;
     }
