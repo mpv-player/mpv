@@ -21,8 +21,6 @@
 
 #include <stdbool.h>
 
-#include "codec_tags.h"
-
 #include "audio/chmap.h"
 #include "ms_hdr.h"
 struct MPOpts;
@@ -149,8 +147,5 @@ typedef struct sh_sub {
     struct ass_track *track;    // loaded by libass
     struct dec_sub *dec_sub;    // decoder context
 } sh_sub_t;
-
-// demuxer.c:
-struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
 
 #endif /* MPLAYER_STHEADER_H */

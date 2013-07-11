@@ -49,7 +49,7 @@
 #include "stheader.h"
 #include "ebml.h"
 #include "matroska.h"
-//#include "demux_real.h"
+#include "codec_tags.h"
 
 #include "core/mp_msg.h"
 

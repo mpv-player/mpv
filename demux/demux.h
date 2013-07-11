@@ -232,6 +232,8 @@ double demux_get_next_pts(struct sh_stream *sh);
 bool demux_has_packet(struct sh_stream *sh);
 bool demux_stream_eof(struct sh_stream *sh);
 
+struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
+
 struct demuxer *demux_open(struct MPOpts *opts, struct stream *stream,
                            int file_format, char *filename);
 
