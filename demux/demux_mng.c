@@ -421,6 +421,9 @@ static int demux_mng_open(demuxer_t * demuxer, enum demux_check check)
     sh_video->bih->biBitCount    = 32;
     sh_video->bih->biPlanes      = 1;
 
+    // weirdly broken
+    demuxer->accurate_seek = false;
+
     // set private data in demuxer and return demuxer
     demuxer->priv = mng_priv;
     return 0;

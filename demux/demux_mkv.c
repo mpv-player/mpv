@@ -1803,8 +1803,6 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
         demuxer->seekable = 1;
     }
 
-    demuxer->accurate_seek = true;
-
     return 0;
 }
 
