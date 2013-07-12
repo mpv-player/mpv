@@ -142,10 +142,6 @@ typedef struct mkv_track {
     int sub_packet_cnt;         ///< number of subpacket already received
     int audio_filepos;          ///< file position of first audio packet in block
 
-    /* stuff for quicktime */
-    int fix_i_bps;
-    double qt_last_a_pts;
-
     /* generic content encoding support */
     mkv_content_encoding_t *encodings;
     int num_encodings;
@@ -1430,8 +1426,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
                || !strcmp(track->codec_id, MKV_A_QDMC2)) {
         sh_a->wf->nAvgBytesPerSec = 16000;
         sh_a->wf->nBlockAlign = 1486;
-        track->fix_i_bps = 1;
-        track->qt_last_a_pts = 0.0;
         copy_audio_private_data(sh_a, track);
     } else if (track->a_formattag == mmioFOURCC('M', 'P', '4', 'A')) {
         int profile, srate_idx;
@@ -2273,20 +2267,6 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
             use_this_block = keyframe;
         if (mkv_d->v_skip_to_keyframe)
             use_this_block = 0;
-
-        if (track->fix_i_bps && use_this_block) {
-            sh_audio_t *sh = stream->audio;
-
-            if (block_duration != 0) {
-                sh->i_bps = data.len * 1e9 / block_duration;
-                track->fix_i_bps = 0;
-            } else if (track->qt_last_a_pts == 0.0)
-                track->qt_last_a_pts = current_pts;
-            else if (track->qt_last_a_pts != current_pts) {
-                sh->i_bps = data.len / (current_pts - track->qt_last_a_pts);
-                track->fix_i_bps = 0;
-            }
-        }
     } else if (track->type == MATROSKA_TRACK_SUBTITLE) {
         use_this_block |= mkv_d->subtitle_preroll;
         if (use_this_block) {
