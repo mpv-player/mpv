@@ -2842,6 +2842,18 @@ fi
 echores "$_encoding"
 
 
+# needs dlopen on unix, uses winapi on windows
+_dlopen="$_dl"
+if win32 ; then
+  _dlopen=yes
+fi
+
+if test "$_dlopen" = yes ; then
+  def_dlopen='#define CONFIG_DLOPEN 1'
+else
+  def_dlopen='#undef CONFIG_DLOPEN'
+fi
+
 #############################################################################
 
 echocheck "compiler support for noexecstack"
@@ -2966,6 +2978,7 @@ COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
 DIRECT3D = $_direct3d
 DL = $_dl
+DLOPEN = $_dlopen
 SDL = $_sdl
 SDL2 = $_sdl2
 DSOUND = $_dsound
@@ -3126,6 +3139,7 @@ $def_libavfilter
 $def_vf_lavfi
 $def_af_lavfi
 
+$def_dlopen
 
 /* Audio output drivers */
 $def_alsa

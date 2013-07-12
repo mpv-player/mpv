@@ -116,10 +116,7 @@ ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
     SOURCES-yes                 += video/decode/lavc_dr1.c
 endif
 
-SOURCES-$(DL)                   += video/filter/vf_dlopen.c
-ifeq ($(DL),no)
-    SOURCES-$(WIN32)            += video/filter/vf_dlopen.c
-endif
+SOURCES-$(DLOPEN)               += video/filter/vf_dlopen.c
 
 SOURCES = talloc.c \
           audio/audio.c \
