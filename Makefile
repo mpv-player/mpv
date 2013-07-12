@@ -193,8 +193,7 @@ SOURCES = talloc.c \
           demux/demux_mf.c \
           demux/demux_mkv.c \
           demux/demux_subreader.c \
-          demux/demux_rawaudio.c \
-          demux/demux_rawvideo.c \
+          demux/demux_raw.c \
           demux/ebml.c \
           demux/mf.c \
           osdep/io.c \
