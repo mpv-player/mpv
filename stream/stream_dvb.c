@@ -443,7 +443,7 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
 
 	tries = priv->retry + 1;
 
-	fd = stream->fd;
+	fd = priv->fd;
 	while(pos < size)
 	{
 		pfds[0].fd = fd;
@@ -535,7 +535,7 @@ int dvb_set_channel(stream_t *stream, int card, int n)
 	priv->list = new_list;
 	priv->retry = 5;
 	new_list->current = n;
-	stream->fd = priv->dvr_fd;
+	priv->fd = priv->dvr_fd;
 	mp_msg(MSGT_DEMUX, MSGL_V, "DVB_SET_CHANNEL: new channel name=%s, card: %d, channel %d\n", channel->name, card, n);
 
 	stream->buf_pos = stream->buf_len = 0;

@@ -315,13 +315,7 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
     int orig_len = len;
     s->buf_pos = s->buf_len = 0;
     // we will retry even if we already reached EOF previously.
-    if (s->fill_buffer) {
-        len = s->fill_buffer(s, buf, len);
-    } else if (s->fd >= 0) {
-        len = read(s->fd, buf, len);
-    } else {
-        len = 0;
-    }
+    len = s->fill_buffer ? s->fill_buffer(s, buf, len) : -1;
     if (len < 0)
         len = 0;
     if (len == 0) {
@@ -590,8 +584,6 @@ static stream_t *new_stream(size_t min_size)
     min_size = FFMAX(min_size, TOTAL_BUFFER_SIZE);
     stream_t *s = talloc_size(NULL, sizeof(stream_t) + min_size);
     memset(s, 0, sizeof(stream_t));
-
-    s->fd = -2;
     return s;
 }
 
@@ -604,9 +596,6 @@ void free_stream(stream_t *s)
 
     if (s->close)
         s->close(s);
-    if (s->fd > 0) {
-        close(s->fd);
-    }
     free_stream(s->uncached_stream);
     talloc_free(s);
 }

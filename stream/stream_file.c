@@ -32,6 +32,11 @@
 #include "core/m_option.h"
 #include "core/m_struct.h"
 
+struct priv {
+    int fd;
+    bool close;
+};
+
 static struct stream_priv_s {
   char* filename;
   char *filename2;
@@ -54,15 +59,17 @@ static const struct m_struct_st stream_opts = {
 };
 
 static int fill_buffer(stream_t *s, char* buffer, int max_len){
-  int r = read(s->fd,buffer,max_len);
+  struct priv *p = s->priv;
+  int r = read(p->fd,buffer,max_len);
   return (r <= 0) ? -1 : r;
 }
 
 static int write_buffer(stream_t *s, char* buffer, int len) {
+  struct priv *p = s->priv;
   int r;
   int wr = 0;
   while (wr < len) {
-    r = write(s->fd,buffer,len);
+    r = write(p->fd,buffer,len);
     if (r <= 0)
       return -1;
     wr += r;
@@ -72,8 +79,9 @@ static int write_buffer(stream_t *s, char* buffer, int len) {
 }
 
 static int seek(stream_t *s,int64_t newpos) {
+  struct priv *p = s->priv;
   s->pos = newpos;
-  if(lseek(s->fd,s->pos,SEEK_SET)<0) {
+  if(lseek(p->fd,s->pos,SEEK_SET)<0) {
     return 0;
   }
   return 1;
@@ -95,12 +103,13 @@ static int seek_forward(stream_t *s,int64_t newpos) {
 }
 
 static int control(stream_t *s, int cmd, void *arg) {
+  struct priv *p = s->priv;
   switch(cmd) {
     case STREAM_CTRL_GET_SIZE: {
       off_t size;
 
-      size = lseek(s->fd, 0, SEEK_END);
-      lseek(s->fd, s->pos, SEEK_SET);
+      size = lseek(p->fd, 0, SEEK_END);
+      lseek(p->fd, s->pos, SEEK_SET);
       if(size != (off_t)-1) {
         *(uint64_t*)arg = size;
         return 1;
@@ -110,6 +119,13 @@ static int control(stream_t *s, int cmd, void *arg) {
   return STREAM_UNSUPPORTED;
 }
 
+static void s_close(stream_t *s)
+{
+  struct priv *p = s->priv;
+  if (p->close && p->fd >= 0)
+    close(p->fd);
+}
+
 static int open_f(stream_t *stream,int mode, void* opts)
 {
   int f;
@@ -117,6 +133,9 @@ static int open_f(stream_t *stream,int mode, void* opts)
   int64_t len;
   unsigned char *filename;
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
+  struct priv *priv = talloc_ptrtype(stream, priv);
+  *priv = (struct priv) { .fd = -1 };
+  stream->priv = priv;
 
   if(mode == STREAM_READ)
     m = O_RDONLY;
@@ -163,6 +182,8 @@ static int open_f(stream_t *stream,int mode, void* opts)
       setmode(fileno(stdout),O_BINARY);
 #endif
     }
+    priv->fd = f;
+    priv->close = false;
   } else {
       mode_t openmode = S_IRUSR|S_IWUSR;
 #ifndef __MINGW32__
@@ -184,6 +205,8 @@ static int open_f(stream_t *stream,int mode, void* opts)
       return STREAM_ERROR;
     }
 #endif
+    priv->fd = f;
+    priv->close = true;
   }
 
   len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
@@ -203,11 +226,11 @@ static int open_f(stream_t *stream,int mode, void* opts)
 
   mp_msg(MSGT_OPEN,MSGL_V,"[file] File size is %"PRId64" bytes\n", (int64_t)len);
 
-  stream->fd = f;
   stream->fill_buffer = fill_buffer;
   stream->write_buffer = write_buffer;
   stream->control = control;
   stream->read_chunk = 64*1024;
+  stream->close = s_close;
 
   m_struct_free(&stream_opts,opts);
   return STREAM_OK;

@@ -134,7 +134,6 @@ typedef struct stream {
     // Close
     void (*close)(struct stream *s);
 
-    int fd; // file descriptor, see man open(2)
     enum streamtype type; // see STREAMTYPE_*
     enum streamtype uncached_type; // if stream is cache, type of wrapped str.
     int flags; // MP_STREAM_SEEK_* or'ed flags

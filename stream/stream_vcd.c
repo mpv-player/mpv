@@ -92,43 +92,10 @@ static int seek(stream_t *s,int64_t newpos) {
   return 1;
 }
 
-static int control(stream_t *stream, int cmd, void *arg) {
-  struct stream_priv_s *p = stream->priv;
-  switch(cmd) {
-    case STREAM_CTRL_GET_NUM_TITLES:
-    case STREAM_CTRL_GET_NUM_CHAPTERS:
-    {
-      mp_vcd_priv_t *vcd = vcd_read_toc(stream->fd);
-      if (!vcd)
-        break;
-      *(unsigned int *)arg = vcd_end_track(vcd);
-      return STREAM_OK;
-    }
-    case STREAM_CTRL_SEEK_TO_CHAPTER:
-    {
-      int r;
-      unsigned int track = *(unsigned int *)arg + 1;
-      mp_vcd_priv_t *vcd = vcd_read_toc(stream->fd);
-      if (!vcd)
-        break;
-      r = vcd_seek_to_track(vcd, track);
-      if (r >= 0) {
-        p->track = track;
-        return STREAM_OK;
-      }
-      break;
-    }
-    case STREAM_CTRL_GET_CURRENT_CHAPTER:
-    {
-      *(unsigned int *)arg = p->track - 1;
-      return STREAM_OK;
-    }
-  }
-  return STREAM_UNSUPPORTED;
-}
-
 static void close_s(stream_t *stream) {
-  free(stream->priv);
+  mp_vcd_priv_t *p = stream->priv;
+  close(p->fd);
+  free(p);
 }
 
 static int open_s(stream_t *stream,int mode, void* opts)
@@ -220,7 +187,6 @@ static int open_s(stream_t *stream,int mode, void* opts)
   }
 #endif
 
-  stream->fd = f;
   stream->sector_size = VCD_SECTOR_DATA;
   stream->start_pos=ret;
   stream->end_pos=ret2;
@@ -228,7 +194,6 @@ static int open_s(stream_t *stream,int mode, void* opts)
 
   stream->fill_buffer = fill_buffer;
   stream->seek = seek;
-  stream->control = control;
   stream->close = close_s;
   stream->demuxer = "lavf"; // mpegps ( or "vcd"?)
 
