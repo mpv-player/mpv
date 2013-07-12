@@ -144,7 +144,7 @@ static int demux_rawvideo_fill_buffer(demuxer_t* demuxer)
 
   dp = new_demux_packet(imgsize);
   dp->pos = (spos - demuxer->movi_start);
-  dp->pts = dp->pos / (float)(imgsize);
+  dp->pts = dp->pos / (float)(imgsize) / fps;
 
   size = stream_read(demuxer->stream, dp->buffer, imgsize);
   resize_demux_packet(dp, size);
