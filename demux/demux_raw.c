@@ -232,12 +232,34 @@ static void raw_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,in
   stream_seek(s, (pos / p->frame_size) * p->frame_size);
 }
 
+static int raw_control(demuxer_t *demuxer, int cmd, void *arg)
+{
+    struct priv *p = demuxer->priv;
+
+    switch (cmd) {
+    case DEMUXER_CTRL_GET_TIME_LENGTH: {
+        stream_t *s = demuxer->stream;
+        stream_update_size(s);
+        int64_t start = s->start_pos;
+        int64_t end = s->end_pos;
+        if (!end)
+            return DEMUXER_CTRL_DONTKNOW;
+
+        *((double *) arg) = ((end - start) / p->frame_size) / p->frame_rate;
+        return DEMUXER_CTRL_OK;
+    }
+    default:
+        return DEMUXER_CTRL_NOTIMPL;
+    }
+}
+
 const demuxer_desc_t demuxer_desc_rawaudio = {
     .name = "rawaudio",
     .desc = "Uncompressed audio",
     .open = demux_rawaudio_open,
     .fill_buffer = raw_fill_buffer,
     .seek = raw_seek,
+    .control = raw_control,
 };
 
 const demuxer_desc_t demuxer_desc_rawvideo = {
@@ -246,4 +268,5 @@ const demuxer_desc_t demuxer_desc_rawvideo = {
     .open = demux_rawvideo_open,
     .fill_buffer = raw_fill_buffer,
     .seek = raw_seek,
+    .control = raw_control,
 };
