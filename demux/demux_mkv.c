@@ -2704,8 +2704,6 @@ static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
 
     switch (cmd) {
-    case DEMUXER_CTRL_CORRECT_PTS:
-        return DEMUXER_CTRL_OK;
     case DEMUXER_CTRL_GET_TIME_LENGTH:
         if (mkv_d->duration == 0)
             return DEMUXER_CTRL_DONTKNOW;

@@ -63,7 +63,7 @@ enum timestamp_type {
 #define DEMUXER_CTRL_RESYNC 13
 #define DEMUXER_CTRL_SWITCH_VIDEO 14
 #define DEMUXER_CTRL_IDENTIFY_PROGRAM 15
-#define DEMUXER_CTRL_CORRECT_PTS 16
+#define DEMUXER_CTRL_CORRECT_PTS 16 // int* (write 1 for ok, 0 for no)
 
 #define SEEK_ABSOLUTE (1 << 0)
 #define SEEK_FACTOR   (1 << 1)

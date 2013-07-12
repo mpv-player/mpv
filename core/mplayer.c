@@ -4233,9 +4233,9 @@ goto_reopen_demuxer: ;
     // Decide correct-pts mode based on first segment of video track
     opts->correct_pts = opts->user_correct_pts;
     if (opts->correct_pts < 0) {
-        opts->correct_pts =
-            demux_control(mpctx->demuxer, DEMUXER_CTRL_CORRECT_PTS,
-                          NULL) == DEMUXER_CTRL_OK;
+        int val = 1;
+        demux_control(mpctx->demuxer, DEMUXER_CTRL_CORRECT_PTS, &val);
+        opts->correct_pts = val;
     }
 
     mpctx->initialized_flags |= INITIALIZED_DEMUXER;

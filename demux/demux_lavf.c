@@ -778,8 +778,6 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
     lavf_priv_t *priv = demuxer->priv;
 
     switch (cmd) {
-    case DEMUXER_CTRL_CORRECT_PTS:
-        return DEMUXER_CTRL_OK;
     case DEMUXER_CTRL_GET_TIME_LENGTH:
         if (priv->seek_by_bytes) {
             /* Our bitrate estimate may be better than would be used in

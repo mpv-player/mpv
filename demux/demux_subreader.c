@@ -1380,8 +1380,6 @@ static int d_control(struct demuxer *demuxer, int cmd, void *arg)
 {
     struct priv *p = demuxer->priv;
     switch (cmd) {
-    case DEMUXER_CTRL_CORRECT_PTS:
-        return DEMUXER_CTRL_OK;
     case DEMUXER_CTRL_GET_TIME_LENGTH:
         *((double *) arg) = demux_packet_list_duration(p->pkts, p->num_pkts);
         return DEMUXER_CTRL_OK;

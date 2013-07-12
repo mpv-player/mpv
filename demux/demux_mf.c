@@ -235,9 +235,6 @@ static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg) {
       *((double *)arg) = (double)mf->nr_of_files / mf->sh->fps;
       return DEMUXER_CTRL_OK;
 
-    case DEMUXER_CTRL_CORRECT_PTS:
-      return DEMUXER_CTRL_OK;
-
     default:
       return DEMUXER_CTRL_NOTIMPL;
   }
