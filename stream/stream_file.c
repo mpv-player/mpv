@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Original authors: Albeu, probably Arpi
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -237,10 +239,7 @@ static int open_f(stream_t *stream,int mode, void* opts)
 }
 
 const stream_info_t stream_info_file = {
-  "File",
   "file",
-  "Albeu",
-  "based on the code from ??? (probably Arpi)",
   open_f,
   { "file", "", NULL },
   &stream_opts,

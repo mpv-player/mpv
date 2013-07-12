@@ -2,6 +2,7 @@
  * stream layer for multiple files input, based on previous work from Albeu
  *
  * Copyright (C) 2006 Benjamin Zores
+ * Original author: Albeu
  *
  * This file is part of MPlayer.
  *
@@ -37,10 +38,7 @@ mf_stream_open (stream_t *stream, int mode, void *opts)
 }
 
 const stream_info_t stream_info_mf = {
-  "Multiple files input",
   "mf",
-  "Benjamin Zores, Albeu",
-  "",
   mf_stream_open,
   { "mf", NULL },
   NULL,

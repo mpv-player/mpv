@@ -3,6 +3,8 @@
 dvbstream
 (C) Dave Chapman <dave@dchapman.com> 2001, 2002.
 
+Original authors: Nico, probably Arpi
+
 The latest version can be found at http://www.linuxstb.org/dvbstream
 
 Modified for use with MPlayer, for details see the changelog at
@@ -855,10 +857,7 @@ dvb_config_t *dvb_get_config(void)
 
 
 const stream_info_t stream_info_dvb = {
-	"Dvb Input",
 	"dvbin",
-	"Nico",
-	"based on the code from ??? (probably Arpi)",
 	dvb_open,
 	{ "dvb", NULL },
 	&stream_opts,

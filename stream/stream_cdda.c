@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Original author: Albeu
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -487,10 +489,7 @@ static int open_cdda(stream_t *st, int m, void *opts)
 }
 
 const stream_info_t stream_info_cdda = {
-    "CDDA",
     "cdda",
-    "Albeu",
-    "",
     open_cdda,
     {"cdda", NULL },
     &stream_opts,

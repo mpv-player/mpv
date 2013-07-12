@@ -38,11 +38,7 @@ static int open_f(stream_t *stream, int mode, void *opts)
 }
 
 const stream_info_t stream_info_avdevice = {
-    .info = "FFmpeg libavdevice",
     .name = "avdevice",
-    .author = "",
-    .comment =
-        "Force a libavformat/libavdevice demuxer with avdevice://demuxer:args",
     .open = open_f,
     .protocols = { "avdevice", "av", NULL },
 };

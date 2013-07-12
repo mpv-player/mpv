@@ -183,10 +183,7 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
 
     s->uncached_type = s->type;
 
-    mp_msg(MSGT_OPEN, MSGL_V, "STREAM: [%s] %s\n", sinfo->name, filename);
-    mp_msg(MSGT_OPEN, MSGL_V, "STREAM: Description: %s\n", sinfo->info);
-    mp_msg(MSGT_OPEN, MSGL_V, "STREAM: Author: %s\n", sinfo->author);
-    mp_msg(MSGT_OPEN, MSGL_V, "STREAM: Comment: %s\n", sinfo->comment);
+    mp_msg(MSGT_OPEN, MSGL_V, "[stream] [%s] %s\n", sinfo->name, filename);
 
     if (s->mime_type)
         mp_msg(MSGT_OPEN, MSGL_V, "Mime-type: '%s'\n", s->mime_type);

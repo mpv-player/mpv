@@ -107,10 +107,7 @@ struct stream_dvd_info_req {
 
 struct stream;
 typedef struct stream_info_st {
-    const char *info;
     const char *name;
-    const char *author;
-    const char *comment;
     // opts is set from ->opts
     int (*open)(struct stream *st, int mode, void *opts);
     const char *protocols[MAX_STREAM_PROTOCOLS];

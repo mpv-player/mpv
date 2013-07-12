@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Original author: M. Tourne
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -188,10 +190,7 @@ static int open_f (stream_t *stream, int mode, void *opts)
 }
 
 const stream_info_t stream_info_smb = {
-  "Server Message Block",
   "smb",
-  "M. Tourne",
-  "based on the code from 'a bulgarian' (one says)",
   open_f,
   {"smb", NULL},
   &stream_opts,

@@ -417,10 +417,7 @@ err_no_info:
 }
 
 const stream_info_t stream_info_bluray = {
-    "Blu-ray Disc",
     "bd",
-    "Benjamin Zores",
-    "Play Blu-ray discs through external libbluray",
     bluray_stream_open,
     { "bd", "br", "bluray", NULL },
     &bluray_stream_opts,

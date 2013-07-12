@@ -73,10 +73,7 @@ static int open_f(stream_t *stream, int mode, void* opts)
 }
 
 const stream_info_t stream_info_memory = {
-    "Memory",
     "memory",
-    "",
-    "",
     open_f,
     { "memory", NULL },
 };

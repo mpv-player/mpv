@@ -305,10 +305,7 @@ done:
 }
 
 const stream_info_t stream_info_ffmpeg = {
-  "FFmpeg",
   "ffmpeg",
-  "",
-  "",
   open_f,
   { "lavf", "ffmpeg", "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh",
     "mmshttp", "udp", "ftp", "rtp", "httpproxy", NULL },

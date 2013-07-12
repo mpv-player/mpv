@@ -2,6 +2,7 @@
  * stream layer for TV Input, based on previous work from Albeu
  *
  * Copyright (C) 2006 Benjamin Zores
+ * Original author: Albeu
  *
  * This file is part of MPlayer.
  *
@@ -108,10 +109,7 @@ tv_stream_open (stream_t *stream, int mode, void *opts)
 }
 
 const stream_info_t stream_info_tv = {
-  "TV Input",
   "tv",
-  "Benjamin Zores, Albeu",
-  "",
   tv_stream_open,
   { "tv", NULL },
   &stream_opts,

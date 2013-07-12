@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Original author: Benjamin Zores
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -1090,10 +1092,7 @@ static int ifo_stream_open (stream_t *stream, int mode, void *opts)
 }
 
 const stream_info_t stream_info_dvd = {
-  "DVD stream",
-  "null",
-  "",
-  "",
+  "dvd",
   open_s,
   { "dvd", NULL },
   &stream_opts,
@@ -1101,10 +1100,7 @@ const stream_info_t stream_info_dvd = {
 };
 
 const stream_info_t stream_info_ifo = {
-  "DVD IFO input",
   "ifo",
-  "Benjamin Zores",
-  "Mostly used to play DVDs on disk through OSD Menu",
   ifo_stream_open,
   { "file", "", NULL },
   NULL,
