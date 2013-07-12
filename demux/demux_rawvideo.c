@@ -170,11 +170,8 @@ static void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
 
 
 const demuxer_desc_t demuxer_desc_rawvideo = {
-    .info = "Raw video demuxer",
     .name = "rawvideo",
-    .shortdesc = "rawvideo",
-    .author = "?",
-    .comment = "",
+    .desc = "Uncompressed video",
     .fill_buffer = demux_rawvideo_fill_buffer,
     .open = demux_rawvideo_open,
     .seek = demux_rawvideo_seek,

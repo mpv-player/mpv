@@ -309,8 +309,6 @@ static void free_sh_stream(struct sh_stream *sh)
 
 void free_demuxer(demuxer_t *demuxer)
 {
-    mp_msg(MSGT_DEMUXER, MSGL_DBG2, "DEMUXER: freeing %s demuxer at %p\n",
-           demuxer->desc->shortdesc, demuxer);
     if (demuxer->desc->close)
         demuxer->desc->close(demuxer);
     // free streams:
@@ -502,16 +500,11 @@ void demuxer_help(void)
     int i;
 
     mp_msg(MSGT_DEMUXER, MSGL_INFO, "Available demuxers:\n");
-    mp_msg(MSGT_DEMUXER, MSGL_INFO, " demuxer:   info:  (comment)\n");
+    mp_msg(MSGT_DEMUXER, MSGL_INFO, " demuxer:   info:\n");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DEMUXERS\n");
     for (i = 0; demuxer_list[i]; i++) {
-        if (demuxer_list[i]->comment && strlen(demuxer_list[i]->comment))
-            mp_msg(MSGT_DEMUXER, MSGL_INFO, "%10s  %s (%s)\n",
-                   demuxer_list[i]->name, demuxer_list[i]->info,
-                   demuxer_list[i]->comment);
-        else
-            mp_msg(MSGT_DEMUXER, MSGL_INFO, "%10s  %s\n",
-                   demuxer_list[i]->name, demuxer_list[i]->info);
+        mp_msg(MSGT_DEMUXER, MSGL_INFO, "%10s  %s\n",
+               demuxer_list[i]->name, demuxer_list[i]->desc);
     }
 }
 
@@ -556,10 +549,10 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
         demuxer->params = NULL;
         if (demuxer->filetype)
             mp_tmsg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s (%s)\n",
-                    demuxer->filetype, desc->shortdesc);
+                    demuxer->filetype, desc->desc);
         else
             mp_tmsg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s\n",
-                    desc->shortdesc);
+                    desc->desc);
         if (stream_manages_timeline(demuxer->stream)) {
             // Incorrect, but fixes some behavior with DVD/BD
             demuxer->ts_resets_possible = false;

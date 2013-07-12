@@ -1097,11 +1097,8 @@ int tv_step_chanlist(tvi_handle_t *tvh)
 }
 
 demuxer_desc_t demuxer_desc_tv = {
-    .info = "Tv card demuxer",
     .name = "tv",
-    .shortdesc = "TV",
-    .author = "Alex Beregszaszi, Charles R. Henrich",
-    .comment = "?",
+    .desc = "TV card demuxer",
     .type = DEMUXER_TYPE_TV,
     .fill_buffer = demux_tv_fill_buffer,
     .open = demux_open_tv,

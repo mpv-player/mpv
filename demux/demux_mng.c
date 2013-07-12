@@ -560,11 +560,8 @@ static int demux_mng_control(demuxer_t * demuxer, int cmd, void * arg)
 }
 
 const demuxer_desc_t demuxer_desc_mng = {
-    .info = "MNG demuxer",
     .name = "mng",
-    .shortdesc = "MNG",
-    .author = "Stefan Schuermans <stefan@blinkenarea.org>",
-    .comment = "MNG files, using libmng",
+    .desc = "MNG",
     .fill_buffer = demux_mng_fill_buffer,
     .open = demux_mng_open,
     .close = demux_mng_close,

@@ -98,11 +98,8 @@ struct demuxer;
  * Demuxer description structure
  */
 typedef struct demuxer_desc {
-    const char *info;      // What is it (long name and/or description)
     const char *name;      // Demuxer name, used with -demuxer switch
-    const char *shortdesc; // Description printed at demuxer detection
-    const char *author;    // Demuxer author(s)
-    const char *comment;   // Comment, printed with -demuxer help
+    const char *desc;      // Displayed to user
 
     enum demuxer_type type; // optional
 

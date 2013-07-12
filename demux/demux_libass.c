@@ -112,11 +112,8 @@ static void d_close(struct demuxer *demuxer)
 }
 
 const struct demuxer_desc demuxer_desc_libass = {
-    .info = "Read subtitles with libass",
     .name = "libass",
-    .shortdesc = "ASS/SSA subtitles (libass)",
-    .author = "",
-    .comment = "",
+    .desc = "ASS/SSA subtitles (libass)",
     .open = d_check_file,
     .close = d_close,
 };

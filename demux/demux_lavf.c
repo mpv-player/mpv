@@ -902,11 +902,8 @@ static void demux_close_lavf(demuxer_t *demuxer)
 
 
 const demuxer_desc_t demuxer_desc_lavf = {
-    .info = "libavformat demuxer",
     .name = "lavf",
-    .shortdesc = "libavformat",
-    .author = "Michael Niedermayer",
-    .comment = "supports many formats, requires libavformat",
+    .desc = "libavformat",
     .fill_buffer = demux_lavf_fill_buffer,
     .open = demux_open_lavf,
     .close = demux_close_lavf,

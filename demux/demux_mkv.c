@@ -2718,11 +2718,8 @@ static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
 }
 
 const demuxer_desc_t demuxer_desc_matroska = {
-    .info = "Matroska demuxer",
     .name = "mkv",
-    .shortdesc = "Matroska",
-    .author = "Aurelien Jacobs",
-    .comment = "",
+    .desc = "Matroska",
     .type = DEMUXER_TYPE_MATROSKA,
     .open = demux_mkv_open,
     .fill_buffer = demux_mkv_fill_buffer,

@@ -1391,11 +1391,8 @@ static int d_control(struct demuxer *demuxer, int cmd, void *arg)
 }
 
 const struct demuxer_desc demuxer_desc_subreader = {
-    .info = "Deprecated MPlayer subtitle reader",
     .name = "subreader",
-    .shortdesc = "Deprecated Subreader",
-    .author = "",
-    .comment = "",
+    .desc = "Deprecated MPlayer subreader",
     .open = d_open_file,
     .fill_buffer = d_fill_buffer,
     .seek = d_seek,

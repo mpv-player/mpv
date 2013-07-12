@@ -244,11 +244,8 @@ static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg) {
 }
 
 const demuxer_desc_t demuxer_desc_mf = {
-    .info = "mf demuxer",
     .name = "mf",
-    .shortdesc = "MF",
-    .author = "?",
-    .comment = "multiframe?, pictures demuxer",
+    .desc = "image files (mf)",
     .fill_buffer = demux_mf_fill_buffer,
     .open = demux_open_mf,
     .close = demux_close_mf,

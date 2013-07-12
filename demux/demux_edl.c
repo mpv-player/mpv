@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Original author: Uoti Urpala
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -43,11 +45,8 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
 }
 
 const struct demuxer_desc demuxer_desc_edl = {
-    .info = "EDL file demuxer",
     .name = "edl",
-    .shortdesc = "EDL",
-    .author = "Uoti Urpala",
-    .comment = "",
+    .desc = "mplayer2 edit decision list",
     .type = DEMUXER_TYPE_EDL,
     .open = try_open_file,
 };

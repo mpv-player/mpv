@@ -114,11 +114,8 @@ static void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
 }
 
 const demuxer_desc_t demuxer_desc_rawaudio = {
-    .info = "Raw audio demuxer",
     .name = "rawaudio",
-    .shortdesc = "rawaudio",
-    .author = "?",
-    .comment = "",
+    .desc = "Uncompressed audio",
     .fill_buffer = demux_rawaudio_fill_buffer,
     .open = demux_rawaudio_open,
     .seek = demux_rawaudio_seek,
