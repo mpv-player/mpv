@@ -183,14 +183,6 @@ inline static int stream_read_char(stream_t *s)
            (stream_fill_buffer(s) ? s->buffer[s->buf_pos++] : -256);
 }
 
-inline static unsigned int stream_read_word(stream_t *s)
-{
-    int x, y;
-    x = stream_read_char(s);
-    y = stream_read_char(s);
-    return (x << 8) | y;
-}
-
 inline static unsigned int stream_read_dword(stream_t *s)
 {
     unsigned int y;
@@ -198,26 +190,6 @@ inline static unsigned int stream_read_dword(stream_t *s)
     y = (y << 8) | stream_read_char(s);
     y = (y << 8) | stream_read_char(s);
     y = (y << 8) | stream_read_char(s);
-    return y;
-}
-
-#define stream_read_fourcc stream_read_dword_le
-
-inline static unsigned int stream_read_word_le(stream_t *s)
-{
-    int x, y;
-    x = stream_read_char(s);
-    y = stream_read_char(s);
-    return (y << 8) | x;
-}
-
-inline static uint32_t stream_read_dword_le(stream_t *s)
-{
-    unsigned int y;
-    y = stream_read_char(s);
-    y |= stream_read_char(s) << 8;
-    y |= stream_read_char(s) << 16;
-    y |= stream_read_char(s) << 24;
     return y;
 }
 
@@ -232,14 +204,6 @@ inline static uint64_t stream_read_qword(stream_t *s)
     y = (y << 8) | stream_read_char(s);
     y = (y << 8) | stream_read_char(s);
     y = (y << 8) | stream_read_char(s);
-    return y;
-}
-
-inline static uint64_t stream_read_qword_le(stream_t *s)
-{
-    uint64_t y;
-    y = stream_read_dword_le(s);
-    y |= (uint64_t)stream_read_dword_le(s) << 32;
     return y;
 }
 
