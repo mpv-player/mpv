@@ -3029,17 +3029,7 @@ double get_time_length(struct MPContext *mpctx)
     if (len >= 0)
         return len;
 
-    struct sh_video *sh_video = mpctx->sh_video;
-    struct sh_audio *sh_audio = mpctx->sh_audio;
-    if (sh_video && sh_video->i_bps && sh_audio && sh_audio->i_bps)
-        return (double) (demuxer->movi_end - demuxer->movi_start) /
-               (sh_video->i_bps + sh_audio->i_bps);
-    if (sh_video && sh_video->i_bps)
-        return (double) (demuxer->movi_end - demuxer->movi_start) /
-               sh_video->i_bps;
-    if (sh_audio && sh_audio->i_bps)
-        return (double) (demuxer->movi_end - demuxer->movi_start) /
-               sh_audio->i_bps;
+    // Unknown
     return 0;
 }
 
