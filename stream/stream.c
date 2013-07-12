@@ -60,18 +60,11 @@ static struct input_ctx *stream_check_interrupt_ctx;
 
 extern const stream_info_t stream_info_vcd;
 extern const stream_info_t stream_info_cdda;
-extern const stream_info_t stream_info_asf;
-extern const stream_info_t stream_info_udp;
-extern const stream_info_t stream_info_http1;
-extern const stream_info_t stream_info_http2;
 extern const stream_info_t stream_info_dvb;
 extern const stream_info_t stream_info_tv;
 extern const stream_info_t stream_info_radio;
 extern const stream_info_t stream_info_pvr;
-extern const stream_info_t stream_info_ftp;
-extern const stream_info_t stream_info_vstream;
 extern const stream_info_t stream_info_smb;
-
 extern const stream_info_t stream_info_null;
 extern const stream_info_t stream_info_memory;
 extern const stream_info_t stream_info_mf;
@@ -102,12 +95,6 @@ static const stream_info_t *const auto_open_streams[] = {
 #endif
 #ifdef CONFIG_PVR
     &stream_info_pvr,
-#endif
-#ifdef CONFIG_FTP
-    &stream_info_ftp,
-#endif
-#ifdef CONFIG_VSTREAM
-    &stream_info_vstream,
 #endif
 #ifdef CONFIG_LIBSMBCLIENT
     &stream_info_smb,
