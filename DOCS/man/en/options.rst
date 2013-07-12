@@ -690,12 +690,6 @@
     Stop at given absolute time. Use ``--length`` if the time should be relative
     to ``--start``. See ``--start`` for valid option values and examples.
 
-``--no-extbased``, ``--extbased``
-    ``--no-extbased`` disables extension-based demuxer selection. By default,
-    when the file type (demuxer) cannot be detected reliably (the file has no
-    header or it is not reliable enough), the filename extension is used to
-    select the demuxer. Always falls back on content-based demuxer selection.
-
 ``--field-dominance=<auto|top|bottom>``
     Set first field for interlaced content. Useful for deinterlacers that
     double the framerate: ``--vf=yadif=1`` and ``--vo=vdpau:deint``.

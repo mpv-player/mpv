@@ -739,7 +739,8 @@ static int dvb_open(stream_t *stream, int mode, void *opts)
 	stream->close = dvbin_close;
 	m_struct_free(&stream_opts, opts);
 
-	stream->demuxer = "lavf:mpegts";
+	stream->demuxer = "lavf";
+        stream->lavf_type = "mpegts";
 
 	return STREAM_OK;
 }

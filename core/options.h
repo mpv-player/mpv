@@ -152,7 +152,6 @@ typedef struct MPOpts {
     char *demuxer_name;
     char *audio_demuxer_name;
     char *sub_demuxer_name;
-    int extension_parsing;
     int mkv_subtitle_preroll;
 
     struct image_writer_opts *screenshot_image_opts;

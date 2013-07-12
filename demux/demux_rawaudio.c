@@ -43,10 +43,14 @@ const m_option_t demux_rawaudio_opts[] = {
 };
 
 
-static int demux_rawaudio_open(demuxer_t* demuxer) {
+static int demux_rawaudio_open(demuxer_t* demuxer, enum demux_check check)
+{
   struct sh_stream *sh;
   sh_audio_t* sh_audio;
   WAVEFORMATEX* w;
+
+  if (check != DEMUX_CHECK_REQUEST && check != DEMUX_CHECK_FORCE)
+    return -1;
 
   if ((format & AF_FORMAT_SPECIAL_MASK) != 0)
       return -1;
@@ -115,7 +119,6 @@ const demuxer_desc_t demuxer_desc_rawaudio = {
     .shortdesc = "rawaudio",
     .author = "?",
     .comment = "",
-    .type = DEMUXER_TYPE_RAWAUDIO,
     .fill_buffer = demux_rawaudio_fill_buffer,
     .open = demux_rawaudio_open,
     .seek = demux_rawaudio_seek,

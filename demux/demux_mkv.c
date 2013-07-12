@@ -1751,7 +1751,7 @@ static int read_mkv_segment_header(demuxer_t *demuxer)
     return 0;
 }
 
-static int demux_mkv_open(demuxer_t *demuxer)
+static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
 {
     stream_t *s = demuxer->stream;
     mkv_demuxer_t *mkv_d;
@@ -2724,8 +2724,7 @@ const demuxer_desc_t demuxer_desc_matroska = {
     .author = "Aurelien Jacobs",
     .comment = "",
     .type = DEMUXER_TYPE_MATROSKA,
-    .safe_check = 1,                          // safe autodetect
-    .check_file = demux_mkv_open,
+    .open = demux_mkv_open,
     .fill_buffer = demux_mkv_fill_buffer,
     .close = mkv_free,
     .seek = demux_mkv_seek,

@@ -196,7 +196,6 @@ SOURCES = talloc.c \
           demux/demux_rawaudio.c \
           demux/demux_rawvideo.c \
           demux/ebml.c \
-          demux/extension.c \
           demux/mf.c \
           osdep/io.c \
           osdep/numcores.c \

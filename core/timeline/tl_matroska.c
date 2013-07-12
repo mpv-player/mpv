@@ -168,7 +168,7 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer **sources,
         free_stream(s);
         return was_valid;
     }
-    if (d->file_format == DEMUXER_TYPE_MATROSKA) {
+    if (d->type == DEMUXER_TYPE_MATROSKA) {
         for (int i = 1; i < num_sources; i++) {
             if (sources[i])
                 continue;

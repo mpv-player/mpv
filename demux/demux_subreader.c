@@ -1326,8 +1326,11 @@ static struct stream *read_probe_stream(struct stream *s, int max)
 
 #define PROBE_SIZE FFMIN(32 * 1024, STREAM_MAX_BUFFER_SIZE)
 
-static int d_check_file(struct demuxer *demuxer)
+static int d_open_file(struct demuxer *demuxer, enum demux_check check)
 {
+    if (check > DEMUX_CHECK_REQUEST)
+        return -1;
+
     struct stream *ps = read_probe_stream(demuxer->stream, PROBE_SIZE);
 
     struct subreader sr;
@@ -1393,9 +1396,7 @@ const struct demuxer_desc demuxer_desc_subreader = {
     .shortdesc = "Deprecated Subreader",
     .author = "",
     .comment = "",
-    .type = DEMUXER_TYPE_SUBREADER,
-    .safe_check = 1,
-    .check_file = d_check_file,
+    .open = d_open_file,
     .fill_buffer = d_fill_buffer,
     .seek = d_seek,
     .control = d_control,

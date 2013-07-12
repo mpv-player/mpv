@@ -224,46 +224,6 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
     return new;
 }
 
-/**
- * Get demuxer description structure for a given demuxer type
- *
- * @param file_format    type of the demuxer
- * @return               structure for the demuxer, NULL if not found
- */
-static const demuxer_desc_t *get_demuxer_desc_from_type(int file_format)
-{
-    int i;
-
-    for (i = 0; demuxer_list[i]; i++)
-        if (file_format == demuxer_list[i]->type)
-            return demuxer_list[i];
-
-    return NULL;
-}
-
-
-static demuxer_t *new_demuxer(struct MPOpts *opts, stream_t *stream, int type)
-{
-    struct demuxer *d = talloc_zero(NULL, struct demuxer);
-    d->stream = stream;
-    d->stream_pts = MP_NOPTS_VALUE;
-    d->movi_start = stream->start_pos;
-    d->movi_end = stream->end_pos;
-    d->seekable = 1;
-    d->filepos = -1;
-    d->type = type;
-    d->opts = opts;
-    if (type)
-        if (!(d->desc = get_demuxer_desc_from_type(type)))
-            mp_msg(MSGT_DEMUXER, MSGL_ERR,
-                   "BUG! Invalid demuxer type in new_demuxer(), "
-                   "big troubles ahead.\n");
-    if (stream->url)
-        d->filename = strdup(stream->url);
-    stream_seek(stream, stream->start_pos);
-    return d;
-}
-
 struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
 {
     if (demuxer->num_streams > MAX_SH_STREAMS) {
@@ -356,7 +316,6 @@ void free_demuxer(demuxer_t *demuxer)
     // free streams:
     for (int n = 0; n < demuxer->num_streams; n++)
         free_sh_stream(demuxer->streams[n]);
-    free(demuxer->filename);
     talloc_free(demuxer);
 }
 
@@ -546,8 +505,6 @@ void demuxer_help(void)
     mp_msg(MSGT_DEMUXER, MSGL_INFO, " demuxer:   info:  (comment)\n");
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DEMUXERS\n");
     for (i = 0; demuxer_list[i]; i++) {
-        if (demuxer_list[i]->type >= DEMUXER_TYPE_END)  // internal type
-            continue;
         if (demuxer_list[i]->comment && strlen(demuxer_list[i]->comment))
             mp_msg(MSGT_DEMUXER, MSGL_INFO, "%10s  %s (%s)\n",
                    demuxer_list[i]->name, demuxer_list[i]->info,
@@ -558,66 +515,51 @@ void demuxer_help(void)
     }
 }
 
-
-/**
- * Get demuxer type for a given demuxer name
- *
- * @param demuxer_name    string with demuxer name of demuxer number
- * @param force           will be set if demuxer should be forced.
- *                        May be NULL.
- * @return                DEMUXER_TYPE_xxx, -1 if error or not found
- */
-static int get_demuxer_type_from_name(char *demuxer_name, int *force)
+static const char *d_level(enum demux_check level)
 {
-    if (!demuxer_name || !demuxer_name[0])
-        return DEMUXER_TYPE_UNKNOWN;
-    if (force)
-        *force = demuxer_name[0] == '+';
-    if (demuxer_name[0] == '+')
-        demuxer_name = &demuxer_name[1];
-    for (int i = 0; demuxer_list[i]; i++) {
-        if (demuxer_list[i]->type >= DEMUXER_TYPE_END)
-            // Can't select special demuxers from commandline
-            continue;
-        if (strcmp(demuxer_name, demuxer_list[i]->name) == 0)
-            return demuxer_list[i]->type;
+    switch (level) {
+    case DEMUX_CHECK_FORCE:  return "force";
+    case DEMUX_CHECK_UNSAFE: return "unsafe";
+    case DEMUX_CHECK_REQUEST:return "request";
+    case DEMUX_CHECK_NORMAL: return "normal";
     }
-
-    return -1;
+    abort();
 }
 
 static struct demuxer *open_given_type(struct MPOpts *opts,
                                        const struct demuxer_desc *desc,
-                                       struct stream *stream, bool force,
-                                       struct demuxer_params *params)
+                                       struct stream *stream,
+                                       struct demuxer_params *params,
+                                       enum demux_check check)
 {
-    struct demuxer *demuxer;
-    int fformat = desc->type;
-    mp_msg(MSGT_DEMUXER, MSGL_V, "Trying demuxer: %s\n", desc->name);
-    demuxer = new_demuxer(opts, stream, desc->type);
-    demuxer->params = params;
-    if (!force) {
-        if (desc->check_file)
-            fformat = desc->check_file(demuxer) >= 0 ? fformat : 0;
-    }
-    if (fformat == 0)
-        goto fail;
-    if (fformat == desc->type) {
+    struct demuxer *demuxer = talloc_ptrtype(NULL, demuxer);
+    *demuxer = (struct demuxer) {
+        .desc = desc,
+        .type = desc->type,
+        .stream = stream,
+        .stream_pts = MP_NOPTS_VALUE,
+        .movi_start = stream->start_pos,
+        .movi_end = stream->end_pos,
+        .seekable = 1,
+        .filepos = -1,
+        .opts = opts,
+        .filename = talloc_strdup(demuxer, stream->url),
+    };
+    demuxer->params = params; // temporary during open()
+    stream_seek(stream, stream->start_pos);
+
+    mp_msg(MSGT_DEMUXER, MSGL_V, "Trying demuxer: %s (force-level: %s)\n",
+           desc->name, d_level(check));
+
+    int ret = demuxer->desc->open(demuxer, check);
+    if (ret >= 0) {
+        demuxer->params = NULL;
         if (demuxer->filetype)
             mp_tmsg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s (%s)\n",
                     demuxer->filetype, desc->shortdesc);
         else
             mp_tmsg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s\n",
                     desc->shortdesc);
-        if (demuxer->desc->open) {
-            int ret = demuxer->desc->open(demuxer);
-            if (ret < 0) {
-                mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "Opening as detected format "
-                        "\"%s\" failed.\n", desc->shortdesc);
-                goto fail;
-            }
-        }
-        demuxer->file_format = fformat;
         if (stream_manages_timeline(demuxer->stream)) {
             // Incorrect, but fixes some behavior with DVD/BD
             demuxer->ts_resets_possible = false;
@@ -628,81 +570,55 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
         demuxer_sort_chapters(demuxer);
         demux_info_update(demuxer);
         return demuxer;
-    } else {
-        // demux_mov can return playlist instead of mov
-        if (fformat == DEMUXER_TYPE_PLAYLIST)
-            return demuxer; // handled in mplayer.c
-        /* Internal MPEG PS demuxer check can return other MPEG subtypes
-         * which don't have their own checks; recurse to try opening as
-         * the returned type instead. */
-        free_demuxer(demuxer);
-        desc = get_demuxer_desc_from_type(fformat);
-        if (!desc) {
-            mp_msg(MSGT_DEMUXER, MSGL_ERR,
-                   "BUG: recursion to nonexistent file format\n");
-            return NULL;
-        }
-        return open_given_type(opts, desc, stream, false, params);
     }
- fail:
+
     free_demuxer(demuxer);
     return NULL;
 }
 
+static const int d_normal[]  = {DEMUX_CHECK_NORMAL, DEMUX_CHECK_UNSAFE, -1};
+static const int d_request[] = {DEMUX_CHECK_REQUEST, -1};
+static const int d_force[]   = {DEMUX_CHECK_FORCE, -1};
+
 struct demuxer *demux_open(struct stream *stream, char *force_format,
                            struct demuxer_params *params, struct MPOpts *opts)
 {
-    struct demuxer *demuxer = NULL;
-    const struct demuxer_desc *desc;
+    const int *check_levels = d_normal;
+    const struct demuxer_desc *check_desc = NULL;
+
     if (!force_format)
         force_format = opts->demuxer_name;
+    if (!force_format)
+        force_format = stream->demuxer;
 
-    int force = 0;
-    int demuxer_type;
-    if ((demuxer_type = get_demuxer_type_from_name(force_format, &force)) < 0) {
-        mp_msg(MSGT_DEMUXER, MSGL_ERR, "Demuxer %s does not exist.\n",
-               force_format);
-        return NULL;
-    }
-    int file_format = 0;
-    if (demuxer_type)
-        file_format = demuxer_type;
-
-    // If somebody requested a demuxer check it
-    if (file_format) {
-        desc = get_demuxer_desc_from_type(file_format);
-        if (!desc)
-            // should only happen with obsolete -demuxer 99 numeric format
+    if (force_format && force_format[0]) {
+        check_levels = d_request;
+        if (force_format[0] == '+') {
+            force_format += 1;
+            check_levels = d_force;
+        }
+        for (int n = 0; demuxer_list[n]; n++) {
+            if (strcmp(demuxer_list[n]->name, force_format) == 0)
+                check_desc = demuxer_list[n];
+        }
+        if (!check_desc) {
+            mp_msg(MSGT_DEMUXER, MSGL_ERR, "Demuxer %s does not exist.\n",
+                   force_format);
             return NULL;
-        return open_given_type(opts, desc, stream, force, params);
-    }
-
-    // Test demuxers with safe file checks
-    for (int i = 0; (desc = demuxer_list[i]); i++) {
-        if (desc->safe_check) {
-            demuxer = open_given_type(opts, desc, stream, false, params);
-            if (demuxer)
-                return demuxer;
         }
     }
 
-    // Ok. We're over the stable detectable fileformats, the next ones are
-    // a bit fuzzy. So by default (extension_parsing==1) try extension-based
-    // detection first:
-    if (stream->url && opts->extension_parsing == 1) {
-        desc = get_demuxer_desc_from_type(demuxer_type_by_filename(stream->url));
-        if (desc)
-            demuxer = open_given_type(opts, desc, stream, false, params);
-        if (demuxer)
-            return demuxer;
-    }
-
-    // Finally try detection for demuxers with unsafe checks
-    for (int i = 0; (desc = demuxer_list[i]); i++) {
-        if (!desc->safe_check && desc->check_file) {
-            demuxer = open_given_type(opts, desc, stream, false, params);
-            if (demuxer)
-                return demuxer;
+    // Test demuxers from first to last, one pass for each check_levels[] entry
+    for (int pass = 0; check_levels[pass] != -1; pass++) {
+        enum demux_check level = check_levels[pass];
+        for (int n = 0; demuxer_list[n]; n++) {
+            const struct demuxer_desc *desc = demuxer_list[n];
+            if (!check_desc || desc == check_desc) {
+                struct demuxer *demuxer = open_given_type(opts, desc, stream,
+                                                          params, level);
+                if (demuxer)
+                    return demuxer;
+            }
         }
     }
 

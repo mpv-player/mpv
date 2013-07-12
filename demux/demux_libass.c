@@ -33,7 +33,7 @@ struct priv {
     ASS_Track *track;
 };
 
-static int d_check_file(struct demuxer *demuxer)
+static int d_check_file(struct demuxer *demuxer, enum demux_check check)
 {
     const char *user_cp = demuxer->opts->sub_cp;
     struct stream *s = demuxer->stream;
@@ -43,42 +43,45 @@ static int d_check_file(struct demuxer *demuxer)
     if (!lib)
         return -1;
 
-    // Probe by loading a part of the beginning of the file with libass.
-    // Incomplete scripts are usually ok, and we hope libass is not verbose
-    // when dealing with (from its perspective) completely broken binary
-    // garbage.
+    if (check >= DEMUX_CHECK_UNSAFE) {
+        // Probe by loading a part of the beginning of the file with libass.
+        // Incomplete scripts are usually ok, and we hope libass is not verbose
+        // when dealing with (from its perspective) completely broken binary
+        // garbage.
 
-    bstr buf = stream_peek(s, PROBE_SIZE);
-    // Older versions of libass will overwrite the input buffer, and despite
-    // passing length, expect a 0 termination.
-    void *tmp = talloc_size(NULL, buf.len + 1);
-    memcpy(tmp, buf.start, buf.len);
-    buf.start = tmp;
-    buf.start[buf.len] = '\0';
-    bstr cbuf =
-        mp_charset_guess_and_conv_to_utf8(buf, user_cp,  MP_ICONV_ALLOW_CUTOFF);
-    if (cbuf.start == NULL)
-        cbuf = buf;
-    ASS_Track *track = ass_read_memory(lib, cbuf.start, cbuf.len, NULL);
-    if (cbuf.start != buf.start)
-        talloc_free(cbuf.start);
-    talloc_free(buf.start);
-    if (!track)
-        return -1;
-    ass_free_track(track);
+        bstr buf = stream_peek(s, PROBE_SIZE);
+        // Older versions of libass will overwrite the input buffer, and despite
+        // passing length, expect a 0 termination.
+        void *tmp = talloc_size(NULL, buf.len + 1);
+        memcpy(tmp, buf.start, buf.len);
+        buf.start = tmp;
+        buf.start[buf.len] = '\0';
+        bstr cbuf = mp_charset_guess_and_conv_to_utf8(buf, user_cp,
+                                                      MP_ICONV_ALLOW_CUTOFF);
+        if (cbuf.start == NULL)
+            cbuf = buf;
+        ASS_Track *track = ass_read_memory(lib, cbuf.start, cbuf.len, NULL);
+        if (cbuf.start != buf.start)
+            talloc_free(cbuf.start);
+        talloc_free(buf.start);
+        if (!track)
+            return -1;
+        ass_free_track(track);
+    }
 
     // Actually load the full thing.
 
-    buf = stream_read_complete(s, NULL, 100000000);
+    bstr buf = stream_read_complete(s, NULL, 100000000);
     if (!buf.start) {
         mp_tmsg(MSGT_ASS, MSGL_ERR, "Refusing to load subtitle file "
                 "larger than 100 MB: %s\n", demuxer->filename);
         return -1;
     }
-    cbuf = mp_charset_guess_and_conv_to_utf8(buf, user_cp,  MP_ICONV_VERBOSE);
+    bstr cbuf = mp_charset_guess_and_conv_to_utf8(buf, user_cp,
+                                                  MP_ICONV_VERBOSE);
     if (cbuf.start == NULL)
         cbuf = buf;
-    track = ass_read_memory(lib, cbuf.start, cbuf.len, NULL);
+    ASS_Track *track = ass_read_memory(lib, cbuf.start, cbuf.len, NULL);
     if (cbuf.start != buf.start)
         talloc_free(cbuf.start);
     talloc_free(buf.start);
@@ -114,8 +117,6 @@ const struct demuxer_desc demuxer_desc_libass = {
     .shortdesc = "ASS/SSA subtitles (libass)",
     .author = "",
     .comment = "",
-    .safe_check = 1,
-    .type = DEMUXER_TYPE_LIBASS,
-    .check_file = d_check_file,
+    .open = d_check_file,
     .close = d_close,
 };

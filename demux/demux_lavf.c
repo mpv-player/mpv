@@ -185,7 +185,7 @@ static char *remove_prefix(char *s, const char **prefixes)
 static const char *prefixes[] =
     {"ffmpeg://", "lavf://", "avdevice://", "av://", NULL};
 
-static int lavf_check_file(demuxer_t *demuxer)
+static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 {
     struct MPOpts *opts = demuxer->opts;
     struct lavfdopts *lavfdopts = &opts->lavfdopts;
@@ -258,7 +258,8 @@ static int lavf_check_file(demuxer_t *demuxer)
         min_probe = lavfdopts->probescore;
 
     AVProbeData avpd = {
-        .filename = priv->filename,
+        // Disable file-extension matching with normal checks
+        .filename = check <= DEMUX_CHECK_REQUEST ? priv->filename : NULL,
         .buf_size = 0,
         .buf = av_mallocz(PROBE_BUF_SIZE + FF_INPUT_BUFFER_PADDING_SIZE),
     };
@@ -493,18 +494,20 @@ static void add_metadata(demuxer_t *demuxer, AVDictionary *metadata)
         demux_info_add(demuxer, t->key, t->value);
 }
 
-static int demux_open_lavf(demuxer_t *demuxer)
+static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 {
     struct MPOpts *opts = demuxer->opts;
     struct lavfdopts *lavfdopts = &opts->lavfdopts;
     AVFormatContext *avfc;
     AVDictionaryEntry *t = NULL;
-    lavf_priv_t *priv = demuxer->priv;
     float analyze_duration = 0;
     int i;
 
-    // do not allow forcing the demuxer
-    if (!priv->avif)
+    if (lavf_check_file(demuxer, check) < 0)
+        return -1;
+
+    lavf_priv_t *priv = demuxer->priv;
+    if (!priv)
         return -1;
 
     stream_seek(demuxer->stream, 0);
@@ -904,9 +907,6 @@ const demuxer_desc_t demuxer_desc_lavf = {
     .shortdesc = "libavformat",
     .author = "Michael Niedermayer",
     .comment = "supports many formats, requires libavformat",
-    .type = DEMUXER_TYPE_LAVF,
-    .safe_check = 1,
-    .check_file = lavf_check_file,
     .fill_buffer = demux_lavf_fill_buffer,
     .open = demux_open_lavf,
     .close = demux_close_lavf,

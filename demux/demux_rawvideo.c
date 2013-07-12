@@ -56,9 +56,13 @@ const m_option_t demux_rawvideo_opts[] = {
 };
 
 
-static int demux_rawvideo_open(demuxer_t* demuxer) {
+static int demux_rawvideo_open(demuxer_t* demuxer, enum demux_check check)
+{
   struct sh_stream *sh;
   sh_video_t* sh_video;
+
+  if (check != DEMUX_CHECK_REQUEST && check != DEMUX_CHECK_FORCE)
+    return -1;
 
   if(!width || !height){
       mp_msg(MSGT_DEMUX,MSGL_ERR,"rawvideo: width or height not specified!\n");
@@ -171,7 +175,6 @@ const demuxer_desc_t demuxer_desc_rawvideo = {
     .shortdesc = "rawvideo",
     .author = "?",
     .comment = "",
-    .type = DEMUXER_TYPE_RAWVIDEO,
     .fill_buffer = demux_rawvideo_fill_buffer,
     .open = demux_rawvideo_open,
     .seek = demux_rawvideo_seek,

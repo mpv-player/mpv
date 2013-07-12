@@ -2297,9 +2297,9 @@ int reinit_video_chain(struct MPContext *mpctx)
         goto no_video;
     }
 
-    mp_tmsg(MSGT_CPLAYER, MSGL_V, "[V] filefmt:%d  fourcc:0x%X  "
+    mp_tmsg(MSGT_CPLAYER, MSGL_V, "[V] fourcc:0x%X  "
             "size:%dx%d  fps:%5.3f\n",
-            mpctx->master_demuxer->file_format, mpctx->sh_video->format,
+            mpctx->sh_video->format,
             mpctx->sh_video->disp_w, mpctx->sh_video->disp_h,
             mpctx->sh_video->fps);
     if (opts->force_fps)
@@ -2459,7 +2459,7 @@ static struct demux_packet *video_read_frame(struct MPContext *mpctx)
         double d = next_pts == MP_NOPTS_VALUE ? sh_video->last_pts - pts1
                                               : next_pts - sh_video->last_pts;
         if (d >= 0) {
-            if (demuxer->file_format == DEMUXER_TYPE_TV) {
+            if (demuxer->type == DEMUXER_TYPE_TV) {
                 if (d > 0)
                     sh_video->fps = 1.0f / d;
                 frame_time = d;

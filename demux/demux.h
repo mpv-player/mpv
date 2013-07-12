@@ -36,24 +36,11 @@ struct MPOpts;
 #define MAX_PACK_BYTES 0x8000000  // 128 MiB
 
 enum demuxer_type {
-    DEMUXER_TYPE_UNKNOWN = 0,
+    DEMUXER_TYPE_GENERIC = 0,
     DEMUXER_TYPE_TV,
-    DEMUXER_TYPE_MF,
-    DEMUXER_TYPE_RAWAUDIO,
-    DEMUXER_TYPE_RAWVIDEO,
     DEMUXER_TYPE_MATROSKA,
-    DEMUXER_TYPE_LAVF,
-    DEMUXER_TYPE_MNG,
     DEMUXER_TYPE_EDL,
     DEMUXER_TYPE_CUE,
-    DEMUXER_TYPE_SUBREADER,
-    DEMUXER_TYPE_LIBASS,
-
-    /* Values after this are for internal use and can not be selected
-     * as demuxer type by the user (-demuxer option). */
-    DEMUXER_TYPE_END,
-
-    DEMUXER_TYPE_PLAYLIST,
 };
 
 enum timestamp_type {
@@ -84,6 +71,22 @@ enum timestamp_type {
 #define SEEK_BACKWARD (1 << 3)
 #define SEEK_SUBPREROLL (1 << 4)
 
+// Strictness of the demuxer open format check.
+// demux.c will try by default: NORMAL, UNSAFE (in this order)
+// Using "-demuxer format" will try REQUEST
+// Using "-demuxer +format" will try FORCE
+// REQUEST can be used as special value for raw demuxers which have no file
+// header check; then they should fail if check!=FORCE && check!=REQUEST.
+//
+// In general, the list is sorted from weakest check to normal check.
+// You can use relation operators to compare the check level.
+enum demux_check {
+    DEMUX_CHECK_FORCE,  // force format if possible
+    DEMUX_CHECK_UNSAFE, // risky/fuzzy detection
+    DEMUX_CHECK_REQUEST,// requested by user or stream implementation
+    DEMUX_CHECK_NORMAL, // normal, safe detection
+};
+
 // demux_lavf can pass lavf buffers using FF_INPUT_BUFFER_PADDING_SIZE instead
 #define MP_INPUT_BUFFER_PADDING_SIZE 16
 
@@ -101,14 +104,10 @@ typedef struct demuxer_desc {
     const char *author;    // Demuxer author(s)
     const char *comment;   // Comment, printed with -demuxer help
 
-    enum demuxer_type type;
-    // If 1 detection is safe and fast, do it before file extension check
-    int safe_check;
+    enum demuxer_type type; // optional
 
     // Return 0 on success, otherwise -1
-    int (*check_file)(struct demuxer *demuxer);
-    // Open the demuxer, return 0 on success, otherwise -1
-    int (*open)(struct demuxer *demuxer);
+    int (*open)(struct demuxer *demuxer, enum demux_check check);
     // The following functions are all optional
     int (*fill_buffer)(struct demuxer *demuxer); // 0 on EOF, otherwise 1
     void (*close)(struct demuxer *demuxer);
@@ -160,15 +159,8 @@ typedef struct demuxer {
     int64_t movi_end;
     struct stream *stream;
     double stream_pts;     // current stream pts, if applicable (e.g. dvd)
-    char *filename;  // Needed by avs_check_file
+    char *filename;  // same as stream->url
     enum demuxer_type type;
-    /* Normally the file_format field is just a copy of the type field above.
-     * There are 2 exceptions I noticed. Internal demux_avi may force
-     * ->type to DEMUXER_TYPE_AVI_[NI|NINI] while leaving ->file_format at
-     * DEMUXER_TYPE_AVI. Internal demux_mov may set ->type to
-     * DEMUXER_TYPE_PLAYLIST and also return that from the check function
-     * or not (looks potentially buggy). */
-    enum demuxer_type file_format;
     int seekable; // flag
     /* Set if using absolute seeks for small movements is OK (no pts resets
      * that would make pts ambigious, preferably supports back/forward flags */
@@ -251,8 +243,6 @@ void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
 void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
                           bool selected);
 void demuxer_enable_autoselect(struct demuxer *demuxer);
-
-int demuxer_type_by_filename(char *filename);
 
 void demuxer_help(void);
 

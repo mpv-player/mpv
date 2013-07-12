@@ -701,12 +701,15 @@ static int tv_uninit(tvi_handle_t *tvh)
     return res;
 }
 
-static int demux_open_tv(demuxer_t *demuxer)
+static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
 {
     tvi_handle_t *tvh;
     sh_video_t *sh_video;
     sh_audio_t *sh_audio = NULL;
     const tvi_functions_t *funcs;
+
+    if (check > DEMUX_CHECK_REQUEST || demuxer->stream->type != STREAMTYPE_TV)
+        return -1;
 
     demuxer->priv=NULL;
     if(!(tvh=tv_begin(demuxer->stream->priv))) return -1;

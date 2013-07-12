@@ -399,7 +399,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("demuxer", demuxer_name, 0),
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
-    OPT_FLAG("extbased", extension_parsing, 0),
 
     {"mf", (void *) mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
 #ifdef CONFIG_RADIO
@@ -777,7 +776,6 @@ const struct MPOpts mp_default_opts = {
     .sub_visibility = 1,
     .sub_pos = 100,
     .sub_speed = 1.0,
-    .extension_parsing = 1,
     .audio_output_channels = MP_CHMAP_INIT_STEREO,
     .audio_output_format = -1,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,

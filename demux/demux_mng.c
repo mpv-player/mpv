@@ -255,21 +255,6 @@ static mng_bool demux_mng_settimer(mng_handle h_mng, mng_uint32 msecs)
 }
 
 /**
- * \brief MPlayer callback: Check if stream contains MNG data.
- * \param[in] demuxer demuxer structure
- * \return demuxer type constant, \p 0 if unknown
- */
-static int demux_mng_check_file(demuxer_t *demuxer)
-{
-    char buf[4];
-    if (stream_read(demuxer->stream, buf, 4) != 4)
-        return -1;
-    if (memcmp(buf, "\x8AMNG", 4))
-        return -1;
-    return 0;
-}
-
-/**
  * \brief MPlayer callback: Fill buffer from MNG stream.
  * \param[in] demuxer demuxer structure
  * \return \p 1 on success, \p 0 on error
@@ -343,12 +328,23 @@ static int demux_mng_fill_buffer(demuxer_t * demuxer)
     return 1;
 }
 
-static int demux_mng_open(demuxer_t * demuxer)
+static int demux_mng_open(demuxer_t * demuxer, enum demux_check check)
 {
     mng_priv_t * mng_priv;
     mng_handle h_mng;
     mng_retcode mng_ret;
     sh_video_t * sh_video;
+
+    if (check > DEMUX_CHECK_REQUEST)
+        return -1; // check too unsafe
+    if (check > DEMUX_CHECK_FORCE) {
+        char buf[4];
+        if (stream_read(demuxer->stream, buf, 4) != 4)
+            return -1;
+        if (memcmp(buf, "\x8AMNG", 4))
+            return -1;
+        stream_seek(demuxer->stream, demuxer->stream->start_pos);
+    }
 
     // create private data structure
     mng_priv = calloc(1, sizeof(mng_priv_t));
@@ -569,9 +565,6 @@ const demuxer_desc_t demuxer_desc_mng = {
     .shortdesc = "MNG",
     .author = "Stefan Schuermans <stefan@blinkenarea.org>",
     .comment = "MNG files, using libmng",
-    .type = DEMUXER_TYPE_MNG,
-    .safe_check = 0, // unsafe autodetect (only checking magic at beginning of stream)
-    .check_file = demux_mng_check_file,
     .fill_buffer = demux_mng_fill_buffer,
     .open = demux_mng_open,
     .close = demux_mng_close,

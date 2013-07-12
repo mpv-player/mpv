@@ -32,7 +32,7 @@ static int
 mf_stream_open (stream_t *stream, int mode, void *opts)
 {
   stream->type = STREAMTYPE_MF;
-  stream->demuxer = "lavf";
+  stream->demuxer = "mf";
 
   return STREAM_OK;
 }
