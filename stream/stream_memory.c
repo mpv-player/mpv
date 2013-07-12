@@ -56,8 +56,6 @@ static int control(stream_t *s, int cmd, void *arg)
 
 static int open_f(stream_t *stream, int mode, void* opts)
 {
-    stream->type = STREAMTYPE_MEMORY;
-
     stream->fill_buffer = fill_buffer;
     stream->seek = seek;
     stream->control = control;

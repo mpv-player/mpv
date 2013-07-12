@@ -175,8 +175,6 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
         s->cache_size = 320;
     }
 
-    if (s->type <= -2)
-        mp_msg(MSGT_OPEN, MSGL_WARN, "Warning streams need a type !!!!\n");
     if (!s->seek)
         s->flags &= ~MP_STREAM_SEEK;
     if (s->seek && !(s->flags & MP_STREAM_SEEK))
@@ -595,7 +593,6 @@ static stream_t *new_stream(size_t min_size)
     memset(s, 0, sizeof(stream_t));
 
     s->fd = -2;
-    s->type = -2;
     return s;
 }
 
@@ -672,7 +669,6 @@ int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
     orig->buf_len = orig->buf_pos = 0;
 
     stream_t *cache = new_stream(0);
-    cache->type = STREAMTYPE_CACHE;
     cache->uncached_type = orig->type;
     cache->uncached_stream = orig;
     cache->flags |= MP_STREAM_SEEK;

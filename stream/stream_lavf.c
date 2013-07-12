@@ -222,7 +222,6 @@ static int open_f(stream_t *stream, int mode, void *opts)
     int64_t size = avio_size(avio);
     if (size >= 0)
         stream->end_pos = size;
-    stream->type = STREAMTYPE_FILE;
     stream->seek = seek;
     if (!avio->seekable)
         stream->seek = NULL;

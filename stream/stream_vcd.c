@@ -221,7 +221,6 @@ static int open_s(stream_t *stream,int mode, void* opts)
 #endif
 
   stream->fd = f;
-  stream->type = STREAMTYPE_VCD;
   stream->sector_size = VCD_SECTOR_DATA;
   stream->start_pos=ret;
   stream->end_pos=ret2;

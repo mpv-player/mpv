@@ -165,7 +165,6 @@ static int open_f (stream_t *stream, int mode, void *opts)
     stream->seek = seek;
     if(mode == STREAM_READ) stream->end_pos = len;
   }
-  stream->type = STREAMTYPE_SMB;
   stream->fd = fd;
   stream->fill_buffer = fill_buffer;
   stream->write_buffer = write_buffer;

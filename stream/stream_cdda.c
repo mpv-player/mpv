@@ -470,7 +470,6 @@ static int open_cdda(stream_t *st, int m, void *opts)
     st->priv = priv;
     st->start_pos = priv->start_sector * CDIO_CD_FRAMESIZE_RAW;
     st->end_pos = (priv->end_sector + 1) * CDIO_CD_FRAMESIZE_RAW;
-    st->type = STREAMTYPE_CDDA;
     st->sector_size = CDIO_CD_FRAMESIZE_RAW;
 
     st->fill_buffer = fill_buffer;

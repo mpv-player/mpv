@@ -34,25 +34,17 @@
 #define O_BINARY 0
 #endif
 
-#define STREAMTYPE_DUMMY -1    // for placeholders, when the actual reading is handled in the demuxer
-#define STREAMTYPE_FILE 0      // read from seekable file
-#define STREAMTYPE_VCD  1      // raw mode-2 CDROM reading, 2324 bytes/sector
-#define STREAMTYPE_DVD  3      // libdvdread
-#define STREAMTYPE_MEMORY 4
-#define STREAMTYPE_PLAYLIST 6  // FIXME!!! same as STREAMTYPE_FILE now
-#define STREAMTYPE_CDDA 10     // raw audio CD reader
-#define STREAMTYPE_SMB 11      // smb:// url, using libsmbclient (samba)
-#define STREAMTYPE_VCDBINCUE 12      // vcd directly from bin/cue files
-#define STREAMTYPE_DVB 13
-#define STREAMTYPE_VSTREAM 14
-#define STREAMTYPE_SDP 15
-#define STREAMTYPE_PVR 16
-#define STREAMTYPE_TV 17
-#define STREAMTYPE_MF 18
-#define STREAMTYPE_RADIO 19
-#define STREAMTYPE_BLURAY 20
-#define STREAMTYPE_AVDEVICE 21
-#define STREAMTYPE_CACHE 22
+enum streamtype {
+    STREAMTYPE_GENERIC = 0,
+    STREAMTYPE_FILE,
+    STREAMTYPE_RADIO,
+    STREAMTYPE_DVB,
+    STREAMTYPE_DVD,
+    STREAMTYPE_PVR,
+    STREAMTYPE_TV,
+    STREAMTYPE_MF,
+    STREAMTYPE_AVDEVICE,
+};
 
 #define STREAM_BUFFER_SIZE 2048
 #define STREAM_MAX_SECTOR_SIZE (8 * 1024)
@@ -143,8 +135,8 @@ typedef struct stream {
     void (*close)(struct stream *s);
 
     int fd; // file descriptor, see man open(2)
-    int type; // see STREAMTYPE_*
-    int uncached_type; // like (uncached_stream ? uncached_stream->type : type)
+    enum streamtype type; // see STREAMTYPE_*
+    enum streamtype uncached_type; // if stream is cache, type of wrapped str.
     int flags; // MP_STREAM_SEEK_* or'ed flags
     int sector_size; // sector size (seek will be aligned on this size if non 0)
     int read_chunk; // maximum amount of data to read at once to limit latency

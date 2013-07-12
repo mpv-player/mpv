@@ -409,7 +409,6 @@ err_no_info:
     s->sector_size = BLURAY_SECTOR_SIZE;
     s->flags       = MP_STREAM_SEEK;
     s->priv        = b;
-    s->type        = STREAMTYPE_BLURAY;
     s->url         = strdup("br://");
 
     mp_tmsg(MSGT_OPEN, MSGL_V, "Blu-ray successfully opened.\n");
