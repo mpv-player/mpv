@@ -157,12 +157,11 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     }
     s = new_stream(0);
     s->opts = options;
-    s->url = strdup(filename);
+    s->url = talloc_strdup(s, filename);
     s->flags = 0;
     s->mode = mode;
     *ret = sinfo->open(s, mode, arg);
     if ((*ret) != STREAM_OK) {
-        free(s->url);
         talloc_free(s);
         return NULL;
     }
@@ -598,6 +597,9 @@ static stream_t *new_stream(size_t min_size)
 
 void free_stream(stream_t *s)
 {
+    if (!s)
+        return;
+
     stream_set_capture_file(s, NULL);
 
     if (s->close)
@@ -605,9 +607,7 @@ void free_stream(stream_t *s)
     if (s->fd > 0) {
         close(s->fd);
     }
-    free(s->url);
-    if (s->uncached_stream)
-        free_stream(s->uncached_stream);
+    free_stream(s->uncached_stream);
     talloc_free(s);
 }
 
@@ -675,9 +675,9 @@ int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
     cache->mode = STREAM_READ;
     cache->read_chunk = 4 * STREAM_BUFFER_SIZE;
 
-    cache->url = strdup(orig->url);
+    cache->url = talloc_strdup(cache, orig->url);
     cache->mime_type = talloc_strdup(cache, orig->mime_type);
-    cache->lavf_type = orig->lavf_type;
+    cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
     cache->opts = orig->opts;
     cache->start_pos = orig->start_pos;
     cache->end_pos = orig->end_pos;
