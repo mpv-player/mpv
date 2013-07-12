@@ -44,7 +44,6 @@
 #include "core/m_struct.h"
 #include "libavutil/common.h"
 #include "compat/mpbswap.h"
-#include "demux/demux.h"
 
 #include "cdd.h"
 

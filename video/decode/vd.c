@@ -28,7 +28,6 @@
 #include "video/img_format.h"
 
 #include "stream/stream.h"
-#include "demux/demux.h"
 #include "demux/stheader.h"
 #include "dec_video.h"
 

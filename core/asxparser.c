@@ -27,7 +27,6 @@
 #include "playlist.h"
 #include "playlist_parser.h"
 #include "stream/stream.h"
-#include "demux/demux.h"
 #include "asxparser.h"
 #include "core/mp_msg.h"
 

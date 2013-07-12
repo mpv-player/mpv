@@ -51,8 +51,6 @@
 #include "vcd_read.h"
 #endif
 
-#include "demux/demux.h"
-
 extern char *cdrom_device;
 
 static struct stream_priv_s {

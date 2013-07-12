@@ -29,18 +29,19 @@
  *
  */
 
-#include <libbluray/bluray.h>
 #include <string.h>
 #include <assert.h>
 
+#include <libbluray/bluray.h>
+#include <libavutil/common.h>
+
 #include "config.h"
-#include "libavutil/common.h"
-#include "demux/demux.h"
 #include "talloc.h"
 #include "core/mp_msg.h"
 #include "core/m_struct.h"
 #include "core/m_option.h"
 #include "stream.h"
+#include "demux/stheader.h"
 
 #define BLURAY_SECTOR_SIZE     6144
 

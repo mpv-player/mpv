@@ -34,7 +34,7 @@ static const char osd_font_pfb[] =
 ;
 
 #include "sub/ass_mp.h"
-#include "core/mp_core.h"
+#include "core/options.h"
 
 
 // NOTE: \fs-5 to reduce the size of the symbols in relation to normal text.

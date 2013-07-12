@@ -40,14 +40,15 @@
 #include <linux/types.h>
 #include <linux/videodev2.h>
 
+#include <libavutil/common.h>
+#include <libavutil/avstring.h>
+
 #include "core/mp_msg.h"
 
 #include "stream.h"
 #include "pvr.h"
 
 #include "frequencies.h"
-#include "libavutil/common.h"
-#include "libavutil/avstring.h"
 
 #define PVR_DEFAULT_DEVICE "/dev/video0"
 #define PVR_MAX_CONTROLS 10

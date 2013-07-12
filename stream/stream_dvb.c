@@ -40,7 +40,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include <errno.h>
 
 #include "stream.h"
-#include "demux/demux.h"
 #include "core/m_option.h"
 #include "core/m_struct.h"
 #include "core/path.h"

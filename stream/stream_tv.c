@@ -26,7 +26,6 @@
 #include <string.h>
 
 #include "stream.h"
-#include "demux/demux.h"
 #include "core/m_option.h"
 #include "core/m_struct.h"
 #include "tv.h"

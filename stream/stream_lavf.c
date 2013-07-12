@@ -26,7 +26,6 @@
 #include "stream.h"
 #include "core/m_option.h"
 #include "core/m_struct.h"
-#include "demux/demux.h"
 
 #include "cookies.h"
 

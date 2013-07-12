@@ -19,7 +19,6 @@
 #include "config.h"
 
 #include "stream.h"
-#include "demux/demux.h"
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
