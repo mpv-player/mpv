@@ -3913,6 +3913,7 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     }
     if (!first) {
         free_demuxer(demuxer);
+        free_stream(stream);
         mp_msg(MSGT_CPLAYER, MSGL_WARN, "No streams added from file %s.\n",
                disp_filename);
         goto err_out;
