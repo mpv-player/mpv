@@ -104,19 +104,14 @@ bool ca_format_is_digital(AudioStreamBasicDescription asbd)
 bool ca_stream_supports_digital(AudioStreamID stream)
 {
     AudioStreamRangedDescription *formats = NULL;
+    size_t n_formats;
 
-    /* Retrieve all the stream formats supported by each output stream. */
-    uint32_t size =
-        GetGlobalAudioPropertyArray(stream,
-                                    kAudioStreamPropertyAvailablePhysicalFormats,
-                                    (void **)&formats);
+    OSStatus err =
+        CA_GET_ARY(stream, kAudioStreamPropertyAvailablePhysicalFormats,
+                   &formats, &n_formats);
 
-    if (!size) {
-        ca_msg(MSGL_WARN, "Could not get number of stream formats.\n");
-        return false;
-    }
+    CHECK_CA_ERROR("Could not get number of stream formats.");
 
-    const int n_formats = size / sizeof(AudioStreamRangedDescription);
     for (int i = 0; i < n_formats; i++) {
         AudioStreamBasicDescription asbd = formats[i].mFormat;
         ca_print_asbd("supported format:", &(asbd));
@@ -127,25 +122,21 @@ bool ca_stream_supports_digital(AudioStreamID stream)
     }
 
     free(formats);
+coreaudio_error:
     return false;
 }
 
 bool ca_device_supports_digital(AudioDeviceID device)
 {
     AudioStreamID *streams = NULL;
+    size_t n_streams;
 
     /* Retrieve all the output streams. */
-    uint32_t size = GetAudioPropertyArray(device,
-                                          kAudioDevicePropertyStreams,
-                                          kAudioDevicePropertyScopeOutput,
-                                          (void **)&streams);
+    OSStatus err =
+        CA_GET_ARY_O(device, kAudioDevicePropertyStreams, &streams, &n_streams);
 
-    if (!size) {
-        ca_msg(MSGL_WARN, "could not get number of streams.\n");
-        return CONTROL_FALSE;
-    }
+    CHECK_CA_ERROR("could not get number of streams.");
 
-    const int n_streams = size / sizeof(AudioStreamID);
     for (int i = 0; i < n_streams; i++) {
         if (ca_stream_supports_digital(streams[i])) {
             free(streams);
@@ -154,6 +145,8 @@ bool ca_device_supports_digital(AudioDeviceID device)
     }
 
     free(streams);
+
+coreaudio_error:
     return false;
 }
 
@@ -194,8 +187,7 @@ OSStatus ca_device_listener(AudioObjectID object, uint32_t n_addresses,
 
 OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid) {
     *pid = getpid();
-    OSStatus err = SetAudioProperty(device, kAudioDevicePropertyHogMode,
-                                    sizeof(*pid), pid);
+    OSStatus err = CA_SET(device, kAudioDevicePropertyHogMode, pid);
     if (err != noErr)
         *pid = -1;
 
@@ -205,8 +197,7 @@ OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid) {
 OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid) {
     if (*pid == getpid()) {
         *pid = -1;
-        return SetAudioProperty(device, kAudioDevicePropertyHogMode,
-                                sizeof(*pid), &pid);
+        return CA_SET(device, kAudioDevicePropertyHogMode, &pid);
     }
     return noErr;
 }
@@ -224,8 +215,8 @@ static OSStatus ca_change_mixing(AudioDeviceID device, uint32_t val,
     if (AudioObjectHasProperty(device, &p_addr)) {
         OSStatus err;
         Boolean writeable = 0;
-        err = IsAudioPropertySettable(device, kAudioDevicePropertySupportsMixing,
-                                      &writeable);
+        err = CA_SETTABLE(device, kAudioDevicePropertySupportsMixing,
+                          &writeable);
 
         if (!CHECK_CA_WARN("can't tell if mixing property is settable")) {
             return err;
@@ -234,8 +225,7 @@ static OSStatus ca_change_mixing(AudioDeviceID device, uint32_t val,
         if (!writeable)
             return noErr;
 
-        err = SetAudioProperty(device, kAudioDevicePropertySupportsMixing,
-                               sizeof(uint32_t), &val);
+        err = CA_SET(device, kAudioDevicePropertySupportsMixing, &val);
         if (err != noErr)
             return err;
 
@@ -311,8 +301,7 @@ bool ca_change_format(AudioStreamID stream,
     }
 
     /* Change the format. */
-    err = SetAudioProperty(stream, kAudioStreamPropertyPhysicalFormat,
-                           sizeof(AudioStreamBasicDescription), &change_format);
+    err = CA_SET(stream, kAudioStreamPropertyPhysicalFormat, &change_format);
     if (!CHECK_CA_WARN("error changing physical format")) {
         return false;
     }

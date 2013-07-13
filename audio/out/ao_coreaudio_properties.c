@@ -22,69 +22,65 @@
 #include "audio/out/ao_coreaudio_properties.h"
 #include "audio/out/ao_coreaudio_utils.h"
 
-OSStatus ca_get(AudioObjectID id, AudioObjectPropertySelector selector,
+OSStatus ca_get(AudioObjectID id, ca_scope scope, ca_sel selector,
                 uint32_t size, void *data)
 {
     AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
         .mSelector = selector,
-        .mScope    = kAudioObjectPropertyScopeGlobal,
+        .mScope    = scope,
         .mElement  = kAudioObjectPropertyElementMaster,
     };
 
     return AudioObjectGetPropertyData(id, &p_addr, 0, NULL, &size, data);
 }
 
-uint32_t GetAudioPropertyArray(AudioObjectID id,
-                               AudioObjectPropertySelector selector,
-                               AudioObjectPropertyScope scope, void **data)
+OSStatus ca_set(AudioObjectID id, ca_scope scope, ca_sel selector,
+                uint32_t size, void *data)
+{
+    AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
+        .mSelector = selector,
+        .mScope    = scope,
+        .mElement  = kAudioObjectPropertyElementMaster,
+    };
+
+    return AudioObjectSetPropertyData(id, &p_addr, 0, NULL, size, data);
+}
+
+OSStatus ca_get_ary(AudioObjectID id, ca_scope scope, ca_sel selector,
+                    uint32_t element_size, void **data, size_t *elements)
 {
     OSStatus err;
-    AudioObjectPropertyAddress p_addr;
-    UInt32 p_size;
+    uint32_t p_size;
 
-    p_addr.mSelector = selector;
-    p_addr.mScope    = scope;
-    p_addr.mElement  = kAudioObjectPropertyElementMaster;
+    AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
+        .mSelector = selector,
+        .mScope    = scope,
+        .mElement  = kAudioObjectPropertyElementMaster,
+    };
 
     err = AudioObjectGetPropertyDataSize(id, &p_addr, 0, NULL, &p_size);
-    CHECK_CA_ERROR("Can't fetch property size");
+    CHECK_CA_ERROR("can't fetch property size");
 
     *data = malloc(p_size);
+    *elements = p_size / element_size;
 
-    err = AudioObjectGetPropertyData(id, &p_addr, 0, NULL, &p_size, *data);
-    CHECK_CA_ERROR_L(coreaudio_error_free, "Can't fetch property data %s");
+    err = ca_get(id, scope, selector, p_size, *data);
+    CHECK_CA_ERROR_L(coreaudio_error_free, "can't fetch property data");
 
-    return p_size;
-
+    return err;
 coreaudio_error_free:
     free(*data);
 coreaudio_error:
-    return 0;
+    return err;
 }
 
-uint32_t GetGlobalAudioPropertyArray(AudioObjectID id,
-                                     AudioObjectPropertySelector selector,
-                                     void **data)
+OSStatus ca_get_str(AudioObjectID id, ca_scope scope, ca_sel selector,
+                    char **data)
 {
-    return GetAudioPropertyArray(id, selector, kAudioObjectPropertyScopeGlobal,
-                                 data);
-}
-
-OSStatus GetAudioPropertyString(AudioObjectID id,
-                                AudioObjectPropertySelector selector,
-                                char **data)
-{
-    OSStatus err;
-    AudioObjectPropertyAddress p_addr;
-    UInt32 p_size = sizeof(CFStringRef);
     CFStringRef string;
-
-    p_addr.mSelector = selector;
-    p_addr.mScope    = kAudioObjectPropertyScopeGlobal;
-    p_addr.mElement  = kAudioObjectPropertyElementMaster;
-
-    err = AudioObjectGetPropertyData(id, &p_addr, 0, NULL, &p_size, &string);
-    CHECK_CA_ERROR("Can't fetch array property");
+    OSStatus err =
+        ca_get(id, scope, selector, sizeof(CFStringRef), (void **)&string);
+    CHECK_CA_ERROR("Can't fetch string property");
 
     CFIndex size =
         CFStringGetMaximumSizeForEncoding(
@@ -97,29 +93,14 @@ coreaudio_error:
     return err;
 }
 
-OSStatus SetAudioProperty(AudioObjectID id,
-                          AudioObjectPropertySelector selector,
-                          uint32_t size, void *data)
+Boolean ca_settable(AudioObjectID id, ca_scope scope, ca_sel selector,
+                    Boolean *data)
 {
-    AudioObjectPropertyAddress p_addr;
-
-    p_addr.mSelector = selector;
-    p_addr.mScope    = kAudioObjectPropertyScopeGlobal;
-    p_addr.mElement  = kAudioObjectPropertyElementMaster;
-
-    return AudioObjectSetPropertyData(id, &p_addr, 0, NULL,
-                                      size, data);
-}
-
-Boolean IsAudioPropertySettable(AudioObjectID id,
-                                AudioObjectPropertySelector selector,
-                                Boolean *data)
-{
-    AudioObjectPropertyAddress p_addr;
-
-    p_addr.mSelector = selector;
-    p_addr.mScope    = kAudioObjectPropertyScopeGlobal;
-    p_addr.mElement  = kAudioObjectPropertyElementMaster;
+    AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
+        .mSelector = selector,
+        .mScope    = kAudioObjectPropertyScopeGlobal,
+        .mElement  = kAudioObjectPropertyElementMaster,
+    };
 
     return AudioObjectIsPropertySettable(id, &p_addr, data);
 }
