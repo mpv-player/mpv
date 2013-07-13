@@ -1154,12 +1154,14 @@ static int default_cmd_func(int fd, char *buf, int l)
     }
 }
 
+#ifndef __MINGW32__
 static int read_wakeup(void *ctx, int fd)
 {
     char buf[100];
     read(fd, buf, sizeof(buf));
     return MP_INPUT_NOTHING;
 }
+#endif
 
 static bool bind_matches_key(struct cmd_bind *bind, int n, const int *keys);
 
