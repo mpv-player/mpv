@@ -33,14 +33,14 @@
  */
 
 #include "config.h"
-
-#include "audio/out/ao_coreaudio_common.c"
-
 #include "ao.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
 #include "core/subopt-helper.h"
 #include "core/mp_ring.h"
+#include "core/mp_msg.h"
+#include "audio/out/ao_coreaudio_properties.h"
+#include "audio/out/ao_coreaudio_utils.h"
 
 static void audio_pause(struct ao *ao);
 static void audio_resume(struct ao *ao);
@@ -281,9 +281,9 @@ static int init(struct ao *ao, char *params)
     AudioDeviceID selected_device = 0;
     if (device_opt < 0) {
         // device not set by user, get the default one
-        err = GetAudioProperty(kAudioObjectSystemObject,
-                               kAudioHardwarePropertyDefaultOutputDevice,
-                               sizeof(uint32_t), &selected_device);
+        err = CA_GET(kAudioObjectSystemObject,
+                     kAudioHardwarePropertyDefaultOutputDevice,
+                     &selected_device);
         CHECK_CA_ERROR("could not get default audio device");
     } else {
         selected_device = device_opt;
@@ -551,10 +551,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     uint32_t size;
 
     uint32_t is_alive = 1;
-    err = GetAudioProperty(p->device,
-                               kAudioDevicePropertyDeviceIsAlive,
-                               sizeof(uint32_t), &is_alive);
-
+    err = CA_GET(p->device, kAudioDevicePropertyDeviceIsAlive, &is_alive);
     CHECK_CA_WARN( "could not check whether device is alive");
 
     if (!is_alive)

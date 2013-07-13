@@ -73,7 +73,9 @@ SOURCES-$(ALSA)                 += audio/out/ao_alsa.c
 SOURCES-$(CACA)                 += video/out/vo_caca.c
 SOURCES-$(SDL)                  += audio/out/ao_sdl.c
 SOURCES-$(SDL2)                 += video/out/vo_sdl.c
-SOURCES-$(COREAUDIO)            += audio/out/ao_coreaudio.c
+SOURCES-$(COREAUDIO)            += audio/out/ao_coreaudio.c \
+                                   audio/out/ao_coreaudio_utils.c \
+                                   audio/out/ao_coreaudio_properties.c
 SOURCES-$(COREVIDEO)            += video/out/vo_corevideo.m
 SOURCES-$(DIRECT3D)             += video/out/vo_direct3d.c \
                                    video/out/w32_common.c

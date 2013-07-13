@@ -22,17 +22,14 @@
  * on CoreAudio but not the AUHAL (such as using AudioQueue services).
  */
 
-#include <AudioToolbox/AudioToolbox.h>
-#include <AudioUnit/AudioUnit.h>
-#include <inttypes.h>
-#include <stdbool.h>
+#include "audio/out/ao_coreaudio_utils.h"
+#include "audio/out/ao_coreaudio_properties.h"
 #include "osdep/timer.h"
-#include "core/mp_msg.h"
 
 #define ca_msg(a, b ...) mp_msg(MSGT_AO, a, "AO: [coreaudio] " b)
 #define CA_CFSTR_ENCODING kCFStringEncodingASCII
 
-static char *fourcc_repr(void *talloc_ctx, uint32_t code)
+char *fourcc_repr(void *talloc_ctx, uint32_t code)
 {
     // Extract FourCC letters from the uint32_t and finde out if it's a valid
     // code that is made of letters.
@@ -58,7 +55,7 @@ static char *fourcc_repr(void *talloc_ctx, uint32_t code)
     return repr;
 }
 
-static bool check_ca_st(int level, OSStatus code, const char *message)
+bool check_ca_st(int level, OSStatus code, const char *message)
 {
     if (code == noErr) return true;
 
@@ -69,18 +66,8 @@ static bool check_ca_st(int level, OSStatus code, const char *message)
     return false;
 }
 
-#define CHECK_CA_ERROR_L(label, message) \
-    do { \
-        if (!check_ca_st(MSGL_ERR, err, message)) { \
-            goto label; \
-        } \
-    } while (0)
-
-#define CHECK_CA_ERROR(message) CHECK_CA_ERROR_L(coreaudio_error, message)
-#define CHECK_CA_WARN(message)  check_ca_st(MSGL_WARN, err, message)
-
-static void ca_print_asbd(const char *description,
-                          const AudioStreamBasicDescription *asbd)
+void ca_print_asbd(const char *description,
+                   const AudioStreamBasicDescription *asbd)
 {
     uint32_t flags  = asbd->mFormatFlags;
     char *format    = fourcc_repr(NULL, asbd->mFormatID);
@@ -103,112 +90,7 @@ static void ca_print_asbd(const char *description,
     talloc_free(format);
 }
 
-static OSStatus GetAudioProperty(AudioObjectID id,
-                                 AudioObjectPropertySelector selector,
-                                 UInt32 outSize, void *outData)
-{
-    AudioObjectPropertyAddress p_addr;
-
-    p_addr.mSelector = selector;
-    p_addr.mScope    = kAudioObjectPropertyScopeGlobal;
-    p_addr.mElement  = kAudioObjectPropertyElementMaster;
-
-    return AudioObjectGetPropertyData(id, &p_addr, 0, NULL, &outSize,
-                                      outData);
-}
-
-static UInt32 GetAudioPropertyArray(AudioObjectID id,
-                                    AudioObjectPropertySelector selector,
-                                    AudioObjectPropertyScope scope,
-                                    void **data)
-{
-    OSStatus err;
-    AudioObjectPropertyAddress p_addr;
-    UInt32 p_size;
-
-    p_addr.mSelector = selector;
-    p_addr.mScope    = scope;
-    p_addr.mElement  = kAudioObjectPropertyElementMaster;
-
-    err = AudioObjectGetPropertyDataSize(id, &p_addr, 0, NULL, &p_size);
-    CHECK_CA_ERROR("Can't fetch property size");
-
-    *data = malloc(p_size);
-
-    err = AudioObjectGetPropertyData(id, &p_addr, 0, NULL, &p_size, *data);
-    CHECK_CA_ERROR_L(coreaudio_error_free, "Can't fetch property data %s");
-
-    return p_size;
-
-coreaudio_error_free:
-    free(*data);
-coreaudio_error:
-    return 0;
-}
-
-static UInt32 GetGlobalAudioPropertyArray(AudioObjectID id,
-                                          AudioObjectPropertySelector selector,
-                                          void **outData)
-{
-    return GetAudioPropertyArray(id, selector, kAudioObjectPropertyScopeGlobal,
-                                 outData);
-}
-
-static OSStatus GetAudioPropertyString(AudioObjectID id,
-                                       AudioObjectPropertySelector selector,
-                                       char **data)
-{
-    OSStatus err;
-    AudioObjectPropertyAddress p_addr;
-    UInt32 p_size = sizeof(CFStringRef);
-    CFStringRef string;
-
-    p_addr.mSelector = selector;
-    p_addr.mScope    = kAudioObjectPropertyScopeGlobal;
-    p_addr.mElement  = kAudioObjectPropertyElementMaster;
-
-    err = AudioObjectGetPropertyData(id, &p_addr, 0, NULL, &p_size, &string);
-    CHECK_CA_ERROR("Can't fetch array property");
-
-    CFIndex size =
-        CFStringGetMaximumSizeForEncoding(
-            CFStringGetLength(string), CA_CFSTR_ENCODING) + 1;
-
-    *data = malloc(size);
-    CFStringGetCString(string, *data, size, CA_CFSTR_ENCODING);
-    CFRelease(string);
-coreaudio_error:
-    return err;
-}
-
-static OSStatus SetAudioProperty(AudioObjectID id,
-                                 AudioObjectPropertySelector selector,
-                                 UInt32 inDataSize, void *inData)
-{
-    AudioObjectPropertyAddress p_addr;
-
-    p_addr.mSelector = selector;
-    p_addr.mScope    = kAudioObjectPropertyScopeGlobal;
-    p_addr.mElement  = kAudioObjectPropertyElementMaster;
-
-    return AudioObjectSetPropertyData(id, &p_addr, 0, NULL,
-                                      inDataSize, inData);
-}
-
-static Boolean IsAudioPropertySettable(AudioObjectID id,
-                                       AudioObjectPropertySelector selector,
-                                       Boolean *outData)
-{
-    AudioObjectPropertyAddress p_addr;
-
-    p_addr.mSelector = selector;
-    p_addr.mScope    = kAudioObjectPropertyScopeGlobal;
-    p_addr.mElement  = kAudioObjectPropertyElementMaster;
-
-    return AudioObjectIsPropertySettable(id, &p_addr, outData);
-}
-
-static int AudioFormatIsDigital(AudioStreamBasicDescription asbd)
+int AudioFormatIsDigital(AudioStreamBasicDescription asbd)
 {
     switch (asbd.mFormatID)
     case 'IAC3':
@@ -219,7 +101,7 @@ static int AudioFormatIsDigital(AudioStreamBasicDescription asbd)
     return CONTROL_FALSE;
 }
 
-static int AudioStreamSupportsDigital(AudioStreamID stream)
+int AudioStreamSupportsDigital(AudioStreamID stream)
 {
     AudioStreamRangedDescription *formats = NULL;
 
@@ -248,7 +130,7 @@ static int AudioStreamSupportsDigital(AudioStreamID stream)
     return CONTROL_FALSE;
 }
 
-static int AudioDeviceSupportsDigital(AudioDeviceID device)
+int AudioDeviceSupportsDigital(AudioDeviceID device)
 {
     AudioStreamID *streams = NULL;
 
@@ -275,10 +157,10 @@ static int AudioDeviceSupportsDigital(AudioDeviceID device)
     return CONTROL_FALSE;
 }
 
-static OSStatus ca_property_listener(AudioObjectPropertySelector selector,
-                                     AudioObjectID object, uint32_t n_addresses,
-                                     const AudioObjectPropertyAddress addresses[],
-                                     void *data)
+OSStatus ca_property_listener(AudioObjectPropertySelector selector,
+                              AudioObjectID object, uint32_t n_addresses,
+                              const AudioObjectPropertyAddress addresses[],
+                              void *data)
 {
     void *talloc_ctx = talloc_new(NULL);
 
@@ -294,23 +176,23 @@ static OSStatus ca_property_listener(AudioObjectPropertySelector selector,
     return noErr;
 }
 
-static OSStatus ca_stream_listener(AudioObjectID object, uint32_t n_addresses,
-                                   const AudioObjectPropertyAddress addresses[],
-                                   void *data)
+OSStatus ca_stream_listener(AudioObjectID object, uint32_t n_addresses,
+                            const AudioObjectPropertyAddress addresses[],
+                            void *data)
 {
     return ca_property_listener(kAudioStreamPropertyPhysicalFormat,
                                 object, n_addresses, addresses, data);
 }
 
-static OSStatus ca_device_listener(AudioObjectID object, uint32_t n_addresses,
-                                   const AudioObjectPropertyAddress addresses[],
-                                   void *data)
+OSStatus ca_device_listener(AudioObjectID object, uint32_t n_addresses,
+                            const AudioObjectPropertyAddress addresses[],
+                            void *data)
 {
     return ca_property_listener(kAudioDevicePropertyDeviceHasChanged,
                                 object, n_addresses, addresses, data);
 }
 
-static OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid) {
+OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid) {
     *pid = getpid();
     OSStatus err = SetAudioProperty(device, kAudioDevicePropertyHogMode,
                                     sizeof(*pid), pid);
@@ -320,7 +202,7 @@ static OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid) {
     return err;
 }
 
-static OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid) {
+OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid) {
     if (*pid == getpid()) {
         *pid = -1;
         return SetAudioProperty(device, kAudioDevicePropertyHogMode,
@@ -367,11 +249,11 @@ static OSStatus ca_change_mixing(AudioDeviceID device, uint32_t val,
     return noErr;
 }
 
-static OSStatus ca_disable_mixing(AudioDeviceID device, bool *changed) {
+OSStatus ca_disable_mixing(AudioDeviceID device, bool *changed) {
     return ca_change_mixing(device, 0, changed);
 }
 
-static OSStatus ca_enable_mixing(AudioDeviceID device, bool changed) {
+OSStatus ca_enable_mixing(AudioDeviceID device, bool changed) {
     if (changed) {
         bool dont_care = false;
         return ca_change_mixing(device, 1, &dont_care);
@@ -398,16 +280,16 @@ static OSStatus ca_change_device_listening(AudioDeviceID device,
     }
 }
 
-static OSStatus ca_enable_device_listener(AudioDeviceID device, void *flag) {
+OSStatus ca_enable_device_listener(AudioDeviceID device, void *flag) {
     return ca_change_device_listening(device, flag, true);
 }
 
-static OSStatus ca_disable_device_listener(AudioDeviceID device, void *flag) {
+OSStatus ca_disable_device_listener(AudioDeviceID device, void *flag) {
     return ca_change_device_listening(device, flag, false);
 }
 
-static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
-                                   AudioStreamBasicDescription change_format)
+int AudioStreamChangeFormat(AudioStreamID i_stream_id,
+                            AudioStreamBasicDescription change_format)
 {
     OSStatus err = noErr;
     AudioObjectPropertyAddress p_addr;
@@ -453,10 +335,7 @@ static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
         }
 
         AudioStreamBasicDescription actual_format;
-        err = GetAudioProperty(i_stream_id,
-                               kAudioStreamPropertyPhysicalFormat,
-                               sizeof(AudioStreamBasicDescription),
-                               &actual_format);
+        err = CA_GET(i_stream_id, kAudioStreamPropertyPhysicalFormat, &actual_format);
 
         ca_print_asbd("actual format in use:", &actual_format);
         if (actual_format.mSampleRate == change_format.mSampleRate &&
@@ -477,4 +356,3 @@ static int AudioStreamChangeFormat(AudioStreamID i_stream_id,
 
     return format_set;
 }
-
