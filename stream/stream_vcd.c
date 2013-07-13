@@ -166,7 +166,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   /* open() can't be used for devices so do it the complicated way */
   hd = CreateFile(device, GENERIC_READ, FILE_SHARE_READ, NULL,
 	  OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-  f = _open_osfhandle((long)hd, _O_RDONLY);
+  f = _open_osfhandle((intptr_t)hd, _O_RDONLY);
 #else
   f=open(p->device,O_RDONLY);
 #endif
