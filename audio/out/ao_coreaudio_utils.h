@@ -43,9 +43,9 @@ bool check_ca_st(int level, OSStatus code, const char *message);
 void ca_print_asbd(const char *description,
                    const AudioStreamBasicDescription *asbd);
 
-int AudioFormatIsDigital(AudioStreamBasicDescription asbd);
-int AudioStreamSupportsDigital(AudioStreamID stream);
-int AudioDeviceSupportsDigital(AudioDeviceID device);
+bool ca_format_is_digital(AudioStreamBasicDescription asbd);
+bool ca_stream_supports_digital(AudioStreamID stream);
+bool ca_device_supports_digital(AudioDeviceID device);
 
 OSStatus ca_property_listener(AudioObjectPropertySelector selector,
                               AudioObjectID object, uint32_t n_addresses,
@@ -67,8 +67,8 @@ OSStatus ca_enable_mixing(AudioDeviceID device, bool changed);
 OSStatus ca_enable_device_listener(AudioDeviceID device, void *flag);
 OSStatus ca_disable_device_listener(AudioDeviceID device, void *flag);
 
-int AudioStreamChangeFormat(AudioStreamID i_stream_id,
-                            AudioStreamBasicDescription change_format);
+bool ca_change_format(AudioStreamID stream,
+                      AudioStreamBasicDescription change_format);
 
 bool ca_bitmap_from_ch_descriptions(AudioChannelLayout layout,
                                     uint32_t *bitmap);

@@ -90,18 +90,18 @@ void ca_print_asbd(const char *description,
     talloc_free(format);
 }
 
-int AudioFormatIsDigital(AudioStreamBasicDescription asbd)
+bool ca_format_is_digital(AudioStreamBasicDescription asbd)
 {
     switch (asbd.mFormatID)
     case 'IAC3':
     case 'iac3':
     case  kAudioFormat60958AC3:
     case  kAudioFormatAC3:
-        return CONTROL_OK;
-    return CONTROL_FALSE;
+        return true;
+    return false;
 }
 
-int AudioStreamSupportsDigital(AudioStreamID stream)
+bool ca_stream_supports_digital(AudioStreamID stream)
 {
     AudioStreamRangedDescription *formats = NULL;
 
@@ -113,24 +113,24 @@ int AudioStreamSupportsDigital(AudioStreamID stream)
 
     if (!size) {
         ca_msg(MSGL_WARN, "Could not get number of stream formats.\n");
-        return CONTROL_FALSE;
+        return false;
     }
 
     const int n_formats = size / sizeof(AudioStreamRangedDescription);
     for (int i = 0; i < n_formats; i++) {
         AudioStreamBasicDescription asbd = formats[i].mFormat;
         ca_print_asbd("supported format:", &(asbd));
-        if (AudioFormatIsDigital(asbd)) {
+        if (ca_format_is_digital(asbd)) {
             free(formats);
-            return CONTROL_TRUE;
+            return true;
         }
     }
 
     free(formats);
-    return CONTROL_FALSE;
+    return false;
 }
 
-int AudioDeviceSupportsDigital(AudioDeviceID device)
+bool ca_device_supports_digital(AudioDeviceID device)
 {
     AudioStreamID *streams = NULL;
 
@@ -147,14 +147,14 @@ int AudioDeviceSupportsDigital(AudioDeviceID device)
 
     const int n_streams = size / sizeof(AudioStreamID);
     for (int i = 0; i < n_streams; i++) {
-        if (AudioStreamSupportsDigital(streams[i])) {
+        if (ca_stream_supports_digital(streams[i])) {
             free(streams);
-            return CONTROL_OK;
+            return true;
         }
     }
 
     free(streams);
-    return CONTROL_FALSE;
+    return false;
 }
 
 OSStatus ca_property_listener(AudioObjectPropertySelector selector,
@@ -288,8 +288,8 @@ OSStatus ca_disable_device_listener(AudioDeviceID device, void *flag) {
     return ca_change_device_listening(device, flag, false);
 }
 
-int AudioStreamChangeFormat(AudioStreamID i_stream_id,
-                            AudioStreamBasicDescription change_format)
+bool ca_change_format(AudioStreamID stream,
+                      AudioStreamBasicDescription change_format)
 {
     OSStatus err = noErr;
     AudioObjectPropertyAddress p_addr;
@@ -304,26 +304,23 @@ int AudioStreamChangeFormat(AudioStreamID i_stream_id,
         .mElement  = kAudioObjectPropertyElementMaster,
     };
 
-    err = AudioObjectAddPropertyListener(i_stream_id,
-                                         &p_addr,
-                                         ca_stream_listener,
+    err = AudioObjectAddPropertyListener(stream, &p_addr, ca_stream_listener,
                                          (void *)&stream_format_changed);
     if (!CHECK_CA_WARN("can't add property listener during format change")) {
-        return CONTROL_FALSE;
+        return false;
     }
 
     /* Change the format. */
-    err = SetAudioProperty(i_stream_id,
-                           kAudioStreamPropertyPhysicalFormat,
+    err = SetAudioProperty(stream, kAudioStreamPropertyPhysicalFormat,
                            sizeof(AudioStreamBasicDescription), &change_format);
     if (!CHECK_CA_WARN("error changing physical format")) {
-        return CONTROL_FALSE;
+        return false;
     }
 
     /* The AudioStreamSetProperty is not only asynchronious,
      * it is also not Atomic, in its behaviour.
      * Therefore we check 5 times before we really give up. */
-    bool format_set = CONTROL_FALSE;
+    bool format_set = false;
     for (int i = 0; !format_set && i < 5; i++) {
         for (int j = 0; !stream_format_changed && j < 50; j++)
             mp_sleep_us(10000);
@@ -335,23 +332,21 @@ int AudioStreamChangeFormat(AudioStreamID i_stream_id,
         }
 
         AudioStreamBasicDescription actual_format;
-        err = CA_GET(i_stream_id, kAudioStreamPropertyPhysicalFormat, &actual_format);
+        err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &actual_format);
 
         ca_print_asbd("actual format in use:", &actual_format);
         if (actual_format.mSampleRate == change_format.mSampleRate &&
             actual_format.mFormatID == change_format.mFormatID &&
             actual_format.mFramesPerPacket == change_format.mFramesPerPacket) {
-            format_set = CONTROL_TRUE;
+            format_set = true;
         }
     }
 
-    err = AudioObjectRemovePropertyListener(i_stream_id,
-                                            &p_addr,
-                                            ca_stream_listener,
+    err = AudioObjectRemovePropertyListener(stream, &p_addr, ca_stream_listener,
                                             (void *)&stream_format_changed);
 
     if (!CHECK_CA_WARN("can't remove property listener")) {
-        return CONTROL_FALSE;
+        return false;
     }
 
     return format_set;

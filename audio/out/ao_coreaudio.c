@@ -308,7 +308,7 @@ static int init(struct ao *ao, char *params)
     bool supports_digital = false;
     /* Probe whether device support S/PDIF stream output if input is AC3 stream. */
     if (AF_FORMAT_IS_AC3(ao->format)) {
-        if (AudioDeviceSupportsDigital(selected_device))
+        if (ca_device_supports_digital(selected_device))
             supports_digital = true;
     }
 
@@ -580,7 +580,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     int streams_n = size / sizeof(AudioStreamID);
 
     for (int i = 0; i < streams_n && d->stream_idx < 0; i++) {
-        bool digital = AudioStreamSupportsDigital(streams[i]);
+        bool digital = ca_stream_supports_digital(streams[i]);
 
         if (digital) {
             /* Find a stream with a cac3 stream. */
@@ -603,7 +603,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
             d->stream_idx = i;
 
             for (int j = 0; j < formats_n; j++)
-                if (AudioFormatIsDigital(formats[j].mFormat)) {
+                if (ca_format_is_digital(formats[j].mFormat)) {
                     // select the digital format that has exactly the same
                     // samplerate. If an exact match cannot be found, select
                     // the format with highest samplerate as backup.
@@ -632,7 +632,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
         goto coreaudio_error;
     }
 
-    if (!AudioStreamChangeFormat(d->stream, d->stream_asbd))
+    if (!ca_change_format(d->stream, d->stream_asbd))
         goto coreaudio_error;
 
     void *changed = (void *) &(d->stream_asbd_changed);
@@ -683,8 +683,8 @@ static int play(struct ao *ao, void *output_samples, int num_bytes, int flags)
     // Check whether we need to reset the digital output stream.
     if (p->is_digital && d->stream_asbd_changed) {
         d->stream_asbd_changed = 0;
-        if (AudioStreamSupportsDigital(d->stream)) {
-            if (!AudioStreamChangeFormat(d->stream, d->stream_asbd)) {
+        if (ca_stream_supports_digital(d->stream)) {
+            if (!ca_change_format(d->stream, d->stream_asbd)) {
                 ca_msg(MSGL_WARN, "can't restore digital output\n");
             } else {
                 ca_msg(MSGL_WARN, "restoring digital output succeeded.\n");
