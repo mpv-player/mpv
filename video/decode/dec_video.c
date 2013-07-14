@@ -43,6 +43,14 @@
 #include "video/decode/dec_video.h"
 
 
+int vd_control(struct sh_video *sh_video, int cmd, void *arg)
+{
+    const struct vd_functions *vd = sh_video->vd_driver;
+    if (vd)
+        return vd->control(sh_video, cmd, arg);
+    return CONTROL_UNKNOWN;
+}
+
 int get_video_quality_max(sh_video_t *sh_video)
 {
     vf_instance_t *vf = sh_video->vfilter;
@@ -146,24 +154,20 @@ void set_video_colorspace(struct sh_video *sh)
 void resync_video_stream(sh_video_t *sh_video)
 {
     const struct vd_functions *vd = sh_video->vd_driver;
-    if (vd)
-        vd->control(sh_video, VDCTRL_RESYNC_STREAM, NULL);
+    vd_control(sh_video, VDCTRL_RESYNC_STREAM, NULL);
     sh_video->prev_codec_reordered_pts = MP_NOPTS_VALUE;
     sh_video->prev_sorted_pts = MP_NOPTS_VALUE;
 }
 
 void video_reinit_vo(struct sh_video *sh_video)
 {
-    sh_video->vd_driver->control(sh_video, VDCTRL_REINIT_VO, NULL);
+    vd_control(sh_video, VDCTRL_REINIT_VO, NULL);
 }
 
 int get_current_video_decoder_lag(sh_video_t *sh_video)
 {
-    const struct vd_functions *vd = sh_video->vd_driver;
-    if (!vd)
-        return -1;
     int ret = -1;
-    vd->control(sh_video, VDCTRL_QUERY_UNSEEN_FRAMES, &ret);
+    vd_control(sh_video, VDCTRL_QUERY_UNSEEN_FRAMES, &ret);
     return ret;
 }
 

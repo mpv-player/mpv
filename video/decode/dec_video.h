@@ -43,6 +43,7 @@ void set_video_colorspace(struct sh_video *sh);
 void resync_video_stream(sh_video_t *sh_video);
 void video_reinit_vo(struct sh_video *sh_video);
 int get_current_video_decoder_lag(sh_video_t *sh_video);
+int vd_control(struct sh_video *sh_video, int cmd, void *arg);
 
 extern int divx_quality;
 
