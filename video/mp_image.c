@@ -453,6 +453,15 @@ void mp_image_params_guess_csp(struct mp_image_params *params)
     if (!fmt.id)
         return;
     if (fmt.flags & MP_IMGFLAG_YUV) {
+        if (params->colorspace != MP_CSP_BT_601 &&
+            params->colorspace != MP_CSP_BT_709 &&
+            params->colorspace != MP_CSP_SMPTE_240M &&
+            params->colorspace != MP_CSP_YCGCO)
+        {
+            // Makes no sense, so guess instead
+            // YCGCO should be separate, but libavcodec disagrees
+            params->colorspace = MP_CSP_AUTO;
+        }
         if (params->colorspace == MP_CSP_AUTO)
             params->colorspace = mp_csp_guess_colorspace(params->w, params->h);
         if (params->colorlevels == MP_CSP_LEVELS_AUTO)
