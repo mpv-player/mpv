@@ -223,6 +223,7 @@ typedef struct MPOpts {
         char *format;
         char *cryptokey;
         char *avopt;
+        int genptsmode;
     } lavfdopts;
 
     struct input_conf {

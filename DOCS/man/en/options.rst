@@ -559,6 +559,16 @@
 ``--demuxer-lavf-format=<value>``
     Force a specific libavformat demuxer.
 
+``--demuxer-lavf-genpts-mode=<auto|lavf|builtin|no>``
+    Mode for deriving missing packet PTS values from packet DTS. ``lavf``
+    enables libavformat's ``genpts`` option. ``builtin`` enables equivalent
+    code in mpv. ``auto`` will enable either lavf (normal playback) or builtin
+    (DVD playback) in correct-pts mode. The difference between them is that
+    the builtin code will not potentially read until EOF trying to derive the
+    PTS (which is very bad for DVD playback). On the other hand, builtin might
+    give up too early, which is why lavf is preferred normally. ``no`` disables
+    both.
+
 ``--demuxer-lavf-o=<key>=<value>[,<key>=<value>[,...]]``
     Pass AVOptions to libavformat demuxer.
 

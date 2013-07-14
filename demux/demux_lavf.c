@@ -58,6 +58,8 @@ const m_option_t lavfdopts_conf[] = {
     OPT_FLAG("allow-mimetype", lavfdopts.allow_mimetype, 0),
     OPT_INTRANGE("probescore", lavfdopts.probescore, 0, 0, 100),
     OPT_STRING("cryptokey", lavfdopts.cryptokey, 0),
+    OPT_CHOICE("genpts-mode", lavfdopts.genptsmode, 0,
+               ({"auto", 0}, {"lavf", 1}, {"builtin", 2}, {"no", 3})),
     OPT_STRING("o", lavfdopts.avopt, 0),
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -65,6 +67,8 @@ const m_option_t lavfdopts_conf[] = {
 // Should correspond to IO_BUFFER_SIZE in libavformat/aviobuf.c (not public)
 // libavformat (almost) always reads data in blocks of this size.
 #define BIO_BUFFER_SIZE 32768
+
+#define MAX_PKT_QUEUE 50
 
 typedef struct lavf_priv {
     char *filename;
@@ -81,6 +85,9 @@ typedef struct lavf_priv {
     bool seek_by_bytes;
     int bitrate;
     char *mime_type;
+    bool genpts_hack;
+    AVPacket *packets[MAX_PKT_QUEUE];
+    int num_packets;
 } lavf_priv_t;
 
 struct format_hack {
@@ -522,8 +529,13 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         priv->use_dts = true;
         demuxer->timestamp_type = TIMESTAMP_TYPE_SORT;
     } else {
-        if (opts->user_correct_pts != 0)
+        int mode = lavfdopts->genptsmode;
+        if (mode == 0 && opts->user_correct_pts != 0)
+            mode = demuxer->stream->uncached_type == STREAMTYPE_DVD ? 2 : 1;
+        if (mode == 1)
             avfc->flags |= AVFMT_FLAG_GENPTS;
+        if (mode == 2)
+            priv->genpts_hack = true;
     }
     if (opts->index_mode == 0)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
@@ -646,10 +658,89 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     return 0;
 }
 
+static void seek_reset(demuxer_t *demux)
+{
+    lavf_priv_t *priv = demux->priv;
+
+    for (int n = 0; n < priv->num_packets; n++)
+        talloc_free(priv->packets[n]);
+    priv->num_packets = 0;
+}
+
 static int destroy_avpacket(void *pkt)
 {
     av_free_packet(pkt);
     return 0;
+}
+
+static int read_more_av_packets(demuxer_t *demux)
+{
+    lavf_priv_t *priv = demux->priv;
+
+    if (priv->num_packets >= MAX_PKT_QUEUE)
+        return -1;
+
+    demux->filepos = stream_tell(demux->stream);
+
+    AVPacket *pkt = talloc(NULL, AVPacket);
+    if (av_read_frame(priv->avfc, pkt) < 0) {
+        talloc_free(pkt);
+        return -2; // eof
+    }
+    talloc_set_destructor(pkt, destroy_avpacket);
+
+    add_new_streams(demux);
+
+    assert(pkt->stream_index >= 0 && pkt->stream_index < priv->num_streams);
+    struct sh_stream *stream = priv->streams[pkt->stream_index];
+
+    if (!demuxer_stream_is_selected(demux, stream)) {
+        talloc_free(pkt);
+        return 0; // skip
+    }
+
+    // If the packet has pointers to temporary fields that could be
+    // overwritten/freed by next av_read_frame(), copy them to persistent
+    // allocations so we can safely queue the packet for any length of time.
+    if (av_dup_packet(pkt) < 0)
+        abort();
+
+    priv->packets[priv->num_packets++] = pkt;
+    talloc_steal(priv, pkt);
+    return 1;
+}
+
+static int read_av_packet(demuxer_t *demux, AVPacket **pkt)
+{
+    lavf_priv_t *priv = demux->priv;
+
+    if (priv->num_packets < 1) {
+        int r = read_more_av_packets(demux);
+        if (r <= 0)
+            return r;
+    }
+
+    AVPacket *next = priv->packets[0];
+    if (priv->genpts_hack && next->dts != AV_NOPTS_VALUE) {
+        int n = 1;
+        while (next->pts == AV_NOPTS_VALUE) {
+            while (n >= priv->num_packets) {
+                if (read_more_av_packets(demux) < 0)
+                    goto end; // queue limit or EOF reached - just use as is
+            }
+            AVPacket *cur = priv->packets[n];
+            if (cur->stream_index == next->stream_index) {
+                if (next->dts < cur->dts && cur->pts != cur->dts)
+                    next->pts = cur->dts;
+            }
+            n++;
+        }
+    }
+
+end:
+    MP_TARRAY_REMOVE_AT(priv->packets, priv->num_packets, 0);
+    *pkt = next;
+    return 1;
 }
 
 static int demux_lavf_fill_buffer(demuxer_t *demux)
@@ -658,33 +749,16 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     demux_packet_t *dp;
     mp_msg(MSGT_DEMUX, MSGL_DBG2, "demux_lavf_fill_buffer()\n");
 
-    demux->filepos = stream_tell(demux->stream);
+    AVPacket *pkt;
+    int r = read_av_packet(demux, &pkt);
+    if (r <= 0)
+        return r == 0; // don't signal EOF if skipping a packet
 
-    AVPacket *pkt = talloc(NULL, AVPacket);
-    if (av_read_frame(priv->avfc, pkt) < 0) {
-        talloc_free(pkt);
-        return 0;
-    }
-    talloc_set_destructor(pkt, destroy_avpacket);
-
-    add_new_streams(demux);
-
-    assert(pkt->stream_index >= 0 && pkt->stream_index < priv->num_streams);
     AVStream *st = priv->avfc->streams[pkt->stream_index];
     struct sh_stream *stream = priv->streams[pkt->stream_index];
 
-    if (!demuxer_stream_is_selected(demux, stream)) {
-        talloc_free(pkt);
-        return 1;
-    }
-
-    // If the packet has pointers to temporary fields that could be
-    // overwritten/freed by next av_read_frame(), copy them to persistent
-    // allocations so we can safely queue the packet for any length of time.
-    if (av_dup_packet(pkt) < 0)
-        abort();
     dp = new_demux_packet_fromdata(pkt->data, pkt->size);
-    dp->avpacket = pkt;
+    dp->avpacket = talloc_steal(dp, pkt);
 
     int64_t ts = priv->use_dts ? pkt->dts : pkt->pts;
     if (ts != AV_NOPTS_VALUE) {
@@ -713,6 +787,8 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs,
     int avsflags = 0;
     mp_msg(MSGT_DEMUX, MSGL_DBG2, "demux_seek_lavf(%p, %f, %f, %d)\n",
            demuxer, rel_seek_secs, audio_delay, flags);
+
+    seek_reset(demuxer);
 
     if (priv->seek_by_bytes) {
         int64_t pos = demuxer->filepos;
@@ -877,6 +953,7 @@ redo:
         avio_flush(priv->avfc->pb);
         av_seek_frame(priv->avfc, 0, stream_tell(demuxer->stream),
                       AVSEEK_FLAG_BYTE);
+        seek_reset(demuxer);
         avio_flush(priv->avfc->pb);
         return DEMUXER_CTRL_OK;
     default:
