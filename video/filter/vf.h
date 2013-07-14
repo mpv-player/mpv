@@ -109,6 +109,7 @@ typedef struct vf_seteq {
 #define VFCTRL_SET_YUV_COLORSPACE 22 // arg is struct mp_csp_details*
 #define VFCTRL_GET_YUV_COLORSPACE 23 // arg is struct mp_csp_details*
 
+int vf_control(struct vf_instance *vf, int cmd, void *arg);
 
 struct mp_image *vf_alloc_out_image(struct vf_instance *vf);
 void vf_make_out_image_writeable(struct vf_instance *vf, struct mp_image *img);

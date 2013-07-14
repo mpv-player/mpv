@@ -55,7 +55,7 @@ int get_video_quality_max(sh_video_t *sh_video)
 {
     vf_instance_t *vf = sh_video->vfilter;
     if (vf) {
-        int ret = vf->control(vf, VFCTRL_QUERY_MAX_PP_LEVEL, NULL);
+        int ret = vf_control(vf, VFCTRL_QUERY_MAX_PP_LEVEL, NULL);
         if (ret > 0) {
             mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[PP] Using external postprocessing filter, max q = %d.\n", ret);
             return ret;
@@ -74,7 +74,7 @@ int set_video_colors(sh_video_t *sh_video, const char *item, int value)
 
     mp_dbg(MSGT_DECVIDEO, MSGL_V, "set video colors %s=%d \n", item, value);
     if (vf) {
-        int ret = vf->control(vf, VFCTRL_SET_EQUALIZER, &data);
+        int ret = vf_control(vf, VFCTRL_SET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE)
             return 1;
     }
@@ -92,7 +92,7 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
 
     mp_dbg(MSGT_DECVIDEO, MSGL_V, "get video colors %s \n", item);
     if (vf) {
-        int ret = vf->control(vf, VFCTRL_GET_EQUALIZER, &data);
+        int ret = vf_control(vf, VFCTRL_GET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE) {
             *value = data.value;
             return 1;
@@ -129,10 +129,10 @@ void set_video_colorspace(struct sh_video *sh)
 
     struct mp_csp_details requested;
     get_detected_video_colorspace(sh, &requested);
-    vf->control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
+    vf_control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
 
     struct mp_csp_details actual = MP_CSP_DETAILS_DEFAULTS;
-    vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual);
+    vf_control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual);
 
     int success = actual.format == requested.format
                && actual.levels_in == requested.levels_in
@@ -146,7 +146,7 @@ void set_video_colorspace(struct sh_video *sh)
             && requested.format == MP_CSP_SMPTE_240M) {
         // BT.709 is pretty close, much better than BT.601
         requested.format = MP_CSP_BT_709;
-        vf->control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
+        vf_control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
     }
 
 }
