@@ -221,6 +221,12 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             }
             break;
         }
+        case WM_SETCURSOR:
+            if (LOWORD(lParam) == HTCLIENT && !w32->cursor_visible) {
+                SetCursor(NULL);
+                return TRUE;
+            }
+            break;
         case WM_MOUSEMOVE:
             vo_mouse_movement(vo, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
             break;
@@ -592,7 +598,7 @@ int vo_w32_init(struct vo *vo)
         .lpfnWndProc = WndProc,
         .hInstance = hInstance,
         .hIcon = mplayerIcon,
-        .hCursor = LoadCursor(0, IDC_ARROW),
+        .hCursor = LoadCursor(NULL, IDC_ARROW),
         .lpszClassName = classname,
         .hIconSm = mplayerIcon,
     };
@@ -628,6 +634,7 @@ int vo_w32_init(struct vo *vo)
 
     if (vo->opts->WinID >= 0)
         EnableWindow(w32->window, 0);
+    w32->cursor_visible = true;
 
     // we don't have proper event handling
     vo->wakeup_period = 0.02;
@@ -678,6 +685,12 @@ static void vo_w32_ontop(struct vo *vo)
     reinit_window_state(vo);
 }
 
+static bool vo_w32_is_cursor_in_client(struct vo *vo)
+{
+    DWORD pos = GetMessagePos();
+    return SendMessage(vo->w32->window, WM_NCHITTEST, 0, pos) == HTCLIENT;
+}
+
 int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_w32_state *w32 = vo->w32;
@@ -700,10 +713,13 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
         w32_update_xinerama_info(vo);
         return VO_TRUE;
     case VOCTRL_SET_CURSOR_VISIBILITY:
-        if (*(bool *)arg) {
-            while (ShowCursor(1) < 0) { }
-        } else {
-            while (ShowCursor(0) >= 0) { }
+        w32->cursor_visible = *(bool *)arg;
+
+        if (vo_w32_is_cursor_in_client(vo)) {
+            if (w32->cursor_visible)
+                SetCursor(LoadCursor(NULL, IDC_ARROW));
+            else
+                SetCursor(NULL);
         }
         return VO_TRUE;
     case VOCTRL_KILL_SCREENSAVER:
@@ -737,7 +753,6 @@ void vo_w32_uninit(struct vo *vo)
     mp_msg(MSGT_VO, MSGL_V, "vo: win32: uninit\n");
     if (!w32)
         return;
-    while (ShowCursor(1) < 0) { }
     SetThreadExecutionState(ES_CONTINUOUS);
     DestroyWindow(w32->window);
     UnregisterClassW(classname, 0);
