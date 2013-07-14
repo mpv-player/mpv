@@ -34,25 +34,17 @@
 #define O_BINARY 0
 #endif
 
-#define STREAMTYPE_DUMMY -1    // for placeholders, when the actual reading is handled in the demuxer
-#define STREAMTYPE_FILE 0      // read from seekable file
-#define STREAMTYPE_VCD  1      // raw mode-2 CDROM reading, 2324 bytes/sector
-#define STREAMTYPE_DVD  3      // libdvdread
-#define STREAMTYPE_MEMORY 4
-#define STREAMTYPE_PLAYLIST 6  // FIXME!!! same as STREAMTYPE_FILE now
-#define STREAMTYPE_CDDA 10     // raw audio CD reader
-#define STREAMTYPE_SMB 11      // smb:// url, using libsmbclient (samba)
-#define STREAMTYPE_VCDBINCUE 12      // vcd directly from bin/cue files
-#define STREAMTYPE_DVB 13
-#define STREAMTYPE_VSTREAM 14
-#define STREAMTYPE_SDP 15
-#define STREAMTYPE_PVR 16
-#define STREAMTYPE_TV 17
-#define STREAMTYPE_MF 18
-#define STREAMTYPE_RADIO 19
-#define STREAMTYPE_BLURAY 20
-#define STREAMTYPE_AVDEVICE 21
-#define STREAMTYPE_CACHE 22
+enum streamtype {
+    STREAMTYPE_GENERIC = 0,
+    STREAMTYPE_FILE,
+    STREAMTYPE_RADIO,
+    STREAMTYPE_DVB,
+    STREAMTYPE_DVD,
+    STREAMTYPE_PVR,
+    STREAMTYPE_TV,
+    STREAMTYPE_MF,
+    STREAMTYPE_AVDEVICE,
+};
 
 #define STREAM_BUFFER_SIZE 2048
 #define STREAM_MAX_SECTOR_SIZE (8 * 1024)
@@ -70,7 +62,6 @@
 #define MP_STREAM_SEEK_FW  4
 #define MP_STREAM_SEEK  (MP_STREAM_SEEK_BW | MP_STREAM_SEEK_FW)
 
-#define STREAM_REDIRECTED -2
 #define STREAM_UNSUPPORTED -1
 #define STREAM_ERROR 0
 #define STREAM_OK    1
@@ -116,12 +107,9 @@ struct stream_dvd_info_req {
 
 struct stream;
 typedef struct stream_info_st {
-    const char *info;
     const char *name;
-    const char *author;
-    const char *comment;
     // opts is set from ->opts
-    int (*open)(struct stream *st, int mode, void *opts, int *file_format);
+    int (*open)(struct stream *st, int mode, void *opts);
     const char *protocols[MAX_STREAM_PROTOCOLS];
     const void *opts;
     int opts_url; /* If this is 1 we will parse the url as an option string
@@ -143,9 +131,8 @@ typedef struct stream {
     // Close
     void (*close)(struct stream *s);
 
-    int fd; // file descriptor, see man open(2)
-    int type; // see STREAMTYPE_*
-    int uncached_type; // like (uncached_stream ? uncached_stream->type : type)
+    enum streamtype type; // see STREAMTYPE_*
+    enum streamtype uncached_type; // if stream is cache, type of wrapped str.
     int flags; // MP_STREAM_SEEK_* or'ed flags
     int sector_size; // sector size (seek will be aligned on this size if non 0)
     int read_chunk; // maximum amount of data to read at once to limit latency
@@ -157,6 +144,7 @@ typedef struct stream {
     void *priv; // used for DVD, TV, RTSP etc
     char *url; // strdup() of filename/url
     char *mime_type; // when HTTP streaming is used
+    char *demuxer; // request demuxer to be used
     char *lavf_type; // name of expected demuxer type for lavf
     struct MPOpts *opts;
 
@@ -190,14 +178,6 @@ inline static int stream_read_char(stream_t *s)
            (stream_fill_buffer(s) ? s->buffer[s->buf_pos++] : -256);
 }
 
-inline static unsigned int stream_read_word(stream_t *s)
-{
-    int x, y;
-    x = stream_read_char(s);
-    y = stream_read_char(s);
-    return (x << 8) | y;
-}
-
 inline static unsigned int stream_read_dword(stream_t *s)
 {
     unsigned int y;
@@ -205,26 +185,6 @@ inline static unsigned int stream_read_dword(stream_t *s)
     y = (y << 8) | stream_read_char(s);
     y = (y << 8) | stream_read_char(s);
     y = (y << 8) | stream_read_char(s);
-    return y;
-}
-
-#define stream_read_fourcc stream_read_dword_le
-
-inline static unsigned int stream_read_word_le(stream_t *s)
-{
-    int x, y;
-    x = stream_read_char(s);
-    y = stream_read_char(s);
-    return (y << 8) | x;
-}
-
-inline static uint32_t stream_read_dword_le(stream_t *s)
-{
-    unsigned int y;
-    y = stream_read_char(s);
-    y |= stream_read_char(s) << 8;
-    y |= stream_read_char(s) << 16;
-    y |= stream_read_char(s) << 24;
     return y;
 }
 
@@ -239,14 +199,6 @@ inline static uint64_t stream_read_qword(stream_t *s)
     y = (y << 8) | stream_read_char(s);
     y = (y << 8) | stream_read_char(s);
     y = (y << 8) | stream_read_char(s);
-    return y;
-}
-
-inline static uint64_t stream_read_qword_le(stream_t *s)
-{
-    uint64_t y;
-    y = stream_read_dword_le(s);
-    y |= (uint64_t)stream_read_dword_le(s) << 32;
     return y;
 }
 
@@ -276,8 +228,7 @@ struct bstr stream_read_complete(struct stream *s, void *talloc_ctx,
 int stream_control(stream_t *s, int cmd, void *arg);
 void stream_update_size(stream_t *s);
 void free_stream(stream_t *s);
-stream_t *open_stream(const char *filename, struct MPOpts *options,
-                      int *file_format);
+struct stream *stream_open(const char *filename, struct MPOpts *options);
 stream_t *open_output_stream(const char *filename, struct MPOpts *options);
 stream_t *open_memory_stream(void *data, int len);
 struct demux_stream;

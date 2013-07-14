@@ -29,18 +29,19 @@
  *
  */
 
-#include <libbluray/bluray.h>
 #include <string.h>
 #include <assert.h>
 
+#include <libbluray/bluray.h>
+#include <libavutil/common.h>
+
 #include "config.h"
-#include "libavutil/common.h"
-#include "demux/demux.h"
 #include "talloc.h"
 #include "core/mp_msg.h"
 #include "core/m_struct.h"
 #include "core/m_option.h"
 #include "stream.h"
+#include "demux/stheader.h"
 
 #define BLURAY_SECTOR_SIZE     6144
 
@@ -291,8 +292,7 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static int bluray_stream_open(stream_t *s, int mode,
-                              void *opts, int *file_format)
+static int bluray_stream_open(stream_t *s, int mode, void *opts)
 {
     struct stream_priv_s *p = opts;
     struct bluray_priv_s *b;
@@ -409,7 +409,6 @@ err_no_info:
     s->sector_size = BLURAY_SECTOR_SIZE;
     s->flags       = MP_STREAM_SEEK;
     s->priv        = b;
-    s->type        = STREAMTYPE_BLURAY;
     s->url         = strdup("br://");
 
     mp_tmsg(MSGT_OPEN, MSGL_V, "Blu-ray successfully opened.\n");
@@ -418,10 +417,7 @@ err_no_info:
 }
 
 const stream_info_t stream_info_bluray = {
-    "Blu-ray Disc",
     "bd",
-    "Benjamin Zores",
-    "Play Blu-ray discs through external libbluray",
     bluray_stream_open,
     { "bd", "br", "bluray", NULL },
     &bluray_stream_opts,

@@ -2,6 +2,7 @@
  * stream layer for multiple files input, based on previous work from Albeu
  *
  * Copyright (C) 2006 Benjamin Zores
+ * Original author: Albeu
  *
  * This file is part of MPlayer.
  *
@@ -26,22 +27,18 @@
 #include <string.h>
 
 #include "stream.h"
-#include "demux/demux.h"
 
 static int
-mf_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
+mf_stream_open (stream_t *stream, int mode, void *opts)
 {
   stream->type = STREAMTYPE_MF;
-  *file_format = DEMUXER_TYPE_MF;
+  stream->demuxer = "mf";
 
   return STREAM_OK;
 }
 
 const stream_info_t stream_info_mf = {
-  "Multiple files input",
   "mf",
-  "Benjamin Zores, Albeu",
-  "",
   mf_stream_open,
   { "mf", NULL },
   NULL,

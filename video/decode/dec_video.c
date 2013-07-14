@@ -24,14 +24,12 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "demux/codec_tags.h"
-
 #include "core/mp_msg.h"
 
 #include "osdep/timer.h"
 
 #include "stream/stream.h"
-#include "demux/demux.h"
+#include "demux/demux_packet.h"
 
 #include "core/codecs.h"
 

@@ -2,6 +2,7 @@
  * stream layer for TV Input, based on previous work from Albeu
  *
  * Copyright (C) 2006 Benjamin Zores
+ * Original author: Albeu
  *
  * This file is part of MPlayer.
  *
@@ -26,7 +27,6 @@
 #include <string.h>
 
 #include "stream.h"
-#include "demux/demux.h"
 #include "core/m_option.h"
 #include "core/m_struct.h"
 #include "tv.h"
@@ -97,22 +97,19 @@ tv_stream_close (stream_t *stream)
   stream->priv=NULL;
 }
 static int
-tv_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
+tv_stream_open (stream_t *stream, int mode, void *opts)
 {
 
   stream->type = STREAMTYPE_TV;
   stream->priv = opts;
   stream->close=tv_stream_close;
-  *file_format =  DEMUXER_TYPE_TV;
+  stream->demuxer = "tv";
 
   return STREAM_OK;
 }
 
 const stream_info_t stream_info_tv = {
-  "TV Input",
   "tv",
-  "Benjamin Zores, Albeu",
-  "",
   tv_stream_open,
   { "tv", NULL },
   &stream_opts,

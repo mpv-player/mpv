@@ -54,10 +54,8 @@ static int control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static int open_f(stream_t *stream, int mode, void* opts, int* file_format)
+static int open_f(stream_t *stream, int mode, void* opts)
 {
-    stream->type = STREAMTYPE_MEMORY;
-
     stream->fill_buffer = fill_buffer;
     stream->seek = seek;
     stream->control = control;
@@ -75,10 +73,7 @@ static int open_f(stream_t *stream, int mode, void* opts, int* file_format)
 }
 
 const stream_info_t stream_info_memory = {
-    "Memory",
     "memory",
-    "",
-    "",
     open_f,
     { "memory", NULL },
 };

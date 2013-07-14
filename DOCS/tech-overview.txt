@@ -1,9 +1,9 @@
 NOTE: DOCS/OUTDATED-tech/* may contain more detailed information, but most of it
       is possibly or definitely outdated. This file intends to give a big
-      picture of how mplayer/mpv is structured.
+      picture of how mpv is structured.
 
 core/mplayer.c:
-    This contains the main play loop, anything related to mplayer and playback
+    This contains the main play loop, anything related to mpv and playback
     related initializations. It also contains the main function. Generally, it
     accesses all other subsystems, initializes them, and pushes data between
     them during playback.
@@ -59,7 +59,7 @@ talloc.h & talloc.c:
     allocation. (Needless to say, talloc_free() and free() are completely
     different things.)
 
-    The copy in mplayer has been modified to abort on OOM conditions. An
+    The copy in mpv has been modified to abort on OOM conditions. An
     allocation call will never return NULL.
 
     One very useful feature of talloc is fast tracking of memory leaks. ("Fast"
@@ -72,9 +72,13 @@ talloc.h & talloc.c:
     Documentation can be found here:
         http://git.samba.org/?p=samba.git;a=blob;f=lib/talloc/talloc.h;hb=HEAD
 
+    Note: unlike tcmalloc, jemalloc, etc., talloc() is not actually a malloc
+          replacement. It works on top of system malloc and provides additional
+          features that are supposed to make memory management easier.
+
 core/mp_core.h:
     Data structures for mplayer.c and command.c. They are usually not accessed
-    by other parts of mplayer for the sake of modularization.
+    by other parts of mpv for the sake of modularization.
 
     Note that there are lots of global variables floating around everywhere
     else. This is an ongoing transition, and eventually there should be no
@@ -92,7 +96,7 @@ core/input/input.c:
 
     Note that keyboard input and slave mode input are essentially the same
     things. Just looking at input.conf should make this clear. (The other
-    direction of slave mode communication, mplayer to application, consists of
+    direction of slave mode communication, mpv to application, consists of
     random mp_msg() calls all over the code in all parts of the player.)
 
 core/command.c:
@@ -100,18 +104,18 @@ core/command.c:
     Properties are essentially dynamic variables changed by certain commands.
     This is basically responsible for all user commands, like initiating
     seeking, switching tracks, etc. It calls into mplayer.c, where most of the
-    work is done, but also into other parts of mplayer.
+    work is done, but also into other parts of mpv.
 
 core/mp_msg.h:
-    All terminal output should go though mp_msg().
+    All terminal output should go through mp_msg().
 
 stream/*:
     File input is implemented here. stream.h/.c provides a simple stream based
-    interface (like reading a number of bytes at a given offset). mplayer can
+    interface (like reading a number of bytes at a given offset). mpv can
     also play from http streams and such, which is implemented here.
 
-    E.g. if mplayer sees "http://something" on the command line, it will pick
-    stream_http.c based on the prefix, and pass the rest of the filename to it.
+    E.g. if mpv sees "http://something" on the command line, it will pick
+    stream_lavf.c based on the prefix, and pass the rest of the filename to it.
 
     Some stream inputs are quite special: stream_dvd.c turns DVDs into mpeg
     streams (DVDs are actually a bunch of vob files etc. on a filesystem),
@@ -120,39 +124,40 @@ stream/*:
     Some stream inputs are just there to invoke special demuxers, like
     stream_mf.c. (Basically to make the prefix "mf://" do something special.)
 
-    cache2.c is a horrible little thing which provides a caching wrapper around
-    stream implementations, needed for smooth network playback.
+    cache.c is a caching wrapper around streams implementations, needed for
+    smooth network playback.
 
 demux/:
     Demuxers split data streams into audio/video/sub streams, which in turn
-    yield packets. Packets (see demux_packet.h) are mostly byte chunks tagged
-    with a playback time (PTS). These packets are passed to the decoders.
+    are split in packets. Packets (see demux_packet.h) are mostly byte chunks
+    tagged with a playback time (PTS). These packets are passed to the decoders.
 
     Most demuxers have been removed from this fork, and the only important and
     "actual" demuxers left are demux_mkv.c and demux_lavf.c (uses libavformat).
     There are some pseudo demuxers like demux_cue.c, which exist only to invoke
     other frontend code (tl_cue.c in this case).
 
-    The main interface is in demux.h. A demuxer provides a list of available
-    streams. Also, for each type of stream (video/audio/sub) there is a
-    demux_stream. This contains the current packet stream coming from the
-    demuxer as a linked list of demux_packets.
+    The main interface is in demux.h. The stream headers are in stheader.h.
+    There is a stream header for each audio/video/sub stream, and each of them
+    holds codec information about the stream and other information.
 
 video/:
-    This contains several things related to audio/video encoding, as well as
+    This contains several things related to audio/video decoding, as well as
     video filters.
 
-    mp_image.h and img_format.h define how mplayer stores video frames
+    mp_image.h and img_format.h define how mpv stores decoded video frames
     internally.
 
 video/decode/:
-    vd_*.c are video decoders. (There's only vd_ffmpeg.c left.) dec_video.c/vd.c
+    vd_*.c are video decoders. (There's only vd_lavc.c left.) dec_video.c/vd.c
     handle most of connecting the frontend with the actual decoder.
 
 video/filter/:
     vf_*.c and vf.c form the video filter chain. They are fed by the video
     decoder, and output the filtered images to the VOs though vf_vo.c. By
-    default, no video filters (except vf_vo) are used.
+    default, no video filters (except vf_vo) are used. vf_scale is automatically
+    inserted if the video output can't handle the video format used by the
+    decoder.
 
 video/out/:
     Video output. They also create GUI windows and handle user input. In most
@@ -167,13 +172,18 @@ video/out/:
     vo_vdpau and vo_opengl should be taken as reference.
 
 audio/:
-    format.h/format.c define the audio formats.
+    format.h/format.c define the uncompressed audio formats. (As well as some
+    compressed formats used for spdif.)
 
 audio/decode/:
-    ad_*.c and dec_audio.c/ad.c handle audio decoding.
+    ad_*.c and dec_audio.c/ad.c handle audio decoding. ad_lavc.c is the
+    decoder using ffmpeg. ad_spdif.c is not really a decoder, but is used for
+    compressed audio passthrough.
 
 audio/filter/:
-    Audio filter chain.
+    Audio filter chain. af_lavrresample is inserted if any form of conversion
+    between audio formats is needed. (af_format.c is also used for some corner
+    cases.)
 
 audio/out/:
     Audio outputs.
@@ -182,7 +192,7 @@ audio/out/:
     --gapless-audio, even playing a new file will close and re-open the audio
     device.
 
-    Note that mplayer synchronizes the video to the audio. That's the reason
+    Note that mpv synchronizes the video to the audio. That's the reason
     why buggy audio drivers can have a bad influence on playback quality.
 
 sub/:
@@ -210,7 +220,8 @@ sub/:
     Text subtitles can be preloaded, in which case they are read fully as soon
     as the subtitle is selected, and then effectively stored in an ASS_Track.
     It's used for external text subtitles, and required to make codepage
-    detection as well as timing postprocessing work.
+    detection as well as timing postprocessing work. (Timing postprocessing
+    removes tiny gaps or overlaps between subtitle events.)
 
 core/timeline/:
     A timeline is the abstraction used by mplayer.c to combine several files

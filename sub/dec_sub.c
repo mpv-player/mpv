@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 #include <assert.h>
 
 #include "config.h"
@@ -379,12 +380,12 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
         preprocess = 1;
 
     for (;;) {
-        ds_get_next_pts(sh->ds);
-        struct demux_packet *pkt = ds_get_packet_sub(sh->ds);
+        struct demux_packet *pkt = demux_read_packet(sh->gsh);
         if (!pkt)
             break;
         if (preprocess) {
             decode_chain(sub->sd, preprocess, pkt);
+            talloc_free(pkt);
             while (1) {
                 pkt = get_decoded_packet(sub->sd[preprocess - 1]);
                 if (!pkt)
@@ -393,6 +394,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
             }
         } else {
             add_packet(subs, pkt);
+            talloc_free(pkt);
         }
     }
 

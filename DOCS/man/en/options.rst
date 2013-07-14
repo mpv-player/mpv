@@ -695,12 +695,6 @@
     Stop at given absolute time. Use ``--length`` if the time should be relative
     to ``--start``. See ``--start`` for valid option values and examples.
 
-``--no-extbased``, ``--extbased``
-    ``--no-extbased`` disables extension-based demuxer selection. By default,
-    when the file type (demuxer) cannot be detected reliably (the file has no
-    header or it is not reliable enough), the filename extension is used to
-    select the demuxer. Always falls back on content-based demuxer selection.
-
 ``--field-dominance=<auto|top|bottom>``
     Set first field for interlaced content. Useful for deinterlacers that
     double the framerate: ``--vf=yadif=1`` and ``--vo=vdpau:deint``.
@@ -1049,11 +1043,6 @@
         This option only works if the underlying media supports seeking
         (i.e. not with stdin, pipe, etc).
 
-``--ignore-start``
-    Matters with the builtin AVI demuxer only, which is not enabled by default.
-    Ignore the specified starting time for streams in AVI files. This
-    nullifies stream delays.
-
 ``--include=<configuration-file>``
     Specify configuration file to be parsed after the default ones.
 
@@ -1258,19 +1247,9 @@
     depends on the VO backend and how it handles keyboard input. Does not
     apply to terminal input.)
 
-``--avi-ni``
-    (Internal AVI demuxer which is not used by default only)
-    Force usage of non-interleaved AVI parser (fixes playback of some bad AVI
-    files).
-
 ``--no-aspect``
     Ignore aspect ratio information from video file and assume the video has
     square pixels. See also ``--aspect``.
-
-``--no-bps``
-    (Internal AVI demuxer which is not used by default only)
-    Do not use average byte/second value for A-V sync. Helps with some AVI
-    files with broken header.
 
 ``--no-cache``
     Turn off input stream caching. See ``--cache``.

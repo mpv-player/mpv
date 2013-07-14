@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Original author: Albeu
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -44,7 +46,6 @@
 #include "core/m_struct.h"
 #include "libavutil/common.h"
 #include "compat/mpbswap.h"
-#include "demux/demux.h"
 
 #include "cdd.h"
 
@@ -333,7 +334,7 @@ static int control(stream_t *stream, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
+static int open_cdda(stream_t *st, int m, void *opts)
 {
     struct cdda_params *p = (struct cdda_params *)opts;
     int mode = p->paranoia_mode;
@@ -471,7 +472,6 @@ static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
     st->priv = priv;
     st->start_pos = priv->start_sector * CDIO_CD_FRAMESIZE_RAW;
     st->end_pos = (priv->end_sector + 1) * CDIO_CD_FRAMESIZE_RAW;
-    st->type = STREAMTYPE_CDDA;
     st->sector_size = CDIO_CD_FRAMESIZE_RAW;
 
     st->fill_buffer = fill_buffer;
@@ -479,7 +479,7 @@ static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
     st->control = control;
     st->close = close_cdda;
 
-    *file_format = DEMUXER_TYPE_RAWAUDIO;
+    st->demuxer = "rawaudio";
 
     m_struct_free(&stream_opts, opts);
 
@@ -489,10 +489,7 @@ static int open_cdda(stream_t *st, int m, void *opts, int *file_format)
 }
 
 const stream_info_t stream_info_cdda = {
-    "CDDA",
     "cdda",
-    "Albeu",
-    "",
     open_cdda,
     {"cdda", NULL },
     &stream_opts,

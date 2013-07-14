@@ -566,13 +566,11 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_SET:
         angle = demuxer_set_angle(demuxer, *(int *)arg);
         if (angle >= 0) {
-            struct sh_video *sh_video = demuxer->video->sh;
-            if (sh_video)
-                resync_video_stream(sh_video);
+            if (mpctx->sh_video)
+                resync_video_stream(mpctx->sh_video);
 
-            struct sh_audio *sh_audio = demuxer->audio->sh;
-            if (sh_audio)
-                resync_audio_stream(sh_audio);
+            if (mpctx->sh_audio)
+                resync_audio_stream(mpctx->sh_audio);
         }
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_TYPE: {

@@ -397,7 +397,7 @@ static void encode_2pass_prepare(struct encode_lavc_context *ctx,
         buf[sizeof(buf) - 1] = 0;
 
         if (value_has_flag(de ? de->value : "", "pass2")) {
-            if (!(*bytebuf = open_stream(buf, NULL, NULL))) {
+            if (!(*bytebuf = stream_open(buf, NULL))) {
                 mp_msg(MSGT_ENCODE, MSGL_WARN, "%s: could not open '%s', "
                        "disabling 2-pass encoding at pass 2\n", prefix, buf);
                 stream->codec->flags &= ~CODEC_FLAG_PASS2;

@@ -25,6 +25,7 @@
 
 #include <stddef.h>
 #include <sys/types.h>
+#include <limits.h>
 
 #include "core/options.h"
 #include "config.h"
@@ -372,12 +373,9 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("pause", pause, 0),
     OPT_FLAG("keep-open", keep_open, 0),
 
-    // AVI specific: force non-interleaved mode
-    {"avi-ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-
     // AVI and Ogg only: (re)build index at startup
-    {"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1, NULL},
-    {"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2, NULL},
+    OPT_FLAG_CONSTANTS("idx", index_mode, 0, -1, 1),
+    OPT_FLAG_STORE("forceidx", index_mode, 0, 2),
 
     // select audio/video/subtitle stream
     OPT_TRACKCHOICE("aid", audio_id),
@@ -404,7 +402,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("demuxer", demuxer_name, 0),
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
-    OPT_FLAG("extbased", extension_parsing, 0),
 
     {"mf", (void *) mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
 #ifdef CONFIG_RADIO
@@ -422,9 +419,6 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- a-v sync options --------------------
 
-    // AVI specific: A-V sync mode (bps vs. interleaving)
-    {"bps", &pts_from_bps, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-
     // set A-V sync correction speed (0=disables it):
     OPT_FLOATRANGE("mc", default_max_pts_correction, 0, 0, 100),
 
@@ -437,9 +431,6 @@ const m_option_t mp_opts[] = {
 
     // set a-v distance
     OPT_FLOATRANGE("audio-delay", audio_delay, 0, -100.0, 100.0),
-
-    // ignore header-specified delay (dwStart)
-    OPT_FLAG("ignore-start", ignore_start, 0),
 
 // ------------------------- codec/vfilter options --------------------
 
@@ -788,7 +779,6 @@ const struct MPOpts mp_default_opts = {
     .sub_visibility = 1,
     .sub_pos = 100,
     .sub_speed = 1.0,
-    .extension_parsing = 1,
     .audio_output_channels = MP_CHMAP_INIT_STEREO,
     .audio_output_format = -1,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,
@@ -806,6 +796,8 @@ const struct MPOpts mp_default_opts = {
     .suboverlap_enabled = 0,
 
     .hwdec_codecs = "all",
+
+    .index_mode = -1,
 
     .ad_lavc_param = {
         .ac3drc = 1.,

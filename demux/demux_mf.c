@@ -61,7 +61,8 @@ static void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,float audio_del
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
+static int demux_mf_fill_buffer(demuxer_t *demuxer)
+{
     mf_t *mf = demuxer->priv;
     if (mf->curr_frame >= mf->nr_of_files)
         return 0;
@@ -73,7 +74,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
     if (!stream) {
         char *filename = mf->names[mf->curr_frame];
         if (filename)
-            stream = open_stream(filename, demuxer->opts, NULL);
+            stream = stream_open(filename, demuxer->opts);
     }
 
     if (stream) {
@@ -85,7 +86,7 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
             dp->pts = mf->curr_frame / mf->sh->fps;
             dp->pos = mf->curr_frame;
             dp->keyframe = true;
-            ds_add_packet(demuxer->video, dp);
+            demuxer_add_packet(demuxer, demuxer->streams[0], dp);
         }
         talloc_free(data.start);
     }
@@ -148,9 +149,9 @@ static const struct {
   {0}
 };
 
-static const char *probe_format(mf_t *mf)
+static const char *probe_format(mf_t *mf, enum demux_check check)
 {
-    if (mf->nr_of_files < 1)
+    if (check > DEMUX_CHECK_REQUEST)
         return NULL;
     char *type = mf_type;
     if (!type || !type[0]) {
@@ -158,46 +159,42 @@ static const char *probe_format(mf_t *mf)
         if (p)
             type = p + 1;
     }
-    if (!type || !type[0])
-        return NULL;
-    int i;
-    for (i = 0; type2format[i].type; i++) {
-        if (strcasecmp(type, type2format[i].type) == 0)
-            break;
+    for (int i = 0; type2format[i].type; i++) {
+        if (type && strcasecmp(type, type2format[i].type) == 0)
+            return type2format[i].codec;
     }
-    return type2format[i].codec;
-}
-
-static mf_t *open_mf(demuxer_t *demuxer)
-{
-    if (!demuxer->stream->url)
-        return NULL;
-
-    if (strncmp(demuxer->stream->url, "mf://", 5) == 0) {
-        return open_mf_pattern(demuxer->stream->url + 5);
-    } else {
-        mf_t *mf = open_mf_single(demuxer->stream->url);
-        mf->streams = calloc(1, sizeof(struct stream *));
-        mf->streams[0] = demuxer->stream;
-        return mf;
+    if (check == DEMUX_CHECK_REQUEST) {
+        if (!mf_type) {
+            mp_msg(MSGT_DEMUX, MSGL_ERR,
+                   "[demux_mf] file type was not set! (try --mf-type=ext)\n");
+        } else  {
+            mp_msg(MSGT_DEMUX, MSGL_ERR,
+                   "[demux_mf] --mf-type set to an unknown codec!\n");
+        }
     }
+    return NULL;
 }
 
-static int demux_check_file(demuxer_t *demuxer)
+static int demux_open_mf(demuxer_t* demuxer, enum demux_check check)
 {
-    if (demuxer->stream->type == STREAMTYPE_MF)
-        return DEMUXER_TYPE_MF;
-    mf_t *mf = open_mf(demuxer);
-    bool ok = mf && probe_format(mf);
-    free_mf(mf);
-    return ok ? DEMUXER_TYPE_MF : 0;
-}
-
-static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   sh_video_t   *sh_video = NULL;
+  mf_t *mf;
 
-  mf_t *mf = open_mf(demuxer);
-  if (!mf)
+  if (strncmp(demuxer->stream->url, "mf://", 5) == 0 &&
+      demuxer->stream->type == STREAMTYPE_MF)
+  {
+    mf = open_mf_pattern(demuxer->stream->url + 5);
+  } else {
+    mf = open_mf_single(demuxer->stream->url);
+    mf->streams = calloc(1, sizeof(struct stream *));
+    mf->streams[0] = demuxer->stream;
+  }
+
+  if (!mf || mf->nr_of_files < 1)
+    goto error;
+
+  const char *codec = probe_format(mf, check);
+  if (!codec)
     goto error;
 
   mf->curr_frame = 0;
@@ -206,35 +203,22 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   demuxer->movi_end = mf->nr_of_files - 1;
 
   // create a new video stream header
-  sh_video = new_sh_video(demuxer, 0);
-  // make sure the demuxer knows about the new video stream header
-  // (even though new_sh_video() ought to take care of it)
-  demuxer->video->sh = sh_video;
+  struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
+  sh_video = sh->video;
 
-  sh_video->gsh->codec = probe_format(mf);
-  if (!sh_video->gsh->codec) {
-    mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] file type was not set! (try -mf type=ext)\n" );
-    goto error;
-  }
-
-  // make sure that the video demuxer stream header knows about its
-  // parent video demuxer stream (this is getting wacky), or else
-  // video_read_properties() will choke
-  sh_video->ds = demuxer->video;
-
+  sh_video->gsh->codec = codec;
   sh_video->disp_w = 0;
   sh_video->disp_h = 0;
   sh_video->fps = mf_fps;
-  sh_video->frametime = 1 / sh_video->fps;
 
   mf->sh = sh_video;
   demuxer->priv=(void*)mf;
 
-  return demuxer;
+  return 0;
 
 error:
   free_mf(mf);
-  return NULL;
+  return -1;
 }
 
 static void demux_close_mf(demuxer_t* demuxer) {
@@ -251,26 +235,17 @@ static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg) {
       *((double *)arg) = (double)mf->nr_of_files / mf->sh->fps;
       return DEMUXER_CTRL_OK;
 
-    case DEMUXER_CTRL_CORRECT_PTS:
-      return DEMUXER_CTRL_OK;
-
     default:
       return DEMUXER_CTRL_NOTIMPL;
   }
 }
 
 const demuxer_desc_t demuxer_desc_mf = {
-  "mf demuxer",
-  "mf",
-  "MF",
-  "?",
-  "multiframe?, pictures demuxer",
-  DEMUXER_TYPE_MF,
-  1,
-  demux_check_file,
-  demux_mf_fill_buffer,
-  demux_open_mf,
-  demux_close_mf,
-  demux_seek_mf,
-  demux_control_mf
+    .name = "mf",
+    .desc = "image files (mf)",
+    .fill_buffer = demux_mf_fill_buffer,
+    .open = demux_open_mf,
+    .close = demux_close_mf,
+    .seek = demux_seek_mf,
+    .control = demux_control_mf,
 };

@@ -118,10 +118,8 @@ static stream_t *new_stream(size_t min_size);
 static int stream_seek_unbuffered(stream_t *s, int64_t newpos);
 
 static stream_t *open_stream_plugin(const stream_info_t *sinfo,
-                                    const char *filename,
-                                    int mode, struct MPOpts *options,
-                                    int *file_format, int *ret,
-                                    char **redirected_url)
+                                    const char *filename, int mode,
+                                    struct MPOpts *options, int *ret)
 {
     void *arg = NULL;
     stream_t *s;
@@ -146,12 +144,11 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     }
     s = new_stream(0);
     s->opts = options;
-    s->url = strdup(filename);
+    s->url = talloc_strdup(s, filename);
     s->flags = 0;
     s->mode = mode;
-    *ret = sinfo->open(s, mode, arg, file_format);
+    *ret = sinfo->open(s, mode, arg);
     if ((*ret) != STREAM_OK) {
-        free(s->url);
         talloc_free(s);
         return NULL;
     }
@@ -159,8 +156,6 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     if (!s->read_chunk)
         s->read_chunk = 4 * (s->sector_size ? s->sector_size : STREAM_BUFFER_SIZE);
 
-    if (s->type <= -2)
-        mp_msg(MSGT_OPEN, MSGL_WARN, "Warning streams need a type !!!!\n");
     if (!s->seek)
         s->flags &= ~MP_STREAM_SEEK;
     if (s->seek && !(s->flags & MP_STREAM_SEEK))
@@ -170,10 +165,7 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
 
     s->uncached_type = s->type;
 
-    mp_msg(MSGT_OPEN, MSGL_V, "STREAM: [%s] %s\n", sinfo->name, filename);
-    mp_msg(MSGT_OPEN, MSGL_V, "STREAM: Description: %s\n", sinfo->info);
-    mp_msg(MSGT_OPEN, MSGL_V, "STREAM: Author: %s\n", sinfo->author);
-    mp_msg(MSGT_OPEN, MSGL_V, "STREAM: Comment: %s\n", sinfo->comment);
+    mp_msg(MSGT_OPEN, MSGL_V, "[stream] [%s] %s\n", sinfo->name, filename);
 
     if (s->mime_type)
         mp_msg(MSGT_OPEN, MSGL_V, "Mime-type: '%s'\n", s->mime_type);
@@ -183,20 +175,13 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
 
 
 static stream_t *open_stream_full(const char *filename, int mode,
-                                  struct MPOpts *options, int *file_format)
+                                  struct MPOpts *options)
 {
     int i, j, l, r;
     const stream_info_t *sinfo;
     stream_t *s;
-    char *redirected_url = NULL;
 
     assert(filename);
-
-    int dummy;
-    if (!file_format)
-        file_format = &dummy;
-
-    *file_format = DEMUXER_TYPE_UNKNOWN;
 
     for (i = 0; auto_open_streams[i]; i++) {
         sinfo = auto_open_streams[i];
@@ -212,22 +197,10 @@ static stream_t *open_stream_full(const char *filename, int mode,
             if ((l == 0 && !strstr(filename, "://")) ||
                 ((strncasecmp(sinfo->protocols[j], filename, l) == 0) &&
                  (strncmp("://", filename + l, 3) == 0))) {
-                *file_format = DEMUXER_TYPE_UNKNOWN;
-                s =
-                    open_stream_plugin(sinfo, filename, mode, options,
-                                       file_format,
-                                       &r,
-                                       &redirected_url);
+                s = open_stream_plugin(sinfo, filename, mode, options, &r);
                 if (s)
                     return s;
-                if (r == STREAM_REDIRECTED && redirected_url) {
-                    mp_msg(MSGT_OPEN, MSGL_V, "[%s] open %s redirected to %s\n",
-                           sinfo->info, filename, redirected_url);
-                    s = open_stream_full(redirected_url, mode, options,
-                                         file_format);
-                    free(redirected_url);
-                    return s;
-                } else if (r != STREAM_UNSUPPORTED) {
+                if (r != STREAM_UNSUPPORTED) {
                     mp_tmsg(MSGT_OPEN, MSGL_ERR, "Failed to open %s.\n",
                             filename);
                     return NULL;
@@ -241,15 +214,14 @@ static stream_t *open_stream_full(const char *filename, int mode,
     return NULL;
 }
 
-stream_t *open_stream(const char *filename, struct MPOpts *options,
-                      int *file_format)
+struct stream *stream_open(const char *filename, struct MPOpts *options)
 {
-    return open_stream_full(filename, STREAM_READ, options, file_format);
+    return open_stream_full(filename, STREAM_READ, options);
 }
 
 stream_t *open_output_stream(const char *filename, struct MPOpts *options)
 {
-    return open_stream_full(filename, STREAM_WRITE, options, NULL);
+    return open_stream_full(filename, STREAM_WRITE, options);
 }
 
 static int stream_reconnect(stream_t *s)
@@ -322,13 +294,7 @@ static int stream_read_unbuffered(stream_t *s, void *buf, int len)
     int orig_len = len;
     s->buf_pos = s->buf_len = 0;
     // we will retry even if we already reached EOF previously.
-    if (s->fill_buffer) {
-        len = s->fill_buffer(s, buf, len);
-    } else if (s->fd >= 0) {
-        len = read(s->fd, buf, len);
-    } else {
-        len = 0;
-    }
+    len = s->fill_buffer ? s->fill_buffer(s, buf, len) : -1;
     if (len < 0)
         len = 0;
     if (len == 0) {
@@ -597,24 +563,19 @@ static stream_t *new_stream(size_t min_size)
     min_size = FFMAX(min_size, TOTAL_BUFFER_SIZE);
     stream_t *s = talloc_size(NULL, sizeof(stream_t) + min_size);
     memset(s, 0, sizeof(stream_t));
-
-    s->fd = -2;
-    s->type = -2;
     return s;
 }
 
 void free_stream(stream_t *s)
 {
+    if (!s)
+        return;
+
     stream_set_capture_file(s, NULL);
 
     if (s->close)
         s->close(s);
-    if (s->fd > 0) {
-        close(s->fd);
-    }
-    free(s->url);
-    if (s->uncached_stream)
-        free_stream(s->uncached_stream);
+    free_stream(s->uncached_stream);
     talloc_free(s);
 }
 
@@ -637,7 +598,7 @@ int stream_check_interrupt(int time)
 stream_t *open_memory_stream(void *data, int len)
 {
     assert(len >= 0);
-    stream_t *s = open_stream("memory://", NULL, NULL);
+    stream_t *s = stream_open("memory://", NULL);
     assert(s);
     stream_control(s, STREAM_CTRL_SET_CONTENTS, &(bstr){data, len});
     return s;
@@ -678,16 +639,15 @@ static int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
     orig->buf_len = orig->buf_pos = 0;
 
     stream_t *cache = new_stream(0);
-    cache->type = STREAMTYPE_CACHE;
     cache->uncached_type = orig->type;
     cache->uncached_stream = orig;
     cache->flags |= MP_STREAM_SEEK;
     cache->mode = STREAM_READ;
     cache->read_chunk = 4 * STREAM_BUFFER_SIZE;
 
-    cache->url = strdup(orig->url);
+    cache->url = talloc_strdup(cache, orig->url);
     cache->mime_type = talloc_strdup(cache, orig->mime_type);
-    cache->lavf_type = orig->lavf_type;
+    cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
     cache->opts = orig->opts;
     cache->start_pos = orig->start_pos;
     cache->end_pos = orig->end_pos;

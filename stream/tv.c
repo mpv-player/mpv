@@ -210,15 +210,28 @@ static void tv_scan(tvi_handle_t *tvh)
 */
 /* fill demux->video and demux->audio */
 
-static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
+static int demux_tv_fill_buffer(demuxer_t *demux)
 {
     tvi_handle_t *tvh=(tvi_handle_t*)(demux->priv);
     demux_packet_t* dp;
     unsigned int len=0;
+    struct sh_stream *want_audio = NULL, *want_video = NULL;
+
+    for (int n = 0; n < demux->num_streams; n++) {
+        struct sh_stream *sh = demux->streams[n];
+        if (!demuxer_stream_has_packets_queued(demux, sh) &&
+            demuxer_stream_is_selected(demux, sh))
+        {
+            if (sh->type == STREAM_AUDIO)
+                want_audio = sh;
+            if (sh->type == STREAM_VIDEO)
+                want_video = sh;
+        }
+    }
 
     /* ================== ADD AUDIO PACKET =================== */
 
-    if (ds==demux->audio && tvh->tv_param->noaudio == 0 &&
+    if (want_audio && tvh->tv_param->noaudio == 0 &&
         tvh->functions->control(tvh->priv,
                                 TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
         {
@@ -227,19 +240,19 @@ static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
         dp=new_demux_packet(len);
         dp->keyframe = true;
         dp->pts=tvh->functions->grab_audio_frame(tvh->priv, dp->buffer,len);
-        ds_add_packet(demux->audio,dp);
+        demuxer_add_packet(demux, want_audio, dp);
         }
 
     /* ================== ADD VIDEO PACKET =================== */
 
-    if (ds==demux->video && tvh->functions->control(tvh->priv,
+    if (want_video && tvh->functions->control(tvh->priv,
                             TVI_CONTROL_IS_VIDEO, 0) == TVI_CONTROL_TRUE)
         {
 		len = tvh->functions->get_video_framesize(tvh->priv);
        	dp=new_demux_packet(len);
         dp->keyframe = true;
   		dp->pts=tvh->functions->grab_video_frame(tvh->priv, dp->buffer, len);
-   		ds_add_packet(demux->video,dp);
+   		demuxer_add_packet(demux, want_video, dp);
 	 }
 
     if (tvh->tv_param->scan) tv_scan(tvh);
@@ -688,27 +701,31 @@ static int tv_uninit(tvi_handle_t *tvh)
     return res;
 }
 
-static demuxer_t* demux_open_tv(demuxer_t *demuxer)
+static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
 {
     tvi_handle_t *tvh;
     sh_video_t *sh_video;
     sh_audio_t *sh_audio = NULL;
     const tvi_functions_t *funcs;
 
+    if (check > DEMUX_CHECK_REQUEST || demuxer->stream->type != STREAMTYPE_TV)
+        return -1;
+
     demuxer->priv=NULL;
-    if(!(tvh=tv_begin(demuxer->stream->priv))) return NULL;
-    if (!tvh->functions->init(tvh->priv)) return NULL;
+    if(!(tvh=tv_begin(demuxer->stream->priv))) return -1;
+    if (!tvh->functions->init(tvh->priv)) return -1;
 
     tvh->demuxer = demuxer;
 
     if (!open_tv(tvh)){
 	tv_uninit(tvh);
-	return NULL;
+	return -1;
     }
     funcs = tvh->functions;
     demuxer->priv=tvh;
 
-    sh_video = new_sh_video(demuxer, 0);
+    struct sh_stream *sh_v = new_sh_stream(demuxer, STREAM_VIDEO);
+    sh_video = sh_v->video;
 
     /* get IMAGE FORMAT */
     int fourcc;
@@ -729,8 +746,6 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
     if (tvh->tv_param->fps != -1.0f)
         sh_video->fps = tvh->tv_param->fps;
 
-    sh_video->frametime = 1.0f/sh_video->fps;
-
     /* If playback only mode, go to immediate mode, fail silently */
     if(tvh->tv_param->immediate == 1)
         {
@@ -738,20 +753,12 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
         tvh->tv_param->noaudio = 1;
         }
 
-    /* disable TV audio if -nosound is present */
-    if (!demuxer->audio || demuxer->audio->id == -2) {
-        tvh->tv_param->noaudio = 1;
-    }
-
     /* set width */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &sh_video->disp_w);
 
     /* set height */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HEIGHT, &sh_video->disp_h);
 
-    demuxer->video->sh = sh_video;
-    sh_video->ds = demuxer->video;
-    demuxer->video->id = 0;
     demuxer->seekable = 0;
 
     /* here comes audio init */
@@ -786,7 +793,8 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
 		goto no_audio;
 	}
 
-	sh_audio = new_sh_audio(demuxer, 0);
+	struct sh_stream *sh_a = new_sh_stream(demuxer, STREAM_AUDIO);
+	sh_audio = sh_a->audio;
 
 	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_SAMPLERATE,
                    &sh_audio->samplerate);
@@ -800,7 +808,7 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
         sh_audio->gsh->codec = "mp-pcm";
 	sh_audio->format = audio_format;
 
-	sh_audio->i_bps = sh_audio->o_bps =
+	sh_audio->i_bps =
 	    sh_audio->samplerate * sh_audio->samplesize *
 	    sh_audio->channels.num;
 
@@ -816,17 +824,13 @@ static demuxer_t* demux_open_tv(demuxer_t *demuxer)
 	mp_tmsg(MSGT_DECVIDEO, MSGL_V, "  TV audio: %d channels, %d bits, %d Hz\n",
           sh_audio->wf->nChannels, sh_audio->wf->wBitsPerSample,
           sh_audio->wf->nSamplesPerSec);
-
-	demuxer->audio->sh = sh_audio;
-	sh_audio->ds = demuxer->audio;
-	demuxer->audio->id = 0;
     }
 no_audio:
 
     if(!(funcs->start(tvh->priv))){
 	// start failed :(
 	tv_uninit(tvh);
-	return NULL;
+	return -1;
     }
 
     /* set color eq */
@@ -839,7 +843,7 @@ no_audio:
         if(funcs->control(tvh->priv,TVI_CONTROL_VID_SET_GAIN,&tvh->tv_param->gain)!=TVI_CONTROL_TRUE)
             mp_msg(MSGT_TV,MSGL_WARN,"Unable to set gain control!\n");
 
-    return demuxer;
+    return 0;
 }
 
 static void demux_close_tv(demuxer_t *demuxer)
@@ -1093,17 +1097,10 @@ int tv_step_chanlist(tvi_handle_t *tvh)
 }
 
 demuxer_desc_t demuxer_desc_tv = {
-  "Tv card demuxer",
-  "tv",
-  "TV",
-  "Alex Beregszaszi, Charles R. Henrich",
-  "?",
-  DEMUXER_TYPE_TV,
-  0, // no autodetect
-  NULL,
-  demux_tv_fill_buffer,
-  demux_open_tv,
-  demux_close_tv,
-  NULL,
-  NULL
+    .name = "tv",
+    .desc = "TV card demuxer",
+    .type = DEMUXER_TYPE_TV,
+    .fill_buffer = demux_tv_fill_buffer,
+    .open = demux_open_tv,
+    .close = demux_close_tv,
 };

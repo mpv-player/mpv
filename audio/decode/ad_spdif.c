@@ -84,9 +84,7 @@ static int codecs[] = {
 
 static int init(sh_audio_t *sh, const char *decoder)
 {
-    int x, in_size, srate, bps, *dtshd_rate;
-    unsigned char *start;
-    double pts;
+    int srate, bps, *dtshd_rate;
     AVFormatContext     *lavf_ctx  = NULL;
     AVStream            *stream    = NULL;
     const AVOption      *opt       = NULL;
@@ -125,28 +123,8 @@ static int init(sh_audio_t *sh, const char *decoder)
         goto fail;
     }
 
-    // get sample_rate & bitrate from parser
-    x = ds_get_packet_pts(sh->ds, &start, &pts);
-    in_size = x;
-    if (x <= 0) {
-        pts = MP_NOPTS_VALUE;
-        x = 0;
-    }
-    ds_parse(sh->ds, &start, &x, pts, 0);
     srate = 48000;    //fake value
     bps   = 768000/8; //fake value
-    if (x && sh->avctx) { // we have parser and large enough buffer
-        if (sh->avctx->sample_rate < 44100) {
-            mp_msg(MSGT_DECAUDIO,MSGL_INFO,
-                   "This stream sample_rate[%d Hz] may be broken. "
-                   "Force reset 48000Hz.\n",
-                   sh->avctx->sample_rate);
-            srate = 48000; //fake value
-        } else
-            srate = sh->avctx->sample_rate;
-        bps = sh->avctx->bit_rate/8;
-    }
-    sh->ds->buffer_pos -= in_size;
 
     int num_channels = 0;
     switch (lavf_ctx->streams[0]->codec->codec_id) {
@@ -226,64 +204,35 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf,
     struct spdifContext *spdif_ctx = sh->context;
     AVFormatContext     *lavf_ctx  = spdif_ctx->lavf_ctx;
     AVPacket            pkt;
-    double              pts;
-    int                 ret, in_size, consumed, x;
-    unsigned char       *start = NULL;
 
-    consumed = spdif_ctx->out_buffer_len  = 0;
+    spdif_ctx->out_buffer_len  = 0;
     spdif_ctx->out_buffer_size = maxlen;
     spdif_ctx->out_buffer      = buf;
     while (spdif_ctx->out_buffer_len + spdif_ctx->iec61937_packet_size < maxlen
            && spdif_ctx->out_buffer_len < minlen) {
-        if (sh->ds->eof)
+        struct demux_packet *mpkt = demux_read_packet(sh->gsh);
+        if (!mpkt)
             break;
-        x = ds_get_packet_pts(sh->ds, &start, &pts);
-        if (x <= 0) {
-            x = 0;
-            ds_parse(sh->ds, &start, &x, MP_NOPTS_VALUE, 0);
-            if (x == 0)
-                continue; // END_NOT_FOUND
-            in_size = x;
-        } else {
-            in_size = x;
-            consumed = ds_parse(sh->ds, &start, &x, pts, 0);
-            if (x == 0) {
-                mp_msg(MSGT_DECAUDIO,MSGL_V,
-                       "start[%p] in_size[%d] consumed[%d] x[%d].\n",
-                       start, in_size, consumed, x);
-                continue; // END_NOT_FOUND
-            }
-            sh->ds->buffer_pos -= in_size - consumed;
-        }
-        av_init_packet(&pkt);
-        pkt.data = start;
-        pkt.size = x;
-        mp_msg(MSGT_DECAUDIO,MSGL_V,
-               "start[%p] pkt.size[%d] in_size[%d] consumed[%d] x[%d].\n",
-               start, pkt.size, in_size, consumed, x);
-        if (pts != MP_NOPTS_VALUE) {
-            sh->pts       = pts;
+        mp_set_av_packet(&pkt, mpkt);
+        mp_msg(MSGT_DECAUDIO,MSGL_V, "pkt.data[%p] pkt.size[%d]\n",
+               pkt.data, pkt.size);
+        if (mpkt->pts != MP_NOPTS_VALUE) {
+            sh->pts       = mpkt->pts;
             sh->pts_bytes = 0;
         }
-        ret = lavf_ctx->oformat->write_packet(lavf_ctx, &pkt);
+        int out_len = spdif_ctx->out_buffer_len;
+        int ret = lavf_ctx->oformat->write_packet(lavf_ctx, &pkt);
+        avio_flush(lavf_ctx->pb);
+        sh->pts_bytes += spdif_ctx->out_buffer_len - out_len;
+        talloc_free(mpkt);
         if (ret < 0)
             break;
     }
-    sh->pts_bytes += spdif_ctx->out_buffer_len;
     return spdif_ctx->out_buffer_len;
 }
 
 static int control(sh_audio_t *sh, int cmd, void *arg)
 {
-    unsigned char *start;
-    double pts;
-
-    switch (cmd) {
-    case ADCTRL_RESYNC_STREAM:
-    case ADCTRL_SKIP_FRAME:
-        ds_get_packet_pts(sh->ds, &start, &pts);
-        return CONTROL_TRUE;
-    }
     return CONTROL_UNKNOWN;
 }
 

@@ -3,6 +3,8 @@
 dvbstream
 (C) Dave Chapman <dave@dchapman.com> 2001, 2002.
 
+Original authors: Nico, probably Arpi
+
 The latest version can be found at http://www.linuxstb.org/dvbstream
 
 Modified for use with MPlayer, for details see the changelog at
@@ -40,7 +42,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include <errno.h>
 
 #include "stream.h"
-#include "demux/demux.h"
 #include "core/m_option.h"
 #include "core/m_struct.h"
 #include "core/path.h"
@@ -444,7 +445,7 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
 
 	tries = priv->retry + 1;
 
-	fd = stream->fd;
+	fd = priv->fd;
 	while(pos < size)
 	{
 		pfds[0].fd = fd;
@@ -536,7 +537,7 @@ int dvb_set_channel(stream_t *stream, int card, int n)
 	priv->list = new_list;
 	priv->retry = 5;
 	new_list->current = n;
-	stream->fd = priv->dvr_fd;
+	priv->fd = priv->dvr_fd;
 	mp_msg(MSGT_DEMUX, MSGL_V, "DVB_SET_CHANNEL: new channel name=%s, card: %d, channel %d\n", channel->name, card, n);
 
 	stream->buf_pos = stream->buf_len = 0;
@@ -659,7 +660,7 @@ static int dvb_streaming_start(stream_t *stream, struct stream_priv_s *opts, int
 
 
 
-static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
+static int dvb_open(stream_t *stream, int mode, void *opts)
 {
 	// I don't force  the file format bacause, although it's almost always TS,
 	// there are some providers that stream an IP multicast with M$ Mpeg4 inside
@@ -739,7 +740,8 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 	stream->close = dvbin_close;
 	m_struct_free(&stream_opts, opts);
 
-	*file_format = DEMUXER_TYPE_MPEG_TS;
+	stream->demuxer = "lavf";
+        stream->lavf_type = "mpegts";
 
 	return STREAM_OK;
 }
@@ -855,10 +857,7 @@ dvb_config_t *dvb_get_config(void)
 
 
 const stream_info_t stream_info_dvb = {
-	"Dvb Input",
 	"dvbin",
-	"Nico",
-	"based on the code from ??? (probably Arpi)",
 	dvb_open,
 	{ "dvb", NULL },
 	&stream_opts,

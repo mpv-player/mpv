@@ -26,14 +26,13 @@
 #include "stream.h"
 #include "core/m_option.h"
 #include "core/m_struct.h"
-#include "demux/demux.h"
 
 #include "cookies.h"
 
 #include "core/bstr.h"
 #include "core/mp_talloc.h"
 
-static int open_f(stream_t *stream, int mode, void *opts, int *file_format);
+static int open_f(stream_t *stream, int mode, void *opts);
 static char **read_icy(stream_t *stream);
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
@@ -115,7 +114,7 @@ static int control(stream_t *s, int cmd, void *arg)
         // avio doesn't seem to support this - emulate it by reopening
         close_f(s);
         s->priv = NULL;
-        return open_f(s, STREAM_READ, NULL, &(int) {0});
+        return open_f(s, STREAM_READ, NULL);
     }
     }
     return STREAM_UNSUPPORTED;
@@ -132,7 +131,7 @@ static bool mp_avio_has_opts(AVIOContext *avio)
 
 static const char * const prefix[] = { "lavf://", "ffmpeg://" };
 
-static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
+static int open_f(stream_t *stream, int mode, void *opts)
 {
     int flags = 0;
     AVIOContext *avio = NULL;
@@ -163,7 +162,7 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
          * stream layer. demux_lavf will do all the real work.
          */
         stream->seek = NULL;
-        *file_format = DEMUXER_TYPE_LAVF;
+        stream->demuxer = "lavf";
         stream->lavf_type = "rtsp";
         return STREAM_OK;
     }
@@ -216,14 +215,13 @@ static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
     char *rtmp[] = {"rtmp:", "rtmpt:", "rtmpe:", "rtmpte:", "rtmps:"};
     for (int i = 0; i < FF_ARRAY_ELEMS(rtmp); i++)
         if (!strncmp(filename, rtmp[i], strlen(rtmp[i]))) {
-            *file_format = DEMUXER_TYPE_LAVF;
+            stream->demuxer = "lavf";
             stream->lavf_type = "flv";
         }
     stream->priv = avio;
     int64_t size = avio_size(avio);
     if (size >= 0)
         stream->end_pos = size;
-    stream->type = STREAMTYPE_FILE;
     stream->seek = seek;
     if (!avio->seekable)
         stream->seek = NULL;
@@ -307,10 +305,7 @@ done:
 }
 
 const stream_info_t stream_info_ffmpeg = {
-  "FFmpeg",
   "ffmpeg",
-  "",
-  "",
   open_f,
   { "lavf", "ffmpeg", "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh",
     "mmshttp", "udp", "ftp", "rtp", "httpproxy", NULL },

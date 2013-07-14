@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Original author: Albeu
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -23,18 +25,14 @@
 
 #include "stream.h"
 
-static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
-  stream->type = STREAMTYPE_DUMMY;
-
+static int open_s(stream_t *stream,int mode, void* opts)
+{
   return 1;
 }
 
 
 const stream_info_t stream_info_null = {
-  "Null stream",
   "null",
-  "Albeu",
-  "",
   open_s,
   { "null", NULL },
   NULL,

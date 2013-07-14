@@ -21,6 +21,8 @@
 #include <unistd.h>
 #include <assert.h>
 
+#include <libavutil/mem.h>
+
 #include "demux/codec_tags.h"
 
 #include "config.h"
@@ -53,15 +55,6 @@ static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
         return 0;
     }
 
-    /* allocate audio in buffer: */
-    if (sh_audio->audio_in_minsize > 0) {
-        sh_audio->a_in_buffer_size = sh_audio->audio_in_minsize;
-        mp_tmsg(MSGT_DECAUDIO, MSGL_V,
-                "dec_audio: Allocating %d bytes for input buffer.\n",
-                sh_audio->a_in_buffer_size);
-        sh_audio->a_in_buffer = av_mallocz(sh_audio->a_in_buffer_size);
-    }
-
     const int base_size = 65536;
     // At least 64 KiB plus rounding up to next decodable unit size
     sh_audio->a_buffer_size = base_size + sh_audio->audio_out_minsize;
@@ -91,9 +84,6 @@ static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
         return 0;
     }
 
-    if (!sh_audio->o_bps)
-        sh_audio->o_bps = sh_audio->channels.num * sh_audio->samplerate
-                          * sh_audio->samplesize;
     return 1;
 }
 
@@ -157,12 +147,9 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char *audio_decoders)
         mp_msg(MSGT_DECAUDIO, MSGL_INFO, "Selected audio codec: %s\n",
                sh_audio->gsh->decoder_desc);
         mp_msg(MSGT_DECAUDIO, MSGL_V,
-               "AUDIO: %d Hz, %d ch, %s, %3.1f kbit/%3.2f%% (ratio: %d->%d)\n",
+               "AUDIO: %d Hz, %d ch, %s\n",
                sh_audio->samplerate, sh_audio->channels.num,
-               af_fmt2str_short(sh_audio->sample_format),
-               sh_audio->i_bps * 8 * 0.001,
-               ((float) sh_audio->i_bps / sh_audio->o_bps) * 100.0,
-               sh_audio->i_bps, sh_audio->o_bps);
+               af_fmt2str_short(sh_audio->sample_format));
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
                "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
                sh_audio->i_bps * 8, sh_audio->samplerate, sh_audio->channels.num);
@@ -192,7 +179,6 @@ void uninit_audio(sh_audio_t *sh_audio)
     talloc_free(sh_audio->gsh->decoder_desc);
     sh_audio->gsh->decoder_desc = NULL;
     av_freep(&sh_audio->a_buffer);
-    av_freep(&sh_audio->a_in_buffer);
 }
 
 
@@ -368,20 +354,8 @@ void decode_audio_prepend_bytes(struct bstr *outbuf, int count, int byte)
 
 void resync_audio_stream(sh_audio_t *sh_audio)
 {
-    sh_audio->a_in_buffer_len = 0;      // clear audio input buffer
     sh_audio->pts = MP_NOPTS_VALUE;
     if (!sh_audio->initialized)
         return;
     sh_audio->ad_driver->control(sh_audio, ADCTRL_RESYNC_STREAM, NULL);
-}
-
-void skip_audio_frame(sh_audio_t *sh_audio)
-{
-    if (!sh_audio->initialized)
-        return;
-    if (sh_audio->ad_driver->control(sh_audio, ADCTRL_SKIP_FRAME, NULL)
-        == CONTROL_TRUE)
-        return;
-    // default skip code:
-    ds_fill_buffer(sh_audio->ds);       // skip block
 }

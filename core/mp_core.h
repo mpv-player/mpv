@@ -172,6 +172,9 @@ typedef struct MPContext {
     /* We're starting playback from scratch or after a seek. Show first
      * video frame immediately and reinitialize sync. */
     bool restart_playback;
+    /* Set if audio should be timed to start with video frame after seeking,
+     * not set when e.g. playing cover art */
+    bool sync_audio_to_video;
     /* After playback restart (above) or audio stream change, adjust audio
      * stream by cutting samples or adding silence at the beginning to make
      * audio playback position match video position. */

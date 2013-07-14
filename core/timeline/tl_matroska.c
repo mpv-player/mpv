@@ -113,14 +113,6 @@ static char **find_files(const char *original_file, const char *suffix)
     return results;
 }
 
-static struct demuxer *open_demuxer(struct stream *stream,
-        struct MPContext *mpctx, char *filename, struct demuxer_params *params)
-{
-    return demux_open_withparams(&mpctx->opts, stream,
-                DEMUXER_TYPE_MATROSKA, NULL, mpctx->opts.audio_id,
-                mpctx->opts.video_id, mpctx->opts.sub_id, filename, params);
-}
-
 static int enable_cache(struct MPContext *mpctx, struct stream **stream,
                         struct demuxer **demuxer, struct demuxer_params *params)
 {
@@ -133,8 +125,7 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
     free_demuxer(*demuxer);
     free_stream(*stream);
 
-    int format = 0;
-    *stream = open_stream(filename, &mpctx->opts, &format);
+    *stream = stream_open(filename, &mpctx->opts);
     if (!*stream) {
         talloc_free(filename);
         return -1;
@@ -146,7 +137,7 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
                                 opts->stream_cache_min_percent,
                                 opts->stream_cache_seek_min_percent);
 
-    *demuxer = open_demuxer(*stream, mpctx, filename, params);
+    *demuxer = demux_open(*stream, "mkv", params, &mpctx->opts);
     if (!*demuxer) {
         talloc_free(filename);
         free_stream(*stream);
@@ -168,17 +159,16 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer **sources,
         .matroska_wanted_segment = segment,
         .matroska_was_valid = &was_valid,
     };
-    int format = 0;
-    struct stream *s = open_stream(filename, &mpctx->opts, &format);
+    struct stream *s = stream_open(filename, &mpctx->opts);
     if (!s)
         return false;
-    struct demuxer *d = open_demuxer(s, mpctx, filename, &params);
+    struct demuxer *d = demux_open(s, "mkv", &params, &mpctx->opts);
 
     if (!d) {
         free_stream(s);
         return was_valid;
     }
-    if (d->file_format == DEMUXER_TYPE_MATROSKA) {
+    if (d->type == DEMUXER_TYPE_MATROSKA) {
         for (int i = 1; i < num_sources; i++) {
             if (sources[i])
                 continue;

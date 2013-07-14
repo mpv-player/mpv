@@ -76,6 +76,7 @@ typedef struct {
 } dvb_config_t;
 
 typedef struct {
+        int fd;
 	int card;
 	int fe_fd;
 	int sec_fd;

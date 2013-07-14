@@ -217,27 +217,25 @@ static int decode_a_bit(sh_audio_t *sh, unsigned char *buf, int count)
 
         /* Feed the decoder. This will only fire from the second round on. */
         if (ret == MPG123_NEED_MORE) {
-            int incount;
-            double pts;
-            unsigned char *inbuf;
             /* Feed more input data. */
-            incount = ds_get_packet_pts(sh->ds, &inbuf, &pts);
-            if (incount <= 0)
+            struct demux_packet *pkt = demux_read_packet(sh->gsh);
+            if (!pkt)
                 break;          /* Apparently that's it. EOF. */
 
             /* Next bytes from that presentation time. */
-            if (pts != MP_NOPTS_VALUE) {
-                sh->pts       = pts;
+            if (pkt->pts != MP_NOPTS_VALUE) {
+                sh->pts       = pkt->pts;
                 sh->pts_bytes = 0;
             }
 
 #ifdef AD_MPG123_FRAMEWISE
             /* Have to use mpg123_feed() to avoid decoding here. */
-            ret = mpg123_feed(con->handle, inbuf, incount);
+            ret = mpg123_feed(con->handle, pkt->buffer, pkt->len);
 #else
             /* Do not use mpg123_feed(), added in later libmpg123 versions. */
-            ret = mpg123_decode(con->handle, inbuf, incount, NULL, 0, NULL);
+            ret = mpg123_decode(con->handle, pkt->buffer, pkt->len, NULL, 0, NULL);
 #endif
+            talloc_free(pkt);
             if (ret == MPG123_ERR)
                 break;
         }

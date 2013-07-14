@@ -19,31 +19,26 @@
 #include "config.h"
 
 #include "stream.h"
-#include "demux/demux.h"
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
 {
     return -1;
 }
 
-static int open_f(stream_t *stream, int mode, void *opts, int *file_format)
+static int open_f(stream_t *stream, int mode, void *opts)
 {
     if (mode != STREAM_READ)
         return STREAM_ERROR;
 
     stream->fill_buffer = fill_buffer;
     stream->type = STREAMTYPE_AVDEVICE;
+    stream->demuxer = "lavf";
 
-    *file_format = DEMUXER_TYPE_LAVF;
     return STREAM_OK;
 }
 
 const stream_info_t stream_info_avdevice = {
-    .info = "FFmpeg libavdevice",
     .name = "avdevice",
-    .author = "",
-    .comment =
-        "Force a libavformat/libavdevice demuxer with avdevice://demuxer:args",
     .open = open_f,
     .protocols = { "avdevice", "av", NULL },
 };
