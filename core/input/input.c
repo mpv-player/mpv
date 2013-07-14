@@ -1664,31 +1664,29 @@ static void read_events(struct input_ctx *ictx, int time)
         time = FFMIN(time, ictx->ar_delay);
     }
     time = FFMAX(time, 0);
-    ictx->got_new_events = false;
-    remove_dead_fds(ictx);
-    if (time) {
-        for (int i = 0; i < ictx->num_fds; i++) {
-            if (!ictx->fds[i].select)
-                read_fd(ictx, &ictx->fds[i]);
-        }
-    }
-    if (ictx->got_new_events)
-        time = 0;
 
-    input_wait_read(ictx, time);
-}
-
-/* To support blocking file descriptors we don't loop the read over
- * every source until it's known to be empty. Instead we use this wrapper
- * to run select() again.
- */
-static void read_all_fd_events(struct input_ctx *ictx, int time)
-{
     while (1) {
-        read_events(ictx, time);
+        if (ictx->got_new_events)
+            time = 0;
+        ictx->got_new_events = false;
+
+        remove_dead_fds(ictx);
+
+        if (time) {
+            for (int i = 0; i < ictx->num_fds; i++) {
+                if (!ictx->fds[i].select)
+                    read_fd(ictx, &ictx->fds[i]);
+            }
+        }
+
+        if (ictx->got_new_events)
+            time = 0;
+
+        input_wait_read(ictx, time);
+
+        // Read until all input FDs are empty
         if (!ictx->got_new_events)
-            return;
-        time = 0;
+            break;
     }
 }
 
@@ -1698,7 +1696,7 @@ static void read_all_events(struct input_ctx *ictx, int time)
 #ifdef CONFIG_COCOA
     cocoa_check_events();
 #endif
-    read_all_fd_events(ictx, time);
+    read_events(ictx, time);
 }
 
 int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
