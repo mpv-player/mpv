@@ -757,6 +757,9 @@ static int control(sh_video_t *sh, int cmd, void *arg)
         if (ctx->vo_initialized)
             mpcodecs_reconfig_vo(sh, &ctx->image_params);
         return true;
+    case VDCTRL_GET_PARAMS:
+        *(struct mp_image_params *)arg = ctx->image_params;
+        return ctx->vo_initialized ? true : CONTROL_NA;
     }
     return CONTROL_UNKNOWN;
 }
