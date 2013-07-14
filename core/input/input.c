@@ -474,7 +474,7 @@ struct input_fd {
     unsigned drop : 1;
     unsigned dead : 1;
     unsigned got_cmd : 1;
-    unsigned no_select : 1;
+    unsigned select : 1;
     // These fields are for the cmd fds.
     char *buffer;
     int pos, size;
@@ -699,7 +699,6 @@ static struct input_fd *mp_input_add_fd(struct input_ctx *ictx)
     struct input_fd *fd = &ictx->fds[ictx->num_fds];
     *fd = (struct input_fd){
         .fd = -1,
-        .no_select = 1,
     };
     ictx->num_fds++;
 
@@ -720,7 +719,7 @@ int mp_input_add_cmd_fd(struct input_ctx *ictx, int unix_fd, int select,
     if (!fd)
         return 0;
     fd->fd = unix_fd;
-    fd->no_select = !select;
+    fd->select = select;
     fd->read_cmd = read_func ? read_func : default_cmd_func;
     fd->close_func = close_func;
     return 1;
@@ -741,7 +740,7 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int unix_fd, int select,
     if (!fd)
         return 0;
     fd->fd = unix_fd;
-    fd->no_select = !select;
+    fd->select = select;
     fd->read_key = read_func;
     fd->close_func = close_func;
     fd->ctx = ctx;
@@ -1619,7 +1618,7 @@ static void input_wait_read(struct input_ctx *ictx, int time)
     FD_ZERO(&fds);
     int max_fd = 0;
     for (int i = 0; i < ictx->num_fds; i++) {
-        if (ictx->fds[i].no_select)
+        if (!ictx->fds[i].select)
             continue;
         if (ictx->fds[i].fd > max_fd)
             max_fd = ictx->fds[i].fd;
@@ -1636,7 +1635,7 @@ static void input_wait_read(struct input_ctx *ictx, int time)
         FD_ZERO(&fds);
     }
     for (int i = 0; i < ictx->num_fds; i++) {
-        if (!ictx->fds[i].no_select && !FD_ISSET(ictx->fds[i].fd, &fds))
+        if (ictx->fds[i].select && !FD_ISSET(ictx->fds[i].fd, &fds))
             continue;
         read_fd(ictx, &ictx->fds[i]);
     }
@@ -1669,7 +1668,7 @@ static void read_events(struct input_ctx *ictx, int time)
     remove_dead_fds(ictx);
     if (time) {
         for (int i = 0; i < ictx->num_fds; i++) {
-            if (ictx->fds[i].no_select)
+            if (!ictx->fds[i].select)
                 read_fd(ictx, &ictx->fds[i]);
         }
     }
