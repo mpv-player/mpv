@@ -101,34 +101,47 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
     return 0;
 }
 
-void get_detected_video_colorspace(struct sh_video *sh, struct mp_csp_details *csp)
+// Return the effective video image parameters. Might be different from VO,
+// and might be different from actual video bitstream/container params.
+// This is affected by user-specified overrides (aspect, colorspace...).
+bool get_video_params(struct sh_video *sh, struct mp_image_params *p)
 {
     struct MPOpts *opts = sh->opts;
 
-    csp->format = opts->requested_colorspace;
-    csp->levels_in = opts->requested_input_range;
-    csp->levels_out = opts->requested_output_range;
+    if (!sh->vf_input)
+        return false;
 
-    if (csp->format == MP_CSP_AUTO)
-        csp->format = sh->colorspace;
-    if (csp->format == MP_CSP_AUTO)
-        csp->format = mp_csp_guess_colorspace(sh->disp_w, sh->disp_h);
+    *p = *sh->vf_input;
 
-    if (csp->levels_in == MP_CSP_LEVELS_AUTO)
-        csp->levels_in = sh->color_range;
-    if (csp->levels_in == MP_CSP_LEVELS_AUTO)
-        csp->levels_in = MP_CSP_LEVELS_TV;
+    // Apply user overrides
+    if (opts->requested_colorspace != MP_CSP_AUTO)
+        p->colorspace = opts->requested_colorspace;
+    if (opts->requested_input_range != MP_CSP_LEVELS_AUTO)
+        p->colorlevels = opts->requested_input_range;
 
-    if (csp->levels_out == MP_CSP_LEVELS_AUTO)
-        csp->levels_out = MP_CSP_LEVELS_PC;
+    // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.)
+    mp_image_params_guess_csp(p);
+
+    return true;
 }
 
 void set_video_colorspace(struct sh_video *sh)
 {
+    struct MPOpts *opts = sh->opts;
     struct vf_instance *vf = sh->vfilter;
 
-    struct mp_csp_details requested;
-    get_detected_video_colorspace(sh, &requested);
+    struct mp_image_params params;
+    if (!get_video_params(sh, &params))
+        return;
+
+    struct mp_csp_details requested = {
+        .format = params.colorspace,
+        .levels_in = params.colorlevels,
+        .levels_out = opts->requested_output_range,
+    };
+    if (requested.levels_out == MP_CSP_LEVELS_AUTO)
+        requested.levels_out = MP_CSP_LEVELS_PC;
+
     vf_control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
 
     struct mp_csp_details actual = MP_CSP_DETAILS_DEFAULTS;
@@ -153,7 +166,6 @@ void set_video_colorspace(struct sh_video *sh)
 
 void resync_video_stream(sh_video_t *sh_video)
 {
-    const struct vd_functions *vd = sh_video->vd_driver;
     vd_control(sh_video, VDCTRL_RESYNC_STREAM, NULL);
     sh_video->prev_codec_reordered_pts = MP_NOPTS_VALUE;
     sh_video->prev_sorted_pts = MP_NOPTS_VALUE;

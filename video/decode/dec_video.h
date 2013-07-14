@@ -37,8 +37,8 @@ int get_video_quality_max(sh_video_t *sh_video);
 
 int get_video_colors(sh_video_t *sh_video, const char *item, int *value);
 int set_video_colors(sh_video_t *sh_video, const char *item, int value);
-struct mp_csp_details;
-void get_detected_video_colorspace(struct sh_video *sh, struct mp_csp_details *csp);
+struct mp_image_params;
+bool get_video_params(struct sh_video *sh, struct mp_image_params *p);
 void set_video_colorspace(struct sh_video *sh);
 void resync_video_stream(sh_video_t *sh_video);
 void video_reinit_vo(struct sh_video *sh_video);

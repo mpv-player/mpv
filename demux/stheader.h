@@ -127,9 +127,8 @@ typedef struct sh_video {
     float aspect;         // aspect ratio stored in the file (for prescaling)
     float stream_aspect;  // aspect ratio in media headers (DVD IFO files)
     int i_bps;            // == bitrate  (compressed bytes/sec)
-    int disp_w, disp_h;   // display size (filled by demuxer)
-    int colorspace;       // mp_csp
-    int color_range;      // mp_csp_levels
+    int disp_w, disp_h;   // display size (filled by demuxer or decoder)
+    struct mp_image_params *vf_input; // video filter input params
     // output driver/filters: (set by libmpcodecs core)
     struct vf_instance *vfilter;  // video filter chain
     const struct vd_functions *vd_driver;
