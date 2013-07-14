@@ -174,6 +174,31 @@
 
     Enabled by default.
 
+``--ass-vsfilter-color-compat=<basic|full|force-601|no``
+    Mangle colors like (xy-)vsfilter do (default: basic). Historically, VSFilter
+    was not colorspace aware. This was no problem as long as the colorspace
+    used for SD video (BT.601) was used. But when everything switched to HD
+    (BT.709), VSFilter was still converting RGB colors to BT.601, rendered
+    them into the video frame, and handled the frame to the video output, which
+    would use BT.709 for conversion to RGB. The result were mangled subtitle
+    colors. Later on, bad hacks were added on top of the ASS format to control
+    how colors are to be mangled.
+
+    :basic: Handle only BT.601->BT.709 mangling, if the subtitles seem to
+            indicate that this is required (default).
+    :full:  Handle the full ``YCbCr Matrix`` header with all video colorspaces
+            supported by libass and mpv. This might lead to bad breakages in
+            corner cases and is not strictly needed for compatibility
+            (hopefully), which is why this is not default.
+    :force-601: Force BT.601->BT.709 mangling, regardless of subtitle headers
+            or video colorspace.
+    :no:    Disable color mangling completely. All colors are RGB.
+
+    Choosing anything other than ``no`` will make the subtitle color depend on
+    the video colorspace, and it's for example in theory not possible to reuse
+    a subtitle script with another video file. The ``--ass-style-override``
+    option doesn't affect how this option is interpreted.
+
 ``--audio-demuxer=<[+]name>``
     Use this audio demuxer type when using ``--audiofile``. Use a '+' before the
     name to force it; this will skip some checks. Give the demuxer name as

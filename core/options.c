@@ -500,6 +500,8 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("ass-line-spacing", ass_line_spacing, 0, -1000, 1000),
     OPT_FLAG("ass-use-margins", ass_use_margins, 0),
     OPT_FLAG("ass-vsfilter-aspect-compat", ass_vsfilter_aspect_compat, 0),
+    OPT_CHOICE("ass-vsfilter-color-compat", ass_vsfilter_color_compat, 0,
+               ({"no", 0}, {"basic", 1}, {"full", 2}, {"force-601", 3})),
     OPT_FLAG("embeddedfonts", use_embedded_fonts, 0),
     OPT_STRINGLIST("ass-force-style", ass_force_style_list, 0),
     OPT_STRING("ass-styles", ass_styles_file, 0),
@@ -791,6 +793,7 @@ const struct MPOpts mp_default_opts = {
 #endif
     .sub_scale = 1,
     .ass_vsfilter_aspect_compat = 1,
+    .ass_vsfilter_color_compat = 1,
     .ass_style_override = 1,
     .use_embedded_fonts = 1,
     .suboverlap_enabled = 0,

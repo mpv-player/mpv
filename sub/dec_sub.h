@@ -18,6 +18,7 @@ struct sd;
 
 enum sd_ctrl {
     SD_CTRL_SUB_STEP,
+    SD_CTRL_SET_VIDEO_PARAMS,
 };
 
 struct dec_sub *sub_create(struct MPOpts *opts);

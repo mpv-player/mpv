@@ -1746,6 +1746,12 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
     assert(track && sh_sub);
     struct dec_sub *dec_sub = sh_sub->dec_sub;
 
+    if (mpctx->sh_video) {
+        struct mp_image_params params;
+        if (get_video_params(mpctx->sh_video, &params) > 0)
+            sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &params);
+    }
+
     mpctx->osd->video_offset = track->under_timeline ? mpctx->video_offset : 0;
 
     double refpts_s = refpts_tl - mpctx->osd->video_offset;
