@@ -47,6 +47,18 @@ If you are running Mac OSX and using homebrew we provide [homebrew-mpv][homebrew
 to date formula that compiles mpv with sensible dependencies and defaults for
 OSX.
 
+configure --enable-* parameters
+-------------------------------
+
+The --enable-* parameters unconditionally force options on, completely
+skipping autodetection. This behavior is unlike what you may be used to from
+autoconf-based configure scripts that can decide to override you. This greater
+level of control comes at a price. You may have to provide the correct compiler
+and linker flags yourself.
+If you used one of these options and experience a compilation or
+linking failure, make sure you have passed the necessary compiler/linker flags
+to configure.
+
 Bug reports
 -----------
 
