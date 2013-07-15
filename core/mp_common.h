@@ -34,6 +34,9 @@
 
 #define ROUND(x) ((int)((x) < 0 ? (x) - 0.5 : (x) + 0.5))
 
+#define MPMAX(a, b) ((a) > (b) ? (a) : (b))
+#define MPMIN(a, b) ((a) > (b) ? (b) : (a))
+
 #define CONTROL_OK 1
 #define CONTROL_TRUE 1
 #define CONTROL_FALSE 0
