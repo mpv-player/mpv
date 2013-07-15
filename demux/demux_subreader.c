@@ -1326,8 +1326,11 @@ static struct stream *read_probe_stream(struct stream *s, int max)
 
 #define PROBE_SIZE FFMIN(32 * 1024, STREAM_MAX_BUFFER_SIZE)
 
-static int d_check_file(struct demuxer *demuxer)
+static int d_open_file(struct demuxer *demuxer, enum demux_check check)
 {
+    if (check > DEMUX_CHECK_REQUEST)
+        return -1;
+
     struct stream *ps = read_probe_stream(demuxer->stream, PROBE_SIZE);
 
     struct subreader sr;
@@ -1336,11 +1339,11 @@ static int d_check_file(struct demuxer *demuxer)
     free_stream(ps);
 
     if (!res)
-        return 0;
+        return -1;
 
     sub_data *sd = sub_read_file(demuxer->stream, &sr);
     if (!sd)
-        return 0;
+        return -1;
 
     struct priv *p = talloc_zero(demuxer, struct priv);
     demuxer->priv = p;
@@ -1353,12 +1356,10 @@ static int d_check_file(struct demuxer *demuxer)
     add_sub_data(demuxer, sd);
     subdata_free(sd);
 
-    demuxer->accurate_seek = true;
-
-    return DEMUXER_TYPE_SUBREADER;
+    return 0;
 }
 
-static int d_fill_buffer(struct demuxer *demuxer, struct demux_stream *ds)
+static int d_fill_buffer(struct demuxer *demuxer)
 {
     struct priv *p = demuxer->priv;
     struct demux_packet *dp = demux_packet_list_fill(p->pkts, p->num_pkts,
@@ -1377,8 +1378,6 @@ static int d_control(struct demuxer *demuxer, int cmd, void *arg)
 {
     struct priv *p = demuxer->priv;
     switch (cmd) {
-    case DEMUXER_CTRL_CORRECT_PTS:
-        return DEMUXER_CTRL_OK;
     case DEMUXER_CTRL_GET_TIME_LENGTH:
         *((double *) arg) = demux_packet_list_duration(p->pkts, p->num_pkts);
         return DEMUXER_CTRL_OK;
@@ -1388,14 +1387,9 @@ static int d_control(struct demuxer *demuxer, int cmd, void *arg)
 }
 
 const struct demuxer_desc demuxer_desc_subreader = {
-    .info = "Deprecated MPlayer subtitle reader",
     .name = "subreader",
-    .shortdesc = "Deprecated Subreader",
-    .author = "",
-    .comment = "",
-    .type = DEMUXER_TYPE_SUBREADER,
-    .safe_check = 1,
-    .check_file = d_check_file,
+    .desc = "Deprecated MPlayer subreader",
+    .open = d_open_file,
     .fill_buffer = d_fill_buffer,
     .seek = d_seek,
     .control = d_control,

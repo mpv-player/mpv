@@ -134,7 +134,7 @@ static int cond_timed_wait(pthread_cond_t *cond, pthread_mutex_t *mutex,
                            double timeout)
 {
     struct timespec ts;
-#if _POSIX_TIMERS > 0
+#if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0
     clock_gettime(CLOCK_REALTIME, &ts);
 #else
     struct timeval tv;

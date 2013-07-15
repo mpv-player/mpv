@@ -93,6 +93,7 @@ typedef struct MPOpts {
     int load_config;
     int use_filedir_conf;
     int stream_cache_size;
+    int stream_cache_def_size;
     float stream_cache_min_percent;
     float stream_cache_seek_min_percent;
     int stream_cache_pause;
@@ -106,7 +107,6 @@ typedef struct MPOpts {
     float hr_seek_demuxer_offset;
     float audio_delay;
     float default_max_pts_correction;
-    int ignore_start;
     int autosync;
     int softsleep;
     int frame_dropping;
@@ -154,13 +154,13 @@ typedef struct MPOpts {
     char *demuxer_name;
     char *audio_demuxer_name;
     char *sub_demuxer_name;
-    int extension_parsing;
     int mkv_subtitle_preroll;
 
     struct image_writer_opts *screenshot_image_opts;
     char *screenshot_template;
 
     double force_fps;
+    int index_mode; // -1=untouched  0=don't use index  1=use (generate) index
 
     struct mp_chmap audio_output_channels;
     int audio_output_format;
@@ -191,6 +191,8 @@ typedef struct MPOpts {
     float ass_line_spacing;
     int ass_use_margins;
     int ass_vsfilter_aspect_compat;
+    int ass_vsfilter_color_compat;
+    int ass_vsfilter_blur_compat;
     int use_embedded_fonts;
     char **ass_force_style_list;
     char *ass_styles_file;
@@ -224,6 +226,7 @@ typedef struct MPOpts {
         char *format;
         char *cryptokey;
         char *avopt;
+        int genptsmode;
     } lavfdopts;
 
     struct input_conf {

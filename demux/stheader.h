@@ -21,10 +21,7 @@
 
 #include <stdbool.h>
 
-#include "codec_tags.h"
-
 #include "audio/chmap.h"
-#include "aviheader.h"
 #include "ms_hdr.h"
 struct MPOpts;
 struct demuxer;
@@ -43,8 +40,6 @@ struct sh_stream {
     struct demuxer *demuxer;
     // Index into demuxer->streams.
     int index;
-    // Index into stream array (currently one array per type, e.g. a_streams).
-    int stream_index;
     // Demuxer/format specific ID. Corresponds to the stream IDs as encoded in
     // some file formats (e.g. MPEG), or an index chosen by demux.c.
     int demuxer_id;
@@ -64,26 +59,26 @@ struct sh_stream {
     char *title;
     char *lang;                 // language code
     bool default_track;         // container default track flag
-    bool attached_picture;      // stream is a picture (such as album art)
+
+    // stream is a picture (such as album art)
+    struct demux_packet *attached_picture;
 
     // Human readable description of the running decoder, or NULL
     char *decoder_desc;
 
     // shouldn't exist type of stuff
     struct MPOpts *opts;
-};
 
+    // Internal to demux.c
+    struct demux_stream *ds;
+};
 
 #define SH_COMMON                                                       \
     struct sh_stream *gsh;                                              \
     struct MPOpts *opts;                                                \
-    struct demux_stream *ds;                                            \
     /* usually a FourCC, exact meaning depends on gsh->format */        \
     unsigned int format;                                                \
     int initialized;                                                    \
-    /* number of seconds stream should be delayed                       \
-     * (according to dwStart or similar) */                             \
-    float stream_delay;                                                 \
     /* audio: last known pts value in output from decoder               \
      * video: predicted/interpolated PTS of the current frame */        \
     double pts;                                                         \
@@ -98,13 +93,7 @@ typedef struct sh_audio {
     int container_out_samplerate;
     int samplesize;
     struct mp_chmap channels;
-    int o_bps; // == samplerate*samplesize*channels.num   (uncompr. bytes/sec)
     int i_bps; // == bitrate  (compressed bytes/sec)
-    // in buffers:
-    int audio_in_minsize;   // initial size to allocate for a_in_buffer if any
-    char *a_in_buffer;      // input buffer used by some decoders
-    int a_in_buffer_len;
-    int a_in_buffer_size;
     // decoder buffers:
     int audio_out_minsize;  // minimal output from decoder may be this much
     char *a_buffer;         // buffer for decoder output
@@ -113,21 +102,15 @@ typedef struct sh_audio {
     struct af_stream *afilter;          // the audio filter stream
     const struct ad_functions *ad_driver;
     // win32-compatible codec parameters:
-    AVIStreamHeader audio;
     WAVEFORMATEX *wf;
     // note codec extradata may be either under "wf" or "codecdata"
     unsigned char *codecdata;
     int codecdata_len;
     int pts_bytes;   // bytes output by decoder after last known pts
-    /* things needed for parsing */
-    bool needs_parsing;
-    struct AVCodecContext *avctx;
-    struct AVCodecParserContext *parser;
 } sh_audio_t;
 
 typedef struct sh_video {
     SH_COMMON
-    double i_pts;   // PTS for the _next_ I/P frame (internal mpeg demuxing)
     float next_frame_time;
     double last_pts;
     double buffered_pts[32];
@@ -141,19 +124,16 @@ typedef struct sh_video {
     int pts_assoc_mode;
     // output format: (set by demuxer)
     float fps;            // frames per second (set only if constant fps)
-    float frametime;      // 1/fps
     float aspect;         // aspect ratio stored in the file (for prescaling)
     float stream_aspect;  // aspect ratio in media headers (DVD IFO files)
     int i_bps;            // == bitrate  (compressed bytes/sec)
-    int disp_w, disp_h;   // display size (filled by demuxer)
-    int colorspace;       // mp_csp
-    int color_range;      // mp_csp_levels
+    int disp_w, disp_h;   // display size (filled by demuxer or decoder)
+    struct mp_image_params *vf_input; // video filter input params
     // output driver/filters: (set by libmpcodecs core)
     struct vf_instance *vfilter;  // video filter chain
     const struct vd_functions *vd_driver;
     int vf_initialized;   // -1 failed, 0 not done, 1 done
     // win32-compatible codec parameters:
-    AVIStreamHeader video;
     BITMAPINFOHEADER *bih;
 } sh_video_t;
 
@@ -166,21 +146,5 @@ typedef struct sh_sub {
     struct ass_track *track;    // loaded by libass
     struct dec_sub *dec_sub;    // decoder context
 } sh_sub_t;
-
-// demuxer.c:
-#define new_sh_audio(d, i) new_sh_audio_aid(d, i, i)
-struct sh_audio *new_sh_audio_aid(struct demuxer *demuxer, int id, int aid);
-#define new_sh_video(d, i) new_sh_video_vid(d, i, i)
-struct sh_video *new_sh_video_vid(struct demuxer *demuxer, int id, int vid);
-#define new_sh_sub(d, i) new_sh_sub_sid(d, i, i)
-struct sh_sub *new_sh_sub_sid(struct demuxer *demuxer, int id, int sid);
-struct sh_sub *new_sh_sub_sid_lang(struct demuxer *demuxer, int id, int sid,
-                                   const char *lang);
-struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
-
-// video.c:
-int video_read_properties(struct sh_video *sh_video);
-int video_read_frame(struct sh_video *sh_video, float *frame_time_ptr,
-                     unsigned char **start, int force_fps);
 
 #endif /* MPLAYER_STHEADER_H */

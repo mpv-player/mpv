@@ -824,7 +824,8 @@ static const radio_driver_t* radio_drivers[]={
  * Stream initialization
  * \return STREAM_OK if success, STREAM_ERROR otherwise
  */
-static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
+static int open_s(stream_t *stream,int mode, void* opts)
+{
     radio_priv_t* priv;
     float frequency=0;
     int i;
@@ -875,7 +876,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
     stream->type = STREAMTYPE_RADIO;
     /* using rawaudio demuxer */
-    *file_format =  DEMUXER_TYPE_RAWAUDIO;
+    stream->demuxer = "lavf";
     stream->flags = STREAM_READ;
 
     priv->radio_fd=-1;
@@ -967,10 +968,7 @@ static void close_s(struct stream *stream){
 }
 
 const stream_info_t stream_info_radio = {
-    "Radio stream",
-    "Radio",
-    "Vladimir Voroshilov",
-    "In development",
+    "radio",
     open_s,
     { "radio", NULL },
     &stream_opts,

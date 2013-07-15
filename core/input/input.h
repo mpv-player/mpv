@@ -174,9 +174,6 @@ int mp_input_add_cmd_fd(struct input_ctx *ictx, int fd, int select,
                         int read_func(int fd, char *dest, int size),
                         int close_func(int fd));
 
-// This removes a cmd driver, you usually don't need to use it.
-void mp_input_rm_cmd_fd(struct input_ctx *ictx, int fd);
-
 /* The args are similar to the cmd version above, except you must give
  * a read_func, and it should return key codes (ASCII plus keycodes.h).
  */

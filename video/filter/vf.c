@@ -109,7 +109,9 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_sub,
     &vf_info_yadif,
     &vf_info_stereo3d,
+#ifdef CONFIG_DLOPEN
     &vf_info_dlopen,
+#endif
     NULL
 };
 
@@ -120,6 +122,11 @@ const m_obj_list_t vf_obj_list = {
     M_ST_OFF(vf_info_t, info),
     M_ST_OFF(vf_info_t, opts)
 };
+
+int vf_control(struct vf_instance *vf, int cmd, void *arg)
+{
+    return vf->control(vf, cmd, arg);
+}
 
 // Get a new image for filter output, with size and pixel format according to
 // the last vf_config call.

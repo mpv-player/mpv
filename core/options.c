@@ -25,6 +25,7 @@
 
 #include <stddef.h>
 #include <sys/types.h>
+#include <limits.h>
 
 #include "core/options.h"
 #include "config.h"
@@ -333,6 +334,9 @@ const m_option_t mp_opts[] = {
                       ({"no", 0},
                        {"auto", -1}),
                       OPTDEF_INT(-1)),
+    OPT_CHOICE_OR_INT("cache-default", stream_cache_def_size, 0, 32, 0x7fffffff,
+                      ({"no", 0}),
+                      OPTDEF_INT(320)),
     OPT_FLOATRANGE("cache-min", stream_cache_min_percent, 0, 0, 99),
     OPT_FLOATRANGE("cache-seek-min", stream_cache_seek_min_percent, 0, 0, 99),
     OPT_CHOICE_OR_INT("cache-pause", stream_cache_pause, 0,
@@ -371,12 +375,9 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("pause", pause, 0),
     OPT_FLAG("keep-open", keep_open, 0),
 
-    // AVI specific: force non-interleaved mode
-    {"avi-ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-
     // AVI and Ogg only: (re)build index at startup
-    {"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1, NULL},
-    {"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2, NULL},
+    OPT_FLAG_CONSTANTS("idx", index_mode, 0, -1, 1),
+    OPT_FLAG_STORE("forceidx", index_mode, 0, 2),
 
     // select audio/video/subtitle stream
     OPT_TRACKCHOICE("aid", audio_id),
@@ -403,7 +404,6 @@ const m_option_t mp_opts[] = {
     OPT_STRING("demuxer", demuxer_name, 0),
     OPT_STRING("audio-demuxer", audio_demuxer_name, 0),
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
-    OPT_FLAG("extbased", extension_parsing, 0),
 
     {"mf", (void *) mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
 #ifdef CONFIG_RADIO
@@ -421,9 +421,6 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- a-v sync options --------------------
 
-    // AVI specific: A-V sync mode (bps vs. interleaving)
-    {"bps", &pts_from_bps, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-
     // set A-V sync correction speed (0=disables it):
     OPT_FLOATRANGE("mc", default_max_pts_correction, 0, 0, 100),
 
@@ -436,9 +433,6 @@ const m_option_t mp_opts[] = {
 
     // set a-v distance
     OPT_FLOATRANGE("audio-delay", audio_delay, 0, -100.0, 100.0),
-
-    // ignore header-specified delay (dwStart)
-    OPT_FLAG("ignore-start", ignore_start, 0),
 
 // ------------------------- codec/vfilter options --------------------
 
@@ -508,6 +502,9 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("ass-line-spacing", ass_line_spacing, 0, -1000, 1000),
     OPT_FLAG("ass-use-margins", ass_use_margins, 0),
     OPT_FLAG("ass-vsfilter-aspect-compat", ass_vsfilter_aspect_compat, 0),
+    OPT_CHOICE("ass-vsfilter-color-compat", ass_vsfilter_color_compat, 0,
+               ({"no", 0}, {"basic", 1}, {"full", 2}, {"force-601", 3})),
+    OPT_FLAG("ass-vsfilter-blur-compat", ass_vsfilter_blur_compat, 0),
     OPT_FLAG("embeddedfonts", use_embedded_fonts, 0),
     OPT_STRINGLIST("ass-force-style", ass_force_style_list, 0),
     OPT_STRING("ass-styles", ass_styles_file, 0),
@@ -787,7 +784,6 @@ const struct MPOpts mp_default_opts = {
     .sub_visibility = 1,
     .sub_pos = 100,
     .sub_speed = 1.0,
-    .extension_parsing = 1,
     .audio_output_channels = MP_CHMAP_INIT_STEREO,
     .audio_output_format = -1,  // AF_FORMAT_UNKNOWN
     .playback_speed = 1.,
@@ -800,11 +796,15 @@ const struct MPOpts mp_default_opts = {
 #endif
     .sub_scale = 1,
     .ass_vsfilter_aspect_compat = 1,
+    .ass_vsfilter_color_compat = 1,
+    .ass_vsfilter_blur_compat = 1,
     .ass_style_override = 1,
     .use_embedded_fonts = 1,
     .suboverlap_enabled = 0,
 
     .hwdec_codecs = "all",
+
+    .index_mode = -1,
 
     .ad_lavc_param = {
         .ac3drc = 1.,

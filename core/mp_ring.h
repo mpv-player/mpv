@@ -49,7 +49,7 @@ int mp_ring_read(struct mp_ring *buffer, unsigned char *dest, int len);
 /**
  * Read data from the ringbuffer
  *
- * This function behaves similarly to `av_fifo_generic_read` and was  actually
+ * This function behaves similarly to `av_fifo_generic_read` and was actually
  * added for compatibility with code that was written for it.
  * This function will drain the returned amount of bytes from the ringbuffer
  * so you don't have to handle that in inside `func`.
@@ -57,11 +57,16 @@ int mp_ring_read(struct mp_ring *buffer, unsigned char *dest, int len);
  * buffer: target ringbuffer instance
  * ctx:    context for the callback function
  * len:    maximum number of bytes to read
- * func:   callback function to customize reading behaviour
+ * func:   callback function to customize reading behaviour. It will be called
+ *         by `mp_ring_read_cb` with the following parameters:
+ *           ctx: context data provided to `mp_ring_read_cb`
+ *           src: source buffer to read from
+ *           len: the *exact* amount of bytes to read. These will be drained
+ *                by the ring after this callback is called.
  * return: number of bytes read
  */
 int mp_ring_read_cb(struct mp_ring *buffer, void *ctx, int len,
-        void (*func)(void*, void*, int));
+        void (*func)(void *ctx, void *src, int len));
 
 /**
  * Write data to the ringbuffer
@@ -101,7 +106,7 @@ int mp_ring_available(struct mp_ring *buffer);
  * Get the total size
  *
  * buffer: target ringbuffer instance
- * return: total ringbuffer size
+ * return: total ringbuffer size in bytes
  */
 int mp_ring_size(struct mp_ring *buffer);
 

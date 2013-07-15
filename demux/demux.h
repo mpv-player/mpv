@@ -32,53 +32,15 @@
 
 struct MPOpts;
 
-#if (__GNUC__ >= 3)
-#define likely(x) __builtin_expect((x) != 0, 1)
-#define unlikely(x) __builtin_expect((x) != 0, 0)
-#else
-#define likely(x) (x)
-#define unlikely(x) (x)
-#endif
-
 #define MAX_PACKS 4096
 #define MAX_PACK_BYTES 0x8000000  // 128 MiB
 
 enum demuxer_type {
-    DEMUXER_TYPE_UNKNOWN = 0,
-    DEMUXER_TYPE_MPEG_PS,
-    DEMUXER_TYPE_AVI,
-    DEMUXER_TYPE_AVI_NI,
-    DEMUXER_TYPE_AVI_NINI,
-    DEMUXER_TYPE_ASF,
+    DEMUXER_TYPE_GENERIC = 0,
     DEMUXER_TYPE_TV,
-    DEMUXER_TYPE_Y4M,
-    DEMUXER_TYPE_MF,
-    DEMUXER_TYPE_RAWAUDIO,
-    DEMUXER_TYPE_RAWVIDEO,
-    DEMUXER_TYPE_MPEG_ES,
-    DEMUXER_TYPE_MPEG4_ES,
-    DEMUXER_TYPE_H264_ES,
-    DEMUXER_TYPE_MPEG_PES,
-    DEMUXER_TYPE_MPEG_GXF,
-    DEMUXER_TYPE_GIF,
-    DEMUXER_TYPE_MPEG_TS,
     DEMUXER_TYPE_MATROSKA,
-    DEMUXER_TYPE_LAVF,
-    DEMUXER_TYPE_NSV,
-    DEMUXER_TYPE_AVS,
-    DEMUXER_TYPE_AAC,
-    DEMUXER_TYPE_MPC,
-    DEMUXER_TYPE_MNG,
     DEMUXER_TYPE_EDL,
     DEMUXER_TYPE_CUE,
-    DEMUXER_TYPE_SUBREADER,
-    DEMUXER_TYPE_LIBASS,
-
-    /* Values after this are for internal use and can not be selected
-     * as demuxer type by the user (-demuxer option). */
-    DEMUXER_TYPE_END,
-
-    DEMUXER_TYPE_PLAYLIST,
 };
 
 enum timestamp_type {
@@ -101,8 +63,7 @@ enum timestamp_type {
 #define DEMUXER_CTRL_RESYNC 13
 #define DEMUXER_CTRL_SWITCH_VIDEO 14
 #define DEMUXER_CTRL_IDENTIFY_PROGRAM 15
-#define DEMUXER_CTRL_CORRECT_PTS 16
-#define DEMUXER_CTRL_AUTOSELECT_SUBTITLE 17
+#define DEMUXER_CTRL_CORRECT_PTS 16 // int* (write 1 for ok, 0 for no)
 
 #define SEEK_ABSOLUTE (1 << 0)
 #define SEEK_FACTOR   (1 << 1)
@@ -110,49 +71,26 @@ enum timestamp_type {
 #define SEEK_BACKWARD (1 << 3)
 #define SEEK_SUBPREROLL (1 << 4)
 
+// Strictness of the demuxer open format check.
+// demux.c will try by default: NORMAL, UNSAFE (in this order)
+// Using "-demuxer format" will try REQUEST
+// Using "-demuxer +format" will try FORCE
+// REQUEST can be used as special value for raw demuxers which have no file
+// header check; then they should fail if check!=FORCE && check!=REQUEST.
+//
+// In general, the list is sorted from weakest check to normal check.
+// You can use relation operators to compare the check level.
+enum demux_check {
+    DEMUX_CHECK_FORCE,  // force format if possible
+    DEMUX_CHECK_UNSAFE, // risky/fuzzy detection
+    DEMUX_CHECK_REQUEST,// requested by user or stream implementation
+    DEMUX_CHECK_NORMAL, // normal, safe detection
+};
+
 // demux_lavf can pass lavf buffers using FF_INPUT_BUFFER_PADDING_SIZE instead
 #define MP_INPUT_BUFFER_PADDING_SIZE 16
 
-typedef struct demux_stream {
-    enum stream_type stream_type;
-    int buffer_pos;        // current buffer position
-    int buffer_size;       // current buffer size
-    unsigned char *buffer; // current buffer, never free() it, always use free_demux_packet(buffer_ref);
-    double pts;            // current buffer's pts
-    int pts_bytes;         // number of bytes read after last pts stamp
-    int eof;               // end of demuxed stream? (true if all buffer empty)
-    int64_t pos;               // position in the input stream (file)
-    int64_t dpos;              // position in the demuxed stream
-    int pack_no;           // serial number of packet
-    bool keyframe;         // keyframe flag of current packet
-//---------------
-    int fill_count;        // number of unsuccessful tries to get a packet
-    int packs;            // number of packets in buffer
-    int bytes;            // total bytes of packets in buffer
-    demux_packet_t *first; // read to current buffer from here
-    demux_packet_t *last; // append new packets from input stream to here
-    demux_packet_t *current; // needed for refcounting of the buffer
-    int id;               // stream ID  (for multiple audio/video streams)
-    struct demuxer *demuxer; // parent demuxer structure (stream handler)
-// ---- asf -----
-    struct demux_packet *asf_packet; // read asf fragments here
-    int asf_seq;
-// ---- stream header ----
-    void *sh;              // points to sh_audio or sh_video
-} demux_stream_t;
-
-typedef struct demuxer_info {
-    char *name;
-    char *author;
-    char *encoder;
-    char *comments;
-    char *copyright;
-} demuxer_info_t;
-
 #define MAX_SH_STREAMS 256
-#define MAX_A_STREAMS MAX_SH_STREAMS
-#define MAX_V_STREAMS MAX_SH_STREAMS
-#define MAX_S_STREAMS MAX_SH_STREAMS
 
 struct demuxer;
 
@@ -160,29 +98,18 @@ struct demuxer;
  * Demuxer description structure
  */
 typedef struct demuxer_desc {
-    const char *info;      // What is it (long name and/or description)
     const char *name;      // Demuxer name, used with -demuxer switch
-    const char *shortdesc; // Description printed at demuxer detection
-    const char *author;    // Demuxer author(s)
-    const char *comment;   // Comment, printed with -demuxer help
+    const char *desc;      // Displayed to user
 
-    enum demuxer_type type;
-    // If 1 detection is safe and fast, do it before file extension check
-    int safe_check;
+    enum demuxer_type type; // optional
 
-    // Check if can demux the file, return DEMUXER_TYPE_xxx on success
-    // Mandatory if safe_check == 1, else optional
-    int (*check_file)(struct demuxer *demuxer);
-    /// Get packets from file, return 0 on eof. Mandatory
-    int (*fill_buffer)(struct demuxer *demuxer, struct demux_stream *ds);
-    /// Open the demuxer, return demuxer on success, NULL on failure
-    struct demuxer *(*open)(struct demuxer *demuxer); // Optional
-    /// Close the demuxer
-    void (*close)(struct demuxer *demuxer); // Optional
-    // Seek. Optional
+    // Return 0 on success, otherwise -1
+    int (*open)(struct demuxer *demuxer, enum demux_check check);
+    // The following functions are all optional
+    int (*fill_buffer)(struct demuxer *demuxer); // 0 on EOF, otherwise 1
+    void (*close)(struct demuxer *demuxer);
     void (*seek)(struct demuxer *demuxer, float rel_seek_secs,
                  float audio_delay, int flags);
-    // Various control functions. Optional
     int (*control)(struct demuxer *demuxer, int cmd, void *arg);
 } demuxer_desc_t;
 
@@ -229,17 +156,8 @@ typedef struct demuxer {
     int64_t movi_end;
     struct stream *stream;
     double stream_pts;     // current stream pts, if applicable (e.g. dvd)
-    double reference_clock;
-    char *filename;  // Needed by avs_check_file
-    int synced;      // stream synced (used by mpeg)
+    char *filename;  // same as stream->url
     enum demuxer_type type;
-    /* Normally the file_format field is just a copy of the type field above.
-     * There are 2 exceptions I noticed. Internal demux_avi may force
-     * ->type to DEMUXER_TYPE_AVI_[NI|NINI] while leaving ->file_format at
-     * DEMUXER_TYPE_AVI. Internal demux_mov may set ->type to
-     * DEMUXER_TYPE_PLAYLIST and also return that from the check function
-     * or not (looks potentially buggy). */
-    enum demuxer_type file_format;
     int seekable; // flag
     /* Set if using absolute seeks for small movements is OK (no pts resets
      * that would make pts ambigious, preferably supports back/forward flags */
@@ -249,20 +167,9 @@ typedef struct demuxer {
     enum timestamp_type timestamp_type;
     bool warned_queue_overflow;
 
-    struct demux_stream *ds[STREAM_TYPE_COUNT]; // video/audio/sub buffers
-
-    // These correspond to ds[], e.g.: audio == ds[STREAM_AUDIO]
-    struct demux_stream *audio; // audio buffer/demuxer
-    struct demux_stream *video; // video buffer/demuxer
-    struct demux_stream *sub;   // dvd subtitle buffer/demuxer
-
-    // stream headers:
-    struct sh_audio *a_streams[MAX_SH_STREAMS];
-    struct sh_video *v_streams[MAX_SH_STREAMS];
-    struct sh_sub   *s_streams[MAX_SH_STREAMS];
-
     struct sh_stream **streams;
     int num_streams;
+    bool stream_autoselect;
 
     int num_editions;
     int edition;
@@ -300,86 +207,24 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp);
 #define SIZE_MAX ((size_t)-1)
 #endif
 
-static inline void *realloc_struct(void *ptr, size_t nmemb, size_t size)
-{
-    if (nmemb > SIZE_MAX / size) {
-        free(ptr);
-        return NULL;
-    }
-    return realloc(ptr, nmemb * size);
-}
-
 void free_demuxer(struct demuxer *demuxer);
 
 int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
                        demux_packet_t *dp);
-void ds_add_packet(struct demux_stream *ds, struct demux_packet *dp);
-void ds_read_packet(struct demux_stream *ds, struct stream *stream, int len,
-                    double pts, int64_t pos, bool keyframe);
 
-int demux_fill_buffer(struct demuxer *demux, struct demux_stream *ds);
-int ds_fill_buffer(struct demux_stream *ds);
+struct demux_packet *demux_read_packet(struct sh_stream *sh);
+double demux_get_next_pts(struct sh_stream *sh);
+bool demux_has_packet(struct sh_stream *sh);
+bool demux_stream_eof(struct sh_stream *sh);
 
-static inline int64_t ds_tell(struct demux_stream *ds)
-{
-    return (ds->dpos - ds->buffer_size) + ds->buffer_pos;
-}
+struct sh_stream *new_sh_stream(struct demuxer *demuxer, enum stream_type type);
 
-static inline int ds_tell_pts(struct demux_stream *ds)
-{
-    return (ds->pts_bytes - ds->buffer_size) + ds->buffer_pos;
-}
-
-int demux_read_data(struct demux_stream *ds, unsigned char *mem, int len);
-int demux_pattern_3(struct demux_stream *ds, unsigned char *mem, int maxlen,
-                    int *read, uint32_t pattern);
-
-#define demux_peekc(ds) ( \
-        (likely(ds->buffer_pos<ds->buffer_size)) ? ds->buffer[ds->buffer_pos] \
-        : ((unlikely(!ds_fill_buffer(ds))) ? (-1) : ds->buffer[ds->buffer_pos]))
-#define demux_getc(ds) ( \
-        (likely(ds->buffer_pos<ds->buffer_size)) ? ds->buffer[ds->buffer_pos++] \
-        : ((unlikely(!ds_fill_buffer(ds))) ? (-1) : ds->buffer[ds->buffer_pos++]))
-
-void ds_free_packs(struct demux_stream *ds);
-int ds_get_packet(struct demux_stream *ds, unsigned char **start);
-int ds_get_packet_pts(struct demux_stream *ds, unsigned char **start,
-                      double *pts);
-struct demux_packet *ds_get_packet_sub(demux_stream_t *ds);
-struct demux_packet *ds_get_packet2(struct demux_stream *ds, bool repeat_last);
-double ds_get_next_pts(struct demux_stream *ds);
-int ds_parse(struct demux_stream *sh, uint8_t **buffer, int *len, double pts,
-             int64_t pos);
-void ds_clear_parser(struct demux_stream *sh);
-
-static inline int avi_stream_id(unsigned int id)
-{
-    unsigned char a, b;
-    a = id - '0';
-    b = (id >> 8) - '0';
-    if (a>9 || b>9)
-        return 100;          // invalid ID
-    return a * 10 + b;
-}
-
-struct demuxer *demux_open(struct MPOpts *opts, struct stream *stream,
-                           int file_format, int aid, int vid, int sid,
-                           char *filename);
-
-struct demuxer *demux_open_withparams(struct MPOpts *opts,
-                                      struct stream *stream, int file_format,
-                                      char *force_format, int audio_id,
-                                      int video_id, int sub_id, char *filename,
-                                      struct demuxer_params *params);
+struct demuxer *demux_open(struct stream *stream, char *force_format,
+                           struct demuxer_params *params, struct MPOpts *opts);
 
 void demux_flush(struct demuxer *demuxer);
 int demux_seek(struct demuxer *demuxer, float rel_seek_secs, float audio_delay,
                int flags);
-
-// AVI demuxer params:
-extern int index_mode;  // -1=untouched  0=don't use index  1=use (generate) index
-extern int force_ni;
-extern int pts_from_bps;
 
 int demux_info_add(struct demuxer *demuxer, const char *opt, const char *param);
 int demux_info_add_bstr(struct demuxer *demuxer, struct bstr opt,
@@ -392,8 +237,9 @@ int demux_control(struct demuxer *demuxer, int cmd, void *arg);
 
 void demuxer_switch_track(struct demuxer *demuxer, enum stream_type type,
                           struct sh_stream *stream);
-
-int demuxer_type_by_filename(char *filename);
+void demuxer_select_track(struct demuxer *demuxer, struct sh_stream *stream,
+                          bool selected);
+void demuxer_enable_autoselect(struct demuxer *demuxer);
 
 void demuxer_help(void);
 
@@ -427,6 +273,7 @@ struct sh_stream *demuxer_stream_by_demuxer_id(struct demuxer *d,
                                                enum stream_type t, int id);
 
 bool demuxer_stream_is_selected(struct demuxer *d, struct sh_stream *stream);
+bool demuxer_stream_has_packets_queued(struct demuxer *d, struct sh_stream *stream);
 
 void demux_packet_list_sort(struct demux_packet **pkts, int num_pkts);
 void demux_packet_list_seek(struct demux_packet **pkts, int num_pkts,

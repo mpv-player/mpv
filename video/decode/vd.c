@@ -28,7 +28,6 @@
 #include "video/img_format.h"
 
 #include "stream/stream.h"
-#include "demux/demux.h"
 #include "demux/stheader.h"
 #include "dec_video.h"
 
@@ -153,6 +152,8 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
     p.d_w = d_w;
     p.d_h = d_h;
 
+    mp_image_params_guess_csp(&p);
+
     vocfg_flags = (opts->fullscreen ? VOFLAG_FULLSCREEN : 0) |
                   (flip ? VOFLAG_FLIPPING : 0);
 
@@ -172,8 +173,9 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
 
     sh->vf_initialized = 1;
 
-    sh->colorspace = p.colorspace;
-    sh->color_range = p.colorlevels;
+    if (!sh->vf_input)
+        sh->vf_input = talloc(sh, struct mp_image_params);
+    *sh->vf_input = p;
 
     set_video_colorspace(sh);
 

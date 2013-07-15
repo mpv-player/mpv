@@ -85,7 +85,7 @@ static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
 static struct bstr load_file(void *talloc_ctx, const char *filename)
 {
     struct bstr res = {0};
-    stream_t *s = open_stream(filename, NULL, NULL);
+    stream_t *s = stream_open(filename, NULL);
     if (s) {
         res = stream_read_complete(s, talloc_ctx, 1000000000);
         free_stream(s);

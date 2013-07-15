@@ -38,14 +38,6 @@
 #include <libmng.h>
 
 /**
- * \brief some small fixed start time > 0
- *
- * Start time must be > 0 for the variable frame time mechanism
- * (GIF, MATROSKA, MNG) in video.c to work for the first frame.
- */
-#define MNG_START_PTS 0.01f
-
-/**
  * \brief private context structure
  *
  * This structure is used as private data for MPlayer demuxer
@@ -263,28 +255,11 @@ static mng_bool demux_mng_settimer(mng_handle h_mng, mng_uint32 msecs)
 }
 
 /**
- * \brief MPlayer callback: Check if stream contains MNG data.
- * \param[in] demuxer demuxer structure
- * \return demuxer type constant, \p 0 if unknown
- */
-static int demux_mng_check_file(demuxer_t *demuxer)
-{
-    char buf[4];
-    if (stream_read(demuxer->stream, buf, 4) != 4)
-        return 0;
-    if (memcmp(buf, "\x8AMNG", 4))
-        return 0;
-    return DEMUXER_TYPE_MNG;
-}
-
-/**
  * \brief MPlayer callback: Fill buffer from MNG stream.
  * \param[in] demuxer demuxer structure
- * \param[in] ds demuxer stream
  * \return \p 1 on success, \p 0 on error
  */
-static int demux_mng_fill_buffer(demuxer_t * demuxer,
-                                 demux_stream_t * ds)
+static int demux_mng_fill_buffer(demuxer_t * demuxer)
 {
     mng_priv_t * mng_priv = demuxer->priv;
     mng_handle h_mng = mng_priv->h_mng;
@@ -346,25 +321,30 @@ static int demux_mng_fill_buffer(demuxer_t * demuxer,
     // Set position and timing information in demuxer video and demuxer packet.
     //  - Time must be time of next frame and always be > 0 for the variable
     //    frame time mechanism (GIF, MATROSKA, MNG) in video.c to work.
-    demuxer->video->dpos++;
-    dp->pts = (float)mng_priv->show_next_time_ms / 1000.0f + MNG_START_PTS;
+    dp->pts = (float)mng_priv->show_next_time_ms / 1000.0f;
     dp->pos = stream_tell(demuxer->stream);
-    ds_add_packet(demuxer->video, dp);
+    demuxer_add_packet(demuxer, demuxer->streams[0], dp);
 
     return 1;
 }
 
-/**
- * \brief MPlayer callback: Open MNG stream.
- * \param[in] demuxer demuxer structure
- * \return demuxer structure on success, \p NULL on error
- */
-static demuxer_t * demux_mng_open(demuxer_t * demuxer)
+static int demux_mng_open(demuxer_t * demuxer, enum demux_check check)
 {
     mng_priv_t * mng_priv;
     mng_handle h_mng;
     mng_retcode mng_ret;
     sh_video_t * sh_video;
+
+    if (check > DEMUX_CHECK_REQUEST)
+        return -1; // check too unsafe
+    if (check > DEMUX_CHECK_FORCE) {
+        char buf[4];
+        if (stream_read(demuxer->stream, buf, 4) != 4)
+            return -1;
+        if (memcmp(buf, "\x8AMNG", 4))
+            return -1;
+        stream_seek(demuxer->stream, demuxer->stream->start_pos);
+    }
 
     // create private data structure
     mng_priv = calloc(1, sizeof(mng_priv_t));
@@ -379,7 +359,7 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
         mp_msg(MSGT_DEMUX, MSGL_ERR,
                "demux_mng: could not initialize MNG image instance\n");
         free(mng_priv);
-        return NULL;
+        return -1;
     }
 
     // MNG image handle into private data
@@ -399,7 +379,7 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
                "demux_mng: could not set MNG callbacks\n");
         mng_cleanup(&h_mng);
         free(mng_priv);
-        return NULL;
+        return -1;
     }
 
     // start reading MNG data
@@ -410,7 +390,7 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
                "mng_retcode %d\n", mng_ret);
         mng_cleanup(&h_mng);
         free(mng_priv);
-        return NULL;
+        return -1;
     }
 
     // check that MNG header is processed now
@@ -419,22 +399,12 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
                "demux_mng: internal error: header not processed\n");
         mng_cleanup(&h_mng);
         free(mng_priv);
-        return NULL;
+        return -1;
     }
 
     // create a new video stream header
-    sh_video = new_sh_video(demuxer, 0);
-
-    // Make sure the demuxer knows about the new video stream header
-    // (even though new_sh_video() ought to take care of it).
-    // (Thanks to demux_gif.c for this.)
-    demuxer->video->sh = sh_video;
-
-    // Make sure that the video demuxer stream header knows about its
-    // parent video demuxer stream (this is getting wacky), or else
-    // video_read_properties() will choke.
-    // (Thanks to demux_gif.c for this.)
-    sh_video->ds = demuxer->video;
+    struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
+    sh_video = sh->video;
 
     // set format of pixels in video packets
     sh_video->gsh->codec = "rawvideo";
@@ -442,7 +412,6 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
 
     // set framerate to some value (MNG does not have a fixed framerate)
     sh_video->fps       = 5.0f;
-    sh_video->frametime = 1.0f / sh_video->fps;
 
     // set video frame parameters
     sh_video->bih                = calloc(1, sizeof(*sh_video->bih));
@@ -452,14 +421,12 @@ static demuxer_t * demux_mng_open(demuxer_t * demuxer)
     sh_video->bih->biBitCount    = 32;
     sh_video->bih->biPlanes      = 1;
 
-    // Set start time to something > 0.
-    //  - This is required for the variable frame time mechanism
-    //    (GIF, MATROSKA, MNG) in video.c to work for the first frame.
-    sh_video->ds->pts = MNG_START_PTS;
+    // weirdly broken
+    demuxer->accurate_seek = false;
 
     // set private data in demuxer and return demuxer
     demuxer->priv = mng_priv;
-    return demuxer;
+    return 0;
 }
 
 /**
@@ -596,17 +563,11 @@ static int demux_mng_control(demuxer_t * demuxer, int cmd, void * arg)
 }
 
 const demuxer_desc_t demuxer_desc_mng = {
-    "MNG demuxer",
-    "mng",
-    "MNG",
-    "Stefan Schuermans <stefan@blinkenarea.org>",
-    "MNG files, using libmng",
-    DEMUXER_TYPE_MNG,
-    0, // unsafe autodetect (only checking magic at beginning of stream)
-    demux_mng_check_file,
-    demux_mng_fill_buffer,
-    demux_mng_open,
-    demux_mng_close,
-    demux_mng_seek,
-    demux_mng_control
+    .name = "mng",
+    .desc = "MNG",
+    .fill_buffer = demux_mng_fill_buffer,
+    .open = demux_mng_open,
+    .close = demux_mng_close,
+    .seek = demux_mng_seek,
+    .control = demux_mng_control,
 };

@@ -380,6 +380,7 @@ Miscellaneous options:
   --enable-static        build a statically linked binary
   --with-install=PATH    path to a custom install program
   --disable-manpage      do not build and install manpage [auto]
+  --disable-build-date   do not include binary compile time
 
 Advanced options:
   --enable-shm              enable shm [autodetect]
@@ -489,6 +490,7 @@ _priority=no
 def_dos_paths="#define HAVE_DOS_PATHS 0"
 def_priority="#undef CONFIG_PRIORITY"
 _build_man=auto
+_build_date=yes
 for ac_option do
   case "$ac_option" in
   --help|-help|-h)
@@ -712,6 +714,8 @@ for ac_option do
   --enable-manpage) _build_man=yes ;;
   --disable-manpage) _build_man=no ;;
 
+  --enable-build-date) _build_date=yes ;;
+  --disable-build-date) _build_date=no ;;
   *)
     echo "Unknown parameter: $ac_option" >&2
     exit 1
@@ -865,7 +869,9 @@ if darwin; then
   _timer=timer-darwin.c
 fi
 
+_win32=no
 if win32 ; then
+  _win32=yes
   _exesuf=".exe"
   extra_cflags="$extra_cflags -fno-common"
   # -lwinmm is always needed for osdep/timer-win2.c
@@ -903,6 +909,16 @@ else
     _build_man=no
 fi
 echores "$_build_man"
+
+echocheck "whether to print binary build date"
+if test "$_build_date" = yes ; then
+    _build_yes=yes
+else
+    _build_date=no
+    extra_cflags="$extra_cflags -DNO_BUILD_TIMESTAMPS"
+fi
+echores "$_build_date"
+
 
 
 TMPC="$mplayer_tmpdir/tmp.c"
@@ -2360,7 +2376,7 @@ if test "$_vcd" = auto; then
   if linux || freebsd || netbsd || openbsd || dragonfly || darwin ; then
     _vcd=yes
   elif mingw32; then
-  header_check ntddcdrm.h && _vcd=yes
+  header_check_broken windows.h ntddcdrm.h && _vcd=yes
   fi
 fi
 if test "$_vcd" = yes; then
@@ -2497,7 +2513,9 @@ echores "$_mpg123"
 echocheck "LADSPA plugin support"
 if test "$_ladspa" = auto ; then
   _ladspa=no
-  statement_check ladspa.h 'LADSPA_Descriptor ld = {0}' && _ladspa=yes
+  if test "$_dl" = yes ; then
+    statement_check ladspa.h 'LADSPA_Descriptor ld = {0}' && _ladspa=yes
+  fi
 fi
 if test "$_ladspa" = yes; then
   def_ladspa="#define CONFIG_LADSPA 1"
@@ -2855,6 +2873,18 @@ fi
 echores "$_encoding"
 
 
+# needs dlopen on unix, uses winapi on windows
+_dlopen="$_dl"
+if win32 ; then
+  _dlopen=yes
+fi
+
+if test "$_dlopen" = yes ; then
+  def_dlopen='#define CONFIG_DLOPEN 1'
+else
+  def_dlopen='#undef CONFIG_DLOPEN'
+fi
+
 #############################################################################
 
 echocheck "compiler support for noexecstack"
@@ -2978,6 +3008,8 @@ COCOA = $_cocoa
 COREAUDIO = $_coreaudio
 COREVIDEO = $_corevideo
 DIRECT3D = $_direct3d
+DL = $_dl
+DLOPEN = $_dlopen
 SDL = $_sdl
 SDL2 = $_sdl2
 DSOUND = $_dsound
@@ -3031,6 +3063,7 @@ TV = $_tv
 TV_V4L2 = $_tv_v4l2
 VCD = $_vcd
 VDPAU = $_vdpau
+WIN32 = $_win32
 X11 = $_x11
 WAYLAND = $_wayland
 XV = $_xv
@@ -3138,6 +3171,7 @@ $def_libavfilter
 $def_vf_lavfi
 $def_af_lavfi
 
+$def_dlopen
 
 /* Audio output drivers */
 $def_alsa

@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Original author: Albeu
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -51,8 +53,6 @@
 #include "vcd_read.h"
 #endif
 
-#include "demux/demux.h"
-
 extern char *cdrom_device;
 
 static struct stream_priv_s {
@@ -94,46 +94,14 @@ static int seek(stream_t *s,int64_t newpos) {
   return 1;
 }
 
-static int control(stream_t *stream, int cmd, void *arg) {
-  struct stream_priv_s *p = stream->priv;
-  switch(cmd) {
-    case STREAM_CTRL_GET_NUM_TITLES:
-    case STREAM_CTRL_GET_NUM_CHAPTERS:
-    {
-      mp_vcd_priv_t *vcd = vcd_read_toc(stream->fd);
-      if (!vcd)
-        break;
-      *(unsigned int *)arg = vcd_end_track(vcd);
-      return STREAM_OK;
-    }
-    case STREAM_CTRL_SEEK_TO_CHAPTER:
-    {
-      int r;
-      unsigned int track = *(unsigned int *)arg + 1;
-      mp_vcd_priv_t *vcd = vcd_read_toc(stream->fd);
-      if (!vcd)
-        break;
-      r = vcd_seek_to_track(vcd, track);
-      if (r >= 0) {
-        p->track = track;
-        return STREAM_OK;
-      }
-      break;
-    }
-    case STREAM_CTRL_GET_CURRENT_CHAPTER:
-    {
-      *(unsigned int *)arg = p->track - 1;
-      return STREAM_OK;
-    }
-  }
-  return STREAM_UNSUPPORTED;
-}
-
 static void close_s(stream_t *stream) {
-  free(stream->priv);
+  mp_vcd_priv_t *p = stream->priv;
+  close(p->fd);
+  free(p);
 }
 
-static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
+static int open_s(stream_t *stream,int mode, void* opts)
+{
   struct stream_priv_s* p = opts;
   int ret,ret2,f,sect,tmp;
   mp_vcd_priv_t* vcd;
@@ -166,7 +134,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   /* open() can't be used for devices so do it the complicated way */
   hd = CreateFile(device, GENERIC_READ, FILE_SHARE_READ, NULL,
 	  OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
-  f = _open_osfhandle((long)hd, _O_RDONLY);
+  f = _open_osfhandle((intptr_t)hd, _O_RDONLY);
 #else
   f=open(p->device,O_RDONLY);
 #endif
@@ -221,8 +189,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
 #endif
 
-  stream->fd = f;
-  stream->type = STREAMTYPE_VCD;
   stream->sector_size = VCD_SECTOR_DATA;
   stream->start_pos=ret;
   stream->end_pos=ret2;
@@ -230,19 +196,15 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
   stream->fill_buffer = fill_buffer;
   stream->seek = seek;
-  stream->control = control;
   stream->close = close_s;
-  *file_format = DEMUXER_TYPE_MPEG_PS;
+  stream->demuxer = "lavf"; // mpegps ( or "vcd"?)
 
   m_struct_free(&stream_opts,opts);
   return STREAM_OK;
 }
 
 const stream_info_t stream_info_vcd = {
-  "Video CD",
   "vcd",
-  "Albeu",
-  "based on the code from ???",
   open_s,
   { "vcd", NULL },
   &stream_opts,

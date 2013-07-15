@@ -104,7 +104,6 @@ Command Line Switches
     ``-subdelay``               ``--sub-delay``
     ``-subpos``                 ``--sub-pos``
     ``-forcedsubsonly``         ``--sub-forced-only``
-    ``-ni``                     ``--avi-ni``
     ``-benchmark``              ``--untimed`` (no stats)
     ``-xineramascreen``         ``--screen`` (different values)
     ``-ss``                     ``--start``

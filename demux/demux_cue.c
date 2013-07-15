@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Original author: Uoti Urpala
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -29,31 +31,27 @@ bool mp_probe_cue(struct bstr s);
 
 #define PROBE_SIZE 512
 
-static int try_open_file(struct demuxer *demuxer)
+static int try_open_file(struct demuxer *demuxer, enum demux_check check)
 {
     struct stream *s = demuxer->stream;
-    char buf[PROBE_SIZE];
-    int len = stream_read(s, buf, sizeof(buf));
-    if (len <= 0)
-        return 0;
-    if (!mp_probe_cue((struct bstr) { buf, len }))
-        return 0;
-    stream_seek(s, 0);
+    if (check >= DEMUX_CHECK_UNSAFE) {
+        char buf[PROBE_SIZE];
+        int len = stream_read(s, buf, sizeof(buf));
+        if (len <= 0)
+            return -1;
+        if (!mp_probe_cue((struct bstr) { buf, len }))
+            return -1;
+        stream_seek(s, 0);
+    }
     demuxer->file_contents = stream_read_complete(s, demuxer, 1000000);
     if (demuxer->file_contents.start == NULL)
-        return 0;
-    if (!mp_probe_cue((struct bstr) { buf, len }))
-        return 0;
-    return DEMUXER_TYPE_CUE;
+        return -1;
+    return 0;
 }
 
 const struct demuxer_desc demuxer_desc_cue = {
-    .info = "CUE file demuxer",
     .name = "cue",
-    .shortdesc = "CUE",
-    .author = "Uoti Urpala",
-    .comment = "",
+    .desc = "CUE sheet",
     .type = DEMUXER_TYPE_CUE,
-    .safe_check = true,
-    .check_file = try_open_file,       // no separate .open
+    .open = try_open_file,
 };

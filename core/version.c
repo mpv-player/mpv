@@ -17,6 +17,10 @@
  */
 
 #include "version.h"
+#ifdef NO_BUILD_TIMESTAMPS
+#undef BUILDDATE
+#define BUILDDATE "UNKNOWN"
+#endif
 
 const char *mplayer_version  = "mpv " VERSION;
 const char *mplayer_builddate = BUILDDATE;

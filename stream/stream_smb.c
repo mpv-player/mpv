@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Original author: M. Tourne
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -25,6 +27,10 @@
 #include "stream.h"
 #include "core/m_option.h"
 #include "core/m_struct.h"
+
+struct priv {
+    int fd;
+};
 
 static struct stream_priv_s {
 } stream_priv_dflts = {
@@ -72,10 +78,11 @@ static void smb_auth_fn(const char *server, const char *share,
 }
 
 static int control(stream_t *s, int cmd, void *arg) {
+  struct priv *p = s->priv;
   switch(cmd) {
     case STREAM_CTRL_GET_SIZE: {
-      off_t size = smbc_lseek(s->fd,0,SEEK_END);
-      smbc_lseek(s->fd,s->pos,SEEK_SET);
+      off_t size = smbc_lseek(p->fd,0,SEEK_END);
+      smbc_lseek(p->fd,s->pos,SEEK_SET);
       if(size != (off_t)-1) {
         *(uint64_t *)arg = size;
         return 1;
@@ -86,23 +93,26 @@ static int control(stream_t *s, int cmd, void *arg) {
 }
 
 static int seek(stream_t *s,int64_t newpos) {
+  struct priv *p = s->priv;
   s->pos = newpos;
-  if(smbc_lseek(s->fd,s->pos,SEEK_SET)<0) {
+  if(smbc_lseek(p->fd,s->pos,SEEK_SET)<0) {
     return 0;
   }
   return 1;
 }
 
 static int fill_buffer(stream_t *s, char* buffer, int max_len){
-  int r = smbc_read(s->fd,buffer,max_len);
+  struct priv *p = s->priv;
+  int r = smbc_read(p->fd,buffer,max_len);
   return (r <= 0) ? -1 : r;
 }
 
 static int write_buffer(stream_t *s, char* buffer, int len) {
+  struct priv *p = s->priv;
   int r;
   int wr = 0;
   while (wr < len) {
-    r = smbc_write(s->fd,buffer,len);
+    r = smbc_write(p->fd,buffer,len);
     if (r <= 0)
       return -1;
     wr += r;
@@ -112,14 +122,19 @@ static int write_buffer(stream_t *s, char* buffer, int len) {
 }
 
 static void close_f(stream_t *s){
-  smbc_close(s->fd);
+  struct priv *p = s->priv;
+  smbc_close(p->fd);
 }
 
-static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
+static int open_f (stream_t *stream, int mode, void *opts)
+{
   char *filename;
   mode_t m = 0;
   int64_t len;
   int fd, err;
+
+  struct priv *priv = talloc_zero(stream, struct priv);
+  stream->priv = priv;
 
   filename = stream->url;
 
@@ -164,8 +179,7 @@ static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
     stream->seek = seek;
     if(mode == STREAM_READ) stream->end_pos = len;
   }
-  stream->type = STREAMTYPE_SMB;
-  stream->fd = fd;
+  priv->fd = fd;
   stream->fill_buffer = fill_buffer;
   stream->write_buffer = write_buffer;
   stream->close = close_f;
@@ -176,10 +190,7 @@ static int open_f (stream_t *stream, int mode, void *opts, int* file_format) {
 }
 
 const stream_info_t stream_info_smb = {
-  "Server Message Block",
   "smb",
-  "M. Tourne",
-  "based on the code from 'a bulgarian' (one says)",
   open_f,
   {"smb", NULL},
   &stream_opts,

@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include <libavutil/common.h>
 #include <ass/ass.h>
 
 #include "talloc.h"
@@ -27,6 +28,8 @@
 #include "core/options.h"
 #include "core/mp_common.h"
 #include "core/mp_msg.h"
+#include "video/csputils.h"
+#include "video/mp_image.h"
 #include "sub.h"
 #include "dec_sub.h"
 #include "ass_mp.h"
@@ -38,12 +41,16 @@
 
 struct sd_ass_priv {
     struct ass_track *ass_track;
-    bool vsfilter_aspect;
+    bool is_converted;
     bool incomplete_event;
     struct sub_bitmap *parts;
     bool flush_on_seek;
     char last_text[500];
+    struct mp_image_params video_params;
+    struct mp_image_params last_params;
 };
+
+static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts);
 
 static bool supports_format(const char *format)
 {
@@ -68,15 +75,16 @@ static int init(struct sd *sd)
     if (!sd->ass_library || !sd->ass_renderer || !sd->codec)
         return -1;
 
-    bool is_converted = sd->converted_from != NULL;
-
     struct sd_ass_priv *ctx = talloc_zero(NULL, struct sd_ass_priv);
     sd->priv = ctx;
+
+    ctx->is_converted = sd->converted_from != NULL;
+
     if (sd->ass_track) {
         ctx->ass_track = sd->ass_track;
     } else {
         ctx->ass_track = ass_new_track(sd->ass_library);
-        if (!is_converted)
+        if (!ctx->is_converted)
             ctx->ass_track->track_type = TRACK_TYPE_ASS;
     }
 
@@ -87,7 +95,6 @@ static int init(struct sd *sd)
 
     mp_ass_add_default_styles(ctx->ass_track, opts);
 
-    ctx->vsfilter_aspect = !is_converted;
     return 0;
 }
 
@@ -181,17 +188,30 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     if (pts == MP_NOPTS_VALUE || !sd->ass_renderer)
         return;
 
-    double scale = dim.display_par;
-    bool use_vs_aspect = opts->ass_style_override
-                         ? opts->ass_vsfilter_aspect_compat : 1;
-    if (ctx->vsfilter_aspect && use_vs_aspect)
-        scale = scale * dim.video_par;
+    bool use_vs_aspect = !ctx->is_converted &&
+        opts->ass_style_override ? opts->ass_vsfilter_aspect_compat : 1;
+
     ASS_Renderer *renderer = sd->ass_renderer;
+    double scale = dim.display_par;
+    if (use_vs_aspect)
+        scale = scale * dim.video_par;
     mp_ass_configure(renderer, opts, &dim);
     ass_set_aspect_ratio(renderer, scale, 1);
+#if LIBASS_VERSION >= 0x01020000
+    if (!ctx->is_converted && (!opts->ass_style_override ||
+                               opts->ass_vsfilter_blur_compat))
+    {
+        ass_set_storage_size(renderer, ctx->video_params.w, ctx->video_params.h);
+    } else {
+        ass_set_storage_size(renderer, 0, 0);
+    }
+#endif
     mp_ass_render_frame(renderer, ctx->ass_track, pts * 1000 + .5,
                         &ctx->parts, res);
     talloc_steal(ctx, ctx->parts);
+
+    if (!ctx->is_converted)
+        mangle_colors(sd, res);
 }
 
 struct buf {
@@ -325,6 +345,9 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
         double *a = arg;
         a[0] = ass_step_sub(ctx->ass_track, a[0] * 1000 + .5, a[1]) / 1000.0;
         return CONTROL_OK;
+    case SD_CTRL_SET_VIDEO_PARAMS:
+        ctx->video_params = *(struct mp_image_params *)arg;
+        return CONTROL_OK;
     }
     default:
         return CONTROL_UNKNOWN;
@@ -344,3 +367,113 @@ const struct sd_functions sd_ass = {
     .reset = reset,
     .uninit = uninit,
 };
+
+// Disgusting hack for (xy-)vsfilter color compatibility.
+static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
+{
+    struct MPOpts *opts = sd->opts;
+    struct sd_ass_priv *ctx = sd->priv;
+    ASS_Track *track = ctx->ass_track;
+    enum mp_csp csp = 0;
+    enum mp_csp_levels levels = 0;
+    if (opts->ass_vsfilter_color_compat == 0) // "no"
+        return;
+    bool force_601 = opts->ass_vsfilter_color_compat == 3;
+#if LIBASS_VERSION >= 0x01020000
+    static const int ass_csp[] = {
+        [YCBCR_BT601_TV]        = MP_CSP_BT_601,
+        [YCBCR_BT601_PC]        = MP_CSP_BT_601,
+        [YCBCR_BT709_TV]        = MP_CSP_BT_709,
+        [YCBCR_BT709_PC]        = MP_CSP_BT_709,
+        [YCBCR_SMPTE240M_TV]    = MP_CSP_SMPTE_240M,
+        [YCBCR_SMPTE240M_PC]    = MP_CSP_SMPTE_240M,
+    };
+    static const int ass_levels[] = {
+        [YCBCR_BT601_TV]        = MP_CSP_LEVELS_TV,
+        [YCBCR_BT601_PC]        = MP_CSP_LEVELS_PC,
+        [YCBCR_BT709_TV]        = MP_CSP_LEVELS_TV,
+        [YCBCR_BT709_PC]        = MP_CSP_LEVELS_PC,
+        [YCBCR_SMPTE240M_TV]    = MP_CSP_LEVELS_TV,
+        [YCBCR_SMPTE240M_PC]    = MP_CSP_LEVELS_PC,
+    };
+    int trackcsp = track->YCbCrMatrix;
+    if (force_601)
+        trackcsp = YCBCR_BT601_TV;
+    // NONE is a bit random, but the intention is: don't modify colors.
+    if (trackcsp == YCBCR_NONE)
+        return;
+    if (trackcsp < sizeof(ass_csp) / sizeof(ass_csp[0]))
+        csp = ass_csp[trackcsp];
+    if (trackcsp < sizeof(ass_levels) / sizeof(ass_levels[0]))
+        levels = ass_levels[trackcsp];
+    if (trackcsp == YCBCR_DEFAULT) {
+        csp = MP_CSP_BT_601;
+        levels = MP_CSP_LEVELS_TV;
+    }
+    // Unknown colorspace (either YCBCR_UNKNOWN, or a valid value unknown to us)
+    if (!csp || !levels)
+        return;
+#endif
+
+    struct mp_image_params params = ctx->video_params;
+
+    if (force_601) {
+        params.colorspace = MP_CSP_BT_709;
+        params.colorlevels = MP_CSP_LEVELS_TV;
+    }
+
+    if (csp == params.colorspace && levels == params.colorlevels)
+        return;
+
+    bool basic_conv = params.colorspace == MP_CSP_BT_709 &&
+                      params.colorlevels == MP_CSP_LEVELS_TV &&
+                      csp == MP_CSP_BT_601 &&
+                      levels == MP_CSP_LEVELS_TV;
+
+    // With "basic", only do as much as needed for basic compatibility.
+    if (opts->ass_vsfilter_color_compat == 1 && !basic_conv)
+        return;
+
+    if (params.colorspace != ctx->last_params.colorspace ||
+        params.colorlevels != ctx->last_params.colorlevels)
+    {
+        int msgl = basic_conv ? MSGL_V : MSGL_WARN;
+        ctx->last_params = params;
+        mp_msg(MSGT_SUBREADER, msgl, "[sd_ass] mangling colors like vsfilter: "
+               "RGB -> %s %s -> %s %s -> RGB\n", mp_csp_names[csp],
+               mp_csp_levels_names[levels], mp_csp_names[params.colorspace],
+               mp_csp_levels_names[params.colorlevels]);
+    }
+
+    // Conversion that VSFilter would use
+    struct mp_csp_params vs_params = MP_CSP_PARAMS_DEFAULTS;
+    vs_params.colorspace.format = csp;
+    vs_params.colorspace.levels_in = levels;
+    vs_params.int_bits_in = 8;
+    vs_params.int_bits_out = 8;
+    float vs_yuv2rgb[3][4], vs_rgb2yuv[3][4];
+    mp_get_yuv2rgb_coeffs(&vs_params, vs_yuv2rgb);
+    mp_invert_yuv2rgb(vs_rgb2yuv, vs_yuv2rgb);
+
+    // Proper conversion to RGB
+    struct mp_csp_params rgb_params = MP_CSP_PARAMS_DEFAULTS;
+    rgb_params.colorspace.format = params.colorspace;
+    rgb_params.colorspace.levels_in = params.colorlevels;
+    rgb_params.int_bits_in = 8;
+    rgb_params.int_bits_out = 8;
+    float vs2rgb[3][4];
+    mp_get_yuv2rgb_coeffs(&rgb_params, vs2rgb);
+
+    for (int n = 0; n < parts->num_parts; n++) {
+        struct sub_bitmap *sb = &parts->parts[n];
+        uint32_t color = sb->libass.color;
+        int r = (color >> 24u) & 0xff;
+        int g = (color >> 16u) & 0xff;
+        int b = (color >>  8u) & 0xff;
+        int a = color & 0xff;
+        int c[3] = {r, g, b};
+        mp_map_int_color(vs_rgb2yuv, 8, c);
+        mp_map_int_color(vs2rgb, 8, c);
+        sb->libass.color = (c[0] << 24u) | (c[1] << 16) | (c[2] << 8) | a;
+    }
+}

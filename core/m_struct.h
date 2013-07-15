@@ -19,6 +19,9 @@
 #ifndef MPLAYER_M_STRUCT_H
 #define MPLAYER_M_STRUCT_H
 
+#include <stddef.h>
+#include <inttypes.h>
+
 #include "core/bstr.h"
 
 /// \defgroup OptionsStruct Options struct
@@ -46,15 +49,12 @@ typedef struct m_struct_st {
 } m_struct_t;
 
 
-// From glib.h (modified ;-)
-
 /// Get the offset of a struct field.
 /** \param struct_type Struct type.
  *  \param member Name of the field.
  *  \return The offset of the field in bytes.
  */
-#define M_ST_OFF(struct_type, member)    \
-    ((void*) &((struct_type*) 0)->member)
+#define M_ST_OFF (void *)(uintptr_t)offsetof
 
 /// Get a pointer to a struct field.
 /** \param struct_p Pointer to the struct.
@@ -62,7 +62,7 @@ typedef struct m_struct_st {
  *  \return Pointer to the struct field.
  */
 #define M_ST_MB_P(struct_p, struct_offset)   \
-    ((void *)((char *)(struct_p) + (unsigned long)(struct_offset)))
+    ((void *)((char *)(struct_p) + (uintptr_t)(struct_offset)))
 
 /// Access a struct field at a given offset.
 /** \param member_type Type of the field.

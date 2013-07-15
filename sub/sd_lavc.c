@@ -19,6 +19,7 @@
 #include <assert.h>
 
 #include <libavcodec/avcodec.h>
+#include <libavutil/common.h>
 
 #include "talloc.h"
 #include "core/mp_msg.h"

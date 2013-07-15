@@ -40,14 +40,15 @@
 #include <linux/types.h>
 #include <linux/videodev2.h>
 
+#include <libavutil/common.h>
+#include <libavutil/avstring.h>
+
 #include "core/mp_msg.h"
 
 #include "stream.h"
 #include "pvr.h"
 
 #include "frequencies.h"
-#include "libavutil/common.h"
-#include "libavutil/avstring.h"
 
 #define PVR_DEFAULT_DEVICE "/dev/video0"
 #define PVR_MAX_CONTROLS 10
@@ -1555,7 +1556,7 @@ pvr_stream_read (stream_t *stream, char *buffer, int size)
 }
 
 static int
-pvr_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
+pvr_stream_open (stream_t *stream, int mode, void *opts)
 {
   struct v4l2_capability vcap;
   struct v4l2_ext_controls ctrls;
@@ -1756,10 +1757,7 @@ pvr_force_freq_step (stream_t *stream, int step)
 }
 
 const stream_info_t stream_info_pvr = {
-  "V4L2 MPEG Input (a.k.a PVR)",
   "pvr",
-  "Benjamin Zores",
-  "",
   pvr_stream_open,
   { "pvr", NULL },
   NULL,

@@ -53,6 +53,9 @@ enum mp_csp_levels {
     MP_CSP_LEVELS_COUNT,
 };
 
+// Any enum mp_csp_levels value is a valid index (except MP_CSP_LEVELS_COUNT)
+extern char * const mp_csp_levels_names[MP_CSP_LEVELS_COUNT];
+
 struct mp_csp_details {
     enum mp_csp format;
     enum mp_csp_levels levels_in;      // encoded video

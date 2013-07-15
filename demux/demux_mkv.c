@@ -49,7 +49,7 @@
 #include "stheader.h"
 #include "ebml.h"
 #include "matroska.h"
-//#include "demux_real.h"
+#include "codec_tags.h"
 
 #include "core/mp_msg.h"
 
@@ -141,10 +141,6 @@ typedef struct mkv_track {
     double *audio_timestamp;    ///< timestamp for each audio packet
     int sub_packet_cnt;         ///< number of subpacket already received
     int audio_filepos;          ///< file position of first audio packet in block
-
-    /* stuff for quicktime */
-    int fix_i_bps;
-    double qt_last_a_pts;
 
     /* generic content encoding support */
     mkv_content_encoding_t *encodings;
@@ -722,10 +718,11 @@ static void add_block_position(demuxer_t *demuxer, struct mkv_track *track,
 
 static int demux_mkv_read_cues(demuxer_t *demuxer)
 {
+    struct MPOpts *opts = demuxer->opts;
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
 
-    if (index_mode == 0 || index_mode == 2) {
+    if (opts->index_mode == 0 || opts->index_mode == 2) {
         ebml_read_skip(s, NULL);
         return 0;
     }
@@ -1282,7 +1279,6 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     if (track->v_frate == 0.0)
         track->v_frate = 25.0;
     sh_v->fps = track->v_frate;
-    sh_v->frametime = 1 / track->v_frate;
     sh_v->aspect = 0;
     if (!track->realmedia) {
         sh_v->disp_w = track->v_width;
@@ -1430,8 +1426,6 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
                || !strcmp(track->codec_id, MKV_A_QDMC2)) {
         sh_a->wf->nAvgBytesPerSec = 16000;
         sh_a->wf->nBlockAlign = 1486;
-        track->fix_i_bps = 1;
-        track->qt_last_a_pts = 0.0;
         copy_audio_private_data(sh_a, track);
     } else if (track->a_formattag == mmioFOURCC('M', 'P', '4', 'A')) {
         int profile, srate_idx;
@@ -1751,7 +1745,7 @@ static int read_mkv_segment_header(demuxer_t *demuxer)
     return 0;
 }
 
-static int demux_mkv_open(demuxer_t *demuxer)
+static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
 {
     stream_t *s = demuxer->stream;
     mkv_demuxer_t *mkv_d;
@@ -1759,11 +1753,11 @@ static int demux_mkv_open(demuxer_t *demuxer)
     stream_seek(s, s->start_pos);
 
     if (!read_ebml_header(demuxer))
-        return 0;
+        return -1;
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Found the head...\n");
 
     if (!read_mkv_segment_header(demuxer))
-        return 0;
+        return -1;
 
     mkv_d = talloc_zero(demuxer, struct mkv_demuxer);
     demuxer->priv = mkv_d;
@@ -1788,7 +1782,7 @@ static int demux_mkv_open(demuxer_t *demuxer)
         }
         int res = read_header_element(demuxer, id, 0);
         if (res <= -2)
-            return 0;
+            return -1;
         if (res < 0)
             break;
     }
@@ -1803,9 +1797,7 @@ static int demux_mkv_open(demuxer_t *demuxer)
         demuxer->seekable = 1;
     }
 
-    demuxer->accurate_seek = true;
-
-    return DEMUXER_TYPE_MATROSKA;
+    return 0;
 }
 
 static bool bstr_read_u8(bstr *buffer, uint8_t *out_u8)
@@ -1961,9 +1953,8 @@ static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
     } else
         dp->pts =
             real_fix_timestamp(dp->buffer, timestamp,
-                               ((sh_video_t *) demuxer->video->sh)->bih->
-                               biCompression, &track->rv_kf_base,
-                               &track->rv_kf_pts, NULL);
+                               track->stream->video->bih->biCompression,
+                               &track->rv_kf_base, &track->rv_kf_pts, NULL);
     dp->pos = demuxer->filepos;
     dp->keyframe = keyframe;
 
@@ -2046,8 +2037,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
         if (track->sub_packet_cnt == 0)
             track->audio_filepos = demuxer->filepos;
         if (++(track->sub_packet_cnt) == sph) {
-            int apk_usize =
-                ((sh_audio_t *) demuxer->audio->sh)->wf->nBlockAlign;
+            int apk_usize = track->stream->audio->wf->nBlockAlign;
             track->sub_packet_cnt = 0;
             // Release all the audio packets
             for (x = 0; x < sph * w / apk_usize; x++) {
@@ -2277,20 +2267,6 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
             use_this_block = keyframe;
         if (mkv_d->v_skip_to_keyframe)
             use_this_block = 0;
-
-        if (track->fix_i_bps && use_this_block) {
-            sh_audio_t *sh = stream->audio;
-
-            if (block_duration != 0) {
-                sh->i_bps = data.len * 1e9 / block_duration;
-                track->fix_i_bps = 0;
-            } else if (track->qt_last_a_pts == 0.0)
-                track->qt_last_a_pts = current_pts;
-            else if (track->qt_last_a_pts != current_pts) {
-                sh->i_bps = data.len / (current_pts - track->qt_last_a_pts);
-                track->fix_i_bps = 0;
-            }
-        }
     } else if (track->type == MATROSKA_TRACK_SUBTITLE) {
         use_this_block |= mkv_d->subtitle_preroll;
         if (use_this_block) {
@@ -2466,7 +2442,7 @@ static int read_next_block(demuxer_t *demuxer, struct block_info *block)
     }
 }
 
-static int demux_mkv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
+static int demux_mkv_fill_buffer(demuxer_t *demuxer)
 {
     for (;;) {
         int res;
@@ -2658,7 +2634,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
                                             : 0;
         mkv_d->a_skip_to_keyframe = 1;
 
-        demux_mkv_fill_buffer(demuxer, NULL);
+        demux_mkv_fill_buffer(demuxer);
     } else if ((demuxer->movi_end <= 0) || !(flags & SEEK_ABSOLUTE))
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] seek unsupported flags\n");
     else {
@@ -2697,7 +2673,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
         mkv_d->skip_to_timecode = index->timecode * mkv_d->tc_scale;
         mkv_d->a_skip_to_keyframe = 1;
 
-        demux_mkv_fill_buffer(demuxer, NULL);
+        demux_mkv_fill_buffer(demuxer);
     }
 }
 
@@ -2706,8 +2682,6 @@ static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
 
     switch (cmd) {
-    case DEMUXER_CTRL_CORRECT_PTS:
-        return DEMUXER_CTRL_OK;
     case DEMUXER_CTRL_GET_TIME_LENGTH:
         if (mkv_d->duration == 0)
             return DEMUXER_CTRL_DONTKNOW;
@@ -2720,17 +2694,12 @@ static int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg)
 }
 
 const demuxer_desc_t demuxer_desc_matroska = {
-    "Matroska demuxer",
-    "mkv",
-    "Matroska",
-    "Aurelien Jacobs",
-    "",
-    DEMUXER_TYPE_MATROSKA,
-    1,                          // safe autodetect
-    demux_mkv_open,
-    demux_mkv_fill_buffer,
-    NULL,
-    mkv_free,
-    demux_mkv_seek,
-    demux_mkv_control
+    .name = "mkv",
+    .desc = "Matroska",
+    .type = DEMUXER_TYPE_MATROSKA,
+    .open = demux_mkv_open,
+    .fill_buffer = demux_mkv_fill_buffer,
+    .close = mkv_free,
+    .seek = demux_mkv_seek,
+    .control = demux_mkv_control
 };

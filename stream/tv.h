@@ -25,8 +25,6 @@
 #ifndef MPLAYER_TV_H
 #define MPLAYER_TV_H
 
-#include "demux/demux.h"
-
 typedef struct tv_param_s {
     char *freq;
     char *channel;
@@ -105,7 +103,7 @@ typedef struct tvi_handle_s {
     const tvi_functions_t	*functions;
     void		*priv;
     int 		seq;
-    demuxer_t		*demuxer;
+    struct demuxer	*demuxer;
 
     /* specific */
     int			norm;

@@ -345,10 +345,7 @@ static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
     avctx->coded_width  = sh->disp_w;
     avctx->coded_height = sh->disp_h;
 
-    // demux_avi only
-    avctx->stream_codec_tag = sh->video.fccHandler;
-
-    // demux_mkv, demux_avi, demux_asf
+    // demux_mkv
     if (sh->bih)
         set_from_bih(avctx, sh->format, sh->bih);
 
@@ -760,6 +757,9 @@ static int control(sh_video_t *sh, int cmd, void *arg)
         if (ctx->vo_initialized)
             mpcodecs_reconfig_vo(sh, &ctx->image_params);
         return true;
+    case VDCTRL_GET_PARAMS:
+        *(struct mp_image_params *)arg = ctx->image_params;
+        return ctx->vo_initialized ? true : CONTROL_NA;
     }
     return CONTROL_UNKNOWN;
 }

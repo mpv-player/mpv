@@ -24,6 +24,7 @@
 
 #include <libavcodec/avcodec.h>
 #include <libavutil/opt.h>
+#include <libavutil/common.h>
 
 #include "talloc.h"
 
@@ -50,8 +51,8 @@ struct priv {
     uint8_t *output_packed; // used by deplanarize to store packed audio samples
     int output_left;
     int unitsize;
-    int previous_data_left;  // input demuxer packet data
     bool force_channel_map;
+    struct demux_packet *packet;
 };
 
 #define OPT_BASE_STRUCT struct MPOpts
@@ -344,9 +345,9 @@ static int control(sh_audio_t *sh, int cmd, void *arg)
     switch (cmd) {
     case ADCTRL_RESYNC_STREAM:
         avcodec_flush_buffers(ctx->avctx);
-        ds_clear_parser(sh->ds);
-        ctx->previous_data_left = 0;
         ctx->output_left = 0;
+        talloc_free(ctx->packet);
+        ctx->packet = NULL;
         return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
@@ -375,43 +376,35 @@ static int decode_new_packet(struct sh_audio *sh)
 {
     struct priv *priv = sh->context;
     AVCodecContext *avctx = priv->avctx;
-    double pts = MP_NOPTS_VALUE;
-    int insize;
-    bool packet_already_used = priv->previous_data_left;
-    struct demux_packet *mpkt = ds_get_packet2(sh->ds,
-                                               priv->previous_data_left);
-    unsigned char *start;
-    if (!mpkt) {
-        assert(!priv->previous_data_left);
-        start = NULL;
-        insize = 0;
-        ds_parse(sh->ds, &start, &insize, pts, 0);
-        if (insize <= 0)
-            return -1;  // error or EOF
-    } else {
-        assert(mpkt->len >= priv->previous_data_left);
-        if (!priv->previous_data_left) {
-            priv->previous_data_left = mpkt->len;
-            pts = mpkt->pts;
-        }
-        insize = priv->previous_data_left;
-        start = mpkt->buffer + mpkt->len - priv->previous_data_left;
-        int consumed = ds_parse(sh->ds, &start, &insize, pts, 0);
-        priv->previous_data_left -= consumed;
-        priv->previous_data_left = FFMAX(priv->previous_data_left, 0);
-    }
+    struct demux_packet *mpkt = priv->packet;
+    if (!mpkt)
+        mpkt = demux_read_packet(sh->gsh);
+    if (!mpkt)
+        return -1;  // error or EOF
+
+    priv->packet = talloc_steal(priv, mpkt);
+
+    int in_len = mpkt->len;
 
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt);
-    pkt.data = start;
-    pkt.size = insize;
 
-    if (pts != MP_NOPTS_VALUE && !packet_already_used) {
-        sh->pts = pts;
+    if (mpkt->pts != MP_NOPTS_VALUE) {
+        sh->pts = mpkt->pts;
         sh->pts_bytes = 0;
     }
     int got_frame = 0;
     int ret = avcodec_decode_audio4(avctx, priv->avframe, &got_frame, &pkt);
+    if (ret > 0) {
+        ret = FFMIN(ret, mpkt->len); // sanity check against decoder overreads
+        mpkt->buffer += ret;
+        mpkt->len    -= ret;
+        mpkt->pts = MP_NOPTS_VALUE; // don't reset PTS next time
+    }
+    if (mpkt->len == 0 || ret <= 0) {
+        talloc_free(mpkt);
+        priv->packet = NULL;
+    }
     // LATM may need many packets to find mux info
     if (ret == AVERROR(EAGAIN))
         return 0;
@@ -419,9 +412,6 @@ static int decode_new_packet(struct sh_audio *sh)
         mp_msg(MSGT_DECAUDIO, MSGL_V, "lavc_audio: error\n");
         return -1;
     }
-    // The "insize >= ret" test is sanity check against decoder overreads
-    if (!sh->parser && insize >= ret)
-        priv->previous_data_left = insize - ret;
     if (!got_frame)
         return 0;
     uint64_t unitsize = (uint64_t)av_get_bytes_per_sample(avctx->sample_fmt) *
@@ -438,7 +428,7 @@ static int decode_new_packet(struct sh_audio *sh)
     } else {
         priv->output = priv->avframe->data[0];
     }
-    mp_dbg(MSGT_DECAUDIO, MSGL_DBG2, "Decoded %d -> %d  \n", insize,
+    mp_dbg(MSGT_DECAUDIO, MSGL_DBG2, "Decoded %d -> %d  \n", in_len,
            priv->output_left);
     return 0;
 }

@@ -419,19 +419,63 @@ enum mp_csp_levels mp_image_levels(struct mp_image *img)
     return (img->flags & MP_IMGFLAG_YUV) ? MP_CSP_LEVELS_TV : MP_CSP_LEVELS_PC;
 }
 
+static void mp_image_params_from_image(struct mp_image_params *params,
+                                       const struct mp_image *image)
+{
+    // (Ideally mp_image should use mp_image_params directly instead)
+    *params = (struct mp_image_params) {
+        .imgfmt = image->imgfmt,
+        .w = image->w,
+        .h = image->h,
+        .d_w = image->display_w,
+        .d_h = image->display_h,
+        .colorspace = image->colorspace,
+        .colorlevels = image->levels,
+    };
+}
+
 void mp_image_set_colorspace_details(struct mp_image *image,
                                      struct mp_csp_details *csp)
 {
-    if (image->flags & MP_IMGFLAG_YUV) {
-        image->colorspace = csp->format;
-        if (image->colorspace == MP_CSP_AUTO)
-            image->colorspace = MP_CSP_BT_601;
-        image->levels = csp->levels_in;
-        if (image->levels == MP_CSP_LEVELS_AUTO)
-            image->levels = MP_CSP_LEVELS_TV;
+    struct mp_image_params params;
+    mp_image_params_from_image(&params, image);
+    mp_image_params_guess_csp(&params);
+    image->colorspace = params.colorspace;
+    image->levels = params.colorlevels;
+}
+
+// If details like params->colorspace/colorlevels are missing, guess them from
+// the other settings. Also, even if they are set, make them consistent with
+// the colorspace as implied by the pixel format.
+void mp_image_params_guess_csp(struct mp_image_params *params)
+{
+    struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(params->imgfmt);
+    if (!fmt.id)
+        return;
+    if (fmt.flags & MP_IMGFLAG_YUV) {
+        if (params->colorspace != MP_CSP_BT_601 &&
+            params->colorspace != MP_CSP_BT_709 &&
+            params->colorspace != MP_CSP_SMPTE_240M &&
+            params->colorspace != MP_CSP_YCGCO)
+        {
+            // Makes no sense, so guess instead
+            // YCGCO should be separate, but libavcodec disagrees
+            params->colorspace = MP_CSP_AUTO;
+        }
+        if (params->colorspace == MP_CSP_AUTO)
+            params->colorspace = mp_csp_guess_colorspace(params->w, params->h);
+        if (params->colorlevels == MP_CSP_LEVELS_AUTO)
+            params->colorlevels = MP_CSP_LEVELS_TV;
+    } else if (fmt.flags & MP_IMGFLAG_RGB) {
+        params->colorspace = MP_CSP_RGB;
+        params->colorlevels = MP_CSP_LEVELS_PC;
+    } else if (fmt.flags & MP_IMGFLAG_XYZ) {
+        params->colorspace = MP_CSP_XYZ;
+        params->colorlevels = MP_CSP_LEVELS_PC;
     } else {
-        image->colorspace = MP_CSP_RGB;
-        image->levels = MP_CSP_LEVELS_PC;
+        // We have no clue.
+        params->colorspace = MP_CSP_AUTO;
+        params->colorlevels = MP_CSP_LEVELS_AUTO;
     }
 }
 

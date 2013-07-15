@@ -45,6 +45,12 @@ char * const mp_csp_names[MP_CSP_COUNT] = {
     "YCgCo",
 };
 
+char * const mp_csp_levels_names[MP_CSP_LEVELS_COUNT] = {
+    "Autoselect",
+    "TV",
+    "PC",
+};
+
 char * const mp_csp_equalizer_names[MP_CSP_EQ_COUNT] = {
     "brightness",
     "contrast",

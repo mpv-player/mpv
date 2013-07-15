@@ -138,6 +138,8 @@ struct mp_csp_details;
 void mp_image_set_colorspace_details(struct mp_image *image,
                                      struct mp_csp_details *csp);
 
+void mp_image_params_guess_csp(struct mp_image_params *params);
+
 struct AVFrame;
 void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
                                         struct AVFrame *src);

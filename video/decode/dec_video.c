@@ -24,14 +24,12 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "demux/codec_tags.h"
-
 #include "core/mp_msg.h"
 
 #include "osdep/timer.h"
 
 #include "stream/stream.h"
-#include "demux/demux.h"
+#include "demux/demux_packet.h"
 
 #include "core/codecs.h"
 
@@ -45,11 +43,19 @@
 #include "video/decode/dec_video.h"
 
 
+int vd_control(struct sh_video *sh_video, int cmd, void *arg)
+{
+    const struct vd_functions *vd = sh_video->vd_driver;
+    if (vd)
+        return vd->control(sh_video, cmd, arg);
+    return CONTROL_UNKNOWN;
+}
+
 int get_video_quality_max(sh_video_t *sh_video)
 {
     vf_instance_t *vf = sh_video->vfilter;
     if (vf) {
-        int ret = vf->control(vf, VFCTRL_QUERY_MAX_PP_LEVEL, NULL);
+        int ret = vf_control(vf, VFCTRL_QUERY_MAX_PP_LEVEL, NULL);
         if (ret > 0) {
             mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[PP] Using external postprocessing filter, max q = %d.\n", ret);
             return ret;
@@ -68,7 +74,7 @@ int set_video_colors(sh_video_t *sh_video, const char *item, int value)
 
     mp_dbg(MSGT_DECVIDEO, MSGL_V, "set video colors %s=%d \n", item, value);
     if (vf) {
-        int ret = vf->control(vf, VFCTRL_SET_EQUALIZER, &data);
+        int ret = vf_control(vf, VFCTRL_SET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE)
             return 1;
     }
@@ -86,7 +92,7 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
 
     mp_dbg(MSGT_DECVIDEO, MSGL_V, "get video colors %s \n", item);
     if (vf) {
-        int ret = vf->control(vf, VFCTRL_GET_EQUALIZER, &data);
+        int ret = vf_control(vf, VFCTRL_GET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE) {
             *value = data.value;
             return 1;
@@ -95,38 +101,51 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
     return 0;
 }
 
-void get_detected_video_colorspace(struct sh_video *sh, struct mp_csp_details *csp)
+// Return the effective video image parameters. Might be different from VO,
+// and might be different from actual video bitstream/container params.
+// This is affected by user-specified overrides (aspect, colorspace...).
+bool get_video_params(struct sh_video *sh, struct mp_image_params *p)
 {
     struct MPOpts *opts = sh->opts;
 
-    csp->format = opts->requested_colorspace;
-    csp->levels_in = opts->requested_input_range;
-    csp->levels_out = opts->requested_output_range;
+    if (!sh->vf_input)
+        return false;
 
-    if (csp->format == MP_CSP_AUTO)
-        csp->format = sh->colorspace;
-    if (csp->format == MP_CSP_AUTO)
-        csp->format = mp_csp_guess_colorspace(sh->disp_w, sh->disp_h);
+    *p = *sh->vf_input;
 
-    if (csp->levels_in == MP_CSP_LEVELS_AUTO)
-        csp->levels_in = sh->color_range;
-    if (csp->levels_in == MP_CSP_LEVELS_AUTO)
-        csp->levels_in = MP_CSP_LEVELS_TV;
+    // Apply user overrides
+    if (opts->requested_colorspace != MP_CSP_AUTO)
+        p->colorspace = opts->requested_colorspace;
+    if (opts->requested_input_range != MP_CSP_LEVELS_AUTO)
+        p->colorlevels = opts->requested_input_range;
 
-    if (csp->levels_out == MP_CSP_LEVELS_AUTO)
-        csp->levels_out = MP_CSP_LEVELS_PC;
+    // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.)
+    mp_image_params_guess_csp(p);
+
+    return true;
 }
 
 void set_video_colorspace(struct sh_video *sh)
 {
+    struct MPOpts *opts = sh->opts;
     struct vf_instance *vf = sh->vfilter;
 
-    struct mp_csp_details requested;
-    get_detected_video_colorspace(sh, &requested);
-    vf->control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
+    struct mp_image_params params;
+    if (!get_video_params(sh, &params))
+        return;
+
+    struct mp_csp_details requested = {
+        .format = params.colorspace,
+        .levels_in = params.colorlevels,
+        .levels_out = opts->requested_output_range,
+    };
+    if (requested.levels_out == MP_CSP_LEVELS_AUTO)
+        requested.levels_out = MP_CSP_LEVELS_PC;
+
+    vf_control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
 
     struct mp_csp_details actual = MP_CSP_DETAILS_DEFAULTS;
-    vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual);
+    vf_control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual);
 
     int success = actual.format == requested.format
                && actual.levels_in == requested.levels_in
@@ -140,32 +159,27 @@ void set_video_colorspace(struct sh_video *sh)
             && requested.format == MP_CSP_SMPTE_240M) {
         // BT.709 is pretty close, much better than BT.601
         requested.format = MP_CSP_BT_709;
-        vf->control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
+        vf_control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
     }
 
 }
 
 void resync_video_stream(sh_video_t *sh_video)
 {
-    const struct vd_functions *vd = sh_video->vd_driver;
-    if (vd)
-        vd->control(sh_video, VDCTRL_RESYNC_STREAM, NULL);
+    vd_control(sh_video, VDCTRL_RESYNC_STREAM, NULL);
     sh_video->prev_codec_reordered_pts = MP_NOPTS_VALUE;
     sh_video->prev_sorted_pts = MP_NOPTS_VALUE;
 }
 
 void video_reinit_vo(struct sh_video *sh_video)
 {
-    sh_video->vd_driver->control(sh_video, VDCTRL_REINIT_VO, NULL);
+    vd_control(sh_video, VDCTRL_REINIT_VO, NULL);
 }
 
 int get_current_video_decoder_lag(sh_video_t *sh_video)
 {
-    const struct vd_functions *vd = sh_video->vd_driver;
-    if (!vd)
-        return -1;
     int ret = -1;
-    vd->control(sh_video, VDCTRL_QUERY_UNSEEN_FRAMES, &ret);
+    vd_control(sh_video, VDCTRL_QUERY_UNSEEN_FRAMES, &ret);
     return ret;
 }
 

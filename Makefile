@@ -118,6 +118,8 @@ ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
     SOURCES-yes                 += video/decode/lavc_dr1.c
 endif
 
+SOURCES-$(DLOPEN)               += video/filter/vf_dlopen.c
+
 SOURCES = talloc.c \
           audio/audio.c \
           audio/chmap.c \
@@ -187,30 +189,17 @@ SOURCES = talloc.c \
           core/timeline/tl_edl.c \
           core/timeline/tl_matroska.c \
           core/timeline/tl_cue.c \
-          demux/asfheader.c \
-          demux/aviheader.c \
-          demux/aviprint.c \
           demux/codec_tags.c \
           demux/demux.c \
-          demux/demux_asf.c \
-          demux/demux_avi.c \
           demux/demux_edl.c \
           demux/demux_cue.c \
           demux/demux_lavf.c \
           demux/demux_mf.c \
           demux/demux_mkv.c \
-          demux/demux_mpg.c \
           demux/demux_subreader.c \
-          demux/demux_ts.c \
-          demux/mp3_hdr.c \
-          demux/parse_es.c \
-          demux/mpeg_hdr.c \
-          demux/demux_rawaudio.c \
-          demux/demux_rawvideo.c \
+          demux/demux_raw.c \
           demux/ebml.c \
-          demux/extension.c \
           demux/mf.c \
-          demux/video.c \
           osdep/io.c \
           osdep/numcores.c \
           osdep/timer.c \
@@ -250,7 +239,6 @@ SOURCES = talloc.c \
           video/filter/vf_crop.c \
           video/filter/vf_delogo.c \
           video/filter/vf_divtc.c \
-          video/filter/vf_dlopen.c \
           video/filter/vf_down3dright.c \
           video/filter/vf_dsize.c \
           video/filter/vf_eq.c \

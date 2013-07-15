@@ -157,7 +157,7 @@
     Enables placing toptitles and subtitles in black borders when they are
     available.
 
-``--ass-vsfilter-aspect-compat``
+``--ass-vsfilter-aspect-compat=<yes|no>``
     Stretch SSA/ASS subtitles when playing anamorphic videos for compatibility
     with traditional VSFilter behavior. This switch has no effect when the
     video is stored with square pixels.
@@ -173,6 +173,40 @@
     behavior (undesirable but expected by many existing scripts).
 
     Enabled by default.
+
+``--ass-vsfilter-blur-compat=<yes|no>``
+    Scale ``\blur`` tags by video resolution instead of script resolution
+    (enabled by default). This is bug in VSFilter, which according to some,
+    can't be fixed anymore in the name of compatibility.
+
+    Note that this uses the actual video resolution for calculating the
+    offset scale factor, not what the video filter chain or the video output
+    use.
+
+``--ass-vsfilter-color-compat=<basic|full|force-601|no``
+    Mangle colors like (xy-)vsfilter do (default: basic). Historically, VSFilter
+    was not colorspace aware. This was no problem as long as the colorspace
+    used for SD video (BT.601) was used. But when everything switched to HD
+    (BT.709), VSFilter was still converting RGB colors to BT.601, rendered
+    them into the video frame, and handled the frame to the video output, which
+    would use BT.709 for conversion to RGB. The result were mangled subtitle
+    colors. Later on, bad hacks were added on top of the ASS format to control
+    how colors are to be mangled.
+
+    :basic: Handle only BT.601->BT.709 mangling, if the subtitles seem to
+            indicate that this is required (default).
+    :full:  Handle the full ``YCbCr Matrix`` header with all video colorspaces
+            supported by libass and mpv. This might lead to bad breakages in
+            corner cases and is not strictly needed for compatibility
+            (hopefully), which is why this is not default.
+    :force-601: Force BT.601->BT.709 mangling, regardless of subtitle headers
+            or video colorspace.
+    :no:    Disable color mangling completely. All colors are RGB.
+
+    Choosing anything other than ``no`` will make the subtitle color depend on
+    the video colorspace, and it's for example in theory not possible to reuse
+    a subtitle script with another video file. The ``--ass-style-override``
+    option doesn't affect how this option is interpreted.
 
 ``--audio-demuxer=<[+]name>``
     Use this audio demuxer type when using ``--audiofile``. Use a '+' before the
@@ -309,7 +343,7 @@
     Set the size of the cache in kilobytes, disable it with ``no``, or
     automatically enable it if needed with ``auto`` (default: ``auto``).
     With ``auto``, the cache will usually be enabled for network streams,
-    using a default size.
+    using the size set by ``--cache-default``.
 
     May be useful when playing files from slow media, but can also have
     negative effects, especially with file formats that require a lot of
@@ -320,6 +354,11 @@
     cache fill display does not include the part of the cache reserved for
     seeking back. Likewise, when starting a file the cache will be at 100%,
     because no space is reserved for seeking back yet.
+
+``--cache-default=<kBytes|no>``
+    Set the size of the cache in kilobytes (default: 320 KB). Using ``no``
+    will not automatically enable the cache e.h. when playing from a network
+    stream. Note that using ``--cache`` will always override this option.
 
 ``--cache-pause=<no|percentage>``
     If the cache percentage goes below the specified value, pause and wait
@@ -554,6 +593,16 @@
 ``--demuxer-lavf-format=<value>``
     Force a specific libavformat demuxer.
 
+``--demuxer-lavf-genpts-mode=<auto|lavf|builtin|no>``
+    Mode for deriving missing packet PTS values from packet DTS. ``lavf``
+    enables libavformat's ``genpts`` option. ``builtin`` enables equivalent
+    code in mpv. ``auto`` will enable either lavf (normal playback) or builtin
+    (DVD playback) in correct-pts mode. The difference between them is that
+    the builtin code will not potentially read until EOF trying to derive the
+    PTS (which is very bad for DVD playback). On the other hand, builtin might
+    give up too early, which is why lavf is preferred normally. ``no`` disables
+    both.
+
 ``--demuxer-lavf-o=<key>=<value>[,<key>=<value>[,...]]``
     Pass AVOptions to libavformat demuxer.
 
@@ -689,12 +738,6 @@
 ``--end=<time>``
     Stop at given absolute time. Use ``--length`` if the time should be relative
     to ``--start``. See ``--start`` for valid option values and examples.
-
-``--no-extbased``, ``--extbased``
-    ``--no-extbased`` disables extension-based demuxer selection. By default,
-    when the file type (demuxer) cannot be detected reliably (the file has no
-    header or it is not reliable enough), the filename extension is used to
-    select the demuxer. Always falls back on content-based demuxer selection.
 
 ``--field-dominance=<auto|top|bottom>``
     Set first field for interlaced content. Useful for deinterlacers that
@@ -1044,11 +1087,6 @@
         This option only works if the underlying media supports seeking
         (i.e. not with stdin, pipe, etc).
 
-``--ignore-start``
-    Matters with the builtin AVI demuxer only, which is not enabled by default.
-    Ignore the specified starting time for streams in AVI files. This
-    nullifies stream delays.
-
 ``--include=<configuration-file>``
     Specify configuration file to be parsed after the default ones.
 
@@ -1256,19 +1294,9 @@
     depends on the VO backend and how it handles keyboard input. Does not
     apply to terminal input.)
 
-``--avi-ni``
-    (Internal AVI demuxer which is not used by default only)
-    Force usage of non-interleaved AVI parser (fixes playback of some bad AVI
-    files).
-
 ``--no-aspect``
     Ignore aspect ratio information from video file and assume the video has
     square pixels. See also ``--aspect``.
-
-``--no-bps``
-    (Internal AVI demuxer which is not used by default only)
-    Do not use average byte/second value for A-V sync. Helps with some AVI
-    files with broken header.
 
 ``--no-cache``
     Turn off input stream caching. See ``--cache``.
