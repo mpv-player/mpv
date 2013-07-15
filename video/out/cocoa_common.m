@@ -851,6 +851,8 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         NSPoint loc = [self mouseLocationUpperLeft];
         vo_mouse_movement(self.videoOutput, loc.x, loc.y);
         [self recalcDraggableState];
+    } else {
+        cocoa_put_key(MP_KEY_MOUSE_LEAVE);
     }
 }
 
