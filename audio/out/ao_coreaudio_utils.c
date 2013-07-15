@@ -116,12 +116,12 @@ bool ca_stream_supports_digital(AudioStreamID stream)
         AudioStreamBasicDescription asbd = formats[i].mFormat;
         ca_print_asbd("supported format:", &(asbd));
         if (ca_format_is_digital(asbd)) {
-            free(formats);
+            talloc_free(formats);
             return true;
         }
     }
 
-    free(formats);
+    talloc_free(formats);
 coreaudio_error:
     return false;
 }
@@ -139,12 +139,12 @@ bool ca_device_supports_digital(AudioDeviceID device)
 
     for (int i = 0; i < n_streams; i++) {
         if (ca_stream_supports_digital(streams[i])) {
-            free(streams);
+            talloc_free(streams);
             return true;
         }
     }
 
-    free(streams);
+    talloc_free(streams);
 
 coreaudio_error:
     return false;

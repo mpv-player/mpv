@@ -215,16 +215,16 @@ static void print_help(void)
         char *name;
         OSStatus err = CA_GET_STR(devs[i], kAudioObjectPropertyName, &name);
 
-        if (err == noErr) {
-            help = talloc_asprintf_append(help,
-                    "%s (id: %" PRIu32 ")\n", name, devs[i]);
-            free(name);
-        } else
-            help = talloc_asprintf_append(help,
-                    "Unknown (id: %" PRIu32 ")\n", devs[i]);
+        if (err == noErr)
+            talloc_steal(devs, name);
+        else
+            name = "Unknown";
+
+        help = talloc_asprintf_append(
+                help, "%s (id: %" PRIu32 ")\n", name, devs[i]);
     }
 
-    free(devs);
+    talloc_free(devs);
 
 coreaudio_error:
     ca_msg(MSGL_FATAL, "%s", help);
@@ -294,7 +294,7 @@ static int init(struct ao *ao, char *params)
            "selected audio output device: %s (%" PRIu32 ")\n",
            device_name, selected_device);
 
-    free(device_name);
+    talloc_free(device_name);
 
     // Save selected device id
     p->device = selected_device;
@@ -318,7 +318,7 @@ static int init(struct ao *ao, char *params)
         size_t   n_bitmaps;
 
         ca_bitmaps_from_layouts(layouts, n_layouts, &bitmaps, &n_bitmaps);
-        free(layouts);
+        talloc_free(layouts);
 
         struct mp_chmap_sel chmap_sel = {0};
 
@@ -535,11 +535,11 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
             else
                 d->stream_asbd = formats[max_rate_format].mFormat;
 
-            free(formats);
+            talloc_free(formats);
         }
     }
 
-    free(streams);
+    talloc_free(streams);
 
     if (d->stream_idx < 0) {
         ca_msg(MSGL_WARN, "can't find any digital output stream format\n");
