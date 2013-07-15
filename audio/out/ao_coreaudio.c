@@ -70,6 +70,7 @@ struct priv_d {
     // format we changed the stream to: for the digital case each application
     // sets the stream format for a device to what it needs
     AudioStreamBasicDescription stream_asbd;
+    AudioStreamBasicDescription original_asbd;
 
     bool changed_mixing;
     int stream_asbd_changed;
@@ -493,6 +494,12 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
         bool digital = ca_stream_supports_digital(streams[i]);
 
         if (digital) {
+            err = CA_GET(streams[i], kAudioStreamPropertyPhysicalFormat,
+                         &d->original_asbd);
+            if (!CHECK_CA_WARN("could not get stream's physical format to "
+                               "revert to, getting the next one"))
+                continue;
+
             AudioStreamRangedDescription *formats;
             size_t n_formats;
 
@@ -500,10 +507,8 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
                              kAudioStreamPropertyAvailablePhysicalFormats,
                              &formats, &n_formats);
 
-            if (err != noErr) {
-                ca_msg(MSGL_WARN, "could not get number of stream formats\n");
+            if (!CHECK_CA_WARN("could not get number of stream formats"))
                 continue; // try next one
-            }
 
             int req_rate_format = -1;
             int max_rate_format = -1;
@@ -653,6 +658,9 @@ static void uninit(struct ao *ao, bool immed)
 
         err = AudioDeviceDestroyIOProcID(p->device, d->render_cb);
         CHECK_CA_WARN("failed to remove device render callback");
+
+        if (!ca_change_format(d->stream, d->original_asbd))
+            ca_msg(MSGL_WARN, "can't revert to original device format");
 
         err = ca_enable_mixing(p->device, d->changed_mixing);
         CHECK_CA_WARN("can't re-enable mixing");
