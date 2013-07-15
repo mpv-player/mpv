@@ -388,7 +388,7 @@ bool ca_bitmap_from_ch_desc(AudioChannelLayout *layout, uint32_t *bitmap)
         if (label == kAudioChannelLabel_UseCoordinates ||
             label == kAudioChannelLabel_Unknown ||
             label > kAudioChannelLabel_TopBackRight) {
-            ca_msg(MSGL_WARN,
+            ca_msg(MSGL_V,
                     "channel label=%d unusable to build channel "
                     "bitmap, skipping layout\n", label);
             all_channels_valid = false;
@@ -413,7 +413,7 @@ bool ca_bitmap_from_ch_tag(AudioChannelLayout *layout, uint32_t *bitmap)
         sizeof(AudioChannelLayoutTag), &tag,
         &bitmap_size, bitmap);
     if (err != noErr) {
-        ca_msg(MSGL_WARN,
+        ca_msg(MSGL_V,
                 "channel layout tag=%d unusable to build channel "
                 "bitmap, skipping layout\n", tag);
         return false;
