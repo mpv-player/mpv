@@ -26,6 +26,7 @@
 #include "core/input/keycodes.h"
 #include "core/input/input.h"
 #include "core/mp_msg.h"
+#include "core/mp_common.h"
 #include "vo.h"
 #include "aspect.h"
 #include "w32_common.h"
@@ -158,7 +159,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                 RECT r = *rc;
                 subtract_window_borders(w32->window, &r);
                 int c_w = r.right - r.left, c_h = r.bottom - r.top;
-                float aspect = vo->aspdat.asp;
+                float aspect = w32->o_dwidth / (float) MPMAX(w32->o_dheight, 1);
                 int d_w = c_h * aspect - c_w;
                 int d_h = c_w / aspect - c_h;
                 int d_corners[4] = { d_w, d_h, -d_w, -d_h };
