@@ -30,6 +30,7 @@
 #include <libavutil/intreadwrite.h>
 #include <libavutil/attributes.h>
 #include <libavutil/md5.h>
+#include <libavutil/common.h>
 
 #include <libavcodec/version.h>
 

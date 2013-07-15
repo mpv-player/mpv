@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <string.h>
 
+#include <libavutil/common.h>
 #include <ass/ass.h>
 
 #include "talloc.h"
