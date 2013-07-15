@@ -860,6 +860,16 @@ extra_cflags="-I. -D_GNU_SOURCE $extra_cflags"
 _timer=timer-linux.c
 _getch=getch2.c
 
+if freebsd ; then
+  extra_ldflags="$extra_ldflags -L/usr/local/lib"
+  extra_cflags="$extra_cflags -I/usr/local/include"
+fi
+
+if netbsd || dragonfly ; then
+  extra_ldflags="$extra_ldflags -L/usr/pkg/lib"
+  extra_cflags="$extra_cflags -I/usr/pkg/include"
+fi
+
 if darwin; then
   extra_cflags="-mdynamic-no-pic $extra_cflags"
   _timer=timer-darwin.c
