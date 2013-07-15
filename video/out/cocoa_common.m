@@ -958,7 +958,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         // The visible frame's width is smaller: dock is on left or right end
         // of this method's receiver.
         vF.size.width < f.size.width ||
-        // The visible frame's veritical origin is bigger is smaller: dock is
+        // The visible frame's veritical origin is bigger: dock is
         // on the bottom of this method's receiver.
         vF.origin.y > f.origin.y;
 
