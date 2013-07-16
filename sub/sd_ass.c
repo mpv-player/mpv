@@ -188,13 +188,13 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     if (pts == MP_NOPTS_VALUE || !sd->ass_renderer)
         return;
 
-    bool use_vs_aspect = !ctx->is_converted &&
-        opts->ass_style_override ? opts->ass_vsfilter_aspect_compat : 1;
-
     ASS_Renderer *renderer = sd->ass_renderer;
     double scale = dim.display_par;
-    if (use_vs_aspect)
+    if (!ctx->is_converted && (!opts->ass_style_override ||
+                               opts->ass_vsfilter_aspect_compat))
+    {
         scale = scale * dim.video_par;
+    }
     mp_ass_configure(renderer, opts, &dim);
     ass_set_aspect_ratio(renderer, scale, 1);
 #if LIBASS_VERSION >= 0x01020000
