@@ -1587,6 +1587,12 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         goto error;
     }
 
+    // Some files have broken default DefaultDuration set, which will lead to
+    // audio packets with incorrect timestamps. This follows FFmpeg commit
+    // 6158a3b, sample see FFmpeg ticket 2508.
+    if (sh_a->samplerate == 8000 && strcmp(track->codec_id, MKV_A_AC3) == 0)
+        track->default_duration = 0;
+
     mp_set_audio_codec_from_tag(sh_a);
 
     return 0;
