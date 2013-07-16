@@ -56,7 +56,7 @@
 #include "mp_core.h"
 #include "command.h"
 
-#ifdef CONFIG_DVBIN
+#if HAVE_DVBIN
 #include "stream/dvbin.h"
 #endif
 
@@ -85,7 +85,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
     if (mask & INITIALIZED_LIBASS) {
         mpctx->initialized_flags &= ~INITIALIZED_LIBASS;
-#ifdef CONFIG_ASS
+#if HAVE_LIBASS
         if (mpctx->osd->ass_renderer)
             ass_renderer_done(mpctx->osd->ass_renderer);
         mpctx->osd->ass_renderer = NULL;
@@ -472,7 +472,7 @@ void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
 
 static void add_dvd_tracks(struct MPContext *mpctx)
 {
-#ifdef CONFIG_DVDREAD
+#if HAVE_DVDREAD
     struct demuxer *demuxer = mpctx->demuxer;
     struct stream *stream = demuxer->stream;
     struct stream_dvd_info_req info;
@@ -818,7 +818,7 @@ static bool attachment_is_font(struct demux_attachment *att)
 
 static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
 {
-#ifdef CONFIG_ASS
+#if HAVE_LIBASS
     if (mpctx->opts->ass_enabled) {
         for (int j = 0; j < mpctx->num_sources; j++) {
             struct demuxer *d = mpctx->sources[j];
@@ -835,7 +835,7 @@ static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
 
 static void init_sub_renderer(struct MPContext *mpctx)
 {
-#ifdef CONFIG_ASS
+#if HAVE_LIBASS
     assert(!(mpctx->initialized_flags & INITIALIZED_LIBASS));
     assert(!mpctx->osd->ass_renderer);
 
@@ -853,7 +853,7 @@ static struct mp_resolve_result *resolve_url(const char *filename,
 {
     if (!mp_is_url(bstr0(filename)))
         return NULL;
-#if defined(CONFIG_LIBQUVI) || defined(CONFIG_LIBQUVI9)
+#if HAVE_LIBQUVI4 || HAVE_LIBQUVI9
     return mp_resolve_quvi(filename, opts);
 #else
     return NULL;
@@ -979,7 +979,7 @@ static void play_current_file(struct MPContext *mpctx)
     if (!mpctx->filename)
         goto terminate_playback;
 
-#ifdef CONFIG_ENCODING
+#if HAVE_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
 #endif
 
@@ -1026,7 +1026,7 @@ static void play_current_file(struct MPContext *mpctx)
         MP_DBG(mpctx, "\n[[[init getch2]]]\n");
     }
 
-#ifdef CONFIG_ASS
+#if HAVE_LIBASS
     if (opts->ass_style_override)
         ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
 #endif
@@ -1077,7 +1077,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     stream_set_capture_file(mpctx->stream, opts->stream_capture);
 
-#ifdef CONFIG_DVBIN
+#if HAVE_DVBIN
 goto_reopen_demuxer: ;
 #endif
 
@@ -1164,7 +1164,7 @@ goto_reopen_demuxer: ;
 
     preselect_demux_streams(mpctx);
 
-#ifdef CONFIG_ENCODING
+#if HAVE_ENCODING
     if (mpctx->encode_lavc_ctx && mpctx->current_track[STREAM_VIDEO])
         encode_lavc_expect_stream(mpctx->encode_lavc_ctx, AVMEDIA_TYPE_VIDEO);
     if (mpctx->encode_lavc_ctx && mpctx->current_track[STREAM_AUDIO])
@@ -1186,7 +1186,7 @@ goto_reopen_demuxer: ;
 
     if (!mpctx->sh_video && !mpctx->sh_audio) {
         MP_FATAL(mpctx, "No video or audio streams selected.\n");
-#ifdef CONFIG_DVBIN
+#if HAVE_DVBIN
         if (mpctx->stream->type == STREAMTYPE_DVB) {
             int dir;
             int v = mpctx->last_dvb_step;
@@ -1262,7 +1262,7 @@ goto_reopen_demuxer: ;
 
     MP_VERBOSE(mpctx, "EOF code: %d  \n", mpctx->stop_play);
 
-#ifdef CONFIG_DVBIN
+#if HAVE_DVBIN
     if (mpctx->dvbin_reopen) {
         mpctx->stop_play = 0;
         uninit_player(mpctx, INITIALIZED_ALL - (INITIALIZED_STREAM | INITIALIZED_GETCH2 | (opts->fixed_vo ? INITIALIZED_VO : 0)));

@@ -30,7 +30,7 @@ void mp_sleep_us(int64_t us)
 {
     if (us < 0)
         return;
-#ifdef HAVE_NANOSLEEP
+#if HAVE_NANOSLEEP
     struct timespec ts;
     ts.tv_sec  =  us / 1000000;
     ts.tv_nsec = (us % 1000000) * 1000;

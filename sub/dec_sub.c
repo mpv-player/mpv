@@ -41,7 +41,7 @@ extern const struct sd_functions sd_lavf_srt;
 extern const struct sd_functions sd_lavc_conv;
 
 static const struct sd_functions *sd_list[] = {
-#ifdef CONFIG_ASS
+#if HAVE_LIBASS
     &sd_ass,
 #endif
     &sd_lavc,

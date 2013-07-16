@@ -65,7 +65,7 @@ static struct af_info* filter_list[] = {
     &af_info_pan,
     &af_info_surround,
     &af_info_sub,
-#ifdef HAVE_SYS_MMAN_H
+#if HAVE_SYS_MMAN_H
     &af_info_export,
 #endif
     &af_info_drc,
@@ -74,17 +74,17 @@ static struct af_info* filter_list[] = {
     &af_info_lavrresample,
     &af_info_sweep,
     &af_info_hrtf,
-#ifdef CONFIG_LADSPA
+#if HAVE_LADSPA
     &af_info_ladspa,
 #endif
     &af_info_center,
     &af_info_sinesuppress,
     &af_info_karaoke,
     &af_info_scaletempo,
-#ifdef CONFIG_LIBBS2B
+#if HAVE_LIBBS2B
     &af_info_bs2b,
 #endif
-#ifdef CONFIG_AF_LAVFI
+#if HAVE_AF_LAVFI
     &af_info_lavfi,
 #endif
     // Must come last, because they're fallback format conversion filter

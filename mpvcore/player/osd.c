@@ -140,7 +140,7 @@ void print_status(struct MPContext *mpctx)
             saddf(&line, " ct:%7.3f", mpctx->total_avsync_change);
     }
 
-#ifdef CONFIG_ENCODING
+#if HAVE_ENCODING
     double position = get_current_pos_ratio(mpctx, true);
     char lavcbuf[80];
     if (encode_lavc_getstatus(mpctx->encode_lavc_ctx, lavcbuf, sizeof(lavcbuf),

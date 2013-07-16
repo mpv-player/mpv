@@ -658,7 +658,7 @@ const struct vo_driver video_out_vaapi = {
     .priv_defaults = &(const struct priv) {
         .scaling = VA_FILTER_SCALING_DEFAULT,
         .deint = 0,
-#if !CONFIG_VAAPI_VPP
+#if !HAVE_VAAPI_VPP
         .deint_type = 2,
 #endif
     },

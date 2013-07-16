@@ -35,7 +35,7 @@
 #include "gl_video.h"
 #include "gl_lcms.h"
 
-#ifdef CONFIG_LCMS2
+#if HAVE_LCMS2
 
 #include <lcms2.h>
 
@@ -212,7 +212,7 @@ error_exit:
     return NULL;
 }
 
-#else /* CONFIG_LCMS2 */
+#else /* HAVE_LCMS2 */
 
 const struct m_sub_options mp_icc_conf = {
     .opts = (m_option_t[]) { {0} },

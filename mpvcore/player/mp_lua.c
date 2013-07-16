@@ -24,13 +24,13 @@
 // All these are generated from mpvcore/lua/*.lua
 static const char *builtin_lua_scripts[][2] = {
     {"mp.defaults",
-#   include "lua/defaults.inc"
+#   include "mpvcore/player/lua/defaults.inc"
     },
     {"mp.assdraw",
-#   include "lua/assdraw.inc"
+#   include "mpvcore/player/lua/assdraw.inc"
     },
     {"@osc",
-#   include "lua/osc.inc"
+#   include "mpvcore/player/lua/osc.inc"
     },
     {0}
 };

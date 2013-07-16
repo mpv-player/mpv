@@ -72,7 +72,7 @@ static int print_version_opt(const m_option_t *opt, const char *name,
     exit(0);
 }
 
-#ifdef CONFIG_RADIO
+#if HAVE_RADIO
 static const m_option_t radioopts_conf[]={
     {"device", &stream_radio_defaults.device, CONF_TYPE_STRING, 0, 0 ,0, NULL},
     {"driver", &stream_radio_defaults.driver, CONF_TYPE_STRING, 0, 0 ,0, NULL},
@@ -83,9 +83,9 @@ static const m_option_t radioopts_conf[]={
     {"achannels", &stream_radio_defaults.achannels, CONF_TYPE_INT, CONF_MIN, 0 ,0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
-#endif /* CONFIG_RADIO */
+#endif /* HAVE_RADIO */
 
-#ifdef CONFIG_TV
+#if HAVE_TV
 static const m_option_t tvopts_conf[]={
     {"immediatemode", &stream_tv_defaults.immediate, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
     {"audio", &stream_tv_defaults.noaudio, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -97,7 +97,7 @@ static const m_option_t tvopts_conf[]={
     {"chanlist", &stream_tv_defaults.chanlist, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"norm", &stream_tv_defaults.norm, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"automute", &stream_tv_defaults.automute, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
-#if defined(CONFIG_TV_V4L2)
+#if HAVE_TV_V4L2
     {"normid", &stream_tv_defaults.normid, CONF_TYPE_INT, 0, 0, 0, NULL},
 #endif
     {"width", &stream_tv_defaults.width, CONF_TYPE_INT, 0, 0, 4096, NULL},
@@ -111,7 +111,7 @@ static const m_option_t tvopts_conf[]={
     {"hue", &stream_tv_defaults.hue, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
     {"saturation", &stream_tv_defaults.saturation, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
     {"gain", &stream_tv_defaults.gain, CONF_TYPE_INT, CONF_RANGE, -1, 100, NULL},
-#if defined(CONFIG_TV_V4L2)
+#if HAVE_TV_V4L2
     {"amode", &stream_tv_defaults.amode, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
     {"volume", &stream_tv_defaults.volume, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
     {"bass", &stream_tv_defaults.bass, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
@@ -123,15 +123,15 @@ static const m_option_t tvopts_conf[]={
     {"mjpeg", &stream_tv_defaults.mjpeg, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"decimation", &stream_tv_defaults.decimation, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
     {"quality", &stream_tv_defaults.quality, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-#ifdef CONFIG_ALSA
+#if HAVE_ALSA
     {"alsa", &stream_tv_defaults.alsa, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#endif /* CONFIG_ALSA */
-#endif /* defined(CONFIG_TV_V4L2) */
+#endif /* HAVE_ALSA */
+#endif /* HAVE_TV_V4L2 */
     {"adevice", &stream_tv_defaults.adevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"audioid", &stream_tv_defaults.audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
-#endif /* CONFIG_TV */
+#endif /* HAVE_TV */
 
 extern int pvr_param_aspect_ratio;
 extern int pvr_param_sample_rate;
@@ -143,7 +143,7 @@ extern char *pvr_param_bitrate_mode;
 extern int pvr_param_bitrate_peak;
 extern char *pvr_param_stream_type;
 
-#ifdef CONFIG_PVR
+#if HAVE_PVR
 static const m_option_t pvropts_conf[]={
     {"aspect", &pvr_param_aspect_ratio, CONF_TYPE_INT, 0, 1, 4, NULL},
     {"arate", &pvr_param_sample_rate, CONF_TYPE_INT, 0, 32000, 48000, NULL},
@@ -156,7 +156,7 @@ static const m_option_t pvropts_conf[]={
     {"fmt", &pvr_param_stream_type, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
-#endif /* CONFIG_PVR */
+#endif /* HAVE_PVR */
 
 extern const m_option_t dvbin_opts_conf[];
 extern const m_option_t lavfdopts_conf[];
@@ -290,7 +290,7 @@ static const m_option_t msgl_config[]={
 
 };
 
-#ifdef CONFIG_TV
+#if HAVE_TV
 static const m_option_t tvscan_conf[]={
     {"autostart", &stream_tv_defaults.scan, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"threshold", &stream_tv_defaults.scan_threshold, CONF_TYPE_INT, CONF_RANGE, 1, 100, NULL},
@@ -340,20 +340,20 @@ const m_option_t mp_opts[] = {
     {"msglevel", (void *) msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
     {"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL | CONF_PRE_PARSE, 0, 1, NULL},
     {"msgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
-#ifdef CONFIG_PRIORITY
+#if HAVE_PRIORITY
     {"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
     OPT_FLAG("config", load_config, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
     OPT_STRINGLIST("reset-on-next-file", reset_options, CONF_GLOBAL),
 
-#ifdef CONFIG_LUA
+#if HAVE_LUA
     OPT_STRINGLIST("lua", lua_files, CONF_GLOBAL),
     OPT_FLAG("osc", lua_load_osc, CONF_GLOBAL),
 #endif
 
 // ------------------------- stream options --------------------
 
-#ifdef CONFIG_STREAM_CACHE
+#if HAVE_STREAM_CACHE
     OPT_CHOICE_OR_INT("cache", stream_cache_size, 0, 32, 0x7fffffff,
                       ({"no", 0},
                        {"auto", -1}),
@@ -365,20 +365,20 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("cache-seek-min", stream_cache_seek_min_percent, 0, 0, 99),
     OPT_CHOICE_OR_INT("cache-pause", stream_cache_pause, 0,
                       0, 40, ({"no", -1})),
-#endif /* CONFIG_STREAM_CACHE */
+#endif /* HAVE_STREAM_CACHE */
     {"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#ifdef CONFIG_DVDREAD
+#if HAVE_DVDREAD
     {"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"dvd-speed", &dvd_speed, CONF_TYPE_INT, 0, 0, 0, NULL},
     {"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
-#endif /* CONFIG_DVDREAD */
+#endif /* HAVE_DVDREAD */
     OPT_INTPAIR("chapter", chapterrange, 0),
     OPT_CHOICE_OR_INT("edition", edition_id, 0, 0, 8190,
                       ({"auto", -1})),
-#ifdef CONFIG_LIBBLURAY
+#if HAVE_LIBBLURAY
     {"bluray-device",  &bluray_device,  CONF_TYPE_STRING, 0,          0,  0, NULL},
     {"bluray-angle",   &bluray_angle,   CONF_TYPE_INT,    CONF_RANGE, 0, 999, NULL},
-#endif /* CONFIG_LIBBLURAY */
+#endif /* HAVE_LIBBLURAY */
 
     {"http-header-fields", &network_http_header_fields, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
     {"user-agent", &network_useragent, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -426,7 +426,7 @@ const m_option_t mp_opts[] = {
 
     OPT_STRING("quvi-format", quvi_format, 0),
 
-#ifdef CONFIG_CDDA
+#if HAVE_CDDA
     { "cdda", (void *)&cdda_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 
@@ -438,16 +438,16 @@ const m_option_t mp_opts[] = {
     OPT_STRING("sub-demuxer", sub_demuxer_name, 0),
 
     {"mf", (void *) mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
-#ifdef CONFIG_RADIO
+#if HAVE_RADIO
     {"radio", (void *) radioopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-#endif /* CONFIG_RADIO */
-#ifdef CONFIG_TV
+#endif /* HAVE_RADIO */
+#if HAVE_TV
     {"tv", (void *) tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-#endif /* CONFIG_TV */
-#ifdef CONFIG_PVR
+#endif /* HAVE_TV */
+#if HAVE_PVR
     {"pvr", (void *) pvropts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-#endif /* CONFIG_PVR */
-#ifdef CONFIG_DVBIN
+#endif /* HAVE_PVR */
+#if HAVE_DVBIN
     {"dvbin", (void *) dvbin_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 
@@ -494,7 +494,7 @@ const m_option_t mp_opts[] = {
 
     // postprocessing:
     OPT_INT("pp", divx_quality, 0),
-#ifdef CONFIG_LIBPOSTPROC
+#if HAVE_LIBPOSTPROC
     {"pphelp", (void *) &pp_help, CONF_TYPE_PRINT, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
 #endif
 
@@ -633,7 +633,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("stop-screensaver", stop_screensaver, 0),
 
     OPT_INT64("wid", vo.WinID, CONF_GLOBAL),
-#ifdef CONFIG_X11
+#if HAVE_X11
     OPT_STRINGLIST("fstype", vo.fstype_list, 0),
 #endif
     OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0),
@@ -645,7 +645,7 @@ const m_option_t mp_opts[] = {
     OPT_CHOICE_OR_INT("fs-screen", vo.fsscreen_id, 0, 0, 32,
                       ({"all", -2}, {"current", -1})),
 
-#ifdef CONFIG_COCOA
+#if HAVE_COCOA
     OPT_FLAG("native-fs", vo.native_fs, 0),
 #endif
 
@@ -677,7 +677,7 @@ const m_option_t mp_opts[] = {
     OPT_STRING("stream-capture", stream_capture, 0),
     OPT_STRING("stream-dump", stream_dump, 0),
 
-#ifdef CONFIG_LIRC
+#if HAVE_LIRC
     {"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 
@@ -724,9 +724,9 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("key-fifo-size", input.key_fifo_size, CONF_GLOBAL, 2, 65000),
     OPT_FLAG("consolecontrols", consolecontrols, CONF_GLOBAL),
     OPT_FLAG("mouse-movements", vo.enable_mouse_movements, CONF_GLOBAL),
-#ifdef CONFIG_TV
+#if HAVE_TV
     {"tvscan", (void *) tvscan_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-#endif /* CONFIG_TV */
+#endif /* HAVE_TV */
 
     {"screenshot", (void *) screenshot_conf, CONF_TYPE_SUBCONFIG},
 
@@ -739,7 +739,7 @@ const m_option_t mp_opts[] = {
     {"version", (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
     {"V",       (void *)print_version_opt, CONF_TYPE_PRINT_FUNC, CONF_NOCFG|CONF_GLOBAL|M_OPT_PRE_PARSE},
 
-#ifdef CONFIG_ENCODING
+#if HAVE_ENCODING
     OPT_STRING("o", encode_output.file, CONF_GLOBAL),
     OPT_STRING("of", encode_output.format, CONF_GLOBAL),
     OPT_STRINGLIST("ofopts*", encode_output.fopts, CONF_GLOBAL),
@@ -836,7 +836,7 @@ const struct MPOpts mp_default_opts = {
     .field_dominance = -1,
     .sub_auto = 1,
     .osd_bar_visible = 1,
-#ifdef CONFIG_ASS
+#if HAVE_LIBASS
     .ass_enabled = 1,
 #endif
     .sub_scale = 1,
@@ -847,7 +847,7 @@ const struct MPOpts mp_default_opts = {
     .ass_shaper = 1,
     .use_embedded_fonts = 1,
     .suboverlap_enabled = 0,
-#ifdef CONFIG_ENCA
+#if HAVE_ENCA
     .sub_cp = "enca",
 #else
     .sub_cp = "UTF-8:UTF-8-BROKEN",
@@ -875,7 +875,7 @@ const struct MPOpts mp_default_opts = {
         .use_joystick = 1,
         .use_lirc = 1,
         .use_lircc = 1,
-#ifdef CONFIG_COCOA
+#if HAVE_COCOA
         .use_ar = 1,
         .use_media_keys = 1,
 #endif

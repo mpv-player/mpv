@@ -66,47 +66,47 @@ extern struct vo_driver video_out_wayland;
 
 const struct vo_driver *video_out_drivers[] =
 {
-#if CONFIG_VDPAU
+#if HAVE_VDPAU
         &video_out_vdpau,
 #endif
-#ifdef CONFIG_GL
+#if HAVE_GL
         &video_out_opengl,
 #endif
-#ifdef CONFIG_DIRECT3D
+#if HAVE_DIRECT3D
         &video_out_direct3d_shaders,
         &video_out_direct3d,
 #endif
-#ifdef CONFIG_COREVIDEO
+#if HAVE_COREVIDEO
         &video_out_corevideo,
 #endif
-#ifdef CONFIG_XV
+#if HAVE_XV
         &video_out_xv,
 #endif
-#ifdef CONFIG_SDL2
+#if HAVE_SDL2
         &video_out_sdl,
 #endif
-#ifdef CONFIG_GL
+#if HAVE_GL
         &video_out_opengl_old,
 #endif
-#if CONFIG_VAAPI
+#if HAVE_VAAPI
         &video_out_vaapi,
 #endif
-#ifdef CONFIG_X11
+#if HAVE_X11
         &video_out_x11,
 #endif
         &video_out_null,
         // should not be auto-selected
         &video_out_image,
-#ifdef CONFIG_CACA
+#if HAVE_CACA
         &video_out_caca,
 #endif
-#ifdef CONFIG_ENCODING
+#if HAVE_ENCODING
         &video_out_lavc,
 #endif
-#ifdef CONFIG_GL
+#if HAVE_GL
         &video_out_opengl_hq,
 #endif
-#ifdef CONFIG_WAYLAND
+#if HAVE_WAYLAND
         &video_out_wayland,
 #endif
         NULL

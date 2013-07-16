@@ -177,7 +177,7 @@ static int create_tmpfile_cloexec(char *tmpname)
 {
     int fd;
 
-#ifdef HAVE_MKOSTEMP
+#if HAVE_MKOSTEMP
     fd = mkostemp(tmpname, O_CLOEXEC);
     if (fd >= 0)
         unlink(tmpname);

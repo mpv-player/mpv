@@ -202,11 +202,11 @@ char *mp_get_playback_resume_config_filename(const char *fname,
             goto exit;
         realpath = mp_path_join(tmp, bstr0(cwd), bstr0(fname));
     }
-#ifdef CONFIG_DVDREAD
+#if HAVE_DVDREAD
     if (bstr_startswith0(bfname, "dvd://"))
         realpath = talloc_asprintf(tmp, "%s - %s", realpath, dvd_device);
 #endif
-#ifdef CONFIG_LIBBLURAY
+#if HAVE_LIBBLURAY
     if (bstr_startswith0(bfname, "br://") || bstr_startswith0(bfname, "bd://") ||
         bstr_startswith0(bfname, "bluray://"))
         realpath = talloc_asprintf(tmp, "%s - %s", realpath, bluray_device);

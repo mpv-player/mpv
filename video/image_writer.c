@@ -27,7 +27,7 @@
 
 #include "config.h"
 
-#ifdef CONFIG_JPEG
+#if HAVE_JPEG
 #include <jpeglib.h>
 #endif
 
@@ -142,7 +142,7 @@ error_exit:
     return success;
 }
 
-#ifdef CONFIG_JPEG
+#if HAVE_JPEG
 
 static void write_jpeg_error_exit(j_common_ptr cinfo)
 {
@@ -226,7 +226,7 @@ static const struct img_writer img_writers[] = {
       .pixfmts = (int[]) { IMGFMT_BGR24, IMGFMT_BGRA, IMGFMT_BGR15_LE,
                            IMGFMT_Y8, 0},
     },
-#ifdef CONFIG_JPEG
+#if HAVE_JPEG
     { "jpg", write_jpeg },
     { "jpeg", write_jpeg },
 #endif

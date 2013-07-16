@@ -50,47 +50,47 @@ extern const struct ao_driver audio_out_sdl;
 
 static const struct ao_driver * const audio_out_drivers[] = {
 // native:
-#ifdef CONFIG_COREAUDIO
+#if HAVE_COREAUDIO
     &audio_out_coreaudio,
 #endif
-#ifdef CONFIG_PULSE
+#if HAVE_PULSE
     &audio_out_pulse,
 #endif
-#ifdef CONFIG_SNDIO
+#if HAVE_SNDIO
     &audio_out_sndio,
 #endif
-#ifdef CONFIG_ALSA
+#if HAVE_ALSA
     &audio_out_alsa,
 #endif
-#ifdef CONFIG_WASAPI
+#if HAVE_WASAPI
     &audio_out_wasapi,
 #endif
-#ifdef CONFIG_OSS_AUDIO
+#if HAVE_OSS_AUDIO
     &audio_out_oss,
 #endif
-#ifdef CONFIG_DSOUND
+#if HAVE_DSOUND
     &audio_out_dsound,
 #endif
-#ifdef CONFIG_PORTAUDIO
+#if HAVE_PORTAUDIO
     &audio_out_portaudio,
 #endif
     // wrappers:
-#ifdef CONFIG_JACK
+#if HAVE_JACK
     &audio_out_jack,
 #endif
-#ifdef CONFIG_OPENAL
+#if HAVE_OPENAL
     &audio_out_openal,
 #endif
-#ifdef CONFIG_SDL
+#if HAVE_SDL || HAVE_SDL2
     &audio_out_sdl,
 #endif
     &audio_out_null,
     // should not be auto-selected:
     &audio_out_pcm,
-#ifdef CONFIG_ENCODING
+#if HAVE_ENCODING
     &audio_out_lavc,
 #endif
-#ifdef CONFIG_RSOUND
+#if HAVE_RSOUND
     &audio_out_rsound,
 #endif
     NULL

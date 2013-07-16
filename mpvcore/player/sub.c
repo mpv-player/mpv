@@ -129,7 +129,7 @@ void update_subtitles(struct MPContext *mpctx)
 static void set_dvdsub_fake_extradata(struct dec_sub *dec_sub, struct stream *st,
                                       int width, int height)
 {
-#ifdef CONFIG_DVDREAD
+#if HAVE_DVDREAD
     if (!st)
         return;
 

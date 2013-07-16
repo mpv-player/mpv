@@ -37,7 +37,7 @@
 
 #include "video/mp_image.h"
 
-#if defined(CONFIG_GL_COCOA)
+#if HAVE_GL_COCOA
 #ifdef GL_VERSION_3_0
 #include <OpenGL/gl3.h>
 #else

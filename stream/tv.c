@@ -60,7 +60,7 @@ extern const tvi_info_t tvi_info_v4l2;
 
 /** List of drivers in autodetection order */
 static const tvi_info_t* tvi_driver_list[]={
-#ifdef CONFIG_TV_V4L2
+#if HAVE_TV_V4L2
     &tvi_info_v4l2,
 #endif
     &tvi_info_dummy,
@@ -474,7 +474,7 @@ static int open_tv(tvi_handle_t *tvh)
     funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tvh->tv_param->input);
 
     if ((!strcmp(tvh->tv_param->driver, "v4l2") && tvh->tv_param->normid >= 0))
-	tv_set_norm_i(tvh, tvh->tv_param->normid);
+        tv_set_norm_i(tvh, tvh->tv_param->normid);
     else
         tv_set_norm(tvh,tvh->tv_param->norm);
 

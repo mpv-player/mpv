@@ -23,7 +23,7 @@
 #include "config.h"
 
 #include <QuartzCore/QuartzCore.h>
-#if CONFIG_VDA
+#if HAVE_VDA_HWACCEL
 #include <IOSurface/IOSurface.h>
 #endif
 
@@ -446,7 +446,7 @@ static struct cv_functions cv_functions = {
     .set_yuv_colorspace = cv_set_yuv_colorspace,
 };
 
-#if CONFIG_VDA
+#if HAVE_VDA_HWACCEL
 static void iosurface_init(struct vo *vo)
 {
     struct priv *p = vo->priv;
@@ -546,7 +546,7 @@ static struct cv_functions iosurface_functions = {
     .get_yuv_colorspace = get_yuv_colorspace,
     .set_yuv_colorspace = iosurface_set_yuv_csp,
 };
-#endif /* CONFIG_VDA */
+#endif /* HAVE_VDA_HWACCEL */
 
 static int query_format(struct vo *vo, uint32_t format)
 {
@@ -554,7 +554,7 @@ static int query_format(struct vo *vo, uint32_t format)
     const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
 
     switch (format) {
-#if CONFIG_VDA
+#if HAVE_VDA_HWACCEL
         case IMGFMT_VDA:
             p->fns = iosurface_functions;
             return flags;

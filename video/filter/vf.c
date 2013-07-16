@@ -84,10 +84,10 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_rotate,
     &vf_info_mirror,
 
-#ifdef CONFIG_LIBPOSTPROC
+#if HAVE_LIBPOSTPROC
     &vf_info_pp,
 #endif
-#ifdef CONFIG_VF_LAVFI
+#if HAVE_VF_LAVFI
     &vf_info_lavfi,
 #endif
 
@@ -110,10 +110,10 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_sub,
     &vf_info_yadif,
     &vf_info_stereo3d,
-#ifdef CONFIG_DLOPEN
+#if HAVE_DLOPEN
     &vf_info_dlopen,
 #endif
-#if CONFIG_VAAPI_VPP
+#if HAVE_VAAPI_VPP
     &vf_info_vaapi,
 #endif
     NULL

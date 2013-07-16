@@ -27,15 +27,15 @@
 
 #include "mpvcore/mp_msg.h"
 
-#ifdef CONFIG_ENCA
+#if HAVE_ENCA
 #include <enca.h>
 #endif
 
-#ifdef CONFIG_LIBGUESS
+#if HAVE_LIBGUESS
 #include <libguess.h>
 #endif
 
-#ifdef CONFIG_ICONV
+#if HAVE_ICONV
 #include <iconv.h>
 #endif
 
@@ -85,7 +85,7 @@ bool mp_charset_requires_guess(const char *user_cp)
            (r > 1 && bstrcasecmp0(res[0], "utf8") == 0);
 }
 
-#ifdef CONFIG_ENCA
+#if HAVE_ENCA
 static const char *enca_guess(bstr buf, const char *language)
 {
     if (!language || !language[0])
@@ -117,7 +117,7 @@ static const char *enca_guess(bstr buf, const char *language)
 }
 #endif
 
-#ifdef CONFIG_LIBGUESS
+#if HAVE_LIBGUESS
 static const char *libguess_guess(bstr buf, const char *language)
 {
     if (!language || !language[0] || strcmp(language, "help") == 0) {
@@ -157,11 +157,11 @@ const char *mp_charset_guess(bstr buf, const char *user_cp, int flags)
 
     const char *res = NULL;
 
-#ifdef CONFIG_ENCA
+#if HAVE_ENCA
     if (bstrcasecmp0(type, "enca") == 0)
         res = enca_guess(buf, lang);
 #endif
-#ifdef CONFIG_LIBGUESS
+#if HAVE_LIBGUESS
     if (bstrcasecmp0(type, "guess") == 0)
         res = libguess_guess(buf, lang);
 #endif
@@ -212,7 +212,7 @@ bstr mp_charset_guess_and_conv_to_utf8(bstr buf, const char *user_cp, int flags)
 //  returns: buf (no conversion), .start==NULL (error), or allocated buffer
 bstr mp_iconv_to_utf8(bstr buf, const char *cp, int flags)
 {
-#ifdef CONFIG_ICONV
+#if HAVE_ICONV
     if (!cp || !cp[0] || mp_charset_is_utf8(cp))
         return buf;
 
