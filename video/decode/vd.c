@@ -152,6 +152,14 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
     p.d_w = d_w;
     p.d_h = d_h;
 
+    // Apply user overrides
+    if (opts->requested_colorspace != MP_CSP_AUTO)
+        p.colorspace = opts->requested_colorspace;
+    if (opts->requested_input_range != MP_CSP_LEVELS_AUTO)
+        p.colorlevels = opts->requested_input_range;
+
+    // Detect colorspace from resolution.
+    // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.).
     mp_image_params_guess_csp(&p);
 
     vocfg_flags = (opts->fullscreen ? VOFLAG_FULLSCREEN : 0) |
@@ -177,7 +185,7 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
         sh->vf_input = talloc(sh, struct mp_image_params);
     *sh->vf_input = p;
 
-    set_video_colorspace(sh);
+    set_video_output_levels(sh);
 
     if (opts->gamma_gamma != 1000)
         set_video_colors(sh, "gamma", opts->gamma_gamma);

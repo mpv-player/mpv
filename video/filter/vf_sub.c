@@ -39,7 +39,6 @@
 
 #include "video/sws_utils.h"
 #include "video/memcpy_pic.h"
-#include "video/csputils.h"
 
 #include "core/m_option.h"
 #include "core/m_struct.h"
@@ -49,12 +48,10 @@ static const struct vf_priv_s {
 
     int outh, outw;
 
-    struct mp_csp_details csp;
-
     struct osd_state *osd;
     struct mp_osd_res dim;
 } vf_priv_dflt = {
-    .csp = MP_CSP_DETAILS_DEFAULTS,
+    0
 };
 
 static int config(struct vf_instance *vf,
@@ -109,8 +106,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
         mpi = dmpi;
     }
 
-    mp_image_set_colorspace_details(mpi, &priv->csp);
-
     osd_draw_on_image_p(osd, priv->dim, mpi->pts, OSD_DRAW_SUB_FILTER,
                         vf->out_pool, mpi);
 
@@ -132,11 +127,6 @@ static int control(vf_instance_t *vf, int request, void *data)
         break;
     case VFCTRL_INIT_OSD:
         return CONTROL_TRUE;
-    case VFCTRL_SET_YUV_COLORSPACE: {
-        struct mp_csp_details colorspace = *(struct mp_csp_details *)data;
-        vf->priv->csp = colorspace;
-        break;
-    }
     }
     return vf_next_control(vf, request, data);
 }

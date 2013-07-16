@@ -170,6 +170,8 @@ static void print_fmt(int msglevel, struct vf_format *fmt)
             mp_msg(MSGT_VFILTER, msglevel, "->%dx%d", p->d_w, p->d_h);
         mp_msg(MSGT_VFILTER, msglevel, " %s %#x", mp_imgfmt_to_name(p->imgfmt),
                fmt->flags);
+        mp_msg(MSGT_VFILTER, msglevel, " %s/%s", mp_csp_names[p->colorspace],
+               mp_csp_levels_names[p->colorlevels]);
     } else {
         mp_msg(MSGT_VFILTER, msglevel, "???");
     }
@@ -357,8 +359,19 @@ unsigned int vf_match_csp(vf_instance_t **vfp, const unsigned int *list,
 // Ownership of img is transferred from caller to the filter chain.
 void vf_add_output_frame(struct vf_instance *vf, struct mp_image *img)
 {
-    if (img)
+    if (img) {
+        struct mp_image_params *p = &vf->fmt_out.params;
+        // vf_vo doesn't have output config
+        if (vf->fmt_out.configured) {
+            assert(p->imgfmt == img->imgfmt);
+            assert(p->w == img->w && p->h == img->h);
+            // Too many filters which don't set these correctly
+            img->colorspace = p->colorspace;
+            img->levels = p->colorlevels;
+            img->chroma_location = p->chroma_location;
+        }
         MP_TARRAY_APPEND(vf, vf->out_queued, vf->num_out_queued, img);
+    }
 }
 
 static struct mp_image *vf_dequeue_output_frame(struct vf_instance *vf)
@@ -486,6 +499,8 @@ int vf_next_config(struct vf_instance *vf,
         .colorlevels = vf->fmt_in.params.colorlevels,
         .chroma_location = vf->fmt_in.params.chroma_location,
     };
+    // Fix csp in case of pixel format change
+    mp_image_params_guess_csp(&p);
     int r = vf_reconfig_wrapper(vf->next, &p, voflags);
     return r < 0 ? 0 : 1;
 }
