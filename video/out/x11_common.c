@@ -50,7 +50,7 @@
 #include <X11/extensions/scrnsaver.h>
 #endif
 
-#if HAVE_XDPMS
+#if HAVE_XEXT
 #include <X11/extensions/dpms.h>
 #endif
 
@@ -1552,7 +1552,7 @@ static void saver_on(struct vo_x11_state *x11)
     x11->screensaver_off = 0;
     if (xss_suspend(mDisplay, False))
         return;
-#if HAVE_XDPMS
+#if HAVE_XEXT
     if (x11->dpms_disabled) {
         int nothing;
         if (DPMSQueryExtension(mDisplay, &nothing, &nothing)) {
@@ -1587,7 +1587,7 @@ static void saver_off(struct vo_x11_state *x11)
     x11->screensaver_off = 1;
     if (xss_suspend(mDisplay, True))
         return;
-#if HAVE_XDPMS
+#if HAVE_XEXT
     if (DPMSQueryExtension(mDisplay, &nothing, &nothing)) {
         BOOL onoff;
         CARD16 state;

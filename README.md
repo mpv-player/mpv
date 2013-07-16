@@ -16,12 +16,23 @@ Compilation
 -----------
 
 Compiling with full features requires development files for several
-external libraries. Below is a list of some important requirements. For
-more information see the output of `./configure --help` for a list of options,
-or look at the list of enabled and disabled features printed after running
-`./configure`. If you think you have support for some feature installed
-but configure fails to detect it, the file `config.log` may contain
-information about the reasons for the failure.
+external libraries. Below is a list of some important requirements.
+
+The mpv build system uses *waf* but we don't store it in your source tree. The
+script './autogen.sh' will download the latest version of waf that was tested
+with the build system.
+
+For a list of the available build options use `./waf configure --help`. If
+you think you have support for some feature installed but configure fails to
+detect it, the file `build/config.log` may contain information about the
+reasons for the failure.
+
+To build the software you can use `./waf build`, and `./waf install` to install
+it.
+
+NOTE: If you used the old `./configure` shell script you must use
+`make distclean` in order to remove build artifcats from the source directory
+before you can use the waf build system.
 
 Essential dependencies (incomplete list):
 
@@ -46,22 +57,6 @@ those.
 If you are running Mac OSX and using homebrew we provide [homebrew-mpv][homebrew-mpv], an up
 to date formula that compiles mpv with sensible dependencies and defaults for
 OSX.
-
-### configure `--enable-*` parameters
-
-The `--enable-*` parameters unconditionally force options on, completely
-skipping autodetection. This behavior is unlike what you may be used to from
-autoconf-based configure scripts that can decide to override you. This greater
-level of control comes at a price. You may have to provide the correct compiler
-and linker flags yourself.
-
-If you used one of these options and experience a compilation or
-linking failure, make sure you have passed the necessary compiler/linker flags
-to configure.
-
-mpv's configure script is greedy and automatically enables features as a result
-of autodetection. The cases where you may want to use `--enable-*` are very
-limited.
 
 FFmpeg vs. Libav
 ----------------

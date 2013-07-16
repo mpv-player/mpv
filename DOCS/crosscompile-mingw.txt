@@ -3,7 +3,7 @@ produce both 32 bit and 64 bit executables. MinGW-w64 is available from
 http://mingw-w64.sourceforge.net.
 
 You have to run mpv's configure with these arguments:
-    ./configure --enable-cross-compile --target=i686-w64-mingw32
+    DEST_OS=win32 TARGET=i686-w64-mingw32 ./waf configure
 
 Using mingw-w64-cmake to setup a MinGW-w64 environment is recommended (this will
 also build mpv and its dependencies): https://github.com/lachs0r/mingw-w64-cmake
@@ -44,8 +44,8 @@ make pthreads
 git clone https://github.com/mpv-player/mpv.git
 cd mpv
 export PATH=/opt/mingw/usr/bin/:$PATH
-./configure --enable-cross-compile --target=i686-w64-mingw32
-make
+DEST_OS=win32 TARGET=i686-w64-mingw32 ./waf configure
+./waf build
 
 # This should work. Note however that MXE’s ffmpeg package might be very old
 # in order to avoid breaking e.g. xine-lib, so you might want to update that

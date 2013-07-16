@@ -73,7 +73,6 @@ static keycode_map getch2_keys;
 
 #if HAVE_TERMINFO || HAVE_TERMCAP
 
-
 static char *term_rmkx = NULL;
 static char *term_smkx = NULL;
 
