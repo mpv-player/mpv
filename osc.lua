@@ -166,8 +166,8 @@ function render_elements(ass)
         end
 
         ass:new_event()
-        ass:pos(element.x, element.y)
-        ass:an(element.an) -- positioning
+        ass:pos(element.x, element.y) -- positioning
+        ass:an(element.an) 
         ass:append(style) -- styling
         if type(element.content) == "function" then
             element.content(ass) -- function objects
@@ -229,7 +229,7 @@ local osc_styles = {
     elementDisab = "{\\1a&H88&}",
     timecodes = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs25\\fnsans-serif}",
     vidtitle = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs12\\fnsans-serif}",
-    box = "{\\bord1\\1c&H000000\\1a&H64&\\3c&HFFFFFF\\3a&H00&}",
+    box = "{\\bord1\\1c&H000000\\1a&H64&\\3c&HFFFFFF\\3a&H64&}",
 }
 
 
