@@ -19,7 +19,7 @@
 # with MPlayer; if not, write to the Free Software Foundation, Inc.,
 # 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 
-include config.mak
+include old_build/config.mak
 
 ###### variable declarations #######
 
@@ -535,7 +535,8 @@ clean:
 	-$(RM) mpvcore/player/lua/osc.inc
 
 distclean: clean
-	-$(RM) config.log config.mak config.h TAGS tags
+	-$(RM) config.log old_build/config.h old_build/config.mak Makefile config.mak config.h TAGS tags
+	-rmdir old_build/
 
 TAGS:
 	$(RM) $@; find . -name '*.[chS]' -o -name '*.asm' | xargs etags -a

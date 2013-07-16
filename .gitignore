@@ -2,6 +2,7 @@
 *.a
 *.d
 *.exe
+*.pyc
 .depend
 
 /config.h
@@ -25,3 +26,8 @@
 /DOCS/man/*/mpv.out
 /DOCS/man/*/mpv.pdf
 /DOCS/man/*/mpv.toc
+
+/waf
+/build
+/.waf*
+/.lock-waf_*
