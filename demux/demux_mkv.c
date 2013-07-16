@@ -488,14 +488,6 @@ static void parse_trackaudio(struct demuxer *demuxer, struct mkv_track *track,
                "[mkv] |   + Output sampling frequency: %f\n", track->a_osfreq);
     } else
         track->a_osfreq = track->a_sfreq;
-    // Something creates files with osfreq incorrectly set
-    if (track->a_sfreq == 44100 && track->a_osfreq == 96000) {
-        mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Audio track has codec frequency "
-               "%.1f and playback frequency %.1f.\n[mkv] This looks wrong. "
-               "Assuming this file is corrupt and ignoring the latter.\n",
-               track->a_sfreq, track->a_osfreq);
-        track->a_osfreq = track->a_sfreq;
-    }
     if (audio->n_bit_depth) {
         track->a_bps = audio->bit_depth;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Bit depth: %u\n",
@@ -1359,9 +1351,12 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     sh_a->gsh->demuxer_id = track->tnum;
     sh_a->gsh->title = talloc_strdup(sh_a, track->name);
     sh_a->gsh->default_track = track->default_track;
+    if (!track->a_osfreq)
+        track->a_osfreq = track->a_sfreq;
     if (track->ms_compat) {
         if (track->private_size < sizeof(*sh_a->wf))
             goto error;
+        mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] track with MS compat audio.\n");
         WAVEFORMATEX *wf = (WAVEFORMATEX *) track->private_data;
         sh_a->wf = calloc(1, track->private_size);
         sh_a->wf->wFormatTag = le2me_16(wf->wFormatTag);
@@ -1373,8 +1368,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         sh_a->wf->cbSize = track->private_size - sizeof(*sh_a->wf);
         memcpy(sh_a->wf + 1, wf + 1,
                track->private_size - sizeof(*sh_a->wf));
-        if (track->a_sfreq == 0.0)
-            track->a_sfreq = sh_a->wf->nSamplesPerSec;
+        if (track->a_osfreq == 0.0)
+            track->a_osfreq = sh_a->wf->nSamplesPerSec;
         if (track->a_channels == 0)
             track->a_channels = sh_a->wf->nChannels;
         if (track->a_bps == 0)
@@ -1402,9 +1397,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     sh_a->wf->wFormatTag = track->a_formattag;
     mp_chmap_from_channels(&sh_a->channels, track->a_channels);
     sh_a->wf->nChannels = track->a_channels;
-    sh_a->samplerate = (uint32_t) track->a_sfreq;
-    sh_a->container_out_samplerate = track->a_osfreq;
-    sh_a->wf->nSamplesPerSec = (uint32_t) track->a_sfreq;
+    sh_a->samplerate = (uint32_t) track->a_osfreq;
+    sh_a->wf->nSamplesPerSec = (uint32_t) track->a_osfreq;
     if (track->a_bps == 0)
         sh_a->wf->wBitsPerSample = 16;
     else
@@ -1438,7 +1432,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         } else {
             /* Recreate the 'private data' */
             /* which faad2 uses in its initialization */
-            srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
+            srate_idx = aac_get_sample_rate_index(track->a_sfreq);
             if (!strncmp(&track->codec_id[12], "MAIN", 4))
                 profile = 0;
             else if (!strncmp(&track->codec_id[12], "LC", 2))
@@ -1456,8 +1450,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
                 /* HE-AAC (aka SBR AAC) */
                 sh_a->codecdata_len = 5;
 
-                sh_a->samplerate *= 2;
-                sh_a->wf->nSamplesPerSec *= 2;
+                sh_a->samplerate = sh_a->wf->nSamplesPerSec = track->a_osfreq;
                 srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
                 sh_a->codecdata[2] = AAC_SYNC_EXTENSION_TYPE >> 3;
                 sh_a->codecdata[3] = ((AAC_SYNC_EXTENSION_TYPE & 0x07) << 5) | 5;
@@ -1587,7 +1580,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         AV_WL16(data + 4, 1);
         AV_WL16(data + 6, sh_a->channels.num);
         AV_WL16(data + 8, sh_a->wf->wBitsPerSample);
-        AV_WL32(data + 10, sh_a->samplerate);
+        AV_WL32(data + 10, track->a_osfreq);
         // Bogus: last frame won't be played.
         AV_WL32(data + 14, 0);
     } else if (!track->ms_compat) {
