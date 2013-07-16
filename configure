@@ -2360,7 +2360,7 @@ elif darwin ; then
 elif dragonfly ; then
   default_cdrom_device="/dev/cd0"
 elif freebsd ; then
-  default_cdrom_device="/dev/acd0"
+  default_cdrom_device="/dev/cd0"
 elif openbsd ; then
   default_cdrom_device="/dev/rcd0c"
 else
