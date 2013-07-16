@@ -882,6 +882,8 @@ bool vo_wayland_config (struct vo *vo, uint32_t d_width,
     w->width = d_width;
     w->height = d_height;
 
+    w->aspect = w->width / (float) MPMAX(w->height, 1);
+
     if ((VOFLAG_FULLSCREEN & flags) && w->type != TYPE_FULLSCREEN)
         vo_wayland_fullscreen(vo);
 
