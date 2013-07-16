@@ -1909,7 +1909,6 @@ static void change_video_filters(MPContext *mpctx, const char *cmd,
     struct m_obj_settings *old_vf_settings = NULL;
     bool success = false;
     bool need_refresh = false;
-    double refresh_pts = mpctx->last_vo_pts;
 
     // The option parser is used to modify the filter list itself.
     char optname[20];
@@ -1931,10 +1930,8 @@ static void change_video_filters(MPContext *mpctx, const char *cmd,
     }
     m_option_free(type, &old_vf_settings);
 
-    // Try to refresh the video by doing a precise seek to the currently
-    // displayed frame.
-    if (need_refresh && opts->pause)
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, refresh_pts, 1);
+    if (need_refresh)
+        mp_force_video_refresh(mpctx);
 }
 
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
