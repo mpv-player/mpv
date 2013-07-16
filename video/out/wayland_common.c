@@ -695,8 +695,6 @@ void vo_wayland_uninit (struct vo *vo)
 
 static void vo_wayland_ontop (struct vo *vo)
 {
-    struct vo_wayland_state *wl = vo->wayland;
-
     vo->opts->ontop = !vo->opts->ontop;
     vo->opts->fullscreen = !vo->opts->fullscreen;
 

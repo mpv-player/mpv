@@ -220,11 +220,7 @@ static bool config_window_wayland(struct MPGLContext *ctx,
         return ret;
     }
     else {
-        /* If the window exists just resize it */
-        if (egl_ctx->egl_window)
-            egl_resize_func(wl, 0, d_width, d_height, egl_ctx);
-
-        else {
+        if (!egl_ctx->egl_window) {
             /* If the context exists and the hidden flag is unset then
              * create the window */
             if (!(VOFLAG_HIDDEN & flags))
