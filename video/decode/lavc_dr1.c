@@ -19,6 +19,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+
+/*
+ * NOTE: this file is for compatibility with older versions of
+ *       libavcodec, before AVFrame reference counting was introduced.
+ *       It is not compiled if libavcodec is new enough.
+ */
+
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -30,6 +37,7 @@
 #include <libavutil/mathematics.h>
 #include <libavutil/imgutils.h>
 #include <libavutil/pixdesc.h>
+#include <libavutil/common.h>
 
 #include "lavc.h"
 

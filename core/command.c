@@ -1095,13 +1095,16 @@ static int mp_property_deinterlace(m_option_t *prop, int action,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-static int colormatrix_property_helper(m_option_t *prop, int action,
-                                      void *arg, MPContext *mpctx)
+// Generic option + requires hard refresh to make changes take effect.
+static int video_refresh_property_helper(m_option_t *prop, int action,
+                                         void *arg, MPContext *mpctx)
 {
     int r = mp_property_generic_option(prop, action, arg, mpctx);
     if (action == M_PROPERTY_SET) {
-        if (mpctx->sh_video)
-            set_video_colorspace(mpctx->sh_video);
+        if (mpctx->sh_video) {
+            reinit_video_filters(mpctx);
+            mp_force_video_refresh(mpctx);
+        }
     }
     return r;
 }
@@ -1110,72 +1113,32 @@ static int mp_property_colormatrix(m_option_t *prop, int action, void *arg,
                                    MPContext *mpctx)
 {
     if (action != M_PROPERTY_PRINT)
-        return colormatrix_property_helper(prop, action, arg, mpctx);
+        return video_refresh_property_helper(prop, action, arg, mpctx);
 
     struct MPOpts *opts = &mpctx->opts;
-    struct mp_csp_details actual = { .format = -1 };
-    char *req_csp = mp_csp_names[opts->requested_colorspace];
-    char *real_csp = NULL;
-    if (mpctx->sh_video) {
-        struct vf_instance *vf = mpctx->sh_video->vfilter;
-        if (vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual) == true) {
-            real_csp = mp_csp_names[actual.format];
-        } else {
-            real_csp = "Unknown";
-        }
+
+    struct mp_csp_details vo_csp = {0};
+    if (mpctx->sh_video && mpctx->sh_video->vfilter)
+        vf_control(mpctx->sh_video->vfilter, VFCTRL_GET_YUV_COLORSPACE, &vo_csp);
+
+    struct mp_image_params vd_csp = {0};
+    if (mpctx->sh_video)
+        vd_control(mpctx->sh_video, VDCTRL_GET_PARAMS, &vd_csp);
+
+    char *res = talloc_asprintf(NULL, "%s",
+                                mp_csp_names[opts->requested_colorspace]);
+    if (!vo_csp.format) {
+        res = talloc_asprintf_append(res, " (VO: unknown)");
+    } else if (vo_csp.format != opts->requested_colorspace) {
+        res = talloc_asprintf_append(res, " (VO: %s)",
+                                     mp_csp_names[vo_csp.format]);
     }
-    char *res;
-    if (opts->requested_colorspace == MP_CSP_AUTO && real_csp) {
-        // Caveat: doesn't handle the case when the autodetected colorspace
-        // is different from the actual colorspace as used by the
-        // VO - the OSD will display the VO colorspace without
-        // indication that it doesn't match the requested colorspace.
-        res = talloc_asprintf(NULL, "Auto (%s)", real_csp);
-    } else if (opts->requested_colorspace == actual.format || !real_csp) {
-        res = talloc_strdup(NULL, req_csp);
-    } else
-        res = talloc_asprintf(NULL, mp_gtext("%s, but %s used"),
-                                req_csp, real_csp);
-    *(char **)arg = res;
-    return M_PROPERTY_OK;
-}
-
-static int levels_property_helper(int offset, m_option_t *prop, int action,
-                                  void *arg, MPContext *mpctx)
-{
-    if (action != M_PROPERTY_PRINT)
-        return colormatrix_property_helper(prop, action, arg, mpctx);
-
-    struct m_option opt = {0};
-    mp_property_generic_option(prop, M_PROPERTY_GET_TYPE, &opt, mpctx);
-    assert(opt.type);
-
-    int requested = 0;
-    mp_property_generic_option(prop, M_PROPERTY_GET, &requested, mpctx);
-
-    struct mp_csp_details actual = {0};
-    int actual_level = -1;
-    char *req_level = m_option_print(&opt, &requested);
-    char *real_level = NULL;
-    if (mpctx->sh_video) {
-        struct vf_instance *vf = mpctx->sh_video->vfilter;
-        if (vf->control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual) == true) {
-            actual_level = *(enum mp_csp_levels *)(((char *)&actual) + offset);
-            real_level = m_option_print(&opt, &actual_level);
-        } else {
-            real_level = talloc_strdup(NULL, "Unknown");
-        }
+    if (!vd_csp.colorspace) {
+        res = talloc_asprintf_append(res, " (VD: unknown)");
+    } else if (!vo_csp.format || vd_csp.colorspace != vo_csp.format) {
+        res = talloc_asprintf_append(res, " (VD: %s)",
+                                     mp_csp_names[vd_csp.colorspace]);
     }
-    char *res;
-    if (requested == MP_CSP_LEVELS_AUTO && real_level) {
-        res = talloc_asprintf(NULL, "Auto (%s)", real_level);
-    } else if (requested == actual_level || !real_level) {
-        res = talloc_strdup(NULL, real_level);
-    } else
-        res = talloc_asprintf(NULL, mp_gtext("%s, but %s used"),
-                                req_level, real_level);
-    talloc_free(req_level);
-    talloc_free(real_level);
     *(char **)arg = res;
     return M_PROPERTY_OK;
 }
@@ -1183,15 +1146,65 @@ static int levels_property_helper(int offset, m_option_t *prop, int action,
 static int mp_property_colormatrix_input_range(m_option_t *prop, int action,
                                                void *arg, MPContext *mpctx)
 {
-    return levels_property_helper(offsetof(struct mp_csp_details, levels_in),
-                                  prop, action, arg, mpctx);
+    if (action != M_PROPERTY_PRINT)
+        return video_refresh_property_helper(prop, action, arg, mpctx);
+
+    struct MPOpts *opts = &mpctx->opts;
+
+    struct mp_csp_details vo_csp = {0};
+    if (mpctx->sh_video && mpctx->sh_video->vfilter)
+        vf_control(mpctx->sh_video->vfilter, VFCTRL_GET_YUV_COLORSPACE, &vo_csp );
+
+    struct mp_image_params vd_csp = {0};
+    if (mpctx->sh_video)
+        vd_control(mpctx->sh_video, VDCTRL_GET_PARAMS, &vd_csp);
+
+    char *res = talloc_asprintf(NULL, "%s",
+                                mp_csp_levels_names[opts->requested_input_range]);
+    if (!vo_csp.levels_in) {
+        res = talloc_asprintf_append(res, " (VO: unknown)");
+    } else if (vo_csp.levels_in != opts->requested_input_range) {
+        res = talloc_asprintf_append(res, " (VO: %s)",
+                                     mp_csp_levels_names[vo_csp.levels_in]);
+    }
+    if (!vd_csp.colorlevels) {
+        res = talloc_asprintf_append(res, " (VD: unknown)");
+    } else if (!vo_csp.levels_in || vd_csp.colorlevels != vo_csp.levels_in) {
+        res = talloc_asprintf_append(res, " (VD: %s)",
+                                     mp_csp_levels_names[vd_csp.colorlevels]);
+    }
+    *(char **)arg = res;
+    return M_PROPERTY_OK;
 }
 
 static int mp_property_colormatrix_output_range(m_option_t *prop, int action,
                                                 void *arg, MPContext *mpctx)
 {
-    return levels_property_helper(offsetof(struct mp_csp_details, levels_out),
-                                  prop, action, arg, mpctx);
+    if (action != M_PROPERTY_PRINT) {
+        int r = mp_property_generic_option(prop, action, arg, mpctx);
+        if (action == M_PROPERTY_SET) {
+            if (mpctx->sh_video)
+                set_video_output_levels(mpctx->sh_video);
+        }
+        return r;
+    }
+
+    struct MPOpts *opts = &mpctx->opts;
+
+    int req = opts->requested_output_range;
+    struct mp_csp_details actual = {0};
+    if (mpctx->sh_video && mpctx->sh_video->vfilter)
+        vf_control(mpctx->sh_video->vfilter, VFCTRL_GET_YUV_COLORSPACE, &actual);
+
+    char *res = talloc_asprintf(NULL, "%s", mp_csp_levels_names[req]);
+    if (!actual.levels_out) {
+        res = talloc_asprintf_append(res, " (Actual: unknown)");
+    } else if (actual.levels_out != req) {
+        res = talloc_asprintf_append(res, " (Actual: %s)",
+                                     mp_csp_levels_names[actual.levels_out]);
+    }
+    *(char **)arg = res;
+    return M_PROPERTY_OK;
 }
 
 /// Panscan (RW)
@@ -1923,7 +1936,6 @@ static void change_video_filters(MPContext *mpctx, const char *cmd,
     struct m_obj_settings *old_vf_settings = NULL;
     bool success = false;
     bool need_refresh = false;
-    double refresh_pts = mpctx->last_vo_pts;
 
     // The option parser is used to modify the filter list itself.
     char optname[20];
@@ -1945,10 +1957,8 @@ static void change_video_filters(MPContext *mpctx, const char *cmd,
     }
     m_option_free(type, &old_vf_settings);
 
-    // Try to refresh the video by doing a precise seek to the currently
-    // displayed frame.
-    if (need_refresh && opts->pause)
-        queue_seek(mpctx, MPSEEK_ABSOLUTE, refresh_pts, 1);
+    if (need_refresh)
+        mp_force_video_refresh(mpctx);
 }
 
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)

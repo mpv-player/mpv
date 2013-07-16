@@ -439,6 +439,8 @@ void mp_image_set_colorspace_details(struct mp_image *image,
 {
     struct mp_image_params params;
     mp_image_params_from_image(&params, image);
+    params.colorspace = csp->format;
+    params.colorlevels = csp->levels_in;
     mp_image_params_guess_csp(&params);
     image->colorspace = params.colorspace;
     image->levels = params.colorlevels;

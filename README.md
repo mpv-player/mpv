@@ -33,8 +33,8 @@ Essential dependencies (incomplete list):
 - FFmpeg libraries (libavutil libavcodec libavformat libswscale libpostproc)
 - libjpeg
 - libquvi if you want to play Youtube videos directly
-- libx264 if you want to use encoding (has to be explicitly enabled when
-  compiling ffmpeg)
+- libx264/libmp3lame/libfdk-aac if you want to use encoding (has to be
+  explicitly enabled when compiling ffmpeg)
 
 Most of the above libraries are available in suitable versions on normal
 Linux distributions. However FFmpeg is an exception (distro versions may be
@@ -46,6 +46,18 @@ those.
 If you are running Mac OSX and using homebrew we provide [homebrew-mpv][homebrew-mpv], an up
 to date formula that compiles mpv with sensible dependencies and defaults for
 OSX.
+
+configure --enable-* parameters
+-------------------------------
+
+The --enable-* parameters unconditionally force options on, completely
+skipping autodetection. This behavior is unlike what you may be used to from
+autoconf-based configure scripts that can decide to override you. This greater
+level of control comes at a price. You may have to provide the correct compiler
+and linker flags yourself.
+If you used one of these options and experience a compilation or
+linking failure, make sure you have passed the necessary compiler/linker flags
+to configure.
 
 Bug reports
 -----------

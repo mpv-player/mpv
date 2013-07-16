@@ -211,13 +211,25 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     int inw = priv->avctx->width;
     int inh = priv->avctx->height;
     guess_resolution(priv->avctx->codec_id, &inw, &inh);
-    double xscale = (double) (d.w - d.ml - d.mr) / inw;
-    double yscale = (double) (d.h - d.mt - d.mb) / inh;
+    int vidw = d.w - d.ml - d.mr;
+    int vidh = d.h - d.mt - d.mb;
+    double xscale = (double)vidw / inw;
+    double yscale = (double)vidh / inh;
+    if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE) {
+        // For DVD subs, try to keep the subtitle PAR at display PAR.
+        if (d.video_par > 1.0) {
+            xscale /= d.video_par;
+        } else {
+            yscale *= d.video_par;
+        }
+    }
+    int cx = vidw / 2 - (int)(inw * xscale) / 2;
+    int cy = vidh / 2 - (int)(inh * yscale) / 2;
     for (int i = 0; i < priv->count; i++) {
         struct sub_bitmap *bi = &priv->inbitmaps[i];
         struct sub_bitmap *bo = &priv->outbitmaps[i];
-        bo->x = bi->x * xscale + d.ml;
-        bo->y = bi->y * yscale + d.mt;
+        bo->x = bi->x * xscale + cx + d.ml;
+        bo->y = bi->y * yscale + cy + d.mt;
         bo->dw = bi->w * xscale;
         bo->dh = bi->h * yscale;
     }

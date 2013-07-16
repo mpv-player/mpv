@@ -214,7 +214,7 @@ static subtitle *sub_read_line_sami(stream_t* st, subtitle *current,
                 sami_add_line(current, text, &p);
 		s += 4;
 	    }
-	    else if ((*s == '{')) { state = 5; ++s; continue; }
+	    else if (*s == '{') { state = 5; ++s; continue; }
 	    else if (*s == '<') { state = 4; }
 	    else if (!strncasecmp (s, "&nbsp;", 6)) { *p++ = ' '; s += 6; }
 	    else if (*s == '\t') { *p++ = ' '; s++; }

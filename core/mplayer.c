@@ -2385,6 +2385,17 @@ no_video:
     return 0;
 }
 
+// Try to refresh the video by doing a precise seek to the currently displayed
+// frame. This can go wrong in all sorts of ways, so use sparingly.
+void mp_force_video_refresh(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+
+    // If not paused, the next frame should come soon enough.
+    if (opts->pause && mpctx->last_vo_pts != MP_NOPTS_VALUE)
+        queue_seek(mpctx, MPSEEK_ABSOLUTE, mpctx->last_vo_pts, 1);
+}
+
 static void add_frame_pts(struct MPContext *mpctx, double pts)
 {
     if (pts == MP_NOPTS_VALUE || mpctx->hrseek_framedrop) {
