@@ -6,12 +6,12 @@ local osc_geo = {
     vidscale = true,                        -- scale the controller with the video? don't use false, currently causes glitches
     valign = 0.8,                           -- vertical alignment, -1 (top) to 1 (bottom)
     halign = 0,                             -- vertical alignment, -1 (left) to 1 (right)
-    deadzonedist = 0.2,                     -- distance between OSC and deadzone
+    deadzonedist = 0.1,                     -- distance between OSC and deadzone
     iAmAProgrammer = false,                 -- start counting stuff at 0
 
     -- not user-safe
     osc_w = 550,                            -- width, height, corner-radius, padding of the box
-    osc_h = 150,
+    osc_h = 138,
     osc_r = 10,
     osc_p = 15,
 
@@ -33,6 +33,7 @@ local state = {
     rightTC_trem = false,
     mp_screen_sizeX,
     mp_screen_sizeY,
+    initREQ = false                        -- is a re-init request pending?
 }
 
 -- align:  -1 .. +1
@@ -223,19 +224,20 @@ end
 local osc_styles = {
     bigButtons = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnosd-font}",
     smallButtonsL = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs20\\fnosd-font}",
+    smallButtonsLlabel = "{\\fs17\\fnsans-serif}",
     smallButtonsR = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs30\\fnosd-font}",
 
     elementDown = "{\\1c&H999999}",
     elementDisab = "{\\1a&H88&}",
-    timecodes = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs25\\fnsans-serif}",
+    timecodes = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs20\\fnsans-serif}",
     vidtitle = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs12\\fnsans-serif}",
     box = "{\\bord1\\1c&H000000\\1a&H64&\\3c&HFFFFFF\\3a&H64&}",
 }
 
 
 -- OSC INIT
-function osc_init ()
-
+function osc_init()
+    --print("\nINIT\n")
     -- kill old Elements
     elements = {}
 
@@ -300,7 +302,16 @@ function osc_init ()
             ass:append("mpv")
         end
     end
-    local up_cmd = function () mp.send_command("show_text ${media-title}") end
+    local up_cmd = function ()
+
+        local title = "${media-title}"
+
+        if tonumber(mp.property_get("playlist-count")) > 1 then
+            title = "[" .. tonumber(mp.property_get("playlist-pos")) + 1 .. "/${playlist-count}] " .. title
+        end
+
+        mp.send_command("show_text \"" .. title .. "\"")
+    end
     register_element(posX, posY - pos_offsetY - 10, 8, 496, 12, osc_styles.vidtitle, osc_styles.elementDown, contentF, nil, up_cmd, false)
 
     -- If we have more than one playlist entry, render playlist navigation buttons
@@ -389,7 +400,7 @@ function osc_init ()
                 aid = tonumber(mp.property_get("audio")) + 1
             end
         end
-        ass:append("\238\132\134 {\\fs17}" .. aid .. "/" .. audiotracks)
+        ass:append("\238\132\134 " .. osc_styles.smallButtonsLlabel .. aid .. "/" .. audiotracks)
     end
     if audiotracks > 0 then -- do we have any?
         local up_cmd = function () mp.send_command("add audio") end
@@ -411,7 +422,7 @@ function osc_init ()
                 sid = tonumber(mp.property_get("sub")) + 1
             end
         end
-        ass:append("\238\132\135 {\\fs17}" .. sid .. "/" .. subtracks)
+        ass:append("\238\132\135 " .. osc_styles.smallButtonsLlabel .. sid .. "/" .. subtracks)
     end
     if subtracks > 0 then -- do we have any?
         local up_cmd = function () mp.send_command("add sub") end
@@ -458,9 +469,9 @@ function osc_init ()
     end
     -- do we have a usuable duration?
     if (not (mp.property_get("length") == nil)) and (tonumber(mp.property_get("length")) > 0) then
-        register_element(posX, posY+pos_offsetY-30, 2, pos_offsetX*2, 17, osc_styles.timecodes, nil, contentF, down_cmd, nil, false)
+        register_element(posX, posY+pos_offsetY-22, 2, pos_offsetX*2, 17, osc_styles.timecodes, nil, contentF, down_cmd, nil, false)
     else
-        register_element(posX, posY+pos_offsetY-30, 2, pos_offsetX*2, 17, (osc_styles.timecodes .. osc_styles.elementDisab), nil, contentF, nil, nil, false)
+        register_element(posX, posY+pos_offsetY-22, 2, pos_offsetX*2, 17, (osc_styles.timecodes .. osc_styles.elementDisab), nil, contentF, nil, nil, false)
     end
 
     --
@@ -469,7 +480,7 @@ function osc_init ()
 
     -- left (current pos)
     local contentF = function (ass) return ass:append(mp.property_get_string("time-pos")) end
-    register_element(posX - pos_offsetX, posY + pos_offsetY, 1, 110, 25, osc_styles.timecodes, nil, contentF, nil, nil, false)
+    register_element(posX - pos_offsetX, posY + pos_offsetY + 5, 1, 110, 20, osc_styles.timecodes, nil, contentF, nil, nil, false)
 
     -- right (total/remaining time)
     -- do we have a usuable duration?
@@ -483,7 +494,7 @@ function osc_init ()
         end
         local up_cmd = function () state.rightTC_trem = not state.rightTC_trem end
     
-        register_element(posX + pos_offsetX, posY + pos_offsetY, 3, 110, 25, osc_styles.timecodes, osc_styles.elementDown, contentF, nil, up_cmd, false)
+        register_element(posX + pos_offsetX, posY + pos_offsetY + 5, 3, 110, 20, osc_styles.timecodes, osc_styles.elementDown, contentF, nil, up_cmd, false)
     end
 
 end
@@ -551,14 +562,24 @@ function mouse_down()
     end
 end
 
+function request_init()
+    state.initREQ = true
+end
+
+
 -- called by mpv on every frame
 function mp_update()
     local current_screen_sizeX, current_screen_sizeY = mp.get_screen_size()
 
     if not (state.mp_screen_sizeX == current_screen_sizeX and state.mp_screen_sizeY == current_screen_sizeY) then
     -- display changed, reinit everything
-        osc_init()
+        request_init()
         state.mp_screen_sizeX, state.mp_screen_sizeY = current_screen_sizeX, current_screen_sizeY
+    end
+
+    if state.initREQ then
+        osc_init()
+        state.initREQ = false
     end
 
     local area_y0, area_y1
@@ -647,6 +668,7 @@ function mp_event(name, arg)
         mp_update()
     elseif name == "start" then
         --print("start new file")
+        request_init()
     elseif name == "end" then
         --print("end current file")
     end
