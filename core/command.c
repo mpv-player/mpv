@@ -2576,3 +2576,41 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 }
+
+static void script_event(struct MPContext *mpctx, const char *name,
+                         const char *arg)
+{
+#ifdef CONFIG_LUA
+    mp_lua_event(mpctx, name, arg);
+#endif
+}
+
+// Notify that a property might have changed.
+void mp_notify_property(struct MPContext *mpctx, const char *property)
+{
+    mp_notify(mpctx, MP_EVENT_PROPERTY, (void *)property);
+}
+
+void mp_notify(struct MPContext *mpctx, enum mp_event event, void *arg)
+{
+    switch (event) {
+    case MP_EVENT_TICK: {
+        script_event(mpctx, "tick", NULL);
+        break;
+    }
+    case MP_EVENT_PROPERTY: {
+        const char *name = arg;
+        mp_msg(MSGT_CPLAYER, MSGL_V, "Property '%s' changed.\n", name);
+        script_event(mpctx, "property", name);
+        break;
+    }
+    case MP_EVENT_START_FILE: {
+        script_event(mpctx, "start", NULL);
+        break;
+    }
+    case MP_EVENT_END_FILE: {
+        script_event(mpctx, "end", NULL);
+        break;
+    }
+    }
+}

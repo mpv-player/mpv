@@ -3656,9 +3656,7 @@ static void run_playloop(struct MPContext *mpctx)
 
     handle_pause_on_low_cache(mpctx);
 
-#ifdef CONFIG_LUA
-    mp_lua_update(mpctx);
-#endif
+    mp_notify(mpctx, MP_EVENT_TICK, NULL);
 
     mp_cmd_t *cmd;
     while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
@@ -4089,6 +4087,8 @@ static void play_current_file(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
 
+    mp_notify(mpctx, MP_EVENT_START_FILE, NULL);
+
     mpctx->stop_play = 0;
     mpctx->filename = NULL;
 
@@ -4421,6 +4421,8 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     mpctx->osd->ass_renderer = NULL;
     ass_clear_fonts(mpctx->ass_library);
 #endif
+
+    mp_notify(mpctx, MP_EVENT_END_FILE, NULL);
 }
 
 // Determine the next file to play. Note that if this function returns non-NULL,

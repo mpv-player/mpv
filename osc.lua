@@ -642,6 +642,16 @@ function mp_update()
 
 end
 
+function mp_event(name, arg)
+    if name == "tick" then
+        mp_update()
+    elseif name == "start" then
+        --print("start new file")
+    elseif name == "end" then
+        --print("end current file")
+    end
+end
+
 set_key_bindings {
     {"mouse_btn0",      function(e) mouse_click(false) end,
                         function(e) mouse_click(true)  end},
