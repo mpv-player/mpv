@@ -106,62 +106,27 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
 // This is affected by user-specified overrides (aspect, colorspace...).
 bool get_video_params(struct sh_video *sh, struct mp_image_params *p)
 {
-    struct MPOpts *opts = sh->opts;
-
     if (!sh->vf_input)
         return false;
 
     *p = *sh->vf_input;
-
-    // Apply user overrides
-    if (opts->requested_colorspace != MP_CSP_AUTO)
-        p->colorspace = opts->requested_colorspace;
-    if (opts->requested_input_range != MP_CSP_LEVELS_AUTO)
-        p->colorlevels = opts->requested_input_range;
-
-    // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.)
-    mp_image_params_guess_csp(p);
-
     return true;
 }
 
-void set_video_colorspace(struct sh_video *sh)
+void set_video_output_levels(struct sh_video *sh)
 {
     struct MPOpts *opts = sh->opts;
-    struct vf_instance *vf = sh->vfilter;
 
-    struct mp_image_params params;
-    if (!get_video_params(sh, &params))
+    if (!sh->vfilter)
         return;
 
-    struct mp_csp_details requested = {
-        .format = params.colorspace,
-        .levels_in = params.colorlevels,
-        .levels_out = opts->requested_output_range,
-    };
-    if (requested.levels_out == MP_CSP_LEVELS_AUTO)
-        requested.levels_out = MP_CSP_LEVELS_PC;
-
-    vf_control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
-
-    struct mp_csp_details actual = MP_CSP_DETAILS_DEFAULTS;
-    vf_control(vf, VFCTRL_GET_YUV_COLORSPACE, &actual);
-
-    int success = actual.format == requested.format
-               && actual.levels_in == requested.levels_in
-               && actual.levels_out == requested.levels_out;
-
-    if (!success)
-        mp_tmsg(MSGT_DECVIDEO, MSGL_WARN,
-                "Colorspace details not fully supported by selected vo.\n");
-
-    if (actual.format != requested.format
-            && requested.format == MP_CSP_SMPTE_240M) {
-        // BT.709 is pretty close, much better than BT.601
-        requested.format = MP_CSP_BT_709;
-        vf_control(vf, VFCTRL_SET_YUV_COLORSPACE, &requested);
+    struct mp_csp_details csp;
+    if (vf_control(sh->vfilter, VFCTRL_GET_YUV_COLORSPACE, &csp) > 0) {
+        csp.levels_out = opts->requested_output_range;
+        if (csp.levels_out == MP_CSP_LEVELS_AUTO)
+            csp.levels_out = MP_CSP_LEVELS_PC;
+        vf_control(sh->vfilter, VFCTRL_SET_YUV_COLORSPACE, &csp);
     }
-
 }
 
 void resync_video_stream(sh_video_t *sh_video)

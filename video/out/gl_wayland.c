@@ -48,11 +48,12 @@ static void egl_resize_func(struct vo_wayland_state *wl,
     struct egl_context *ctx = user_data;
     int32_t minimum_size = 150;
     int32_t x, y;
+    float temp_aspect = width / (float) MPMAX(height, 1);
 
     /* get the real window size of the window */
     wl_egl_window_get_attached_size(ctx->egl_window,
-                                    &wl->window->width,
-                                    &wl->window->height);
+                                    &w->width,
+                                    &w->height);
 
     if (width < minimum_size)
         width = minimum_size;
@@ -61,11 +62,27 @@ static void egl_resize_func(struct vo_wayland_state *wl,
 
     /* if only the height is changed we have to calculate the width
      * in any other case we calculate the height */
-    if (edges == WL_SHELL_SURFACE_RESIZE_BOTTOM ||
-        edges == WL_SHELL_SURFACE_RESIZE_TOP)
-        width = wl->vo->aspdat.asp * height;
-    else
-        height = (1 / wl->vo->aspdat.asp) * width;
+    switch (edges) {
+        case WL_SHELL_SURFACE_RESIZE_TOP:
+        case WL_SHELL_SURFACE_RESIZE_BOTTOM:
+            width = w->aspect * height;
+            break;
+        case WL_SHELL_SURFACE_RESIZE_LEFT:
+        case WL_SHELL_SURFACE_RESIZE_RIGHT:
+        case WL_SHELL_SURFACE_RESIZE_TOP_LEFT:    // just a preference
+        case WL_SHELL_SURFACE_RESIZE_TOP_RIGHT:
+        case WL_SHELL_SURFACE_RESIZE_BOTTOM_LEFT:
+        case WL_SHELL_SURFACE_RESIZE_BOTTOM_RIGHT:
+            height = (1 / w->aspect) * width;
+            break;
+        default:
+            if (w->aspect < temp_aspect)
+                width = w->aspect * height;
+            else
+                height = (1 / w->aspect) * width;
+            break;
+    }
+
 
     if (edges & WL_SHELL_SURFACE_RESIZE_LEFT)
         x = w->width - width;

@@ -50,7 +50,6 @@ static struct vf_priv_s {
     int interlaced;
     int noup;
     int accurate_rnd;
-    struct mp_csp_details colorspace;
 } const vf_priv_dflt = {
   0, 0,
   -1,-1,
@@ -59,7 +58,7 @@ static struct vf_priv_s {
 };
 
 static int mp_sws_set_colorspace(struct SwsContext *sws,
-                                 struct mp_csp_details *csp);
+                                 struct mp_image_params *p);
 
 //===========================================================================//
 
@@ -197,20 +196,19 @@ static unsigned int find_best_out(vf_instance_t *vf, int in_format){
     return best;
 }
 
-static int config(struct vf_instance *vf,
-        int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt){
+static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags)
+{
+    int width = p->w, height = p->h, d_width = p->d_w, d_height = p->d_h;
+    unsigned int outfmt = p->imgfmt;
     unsigned int best=find_best_out(vf, outfmt);
     int int_sws_flags=0;
     int round_w=0, round_h=0;
     SwsFilter *srcFilter, *dstFilter;
     enum PixelFormat dfmt, sfmt;
 
-    vf->priv->colorspace = (struct mp_csp_details) {0};
-
     if(!best){
 	mp_msg(MSGT_VFILTER,MSGL_WARN,"SwScale: no supported outfmt found :(\n");
-	return 0;
+	return -1;
     }
     sfmt = imgfmt2pixfmt(outfmt);
     dfmt = imgfmt2pixfmt(best);
@@ -235,7 +233,7 @@ static int config(struct vf_instance *vf,
       // and find out what the heck he thinks MPlayer should do
       // with this nonsense.
       mp_msg(MSGT_VFILTER, MSGL_ERR, "SwScale: EUSERBROKEN Check your parameters, they make no sense!\n");
-      return 0;
+      return -1;
     }
 
     if (vf->priv->w == -1)
@@ -301,7 +299,7 @@ static int config(struct vf_instance *vf,
     if(!vf->priv->ctx){
 	// error...
 	mp_msg(MSGT_VFILTER,MSGL_WARN,"Couldn't init SwScaler for this setup\n");
-	return 0;
+	return -1;
     }
     vf->priv->fmt=best;
 	// Compute new d_width and d_height, preserving aspect
@@ -315,7 +313,17 @@ static int config(struct vf_instance *vf,
 	}
 	//d_width=d_width*vf->priv->w/width;
 	//d_height=d_height*vf->priv->h/height;
-    return vf_next_config(vf,vf->priv->w,vf->priv->h,d_width,d_height,flags,best);
+	p->w = vf->priv->w;
+        p->h = vf->priv->h;
+        p->d_w = d_width;
+        p->d_h = d_height;
+        p->imgfmt = best;
+        mp_sws_set_colorspace(vf->priv->ctx, p);
+        // In particular, fix up colorspace/levels if YUV<->RGB conversion is
+        // performed.
+        p->colorlevels = MP_CSP_LEVELS_TV; // in case output is YUV
+        mp_image_params_guess_csp(p);
+    return vf_next_reconfig(vf, p, flags);
 }
 
 static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src[MP_MAX_PLANES], int src_stride[MP_MAX_PLANES],
@@ -407,30 +415,6 @@ static int control(struct vf_instance *vf, int request, void* data){
 	if(r<0) break;
 
 	return CONTROL_TRUE;
-    case VFCTRL_SET_YUV_COLORSPACE: {
-        struct mp_csp_details colorspace = *(struct mp_csp_details *)data;
-        if (mp_sws_set_colorspace(vf->priv->ctx, &colorspace) >= 0) {
-            vf->priv->colorspace = colorspace;
-            return 1;
-        }
-        break;
-    }
-    case VFCTRL_GET_YUV_COLORSPACE: {
-        /* This scale filter should never react to colorspace commands if it
-         * doesn't do YUV->RGB conversion. But because finding out whether this
-         * is really YUV->RGB (and not YUV->YUV or anything else) is hard,
-         * react only if the colorspace has been set explicitly before. The
-         * trick is that mp_sws_set_colorspace does not succeed for YUV->YUV
-         * and RGB->YUV conversions, which makes this code correct in "most"
-         * cases. (This would be trivial to do correctly if libswscale exposed
-         * functionality like isYUV()).
-         */
-        if (vf->priv->colorspace.format) {
-            *(struct mp_csp_details *)data = vf->priv->colorspace;
-            return CONTROL_TRUE;
-        }
-        break;
-    }
     default:
 	break;
     }
@@ -446,26 +430,22 @@ static const int mp_csp_to_swscale[MP_CSP_COUNT] = {
 
 // Adjust the colorspace used for YUV->RGB conversion. On other conversions,
 // do nothing or return an error.
-// The csp argument is set to the supported values.
 // Return 0 on success and -1 on error.
 static int mp_sws_set_colorspace(struct SwsContext *sws,
-                                 struct mp_csp_details *csp)
+                                 struct mp_image_params *p)
 {
     int *table, *inv_table;
     int brightness, contrast, saturation, srcRange, dstRange;
-
-    csp->levels_out = MP_CSP_LEVELS_PC;
 
     // NOTE: returns an error if the destination format is YUV
     if (sws_getColorspaceDetails(sws, &inv_table, &srcRange, &table, &dstRange,
                                  &brightness, &contrast, &saturation) == -1)
         goto error_out;
 
-    int sws_csp = mp_csp_to_swscale[csp->format];
+    int sws_csp = mp_csp_to_swscale[p->colorspace];
     if (sws_csp == 0) {
         // colorspace not supported, go with a reasonable default
-        csp->format = SWS_CS_ITU601;
-        sws_csp = MP_CSP_BT_601;
+        sws_csp = SWS_CS_ITU601;
     }
 
     /* The swscale API for these is hardly documented.
@@ -473,7 +453,7 @@ static int mp_sws_set_colorspace(struct SwsContext *sws,
      * for YUV->RGB conversions, and conversions to limited-range RGB are
      * not supported.
      */
-    srcRange = csp->levels_in == MP_CSP_LEVELS_PC;
+    srcRange = p->colorlevels == MP_CSP_LEVELS_PC;
     const int *new_inv_table = sws_getCoefficients(sws_csp);
 
     if (sws_setColorspaceDetails(sws, new_inv_table, srcRange, table, dstRange,
@@ -483,7 +463,6 @@ static int mp_sws_set_colorspace(struct SwsContext *sws,
     return 0;
 
 error_out:
-    *csp = (struct mp_csp_details){0};
     return -1;
 }
 
@@ -509,7 +488,7 @@ static void uninit(struct vf_instance *vf){
 }
 
 static int vf_open(vf_instance_t *vf, char *args){
-    vf->config=config;
+    vf->reconfig=reconfig;
     vf->filter=filter;
     vf->query_format=query_format;
     vf->control= control;

@@ -143,28 +143,30 @@ void mp_lua_uninit(struct MPContext *mpctx)
     mpctx->lua_ctx = NULL;
 }
 
-static int run_update(lua_State *L)
+static int run_event(lua_State *L)
 {
-    lua_getglobal(L, "mp_update");
+    lua_getglobal(L, "mp_event"); // name arg mp_event
     if (lua_isnil(L, -1))
         return 0;
-    lua_call(L, 0, 0);
+    lua_insert(L, -3); // mp_event name arg
+    lua_call(L, 2, 0);
     return 0;
 }
 
-void mp_lua_update(struct MPContext *mpctx)
+void mp_lua_event(struct MPContext *mpctx, const char *name, const char *arg)
 {
     if (!mpctx->lua_ctx)
         return;
     lua_State *L = mpctx->lua_ctx->state;
-    if (mp_cpcall(L, run_update, 0) != 0)
+    lua_pushstring(L, name);
+    if (arg) {
+        lua_pushstring(L, arg);
+    } else {
+        lua_pushnil(L);
+    }
+    if (mp_cpcall(L, run_event, 2) != 0)
         report_error(L);
 }
-
-struct dispatch_args {
-    int id;
-    char *event;
-};
 
 static int run_script_dispatch(lua_State *L)
 {

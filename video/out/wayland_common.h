@@ -79,6 +79,7 @@ struct vo_wayland_window {
     int32_t height;
     int32_t p_width;
     int32_t p_height;
+    float aspect;
 
     struct wl_surface *surface;
     struct wl_shell_surface *shell_surface;

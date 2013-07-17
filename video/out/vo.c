@@ -441,6 +441,15 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     vo->waiting_mpi = NULL;
     vo->redrawing = false;
     vo->hasframe = false;
+    if (vo->config_ok) {
+        // Legacy
+        struct mp_csp_details csp;
+        if (vo_control(vo, VOCTRL_GET_YUV_COLORSPACE, &csp) > 0) {
+            csp.levels_in = params->colorlevels;
+            csp.format = params->colorspace;
+            vo_control(vo, VOCTRL_SET_YUV_COLORSPACE, &csp);
+        }
+    }
     return ret;
 }
 

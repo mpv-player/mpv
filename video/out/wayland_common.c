@@ -730,7 +730,7 @@ static void vo_wayland_fullscreen (struct vo *vo)
         wl->window->p_width = wl->window->width;
         wl->window->p_height = wl->window->height;
         wl_shell_surface_set_fullscreen(wl->window->shell_surface,
-                WL_SHELL_SURFACE_FULLSCREEN_METHOD_SCALE,
+                WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT,
                 0, fs_output);
 
         wl->window->type = TYPE_FULLSCREEN;
@@ -881,6 +881,8 @@ bool vo_wayland_config (struct vo *vo, uint32_t d_width,
 
     w->width = d_width;
     w->height = d_height;
+
+    w->aspect = w->width / (float) MPMAX(w->height, 1);
 
     if ((VOFLAG_FULLSCREEN & flags) && w->type != TYPE_FULLSCREEN)
         vo_wayland_fullscreen(vo);

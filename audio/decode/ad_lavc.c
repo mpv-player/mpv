@@ -160,16 +160,12 @@ static int setup_format(sh_audio_t *sh_audio,
     struct priv *priv = sh_audio->context;
     int sample_format        =
         af_from_avformat(av_get_packed_sample_fmt(lavc_context->sample_fmt));
-    bool broken_srate        = false;
     int samplerate           = lavc_context->sample_rate;
-    int container_samplerate = sh_audio->container_out_samplerate;
-    if (!container_samplerate && sh_audio->wf)
-        container_samplerate = sh_audio->wf->nSamplesPerSec;
-    if (lavc_context->codec_id == AV_CODEC_ID_AAC
-        && samplerate == 2 * container_samplerate)
-        broken_srate = true;
-    else if (container_samplerate)
-        samplerate = container_samplerate;
+    // If not set, try container samplerate
+    if (!samplerate && sh_audio->wf) {
+        samplerate = sh_audio->wf->nSamplesPerSec;
+        mp_tmsg(MSGT_DECAUDIO, MSGL_V, "ad_lavc: using container rate.\n");
+    }
 
     struct mp_chmap lavc_chmap;
     mp_chmap_from_lavc(&lavc_chmap, lavc_context->channel_layout);
@@ -188,9 +184,6 @@ static int setup_format(sh_audio_t *sh_audio,
         sh_audio->samplerate = samplerate;
         sh_audio->sample_format = sample_format;
         sh_audio->samplesize = af_fmt2bits(sh_audio->sample_format) / 8;
-        if (broken_srate)
-            mp_msg(MSGT_DECAUDIO, MSGL_WARN,
-                   "Ignoring broken container sample rate for AAC with SBR\n");
         return 1;
     }
     return 0;
