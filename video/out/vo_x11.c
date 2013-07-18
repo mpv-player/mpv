@@ -21,6 +21,7 @@
 #include <string.h>
 #include <sys/types.h>
 
+#include <libswscale/swscale.h>
 #include <libavutil/common.h>
 
 #include "config.h"

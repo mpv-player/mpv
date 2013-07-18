@@ -2,7 +2,6 @@
 #define MPLAYER_SWS_UTILS_H
 
 #include <stdbool.h>
-#include <libswscale/swscale.h>
 
 #include "mp_image.h"
 

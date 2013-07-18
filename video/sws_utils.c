@@ -18,6 +18,7 @@
 
 #include <assert.h>
 
+#include <libswscale/swscale.h>
 #include <libavutil/opt.h>
 
 #include "sws_utils.h"

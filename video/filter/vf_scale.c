@@ -22,6 +22,8 @@
 #include <inttypes.h>
 #include <sys/types.h>
 
+#include <libswscale/swscale.h>
+
 #include "config.h"
 #include "core/mp_msg.h"
 #include "core/options.h"
