@@ -13,6 +13,8 @@ struct mp_csp_details;
 // Guaranteed to be a power of 2 and > 1.
 #define SWS_MIN_BYTE_ALIGN 16
 
+extern const int mp_sws_hq_flags;
+
 bool mp_sws_supported_format(int imgfmt);
 
 void mp_image_swscale(struct mp_image *dst, struct mp_image *src,

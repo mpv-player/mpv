@@ -20,7 +20,6 @@
 #include <string.h>
 #include <setjmp.h>
 
-#include <libswscale/swscale.h>
 #include <libavcodec/avcodec.h>
 #include <libavutil/mem.h>
 
@@ -288,10 +287,7 @@ int write_image(struct mp_image *image, const struct image_writer_opts *opts,
         struct mp_image *dst = mp_image_alloc(destfmt, d_w, d_h);
         mp_image_copy_attributes(dst, image);
 
-        int flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP |
-                    SWS_ACCURATE_RND | SWS_BITEXACT;
-
-        mp_image_swscale(dst, image, flags);
+        mp_image_swscale(dst, image, mp_sws_hq_flags);
 
         allocated_image = dst;
         image = dst;

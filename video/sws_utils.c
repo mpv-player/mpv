@@ -39,6 +39,10 @@ int sws_chr_hshift = 0;
 float sws_chr_sharpen = 0.0;
 float sws_lum_sharpen = 0.0;
 
+// Highest quality, but also slowest.
+const int mp_sws_hq_flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT |
+                            SWS_FULL_CHR_H_INP | SWS_ACCURATE_RND |
+                            SWS_BITEXACT;
 
 // Set ctx parameters to global command line flags.
 void mp_sws_set_from_cmdline(struct mp_sws_context *ctx)
@@ -271,8 +275,7 @@ void mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
                             float gblur)
 {
     struct mp_sws_context *ctx = mp_sws_alloc(NULL);
-    ctx->flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP |
-                 SWS_ACCURATE_RND | SWS_BITEXACT;
+    ctx->flags = mp_sws_hq_flags;
     ctx->src_filter = sws_getDefaultFilter(gblur, gblur, 0, 0, 0, 0, 0);
     ctx->force_reload = true;
     mp_sws_scale(ctx, dst, src);
