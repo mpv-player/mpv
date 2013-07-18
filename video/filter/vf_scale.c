@@ -45,9 +45,7 @@ static struct vf_priv_s {
     int cfg_w, cfg_h;
     int v_chr_drop;
     double param[2];
-    unsigned int fmt;
-    struct SwsContext *ctx;
-    int interlaced;
+    struct mp_sws_context *sws;
     int noup;
     int accurate_rnd;
 } const vf_priv_dflt = {
@@ -56,9 +54,6 @@ static struct vf_priv_s {
     0,
     {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
 };
-
-static int mp_sws_set_colorspace(struct SwsContext *sws,
-                                 struct mp_image_params *p);
 
 //===========================================================================//
 
@@ -226,18 +221,14 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags
     int width = p->w, height = p->h, d_width = p->d_w, d_height = p->d_h;
     unsigned int outfmt = p->imgfmt;
     unsigned int best = find_best_out(vf, outfmt);
-    int int_sws_flags = 0;
     int round_w = 0, round_h = 0;
-    SwsFilter *srcFilter, *dstFilter;
-    enum PixelFormat dfmt, sfmt;
+    struct mp_image_params input = *p;
 
     if (!best) {
         mp_msg(MSGT_VFILTER, MSGL_WARN,
                "SwScale: no supported outfmt found :(\n");
         return -1;
     }
-    sfmt = imgfmt2pixfmt(outfmt);
-    dfmt = imgfmt2pixfmt(best);
 
     vf->next->query_format(vf->next, best);
 
@@ -301,26 +292,6 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags
            width, height, vo_format_name(outfmt), vf->priv->w, vf->priv->h,
            vo_format_name(best));
 
-    // free old ctx:
-    if (vf->priv->ctx)
-        sws_freeContext(vf->priv->ctx);
-
-    // new swscaler:
-    sws_getFlagsAndFilterFromCmdLine(&int_sws_flags, &srcFilter, &dstFilter);
-    int_sws_flags |= vf->priv->v_chr_drop << SWS_SRC_V_CHR_DROP_SHIFT;
-    int_sws_flags |= vf->priv->accurate_rnd * SWS_ACCURATE_RND;
-    vf->priv->ctx = sws_getContext(width, height >> vf->priv->interlaced,
-                                   sfmt, vf->priv->w,
-                                   vf->priv->h >> vf->priv->interlaced, dfmt,
-                                   int_sws_flags, srcFilter, dstFilter,
-                                   vf->priv->param);
-    if (!vf->priv->ctx) {
-        // error...
-        mp_msg(MSGT_VFILTER, MSGL_WARN,
-               "Couldn't init SwScaler for this setup\n");
-        return -1;
-    }
-    vf->priv->fmt = best;
     // Compute new d_width and d_height, preserving aspect
     // while ensuring that both are >= output size in pixels.
     if (vf->priv->h * d_width > vf->priv->w * d_height) {
@@ -337,38 +308,35 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags
     p->d_w = d_width;
     p->d_h = d_height;
     p->imgfmt = best;
-    mp_sws_set_colorspace(vf->priv->ctx, p);
+
+    // Second-guess what libswscale is going to output and what not.
+    // It depends what libswscale supports for in/output, and what makes sense.
+    struct mp_imgfmt_desc s_fmt = mp_imgfmt_get_desc(input.imgfmt);
+    struct mp_imgfmt_desc d_fmt = mp_imgfmt_get_desc(p->imgfmt);
+    // keep colorspace settings if the data stays in yuv
+    if (!(s_fmt.flags & MP_IMGFLAG_YUV) || !(d_fmt.flags & MP_IMGFLAG_YUV)) {
+        p->colorspace = MP_CSP_AUTO;
+        p->colorlevels = MP_CSP_LEVELS_AUTO;
+    }
+    mp_image_params_guess_csp(p);
+
+    mp_sws_set_from_cmdline(vf->priv->sws);
+    vf->priv->sws->flags |= vf->priv->v_chr_drop << SWS_SRC_V_CHR_DROP_SHIFT;
+    vf->priv->sws->flags |= vf->priv->accurate_rnd * SWS_ACCURATE_RND;
+    vf->priv->sws->src = input;
+    vf->priv->sws->dst = *p;
+
+    if (mp_sws_reinit(vf->priv->sws) < 0) {
+        // error...
+        mp_msg(MSGT_VFILTER, MSGL_WARN,
+               "Couldn't init libswscale for this setup\n");
+        return -1;
+    }
+
     // In particular, fix up colorspace/levels if YUV<->RGB conversion is
     // performed.
-    p->colorlevels = MP_CSP_LEVELS_TV;     // in case output is YUV
-    mp_image_params_guess_csp(p);
+
     return vf_next_reconfig(vf, p, flags);
-}
-
-static void scale(struct SwsContext *sws1, struct SwsContext *sws2,
-                  uint8_t *src[MP_MAX_PLANES], int src_stride[MP_MAX_PLANES],
-                  int y, int h, uint8_t *dst[MP_MAX_PLANES],
-                  int dst_stride[MP_MAX_PLANES],
-                  int interlaced)
-{
-    const uint8_t *src2[MP_MAX_PLANES] = {src[0], src[1], src[2], src[3]};
-
-    if (interlaced) {
-        int i;
-        uint8_t *dst2[MP_MAX_PLANES] = {dst[0], dst[1], dst[2], dst[3]};
-        int src_stride2[MP_MAX_PLANES] = {2 * src_stride[0], 2 * src_stride[1],
-                                          2 * src_stride[2], 2 * src_stride[3]};
-        int dst_stride2[MP_MAX_PLANES] = {2 * dst_stride[0], 2 * dst_stride[1],
-                                          2 * dst_stride[2], 2 * dst_stride[3]};
-        sws_scale(sws1, src2, src_stride2, y >> 1, h >> 1, dst2, dst_stride2);
-        for (i = 0; i < MP_MAX_PLANES; i++) {
-            src2[i] += src_stride[i];
-            dst2[i] += dst_stride[i];
-        }
-        sws_scale(sws2, src2, src_stride2, y >> 1, h >> 1, dst2, dst_stride2);
-    } else {
-        sws_scale(sws1, src2, src_stride, y, h, dst, dst_stride);
-    }
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
@@ -376,8 +344,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     struct mp_image *dmpi = vf_alloc_out_image(vf);
     mp_image_copy_attributes(dmpi, mpi);
 
-    scale(vf->priv->ctx, vf->priv->ctx, mpi->planes, mpi->stride, 0, mpi->h,
-          dmpi->planes, dmpi->stride, vf->priv->interlaced);
+    mp_sws_scale(vf->priv->sws, dmpi, mpi);
 
     talloc_free(mpi);
     return dmpi;
@@ -385,105 +352,43 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 
 static int control(struct vf_instance *vf, int request, void *data)
 {
-    int *table;
-    int *inv_table;
     int r;
-    int brightness, contrast, saturation, srcRange, dstRange;
     vf_equalizer_t *eq;
+    struct mp_sws_context *sws = vf->priv->sws;
 
-    if (vf->priv->ctx) {
-        switch (request) {
-        case VFCTRL_GET_EQUALIZER:
-            r = sws_getColorspaceDetails(vf->priv->ctx, &inv_table, &srcRange,
-                                         &table, &dstRange, &brightness,
-                                         &contrast, &saturation);
-            if (r < 0)
-                break;
-
-            eq = data;
-            if (!strcmp(eq->item, "brightness"))
-                eq->value =  ((brightness * 100) + (1 << 15)) >> 16;
-            else if (!strcmp(eq->item, "contrast"))
-                eq->value = (((contrast  * 100) + (1 << 15)) >> 16) - 100;
-            else if (!strcmp(eq->item, "saturation"))
-                eq->value = (((saturation * 100) + (1 << 15)) >> 16) - 100;
-            else
-                break;
-            return CONTROL_TRUE;
-        case VFCTRL_SET_EQUALIZER:
-            r = sws_getColorspaceDetails(vf->priv->ctx, &inv_table, &srcRange,
-                                         &table, &dstRange, &brightness,
-                                         &contrast, &saturation);
-            if (r < 0)
-                break;
-
-            eq = data;
-            if (!strcmp(eq->item, "brightness"))
-                brightness = ((eq->value << 16) + 50) / 100;
-            else if (!strcmp(eq->item, "contrast"))
-                contrast   = (((eq->value + 100) << 16) + 50) / 100;
-            else if (!strcmp(eq->item, "saturation"))
-                saturation = (((eq->value + 100) << 16) + 50) / 100;
-            else
-                break;
-
-            r = sws_setColorspaceDetails(vf->priv->ctx, inv_table, srcRange,
-                                         table, dstRange, brightness, contrast,
-                                         saturation);
-            if (r < 0)
-                break;
-
-            return CONTROL_TRUE;
-        default:
+    switch (request) {
+    case VFCTRL_GET_EQUALIZER:
+        eq = data;
+        if (!strcmp(eq->item, "brightness"))
+            eq->value =  ((sws->brightness * 100) + (1 << 15)) >> 16;
+        else if (!strcmp(eq->item, "contrast"))
+            eq->value = (((sws->contrast  * 100) + (1 << 15)) >> 16) - 100;
+        else if (!strcmp(eq->item, "saturation"))
+            eq->value = (((sws->saturation * 100) + (1 << 15)) >> 16) - 100;
+        else
             break;
-        }
+        return CONTROL_TRUE;
+    case VFCTRL_SET_EQUALIZER:
+        eq = data;
+        if (!strcmp(eq->item, "brightness"))
+            sws->brightness = ((eq->value << 16) + 50) / 100;
+        else if (!strcmp(eq->item, "contrast"))
+            sws->contrast   = (((eq->value + 100) << 16) + 50) / 100;
+        else if (!strcmp(eq->item, "saturation"))
+            sws->saturation = (((eq->value + 100) << 16) + 50) / 100;
+        else
+            break;
+
+        r = mp_sws_reinit(sws);
+        if (r < 0)
+            break;
+
+        return CONTROL_TRUE;
+    default:
+        break;
     }
 
     return vf_next_control(vf, request, data);
-}
-
-static const int mp_csp_to_swscale[MP_CSP_COUNT] = {
-    [MP_CSP_BT_601] = SWS_CS_ITU601,
-    [MP_CSP_BT_709] = SWS_CS_ITU709,
-    [MP_CSP_SMPTE_240M] = SWS_CS_SMPTE240M,
-};
-
-// Adjust the colorspace used for YUV->RGB conversion. On other conversions,
-// do nothing or return an error.
-// Return 0 on success and -1 on error.
-static int mp_sws_set_colorspace(struct SwsContext *sws,
-                                 struct mp_image_params *p)
-{
-    int *table, *inv_table;
-    int brightness, contrast, saturation, srcRange, dstRange;
-
-    // NOTE: returns an error if the destination format is YUV
-    if (sws_getColorspaceDetails(sws, &inv_table, &srcRange, &table, &dstRange,
-                                 &brightness, &contrast, &saturation) == -1)
-        goto error_out;
-
-    int sws_csp = mp_csp_to_swscale[p->colorspace];
-    if (sws_csp == 0) {
-        // colorspace not supported, go with a reasonable default
-        sws_csp = SWS_CS_ITU601;
-    }
-
-    /* The swscale API for these is hardly documented.
-     * Apparently table/range only apply to YUV. Thus dstRange has no effect
-     * for YUV->RGB conversions, and conversions to limited-range RGB are
-     * not supported.
-     */
-    srcRange = p->colorlevels == MP_CSP_LEVELS_PC;
-    const int *new_inv_table = sws_getCoefficients(sws_csp);
-
-    if (sws_setColorspaceDetails(sws, new_inv_table, srcRange, table, dstRange,
-                                 brightness, contrast, saturation) == -1)
-        goto error_out;
-
-    return 0;
-
-error_out:
-    return -1;
 }
 
 //===========================================================================//
@@ -509,8 +414,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 
 static void uninit(struct vf_instance *vf)
 {
-    if (vf->priv->ctx)
-        sws_freeContext(vf->priv->ctx);
 }
 
 static int vf_open(vf_instance_t *vf, char *args)
@@ -520,6 +423,7 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->query_format = query_format;
     vf->control = control;
     vf->uninit = uninit;
+    vf->priv->sws = mp_sws_alloc(vf);
     mp_msg(MSGT_VFILTER, MSGL_V, "SwScale params: %d x %d (-1=no scaling)\n",
            vf->priv->cfg_w, vf->priv->cfg_h);
 
@@ -531,7 +435,6 @@ static int vf_open(vf_instance_t *vf, char *args)
 static const m_option_t vf_opts_fields[] = {
     {"w", ST_OFF(cfg_w), CONF_TYPE_INT, M_OPT_MIN, -11, 0, NULL},
     {"h", ST_OFF(cfg_h), CONF_TYPE_INT, M_OPT_MIN, -11, 0, NULL},
-    {"interlaced", ST_OFF(interlaced), CONF_TYPE_INT, M_OPT_RANGE, 0, 1, NULL},
     {"chr-drop", ST_OFF(v_chr_drop), CONF_TYPE_INT, M_OPT_RANGE, 0, 3, NULL},
     {"param", ST_OFF(param[0]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
     {"param2", ST_OFF(param[1]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},

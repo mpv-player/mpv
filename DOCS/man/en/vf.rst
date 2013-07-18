@@ -113,12 +113,6 @@ Available filters are:
         :-(n+8): Like -n above, but rounding the dimension to the closest
                  multiple of 16.
 
-    ``<interlaced>``
-        Toggle interlaced scaling.
-
-        :0: off (default)
-        :1: on
-
     ``<chr_drop>``
         chroma skipping
 
