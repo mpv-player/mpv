@@ -30,8 +30,6 @@
 #include "config.h"
 
 struct vo;
-struct vo_wayland_state;
-
 
 struct vo_wayland_output {
     uint32_t id; /* unique name */
@@ -42,11 +40,48 @@ struct vo_wayland_output {
     struct wl_list link;
 };
 
-struct vo_wayland_display {
-    struct wl_display *display;
-    struct wl_registry *registry;
-    struct wl_compositor *compositor;
-    struct wl_shell *shell;
+
+struct vo_wayland_state {
+    struct vo *vo;
+
+    struct {
+        int fd;
+        struct wl_display *display;
+        struct wl_registry *registry;
+        struct wl_compositor *compositor;
+        struct wl_shell *shell;
+
+        struct wl_list output_list;
+        struct wl_output *fs_output; /* fullscreen output */
+        int output_mode_received;
+
+        int display_fd;
+
+        uint32_t formats;
+    } display;
+
+    struct {
+        int32_t width;
+        int32_t height;
+        int32_t p_width; // previous sizes for leaving fullscreen
+        int32_t p_height;
+        float aspect;
+
+        struct wl_surface *surface;
+        struct wl_shell_surface *shell_surface;
+        int events; /* mplayer events (VO_EVENT_RESIZE) */
+
+        /* Because the egl windows have a special resize windw function we have to
+         * register it first before doing any resizing.
+         * This makes us independet from the output driver */
+        void (*resize_func) (struct vo_wayland_state *wl,
+                             uint32_t edges,
+                             int32_t width,
+                             int32_t height,
+                             void *user_data);
+
+        void *resize_func_data;
+    } window;
 
     struct {
         struct wl_shm *shm;
@@ -60,57 +95,17 @@ struct vo_wayland_display {
         uint32_t serial;
     } cursor;
 
-    int display_fd;
-
-    struct wl_list output_list;
-    struct wl_output *fs_output; /* fullscreen output */
-    int output_mode_received;
-
-    uint32_t formats;
-};
-
-struct vo_wayland_window {
-    int32_t width;
-    int32_t height;
-    int32_t p_width;
-    int32_t p_height;
-    float aspect;
-
-    struct wl_surface *surface;
-    struct wl_shell_surface *shell_surface;
-
-    int events; /* mplayer events (VO_EVENT_RESIZE) */
-
-    /* Because the egl windows have a special resize windw function we have to
-     * register it first before doing any resizing.
-     * This makes us independet from the output driver */
-    void (*resize_func) (struct vo_wayland_state *wl,
-                         uint32_t edges,
-                         int32_t width,
-                         int32_t height,
-                         void *user_data);
-
-    void *resize_func_data;
-};
-
-struct vo_wayland_input {
-    struct wl_seat *seat;
-    struct wl_keyboard *keyboard;
-    struct wl_pointer *pointer;
-
     struct {
-        struct xkb_context *context;
-        struct xkb_keymap *keymap;
-        struct xkb_state *state;
-    } xkb;
-};
+        struct wl_seat *seat;
+        struct wl_keyboard *keyboard;
+        struct wl_pointer *pointer;
 
-struct vo_wayland_state {
-    struct vo *vo;
-
-    struct vo_wayland_display *display;
-    struct vo_wayland_window *window;
-    struct vo_wayland_input *input;
+        struct {
+            struct xkb_context *context;
+            struct xkb_keymap *keymap;
+            struct xkb_state *state;
+        } xkb;
+    } input;
 };
 
 int vo_wayland_init(struct vo *vo);
