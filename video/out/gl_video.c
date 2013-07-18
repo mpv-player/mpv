@@ -168,6 +168,8 @@ struct gl_video {
 
     bool is_yuv, is_rgb;
     bool is_linear_rgb;
+    bool has_alpha;
+    char color_swizzle[5];
 
     float input_gamma, conv_gamma;
 
@@ -208,24 +210,52 @@ struct fmt_entry {
     GLenum type;
 };
 
+// Very special formats, for which OpenGL happens to have direct support
 static const struct fmt_entry mp_to_gl_formats[] = {
-    {IMGFMT_Y8,      GL_RED,   GL_RED,  GL_UNSIGNED_BYTE},
-    {IMGFMT_Y16,     GL_R16,   GL_RED,  GL_UNSIGNED_SHORT},
-    {IMGFMT_YA8,     GL_RG,    GL_RG,   GL_UNSIGNED_BYTE},
-    {IMGFMT_RGB48,   GL_RGB16, GL_RGB,  GL_UNSIGNED_SHORT},
-    {IMGFMT_RGB24,   GL_RGB,   GL_RGB,  GL_UNSIGNED_BYTE},
-    {IMGFMT_RGBA,    GL_RGBA,  GL_RGBA, GL_UNSIGNED_BYTE},
     {IMGFMT_RGB15,   GL_RGBA,  GL_RGBA, GL_UNSIGNED_SHORT_1_5_5_5_REV},
     {IMGFMT_RGB16,   GL_RGB,   GL_RGB,  GL_UNSIGNED_SHORT_5_6_5_REV},
     {IMGFMT_BGR15,   GL_RGBA,  GL_BGRA, GL_UNSIGNED_SHORT_1_5_5_5_REV},
     {IMGFMT_BGR16,   GL_RGB,   GL_RGB,  GL_UNSIGNED_SHORT_5_6_5},
-    {IMGFMT_BGR24,   GL_RGB,   GL_BGR,  GL_UNSIGNED_BYTE},
-    {IMGFMT_BGRA,    GL_RGBA,  GL_BGRA, GL_UNSIGNED_BYTE},
     {0},
 };
 
-static const int byte_formats[3] =
-    {0, IMGFMT_Y8, IMGFMT_Y16};
+static const struct fmt_entry gl_byte_formats[] = {
+    {0, GL_RED,     GL_RED,     GL_UNSIGNED_BYTE},      // 1 x 8
+    {0, GL_RG,      GL_RG,      GL_UNSIGNED_BYTE},      // 2 x 8
+    {0, GL_RGB,     GL_RGB,     GL_UNSIGNED_BYTE},      // 3 x 8
+    {0, GL_RGBA,    GL_RGBA,    GL_UNSIGNED_BYTE},      // 4 x 8
+    {0, GL_R16,     GL_RED,     GL_UNSIGNED_SHORT},     // 1 x 16
+    {0, GL_RG16,    GL_RG,      GL_UNSIGNED_SHORT},     // 2 x 16
+    {0, GL_RGB16,   GL_RGB,     GL_UNSIGNED_SHORT},     // 3 x 16
+    {0, GL_RGBA16,  GL_RGBA,    GL_UNSIGNED_SHORT},     // 4 x 16
+};
+
+struct packed_fmt_entry {
+    int fmt;
+    int8_t component_size;
+    int8_t components[4]; // source component - 0 means unmapped
+};
+
+static const struct packed_fmt_entry mp_packed_formats[] = {
+    //                      R  G  B  A
+    {IMGFMT_Y8,         1, {1, 0, 0, 0}},
+    {IMGFMT_Y16,        2, {1, 0, 0, 0}},
+    {IMGFMT_YA8,        1, {1, 0, 0, 2}},
+    {IMGFMT_ARGB,       1, {2, 3, 4, 1}},
+    {IMGFMT_0RGB,       1, {2, 3, 4, 0}},
+    {IMGFMT_BGRA,       1, {3, 2, 1, 4}},
+    {IMGFMT_BGR0,       1, {3, 2, 1, 0}},
+    {IMGFMT_ABGR,       1, {4, 3, 2, 1}},
+    {IMGFMT_0BGR,       1, {4, 3, 2, 0}},
+    {IMGFMT_RGBA,       1, {1, 2, 3, 4}},
+    {IMGFMT_RGB0,       1, {1, 2, 3, 0}},
+    {IMGFMT_BGR24,      1, {3, 2, 1, 0}},
+    {IMGFMT_RGB24,      1, {1, 2, 3, 0}},
+    {IMGFMT_RGB48,      2, {1, 2, 3, 0}},
+    {IMGFMT_RGBA64,     2, {1, 2, 3, 4}},
+    {IMGFMT_BGRA64,     2, {3, 2, 1, 4}},
+    {0},
+};
 
 static const char *osd_shaders[SUBBITMAP_COUNT] = {
     [SUBBITMAP_LIBASS] = "frag_osd_libass",
@@ -738,7 +768,8 @@ static void compile_shaders(struct gl_video *p)
                                    shader_prelude, PRELUDE_END);
 
     // Need to pass alpha through the whole chain. (Not needed for OSD shaders.)
-    shader_def_opt(&header, "USE_ALPHA", p->opts.enable_alpha);
+    bool use_alpha = p->opts.enable_alpha && p->has_alpha;
+    shader_def_opt(&header, "USE_ALPHA", use_alpha);
 
     char *header_osd = talloc_strdup(tmp, header);
     shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV", p->opts.srgb &&
@@ -782,13 +813,14 @@ static void compile_shaders(struct gl_video *p)
         shader_def(&header_conv, "USE_CONV", "CONV_PLANAR");
     }
 
-    shader_def_opt(&header_conv, "USE_GBRP", p->image_format == IMGFMT_GBRP);
+    if (p->color_swizzle[0])
+        shader_def(&header_conv, "USE_COLOR_SWIZZLE", p->color_swizzle);
     shader_def_opt(&header_conv, "USE_SWAP_UV", p->image_format == IMGFMT_NV21);
     shader_def_opt(&header_conv, "USE_YGRAY", p->is_yuv && p->plane_count == 1);
     shader_def_opt(&header_conv, "USE_INPUT_GAMMA", convert_input_gamma);
     shader_def_opt(&header_conv, "USE_COLORMATRIX", !p->is_rgb);
     shader_def_opt(&header_conv, "USE_CONV_GAMMA", convert_input_to_linear);
-    if (p->opts.enable_alpha && p->plane_count == 4)
+    if (use_alpha && p->plane_count > 3)
         shader_def(&header_conv, "USE_ALPHA_PLANE", "3");
 
     shader_def_opt(&header_final, "USE_LINEAR_CONV_INV", p->use_lut_3d);
@@ -1781,6 +1813,21 @@ void gl_video_uninit(struct gl_video *p)
     talloc_free(p);
 }
 
+// dest = src.<w> (always using 4 components)
+static void packed_fmt_swizzle(char w[5], const struct packed_fmt_entry *fmt)
+{
+    for (int c = 0; c < 4; c++)
+        w[c] = "rgba"[MPMAX(fmt->components[c] - 1, 0)];
+    w[4] = '\0';
+}
+
+static const struct fmt_entry *find_tex_format(int bytes_per_comp, int n_channels)
+{
+    assert(bytes_per_comp == 1 || bytes_per_comp == 2);
+    assert(n_channels >= 1 && n_channels <= 4);
+    return &gl_byte_formats[n_channels - 1 + (bytes_per_comp - 1) * 4];
+}
+
 static bool init_format(int fmt, struct gl_video *init)
 {
     bool supported = false;
@@ -1795,10 +1842,12 @@ static bool init_format(int fmt, struct gl_video *init)
     if (desc.num_planes > 4)
         return false;
 
-    int plane_format[4] = {0};
+    const struct fmt_entry *plane_format[4] = {0};
 
     init->image_format = fmt;
     init->plane_bits = desc.bpp[0];
+    init->color_swizzle[0] = '\0';
+    init->has_alpha = false;
 
     // YUV/planar formats
     if (!supported && (desc.flags & MP_IMGFLAG_YUV_P)) {
@@ -1806,59 +1855,77 @@ static bool init_format(int fmt, struct gl_video *init)
         if ((desc.flags & MP_IMGFLAG_NE) && bits >= 8 && bits <= 16) {
             supported = true;
             init->plane_bits = bits;
-            plane_format[0] = byte_formats[(bits + 7) / 8];
+            init->has_alpha = desc.num_planes > 3;
+            plane_format[0] = find_tex_format((bits + 7) / 8, 1);
+            for (int p = 1; p < desc.num_planes; p++)
+                plane_format[p] = plane_format[0];
         }
     }
 
     // YUV/half-packed
     if (!supported && (fmt == IMGFMT_NV12 || fmt == IMGFMT_NV21)) {
         supported = true;
-        plane_format[0] = IMGFMT_Y8;
-        plane_format[1] = IMGFMT_YA8;
+        plane_format[0] = find_tex_format(1, 1);
+        plane_format[1] = find_tex_format(1, 2);
+        if (fmt == IMGFMT_NV21)
+            snprintf(init->color_swizzle, sizeof(init->color_swizzle), "rbga");
     }
 
     // RGB/planar
     if (!supported && fmt == IMGFMT_GBRP) {
         supported = true;
-        plane_format[0] = byte_formats[1];
+        snprintf(init->color_swizzle, sizeof(init->color_swizzle), "brga");
+        plane_format[0] = find_tex_format(1, 1);
+        for (int p = 1; p < desc.num_planes; p++)
+            plane_format[p] = plane_format[0];
     }
 
     // XYZ (same organization as RGB packed, but requires conversion matrix)
     if (!supported && fmt == IMGFMT_XYZ12) {
         supported = true;
-        plane_format[0] = IMGFMT_RGB48;
+        plane_format[0] = find_tex_format(2, 3);
     }
 
-    // All formats in mp_to_gl_formats[] are supported
-    // If it's not in the table, it will be rejected below.
-    // Includes packed RGB and YUV formats
-    if (!supported && desc.num_planes == 1) {
-        supported = true;
-        plane_format[0] = fmt;
+    // Packed RGB special formats
+    if (!supported) {
+        for (const struct fmt_entry *e = mp_to_gl_formats; e->mp_format; e++) {
+            if (e->mp_format == fmt) {
+                supported = true;
+                plane_format[0] = e;
+                break;
+            }
+        }
+    }
+
+    // Packed RGB(A) formats
+    if (!supported) {
+        for (const struct packed_fmt_entry *e = mp_packed_formats; e->fmt; e++) {
+            if (e->fmt == fmt) {
+                supported = true;
+                int n_comp = desc.bytes[0] / e->component_size;
+                plane_format[0] = find_tex_format(e->component_size, n_comp);
+                packed_fmt_swizzle(init->color_swizzle, e);
+                init->has_alpha = e->components[3] != 0;
+                break;
+            }
+        }
     }
 
     if (!supported)
         return false;
 
-    for (int p = 0; p < desc.num_planes; p++) {
-        struct texplane *plane = &init->image.planes[p];
-        if (p > 0 && !plane_format[p])
-            plane_format[p] = plane_format[0];
-        for (const struct fmt_entry *e = mp_to_gl_formats; e->mp_format; e++) {
-            if (e->mp_format == plane_format[p]) {
-                plane->gl_format = e->format;
-                plane->gl_internal_format = e->internal_format;
-                plane->gl_type = e->type;
-                goto found;
-            }
-        }
-        return false; // not found
-    found: ;
-    }
-
     // Stuff like IMGFMT_420AP10. Untested, most likely insane.
     if (desc.num_planes == 4 && (init->plane_bits % 8) != 0)
         return false;
+
+    for (int p = 0; p < desc.num_planes; p++) {
+        struct texplane *plane = &init->image.planes[p];
+        const struct fmt_entry *format = plane_format[p];
+        assert(format);
+        plane->gl_format = format->format;
+        plane->gl_internal_format = format->internal_format;
+        plane->gl_type = format->type;
+    }
 
     init->is_yuv = desc.flags & MP_IMGFLAG_YUV;
     init->is_rgb = desc.flags & MP_IMGFLAG_RGB;

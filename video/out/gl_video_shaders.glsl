@@ -330,29 +330,25 @@ void main() {
 #define USE_CONV 0
 #endif
 #if USE_CONV == CONV_PLANAR
-    vec3 color = vec3(SAMPLE_L(texture0, textures_size[0], texcoord).r,
-                      SAMPLE_C(texture1, textures_size[1], chr_texcoord).r,
-                      SAMPLE_C(texture2, textures_size[2], chr_texcoord).r);
-    float alpha = 1.0;
+    vec4 acolor = vec4(SAMPLE_L(texture0, textures_size[0], texcoord).r,
+                       SAMPLE_C(texture1, textures_size[1], chr_texcoord).r,
+                       SAMPLE_C(texture2, textures_size[2], chr_texcoord).r,
+                       1.0);
 #elif USE_CONV == CONV_NV12
-    vec3 color = vec3(SAMPLE_L(texture0, textures_size[0], texcoord).r,
-                      SAMPLE_C(texture1, textures_size[1], chr_texcoord).rg);
-    float alpha = 1.0;
+    vec4 acolor = vec4(SAMPLE_L(texture0, textures_size[0], texcoord).r,
+                       SAMPLE_C(texture1, textures_size[1], chr_texcoord).rg,
+                       1.0);
 #else
     vec4 acolor = SAMPLE_L(texture0, textures_size[0], texcoord);
-    vec3 color = acolor.rgb;
-    float alpha = acolor.a;
 #endif
 #ifdef USE_ALPHA_PLANE
-    alpha = SAMPLE_L(texture3,
-                     textures_size[3], texcoord).r;
+    acolor.a = SAMPLE_L(texture3, textures_size[3], texcoord).r;
 #endif
-#ifdef USE_GBRP
-    color.gbr = color;
+#ifdef USE_COLOR_SWIZZLE
+    acolor = acolor. USE_COLOR_SWIZZLE ;
 #endif
-#ifdef USE_SWAP_UV
-    color.rbg = color;
-#endif
+    vec3 color = acolor.rgb;
+    float alpha = acolor.a;
 #ifdef USE_YGRAY
     // NOTE: actually slightly wrong for 16 bit input video, and completely
     //       wrong for 9/10 bit input
