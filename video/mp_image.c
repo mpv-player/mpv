@@ -430,6 +430,17 @@ void mp_image_params_from_image(struct mp_image_params *params,
     };
 }
 
+void mp_image_set_params(struct mp_image *image,
+                         const struct mp_image_params *params)
+{
+    mp_image_setfmt(image, params->imgfmt);
+    mp_image_set_size(image, params->w, params->h);
+    mp_image_set_display_size(image, params->d_w, params->d_h);
+    image->colorspace = params->colorspace;
+    image->levels = params->colorlevels;
+    image->chroma_location = params->chroma_location;
+}
+
 void mp_image_set_colorspace_details(struct mp_image *image,
                                      struct mp_csp_details *csp)
 {

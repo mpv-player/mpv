@@ -143,6 +143,9 @@ bool mp_image_params_equals(const struct mp_image_params *p1,
 void mp_image_params_from_image(struct mp_image_params *params,
                                 const struct mp_image *image);
 
+void mp_image_set_params(struct mp_image *image,
+                         const struct mp_image_params *params);
+
 struct AVFrame;
 void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
                                         struct AVFrame *src);
