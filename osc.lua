@@ -115,7 +115,7 @@ function register_element(x, y, an, w, h, styleA, styleB, content, down_cmd, up_
     -- w, h         size of hitbox
     -- styleA       main style
     -- styleB       additional styles to be appended on mouse_down
-    -- content      what the element should display, can be a string of a function
+    -- content      what the element should display, can be a string of a function(ass)
     -- down_cmd     function to be run when the mouse goes or stays down on the element
     -- up_cmd       function to be run when the mouse goes up on the element (use this for normal button behaviour)
     -- down_repeat  boolean, true if the down_cmd function should be run repeatedly with a small delay or false on every render pass
@@ -271,15 +271,7 @@ function osc_init()
 
     local contentF = function (ass)
         ass:draw_start()
-        ass:move_to(osc_r, 0)
-        ass:line_to(osc_w - osc_r, 0) -- top line
-        if osc_r > 0 then ass:bezier_curve(osc_w, 0, osc_w, 0, osc_w, osc_r) end -- top right corner
-        ass:line_to(osc_w, osc_h - osc_r) -- right line
-        if osc_r > 0 then ass:bezier_curve(osc_w, osc_h, osc_w, osc_h, osc_w - osc_r, osc_h) end -- bottom right corner
-        ass:line_to(osc_r, osc_h) -- bottom line
-        if osc_r > 0 then ass:bezier_curve(0, osc_h, 0, osc_h, 0, osc_h - osc_r) end -- bottom left corner
-        ass:line_to(0, osc_r) -- left line
-        if osc_r > 0 then ass:bezier_curve(0, 0, 0, 0, osc_r, 0) end -- top left corner
+        ass:round_rect_cw(0, 0, osc_w, osc_h, osc_r)
         ass:draw_stop()
     end
     register_element(posX, posY, 5, osc_w, osc_h, osc_styles.box, nil, contentF, nil, nil, false)
@@ -307,7 +299,11 @@ function osc_init()
         local title = "${media-title}"
 
         if tonumber(mp.property_get("playlist-count")) > 1 then
-            title = "[" .. tonumber(mp.property_get("playlist-pos")) + 1 .. "/${playlist-count}] " .. title
+            local playlist_pos = tonumber(mp.property_get("playlist-pos"))
+            if not (osc_geo.iAmAProgrammer) then
+                playlist_pos = playlist_pos + 1
+            end
+            title = "[" .. playlist_pos .. "/${playlist-count}] " .. title
         end
 
         mp.send_command("show_text \"" .. title .. "\"")
@@ -394,7 +390,7 @@ function osc_init()
         if (mp.property_get("audio") == "no") then
             aid = "–"
         else
-            if (osc_geo.iAmAProgrammer == true) then
+            if (osc_geo.iAmAProgrammer) then
                 aid = tonumber(mp.property_get("audio"))
             else
                 aid = tonumber(mp.property_get("audio")) + 1
@@ -406,7 +402,7 @@ function osc_init()
         local up_cmd = function () mp.send_command("add audio") end
         register_element(posX-pos_offsetX, bbposY, 1, 70, 18, osc_styles.smallButtonsL, osc_styles.elementDown, contentF, nil, up_cmd, false)
     else
-        register_element(posX-pos_offsetX, bbposY, 1, 70, 18, (osc_styles.smallButtonsL .. osc_styles.elementDown), nil, contentF, nil, nil, false)
+        register_element(posX-pos_offsetX, bbposY, 1, 70, 18, (osc_styles.smallButtonsL .. osc_styles.elementDisab), nil, contentF, nil, nil, false)
     end
 
     --cycle sub tracks
@@ -416,7 +412,7 @@ function osc_init()
         if (mp.property_get("sub") == "no") then
             sid = "–"
         else
-            if (osc_geo.iAmAProgrammer == true) then
+            if (osc_geo.iAmAProgrammer) then
                 sid = tonumber(mp.property_get("sub"))
             else
                 sid = tonumber(mp.property_get("sub")) + 1
@@ -428,7 +424,7 @@ function osc_init()
         local up_cmd = function () mp.send_command("add sub") end
         register_element(posX-pos_offsetX, bbposY, 7, 70, 18, osc_styles.smallButtonsL, osc_styles.elementDown, contentF, nil, up_cmd, false)
     else
-        register_element(posX-pos_offsetX, bbposY, 7, 70, 18, (osc_styles.smallButtonsL .. osc_styles.elementDown), nil, contentF, nil, nil, false)
+        register_element(posX-pos_offsetX, bbposY, 7, 70, 18, (osc_styles.smallButtonsL .. osc_styles.elementDisab), nil, contentF, nil, nil, false)
     end
 
 
@@ -518,7 +514,7 @@ function mouse_over_osc()
 end
 
 function show_osc()
-    state.last_osd_time = mp.get_timer()
+    --state.last_osd_time = mp.get_timer()
     state.osc_visible = true
 end
 
@@ -550,7 +546,7 @@ function mouse_click(down)
 end
 
 function mouse_up()
-    show_osc()
+    --show_osc()
     state.mouse_down_counter = 0
     any_button_up()
     state.last_mouse_posX = nil
@@ -596,14 +592,10 @@ function mp_update()
 
     local ass = assdraw.ass_new()
 
-    local x, y = mp.get_mouse_pos()
+    --local x, y = mp.get_mouse_pos()
 
-    local now = mp.get_timer()
+    --local now = mp.get_timer()
 
-
-
-
-    --state.append_calls = 0
 
     if state.osc_visible then
         draw_osc(ass)
