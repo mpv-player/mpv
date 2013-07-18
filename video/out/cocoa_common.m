@@ -162,7 +162,7 @@ static void vo_cocoa_set_cursor_visibility(struct vo *vo, bool visible)
     if (visible) {
         // show cursor unconditionally
         CGDisplayShowCursor(kCGDirectMainDisplay);
-    } else if (vo->opts->fs &&
+    } else if (vo->opts->fullscreen &&
                [s->view containsCurrentMouseLocation] &&
                ![s->view hasMouseDown]) {
         // only hide cursor if in fullscreen and the video view contains the
@@ -179,7 +179,7 @@ void vo_cocoa_uninit(struct vo *vo)
         enable_power_management(vo);
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
 
-        if (vo->opts->fs)
+        if (vo->opts->fullscreen)
             [[s->view window] release];
 
         [s->window release];
@@ -332,9 +332,6 @@ static void create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     [s->window makeKeyAndOrderFront:nil];
     [NSApp activateIgnoringOtherApps:YES];
 
-    if (flags & VOFLAG_FULLSCREEN)
-        vo_cocoa_fullscreen(vo);
-
     vo_set_level(vo, opts->ontop);
 
     if (opts->native_fs) {
@@ -392,7 +389,7 @@ static void update_window(struct vo *vo)
     struct vo_cocoa_state *s = vo->cocoa;
 
     if (!CGSizeEqualToSize(s->current_video_size, s->previous_video_size)) {
-        if (vo->opts->fs) {
+        if (vo->opts->fullscreen) {
             // we will resize as soon as we get out of fullscreen
             s->out_fs_resize = YES;
         } else {
@@ -404,7 +401,7 @@ static void update_window(struct vo *vo)
 
     cocoa_set_window_title(vo, vo_get_window_title(vo));
 
-    resize_window(vo);
+    vo_cocoa_fullscreen(vo);
 }
 
 static void resize_redraw(struct vo *vo, int width, int height)
@@ -681,25 +678,23 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     // Go use the fullscreen API selected by the user. View-based or Mission
     // Control.
     if (opts->native_fs) {
-        [self toggleMissionControlFullScreen:!opts->fs];
+        [self toggleMissionControlFullScreen:opts->fullscreen];
     } else {
-        [self toggleViewFullscreen:!opts->fs];
+        [self toggleViewFullscreen:opts->fullscreen];
     }
 
     // Do common work such as setting mouse visibility and actually setting
     // the new fullscreen state
-    if (!opts->fs) {
-        opts->fs = VO_TRUE;
+    if (opts->fullscreen) {
         vo_cocoa_set_cursor_visibility(self.videoOutput, false);
     } else {
-        opts->fs = VO_FALSE;
         vo_cocoa_set_cursor_visibility(self.videoOutput, true);
     }
 
     // Change window size if the core attempted to change it while we were in
     // fullscreen. For example config() might have been called as a result of
     // a new file changing the window size.
-    if (!opts->fs && s->out_fs_resize) {
+    if (!opts->fullscreen && s->out_fs_resize) {
         resize_window_from_stored_size(self.videoOutput);
         s->out_fs_resize = NO;
     }
@@ -722,7 +717,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 - (BOOL)isMovableByWindowBackground
 {
     if (self.videoOutput) {
-        return !self.videoOutput->opts->fs;
+        return !self.videoOutput->opts->fullscreen;
     } else {
         return YES;
     }
@@ -736,7 +731,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (void)mulSize:(float)multiplier
 {
-    if (!self.videoOutput->opts->fs) {
+    if (!self.videoOutput->opts->fullscreen) {
         NSSize size = {
             .width  = self.videoOutput->cocoa->aspdat.prew * multiplier,
             .height = self.videoOutput->cocoa->aspdat.preh * multiplier

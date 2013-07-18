@@ -29,11 +29,6 @@
 
 #include "config.h"
 
-enum vo_wayland_window_type {
-    TYPE_TOPLEVEL,
-    TYPE_FULLSCREEN
-};
-
 struct vo;
 struct vo_wayland_state;
 
@@ -85,8 +80,6 @@ struct vo_wayland_window {
     struct wl_shell_surface *shell_surface;
 
     int events; /* mplayer events (VO_EVENT_RESIZE) */
-
-    enum vo_wayland_window_type type; /* is fullscreen */
 
     /* Because the egl windows have a special resize windw function we have to
      * register it first before doing any resizing.

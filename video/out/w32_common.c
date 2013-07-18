@@ -152,7 +152,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
         }
         case WM_SIZING:
-            if (vo->opts->keepaspect && !vo->opts->fs && vo->opts->WinID < 0) {
+            if (vo->opts->keepaspect && !vo->opts->fullscreen &&
+                vo->opts->WinID < 0)
+            {
                 RECT *rc = (RECT*)lParam;
                 // get client area of the windows if it had the rect rc
                 // (subtracting the window borders)
@@ -260,7 +262,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
         int y = GET_Y_LPARAM(lParam);
         mouse_button |= mod_state(vo);
         if (mouse_button == (MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN) &&
-            !vo->opts->fs && !mp_input_test_dragging(vo->input_ctx, x, y))
+            !vo->opts->fullscreen && !mp_input_test_dragging(vo->input_ctx, x, y))
         {
             // Window dragging hack
             ReleaseCapture();
@@ -353,9 +355,9 @@ static void w32_update_xinerama_info(struct vo *vo)
 {
     struct vo_w32_state *w32 = vo->w32;
     struct mp_vo_opts *opts = vo->opts;
-    int screen = opts->fs ? opts->fsscreen_id : opts->screen_id;
+    int screen = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
     vo->xinerama_x = vo->xinerama_y = 0;
-    if (opts->fs && screen == -2) {
+    if (opts->fullscreen && screen == -2) {
         int tmp;
         vo->xinerama_x = GetSystemMetrics(SM_XVIRTUALSCREEN);
         vo->xinerama_y = GetSystemMetrics(SM_YVIRTUALSCREEN);
@@ -403,7 +405,7 @@ static DWORD update_style(struct vo *vo, DWORD style)
     const DWORD NO_FRAME = WS_POPUP;
     const DWORD FRAME = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
     style &= ~(NO_FRAME | FRAME);
-    style |= (vo->opts->border && !vo->opts->fs) ? FRAME : NO_FRAME;
+    style |= (vo->opts->border && !vo->opts->fullscreen) ? FRAME : NO_FRAME;
     return style;
 }
 
@@ -417,18 +419,18 @@ static int reinit_window_state(struct vo *vo)
     if (vo->opts->WinID >= 0)
         return 1;
 
-    bool toggle_fs = w32->current_fs != vo->opts->fs;
-    w32->current_fs = vo->opts->fs;
+    bool toggle_fs = w32->current_fs != vo->opts->fullscreen;
+    w32->current_fs = vo->opts->fullscreen;
 
     DWORD style = update_style(vo, GetWindowLong(w32->window, GWL_STYLE));
 
-    if (vo->opts->fs || vo->opts->ontop)
+    if (vo->opts->fullscreen || vo->opts->ontop)
         layer = HWND_TOPMOST;
 
     // xxx not sure if this can trigger any unwanted messages (WM_MOVE/WM_SIZE)
     updateScreenProperties(vo);
 
-    if (vo->opts->fs) {
+    if (vo->opts->fullscreen) {
         // Save window position and size when switching to fullscreen.
         if (toggle_fs) {
             w32->prev_width = vo->dwidth;
@@ -554,7 +556,6 @@ int vo_w32_config(struct vo *vo, uint32_t width, uint32_t height,
         vo->dheight = r.bottom;
     }
 
-    vo->opts->fs = flags & VOFLAG_FULLSCREEN;
     return reinit_window_state(vo);
 }
 
@@ -651,8 +652,8 @@ int vo_w32_init(struct vo *vo)
 
 static void vo_w32_fullscreen(struct vo *vo)
 {
-    vo->opts->fs = !vo->opts->fs;
-    reinit_window_state(vo);
+    if (vo->opts->fullscreen != vo->w32->current_fs)
+        reinit_window_state(vo);
 }
 
 /**

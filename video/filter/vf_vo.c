@@ -45,11 +45,10 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags
     }
 
     const vo_info_t *info = video_out->driver->info;
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "VO: [%s] %dx%d => %dx%d %s %s%s\n",
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "VO: [%s] %dx%d => %dx%d %s %s\n",
            info->short_name,
            p->w, p->h, p->d_w, p->d_h,
            vo_format_name(p->imgfmt),
-           (flags & VOFLAG_FULLSCREEN) ? " [fs]" : "",
            (flags & VOFLAG_FLIPPING) ? " [flip]" : "");
     mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Description: %s\n", info->name);
     mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Author: %s\n", info->author);

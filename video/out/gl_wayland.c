@@ -50,6 +50,9 @@ static void egl_resize_func(struct vo_wayland_state *wl,
     int32_t x, y;
     float temp_aspect = width / (float) MPMAX(height, 1);
 
+    if (!ctx->egl_window)
+        return;
+
     /* get the real window size of the window */
     wl_egl_window_get_attached_size(ctx->egl_window,
                                     &w->width,

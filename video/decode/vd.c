@@ -162,8 +162,7 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
     // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.).
     mp_image_params_guess_csp(&p);
 
-    vocfg_flags = (opts->fullscreen ? VOFLAG_FULLSCREEN : 0) |
-                  (flip ? VOFLAG_FLIPPING : 0);
+    vocfg_flags = (flip ? VOFLAG_FLIPPING : 0);
 
     // Time to config libvo!
     mp_msg(MSGT_CPLAYER, MSGL_V,

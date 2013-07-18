@@ -381,7 +381,7 @@ static void vo_x11_update_screeninfo(struct vo *vo)
 {
     struct mp_vo_opts *opts = vo->opts;
     struct vo_x11_state *x11 = vo->x11;
-    bool all_screens = opts->fs && opts->fsscreen_id == -2;
+    bool all_screens = opts->fullscreen && opts->fsscreen_id == -2;
     vo->xinerama_x = vo->xinerama_y = 0;
     if (all_screens) {
         opts->screenwidth = x11->ws_width;
@@ -391,7 +391,7 @@ static void vo_x11_update_screeninfo(struct vo *vo)
     if (opts->screen_id >= -1 && XineramaIsActive(x11->display) &&
         !all_screens)
     {
-        int screen = opts->fs ? opts->fsscreen_id : opts->screen_id;
+        int screen = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
         XineramaScreenInfo *screens;
         int num_screens;
 
@@ -665,7 +665,6 @@ void vo_x11_uninit(struct vo *vo)
         XDestroyIC(x11->xic);
     if (x11->colormap != None)
         XFreeColormap(vo->x11->display, x11->colormap);
-    vo->opts->fs = false;
 
     mp_msg(MSGT_VO, MSGL_V, "vo: uninit ...\n");
     if (x11->xim)
@@ -1024,7 +1023,6 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     if (x11->window == None) {
         vo_x11_create_window(vo, vis, x, y, width, height);
         vo_x11_classhint(vo, x11->window, classname);
-        opts->fs = 0;
         x11->window_hidden = true;
     }
 
@@ -1057,7 +1055,7 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
             x11->nofs_x = x;
             x11->nofs_y = y;
         }
-        if (opts->fs) {
+        if (opts->fullscreen) {
             x11->size_changed_during_fs = true;
             x11->pos_changed_during_fs = reset_pos;
             vo_x11_sizehint(vo, x, y, width, height, false);
@@ -1066,9 +1064,7 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
         }
     }
 
-    if (!!opts->fs != !!(flags & VOFLAG_FULLSCREEN)) {
-        vo_x11_fullscreen(vo);
-    }
+    vo_x11_fullscreen(vo);
 
     XSync(x11->display, False);
 
@@ -1270,16 +1266,18 @@ static void vo_x11_fullscreen(struct vo *vo)
     struct vo_x11_state *x11 = vo->x11;
     int x, y, w, h;
 
+    if (opts->fullscreen == x11->fs)
+        return;
     if (opts->WinID >= 0) {
-        opts->fs = !opts->fs;
+        x11->fs = opts->fullscreen;
         return;
     }
     if (x11->fs_flip)
         return;
 
-    if (opts->fs) {
+    if (!opts->fullscreen) {
         // fs->win
-        opts->fs = VO_FALSE;
+        opts->fullscreen = x11->fs = 0;
 
         x = x11->nofs_x;
         y = x11->nofs_y;
@@ -1298,7 +1296,7 @@ static void vo_x11_fullscreen(struct vo *vo)
         }
     } else {
         // win->fs
-        opts->fs = true;
+        opts->fullscreen = x11->fs = 1;
 
         vo_x11_update_geometry(vo);
         x11->nofs_x = x11->win_x;
@@ -1339,15 +1337,15 @@ static void vo_x11_fullscreen(struct vo *vo)
     }
 
     if (!(x11->fs_type & vo_wm_FULLSCREEN)) {  // not needed with EWMH fs
-        vo_x11_decoration(vo, opts->border && !opts->fs);
+        vo_x11_decoration(vo, opts->border && !x11->fs);
         vo_x11_sizehint(vo, x, y, w, h, true);
-        vo_x11_setlayer(vo, x11->window, opts->fs);
+        vo_x11_setlayer(vo, x11->window, x11->fs);
 
 
         XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
     }
     /* some WMs lose ontop after fullscreen */
-    if ((!(opts->fs)) & opts->ontop)
+    if ((!(x11->fs)) & opts->ontop)
         vo_x11_setlayer(vo, x11->window, opts->ontop);
 
     XMapRaised(x11->display, x11->window);
@@ -1371,7 +1369,7 @@ static void vo_x11_ontop(struct vo *vo)
 static void vo_x11_border(struct vo *vo)
 {
     vo->opts->border = !vo->opts->border;
-    vo_x11_decoration(vo, vo->opts->border && !vo->opts->fs);
+    vo_x11_decoration(vo, vo->opts->border && !vo->x11->fs);
 }
 
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)

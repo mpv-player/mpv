@@ -698,13 +698,11 @@ static void vo_wayland_ontop (struct vo *vo)
     struct vo_wayland_state *wl = vo->wayland;
 
     vo->opts->ontop = !vo->opts->ontop;
+    vo->opts->fullscreen = !vo->opts->fullscreen;
 
-    if (vo->opts->fs)
-        vo_wayland_fullscreen(vo);
-        /* use the already existing code to leave fullscreen mode and go into
-         * toplevel mode */
-    else
-        wl_shell_surface_set_toplevel(wl->window->shell_surface);
+    /* use the already existing code to leave fullscreen mode and go into
+     * toplevel mode */
+    vo_wayland_fullscreen(vo);
 }
 
 static void vo_wayland_border (struct vo *vo)
@@ -726,22 +724,17 @@ static void vo_wayland_fullscreen (struct vo *vo)
 
     struct wl_output *fs_output = wl->display->fs_output;
 
-    if (!vo->opts->fs) {
+    if (vo->opts->fullscreen) {
         wl->window->p_width = wl->window->width;
         wl->window->p_height = wl->window->height;
         wl_shell_surface_set_fullscreen(wl->window->shell_surface,
                 WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT,
                 0, fs_output);
-
-        wl->window->type = TYPE_FULLSCREEN;
-        vo->opts->fs = true;
     }
 
     else {
         wl_shell_surface_set_toplevel(wl->window->shell_surface);
         resize_window(wl, 0, wl->window->p_width, wl->window->p_height);
-        wl->window->type = TYPE_TOPLEVEL;
-        vo->opts->fs = false;
     }
 }
 
@@ -881,11 +874,11 @@ bool vo_wayland_config (struct vo *vo, uint32_t d_width,
 
     w->width = d_width;
     w->height = d_height;
-
+    w->p_width = d_width;
+    w->p_height = d_height;
     w->aspect = w->width / (float) MPMAX(w->height, 1);
 
-    if ((VOFLAG_FULLSCREEN & flags) && w->type != TYPE_FULLSCREEN)
-        vo_wayland_fullscreen(vo);
+    vo_wayland_fullscreen(vo);
 
     return true;
 }
