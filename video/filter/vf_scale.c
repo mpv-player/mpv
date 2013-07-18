@@ -41,7 +41,7 @@
 #include "core/m_struct.h"
 
 static struct vf_priv_s {
-    int w,h;
+    int w, h;
     int cfg_w, cfg_h;
     int v_chr_drop;
     double param[2];
@@ -51,10 +51,10 @@ static struct vf_priv_s {
     int noup;
     int accurate_rnd;
 } const vf_priv_dflt = {
-  0, 0,
-  -1,-1,
-  0,
-  {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
+    0, 0,
+    -1, -1,
+    0,
+    {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
 };
 
 static int mp_sws_set_colorspace(struct SwsContext *sws,
@@ -62,7 +62,7 @@ static int mp_sws_set_colorspace(struct SwsContext *sws,
 
 //===========================================================================//
 
-static const unsigned int outfmt_list[]={
+static const unsigned int outfmt_list[] = {
 // YUV:
     IMGFMT_444P,
     IMGFMT_444P16_LE,
@@ -158,8 +158,9 @@ static int preferred_conversions[][2] = {
     {0, 0}
 };
 
-static unsigned int find_best_out(vf_instance_t *vf, int in_format){
-    unsigned int best=0;
+static unsigned int find_best_out(vf_instance_t *vf, int in_format)
+{
+    unsigned int best = 0;
     int i = -1;
     int j = -1;
     int format = 0;
@@ -185,13 +186,15 @@ static unsigned int find_best_out(vf_instance_t *vf, int in_format){
             break;
         ret = vf_next_query_format(vf, format);
 
-	mp_msg(MSGT_VFILTER,MSGL_DBG2,"scale: query(%s) -> %d\n",vo_format_name(format),ret&3);
-	if(ret&VFCAP_CSP_SUPPORTED_BY_HW){
-            best=format; // no conversion -> bingo!
+        mp_msg(MSGT_VFILTER, MSGL_DBG2, "scale: query(%s) -> %d\n",
+               vo_format_name(
+                   format), ret & 3);
+        if (ret & VFCAP_CSP_SUPPORTED_BY_HW) {
+            best = format; // no conversion -> bingo!
             break;
         }
-	if(ret&VFCAP_CSP_SUPPORTED && !best)
-            best=format; // best with conversion
+        if (ret & VFCAP_CSP_SUPPORTED && !best)
+            best = format;  // best with conversion
     }
     return best;
 }
@@ -200,158 +203,167 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags
 {
     int width = p->w, height = p->h, d_width = p->d_w, d_height = p->d_h;
     unsigned int outfmt = p->imgfmt;
-    unsigned int best=find_best_out(vf, outfmt);
-    int int_sws_flags=0;
-    int round_w=0, round_h=0;
+    unsigned int best = find_best_out(vf, outfmt);
+    int int_sws_flags = 0;
+    int round_w = 0, round_h = 0;
     SwsFilter *srcFilter, *dstFilter;
     enum PixelFormat dfmt, sfmt;
 
-    if(!best){
-	mp_msg(MSGT_VFILTER,MSGL_WARN,"SwScale: no supported outfmt found :(\n");
-	return -1;
+    if (!best) {
+        mp_msg(MSGT_VFILTER, MSGL_WARN,
+               "SwScale: no supported outfmt found :(\n");
+        return -1;
     }
     sfmt = imgfmt2pixfmt(outfmt);
     dfmt = imgfmt2pixfmt(best);
 
-    vf->next->query_format(vf->next,best);
+    vf->next->query_format(vf->next, best);
 
     vf->priv->w = vf->priv->cfg_w;
     vf->priv->h = vf->priv->cfg_h;
 
     if (vf->priv->w <= -8) {
-      vf->priv->w += 8;
-      round_w = 1;
+        vf->priv->w += 8;
+        round_w = 1;
     }
     if (vf->priv->h <= -8) {
-      vf->priv->h += 8;
-      round_h = 1;
+        vf->priv->h += 8;
+        round_h = 1;
     }
 
     if (vf->priv->w < -3 || vf->priv->h < -3 ||
-         (vf->priv->w < -1 && vf->priv->h < -1)) {
-      // TODO: establish a direct connection to the user's brain
-      // and find out what the heck he thinks MPlayer should do
-      // with this nonsense.
-      mp_msg(MSGT_VFILTER, MSGL_ERR, "SwScale: EUSERBROKEN Check your parameters, they make no sense!\n");
-      return -1;
+        (vf->priv->w < -1 && vf->priv->h < -1))
+    {
+        // TODO: establish a direct connection to the user's brain
+        // and find out what the heck he thinks MPlayer should do
+        // with this nonsense.
+        mp_msg(MSGT_VFILTER, MSGL_ERR,
+               "SwScale: EUSERBROKEN Check your parameters, they make no sense!\n");
+        return -1;
     }
 
     if (vf->priv->w == -1)
-      vf->priv->w = width;
+        vf->priv->w = width;
     if (vf->priv->w == 0)
-      vf->priv->w = d_width;
+        vf->priv->w = d_width;
 
     if (vf->priv->h == -1)
-      vf->priv->h = height;
+        vf->priv->h = height;
     if (vf->priv->h == 0)
-      vf->priv->h = d_height;
+        vf->priv->h = d_height;
 
     if (vf->priv->w == -3)
-      vf->priv->w = vf->priv->h * width / height;
+        vf->priv->w = vf->priv->h * width / height;
     if (vf->priv->w == -2)
-      vf->priv->w = vf->priv->h * d_width / d_height;
+        vf->priv->w = vf->priv->h * d_width / d_height;
 
     if (vf->priv->h == -3)
-      vf->priv->h = vf->priv->w * height / width;
+        vf->priv->h = vf->priv->w * height / width;
     if (vf->priv->h == -2)
-      vf->priv->h = vf->priv->w * d_height / d_width;
+        vf->priv->h = vf->priv->w * d_height / d_width;
 
     if (round_w)
-      vf->priv->w = ((vf->priv->w + 8) / 16) * 16;
+        vf->priv->w = ((vf->priv->w + 8) / 16) * 16;
     if (round_h)
-      vf->priv->h = ((vf->priv->h + 8) / 16) * 16;
+        vf->priv->h = ((vf->priv->h + 8) / 16) * 16;
 
     // check for upscaling, now that all parameters had been applied
-    if(vf->priv->noup){
-        if((vf->priv->w > width) + (vf->priv->h > height) >= vf->priv->noup){
-            vf->priv->w= width;
-            vf->priv->h= height;
+    if (vf->priv->noup) {
+        if ((vf->priv->w > width) + (vf->priv->h > height) >= vf->priv->noup) {
+            vf->priv->w = width;
+            vf->priv->h = height;
         }
     }
 
     // calculate the missing parameters:
-    switch(best) {
-    case IMGFMT_420P:		/* YV12 needs w & h rounded to 2 */
+    switch (best) {
+    case IMGFMT_420P:           /* YV12 needs w & h rounded to 2 */
     case IMGFMT_NV12:
     case IMGFMT_NV21:
-      vf->priv->h = (vf->priv->h + 1) & ~1;
-    case IMGFMT_YUYV:		/* YUY2 needs w rounded to 2 */
+        vf->priv->h = (vf->priv->h + 1) & ~1;
+    case IMGFMT_YUYV:           /* YUY2 needs w rounded to 2 */
     case IMGFMT_UYVY:
-      vf->priv->w = (vf->priv->w + 1) & ~1;
+        vf->priv->w = (vf->priv->w + 1) & ~1;
     }
 
-    mp_msg(MSGT_VFILTER,MSGL_DBG2,"SwScale: scaling %dx%d %s to %dx%d %s  \n",
-	width,height,vo_format_name(outfmt),
-	vf->priv->w,vf->priv->h,vo_format_name(best));
+    mp_msg(MSGT_VFILTER, MSGL_DBG2, "SwScale: scaling %dx%d %s to %dx%d %s  \n",
+           width, height, vo_format_name(outfmt), vf->priv->w, vf->priv->h,
+           vo_format_name(best));
 
     // free old ctx:
-    if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
+    if (vf->priv->ctx)
+        sws_freeContext(vf->priv->ctx);
 
     // new swscaler:
     sws_getFlagsAndFilterFromCmdLine(&int_sws_flags, &srcFilter, &dstFilter);
-    int_sws_flags|= vf->priv->v_chr_drop << SWS_SRC_V_CHR_DROP_SHIFT;
-    int_sws_flags|= vf->priv->accurate_rnd * SWS_ACCURATE_RND;
-    vf->priv->ctx=sws_getContext(width, height >> vf->priv->interlaced,
-	    sfmt,
-		  vf->priv->w, vf->priv->h >> vf->priv->interlaced,
-	    dfmt,
-	    int_sws_flags, srcFilter, dstFilter, vf->priv->param);
-    if(!vf->priv->ctx){
-	// error...
-	mp_msg(MSGT_VFILTER,MSGL_WARN,"Couldn't init SwScaler for this setup\n");
-	return -1;
+    int_sws_flags |= vf->priv->v_chr_drop << SWS_SRC_V_CHR_DROP_SHIFT;
+    int_sws_flags |= vf->priv->accurate_rnd * SWS_ACCURATE_RND;
+    vf->priv->ctx = sws_getContext(width, height >> vf->priv->interlaced,
+                                   sfmt, vf->priv->w,
+                                   vf->priv->h >> vf->priv->interlaced, dfmt,
+                                   int_sws_flags, srcFilter, dstFilter,
+                                   vf->priv->param);
+    if (!vf->priv->ctx) {
+        // error...
+        mp_msg(MSGT_VFILTER, MSGL_WARN,
+               "Couldn't init SwScaler for this setup\n");
+        return -1;
     }
-    vf->priv->fmt=best;
-	// Compute new d_width and d_height, preserving aspect
-	// while ensuring that both are >= output size in pixels.
-	if (vf->priv->h * d_width > vf->priv->w * d_height) {
-		d_width = vf->priv->h * d_width / d_height;
-		d_height = vf->priv->h;
-	} else {
-		d_height = vf->priv->w * d_height / d_width;
-		d_width = vf->priv->w;
-	}
-	//d_width=d_width*vf->priv->w/width;
-	//d_height=d_height*vf->priv->h/height;
-	p->w = vf->priv->w;
-        p->h = vf->priv->h;
-        p->d_w = d_width;
-        p->d_h = d_height;
-        p->imgfmt = best;
-        mp_sws_set_colorspace(vf->priv->ctx, p);
-        // In particular, fix up colorspace/levels if YUV<->RGB conversion is
-        // performed.
-        p->colorlevels = MP_CSP_LEVELS_TV; // in case output is YUV
-        mp_image_params_guess_csp(p);
+    vf->priv->fmt = best;
+    // Compute new d_width and d_height, preserving aspect
+    // while ensuring that both are >= output size in pixels.
+    if (vf->priv->h * d_width > vf->priv->w * d_height) {
+        d_width = vf->priv->h * d_width / d_height;
+        d_height = vf->priv->h;
+    } else {
+        d_height = vf->priv->w * d_height / d_width;
+        d_width = vf->priv->w;
+    }
+    //d_width=d_width*vf->priv->w/width;
+    //d_height=d_height*vf->priv->h/height;
+    p->w = vf->priv->w;
+    p->h = vf->priv->h;
+    p->d_w = d_width;
+    p->d_h = d_height;
+    p->imgfmt = best;
+    mp_sws_set_colorspace(vf->priv->ctx, p);
+    // In particular, fix up colorspace/levels if YUV<->RGB conversion is
+    // performed.
+    p->colorlevels = MP_CSP_LEVELS_TV;     // in case output is YUV
+    mp_image_params_guess_csp(p);
     return vf_next_reconfig(vf, p, flags);
 }
 
-static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src[MP_MAX_PLANES], int src_stride[MP_MAX_PLANES],
-                  int y, int h,  uint8_t *dst[MP_MAX_PLANES], int dst_stride[MP_MAX_PLANES], int interlaced){
-    const uint8_t *src2[MP_MAX_PLANES]={src[0], src[1], src[2], src[3]};
+static void scale(struct SwsContext *sws1, struct SwsContext *sws2,
+                  uint8_t *src[MP_MAX_PLANES], int src_stride[MP_MAX_PLANES],
+                  int y, int h, uint8_t *dst[MP_MAX_PLANES],
+                  int dst_stride[MP_MAX_PLANES],
+                  int interlaced)
+{
+    const uint8_t *src2[MP_MAX_PLANES] = {src[0], src[1], src[2], src[3]};
 #if BYTE_ORDER == BIG_ENDIAN
     uint32_t pal2[256];
-    if (src[1] && !src[2]){
-        int i;
-        for(i=0; i<256; i++)
-            pal2[i]= bswap_32(((uint32_t*)src[1])[i]);
-        src2[1]= pal2;
+    if (src[1] && !src[2]) {
+        for (int i = 0; i < 256; i++)
+            pal2[i] = bswap_32(((uint32_t *)src[1])[i]);
+        src2[1] = pal2;
     }
 #endif
 
-    if(interlaced){
+    if (interlaced) {
         int i;
-        uint8_t *dst2[MP_MAX_PLANES]={dst[0], dst[1], dst[2], dst[3]};
-        int src_stride2[MP_MAX_PLANES]={2*src_stride[0], 2*src_stride[1], 2*src_stride[2], 2*src_stride[3]};
-        int dst_stride2[MP_MAX_PLANES]={2*dst_stride[0], 2*dst_stride[1], 2*dst_stride[2], 2*dst_stride[3]};
-
-        sws_scale(sws1, src2, src_stride2, y>>1, h>>1, dst2, dst_stride2);
-        for(i=0; i<MP_MAX_PLANES; i++){
+        uint8_t *dst2[MP_MAX_PLANES] = {dst[0], dst[1], dst[2], dst[3]};
+        int src_stride2[MP_MAX_PLANES] = {2 * src_stride[0], 2 * src_stride[1],
+                                          2 * src_stride[2], 2 * src_stride[3]};
+        int dst_stride2[MP_MAX_PLANES] = {2 * dst_stride[0], 2 * dst_stride[1],
+                                          2 * dst_stride[2], 2 * dst_stride[3]};
+        sws_scale(sws1, src2, src_stride2, y >> 1, h >> 1, dst2, dst_stride2);
+        for (i = 0; i < MP_MAX_PLANES; i++) {
             src2[i] += src_stride[i];
             dst2[i] += dst_stride[i];
         }
-        sws_scale(sws2, src2, src_stride2, y>>1, h>>1, dst2, dst_stride2);
-    }else{
+        sws_scale(sws2, src2, src_stride2, y >> 1, h >> 1, dst2, dst_stride2);
+    } else {
         sws_scale(sws1, src2, src_stride, y, h, dst, dst_stride);
     }
 }
@@ -361,65 +373,70 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     struct mp_image *dmpi = vf_alloc_out_image(vf);
     mp_image_copy_attributes(dmpi, mpi);
 
-    scale(vf->priv->ctx, vf->priv->ctx, mpi->planes,mpi->stride,0,mpi->h,dmpi->planes,dmpi->stride, vf->priv->interlaced);
+    scale(vf->priv->ctx, vf->priv->ctx, mpi->planes, mpi->stride, 0, mpi->h,
+          dmpi->planes, dmpi->stride, vf->priv->interlaced);
 
     talloc_free(mpi);
     return dmpi;
 }
 
-static int control(struct vf_instance *vf, int request, void* data){
+static int control(struct vf_instance *vf, int request, void *data)
+{
     int *table;
     int *inv_table;
     int r;
     int brightness, contrast, saturation, srcRange, dstRange;
     vf_equalizer_t *eq;
 
-  if(vf->priv->ctx)
-    switch(request){
-    case VFCTRL_GET_EQUALIZER:
-	r= sws_getColorspaceDetails(vf->priv->ctx, &inv_table, &srcRange, &table, &dstRange, &brightness, &contrast, &saturation);
-	if(r<0) break;
+    if (vf->priv->ctx) {
+        switch (request) {
+        case VFCTRL_GET_EQUALIZER:
+            r = sws_getColorspaceDetails(vf->priv->ctx, &inv_table, &srcRange,
+                                         &table, &dstRange, &brightness,
+                                         &contrast, &saturation);
+            if (r < 0)
+                break;
 
-	eq = data;
-	if (!strcmp(eq->item,"brightness")) {
-		eq->value =  ((brightness*100) + (1<<15))>>16;
-	}
-	else if (!strcmp(eq->item,"contrast")) {
-		eq->value = (((contrast  *100) + (1<<15))>>16) - 100;
-	}
-	else if (!strcmp(eq->item,"saturation")) {
-		eq->value = (((saturation*100) + (1<<15))>>16) - 100;
-	}
-	else
-		break;
-	return CONTROL_TRUE;
-    case VFCTRL_SET_EQUALIZER:
-	r= sws_getColorspaceDetails(vf->priv->ctx, &inv_table, &srcRange, &table, &dstRange, &brightness, &contrast, &saturation);
-	if(r<0) break;
-//printf("set %f %f %f\n", brightness/(float)(1<<16), contrast/(float)(1<<16), saturation/(float)(1<<16));
-	eq = data;
+            eq = data;
+            if (!strcmp(eq->item, "brightness"))
+                eq->value =  ((brightness * 100) + (1 << 15)) >> 16;
+            else if (!strcmp(eq->item, "contrast"))
+                eq->value = (((contrast  * 100) + (1 << 15)) >> 16) - 100;
+            else if (!strcmp(eq->item, "saturation"))
+                eq->value = (((saturation * 100) + (1 << 15)) >> 16) - 100;
+            else
+                break;
+            return CONTROL_TRUE;
+        case VFCTRL_SET_EQUALIZER:
+            r = sws_getColorspaceDetails(vf->priv->ctx, &inv_table, &srcRange,
+                                         &table, &dstRange, &brightness,
+                                         &contrast, &saturation);
+            if (r < 0)
+                break;
 
-	if (!strcmp(eq->item,"brightness")) {
-		brightness = (( eq->value     <<16) + 50)/100;
-	}
-	else if (!strcmp(eq->item,"contrast")) {
-		contrast   = (((eq->value+100)<<16) + 50)/100;
-	}
-	else if (!strcmp(eq->item,"saturation")) {
-		saturation = (((eq->value+100)<<16) + 50)/100;
-	}
-	else
-		break;
+            eq = data;
+            if (!strcmp(eq->item, "brightness"))
+                brightness = ((eq->value << 16) + 50) / 100;
+            else if (!strcmp(eq->item, "contrast"))
+                contrast   = (((eq->value + 100) << 16) + 50) / 100;
+            else if (!strcmp(eq->item, "saturation"))
+                saturation = (((eq->value + 100) << 16) + 50) / 100;
+            else
+                break;
 
-	r= sws_setColorspaceDetails(vf->priv->ctx, inv_table, srcRange, table, dstRange, brightness, contrast, saturation);
-	if(r<0) break;
+            r = sws_setColorspaceDetails(vf->priv->ctx, inv_table, srcRange,
+                                         table, dstRange, brightness, contrast,
+                                         saturation);
+            if (r < 0)
+                break;
 
-	return CONTROL_TRUE;
-    default:
-	break;
+            return CONTROL_TRUE;
+        default:
+            break;
+        }
     }
 
-    return vf_next_control(vf,request,data);
+    return vf_next_control(vf, request, data);
 }
 
 static const int mp_csp_to_swscale[MP_CSP_COUNT] = {
@@ -457,7 +474,7 @@ static int mp_sws_set_colorspace(struct SwsContext *sws,
     const int *new_inv_table = sws_getCoefficients(sws_csp);
 
     if (sws_setColorspaceDetails(sws, new_inv_table, srcRange, table, dstRange,
-        brightness, contrast, saturation) == -1)
+                                 brightness, contrast, saturation) == -1)
         goto error_out;
 
     return 0;
@@ -468,57 +485,61 @@ error_out:
 
 //===========================================================================//
 
-//  supported Input formats: YV12, I420, IYUV, YUY2, UYVY, BGR32, BGR24, BGR16, BGR15, RGB32, RGB24, Y8, Y800
-
-static int query_format(struct vf_instance *vf, unsigned int fmt){
+static int query_format(struct vf_instance *vf, unsigned int fmt)
+{
     if (!IMGFMT_IS_HWACCEL(fmt) && imgfmt2pixfmt(fmt) != PIX_FMT_NONE) {
-	unsigned int best=find_best_out(vf, fmt);
-	int flags;
-	if(!best) return 0;	 // no matching out-fmt
-	flags=vf_next_query_format(vf,best);
-	if(!(flags&(VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW))) return 0; // huh?
-	if(fmt!=best) flags&=~VFCAP_CSP_SUPPORTED_BY_HW;
-	return flags;
+        unsigned int best = find_best_out(vf, fmt);
+        int flags;
+        if (!best)
+            return 0;            // no matching out-fmt
+        flags = vf_next_query_format(vf, best);
+        if (!(flags & (VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW)))
+            return 0;
+        if (fmt != best)
+            flags &= ~VFCAP_CSP_SUPPORTED_BY_HW;
+        return flags;
     }
-    return 0;	// nomatching in-fmt
+    return 0;   // nomatching in-fmt
 }
 
-static void uninit(struct vf_instance *vf){
-    if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
+static void uninit(struct vf_instance *vf)
+{
+    if (vf->priv->ctx)
+        sws_freeContext(vf->priv->ctx);
 }
 
-static int vf_open(vf_instance_t *vf, char *args){
-    vf->reconfig=reconfig;
-    vf->filter=filter;
-    vf->query_format=query_format;
-    vf->control= control;
-    vf->uninit=uninit;
-    mp_msg(MSGT_VFILTER,MSGL_V,"SwScale params: %d x %d (-1=no scaling)\n",
-    vf->priv->cfg_w,
-    vf->priv->cfg_h);
+static int vf_open(vf_instance_t *vf, char *args)
+{
+    vf->reconfig = reconfig;
+    vf->filter = filter;
+    vf->query_format = query_format;
+    vf->control = control;
+    vf->uninit = uninit;
+    mp_msg(MSGT_VFILTER, MSGL_V, "SwScale params: %d x %d (-1=no scaling)\n",
+           vf->priv->cfg_w, vf->priv->cfg_h);
 
     return 1;
 }
 
 #undef ST_OFF
-#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+#define ST_OFF(f) M_ST_OFF(struct vf_priv_s, f)
 static const m_option_t vf_opts_fields[] = {
-  {"w", ST_OFF(cfg_w), CONF_TYPE_INT, M_OPT_MIN,-11,0, NULL},
-  {"h", ST_OFF(cfg_h), CONF_TYPE_INT, M_OPT_MIN,-11,0, NULL},
-  {"interlaced", ST_OFF(interlaced), CONF_TYPE_INT, M_OPT_RANGE, 0, 1, NULL},
-  {"chr-drop", ST_OFF(v_chr_drop), CONF_TYPE_INT, M_OPT_RANGE, 0, 3, NULL},
-  {"param" , ST_OFF(param[0]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
-  {"param2", ST_OFF(param[1]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
-  {"noup", ST_OFF(noup), CONF_TYPE_INT, M_OPT_RANGE, 0, 2, NULL},
-  {"arnd", ST_OFF(accurate_rnd), CONF_TYPE_FLAG, 0, 0, 1, NULL},
-  { NULL, NULL, 0, 0, 0, 0,  NULL }
+    {"w", ST_OFF(cfg_w), CONF_TYPE_INT, M_OPT_MIN, -11, 0, NULL},
+    {"h", ST_OFF(cfg_h), CONF_TYPE_INT, M_OPT_MIN, -11, 0, NULL},
+    {"interlaced", ST_OFF(interlaced), CONF_TYPE_INT, M_OPT_RANGE, 0, 1, NULL},
+    {"chr-drop", ST_OFF(v_chr_drop), CONF_TYPE_INT, M_OPT_RANGE, 0, 3, NULL},
+    {"param", ST_OFF(param[0]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
+    {"param2", ST_OFF(param[1]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
+    {"noup", ST_OFF(noup), CONF_TYPE_INT, M_OPT_RANGE, 0, 2, NULL},
+    {"arnd", ST_OFF(accurate_rnd), CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { NULL, NULL, 0, 0, 0, 0, NULL }
 };
 
 static const m_struct_t vf_opts = {
-  "scale",
-  sizeof(struct vf_priv_s),
-  &vf_priv_dflt,
-  vf_opts_fields
+    "scale",
+    sizeof(struct vf_priv_s),
+    &vf_priv_dflt,
+    vf_opts_fields
 };
 
 const vf_info_t vf_info_scale = {
