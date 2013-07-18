@@ -109,6 +109,33 @@ struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH,
                           srcFilterParam, dstFilterParam, NULL);
 }
 
+// Set ctx parameters to global command line flags.
+void mp_sws_set_from_cmdline(struct mp_sws_context *ctx)
+{
+    sws_freeFilter(ctx->src_filter);
+    ctx->src_filter = sws_getDefaultFilter(sws_lum_gblur, sws_chr_gblur,
+                                           sws_lum_sharpen, sws_chr_sharpen,
+                                           sws_chr_hshift, sws_chr_vshift, 0);
+    ctx->force_reload = true;
+
+    ctx->flags = SWS_PRINT_INFO;
+
+    switch (sws_flags) {
+    case 0:  ctx->flags |= SWS_FAST_BILINEAR;   break;
+    case 1:  ctx->flags |= SWS_BILINEAR;        break;
+    case 2:  ctx->flags |= SWS_BICUBIC;         break;
+    case 3:  ctx->flags |= SWS_X;               break;
+    case 4:  ctx->flags |= SWS_POINT;           break;
+    case 5:  ctx->flags |= SWS_AREA;            break;
+    case 6:  ctx->flags |= SWS_BICUBLIN;        break;
+    case 7:  ctx->flags |= SWS_GAUSS;           break;
+    case 8:  ctx->flags |= SWS_SINC;            break;
+    case 9:  ctx->flags |= SWS_LANCZOS;         break;
+    case 10: ctx->flags |= SWS_SPLINE;          break;
+    default: ctx->flags |= SWS_BILINEAR;        break;
+    }
+}
+
 bool mp_sws_supported_format(int imgfmt)
 {
     enum PixelFormat av_format = imgfmt2pixfmt(imgfmt);
@@ -146,8 +173,8 @@ static void planarize32(struct mp_image *dst, struct mp_image *src,
 #define SET_COMPS(comp, r, g, b, a) \
     { (comp)[0] = (r); (comp)[1] = (g); (comp)[2] = (b); (comp)[3] = (a); }
 
-static void to_gbrp(struct mp_image *dst, struct mp_image *src,
-                    int my_sws_flags)
+static int to_gbrp(struct mp_image *dst, struct mp_image *src,
+                   int my_sws_flags)
 {
     struct mp_image *temp = NULL;
     int comp[4];
@@ -167,80 +194,158 @@ static void to_gbrp(struct mp_image *dst, struct mp_image *src,
     planarize32(dst, src, comp);
 
     talloc_free(temp);
+    return 0;
 }
 
-
-static void mp_sws_set_conv(struct SwsContext *sws, struct mp_image *dst,
-                            struct mp_image *src, int my_sws_flags)
+static bool cache_valid(struct mp_sws_context *ctx)
 {
+    struct mp_sws_context *old = ctx->cached;
+    if (ctx->force_reload)
+        return false;
+    return mp_image_params_equals(&ctx->src, &old->src) &&
+           mp_image_params_equals(&ctx->dst, &old->dst) &&
+           ctx->flags == old->flags &&
+           ctx->brightness == old->brightness &&
+           ctx->contrast == old->contrast &&
+           ctx->saturation == old->saturation;
+}
+
+static int free_mp_sws(void *p)
+{
+    struct mp_sws_context *ctx = p;
+    sws_freeContext(ctx->sws);
+    sws_freeFilter(ctx->src_filter);
+    sws_freeFilter(ctx->dst_filter);
+    return 0;
+}
+
+// You're supposed to set your scaling parameters on the returned context.
+// Free the context with talloc_free().
+struct mp_sws_context *mp_sws_alloc(void *talloc_parent)
+{
+    struct mp_sws_context *ctx = talloc_ptrtype(talloc_parent, ctx);
+    *ctx = (struct mp_sws_context) {
+        .flags = SWS_BILINEAR,
+        .contrast = 1 << 16,    // 1.0 in 16.16 fixed point
+        .saturation = 1 << 16,
+        .force_reload = true,
+        .cached = talloc_zero(ctx, struct mp_sws_context),
+    };
+    talloc_set_destructor(ctx, free_mp_sws);
+    return ctx;
+}
+
+// Reinitialize (if needed) - return error code.
+// Optional, but possibly useful to avoid having to handle mp_sws_scale errors.
+int mp_sws_reinit(struct mp_sws_context *ctx)
+{
+    if (cache_valid(ctx))
+        return 0;
+
+    sws_freeContext(ctx->sws);
+    ctx->sws = sws_alloc_context();
+    if (!ctx->sws)
+        return -1;
+
+    struct mp_image_params *src = &ctx->src;
+    struct mp_image_params *dst = &ctx->dst;
+
+    mp_image_params_guess_csp(src); // sanitize colorspace/colorlevels
+    mp_image_params_guess_csp(dst);
+
+    struct mp_imgfmt_desc src_fmt = mp_imgfmt_get_desc(src->imgfmt);
+    struct mp_imgfmt_desc dst_fmt = mp_imgfmt_get_desc(dst->imgfmt);
+    if (!src_fmt.id || !dst_fmt.id)
+        return -1;
+
     enum PixelFormat s_fmt = imgfmt2pixfmt(src->imgfmt);
-    int s_csp = mp_csp_to_sws_colorspace(mp_image_csp(src));
-    int s_range = mp_image_levels(src) == MP_CSP_LEVELS_PC;
+    if (s_fmt == PIX_FMT_NONE || sws_isSupportedInput(s_fmt) < 1)
+        return -1;
 
     enum PixelFormat d_fmt = imgfmt2pixfmt(dst->imgfmt);
-    int d_csp = mp_csp_to_sws_colorspace(mp_image_csp(dst));
-    int d_range = mp_image_levels(dst) == MP_CSP_LEVELS_PC;
+    if (d_fmt == PIX_FMT_NONE || sws_isSupportedOutput(d_fmt) < 1)
+        return -1;
+
+    int s_csp = mp_csp_to_sws_colorspace(src->colorspace);
+    int s_range = src->colorlevels == MP_CSP_LEVELS_PC;
+
+    int d_csp = mp_csp_to_sws_colorspace(dst->colorspace);
+    int d_range = dst->colorlevels == MP_CSP_LEVELS_PC;
 
     // Work around libswscale bug #1852 (fixed in ffmpeg commit 8edf9b1fa):
     // setting range flags for RGB gives random bogus results.
     // Newer libswscale always ignores range flags for RGB.
-    bool s_yuv = src->flags & MP_IMGFLAG_YUV;
-    bool d_yuv = dst->flags & MP_IMGFLAG_YUV;
-    s_range = s_range && s_yuv;
-    d_range = d_range && d_yuv;
+    s_range = s_range && (src_fmt.flags & MP_IMGFLAG_YUV);
+    d_range = d_range && (dst_fmt.flags & MP_IMGFLAG_YUV);
 
-    av_opt_set_int(sws, "sws_flags", my_sws_flags, 0);
+    av_opt_set_int(ctx->sws, "sws_flags", ctx->flags, 0);
 
-    av_opt_set_int(sws, "srcw", src->w, 0);
-    av_opt_set_int(sws, "srch", src->h, 0);
-    av_opt_set_int(sws, "src_format", s_fmt, 0);
+    av_opt_set_int(ctx->sws, "srcw", src->w, 0);
+    av_opt_set_int(ctx->sws, "srch", src->h, 0);
+    av_opt_set_int(ctx->sws, "src_format", s_fmt, 0);
 
-    av_opt_set_int(sws, "dstw", dst->w, 0);
-    av_opt_set_int(sws, "dsth", dst->h, 0);
-    av_opt_set_int(sws, "dst_format", d_fmt, 0);
+    av_opt_set_int(ctx->sws, "dstw", dst->w, 0);
+    av_opt_set_int(ctx->sws, "dsth", dst->h, 0);
+    av_opt_set_int(ctx->sws, "dst_format", d_fmt, 0);
 
-    sws_setColorspaceDetails(sws, sws_getCoefficients(s_csp), s_range,
+    // This can fail even with normal operation, e.g. if a conversion path
+    // simply does not support these settings.
+    sws_setColorspaceDetails(ctx->sws, sws_getCoefficients(s_csp), s_range,
                              sws_getCoefficients(d_csp), d_range,
-                             0, 1 << 16, 1 << 16);
+                             ctx->brightness, ctx->contrast, ctx->saturation);
+
+    if (sws_init_context(ctx->sws, ctx->src_filter, ctx->dst_filter) < 0)
+        return -1;
+
+    ctx->force_reload = false;
+    *ctx->cached = *ctx;
+    return 1;
+}
+
+// Scale from src to dst - if src/dst have different parameters from previous
+// calls, the context is reinitialized. Return error code. (It can fail if
+// reinitialization was necessary, and swscale returned an error.)
+int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
+                 struct mp_image *src)
+{
+    // Hack for older swscale versions which don't support this.
+    // We absolutely need this in the OSD rendering path.
+    if (dst->imgfmt == IMGFMT_GBRP && !sws_isSupportedOutput(PIX_FMT_GBRP))
+        return to_gbrp(dst, src, ctx->flags);
+
+    mp_image_params_from_image(&ctx->src, src);
+    mp_image_params_from_image(&ctx->dst, dst);
+
+    int r = mp_sws_reinit(ctx);
+    if (r < 0) {
+        mp_msg(MSGT_VFILTER, MSGL_ERR, "libswscale initialization failed.\n");
+        return r;
+    }
+
+    sws_scale(ctx->sws, (const uint8_t *const *) src->planes, src->stride,
+              0, src->h, dst->planes, dst->stride);
+    return 0;
 }
 
 void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
                       int my_sws_flags)
 {
-    if (dst->imgfmt == IMGFMT_GBRP && !sws_isSupportedOutput(PIX_FMT_GBRP))
-        return to_gbrp(dst, src, my_sws_flags);
-
-    struct SwsContext *sws = sws_alloc_context();
-    mp_sws_set_conv(sws, dst, src, my_sws_flags);
-
-    int res = sws_init_context(sws, NULL, NULL);
-    assert(res >= 0);
-
-    sws_scale(sws, (const uint8_t *const *) src->planes, src->stride,
-              0, src->h, dst->planes, dst->stride);
-    sws_freeContext(sws);
+    struct mp_sws_context *ctx = mp_sws_alloc(NULL);
+    ctx->flags = my_sws_flags;
+    mp_sws_scale(ctx, dst, src);
+    talloc_free(ctx);
 }
 
 void mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
                             float gblur)
 {
-    struct SwsContext *sws = sws_alloc_context();
-
-    int flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP |
-                SWS_ACCURATE_RND | SWS_BITEXACT;
-
-    mp_sws_set_conv(sws, dst, src, flags);
-
-    SwsFilter *src_filter = sws_getDefaultFilter(gblur, gblur, 0, 0, 0, 0, 0);
-
-    int res = sws_init_context(sws, src_filter, NULL);
-    assert(res >= 0);
-
-    sws_scale(sws, (const uint8_t *const *) src->planes, src->stride,
-              0, src->h, dst->planes, dst->stride);
-    sws_freeContext(sws);
-
-    sws_freeFilter(src_filter);
+    struct mp_sws_context *ctx = mp_sws_alloc(NULL);
+    ctx->flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT | SWS_FULL_CHR_H_INP |
+                 SWS_ACCURATE_RND | SWS_BITEXACT;
+    ctx->src_filter = sws_getDefaultFilter(gblur, gblur, 0, 0, 0, 0, 0);
+    ctx->force_reload = true;
+    mp_sws_scale(ctx, dst, src);
+    talloc_free(ctx);
 }
 
 // vim: ts=4 sw=4 et tw=80

@@ -405,22 +405,18 @@ void mp_image_vflip(struct mp_image *img)
     }
 }
 
-enum mp_csp mp_image_csp(struct mp_image *img)
+bool mp_image_params_equals(const struct mp_image_params *p1,
+                            const struct mp_image_params *p2)
 {
-    if (img->colorspace != MP_CSP_AUTO)
-        return img->colorspace;
-    return (img->flags & MP_IMGFLAG_YUV) ? MP_CSP_BT_601 : MP_CSP_RGB;
+    return p1->imgfmt == p2->imgfmt &&
+           p1->w == p2->w && p1->h == p2->h &&
+           p1->d_w == p2->d_w && p1->d_h == p2->d_h &&
+           p1->colorspace == p2->colorspace &&
+           p1->colorlevels == p2->colorlevels;
 }
 
-enum mp_csp_levels mp_image_levels(struct mp_image *img)
-{
-    if (img->levels != MP_CSP_LEVELS_AUTO)
-        return img->levels;
-    return (img->flags & MP_IMGFLAG_YUV) ? MP_CSP_LEVELS_TV : MP_CSP_LEVELS_PC;
-}
-
-static void mp_image_params_from_image(struct mp_image_params *params,
-                                       const struct mp_image *image)
+void mp_image_params_from_image(struct mp_image_params *params,
+                                const struct mp_image *image)
 {
     // (Ideally mp_image should use mp_image_params directly instead)
     *params = (struct mp_image_params) {

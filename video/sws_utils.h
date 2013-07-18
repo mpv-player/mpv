@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <libswscale/swscale.h>
 
+#include "mp_image.h"
+
 struct mp_image;
 struct mp_csp_details;
 
@@ -25,6 +27,34 @@ void mp_image_swscale(struct mp_image *dst, struct mp_image *src,
 
 void mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
                             float gblur);
+
+struct mp_sws_context {
+    // User configuration. These can be changed freely, at any time.
+    // mp_sws_scale() will handle the changes transparently.
+    int flags;
+    int brightness, contrast, saturation;
+    bool force_reload;
+    // These are also implicitly set by mp_sws_scale(), and thus optional.
+    // Setting them before that call makes sense when using mp_sws_reinit().
+    struct mp_image_params src, dst;
+
+    // Changing these requires setting force_reload=true.
+    // By default, they are NULL.
+    // Freeing the mp_sws_context will deallocate these if set.
+    struct SwsFilter *src_filter, *dst_filter;
+
+    // Cached context (if any)
+    struct SwsContext *sws;
+
+    // Contains parameters for which sws is valid
+    struct mp_sws_context *cached;
+};
+
+struct mp_sws_context *mp_sws_alloc(void *talloc_parent);
+int mp_sws_reinit(struct mp_sws_context *ctx);
+void mp_sws_set_from_cmdline(struct mp_sws_context *ctx);
+int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
+                 struct mp_image *src);
 
 #endif /* MP_SWS_UTILS_H */
 
