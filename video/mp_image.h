@@ -63,7 +63,7 @@ struct mp_image_params {
  *   image data. mp_image_make_writeable() will do that copy if required.
  */
 typedef struct mp_image {
-    unsigned int flags;
+    unsigned int flags; // same as fmt.flags
     struct mp_imgfmt_desc fmt;
 
     // fields redundant to fmt, for convenience or compatibility

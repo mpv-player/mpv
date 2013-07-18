@@ -57,7 +57,9 @@
 // set if in native (host) endian, or endian independent
 #define MP_IMGFLAG_NE MP_SELECT_LE_BE(MP_IMGFLAG_LE, MP_IMGFLAG_BE)
 
-#define MP_IMGFLAG_FMT_MASK 0x3FFF
+// Exactly one of these bits is set in mp_imgfmt_desc.flags
+#define MP_IMGFLAG_COLOR_CLASS_MASK \
+    (MP_IMGFLAG_YUV | MP_IMGFLAG_RGB | MP_IMGFLAG_XYZ)
 
 struct mp_imgfmt_desc {
     int id;                 // IMGFMT_*

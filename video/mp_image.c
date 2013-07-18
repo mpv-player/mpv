@@ -127,10 +127,9 @@ static void mp_image_alloc_planes(struct mp_image *mpi)
 
 void mp_image_setfmt(struct mp_image *mpi, unsigned int out_fmt)
 {
-    mpi->flags &= ~MP_IMGFLAG_FMT_MASK;
     struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(out_fmt);
     mpi->fmt = fmt;
-    mpi->flags |= fmt.flags;
+    mpi->flags = fmt.flags;
     mpi->imgfmt = fmt.id;
     mpi->chroma_x_shift = fmt.chroma_xs;
     mpi->chroma_y_shift = fmt.chroma_ys;
