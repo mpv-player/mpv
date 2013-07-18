@@ -71,8 +71,7 @@ struct priv {
 
     uint32_t image_width;
     uint32_t image_height;
-    uint32_t in_format;
-    uint32_t out_format;
+    struct mp_image_params in_format;
 
     struct mp_rect src;
     struct mp_rect dst;
@@ -80,7 +79,7 @@ struct priv {
     int dst_w, dst_h;
     struct mp_osd_res osd;
 
-    struct SwsContext *swsContext;
+    struct mp_sws_context *sws;
 
     XVisualInfo vinfo;
     int ximage_depth;
@@ -288,15 +287,13 @@ const struct fmt2Xfmtentry_s {
     {0}
 };
 
-static int config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  uint32_t format)
+static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
 {
     struct priv *p = vo->priv;
 
     mp_image_unrefp(&p->original_image);
 
-    p->in_format = format;
+    p->in_format = *fmt;
 
     XGetWindowAttributes(vo->x11->display, vo->x11->rootwin, &p->attribs);
     p->depth = p->attribs.depth;
@@ -328,9 +325,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 static bool resize(struct vo *vo)
 {
     struct priv *p = vo->priv;
-
-    sws_freeContext(p->swsContext);
-    p->swsContext = NULL;
 
     for (int i = 0; i < p->num_buffers; i++)
         freeMyXImage(p, i);
@@ -381,12 +375,19 @@ static bool resize(struct vo *vo)
             "X server image format not supported, please contact the developers\n");
         return -1;
     }
-    p->out_format = fmte->mpfmt;
     p->bpp = p->myximage[0]->bits_per_pixel;
 
-    p->swsContext = sws_getContextFromCmdLine(p->src_w, p->src_h, p->in_format,
-                                              p->dst_w, p->dst_h, p->out_format);
-    if (!p->swsContext)
+    mp_sws_set_from_cmdline(p->sws);
+    p->sws->src = p->in_format;
+    p->sws->dst = (struct mp_image_params) {
+        .imgfmt = fmte->mpfmt,
+        .w = p->dst_w,
+        .h = p->dst_h,
+        .d_w = p->dst_w,
+        .d_h = p->dst_h,
+    };
+
+    if (mp_sws_reinit(p->sws) < 0)
         return false;
 
     vo_x11_clear_background(vo, &p->dst);
@@ -418,8 +419,7 @@ static void Display_Image(struct priv *p, XImage *myximage)
 static struct mp_image get_x_buffer(struct priv *p, int buf_index)
 {
     struct mp_image img = {0};
-    mp_image_set_size(&img, p->image_width, p->image_height);
-    mp_image_setfmt(&img, p->out_format);
+    mp_image_set_params(&img, &p->sws->dst);
 
     img.planes[0] = p->ImageData[buf_index];
     img.stride[0] = p->image_width * ((p->bpp + 7) / 8);
@@ -480,11 +480,6 @@ static void flip_page(struct vo *vo)
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
-    uint8_t *dst[MP_MAX_PLANES] = {NULL};
-    int dstStride[MP_MAX_PLANES] = {0};
-
-    if (!p->swsContext)
-        return;
 
     wait_for_completion(vo, p->num_buffers - 1);
 
@@ -494,10 +489,8 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, src.fmt.align_y);
     mp_image_crop_rc(&src, src_rc);
 
-    dstStride[0] = p->image_width * ((p->bpp + 7) / 8);
-    dst[0] = p->ImageData[p->current_buf];
-    sws_scale(p->swsContext, (const uint8_t **)src.planes, src.stride,
-              0, src.h, dst, dstStride);
+    struct mp_image img = get_x_buffer(p, p->current_buf);
+    mp_sws_scale(p->sws, &img, &src);
 
     mp_image_setrefp(&p->original_image, mpi);
 }
@@ -606,8 +599,6 @@ static void uninit(struct vo *vo)
     talloc_free(p->original_image);
 
     vo_x11_uninit(vo);
-
-    sws_freeContext(p->swsContext);
 }
 
 static int preinit(struct vo *vo, const char *arg)
@@ -618,6 +609,7 @@ static int preinit(struct vo *vo, const char *arg)
     if (!vo_x11_init(vo))
         return -1;              // Can't open X11
     find_x11_depth(vo);
+    p->sws = mp_sws_alloc(vo);
     return 0;
 }
 
@@ -675,7 +667,7 @@ const struct vo_driver video_out_x11 = {
     .options = (const struct m_option []){{0}},
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .draw_osd = draw_osd,
