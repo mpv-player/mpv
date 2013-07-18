@@ -86,7 +86,6 @@ static void aspect_calc(struct vo *vo, int *srcw, int *srch)
                     "[ASPECT] Warning: No suitable new res found!\n");
         }
     }
-    aspdat->asp = *srcw / (float)*srch;
     mp_msg(MSGT_VO, MSGL_DBG2, "aspect(2) wh: %dx%d (org: %dx%d)\n",
            *srcw, *srch, aspdat->prew, aspdat->preh);
 }
@@ -106,6 +105,6 @@ void aspect_calc_panscan(struct vo *vo, int *out_w, int *out_h)
     } else
         vo_panscan_area = -opts->panscanrange * vo->dheight;
 
-    *out_w = fwidth + vo_panscan_area * opts->panscan * vo->aspdat.asp;
+    *out_w = fwidth + vo_panscan_area * opts->panscan * fwidth / fheight;
     *out_h = fheight + vo_panscan_area * opts->panscan;
 }

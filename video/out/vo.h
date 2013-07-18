@@ -283,7 +283,6 @@ struct vo {
         int prew; // prescaled width
         int preh; // prescaled height
         float par; // pixel aspect ratio out of orgw/orgh and prew/preh
-        float asp; // final video display aspect
     } aspdat;
 
     char *window_title;
