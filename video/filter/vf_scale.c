@@ -341,14 +341,6 @@ static void scale(struct SwsContext *sws1, struct SwsContext *sws2,
                   int interlaced)
 {
     const uint8_t *src2[MP_MAX_PLANES] = {src[0], src[1], src[2], src[3]};
-#if BYTE_ORDER == BIG_ENDIAN
-    uint32_t pal2[256];
-    if (src[1] && !src[2]) {
-        for (int i = 0; i < 256; i++)
-            pal2[i] = bswap_32(((uint32_t *)src[1])[i]);
-        src2[1] = pal2;
-    }
-#endif
 
     if (interlaced) {
         int i;
