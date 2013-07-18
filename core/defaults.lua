@@ -1,3 +1,4 @@
+-- defaults.lua
 -- print as rectangular table, taking maxwidth space at most
 function print_ascii_table(input, maxwidth)
     local t = {}
@@ -199,7 +200,10 @@ end
 
 function ass_mt.append(ass, s)
     ass.text = ass.text .. s
-    --state.append_calls = state.append_calls + 1
+end
+
+function ass_mt.merge(ass1, ass2)
+    ass1.text = ass1.text .. ass2.text
 end
 
 function ass_mt.pos(ass, x, y)
@@ -241,3 +245,16 @@ function ass_mt.rect_cw(ass, x0, y0, x1, y1)
     ass:line_to(x1, y1)
     ass:line_to(x0, y1)
 end
+
+function ass_mt.round_rect_cw(ass, x0, y0, x1, y1, r)
+    ass:move_to(x0 + r, y0)
+    ass:line_to(x1 - r, y0) -- top line
+    if r > 0 then ass:bezier_curve(x1, y0, x1, y0, x1, y0 + r) end -- top right corner
+    ass:line_to(x1, y1 - r) -- right line
+    if r > 0 then ass:bezier_curve(x1, y1, x1, y1, x1 - r, y1) end -- bottom right corner
+    ass:line_to(x0 + r, y1) -- bottom line
+    if r > 0 then ass:bezier_curve(x0, y1, x0, y1, x0, y1 - r) end -- bottom left corner
+    ass:line_to(x0, y0 + r) -- left line
+    if r > 0 then ass:bezier_curve(x0, y0, x0, y0, x0 + r, y0) end -- top left corner
+end
+
