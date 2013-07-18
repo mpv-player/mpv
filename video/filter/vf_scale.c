@@ -158,6 +158,14 @@ static int preferred_conversions[][2] = {
     {0, 0}
 };
 
+static int check_outfmt(vf_instance_t *vf, int outfmt)
+{
+    enum AVPixelFormat pixfmt = imgfmt2pixfmt(outfmt);
+    if (pixfmt == PIX_FMT_NONE || sws_isSupportedOutput(pixfmt) < 1)
+        return 0;
+    return vf_next_query_format(vf, outfmt);
+}
+
 static unsigned int find_best_out(vf_instance_t *vf, int in_format)
 {
     unsigned int best = 0;
@@ -184,7 +192,8 @@ static unsigned int find_best_out(vf_instance_t *vf, int in_format)
             format = outfmt_list[i++];
         if (!format)
             break;
-        ret = vf_next_query_format(vf, format);
+
+        ret = check_outfmt(vf, format);
 
         mp_msg(MSGT_VFILTER, MSGL_DBG2, "scale: query(%s) -> %d\n",
                vo_format_name(
@@ -195,6 +204,19 @@ static unsigned int find_best_out(vf_instance_t *vf, int in_format)
         }
         if (ret & VFCAP_CSP_SUPPORTED && !best)
             best = format;  // best with conversion
+    }
+    if (!best) {
+        // Try anything else. outfmt_list is just a list of preferred formats.
+        for (int format = IMGFMT_START; format < IMGFMT_END; format++) {
+            int ret = check_outfmt(vf, format);
+
+            if (ret & VFCAP_CSP_SUPPORTED_BY_HW) {
+                best = format; // no conversion -> bingo!
+                break;
+            }
+            if (ret & VFCAP_CSP_SUPPORTED && !best)
+                best = format;  // best with conversion
+        }
     }
     return best;
 }
@@ -480,6 +502,8 @@ error_out:
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
     if (!IMGFMT_IS_HWACCEL(fmt) && imgfmt2pixfmt(fmt) != PIX_FMT_NONE) {
+        if (sws_isSupportedInput(imgfmt2pixfmt(fmt)) < 1)
+            return 0;
         unsigned int best = find_best_out(vf, fmt);
         int flags;
         if (!best)
