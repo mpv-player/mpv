@@ -177,18 +177,18 @@ enum mp_imgfmt {
 
     // Byte accessed (low address to high address)
     IMGFMT_ARGB,
-    IMGFMT_0RGB,
+    IMGFMT_0RGB,                // "0" is a padding byte (as opposed to alpha)
     IMGFMT_BGRA,
     IMGFMT_BGR0,
     IMGFMT_ABGR,
     IMGFMT_0BGR,
     IMGFMT_RGBA,
     IMGFMT_RGB0,
-    IMGFMT_BGR24,
+    IMGFMT_BGR24,               // 3 bytes per pixel
     IMGFMT_RGB24,
-    IMGFMT_RGB48_LE,
+    IMGFMT_RGB48_LE,            // 6 bytes per pixel, uint16_t channels
     IMGFMT_RGB48_BE,
-    IMGFMT_RGBA64_LE,
+    IMGFMT_RGBA64_LE,           // 8 bytes per pixel, uint16_t channels
     IMGFMT_RGBA64_BE,
     IMGFMT_BGRA64_LE,
     IMGFMT_BGRA64_BE,
@@ -217,11 +217,13 @@ enum mp_imgfmt {
     IMGFMT_BGR16_LE,            // 5b 6g 5r
     IMGFMT_BGR16_BE,
 
-    IMGFMT_PAL8,                // Palette entries are IMGFMT_BGR32
+    // The first plane has 1 byte per pixel. The second plane is a palette with
+    // 256 entries, with each entry encoded like in IMGFMT_BGR32.
+    IMGFMT_PAL8,
 
     // Planar RGB (planes are shuffled: plane 0 is G, etc.)
     IMGFMT_GBRP,
-    IMGFMT_GBRP9_LE,
+    IMGFMT_GBRP9_LE,            // similar organization to IMGFMT_444P9_LE
     IMGFMT_GBRP9_BE,
     IMGFMT_GBRP10_LE,
     IMGFMT_GBRP10_BE,
@@ -237,7 +239,7 @@ enum mp_imgfmt {
     IMGFMT_XYZ12_LE,
     IMGFMT_XYZ12_BE,
 
-    // Hardware acclerated formats. Plane data points to special data
+    // Hardware accelerated formats. Plane data points to special data
     // structures, instead of pixel data.
 
     IMGFMT_VDPAU_MPEG1,
