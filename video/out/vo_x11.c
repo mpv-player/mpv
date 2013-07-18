@@ -73,7 +73,6 @@ struct priv {
     uint32_t image_height;
     uint32_t in_format;
     uint32_t out_format;
-    int out_offset;
 
     struct mp_rect src;
     struct mp_rect dst;
@@ -384,18 +383,6 @@ static bool resize(struct vo *vo)
     }
     p->out_format = fmte->mpfmt;
     p->bpp = p->myximage[0]->bits_per_pixel;
-    p->out_offset = 0;
-    // We can easily "emulate" non-native RGB32 and BGR32
-    if (p->out_format == (IMGFMT_BGR32 | 128)
-        || p->out_format == (IMGFMT_RGB32 | 128))
-    {
-        p->out_format &= ~128;
-#if BYTE_ORDER == BIG_ENDIAN
-        p->out_offset = 1;
-#else
-        p->out_offset = -1;
-#endif
-    }
 
     p->swsContext = sws_getContextFromCmdLine(p->src_w, p->src_h, p->in_format,
                                               p->dst_w, p->dst_h, p->out_format);
@@ -414,7 +401,6 @@ static void Display_Image(struct priv *p, XImage *myximage)
 
     XImage *x_image = p->myximage[p->current_buf];
 
-    x_image->data += p->out_offset;
 #ifdef HAVE_SHM
     if (p->Shmem_Flag) {
         XShmPutImage(vo->x11->display, vo->x11->window, vo->x11->vo_gc, x_image,
@@ -427,7 +413,6 @@ static void Display_Image(struct priv *p, XImage *myximage)
         XPutImage(vo->x11->display, vo->x11->window, vo->x11->vo_gc, x_image,
                   0, 0, p->dst.x0, p->dst.y0, p->dst_w, p->dst_h);
     }
-    x_image->data -= p->out_offset;
 }
 
 static struct mp_image get_x_buffer(struct priv *p, int buf_index)
