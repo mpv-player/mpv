@@ -297,17 +297,6 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags
         }
     }
 
-    // calculate the missing parameters:
-    switch (best) {
-    case IMGFMT_420P:           /* YV12 needs w & h rounded to 2 */
-    case IMGFMT_NV12:
-    case IMGFMT_NV21:
-        vf->priv->h = (vf->priv->h + 1) & ~1;
-    case IMGFMT_YUYV:           /* YUY2 needs w rounded to 2 */
-    case IMGFMT_UYVY:
-        vf->priv->w = (vf->priv->w + 1) & ~1;
-    }
-
     mp_msg(MSGT_VFILTER, MSGL_DBG2, "SwScale: scaling %dx%d %s to %dx%d %s  \n",
            width, height, vo_format_name(outfmt), vf->priv->w, vf->priv->h,
            vo_format_name(best));
