@@ -77,7 +77,7 @@ static int mp_msg_docolor(void) {
 void mp_msg_init(void){
 #ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO cinfo;
-    long cmode = 0;
+    DWORD cmode = 0;
     GetConsoleMode(hSTDOUT, &cmode);
     cmode |= (ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
     SetConsoleMode(hSTDOUT, cmode);
