@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <d3d9.h>
+#include <inttypes.h>
 #include "config.h"
 #include "core/options.h"
 #include "core/subopt-helper.h"
@@ -290,7 +291,7 @@ static void calc_fs_rect(d3d_priv *priv)
     priv->fs_panscan_rect.bottom = src_rect.y1;
 
     mp_msg(MSGT_VO, MSGL_V,
-           "<vo_direct3d>Video rectangle: t: %ld, l: %ld, r: %ld, b:%ld\n",
+           "<vo_direct3d>Video rectangle: t: %"PRId32", l: %"PRId32", r: %"PRId32", b:%"PRId32"\n",
            priv->fs_movie_rect.top,   priv->fs_movie_rect.left,
            priv->fs_movie_rect.right, priv->fs_movie_rect.bottom);
 }
