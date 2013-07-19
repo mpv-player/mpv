@@ -19,6 +19,7 @@
 #define _WIN32_WINNT 0x600
 
 #include <stdlib.h>
+#include <inttypes.h>
 #include <process.h>
 #include <initguid.h>
 #include <audioclient.h>
@@ -32,6 +33,10 @@
 #include "core/mp_msg.h"
 #include "core/mp_ring.h"
 #include "ao.h"
+
+#ifndef BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE
+#define BASE_SEARCH_PATH_ENABLE_SAFE_SEARCHMODE 0x00000001
+#endif
 
 #define RING_BUFFER_COUNT 64
 
@@ -236,7 +241,7 @@ static HRESULT check_support(struct wasapi0_state *state,
         EnterCriticalSection(&state->print_lock);
         mp_msg(
             MSGT_AO, MSGL_ERR,
-            "IAudioClient::IsFormatSupported failed with %s (%d at %ldHz %dchannels, channelmask = %lx)\n",
+            "IAudioClient::IsFormatSupported failed with %s (%d at %"PRId32"Hz %dchannels, channelmask = %"PRIx32")\n",
             explain_err(
                 hr), wformat->Format.wBitsPerSample,
             wformat->Format.nSamplesPerSec,
@@ -366,7 +371,7 @@ reinit:
     EnterCriticalSection(&state->print_lock);
     mp_msg(MSGT_AO, MSGL_V,
            "ao-wasapi: fix_format OK, using %lld byte buffer block size!\n",
-           state->buffer_block_size);
+           (long long) state->buffer_block_size);
     LeaveCriticalSection(&state->print_lock);
     return 0;
 exit_label:
@@ -463,7 +468,7 @@ static void thread_feed(wasapi0_state *state,int force_feed)
     return;
 exit_label:
     EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_feed fails with %lx!\n", hr);
+    mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_feed fails with %"PRIx32"!\n", hr);
     LeaveCriticalSection(&state->print_lock);
     return;
 }
@@ -515,7 +520,7 @@ static void thread_uninit(wasapi0_state *state)
     if (state->hTask)
         state->VistaBlob.pAvRevertMmThreadCharacteristics(state->hTask);
     CoUninitialize();
-    _endthreadex(0);
+    ExitThread(0);
 }
 
 static unsigned int __stdcall ThreadLoop(void *lpParameter)
@@ -670,7 +675,7 @@ static int init(struct ao *ao, char *params)
         return -1;
     }
     state->init_ret = -1;
-    state->threadLoop = (HANDLE)_beginthreadex(NULL, 0, &ThreadLoop, ao, 0, NULL);
+    state->threadLoop = (HANDLE)CreateThread(NULL, 0, &ThreadLoop, ao, 0, NULL);
     if (!state->threadLoop) {
         /* failed to init thread */
         mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi0: fail to create thread!\n");
