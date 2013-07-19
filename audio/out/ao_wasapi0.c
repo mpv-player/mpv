@@ -425,13 +425,8 @@ exit_label:
 
 static void thread_pause(wasapi0_state *state)
 {
+    state->is_playing = 0;
     IAudioClient_Stop(state->pAudioClient);
-}
-
-static void thread_reset(wasapi0_state *state)
-{
-    IAudioClient_Stop(state->pAudioClient);
-    IAudioClient_Reset(state->pAudioClient);
 }
 
 /* force_feed - feed in even if available data is smaller than required buffer, to clear the buffer */
@@ -472,8 +467,18 @@ exit_label:
 static void thread_play(wasapi0_state *state)
 {
     thread_feed(state, 0);
+    state->is_playing = 1;
     IAudioClient_Start(state->pAudioClient);
     return;
+}
+
+static void thread_reset(wasapi0_state *state)
+{
+    IAudioClient_Stop(state->pAudioClient);
+    IAudioClient_Reset(state->pAudioClient);
+    if (state->is_playing) {
+        thread_play(state);
+    }
 }
 
 static void thread_getVol(wasapi0_state *state)
