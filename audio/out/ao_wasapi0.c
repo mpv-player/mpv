@@ -461,6 +461,7 @@ static void thread_feed(wasapi0_state *state,int force_feed)
                                               state->bufferFrameCount,
                                               AUDCLNT_BUFFERFLAGS_SILENT);
         EXIT_ON_ERROR(hr)
+        return;
     }
     hr = IAudioRenderClient_ReleaseBuffer(state->pRenderClient,
                                           state->bufferFrameCount, 0);
