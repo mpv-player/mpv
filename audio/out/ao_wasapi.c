@@ -28,7 +28,6 @@
 #include <avrt.h>
 
 #include "config.h"
-#include "core/subopt-helper.h"
 #include "core/m_option.h"
 #include "core/m_config.h"
 #include "audio/format.h"
@@ -1086,17 +1085,6 @@ static void uninit(struct ao *ao, bool immed)
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: uninit END!\n");
 }
 
-#define OPT_BASE_STRUCT wasapi_state
-const struct m_sub_options ao_wasapi_conf = {
-    .opts = (m_option_t[]){
-        OPT_FLAG("exclusive", opt_exclusive, 0),
-        OPT_FLAG("list", opt_list, 0),
-        OPT_STRING("device", opt_device, 0),
-        {NULL},
-    },
-    .size = sizeof(wasapi_state),
-};
-
 static int init(struct ao *ao, char *params)
 {
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: init!\n");
@@ -1104,15 +1092,8 @@ static int init(struct ao *ao, char *params)
     mp_chmap_sel_add_waveext(&sel);
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         return -1;
-    struct wasapi_state *state = talloc_zero(ao, struct wasapi_state);
-    if (!state)
-        return -1;
-    ao->priv = (void *)state;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     fill_VistaBlob(state);
-
-    struct m_config *cfg = m_config_simple(state);
-    m_config_register_options(cfg, ao_wasapi_conf.opts);
-    m_config_parse_suboptions(cfg, "wasapi", params);
 
     if (state->opt_list) {
         enumerate_devices();
@@ -1244,6 +1225,8 @@ static float get_delay(struct ao *ao)
            (float)state->format.Format.nAvgBytesPerSec;
 }
 
+#define OPT_BASE_STRUCT struct wasapi_state
+
 const struct ao_driver audio_out_wasapi = {
     .info = &(const struct ao_info) {
         "Windows WASAPI audio output (event mode)",
@@ -1260,4 +1243,11 @@ const struct ao_driver audio_out_wasapi = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .reset     = reset,
+    .priv_size = sizeof(wasapi_state),
+    .options   = (const struct m_option[]) {
+        OPT_FLAG("exclusive", opt_exclusive, 0),
+        OPT_FLAG("list", opt_list, 0),
+        OPT_STRING("device", opt_device, 0),
+        {NULL},
+    },
 };
