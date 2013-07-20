@@ -621,23 +621,32 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     }
 }
 
+- (BOOL)isInFullScreenMode
+{
+    return (([self styleMask] & NSFullScreenWindowMask) ==
+                NSFullScreenWindowMask);
+}
+
 - (void)toggleMissionControlFullScreen:(BOOL)willBeFullscreen
 {
     struct vo_cocoa_state *s = self.videoOutput->cocoa;
 
-    if (willBeFullscreen) {
+    if (willBeFullscreen && ![self isInFullScreenMode]) {
         [self setContentResizeIncrements:NSMakeSize(1, 1)];
-    } else {
-        [self setContentAspectRatio:s->current_video_size];
+        [self toggleFullScreen:nil];
     }
 
-    [self toggleFullScreen:nil];
+    if (!willBeFullscreen && [self isInFullScreenMode]) {
+        [self setContentAspectRatio:s->current_video_size];
+        [self toggleFullScreen:nil];
+    }
+
 }
 - (void)toggleViewFullscreen:(BOOL)willBeFullscreen
 {
     struct vo_cocoa_state *s = self.videoOutput->cocoa;
 
-    if (willBeFullscreen) {
+    if (willBeFullscreen && ![s->view isInFullScreenMode]) {
         NSApplicationPresentationOptions popts =
             NSApplicationPresentationDefault;
 
@@ -659,7 +668,9 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         // sending the View fullscreen to another screen. Make it go away
         // manually.
         [s->window orderOut:self];
-    } else {
+    }
+
+    if (!willBeFullscreen && [s->view isInFullScreenMode]) {
         [s->view exitFullScreenModeWithOptions:nil];
 
         // Show the "windowed" window again.
