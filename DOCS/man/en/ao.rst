@@ -169,3 +169,18 @@ Available audio output drivers are:
     ``port=<number>``
         Set the TCP port used for connecting to the server (default: 12345).
         Not used if connecting to a Unix domain socket.
+
+``wasapi0``
+    Audio output to the Windows Audio Session API.
+
+    ``device=<id>``
+        Uses the requested endpoint instead of the system's default audio
+        endpoint. Both the number and the ID String are valid; the ID String
+        is guaranteed to not change unless the driver is uninstalled.
+
+        To get a list of the valid devices, use the ``list`` suboption.
+    ``exclusive``
+        Requests exclusive, direct hardware access. By definition prevents
+        sound playback of any other program until mpv exits.
+    ``list``
+        Lists all audio endpoints (output devices) present in the system.
