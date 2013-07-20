@@ -564,6 +564,77 @@ exit_label:
     return 1;
 }
 
+static char* wstring_to_utf8(wchar_t *wstring) {
+    if (wstring) {
+        int len = WideCharToMultiByte(CP_UTF8, 0, wstring, -1, NULL, 0, NULL, NULL);
+        char *ret = malloc(len);
+        WideCharToMultiByte(CP_UTF8, 0, wstring, -1, ret, len, NULL, NULL);
+        return ret;
+    }
+    return NULL;
+}
+
+static char* get_device_id(IMMDevice *pDevice) {
+    LPWSTR devid = NULL;
+    char *idstr = NULL;
+
+    HRESULT hr = IMMDevice_GetId(pDevice, &devid);
+    EXIT_ON_ERROR(hr)
+
+    idstr = wstring_to_utf8(devid);
+
+    if (strstr(idstr, "{0.0.0.00000000}.")) {
+        char *stripped = strdup(idstr + strlen("{0.0.0.00000000}."));
+        free(idstr);
+        idstr = stripped;
+    }
+
+exit_label:
+    SAFE_RELEASE(devid, CoTaskMemFree(devid));
+    return idstr;
+}
+
+static char* get_device_name(IMMDevice *pDevice) {
+    IPropertyStore *pProps = NULL;
+    char *namestr = NULL;
+
+    HRESULT hr = IMMDevice_OpenPropertyStore(pDevice, STGM_READ, &pProps);
+    EXIT_ON_ERROR(hr)
+
+    PROPVARIANT devname;
+    PropVariantInit(&devname);
+
+    hr = IPropertyStore_GetValue(pProps, &PKEY_Device_FriendlyName, &devname);
+    EXIT_ON_ERROR(hr)
+
+    namestr = wstring_to_utf8(devname.pwszVal);
+
+exit_label:
+    PropVariantClear(&devname);
+    SAFE_RELEASE(pProps, IPropertyStore_Release(pProps));
+    return namestr;
+}
+
+// frees *idstr
+static int device_id_match(char *idstr, char *candidate) {
+    if (idstr == NULL || candidate == NULL)
+        return 0;
+
+    int found = 0;
+#define FOUND(x) do { found = (x); goto end; } while(0)
+    if (strcmp(idstr, candidate) == 0)
+        FOUND(1);
+    if (strstr(idstr, "{0.0.0.00000000}.")) {
+        char *start = idstr + strlen("{0.0.0.00000000}.");
+        if (strcmp(start, candidate) == 0)
+            FOUND(1);
+    }
+#undef FOUND
+end:
+    free(idstr);
+    return found;
+}
+
 static HRESULT enumerate_with_state(char *header, int status, int with_id) {
     HRESULT hr;
     IMMDeviceEnumerator *pEnumerator = NULL;
@@ -591,30 +662,19 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
         hr = IMMDeviceCollection_Item(pDevices, i, &pDevice);
         EXIT_ON_ERROR(hr)
 
-        hr = IMMDevice_GetId(pDevice, &idStr);
-        EXIT_ON_ERROR(hr)
-
-        hr = IMMDevice_OpenPropertyStore(pDevice, STGM_READ, &pProps);
-        EXIT_ON_ERROR(hr)
-
-        PROPVARIANT varName;
-        PropVariantInit(&varName);
-
-        hr = IPropertyStore_GetValue(pProps, &PKEY_Device_FriendlyName, &varName);
-        EXIT_ON_ERROR(hr)
+        char *name = get_device_name(pDevice);
+        char *id = get_device_id(pDevice);
 
         if (with_id) {
-            mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: Endpoint #%d: \"%S\" (ID \"%S\")\n",
-                i, varName.pwszVal, idStr);
+            mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: Device #%d: %s, ID: %s\n",
+                i, name, id);
         } else {
-            mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: Endpoint: \"%S\" (ID \"%S\")\n",
-                varName.pwszVal, idStr);
+            mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: %s, ID: %s\n",
+                name, id);
         }
 
-        CoTaskMemFree(idStr);
-        idStr = NULL;
-        PropVariantClear(&varName);
-        SAFE_RELEASE(pProps, IPropertyStore_Release(pProps));
+        free(name);
+        free(id);
         SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
     }
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
@@ -648,8 +708,6 @@ static HRESULT find_and_load_device(wasapi_state *state, int devno, char *devid)
     IMMDeviceCollection *pDevices = NULL;
     IMMDevice *pTempDevice = NULL;
     LPWSTR deviceID = NULL;
-    LPWSTR tmpID = NULL;
-    char *tmpStr = NULL;
 
     hr = IMMDeviceEnumerator_EnumAudioEndpoints(state->pEnumerator, eRender,
                                                 DEVICE_STATE_ACTIVE, &pDevices);
@@ -662,40 +720,32 @@ static HRESULT find_and_load_device(wasapi_state *state, int devno, char *devid)
         if (devno >= count) {
             mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: no endpoind #%d!\n", devno);
         } else {
-            mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: finding endpoint #%d\n", devno);
+            mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: finding device #%d\n", devno);
             hr = IMMDeviceCollection_Item(pDevices, devno, &pTempDevice);
             EXIT_ON_ERROR(hr)
 
             hr = IMMDevice_GetId(pTempDevice, &deviceID);
             EXIT_ON_ERROR(hr)
 
-            mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: found endpoint #%d\n", devno);
+            mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: found device #%d\n", devno);
         }
     } else {
-        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: finding endpoint \"%s\"\n", devid);
+        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: finding device %s\n", devid);
 
         for (int i = 0; i < count; i++) {
             hr = IMMDeviceCollection_Item(pDevices, i, &pTempDevice);
             EXIT_ON_ERROR(hr)
 
-            hr = IMMDevice_GetId(pTempDevice, &tmpID);
-            EXIT_ON_ERROR(hr)
-
-            int len = WideCharToMultiByte(CP_UTF8, 0, tmpID, -1, NULL, 0, NULL, NULL);
-            tmpStr = malloc(len);
-            WideCharToMultiByte(CP_UTF8, 0, tmpID, -1, tmpStr, len, NULL, NULL);
-
-            if (strcmp(devid, tmpStr) == 0) {
-                deviceID = tmpID;
+            if (device_id_match(get_device_id(pTempDevice), devid)) {
+                hr = IMMDevice_GetId(pTempDevice, &deviceID);
+                EXIT_ON_ERROR(hr)
                 break;
             }
 
-            SAFE_RELEASE(tmpStr, free(tmpStr));
-            SAFE_RELEASE(tmpID, CoTaskMemFree(tmpID));
             SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
         }
         if (deviceID == NULL) {
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: could not find endpoint \"%s\"!\n", devid);
+            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: could not find device %s!\n", devid);
         }
     }
 
@@ -703,20 +753,18 @@ static HRESULT find_and_load_device(wasapi_state *state, int devno, char *devid)
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices))
 
     if (deviceID == NULL) {
-        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: no endpoint to load!\n");
+        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: no device to load!\n");
     } else {
-        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: loading endpoint %S\n", deviceID);
+        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: loading device %S\n", deviceID);
 
         hr = IMMDeviceEnumerator_GetDevice(state->pEnumerator, deviceID, &state->pDevice);
 
         if (FAILED(hr)) {
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: could not load requested endpoint!\n");
+            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: could not load requested device!\n");
         }
     }
 
 exit_label:
-    SAFE_RELEASE(tmpStr, free(tmpStr));
-    SAFE_RELEASE(tmpID, CoTaskMemFree(tmpID));
     SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
     return hr;
@@ -732,10 +780,13 @@ static int thread_init(struct ao *ao)
     EXIT_ON_ERROR(hr)
 
     if (!state->opt_device) {
-        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: using default endpoint\n");
         hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(state->pEnumerator,
                                                          eRender, eConsole,
                                                          &state->pDevice);
+
+        char *id = get_device_id(state->pDevice);
+        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: default device ID: %s\n", id);
+        free(id);
     } else {
         int devno = -1;
         char *devid = NULL;
@@ -754,6 +805,10 @@ static int thread_init(struct ao *ao)
         hr = find_and_load_device(state, devno, devid);
     }
     EXIT_ON_ERROR(hr)
+
+    char *name = get_device_name(state->pDevice);
+    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: device loaded: %s\n", name);
+    free(name);
 
     hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
                                      CLSCTX_ALL, NULL, (void **)&state->pAudioClient);
