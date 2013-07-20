@@ -154,8 +154,17 @@ static bool egl_create_context(struct vo_wayland_state *wl,
                                         egl_ctx->egl.conf,
                                         EGL_NO_CONTEXT,
                                         context_attribs);
-    if (!egl_ctx->egl.ctx)
-        return false;
+    if (!egl_ctx->egl.ctx) {
+        /* fallback to any GL version */
+        context_attribs[0] = EGL_NONE;
+        egl_ctx->egl.ctx = eglCreateContext(egl_ctx->egl.dpy,
+                                            egl_ctx->egl.conf,
+                                            EGL_NO_CONTEXT,
+                                            context_attribs);
+
+        if (!egl_ctx->egl.ctx)
+            return false;
+    }
 
     eglMakeCurrent(egl_ctx->egl.dpy, NULL, NULL, egl_ctx->egl.ctx);
 
