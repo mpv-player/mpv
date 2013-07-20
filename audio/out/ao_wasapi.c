@@ -413,6 +413,11 @@ static int try_passthrough(struct wasapi_state *state,
     union WAVEFMT u;
     u.extensible = &wformat;
 
+    EnterCriticalSection(&state->print_lock);
+    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: trying passthrough for %s...\n",
+        af_fmt2str_short(ao->format));
+    LeaveCriticalSection(&state->print_lock);
+
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 state->share_mode,
                                                 u.ex, NULL);
