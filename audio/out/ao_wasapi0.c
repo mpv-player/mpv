@@ -382,6 +382,8 @@ static int try_mix_format(struct wasapi0_state *state,
 
     ret = try_format(state, ao, wformat.Format.wBitsPerSample,
                      wformat.Format.nSamplesPerSec, ao->channels);
+    if (ret)
+        state->format = wformat;
 
 exit_label:
     SAFE_RELEASE(deviceFormat, CoTaskMemFree(deviceFormat));
