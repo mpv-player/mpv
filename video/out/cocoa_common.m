@@ -52,9 +52,10 @@
 @end
 
 @interface GLMPlayerOpenGLView : NSView
+@property(nonatomic, retain) NSTrackingArea *tracker;
 @property(nonatomic, assign) struct vo *videoOutput;
+- (BOOL)containsMouseLocation;
 - (void)recalcDraggableState;
-- (BOOL)containsCurrentMouseLocation;
 - (void)mouseEvent:(NSEvent *)theEvent;
 @property(nonatomic, assign, getter=hasMouseDown) BOOL mouseDown;
 @end
@@ -162,13 +163,9 @@ static void vo_cocoa_set_cursor_visibility(struct vo *vo, bool visible)
     struct vo_cocoa_state *s = vo->cocoa;
 
     if (visible) {
-        // show cursor unconditionally
         CGDisplayShowCursor(kCGDirectMainDisplay);
-    } else if (vo->opts->fullscreen &&
-               [s->view containsCurrentMouseLocation] &&
-               ![s->view hasMouseDown]) {
-        // only hide cursor if in fullscreen and the video view contains the
-        // mouse location
+    } else if (vo->opts->fullscreen && ![s->view hasMouseDown] &&
+               [s->view containsMouseLocation]) {
         CGDisplayHideCursor(kCGDirectMainDisplay);
     }
 }
@@ -322,7 +319,6 @@ static void create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
     [s->window setRestorable:NO];
     [s->window setContentView:s->view];
     [s->view release];
-    [s->window setAcceptsMouseMovedEvents:YES];
     [s->glContext setView:s->view];
     s->window.videoOutput = vo;
     s->view.videoOutput   = vo;
@@ -798,14 +794,35 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         [self setContentSize:ns];
     }
 }
+
 @end
 
 @implementation GLMPlayerOpenGLView
+@synthesize tracker = _tracker;
 @synthesize videoOutput = _video_output;
 @synthesize mouseDown = _mouse_down;
-- (BOOL)acceptsFirstResponder { return YES; }
-- (BOOL)becomeFirstResponder { return YES; }
-- (BOOL)resignFirstResponder { return YES; }
+// mpv uses flipped coordinates, because X11 uses those. So let's just use them
+// as well without having to do any coordinate conversion of mouse positions.
+- (BOOL) isFlipped { return YES; }
+
+- (id)initWithFrame:(NSRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        NSTrackingAreaOptions trackingOptions =
+            NSTrackingEnabledDuringMouseDrag |
+            NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved |
+            NSTrackingActiveInActiveApp;
+
+        self.tracker =
+            [[[NSTrackingArea alloc] initWithRect:[self bounds]
+                                          options:trackingOptions
+                                            owner:self
+                                         userInfo:nil] autorelease];
+
+        [self addTrackingArea:self.tracker];
+    }
+
+    return self;
+}
 
 - (NSPoint)mouseLocation
 {
@@ -813,23 +830,20 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     return [self convertPoint:wLoc fromView:nil];
 }
 
-- (NSPoint)mouseLocationUpperLeft
+- (BOOL)containsMouseLocation
 {
-    NSPoint loc = [self mouseLocation];
-    loc.y = - loc.y + [self bounds].size.height;
-    return loc;
-}
-
-- (BOOL)containsCurrentMouseLocation
-{
-    NSRect vF   = [[self.window screen] visibleFrame];
-    NSRect vFR  = [self.window convertRectFromScreen:vF];
-    NSRect vFRV = [self convertRect:vFR fromView:nil];
+    NSRect vF  = [[self.window screen] visibleFrame];
+    NSRect vFW = [self.window convertRectFromScreen:vF];
+    NSRect vFV = [self convertRect:vFW fromView:nil];
 
     // clip bounds to current visibleFrame
-    NSRect clippedBounds = CGRectIntersection([self bounds], vFRV);
+    NSRect clippedBounds = CGRectIntersection([self bounds], vFV);
     return CGRectContainsPoint(clippedBounds, [self mouseLocation]);
 }
+
+- (BOOL)acceptsFirstResponder { return YES; }
+- (BOOL)becomeFirstResponder { return YES; }
+- (BOOL)resignFirstResponder { return YES; }
 
 - (void)recalcDraggableState
 {
@@ -837,27 +851,32 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     BOOL movable  = NO;
 
     if (!vo->opts->fullscreen) {
-        NSPoint loc = [self mouseLocationUpperLeft];
+        NSPoint loc = [self mouseLocation];
         movable = !mp_input_test_dragging(vo->input_ctx, loc.x, loc.y);
     }
 
     [self.window setMovableByWindowBackground:movable];
 }
 
+- (void)mouseEntered:(NSEvent *)event
+{
+    // do nothing!
+}
+
+- (void)mouseExited:(NSEvent *)event
+{
+    cocoa_put_key(MP_KEY_MOUSE_LEAVE);
+    vo_cocoa_set_cursor_visibility(self.videoOutput, true);
+}
 
 - (void)signalMouseMovement:(NSEvent *)event
 {
-    if ([self containsCurrentMouseLocation]) {
-        NSPoint loc = [self mouseLocationUpperLeft];
-        vo_mouse_movement(self.videoOutput, loc.x, loc.y);
-        [self recalcDraggableState];
-    } else {
-        cocoa_put_key(MP_KEY_MOUSE_LEAVE);
-    }
+    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+    vo_mouse_movement(self.videoOutput, p.x, p.y);
 }
 
-- (void)mouseMoved:(NSEvent *)evt     { [self signalMouseMovement:evt]; }
-- (void)mouseDragged:(NSEvent *)evt   { [self signalMouseMovement:evt]; }
+- (void)mouseMoved:(NSEvent *)event   { [self signalMouseMovement:event]; }
+- (void)mouseDragged:(NSEvent *)event { [self signalMouseMovement:event]; }
 - (void)mouseDown:(NSEvent *)evt      { [self mouseEvent:evt]; }
 - (void)mouseUp:(NSEvent *)evt        { [self mouseEvent:evt]; }
 - (void)rightMouseDown:(NSEvent *)evt { [self mouseEvent:evt]; }
