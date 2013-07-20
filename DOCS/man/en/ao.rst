@@ -170,7 +170,7 @@ Available audio output drivers are:
         Set the TCP port used for connecting to the server (default: 12345).
         Not used if connecting to a Unix domain socket.
 
-``wasapi0``
+``wasapi``
     Audio output to the Windows Audio Session API.
 
     ``device=<id>``

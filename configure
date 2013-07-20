@@ -364,7 +364,7 @@ Audio output:
   --enable-openal        enable OpenAL audio output [disable]
   --disable-coreaudio    disable CoreAudio audio output [autodetect]
   --disable-dsound       disable DirectSound audio output [autodetect]
-  --disable-wasapi0      disable WASAPI (event mode) audio output [autodetect]
+  --disable-wasapi       disable WASAPI (event mode) audio output [autodetect]
   --disable-select       disable using select() on the audio device [enable]
 
 Localization options:
@@ -424,7 +424,7 @@ _direct3d=auto
 _sdl=no
 _sdl2=no
 _dsound=auto
-_wasapi0=auto
+_wasapi=auto
 _mng=auto
 _jpeg=auto
 _gl=auto
@@ -588,8 +588,8 @@ for ac_option do
   --disable-sdl2)       _sdl2=no        ;;
   --enable-dsound)      _dsound=yes     ;;
   --disable-dsound)     _dsound=no      ;;
-  --enable-wasapi0)      _wasapi0=yes     ;;
-  --disable-wasapi0)     _wasapi0=no      ;;
+  --enable-wasapi)      _wasapi=yes     ;;
+  --disable-wasapi)     _wasapi=no      ;;
   --enable-mng)         _mng=yes        ;;
   --disable-mng)        _mng=no         ;;
   --enable-jpeg)        _jpeg=yes       ;;
@@ -2093,8 +2093,8 @@ fi
 echores "$_dsound"
 
 echocheck "WASAPI"
-if test "$_wasapi0" = auto ; then
-  _wasapi0=no
+if test "$_wasapi" = auto ; then
+  _wasapi=no
 
 cat > $TMPC << EOF
 #define COBJMACROS 1
@@ -2119,19 +2119,19 @@ int main(void) {
 EOF
 
 if cc_check "-lole32"; then
-  _wasapi0="yes"
+  _wasapi="yes"
 fi
 
 fi
-if test "$_wasapi0" = yes ; then
-  def_wasapi0='#define CONFIG_WASAPI0 1'
-  aomodules="wasapi0 $aomodules"
+if test "$_wasapi" = yes ; then
+  def_wasapi='#define CONFIG_WASAPI 1'
+  aomodules="wasapi $aomodules"
   libs_mplayer="$libs_mplayer -lole32"
 else
-  def_wasapi0='#undef CONFIG_WASAPI0'
-  noaomodules="wasapi0 $noaomodules"
+  def_wasapi='#undef CONFIG_WASAPI'
+  noaomodules="wasapi $noaomodules"
 fi
-echores "$_wasapi0"
+echores "$_wasapi"
 
 fi #if win32; then
 
@@ -2992,7 +2992,7 @@ DLOPEN = $_dlopen
 SDL = $_sdl
 SDL2 = $_sdl2
 DSOUND = $_dsound
-WASAPI0 = $_wasapi0
+WASAPI = $_wasapi
 DVBIN = $_dvbin
 DVDREAD = $_dvdread
 GL = $_gl
@@ -3201,7 +3201,7 @@ $def_direct3d
 $def_sdl
 $def_sdl2
 $def_dsound
-$def_wasapi0
+$def_wasapi
 $def_dvb
 $def_dvbin
 $def_gl

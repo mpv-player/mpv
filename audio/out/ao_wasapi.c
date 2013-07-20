@@ -68,7 +68,7 @@ union WAVEFMT {
     WAVEFORMATEXTENSIBLE *extensible;
 };
 
-typedef struct wasapi0_state {
+typedef struct wasapi_state {
     HANDLE threadLoop;
 
     /* Init phase */
@@ -129,9 +129,9 @@ typedef struct wasapi0_state {
         HANDLE (WINAPI *pAvSetMmThreadCharacteristicsW)(LPCWSTR, LPDWORD);
         WINBOOL (WINAPI *pAvRevertMmThreadCharacteristics)(HANDLE);
     } VistaBlob;
-} wasapi0_state;
+} wasapi_state;
 
-static int fill_VistaBlob(wasapi0_state *state)
+static int fill_VistaBlob(wasapi_state *state)
 {
     if (!state)
         return 1;
@@ -285,7 +285,7 @@ static int format_set_bits(int old_format, int bits, int fp) {
     return format;
 }
 
-static int set_ao_format(struct wasapi0_state *state,
+static int set_ao_format(struct wasapi_state *state,
                          struct ao *const ao,
                          WAVEFORMATEXTENSIBLE wformat) {
     // .Data1 == 1 is PCM, .Data1 == 3 is IEEE_FLOAT
@@ -310,7 +310,7 @@ static int set_ao_format(struct wasapi0_state *state,
     return 1;
 }
 
-static int try_format(struct wasapi0_state *state,
+static int try_format(struct wasapi_state *state,
                       struct ao *const ao,
                       int bits, int samplerate,
                       const struct mp_chmap channels)
@@ -366,7 +366,7 @@ static int try_format(struct wasapi0_state *state,
     return 0;
 }
 
-static int try_mix_format(struct wasapi0_state *state,
+static int try_mix_format(struct wasapi_state *state,
                           struct ao *const ao)
 {
     WAVEFORMATEX *deviceFormat = NULL;
@@ -393,7 +393,7 @@ exit_label:
 
 static int find_formats(struct ao *const ao)
 {
-    struct wasapi0_state *state = (struct wasapi0_state *)ao->priv;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
 
     /* See if the format works as-is */
     int bits = af_fmt2bits(ao->format);
@@ -490,7 +490,7 @@ static int find_formats(struct ao *const ao)
     }
 }
 
-static int fix_format(struct wasapi0_state *state)
+static int fix_format(struct wasapi_state *state)
 {
     HRESULT hr;
     double offset = 0.5;
@@ -643,7 +643,7 @@ exit_label:
     return 1;
 }
 
-static HRESULT find_and_load_device(wasapi0_state *state, int devno, char *devid) {
+static HRESULT find_and_load_device(wasapi_state *state, int devno, char *devid) {
     HRESULT hr;
     IMMDeviceCollection *pDevices = NULL;
     IMMDevice *pTempDevice = NULL;
@@ -724,7 +724,7 @@ exit_label:
 
 static int thread_init(struct ao *ao)
 {
-    struct wasapi0_state *state = (struct wasapi0_state *)ao->priv;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     HRESULT hr;
     CoInitialize(NULL);
     hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
@@ -782,14 +782,14 @@ exit_label:
     return -1;
 }
 
-static void thread_pause(wasapi0_state *state)
+static void thread_pause(wasapi_state *state)
 {
     state->is_playing = 0;
     IAudioClient_Stop(state->pAudioClient);
 }
 
 /* force_feed - feed in even if available data is smaller than required buffer, to clear the buffer */
-static void thread_feed(wasapi0_state *state,int force_feed)
+static void thread_feed(wasapi_state *state,int force_feed)
 {
     BYTE *pData;
     int buffer_size;
@@ -837,7 +837,7 @@ exit_label:
     return;
 }
 
-static void thread_play(wasapi0_state *state)
+static void thread_play(wasapi_state *state)
 {
     thread_feed(state, 0);
     state->is_playing = 1;
@@ -845,7 +845,7 @@ static void thread_play(wasapi0_state *state)
     return;
 }
 
-static void thread_reset(wasapi0_state *state)
+static void thread_reset(wasapi_state *state)
 {
     IAudioClient_Stop(state->pAudioClient);
     IAudioClient_Reset(state->pAudioClient);
@@ -854,21 +854,21 @@ static void thread_reset(wasapi0_state *state)
     }
 }
 
-static void thread_getVol(wasapi0_state *state)
+static void thread_getVol(wasapi_state *state)
 {
     IAudioEndpointVolume_GetMasterVolumeLevelScalar(state->pEndpointVolume,
                                                     &state->audio_volume);
     SetEvent(state->hDoneVol);
 }
 
-static void thread_setVol(wasapi0_state *state)
+static void thread_setVol(wasapi_state *state)
 {
     IAudioEndpointVolume_SetMasterVolumeLevelScalar(state->pEndpointVolume,
                                                     state->audio_volume, NULL);
     SetEvent(state->hDoneVol);
 }
 
-static void thread_uninit(wasapi0_state *state)
+static void thread_uninit(wasapi_state *state)
 {
     if (!state->immed) {
         /* feed until empty */
@@ -903,7 +903,7 @@ static unsigned int __stdcall ThreadLoop(void *lpParameter)
     int feedwatch = 0;
     if (!ao || !ao->priv)
         return -1;
-    struct wasapi0_state *state = (struct wasapi0_state *)ao->priv;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     if (thread_init(ao))
         goto exit_label;
 
@@ -958,7 +958,7 @@ exit_label:
 
 static void closehandles(struct ao *ao)
 {
-    struct wasapi0_state *state = (struct wasapi0_state *)ao->priv;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     if (state->init_done)
         CloseHandle(state->init_done);
     if (state->hPlay)
@@ -983,16 +983,16 @@ static int get_space(struct ao *ao)
 {
     if (!ao || !ao->priv)
         return -1;
-    struct wasapi0_state *state = (struct wasapi0_state *)ao->priv;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     return mp_ring_available(state->ringbuff);
 }
 
-static void reset_buffers(struct wasapi0_state *state)
+static void reset_buffers(struct wasapi_state *state)
 {
     mp_ring_reset(state->ringbuff);
 }
 
-static int setup_buffers(struct wasapi0_state *state)
+static int setup_buffers(struct wasapi_state *state)
 {
     state->ringbuff =
         mp_ring_new(state, RING_BUFFER_COUNT * state->buffer_block_size);
@@ -1001,8 +1001,8 @@ static int setup_buffers(struct wasapi0_state *state)
 
 static void uninit(struct ao *ao, bool immed)
 {
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi0: uninit!\n");
-    struct wasapi0_state *state = (struct wasapi0_state *)ao->priv;
+    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: uninit!\n");
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     state->immed = immed;
     SetEvent(state->hUninit);
     /* wait up to 10 seconds */
@@ -1014,36 +1014,36 @@ static void uninit(struct ao *ao, bool immed)
     DeleteCriticalSection(&state->print_lock);
     talloc_free(state);
     ao->priv = NULL;
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi0: uninit END!\n");
+    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: uninit END!\n");
 }
 
-#define OPT_BASE_STRUCT wasapi0_state
-const struct m_sub_options ao_wasapi0_conf = {
+#define OPT_BASE_STRUCT wasapi_state
+const struct m_sub_options ao_wasapi_conf = {
     .opts = (m_option_t[]){
         OPT_FLAG("exclusive", opt_exclusive, 0),
         OPT_FLAG("list", opt_list, 0),
         OPT_STRING("device", opt_device, 0),
         {NULL},
     },
-    .size = sizeof(wasapi0_state),
+    .size = sizeof(wasapi_state),
 };
 
 static int init(struct ao *ao, char *params)
 {
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi0: init!\n");
+    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: init!\n");
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_waveext(&sel);
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         return -1;
-    struct wasapi0_state *state = talloc_zero(ao, struct wasapi0_state);
+    struct wasapi_state *state = talloc_zero(ao, struct wasapi_state);
     if (!state)
         return -1;
     ao->priv = (void *)state;
     fill_VistaBlob(state);
 
     struct m_config *cfg = m_config_simple(state);
-    m_config_register_options(cfg, ao_wasapi0_conf.opts);
-    m_config_parse_suboptions(cfg, "wasapi0", params);
+    m_config_register_options(cfg, ao_wasapi_conf.opts);
+    m_config_parse_suboptions(cfg, "wasapi", params);
 
     if (state->opt_list) {
         enumerate_devices();
@@ -1078,7 +1078,7 @@ static int init(struct ao *ao, char *params)
     state->threadLoop = (HANDLE)CreateThread(NULL, 0, &ThreadLoop, ao, 0, NULL);
     if (!state->threadLoop) {
         /* failed to init thread */
-        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi0: fail to create thread!\n");
+        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: fail to create thread!\n");
         return -1;
     }
     WaitForSingleObject(state->init_done, INFINITE); /* wait on init complete */
@@ -1087,16 +1087,16 @@ static int init(struct ao *ao, char *params)
             mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_init failed!\n");
         }
     } else {
-        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi0: Init Done!\n");
+        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: Init Done!\n");
         if (setup_buffers(state))
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi0: buffer setup failed!\n");
+            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: buffer setup failed!\n");
     }
     return state->init_ret;
 }
 
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
-    struct wasapi0_state *state = (struct wasapi0_state *)ao->priv;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     if (!(state->vol_hw_support & ENDPOINT_HARDWARE_SUPPORT_VOLUME))
         return CONTROL_UNKNOWN;  /* hw does not support volume controls in exclusive mode */
 
@@ -1124,7 +1124,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
 static void audio_resume(struct ao *ao)
 {
-    struct wasapi0_state *state = (struct wasapi0_state *)ao->priv;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     ResetEvent(state->hPause);
     ResetEvent(state->hReset);
     SetEvent(state->hPlay);
@@ -1132,14 +1132,14 @@ static void audio_resume(struct ao *ao)
 
 static void audio_pause(struct ao *ao)
 {
-    struct wasapi0_state *state = (struct wasapi0_state *)ao->priv;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     ResetEvent(state->hPlay);
     SetEvent(state->hPause);
 }
 
 static void reset(struct ao *ao)
 {
-    struct wasapi0_state *state = (struct wasapi0_state *)ao->priv;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     ResetEvent(state->hPlay);
     SetEvent(state->hReset);
     reset_buffers(state);
@@ -1150,7 +1150,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
     int ret = 0;
     if (!ao || !ao->priv)
         return ret;
-    struct wasapi0_state *state = (struct wasapi0_state *)ao->priv;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     if (WaitForSingleObject(state->fatal_error, 0) == WAIT_OBJECT_0) {
         /* something bad happened */
         return ret;
@@ -1170,15 +1170,15 @@ static float get_delay(struct ao *ao)
 {
     if (!ao || !ao->priv)
         return -1.0f;
-    struct wasapi0_state *state = (struct wasapi0_state *)ao->priv;
+    struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     return (float)(RING_BUFFER_COUNT * state->buffer_block_size - get_space(ao)) /
            (float)state->format.Format.nAvgBytesPerSec;
 }
 
-const struct ao_driver audio_out_wasapi0 = {
+const struct ao_driver audio_out_wasapi = {
     .info = &(const struct ao_info) {
         "Windows WASAPI audio output (event mode)",
-        "wasapi0",
+        "wasapi",
         "Jonathan Yong <10walls@gmail.com>",
         ""
     },
