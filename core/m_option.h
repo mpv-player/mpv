@@ -129,14 +129,6 @@ extern const m_option_type_t m_option_type_obj_settings_list;
  */
 extern const m_option_type_t m_option_type_custom_url;
 
-// Extra definition needed for \ref m_option_type_obj_params options.
-typedef struct {
-    // Field descriptions.
-    const struct m_struct_st *desc;
-    // Field separator to use.
-    char separator;
-} m_obj_params_t;
-
 struct m_opt_choice_alternatives {
     char *name;
     int value;
@@ -170,7 +162,6 @@ struct m_sub_options {
 #define CONF_TYPE_AFMT          (&m_option_type_afmt)
 #define CONF_TYPE_OBJ_SETTINGS_LIST (&m_option_type_obj_settings_list)
 #define CONF_TYPE_CUSTOM_URL    (&m_option_type_custom_url)
-#define CONF_TYPE_OBJ_PARAMS    (&m_option_type_obj_params)
 #define CONF_TYPE_TIME          (&m_option_type_time)
 #define CONF_TYPE_CHOICE        (&m_option_type_choice)
 #define CONF_TYPE_INT_PAIR      (&m_option_type_intpair)
