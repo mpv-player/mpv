@@ -648,6 +648,15 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
                           &IID_IMMDeviceEnumerator, (void **)&pEnumerator);
     EXIT_ON_ERROR(hr)
 
+    hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
+                                                     eRender, eConsole,
+                                                     &pDevice);
+    EXIT_ON_ERROR(hr)
+
+    char *defid = get_device_id(pDevice);
+
+    SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
+
     hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
                                                 status, &pDevices);
     EXIT_ON_ERROR(hr)
@@ -665,12 +674,16 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
         char *name = get_device_name(pDevice);
         char *id = get_device_id(pDevice);
 
+        char *mark = "";
+        if (strcmp(id, defid) == 0)
+            mark = " (default)";
+
         if (with_id) {
-            mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: Device #%d: %s, ID: %s\n",
-                i, name, id);
+            mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: Device #%d: %s, ID: %s%s\n",
+                i, name, id, mark);
         } else {
-            mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: %s, ID: %s\n",
-                name, id);
+            mp_msg(MSGT_AO, MSGL_INFO, "ao-wasapi: %s, ID: %s%s\n",
+                name, id, mark);
         }
 
         free(name);
