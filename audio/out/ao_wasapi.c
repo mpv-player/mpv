@@ -427,7 +427,7 @@ static int find_formats(struct ao *const ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
 
-    if (AF_FORMAT_IS_IEC61937(ao->format)) {
+    if (AF_FORMAT_IS_IEC61937(ao->format) || ao->format == AF_FORMAT_MPEG2) {
         if (try_passthrough(state, ao))
             return 0;
 
