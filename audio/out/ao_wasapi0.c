@@ -746,7 +746,7 @@ static int thread_init(struct ao *ao)
 
             if (*end != '\0' || devno < 0) {
                 mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: invalid device number %s!", state->opt_device);
-                goto exit_nolog;
+                goto exit_label;
             }
         }
         hr = find_and_load_device(state, devno, devid);
@@ -775,10 +775,6 @@ static int thread_init(struct ao *ao)
         return state->init_ret;
     }
 exit_label:
-    EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_init failed!\n");
-    LeaveCriticalSection(&state->print_lock);
-exit_nolog:
     state->init_ret = -1;
     SetEvent(state->init_done);
     return -1;
@@ -1084,9 +1080,15 @@ static int init(struct ao *ao, char *params)
         return -1;
     }
     WaitForSingleObject(state->init_done, INFINITE); /* wait on init complete */
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi0: Init Done!\n");
-    if (setup_buffers(state))
-        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi0: buffer setup failed!\n");
+    if (state->init_ret) {
+        if (!ao->probing) {
+            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_init failed!\n");
+        }
+    } else {
+        mp_msg(MSGT_AO, MSGL_V, "ao-wasapi0: Init Done!\n");
+        if (setup_buffers(state))
+            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi0: buffer setup failed!\n");
+    }
     return state->init_ret;
 }
 
