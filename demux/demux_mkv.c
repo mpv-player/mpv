@@ -2044,7 +2044,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
                                            apk_usize);
                 /* Put timestamp only on packets that correspond to original
                  * audio packets in file */
-                dp->pts = (x * apk_usize % w) ? 0 :
+                dp->pts = (x * apk_usize % w) ? MP_NOPTS_VALUE :
                     track->audio_timestamp[x * apk_usize / w];
                 dp->pos = track->audio_filepos; // all equal
                 dp->keyframe = !x;   // Mark first packet as keyframe
@@ -2054,7 +2054,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
     } else { // Not a codec that requires reordering
         dp = new_demux_packet_from(buffer, size);
         if (track->ra_pts == mkv_d->last_pts && !mkv_d->a_skip_to_keyframe)
-            dp->pts = 0;
+            dp->pts = MP_NOPTS_VALUE;
         else
             dp->pts = mkv_d->last_pts;
         track->ra_pts = mkv_d->last_pts;
