@@ -641,7 +641,7 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
     IMMDeviceCollection *pDevices = NULL;
     IMMDevice *pDevice = NULL;
     IPropertyStore *pProps = NULL;
-    LPWSTR idStr = NULL;
+    char *defid = NULL;
 
     CoInitialize(NULL);
     hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
@@ -653,7 +653,7 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
                                                      &pDevice);
     EXIT_ON_ERROR(hr)
 
-    char *defid = get_device_id(pDevice);
+    defid = get_device_id(pDevice);
 
     SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
 
@@ -690,12 +690,13 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
         free(id);
         SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
     }
+    free(defid);
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
     SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
     return hr;
 
 exit_label:
-    CoTaskMemFree(idStr);
+    free(defid);
     SAFE_RELEASE(pProps, IPropertyStore_Release(pProps));
     SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
