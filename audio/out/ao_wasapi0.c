@@ -1049,8 +1049,6 @@ static int init(struct ao *ao, char *params)
 
     if (state->opt_list) {
         enumerate_devices();
-        mp_msg(MSGT_AO, MSGL_WARN, "ao-wasapi: devices listed, cancelling init\n");
-        return -1;
     }
 
     if (state->opt_exclusive) {
