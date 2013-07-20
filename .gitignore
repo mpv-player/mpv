@@ -15,8 +15,8 @@
 /TAGS
 /video/out/gl_video_shaders.h
 /video/out/vdpau_template.c
+/video/out/vo_opengl_shaders.h
 /demux/ebml_defs.c
 /demux/ebml_types.h
 /sub/osd_font.h
 /DOCS/man/*/mpv.1
-
