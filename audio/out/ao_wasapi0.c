@@ -511,8 +511,8 @@ reinit:
     if (hr == AUDCLNT_E_BUFFER_SIZE_NOT_ALIGNED) {
         EnterCriticalSection(&state->print_lock);
         mp_msg(
-            MSGT_AO, MSGL_ERR,
-            "IAudioClient::Initialize negotiation failed with %s, used %lld * 100ns\n",
+            MSGT_AO, MSGL_V,
+            "ao-wasapi: IAudioClient::Initialize negotiation failed with %s, used %lld * 100ns\n",
             explain_err(hr), state->defaultRequestedDuration);
         LeaveCriticalSection(&state->print_lock);
         if (offset > 10.0)
