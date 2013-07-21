@@ -50,9 +50,9 @@ DEFINE_PROPERTYKEY(PKEY_Device_FriendlyName,
 /* 20 millisecond buffer? */
 #define BUFFER_TIME 20000000.0
 #define EXIT_ON_ERROR(hres)  \
-              if (FAILED(hres)) { goto exit_label; }
+              do { if (FAILED(hres)) { goto exit_label; } } while(0)
 #define SAFE_RELEASE(unk, release) \
-              if ((unk) != NULL) { release; (unk) = NULL; }
+              do { if ((unk) != NULL) { release; (unk) = NULL; } } while(0)
 
 /* Supposed to use __uuidof, but it is C++ only, declare our own */
 static const GUID local_KSDATAFORMAT_SUBTYPE_PCM = {
@@ -372,7 +372,7 @@ static int try_mix_format(struct wasapi_state *state,
     int ret = 0;
 
     HRESULT hr = IAudioClient_GetMixFormat(state->pAudioClient, &deviceFormat);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
 
     union WAVEFMT u;
     u.ex = deviceFormat;
@@ -529,18 +529,18 @@ reinit:
                                          NULL, (void **)&state->pAudioClient);
         goto reinit;
     }
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
     hr = IAudioClient_GetService(state->pAudioClient,
                                  &IID_IAudioRenderClient,
                                  (void **)&state->pRenderClient);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
     if (!state->hFeed)
         goto exit_label;
     hr = IAudioClient_SetEventHandle(state->pAudioClient, state->hFeed);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
     hr = IAudioClient_GetBufferSize(state->pAudioClient,
                                     &state->bufferFrameCount);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
     state->buffer_block_size = state->format.Format.nChannels *
                                state->format.Format.wBitsPerSample / 8 *
                                state->bufferFrameCount;
@@ -581,7 +581,7 @@ static char* get_device_id(IMMDevice *pDevice) {
     char *idstr = NULL;
 
     HRESULT hr = IMMDevice_GetId(pDevice, &devid);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
 
     idstr = wstring_to_utf8(devid);
 
@@ -605,13 +605,13 @@ static char* get_device_name(IMMDevice *pDevice) {
     char *namestr = NULL;
 
     HRESULT hr = IMMDevice_OpenPropertyStore(pDevice, STGM_READ, &pProps);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
 
     PROPVARIANT devname;
     PropVariantInit(&devname);
 
     hr = IPropertyStore_GetValue(pProps, &PKEY_Device_FriendlyName, &devname);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
 
     namestr = wstring_to_utf8(devname.pwszVal);
 
@@ -650,12 +650,12 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
 
     hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
                           &IID_IMMDeviceEnumerator, (void **)&pEnumerator);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
 
     hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
                                                      eRender, eConsole,
                                                      &pDevice);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
 
     defid = get_device_id(pDevice);
 
@@ -663,7 +663,7 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
 
     hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
                                                 status, &pDevices);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
 
     int count;
     IMMDeviceCollection_GetCount(pDevices, &count);
@@ -673,7 +673,7 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
 
     for (int i = 0; i < count; i++) {
         hr = IMMDeviceCollection_Item(pDevices, i, &pDevice);
-        EXIT_ON_ERROR(hr)
+        EXIT_ON_ERROR(hr);
 
         char *name = get_device_name(pDevice);
         char *id = get_device_id(pDevice);
@@ -711,9 +711,9 @@ static int enumerate_devices(void) {
     HRESULT hr;
     CoInitialize(NULL);
     hr = enumerate_with_state("Active devices:", DEVICE_STATE_ACTIVE, 1);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
     hr = enumerate_with_state("Unplugged devices:", DEVICE_STATE_UNPLUGGED, 0);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
     CoUninitialize();
     return 0;
 exit_label:
@@ -747,10 +747,10 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, int devno, char *devid
         } else {
             mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: finding device #%d\n", devno);
             hr = IMMDeviceCollection_Item(pDevices, devno, &pTempDevice);
-            EXIT_ON_ERROR(hr)
+            EXIT_ON_ERROR(hr);
 
             hr = IMMDevice_GetId(pTempDevice, &deviceID);
-            EXIT_ON_ERROR(hr)
+            EXIT_ON_ERROR(hr);
 
             mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: found device #%d\n", devno);
         }
@@ -767,11 +767,11 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, int devno, char *devid
 
         for (int i = 0; i < count; i++) {
             hr = IMMDeviceCollection_Item(pDevices, i, &pTempDevice);
-            EXIT_ON_ERROR(hr)
+            EXIT_ON_ERROR(hr);
 
             if (device_id_match(get_device_id(pTempDevice), devid)) {
                 hr = IMMDevice_GetId(pTempDevice, &deviceID);
-                EXIT_ON_ERROR(hr)
+                EXIT_ON_ERROR(hr);
                 break;
             }
 
@@ -783,7 +783,7 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, int devno, char *devid
     }
 
     SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
-    SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices))
+    SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
 
     if (deviceID == NULL) {
         hr = E_NOTFOUND;
@@ -852,7 +852,7 @@ static int thread_init(struct ao *ao)
         IMMDeviceEnumerator *pEnumerator;
         hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
                               &IID_IMMDeviceEnumerator, (void**)&pEnumerator);
-        EXIT_ON_ERROR(hr)
+        EXIT_ON_ERROR(hr);
 
         hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
                                                          eRender, eConsole,
@@ -879,7 +879,7 @@ static int thread_init(struct ao *ao)
         }
         hr = find_and_load_device(&state->pDevice, devno, devid);
     }
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
 
     char *name = get_device_name(state->pDevice);
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: device loaded: %s\n", name);
@@ -887,12 +887,12 @@ static int thread_init(struct ao *ao)
 
     hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioClient,
                                      CLSCTX_ALL, NULL, (void **)&state->pAudioClient);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
 
     hr = IMMDeviceActivator_Activate(state->pDevice, &IID_IAudioEndpointVolume,
                                      CLSCTX_ALL, NULL,
                                      (void **)&state->pEndpointVolume);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
     IAudioEndpointVolume_QueryHardwareSupport(state->pEndpointVolume,
                                               &state->vol_hw_support);
 
@@ -931,7 +931,7 @@ static void thread_feed(wasapi_state *state,int force_feed)
     if (state->share_mode == AUDCLNT_SHAREMODE_SHARED) {
         UINT32 padding = 0;
         hr = IAudioClient_GetCurrentPadding(state->pAudioClient, &padding);
-        EXIT_ON_ERROR(hr)
+        EXIT_ON_ERROR(hr);
 
         frame_count -= padding;
         client_buffer = state->format.Format.nBlockAlign * frame_count;
@@ -939,7 +939,7 @@ static void thread_feed(wasapi_state *state,int force_feed)
 
     hr = IAudioRenderClient_GetBuffer(state->pRenderClient,
                                       frame_count, &pData);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
     buffer_size = mp_ring_buffered(state->ringbuff);
     if(buffer_size > client_buffer) { /* OK to copy! */
         mp_ring_read(state->ringbuff, (unsigned char *)pData,
@@ -953,12 +953,12 @@ static void thread_feed(wasapi_state *state,int force_feed)
         hr = IAudioRenderClient_ReleaseBuffer(state->pRenderClient,
                                               frame_count,
                                               AUDCLNT_BUFFERFLAGS_SILENT);
-        EXIT_ON_ERROR(hr)
+        EXIT_ON_ERROR(hr);
         return;
     }
     hr = IAudioRenderClient_ReleaseBuffer(state->pRenderClient,
                                           frame_count, 0);
-    EXIT_ON_ERROR(hr)
+    EXIT_ON_ERROR(hr);
     return;
 exit_label:
     EnterCriticalSection(&state->print_lock);
