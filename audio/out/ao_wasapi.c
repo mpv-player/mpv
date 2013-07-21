@@ -43,6 +43,9 @@
 DEFINE_PROPERTYKEY(PKEY_Device_FriendlyName,
                    0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
                    0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 14);
+DEFINE_PROPERTYKEY(PKEY_Device_DeviceDesc,
+                   0xa45c254e, 0xdf1c, 0x4efd, 0x80, 0x20,
+                   0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 2);
 #endif
 
 #define RING_BUFFER_COUNT 64
@@ -471,6 +474,7 @@ static int find_formats(struct ao *const ao)
                 }
             }
         }
+
         if (ao->channels.num > 6) {
             /* Maybe this is 5.1 hardware with no support for more. */
             bits = start_bits;
@@ -621,6 +625,31 @@ exit_label:
     return namestr;
 }
 
+static char* get_device_desc(IMMDevice *pDevice) {
+    if (!pDevice) {
+        return NULL;
+    }
+
+    IPropertyStore *pProps = NULL;
+    char *desc = NULL;
+
+    HRESULT hr = IMMDevice_OpenPropertyStore(pDevice, STGM_READ, &pProps);
+    EXIT_ON_ERROR(hr);
+
+    PROPVARIANT devdesc;
+    PropVariantInit(&devdesc);
+
+    hr = IPropertyStore_GetValue(pProps, &PKEY_Device_DeviceDesc, &devdesc);
+    EXIT_ON_ERROR(hr);
+
+    desc = wstring_to_utf8(devdesc.pwszVal);
+
+exit_label:
+    PropVariantClear(&devdesc);
+    SAFE_RELEASE(pProps, IPropertyStore_Release(pProps));
+    return desc;
+}
+
 // frees *idstr
 static int device_id_match(char *idstr, char *candidate) {
     if (idstr == NULL || candidate == NULL)
@@ -710,6 +739,7 @@ exit_label:
 static int enumerate_devices(void) {
     HRESULT hr;
     CoInitialize(NULL);
+
     hr = enumerate_with_state("Active devices:", DEVICE_STATE_ACTIVE, 1);
     EXIT_ON_ERROR(hr);
     hr = enumerate_with_state("Unplugged devices:", DEVICE_STATE_UNPLUGGED, 0);
@@ -723,16 +753,26 @@ exit_label:
     return 1;
 }
 
-static HRESULT find_and_load_device(IMMDevice **ppDevice, int devno, char *devid) {
+static HRESULT find_and_load_device(IMMDevice **ppDevice, char *search) {
     HRESULT hr;
     IMMDeviceEnumerator *pEnumerator = NULL;
     IMMDeviceCollection *pDevices = NULL;
     IMMDevice *pTempDevice = NULL;
     LPWSTR deviceID = NULL;
 
+    char *end;
+    int devno = (int) strtol(search, &end, 10);
+
+    char *devid = NULL;
+    if (end == search || *end) {
+        devid = search;
+    }
+
     hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
                           &IID_IMMDeviceEnumerator, (void**)&pEnumerator);
     EXIT_ON_ERROR(hr);
+
+    int search_err = 0;
 
     if (devid == NULL) {
         hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
@@ -765,6 +805,8 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, int devno, char *devid
 
         mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: finding device %s\n", devid);
 
+        IMMDevice *prevDevice = NULL;
+
         for (int i = 0; i < count; i++) {
             hr = IMMDeviceCollection_Item(pDevices, i, &pTempDevice);
             EXIT_ON_ERROR(hr);
@@ -774,9 +816,29 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, int devno, char *devid
                 EXIT_ON_ERROR(hr);
                 break;
             }
+            char *desc = get_device_desc(pTempDevice);
+            if (strstr(desc, devid)) {
+                if (deviceID) {
+                    char *name;
+                    if (!search_err) {
+                        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: multiple matching devices found!\n");
+                        name = get_device_name(prevDevice);
+                        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: %s\n", name);
+                        free(name);
+                        search_err = 1;
+                    }
+                    name = get_device_name(pTempDevice);
+                    mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: %s\n", name);
+                    free(name);
+                }
+                hr = IMMDevice_GetId(pTempDevice, &deviceID);
+                prevDevice = pTempDevice;
+            }
+            free(desc);
 
             SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
         }
+
         if (deviceID == NULL) {
             mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: could not find device %s!\n", devid);
         }
@@ -785,7 +847,7 @@ static HRESULT find_and_load_device(IMMDevice **ppDevice, int devno, char *devid
     SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
 
-    if (deviceID == NULL) {
+    if (deviceID == NULL || search_err) {
         hr = E_NOTFOUND;
     } else {
         mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: loading device %S\n", deviceID);
@@ -846,21 +908,7 @@ static int thread_init(struct ao *ao)
         mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: default device ID: %s\n", id);
         free(id);
     } else {
-        int devno = -1;
-        char *devid = NULL;
-
-        if (state->opt_device[0] == '{') { // ID as printed by list
-            devid = state->opt_device;
-        } else { // assume integer
-            char *end;
-            devno = (int) strtol(state->opt_device, &end, 10);
-
-            if (*end != '\0' || devno < 0) {
-                mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: invalid device number %s!", state->opt_device);
-                goto exit_label;
-            }
-        }
-        hr = find_and_load_device(&state->pDevice, devno, devid);
+        hr = find_and_load_device(&state->pDevice, state->opt_device);
     }
     EXIT_ON_ERROR(hr);
 
