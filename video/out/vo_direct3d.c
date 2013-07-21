@@ -289,11 +289,6 @@ static void calc_fs_rect(d3d_priv *priv)
     priv->fs_panscan_rect.right  = src_rect.x1;
     priv->fs_panscan_rect.top    = src_rect.y0;
     priv->fs_panscan_rect.bottom = src_rect.y1;
-
-    mp_msg(MSGT_VO, MSGL_V,
-           "<vo_direct3d>Video rectangle: t: %"PRId32", l: %"PRId32", r: %"PRId32", b:%"PRId32"\n",
-           priv->fs_movie_rect.top,   priv->fs_movie_rect.left,
-           priv->fs_movie_rect.right, priv->fs_movie_rect.bottom);
 }
 
 // Adjust the texture size *width/*height to fit the requirements of the D3D
