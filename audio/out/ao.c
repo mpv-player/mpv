@@ -107,6 +107,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
         .priv_size = ao->priv_size,
         .priv_defaults = ao->priv_defaults,
         .options = ao->options,
+        .hidden = ao->encode,
         .p = ao,
     };
     return true;

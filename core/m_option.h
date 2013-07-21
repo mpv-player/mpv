@@ -110,6 +110,8 @@ struct m_obj_desc {
     // This member is usually set my m_obj_list_find() only.
     // Only works if options is not NULL.
     const char *init_options;
+    // Don't list entries with "help"
+    bool hidden;
 };
 
 // Extra definition needed for \ref m_option_type_obj_settings_list options.

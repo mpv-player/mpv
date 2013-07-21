@@ -115,6 +115,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
         .priv_defaults = vo->priv_defaults,
         .options = vo->options,
         .init_options = vo->init_option_string,
+        .hidden = vo->encode,
         .p = vo,
     };
     return true;

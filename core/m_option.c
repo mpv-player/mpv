@@ -2283,8 +2283,10 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
             struct m_obj_desc desc;
             if (!ol->get_desc(&desc, n))
                 break;
-            mp_msg(MSGT_CFGPARSER, MSGL_INFO, "  %-15s: %s\n",
-                   desc.name, desc.description);
+            if (!desc.hidden) {
+                mp_msg(MSGT_CFGPARSER, MSGL_INFO, "  %-15s: %s\n",
+                       desc.name, desc.description);
+            }
         }
         mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
         return M_OPT_EXIT - 1;
