@@ -209,10 +209,8 @@ void vf_print_filter_chain(int msglevel, struct vf_instance *vf)
     }
 }
 
-struct vf_instance *vf_open_plugin_noerr(struct MPOpts *opts,
-                                         const vf_info_t *const *filter_list,
-                                         vf_instance_t *next, const char *name,
-                                         char **args, int *retcode)
+static struct vf_instance *vf_open(struct MPOpts *opts, vf_instance_t *next,
+                                   const char *name, char **args)
 {
     vf_instance_t *vf;
     int i;
@@ -247,24 +245,11 @@ struct vf_instance *vf_open_plugin_noerr(struct MPOpts *opts,
         args = (char **)args[1];
     else
         args = NULL;
-    *retcode = vf->info->vf_open(vf, (char *)args);
-    if (*retcode > 0)
+    int retcode = vf->info->vf_open(vf, (char *)args);
+    if (retcode > 0)
         return vf;
     talloc_free(vf);
     return NULL;
-}
-
-struct vf_instance *vf_open_plugin(struct MPOpts *opts,
-                                   const vf_info_t *const *filter_list,
-                                   vf_instance_t *next, const char *name,
-                                   char **args)
-{
-    struct vf_instance *vf = vf_open_plugin_noerr(opts, filter_list, next,
-                                                  name, args, &(int){0});
-    if (!vf)
-        mp_tmsg(MSGT_VFILTER, MSGL_ERR, "Couldn't open video filter '%s'.\n",
-                name);
-    return vf;
 }
 
 vf_instance_t *vf_open_filter(struct MPOpts *opts, vf_instance_t *next,
@@ -292,7 +277,7 @@ vf_instance_t *vf_open_filter(struct MPOpts *opts, vf_instance_t *next,
             mp_msg(MSGT_VFILTER, MSGL_INFO, "%s[%s]\n",
                    mp_gtext("Opening video filter: "), name);
     }
-    return vf_open_plugin(opts, filter_list, next, name, args);
+    return vf_open(opts, next, name, args);
 }
 
 /**

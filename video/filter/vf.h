@@ -119,12 +119,6 @@ int vf_filter_frame(struct vf_instance *vf, struct mp_image *img);
 struct mp_image *vf_chain_output_queued_frame(struct vf_instance *vf);
 void vf_chain_seek_reset(struct vf_instance *vf);
 
-vf_instance_t *vf_open_plugin(struct MPOpts *opts,
-        const vf_info_t * const *filter_list, vf_instance_t *next,
-        const char *name, char **args);
-struct vf_instance *vf_open_plugin_noerr(struct MPOpts *opts,
-        const vf_info_t *const *filter_list, vf_instance_t *next,
-        const char *name, char **args, int *retcode);
 vf_instance_t *vf_open_filter(struct MPOpts *opts, vf_instance_t *next,
                               const char *name, char **args);
 vf_instance_t *vf_add_before_vo(vf_instance_t **vf, char *name, char **args);
