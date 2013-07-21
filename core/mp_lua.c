@@ -5,7 +5,7 @@
 #include <lualib.h>
 #include <lauxlib.h>
 
-#include <libavutil/avutil.h>
+#include <libavutil/common.h>
 
 #include "talloc.h"
 
