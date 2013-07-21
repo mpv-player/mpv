@@ -37,7 +37,6 @@
 
 #include "core/mp_msg.h"
 #include "core/m_option.h"
-#include "core/m_struct.h"
 #include "core/av_opts.h"
 
 #include "video/img_format.h"
@@ -326,20 +325,12 @@ static int vf_open(vf_instance_t *vf, char *args)
     return 1;
 }
 
-#undef ST_OFF
-#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+#define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
-    {"graph", ST_OFF(cfg_graph), CONF_TYPE_STRING, CONF_MIN, 1},
-    {"sws_flags", ST_OFF(cfg_sws_flags), CONF_TYPE_INT64},
-    {"o", ST_OFF(cfg_avopts), CONF_TYPE_STRING},
+    OPT_STRING("graph", cfg_graph, M_OPT_MIN, .min = 1),
+    OPT_INT64("sws_flags", cfg_sws_flags, 0),
+    OPT_STRING("o", cfg_avopts, 0),
     {0}
-};
-
-static const m_struct_t vf_opts = {
-    "lavfi",
-    sizeof(struct vf_priv_s),
-    &vf_priv_dflt,
-    vf_opts_fields
 };
 
 const vf_info_t vf_info_lavfi = {
@@ -348,5 +339,7 @@ const vf_info_t vf_info_lavfi = {
     "",
     "",
     vf_open,
-    &vf_opts
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &vf_priv_dflt,
+    .options = vf_opts_fields,
 };

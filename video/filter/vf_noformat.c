@@ -29,10 +29,9 @@
 #include "vf.h"
 
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 static struct vf_priv_s {
-    unsigned int fmt;
+    int fmt;
 } const vf_priv_dflt = {
   IMGFMT_420P
 };
@@ -50,17 +49,10 @@ static int vf_open(vf_instance_t *vf, char *args){
     return 1;
 }
 
-#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+#define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
-  {"fmt", ST_OFF(fmt), CONF_TYPE_IMGFMT, 0,0 ,0, NULL},
-  { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-
-static const m_struct_t vf_opts = {
-  "noformat",
-  sizeof(struct vf_priv_s),
-  &vf_priv_dflt,
-  vf_opts_fields
+    OPT_IMAGEFORMAT("fmt", fmt, 0),
+    {0}
 };
 
 const vf_info_t vf_info_noformat = {
@@ -69,7 +61,9 @@ const vf_info_t vf_info_noformat = {
     "Joey",
     "",
     vf_open,
-    &vf_opts
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &vf_priv_dflt,
+    .options = vf_opts_fields,
 };
 
 //===========================================================================//

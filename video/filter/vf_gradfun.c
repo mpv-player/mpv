@@ -44,7 +44,6 @@
 #include "compat/x86_cpu.h"
 
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 struct vf_priv_s {
     float cfg_thresh;
@@ -393,20 +392,12 @@ static int vf_open(vf_instance_t *vf, char *args)
     return 1;
 }
 
-#undef ST_OFF
-#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+#define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
-    {"strength", ST_OFF(cfg_thresh), CONF_TYPE_FLOAT, M_OPT_RANGE, 0.51, 255, NULL},
-    {"radius", ST_OFF(cfg_radius), CONF_TYPE_INT, M_OPT_RANGE, 4, 32, NULL},
-    {"size", ST_OFF(cfg_size), CONF_TYPE_FLOAT, M_OPT_RANGE, 0.1, 5.0, NULL},
-    { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-
-static const m_struct_t vf_opts = {
-    "gradfun",
-    sizeof(struct vf_priv_s),
-    &vf_priv_dflt,
-    vf_opts_fields
+    OPT_FLOATRANGE("strength", cfg_thresh, 0, 0.51, 255),
+    OPT_INTRANGE("radius", cfg_radius, 0, 4, 32),
+    OPT_FLOATRANGE("size", cfg_size, 0, 0.1, 5.0),
+    {0}
 };
 
 const vf_info_t vf_info_gradfun = {
@@ -415,5 +406,7 @@ const vf_info_t vf_info_gradfun = {
     "Loren Merritt",
     "",
     vf_open,
-    &vf_opts
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &vf_priv_dflt,
+    .options = vf_opts_fields,
 };

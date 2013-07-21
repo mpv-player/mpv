@@ -28,7 +28,7 @@
 
 #include "core/mp_msg.h"
 #include "core/m_option.h"
-#include "core/m_struct.h"
+#include "core/m_config.h"
 
 #include "core/options.h"
 
@@ -115,12 +115,26 @@ static const vf_info_t *const filter_list[] = {
     NULL
 };
 
+static bool get_desc(struct m_obj_desc *dst, int index)
+{
+    if (index >= MP_ARRAY_SIZE(filter_list) - 1)
+        return false;
+    const vf_info_t *vf = filter_list[index];
+    *dst = (struct m_obj_desc) {
+        .name = vf->name,
+        .description = vf->info,
+        .priv_size = vf->priv_size,
+        .priv_defaults = vf->priv_defaults,
+        .options = vf->options,
+        .p = vf,
+    };
+    return true;
+}
+
 // For the vf option
-const m_obj_list_t vf_obj_list = {
-    (void **)filter_list,
-    M_ST_OFF(vf_info_t, name),
-    M_ST_OFF(vf_info_t, info),
-    M_ST_OFF(vf_info_t, opts)
+const struct m_obj_list vf_obj_list = {
+    .get_desc = get_desc,
+    .description = "video filters",
 };
 
 int vf_control(struct vf_instance *vf, int cmd, void *arg)
@@ -212,42 +226,34 @@ void vf_print_filter_chain(int msglevel, struct vf_instance *vf)
 static struct vf_instance *vf_open(struct MPOpts *opts, vf_instance_t *next,
                                    const char *name, char **args)
 {
-    vf_instance_t *vf;
-    int i;
-    for (i = 0;; i++) {
-        if (!filter_list[i]) {
-            mp_tmsg(MSGT_VFILTER, MSGL_ERR,
-                    "Couldn't find video filter '%s'.\n", name);
-            return NULL; // no such filter!
-        }
-        if (!strcmp(filter_list[i]->name, name))
-            break;
+    struct m_obj_desc desc;
+    if (!m_obj_list_find(&desc, &vf_obj_list, bstr0(name))) {
+        mp_tmsg(MSGT_VFILTER, MSGL_ERR,
+                "Couldn't find video filter '%s'.\n", name);
+        return NULL;
     }
-    vf = talloc_zero(NULL, struct vf_instance);
-    vf->opts = opts;
-    vf->info = filter_list[i];
-    vf->next = next;
-    vf->config = vf_next_config;
-    vf->control = vf_next_control;
-    vf->query_format = vf_default_query_format;
-    vf->filter = vf_default_filter;
-    vf->out_pool = talloc_steal(vf, mp_image_pool_new(16));
-    if (vf->info->opts) { // vf_vo get some special argument
-        const m_struct_t *st = vf->info->opts;
-        void *vf_priv = m_struct_alloc(st);
-        int n;
-        for (n = 0; args && args[2 * n]; n++)
-            m_struct_set(st, vf_priv, args[2 * n], bstr0(args[2 * n + 1]));
-        vf->priv = vf_priv;
-        args = NULL;
-    } else // Otherwise we should have the '_oldargs_'
-    if (args && !strcmp(args[0], "_oldargs_"))
-        args = (char **)args[1];
-    else
-        args = NULL;
+    vf_instance_t *vf = talloc_zero(NULL, struct vf_instance);
+    *vf = (vf_instance_t) {
+        .info = desc.p,
+        .opts = opts,
+        .next = next,
+        .config = vf_next_config,
+        .control = vf_next_control,
+        .query_format = vf_default_query_format,
+        .filter = vf_default_filter,
+        .out_pool = talloc_steal(vf, mp_image_pool_new(16)),
+    };
+    struct m_config *config = m_config_from_obj_desc(vf, &desc);
+    void *priv = NULL;
+    if (m_config_initialize_obj(config, &desc, &priv, &args) < 0)
+        goto error;
+    vf->priv = priv;
     int retcode = vf->info->vf_open(vf, (char *)args);
-    if (retcode > 0)
-        return vf;
+    if (retcode < 0)
+        goto error;
+    return vf;
+
+error:
     talloc_free(vf);
     return NULL;
 }
@@ -551,9 +557,6 @@ void vf_uninit_filter(vf_instance_t *vf)
     if (vf->uninit)
         vf->uninit(vf);
     vf_forget_frames(vf);
-    const m_struct_t *st = vf->info->opts;
-    if (st)
-        m_struct_free(st, vf->priv);
     talloc_free(vf);
 }
 

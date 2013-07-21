@@ -41,7 +41,6 @@
 #include "video/memcpy_pic.h"
 
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 static const struct vf_priv_s {
     int opt_top_margin, opt_bottom_margin;
@@ -140,20 +139,11 @@ static int vf_open(vf_instance_t *vf, char *args)
     return 1;
 }
 
-#define ST_OFF(f) M_ST_OFF(struct vf_priv_s, f)
+#define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
-    {"bottom-margin", ST_OFF(opt_bottom_margin),
-     CONF_TYPE_INT, M_OPT_RANGE, 0, 2000},
-    {"top-margin", ST_OFF(opt_top_margin),
-     CONF_TYPE_INT, M_OPT_RANGE, 0, 2000},
-    {0},
-};
-
-static const m_struct_t vf_opts = {
-    "sub",
-    sizeof(struct vf_priv_s),
-    &vf_priv_dflt,
-    vf_opts_fields
+    OPT_INTRANGE("bottom-margin", opt_bottom_margin, 0, 0, 2000),
+    OPT_INTRANGE("top-margin", opt_top_margin, 0, 0, 2000),
+    {0}
 };
 
 const vf_info_t vf_info_sub = {
@@ -162,5 +152,7 @@ const vf_info_t vf_info_sub = {
     "Evgeniy Stepanov",
     "",
     vf_open,
-    &vf_opts
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &vf_priv_dflt,
+    .options = vf_opts_fields,
 };

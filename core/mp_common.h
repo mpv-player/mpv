@@ -36,6 +36,7 @@
 
 #define MPMAX(a, b) ((a) > (b) ? (a) : (b))
 #define MPMIN(a, b) ((a) > (b) ? (b) : (a))
+#define MP_ARRAY_SIZE(s) (sizeof(s) / sizeof((s)[0]))
 
 #define CONTROL_OK 1
 #define CONTROL_TRUE 1

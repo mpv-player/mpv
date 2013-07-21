@@ -34,7 +34,6 @@
 #include "video/memcpy_pic.h"
 
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 static struct vf_priv_s {
     // These four values are a backup of the values parsed from the command line.
@@ -164,25 +163,16 @@ static int vf_open(vf_instance_t *vf, char *args){
     return 1;
 }
 
-#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
-static m_option_t vf_opts_fields[] = {
-  {"w", ST_OFF(cfg_exp_w), CONF_TYPE_INT, 0, 0 ,0, NULL},
-  {"h", ST_OFF(cfg_exp_h), CONF_TYPE_INT, 0, 0 ,0, NULL},
-  {"x", ST_OFF(cfg_exp_x), CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL},
-  {"y", ST_OFF(cfg_exp_y), CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL},
-  {"aspect", ST_OFF(aspect), CONF_TYPE_DOUBLE, M_OPT_MIN, 0, 0, NULL},
-  {"round", ST_OFF(round), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL},
-  { NULL, NULL, 0, 0, 0, 0,  NULL }
+#define OPT_BASE_STRUCT struct vf_priv_s
+static const m_option_t vf_opts_fields[] = {
+    OPT_INT("w", cfg_exp_w, 0),
+    OPT_INT("h", cfg_exp_h, 0),
+    OPT_INT("x", cfg_exp_x, M_OPT_MIN, .min = -1),
+    OPT_INT("y", cfg_exp_y, M_OPT_MIN, .min = -1),
+    OPT_DOUBLE("aspect", aspect, M_OPT_MIN, .min = 0),
+    OPT_INT("round", round, M_OPT_MIN, .min = 1),
+    {0}
 };
-
-static const m_struct_t vf_opts = {
-  "expand",
-  sizeof(struct vf_priv_s),
-  &vf_priv_dflt,
-  vf_opts_fields
-};
-
-
 
 const vf_info_t vf_info_expand = {
     "expanding",
@@ -190,7 +180,9 @@ const vf_info_t vf_info_expand = {
     "A'rpi",
     "",
     vf_open,
-    &vf_opts
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &vf_priv_dflt,
+    .options = vf_opts_fields,
 };
 
 //===========================================================================//

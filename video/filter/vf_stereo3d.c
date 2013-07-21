@@ -30,7 +30,6 @@
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"
-#include "core/m_struct.h"
 #include "core/m_option.h"
 
 #include "libavutil/common.h"
@@ -66,7 +65,7 @@ typedef enum stereo_code {
 } stereo_code;
 
 typedef struct component {
-    stereo_code  fmt;
+    int fmt;
     unsigned int width;
     unsigned int height;
     unsigned int off_left;
@@ -455,21 +454,14 @@ const struct m_opt_choice_alternatives stereo_code_names[] = {
     { NULL, 0}
 };
 
-#undef ST_OFF
-#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+#define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
-  {"in", ST_OFF(in.fmt), CONF_TYPE_CHOICE, .priv = (void *)stereo_code_names},
-  {"out", ST_OFF(out.fmt), CONF_TYPE_CHOICE,  .priv = (void *)stereo_code_names},
-  { NULL, NULL, 0, 0, 0, 0,  NULL }
+    OPT_GENERAL(int, "in", in.fmt, 0, .type = CONF_TYPE_CHOICE,
+                .priv = (void *)stereo_code_names),
+    OPT_GENERAL(int, "out", out.fmt, 0, .type = CONF_TYPE_CHOICE,
+                .priv = (void *)stereo_code_names),
+    {0}
 };
-
-static const m_struct_t vf_opts = {
-  "stereo3d",
-  sizeof(struct vf_priv_s),
-  &vf_priv_default,
-  vf_opts_fields
-};
-
 
 //==info struct==//
 const vf_info_t vf_info_stereo3d = {
@@ -478,5 +470,7 @@ const vf_info_t vf_info_stereo3d = {
     "Gordon Schmidt",
     "view stereoscopic videos",
     vf_open,
-    &vf_opts
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &vf_priv_default,
+    .options = vf_opts_fields,
 };

@@ -182,6 +182,49 @@ struct m_config *m_config_simple(void *optstruct)
     return config;
 }
 
+struct m_config *m_config_from_obj_desc(void *talloc_parent,
+                                        struct m_obj_desc *desc)
+{
+    struct m_config *config = m_config_simple(NULL);
+    talloc_steal(talloc_parent, config);
+    if (desc->priv_size) {
+        config->optstruct = talloc_zero_size(config, desc->priv_size);
+        if (desc->priv_defaults)
+            memcpy(config->optstruct, desc->priv_defaults, desc->priv_size);
+        m_config_register_options(config, desc->options);
+    }
+    return config;
+}
+
+int m_config_set_obj_params(struct m_config *conf, char **args)
+{
+    for (int n = 0; args && args[n * 2 + 0]; n++) {
+        int r = m_config_set_option(conf, bstr0(args[n * 2 + 0]),
+                                    bstr0(args[n * 2 + 1]));
+        if (r < 0)
+            return r;
+    }
+    return 0;
+}
+
+int m_config_initialize_obj(struct m_config *config, struct m_obj_desc *desc,
+                            void **ppriv, char ***pargs)
+{
+    if (desc->priv_size) {
+        int r = m_config_set_obj_params(config, *pargs);
+        if (r < 0)
+            return r;
+        *ppriv = config->optstruct;
+        *pargs = NULL;
+    } else if (*pargs && !strcmp((*pargs)[0], "_oldargs_")) {
+        // Handle things which still use the old subopt parser
+        *pargs = (char **)((*pargs)[1]);
+    } else {
+        *pargs = NULL;
+    }
+    return 0;
+}
+
 struct m_config *m_config_new(void *optstruct,
                               int includefunc(struct m_config *conf,
                                               char *filename))
@@ -414,8 +457,14 @@ static void m_config_add_option(struct m_config *config,
 
     // pretend that merge options don't exist (only their children matter)
     if (!is_merge_opt(co->opt)) {
-        co->next = config->opts;
-        config->opts = co;
+        struct m_config_option **last = &config->opts;
+        while (*last)
+            last = &(*last)->next;
+        *last = co;
+        if (!co->alias_owner) { // don't make no- etc. options positional
+            config->num_pos_opts += 1;
+            co->pos = config->num_pos_opts;
+        }
     }
 
     add_negation_option(config, parent, arg);
@@ -425,10 +474,8 @@ int m_config_register_options(struct m_config *config,
                               const struct m_option *args)
 {
     assert(config != NULL);
-    assert(args != NULL);
-
-    add_options(config, NULL, args);
-
+    if (args)
+        add_options(config, NULL, args);
     return 1;
 }
 
@@ -446,6 +493,15 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
                 return co;
         } else if (bstrcmp(coname, name) == 0)
             return co;
+    }
+    return NULL;
+}
+
+const char *m_config_get_positional_option(const struct m_config *config, int n)
+{
+    for (struct m_config_option *co = config->opts; co; co = co->next) {
+        if (co->pos && co->pos - 1 == n)
+            return co->name;
     }
     return NULL;
 }

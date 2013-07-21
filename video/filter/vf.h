@@ -36,8 +36,10 @@ typedef struct vf_info {
     const char *author;
     const char *comment;
     int (*vf_open)(struct vf_instance *vf, char *args);
-    // Ptr to a struct describing the options
-    const void *opts;
+    void *damn_you;
+    int priv_size;
+    const void *priv_defaults;
+    const struct m_option *options;
 } vf_info_t;
 
 struct vf_format {

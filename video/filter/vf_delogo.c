@@ -36,14 +36,13 @@
 #include "video/memcpy_pic.h"
 
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 //===========================================================================//
 
 static struct vf_priv_s {
     unsigned int outfmt;
     int xoff, yoff, lw, lh, band, show;
-    const char *file;
+    char *file;
     struct timed_rectangle {
         int ts, x, y, w, h, b;
     } *timed_rect;
@@ -304,23 +303,16 @@ static int vf_open(vf_instance_t *vf, char *args){
     return 1;
 }
 
-#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+#define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
-    { "x", ST_OFF(xoff), CONF_TYPE_INT, 0, 0, 0, NULL },
-    { "y", ST_OFF(yoff), CONF_TYPE_INT, 0, 0, 0, NULL },
-    { "w", ST_OFF(lw), CONF_TYPE_INT, 0, 0, 0, NULL },
-    { "h", ST_OFF(lh), CONF_TYPE_INT, 0, 0, 0, NULL },
-    { "t", ST_OFF(band), CONF_TYPE_INT, 0, 0, 0, NULL },
-    { "band", ST_OFF(band), CONF_TYPE_INT, 0, 0, 0, NULL }, // alias
-    { "file", ST_OFF(file), CONF_TYPE_STRING, 0, 0, 0, NULL },
-    { NULL, NULL, 0, 0, 0, 0, NULL }
-};
-
-static const m_struct_t vf_opts = {
-    "delogo",
-    sizeof(struct vf_priv_s),
-    &vf_priv_dflt,
-    vf_opts_fields
+    OPT_INT("x", xoff, 0),
+    OPT_INT("y", yoff, 0),
+    OPT_INT("w", lw, 0),
+    OPT_INT("h", lh, 0),
+    OPT_INT("t", band, 0),
+    OPT_INT("band", band, 0), // alias
+    OPT_STRING("file", file, 0),
+    {0}
 };
 
 const vf_info_t vf_info_delogo = {
@@ -329,7 +321,9 @@ const vf_info_t vf_info_delogo = {
     "Jindrich Makovicka, Alex Beregszaszi",
     "",
     vf_open,
-    &vf_opts
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &vf_priv_dflt,
+    .options = vf_opts_fields,
 };
 
 //===========================================================================//

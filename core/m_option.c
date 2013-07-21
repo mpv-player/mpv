@@ -38,6 +38,7 @@
 #include "talloc.h"
 #include "core/mp_common.h"
 #include "core/m_option.h"
+#include "core/m_config.h"
 #include "core/mp_msg.h"
 
 char *m_option_strerror(int code)
@@ -1780,20 +1781,16 @@ const m_option_type_t m_option_type_rel_time = {
 #undef VAL
 #define VAL(x) (*(m_obj_settings_t **)(x))
 
-static int find_obj_desc(struct bstr name, const m_obj_list_t *l,
-                         const m_struct_t **ret)
+bool m_obj_list_find(struct m_obj_desc *dst, const struct m_obj_list *l,
+                     bstr name)
 {
-    int i;
-    char *n;
-
-    for (i = 0; l->list[i]; i++) {
-        n = M_ST_MB(char *, l->list[i], l->name_off);
-        if (!bstrcmp0(name, n)) {
-            *ret = M_ST_MB(m_struct_t *, l->list[i], l->desc_off);
-            return 1;
-        }
+    for (int i = 0; ; i++) {
+        if (!l->get_desc(dst, i))
+            break;
+        if (bstr_equals0(name, dst->name))
+            return true;
     }
-    return 0;
+    return false;
 }
 
 static void obj_setting_free(m_obj_settings_t *item)
@@ -1944,25 +1941,24 @@ static void copy_obj_settings_list(const m_option_t *opt, void *dst,
 // Consider -vf a=b=c:d=e. This verifies "b"="c" and "d"="e" and that the
 // option names/values are correct. Try to determine whether an option
 // without '=' sets a flag, or whether it's a positional argument.
-static int get_obj_param(bstr opt_name, bstr obj_name, const m_struct_t *desc,
-                         bstr name, bstr val, int *nold, int oldmax,
+static int get_obj_param(bstr opt_name, bstr obj_name, struct m_config *config,
+                         bstr name, bstr val, int *nold,
                          bstr *out_name, bstr *out_val)
 {
-    const m_option_t *opt = m_option_list_findb(desc->fields, name);
     int r;
 
     // va.start != NULL => of the form name=val (not positional)
     // If it's just "name", and the associated option exists and is a flag,
     // don't accept it as positional argument.
-    if (val.start || (opt && m_option_required_params(opt) == 0)) {
-        if (!opt) {
-            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                   "Option %.*s: %.*s doesn't have a %.*s parameter.\n",
-                   BSTR_P(opt_name), BSTR_P(obj_name), BSTR_P(name));
-            return M_OPT_UNKNOWN;
-        }
-        r = m_option_parse(opt, name, val, NULL);
+    if (val.start || m_config_option_requires_param(config, name) == 0) {
+        r = m_config_set_option(config, name, val);
         if (r < 0) {
+            if (r == M_OPT_UNKNOWN) {
+                mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+                       "Option %.*s: %.*s doesn't have a %.*s parameter.\n",
+                       BSTR_P(opt_name), BSTR_P(obj_name), BSTR_P(name));
+                return M_OPT_UNKNOWN;
+            }
             if (r > M_OPT_EXIT)
                 mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: "
                        "Error while parsing %.*s parameter %.*s (%.*s)\n",
@@ -1980,22 +1976,22 @@ static int get_obj_param(bstr opt_name, bstr obj_name, const m_struct_t *desc,
             (*nold)++;
             return 0;
         }
-        if ((*nold) >= oldmax) {
-            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: %.*s has only %d params, so you can't give more than %d unnamed params.\n",
-                   BSTR_P(opt_name), BSTR_P(obj_name), oldmax, oldmax);
+        const char *opt = m_config_get_positional_option(config, *nold);
+        if (!opt) {
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: %.*s has only %d "
+                   "params, so you can't give more than %d unnamed params.\n",
+                   BSTR_P(opt_name), BSTR_P(obj_name), *nold, *nold);
             return M_OPT_OUT_OF_RANGE;
         }
-        opt = &desc->fields[(*nold)];
-        r = m_option_parse(opt, bstr0(opt->name), val, NULL);
+        r = m_config_set_option(config, bstr0(opt), val);
         if (r < 0) {
             if (r > M_OPT_EXIT)
                 mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: "
                        "Error while parsing %.*s parameter %s (%.*s)\n",
-                       BSTR_P(opt_name), BSTR_P(obj_name), opt->name,
-                       BSTR_P(val));
+                       BSTR_P(opt_name), BSTR_P(obj_name), opt, BSTR_P(val));
             return r;
         }
-        *out_name = bstr0(opt->name);
+        *out_name = bstr0(opt);
         *out_val = val;
         (*nold)++;
         return 1;
@@ -2006,16 +2002,15 @@ static int get_obj_param(bstr opt_name, bstr obj_name, const m_struct_t *desc,
 // linear array in *_ret. In particular, desc contains what options a the
 // object takes, and verifies the option values as well.
 static int get_obj_params(struct bstr opt_name, struct bstr name,
-                          struct bstr *pstr, const m_struct_t *desc,
+                          struct bstr *pstr, struct m_obj_desc *desc,
                           char ***ret)
 {
-    int n = 0, nold = 0, nopts;
+    int nold = 0;
     char **args = NULL;
     int num_args = 0;
     int r = 1;
 
-    for (nopts = 0; desc->fields[nopts].name; nopts++)
-        /* NOP */;
+    struct m_config *config = m_config_from_obj_desc(NULL, desc);
 
     while (pstr->len > 0) {
         bstr fname, fval;
@@ -2024,7 +2019,7 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
             goto exit;
         if (bstr_equals0(fname, "help"))
             goto print_help;
-        r = get_obj_param(opt_name, name, desc, fname, fval, &nold, nopts,
+        r = get_obj_param(opt_name, name, config, fname, fval, &nold,
                           &fname, &fval);
         if (r < 0)
             goto exit;
@@ -2049,36 +2044,15 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
         }
     }
 
-exit:
-    return r;
+    goto exit;
 
 print_help: ;
-    char min[50], max[50];
-    if (!desc->fields) {
-        mp_msg(MSGT_CFGPARSER, MSGL_INFO,
-                "%.*s doesn't have any options.\n\n", BSTR_P(name));
-        return M_OPT_EXIT - 1;
-    }
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO,
-            "\n Name                 Type            Min        Max\n\n");
-    for (n = 0; desc->fields[n].name; n++) {
-        const m_option_t *opt = &desc->fields[n];
-        if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
-            continue;
-        if (opt->flags & M_OPT_MIN)
-            sprintf(min, "%-8.0f", opt->min);
-        else
-            strcpy(min, "No");
-        if (opt->flags & M_OPT_MAX)
-            sprintf(max, "%-8.0f", opt->max);
-        else
-            strcpy(max, "No");
-        mp_msg(MSGT_CFGPARSER, MSGL_INFO,
-                " %-20.20s %-15.15s %-10.10s %-10.10s\n",
-                opt->name, opt->type->name, min, max);
-    }
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
-    return M_OPT_EXIT - 1;
+    m_config_print_option_list(config);
+    r = M_OPT_EXIT - 1;
+
+exit:
+    talloc_free(config);
+    return r;
 }
 
 // Characters which may appear in a filter name
@@ -2086,12 +2060,12 @@ print_help: ;
 
 // Parse one item, e.g. -vf a=b:c:d,e=f:g => parse a=b:c:d into "a" and "b:c:d"
 static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
-                              const m_obj_list_t *list,
+                              const struct m_obj_list *list,
                               m_obj_settings_t **_ret)
 {
     int r;
     char **plist = NULL;
-    const m_struct_t *desc;
+    struct m_obj_desc desc;
     bstr label = {0};
 
     if (bstr_eatstart0(pstr, "@")) {
@@ -2109,14 +2083,14 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
     if (bstr_eatstart0(pstr, "="))
         has_param = true;
 
-    if (!find_obj_desc(str, list, &desc)) {
+    if (!m_obj_list_find(&desc, list, str)) {
         mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: %.*s doesn't exist.\n",
                BSTR_P(opt), BSTR_P(str));
         return M_OPT_INVALID;
     }
 
     if (has_param) {
-        if (!desc) {
+        if (!desc.options) {
             // Should perhaps be parsed as escape-able string. But this is a
             // compatibility path, so it's not worth the trouble.
             int next = bstrcspn(*pstr, ",");
@@ -2133,8 +2107,8 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
                 plist[0] = talloc_strdup(NULL, "_oldargs_");
                 plist[1] = bstrto0(NULL, param);
             }
-        } else if (desc) {
-            r = get_obj_params(opt, str, pstr, desc, _ret ? &plist : NULL);
+        } else {
+            r = get_obj_params(opt, str, pstr, &desc, _ret ? &plist : NULL);
             if (r < 0)
                 return r;
         }
@@ -2210,6 +2184,7 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
     int op = OP_NONE;
     bool *mark_del = NULL;
     int num_items = obj_settings_list_num_items(dst ? VAL(dst) : 0);
+    struct m_obj_list *ol = opt->priv;
 
     assert(opt->priv);
 
@@ -2253,12 +2228,14 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
     }
 
     if (!bstrcmp0(param, "help")) {
-        m_obj_list_t *ol = opt->priv;
-        mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Available video filters:\n");
-        for (int n = 0; ol->list[n]; n++)
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Available %s:\n", ol->description);
+        for (int n = 0; ; n++) {
+            struct m_obj_desc desc;
+            if (!ol->get_desc(&desc, n))
+                break;
             mp_msg(MSGT_CFGPARSER, MSGL_INFO, "  %-15s: %s\n",
-                   M_ST_MB(char *, ol->list[n], ol->name_off),
-                   M_ST_MB(char *, ol->list[n], ol->info_off));
+                   desc.name, desc.description);
+        }
         mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
         return M_OPT_EXIT - 1;
     }
@@ -2279,8 +2256,7 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
         if (op == OP_DEL)
             r = parse_obj_settings_del(name, &param, dst, mark_del);
         if (r == 0) {
-            r = parse_obj_settings(name, &param, opt->priv,
-                                   dst ? &res : NULL);
+            r = parse_obj_settings(name, &param, ol, dst ? &res : NULL);
         }
         if (r < 0)
             return r;

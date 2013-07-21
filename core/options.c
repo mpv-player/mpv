@@ -181,7 +181,7 @@ extern char *dvd_device, *cdrom_device;
 
 extern double mf_fps;
 extern char * mf_type;
-extern const m_obj_list_t vf_obj_list;
+extern const struct m_obj_list vf_obj_list;
 
 static const m_option_t mfopts_conf[]={
     {"fps", &mf_fps, CONF_TYPE_DOUBLE, 0, 0, 0, NULL},
@@ -436,7 +436,7 @@ const m_option_t mp_opts[] = {
 
     {"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
-    OPT_SETTINGSLIST("vf*", vf_settings, 0, (void *) &vf_obj_list),
+    OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
 
     OPT_STRING("ad", audio_decoders, 0),
     OPT_STRING("vd", video_decoders, 0),

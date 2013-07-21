@@ -31,10 +31,13 @@ typedef struct m_profile m_profile_t;
 struct m_option;
 struct m_option_type;
 struct m_sub_options;
+struct m_obj_desc;
 
 // Config option
 struct m_config_option {
     struct m_config_option *next;
+    // For positional parameters
+    int pos;
     // Full name (ie option-subopt).
     char *name;
     // Option description.
@@ -71,6 +74,7 @@ typedef struct m_config {
     /** This contains all options and suboptions.
      */
     struct m_config_option *opts;
+    int num_pos_opts;
     // When options are set (via m_config_set_option or m_config_set_profile),
     // back up the old value (unless it's already backed up). Used for restoring
     // global options when per-file options are set.
@@ -91,6 +95,16 @@ m_config_new(void *optstruct,
              int includefunc(struct m_config *conf, char *filename));
 
 struct m_config *m_config_simple(void *optstruct);
+
+struct m_config *m_config_from_obj_desc(void *talloc_parent,
+                                        struct m_obj_desc *desc);
+
+int m_config_set_obj_params(struct m_config *conf, char **args);
+
+// Initialize an object (VO/VF/...) in one go, including legacy handling.
+// This is pretty specialized, and is just for convenience.
+int m_config_initialize_obj(struct m_config *config, struct m_obj_desc *desc,
+                            void **ppriv, char ***pargs);
 
 // Free a config object.
 void m_config_free(struct m_config *config);
@@ -148,6 +162,10 @@ const struct m_option *m_config_get_option(const struct m_config *config,
 
 struct m_config_option *m_config_get_co(const struct m_config *config,
                                         struct bstr name);
+
+// Return the n-th option by position. n==0 is the first option. If there are
+// less than (n + 1) options, return NULL.
+const char *m_config_get_positional_option(const struct m_config *config, int n);
 
 // Return a hint to the option parser whether a parameter is/may be required.
 // The option may still accept empty/non-empty parameters independent from
