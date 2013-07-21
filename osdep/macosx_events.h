@@ -22,6 +22,7 @@
 #include "core/input/keycodes.h"
 
 void cocoa_put_key(int keycode);
+void cocoa_put_key_with_modifiers(int keycode, int modifiers);
 void cocoa_check_events(void);
 
 void cocoa_init_apple_remote(void);

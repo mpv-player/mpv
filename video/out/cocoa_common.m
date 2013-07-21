@@ -56,13 +56,16 @@
 @property(nonatomic, assign) struct vo *videoOutput;
 - (BOOL)containsMouseLocation;
 - (void)recalcDraggableState;
-- (void)mouseEvent:(NSEvent *)theEvent;
 @property(nonatomic, assign, getter=hasMouseDown) BOOL mouseDown;
 @end
 
 @interface NSScreen (mpvadditions)
 - (BOOL)hasDock;
 - (BOOL)hasMenubar;
+@end
+
+@interface NSEvent (mpvadditions)
+- (int)mpvButtonNumber;
 @end
 
 struct vo_cocoa_state {
@@ -888,73 +891,62 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (void)mouseMoved:(NSEvent *)event   { [self signalMouseMovement:event]; }
 - (void)mouseDragged:(NSEvent *)event { [self signalMouseMovement:event]; }
-- (void)mouseDown:(NSEvent *)evt      { [self mouseEvent:evt]; }
-- (void)mouseUp:(NSEvent *)evt        { [self mouseEvent:evt]; }
-- (void)rightMouseDown:(NSEvent *)evt { [self mouseEvent:evt]; }
-- (void)rightMouseUp:(NSEvent *)evt   { [self mouseEvent:evt]; }
-- (void)otherMouseDown:(NSEvent *)evt { [self mouseEvent:evt]; }
-- (void)otherMouseUp:(NSEvent *)evt   { [self mouseEvent:evt]; }
+- (void)mouseDown:(NSEvent *)evt      { [self mouseDownEvent:evt]; }
+- (void)mouseUp:(NSEvent *)evt        { [self mouseUpEvent:evt]; }
+- (void)rightMouseDown:(NSEvent *)evt { [self mouseDownEvent:evt]; }
+- (void)rightMouseUp:(NSEvent *)evt   { [self mouseUpEvent:evt]; }
+- (void)otherMouseDown:(NSEvent *)evt { [self mouseDownEvent:evt]; }
+- (void)otherMouseUp:(NSEvent *)evt   { [self mouseUpEvent:evt]; }
 
-- (void)scrollWheel:(NSEvent *)theEvent
+- (void)scrollWheel:(NSEvent *)event
 {
     struct vo_cocoa_state *s = self.videoOutput->cocoa;
 
     CGFloat delta;
     // Use the dimention with the most delta as the scrolling one
-    if (FFABS([theEvent deltaY]) > FFABS([theEvent deltaX])) {
-        delta = [theEvent deltaY];
+    if (FFABS([event deltaY]) > FFABS([event deltaX])) {
+        delta = [event deltaY];
     } else {
-        delta = - [theEvent deltaX];
+        delta = - [event deltaX];
     }
 
-    if ([theEvent hasPreciseScrollingDeltas]) {
+    if ([event hasPreciseScrollingDeltas]) {
         s->accumulated_scroll += delta;
         static const CGFloat threshold = 10;
         while (s->accumulated_scroll >= threshold) {
             s->accumulated_scroll -= threshold;
-            cocoa_put_key(MP_MOUSE_BTN3);
+            cocoa_put_key_with_modifiers(MP_MOUSE_BTN3, [event modifierFlags]);
         }
         while (s->accumulated_scroll <= -threshold) {
             s->accumulated_scroll += threshold;
-            cocoa_put_key(MP_MOUSE_BTN4);
+            cocoa_put_key_with_modifiers(MP_MOUSE_BTN4, [event modifierFlags]);
         }
     } else {
         if (delta > 0)
-            cocoa_put_key(MP_MOUSE_BTN3);
+            cocoa_put_key_with_modifiers(MP_MOUSE_BTN3, [event modifierFlags]);
         else
-            cocoa_put_key(MP_MOUSE_BTN4);
+            cocoa_put_key_with_modifiers(MP_MOUSE_BTN4, [event modifierFlags]);
     }
 }
 
-- (void)mouseEvent:(NSEvent *)theEvent
+- (void)mouseDownEvent:(NSEvent *)event
 {
-    if ([theEvent buttonNumber] >= 0 && [theEvent buttonNumber] <= 9) {
-        int buttonNumber = [theEvent buttonNumber];
-        // Fix to mplayer defined button order: left, middle, right
-        if (buttonNumber == 1)  buttonNumber = 2;
-        else if (buttonNumber == 2) buttonNumber = 1;
-        switch ([theEvent type]) {
-            case NSLeftMouseDown:
-            case NSRightMouseDown:
-            case NSOtherMouseDown:
-                cocoa_put_key((MP_MOUSE_BTN0 + buttonNumber) | MP_KEY_STATE_DOWN);
-                self.mouseDown = YES;
-                // Looks like Cocoa doesn't create MouseUp events when we are
-                // doing the second click in a double click. Put in the key_fifo
-                // the key that would be put from the MouseUp handling code.
-                if([theEvent clickCount] == 2) {
-                    cocoa_put_key((MP_MOUSE_BTN0 + buttonNumber) | MP_KEY_STATE_UP);
-                    self.mouseDown = NO;
-                }
-                break;
-            case NSLeftMouseUp:
-            case NSRightMouseUp:
-            case NSOtherMouseUp:
-                cocoa_put_key((MP_MOUSE_BTN0 + buttonNumber) | MP_KEY_STATE_UP);
-                self.mouseDown = NO;
-                break;
-        }
-    }
+    [self putMouseEvent:event withState:MP_KEY_STATE_DOWN];
+
+    if ([event clickCount] > 1)
+        [self putMouseEvent:event withState:MP_KEY_STATE_UP];
+}
+
+- (void)mouseUpEvent:(NSEvent *)event
+{
+    [self putMouseEvent:event withState:MP_KEY_STATE_UP];
+}
+
+- (void)putMouseEvent:(NSEvent *)event withState:(int)state
+{
+    self.mouseDown = (state == MP_KEY_STATE_DOWN);
+    int mp_key = (MP_MOUSE_BTN0 + [event mpvButtonNumber]);
+    cocoa_put_key_with_modifiers(mp_key | state, [event modifierFlags]);
 }
 
 - (void)drawRect: (NSRect)rect
@@ -996,5 +988,17 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 - (BOOL)hasMenubar
 {
     return [self isEqual: [NSScreen screens][0]];
+}
+@end
+
+@implementation NSEvent (mpvadditions)
+- (int)mpvButtonNumber
+{
+    int buttonNumber = [self buttonNumber];
+    switch (buttonNumber) {
+        case 1:  return 2;
+        case 2:  return 1;
+        default: return buttonNumber;
+    }
 }
 @end

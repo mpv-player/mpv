@@ -37,16 +37,14 @@
 #define NSLeftAlternateKeyMask  (0x000020 | NSAlternateKeyMask)
 #define NSRightAlternateKeyMask (0x000040 | NSAlternateKeyMask)
 
-static bool LeftAltPressed(NSEvent *event)
+static bool LeftAltPressed(int mask)
 {
-    return ([event modifierFlags] & NSLeftAlternateKeyMask) ==
-            NSLeftAlternateKeyMask;
+    return (mask & NSLeftAlternateKeyMask) == NSLeftAlternateKeyMask;
 }
 
-static bool RightAltPressed(NSEvent *event)
+static bool RightAltPressed(int mask)
 {
-    return ([event modifierFlags] & NSRightAlternateKeyMask) ==
-            NSRightAlternateKeyMask;
+    return (mask & NSRightAlternateKeyMask) == NSRightAlternateKeyMask;
 }
 
 static const struct mp_keymap keymap[] = {
@@ -174,6 +172,12 @@ void cocoa_put_key(int keycode)
     [mpv_shared_app().iqueue push:keycode];
 }
 
+void cocoa_put_key_with_modifiers(int keycode, int modifiers)
+{
+    keycode |= [mpv_shared_app().eventsResponder mapKeyModifiers:modifiers];
+    cocoa_put_key(keycode);
+}
+
 @implementation EventsResponder {
     CFMachPortRef _mk_tap_port;
     HIDRemote *_remote;
@@ -262,7 +266,7 @@ void cocoa_put_key(int keycode)
 {
     NSString *chars;
 
-    if (RightAltPressed(event))
+    if (RightAltPressed([event modifierFlags]))
         chars = [event characters];
     else
         chars = [event charactersIgnoringModifiers];
@@ -308,19 +312,23 @@ void cocoa_put_key(int keycode)
     [self handleKey:buttonCode withMask:0 andMapping:keymap];
 }
 
-- (int)keyModifierMask:(NSEvent *)event
+- (int)mapKeyModifiers:(int)cocoaModifiers
 {
     int mask = 0;
-    if ([event modifierFlags] & NSShiftKeyMask)
+    if (cocoaModifiers & NSShiftKeyMask)
         mask |= MP_KEY_MODIFIER_SHIFT;
-    if ([event modifierFlags] & NSControlKeyMask)
+    if (cocoaModifiers & NSControlKeyMask)
         mask |= MP_KEY_MODIFIER_CTRL;
-    if (LeftAltPressed(event))
+    if (LeftAltPressed(cocoaModifiers))
         mask |= MP_KEY_MODIFIER_ALT;
-    if ([event modifierFlags] & NSCommandKeyMask)
+    if (cocoaModifiers & NSCommandKeyMask)
         mask |= MP_KEY_MODIFIER_META;
-
     return mask;
+}
+
+- (int)keyModifierMask:(NSEvent *)event
+{
+    return [self mapKeyModifiers:[event modifierFlags]];
 }
 
 -(BOOL)handleKey:(int)key withMask:(int)mask andMapping:(NSDictionary *)mapping
