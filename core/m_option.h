@@ -106,12 +106,23 @@ struct m_obj_desc {
     const struct m_option *options;
     // For free use by the implementer of m_obj_list.get_desc
     const void *p;
+    // If not NULL, options which should be set before applying other options.
+    // This member is usually set my m_obj_list_find() only.
+    // Only works if options is not NULL.
+    const char *init_options;
 };
 
 // Extra definition needed for \ref m_option_type_obj_settings_list options.
 struct m_obj_list {
     bool (*get_desc)(struct m_obj_desc *dst, int index);
     const char *description;
+    // Can be set to a NULL terminated array of aliases
+    const char *aliases[4][5];
+    // Allow a trailing ",", which adds an entry with name=""
+    bool allow_trailer;
+    // Allow unknown entries, for which a dummy entry is inserted, and whose
+    // options are skipped and ignored.
+    bool allow_unknown_entries;
 };
 
 // Find entry by name

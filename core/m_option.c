@@ -1790,6 +1790,27 @@ bool m_obj_list_find(struct m_obj_desc *dst, const struct m_obj_list *l,
         if (bstr_equals0(name, dst->name))
             return true;
     }
+    if (l->aliases) {
+        for (int i = 0; l->aliases[i][0]; i++) {
+            const char *aname = l->aliases[i][0];
+            const char *alias = l->aliases[i][1];
+            const char *opts  = l->aliases[i][2];
+            if (bstr_equals0(name, aname) &&
+                m_obj_list_find(dst, l, bstr0(alias)))
+            {
+                if (opts) {
+                    dst->init_options = opts;
+                } else {
+                    // Assume it's deprecated in this case.
+                    // Also, it's used by the VO code only, so whatever.
+                    mp_msg(MSGT_CFGPARSER, MSGL_WARN,
+                           "VO driver '%s' has been replaced with '%s'!\n",
+                           aname, alias);
+                }
+                return true;
+            }
+        }
+    }
     return false;
 }
 
@@ -1947,6 +1968,9 @@ static int get_obj_param(bstr opt_name, bstr obj_name, struct m_config *config,
 {
     int r;
 
+    if (!config)
+        return 0; // skip
+
     // va.start != NULL => of the form name=val (not positional)
     // If it's just "name", and the associated option exists and is a flag,
     // don't accept it as positional argument.
@@ -2010,6 +2034,12 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
     int num_args = 0;
     int r = 1;
 
+    if (ret) {
+        args = *ret;
+        while (args && args[num_args])
+            num_args++;
+    }
+
     struct m_config *config = m_config_from_obj_desc(NULL, desc);
 
     while (pstr->len > 0) {
@@ -2048,7 +2078,12 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
     goto exit;
 
 print_help: ;
-    m_config_print_option_list(config);
+    if (config) {
+        m_config_print_option_list(config);
+    } else {
+        mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %.*s doesn't exist.\n",
+               BSTR_P(opt_name));
+    }
     r = M_OPT_EXIT - 1;
 
 exit:
@@ -2082,13 +2117,26 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
     int idx = bstrspn(*pstr, NAMECH);
     bstr str = bstr_splice(*pstr, 0, idx);
     *pstr = bstr_cut(*pstr, idx);
-    if (bstr_eatstart0(pstr, "="))
+    // video filters use "=", VOs use ":"
+    if (bstr_eatstart0(pstr, "=") || bstr_eatstart0(pstr, ":"))
         has_param = true;
 
     if (!m_obj_list_find(&desc, list, str)) {
-        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: %.*s doesn't exist.\n",
-               BSTR_P(opt), BSTR_P(str));
-        return M_OPT_INVALID;
+        if (!list->allow_unknown_entries) {
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: %.*s doesn't exist.\n",
+                   BSTR_P(opt), BSTR_P(str));
+            return M_OPT_INVALID;
+        }
+        desc = (struct m_obj_desc){0};
+    }
+
+    if (desc.init_options && desc.options && _ret) {
+        bstr s = bstr0(desc.init_options);
+        r = get_obj_params(opt, str, &s, &desc, &plist);
+        if (r < 0 || s.len > 0) {
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Internal error: preset broken\n");
+            return r;
+        }
     }
 
     if (has_param) {
@@ -2099,7 +2147,7 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
             bstr param = bstr_splice(*pstr, 0, next);
             *pstr = bstr_cut(*pstr, next);
             if (!bstrcmp0(param, "help")) {
-                mp_msg(MSGT_CFGPARSER, MSGL_INFO,
+                mp_msg(MSGT_CFGPARSER, MSGL_WARN,
                        "Option %.*s: %.*s has no option description.\n",
                        BSTR_P(opt), BSTR_P(str));
                 return M_OPT_EXIT - 1;
@@ -2262,9 +2310,21 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
         }
         if (r < 0)
             return r;
-        const char sep[2] = {OPTION_LIST_SEPARATOR, 0};
-        if (param.len > 0 && !bstr_eatstart0(&param, sep))
-            return M_OPT_INVALID;
+        if (param.len > 0) {
+            const char sep[2] = {OPTION_LIST_SEPARATOR, 0};
+            if (!bstr_eatstart0(&param, sep))
+                return M_OPT_INVALID;
+            if (param.len == 0) {
+                if (!ol->allow_trailer)
+                    return M_OPT_INVALID;
+                if (dst) {
+                    m_obj_settings_t item = {
+                        .name = talloc_strdup(NULL, ""),
+                    };
+                    obj_settings_list_insert_at(&res, -1, &item);
+                }
+            }
+        }
     }
 
     if (dst) {
