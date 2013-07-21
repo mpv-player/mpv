@@ -178,7 +178,12 @@ Available audio output drivers are:
         endpoint. Both the number and the ID String are valid; the ID String
         is guaranteed to not change unless the driver is uninstalled.
 
-        To get a list of the valid devices, use the ``list`` suboption.
+        Also supports searching active devices by name. If more than one
+        device matches the name, refuses loading it.
+
+        To get a list of the valid devices, give ``help`` as the id. The
+        list is the same as the ``list`` suboption, but stops the player
+        initialization.
     ``exclusive``
         Requests exclusive, direct hardware access. By definition prevents
         sound playback of any other program until mpv exits.
