@@ -47,7 +47,7 @@ typedef struct mp_vo_opts {
 typedef struct MPOpts {
     char **reset_options;
 
-    char **audio_driver_list;
+    struct m_obj_settings *audio_driver_list;
     int fixed_vo;
     char *mixer_device;
     char *mixer_channel;

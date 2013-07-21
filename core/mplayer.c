@@ -1618,14 +1618,10 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->initialized_flags |= INITIALIZED_AO;
         mp_chmap_remove_useless_channels(&ao_channels,
                                          &opts->audio_output_channels);
-        mpctx->ao = ao_create(opts, mpctx->input);
+        mpctx->ao = ao_init_best(opts, mpctx->input, mpctx->encode_lavc_ctx,
+                                 ao_srate, ao_format, ao_channels);
         struct ao *ao = mpctx->ao;
-        ao->samplerate = ao_srate;
-        ao->format     = ao_format;
-        ao->channels   = ao_channels;
-        ao->encode_lavc_ctx = mpctx->encode_lavc_ctx;
-        ao_init(ao, opts->audio_driver_list);
-        if (!ao->initialized) {
+        if (!ao) {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
                     "Could not open/initialize audio device -> no sound.\n");
             goto init_error;
@@ -4117,7 +4113,7 @@ static void play_current_file(struct MPContext *mpctx)
                                opts->vo.video_driver_list[0].name);
     if (opts->audio_driver_list)
         load_per_output_config(mpctx->mconfig, PROFILE_CFG_AO,
-                               opts->audio_driver_list[0]);
+                               opts->audio_driver_list[0].name);
 
     if (opts->position_resume)
         load_playback_resume(mpctx->mconfig, mpctx->filename);
@@ -4504,11 +4500,6 @@ static bool handle_help_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     int opt_exit = 0;
-    if (opts->audio_driver_list &&
-            strcmp(opts->audio_driver_list[0], "help") == 0) {
-        list_audio_out();
-        opt_exit = 1;
-    }
     if (opts->audio_decoders && strcmp(opts->audio_decoders, "help") == 0) {
         struct mp_decoder_list *list = mp_audio_decoder_list();
         mp_print_decoders(MSGT_CPLAYER, MSGL_INFO, "Audio decoders:", list);
