@@ -854,7 +854,8 @@ static struct track* track_next(struct MPContext *mpctx, enum stream_type type,
             } else {
                 if (seen && !next) {
                     next = cur;
-                } else if (!seen || !track) {
+                }
+                if (!seen || !track) {
                     prev = cur;
                 }
             }
