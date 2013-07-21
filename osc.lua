@@ -1,6 +1,12 @@
+-- osc2.lua
+
 local assdraw = require 'assdraw'
 
-local osc_geo = {
+--
+-- Parameters
+--
+
+local osc_param = {
     -- user-safe
     scale = 1,                              -- scaling of the controller
     vidscale = true,                        -- scale the controller with the video? don't use false, currently causes glitches
@@ -10,7 +16,7 @@ local osc_geo = {
     iAmAProgrammer = false,                 -- start counting stuff at 0
 
     -- not user-safe
-    osc_w = 550,                            -- width, height, corner-radius, padding of the box
+    osc_w = 550,                            -- width, height, corner-radius, padding of the OSC box
     osc_h = 138,
     osc_r = 10,
     osc_p = 15,
@@ -22,72 +28,41 @@ local osc_geo = {
     pos_offsetX, pos_offsetY = 0,0,         -- vertical/horizontal position offset for contents aligned at the borders of the box
 }
 
+local osc_styles = {
+    bigButtons = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnosd-font}",
+    smallButtonsL = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs20\\fnosd-font}",
+    smallButtonsLlabel = "{\\fs17\\fnsans-serif}",
+    smallButtonsR = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs30\\fnosd-font}",
+
+    elementDown = "{\\1c&H999999}",
+    elementDisab = "{\\1a&H88&}",
+    timecodes = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs20\\fnsans-serif}",
+    vidtitle = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs12\\fnsans-serif}",
+    box = "{\\bord1\\1c&H000000\\1a&H64&\\3c&HFFFFFF\\3a&H64&}",
+}
+
 -- internal states, do not touch
 local state = {
     osc_visible = false,
     mouse_down = false,
-    last_mouse_posX,
-    bar_location,
     mouse_down_counter = 0,
-    active_button = nil,                    -- nil = none, 0 = background, 1+ = see elements[]
+    active_element = nil,                    -- nil = none, 0 = background, 1+ = see elements[]
+    active_event_source = nil,
     rightTC_trem = false,
     mp_screen_sizeX,
     mp_screen_sizeY,
     initREQ = false                        -- is a re-init request pending?
 }
 
--- align:  -1 .. +1
--- frame:  size of the containing area
--- obj:    size of the object that should be positioned inside the area
--- margin: min. distance from object to frame (as long as -1 <= align <= +1)
-function get_align(align, frame, obj, margin)
-    return (frame / 2) + (((frame / 2) - margin - (obj / 2)) * align)
+--
+-- Helperfunctions
+--
+
+function scale_value(x0, x1, y0, y1, val)
+    local m = (y1 - y0) / (x1 - x0)
+    local b = y0 - (m * x0)
+    return (m * val) + b
 end
-
-function draw_bar_simple(ass, x, y, w, h)
-    local pos = 0
-    local duration = 0
-    if not (mp.property_get("length") == nil) then
-        duration = tonumber(mp.property_get("length"))
-        pos = tonumber(mp.property_get("percent-pos")) / 100
-    end
-
-    -- thickness of border and gap between border and filling bar
-    local border, gap = 1, 2
-
-    local fill_offset = border + gap
-    local xp = (pos * (w - (2*fill_offset))) + fill_offset
-
-    ass:draw_start()
-    -- the box
-    ass:rect_cw(0, 0, w, h);
-
-    -- the "hole"
-    ass:rect_ccw(border, border, w - border, h - border)
-
-    -- chapter nibbles
-    local chapters = mp.get_chapter_list()
-    for n = 1, #chapters do
-        if chapters[n].time > 0 and chapters[n].time < duration then
-            local s = (chapters[n].time / duration * (w - (2*fill_offset))) + fill_offset
-
-            ass:rect_cw(s - 1, 1, s, 2);
-            ass:rect_cw(s - 1, h - 2, s, h - 1);
-
-        end
-    end
-
-    -- the filling, draw it only if positive
-    if pos > 0 then
-        ass:rect_cw(fill_offset, fill_offset, xp, h - fill_offset)
-    end
-
-    -- remember where the bar is for seeking
-    local b_x, b_y, b_w, b_h = x - (w/2) + fill_offset, y - h + fill_offset, (w - (2*fill_offset)), (h - (2*fill_offset))
-    state.bar_location = {b_x=b_x, b_y=b_y, b_w=b_w, b_h=b_h}
-
-end
-
 
 -- returns hitbox spanning coordinates (top left, bottom right corner) according to alignment
 function get_hitbox_coords(x, y, an, w, h)
@@ -109,131 +84,250 @@ function get_hitbox_coords(x, y, an, w, h)
     return alignments[an]()
 end
 
-function register_element(x, y, an, w, h, styleA, styleB, content, down_cmd, up_cmd, down_repeat)
-    -- x, y         position
-    -- an           alignment (see ASS standard)
-    -- w, h         size of hitbox
-    -- styleA       main style
-    -- styleB       additional styles to be appended on mouse_down
-    -- content      what the element should display, can be a string of a function(ass)
-    -- down_cmd     function to be run when the mouse goes or stays down on the element
-    -- up_cmd       function to be run when the mouse goes up on the element (use this for normal button behaviour)
-    -- down_repeat  boolean, true if the down_cmd function should be run repeatedly with a small delay or false on every render pass
-
-    local element = {
-        x = x,
-        y = y,
-        an = an,
-        w = w,
-        h = h,
-        styleA = styleA,
-        styleB = styleB,
-        content = content,
-        down_cmd = down_cmd,
-        up_cmd = up_cmd,
-        down_repeat = down_repeat,
-    }
-
-    table.insert(elements, element)
+function get_element_hitbox(element)
+    return element.hitbox.x1, element.hitbox.y1, element.hitbox.x2, element.hitbox.y2
 end
 
+function mouse_hit(element)
+    local mX, mY = mp.get_mouse_pos()
+    local bX1, bY1, bX2, bY2 = get_element_hitbox(element)
 
-function render_elements(ass)
+    return (mX >= bX1 and mX <= bX2 and mY >= bY1 and mY <= bY2)
+end
+
+function limit_range(min, max, val)
+    if val > max then
+        val = max
+    elseif val < min then
+        val = min
+    end
+    return val
+end
+
+function get_slider_value(element)
+    local b_x1, b_x2 = element.hitbox.x1, element.hitbox.x2
+    local s_min, s_max = element.metainfo.slider.min, element.metainfo.slider.max
+
+    local pos = scale_value(b_x1, b_x2, s_min, s_max, mp.get_mouse_pos())
+
+    return limit_range(s_min, s_max, pos)
+end
+
+-- align:  -1 .. +1
+-- frame:  size of the containing area
+-- obj:    size of the object that should be positioned inside the area
+-- margin: min. distance from object to frame (as long as -1 <= align <= +1)
+function get_align(align, frame, obj, margin)
+    return (frame / 2) + (((frame / 2) - margin - (obj / 2)) * align)
+end
+
+--
+-- Element Management
+--
+
+-- do not use this function
+function register_element(type, x, y, an, w, h, style, content, eventresponder, metainfo2)
+    -- type             button or slider
+    -- x, y             position
+    -- an               alignment (see ASS standard)
+    -- w, h             size of hitbox
+    -- style            main style
+    -- content          what the element should display, can be a string of a function(ass)
+    -- eventresponder   A table containing functions mapped to events that shall be run on those events
+    -- metainfo         A table containing additional parameters for the element, currently "enabled", "visible", "styledown" (all default to true)
+
+    -- set default metainfo
+    local metainfo = {}
+    if not (metainfo2 == nil) then metainfo = metainfo2 end
+    if metainfo.visible == nil then metainfo.visible = true end         -- element visible at all?
+    if metainfo.enabled == nil then metainfo.enabled = true end         -- element clickable?
+    if metainfo.styledown == nil then metainfo.styledown = true end     -- should the element be styled with the elementDown style when clicked?
+    if metainfo.softrepeat == nil then metainfo.softrepeat = false end   -- should the render event be executed with "hold for repeat" behaviour?
+
+    if metainfo.visible then
+        local ass = assdraw.ass_new()
+
+        ass:append("{}") -- shitty hack to troll the new_event funtion into inserting an \n 
+        ass:new_event()
+        ass:pos(x, y) -- positioning
+        ass:an(an) 
+        ass:append(style) -- styling
+
+        -- Calculate the hitbox
+        local bX1, bY1, bX2, bY2 = get_hitbox_coords(x, y, an, w, h)
+        local hitbox
+        if type == "slider" then
+            -- if it's a slider, cut the border and gap off, as those aren't of interest for eventhandling
+            local fill_offset = metainfo.slider.border + metainfo.slider.gap
+            hitbox = {x1 = bX1 + fill_offset, y1 = bY1 + fill_offset, x2 = bX2 - fill_offset, y2 = bY2 - fill_offset}
+        else
+            hitbox = {x1 = bX1, y1 = bY1, x2 = bX2, y2 = bY2}
+        end
+
+        
+
+        local element = {
+            type = type,
+            elem_ass = ass,
+            hitbox = hitbox,
+            w = w,
+            h = h,
+            content = content,
+            eventresponder = eventresponder,
+            metainfo = metainfo,
+        }
+
+        table.insert(elements, element)
+    end
+end
+
+function register_button(x, y, an, w, h, style, content, eventresponder, metainfo) 
+    register_element("button", x, y, an, w, h, style, content, eventresponder, metainfo)
+end
+
+function register_box(x, y, an, w, h, r, style, metainfo2)
+    local ass = assdraw.ass_new()
+    ass:draw_start()
+    ass:round_rect_cw(0, 0, w, h, r)
+    ass:draw_stop()
+
+    local metainfo = {}
+    if not (metainfo2 == nil) then metainfo = metainfo2 end
+
+    metainfo.styledown = false
+
+    register_element("box", x, y, an, w, h, style, ass, nil, metainfo)
+end
+
+function register_slider(x, y, an, w, h, style, min, max, markerF, posF, eventresponder, metainfo2)
+    local metainfo = {}
+    if not (metainfo2 == nil) then metainfo = metainfo2 end
+    local slider1 = {}
+    if (metainfo.slider == nil) then metainfo.slider = slider1 end
+
+    if min == nil then metainfo.slider.min = 0 else metainfo.slider.min = min end
+    if max == nil then metainfo.slider.max = 100 else metainfo.slider.max = max end
+    metainfo.slider.markerF = markerF
+    metainfo.slider.posF = posF
+
+    -- prepare the box with markers
+    local ass = assdraw.ass_new()
+    local border, gap = metainfo.slider.border, metainfo.slider.gap
+    local fill_offset = border + gap
+
+    ass:draw_start()
+
+    -- the box
+    ass:rect_cw(0, 0, w, h);
+
+    -- the "hole"
+    ass:rect_ccw(border, border, w - border, h - border)
+
+    -- marker nibbles
+    if not (markerF == nil) then
+        local markers = markerF()
+        for n = 1, #markers do
+            if (markers[n] > min) and (markers[n] < max) then
+
+                local coordL, coordR = fill_offset, (w - (2*fill_offset))
+
+                local s = scale_value(min, max, coordL, coordR, markers[n])
+
+                ass:rect_cw(s - 1, border, s, border*2);
+                ass:rect_cw(s - 1, h - border*2, s, h - border); 
+
+            end
+        end
+    end
+
+    register_element("slider", x, y, an, w, h, style, ass, eventresponder, metainfo)
+end
+
+--
+-- Element Rendering
+--
+
+function render_elements(master_ass)
 
     for n = 1, #elements do
 
         local element = elements[n]
-        local style = element.styleA
+        local elem_ass1 = element.elem_ass
+        local elem_ass = assdraw.ass_new()
+        elem_ass:merge(elem_ass1)
 
-        if state.mouse_down == true and state.active_button == n then
-            local mX, mY = mp.get_mouse_pos()
-            local bX1, bY1, bX2, bY2 = get_hitbox_coords(element.x, element.y, element.an, element.w, element.h)
 
-            if mX >= bX1 and mX <= bX2 and mY >= bY1 and mY <= bY2 then
-                if element.styleB == nil then
-                else
-                    style = style .. element.styleB
+        if element.metainfo.enabled == false then
+            elem_ass:append(osc_styles.elementDisab)
+
+        elseif state.active_element == n then
+
+            if mouse_hit(element) then
+                -- mouse down styling
+                if element.metainfo.styledown then
+                    elem_ass:append(osc_styles.elementDown)
                 end
 
-                if element.down_cmd == nil then
-                elseif element.down_repeat == false then
-                    element.down_cmd()
-                elseif state.mouse_down_counter == 0 or (state.mouse_down_counter >= 15 and state.mouse_down_counter % 5 == 0) then
-                    element.down_cmd()
+                -- run render event functions
+                if not (element.eventresponder.render == nil) then
+                    element.eventresponder.render()
+                end
+                
+
+                if (element.metainfo.softrepeat == true) and (state.mouse_down_counter >= 15 and state.mouse_down_counter % 5 == 0) then
+                    element.eventresponder[state.active_event_source .. "_down"]()
                 end
                 state.mouse_down_counter = state.mouse_down_counter + 1
             end
 
         end
 
-        ass:new_event()
-        ass:pos(element.x, element.y) -- positioning
-        ass:an(element.an) 
-        ass:append(style) -- styling
-        if type(element.content) == "function" then
-            element.content(ass) -- function objects
-        else
-            ass:append(element.content) -- text objects
-        end
-    end
-end
+        if element.type == "slider" then
 
--- Did mouse go down on a button?
-function any_button_down()
+            elem_ass:merge(element.content) -- ASS objects
+            -- draw pos marker
 
-    local mX, mY = mp.get_mouse_pos()
-    for n = 1, #elements do
+            local pos = element.metainfo.slider.posF()
 
-        local bX1, bY1, bX2, bY2 = get_hitbox_coords(elements[n].x, elements[n].y, elements[n].an, elements[n].w, elements[n].h)
-
-        if mX >= bX1 and mX <= bX2 and mY >= bY1 and mY <= bY2 then
-            --print("click on button #" .. n .. "   \n")
-            state.active_button = n
-        end
-    end
-
-    -- if state.active_button is still nil, user must have clicked outside the controller -> 0
-    if state.active_button == nil then
-        state.active_button = 0
-    end
-end
-
--- Did mouse go up on the same button?
-function any_button_up()
-    if not (state.active_button == nil) then
-
-        local n = state.active_button
-
-        if n == 0 and not (mouse_over_osc()) then
-            --click on background
-            --hide_osc()
-        elseif n > 0 and not (elements[n].up_cmd == nil) then
-            local bX1, bY1, bX2, bY2 = get_hitbox_coords(elements[n].x, elements[n].y, elements[n].an, elements[n].w, elements[n].h)
-            local mX, mY = mp.get_mouse_pos()
-
-            if mX >= bX1 and mX <= bX2 and mY >= bY1 and mY <= bY2 then
-                --print("up on button #" .. n .. "    \n")
-                elements[n].up_cmd()
+            if pos > element.metainfo.slider.max then
+                pos = element.metainfo.slider.max
             end
+
+            local fill_offset = element.metainfo.slider.border + element.metainfo.slider.gap
+
+            local coordL, coordR = fill_offset, (element.w - (2*fill_offset))
+
+            local xp = scale_value(element.metainfo.slider.min, element.metainfo.slider.max, coordL, coordR, pos)
+
+            -- the filling, draw it only if positive
+
+            if xp > fill_offset then
+                elem_ass:rect_cw(fill_offset, fill_offset, xp, element.h - fill_offset)
+            end
+
+            elem_ass:draw_stop()
+
+        elseif element.type == "box" then
+            elem_ass:merge(element.content) -- ASS objects
+        elseif type(element.content) == "function" then
+            element.content(elem_ass) -- function objects
+        else
+            elem_ass:append(element.content) -- text objects
         end
+
+        master_ass:merge(elem_ass)
     end
-    state.active_button = nil
 end
 
+--
+-- Eventhandling
+--
 
-local osc_styles = {
-    bigButtons = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs50\\fnosd-font}",
-    smallButtonsL = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs20\\fnosd-font}",
-    smallButtonsLlabel = "{\\fs17\\fnsans-serif}",
-    smallButtonsR = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs30\\fnosd-font}",
+-- will eventually be here
 
-    elementDown = "{\\1c&H999999}",
-    elementDisab = "{\\1a&H88&}",
-    timecodes = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs20\\fnsans-serif}",
-    vidtitle = "{\\bord0\\1c&HFFFFFF\\1a&H00&\\3c&HFFFFFF\\3a&HFF&\\fs12\\fnsans-serif}",
-    box = "{\\bord1\\1c&H000000\\1a&H64&\\3c&HFFFFFF\\3a&H64&}",
-}
-
+--
+-- Initialisation and arrangement
+--
 
 -- OSC INIT
 function osc_init()
@@ -244,37 +338,31 @@ function osc_init()
     -- set canvas resolution acording to display aspect and scaleing setting
     local baseResY = 720
     local display_w, display_h, display_aspect = mp.get_screen_size()
-    if osc_geo.vidscale == true then
-        osc_geo.playresy = baseResY / osc_geo.scale
+    if osc_param.vidscale == true then
+        osc_param.playresy = baseResY / osc_param.scale
     else
-        osc_geo.playresy = display_h / osc_geo.scale
+        osc_param.playresy = display_h / osc_param.scale
     end
-    osc_geo.playresx = osc_geo.playresy * display_aspect
+    osc_param.playresx = osc_param.playresy * display_aspect
 
+    -- position of the controller according to video aspect and valignment
+    osc_param.posX = math.floor(get_align(osc_param.halign, osc_param.playresx, osc_param.osc_w, 0))
+    osc_param.posY = math.floor(get_align(osc_param.valign, osc_param.playresy, osc_param.osc_h, 0))
 
     -- Some calculations on stuff we'll need
     -- vertical/horizontal position offset for contents aligned at the borders of the box
-    osc_geo.pos_offsetX, osc_geo.pos_offsetY = (osc_geo.osc_w - (2*osc_geo.osc_p)) / 2, (osc_geo.osc_h - (2*osc_geo.osc_p)) / 2
-
-    -- position of the controller according to video aspect and valignment
-    osc_geo.posX = math.floor(get_align(osc_geo.halign, osc_geo.playresx, osc_geo.osc_w, 0))
-    osc_geo.posY = math.floor(get_align(osc_geo.valign, osc_geo.playresy, osc_geo.osc_h, 0))
+    osc_param.pos_offsetX, osc_param.pos_offsetY = (osc_param.osc_w - (2*osc_param.osc_p)) / 2, (osc_param.osc_h - (2*osc_param.osc_p)) / 2
 
     -- fetch values
-    local osc_w, osc_h, osc_r, osc_p = osc_geo.osc_w, osc_geo.osc_h, osc_geo.osc_r, osc_geo.osc_p
-    local pos_offsetX, pos_offsetY = osc_geo.pos_offsetX, osc_geo.pos_offsetY
-    local posX, posY = osc_geo.posX, osc_geo.posY
+    local osc_w, osc_h, osc_r, osc_p = osc_param.osc_w, osc_param.osc_h, osc_param.osc_r, osc_param.osc_p
+    local pos_offsetX, pos_offsetY = osc_param.pos_offsetX, osc_param.pos_offsetY
+    local posX, posY = osc_param.posX, osc_param.posY
 
     --
     -- Backround box
     --
 
-    local contentF = function (ass)
-        ass:draw_start()
-        ass:round_rect_cw(0, 0, osc_w, osc_h, osc_r)
-        ass:draw_stop()
-    end
-    register_element(posX, posY, 5, osc_w, osc_h, osc_styles.box, nil, contentF, nil, nil, false)
+    register_box(posX, posY, 5, osc_w, osc_h, osc_r, osc_styles.box, nil)
 
     --
     -- Title
@@ -294,13 +382,15 @@ function osc_init()
             ass:append("mpv")
         end
     end
-    local up_cmd = function ()
+
+    local eventresponder = {}
+    eventresponder.mouse_btn0_up = function ()
 
         local title = "${media-title}"
 
         if tonumber(mp.property_get("playlist-count")) > 1 then
             local playlist_pos = tonumber(mp.property_get("playlist-pos"))
-            if not (osc_geo.iAmAProgrammer) then
+            if not (osc_param.iAmAProgrammer) then
                 playlist_pos = playlist_pos + 1
             end
             title = "[" .. playlist_pos .. "/${playlist-count}] " .. title
@@ -308,19 +398,24 @@ function osc_init()
 
         mp.send_command("show_text \"" .. title .. "\"")
     end
-    register_element(posX, posY - pos_offsetY - 10, 8, 496, 12, osc_styles.vidtitle, osc_styles.elementDown, contentF, nil, up_cmd, false)
+    eventresponder.mouse_btn2_up = function () mp.send_command("show_text ${filename}") end
+
+    register_button(posX, posY - pos_offsetY - 10, 8, 496, 12, osc_styles.vidtitle, contentF, eventresponder, nil) 
 
     -- If we have more than one playlist entry, render playlist navigation buttons
-    if tonumber(mp.property_get("playlist-count")) > 1 then
-        -- playlist prev
-        local up_cmd = function () mp.send_command("playlist_prev weak") end
-        register_element(posX - pos_offsetX, posY - pos_offsetY - 10, 7, 12, 12, osc_styles.vidtitle, osc_styles.elementDown, "◀", nil, up_cmd, false)
+    local metainfo = {}
+    metainfo.visible = (tonumber(mp.property_get("playlist-count")) > 1)
+    
+    -- playlist prev
+    local eventresponder = {}
+    eventresponder.mouse_btn0_up = function () mp.send_command("playlist_prev weak") end
+    register_button(posX - pos_offsetX, posY - pos_offsetY - 10, 7, 12, 12, osc_styles.vidtitle, "◀", eventresponder, metainfo)
 
-        -- playlist next
-        local up_cmd = function () mp.send_command("playlist_next weak") end
-        register_element(posX + pos_offsetX, posY - pos_offsetY - 10, 9, 12, 12, osc_styles.vidtitle, osc_styles.elementDown, "▶", nil, up_cmd, false)
-    end
-
+    -- playlist next
+    local eventresponder = {}
+    eventresponder.mouse_btn0_up = function () mp.send_command("playlist_next weak") end
+    register_button(posX + pos_offsetX, posY - pos_offsetY - 10, 9, 12, 12, osc_styles.vidtitle, "▶", eventresponder, metainfo)
+    
     --
     -- Big buttons
     --
@@ -335,36 +430,51 @@ function osc_init()
             ass:append("\238\128\130")
         end
     end
-    local up_cmd = function () mp.send_command("no-osd cycle pause") end
-    register_element(posX, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, contentF, nil, up_cmd, false)
+    local eventresponder = {}
+    eventresponder.mouse_btn0_up = function () mp.send_command("no-osd cycle pause") end
+    register_button(posX, bbposY, 5, 40, 40, osc_styles.bigButtons, contentF, eventresponder, nil)
 
     --skipback
-    local down_cmd = function () mp.send_command("no-osd seek -5 relative keyframes") end
-    register_element(posX-60, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "\238\128\132", down_cmd, nil, true)
+    local metainfo = {}
+    metainfo.softrepeat = true
+
+    local eventresponder = {}
+    eventresponder.mouse_btn0_down = function () mp.send_command("no-osd seek -5 relative keyframes") end
+    eventresponder["shift+mouse_btn0_down"] = function () mp.send_command("no-osd frame_back_step") end
+    eventresponder.mouse_btn2_down = function () mp.send_command("no-osd seek -30 relative keyframes") end
+    register_button(posX-60, bbposY, 5, 40, 40, osc_styles.bigButtons, "\238\128\132", eventresponder, metainfo)
 
     --skipfrwd
-    local down_cmd = function () mp.send_command("no-osd seek 10 relative keyframes") end
-    register_element(posX+60, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "\238\128\133", down_cmd, nil, true)
+    local eventresponder = {}
+    eventresponder.mouse_btn0_down = function () mp.send_command("no-osd seek 10 relative keyframes") end
+    eventresponder["shift+mouse_btn0_down"] = function () mp.send_command("no-osd frame_step") end
+    eventresponder.mouse_btn2_down = function () mp.send_command("no-osd seek 60 relative keyframes") end
+    register_button(posX+60, bbposY, 5, 40, 40, osc_styles.bigButtons, "\238\128\133", eventresponder, metainfo)
 
-    -- do we have chapters?
-    if (#mp.get_chapter_list()) > 0 then
-
-        --prev
-        local up_cmd = function () mp.send_command("add chapter -1") end
-        register_element(posX-120, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "\238\132\132", nil, up_cmd, false)
-
-        --next
-        local up_cmd = function () mp.send_command("add chapter 1") end
-        register_element(posX+120, bbposY, 5, 40, 40, osc_styles.bigButtons, osc_styles.elementDown, "\238\132\133", nil, up_cmd, false)
-
-    else -- if not, render buttons as disabled and don't attach functions
-        --prev
-        register_element(posX-120, bbposY, 5, 40, 40, (osc_styles.bigButtons .. osc_styles.elementDisab), nil, "\238\132\132", nil, nil, false)
-
-        --next
-        register_element(posX+120, bbposY, 5, 40, 40, (osc_styles.bigButtons .. osc_styles.elementDisab), nil, "\238\132\133", nil, nil, false)
-
+    --chapters
+    -- do we have any?
+    local metainfo = {}
+    metainfo.enabled = ((#mp.get_chapter_list()) > 0)
+    
+    --prev
+    local eventresponder = {}
+    eventresponder.mouse_btn0_up = function ()
+        local chaplist = mp.get_chapter_list()
+        local chapter = tonumber(mp.property_get("chapter")) + 1
+        if (tonumber(chaplist[chapter].time) + 3) < tonumber(mp.property_get("time-pos")) then
+            mp.send_command("set chapter ${=chapter}") 
+        else
+            mp.send_command("add chapter -1")
+        end
+        
     end
+    register_button(posX-120, bbposY, 5, 40, 40, osc_styles.bigButtons, "\238\132\132", eventresponder, metainfo)
+
+    --next
+    local eventresponder = {}
+    eventresponder.mouse_btn0_up = function () mp.send_command("add chapter 1") end
+    register_button(posX+120, bbposY, 5, 40, 40, osc_styles.bigButtons, "\238\132\133", eventresponder, metainfo)
+
 
     --
     -- Smaller buttons
@@ -390,7 +500,7 @@ function osc_init()
         if (mp.property_get("audio") == "no") then
             aid = "–"
         else
-            if (osc_geo.iAmAProgrammer) then
+            if (osc_param.iAmAProgrammer) then
                 aid = tonumber(mp.property_get("audio"))
             else
                 aid = tonumber(mp.property_get("audio")) + 1
@@ -398,12 +508,16 @@ function osc_init()
         end
         ass:append("\238\132\134 " .. osc_styles.smallButtonsLlabel .. aid .. "/" .. audiotracks)
     end
-    if audiotracks > 0 then -- do we have any?
-        local up_cmd = function () mp.send_command("add audio") end
-        register_element(posX-pos_offsetX, bbposY, 1, 70, 18, osc_styles.smallButtonsL, osc_styles.elementDown, contentF, nil, up_cmd, false)
-    else
-        register_element(posX-pos_offsetX, bbposY, 1, 70, 18, (osc_styles.smallButtonsL .. osc_styles.elementDisab), nil, contentF, nil, nil, false)
-    end
+
+    -- do we have any?
+    local metainfo = {}
+    metainfo.enabled = (audiotracks > 0)
+
+    local eventresponder = {}
+    eventresponder.mouse_btn0_up = function () mp.send_command("add audio 1") end
+    eventresponder.mouse_btn2_up = function () mp.send_command("add audio -1") end
+    register_button(posX-pos_offsetX, bbposY, 1, 70, 18, osc_styles.smallButtonsL, contentF, eventresponder, metainfo)
+    
 
     --cycle sub tracks
     
@@ -412,7 +526,7 @@ function osc_init()
         if (mp.property_get("sub") == "no") then
             sid = "–"
         else
-            if (osc_geo.iAmAProgrammer) then
+            if (osc_param.iAmAProgrammer) then
                 sid = tonumber(mp.property_get("sub"))
             else
                 sid = tonumber(mp.property_get("sub")) + 1
@@ -420,12 +534,16 @@ function osc_init()
         end
         ass:append("\238\132\135 " .. osc_styles.smallButtonsLlabel .. sid .. "/" .. subtracks)
     end
-    if subtracks > 0 then -- do we have any?
-        local up_cmd = function () mp.send_command("add sub") end
-        register_element(posX-pos_offsetX, bbposY, 7, 70, 18, osc_styles.smallButtonsL, osc_styles.elementDown, contentF, nil, up_cmd, false)
-    else
-        register_element(posX-pos_offsetX, bbposY, 7, 70, 18, (osc_styles.smallButtonsL .. osc_styles.elementDisab), nil, contentF, nil, nil, false)
-    end
+    
+    -- do we have any?
+    local metainfo = {}
+    metainfo.enabled = (subtracks > 0)
+    
+    local eventresponder = {}
+    eventresponder.mouse_btn0_up = function () mp.send_command("add sub 1") end
+    eventresponder.mouse_btn2_up = function () mp.send_command("add sub -1") end
+    register_button(posX-pos_offsetX, bbposY, 7, 70, 18, osc_styles.smallButtonsL, contentF, eventresponder, metainfo)
+
 
 
 
@@ -437,81 +555,80 @@ function osc_init()
             ass:append("\238\132\136")
         end
     end
-    local up_cmd = function () mp.send_command("no-osd cycle fullscreen") end
-    register_element(posX+pos_offsetX, bbposY, 6, 25, 25, osc_styles.smallButtonsR, osc_styles.elementDown, contentF, nil, up_cmd, false)
+    local eventresponder = {}
+    eventresponder.mouse_btn0_up = function () mp.send_command("no-osd cycle fullscreen") end
+    register_button(posX+pos_offsetX, bbposY, 6, 25, 25, osc_styles.smallButtonsR, contentF, eventresponder, nil)
 
 
     --
     -- Seekbar
     --
 
-    local contentF = function (ass)
-        draw_bar_simple(ass, posX, posY+pos_offsetY-30, pos_offsetX*2, 17)
-    end
-
-    local down_cmd = function ()
-        -- Ignore identical seeks
-        if not (state.last_mouse_posX == mp.get_mouse_pos()) then
-            state.last_mouse_posX = mp.get_mouse_pos()
-
-            local b_x, b_w = state.bar_location.b_x, state.bar_location.b_w
-
-            if state.last_mouse_posX >= b_x and state.last_mouse_posX <= b_x + b_w then
-                local time = (state.last_mouse_posX - b_x) / b_w * 100
-
-                mp.send_command(string.format("no-osd seek %f absolute-percent keyframes", time))
-            end
+    local markerF = function ()
+        local duration = 0
+        if not (mp.property_get("length") == nil) then
+            duration = tonumber(mp.property_get("length"))
         end
+
+        local chapters = mp.get_chapter_list()
+        local markers = {}
+        for n = 1, #chapters do
+            markers[n] = (chapters[n].time / duration * 100)
+        end
+        return markers
     end
-    -- do we have a usuable duration?
-    if (not (mp.property_get("length") == nil)) and (tonumber(mp.property_get("length")) > 0) then
-        register_element(posX, posY+pos_offsetY-22, 2, pos_offsetX*2, 17, osc_styles.timecodes, nil, contentF, down_cmd, nil, false)
-    else
-        register_element(posX, posY+pos_offsetY-22, 2, pos_offsetX*2, 17, (osc_styles.timecodes .. osc_styles.elementDisab), nil, contentF, nil, nil, false)
+
+    local posF = function () return tonumber(mp.property_get("percent-pos")) end
+
+    local metainfo = {}
+    metainfo.enabled = (not (mp.property_get("length") == nil)) and (tonumber(mp.property_get("length")) > 0)
+    metainfo.styledown = false
+    metainfo.slider = {}
+    metainfo.slider.border = 1
+    metainfo.slider.gap = 2
+
+    local eventresponder = {}
+    local sliderF = function (element)
+        mp.send_command(string.format("no-osd seek %f absolute-percent keyframes", get_slider_value(element)))
+        
     end
+    eventresponder.mouse_move = sliderF
+    eventresponder.mouse_btn0_down = sliderF
+    register_slider(posX, posY+pos_offsetY-22, 2, pos_offsetX*2, 17, osc_styles.timecodes, 0, 100, markerF, posF, eventresponder, metainfo)
 
     --
     -- Timecodes
     --
 
     -- left (current pos)
+    local metainfo = {}
+    metainfo.styledown = false
     local contentF = function (ass) return ass:append(mp.property_get_string("time-pos")) end
-    register_element(posX - pos_offsetX, posY + pos_offsetY + 5, 1, 110, 20, osc_styles.timecodes, nil, contentF, nil, nil, false)
+    register_button(posX - pos_offsetX, posY + pos_offsetY + 5, 1, 110, 20, osc_styles.timecodes, contentF, nil, metainfo)
 
     -- right (total/remaining time)
     -- do we have a usuable duration?
-    if (not (mp.property_get("length") == nil)) and (tonumber(mp.property_get("length")) > 0) then
-        local contentF = function (ass)
-            if state.rightTC_trem == true then
-                ass:append("-" .. mp.property_get_string("time-remaining"))
-            else
-                ass:append(mp.property_get_string("length"))
-            end
+    local metainfo = {}
+    metainfo.visible = (not (mp.property_get("length") == nil)) and (tonumber(mp.property_get("length")) > 0)
+
+    local contentF = function (ass)
+        if state.rightTC_trem == true then
+            ass:append("-" .. mp.property_get_string("time-remaining"))
+        else
+            ass:append(mp.property_get_string("length"))
         end
-        local up_cmd = function () state.rightTC_trem = not state.rightTC_trem end
+    end
+    local eventresponder = {}
+    eventresponder.mouse_btn0_up = function () state.rightTC_trem = not state.rightTC_trem end
+
+    register_button(posX + pos_offsetX, posY + pos_offsetY + 5, 3, 110, 20, osc_styles.timecodes, contentF, eventresponder, metainfo)
     
-        register_element(posX + pos_offsetX, posY + pos_offsetY + 5, 3, 110, 20, osc_styles.timecodes, osc_styles.elementDown, contentF, nil, up_cmd, false)
-    end
 
 end
 
-
-function draw_osc(ass)
-
-    render_elements(ass)
-
-end
-
-function mouse_over_osc()
-    local mX, mY = mp.get_mouse_pos()
-    local bX1, bY1, bX2, bY2 = get_hitbox_coords(osc_geo.posX, osc_geo.posY, 5, osc_geo.osc_w, osc_geo.osc_h)
-
-    if mX >= bX1 and mX <= bX2 and mY >= bY1 and mY <= bY2 then
-        return true
-    else
-        return false
-    end
-end
+--
+-- Other important stuff
+--
 
 function show_osc()
     --state.last_osd_time = mp.get_timer()
@@ -522,49 +639,16 @@ function hide_osc()
     state.osc_visible = false
 end
 
--- called by input.conf bindings
-function mouse_move()
-    --print "\nI like to move it, move it!\n"
-    show_osc()
-end
-
 function mouse_leave()
     hide_osc()
-end
-
-function mouse_click(down)
-
-    -- Build our own mouse_down/up events
-    if down == true and state.mouse_down == false then
-        mouse_down();
-    elseif down == false and state.mouse_down == true then
-        mouse_up();
-    end
-
-    state.mouse_down = down
-    mp_update()
-end
-
-function mouse_up()
-    --show_osc()
-    state.mouse_down_counter = 0
-    any_button_up()
-    state.last_mouse_posX = nil
-end
-
-function mouse_down()
-    if state.osc_visible then
-        any_button_down()
-    end
 end
 
 function request_init()
     state.initREQ = true
 end
 
-
 -- called by mpv on every frame
-function mp_update()
+function render()
     local current_screen_sizeX, current_screen_sizeY = mp.get_screen_size()
 
     if not (state.mp_screen_sizeX == current_screen_sizeX and state.mp_screen_sizeY == current_screen_sizeY) then
@@ -579,16 +663,17 @@ function mp_update()
     end
 
     local area_y0, area_y1
-    if osc_geo.valign > 0 then
+    if osc_param.valign > 0 then
         -- deadzone above OSC
-        area_y0 = get_align(1 - osc_geo.deadzonedist, osc_geo.posY - (osc_geo.osc_h / 2), 0, 0)
-        area_y1 = osc_geo.playresy
+        area_y0 = get_align(1 - osc_param.deadzonedist, osc_param.posY - (osc_param.osc_h / 2), 0, 0)
+        area_y1 = osc_param.playresy
     else
         -- deadzone below OSC
         area_y0 = 0
-        area_y1 = (osc_geo.posY + (osc_geo.osc_h / 2)) + get_align(-1 + osc_geo.deadzonedist, osc_geo.playresy - (osc_geo.posY + (osc_geo.osc_h / 2)), 0, 0)
+        area_y1 = (osc_param.posY + (osc_param.osc_h / 2))
+         + get_align(-1 + osc_param.deadzonedist, osc_param.playresy - (osc_param.posY + (osc_param.osc_h / 2)), 0, 0)
     end
-    set_mouse_area(0, area_y0, osc_geo.playresx, area_y1)
+    set_mouse_area(0, area_y0, osc_param.playresx, area_y1)
 
     local ass = assdraw.ass_new()
 
@@ -598,7 +683,7 @@ function mp_update()
 
 
     if state.osc_visible then
-        draw_osc(ass)
+        render_elements(ass)
     end
 
 
@@ -629,7 +714,7 @@ function mp_update()
     --else
     --    ass:append("state.active_button: " .. state.active_button)
     --end
-    --ass:append("Rendertime: " .. mp.get_timer() - now .. "   state.append_calls: " .. state.append_calls)
+    --ass:append("Build time: " .. (mp.get_timer() - now)*1000 .." ms")
 
 
 
@@ -648,16 +733,76 @@ function mp_update()
 
     -- make sure there is something in ass so that mp.set_osd_ass won't fail
     --ass:new_event()
-    --ass:append("blah")
+    --ass:append(tonumber(mp.property_get("percent-pos")))
 
     local w, h, aspect = mp.get_screen_size()
-    mp.set_osd_ass(osc_geo.playresy * aspect, osc_geo.playresy, ass.text)
+    mp.set_osd_ass(osc_param.playresy * aspect, osc_param.playresy, ass.text)
+
+end
+
+function process_event(source, what)
+
+    if what == "down" then
+
+        --state.active_element = 0
+        for n = 1, #elements do
+
+            if not (elements[n].eventresponder == nil) then
+                if not (elements[n].eventresponder[source .. "_up"] == nil) or not (elements[n].eventresponder[source .. "_down"] == nil) then
+
+                    if mouse_hit(elements[n]) then
+                        state.active_element = n
+                        state.active_event_source = source
+                        -- fire the down event if the element has one
+                        if not (elements[n].eventresponder[source .. "_" .. what] == nil) then
+                            elements[n].eventresponder[source .. "_" .. what](elements[n])
+                        end
+                    end
+                end
+
+            end
+        end
+
+    elseif what == "up" then
+
+        if not (state.active_element == nil) then
+
+            local n = state.active_element
+
+            if n == 0 then
+                --click on background (does not work)
+            elseif n > 0 and not (elements[n].eventresponder[source .. "_" .. what] == nil) then
+
+                if mouse_hit(elements[n]) then
+                    elements[n].eventresponder[source .. "_" .. what](elements[n])
+                end
+            end
+        end
+        state.active_element = nil
+        state.mouse_down_counter = 0
+
+    elseif source == "mouse_move" then
+        show_osc()
+
+        if not (state.active_element == nil) then
+
+            local n = state.active_element
+
+            if not (elements[n].eventresponder == nil) then
+                if not (elements[n].eventresponder[source] == nil) then
+                    elements[n].eventresponder[source](elements[n])
+                end
+            end
+        end
+
+
+    end
 
 end
 
 function mp_event(name, arg)
     if name == "tick" then
-        mp_update()
+        render()
     elseif name == "start" then
         --print("start new file")
         request_init()
@@ -667,10 +812,16 @@ function mp_event(name, arg)
 end
 
 set_key_bindings {
-    {"mouse_btn0",      function(e) mouse_click(false) end,
-                        function(e) mouse_click(true)  end},
-    {"mouse_move",      mouse_move},
-    {"mouse_leave",     mouse_leave},
-    {"mouse_btn0_dbl",  "ignore"},
+    {"mouse_btn0",              function(e) process_event("mouse_btn0", "up") end,
+                                function(e) process_event("mouse_btn0", "down")  end},
+    {"shift+mouse_btn0",        function(e) process_event("shift+mouse_btn0", "up") end,
+                                function(e) process_event("shift+mouse_btn0", "down")  end},
+    {"mouse_btn2",              function(e) process_event("mouse_btn2", "up") end,
+                                function(e) process_event("mouse_btn2", "down")  end},
+    {"mouse_move",              function(e) process_event("mouse_move", nil) end},
+    {"mouse_leave",             mouse_leave},
+    {"mouse_btn0_dbl",          "ignore"},
+    {"shift+mouse_btn0_dbl",    "ignore"},
+    {"mouse_btn2_dbl",          "ignore"},
 }
 enable_key_bindings()
