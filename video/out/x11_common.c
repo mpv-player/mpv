@@ -687,6 +687,20 @@ static void update_vo_size(struct vo *vo)
     }
 }
 
+static int get_mods(unsigned int state)
+{
+    int modifiers = 0;
+    if (state & ShiftMask)
+        modifiers |= MP_KEY_MODIFIER_SHIFT;
+    if (state & ControlMask)
+        modifiers |= MP_KEY_MODIFIER_CTRL;
+    if (state & Mod1Mask)
+        modifiers |= MP_KEY_MODIFIER_ALT;
+    if (state & Mod4Mask)
+        modifiers |= MP_KEY_MODIFIER_META;
+    return modifiers;
+}
+
 int vo_x11_check_events(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -712,17 +726,9 @@ int vo_x11_check_events(struct vo *vo)
         case KeyPress: {
             char buf[100];
             KeySym keySym = 0;
-            int modifiers = 0;
+            int modifiers = get_mods(Event.xkey.state);
             if (x11->no_autorepeat)
                 modifiers |= MP_KEY_STATE_DOWN;
-            if (Event.xkey.state & ShiftMask)
-                modifiers |= MP_KEY_MODIFIER_SHIFT;
-            if (Event.xkey.state & ControlMask)
-                modifiers |= MP_KEY_MODIFIER_CTRL;
-            if (Event.xkey.state & Mod1Mask)
-                modifiers |= MP_KEY_MODIFIER_ALT;
-            if (Event.xkey.state & Mod4Mask)
-                modifiers |= MP_KEY_MODIFIER_META;
             if (x11->xic) {
                 Status status;
                 int len = Xutf8LookupString(x11->xic, &Event.xkey, buf,
@@ -760,13 +766,13 @@ int vo_x11_check_events(struct vo *vo)
             break;
         case ButtonPress:
             mp_input_put_key(vo->input_ctx,
-                             (MP_MOUSE_BTN0 + Event.xbutton.button - 1)
-                             | MP_KEY_STATE_DOWN);
+                             (MP_MOUSE_BTN0 + Event.xbutton.button - 1) |
+                             get_mods(Event.xbutton.state) | MP_KEY_STATE_DOWN);
             break;
         case ButtonRelease:
             mp_input_put_key(vo->input_ctx,
-                             (MP_MOUSE_BTN0 + Event.xbutton.button - 1)
-                             | MP_KEY_STATE_UP);
+                             (MP_MOUSE_BTN0 + Event.xbutton.button - 1) |
+                             get_mods(Event.xbutton.state) | MP_KEY_STATE_UP);
             break;
         case PropertyNotify: {
             char *name = XGetAtomName(display, Event.xproperty.atom);
