@@ -45,6 +45,7 @@ struct vo_w32_state {
     uint32_t o_dheight;
 
     bool disable_screensaver;
+    bool cursor_visible;
     int event_flags;
     int mon_cnt;
     int mon_id;
