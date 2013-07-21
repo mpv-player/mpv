@@ -66,7 +66,7 @@ Available audio output drivers are:
     ``port=<name>``
         Connects to the ports with the given name (default: physical ports).
     ``name=<client>``
-        Client name that is passed to JACK (default: mpv [<PID>]). Useful
+        Client name that is passed to JACK (default: ``mpv``). Useful
         if you want to have certain connections established automatically.
     ``(no-)estimate``
         Estimate the audio delay, supposed to make the video playback smoother
