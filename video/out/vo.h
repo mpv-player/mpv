@@ -230,9 +230,6 @@ struct vo_driver {
     // List of options to parse into priv struct (requires privsize to be set)
     const struct m_option *options;
 
-    // Help text to print when option parsing fails
-    const char *help_text;
-
     // Parse these options before parsing user options
     const char *init_option_string;
 };
@@ -291,7 +288,6 @@ struct vo *init_best_video_out(struct mp_vo_opts *opts,
                                struct input_ctx *input_ctx,
                                struct encode_lavc_context *encode_lavc_ctx);
 int vo_reconfig(struct vo *vo, struct mp_image_params *p, int flags);
-void list_video_out(void);
 
 int vo_control(struct vo *vo, uint32_t request, void *data);
 void vo_queue_image(struct vo *vo, struct mp_image *mpi);

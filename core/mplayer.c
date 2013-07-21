@@ -700,6 +700,9 @@ static void load_per_output_config(m_config_t *conf, char *cfg, char *out)
     char profile[strlen(cfg) + strlen(out) + 1];
     m_profile_t *p;
 
+    if (!out && !out[0])
+        return;
+
     sprintf(profile, "%s%s", cfg, out);
     p = m_config_get_profile(conf, profile);
     if (p) {
@@ -4102,7 +4105,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     if (opts->vo.video_driver_list)
         load_per_output_config(mpctx->mconfig, PROFILE_CFG_VO,
-                               opts->vo.video_driver_list[0]);
+                               opts->vo.video_driver_list[0].name);
     if (opts->audio_driver_list)
         load_per_output_config(mpctx->mconfig, PROFILE_CFG_AO,
                                opts->audio_driver_list[0]);
@@ -4492,11 +4495,6 @@ static bool handle_help_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     int opt_exit = 0;
-    if (opts->vo.video_driver_list &&
-            strcmp(opts->vo.video_driver_list[0], "help") == 0) {
-        list_video_out();
-        opt_exit = 1;
-    }
     if (opts->audio_driver_list &&
             strcmp(opts->audio_driver_list[0], "help") == 0) {
         list_audio_out();

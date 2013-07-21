@@ -6,7 +6,7 @@
 #include "core/m_option.h"
 
 typedef struct mp_vo_opts {
-    char **video_driver_list;
+    struct m_obj_settings *video_driver_list;
 
     int screenwidth;
     int screenheight;
