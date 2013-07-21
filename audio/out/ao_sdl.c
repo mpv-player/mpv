@@ -24,7 +24,7 @@
 #include "talloc.h"
 #include "ao.h"
 #include "core/mp_msg.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 #include "osdep/timer.h"
 
 #include <libavutil/fifo.h>
@@ -45,6 +45,8 @@ struct priv
     int64_t callback_time0;
     int64_t callback_time1;
 #endif
+    float buflen;
+    float bufcnt;
 };
 
 static void audio_callback(void *userdata, Uint8 *stream, int len)
@@ -119,18 +121,6 @@ static unsigned int ceil_power_of_two(unsigned int x)
     return y;
 }
 
-static void print_help(void) {
-  mp_msg(MSGT_AO, MSGL_FATAL,
-          "\n-ao sdl commandline help:\n"
-          "Example: mpv -ao sdl:buflen=len\n"
-          "\nOptions:\n"
-          "   buflen=len\n"
-          "      Length of audio buffer in seconds\n"
-          "   bufcnt=cnt\n"
-          "      Count of extra audio buffers\n"
-        );
-}
-
 static int init(struct ao *ao, char *params)
 {
     if (SDL_WasInit(SDL_INIT_AUDIO)) {
@@ -138,20 +128,7 @@ static int init(struct ao *ao, char *params)
         return -1;
     }
 
-    float buflen = 0; // use SDL default
-    float bufcnt = 2;
-    const opt_t subopts[] = {
-        {"buflen", OPT_ARG_FLOAT, &buflen, NULL},
-        {"bufcnt", OPT_ARG_FLOAT, &bufcnt, NULL},
-        {NULL}
-    };
-    if (subopt_parse(params, subopts) != 0) {
-        print_help();
-        return -1;
-    }
-
-    struct priv *priv = talloc_zero(ao, struct priv);
-    ao->priv = priv;
+    struct priv *priv = ao->priv;
 
     if (SDL_InitSubSystem(SDL_INIT_AUDIO)) {
         if (!ao->probing)
@@ -192,7 +169,8 @@ static int init(struct ao *ao, char *params)
     }
     desired.freq = ao->samplerate;
     desired.channels = ao->channels.num;
-    desired.samples = FFMIN(32768, ceil_power_of_two(ao->samplerate * buflen));
+    desired.samples = FFMIN(32768, ceil_power_of_two(ao->samplerate *
+                                                     priv->buflen));
     desired.callback = audio_callback;
     desired.userdata = ao;
 
@@ -248,7 +226,7 @@ static int init(struct ao *ao, char *params)
     }
 
     ao->samplerate = obtained.freq;
-    priv->buffer = av_fifo_alloc(obtained.size * bufcnt);
+    priv->buffer = av_fifo_alloc(obtained.size * priv->bufcnt);
     priv->buffer_mutex = SDL_CreateMutex();
     if (!priv->buffer_mutex) {
         mp_msg(MSGT_AO, MSGL_ERR, "[sdl] SDL_CreateMutex failed\n");
@@ -368,6 +346,8 @@ static float get_delay(struct ao *ao)
     return delay;
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct ao_driver audio_out_sdl = {
     .info = &(const struct ao_info) {
         "SDL Audio",
@@ -383,4 +363,14 @@ const struct ao_driver audio_out_sdl = {
     .pause     = pause,
     .resume    = resume,
     .reset     = reset,
+    .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv) {
+        .buflen = 0, // use SDL default
+        .bufcnt = 2,
+    },
+    .options = (const struct m_option[]) {
+        OPT_FLOAT("buflen", buflen, 0),
+        OPT_FLOAT("bufcnt", bufcnt, 0),
+        {0}
+    },
 };
