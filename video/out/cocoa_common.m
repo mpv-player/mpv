@@ -819,23 +819,22 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 // as well without having to do any coordinate conversion of mouse positions.
 - (BOOL) isFlipped { return YES; }
 
-- (id)initWithFrame:(NSRect)frame {
-    if (self = [super initWithFrame:frame]) {
-        NSTrackingAreaOptions trackingOptions =
-            NSTrackingEnabledDuringMouseDrag |
-            NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved |
-            NSTrackingActiveInActiveApp;
+- (void)updateTrackingAreas
+{
+    if (self.tracker) [self removeTrackingArea:self.tracker];
 
-        self.tracker =
-            [[[NSTrackingArea alloc] initWithRect:[self bounds]
-                                          options:trackingOptions
-                                            owner:self
-                                         userInfo:nil] autorelease];
+    NSTrackingAreaOptions trackingOptions =
+        NSTrackingEnabledDuringMouseDrag |
+        NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved |
+        NSTrackingActiveInActiveApp;
 
-        [self addTrackingArea:self.tracker];
-    }
+    self.tracker =
+        [[[NSTrackingArea alloc] initWithRect:[self bounds]
+                                      options:trackingOptions
+                                        owner:self
+                                     userInfo:nil] autorelease];
 
-    return self;
+    [self addTrackingArea:self.tracker];
 }
 
 - (NSPoint)mouseLocation
