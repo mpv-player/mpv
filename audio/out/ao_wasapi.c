@@ -806,39 +806,22 @@ exit_label:
 
 static int validate_device(const m_option_t *opt, struct bstr name,
                            struct bstr param) {
-    IMMDevice *pDevice = NULL;
-
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: validating device=%s\n", param.start);
-
     if (bstr_equals0(param, "help")) {
         enumerate_devices();
         return M_OPT_EXIT;
     }
 
-    CoInitialize(NULL);
+    mp_msg(MSGT_AO, MSGL_DBG2, "ao-wasapi: validating device=%s\n", param.start);
 
-    int devno = -1;
-    char *devid = NULL;
+    char *end;
+    int devno = (int) strtol(param.start, &end, 10);
 
-    if (bstr_startswith0(param, "{")) { // ID as printed by enumerate_devices
-        devid = param.start;
-    } else {
-        unsigned char *end;
-        devno = (int) strtol(param.start, (char**)&end, 10);
-        if (end == param.start || *end || devno < 0) {
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: invalid number \"%s\"!\n", param.start);
-            return M_OPT_INVALID;
-        }
-    }
     int ret = 1;
-    if (FAILED(find_and_load_device(&pDevice, devno, devid))) {
+    if ((end == (void*)param.start || *end) && devno < 0)
         ret = M_OPT_OUT_OF_RANGE;
-    }
-    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: device=%s %svalid\n",
-           param.start, ret == 1 ? "" : "not ");
 
-    SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
-    CoUninitialize();
+    mp_msg(MSGT_AO, MSGL_DBG2, "ao-wasapi: device=%s %svalid\n",
+           param.start, ret == 1 ? "" : "not ");
     return ret;
 }
 
