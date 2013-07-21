@@ -52,6 +52,9 @@ struct priv {
 
     bool broken_pause;
     int retval;
+
+    char *cfg_host;
+    char *cfg_sink;
 };
 
 #define GENERIC_ERR_MSG(ctx, str) \
@@ -229,24 +232,12 @@ static int init(struct ao *ao, char *params)
 {
     struct pa_sample_spec ss;
     struct pa_channel_map map;
-    char *devarg = NULL;
-    char *host = NULL;
-    char *sink = NULL;
+    struct priv *priv = ao->priv;
+    char *host = priv->cfg_host && priv->cfg_host[0] ? priv->cfg_host : NULL;
+    char *sink = priv->cfg_sink && priv->cfg_sink[0] ? priv->cfg_sink : NULL;
     const char *version = pa_get_library_version();
 
-    struct priv *priv = talloc_zero(ao, struct priv);
-    ao->priv = priv;
-
     ao->per_application_mixer = true;
-
-    if (params) {
-        devarg = strdup(params);
-        sink = strchr(devarg, ':');
-        if (sink)
-            *sink++ = 0;
-        if (devarg[0])
-            host = devarg;
-    }
 
     priv->broken_pause = false;
     /* not sure which versions are affected, assume 0.9.11* to 0.9.14*
@@ -340,7 +331,6 @@ static int init(struct ao *ao, char *params)
 
     pa_threaded_mainloop_unlock(priv->mainloop);
 
-    free(devarg);
     return 0;
 
 unlock_and_fail:
@@ -354,7 +344,6 @@ fail:
               && ao->probing))
             GENERIC_ERR_MSG(priv->context, "Init failed");
     }
-    free(devarg);
     uninit(ao, true);
     return -1;
 }
@@ -585,6 +574,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     }
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct ao_driver audio_out_pulse = {
     .info = &(const struct ao_info) {
         "PulseAudio audio output",
@@ -601,4 +592,10 @@ const struct ao_driver audio_out_pulse = {
     .get_delay = get_delay,
     .pause     = pause,
     .resume    = resume,
+    .priv_size = sizeof(struct priv),
+    .options = (const struct m_option[]) {
+        OPT_STRING("host", cfg_host, 0),
+        OPT_STRING("sink", cfg_sink, 0),
+        {0}
+    },
 };
