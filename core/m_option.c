@@ -2098,7 +2098,7 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
             *pstr = bstr_cut(*pstr, next);
             if (!bstrcmp0(param, "help")) {
                 mp_msg(MSGT_CFGPARSER, MSGL_INFO,
-                       "Option %.*s: %.*s have no option description.\n",
+                       "Option %.*s: %.*s has no option description.\n",
                        BSTR_P(opt), BSTR_P(str));
                 return M_OPT_EXIT - 1;
             }

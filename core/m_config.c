@@ -655,28 +655,36 @@ void m_config_print_option_list(const struct m_config *config)
     if (!config->opts)
         return;
 
-    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO,
-            "\n Name                 Type            Min        Max      Global  Cfg\n\n");
+    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "Options:\n\n");
     for (co = config->opts; co; co = co->next) {
         const struct m_option *opt = co->opt;
         if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
             continue;
-        if (opt->flags & M_OPT_MIN)
-            sprintf(min, "%-8.0f", opt->min);
-        else
-            strcpy(min, "No");
-        if (opt->flags & M_OPT_MAX)
-            sprintf(max, "%-8.0f", opt->max);
-        else
-            strcpy(max, "No");
-        mp_msg(MSGT_CFGPARSER, MSGL_INFO,
-             " %-20.20s %-15.15s %-10.10s %-10.10s %-3.3s   %-3.3s\n",
-               co->name,
-               co->opt->type->name,
-               min,
-               max,
-               opt->flags & CONF_GLOBAL ? "Yes" : "No",
-               opt->flags & CONF_NOCFG ? "No" : "Yes");
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %-30.30s", co->name);
+        if (opt->type == &m_option_type_choice) {
+            mp_msg(MSGT_CFGPARSER, MSGL_INFO, " Choices:");
+            struct m_opt_choice_alternatives *alt = opt->priv;
+            for (int n = 0; alt[n].name; n++)
+                mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %s", alt[n].name);
+            if (opt->flags & (M_OPT_MIN | M_OPT_MAX))
+                mp_msg(MSGT_CFGPARSER, MSGL_INFO, " (or an integer)");
+        } else {
+            mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %s", co->opt->type->name);
+        }
+        if (opt->flags & (M_OPT_MIN | M_OPT_MAX)) {
+            snprintf(min, sizeof(min), "any");
+            snprintf(max, sizeof(max), "any");
+            if (opt->flags & M_OPT_MIN)
+                snprintf(min, sizeof(min), "%g", opt->min);
+            if (opt->flags & M_OPT_MAX)
+                snprintf(max, sizeof(max), "%g", opt->max);
+            mp_msg(MSGT_CFGPARSER, MSGL_INFO, " (%s to %s)", min, max);
+        }
+        if (opt->flags & CONF_GLOBAL)
+            mp_msg(MSGT_CFGPARSER, MSGL_INFO, " [global]");
+        if (opt->flags & CONF_NOCFG)
+            mp_msg(MSGT_CFGPARSER, MSGL_INFO, " [nocfg]");
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
         count++;
     }
     mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\nTotal: %d options\n", count);
