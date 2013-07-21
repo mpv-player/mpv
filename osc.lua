@@ -1,4 +1,4 @@
--- osc2.lua
+-- osc.lua
 
 local assdraw = require 'assdraw'
 
@@ -44,14 +44,12 @@ local osc_styles = {
 -- internal states, do not touch
 local state = {
     osc_visible = false,
-    mouse_down = false,
-    mouse_down_counter = 0,
-    active_element = nil,                    -- nil = none, 0 = background, 1+ = see elements[]
-    active_event_source = nil,
-    rightTC_trem = false,
-    mp_screen_sizeX,
-    mp_screen_sizeY,
-    initREQ = false                        -- is a re-init request pending?
+    mouse_down_counter = 0,                 -- used for softrepeat
+    active_element = nil,                   -- nil = none, 0 = background, 1+ = see elements[]
+    active_event_source = nil,              -- the "button" that issued the current event
+    rightTC_trem = false,                   -- if the left timcode should display total or remaining time
+    mp_screen_sizeX, mp_screen_sizeY,       -- last screen-resolution, to detect resolution changes to issue reINITs
+    initREQ = false                         -- is a re-init request pending?
 }
 
 --
@@ -125,9 +123,9 @@ end
 -- Element Management
 --
 
--- do not use this function
+-- do not use this function, use the wrappers below
 function register_element(type, x, y, an, w, h, style, content, eventresponder, metainfo2)
-    -- type             button or slider
+    -- type             button, slider or box
     -- x, y             position
     -- an               alignment (see ASS standard)
     -- w, h             size of hitbox
@@ -142,7 +140,7 @@ function register_element(type, x, y, an, w, h, style, content, eventresponder, 
     if metainfo.visible == nil then metainfo.visible = true end         -- element visible at all?
     if metainfo.enabled == nil then metainfo.enabled = true end         -- element clickable?
     if metainfo.styledown == nil then metainfo.styledown = true end     -- should the element be styled with the elementDown style when clicked?
-    if metainfo.softrepeat == nil then metainfo.softrepeat = false end   -- should the render event be executed with "hold for repeat" behaviour?
+    if metainfo.softrepeat == nil then metainfo.softrepeat = false end  -- should the *_down event be executed with "hold for repeat" behaviour?
 
     if metainfo.visible then
         local ass = assdraw.ass_new()
@@ -152,6 +150,13 @@ function register_element(type, x, y, an, w, h, style, content, eventresponder, 
         ass:pos(x, y) -- positioning
         ass:an(an) 
         ass:append(style) -- styling
+
+        -- if the element is supposed to be disabled, style it accordingly and kill the eventresponders
+        if metainfo.enabled == false then
+            ass:append(osc_styles.elementDisab)
+            eventresponder = nil
+        end
+
 
         -- Calculate the hitbox
         local bX1, bY1, bX2, bY2 = get_hitbox_coords(x, y, an, w, h)
@@ -256,11 +261,7 @@ function render_elements(master_ass)
         local elem_ass = assdraw.ass_new()
         elem_ass:merge(elem_ass1)
 
-
-        if element.metainfo.enabled == false then
-            elem_ass:append(osc_styles.elementDisab)
-
-        elseif state.active_element == n then
+        if state.active_element == n then
 
             if mouse_hit(element) then
                 -- mouse down styling
