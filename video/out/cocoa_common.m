@@ -884,6 +884,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (void)signalMouseMovement:(NSEvent *)event
 {
+    [self recalcDraggableState];
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
     vo_mouse_movement(self.videoOutput, p.x, p.y);
 }
