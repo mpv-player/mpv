@@ -343,20 +343,12 @@ err_out:
     return -1;
 }
 
-static int validate_backend_opt(const m_option_t *opt, struct bstr name,
-                                struct bstr param)
-{
-    char s[20];
-    snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
-    return mpgl_find_backend(s) >= -1 ? 1 : M_OPT_INVALID;
-}
-
 #define OPT_BASE_STRUCT struct gl_priv
 const struct m_option options[] = {
     OPT_FLAG("glfinish", use_glFinish, 0),
     OPT_INT("swapinterval", swap_interval, 0, OPTDEF_INT(1)),
     OPT_FLAG("debug", use_gl_debug, 0),
-    OPT_STRING_VALIDATE("backend", backend, 0, validate_backend_opt),
+    OPT_STRING_VALIDATE("backend", backend, 0, mpgl_validate_backend_opt),
     OPT_FLAG("sw", allow_sw, 0),
 
     OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),

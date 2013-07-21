@@ -32,7 +32,7 @@
 #include "config.h"
 #include "talloc.h"
 #include "core/mp_msg.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 #include "vo.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"
@@ -97,6 +97,7 @@ struct gl_priv {
     int custom_trect;
     int mipmap_gen;
     int stereo_mode;
+    char *backend_arg;
 
     struct mp_csp_equalizer video_eq;
 
@@ -109,7 +110,7 @@ struct gl_priv {
     struct mp_rect dst_rect;    // video rectangle on output window
     struct mp_osd_res osd_res;
 
-    unsigned int slice_height;
+    int slice_height;
 };
 
 static int glFindFormat(uint32_t format, int have_texture_rg, int *bpp,
@@ -2071,176 +2072,22 @@ static void uninit(struct vo *vo)
     struct gl_priv *p = vo->priv;
 
     uninitGl(vo);
-    free(p->custom_prog);
-    p->custom_prog = NULL;
-    free(p->custom_tex);
-    p->custom_tex = NULL;
     mpgl_uninit(p->glctx);
     p->glctx = NULL;
     p->gl = NULL;
 }
 
-static int backend_valid(void *arg)
-{
-    return mpgl_find_backend(*(const char **)arg) >= -1;
-}
-
 static int preinit(struct vo *vo, const char *arg)
 {
-    struct gl_priv *p = talloc_zero(vo, struct gl_priv);
-    vo->priv = p;
+    struct gl_priv *p = vo->priv;
 
-    *p = (struct gl_priv) {
-        .many_fmts = 1,
-        .use_yuv = -1,
-        .colorspace = MP_CSP_DETAILS_DEFAULTS,
-        .filter_strength = 0.5,
-        .use_rectangle = -1,
-        .ati_hack = -1,
-        .force_pbo = -1,
-        .swap_interval = 1,
-        .custom_prog = NULL,
-        .custom_tex = NULL,
-        .custom_tlin = 1,
-        .osd_color = 0xffffff,
-    };
-
-    char *backend_arg = NULL;
-
-    //essentially unused; for legacy warnings only
-    int user_colorspace = 0;
-    int levelconv = -1;
-    int aspect = -1;
-
-    const opt_t subopts[] = {
-        {"manyfmts",     OPT_ARG_BOOL, &p->many_fmts,    NULL},
-        {"scaled-osd",   OPT_ARG_BOOL, &p->scaled_osd,   NULL},
-        {"ycbcr",        OPT_ARG_BOOL, &p->use_ycbcr,    NULL},
-        {"slice-height", OPT_ARG_INT,  &p->slice_height, int_non_neg},
-        {"rectangle",    OPT_ARG_INT,  &p->use_rectangle,int_non_neg},
-        {"yuv",          OPT_ARG_INT,  &p->use_yuv,      int_non_neg},
-        {"lscale",       OPT_ARG_INT,  &p->lscale,       int_non_neg},
-        {"cscale",       OPT_ARG_INT,  &p->cscale,       int_non_neg},
-        {"filter-strength", OPT_ARG_FLOAT, &p->filter_strength, NULL},
-        {"noise-strength", OPT_ARG_FLOAT, &p->noise_strength, NULL},
-        {"ati-hack",     OPT_ARG_BOOL, &p->ati_hack,     NULL},
-        {"force-pbo",    OPT_ARG_BOOL, &p->force_pbo,    NULL},
-        {"glfinish",     OPT_ARG_BOOL, &p->use_glFinish, NULL},
-        {"swapinterval", OPT_ARG_INT,  &p->swap_interval,NULL},
-        {"customprog",   OPT_ARG_MSTRZ,&p->custom_prog,  NULL},
-        {"customtex",    OPT_ARG_MSTRZ,&p->custom_tex,   NULL},
-        {"customtlin",   OPT_ARG_BOOL, &p->custom_tlin,  NULL},
-        {"customtrect",  OPT_ARG_BOOL, &p->custom_trect, NULL},
-        {"mipmapgen",    OPT_ARG_BOOL, &p->mipmap_gen,   NULL},
-        {"osdcolor",     OPT_ARG_INT,  &p->osd_color,    NULL},
-        {"stereo",       OPT_ARG_INT,  &p->stereo_mode,  NULL},
-        {"sw",           OPT_ARG_BOOL, &p->allow_sw,     NULL},
-        {"backend",      OPT_ARG_MSTRZ,&backend_arg,     backend_valid},
-        // Removed options.
-        // They are only parsed to notify the user about the replacements.
-        {"aspect",       OPT_ARG_BOOL, &aspect,          NULL},
-        {"colorspace",   OPT_ARG_INT,  &user_colorspace, NULL},
-        {"levelconv",    OPT_ARG_INT,  &levelconv,       NULL},
-        {NULL}
-    };
-
-    if (subopt_parse(arg, subopts) != 0) {
-        mp_msg(MSGT_VO, MSGL_FATAL,
-               "\n-vo opengl_old command line help:\n"
-               "Example: mpv -vo opengl_old:slice-height=4\n"
-               "\nOptions:\n"
-               "  nomanyfmts\n"
-               "    Disable extended color formats for OpenGL 1.2 and later\n"
-               "  slice-height=<0-...>\n"
-               "    Slice size for texture transfer, 0 for whole image\n"
-               "  scaled-osd\n"
-               "    Render OSD at movie resolution and scale it\n"
-               "  rectangle=<0,1,2>\n"
-               "    0: use power-of-two textures\n"
-               "    1: use texture_rectangle\n"
-               "    2: use texture_non_power_of_two\n"
-               "  ati-hack\n"
-               "    Workaround ATI bug with PBOs\n"
-               "  force-pbo\n"
-               "    Force use of PBO even if this involves an extra memcpy\n"
-               "  glfinish\n"
-               "    Call glFinish() before swapping buffers\n"
-               "  swapinterval=<n>\n"
-               "    Interval in displayed frames between to buffer swaps.\n"
-               "    1 is equivalent to enable VSYNC, 0 to disable VSYNC.\n"
-               "    Requires GLX_SGI_swap_control support to work.\n"
-               "  ycbcr\n"
-               "    also try to use the GL_MESA_ycbcr_texture extension\n"
-               "  yuv=<n>\n"
-               "    0: use software YUV to RGB conversion.\n"
-               "    1: deprecated, will use yuv=2 (used to be nVidia register combiners).\n"
-               "    2: use fragment program.\n"
-               "    3: use fragment program with gamma correction.\n"
-               "    4: use fragment program with gamma correction via lookup.\n"
-               "    5: use ATI-specific method (for older cards).\n"
-               "    6: use lookup via 3D texture.\n"
-               "  lscale=<n>\n"
-               "    0: use standard bilinear scaling for luma.\n"
-               "    1: use improved bicubic scaling for luma.\n"
-               "    2: use cubic in X, linear in Y direction scaling for luma.\n"
-               "    3: as 1 but without using a lookup texture.\n"
-               "    4: experimental unsharp masking (sharpening).\n"
-               "    5: experimental unsharp masking (sharpening) with larger radius.\n"
-               "  cscale=<n>\n"
-               "    as lscale but for chroma (2x slower with little visible effect).\n"
-               "  filter-strength=<value>\n"
-               "    set the effect strength for some lscale/cscale filters\n"
-               "  noise-strength=<value>\n"
-               "    set how much noise to add. 1.0 is suitable for dithering to 6 bit.\n"
-               "  customprog=<filename>\n"
-               "    use a custom YUV conversion program\n"
-               "  customtex=<filename>\n"
-               "    use a custom YUV conversion lookup texture\n"
-               "  nocustomtlin\n"
-               "    use GL_NEAREST scaling for customtex texture\n"
-               "  customtrect\n"
-               "    use texture_rectangle for customtex texture\n"
-               "  mipmapgen\n"
-               "    generate mipmaps for the video image (use with TXB in customprog)\n"
-               "  osdcolor=<0xAARRGGBB>\n"
-               "    use the given color for the OSD\n"
-               "  stereo=<n>\n"
-               "    0: normal display\n"
-               "    1: side-by-side to red-cyan stereo\n"
-               "    2: side-by-side to green-magenta stereo\n"
-               "    3: side-by-side to quadbuffer stereo\n"
-               "  sw\n"
-               "    allow using a software renderer, if such is detected\n"
-               "  backend=<sys>\n"
-               "    auto: auto-select (default)\n"
-               "    cocoa: Cocoa/OSX\n"
-               "    win: Win32/WGL\n"
-               "    x11: X11/GLX\n"
-               "    wayland: Wayland/EGL\n"
-               "\n");
-        return -1;
-    }
-    if (user_colorspace != 0 || levelconv != -1) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] \"colorspace\" and \"levelconv\" "
-               "suboptions have been removed. Use options --colormatrix and"
-               " --colormatrix-input-range/--colormatrix-output-range instead.\n");
-        return -1;
-    }
-    if (aspect != -1) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] \"noaspect\" suboption has been "
-               "removed. Use --noaspect instead.\n");
-        return -1;
-    }
     if (p->use_yuv == 1) {
         mp_msg(MSGT_VO, MSGL_WARN, "[gl] yuv=1 (nVidia register combiners) have"
                " been removed, using yuv=2 instead.\n");
         p->use_yuv = 2;
     }
 
-    char *backend = talloc_strdup(vo, backend_arg);
-    free(backend_arg);
-
-    p->glctx = mpgl_init(vo, backend);
+    p->glctx = mpgl_init(vo, p->backend_arg);
     if (!p->glctx)
         goto err_out;
     p->gl = p->glctx->gl;
@@ -2322,6 +2169,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return r;
 }
 
+#define OPT_BASE_STRUCT struct gl_priv
+
 const struct vo_driver video_out_opengl_old = {
     .info = &(const vo_info_t) {
         "OpenGL",
@@ -2337,4 +2186,47 @@ const struct vo_driver video_out_opengl_old = {
     .draw_osd = draw_osd,
     .flip_page = flip_page,
     .uninit = uninit,
+    .priv_size = sizeof(struct gl_priv),
+    .priv_defaults = &(const struct gl_priv) {
+        .many_fmts = 1,
+        .use_yuv = -1,
+        .colorspace = MP_CSP_DETAILS_DEFAULTS,
+        .filter_strength = 0.5,
+        .use_rectangle = -1,
+        .ati_hack = -1,
+        .force_pbo = -1,
+        .swap_interval = 1,
+        .custom_prog = NULL,
+        .custom_tex = NULL,
+        .custom_tlin = 1,
+        .osd_color = 0xffffff,
+    },
+    .options = (const struct m_option[]) {
+        OPT_FLAG("manyfmts", many_fmts, 0),
+        OPT_FLAG("scaled-osd", scaled_osd, 0),
+        OPT_FLAG("ycbcr", use_ycbcr, 0),
+        OPT_INT("slice-height", slice_height, M_OPT_MIN, .min = 0),
+        OPT_INT("rectangle", use_rectangle, M_OPT_MIN, .min = -1),
+        OPT_INT("yuv", use_yuv, M_OPT_MIN, .min = -1),
+        OPT_INT("lscale", lscale, M_OPT_MIN, .min = 0),
+        OPT_INT("cscale", cscale, M_OPT_MIN, .min = 0),
+        OPT_FLOAT("filter-strength", filter_strength, 0),
+        OPT_FLOAT("noise-strength", noise_strength, 0),
+        OPT_CHOICE("ati-hack", ati_hack, 0,
+                   ({"auto", -1}, {"no", 0}, {"yes", 1})),
+        OPT_CHOICE("force-pbo", force_pbo, 0,
+                   ({"auto", -1}, {"no", 0}, {"yes", 1})),
+        OPT_FLAG("glfinish", use_glFinish, 0),
+        OPT_INT("swapinterval", swap_interval, 0),
+        OPT_STRING("customprog", custom_prog, 0),
+        OPT_STRING("customtex", custom_tex, 0),
+        OPT_FLAG("customtlin", custom_tlin, 0),
+        OPT_FLAG("customtrect", custom_trect, 0),
+        OPT_FLAG("mipmapgen", mipmap_gen, 0),
+        OPT_INT("osdcolor", osd_color, 0),
+        OPT_INT("stereo", stereo_mode, 0),
+        OPT_FLAG("sw", allow_sw, 0),
+        OPT_STRING_VALIDATE("backend", backend_arg, 0, mpgl_validate_backend_opt),
+        {0}
+    },
 };

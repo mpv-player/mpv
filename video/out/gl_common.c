@@ -876,6 +876,14 @@ int mpgl_find_backend(const char *name)
     return -2;
 }
 
+int mpgl_validate_backend_opt(const struct m_option *opt, struct bstr name,
+                              struct bstr param)
+{
+    char s[20];
+    snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
+    return mpgl_find_backend(s) >= -1 ? 1 : M_OPT_INVALID;
+}
+
 static MPGLContext *init_backend(struct vo *vo, MPGLSetBackendFn set_backend)
 {
     MPGLContext *ctx = talloc_ptrtype(NULL, ctx);

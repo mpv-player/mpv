@@ -30,6 +30,7 @@
 
 #include "config.h"
 #include "core/mp_msg.h"
+#include "core/bstr.h"
 
 #include "vo.h"
 #include "video/csputils.h"
@@ -153,6 +154,10 @@ bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
                         uint32_t d_height, uint32_t flags);
 
 int mpgl_find_backend(const char *name);
+
+struct m_option;
+int mpgl_validate_backend_opt(const struct m_option *opt, struct bstr name,
+                              struct bstr param);
 
 void mpgl_set_backend_cocoa(MPGLContext *ctx);
 void mpgl_set_backend_w32(MPGLContext *ctx);
