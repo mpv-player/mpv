@@ -391,9 +391,54 @@ exit_label:
     return ret;
 }
 
+static int try_passthrough(struct wasapi_state *state,
+                           struct ao *const ao)
+{
+    WAVEFORMATEXTENSIBLE wformat = {
+        .Format = {
+            .wFormatTag = WAVE_FORMAT_EXTENSIBLE,
+            .nChannels = ao->channels.num,
+            .nSamplesPerSec = ao->samplerate * 4,
+            .nAvgBytesPerSec = (ao->samplerate * 4) * (ao->channels.num * 2),
+            .nBlockAlign = ao->channels.num * 2,
+            .wBitsPerSample = 16,
+            .cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX),
+        },
+        .Samples.wValidBitsPerSample = 16,
+        .dwChannelMask = mp_chmap_to_waveext(&ao->channels),
+        .SubFormat = local_KSDATAFORMAT_SUBTYPE_PCM,
+    };
+    wformat.SubFormat.Data1 = WAVE_FORMAT_DOLBY_AC3_SPDIF; // see INIT_WAVEFORMATEX_GUID macro
+
+    union WAVEFMT u;
+    u.extensible = &wformat;
+
+    HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
+                                                state->share_mode,
+                                                u.ex, NULL);
+    if (!FAILED(hr)) {
+        state->format = wformat;
+        return 1;
+    }
+    return 0;
+}
+
 static int find_formats(struct ao *const ao)
 {
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
+
+    if (AF_FORMAT_IS_IEC61937(ao->format)) {
+        if (try_passthrough(state, ao))
+            return 0;
+
+        EnterCriticalSection(&state->print_lock);
+        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: couldn't use passthrough!");
+        if (!state->opt_exclusive)
+            mp_msg(MSGT_AO, MSGL_ERR, " (try exclusive mode)");
+        mp_msg(MSGT_AO, MSGL_ERR, "\n");
+        LeaveCriticalSection(&state->print_lock);
+        return -1;
+    }
 
     /* See if the format works as-is */
     int bits = af_fmt2bits(ao->format);
