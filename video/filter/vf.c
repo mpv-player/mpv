@@ -128,13 +128,29 @@ int vf_control(struct vf_instance *vf, int cmd, void *arg)
     return vf->control(vf, cmd, arg);
 }
 
+static void vf_fix_img_params(struct mp_image *img, struct mp_image_params *p)
+{
+    // Filters must absolutely set these correctly.
+    assert(img->w == p->w && img->h == p->h);
+    assert(img->imgfmt == p->imgfmt);
+    // Too many things don't set this correctly.
+    // If --colormatrix is used, decoder and filter chain disagree too.
+    // In general, it's probably more convenient to force these here,
+    // instead of requiring filters to set these correctly.
+    img->colorspace = p->colorspace;
+    img->levels = p->colorlevels;
+    img->chroma_location = p->chroma_location;
+}
+
 // Get a new image for filter output, with size and pixel format according to
 // the last vf_config call.
 struct mp_image *vf_alloc_out_image(struct vf_instance *vf)
 {
-    struct mp_image_params *p = &vf->fmt_out.params;
     assert(vf->fmt_out.configured);
-    return mp_image_pool_get(vf->out_pool, p->imgfmt, p->w, p->h);
+    struct mp_image_params *p = &vf->fmt_out.params;
+    struct mp_image *img = mp_image_pool_get(vf->out_pool, p->imgfmt, p->w, p->h);
+    vf_fix_img_params(img, p);
+    return img;
 }
 
 void vf_make_out_image_writeable(struct vf_instance *vf, struct mp_image *img)
@@ -360,16 +376,9 @@ unsigned int vf_match_csp(vf_instance_t **vfp, const unsigned int *list,
 void vf_add_output_frame(struct vf_instance *vf, struct mp_image *img)
 {
     if (img) {
-        struct mp_image_params *p = &vf->fmt_out.params;
         // vf_vo doesn't have output config
-        if (vf->fmt_out.configured) {
-            assert(p->imgfmt == img->imgfmt);
-            assert(p->w == img->w && p->h == img->h);
-            // Too many filters which don't set these correctly
-            img->colorspace = p->colorspace;
-            img->levels = p->colorlevels;
-            img->chroma_location = p->chroma_location;
-        }
+        if (vf->fmt_out.configured)
+            vf_fix_img_params(img, &vf->fmt_out.params);
         MP_TARRAY_APPEND(vf, vf->out_queued, vf->num_out_queued, img);
     }
 }
@@ -388,10 +397,8 @@ static struct mp_image *vf_dequeue_output_frame(struct vf_instance *vf)
 // Return >= 0 on success, < 0 on failure (even if output frames were produced)
 int vf_filter_frame(struct vf_instance *vf, struct mp_image *img)
 {
-    struct mp_image_params *p = &vf->fmt_in.params;
     assert(vf->fmt_in.configured);
-    assert(img->w == p->w && img->h == p->h);
-    assert(img->imgfmt == p->imgfmt);
+    vf_fix_img_params(img, &vf->fmt_in.params);
 
     if (vf->filter_ext) {
         return vf->filter_ext(vf, img);

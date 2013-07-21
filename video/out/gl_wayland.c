@@ -44,16 +44,18 @@ static void egl_resize_func(struct vo_wayland_state *wl,
                             int32_t height,
                             void *user_data)
 {
-    struct vo_wayland_window *w = wl->window;
     struct egl_context *ctx = user_data;
     int32_t minimum_size = 150;
     int32_t x, y;
     float temp_aspect = width / (float) MPMAX(height, 1);
 
+    if (!ctx->egl_window)
+        return;
+
     /* get the real window size of the window */
     wl_egl_window_get_attached_size(ctx->egl_window,
-                                    &w->width,
-                                    &w->height);
+                                    &wl->window.width,
+                                    &wl->window.height);
 
     if (width < minimum_size)
         width = minimum_size;
@@ -65,7 +67,7 @@ static void egl_resize_func(struct vo_wayland_state *wl,
     switch (edges) {
         case WL_SHELL_SURFACE_RESIZE_TOP:
         case WL_SHELL_SURFACE_RESIZE_BOTTOM:
-            width = w->aspect * height;
+            width = wl->window.aspect * height;
             break;
         case WL_SHELL_SURFACE_RESIZE_LEFT:
         case WL_SHELL_SURFACE_RESIZE_RIGHT:
@@ -73,31 +75,31 @@ static void egl_resize_func(struct vo_wayland_state *wl,
         case WL_SHELL_SURFACE_RESIZE_TOP_RIGHT:
         case WL_SHELL_SURFACE_RESIZE_BOTTOM_LEFT:
         case WL_SHELL_SURFACE_RESIZE_BOTTOM_RIGHT:
-            height = (1 / w->aspect) * width;
+            height = (1 / wl->window.aspect) * width;
             break;
         default:
-            if (w->aspect < temp_aspect)
-                width = w->aspect * height;
+            if (wl->window.aspect < temp_aspect)
+                width = wl->window.aspect * height;
             else
-                height = (1 / w->aspect) * width;
+                height = (1 / wl->window.aspect) * width;
             break;
     }
 
 
     if (edges & WL_SHELL_SURFACE_RESIZE_LEFT)
-        x = w->width - width;
+        x = wl->window.width - width;
     else
         x = 0;
 
     if (edges & WL_SHELL_SURFACE_RESIZE_TOP)
-        y = w->height - height;
+        y = wl->window.height - height;
     else
         y = 0;
 
     wl_egl_window_resize(ctx->egl_window, width, height, x, y);
 
-    w->width = width;
-    w->height = height;
+    wl->window.width = width;
+    wl->window.height = height;
 
     /* set size for mplayer */
     wl->vo->dwidth = width;
@@ -114,7 +116,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     GL *gl = ctx->gl;
     const char *eglstr = "";
 
-    if (!(egl_ctx->egl.dpy = eglGetDisplay(wl->display->display)))
+    if (!(egl_ctx->egl.dpy = eglGetDisplay(wl->display.display)))
         return false;
 
     EGLint config_attribs[] = {
@@ -152,8 +154,17 @@ static bool egl_create_context(struct vo_wayland_state *wl,
                                         egl_ctx->egl.conf,
                                         EGL_NO_CONTEXT,
                                         context_attribs);
-    if (!egl_ctx->egl.ctx)
-        return false;
+    if (!egl_ctx->egl.ctx) {
+        /* fallback to any GL version */
+        context_attribs[0] = EGL_NONE;
+        egl_ctx->egl.ctx = eglCreateContext(egl_ctx->egl.dpy,
+                                            egl_ctx->egl.conf,
+                                            EGL_NO_CONTEXT,
+                                            context_attribs);
+
+        if (!egl_ctx->egl.ctx)
+            return false;
+    }
 
     eglMakeCurrent(egl_ctx->egl.dpy, NULL, NULL, egl_ctx->egl.ctx);
 
@@ -171,9 +182,9 @@ static void egl_create_window(struct vo_wayland_state *wl,
                               uint32_t width,
                               uint32_t height)
 {
-    egl_ctx->egl_window = wl_egl_window_create(wl->window->surface,
-                                               wl->window->width,
-                                               wl->window->height);
+    egl_ctx->egl_window = wl_egl_window_create(wl->window.surface,
+                                               wl->window.width,
+                                               wl->window.height);
 
     egl_ctx->egl_surface = eglCreateWindowSurface(egl_ctx->egl.dpy,
                                                   egl_ctx->egl.conf,
@@ -185,7 +196,7 @@ static void egl_create_window(struct vo_wayland_state *wl,
                    egl_ctx->egl_surface,
                    egl_ctx->egl.ctx);
 
-    wl_display_dispatch_pending(wl->display->display);
+    wl_display_dispatch_pending(wl->display.display);
 
 }
 
@@ -199,8 +210,8 @@ static bool config_window_wayland(struct MPGLContext *ctx,
     bool enable_alpha = !!(flags & VOFLAG_ALPHA);
     bool ret = false;
 
-    wl->window->resize_func = egl_resize_func;
-    wl->window->resize_func_data = (void*) egl_ctx;
+    wl->window.resize_func = egl_resize_func;
+    wl->window.resize_func_data = (void*) egl_ctx;
 
     if (!vo_wayland_config(ctx->vo, d_width, d_height, flags))
         return false;
@@ -217,11 +228,7 @@ static bool config_window_wayland(struct MPGLContext *ctx,
         return ret;
     }
     else {
-        /* If the window exists just resize it */
-        if (egl_ctx->egl_window)
-            egl_resize_func(wl, 0, d_width, d_height, egl_ctx);
-
-        else {
+        if (!egl_ctx->egl_window) {
             /* If the context exists and the hidden flag is unset then
              * create the window */
             if (!(VOFLAG_HIDDEN & flags))

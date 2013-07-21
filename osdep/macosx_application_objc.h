@@ -35,6 +35,8 @@ struct cocoa_input_queue;
 - (void)startMediaKeys;
 - (void)restartMediaKeys;
 - (void)stopMediaKeys;
+- (int)mapKeyModifiers:(int)cocoaModifiers;
+- (int)keyModifierMask:(NSEvent *)event;
 @end
 
 @interface Application : NSApplication

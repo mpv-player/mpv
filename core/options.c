@@ -555,8 +555,8 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("monitoraspect", vo.force_monitor_aspect, 0, 0.0, 9.0),
     OPT_FLOATRANGE("monitorpixelaspect", vo.monitor_pixel_aspect, 0, 0.2, 9.0),
     // start in fullscreen mode:
-    OPT_FLAG("fullscreen", fullscreen, 0),
-    OPT_FLAG("fs", fullscreen, 0),
+    OPT_FLAG("fullscreen", vo.fullscreen, 0),
+    OPT_FLAG("fs", vo.fullscreen, 0),
     // set fullscreen switch method (workaround for buggy WMs)
     OPT_INTRANGE("fsmode-dontuse", vo.fsmode, 0, 31, 4096),
     OPT_INT("colorkey", vo.colorkey, 0),
@@ -733,7 +733,6 @@ const struct MPOpts mp_default_opts = {
         .cursor_autohide_delay = 1000,
         .monitor_pixel_aspect = 1.0,
         .panscanrange = 1.0,
-        .fs = false,
         .screen_id = -1,
         .fsscreen_id = -1,
         .nomouse_input = 0,

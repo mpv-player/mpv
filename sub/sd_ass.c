@@ -373,13 +373,13 @@ static void mangle_colors(struct sd *sd, struct sub_bitmaps *parts)
 {
     struct MPOpts *opts = sd->opts;
     struct sd_ass_priv *ctx = sd->priv;
-    ASS_Track *track = ctx->ass_track;
     enum mp_csp csp = 0;
     enum mp_csp_levels levels = 0;
     if (opts->ass_vsfilter_color_compat == 0) // "no"
         return;
     bool force_601 = opts->ass_vsfilter_color_compat == 3;
 #if LIBASS_VERSION >= 0x01020000
+    ASS_Track *track = ctx->ass_track;
     static const int ass_csp[] = {
         [YCBCR_BT601_TV]        = MP_CSP_BT_601,
         [YCBCR_BT601_PC]        = MP_CSP_BT_601,

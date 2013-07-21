@@ -163,7 +163,7 @@ static int cache_wakeup_and_wait(struct priv *s, double *retry_time)
         return CACHE_INTERRUPTED;
 
     // Print a "more severe" warning after waiting 1 second and no new data
-    if ((*retry_time) * CACHE_WAIT_TIME >= 1.0) {
+    if ((*retry_time) >= 1.0) {
         mp_msg(MSGT_CACHE, MSGL_ERR, "Cache keeps not responding.\n");
     } else if (*retry_time > 0.1) {
         mp_msg(MSGT_CACHE, MSGL_WARN,

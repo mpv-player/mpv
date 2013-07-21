@@ -1034,12 +1034,11 @@ static int mp_property_fullscreen(m_option_t *prop,
     struct mp_vo_opts *opts = mpctx->video_out->opts;
 
     if (action == M_PROPERTY_SET) {
-        if (opts->fs == !!*(int *) arg)
-            return M_PROPERTY_OK;
+        int val = *(int *)arg;
+        opts->fullscreen = val;
         if (mpctx->video_out->config_ok)
             vo_control(mpctx->video_out, VOCTRL_FULLSCREEN, 0);
-        mpctx->opts.fullscreen = opts->fs;
-        return M_PROPERTY_OK;
+        return opts->fullscreen == val ? M_PROPERTY_OK : M_PROPERTY_ERROR;
     }
     return mp_property_generic_option(prop, action, arg, mpctx);
 }

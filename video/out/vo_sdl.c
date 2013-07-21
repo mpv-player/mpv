@@ -367,19 +367,27 @@ static void check_resize(struct vo *vo)
         resize(vo, w, h);
 }
 
-static void set_fullscreen(struct vo *vo, int fs)
+static void set_fullscreen(struct vo *vo)
 {
     struct priv *vc = vo->priv;
+    int fs = vo->opts->fullscreen;
 
-    Uint32 fs_flags = 0;
-    if (fs) {
-        if (vc->switch_mode)
-            fs_flags |= SDL_WINDOW_FULLSCREEN;
-        else
-            fs_flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    }
+    Uint32 fs_flag;
+    if (vc->switch_mode)
+        fs_flag = SDL_WINDOW_FULLSCREEN;
+    else
+        fs_flag = SDL_WINDOW_FULLSCREEN_DESKTOP;
 
-    if (SDL_SetWindowFullscreen(vc->window, fs_flags)) {
+    Uint32 old_flags = SDL_GetWindowFlags(vc->window);
+    int prev_fs = !!(old_flags & fs_flag);
+    if (fs == prev_fs)
+        return;
+
+    Uint32 flags = 0;
+    if (fs)
+        flags |= fs_flag;
+
+    if (SDL_SetWindowFullscreen(vc->window, flags)) {
         mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_SetWindowFullscreen failed\n");
         return;
     }
@@ -387,7 +395,6 @@ static void set_fullscreen(struct vo *vo, int fs)
     // toggling fullscreen might recreate the window, so better guard for this
     SDL_DisableScreenSaver();
 
-    vo->opts->fs = fs;
     force_resize(vo);
 }
 
@@ -449,8 +456,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     SDL_DisableScreenSaver();
 
-    if (flags & VOFLAG_FULLSCREEN)
-        set_fullscreen(vo, 1);
+    set_fullscreen(vo);
 
     SDL_SetWindowTitle(vc->window, vo_get_window_title(vo));
 
@@ -946,7 +952,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
         check_events(vo);
         return 1;
     case VOCTRL_FULLSCREEN:
-        set_fullscreen(vo, !vo->opts->fs);
+        set_fullscreen(vo);
         return 1;
     case VOCTRL_REDRAW_FRAME:
         draw_image(vo, NULL);

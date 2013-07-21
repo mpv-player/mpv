@@ -63,7 +63,7 @@ struct mp_image_params {
  *   image data. mp_image_make_writeable() will do that copy if required.
  */
 typedef struct mp_image {
-    unsigned int flags;
+    unsigned int flags; // same as fmt.flags
     struct mp_imgfmt_desc fmt;
 
     // fields redundant to fmt, for convenience or compatibility
@@ -131,14 +131,20 @@ struct mp_image *mp_image_new_external_ref(struct mp_image *img, void *arg,
                                            bool (*is_unique)(void *arg),
                                            void (*free)(void *arg));
 
-enum mp_csp mp_image_csp(struct mp_image *img);
-enum mp_csp_levels mp_image_levels(struct mp_image *img);
-
 struct mp_csp_details;
 void mp_image_set_colorspace_details(struct mp_image *image,
                                      struct mp_csp_details *csp);
 
 void mp_image_params_guess_csp(struct mp_image_params *params);
+
+bool mp_image_params_equals(const struct mp_image_params *p1,
+                            const struct mp_image_params *p2);
+
+void mp_image_params_from_image(struct mp_image_params *params,
+                                const struct mp_image *image);
+
+void mp_image_set_params(struct mp_image *image,
+                         const struct mp_image_params *params);
 
 struct AVFrame;
 void mp_image_copy_fields_from_av_frame(struct mp_image *dst,

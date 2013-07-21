@@ -65,87 +65,6 @@ static void resize_window(struct vo_wayland_state *wl,
 
 static void vo_wayland_fullscreen (struct vo *vo);
 
-/*** wayland interface ***/
-
-/* SHELL SURFACE LISTENER  */
-static void ssurface_handle_ping(void *data,
-                                 struct wl_shell_surface *shell_surface,
-                                 uint32_t serial)
-{
-    wl_shell_surface_pong(shell_surface, serial);
-}
-
-static void ssurface_handle_configure(void *data,
-                                      struct wl_shell_surface *shell_surface,
-                                      uint32_t edges,
-                                      int32_t width,
-                                      int32_t height)
-{
-    struct vo_wayland_state *wl = data;
-    resize_window(wl, edges, width, height);
-}
-
-static void ssurface_handle_popup_done(void *data,
-                                       struct wl_shell_surface *shell_surface)
-{
-}
-
-const struct wl_shell_surface_listener shell_surface_listener = {
-    ssurface_handle_ping,
-    ssurface_handle_configure,
-    ssurface_handle_popup_done
-};
-
-/* OUTPUT LISTENER */
-static void output_handle_geometry(void *data,
-                                   struct wl_output *wl_output,
-                                   int32_t x,
-                                   int32_t y,
-                                   int32_t physical_width,
-                                   int32_t physical_height,
-                                   int32_t subpixel,
-                                   const char *make,
-                                   const char *model,
-                                   int32_t transform)
-{
-    /* Ignore transforms for now */
-    switch (transform) {
-        case WL_OUTPUT_TRANSFORM_NORMAL:
-        case WL_OUTPUT_TRANSFORM_90:
-        case WL_OUTPUT_TRANSFORM_180:
-        case WL_OUTPUT_TRANSFORM_270:
-        case WL_OUTPUT_TRANSFORM_FLIPPED:
-        case WL_OUTPUT_TRANSFORM_FLIPPED_90:
-        case WL_OUTPUT_TRANSFORM_FLIPPED_180:
-        case WL_OUTPUT_TRANSFORM_FLIPPED_270:
-        default:
-            break;
-    }
-}
-
-static void output_handle_mode(void *data,
-                               struct wl_output *wl_output,
-                               uint32_t flags,
-                               int32_t width,
-                               int32_t height,
-                               int32_t refresh)
-{
-    struct vo_wayland_output *output = data;
-
-    if (!output)
-        return;
-
-    output->width = width;
-    output->height = height;
-    output->flags = flags;
-}
-
-const struct wl_output_listener output_listener = {
-    output_handle_geometry,
-    output_handle_mode
-};
-
-/* KEY LOOKUP */
 static const struct mp_keymap keymap[] = {
     // special keys
     {XKB_KEY_Pause,     MP_KEY_PAUSE}, {XKB_KEY_Escape, MP_KEY_ESC},
@@ -194,6 +113,84 @@ static const struct mp_keymap keymap[] = {
     {0, 0}
 };
 
+
+/** Wayland listeners **/
+static void ssurface_handle_ping(void *data,
+                                 struct wl_shell_surface *shell_surface,
+                                 uint32_t serial)
+{
+    wl_shell_surface_pong(shell_surface, serial);
+}
+
+static void ssurface_handle_configure(void *data,
+                                      struct wl_shell_surface *shell_surface,
+                                      uint32_t edges,
+                                      int32_t width,
+                                      int32_t height)
+{
+    struct vo_wayland_state *wl = data;
+    resize_window(wl, edges, width, height);
+}
+
+static void ssurface_handle_popup_done(void *data,
+                                       struct wl_shell_surface *shell_surface)
+{
+}
+
+const struct wl_shell_surface_listener shell_surface_listener = {
+    ssurface_handle_ping,
+    ssurface_handle_configure,
+    ssurface_handle_popup_done
+};
+
+static void output_handle_geometry(void *data,
+                                   struct wl_output *wl_output,
+                                   int32_t x,
+                                   int32_t y,
+                                   int32_t physical_width,
+                                   int32_t physical_height,
+                                   int32_t subpixel,
+                                   const char *make,
+                                   const char *model,
+                                   int32_t transform)
+{
+    /* Ignore transforms for now */
+    switch (transform) {
+        case WL_OUTPUT_TRANSFORM_NORMAL:
+        case WL_OUTPUT_TRANSFORM_90:
+        case WL_OUTPUT_TRANSFORM_180:
+        case WL_OUTPUT_TRANSFORM_270:
+        case WL_OUTPUT_TRANSFORM_FLIPPED:
+        case WL_OUTPUT_TRANSFORM_FLIPPED_90:
+        case WL_OUTPUT_TRANSFORM_FLIPPED_180:
+        case WL_OUTPUT_TRANSFORM_FLIPPED_270:
+        default:
+            break;
+    }
+}
+
+static void output_handle_mode(void *data,
+                               struct wl_output *wl_output,
+                               uint32_t flags,
+                               int32_t width,
+                               int32_t height,
+                               int32_t refresh)
+{
+    struct vo_wayland_output *output = data;
+
+    if (!output)
+        return;
+
+    output->width = width;
+    output->height = height;
+    output->flags = flags;
+}
+
+const struct wl_output_listener output_listener = {
+    output_handle_geometry,
+    output_handle_mode
+};
+
 /* KEYBOARD LISTENER */
 static void keyboard_handle_keymap(void *data,
                                    struct wl_keyboard *wl_keyboard,
@@ -201,10 +198,10 @@ static void keyboard_handle_keymap(void *data,
                                    int32_t fd,
                                    uint32_t size)
 {
-    struct vo_wayland_input *input;
+    struct vo_wayland_state *wl = data;
     char *map_str;
 
-    if(!data || format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1) {
+    if (format != WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1) {
         close(fd);
         return;
     }
@@ -215,23 +212,25 @@ static void keyboard_handle_keymap(void *data,
         return;
     }
 
-    input = ((struct vo_wayland_state *) data)->input;
-    input->xkb.keymap = xkb_keymap_new_from_buffer(input->xkb.context,
-            map_str, size, XKB_KEYMAP_FORMAT_TEXT_V1, 0);
+    wl->input.xkb.keymap = xkb_keymap_new_from_buffer(wl->input.xkb.context,
+                                                      map_str,
+                                                      size,
+                                                      XKB_KEYMAP_FORMAT_TEXT_V1,
+                                                      0);
 
     munmap(map_str, size);
     close(fd);
 
-    if (!input->xkb.keymap) {
+    if (!wl->input.xkb.keymap) {
         mp_msg(MSGT_VO, MSGL_ERR, "[wayland] failed to compile keymap.\n");
         return;
     }
 
-    input->xkb.state = xkb_state_new(input->xkb.keymap);
-    if (!input->xkb.state) {
+    wl->input.xkb.state = xkb_state_new(wl->input.xkb.keymap);
+    if (!wl->input.xkb.state) {
         mp_msg(MSGT_VO, MSGL_ERR, "[wayland] failed to create XKB state.\n");
-        xkb_map_unref(input->xkb.keymap);
-        input->xkb.keymap = NULL;
+        xkb_map_unref(wl->input.xkb.keymap);
+        wl->input.xkb.keymap = NULL;
         return;
     }
 }
@@ -259,7 +258,6 @@ static void keyboard_handle_key(void *data,
                                 uint32_t state)
 {
     struct vo_wayland_state *wl = data;
-    struct vo_wayland_input *input = wl->input;
     uint32_t code, num_syms;
     int mpkey;
 
@@ -267,7 +265,7 @@ static void keyboard_handle_key(void *data,
     xkb_keysym_t sym;
 
     code = key + 8;
-    num_syms = xkb_key_get_syms(input->xkb.state, code, &syms);
+    num_syms = xkb_key_get_syms(wl->input.xkb.state, code, &syms);
 
     sym = XKB_KEY_NoSymbol;
     if (num_syms == 1)
@@ -289,10 +287,13 @@ static void keyboard_handle_modifiers(void *data,
                                       uint32_t mods_locked,
                                       uint32_t group)
 {
-    struct vo_wayland_input *input = ((struct vo_wayland_state *) data)->input;
+    struct vo_wayland_state *wl = data;
 
-    xkb_state_update_mask(input->xkb.state, mods_depressed, mods_latched,
-            mods_locked, 0, 0, group);
+    xkb_state_update_mask(wl->input.xkb.state,
+                          mods_depressed,
+                          mods_latched,
+                          mods_locked,
+                          0, 0, group);
 }
 
 const struct wl_keyboard_listener keyboard_listener = {
@@ -312,10 +313,9 @@ static void pointer_handle_enter(void *data,
                                  wl_fixed_t sy_w)
 {
     struct vo_wayland_state *wl = data;
-    struct vo_wayland_display * display = wl->display;
 
-    display->cursor.serial = serial;
-    display->cursor.pointer = pointer;
+    wl->cursor.serial = serial;
+    wl->cursor.pointer = pointer;
 
     /* Release the left button on pointer enter again
      * because after moving the shell surface no release event is sent */
@@ -340,7 +340,7 @@ static void pointer_handle_motion(void *data,
 {
     struct vo_wayland_state *wl = data;
 
-    wl->display->cursor.pointer = pointer;
+    wl->cursor.pointer = pointer;
 
     vo_mouse_movement(wl->vo, wl_fixed_to_int(sx_w),
                               wl_fixed_to_int(sy_w));
@@ -356,11 +356,11 @@ static void pointer_handle_button(void *data,
     struct vo_wayland_state *wl = data;
 
     mp_input_put_key(wl->vo->input_ctx, MP_MOUSE_BTN0 + (button - BTN_LEFT) |
-        ((state == WL_POINTER_BUTTON_STATE_PRESSED)
-            ? MP_KEY_STATE_DOWN : MP_KEY_STATE_UP));
+                    ((state == WL_POINTER_BUTTON_STATE_PRESSED)
+                    ? MP_KEY_STATE_DOWN : MP_KEY_STATE_UP));
 
     if ((button == BTN_LEFT) && (state == WL_POINTER_BUTTON_STATE_PRESSED))
-        wl_shell_surface_move(wl->window->shell_surface, wl->input->seat, serial);
+        wl_shell_surface_move(wl->window.shell_surface, wl->input.seat, serial);
 }
 
 static void pointer_handle_axis(void *data,
@@ -393,23 +393,23 @@ static void seat_handle_capabilities(void *data,
 {
     struct vo_wayland_state *wl = data;
 
-    if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && !wl->input->keyboard) {
-        wl->input->keyboard = wl_seat_get_keyboard(seat);
-        wl_keyboard_set_user_data(wl->input->keyboard, wl);
-        wl_keyboard_add_listener(wl->input->keyboard, &keyboard_listener, wl);
+    if ((caps & WL_SEAT_CAPABILITY_KEYBOARD) && !wl->input.keyboard) {
+        wl->input.keyboard = wl_seat_get_keyboard(seat);
+        wl_keyboard_set_user_data(wl->input.keyboard, wl);
+        wl_keyboard_add_listener(wl->input.keyboard, &keyboard_listener, wl);
     }
-    else if (!(caps & WL_SEAT_CAPABILITY_KEYBOARD) && wl->input->keyboard) {
-        wl_keyboard_destroy(wl->input->keyboard);
-        wl->input->keyboard = NULL;
+    else if (!(caps & WL_SEAT_CAPABILITY_KEYBOARD) && wl->input.keyboard) {
+        wl_keyboard_destroy(wl->input.keyboard);
+        wl->input.keyboard = NULL;
     }
-    if ((caps & WL_SEAT_CAPABILITY_POINTER) && !wl->input->pointer) {
-        wl->input->pointer = wl_seat_get_pointer(seat);
-        wl_pointer_set_user_data(wl->input->pointer, wl);
-        wl_pointer_add_listener(wl->input->pointer, &pointer_listener, wl);
+    if ((caps & WL_SEAT_CAPABILITY_POINTER) && !wl->input.pointer) {
+        wl->input.pointer = wl_seat_get_pointer(seat);
+        wl_pointer_set_user_data(wl->input.pointer, wl);
+        wl_pointer_add_listener(wl->input.pointer, &pointer_listener, wl);
     }
-    else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && wl->input->pointer) {
-        wl_pointer_destroy(wl->input->pointer);
-        wl->input->pointer = NULL;
+    else if (!(caps & WL_SEAT_CAPABILITY_POINTER) && wl->input.pointer) {
+        wl_pointer_destroy(wl->input.pointer);
+        wl->input.pointer = NULL;
     }
 }
 
@@ -422,8 +422,8 @@ static void shm_handle_format(void *data,
                               struct wl_shm *wl_shm,
                               uint32_t format)
 {
-    struct vo_wayland_display *d = data;
-    d->formats |= (1 << format);
+    struct vo_wayland_state *wl = data;
+    wl->display.formats |= (1 << format);
 }
 
 const struct wl_shm_listener shm_listener = {
@@ -437,50 +437,45 @@ static void registry_handle_global (void *data,
                                     uint32_t version)
 {
     struct vo_wayland_state *wl = data;
-    struct vo_wayland_display *d = wl->display;
+    struct wl_registry *reg = wl->display.registry;
 
     if (strcmp(interface, "wl_compositor") == 0) {
 
-        d->compositor = wl_registry_bind(d->registry, id,
-                &wl_compositor_interface, 1);
+        wl->display.compositor = wl_registry_bind(reg, id,
+                                                  &wl_compositor_interface, 1);
     }
 
     else if (strcmp(interface, "wl_shell") == 0) {
 
-        d->shell = wl_registry_bind(d->registry, id, &wl_shell_interface, 1);
+        wl->display.shell = wl_registry_bind(reg, id, &wl_shell_interface, 1);
     }
 
     else if (strcmp(interface, "wl_shm") == 0) {
 
-        d->cursor.shm = wl_registry_bind(d->registry, id, &wl_shm_interface, 1);
-        d->cursor.theme = wl_cursor_theme_load(NULL, 32, d->cursor.shm);
-        d->cursor.default_cursor = wl_cursor_theme_get_cursor(d->cursor.theme,
+        wl->cursor.shm = wl_registry_bind(reg, id, &wl_shm_interface, 1);
+        wl->cursor.theme = wl_cursor_theme_load(NULL, 32, wl->cursor.shm);
+        wl->cursor.default_cursor = wl_cursor_theme_get_cursor(wl->cursor.theme,
                                                               "left_ptr");
-        wl_shm_add_listener(d->cursor.shm, &shm_listener, d);
+        wl_shm_add_listener(wl->cursor.shm, &shm_listener, wl);
     }
 
     else if (strcmp(interface, "wl_output") == 0) {
 
-        struct vo_wayland_output *output = talloc_zero(d,
-                struct vo_wayland_output);
+        struct vo_wayland_output *output =
+            talloc_zero(wl, struct vo_wayland_output);
+
         output->id = id;
-        output->output = wl_registry_bind(d->registry,
-                                          id,
-                                          &wl_output_interface,
-                                          1);
+        output->output = wl_registry_bind(reg, id, &wl_output_interface, 1);
 
         wl_output_add_listener(output->output, &output_listener, output);
-        wl_list_insert(&d->output_list, &output->link);
+        wl_list_insert(&wl->display.output_list, &output->link);
     }
 
     else if (strcmp(interface, "wl_seat") == 0) {
 
-        wl->input->seat = wl_registry_bind(d->registry,
-                                           id,
-                                           &wl_seat_interface,
-                                           1);
+        wl->input.seat = wl_registry_bind(reg, id, &wl_seat_interface, 1);
 
-        wl_seat_add_listener(wl->input->seat, &seat_listener, wl);
+        wl_seat_add_listener(wl->input.seat, &seat_listener, wl);
     }
 }
 
@@ -518,31 +513,29 @@ static int lookupkey(int key)
 
 static void hide_cursor (struct vo_wayland_state *wl)
 {
-    struct vo_wayland_display *display = wl->display;
-    if (!display->cursor.pointer)
+    if (!wl->cursor.pointer)
         return;
 
-    wl_pointer_set_cursor(display->cursor.pointer, display->cursor.serial,
-            NULL, 0, 0);
+    wl_pointer_set_cursor(wl->cursor.pointer, wl->cursor.serial, NULL, 0, 0);
 }
 
 static void show_cursor (struct vo_wayland_state *wl)
 {
-    struct vo_wayland_display *display = wl->display;
-    if (!display->cursor.pointer)
+    if (!wl->cursor.pointer)
         return;
 
-    struct wl_buffer *buffer;
-    struct wl_cursor_image *image;
+    struct wl_cursor_image *image  = wl->cursor.default_cursor->images[0];
+    struct wl_buffer *buffer = wl_cursor_image_get_buffer(image);
 
-    image = display->cursor.default_cursor->images[0];
-    buffer = wl_cursor_image_get_buffer(image);
-    wl_pointer_set_cursor(display->cursor.pointer, display->cursor.serial,
-            display->cursor.surface, image->hotspot_x, image->hotspot_y);
-    wl_surface_attach(display->cursor.surface, buffer, 0, 0);
-    wl_surface_damage(display->cursor.surface, 0, 0,
-            image->width, image->height);
-    wl_surface_commit(display->cursor.surface);
+    wl_pointer_set_cursor(wl->cursor.pointer,
+                          wl->cursor.serial,
+                          wl->cursor.surface,
+                          image->hotspot_x,
+                          image->hotspot_y);
+
+    wl_surface_attach(wl->cursor.surface, buffer, 0, 0);
+    wl_surface_damage(wl->cursor.surface, 0, 0, image->width, image->height);
+    wl_surface_commit(wl->cursor.surface);
 }
 
 static void resize_window(struct vo_wayland_state *wl,
@@ -550,10 +543,10 @@ static void resize_window(struct vo_wayland_state *wl,
                           int32_t width,
                           int32_t height)
 {
-    struct vo_wayland_window *w = wl->window;
-    if (w->resize_func && w->resize_func_data) {
-        w->resize_func(wl, edges, width, height, w->resize_func_data);
-        w->events |= VO_EVENT_RESIZE;
+    if (wl->window.resize_func && wl->window.resize_func_data) {
+        wl->window.resize_func(wl, edges, width, height,
+                               wl->window.resize_func_data);
+        wl->window.events |= VO_EVENT_RESIZE;
     }
     else
         mp_msg(MSGT_VO, MSGL_WARN, "[wayland] No resizing possible!\n");
@@ -562,104 +555,101 @@ static void resize_window(struct vo_wayland_state *wl,
 
 static bool create_display (struct vo_wayland_state *wl)
 {
-    struct vo_wayland_display *d = wl->display;
+    wl->display.display = wl_display_connect(NULL);
 
-    if (d)
-        return true;
-
-    d = talloc_zero(wl, struct vo_wayland_display);
-    d->display = wl_display_connect(NULL);
-
-    wl_list_init(&d->output_list);
-
-    if (!d->display)
+    if (!wl->display.display)
         return false;
 
-    wl->display = d;
-    d->registry = wl_display_get_registry(d->display);
-    wl_registry_add_listener(d->registry, &registry_listener, wl);
+    wl_list_init(&wl->display.output_list);
+    wl->display.registry = wl_display_get_registry(wl->display.display);
+    wl_registry_add_listener(wl->display.registry, &registry_listener, wl);
 
-    wl_display_dispatch(d->display);
+    wl_display_dispatch(wl->display.display);
 
-    d->cursor.surface =
-        wl_compositor_create_surface(d->compositor);
-
-    d->display_fd = wl_display_get_fd(d->display);
+    wl->display.display_fd = wl_display_get_fd(wl->display.display);
 
     return true;
 }
 
 static void destroy_display (struct vo_wayland_state *wl)
 {
+    if (wl->display.shell)
+        wl_shell_destroy(wl->display.shell);
 
-    if (wl->display->cursor.theme)
-        wl_cursor_theme_destroy(wl->display->cursor.theme);
+    if (wl->display.compositor)
+        wl_compositor_destroy(wl->display.compositor);
 
-    if (wl->display->cursor.surface)
-        wl_surface_destroy(wl->display->cursor.surface);
-
-    if (wl->display->shell)
-        wl_shell_destroy(wl->display->shell);
-
-    if (wl->display->compositor)
-        wl_compositor_destroy(wl->display->compositor);
-
-    wl_registry_destroy(wl->display->registry);
-    wl_display_flush(wl->display->display);
-    wl_display_disconnect(wl->display->display);
+    wl_registry_destroy(wl->display.registry);
+    wl_display_flush(wl->display.display);
+    wl_display_disconnect(wl->display.display);
 }
 
-static void create_window (struct vo_wayland_state *wl)
+static bool create_window (struct vo_wayland_state *wl)
 {
-    if (wl->window)
-        return;
+    wl->window.surface = wl_compositor_create_surface(wl->display.compositor);
+    wl->window.shell_surface = wl_shell_get_shell_surface(wl->display.shell,
+                                                          wl->window.surface);
 
-    wl->window = talloc_zero(wl, struct vo_wayland_window);
+    if (!wl->window.shell_surface)
+        return false;
 
-    wl->window->surface = wl_compositor_create_surface(wl->display->compositor);
-    wl->window->shell_surface = wl_shell_get_shell_surface(wl->display->shell,
-            wl->window->surface);
+    wl_shell_surface_add_listener(wl->window.shell_surface,
+                                  &shell_surface_listener, wl);
 
-    if (wl->window->shell_surface)
-        wl_shell_surface_add_listener(wl->window->shell_surface,
-                &shell_surface_listener, wl);
+    wl_shell_surface_set_toplevel(wl->window.shell_surface);
+    wl_shell_surface_set_class(wl->window.shell_surface, "mpv");
 
-    wl_shell_surface_set_toplevel(wl->window->shell_surface);
-    wl_shell_surface_set_class(wl->window->shell_surface, "mpv");
+    return true;
 }
 
 static void destroy_window (struct vo_wayland_state *wl)
 {
-    wl_shell_surface_destroy(wl->window->shell_surface);
-    wl_surface_destroy(wl->window->surface);
+    wl_shell_surface_destroy(wl->window.shell_surface);
+    wl_surface_destroy(wl->window.surface);
 }
 
-static void create_input (struct vo_wayland_state *wl)
+static bool create_cursor (struct vo_wayland_state *wl)
 {
-    if (wl->input)
-        return;
+    wl->cursor.surface =
+        wl_compositor_create_surface(wl->display.compositor);
 
-    wl->input = talloc_zero(wl, struct vo_wayland_input);
-
-    wl->input->xkb.context = xkb_context_new(0);
-    if (wl->input->xkb.context == NULL) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[wayland] failed to initialize input.\n");
-        return;
-    }
+    return wl->cursor.surface != NULL;
 }
+
+static void destroy_cursor (struct vo_wayland_state *wl)
+{
+    if (wl->cursor.theme)
+        wl_cursor_theme_destroy(wl->cursor.theme);
+
+    if (wl->cursor.surface)
+        wl_surface_destroy(wl->cursor.surface);
+}
+
+static bool create_input (struct vo_wayland_state *wl)
+{
+    wl->input.xkb.context = xkb_context_new(0);
+
+    if (!wl->input.xkb.context) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[wayland] failed to initialize input.\n");
+        return false;
+    }
+
+    return true;
+}
+
 
 static void destroy_input (struct vo_wayland_state *wl)
 {
-    if (wl->input->keyboard)
-        wl_keyboard_destroy(wl->input->keyboard);
+    if (wl->input.keyboard)
+        wl_keyboard_destroy(wl->input.keyboard);
 
-    if (wl->input->pointer)
-        wl_pointer_destroy(wl->input->pointer);
+    if (wl->input.pointer)
+        wl_pointer_destroy(wl->input.pointer);
 
-    if (wl->input->seat)
-        wl_seat_destroy(wl->input->seat);
+    if (wl->input.seat)
+        wl_seat_destroy(wl->input.seat);
 
-    xkb_context_unref(wl->input->xkb.context);
+    xkb_context_unref(wl->input.xkb.context);
 }
 
 /*** mplayer2 interface ***/
@@ -670,41 +660,39 @@ int vo_wayland_init (struct vo *vo)
     struct vo_wayland_state *wl = vo->wayland;
     wl->vo = vo;
 
-    create_input(wl);
-
-    if (!create_display(wl)) {
+    if (!create_input(wl)
+        || !create_display(wl)
+        || !create_window(wl)
+        || !create_cursor(wl))
+    {
         mp_msg(MSGT_VO, MSGL_ERR, "[wayland] failed to initialize display.\n");
         return false;
     }
 
-    vo->event_fd = wl->display->display_fd;
+    vo->event_fd = wl->display.display_fd;
 
-    create_window(wl);
     return true;
 }
 
 void vo_wayland_uninit (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
-    destroy_input(wl);
+    destroy_cursor(wl);
     destroy_window(wl);
     destroy_display(wl);
+    destroy_input(wl);
     talloc_free(wl);
     vo->wayland = NULL;
 }
 
 static void vo_wayland_ontop (struct vo *vo)
 {
-    struct vo_wayland_state *wl = vo->wayland;
-
     vo->opts->ontop = !vo->opts->ontop;
+    vo->opts->fullscreen = !vo->opts->fullscreen;
 
-    if (vo->opts->fs)
-        vo_wayland_fullscreen(vo);
-        /* use the already existing code to leave fullscreen mode and go into
-         * toplevel mode */
-    else
-        wl_shell_surface_set_toplevel(wl->window->shell_surface);
+    /* use the already existing code to leave fullscreen mode and go into
+     * toplevel mode */
+    vo_wayland_fullscreen(vo);
 }
 
 static void vo_wayland_border (struct vo *vo)
@@ -721,41 +709,36 @@ static void vo_wayland_border (struct vo *vo)
 static void vo_wayland_fullscreen (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
-    if (!wl->window || !wl->display->shell)
+    if (!wl->display.shell)
         return;
 
-    struct wl_output *fs_output = wl->display->fs_output;
+    struct wl_output *fs_output = wl->display.fs_output;
 
-    if (!vo->opts->fs) {
-        wl->window->p_width = wl->window->width;
-        wl->window->p_height = wl->window->height;
-        wl_shell_surface_set_fullscreen(wl->window->shell_surface,
+    if (vo->opts->fullscreen) {
+        wl->window.p_width = wl->window.width;
+        wl->window.p_height = wl->window.height;
+        wl_shell_surface_set_fullscreen(wl->window.shell_surface,
                 WL_SHELL_SURFACE_FULLSCREEN_METHOD_DEFAULT,
                 0, fs_output);
-
-        wl->window->type = TYPE_FULLSCREEN;
-        vo->opts->fs = true;
     }
 
     else {
-        wl_shell_surface_set_toplevel(wl->window->shell_surface);
-        resize_window(wl, 0, wl->window->p_width, wl->window->p_height);
-        wl->window->type = TYPE_TOPLEVEL;
-        vo->opts->fs = false;
+        wl_shell_surface_set_toplevel(wl->window.shell_surface);
+        resize_window(wl, 0, wl->window.p_width, wl->window.p_height);
     }
 }
 
 static int vo_wayland_check_events (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
-    struct wl_display *dp = wl->display->display;
+    struct wl_display *dp = wl->display.display;
     int ret;
 
     wl_display_dispatch_pending(dp);
     wl_display_flush(dp);
 
     struct pollfd fd = {
-        wl->display->display_fd,
+        wl->display.display_fd,
         POLLIN | POLLOUT | POLLERR | POLLHUP,
         0
     };
@@ -774,8 +757,8 @@ static int vo_wayland_check_events (struct vo *vo)
             wl_display_flush(dp);
     }
 
-    ret = wl->window->events;
-    wl->window->events = 0;
+    ret = wl->window.events;
+    wl->window.events = 0;
 
     return ret;
 }
@@ -786,7 +769,7 @@ static void vo_wayland_update_screeninfo (struct vo *vo)
     struct mp_vo_opts *opts = vo->opts;
     bool mode_received = false;
 
-    wl_display_roundtrip(wl->display->display);
+    wl_display_roundtrip(wl->display.display);
 
     vo->xinerama_x = vo->xinerama_y = 0;
 
@@ -796,7 +779,7 @@ static void vo_wayland_update_screeninfo (struct vo *vo)
     struct vo_wayland_output *first_output = NULL;
     struct vo_wayland_output *fsscreen_output = NULL;
 
-    wl_list_for_each_reverse(output, &wl->display->output_list, link) {
+    wl_list_for_each_reverse(output, &wl->display.output_list, link) {
         if (!output || !output->width)
             continue;
 
@@ -817,12 +800,12 @@ static void vo_wayland_update_screeninfo (struct vo *vo)
     }
 
     if (fsscreen_output) {
-        wl->display->fs_output = fsscreen_output->output;
+        wl->display.fs_output = fsscreen_output->output;
         opts->screenwidth = fsscreen_output->width;
         opts->screenheight = fsscreen_output->height;
     }
     else {
-        wl->display->fs_output = NULL; /* current output is always 0 */
+        wl->display.fs_output = NULL; /* current output is always 0 */
 
         if (first_output) {
             opts->screenwidth = first_output->width;
@@ -836,7 +819,7 @@ static void vo_wayland_update_screeninfo (struct vo *vo)
 int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
 {
     struct vo_wayland_state *wl = vo->wayland;
-    wl_display_dispatch_pending(wl->display->display);
+    wl_display_dispatch_pending(wl->display.display);
 
     switch (request) {
     case VOCTRL_CHECK_EVENTS:
@@ -858,17 +841,17 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
         return VO_TRUE;
     case VOCTRL_SET_CURSOR_VISIBILITY:
         if (*(bool *)arg) {
-            if (!wl->display->cursor.visible)
+            if (!wl->cursor.visible)
                 show_cursor(wl);
         }
         else {
-            if (wl->display->cursor.visible)
+            if (wl->cursor.visible)
                 hide_cursor(wl);
         }
-        wl->display->cursor.visible = *(bool *)arg;
+        wl->cursor.visible = *(bool *)arg;
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE:
-        wl_shell_surface_set_title(wl->window->shell_surface, (char *) arg);
+        wl_shell_surface_set_title(wl->window.shell_surface, (char *) arg);
         return VO_TRUE;
     }
     return VO_NOTIMPL;
@@ -877,15 +860,15 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
 bool vo_wayland_config (struct vo *vo, uint32_t d_width,
                         uint32_t d_height, uint32_t flags)
 {
-    struct vo_wayland_window *w = vo->wayland->window;
+    struct vo_wayland_state *wl = vo->wayland;
 
-    w->width = d_width;
-    w->height = d_height;
+    wl->window.width = d_width;
+    wl->window.height = d_height;
+    wl->window.p_width = d_width;
+    wl->window.p_height = d_height;
+    wl->window.aspect = wl->window.width / (float) MPMAX(wl->window.height, 1);
 
-    w->aspect = w->width / (float) MPMAX(w->height, 1);
-
-    if ((VOFLAG_FULLSCREEN & flags) && w->type != TYPE_FULLSCREEN)
-        vo_wayland_fullscreen(vo);
+    vo_wayland_fullscreen(vo);
 
     return true;
 }

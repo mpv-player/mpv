@@ -118,7 +118,6 @@ struct voctrl_screenshot_args {
 #define VO_NOTAVAIL	-2
 #define VO_NOTIMPL	-3
 
-#define VOFLAG_FULLSCREEN	0x01
 #define VOFLAG_FLIPPING		0x08
 #define VOFLAG_HIDDEN		0x10  //< Use to create a hidden window
 #define VOFLAG_STEREO		0x20  //< Use to create a stereo-capable window
@@ -283,7 +282,6 @@ struct vo {
         int prew; // prescaled width
         int preh; // prescaled height
         float par; // pixel aspect ratio out of orgw/orgh and prew/preh
-        float asp; // final video display aspect
     } aspdat;
 
     char *window_title;

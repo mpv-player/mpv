@@ -127,10 +127,9 @@ static void mp_image_alloc_planes(struct mp_image *mpi)
 
 void mp_image_setfmt(struct mp_image *mpi, unsigned int out_fmt)
 {
-    mpi->flags &= ~MP_IMGFLAG_FMT_MASK;
     struct mp_imgfmt_desc fmt = mp_imgfmt_get_desc(out_fmt);
     mpi->fmt = fmt;
-    mpi->flags |= fmt.flags;
+    mpi->flags = fmt.flags;
     mpi->imgfmt = fmt.id;
     mpi->chroma_x_shift = fmt.chroma_xs;
     mpi->chroma_y_shift = fmt.chroma_ys;
@@ -405,22 +404,18 @@ void mp_image_vflip(struct mp_image *img)
     }
 }
 
-enum mp_csp mp_image_csp(struct mp_image *img)
+bool mp_image_params_equals(const struct mp_image_params *p1,
+                            const struct mp_image_params *p2)
 {
-    if (img->colorspace != MP_CSP_AUTO)
-        return img->colorspace;
-    return (img->flags & MP_IMGFLAG_YUV) ? MP_CSP_BT_601 : MP_CSP_RGB;
+    return p1->imgfmt == p2->imgfmt &&
+           p1->w == p2->w && p1->h == p2->h &&
+           p1->d_w == p2->d_w && p1->d_h == p2->d_h &&
+           p1->colorspace == p2->colorspace &&
+           p1->colorlevels == p2->colorlevels;
 }
 
-enum mp_csp_levels mp_image_levels(struct mp_image *img)
-{
-    if (img->levels != MP_CSP_LEVELS_AUTO)
-        return img->levels;
-    return (img->flags & MP_IMGFLAG_YUV) ? MP_CSP_LEVELS_TV : MP_CSP_LEVELS_PC;
-}
-
-static void mp_image_params_from_image(struct mp_image_params *params,
-                                       const struct mp_image *image)
+void mp_image_params_from_image(struct mp_image_params *params,
+                                const struct mp_image *image)
 {
     // (Ideally mp_image should use mp_image_params directly instead)
     *params = (struct mp_image_params) {
@@ -432,6 +427,17 @@ static void mp_image_params_from_image(struct mp_image_params *params,
         .colorspace = image->colorspace,
         .colorlevels = image->levels,
     };
+}
+
+void mp_image_set_params(struct mp_image *image,
+                         const struct mp_image_params *params)
+{
+    mp_image_setfmt(image, params->imgfmt);
+    mp_image_set_size(image, params->w, params->h);
+    mp_image_set_display_size(image, params->d_w, params->d_h);
+    image->colorspace = params->colorspace;
+    image->levels = params->colorlevels;
+    image->chroma_location = params->chroma_location;
 }
 
 void mp_image_set_colorspace_details(struct mp_image *image,

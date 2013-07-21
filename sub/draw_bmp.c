@@ -22,6 +22,7 @@
 #include <math.h>
 #include <inttypes.h>
 
+#include <libswscale/swscale.h>
 #include <libavutil/common.h>
 
 #include "core/mp_common.h"
