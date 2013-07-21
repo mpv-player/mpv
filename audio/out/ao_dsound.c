@@ -41,7 +41,7 @@
 #include "audio/reorder_ch.h"
 #include "core/mp_msg.h"
 #include "osdep/timer.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 
 /**
 \todo use the definitions from the win32 api headers when they define these
@@ -96,6 +96,8 @@ struct priv {
     int device_index;
 
     int outburst;                   ///play in multiple of chunks of this size
+
+    int cfg_device;
 };
 
 static float get_delay(struct ao *ao);
@@ -194,7 +196,7 @@ static BOOL CALLBACK DirectSoundEnum(LPGUID guid, LPCSTR desc, LPCSTR module,
 \brief initilize direct sound
 \return 0 if error, 1 if ok
 */
-static int InitDirectSound(struct ao *ao, char *params)
+static int InitDirectSound(struct ao *ao)
 {
     struct priv *p = ao->priv;
 
@@ -204,14 +206,7 @@ static int InitDirectSound(struct ao *ao, char *params)
     HRESULT (WINAPI *OurDirectSoundCreate)(LPGUID, LPDIRECTSOUND *, LPUNKNOWN);
     HRESULT (WINAPI *OurDirectSoundEnumerate)(LPDSENUMCALLBACKA, LPVOID);
     p->device_index = 0;
-    const opt_t subopts[] = {
-        {"device", OPT_ARG_INT, &p->device_num, NULL},
-        {NULL}
-    };
-    if (subopt_parse(params, subopts) != 0) {
-        print_help();
-        return 0;
-    }
+    p->device_num = p->cfg_device;
 
     p->hdsound_dll = LoadLibrary("DSOUND.DLL");
     if (p->hdsound_dll == NULL) {
@@ -398,12 +393,10 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 */
 static int init(struct ao *ao, char *params)
 {
-    struct priv *p = talloc_zero(ao, struct priv);
+    struct priv *p = ao->priv;
     int res;
 
-    ao->priv = p;
-
-    if (!InitDirectSound(ao, params))
+    if (!InitDirectSound(ao))
         return -1;
 
     ao->no_persistent_volume = true;
@@ -662,6 +655,8 @@ static float get_delay(struct ao *ao)
     return (float)(p->buffer_size - space) / (float)ao->bps;
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct ao_driver audio_out_dsound = {
     .info = &(const struct ao_info) {
         "Windows DirectSound audio output",
@@ -678,4 +673,9 @@ const struct ao_driver audio_out_dsound = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .reset     = reset,
+    .priv_size = sizeof(struct priv),
+    .options = (const struct m_option[]) {
+        OPT_INT("device", cfg_device, 0),
+        {0}
+    },
 };
