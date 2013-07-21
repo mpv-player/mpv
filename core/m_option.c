@@ -2027,6 +2027,9 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
         if (r > 0 && ret) {
             MP_TARRAY_APPEND(NULL, args, num_args, bstrto0(NULL, fname));
             MP_TARRAY_APPEND(NULL, args, num_args, bstrto0(NULL, fval));
+            MP_TARRAY_APPEND(NULL, args, num_args, NULL);
+            MP_TARRAY_APPEND(NULL, args, num_args, NULL);
+            num_args -= 2;
         }
 
         if (!bstr_eatstart0(pstr, ":"))
@@ -2035,8 +2038,6 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
 
     if (ret) {
         if (num_args > 0) {
-            for (int n = 0; n < 2; n++)
-                MP_TARRAY_APPEND(NULL, args, num_args, NULL);
             *ret = args;
             args = NULL;
         } else {
@@ -2051,6 +2052,7 @@ print_help: ;
     r = M_OPT_EXIT - 1;
 
 exit:
+    free_str_list(&args);
     talloc_free(config);
     return r;
 }
