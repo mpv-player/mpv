@@ -53,6 +53,10 @@
 #include "vcd_read.h"
 #endif
 
+#ifndef vcd_close
+#define vcd_close(priv) (close(((mp_vcd_priv_t*)priv)->fd))
+#endif
+
 extern char *cdrom_device;
 
 static struct stream_priv_s {
@@ -95,9 +99,8 @@ static int seek(stream_t *s,int64_t newpos) {
 }
 
 static void close_s(stream_t *stream) {
-  mp_vcd_priv_t *p = stream->priv;
-  close(p->fd);
-  free(p);
+  vcd_close(stream->priv);
+  free(stream->priv);
 }
 
 static int open_s(stream_t *stream,int mode, void* opts)

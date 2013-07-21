@@ -132,6 +132,8 @@ static mp_vcd_priv_t* vcd_read_toc(int fd)
     return vcd;
 }
 
+#define vcd_close(priv) (CloseHandle(((mp_vcd_priv_t*)priv)->hd))
+
 static int vcd_read(mp_vcd_priv_t* vcd, char *mem)
 {
     DWORD dwBytesReturned;
