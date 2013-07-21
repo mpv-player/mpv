@@ -817,7 +817,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 @synthesize mouseDown = _mouse_down;
 // mpv uses flipped coordinates, because X11 uses those. So let's just use them
 // as well without having to do any coordinate conversion of mouse positions.
-- (BOOL) isFlipped { return YES; }
+- (BOOL)isFlipped { return YES; }
 
 - (void)updateTrackingAreas
 {
@@ -948,7 +948,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     cocoa_put_key_with_modifiers(mp_key | state, [event modifierFlags]);
 }
 
-- (void)drawRect: (NSRect)rect
+- (void)drawRect:(NSRect)rect
 {
     struct vo *vo = [self videoOutput];
 
