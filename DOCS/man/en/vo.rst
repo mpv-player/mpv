@@ -54,6 +54,13 @@ Available video output drivers are:
         auto
           Let Xv draw the colorkey.
 
+    ``colorkey=<number>``
+        Changes the colorkey to an RGB value of your choice. ``0x000000`` is
+        black and ``0xffffff`` is white.
+
+    ``no-colorkey``
+        Disables colorkeying.
+
 ``x11`` (X11 only)
     Shared memory video output driver without hardware acceleration that works
     whenever X11 is present.

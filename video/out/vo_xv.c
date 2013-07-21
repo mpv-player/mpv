@@ -76,6 +76,7 @@ struct xvctx {
         int method; // CK_METHOD_* constants
         int source; // CK_SRC_* constants
     } xv_ck_info;
+    int colorkey;
     unsigned long xv_colorkey;
     int xv_port;
     int cfg_xv_adaptor;
@@ -326,7 +327,7 @@ static int xv_init_colorkey(struct vo *vo)
 
     /* check if colorkeying is needed */
     xv_atom = xv_intern_atom_if_exists(vo, "XV_COLORKEY");
-    if (xv_atom != None && !(vo->opts->colorkey & 0xFF000000)) {
+    if (xv_atom != None && !(ctx->colorkey & 0xFF000000)) {
         if (ctx->xv_ck_info.source == CK_SRC_CUR) {
             int colorkey_ret;
 
@@ -340,14 +341,14 @@ static int xv_init_colorkey(struct vo *vo)
                 return 0; // error getting colorkey
             }
         } else {
-            ctx->xv_colorkey = vo->opts->colorkey;
+            ctx->xv_colorkey = ctx->colorkey;
 
             /* check if we have to set the colorkey too */
             if (ctx->xv_ck_info.source == CK_SRC_SET) {
                 xv_atom = XInternAtom(display, "XV_COLORKEY", False);
 
                 rez = XvSetPortAttribute(display, ctx->xv_port, xv_atom,
-                                         vo->opts->colorkey);
+                                         ctx->colorkey);
                 if (rez != Success) {
                     mp_msg(MSGT_VO, MSGL_FATAL, "[xv] Couldn't set colorkey!\n");
                     return 0; // error setting colorkey
@@ -899,6 +900,8 @@ const struct vo_driver video_out_xv = {
     .priv_defaults = &(const struct xvctx) {
         .cfg_xv_adaptor = -1,
         .xv_ck_info = {CK_METHOD_MANUALFILL, CK_SRC_CUR},
+        .colorkey = 0x0000ff00, // default colorkey is green
+                    // (0xff000000 means that colorkey has been disabled)
     },
     .options = (const struct m_option[]) {
         OPT_INT("port", xv_port, M_OPT_MIN, .min = 0),
@@ -911,6 +914,8 @@ const struct vo_driver video_out_xv = {
                    ({"bg", CK_METHOD_BACKGROUND},
                     {"man", CK_METHOD_MANUALFILL},
                     {"auto", CK_METHOD_AUTOPAINT})),
+        OPT_INT("colorkey", colorkey, 0),
+        OPT_FLAG_STORE("no-colorkey", colorkey, 0, 0x1000000),
         {0}
     },
 };

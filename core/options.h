@@ -29,8 +29,6 @@ typedef struct mp_vo_opts {
     int keepaspect;
     int border;
 
-    int colorkey;
-
     int nomouse_input;
     int enable_mouse_movements;
     int cursor_autohide_delay;

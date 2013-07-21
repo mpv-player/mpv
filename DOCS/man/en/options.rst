@@ -524,11 +524,6 @@
         It is advisable to use your graphics driver's color range option
         instead, if available.
 
-``--colorkey=<number>``
-    Changes the colorkey to an RGB value of your choice. ``0x000000`` is black
-    and ``0xffffff`` is white. Only supported by the ``xv`` (see
-    ``--vo=xv:ck``) video output driver. See also ``--no-colorkey``.
-
 ``--consolecontrols``, ``--no-consolecontrols``
     ``--no-consolecontrols`` prevents the player from reading key events from
     standard input. Useful when reading data from standard input. This is
@@ -1279,10 +1274,6 @@
 
 ``--no-cache``
     Turn off input stream caching. See ``--cache``.
-
-``--no-colorkey``
-    Disables colorkeying. Only supported by the xv (see ``--vo=xv:ck``) video
-    output driver.
 
 ``--no-config``
     Do not load default configuration files. This prevents loading of

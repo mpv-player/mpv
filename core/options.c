@@ -557,8 +557,6 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("fs", vo.fullscreen, 0),
     // set fullscreen switch method (workaround for buggy WMs)
     OPT_INTRANGE("fsmode-dontuse", vo.fsmode, 0, 31, 4096),
-    OPT_INT("colorkey", vo.colorkey, 0),
-    OPT_FLAG_STORE("no-colorkey", vo.colorkey, 0, 0x1000000),
     OPT_FLAG("native-keyrepeat", vo.native_keyrepeat, 0),
     OPT_FLOATRANGE("panscan", vo.panscan, 0, 0.0, 1.0),
     OPT_FLOATRANGE("panscanrange", vo.panscanrange, 0, -19.0, 99.0),
@@ -739,8 +737,6 @@ const struct MPOpts mp_default_opts = {
         .panscan = 0.0f,
         .keepaspect = 1,
         .border = 1,
-        .colorkey = 0x0000ff00, // default colorkey is green
-                    // (0xff000000 means that colorkey has been disabled)
         .WinID = -1,
     },
     .wintitle = "mpv - ${media-title}",
