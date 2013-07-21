@@ -30,6 +30,15 @@ Available audio output drivers are:
     ``device=<device>``
         Sets the device name. For ac3 output via S/PDIF, use an "iec958" or
         "spdif" device, unless you really know how to set it correctly.
+    ``mixer-device=<device>``
+        Set the mixer device used with ``--no-softvol`` (default: ``default``).
+    ``mixer-name=<name>``
+        Set the name of the mixer element (default: ``Master``). This is for
+        example ``PCM`` or ``Master``.
+    ``mixer-index=<number>``
+        Set the index of the mixer channel (default: 0). Consider the output
+        "``amixer scontrols``", then the index is the number that follows the
+        name of the element.
 
     .. note::
 
@@ -47,7 +56,9 @@ Available audio output drivers are:
     ``<mixer-device>``
         Sets the audio mixer device (default: ``/dev/mixer``).
     ``<mixer-channel>``
-        Sets the audio mixer channel (default: ``pcm``).
+        Sets the audio mixer channel (default: ``pcm``). Other valid values
+        include **vol, pcm, line**. For a complete list of options look for
+        ``SOUND_DEVICE_NAMES`` in ``/usr/include/linux/soundcard.h``.
 
 ``jack``
     JACK (Jack Audio Connection Kit) audio output driver

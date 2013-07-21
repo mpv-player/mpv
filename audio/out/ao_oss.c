@@ -193,10 +193,10 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 // return: 0=success -1=fail
 static int init(struct ao *ao, char *params)
 {
-    struct MPOpts *opts = ao->opts;
     char *mixer_channels[SOUND_MIXER_NRDEVICES] = SOUND_DEVICE_NAMES;
     int oss_format;
-    char *mdev = opts->mixer_device, *mchan = opts->mixer_channel;
+    char *mdev = PATH_DEV_MIXER;
+    char *mchan = talloc_strdup(ao, mixer_channels[SOUND_MIXER_PCM]);
 
     mp_msg(MSGT_AO, MSGL_V, "ao2: %d Hz  %d chans  %s\n", ao->samplerate,
            ao->channels.num, af_fmt2str_short(ao->format));
@@ -205,8 +205,6 @@ static int init(struct ao *ao, char *params)
     *p = (struct priv) {
         .dsp = PATH_DEV_DSP,
         .audio_fd = -1,
-        .oss_mixer_device = mdev ? mdev : PATH_DEV_MIXER,
-        .oss_mixer_channel = SOUND_MIXER_PCM,
         .audio_delay_method = 2,
         .buffersize = -1,
         .outburst = 512,
@@ -227,6 +225,7 @@ static int init(struct ao *ao, char *params)
         }
         p->dsp = talloc_strdup(ao, params);
     }
+    p->oss_mixer_device = talloc_strdup(p, mdev);
 
     if (mchan) {
         int fd, devs, i;

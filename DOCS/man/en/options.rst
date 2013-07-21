@@ -1202,24 +1202,6 @@
     :fps=<value>:  output fps (default: 25)
     :type=<value>: input file type (available: jpeg, png, tga, sgi)
 
-``--mixer=<device>``
-    Use a mixer device different from the default ``/dev/mixer``. For ALSA
-    this is the mixer name.
-
-``--mixer-channel=<name[,index]>``
-    (``--ao=oss`` and ``--ao=alsa`` only)
-    This option will tell mpv to use a different channel for controlling
-    volume than the default PCM. Options for OSS include **vol, pcm, line**.
-    For a complete list of options look for ``SOUND_DEVICE_NAMES`` in
-    ``/usr/include/linux/soundcard.h``. For ALSA, you can use the names e.g.
-    "``amixer scontrols``" displays, like **Master, Line, PCM**.
-
-    .. note::
-
-        ALSA mixer channel names followed by a number must be specified in the
-        <name,number> format, i.e. a channel labeled 'PCM 1' in alsamixer must
-        be converted to PCM,1.
-
 ``--monitoraspect=<ratio>``
     Set the aspect ratio of your monitor or TV screen. A value of 0 disables a
     previous setting (e.g. in the config file). Overrides the

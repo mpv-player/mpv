@@ -62,6 +62,9 @@ struct priv {
 
     int cfg_block;
     char *cfg_device;
+    char *cfg_mixer_device;
+    char *cfg_mixer_name;
+    int cfg_mixer_index;
 };
 
 #define BUFFER_TIME 500000  // 0.5 s
@@ -102,6 +105,7 @@ static void alsa_error_handler(const char *file, int line, const char *function,
 /* to set/get/query special features/parameters */
 static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 {
+    struct priv *p = ao->priv;
     snd_mixer_t *handle = NULL;
     switch (cmd) {
     case AOCONTROL_GET_MUTE:
@@ -113,10 +117,6 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         snd_mixer_elem_t *elem;
         snd_mixer_selem_id_t *sid;
 
-        char *mix_name = "Master";
-        char *card = "default";
-        int mix_index = 0;
-
         long pmin, pmax;
         long get_vol, set_vol;
         float f_multi;
@@ -124,41 +124,17 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         if (AF_FORMAT_IS_IEC61937(ao->format))
             return CONTROL_TRUE;
 
-        if (ao->opts->mixer_channel) {
-            char *test_mix_index;
-
-            mix_name = strdup(ao->opts->mixer_channel);
-            if ((test_mix_index = strchr(mix_name, ','))) {
-                *test_mix_index = 0;
-                test_mix_index++;
-                mix_index = strtol(test_mix_index, &test_mix_index, 0);
-
-                if (*test_mix_index) {
-                    mp_tmsg(MSGT_AO, MSGL_ERR,
-                            "[AO_ALSA] Invalid mixer index. Defaulting to 0.\n");
-                    mix_index = 0;
-                }
-            }
-        }
-        if (ao->opts->mixer_device)
-            card = ao->opts->mixer_device;
-
         //allocate simple id
         snd_mixer_selem_id_alloca(&sid);
 
         //sets simple-mixer index and name
-        snd_mixer_selem_id_set_index(sid, mix_index);
-        snd_mixer_selem_id_set_name(sid, mix_name);
-
-        if (ao->opts->mixer_channel) {
-            free(mix_name);
-            mix_name = NULL;
-        }
+        snd_mixer_selem_id_set_index(sid, p->cfg_mixer_index);
+        snd_mixer_selem_id_set_name(sid, p->cfg_mixer_name);
 
         err = snd_mixer_open(&handle, 0);
         CHECK_ALSA_ERROR("Mixer open error");
 
-        err = snd_mixer_attach(handle, card);
+        err = snd_mixer_attach(handle, p->cfg_mixer_device);
         CHECK_ALSA_ERROR("Mixer attach error");
 
         err = snd_mixer_selem_register(handle, NULL, NULL);
@@ -791,10 +767,18 @@ const struct ao_driver audio_out_alsa = {
     .resume    = audio_resume,
     .reset     = reset,
     .priv_size = sizeof(struct priv),
-    .priv_defaults = &(const struct priv) { .cfg_block = 1 },
+    .priv_defaults = &(const struct priv) {
+        .cfg_block = 1,
+        .cfg_mixer_device = "default",
+        .cfg_mixer_name = "Master",
+        .cfg_mixer_index = 0,
+    },
     .options = (const struct m_option[]) {
         OPT_STRING("device", cfg_device, 0),
         OPT_FLAG("block", cfg_block, 0),
+        OPT_STRING("mixer-device", cfg_mixer_device, 0),
+        OPT_STRING("mixer-name", cfg_mixer_name, 0),
+        OPT_INTRANGE("mixer-index", cfg_mixer_index, 0, 0, 99),
         {0}
     },
 };

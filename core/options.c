@@ -526,8 +526,6 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("ontop", vo.ontop, 0),
     OPT_FLAG("border", vo.border, 0),
 
-    OPT_STRING("mixer", mixer_device, 0),
-    OPT_STRING("mixer-channel", mixer_channel, 0),
     OPT_CHOICE("softvol", softvol, 0,
                ({"no", SOFTVOL_NO},
                 {"yes", SOFTVOL_YES},
