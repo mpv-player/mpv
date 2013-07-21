@@ -108,7 +108,6 @@ typedef struct wasapi_state {
     UINT32 bufferFrameCount; /* wasapi buffer block size, number of frames, frame size at format.nBlockAlign */
 
     /* WASAPI handles, owned by other thread */
-    IMMDeviceEnumerator *pEnumerator;
     IMMDevice *pDevice;
     IAudioClient *pAudioClient;
     IAudioRenderClient *pRenderClient;
@@ -574,6 +573,10 @@ static char* wstring_to_utf8(wchar_t *wstring) {
 }
 
 static char* get_device_id(IMMDevice *pDevice) {
+    if (!pDevice) {
+        return NULL;
+    }
+
     LPWSTR devid = NULL;
     char *idstr = NULL;
 
@@ -594,6 +597,10 @@ exit_label:
 }
 
 static char* get_device_name(IMMDevice *pDevice) {
+    if (!pDevice) {
+        return NULL;
+    }
+
     IPropertyStore *pProps = NULL;
     char *namestr = NULL;
 
@@ -639,10 +646,8 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
     IMMDeviceEnumerator *pEnumerator = NULL;
     IMMDeviceCollection *pDevices = NULL;
     IMMDevice *pDevice = NULL;
-    IPropertyStore *pProps = NULL;
     char *defid = NULL;
 
-    CoInitialize(NULL);
     hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
                           &IID_IMMDeviceEnumerator, (void **)&pEnumerator);
     EXIT_ON_ERROR(hr)
@@ -696,7 +701,6 @@ static HRESULT enumerate_with_state(char *header, int status, int with_id) {
 
 exit_label:
     free(defid);
-    SAFE_RELEASE(pProps, IPropertyStore_Release(pProps));
     SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
     SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
@@ -705,33 +709,41 @@ exit_label:
 
 static int enumerate_devices(void) {
     HRESULT hr;
+    CoInitialize(NULL);
     hr = enumerate_with_state("Active devices:", DEVICE_STATE_ACTIVE, 1);
     EXIT_ON_ERROR(hr)
     hr = enumerate_with_state("Unplugged devices:", DEVICE_STATE_UNPLUGGED, 0);
     EXIT_ON_ERROR(hr)
+    CoUninitialize();
     return 0;
 exit_label:
     mp_msg(MSGT_AO, MSGL_ERR, "Error enumerating devices: HRESULT %08x \"%s\"\n",
         hr, explain_err(hr));
+    CoUninitialize();
     return 1;
 }
 
-static HRESULT find_and_load_device(wasapi_state *state, int devno, char *devid) {
+static HRESULT find_and_load_device(IMMDevice **ppDevice, int devno, char *devid) {
     HRESULT hr;
+    IMMDeviceEnumerator *pEnumerator = NULL;
     IMMDeviceCollection *pDevices = NULL;
     IMMDevice *pTempDevice = NULL;
     LPWSTR deviceID = NULL;
 
-    hr = IMMDeviceEnumerator_EnumAudioEndpoints(state->pEnumerator, eRender,
-                                                DEVICE_STATE_ACTIVE, &pDevices);
-    EXIT_ON_ERROR(hr)
-
-    int count;
-    IMMDeviceCollection_GetCount(pDevices, &count);
+    hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                          &IID_IMMDeviceEnumerator, (void**)&pEnumerator);
+    EXIT_ON_ERROR(hr);
 
     if (devid == NULL) {
+        hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
+                                                    DEVICE_STATE_ACTIVE, &pDevices);
+        EXIT_ON_ERROR(hr);
+
+        int count;
+        IMMDeviceCollection_GetCount(pDevices, &count);
+
         if (devno >= count) {
-            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: no endpoind #%d!\n", devno);
+            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: no device #%d!\n", devno);
         } else {
             mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: finding device #%d\n", devno);
             hr = IMMDeviceCollection_Item(pDevices, devno, &pTempDevice);
@@ -743,6 +755,14 @@ static HRESULT find_and_load_device(wasapi_state *state, int devno, char *devid)
             mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: found device #%d\n", devno);
         }
     } else {
+        hr = IMMDeviceEnumerator_EnumAudioEndpoints(pEnumerator, eRender,
+                                                    DEVICE_STATE_ACTIVE|DEVICE_STATE_UNPLUGGED,
+                                                    &pDevices);
+        EXIT_ON_ERROR(hr);
+
+        int count;
+        IMMDeviceCollection_GetCount(pDevices, &count);
+
         mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: finding device %s\n", devid);
 
         for (int i = 0; i < count; i++) {
@@ -766,11 +786,11 @@ static HRESULT find_and_load_device(wasapi_state *state, int devno, char *devid)
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices))
 
     if (deviceID == NULL) {
-        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: no device to load!\n");
+        hr = E_NOTFOUND;
     } else {
         mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: loading device %S\n", deviceID);
 
-        hr = IMMDeviceEnumerator_GetDevice(state->pEnumerator, deviceID, &state->pDevice);
+        hr = IMMDeviceEnumerator_GetDevice(pEnumerator, deviceID, ppDevice);
 
         if (FAILED(hr)) {
             mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: could not load requested device!\n");
@@ -780,7 +800,46 @@ static HRESULT find_and_load_device(wasapi_state *state, int devno, char *devid)
 exit_label:
     SAFE_RELEASE(pTempDevice, IMMDevice_Release(pTempDevice));
     SAFE_RELEASE(pDevices, IMMDeviceCollection_Release(pDevices));
+    SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
     return hr;
+}
+
+static int validate_device(const m_option_t *opt, struct bstr name,
+                           struct bstr param) {
+    IMMDevice *pDevice = NULL;
+
+    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: validating device=%s\n", param.start);
+
+    if (bstr_equals0(param, "help")) {
+        enumerate_devices();
+        return M_OPT_EXIT;
+    }
+
+    CoInitialize(NULL);
+
+    int devno = -1;
+    char *devid = NULL;
+
+    if (bstr_startswith0(param, "{")) { // ID as printed by enumerate_devices
+        devid = param.start;
+    } else {
+        unsigned char *end;
+        devno = (int) strtol(param.start, (char**)&end, 10);
+        if (end == param.start || *end || devno < 0) {
+            mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: invalid number \"%s\"!\n", param.start);
+            return M_OPT_INVALID;
+        }
+    }
+    int ret = 1;
+    if (FAILED(find_and_load_device(&pDevice, devno, devid))) {
+        ret = M_OPT_OUT_OF_RANGE;
+    }
+    mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: device=%s %svalid\n",
+           param.start, ret == 1 ? "" : "not ");
+
+    SAFE_RELEASE(pDevice, IMMDevice_Release(pDevice));
+    CoUninitialize();
+    return ret;
 }
 
 static int thread_init(struct ao *ao)
@@ -788,14 +847,17 @@ static int thread_init(struct ao *ao)
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     HRESULT hr;
     CoInitialize(NULL);
-    hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
-                          &IID_IMMDeviceEnumerator, (void **)&state->pEnumerator);
-    EXIT_ON_ERROR(hr)
 
     if (!state->opt_device) {
-        hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(state->pEnumerator,
+        IMMDeviceEnumerator *pEnumerator;
+        hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL,
+                              &IID_IMMDeviceEnumerator, (void**)&pEnumerator);
+        EXIT_ON_ERROR(hr)
+
+        hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(pEnumerator,
                                                          eRender, eConsole,
                                                          &state->pDevice);
+        SAFE_RELEASE(pEnumerator, IMMDeviceEnumerator_Release(pEnumerator));
 
         char *id = get_device_id(state->pDevice);
         mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: default device ID: %s\n", id);
@@ -815,7 +877,7 @@ static int thread_init(struct ao *ao)
                 goto exit_label;
             }
         }
-        hr = find_and_load_device(state, devno, devid);
+        hr = find_and_load_device(&state->pDevice, devno, devid);
     }
     EXIT_ON_ERROR(hr)
 
@@ -955,8 +1017,6 @@ static void thread_uninit(wasapi_state *state)
         IAudioRenderClient_Release(state->pRenderClient);
     if (state->pAudioClient)
         IAudioClient_Release(state->pAudioClient);
-    if (state->pEnumerator)
-        IMMDeviceEnumerator_Release(state->pEnumerator);
     if (state->pDevice)
         IMMDevice_Release(state->pDevice);
     if (state->hTask)
@@ -1247,7 +1307,7 @@ const struct ao_driver audio_out_wasapi = {
     .options   = (const struct m_option[]) {
         OPT_FLAG("exclusive", opt_exclusive, 0),
         OPT_FLAG("list", opt_list, 0),
-        OPT_STRING("device", opt_device, 0),
+        OPT_STRING_VALIDATE("device", opt_device, 0, validate_device),
         {NULL},
     },
 };
