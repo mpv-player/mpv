@@ -1171,8 +1171,6 @@ static void uninit(struct ao *ao, bool immed)
         FreeLibrary(state->VistaBlob.hAvrt);
     closehandles(ao);
     DeleteCriticalSection(&state->print_lock);
-    talloc_free(state);
-    ao->priv = NULL;
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: uninit END!\n");
 }
 
