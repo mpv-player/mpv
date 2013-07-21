@@ -25,12 +25,19 @@ Available audio output drivers are:
 ``alsa`` (Linux only)
     ALSA 0.9/1.x audio output driver
 
-    ``noblock``
+    ``no-block``
         Sets noblock-mode.
     ``device=<device>``
-        Sets the device name. Replace any ',' with '.' and any ':' with '=' in
-        the ALSA device name. For hwac3 output via S/PDIF, use an "iec958" or
+        Sets the device name. For ac3 output via S/PDIF, use an "iec958" or
         "spdif" device, unless you really know how to set it correctly.
+
+    .. note::
+
+        MPlayer and mplayer2 required you to replace any ',' with '.' and
+        any ':' with '=' in the ALSA device name. mpv does not do this anymore.
+        Instead, quote the device name:
+
+            ``--ao=alsa:device=[plug:surround50]``
 
 ``oss``
     OSS audio output driver

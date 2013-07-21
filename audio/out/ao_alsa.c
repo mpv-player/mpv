@@ -59,12 +59,13 @@ struct priv {
     float delay_before_pause;
     int buffersize;
     int outburst;
+
+    int cfg_block;
+    char *cfg_device;
 };
 
 #define BUFFER_TIME 500000  // 0.5 s
 #define FRAGCOUNT 16
-
-#define ALSA_DEVICE_SIZE 256
 
 #define CHECK_ALSA_ERROR(message) \
     do { \
@@ -253,37 +254,6 @@ alsa_error:
     return CONTROL_ERROR;
 }
 
-static void parse_device(char *dest, const char *src, int len)
-{
-    char *tmp;
-    memmove(dest, src, len);
-    dest[len] = 0;
-    while ((tmp = strrchr(dest, '.')))
-        tmp[0] = ',';
-    while ((tmp = strrchr(dest, '=')))
-        tmp[0] = ':';
-}
-
-static void print_help(void)
-{
-    mp_tmsg(MSGT_AO, MSGL_FATAL,
-            "\n[AO_ALSA] -ao alsa commandline help:\n" \
-            "[AO_ALSA] Example: mpv -ao alsa:device=hw=0.3\n" \
-            "[AO_ALSA]   Sets first card fourth hardware device.\n\n" \
-            "[AO_ALSA] Options:\n" \
-            "[AO_ALSA]   noblock\n" \
-            "[AO_ALSA]     Opens device in non-blocking mode.\n" \
-            "[AO_ALSA]   device=<device-name>\n" \
-            "[AO_ALSA]     Sets device (change , to . and : to =)\n");
-}
-
-static int str_maxlen(void *strp)
-{
-    strarg_t *str = strp;
-    return str->len <= ALSA_DEVICE_SIZE;
-}
-
-
 static const int mp_to_alsa_format[][2] = {
     {AF_FORMAT_S8,          SND_PCM_FORMAT_S8},
     {AF_FORMAT_U8,          SND_PCM_FORMAT_U8},
@@ -418,78 +388,58 @@ static int try_open_device(struct ao *ao, const char *device, int open_mode,
 static int init(struct ao *ao, char *params)
 {
     int err;
-    int block;
-    strarg_t device;
     snd_pcm_uframes_t chunk_size;
     snd_pcm_uframes_t bufsize;
     snd_pcm_uframes_t boundary;
-    const opt_t subopts[] = {
-        {"block", OPT_ARG_BOOL, &block, NULL},
-        {"device", OPT_ARG_STR, &device, str_maxlen},
-        {NULL}
-    };
 
-    struct priv *p = talloc_zero(ao, struct priv);
-    ao->priv = p;
-
-    char alsa_device[ALSA_DEVICE_SIZE + 1];
-    // make sure alsa_device is null-terminated even when using strncpy etc.
-    memset(alsa_device, 0, ALSA_DEVICE_SIZE + 1);
+    struct priv *p = ao->priv;
 
     mp_msg(MSGT_AO, MSGL_V,
            "alsa-init: requested format: %d Hz, %d channels, %x\n",
            ao->samplerate, ao->channels.num, ao->format);
 
-
     p->prepause_frames = 0;
     p->delay_before_pause = 0;
 
-    //subdevice parsing
-    // set defaults
-    block = 1;
     /* switch for spdif
      * sets opening sequence for SPDIF
      * sets also the playback and other switches 'on the fly'
      * while opening the abstract alias for the spdif subdevice
      * 'iec958'
      */
-    device.str = NULL;
+    const char *device;
     if (AF_FORMAT_IS_IEC61937(ao->format)) {
-        device.str = "iec958";
+        device = "iec958";
         mp_msg(MSGT_AO, MSGL_V,
                "alsa-spdif-init: playing AC3/iec61937/iec958, %i channels\n",
                ao->channels.num);
     } else {
-        device.str = select_chmap(ao);
-        if (strcmp(device.str, "default") != 0 && ao->format == AF_FORMAT_FLOAT_NE)
+        device = select_chmap(ao);
+        if (strcmp(device, "default") != 0 && ao->format == AF_FORMAT_FLOAT_NE)
         {
             // hack - use the converter plugin (why the heck?)
-            device.str = talloc_asprintf(ao, "plug:%s", device.str);
+            device = talloc_asprintf(ao, "plug:%s", device);
         }
     }
-    device.len = strlen(device.str);
-    if (subopt_parse(params, subopts) != 0) {
-        print_help();
-        return 0;
-    }
-    parse_device(alsa_device, device.str, device.len);
+    if (p->cfg_device && p->cfg_device[0])
+        device = p->cfg_device;
 
-    mp_msg(MSGT_AO, MSGL_V, "alsa-init: using device %s\n", alsa_device);
+    mp_msg(MSGT_AO, MSGL_V, "alsa-init: using device %s\n", device);
 
     p->can_pause = 1;
 
     mp_msg(MSGT_AO, MSGL_V, "alsa-init: using ALSA %s\n", snd_asoundlib_version());
     snd_lib_error_set_handler(alsa_error_handler);
 
-    int open_mode = block ? 0 : SND_PCM_NONBLOCK;
+    int open_mode = p->cfg_block ? 0 : SND_PCM_NONBLOCK;
     int isac3 =  AF_FORMAT_IS_IEC61937(ao->format);
     //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
-    err = try_open_device(ao, alsa_device, open_mode, isac3);
+    err = try_open_device(ao, device, open_mode, isac3);
     if (err < 0) {
-        if (err != -EBUSY && !block) {
+        if (err != -EBUSY && !p->cfg_block) {
             mp_tmsg(MSGT_AO, MSGL_INFO, "[AO_ALSA] Open in nonblock-mode "
                     "failed, trying to open in block-mode.\n");
-            err = try_open_device(ao, alsa_device, 0, isac3);
+            err = try_open_device(ao, device, 0, isac3);
         }
         CHECK_ALSA_ERROR("Playback open error");
     }
@@ -822,6 +772,8 @@ static float get_delay(struct ao *ao)
         return 0;
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct ao_driver audio_out_alsa = {
     .info = &(const struct ao_info) {
         "ALSA-0.9.x-1.x audio output",
@@ -838,4 +790,11 @@ const struct ao_driver audio_out_alsa = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .reset     = reset,
+    .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv) { .cfg_block = 1 },
+    .options = (const struct m_option[]) {
+        OPT_STRING("device", cfg_device, 0),
+        OPT_FLAG("block", cfg_block, 0),
+        {0}
+    },
 };
