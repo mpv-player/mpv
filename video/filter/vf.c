@@ -135,6 +135,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
 const struct m_obj_list vf_obj_list = {
     .get_desc = get_desc,
     .description = "video filters",
+    .legacy_hacks = true, // some filters have custom option parsing
 };
 
 int vf_control(struct vf_instance *vf, int cmd, void *arg)

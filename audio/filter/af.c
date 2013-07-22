@@ -109,6 +109,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
 const struct m_obj_list af_obj_list = {
     .get_desc = get_desc,
     .description = "audio filters",
+    .legacy_hacks = true, // many filters have custom option parsing
 };
 
 static bool af_config_equals(struct mp_audio *a, struct mp_audio *b)

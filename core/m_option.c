@@ -2140,7 +2140,7 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
     }
 
     if (has_param) {
-        if (!desc.options) {
+        if (!desc.options && list->legacy_hacks) {
             // Should perhaps be parsed as escape-able string. But this is a
             // compatibility path, so it's not worth the trouble.
             int next = bstrcspn(*pstr, ",");
