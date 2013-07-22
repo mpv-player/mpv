@@ -93,18 +93,43 @@ struct m_geometry {
 void m_geometry_apply(int *xpos, int *ypos, int *widw, int *widh,
                       int scrw, int scrh, struct m_geometry *gm);
 
+struct m_obj_desc {
+    // Name which will be used in the option string
+    const char *name;
+    // Will be printed when "help" is passed
+    const char *description;
+    // Size of the private struct
+    int priv_size;
+    // If not NULL, default values for private struct
+    const void *priv_defaults;
+    // Options which refer to members in the private struct
+    const struct m_option *options;
+    // For free use by the implementer of m_obj_list.get_desc
+    const void *p;
+    // If not NULL, options which should be set before applying other options.
+    // This member is usually set my m_obj_list_find() only.
+    // Only works if options is not NULL.
+    const char *init_options;
+    // Don't list entries with "help"
+    bool hidden;
+};
+
 // Extra definition needed for \ref m_option_type_obj_settings_list options.
-typedef struct {
-    // Pointer to an array of pointer to some object type description struct.
-    void **list;
-    // Offset of the object type name (char*) in the description struct.
-    void *name_off;
-    // Offset of the object type info string (char*) in the description struct.
-    void *info_off;
-    // Offset of the object type parameter description (\ref m_struct_st)
-    // in the description struct.
-    void *desc_off;
-} m_obj_list_t;
+struct m_obj_list {
+    bool (*get_desc)(struct m_obj_desc *dst, int index);
+    const char *description;
+    // Can be set to a NULL terminated array of aliases
+    const char *aliases[4][5];
+    // Allow a trailing ",", which adds an entry with name=""
+    bool allow_trailer;
+    // Allow unknown entries, for which a dummy entry is inserted, and whose
+    // options are skipped and ignored.
+    bool allow_unknown_entries;
+};
+
+// Find entry by name
+bool m_obj_list_find(struct m_obj_desc *dst, const struct m_obj_list *list,
+                     bstr name);
 
 // The data type used by \ref m_option_type_obj_settings_list.
 typedef struct m_obj_settings {
@@ -559,7 +584,10 @@ int m_option_required_params(const m_option_t *opt);
 #define OPT_SETTINGSLIST(optname, varname, flags, objlist)      \
     OPT_GENERAL(m_obj_settings_t*, optname, varname, flags,     \
                 .type = &m_option_type_obj_settings_list,       \
-                .priv = objlist)
+                .priv = (void*)MP_EXPECT_TYPE(const struct m_obj_list*, objlist))
+
+#define OPT_IMAGEFORMAT(...) \
+    OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_imgfmt)
 
 #define OPT_AUDIOFORMAT(...) \
     OPT_GENERAL(int, __VA_ARGS__, .type = &m_option_type_afmt)

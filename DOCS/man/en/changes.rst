@@ -131,6 +131,8 @@ Command Line Switches
     ``-lavfdopts``              ``--demuxer-lavf-...``
     ``-rawaudio ...``           ``--demuxer-rawaudio-...``
     ``-rawvideo ...``           ``--demuxer-rawvideo-...``
+    ``--mixer``                 AO suboptions (``alsa``, ``oss``)
+    ``--mixer-channel``         AO suboptions (``alsa``, ``oss``)
     =========================== ========================================
 
 .. note::

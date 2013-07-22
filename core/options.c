@@ -181,7 +181,9 @@ extern char *dvd_device, *cdrom_device;
 
 extern double mf_fps;
 extern char * mf_type;
-extern const m_obj_list_t vf_obj_list;
+extern const struct m_obj_list vf_obj_list;
+extern const struct m_obj_list vo_obj_list;
+extern const struct m_obj_list ao_obj_list;
 
 static const m_option_t mfopts_conf[]={
     {"fps", &mf_fps, CONF_TYPE_DOUBLE, 0, 0, 0, NULL},
@@ -438,7 +440,7 @@ const m_option_t mp_opts[] = {
 
     {"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
-    OPT_SETTINGSLIST("vf*", vf_settings, 0, (void *) &vf_obj_list),
+    OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
 
     OPT_STRING("ad", audio_decoders, 0),
     OPT_STRING("vd", video_decoders, 0),
@@ -520,14 +522,12 @@ const m_option_t mp_opts[] = {
     OPT_SUBSTRUCT("sub-text", sub_text_style, osd_style_conf, 0),
 
 //---------------------- libao/libvo options ------------------------
-    OPT_STRINGLIST("vo", vo.video_driver_list, 0),
-    OPT_STRINGLIST("ao", audio_driver_list, 0),
+    OPT_SETTINGSLIST("vo", vo.video_driver_list, 0, &vo_obj_list),
+    OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list),
     OPT_FLAG("fixed-vo", fixed_vo, CONF_GLOBAL),
     OPT_FLAG("ontop", vo.ontop, 0),
     OPT_FLAG("border", vo.border, 0),
 
-    OPT_STRING("mixer", mixer_device, 0),
-    OPT_STRING("mixer-channel", mixer_channel, 0),
     OPT_CHOICE("softvol", softvol, 0,
                ({"no", SOFTVOL_NO},
                 {"yes", SOFTVOL_YES},
@@ -559,8 +559,6 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("fs", vo.fullscreen, 0),
     // set fullscreen switch method (workaround for buggy WMs)
     OPT_INTRANGE("fsmode-dontuse", vo.fsmode, 0, 31, 4096),
-    OPT_INT("colorkey", vo.colorkey, 0),
-    OPT_FLAG_STORE("no-colorkey", vo.colorkey, 0, 0x1000000),
     OPT_FLAG("native-keyrepeat", vo.native_keyrepeat, 0),
     OPT_FLOATRANGE("panscan", vo.panscan, 0, 0.0, 1.0),
     OPT_FLOATRANGE("panscanrange", vo.panscanrange, 0, -19.0, 99.0),
@@ -741,8 +739,6 @@ const struct MPOpts mp_default_opts = {
         .panscan = 0.0f,
         .keepaspect = 1,
         .border = 1,
-        .colorkey = 0x0000ff00, // default colorkey is green
-                    // (0xff000000 means that colorkey has been disabled)
         .WinID = -1,
     },
     .wintitle = "mpv - ${media-title}",

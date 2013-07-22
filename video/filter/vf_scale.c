@@ -40,7 +40,6 @@
 #include "video/out/vo.h"
 
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 static struct vf_priv_s {
     int w, h;
@@ -432,24 +431,16 @@ static int vf_open(vf_instance_t *vf, char *args)
     return 1;
 }
 
-#undef ST_OFF
-#define ST_OFF(f) M_ST_OFF(struct vf_priv_s, f)
+#define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
-    {"w", ST_OFF(cfg_w), CONF_TYPE_INT, M_OPT_MIN, -11, 0, NULL},
-    {"h", ST_OFF(cfg_h), CONF_TYPE_INT, M_OPT_MIN, -11, 0, NULL},
-    {"chr-drop", ST_OFF(v_chr_drop), CONF_TYPE_INT, M_OPT_RANGE, 0, 3, NULL},
-    {"param", ST_OFF(param[0]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
-    {"param2", ST_OFF(param[1]), CONF_TYPE_DOUBLE, M_OPT_RANGE, 0.0, 100.0, NULL},
-    {"noup", ST_OFF(noup), CONF_TYPE_INT, M_OPT_RANGE, 0, 2, NULL},
-    {"arnd", ST_OFF(accurate_rnd), CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    { NULL, NULL, 0, 0, 0, 0, NULL }
-};
-
-static const m_struct_t vf_opts = {
-    "scale",
-    sizeof(struct vf_priv_s),
-    &vf_priv_dflt,
-    vf_opts_fields
+    OPT_INT("w", cfg_w, M_OPT_MIN, .min = -11),
+    OPT_INT("h", cfg_h, M_OPT_MIN, .min = -11),
+    OPT_DOUBLE("param", param[0], M_OPT_RANGE, .min = 0.0, .max = 100.0),
+    OPT_DOUBLE("param2", param[1], M_OPT_RANGE, .min = 0.0, .max = 100.0),
+    OPT_INTRANGE("chr-drop", v_chr_drop, 0, 0, 3),
+    OPT_INTRANGE("noup", noup, 0, 0, 2),
+    OPT_FLAG("arnd", accurate_rnd, 0),
+    {0}
 };
 
 const vf_info_t vf_info_scale = {
@@ -458,7 +449,9 @@ const vf_info_t vf_info_scale = {
     "A'rpi",
     "",
     vf_open,
-    &vf_opts
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &vf_priv_dflt,
+    .options = vf_opts_fields,
 };
 
 //===========================================================================//

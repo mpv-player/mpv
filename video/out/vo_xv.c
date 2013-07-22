@@ -76,8 +76,10 @@ struct xvctx {
         int method; // CK_METHOD_* constants
         int source; // CK_SRC_* constants
     } xv_ck_info;
+    int colorkey;
     unsigned long xv_colorkey;
-    unsigned int xv_port;
+    int xv_port;
+    int cfg_xv_adaptor;
     XvAdaptorInfo *ai;
     XvImageFormatValues *fo;
     unsigned int formats, adaptors, xv_format;
@@ -325,7 +327,7 @@ static int xv_init_colorkey(struct vo *vo)
 
     /* check if colorkeying is needed */
     xv_atom = xv_intern_atom_if_exists(vo, "XV_COLORKEY");
-    if (xv_atom != None && !(vo->opts->colorkey & 0xFF000000)) {
+    if (xv_atom != None && !(ctx->colorkey & 0xFF000000)) {
         if (ctx->xv_ck_info.source == CK_SRC_CUR) {
             int colorkey_ret;
 
@@ -339,14 +341,14 @@ static int xv_init_colorkey(struct vo *vo)
                 return 0; // error getting colorkey
             }
         } else {
-            ctx->xv_colorkey = vo->opts->colorkey;
+            ctx->xv_colorkey = ctx->colorkey;
 
             /* check if we have to set the colorkey too */
             if (ctx->xv_ck_info.source == CK_SRC_SET) {
                 xv_atom = XInternAtom(display, "XV_COLORKEY", False);
 
                 rez = XvSetPortAttribute(display, ctx->xv_port, xv_atom,
-                                         vo->opts->colorkey);
+                                         ctx->colorkey);
                 if (rez != Success) {
                     mp_msg(MSGT_VO, MSGL_FATAL, "[xv] Couldn't set colorkey!\n");
                     return 0; // error setting colorkey
@@ -395,62 +397,6 @@ static void xv_draw_colorkey(struct vo *vo, const struct mp_rect *rc)
         XSetForeground(x11->display, x11->vo_gc, ctx->xv_colorkey);
         XFillRectangle(x11->display, x11->window, x11->vo_gc, rc->x0, rc->y0,
                        rc->x1 - rc->x0, rc->y1 - rc->y0);
-    }
-}
-
-// Tests if a valid argument for the ck suboption was given.
-static int xv_test_ck(void *arg)
-{
-    strarg_t *strarg = (strarg_t *)arg;
-
-    if (strargcmp(strarg, "use") == 0 ||
-        strargcmp(strarg, "set") == 0 ||
-        strargcmp(strarg, "cur") == 0)
-        return 1;
-
-    return 0;
-}
-
-// Tests if a valid arguments for the ck-method suboption was given.
-static int xv_test_ckm(void *arg)
-{
-    strarg_t *strarg = (strarg_t *)arg;
-
-    if (strargcmp(strarg, "bg") == 0 ||
-        strargcmp(strarg, "man") == 0 ||
-        strargcmp(strarg, "auto") == 0)
-        return 1;
-
-    return 0;
-}
-
-/* Modify the colorkey_handling var according to str
- *
- * Checks if a valid pointer ( not NULL ) to the string
- * was given. And in that case modifies the colorkey_handling
- * var to reflect the requested behaviour.
- * If nothing happens the content of colorkey_handling stays
- * the same.
- */
-static void xv_setup_colorkeyhandling(struct xvctx *ctx,
-                                      const char *ck_method_str,
-                                      const char *ck_str)
-{
-    /* check if a valid pointer to the string was passed */
-    if (ck_str) {
-        if (strncmp(ck_str, "use", 3) == 0)
-            ctx->xv_ck_info.source = CK_SRC_USE;
-        else if (strncmp(ck_str, "set", 3) == 0)
-            ctx->xv_ck_info.source = CK_SRC_SET;
-    }
-    /* check if a valid pointer to the string was passed */
-    if (ck_method_str) {
-        if (strncmp(ck_method_str, "bg", 2) == 0)
-            ctx->xv_ck_info.method = CK_METHOD_BACKGROUND;
-        else if (strncmp(ck_method_str, "man", 3) == 0)
-            ctx->xv_ck_info.method = CK_METHOD_MANUALFILL;
-        else if (strncmp(ck_method_str, "auto", 4) == 0)
-            ctx->xv_ck_info.method = CK_METHOD_AUTOPAINT;
     }
 }
 
@@ -781,37 +727,13 @@ static int preinit(struct vo *vo, const char *arg)
     XvPortID xv_p;
     int busy_ports = 0;
     unsigned int i;
-    strarg_t ck_src_arg = { 0, NULL };
-    strarg_t ck_method_arg = { 0, NULL };
-    struct xvctx *ctx = talloc_ptrtype(vo, ctx);
-    *ctx = (struct xvctx) {
-        .xv_ck_info = { CK_METHOD_MANUALFILL, CK_SRC_CUR },
-    };
-    vo->priv = ctx;
-    int xv_adaptor = -1;
+    struct xvctx *ctx = vo->priv;
+    int xv_adaptor = ctx->cfg_xv_adaptor;
 
     if (!vo_x11_init(vo))
         return -1;
 
     struct vo_x11_state *x11 = vo->x11;
-
-    const opt_t subopts[] =
-    {
-      /* name         arg type     arg var         test */
-      {  "port",      OPT_ARG_INT, &ctx->xv_port,  int_pos },
-      {  "adaptor",   OPT_ARG_INT, &xv_adaptor,    int_non_neg },
-      {  "ck",        OPT_ARG_STR, &ck_src_arg,    xv_test_ck },
-      {  "ck-method", OPT_ARG_STR, &ck_method_arg, xv_test_ckm },
-      {  NULL }
-    };
-
-    /* parse suboptions */
-    if (subopt_parse(arg, subopts) != 0) {
-        return -1;
-    }
-
-    /* modify colorkey settings according to the given options */
-    xv_setup_colorkeyhandling(ctx, ck_method_arg.str, ck_src_arg.str);
 
     /* check for Xvideo extension */
     unsigned int ver, rel, req, ev, err;
@@ -962,6 +884,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
     return r;
 }
 
+#define OPT_BASE_STRUCT struct xvctx
+
 const struct vo_driver video_out_xv = {
     .info = &info,
     .preinit = preinit,
@@ -971,5 +895,27 @@ const struct vo_driver video_out_xv = {
     .draw_image = draw_image,
     .draw_osd = draw_osd,
     .flip_page = flip_page,
-    .uninit = uninit
+    .uninit = uninit,
+    .priv_size = sizeof(struct xvctx),
+    .priv_defaults = &(const struct xvctx) {
+        .cfg_xv_adaptor = -1,
+        .xv_ck_info = {CK_METHOD_MANUALFILL, CK_SRC_CUR},
+        .colorkey = 0x0000ff00, // default colorkey is green
+                    // (0xff000000 means that colorkey has been disabled)
+    },
+    .options = (const struct m_option[]) {
+        OPT_INT("port", xv_port, M_OPT_MIN, .min = 0),
+        OPT_INT("adaptor", cfg_xv_adaptor, M_OPT_MIN, .min = -1),
+        OPT_CHOICE("ck", xv_ck_info.source, 0,
+                   ({"use", CK_SRC_USE},
+                    {"set", CK_SRC_SET},
+                    {"cur", CK_SRC_CUR})),
+        OPT_CHOICE("ck-method", xv_ck_info.method, 0,
+                   ({"bg", CK_METHOD_BACKGROUND},
+                    {"man", CK_METHOD_MANUALFILL},
+                    {"auto", CK_METHOD_AUTOPAINT})),
+        OPT_INT("colorkey", colorkey, 0),
+        OPT_FLAG_STORE("no-colorkey", colorkey, 0, 0x1000000),
+        {0}
+    },
 };

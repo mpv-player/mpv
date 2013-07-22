@@ -32,7 +32,7 @@
 #include "ao.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 
 #include "core/mp_ring.h"
 
@@ -53,7 +53,12 @@ struct priv {
     jack_client_t *client;
     int outburst;
     float jack_latency;
+    char *cfg_port;
+    char *cfg_client_name;
     int estimate;
+    int connect;
+    int autostart;
+    int stdlayout;
     volatile int paused;
     volatile int underrun; // signals if an underrun occured
     volatile float callback_interval;
@@ -159,86 +164,31 @@ static int outputaudio(jack_nframes_t nframes, void *arg)
     return 0;
 }
 
-/**
- * \brief print suboption usage help
- */
-static void print_help(void)
-{
-    mp_msg(
-        MSGT_AO, MSGL_FATAL,
-        "\n-ao jack commandline help:\n"
-        "Example: mpv -ao jack:port=myout\n"
-        "  connects mpv to the jack ports named myout\n"
-        "\nOptions:\n"
-        "  connect\n"
-        "    Automatically connect to output ports\n"
-        "  port=<port name>\n"
-        "    Connects to the given ports instead of the default physical ones\n"
-        "  name=<client name>\n"
-        "    Client name to pass to JACK\n"
-        "  estimate\n"
-        "    Estimates the amount of data in buffers (experimental)\n"
-        "  autostart\n"
-        "    Automatically start JACK server if necessary\n"
-        );
-}
-
 static int init(struct ao *ao, char *params)
 {
+    struct priv *p = ao->priv;
     const char **matching_ports = NULL;
-    char *port_name = NULL;
-    char *client_name = NULL;
-    char *stdlayout = NULL;
-    int autostart = 0;
-    int connect = 1;
-    struct priv *p = talloc_zero(ao, struct priv);
-    const opt_t subopts[] = {
-        {"port", OPT_ARG_MSTRZ, &port_name, NULL},
-        {"name", OPT_ARG_MSTRZ, &client_name, NULL},
-        {"estimate", OPT_ARG_BOOL, &p->estimate, NULL},
-        {"autostart", OPT_ARG_BOOL, &autostart, NULL},
-        {"connect", OPT_ARG_BOOL, &connect, NULL},
-        {"std-channel-layout", OPT_ARG_MSTRZ, &stdlayout, NULL},
-        {NULL}
-    };
+    char *port_name = p->cfg_port && p->cfg_port[0] ? p->cfg_port : NULL;
     jack_options_t open_options = JackUseExactName;
     int port_flags = JackPortIsInput;
     int i;
-    ao->priv = p;
-    p->estimate = 1;
-    if (subopt_parse(params, subopts) != 0) {
-        print_help();
-        return -1;
-    }
 
     struct mp_chmap_sel sel = {0};
 
-    if (stdlayout) {
-        if (strcmp(stdlayout, "waveext") == 0) {
-            mp_chmap_sel_add_waveext(&sel);
-        } else if (strcmp(stdlayout, "alsa") == 0) {
-            mp_chmap_sel_add_alsa_def(&sel);
-        } else if (strcmp(stdlayout, "any") == 0) {
-            mp_chmap_sel_add_any(&sel);
-        } else {
-            mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] std-channel-layout suboption "
-                   "expects 'alsa' or 'waveext' as value.\n");
-            goto err_out;
-        }
-    } else {
+    if (p->stdlayout == 0) {
         mp_chmap_sel_add_waveext(&sel);
+    } else if (p->stdlayout == 1) {
+        mp_chmap_sel_add_alsa_def(&sel);
+    } else {
+        mp_chmap_sel_add_any(&sel);
     }
 
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         goto err_out;
 
-    if (!client_name) {
-        client_name = malloc(40);
-        sprintf(client_name, "mpv [%d]", getpid());
-    }
-    if (!autostart)
+    if (!p->autostart)
         open_options |= JackNoStartServer;
-    p->client = jack_client_open(client_name, open_options, NULL);
+    p->client = jack_client_open(p->cfg_client_name, open_options, NULL);
     if (!p->client) {
         mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] cannot open server\n");
         goto err_out;
@@ -246,7 +196,7 @@ static int init(struct ao *ao, char *params)
     jack_set_process_callback(p->client, outputaudio, ao);
 
     // list matching ports if connections should be made
-    if (connect) {
+    if (p->connect) {
         if (!port_name)
             port_flags |= JackPortIsPhysical;
         matching_ports = jack_get_ports(p->client, port_name, NULL, port_flags);
@@ -302,16 +252,10 @@ static int init(struct ao *ao, char *params)
     p->outburst = (CHUNK_SIZE + unitsize - 1) / unitsize * unitsize;
     p->ring = mp_ring_new(p, NUM_CHUNKS * p->outburst);
     free(matching_ports);
-    free(port_name);
-    free(client_name);
-    free(stdlayout);
     return 0;
 
 err_out:
     free(matching_ports);
-    free(port_name);
-    free(client_name);
-    free(stdlayout);
     if (p->client)
         jack_client_close(p->client);
     return -1;
@@ -390,6 +334,8 @@ static int play(struct ao *ao, void *data, int len, int flags)
     return mp_ring_write(p->ring, data, len);
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct ao_driver audio_out_jack = {
     .info = &(const struct ao_info) {
         "JACK audio output",
@@ -405,4 +351,20 @@ const struct ao_driver audio_out_jack = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .reset     = reset,
+    .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv) {
+        .cfg_client_name = "mpv",
+        .estimate = 1,
+        .connect = 1,
+    },
+    .options = (const struct m_option[]) {
+        OPT_STRING("port", cfg_port, 0),
+        OPT_STRING("name", cfg_client_name, 0),
+        OPT_FLAG("estimate", estimate, 0),
+        OPT_FLAG("autostart", autostart, 0),
+        OPT_FLAG("connect", connect, 0),
+        OPT_CHOICE("std-channel-layout", stdlayout, 0,
+                   ({"waveext", 0}, {"alsa", 1}, {"any", 2})),
+        {0}
+    },
 };

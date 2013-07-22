@@ -25,12 +25,28 @@ Available audio output drivers are:
 ``alsa`` (Linux only)
     ALSA 0.9/1.x audio output driver
 
-    ``noblock``
+    ``no-block``
         Sets noblock-mode.
     ``device=<device>``
-        Sets the device name. Replace any ',' with '.' and any ':' with '=' in
-        the ALSA device name. For hwac3 output via S/PDIF, use an "iec958" or
+        Sets the device name. For ac3 output via S/PDIF, use an "iec958" or
         "spdif" device, unless you really know how to set it correctly.
+    ``mixer-device=<device>``
+        Set the mixer device used with ``--no-softvol`` (default: ``default``).
+    ``mixer-name=<name>``
+        Set the name of the mixer element (default: ``Master``). This is for
+        example ``PCM`` or ``Master``.
+    ``mixer-index=<number>``
+        Set the index of the mixer channel (default: 0). Consider the output
+        "``amixer scontrols``", then the index is the number that follows the
+        name of the element.
+
+    .. note::
+
+        MPlayer and mplayer2 required you to replace any ',' with '.' and
+        any ':' with '=' in the ALSA device name. mpv does not do this anymore.
+        Instead, quote the device name:
+
+            ``--ao=alsa:device=[plug:surround50]``
 
 ``oss``
     OSS audio output driver
@@ -40,7 +56,9 @@ Available audio output drivers are:
     ``<mixer-device>``
         Sets the audio mixer device (default: ``/dev/mixer``).
     ``<mixer-channel>``
-        Sets the audio mixer channel (default: ``pcm``).
+        Sets the audio mixer channel (default: ``pcm``). Other valid values
+        include **vol, pcm, line**. For a complete list of options look for
+        ``SOUND_DEVICE_NAMES`` in ``/usr/include/linux/soundcard.h``.
 
 ``jack``
     JACK (Jack Audio Connection Kit) audio output driver
@@ -48,7 +66,7 @@ Available audio output drivers are:
     ``port=<name>``
         Connects to the ports with the given name (default: physical ports).
     ``name=<client>``
-        Client name that is passed to JACK (default: mpv [<PID>]). Useful
+        Client name that is passed to JACK (default: ``mpv``). Useful
         if you want to have certain connections established automatically.
     ``(no-)estimate``
         Estimate the audio delay, supposed to make the video playback smoother
@@ -151,3 +169,23 @@ Available audio output drivers are:
     ``port=<number>``
         Set the TCP port used for connecting to the server (default: 12345).
         Not used if connecting to a Unix domain socket.
+
+``wasapi``
+    Audio output to the Windows Audio Session API.
+
+    ``device=<id>``
+        Uses the requested endpoint instead of the system's default audio
+        endpoint. Both the number and the ID String are valid; the ID String
+        is guaranteed to not change unless the driver is uninstalled.
+
+        Also supports searching active devices by name. If more than one
+        device matches the name, refuses loading it.
+
+        To get a list of the valid devices, give ``help`` as the id. The
+        list is the same as the ``list`` suboption, but stops the player
+        initialization.
+    ``exclusive``
+        Requests exclusive, direct hardware access. By definition prevents
+        sound playback of any other program until mpv exits.
+    ``list``
+        Lists all audio endpoints (output devices) present in the system.

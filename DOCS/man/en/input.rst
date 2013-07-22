@@ -21,7 +21,7 @@ In general, keys can be combined with ``Shift``, ``Ctrl`` and ``Alt``::
 **mpv** can be started in input test mode, which displays key bindings and the
 commands they're bound to on the OSD, instead of executing the commands::
 
-    mpv --input-test --demuxer=rawvideo --rawvideo=w=1280:h=720 /dev/zero
+    mpv --input-test --demuxer=rawvideo --demuxer-rawvideo=w=1280:h=720 /dev/zero
 
 (Commands which normally close the player will not work in this mode, and you
 must kill **mpv** externally to make it exit.)

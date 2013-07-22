@@ -706,6 +706,9 @@ static void load_per_output_config(m_config_t *conf, char *cfg, char *out)
     char profile[strlen(cfg) + strlen(out) + 1];
     m_profile_t *p;
 
+    if (!out && !out[0])
+        return;
+
     sprintf(profile, "%s%s", cfg, out);
     p = m_config_get_profile(conf, profile);
     if (p) {
@@ -1578,48 +1581,53 @@ static void update_osd_msg(struct MPContext *mpctx)
 void reinit_audio_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
-    struct ao *ao;
     init_demux_stream(mpctx, STREAM_AUDIO);
     if (!mpctx->sh_audio) {
         uninit_player(mpctx, INITIALIZED_VOL | INITIALIZED_AO);
         goto no_audio;
     }
+
     if (!(mpctx->initialized_flags & INITIALIZED_ACODEC)) {
         if (!init_best_audio_codec(mpctx->sh_audio, opts->audio_decoders))
             goto init_error;
         mpctx->initialized_flags |= INITIALIZED_ACODEC;
     }
 
-    if (!(mpctx->initialized_flags & INITIALIZED_AO)) {
-        mpctx->initialized_flags |= INITIALIZED_AO;
-        mpctx->ao = ao_create(opts, mpctx->input);
-        mpctx->ao->samplerate = opts->force_srate;
-        mpctx->ao->format = opts->audio_output_format;
+    int ao_srate = opts->force_srate;
+    int ao_format = opts->audio_output_format;
+    struct mp_chmap ao_channels = {0};
+    if (mpctx->initialized_flags & INITIALIZED_AO) {
+        ao_srate    = mpctx->ao->samplerate;
+        ao_format   = mpctx->ao->format;
+        ao_channels = mpctx->ao->channels;
+    } else {
         // Automatic downmix
         if (mp_chmap_is_stereo(&opts->audio_output_channels) &&
             !mp_chmap_is_stereo(&mpctx->sh_audio->channels))
         {
-            mp_chmap_from_channels(&mpctx->ao->channels, 2);
+            mp_chmap_from_channels(&ao_channels, 2);
         }
     }
-    ao = mpctx->ao;
 
     // first init to detect best values
     if (!init_audio_filters(mpctx->sh_audio,  // preliminary init
                             // input:
                             mpctx->sh_audio->samplerate,
                             // output:
-                            &ao->samplerate, &ao->channels, &ao->format)) {
+                            &ao_srate, &ao_channels, &ao_format)) {
         mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Error at audio filter chain "
                 "pre-init!\n");
         goto init_error;
     }
-    if (!ao->initialized) {
-        ao->encode_lavc_ctx = mpctx->encode_lavc_ctx;
-        mp_chmap_remove_useless_channels(&ao->channels,
+
+    if (!(mpctx->initialized_flags & INITIALIZED_AO)) {
+        mpctx->initialized_flags |= INITIALIZED_AO;
+        mp_chmap_remove_useless_channels(&ao_channels,
                                          &opts->audio_output_channels);
-        ao_init(ao, opts->audio_driver_list);
-        if (!ao->initialized) {
+        mpctx->ao = ao_init_best(opts, mpctx->input, mpctx->encode_lavc_ctx,
+                                 ao_srate, ao_format, ao_channels);
+        struct ao *ao = mpctx->ao;
+        if (!ao) {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
                     "Could not open/initialize audio device -> no sound.\n");
             goto init_error;
@@ -1645,7 +1653,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     mpctx->mixer.volstep = opts->volstep;
     mpctx->mixer.softvol = opts->softvol;
     mpctx->mixer.softvol_max = opts->softvol_max;
-    mixer_reinit(&mpctx->mixer, ao);
+    mixer_reinit(&mpctx->mixer, mpctx->ao);
     if (!(mpctx->initialized_flags & INITIALIZED_VOL)) {
         if (opts->mixer_init_volume >= 0) {
             mixer_setvolume(&mpctx->mixer, opts->mixer_init_volume,
@@ -4112,10 +4120,10 @@ static void play_current_file(struct MPContext *mpctx)
 
     if (opts->vo.video_driver_list)
         load_per_output_config(mpctx->mconfig, PROFILE_CFG_VO,
-                               opts->vo.video_driver_list[0]);
+                               opts->vo.video_driver_list[0].name);
     if (opts->audio_driver_list)
         load_per_output_config(mpctx->mconfig, PROFILE_CFG_AO,
-                               opts->audio_driver_list[0]);
+                               opts->audio_driver_list[0].name);
 
     if (opts->position_resume)
         load_playback_resume(mpctx->mconfig, mpctx->filename);
@@ -4504,16 +4512,6 @@ static bool handle_help_options(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
     int opt_exit = 0;
-    if (opts->vo.video_driver_list &&
-            strcmp(opts->vo.video_driver_list[0], "help") == 0) {
-        list_video_out();
-        opt_exit = 1;
-    }
-    if (opts->audio_driver_list &&
-            strcmp(opts->audio_driver_list[0], "help") == 0) {
-        list_audio_out();
-        opt_exit = 1;
-    }
     if (opts->audio_decoders && strcmp(opts->audio_decoders, "help") == 0) {
         struct mp_decoder_list *list = mp_audio_decoder_list();
         mp_print_decoders(MSGT_CPLAYER, MSGL_INFO, "Audio decoders:", list);

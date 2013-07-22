@@ -27,7 +27,6 @@
 #include "config.h"
 #include "core/cpudetect.h"
 #include "core/options.h"
-#include "core/m_struct.h"
 
 #include "core/mp_msg.h"
 #include "video/img_format.h"
@@ -517,19 +516,11 @@ static int vf_open(vf_instance_t *vf, char *args){
     return 1;
 }
 
-#undef ST_OFF
-#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+#define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
-  {"mode", ST_OFF(mode), CONF_TYPE_INT, M_OPT_RANGE, 0, 3},
-  {"enabled", ST_OFF(do_deinterlace), CONF_TYPE_FLAG, 0, 0, 1},
-  {0}
-};
-
-static const m_struct_t vf_opts = {
-  "yadif",
-  sizeof(struct vf_priv_s),
-  &vf_priv_default,
-  vf_opts_fields
+    OPT_INTRANGE("mode", mode, 0, 0, 3),
+    OPT_INTRANGE("enabled", do_deinterlace, 0, 0, 1),
+    {0}
 };
 
 const vf_info_t vf_info_yadif = {
@@ -538,5 +529,7 @@ const vf_info_t vf_info_yadif = {
     "Michael Niedermayer",
     "",
     vf_open,
-    &vf_opts
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &vf_priv_default,
+    .options = vf_opts_fields,
 };

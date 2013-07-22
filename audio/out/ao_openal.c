@@ -40,7 +40,7 @@
 #include "ao.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 
 #define MAX_CHANS MP_NUM_CHANNELS
 #define NUM_BUF 128
@@ -53,6 +53,10 @@ static int unqueue_buf[MAX_CHANS];
 static int16_t *tmpbuf;
 
 static struct ao *ao_data;
+
+struct priv {
+    char *cfg_device;
+};
 
 static void reset(struct ao *ao);
 
@@ -75,33 +79,23 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
     return CONTROL_UNKNOWN;
 }
 
-/**
- * \brief print suboption usage help
- */
-static void print_help(void)
+static int validate_device_opt(const m_option_t *opt, struct bstr name,
+                               struct bstr param)
 {
-    mp_msg(MSGT_AO, MSGL_FATAL,
-           "\n-ao openal commandline help:\n"
-           "Example: mpv -ao openal:device=subdevice\n"
-           "\nOptions:\n"
-           "   device=subdevice\n"
-           "      Audio device OpenAL should use. Devices can be listed\n"
-           "      with -ao openal:device=help\n"
-           );
-}
-
-static void list_devices(void)
-{
-    if (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") != AL_TRUE) {
-        mp_msg(MSGT_AO, MSGL_FATAL, "Device listing not supported.\n");
-        return;
+    if (bstr_equals0(param, "help")) {
+        if (alcIsExtensionPresent(NULL, "ALC_ENUMERATE_ALL_EXT") != AL_TRUE) {
+            mp_msg(MSGT_AO, MSGL_FATAL, "Device listing not supported.\n");
+            return M_OPT_EXIT;
+        }
+        const char *list = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
+        mp_msg(MSGT_AO, MSGL_INFO, "OpenAL devices:\n");
+        while (list && *list) {
+            mp_msg(MSGT_AO, MSGL_INFO, "  '%s'\n", list);
+            list = list + strlen(list) + 1;
+        }
+        return M_OPT_EXIT - 1;
     }
-    const char *list = alcGetString(NULL, ALC_ALL_DEVICES_SPECIFIER);
-    mp_msg(MSGT_AO, MSGL_FATAL, "OpenAL devices:\n");
-    while (list && *list) {
-        mp_msg(MSGT_AO, MSGL_FATAL, "  '%s'\n", list);
-        list = list + strlen(list) + 1;
-    }
+    return 0;
 }
 
 struct speaker {
@@ -131,25 +125,13 @@ static int init(struct ao *ao, char *params)
     ALCint freq = 0;
     ALCint attribs[] = {ALC_FREQUENCY, ao->samplerate, 0, 0};
     int i;
-    char *device = NULL;
-    const opt_t subopts[] = {
-        {"device", OPT_ARG_MSTRZ, &device, NULL},
-        {NULL}
-    };
+    struct priv *p = ao->priv;
     if (ao_data) {
         mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] Not reentrant!\n");
         return -1;
     }
     ao_data = ao;
     ao->no_persistent_volume = true;
-    if (subopt_parse(params, subopts) != 0) {
-        print_help();
-        return -1;
-    }
-    if (device && strcmp(device, "help") == 0) {
-        list_devices();
-        goto err_out;
-    }
     struct mp_chmap_sel sel = {0};
     for (i = 0; speaker_pos[i].id != -1; i++)
         mp_chmap_sel_add_speaker(&sel, speaker_pos[i].id);
@@ -167,7 +149,7 @@ static int init(struct ao *ao, char *params)
             goto err_out;
         }
     }
-    dev = alcOpenDevice(device);
+    dev = alcOpenDevice(p->cfg_device && p->cfg_device[0] ? p->cfg_device : NULL);
     if (!dev) {
         mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] could not open device\n");
         goto err_out;
@@ -189,11 +171,9 @@ static int init(struct ao *ao, char *params)
         ao->samplerate = freq;
     ao->format = AF_FORMAT_S16_NE;
     tmpbuf = malloc(CHUNK_SIZE);
-    free(device);
     return 0;
 
 err_out:
-    free(device);
     return -1;
 }
 
@@ -309,6 +289,8 @@ static float get_delay(struct ao *ao)
     return queued * CHUNK_SIZE / 2 / (float)ao->samplerate;
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct ao_driver audio_out_openal = {
     .info = &(const struct ao_info) {
         "OpenAL audio output",
@@ -325,4 +307,9 @@ const struct ao_driver audio_out_openal = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .reset     = reset,
+    .priv_size = sizeof(struct priv),
+    .options = (const struct m_option[]) {
+        OPT_STRING_VALIDATE("device", cfg_device, 0, validate_device_opt),
+        {0}
+    },
 };

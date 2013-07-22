@@ -26,7 +26,7 @@
 #include <portaudio.h>
 
 #include "config.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 #include "audio/format.h"
 #include "core/mp_msg.h"
 #include "core/mp_ring.h"
@@ -44,6 +44,9 @@ struct priv {
                         // 0 is N/A (0 is not a valid PA time value)
     int play_silence;   // play this many bytes of silence, before real data
     bool play_remaining;// play what's left in the buffer, then stop stream
+
+    // Options
+    char *cfg_device;
 };
 
 struct format_map {
@@ -61,18 +64,6 @@ static const struct format_map format_maps[] = {
     {AF_FORMAT_FLOAT_NE,    paFloat32},
     {AF_FORMAT_UNKNOWN,     0}
 };
-
-static void print_help(void)
-{
-    mp_msg(MSGT_AO, MSGL_FATAL,
-           "\n-ao portaudio commandline help:\n"
-          "Example: mpv -ao portaudio:device=subdevice\n"
-          "\nOptions:\n"
-          "   device=subdevice\n"
-          "      Audio device PortAudio should use. Devices can be listed\n"
-          "      with -ao portaudio:device=help\n"
-          "      The subdevice can be passed as index, or as complete name.\n");
-}
 
 static bool check_pa_ret(int ret)
 {
@@ -102,12 +93,14 @@ static int to_int(const char *s, int return_on_error)
     return (s[0] && !endptr[0]) ? res : return_on_error;
 }
 
-static int find_device(struct ao *ao, const char *name)
+static int find_device(const char *name)
 {
+    int found = paNoDevice;
+    if (!name)
+        return found;
     int help = strcmp(name, "help") == 0;
     int count = Pa_GetDeviceCount();
     check_pa_ret(count);
-    int found = paNoDevice;
     int index = to_int(name, -1);
     if (help)
         mp_msg(MSGT_AO, MSGL_INFO, "PortAudio devices:\n");
@@ -128,9 +121,25 @@ static int find_device(struct ao *ao, const char *name)
         }
     }
     if (found == paNoDevice && !help)
-        mp_msg(MSGT_AO, MSGL_FATAL, "[portaudio] Device '%s' not found!\n",
+        mp_msg(MSGT_AO, MSGL_WARN, "[portaudio] Device '%s' not found!\n",
                name);
     return found;
+}
+
+static int validate_device_opt(const m_option_t *opt, struct bstr name,
+                               struct bstr param)
+{
+    // Note: we do not check whether the device actually exist, because this
+    //       might break elaborate configs with several AOs trying several
+    //       devices. We do it merely for making "help" special.
+    if (bstr_equals0(param, "help")) {
+        if (!check_pa_ret(Pa_Initialize()))
+            return M_OPT_EXIT;
+        find_device("help");
+        Pa_Terminate();
+        return M_OPT_EXIT - 1;
+    }
+    return 0;
 }
 
 static void fill_silence(unsigned char *ptr, int len)
@@ -207,27 +216,16 @@ static void uninit(struct ao *ao, bool cut_audio)
 
 static int init(struct ao *ao, char *params)
 {
-    struct priv *priv = talloc_zero(ao, struct priv);
-    ao->priv = priv;
+    struct priv *priv = ao->priv;
 
     if (!check_pa_ret(Pa_Initialize()))
         return -1;
 
     pthread_mutex_init(&priv->ring_mutex, NULL);
 
-    char *device = NULL;
-    const opt_t subopts[] = {
-        {"device", OPT_ARG_MSTRZ, &device, NULL},
-        {NULL}
-    };
-    if (subopt_parse(params, subopts) != 0) {
-        print_help();
-        goto error_exit;
-    }
-
     int pa_device = Pa_GetDefaultOutputDevice();
-    if (device)
-        pa_device = find_device(ao, device);
+    if (priv->cfg_device && priv->cfg_device[0])
+        pa_device = find_device(priv->cfg_device);
     if (pa_device == paNoDevice)
         goto error_exit;
 
@@ -274,12 +272,10 @@ static int init(struct ao *ao, char *params)
 
     priv->ring = mp_ring_new(priv, seconds_to_bytes(ao, 0.5));
 
-    free(device);
     return 0;
 
 error_exit:
     uninit(ao, true);
-    free(device);
     return -1;
 }
 
@@ -374,6 +370,8 @@ static void resume(struct ao *ao)
     check_pa_ret(Pa_StartStream(priv->stream));
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct ao_driver audio_out_portaudio = {
     .info = &(const struct ao_info) {
         "PortAudio",
@@ -389,4 +387,9 @@ const struct ao_driver audio_out_portaudio = {
     .get_delay = get_delay,
     .pause     = pause,
     .resume    = resume,
+    .priv_size = sizeof(struct priv),
+    .options = (const struct m_option[]) {
+        OPT_STRING_VALIDATE("device", cfg_device, 0, validate_device_opt),
+        {0}
+    },
 };

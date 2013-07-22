@@ -51,16 +51,20 @@
 #include "ao.h"
 
 struct priv {
-    char *dsp;
     int audio_fd;
     int prepause_space;
-    const char *oss_mixer_device;
     int oss_mixer_channel;
     audio_buf_info zz;
     int audio_delay_method;
     int buffersize;
     int outburst;
+
+    char *dsp;
+    char *oss_mixer_device;
+    char *cfg_oss_mixer_channel;
 };
+
+static const char *mixer_channels[SOUND_MIXER_NRDEVICES] = SOUND_DEVICE_NAMES;
 
 static int format_table[][2] = {
     {AFMT_U8,           AF_FORMAT_U8},
@@ -193,40 +197,15 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 // return: 0=success -1=fail
 static int init(struct ao *ao, char *params)
 {
-    struct MPOpts *opts = ao->opts;
-    char *mixer_channels[SOUND_MIXER_NRDEVICES] = SOUND_DEVICE_NAMES;
+    struct priv *p = ao->priv;
     int oss_format;
-    char *mdev = opts->mixer_device, *mchan = opts->mixer_channel;
+
+    const char *mchan = NULL;
+    if (p->cfg_oss_mixer_channel && p->cfg_oss_mixer_channel[0])
+        mchan = p->cfg_oss_mixer_channel;
 
     mp_msg(MSGT_AO, MSGL_V, "ao2: %d Hz  %d chans  %s\n", ao->samplerate,
            ao->channels.num, af_fmt2str_short(ao->format));
-
-    struct priv *p = talloc(ao, struct priv);
-    *p = (struct priv) {
-        .dsp = PATH_DEV_DSP,
-        .audio_fd = -1,
-        .oss_mixer_device = mdev ? mdev : PATH_DEV_MIXER,
-        .oss_mixer_channel = SOUND_MIXER_PCM,
-        .audio_delay_method = 2,
-        .buffersize = -1,
-        .outburst = 512,
-    };
-    ao->priv = p;
-
-    if (params) {
-        char *m, *c;
-        m = strchr(params, ':');
-        if (m) {
-            c = strchr(m + 1, ':');
-            if (c) {
-                mchan = c + 1;
-                c[0] = '\0';
-            }
-            mdev = m + 1;
-            m[0] = '\0';
-        }
-        p->dsp = talloc_strdup(ao, params);
-    }
 
     if (mchan) {
         int fd, devs, i;
@@ -571,6 +550,8 @@ static float get_delay(struct ao *ao)
     return ((float)p->buffersize) / (float)ao->bps;
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct ao_driver audio_out_oss = {
     .info = &(const struct ao_info) {
         "OSS/ioctl audio output",
@@ -587,4 +568,21 @@ const struct ao_driver audio_out_oss = {
     .pause     = audio_pause,
     .resume    = audio_resume,
     .reset     = reset,
+    .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv) {
+        .audio_fd = -1,
+        .audio_delay_method = 2,
+        .buffersize = -1,
+        .outburst = 512,
+        .oss_mixer_channel = SOUND_MIXER_PCM,
+
+        .dsp = PATH_DEV_DSP,
+        .oss_mixer_device = PATH_DEV_MIXER,
+    },
+    .options = (const struct m_option[]) {
+        OPT_STRING("device", dsp, 0),
+        OPT_STRING("mixer-device", oss_mixer_device, 0),
+        OPT_STRING("mixer-channel", cfg_oss_mixer_channel, 0),
+        {0}
+    },
 };

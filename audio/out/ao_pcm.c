@@ -28,7 +28,7 @@
 
 #include "talloc.h"
 
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 #include "audio/format.h"
 #include "audio/reorder_ch.h"
 #include "ao.h"
@@ -111,23 +111,11 @@ static void write_wave_header(struct ao *ao, FILE *fp, uint64_t data_length)
 
 static int init(struct ao *ao, char *params)
 {
-    struct priv *priv = talloc_zero(ao, struct priv);
-    ao->priv = priv;
-
-    const opt_t subopts[] = {
-        {"waveheader", OPT_ARG_BOOL,  &priv->waveheader, NULL},
-        {"file",       OPT_ARG_MSTRZ, &priv->outputfilename, NULL},
-        {NULL}
-    };
-    // set defaults
-    priv->waveheader = 1;
-
-    if (subopt_parse(params, subopts) != 0)
-        return -1;
+    struct priv *priv = ao->priv;
 
     if (!priv->outputfilename)
         priv->outputfilename =
-            strdup(priv->waveheader ? "audiodump.wav" : "audiodump.pcm");
+            talloc_strdup(priv, priv->waveheader ? "audiodump.wav" : "audiodump.pcm");
     if (priv->waveheader) {
         // WAV files must have one of the following formats
 
@@ -201,7 +189,6 @@ static void uninit(struct ao *ao, bool cut_audio)
         }
     }
     fclose(priv->fp);
-    free(priv->outputfilename);
 }
 
 static int get_space(struct ao *ao)
@@ -218,6 +205,8 @@ static int play(struct ao *ao, void *data, int len, int flags)
     return len;
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct ao_driver audio_out_pcm = {
     .info = &(const struct ao_info) {
         "RAW PCM/WAVE file writer audio output",
@@ -229,4 +218,11 @@ const struct ao_driver audio_out_pcm = {
     .uninit    = uninit,
     .get_space = get_space,
     .play      = play,
+    .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv) { .waveheader = 1 },
+    .options = (const struct m_option[]) {
+        OPT_STRING("file", outputfilename, 0),
+        OPT_FLAG("waveheader", waveheader, 0),
+        {0}
+    },
 };

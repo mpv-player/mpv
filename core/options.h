@@ -6,7 +6,7 @@
 #include "core/m_option.h"
 
 typedef struct mp_vo_opts {
-    char **video_driver_list;
+    struct m_obj_settings *video_driver_list;
 
     int screenwidth;
     int screenheight;
@@ -29,8 +29,6 @@ typedef struct mp_vo_opts {
     int keepaspect;
     int border;
 
-    int colorkey;
-
     int nomouse_input;
     int enable_mouse_movements;
     int cursor_autohide_delay;
@@ -48,10 +46,8 @@ typedef struct MPOpts {
     char **reset_options;
     char *lua_file;
 
-    char **audio_driver_list;
+    struct m_obj_settings *audio_driver_list;
     int fixed_vo;
-    char *mixer_device;
-    char *mixer_channel;
     int softvol;
     float mixer_init_volume;
     int mixer_init_mute;

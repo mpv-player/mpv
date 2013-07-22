@@ -29,13 +29,15 @@
 
 #include "talloc.h"
 
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 #include "osdep/timer.h"
 #include "audio/format.h"
 #include "ao.h"
 
 struct priv {
     rsound_t *rd;
+    const char *host;
+    const char *port;
 };
 
 static int set_format(struct ao *ao)
@@ -90,36 +92,16 @@ static int set_format(struct ao *ao)
 
 static int init(struct ao *ao, char *params)
 {
-    struct priv *priv = talloc_zero(ao, struct priv);
-    ao->priv = priv;
+    struct priv *priv = ao->priv;
 
-    char *host = NULL;
-    char *port = NULL;
-
-    const opt_t subopts[] = {
-        {"host", OPT_ARG_MSTRZ, &host, NULL},
-        {"port", OPT_ARG_MSTRZ, &port, NULL},
-        {NULL}
-    };
-
-    if (subopt_parse(params, subopts) != 0)
+    if (rsd_init(&priv->rd) < 0)
         return -1;
 
-    if (rsd_init(&priv->rd) < 0) {
-        free(host);
-        free(port);
-        return -1;
-    }
+    if (priv->host && priv->host[0])
+        rsd_set_param(priv->rd, RSD_HOST, priv->host);
 
-    if (host) {
-        rsd_set_param(priv->rd, RSD_HOST, host);
-        free(host);
-    }
-
-    if (port) {
-        rsd_set_param(priv->rd, RSD_PORT, port);
-        free(port);
-    }
+    if (priv->port && priv->port[0])
+        rsd_set_param(priv->rd, RSD_PORT, priv->port);
 
     // Actual channel layout unknown.
     struct mp_chmap_sel sel = {0};
@@ -194,6 +176,8 @@ static float get_delay(struct ao *ao)
     return rsd_delay_ms(priv->rd) / 1000.0;
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct ao_driver audio_out_rsound = {
     .info      = &(const struct ao_info) {
         .name       = "RSound output driver",
@@ -209,5 +193,11 @@ const struct ao_driver audio_out_rsound = {
     .get_delay = get_delay,
     .pause     = audio_pause,
     .resume    = audio_resume,
+    .priv_size = sizeof(struct priv),
+    .options   = (const struct m_option[]) {
+        OPT_STRING("host", host, 0),
+        OPT_STRING("port", port, 0),
+        {0}
+    },
 };
 

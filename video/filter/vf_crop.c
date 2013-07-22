@@ -29,7 +29,6 @@
 #include "vf.h"
 
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 static const struct vf_priv_s {
     int crop_w,crop_h;
@@ -95,20 +94,13 @@ static int vf_open(vf_instance_t *vf, char *args){
     return 1;
 }
 
-#define ST_OFF(f) M_ST_OFF(struct vf_priv_s,f)
+#define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
-  {"w", ST_OFF(crop_w), CONF_TYPE_INT, M_OPT_MIN,0 ,0, NULL},
-  {"h", ST_OFF(crop_h), CONF_TYPE_INT, M_OPT_MIN,0 ,0, NULL},
-  {"x", ST_OFF(crop_x), CONF_TYPE_INT, M_OPT_MIN,-1 ,0, NULL},
-  {"y", ST_OFF(crop_y), CONF_TYPE_INT, M_OPT_MIN,-1 ,0, NULL},
-  { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-
-static const m_struct_t vf_opts = {
-  "crop",
-  sizeof(struct vf_priv_s),
-  &vf_priv_dflt,
-  vf_opts_fields
+    OPT_INT("w", crop_w, M_OPT_MIN, .min = 0),
+    OPT_INT("h", crop_h, M_OPT_MIN, .min = 0),
+    OPT_INT("x", crop_x, M_OPT_MIN, .min = -1),
+    OPT_INT("y", crop_y, M_OPT_MIN, .min = -1),
+    {0}
 };
 
 const vf_info_t vf_info_crop = {
@@ -117,7 +109,9 @@ const vf_info_t vf_info_crop = {
     "A'rpi",
     "",
     vf_open,
-    &vf_opts
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &vf_priv_dflt,
+    .options = vf_opts_fields,
 };
 
 //===========================================================================//

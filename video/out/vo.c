@@ -103,35 +103,68 @@ const struct vo_driver *video_out_drivers[] =
         NULL
 };
 
-
-static int vo_preinit(struct vo *vo, char *arg)
+static bool get_desc(struct m_obj_desc *dst, int index)
 {
+    if (index >= MP_ARRAY_SIZE(video_out_drivers) - 1)
+        return false;
+    const struct vo_driver *vo = video_out_drivers[index];
+    *dst = (struct m_obj_desc) {
+        .name = vo->info->short_name,
+        .description = vo->info->name,
+        .priv_size = vo->priv_size,
+        .priv_defaults = vo->priv_defaults,
+        .options = vo->options,
+        .init_options = vo->init_option_string,
+        .hidden = vo->encode,
+        .p = vo,
+    };
+    return true;
+}
+
+// For the vo option
+const struct m_obj_list vo_obj_list = {
+    .get_desc = get_desc,
+    .description = "video outputs",
+    .aliases = {
+        {"gl",        "opengl"},
+        {"gl3",       "opengl-hq"},
+        {0}
+    },
+    .allow_unknown_entries = true,
+    .allow_trailer = true,
+};
+
+static struct vo *vo_create(struct mp_vo_opts *opts,
+                            struct input_ctx *input_ctx,
+                            struct encode_lavc_context *encode_lavc_ctx,
+                            char *name, char **args)
+{
+    struct m_obj_desc desc;
+    if (!m_obj_list_find(&desc, &vo_obj_list, bstr0(name))) {
+        mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Video output %s not found!\n", name);
+        return NULL;
+    };
+    struct vo *vo = talloc_ptrtype(NULL, vo);
+    *vo = (struct vo) {
+        .driver = desc.p,
+        .opts = opts,
+        .encode_lavc_ctx = encode_lavc_ctx,
+        .input_ctx = input_ctx,
+        .event_fd = -1,
+        .registered_fd = -1,
+        .aspdat = { .monitor_par = 1 },
+    };
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
-        return -1;
-    if (vo->driver->priv_size) {
-        vo->priv = talloc_zero_size(vo, vo->driver->priv_size);
-        if (vo->driver->priv_defaults)
-            memcpy(vo->priv, vo->driver->priv_defaults, vo->driver->priv_size);
-    }
-    if (vo->driver->options) {
-        struct m_config *cfg = m_config_simple(vo->priv);
-        talloc_steal(vo->priv, cfg);
-        m_config_register_options(cfg, vo->driver->options);
-        char n[50];
-        int l = snprintf(n, sizeof(n), "vo/%s", vo->driver->info->short_name);
-        assert(l < sizeof(n));
-        if (vo->driver->init_option_string) {
-            m_config_parse_suboptions(cfg, n,
-                                      (char *)vo->driver->init_option_string);
-        }
-        int r = m_config_parse_suboptions(cfg, n, arg);
-        if (r < 0) {
-            if (vo->driver->help_text)
-                mp_msg(MSGT_VO, MSGL_FATAL, "%s\n", vo->driver->help_text);
-            return r;
-        }
-    }
-    return vo->driver->preinit(vo, arg);
+        goto error;
+    struct m_config *config = m_config_from_obj_desc(vo, &desc);
+    if (m_config_initialize_obj(config, &desc, &vo->priv, &args) < 0)
+        goto error;
+    if (vo->driver->preinit(vo, (char *)args))
+        goto error;
+    return vo;
+error:
+    talloc_free(vo);
+    return NULL;
 }
 
 int vo_control(struct vo *vo, uint32_t request, void *data)
@@ -255,89 +288,32 @@ void vo_destroy(struct vo *vo)
     talloc_free(vo);
 }
 
-void list_video_out(void)
-{
-    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Available video output drivers:\n");
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_OUTPUTS\n");
-    for (int i = 0; video_out_drivers[i]; i++) {
-        const vo_info_t *info = video_out_drivers[i]->info;
-        if (!video_out_drivers[i]->encode) {
-            mp_msg(MSGT_GLOBAL, MSGL_INFO,"\t%s\t%s\n",
-                   info->short_name, info->name);
-        }
-    }
-    mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
-}
-
-static void replace_legacy_vo_name(bstr *name)
-{
-    bstr new = *name;
-    if (bstr_equals0(*name, "gl"))
-        new = bstr0("opengl");
-    if (bstr_equals0(*name, "gl3"))
-        new = bstr0("opengl-hq");
-    if (!bstr_equals(*name, new)) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "VO driver '%.*s' has been replaced "
-                "with '%.*s'!\n", BSTR_P(*name), BSTR_P(new));
-    }
-    *name = new;
-}
-
 struct vo *init_best_video_out(struct mp_vo_opts *opts,
                                struct input_ctx *input_ctx,
                                struct encode_lavc_context *encode_lavc_ctx)
 {
-    char **vo_list = opts->video_driver_list;
-    int i;
-    struct vo *vo = talloc_ptrtype(NULL, vo);
-    struct vo initial_values = {
-        .opts = opts,
-        .encode_lavc_ctx = encode_lavc_ctx,
-        .input_ctx = input_ctx,
-        .event_fd = -1,
-        .registered_fd = -1,
-        .aspdat = { .monitor_par = 1 },
-    };
+    struct m_obj_settings *vo_list = opts->video_driver_list;
     // first try the preferred drivers, with their optional subdevice param:
-    if (vo_list && vo_list[0])
-        while (vo_list[0][0]) {
-            char *arg = vo_list[0];
-            bstr name = bstr0(arg);
-            char *params = strchr(arg, ':');
-            if (params) {
-                name = bstr_splice(name, 0, params - arg);
-                params++;
-            }
-            replace_legacy_vo_name(&name);
-            for (i = 0; video_out_drivers[i]; i++) {
-                const struct vo_driver *video_driver = video_out_drivers[i];
-                const vo_info_t *info = video_driver->info;
-                if (bstr_equals0(name, info->short_name)) {
-                    // name matches, try it
-                    *vo = initial_values;
-                    vo->driver = video_driver;
-                    if (!vo_preinit(vo, params))
-                        return vo; // success!
-                    talloc_free_children(vo);
-		}
-	    }
-            // continue...
-            ++vo_list;
-            if (!(vo_list[0])) {
-                talloc_free(vo);
-                return NULL; // do NOT fallback to others
-            }
-	}
-    // now try the rest...
-    for (i = 0; video_out_drivers[i]; i++) {
-        const struct vo_driver *video_driver = video_out_drivers[i];
-        *vo = initial_values;
-        vo->driver = video_driver;
-        if (!vo_preinit(vo, NULL))
-            return vo; // success!
-        talloc_free_children(vo);
+    if (vo_list && vo_list[0].name) {
+        for (int n = 0; vo_list[n].name; n++) {
+            // Something like "-vo name," allows fallback to autoprobing.
+            if (strlen(vo_list[n].name) == 0)
+                goto autoprobe;
+            struct vo *vo = vo_create(opts, input_ctx, encode_lavc_ctx,
+                                      vo_list[n].name, vo_list[n].attribs);
+            if (vo)
+                return vo;
+        }
+        return NULL;
     }
-    talloc_free(vo);
+autoprobe:
+    // now try the rest...
+    for (int i = 0; video_out_drivers[i]; i++) {
+        struct vo *vo = vo_create(opts, input_ctx, encode_lavc_ctx,
+                          (char *)video_out_drivers[i]->info->short_name, NULL);
+        if (vo)
+            return vo;
+    }
     return NULL;
 }
 

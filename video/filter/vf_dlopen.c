@@ -29,7 +29,6 @@
 #include "vf.h"
 
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 #include "vf_dlopen.h"
 
@@ -46,9 +45,9 @@
 #endif
 
 static struct vf_priv_s {
-    const char *cfg_dllname;
+    char *cfg_dllname;
     int cfg_argc;
-    const char *cfg_argv[16];
+    char *cfg_argv[16];
     void *dll;
     struct vf_dlopen_context filter;
 
@@ -329,7 +328,9 @@ static int vf_open(vf_instance_t *vf, char *args)
         if (vf->priv->cfg_argv[i] == NULL)
             vf->priv->cfg_argv[i] = talloc_strdup (vf->priv, "");
 
-    if (func(&vf->priv->filter, vf->priv->cfg_argc, vf->priv->cfg_argv) < 0) {
+    if (func(&vf->priv->filter, vf->priv->cfg_argc,
+             (const char **)vf->priv->cfg_argv)  < 0)
+    {
         mp_msg(MSGT_VFILTER, MSGL_ERR,
                "function did not create a filter: %s\n",
                vf->priv->cfg_dllname);
@@ -351,33 +352,26 @@ static int vf_open(vf_instance_t *vf, char *args)
     return 1;
 }
 
-#define ST_OFF(f) M_ST_OFF(struct vf_priv_s, f)
-static m_option_t vf_opts_fields[] = {
-    {"dll", ST_OFF(cfg_dllname), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a0", ST_OFF(cfg_argv[0]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a1", ST_OFF(cfg_argv[1]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a2", ST_OFF(cfg_argv[2]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a3", ST_OFF(cfg_argv[3]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a4", ST_OFF(cfg_argv[4]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a5", ST_OFF(cfg_argv[5]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a6", ST_OFF(cfg_argv[6]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a7", ST_OFF(cfg_argv[7]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a8", ST_OFF(cfg_argv[8]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a9", ST_OFF(cfg_argv[9]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a10", ST_OFF(cfg_argv[10]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a11", ST_OFF(cfg_argv[11]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a12", ST_OFF(cfg_argv[12]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a13", ST_OFF(cfg_argv[13]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a14", ST_OFF(cfg_argv[14]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"a15", ST_OFF(cfg_argv[15]), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    { NULL, NULL, 0, 0, 0, 0, NULL }
-};
-
-static const m_struct_t vf_opts = {
-    "dlopen",
-    sizeof(struct vf_priv_s),
-    &vf_priv_dflt,
-    vf_opts_fields
+#define OPT_BASE_STRUCT struct vf_priv_s
+static const m_option_t vf_opts_fields[] = {
+    OPT_STRING("dll", cfg_dllname, 0),
+    OPT_STRING("a0", cfg_argv[0], 0),
+    OPT_STRING("a1", cfg_argv[1], 0),
+    OPT_STRING("a2", cfg_argv[2], 0),
+    OPT_STRING("a3", cfg_argv[3], 0),
+    OPT_STRING("a4", cfg_argv[4], 0),
+    OPT_STRING("a5", cfg_argv[5], 0),
+    OPT_STRING("a6", cfg_argv[6], 0),
+    OPT_STRING("a7", cfg_argv[7], 0),
+    OPT_STRING("a8", cfg_argv[8], 0),
+    OPT_STRING("a9", cfg_argv[9], 0),
+    OPT_STRING("a10", cfg_argv[10], 0),
+    OPT_STRING("a11", cfg_argv[11], 0),
+    OPT_STRING("a12", cfg_argv[12], 0),
+    OPT_STRING("a13", cfg_argv[13], 0),
+    OPT_STRING("a14", cfg_argv[14], 0),
+    OPT_STRING("a15", cfg_argv[15], 0),
+    {0}
 };
 
 const vf_info_t vf_info_dlopen = {
@@ -386,7 +380,9 @@ const vf_info_t vf_info_dlopen = {
     "Rudolf Polzer",
     "",
     vf_open,
-    &vf_opts
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &vf_priv_dflt,
+    .options = vf_opts_fields,
 };
 
 //===========================================================================//

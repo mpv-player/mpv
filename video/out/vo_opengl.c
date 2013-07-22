@@ -343,28 +343,18 @@ err_out:
     return -1;
 }
 
-static int validate_backend_opt(const m_option_t *opt, struct bstr name,
-                                struct bstr param)
-{
-    char s[20];
-    snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
-    return mpgl_find_backend(s) >= -1 ? 1 : M_OPT_INVALID;
-}
-
 #define OPT_BASE_STRUCT struct gl_priv
 const struct m_option options[] = {
     OPT_FLAG("glfinish", use_glFinish, 0),
     OPT_INT("swapinterval", swap_interval, 0, OPTDEF_INT(1)),
     OPT_FLAG("debug", use_gl_debug, 0),
-    OPT_STRING_VALIDATE("backend", backend, 0, validate_backend_opt),
+    OPT_STRING_VALIDATE("backend", backend, 0, mpgl_validate_backend_opt),
     OPT_FLAG("sw", allow_sw, 0),
 
     OPT_SUBSTRUCT("", renderer_opts, gl_video_conf, 0),
     OPT_SUBSTRUCT("", icc_opts, mp_icc_conf, 0),
     {0},
 };
-
-static const char help_text[];
 
 const struct vo_driver video_out_opengl = {
     .info = &(const vo_info_t) {
@@ -383,7 +373,6 @@ const struct vo_driver video_out_opengl = {
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),
     .options = options,
-    .help_text = help_text,
 };
 
 const struct vo_driver video_out_opengl_hq = {
@@ -403,39 +392,5 @@ const struct vo_driver video_out_opengl_hq = {
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),
     .options = options,
-    .help_text = help_text,
     .init_option_string = "lscale=lanczos2:dither-depth=auto:pbo:fbo-format=rgb16",
 };
-
-static const char help_text[] =
-"\n--vo=opengl command line help:\n"
-"Example: mpv --vo=opengl:scale-sep:lscale=lanczos2\n"
-"\nOptions:\n"
-"  lscale=<filter>\n"
-"    Set the scaling filter. Includes, but is not limited to:\n"
-"    bilinear: bilinear texture filtering (fastest).\n"
-"    bicubic_fast: bicubic filter (without lookup texture).\n"
-"    sharpen3: unsharp masking (sharpening) with radius=3.\n"
-"    sharpen5: unsharp masking (sharpening) with radius=5.\n"
-"    lanczos2: Lanczos with radius=2 (recommended).\n"
-"    lanczos3: Lanczos with radius=3 (not recommended).\n"
-"    mitchell: Mitchell-Netravali.\n"
-"    Default: bilinear\n"
-"  lparam1=<value> / lparam2=<value>\n"
-"    Set parameters for configurable filters. Affects chroma scaler\n"
-"    as well.\n"
-"    Filters which use this:\n"
-"     mitchell: b and c params (defaults: b=1/3 c=1/3)\n"
-"     kaiser: (defaults: 6.33 6.33)\n"
-"     sharpen3: lparam1 sets sharpening strength (default: 0.5)\n"
-"     sharpen5: as with sharpen3\n"
-"  cscale=<n>\n"
-"    As lscale but for chroma (Much slower with little visible effect).\n"
-"    For details, refer to the man-pages (see link below).\n"
-"\n"
-"Note: all defaults mentioned are for 'opengl', not 'opengl-hq'.\n"
-"    'opengl-hq' is merely 'opengl' with different default settings applied.\n"
-"\n"
-"There are many more options. Read:\n"
-"    https://github.com/mpv-player/mpv/blob/master/DOCS/man/en/vo.rst#vo-opengl\n"
-"\n";

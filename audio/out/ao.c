@@ -27,6 +27,8 @@
 #include "ao.h"
 #include "audio/format.h"
 
+#include "core/options.h"
+#include "core/m_config.h"
 #include "core/mp_msg.h"
 
 // there are some globals:
@@ -42,7 +44,7 @@ extern const struct ao_driver audio_out_openal;
 extern const struct ao_driver audio_out_null;
 extern const struct ao_driver audio_out_alsa;
 extern const struct ao_driver audio_out_dsound;
-extern const struct ao_driver audio_out_wasapi0;
+extern const struct ao_driver audio_out_wasapi;
 extern const struct ao_driver audio_out_pcm;
 extern const struct ao_driver audio_out_pss;
 extern const struct ao_driver audio_out_lavc;
@@ -60,14 +62,14 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #ifdef CONFIG_ALSA
     &audio_out_alsa,
 #endif
+#ifdef CONFIG_WASAPI
+    &audio_out_wasapi,
+#endif
 #ifdef CONFIG_OSS_AUDIO
     &audio_out_oss,
 #endif
 #ifdef CONFIG_DSOUND
     &audio_out_dsound,
-#endif
-#ifdef CONFIG_WASAPI0
-    &audio_out_wasapi0,
 #endif
 #ifdef CONFIG_PORTAUDIO
     &audio_out_portaudio,
@@ -94,113 +96,106 @@ static const struct ao_driver * const audio_out_drivers[] = {
     NULL
 };
 
-void list_audio_out(void)
+static bool get_desc(struct m_obj_desc *dst, int index)
 {
-    mp_tmsg(MSGT_AO, MSGL_INFO, "Available audio output drivers:\n");
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_OUTPUTS\n");
-    for (int i = 0; audio_out_drivers[i]; i++) {
-        const ao_info_t *info = audio_out_drivers[i]->info;
-        if (!audio_out_drivers[i]->encode) {
-            mp_msg(MSGT_GLOBAL, MSGL_INFO, "\t%s\t%s\n",
-                   info->short_name, info->name);
-        }
-    }
-    mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
-}
-
-struct ao *ao_create(struct MPOpts *opts, struct input_ctx *input)
-{
-    struct ao *r = talloc(NULL, struct ao);
-    *r = (struct ao){.opts = opts, .input_ctx = input };
-    return r;
-}
-
-static bool ao_try_init(struct ao *ao, char *params)
-{
-    if (ao->driver->encode != !!ao->encode_lavc_ctx)
+    if (index >= MP_ARRAY_SIZE(audio_out_drivers) - 1)
         return false;
-    if (ao->driver->init(ao, params) < 0)
-        return false;
-    ao->bps = ao->channels.num * ao->samplerate * af_fmt2bits(ao->format) / 8;
-    ao->initialized = true;
+    const struct ao_driver *ao = audio_out_drivers[index];
+    *dst = (struct m_obj_desc) {
+        .name = ao->info->short_name,
+        .description = ao->info->name,
+        .priv_size = ao->priv_size,
+        .priv_defaults = ao->priv_defaults,
+        .options = ao->options,
+        .hidden = ao->encode,
+        .p = ao,
+    };
     return true;
 }
 
-void ao_init(struct ao *ao, char **ao_list)
+// For the ao option
+const struct m_obj_list ao_obj_list = {
+    .get_desc = get_desc,
+    .description = "audio outputs",
+    .allow_unknown_entries = true,
+    .allow_trailer = true,
+};
+
+static struct ao *ao_create(bool probing, struct MPOpts *opts,
+                            struct input_ctx *input_ctx,
+                            struct encode_lavc_context *encode_lavc_ctx,
+                            int samplerate, int format, struct mp_chmap channels,
+                            char *name, char **args)
 {
-    /* Caller adding child blocks is not supported as we may call
-     * talloc_free_children() to clean up after failed open attempts.
-     */
-    assert(talloc_total_blocks(ao) == 1);
-    struct ao backup = *ao;
+    struct m_obj_desc desc;
+    if (!m_obj_list_find(&desc, &ao_obj_list, bstr0(name))) {
+        mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Audio output %s not found!\n", name);
+        return NULL;
+    };
+    struct ao *ao = talloc_ptrtype(NULL, ao);
+    *ao = (struct ao) {
+        .driver = desc.p,
+        .probing = probing,
+        .opts = opts,
+        .encode_lavc_ctx = encode_lavc_ctx,
+        .input_ctx = input_ctx,
+        .samplerate = samplerate,
+        .channels = channels,
+        .format = format,
+    };
+    if (ao->driver->encode != !!ao->encode_lavc_ctx)
+        goto error;
+    struct m_config *config = m_config_from_obj_desc(ao, &desc);
+    if (m_config_initialize_obj(config, &desc, &ao->priv, &args) < 0)
+        goto error;
+    if (ao->driver->init(ao, (char *)args) < 0)
+        goto error;
+    ao->bps = ao->channels.num * ao->samplerate * af_fmt2bits(ao->format) / 8;
+    return ao;
+error:
+    talloc_free(ao);
+    return NULL;
+}
 
-    if (!ao_list)
-        goto try_defaults;
-
-    // first try the preferred drivers, with their optional subdevice param:
-    while (*ao_list) {
-        char *ao_name = *ao_list;
-        if (!*ao_name)
-            goto try_defaults; // empty entry means try defaults
-        int ao_len;
-        char *params = strchr(ao_name, ':');
-        if (params) {
-            ao_len = params - ao_name;
-            params++;
-        } else
-            ao_len = strlen(ao_name);
-
-        mp_tmsg(MSGT_AO, MSGL_V,
-                "Trying preferred audio driver '%.*s', options '%s'\n",
-                ao_len, ao_name, params ? params : "[none]");
-
-        const struct ao_driver *audio_out = NULL;
-        for (int i = 0; audio_out_drivers[i]; i++) {
-            audio_out = audio_out_drivers[i];
-            if (!strncmp(audio_out->info->short_name, ao_name, ao_len))
-                break;
-            audio_out = NULL;
+struct ao *ao_init_best(struct MPOpts *opts,
+                        struct input_ctx *input_ctx,
+                        struct encode_lavc_context *encode_lavc_ctx,
+                        int samplerate, int format, struct mp_chmap channels)
+{
+    struct m_obj_settings *ao_list = opts->audio_driver_list;
+    if (ao_list && ao_list[0].name) {
+        for (int n = 0; ao_list[n].name; n++) {
+            if (strlen(ao_list[n].name) == 0)
+                goto autoprobe;
+            mp_tmsg(MSGT_AO, MSGL_V, "Trying preferred audio driver '%s'\n",
+                    ao_list[n].name);
+            struct ao *ao = ao_create(false, opts, input_ctx, encode_lavc_ctx,
+                                      samplerate, format, channels,
+                                      ao_list[n].name, ao_list[n].attribs);
+            if (ao)
+                return ao;
+            mp_tmsg(MSGT_AO, MSGL_WARN, "Failed to initialize audio driver '%s'\n",
+                    ao_list[n].name);
         }
-        if (audio_out) {
-            // name matches, try it
-            ao->driver = audio_out;
-            if (ao_try_init(ao, params))
-                return;
-            mp_tmsg(MSGT_AO, MSGL_WARN,
-                    "Failed to initialize audio driver '%s'\n", ao_name);
-            talloc_free_children(ao);
-            *ao = backup;
-        } else
-            mp_tmsg(MSGT_AO, MSGL_WARN, "No such audio driver '%.*s'\n",
-                    ao_len, ao_name);
-        ++ao_list;
+        return NULL;
     }
-    return;
-
- try_defaults:
-    mp_tmsg(MSGT_AO, MSGL_V, "Trying every known audio driver...\n");
-
-    ao->probing = false;
-
+autoprobe:
     // now try the rest...
     for (int i = 0; audio_out_drivers[i]; i++) {
-        const struct ao_driver *audio_out = audio_out_drivers[i];
-        ao->driver = audio_out;
-        ao->probing = true;
-        if (ao_try_init(ao, NULL))
-            return;
-        talloc_free_children(ao);
-        *ao = backup;
+        struct ao *ao = ao_create(true, opts, input_ctx, encode_lavc_ctx,
+                                  samplerate, format, channels,
+                          (char *)audio_out_drivers[i]->info->short_name, NULL);
+        if (ao)
+            return ao;
     }
-    return;
+    return NULL;
 }
 
 void ao_uninit(struct ao *ao, bool cut_audio)
 {
     assert(ao->buffer.len >= ao->buffer_playable_size);
     ao->buffer.len = ao->buffer_playable_size;
-    if (ao->initialized)
-        ao->driver->uninit(ao, cut_audio);
+    ao->driver->uninit(ao, cut_audio);
     if (!cut_audio && ao->buffer.len)
         mp_msg(MSGT_AO, MSGL_WARN, "Audio output truncated at end.\n");
     talloc_free(ao);

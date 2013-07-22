@@ -524,11 +524,6 @@
         It is advisable to use your graphics driver's color range option
         instead, if available.
 
-``--colorkey=<number>``
-    Changes the colorkey to an RGB value of your choice. ``0x000000`` is black
-    and ``0xffffff`` is white. Only supported by the ``xv`` (see
-    ``--vo=xv:ck``) video output driver. See also ``--no-colorkey``.
-
 ``--consolecontrols``, ``--no-consolecontrols``
     ``--no-consolecontrols`` prevents the player from reading key events from
     standard input. Useful when reading data from standard input. This is
@@ -1205,24 +1200,6 @@
     :fps=<value>:  output fps (default: 25)
     :type=<value>: input file type (available: jpeg, png, tga, sgi)
 
-``--mixer=<device>``
-    Use a mixer device different from the default ``/dev/mixer``. For ALSA
-    this is the mixer name.
-
-``--mixer-channel=<name[,index]>``
-    (``--ao=oss`` and ``--ao=alsa`` only)
-    This option will tell mpv to use a different channel for controlling
-    volume than the default PCM. Options for OSS include **vol, pcm, line**.
-    For a complete list of options look for ``SOUND_DEVICE_NAMES`` in
-    ``/usr/include/linux/soundcard.h``. For ALSA, you can use the names e.g.
-    "``amixer scontrols``" displays, like **Master, Line, PCM**.
-
-    .. note::
-
-        ALSA mixer channel names followed by a number must be specified in the
-        <name,number> format, i.e. a channel labeled 'PCM 1' in alsamixer must
-        be converted to PCM,1.
-
 ``--monitoraspect=<ratio>``
     Set the aspect ratio of your monitor or TV screen. A value of 0 disables a
     previous setting (e.g. in the config file). Overrides the
@@ -1300,10 +1277,6 @@
 
 ``--no-cache``
     Turn off input stream caching. See ``--cache``.
-
-``--no-colorkey``
-    Disables colorkeying. Only supported by the xv (see ``--vo=xv:ck``) video
-    output driver.
 
 ``--no-config``
     Do not load default configuration files. This prevents loading of

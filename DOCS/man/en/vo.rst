@@ -54,6 +54,13 @@ Available video output drivers are:
         auto
           Let Xv draw the colorkey.
 
+    ``colorkey=<number>``
+        Changes the colorkey to an RGB value of your choice. ``0x000000`` is
+        black and ``0xffffff`` is white.
+
+    ``no-colorkey``
+        Disables colorkeying.
+
 ``x11`` (X11 only)
     Shared memory video output driver without hardware acceleration that works
     whenever X11 is present.
@@ -228,31 +235,6 @@ Available video output drivers are:
     (or if the necessary extensions are available).
 
     ``lscale=<filter>``
-        Set the scaling filter. Possible choices:
-            bilinear
-            bicubic_fast
-            sharpen3
-            sharpen5
-            hanning
-            hamming
-            hermite
-            quadric
-            bicubic
-            kaiser
-            catmull_rom
-            mitchell
-            spline16
-            spline36
-            gaussian
-            sinc2
-            sinc3
-            sinc4
-            lanczos2
-            lanczos3
-            lanczos4
-            blackman2
-            blackman3
-            blackman4
 
         ``bilinear``
             Bilinear hardware texture filtering (fastest, mid-quality).
@@ -281,6 +263,10 @@ Available video output drivers are:
             Mitchell-Netravali. The ``b`` and ``c`` parameters can be set with
             ``lparam1`` and ``lparam2``. Both are set to 1/3 by default.
 
+
+        There are some more filters. For a complete list, pass ``help`` as
+        value, e.g.: ``mpv --vo=opengl:lscale=help``
+
     ``lparam1=<value>``
         Set filter parameters. Ignored if the filter is not tunable. These are
         unset by default, and use the filter specific default if applicable.
@@ -300,13 +286,13 @@ Available video output drivers are:
         Select a method for stereo display. You may have to use ``--aspect`` to
         fix the aspect value. Experimental, do not expect too much from it.
 
-        0
+        no
             Normal 2D display
-        1
+        red-cyan
             Convert side by side input to full-color red-cyan stereo.
-        2
+        green-magenta
             Convert side by side input to full-color green-magenta stereo.
-        3
+        quadbuffer
             Convert side by side input to quadbuffered stereo. Only supported
             by very few OpenGL cards.
 
@@ -399,6 +385,10 @@ Available video output drivers are:
         Continue even if a software renderer is detected.
 
     ``backend=<sys>``
+        The value ``auto`` (the default) selects the windowing backend. You
+        can also pass ``help`` to get a complete list of compiled in backends
+        (sorted by autoprobe order).
+
         auto
             auto-select (default)
         cocoa

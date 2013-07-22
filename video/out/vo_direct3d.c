@@ -29,7 +29,7 @@
 #include <inttypes.h>
 #include "config.h"
 #include "core/options.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 #include "talloc.h"
 #include "vo.h"
 #include "video/vfcap.h"
@@ -289,11 +289,6 @@ static void calc_fs_rect(d3d_priv *priv)
     priv->fs_panscan_rect.right  = src_rect.x1;
     priv->fs_panscan_rect.top    = src_rect.y0;
     priv->fs_panscan_rect.bottom = src_rect.y1;
-
-    mp_msg(MSGT_VO, MSGL_V,
-           "<vo_direct3d>Video rectangle: t: %"PRId32", l: %"PRId32", r: %"PRId32", b:%"PRId32"\n",
-           priv->fs_movie_rect.top,   priv->fs_movie_rect.left,
-           priv->fs_movie_rect.right, priv->fs_movie_rect.bottom);
 }
 
 // Adjust the texture size *width/*height to fit the requirements of the D3D
@@ -1155,46 +1150,6 @@ static void update_colorspace(d3d_priv *priv)
     }
 }
 
-const char *options_help_text = "-vo direct3d command line help:\n"
-"Example: -vo direct3d:disable-textures\n"
-"Options:\n"
-"    prefer-stretchrect\n"
-"        Use IDirect3DDevice9::StretchRect over other methods if possible.\n"
-"    disable-stretchrect\n"
-"        Never render the video using IDirect3DDevice9::StretchRect.\n"
-"    disable-textures\n"
-"        Never render the video using D3D texture rendering. (Rendering with\n"
-"        textures + shader will still be allowed. Add disable-shaders to\n"
-"        completely disable video rendering with textures.)\n"
-"    disable-shaders\n"
-"        Never use shaders when rendering video.\n"
-"    only-8bit\n"
-"        Never render YUV video with more than 8 bits per component.\n"
-"        (Using this flag will force software conversion to 8 bit.)\n"
-"    disable-texture-align\n"
-"        Normally texture sizes are always aligned to 16. With this option\n"
-"        enabled, the video texture will always have exactly the same size as\n"
-"        the video itself.\n"
-"Debug options. These might be incorrect, might be removed in the future, might\n"
-"crash, might cause slow downs, etc. Contact the developers if you actually need\n"
-"any of these for performance or proper operation.\n"
-"    force-power-of-2\n"
-"        Always force textures to power of 2, even if the device reports\n"
-"        non-power-of-2 texture sizes as supported.\n"
-"    texture-memory=N\n"
-"        Only affects operation with shaders/texturing enabled, and (E)OSD.\n"
-"        Values for N:\n"
-"           0 default, will often use an additional shadow texture + copy\n"
-"           1 use D3DPOOL_MANAGED\n"
-"           2 use D3DPOOL_DEFAULT\n"
-"           3 use D3DPOOL_SYSTEMMEM, but without shadow texture\n"
-"    swap-discard\n"
-"        Use D3DSWAPEFFECT_DISCARD, which might be faster.\n"
-"        Might be slower too, as it must (?) clear every frame.\n"
-"    exact-backbuffer\n"
-"        Always resize the backbuffer to window size.\n"
-"";
-
 /** @brief libvo Callback: Preinitialize the video card.
  *  Preinit the hardware just enough to be queried about
  *  supported formats.
@@ -1202,17 +1157,10 @@ const char *options_help_text = "-vo direct3d command line help:\n"
  *  @return 0 on success, -1 on failure
  */
 
-static int preinit_internal(struct vo *vo, const char *arg, bool allow_shaders)
+static int preinit(struct vo *vo, const char *arg)
 {
-    d3d_priv *priv = talloc_zero(vo, d3d_priv);
-    vo->priv = priv;
-
-    *priv = (d3d_priv) {
-        .vo = vo,
-
-        .colorspace = MP_CSP_DETAILS_DEFAULTS,
-        .video_eq = { MP_CSP_EQ_CAPS_COLORMATRIX },
-    };
+    d3d_priv *priv = vo->priv;
+    priv->vo = vo;
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osdpart *osd = talloc_ptrtype(priv, osd);
@@ -1220,28 +1168,6 @@ static int preinit_internal(struct vo *vo, const char *arg, bool allow_shaders)
             .packer = talloc_zero(osd, struct bitmap_packer),
         };
         priv->osd[n] = osd;
-    }
-
-    if (!allow_shaders) {
-        priv->opt_disable_shaders = priv->opt_disable_textures = true;
-    }
-
-    const opt_t subopts[] = {
-        {"prefer-stretchrect", OPT_ARG_BOOL, &priv->opt_prefer_stretchrect},
-        {"disable-textures", OPT_ARG_BOOL, &priv->opt_disable_textures},
-        {"disable-stretchrect", OPT_ARG_BOOL, &priv->opt_disable_stretchrect},
-        {"disable-shaders", OPT_ARG_BOOL, &priv->opt_disable_shaders},
-        {"only-8bit", OPT_ARG_BOOL, &priv->opt_only_8bit},
-        {"force-power-of-2", OPT_ARG_BOOL, &priv->opt_force_power_of_2},
-        {"disable-texture-align", OPT_ARG_BOOL, &priv->opt_disable_texture_align},
-        {"texture-memory", OPT_ARG_INT, &priv->opt_texture_memory},
-        {"swap-discard", OPT_ARG_BOOL, &priv->opt_swap_discard},
-        {"exact-backbuffer", OPT_ARG_BOOL, &priv->opt_exact_backbuffer},
-        {NULL}
-    };
-    if (subopt_parse(arg, subopts) != 0) {
-        mp_msg(MSGT_VO, MSGL_FATAL, options_help_text);
-        return -1;
     }
 
     priv->d3d9_dll = LoadLibraryA("d3d9.dll");
@@ -1276,16 +1202,6 @@ static int preinit_internal(struct vo *vo, const char *arg, bool allow_shaders)
 err_out:
     uninit(vo);
     return -1;
-}
-
-static int preinit_standard(struct vo *vo, const char *arg)
-{
-    return preinit_internal(vo, arg, false);
-}
-
-static int preinit_shaders(struct vo *vo, const char *arg)
-{
-    return preinit_internal(vo, arg, true);
 }
 
 /** @brief libvo Callback: Handle control requests.
@@ -1793,6 +1709,27 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
              draw_osd_cb, priv);
 }
 
+#define OPT_BASE_STRUCT d3d_priv
+
+static const struct m_option opts[] = {
+    OPT_FLAG("prefer-stretchrect", opt_prefer_stretchrect, 0),
+    OPT_FLAG("disable-textures", opt_disable_textures, 0),
+    OPT_FLAG("disable-stretchrect", opt_disable_stretchrect, 0),
+    OPT_FLAG("disable-shaders", opt_disable_shaders, 0),
+    OPT_FLAG("only-8bit", opt_only_8bit, 0),
+    OPT_FLAG("force-power-of-2", opt_force_power_of_2, 0),
+    OPT_FLAG("disable-texture-align", opt_disable_texture_align, 0),
+    OPT_FLAG("texture-memory", opt_texture_memory, 0),
+    OPT_FLAG("swap-discard", opt_swap_discard, 0),
+    OPT_FLAG("exact-backbuffer", opt_exact_backbuffer, 0),
+    {0}
+};
+
+static const d3d_priv defaults = {
+    .colorspace = MP_CSP_DETAILS_DEFAULTS,
+    .video_eq = { MP_CSP_EQ_CAPS_COLORMATRIX },
+};
+
 #define AUTHOR "Georgi Petrov (gogothebee) <gogothebee@gmail.com> and others"
 
 const struct vo_driver video_out_direct3d = {
@@ -1802,7 +1739,7 @@ const struct vo_driver video_out_direct3d = {
         AUTHOR,
         ""
     },
-    .preinit = preinit_standard,
+    .preinit = preinit,
     .query_format = query_format,
     .config = config,
     .control = control,
@@ -1810,6 +1747,10 @@ const struct vo_driver video_out_direct3d = {
     .draw_osd = draw_osd,
     .flip_page = flip_page,
     .uninit = uninit,
+    .priv_size = sizeof(d3d_priv),
+    .priv_defaults = &defaults,
+    .options = opts,
+    .init_option_string = "disable-shaders:disable-textures",
 };
 
 const struct vo_driver video_out_direct3d_shaders = {
@@ -1819,7 +1760,7 @@ const struct vo_driver video_out_direct3d_shaders = {
         AUTHOR,
         ""
     },
-    .preinit = preinit_shaders,
+    .preinit = preinit,
     .query_format = query_format,
     .config = config,
     .control = control,
@@ -1827,4 +1768,7 @@ const struct vo_driver video_out_direct3d_shaders = {
     .draw_osd = draw_osd,
     .flip_page = flip_page,
     .uninit = uninit,
+    .priv_size = sizeof(d3d_priv),
+    .priv_defaults = &defaults,
+    .options = opts,
 };

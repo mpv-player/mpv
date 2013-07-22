@@ -82,6 +82,11 @@ struct ao_driver {
     float (*get_delay)(struct ao *ao);
     void (*pause)(struct ao *ao);
     void (*resume)(struct ao *ao);
+
+    // For option parsing (see vo.h)
+    int priv_size;
+    const void *priv_defaults;
+    const struct m_option *options;
 };
 
 /* global data used by mplayer and plugins */
@@ -94,7 +99,6 @@ struct ao {
     struct bstr buffer;
     int buffer_playable_size;
     bool probing;               // if true, don't fail loudly on init
-    bool initialized;
     bool untimed;
     bool no_persistent_volume;  // the AO does the equivalent of af_volume
     bool per_application_mixer; // like above, but volume persists (per app)
@@ -107,10 +111,10 @@ struct ao {
 
 extern char *ao_subdevice;
 
-void list_audio_out(void);
-
-struct ao *ao_create(struct MPOpts *opts, struct input_ctx *input);
-void ao_init(struct ao *ao, char **ao_list);
+struct ao *ao_init_best(struct MPOpts *opts,
+                        struct input_ctx *input_ctx,
+                        struct encode_lavc_context *encode_lavc_ctx,
+                        int samplerate, int format, struct mp_chmap channels);
 void ao_uninit(struct ao *ao, bool cut_audio);
 int ao_play(struct ao *ao, void *data, int len, int flags);
 int ao_control(struct ao *ao, enum aocontrol cmd, void *arg);

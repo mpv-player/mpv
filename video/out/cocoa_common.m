@@ -817,25 +817,24 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 @synthesize mouseDown = _mouse_down;
 // mpv uses flipped coordinates, because X11 uses those. So let's just use them
 // as well without having to do any coordinate conversion of mouse positions.
-- (BOOL) isFlipped { return YES; }
+- (BOOL)isFlipped { return YES; }
 
-- (id)initWithFrame:(NSRect)frame {
-    if (self = [super initWithFrame:frame]) {
-        NSTrackingAreaOptions trackingOptions =
-            NSTrackingEnabledDuringMouseDrag |
-            NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved |
-            NSTrackingActiveInActiveApp;
+- (void)updateTrackingAreas
+{
+    if (self.tracker) [self removeTrackingArea:self.tracker];
 
-        self.tracker =
-            [[[NSTrackingArea alloc] initWithRect:[self bounds]
-                                          options:trackingOptions
-                                            owner:self
-                                         userInfo:nil] autorelease];
+    NSTrackingAreaOptions trackingOptions =
+        NSTrackingEnabledDuringMouseDrag |
+        NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved |
+        NSTrackingActiveInActiveApp;
 
-        [self addTrackingArea:self.tracker];
-    }
+    self.tracker =
+        [[[NSTrackingArea alloc] initWithRect:[self bounds]
+                                      options:trackingOptions
+                                        owner:self
+                                     userInfo:nil] autorelease];
 
-    return self;
+    [self addTrackingArea:self.tracker];
 }
 
 - (NSPoint)mouseLocation
@@ -885,6 +884,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (void)signalMouseMovement:(NSEvent *)event
 {
+    [self recalcDraggableState];
     NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
     vo_mouse_movement(self.videoOutput, p.x, p.y);
 }
@@ -949,7 +949,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     cocoa_put_key_with_modifiers(mp_key | state, [event modifierFlags]);
 }
 
-- (void)drawRect: (NSRect)rect
+- (void)drawRect:(NSRect)rect
 {
     struct vo *vo = [self videoOutput];
 
