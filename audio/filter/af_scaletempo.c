@@ -36,9 +36,10 @@
 #include <limits.h>
 #include <assert.h>
 
+#include "core/mp_common.h"
+
 #include "af.h"
-#include "libavutil/common.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 
 // Data for specific instances of this filter
 typedef struct af_scaletempo_s
@@ -74,13 +75,14 @@ typedef struct af_scaletempo_s
   float   ms_stride;
   float   percent_overlap;
   float   ms_search;
+  int     speed_opt;
   short   speed_tempo;
   short   speed_pitch;
 } af_scaletempo_t;
 
 static int fill_queue(struct af_instance* af, struct mp_audio* data, int offset)
 {
-  af_scaletempo_t* s = af->setup;
+  af_scaletempo_t* s = af->priv;
   int bytes_in = data->len - offset;
   int offset_unchanged = offset;
 
@@ -95,7 +97,7 @@ static int fill_queue(struct af_instance* af, struct mp_audio* data, int offset)
     } else {
       int bytes_skip;
       s->bytes_to_slide -= s->bytes_queued;
-      bytes_skip = FFMIN(s->bytes_to_slide, bytes_in);
+      bytes_skip = MPMIN(s->bytes_to_slide, bytes_in);
       s->bytes_queued = 0;
       s->bytes_to_slide -= bytes_skip;
       offset += bytes_skip;
@@ -104,7 +106,7 @@ static int fill_queue(struct af_instance* af, struct mp_audio* data, int offset)
   }
 
   if (bytes_in > 0) {
-    int bytes_copy = FFMIN(s->bytes_queue - s->bytes_queued, bytes_in);
+    int bytes_copy = MPMIN(s->bytes_queue - s->bytes_queued, bytes_in);
     assert(bytes_copy >= 0);
     memcpy(s->buf_queue + s->bytes_queued,
            (int8_t*)data->audio + offset,
@@ -221,7 +223,7 @@ static void output_overlap_s16(af_scaletempo_t* s, void* buf_out,
 // Filter data through filter
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
-  af_scaletempo_t* s = af->setup;
+  af_scaletempo_t* s = af->priv;
   int offset_in;
   int max_bytes_out;
   int8_t* pout;
@@ -287,7 +289,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_scaletempo_t* s = af->setup;
+  af_scaletempo_t* s = af->priv;
   switch(cmd){
   case AF_CONTROL_REINIT:{
     struct mp_audio* data = (struct mp_audio*)arg;
@@ -461,69 +463,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
   case AF_CONTROL_SCALETEMPO_AMOUNT | AF_CONTROL_GET:
     *(float*)arg = s->scale;
     return AF_OK;
-  case AF_CONTROL_COMMAND_LINE:{
-    strarg_t speed = {};
-    opt_t subopts[] = {
-      {"scale",   OPT_ARG_FLOAT, &s->scale_nominal, NULL},
-      {"stride",  OPT_ARG_FLOAT, &s->ms_stride, NULL},
-      {"overlap", OPT_ARG_FLOAT, &s->percent_overlap, NULL},
-      {"search",  OPT_ARG_FLOAT, &s->ms_search, NULL},
-      {"speed",   OPT_ARG_STR,   &speed, NULL},
-      {NULL},
-    };
-    if (subopt_parse(arg, subopts) != 0) {
-      return AF_ERROR;
-    }
-    if (s->scale_nominal <= 0) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] %s: %s: scale > 0\n",
-               mp_gtext("error parsing command line"),
-               mp_gtext("value out of range"));
-      return AF_ERROR;
-    }
-    if (s->ms_stride <= 0) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] %s: %s: stride > 0\n",
-               mp_gtext("error parsing command line"),
-               mp_gtext("value out of range"));
-      return AF_ERROR;
-    }
-    if (s->percent_overlap < 0 || s->percent_overlap > 1) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR,
-               "[scaletempo] %s: %s: 0 <= overlap <= 1\n",
-               mp_gtext("error parsing command line"),
-               mp_gtext("value out of range"));
-      return AF_ERROR;
-    }
-    if (s->ms_search < 0) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "[scaletempo] %s: %s: search >= 0\n",
-               mp_gtext("error parsing command line"),
-               mp_gtext("value out of range"));
-      return AF_ERROR;
-    }
-    if (speed.len > 0) {
-      if (strcmp(speed.str, "pitch") == 0) {
-        s->speed_tempo = 0;
-        s->speed_pitch = 1;
-      } else if (strcmp(speed.str, "tempo") == 0) {
-        s->speed_tempo = 1;
-        s->speed_pitch = 0;
-      } else if (strcmp(speed.str, "none") == 0) {
-        s->speed_tempo = 0;
-        s->speed_pitch = 0;
-      } else if (strcmp(speed.str, "both") == 0) {
-        s->speed_tempo = 1;
-        s->speed_pitch = 1;
-      } else {
-        mp_msg(MSGT_AFILTER, MSGL_ERR,
-               "[scaletempo] %s: %s: speed=[pitch|tempo|none|both]\n",
-               mp_gtext("error parsing command line"),
-               mp_gtext("value out of range"));
-        return AF_ERROR;
-      }
-    }
-    s->scale = s->speed * s->scale_nominal;
-    mp_msg(MSGT_AFILTER, MSGL_DBG2, "[scaletempo] %6.3f scale, %6.2f stride, %6.2f overlap, %6.2f search, speed = %s\n", s->scale_nominal, s->ms_stride, s->percent_overlap, s->ms_search, (s->speed_tempo?(s->speed_pitch?"tempo and speed":"tempo"):(s->speed_pitch?"pitch":"none")));
-    return AF_OK;
-  }
   }
   return AF_UNKNOWN;
 }
@@ -531,7 +470,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 // Deallocate memory
 static void uninit(struct af_instance* af)
 {
-  af_scaletempo_t* s = af->setup;
+  af_scaletempo_t* s = af->priv;
   free(af->data->audio);
   free(af->data);
   free(s->buf_queue);
@@ -539,39 +478,60 @@ static void uninit(struct af_instance* af)
   free(s->buf_pre_corr);
   free(s->table_blend);
   free(s->table_window);
-  free(af->setup);
 }
+
+#define SCALE_TEMPO 1
+#define SCALE_PITCH 2
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
-  af_scaletempo_t* s;
+  af_scaletempo_t *s = af->priv;
 
   af->control   = control;
   af->uninit    = uninit;
   af->play      = play;
   af->mul       = 1;
   af->data      = calloc(1,sizeof(struct mp_audio));
-  af->setup     = calloc(1,sizeof(af_scaletempo_t));
-  if(af->data == NULL || af->setup == NULL)
+  if(af->data == NULL)
     return AF_ERROR;
 
-  s = af->setup;
-  s->scale = s->speed = s->scale_nominal = 1.0;
-  s->speed_tempo = 1;
-  s->speed_pitch = 0;
-  s->ms_stride = 60;
-  s->percent_overlap = .20;
-  s->ms_search = 14;
+  s->speed_tempo = !!(s->speed_opt & SCALE_TEMPO);
+  s->speed_pitch = !!(s->speed_opt & SCALE_PITCH);
+
+  s->scale = s->speed * s->scale_nominal;
+  mp_msg(MSGT_AFILTER, MSGL_DBG2, "[scaletempo] %6.3f scale, %6.2f stride, %6.2f overlap, %6.2f search, speed = %s\n", s->scale_nominal, s->ms_stride, s->percent_overlap, s->ms_search, (s->speed_tempo?(s->speed_pitch?"tempo and speed":"tempo"):(s->speed_pitch?"pitch":"none")));
 
   return AF_OK;
 }
 
-// Description of this filter
+#define OPT_BASE_STRUCT af_scaletempo_t
+
 struct af_info af_info_scaletempo = {
   "Scale audio tempo while maintaining pitch",
   "scaletempo",
   "Robert Juliano",
   "",
   AF_FLAGS_REENTRANT,
-  af_open
+  af_open,
+    .priv_size = sizeof(af_scaletempo_t),
+    .priv_defaults = &(const af_scaletempo_t) {
+        .ms_stride = 60,
+        .percent_overlap = .20,
+        .ms_search = 14,
+        .speed_opt = SCALE_TEMPO,
+        .speed = 1.0,
+        .scale_nominal = 1.0,
+    },
+    .options = (const struct m_option[]) {
+        OPT_FLOAT("scale", scale_nominal, M_OPT_MIN, .min = 0.01),
+        OPT_FLOAT("stride", ms_stride, M_OPT_MIN, .min = 0.01),
+        OPT_FLOAT("overlap", percent_overlap, M_OPT_RANGE, .min = 0, .max = 1),
+        OPT_FLOAT("search", ms_search, M_OPT_MIN, .min = 0),
+        OPT_CHOICE("speed", speed_opt, 0,
+                   ({"pitch", SCALE_PITCH},
+                    {"tempo", SCALE_TEMPO},
+                    {"none", 0},
+                    {"both", SCALE_TEMPO | SCALE_PITCH})),
+        {0}
+    },
 };
