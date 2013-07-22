@@ -203,15 +203,15 @@ static unsigned int find_best_out(vf_instance_t *vf, int in_format)
     }
     if (!best) {
         // Try anything else. outfmt_list is just a list of preferred formats.
-        for (int format = IMGFMT_START; format < IMGFMT_END; format++) {
-            int ret = check_outfmt(vf, format);
+        for (int cur = IMGFMT_START; cur < IMGFMT_END; cur++) {
+            int ret = check_outfmt(vf, cur);
 
             if (ret & VFCAP_CSP_SUPPORTED_BY_HW) {
-                best = format; // no conversion -> bingo!
+                best = cur; // no conversion -> bingo!
                 break;
             }
             if (ret & VFCAP_CSP_SUPPORTED && !best)
-                best = format;  // best with conversion
+                best = cur;  // best with conversion
         }
     }
     return best;

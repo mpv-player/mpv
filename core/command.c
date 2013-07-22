@@ -499,8 +499,8 @@ static int mp_property_quvi_format(m_option_t *prop, int action, void *arg,
                 pos = av_clip(pos, 0, res->num_srcs);
             }
         }
-        char *arg = res->srcs[pos]->encid;
-        return mp_property_quvi_format(prop, M_PROPERTY_SET, &arg, mpctx);
+        char *fmt = res->srcs[pos]->encid;
+        return mp_property_quvi_format(prop, M_PROPERTY_SET, &fmt, mpctx);
     }
     }
     return mp_property_generic_option(prop, action, arg, mpctx);
@@ -916,7 +916,7 @@ static const char *track_type_name(enum stream_type t)
 }
 
 static int property_list_tracks(m_option_t *prop, int action, void *arg,
-                                MPContext *mpctx, enum stream_type type)
+                                MPContext *mpctx)
 {
     if (action == M_PROPERTY_GET) {
         char *res = NULL;

@@ -1592,7 +1592,7 @@ static void draw_osd_cb(void *ctx, struct mpgl_osd_part *osd,
 
         for (int n = 0; n < osd->packer->count; n++) {
             struct sub_bitmap *b = &imgs->parts[n];
-            struct pos p = osd->packer->result[n];
+            struct pos pos = osd->packer->result[n];
 
             // NOTE: the blend color is used with SUBBITMAP_LIBASS only, so it
             //       doesn't matter that we upload garbage for the other formats
@@ -1602,7 +1602,7 @@ static void draw_osd_cb(void *ctx, struct mpgl_osd_part *osd,
 
             write_quad(&va[osd->num_vertices],
                     b->x, b->y, b->x + b->dw, b->y + b->dh,
-                    p.x, p.y, p.x + b->w, p.y + b->h,
+                    pos.x, pos.y, pos.x + b->w, pos.y + b->h,
                     osd->w, osd->h, color, false);
             osd->num_vertices += VERTICES_PER_QUAD;
         }
@@ -1657,12 +1657,12 @@ static bool test_fbo(struct gl_video *p, GLenum format)
         gl->BindFramebuffer(GL_FRAMEBUFFER, fbo.fbo);
         gl->ReadBuffer(GL_COLOR_ATTACHMENT0);
         for (int i = 0; i < 4; i++) {
-            float p = -1;
+            float pixel = -1;
             float val = vals[i];
             gl->ClearColor(val, 0.0f, 0.0f, 1.0f);
             gl->Clear(GL_COLOR_BUFFER_BIT);
-            gl->ReadPixels(0, 0, 1, 1, GL_RED, GL_FLOAT, &p);
-            mp_msg(MSGT_VO, MSGL_V, "   %s: %a\n", val_names[i], val - p);
+            gl->ReadPixels(0, 0, 1, 1, GL_RED, GL_FLOAT, &pixel);
+            mp_msg(MSGT_VO, MSGL_V, "   %s: %a\n", val_names[i], val - pixel);
         }
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
         glCheckError(gl, "after FBO read");

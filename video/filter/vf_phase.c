@@ -86,7 +86,7 @@ static void do_plane(unsigned char *to, unsigned char *from,
 
 static enum mode analyze_plane(unsigned char *old, unsigned char *new,
 			       int w, int h, int os, int ns, enum mode mode,
-			       int verbose, int fields)
+			       int unused, int fields)
    {
    double bdiff, pdiff, tdiff, scale;
    int bdif, tdif, pdif;

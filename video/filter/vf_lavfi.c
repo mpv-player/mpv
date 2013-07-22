@@ -282,7 +282,7 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
     av_frame_free(&frame);
 
     for (;;) {
-        AVFrame *frame = av_frame_alloc();
+        frame = av_frame_alloc();
         if (av_buffersink_get_frame(p->out, frame) < 0) {
             // Not an error situation - no more output buffers in queue.
             av_frame_free(&frame);

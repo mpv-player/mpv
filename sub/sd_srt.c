@@ -362,10 +362,10 @@ static void convert_subrip(const char *orig, char *dest, int dest_buffer_size)
                     for (int i = 0; i < FF_ARRAY_ELEMS(subrip_web_colors); i++) {
                         char *color = subrip_web_colors[i].s;
                         if (bstrcasecmp(val, bstr0(color)) == 0) {
-                            uint32_t color = subrip_web_colors[i].v;
-                            tag->color = ((color & 0xff) << 16)
-                                | (color & 0xff00)
-                                | ((color & 0xff0000) >> 16);
+                            uint32_t xcolor = subrip_web_colors[i].v;
+                            tag->color = ((xcolor & 0xff) << 16)
+                                | (xcolor & 0xff00)
+                                | ((xcolor & 0xff0000) >> 16);
                             found = 1;
                         }
                     }

@@ -850,11 +850,11 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     fprintf(file, "start=%f\n", pos);
     for (int i = 0; backup_properties[i]; i++) {
         const char *pname = backup_properties[i];
-        char *tmp = NULL;
-        int r = mp_property_do(pname, M_PROPERTY_GET_STRING, &tmp, mpctx);
+        char *val = NULL;
+        int r = mp_property_do(pname, M_PROPERTY_GET_STRING, &val, mpctx);
         if (r == M_PROPERTY_OK)
-            fprintf(file, "%s=%s\n", pname, tmp);
-        talloc_free(tmp);
+            fprintf(file, "%s=%s\n", pname, val);
+        talloc_free(val);
     }
     fclose(file);
 
@@ -2135,7 +2135,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
         if (written_pts <= 1 && sh_audio->pts == MP_NOPTS_VALUE) {
             if (!did_retry) {
                 // Try to read more data to see packets that have pts
-                int res = decode_audio(sh_audio, &ao->buffer, ao->bps);
+                res = decode_audio(sh_audio, &ao->buffer, ao->bps);
                 if (res < 0)
                     return res;
                 did_retry = true;
@@ -2152,7 +2152,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
 
         mpctx->syncing_audio = false;
         int a = FFMIN(-bytes, FFMAX(playsize, 20000));
-        int res = decode_audio(sh_audio, &ao->buffer, a);
+        res = decode_audio(sh_audio, &ao->buffer, a);
         bytes += ao->buffer.len;
         if (bytes >= 0) {
             memmove(ao->buffer.start,
@@ -2838,8 +2838,8 @@ static bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
 
     // While another timeline was active, the selection of active tracks might
     // have been changed - possibly we need to update this source.
-    for (int n = 0; n < mpctx->num_tracks; n++) {
-        struct track *track = mpctx->tracks[n];
+    for (int x = 0; x < mpctx->num_tracks; x++) {
+        struct track *track = mpctx->tracks[x];
         if (track->under_timeline) {
             track->demuxer = mpctx->demuxer;
             track->stream = demuxer_stream_by_demuxer_id(track->demuxer,
@@ -3127,11 +3127,11 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     if (len > 0 && !demuxer->ts_resets_possible) {
         ans = av_clipf((pos - start) / len, 0, 1);
     } else {
-        int len = (demuxer->movi_end - demuxer->movi_start);
-        int64_t pos = demuxer->filepos > 0 ?
-                      demuxer->filepos : stream_tell(demuxer->stream);
-        if (len > 0)
-            ans = av_clipf((double)(pos - demuxer->movi_start) / len, 0, 1);
+        int64_t size = (demuxer->movi_end - demuxer->movi_start);
+        int64_t fpos = demuxer->filepos > 0 ?
+                       demuxer->filepos : stream_tell(demuxer->stream);
+        if (size > 0)
+            ans = av_clipf((double)(fpos - demuxer->movi_start) / size, 0, 1);
     }
     if (use_range) {
         if (mpctx->opts.play_frames > 0)
@@ -3936,9 +3936,9 @@ static struct track *open_external_file(struct MPContext *mpctx, char *filename,
     }
     struct track *first = NULL;
     for (int n = 0; n < demuxer->num_streams; n++) {
-        struct sh_stream *stream = demuxer->streams[n];
-        if (stream->type == filter) {
-            struct track *t = add_stream_track(mpctx, stream, false);
+        struct sh_stream *sh = demuxer->streams[n];
+        if (sh->type == filter) {
+            struct track *t = add_stream_track(mpctx, sh, false);
             t->is_external = true;
             t->title = talloc_strdup(t, disp_filename);
             t->external_filename = talloc_strdup(t, filename);

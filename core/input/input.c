@@ -559,7 +559,7 @@ static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam);
 #define OPT_BASE_STRUCT struct MPOpts
 
 // Our command line options
-static const m_option_t input_conf[] = {
+static const m_option_t input_config[] = {
     OPT_STRING("conf", input.config_file, CONF_GLOBAL),
     OPT_INT("ar-delay", input.ar_delay, CONF_GLOBAL),
     OPT_INT("ar-rate", input.ar_rate, CONF_GLOBAL),
@@ -573,7 +573,7 @@ static const m_option_t input_conf[] = {
 };
 
 static const m_option_t mp_input_opts[] = {
-    { "input", (void *)&input_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+    { "input", (void *)&input_config, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
     OPT_INTRANGE("doubleclick-time", input.doubleclick_time, 0, 0, 1000),
     OPT_FLAG("joystick", input.use_joystick, CONF_GLOBAL),
     OPT_FLAG("lirc", input.use_lirc, CONF_GLOBAL),
@@ -1260,8 +1260,8 @@ static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
         struct cmd_bind *bind = find_bind_for_key_section(ictx, s->name, n, keys);
         if (bind) {
             struct cmd_bind_section *bs = bind->owner;
-            for (int i = 0; i < n; i++) {
-                if (MP_KEY_DEPENDS_ON_MOUSE_POS(keys[i]) && bs->mouse_area_set &&
+            for (int x = 0; x < n; x++) {
+                if (MP_KEY_DEPENDS_ON_MOUSE_POS(keys[x]) && bs->mouse_area_set &&
                     !test_rect(&bs->mouse_area, ictx->mouse_vo_x, ictx->mouse_vo_y))
                     goto skip;
             }

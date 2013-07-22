@@ -187,11 +187,11 @@ static char *create_fname(struct MPContext *mpctx, char *template,
             break;
         }
         case 't': {
-            char fmt = *template;
-            if (!fmt)
+            char tfmt = *template;
+            if (!tfmt)
                 goto error_exit;
             template++;
-            char fmtstr[] = {'%', fmt, '\0'};
+            char fmtstr[] = {'%', tfmt, '\0'};
             char buffer[80];
             if (strftime(buffer, sizeof(buffer), fmtstr, local_time) == 0)
                 buffer[0] = '\0';

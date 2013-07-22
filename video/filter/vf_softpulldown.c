@@ -95,9 +95,9 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
 		vf_add_output_frame(vf, new);
 		vf->priv->out++;
 		if (flags & MP_IMGFIELD_REPEAT_FIRST) {
-                        struct mp_image *new = mp_image_new_ref(mpi);
-                        new->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, 3);
-                        vf_add_output_frame(vf, new);
+                        struct mp_image *new2 = mp_image_new_ref(mpi);
+                        new2->pts = vf_softpulldown_adjust_pts(&vf->priv->ptsbuf, mpi->pts, 0, 0, 3);
+                        vf_add_output_frame(vf, new2);
                         vf->priv->out++;
                         vf->priv->state=0;
 		} else {

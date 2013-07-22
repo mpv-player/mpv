@@ -459,12 +459,12 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
            level, "       ", type->name);
 
     char *s = target;
-    int len;
     uint8_t *end = data + size;
     uint8_t *p = data;
     int num_elems[MAX_EBML_SUBELEMENTS] = {};
     while (p < end) {
         uint8_t *startp = p;
+        int len;
         uint32_t id = ebml_parse_id(p, &len);
         if (len > end - p)
             goto past_end_error;
@@ -523,9 +523,8 @@ static void ebml_parse_element(struct ebml_parse_ctx *ctx, void *target,
             case EBML_TYPE_SUBELEMENTS:
                 num_elems[i] = FFMIN(num_elems[i],
                                      1000000000 / type->fields[i].desc->size);
-                int size = num_elems[i] * type->fields[i].desc->size;
-                *(generic_struct **) ptr = talloc_zero_size(ctx->talloc_ctx,
-                                                            size);
+                int sz = num_elems[i] * type->fields[i].desc->size;
+                *(generic_struct **) ptr = talloc_zero_size(ctx->talloc_ctx, sz);
                 break;
             case EBML_TYPE_UINT:
                 *(uint64_t **) ptr = talloc_zero_array(ctx->talloc_ctx,

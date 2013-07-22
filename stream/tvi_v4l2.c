@@ -1103,9 +1103,8 @@ static int uninit(priv_t *priv)
     free(priv->video_dev);        priv->video_dev = NULL;
 
     if (priv->video_ringbuffer) {
-        int i;
-        for (i = 0; i < priv->video_buffer_size_current; i++) {
-            free(priv->video_ringbuffer[i].data);
+        for (int n = 0; n < priv->video_buffer_size_current; n++) {
+            free(priv->video_ringbuffer[n].data);
         }
         free(priv->video_ringbuffer);
     }

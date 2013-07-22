@@ -96,7 +96,7 @@ struct hwdec {
     const char *codec, *hw_codec;
 };
 
-static const struct hwdec hwdec[] = {
+static const struct hwdec hwdec_list[] = {
     {HWDEC_VDPAU,       "h264",         "h264_vdpau"},
     {HWDEC_VDPAU,       "wmv3",         "wmv3_vdpau"},
     {HWDEC_VDPAU,       "vc1",          "vc1_vdpau"},
@@ -120,9 +120,9 @@ static const struct hwdec hwdec[] = {
 
 static struct hwdec *find_hwcodec(enum hwdec_type api, const char *codec)
 {
-    for (int n = 0; hwdec[n].api; n++) {
-        if (hwdec[n].api == api && strcmp(hwdec[n].codec, codec) == 0)
-            return (struct hwdec *)&hwdec[n];
+    for (int n = 0; hwdec_list[n].api; n++) {
+        if (hwdec_list[n].api == api && strcmp(hwdec_list[n].codec, codec) == 0)
+            return (struct hwdec *)&hwdec_list[n];
     }
     return NULL;
 }

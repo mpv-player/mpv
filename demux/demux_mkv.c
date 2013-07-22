@@ -734,9 +734,9 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
             continue;
         }
         uint64_t time = cuepoint->cue_time;
-        for (int i = 0; i < cuepoint->n_cue_track_positions; i++) {
+        for (int c = 0; c < cuepoint->n_cue_track_positions; c++) {
             struct ebml_cue_track_positions *trackpos =
-                &cuepoint->cue_track_positions[i];
+                &cuepoint->cue_track_positions[c];
             uint64_t pos = mkv_d->segment_start + trackpos->cue_cluster_position;
             cue_index_add(demuxer, trackpos->cue_track, pos, time);
             mp_msg(MSGT_DEMUX, MSGL_DBG2,
@@ -853,9 +853,9 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                     memcpy(chapter.segment_uid, ca->chapter_segment_uid.start,
                            len);
                     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Chapter segment uid ");
-                    for (int i = 0; i < len; i++)
+                    for (int n = 0; n < len; n++)
                         mp_msg(MSGT_DEMUX, MSGL_V, "%02x ",
-                               chapter.segment_uid[i]);
+                               chapter.segment_uid[n]);
                     mp_msg(MSGT_DEMUX, MSGL_V, "\n");
                 }
             }
@@ -1979,16 +1979,15 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
         || (track->a_formattag == mmioFOURCC('s', 'i', 'p', 'r'))) {
 //      if(!block_bref)
 //        spc = track->sub_packet_cnt = 0;
-        int x;
         switch (track->a_formattag) {
         case mmioFOURCC('2', '8', '_', '8'):
-            for (x = 0; x < sph / 2; x++)
+            for (int x = 0; x < sph / 2; x++)
                 memcpy(track->audio_buf + x * 2 * w + spc * cfs,
                        buffer + cfs * x, cfs);
             break;
         case mmioFOURCC('c', 'o', 'o', 'k'):
         case mmioFOURCC('a', 't', 'r', 'c'):
-            for (x = 0; x < w / sps; x++)
+            for (int x = 0; x < w / sps; x++)
                 memcpy(track->audio_buf +
                        sps * (sph * x + ((sph + 1) / 2) * (spc & 1) +
                               (spc >> 1)), buffer + sps * x, sps);
@@ -2039,7 +2038,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
             int apk_usize = track->stream->audio->wf->nBlockAlign;
             track->sub_packet_cnt = 0;
             // Release all the audio packets
-            for (x = 0; x < sph * w / apk_usize; x++) {
+            for (int x = 0; x < sph * w / apk_usize; x++) {
                 dp = new_demux_packet_from(track->audio_buf + x * apk_usize,
                                            apk_usize);
                 /* Put timestamp only on packets that correspond to original

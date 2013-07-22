@@ -96,20 +96,20 @@ mf_t* open_mf_pattern(char * filename)
     {
      bstr bfname;
      bstr_split_tok(bfilename, ",", &bfname, &bfilename);
-     char *fname = bstrdup0(NULL, bfname);
+     char *fname2 = bstrdup0(NULL, bfname);
 
-     if ( !mp_path_exists( fname ) )
+     if ( !mp_path_exists( fname2 ) )
       {
-       mp_msg( MSGT_STREAM,MSGL_V,"[mf] file not found: '%s'\n",fname );
+       mp_msg( MSGT_STREAM,MSGL_V,"[mf] file not found: '%s'\n",fname2 );
       }
       else
       {
        mf->names=realloc( mf->names,( mf->nr_of_files + 1 ) * sizeof( char* ) );
-       mf->names[mf->nr_of_files] = strdup(fname);
+       mf->names[mf->nr_of_files] = strdup(fname2);
 //       mp_msg( MSGT_STREAM,MSGL_V,"[mf] added file %d.: %s\n",mf->nr_of_files,mf->names[mf->nr_of_files] );
        mf->nr_of_files++;
       }
-      talloc_free(fname);
+      talloc_free(fname2);
     }
    mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files );
 

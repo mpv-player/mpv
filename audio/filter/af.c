@@ -204,9 +204,9 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         goto error;
     if (args && af->control) {
         // Single option string for old filters
-        char *s = (char *)args; // m_config_initialize_obj did this
+        char *opts = (char *)args; // m_config_initialize_obj did this
         assert(!af->priv);
-        if (af->control(af, AF_CONTROL_COMMAND_LINE, s) <= AF_ERROR)
+        if (af->control(af, AF_CONTROL_COMMAND_LINE, opts) <= AF_ERROR)
             goto error;
     }
 

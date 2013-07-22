@@ -175,15 +175,15 @@ static void uninit(struct af_instance* af)
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
+static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
 {
     af_ac3enc_t *s = af->setup;
-    struct mp_audio *c = data;    // Current working data
+    struct mp_audio *c = audio;    // Current working data
     struct mp_audio *l;
     int left, outsize = 0;
     char *buf, *src;
     int max_output_len;
-    int frame_num = (data->len + s->pending_len) / s->expect_len;
+    int frame_num = (audio->len + s->pending_len) / s->expect_len;
     int samplesize = af_fmt2bits(s->in_sampleformat) / 8;
 
     if (s->add_iec61937_header)

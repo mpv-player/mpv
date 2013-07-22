@@ -721,11 +721,11 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
 {
     struct priv *vc = vo->priv;
 
-    static const bool formats[SUBBITMAP_COUNT] = {
+    static const bool osdformats[SUBBITMAP_COUNT] = {
         [SUBBITMAP_RGBA] = true,
     };
 
-    osd_draw(osd, vc->osd_res, osd->vo_pts, 0, formats, draw_osd_cb, vo);
+    osd_draw(osd, vc->osd_res, osd->vo_pts, 0, osdformats, draw_osd_cb, vo);
 }
 
 static int preinit(struct vo *vo)

@@ -242,8 +242,8 @@ bool osd_conv_ass_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
 
         memset_pic(bmp->bitmap, 0, bmp->w * 4, bmp->h, bmp->stride);
 
-        for (int n = 0; n < src.num_parts; n++) {
-            struct sub_bitmap *s = &src.parts[n];
+        for (int p = 0; p < src.num_parts; p++) {
+            struct sub_bitmap *s = &src.parts[p];
 
             // Assume mp_get_sub_bb_list() never splits sub bitmaps
             // So we don't clip/adjust the size of the sub bitmap

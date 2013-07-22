@@ -37,16 +37,16 @@ struct vf_priv_s {
 	int scaleh;
 };
 
-static void toright(unsigned char *dst[3], unsigned char *src[3],
+static void toright(unsigned char *adst[3], unsigned char *asrc[3],
 		    int dststride[3], int srcstride[3],
 		    int w, int h, struct vf_priv_s* p)
 {
 	int k;
 
 	for (k = 0; k < 3; k++) {
-		unsigned char* fromL = src[k];
-		unsigned char* fromR = src[k];
-		unsigned char* to = dst[k];
+		unsigned char* fromL = asrc[k];
+		unsigned char* fromR = asrc[k];
+		unsigned char* to = adst[k];
 		int src = srcstride[k];
                 int dst = dststride[k];
 		int ss;

@@ -39,9 +39,9 @@
 
 #include <lcms2.h>
 
-static bool parse_3dlut_size(const char *s, int *p1, int *p2, int *p3)
+static bool parse_3dlut_size(const char *arg, int *p1, int *p2, int *p3)
 {
-    if (sscanf(s, "%dx%dx%d", p1, p2, p3) != 3)
+    if (sscanf(arg, "%dx%dx%d", p1, p2, p3) != 3)
         return false;
     for (int n = 0; n < 3; n++) {
         int s = ((int[]) { *p1, *p2, *p3 })[n];

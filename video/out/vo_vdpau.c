@@ -1390,7 +1390,6 @@ static void destroy_vdpau_objects(struct vo *vo)
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
 
-    int i;
     VdpStatus vdp_st;
 
     free_video_specific(vo);
@@ -1406,7 +1405,7 @@ static void destroy_vdpau_objects(struct vo *vo)
                          "vdp_presentation_queue_target_destroy");
     }
 
-    for (i = 0; i < vc->num_output_surfaces; i++) {
+    for (int i = 0; i < vc->num_output_surfaces; i++) {
         if (vc->output_surfaces[i] == VDP_INVALID_HANDLE)
             continue;
         vdp_st = vdp->output_surface_destroy(vc->output_surfaces[i]);

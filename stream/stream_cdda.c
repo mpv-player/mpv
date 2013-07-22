@@ -410,9 +410,8 @@ static int open_cdda(stream_t *st, int m, void *opts)
         offset -= cdda_track_firstsector(cdd, 1);
 
     if (offset) {
-        int i;
-        for (i = 0; i < cdd->tracks + 1; i++)
-            cdd->disc_toc[i].dwStartSector += offset;
+        for (int n = 0; n < cdd->tracks + 1; n++)
+            cdd->disc_toc[n].dwStartSector += offset;
     }
 
     if (p->speed > 0)
