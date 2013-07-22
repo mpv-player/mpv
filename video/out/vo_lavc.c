@@ -28,7 +28,6 @@
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
 #include "video/vfcap.h"
-#include "core/subopt-helper.h"
 #include "talloc.h"
 #include "vo.h"
 

@@ -37,7 +37,7 @@
 
 #include "config.h"
 #include "core/options.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 #include "audio/mixer.h"
 #include "core/mp_msg.h"
 

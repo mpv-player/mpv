@@ -182,7 +182,6 @@ SOURCES = talloc.c \
           core/playlist.c \
           core/playlist_parser.c \
           core/screenshot.c \
-          core/subopt-helper.c \
           core/version.c \
           core/input/input.c \
           core/timeline/tl_edl.c \

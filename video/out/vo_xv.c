@@ -53,7 +53,7 @@
 #include "sub/sub.h"
 #include "sub/draw_bmp.h"
 #include "video/csputils.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 #include "osdep/timer.h"
 
 static const vo_info_t info = {

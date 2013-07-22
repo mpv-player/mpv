@@ -45,8 +45,6 @@
 #include "aspect.h"
 #include "osdep/timer.h"
 
-#include "core/subopt-helper.h"
-
 #include "core/input/input.h"
 #include "core/input/keycodes.h"
 
