@@ -37,6 +37,7 @@ struct mp_sws_context {
     // By default, they are NULL.
     // Freeing the mp_sws_context will deallocate these if set.
     struct SwsFilter *src_filter, *dst_filter;
+    double params[2];
 
     // Cached context (if any)
     struct SwsContext *sws;

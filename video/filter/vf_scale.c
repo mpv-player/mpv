@@ -425,6 +425,9 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->control = control;
     vf->uninit = uninit;
     vf->priv->sws = mp_sws_alloc(vf);
+    vf->priv->sws->params[0] = vf->priv->param[0];
+    vf->priv->sws->params[1] = vf->priv->param[1];
+
     mp_msg(MSGT_VFILTER, MSGL_V, "SwScale params: %d x %d (-1=no scaling)\n",
            vf->priv->cfg_w, vf->priv->cfg_h);
 

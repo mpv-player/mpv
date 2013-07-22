@@ -164,6 +164,7 @@ struct mp_sws_context *mp_sws_alloc(void *talloc_parent)
         .contrast = 1 << 16,    // 1.0 in 16.16 fixed point
         .saturation = 1 << 16,
         .force_reload = true,
+        .params = {SWS_PARAM_DEFAULT, SWS_PARAM_DEFAULT},
         .cached = talloc_zero(ctx, struct mp_sws_context),
     };
     talloc_set_destructor(ctx, free_mp_sws);
@@ -222,6 +223,9 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     av_opt_set_int(ctx->sws, "dstw", dst->w, 0);
     av_opt_set_int(ctx->sws, "dsth", dst->h, 0);
     av_opt_set_int(ctx->sws, "dst_format", d_fmt, 0);
+
+    av_opt_set_double(ctx->sws, "param0", ctx->params[0], 0);
+    av_opt_set_double(ctx->sws, "param1", ctx->params[1], 0);
 
     // This can fail even with normal operation, e.g. if a conversion path
     // simply does not support these settings.
