@@ -50,15 +50,19 @@ struct af_info {
     const int flags;
     int (*open)(struct af_instance *vf);
     bool (*test_conversion)(int src_format, int dst_format);
+    int priv_size;
+    const void *priv_defaults;
+    const struct m_option *options;
 };
 
 // Linked list of audio filters
 struct af_instance {
-    struct af_info *info;
+    const struct af_info *info;
     int (*control)(struct af_instance *af, int cmd, void *arg);
     void (*uninit)(struct af_instance *af);
     struct mp_audio * (*play)(struct af_instance *af, struct mp_audio *data);
-    void *setup;  // setup data for this specific instance and filter
+    void *setup;  // old field for priv structs
+    void *priv;
     struct mp_audio *data; // configuration for outgoing data stream
     struct af_instance *next;
     struct af_instance *prev;
@@ -67,12 +71,6 @@ struct af_instance {
     double mul; /* length multiplier: how much does this instance change
                    the length of the buffer. */
     bool auto_inserted; // inserted by af.c, such as conversion filters
-};
-
-// Configuration switches
-struct af_cfg {
-    char **list; /* list of names of filters that are added to filter
-                    list during first initialization of stream */
 };
 
 // Current audio stream
@@ -86,8 +84,7 @@ struct af_stream {
     struct mp_audio input;
     struct mp_audio output;
     struct mp_audio filter_output;
-    // Configuration for this stream
-    struct af_cfg cfg;
+
     struct MPOpts *opts;
 };
 
@@ -139,13 +136,6 @@ int af_init(struct af_stream *s);
 void af_uninit(struct af_stream *s);
 
 /**
- * \brief  Reinit the filter list from the given filter on downwards
- * See af.c.
- * \return AF_OK on success or AF_ERROR on failure
- */
-int af_reinit(struct af_stream *s);
-
-/**
  * \brief This function adds the filter "name" to the stream s.
  * \param name name of filter to add
  * \return pointer to the new filter, NULL if insert failed
@@ -154,22 +144,7 @@ int af_reinit(struct af_stream *s);
  * list of filters (i.e. at the beginning unless the
  * first filter is the format filter (why??).
  */
-struct af_instance *af_add(struct af_stream *s, char *name);
-
-/**
- * \brief Uninit and remove the filter "af"
- * \param af filter to remove
- */
-void af_remove(struct af_stream *s, struct af_instance *af);
-
-/**
- * \brief find filter in chain by name
- * \param name name of the filter to find
- * \return first filter with right name or NULL if not found
- *
- * This function is used for finding already initialized filters
- */
-struct af_instance *af_get(struct af_stream *s, char *name);
+struct af_instance *af_add(struct af_stream *s, char *name, char **args);
 
 /**
  * \brief filter data chunk through the filters in the list
@@ -281,9 +256,6 @@ int af_test_output(struct af_instance *af, struct mp_audio *out);
 float af_softclip(float a);
 
 /** \} */ // end of af_filter group, but more functions of this group below
-
-/** Print a list of all available audio filters */
-void af_help(void);
 
 /** Memory reallocation macro: if a local buffer is used (i.e. if the
    filter doesn't operate on the incoming buffer this macro must be

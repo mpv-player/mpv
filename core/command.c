@@ -1914,43 +1914,72 @@ static const char *property_error_string(int error_value)
     return "UNKNOWN";
 }
 
-static void change_video_filters(MPContext *mpctx, const char *cmd,
-                                 const char *arg)
+static bool reinit_filters(MPContext *mpctx, enum stream_type mediatype)
+{
+    switch (mediatype) {
+    case STREAM_VIDEO:
+        return reinit_video_filters(mpctx) >= 0;
+    case STREAM_AUDIO:
+        return reinit_audio_filters(mpctx) >= 0;
+    }
+    return false;
+}
+
+static void change_filters(MPContext *mpctx, enum stream_type mediatype,
+                           const char *cmd, const char *arg)
 {
     struct MPOpts *opts = &mpctx->opts;
     struct m_config *conf = mpctx->mconfig;
-    struct m_obj_settings *old_vf_settings = NULL;
+    struct m_obj_settings *old_settings = NULL;
     bool success = false;
     bool need_refresh = false;
+    const char *option;
+    struct m_obj_settings **list;
+
+    switch (mediatype) {
+    case STREAM_VIDEO:
+        option = "vf";
+        list = &opts->vf_settings;
+        break;
+    case STREAM_AUDIO:
+        option = "af";
+        list = &opts->af_settings;
+        break;
+    }
 
     // The option parser is used to modify the filter list itself.
     char optname[20];
-    snprintf(optname, sizeof(optname), "vf-%s", cmd);
+    snprintf(optname, sizeof(optname), "%s-%s", option, cmd);
     const struct m_option *type = m_config_get_option(conf, bstr0(optname));
 
     // Backup old settings, in case it fails
-    m_option_copy(type, &old_vf_settings, &opts->vf_settings);
+    m_option_copy(type, &old_settings, list);
 
     if (m_config_set_option0(conf, optname, arg) >= 0) {
         need_refresh = true;
-        success = reinit_video_filters(mpctx) >= 0;
+        success = reinit_filters(mpctx, mediatype);
     }
 
     if (!success) {
-        m_option_copy(type, &opts->vf_settings, &old_vf_settings);
+        m_option_copy(type, list, &old_settings);
         if (need_refresh)
-            reinit_video_filters(mpctx);
+            reinit_filters(mpctx, mediatype);
     }
-    m_option_free(type, &old_vf_settings);
+    m_option_free(type, &old_settings);
 
-    if (need_refresh)
+    if (need_refresh && mediatype == STREAM_VIDEO)
         mp_force_video_refresh(mpctx);
+}
+
+static void change_video_filters(MPContext *mpctx, const char *cmd,
+                                 const char *arg)
+{
+    change_filters(mpctx, STREAM_VIDEO, cmd, arg);
 }
 
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     struct MPOpts *opts = &mpctx->opts;
-    sh_audio_t *const sh_audio = mpctx->sh_audio;
     sh_video_t *const sh_video = mpctx->sh_video;
     int osd_duration = opts->osd_duration;
     bool auto_osd = cmd->on_osd == MP_ON_OSD_AUTO;
@@ -2467,54 +2496,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         }
         break;
 
-    case MP_CMD_AF_SWITCH:
-        if (sh_audio) {
-            af_uninit(mpctx->mixer.afilter);
-            af_init(mpctx->mixer.afilter);
-        }
-        /* fallthrough */
-    case MP_CMD_AF_ADD:
-    case MP_CMD_AF_DEL: {
-        if (!sh_audio)
-            break;
-        char *af_args = strdup(cmd->args[0].v.s);
-        bstr af_commands = bstr0(af_args);
-        struct af_instance *af;
-        while (af_commands.len) {
-            bstr af_command;
-            bstr_split_tok(af_commands, ",", &af_command, &af_commands);
-            char *af_command0 = bstrdup0(NULL, af_command);
-            if (cmd->id == MP_CMD_AF_DEL) {
-                af = af_get(mpctx->mixer.afilter, af_command0);
-                if (af != NULL)
-                    af_remove(mpctx->mixer.afilter, af);
-            } else
-                af_add(mpctx->mixer.afilter, af_command0);
-            talloc_free(af_command0);
-        }
-        reinit_audio_chain(mpctx);
-        free(af_args);
+    case MP_CMD_AF:
+        change_filters(mpctx, STREAM_AUDIO, cmd->args[0].v.s, cmd->args[1].v.s);
         break;
-    }
-    case MP_CMD_AF_CLR:
-        if (!sh_audio)
-            break;
-        af_uninit(mpctx->mixer.afilter);
-        af_init(mpctx->mixer.afilter);
-        reinit_audio_chain(mpctx);
-        break;
-    case MP_CMD_AF_CMDLINE:
-        if (sh_audio) {
-            struct af_instance *af = af_get(sh_audio->afilter, cmd->args[0].v.s);
-            if (!af) {
-                mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                       "Filter '%s' not found in chain.\n", cmd->args[0].v.s);
-                break;
-            }
-            af->control(af, AF_CONTROL_COMMAND_LINE, cmd->args[1].v.s);
-            af_reinit(sh_audio->afilter);
-        }
-        break;
+
     case MP_CMD_VF:
         change_video_filters(mpctx, cmd->args[0].v.s, cmd->args[1].v.s);
         break;

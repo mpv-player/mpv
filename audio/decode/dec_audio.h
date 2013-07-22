@@ -37,6 +37,4 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
                        int *out_samplerate, struct mp_chmap *out_channels,
                        int *out_format);
 
-extern struct af_cfg af_cfg;
-
 #endif /* MPLAYER_DEC_AUDIO_H */

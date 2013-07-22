@@ -210,11 +210,7 @@ static const mp_cmd_t mp_cmds[] = {
   }},
   { MP_CMD_DISABLE_INPUT_SECTION, "disable_section", { ARG_STRING } },
 
-  { MP_CMD_AF_SWITCH, "af_switch", { ARG_STRING } },
-  { MP_CMD_AF_ADD, "af_add", { ARG_STRING } },
-  { MP_CMD_AF_DEL, "af_del", { ARG_STRING } },
-  { MP_CMD_AF_CLR, "af_clr", },
-  { MP_CMD_AF_CMDLINE, "af_cmdline", { ARG_STRING, ARG_STRING } },
+  { MP_CMD_AF, "af", { ARG_STRING, ARG_STRING } },
 
   { MP_CMD_VF, "vf", { ARG_STRING, ARG_STRING } },
 

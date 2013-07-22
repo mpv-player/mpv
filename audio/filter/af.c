@@ -22,6 +22,9 @@
 #include <string.h>
 #include <assert.h>
 
+#include "core/m_option.h"
+#include "core/m_config.h"
+
 #include "af.h"
 
 // Static list of filters
@@ -87,6 +90,27 @@ static struct af_info* filter_list[] = {
     NULL
 };
 
+static bool get_desc(struct m_obj_desc *dst, int index)
+{
+    if (index >= MP_ARRAY_SIZE(filter_list) - 1)
+        return false;
+    const struct af_info *af = filter_list[index];
+    *dst = (struct m_obj_desc) {
+        .name = af->name,
+        .description = af->info,
+        .priv_size = af->priv_size,
+        .priv_defaults = af->priv_defaults,
+        .options = af->options,
+        .p = af,
+    };
+    return true;
+}
+
+const struct m_obj_list af_obj_list = {
+    .get_desc = get_desc,
+    .description = "audio filters",
+};
+
 static bool af_config_equals(struct mp_audio *a, struct mp_audio *b)
 {
     return a->format == b->format
@@ -139,90 +163,58 @@ static struct mp_audio *dummy_play(struct af_instance* af, struct mp_audio* data
     return data;
 }
 
-/* Find a filter in the static list of filters using it's name. This
-   function is used internally */
-static struct af_info *af_find(char *name)
-{
-    int i = 0;
-    while (filter_list[i]) {
-        if (!strcmp(filter_list[i]->name, name))
-            return filter_list[i];
-        i++;
-    }
-    mp_msg(MSGT_AFILTER, MSGL_ERR, "Couldn't find audio filter '%s'\n", name);
-    return NULL;
-}
-
-/* Find filter in the dynamic filter list using it's name This
-   function is used for finding already initialized filters */
-struct af_instance *af_get(struct af_stream *s, char *name)
-{
-    struct af_instance *af = s->first;
-    // Find the filter
-    while (af != NULL) {
-        if (!strcmp(af->info->name, name))
-            return af;
-        af = af->next;
-    }
-    return NULL;
-}
-
 /* Function for creating a new filter of type name.The name may
 contain the commandline parameters for the filter */
-static struct af_instance *af_create(struct af_stream *s,
-                                     const char *name_with_cmd)
+static struct af_instance *af_create(struct af_stream *s, char *name,
+                                     char **args)
 {
-    char *name = strdup(name_with_cmd);
-    char *cmdline = name;
-
-    // Allocate space for the new filter and reset all pointers
-    struct af_instance *new = malloc(sizeof(struct af_instance));
-    if (!name || !new) {
-        mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Could not allocate memory\n");
-        goto err_out;
+    struct m_obj_desc desc;
+    if (!m_obj_list_find(&desc, &af_obj_list, bstr0(name))) {
+        mp_tmsg(MSGT_VFILTER, MSGL_ERR,
+                "Couldn't find audio filter '%s'.\n", name);
+        return NULL;
     }
-    memset(new, 0, sizeof(struct af_instance));
-
-    // Check for commandline parameters
-    char *skip = strstr(cmdline, "=");
-    if (skip) {
-        *skip = '\0'; // for name
-        cmdline = skip + 1;
-    } else {
-        cmdline = NULL;
-    }
-
-    // Find filter from name
-    if (NULL == (new->info = af_find(name)))
-        goto err_out;
-
+    const struct af_info *info = desc.p;
     /* Make sure that the filter is not already in the list if it is
        non-reentrant */
-    if (new->info->flags & AF_FLAGS_NOT_REENTRANT) {
-        if (af_get(s, name)) {
-            mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] There can only be one "
-                   "instance of the filter '%s' in each stream\n", name);
-            goto err_out;
+    if (info->flags & AF_FLAGS_NOT_REENTRANT) {
+        for (struct af_instance *cur = s->first; cur; cur = cur->next) {
+            if (cur->info == info) {
+                mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] There can only be one "
+                       "instance of the filter '%s' in each stream\n", name);
+                return NULL;
+            }
         }
     }
 
     mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Adding filter %s \n", name);
 
+    struct af_instance *af = talloc_zero(NULL, struct af_instance);
+    *af = (struct af_instance) {
+        .info = info,
+        .mul = 1,
+    };
+    struct m_config *config = m_config_from_obj_desc(af, &desc);
+    if (m_config_initialize_obj(config, &desc, &af->priv, &args) < 0)
+        goto error;
+
     // Initialize the new filter
-    if (AF_OK == new->info->open(new)) {
-        if (cmdline) {
-            if (AF_ERROR >= new->control(new, AF_CONTROL_COMMAND_LINE, cmdline))
-                goto err_out;
-        }
-        free(name);
-        return new;
+    if (af->info->open(af) != AF_OK)
+        goto error;
+    if (args && af->control) {
+        // Single option string for old filters
+        char *s = (char *)args; // m_config_initialize_obj did this
+        assert(!af->priv);
+        if (af->control(af, AF_CONTROL_COMMAND_LINE, s) <= AF_ERROR)
+            goto error;
     }
 
-err_out:
-    free(new);
+    return af;
+
+error:
     mp_msg(MSGT_AFILTER, MSGL_ERR,
            "[libaf] Couldn't create or open audio filter '%s'\n", name);
-    free(name);
+    talloc_free(af);
     return NULL;
 }
 
@@ -231,14 +223,14 @@ err_out:
    value is the new filter */
 static struct af_instance *af_prepend(struct af_stream *s,
                                       struct af_instance *af,
-                                      const char *name)
+                                      char *name, char **args)
 {
     if (!af)
         af = s->last;
     if (af == s->first)
         af = s->first->next;
     // Create the new filter and make sure it is OK
-    struct af_instance *new = af_create(s, name);
+    struct af_instance *new = af_create(s, name, args);
     if (!new)
         return NULL;
     // Update pointers
@@ -254,14 +246,14 @@ static struct af_instance *af_prepend(struct af_stream *s,
    value is the new filter */
 static struct af_instance *af_append(struct af_stream *s,
                                      struct af_instance *af,
-                                     const char *name)
+                                     char *name, char **args)
 {
     if (!af)
         af = s->first;
     if (af == s->last)
         af = s->last->prev;
     // Create the new filter and make sure it is OK
-    struct af_instance *new = af_create(s, name);
+    struct af_instance *new = af_create(s, name, args);
     if (!new)
         return NULL;
     // Update pointers
@@ -273,7 +265,7 @@ static struct af_instance *af_append(struct af_stream *s,
 }
 
 // Uninit and remove the filter "af"
-void af_remove(struct af_stream *s, struct af_instance *af)
+static void af_remove(struct af_stream *s, struct af_instance *af)
 {
     if (!af)
         return;
@@ -293,7 +285,7 @@ void af_remove(struct af_stream *s, struct af_instance *af)
     af->next->prev = af->prev;
 
     af->uninit(af);
-    free(af);
+    talloc_free(af);
 }
 
 static void remove_auto_inserted_filters(struct af_stream *s)
@@ -341,12 +333,12 @@ static int af_count_filters(struct af_stream *s)
     return count;
 }
 
-static const char *af_find_conversion_filter(int srcfmt, int dstfmt)
+static char *af_find_conversion_filter(int srcfmt, int dstfmt)
 {
     for (int n = 0; filter_list[n]; n++) {
         struct af_info *af = filter_list[n];
         if (af->test_conversion && af->test_conversion(srcfmt, dstfmt))
-            return af->name;
+            return (char *)af->name;
     }
     return NULL;
 }
@@ -376,10 +368,10 @@ static int af_fix_format_conversion(struct af_stream *s,
         *p_af = prev;
         return AF_OK;
     }
-    const char *filter = af_find_conversion_filter(actual.format, in.format);
+    char *filter = af_find_conversion_filter(actual.format, in.format);
     if (!filter)
         return AF_ERROR;
-    struct af_instance *new = af_prepend(s, af, filter);
+    struct af_instance *new = af_prepend(s, af, filter, NULL);
     if (new == NULL)
         return AF_ERROR;
     new->auto_inserted = true;
@@ -403,8 +395,8 @@ static int af_fix_channels(struct af_stream *s, struct af_instance **p_af,
         *p_af = prev;
         return AF_OK;
     }
-    const char *filter = "lavrresample";
-    struct af_instance *new = af_prepend(s, af, filter);
+    char *filter = "lavrresample";
+    struct af_instance *new = af_prepend(s, af, filter, NULL);
     if (new == NULL)
         return AF_ERROR;
     new->auto_inserted = true;
@@ -427,8 +419,8 @@ static int af_fix_rate(struct af_stream *s, struct af_instance **p_af,
         *p_af = prev;
         return AF_OK;
     }
-    const char *filter = "lavrresample";
-    struct af_instance *new = af_prepend(s, af, filter);
+    char *filter = "lavrresample";
+    struct af_instance *new = af_prepend(s, af, filter, NULL);
     if (new == NULL)
         return AF_ERROR;
     new->auto_inserted = true;
@@ -438,6 +430,7 @@ static int af_fix_rate(struct af_stream *s, struct af_instance **p_af,
     return AF_OK;
 }
 
+// Return AF_OK on success or AF_ERROR on failure.
 // Warning:
 // A failed af_reinit() leaves the audio chain behind in a useless, broken
 // state (for example, format filters that were tentatively inserted stay
@@ -445,7 +438,7 @@ static int af_fix_rate(struct af_stream *s, struct af_instance **p_af,
 // In that case, you should always rebuild the filter chain, or abort.
 // Also, note that for complete reinit, fixup_output_format() may have to be
 // called after this function.
-int af_reinit(struct af_stream *s)
+static int af_reinit(struct af_stream *s)
 {
     // Start with the second filter, as the first filter is the special input
     // filter which needs no initialization.
@@ -543,6 +536,7 @@ struct af_stream *af_new(struct MPOpts *opts)
     };
     s->first->next = s->last;
     s->last->prev = s->first;
+    s->opts = opts;
     return s;
 }
 
@@ -578,8 +572,6 @@ static int fixup_output_format(struct af_stream *s)
    The return value is 0 if success and -1 if failure */
 int af_init(struct af_stream *s)
 {
-    int i = 0;
-
     // Sanity check
     if (!s)
         return -1;
@@ -591,11 +583,10 @@ int af_init(struct af_stream *s)
     // Check if this is the first call
     if (s->first->next == s->last) {
         // Add all filters in the list (if there are any)
-        if (s->cfg.list) {
-            while (s->cfg.list[i]) {
-                if (!af_prepend(s, s->last, s->cfg.list[i++]))
-                    return -1;
-            }
+        struct m_obj_settings *list = s->opts->af_settings;
+        for (int i = 0; list && list[i].name; i++) {
+            if (!af_prepend(s, s->last, list[i].name, list[i].attribs))
+                return -1;
         }
     }
 
@@ -621,7 +612,7 @@ int af_init(struct af_stream *s)
    to the stream s. The filter will be inserted somewhere nice in the
    list of filters. The return value is a pointer to the new filter,
    If the filter couldn't be added the return value is NULL. */
-struct af_instance *af_add(struct af_stream *s, char *name)
+struct af_instance *af_add(struct af_stream *s, char *name, char **args)
 {
     struct af_instance *new;
     // Sanity check
@@ -629,9 +620,9 @@ struct af_instance *af_add(struct af_stream *s, char *name)
         return NULL;
     // Insert the filter somewhere nice
     if (af_is_conversion_filter(s->first->next))
-        new = af_append(s, s->first->next, name);
+        new = af_append(s, s->first->next, name, args);
     else
-        new = af_prepend(s, s->first->next, name);
+        new = af_prepend(s, s->first->next, name, args);
     if (!new)
         return NULL;
 
@@ -728,22 +719,4 @@ struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg)
         filt = filt->prev;
     }
     return NULL;
-}
-
-void af_help(void)
-{
-    int i = 0;
-    mp_msg(MSGT_AFILTER, MSGL_INFO, "Available audio filters:\n");
-    while (filter_list[i]) {
-        if (filter_list[i]->comment && filter_list[i]->comment[0]) {
-            mp_msg(MSGT_AFILTER, MSGL_INFO, "  %-15s: %s (%s)\n",
-                   filter_list[i]->name, filter_list[i]->info,
-                   filter_list[i]->comment);
-        } else {
-            mp_msg(MSGT_AFILTER, MSGL_INFO, "  %-15s: %s\n",
-                   filter_list[i]->name,
-                   filter_list[i]->info);
-        }
-        i++;
-    }
 }

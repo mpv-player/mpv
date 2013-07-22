@@ -77,11 +77,7 @@ enum mp_command_type {
     MP_CMD_DVB_SET_CHANNEL = 5101,
 
     /// Audio Filter commands
-    MP_CMD_AF_SWITCH,
-    MP_CMD_AF_ADD,
-    MP_CMD_AF_DEL,
-    MP_CMD_AF_CLR,
-    MP_CMD_AF_CMDLINE,
+    MP_CMD_AF,
 
     /// Video filter commands
     MP_CMD_VF,

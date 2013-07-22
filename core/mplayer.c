@@ -1185,11 +1185,6 @@ static int build_afilter_chain(struct MPContext *mpctx)
     struct ao *ao = mpctx->ao;
     struct MPOpts *opts = &mpctx->opts;
     int new_srate;
-    int result;
-    if (!sh_audio) {
-        mpctx->mixer.afilter = NULL;
-        return 0;
-    }
     if (af_control_any_rev(sh_audio->afilter,
                            AF_CONTROL_PLAYBACK_SPEED | AF_CONTROL_SET,
                            &opts->playback_speed))
@@ -1205,10 +1200,8 @@ static int build_afilter_chain(struct MPContext *mpctx)
             opts->playback_speed = (float)new_srate / sh_audio->samplerate;
         }
     }
-    result =  init_audio_filters(sh_audio, new_srate,
-                                 &ao->samplerate, &ao->channels, &ao->format);
-    mpctx->mixer.afilter = sh_audio->afilter;
-    return result;
+    return init_audio_filters(sh_audio, new_srate,
+                              &ao->samplerate, &ao->channels, &ao->format);
 }
 
 
@@ -1572,6 +1565,51 @@ static void update_osd_msg(struct MPContext *mpctx)
     }
 }
 
+static int recreate_audio_filters(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = &mpctx->opts;
+    assert(mpctx->sh_audio);
+
+    // init audio filters:
+    if (!build_afilter_chain(mpctx)) {
+        mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
+                "Couldn't find matching filter/ao format!\n");
+        return -1;
+    }
+
+    mpctx->mixer.afilter = mpctx->sh_audio->afilter;
+    mpctx->mixer.volstep = opts->volstep;
+    mpctx->mixer.softvol = opts->softvol;
+    mpctx->mixer.softvol_max = opts->softvol_max;
+    mixer_reinit(&mpctx->mixer, mpctx->ao);
+    if (!(mpctx->initialized_flags & INITIALIZED_VOL)) {
+        if (opts->mixer_init_volume >= 0) {
+            mixer_setvolume(&mpctx->mixer, opts->mixer_init_volume,
+                            opts->mixer_init_volume);
+        }
+        if (opts->mixer_init_mute >= 0)
+            mixer_setmute(&mpctx->mixer, opts->mixer_init_mute);
+        mpctx->initialized_flags |= INITIALIZED_VOL;
+    }
+
+    return 0;
+}
+
+int reinit_audio_filters(struct MPContext *mpctx)
+{
+    struct sh_audio *sh_audio = mpctx->sh_audio;
+    if (!sh_audio)
+        return -2;
+
+    af_uninit(mpctx->sh_audio->afilter);
+    if (af_init(mpctx->sh_audio->afilter) < 0)
+        return -1;
+    if (recreate_audio_filters(mpctx) < 0)
+        return -1;
+
+    return 0;
+}
+
 void reinit_audio_chain(struct MPContext *mpctx)
 {
     struct MPOpts *opts = &mpctx->opts;
@@ -1603,7 +1641,9 @@ void reinit_audio_chain(struct MPContext *mpctx)
         }
     }
 
-    // first init to detect best values
+    // Determine what the filter chain outputs. build_afilter_chain() also
+    // needs this for testing whether playback speed is changed by resampling
+    // or using a special filter.
     if (!init_audio_filters(mpctx->sh_audio,  // preliminary init
                             // input:
                             mpctx->sh_audio->samplerate,
@@ -1638,25 +1678,9 @@ void reinit_audio_chain(struct MPContext *mpctx)
                    ao->driver->info->comment);
     }
 
-    // init audio filters:
-    if (!build_afilter_chain(mpctx)) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
-                "Couldn't find matching filter/ao format!\n");
+    if (recreate_audio_filters(mpctx) < 0)
         goto init_error;
-    }
-    mpctx->mixer.volstep = opts->volstep;
-    mpctx->mixer.softvol = opts->softvol;
-    mpctx->mixer.softvol_max = opts->softvol_max;
-    mixer_reinit(&mpctx->mixer, mpctx->ao);
-    if (!(mpctx->initialized_flags & INITIALIZED_VOL)) {
-        if (opts->mixer_init_volume >= 0) {
-            mixer_setvolume(&mpctx->mixer, opts->mixer_init_volume,
-                            opts->mixer_init_volume);
-        }
-        if (opts->mixer_init_mute >= 0)
-            mixer_setmute(&mpctx->mixer, opts->mixer_init_mute);
-        mpctx->initialized_flags |= INITIALIZED_VOL;
-    }
+
     mpctx->syncing_audio = true;
     return;
 
@@ -4510,11 +4534,6 @@ static bool handle_help_options(struct MPContext *mpctx)
         struct mp_decoder_list *list = mp_video_decoder_list();
         mp_print_decoders(MSGT_CPLAYER, MSGL_INFO, "Video decoders:", list);
         talloc_free(list);
-        opt_exit = 1;
-    }
-    if (af_cfg.list && strcmp(af_cfg.list[0], "help") == 0) {
-        af_help();
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
         opt_exit = 1;
     }
 #ifdef CONFIG_X11

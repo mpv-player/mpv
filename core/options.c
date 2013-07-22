@@ -182,6 +182,7 @@ extern char *dvd_device, *cdrom_device;
 extern double mf_fps;
 extern char * mf_type;
 extern const struct m_obj_list vf_obj_list;
+extern const struct m_obj_list af_obj_list;
 extern const struct m_obj_list vo_obj_list;
 extern const struct m_obj_list ao_obj_list;
 
@@ -436,8 +437,7 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- codec/vfilter options --------------------
 
-    {"af*", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
-
+    OPT_SETTINGSLIST("af*", af_settings, 0, &af_obj_list),
     OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
 
     OPT_STRING("ad", audio_decoders, 0),

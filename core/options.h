@@ -162,6 +162,7 @@ typedef struct MPOpts {
     int dtshd;
     float playback_speed;
     struct m_obj_settings *vf_settings;
+    struct m_obj_settings *af_settings;
     float movie_aspect;
     int flip;
     int field_dominance;

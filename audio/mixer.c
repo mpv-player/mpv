@@ -113,7 +113,7 @@ static void setvolume_internal(mixer_t *mixer, float l, float r)
     {
         mp_tmsg(MSGT_GLOBAL, mixer->softvol ? MSGL_V : MSGL_WARN,
                 "[Mixer] No hardware mixing, inserting volume filter.\n");
-        if (!(af_add(mixer->afilter, "volume")
+        if (!(af_add(mixer->afilter, "volume", NULL)
               && af_control_any_rev(mixer->afilter,
                                     AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET,
                                     db_vals)))
@@ -220,7 +220,7 @@ void mixer_setbalance(mixer_t *mixer, float val)
     if (val == 0 || mixer->ao->channels.num < 2)
         return;
 
-    if (!(af_pan_balance = af_add(mixer->afilter, "pan"))) {
+    if (!(af_pan_balance = af_add(mixer->afilter, "pan", NULL))) {
         mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
                 "[Mixer] No balance control available.\n");
         return;

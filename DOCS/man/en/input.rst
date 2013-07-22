@@ -253,20 +253,10 @@ List of Input Commands
 Input Commands that are Possibly Subject to Change
 --------------------------------------------------
 
-``af_switch "filter1=params,filter2,..."``
-    Replace the current filter chain with the given list.
+``af set|add|toggle|del|clr "filter1=params,filter2,..."``
+    Change audio filter chain. See ``vf`` command.
 
-``af_add "filter1=params,filter2,..."``
-    Add the given list of audio filters to the audio filter chain.
-
-``af_del "filter1,filter2,..."``
-    Remove the given list of audio filters.
-
-``af_clr``
-    Remove all audio filters. (Conversion filters will be re-added
-    automatically if needed.)
-
-``vf set|add|toggle|del "filter1=params,filter2,..."``
+``vf set|add|toggle|del|clr "filter1=params,filter2,..."``
     Change video filter chain.
 
     The first argument decides what happens:
@@ -289,6 +279,10 @@ Input Commands that are Possibly Subject to Change
         or integer indexes. ``0`` would denote the first filter. Negative
         indexes start from the last filter, and ``-1`` denotes the last
         filter.
+
+    clr
+        Remove all filters. Note that like the other sub-commands, this does
+        not control automatically inserted filters.
 
     You can assign labels to filter by prefixing them with ``@name:`` (where
     ``name`` is a user-chosen arbitrary identifier). Labels can be used to
@@ -322,7 +316,7 @@ Undocumented commands: ``tv_start_scan``, ``tv_step_channel``, ``tv_step_norm``,
 ``tv_step_freq``, ``tv_set_norm``, ``dvb_set_channel``, ``radio_step_channel``,
 ``radio_set_channel``, ``radio_set_freq``, ``radio_step_freq`` (all of these
 should be replaced by properties), ``stop`` (questionable use), ``get_property``
-(?), ``af_cmdline``, ``vo_cmdline`` (experimental).
+(?), ``vo_cmdline`` (experimental).
 
 Input Command Prefixes
 ----------------------
