@@ -35,6 +35,8 @@ struct priv {
     int out_srate;
     struct mp_chmap out_channels;
 
+    int fail;
+
     struct mp_audio data;
     struct mp_audio temp;
 };
@@ -53,6 +55,7 @@ static const struct m_option options[] = {
     OPT_AUDIOFORMAT("out-format", out_format, 0),
     OPT_INTRANGE("out-srate", out_srate, 0, 1000, 8*48000),
     OPT_CHMAP("out-channels", out_channels, CONF_MIN, .min = 0),
+    OPT_FLAG("fail", fail, 0),
     {0}
 };
 
@@ -88,7 +91,12 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         if (in->nch != out->nch || in->bps != out->bps) {
             mp_msg(MSGT_AFILTER, MSGL_ERR,
-                   "[af_force] Forced input/output format are incompatible.\n");
+                   "[af_force] Forced input/output formats are incompatible.\n");
+            return AF_ERROR;
+        }
+
+        if (priv->fail) {
+            mp_msg(MSGT_AFILTER, MSGL_ERR, "[af_force] Failing on purpose.\n");
             return AF_ERROR;
         }
 
