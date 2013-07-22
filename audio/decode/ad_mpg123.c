@@ -24,9 +24,8 @@
 
 #include "config.h"
 
-#include "ad_internal.h"
-
-LIBAD_EXTERN(mpg123)
+#include "ad.h"
+#include "core/mp_msg.h"
 
 /* Reducing the ifdeffery to two main variants:
  *   1. most compatible to any libmpg123 version
@@ -472,3 +471,13 @@ static void add_decoders(struct mp_decoder_list *list)
     mp_add_decoder(list, "mpg123", "mp3", "mp3",
                    "High-performance decoder using libmpg123");
 }
+
+const struct ad_functions ad_mpg123 = {
+    .name = "mpg123",
+    .add_decoders = add_decoders,
+    .preinit = preinit,
+    .init = init,
+    .uninit = uninit,
+    .control = control,
+    .decode_audio = decode_audio,
+};

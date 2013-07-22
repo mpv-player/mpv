@@ -41,6 +41,19 @@
 
 #include "audio/filter/af.h"
 
+extern const struct ad_functions ad_mpg123;
+extern const struct ad_functions ad_lavc;
+extern const struct ad_functions ad_spdif;
+
+static const struct ad_functions * const ad_drivers[] = {
+#ifdef CONFIG_MPG123
+    &ad_mpg123,
+#endif
+    &ad_lavc,
+    &ad_spdif,
+    NULL
+};
+
 struct af_cfg af_cfg = {0}; // Configuration for audio filters
 
 static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
@@ -90,8 +103,8 @@ static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
 struct mp_decoder_list *mp_audio_decoder_list(void)
 {
     struct mp_decoder_list *list = talloc_zero(NULL, struct mp_decoder_list);
-    for (int i = 0; mpcodecs_ad_drivers[i] != NULL; i++)
-        mpcodecs_ad_drivers[i]->add_decoders(list);
+    for (int i = 0; ad_drivers[i] != NULL; i++)
+        ad_drivers[i]->add_decoders(list);
     return list;
 }
 
@@ -106,9 +119,9 @@ static struct mp_decoder_list *mp_select_audio_decoders(const char *codec,
 
 static const struct ad_functions *find_driver(const char *name)
 {
-    for (int i = 0; mpcodecs_ad_drivers[i] != NULL; i++) {
-        if (strcmp(mpcodecs_ad_drivers[i]->name, name) == 0)
-            return mpcodecs_ad_drivers[i];
+    for (int i = 0; ad_drivers[i] != NULL; i++) {
+        if (strcmp(ad_drivers[i]->name, name) == 0)
+            return ad_drivers[i];
     }
     return NULL;
 }

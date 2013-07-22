@@ -35,14 +35,12 @@
 #include "core/options.h"
 #include "core/av_opts.h"
 
-#include "ad_internal.h"
+#include "ad.h"
 #include "audio/reorder_ch.h"
 #include "audio/fmt-conversion.h"
 
 #include "compat/mpbswap.h"
 #include "compat/libav.h"
-
-LIBAD_EXTERN(lavc)
 
 struct priv {
     AVCodecContext *avctx;
@@ -54,6 +52,9 @@ struct priv {
     bool force_channel_map;
     struct demux_packet *packet;
 };
+
+static void uninit(sh_audio_t *sh);
+static int decode_audio(sh_audio_t *sh,unsigned char *buffer,int minlen,int maxlen);
 
 #define OPT_BASE_STRUCT struct MPOpts
 
@@ -467,3 +468,13 @@ static void add_decoders(struct mp_decoder_list *list)
     mp_add_decoder(list, "lavc", "pcm", "pcm", "Raw PCM");
     mp_add_decoder(list, "lavc", "mp-pcm", "mp-pcm", "Raw PCM");
 }
+
+const struct ad_functions ad_lavc = {
+    .name = "lavc",
+    .add_decoders = add_decoders,
+    .preinit = preinit,
+    .init = init,
+    .uninit = uninit,
+    .control = control,
+    .decode_audio = decode_audio,
+};

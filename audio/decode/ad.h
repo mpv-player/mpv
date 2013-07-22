@@ -21,14 +21,14 @@
 
 #include "core/codecs.h"
 #include "demux/stheader.h"
+#include "demux/demux.h"
 
-typedef struct mp_codec_info ad_info_t;
+#include "audio/format.h"
 
 struct mp_decoder_list;
 
 /* interface of video decoder drivers */
-typedef struct ad_functions
-{
+struct ad_functions {
     const char *name;
     void (*add_decoders)(struct mp_decoder_list *list);
     int (*preinit)(sh_audio_t *sh);
@@ -37,10 +37,7 @@ typedef struct ad_functions
     int (*control)(sh_audio_t *sh, int cmd, void *arg);
     int (*decode_audio)(sh_audio_t *sh, unsigned char *buffer, int minlen,
                         int maxlen);
-} ad_functions_t;
-
-// NULL terminated array of all drivers
-extern const ad_functions_t * const mpcodecs_ad_drivers[];
+};
 
 #define ADCTRL_RESYNC_STREAM 1   // resync, called after seeking
 

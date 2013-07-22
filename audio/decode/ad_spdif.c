@@ -28,9 +28,7 @@
 #include "core/mp_msg.h"
 #include "core/av_common.h"
 #include "core/options.h"
-#include "ad_internal.h"
-
-LIBAD_EXTERN(spdif)
+#include "ad.h"
 
 #define FILENAME_SPDIFENC "spdif"
 #define OUTBUF_SIZE 65536
@@ -42,6 +40,8 @@ struct spdifContext {
     uint8_t         *out_buffer;
     uint8_t          pb_buffer[OUTBUF_SIZE];
 };
+
+static void uninit(sh_audio_t *sh);
 
 static int read_packet(void *p, uint8_t *buf, int buf_size)
 {
@@ -267,3 +267,13 @@ static void add_decoders(struct mp_decoder_list *list)
         }
     }
 }
+
+const struct ad_functions ad_spdif = {
+    .name = "spdif",
+    .add_decoders = add_decoders,
+    .preinit = preinit,
+    .init = init,
+    .uninit = uninit,
+    .control = control,
+    .decode_audio = decode_audio,
+};
