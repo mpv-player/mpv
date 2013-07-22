@@ -636,10 +636,8 @@ struct af_instance *af_add(struct af_stream *s, char *name)
         return NULL;
 
     // Reinitalize the filter list
-    if (AF_OK != af_reinit(s) ||
-        AF_OK != fixup_output_format(s)) {
-        while (s->first)
-            af_remove(s, s->first);
+    if (af_reinit(s) != AF_OK || fixup_output_format(s) != AF_OK) {
+        af_uninit(s);
         af_init(s);
         return NULL;
     }
