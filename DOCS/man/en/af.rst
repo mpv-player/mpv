@@ -565,5 +565,9 @@ Available filters are:
 
         .. warning::
 
-            Due to shortcomings in the current ``-af`` option parser code,
-            the filter graph must not contain any ``,``.
+            Don't forget to quote libavfilter graphs as described in the lavfi
+            video filter section.
+
+    ``o=<string>``
+        AVOptions.
+

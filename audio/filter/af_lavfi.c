@@ -38,6 +38,9 @@
 #include "audio/fmt-conversion.h"
 #include "af.h"
 
+#include "core/m_option.h"
+#include "core/av_opts.h"
+
 #define IS_LIBAV_FORK (LIBAVFILTER_VERSION_MICRO < 100)
 
 // FFmpeg and Libav have slightly different APIs, just enough to cause us
@@ -68,11 +71,12 @@ struct priv {
 
     // options
     char *cfg_graph;
+    char *cfg_avopts;
 };
 
 static void destroy_graph(struct af_instance *af)
 {
-    struct priv *p = af->setup;
+    struct priv *p = af->priv;
     avfilter_graph_free(&p->graph);
     p->in = p->out = NULL;
 }
@@ -80,7 +84,7 @@ static void destroy_graph(struct af_instance *af)
 static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
 {
     void *tmp = talloc_new(NULL);
-    struct priv *p = af->setup;
+    struct priv *p = af->priv;
     AVFilterContext *in = NULL, *out = NULL;
     int r;
 
@@ -95,6 +99,12 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
     AVFilterGraph *graph = avfilter_graph_alloc();
     if (!graph)
         goto error;
+
+    if (parse_avopts(graph, p->cfg_avopts) < 0) {
+        mp_msg(MSGT_VFILTER, MSGL_FATAL, "lavfi: could not set opts: '%s'\n",
+               p->cfg_avopts);
+        goto error;
+    }
 
     AVFilterInOut *outputs = avfilter_inout_alloc();
     AVFilterInOut *inputs  = avfilter_inout_alloc();
@@ -161,7 +171,7 @@ error:
 
 static int control(struct af_instance *af, int cmd, void *arg)
 {
-    struct priv *p = af->setup;
+    struct priv *p = af->priv;
 
     switch (cmd) {
     case AF_CONTROL_REINIT: {
@@ -207,7 +217,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
 static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 {
-    struct priv *p = af->setup;
+    struct priv *p = af->priv;
 
     AVFilterLink *l_in = p->in->outputs[0];
 
@@ -281,7 +291,6 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 
 static void uninit(struct af_instance *af)
 {
-    talloc_free(af->setup);
 }
 
 static int af_open(struct af_instance *af)
@@ -290,11 +299,12 @@ static int af_open(struct af_instance *af)
     af->uninit = uninit;
     af->play = play;
     af->mul = 1;
-    struct priv *priv = talloc_zero(NULL, struct priv);
-    af->setup = priv;
+    struct priv *priv = af->priv;
     af->data = &priv->data;
     return AF_OK;
 }
+
+#define OPT_BASE_STRUCT struct priv
 
 struct af_info af_info_lavfi = {
     "libavfilter bridge",
@@ -302,5 +312,11 @@ struct af_info af_info_lavfi = {
     "",
     "",
     0,
-    af_open
+    af_open,
+    .priv_size = sizeof(struct priv),
+    .options = (const struct m_option[]) {
+        OPT_STRING("graph", cfg_graph, 0),
+        OPT_STRING("o", cfg_avopts, 0),
+        {0}
+    },
 };
