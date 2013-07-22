@@ -23,20 +23,14 @@
 
 #include "config.h"
 
-//#define HAVE_TERMCAP
 #if !defined(__MORPHOS__)
 #define CONFIG_IOCTL
 #endif
 
-#define MAX_KEYS 64
-#define BUF_LEN 256
-
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 #include <signal.h>
-#include <sys/time.h>
-#include <sys/types.h>
 #ifdef CONFIG_IOCTL
 #include <sys/ioctl.h>
 #endif
@@ -51,8 +45,8 @@
 #endif
 
 #include <unistd.h>
-#include <fcntl.h>
 
+#include "core/mp_common.h"
 #include "core/bstr.h"
 #include "core/input/input.h"
 #include "core/input/keycodes.h"
@@ -62,102 +56,303 @@
 static volatile struct termios tio_orig;
 static volatile int tio_orig_set;
 #endif
-static int getch2_len=0;
-static unsigned char getch2_buf[BUF_LEN];
 
-int screen_width=80;
-int screen_height=24;
+int screen_width = 80;
+int screen_height = 24;
 char * erase_to_end_of_line = NULL;
 
 typedef struct {
-  int len;
-  int code;
-  char chars[8];
+    char *cap;
+    int len;
+    int code;
+    char chars[8];
 } keycode_st;
-static keycode_st getch2_keys[MAX_KEYS];
-static int getch2_key_db=0;
+
+typedef struct {
+    keycode_st *map;
+    int len;
+    int cap;
+} keycode_map;
+
+static keycode_map getch2_keys;
 
 #ifdef HAVE_TERMCAP
 
-#if 0
-#include <termcap.h>
-#else
-int tgetent(char *BUFFER, char *TERMTYPE);
-int tgetnum(char *NAME);
-int tgetflag(char *NAME);
-char *tgetstr(char *NAME, char **AREA);
+static char *term_rmkx = NULL;
+static char *term_smkx = NULL;
+
+#ifdef HAVE_TERMINFO
+#include <curses.h>
+#endif
+#include <term.h>
+
 #endif
 
-static char term_buffer[4096];
-static char term_buffer2[4096];
-static char *term_p=term_buffer2;
+static keycode_st *keys_push(char *p, int code) {
+    if (getch2_keys.len == getch2_keys.cap) {
+        getch2_keys.cap *= 2;
+        if (getch2_keys.cap == 0)
+            getch2_keys.cap = 32;
 
-static void termcap_add(char *id,int code){
-char *p=tgetstr(id,&term_p);
-  if(!p) return;
-  if(getch2_key_db>=MAX_KEYS) return;
-  getch2_keys[getch2_key_db].len=strlen(p);
-  strncpy(getch2_keys[getch2_key_db].chars,p,8);
-  getch2_keys[getch2_key_db].code=code;
-  ++getch2_key_db;
-/*  printf("%s=%s\n",id,p); */
+        getch2_keys.map = realloc(getch2_keys.map, sizeof(keycode_st) * getch2_keys.cap);
+    }
+
+    keycode_st *st = &getch2_keys.map[getch2_keys.len++];
+    st->cap = NULL;
+    st->len = strlen(p);
+    st->code = code;
+    strncpy(st->chars, p, 8);
+
+    return st;
 }
 
-static int success=0;
+static int keys_count_matches(char *buf, int buflen) {
+    int count = 0;
+    if (buflen < 0)
+        buflen = strlen(buf);
+
+    for (int i = 0; i < getch2_keys.len; i++) {
+        keycode_st *st = &getch2_keys.map[i];
+        int len = MPMIN(buflen, st->len);
+
+        if (memcmp(buf, st->chars, len) == 0)
+            count++;
+    }
+    return count;
+}
+
+static keycode_st *keys_search(char *buf, int buflen) {
+    if (buflen < 0)
+        buflen = strlen(buf);
+
+    for (int i = 0; i < getch2_keys.len; i++) {
+        keycode_st *st = &getch2_keys.map[i];
+
+        if (buflen >= st->len && memcmp(buf, st->chars, st->len) == 0)
+            return st;
+    }
+    return NULL;
+}
+
+static keycode_st *keys_get_by_cap(char *cap) {
+    for (int i = 0; i < getch2_keys.len; i++) {
+        keycode_st *st = &getch2_keys.map[i];
+
+        if (strcmp(cap, st->cap) == 0)
+            return st;
+    }
+    return NULL;
+}
+
+/* pushes only if there is no duplicate.
+   important as we only consider keys if the matches are unique. */
+static keycode_st* keys_push_once(char *p, int code) {
+    keycode_st *st = keys_search(p, -1);
+    if (!st)
+        return keys_push(p, code);
+    return st;
+}
+
+#ifdef HAVE_TERMCAP
+
+typedef struct {
+    char *buf;
+    char *pos;
+    int cap;
+} buf_st;
+static buf_st termcap_buf;
+
+static void ensure_cap(buf_st *buf, int cap) {
+    if (buf->pos - buf->buf < cap) {
+        ptrdiff_t diff = buf->pos - buf->buf;
+        buf->cap += cap;
+        buf->buf = realloc(buf->buf, buf->cap);
+        buf->pos = buf->buf + diff;
+    }
+}
+
+static char *termcap_get(char *id) {
+    ensure_cap(&termcap_buf, 1024);
+    return tgetstr(id, &termcap_buf.pos);
+}
+
+typedef struct {
+    char *id;
+    int code;
+} cap_key_pair;
+
+#if 0
+#include <stdio.h>
+#include <ctype.h>
+
+static void debug_keycode(keycode_st *st) {
+    if (!st)
+        return;
+
+    char buf[128]; /* worst case should be 70 bytes */
+    unsigned char *b = &buf[0];
+    unsigned char *p = &st->chars[0];
+
+    if (st->cap)
+        b += sprintf(b, "%s: ", st->cap);
+
+    for(; *p; p++) {
+        if (*p == 27)
+            b += sprintf(b, "\\e");
+        else if (*p < 27)
+            b += sprintf(b, "^%c", '@' + *p);
+        else if (!isgraph(*p))
+            b += sprintf(b, "\\x%02x", (unsigned int)*p);
+        else
+            b += sprintf(b, "%c", *p);
+    }
+    fprintf(stderr, "%s\n", buf);
+}
+#endif
+
+static void termcap_add(cap_key_pair pair) {
+    char *p = termcap_get(pair.id);
+    if (p) {
+        keycode_st *st = keys_push_once(p, pair.code);
+        if (st)
+            st->cap = pair.id;
+        /* debug_keycode(st); */
+    }
+}
+
+static void termcap_add_extra_f_keys(void) {
+    char capbuf[3];
+    for (int i = 11; i < 0x20; i++) {
+        unsigned char c;
+        if (i < 20) { /* 1-9 */
+            c = '0' + (i - 10);
+        } else {      /* A-Z */
+            c = 'A' + (i - 20);
+        }
+
+        sprintf(&capbuf[0], "F%c", c);
+
+        char *p = termcap_get(capbuf);
+        if (p)
+            keys_push_once(p, MP_KEY_F+i);
+        else
+            break; /* unlikely that the database has further keys */
+    }
+}
+
+#endif
 
 int load_termcap(char *termtype){
-  if(!termtype) termtype=getenv("TERM");
-  if(!termtype) termtype="unknown";
-  success=tgetent(term_buffer, termtype);
-  if(success<0){ printf("Could not access the 'termcap' data base.\n"); return 0; }
-  if(success==0){ printf("Terminal type `%s' is not defined.\n", termtype);return 0;}
+#ifdef HAVE_TERMCAP
 
-  screen_width=tgetnum("co");
-  screen_height=tgetnum("li");
-  if(screen_width<1 || screen_width>255) screen_width=80;
-  if(screen_height<1 || screen_height>255) screen_height=24;
-  erase_to_end_of_line= tgetstr("ce",&term_p);
+#ifdef HAVE_TERMINFO
+    use_env(TRUE);
+    setupterm(termtype, 1, NULL);
+#else
+    static char term_buffer[2048];
+    if (!termtype) termtype = getenv("TERM");
+    if (!termtype) termtype = "ansi";
+    int success = tgetent(term_buffer, termtype);
+    if (success < 0) {
+        printf("Could not access the 'termcap' data base.\n");
+        return 0;
+    } else if (success == 0) {
+        printf("Terminal type `%s' is not defined.\n", termtype);
+        return 0;
+    }
+#endif
+    ensure_cap(&termcap_buf, 2048);
 
-  termcap_add("kP",MP_KEY_PGUP);
-  termcap_add("kN",MP_KEY_PGDWN);
-  termcap_add("kh",MP_KEY_HOME);
-  termcap_add("kH",MP_KEY_END);
-  termcap_add("kI",MP_KEY_INS);
-  termcap_add("kD",MP_KEY_DEL);
-  termcap_add("kb",MP_KEY_BS);
-  termcap_add("kl",MP_KEY_LEFT);
-  termcap_add("kd",MP_KEY_DOWN);
-  termcap_add("ku",MP_KEY_UP);
-  termcap_add("kr",MP_KEY_RIGHT);
-  termcap_add("k0",MP_KEY_F+0);
-  termcap_add("k1",MP_KEY_F+1);
-  termcap_add("k2",MP_KEY_F+2);
-  termcap_add("k3",MP_KEY_F+3);
-  termcap_add("k4",MP_KEY_F+4);
-  termcap_add("k5",MP_KEY_F+5);
-  termcap_add("k6",MP_KEY_F+6);
-  termcap_add("k7",MP_KEY_F+7);
-  termcap_add("k8",MP_KEY_F+8);
-  termcap_add("k9",MP_KEY_F+9);
-  termcap_add("k;",MP_KEY_F+10);
-  return getch2_key_db;
+    erase_to_end_of_line = termcap_get("ce");
+
+    screen_width  = tgetnum("co");
+    screen_height = tgetnum("li");
+    if (screen_width < 1 || screen_width > 255)
+        screen_width = 80;
+    if (screen_height < 1 || screen_height > 255)
+        screen_height = 24;
+
+    term_smkx = termcap_get("ks");
+    term_rmkx = termcap_get("ke");
+
+    cap_key_pair keys[] = {
+        {"kP", MP_KEY_PGUP}, {"kN", MP_KEY_PGDWN}, {"kh", MP_KEY_HOME}, {"kH", MP_KEY_END},
+        {"kI", MP_KEY_INS},  {"kD", MP_KEY_DEL},  /* on PC keyboards */ {"@7", MP_KEY_END},
+
+        {"kl", MP_KEY_LEFT}, {"kd", MP_KEY_DOWN}, {"ku", MP_KEY_UP}, {"kr", MP_KEY_RIGHT},
+
+        {"do", MP_KEY_ENTER},
+        {"kb", MP_KEY_BS},
+
+        {"k1", MP_KEY_F+1},  {"k2", MP_KEY_F+2},  {"k3", MP_KEY_F+3},
+        {"k4", MP_KEY_F+4},  {"k5", MP_KEY_F+5},  {"k6", MP_KEY_F+6},
+        {"k7", MP_KEY_F+7},  {"k8", MP_KEY_F+8},  {"k9", MP_KEY_F+9},
+        {"k;", MP_KEY_F+10}, {"k0", MP_KEY_F+0},
+
+        /* K2 is the keypad center */
+        {"K2", MP_KEY_KP5},
+
+        /* EOL */
+        {NULL},
+    };
+    for (int i = 0; keys[i].id; i++) {
+        termcap_add(keys[i]);
+    }
+    termcap_add_extra_f_keys();
+#endif
+
+    /* special cases (hardcoded, no need for HAVE_TERMCAP) */
+
+    /* it's important to use keys_push_once as we can't have duplicates */
+
+    /* many terminals, for emacs compatibility, use 0x7f instead of ^H
+       when typing backspace, even when the 'kb' cap says otherwise. */
+    keys_push_once("\177", MP_KEY_BS);
+
+    /* mintty always sends these when using the numpad arrows,
+       even in application mode, for telling them from regular arrows. */
+    keys_push_once("\033[A", MP_KEY_UP);
+    keys_push_once("\033[B", MP_KEY_DOWN);
+    keys_push_once("\033[C", MP_KEY_RIGHT);
+    keys_push_once("\033[D", MP_KEY_LEFT);
+
+    /* mintty uses this instead of the "K2" cap for keypad center */
+    keys_push_once("\033OE", MP_KEY_KP5);
+
+    return getch2_keys.len;
 }
 
-#endif
-
-void get_screen_size(void){
+void get_screen_size(void) {
 #ifdef CONFIG_IOCTL
-  struct winsize ws;
-  if (ioctl(0, TIOCGWINSZ, &ws) < 0 || !ws.ws_row || !ws.ws_col) return;
-/*  printf("Using IOCTL\n"); */
-  screen_width=ws.ws_col;
-  screen_height=ws.ws_row;
+    struct winsize ws;
+    if (ioctl(0, TIOCGWINSZ, &ws) < 0 || !ws.ws_row || !ws.ws_col)
+        return;
+
+    screen_width = ws.ws_col;
+    screen_height = ws.ws_row;
 #endif
+}
+
+#define BUF_LEN 256
+
+static unsigned char getch2_buf[BUF_LEN];
+static int getch2_len = 0;
+static int getch2_pos = 0;
+
+static void walk_buf(unsigned int count) {
+    if (!(count < BUF_LEN && count <= getch2_len))
+        abort();
+
+    memmove(&getch2_buf[0], &getch2_buf[count], getch2_len - count);
+    getch2_len -= count;
+    getch2_pos -= count;
+    if (getch2_pos < 0)
+        getch2_pos = 0;
 }
 
 bool getch2(struct input_ctx *input_ctx)
 {
-    int retval = read(0, &getch2_buf[getch2_len], BUF_LEN-getch2_len);
+    int retval = read(0, &getch2_buf[getch2_pos], BUF_LEN - getch2_len - getch2_pos);
     /* Return false on EOF to stop running select() on the FD, as it'd
      * trigger all the time. Note that it's possible to get temporary
      * EOF on terminal if the user presses ctrl-d, but that shouldn't
@@ -168,149 +363,103 @@ bool getch2(struct input_ctx *input_ctx)
         return retval;
     getch2_len += retval;
 
-    while (getch2_len > 0 && (getch2_len > 1 || getch2_buf[0] != 27)) {
-        int i, len, code;
+    static enum {
+        STATE_INITIAL = 0,
+        STATE_UTF8,
+    } state = STATE_INITIAL;
+    static int utf8_len = 0;
 
-        /* First find in the TERMCAP database: */
-        for (i = 0; i < getch2_key_db; i++) {
-            if ((len = getch2_keys[i].len) <= getch2_len)
-                if(memcmp(getch2_keys[i].chars, getch2_buf, len) == 0) {
-                    code = getch2_keys[i].code;
-                    goto found;
-                }
-        }
-        /* We always match some keypress here, with length 1 if nothing else.
-         * Since some of the cases explicitly test remaining buffer length
-         * having a keycode only partially read in the buffer could incorrectly
-         * use the first byte as an independent character.
-         * However the buffer is big enough that this shouldn't happen too
-         * easily, and it's been this way for years without many complaints.
-         * I see no simple fix as there's no easy test which would tell
-         * whether a string must be part of a longer keycode. */
-        len = 1;
-        code = getch2_buf[0];
-        /* Check the well-known codes... */
-        if (code != 27) {
-            if (code == 'A'-64) code = MP_KEY_HOME;
-            else if (code == 'E'-64) code = MP_KEY_END;
-            else if (code == 'D'-64) code = MP_KEY_DEL;
-            else if (code == 'H'-64) code = MP_KEY_BS;
-            else if (code == 'U'-64) code = MP_KEY_PGUP;
-            else if (code == 'V'-64) code = MP_KEY_PGDWN;
-            else if (code == 8 || code==127) code = MP_KEY_BS;
-            else if (code == 10 || code==13) {
-                if (getch2_len > 1) {
-                    int c = getch2_buf[1];
-                    if ((c == 10 || c == 13) && (c != code))
-                        len = 2;
-                }
-                code = MP_KEY_ENTER;
-            } else {
-                int utf8len = bstr_parse_utf8_code_length(code);
-                if (utf8len > 0 && utf8len <= getch2_len) {
-                    struct bstr s = { getch2_buf, utf8len };
-                    int unicode = bstr_decode_utf8(s, NULL);
-                    if (unicode > 0) {
-                        len = utf8len;
-                        code = unicode;
+    while (getch2_pos < getch2_len) {
+        unsigned char c = getch2_buf[getch2_pos++];
+
+        switch (state) {
+            case STATE_INITIAL: {
+#ifdef HAVE_TERMCAP
+                int match_count = keys_count_matches(&getch2_buf[0], getch2_len);
+                if (match_count == 1) {
+                    keycode_st *st = keys_search(&getch2_buf[0], getch2_len);
+
+                    mp_input_put_key(input_ctx, st->code);
+                    walk_buf(st->len);
+                } else if (match_count > 1) {
+                    continue; /* need more bytes to disambiguate */
+                } else {
+#endif
+                    utf8_len = bstr_parse_utf8_code_length(c);
+
+                    if (utf8_len > 1) {
+                        state = STATE_UTF8;
+                    } else {
+                        if (utf8_len == 1)
+                            mp_input_put_key(input_ctx, c);
+                        walk_buf(getch2_pos);
                     }
+#ifdef HAVE_TERMCAP
                 }
+#endif
+                break;
+            }
+            case STATE_UTF8: {
+                if (getch2_pos < utf8_len) /* need more bytes */
+                    continue;
+
+                struct bstr s = {getch2_buf, utf8_len};
+                int unicode = bstr_decode_utf8(s, NULL);
+
+                if (unicode > 0) {
+                    mp_input_put_key(input_ctx, unicode);
+                }
+                walk_buf(utf8_len);
+                state = STATE_INITIAL;
+                continue;
             }
         }
-        else if (getch2_len > 1) {
-            int c = getch2_buf[1];
-            if (c == 27) {
-                code = MP_KEY_ESC;
-                len = 2;
-                goto found;
-            }
-            if (c >= '0' && c <= '9') {
-                code = c-'0'+MP_KEY_F;
-                len = 2;
-                goto found;
-            }
-            if (getch2_len >= 4 && c == '[' && getch2_buf[2] == '[') {
-                int c = getch2_buf[3];
-                if (c >= 'A' && c < 'A'+12) {
-                    code = MP_KEY_F+1 + c-'A';
-                    len = 4;
-                    goto found;
-                }
-            }
-            if ((c == '[' || c == 'O') && getch2_len >= 3) {
-                int c = getch2_buf[2];
-                const int ctable[] = {
-                    MP_KEY_UP, MP_KEY_DOWN, MP_KEY_RIGHT, MP_KEY_LEFT, 0,
-                    MP_KEY_END, MP_KEY_PGDWN, MP_KEY_HOME, MP_KEY_PGUP, 0, 0, MP_KEY_INS, 0, 0, 0,
-                    MP_KEY_F+1, MP_KEY_F+2, MP_KEY_F+3, MP_KEY_F+4};
-                if (c >= 'A' && c <= 'S')
-                    if (ctable[c - 'A']) {
-                        code = ctable[c - 'A'];
-                        len = 3;
-                        goto found;
-                    }
-            }
-            if (getch2_len >= 4 && c == '[' && getch2_buf[3] == '~') {
-                int c = getch2_buf[2];
-                const int ctable[8] = {MP_KEY_HOME, MP_KEY_INS, MP_KEY_DEL, MP_KEY_END, MP_KEY_PGUP, MP_KEY_PGDWN, MP_KEY_HOME, MP_KEY_END};
-                if (c >= '1' && c <= '8') {
-                    code = ctable[c - '1'];
-                    len = 4;
-                    goto found;
-                }
-            }
-            if (getch2_len >= 5 && c == '[' && getch2_buf[4] == '~') {
-                int i = getch2_buf[2] - '0';
-                int j = getch2_buf[3] - '0';
-                if (i >= 0 && i <= 9 && j >= 0 && j <= 9) {
-                    const short ftable[20] = {
-                        11,12,13,14,15, 17,18,19,20,21,
-                        23,24,25,26,28, 29,31,32,33,34 };
-                    int a = i*10 + j;
-                    for (i = 0; i < 20; i++)
-                        if (ftable[i] == a) {
-                            code = MP_KEY_F+1 + i;
-                            len = 5;
-                            goto found;
-                        }
-                }
-            }
-        }
-    found:
-        getch2_len -= len;
-        for (i = 0; i < getch2_len; i++)
-            getch2_buf[i] = getch2_buf[len+i];
-        mp_input_put_key(input_ctx, code);
     }
+
     return true;
 }
 
-static volatile int getch2_active=0;
-static volatile int getch2_enabled=0;
+static volatile int getch2_active  = 0;
+static volatile int getch2_enabled = 0;
 
 static void do_activate_getch2(void)
 {
     if (getch2_active)
         return;
+
+#ifdef HAVE_TERMCAP
+    if (term_smkx)
+        tputs(term_smkx, 1, putchar);
+#endif
+
 #ifdef HAVE_TERMIOS
     struct termios tio_new;
     tcgetattr(0,&tio_new);
+
     if (!tio_orig_set) {
         tio_orig = tio_new;
         tio_orig_set = 1;
     }
+
     tio_new.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
     tio_new.c_cc[VMIN] = 1;
     tio_new.c_cc[VTIME] = 0;
     tcsetattr(0,TCSANOW,&tio_new);
 #endif
-    getch2_active=1;
+
+    getch2_active = 1;
 }
 
 static void do_deactivate_getch2(void)
 {
     if (!getch2_active)
         return;
+
+#ifdef HAVE_TERMCAP
+    if (term_rmkx)
+        tputs(term_rmkx, 1, putchar);
+#endif
+
 #ifdef HAVE_TERMIOS
     if (tio_orig_set) {
         // once set, it will never be set again
@@ -318,7 +467,8 @@ static void do_deactivate_getch2(void)
         tcsetattr(0, TCSANOW, (const struct termios *) &tio_orig);
     }
 #endif
-    getch2_active=0;
+
+    getch2_active = 0;
 }
 
 // sigaction wrapper
@@ -327,10 +477,12 @@ static int setsigaction(int signo, void (*handler) (int),
 {
     struct sigaction sa;
     sa.sa_handler = handler;
+
     if(do_mask)
         sigfillset(&sa.sa_mask);
     else
         sigemptyset(&sa.sa_mask);
+
     sa.sa_flags = flags;
     return sigaction(signo, &sa, NULL);
 }
@@ -378,7 +530,7 @@ void getch2_enable(void){
     // handlers to fix terminal settings
     setsigaction(SIGCONT, continue_sighandler, 0, true);
     setsigaction(SIGTSTP, stop_sighandler, SA_RESETHAND, false);
-    setsigaction(SIGINT, quit_request_sighandler, SA_RESETHAND, false);
+    setsigaction(SIGINT,  quit_request_sighandler, SA_RESETHAND, false);
     setsigaction(SIGTTIN, SIG_IGN, 0, true);
 
     do_activate_getch2();
@@ -393,7 +545,7 @@ void getch2_disable(void){
     // restore signals
     setsigaction(SIGCONT, SIG_DFL, 0, false);
     setsigaction(SIGTSTP, SIG_DFL, 0, false);
-    setsigaction(SIGINT, SIG_DFL, 0, false);
+    setsigaction(SIGINT,  SIG_DFL, 0, false);
     setsigaction(SIGTTIN, SIG_DFL, 0, false);
 
     do_deactivate_getch2();
