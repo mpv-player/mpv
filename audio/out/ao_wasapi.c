@@ -399,8 +399,8 @@ static int try_passthrough(struct wasapi_state *state,
         .Format = {
             .wFormatTag = WAVE_FORMAT_EXTENSIBLE,
             .nChannels = ao->channels.num,
-            .nSamplesPerSec = ao->samplerate * 4,
-            .nAvgBytesPerSec = (ao->samplerate * 4) * (ao->channels.num * 2),
+            .nSamplesPerSec = ao->samplerate,
+            .nAvgBytesPerSec = (ao->samplerate) * (ao->channels.num * 2),
             .nBlockAlign = ao->channels.num * 2,
             .wBitsPerSample = 16,
             .cbSize = sizeof(WAVEFORMATEXTENSIBLE) - sizeof(WAVEFORMATEX),
@@ -416,13 +416,14 @@ static int try_passthrough(struct wasapi_state *state,
 
     EnterCriticalSection(&state->print_lock);
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: trying passthrough for %s...\n",
-        af_fmt2str_short(ao->format));
+        af_fmt2str_short((ao->format&~AF_FORMAT_END_MASK) | AF_FORMAT_LE));
     LeaveCriticalSection(&state->print_lock);
 
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,
                                                 state->share_mode,
                                                 u.ex, NULL);
     if (!FAILED(hr)) {
+        ao->format = (ao->format&~AF_FORMAT_END_MASK) | AF_FORMAT_LE;
         state->format = wformat;
         return 1;
     }
