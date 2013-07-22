@@ -536,9 +536,9 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     if (d->stream_asbd.mFormatID & kAudioFormat60958AC3)
         ao->format = AF_FORMAT_AC3_LE;
     else if (d->stream_asbd.mFormatFlags & kAudioFormatFlagIsBigEndian)
+#endif
         ca_msg(MSGL_WARN,
                "stream has non-native byte order, digital output may fail\n");
-#endif
 
     ao->samplerate = d->stream_asbd.mSampleRate;
     ao->bps = ao->samplerate *
