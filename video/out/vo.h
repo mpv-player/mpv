@@ -151,11 +151,9 @@ struct vo_driver {
 
     const vo_info_t *info;
     /*
-     * Preinitializes driver (real INITIALIZATION)
-     *   arg - currently it's vo_subdevice
      *   returns: zero on successful initialization, non-zero on error.
      */
-    int (*preinit)(struct vo *vo, const char *arg);
+    int (*preinit)(struct vo *vo);
 
     /*
      * Whether the given image format is supported and config() will succeed.

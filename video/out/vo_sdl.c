@@ -728,7 +728,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     osd_draw(osd, vc->osd_res, osd->vo_pts, 0, formats, draw_osd_cb, vo);
 }
 
-static int preinit(struct vo *vo, const char *arg)
+static int preinit(struct vo *vo)
 {
     struct priv *vc = vo->priv;
 

@@ -56,12 +56,8 @@ static void uninit(struct vo *vo)
 {
 }
 
-static int preinit(struct vo *vo, const char *arg)
+static int preinit(struct vo *vo)
 {
-    if (arg) {
-        mp_tmsg(MSGT_VO, MSGL_WARN, "[VO_NULL] Unknown subdevice: %s.\n", arg);
-        return ENOSYS;
-    }
     return 0;
 }
 

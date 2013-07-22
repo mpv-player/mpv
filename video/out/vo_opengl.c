@@ -303,7 +303,7 @@ static void uninit(struct vo *vo)
     }
 }
 
-static int preinit(struct vo *vo, const char *arg)
+static int preinit(struct vo *vo)
 {
     struct gl_priv *p = vo->priv;
     p->vo = vo;

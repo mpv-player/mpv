@@ -157,9 +157,10 @@ static struct vo *vo_create(struct mp_vo_opts *opts,
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
         goto error;
     struct m_config *config = m_config_from_obj_desc(vo, &desc);
-    if (m_config_initialize_obj(config, &desc, &vo->priv, &args) < 0)
+    if (m_config_set_obj_params(config, args) < 0)
         goto error;
-    if (vo->driver->preinit(vo, (char *)args))
+    vo->priv = config->optstruct;
+    if (vo->driver->preinit(vo))
         goto error;
     return vo;
 error:

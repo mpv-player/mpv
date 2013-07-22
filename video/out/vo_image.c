@@ -152,7 +152,7 @@ static void uninit(struct vo *vo)
     mp_image_unrefp(&p->current);
 }
 
-static int preinit(struct vo *vo, const char *arg)
+static int preinit(struct vo *vo)
 {
     vo->untimed = true;
     return 0;

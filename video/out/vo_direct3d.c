@@ -1157,7 +1157,7 @@ static void update_colorspace(d3d_priv *priv)
  *  @return 0 on success, -1 on failure
  */
 
-static int preinit(struct vo *vo, const char *arg)
+static int preinit(struct vo *vo)
 {
     d3d_priv *priv = vo->priv;
     priv->vo = vo;

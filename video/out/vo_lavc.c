@@ -60,7 +60,7 @@ struct priv {
     struct mp_csp_details colorspace;
 };
 
-static int preinit(struct vo *vo, const char *arg)
+static int preinit(struct vo *vo)
 {
     struct priv *vc;
     if (!encode_lavc_available(vo->encode_lavc_ctx)) {

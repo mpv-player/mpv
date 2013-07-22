@@ -1439,7 +1439,7 @@ static void uninit(struct vo *vo)
         av_freep(&vc->surface_render[i].bitstream_buffers);
 }
 
-static int preinit(struct vo *vo, const char *arg)
+static int preinit(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 

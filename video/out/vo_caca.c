@@ -246,13 +246,8 @@ static void uninit(struct vo *vo)
     caca_free_canvas(canvas);
 }
 
-static int preinit(struct vo *vo, const char *arg)
+static int preinit(struct vo *vo)
 {
-    if (arg) {
-        mp_msg(MSGT_VO, MSGL_ERR, "vo_caca: Unknown subdevice: %s\n", arg);
-        return ENOSYS;
-    }
-
     canvas = caca_create_canvas(0, 0);
     if (canvas == NULL) {
         mp_msg(MSGT_VO, MSGL_ERR, "vo_caca: failed to create canvas\n");

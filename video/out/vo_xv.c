@@ -722,7 +722,7 @@ static void uninit(struct vo *vo)
     vo_x11_uninit(vo);
 }
 
-static int preinit(struct vo *vo, const char *arg)
+static int preinit(struct vo *vo)
 {
     XvPortID xv_p;
     int busy_ports = 0;
