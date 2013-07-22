@@ -19,7 +19,6 @@
 
 #include <libavutil/common.h>
 
-#include "core/m_config.h"
 #include "core/m_option.h"
 
 #include "audio/format.h"
@@ -41,27 +40,9 @@ struct priv {
     struct mp_audio temp;
 };
 
-static const struct priv defaults = {
-    .in_format = AF_FORMAT_UNKNOWN,
-    .out_format = AF_FORMAT_UNKNOWN,
-};
-
-#define OPT_BASE_STRUCT struct priv
-
-static const struct m_option options[] = {
-    OPT_AUDIOFORMAT("format", in_format, 0),
-    OPT_INTRANGE("srate", in_srate, 0, 1000, 8*48000),
-    OPT_CHMAP("channels", in_channels, CONF_MIN, .min = 0),
-    OPT_AUDIOFORMAT("out-format", out_format, 0),
-    OPT_INTRANGE("out-srate", out_srate, 0, 1000, 8*48000),
-    OPT_CHMAP("out-channels", out_channels, CONF_MIN, .min = 0),
-    OPT_FLAG("fail", fail, 0),
-    {0}
-};
-
 static int control(struct af_instance *af, int cmd, void *arg)
 {
-    struct priv *priv = af->setup;
+    struct priv *priv = af->priv;
 
     switch (cmd) {
     case AF_CONTROL_REINIT: {
@@ -102,18 +83,13 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
     }
-    case AF_CONTROL_COMMAND_LINE: {
-        if (m_config_parse_suboptions(priv->config, "af_force", (char *)arg) < 0)
-            return AF_ERROR;
-        return AF_OK;
-    }
     }
     return AF_UNKNOWN;
 }
 
 static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 {
-    struct priv *priv = af->setup;
+    struct priv *priv = af->priv;
     struct mp_audio *r = &priv->temp;
 
     *r = *af->data;
@@ -125,7 +101,6 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 
 static void uninit(struct af_instance *af)
 {
-    talloc_free(af->setup);
 }
 
 static int af_open(struct af_instance *af)
@@ -134,15 +109,12 @@ static int af_open(struct af_instance *af)
     af->uninit = uninit;
     af->play = play;
     af->mul = 1;
-    struct priv *priv = talloc(NULL, struct priv);
-    af->setup = priv;
-    *priv = defaults;
-    priv->config = m_config_simple(priv);
-    talloc_steal(priv, priv->config);
-    m_config_register_options(priv->config, options);
+    struct priv *priv = af->priv;
     af->data = &priv->data;
     return AF_OK;
 }
+
+#define OPT_BASE_STRUCT struct priv
 
 struct af_info af_info_force = {
     "Force audio format",
@@ -150,5 +122,20 @@ struct af_info af_info_force = {
     "",
     "",
     0,
-    af_open
+    af_open,
+    .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv) {
+        .in_format = AF_FORMAT_UNKNOWN,
+        .out_format = AF_FORMAT_UNKNOWN,
+    },
+    .options = (const struct m_option[]) {
+        OPT_AUDIOFORMAT("format", in_format, 0),
+        OPT_INTRANGE("srate", in_srate, 0, 1000, 8*48000),
+        OPT_CHMAP("channels", in_channels, CONF_MIN, .min = 0),
+        OPT_AUDIOFORMAT("out-format", out_format, 0),
+        OPT_INTRANGE("out-srate", out_srate, 0, 1000, 8*48000),
+        OPT_CHMAP("out-channels", out_channels, CONF_MIN, .min = 0),
+        OPT_FLAG("fail", fail, 0),
+        {0}
+    },
 };
