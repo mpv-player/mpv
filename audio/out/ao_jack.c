@@ -164,7 +164,7 @@ static int outputaudio(jack_nframes_t nframes, void *arg)
     return 0;
 }
 
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
     const char **matching_ports = NULL;

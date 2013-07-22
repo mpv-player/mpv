@@ -90,7 +90,7 @@ static int set_format(struct ao *ao)
     return rsd_format;
 }
 
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 

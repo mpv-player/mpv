@@ -361,7 +361,7 @@ static int try_open_device(struct ao *ao, const char *device, int open_mode,
     open & setup audio device
     return: 0=success -1=fail
  */
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     int err;
     snd_pcm_uframes_t chunk_size;

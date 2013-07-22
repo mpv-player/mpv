@@ -391,7 +391,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 \param flags unused
 \return 0=success -1=fail
 */
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     struct priv *p = ao->priv;
     int res;

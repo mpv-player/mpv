@@ -54,27 +54,13 @@ typedef struct ao_info {
     const char *comment;
 } ao_info_t;
 
-/* interface towards mplayer and */
-typedef struct ao_old_functions {
-    int (*control)(int cmd, void *arg);
-    int (*init)(int rate, const struct mp_chmap *channels, int format, int flags);
-    void (*uninit)(int immed);
-    void (*reset)(void);
-    int (*get_space)(void);
-    int (*play)(void *data, int len, int flags);
-    float (*get_delay)(void);
-    void (*pause)(void);
-    void (*resume)(void);
-} ao_functions_t;
-
 struct ao;
 
 struct ao_driver {
     bool encode;
     const struct ao_info *info;
-    const struct ao_old_functions *old_functions;
     int (*control)(struct ao *ao, enum aocontrol cmd, void *arg);
-    int (*init)(struct ao *ao, char *params);
+    int (*init)(struct ao *ao);
     void (*uninit)(struct ao *ao, bool cut_audio);
     void (*reset)(struct ao*ao);
     int (*get_space)(struct ao *ao);

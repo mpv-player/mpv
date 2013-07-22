@@ -109,7 +109,7 @@ static void write_wave_header(struct ao *ao, FILE *fp, uint64_t data_length)
     fput32le(data_length, fp);
 }
 
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 

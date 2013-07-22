@@ -64,7 +64,7 @@ struct priv {
 };
 
 // open & setup audio device
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     struct priv *ac = talloc_zero(ao, struct priv);
     const enum AVSampleFormat *sampleformat;

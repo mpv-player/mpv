@@ -1225,7 +1225,7 @@ static void uninit(struct ao *ao, bool immed)
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: uninit END!\n");
 }
 
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: init!\n");
     struct mp_chmap_sel sel = {0};

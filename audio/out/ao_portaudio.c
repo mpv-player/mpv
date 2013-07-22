@@ -214,7 +214,7 @@ static void uninit(struct ao *ao, bool cut_audio)
     Pa_Terminate();
 }
 
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 

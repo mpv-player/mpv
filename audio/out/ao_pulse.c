@@ -228,7 +228,7 @@ static void uninit(struct ao *ao, bool cut_audio)
     }
 }
 
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     struct pa_sample_spec ss;
     struct pa_channel_map map;

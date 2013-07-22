@@ -121,7 +121,7 @@ static unsigned int ceil_power_of_two(unsigned int x)
     return y;
 }
 
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     if (SDL_WasInit(SDL_INIT_AUDIO)) {
         mp_msg(MSGT_AO, MSGL_ERR, "[sdl] already initialized\n");

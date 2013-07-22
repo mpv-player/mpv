@@ -116,7 +116,7 @@ static const struct speaker speaker_pos[] = {
     {-1},
 };
 
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     float position[3] = {0, 0, 0};
     float direction[6] = {0, 0, 1, 0, -1, 0};

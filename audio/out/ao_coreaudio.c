@@ -228,7 +228,7 @@ coreaudio_error:
 static int init_lpcm(struct ao *ao, AudioStreamBasicDescription asbd);
 static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd);
 
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     OSStatus err;
     struct priv *p   = ao->priv;

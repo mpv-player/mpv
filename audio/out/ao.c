@@ -146,9 +146,10 @@ static struct ao *ao_create(bool probing, struct MPOpts *opts,
     if (ao->driver->encode != !!ao->encode_lavc_ctx)
         goto error;
     struct m_config *config = m_config_from_obj_desc(ao, &desc);
-    if (m_config_initialize_obj(config, &desc, &ao->priv, &args) < 0)
+    if (m_config_set_obj_params(config, args) < 0)
         goto error;
-    if (ao->driver->init(ao, (char *)args) < 0)
+    ao->priv = config->optstruct;
+    if (ao->driver->init(ao) < 0)
         goto error;
     ao->bps = ao->channels.num * ao->samplerate * af_fmt2bits(ao->format) / 8;
     return ao;

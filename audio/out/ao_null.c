@@ -46,7 +46,7 @@ static void drain(struct ao *ao)
     priv->last_time = now;
 }
 
-static int init(struct ao *ao, char *params)
+static int init(struct ao *ao)
 {
     struct priv *priv = talloc_zero(ao, struct priv);
     ao->priv = priv;
