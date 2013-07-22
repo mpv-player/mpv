@@ -36,7 +36,7 @@
 #include "ao.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 #include "core/mp_ring.h"
 #include "core/mp_msg.h"
 #include "audio/out/ao_coreaudio_properties.h"
@@ -87,6 +87,10 @@ struct priv {
 
     struct mp_ring *buffer;
     struct priv_d *digital;
+
+    // options
+    int opt_device_id;
+    int opt_list;
 };
 
 static int get_ring_size(struct ao *ao)
@@ -188,19 +192,9 @@ coreaudio_error:
     return CONTROL_ERROR;
 }
 
-static void print_help(void)
+static void print_list(void)
 {
-    char *help = talloc_strdup(NULL,
-           " -ao coreaudio commandline help:\n"
-           "Example: mpv -ao coreaudio:device_id=266\n"
-           "    open Core Audio with output device ID 266.\n"
-           "\nOptions:\n"
-           "    device_id\n"
-           "        ID of output device to use (0 = default device)\n"
-           "    help\n"
-           "        This help including list of available devices.\n"
-           "\n"
-           "Available output devices:\n");
+    char *help = talloc_strdup(NULL, "Available output devices:\n");
 
     AudioDeviceID *devs;
     size_t n_devs;
@@ -221,13 +215,13 @@ static void print_help(void)
             name = "Unknown";
 
         help = talloc_asprintf_append(
-                help, "%s (id: %" PRIu32 ")\n", name, devs[i]);
+                help, "  * %s (id: %" PRIu32 ")\n", name, devs[i]);
     }
 
     talloc_free(devs);
 
 coreaudio_error:
-    ca_msg(MSGL_FATAL, "%s", help);
+    ca_msg(MSGL_INFO, "%s", help);
     talloc_free(help);
 }
 
@@ -237,29 +231,12 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd);
 static int init(struct ao *ao, char *params)
 {
     OSStatus err;
-    int device_opt = -1, help_opt = 0;
+    struct priv *p   = ao->priv;
 
-    const opt_t subopts[] = {
-        {"device_id", OPT_ARG_INT, &device_opt, NULL},
-        {"help", OPT_ARG_BOOL, &help_opt, NULL},
-        {NULL}
-    };
+    if (p->opt_list) print_list();
 
-    if (subopt_parse(params, subopts) != 0) {
-        print_help();
-        return 0;
-    }
+    struct priv_d *d = talloc_zero(p, struct priv_d);
 
-    if (help_opt)
-        print_help();
-
-    struct priv *p = talloc_zero(ao, struct priv);
-    *p = (struct priv) {
-        .device = 0,
-        .is_digital = 0,
-    };
-
-    struct priv_d *d= talloc_zero(p, struct priv_d);
     *d = (struct priv_d) {
         .muted = false,
         .stream_asbd_changed = 0,
@@ -270,20 +247,19 @@ static int init(struct ao *ao, char *params)
     };
 
     p->digital = d;
-    ao->priv   = p;
 
     ao->per_application_mixer = true;
     ao->no_persistent_volume  = true;
 
     AudioDeviceID selected_device = 0;
-    if (device_opt < 0) {
+    if (p->opt_device_id < 0) {
         // device not set by user, get the default one
         err = CA_GET(kAudioObjectSystemObject,
                      kAudioHardwarePropertyDefaultOutputDevice,
                      &selected_device);
         CHECK_CA_ERROR("could not get default audio device");
     } else {
-        selected_device = device_opt;
+        selected_device = p->opt_device_id;
     }
 
     char *device_name;
@@ -710,6 +686,8 @@ static void audio_resume(struct ao *ao)
     p->paused = false;
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct ao_driver audio_out_coreaudio = {
     .info = &(const struct ao_info) {
         "CoreAudio (OS X Audio Output)",
@@ -726,4 +704,10 @@ const struct ao_driver audio_out_coreaudio = {
     .reset     = reset,
     .pause     = audio_pause,
     .resume    = audio_resume,
+    .priv_size = sizeof(struct priv),
+    .options = (const struct m_option[]) {
+        OPT_INT("device_id", opt_device_id, 0, OPTDEF_INT(-1)),
+        OPT_FLAG("list", opt_list, 0),
+        {0}
+    },
 };
