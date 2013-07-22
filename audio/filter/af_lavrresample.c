@@ -51,7 +51,8 @@
 #endif
 
 #include "core/mp_msg.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
+#include "core/av_opts.h"
 #include "audio/filter/af.h"
 #include "audio/fmt-conversion.h"
 #include "audio/reorder_ch.h"
@@ -72,6 +73,7 @@ struct af_resample_opts {
 
 struct af_resample {
     int allow_detach;
+    char *avopts;
     struct AVAudioResampleContext *avrctx;
     struct AVAudioResampleContext *avrctx_out; // for output channel reordering
     struct af_resample_opts ctx;   // opts in the context
@@ -127,7 +129,7 @@ static bool test_conversion(int src_format, int dst_format)
 
 static int control(struct af_instance *af, int cmd, void *arg)
 {
-    struct af_resample *s = (struct af_resample *) af->setup;
+    struct af_resample *s = (struct af_resample *) af->priv;
     struct mp_audio *in   = (struct mp_audio *) arg;
     struct mp_audio *out  = (struct mp_audio *) af->data;
 
@@ -176,6 +178,18 @@ static int control(struct af_instance *af, int cmd, void *arg)
             s->ctx.linear      = s->opts.linear;
             s->ctx.cutoff      = s->opts.cutoff;
 
+            ctx_opt_set_int("filter_size",        s->ctx.filter_size);
+            ctx_opt_set_int("phase_shift",        s->ctx.phase_shift);
+            ctx_opt_set_int("linear_interp",      s->ctx.linear);
+
+            ctx_opt_set_dbl("cutoff",             s->ctx.cutoff);
+
+            if (parse_avopts(s->avrctx, s->avopts) < 0) {
+                mp_msg(MSGT_VFILTER, MSGL_FATAL,
+                       "af_lavrresample: could not set opts: '%s'\n", s->avopts);
+                return AF_ERROR;
+            }
+
             struct mp_chmap map_in = in->channels;
             struct mp_chmap map_out = out->channels;
 
@@ -197,12 +211,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
             ctx_opt_set_int("in_sample_fmt",      in_samplefmt);
             ctx_opt_set_int("out_sample_fmt",     out_samplefmt);
-
-            ctx_opt_set_int("filter_size",        s->ctx.filter_size);
-            ctx_opt_set_int("phase_shift",        s->ctx.phase_shift);
-            ctx_opt_set_int("linear_interp",      s->ctx.linear);
-
-            ctx_opt_set_dbl("cutoff",             s->ctx.cutoff);
 
             struct mp_chmap in_lavc;
             mp_chmap_from_lavc(&in_lavc, in_ch_layout);
@@ -252,29 +260,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
         mp_audio_set_channels(af->data, (struct mp_chmap *)arg);
         return AF_OK;
     }
-    case AF_CONTROL_COMMAND_LINE: {
-        s->opts.cutoff = 0.0;
-
-        const opt_t subopts[] = {
-            {"srate",        OPT_ARG_INT,    &out->rate, NULL},
-            {"filter_size",  OPT_ARG_INT,    &s->opts.filter_size, NULL},
-            {"phase_shift",  OPT_ARG_INT,    &s->opts.phase_shift, NULL},
-            {"linear",       OPT_ARG_BOOL,   &s->opts.linear, NULL},
-            {"cutoff",       OPT_ARG_FLOAT,  &s->opts.cutoff, NULL},
-            {"detach",       OPT_ARG_BOOL,   &s->allow_detach, NULL},
-            {0}
-        };
-
-        if (subopt_parse(arg, subopts) != 0) {
-            mp_msg(MSGT_AFILTER, MSGL_ERR, "[lavrresample] Invalid option "
-                   "specified.\n");
-            return AF_ERROR;
-        }
-
-        if (s->opts.cutoff <= 0.0)
-            s->opts.cutoff = af_resample_default_cutoff(s->opts.filter_size);
-        return AF_OK;
-    }
     case AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET:
         out->rate = *(int *)arg;
         return AF_OK;
@@ -287,14 +272,11 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
 static void uninit(struct af_instance *af)
 {
-    if (af->setup) {
-        struct af_resample *s = af->setup;
-        if (s->avrctx)
-            avresample_close(s->avrctx);
-        if (s->avrctx_out)
-            avresample_close(s->avrctx_out);
-        talloc_free(af->setup);
-    }
+    struct af_resample *s = af->priv;
+    if (s->avrctx)
+        avresample_close(s->avrctx);
+    if (s->avrctx_out)
+        avresample_close(s->avrctx_out);
 }
 
 static bool needs_reorder(int *reorder, int num_ch)
@@ -308,7 +290,7 @@ static bool needs_reorder(int *reorder, int num_ch)
 
 static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 {
-    struct af_resample *s = af->setup;
+    struct af_resample *s = af->priv;
     struct mp_audio *in   = data;
     struct mp_audio *out  = af->data;
 
@@ -356,7 +338,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 
 static int af_open(struct af_instance *af)
 {
-    struct af_resample *s = talloc_zero(NULL, struct af_resample);
+    struct af_resample *s = af->priv;
 
     af->control = control;
     af->uninit  = uninit;
@@ -366,19 +348,11 @@ static int af_open(struct af_instance *af)
 
     af->data->rate   = 0;
 
-    int default_filter_size = 16;
-    s->opts = (struct af_resample_opts) {
-        .linear      = 0,
-        .filter_size = default_filter_size,
-        .cutoff      = af_resample_default_cutoff(default_filter_size),
-        .phase_shift = 10,
-    };
-
-    s->allow_detach = 1;
+    if (s->opts.cutoff <= 0.0)
+        s->opts.cutoff = af_resample_default_cutoff(s->opts.filter_size);
 
     s->avrctx = avresample_alloc_context();
     s->avrctx_out = avresample_alloc_context();
-    af->setup = s;
 
     if (s->avrctx && s->avrctx_out) {
         return AF_OK;
@@ -390,6 +364,8 @@ static int af_open(struct af_instance *af)
     }
 }
 
+#define OPT_BASE_STRUCT struct af_resample
+
 struct af_info af_info_lavrresample = {
     "Sample frequency conversion using libavresample",
     "lavrresample",
@@ -398,4 +374,22 @@ struct af_info af_info_lavrresample = {
     AF_FLAGS_REENTRANT,
     af_open,
     .test_conversion = test_conversion,
+    .priv_size = sizeof(struct af_resample),
+    .priv_defaults = &(const struct af_resample) {
+        .opts = {
+            .filter_size = 16,
+            .cutoff      = 0.0,
+            .phase_shift = 10,
+        },
+        .allow_detach = 1,
+    },
+    .options = (const struct m_option[]) {
+        OPT_INTRANGE("filter-size", opts.filter_size, 0, 0, 32),
+        OPT_INTRANGE("phase-shift", opts.phase_shift, 0, 0, 30),
+        OPT_FLAG("linear", opts.linear, 0),
+        OPT_DOUBLE("cutoff", opts.cutoff, M_OPT_RANGE, .min = 0, .max = 1),
+        OPT_FLAG("detach", allow_detach, 0),
+        OPT_STRING("o", avopts, 0),
+        {0}
+    },
 };

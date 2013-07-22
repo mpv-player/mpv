@@ -37,12 +37,10 @@ Available filters are:
 
     It supports only the following sample formats: u8, s16ne, s32ne, floatne.
 
-    ``srate=<srate>``
-        The output sample rate.
-    ``length=<length>``
+    ``filter-size=<length>``
         Length of the filter with respect to the lower sampling rate. (default:
         16)
-    ``phase_shift=<count>``
+    ``phase-shift=<count>``
         Log2 of the number of polyphase entries. (..., 10->1024, 11->2048,
         12->4096, ...) (default: 10->1024)
     ``cutoff=<cutoff>``
@@ -55,6 +53,9 @@ Available filters are:
         You should add this option if you specify additional parameters, as
         automatically inserted lavrresample instances will use the default
         settings.
+    ``o=<string>``
+        Set AVOptions on the SwrContext or AVAudioResampleContext. These should
+        be documented by FFmpeg or Libav.
 
 ``lavcac3enc[=tospdif[:bitrate[:minchn]]]``
     Encode multi-channel audio to AC-3 at runtime using libavcodec. Supports
