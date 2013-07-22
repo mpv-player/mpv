@@ -1173,38 +1173,6 @@ static void print_status(struct MPContext *mpctx)
     talloc_free(line);
 }
 
-/**
- * \brief build a chain of audio filters that converts the input format
- * to the ao's format, taking into account the current playback_speed.
- * sh_audio describes the requested input format of the chain.
- * ao describes the requested output format of the chain.
- */
-static int build_afilter_chain(struct MPContext *mpctx)
-{
-    struct sh_audio *sh_audio = mpctx->sh_audio;
-    struct ao *ao = mpctx->ao;
-    struct MPOpts *opts = &mpctx->opts;
-    int new_srate;
-    if (af_control_any_rev(sh_audio->afilter,
-                           AF_CONTROL_PLAYBACK_SPEED | AF_CONTROL_SET,
-                           &opts->playback_speed))
-        new_srate = sh_audio->samplerate;
-    else {
-        new_srate = sh_audio->samplerate * opts->playback_speed;
-        if (new_srate != ao->samplerate) {
-            // limits are taken from libaf/af_resample.c
-            if (new_srate < 8000)
-                new_srate = 8000;
-            if (new_srate > 192000)
-                new_srate = 192000;
-            opts->playback_speed = (float)new_srate / sh_audio->samplerate;
-        }
-    }
-    return init_audio_filters(sh_audio, new_srate,
-                              &ao->samplerate, &ao->channels, &ao->format);
-}
-
-
 typedef struct mp_osd_msg mp_osd_msg_t;
 struct mp_osd_msg {
     /// Previous message on the stack.
@@ -1563,6 +1531,31 @@ static void update_osd_msg(struct MPContext *mpctx)
         mpctx->terminal_osd_text[0] = '\0';
         mp_msg(MSGT_CPLAYER, MSGL_STATUS, "%s\n", opts->term_osd_esc);
     }
+}
+
+static int build_afilter_chain(struct MPContext *mpctx)
+{
+    struct sh_audio *sh_audio = mpctx->sh_audio;
+    struct ao *ao = mpctx->ao;
+    struct MPOpts *opts = &mpctx->opts;
+    int new_srate;
+    if (af_control_any_rev(sh_audio->afilter,
+                           AF_CONTROL_PLAYBACK_SPEED | AF_CONTROL_SET,
+                           &opts->playback_speed))
+        new_srate = sh_audio->samplerate;
+    else {
+        new_srate = sh_audio->samplerate * opts->playback_speed;
+        if (new_srate != ao->samplerate) {
+            // limits are taken from libaf/af_resample.c
+            if (new_srate < 8000)
+                new_srate = 8000;
+            if (new_srate > 192000)
+                new_srate = 192000;
+            opts->playback_speed = (float)new_srate / sh_audio->samplerate;
+        }
+    }
+    return init_audio_filters(sh_audio, new_srate,
+                              &ao->samplerate, &ao->channels, &ao->format);
 }
 
 static int recreate_audio_filters(struct MPContext *mpctx)
