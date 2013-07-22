@@ -103,6 +103,8 @@ static int extract_msg_type_from_ctx(void *ptr)
 #define LIB_PREFIX "libav"
 #endif
 
+static bool print_prefix = true;
+
 static void mp_msg_av_log_callback(void *ptr, int level, const char *fmt,
                                    va_list vl)
 {
@@ -113,8 +115,11 @@ static void mp_msg_av_log_callback(void *ptr, int level, const char *fmt,
     if (!mp_msg_test(type, mp_level))
         return;
 
-    mp_msg(type, mp_level, "[%s/%s] ", LIB_PREFIX,
-           avc ? avc->item_name(ptr) : "?");
+    if (print_prefix) {
+        mp_msg(type, mp_level, "[%s/%s] ", LIB_PREFIX,
+               avc ? avc->item_name(ptr) : "?");
+    }
+    print_prefix = fmt[strlen(fmt) - 1] == '\n';
 
     mp_msg_va(type, mp_level, fmt, vl);
 }
