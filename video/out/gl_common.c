@@ -43,6 +43,7 @@
 #include "talloc.h"
 #include "gl_common.h"
 #include "core/options.h"
+#include "core/m_option.h"
 #include "sub/sub.h"
 #include "bitmap_packer.h"
 
@@ -879,6 +880,13 @@ int mpgl_find_backend(const char *name)
 int mpgl_validate_backend_opt(const struct m_option *opt, struct bstr name,
                               struct bstr param)
 {
+    if (bstr_equals0(param, "help")) {
+        mp_msg(MSGT_VO, MSGL_INFO, "OpenGL windowing backends:\n");
+        mp_msg(MSGT_VO, MSGL_INFO, "    auto (autodetect)\n");
+        for (const struct backend *entry = backends; entry->name; entry++)
+            mp_msg(MSGT_VO, MSGL_INFO, "    %s\n", entry->name);
+        return M_OPT_EXIT - 1;
+    }
     char s[20];
     snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
     return mpgl_find_backend(s) >= -1 ? 1 : M_OPT_INVALID;

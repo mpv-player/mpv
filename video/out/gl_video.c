@@ -283,7 +283,11 @@ const struct m_sub_options gl_video_conf = {
         OPT_FLAG("srgb", srgb, 0),
         OPT_FLAG("npot", npot, 0),
         OPT_FLAG("pbo", pbo, 0),
-        OPT_INT("stereo", stereo_mode, 0),
+        OPT_CHOICE("stereo", stereo_mode, 0,
+                   ({"no", 0},
+                    {"red-cyan",        GL_3D_RED_CYAN},
+                    {"green-magenta",   GL_3D_GREEN_MAGENTA},
+                    {"quadbuffer",      GL_3D_QUADBUFFER})),
         OPT_STRING_VALIDATE("lscale", scalers[0], 0, validate_scaler_opt),
         OPT_STRING_VALIDATE("cscale", scalers[1], 0, validate_scaler_opt),
         OPT_FLOAT("lparam1", scaler_params[0], 0),
@@ -2059,6 +2063,14 @@ bool gl_video_get_equalizer(struct gl_video *p, const char *name, int *val)
 static int validate_scaler_opt(const m_option_t *opt, struct bstr name,
                                struct bstr param)
 {
+    if (bstr_equals0(param, "help")) {
+        mp_msg(MSGT_VO, MSGL_INFO, "Available scalers:\n");
+        for (const char **filter = fixed_scale_filters; *filter; filter++)
+            mp_msg(MSGT_VO, MSGL_INFO, "    %s\n", *filter);
+        for (int n = 0; mp_filter_kernels[n].name; n++)
+            mp_msg(MSGT_VO, MSGL_INFO, "    %s\n", mp_filter_kernels[n].name);
+        return M_OPT_EXIT - 1;
+    }
     char s[20];
     snprintf(s, sizeof(s), "%.*s", BSTR_P(param));
     return handle_scaler_opt(s) ? 1 : M_OPT_INVALID;
