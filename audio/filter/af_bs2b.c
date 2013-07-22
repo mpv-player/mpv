@@ -27,13 +27,13 @@
 #include <string.h>
 
 #include "af.h"
-#include "core/subopt-helper.h"
+#include "core/m_option.h"
 
 /// Internal specific data of the filter
 struct af_bs2b {
     int fcut;           ///< cut frequency in Hz
     int feed;           ///< feed level for low frequencies in 0.1*dB
-    char *profile;      ///< profile (available crossfeed presets)
+    int profile  ;      ///< profile (available crossfeed presets)
     t_bs2bdp filter;    ///< instance of a library filter
 };
 
@@ -41,7 +41,7 @@ struct af_bs2b {
 static struct mp_audio *play_##name(struct af_instance *af, struct mp_audio *data) \
 { \
     /* filter is called for all pairs of samples available in the buffer */ \
-    bs2b_cross_feed_##name(((struct af_bs2b*)(af->setup))->filter, \
+    bs2b_cross_feed_##name(((struct af_bs2b*)(af->priv))->filter, \
         (type*)(data->audio), data->len/data->bps/2); \
 \
     return data; \
@@ -65,36 +65,11 @@ PLAY(u16le, uint16_t)
 PLAY(s8, int8_t)
 PLAY(u8, uint8_t)
 
-/// Sanity check for fcut value
-static int test_fcut(void *par)
-{
-    const int val = *(int*)par;
-    if (val >= BS2B_MINFCUT && val <= BS2B_MAXFCUT)
-        return 1;
-
-    mp_msg(MSGT_AFILTER, MSGL_ERR,
-           "[bs2b] Cut frequency must be in range [%d..%d], but current value is %d.\n",
-           BS2B_MINFCUT, BS2B_MAXFCUT, val);
-    return 0;
-}
-
-/// Sanity check for feed value
-static int test_feed(void *par)
-{
-    const int val = *(int*)par;
-    if (val >= BS2B_MINFEED && val <= BS2B_MAXFEED)
-        return 1;
-
-    mp_msg(MSGT_AFILTER, MSGL_ERR,
-           "[bs2b] Feed level must be in range [%d..%d], but current value is %d.\n",
-           BS2B_MINFEED, BS2B_MAXFEED, val);
-    return 0;
-}
 
 /// Initialization and runtime control
 static int control(struct af_instance *af, int cmd, void *arg)
 {
-    struct af_bs2b *s = af->setup;
+    struct af_bs2b *s = af->priv;
 
     switch (cmd) {
     case AF_CONTROL_REINIT: {
@@ -179,47 +154,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         return af_test_output(af,(struct mp_audio*)arg);
     }
-    case AF_CONTROL_COMMAND_LINE: {
-        const opt_t subopts[] = {
-            {"fcut",    OPT_ARG_INT,   &s->fcut,    test_fcut},
-            {"feed",    OPT_ARG_INT,   &s->feed,    test_feed},
-            {"profile", OPT_ARG_MSTRZ, &s->profile, NULL},
-            {NULL}
-        };
-        if (subopt_parse(arg, subopts) != 0) {
-            mp_msg(MSGT_AFILTER, MSGL_ERR, "[bs2b] Invalid option specified.\n");
-            free(s->profile);
-            return AF_ERROR;
-        }
-        // parse profile if specified
-        if (s->profile) {
-            if (!strcmp(s->profile, "default"))
-                bs2b_set_level(s->filter, BS2B_DEFAULT_CLEVEL);
-            else if (!strcmp(s->profile, "cmoy"))
-                bs2b_set_level(s->filter, BS2B_CMOY_CLEVEL);
-            else if (!strcmp(s->profile, "jmeier"))
-                bs2b_set_level(s->filter, BS2B_JMEIER_CLEVEL);
-            else {
-                mp_msg(MSGT_AFILTER, MSGL_ERR,
-                       "[bs2b] Invalid profile specified: %s.\n"
-                       "[bs2b] Available profiles are: default, cmoy, jmeier.\n",
-                       s->profile);
-                free(s->profile);
-                return AF_ERROR;
-            }
-        }
-        // set fcut and feed only if specified, otherwise defaults will be used
-        if (s->fcut)
-            bs2b_set_level_fcut(s->filter, s->fcut);
-        if (s->feed)
-            bs2b_set_level_feed(s->filter, s->feed);
-
-        mp_msg(MSGT_AFILTER, MSGL_V,
-               "[bs2b] using cut frequency %d, LF feed level %d\n",
-               bs2b_get_level_fcut(s->filter), bs2b_get_level_feed(s->filter));
-        free(s->profile);
-        return AF_OK;
-    }
     }
     return AF_UNKNOWN;
 }
@@ -227,39 +161,39 @@ static int control(struct af_instance *af, int cmd, void *arg)
 /// Deallocate memory and close library
 static void uninit(struct af_instance *af)
 {
-    struct af_bs2b *s = af->setup;
+    struct af_bs2b *s = af->priv;
     free(af->data);
-    if (s && s->filter)
+    if (s->filter)
         bs2b_close(s->filter);
-    free(s);
 }
 
 /// Allocate memory, set function pointers and init library
 static int af_open(struct af_instance *af)
 {
-    struct af_bs2b *s;
+    struct af_bs2b *s = af->priv;
     af->control = control;
     af->uninit  = uninit;
     af->mul     = 1;
     if (!(af->data = calloc(1, sizeof(struct mp_audio))))
         return AF_ERROR;
-    if (!(af->setup = s = calloc(1, sizeof(struct af_bs2b)))) {
-        free(af->data);
-        return AF_ERROR;
-    }
 
     // NULL means failed initialization
     if (!(s->filter = bs2b_open())) {
         free(af->data);
-        free(af->setup);
         return AF_ERROR;
     }
-    // Set zero defaults indicating no option was specified.
-    s->profile = NULL;
-    s->fcut    = 0;
-    s->feed    = 0;
+
+    if (s->profile)
+        bs2b_set_level(s->filter, s->profile);
+    // set fcut and feed only if specified, otherwise defaults will be used
+    if (s->fcut)
+        bs2b_set_level_fcut(s->filter, s->fcut);
+    if (s->feed)
+        bs2b_set_level_feed(s->filter, s->feed);
     return AF_OK;
 }
+
+#define OPT_BASE_STRUCT struct af_bs2b
 
 /// Description of this filter
 struct af_info af_info_bs2b = {
@@ -268,5 +202,15 @@ struct af_info af_info_bs2b = {
     "Andrew Savchenko",
     "",
     AF_FLAGS_REENTRANT,
-    af_open
+    af_open,
+    .priv_size = sizeof(struct af_bs2b),
+    .options = (const struct m_option[]) {
+        OPT_INTRANGE("fcut", fcut, 0, BS2B_MINFCUT, BS2B_MAXFCUT),
+        OPT_INTRANGE("feed", feed, 0, BS2B_MINFEED, BS2B_MAXFEED),
+        OPT_CHOICE("profile", profile, 0,
+                   ({"default", BS2B_DEFAULT_CLEVEL},
+                    {"cmoy", BS2B_CMOY_CLEVEL},
+                    {"jmeier", BS2B_JMEIER_CLEVEL})),
+        {0}
+    },
 };
