@@ -581,8 +581,6 @@ struct demuxer *demux_open(struct stream *stream, char *force_format,
     const struct demuxer_desc *check_desc = NULL;
 
     if (!force_format)
-        force_format = opts->demuxer_name;
-    if (!force_format)
         force_format = stream->demuxer;
 
     if (force_format && force_format[0]) {

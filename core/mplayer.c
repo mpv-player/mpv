@@ -4230,7 +4230,7 @@ goto_reopen_demuxer: ;
 
     mpctx->audio_delay = opts->audio_delay;
 
-    mpctx->demuxer = demux_open(mpctx->stream, NULL, NULL, opts);
+    mpctx->demuxer = demux_open(mpctx->stream, opts->demuxer_name, NULL, opts);
     mpctx->master_demuxer = mpctx->demuxer;
 
     if (!mpctx->demuxer) {
