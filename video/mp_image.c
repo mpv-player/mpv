@@ -591,7 +591,15 @@ struct AVFrame *mp_image_to_av_frame_and_unref(struct mp_image *img)
     int flags = 0;
     if (!mp_image_is_writeable(new_ref))
         flags |= AV_BUFFER_FLAG_READONLY;
-    frame->buf[0] = av_buffer_create(NULL, 0, free_img, new_ref, flags);
+    for (int n = 0; n < new_ref->num_planes; n++) {
+        // Make it so that the actual image data is freed only if _all_ buffers
+        // are unreferenced.
+        struct mp_image *dummy_ref = mp_image_new_ref(new_ref);
+        void *ptr = new_ref->planes[n];
+        size_t size = new_ref->stride[n] * new_ref->h;
+        frame->buf[n] = av_buffer_create(ptr, size, free_img, dummy_ref, flags);
+    }
+    talloc_free(new_ref);
     return frame;
 }
 
