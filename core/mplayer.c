@@ -2650,8 +2650,6 @@ static double update_video(struct MPContext *mpctx, double endpts)
         return 0;
 
     pts = video_out->next_pts;
-    if (sh_video->gsh->attached_picture)
-        pts = mpctx->last_seek_pts;
     if (pts == MP_NOPTS_VALUE) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "Video pts after filters MISSING\n");
         // Try to use decoder pts from before filters
