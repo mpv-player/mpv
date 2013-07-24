@@ -402,6 +402,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
                                                          st->attached_pic.size);
             sh->attached_picture->pts = 0;
             talloc_steal(sh, sh->attached_picture);
+            sh->attached_picture->keyframe = true;
         }
 
         sh_video->format = codec->codec_tag;
