@@ -94,6 +94,7 @@ static int d_check_file(struct demuxer *demuxer, enum demux_check check)
     *p = (struct priv) {
         .track = track,
     };
+    demuxer->priv = p;
 
     struct sh_stream *sh = new_sh_stream(demuxer, STREAM_SUB);
     sh->sub->track = track;
