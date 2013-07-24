@@ -1772,13 +1772,16 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
     }
 
     if (cmd->id == MP_CMD_COMMAND_LIST) {
-        bool first = true;
+        struct mp_cmd *prev = NULL;
         for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next) {
             sub = mp_cmd_clone(sub);
-            talloc_steal(cmd, sub);
-            if (first)
-                cmd->args[0].v.p = sub;
-            first = false;
+            talloc_steal(ret, sub);
+            if (prev) {
+                prev->queue_next = sub;
+            } else {
+                ret->args[0].v.p = sub;
+            }
+            prev = sub;
         }
     }
 
