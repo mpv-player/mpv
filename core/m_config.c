@@ -253,6 +253,8 @@ struct m_config *m_config_new(void *optstruct,
         config->includefunc = includefunc;
     }
 
+    config->use_profiles = true;
+
     return config;
 }
 
@@ -542,7 +544,7 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
 
     if (config->includefunc && !bstrcmp0(name, "include")) {
         return parse_include(config, param, set);
-    } else if (!bstrcmp0(name, "profile"))
+    } else if (config->use_profiles && !bstrcmp0(name, "profile"))
         return parse_profile(config, co->opt, name, param, set);
 
     // Option with children are a bit different to parse

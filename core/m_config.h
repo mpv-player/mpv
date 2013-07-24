@@ -87,6 +87,7 @@ typedef struct m_config {
 
     void *optstruct; // struct mpopts or other
     int (*includefunc)(struct m_config *conf, char *filename);
+    bool use_profiles;
 } m_config_t;
 
 // Create a new config object.
