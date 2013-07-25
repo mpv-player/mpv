@@ -4586,9 +4586,7 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
     SetErrorMode(0x8003);
 #endif
 
-#ifdef HAVE_TERMCAP
     load_termcap(NULL); // load key-codes
-#endif
 
     mp_time_init();
 }

@@ -64,6 +64,11 @@ void get_screen_size(void)
     }
 }
 
+int load_termcap(char *termtype)
+{
+    return 0;
+}
+
 static HANDLE in;
 static int getch2_status = 0;
 
