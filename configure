@@ -1426,7 +1426,7 @@ if test "$_terminfo" = yes ; then
   test $_ld_tmp && res_comment="using $_ld_tmp"
 
   if test "$_termcap" = auto ; then
-    _termcap = yes # terminfo provides termcap
+    _termcap=yes # terminfo provides termcap
   fi
 else
   def_terminfo='#undef HAVE_TERMINFO'
