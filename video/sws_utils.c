@@ -19,6 +19,7 @@
 #include <assert.h>
 
 #include <libswscale/swscale.h>
+#include <libavcodec/avcodec.h>
 #include <libavutil/opt.h>
 
 #include "sws_utils.h"
@@ -226,6 +227,20 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
 
     av_opt_set_double(ctx->sws, "param0", ctx->params[0], 0);
     av_opt_set_double(ctx->sws, "param1", ctx->params[1], 0);
+
+#if HAVE_AVCODEC_CHROMA_POS_API
+    int cr_src = mp_chroma_location_to_av(src->chroma_location);
+    int cr_dst = mp_chroma_location_to_av(dst->chroma_location);
+    int cr_xpos, cr_ypos;
+    if (avcodec_enum_to_chroma_pos(&cr_xpos, &cr_ypos, cr_src) >= 0) {
+        av_opt_set_int(ctx->sws, "src_h_chr_pos", cr_xpos, 0);
+        av_opt_set_int(ctx->sws, "src_v_chr_pos", cr_ypos, 0);
+    }
+    if (avcodec_enum_to_chroma_pos(&cr_xpos, &cr_ypos, cr_dst) >= 0) {
+        av_opt_set_int(ctx->sws, "dst_h_chr_pos", cr_xpos, 0);
+        av_opt_set_int(ctx->sws, "dst_v_chr_pos", cr_ypos, 0);
+    }
+#endif
 
     // This can fail even with normal operation, e.g. if a conversion path
     // simply does not support these settings.

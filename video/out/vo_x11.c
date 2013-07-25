@@ -387,6 +387,7 @@ static bool resize(struct vo *vo)
         .d_w = p->dst_w,
         .d_h = p->dst_h,
     };
+    mp_image_params_guess_csp(&p->sws->dst);
 
     if (mp_sws_reinit(p->sws) < 0)
         return false;

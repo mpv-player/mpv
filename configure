@@ -2647,6 +2647,17 @@ fi
 echores "$_avcodec_has_text_flag_api"
 
 
+echocheck "libavcodec avcodec_enum_to_chroma_pos API"
+_avcodec_has_chroma_pos_api=no
+statement_check libavcodec/avcodec.h 'int x, y; avcodec_enum_to_chroma_pos(&x, &y, AVCHROMA_LOC_UNSPECIFIED)' && _avcodec_has_chroma_pos_api=yes
+if test "$_avcodec_has_chroma_pos_api" = yes ; then
+  def_avcodec_has_chroma_pos_api='#define HAVE_AVCODEC_CHROMA_POS_API 1'
+else
+  def_avcodec_has_chroma_pos_api='#define HAVE_AVCODEC_CHROMA_POS_API 0'
+fi
+echores "$_avcodec_has_chroma_pos_api"
+
+
 echocheck "libavutil QP API"
 _avutil_has_qp_api=no
 statement_check libavutil/frame.h 'av_frame_get_qp_table(NULL, NULL, NULL)' && _avutil_has_qp_api=yes
@@ -3169,6 +3180,7 @@ $def_zlib
 $def_avutil_has_refcounting
 $def_avutil_has_qp_api
 $def_avcodec_has_text_flag_api
+$def_avcodec_has_chroma_pos_api
 $def_libpostproc
 $def_libavdevice
 $def_libavfilter

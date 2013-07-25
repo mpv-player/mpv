@@ -144,6 +144,7 @@ int mp_csp_levels_to_avcol_range(enum mp_csp_levels range);
 enum mp_csp mp_csp_guess_colorspace(int width, int height);
 
 enum mp_chroma_location avchroma_location_to_mp(int avloc);
+int mp_chroma_location_to_av(enum mp_chroma_location mploc);
 
 void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y);
 

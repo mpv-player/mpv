@@ -116,6 +116,15 @@ enum mp_chroma_location avchroma_location_to_mp(int avloc)
     }
 }
 
+int mp_chroma_location_to_av(enum mp_chroma_location mploc)
+{
+    switch (mploc) {
+    case MP_CHROMA_LEFT:                return AVCHROMA_LOC_LEFT;
+    case MP_CHROMA_CENTER:              return AVCHROMA_LOC_CENTER;
+    default:                            return AVCHROMA_LOC_UNSPECIFIED;
+    }
+}
+
 // Return location of chroma samples relative to luma samples. 0/0 means
 // centered. Other possible values are -1 (top/left) and +1 (right/bottom).
 void mp_get_chroma_location(enum mp_chroma_location loc, int *x, int *y)
