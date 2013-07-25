@@ -369,11 +369,23 @@ static void pointer_handle_axis(void *data,
 {
     struct vo_wayland_state *wl = data;
 
+    // value is 10.00 on a normal mouse wheel
+    // scale it down to 1.00 for multipliying it with the commands
     if (axis == WL_POINTER_AXIS_VERTICAL_SCROLL) {
         if (value > 0)
-            mp_input_put_key(wl->vo->input_ctx, MP_MOUSE_BTN4);
+            mp_input_put_axis(wl->vo->input_ctx, MP_AXIS_DOWN,
+                    wl_fixed_to_double(value)*0.1);
         if (value < 0)
-            mp_input_put_key(wl->vo->input_ctx, MP_MOUSE_BTN3);
+            mp_input_put_axis(wl->vo->input_ctx, MP_AXIS_UP,
+                    wl_fixed_to_double(value)*-0.1);
+    }
+    else if (axis == WL_POINTER_AXIS_HORIZONTAL_SCROLL) {
+        if (value > 0)
+            mp_input_put_axis(wl->vo->input_ctx, MP_AXIS_RIGHT,
+                    wl_fixed_to_double(value)*0.1);
+        if (value < 0)
+            mp_input_put_axis(wl->vo->input_ctx, MP_AXIS_LEFT,
+                    wl_fixed_to_double(value)*-0.1);
     }
 }
 
