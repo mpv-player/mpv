@@ -146,6 +146,7 @@ typedef struct mp_cmd {
     bool mouse_move;
     int mouse_x, mouse_y;
     struct mp_cmd *queue_next;
+    double scale;                             // for scaling numeric arguments
 } mp_cmd_t;
 
 
@@ -180,6 +181,10 @@ void mp_input_put_key(struct input_ctx *ictx, int code);
 // Like mp_input_put_key(), but process all UTF-8 characters in the given
 // string as key events.
 void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t);
+
+// Process scrolling input. Support for precise scrolling. Scales the given
+// scroll amount add multiplies it with the command (seeking, sub-delay, etc)
+void mp_input_put_axis(struct input_ctx *ictx, int direction, double value);
 
 // Update mouse position (in window coordinates).
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y);

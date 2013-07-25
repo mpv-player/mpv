@@ -201,6 +201,13 @@
 #define MP_MK_PREV        (MP_MK_BASE + 1)
 #define MP_MK_NEXT        (MP_MK_BASE + 2)
 
+// Mouse wheels or touchpad input
+#define MP_AXIS_BASE      (MP_KEY_BASE+0x100)
+#define MP_AXIS_UP        (MP_AXIS_BASE+0)
+#define MP_AXIS_DOWN      (MP_AXIS_BASE+1)
+#define MP_AXIS_LEFT      (MP_AXIS_BASE+2)
+#define MP_AXIS_RIGHT     (MP_AXIS_BASE+3)
+
 /* Special keys */
 #define MP_KEY_INTERN (MP_KEY_BASE+0x1000)
 #define MP_KEY_CLOSE_WIN (MP_KEY_INTERN+0)

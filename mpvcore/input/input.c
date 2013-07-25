@@ -424,6 +424,11 @@ static const struct key_name key_names[] = {
   { MP_MK_PREV,         "MK_PREV" },
   { MP_MK_NEXT,         "MK_NEXT" },
 
+  { MP_AXIS_UP,         "AXIS_UP" },
+  { MP_AXIS_DOWN,       "AXIS_DOWN" },
+  { MP_AXIS_LEFT,       "AXIS_LEFT" },
+  { MP_AXIS_RIGHT,      "AXIS_RIGHT" },
+
   { MP_KEY_POWER,       "POWER" },
   { MP_KEY_MENU,        "MENU" },
   { MP_KEY_PLAY,        "PLAY" },
@@ -910,6 +915,7 @@ static int parse_cmd(struct mp_cmd **dest, bstr str, const char *loc)
 
     cmd = talloc_ptrtype(NULL, cmd);
     *cmd = mp_cmds[cmd_idx];
+    cmd->scale = 1;
     cmd->pausing = pausing;
     cmd->on_osd = on_osd;
     cmd->raw_args = raw_args;
@@ -1515,6 +1521,18 @@ void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t)
             break;
         mp_input_put_key(ictx, code | mods);
     }
+}
+
+void mp_input_put_axis(struct input_ctx *ictx, int direction, double value)
+{
+    struct mp_cmd *cmd = interpret_key(ictx, direction);
+    if (!cmd)
+        return;
+
+    cmd->scale = value;
+
+    ictx->got_new_events = true;
+    add_key_cmd(ictx, cmd);
 }
 
 static void trigger_mouse_leave(struct input_ctx *ictx, char *new_section)

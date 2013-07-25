@@ -2142,7 +2142,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     switch (cmd->id) {
     case MP_CMD_SEEK: {
-        double v = cmd->args[0].v.d;
+        double v = cmd->args[0].v.d * cmd->scale;
         int abs = cmd->args[1].v.i;
         int exact = cmd->args[2].v.i;
         if (abs == 2) {   // Absolute seek to a timestamp in seconds
@@ -2187,7 +2187,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             .wrap = cmd->id == MP_CMD_CYCLE,
         };
         if (cmd->args[1].v.d)
-            s.inc = cmd->args[1].v.d;
+            s.inc = cmd->args[1].v.d * cmd->scale;
         int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_SWITCH, &s, mpctx);
         if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
             show_property_osd(mpctx, cmd->args[0].v.s, cmd->on_osd);
@@ -2221,7 +2221,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SPEED_MULT: {
-        double v = cmd->args[0].v.d;
+        double v = cmd->args[0].v.d * cmd->scale;
         v *= mpctx->opts->playback_speed;
         mp_property_do("speed", M_PROPERTY_SET, &v, mpctx);
         show_property_osd(mpctx, "speed", cmd->on_osd);
