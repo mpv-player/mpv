@@ -469,6 +469,7 @@ Name                            W Comment
 ``track-list``                    list of audio/video/sub tracks, cur. entr. marked
 ``chapter-list``                  list of chapters, current entry marked
 ``quvi-format``                 x see ``--quvi-format``
+``options/name``                  read-only access to value of option ``--name``
 =============================== = ==================================================
 
 Property Expansion

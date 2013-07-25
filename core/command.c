@@ -1567,6 +1567,31 @@ static int mp_property_alias(m_option_t *prop, int action, void *arg,
     return r;
 }
 
+static int mp_property_options(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
+{
+    if (action != M_PROPERTY_KEY_ACTION)
+        return M_PROPERTY_NOT_IMPLEMENTED;
+
+    struct m_property_action_arg *ka = arg;
+
+    struct m_config_option *opt = m_config_get_co(mpctx->mconfig,
+                                                  bstr0(ka->key));
+    if (!opt)
+        return M_PROPERTY_UNKNOWN;
+
+    switch (ka->action) {
+    case M_PROPERTY_GET:
+        m_option_copy(opt->opt, ka->arg, opt->data);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_GET_TYPE:
+        *(struct m_option *)ka->arg = *opt->opt;
+        return M_PROPERTY_OK;
+    }
+
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 // Use option-to-property-bridge. (The property and option have the same names.)
 #define M_OPTION_PROPERTY(name) \
     {(name), mp_property_generic_option, &m_option_type_dummy, 0, 0, 0, (name)}
@@ -1736,6 +1761,8 @@ static const m_option_t mp_properties[] = {
     M_PROPERTY_ALIAS("video", "vid"),
     M_PROPERTY_ALIAS("audio", "aid"),
     M_PROPERTY_ALIAS("sub", "sid"),
+
+    { "options", mp_property_options, &m_option_type_dummy },
 
     {0},
 };
