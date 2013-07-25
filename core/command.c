@@ -256,6 +256,36 @@ static int mp_property_stream_length(m_option_t *prop, int action,
                                stream->end_pos - stream->start_pos);
 }
 
+// Does some magic to handle "<name>/full" as time formatted with milliseconds.
+// Assumes prop is the type of the actual property.
+static int property_time(m_option_t *prop, int action, void *arg, double time)
+{
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(double *)arg = time;
+        return M_PROPERTY_OK;
+    case M_PROPERTY_KEY_ACTION: {
+        struct m_property_action_arg *ka = arg;
+
+        if (strcmp(ka->key, "full") != 0)
+            return M_PROPERTY_UNKNOWN;
+
+        switch (ka->action) {
+        case M_PROPERTY_GET:
+            *(double *)ka->arg = time;
+            return M_PROPERTY_OK;
+        case M_PROPERTY_PRINT:
+            *(char **)ka->arg = mp_format_time(time, true);
+            return M_PROPERTY_OK;
+        case M_PROPERTY_GET_TYPE:
+            *(struct m_option *)ka->arg = *prop;
+            return M_PROPERTY_OK;
+        }
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 /// Current stream position in seconds (RO)
 static int mp_property_stream_time_pos(m_option_t *prop, int action,
                                        void *arg, MPContext *mpctx)
@@ -267,7 +297,7 @@ static int mp_property_stream_time_pos(m_option_t *prop, int action,
     if (pts == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_double_ro(prop, action, arg, pts);
+    return property_time(prop, action, arg, pts);
 }
 
 
@@ -280,7 +310,7 @@ static int mp_property_length(m_option_t *prop, int action, void *arg,
     if (!(int) (len = get_time_length(mpctx)))
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_double_ro(prop, action, arg, len);
+    return property_time(prop, action, arg, len);
 }
 
 static int mp_property_avsync(m_option_t *prop, int action, void *arg,
@@ -320,15 +350,11 @@ static int mp_property_time_pos(m_option_t *prop, int action,
     if (!mpctx->num_sources)
         return M_PROPERTY_UNAVAILABLE;
 
-    switch (action) {
-    case M_PROPERTY_SET:
+    if (action == M_PROPERTY_SET) {
         queue_seek(mpctx, MPSEEK_ABSOLUTE, *(double *)arg, 0);
         return M_PROPERTY_OK;
-    case M_PROPERTY_GET:
-        *(double *)arg = get_current_time(mpctx);
-        return M_PROPERTY_OK;
     }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    return property_time(prop, action, arg, get_current_time(mpctx));
 }
 
 static int mp_property_remaining(m_option_t *prop, int action,
@@ -341,7 +367,7 @@ static int mp_property_remaining(m_option_t *prop, int action,
     if (!(int)len)
         return M_PROPERTY_UNAVAILABLE;
 
-    return m_property_double_ro(prop, action, arg, len - (pos - start));
+    return property_time(prop, action, arg, len - (pos - start));
 }
 
 /// Current chapter (RW)
