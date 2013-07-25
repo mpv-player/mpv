@@ -112,6 +112,12 @@ static int mod_state(struct vo *vo)
     return res;
 }
 
+static BOOL tracking;
+static TRACKMOUSEEVENT trackEvent = {
+    .cbSize    = sizeof(TRACKMOUSEEVENT),
+    .dwFlags   = TME_LEAVE,
+};
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                                 LPARAM lParam)
 {
@@ -227,7 +233,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
                 return TRUE;
             }
             break;
+        case WM_MOUSELEAVE:
+            tracking = FALSE;
+            mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
+            break;
         case WM_MOUSEMOVE:
+            if (!tracking)
+                tracking = TrackMouseEvent(&trackEvent);;
             vo_mouse_movement(vo, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
             break;
         case WM_LBUTTONDOWN:
@@ -631,6 +643,9 @@ int vo_w32_init(struct vo *vo)
         mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to create window!\n");
         return 0;
     }
+
+    tracking = FALSE;
+    trackEvent.hwndTrack = w32->window;
 
     if (vo->opts->WinID >= 0)
         EnableWindow(w32->window, 0);
