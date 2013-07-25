@@ -87,13 +87,14 @@ static int do_action(const m_option_t *prop_list, const char *name,
 {
     const char *sep;
     const m_option_t *prop;
+    struct m_property_action_arg ka;
     if ((sep = strchr(name, '/')) && sep[1]) {
         int len = sep - name;
         char base[len + 1];
         memcpy(base, name, len);
         base[len] = 0;
         prop = m_option_list_find(prop_list, base);
-        struct m_property_action_arg ka = {
+        ka = (struct m_property_action_arg) {
             .key = sep + 1,
             .action = action,
             .arg = arg,
