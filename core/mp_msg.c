@@ -138,7 +138,7 @@ static void set_msg_color(FILE* stream, int lev)
 #endif
     if (mp_msg_docolor())
     {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(__CYGWIN__)
         HANDLE *wstream = stream == stderr ? hSTDERR : hSTDOUT;
         if (c == -1)
             c = 7;
