@@ -385,11 +385,11 @@ bool getch2(struct input_ctx *input_ctx)
 
                 if (utf8_len > 1) {
                     state = STATE_UTF8;
-                } else if (utf8_len == 1) {
+                    continue;
+                } else if (utf8_len == 1)
                     mp_input_put_key(input_ctx, c);
-                    walk_buf(1);
-                } else
-                    walk_buf(getch2_pos);
+
+                walk_buf(1);
 
                 break;
             }
