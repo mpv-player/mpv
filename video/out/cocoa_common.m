@@ -869,27 +869,22 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (void)scrollWheel:(NSEvent *)event
 {
-    struct vo_cocoa_state *s = self.videoOutput->cocoa;
-
+    struct vo *vo = self.videoOutput;
     CGFloat delta;
-    // Use the dimention with the most delta as the scrolling one
-    if (FFABS([event deltaY]) > FFABS([event deltaX])) {
-        delta = [event deltaY];
+    int cmd;
+
+    if (FFABS([event deltaY]) >= FFABS([event deltaX])) {
+        delta = [event deltaY] * 0.1;
+        cmd   = delta > 0 ? MP_AXIS_UP : MP_AXIS_DOWN;
+        delta = FFABS(delta);
     } else {
-        delta = - [event deltaX];
+        delta = [event deltaX] * 0.1;
+        cmd   = delta > 0 ? MP_AXIS_RIGHT : MP_AXIS_LEFT;
+        delta = FFABS(delta);
     }
 
     if ([event hasPreciseScrollingDeltas]) {
-        s->accumulated_scroll += delta;
-        static const CGFloat threshold = 10;
-        while (s->accumulated_scroll >= threshold) {
-            s->accumulated_scroll -= threshold;
-            cocoa_put_key_with_modifiers(MP_MOUSE_BTN3, [event modifierFlags]);
-        }
-        while (s->accumulated_scroll <= -threshold) {
-            s->accumulated_scroll += threshold;
-            cocoa_put_key_with_modifiers(MP_MOUSE_BTN4, [event modifierFlags]);
-        }
+        mp_input_put_axis(vo->input_ctx, cmd, delta);
     } else {
         if (delta > 0)
             cocoa_put_key_with_modifiers(MP_MOUSE_BTN3, [event modifierFlags]);
