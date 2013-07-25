@@ -1417,7 +1417,7 @@ echocheck "terminfo"
 if test "$_terminfo" = auto ; then
   _terminfo=no
   for _ld_tmp in "-lncurses" "-lncursesw"; do
-    statement_check term.h 'setupterm(NULL, 1, NULL)' $_ld_tmp &&
+    statement_check term.h 'setupterm(0, 1, 0)' $_ld_tmp &&
       libs_mplayer="$libs_mplayer $_ld_tmp" && _terminfo=yes && break
   done
 fi
