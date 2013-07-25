@@ -187,7 +187,7 @@ struct gl_video {
 
     struct mp_csp_details colorspace;
     struct mp_csp_equalizer video_eq;
-    enum mp_chroma_location chroma_loc;
+    struct mp_image_params image_params;
 
     struct mp_rect src_rect;    // displayed part of the source video
     struct mp_rect dst_rect;    // video rectangle on output window
@@ -553,7 +553,7 @@ static void update_uniforms(struct gl_video *p, GLuint program)
     if (loc >= 0) {
         int chr = p->opts.chroma_location;
         if (!chr)
-            chr = p->chroma_loc;
+            chr = p->image_params.chroma_location;
         int cx, cy;
         mp_get_chroma_location(chr, &cx, &cy);
         // By default texture coordinates are such that chroma is centered with
@@ -1557,6 +1557,10 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
     if (!vimg->planes[0].gl_texture)
         return NULL;
 
+    assert(p->image_format == p->image_params.imgfmt);
+    assert(p->texture_w >= p->image_params.w);
+    assert(p->texture_h >= p->image_params.h);
+
     mp_image_t *image = mp_image_alloc(p->image_format, p->texture_w,
                                                         p->texture_h);
 
@@ -1568,10 +1572,7 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
                       image->planes[n], image->stride[n]);
     }
     gl->ActiveTexture(GL_TEXTURE0);
-    mp_image_set_size(image, p->image_w, p->image_h);
-    mp_image_set_display_size(image, p->image_dw, p->image_dh);
-
-    mp_image_set_colorspace_details(image, &p->colorspace);
+    mp_image_set_params(image, &p->image_params);
 
     return image;
 }
@@ -1958,7 +1959,7 @@ void gl_video_config(struct gl_video *p, struct mp_image_params *params)
     }
     p->image_dw = params->d_w;
     p->image_dh = params->d_h;
-    p->chroma_loc = params->chroma_location;
+    p->image_params = *params;
 }
 
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b)
