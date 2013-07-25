@@ -378,7 +378,7 @@ bool getch2(struct input_ctx *input_ctx)
                     continue; /* need more bytes to disambiguate */
                 } else {
                     /* backtrack, send as UTF-8 */
-                    getch2_pos = 0;
+                    getch2_pos = 1;
                     c = getch2_buf[0];
                 }
                 utf8_len = bstr_parse_utf8_code_length(c);
