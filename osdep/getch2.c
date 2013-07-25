@@ -134,16 +134,6 @@ static keycode_st *keys_search(char *buf, int buflen) {
     return NULL;
 }
 
-static keycode_st *keys_get_by_cap(char *cap) {
-    for (int i = 0; i < getch2_keys.len; i++) {
-        keycode_st *st = &getch2_keys.map[i];
-
-        if (strcmp(cap, st->cap) == 0)
-            return st;
-    }
-    return NULL;
-}
-
 /* pushes only if there is no duplicate.
    important as we only consider keys if the matches are unique. */
 static keycode_st* keys_push_once(char *p, int code) {
@@ -374,29 +364,33 @@ bool getch2(struct input_ctx *input_ctx)
 
         switch (state) {
             case STATE_INITIAL: {
-#ifdef HAVE_TERMCAP
                 int match_count = keys_count_matches(&getch2_buf[0], getch2_len);
                 if (match_count == 1) {
                     keycode_st *st = keys_search(&getch2_buf[0], getch2_len);
 
-                    mp_input_put_key(input_ctx, st->code);
-                    walk_buf(st->len);
+                    if (st) {
+                        mp_input_put_key(input_ctx, st->code);
+                        walk_buf(st->len);
+                    } /* else this is still a partial (but unique) match */
+
+                    continue;
                 } else if (match_count > 1) {
                     continue; /* need more bytes to disambiguate */
                 } else {
-#endif
-                    utf8_len = bstr_parse_utf8_code_length(c);
-
-                    if (utf8_len > 1) {
-                        state = STATE_UTF8;
-                    } else {
-                        if (utf8_len == 1)
-                            mp_input_put_key(input_ctx, c);
-                        walk_buf(getch2_pos);
-                    }
-#ifdef HAVE_TERMCAP
+                    /* backtrack, send as UTF-8 */
+                    getch2_pos = 0;
+                    c = getch2_buf[0];
                 }
-#endif
+                utf8_len = bstr_parse_utf8_code_length(c);
+
+                if (utf8_len > 1) {
+                    state = STATE_UTF8;
+                } else if (utf8_len == 1) {
+                    mp_input_put_key(input_ctx, c);
+                    walk_buf(1);
+                } else
+                    walk_buf(getch2_pos);
+
                 break;
             }
             case STATE_UTF8: {
