@@ -237,7 +237,24 @@ int load_termcap(char *termtype){
 
 #ifdef HAVE_TERMINFO
     use_env(TRUE);
-    setupterm(termtype, 1, NULL);
+    int ret;
+    if (setupterm(termtype, 1, &ret) != OK) {
+        /* try again, with with "ansi" terminal if it was unset before */
+        if (!termtype)
+            termtype = getenv("TERM");
+        if (!termtype || *termtype == '\0')
+            termtype = "ansi";
+
+        if (setupterm(termtype, 1, &ret) != OK) {
+            if (ret < 0) {
+                printf("Could not access the 'terminfo' data base.\n");
+                return 0;
+            } else {
+                printf("Couldn't use terminal `%s' for input.\n", termtype);
+                return 0;
+            }
+        }
+    }
 #else
     static char term_buffer[2048];
     if (!termtype) termtype = getenv("TERM");
