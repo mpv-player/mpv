@@ -541,6 +541,8 @@ static void continue_sighandler(int signum)
 
 static void quit_request_sighandler(int signum)
 {
+    do_deactivate_getch2();
+
     async_quit_request = 1;
 }
 
@@ -552,6 +554,7 @@ void getch2_enable(void){
     setsigaction(SIGCONT, continue_sighandler, 0, true);
     setsigaction(SIGTSTP, stop_sighandler, SA_RESETHAND, false);
     setsigaction(SIGINT,  quit_request_sighandler, SA_RESETHAND, false);
+    setsigaction(SIGQUIT, quit_request_sighandler, SA_RESETHAND, false);
     setsigaction(SIGTTIN, SIG_IGN, 0, true);
 
     do_activate_getch2();
@@ -567,6 +570,7 @@ void getch2_disable(void){
     setsigaction(SIGCONT, SIG_DFL, 0, false);
     setsigaction(SIGTSTP, SIG_DFL, 0, false);
     setsigaction(SIGINT,  SIG_DFL, 0, false);
+    setsigaction(SIGQUIT, SIG_DFL, 0, false);
     setsigaction(SIGTTIN, SIG_DFL, 0, false);
 
     do_deactivate_getch2();
