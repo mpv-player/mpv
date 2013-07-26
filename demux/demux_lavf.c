@@ -531,7 +531,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         demuxer->timestamp_type = TIMESTAMP_TYPE_SORT;
     } else {
         int mode = lavfdopts->genptsmode;
-        if (mode == 0 && opts->user_correct_pts != 0)
+        if (mode == 0 && opts->correct_pts)
             mode = demuxer->stream->uncached_type == STREAMTYPE_DVD ? 2 : 1;
         if (mode == 1)
             avfc->flags |= AVFMT_FLAG_GENPTS;

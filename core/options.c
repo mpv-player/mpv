@@ -648,7 +648,7 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),
 
     // a-v sync stuff:
-    OPT_FLAG("correct-pts", user_correct_pts, 0),
+    OPT_FLAG("correct-pts", correct_pts, 0),
     OPT_CHOICE("pts-association-mode", user_pts_assoc_mode, 0,
                ({"auto", 0}, {"decoder", 1}, {"sort", 2})),
     OPT_FLAG("initial-audio-sync", initial_audio_sync, 0),
@@ -764,7 +764,7 @@ const struct MPOpts mp_default_opts = {
     .chapterrange = {-1, -1},
     .edition_id = -1,
     .default_max_pts_correction = -1,
-    .user_correct_pts = -1,
+    .correct_pts = 1,
     .initial_audio_sync = 1,
     .term_osd = 2,
     .consolecontrols = 1,

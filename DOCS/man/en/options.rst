@@ -547,13 +547,12 @@
     format.
 
 ``--correct-pts``, ``--no-correct-pts``
-    Switches mpv to a mode where timestamps for video frames are calculated
-    differently and video filters which add new frames or modify timestamps of
-    existing ones are supported. Now enabled automatically for most common file
-    formats. The more accurate timestamps can be visible for example when
-    playing subtitles timed to scene changes with the ``--ass`` option. Without
-    ``--correct-pts``, the subtitle timing will typically be off by some frames.
-    This option does not work correctly with some demuxers and codecs.
+    ``--no-correct-pts`` switches mpv to a mode where video timing is
+    determined using a fixed framerate value (either using the ``--fps``
+    option, or using file information). Sometimes, files with very broken
+    timestamps can be played somewhat well in this mode. Note that video
+    filters, subtitle rendering and audio synchronization can be completely
+    broken in this mode.
 
 ``--cursor-autohide=<number|no|always>``
     Make mouse cursor automatically hide after given number of milliseconds.
