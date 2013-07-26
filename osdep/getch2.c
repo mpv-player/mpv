@@ -386,7 +386,15 @@ bool getch2(struct input_ctx *input_ctx)
                 if (utf8_len > 1) {
                     state = STATE_UTF8;
                 } else if (utf8_len == 1) {
-                    mp_input_put_key(input_ctx, c);
+                    switch (c) {
+                    case 0x1b: /* ESC that's not part of escape sequence */
+                        mp_input_put_key(input_ctx, MP_KEY_ESC);
+                        if (getch2_len > 1 && getch2_buf[1] == 0x1b)
+                            walk_buf(1) /* eat the second ESC if it was typed twice */
+                        break;
+                    default:
+                        mp_input_put_key(input_ctx, c);
+                    }
                     walk_buf(1);
                 } else
                     walk_buf(getch2_pos);
