@@ -147,8 +147,8 @@ vf_instance_t *vf_find_by_label(vf_instance_t *chain, const char *label);
 void vf_uninit_filter(vf_instance_t *vf);
 void vf_uninit_filter_chain(vf_instance_t *vf);
 
-int vf_reconfig_wrapper(struct vf_instance *vf, struct mp_image_params *params,
-                        int flags);
+int vf_reconfig_wrapper(struct vf_instance *vf,
+                        const struct mp_image_params *params, int flags);
 void vf_print_filter_chain(int msglevel, struct vf_instance *vf);
 
 void vf_rescale_dsize(int *d_width, int *d_height, int old_w, int old_h,

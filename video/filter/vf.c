@@ -432,7 +432,7 @@ void vf_chain_seek_reset(struct vf_instance *vf)
         vf_forget_frames(cur);
 }
 
-int vf_reconfig_wrapper(struct vf_instance *vf, struct mp_image_params *p,
+int vf_reconfig_wrapper(struct vf_instance *vf, const struct mp_image_params *p,
                         int flags)
 {
     vf_forget_frames(vf);
@@ -446,7 +446,8 @@ int vf_reconfig_wrapper(struct vf_instance *vf, struct mp_image_params *p,
 
     int r;
     if (vf->reconfig) {
-        r = vf->reconfig(vf, p, flags);
+        struct mp_image_params params = *p;
+        r = vf->reconfig(vf, &params, flags);
     } else {
         r = vf->config(vf, p->w, p->h, p->d_w, p->d_h, flags, p->imgfmt);
         r = r ? 0 : -1;
