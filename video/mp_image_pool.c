@@ -16,6 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "config.h"
+
+#include <stddef.h>
+#include <stdbool.h>
 #include <assert.h>
 
 #include "talloc.h"
@@ -25,18 +29,39 @@
 
 #include "mp_image_pool.h"
 
-struct pool_trampoline {
-    struct mp_image_pool *pool;
-    int refcount;
+#if HAVE_PTHREADS
+#include <pthread.h>
+static pthread_mutex_t pool_mutex = PTHREAD_MUTEX_INITIALIZER;
+#define pool_lock() pthread_mutex_lock(&pool_mutex)
+#define pool_unlock() pthread_mutex_unlock(&pool_mutex)
+#else
+#define pool_lock() 0
+#define pool_unlock() 0
+#endif
+
+// Thread-safety: the pool itself is not thread-safe, but pool-allocated images
+// can be referenced and unreferenced from other threads. (As long as compiled
+// with pthreads, and the image destructors are thread-safe.)
+
+struct mp_image_pool {
+    int max_count;
+
+    struct mp_image **images;
+    int num_images;
+};
+
+// Used to gracefully handle the case when the pool is freed while image
+// references allocated from the image pool are still held by someone.
+struct image_flags {
+    // If both of these are false, the image must be freed.
+    bool referenced;            // outside mp_image reference exists
+    bool pool_alive;            // the mp_image_pool references this
 };
 
 static int image_pool_destructor(void *ptr)
 {
     struct mp_image_pool *pool = ptr;
     mp_image_pool_clear(pool);
-    pool->trampoline->pool = NULL;
-    if (!pool->trampoline->refcount)
-        talloc_free(pool->trampoline);
     return 0;
 }
 
@@ -46,9 +71,6 @@ struct mp_image_pool *mp_image_pool_new(int max_count)
     talloc_set_destructor(pool, image_pool_destructor);
     *pool = (struct mp_image_pool) {
         .max_count = max_count,
-        .trampoline = talloc_struct(NULL, struct pool_trampoline, {
-            .pool = pool,
-        }),
     };
     return pool;
 }
@@ -57,32 +79,33 @@ void mp_image_pool_clear(struct mp_image_pool *pool)
 {
     for (int n = 0; n < pool->num_images; n++) {
         struct mp_image *img = pool->images[n];
-        if (img->priv) {
-            // Image data is being used - detach from the pool, and make it
-            // free itself when pool_free_image() is called
-            img->priv = talloc_struct(NULL, struct pool_trampoline, {
-                .refcount = 1,
-            });
-        } else {
+        struct image_flags *it = img->priv;
+        bool referenced;
+        pool_lock();
+        assert(it->pool_alive);
+        it->pool_alive = false;
+        referenced = it->referenced;
+        pool_unlock();
+        if (!referenced)
             talloc_free(img);
-        }
     }
     pool->num_images = 0;
-    pool->trampoline->refcount = 0;
 }
 
-static void pool_free_image(void *ptr)
+// This is the only function that is allowed to run in a different thread.
+// (Consider passing an image to another thread, which frees it.)
+static void unref_image(void *ptr)
 {
     struct mp_image *img = ptr;
-    struct pool_trampoline *trampoline = img->priv;
-    trampoline->refcount--;
-    img->priv = NULL;
-    if (!trampoline->pool) {
-        // pool was free'd while image reference was still held
-        if (trampoline->refcount == 0)
-            talloc_free(trampoline);
+    struct image_flags *it = img->priv;
+    bool alive;
+    pool_lock();
+    assert(it->referenced);
+    it->referenced = false;
+    alive = it->pool_alive;
+    pool_unlock();
+    if (!alive)
         talloc_free(img);
-    }
 }
 
 // Return a new image of given format/size. The only difference to
@@ -93,22 +116,35 @@ struct mp_image *mp_image_pool_get(struct mp_image_pool *pool, unsigned int fmt,
                                    int w, int h)
 {
     struct mp_image *new = NULL;
+
+    pool_lock();
     for (int n = 0; n < pool->num_images; n++) {
         struct mp_image *img = pool->images[n];
-        if (!img->priv && img->imgfmt == fmt && img->w == w && img->h == h) {
-            new = img;
-            break;
+        struct image_flags *it = img->priv;
+        assert(it->pool_alive);
+        if (!it->referenced) {
+            if (img->imgfmt == fmt && img->w == w && img->h == h) {
+                new = img;
+                break;
+            }
         }
     }
+    pool_unlock();
+
     if (!new) {
         if (pool->num_images >= pool->max_count)
             mp_image_pool_clear(pool);
         new = mp_image_alloc(fmt, w, h);
+        struct image_flags *it = talloc_ptrtype(new, it);
+        *it = (struct image_flags) { .pool_alive = true };
+        new->priv = it;
         MP_TARRAY_APPEND(pool, pool->images, pool->num_images, new);
     }
-    pool->trampoline->refcount++;
-    new->priv = pool->trampoline;
-    return mp_image_new_custom_ref(new, new, pool_free_image);
+
+    struct image_flags *it = new->priv;
+    assert(!it->referenced && it->pool_alive);
+    it->referenced = true;
+    return mp_image_new_custom_ref(new, new, unref_image);
 }
 
 // Like mp_image_new_copy(), but allocate the image out of the pool.
