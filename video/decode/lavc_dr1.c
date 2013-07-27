@@ -39,7 +39,19 @@
 #include <libavutil/pixdesc.h>
 #include <libavutil/common.h>
 
+#include "config.h"
+
 #include "lavc.h"
+
+#if HAVE_PTHREADS
+#include <pthread.h>
+static pthread_mutex_t pool_mutex = PTHREAD_MUTEX_INITIALIZER;
+#define pool_lock() pthread_mutex_lock(&pool_mutex)
+#define pool_unlock() pthread_mutex_unlock(&pool_mutex)
+#else
+#define pool_lock() 0
+#define pool_unlock() 0
+#endif
 
 typedef struct FramePool {
     struct FrameBuffer *list;
@@ -142,16 +154,22 @@ int mp_codec_get_buffer(AVCodecContext *s, AVFrame *frame)
         return -1;
     }
 
-    if (!pool->list && (ret = alloc_buffer(pool, s)) < 0)
+    pool_lock();
+
+    if (!pool->list && (ret = alloc_buffer(pool, s)) < 0) {
+        pool_unlock();
         return ret;
+    }
 
     buf = pool->list;
     if (buf->w != s->width || buf->h != s->height || buf->pix_fmt != s->pix_fmt) {
         pool->list = buf->next;
         av_freep(&buf->base[0]);
         av_free(buf);
-        if ((ret = alloc_buffer(pool, s)) < 0)
+        if ((ret = alloc_buffer(pool, s)) < 0) {
+            pool_unlock();
             return ret;
+        }
         buf = pool->list;
     }
     av_assert0(!buf->refcount);
@@ -159,6 +177,8 @@ int mp_codec_get_buffer(AVCodecContext *s, AVFrame *frame)
 
     pool->list = buf->next;
     pool->refcount++;
+
+    pool_unlock();
 
     frame->opaque        = buf;
     frame->type          = FF_BUFFER_TYPE_USER;
@@ -184,12 +204,17 @@ int mp_codec_get_buffer(AVCodecContext *s, AVFrame *frame)
 
 void mp_buffer_ref(struct FrameBuffer *buf)
 {
+    pool_lock();
     buf->refcount++;
+    pool_unlock();
 }
 
 void mp_buffer_unref(struct FrameBuffer *buf)
 {
     FramePool *pool = buf->pool;
+    bool pool_dead;
+
+    pool_lock();
 
     av_assert0(pool->refcount > 0);
     av_assert0(buf->refcount > 0);
@@ -204,17 +229,23 @@ void mp_buffer_unref(struct FrameBuffer *buf)
         pool->refcount--;
     }
 
-    if (pool->dead && pool->refcount == 0)
+    pool_dead = pool->dead && pool->refcount == 0;
+    pool_unlock();
+
+    if (pool_dead)
         mp_buffer_pool_free(&pool);
 }
 
 bool mp_buffer_is_unique(struct FrameBuffer *buf)
 {
-    int refcount = buf->refcount;
+    int refcount;
+    pool_lock();
+    refcount = buf->refcount;
     // Decoder has a reference, but doesn't want to use it. (ffmpeg has no good
     // way of transferring frame ownership to the user.)
     if (buf->used_by_decoder && !buf->needed_by_decoder)
         refcount--;
+    pool_unlock();
     return refcount == 1;
 }
 
@@ -242,6 +273,8 @@ void mp_buffer_pool_free(struct FramePool **p_pool)
     if (!pool)
         return;
 
+    pool_lock();
+
     while (pool->list) {
         FrameBuffer *buf = pool->list;
         pool->list = buf->next;
@@ -252,6 +285,8 @@ void mp_buffer_pool_free(struct FramePool **p_pool)
     pool->dead = 1;
     if (pool->refcount == 0)
         av_free(pool);
+
+    pool_unlock();
 
     *p_pool = NULL;
 }
