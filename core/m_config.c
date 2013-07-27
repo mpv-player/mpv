@@ -152,10 +152,10 @@ static void substruct_write_ptr(void *ptr, void *val)
     memcpy(ptr, &val, sizeof(void*));
 }
 
-static void m_config_add_option(struct m_config *config,
-                                const char *prefix,
-                                struct m_config_option *parent,
-                                const struct m_option *arg);
+static struct m_config_option *m_config_add_option(struct m_config *config,
+                                                   const char *prefix,
+                                                   struct m_config_option *parent,
+                                                   const struct m_option *arg);
 
 static void add_options(struct m_config *config,
                         struct m_config_option *parent,
@@ -323,7 +323,8 @@ static void add_negation_option(struct m_config *config,
         .offset = opt->offset,
         .max = value,
     };
-    m_config_add_option(config, "", parent, no_opt);
+    struct m_config_option *co = m_config_add_option(config, "", parent, no_opt);
+    co->is_generated = true;
     // Consider a parent option "--sub" and a subopt "opt". Then the above
     // call will add "no-opt". Add "--no-sub-opt" too. (This former call will
     // also generate "--sub-no-opt", which is not really needed or wanted, but
@@ -331,7 +332,8 @@ static void add_negation_option(struct m_config *config,
     if (parent && parent->name && strlen(parent->name)) {
         no_opt = talloc_memdup(config, no_opt, sizeof(*no_opt));
         no_opt->name = opt->name;
-        m_config_add_option(config, "no-", parent, no_opt);
+        co = m_config_add_option(config, "no-", parent, no_opt);
+        co->is_generated = true;
     }
 }
 
@@ -349,10 +351,10 @@ static bool is_merge_opt(const struct m_option *opt)
     return (opt->type->flags & M_OPT_TYPE_HAS_CHILD) && strlen(opt->name) == 0;
 }
 
-static void m_config_add_option(struct m_config *config,
-                                const char *prefix,
-                                struct m_config_option *parent,
-                                const struct m_option *arg)
+static struct m_config_option *m_config_add_option(struct m_config *config,
+                                                   const char *prefix,
+                                                   struct m_config_option *parent,
+                                                   const struct m_option *arg)
 {
     assert(config != NULL);
     assert(arg != NULL);
@@ -433,13 +435,11 @@ static void m_config_add_option(struct m_config *config,
         while (*last)
             last = &(*last)->next;
         *last = co;
-        if (!co->alias_owner) { // don't make no- etc. options positional
-            config->num_pos_opts += 1;
-            co->pos = config->num_pos_opts;
-        }
     }
 
     add_negation_option(config, parent, arg);
+
+    return co;
 }
 
 struct m_config_option *m_config_get_co(const struct m_config *config,
@@ -462,9 +462,13 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
 
 const char *m_config_get_positional_option(const struct m_config *config, int n)
 {
+    int pos = 0;
     for (struct m_config_option *co = config->opts; co; co = co->next) {
-        if (co->pos && co->pos - 1 == n)
-            return co->name;
+        if (!co->is_generated) {
+            if (pos == n)
+                return co->name;
+            pos++;
+        }
     }
     return NULL;
 }
@@ -643,6 +647,8 @@ void m_config_print_option_list(const struct m_config *config)
     for (co = config->opts; co; co = co->next) {
         const struct m_option *opt = co->opt;
         if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
+            continue;
+        if (co->is_generated)
             continue;
         mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %-30.30s", co->name);
         if (opt->type == &m_option_type_choice) {

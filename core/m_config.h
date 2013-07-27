@@ -37,8 +37,7 @@ struct m_obj_desc;
 // Config option
 struct m_config_option {
     struct m_config_option *next;
-    // For positional parameters
-    int pos;
+    bool is_generated : 1;
     // Full name (ie option-subopt).
     char *name;
     // Option description.
@@ -73,7 +72,6 @@ struct m_profile {
 typedef struct m_config {
     // Registered options.
     struct m_config_option *opts; // all options, even suboptions
-    int num_pos_opts;
 
     // When options are set (via m_config_set_option or m_config_set_profile),
     // back up the old value (unless it's already backed up). Used for restoring
