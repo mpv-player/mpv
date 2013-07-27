@@ -36,6 +36,16 @@
 #include "memcpy_pic.h"
 #include "fmt-conversion.h"
 
+#if HAVE_PTHREADS
+#include <pthread.h>
+static pthread_mutex_t refcount_mutex = PTHREAD_MUTEX_INITIALIZER;
+#define refcount_lock() pthread_mutex_lock(&refcount_mutex)
+#define refcount_unlock() pthread_mutex_unlock(&refcount_mutex)
+#else
+#define refcount_lock() 0
+#define refcount_unlock() 0
+#endif
+
 struct m_refcount {
     void *arg;
     // free() is called if refcount reaches 0.
@@ -70,18 +80,27 @@ static struct m_refcount *m_refcount_new(void)
 
 static void m_refcount_ref(struct m_refcount *ref)
 {
+    refcount_lock();
     ref->refcount++;
+    refcount_unlock();
+
     if (ref->ext_ref)
         ref->ext_ref(ref->arg);
 }
 
 static void m_refcount_unref(struct m_refcount *ref)
 {
-    assert(ref->refcount > 0);
     if (ref->ext_unref)
         ref->ext_unref(ref->arg);
+
+    bool dead;
+    refcount_lock();
+    assert(ref->refcount > 0);
     ref->refcount--;
-    if (ref->refcount == 0) {
+    dead = ref->refcount == 0;
+    refcount_unlock();
+
+    if (dead) {
         if (ref->free)
             ref->free(ref->arg);
         talloc_free(ref);
@@ -90,7 +109,12 @@ static void m_refcount_unref(struct m_refcount *ref)
 
 static bool m_refcount_is_unique(struct m_refcount *ref)
 {
-    if (ref->refcount > 1)
+    bool nonunique;
+    refcount_lock();
+    nonunique = ref->refcount > 1;
+    refcount_unlock();
+
+    if (nonunique)
         return false;
     if (ref->ext_is_unique)
         return ref->ext_is_unique(ref->arg); // referenced only by us
