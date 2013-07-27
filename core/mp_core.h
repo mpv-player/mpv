@@ -113,7 +113,7 @@ enum {
 };
 
 typedef struct MPContext {
-    struct MPOpts opts;
+    struct MPOpts *opts;
     struct m_config *mconfig;
     struct input_ctx *input;
     struct osd_state *osd;

@@ -81,7 +81,7 @@ static void screenshot_msg(screenshot_ctx *ctx, int status, const char *msg,
 
     mp_msg(MSGT_CPLAYER, status == SMSG_ERR ? MSGL_ERR : MSGL_INFO, "%s\n", s);
     if (ctx->osd) {
-        set_osd_tmsg(ctx->mpctx, OSD_MSG_TEXT, 1, ctx->mpctx->opts.osd_duration,
+        set_osd_tmsg(ctx->mpctx, OSD_MSG_TEXT, 1, ctx->mpctx->opts->osd_duration,
                      "%s", s);
     }
 
@@ -234,7 +234,7 @@ static char *gen_fname(screenshot_ctx *ctx, const char *file_ext)
     for (;;) {
         int prev_sequence = sequence;
         char *fname = create_fname(ctx->mpctx,
-                                   ctx->mpctx->opts.screenshot_template,
+                                   ctx->mpctx->opts->screenshot_template,
                                    file_ext,
                                    &sequence,
                                    &ctx->frameno);
@@ -282,7 +282,7 @@ static void screenshot_save(struct MPContext *mpctx, struct mp_image *image)
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
 
-    struct image_writer_opts *opts = mpctx->opts.screenshot_image_opts;
+    struct image_writer_opts *opts = mpctx->opts->screenshot_image_opts;
 
     char *filename = gen_fname(ctx, image_writer_file_ext(opts));
     if (filename) {
@@ -322,7 +322,7 @@ void screenshot_to_file(struct MPContext *mpctx, const char *filename, int mode,
                         bool osd)
 {
     screenshot_ctx *ctx = mpctx->screenshot_ctx;
-    struct image_writer_opts opts = *mpctx->opts.screenshot_image_opts;
+    struct image_writer_opts opts = *mpctx->opts->screenshot_image_opts;
     bool old_osd = ctx->osd;
     ctx->osd = osd;
 

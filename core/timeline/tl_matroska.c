@@ -116,7 +116,7 @@ static char **find_files(const char *original_file, const char *suffix)
 static int enable_cache(struct MPContext *mpctx, struct stream **stream,
                         struct demuxer **demuxer, struct demuxer_params *params)
 {
-    struct MPOpts *opts = &mpctx->opts;
+    struct MPOpts *opts = mpctx->opts;
 
     if (opts->stream_cache_size <= 0)
         return 0;
@@ -125,7 +125,7 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
     free_demuxer(*demuxer);
     free_stream(*stream);
 
-    *stream = stream_open(filename, &mpctx->opts);
+    *stream = stream_open(filename, opts);
     if (!*stream) {
         talloc_free(filename);
         return -1;
@@ -137,7 +137,7 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
                                 opts->stream_cache_min_percent,
                                 opts->stream_cache_seek_min_percent);
 
-    *demuxer = demux_open(*stream, "mkv", params, &mpctx->opts);
+    *demuxer = demux_open(*stream, "mkv", params, opts);
     if (!*demuxer) {
         talloc_free(filename);
         free_stream(*stream);
@@ -159,10 +159,10 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer **sources,
         .matroska_wanted_segment = segment,
         .matroska_was_valid = &was_valid,
     };
-    struct stream *s = stream_open(filename, &mpctx->opts);
+    struct stream *s = stream_open(filename, mpctx->opts);
     if (!s)
         return false;
-    struct demuxer *d = demux_open(s, "mkv", &params, &mpctx->opts);
+    struct demuxer *d = demux_open(s, "mkv", &params, mpctx->opts);
 
     if (!d) {
         free_stream(s);
@@ -258,7 +258,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
 
 void build_ordered_chapter_timeline(struct MPContext *mpctx)
 {
-    struct MPOpts *opts = &mpctx->opts;
+    struct MPOpts *opts = mpctx->opts;
 
     if (!opts->ordered_chapters) {
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "File uses ordered chapters, but "

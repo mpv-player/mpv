@@ -354,10 +354,10 @@ void build_edl_timeline(struct MPContext *mpctx)
     mpctx->num_sources = 1;
 
     for (int i = 0; i < num_sources; i++) {
-        struct stream *s = stream_open(edl_ids[i].filename, &mpctx->opts);
+        struct stream *s = stream_open(edl_ids[i].filename, mpctx->opts);
         if (!s)
             goto openfail;
-        struct demuxer *d = demux_open(s, NULL, NULL, &mpctx->opts);
+        struct demuxer *d = demux_open(s, NULL, NULL, mpctx->opts);
         if (!d) {
             free_stream(s);
         openfail:

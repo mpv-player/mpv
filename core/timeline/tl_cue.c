@@ -188,10 +188,10 @@ static bool try_open(struct MPContext *mpctx, char *filename)
         || bstrcasecmp(bstr0(mpctx->demuxer->filename), bfilename) == 0)
         return false;
 
-    struct stream *s = stream_open(filename, &mpctx->opts);
+    struct stream *s = stream_open(filename, mpctx->opts);
     if (!s)
         return false;
-    struct demuxer *d = demux_open(s, NULL, NULL, &mpctx->opts);
+    struct demuxer *d = demux_open(s, NULL, NULL, mpctx->opts);
     // Since .bin files are raw PCM data with no headers, we have to explicitly
     // open them. Also, try to avoid to open files that are most likely not .bin
     // files, as that would only play noise. Checking the file extension is
@@ -200,7 +200,7 @@ static bool try_open(struct MPContext *mpctx, char *filename)
     //       CD sector size (2352 bytes)
     if (!d && bstr_case_endswith(bfilename, bstr0(".bin"))) {
         mp_msg(MSGT_CPLAYER, MSGL_WARN, "CUE: Opening as BIN file!\n");
-        d = demux_open(s, "rawaudio", NULL, &mpctx->opts);
+        d = demux_open(s, "rawaudio", NULL, mpctx->opts);
     }
     if (d) {
         add_source(mpctx, d);
