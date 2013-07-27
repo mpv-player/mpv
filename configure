@@ -2635,6 +2635,23 @@ else
   def_avresample_has_set_channel_mapping='#define HAVE_AVRESAMPLE_SET_CHANNEL_MAPPING 0'
 fi
 
+_vdpau_dec=no
+_vdpau_dec_old=no
+if test "$_vdpau" = yes ; then
+
+echocheck "libavcodec new vdpau API"
+_avcodec_new_vdpau_api=no
+statement_check libavutil/pixfmt.h 'int x = AV_PIX_FMT_VDPAU' && _avcodec_new_vdpau_api=yes
+if test "$_avcodec_new_vdpau_api" = yes ; then
+  def_avcodec_new_vdpau_api='#define HAVE_AV_CODEC_NEW_VDPAU_API 1'
+  _vdpau_dec=yes
+else
+  def_avcodec_new_vdpau_api='#define HAVE_AV_CODEC_NEW_VDPAU_API 0'
+  _vdpau_dec_old=yes
+fi
+echores "$_avcodec_new_vdpau_api"
+
+fi
 
 echocheck "libavcodec AV_CODEC_PROP_TEXT_SUB API"
 _avcodec_has_text_flag_api=no
@@ -3077,6 +3094,8 @@ TV = $_tv
 TV_V4L2 = $_tv_v4l2
 VCD = $_vcd
 VDPAU = $_vdpau
+VDPAU_DEC = $_vdpau_dec
+VDPAU_DEC_OLD = $_vdpau_dec_old
 WIN32 = $_win32
 X11 = $_x11
 WAYLAND = $_wayland
@@ -3179,6 +3198,7 @@ $def_zlib
 
 $def_avutil_has_refcounting
 $def_avutil_has_qp_api
+$def_avcodec_new_vdpau_api
 $def_avcodec_has_text_flag_api
 $def_avcodec_has_chroma_pos_api
 $def_libpostproc

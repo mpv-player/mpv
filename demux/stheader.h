@@ -127,11 +127,12 @@ typedef struct sh_video {
     float stream_aspect;  // aspect ratio in media headers (DVD IFO files)
     int i_bps;            // == bitrate  (compressed bytes/sec)
     int disp_w, disp_h;   // display size (filled by demuxer or decoder)
-    struct mp_image_params *vf_input; // video filter input params
     // output driver/filters: (set by libmpcodecs core)
     struct vf_instance *vfilter;  // video filter chain
     const struct vd_functions *vd_driver;
     int vf_initialized;   // -1 failed, 0 not done, 1 done
+    struct mp_image_params *vf_input; // video filter input params
+    struct mp_hwdec_info *hwdec_info; // video output hwdec handles
     // win32-compatible codec parameters:
     BITMAPINFOHEADER *bih;
 } sh_video_t;

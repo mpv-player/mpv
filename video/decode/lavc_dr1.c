@@ -137,7 +137,7 @@ static int alloc_buffer(FramePool *pool, AVCodecContext *s)
 int mp_codec_get_buffer(AVCodecContext *s, AVFrame *frame)
 {
     sh_video_t *sh = s->opaque;
-    struct ffmpeg_ctx *ctx = sh->context;
+    struct lavc_ctx *ctx = sh->context;
 
     if (!ctx->dr1_buffer_pool) {
         ctx->dr1_buffer_pool = av_mallocz(sizeof(*ctx->dr1_buffer_pool));

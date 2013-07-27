@@ -47,4 +47,10 @@ int vd_control(struct sh_video *sh_video, int cmd, void *arg);
 
 extern int divx_quality;
 
+// Used to communicate hardware decoder API handles from VO to video decoder.
+// The VO can set the context pointer for supported APIs.
+struct mp_hwdec_info {
+    struct mp_vdpau_ctx *vdpau_ctx;
+};
+
 #endif /* MPLAYER_DEC_VIDEO_H */

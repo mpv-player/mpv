@@ -171,12 +171,18 @@ static const struct {
     {IMGFMT_BGRA64_LE,  PIX_FMT_BGRA64LE},
 #endif
 
+#if HAVE_AV_CODEC_NEW_VDPAU_API
+    {IMGFMT_VDPAU,           AV_PIX_FMT_VDPAU},
+#else
     {IMGFMT_VDPAU_MPEG1,     PIX_FMT_VDPAU_MPEG1},
     {IMGFMT_VDPAU_MPEG2,     PIX_FMT_VDPAU_MPEG2},
     {IMGFMT_VDPAU_H264,      PIX_FMT_VDPAU_H264},
     {IMGFMT_VDPAU_WMV3,      PIX_FMT_VDPAU_WMV3},
     {IMGFMT_VDPAU_VC1,       PIX_FMT_VDPAU_VC1},
     {IMGFMT_VDPAU_MPEG4,     PIX_FMT_VDPAU_MPEG4},
+    // map to an arbitrary but existing vdpau format
+    {IMGFMT_VDPAU,           PIX_FMT_VDPAU_H264},
+#endif
     {0, PIX_FMT_NONE}
 };
 

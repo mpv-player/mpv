@@ -118,6 +118,7 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     FMT("vdpau_wmv3",           IMGFMT_VDPAU_WMV3)
     FMT("vdpau_vc1",            IMGFMT_VDPAU_VC1)
     FMT("vdpau_mpeg4",          IMGFMT_VDPAU_MPEG4)
+    FMT("vdpau",                IMGFMT_VDPAU)
     {0}
 };
 

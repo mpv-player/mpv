@@ -22,10 +22,7 @@
  */
 
 /*
- * Actual decoding and presentation are implemented here.
- * All necessary frame information is collected through
- * the "vdpau_render_state" structure after parsing all headers
- * etc. in libavcodec for different codecs.
+ * Actual decoding is done in video/decode/vdpau.c
  */
 
 #include <stdio.h>
@@ -36,9 +33,10 @@
 #include <assert.h>
 
 #include <libavutil/common.h>
-#include <libavcodec/vdpau.h>
 
 #include "config.h"
+#include "video/vdpau.h"
+#include "video/decode/dec_video.h"
 #include "core/mp_msg.h"
 #include "core/options.h"
 #include "talloc.h"
@@ -56,21 +54,6 @@
                            ? ((x)+(a)+(m) < (m) ? (x)+(a)+(m) : (x)+(a)) \
                            : ((x)+(a) < (m) ? (x)+(a) : (x)+(a)-(m)))
 
-#define CHECK_ST_ERROR(message) \
-    do { \
-        if (vdp_st != VDP_STATUS_OK) { \
-            mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] %s: %s\n", \
-                   message, vdp->get_error_string(vdp_st)); \
-            return -1; \
-        } \
-    } while (0)
-
-#define CHECK_ST_WARNING(message) \
-    do { \
-        if (vdp_st != VDP_STATUS_OK) \
-            mp_msg(MSGT_VO, MSGL_WARN, "[   vdpau] %s: %s\n", \
-                   message, vdp->get_error_string(vdp_st)); \
-    } while (0)
 
 /* number of video and output surfaces */
 #define MAX_OUTPUT_SURFACES                15
@@ -84,21 +67,15 @@
  * Global variable declaration - VDPAU specific
  */
 
-struct vdp_functions {
-#define VDP_FUNCTION(vdp_type, _, mp_name) vdp_type *mp_name;
-#include "vdpau_template.c"
-#undef VDP_FUNCTION
-};
-
 struct vdpctx {
-    struct vdp_functions *vdp;
-
+    struct mp_vdpau_ctx                mpvdp;
+    struct vdp_functions              *vdp;
     VdpDevice                          vdp_device;
+
     bool                               is_preempted;
     bool                               preemption_acked;
     bool                               preemption_user_notified;
     double                             last_preemption_retry_fail;
-    VdpGetProcAddress                 *vdp_get_proc_address;
 
     VdpPresentationQueueTarget         flip_target;
     VdpPresentationQueue               flip_queue;
@@ -131,15 +108,18 @@ struct vdpctx {
     int                                top_field_first;
     bool                               flip;
 
-    VdpDecoder                         decoder;
-    int                                decoder_max_refs;
-
     VdpRect                            src_rect_vid;
     VdpRect                            out_rect_vid;
     struct mp_osd_res                  osd_rect;
 
-    struct vdpau_render_state          surface_render[MAX_VIDEO_SURFACES];
-    bool                               surface_in_use[MAX_VIDEO_SURFACES];
+    // Surface pool
+    struct surface_entry {
+        VdpVideoSurface surface;
+        int fmt, w, h;
+        VdpChromaType chroma;
+        bool in_use;
+    } video_surfaces[MAX_VIDEO_SURFACES];
+
     int                                surface_num; // indexes output_surfaces
     int                                query_surface_num;
     VdpTime                            recent_vsync_time;
@@ -334,7 +314,7 @@ static void add_new_video_surface(struct vo *vo, VdpVideoSurface surface,
     for (int i = NUM_BUFFERED_VIDEO - 1; i > 0; i--)
         bv[i] = bv[i - 1];
     bv[0] = (struct buffered_video_surface){
-        .mpi = reserved_mpi ? mp_image_new_ref(reserved_mpi) : NULL,
+        .mpi = reserved_mpi,
         .surface = surface,
         .pts = pts,
     };
@@ -419,20 +399,18 @@ static void preemption_callback(VdpDevice device, void *context)
 {
     struct vdpctx *vc = context;
     vc->is_preempted = true;
+    vc->mpvdp.is_preempted = true;
     vc->preemption_acked = false;
 }
 
-/* Initialize vdp_get_proc_address, called from preinit() */
 static int win_x11_init_vdpau_procs(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
     struct vdpctx *vc = vo->priv;
-    if (vc->vdp)  // reinitialization after preemption
-        memset(vc->vdp, 0, sizeof(*vc->vdp));
-    else
-        vc->vdp = talloc_zero(vc, struct vdp_functions);
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
+
+    *vdp = (struct vdp_functions){0};
 
     struct vdp_function {
         const int id;
@@ -448,8 +426,10 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
         {0, -1}
     };
 
+    VdpGetProcAddress *get_proc_address;
     vdp_st = vdp_device_create_x11(x11->display, x11->screen, &vc->vdp_device,
-                                   &vc->vdp_get_proc_address);
+                                   &get_proc_address);
+    vc->mpvdp.vdp_device = vc->vdp_device;
     if (vdp_st != VDP_STATUS_OK) {
         if (vc->is_preempted)
             mp_msg(MSGT_VO, MSGL_DBG2, "[vdpau] Error calling "
@@ -462,7 +442,7 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
 
     vdp->get_error_string = NULL;
     for (dsc = vdp_func; dsc->offset >= 0; dsc++) {
-        vdp_st = vc->vdp_get_proc_address(vc->vdp_device, dsc->id,
+        vdp_st = get_proc_address(vc->vdp_device, dsc->id,
                                       (void **)((char *)vdp + dsc->offset));
         if (vdp_st != VDP_STATUS_OK) {
             mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error when calling "
@@ -671,23 +651,9 @@ static void free_video_specific(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
-    int i;
     VdpStatus vdp_st;
 
-    if (vc->decoder != VDP_INVALID_HANDLE)
-        vdp->decoder_destroy(vc->decoder);
-    vc->decoder = VDP_INVALID_HANDLE;
-    vc->decoder_max_refs = -1;
-
     forget_frames(vo);
-
-    for (i = 0; i < MAX_VIDEO_SURFACES; i++) {
-        if (vc->surface_render[i].surface != VDP_INVALID_HANDLE) {
-            vdp_st = vdp->video_surface_destroy(vc->surface_render[i].surface);
-            CHECK_ST_WARNING("Error when calling vdp_video_surface_destroy");
-        }
-        vc->surface_render[i].surface = VDP_INVALID_HANDLE;
-    }
 
     if (vc->video_mixer != VDP_INVALID_HANDLE) {
         vdp_st = vdp->video_mixer_destroy(vc->video_mixer);
@@ -702,73 +668,13 @@ static void free_video_specific(struct vo *vo)
     vc->screenshot_surface = VDP_INVALID_HANDLE;
 }
 
-static int create_vdp_decoder(struct vo *vo, int max_refs)
-{
-    struct vdpctx *vc = vo->priv;
-    struct vdp_functions *vdp = vc->vdp;
-    VdpStatus vdp_st;
-    VdpDecoderProfile vdp_decoder_profile;
-    if (vc->decoder != VDP_INVALID_HANDLE)
-        vdp->decoder_destroy(vc->decoder);
-    switch (vc->image_format) {
-    case IMGFMT_VDPAU_MPEG1:
-        vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG1;
-        break;
-    case IMGFMT_VDPAU_MPEG2:
-        vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG2_MAIN;
-        break;
-    case IMGFMT_VDPAU_H264:
-        vdp_decoder_profile = VDP_DECODER_PROFILE_H264_HIGH;
-        mp_msg(MSGT_VO, MSGL_V, "[vdpau] Creating H264 hardware decoder "
-               "for %d reference frames.\n", max_refs);
-        break;
-    case IMGFMT_VDPAU_WMV3:
-        vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_MAIN;
-        break;
-    case IMGFMT_VDPAU_VC1:
-        vdp_decoder_profile = VDP_DECODER_PROFILE_VC1_ADVANCED;
-        break;
-    case IMGFMT_VDPAU_MPEG4:
-        vdp_decoder_profile = VDP_DECODER_PROFILE_MPEG4_PART2_ASP;
-        break;
-    default:
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Unknown image format!\n");
-        goto fail;
-    }
-    vdp_st = vdp->decoder_create(vc->vdp_device, vdp_decoder_profile,
-                                 vc->vid_width, vc->vid_height, max_refs,
-                                 &vc->decoder);
-    CHECK_ST_WARNING("Failed creating VDPAU decoder");
-    if (vdp_st != VDP_STATUS_OK) {
-    fail:
-        vc->decoder = VDP_INVALID_HANDLE;
-        vc->decoder_max_refs = 0;
-        return 0;
-    }
-    vc->decoder_max_refs = max_refs;
-    return 1;
-}
-
 static int initialize_vdpau_objects(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 
-    vc->vdp_chroma_type = VDP_CHROMA_TYPE_420;
-    switch (vc->image_format) {
-    case IMGFMT_420P:
-        vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YV12;
-        break;
-    case IMGFMT_NV12:
-        vc->vdp_pixel_format = VDP_YCBCR_FORMAT_NV12;
-        break;
-    case IMGFMT_YUYV:
-        vc->vdp_pixel_format = VDP_YCBCR_FORMAT_YUYV;
-        vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
-        break;
-    case IMGFMT_UYVY:
-        vc->vdp_pixel_format = VDP_YCBCR_FORMAT_UYVY;
-        vc->vdp_chroma_type  = VDP_CHROMA_TYPE_422;
-    }
+    mp_vdpau_get_format(vc->image_format, &vc->vdp_chroma_type,
+                        &vc->vdp_pixel_format);
+
     if (win_x11_init_vdpau_flip_queue(vo) < 0)
         return -1;
 
@@ -784,9 +690,8 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 
-    vc->decoder = VDP_INVALID_HANDLE;
     for (int i = 0; i < MAX_VIDEO_SURFACES; i++)
-        vc->surface_render[i].surface = VDP_INVALID_HANDLE;
+        vc->video_surfaces[i].surface = VDP_INVALID_HANDLE;
     forget_frames(vo);
     vc->video_mixer = VDP_INVALID_HANDLE;
     vc->flip_queue = VDP_INVALID_HANDLE;
@@ -795,6 +700,7 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
         vc->output_surfaces[i] = VDP_INVALID_HANDLE;
     vc->screenshot_surface = VDP_INVALID_HANDLE;
     vc->vdp_device = VDP_INVALID_HANDLE;
+    vc->mpvdp.vdp_device = vc->vdp_device;
     for (int i = 0; i < MAX_OSD_PARTS; i++) {
         struct osd_bitmap_surface *sfc = &vc->osd_surfaces[i];
         talloc_free(sfc->packer);
@@ -831,9 +737,22 @@ static int handle_preemption(struct vo *vo)
     }
     vc->last_preemption_retry_fail = 0;
     vc->is_preempted = false;
+    vc->mpvdp.is_preempted = false;
+    vc->mpvdp.preemption_counter++;
     vc->preemption_user_notified = false;
     mp_tmsg(MSGT_VO, MSGL_INFO, "[vdpau] Recovered from display preemption.\n");
     return 1;
+}
+
+static bool status_ok(struct vo *vo)
+{
+    return vo->config_ok && handle_preemption(vo) >= 0;
+}
+
+static bool ctx_status_ok(struct mp_vdpau_ctx *ctx)
+{
+    struct vo *vo = ctx->priv;
+    return handle_preemption(vo) >= 0;
 }
 
 /*
@@ -855,8 +774,6 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     vc->vid_height   = height;
 
     free_video_specific(vo);
-    if (IMGFMT_IS_VDPAU(vc->image_format) && !create_vdp_decoder(vo, 2))
-        return -1;
 
     vo_x11_config_vo_window(vo, NULL, vo->dx, vo->dy, d_width, d_height,
                             flags, "vdpau");
@@ -1191,51 +1108,82 @@ static void flip_page_timed(struct vo *vo, int64_t pts_us, int duration)
     vc->surface_num = WRAP_ADD(vc->surface_num, 1, vc->num_output_surfaces);
 }
 
-static int decoder_render(struct vo *vo, void *state_ptr)
+static void release_decoder_surface(void *ptr)
 {
+    bool *in_use_ptr = ptr;
+    *in_use_ptr = false;
+}
+
+static struct mp_image *create_ref(struct surface_entry *e)
+{
+    assert(!e->in_use);
+    e->in_use = true;
+    struct mp_image *res =
+        mp_image_new_custom_ref(&(struct mp_image){0}, &e->in_use,
+                                release_decoder_surface);
+    mp_image_setfmt(res, e->fmt);
+    mp_image_set_size(res, e->w, e->h);
+    res->planes[0] = (void *)"dummy"; // must be non-NULL, otherwise arbitrary
+    res->planes[3] = (void *)(intptr_t)e->surface;
+    return res;
+}
+
+static struct mp_image *get_video_surface(struct mp_vdpau_ctx *ctx, int fmt,
+                                          VdpChromaType chroma, int w, int h)
+{
+    struct vo *vo = ctx->priv;
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
-    struct vdpau_render_state *rndr = (struct vdpau_render_state *)state_ptr;
 
-    if (handle_preemption(vo) < 0)
-        return VO_TRUE;
+    assert(IMGFMT_IS_VDPAU(fmt));
 
-    int max_refs = vc->image_format == IMGFMT_VDPAU_H264 ?
-        rndr->info.h264.num_ref_frames : 2;
-    if (!IMGFMT_IS_VDPAU(vc->image_format))
-        return VO_FALSE;
-    if ((vc->decoder == VDP_INVALID_HANDLE || vc->decoder_max_refs < max_refs)
-        && !create_vdp_decoder(vo, max_refs))
-        return VO_FALSE;
-
-    vdp_st = vdp->decoder_render(vc->decoder, rndr->surface,
-                                 (void *)&rndr->info,
-                                 rndr->bitstream_buffers_used,
-                                 rndr->bitstream_buffers);
-    CHECK_ST_WARNING("Failed VDPAU decoder rendering");
-    return VO_TRUE;
-}
-
-
-static struct vdpau_render_state *get_surface(struct vo *vo, int number)
-{
-    struct vdpctx *vc = vo->priv;
-    struct vdp_functions *vdp = vc->vdp;
-
-    if (number >= MAX_VIDEO_SURFACES)
-        return NULL;
-    if (vc->surface_render[number].surface == VDP_INVALID_HANDLE
-        && !vc->is_preempted) {
-        VdpStatus vdp_st;
-        vdp_st = vdp->video_surface_create(vc->vdp_device, vc->vdp_chroma_type,
-                                           vc->vid_width, vc->vid_height,
-                                           &vc->surface_render[number].surface);
-        CHECK_ST_WARNING("Error when calling vdp_video_surface_create");
+    // Destroy all unused surfaces that don't have matching parameters
+    for (int n = 0; n < MAX_VIDEO_SURFACES; n++) {
+        struct surface_entry *e = &vc->video_surfaces[n];
+        if (!e->in_use && e->surface != VDP_INVALID_HANDLE) {
+            if (e->fmt != fmt || e->chroma != chroma || e->w != w || e->h != h) {
+                vdp_st = vdp->video_surface_destroy(e->surface);
+                CHECK_ST_WARNING("Error when calling vdp_video_surface_destroy");
+                e->surface = VDP_INVALID_HANDLE;
+            }
+        }
     }
-    mp_msg(MSGT_VO, MSGL_DBG3, "vdpau vid create: %u\n",
-           vc->surface_render[number].surface);
-    return &vc->surface_render[number];
+
+    // Try to find an existing unused surface
+    for (int n = 0; n < MAX_VIDEO_SURFACES; n++) {
+        struct surface_entry *e = &vc->video_surfaces[n];
+        if (!e->in_use && e->surface != VDP_INVALID_HANDLE) {
+            assert(e->w == w && e->h == h);
+            assert(e->fmt == fmt && e->chroma == chroma);
+            return create_ref(e);
+        }
+    }
+
+    // Allocate new surface
+    for (int n = 0; n < MAX_VIDEO_SURFACES; n++) {
+        struct surface_entry *e = &vc->video_surfaces[n];
+        if (!e->in_use) {
+            assert(e->surface == VDP_INVALID_HANDLE);
+            e->fmt = fmt;
+            e->chroma = chroma;
+            e->w = w;
+            e->h = h;
+            if (vc->is_preempted) {
+                mp_msg(MSGT_VO, MSGL_WARN, "[vdpau] Preempted, no surface.\n");
+            } else {
+                vdp_st = vdp->video_surface_create(vc->vdp_device, chroma,
+                                                   w, h, &e->surface);
+                CHECK_ST_WARNING("Error when calling vdp_video_surface_create");
+            }
+            return create_ref(e);
+        }
+    }
+
+    mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] no surfaces available in "
+           "get_video_surface\n");
+    // TODO: this probably breaks things forever, provide a dummy buffer?
+    return NULL;
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
@@ -1243,13 +1191,17 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     struct mp_image *reserved_mpi = NULL;
-    struct vdpau_render_state *rndr;
+    VdpVideoSurface surface = VDP_INVALID_HANDLE;
 
     if (IMGFMT_IS_VDPAU(vc->image_format)) {
-        rndr = (struct vdpau_render_state *)mpi->planes[0];
-        reserved_mpi = mpi;
+        surface = (VdpVideoSurface)(intptr_t)mpi->planes[3];
+        reserved_mpi = mp_image_new_ref(mpi);
     } else {
-        rndr = get_surface(vo, vc->deint_counter);
+        reserved_mpi = get_video_surface(&vc->mpvdp, IMGFMT_VDPAU,
+                                         vc->vdp_chroma_type, mpi->w, mpi->h);
+        if (!reserved_mpi)
+            return;
+        surface = (VdpVideoSurface)(intptr_t)reserved_mpi->planes[3];
         vc->deint_counter = WRAP_ADD(vc->deint_counter, 1, NUM_BUFFERED_VIDEO);
         if (handle_preemption(vo) >= 0) {
             VdpStatus vdp_st;
@@ -1257,7 +1209,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
                                        mpi->planes[1]};
             if (vc->image_format == IMGFMT_NV12)
                 destdata[1] = destdata[2];
-            vdp_st = vdp->video_surface_put_bits_y_cb_cr(rndr->surface,
+            vdp_st = vdp->video_surface_put_bits_y_cb_cr(surface,
                     vc->vdp_pixel_format, destdata, mpi->stride);
             CHECK_ST_WARNING("Error when calling "
                              "vdp_video_surface_put_bits_y_cb_cr");
@@ -1268,7 +1220,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     else
         vc->top_field_first = 1;
 
-    add_new_video_surface(vo, rndr->surface, reserved_mpi, mpi->pts);
+    add_new_video_surface(vo, surface, reserved_mpi, mpi->pts);
 
     return;
 }
@@ -1331,58 +1283,12 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
     return image;
 }
 
-static void release_decoder_surface(void *ptr)
-{
-    bool *in_use_ptr = ptr;
-    *in_use_ptr = false;
-}
-
-static struct mp_image *get_decoder_surface(struct vo *vo)
-{
-    struct vdpctx *vc = vo->priv;
-
-    if (!IMGFMT_IS_VDPAU(vc->image_format))
-        return NULL;
-
-    for (int n = 0; n < MAX_VIDEO_SURFACES; n++) {
-        if (!vc->surface_in_use[n]) {
-            vc->surface_in_use[n] = true;
-            struct mp_image *res =
-                mp_image_new_custom_ref(&(struct mp_image){0},
-                                        &vc->surface_in_use[n],
-                                        release_decoder_surface);
-            mp_image_setfmt(res, vc->image_format);
-            mp_image_set_size(res, vc->vid_width, vc->vid_height);
-            struct vdpau_render_state *rndr = get_surface(vo, n);
-            res->planes[0] = (void *)rndr;
-            return res;
-        }
-    }
-
-    mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] no surfaces available in "
-           "get_decoder_surface\n");
-    // TODO: this probably breaks things forever, provide a dummy buffer?
-    return NULL;
-}
 
 static int query_format(struct vo *vo, uint32_t format)
 {
-    int default_flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW
-        | VFCAP_FLIP;
-    switch (format) {
-    case IMGFMT_420P:
-    case IMGFMT_NV12:
-    case IMGFMT_YUYV:
-    case IMGFMT_UYVY:
-    case IMGFMT_VDPAU_MPEG1:
-    case IMGFMT_VDPAU_MPEG2:
-    case IMGFMT_VDPAU_H264:
-    case IMGFMT_VDPAU_WMV3:
-    case IMGFMT_VDPAU_VC1:
-    case IMGFMT_VDPAU_MPEG4:
-        return default_flags;
-    }
-    return 0;
+    if (!mp_vdpau_get_format(format, NULL, NULL))
+        return 0;
+    return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP;
 }
 
 static void destroy_vdpau_objects(struct vo *vo)
@@ -1393,6 +1299,15 @@ static void destroy_vdpau_objects(struct vo *vo)
     VdpStatus vdp_st;
 
     free_video_specific(vo);
+
+    for (int i = 0; i < MAX_VIDEO_SURFACES; i++) {
+        // can't hold references past VO lifetime
+        assert(!vc->video_surfaces[i].in_use);
+        if (vc->video_surfaces[i].surface != VDP_INVALID_HANDLE) {
+            vdp_st = vdp->video_surface_destroy(vc->video_surfaces[i].surface);
+            CHECK_ST_WARNING("Error when calling vdp_video_surface_destroy");
+        }
+    }
 
     if (vc->flip_queue != VDP_INVALID_HANDLE) {
         vdp_st = vdp->presentation_queue_destroy(vc->flip_queue);
@@ -1426,21 +1341,21 @@ static void destroy_vdpau_objects(struct vo *vo)
 
 static void uninit(struct vo *vo)
 {
-    struct vdpctx *vc = vo->priv;
-
     /* Destroy all vdpau objects */
     destroy_vdpau_objects(vo);
 
     vo_x11_uninit(vo);
-
-    // Free bitstream buffers allocated by FFmpeg
-    for (int i = 0; i < MAX_VIDEO_SURFACES; i++)
-        av_freep(&vc->surface_render[i].bitstream_buffers);
 }
 
 static int preinit(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
+
+    vc->vdp = talloc_zero(vc, struct vdp_functions);
+    vc->mpvdp.priv = vo;
+    vc->mpvdp.vdp = vc->vdp;
+    vc->mpvdp.status_ok = ctx_status_ok;
+    vc->mpvdp.get_video_surface = get_video_surface;
 
     // Mark everything as invalid first so uninit() can tell what has been
     // allocated
@@ -1459,7 +1374,7 @@ static int preinit(struct vo *vo)
     // After this calling uninit() should work to free resources
 
     if (win_x11_init_vdpau_procs(vo) < 0) {
-        if (vc->vdp && vc->vdp->device_destroy)
+        if (vc->vdp->device_destroy)
             vc->vdp->device_destroy(vc->vdp_device);
         vo_x11_uninit(vo);
         return -1;
@@ -1473,13 +1388,6 @@ static int get_equalizer(struct vo *vo, const char *name, int *value)
     struct vdpctx *vc = vo->priv;
     return mp_csp_equalizer_get(&vc->video_eq, name, value) >= 0 ?
            VO_TRUE : VO_NOTIMPL;
-}
-
-static bool status_ok(struct vo *vo)
-{
-    if (!vo->config_ok || handle_preemption(vo) < 0)
-        return false;
-    return true;
 }
 
 static int set_equalizer(struct vo *vo, const char *name, int value)
@@ -1534,11 +1442,11 @@ static int control(struct vo *vo, uint32_t request, void *data)
         if (vc->dropped_frame)
             vo->want_redraw = true;
         return true;
-    case VOCTRL_HWDEC_ALLOC_SURFACE:
-        *(struct mp_image **)data = get_decoder_surface(vo);
+    case VOCTRL_GET_HWDEC_INFO: {
+        struct mp_hwdec_info *arg = data;
+        arg->vdpau_ctx = &vc->mpvdp;
         return true;
-    case VOCTRL_HWDEC_DECODER_RENDER:
-        return decoder_render(vo, data);
+    }
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
     case VOCTRL_SET_PANSCAN:

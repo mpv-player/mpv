@@ -2319,7 +2319,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     assert(!(mpctx->initialized_flags & INITIALIZED_VCODEC));
     init_demux_stream(mpctx, STREAM_VIDEO);
-    sh_video_t * const sh_video = mpctx->sh_video;
+    sh_video_t *sh_video = mpctx->sh_video;
     if (!sh_video) {
         uninit_player(mpctx, INITIALIZED_VO);
         goto no_video;
@@ -2354,6 +2354,11 @@ int reinit_video_chain(struct MPContext *mpctx)
                        &(bool){false});
         }
         mpctx->initialized_flags |= INITIALIZED_VO;
+
+        // dynamic allocation only to make stheader.h lighter
+        talloc_free(sh_video->hwdec_info);
+        sh_video->hwdec_info = talloc_zero(sh_video, struct mp_hwdec_info);
+        vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, sh_video->hwdec_info);
     }
 
     vo_update_window_title(mpctx);

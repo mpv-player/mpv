@@ -51,8 +51,7 @@ enum mp_voctrl {
     VOCTRL_GET_EQUALIZER,               // struct voctrl_get_equalizer_args*
 
     /* for vdpau hardware decoding */
-    VOCTRL_HWDEC_DECODER_RENDER,        // pointer to hw state
-    VOCTRL_HWDEC_ALLOC_SURFACE,         // struct mp_image**
+    VOCTRL_GET_HWDEC_INFO,              // struct mp_hwdec_info*
 
     VOCTRL_NEWFRAME,
     VOCTRL_SKIPFRAME,

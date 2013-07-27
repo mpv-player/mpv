@@ -34,6 +34,7 @@
 #include "config.h"
 #include "core/mp_msg.h"
 #include "core/options.h"
+#include "core/bstr.h"
 #include "core/av_opts.h"
 #include "core/av_common.h"
 #include "core/codecs.h"
@@ -50,7 +51,6 @@
 #include "osdep/numcores.h"
 #include "video/csputils.h"
 
-#include "libavcodec/avcodec.h"
 #include "lavc.h"
 
 #if AVPALETTE_SIZE != MP_PALETTE_SIZE
@@ -62,8 +62,6 @@
 static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec);
 static void uninit_avctx(sh_video_t *sh);
 static void setup_refcounting_hw(struct AVCodecContext *s);
-static void draw_slice_hwdec(struct AVCodecContext *s, const AVFrame *src,
-                             int offset[4], int y, int type, int height);
 
 static enum PixelFormat get_format_hwdec(struct AVCodecContext *avctx,
                                          const enum PixelFormat *pix_fmt);
@@ -94,17 +92,32 @@ enum hwdec_type {
 struct hwdec {
     enum hwdec_type api;
     const char *codec, *hw_codec;
+    const struct vd_lavc_hwdec_functions *fns;
 };
 
+const struct vd_lavc_hwdec_functions mp_vd_lavc_vdpau;
+const struct vd_lavc_hwdec_functions mp_vd_lavc_vdpau_old;
+
 static const struct hwdec hwdec_list[] = {
-    {HWDEC_VDPAU,       "h264",         "h264_vdpau"},
-    {HWDEC_VDPAU,       "wmv3",         "wmv3_vdpau"},
-    {HWDEC_VDPAU,       "vc1",          "vc1_vdpau"},
-    {HWDEC_VDPAU,       "mpegvideo",    "mpegvideo_vdpau"},
-    {HWDEC_VDPAU,       "mpeg1video",   "mpeg1video_vdpau"},
-    {HWDEC_VDPAU,       "mpeg2video",   "mpegvideo_vdpau"},
-    {HWDEC_VDPAU,       "mpeg2",        "mpeg2_vdpau"},
-    {HWDEC_VDPAU,       "mpeg4",        "mpeg4_vdpau"},
+#ifdef CONFIG_VDPAU
+#if HAVE_AV_CODEC_NEW_VDPAU_API
+    {HWDEC_VDPAU,       "h264",         NULL,           &mp_vd_lavc_vdpau},
+    {HWDEC_VDPAU,       "wmv3",         NULL,           &mp_vd_lavc_vdpau},
+    {HWDEC_VDPAU,       "vc1",          NULL,           &mp_vd_lavc_vdpau},
+    {HWDEC_VDPAU,       "mpeg1video",   NULL,           &mp_vd_lavc_vdpau},
+    {HWDEC_VDPAU,       "mpeg2video",   NULL,           &mp_vd_lavc_vdpau},
+    {HWDEC_VDPAU,       "mpeg4",        NULL,           &mp_vd_lavc_vdpau},
+#else
+    {HWDEC_VDPAU,       "h264",         "h264_vdpau",   &mp_vd_lavc_vdpau_old},
+    {HWDEC_VDPAU,       "wmv3",         "wmv3_vdpau",   &mp_vd_lavc_vdpau_old},
+    {HWDEC_VDPAU,       "vc1",          "vc1_vdpau",    &mp_vd_lavc_vdpau_old},
+    {HWDEC_VDPAU,       "mpegvideo",    "mpegvideo_vdpau", &mp_vd_lavc_vdpau_old},
+    {HWDEC_VDPAU,       "mpeg1video",   "mpeg1video_vdpau", &mp_vd_lavc_vdpau_old},
+    {HWDEC_VDPAU,       "mpeg2video",   "mpegvideo_vdpau", &mp_vd_lavc_vdpau_old},
+    {HWDEC_VDPAU,       "mpeg2",        "mpeg2_vdpau",  &mp_vd_lavc_vdpau_old},
+    {HWDEC_VDPAU,       "mpeg4",        "mpeg4_vdpau",  &mp_vd_lavc_vdpau_old},
+#endif
+#endif // CONFIG_VDPAU
 
     {HWDEC_VDA,         "h264",         "h264_vda"},
 
@@ -158,17 +171,33 @@ static int init(sh_video_t *sh, const char *decoder)
     ctx = sh->context = talloc_zero(NULL, vd_ffmpeg_ctx);
     ctx->non_dr1_pool = talloc_steal(ctx, mp_image_pool_new(16));
 
+    if (bstr_endswith0(bstr0(decoder), "_vdpau")) {
+        mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "VDPAU decoder '%s' was requested. "
+                "This way of enabling hardware\ndecoding is not supported "
+                "anymore. Use --hwdec=vdpau instead.\nThe --hwdec-codec=... "
+                "option can be used to restrict which codecs are\nenabled, "
+                "otherwise all hardware decoding is tried for all codecs.\n",
+                decoder);
+        uninit(sh);
+        return 0;
+    }
+
     struct hwdec *hwdec = find_hwcodec(sh->opts->hwdec_api, decoder);
     struct hwdec *use_hwdec = NULL;
     if (hwdec && hwdec_codec_allowed(sh, hwdec)) {
-        AVCodec *lavc_hwcodec = avcodec_find_decoder_by_name(hwdec->hw_codec);
-        if (lavc_hwcodec) {
-            ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
-            decoder = lavc_hwcodec->name;
-            use_hwdec = hwdec;
+        if (hwdec->hw_codec) {
+            AVCodec *lavc_hwcodec = avcodec_find_decoder_by_name(hwdec->hw_codec);
+            if (lavc_hwcodec) {
+                ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
+                decoder = lavc_hwcodec->name;
+                use_hwdec = hwdec;
+            } else {
+                mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "Decoder '%s' not found in "
+                        "libavcodec, using software decoding.\n", hwdec->hw_codec);
+            }
         } else {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "Decoder '%s' not found in "
-                    "libavcodec, using software decoding.\n", hwdec->hw_codec);
+            ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
+            use_hwdec = hwdec;
         }
     }
 
@@ -264,6 +293,8 @@ static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
     if (!lavc_codec)
         return;
 
+    ctx->hwdec_info = sh->hwdec_info;
+
     ctx->do_dr1 = ctx->do_hw_dr1 = 0;
     ctx->pix_fmt = PIX_FMT_NONE;
     ctx->vo_initialized = 0;
@@ -277,26 +308,15 @@ static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
 
     avctx->thread_count = lavc_param->threads;
 
-    // Hack to allow explicitly selecting vdpau hw decoders
-    if (!hwdec && (lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU)) {
-        ctx->hwdec = talloc(ctx, struct hwdec);
-        *ctx->hwdec = (struct hwdec) {
-            .api = HWDEC_VDPAU,
-            .codec = sh->gsh->codec,
-            .hw_codec = decoder,
-        };
-    }
-
-    if (ctx->hwdec && ctx->hwdec->api == HWDEC_VDPAU) {
-        assert(lavc_codec->capabilities & CODEC_CAP_HWACCEL_VDPAU);
+    if (ctx->hwdec && ctx->hwdec->fns) {
         ctx->do_hw_dr1         = true;
         avctx->thread_count    = 1;
-        avctx->get_format      = get_format_hwdec;
+        if (ctx->hwdec->fns->image_formats)
+            avctx->get_format  = get_format_hwdec;
         setup_refcounting_hw(avctx);
-        if (ctx->hwdec->api == HWDEC_VDPAU) {
-            avctx->draw_horiz_band = draw_slice_hwdec;
-            avctx->slice_flags =
-                SLICE_FLAG_CODED_ORDER | SLICE_FLAG_ALLOW_FIELD;
+        if (ctx->hwdec->fns->init(ctx) < 0) {
+            uninit_avctx(sh);
+            return;
         }
     } else {
 #if HAVE_AVUTIL_REFCOUNTING
@@ -381,6 +401,9 @@ static void uninit_avctx(sh_video_t *sh)
     av_freep(&ctx->avctx);
     avcodec_free_frame(&ctx->pic);
 
+    if (ctx->hwdec && ctx->hwdec->fns)
+        ctx->hwdec->fns->uninit(ctx);
+
 #if !HAVE_AVUTIL_REFCOUNTING
     mp_buffer_pool_free(&ctx->dr1_buffer_pool);
 #endif
@@ -406,11 +429,6 @@ static int init_vo(sh_video_t *sh, AVFrame *frame)
     pix_fmt = ctx->avctx->pix_fmt;
 #endif
 
-    /* Reconfiguring filter/VO chain may invalidate direct rendering buffers
-     * we have allocated for libavcodec (including the VDPAU HW decoding
-     * case). Is it guaranteed that the code below only triggers in a situation
-     * with no busy direct rendering buffers for reference frames?
-     */
     if (av_cmp_q(frame->sample_aspect_ratio, ctx->last_sample_aspect_ratio) ||
             width != sh->disp_w || height != sh->disp_h ||
             pix_fmt != ctx->pix_fmt || !ctx->vo_initialized)
@@ -466,25 +484,17 @@ static enum PixelFormat get_format_hwdec(struct AVCodecContext *avctx,
         mp_msg(MSGT_DECVIDEO, MSGL_V, " %s", av_get_pix_fmt_name(fmt[i]));
     mp_msg(MSGT_DECVIDEO, MSGL_V, "\n");
 
-    assert(ctx->hwdec);
+    assert(ctx->hwdec && ctx->hwdec->fns);
 
     for (int i = 0; fmt[i] != PIX_FMT_NONE; i++) {
-        int imgfmt = pixfmt2imgfmt(fmt[i]);
-        if (ctx->hwdec->api == HWDEC_VDPAU && IMGFMT_IS_VDPAU(imgfmt))
-            return fmt[i];
+        const int *okfmt = ctx->hwdec->fns->image_formats;
+        for (int n = 0; okfmt && okfmt[n]; n++) {
+            if (imgfmt2pixfmt(okfmt[n]) == fmt[i])
+                return fmt[i];
+        }
     }
 
     return PIX_FMT_NONE;
-}
-
-static void draw_slice_hwdec(struct AVCodecContext *s,
-                             const AVFrame *src, int offset[4],
-                             int y, int type, int height)
-{
-    sh_video_t *sh = s->opaque;
-    struct vf_instance *vf = sh->vfilter;
-    void *state_ptr = src->data[0];
-    vf->control(vf, VFCTRL_HWDEC_DECODER_RENDER, state_ptr);
 }
 
 static struct mp_image *get_surface_hwdec(struct sh_video *sh, AVFrame *pic)
@@ -506,24 +516,7 @@ static struct mp_image *get_surface_hwdec(struct sh_video *sh, AVFrame *pic)
     if (!IMGFMT_IS_HWACCEL(imgfmt))
         return NULL;
 
-    // Video with non mod-16 width/height will have allocation sizes that are
-    // rounded up. This conflicts with our video size change detection and
-    // leads to an endless loop. On the other hand, vdpau seems to round up
-    // frame allocations internally. So use the original video resolution
-    // instead.
-    AVFrame pic_resized = *pic;
-    pic_resized.width = ctx->avctx->width;
-    pic_resized.height = ctx->avctx->height;
-
-    if (init_vo(sh, &pic_resized) < 0)
-        return NULL;
-
-    assert(IMGFMT_IS_HWACCEL(ctx->best_csp));
-
-    struct mp_image *mpi = NULL;
-
-    struct vf_instance *vf = sh->vfilter;
-    vf->control(vf, VFCTRL_HWDEC_ALLOC_SURFACE, &mpi);
+    struct mp_image *mpi = ctx->hwdec->fns->allocate_image(ctx, pic);
 
     if (mpi) {
         for (int i = 0; i < 4; i++)
@@ -697,6 +690,9 @@ static int decode(struct sh_video *sh, struct demux_packet *packet,
 
     struct mp_image *mpi = image_from_decoder(sh);
     assert(mpi->planes[0]);
+
+    if (ctx->hwdec && ctx->hwdec->fns && ctx->hwdec->fns->fix_image)
+        ctx->hwdec->fns->fix_image(ctx, mpi);
 
     mpi->colorspace = ctx->image_params.colorspace;
     mpi->levels = ctx->image_params.colorlevels;

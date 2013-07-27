@@ -87,10 +87,6 @@ static int control(struct vf_instance *vf, int request, void *data)
         };
         return vo_control(video_out, VOCTRL_GET_EQUALIZER, &param) == VO_TRUE;
     }
-    case VFCTRL_HWDEC_DECODER_RENDER:
-        return vo_control(video_out, VOCTRL_HWDEC_DECODER_RENDER, data);
-    case VFCTRL_HWDEC_ALLOC_SURFACE:
-        return vo_control(video_out, VOCTRL_HWDEC_ALLOC_SURFACE, data);
     }
     return CONTROL_UNKNOWN;
 }

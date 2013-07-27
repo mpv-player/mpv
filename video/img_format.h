@@ -242,14 +242,15 @@ enum mp_imgfmt {
     // Hardware accelerated formats. Plane data points to special data
     // structures, instead of pixel data.
 
-    IMGFMT_VDPAU_MPEG1,
+    IMGFMT_VDPAU,               // new decoder API
+    IMGFMT_VDPAU_MPEG1,         // old API
     IMGFMT_VDPAU_MPEG2,
     IMGFMT_VDPAU_H264,
     IMGFMT_VDPAU_WMV3,
     IMGFMT_VDPAU_VC1,
     IMGFMT_VDPAU_MPEG4,
 
-    IMGFMT_VDPAU_FIRST = IMGFMT_VDPAU_MPEG1,
+    IMGFMT_VDPAU_FIRST = IMGFMT_VDPAU,
     IMGFMT_VDPAU_LAST  = IMGFMT_VDPAU_MPEG4,
 
     IMGFMT_END,
