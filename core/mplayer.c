@@ -563,7 +563,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     timeEndPeriod(1);
 #endif
 
-    mp_input_uninit(mpctx->input, &mpctx->opts->input);
+    mp_input_uninit(mpctx->input);
 
     osd_free(mpctx->osd);
 
@@ -585,10 +585,6 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 
     // must be last since e.g. mp_msg uses option values
     // that will be freed by this.
-    if (mpctx->mconfig)
-        m_config_free(mpctx->mconfig);
-    mpctx->mconfig = NULL;
-
     talloc_free(mpctx);
 
 #ifdef CONFIG_COCOA
@@ -661,7 +657,7 @@ static void load_per_protocol_config(m_config_t *conf, const char * const file)
 
     sprintf(protocol, "%s%s", PROFILE_CFG_PROTOCOL, file);
     protocol[strlen(PROFILE_CFG_PROTOCOL) + strlen(file) - strlen(str)] = '\0';
-    p = m_config_get_profile(conf, protocol);
+    p = m_config_get_profile0(conf, protocol);
     if (p) {
         mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
                 "Loading protocol-related profile '%s'\n", protocol);
@@ -684,7 +680,7 @@ static void load_per_extension_config(m_config_t *conf, const char * const file)
 
     sprintf(extension, PROFILE_CFG_EXTENSION);
     strncat(extension, ++str, 7);
-    p = m_config_get_profile(conf, extension);
+    p = m_config_get_profile0(conf, extension);
     if (p) {
         mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
                 "Loading extension-related profile '%s'\n", extension);
@@ -704,7 +700,7 @@ static void load_per_output_config(m_config_t *conf, char *cfg, char *out)
         return;
 
     sprintf(profile, "%s%s", cfg, out);
-    p = m_config_get_profile(conf, profile);
+    p = m_config_get_profile0(conf, profile);
     if (p) {
         mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
                 "Loading extension-related profile '%s'\n", profile);
@@ -3872,7 +3868,7 @@ static int read_keys(void *ctx, int fd)
 
 static void init_input(struct MPContext *mpctx)
 {
-    mpctx->input = mp_input_init(&mpctx->opts->input, mpctx->opts->load_config);
+    mpctx->input = mp_input_init(mpctx->opts);
     if (mpctx->opts->slave_mode)
         mp_input_add_cmd_fd(mpctx->input, 0, USE_FD0_CMD_SELECT, MP_INPUT_SLAVE_CMD_FUNC, NULL);
     else if (mpctx->opts->consolecontrols)
@@ -4597,7 +4593,6 @@ static int mpv_main(int argc, char *argv[])
 
     struct MPContext *mpctx = talloc(NULL, MPContext);
     *mpctx = (struct MPContext){
-        .opts = talloc(mpctx, struct MPOpts),
         .last_dvb_step = 1,
         .terminal_osd_text = talloc_strdup(mpctx, ""),
         .playlist = talloc_struct(mpctx, struct playlist, {0}),
@@ -4607,12 +4602,14 @@ static int mpv_main(int argc, char *argv[])
     init_libav();
     screenshot_init(mpctx);
 
-    struct MPOpts *opts = mpctx->opts;
     // Create the config context and register the options
-    *opts = mp_default_opts;
-    mpctx->mconfig = m_config_new(opts, cfg_include);
-    m_config_register_options(mpctx->mconfig, mp_opts);
-    mp_input_register_options(mpctx->mconfig);
+    mpctx->mconfig = m_config_new(mpctx, sizeof(struct MPOpts),
+                                  &mp_default_opts, mp_opts);
+    mpctx->opts = mpctx->mconfig->optstruct;
+    mpctx->mconfig->includefunc = cfg_include;
+    mpctx->mconfig->use_profiles = true;
+
+    struct MPOpts *opts = mpctx->opts;
 
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, argc, argv);

@@ -192,15 +192,15 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 static bool reparse_cmdline(struct gl_priv *p, char *args)
 {
     struct m_config *cfg = NULL;
-    struct gl_video_opts opts;
+    struct gl_video_opts *opts = NULL;
     int r = 0;
 
     if (strcmp(args, "-") == 0) {
-        opts = *p->renderer_opts;
+        opts = p->renderer_opts;
     } else {
-        memcpy(&opts, gl_video_conf.defaults, sizeof(opts));
-        cfg = m_config_simple(&opts);
-        m_config_register_options(cfg, gl_video_conf.opts);
+        cfg = m_config_new(NULL, sizeof(*opts), gl_video_conf.defaults,
+                           gl_video_conf.opts);
+        opts = cfg->optstruct;
         const char *init = p->vo->driver->init_option_string;
         if (init)
             m_config_parse_suboptions(cfg, "opengl", (char *)init);
@@ -209,7 +209,7 @@ static bool reparse_cmdline(struct gl_priv *p, char *args)
 
     if (r >= 0) {
         mpgl_lock(p->glctx);
-        gl_video_set_options(p->renderer, &opts);
+        gl_video_set_options(p->renderer, opts);
         resize(p);
         mpgl_unlock(p->glctx);
     }

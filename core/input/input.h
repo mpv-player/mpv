@@ -257,14 +257,10 @@ bool mp_input_test_mouse_active(struct input_ctx *ictx, int x, int y);
 bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y);
 
 // Initialize the input system
-struct input_conf;
-struct input_ctx *mp_input_init(struct input_conf *input_conf,
-                                bool load_default_conf);
+struct MPOpts;
+struct input_ctx *mp_input_init(struct MPOpts *opts);
 
-void mp_input_uninit(struct input_ctx *ictx, struct input_conf *input_conf);
-
-struct m_config;
-void mp_input_register_options(struct m_config *cfg);
+void mp_input_uninit(struct input_ctx *ictx);
 
 // Wake up sleeping input loop from another thread.
 void mp_input_wakeup(struct input_ctx *ictx);

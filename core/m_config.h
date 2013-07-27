@@ -19,6 +19,7 @@
 #ifndef MPLAYER_M_CONFIG_H
 #define MPLAYER_M_CONFIG_H
 
+#include <stddef.h>
 #include <stdbool.h>
 
 #include "core/bstr.h"
@@ -71,10 +72,9 @@ struct m_profile {
 /** \ingroup Config */
 typedef struct m_config {
     // Registered options.
-    /** This contains all options and suboptions.
-     */
-    struct m_config_option *opts;
+    struct m_config_option *opts; // all options, even suboptions
     int num_pos_opts;
+
     // When options are set (via m_config_set_option or m_config_set_profile),
     // back up the old value (unless it's already backed up). Used for restoring
     // global options when per-file options are set.
@@ -85,17 +85,27 @@ typedef struct m_config {
     // Depth when recursively including profiles.
     int profile_depth;
 
-    void *optstruct; // struct mpopts or other
-    int (*includefunc)(struct m_config *conf, char *filename);
     bool use_profiles;
+    int (*includefunc)(struct m_config *conf, char *filename);
+
+    const void *optstruct_defaults;
+    size_t optstruct_size;
+    const struct m_option *options; // top-level options
+
+    void *optstruct; // struct mpopts or other
 } m_config_t;
 
 // Create a new config object.
-struct m_config *
-m_config_new(void *optstruct,
-             int includefunc(struct m_config *conf, char *filename));
-
-struct m_config *m_config_simple(void *optstruct);
+//  talloc_parent: talloc parent context for the m_config allocation
+//  size: size of the optstruct (where option values are stored)
+//  defaults: if not NULL, points to a struct of same type as optstruct, which
+//            contains default values for all options
+//  options: list of options. Each option defines a member of the optstruct
+//           and a corresponding option switch or sub-option field.
+// Note that the m_config object will keep pointers to defaults and options.
+struct m_config *m_config_new(void *talloc_parent, size_t size,
+                              const void *defaults,
+                              const struct m_option *options);
 
 struct m_config *m_config_from_obj_desc(void *talloc_parent,
                                         struct m_obj_desc *desc);
@@ -107,21 +117,10 @@ int m_config_set_obj_params(struct m_config *conf, char **args);
 int m_config_initialize_obj(struct m_config *config, struct m_obj_desc *desc,
                             void **ppriv, char ***pargs);
 
-// Free a config object.
-void m_config_free(struct m_config *config);
-
 void m_config_enter_file_local(struct m_config *config);
 void m_config_leave_file_local(struct m_config *config);
 void m_config_mark_file_local(struct m_config *config, const char *opt);
 void m_config_mark_all_file_local(struct m_config *config);
-
-/*  Register some options to be used.
- *  \param config The config object.
- *  \param args An array of \ref m_option struct.
- *  \return 1 on success, 0 on failure.
- */
-int m_config_register_options(struct m_config *config,
-                              const struct m_option *args);
 
 enum {
     M_SETOPT_PRE_PARSE_ONLY = 1,    // Silently ignore non-M_OPT_PRE_PARSE opt.
@@ -186,8 +185,9 @@ void m_config_print_option_list(const struct m_config *config);
  *  \param arg The profile's name.
  *  \return The profile object or NULL.
  */
-struct m_profile *m_config_get_profile(const struct m_config *config,
-                                       char *name);
+struct m_profile *m_config_get_profile0(const struct m_config *config,
+                                        char *name);
+struct m_profile *m_config_get_profile(const struct m_config *config, bstr name);
 
 /*  Get the profile with the given name, creating it if necessary.
  *  \param config The config object.

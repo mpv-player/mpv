@@ -73,7 +73,7 @@ static int parse_profile(struct m_config *config, const struct m_option *opt,
     if (!list || !list[0])
         return M_OPT_INVALID;
     for (int i = 0; list[i]; i++) {
-        struct m_profile *p = m_config_get_profile(config, list[i]);
+        struct m_profile *p = m_config_get_profile0(config, list[i]);
         if (!p) {
             mp_tmsg(MSGT_CFGPARSER, MSGL_WARN, "Unknown profile '%s'.\n",
                     list[i]);
@@ -85,19 +85,19 @@ static int parse_profile(struct m_config *config, const struct m_option *opt,
     return r;
 }
 
-static int show_profile(struct m_option *opt, char *name, char *param)
+static int show_profile(struct m_config *config, bstr param)
 {
-    struct m_config *config = opt->priv;
     struct m_profile *p;
     int i, j;
-    if (!param)
+    if (!param.len)
         return M_OPT_MISSING_PARAM;
     if (!(p = m_config_get_profile(config, param))) {
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "Unknown profile '%s'.\n", param);
+        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "Unknown profile '%.*s'.\n",
+                BSTR_P(param));
         return M_OPT_EXIT - 1;
     }
     if (!config->profile_depth)
-        mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "Profile %s: %s\n", param,
+        mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "Profile %s: %s\n", p->name,
                 p->desc ? p->desc : "");
     config->profile_depth++;
     for (i = 0; i < p->num_opts; i++) {
@@ -119,11 +119,11 @@ static int show_profile(struct m_option *opt, char *name, char *param)
                     continue;
                 memcpy(tmp, list, l);
                 tmp[l] = '\0';
-                show_profile(opt, name, tmp);
+                show_profile(config, bstr0(tmp));
                 list = e + 1;
             }
             if (list[0] != '\0')
-                show_profile(opt, name, list);
+                show_profile(config, bstr0(list));
         }
     }
     config->profile_depth--;
@@ -132,9 +132,8 @@ static int show_profile(struct m_option *opt, char *name, char *param)
     return M_OPT_EXIT - 1;
 }
 
-static int list_options(struct m_option *opt, char *name, char *param)
+static int list_options(struct m_config *config)
 {
-    struct m_config *config = opt->priv;
     m_config_print_option_list(config);
     return M_OPT_EXIT;
 }
@@ -158,6 +157,10 @@ static void m_config_add_option(struct m_config *config,
                                 struct m_config_option *parent,
                                 const struct m_option *arg);
 
+static void add_options(struct m_config *config,
+                        struct m_config_option *parent,
+                        const struct m_option *defs);
+
 static int config_destroy(void *p)
 {
     struct m_config *config = p;
@@ -173,27 +176,32 @@ static int config_destroy(void *p)
     return 0;
 }
 
-struct m_config *m_config_simple(void *optstruct)
+struct m_config *m_config_new(void *talloc_parent, size_t size,
+                              const void *defaults,
+                              const struct m_option *options)
 {
-    struct m_config *config = talloc_struct(NULL, struct m_config, {
-        .optstruct = optstruct,
-    });
+    struct m_config *config = talloc(talloc_parent, struct m_config);
     talloc_set_destructor(config, config_destroy);
+    *config = (struct m_config) {
+        .optstruct_size = size,
+        .optstruct_defaults = defaults,
+        .options = options,
+    };
+    if (size) { // size==0 means a dummy object is created
+        config->optstruct = talloc_zero_size(config, size);
+        if (defaults)
+            memcpy(config->optstruct, defaults, size);
+        if (options)
+            add_options(config, NULL, options);
+    }
     return config;
 }
 
 struct m_config *m_config_from_obj_desc(void *talloc_parent,
                                         struct m_obj_desc *desc)
 {
-    struct m_config *config = m_config_simple(NULL);
-    talloc_steal(talloc_parent, config);
-    if (desc->priv_size) {
-        config->optstruct = talloc_zero_size(config, desc->priv_size);
-        if (desc->priv_defaults)
-            memcpy(config->optstruct, desc->priv_defaults, desc->priv_size);
-        m_config_register_options(config, desc->options);
-    }
-    return config;
+    return m_config_new(talloc_parent, desc->priv_size, desc->priv_defaults,
+                        desc->options);
 }
 
 int m_config_set_obj_params(struct m_config *conf, char **args)
@@ -223,44 +231,6 @@ int m_config_initialize_obj(struct m_config *config, struct m_obj_desc *desc,
         *pargs = NULL;
     }
     return 0;
-}
-
-struct m_config *m_config_new(void *optstruct,
-                              int includefunc(struct m_config *conf,
-                                              char *filename))
-{
-    static const struct m_option ref_opts[] = {
-        { "profile", NULL, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL },
-        { "show-profile", show_profile, &m_option_type_print_func_param,
-          CONF_NOCFG },
-        { "list-options", list_options, CONF_TYPE_PRINT_FUNC, CONF_NOCFG },
-        { NULL }
-    };
-
-    struct m_config *config = m_config_simple(optstruct);
-
-    struct m_option *self_opts = talloc_memdup(config, ref_opts,
-                                               sizeof(ref_opts));
-    for (int i = 1; self_opts[i].name; i++)
-        self_opts[i].priv = config;
-    m_config_register_options(config, self_opts);
-    if (includefunc) {
-        struct m_option *p = talloc_ptrtype(config, p);
-        *p = (struct m_option){
-            "include", NULL, CONF_TYPE_STRING, 0,
-        };
-        m_config_add_option(config, "", NULL, p);
-        config->includefunc = includefunc;
-    }
-
-    config->use_profiles = true;
-
-    return config;
-}
-
-void m_config_free(struct m_config *config)
-{
-    talloc_free(config);
 }
 
 static void ensure_backup(struct m_config *config, struct m_config_option *co)
@@ -472,15 +442,6 @@ static void m_config_add_option(struct m_config *config,
     add_negation_option(config, parent, arg);
 }
 
-int m_config_register_options(struct m_config *config,
-                              const struct m_option *args)
-{
-    assert(config != NULL);
-    if (args)
-        add_options(config, NULL, args);
-    return 1;
-}
-
 struct m_config_option *m_config_get_co(const struct m_config *config,
                                         struct bstr name)
 {
@@ -542,10 +503,14 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
         return M_OPT_INVALID;
     }
 
-    if (config->includefunc && !bstrcmp0(name, "include")) {
+    if (config->includefunc && bstr_equals0(name, "include"))
         return parse_include(config, param, set);
-    } else if (config->use_profiles && !bstrcmp0(name, "profile"))
+    if (config->use_profiles && bstr_equals0(name, "profile"))
         return parse_profile(config, co->opt, name, param, set);
+    if (config->use_profiles && bstr_equals0(name, "show-profile"))
+        return show_profile(config, param);
+    if (bstr_equals0(name, "list-options"))
+        return list_options(config);
 
     // Option with children are a bit different to parse
     if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD) {
@@ -692,19 +657,24 @@ void m_config_print_option_list(const struct m_config *config)
     mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\nTotal: %d options\n", count);
 }
 
-struct m_profile *m_config_get_profile(const struct m_config *config,
-                                       char *name)
+struct m_profile *m_config_get_profile(const struct m_config *config, bstr name)
 {
-    struct m_profile *p;
-    for (p = config->profiles; p; p = p->next)
-        if (!strcmp(p->name, name))
+    for (struct m_profile *p = config->profiles; p; p = p->next) {
+        if (bstr_equals0(name, p->name))
             return p;
+    }
     return NULL;
+}
+
+struct m_profile *m_config_get_profile0(const struct m_config *config,
+                                        char *name)
+{
+    return m_config_get_profile(config, bstr0(name));
 }
 
 struct m_profile *m_config_add_profile(struct m_config *config, char *name)
 {
-    struct m_profile *p = m_config_get_profile(config, name);
+    struct m_profile *p = m_config_get_profile0(config, name);
     if (p)
         return p;
     p = talloc_zero(config, struct m_profile);

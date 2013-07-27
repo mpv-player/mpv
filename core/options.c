@@ -313,12 +313,30 @@ static const m_option_t screenshot_conf[] = {
 extern const m_option_t lavc_decode_opts_conf[];
 extern const m_option_t ad_lavc_decode_opts_conf[];
 
+extern const m_option_t mp_input_opts[];
+
 const m_option_t mp_opts[] = {
+    // handled in command line pre-parser (parser-mpcmd.c)
+    {"v", NULL, CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
+
+    // handled in command line parser (parser-mpcmd.c)
+    {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN, 1, 0, NULL},
+    {"shuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
+    {"{", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
+    {"}", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
+
+    // handled in m_config.c
+    { "include", NULL, CONF_TYPE_STRING },
+    { "profile", NULL, CONF_TYPE_STRING_LIST },
+    { "show-profile", NULL, CONF_TYPE_STRING, CONF_NOCFG },
+    { "list-options", NULL, CONF_TYPE_STORE, CONF_NOCFG },
+
+    // handled in mplayer.c (looks at the raw argv[])
+    {"leak-report", "", CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG },
+
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, CONF_GLOBAL),
     {"really-quiet", &verbose, CONF_TYPE_STORE, CONF_GLOBAL|CONF_PRE_PARSE, 0, -10, NULL},
-    // -v is handled in command line preparser
-    {"v", NULL, CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
     {"msglevel", (void *) msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
     {"msgcolor", &mp_msg_color, CONF_TYPE_FLAG, CONF_GLOBAL | CONF_PRE_PARSE, 0, 1, NULL},
     {"msgmodule", &mp_msg_module, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
@@ -630,16 +648,9 @@ const m_option_t mp_opts[] = {
     {"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 
-    {"leak-report", "", CONF_TYPE_PRINT, 0, 0, 0, (void*)1},
-
     OPT_CHOICE_OR_INT("loop", loop_times, M_OPT_GLOBAL, 1, 10000,
                       ({"no", -1}, {"0", -1},
                        {"inf", 0})),
-
-    {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN, 1, 0, NULL},
-    {"shuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
-    {"{", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
-    {"}", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
 
     OPT_FLAG("resume-playback", position_resume, 0),
     OPT_FLAG("save-position-on-quit", position_save_on_quit, 0),
@@ -681,6 +692,8 @@ const m_option_t mp_opts[] = {
 #endif /* CONFIG_TV */
 
     {"screenshot", (void *) screenshot_conf, CONF_TYPE_SUBCONFIG},
+
+    {"", (void *) mp_input_opts, CONF_TYPE_SUBCONFIG},
 
     OPT_FLAG("list-properties", list_properties, CONF_GLOBAL),
     {"identify", &mp_msg_levels[MSGT_IDENTIFY], CONF_TYPE_FLAG, CONF_GLOBAL, 0, MSGL_V, NULL},
