@@ -521,6 +521,9 @@ void mp_image_copy_fields_from_av_frame(struct mp_image *dst,
 #endif
 }
 
+// Not strictly related, but was added in a similar timeframe.
+#define HAVE_AVFRAME_COLORSPACE HAVE_AVCODEC_CHROMA_POS_API
+
 // Copy properties and data of the mp_image into the AVFrame, without taking
 // care of memory management issues.
 void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
@@ -543,6 +546,11 @@ void mp_image_copy_fields_to_av_frame(struct AVFrame *dst,
         dst->top_field_first = 1;
     if (src->fields & MP_IMGFIELD_REPEAT_FIRST)
         dst->repeat_pict = 1;
+
+#if HAVE_AVFRAME_COLORSPACE
+    dst->colorspace = mp_csp_to_avcol_spc(src->colorspace);
+    dst->color_range = mp_csp_levels_to_avcol_range(src->levels);
+#endif
 }
 
 #if HAVE_AVUTIL_REFCOUNTING
