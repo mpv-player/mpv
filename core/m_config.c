@@ -613,6 +613,21 @@ int m_config_option_requires_param(struct m_config *config, bstr name)
     return M_OPT_UNKNOWN;
 }
 
+static struct m_config *get_defaults(const struct m_config *config)
+{
+    return m_config_new(NULL, config->optstruct_size,
+                        config->optstruct_defaults, config->options);
+}
+
+static char *get_option_value_string(const struct m_config *config,
+                                     const char *name)
+{
+    struct m_config_option *co = m_config_get_co(config, bstr0(name));
+    if (!co || !co->data)
+        return NULL;
+    return m_option_print(co->opt, co->data);
+}
+
 void m_config_print_option_list(const struct m_config *config)
 {
     char min[50], max[50];
@@ -621,6 +636,8 @@ void m_config_print_option_list(const struct m_config *config)
 
     if (!config->opts)
         return;
+
+    struct m_config *defaults = get_defaults(config);
 
     mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "Options:\n\n");
     for (co = config->opts; co; co = co->next) {
@@ -647,6 +664,11 @@ void m_config_print_option_list(const struct m_config *config)
                 snprintf(max, sizeof(max), "%g", opt->max);
             mp_msg(MSGT_CFGPARSER, MSGL_INFO, " (%s to %s)", min, max);
         }
+        char *def = get_option_value_string(defaults, co->name);
+        if (def) {
+            mp_msg(MSGT_CFGPARSER, MSGL_INFO, " (default: %s)", def);
+            talloc_free(def);
+        }
         if (opt->flags & CONF_GLOBAL)
             mp_msg(MSGT_CFGPARSER, MSGL_INFO, " [global]");
         if (opt->flags & CONF_NOCFG)
@@ -655,6 +677,8 @@ void m_config_print_option_list(const struct m_config *config)
         count++;
     }
     mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\nTotal: %d options\n", count);
+
+    talloc_free(defaults);
 }
 
 struct m_profile *m_config_get_profile(const struct m_config *config, bstr name)
