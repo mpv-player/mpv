@@ -665,9 +665,9 @@ void m_config_print_option_list(const struct m_config *config)
             snprintf(min, sizeof(min), "any");
             snprintf(max, sizeof(max), "any");
             if (opt->flags & M_OPT_MIN)
-                snprintf(min, sizeof(min), "%g", opt->min);
+                snprintf(min, sizeof(min), "%.14g", opt->min);
             if (opt->flags & M_OPT_MAX)
-                snprintf(max, sizeof(max), "%g", opt->max);
+                snprintf(max, sizeof(max), "%.14g", opt->max);
             mp_msg(MSGT_CFGPARSER, MSGL_INFO, " (%s to %s)", min, max);
         }
         char *def = get_option_value_string(defaults, co->name);
