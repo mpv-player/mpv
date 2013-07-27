@@ -1605,6 +1605,8 @@ static int mp_property_options(m_option_t *prop, int action, void *arg,
                                                   bstr0(ka->key));
     if (!opt)
         return M_PROPERTY_UNKNOWN;
+    if (!opt->data)
+        return M_PROPERTY_UNAVAILABLE;
 
     switch (ka->action) {
     case M_PROPERTY_GET:
