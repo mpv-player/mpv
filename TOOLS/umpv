@@ -1,0 +1,91 @@
+#!/usr/bin/env python
+
+"""
+This script emulates "unique application" functionality on Linux. When starting
+playback with this script, it will try to reuse an already running instance of
+mpv (but only if that was started with umpv).
+
+This script only uses mpv instances started with umpv. Other instances are
+ignored, and don't exist for the script.
+
+This only takes filenames as arguments. If mpv is already running, they are
+appended to mpv's internal playlist. If the file does not exist or is otherwise
+not playable, mpv will skip the playlist entry when attempting to play it (from
+the GUI perspective, it's silently ignored).
+
+If mpv isn't running yet, this script will start mpv and let it control the
+current terminal. If you play an audio-only file, mpv will not open a window
+(that is its normal behavior; but it might not be what a user expects if this
+script is used in a GUI setting).
+
+mpv will terminate if there are no more files to play, and running the umpv
+script after that will start a new mpv instance.
+
+Note that you can control the mpv instance by writing to the command fifo:
+
+    echo "cycle fullscreen" > /tmp/umpv-fifo-*
+
+Warning:
+
+The script attempts to make sure the FIFO is safely created (i.e. not world-
+readable, not trying to open a bogus
+"""
+
+import sys
+import os
+import errno
+import subprocess
+import fcntl
+import stat
+
+if len(sys.argv) < 2:
+    print("error: needs at least one file as argument.")
+    sys.exit(1)
+files = sys.argv[1:]
+# make them absolute; also makes them safe against interpretation as options
+files = [os.path.abspath(f) for f in files]
+
+FIFO = "/tmp/umpv-fifo-" + os.getenv("USER")
+
+fifo_fd = -1
+try:
+    fifo_fd = os.open(FIFO, os.O_NONBLOCK | os.O_WRONLY)
+except OSError as e:
+    if e.errno == errno.ENXIO:
+        pass  # pipe has no writer
+    elif e.errno == errno.ENOENT:
+        pass # doesn't exist
+    else:
+        raise e
+
+if fifo_fd >= 0:
+    st = os.fstat(fifo_fd)
+    if (((st.st_mode & (stat.S_IRWXG | stat.S_IRWXO)) != 0) or
+        (not stat.S_ISFIFO(st.st_mode)) or
+        (st.st_uid != os.getuid())):
+        print("error: command FIFO is not a FIFO or has bogus permissions")
+        sys.exit(1)
+
+if fifo_fd >= 0:
+    # Unhandled race condition: what if mpv is terminating right now?
+    fcntl.fcntl(fifo_fd, fcntl.F_SETFL, 0) # set blocking mode
+    fifo = os.fdopen(fifo_fd, "w")
+    for f in files:
+        # escape: \ \n "
+        f = f.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
+        f = "\"" + f + "\""
+        fifo.write("raw loadfile " + f + " append\n")
+else:
+    # Recreate pipe if it doesn't already exist.
+    # Also makes sure it's safe, and no other user can create a bogus pipe
+    # that breaks security.
+    try:
+        os.unlink(FIFO)
+    except OSError as e:
+        if e.errno == errno.ENOENT:
+            pass
+        else:
+            raise e
+    os.mkfifo(FIFO, 0600)
+
+    subprocess.check_call(["mpv", "--input-file=" + FIFO] + files)
