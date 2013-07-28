@@ -2000,6 +2000,8 @@ static void change_filters(MPContext *mpctx, enum stream_type mediatype,
         option = "af";
         list = &opts->af_settings;
         break;
+    default:
+        abort();
     }
 
     // The option parser is used to modify the filter list itself.
