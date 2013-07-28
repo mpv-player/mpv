@@ -109,7 +109,12 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
     AudioBuffer buf = buffer_list->mBuffers[0];
     int requested   = buf.mDataByteSize;
 
-    buf.mDataByteSize = mp_ring_read(p->buffer, buf.mData, requested);
+    if (mp_ring_buffered(p->buffer) < requested) {
+        ca_msg(MSGL_V, "buffer underrun\n");
+        audio_pause(ao);
+    } else {
+        mp_ring_read(p->buffer, buf.mData, requested);
+    }
 
     return noErr;
 }
