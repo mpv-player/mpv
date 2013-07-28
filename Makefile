@@ -349,10 +349,6 @@ core/input/input.c: core/input/input_conf.h
 core/input/input_conf.h: TOOLS/file2string.pl etc/input.conf
 	./$^ >$@
 
-video/vdpau.h: video/out/vdpau_template.c
-video/out/vdpau_template.c: TOOLS/vdpau_functions.pl
-	./$< > $@
-
 MKVLIB_DEPS = TOOLS/lib/Parse/Matroska.pm \
               TOOLS/lib/Parse/Matroska/Definitions.pm \
               TOOLS/lib/Parse/Matroska/Element.pm \

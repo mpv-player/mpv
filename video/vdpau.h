@@ -27,7 +27,7 @@
 
 struct vdp_functions {
 #define VDP_FUNCTION(vdp_type, _, mp_name) vdp_type *mp_name;
-#include "video/out/vdpau_template.c"
+#include "video/vdpau_functions.inc"
 #undef VDP_FUNCTION
 };
 

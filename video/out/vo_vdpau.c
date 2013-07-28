@@ -421,7 +421,7 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
 
     static const struct vdp_function vdp_func[] = {
 #define VDP_FUNCTION(_, macro_name, mp_name) {macro_name, offsetof(struct vdp_functions, mp_name)},
-#include "vdpau_template.c"
+#include "video/vdpau_functions.inc"
 #undef VDP_FUNCTION
         {0, -1}
     };
