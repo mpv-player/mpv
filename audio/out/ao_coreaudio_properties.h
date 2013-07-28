@@ -25,7 +25,7 @@
 #define ca_sel    AudioObjectPropertySelector
 #define ca_scope  AudioObjectPropertyScope
 #define CA_GLOBAL kAudioObjectPropertyScopeGlobal
-#define CA_OUTPUT kAudioObjectPropertyScopeOutput
+#define CA_OUTPUT kAudioDevicePropertyScopeOutput
 
 OSStatus ca_get(AudioObjectID id, ca_scope scope, ca_sel selector,
                 uint32_t size, void *data);
