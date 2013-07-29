@@ -363,7 +363,9 @@ static int init_lpcm(struct ao *ao, AudioStreamBasicDescription asbd)
 
     AudioComponentDescription desc = (AudioComponentDescription) {
         .componentType         = kAudioUnitType_Output,
-        .componentSubType      = kAudioUnitSubType_HALOutput,
+        .componentSubType      = (p->opt_device_id < 0) ?
+                                    kAudioUnitSubType_DefaultOutput :
+                                    kAudioUnitSubType_HALOutput,
         .componentManufacturer = kAudioUnitManufacturer_Apple,
         .componentFlags        = 0,
         .componentFlagsMask    = 0,
