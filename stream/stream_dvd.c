@@ -1085,8 +1085,7 @@ static int ifo_stream_open (stream_t *stream, int mode, void *opts)
         spriv->title=1;
 
     free(filename);
-    free(stream->url);
-    stream->url=strdup("dvd://");
+    stream->url=talloc_strdup(stream, "dvd://");
 
     return open_s(stream, mode, spriv);
 }
