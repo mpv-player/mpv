@@ -199,6 +199,9 @@ static int init(sh_video_t *sh, const char *decoder)
             ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
             use_hwdec = hwdec;
         }
+    } else if (!hwdec && sh->opts->hwdec_api) {
+        mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "Selected hardware decoding API not "
+                "available, using software decoding.\n");
     }
 
     init_avctx(sh, decoder, use_hwdec);
