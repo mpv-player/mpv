@@ -79,21 +79,6 @@ static struct cdda_params {
 
 #define ST_OFF(f) M_ST_OFF(struct cdda_params, f)
 static const m_option_t cdda_params_fields[] = {
-    {"speed", ST_OFF(speed), CONF_TYPE_INT, M_OPT_RANGE, 0, 100, NULL},
-    {"paranoia", ST_OFF(paranoia_mode), CONF_TYPE_INT, M_OPT_RANGE, 0, 2,
-     NULL},
-    {"generic-dev", ST_OFF(generic_dev), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"sector-size", ST_OFF(sector_size), CONF_TYPE_INT, M_OPT_RANGE, 1, 100,
-     NULL},
-    {"overlap", ST_OFF(search_overlap), CONF_TYPE_INT, M_OPT_RANGE, -1, 75,
-     NULL},
-    {"toc-bias", ST_OFF(toc_bias), CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"toc-offset", ST_OFF(toc_offset), CONF_TYPE_INT, 0, 0, 0, NULL},
-    {"noskip", ST_OFF(no_skip), CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    {"skip", ST_OFF(no_skip), CONF_TYPE_FLAG, 0, 1, 0, NULL},
-    {"device", ST_OFF(device), CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"span", ST_OFF(span), CONF_TYPE_INT_PAIR, 0, 0, 0, NULL},
-    /// For url parsing
     {"hostname", ST_OFF(span), CONF_TYPE_INT_PAIR, 0, 0, 0, NULL},
     {"port", ST_OFF(speed), CONF_TYPE_INT, M_OPT_RANGE, 1, 100, NULL},
     {"filename", ST_OFF(device), CONF_TYPE_STRING, 0, 0, 0, NULL},

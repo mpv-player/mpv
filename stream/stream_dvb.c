@@ -74,11 +74,6 @@ stream_defaults =
 
 /// URL definition
 static const m_option_t stream_params[] = {
-	{"prog", ST_OFF(prog), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-	{"card", ST_OFF(card), CONF_TYPE_INT, M_OPT_RANGE, 1, 4, NULL},
-	{"timeout",ST_OFF(timeout),  CONF_TYPE_INT, M_OPT_RANGE, 1, 30, NULL},
-	{"file", ST_OFF(file), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-
 	{"hostname", 	ST_OFF(prog), CONF_TYPE_STRING, 0, 0, 0, NULL },
 	{"username", 	ST_OFF(card), CONF_TYPE_INT, M_OPT_RANGE, 1, 4, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
