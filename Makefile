@@ -391,7 +391,7 @@ version.h .version: version.sh
 
 core/version.c osdep/mpv-rc.o: version.h
 
-osdep/mpv-rc.o: osdep/mpv.exe.manifest
+osdep/mpv-rc.o: osdep/mpv.exe.manifest etc/mpv-icon.ico
 
 DOCS/man/en/mpv.1: DOCS/man/en/af.rst \
                    DOCS/man/en/ao.rst \
