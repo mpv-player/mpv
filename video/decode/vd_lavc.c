@@ -99,7 +99,7 @@ const struct vd_lavc_hwdec_functions mp_vd_lavc_vdpau;
 const struct vd_lavc_hwdec_functions mp_vd_lavc_vdpau_old;
 
 static const struct hwdec hwdec_list[] = {
-#ifdef CONFIG_VDPAU
+#if CONFIG_VDPAU
 #if HAVE_AV_CODEC_NEW_VDPAU_API
     {HWDEC_VDPAU,       "h264",         NULL,           &mp_vd_lavc_vdpau},
     {HWDEC_VDPAU,       "wmv3",         NULL,           &mp_vd_lavc_vdpau},
