@@ -11,7 +11,7 @@ Currently, using an experimental branch of MXE is required:
 
 Warning: the original MinGW (http://www.mingw.org) is unsupported.
 
-Note that MingGW environments included in Linux distributions are often broken,
+Note that MinGW environments included in Linux distributions are often broken,
 outdated and useless, and usually don't use MinGW-w64.
 
 Example with MXE
@@ -25,7 +25,7 @@ cd /opt
 git clone https://github.com/tonytheodore/mxe.git mingw
 cd mingw
 
-# Edit the MXE target, so that MingGW-w64 for 32 bit targets is built.
+# Edit the MXE target, so that MinGW-w64 for 32 bit targets is built.
 
 echo "MXE_TARGETS := i686-w64-mingw32" > settings.mk
 
@@ -38,7 +38,7 @@ make libass
 make jpeg
 make pthreads
 
-# Older MXE and MingGW-w64 snapshots don't provide up-to-date OpenGL headers.
+# Older MXE and MinGW-w64 snapshots don't provide up-to-date OpenGL headers.
 
 wget http://www.opengl.org/registry/api/glext.h
 mv glext.h usr/i686-w64-mingw32/include/GL/
