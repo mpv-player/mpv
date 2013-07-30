@@ -38,7 +38,7 @@ make libass
 make jpeg
 make pthreads
 
-# MXE and MingGW-w64 don't provide up-to-date OpenGL headers (to my knowledge).
+# Older MXE and MingGW-w64 snapshots don't provide up-to-date OpenGL headers.
 
 wget http://www.opengl.org/registry/api/glext.h
 mv glext.h usr/i686-w64-mingw32/include/GL/
