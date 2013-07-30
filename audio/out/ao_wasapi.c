@@ -294,8 +294,8 @@ static int set_ao_format(struct wasapi_state *state,
         wformat.Format.wBitsPerSample, wformat.SubFormat.Data1 == 3);
 
     if (wformat.SubFormat.Data1 != 1 && wformat.SubFormat.Data1 != 3) {
-        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: unknown SubFormat %lu\n",
-            wformat.SubFormat.Data1);
+        mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: unknown SubFormat %"PRIu32"\n",
+            (uint32_t)wformat.SubFormat.Data1);
         return 0;
     }
 
@@ -798,8 +798,8 @@ static int enumerate_devices(void) {
     CoUninitialize();
     return 0;
 exit_label:
-    mp_msg(MSGT_AO, MSGL_ERR, "Error enumerating devices: HRESULT %08lx \"%s\"\n",
-        hr, explain_err(hr));
+    mp_msg(MSGT_AO, MSGL_ERR, "Error enumerating devices: HRESULT %08"PRIx32" \"%s\"\n",
+        (uint32_t)hr, explain_err(hr));
     CoUninitialize();
     return 1;
 }
@@ -1044,7 +1044,7 @@ static void thread_feed(wasapi_state *state,int force_feed)
     return;
 exit_label:
     EnterCriticalSection(&state->print_lock);
-    mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_feed fails with %lx!\n", hr);
+    mp_msg(MSGT_AO, MSGL_ERR, "ao-wasapi: thread_feed fails with %"PRIx32"!\n", (uint32_t)hr);
     LeaveCriticalSection(&state->print_lock);
     return;
 }
