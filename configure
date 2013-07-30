@@ -2635,22 +2635,25 @@ else
   def_avresample_has_set_channel_mapping='#define HAVE_AVRESAMPLE_SET_CHANNEL_MAPPING 0'
 fi
 
-_vdpau_dec=no
-_vdpau_dec_old=no
-if test "$_vdpau" = yes ; then
 
 echocheck "libavcodec new vdpau API"
 _avcodec_new_vdpau_api=no
 statement_check libavutil/pixfmt.h 'int x = AV_PIX_FMT_VDPAU' && _avcodec_new_vdpau_api=yes
 if test "$_avcodec_new_vdpau_api" = yes ; then
   def_avcodec_new_vdpau_api='#define HAVE_AV_CODEC_NEW_VDPAU_API 1'
-  _vdpau_dec=yes
 else
   def_avcodec_new_vdpau_api='#define HAVE_AV_CODEC_NEW_VDPAU_API 0'
-  _vdpau_dec_old=yes
 fi
 echores "$_avcodec_new_vdpau_api"
 
+_vdpau_dec=no
+_vdpau_dec_old=no
+if test "$_vdpau" = yes ; then
+  if test "$_avcodec_new_vdpau_api" = yes ; then
+    _vdpau_dec=yes
+  else
+    _vdpau_dec_old=yes
+  fi
 fi
 
 echocheck "libavcodec AV_CODEC_PROP_TEXT_SUB API"
