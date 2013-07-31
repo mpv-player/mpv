@@ -52,7 +52,7 @@ extern const struct m_sub_options gl_video_conf;
 
 struct gl_video;
 
-struct gl_video *gl_video_init(GL *gl);
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log);
 void gl_video_uninit(struct gl_video *p);
 void gl_video_set_options(struct gl_video *p, struct gl_video_opts *opts);
 void gl_video_config(struct gl_video *p, struct mp_image_params *params);

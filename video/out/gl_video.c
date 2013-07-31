@@ -138,6 +138,7 @@ struct fbotex {
 struct gl_video {
     GL *gl;
 
+    struct mp_log *log;
     struct gl_video_opts opts;
     bool gl_debug;
 
@@ -443,7 +444,7 @@ static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
 
     tex_size(p, w, h, &fbo->tex_w, &fbo->tex_h);
 
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Create FBO: %dx%d\n", fbo->tex_w, fbo->tex_h);
+    MP_VERBOSE(p, "Create FBO: %dx%d\n", fbo->tex_w, fbo->tex_h);
 
     gl->GenFramebuffers(1, &fbo->fbo);
     gl->GenTextures(1, &fbo->texture);
@@ -457,8 +458,7 @@ static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
                              GL_TEXTURE_2D, fbo->texture, 0);
 
     if (gl->CheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] Error: framebuffer completeness "
-                                  "check failed!\n");
+        MP_ERR(p, "Error: framebuffer completeness check failed!\n");
         res = false;
     }
 
@@ -629,9 +629,11 @@ static char *t_concat(void *talloc_ctx, const char *s1, const char *s2)
     return talloc_asprintf(talloc_ctx, "%s%s", s1, s2);
 }
 
-static GLuint create_shader(GL *gl, GLenum type, const char *header,
+static GLuint create_shader(struct gl_video *p, GLenum type, const char *header,
                             const char *source)
 {
+    GL *gl = p->gl;
+
     void *tmp = talloc_new(NULL);
     const char *full_source = t_concat(tmp, header, source);
 
@@ -645,15 +647,15 @@ static GLuint create_shader(GL *gl, GLenum type, const char *header,
 
     int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DBG2) : MSGL_ERR;
     const char *typestr = type == GL_VERTEX_SHADER ? "vertex" : "fragment";
-    if (mp_msg_test(MSGT_VO, pri)) {
-        mp_msg(MSGT_VO, pri, "[gl] %s shader source:\n", typestr);
-        mp_log_source(MSGT_VO, pri, full_source);
+    if (mp_msg_test_log(p->log, pri)) {
+        MP_MSG(p, pri, "%s shader source:\n", typestr);
+        mp_log_source(p->log, pri, full_source);
     }
     if (log_length > 1) {
-        GLchar *log = talloc_zero_size(tmp, log_length + 1);
-        gl->GetShaderInfoLog(shader, log_length, NULL, log);
-        mp_msg(MSGT_VO, pri, "[gl] %s shader compile log (status=%d):\n%s\n",
-               typestr, status, log);
+        GLchar *logstr = talloc_zero_size(tmp, log_length + 1);
+        gl->GetShaderInfoLog(shader, log_length, NULL, logstr);
+        MP_MSG(p, pri, "%s shader compile log (status=%d):\n%s\n",
+               typestr, status, logstr);
     }
 
     talloc_free(tmp);
@@ -661,16 +663,18 @@ static GLuint create_shader(GL *gl, GLenum type, const char *header,
     return shader;
 }
 
-static void prog_create_shader(GL *gl, GLuint program, GLenum type,
-                               const char *header, const char *source)
+static void prog_create_shader(struct gl_video *p, GLuint program, GLenum type,
+                               const char *header,  const char *source)
 {
-    GLuint shader = create_shader(gl, type, header, source);
+    GL *gl = p->gl;
+    GLuint shader = create_shader(p, type, header, source);
     gl->AttachShader(program, shader);
     gl->DeleteShader(shader);
 }
 
-static void link_shader(GL *gl, GLuint program)
+static void link_shader(struct gl_video *p, GLuint program)
 {
+    GL *gl = p->gl;
     gl->LinkProgram(program);
     GLint status;
     gl->GetProgramiv(program, GL_LINK_STATUS, &status);
@@ -678,12 +682,11 @@ static void link_shader(GL *gl, GLuint program)
     gl->GetProgramiv(program, GL_INFO_LOG_LENGTH, &log_length);
 
     int pri = status ? (log_length > 1 ? MSGL_V : MSGL_DBG2) : MSGL_ERR;
-    if (mp_msg_test(MSGT_VO, pri)) {
-        GLchar *log = talloc_zero_size(NULL, log_length + 1);
-        gl->GetProgramInfoLog(program, log_length, NULL, log);
-        mp_msg(MSGT_VO, pri, "[gl] shader link log (status=%d): %s\n",
-               status, log);
-        talloc_free(log);
+    if (mp_msg_test_log(p->log, pri)) {
+        GLchar *logstr = talloc_zero_size(NULL, log_length + 1);
+        gl->GetProgramInfoLog(program, log_length, NULL, logstr);
+        MP_MSG(p, pri, "shader link log (status=%d): %s\n", status, logstr);
+        talloc_free(logstr);
     }
 }
 
@@ -696,18 +699,20 @@ static void bind_attrib_locs(GL *gl, GLuint program)
 
 #define PRELUDE_END "// -- prelude end\n"
 
-static GLuint create_program(GL *gl, const char *name, const char *header,
-                             const char *vertex, const char *frag)
+static GLuint create_program(struct gl_video *p, const char *name,
+                             const char *header, const char *vertex,
+                             const char *frag)
 {
-    mp_msg(MSGT_VO, MSGL_V, "[gl] compiling shader program '%s', header:\n", name);
+    GL *gl = p->gl;
+    MP_VERBOSE(p, "compiling shader program '%s', header:\n", name);
     const char *real_header = strstr(header, PRELUDE_END);
     real_header = real_header ? real_header + strlen(PRELUDE_END) : header;
-    mp_log_source(MSGT_VO, MSGL_V, real_header);
+    mp_log_source(p->log, MSGL_V, real_header);
     GLuint prog = gl->CreateProgram();
-    prog_create_shader(gl, prog, GL_VERTEX_SHADER, header, vertex);
-    prog_create_shader(gl, prog, GL_FRAGMENT_SHADER, header, frag);
+    prog_create_shader(p, prog, GL_VERTEX_SHADER, header, vertex);
+    prog_create_shader(p, prog, GL_FRAGMENT_SHADER, header, frag);
     bind_attrib_locs(gl, prog);
-    link_shader(gl, prog);
+    link_shader(p, prog);
     return prog;
 }
 
@@ -786,7 +791,7 @@ static void compile_shaders(struct gl_video *p)
         if (name) {
             char *s_osd = get_section(tmp, src, name);
             p->osd_programs[n] =
-                create_program(gl, name, header_osd, vertex_shader, s_osd);
+                create_program(p, name, header_osd, vertex_shader, s_osd);
         }
     }
 
@@ -883,7 +888,7 @@ static void compile_shaders(struct gl_video *p)
         shader_def_opt(&header_conv, "FIXED_SCALE", true);
         header_conv = t_concat(tmp, header, header_conv);
         p->indirect_program =
-            create_program(gl, "indirect", header_conv, vertex_shader, s_video);
+            create_program(p, "indirect", header_conv, vertex_shader, s_video);
     } else if (header_sep) {
         header_sep = t_concat(tmp, header_sep, header_conv);
     } else {
@@ -893,12 +898,12 @@ static void compile_shaders(struct gl_video *p)
     if (header_sep) {
         header_sep = t_concat(tmp, header, header_sep);
         p->scale_sep_program =
-            create_program(gl, "scale_sep", header_sep, vertex_shader, s_video);
+            create_program(p, "scale_sep", header_sep, vertex_shader, s_video);
     }
 
     header_final = t_concat(tmp, header, header_final);
     p->final_program =
-        create_program(gl, "final", header_final, vertex_shader, s_video);
+        create_program(p, "final", header_final, vertex_shader, s_video);
 
     debug_check_gl(p, "shader compilation");
 
@@ -1017,7 +1022,7 @@ static void init_dither(struct gl_video *p)
     if (p->opts.dither_depth < 0 || p->opts.dither_algo < 0)
         return;
 
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Dither to %d.\n", dst_depth);
+    MP_VERBOSE(p, "Dither to %d.\n", dst_depth);
 
     int tex_size;
     void *tex_data;
@@ -1098,7 +1103,7 @@ static const char *expected_scaler(struct gl_video *p, int unit)
 
 static void reinit_rendering(struct gl_video *p)
 {
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Reinit rendering.\n");
+    MP_VERBOSE(p, "Reinit rendering.\n");
 
     debug_check_gl(p, "before scaler initialization");
 
@@ -1213,8 +1218,8 @@ static void init_video(struct gl_video *p)
         tex_size(p, plane->w, plane->h,
                     &plane->tex_w, &plane->tex_h);
 
-        mp_msg(MSGT_VO, MSGL_V, "[gl] Texture for plane %d: %dx%d\n",
-                n, plane->tex_w, plane->tex_h);
+        MP_VERBOSE(p, "Texture for plane %d: %dx%d\n",
+                   n, plane->tex_w, plane->tex_h);
 
         gl->ActiveTexture(GL_TEXTURE0 + n);
         gl->GenTextures(1, &plane->gl_texture);
@@ -1451,8 +1456,8 @@ static void check_resize(struct gl_video *p)
         init_scaler(p, &p->scalers[1]);
     }
     if (too_small) {
-        mp_msg(MSGT_VO, MSGL_WARN, "[gl] Can't downscale that much, window "
-                                   "output may look suboptimal.\n");
+        MP_WARN(p, "Can't downscale that much, window "
+                "output may look suboptimal.\n");
     }
 
     update_window_sized_objects(p);
@@ -1534,8 +1539,8 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         if (pbo) {
             gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, plane->gl_buffer);
             if (!gl->UnmapBuffer(GL_PIXEL_UNPACK_BUFFER))
-                mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Video PBO upload failed. "
-                       "Remove the 'pbo' suboption.\n");
+                MP_FATAL(p, "Video PBO upload failed. "
+                         "Remove the 'pbo' suboption.\n");
             plane->buffer_ptr = NULL;
             plane_ptr = NULL; // PBO offset 0
         }
@@ -1663,7 +1668,7 @@ static bool test_fbo(struct gl_video *p, GLenum format)
             gl->ClearColor(val, 0.0f, 0.0f, 1.0f);
             gl->Clear(GL_COLOR_BUFFER_BIT);
             gl->ReadPixels(0, 0, 1, 1, GL_RED, GL_FLOAT, &pixel);
-            mp_msg(MSGT_VO, MSGL_V, "   %s: %a\n", val_names[i], val - pixel);
+            MP_VERBOSE(p, "   %s: %a\n", val_names[i], val - pixel);
         }
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
         glCheckError(gl, "after FBO read");
@@ -1691,7 +1696,7 @@ static void check_gl_features(struct gl_video *p)
     int n_disabled = 0;
 
     if (have_fbo) {
-        mp_msg(MSGT_VO, MSGL_V, "Testing user-set FBO format\n");
+        MP_VERBOSE(p, "Testing user-set FBO format\n");
         have_fbo = test_fbo(p, p->opts.fbo_format);
     }
 
@@ -1700,7 +1705,7 @@ static void check_gl_features(struct gl_video *p)
         p->use_lut_3d)
     {
         // doesn't disalbe anything; it's just for the log
-        mp_msg(MSGT_VO, MSGL_V, "Testing GL_R16 FBO (dithering/LUT)\n");
+        MP_VERBOSE(p, "Testing GL_R16 FBO (dithering/LUT)\n");
         test_fbo(p, GL_R16);
     }
 
@@ -1739,14 +1744,14 @@ static void check_gl_features(struct gl_video *p)
     }
 
     if (n_disabled) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] Some OpenGL extensions not detected, "
+        MP_ERR(p, "Some OpenGL extensions not detected, "
                "disabling: ");
         for (int n = 0; n < n_disabled; n++) {
             if (n)
-                mp_msg(MSGT_VO, MSGL_ERR, ", ");
-            mp_msg(MSGT_VO, MSGL_ERR, "%s", disabled[n]);
+                MP_ERR(p, ", ");
+            MP_ERR(p, "%s", disabled[n]);
         }
-        mp_msg(MSGT_VO, MSGL_ERR, ".\n");
+        MP_ERR(p, ".\n");
     }
 }
 
@@ -1964,15 +1969,16 @@ void gl_video_config(struct gl_video *p, struct mp_image_params *params)
 
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b)
 {
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Display depth: R=%d, G=%d, B=%d\n", r, g, b);
+    MP_VERBOSE(p, "Display depth: R=%d, G=%d, B=%d\n", r, g, b);
     p->depth_g = g;
 }
 
-struct gl_video *gl_video_init(GL *gl)
+struct gl_video *gl_video_init(GL *gl, struct mp_log *log)
 {
     struct gl_video *p = talloc_ptrtype(NULL, p);
     *p = (struct gl_video) {
         .gl = gl,
+        .log = log,
         .opts = gl_video_opts_def,
         .gl_debug = true,
         .colorspace = MP_CSP_DETAILS_DEFAULTS,
@@ -2046,7 +2052,7 @@ bool gl_video_set_equalizer(struct gl_video *p, const char *name, int val)
 {
     if (mp_csp_equalizer_set(&p->video_eq, name, val) >= 0) {
         if (!p->opts.gamma && p->video_eq.values[MP_CSP_EQ_GAMMA] != 0) {
-            mp_msg(MSGT_VO, MSGL_V, "[gl] Auto-enabling gamma.\n");
+            MP_VERBOSE(p, "Auto-enabling gamma.\n");
             p->opts.gamma = true;
             compile_shaders(p);
         }

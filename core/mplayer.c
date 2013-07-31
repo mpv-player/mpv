@@ -2345,7 +2345,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     double ar = -1.0;
     //================== Init VIDEO (codec & libvo) ==========================
     if (!opts->fixed_vo || !(mpctx->initialized_flags & INITIALIZED_VO)) {
-        mpctx->video_out = init_best_video_out(&opts->vo, mpctx->input,
+        mpctx->video_out = init_best_video_out(mpctx->global, mpctx->input,
                                                mpctx->encode_lavc_ctx);
         if (!mpctx->video_out) {
             mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, "Error opening/initializing "

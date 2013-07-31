@@ -984,7 +984,7 @@ bool mpgl_is_thread_safe(MPGLContext *ctx)
     return !!ctx->set_current;
 }
 
-void mp_log_source(int mod, int lev, const char *src)
+void mp_log_source(struct mp_log *log, int lev, const char *src)
 {
     int line = 1;
     if (!src)
@@ -994,7 +994,7 @@ void mp_log_source(int mod, int lev, const char *src)
         const char *next = end + 1;
         if (!end)
             next = end = src + strlen(src);
-        mp_msg(mod, lev, "[%3d] %.*s\n", line, (int)(end - src), src);
+        mp_msg_log(log, lev, "[%3d] %.*s\n", line, (int)(end - src), src);
         line++;
         src = next;
     }

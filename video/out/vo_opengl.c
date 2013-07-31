@@ -75,7 +75,7 @@ static void resize(struct gl_priv *p)
 {
     struct vo *vo = p->vo;
 
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Resize: %dx%d\n", vo->dwidth, vo->dheight);
+    MP_VERBOSE(vo, "Resize: %dx%d\n", vo->dwidth, vo->dheight);
 
     struct mp_rect wnd = {0, 0, vo->dwidth, vo->dheight};
     struct mp_rect src, dst;
@@ -319,7 +319,7 @@ static int preinit(struct vo *vo)
     if (p->gl->SwapInterval)
         p->gl->SwapInterval(p->swap_interval);
 
-    p->renderer = gl_video_init(p->gl);
+    p->renderer = gl_video_init(p->gl, vo->log);
     gl_video_set_output_depth(p->renderer, p->glctx->depth_r, p->glctx->depth_g,
                               p->glctx->depth_b);
     gl_video_set_options(p->renderer, p->renderer_opts);

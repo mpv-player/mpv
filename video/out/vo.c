@@ -39,6 +39,7 @@
 #include "core/input/input.h"
 #include "core/m_config.h"
 #include "core/mp_msg.h"
+#include "core/mpv_global.h"
 #include "video/mp_image.h"
 #include "video/vfcap.h"
 #include "sub/sub.h"
@@ -134,20 +135,24 @@ const struct m_obj_list vo_obj_list = {
     .allow_trailer = true,
 };
 
-static struct vo *vo_create(struct mp_vo_opts *opts,
+static struct vo *vo_create(struct mpv_global *global,
                             struct input_ctx *input_ctx,
                             struct encode_lavc_context *encode_lavc_ctx,
                             char *name, char **args)
 {
+    struct mp_log *log = mp_log_new(NULL, global->log, "vo");
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &vo_obj_list, bstr0(name))) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Video output %s not found!\n", name);
+        mp_tmsg_log(log, MSGL_ERR, "Video output %s not found!\n", name);
+        talloc_free(log);
         return NULL;
     };
     struct vo *vo = talloc_ptrtype(NULL, vo);
     *vo = (struct vo) {
+        .vo_log = { .log = talloc_steal(vo, log) },
+        .log = mp_log_new(vo, log, name),
         .driver = desc.p,
-        .opts = opts,
+        .opts = &global->opts->vo,
         .encode_lavc_ctx = encode_lavc_ctx,
         .input_ctx = input_ctx,
         .event_fd = -1,
@@ -289,18 +294,18 @@ void vo_destroy(struct vo *vo)
     talloc_free(vo);
 }
 
-struct vo *init_best_video_out(struct mp_vo_opts *opts,
+struct vo *init_best_video_out(struct mpv_global *global,
                                struct input_ctx *input_ctx,
                                struct encode_lavc_context *encode_lavc_ctx)
 {
-    struct m_obj_settings *vo_list = opts->video_driver_list;
+    struct m_obj_settings *vo_list = global->opts->vo.video_driver_list;
     // first try the preferred drivers, with their optional subdevice param:
     if (vo_list && vo_list[0].name) {
         for (int n = 0; vo_list[n].name; n++) {
             // Something like "-vo name," allows fallback to autoprobing.
             if (strlen(vo_list[n].name) == 0)
                 goto autoprobe;
-            struct vo *vo = vo_create(opts, input_ctx, encode_lavc_ctx,
+            struct vo *vo = vo_create(global, input_ctx, encode_lavc_ctx,
                                       vo_list[n].name, vo_list[n].attribs);
             if (vo)
                 return vo;
@@ -310,7 +315,7 @@ struct vo *init_best_video_out(struct mp_vo_opts *opts,
 autoprobe:
     // now try the rest...
     for (int i = 0; video_out_drivers[i]; i++) {
-        struct vo *vo = vo_create(opts, input_ctx, encode_lavc_ctx,
+        struct vo *vo = vo_create(global, input_ctx, encode_lavc_ctx,
                           (char *)video_out_drivers[i]->info->short_name, NULL);
         if (vo)
             return vo;
@@ -444,24 +449,22 @@ int lookup_keymap_table(const struct mp_keymap *map, int key) {
 static void print_video_rect(struct vo *vo, struct mp_rect src,
                              struct mp_rect dst, struct mp_osd_res osd)
 {
-    int lv = MSGL_V;
-
     int sw = src.x1 - src.x0, sh = src.y1 - src.y0;
     int dw = dst.x1 - dst.x0, dh = dst.y1 - dst.y0;
 
-    mp_msg(MSGT_VO, lv, "[vo] Window size: %dx%d\n",
-           vo->dwidth, vo->dheight);
-    mp_msg(MSGT_VO, lv, "[vo] Video source: %dx%d (%dx%d)\n",
-           vo->aspdat.orgw, vo->aspdat.orgh,
-           vo->aspdat.prew, vo->aspdat.preh);
-    mp_msg(MSGT_VO, lv, "[vo] Video display: (%d, %d) %dx%d -> (%d, %d) %dx%d\n",
-           src.x0, src.y0, sw, sh, dst.x0, dst.y0, dw, dh);
-    mp_msg(MSGT_VO, lv, "[vo] Video scale: %f/%f\n",
-           (double)dw / sw, (double)dh / sh);
-    mp_msg(MSGT_VO, lv, "[vo] OSD borders: l=%d t=%d r=%d b=%d\n",
-           osd.ml, osd.mt, osd.mr, osd.mb);
-    mp_msg(MSGT_VO, lv, "[vo] Video borders: l=%d t=%d r=%d b=%d\n",
-           dst.x0, dst.y0, vo->dwidth - dst.x1, vo->dheight - dst.y1);
+    MP_VERBOSE(&vo->vo_log, "Window size: %dx%d\n",
+               vo->dwidth, vo->dheight);
+    MP_VERBOSE(&vo->vo_log, "Video source: %dx%d (%dx%d)\n",
+               vo->aspdat.orgw, vo->aspdat.orgh,
+               vo->aspdat.prew, vo->aspdat.preh);
+    MP_VERBOSE(&vo->vo_log, "Video display: (%d, %d) %dx%d -> (%d, %d) %dx%d\n",
+               src.x0, src.y0, sw, sh, dst.x0, dst.y0, dw, dh);
+    MP_VERBOSE(&vo->vo_log, "Video scale: %f/%f\n",
+               (double)dw / sw, (double)dh / sh);
+    MP_VERBOSE(&vo->vo_log, "OSD borders: l=%d t=%d r=%d b=%d\n",
+               osd.ml, osd.mt, osd.mr, osd.mb);
+    MP_VERBOSE(&vo->vo_log, "Video borders: l=%d t=%d r=%d b=%d\n",
+               dst.x0, dst.y0, vo->dwidth - dst.x1, vo->dheight - dst.y1);
 }
 
 // Clamp [start, end) to range [0, size) with various fallbacks.

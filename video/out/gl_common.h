@@ -170,8 +170,8 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
                          const char *ext2);
 
 // print a multi line string with line numbers (e.g. for shader sources)
-// mod, lev: module and log level, as in mp_msg()
-void mp_log_source(int mod, int lev, const char *src);
+// log, lev: module and log level, as in mp_msg()
+void mp_log_source(struct mp_log *log, int lev, const char *src);
 
 //function pointers loaded from the OpenGL library
 struct GL {
