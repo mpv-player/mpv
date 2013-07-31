@@ -27,6 +27,7 @@
 #include "gl_common.h"
 
 struct egl_context {
+    struct mp_log *log;
     EGLSurface egl_surface;
 
     struct wl_egl_window *egl_window;
@@ -96,6 +97,8 @@ static void egl_resize_func(struct vo_wayland_state *wl,
     else
         y = 0;
 
+    MP_VERBOSE(ctx, "resizing %dx%d -> %dx%d\n", wl->window.width,
+            wl->window.height, width, height);
     wl_egl_window_resize(ctx->egl_window, width, height, x, y);
 
     wl->window.width = width;
@@ -133,6 +136,8 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     /* major and minor here returns the supported EGL version (e.g.: 1.4) */
     if (eglInitialize(egl_ctx->egl.dpy, &major, &minor) != EGL_TRUE)
         return false;
+
+    MP_VERBOSE(egl_ctx, "EGL version %d.%d\n", major, minor);
 
     EGLint context_attribs[] = {
         EGL_CONTEXT_MAJOR_VERSION_KHR,
@@ -209,6 +214,8 @@ static bool config_window_wayland(struct MPGLContext *ctx,
     struct vo_wayland_state * wl = ctx->vo->wayland;
     bool enable_alpha = !!(flags & VOFLAG_ALPHA);
     bool ret = false;
+
+    egl_ctx->log = mp_log_new(egl_ctx, wl->log, "EGL");
 
     wl->window.resize_func = egl_resize_func;
     wl->window.resize_func_data = (void*) egl_ctx;
