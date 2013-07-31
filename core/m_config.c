@@ -191,7 +191,8 @@ static int config_destroy(void *p)
 
 struct m_config *m_config_new(void *talloc_parent, size_t size,
                               const void *defaults,
-                              const struct m_option *options)
+                              const struct m_option *options,
+                              const char *suboptinit)
 {
     struct m_config *config = talloc(talloc_parent, struct m_config);
     talloc_set_destructor(config, config_destroy);
@@ -199,6 +200,7 @@ struct m_config *m_config_new(void *talloc_parent, size_t size,
         .optstruct_size = size,
         .optstruct_defaults = defaults,
         .options = options,
+        .suboptinit = suboptinit,
     };
     if (size) { // size==0 means a dummy object is created
         config->optstruct = talloc_zero_size(config, size);
@@ -207,6 +209,13 @@ struct m_config *m_config_new(void *talloc_parent, size_t size,
         if (options)
             add_options(config, NULL, options);
     }
+    if (suboptinit) {
+        bstr s = bstr0(suboptinit);
+        int r = m_obj_parse_sub_config(bstr0("internal"), bstr0("-"), &s,
+                                       config, 0, NULL);
+        if (r < 0 || s.len > 0)
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Internal error: preset broken\n");
+    }
     return config;
 }
 
@@ -214,7 +223,7 @@ struct m_config *m_config_from_obj_desc(void *talloc_parent,
                                         struct m_obj_desc *desc)
 {
     return m_config_new(talloc_parent, desc->priv_size, desc->priv_defaults,
-                        desc->options);
+                        desc->options, desc->init_options);
 }
 
 int m_config_set_obj_params(struct m_config *conf, char **args)
@@ -638,7 +647,8 @@ int m_config_option_requires_param(struct m_config *config, bstr name)
 static struct m_config *get_defaults(const struct m_config *config)
 {
     return m_config_new(NULL, config->optstruct_size,
-                        config->optstruct_defaults, config->options);
+                        config->optstruct_defaults, config->options,
+                        config->suboptinit);
 }
 
 static char *get_option_value_string(const struct m_config *config,

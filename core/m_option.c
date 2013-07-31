@@ -1963,7 +1963,7 @@ static void copy_obj_settings_list(const m_option_t *opt, void *dst,
 // option names/values are correct. Try to determine whether an option
 // without '=' sets a flag, or whether it's a positional argument.
 static int get_obj_param(bstr opt_name, bstr obj_name, struct m_config *config,
-                         bstr name, bstr val, int *nold,
+                         bstr name, bstr val, int flags, int *nold,
                          bstr *out_name, bstr *out_val)
 {
     int r;
@@ -1975,7 +1975,7 @@ static int get_obj_param(bstr opt_name, bstr obj_name, struct m_config *config,
     // If it's just "name", and the associated option exists and is a flag,
     // don't accept it as positional argument.
     if (val.start || m_config_option_requires_param(config, name) == 0) {
-        r = m_config_set_option(config, name, val);
+        r = m_config_set_option_ext(config, name, val, flags);
         if (r < 0) {
             if (r == M_OPT_UNKNOWN) {
                 mp_msg(MSGT_CFGPARSER, MSGL_ERR,
@@ -2007,7 +2007,7 @@ static int get_obj_param(bstr opt_name, bstr obj_name, struct m_config *config,
                    BSTR_P(opt_name), BSTR_P(obj_name), *nold, *nold);
             return M_OPT_OUT_OF_RANGE;
         }
-        r = m_config_set_option(config, bstr0(opt), val);
+        r = m_config_set_option_ext(config, bstr0(opt), val, flags);
         if (r < 0) {
             if (r > M_OPT_EXIT)
                 mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: "
@@ -2023,11 +2023,14 @@ static int get_obj_param(bstr opt_name, bstr obj_name, struct m_config *config,
 }
 
 // Consider -vf a=b:c:d. This parses "b:c:d" into name/value pairs, stored as
-// linear array in *_ret. In particular, desc contains what options a the
+// linear array in *_ret. In particular, config contains what options a the
 // object takes, and verifies the option values as well.
-static int get_obj_params(struct bstr opt_name, struct bstr name,
-                          struct bstr *pstr, struct m_obj_desc *desc,
-                          char ***ret)
+// If config is NULL, all parameters are accepted without checking.
+// _ret set to NULL can be used for checking-only.
+// flags can contain any M_SETOPT_* flag.
+int m_obj_parse_sub_config(struct bstr opt_name, struct bstr name,
+                           struct bstr *pstr, struct m_config *config,
+                           int flags, char ***ret)
 {
     int nold = 0;
     char **args = NULL;
@@ -2040,8 +2043,6 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
             num_args++;
     }
 
-    struct m_config *config = desc ? m_config_from_obj_desc(NULL, desc) : NULL;
-
     while (pstr->len > 0) {
         bstr fname, fval;
         r = split_subconf(opt_name, pstr, &fname, &fval);
@@ -2049,7 +2050,7 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
             goto exit;
         if (bstr_equals0(fname, "help"))
             goto print_help;
-        r = get_obj_param(opt_name, name, config, fname, fval, &nold,
+        r = get_obj_param(opt_name, name, config, fname, fval, flags, &nold,
                           &fname, &fval);
         if (r < 0)
             goto exit;
@@ -2088,7 +2089,6 @@ print_help: ;
 
 exit:
     free_str_list(&args);
-    talloc_free(config);
     return r;
 }
 
@@ -2121,8 +2121,11 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
     if (bstr_eatstart0(pstr, "=") || bstr_eatstart0(pstr, ":"))
         has_param = true;
 
+    bool legacy = false;
     bool skip = false;
-    if (!m_obj_list_find(&desc, list, str)) {
+    if (m_obj_list_find(&desc, list, str)) {
+        legacy = !desc.priv_size && list->legacy_hacks;
+    } else {
         if (!list->allow_unknown_entries) {
             mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: %.*s doesn't exist.\n",
                    BSTR_P(opt), BSTR_P(str));
@@ -2132,21 +2135,8 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
         skip = true;
     }
 
-    if (desc.init_options && _ret) {
-        bstr s = bstr0(desc.init_options);
-        r = get_obj_params(opt, str, &s, &desc, &plist);
-        if (r < 0 || s.len > 0) {
-            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Internal error: preset broken\n");
-            return r;
-        }
-    }
-
     if (has_param) {
-        if (skip) {
-            r = get_obj_params(opt, str, pstr, NULL, _ret ? &plist : NULL);
-            if (r < 0)
-                return r;
-        } else if (!desc.priv_size && list->legacy_hacks) {
+        if (legacy) {
             // Should perhaps be parsed as escape-able string. But this is a
             // compatibility path, so it's not worth the trouble.
             int next = bstrcspn(*pstr, ",");
@@ -2164,7 +2154,13 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
                 plist[1] = bstrto0(NULL, param);
             }
         } else {
-            r = get_obj_params(opt, str, pstr, &desc, _ret ? &plist : NULL);
+            struct m_config *config = NULL;
+            if (!skip)
+                config = m_config_from_obj_desc(NULL, &desc);
+            r = m_obj_parse_sub_config(opt, str, pstr, config,
+                                       M_SETOPT_CHECK_ONLY,
+                                       _ret ? &plist : NULL);
+            talloc_free(config);
             if (r < 0)
                 return r;
         }

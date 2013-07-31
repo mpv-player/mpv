@@ -72,6 +72,7 @@ typedef struct m_config {
     const void *optstruct_defaults;
     size_t optstruct_size;
     const struct m_option *options; // top-level options
+    const char *suboptinit;
 
     void *optstruct; // struct mpopts or other
 } m_config_t;
@@ -83,10 +84,12 @@ typedef struct m_config {
 //            contains default values for all options
 //  options: list of options. Each option defines a member of the optstruct
 //           and a corresponding option switch or sub-option field.
+//  suboptinit: if not NULL, initialize the suboption string (used for presets)
 // Note that the m_config object will keep pointers to defaults and options.
 struct m_config *m_config_new(void *talloc_parent, size_t size,
                               const void *defaults,
-                              const struct m_option *options);
+                              const struct m_option *options,
+                              const char *suboptinit);
 
 struct m_config *m_config_from_obj_desc(void *talloc_parent,
                                         struct m_obj_desc *desc);

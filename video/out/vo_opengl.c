@@ -199,11 +199,9 @@ static bool reparse_cmdline(struct gl_priv *p, char *args)
         opts = p->renderer_opts;
     } else {
         cfg = m_config_new(NULL, sizeof(*opts), gl_video_conf.defaults,
-                           gl_video_conf.opts);
+                           gl_video_conf.opts,
+                           p->vo->driver->init_option_string);
         opts = cfg->optstruct;
-        const char *init = p->vo->driver->init_option_string;
-        if (init)
-            m_config_parse_suboptions(cfg, "opengl", (char *)init);
         r = m_config_parse_suboptions(cfg, "opengl", args);
     }
 

@@ -4609,7 +4609,7 @@ static int mpv_main(int argc, char *argv[])
 
     // Create the config context and register the options
     mpctx->mconfig = m_config_new(mpctx, sizeof(struct MPOpts),
-                                  &mp_default_opts, mp_opts);
+                                  &mp_default_opts, mp_opts, NULL);
     mpctx->opts = mpctx->mconfig->optstruct;
     mpctx->mconfig->includefunc = cfg_include;
     mpctx->mconfig->use_profiles = true;
