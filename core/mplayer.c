@@ -63,6 +63,7 @@
 
 #include <errno.h>
 
+#include "core/mpv_global.h"
 #include "core/mp_msg.h"
 #include "av_log.h"
 
@@ -585,6 +586,8 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 
     // must be last since e.g. mp_msg uses option values
     // that will be freed by this.
+
+    mp_msg_uninit(mpctx->global);
     talloc_free(mpctx);
 
 #ifdef CONFIG_COCOA
@@ -4562,8 +4565,6 @@ static void osdep_preinit(int *p_argc, char ***p_argv)
     if (enable_talloc && strcmp(enable_talloc, "1") == 0)
         talloc_enable_leak_report();
 
-    GetCpuCaps(&gCpuCaps);
-
 #ifdef __MINGW32__
     mp_get_converted_argv(p_argc, p_argv);
 #endif
@@ -4603,10 +4604,6 @@ static int mpv_main(int argc, char *argv[])
         .playlist = talloc_struct(mpctx, struct playlist, {0}),
     };
 
-    mp_msg_init();
-    init_libav();
-    screenshot_init(mpctx);
-
     // Create the config context and register the options
     mpctx->mconfig = m_config_new(mpctx, sizeof(struct MPOpts),
                                   &mp_default_opts, mp_opts, NULL);
@@ -4615,6 +4612,18 @@ static int mpv_main(int argc, char *argv[])
     mpctx->mconfig->use_profiles = true;
 
     struct MPOpts *opts = mpctx->opts;
+
+
+    mpctx->global = talloc_zero(mpctx, struct mpv_global);
+    mpctx->global->opts = opts;
+
+    // Nothing must call mp_msg() before this
+    mp_msg_init(mpctx->global);
+    mpctx->log = mp_log_new(mpctx, mpctx->global->log, "!mpv");
+
+    init_libav();
+    GetCpuCaps(&gCpuCaps);
+    screenshot_init(mpctx);
 
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, argc, argv);

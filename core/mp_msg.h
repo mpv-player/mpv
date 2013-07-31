@@ -20,6 +20,9 @@
 #define MPLAYER_MP_MSG_H
 
 #include <stdarg.h>
+#include <stdbool.h>
+
+struct mp_log;
 
 // defined in mplayer.c
 extern int verbose;
@@ -126,10 +129,10 @@ extern int verbose;
 
 #define MSGT_TELETEXT 46       // Teletext decoder
 
-#define MSGT_MAX 64
+#define MSGT_MAX 47
 
-void mp_msg_init(void);
 int mp_msg_test(int mod, int lev);
+bool mp_msg_test_log(struct mp_log *log, int lev);
 
 #include "config.h"
 #include "core/mp_common.h"
@@ -141,6 +144,34 @@ void mp_msg_va(int mod, int lev, const char *format, va_list va);
 void mp_msg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
 void mp_tmsg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
 #define mp_dbg mp_msg
+
+struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
+                          const char *name);
+
+void mp_msg_log(struct mp_log *log, int lev, const char *format, ...)
+    PRINTF_ATTRIBUTE(3, 4);
+void mp_tmsg_log(struct mp_log *log, int lev, const char *format, ...)
+    PRINTF_ATTRIBUTE(3, 4);
+
+// Convenience macros, typically called with a pointer to a context struct
+// as first argument, which has a "struct mp_log log;" member.
+
+#define MP_MSG(obj, lev, ...)   mp_msg_log((obj)->log, lev, __VA_ARGS__)
+#define MP_MSGT(obj, lev, ...)  mp_msgt_log((obj)->log, lev, __VA_ARGS__)
+
+#define MP_FATAL(obj, ...)      MP_MSG(obj, MSGL_FATAL, __VA_ARGS__)
+#define MP_ERR(obj, ...)        MP_MSG(obj, MSGL_ERR, __VA_ARGS__)
+#define MP_WARN(obj, ...)       MP_MSG(obj, MSGL_WARN, __VA_ARGS__)
+#define MP_INFO(obj, ...)       MP_MSG(obj, MSGL_INFO, __VA_ARGS__)
+#define MP_VERBOSE(obj, ...)    MP_MSG(obj, MSGL_V, __VA_ARGS__)
+#define MP_DBG(obj, ...)        MP_MSG(obj, MSGL_DGB2, __VA_ARGS__)
+#define MP_TRACE(obj, ...)      MP_MSG(obj, MSGL_DGB5, __VA_ARGS__)
+
+struct mpv_global;
+void mp_msg_init(struct mpv_global *global);
+void mp_msg_uninit(struct mpv_global *global);
+
+struct mpv_global *mp_log_get_global(struct mp_log *log);
 
 extern bool mp_msg_stdout_in_use;
 
