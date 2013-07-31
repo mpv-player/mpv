@@ -2040,7 +2040,7 @@ static int get_obj_params(struct bstr opt_name, struct bstr name,
             num_args++;
     }
 
-    struct m_config *config = m_config_from_obj_desc(NULL, desc);
+    struct m_config *config = desc ? m_config_from_obj_desc(NULL, desc) : NULL;
 
     while (pstr->len > 0) {
         bstr fname, fval;
@@ -2121,6 +2121,7 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
     if (bstr_eatstart0(pstr, "=") || bstr_eatstart0(pstr, ":"))
         has_param = true;
 
+    bool skip = false;
     if (!m_obj_list_find(&desc, list, str)) {
         if (!list->allow_unknown_entries) {
             mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: %.*s doesn't exist.\n",
@@ -2128,9 +2129,10 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
             return M_OPT_INVALID;
         }
         desc = (struct m_obj_desc){0};
+        skip = true;
     }
 
-    if (desc.init_options && desc.options && _ret) {
+    if (desc.init_options && _ret) {
         bstr s = bstr0(desc.init_options);
         r = get_obj_params(opt, str, &s, &desc, &plist);
         if (r < 0 || s.len > 0) {
@@ -2140,7 +2142,11 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
     }
 
     if (has_param) {
-        if (!desc.options && list->legacy_hacks) {
+        if (skip) {
+            r = get_obj_params(opt, str, pstr, NULL, _ret ? &plist : NULL);
+            if (r < 0)
+                return r;
+        } else if (!desc.priv_size && list->legacy_hacks) {
             // Should perhaps be parsed as escape-able string. But this is a
             // compatibility path, so it's not worth the trouble.
             int next = bstrcspn(*pstr, ",");
