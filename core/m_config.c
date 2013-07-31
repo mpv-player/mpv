@@ -47,6 +47,13 @@ struct m_profile {
     char **opts;
 };
 
+// In the file local case, this contains the old global value.
+struct m_opt_backup {
+    struct m_opt_backup *next;
+    struct m_config_option *co;
+    void *backup;
+};
+
 static int parse_include(struct m_config *config, struct bstr param, bool set)
 {
     if (param.len == 0)
@@ -175,14 +182,14 @@ static void add_options(struct m_config *config,
 static int config_destroy(void *p)
 {
     struct m_config *config = p;
+    if (config->file_local_mode)
+        m_config_leave_file_local(config);
     for (struct m_config_option *copt = config->opts; copt; copt = copt->next) {
         if (copt->alias_owner)
             continue;
         if (copt->opt->type->flags & M_OPT_TYPE_DYNAMIC) {
             m_option_free(copt->opt, copt->data);
         }
-        if (copt->global_backup)
-            m_option_free(copt->opt, copt->global_backup);
     }
     return 0;
 }
@@ -246,18 +253,26 @@ int m_config_initialize_obj(struct m_config *config, struct m_obj_desc *desc,
 
 static void ensure_backup(struct m_config *config, struct m_config_option *co)
 {
-    while (co->alias_owner)
-        co = co->alias_owner;
     if (!config->file_local_mode)
         return;
     if (co->opt->type->flags & M_OPT_TYPE_HAS_CHILD)
         return;
     if (co->opt->flags & M_OPT_GLOBAL)
         return;
-    if (co->global_backup)
+    if (!co->data)
         return;
-    co->global_backup = talloc_zero_size(co, co->opt->type->size);
-    m_option_copy(co->opt, co->global_backup, co->data);
+    for (struct m_opt_backup *cur = config->backup_opts; cur; cur = cur->next) {
+        if (cur->co->data == co->data) // comparing data ptr catches aliases
+            return;
+    }
+    struct m_opt_backup *bc = talloc_ptrtype(NULL, bc);
+    *bc = (struct m_opt_backup) {
+        .co = co,
+        .backup = talloc_zero_size(bc, co->opt->type->size),
+    };
+    m_option_copy(co->opt, bc->backup, co->data);
+    bc->next = config->backup_opts;
+    config->backup_opts = bc;
 }
 
 void m_config_enter_file_local(struct m_config *config)
@@ -274,13 +289,13 @@ void m_config_leave_file_local(struct m_config *config)
 {
     assert(config->file_local_mode);
     config->file_local_mode = false;
-    for (struct m_config_option *co = config->opts; co; co = co->next) {
-        if (co->global_backup) {
-            m_option_copy(co->opt, co->data, co->global_backup);
-            m_option_free(co->opt, co->global_backup);
-            talloc_free(co->global_backup);
-            co->global_backup = NULL;
-        }
+    while (config->backup_opts) {
+        struct m_opt_backup *bc = config->backup_opts;
+        config->backup_opts = bc->next;
+
+        m_option_copy(bc->co->opt, bc->co->data, bc->backup);
+        m_option_free(bc->co->opt, bc->backup);
+        talloc_free(bc);
     }
 }
 

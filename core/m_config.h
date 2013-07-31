@@ -44,8 +44,6 @@ struct m_config_option {
     const struct m_option *opt;
     // Raw value of the option.
     void *data;
-    // Raw value of the backup of the global value (or NULL).
-    void *global_backup;
     // If this is a suboption, the option that contains this option.
     struct m_config_option *parent;
     // If this option aliases another, more important option. The alias_owner
@@ -69,6 +67,8 @@ typedef struct m_config {
     struct m_profile *profiles;
     // Depth when recursively including profiles.
     int profile_depth;
+
+    struct m_opt_backup *backup_opts;
 
     bool use_profiles;
     int (*includefunc)(struct m_config *conf, char *filename);
