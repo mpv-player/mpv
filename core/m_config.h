@@ -46,10 +46,6 @@ struct m_config_option {
     void *data;
     // If this is a suboption, the option that contains this option.
     struct m_config_option *parent;
-    // If this option aliases another, more important option. The alias_owner
-    // option is the one that has the most correct option type for the data
-    // variable, and which is considered the original.
-    struct m_config_option *alias_owner;
 };
 
 // Config object

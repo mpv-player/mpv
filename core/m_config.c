@@ -184,13 +184,8 @@ static int config_destroy(void *p)
     struct m_config *config = p;
     if (config->file_local_mode)
         m_config_leave_file_local(config);
-    for (struct m_config_option *copt = config->opts; copt; copt = copt->next) {
-        if (copt->alias_owner)
-            continue;
-        if (copt->opt->type->flags & M_OPT_TYPE_DYNAMIC) {
-            m_option_free(copt->opt, copt->data);
-        }
-    }
+    for (struct m_config_option *copt = config->opts; copt; copt = copt->next)
+        m_option_free(copt->opt, copt->data);
     return 0;
 }
 
@@ -422,19 +417,8 @@ static struct m_config_option *m_config_add_option(struct m_config *config,
             add_options(config, co, sub);
         }
     } else {
-        // Check if there is already an option pointing to this address
+        // Initialize options
         if (co->data) {
-            for (struct m_config_option *i = config->opts; i; i = i->next) {
-                if (co->data == i->data) {
-                    // So we don't save the same vars more than 1 time
-                    co->alias_owner = i;
-                    break;
-                }
-            }
-        }
-        if (co->alias_owner) {
-            assert(!arg->defval);
-        } else {
             if (arg->defval) {
                 // Target data in optstruct is supposed to be cleared (consider
                 // m_option freeing previously set dynamic data).
@@ -444,7 +428,15 @@ static struct m_config_option *m_config_add_option(struct m_config *config,
                 // string options): copy the option into temporary memory,
                 // clear the original option (to stop m_option from freeing the
                 // static data), copy it back.
-                if (co->data) {
+                // This would leak memory when done on aliased options.
+                bool aliased = false;
+                for (struct m_config_option *i = config->opts; i; i = i->next) {
+                    if (co->data == i->data) {
+                        aliased = true;
+                        break;
+                    }
+                }
+                if (!aliased) {
                     union m_option_value temp = {0};
                     m_option_copy(arg, &temp, co->data);
                     memset(co->data, 0, arg->type->size);
