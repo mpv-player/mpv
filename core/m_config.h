@@ -54,19 +54,6 @@ struct m_config_option {
     struct m_config_option *alias_owner;
 };
 
-// Profiles allow to predefine some sets of options that can then
-// be applied later on with the internal -profile option.
-
-// Config profile
-struct m_profile {
-    struct m_profile *next;
-    char *name;
-    char *desc;
-    int num_opts;
-    // Option/value pair array.
-    char **opts;
-};
-
 // Config object
 /** \ingroup Config */
 typedef struct m_config {

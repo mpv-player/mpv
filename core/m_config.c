@@ -34,7 +34,18 @@
 #include "core/m_option.h"
 #include "core/mp_msg.h"
 
+// Profiles allow to predefine some sets of options that can then
+// be applied later on with the internal -profile option.
 #define MAX_PROFILE_DEPTH 20
+
+struct m_profile {
+    struct m_profile *next;
+    char *name;
+    char *desc;
+    int num_opts;
+    // Option/value pair array.
+    char **opts;
+};
 
 static int parse_include(struct m_config *config, struct bstr param, bool set)
 {
