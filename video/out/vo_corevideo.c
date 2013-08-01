@@ -19,23 +19,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <QuartzCore/QuartzCore.h>
 #include <assert.h>
 
-#import "vo_corevideo.h"
+#include "talloc.h"
+#include "video/out/vo.h"
+#include "sub/sub.h"
+#include "core/m_option.h"
 
-// mplayer includes
-#import "talloc.h"
-#import "vo.h"
-#import "sub/sub.h"
-#import "core/m_option.h"
+#include "video/csputils.h"
+#include "video/vfcap.h"
+#include "video/mp_image.h"
 
-#import "video/csputils.h"
-#import "video/vfcap.h"
-#import "video/mp_image.h"
-
-#import "gl_common.h"
-#import "gl_osd.h"
-#import "cocoa_common.h"
+#include "gl_common.h"
+#include "gl_osd.h"
+#include "cocoa_common.h"
 
 struct quad {
     GLfloat lowerLeft[2];
