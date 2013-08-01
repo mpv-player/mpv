@@ -30,6 +30,7 @@
 #include "core/options.h"
 #include "core/m_config.h"
 #include "core/mp_msg.h"
+#include "core/mpv_global.h"
 
 // there are some globals:
 struct ao *global_ao;
@@ -121,27 +122,31 @@ const struct m_obj_list ao_obj_list = {
     .allow_trailer = true,
 };
 
-static struct ao *ao_create(bool probing, struct MPOpts *opts,
+static struct ao *ao_create(bool probing, struct mpv_global *global,
                             struct input_ctx *input_ctx,
                             struct encode_lavc_context *encode_lavc_ctx,
                             int samplerate, int format, struct mp_chmap channels,
                             char *name, char **args)
 {
+    struct mp_log *log = mp_log_new(NULL, global->log, "ao");
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &ao_obj_list, bstr0(name))) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Audio output %s not found!\n", name);
+        mp_tmsg_log(log, MSGL_ERR, "Audio output %s not found!\n", name);
+        talloc_free(log);
         return NULL;
     };
     struct ao *ao = talloc_ptrtype(NULL, ao);
+    talloc_steal(ao, log);
     *ao = (struct ao) {
         .driver = desc.p,
         .probing = probing,
-        .opts = opts,
+        .opts = global->opts,
         .encode_lavc_ctx = encode_lavc_ctx,
         .input_ctx = input_ctx,
         .samplerate = samplerate,
         .channels = channels,
         .format = format,
+        .log = mp_log_new(ao, log, name),
     };
     if (ao->driver->encode != !!ao->encode_lavc_ctx)
         goto error;
@@ -158,19 +163,19 @@ error:
     return NULL;
 }
 
-struct ao *ao_init_best(struct MPOpts *opts,
+struct ao *ao_init_best(struct mpv_global *global,
                         struct input_ctx *input_ctx,
                         struct encode_lavc_context *encode_lavc_ctx,
                         int samplerate, int format, struct mp_chmap channels)
 {
-    struct m_obj_settings *ao_list = opts->audio_driver_list;
+    struct m_obj_settings *ao_list = global->opts->audio_driver_list;
     if (ao_list && ao_list[0].name) {
         for (int n = 0; ao_list[n].name; n++) {
             if (strlen(ao_list[n].name) == 0)
                 goto autoprobe;
             mp_tmsg(MSGT_AO, MSGL_V, "Trying preferred audio driver '%s'\n",
                     ao_list[n].name);
-            struct ao *ao = ao_create(false, opts, input_ctx, encode_lavc_ctx,
+            struct ao *ao = ao_create(false, global, input_ctx, encode_lavc_ctx,
                                       samplerate, format, channels,
                                       ao_list[n].name, ao_list[n].attribs);
             if (ao)
@@ -183,7 +188,7 @@ struct ao *ao_init_best(struct MPOpts *opts,
 autoprobe:
     // now try the rest...
     for (int i = 0; audio_out_drivers[i]; i++) {
-        struct ao *ao = ao_create(true, opts, input_ctx, encode_lavc_ctx,
+        struct ao *ao = ao_create(true, global, input_ctx, encode_lavc_ctx,
                                   samplerate, format, channels,
                           (char *)audio_out_drivers[i]->info->short_name, NULL);
         if (ao)

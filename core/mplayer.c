@@ -1650,8 +1650,9 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->initialized_flags |= INITIALIZED_AO;
         mp_chmap_remove_useless_channels(&ao_channels,
                                          &opts->audio_output_channels);
-        mpctx->ao = ao_init_best(opts, mpctx->input, mpctx->encode_lavc_ctx,
-                                 ao_srate, ao_format, ao_channels);
+        mpctx->ao = ao_init_best(mpctx->global, mpctx->input,
+                                 mpctx->encode_lavc_ctx, ao_srate, ao_format,
+                                 ao_channels);
         struct ao *ao = mpctx->ao;
         if (!ao) {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR,

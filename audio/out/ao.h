@@ -93,11 +93,13 @@ struct ao {
     struct encode_lavc_context *encode_lavc_ctx;
     struct MPOpts *opts;
     struct input_ctx *input_ctx;
+    struct mp_log *log; // Using e.g. "[ao/coreaudio]" as prefix
 };
 
 extern char *ao_subdevice;
 
-struct ao *ao_init_best(struct MPOpts *opts,
+struct mpv_global;
+struct ao *ao_init_best(struct mpv_global *global,
                         struct input_ctx *input_ctx,
                         struct encode_lavc_context *encode_lavc_ctx,
                         int samplerate, int format, struct mp_chmap channels);
