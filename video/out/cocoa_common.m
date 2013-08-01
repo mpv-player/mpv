@@ -95,6 +95,8 @@ struct vo_cocoa_state {
     NSLock *lock;
     bool enable_resize_redraw;
     void (*resize_redraw)(struct vo *vo, int w, int h);
+
+    struct mp_log *log;
 };
 
 static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
@@ -111,6 +113,7 @@ static struct vo_cocoa_state *vo_cocoa_init_state(struct vo *vo)
         .accumulated_scroll = 0,
         .lock = [[NSLock alloc] init],
         .enable_resize_redraw = NO,
+        .log = mp_log_new(s, vo->log, "cocoa"),
     };
     return s;
 }
@@ -197,13 +200,15 @@ void vo_cocoa_register_resize_callback(struct vo *vo,
     s->resize_redraw = cb;
 }
 
-static int get_screen_handle(int identifier, NSWindow *window, NSScreen **screen) {
+static int get_screen_handle(struct vo *vo, int identifier, NSWindow *window,
+                             NSScreen **screen) {
+    struct vo_cocoa_state *s = vo->cocoa;
     NSArray *screens  = [NSScreen screens];
     int n_of_displays = [screens count];
 
     if (identifier >= n_of_displays) { // check if the identifier is out of bounds
-        mp_msg(MSGT_VO, MSGL_INFO, "[cocoa] Screen ID %d does not exist, "
-            "falling back to main device\n", identifier);
+        MP_INFO(s, "Screen ID %d does not exist, falling back to main "
+                    "device\n", identifier);
         identifier = -1;
     }
 
@@ -223,8 +228,8 @@ static void update_screen_info(struct vo *vo)
 {
     struct vo_cocoa_state *s = vo->cocoa;
     struct mp_vo_opts *opts = vo->opts;
-    get_screen_handle(opts->screen_id, s->window, &s->current_screen);
-    get_screen_handle(opts->fsscreen_id, s->window, &s->fs_screen);
+    get_screen_handle(vo, opts->screen_id, s->window, &s->current_screen);
+    get_screen_handle(vo, opts->fsscreen_id, s->window, &s->fs_screen);
 }
 
 static void vo_cocoa_update_screen_info(struct vo *vo)
@@ -364,8 +369,7 @@ static int create_gl_context(struct vo *vo, int gl3profile)
         [[[NSOpenGLPixelFormat alloc] initWithAttributes:attr] autorelease];
 
     if (!s->pixelFormat) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-            "[cocoa] Trying to build invalid OpenGL pixel format\n");
+        MP_ERR(s, "Trying to build invalid OpenGL pixel format\n");
         return -1;
     }
 
