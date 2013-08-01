@@ -46,10 +46,10 @@ static void audio_pause(struct ao *ao);
 static void audio_resume(struct ao *ao);
 static void reset(struct ao *ao);
 
-static void print_buffer(struct mp_ring *buffer)
+static void print_buffer(struct ao *ao, struct mp_ring *buffer)
 {
     void *tctx = talloc_new(NULL);
-    ca_msg(MSGL_V, "%s\n", mp_ring_repr(buffer, tctx));
+    MP_VERBOSE(ao, "%s\n", mp_ring_repr(buffer, tctx));
     talloc_free(tctx);
 }
 
@@ -110,7 +110,7 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
     int requested   = buf.mDataByteSize;
 
     if (mp_ring_buffered(p->buffer) < requested) {
-        ca_msg(MSGL_V, "buffer underrun\n");
+        MP_VERBOSE(ao, "buffer underrun\n");
         audio_pause(ao);
     } else {
         mp_ring_read(p->buffer, buf.mData, requested);
@@ -197,7 +197,7 @@ coreaudio_error:
     return CONTROL_ERROR;
 }
 
-static void print_list(void)
+static void print_list(struct ao *ao)
 {
     char *help = talloc_strdup(NULL, "Available output devices:\n");
 
@@ -226,7 +226,7 @@ static void print_list(void)
     talloc_free(devs);
 
 coreaudio_error:
-    ca_msg(MSGL_INFO, "%s", help);
+    MP_INFO(ao, "%s", help);
     talloc_free(help);
 }
 
@@ -238,7 +238,7 @@ static int init(struct ao *ao)
     OSStatus err;
     struct priv *p   = ao->priv;
 
-    if (p->opt_list) print_list();
+    if (p->opt_list) print_list(ao);
 
     struct priv_d *d = talloc_zero(p, struct priv_d);
 
@@ -271,9 +271,8 @@ static int init(struct ao *ao)
     err = CA_GET_STR(selected_device, kAudioObjectPropertyName, &device_name);
     CHECK_CA_ERROR("could not get selected audio device name");
 
-    ca_msg(MSGL_V,
-           "selected audio output device: %s (%" PRIu32 ")\n",
-           device_name, selected_device);
+    MP_VERBOSE(ao, "selected audio output device: %s (%" PRIu32 ")\n",
+                   device_name, selected_device);
 
     talloc_free(device_name);
 
@@ -283,7 +282,7 @@ static int init(struct ao *ao)
     bool supports_digital = false;
     /* Probe whether device support S/PDIF stream output if input is AC3 stream. */
     if (AF_FORMAT_IS_AC3(ao->format)) {
-        if (ca_device_supports_digital(selected_device))
+        if (ca_device_supports_digital(ao, selected_device))
             supports_digital = true;
     }
 
@@ -298,7 +297,7 @@ static int init(struct ao *ao)
         uint32_t *bitmaps;
         size_t   n_bitmaps;
 
-        ca_bitmaps_from_layouts(layouts, n_layouts, &bitmaps, &n_bitmaps);
+        ca_bitmaps_from_layouts(ao, layouts, n_layouts, &bitmaps, &n_bitmaps);
         talloc_free(layouts);
 
         struct mp_chmap_sel chmap_sel = {0};
@@ -344,7 +343,7 @@ static int init(struct ao *ao)
         asbd.mFramesPerPacket * asbd.mChannelsPerFrame *
         (asbd.mBitsPerChannel / 8);
 
-    ca_print_asbd("source format:", &asbd);
+    ca_print_asbd(ao, "source format:", &asbd);
 
     if (supports_digital)
         return init_digital(ao, asbd);
@@ -373,7 +372,7 @@ static int init_lpcm(struct ao *ao, AudioStreamBasicDescription asbd)
 
     AudioComponent comp = AudioComponentFindNext(NULL, &desc);
     if (comp == NULL) {
-        ca_msg(MSGL_ERR, "unable to find audio component\n");
+        MP_ERR(ao, "unable to find audio component\n");
         goto coreaudio_error;
     }
 
@@ -417,7 +416,7 @@ static int init_lpcm(struct ao *ao, AudioStreamBasicDescription asbd)
     }
 
     p->buffer = mp_ring_new(p, get_ring_size(ao));
-    print_buffer(p->buffer);
+    print_buffer(ao, p->buffer);
 
     AURenderCallbackStruct render_cb = (AURenderCallbackStruct) {
         .inputProc       = render_cb_lpcm,
@@ -454,14 +453,14 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     CHECK_CA_WARN("could not check whether device is alive");
 
     if (!is_alive)
-        ca_msg(MSGL_WARN, "device is not alive\n");
+        MP_WARN(ao , "device is not alive\n");
 
     p->is_digital = 1;
 
     err = ca_lock_device(p->device, &d->hog_pid);
     CHECK_CA_WARN("failed to set hogmode");
 
-    err = ca_disable_mixing(p->device, &d->changed_mixing);
+    err = ca_disable_mixing(ao, p->device, &d->changed_mixing);
     CHECK_CA_WARN("failed to disable mixing");
 
     AudioStreamID *streams;
@@ -474,7 +473,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     CHECK_CA_ERROR("could not get number of streams");
 
     for (int i = 0; i < n_streams && d->stream_idx < 0; i++) {
-        bool digital = ca_stream_supports_digital(streams[i]);
+        bool digital = ca_stream_supports_digital(ao, streams[i]);
 
         if (digital) {
             err = CA_GET(streams[i], kAudioStreamPropertyPhysicalFormat,
@@ -525,11 +524,11 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
     talloc_free(streams);
 
     if (d->stream_idx < 0) {
-        ca_msg(MSGL_WARN, "can't find any digital output stream format\n");
+        MP_WARN(ao , "can't find any digital output stream format\n");
         goto coreaudio_error;
     }
 
-    if (!ca_change_format(d->stream, d->stream_asbd))
+    if (!ca_change_format(ao, d->stream, d->stream_asbd))
         goto coreaudio_error;
 
     void *changed = (void *) &(d->stream_asbd_changed);
@@ -544,8 +543,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
         ao->format = AF_FORMAT_AC3_LE;
     else if (d->stream_asbd.mFormatFlags & kAudioFormatFlagIsBigEndian)
 #endif
-        ca_msg(MSGL_WARN,
-               "stream has non-native byte order, digital output may fail\n");
+        MP_WARN(ao, "stream has non-native byte order, output may fail\n");
 
     ao->samplerate = d->stream_asbd.mSampleRate;
     ao->bps = ao->samplerate *
@@ -553,7 +551,7 @@ static int init_digital(struct ao *ao, AudioStreamBasicDescription asbd)
                    d->stream_asbd.mFramesPerPacket);
 
     p->buffer = mp_ring_new(p, get_ring_size(ao));
-    print_buffer(p->buffer);
+    print_buffer(ao, p->buffer);
 
     err = AudioDeviceCreateIOProcID(p->device,
                                     (AudioDeviceIOProc)render_cb_digital,
@@ -580,11 +578,11 @@ static int play(struct ao *ao, void *output_samples, int num_bytes, int flags)
     // Check whether we need to reset the digital output stream.
     if (p->is_digital && d->stream_asbd_changed) {
         d->stream_asbd_changed = 0;
-        if (ca_stream_supports_digital(d->stream)) {
-            if (!ca_change_format(d->stream, d->stream_asbd)) {
-                ca_msg(MSGL_WARN, "can't restore digital output\n");
+        if (ca_stream_supports_digital(ao, d->stream)) {
+            if (!ca_change_format(ao, d->stream, d->stream_asbd)) {
+                MP_WARN(ao , "can't restore digital output\n");
             } else {
-                ca_msg(MSGL_WARN, "restoring digital output succeeded.\n");
+                MP_WARN(ao, "restoring digital output succeeded.\n");
                 reset(ao);
             }
         }
@@ -642,10 +640,10 @@ static void uninit(struct ao *ao, bool immed)
         err = AudioDeviceDestroyIOProcID(p->device, d->render_cb);
         CHECK_CA_WARN("failed to remove device render callback");
 
-        if (!ca_change_format(d->stream, d->original_asbd))
-            ca_msg(MSGL_WARN, "can't revert to original device format");
+        if (!ca_change_format(ao, d->stream, d->original_asbd))
+            MP_WARN(ao, "can't revert to original device format");
 
-        err = ca_enable_mixing(p->device, d->changed_mixing);
+        err = ca_enable_mixing(ao, p->device, d->changed_mixing);
         CHECK_CA_WARN("can't re-enable mixing");
 
         err = ca_unlock_device(p->device, &d->hog_pid);

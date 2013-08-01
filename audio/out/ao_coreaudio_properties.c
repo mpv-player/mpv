@@ -60,13 +60,13 @@ OSStatus ca_get_ary(AudioObjectID id, ca_scope scope, ca_sel selector,
     };
 
     err = AudioObjectGetPropertyDataSize(id, &p_addr, 0, NULL, &p_size);
-    CHECK_CA_ERROR("can't fetch property size");
+    CHECK_CA_ERROR_SILENT_L(coreaudio_error);
 
     *data = talloc_size(NULL, p_size);
     *elements = p_size / element_size;
 
     err = ca_get(id, scope, selector, p_size, *data);
-    CHECK_CA_ERROR_L(coreaudio_error_free, "can't fetch property data");
+    CHECK_CA_ERROR_SILENT_L(coreaudio_error_free);
 
     return err;
 coreaudio_error_free:
@@ -81,7 +81,7 @@ OSStatus ca_get_str(AudioObjectID id, ca_scope scope, ca_sel selector,
     CFStringRef string;
     OSStatus err =
         ca_get(id, scope, selector, sizeof(CFStringRef), (void **)&string);
-    CHECK_CA_ERROR("Can't fetch string property");
+    CHECK_CA_ERROR_SILENT_L(coreaudio_error);
 
     CFIndex size =
         CFStringGetMaximumSizeForEncoding(

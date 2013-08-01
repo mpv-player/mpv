@@ -52,24 +52,24 @@ char *fourcc_repr(void *talloc_ctx, uint32_t code)
     return repr;
 }
 
-bool check_ca_st(int level, OSStatus code, const char *message)
+bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message)
 {
     if (code == noErr) return true;
 
     char *error_string = fourcc_repr(NULL, code);
-    ca_msg(level, "%s (%s)\n", message, error_string);
+    mp_msg_log(ao->log, level, "%s (%s)\n", message, error_string);
     talloc_free(error_string);
 
     return false;
 }
 
-void ca_print_asbd(const char *description,
+void ca_print_asbd(struct ao *ao, const char *description,
                    const AudioStreamBasicDescription *asbd)
 {
     uint32_t flags  = asbd->mFormatFlags;
     char *format    = fourcc_repr(NULL, asbd->mFormatID);
 
-    ca_msg(MSGL_V,
+    MP_VERBOSE(ao,
        "%s %7.1fHz %" PRIu32 "bit [%s]"
        "[%" PRIu32 "][%" PRIu32 "][%" PRIu32 "]"
        "[%" PRIu32 "][%" PRIu32 "] "
@@ -98,7 +98,7 @@ bool ca_format_is_digital(AudioStreamBasicDescription asbd)
     return false;
 }
 
-bool ca_stream_supports_digital(AudioStreamID stream)
+bool ca_stream_supports_digital(struct ao *ao, AudioStreamID stream)
 {
     AudioStreamRangedDescription *formats = NULL;
     size_t n_formats;
@@ -111,7 +111,7 @@ bool ca_stream_supports_digital(AudioStreamID stream)
 
     for (int i = 0; i < n_formats; i++) {
         AudioStreamBasicDescription asbd = formats[i].mFormat;
-        ca_print_asbd("supported format:", &(asbd));
+        ca_print_asbd(ao, "supported format:", &(asbd));
         if (ca_format_is_digital(asbd)) {
             talloc_free(formats);
             return true;
@@ -123,7 +123,7 @@ coreaudio_error:
     return false;
 }
 
-bool ca_device_supports_digital(AudioDeviceID device)
+bool ca_device_supports_digital(struct ao *ao, AudioDeviceID device)
 {
     AudioStreamID *streams = NULL;
     size_t n_streams;
@@ -135,7 +135,7 @@ bool ca_device_supports_digital(AudioDeviceID device)
     CHECK_CA_ERROR("could not get number of streams.");
 
     for (int i = 0; i < n_streams; i++) {
-        if (ca_stream_supports_digital(streams[i])) {
+        if (ca_stream_supports_digital(ao, streams[i])) {
             talloc_free(streams);
             return true;
         }
@@ -156,8 +156,6 @@ OSStatus ca_property_listener(AudioObjectPropertySelector selector,
 
     for (int i = 0; i < n_addresses; i++) {
         if (addresses[i].mSelector == selector) {
-            ca_msg(MSGL_WARN, "event: property %s changed\n",
-                              fourcc_repr(talloc_ctx, selector));
             if (data) *(volatile int *)data = 1;
             break;
         }
@@ -199,8 +197,8 @@ OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid) {
     return noErr;
 }
 
-static OSStatus ca_change_mixing(AudioDeviceID device, uint32_t val,
-                                 bool *changed) {
+static OSStatus ca_change_mixing(struct ao *ao, AudioDeviceID device,
+                                 uint32_t val, bool *changed) {
     *changed = false;
 
     AudioObjectPropertyAddress p_addr = (AudioObjectPropertyAddress) {
@@ -236,14 +234,14 @@ static OSStatus ca_change_mixing(AudioDeviceID device, uint32_t val,
     return noErr;
 }
 
-OSStatus ca_disable_mixing(AudioDeviceID device, bool *changed) {
-    return ca_change_mixing(device, 0, changed);
+OSStatus ca_disable_mixing(struct ao *ao, AudioDeviceID device, bool *changed) {
+    return ca_change_mixing(ao, device, 0, changed);
 }
 
-OSStatus ca_enable_mixing(AudioDeviceID device, bool changed) {
+OSStatus ca_enable_mixing(struct ao *ao, AudioDeviceID device, bool changed) {
     if (changed) {
         bool dont_care = false;
-        return ca_change_mixing(device, 1, &dont_care);
+        return ca_change_mixing(ao, device, 1, &dont_care);
     }
 
     return noErr;
@@ -275,14 +273,14 @@ OSStatus ca_disable_device_listener(AudioDeviceID device, void *flag) {
     return ca_change_device_listening(device, flag, false);
 }
 
-bool ca_change_format(AudioStreamID stream,
+bool ca_change_format(struct ao *ao, AudioStreamID stream,
                       AudioStreamBasicDescription change_format)
 {
     OSStatus err = noErr;
     AudioObjectPropertyAddress p_addr;
     volatile int stream_format_changed = 0;
 
-    ca_print_asbd("setting stream format:", &change_format);
+    ca_print_asbd(ao, "setting stream format:", &change_format);
 
     /* Install the callback. */
     p_addr = (AudioObjectPropertyAddress) {
@@ -314,13 +312,13 @@ bool ca_change_format(AudioStreamID stream,
         if (stream_format_changed) {
             stream_format_changed = 0;
         } else {
-            ca_msg(MSGL_V, "reached timeout\n");
+            MP_VERBOSE(ao, "reached timeout\n");
         }
 
         AudioStreamBasicDescription actual_format;
         err = CA_GET(stream, kAudioStreamPropertyPhysicalFormat, &actual_format);
 
-        ca_print_asbd("actual format in use:", &actual_format);
+        ca_print_asbd(ao, "actual format in use:", &actual_format);
         if (actual_format.mSampleRate == change_format.mSampleRate &&
             actual_format.mFormatID == change_format.mFormatID &&
             actual_format.mFramesPerPacket == change_format.mFramesPerPacket) {
@@ -338,33 +336,8 @@ bool ca_change_format(AudioStreamID stream,
     return format_set;
 }
 
-void ca_bitmaps_from_layouts(AudioChannelLayout *layouts, size_t n_layouts,
-                             uint32_t **bitmaps, size_t *n_bitmaps)
-{
-    *n_bitmaps = 0;
-    *bitmaps = talloc_array_size(NULL, sizeof(uint32_t), n_layouts);
-
-    for (int i=0; i < n_layouts; i++) {
-        uint32_t bitmap = 0;
-
-        switch (layouts[i].mChannelLayoutTag) {
-        case kAudioChannelLayoutTag_UseChannelBitmap:
-            (*bitmaps)[(*n_bitmaps)++] = layouts[i].mChannelBitmap;
-            break;
-
-        case kAudioChannelLayoutTag_UseChannelDescriptions:
-            if (ca_bitmap_from_ch_desc(&layouts[i], &bitmap))
-                (*bitmaps)[(*n_bitmaps)++] = bitmap;
-            break;
-
-        default:
-            if (ca_bitmap_from_ch_tag(&layouts[i], &bitmap))
-                (*bitmaps)[(*n_bitmaps)++] = bitmap;
-        }
-    }
-}
-
-bool ca_bitmap_from_ch_desc(AudioChannelLayout *layout, uint32_t *bitmap)
+static bool ca_bitmap_from_ch_desc(struct ao *ao, AudioChannelLayout *layout,
+                                   uint32_t *bitmap)
 {
     // If the channel layout uses channel descriptions, from my
     // exepriments there are there three possibile cases:
@@ -385,9 +358,8 @@ bool ca_bitmap_from_ch_desc(AudioChannelLayout *layout, uint32_t *bitmap)
         if (label == kAudioChannelLabel_UseCoordinates ||
             label == kAudioChannelLabel_Unknown ||
             label > kAudioChannelLabel_TopBackRight) {
-            ca_msg(MSGL_V,
-                    "channel label=%d unusable to build channel "
-                    "bitmap, skipping layout\n", label);
+            MP_VERBOSE(ao, "channel label=%d unusable to build channel "
+                           "bitmap, skipping layout\n", label);
             all_channels_valid = false;
         } else {
             *bitmap |= 1ULL << (label - 1);
@@ -397,7 +369,8 @@ bool ca_bitmap_from_ch_desc(AudioChannelLayout *layout, uint32_t *bitmap)
     return all_channels_valid;
 }
 
-bool ca_bitmap_from_ch_tag(AudioChannelLayout *layout, uint32_t *bitmap)
+static bool ca_bitmap_from_ch_tag(struct ao *ao, AudioChannelLayout *layout,
+                                  uint32_t *bitmap)
 {
     // This layout is defined exclusively by it's tag. Use the Audio
     // Format Services API to try and convert it to a bitmap that
@@ -410,11 +383,37 @@ bool ca_bitmap_from_ch_tag(AudioChannelLayout *layout, uint32_t *bitmap)
         sizeof(AudioChannelLayoutTag), &tag,
         &bitmap_size, bitmap);
     if (err != noErr) {
-        ca_msg(MSGL_V,
-                "channel layout tag=%d unusable to build channel "
-                "bitmap, skipping layout\n", tag);
+        MP_VERBOSE(ao, "channel layout tag=%d unusable to build channel "
+                       "bitmap, skipping layout\n", tag);
         return false;
     } else {
         return true;
+    }
+}
+
+void ca_bitmaps_from_layouts(struct ao *ao,
+                             AudioChannelLayout *layouts, size_t n_layouts,
+                             uint32_t **bitmaps, size_t *n_bitmaps)
+{
+    *n_bitmaps = 0;
+    *bitmaps = talloc_array_size(NULL, sizeof(uint32_t), n_layouts);
+
+    for (int i=0; i < n_layouts; i++) {
+        uint32_t bitmap = 0;
+
+        switch (layouts[i].mChannelLayoutTag) {
+        case kAudioChannelLayoutTag_UseChannelBitmap:
+            (*bitmaps)[(*n_bitmaps)++] = layouts[i].mChannelBitmap;
+            break;
+
+        case kAudioChannelLayoutTag_UseChannelDescriptions:
+            if (ca_bitmap_from_ch_desc(ao, &layouts[i], &bitmap))
+                (*bitmaps)[(*n_bitmaps)++] = bitmap;
+            break;
+
+        default:
+            if (ca_bitmap_from_ch_tag(ao, &layouts[i], &bitmap))
+                (*bitmaps)[(*n_bitmaps)++] = bitmap;
+        }
     }
 }

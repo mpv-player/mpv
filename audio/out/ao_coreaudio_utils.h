@@ -23,29 +23,34 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include "core/mp_msg.h"
+#include "audio/out/ao.h"
 
-#define ca_msg(a, b ...) mp_msg(MSGT_AO, a, "AO: [coreaudio] " b)
 #define CA_CFSTR_ENCODING kCFStringEncodingASCII
 
 char *fourcc_repr(void *talloc_ctx, uint32_t code);
-bool check_ca_st(int level, OSStatus code, const char *message);
+bool check_ca_st(struct ao *ao, int level, OSStatus code, const char *message);
 
 #define CHECK_CA_ERROR_L(label, message) \
     do { \
-        if (!check_ca_st(MSGL_ERR, err, message)) { \
+        if (!check_ca_st(ao, MSGL_ERR, err, message)) { \
             goto label; \
         } \
     } while (0)
 
 #define CHECK_CA_ERROR(message) CHECK_CA_ERROR_L(coreaudio_error, message)
-#define CHECK_CA_WARN(message)  check_ca_st(MSGL_WARN, err, message)
+#define CHECK_CA_WARN(message)  check_ca_st(ao, MSGL_WARN, err, message)
 
-void ca_print_asbd(const char *description,
+#define CHECK_CA_ERROR_SILENT_L(label) \
+    do { \
+        if (err != noErr) goto label; \
+    } while (0)
+
+void ca_print_asbd(struct ao *ao, const char *description,
                    const AudioStreamBasicDescription *asbd);
 
 bool ca_format_is_digital(AudioStreamBasicDescription asbd);
-bool ca_stream_supports_digital(AudioStreamID stream);
-bool ca_device_supports_digital(AudioDeviceID device);
+bool ca_stream_supports_digital(struct ao *ao, AudioStreamID stream);
+bool ca_device_supports_digital(struct ao *ao, AudioDeviceID device);
 
 OSStatus ca_property_listener(AudioObjectPropertySelector selector,
                               AudioObjectID object, uint32_t n_addresses,
@@ -62,17 +67,17 @@ OSStatus ca_device_listener(AudioObjectID object, uint32_t n_addresses,
 
 OSStatus ca_lock_device(AudioDeviceID device, pid_t *pid);
 OSStatus ca_unlock_device(AudioDeviceID device, pid_t *pid);
-OSStatus ca_disable_mixing(AudioDeviceID device, bool *changed);
-OSStatus ca_enable_mixing(AudioDeviceID device, bool changed);
+OSStatus ca_disable_mixing(struct ao *ao, AudioDeviceID device, bool *changed);
+OSStatus ca_enable_mixing(struct ao *ao, AudioDeviceID device, bool changed);
+
 OSStatus ca_enable_device_listener(AudioDeviceID device, void *flag);
 OSStatus ca_disable_device_listener(AudioDeviceID device, void *flag);
 
-bool ca_change_format(AudioStreamID stream,
+bool ca_change_format(struct ao *ao, AudioStreamID stream,
                       AudioStreamBasicDescription change_format);
 
-bool ca_bitmap_from_ch_desc(AudioChannelLayout *layout, uint32_t *bitmap);
-bool ca_bitmap_from_ch_tag(AudioChannelLayout *layout, uint32_t *bitmap);
-void ca_bitmaps_from_layouts(AudioChannelLayout *layouts, size_t n_layouts,
+void ca_bitmaps_from_layouts(struct ao *ao,
+                             AudioChannelLayout *layouts, size_t n_layouts,
                              uint32_t **bitmaps, size_t *n_bitmaps);
 
 #endif /* MPV_COREAUDIO_UTILS_H */
