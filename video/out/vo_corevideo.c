@@ -81,13 +81,6 @@ static int init_gl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     struct priv *p = vo->priv;
     GL *gl = p->mpglctx->gl;
 
-    const char *vendor     = gl->GetString(GL_VENDOR);
-    const char *version    = gl->GetString(GL_VERSION);
-    const char *renderer   = gl->GetString(GL_RENDERER);
-
-    mp_msg(MSGT_VO, MSGL_V, "[vo_corevideo] Running on OpenGL '%s' by '%s',"
-           " version '%s'\n", renderer, vendor, version);
-
     gl->Disable(GL_BLEND);
     gl->Disable(GL_DEPTH_TEST);
     gl->DepthMask(GL_FALSE);
@@ -146,8 +139,7 @@ static void prepare_texture(struct vo *vo)
     error = CVOpenGLTextureCacheCreateTextureFromImage(NULL,
                 p->textureCache, p->pixelBuffer, 0, &p->texture);
     if(error != kCVReturnSuccess)
-        mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL"
-                                 " texture(%d)\n", error);
+        MP_ERR(vo, "Failed to create OpenGL texture(%d)\n", error);
 
     CVOpenGLTextureGetCleanTexCoords(p->texture, q->lowerLeft, q->lowerRight,
                                                  q->upperRight, q->upperLeft);
@@ -213,15 +205,13 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         error = CVOpenGLTextureCacheCreate(NULL, 0, vo_cocoa_cgl_context(vo),
                     vo_cocoa_cgl_pixel_format(vo), 0, &p->textureCache);
         if(error != kCVReturnSuccess)
-            mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create OpenGL"
-                                     " texture Cache(%d)\n", error);
+            MP_ERR(vo, "Failed to create OpenGL texture Cache(%d)\n", error);
 
         error = CVPixelBufferCreateWithBytes(NULL, mpi->w, mpi->h,
                     p->pixelFormat, mpi->planes[0], mpi->stride[0],
                     NULL, NULL, NULL, &p->pixelBuffer);
         if(error != kCVReturnSuccess)
-            mp_msg(MSGT_VO, MSGL_ERR,"[vo_corevideo] Failed to create Pixel"
-                                     "Buffer(%d)\n", error);
+            MP_ERR(vo, "Failed to create PixelBuffer(%d)\n", error);
     }
 
     do_render(vo);
@@ -315,8 +305,8 @@ static int get_image_fmt(struct vo *vo)
         case k32ARGBPixelFormat: return IMGFMT_ARGB;
         case k32BGRAPixelFormat: return IMGFMT_BGRA;
     }
-    mp_msg(MSGT_VO, MSGL_ERR, "[vo_corevideo] Failed to convert pixel format. "
-        "Please contact the developers. PixelFormat: %d\n", p->pixelFormat);
+    MP_ERR(vo, "Failed to convert pixel format. Please contact the "
+               "developers. PixelFormat: %d\n", p->pixelFormat);
     return -1;
 }
 
