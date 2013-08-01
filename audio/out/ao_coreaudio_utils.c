@@ -26,9 +26,6 @@
 #include "audio/out/ao_coreaudio_properties.h"
 #include "osdep/timer.h"
 
-#define ca_msg(a, b ...) mp_msg(MSGT_AO, a, "AO: [coreaudio] " b)
-#define CA_CFSTR_ENCODING kCFStringEncodingASCII
-
 char *fourcc_repr(void *talloc_ctx, uint32_t code)
 {
     // Extract FourCC letters from the uint32_t and finde out if it's a valid
