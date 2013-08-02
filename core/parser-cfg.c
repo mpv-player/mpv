@@ -41,9 +41,11 @@ static int recursion_depth = 0;
 /// Setup the \ref Config from a config file.
 /** \param config The config object.
  *  \param conffile Path to the config file.
+ *  \param flags M_SETOPT_* bits
  *  \return 1 on sucess, -1 on error, 0 if file not accessible.
  */
-int m_config_parse_config_file(m_config_t *config, const char *conffile)
+int m_config_parse_config_file(m_config_t *config, const char *conffile,
+                               int flags)
 {
 #define PRINT_LINENUM   mp_msg(MSGT_CFGPARSER, MSGL_ERR, "%s:%d: ", conffile, line_num)
 #define MAX_LINE_LEN    10000
@@ -62,6 +64,8 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
     int ret = 1;
     int errors = 0;
     m_profile_t *profile = NULL;
+
+    flags = flags | M_SETOPT_FROM_CONFIG_FILE;
 
     mp_msg(MSGT_CFGPARSER, MSGL_V, "Reading config file %s", conffile);
 
@@ -219,8 +223,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile)
         if (profile) {
             tmp = m_config_set_profile_option(config, profile, bopt, bparam);
         } else {
-            tmp = m_config_set_option_ext(config, bopt, bparam,
-                                          M_SETOPT_FROM_CONFIG_FILE);
+            tmp = m_config_set_option_ext(config, bopt, bparam, flags);
         }
         if (tmp < 0) {
             PRINT_LINENUM;

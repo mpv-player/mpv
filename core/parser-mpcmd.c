@@ -131,16 +131,15 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
     struct playlist_param *local_params = 0;
 
     assert(config != NULL);
-    assert(!config->file_local_mode);
 
     mode = GLOBAL;
 
     struct parse_state p = {config, argc, argv};
     while (split_opt(&p)) {
         if (p.is_opt) {
+            int flags = mode == LOCAL ? M_SETOPT_BACKUP | M_SETOPT_CHECK_ONLY : 0;
             int r;
-            r = m_config_set_option_ext(config, p.arg, p.param,
-                                        mode == LOCAL ? M_SETOPT_CHECK_ONLY : 0);
+            r = m_config_set_option_ext(config, p.arg, p.param, flags);
             if (r <= M_OPT_EXIT) {
                 ret = r;
                 goto err_out;
@@ -161,8 +160,6 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                     goto err_out;
                 }
                 mode = LOCAL;
-                // Needed for option checking.
-                m_config_enter_file_local(config);
                 assert(!local_start);
                 local_start = files->last;
                 continue;
@@ -191,7 +188,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 }
                 local_params_count = 0;
                 mode = GLOBAL;
-                m_config_leave_file_local(config);
+                m_config_restore_backups(config);
                 local_start = NULL;
                 shuffle = false;
                 continue;
@@ -284,8 +281,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
 
 err_out:
     talloc_free(local_params);
-    if (config->file_local_mode)
-        m_config_leave_file_local(config);
+    m_config_restore_backups(config);
     return ret;
 }
 

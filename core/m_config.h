@@ -54,11 +54,6 @@ typedef struct m_config {
     // Registered options.
     struct m_config_option *opts; // all options, even suboptions
 
-    // When options are set (via m_config_set_option or m_config_set_profile),
-    // back up the old value (unless it's already backed up). Used for restoring
-    // global options when per-file options are set.
-    bool file_local_mode;
-
     // List of defined profiles.
     struct m_profile *profiles;
     // Depth when recursively including profiles.
@@ -67,7 +62,7 @@ typedef struct m_config {
     struct m_opt_backup *backup_opts;
 
     bool use_profiles;
-    int (*includefunc)(struct m_config *conf, char *filename);
+    int (*includefunc)(struct m_config *conf, char *filename, int flags);
 
     const void *optstruct_defaults;
     size_t optstruct_size;
@@ -101,15 +96,22 @@ int m_config_set_obj_params(struct m_config *conf, char **args);
 int m_config_initialize_obj(struct m_config *config, struct m_obj_desc *desc,
                             void **ppriv, char ***pargs);
 
-void m_config_enter_file_local(struct m_config *config);
-void m_config_leave_file_local(struct m_config *config);
-void m_config_mark_file_local(struct m_config *config, const char *opt);
-void m_config_mark_all_file_local(struct m_config *config);
+// Make sure the option is backed up. If it's already backed up, do nothing.
+// All backed up options can be restored with m_config_restore_backups().
+void m_config_backup_opt(struct m_config *config, const char *opt);
+
+// Call m_config_backup_opt() on all options.
+void m_config_backup_all_opts(struct m_config *config);
+
+// Restore all options backed up with m_config_backup_opt(), and delete the
+// backups afterwards.
+void m_config_restore_backups(struct m_config *config);
 
 enum {
     M_SETOPT_PRE_PARSE_ONLY = 1,    // Silently ignore non-M_OPT_PRE_PARSE opt.
     M_SETOPT_CHECK_ONLY = 2,        // Don't set, just check name/value
     M_SETOPT_FROM_CONFIG_FILE = 4,  // Reject M_OPT_NOCFG opt. (print error)
+    M_SETOPT_BACKUP = 8,            // Call m_config_backup_opt() before
 };
 
 // Set the named option to the given string.
@@ -204,8 +206,10 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
  *
  *  \param config The config object.
  *  \param p The profile object.
+ *  \param flags M_SETOPT_* bits
  */
-void m_config_set_profile(struct m_config *config, struct m_profile *p);
+void m_config_set_profile(struct m_config *config, struct m_profile *p,
+                          int flags);
 
 void *m_config_alloc_struct(void *talloc_parent,
                             const struct m_sub_options *subopts);

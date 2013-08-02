@@ -337,11 +337,6 @@ struct m_option {
 // This option can't be set per-file when used with struct m_config.
 #define M_OPT_GLOBAL            (1 << 4)
 
-// This option is always considered per-file when used with struct m_config.
-// When playback of a file ends, the option value will be restored to the value
-// from before playback begin.
-#define M_OPT_LOCAL             (1 << 5)
-
 // The option should be set during command line pre-parsing
 #define M_OPT_PRE_PARSE         (1 << 6)
 
