@@ -43,7 +43,6 @@
 
 #include "stream.h"
 #include "demux/demux.h"
-#include "core/m_struct.h"
 #include "core/m_option.h"
 #include "core/mp_msg.h"
 #include "stream_radio.h"
@@ -118,18 +117,11 @@ typedef struct radio_driver_s {
     int (*get_frequency)(radio_priv_t* priv,float* frequency);
 } radio_driver_t;
 
-#define ST_OFF(f) M_ST_OFF(radio_param_t,f)
+#define OPT_BASE_STRUCT radio_param_t
 static const m_option_t stream_opts_fields[] = {
-    {"hostname", ST_OFF(freq_channel), CONF_TYPE_FLOAT, 0, 0 ,0, NULL},
-    {"filename", ST_OFF(capture), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-    { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-
-static const struct m_struct_st stream_opts = {
-    "radio",
-    sizeof(radio_param_t),
-    &stream_radio_defaults,
-    stream_opts_fields
+    OPT_FLOAT("title", freq_channel, 0),
+    OPT_STRING("device", capture, 0),
+    {0}
 };
 
 static void close_s(struct stream *stream);
@@ -824,7 +816,7 @@ static const radio_driver_t* radio_drivers[]={
  * Stream initialization
  * \return STREAM_OK if success, STREAM_ERROR otherwise
  */
-static int open_s(stream_t *stream,int mode, void* opts)
+static int open_s(stream_t *stream,int mode)
 {
     radio_priv_t* priv;
     float frequency=0;
@@ -842,7 +834,8 @@ static int open_s(stream_t *stream,int mode, void* opts)
         return STREAM_ERROR;
 
 
-    priv->radio_param=opts;
+    priv->radio_param=stream->priv;
+    stream->priv=NULL;
 
 #ifdef CONFIG_RADIO_CAPTURE
     if (priv->radio_param->capture && strncmp("capture",priv->radio_param->capture,7)==0)
@@ -961,8 +954,6 @@ static void close_s(struct stream *stream){
         close(priv->radio_fd);
     }
 
-    if(priv->radio_param)
-        m_struct_free(&stream_opts,priv->radio_param);
     free(priv);
     stream->priv=NULL;
 }
@@ -971,6 +962,12 @@ const stream_info_t stream_info_radio = {
     "radio",
     open_s,
     { "radio", NULL },
-    &stream_opts,
-    1 // Urls are an option string
+    .priv_size = sizeof(radio_param_t),
+    .priv_defaults = &stream_radio_defaults,
+    .options = stream_opts_fields,
+    .url_options = {
+        {"hostname", "freqchannel"},
+        {"username", "capture"},
+        {0}
+    },
 };

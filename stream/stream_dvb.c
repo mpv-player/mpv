@@ -43,7 +43,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 
 #include "stream.h"
 #include "core/m_option.h"
-#include "core/m_struct.h"
 #include "core/path.h"
 #include "libavutil/avstring.h"
 
@@ -58,41 +57,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 //TODO: CAMBIARE list_ptr e da globale a per_priv
 
 
-static struct stream_priv_s
-{
-	char *prog;
-	int card;
-	int timeout;
-	char *file;
-}
-stream_defaults =
-{
-	"", 1, 30, NULL
+static dvb_priv_t stream_defaults = {
+	.cfg_prog = "",
+        .cfg_card = 1,
+        .cfg_timeout = 30,
 };
 
-#define ST_OFF(f) M_ST_OFF(struct stream_priv_s, f)
+#define OPT_BASE_STRUCT dvb_priv_t
 
 /// URL definition
 static const m_option_t stream_params[] = {
-	{"hostname", 	ST_OFF(prog), CONF_TYPE_STRING, 0, 0, 0, NULL },
-	{"username", 	ST_OFF(card), CONF_TYPE_INT, M_OPT_RANGE, 1, 4, NULL},
-	{NULL, NULL, 0, 0, 0, 0, NULL}
+    OPT_STRING("prog", cfg_prog, 0),
+    OPT_INTRANGE("card", cfg_card, 0, 1, 4),
+    {0}
 };
-
-static const struct m_struct_st stream_opts = {
-	"dvbin",
-	sizeof(struct stream_priv_s),
-	&stream_defaults,
-	stream_params
-};
-
-
 
 const m_option_t dvbin_opts_conf[] = {
-	{"prog", &stream_defaults.prog, CONF_TYPE_STRING, 0, 0 ,0, NULL},
-	{"card", &stream_defaults.card, CONF_TYPE_INT, M_OPT_RANGE, 1, 4, NULL},
-	{"timeout",  &stream_defaults.timeout,  CONF_TYPE_INT, M_OPT_RANGE, 1, 30, NULL},
-	{"file", &stream_defaults.file, CONF_TYPE_STRING, 0, 0 ,0, NULL},
+	{"prog", &stream_defaults.cfg_prog, CONF_TYPE_STRING, 0, 0 ,0, NULL},
+	{"card", &stream_defaults.cfg_card, CONF_TYPE_INT, M_OPT_RANGE, 1, 4, NULL},
+	{"timeout",  &stream_defaults.cfg_timeout,  CONF_TYPE_INT, M_OPT_RANGE, 1, 30, NULL},
 
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -540,7 +523,7 @@ int dvb_set_channel(stream_t *stream, int card, int n)
 
 	if(channel->freq != priv->last_freq)
 		if (! dvb_tune(priv, channel->freq, channel->pol, channel->srate, channel->diseqc, channel->tone,
-			channel->inv, channel->mod, channel->gi, channel->trans, channel->bw, channel->cr, channel->cr_lp, channel->hier, priv->timeout))
+			channel->inv, channel->mod, channel->gi, channel->trans, channel->bw, channel->cr, channel->cr_lp, channel->hier, priv->cfg_timeout))
 			return 0;
 
 	priv->last_freq = channel->freq;
@@ -608,14 +591,15 @@ static void dvbin_close(stream_t *stream)
 }
 
 
-static int dvb_streaming_start(stream_t *stream, struct stream_priv_s *opts, int tuner_type, char *progname)
+static int dvb_streaming_start(stream_t *stream, int tuner_type, char *progname)
 {
 	int i;
 	dvb_channel_t *channel = NULL;
 	dvb_priv_t *priv = stream->priv;
+        dvb_priv_t *opts = priv;
 
-	mp_msg(MSGT_DEMUX, MSGL_V, "\r\ndvb_streaming_start(PROG: %s, CARD: %d, FILE: %s)\r\n",
-	    opts->prog, opts->card, opts->file);
+	mp_msg(MSGT_DEMUX, MSGL_V, "\r\ndvb_streaming_start(PROG: %s, CARD: %d)\r\n",
+	    opts->cfg_prog, opts->cfg_card);
 
 	priv->is_on = 0;
 
@@ -655,12 +639,12 @@ static int dvb_streaming_start(stream_t *stream, struct stream_priv_s *opts, int
 
 
 
-static int dvb_open(stream_t *stream, int mode, void *opts)
+static int dvb_open(stream_t *stream, int mode)
 {
 	// I don't force  the file format bacause, although it's almost always TS,
 	// there are some providers that stream an IP multicast with M$ Mpeg4 inside
-	struct stream_priv_s* p = (struct stream_priv_s*)opts;
-	dvb_priv_t *priv;
+	dvb_priv_t *priv = stream->priv;
+        dvb_priv_t *p = priv;
 	char *progname;
 	int tuner_type = 0, i;
 
@@ -668,11 +652,6 @@ static int dvb_open(stream_t *stream, int mode, void *opts)
 	if(mode != STREAM_READ)
 		return STREAM_UNSUPPORTED;
 
-	stream->priv = calloc(1, sizeof(dvb_priv_t));
-	if(stream->priv ==  NULL)
-		return STREAM_ERROR;
-
-	priv = (dvb_priv_t *)stream->priv;
 	priv->fe_fd = priv->sec_fd = priv->dvr_fd = -1;
 	priv->config = dvb_get_config();
 	if(priv->config == NULL)
@@ -685,7 +664,7 @@ static int dvb_open(stream_t *stream, int mode, void *opts)
 	priv->card = -1;
 	for(i=0; i<priv->config->count; i++)
 	{
-		if(priv->config->cards[i].devno+1 == p->card)
+		if(priv->config->cards[i].devno+1 == p->cfg_card)
 		{
 			priv->card = i;
 			break;
@@ -695,10 +674,10 @@ static int dvb_open(stream_t *stream, int mode, void *opts)
 	if(priv->card == -1)
  	{
 		free(priv);
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "NO CONFIGURATION FOUND FOR CARD N. %d, exit\n", p->card);
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "NO CONFIGURATION FOUND FOR CARD N. %d, exit\n", p->cfg_card);
  		return STREAM_ERROR;
  	}
-	priv->timeout = p->timeout;
+	priv->timeout = p->cfg_timeout;
 
 	tuner_type = priv->config->cards[priv->card].type;
 
@@ -713,17 +692,17 @@ static int dvb_open(stream_t *stream, int mode, void *opts)
 	priv->tuner_type = tuner_type;
 
 	mp_msg(MSGT_DEMUX, MSGL_V, "OPEN_DVB: prog=%s, card=%d, type=%d\n",
-		p->prog, priv->card+1, priv->tuner_type);
+		p->cfg_prog, priv->card+1, priv->tuner_type);
 
 	priv->list = priv->config->cards[priv->card].list;
 
-	if((! strcmp(p->prog, "")) && (priv->list != NULL))
+	if((! strcmp(p->cfg_prog, "")) && (priv->list != NULL))
 		progname = priv->list->channels[0].name;
 	else
-		progname = p->prog;
+		progname = p->cfg_prog;
 
 
-	if(! dvb_streaming_start(stream, p, tuner_type, progname))
+	if(! dvb_streaming_start(stream, tuner_type, progname))
 	{
 		free(stream->priv);
 		stream->priv = NULL;
@@ -733,7 +712,6 @@ static int dvb_open(stream_t *stream, int mode, void *opts)
 	stream->type = STREAMTYPE_DVB;
 	stream->fill_buffer = dvb_streaming_read;
 	stream->close = dvbin_close;
-	m_struct_free(&stream_opts, opts);
 
 	stream->demuxer = "lavf";
         stream->lavf_type = "mpegts";
@@ -855,6 +833,12 @@ const stream_info_t stream_info_dvb = {
 	"dvbin",
 	dvb_open,
 	{ "dvb", NULL },
-	&stream_opts,
-	1 				// Urls are an option string
+    .priv_size = sizeof(dvb_priv_t),
+    .priv_defaults = &stream_defaults,
+    .options = stream_params,
+    .url_options = {
+        {"hostname", "prog"},
+        {"username", "card"},
+        {0}
+    },
 };

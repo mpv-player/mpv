@@ -43,7 +43,6 @@
 
 #include "stream.h"
 #include "core/m_option.h"
-#include "core/m_struct.h"
 #include "libavutil/common.h"
 #include "compat/mpbswap.h"
 
@@ -60,9 +59,8 @@ typedef struct {
     int start_sector;
     int end_sector;
     cd_info_t *cd_info;
-} cdda_priv;
 
-static struct cdda_params {
+    // options
     int speed;
     int paranoia_mode;
     char *generic_dev;
@@ -73,22 +71,18 @@ static struct cdda_params {
     int no_skip;
     char *device;
     int span[2];
-} cdda_dflts = {
+} cdda_priv;
+
+static cdda_priv cdda_dflts = {
     .search_overlap = -1,
 };
 
-#define ST_OFF(f) M_ST_OFF(struct cdda_params, f)
+#define OPT_BASE_STRUCT cdda_priv
 static const m_option_t cdda_params_fields[] = {
-    {"hostname", ST_OFF(span), CONF_TYPE_INT_PAIR, 0, 0, 0, NULL},
-    {"port", ST_OFF(speed), CONF_TYPE_INT, M_OPT_RANGE, 1, 100, NULL},
-    {"filename", ST_OFF(device), CONF_TYPE_STRING, 0, 0, 0, NULL},
+    OPT_INTPAIR("span", span, 0),
+    OPT_INTRANGE("speed", speed, 0, 1, 100),
+    OPT_STRING("device", device, 0),
     {0}
-};
-static const struct m_struct_st stream_opts = {
-    "cdda",
-    sizeof(struct cdda_params),
-    &cdda_dflts,
-    cdda_params_fields
 };
 
 /// We keep these options but now they set the defaults
@@ -319,20 +313,19 @@ static int control(stream_t *stream, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static int open_cdda(stream_t *st, int m, void *opts)
+static int open_cdda(stream_t *st, int m)
 {
-    struct cdda_params *p = (struct cdda_params *)opts;
+    cdda_priv *priv = st->priv;
+    cdda_priv *p = priv;
     int mode = p->paranoia_mode;
     int offset = p->toc_offset;
     cdrom_drive_t *cdd = NULL;
-    cdda_priv *priv;
     cd_info_t *cd_info;
     unsigned int audiolen = 0;
     int last_track;
     int i;
 
     if (m != STREAM_READ) {
-        m_struct_free(&stream_opts, opts);
         return STREAM_UNSUPPORTED;
     }
 
@@ -351,7 +344,6 @@ static int open_cdda(stream_t *st, int m, void *opts)
 
     if (!cdd) {
         mp_tmsg(MSGT_OPEN, MSGL_ERR, "Can't open CDDA device.\n");
-        m_struct_free(&stream_opts, opts);
         return STREAM_ERROR;
     }
 
@@ -363,7 +355,6 @@ static int open_cdda(stream_t *st, int m, void *opts)
     if (cdda_open(cdd) != 0) {
         mp_tmsg(MSGT_OPEN, MSGL_ERR, "Can't open disc.\n");
         cdda_close(cdd);
-        m_struct_free(&stream_opts, opts);
         return STREAM_ERROR;
     }
 
@@ -424,7 +415,6 @@ static int open_cdda(stream_t *st, int m, void *opts)
         cdda_close(cdd);
         free(priv);
         cd_info_free(cd_info);
-        m_struct_free(&stream_opts, opts);
         return STREAM_ERROR;
     }
 
@@ -465,8 +455,6 @@ static int open_cdda(stream_t *st, int m, void *opts)
 
     st->demuxer = "rawaudio";
 
-    m_struct_free(&stream_opts, opts);
-
     print_cdtext(st, 0);
 
     return STREAM_OK;
@@ -476,6 +464,13 @@ const stream_info_t stream_info_cdda = {
     "cdda",
     open_cdda,
     {"cdda", NULL },
-    &stream_opts,
-    .opts_url = 1,
+    .priv_size = sizeof(cdda_priv),
+    .priv_defaults = &cdda_dflts,
+    .options = cdda_params_fields,
+    .url_options = {
+        {"hostname", "span"},
+        {"port",     "speed"},
+        {"filename", "device"},
+        {0}
+    },
 };

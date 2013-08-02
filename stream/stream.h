@@ -109,15 +109,17 @@ struct stream;
 typedef struct stream_info_st {
     const char *name;
     // opts is set from ->opts
-    int (*open)(struct stream *st, int mode, void *opts);
+    int (*open)(struct stream *st, int mode);
     const char *protocols[MAX_STREAM_PROTOCOLS];
-    const void *opts;
-    int opts_url; /* If this is 1 we will parse the url as an option string
-                   * too. Otherwise options are only parsed from the
-                   * options string given to open_stream_plugin */
+    int priv_size;
+    const void *priv_defaults;
+    const struct m_option *options;
+    const char *url_options[][2];
 } stream_info_t;
 
 typedef struct stream {
+    const struct stream_info_st *info;
+
     // Read
     int (*fill_buffer)(struct stream *s, char *buffer, int max_len);
     // Write
@@ -142,7 +144,8 @@ typedef struct stream {
     int mode; //STREAM_READ or STREAM_WRITE
     bool streaming;     // known to be a network stream if true
     void *priv; // used for DVD, TV, RTSP etc
-    char *url; // strdup() of filename/url
+    char *url;  // filename/url (possibly including protocol prefix)
+    char *path; // filename (url without protocol prefix)
     char *mime_type; // when HTTP streaming is used
     char *demuxer; // request demuxer to be used
     char *lavf_type; // name of expected demuxer type for lavf

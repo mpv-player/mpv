@@ -90,6 +90,10 @@ typedef struct {
 	int retry;
 	int timeout;
 	int last_freq;
+
+        char *cfg_prog;
+        int cfg_card;
+        int cfg_timeout;
 } dvb_priv_t;
 
 

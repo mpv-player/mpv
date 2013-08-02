@@ -28,7 +28,6 @@
 
 #include "stream.h"
 #include "core/m_option.h"
-#include "core/m_struct.h"
 #include "tv.h"
 
 #include <stdio.h>
@@ -75,33 +74,22 @@ tv_param_t stream_tv_defaults = {
     0.5,           //scan_period
 };
 
-#define ST_OFF(f) M_ST_OFF(tv_param_t,f)
+#define OPT_BASE_STRUCT tv_param_t
 static const m_option_t stream_opts_fields[] = {
-    {"hostname", ST_OFF(channel), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-    {"filename", ST_OFF(input), CONF_TYPE_INT, 0, 0 ,0, NULL},
-    { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-
-static const struct m_struct_st stream_opts = {
-    "tv",
-    sizeof(tv_param_t),
-    &stream_tv_defaults,
-    stream_opts_fields
+    OPT_STRING("channel", channel, 0),
+    OPT_INT("input", input, 0),
+    {0}
 };
 
 static void
 tv_stream_close (stream_t *stream)
 {
-  if(stream->priv)
-    m_struct_free(&stream_opts,stream->priv);
-  stream->priv=NULL;
 }
 static int
-tv_stream_open (stream_t *stream, int mode, void *opts)
+tv_stream_open (stream_t *stream, int mode)
 {
 
   stream->type = STREAMTYPE_TV;
-  stream->priv = opts;
   stream->close=tv_stream_close;
   stream->demuxer = "tv";
 
@@ -112,6 +100,12 @@ const stream_info_t stream_info_tv = {
   "tv",
   tv_stream_open,
   { "tv", NULL },
-  &stream_opts,
-  1
+  .priv_size = sizeof(tv_param_t),
+  .priv_defaults = &stream_tv_defaults,
+  .options = stream_opts_fields,
+  .url_options = {
+        {"hostname", "channel"},
+        {"filename", "input"},
+        {0}
+    },
 };

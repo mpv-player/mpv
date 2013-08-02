@@ -54,7 +54,7 @@ static int control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static int open_f(stream_t *stream, int mode, void* opts)
+static int open_f(stream_t *stream, int mode)
 {
     stream->fill_buffer = fill_buffer;
     stream->seek = seek;

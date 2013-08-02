@@ -26,27 +26,9 @@
 #include "core/mp_msg.h"
 #include "stream.h"
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 struct priv {
     int fd;
-};
-
-static struct stream_priv_s {
-} stream_priv_dflts = {
-};
-
-#define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
-// URL definition
-static const m_option_t stream_opts_fields[] = {
-  { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-
-static const struct m_struct_st stream_opts = {
-  "smb",
-  sizeof(struct stream_priv_s),
-  &stream_priv_dflts,
-  stream_opts_fields
 };
 
 static char smb_password[15];
@@ -126,7 +108,7 @@ static void close_f(stream_t *s){
   smbc_close(p->fd);
 }
 
-static int open_f (stream_t *stream, int mode, void *opts)
+static int open_f (stream_t *stream, int mode)
 {
   char *filename;
   mode_t m = 0;
@@ -144,27 +126,23 @@ static int open_f (stream_t *stream, int mode, void *opts)
     m = O_RDWR|O_CREAT|O_TRUNC;
   else {
     mp_msg(MSGT_OPEN, MSGL_ERR, "[smb] Unknown open mode %d\n", mode);
-    m_struct_free (&stream_opts, opts);
     return STREAM_UNSUPPORTED;
   }
 
   if(!filename) {
     mp_msg(MSGT_OPEN,MSGL_ERR, "[smb] Bad url\n");
-    m_struct_free(&stream_opts, opts);
     return STREAM_ERROR;
   }
 
   err = smbc_init(smb_auth_fn, 1);
   if (err < 0) {
     mp_tmsg(MSGT_OPEN,MSGL_ERR,"Cannot init the libsmbclient library: %d\n",err);
-    m_struct_free(&stream_opts, opts);
     return STREAM_ERROR;
   }
 
   fd = smbc_open(filename, m,0644);
   if (fd < 0) {
     mp_tmsg(MSGT_OPEN,MSGL_ERR,"Could not open from LAN: '%s'\n", filename);
-    m_struct_free(&stream_opts, opts);
     return STREAM_ERROR;
   }
 
@@ -185,7 +163,6 @@ static int open_f (stream_t *stream, int mode, void *opts)
   stream->close = close_f;
   stream->control = control;
 
-  m_struct_free(&stream_opts, opts);
   return STREAM_OK;
 }
 
@@ -193,6 +170,4 @@ const stream_info_t stream_info_smb = {
   "smb",
   open_f,
   {"smb", NULL},
-  &stream_opts,
-  0 //Url is an option string
 };

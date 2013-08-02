@@ -39,7 +39,6 @@
 
 #include "stream.h"
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 #include "stream_dvd.h"
 #include "stream_dvd_common.h"
@@ -64,26 +63,16 @@ int dvd_angle=1;
 #endif
 
 
-static struct stream_priv_s {
-  int title;
-  char* device;
-} stream_priv_dflts = {
-  1,
-  NULL
+static const dvd_priv_t stream_priv_dflts = {
+  .cfg_title = 1,
 };
 
-#define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
+#define OPT_BASE_STRUCT dvd_priv_t
 /// URL definition
 static const m_option_t stream_opts_fields[] = {
-  { "hostname", ST_OFF(title),  CONF_TYPE_INT, M_OPT_RANGE, 1, 99, NULL},
-  { "filename", ST_OFF(device), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-  { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-static const struct m_struct_st stream_opts = {
-  "dvd",
-  sizeof(struct stream_priv_s),
-  &stream_priv_dflts,
-  stream_opts_fields
+    OPT_INTRANGE("title", cfg_title, 0, 1, 99),
+    OPT_STRING("device", cfg_device, 0),
+    {0}
 };
 
 int dvd_chapter_from_cell(dvd_priv_t* dvd,int title,int cell)
@@ -747,16 +736,15 @@ static int control(stream_t *stream,int cmd,void* arg)
 }
 
 
-static int open_s(stream_t *stream,int mode, void* opts)
+static int open_s(stream_t *stream, int mode)
 {
-  struct stream_priv_s* p = (struct stream_priv_s*)opts;
   int k;
+  dvd_priv_t *d = stream->priv;
 
   mp_msg(MSGT_OPEN,MSGL_V,"URL: %s\n", stream->url);
-  dvd_title = p->title;
+  dvd_title = d->cfg_title;
   if(1){
     //int ret,ret2;
-    dvd_priv_t *d;
     int ttn,pgc_id,pgn;
     dvd_reader_t *dvd;
     dvd_file_t *title;
@@ -767,8 +755,8 @@ static int open_s(stream_t *stream,int mode, void* opts)
     /**
      * Open the disc.
      */
-    if(p->device)
-      dvd_device_current = p->device;
+    if(d->cfg_device)
+      dvd_device_current = d->cfg_device;
     else if(dvd_device)
       dvd_device_current = dvd_device;
     else
@@ -802,7 +790,6 @@ static int open_s(stream_t *stream,int mode, void* opts)
       free(temp_device);
 
       if(!dvd) {
-        m_struct_free(&stream_opts,opts);
         return STREAM_UNSUPPORTED;
       }
     } else
@@ -811,7 +798,6 @@ static int open_s(stream_t *stream,int mode, void* opts)
         dvd = DVDOpen(dvd_device_current);
         if(!dvd) {
           mp_tmsg(MSGT_OPEN,MSGL_ERR,"Couldn't open DVD device: %s (%s)\n",dvd_device_current, strerror(errno));
-          m_struct_free(&stream_opts,opts);
           return STREAM_UNSUPPORTED;
         }
     }
@@ -826,7 +812,6 @@ static int open_s(stream_t *stream,int mode, void* opts)
     if(!vmg_file) {
       mp_tmsg(MSGT_OPEN,MSGL_ERR, "Can't open VMG info!\n");
       DVDClose( dvd );
-      m_struct_free(&stream_opts,opts);
       return STREAM_UNSUPPORTED;
     }
     tt_srpt = vmg_file->tt_srpt;
@@ -866,7 +851,6 @@ static int open_s(stream_t *stream,int mode, void* opts)
       mp_tmsg(MSGT_OPEN,MSGL_ERR, "Invalid DVD title number: %d\n", dvd_title);
       ifoClose( vmg_file );
       DVDClose( dvd );
-      m_struct_free(&stream_opts,opts);
       return STREAM_UNSUPPORTED;
     }
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DVD_CURRENT_TITLE=%d\n", dvd_title);
@@ -901,7 +885,6 @@ static int open_s(stream_t *stream,int mode, void* opts)
 
     mp_msg(MSGT_OPEN,MSGL_V, "DVD successfully opened.\n");
     // store data
-    d=malloc(sizeof(dvd_priv_t)); memset(d,0,sizeof(dvd_priv_t));
     d->dvd=dvd;
     d->title=title;
     d->vmg_file=vmg_file;
@@ -1054,54 +1037,58 @@ static int open_s(stream_t *stream,int mode, void* opts)
 fail:
       ifoClose(vmg_file);
       DVDClose(dvd);
-      m_struct_free(&stream_opts, opts);
       return STREAM_UNSUPPORTED;
   }
   mp_tmsg(MSGT_DVD,MSGL_ERR,"mpv was compiled without DVD support, exiting.\n");
-  m_struct_free(&stream_opts,opts);
   return STREAM_UNSUPPORTED;
 }
 
-static int ifo_stream_open (stream_t *stream, int mode, void *opts)
+static int ifo_stream_open (stream_t *stream, int mode)
 {
     char* filename;
-    struct stream_priv_s *spriv;
-    int len = strlen(stream->url);
+    dvd_priv_t *priv = talloc_ptrtype(stream, priv);
+    stream->priv = priv;
+    *priv = stream_priv_dflts;
 
-    if (len < 4 || strcasecmp (stream->url + len - 4, ".ifo"))
+    int len = strlen(stream->path);
+    if (len < 4 || strcasecmp (stream->path + len - 4, ".ifo"))
         return STREAM_UNSUPPORTED;
 
     mp_msg(MSGT_DVD, MSGL_INFO, ".IFO detected. Redirecting to dvd://\n");
 
-    filename = strdup(basename(stream->url));
+    filename = strdup(basename(stream->path));
 
-    spriv=calloc(1, sizeof(struct stream_priv_s));
-    spriv->device = strdup(dirname(stream->url));
+    talloc_free(priv->cfg_device);
+    priv->cfg_device = talloc_strdup(NULL, dirname(stream->path));
     if(!strncasecmp(filename,"vts_",4))
     {
-        if(sscanf(filename+3, "_%02d_", &spriv->title)!=1)
-            spriv->title=1;
+        if(sscanf(filename+3, "_%02d_", &priv->cfg_title)!=1)
+            priv->cfg_title = 1;
     }else
-        spriv->title=1;
+        priv->cfg_title = 1;
 
     free(filename);
     stream->url=talloc_strdup(stream, "dvd://");
 
-    return open_s(stream, mode, spriv);
+    return open_s(stream, mode);
 }
 
 const stream_info_t stream_info_dvd = {
   "dvd",
   open_s,
   { "dvd", NULL },
-  &stream_opts,
-  1 // Urls are an option string
+  .priv_size = sizeof(dvd_priv_t),
+  .priv_defaults = &stream_priv_dflts,
+  .options = stream_opts_fields,
+  .url_options = {
+        {"hostname", "title"},
+        {"filename", "device"},
+        {0}
+   },
 };
 
 const stream_info_t stream_info_ifo = {
   "ifo",
   ifo_stream_open,
   { "file", "", NULL },
-  NULL,
-  0
 };

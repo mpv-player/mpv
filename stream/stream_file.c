@@ -32,32 +32,10 @@
 #include "core/mp_msg.h"
 #include "stream.h"
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 struct priv {
     int fd;
     bool close;
-};
-
-static struct stream_priv_s {
-  char* filename;
-  char *filename2;
-} stream_priv_dflts = {
-  NULL, NULL
-};
-
-#define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
-/// URL definition
-static const m_option_t stream_opts_fields[] = {
-  {"string", ST_OFF(filename), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-  {"filename", ST_OFF(filename2), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-  { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-static const struct m_struct_st stream_opts = {
-  "file",
-  sizeof(struct stream_priv_s),
-  &stream_priv_dflts,
-  stream_opts_fields
 };
 
 static int fill_buffer(stream_t *s, char* buffer, int max_len){
@@ -128,13 +106,12 @@ static void s_close(stream_t *s)
     close(p->fd);
 }
 
-static int open_f(stream_t *stream,int mode, void* opts)
+static int open_f(stream_t *stream, int mode)
 {
   int f;
   mode_t m = 0;
   int64_t len;
-  unsigned char *filename;
-  struct stream_priv_s* p = (struct stream_priv_s*)opts;
+  char *filename = stream->path;
   struct priv *priv = talloc_ptrtype(stream, priv);
   *priv = (struct priv) { .fd = -1 };
   stream->priv = priv;
@@ -145,20 +122,7 @@ static int open_f(stream_t *stream,int mode, void* opts)
     m = O_RDWR|O_CREAT|O_TRUNC;
   else {
     mp_msg(MSGT_OPEN,MSGL_ERR, "[file] Unknown open mode %d\n",mode);
-    m_struct_free(&stream_opts,opts);
     return STREAM_UNSUPPORTED;
-  }
-
-  if(p->filename)
-    filename = p->filename;
-  else if(p->filename2)
-    filename = p->filename2;
-  else
-    filename = NULL;
-  if(!filename) {
-    mp_msg(MSGT_OPEN,MSGL_ERR, "[file] No filename\n");
-    m_struct_free(&stream_opts,opts);
-    return STREAM_ERROR;
   }
 
 #if HAVE_DOS_PATHS
@@ -195,7 +159,6 @@ static int open_f(stream_t *stream,int mode, void* opts)
     if(f<0) {
         mp_tmsg(MSGT_OPEN, MSGL_ERR, "Cannot open file '%s': %s\n", filename,
                 strerror(errno));
-      m_struct_free(&stream_opts,opts);
       return STREAM_ERROR;
     }
 #ifndef __MINGW32__
@@ -203,7 +166,6 @@ static int open_f(stream_t *stream,int mode, void* opts)
     if (fstat(f, &st) == 0 && S_ISDIR(st.st_mode)) {
       mp_tmsg(MSGT_OPEN,MSGL_ERR,"File is a directory: '%s'\n",filename);
       close(f);
-      m_struct_free(&stream_opts,opts);
       return STREAM_ERROR;
     }
 #endif
@@ -234,7 +196,6 @@ static int open_f(stream_t *stream,int mode, void* opts)
   stream->read_chunk = 64*1024;
   stream->close = s_close;
 
-  m_struct_free(&stream_opts,opts);
   return STREAM_OK;
 }
 
@@ -242,6 +203,4 @@ const stream_info_t stream_info_file = {
   "file",
   open_f,
   { "file", "", NULL },
-  &stream_opts,
-  1 // Urls are an option string
 };

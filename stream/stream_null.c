@@ -25,7 +25,7 @@
 
 #include "stream.h"
 
-static int open_s(stream_t *stream,int mode, void* opts)
+static int open_s(stream_t *stream,int mode)
 {
   return 1;
 }
@@ -35,6 +35,4 @@ const stream_info_t stream_info_null = {
   "null",
   open_s,
   { "null", NULL },
-  NULL,
-  0 // Urls are an option string
 };

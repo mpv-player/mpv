@@ -54,6 +54,9 @@ typedef struct {
 // subtitles
   int nr_of_subtitles;
   stream_language_t subtitles[32];
+
+  int cfg_title;
+  char *cfg_device;
 } dvd_priv_t;
 
 int dvd_number_of_subs(stream_t *stream);

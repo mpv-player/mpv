@@ -38,7 +38,6 @@
 #include "config.h"
 #include "talloc.h"
 #include "core/mp_msg.h"
-#include "core/m_struct.h"
 #include "core/m_option.h"
 #include "stream.h"
 #include "demux/stheader.h"
@@ -61,9 +60,12 @@ struct bluray_priv_s {
     BLURAY *bd;
     int current_angle;
     int current_title;
+
+    int cfg_title;
+    char *cfg_device;
 };
 
-static struct stream_priv_s {
+static const struct stream_priv_s {
     int title;
     char *device;
 } bluray_stream_priv_dflts = {
@@ -71,18 +73,11 @@ static struct stream_priv_s {
     NULL
 };
 
-#define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
+#define OPT_BASE_STRUCT struct bluray_priv_s
 static const m_option_t bluray_stream_opts_fields[] = {
-    { "hostname", ST_OFF(title),  CONF_TYPE_INT, M_OPT_RANGE, 0, 99999, NULL},
-    { "filename", ST_OFF(device), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-    { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-
-static const struct m_struct_st bluray_stream_opts = {
-    "bluray",
-    sizeof(struct stream_priv_s),
-    &bluray_stream_priv_dflts,
-    bluray_stream_opts_fields
+    OPT_INTRANGE("title", cfg_title, 0, 0, 99999),
+    OPT_STRING("device", cfg_device, 0),
+    {0}
 };
 
 static void bluray_stream_close(stream_t *s)
@@ -90,8 +85,6 @@ static void bluray_stream_close(stream_t *s)
     struct bluray_priv_s *b = s->priv;
 
     bd_close(b->bd);
-    b->bd = NULL;
-    free(b);
 }
 
 static int bluray_stream_seek(stream_t *s, int64_t pos)
@@ -292,10 +285,9 @@ static int bluray_stream_control(stream_t *s, int cmd, void *arg)
     return STREAM_UNSUPPORTED;
 }
 
-static int bluray_stream_open(stream_t *s, int mode, void *opts)
+static int bluray_stream_open(stream_t *s, int mode)
 {
-    struct stream_priv_s *p = opts;
-    struct bluray_priv_s *b;
+    struct bluray_priv_s *b = s->priv;
 
     BLURAY_TITLE_INFO *info = NULL;
     BLURAY *bd;
@@ -310,8 +302,8 @@ static int bluray_stream_open(stream_t *s, int mode, void *opts)
     int i;
 
     /* find the requested device */
-    if (p->device)
-        device = p->device;
+    if (b->cfg_device)
+        device = b->cfg_device;
     else if (bluray_device)
         device = bluray_device;
 
@@ -369,7 +361,7 @@ static int bluray_stream_open(stream_t *s, int mode, void *opts)
     }
 
     /* Select current title */
-    title = p->title ? p->title - 1: title_guess;
+    title = b->cfg_title ? b->cfg_title - 1: title_guess;
     title = FFMIN(title, title_count - 1);
 
     bd_select_title(bd, title);
@@ -400,7 +392,6 @@ err_no_info:
     s->close       = bluray_stream_close;
     s->control     = bluray_stream_control;
 
-    b                  = calloc(1, sizeof(struct bluray_priv_s));
     b->bd              = bd;
     b->current_angle   = angle;
     b->current_title   = title;
@@ -409,7 +400,6 @@ err_no_info:
     s->sector_size = BLURAY_SECTOR_SIZE;
     s->flags       = MP_STREAM_SEEK;
     s->priv        = b;
-    s->url         = strdup("br://");
 
     mp_tmsg(MSGT_OPEN, MSGL_V, "Blu-ray successfully opened.\n");
 
@@ -420,6 +410,12 @@ const stream_info_t stream_info_bluray = {
     "bd",
     bluray_stream_open,
     { "bd", "br", "bluray", NULL },
-    &bluray_stream_opts,
-    1
+    .priv_defaults = &bluray_stream_priv_dflts,
+    .priv_size = sizeof(struct bluray_priv_s),
+    .options = bluray_stream_opts_fields,
+    .url_options = {
+        {"hostname", "title"},
+        {"filename", "device"},
+        {0}
+    },
 };

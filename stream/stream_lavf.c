@@ -25,14 +25,13 @@
 #include "core/mp_msg.h"
 #include "stream.h"
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 #include "cookies.h"
 
 #include "core/bstr.h"
 #include "core/mp_talloc.h"
 
-static int open_f(stream_t *stream, int mode, void *opts);
+static int open_f(stream_t *stream, int mode);
 static char **read_icy(stream_t *stream);
 
 static int fill_buffer(stream_t *s, char *buffer, int max_len)
@@ -114,7 +113,7 @@ static int control(stream_t *s, int cmd, void *arg)
         // avio doesn't seem to support this - emulate it by reopening
         close_f(s);
         s->priv = NULL;
-        return open_f(s, STREAM_READ, NULL);
+        return open_f(s, STREAM_READ);
     }
     }
     return STREAM_UNSUPPORTED;
@@ -131,7 +130,7 @@ static bool mp_avio_has_opts(AVIOContext *avio)
 
 static const char * const prefix[] = { "lavf://", "ffmpeg://" };
 
-static int open_f(stream_t *stream, int mode, void *opts)
+static int open_f(stream_t *stream, int mode)
 {
     int flags = 0;
     AVIOContext *avio = NULL;
@@ -309,6 +308,4 @@ const stream_info_t stream_info_ffmpeg = {
   open_f,
   { "lavf", "ffmpeg", "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh",
     "mmshttp", "udp", "ftp", "rtp", "httpproxy", NULL },
-  NULL,
-  1 // Urls are an option string
 };

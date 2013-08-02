@@ -25,7 +25,7 @@ static int fill_buffer(stream_t *s, char *buffer, int max_len)
     return -1;
 }
 
-static int open_f(stream_t *stream, int mode, void *opts)
+static int open_f(stream_t *stream, int mode)
 {
     if (mode != STREAM_READ)
         return STREAM_ERROR;

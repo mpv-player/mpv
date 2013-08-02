@@ -27,7 +27,6 @@
 #include "core/mp_msg.h"
 #include "stream.h"
 #include "core/m_option.h"
-#include "core/m_struct.h"
 
 #include <fcntl.h>
 #include <stdlib.h>
@@ -59,28 +58,6 @@
 
 extern char *cdrom_device;
 
-static struct stream_priv_s {
-  int track;
-  char* device;
-} stream_priv_dflts = {
-  1,
-  NULL
-};
-
-#define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
-/// URL definition
-static const m_option_t stream_opts_fields[] = {
-  { "hostname", ST_OFF(track), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL },
-  { "filename", ST_OFF(device), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-  { NULL, NULL, 0, 0, 0, 0,  NULL }
-};
-static const struct m_struct_st stream_opts = {
-  "vcd",
-  sizeof(struct stream_priv_s),
-  &stream_priv_dflts,
-  stream_opts_fields
-};
-
 static int fill_buffer(stream_t *s, char* buffer, int max_len){
   if(s->pos > s->end_pos) /// don't past end of current track
     return 0;
@@ -100,9 +77,8 @@ static void close_s(stream_t *stream) {
   free(stream->priv);
 }
 
-static int open_s(stream_t *stream,int mode, void* opts)
+static int open_s(stream_t *stream,int mode)
 {
-  struct stream_priv_s* p = opts;
   int ret,ret2,f,sect,tmp;
   mp_vcd_priv_t* vcd;
 #if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
@@ -110,7 +86,7 @@ static int open_s(stream_t *stream,int mode, void* opts)
 #endif
 #if defined(__MINGW32__) || defined(__CYGWIN__)
   HANDLE hd;
-  char device[] = "\\\\.\\?:";
+  char device[20] = "\\\\.\\?:";
 #endif
 
   if(mode != STREAM_READ
@@ -118,29 +94,31 @@ static int open_s(stream_t *stream,int mode, void* opts)
       || GetVersion() > 0x80000000 // Win9x
 #endif
       ) {
-    m_struct_free(&stream_opts,opts);
     return STREAM_UNSUPPORTED;
   }
 
-  if (!p->device) {
+  char *dev = stream->url;
+  if (strncmp("vcd://", dev, 6) != 0)
+    return STREAM_UNSUPPORTED;
+  dev += 6;
+  if (!dev[0]) {
     if(cdrom_device)
-      p->device = talloc_strdup(NULL, cdrom_device);
+      dev = cdrom_device;
     else
-      p->device = talloc_strdup(NULL, DEFAULT_CDROM_DEVICE);
+      dev = DEFAULT_CDROM_DEVICE;
   }
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
-  device[4] = p->device[0];
+  device[4] = dev ? dev[0] : 0;
   /* open() can't be used for devices so do it the complicated way */
   hd = CreateFile(device, GENERIC_READ, FILE_SHARE_READ, NULL,
 	  OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
   f = _open_osfhandle((intptr_t)hd, _O_RDONLY);
 #else
-  f=open(p->device,O_RDONLY);
+  f=open(dev,O_RDONLY);
 #endif
   if(f<0){
-    mp_tmsg(MSGT_OPEN,MSGL_ERR,"CD-ROM Device '%s' not found.\n",p->device);
-    m_struct_free(&stream_opts,opts);
+    mp_tmsg(MSGT_OPEN,MSGL_ERR,"CD-ROM Device '%s' not found.\n",dev);
     return STREAM_ERROR;
   }
 
@@ -148,25 +126,22 @@ static int open_s(stream_t *stream,int mode, void* opts)
   if(!vcd) {
     mp_msg(MSGT_OPEN,MSGL_ERR,"Failed to get cd toc\n");
     close(f);
-    m_struct_free(&stream_opts,opts);
     return STREAM_ERROR;
   }
-  ret2=vcd_get_track_end(vcd,p->track);
+  ret2=vcd_get_track_end(vcd,1);
   if(ret2<0){
       mp_msg(MSGT_OPEN, MSGL_ERR, "%s (get)\n",
              mp_gtext("Error selecting VCD track."));
     close(f);
     free(vcd);
-    m_struct_free(&stream_opts,opts);
     return STREAM_ERROR;
   }
-  ret=vcd_seek_to_track(vcd,p->track);
+  ret=vcd_seek_to_track(vcd,1);
   if(ret<0){
       mp_msg(MSGT_OPEN, MSGL_ERR, "%s (seek)\n",
              mp_gtext("Error selecting VCD track."));
     close(f);
     free(vcd);
-    m_struct_free(&stream_opts,opts);
     return STREAM_ERROR;
   }
   /* search forward up to at most 3 seconds to skip leading margin */
@@ -199,7 +174,6 @@ static int open_s(stream_t *stream,int mode, void* opts)
   stream->close = close_s;
   stream->demuxer = "lavf"; // mpegps ( or "vcd"?)
 
-  m_struct_free(&stream_opts,opts);
   return STREAM_OK;
 }
 
@@ -207,6 +181,4 @@ const stream_info_t stream_info_vcd = {
   "vcd",
   open_s,
   { "vcd", NULL },
-  &stream_opts,
-  1 // Urls are an option string
 };

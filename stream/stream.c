@@ -44,7 +44,7 @@
 #include "demux/demux.h"
 
 #include "core/m_option.h"
-#include "core/m_struct.h"
+#include "core/m_config.h"
 
 // Includes additional padding in case sizes get rounded up by sector size.
 #define TOTAL_BUFFER_SIZE (STREAM_MAX_BUFFER_SIZE + STREAM_MAX_SECTOR_SIZE)
@@ -114,40 +114,97 @@ static const stream_info_t *const auto_open_streams[] = {
     NULL
 };
 
-static stream_t *new_stream(size_t min_size);
 static int stream_seek_unbuffered(stream_t *s, int64_t newpos);
 
-static stream_t *open_stream_plugin(const stream_info_t *sinfo,
-                                    const char *filename, int mode,
-                                    struct MPOpts *options, int *ret)
+static const char *find_url_opt(struct stream *s, const char *opt)
 {
-    void *arg = NULL;
-    stream_t *s;
-    m_struct_t *desc = (m_struct_t *)sinfo->opts;
+    for (int n = 0; s->info->url_options && s->info->url_options[n][0]; n++) {
+        if (strcmp(s->info->url_options[n][0], opt) == 0)
+            return s->info->url_options[n][1];
+    }
+    return NULL;
+}
 
-    // Parse options
-    if (desc) {
-        arg = m_struct_alloc(desc);
-        if (sinfo->opts_url) {
-            m_option_t url_opt = { "stream url", arg, CONF_TYPE_CUSTOM_URL, 0,
-                                   0, 0, (void *)sinfo->opts };
-            if (m_option_parse(&url_opt, bstr0("stream url"), bstr0(filename),
-                               arg) < 0)
-            {
-                mp_tmsg(MSGT_OPEN, MSGL_ERR, "URL parsing failed on url %s\n",
-                        filename);
-                m_struct_free(desc, arg);
-                *ret = STREAM_ERROR;
-                return NULL;
+static bstr split_next(bstr *s, char end, const char *delim)
+{
+    int idx = bstrcspn(*s, delim);
+    if (end && (idx >= s->len || s->start[idx] != end))
+        return (bstr){0};
+    bstr r = bstr_splice(*s, 0, idx);
+    *s = bstr_cut(*s, idx + (end ? 1 : 0));
+    return r;
+}
+
+// Parse the stream URL, syntax:
+//  proto://  [<username>@]<hostname>[:<port>][/<filename>]
+// (the proto:// part is already removed from s->path)
+// This code originates from times when http code used this, but now it's
+// just relict from other stream implementations reusing this code.
+static bool parse_url(struct stream *st, struct m_config *config)
+{
+    bstr s = bstr0(st->path);
+    const char *f_names[4] = {"username", "hostname", "port", "filename"};
+    bstr f[4];
+    f[0] = split_next(&s, '@', "@:/");
+    f[1] = split_next(&s, 0, ":/");
+    f[2] = bstr_eatstart0(&s, ":") ? split_next(&s, 0, "/") : (bstr){0};
+    f[3] = bstr_eatstart0(&s, "/") ? s : (bstr){0};
+    for (int n = 0; n < 4; n++) {
+        if (f[n].len) {
+            const char *opt = find_url_opt(st, f_names[n]);
+            if (!opt) {
+                mp_tmsg(MSGT_OPEN, MSGL_ERR, "Stream type '%s' accepts no '%s' "
+                        "field in URLs.\n", st->info->name, f_names[n]);
+                return false;
+            }
+            int r = m_config_set_option(config, bstr0(opt), f[n]);
+            if (r < 0) {
+                mp_tmsg(MSGT_OPEN, MSGL_ERR, "Error setting stream option: %s\n",
+                        m_option_strerror(r));
+                return false;
             }
         }
     }
-    s = new_stream(0);
+    return true;
+}
+
+static stream_t *new_stream(void)
+{
+    stream_t *s = talloc_size(NULL, sizeof(stream_t) + TOTAL_BUFFER_SIZE);
+    memset(s, 0, sizeof(stream_t));
+    return s;
+}
+
+static stream_t *open_stream_plugin(const stream_info_t *sinfo,
+                                    const char *url, const char *path, int mode,
+                                    struct MPOpts *options, int *ret)
+{
+    stream_t *s = new_stream();
+    s->info = sinfo;
     s->opts = options;
-    s->url = talloc_strdup(s, filename);
+    s->url = talloc_strdup(s, url);
+    s->path = talloc_strdup(s, path);
+
+    // Parse options
+    if (sinfo->priv_size) {
+        struct m_obj_desc desc = {
+            .priv_size = sinfo->priv_size,
+            .priv_defaults = sinfo->priv_defaults,
+            .options = sinfo->options,
+        };
+        struct m_config *config = m_config_from_obj_desc(s, &desc);
+        s->priv = config->optstruct;
+        if (s->info->url_options && !parse_url(s, config)) {
+            mp_tmsg(MSGT_OPEN, MSGL_ERR, "URL parsing failed on url %s\n", url);
+            talloc_free(s);
+            *ret = STREAM_ERROR;
+            return NULL;
+        }
+    }
+
     s->flags = 0;
     s->mode = mode;
-    *ret = sinfo->open(s, mode, arg);
+    *ret = sinfo->open(s, mode);
     if ((*ret) != STREAM_OK) {
         talloc_free(s);
         return NULL;
@@ -165,7 +222,7 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
 
     s->uncached_type = s->type;
 
-    mp_msg(MSGT_OPEN, MSGL_V, "[stream] [%s] %s\n", sinfo->name, filename);
+    mp_msg(MSGT_OPEN, MSGL_V, "[stream] [%s] %s\n", sinfo->name, url);
 
     if (s->mime_type)
         mp_msg(MSGT_OPEN, MSGL_V, "Mime-type: '%s'\n", s->mime_type);
@@ -173,15 +230,28 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     return s;
 }
 
+static const char *match_proto(const char *url, const char *proto)
+{
+    int l = strlen(proto);
+    if (l > 0) {
+        if (strncasecmp(url, proto, l) == 0 && strncmp("://", url + l, 3) == 0)
+            return url + l + 3;
+    } else {
+        // pure filenames
+        if (!strstr(url, "://"))
+            return url;
+    }
+    return NULL;
+}
 
-static stream_t *open_stream_full(const char *filename, int mode,
+static stream_t *open_stream_full(const char *url, int mode,
                                   struct MPOpts *options)
 {
-    int i, j, l, r;
+    int i, j, r;
     const stream_info_t *sinfo;
     stream_t *s;
 
-    assert(filename);
+    assert(url);
 
     for (i = 0; auto_open_streams[i]; i++) {
         sinfo = auto_open_streams[i];
@@ -192,17 +262,13 @@ static stream_t *open_stream_full(const char *filename, int mode,
             continue;
         }
         for (j = 0; sinfo->protocols[j]; j++) {
-            l = strlen(sinfo->protocols[j]);
-            // l == 0 => Don't do protocol matching (ie network and filenames)
-            if ((l == 0 && !strstr(filename, "://")) ||
-                ((strncasecmp(sinfo->protocols[j], filename, l) == 0) &&
-                 (strncmp("://", filename + l, 3) == 0))) {
-                s = open_stream_plugin(sinfo, filename, mode, options, &r);
+            const char *path = match_proto(url, sinfo->protocols[j]);
+            if (path) {
+                s = open_stream_plugin(sinfo, url, path, mode, options, &r);
                 if (s)
                     return s;
                 if (r != STREAM_UNSUPPORTED) {
-                    mp_tmsg(MSGT_OPEN, MSGL_ERR, "Failed to open %s.\n",
-                            filename);
+                    mp_tmsg(MSGT_OPEN, MSGL_ERR, "Failed to open %s.\n", url);
                     return NULL;
                 }
                 break;
@@ -210,7 +276,7 @@ static stream_t *open_stream_full(const char *filename, int mode,
         }
     }
 
-    mp_tmsg(MSGT_OPEN, MSGL_ERR, "No stream found to handle url %s\n", filename);
+    mp_tmsg(MSGT_OPEN, MSGL_ERR, "No stream found to handle url %s\n", url);
     return NULL;
 }
 
@@ -558,14 +624,6 @@ void stream_update_size(stream_t *s)
     }
 }
 
-static stream_t *new_stream(size_t min_size)
-{
-    min_size = FFMAX(min_size, TOTAL_BUFFER_SIZE);
-    stream_t *s = talloc_size(NULL, sizeof(stream_t) + min_size);
-    memset(s, 0, sizeof(stream_t));
-    return s;
-}
-
 void free_stream(stream_t *s)
 {
     if (!s)
@@ -638,7 +696,7 @@ static int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
     // Can't handle a loaded buffer.
     orig->buf_len = orig->buf_pos = 0;
 
-    stream_t *cache = new_stream(0);
+    stream_t *cache = new_stream();
     cache->uncached_type = orig->type;
     cache->uncached_stream = orig;
     cache->flags |= MP_STREAM_SEEK;
