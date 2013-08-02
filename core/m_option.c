@@ -1776,8 +1776,6 @@ const m_option_type_t m_option_type_rel_time = {
 
 //// Objects (i.e. filters, etc) settings
 
-#include "core/m_struct.h"
-
 #undef VAL
 #define VAL(x) (*(m_obj_settings_t **)(x))
 

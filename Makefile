@@ -172,7 +172,6 @@ SOURCES = talloc.c \
           core/m_config.c \
           core/m_option.c \
           core/m_property.c \
-          core/m_struct.c \
           core/mp_common.c \
           core/mp_msg.c \
           core/mp_ring.c \

@@ -64,7 +64,6 @@
 #ifdef CONFIG_DVDREAD
 #include "stream/stream_dvd.h"
 #endif
-#include "core/m_struct.h"
 #include "screenshot.h"
 
 #include "core/mp_core.h"
