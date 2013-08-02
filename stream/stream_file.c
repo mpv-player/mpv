@@ -125,6 +125,10 @@ static int open_f(stream_t *stream, int mode)
     return STREAM_UNSUPPORTED;
   }
 
+  // "file://" prefix -> decode URL-style escapes
+  if (strlen(stream->url) > strlen(stream->path))
+    mp_url_unescape_inplace(stream->path);
+
 #if HAVE_DOS_PATHS
   // extract '/' from '/x:/path'
   if( filename[ 0 ] == '/' && filename[ 1 ] && filename[ 2 ] == ':' )

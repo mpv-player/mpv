@@ -1050,6 +1050,10 @@ static int ifo_stream_open (stream_t *stream, int mode)
     stream->priv = priv;
     *priv = stream_priv_dflts;
 
+    // "file://" prefix -> decode URL-style escapes
+    if (strlen(stream->url) > strlen(stream->path))
+        mp_url_unescape_inplace(stream->path);
+
     int len = strlen(stream->path);
     if (len < 4 || strcasecmp (stream->path + len - 4, ".ifo"))
         return STREAM_UNSUPPORTED;

@@ -116,6 +116,37 @@ static const stream_info_t *const auto_open_streams[] = {
 
 static int stream_seek_unbuffered(stream_t *s, int64_t newpos);
 
+static int from_hex(unsigned char c)
+{
+    if (c >= 'a' && c <= 'f')
+        return c - 'a' + 10;
+    if (c >= 'A' && c <= 'F')
+        return c - 'A' + 10;
+    if (c >= '0' && c <= '9')
+        return c - '0';
+    return -1;
+}
+
+// Replace escape sequences in an URL (or a part of an URL)
+void mp_url_unescape_inplace(char *buf)
+{
+    int len = strlen(buf);
+    int o = 0;
+    for (int i = 0; i < len; i++) {
+        unsigned char c = buf[i];
+        if (c == '%' && i + 2 < len) { //must have 2 more chars
+            int c1 = from_hex(buf[i + 1]);
+            int c2 = from_hex(buf[i + 2]);
+            if (c1 >= 0 && c2 >= 0) {
+                c = c1 * 16 + c2;
+                i = i + 2; //only skip next 2 chars if valid esc
+            }
+        }
+        buf[o++] = c;
+    }
+    buf[o++] = '\0';
+}
+
 static const char *find_url_opt(struct stream *s, const char *opt)
 {
     for (int n = 0; s->info->url_options && s->info->url_options[n][0]; n++) {

@@ -260,4 +260,6 @@ typedef struct {
     int channels;
 } stream_language_t;
 
+void mp_url_unescape_inplace(char *buf);
+
 #endif /* MPLAYER_STREAM_H */
