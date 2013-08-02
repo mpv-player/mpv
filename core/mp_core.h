@@ -52,8 +52,10 @@ enum stop_play_reason {
 enum exit_reason {
   EXIT_NONE,
   EXIT_QUIT,
-  EXIT_EOF,
-  EXIT_ERROR
+  EXIT_PLAYED,
+  EXIT_ERROR,
+  EXIT_NOTPLAYED,
+  EXIT_SOMENOTPLAYED
 };
 
 struct timeline_part {
@@ -135,7 +137,10 @@ typedef struct MPContext {
     unsigned int initialized_flags;  // which subsystems have been initialized
 
     // Return code to use with PT_QUIT
-    int quit_player_rc;
+    enum exit_reason quit_player_rc;
+    int quit_custom_rc;
+    bool has_quit_custom_rc;
+    bool error_playing;
 
     struct demuxer **sources;
     int num_sources;

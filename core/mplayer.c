@@ -549,8 +549,9 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 }
 
 static MP_NORETURN void exit_player(struct MPContext *mpctx,
-                                    enum exit_reason how, int rc)
+                                    enum exit_reason how)
 {
+    int rc;
     uninit_player(mpctx, INITIALIZED_ALL);
 
 #ifdef CONFIG_ENCODING
@@ -576,12 +577,35 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     if (how != EXIT_NONE) {
         const char *reason;
         switch (how) {
-        case EXIT_QUIT:  reason = "Quit"; break;
-        case EXIT_EOF:   reason = "End of file"; break;
-        case EXIT_ERROR: reason = "Fatal error"; break;
-        default:         abort();
+        case EXIT_SOMENOTPLAYED:
+        case EXIT_PLAYED:
+            reason = "End of file";
+            break;
+        case EXIT_NOTPLAYED:
+            reason = "No files played";
+            break;
+        case EXIT_ERROR:
+            reason = "Fatal error";
+            break;
+        default:
+            reason = "Quit";
         }
         mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "\nExiting... (%s)\n", reason);
+    }
+
+    if (mpctx->has_quit_custom_rc) {
+        rc = mpctx->quit_custom_rc;
+    } else {
+        switch (how) {
+            case EXIT_ERROR:
+                rc = 1; break;
+            case EXIT_NOTPLAYED:
+                rc = 2; break;
+            case EXIT_SOMENOTPLAYED:
+                rc = 3; break;
+            default:
+                rc = 0;
+        }
     }
 
     // must be last since e.g. mp_msg uses option values
@@ -3381,6 +3405,7 @@ static void run_playloop(struct MPContext *mpctx)
                 mpctx->current_track[STREAM_VIDEO] = NULL;
                 if (!mpctx->current_track[STREAM_AUDIO])
                     mpctx->stop_play = PT_NEXT_ENTRY;
+                mpctx->error_playing = true;
                 break;
             }
             video_left = frame_time >= 0;
@@ -4385,6 +4410,7 @@ goto_reopen_demuxer: ;
     if (mpctx->opts->pause)
         pause_player(mpctx);
 
+    mpctx->error_playing = false;
     while (!mpctx->stop_play)
         run_playloop(mpctx);
 
@@ -4457,12 +4483,25 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction)
 // Return if all done.
 static void play_files(struct MPContext *mpctx)
 {
+    mpctx->quit_player_rc = EXIT_NONE;
     for (;;) {
         idle_loop(mpctx);
         if (mpctx->stop_play == PT_QUIT)
             break;
 
+        mpctx->error_playing = true;
         play_current_file(mpctx);
+        if (mpctx->error_playing) {
+            if (!mpctx->quit_player_rc) {
+                mpctx->quit_player_rc = EXIT_NOTPLAYED;
+            } else if (mpctx->quit_player_rc == EXIT_PLAYED) {
+                mpctx->quit_player_rc = EXIT_SOMENOTPLAYED;
+            }
+        } else if (mpctx->quit_player_rc == EXIT_NOTPLAYED) {
+            mpctx->quit_player_rc = EXIT_SOMENOTPLAYED;
+        } else {
+            mpctx->quit_player_rc = EXIT_PLAYED;
+        }
         if (mpctx->stop_play == PT_QUIT)
             break;
 
@@ -4633,20 +4672,20 @@ static int mpv_main(int argc, char *argv[])
     print_libav_versions();
 
     if (!parse_cfgfiles(mpctx, mpctx->mconfig))
-        exit_player(mpctx, EXIT_ERROR, 1);
+        exit_player(mpctx, EXIT_ERROR);
 
     int r = m_config_parse_mp_command_line(mpctx->mconfig, mpctx->playlist,
                                            argc, argv);
     if (r < 0) {
         if (r <= M_OPT_EXIT) {
-            exit_player(mpctx, EXIT_NONE, 0);
+            exit_player(mpctx, EXIT_NONE);
         } else {
-            exit_player(mpctx, EXIT_ERROR, 1);
+            exit_player(mpctx, EXIT_ERROR);
         }
     }
 
     if (handle_help_options(mpctx))
-        exit_player(mpctx, EXIT_NONE, 0);
+        exit_player(mpctx, EXIT_NONE);
 
     mp_msg(MSGT_CPLAYER, MSGL_V, "Configuration: " CONFIGURATION "\n");
     mp_tmsg(MSGT_CPLAYER, MSGL_V, "Command line:");
@@ -4657,7 +4696,7 @@ static int mpv_main(int argc, char *argv[])
     if (!mpctx->playlist->first && !opts->player_idle_mode) {
         mp_print_version(true);
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "%s", mp_gtext(mp_help_text));
-        exit_player(mpctx, EXIT_NONE, 0);
+        exit_player(mpctx, EXIT_NONE);
     }
 
 #ifdef CONFIG_PRIORITY
@@ -4671,7 +4710,7 @@ static int mpv_main(int argc, char *argv[])
         mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output);
         if(!mpctx->encode_lavc_ctx) {
             mp_msg(MSGT_VO, MSGL_INFO, "Encoding initialization failed.");
-            exit_player(mpctx, EXIT_ERROR, 1);
+            exit_player(mpctx, EXIT_ERROR);
         }
         m_config_set_option0(mpctx->mconfig, "vo", "lavc");
         m_config_set_option0(mpctx->mconfig, "ao", "lavc");
@@ -4691,8 +4730,7 @@ static int mpv_main(int argc, char *argv[])
 
     play_files(mpctx);
 
-    exit_player(mpctx, mpctx->stop_play == PT_QUIT ? EXIT_QUIT : EXIT_EOF,
-                mpctx->quit_player_rc);
+    exit_player(mpctx, mpctx->stop_play == PT_QUIT ? EXIT_QUIT : mpctx->quit_player_rc);
 
     return 1;
 }

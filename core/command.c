@@ -2154,7 +2154,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_QUIT:
         mpctx->stop_play = PT_QUIT;
-        mpctx->quit_player_rc = cmd->args[0].v.i;
+        mpctx->quit_custom_rc = cmd->args[0].v.i;
+        mpctx->has_quit_custom_rc = true;
         break;
 
     case MP_CMD_QUIT_WATCH_LATER:
