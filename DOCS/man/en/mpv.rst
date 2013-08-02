@@ -467,8 +467,15 @@ ENVIRONMENT VARIABLES
 There are a number of environment variables that can be used to control the
 behavior of mpv.
 
+``HOME``
+    Used to determine mpv config directory: ``$HOME/.mpv``
+
+``TERM``
+    Used to determine terminal type.
+
 ``MPV_HOME``
-    Directory where mpv looks for user settings.
+    Directory where mpv looks for user settings. Overrides ``HOME``, and mpv
+    will try to load the config file as ``$MPV_HOME/config``.
 
 ``MPV_LOCALEDIR``
     Directory where mpv looks for gettext translation files (if enabled).
@@ -478,12 +485,30 @@ behavior of mpv.
     The resulting verbosity corresponds to that of ``--msglevel=5`` plus the
     value of ``MPV_VERBOSE``.
 
-libaf:
-    ``LADSPA_PATH``
-        Specifies the search path for LADSPA plugins. If it is unset, fully
-        qualified path names must be used.
+``MPV_LEAK_REPORT``
+    If set to ``1``, enable internal talloc leak reporting. Note that this can
+    cause trouble with multithreading, so only developers should use this.
 
-        FIXME: This is also mentioned in the ladspa section.
+``LADSPA_PATH``
+    Specifies the search path for LADSPA plugins. If it is unset, fully
+    qualified path names must be used.
+
+``DISPLAY``
+    Standard X11 display name to use.
+
+FFmpeg/Libav:
+    This library accesses various environment variables. However, they are not
+    centrally documented, and documenting them is not our job. Therefore, the
+    list is incomplete.
+
+    Notable environment variables:
+
+    ``http_proxy``
+        URL to proxy for ``http://`` and ``https://`` URLs.
+
+    ``no_proxy``
+        List of domain patterns for which no proxy should be used.
+        List entries are separated by ``,``. Patterns can include ``*``.
 
 libdvdcss:
     ``DVDCSS_CACHE``
@@ -540,53 +565,6 @@ libdvdcss:
     ``HOME``
         FIXME: Document this.
 
-osdep:
-    ``TERM``
-        FIXME: Document this.
-
-libvo:
-    ``DISPLAY``
-        FIXME: Document this.
-
-    ``HOME``
-        FIXME: Document this.
-
-libmpdemux:
-
-    ``HOME``
-        FIXME: Document this.
-
-    ``HOMEPATH``
-        FIXME: Document this.
-
-    ``http_proxy``
-        FIXME: Document this.
-
-    ``LOGNAME``
-        FIXME: Document this.
-
-    ``USERPROFILE``
-        FIXME: Document this.
-
-libavformat:
-
-    ``AUDIO_FLIP_LEFT``
-        FIXME: Document this.
-
-    ``BKTR_DEV``
-        FIXME: Document this.
-
-    ``BKTR_FORMAT``
-        FIXME: Document this.
-
-    ``BKTR_FREQUENCY``
-        FIXME: Document this.
-
-    ``http_proxy``
-        FIXME: Document this.
-
-    ``no_proxy``
-        FIXME: Document this.
 
 EXIT CODES
 ==========
@@ -611,7 +589,7 @@ FILES
 =====
 
 ``/usr/local/etc/mpv/mpv.conf``
-    mpv system-wide settings
+    mpv system-wide settings (depends on ``--prefix`` passed to configure)
 
 ``~/.mpv/config``
     mpv user settings
