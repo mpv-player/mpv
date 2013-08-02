@@ -2379,7 +2379,7 @@ static int parse_obj_settings_list(const m_option_t *opt, struct bstr name,
                 int found = obj_settings_find_by_content(list, &res[n]);
                 if (found < 0) {
                     mp_msg(MSGT_CFGPARSER, MSGL_WARN,
-                           "Option %.*s: Item bot found\n", BSTR_P(name));
+                           "Option %.*s: Item not found\n", BSTR_P(name));
                 } else {
                     obj_settings_list_del_at(&list, found);
                 }
