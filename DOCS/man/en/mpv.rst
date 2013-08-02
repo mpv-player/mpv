@@ -424,23 +424,6 @@ profile name ``default`` to continue with normal options.
         device=spdif
 
 
-OPTIONS
-=======
-
-.. include:: options.rst
-
-.. include:: ao.rst
-
-.. include:: vo.rst
-
-.. include:: af.rst
-
-.. include:: vf.rst
-
-.. include:: encode.rst
-
-.. include:: input.rst
-
 TAKING SCREENSHOTS
 ==================
 
@@ -458,6 +441,23 @@ video output driver. It should normally not be added to the config file, as
 taking screenshots is handled by the VOs, and adding the screenshot filter will
 break hardware decoding. (The filter may still be useful for taking screenshots
 at a certain point within the video chain when using multiple video filters.)
+
+OPTIONS
+=======
+
+.. include:: options.rst
+
+.. include:: ao.rst
+
+.. include:: vo.rst
+
+.. include:: af.rst
+
+.. include:: vf.rst
+
+.. include:: encode.rst
+
+.. include:: input.rst
 
 .. include:: changes.rst
 
