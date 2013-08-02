@@ -500,11 +500,11 @@ const char *m_config_get_positional_option(const struct m_config *config, int n)
     return NULL;
 }
 
-static int parse_subopts(struct m_config *config, void *optstruct, char *name,
-                         char *prefix, struct bstr param, int flags);
+static int parse_subopts(struct m_config *config, char *name, char *prefix,
+                         struct bstr param, int flags);
 
-static int m_config_parse_option(struct m_config *config, void *optstruct,
-                                 struct bstr name, struct bstr param, int flags)
+static int m_config_parse_option(struct m_config *config, struct bstr name,
+                                 struct bstr param, int flags)
 {
     assert(config != NULL);
     assert(name.len != 0);
@@ -548,7 +548,7 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
         char prefix[110];
         assert(strlen(co->name) < 100);
         sprintf(prefix, "%s-", co->name);
-        return parse_subopts(config, optstruct, co->name, prefix, param, flags);
+        return parse_subopts(config, co->name, prefix, param, flags);
     }
 
     if (set)
@@ -557,8 +557,8 @@ static int m_config_parse_option(struct m_config *config, void *optstruct,
     return m_option_parse(co->opt, name, param, set ? co->data : NULL);
 }
 
-static int parse_subopts(struct m_config *config, void *optstruct, char *name,
-                         char *prefix, struct bstr param, int flags)
+static int parse_subopts(struct m_config *config, char *name, char *prefix,
+                         struct bstr param, int flags)
 {
     char **lst = NULL;
     // Split the argument into child options
@@ -571,8 +571,7 @@ static int parse_subopts(struct m_config *config, void *optstruct, char *name,
         char n[110];
         if (snprintf(n, 110, "%s%s", prefix, lst[2 * i]) > 100)
             abort();
-        r = m_config_parse_option(config, optstruct, bstr0(n),
-                                  bstr0(lst[2 * i + 1]), flags);
+        r = m_config_parse_option(config,bstr0(n), bstr0(lst[2 * i + 1]), flags);
         if (r < 0) {
             if (r > M_OPT_EXIT) {
                 mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
@@ -592,7 +591,7 @@ int m_config_parse_suboptions(struct m_config *config, char *name,
 {
     if (!subopts || !*subopts)
         return 0;
-    int r = parse_subopts(config, config->optstruct, name, "", bstr0(subopts), 0);
+    int r = parse_subopts(config, name, "", bstr0(subopts), 0);
     if (r < 0 && r > M_OPT_EXIT) {
         mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "Error parsing suboption %s (%s)\n",
                 name, m_option_strerror(r));
@@ -604,7 +603,7 @@ int m_config_parse_suboptions(struct m_config *config, char *name,
 int m_config_set_option_ext(struct m_config *config, struct bstr name,
                             struct bstr param, int flags)
 {
-    int r = m_config_parse_option(config, config->optstruct, name, param, flags);
+    int r = m_config_parse_option(config, name, param, flags);
     if (r < 0 && r > M_OPT_EXIT) {
         mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "Error parsing option %.*s (%s)\n",
                 BSTR_P(name), m_option_strerror(r));
