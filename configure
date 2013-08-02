@@ -2440,7 +2440,7 @@ echores "$_bluray"
 echocheck "dvdread"
 if test "$_dvdread" = auto ; then
   _dvdread=no
-  pkg_config_add 'dvdread >= 4.2.0' && _dvdread=yes
+  pkg_config_add 'dvdread >= 4.1.0' && _dvdread=yes
 fi
 if test "$_dvdread" = yes ; then
   def_dvdread='#define CONFIG_DVDREAD 1'
