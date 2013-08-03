@@ -469,6 +469,8 @@ Name                            W Comment
 ``track-list``                    list of audio/video/sub tracks, cur. entr. marked
 ``chapter-list``                  list of chapters, current entry marked
 ``quvi-format``                 x see ``--quvi-format``
+``af``                          x see ``--af``
+``vf``                          x see ``--vf``
 ``options/name``                  read-only access to value of option ``--name``
 =============================== = ==================================================
 

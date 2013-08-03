@@ -70,6 +70,8 @@
 
 static void change_video_filters(MPContext *mpctx, const char *cmd,
                                  const char *arg);
+static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
+                       struct m_obj_settings *new_chain);
 
 static char *format_bitrate(int rate)
 {
@@ -1579,6 +1581,52 @@ static int mp_property_playlist(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static char *print_obj_osd_list(struct m_obj_settings *list)
+{
+    char *res = NULL;
+    for (int n = 0; list && list[n].name; n++) {
+        res = talloc_asprintf_append(res, "%s [", list[n].name);
+        for (int i = 0; list[n].attribs && list[n].attribs[i]; i += 2) {
+            res = talloc_asprintf_append(res, "%s%s=%s", i > 0 ? " " : "",
+                                         list[n].attribs[i],
+                                         list[n].attribs[i + 1]);
+        }
+        res = talloc_asprintf_append(res, "]\n");
+    }
+    if (!res)
+        res = talloc_strdup(NULL, "(empty)");
+    return res;
+}
+
+static int property_filter(m_option_t *prop, int action, void *arg,
+                           MPContext *mpctx, enum stream_type mt)
+{
+    switch (action) {
+    case M_PROPERTY_PRINT: {
+        struct m_config_option *opt = m_config_get_co(mpctx->mconfig,
+                                                      bstr0(prop->name));
+        *(char **)arg = print_obj_osd_list(*(struct m_obj_settings **)opt->data);
+        return M_PROPERTY_OK;
+    }
+    case M_PROPERTY_SET:
+        return set_filters(mpctx, mt, *(struct m_obj_settings **)arg) >= 0
+            ? M_PROPERTY_OK : M_PROPERTY_ERROR;
+    }
+    return mp_property_generic_option(prop, action, arg, mpctx);
+}
+
+static int mp_property_vf(m_option_t *prop, int action, void *arg,
+                          MPContext *mpctx)
+{
+    return property_filter(prop, action, arg, mpctx, STREAM_VIDEO);
+}
+
+static int mp_property_af(m_option_t *prop, int action, void *arg,
+                          MPContext *mpctx)
+{
+    return property_filter(prop, action, arg, mpctx, STREAM_AUDIO);
+}
+
 static int mp_property_alias(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
@@ -1774,6 +1822,9 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("ass-style-override", property_osd_helper),
 #endif
 
+    M_OPTION_PROPERTY_CUSTOM("vf*", mp_property_vf),
+    M_OPTION_PROPERTY_CUSTOM("af*", mp_property_af),
+
 #ifdef CONFIG_TV
     { "tv-brightness", mp_property_tv_color, CONF_TYPE_INT,
       M_OPT_RANGE, -100, 100, .offset = TV_COLOR_BRIGHTNESS },
@@ -1829,6 +1880,8 @@ static struct property_osd_display {
     int osd_id;
     // Needs special ways to display the new value (seeks are delayed)
     int seek_msg, seek_bar;
+    // Separator between option name and value (default: ": ")
+    const char *sep;
 } property_osd_display[] = {
     // general
     { "loop", _("Loop") },
@@ -1869,6 +1922,8 @@ static struct property_osd_display {
     { "sub-scale", _("Sub Scale")},
     { "ass-vsfilter-aspect-compat", _("Subtitle VSFilter aspect compat")},
     { "ass-style-override", _("ASS subtitle style override")},
+    { "vf*", _("Video filters"), .sep = ":\n"},
+    { "af*", _("Audio filters"), .sep = ":\n"},
 #ifdef CONFIG_TV
     { "tv-brightness", _("Brightness"), .osd_progbar = OSD_BRIGHTNESS },
     { "tv-hue", _("Hue"), .osd_progbar = OSD_HUE},
@@ -1942,12 +1997,16 @@ static void show_property_osd(MPContext *mpctx, const char *pname,
                          "%s: (unavailable)", osd_name);
         } else if (r >= 0 && val) {
             int osd_id = 0;
+            const char *sep = NULL;
             if (p) {
                 int index = p - property_osd_display;
                 osd_id = p->osd_id ? p->osd_id : OSD_MSG_PROPERTY + index;
+                sep = p->sep;
             }
+            if (!sep)
+                sep = ": ";
             set_osd_tmsg(mpctx, osd_id, 1, opts->osd_duration,
-                         "%s: %s", osd_name, val);
+                         "%s%s%s", osd_name, sep, val);
             talloc_free(val);
         }
     }

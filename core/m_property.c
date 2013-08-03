@@ -37,6 +37,7 @@
 
 const struct m_option_type m_option_type_dummy = {
     .name = "Unknown",
+    .flags = M_OPT_TYPE_ALLOW_WILDCARD, // make "vf*" property work
 };
 
 struct legacy_prop {
