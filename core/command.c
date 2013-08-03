@@ -2096,6 +2096,22 @@ static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
     return r >= 0 ? 0 : -1;
 }
 
+static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
+                            const char *cmd, const char *arg, bool on_osd)
+{
+    int r = edit_filters(mpctx, mediatype, cmd, arg);
+    if (on_osd) {
+        if (r >= 0) {
+            const char *prop = filter_opt[mediatype];
+            show_property_osd(mpctx, prop, MP_ON_OSD_MSG);
+        } else {
+            set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts->osd_duration,
+                         "Changing filters failed!");
+        }
+    }
+    return r;
+}
+
 static void change_video_filters(MPContext *mpctx, const char *cmd,
                                  const char *arg)
 {
@@ -2623,11 +2639,13 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_AF:
-        edit_filters(mpctx, STREAM_AUDIO, cmd->args[0].v.s, cmd->args[1].v.s);
+        edit_filters_osd(mpctx, STREAM_AUDIO, cmd->args[0].v.s,
+                         cmd->args[1].v.s, msg_osd);
         break;
 
     case MP_CMD_VF:
-        edit_filters(mpctx, STREAM_VIDEO, cmd->args[0].v.s, cmd->args[1].v.s);
+        edit_filters_osd(mpctx, STREAM_VIDEO, cmd->args[0].v.s,
+                         cmd->args[1].v.s, msg_osd);
         break;
 
     case MP_CMD_COMMAND_LIST: {
