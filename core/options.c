@@ -604,7 +604,7 @@ const m_option_t mp_opts[] = {
 #endif
     OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0),
     OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
-    OPT_FLAG("mouseinput", vo.nomouse_input, 0),
+    OPT_FLAG_CONSTANTS("mouseinput", vo.nomouse_input, 0, 1, 0),
 
     OPT_CHOICE_OR_INT("screen", vo.screen_id, 0, 0, 32,
                       ({"default", -1})),
