@@ -1979,58 +1979,68 @@ static bool reinit_filters(MPContext *mpctx, enum stream_type mediatype)
     return false;
 }
 
-static void change_filters(MPContext *mpctx, enum stream_type mediatype,
-                           const char *cmd, const char *arg)
-{
-    struct MPOpts *opts = mpctx->opts;
-    struct m_config *conf = mpctx->mconfig;
-    struct m_obj_settings *old_settings = NULL;
-    bool success = false;
-    bool need_refresh = false;
-    const char *option;
-    struct m_obj_settings **list;
+static const char *filter_opt[STREAM_TYPE_COUNT] = {
+    [STREAM_VIDEO] = "vf",
+    [STREAM_AUDIO] = "af",
+};
 
-    switch (mediatype) {
-    case STREAM_VIDEO:
-        option = "vf";
-        list = &opts->vf_settings;
-        break;
-    case STREAM_AUDIO:
-        option = "af";
-        list = &opts->af_settings;
-        break;
-    default:
-        abort();
+static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
+                       struct m_obj_settings *new_chain)
+{
+    bstr option = bstr0(filter_opt[mediatype]);
+    struct m_config_option *co = m_config_get_co(mpctx->mconfig, option);
+    if (!co)
+        return -1;
+
+    struct m_obj_settings **list = co->data;
+    struct m_obj_settings *old_settings = *list;
+    *list = NULL;
+    m_option_copy(co->opt, list, &new_chain);
+
+    bool success = reinit_filters(mpctx, mediatype);
+
+    if (success) {
+        m_option_free(co->opt, &old_settings);
+    } else {
+        m_option_free(co->opt, list);
+        *list = old_settings;
+        reinit_filters(mpctx, mediatype);
     }
+
+    if (mediatype == STREAM_VIDEO)
+        mp_force_video_refresh(mpctx);
+
+    return success ? 0 : -1;
+}
+
+static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
+                        const char *cmd, const char *arg)
+{
+    bstr option = bstr0(filter_opt[mediatype]);
+    struct m_config_option *co = m_config_get_co(mpctx->mconfig, option);
+    if (!co)
+        return -1;
 
     // The option parser is used to modify the filter list itself.
     char optname[20];
-    snprintf(optname, sizeof(optname), "%s-%s", option, cmd);
-    const struct m_option *type = m_config_get_option(conf, bstr0(optname));
+    snprintf(optname, sizeof(optname), "%.*s-%s", BSTR_P(option), cmd);
 
-    // Backup old settings, in case it fails
-    m_option_copy(type, &old_settings, list);
+    struct m_obj_settings *new_chain = NULL;
+    m_option_copy(co->opt, &new_chain, co->data);
 
-    if (m_config_set_option0(conf, optname, arg) >= 0) {
-        need_refresh = true;
-        success = reinit_filters(mpctx, mediatype);
-    }
+    int r = m_option_parse(co->opt, bstr0(optname), bstr0(arg), &new_chain);
+    if (r >= 0)
+        r = set_filters(mpctx, mediatype, new_chain);
 
-    if (!success) {
-        m_option_copy(type, list, &old_settings);
-        if (need_refresh)
-            reinit_filters(mpctx, mediatype);
-    }
-    m_option_free(type, &old_settings);
+    m_option_free(co->opt, &new_chain);
 
-    if (need_refresh && mediatype == STREAM_VIDEO)
-        mp_force_video_refresh(mpctx);
+    return r >= 0 ? 0 : -1;
 }
 
 static void change_video_filters(MPContext *mpctx, const char *cmd,
                                  const char *arg)
 {
-    change_filters(mpctx, STREAM_VIDEO, cmd, arg);
+    edit_filters(mpctx, STREAM_VIDEO, cmd, arg);
 }
 
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
@@ -2554,11 +2564,11 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 
     case MP_CMD_AF:
-        change_filters(mpctx, STREAM_AUDIO, cmd->args[0].v.s, cmd->args[1].v.s);
+        edit_filters(mpctx, STREAM_AUDIO, cmd->args[0].v.s, cmd->args[1].v.s);
         break;
 
     case MP_CMD_VF:
-        change_video_filters(mpctx, cmd->args[0].v.s, cmd->args[1].v.s);
+        edit_filters(mpctx, STREAM_VIDEO, cmd->args[0].v.s, cmd->args[1].v.s);
         break;
 
     case MP_CMD_COMMAND_LIST: {
