@@ -614,6 +614,12 @@
     case of MPEG-TS this value identifies the maximum number of TS packets
     to scan.
 
+``--demuxer-lavf-buffersize=<value>``
+    Size of the stream read buffer allocated for libavformat in bytes
+    (default: 32768). Lowering the size could lower latency. Note that
+    libavformat might reallocate the buffer internally, or not fully use all
+    of it.
+
 ``--demuxer-lavf-cryptokey=<hexstring>``
     Encryption key the demuxer should use. This is the raw binary data of
     the key converted to a hexadecimal string.

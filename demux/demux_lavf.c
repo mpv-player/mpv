@@ -51,10 +51,16 @@
 
 #define OPT_BASE_STRUCT struct MPOpts
 
+// Should correspond to IO_BUFFER_SIZE in libavformat/aviobuf.c (not public)
+// libavformat (almost) always reads data in blocks of this size.
+#define BIO_BUFFER_SIZE 32768
+
 const m_option_t lavfdopts_conf[] = {
     OPT_INTRANGE("probesize", lavfdopts.probesize, 0, 32, INT_MAX),
     OPT_STRING("format", lavfdopts.format, 0),
     OPT_FLOATRANGE("analyzeduration", lavfdopts.analyzeduration, 0, 0, 3600),
+    OPT_INTRANGE("buffersize", lavfdopts.buffersize, 0, 1, 10 * 1024 * 1024,
+                 OPTDEF_INT(BIO_BUFFER_SIZE)),
     OPT_FLAG("allow-mimetype", lavfdopts.allow_mimetype, 0),
     OPT_INTRANGE("probescore", lavfdopts.probescore, 0, 0, 100),
     OPT_STRING("cryptokey", lavfdopts.cryptokey, 0),
@@ -63,10 +69,6 @@ const m_option_t lavfdopts_conf[] = {
     OPT_STRING("o", lavfdopts.avopt, 0),
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
-
-// Should correspond to IO_BUFFER_SIZE in libavformat/aviobuf.c (not public)
-// libavformat (almost) always reads data in blocks of this size.
-#define BIO_BUFFER_SIZE 32768
 
 #define MAX_PKT_QUEUE 50
 
@@ -570,10 +572,10 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (!(priv->avif->flags & AVFMT_NOFILE) &&
         demuxer->stream->type != STREAMTYPE_AVDEVICE)
     {
-        void *buffer = av_malloc(BIO_BUFFER_SIZE);
+        void *buffer = av_malloc(lavfdopts->buffersize);
         if (!buffer)
             return -1;
-        priv->pb = avio_alloc_context(buffer, BIO_BUFFER_SIZE, 0,
+        priv->pb = avio_alloc_context(buffer, lavfdopts->buffersize, 0,
                                       demuxer, mp_read, NULL, mp_seek);
         if (!priv->pb) {
             av_free(buffer);

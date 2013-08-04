@@ -216,6 +216,7 @@ typedef struct MPOpts {
         int probesize;
         int probescore;
         float analyzeduration;
+        int buffersize;
         int allow_mimetype;
         char *format;
         char *cryptokey;
