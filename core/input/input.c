@@ -92,13 +92,14 @@ struct key_name {
 
 #define ARG_INT                 { .type = {"", NULL, &m_option_type_int} }
 #define ARG_FLOAT               { .type = {"", NULL, &m_option_type_float} }
+#define ARG_DOUBLE              { .type = {"", NULL, &m_option_type_double} }
 #define ARG_STRING              { .type = {"", NULL, &m_option_type_string} }
 #define ARG_CHOICE(c)           { .type = {"", NULL, &m_option_type_choice,    \
                                            M_CHOICES(c)} }
 #define ARG_TIME                { .type = {"", NULL, &m_option_type_time} }
 
-#define OARG_FLOAT(def)         { .type = {"", NULL, &m_option_type_float},    \
-                                  .optional = true, .v.f = def }
+#define OARG_DOUBLE(def)        { .type = {"", NULL, &m_option_type_double},   \
+                                  .optional = true, .v.d = def }
 #define OARG_INT(def)           { .type = {"", NULL, &m_option_type_int},      \
                                   .optional = true, .v.i = def }
 #define OARG_CHOICE(def, c)     { .type = {"", NULL, &m_option_type_choice,    \
@@ -129,7 +130,7 @@ static const mp_cmd_t mp_cmds[] = {
                       {"exact", 1},             {"1", 1},
                       {"keyframes", -1},        {"-1", -1})),
   }},
-  { MP_CMD_SPEED_MULT, "speed_mult", { ARG_FLOAT } },
+  { MP_CMD_SPEED_MULT, "speed_mult", { ARG_DOUBLE } },
   { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
   { MP_CMD_QUIT_WATCH_LATER, "quit_watch_later", },
   { MP_CMD_STOP, "stop", },
@@ -195,12 +196,12 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_KEYDOWN_EVENTS, "key_down_event", { ARG_INT } },
   { MP_CMD_SET, "set", { ARG_STRING,  ARG_STRING } },
   { MP_CMD_GET_PROPERTY, "get_property", { ARG_STRING } },
-  { MP_CMD_ADD, "add", { ARG_STRING, OARG_FLOAT(0) } },
+  { MP_CMD_ADD, "add", { ARG_STRING, OARG_DOUBLE(0) } },
   { MP_CMD_CYCLE, "cycle", {
       ARG_STRING,
       { .type = {"", NULL, &m_option_type_cycle_dir},
         .optional = true,
-        .v.f = 1 },
+        .v.d = 1 },
   }},
 
   { MP_CMD_ENABLE_INPUT_SECTION,  "enable_section",  {
@@ -776,15 +777,15 @@ void mp_input_rm_key_fd(struct input_ctx *ictx, int fd)
 static int parse_cycle_dir(const struct m_option *opt, struct bstr name,
                            struct bstr param, void *dst)
 {
-    float val;
+    double val;
     if (bstrcmp0(param, "up") == 0) {
         val = +1;
     } else if (bstrcmp0(param, "down") == 0) {
         val = -1;
     } else {
-        return m_option_type_float.parse(opt, name, param, dst);
+        return m_option_type_double.parse(opt, name, param, dst);
     }
-    *(float *)dst = val;
+    *(double *)dst = val;
     return 1;
 }
 

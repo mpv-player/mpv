@@ -1576,7 +1576,7 @@ static int build_afilter_chain(struct MPContext *mpctx)
                 new_srate = 8000;
             if (new_srate > 192000)
                 new_srate = 192000;
-            opts->playback_speed = (float)new_srate / sh_audio->samplerate;
+            opts->playback_speed = (double)new_srate / sh_audio->samplerate;
         }
     }
     return init_audio_filters(sh_audio, new_srate,

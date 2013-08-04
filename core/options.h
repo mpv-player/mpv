@@ -159,7 +159,7 @@ typedef struct MPOpts {
     int audio_output_format;
     int force_srate;
     int dtshd;
-    float playback_speed;
+    double playback_speed;
     struct m_obj_settings *vf_settings;
     struct m_obj_settings *af_settings;
     float movie_aspect;

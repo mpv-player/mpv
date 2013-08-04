@@ -127,7 +127,7 @@ static int mp_property_playback_speed(m_option_t *prop, int action,
     double orig_speed = opts->playback_speed;
     switch (action) {
     case M_PROPERTY_SET: {
-        opts->playback_speed = *(float *) arg;
+        opts->playback_speed = *(double *) arg;
         // Adjust time until next frame flip for nosound mode
         mpctx->time_frame *= orig_speed / opts->playback_speed;
         if (mpctx->sh_audio)
@@ -2186,8 +2186,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             .inc = 1,
             .wrap = cmd->id == MP_CMD_CYCLE,
         };
-        if (cmd->args[1].v.f)
-            s.inc = cmd->args[1].v.f;
+        if (cmd->args[1].v.d)
+            s.inc = cmd->args[1].v.d;
         int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_SWITCH, &s, mpctx);
         if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
             show_property_osd(mpctx, cmd->args[0].v.s, cmd->on_osd);
@@ -2221,7 +2221,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 
     case MP_CMD_SPEED_MULT: {
-        float v = cmd->args[0].v.f;
+        double v = cmd->args[0].v.d;
         v *= mpctx->opts->playback_speed;
         mp_property_do("speed", M_PROPERTY_SET, &v, mpctx);
         show_property_osd(mpctx, "speed", cmd->on_osd);

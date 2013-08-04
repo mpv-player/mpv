@@ -444,11 +444,11 @@ static int control(struct af_instance* af, int cmd, void* arg)
       if (s->speed_pitch) {
         break;
       }
-      s->speed = *(float*)arg;
+      s->speed = *(double *)arg;
       s->scale = s->speed * s->scale_nominal;
     } else {
       if (s->speed_pitch) {
-        s->speed = 1 / *(float*)arg;
+        s->speed = 1 / *(double *)arg;
         s->scale = s->speed * s->scale_nominal;
         break;
       }
