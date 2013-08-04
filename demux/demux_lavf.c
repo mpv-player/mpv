@@ -76,7 +76,6 @@ typedef struct lavf_priv {
     AVInputFormat *avif;
     AVFormatContext *avfc;
     AVIOContext *pb;
-    uint8_t buffer[BIO_BUFFER_SIZE];
     int64_t last_pts;
     struct sh_stream **streams; // NULL for unknown streams
     int num_streams;
@@ -571,8 +570,15 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (!(priv->avif->flags & AVFMT_NOFILE) &&
         demuxer->stream->type != STREAMTYPE_AVDEVICE)
     {
-        priv->pb = avio_alloc_context(priv->buffer, BIO_BUFFER_SIZE, 0,
+        void *buffer = av_malloc(BIO_BUFFER_SIZE);
+        if (!buffer)
+            return -1;
+        priv->pb = avio_alloc_context(buffer, BIO_BUFFER_SIZE, 0,
                                       demuxer, mp_read, NULL, mp_seek);
+        if (!priv->pb) {
+            av_free(buffer);
+            return -1;
+        }
         priv->pb->read_seek = mp_read_seek;
         priv->pb->seekable = demuxer->stream->end_pos
                  && (demuxer->stream->flags & MP_STREAM_SEEK) == MP_STREAM_SEEK
@@ -970,6 +976,8 @@ static void demux_close_lavf(demuxer_t *demuxer)
             av_freep(&priv->avfc->key);
             avformat_close_input(&priv->avfc);
         }
+        if (priv->pb)
+            av_freep(&priv->pb->buffer);
         av_freep(&priv->pb);
         talloc_free(priv);
         demuxer->priv = NULL;
