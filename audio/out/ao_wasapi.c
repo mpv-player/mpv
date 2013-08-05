@@ -1150,7 +1150,8 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
             thread_play(state);
             break;
         case (WAIT_OBJECT_0 + 6): /* feed */
-            feedwatch = 1;
+            if (state->is_playing)
+                feedwatch = 1;
             thread_feed(state, 0);
             break;
         case WAIT_TIMEOUT: /* Did our feed die? */
