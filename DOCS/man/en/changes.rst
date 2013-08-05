@@ -65,6 +65,7 @@ General Changes for mplayer2 to mpv
   ``mpv input.mkv -o output.y4m --no-audio --oautofps --oneverdrop``.
 * Image subtitles (DVDs etc.) are rendered in color and use more correct
   positioning (color can be disabled with ``--sub-gray``)
+* Wayland support
 * General code cleanups
 * Many more changes
 
