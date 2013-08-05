@@ -2401,7 +2401,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             else
                 radio_step_channel(mpctx->stream, RADIO_CHANNEL_LOWER);
             if (radio_get_channel_name(mpctx->stream)) {
-                set_osd_tmsg(OSD_MSG_RADIO_CHANNEL, osdl, osd_duration,
+                set_osd_tmsg(mpctx, OSD_MSG_RADIO_CHANNEL, osdl, osd_duration,
                              "Channel: %s",
                              radio_get_channel_name(mpctx->stream));
             }
@@ -2412,7 +2412,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (mpctx->stream && mpctx->stream->type == STREAMTYPE_RADIO) {
             radio_set_channel(mpctx->stream, cmd->args[0].v.s);
             if (radio_get_channel_name(mpctx->stream)) {
-                set_osd_tmsg(OSD_MSG_RADIO_CHANNEL, osdl, osd_duration,
+                set_osd_tmsg(mpctx, OSD_MSG_RADIO_CHANNEL, osdl, osd_duration,
                              "Channel: %s",
                              radio_get_channel_name(mpctx->stream));
             }

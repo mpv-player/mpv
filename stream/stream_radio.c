@@ -120,7 +120,7 @@ typedef struct radio_driver_s {
 #define OPT_BASE_STRUCT radio_param_t
 static const m_option_t stream_opts_fields[] = {
     OPT_FLOAT("title", freq_channel, 0),
-    OPT_STRING("device", capture, 0),
+    OPT_STRING("capture", capture, 0),
     {0}
 };
 
@@ -967,7 +967,7 @@ const stream_info_t stream_info_radio = {
     .options = stream_opts_fields,
     .url_options = {
         {"hostname", "freqchannel"},
-        {"username", "capture"},
+        {"filename", "capture"},
         {0}
     },
 };
