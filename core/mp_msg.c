@@ -386,7 +386,7 @@ static const char *module_text[MSGT_MAX] = {
 // The name is the prefix put before the output. It's usually prefixed by the
 // parent's name. If the name starts with "/", the parent's name is not
 // prefixed (except in verbose mode), and if it starts with "!", the name is
-// printed at all (except in verbose mode).
+// not printed at all (except in verbose mode).
 struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
                           const char *name)
 {
