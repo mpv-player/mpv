@@ -125,6 +125,10 @@ static void mp_image_alloc_planes(struct mp_image *mpi)
 {
     assert(!mpi->planes[0]);
 
+    // Note: for non-mod-2 4:2:0 YUV frames, we have to allocate an additional
+    //       top/right border. This is needed for correct handling of such
+    //       images in filter and VO code (e.g. vo_vdpau or vo_opengl).
+
     size_t plane_size[MP_MAX_PLANES];
     for (int n = 0; n < MP_MAX_PLANES; n++) {
         int alloc_h = MP_ALIGN_UP(mpi->h, 32) >> mpi->fmt.ys[n];

@@ -1207,13 +1207,21 @@ static void init_video(struct gl_video *p)
 
     debug_check_gl(p, "before video texture creation");
 
+    // For video with odd sizes: enlarge the luma texture so that it covers all
+    // chroma pixels - then we can render these correctly by cropping the final
+    // image (conceptually).
+    // Image allocations are always such that the "additional" luma border
+    // exists and can be accessed.
+    int full_w = MP_ALIGN_UP(p->image_w, 1 << p->image_desc.chroma_xs);
+    int full_h = MP_ALIGN_UP(p->image_h, 1 << p->image_desc.chroma_ys);
+
     struct video_image *vimg = &p->image;
 
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
 
-        plane->w = p->image_w >> p->image_desc.xs[n];
-        plane->h = p->image_h >> p->image_desc.ys[n];
+        plane->w = full_w >> p->image_desc.xs[n];
+        plane->h = full_h >> p->image_desc.ys[n];
 
         tex_size(p, plane->w, plane->h,
                     &plane->tex_w, &plane->tex_h);
