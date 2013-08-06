@@ -29,8 +29,8 @@
 #include <stdbool.h>
 
 #include "config.h"
-#include "core/mp_msg.h"
-#include "core/bstr.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/bstr.h"
 
 #include "vo.h"
 #include "video/csputils.h"

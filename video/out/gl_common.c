@@ -42,8 +42,8 @@
 #include <assert.h>
 #include "talloc.h"
 #include "gl_common.h"
-#include "core/options.h"
-#include "core/m_option.h"
+#include "mpvcore/options.h"
+#include "mpvcore/m_option.h"
 #include "sub/sub.h"
 #include "bitmap_packer.h"
 

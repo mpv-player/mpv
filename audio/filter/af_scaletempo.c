@@ -36,10 +36,10 @@
 #include <limits.h>
 #include <assert.h>
 
-#include "core/mp_common.h"
+#include "mpvcore/mp_common.h"
 
 #include "af.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 // Data for specific instances of this filter
 typedef struct af_scaletempo_s

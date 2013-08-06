@@ -40,7 +40,7 @@
 #include "video/fmt-conversion.h"
 #include "video/sws_utils.h"
 
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 const struct image_writer_opts image_writer_opts_defaults = {
     .format = "jpg",

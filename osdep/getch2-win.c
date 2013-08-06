@@ -28,8 +28,8 @@
 #include <stdint.h>
 #include <string.h>
 #include <windows.h>
-#include "core/input/keycodes.h"
-#include "core/input/input.h"
+#include "mpvcore/input/keycodes.h"
+#include "mpvcore/input/input.h"
 #include "getch2.h"
 
 int mp_input_slave_cmd_func(int fd, char *dest, int size)

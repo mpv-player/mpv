@@ -28,9 +28,9 @@
 
 #include "config.h"
 #include "audio/format.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 #include "ao.h"
-#include "core/input/input.h"
+#include "mpvcore/input/input.h"
 
 #define PULSE_CLIENT_NAME "mpv"
 

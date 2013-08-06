@@ -25,11 +25,11 @@
 #include <libswscale/swscale.h>
 
 #include "config.h"
-#include "core/bstr.h"
+#include "mpvcore/bstr.h"
 #include "osdep/io.h"
-#include "core/path.h"
+#include "mpvcore/path.h"
 #include "talloc.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
 #include "video/vfcap.h"
@@ -38,7 +38,7 @@
 #include "video/image_writer.h"
 #include "video/sws_utils.h"
 #include "sub/sub.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 struct priv {
     struct image_writer_opts *opts;

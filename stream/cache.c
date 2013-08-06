@@ -51,10 +51,10 @@
 
 #include "osdep/timer.h"
 
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 #include "stream.h"
-#include "core/mp_common.h"
+#include "mpvcore/mp_common.h"
 
 
 // Note: (struct priv*)(cache->priv)->cache == cache

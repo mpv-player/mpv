@@ -23,9 +23,9 @@
 #include <libsmbclient.h>
 #include <unistd.h>
 
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 #include "stream.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 struct priv {
     int fd;

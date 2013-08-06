@@ -34,8 +34,8 @@
 #include <string.h>
 
 #include "config.h"
-#include "core/options.h"
-#include "core/mp_msg.h"
+#include "mpvcore/options.h"
+#include "mpvcore/mp_msg.h"
 #include "audio/mixer.h"
 
 #ifdef HAVE_SYS_SOUNDCARD_H

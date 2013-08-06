@@ -37,14 +37,14 @@
 
 #include "config.h"
 
-#include "core/bstr.h"
-#include "core/mp_msg.h"
+#include "mpvcore/bstr.h"
+#include "mpvcore/mp_msg.h"
 #include "osdep/timer.h"
 #include "stream.h"
 #include "demux/demux.h"
 
-#include "core/m_option.h"
-#include "core/m_config.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/m_config.h"
 
 // Includes additional padding in case sizes get rounded up by sector size.
 #define TOTAL_BUFFER_SIZE (STREAM_MAX_BUFFER_SIZE + STREAM_MAX_SECTOR_SIZE)

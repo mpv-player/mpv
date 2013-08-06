@@ -19,7 +19,7 @@
 
 #ifndef MACOSX_EVENTS_H
 #define MACOSX_EVENTS_H
-#include "core/input/keycodes.h"
+#include "mpvcore/input/keycodes.h"
 
 void cocoa_put_key(int keycode);
 void cocoa_put_key_with_modifiers(int keycode, int modifiers);

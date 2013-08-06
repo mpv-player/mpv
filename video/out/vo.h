@@ -27,8 +27,8 @@
 #include <stdbool.h>
 
 #include "video/img_format.h"
-#include "core/mp_common.h"
-#include "core/options.h"
+#include "mpvcore/mp_common.h"
+#include "mpvcore/options.h"
 
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2

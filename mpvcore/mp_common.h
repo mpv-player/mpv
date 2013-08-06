@@ -24,7 +24,7 @@
 #include <stdint.h>
 
 #include "compat/compiler.h"
-#include "core/mp_talloc.h"
+#include "mpvcore/mp_talloc.h"
 
 // both int64_t and double should be able to represent this exactly
 #define MP_NOPTS_VALUE (-1LL<<63)

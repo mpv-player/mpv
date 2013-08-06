@@ -39,7 +39,7 @@
 
 #include "talloc.h"
 #include "af.h"
-#include "core/path.h"
+#include "mpvcore/path.h"
 
 #define DEF_SZ 512 // default buffer size (in samples)
 #define SHARED_FILE "mpv-af_export" /* default file name

@@ -27,7 +27,7 @@
 
 #include "config.h"
 #include "talloc.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 #include <libgen.h>
 #include <errno.h>
@@ -38,7 +38,7 @@
 #define FIRST_PCM_AID 160
 
 #include "stream.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 #include "stream_dvd.h"
 #include "stream_dvd_common.h"

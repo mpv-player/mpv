@@ -27,10 +27,10 @@
 #include <sys/types.h>
 #include <limits.h>
 
-#include "core/options.h"
+#include "mpvcore/options.h"
 #include "config.h"
-#include "core/m_config.h"
-#include "core/m_option.h"
+#include "mpvcore/m_config.h"
+#include "mpvcore/m_option.h"
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 #include "video/csputils.h"

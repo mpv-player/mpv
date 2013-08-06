@@ -28,7 +28,7 @@
 #include "video/img_format.h"
 #include "fmt-conversion.h"
 #include "csputils.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 //global sws_flags from the command line
 int sws_flags = 2;

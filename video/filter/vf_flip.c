@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "config.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 #include "video/mp_image.h"
 #include "vf.h"

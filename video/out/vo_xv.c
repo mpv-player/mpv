@@ -41,9 +41,9 @@
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
 
-#include "core/options.h"
+#include "mpvcore/options.h"
 #include "talloc.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 #include "vo.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"
@@ -53,7 +53,7 @@
 #include "sub/sub.h"
 #include "sub/draw_bmp.h"
 #include "video/csputils.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 #include "osdep/timer.h"
 
 static const vo_info_t info = {

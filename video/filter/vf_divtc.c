@@ -23,8 +23,8 @@
 #include <math.h>
 
 #include "config.h"
-#include "core/mp_msg.h"
-#include "core/cpudetect.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/cpudetect.h"
 #include "libavutil/common.h"
 #include "compat/mpbswap.h"
 

@@ -35,9 +35,9 @@
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
 
-#include "core/mp_msg.h"
-#include "core/m_option.h"
-#include "core/av_opts.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/av_opts.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"

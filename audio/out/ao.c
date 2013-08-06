@@ -27,10 +27,10 @@
 #include "ao.h"
 #include "audio/format.h"
 
-#include "core/options.h"
-#include "core/m_config.h"
-#include "core/mp_msg.h"
-#include "core/mpv_global.h"
+#include "mpvcore/options.h"
+#include "mpvcore/m_config.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/mpv_global.h"
 
 // there are some globals:
 struct ao *global_ao;

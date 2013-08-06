@@ -42,13 +42,13 @@
 #include "talloc.h"
 
 #include "stream.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 #include "libavutil/common.h"
 #include "compat/mpbswap.h"
 
 #include "cdd.h"
 
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 extern char *cdrom_device;
 

@@ -36,9 +36,9 @@
 #include "ao.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
-#include "core/m_option.h"
-#include "core/mp_ring.h"
-#include "core/mp_msg.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/mp_ring.h"
+#include "mpvcore/mp_msg.h"
 #include "audio/out/ao_coreaudio_properties.h"
 #include "audio/out/ao_coreaudio_utils.h"
 

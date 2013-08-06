@@ -22,7 +22,7 @@
 #include <libavutil/common.h>
 
 #include "lavc.h"
-#include "core/mp_common.h"
+#include "mpvcore/mp_common.h"
 #include "video/fmt-conversion.h"
 #include "video/vdpau.h"
 #include "video/decode/dec_video.h"

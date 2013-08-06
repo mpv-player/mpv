@@ -2,7 +2,7 @@ NOTE: DOCS/OUTDATED-tech/* may contain more detailed information, but most of it
       is possibly or definitely outdated. This file intends to give a big
       picture of how mpv is structured.
 
-core/mplayer.c:
+mpvcore/mplayer.c:
     This contains the main play loop, anything related to mpv and playback
     related initializations. It also contains the main function. Generally, it
     accesses all other subsystems, initializes them, and pushes data between
@@ -76,7 +76,7 @@ talloc.h & talloc.c:
           replacement. It works on top of system malloc and provides additional
           features that are supposed to make memory management easier.
 
-core/mp_core.h:
+mpvcore/mp_core.h:
     Data structures for mplayer.c and command.c. They are usually not accessed
     by other parts of mpv for the sake of modularization.
 
@@ -87,7 +87,7 @@ core/mp_core.h:
     options.h contains the global option struct MPOpts, and its default values
     are in defaultopts.c for some reason.
 
-core/input/input.c:
+mpvcore/input/input.c:
     This translates keyboard input comming from libvo and other sources (such
     as remote control devices like Apple IR or slave mode commands) to the
     key bindings listed in the user's (or the builtin) input.conf and turns
@@ -99,14 +99,14 @@ core/input/input.c:
     direction of slave mode communication, mpv to application, consists of
     random mp_msg() calls all over the code in all parts of the player.)
 
-core/command.c:
+mpvcore/command.c:
     This contains the implementation for slave commands and properties.
     Properties are essentially dynamic variables changed by certain commands.
     This is basically responsible for all user commands, like initiating
     seeking, switching tracks, etc. It calls into mplayer.c, where most of the
     work is done, but also into other parts of mpv.
 
-core/mp_msg.h:
+mpvcore/mp_msg.h:
     All terminal output should go through mp_msg().
 
 stream/*:
@@ -223,7 +223,7 @@ sub/:
     detection as well as timing postprocessing work. (Timing postprocessing
     removes tiny gaps or overlaps between subtitle events.)
 
-core/timeline/:
+mpvcore/timeline/:
     A timeline is the abstraction used by mplayer.c to combine several files
     into one seemingly linear video. It's mainly used for ordered chapters
     playback. The high level code to find and load other files containing the

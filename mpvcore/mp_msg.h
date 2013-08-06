@@ -135,7 +135,7 @@ int mp_msg_test(int mod, int lev);
 bool mp_msg_test_log(struct mp_log *log, int lev);
 
 #include "config.h"
-#include "core/mp_common.h"
+#include "mpvcore/mp_common.h"
 
 char *mp_gtext(const char *string);
 

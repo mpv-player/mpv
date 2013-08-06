@@ -36,10 +36,10 @@
 #include <alloca.h>
 
 #include "config.h"
-#include "core/options.h"
-#include "core/m_option.h"
+#include "mpvcore/options.h"
+#include "mpvcore/m_option.h"
 #include "audio/mixer.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 #define ALSA_PCM_NEW_HW_PARAMS_API
 #define ALSA_PCM_NEW_SW_PARAMS_API

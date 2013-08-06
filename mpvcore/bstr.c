@@ -25,7 +25,7 @@
 
 #include "talloc.h"
 
-#include "core/bstr.h"
+#include "mpvcore/bstr.h"
 
 int bstrcmp(struct bstr str1, struct bstr str2)
 {

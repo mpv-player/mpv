@@ -43,8 +43,8 @@
 
 #include "stream.h"
 #include "demux/demux.h"
-#include "core/m_option.h"
-#include "core/mp_msg.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/mp_msg.h"
 #include "stream_radio.h"
 #include "libavutil/avstring.h"
 

@@ -35,12 +35,12 @@
 #include <AL/alext.h>
 #endif
 
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 #include "ao.h"
 #include "audio/format.h"
 #include "osdep/timer.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 #define MAX_CHANS MP_NUM_CHANNELS
 #define NUM_BUF 128

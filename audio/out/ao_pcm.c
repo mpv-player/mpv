@@ -28,11 +28,11 @@
 
 #include "talloc.h"
 
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 #include "audio/format.h"
 #include "audio/reorder_ch.h"
 #include "ao.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 #ifdef __MINGW32__
 // for GetFileType to detect pipes

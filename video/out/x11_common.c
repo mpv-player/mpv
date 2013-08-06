@@ -23,10 +23,10 @@
 #include <limits.h>
 
 #include "config.h"
-#include "core/bstr.h"
-#include "core/options.h"
-#include "core/mp_msg.h"
-#include "core/input/input.h"
+#include "mpvcore/bstr.h"
+#include "mpvcore/options.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/input/input.h"
 #include "libavutil/common.h"
 #include "x11_common.h"
 #include "talloc.h"
@@ -66,8 +66,8 @@
 #include <X11/XF86keysym.h>
 #endif
 
-#include "core/input/input.h"
-#include "core/input/keycodes.h"
+#include "mpvcore/input/input.h"
+#include "mpvcore/input/keycodes.h"
 
 #define vo_wm_LAYER 1
 #define vo_wm_FULLSCREEN 2

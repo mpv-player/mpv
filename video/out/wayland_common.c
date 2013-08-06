@@ -33,9 +33,9 @@
 #include <linux/input.h>
 
 #include "config.h"
-#include "core/bstr.h"
-#include "core/options.h"
-#include "core/mp_msg.h"
+#include "mpvcore/bstr.h"
+#include "mpvcore/options.h"
+#include "mpvcore/mp_msg.h"
 #include "libavutil/common.h"
 #include "talloc.h"
 
@@ -45,8 +45,8 @@
 #include "aspect.h"
 #include "osdep/timer.h"
 
-#include "core/input/input.h"
-#include "core/input/keycodes.h"
+#include "mpvcore/input/input.h"
+#include "mpvcore/input/keycodes.h"
 
 #define MOD_SHIFT_MASK      0x01
 #define MOD_ALT_MASK        0x02

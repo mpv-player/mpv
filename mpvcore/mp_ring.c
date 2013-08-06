@@ -21,8 +21,8 @@
 #include <libavutil/common.h>
 #include <assert.h>
 #include "talloc.h"
-#include "core/mp_memory_barrier.h"
-#include "core/mp_ring.h"
+#include "mpvcore/mp_memory_barrier.h"
+#include "mpvcore/mp_ring.h"
 
 struct mp_ring {
     uint8_t  *buffer;

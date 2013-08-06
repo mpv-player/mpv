@@ -28,7 +28,7 @@
 #include "playlist_parser.h"
 #include "stream/stream.h"
 #include "asxparser.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 
 typedef struct ASX_Parser_t ASX_Parser_t;

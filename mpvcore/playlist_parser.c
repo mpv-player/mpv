@@ -36,8 +36,8 @@
 #include "playlist_parser.h"
 #include "stream/stream.h"
 #include "demux/demux.h"
-#include "core/mp_msg.h"
-#include "core/path.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/path.h"
 
 
 #define BUF_STEP 1024

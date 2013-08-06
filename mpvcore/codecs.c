@@ -16,9 +16,9 @@
  */
 
 #include <assert.h>
-#include "core/mp_talloc.h"
-#include "core/bstr.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_talloc.h"
+#include "mpvcore/bstr.h"
+#include "mpvcore/mp_msg.h"
 #include "codecs.h"
 
 void mp_add_decoder(struct mp_decoder_list *list, const char *family,

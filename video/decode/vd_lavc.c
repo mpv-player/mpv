@@ -32,12 +32,12 @@
 
 #include "talloc.h"
 #include "config.h"
-#include "core/mp_msg.h"
-#include "core/options.h"
-#include "core/bstr.h"
-#include "core/av_opts.h"
-#include "core/av_common.h"
-#include "core/codecs.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/options.h"
+#include "mpvcore/bstr.h"
+#include "mpvcore/av_opts.h"
+#include "mpvcore/av_common.h"
+#include "mpvcore/codecs.h"
 
 #include "compat/mpbswap.h"
 #include "video/fmt-conversion.h"
@@ -57,7 +57,7 @@
 #error palette too large, adapt video/mp_image.h:MP_PALETTE_SIZE
 #endif
 
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec);
 static void uninit_avctx(sh_video_t *sh);

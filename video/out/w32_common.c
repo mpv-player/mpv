@@ -22,15 +22,15 @@
 #include <windows.h>
 #include <windowsx.h>
 
-#include "core/options.h"
-#include "core/input/keycodes.h"
-#include "core/input/input.h"
-#include "core/mp_msg.h"
-#include "core/mp_common.h"
+#include "mpvcore/options.h"
+#include "mpvcore/input/keycodes.h"
+#include "mpvcore/input/input.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/mp_common.h"
 #include "vo.h"
 #include "aspect.h"
 #include "w32_common.h"
-#include "core/input/input.h"
+#include "mpvcore/input/input.h"
 #include "osdep/io.h"
 #include "talloc.h"
 

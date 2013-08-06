@@ -20,8 +20,8 @@
 #define MPLAYER_INPUT_H
 
 #include <stdbool.h>
-#include "core/bstr.h"
-#include "core/m_option.h"
+#include "mpvcore/bstr.h"
+#include "mpvcore/m_option.h"
 
 // All command IDs
 enum mp_command_type {

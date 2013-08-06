@@ -22,9 +22,9 @@
 
 
 #include "encode_lavc.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 #include "video/vfcap.h"
-#include "core/options.h"
+#include "mpvcore/options.h"
 #include "osdep/timer.h"
 #include "video/out/vo.h"
 #include "talloc.h"

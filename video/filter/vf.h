@@ -22,7 +22,7 @@
 #include <stdbool.h>
 
 #include "video/mp_image.h"
-#include "core/mp_common.h"
+#include "mpvcore/mp_common.h"
 
 #include "video/vfcap.h"
 

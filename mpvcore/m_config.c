@@ -31,8 +31,8 @@
 #include "talloc.h"
 
 #include "m_config.h"
-#include "core/m_option.h"
-#include "core/mp_msg.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/mp_msg.h"
 
 // Profiles allow to predefine some sets of options that can then
 // be applied later on with the internal -profile option.

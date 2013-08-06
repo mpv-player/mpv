@@ -24,12 +24,12 @@
 
 #include "config.h"
 
-#include "core/options.h"
+#include "mpvcore/options.h"
 #include "audio/format.h"
 #include "audio/chmap.h"
 #include "audio/audio.h"
 #include "control.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 struct af_instance;
 

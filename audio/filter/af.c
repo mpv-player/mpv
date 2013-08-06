@@ -22,8 +22,8 @@
 #include <string.h>
 #include <assert.h>
 
-#include "core/m_option.h"
-#include "core/m_config.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/m_config.h"
 
 #include "af.h"
 

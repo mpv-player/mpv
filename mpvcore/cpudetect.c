@@ -24,8 +24,8 @@
 #include "compat/libav.h"
 
 #include "config.h"
-#include "core/cpudetect.h"
-#include "core/mp_msg.h"
+#include "mpvcore/cpudetect.h"
+#include "mpvcore/mp_msg.h"
 
 CpuCaps gCpuCaps;
 

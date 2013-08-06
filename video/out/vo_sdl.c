@@ -30,11 +30,11 @@
 
 #include <SDL.h>
 
-#include "core/input/input.h"
-#include "core/input/keycodes.h"
-#include "core/input/input.h"
-#include "core/mp_msg.h"
-#include "core/options.h"
+#include "mpvcore/input/input.h"
+#include "mpvcore/input/keycodes.h"
+#include "mpvcore/input/input.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/options.h"
 
 #include "osdep/timer.h"
 

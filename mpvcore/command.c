@@ -39,7 +39,7 @@
 #include "playlist_parser.h"
 #include "sub/sub.h"
 #include "sub/dec_sub.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 #include "m_property.h"
 #include "m_config.h"
 #include "video/filter/vf.h"
@@ -50,11 +50,11 @@
 #include "playlist.h"
 #include "audio/mixer.h"
 #include "audio/out/ao.h"
-#include "core/mp_common.h"
+#include "mpvcore/mp_common.h"
 #include "audio/filter/af.h"
 #include "video/decode/dec_video.h"
 #include "audio/decode/dec_audio.h"
-#include "core/path.h"
+#include "mpvcore/path.h"
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 #include "stream/pvr.h"
@@ -66,7 +66,7 @@
 #endif
 #include "screenshot.h"
 
-#include "core/mp_core.h"
+#include "mpvcore/mp_core.h"
 
 static void change_video_filters(MPContext *mpctx, const char *cmd,
                                  const char *arg);

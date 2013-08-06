@@ -25,8 +25,8 @@
 #include "config.h"
 
 #include "talloc.h"
-#include "core/mp_common.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_common.h"
+#include "mpvcore/mp_msg.h"
 #include "sub.h"
 
 static const char osd_font_pfb[] =
@@ -34,7 +34,7 @@ static const char osd_font_pfb[] =
 ;
 
 #include "sub/ass_mp.h"
-#include "core/options.h"
+#include "mpvcore/options.h"
 
 
 // NOTE: \fs-5 to reduce the size of the symbols in relation to normal text.

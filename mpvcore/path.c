@@ -33,8 +33,8 @@
 #include <unistd.h>
 #include <errno.h>
 #include "config.h"
-#include "core/mp_msg.h"
-#include "core/path.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/path.h"
 #include "talloc.h"
 #include "osdep/io.h"
 

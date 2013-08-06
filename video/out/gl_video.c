@@ -30,7 +30,7 @@
 
 #include "gl_video.h"
 
-#include "core/bstr.h"
+#include "mpvcore/bstr.h"
 #include "gl_common.h"
 #include "gl_osd.h"
 #include "filter_kernels.h"

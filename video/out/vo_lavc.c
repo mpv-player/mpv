@@ -23,15 +23,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "compat/libav.h"
-#include "core/mp_common.h"
-#include "core/options.h"
+#include "mpvcore/mp_common.h"
+#include "mpvcore/options.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
 #include "video/vfcap.h"
 #include "talloc.h"
 #include "vo.h"
 
-#include "core/encode_lavc.h"
+#include "mpvcore/encode_lavc.h"
 
 #include "sub/sub.h"
 #include "sub/dec_sub.h"

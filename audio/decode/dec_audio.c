@@ -26,9 +26,9 @@
 #include "demux/codec_tags.h"
 
 #include "config.h"
-#include "core/codecs.h"
-#include "core/mp_msg.h"
-#include "core/bstr.h"
+#include "mpvcore/codecs.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/bstr.h"
 
 #include "stream/stream.h"
 #include "demux/demux.h"

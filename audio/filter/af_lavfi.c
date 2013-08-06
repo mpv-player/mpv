@@ -38,8 +38,8 @@
 #include "audio/fmt-conversion.h"
 #include "af.h"
 
-#include "core/m_option.h"
-#include "core/av_opts.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/av_opts.h"
 
 #define IS_LIBAV_FORK (LIBAVFILTER_VERSION_MICRO < 100)
 

@@ -42,8 +42,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include <errno.h>
 
 #include "stream.h"
-#include "core/m_option.h"
-#include "core/path.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/path.h"
 #include "libavutil/avstring.h"
 
 #include "dvbin.h"

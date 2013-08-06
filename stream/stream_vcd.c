@@ -24,9 +24,9 @@
 #include <windows.h>
 #endif
 
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 #include "stream.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 #include <fcntl.h>
 #include <stdlib.h>

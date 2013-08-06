@@ -36,10 +36,10 @@
 #include <libavutil/avstring.h>
 
 #include "talloc.h"
-#include "core/mp_common.h"
-#include "core/m_option.h"
-#include "core/m_config.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_common.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/m_config.h"
+#include "mpvcore/mp_msg.h"
 
 char *m_option_strerror(int code)
 {

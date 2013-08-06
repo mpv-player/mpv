@@ -19,8 +19,8 @@
 #include <libavutil/common.h>
 
 #include "talloc.h"
-#include "core/bstr.h"
-#include "core/mp_common.h"
+#include "mpvcore/bstr.h"
+#include "mpvcore/mp_common.h"
 
 char *mp_format_time(double time, bool fractions)
 {

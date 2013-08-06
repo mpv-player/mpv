@@ -28,14 +28,14 @@
 #include <errno.h>
 #include <math.h>
 
-#include "core/mp_msg.h"
-#include "core/cpudetect.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/cpudetect.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"
 #include "video/memcpy_pic.h"
 
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 //===========================================================================//
 

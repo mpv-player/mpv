@@ -50,9 +50,9 @@
 #error "config.h broken"
 #endif
 
-#include "core/mp_msg.h"
-#include "core/m_option.h"
-#include "core/av_opts.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/av_opts.h"
 #include "audio/filter/af.h"
 #include "audio/fmt-conversion.h"
 #include "audio/reorder_ch.h"

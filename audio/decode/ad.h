@@ -19,7 +19,7 @@
 #ifndef MPLAYER_AD_H
 #define MPLAYER_AD_H
 
-#include "core/codecs.h"
+#include "mpvcore/codecs.h"
 #include "demux/stheader.h"
 #include "demux/demux.h"
 

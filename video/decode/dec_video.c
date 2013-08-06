@@ -17,21 +17,21 @@
  */
 
 #include "config.h"
-#include "core/options.h"
+#include "mpvcore/options.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
 
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 #include "osdep/timer.h"
 
 #include "stream/stream.h"
 #include "demux/demux_packet.h"
 
-#include "core/codecs.h"
+#include "mpvcore/codecs.h"
 
 #include "video/out/vo.h"
 #include "video/csputils.h"

@@ -25,7 +25,7 @@
 #include "config.h"
 
 #include "ad.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 /* Reducing the ifdeffery to two main variants:
  *   1. most compatible to any libmpg123 version

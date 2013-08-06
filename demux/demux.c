@@ -29,10 +29,10 @@
 #include <sys/stat.h>
 
 #include "config.h"
-#include "core/options.h"
-#include "core/av_common.h"
+#include "mpvcore/options.h"
+#include "mpvcore/av_common.h"
 #include "talloc.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 #include "stream/stream.h"
 #include "demux.h"

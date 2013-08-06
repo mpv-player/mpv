@@ -27,14 +27,14 @@
 
 #include "config.h"
 
-#include "core/options.h"
+#include "mpvcore/options.h"
 #include "vo.h"
 #include "aspect.h"
 
-#include "core/input/input.h"
+#include "mpvcore/input/input.h"
 #include "talloc.h"
 
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 #include "osdep/macosx_application.h"
 #include "osdep/macosx_events.h"

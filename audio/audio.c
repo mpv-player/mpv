@@ -17,7 +17,7 @@
 
 #include <assert.h>
 
-#include "core/mp_talloc.h"
+#include "mpvcore/mp_talloc.h"
 #include "audio.h"
 
 void mp_audio_set_format(struct mp_audio *mpa, int format)

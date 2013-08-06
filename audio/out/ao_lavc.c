@@ -28,15 +28,15 @@
 
 #include "compat/libav.h"
 #include "config.h"
-#include "core/options.h"
-#include "core/mp_common.h"
+#include "mpvcore/options.h"
+#include "mpvcore/mp_common.h"
 #include "audio/format.h"
 #include "audio/reorder_ch.h"
 #include "talloc.h"
 #include "ao.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
-#include "core/encode_lavc.h"
+#include "mpvcore/encode_lavc.h"
 
 static const char *sample_padding_signed = "\x00\x00\x00\x00";
 static const char *sample_padding_u8     = "\x80";

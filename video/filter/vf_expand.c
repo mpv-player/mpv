@@ -24,8 +24,8 @@
 #include <libavutil/common.h>
 
 #include "config.h"
-#include "core/mp_msg.h"
-#include "core/options.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/options.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -33,7 +33,7 @@
 
 #include "video/memcpy_pic.h"
 
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 static struct vf_priv_s {
     // These four values are a backup of the values parsed from the command line.

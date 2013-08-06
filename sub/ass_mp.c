@@ -30,12 +30,12 @@
 #include <libavutil/common.h>
 
 #include "config.h"
-#include "core/mp_msg.h"
-#include "core/path.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/path.h"
 #include "ass_mp.h"
 #include "sub/sub.h"
 #include "stream/stream.h"
-#include "core/options.h"
+#include "mpvcore/options.h"
 
 // res_y should be track->PlayResY
 // It determines scaling of font sizes and more.

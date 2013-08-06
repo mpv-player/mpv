@@ -36,14 +36,14 @@
 #include <libavutil/common.h>
 
 #include "config.h"
-#include "core/cpudetect.h"
+#include "mpvcore/cpudetect.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"
 #include "video/memcpy_pic.h"
 #include "compat/x86_cpu.h"
 
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 struct vf_priv_s {
     float cfg_thresh;

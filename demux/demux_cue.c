@@ -22,7 +22,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "core/bstr.h"
+#include "mpvcore/bstr.h"
 #include "demux.h"
 #include "stream/stream.h"
 

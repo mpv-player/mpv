@@ -23,7 +23,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 // NOTE: VOs must support at least SUBBITMAP_RGBA.
 enum sub_bitmap_format {

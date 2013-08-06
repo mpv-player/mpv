@@ -19,7 +19,7 @@
 
 #include <libavutil/common.h>
 
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 #include "audio/format.h"
 #include "af.h"

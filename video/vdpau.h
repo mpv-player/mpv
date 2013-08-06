@@ -7,7 +7,7 @@
 #include <vdpau/vdpau.h>
 #include <vdpau/vdpau_x11.h>
 
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 #define CHECK_ST_ERROR(message) \
     do { \

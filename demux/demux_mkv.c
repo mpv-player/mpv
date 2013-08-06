@@ -42,8 +42,8 @@
 #endif
 
 #include "talloc.h"
-#include "core/options.h"
-#include "core/bstr.h"
+#include "mpvcore/options.h"
+#include "mpvcore/bstr.h"
 #include "stream/stream.h"
 #include "demux.h"
 #include "stheader.h"
@@ -51,7 +51,7 @@
 #include "matroska.h"
 #include "codec_tags.h"
 
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 static const unsigned char sipr_swaps[38][2] = {
     {0,63},{1,22},{2,44},{3,90},{5,81},{7,31},{8,86},{9,58},{10,36},{12,68},

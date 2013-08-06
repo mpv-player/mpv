@@ -25,7 +25,7 @@
 
 #include "av_log.h"
 #include "config.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 #include <libavutil/avutil.h>
 #include <libavutil/log.h>
 

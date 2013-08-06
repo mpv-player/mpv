@@ -27,8 +27,8 @@
 #include <ctype.h>
 #include <libavutil/common.h>
 
-#include "core/mp_msg.h"
-#include "core/bstr.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/bstr.h"
 #include "sd.h"
 
 struct line {

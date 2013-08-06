@@ -25,7 +25,7 @@
 #include <string.h>
 #include <errno.h>
 #include "config.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 #include "vo.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"

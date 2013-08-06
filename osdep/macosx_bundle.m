@@ -18,7 +18,7 @@
 
 #import <Foundation/Foundation.h>
 #include "osdep/macosx_bundle.h"
-#include "core/path.h"
+#include "mpvcore/path.h"
 
 char *get_bundled_path(const char *file)
 {

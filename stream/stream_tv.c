@@ -27,7 +27,7 @@
 #include <string.h>
 
 #include "stream.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 #include "tv.h"
 
 #include <stdio.h>

@@ -40,15 +40,15 @@
 #include "input.h"
 #include "keycodes.h"
 #include "osdep/timer.h"
-#include "core/mp_msg.h"
-#include "core/m_config.h"
-#include "core/m_option.h"
-#include "core/path.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/m_config.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/path.h"
 #include "talloc.h"
-#include "core/options.h"
-#include "core/bstr.h"
+#include "mpvcore/options.h"
+#include "mpvcore/bstr.h"
 #include "stream/stream.h"
-#include "core/mp_common.h"
+#include "mpvcore/mp_common.h"
 
 #include "joystick.h"
 
@@ -592,7 +592,7 @@ const m_option_t mp_input_opts[] = {
 static int default_cmd_func(int fd, char *buf, int l);
 
 static const char builtin_input_conf[] =
-#include "core/input/input_conf.h"
+#include "mpvcore/input/input_conf.h"
 ;
 
 static bool test_rect(struct mp_rect *rc, int x, int y)

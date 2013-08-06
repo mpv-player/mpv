@@ -35,16 +35,16 @@
 #include "compat/libav.h"
 
 #include "config.h"
-#include "core/options.h"
-#include "core/mp_msg.h"
-#include "core/av_opts.h"
-#include "core/av_common.h"
-#include "core/bstr.h"
+#include "mpvcore/options.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/av_opts.h"
+#include "mpvcore/av_common.h"
+#include "mpvcore/bstr.h"
 
 #include "stream/stream.h"
 #include "demux.h"
 #include "stheader.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 #define INITIAL_PROBE_SIZE STREAM_BUFFER_SIZE
 #define PROBE_BUF_SIZE FFMIN(STREAM_MAX_BUFFER_SIZE, 2 * 1024 * 1024)

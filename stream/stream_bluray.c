@@ -37,8 +37,8 @@
 
 #include "config.h"
 #include "talloc.h"
-#include "core/mp_msg.h"
-#include "core/m_option.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/m_option.h"
 #include "stream.h"
 #include "demux/stheader.h"
 

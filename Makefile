@@ -88,7 +88,7 @@ SOURCES-$(GL)                   += video/out/gl_common.c video/out/gl_osd.c \
                                    video/out/pnm_loader.c
 
 SOURCES-$(ENCODING)             += video/out/vo_lavc.c audio/out/ao_lavc.c \
-                                   core/encode_lavc.c
+                                   mpvcore/encode_lavc.c
 
 SOURCES-$(GL_WIN32)             += video/out/w32_common.c video/out/gl_w32.c
 SOURCES-$(GL_X11)               += video/out/x11_common.c video/out/gl_x11.c
@@ -97,10 +97,10 @@ SOURCES-$(GL_WAYLAND)           += video/out/wayland_common.c \
                                    video/out/gl_wayland.c
 
 SOURCES-$(JACK)                 += audio/out/ao_jack.c
-SOURCES-$(JOYSTICK)             += core/input/joystick.c
-SOURCES-$(LIBQUVI)              += core/resolve_quvi.c
-SOURCES-$(LIBQUVI9)             += core/resolve_quvi9.c
-SOURCES-$(LIRC)                 += core/input/lirc.c
+SOURCES-$(JOYSTICK)             += mpvcore/input/joystick.c
+SOURCES-$(LIBQUVI)              += mpvcore/resolve_quvi.c
+SOURCES-$(LIBQUVI9)             += mpvcore/resolve_quvi9.c
+SOURCES-$(LIRC)                 += mpvcore/input/lirc.c
 SOURCES-$(OPENAL)               += audio/out/ao_openal.c
 SOURCES-$(OSS)                  += audio/out/ao_oss.c
 SOURCES-$(PULSE)                += audio/out/ao_pulse.c
@@ -160,34 +160,6 @@ SOURCES = talloc.c \
           audio/out/ao.c \
           audio/out/ao_null.c \
           audio/out/ao_pcm.c \
-          core/asxparser.c \
-          core/av_common.c \
-          core/av_log.c \
-          core/av_opts.c \
-          core/bstr.c \
-          core/charset_conv.c \
-          core/codecs.c \
-          core/command.c \
-          core/cpudetect.c \
-          core/m_config.c \
-          core/m_option.c \
-          core/m_property.c \
-          core/mp_common.c \
-          core/mp_msg.c \
-          core/mp_ring.c \
-          core/mplayer.c \
-          core/options.c \
-          core/parser-cfg.c \
-          core/parser-mpcmd.c \
-          core/path.c \
-          core/playlist.c \
-          core/playlist_parser.c \
-          core/screenshot.c \
-          core/version.c \
-          core/input/input.c \
-          core/timeline/tl_edl.c \
-          core/timeline/tl_matroska.c \
-          core/timeline/tl_cue.c \
           demux/codec_tags.c \
           demux/demux.c \
           demux/demux_edl.c \
@@ -199,6 +171,34 @@ SOURCES = talloc.c \
           demux/demux_raw.c \
           demux/ebml.c \
           demux/mf.c \
+          mpvcore/asxparser.c \
+          mpvcore/av_common.c \
+          mpvcore/av_log.c \
+          mpvcore/av_opts.c \
+          mpvcore/bstr.c \
+          mpvcore/charset_conv.c \
+          mpvcore/codecs.c \
+          mpvcore/command.c \
+          mpvcore/cpudetect.c \
+          mpvcore/m_config.c \
+          mpvcore/m_option.c \
+          mpvcore/m_property.c \
+          mpvcore/mp_common.c \
+          mpvcore/mp_msg.c \
+          mpvcore/mp_ring.c \
+          mpvcore/mplayer.c \
+          mpvcore/options.c \
+          mpvcore/parser-cfg.c \
+          mpvcore/parser-mpcmd.c \
+          mpvcore/path.c \
+          mpvcore/playlist.c \
+          mpvcore/playlist_parser.c \
+          mpvcore/screenshot.c \
+          mpvcore/version.c \
+          mpvcore/input/input.c \
+          mpvcore/timeline/tl_edl.c \
+          mpvcore/timeline/tl_matroska.c \
+          mpvcore/timeline/tl_cue.c \
           osdep/io.c \
           osdep/numcores.c \
           osdep/timer.c \
@@ -295,8 +295,8 @@ DIRS =  . \
         audio/filter \
         audio/out \
         core \
-        core/input \
-        core/timeline \
+        mpvcore/input \
+        mpvcore/timeline \
         demux \
         osdep \
         stream \
@@ -344,8 +344,8 @@ mpv$(EXESUF): $(OBJECTS)
 mpv$(EXESUF):
 	$(CC) -o $@ $^ $(EXTRALIBS)
 
-core/input/input.c: core/input/input_conf.h
-core/input/input_conf.h: TOOLS/file2string.pl etc/input.conf
+mpvcore/input/input.c: mpvcore/input/input_conf.h
+mpvcore/input/input_conf.h: TOOLS/file2string.pl etc/input.conf
 	./$^ >$@
 
 MKVLIB_DEPS = TOOLS/lib/Parse/Matroska.pm \
@@ -388,7 +388,7 @@ version.h .version: version.sh
 
 ###### dependency declarations / specific CFLAGS ######
 
-core/version.c osdep/mpv-rc.o: version.h
+mpvcore/version.c osdep/mpv-rc.o: version.h
 
 osdep/mpv-rc.o: osdep/mpv.exe.manifest etc/mpv-icon.ico
 
@@ -435,7 +435,7 @@ clean:
 	-$(RM) $(call ADD_ALL_EXESUFS,mpv)
 	-$(RM) DOCS/man/en/mpv.1
 	-$(RM) version.h
-	-$(RM) core/input/input_conf.h
+	-$(RM) mpvcore/input/input_conf.h
 	-$(RM) video/out/vdpau_template.c
 	-$(RM) demux/ebml_types.h demux/ebml_defs.c
 	-$(RM) video/out/gl_video_shaders.h

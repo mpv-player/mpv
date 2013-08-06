@@ -46,10 +46,10 @@
 
 #include <unistd.h>
 
-#include "core/mp_common.h"
-#include "core/bstr.h"
-#include "core/input/input.h"
-#include "core/input/keycodes.h"
+#include "mpvcore/mp_common.h"
+#include "mpvcore/bstr.h"
+#include "mpvcore/input/input.h"
+#include "mpvcore/input/keycodes.h"
 #include "getch2.h"
 
 #ifdef HAVE_TERMIOS

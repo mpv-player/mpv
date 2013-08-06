@@ -25,7 +25,7 @@
 
 #include <sys/types.h>
 #include "config.h"
-#include "core/bstr.h"
+#include "mpvcore/bstr.h"
 
 // Endianness
 #define AF_FORMAT_BE		(0<<0) // Big Endian

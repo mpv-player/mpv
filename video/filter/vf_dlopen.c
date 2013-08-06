@@ -22,13 +22,13 @@
 #include <assert.h>
 
 #include "config.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"
 
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 #include "vf_dlopen.h"
 

@@ -25,10 +25,10 @@
 #include <math.h>
 
 #include "config.h"
-#include "core/cpudetect.h"
-#include "core/options.h"
+#include "mpvcore/cpudetect.h"
+#include "mpvcore/options.h"
 
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"

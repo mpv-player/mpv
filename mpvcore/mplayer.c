@@ -63,26 +63,26 @@
 
 #include <errno.h>
 
-#include "core/mpv_global.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mpv_global.h"
+#include "mpvcore/mp_msg.h"
 #include "av_log.h"
 
 
-#include "core/m_option.h"
-#include "core/m_config.h"
-#include "core/resolve.h"
-#include "core/m_property.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/m_config.h"
+#include "mpvcore/resolve.h"
+#include "mpvcore/m_property.h"
 
 #include "sub/find_subfiles.h"
 #include "sub/dec_sub.h"
 #include "sub/sd.h"
 
-#include "core/mp_osd.h"
+#include "mpvcore/mp_osd.h"
 #include "video/out/vo.h"
-#include "core/screenshot.h"
+#include "mpvcore/screenshot.h"
 
 #include "sub/sub.h"
-#include "core/cpudetect.h"
+#include "mpvcore/cpudetect.h"
 
 #ifdef CONFIG_X11
 #include "video/out/x11_common.h"
@@ -94,13 +94,13 @@
 
 #include "audio/out/ao.h"
 
-#include "core/codecs.h"
+#include "mpvcore/codecs.h"
 
 #include "osdep/getch2.h"
 #include "osdep/timer.h"
 
-#include "core/input/input.h"
-#include "core/encode.h"
+#include "mpvcore/input/input.h"
+#include "mpvcore/encode.h"
 
 #include "osdep/priority.h"
 
@@ -113,20 +113,20 @@
 //**************************************************************************//
 //             Playtree
 //**************************************************************************//
-#include "core/playlist.h"
-#include "core/playlist_parser.h"
+#include "mpvcore/playlist.h"
+#include "mpvcore/playlist_parser.h"
 
 //**************************************************************************//
 //             Config
 //**************************************************************************//
-#include "core/parser-cfg.h"
-#include "core/parser-mpcmd.h"
+#include "mpvcore/parser-cfg.h"
+#include "mpvcore/parser-mpcmd.h"
 
 //**************************************************************************//
 //             Config file
 //**************************************************************************//
 
-#include "core/path.h"
+#include "mpvcore/path.h"
 
 //**************************************************************************//
 //**************************************************************************//
@@ -146,8 +146,8 @@
 
 #include "audio/mixer.h"
 
-#include "core/mp_core.h"
-#include "core/options.h"
+#include "mpvcore/mp_core.h"
+#include "mpvcore/options.h"
 
 const char mp_help_text[] = _(
 "Usage:   mpv [options] [url|path/]filename\n"
@@ -192,8 +192,8 @@ static const char av_desync_help_text[] = _(
 
 // ---
 
-#include "core/mp_common.h"
-#include "core/command.h"
+#include "mpvcore/mp_common.h"
+#include "mpvcore/command.h"
 
 static void reset_subtitles(struct MPContext *mpctx);
 static void reinit_subs(struct MPContext *mpctx);

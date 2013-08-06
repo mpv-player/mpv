@@ -22,13 +22,13 @@
 #include <inttypes.h>
 
 #include "config.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"
 
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 static struct vf_priv_s {
     int fmt;

@@ -21,15 +21,15 @@
 #include <libavutil/opt.h>
 
 #include "config.h"
-#include "core/options.h"
-#include "core/mp_msg.h"
+#include "mpvcore/options.h"
+#include "mpvcore/mp_msg.h"
 #include "stream.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 #include "cookies.h"
 
-#include "core/bstr.h"
-#include "core/mp_talloc.h"
+#include "mpvcore/bstr.h"
+#include "mpvcore/mp_talloc.h"
 
 static int open_f(stream_t *stream, int mode);
 static char **read_icy(stream_t *stream);

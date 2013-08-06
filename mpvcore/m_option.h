@@ -24,7 +24,7 @@
 #include <stdbool.h>
 
 #include "config.h"
-#include "core/bstr.h"
+#include "mpvcore/bstr.h"
 #include "audio/chmap.h"
 
 // m_option allows to parse, print and copy data of various types.

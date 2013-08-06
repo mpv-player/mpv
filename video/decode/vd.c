@@ -22,8 +22,8 @@
 #include <assert.h>
 
 #include "config.h"
-#include "core/mp_msg.h"
-#include "core/options.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/options.h"
 
 #include "video/img_format.h"
 

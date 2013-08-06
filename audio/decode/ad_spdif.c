@@ -25,9 +25,9 @@
 #include <libavutil/opt.h>
 
 #include "config.h"
-#include "core/mp_msg.h"
-#include "core/av_common.h"
-#include "core/options.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/av_common.h"
+#include "mpvcore/options.h"
 #include "ad.h"
 
 #define FILENAME_SPDIFENC "spdif"

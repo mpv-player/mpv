@@ -27,10 +27,10 @@
 #include "config.h"
 
 #include "stream/stream.h"
-#include "core/mp_common.h"
-#include "core/bstr.h"
-#include "core/mp_msg.h"
-#include "core/m_option.h"
+#include "mpvcore/mp_common.h"
+#include "mpvcore/bstr.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/m_option.h"
 
 #include "gl_video.h"
 #include "gl_lcms.h"

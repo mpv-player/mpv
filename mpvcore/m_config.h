@@ -22,7 +22,7 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "core/bstr.h"
+#include "mpvcore/bstr.h"
 
 // m_config provides an API to manipulate the config variables in MPlayer.
 // It makes use of the Options API to provide a context stack that

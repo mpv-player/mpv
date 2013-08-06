@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 #include "csputils.h"
 #include "video/img_format.h"
 

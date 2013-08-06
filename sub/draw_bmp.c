@@ -25,7 +25,7 @@
 #include <libswscale/swscale.h>
 #include <libavutil/common.h>
 
-#include "core/mp_common.h"
+#include "mpvcore/mp_common.h"
 #include "sub/draw_bmp.h"
 #include "sub/sub.h"
 #include "sub/img_convert.h"

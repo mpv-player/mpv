@@ -25,7 +25,7 @@
 
 #include <alsa/asoundlib.h>
 #include "audio_in.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 
 int ai_alsa_setup(audio_in_t *ai)
 {

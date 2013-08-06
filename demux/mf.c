@@ -36,9 +36,9 @@
 #include "osdep/glob.h"
 #endif
 
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 #include "stream/stream.h"
-#include "core/path.h"
+#include "mpvcore/path.h"
 
 #include "mf.h"
 

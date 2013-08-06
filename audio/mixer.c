@@ -23,7 +23,7 @@
 #include "config.h"
 #include "audio/out/ao.h"
 #include "audio/filter/af.h"
-#include "core/mp_msg.h"
+#include "mpvcore/mp_msg.h"
 #include "mixer.h"
 
 

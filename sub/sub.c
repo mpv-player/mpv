@@ -23,15 +23,15 @@
 
 #include <libavutil/common.h>
 
-#include "core/mp_common.h"
+#include "mpvcore/mp_common.h"
 
 #include "stream/stream.h"
 
 #include "osdep/timer.h"
 
 #include "talloc.h"
-#include "core/options.h"
-#include "core/mp_msg.h"
+#include "mpvcore/options.h"
+#include "mpvcore/mp_msg.h"
 #include "sub.h"
 #include "dec_sub.h"
 #include "img_convert.h"

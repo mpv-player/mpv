@@ -19,7 +19,7 @@
 #include <assert.h>
 
 #include "talloc.h"
-#include "core/options.h"
+#include "mpvcore/options.h"
 #include "demux/stheader.h"
 #include "sd.h"
 #include "sub.h"

@@ -19,9 +19,9 @@
 #include <pthread.h>
 #include "talloc.h"
 
-#include "core/mp_msg.h"
-#include "core/input/input.h"
-#include "core/input/keycodes.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/input/input.h"
+#include "mpvcore/input/keycodes.h"
 
 #include "osdep/macosx_application_objc.h"
 #include "osdep/macosx_compat.h"

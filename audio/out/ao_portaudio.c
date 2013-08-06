@@ -26,10 +26,10 @@
 #include <portaudio.h>
 
 #include "config.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 #include "audio/format.h"
-#include "core/mp_msg.h"
-#include "core/mp_ring.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/mp_ring.h"
 #include "ao.h"
 
 struct priv {

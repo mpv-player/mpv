@@ -27,7 +27,7 @@
 #include <string.h>
 
 #include "af.h"
-#include "core/m_option.h"
+#include "mpvcore/m_option.h"
 
 /// Internal specific data of the filter
 struct af_bs2b {

@@ -22,9 +22,9 @@
 #include <libavutil/common.h>
 
 #include "talloc.h"
-#include "core/mp_msg.h"
-#include "core/av_common.h"
-#include "core/options.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/av_common.h"
+#include "mpvcore/options.h"
 #include "demux/stheader.h"
 #include "sd.h"
 #include "dec_sub.h"

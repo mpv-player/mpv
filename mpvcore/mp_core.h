@@ -21,7 +21,7 @@
 
 #include <stdbool.h>
 
-#include "core/options.h"
+#include "mpvcore/options.h"
 #include "audio/mixer.h"
 #include "demux/demux.h"
 

@@ -21,8 +21,8 @@
 
 #include <stdbool.h>
 
-#include "core/bstr.h"
-#include "core/mp_common.h"
+#include "mpvcore/bstr.h"
+#include "mpvcore/mp_common.h"
 #include "audio/chmap.h"
 #include "audio/chmap_sel.h"
 

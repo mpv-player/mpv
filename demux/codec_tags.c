@@ -20,7 +20,7 @@
 #include <libavutil/common.h>
 #include "codec_tags.h"
 #include "stheader.h"
-#include "core/av_common.h"
+#include "mpvcore/av_common.h"
 
 /* The following tables map FourCCs to codec names (as defined by libavcodec).
  * However, this includes only names that are not defined by libavformat's

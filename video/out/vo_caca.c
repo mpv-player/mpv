@@ -40,10 +40,10 @@
 #include "video/vfcap.h"
 #include "video/memcpy_pic.h"
 
-#include "core/input/keycodes.h"
-#include "core/input/input.h"
-#include "core/mp_msg.h"
-#include "core/input/input.h"
+#include "mpvcore/input/keycodes.h"
+#include "mpvcore/input/input.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/input/input.h"
 
 /* caca stuff */
 static caca_canvas_t  *canvas;

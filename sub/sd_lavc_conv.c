@@ -25,9 +25,9 @@
 #include "config.h"
 
 #include "talloc.h"
-#include "core/mp_msg.h"
-#include "core/av_common.h"
-#include "core/bstr.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/av_common.h"
+#include "mpvcore/bstr.h"
 #include "sd.h"
 
 struct sd_lavc_priv {
