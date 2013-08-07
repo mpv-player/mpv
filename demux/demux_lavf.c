@@ -105,6 +105,11 @@ static const struct format_hack format_hacks[] = {
     {0}
 };
 
+static const char *format_blacklist[] = {
+    "tty",      // Useless non-sense, sometimes breaks MLP2 subreader.c fallback
+    0
+};
+
 static const struct format_hack *find_format_from_mime_type(char *mime_type)
 {
     for (int n = 0; format_hacks[n].ff_name; n++) {
@@ -303,9 +308,19 @@ static int lavf_check_file(demuxer_t *demuxer, enum demux_check check)
 
     av_free(avpd.buf);
 
+    if (priv->avif && !format) {
+        for (int n = 0; format_blacklist[n]; n++) {
+            if (strcmp(format_blacklist[n], priv->avif->name) == 0) {
+                mp_msg(MSGT_HEADER, MSGL_V, "Format blacklisted.\n");
+                priv->avif = NULL;
+                break;
+            }
+        }
+    }
+
     if (!priv->avif) {
         mp_msg(MSGT_HEADER, MSGL_V,
-               "No format found, try lowering probescore.\n");
+               "No format found, try lowering probescore or forcing the format.\n");
         return -1;
     }
 
