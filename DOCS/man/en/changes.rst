@@ -66,6 +66,8 @@ General Changes for mplayer2 to mpv
 * Image subtitles (DVDs etc.) are rendered in color and use more correct
   positioning (color can be disabled with ``--sub-gray``)
 * Wayland support
+* Support for precise scrolling which scales the parameter of commands. If the
+  input doesn't support precise scrolling the scale factor stays 1.
 * General code cleanups
 * Many more changes
 
