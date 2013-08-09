@@ -18,8 +18,8 @@ bool osd_conv_ass_to_rgba_str(struct osd_conv_cache *c, struct sub_bitmaps *imgs
 // Sub postprocessing
 bool osd_conv_blur_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
                         double gblur);
+bool osd_scale_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs);
 bool osd_conv_idx_to_gray(struct osd_conv_cache *c, struct sub_bitmaps *imgs);
-
 
 bool mp_sub_bitmaps_bb(struct sub_bitmaps *imgs, struct mp_rect *out_bb);
 

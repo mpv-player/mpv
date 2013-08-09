@@ -45,6 +45,9 @@ const int mp_sws_hq_flags = SWS_LANCZOS | SWS_FULL_CHR_H_INT |
                             SWS_FULL_CHR_H_INP | SWS_ACCURATE_RND |
                             SWS_BITEXACT;
 
+// Fast, lossy.
+const int mp_sws_fast_flags = SWS_BILINEAR;
+
 // Set ctx parameters to global command line flags.
 void mp_sws_set_from_cmdline(struct mp_sws_context *ctx)
 {

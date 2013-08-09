@@ -142,6 +142,51 @@ bool osd_conv_blur_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
     return true;
 }
 
+// If RGBA parts need scaling, scale them.
+bool osd_scale_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
+{
+    struct sub_bitmaps src = *imgs;
+    if (src.format != SUBBITMAP_RGBA && src.format != SUBBITMAP_RGBA_STR)
+        return false;
+
+    bool need_scale = false;
+    for (int n = 0; n < src.num_parts; n++) {
+        struct sub_bitmap *sb = &src.parts[n];
+        if (sb->w != sb->dw || sb->h != sb->dh)
+            need_scale = true;
+    }
+    if (!need_scale)
+        return false;
+
+    talloc_free(c->parts);
+    imgs->parts = c->parts = talloc_array(c, struct sub_bitmap, src.num_parts);
+
+    // Note: we scale all parts, since most likely all need scaling anyway, and
+    //       to get a proper copy of all data in the imgs list.
+    for (int n = 0; n < src.num_parts; n++) {
+        struct sub_bitmap *d = &imgs->parts[n];
+        struct sub_bitmap *s = &src.parts[n];
+
+        struct mp_image src_image = {0};
+        mp_image_setfmt(&src_image, IMGFMT_BGRA);
+        mp_image_set_size(&src_image, s->w, s->h);
+        src_image.planes[0] = s->bitmap;
+        src_image.stride[0] = s->stride;
+
+        d->x = s->x;
+        d->y = s->y;
+        d->w = d->dw = s->dw;
+        d->h = d->dh = s->dh;
+        struct mp_image *image = mp_image_alloc(IMGFMT_BGRA, d->w, d->h);
+        talloc_steal(c->parts, image);
+        d->stride = image->stride[0];
+        d->bitmap = image->planes[0];
+
+        mp_image_swscale(image, &src_image, mp_sws_fast_flags);
+    }
+    return true;
+}
+
 static void rgba_to_gray(uint32_t *colors, size_t count)
 {
     for (int n = 0; n < count; n++) {

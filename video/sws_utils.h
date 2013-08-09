@@ -14,6 +14,7 @@ struct mp_csp_details;
 #define SWS_MIN_BYTE_ALIGN 16
 
 extern const int mp_sws_hq_flags;
+extern const int mp_sws_fast_flags;
 
 bool mp_sws_supported_format(int imgfmt);
 
