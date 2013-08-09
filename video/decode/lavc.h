@@ -17,6 +17,7 @@ enum hwdec_type {
     HWDEC_VDPAU = 1,
     HWDEC_VDA = 2,
     HWDEC_CRYSTALHD = 3,
+    HWDEC_VAAPI = 4,
 };
 
 typedef struct lavc_ctx {

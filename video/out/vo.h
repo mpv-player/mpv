@@ -50,7 +50,7 @@ enum mp_voctrl {
     VOCTRL_SET_EQUALIZER,               // struct voctrl_set_equalizer_args*
     VOCTRL_GET_EQUALIZER,               // struct voctrl_get_equalizer_args*
 
-    /* for vdpau hardware decoding */
+    /* for hardware decoding */
     VOCTRL_GET_HWDEC_INFO,              // struct mp_hwdec_info*
 
     VOCTRL_NEWFRAME,

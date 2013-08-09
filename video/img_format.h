@@ -87,7 +87,6 @@ enum mp_imgfmt {
     IMGFMT_START = 1000,
 
     // Planar YUV formats
-
     IMGFMT_444P,                // 1x1
     IMGFMT_422P,                // 2x1
     IMGFMT_440P,                // 1x2
@@ -253,6 +252,14 @@ enum mp_imgfmt {
     IMGFMT_VDPAU_FIRST = IMGFMT_VDPAU,
     IMGFMT_VDPAU_LAST  = IMGFMT_VDPAU_MPEG4,
 
+    IMGFMT_VAAPI,
+    IMGFMT_VAAPI_MPEG2_IDCT,
+    IMGFMT_VAAPI_MPEG2_MOCO,
+
+    IMGFMT_VAAPI_FIRST = IMGFMT_VAAPI,
+    IMGFMT_VAAPI_LAST = IMGFMT_VAAPI_MPEG2_MOCO,
+
+
     IMGFMT_END,
 
     // Redundant format aliases for native endian access
@@ -328,7 +335,10 @@ static inline bool IMGFMT_IS_RGB(unsigned int fmt)
 #define IMGFMT_IS_VDPAU(fmt) \
     (((fmt) >= IMGFMT_VDPAU_FIRST) && ((fmt) <= IMGFMT_VDPAU_LAST))
 
-#define IMGFMT_IS_HWACCEL(fmt) IMGFMT_IS_VDPAU(fmt)
+#define IMGFMT_IS_VAAPI(fmt) \
+    (((fmt) >= IMGFMT_VAAPI_FIRST) && ((fmt) <= IMGFMT_VAAPI_LAST))
+
+#define IMGFMT_IS_HWACCEL(fmt) (IMGFMT_IS_VDPAU(fmt) || IMGFMT_IS_VAAPI(fmt))
 
 
 struct mp_imgfmt_entry {

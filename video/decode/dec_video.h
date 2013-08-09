@@ -51,6 +51,7 @@ extern int divx_quality;
 // The VO can set the context pointer for supported APIs.
 struct mp_hwdec_info {
     struct mp_vdpau_ctx *vdpau_ctx;
+    struct mp_vaapi_ctx *vaapi_ctx;
 };
 
 #endif /* MPLAYER_DEC_VIDEO_H */

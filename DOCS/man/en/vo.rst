@@ -665,6 +665,39 @@ Available video output drivers are:
     ``switch-mode``
         Instruct SDL to switch the monitor video mode when going fullscreen.
 
+``vaapi``
+    Intel VA API video output driver with support for hardware decoding. Note
+    that there is absolutely no reason to use this, other than wanting to use
+    hardware decoding to save power on laptops, or possibly preventing video
+    tearing with some setups.
+
+    ``scaling=<algorithm>``
+        default
+            Driver default (mpv default as well).
+        fast
+            Fast, but low quality.
+        hq
+            Unspecified driver dependent high-quality scaling, slow.
+        nla
+            ``non-linear anamorphic scaling``
+
+    ``deint-mode=<mode>``
+        Select deinterlacing algorithm. Note that by default deinterlacing is
+        initially always off, and needs to be enabled with the ``D`` key
+        (default key binding for ``cycle deinterlace``).
+
+        no
+            Don't allow deinterlacing.
+        first-field
+            Show only first field (going by ``--field-dominance``).
+        bob
+            bob deinterlacing (default).
+
+    ``scaled-osd=<yes|no>``
+        If enabled, then the OSD is rendered at video resolution and scaled to
+        display resolution. By default, this is disabled, and the OSD is
+        rendered at display resolution if the driver supports it.
+
 ``null``
     Produces no video output. Useful for benchmarking.
 

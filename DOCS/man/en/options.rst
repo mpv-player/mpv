@@ -1052,7 +1052,8 @@
     ``<api>`` can be one of the following:
 
     :no:        always use software decoding (default)
-    :vdpau:     works with nvidia drivers only, requires ``--vo=vdpau``
+    :vdpau:     requires ``--vo=vdpau``
+    :vaapi:     requires ``--vo=vaapi``
     :vda:       OSX
     :crystalhd: Broadcom Crystal HD
 

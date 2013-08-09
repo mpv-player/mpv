@@ -84,6 +84,7 @@ const m_option_t lavc_decode_opts_conf[] = {
 
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau;
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau_old;
+const struct vd_lavc_hwdec mp_vd_lavc_vaapi;
 
 static const struct vd_lavc_hwdec mp_vd_lavc_crystalhd = {
     .type = HWDEC_CRYSTALHD,
@@ -113,6 +114,9 @@ static const struct vd_lavc_hwdec *hwdec_list[] = {
 #endif // CONFIG_VDPAU
     &mp_vd_lavc_vda,
     &mp_vd_lavc_crystalhd,
+#if CONFIG_VAAPI
+    &mp_vd_lavc_vaapi,
+#endif
     NULL
 };
 

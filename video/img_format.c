@@ -119,6 +119,9 @@ struct mp_imgfmt_entry mp_imgfmt_list[] = {
     FMT("vdpau_vc1",            IMGFMT_VDPAU_VC1)
     FMT("vdpau_mpeg4",          IMGFMT_VDPAU_MPEG4)
     FMT("vdpau",                IMGFMT_VDPAU)
+    FMT("vaapi",                IMGFMT_VAAPI)
+    FMT("vaapi_mpeg2_idct",     IMGFMT_VAAPI_MPEG2_IDCT)
+    FMT("vaapi_mpeg2_moco",     IMGFMT_VAAPI_MPEG2_MOCO)
     {0}
 };
 
