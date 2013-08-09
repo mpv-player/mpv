@@ -2,7 +2,21 @@
 
 export LC_ALL=C
 
-test "$1" && extra="-$1"
+for ac_option do
+  case "$ac_option" in
+  --extra=*)
+    extra="-$option"
+    ;;
+  --print)
+    print=yes
+    ;;
+  *)
+    echo "Unknown parameter: $option" >&2
+    exit 1
+    ;;
+
+  esac
+done
 
 # Extract revision number from file used by daily tarball snapshots
 # or from "git describe" output
@@ -15,7 +29,14 @@ test $git_revision || git_revision=UNKNOWN
 version=$(cat VERSION 2> /dev/null)
 test $version || version=$git_revision
 
-NEW_REVISION="#define VERSION \"${version}${extra}\""
+VERSION="${version}${extra}"
+
+if test "$print" = yes ; then
+    echo "$VERSION"
+    exit 0
+fi
+
+NEW_REVISION="#define VERSION \"${VERSION}\""
 OLD_REVISION=$(head -n 1 version.h 2> /dev/null)
 BUILDDATE="#define BUILDDATE \"$(date)\""
 
