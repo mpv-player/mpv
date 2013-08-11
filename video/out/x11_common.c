@@ -74,6 +74,7 @@
 #define vo_wm_STAYS_ON_TOP 4
 #define vo_wm_ABOVE 8
 #define vo_wm_BELOW 16
+#define vo_wm_MWM 32
 #define vo_wm_NETWM (vo_wm_FULLSCREEN | vo_wm_STAYS_ON_TOP | vo_wm_ABOVE | \
                      vo_wm_BELOW)
 
@@ -252,6 +253,8 @@ void fstype_help(void)
            "use _NETWM_STATE_FULLSCREEN hint if available");
     mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "stays_on_top",
            "use _NETWM_STATE_STAYS_ON_TOP hint if available");
+    mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "mwm_hack",
+           "enable MWM hack");
     mp_msg(MSGT_VO, MSGL_INFO,
            "You can also negate the settings with simply putting '-' in the beginning");
     mp_msg(MSGT_VO, MSGL_INFO, "\n");
@@ -271,6 +274,8 @@ static void fstype_dump(int fstype)
             mp_msg(MSGT_VO, MSGL_V, " ABOVE");
         if (fstype & vo_wm_BELOW)
             mp_msg(MSGT_VO, MSGL_V, " BELOW");
+        if (fstype & vo_wm_MWM)
+            mp_msg(MSGT_VO, MSGL_V, " mwm_hack");
         mp_msg(MSGT_VO, MSGL_V, " X atoms\n");
     } else {
         mp_msg(MSGT_VO, MSGL_V,
@@ -1235,6 +1240,11 @@ static int vo_x11_get_fs_type(struct vo *vo)
                     type &= ~vo_wm_NETWM;
                 else
                     type |= vo_wm_NETWM;
+            } else if (!strcmp(arg, "mwm_hack")) {
+                if (neg)
+                    type &= ~vo_wm_MWM;
+                else
+                    type |= vo_wm_MWM;
             } else if (!strcmp(arg, "none"))
                 type = 0;  // clear; keep parsing
         }
@@ -1336,7 +1346,7 @@ static void vo_x11_fullscreen(struct vo *vo)
         else
             x11->old_gravity = x11->vo_hint.win_gravity;
     }
-    if (x11->wm_type == 0 && !(vo->opts->fsmode & 16)) {
+    if (x11->fs_type & vo_wm_MWM) {
         XUnmapWindow(x11->display, x11->window);      // required for MWM
         XWithdrawWindow(x11->display, x11->window, x11->screen);
         x11->fs_flip = 1;
