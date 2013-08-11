@@ -59,7 +59,8 @@
 
 #include "mpvcore/m_option.h"
 
-static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec);
+static void init_avctx(sh_video_t *sh, const char *decoder,
+                       struct vd_lavc_hwdec *hwdec);
 static void uninit_avctx(sh_video_t *sh);
 static void setup_refcounting_hw(struct AVCodecContext *s);
 
@@ -81,72 +82,56 @@ const m_option_t lavc_decode_opts_conf[] = {
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-// keep in sync with --hwdec option
-enum hwdec_type {
-    HWDEC_NONE = 0,
-    HWDEC_VDPAU = 1,
-    HWDEC_VDA = 2,
-    HWDEC_CRYSTALHD = 3,
+const struct vd_lavc_hwdec mp_vd_lavc_vdpau;
+const struct vd_lavc_hwdec mp_vd_lavc_vdpau_old;
+
+static const struct vd_lavc_hwdec mp_vd_lavc_crystalhd = {
+    .type = HWDEC_CRYSTALHD,
+    .codec_pairs = (const char *[]) {
+        "mpeg2",        "mpeg2_crystalhd",
+        "msmpeg4",      "msmpeg4_crystalhd",
+        "wmv3",         "wmv3_crystalhd",
+        "vc1",          "vc1_crystalhd",
+        "h264",         "h264_crystalhd",
+        "mpeg4",        "mpeg4_crystalhd",
+        NULL
+    },
 };
 
-struct hwdec {
-    enum hwdec_type api;
-    const char *codec, *hw_codec;
-    const struct vd_lavc_hwdec_functions *fns;
+static const struct vd_lavc_hwdec mp_vd_lavc_vda = {
+    .type = HWDEC_VDA,
+    .codec_pairs = (const char *[]) {"h264", "h264_vda", NULL},
 };
 
-const struct vd_lavc_hwdec_functions mp_vd_lavc_vdpau;
-const struct vd_lavc_hwdec_functions mp_vd_lavc_vdpau_old;
-
-static const struct hwdec hwdec_list[] = {
+static const struct vd_lavc_hwdec *hwdec_list[] = {
 #if CONFIG_VDPAU
 #if HAVE_AV_CODEC_NEW_VDPAU_API
-    {HWDEC_VDPAU,       "h264",         NULL,           &mp_vd_lavc_vdpau},
-    {HWDEC_VDPAU,       "wmv3",         NULL,           &mp_vd_lavc_vdpau},
-    {HWDEC_VDPAU,       "vc1",          NULL,           &mp_vd_lavc_vdpau},
-    {HWDEC_VDPAU,       "mpeg1video",   NULL,           &mp_vd_lavc_vdpau},
-    {HWDEC_VDPAU,       "mpeg2video",   NULL,           &mp_vd_lavc_vdpau},
-    {HWDEC_VDPAU,       "mpeg4",        NULL,           &mp_vd_lavc_vdpau},
+    &mp_vd_lavc_vdpau,
 #else
-    {HWDEC_VDPAU,       "h264",         "h264_vdpau",   &mp_vd_lavc_vdpau_old},
-    {HWDEC_VDPAU,       "wmv3",         "wmv3_vdpau",   &mp_vd_lavc_vdpau_old},
-    {HWDEC_VDPAU,       "vc1",          "vc1_vdpau",    &mp_vd_lavc_vdpau_old},
-    {HWDEC_VDPAU,       "mpegvideo",    "mpegvideo_vdpau", &mp_vd_lavc_vdpau_old},
-    {HWDEC_VDPAU,       "mpeg1video",   "mpeg1video_vdpau", &mp_vd_lavc_vdpau_old},
-    {HWDEC_VDPAU,       "mpeg2video",   "mpegvideo_vdpau", &mp_vd_lavc_vdpau_old},
-    {HWDEC_VDPAU,       "mpeg2",        "mpeg2_vdpau",  &mp_vd_lavc_vdpau_old},
-    {HWDEC_VDPAU,       "mpeg4",        "mpeg4_vdpau",  &mp_vd_lavc_vdpau_old},
+    &mp_vd_lavc_vdpau_old,
 #endif
 #endif // CONFIG_VDPAU
-
-    {HWDEC_VDA,         "h264",         "h264_vda"},
-
-    {HWDEC_CRYSTALHD,   "mpeg2",        "mpeg2_crystalhd"},
-    {HWDEC_CRYSTALHD,   "msmpeg4",      "msmpeg4_crystalhd"},
-    {HWDEC_CRYSTALHD,   "wmv3",         "wmv3_crystalhd"},
-    {HWDEC_CRYSTALHD,   "vc1",          "vc1_crystalhd"},
-    {HWDEC_CRYSTALHD,   "h264",         "h264_crystalhd"},
-    {HWDEC_CRYSTALHD,   "mpeg4",        "mpeg4_crystalhd"},
-
-    {0}
+    &mp_vd_lavc_vda,
+    &mp_vd_lavc_crystalhd,
+    NULL
 };
 
-static struct hwdec *find_hwcodec(enum hwdec_type api, const char *codec)
+static struct vd_lavc_hwdec *find_hwcodec(enum hwdec_type api)
 {
-    for (int n = 0; hwdec_list[n].api; n++) {
-        if (hwdec_list[n].api == api && strcmp(hwdec_list[n].codec, codec) == 0)
-            return (struct hwdec *)&hwdec_list[n];
+    for (int n = 0; hwdec_list[n]; n++) {
+        if (hwdec_list[n]->type == api)
+            return (struct vd_lavc_hwdec *)hwdec_list[n];
     }
     return NULL;
 }
 
-static bool hwdec_codec_allowed(sh_video_t *sh, struct hwdec *hwdec)
+static bool hwdec_codec_allowed(sh_video_t *sh, const char *codec)
 {
     bstr s = bstr0(sh->opts->hwdec_codecs);
     while (s.len) {
         bstr item;
         bstr_split_tok(s, ",", &item, &s);
-        if (bstr_equals0(item, "all") || bstr_equals0(item, hwdec->codec))
+        if (bstr_equals0(item, "all") || bstr_equals0(item, codec))
             return true;
     }
     return false;
@@ -165,6 +150,56 @@ static enum AVDiscard str2AVDiscard(char *str)
     return AVDISCARD_DEFAULT;
 }
 
+static int hwdec_probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+                       const char *decoder, const char **hw_decoder)
+{
+    if (hwdec->codec_pairs) {
+        for (int n = 0; hwdec->codec_pairs[n + 0]; n += 2) {
+            const char *sw = hwdec->codec_pairs[n + 0];
+            const char *hw = hwdec->codec_pairs[n + 1];
+            if (decoder && strcmp(decoder, sw) == 0) {
+                AVCodec *codec = avcodec_find_decoder_by_name(hw);
+                *hw_decoder = hw;
+                if (codec)
+                    goto found;
+            }
+        }
+        return HWDEC_ERR_NO_CODEC;
+    found: ;
+    }
+    int r = 0;
+    if (hwdec->probe)
+        r = hwdec->probe(hwdec, info, decoder);
+    return r;
+}
+
+static bool probe_hwdec(sh_video_t *sh, bool autoprobe, enum hwdec_type api,
+                        const char *decoder, struct vd_lavc_hwdec **use_hwdec,
+                        const char **use_decoder)
+{
+    struct vd_lavc_hwdec *hwdec = find_hwcodec(api);
+    if (!hwdec) {
+        mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Requested hardware decoder not "
+                "compiled.\n");
+        return false;
+    }
+    const char *hw_decoder = NULL;
+    int r = hwdec_probe(hwdec, sh->hwdec_info, decoder, &hw_decoder);
+    if (r >= 0) {
+        *use_hwdec = hwdec;
+        *use_decoder = hw_decoder;
+        return true;
+    } else if (r == HWDEC_ERR_NO_CODEC) {
+        mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Hardware decoder '%s' not found in "
+                "libavcodec.\n", hw_decoder ? hw_decoder : decoder);
+    } else if (r == HWDEC_ERR_NO_CTX && !autoprobe) {
+        mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "VO does not support requested "
+                "hardware decoder.\n");
+    }
+    return false;
+}
+
+
 static int init(sh_video_t *sh, const char *decoder)
 {
     vd_ffmpeg_ctx *ctx;
@@ -182,29 +217,35 @@ static int init(sh_video_t *sh, const char *decoder)
         return 0;
     }
 
-    struct hwdec *hwdec = find_hwcodec(sh->opts->hwdec_api, decoder);
-    struct hwdec *use_hwdec = NULL;
-    if (hwdec && hwdec_codec_allowed(sh, hwdec)) {
-        if (hwdec->hw_codec) {
-            AVCodec *lavc_hwcodec = avcodec_find_decoder_by_name(hwdec->hw_codec);
-            if (lavc_hwcodec) {
-                ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
-                decoder = lavc_hwcodec->name;
-                use_hwdec = hwdec;
-            } else {
-                mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "Decoder '%s' not found in "
-                        "libavcodec, using software decoding.\n", hwdec->hw_codec);
+    struct vd_lavc_hwdec *hwdec = NULL;
+    const char *hw_decoder = NULL;
+
+    if (hwdec_codec_allowed(sh, decoder)) {
+        if (sh->opts->hwdec_api == HWDEC_AUTO) {
+            for (int n = 0; hwdec_list[n]; n++) {
+                if (probe_hwdec(sh, true, hwdec_list[n]->type, decoder,
+                    &hwdec, &hw_decoder))
+                    break;
             }
-        } else {
-            ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
-            use_hwdec = hwdec;
+        } else if (sh->opts->hwdec_api != HWDEC_NONE) {
+            probe_hwdec(sh, false, sh->opts->hwdec_api, decoder,
+                        &hwdec, &hw_decoder);
         }
-    } else if (!hwdec && sh->opts->hwdec_api) {
-        mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "Selected hardware decoding API not "
-                "available, using software decoding.\n");
+    } else {
+        mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Not trying to use hardware decoding: "
+                "codec %s is blacklisted by user.\n", decoder);
     }
 
-    init_avctx(sh, decoder, use_hwdec);
+    if (hwdec) {
+        ctx->software_fallback_decoder = talloc_strdup(ctx, decoder);
+        if (hw_decoder)
+            decoder = hw_decoder;
+        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Trying to use hardware decoding.\n");
+    } else if (sh->opts->hwdec_api != HWDEC_NONE) {
+        mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Using software decoding.\n");
+    }
+
+    init_avctx(sh, decoder, hwdec);
     if (!ctx->avctx) {
         if (ctx->software_fallback_decoder) {
             mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Error initializing hardware "
@@ -279,7 +320,8 @@ static void set_from_bih(AVCodecContext *avctx, uint32_t format,
     avctx->coded_height = bih->biHeight;
 }
 
-static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
+static void init_avctx(sh_video_t *sh, const char *decoder,
+                       struct vd_lavc_hwdec *hwdec)
 {
     vd_ffmpeg_ctx *ctx = sh->context;
     struct lavc_param *lavc_param = &sh->opts->lavc_param;
@@ -311,13 +353,13 @@ static void init_avctx(sh_video_t *sh, const char *decoder, struct hwdec *hwdec)
 
     avctx->thread_count = lavc_param->threads;
 
-    if (ctx->hwdec && ctx->hwdec->fns) {
+    if (ctx->hwdec && ctx->hwdec->allocate_image) {
         ctx->do_hw_dr1         = true;
         avctx->thread_count    = 1;
-        if (ctx->hwdec->fns->image_formats)
+        if (ctx->hwdec->image_formats)
             avctx->get_format  = get_format_hwdec;
         setup_refcounting_hw(avctx);
-        if (ctx->hwdec->fns->init(ctx) < 0) {
+        if (ctx->hwdec->init && ctx->hwdec->init(ctx) < 0) {
             uninit_avctx(sh);
             return;
         }
@@ -404,8 +446,8 @@ static void uninit_avctx(sh_video_t *sh)
     av_freep(&ctx->avctx);
     avcodec_free_frame(&ctx->pic);
 
-    if (ctx->hwdec && ctx->hwdec->fns)
-        ctx->hwdec->fns->uninit(ctx);
+    if (ctx->hwdec && ctx->hwdec->uninit)
+        ctx->hwdec->uninit(ctx);
 
 #if !HAVE_AVUTIL_REFCOUNTING
     mp_buffer_pool_free(&ctx->dr1_buffer_pool);
@@ -487,10 +529,10 @@ static enum PixelFormat get_format_hwdec(struct AVCodecContext *avctx,
         mp_msg(MSGT_DECVIDEO, MSGL_V, " %s", av_get_pix_fmt_name(fmt[i]));
     mp_msg(MSGT_DECVIDEO, MSGL_V, "\n");
 
-    assert(ctx->hwdec && ctx->hwdec->fns);
+    assert(ctx->hwdec);
 
     for (int i = 0; fmt[i] != PIX_FMT_NONE; i++) {
-        const int *okfmt = ctx->hwdec->fns->image_formats;
+        const int *okfmt = ctx->hwdec->image_formats;
         for (int n = 0; okfmt && okfmt[n]; n++) {
             if (imgfmt2pixfmt(okfmt[n]) == fmt[i])
                 return fmt[i];
@@ -519,7 +561,7 @@ static struct mp_image *get_surface_hwdec(struct sh_video *sh, AVFrame *pic)
     if (!IMGFMT_IS_HWACCEL(imgfmt))
         return NULL;
 
-    struct mp_image *mpi = ctx->hwdec->fns->allocate_image(ctx, pic);
+    struct mp_image *mpi = ctx->hwdec->allocate_image(ctx, pic);
 
     if (mpi) {
         for (int i = 0; i < 4; i++)
@@ -694,8 +736,8 @@ static int decode(struct sh_video *sh, struct demux_packet *packet,
     struct mp_image *mpi = image_from_decoder(sh);
     assert(mpi->planes[0]);
 
-    if (ctx->hwdec && ctx->hwdec->fns && ctx->hwdec->fns->fix_image)
-        ctx->hwdec->fns->fix_image(ctx, mpi);
+    if (ctx->hwdec && ctx->hwdec->fix_image)
+        ctx->hwdec->fix_image(ctx, mpi);
 
     mpi->colorspace = ctx->image_params.colorspace;
     mpi->levels = ctx->image_params.colorlevels;

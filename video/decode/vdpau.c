@@ -23,6 +23,7 @@
 
 #include "lavc.h"
 #include "mpvcore/mp_common.h"
+#include "mpvcore/av_common.h"
 #include "video/fmt-conversion.h"
 #include "video/vdpau.h"
 #include "video/decode/dec_video.h"
@@ -109,6 +110,19 @@ static int handle_preemption(struct lavc_ctx *ctx)
     return 0;
 }
 
+static const struct profile_entry *find_codec(enum AVCodecID id, int ff_profile)
+{
+    for (int n = 0; n < MP_ARRAY_SIZE(profiles); n++) {
+        if (profiles[n].av_codec == id &&
+            (profiles[n].ff_profile == ff_profile ||
+             profiles[n].ff_profile == FF_PROFILE_UNKNOWN))
+        {
+            return &profiles[n];
+        }
+    }
+    return NULL;
+}
+
 static bool create_vdp_decoder(struct lavc_ctx *ctx)
 {
     struct priv *p = ctx->hwdec_priv;
@@ -121,17 +135,8 @@ static bool create_vdp_decoder(struct lavc_ctx *ctx)
     if (p->context.decoder != VDP_INVALID_HANDLE)
         vdp->decoder_destroy(p->context.decoder);
 
-    const struct profile_entry *pe = NULL;
-    for (int n = 0; n < MP_ARRAY_SIZE(profiles); n++) {
-        if (profiles[n].av_codec == ctx->avctx->codec_id &&
-            (profiles[n].ff_profile == ctx->avctx->profile ||
-             profiles[n].ff_profile == FF_PROFILE_UNKNOWN))
-        {
-            pe = &profiles[n];
-            break;
-        }
-    }
-
+    const struct profile_entry *pe = find_codec(ctx->avctx->codec_id,
+                                                ctx->avctx->profile);
     if (!pe) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Unknown codec!\n");
         goto fail;
@@ -200,9 +205,6 @@ static void uninit(struct lavc_ctx *ctx)
 
 static int init(struct lavc_ctx *ctx)
 {
-    if (!ctx->hwdec_info || !ctx->hwdec_info->vdpau_ctx)
-        return -1;
-
     struct priv *p = talloc_ptrtype(NULL, p);
     *p = (struct priv) {
         .mpvdp = ctx->hwdec_info->vdpau_ctx,
@@ -220,8 +222,20 @@ static int init(struct lavc_ctx *ctx)
     return 0;
 }
 
-const struct vd_lavc_hwdec_functions mp_vd_lavc_vdpau = {
+static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+                 const char *decoder)
+{
+    if (!info || !info->vdpau_ctx)
+        return HWDEC_ERR_NO_CTX;
+    if (!find_codec(mp_codec_to_av_codec_id(decoder), FF_PROFILE_UNKNOWN))
+        return HWDEC_ERR_NO_CODEC;
+    return 0;
+}
+
+const struct vd_lavc_hwdec mp_vd_lavc_vdpau = {
+    .type = HWDEC_VDPAU,
     .image_formats = (const int[]) {IMGFMT_VDPAU, 0},
+    .probe = probe,
     .init = init,
     .uninit = uninit,
     .allocate_image = allocate_image,

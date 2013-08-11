@@ -466,6 +466,7 @@ const m_option_t mp_opts[] = {
 
     OPT_CHOICE("hwdec", hwdec_api, 0,
                ({"no", 0},
+                {"auto", -1},
                 {"vdpau", 1},
                 {"vda", 2},
                 {"crystalhd", 3})),

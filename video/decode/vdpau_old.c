@@ -223,9 +223,6 @@ static void uninit(struct lavc_ctx *ctx)
 
 static int init(struct lavc_ctx *ctx)
 {
-    if (!ctx->hwdec_info || !ctx->hwdec_info->vdpau_ctx)
-        return -1;
-
     struct priv *p = talloc_ptrtype(NULL, p);
     *p = (struct priv) {
         .mpvdp = ctx->hwdec_info->vdpau_ctx,
@@ -246,6 +243,14 @@ static int init(struct lavc_ctx *ctx)
     return 0;
 }
 
+static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+                 const char *decoder)
+{
+    if (!info || !info->vdpau_ctx)
+        return HWDEC_ERR_NO_CTX;
+    return 0;
+}
+
 static void fix_image(struct lavc_ctx *ctx, struct mp_image *img)
 {
     // Make it follow the convention of the "new" vdpau decoder
@@ -254,11 +259,22 @@ static void fix_image(struct lavc_ctx *ctx, struct mp_image *img)
     img->planes[3] = (void *)(intptr_t)rndr->surface;
 }
 
-const struct vd_lavc_hwdec_functions mp_vd_lavc_vdpau_old = {
+const struct vd_lavc_hwdec mp_vd_lavc_vdpau_old = {
     .image_formats = (const int[]) {
         IMGFMT_VDPAU_MPEG1, IMGFMT_VDPAU_MPEG2, IMGFMT_VDPAU_H264,
         IMGFMT_VDPAU_WMV3, IMGFMT_VDPAU_VC1, IMGFMT_VDPAU_MPEG4,
         0
+    },
+    .codec_pairs = (const char *[]) {
+        "h264",         "h264_vdpau",
+        "wmv3",         "wmv3_vdpau",
+        "vc1",          "vc1_vdpau",
+        "mpegvideo",    "mpegvideo_vdpau",
+        "mpeg1video",   "mpeg1video_vdpau",
+        "mpeg2video",   "mpegvideo_vdpau",
+        "mpeg2",        "mpeg2_vdpau",
+        "mpeg4",        "mpeg4_vdpau",
+        NULL
     },
     .init = init,
     .uninit = uninit,
