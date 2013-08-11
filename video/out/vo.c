@@ -289,8 +289,8 @@ void vo_destroy(struct vo *vo)
 {
     if (vo->registered_fd != -1)
         mp_input_rm_key_fd(vo->input_ctx, vo->registered_fd);
+    mp_image_unrefp(&vo->waiting_mpi);
     vo->driver->uninit(vo);
-    talloc_free(vo->waiting_mpi);
     talloc_free(vo);
 }
 
