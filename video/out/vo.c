@@ -87,7 +87,7 @@ const struct vo_driver *video_out_drivers[] =
 #ifdef CONFIG_GL
         &video_out_opengl_old,
 #endif
-#ifdef CONFIG_VAAPI
+#if CONFIG_VAAPI
         &video_out_vaapi,
 #endif
 #ifdef CONFIG_X11
