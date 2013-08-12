@@ -1863,7 +1863,7 @@ else
   def_vaapi='#define CONFIG_VAAPI 0'
   novomodules="vaapi $novomodules"
 fi
-echores "$_vdpau"
+echores "$_vaapi"
 
 
 echocheck "Xinerama"
