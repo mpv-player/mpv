@@ -1341,6 +1341,8 @@ static int d_open_file(struct demuxer *demuxer, enum demux_check check)
     if (!res)
         return -1;
 
+    demuxer->filetype = sr.name;
+
     sub_data *sd = sub_read_file(demuxer->stream, &sr);
     if (!sd)
         return -1;
