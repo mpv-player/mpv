@@ -77,12 +77,12 @@ const demuxer_desc_t *const demuxer_list[] = {
 #endif
     &demuxer_desc_matroska,
     &demuxer_desc_lavf,
-    &demuxer_desc_subreader,
+    &demuxer_desc_mf,
 #ifdef CONFIG_MNG
     &demuxer_desc_mng,
 #endif
-    // auto-probe last, because it checks file-extensions only
-    &demuxer_desc_mf,
+    // Pretty aggressive, so should be last.
+    &demuxer_desc_subreader,
     /* Please do not add any new demuxers here. If you want to implement a new
      * demuxer, add it to libavformat, except for wrappers around external
      * libraries and demuxers requiring binary support. */
