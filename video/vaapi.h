@@ -1,5 +1,5 @@
-#ifndef MPV_VDPAU_H
-#define MPV_VDPAU_H
+#ifndef MPV_VAAPI_H
+#define MPV_VAAPI_H
 
 #include <stdbool.h>
 #include <inttypes.h>
