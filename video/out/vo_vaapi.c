@@ -125,7 +125,7 @@ struct priv {
 static const bool osd_formats[SUBBITMAP_COUNT] = {
     // Actually BGRA, but only on little endian.
     // This will break on big endian, I think.
-    [SUBBITMAP_RGBA_STR] = true,
+    [SUBBITMAP_RGBA] = true,
 };
 
 struct fmtentry {

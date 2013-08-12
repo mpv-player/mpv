@@ -25,12 +25,11 @@
 
 #include "mpvcore/m_option.h"
 
-// NOTE: VOs must support at least SUBBITMAP_RGBA or SUBBITMAP_RGBA_STR.
+// NOTE: VOs must support at least SUBBITMAP_RGBA.
 enum sub_bitmap_format {
     SUBBITMAP_EMPTY = 0,// no bitmaps; always has num_parts==0
     SUBBITMAP_LIBASS,   // A8, with a per-surface blend color (libass.color)
     SUBBITMAP_RGBA,     // B8G8R8A8 (MSB=A, LSB=B), scaled, premultiplied alpha
-    SUBBITMAP_RGBA_STR, // like RGBA, but straight (not premultiplied) alpha
     SUBBITMAP_INDEXED,  // scaled, bitmap points to osd_bmp_indexed
 
     SUBBITMAP_COUNT
@@ -39,7 +38,8 @@ enum sub_bitmap_format {
 // For SUBBITMAP_INDEXED
 struct osd_bmp_indexed {
     uint8_t *bitmap;
-    // Each entry is like a pixel in SUBBITMAP_RGBA_STR format.
+    // Each entry is like a pixel in SUBBITMAP_RGBA format, but using straight
+    // alpha.
     uint32_t palette[256];
 };
 

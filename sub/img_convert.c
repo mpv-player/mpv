@@ -56,14 +56,13 @@ static void rgba_to_premultiplied_rgba(uint32_t *colors, size_t count)
     }
 }
 
-static bool conv_idx_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
-                             bool straight_alpha)
+bool osd_conv_idx_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
 {
     struct sub_bitmaps src = *imgs;
     if (src.format != SUBBITMAP_INDEXED)
         return false;
 
-    imgs->format = straight_alpha ? SUBBITMAP_RGBA_STR : SUBBITMAP_RGBA;
+    imgs->format = SUBBITMAP_RGBA;
     talloc_free(c->parts);
     imgs->parts = c->parts = talloc_array(c, struct sub_bitmap, src.num_parts);
 
@@ -72,8 +71,7 @@ static bool conv_idx_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
         struct sub_bitmap *s = &src.parts[n];
         struct osd_bmp_indexed sb = *(struct osd_bmp_indexed *)s->bitmap;
 
-        if (imgs->format == SUBBITMAP_RGBA)
-            rgba_to_premultiplied_rgba(sb.palette, 256);
+        rgba_to_premultiplied_rgba(sb.palette, 256);
 
         *d = *s;
         struct mp_image *image = mp_image_alloc(IMGFMT_BGRA, s->w, s->h);
@@ -91,21 +89,11 @@ static bool conv_idx_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
     return true;
 }
 
-bool osd_conv_idx_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
-{
-    return conv_idx_to_rgba(c, imgs, false);
-}
-
-bool osd_conv_idx_to_rgba_str(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
-{
-    return conv_idx_to_rgba(c, imgs, true);
-}
-
 bool osd_conv_blur_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
                         double gblur)
 {
     struct sub_bitmaps src = *imgs;
-    if (src.format != SUBBITMAP_RGBA && src.format != SUBBITMAP_RGBA_STR)
+    if (src.format != SUBBITMAP_RGBA)
         return false;
 
     talloc_free(c->parts);
@@ -146,7 +134,7 @@ bool osd_conv_blur_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
 bool osd_scale_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
 {
     struct sub_bitmaps src = *imgs;
-    if (src.format != SUBBITMAP_RGBA && src.format != SUBBITMAP_RGBA_STR)
+    if (src.format != SUBBITMAP_RGBA)
         return false;
 
     bool need_scale = false;
@@ -222,8 +210,8 @@ bool osd_conv_idx_to_gray(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
     return true;
 }
 
-static void draw_ass_rgba(uint8_t *src, int src_w, int src_h,
-                          int src_stride, uint8_t *dst, size_t dst_stride,
+static void draw_ass_rgba(unsigned char *src, int src_w, int src_h,
+                          int src_stride, unsigned char *dst, size_t dst_stride,
                           int dst_x, int dst_y, uint32_t color)
 {
     const unsigned int r = (color >> 24) & 0xff;
@@ -255,41 +243,7 @@ static void draw_ass_rgba(uint8_t *src, int src_w, int src_h,
     }
 }
 
-static void draw_ass_rgba_str(uint8_t *src, int src_w, int src_h,
-                              int src_stride, uint8_t *dst, size_t dst_stride,
-                              int dst_x, int dst_y, uint32_t color)
-{
-    const unsigned int r = (color >> 24) & 0xff;
-    const unsigned int g = (color >> 16) & 0xff;
-    const unsigned int b = (color >>  8) & 0xff;
-    const unsigned int a = 0xff - (color & 0xff);
-
-    dst += dst_y * dst_stride + dst_x * 4;
-
-    for (int y = 0; y < src_h; y++, dst += dst_stride, src += src_stride) {
-        uint32_t *dstrow = (uint32_t *) dst;
-        for (int x = 0; x < src_w; x++) {
-            const unsigned int v = src[x];
-            int rr = (r * v);
-            int gg = (g * v);
-            int bb = (b * v);
-            int aa = (a * v);
-            uint32_t dstpix = dstrow[x];
-            unsigned int dstb =  dstpix        & 0xFF;
-            unsigned int dstg = (dstpix >>  8) & 0xFF;
-            unsigned int dstr = (dstpix >> 16) & 0xFF;
-            unsigned int dsta = (dstpix >> 24) & 0xFF;
-            dstb = (bb + dstb * (255 - aa)) / 255;
-            dstg = (gg + dstg * (255 - aa)) / 255;
-            dstr = (rr + dstr * (255 - aa)) / 255;
-            dsta = (aa + dsta * (255 - aa)) / 255;
-            dstrow[x] = dstb | (dstg << 8) | (dstr << 16) | (dsta << 24);
-        }
-    }
-}
-
-static bool conv_ass_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
-                             bool straight_alpha)
+bool osd_conv_ass_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
 {
     struct sub_bitmaps src = *imgs;
     if (src.format != SUBBITMAP_LIBASS)
@@ -299,7 +253,7 @@ static bool conv_ass_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
     struct mp_rect bb_list[MP_SUB_BB_LIST_MAX];
     int num_bb = mp_get_sub_bb_list(&src, bb_list, MP_SUB_BB_LIST_MAX);
 
-    imgs->format = straight_alpha ? SUBBITMAP_RGBA_STR : SUBBITMAP_RGBA;
+    imgs->format = SUBBITMAP_RGBA;
     imgs->parts = c->part;
     imgs->num_parts = num_bb;
 
@@ -342,31 +296,14 @@ static bool conv_ass_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs,
                 s->y > bb.y1 || s->y + s->h < bb.y0)
                 continue;
 
-            if (imgs->format == SUBBITMAP_RGBA_STR) {
-                draw_ass_rgba(s->bitmap, s->w, s->h, s->stride,
-                              bmp->bitmap, bmp->stride,
-                              s->x - bb.x0, s->y - bb.y0,
-                              s->libass.color);
-            } else {
-                draw_ass_rgba_str(s->bitmap, s->w, s->h, s->stride,
-                                  bmp->bitmap, bmp->stride,
-                                  s->x - bb.x0, s->y - bb.y0,
-                                  s->libass.color);
-            }
+            draw_ass_rgba(s->bitmap, s->w, s->h, s->stride,
+                          bmp->bitmap, bmp->stride,
+                          s->x - bb.x0, s->y - bb.y0,
+                          s->libass.color);
         }
     }
 
     return true;
-}
-
-bool osd_conv_ass_to_rgba(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
-{
-    return conv_ass_to_rgba(c, imgs, false);
-}
-
-bool osd_conv_ass_to_rgba_str(struct osd_conv_cache *c, struct sub_bitmaps *imgs)
-{
-    return conv_ass_to_rgba(c, imgs, true);
 }
 
 bool mp_sub_bitmaps_bb(struct sub_bitmaps *imgs, struct mp_rect *out_bb)
