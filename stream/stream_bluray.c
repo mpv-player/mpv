@@ -65,12 +65,8 @@ struct bluray_priv_s {
     char *cfg_device;
 };
 
-static const struct stream_priv_s {
-    int title;
-    char *device;
-} bluray_stream_priv_dflts = {
-    BLURAY_DEFAULT_TITLE,
-    NULL
+static struct bluray_priv_s bluray_stream_priv_dflts = {
+    .cfg_title = BLURAY_DEFAULT_TITLE
 };
 
 #define OPT_BASE_STRUCT struct bluray_priv_s
