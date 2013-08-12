@@ -1052,10 +1052,17 @@
     ``<api>`` can be one of the following:
 
     :no:        always use software decoding (default)
+    :auto:      see below
     :vdpau:     requires ``--vo=vdpau``
     :vaapi:     requires ``--vo=vaapi``
     :vda:       OSX
     :crystalhd: Broadcom Crystal HD
+
+    ``auto`` tries to automatically enable hardware decoding using the first
+    available method. This still depends what VO you are using. For example,
+    if you are not using ``--vo=vdpau``, vdpau decoding will never be enabled.
+    Also note that if the first found method doesn't actually work, it will
+    always fall back to software decoding, instead of trying the next method.
 
 ``--hwdec-codecs=<codec1,codec2,...|all>``
     Allow hardware decoding for a given list of codecs only. The default is the
