@@ -1744,9 +1744,6 @@ static void read_events(struct input_ctx *ictx, int time)
 static void read_all_events(struct input_ctx *ictx, int time)
 {
     getch2_poll();
-#ifdef CONFIG_COCOA
-    cocoa_check_events();
-#endif
     read_events(ictx, time);
 }
 

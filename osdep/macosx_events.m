@@ -150,26 +150,16 @@ static CGEventRef tap_event_callback(CGEventTapProxy proxy, CGEventType type,
 }
 
 void cocoa_init_media_keys(void) {
-    Application *app = mpv_shared_app();
-    [app.eventsResponder startMediaKeys];
+    [mpv_shared_app().eventsResponder startMediaKeys];
 }
 
 void cocoa_uninit_media_keys(void) {
-    Application *app = mpv_shared_app();
-    [app.eventsResponder stopMediaKeys];
-}
-
-void cocoa_check_events(void)
-{
-    Application *app = mpv_shared_app();
-    int key;
-    while ((key = [app.iqueue pop]) >= 0)
-        mp_input_put_key(app.inputContext, key);
+    [mpv_shared_app().eventsResponder stopMediaKeys];
 }
 
 void cocoa_put_key(int keycode)
 {
-    [mpv_shared_app().iqueue push:keycode];
+    mp_input_put_key(mpv_shared_app().inputContext, keycode);
 }
 
 void cocoa_put_key_with_modifiers(int keycode, int modifiers)

@@ -47,47 +47,6 @@ static pthread_t playback_thread_id;
 - (void)setAppleMenu:(NSMenu *)aMenu;
 @end
 
-@implementation InputQueue {
-    NSMutableArray *_fifo;
-}
-
-- (id)init
-{
-    if (self = [super init]) {
-        self->_fifo = [[NSMutableArray alloc] init];
-    }
-
-    return self;
-}
-
-- (void)push:(int)keycode
-{
-    @synchronized (_fifo) {
-        [_fifo addObject:[NSNumber numberWithInt:keycode]];
-    }
-}
-
-- (int)pop
-{
-    int r = -1;
-
-    @synchronized (_fifo) {
-        if ([_fifo count] > 0) {
-            r = [[_fifo objectAtIndex:0] intValue];
-            [_fifo removeObjectAtIndex:0];
-        }
-    }
-
-    return r;
-}
-
-- (void)dealloc
-{
-    [self->_fifo release];
-    [super dealloc];
-}
-@end
-
 Application *mpv_shared_app(void)
 {
     return (Application *)[Application sharedApplication];
@@ -114,7 +73,6 @@ static NSString *escape_loadfile_name(NSString *input)
 @synthesize willStopOnOpenEvent = _will_stop_on_open_event;
 
 @synthesize inputContext = _input_context;
-@synthesize iqueue = _iqueue;
 @synthesize eventsResponder = _events_responder;
 @synthesize menuItems = _menu_items;
 
@@ -132,7 +90,6 @@ static NSString *escape_loadfile_name(NSString *input)
         self.menuItems = [[[NSMutableDictionary alloc] init] autorelease];
         self.files = nil;
         self.argumentsList = [[[NSMutableArray alloc] init] autorelease];
-        self.iqueue = [[[InputQueue alloc] init] autorelease];
         self.eventsResponder = [[[EventsResponder alloc] init] autorelease];
         self.willStopOnOpenEvent = NO;
 
