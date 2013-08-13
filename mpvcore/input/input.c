@@ -66,6 +66,16 @@
 
 #define MP_MAX_KEY_DOWN 4
 
+#if HAVE_PTHREADS
+#include <pthread.h>
+static pthread_mutex_t queue_mutex = PTHREAD_MUTEX_INITIALIZER;
+#define queue_lock()   pthread_mutex_lock(&queue_mutex)
+#define queue_unlock() pthread_mutex_unlock(&queue_mutex)
+#else
+#define queue_lock() 0
+#define queue_lock() 0
+#endif
+
 struct cmd_bind {
     int keys[MP_MAX_KEY_DOWN];
     int num_keys;
@@ -653,23 +663,30 @@ bool mp_input_is_abort_cmd(int cmd_id)
 
 static int queue_count_cmds(struct cmd_queue *queue)
 {
+    queue_lock();
     int res = 0;
     for (struct mp_cmd *cmd = queue->first; cmd; cmd = cmd->queue_next)
         res++;
+    queue_unlock();
     return res;
 }
 
 static bool queue_has_abort_cmds(struct cmd_queue *queue)
 {
-    for (struct mp_cmd *cmd = queue->first; cmd; cmd = cmd->queue_next) {
-        if (mp_input_is_abort_cmd(cmd->id))
-            return true;
-    }
-    return false;
+    queue_lock();
+    bool ret = false;
+    for (struct mp_cmd *cmd = queue->first; cmd; cmd = cmd->queue_next)
+        if (mp_input_is_abort_cmd(cmd->id)) {
+            ret = true;
+            break;
+        }
+    queue_unlock();
+    return ret;
 }
 
 static void queue_remove(struct cmd_queue *queue, struct mp_cmd *cmd)
 {
+    queue_lock();
     struct mp_cmd **p_prev = &queue->first;
     while (*p_prev != cmd) {
         p_prev = &(*p_prev)->queue_next;
@@ -677,11 +694,13 @@ static void queue_remove(struct cmd_queue *queue, struct mp_cmd *cmd)
     // if this fails, cmd was not in the queue
     assert(*p_prev == cmd);
     *p_prev = cmd->queue_next;
+    queue_unlock();
 }
 
 static void queue_add(struct cmd_queue *queue, struct mp_cmd *cmd,
                       bool at_head)
 {
+    queue_lock();
     if (at_head) {
         cmd->queue_next = queue->first;
         queue->first = cmd;
@@ -692,6 +711,16 @@ static void queue_add(struct cmd_queue *queue, struct mp_cmd *cmd,
         *p_prev = cmd;
         cmd->queue_next = NULL;
     }
+    queue_unlock();
+}
+
+static struct mp_cmd *queue_peek(struct cmd_queue *queue)
+{
+    struct mp_cmd *ret = NULL;
+    queue_lock();
+    ret = queue->first;
+    queue_unlock();
+    return ret;
 }
 
 static struct input_fd *mp_input_add_fd(struct input_ctx *ictx)
@@ -1752,7 +1781,7 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
         if (repeated)
             queue_add(queue, repeated, false);
     }
-    struct mp_cmd *ret = queue->first;
+    struct mp_cmd *ret = queue_peek(queue);
     if (!ret)
         return NULL;
 
