@@ -68,6 +68,11 @@ General Changes for mplayer2 to mpv
 * Wayland support
 * Support for precise scrolling which scales the parameter of commands. If the
   input doesn't support precise scrolling the scale factor stays 1.
+* OSX: Cocoa event loop is independent from mplayer's event loop, so user
+  actions like accessing menus and live resizing do not block the playback.
+* OSX: Apple Remote support.
+* OSX: Media Keys support.
+* Windows: Added wasapi audio output.
 * General code cleanups
 * Many more changes
 
