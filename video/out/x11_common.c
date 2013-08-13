@@ -1040,9 +1040,6 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     if (flags & VOFLAG_HIDDEN)
         return;
 
-    if (opts->ontop)
-        vo_x11_setlayer(vo, x11->window, opts->ontop);
-
     bool reset_size = !(x11->old_dwidth == width && x11->old_dheight == height);
     if (x11->window_hidden) {
         x11->nofs_x = x;
@@ -1074,6 +1071,9 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
             vo_x11_move_resize(vo, reset_pos, true, x, y, width, height);
         }
     }
+
+    if (opts->ontop)
+        vo_x11_setlayer(vo, x11->window, opts->ontop);
 
     vo_x11_fullscreen(vo);
 
