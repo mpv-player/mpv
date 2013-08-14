@@ -184,6 +184,8 @@ static const struct {
     {IMGFMT_VDPAU,           PIX_FMT_VDPAU_H264},
 #endif
 
+    { IMGFMT_VDA,             PIX_FMT_VDA_VLD},
+
     {IMGFMT_VAAPI,            PIX_FMT_VAAPI_VLD},
     {IMGFMT_VAAPI_MPEG2_IDCT, PIX_FMT_VAAPI_IDCT},
     {IMGFMT_VAAPI_MPEG2_MOCO, PIX_FMT_VAAPI_MOCO},

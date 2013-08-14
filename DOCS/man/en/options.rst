@@ -1062,7 +1062,7 @@
     :auto:      see below
     :vdpau:     requires ``--vo=vdpau``
     :vaapi:     requires ``--vo=vaapi``
-    :vda:       OSX
+    :vda:       requires ``--vo=corevideo`` (OSX only)
     :crystalhd: Broadcom Crystal HD
 
     ``auto`` tries to automatically enable hardware decoding using the first

@@ -107,6 +107,7 @@ SOURCES-$(PULSE)                += audio/out/ao_pulse.c
 SOURCES-$(PORTAUDIO)            += audio/out/ao_portaudio.c
 SOURCES-$(RSOUND)               += audio/out/ao_rsound.c
 SOURCES-$(VDPAU)                += video/vdpau.c video/out/vo_vdpau.c
+SOURCES-$(VDA)                  += video/decode/vda.c
 SOURCES-$(VDPAU_DEC)            += video/decode/vdpau.c
 SOURCES-$(VDPAU_DEC_OLD)        += video/decode/vdpau_old.c
 SOURCES-$(VAAPI)                += video/out/vo_vaapi.c \

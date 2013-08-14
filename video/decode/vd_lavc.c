@@ -84,6 +84,7 @@ const m_option_t lavc_decode_opts_conf[] = {
 
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau;
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau_old;
+const struct vd_lavc_hwdec mp_vd_lavc_vda;
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi;
 
 static const struct vd_lavc_hwdec mp_vd_lavc_crystalhd = {
@@ -99,11 +100,6 @@ static const struct vd_lavc_hwdec mp_vd_lavc_crystalhd = {
     },
 };
 
-static const struct vd_lavc_hwdec mp_vd_lavc_vda = {
-    .type = HWDEC_VDA,
-    .codec_pairs = (const char *[]) {"h264", "h264_vda", NULL},
-};
-
 static const struct vd_lavc_hwdec *hwdec_list[] = {
 #if CONFIG_VDPAU
 #if HAVE_AV_CODEC_NEW_VDPAU_API
@@ -112,7 +108,9 @@ static const struct vd_lavc_hwdec *hwdec_list[] = {
     &mp_vd_lavc_vdpau_old,
 #endif
 #endif // CONFIG_VDPAU
+#if CONFIG_VDA
     &mp_vd_lavc_vda,
+#endif
     &mp_vd_lavc_crystalhd,
 #if CONFIG_VAAPI
     &mp_vd_lavc_vaapi,
@@ -748,7 +746,7 @@ static int decode(struct sh_video *sh, struct demux_packet *packet,
     assert(mpi->planes[0]);
 
     if (ctx->hwdec && ctx->hwdec->process_image)
-        ctx->hwdec->process_image(ctx, mpi);
+        mpi = ctx->hwdec->process_image(ctx, mpi);
 
     mpi->colorspace = ctx->image_params.colorspace;
     mpi->levels = ctx->image_params.colorlevels;

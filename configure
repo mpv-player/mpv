@@ -347,6 +347,7 @@ Video output:
   --enable-sdl2            enable SDL 2.0+ audio and video output [disable]
   --enable-xv              enable Xv video output [autodetect]
   --enable-vdpau           enable VDPAU acceleration [autodetect]
+  --enable-vda             enable VDA acceleration [autodetect]
   --enable-vaapi           enable VAAPI acceleration [autodetect]
   --enable-vm              enable XF86VidMode support [autodetect]
   --enable-xinerama        enable Xinerama support [autodetect]
@@ -422,6 +423,8 @@ _wayland=auto
 _xss=auto
 _xv=auto
 _vdpau=auto
+_vda=auto
+_vda_refcounting=auto
 _vaapi=auto
 _direct3d=auto
 _sdl=no
@@ -584,6 +587,8 @@ for ac_option do
   --disable-xv)         _xv=no          ;;
   --enable-vdpau)       _vdpau=yes      ;;
   --disable-vdpau)      _vdpau=no       ;;
+  --enable-vda)         _vda=yes        ;;
+  --disable-vda)        _vda=no         ;;
   --enable-vaapi)       _vaapi=yes      ;;
   --disable-vaapi)      _vaapi=no       ;;
   --enable-direct3d)    _direct3d=yes   ;;
@@ -2815,6 +2820,42 @@ fi
 echores "$libpostproc"
 
 
+if darwin ; then
+
+echocheck "VDA"
+if test "$_vda" = auto ; then
+ _vda=no
+ if test "$_avutil_has_refcounting" = "yes" ; then
+   header_check VideoDecodeAcceleration/VDADecoder.h &&
+     header_check libavcodec/vda.h && _vda=yes
+ else
+   res_comment="libavutil too old"
+ fi
+fi
+if test "$_vda" = yes ; then
+  def_vda='#define CONFIG_VDA 1'
+  libs_mplayer="$libs_mplayer -framework VideoDecodeAcceleration -framework QuartzCore -framework IOSurface"
+else
+  def_vda='#define CONFIG_VDA 0'
+fi
+echores "$_vda"
+
+echocheck "VDA libavcodec refcounting"
+_vda_refcounting=no
+if test "$_vda" = yes ; then
+  statement_check libavcodec/vda.h 'struct vda_context a = (struct vda_context) { .use_ref_buffer = 1 }' &&
+    _vda_refcounting=yes
+fi
+if test "$_vda_refcounting" = "yes" ; then
+  def_vda_refcounting='#define HAVE_VDA_LIBAVCODEC_REFCOUNTING 1'
+else
+  def_vda_refcounting='#define HAVE_VDA_LIBAVCODEC_REFCOUNTING 0'
+fi
+echores "$_vda_refcounting"
+
+fi
+
+
 echocheck "TV interface"
 if test "$_tv" = yes ; then
   def_tv='#define CONFIG_TV 1'
@@ -3110,6 +3151,8 @@ VCD = $_vcd
 VDPAU = $_vdpau
 VDPAU_DEC = $_vdpau_dec
 VDPAU_DEC_OLD = $_vdpau_dec_old
+VDA = $_vda
+VDA_REFCOUNTING = $_vda_refcounting
 VAAPI = $_vaapi
 WIN32 = $_win32
 X11 = $_x11
@@ -3120,6 +3163,7 @@ XV = $_xv
 ENCODING = $_encoding
 
 CONFIG_VDPAU    = $_vdpau
+CONFIG_VDA      = $_vda
 CONFIG_VAAPI    = $_vaapi
 CONFIG_ZLIB     = $_zlib
 
@@ -3286,6 +3330,8 @@ $def_jpeg
 $def_mng
 $def_v4l2
 $def_vdpau
+$def_vda
+$def_vda_refcounting
 $def_vaapi
 $def_vm
 $def_x11

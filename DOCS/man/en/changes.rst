@@ -100,6 +100,8 @@ General Changes for mplayer2 to mpv
 * Allow changing/adjusting video filters at runtime. (This is also used to make
   the ``D`` key insert vf_yadif if deinterlacing is not supported otherwise.)
 * Native VAAPI support
+* OSX: VDA support using libavcodec hwaccel API insted of FFmpeg's decoder. Up
+  to 2-2.5x reduction in CPU usage.
 * General bug fixes and removal of long-standing issues
 * General code cleanups (including refactoring or rewrites of many parts)
 * Many more changes

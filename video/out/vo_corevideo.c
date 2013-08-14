@@ -1,6 +1,7 @@
 /*
  * CoreVideo video output driver
  * Copyright (c) 2005 Nicolas Plourde <nicolasplourde@gmail.com>
+ * Copyright (c) 2012-2013 Stefano Pigozzi <stefano.pigozzi@gmail.com>
  *
  * This file is part of MPlayer.
  *
@@ -19,7 +20,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "config.h"
+
 #include <QuartzCore/QuartzCore.h>
+#if CONFIG_VDA
+#include <IOSurface/IOSurface.h>
+#endif
+
 #include <assert.h>
 
 #include "talloc.h"
@@ -42,9 +49,32 @@ struct quad {
     GLfloat upperLeft[2];
 };
 
+struct cv_priv {
+    CVPixelBufferRef pbuf;
+    CVOpenGLTextureCacheRef texture_cache;
+    CVOpenGLTextureRef texture;
+    OSType pixfmt;
+};
+
+struct dr_priv {
+    CVPixelBufferRef pbuf;
+    bool texture_allocated;
+    GLuint texture;
+    GLuint texture_target;
+};
+
+struct cv_functions {
+    void (*init)(struct vo *vo);
+    void (*uninit)(struct vo *vo);
+    void (*prepare_texture)(struct vo *vo, struct mp_image *mpi);
+    void (*bind_texture)(struct vo *vo);
+    void (*unbind_texture)(struct vo *vo);
+    mp_image_t *(*get_screenshot)(struct vo *vo);
+    int (*set_colormatrix)(struct vo *vo, struct mp_csp_details *csp);
+};
+
 struct priv {
     MPGLContext *mpglctx;
-    OSType pixelFormat;
     unsigned int image_width;
     unsigned int image_height;
     struct mp_csp_details colorspace;
@@ -52,12 +82,21 @@ struct priv {
     struct mp_rect dst_rect;
     struct mp_osd_res osd_res;
 
-    CVPixelBufferRef pixelBuffer;
-    CVOpenGLTextureCacheRef textureCache;
-    CVOpenGLTextureRef texture;
-    struct quad *quad;
+    // state for normal CoreVideo rendering path: uploads mp_image data as
+    // OpenGL textures.
+    struct cv_priv cv;
 
+    // state for IOSurface based direct rendering path: accesses the IOSurface
+    // wrapped by the CVPixelBuffer returned by VDADecoder and directly
+    // renders it to the screen.
+    struct dr_priv dr;
+
+    struct quad *quad;
     struct mpgl_osd *osd;
+
+    // functions to to deal with the the OpenGL texture for containing the
+    // video frame (behaviour changes depending on the rendering path).
+    struct cv_functions fns;
 };
 
 static void resize(struct vo *vo)
@@ -98,17 +137,8 @@ static int init_gl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     gl->Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     if (gl->SwapInterval)
         gl->SwapInterval(1);
-    return 1;
-}
 
-static void release_cv_entities(struct vo *vo) {
-    struct priv *p = vo->priv;
-    CVPixelBufferRelease(p->pixelBuffer);
-    p->pixelBuffer = NULL;
-    CVOpenGLTextureRelease(p->texture);
-    p->texture = NULL;
-    CVOpenGLTextureCacheRelease(p->textureCache);
-    p->textureCache = NULL;
+    return 1;
 }
 
 static int config(struct vo *vo, uint32_t width, uint32_t height,
@@ -116,7 +146,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t format)
 {
     struct priv *p = vo->priv;
-    release_cv_entities(vo);
+    p->fns.uninit(vo);
+
     p->image_width = width;
     p->image_height = height;
 
@@ -125,24 +156,9 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
         return -1;
 
     init_gl(vo, vo->dwidth, vo->dheight);
+    p->fns.init(vo);
 
     return 0;
-}
-
-static void prepare_texture(struct vo *vo)
-{
-    struct priv *p = vo->priv;
-    struct quad *q = p->quad;
-    CVReturn error;
-
-    CVOpenGLTextureRelease(p->texture);
-    error = CVOpenGLTextureCacheCreateTextureFromImage(NULL,
-                p->textureCache, p->pixelBuffer, 0, &p->texture);
-    if(error != kCVReturnSuccess)
-        MP_ERR(vo, "Failed to create OpenGL texture(%d)\n", error);
-
-    CVOpenGLTextureGetCleanTexCoords(p->texture, q->lowerLeft, q->lowerRight,
-                                                 q->upperRight, q->upperLeft);
 }
 
 // map x/y (in range 0..1) to the video texture, and emit OpenGL vertexes
@@ -172,12 +188,8 @@ static void do_render(struct vo *vo)
 {
     struct priv *p = vo->priv;
     GL *gl = p->mpglctx->gl;
-    prepare_texture(vo);
 
-    gl->Enable(CVOpenGLTextureGetTarget(p->texture));
-    gl->BindTexture(
-            CVOpenGLTextureGetTarget(p->texture),
-            CVOpenGLTextureGetName(p->texture));
+    p->fns.bind_texture(vo);
 
     gl->Begin(GL_QUADS);
     video_vertex(vo, 0, 0);
@@ -186,7 +198,7 @@ static void do_render(struct vo *vo)
     video_vertex(vo, 1, 0);
     gl->End();
 
-    gl->Disable(CVOpenGLTextureGetTarget(p->texture));
+    p->fns.unbind_texture(vo);
 }
 
 static void flip_page(struct vo *vo)
@@ -196,53 +208,11 @@ static void flip_page(struct vo *vo)
     p->mpglctx->gl->Clear(GL_COLOR_BUFFER_BIT);
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_image(struct vo *vo, struct mp_image *mpi)
 {
     struct priv *p = vo->priv;
-    CVReturn error;
-
-    if (!p->textureCache || !p->pixelBuffer) {
-        error = CVOpenGLTextureCacheCreate(NULL, 0, vo_cocoa_cgl_context(vo),
-                    vo_cocoa_cgl_pixel_format(vo), 0, &p->textureCache);
-        if(error != kCVReturnSuccess)
-            MP_ERR(vo, "Failed to create OpenGL texture Cache(%d)\n", error);
-
-        error = CVPixelBufferCreateWithBytes(NULL, mpi->w, mpi->h,
-                    p->pixelFormat, mpi->planes[0], mpi->stride[0],
-                    NULL, NULL, NULL, &p->pixelBuffer);
-        if(error != kCVReturnSuccess)
-            MP_ERR(vo, "Failed to create PixelBuffer(%d)\n", error);
-    }
-
+    p->fns.prepare_texture(vo, mpi);
     do_render(vo);
-}
-
-static int query_format(struct vo *vo, uint32_t format)
-{
-    struct priv *p = vo->priv;
-    const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
-    switch (format) {
-        case IMGFMT_YUYV:
-            p->pixelFormat = kYUVSPixelFormat;
-            return flags;
-
-        case IMGFMT_UYVY:
-            p->pixelFormat = k2vuyPixelFormat;
-            return flags;
-
-        case IMGFMT_RGB24:
-            p->pixelFormat = k24RGBPixelFormat;
-            return flags;
-
-        case IMGFMT_ARGB:
-            p->pixelFormat = k32ARGBPixelFormat;
-            return flags;
-
-        case IMGFMT_BGRA:
-            p->pixelFormat = k32BGRAPixelFormat;
-            return flags;
-    }
-    return 0;
 }
 
 static void uninit(struct vo *vo)
@@ -250,7 +220,7 @@ static void uninit(struct vo *vo)
     struct priv *p = vo->priv;
     if (p->osd)
         mpgl_osd_destroy(p->osd);
-    release_cv_entities(vo);
+    p->fns.uninit(vo);
     mpgl_uninit(p->mpglctx);
 }
 
@@ -287,23 +257,38 @@ static CFStringRef get_cv_csp_matrix(struct vo *vo)
         case MP_CSP_SMPTE_240M:
             return kCVImageBufferYCbCrMatrix_SMPTE_240M_1995;
         default:
-            return kCVImageBufferYCbCrMatrix_ITU_R_601_4;
+            return NULL;
     }
 }
 
-static void set_yuv_colorspace(struct vo *vo)
+static int set_yuv_colorspace(struct vo *vo, CVPixelBufferRef pbuf,
+                              struct mp_csp_details *csp)
 {
     struct priv *p = vo->priv;
-    CVBufferSetAttachment(p->pixelBuffer,
-                          kCVImageBufferYCbCrMatrixKey, get_cv_csp_matrix(vo),
-                          kCVAttachmentMode_ShouldPropagate);
-    vo->want_redraw = true;
+    p->colorspace = *csp;
+    CFStringRef cv_csp = get_cv_csp_matrix(vo);
+
+    if (cv_csp) {
+        CVBufferSetAttachment(p->cv.pbuf, kCVImageBufferYCbCrMatrixKey, cv_csp,
+                kCVAttachmentMode_ShouldNotPropagate);
+        vo->want_redraw = true;
+        return VO_TRUE;
+    } else {
+        return VO_NOTIMPL;
+    }
 }
 
-static int get_image_fmt(struct vo *vo)
+static int get_yuv_colorspace(struct vo *vo, struct mp_csp_details *csp)
 {
     struct priv *p = vo->priv;
-    switch (p->pixelFormat) {
+    *csp = p->colorspace;
+    return VO_TRUE;
+}
+
+static int get_image_fmt(struct vo *vo, CVPixelBufferRef pbuf)
+{
+    OSType pixfmt = CVPixelBufferGetPixelFormatType(pbuf);
+    switch (pixfmt) {
         case kYUVSPixelFormat:   return IMGFMT_YUYV;
         case k2vuyPixelFormat:   return IMGFMT_UYVY;
         case k24RGBPixelFormat:  return IMGFMT_RGB24;
@@ -311,21 +296,21 @@ static int get_image_fmt(struct vo *vo)
         case k32BGRAPixelFormat: return IMGFMT_BGRA;
     }
     MP_ERR(vo, "Failed to convert pixel format. Please contact the "
-               "developers. PixelFormat: %d\n", p->pixelFormat);
+               "developers. PixelFormat: %d\n", pixfmt);
     return -1;
 }
 
-static mp_image_t *get_screenshot(struct vo *vo)
+static mp_image_t *get_screenshot(struct vo *vo, CVPixelBufferRef pbuf)
 {
-    int img_fmt = get_image_fmt(vo);
+    int img_fmt = get_image_fmt(vo, pbuf);
     if (img_fmt < 0) return NULL;
 
     struct priv *p = vo->priv;
-    void *base = CVPixelBufferGetBaseAddress(p->pixelBuffer);
-
-    size_t width      = CVPixelBufferGetWidth(p->pixelBuffer);
-    size_t height     = CVPixelBufferGetHeight(p->pixelBuffer);
-    size_t stride     = CVPixelBufferGetBytesPerRow(p->pixelBuffer);
+    CVPixelBufferLockBaseAddress(pbuf, 0);
+    void *base = CVPixelBufferGetBaseAddress(pbuf);
+    size_t width  = CVPixelBufferGetWidth(pbuf);
+    size_t height = CVPixelBufferGetHeight(pbuf);
+    size_t stride = CVPixelBufferGetBytesPerRow(pbuf);
 
     struct mp_image img = {0};
     mp_image_setfmt(&img, img_fmt);
@@ -336,6 +321,7 @@ static mp_image_t *get_screenshot(struct vo *vo)
     struct mp_image *image = mp_image_new_copy(&img);
     mp_image_set_display_size(image, vo->aspdat.prew, vo->aspdat.preh);
     mp_image_set_colorspace_details(image, &p->colorspace);
+    CVPixelBufferUnlockBaseAddress(pbuf, 0);
 
     return image;
 }
@@ -353,18 +339,15 @@ static int control(struct vo *vo, uint32_t request, void *data)
             do_render(vo);
             return VO_TRUE;
         case VOCTRL_SET_YUV_COLORSPACE:
-            p->colorspace.format = ((struct mp_csp_details *)data)->format;
-            set_yuv_colorspace(vo);
-            return VO_TRUE;
+            return p->fns.set_colormatrix(vo, data);
         case VOCTRL_GET_YUV_COLORSPACE:
-            *(struct mp_csp_details *)data = p->colorspace;
-            return VO_TRUE;
+            return get_yuv_colorspace(vo, data);
         case VOCTRL_SCREENSHOT: {
             struct voctrl_screenshot_args *args = data;
             if (args->full_window)
                 args->out_image = glGetWindowScreenshot(p->mpglctx->gl);
             else
-                args->out_image = get_screenshot(vo);
+                args->out_image = p->fns.get_screenshot(vo);
             return VO_TRUE;
         }
     }
@@ -375,6 +358,227 @@ static int control(struct vo *vo, uint32_t request, void *data)
         resize(vo);
 
     return r;
+}
+
+static void dummy_cb(struct vo *vo) { }
+
+static void cv_uninit(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    CVPixelBufferRelease(p->cv.pbuf);
+    p->cv.pbuf = NULL;
+    CVOpenGLTextureRelease(p->cv.texture);
+    p->cv.texture = NULL;
+    CVOpenGLTextureCacheRelease(p->cv.texture_cache);
+    p->cv.texture_cache = NULL;
+}
+
+static void cv_bind_texture(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    GL *gl = p->mpglctx->gl;
+
+    gl->Enable(CVOpenGLTextureGetTarget(p->cv.texture));
+    gl->BindTexture(CVOpenGLTextureGetTarget(p->cv.texture),
+                    CVOpenGLTextureGetName(p->cv.texture));
+
+}
+
+static void cv_unbind_texture(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    GL *gl = p->mpglctx->gl;
+
+    gl->Disable(CVOpenGLTextureGetTarget(p->cv.texture));
+}
+
+static void upload_opengl_texture(struct vo *vo, struct mp_image *mpi)
+{
+    struct priv *p = vo->priv;
+    if (!p->cv.texture_cache || !p->cv.pbuf) {
+        CVReturn error;
+        error = CVOpenGLTextureCacheCreate(NULL, 0, vo_cocoa_cgl_context(vo),
+                    vo_cocoa_cgl_pixel_format(vo), 0, &p->cv.texture_cache);
+        if(error != kCVReturnSuccess)
+            MP_ERR(vo, "Failed to create OpenGL texture Cache(%d)\n", error);
+
+        error = CVPixelBufferCreateWithBytes(NULL, mpi->w, mpi->h,
+                    p->cv.pixfmt, mpi->planes[0], mpi->stride[0],
+                    NULL, NULL, NULL, &p->cv.pbuf);
+        if(error != kCVReturnSuccess)
+            MP_ERR(vo, "Failed to create PixelBuffer(%d)\n", error);
+    }
+
+    struct quad *q = p->quad;
+    CVReturn error;
+
+    CVOpenGLTextureRelease(p->cv.texture);
+    error = CVOpenGLTextureCacheCreateTextureFromImage(NULL,
+                p->cv.texture_cache, p->cv.pbuf, 0, &p->cv.texture);
+    if(error != kCVReturnSuccess)
+        MP_ERR(vo, "Failed to create OpenGL texture(%d)\n", error);
+
+    CVOpenGLTextureGetCleanTexCoords(p->cv.texture,
+            q->lowerLeft, q->lowerRight, q->upperRight, q->upperLeft);
+}
+
+static mp_image_t *cv_get_screenshot(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    return get_screenshot(vo, p->cv.pbuf);
+}
+
+static int cv_set_colormatrix(struct vo *vo, struct mp_csp_details *csp)
+{
+    struct priv *p = vo->priv;
+    return set_yuv_colorspace(vo, p->cv.pbuf, csp);
+}
+
+static struct cv_functions cv_functions = {
+    .init            = dummy_cb,
+    .uninit          = cv_uninit,
+    .bind_texture    = cv_bind_texture,
+    .unbind_texture  = cv_unbind_texture,
+    .prepare_texture = upload_opengl_texture,
+    .get_screenshot  = cv_get_screenshot,
+    .set_colormatrix = cv_set_colormatrix,
+};
+
+#if CONFIG_VDA
+static void iosurface_init(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    GL *gl = p->mpglctx->gl;
+
+    p->dr.texture_target = GL_TEXTURE_RECTANGLE_ARB;
+    p->fns.bind_texture(vo);
+    gl->GenTextures(1, &p->dr.texture);
+    p->fns.unbind_texture(vo);
+
+    p->dr.texture_allocated = true;
+}
+
+static void iosurface_uninit(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    GL *gl = p->mpglctx->gl;
+    if (p->dr.texture_allocated) {
+        gl->DeleteTextures(1, &p->dr.texture);
+        p->dr.texture_allocated = false;
+    }
+}
+
+static void iosurface_bind_texture(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    GL *gl = p->mpglctx->gl;
+
+    gl->Enable(p->dr.texture_target);
+    gl->BindTexture(p->dr.texture_target, p->dr.texture);
+    gl->MatrixMode(GL_TEXTURE);
+    gl->LoadIdentity();
+    gl->TexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+}
+
+static void iosurface_unbind_texture(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    GL *gl = p->mpglctx->gl;
+
+    gl->BindTexture(p->dr.texture_target, 0);
+    gl->Disable(p->dr.texture_target);
+}
+
+static void extract_texture_from_iosurface(struct vo *vo, struct mp_image *mpi)
+{
+    struct priv *p = vo->priv;
+    CVPixelBufferRelease(p->dr.pbuf);
+    p->dr.pbuf = (CVPixelBufferRef)mpi->planes[3];
+    CVPixelBufferRetain(p->dr.pbuf);
+    IOSurfaceRef surface = CVPixelBufferGetIOSurface(p->dr.pbuf);
+    MP_DBG(vo, "iosurface id: %d\n", IOSurfaceGetID(surface));
+
+    p->fns.bind_texture(vo);
+
+    CGLError err = CGLTexImageIOSurface2D(
+        vo_cocoa_cgl_context(vo), p->dr.texture_target, GL_RGB8,
+        p->image_width, p->image_height,
+        GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, surface, 0);
+
+    if (err != kCGLNoError)
+        MP_ERR(vo, "error creating IOSurface texture: %s (%x)\n",
+               CGLErrorString(err), glGetError());
+
+    p->fns.unbind_texture(vo);
+
+    // video_vertex flips the coordinates.. so feed in a flipped quad
+    *p->quad = (struct quad) {
+        .lowerRight = { p->image_width, p->image_height },
+        .upperLeft  = { 0.0, 0.0 },
+    };
+}
+
+static mp_image_t *iosurface_get_screenshot(struct vo *vo)
+{
+    struct priv *p = vo->priv;
+    return get_screenshot(vo, p->dr.pbuf);
+}
+
+static int iosurface_set_colormatrix(struct vo *vo, struct mp_csp_details *csp)
+{
+    struct priv *p = vo->priv;
+    return set_yuv_colorspace(vo, p->dr.pbuf, csp);
+}
+
+static struct cv_functions iosurface_functions = {
+    .init            = iosurface_init,
+    .uninit          = iosurface_uninit,
+    .bind_texture    = iosurface_bind_texture,
+    .unbind_texture  = iosurface_unbind_texture,
+    .prepare_texture = extract_texture_from_iosurface,
+    .get_screenshot  = iosurface_get_screenshot,
+    .set_colormatrix = iosurface_set_colormatrix,
+};
+#endif /* CONFIG_VDA */
+
+static int query_format(struct vo *vo, uint32_t format)
+{
+    struct priv *p = vo->priv;
+    const int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+
+    switch (format) {
+#if CONFIG_VDA
+        case IMGFMT_VDA:
+            p->fns = iosurface_functions;
+            return flags;
+#endif
+
+        case IMGFMT_YUYV:
+            p->fns       = cv_functions;
+            p->cv.pixfmt = kYUVSPixelFormat;
+            return flags;
+
+        case IMGFMT_UYVY:
+            p->fns       = cv_functions;
+            p->cv.pixfmt = k2vuyPixelFormat;
+            return flags;
+
+        case IMGFMT_RGB24:
+            p->fns       = cv_functions;
+            p->cv.pixfmt = k24RGBPixelFormat;
+            return flags;
+
+        case IMGFMT_ARGB:
+            p->fns       = cv_functions;
+            p->cv.pixfmt = k32ARGBPixelFormat;
+            return flags;
+
+        case IMGFMT_BGRA:
+            p->fns       = cv_functions;
+            p->cv.pixfmt = k32BGRAPixelFormat;
+            return flags;
+    }
+    return 0;
 }
 
 const struct vo_driver video_out_corevideo = {
