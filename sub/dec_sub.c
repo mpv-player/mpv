@@ -302,6 +302,8 @@ static void multiply_timings(struct packet_list *subs, double factor)
     }
 }
 
+#define MS_TS(f_ts) ((int)((f_ts) * 1000 + 0.5))
+
 // Remove overlaps and fill gaps between adjacent subtitle packets. This is done
 // by adjusting the duration of the earlier packet. If the gaps or overlap are
 // larger than the threshold, or if the durations are close to the threshold,
@@ -322,7 +324,10 @@ static void fix_overlaps_and_gaps(struct packet_list *subs)
             if (fabs(next->pts - end) <= threshold && cur->duration >= keep &&
                 next->duration >= keep)
             {
-                cur->duration = next->pts - cur->pts;
+                // Conceptually: cur->duration = next->pts - cur->pts;
+                // But make sure the rounding and conversion to integers in
+                // sd_ass.c can't produce overlaps.
+                cur->duration = (MS_TS(next->pts) - MS_TS(cur->pts)) / 1000.0;
             }
         }
     }
