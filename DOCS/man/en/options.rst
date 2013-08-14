@@ -459,6 +459,13 @@
     the start of the next one then keep playing video normally over the
     chapter change instead of doing a seek.
 
+``--chapter-seek-threshold=<seconds>``
+    Distance in seconds from the beginning of a chapter within which a backward
+    chapter seek will go to the previous chapter (default: 5.0). Past this
+    threshold, a backward chapter seek will go to the beginning of the current
+    chapter instead. A negative value means always go back to the previous
+    chapter.
+
 ``--colormatrix=<colorspace>``
     Controls the YUV to RGB color space conversion when playing video. There
     are various standards. Normally, BT.601 should be used for SD video, and

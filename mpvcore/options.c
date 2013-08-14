@@ -661,6 +661,8 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("ordered-chapters", ordered_chapters, 0),
     OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),
 
+    OPT_DOUBLE("chapter-seek-threshold", chapter_seek_threshold, 0),
+
     // a-v sync stuff:
     OPT_FLAG("correct-pts", correct_pts, 0),
     OPT_CHOICE("pts-association-mode", user_pts_assoc_mode, 0,
@@ -772,6 +774,7 @@ const struct MPOpts mp_default_opts = {
     .loop_times = -1,
     .ordered_chapters = 1,
     .chapter_merge_threshold = 100,
+    .chapter_seek_threshold = 5.0,
     .load_config = 1,
     .position_resume = 1,
     .stream_cache_min_percent = 20.0,

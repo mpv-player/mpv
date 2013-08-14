@@ -176,7 +176,9 @@ P
     Show progression bar, elapsed time and total duration on the OSD.
 
 ! and @
-    Seek to the beginning of the previous/next chapter.
+    Seek to the beginning of the previous/next chapter. In most cases,
+    "previous" will actually go to the beginning of the current chapter; see
+    ``--chapter-seek-threshold``.
 
 D (``--vo=vdpau``, ``--vf=yadif`` only)
     Activate/deactivate deinterlacer.

@@ -390,9 +390,30 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
         *(char **) arg = chapter_name;
         return M_PROPERTY_OK;
     }
+    case M_PROPERTY_SWITCH:
     case M_PROPERTY_SET: ;
-        int step_all = *(int *)arg - chapter;
+        int step_all;
+        if (action == M_PROPERTY_SWITCH) {
+            struct m_property_switch_arg *sarg = arg;
+            step_all = ROUND(sarg->inc);
+            // Check threshold for relative backward seeks
+            if (mpctx->opts->chapter_seek_threshold >= 0 && step_all < 0) {
+                if (chapter < -1)
+                    return M_PROPERTY_UNAVAILABLE;
+                double current_chapter_start =
+                    chapter_start_time(mpctx, chapter);
+                // If we are far enough into a chapter, seek back to the
+                // beginning of current chapter instead of previous one
+                if (current_chapter_start >= 0 &&
+                    get_current_time(mpctx) - current_chapter_start >
+                    mpctx->opts->chapter_seek_threshold)
+                    step_all++;
+            }
+        } else // Absolute set
+            step_all = *(int *)arg - chapter;
         chapter += step_all;
+        if (chapter < -1)
+            chapter = -1;
         if (chapter >= get_chapter_count(mpctx) && step_all > 0) {
             mpctx->stop_play = PT_NEXT_ENTRY;
         } else {
