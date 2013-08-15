@@ -273,6 +273,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_vdpau_old = {
         "mpeg4",        "mpeg4_vdpau",
         NULL
     },
+    .probe = probe,
     .init = init,
     .uninit = uninit,
     .allocate_image = allocate_image,
