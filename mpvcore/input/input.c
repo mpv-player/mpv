@@ -73,7 +73,7 @@ static pthread_mutex_t queue_mutex = PTHREAD_MUTEX_INITIALIZER;
 #define queue_unlock() pthread_mutex_unlock(&queue_mutex)
 #else
 #define queue_lock() 0
-#define queue_lock() 0
+#define queue_unlock() 0
 #endif
 
 struct cmd_bind {
