@@ -17,8 +17,8 @@ in the list. Suboptions are optional and can mostly be omitted.
 .. admonition:: Examples
 
     - ``--ao=alsa,oss,`` Try the ALSA driver, then the OSS driver, then others.
-    - ``--ao=alsa:noblock:device=hw=0.3`` Sets noblock-mode and the device-name
-      as first card, fourth device.
+    - ``--ao=alsa:noblock:device=[hw:0,3]`` Sets noblock-mode and the
+      device-name as first card, fourth device.
 
 Available audio output drivers are:
 
@@ -47,6 +47,10 @@ Available audio output drivers are:
         Instead, quote the device name:
 
             ``--ao=alsa:device=[plug:surround50]``
+
+        Note that the ``[`` and ``]`` simply quote the device name. With some
+        shells (like zsh), you have to quote the option string to prevent the
+        shell from interpreting the brackets instead of passing them to mpv.
 
 ``oss``
     OSS audio output driver

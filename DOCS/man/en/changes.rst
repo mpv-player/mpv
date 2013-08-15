@@ -141,6 +141,7 @@ Command Line Switches
     ``-rawvideo ...``           ``--demuxer-rawvideo-...``
     ``--mixer``                 AO suboptions (``alsa``, ``oss``)
     ``--mixer-channel``         AO suboptions (``alsa``, ``oss``)
+    ``--ao=alsa:device=hw=0.3`` ``--ao=alsa:device=[hw:0,3]``
     =========================== ========================================
 
 .. note::
