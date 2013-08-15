@@ -18,6 +18,7 @@
 #include <stddef.h>
 #include <assert.h>
 
+#include <libavcodec/avcodec.h>
 #include <libavcodec/vdpau.h>
 #include <libavutil/common.h>
 
