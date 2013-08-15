@@ -2677,16 +2677,6 @@ if test "$_vdpau" = yes ; then
   fi
 fi
 
-echocheck "libavcodec AV_CODEC_PROP_TEXT_SUB API"
-_avcodec_has_text_flag_api=no
-statement_check libavcodec/avcodec.h 'int x = AV_CODEC_PROP_TEXT_SUB' && _avcodec_has_text_flag_api=yes
-if test "$_avcodec_has_text_flag_api" = yes ; then
-  def_avcodec_has_text_flag_api='#define HAVE_AV_CODEC_PROP_TEXT_SUB 1'
-else
-  def_avcodec_has_text_flag_api='#define HAVE_AV_CODEC_PROP_TEXT_SUB 0'
-fi
-echores "$_avcodec_has_text_flag_api"
-
 
 echocheck "libavcodec avcodec_enum_to_chroma_pos API"
 _avcodec_has_chroma_pos_api=no
@@ -3225,7 +3215,6 @@ $def_zlib
 $def_avutil_has_refcounting
 $def_avutil_has_qp_api
 $def_avcodec_new_vdpau_api
-$def_avcodec_has_text_flag_api
 $def_avcodec_has_chroma_pos_api
 $def_libpostproc
 $def_libavdevice
