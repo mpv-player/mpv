@@ -70,9 +70,13 @@ static int split_colon(const char *user_cp, int max, bstr *out_arr)
 bool mp_charset_requires_guess(const char *user_cp)
 {
     bstr res[2] = {{0}};
-    split_colon(user_cp, 2, res);
+    int r = split_colon(user_cp, 2, res);
+    // Note that "utf8" is the UTF-8 codepage, while "utf8:..." specifies UTF-8
+    // by default, plus a codepage that is used if the input is not UTF-8.
     return bstrcasecmp0(res[0], "enca") == 0 ||
-           bstrcasecmp0(res[0], "guess") == 0;
+           bstrcasecmp0(res[0], "guess") == 0 ||
+           (r > 1 && bstrcasecmp0(res[0], "utf-8") == 0) ||
+           (r > 1 && bstrcasecmp0(res[0], "utf8") == 0);
 }
 
 #ifdef CONFIG_ENCA
@@ -155,6 +159,10 @@ const char *mp_charset_guess(bstr buf, const char *user_cp, int flags)
     if (bstrcasecmp0(type, "guess") == 0)
         res = libguess_guess(buf, lang);
 #endif
+    if (bstrcasecmp0(type, "utf8") == 0 || bstrcasecmp0(type, "utf-8") == 0) {
+        if (!fallback)
+            fallback = params[1].start; // must be already 0-terminated
+    }
 
     if (res) {
         mp_msg(MSGT_SUBREADER, MSGL_DBG2, "%.*s detected charset: '%s'\n",

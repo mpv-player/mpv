@@ -2035,10 +2035,14 @@
     If your system supports ``iconv(3)``, you can use this option to specify
     the subtitle codepage.
 
+    Warning: if you force the charset, even subtitles that are known to be
+    UTF-8 will be recoded, which is perhaps not what you expect.
+
     .. admonition:: Examples
 
-        - ``--subcp=latin2``
-        - ``--subcp=cp1250``
+        - ``--subcp=utf8:latin2`` Use Latin 2 if input is not UTF-8.
+        - ``--subcp=utf8:cp1250`` Use CP1250 if input is not UTF-8.
+        - ``--subcp=cp1250`` Always force recoding to cp1250.
 
     If the player was compiled with ENCA support, you can use special syntax
     to use that::
@@ -2049,6 +2053,8 @@
     ENCA detect the codepage automatically. If unsure, enter anything (if the
     language is invalid, mpv will complain and list valid languages).
     Fallback codepage specifies the codepage to use if autodetection fails.
+    If no fallback is specified, the subtitle will be interpreted as UTF-8,
+    but with "Latin 1" as fallback for bytes that are not valid UTF-8 sequences.
 
     .. admonition:: Examples
 
