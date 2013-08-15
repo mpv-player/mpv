@@ -247,12 +247,13 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
     return 0;
 }
 
-static void fix_image(struct lavc_ctx *ctx, struct mp_image *img)
+static struct mp_image *process_image(struct lavc_ctx *ctx, struct mp_image *img)
 {
     // Make it follow the convention of the "new" vdpau decoder
     struct vdpau_render_state *rndr = (void *)img->planes[0];
     img->planes[0] = (void *)"dummy"; // must be non-NULL, otherwise arbitrary
     img->planes[3] = (void *)(intptr_t)rndr->surface;
+    return img;
 }
 
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau_old = {
@@ -275,5 +276,5 @@ const struct vd_lavc_hwdec mp_vd_lavc_vdpau_old = {
     .init = init,
     .uninit = uninit,
     .allocate_image = allocate_image,
-    .fix_image = fix_image,
+    .process_image = process_image,
 };

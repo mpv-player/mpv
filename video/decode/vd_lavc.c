@@ -747,8 +747,8 @@ static int decode(struct sh_video *sh, struct demux_packet *packet,
     struct mp_image *mpi = image_from_decoder(sh);
     assert(mpi->planes[0]);
 
-    if (ctx->hwdec && ctx->hwdec->fix_image)
-        ctx->hwdec->fix_image(ctx, mpi);
+    if (ctx->hwdec && ctx->hwdec->process_image)
+        ctx->hwdec->process_image(ctx, mpi);
 
     mpi->colorspace = ctx->image_params.colorspace;
     mpi->levels = ctx->image_params.colorlevels;
