@@ -157,16 +157,13 @@ fail:
     return false;
 }
 
-static struct mp_image *allocate_image(struct lavc_ctx *ctx, AVFrame *frame)
+static struct mp_image *allocate_image(struct lavc_ctx *ctx, int fmt,
+                                       int w, int h)
 {
     struct priv *p = ctx->hwdec_priv;
 
-    if (frame->format != AV_PIX_FMT_VDPAU)
+    if (fmt != IMGFMT_VDPAU)
         return NULL;
-
-    // frame->width/height lie. Using them breaks with non-mod 16 video.
-    int w = ctx->avctx->width;
-    int h = ctx->avctx->height;
 
     handle_preemption(ctx);
 

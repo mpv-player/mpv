@@ -565,7 +565,11 @@ static struct mp_image *get_surface_hwdec(struct sh_video *sh, AVFrame *pic)
     if (!IMGFMT_IS_HWACCEL(imgfmt))
         return NULL;
 
-    struct mp_image *mpi = ctx->hwdec->allocate_image(ctx, pic);
+    // frame->width/height lie. Using them breaks with non-mod 16 video.
+    int w = ctx->avctx->width;
+    int h = ctx->avctx->height;
+
+    struct mp_image *mpi = ctx->hwdec->allocate_image(ctx, imgfmt, w, h);
 
     if (mpi) {
         for (int i = 0; i < 4; i++)

@@ -324,17 +324,13 @@ error:
     return res;
 }
 
-static struct mp_image *allocate_image(struct lavc_ctx *ctx, AVFrame *frame)
+static struct mp_image *allocate_image(struct lavc_ctx *ctx, int format,
+                                       int w, int h)
 {
     struct priv *p = ctx->hwdec_priv;
-    int format = pixfmt2imgfmt(frame->format);
 
     if (!IMGFMT_IS_VAAPI(format))
         return NULL;
-
-    // frame->width/height lie. Using them breaks with non-mod 16 video.
-    int w = ctx->avctx->width;
-    int h = ctx->avctx->height;
 
     if (format != p->format || w != p->w || h != p->h ||
         p->va_context->context_id == VA_INVALID_ID)
