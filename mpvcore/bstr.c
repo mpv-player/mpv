@@ -273,7 +273,7 @@ int bstr_decode_utf8(struct bstr s, struct bstr *out_next)
             return -1;
         codepoint &= 127 >> bytes;
         for (int n = 1; n < bytes; n++) {
-            int tmp = s.start[0];
+            int tmp = (unsigned char)s.start[0];
             if ((tmp & 0xC0) != 0x80)
                 return -1;
             codepoint = (codepoint << 6) | (tmp & ~0xC0);
@@ -283,6 +283,69 @@ int bstr_decode_utf8(struct bstr s, struct bstr *out_next)
     if (out_next)
         *out_next = s;
     return codepoint;
+}
+
+int bstr_validate_utf8(struct bstr s)
+{
+    while (s.len) {
+        if (bstr_decode_utf8(s, &s) < 0) {
+            // Try to guess whether the sequence was just cut-off.
+            unsigned int codepoint = (unsigned char)s.start[0];
+            int bytes = bstr_parse_utf8_code_length(codepoint);
+            if (bytes > 1 && s.len < 6) {
+                // Manually check validity of left bytes
+                for (int n = 1; n < bytes; n++) {
+                    if (n >= s.len) {
+                        // Everything valid until now - just cut off.
+                        return -(bytes - s.len);
+                    }
+                    int tmp = (unsigned char)s.start[n];
+                    if ((tmp & 0xC0) != 0x80)
+                        break;
+                }
+            }
+            return -8;
+        }
+    }
+    return 0;
+}
+
+static void append_bstr(bstr *buf, bstr s)
+{
+    buf->start = talloc_realloc(NULL, buf->start, unsigned char, buf->len + s.len);
+    memcpy(buf->start + buf->len, s.start, s.len);
+    buf->len += s.len;
+}
+
+struct bstr bstr_sanitize_utf8_latin1(void *talloc_ctx, struct bstr s)
+{
+    bstr new = {0};
+    bstr left = s;
+    unsigned char *first_ok = s.start;
+    while (left.len) {
+        int r = bstr_decode_utf8(left, &left);
+        if (r < 0) {
+            append_bstr(&new, (bstr){first_ok, left.start - first_ok});
+            uint32_t codepoint = (unsigned char)left.start[0];
+            char data[8];
+            uint8_t tmp;
+            char *output = data;
+            PUT_UTF8(codepoint, tmp, *output++ = tmp;);
+            append_bstr(&new, (bstr){data, output - data});
+            left.start += 1;
+            left.len -= 1;
+            first_ok = left.start;
+        }
+    }
+    if (!new.start)
+        return s;
+    if (first_ok != left.start)
+        append_bstr(&new, (bstr){first_ok, left.start - first_ok});
+    // For convenience
+    append_bstr(&new, (bstr){"\0", 1});
+    new.len -= 1;
+    talloc_steal(talloc_ctx, new.start);
+    return new;
 }
 
 bool bstr_case_startswith(struct bstr s, struct bstr prefix)

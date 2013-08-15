@@ -92,6 +92,23 @@ int bstr_decode_utf8(struct bstr str, struct bstr *out_next);
 // On error, -1 is returned. On success, it returns a value in the range [1, 4].
 int bstr_parse_utf8_code_length(unsigned char b);
 
+// Return >= 0 if the string is valid UTF-8, otherwise negative error code.
+// Embedded \0 bytes are considered valid.
+// This returns -N if the UTF-8 string was likely just cut-off in the middle of
+// an UTF-8 sequence: -1 means 1 byte was missing, -5 5 bytes missing.
+// If the string was likely not cut off, -8 is returned.
+// Use (return_value > -8) to check whether the string is valid UTF-8 or valid
+// but cut-off UTF-8.
+int bstr_validate_utf8(struct bstr s);
+
+// Force the input string to valid UTF-8. If invalid UTF-8 encoding is
+// encountered, the invalid bytes are interpreted as Latin-1.
+// Embedded \0 bytes are considered valid.
+// If replacement happens, a newly allocated string is returned (with a \0
+// byte added past its end for convenience). The string is allocated via
+// talloc, with talloc_ctx as parent.
+struct bstr bstr_sanitize_utf8_latin1(void *talloc_ctx, struct bstr s);
+
 // Return the text before the next line break, and return it. Change *rest to
 // point to the text following this line break. (rest can be NULL.)
 // Line break characters are not stripped.
