@@ -110,9 +110,6 @@ static const char *enca_guess(bstr buf, const char *language)
 #ifdef CONFIG_LIBGUESS
 static const char *libguess_guess(bstr buf, const char *language)
 {
-    if (libguess_validate_utf8(buf.start, buf.len))
-        return "UTF-8";
-
     if (!language || !language[0] || strcmp(language, "help") == 0) {
         mp_msg(MSGT_SUBREADER, MSGL_ERR, "libguess needs a language: "
                "japanese taiwanese chinese korean russian arabic turkish "
@@ -129,10 +126,16 @@ static const char *libguess_guess(bstr buf, const char *language)
 // If user_cp doesn't refer to any known auto-detection (for example because
 // it's a real iconv codepage), user_cp is returned without even looking at
 // the buf data.
-const char *mp_charset_guess(bstr buf, const char *user_cp)
+const char *mp_charset_guess(bstr buf, const char *user_cp, int flags)
 {
     if (!mp_charset_requires_guess(user_cp))
         return user_cp;
+
+    // Do our own UTF-8 detection, because at least ENCA seems to get it
+    // wrong sometimes (suggested by divVerent).
+    int r = bstr_validate_utf8(buf);
+    if (r >= 0 || (r > -8 && (flags & MP_ICONV_ALLOW_CUTOFF)))
+        return "UTF-8";
 
     bstr params[3] = {{0}};
     split_colon(user_cp, 3, params);
@@ -160,8 +163,11 @@ const char *mp_charset_guess(bstr buf, const char *user_cp)
         res = fallback;
         mp_msg(MSGT_SUBREADER, MSGL_DBG2,
                "Detection with %.*s failed: fallback to %s\n",
-               BSTR_P(type), res && res[0] ? res : "no conversion");
+               BSTR_P(type), res && res[0] ? res : "broken UTF-8/Latin1");
     }
+
+    if (!res && !(flags & MP_STRICT_UTF8))
+        res = "UTF-8-BROKEN";
 
     return res;
 }
@@ -176,7 +182,7 @@ const char *mp_charset_guess(bstr buf, const char *user_cp)
 //  returns: same as mp_iconv_to_utf8()
 bstr mp_charset_guess_and_conv_to_utf8(bstr buf, const char *user_cp, int flags)
 {
-    return mp_iconv_to_utf8(buf, mp_charset_guess(buf, user_cp), flags);
+    return mp_iconv_to_utf8(buf, mp_charset_guess(buf, user_cp, flags), flags);
 }
 
 // Use iconv to convert buf to UTF-8.
@@ -200,6 +206,9 @@ bstr mp_iconv_to_utf8(bstr buf, const char *cp, int flags)
 
     if (strcasecmp(cp, "ASCII") == 0)
         return buf;
+
+    if (strcasecmp(cp, "UTF-8-BROKEN") == 0)
+        return bstr_sanitize_utf8_latin1(NULL, buf);
 
     iconv_t icdsc;
     if ((icdsc = iconv_open(tocp, cp)) == (iconv_t) (-1)) {

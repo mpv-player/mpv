@@ -286,7 +286,7 @@ static const char *guess_sub_cp(struct packet_list *subs, const char *usercp)
         memcpy(text.start + text.len + pkt->len, sep, sep_len);
         text.len += pkt->len + sep_len;
     }
-    const char *guess = mp_charset_guess(text, usercp);
+    const char *guess = mp_charset_guess(text, usercp, 0);
     talloc_free(text.start);
     return guess;
 }
