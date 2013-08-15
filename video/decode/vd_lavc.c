@@ -565,7 +565,10 @@ static struct mp_image *get_surface_hwdec(struct sh_video *sh, AVFrame *pic)
     if (!IMGFMT_IS_HWACCEL(imgfmt))
         return NULL;
 
-    // frame->width/height lie. Using them breaks with non-mod 16 video.
+    // Using frame->width/height is bad. For non-mod 16 video (which would
+    // require alignment of frame sizes) we want the decoded size, not the
+    // aligned size. At least vdpau needs this: the video mixer is created
+    // with decoded size, and the video surfaces must have matching size.
     int w = ctx->avctx->width;
     int h = ctx->avctx->height;
 
