@@ -279,6 +279,14 @@ int bstr_decode_utf8(struct bstr s, struct bstr *out_next)
             codepoint = (codepoint << 6) | (tmp & ~0xC0);
             s.start++; s.len--;
         }
+        if (codepoint > 0x10FFFF || (codepoint >= 0xD800 && codepoint <= 0xDFFF))
+            return -1;
+        // Overlong sequences - check taken from libavcodec.
+        // (The only reason we even bother with this is to make libavcodec's
+        //  retarded subtitle utf-8 check happy.)
+        unsigned int min = bytes == 2 ? 0x80 : 1 << (5 * bytes - 4);
+        if (codepoint < min)
+            return -1;
     }
     if (out_next)
         *out_next = s;
