@@ -226,6 +226,10 @@ static int query_format(struct vo *vo, uint32_t format)
             p->pixelFormat = kYUVSPixelFormat;
             return flags;
 
+        case IMGFMT_UYVY:
+            p->pixelFormat = k2vuyPixelFormat;
+            return flags;
+
         case IMGFMT_RGB24:
             p->pixelFormat = k24RGBPixelFormat;
             return flags;
@@ -301,6 +305,7 @@ static int get_image_fmt(struct vo *vo)
     struct priv *p = vo->priv;
     switch (p->pixelFormat) {
         case kYUVSPixelFormat:   return IMGFMT_YUYV;
+        case k2vuyPixelFormat:   return IMGFMT_UYVY;
         case k24RGBPixelFormat:  return IMGFMT_RGB24;
         case k32ARGBPixelFormat: return IMGFMT_ARGB;
         case k32BGRAPixelFormat: return IMGFMT_BGRA;
