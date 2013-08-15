@@ -10,6 +10,7 @@ enum {
     MP_STRICT_UTF8 = 4,         // don't fall back to UTF-8-BROKEN when guessing
 };
 
+bool mp_charset_is_utf8(const char *user_cp);
 bool mp_charset_requires_guess(const char *user_cp);
 const char *mp_charset_guess(bstr buf, const char *user_cp, int flags);
 bstr mp_charset_guess_and_conv_to_utf8(bstr buf, const char *user_cp, int flags);

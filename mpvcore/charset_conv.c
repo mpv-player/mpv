@@ -41,6 +41,12 @@
 
 #include "charset_conv.h"
 
+bool mp_charset_is_utf8(const char *user_cp)
+{
+    return user_cp && (strcasecmp(user_cp, "utf8") == 0 ||
+                       strcasecmp(user_cp, "utf-8") == 0);
+}
+
 // Split the string on ':' into components.
 // out_arr is at least max entries long.
 // Return number of out_arr entries filled.
@@ -207,9 +213,7 @@ bstr mp_charset_guess_and_conv_to_utf8(bstr buf, const char *user_cp, int flags)
 bstr mp_iconv_to_utf8(bstr buf, const char *cp, int flags)
 {
 #ifdef CONFIG_ICONV
-    const char *tocp = "UTF-8";
-
-    if (!cp || !cp[0] || strcasecmp(cp, tocp) == 0)
+    if (!cp || !cp[0] || mp_charset_is_utf8(cp))
         return buf;
 
     if (strcasecmp(cp, "ASCII") == 0)
@@ -219,7 +223,7 @@ bstr mp_iconv_to_utf8(bstr buf, const char *cp, int flags)
         return bstr_sanitize_utf8_latin1(NULL, buf);
 
     iconv_t icdsc;
-    if ((icdsc = iconv_open(tocp, cp)) == (iconv_t) (-1)) {
+    if ((icdsc = iconv_open("UTF-8", cp)) == (iconv_t) (-1)) {
         if (flags & MP_ICONV_VERBOSE)
             mp_msg(MSGT_SUBREADER, MSGL_ERR,
                    "Error opening iconv with codepage '%s'\n", cp);
