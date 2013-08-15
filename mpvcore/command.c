@@ -1721,7 +1721,7 @@ static const m_option_t mp_properties[] = {
       M_OPT_MIN, 0, 0, NULL },
     { "time-remaining", mp_property_remaining, CONF_TYPE_TIME },
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
-      M_OPT_MIN, 0, 0, NULL },
+      M_OPT_MIN, -1, 0, NULL },
     M_OPTION_PROPERTY_CUSTOM("edition", mp_property_edition),
     M_OPTION_PROPERTY_CUSTOM("quvi-format", mp_property_quvi_format),
     { "titles", mp_property_titles, CONF_TYPE_INT,

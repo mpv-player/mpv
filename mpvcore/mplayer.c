@@ -3229,6 +3229,8 @@ char *chapter_name(struct MPContext *mpctx, int chapter)
 // returns the start of the chapter in seconds (-1 if unavailable)
 double chapter_start_time(struct MPContext *mpctx, int chapter)
 {
+    if (chapter == -1)
+        return get_start_time(mpctx);
     if (mpctx->chapters)
         return mpctx->chapters[chapter].start;
     if (mpctx->master_demuxer)
@@ -3252,13 +3254,16 @@ bool mp_seek_chapter(struct MPContext *mpctx, int chapter)
     int num = get_chapter_count(mpctx);
     if (num == 0)
         return false;
-    if (chapter < 0 || chapter >= num)
+    if (chapter < -1 || chapter >= num)
         return false;
 
     mpctx->last_chapter_seek = -2;
 
     double pts;
-    if (mpctx->chapters) {
+    if (chapter == -1) {
+        pts = get_start_time(mpctx);
+        goto do_seek;
+    } else if (mpctx->chapters) {
         pts = mpctx->chapters[chapter].start;
         goto do_seek;
     } else if (mpctx->master_demuxer) {
