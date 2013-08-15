@@ -810,6 +810,11 @@ const struct MPOpts mp_default_opts = {
     .ass_style_override = 1,
     .use_embedded_fonts = 1,
     .suboverlap_enabled = 0,
+#ifdef CONFIG_ENCA
+    .sub_cp = "enca",
+#else
+    .sub_cp = "UTF-8:UTF-8-BROKEN",
+#endif
 
     .hwdec_codecs = "all",
 

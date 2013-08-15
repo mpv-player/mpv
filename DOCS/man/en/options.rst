@@ -2033,10 +2033,15 @@
 
 ``--subcp=<codepage>``
     If your system supports ``iconv(3)``, you can use this option to specify
-    the subtitle codepage.
+    the subtitle codepage. By default, ENCA will be used to guess the charset.
+    If mpv is not compiled with ENCA, ``UTF-8:UTF-8-BROKEN`` is the default,
+    which means it will try to use UTF-8, otherwise the ``UTF-8-BROKEN``
+    pseudo codepage (see below).
 
     Warning: if you force the charset, even subtitles that are known to be
-    UTF-8 will be recoded, which is perhaps not what you expect.
+    UTF-8 will be recoded, which is perhaps not what you expect. Prefix
+    codepages with ``utf8:`` if you want the codepage to be used only if the
+    input is not valid UTF-8.
 
     .. admonition:: Examples
 
@@ -2044,17 +2049,21 @@
         - ``--subcp=utf8:cp1250`` Use CP1250 if input is not UTF-8.
         - ``--subcp=cp1250`` Always force recoding to cp1250.
 
+    The pseudo codepage ``UTF-8-BROKEN`` is used internally. If this is used
+    as codepage, the subtitle will be interpreted as UTF-8, but with "Latin 1"
+    as fallback for bytes which are not valid UTF-8 sequences. This codepage
+    name is never passed to iconv.
+
     If the player was compiled with ENCA support, you can use special syntax
     to use that::
 
-        --subcp=enca:<language>:<fallback codepage>
+        ``--subcp=enca:<language>:<fallback codepage>``
 
     You can specify your language using a two letter language code to make
     ENCA detect the codepage automatically. If unsure, enter anything (if the
     language is invalid, mpv will complain and list valid languages).
     Fallback codepage specifies the codepage to use if autodetection fails.
-    If no fallback is specified, the subtitle will be interpreted as UTF-8,
-    but with "Latin 1" as fallback for bytes that are not valid UTF-8 sequences.
+    If no fallback is specified, ``UTF-8-BROKEN`` is used.
 
     .. admonition:: Examples
 
