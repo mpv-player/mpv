@@ -318,7 +318,7 @@ struct m_option {
     int offset;
 
     // Initialize variable to given default before parsing options
-    void *defval;
+    const void *defval;
 };
 
 
