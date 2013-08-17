@@ -186,6 +186,7 @@ const m_option_type_t m_option_type_store = {
     .size  = sizeof(int),
     .flags = M_OPT_TYPE_OPTIONAL_PARAM,
     .parse = parse_store,
+    .copy  = copy_opt,
 };
 
 // Same for float types
@@ -214,6 +215,7 @@ const m_option_type_t m_option_type_float_store = {
     .size  = sizeof(float),
     .flags = M_OPT_TYPE_OPTIONAL_PARAM,
     .parse = parse_store_float,
+    .copy  = copy_opt,
 };
 
 // Integer
@@ -1329,6 +1331,7 @@ const m_option_type_t m_option_type_color = {
     .name  = "Color",
     .size  = sizeof(struct m_color),
     .parse = parse_color,
+    .copy  = copy_opt,
 };
 
 
@@ -1473,6 +1476,7 @@ const m_option_type_t m_option_type_geometry = {
     .name  = "Window geometry",
     .size  = sizeof(struct m_geometry),
     .parse = parse_geometry,
+    .copy  = copy_opt,
 };
 
 static int parse_size_box(const m_option_t *opt, struct bstr name,
@@ -1502,6 +1506,7 @@ const m_option_type_t m_option_type_size_box = {
     .name  = "Window size",
     .size  = sizeof(struct m_geometry),
     .parse = parse_size_box,
+    .copy  = copy_opt,
 };
 
 
