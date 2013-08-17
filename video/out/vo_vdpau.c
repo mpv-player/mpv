@@ -72,6 +72,8 @@ struct vdpctx {
     struct vdp_functions              *vdp;
     VdpDevice                          vdp_device;
 
+    struct m_color                     colorkey;
+
     bool                               is_preempted;
     bool                               preemption_acked;
     bool                               preemption_user_notified;
@@ -487,6 +489,18 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
             return -1;
         } else
             CHECK_ST_ERROR("Error when calling vdp_presentation_queue_create");
+    }
+
+    if (vc->colorkey.a > 0) {
+        VdpColor color = {
+            .red = vc->colorkey.r / 255.0,
+            .green = vc->colorkey.g / 255.0,
+            .blue = vc->colorkey.b / 255.0,
+            .alpha = 0,
+        };
+        vdp_st = vdp->presentation_queue_set_background_color(vc->flip_queue,
+                                                              &color);
+        CHECK_ST_WARNING("Error setting colorkey");
     }
 
     VdpTime vdp_time;
@@ -1542,6 +1556,7 @@ const struct vo_driver video_out_vdpau = {
         OPT_INT("queuetime_fs", flip_offset_fs, 0, OPTDEF_INT(50)),
         OPT_INTRANGE("output_surfaces", num_output_surfaces, 0,
                      2, MAX_OUTPUT_SURFACES, OPTDEF_INT(3)),
+        OPT_COLOR("colorkey", colorkey, 0),
         {NULL},
     }
 };
