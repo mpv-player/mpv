@@ -136,9 +136,9 @@ Available video output drivers are:
     ``colorkey=<#RRGGBB|#AARRGGBB>``
         Set the VDPAU presentation queue background color, which in practice
         is the colorkey used if VDPAU operates in overlay mode (default:
-        ``#00000000``, meaning do not change the VDPAU default). If the alpha
-        component of this value is 0, the default VDPAU colorkey will be used
-        instead (which is usually green).
+        ``#020507``, some shade of black). If the alpha component of this value
+        is 0, the default VDPAU colorkey will be used instead (which is usually
+        green).
 
     Using the VDPAU frame queueing functionality controlled by the queuetime
     options makes mpv's frame flip timing less sensitive to system CPU load and

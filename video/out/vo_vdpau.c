@@ -1556,7 +1556,10 @@ const struct vo_driver video_out_vdpau = {
         OPT_INT("queuetime_fs", flip_offset_fs, 0, OPTDEF_INT(50)),
         OPT_INTRANGE("output_surfaces", num_output_surfaces, 0,
                      2, MAX_OUTPUT_SURFACES, OPTDEF_INT(3)),
-        OPT_COLOR("colorkey", colorkey, 0),
+        OPT_COLOR("colorkey", colorkey, 0,
+                  .defval = &(const struct m_color) {
+                      .r = 2, .g = 5, .b = 7, .a = 255,
+                  }),
         {NULL},
     }
 };
