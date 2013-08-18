@@ -322,7 +322,6 @@ const m_option_t mp_opts[] = {
 
     // handled in command line parser (parser-mpcmd.c)
     {"playlist", NULL, CONF_TYPE_STRING, CONF_NOCFG | M_OPT_MIN, 1, 0, NULL},
-    {"shuffle", NULL, CONF_TYPE_FLAG, CONF_NOCFG, 0, 0, NULL},
     {"{", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
     {"}", NULL, CONF_TYPE_STORE, CONF_NOCFG, 0, 0, NULL},
 
@@ -334,6 +333,8 @@ const m_option_t mp_opts[] = {
 
     // handled in mplayer.c (looks at the raw argv[])
     {"leak-report", "", CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG },
+
+    OPT_FLAG("shuffle", shuffle, CONF_GLOBAL | CONF_NOCFG),
 
 // ------------------------- common options --------------------
     OPT_FLAG("quiet", quiet, CONF_GLOBAL),

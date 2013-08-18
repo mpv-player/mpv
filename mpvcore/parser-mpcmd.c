@@ -110,14 +110,6 @@ static bool split_opt(struct parse_state *p)
     return false;
 }
 
-static bool parse_flag(bstr name, bstr f)
-{
-    struct m_option opt = {NULL, NULL, CONF_TYPE_FLAG, 0, 0, 1, NULL};
-    int val = 0;
-    m_option_parse(&opt, name, f, &val);
-    return !!val;
-}
-
 // returns M_OPT_... error code
 int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                                    int argc, char **argv)
@@ -125,7 +117,6 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
     int ret = M_OPT_UNKNOWN;
     int mode = 0;
     struct playlist_entry *local_start = NULL;
-    bool shuffle = false;
 
     int local_params_count = 0;
     struct playlist_param *local_params = 0;
@@ -190,16 +181,6 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 mode = GLOBAL;
                 m_config_restore_backups(config);
                 local_start = NULL;
-                shuffle = false;
-                continue;
-            }
-
-            if (bstrcmp0(p.arg, "shuffle") == 0) {
-                shuffle = parse_flag(p.arg, p.param);
-                continue;
-            }
-            if (bstrcmp0(p.arg, "no-shuffle") == 0) {
-                shuffle = false;
                 continue;
             }
 
@@ -273,9 +254,6 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 "Missing closing --} on command line.\n");
         goto err_out;
     }
-
-    if (shuffle)
-        playlist_shuffle(files);
 
     ret = 0; // success
 

@@ -4473,6 +4473,8 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction)
     struct playlist_entry *next = playlist_get_next(mpctx->playlist, direction);
     if (!next && mpctx->opts->loop_times >= 0) {
         if (direction > 0) {
+            if (mpctx->opts->shuffle)
+                playlist_shuffle(mpctx->playlist);
             next = mpctx->playlist->first;
             if (next && mpctx->opts->loop_times > 0) {
                 mpctx->opts->loop_times--;
@@ -4733,6 +4735,8 @@ static int mpv_main(int argc, char *argv[])
 
     mpctx->osd = osd_create(opts, mpctx->ass_library);
 
+    if (opts->shuffle)
+        playlist_shuffle(mpctx->playlist);
     mpctx->playlist->current = mpctx->playlist->first;
 
     play_files(mpctx);
