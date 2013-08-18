@@ -27,7 +27,8 @@ General Changes for MPlayer to mplayer2
 * Use libass for subtitle rendering by default (better quality)
 * Generally preferring ffmpeg/libav over internal demuxers and decoders
 * Improvements when playing multiple files (``--fixed-vo``)
-* Screenshot improvements (instant screenshots without 1-frame delay)
+* Screenshot improvements (instant screenshots without 1-frame delay, allow
+  taking screenshots even with hardware decoding)
 * Improved support for PulseAudio
 * General code cleanups
 * Many more changes
@@ -55,6 +56,9 @@ General Changes for mplayer2 to mpv
   ``screenshot`` video filter is not needed anymore, and should not be put
   into the mpv config file)
 * Removal of teletext support
+* Removal of most builtin demuxers, using libavformat instead
+* Removal of builtin network support, using libavformat instead (also,
+  support https via libavformat)
 * Replace image VOs (``--vo=jpeg`` etc.) with ``--vo=image``
 * Do not lose settings when playing a new file in the same player instance
 * New location for config files, new name for the binary.
@@ -72,8 +76,32 @@ General Changes for mplayer2 to mpv
   actions like accessing menus and live resizing do not block the playback.
 * OSX: Apple Remote support.
 * OSX: Media Keys support.
-* Windows: Added wasapi audio output.
-* General code cleanups
+* Windows: Added WASAPI audio output.
+* New OSD bar with chapter marks and not positioned in the middle of the video
+  (though this can be customized with the ``--osd-bar-align-y`` option).
+* Allow customizing whether a key binding for seeking shows the video time, the
+  OSD bar, or nothing (see section `Input Command Prefixes`_).
+* Display list of chapters and audio/subtitle tracks on OSD (see section
+  `Properties`_).
+* ``--keep-open`` option to stop the player from closing the window and
+  exiting after playback ends.
+* Re-enable screensaver while the player is paused.
+* Matroska edition switching at runtime.
+* Support for libavfilter (for video->video and audio->audio). This allows
+  using most of FFmpeg's filters, which improve greatly on the old MPlayer
+  filters in features, performance, and correctness.
+* Improved downmixing and output of surround audio. Instead of using hardcoded
+  pan filters to do remixing, use libavresample. Channel maps are used to
+  identify the channel layout, so e.g. ``3.0`` and ``2.1`` audio can be
+  distinguished.
+* Allow resuming playback at a later point with ``Shift+q``, also see
+  ``quit_watch_later`` input command.
+* Support mapping multiple commands to one key.
+* Allow changing/adjusting video filters at runtime. (This is also used to make
+  the ``D`` key insert vf_yadif if deinterlacing is not supported otherwise.)
+* Native VAAPI support
+* General bug fixes and removal of long-standing issues
+* General code cleanups (including refactoring or rewrites of many parts)
 * Many more changes
 
 Detailed Listing of User-visible Changes
