@@ -206,7 +206,8 @@ static uint64_t convert_to_vdptime(struct vo *vo, uint64_t t)
 
 static int render_video_to_output_surface(struct vo *vo,
                                           VdpOutputSurface output_surface,
-                                          VdpRect *output_rect)
+                                          VdpRect *output_rect,
+                                          VdpRect *video_rect)
 {
     struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
@@ -238,7 +239,7 @@ static int render_video_to_output_surface(struct vo *vo,
     vdp_st = vdp->video_mixer_render(vc->video_mixer, VDP_INVALID_HANDLE,
                                      0, field, 2, past_fields,
                                      bv[dp/2].surface, 1, future_fields,
-                                     &vc->src_rect_vid, output_surface,
+                                     video_rect, output_surface,
                                      NULL, output_rect, 0, NULL);
     CHECK_ST_WARNING("Error when calling vdp_video_mixer_render");
     return 0;
@@ -250,7 +251,7 @@ static int video_to_output_surface(struct vo *vo)
 
     return render_video_to_output_surface(vo,
                                           vc->output_surfaces[vc->surface_num],
-                                          &vc->out_rect_vid);
+                                          &vc->out_rect_vid, &vc->src_rect_vid);
 }
 
 static int next_deint_queue_pos(struct vo *vo, bool eof)
@@ -1261,7 +1262,7 @@ static struct mp_image *get_screenshot(struct vo *vo)
     }
 
     VdpRect rc = { .x1 = vc->vid_width, .y1 = vc->vid_height };
-    render_video_to_output_surface(vo, vc->screenshot_surface, &rc);
+    render_video_to_output_surface(vo, vc->screenshot_surface, &rc, &rc);
 
     struct mp_image *image = read_output_surface(vc, vc->screenshot_surface,
                                                  vc->vid_width, vc->vid_height);
