@@ -64,45 +64,31 @@ struct priv {
 
 struct profile_entry {
     enum AVCodecID av_codec;
-    int ff_profile;
-    VAProfile va_profile;
     int maxrefs;
+    const VAProfile *va_profiles;
 };
 
-#define PE(av_codec_id, ff_profile, va_dcoder_profile, maxrefs) \
+#define RP(...) __VA_ARGS__
+
+#define PE(av_codec_id, maxrefs, ...) \
     {AV_CODEC_ID_ ## av_codec_id,                               \
-     FF_PROFILE_ ## ff_profile,                                 \
-     VAProfile ## va_dcoder_profile,                            \
-     maxrefs}
+     maxrefs, (const VAProfile[]) {RP __VA_ARGS__, -1}}
 
 static const struct profile_entry profiles[] = {
-    PE(MPEG2VIDEO,  MPEG2_SIMPLE,               MPEG2Simple,    2),
-    PE(MPEG2VIDEO,  UNKNOWN,                    MPEG2Main,      2),
-    PE(H264,        H264_BASELINE,              H264Baseline,   16),
-    PE(H264,        H264_CONSTRAINED_BASELINE,  H264ConstrainedBaseline, 16),
-    PE(H264,        H264_MAIN,                  H264Main,       16),
-    PE(H264,        UNKNOWN,                    H264High,       16),
-    PE(WMV3,        VC1_SIMPLE,                 VC1Simple,      2),
-    PE(WMV3,        VC1_MAIN,                   VC1Main,        2),
-    PE(WMV3,        UNKNOWN,                    VC1Advanced,    2),
-    PE(VC1,         VC1_SIMPLE,                 VC1Simple,      2),
-    PE(VC1,         VC1_MAIN,                   VC1Main,        2),
-    PE(VC1,         UNKNOWN,                    VC1Advanced,    2),
-    // No idea whether these are correct
-    PE(MPEG4,       MPEG4_SIMPLE,               MPEG4Simple,    2),
-    PE(MPEG4,       MPEG4_MAIN,                 MPEG4Main,      2),
-    PE(MPEG4,       UNKNOWN,                    MPEG4AdvancedSimple, 2),
+    PE(MPEG2VIDEO,  2,  (VAProfileMPEG2Main, VAProfileMPEG2Simple)),
+    PE(H264,        16, (VAProfileH264High, VAProfileH264Main,
+                         VAProfileH264Baseline)),
+    PE(WMV3,        2,  (VAProfileVC1Main, VAProfileVC1Simple)),
+    PE(VC1,         2,  (VAProfileVC1Advanced)),
+    PE(MPEG4,       2,  (VAProfileMPEG4Main, VAProfileMPEG4AdvancedSimple,
+                         VAProfileMPEG4Simple)),
 };
 
-static const struct profile_entry *find_codec(enum AVCodecID id, int ff_profile)
+static const struct profile_entry *find_codec(enum AVCodecID id)
 {
     for (int n = 0; n < MP_ARRAY_SIZE(profiles); n++) {
-        if (profiles[n].av_codec == id &&
-            (profiles[n].ff_profile == ff_profile ||
-             profiles[n].ff_profile == FF_PROFILE_UNKNOWN))
-        {
+        if (profiles[n].av_codec == id)
             return &profiles[n];
-        }
     }
     return NULL;
 }
@@ -223,6 +209,15 @@ static void destroy_decoder(struct lavc_ctx *ctx)
         p->surfaces[n] = VA_INVALID_ID;
 }
 
+static bool has_profile(VAProfile *va_profiles, int num_profiles, VAProfile p)
+{
+    for (int i = 0; i < num_profiles; i++) {
+        if (va_profiles[i] == p)
+            return true;
+    }
+    return false;
+}
+
 static int create_decoder(struct lavc_ctx *ctx)
 {
     void *tmp = talloc_new(NULL);
@@ -235,8 +230,7 @@ static int create_decoder(struct lavc_ctx *ctx)
 
     destroy_decoder(ctx);
 
-    const struct profile_entry *pe = find_codec(ctx->avctx->codec_id,
-                                                ctx->avctx->profile);
+    const struct profile_entry *pe = find_codec(ctx->avctx->codec_id);
     if (!pe) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Unknown codec!\n");
         goto error;
@@ -251,18 +245,21 @@ static int create_decoder(struct lavc_ctx *ctx)
     for (int i = 0; i < num_profiles; i++)
         mp_msg(MSGT_VO, MSGL_DBG2, "  %s\n", str_va_profile(va_profiles[i]));
 
-    bool profile_found = false;
-    for (int i = 0; i < num_profiles; i++) {
-        if (pe->va_profile == va_profiles[i]) {
-            profile_found = true;
+    VAProfile va_profile = -1;
+    for (int n = 0; ; n++) {
+        if (pe->va_profiles[n] == -1)
+            break;
+        if (has_profile(va_profiles, num_profiles, pe->va_profiles[n])) {
+            va_profile = pe->va_profiles[n];
             break;
         }
     }
-    if (!profile_found) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Profile '%s' not available.\n",
-               str_va_profile(pe->va_profile));
+    if (va_profile == -1) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] No decoder profile available.\n");
         goto error;
     }
+    mp_msg(MSGT_VO, MSGL_V, "[vaapi] Using profile '%s'.\n",
+           str_va_profile(va_profile));
 
     int num_surfaces = pe->maxrefs;
     if (!is_direct_mapping(p->display)) {
@@ -284,7 +281,7 @@ static int create_decoder(struct lavc_ctx *ctx)
 
     int num_ep = vaMaxNumEntrypoints(p->display);
     VAEntrypoint *ep = talloc_zero_array(tmp, VAEntrypoint, num_ep);
-    status = vaQueryConfigEntrypoints(p->display, pe->va_profile, ep, &num_ep);
+    status = vaQueryConfigEntrypoints(p->display, va_profile, ep, &num_ep);
     if (!check_va_status(status, "vaQueryConfigEntrypoints()"))
         goto error;
 
@@ -297,7 +294,7 @@ static int create_decoder(struct lavc_ctx *ctx)
     VAConfigAttrib attrib = {
         .type = VAConfigAttribRTFormat,
     };
-    status = vaGetConfigAttributes(p->display, pe->va_profile, entrypoint,
+    status = vaGetConfigAttributes(p->display, va_profile, entrypoint,
                                    &attrib, 1);
     if (!check_va_status(status, "vaGetConfigAttributes()"))
         goto error;
@@ -306,7 +303,7 @@ static int create_decoder(struct lavc_ctx *ctx)
         goto error;
     }
 
-    status = vaCreateConfig(p->display, pe->va_profile, entrypoint, &attrib, 1,
+    status = vaCreateConfig(p->display, va_profile, entrypoint, &attrib, 1,
                             &p->va_context->config_id);
     if (!check_va_status(status, "vaCreateConfig()"))
         goto error;
@@ -394,7 +391,7 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
 {
     if (!info || !info->vaapi_ctx)
         return HWDEC_ERR_NO_CTX;
-    if (!find_codec(mp_codec_to_av_codec_id(decoder), FF_PROFILE_UNKNOWN))
+    if (!find_codec(mp_codec_to_av_codec_id(decoder)))
         return HWDEC_ERR_NO_CODEC;
     return 0;
 }
