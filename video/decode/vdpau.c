@@ -43,33 +43,22 @@ struct priv {
 
 struct profile_entry {
     enum AVCodecID av_codec;
-    int ff_profile;
     VdpDecoderProfile vdp_profile;
     int maxrefs;
 };
 
-#define PE(av_codec_id, ff_profile, vdp_dcoder_profile, maxrefs) \
+#define PE(av_codec_id, vdp_dcoder_profile, maxrefs)             \
     {AV_CODEC_ID_ ## av_codec_id,                                \
-     FF_PROFILE_ ## ff_profile,                                  \
      VDP_DECODER_PROFILE_ ## vdp_dcoder_profile,                 \
      maxrefs}
 
 static const struct profile_entry profiles[] = {
-    PE(MPEG1VIDEO,  UNKNOWN,                    MPEG1,          2),
-    PE(MPEG2VIDEO,  MPEG2_SIMPLE,               MPEG2_SIMPLE,   2),
-    PE(MPEG2VIDEO,  UNKNOWN,                    MPEG2_MAIN,     2),
-    PE(H264,        H264_BASELINE,              H264_BASELINE,  16),
-    PE(H264,        H264_CONSTRAINED_BASELINE,  H264_BASELINE,  16),
-    PE(H264,        H264_MAIN,                  H264_MAIN,      16),
-    PE(H264,        UNKNOWN,                    H264_HIGH,      16),
-    PE(WMV3,        VC1_SIMPLE,                 VC1_SIMPLE,     2),
-    PE(WMV3,        VC1_MAIN,                   VC1_MAIN,       2),
-    PE(WMV3,        UNKNOWN,                    VC1_ADVANCED,   2),
-    PE(VC1,         VC1_SIMPLE,                 VC1_SIMPLE,     2),
-    PE(VC1,         VC1_MAIN,                   VC1_MAIN,       2),
-    PE(VC1,         UNKNOWN,                    VC1_ADVANCED,   2),
-    PE(MPEG4,       MPEG4_SIMPLE,               MPEG4_PART2_SP, 2),
-    PE(MPEG4,       UNKNOWN,                    MPEG4_PART2_ASP,2),
+    PE(MPEG1VIDEO,  MPEG1,          2),
+    PE(MPEG2VIDEO,  MPEG2_MAIN,     2),
+    PE(H264,        H264_HIGH,      16),
+    PE(WMV3,        VC1_MAIN,       2),
+    PE(VC1,         VC1_ADVANCED,   2),
+    PE(MPEG4,       MPEG4_PART2_ASP,2),
 };
 
 // libavcodec absolutely wants a non-NULL render callback
@@ -111,15 +100,11 @@ static int handle_preemption(struct lavc_ctx *ctx)
     return 0;
 }
 
-static const struct profile_entry *find_codec(enum AVCodecID id, int ff_profile)
+static const struct profile_entry *find_codec(enum AVCodecID id)
 {
     for (int n = 0; n < MP_ARRAY_SIZE(profiles); n++) {
-        if (profiles[n].av_codec == id &&
-            (profiles[n].ff_profile == ff_profile ||
-             profiles[n].ff_profile == FF_PROFILE_UNKNOWN))
-        {
+        if (profiles[n].av_codec == id)
             return &profiles[n];
-        }
     }
     return NULL;
 }
@@ -136,8 +121,7 @@ static bool create_vdp_decoder(struct lavc_ctx *ctx)
     if (p->context.decoder != VDP_INVALID_HANDLE)
         vdp->decoder_destroy(p->context.decoder);
 
-    const struct profile_entry *pe = find_codec(ctx->avctx->codec_id,
-                                                ctx->avctx->profile);
+    const struct profile_entry *pe = find_codec(ctx->avctx->codec_id);
     if (!pe) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Unknown codec!\n");
         goto fail;
@@ -225,7 +209,7 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
 {
     if (!info || !info->vdpau_ctx)
         return HWDEC_ERR_NO_CTX;
-    if (!find_codec(mp_codec_to_av_codec_id(decoder), FF_PROFILE_UNKNOWN))
+    if (!find_codec(mp_codec_to_av_codec_id(decoder)))
         return HWDEC_ERR_NO_CODEC;
     return 0;
 }
