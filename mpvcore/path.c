@@ -38,17 +38,17 @@
 #include "talloc.h"
 #include "osdep/io.h"
 
-#if defined(__MINGW32__)
+#if defined(_WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
-#elif defined(__CYGWIN__)
-#include <windows.h>
-#include <sys/cygwin.h>
+#include <shlobj.h>
 #endif
 
 #ifdef CONFIG_MACOSX_BUNDLE
 #include "osdep/macosx_bundle.h"
 #endif
 
+#define SUPPORT_OLD_CONFIG 1
+#define ALWAYS_LOCAL_APPDATA 1
 
 typedef char *(*lookup_fun)(const char *);
 static const lookup_fun config_lookup_functions[] = {
@@ -74,59 +74,160 @@ char *mp_find_config_file(const char *filename)
     return NULL;
 }
 
+typedef enum {Config, Cache} config_type;
+
+static inline char *mpv_home(void *talloc_ctx, const config_type type) {
+    char *mpvhome = getenv("MPV_HOME");
+    if (mpvhome)
+        switch (type) {
+        case Config:
+            return talloc_strdup(talloc_ctx, mpvhome)
+            break;
+        case Cache:
+            return mp_path_join(talloc_ctx, bstr0(mpvhome), bstr0("cache"));
+            break;
+        }
+
+    return NULL;
+}
+
+#if !defined(_WIN32) || defined(__CYGWIN__)
+static inline struct bstr find_config_dir(void *talloc_ctx, const config_type type) {
+    char *confdir = mpv_home(talloc_ctx, type);
+    if (confdir)
+        return confdir;
+
+    char *homedir = getenv("HOME");
+
+    const char *xdg_env =
+        type == Config ? "XDG_CONFIG_HOME" :
+        type == Cache  ? "XDG_CACHE_HOME"  : NULL;
+
+    /* first, we discover the new config dir's path */
+    char *tmp = talloc_new(NULL);
+    struct bstr ret = bstr0(NULL);
+
+    /* spec requires that the paths on XDG_* envvars are absolute or ignored */
+    if ((confdir = getenv(xdg_env)) != NULL && confdir[0] == '/') {
+        mkdir(confdir, 0777);
+        confdir = mp_path_join(tmp, bstr0(confdir), bstr0("mpv"));
+    } else {
+        if (homedir == NULL)
+            goto exit;
+        switch (type) {
+        case Config:
+            confdir = mp_path_join(tmp, bstr0(homedir), bstr0(".config"));
+            break;
+        case Cache:
+            confdir = mp_path_join(tmp, bstr0(homedir), bstr0(".cache"));
+            break;
+        }
+        mkdir(confdir, 0777);
+        confdir = mp_path_join(tmp, bstr0(confdir), bstr0("mpv"));
+    }
+
+#if SUPPORT_OLD_CONFIG
+    /* check for the old config dir -- we only accept it if it's a real dir */
+    char *olddir = mp_path_join(tmp, bstr0(homedir), bstr0(".mpv"));
+    struct stat st;
+    if (lstat(olddir, &st) == 0 && S_ISDIR(st.st_mode)) {
+        static int warned = 0;
+        if (!warned++)
+            mp_msg(MSGT_GLOBAL, MSGL_WARN,
+                   "The default config directory changed. "
+                   "Migrate to the new directory with: mv %s %s\n",
+                   olddir, confdir);
+        confdir = olddir;
+    }
+#endif
+
+    ret = bstr0(talloc_strdup(talloc_ctx, confdir));
+exit:
+    talloc_free(tmp);
+    return ret;
+}
+
+#else /* windows version */
+
+static inline struct bstr find_config_dir(void *talloc_ctx, config_type type) {
+    char *confdir = mpv_home(talloc_ctx, type);
+    if (confdir)
+        return confdir;
+
+    char *tmp = talloc_new(NULL);
+
+    /* get the exe's path */
+    /* windows xp bug: exename might not be 0-terminated; give the buffer an extra 0 wchar */
+    wchar_t exename[MAX_PATH+1] = {0};
+    GetModuleFileNameW(NULL, exename, MAX_PATH);
+    struct bstr exedir = mp_dirname(mp_to_utf8(tmp, exename));
+    confdir = mp_path_join(tmp, exedir, bstr0("mpv"));
+
+    /* check if we have an exe-local confdir */
+    if (!(ALWAYS_LOCAL_APPDATA && type == Cache) &&
+        mp_path_exists(confdir) && mp_path_isdir(confdir)) {
+        if (type == Cache) {
+            confdir = mp_path_join(talloc_ctx, bstr0(confdir), bstr0("cache"));
+        } else {
+            confdir = talloc_strdup(talloc_ctx, confdir);
+        }
+    } else {
+        wchar_t appdata[MAX_PATH];
+        DWORD flags =
+            type == Config ? CSIDL_APPDATA       :
+            type == Cache  ? CSIDL_LOCAL_APPDATA : 0;
+
+        if (SUCCEEDED(SHGetFolderPathW(NULL,
+                                       flags|CSIDL_FLAG_CREATE,
+                                       NULL,
+                                       SHGFP_TYPE_CURRENT,
+                                       appdata))) {
+            char *u8appdata = mp_to_utf8(tmp, appdata);
+
+            confdir = mp_path_join(talloc_ctx, bstr0(u8appdata), bstr0("mpv"));
+        } else {
+            confdir = NULL;
+        }
+    }
+    talloc_free(tmp);
+    return bstr0(confdir);
+}
+
+#endif
+
 char *mp_find_user_config_file(const char *filename)
 {
-    char *homedir = NULL, *buff = NULL;
-#ifdef __MINGW32__
-    static char *config_dir = "mpv";
-#else
-    static char *config_dir = ".mpv";
-#endif
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-    char *temp = NULL;
-    char exedir[260];
-    /* Hack to get fonts etc. loaded outside of Cygwin environment. */
-    int i, imax = 0;
-    int len = (int)GetModuleFileNameA(NULL, exedir, 260);
-    for (i = 0; i < len; i++)
-        if (exedir[i] == '\\') {
-            exedir[i] = '/';
-            imax = i;
-        }
-    exedir[imax] = '\0';
+    static struct bstr config_dir = {0};
+    if (config_dir.len == 0)
+        config_dir = find_config_dir(NULL, Config);
 
-    if (filename)
-        temp = mp_path_join(NULL, bstr0(exedir), bstr0(filename));
-
-    if (temp && mp_path_exists(temp) && !mp_path_isdir(temp)) {
-        homedir = exedir;
-        config_dir = "";
-    }
-    else
-#endif
-    if ((homedir = getenv("MPV_HOME")) != NULL) {
-        config_dir = "";
-    } else if ((homedir = getenv("HOME")) == NULL) {
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-        homedir = exedir;
-#else
-        return NULL;
-#endif
-    }
-#if defined(__MINGW32__) || defined(__CYGWIN__)
-    talloc_free(temp);
-#endif
-
+    char *buf = NULL;
     if (filename) {
-        char * temp = mp_path_join(NULL, bstr0(homedir), bstr0(config_dir));
-        buff = mp_path_join(NULL, bstr0(temp), bstr0(filename));
-        talloc_free(temp);
+        buf = mp_path_join(NULL, config_dir, bstr0(filename));
     } else {
-        buff = mp_path_join(NULL, bstr0(homedir), bstr0(config_dir));
+        buf = bstrto0(NULL, config_dir);
     }
 
-    mp_msg(MSGT_GLOBAL, MSGL_V, "get_path('%s') -> '%s'\n", filename, buff);
-    return buff;
+    mp_msg(MSGT_GLOBAL, MSGL_V, "mp_find_user_config_file('%s') -> '%s'\n", filename, buf);
+    return buf;
+}
+
+
+char *mp_find_user_cache_file(const char *filename)
+{
+    static struct bstr cache_dir;
+    if (cache_dir.len == 0)
+        cache_dir = find_config_dir(NULL, Cache);
+
+    char *buf = NULL;
+    if (filename) {
+        buf = mp_path_join(NULL, cache_dir, bstr0(filename));
+    } else {
+        buf = bstrto0(NULL, cache_dir);
+    }
+
+    mp_msg(MSGT_GLOBAL, MSGL_V, "mp_find_user_cache_file('%s') -> '%s'\n", filename, buf);
+    return buf;
 }
 
 char *mp_find_global_config_file(const char *filename)
