@@ -139,6 +139,10 @@ Available video output drivers are:
         ``#020507``, some shade of black). If the alpha component of this value
         is 0, the default VDPAU colorkey will be used instead (which is usually
         green).
+    ``force-yuv``
+        Never accept RGBA input. This means mpv will insert a filter to convert
+        to a YUV format before the VO. Sometimes useful to force availability
+        of certain YUV-only features, like video equalizer or deinterlacing.
 
     Using the VDPAU frame queueing functionality controlled by the queuetime
     options makes mpv's frame flip timing less sensitive to system CPU load and
