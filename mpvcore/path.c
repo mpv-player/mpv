@@ -81,7 +81,7 @@ static inline char *mpv_home(void *talloc_ctx, const config_type type) {
     if (mpvhome)
         switch (type) {
         case Config:
-            return talloc_strdup(talloc_ctx, mpvhome)
+            return talloc_strdup(talloc_ctx, mpvhome);
             break;
         case Cache:
             return mp_path_join(talloc_ctx, bstr0(mpvhome), bstr0("cache"));
@@ -95,7 +95,7 @@ static inline char *mpv_home(void *talloc_ctx, const config_type type) {
 static inline struct bstr find_config_dir(void *talloc_ctx, const config_type type) {
     char *confdir = mpv_home(talloc_ctx, type);
     if (confdir)
-        return confdir;
+        return bstr0(confdir);
 
     char *homedir = getenv("HOME");
 
@@ -152,7 +152,7 @@ exit:
 static inline struct bstr find_config_dir(void *talloc_ctx, config_type type) {
     char *confdir = mpv_home(talloc_ctx, type);
     if (confdir)
-        return confdir;
+        return bstr0(confdir);
 
     char *tmp = talloc_new(NULL);
 
