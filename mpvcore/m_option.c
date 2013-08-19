@@ -651,6 +651,7 @@ const m_option_type_t m_option_type_double = {
     .pretty_print = print_double_f3,
     .copy  = copy_opt,
     .clamp = clamp_double,
+    .add = add_double,
 };
 
 #undef VAL
