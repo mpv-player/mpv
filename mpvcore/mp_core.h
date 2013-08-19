@@ -76,6 +76,13 @@ enum mp_osd_seek_info {
     OSD_SEEK_INFO_EDITION       = 8,
 };
 
+enum seek_type {
+    MPSEEK_NONE = 0,
+    MPSEEK_RELATIVE,
+    MPSEEK_ABSOLUTE,
+    MPSEEK_FACTOR,
+};
+
 struct track {
     enum stream_type type;
     // The type specific ID, also called aid (audio), sid (subs), vid (video).
@@ -251,9 +258,7 @@ typedef struct MPContext {
 
     // Used to communicate the parameters of a seek between parts
     struct seek_params {
-        enum seek_type {
-            MPSEEK_NONE, MPSEEK_RELATIVE, MPSEEK_ABSOLUTE, MPSEEK_FACTOR
-        } type;
+        enum seek_type type;
         double amount;
         int exact;  // -1 = disable, 0 = default, 1 = enable
         // currently not set by commands, only used internally by seek()
