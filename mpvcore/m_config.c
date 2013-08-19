@@ -333,7 +333,7 @@ static void add_negation_option(struct m_config *config,
         .name = talloc_asprintf(no_opt, "no-%s", opt->name),
         .type = CONF_TYPE_STORE,
         .flags = opt->flags & (M_OPT_NOCFG | M_OPT_GLOBAL | M_OPT_PRE_PARSE),
-        .new = opt->new,
+        .is_new_option = opt->is_new_option,
         .p = opt->p,
         .offset = opt->offset,
         .max = value,
@@ -381,7 +381,7 @@ static struct m_config_option *m_config_add_option(struct m_config *config,
     void *optstruct = config->optstruct;
     if (parent && (parent->opt->type->flags & M_OPT_TYPE_USE_SUBSTRUCT))
         optstruct = substruct_read_ptr(parent->data);
-    co->data = arg->new ? (char *)optstruct + arg->offset : arg->p;
+    co->data = arg->is_new_option ? (char *)optstruct + arg->offset : arg->p;
 
     if (parent) {
         // Merge case: pretend it has no parent (note that we still must follow

@@ -313,7 +313,7 @@ struct m_option {
      */
     void *priv;
 
-    int new;
+    int is_new_option;
 
     int offset;
 
@@ -505,12 +505,12 @@ int m_option_required_params(const m_option_t *opt);
 #define OPTDEF_INT(i) .defval = (void *)&(const int){i}
 
 #define OPT_GENERAL(ctype, optname, varname, flagv, ...)                \
-    {.name = optname, .flags = flagv, .new = 1,                         \
+    {.name = optname, .flags = flagv, .is_new_option = 1,               \
     .offset = MP_CHECKED_OFFSETOF(OPT_BASE_STRUCT, varname, ctype),     \
     __VA_ARGS__}
 
 #define OPT_GENERAL_NOTYPE(optname, varname, flagv, ...)                \
-    {.name = optname, .flags = flagv, .new = 1,                         \
+    {.name = optname, .flags = flagv, .is_new_option = 1,               \
     .offset = offsetof(OPT_BASE_STRUCT, varname),                       \
     __VA_ARGS__}
 
