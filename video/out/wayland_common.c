@@ -433,7 +433,7 @@ static void shm_handle_format(void *data,
                               uint32_t format)
 {
     struct vo_wayland_state *wl = data;
-    wl->display.formats |= (1 << format);
+    wl->display.shm_formats |= (1 << format);
 }
 
 const struct wl_shm_listener shm_listener = {
@@ -462,11 +462,8 @@ static void registry_handle_global (void *data,
 
     else if (strcmp(interface, "wl_shm") == 0) {
 
-        wl->cursor.shm = wl_registry_bind(reg, id, &wl_shm_interface, 1);
-        wl->cursor.theme = wl_cursor_theme_load(NULL, 32, wl->cursor.shm);
-        wl->cursor.default_cursor = wl_cursor_theme_get_cursor(wl->cursor.theme,
-                                                              "left_ptr");
-        wl_shm_add_listener(wl->cursor.shm, &shm_listener, wl);
+        wl->display.shm = wl_registry_bind(reg, id, &wl_shm_interface, 1);
+        wl_shm_add_listener(wl->display.shm, &shm_listener, wl);
     }
 
     else if (strcmp(interface, "wl_output") == 0) {
@@ -624,10 +621,19 @@ static void destroy_window (struct vo_wayland_state *wl)
 
 static bool create_cursor (struct vo_wayland_state *wl)
 {
+    if (!wl->display.shm)
+        return false;
+
     wl->cursor.surface =
         wl_compositor_create_surface(wl->display.compositor);
 
-    return wl->cursor.surface != NULL;
+    if (!wl->cursor.surface)
+        return false;
+
+    wl->cursor.theme = wl_cursor_theme_load(NULL, 32, wl->display.shm);
+    wl->cursor.default_cursor = wl_cursor_theme_get_cursor(wl->cursor.theme,
+                                                           "left_ptr");
+    return true;
 }
 
 static void destroy_cursor (struct vo_wayland_state *wl)

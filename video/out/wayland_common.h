@@ -58,7 +58,8 @@ struct vo_wayland_state {
 
         int display_fd;
 
-        uint32_t formats;
+        struct wl_shm *shm;
+        uint32_t shm_formats;
     } display;
 
     struct {
@@ -85,7 +86,6 @@ struct vo_wayland_state {
     } window;
 
     struct {
-        struct wl_shm *shm;
         struct wl_cursor *default_cursor;
         struct wl_cursor_theme *theme;
         struct wl_surface *surface;
