@@ -59,7 +59,6 @@ struct vo_wayland_state {
         int display_fd;
 
         struct wl_shm *shm;
-        uint32_t shm_formats;
     } display;
 
     struct {

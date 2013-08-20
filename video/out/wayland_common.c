@@ -427,19 +427,6 @@ static const struct wl_seat_listener seat_listener = {
     seat_handle_capabilities,
 };
 
-/* SHM LISTENER */
-static void shm_handle_format(void *data,
-                              struct wl_shm *wl_shm,
-                              uint32_t format)
-{
-    struct vo_wayland_state *wl = data;
-    wl->display.shm_formats |= (1 << format);
-}
-
-const struct wl_shm_listener shm_listener = {
-    shm_handle_format
-};
-
 static void registry_handle_global (void *data,
                                     struct wl_registry *registry,
                                     uint32_t id,
@@ -463,7 +450,6 @@ static void registry_handle_global (void *data,
     else if (strcmp(interface, "wl_shm") == 0) {
 
         wl->display.shm = wl_registry_bind(reg, id, &wl_shm_interface, 1);
-        wl_shm_add_listener(wl->display.shm, &shm_listener, wl);
     }
 
     else if (strcmp(interface, "wl_output") == 0) {
@@ -698,7 +684,6 @@ static bool create_input (struct vo_wayland_state *wl)
 
     return true;
 }
-
 
 static void destroy_input (struct vo_wayland_state *wl)
 {
