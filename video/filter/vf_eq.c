@@ -72,6 +72,8 @@ typedef struct vf_priv_s {
   unsigned      buf_w[3];
   unsigned      buf_h[3];
   unsigned char *buf[3];
+
+  int gamma_i, contrast_i, brightness_i, saturation_i;
 } vf_eq2_t;
 
 
@@ -381,18 +383,22 @@ int control (vf_instance_t *vf, int request, void *data)
 
       if (strcmp (eq->item, "gamma") == 0) {
         set_gamma (vf->priv, exp (log (8.0) * eq->value / 100.0));
+        vf->priv->gamma_i = eq->value;
         return CONTROL_TRUE;
       }
       else if (strcmp (eq->item, "contrast") == 0) {
         set_contrast (vf->priv, (1.0 / 100.0) * (eq->value + 100));
+        vf->priv->contrast_i = eq->value;
         return CONTROL_TRUE;
       }
       else if (strcmp (eq->item, "brightness") == 0) {
         set_brightness (vf->priv, (1.0 / 100.0) * eq->value);
+        vf->priv->brightness_i = eq->value;
         return CONTROL_TRUE;
       }
       else if (strcmp (eq->item, "saturation") == 0) {
         set_saturation (vf->priv, (double) (eq->value + 100) / 100.0);
+        vf->priv->saturation_i = eq->value;
         return CONTROL_TRUE;
       }
       break;
@@ -400,19 +406,19 @@ int control (vf_instance_t *vf, int request, void *data)
     case VFCTRL_GET_EQUALIZER:
       eq = (vf_equalizer_t *) data;
       if (strcmp (eq->item, "gamma") == 0) {
-        eq->value = (int) (100.0 * log (vf->priv->gamma) / log (8.0));
+        eq->value = vf->priv->gamma_i;
         return CONTROL_TRUE;
       }
       else if (strcmp (eq->item, "contrast") == 0) {
-        eq->value = (int) (100.0 * vf->priv->contrast) - 100;
+        eq->value = vf->priv->contrast_i;
         return CONTROL_TRUE;
       }
       else if (strcmp (eq->item, "brightness") == 0) {
-        eq->value = (int) (100.0 * vf->priv->brightness);
+        eq->value = vf->priv->brightness_i;
         return CONTROL_TRUE;
       }
       else if (strcmp (eq->item, "saturation") == 0) {
-        eq->value = (int) (100.0 * vf->priv->saturation) - 100;
+        eq->value = vf->priv->saturation_i;
         return CONTROL_TRUE;
       }
       break;
@@ -503,9 +509,13 @@ int vf_open(vf_instance_t *vf, char *args)
     eq2->gamma_weight = par[7];
 
     set_gamma (eq2, par[0]);
+    eq2->gamma_i = (int) (100.0 * log (vf->priv->gamma) / log (8.0));
     set_contrast (eq2, par[1]);
+    eq2->contrast_i = (int) (100.0 * vf->priv->contrast) - 100;
     set_brightness (eq2, par[2]);
+    eq2->brightness_i = (int) (100.0 * vf->priv->brightness);
     set_saturation (eq2, par[3]);
+    eq2->saturation_i = (int) (100.0 * vf->priv->saturation) - 100;
   }
 
   return 1;
