@@ -17,7 +17,7 @@ in the list. Suboptions are optional and can mostly be omitted.
 .. admonition:: Examples
 
     - ``--ao=alsa,oss,`` Try the ALSA driver, then the OSS driver, then others.
-    - ``--ao=alsa:noblock:device=[hw:0,3]`` Sets noblock-mode and the
+    - ``--ao=alsa:no-block:device=[hw:0,3]`` Sets noblock-mode and the
       device-name as first card, fourth device.
 
 Available audio output drivers are:
