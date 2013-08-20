@@ -1313,48 +1313,26 @@ static int mp_property_framedrop(m_option_t *prop, int action,
     return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
-/// Color settings, try to use vf/vo then fall back on TV. (RW)
-static int mp_property_gamma(m_option_t *prop, int action, void *arg,
-                             MPContext *mpctx)
+static int mp_property_video_color(m_option_t *prop, int action, void *arg,
+                                   MPContext *mpctx)
 {
-    int *gamma = (int *)((char *)mpctx->opts + prop->offset);
-    int r, val;
-
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
 
-    if (gamma[0] == 1000) {
-        gamma[0] = 0;
-        get_video_colors(mpctx->sh_video, prop->name, gamma);
-    }
-
     switch (action) {
-    case M_PROPERTY_SET:
-        *gamma = *(int *) arg;
-        r = set_video_colors(mpctx->sh_video, prop->name, *gamma);
-        if (r <= 0)
-            break;
-        return r;
-    case M_PROPERTY_GET:
-        if (get_video_colors(mpctx->sh_video, prop->name, &val) > 0) {
-            *(int *)arg = val;
-            return M_PROPERTY_OK;
-        }
+    case M_PROPERTY_SET: {
+        if (set_video_colors(mpctx->sh_video, prop->name, *(int *) arg) <= 0)
+            return M_PROPERTY_UNAVAILABLE;
         break;
-    default:
-        return mp_property_generic_option(prop, action, arg, mpctx);
     }
-
-#ifdef CONFIG_TV
-    if (mpctx->sh_video->gsh->demuxer->type == DEMUXER_TYPE_TV) {
-        int l = strlen(prop->name);
-        char tv_prop[3 + l + 1];
-        sprintf(tv_prop, "tv-%s", prop->name);
-        return mp_property_do(tv_prop, action, arg, mpctx);
+    case M_PROPERTY_GET:
+        if (get_video_colors(mpctx->sh_video, prop->name, (int *)arg) <= 0)
+            return M_PROPERTY_UNAVAILABLE;
+        // Write new value to option variable
+        mp_property_generic_option(prop, M_PROPERTY_SET, arg, mpctx);
+        return M_PROPERTY_OK;
     }
-#endif
-
-    return M_PROPERTY_UNAVAILABLE;
+    return mp_property_generic_option(prop, action, arg, mpctx);
 }
 
 /// Video codec tag (RO)
@@ -1799,16 +1777,11 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("ontop", mp_property_ontop),
     M_OPTION_PROPERTY_CUSTOM("border", mp_property_border),
     M_OPTION_PROPERTY_CUSTOM("framedrop", mp_property_framedrop),
-    M_OPTION_PROPERTY_CUSTOM_("gamma", mp_property_gamma,
-                    .offset = offsetof(struct MPOpts, gamma_gamma)),
-    M_OPTION_PROPERTY_CUSTOM_("brightness", mp_property_gamma,
-                    .offset = offsetof(struct MPOpts, gamma_brightness)),
-    M_OPTION_PROPERTY_CUSTOM_("contrast", mp_property_gamma,
-                    .offset = offsetof(struct MPOpts, gamma_contrast)),
-    M_OPTION_PROPERTY_CUSTOM_("saturation", mp_property_gamma,
-                    .offset = offsetof(struct MPOpts, gamma_saturation)),
-    M_OPTION_PROPERTY_CUSTOM_("hue", mp_property_gamma,
-                    .offset = offsetof(struct MPOpts, gamma_hue)),
+    M_OPTION_PROPERTY_CUSTOM("gamma", mp_property_video_color),
+    M_OPTION_PROPERTY_CUSTOM("brightness", mp_property_video_color),
+    M_OPTION_PROPERTY_CUSTOM("contrast", mp_property_video_color),
+    M_OPTION_PROPERTY_CUSTOM("saturation", mp_property_video_color),
+    M_OPTION_PROPERTY_CUSTOM("hue", mp_property_video_color),
     M_OPTION_PROPERTY_CUSTOM("panscan", panscan_property_helper),
     M_OPTION_PROPERTY_CUSTOM("video-zoom", panscan_property_helper),
     M_OPTION_PROPERTY_CUSTOM("video-align-x", panscan_property_helper),
