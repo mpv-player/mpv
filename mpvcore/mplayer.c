@@ -929,7 +929,7 @@ static bool demux_was_interrupted(struct MPContext *mpctx)
 
 static int find_new_tid(struct MPContext *mpctx, enum stream_type t)
 {
-    int new_id = -1;
+    int new_id = 0;
     for (int i = 0; i < mpctx->num_tracks; i++) {
         struct track *track = mpctx->tracks[i];
         if (track->type == t)

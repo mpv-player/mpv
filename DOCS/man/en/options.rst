@@ -1870,7 +1870,7 @@
     Play files in random order.
 
 ``--sid=<ID|auto|no>``
-    Display the subtitle stream specified by ``<ID>`` (0-31). ``auto`` selects
+    Display the subtitle stream specified by ``<ID>``. ``auto`` selects
     the default, ``no`` disables subtitles.
 
     See also ``--slang``, ``--no-sub``.

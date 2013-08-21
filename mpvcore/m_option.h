@@ -624,7 +624,7 @@ int m_option_required_params(const m_option_t *opt);
     OPT_GENERAL(struct m_geometry, __VA_ARGS__, .type = &m_option_type_size_box)
 
 #define OPT_TRACKCHOICE(name, var) \
-    OPT_CHOICE_OR_INT(name, var, 0, 0, 8190, ({"no", -2}, {"auto", -1}))
+    OPT_CHOICE_OR_INT(name, var, 0, 1, 8190, ({"no", -2}, {"auto", -1}))
 
 #define OPT_STRING_VALIDATE_(optname, varname, flags, validate_fn, ...)        \
     OPT_GENERAL(char*, optname, varname, flags, __VA_ARGS__,                                            \
