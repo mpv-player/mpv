@@ -762,20 +762,15 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     CGFloat dx = (f.size.width  - ns.width) / 2;
     CGFloat dy = (f.size.height - ns.height - [self titleHeight]) / 2;
     NSRect nf  = NSRectFromCGRect(CGRectInset(NSRectToCGRect(f), dx, dy));
-
-    struct vo *vo = self.videoOutput;
-    if (!(vo && !vo->opts->border)) {
-        NSRect s = [[self screen] visibleFrame];
-        if (nf.origin.y + nf.size.height > s.origin.y + s.size.height)
-            nf.origin.y = s.size.height - nf.size.height;
-    }
-
     [self setFrame:nf display:NO animate:NO];
 }
 
-- (NSRect)constrainFrameRect:(NSRect)rect toScreen:(NSScreen *)screen
+- (NSRect)constrainFrameRect:(NSRect)nf toScreen:(NSScreen *)screen
 {
-    return rect;
+    NSRect s = [[self screen] visibleFrame];
+    if (nf.origin.y + nf.size.height > s.origin.y + s.size.height)
+        nf.origin.y = s.origin.y + s.size.height - nf.size.height;
+    return nf;
 }
 
 @end
