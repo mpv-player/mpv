@@ -778,6 +778,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
 {
     struct MPOpts *opts = demuxer->opts;
     stream_t *s = demuxer->stream;
+    int wanted_edition = opts->edition_id;
 
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] /---- [ parsing chapters ] ---------\n");
     struct ebml_chapters file_chapters = {};
@@ -789,8 +790,8 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
     int selected_edition = 0;
     int num_editions = file_chapters.n_edition_entry;
     struct ebml_edition_entry *editions = file_chapters.edition_entry;
-    if (opts->edition_id >= 0 && opts->edition_id < num_editions) {
-        selected_edition = opts->edition_id;
+    if (wanted_edition >= 0 && wanted_edition < num_editions) {
+        selected_edition = wanted_edition;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] User-specified edition: %d\n",
                selected_edition);
     } else

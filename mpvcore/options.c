@@ -370,7 +370,8 @@ const m_option_t mp_opts[] = {
     {"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
 #endif /* CONFIG_DVDREAD */
     OPT_INTPAIR("chapter", chapterrange, 0),
-    OPT_INTRANGE("edition", edition_id, 0, -1, 8190),
+    OPT_CHOICE_OR_INT("edition", edition_id, 0, 0, 8190,
+                      ({"auto", -1})),
 #ifdef CONFIG_LIBBLURAY
     {"bluray-device",  &bluray_device,  CONF_TYPE_STRING, 0,          0,  0, NULL},
     {"bluray-angle",   &bluray_angle,   CONF_TYPE_INT,    CONF_RANGE, 0, 999, NULL},

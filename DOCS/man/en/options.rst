@@ -731,10 +731,10 @@
     Some DVDs contain scenes that can be viewed from multiple angles.
     This option tells mpv which angle to use (default: 1).
 
-``--edition=<ID>``
+``--edition=<ID|auto>``
     (Matroska files only)
     Specify the edition (set of chapters) to use, where 0 is the first. If set
-    to -1 (the default), mpv will choose the first edition declared as a
+    to ``auto`` (the default), mpv will choose the first edition declared as a
     default, or if there is no default, the first edition defined.
 
 ``--embeddedfonts``, ``--no-embeddedfonts``
