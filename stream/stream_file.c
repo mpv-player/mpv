@@ -63,10 +63,7 @@ static int write_buffer(stream_t *s, char *buffer, int len)
 static int seek(stream_t *s, int64_t newpos)
 {
     struct priv *p = s->priv;
-    s->pos = newpos;
-    if (lseek(p->fd, s->pos, SEEK_SET) < 0)
-        return 0;
-    return 1;
+    return lseek(p->fd, newpos, SEEK_SET) != (off_t)-1;
 }
 
 static int control(stream_t *s, int cmd, void *arg)

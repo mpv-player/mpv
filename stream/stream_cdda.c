@@ -213,9 +213,8 @@ static int seek(stream_t *s, int64_t newpos)
     int seek_to_track = 0;
     int i;
 
-    s->pos = newpos;
-    sec = s->pos / CDIO_CD_FRAMESIZE_RAW;
-    if (s->pos < 0 || sec > p->end_sector) {
+    sec = newpos / CDIO_CD_FRAMESIZE_RAW;
+    if (newpos < 0 || sec > p->end_sector) {
         p->sector = p->end_sector + 1;
         return 0;
     }

@@ -550,6 +550,7 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
             return 0;
         }
     }
+    s->pos = newpos;
     s->eof = 0; // EOF reset when seek succeeds.
     return -1;
 }
@@ -558,7 +559,6 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 // Unlike stream_seek_unbuffered(), it still fills the local buffer.
 static int stream_seek_long(stream_t *s, int64_t pos)
 {
-    int64_t oldpos = s->pos;
     s->buf_pos = s->buf_len = 0;
     s->eof = 0;
 
@@ -572,14 +572,12 @@ static int stream_seek_long(stream_t *s, int64_t pos)
     if (s->sector_size)
         newpos = (pos / s->sector_size) * s->sector_size;
 
-    mp_msg(MSGT_STREAM, MSGL_DBG3, "s->pos=%" PRIX64 "  newpos=%" PRIX64
-           "  new_bufpos=%" PRIX64 "  buflen=%X  \n",
-           (int64_t)s->pos, (int64_t)newpos, (int64_t)pos, s->buf_len);
+    mp_msg(MSGT_STREAM, MSGL_DBG3, "Seek from %" PRId64 " to %" PRId64
+           " (with offset %d)\n", s->pos, pos, (int)(pos - newpos));
 
     if (!s->seek && (s->flags & MP_STREAM_FAST_SKIPPING) && pos >= s->pos) {
         // skipping is handled by generic code below
     } else if (stream_seek_unbuffered(s, newpos) >= 0) {
-        s->pos = oldpos;
         return 0;
     }
 

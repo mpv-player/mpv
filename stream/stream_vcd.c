@@ -67,8 +67,7 @@ static int fill_buffer(stream_t *s, char* buffer, int max_len){
 }
 
 static int seek(stream_t *s,int64_t newpos) {
-  s->pos = newpos;
-  vcd_set_msf(s->priv,s->pos/VCD_SECTOR_DATA);
+  vcd_set_msf(s->priv,newpos/VCD_SECTOR_DATA);
   return 1;
 }
 

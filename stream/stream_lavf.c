@@ -60,8 +60,7 @@ static int seek(stream_t *s, int64_t newpos)
     AVIOContext *avio = s->priv;
     if (!avio)
         return -1;
-    s->pos = newpos;
-    if (avio_seek(avio, s->pos, SEEK_SET) < 0) {
+    if (avio_seek(avio, newpos, SEEK_SET) < 0) {
         return 0;
     }
     return 1;

@@ -76,8 +76,7 @@ static int control(stream_t *s, int cmd, void *arg) {
 
 static int seek(stream_t *s,int64_t newpos) {
   struct priv *p = s->priv;
-  s->pos = newpos;
-  if(smbc_lseek(p->fd,s->pos,SEEK_SET)<0) {
+  if(smbc_lseek(p->fd,newpos,SEEK_SET)<0) {
     return 0;
   }
   return 1;

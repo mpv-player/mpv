@@ -92,7 +92,6 @@ static int bluray_stream_seek(stream_t *s, int64_t pos)
     if (p == -1)
         return 0;
 
-    s->pos = p;
     return 1;
 }
 

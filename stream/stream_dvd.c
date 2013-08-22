@@ -354,13 +354,13 @@ static int fill_buffer(stream_t *s, char *buf, int len)
   pos = dvd_read_sector(s->priv, buf);
   if (pos < 0)
     return -1;
+  // dvd_read_sector() sometimes internally skips disk-level blocks
   s->pos = 2048*(pos - 1);
   return 2048; // full sector
 }
 
 static int seek(stream_t *s, int64_t newpos) {
-  s->pos=newpos; // real seek
-  dvd_seek(s->priv,s->pos/2048);
+  dvd_seek(s->priv,newpos/2048);
   return 1;
 }
 
