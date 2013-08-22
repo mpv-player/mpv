@@ -107,8 +107,7 @@ typedef struct demuxer_desc {
     // The following functions are all optional
     int (*fill_buffer)(struct demuxer *demuxer); // 0 on EOF, otherwise 1
     void (*close)(struct demuxer *demuxer);
-    void (*seek)(struct demuxer *demuxer, float rel_seek_secs,
-                 float audio_delay, int flags);
+    void (*seek)(struct demuxer *demuxer, float rel_seek_secs, int flags);
     int (*control)(struct demuxer *demuxer, int cmd, void *arg);
 } demuxer_desc_t;
 
@@ -222,8 +221,7 @@ struct demuxer *demux_open(struct stream *stream, char *force_format,
                            struct demuxer_params *params, struct MPOpts *opts);
 
 void demux_flush(struct demuxer *demuxer);
-int demux_seek(struct demuxer *demuxer, float rel_seek_secs, float audio_delay,
-               int flags);
+int demux_seek(struct demuxer *demuxer, float rel_seek_secs, int flags);
 
 int demux_info_add(struct demuxer *demuxer, const char *opt, const char *param);
 int demux_info_add_bstr(struct demuxer *demuxer, struct bstr opt,

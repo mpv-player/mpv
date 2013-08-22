@@ -624,8 +624,7 @@ void demux_flush(demuxer_t *demuxer)
     demuxer->warned_queue_overflow = false;
 }
 
-int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
-               int flags)
+int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
     if (!demuxer->seekable) {
         mp_tmsg(MSGT_SEEK, MSGL_WARN, "Cannot seek in this file.\n");
@@ -672,7 +671,7 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
 
   dmx_seek:
     if (demuxer->desc->seek)
-        demuxer->desc->seek(demuxer, rel_seek_secs, audio_delay, flags);
+        demuxer->desc->seek(demuxer, rel_seek_secs, flags);
 
     return 1;
 }

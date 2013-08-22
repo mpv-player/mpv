@@ -217,8 +217,7 @@ static int raw_fill_buffer(demuxer_t *demuxer)
     return 1;
 }
 
-static void raw_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay,
-                     int flags)
+static void raw_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
     struct priv *p = demuxer->priv;
     stream_t *s = demuxer->stream;

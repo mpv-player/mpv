@@ -1369,8 +1369,7 @@ static int d_fill_buffer(struct demuxer *demuxer)
     return demuxer_add_packet(demuxer, p->sh, dp);
 }
 
-static void d_seek(struct demuxer *demuxer, float secs, float audio_delay,
-                   int flags)
+static void d_seek(struct demuxer *demuxer, float secs, int flags)
 {
     struct priv *p = demuxer->priv;
     demux_packet_list_seek(p->pkts, p->num_pkts, &p->current, secs, flags);

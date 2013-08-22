@@ -391,7 +391,7 @@ static void init_demux_stream(struct MPContext *mpctx, enum stream_type type)
         demuxer_switch_track(stream->demuxer, type, stream);
         if (track->is_external) {
             double pts = get_main_demux_pts(mpctx);
-            demux_seek(stream->demuxer, pts, mpctx->audio_delay, SEEK_ABSOLUTE);
+            demux_seek(stream->demuxer, pts, SEEK_ABSOLUTE);
         }
     }
 }
@@ -1971,7 +1971,7 @@ static void reinit_subs(struct MPContext *mpctx)
         // if it has only sub streams, because reading packets will change the
         // demuxer position.
         if (!track->preloaded && track->is_external) {
-            demux_seek(track->demuxer, 0, 0, SEEK_ABSOLUTE);
+            demux_seek(track->demuxer, 0, SEEK_ABSOLUTE);
             track->preloaded = sub_read_all_packets(dec_sub, sh_sub);
         }
     }
@@ -2976,8 +2976,7 @@ static int seek(MPContext *mpctx, struct seek_params seek,
 
     if (hr_seek)
         demuxer_amount -= opts->hr_seek_demuxer_offset;
-    int seekresult = demux_seek(mpctx->demuxer, demuxer_amount,
-                                mpctx->audio_delay, demuxer_style);
+    int seekresult = demux_seek(mpctx->demuxer, demuxer_amount, demuxer_style);
     if (seekresult == 0) {
         if (need_reset) {
             reinit_audio_chain(mpctx);
@@ -3002,8 +3001,7 @@ static int seek(MPContext *mpctx, struct seek_params seek,
         for (int type = 0; type < STREAM_TYPE_COUNT; type++) {
             struct track *track = mpctx->current_track[type];
             if (track && track->is_external && track->demuxer)
-                demux_seek(track->demuxer, main_new_pos, mpctx->audio_delay,
-                           SEEK_ABSOLUTE);
+                demux_seek(track->demuxer, main_new_pos, SEEK_ABSOLUTE);
         }
     }
 

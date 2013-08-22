@@ -457,8 +457,7 @@ static void demux_mng_close(demuxer_t* demuxer)
  * \param[in] audio_delay unused, MNG does not contain audio
  * \param[in] flags bit flags, \p 1: absolute, \p 2: fractional position
  */
-static void demux_mng_seek(demuxer_t * demuxer, float rel_seek_secs,
-                           float audio_delay, int flags)
+static void demux_mng_seek(demuxer_t * demuxer, float rel_seek_secs, int flags)
 {
     mng_priv_t * mng_priv = demuxer->priv;
     mng_handle h_mng = mng_priv->h_mng;
