@@ -96,8 +96,6 @@ struct ao {
     struct mp_log *log; // Using e.g. "[ao/coreaudio]" as prefix
 };
 
-extern char *ao_subdevice;
-
 struct mpv_global;
 struct ao *ao_init_best(struct mpv_global *global,
                         struct input_ctx *input_ctx,

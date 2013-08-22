@@ -32,10 +32,6 @@
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/mpv_global.h"
 
-// there are some globals:
-struct ao *global_ao;
-char *ao_subdevice = NULL;
-
 extern const struct ao_driver audio_out_oss;
 extern const struct ao_driver audio_out_coreaudio;
 extern const struct ao_driver audio_out_rsound;
@@ -47,7 +43,6 @@ extern const struct ao_driver audio_out_alsa;
 extern const struct ao_driver audio_out_dsound;
 extern const struct ao_driver audio_out_wasapi;
 extern const struct ao_driver audio_out_pcm;
-extern const struct ao_driver audio_out_pss;
 extern const struct ao_driver audio_out_lavc;
 extern const struct ao_driver audio_out_portaudio;
 extern const struct ao_driver audio_out_sdl;
