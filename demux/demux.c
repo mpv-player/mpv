@@ -466,7 +466,7 @@ struct demux_packet *demux_read_packet(struct sh_stream *sh)
 // packets from the queue.
 double demux_get_next_pts(struct sh_stream *sh)
 {
-    if (sh) {
+    if (sh && sh->ds->selected) {
         ds_get_packets(sh);
         if (sh->ds->head)
             return sh->ds->head->pts;
