@@ -37,6 +37,7 @@
 
 #include "config.h"
 
+#include "mpvcore/mp_common.h"
 #include "mpvcore/bstr.h"
 #include "mpvcore/mp_msg.h"
 #include "osdep/timer.h"
@@ -421,13 +422,21 @@ eof_out:
     return len;
 }
 
-int stream_fill_buffer(stream_t *s)
+static int stream_fill_buffer_by(stream_t *s, int64_t len)
 {
-    int len = s->sector_size ? s->sector_size : STREAM_BUFFER_SIZE;
+    len = MPMIN(len, s->read_chunk);
+    len = MPMAX(len, STREAM_BUFFER_SIZE);
+    if (s->sector_size)
+        len = s->sector_size;
     len = stream_read_unbuffered(s, s->buffer, len);
     s->buf_pos = 0;
     s->buf_len = len;
     return s->buf_len;
+}
+
+int stream_fill_buffer(stream_t *s)
+{
+    return stream_fill_buffer_by(s, STREAM_BUFFER_SIZE);
 }
 
 // Read between 1..buf_size bytes of data, return how much data has been read.
@@ -520,7 +529,7 @@ static int stream_skip_read(struct stream *s, int64_t len)
     while (len > 0) {
         int x = s->buf_len - s->buf_pos;
         if (x == 0) {
-            if (!stream_fill_buffer(s))
+            if (!stream_fill_buffer_by(s, len))
                 return 0; // EOF
             x = s->buf_len - s->buf_pos;
         }
