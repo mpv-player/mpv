@@ -58,6 +58,7 @@ enum streamtype {
 #define STREAM_WRITE 1
 
 // stream->flags
+#define MP_STREAM_FAST_SKIPPING 1 // allow forward seeks by skipping
 #define MP_STREAM_SEEK_BW  2
 #define MP_STREAM_SEEK_FW  4
 #define MP_STREAM_SEEK  (MP_STREAM_SEEK_BW | MP_STREAM_SEEK_FW)

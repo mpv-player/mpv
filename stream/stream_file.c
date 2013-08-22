@@ -69,26 +69,6 @@ static int seek(stream_t *s, int64_t newpos)
     return 1;
 }
 
-static int seek_forward(stream_t *s, int64_t newpos)
-{
-    if (newpos < s->pos) {
-        mp_msg(MSGT_STREAM, MSGL_INFO,
-               "Cannot seek backward in linear streams!\n");
-        return 0;
-    }
-    while (s->pos < newpos) {
-        int len = s->fill_buffer(s, s->buffer, STREAM_BUFFER_SIZE);
-        if (len <= 0) { // EOF
-            s->buf_pos = s->buf_len = 0;
-            break;
-        }
-        s->buf_pos = 0;
-        s->buf_len = len;
-        s->pos += len;
-    }
-    return 1;
-}
-
 static int control(stream_t *s, int cmd, void *arg)
 {
     struct priv *p = s->priv;
@@ -192,10 +172,8 @@ static int open_f(stream_t *stream, int mode)
         len = -1;
 #endif
     stream->type = STREAMTYPE_FILE;
-    if (len == -1 && mode == STREAM_READ) {
-        stream->seek = seek_forward;
-        stream->flags = MP_STREAM_SEEK_FW;
-    } else if (len >= 0) {
+    stream->flags = MP_STREAM_FAST_SKIPPING;
+    if (len >= 0) {
         stream->seek = seek;
         stream->end_pos = len;
     }

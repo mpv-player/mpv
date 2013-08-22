@@ -249,6 +249,9 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     if (s->seek && !(s->flags & MP_STREAM_SEEK))
         s->flags |= MP_STREAM_SEEK;
 
+    if (s->flags & MP_STREAM_FAST_SKIPPING)
+        s->flags |= MP_STREAM_SEEK_FW;
+
     s->mode = mode;
 
     s->uncached_type = s->type;
@@ -512,6 +515,23 @@ int stream_write_buffer(stream_t *s, unsigned char *buf, int len)
     return rd;
 }
 
+static int stream_skip_read(struct stream *s, int64_t len)
+{
+    while (len > 0) {
+        int x = s->buf_len - s->buf_pos;
+        if (x == 0) {
+            if (!stream_fill_buffer(s))
+                return 0; // EOF
+            x = s->buf_len - s->buf_pos;
+        }
+        if (x > len)
+            x = len;
+        s->buf_pos += x;
+        len -= x;
+    }
+    return 1;
+}
+
 // Seek function bypassing the local stream buffer.
 static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 {
@@ -556,26 +576,16 @@ static int stream_seek_long(stream_t *s, int64_t pos)
            "  new_bufpos=%" PRIX64 "  buflen=%X  \n",
            (int64_t)s->pos, (int64_t)newpos, (int64_t)pos, s->buf_len);
 
-    pos -= newpos;
-
-    if (stream_seek_unbuffered(s, newpos) >= 0) {
+    if (!s->seek && (s->flags & MP_STREAM_FAST_SKIPPING) && pos >= s->pos) {
+        // skipping is handled by generic code below
+    } else if (stream_seek_unbuffered(s, newpos) >= 0) {
         s->pos = oldpos;
         return 0;
     }
 
-    while (s->pos < newpos) {
-        if (stream_fill_buffer(s) <= 0)
-            break; // EOF
-    }
+    if (pos >= s->pos && stream_skip_read(s, pos - s->pos) > 0)
+        return 1; // success
 
-    while (stream_fill_buffer(s) > 0) {
-        if (pos <= s->buf_len) {
-            s->buf_pos = pos; // byte position in sector
-            s->eof = 0;
-            return 1;
-        }
-        pos -= s->buf_len;
-    }
     // Fill failed, but seek still is a success (partially).
     s->buf_pos = 0;
     s->buf_len = 0;
@@ -624,19 +634,7 @@ int stream_skip(stream_t *s, int64_t len)
         }
         return r;
     }
-    while (len > 0) {
-        int x = s->buf_len - s->buf_pos;
-        if (x == 0) {
-            if (!stream_fill_buffer(s))
-                return 0; // EOF
-            x = s->buf_len - s->buf_pos;
-        }
-        if (x > len)
-            x = len;
-        s->buf_pos += x;
-        len -= x;
-    }
-    return 1;
+    return stream_skip_read(s, len);
 }
 
 int stream_control(stream_t *s, int cmd, void *arg)
