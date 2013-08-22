@@ -127,7 +127,7 @@ static int init(struct ao *ao)
     int i;
     struct priv *p = ao->priv;
     if (ao_data) {
-        mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] Not reentrant!\n");
+        MP_FATAL(ao, "Not reentrant!\n");
         return -1;
     }
     ao_data = ao;
@@ -145,13 +145,13 @@ static int init(struct ao *ao)
                 speakers[i] = speaker_pos[n];
         }
         if (speakers[i].id < 0) {
-            mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] Unknown channel layout\n");
+            MP_FATAL(ao, "Unknown channel layout\n");
             goto err_out;
         }
     }
     dev = alcOpenDevice(p->cfg_device && p->cfg_device[0] ? p->cfg_device : NULL);
     if (!dev) {
-        mp_msg(MSGT_AO, MSGL_FATAL, "[OpenAL] could not open device\n");
+        MP_FATAL(ao, "could not open device\n");
         goto err_out;
     }
     ctx = alcCreateContext(dev, attribs);

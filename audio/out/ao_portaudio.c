@@ -68,11 +68,11 @@ static const struct format_map format_maps[] = {
 static bool check_pa_ret(int ret)
 {
     if (ret < 0) {
-        mp_msg(MSGT_AO, MSGL_ERR, "[portaudio] %s\n",
+        mp_msg(MSGT_AO, MSGL_ERR, "[ao/portaudio] %s\n",
                Pa_GetErrorText(ret));
         if (ret == paUnanticipatedHostError) {
             const PaHostErrorInfo* hosterr = Pa_GetLastHostErrorInfo();
-            mp_msg(MSGT_AO, MSGL_ERR, "[portaudio] Host error: %s\n",
+            mp_msg(MSGT_AO, MSGL_ERR, "[ao/portaudio] Host error: %s\n",
                    hosterr->errorText);
         }
         return false;
@@ -121,7 +121,7 @@ static int find_device(const char *name)
         }
     }
     if (found == paNoDevice && !help)
-        mp_msg(MSGT_AO, MSGL_WARN, "[portaudio] Device '%s' not found!\n",
+        mp_msg(MSGT_AO, MSGL_WARN, "[ao/portaudio] Device '%s' not found!\n",
                name);
     return found;
 }
@@ -183,7 +183,7 @@ static int stream_callback(const void *input,
             res = paComplete;
             priv->play_remaining = false;
         } else {
-            mp_msg(MSGT_AO, MSGL_ERR, "[portaudio] Buffer underflow!\n");
+            MP_ERR(ao, "Buffer underflow!\n");
         }
         fill_silence(output, len_bytes);
     }
@@ -253,8 +253,7 @@ static int init(struct ao *ao)
         fmt++;
     }
     if (!fmt->pa_format) {
-        mp_msg(MSGT_AO, MSGL_V,
-               "[portaudio] Unsupported format, using default.\n");
+        MP_VERBOSE(ao, "Unsupported format, using default.\n");
         fmt = format_maps;
     }
 

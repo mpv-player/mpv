@@ -124,7 +124,7 @@ static unsigned int ceil_power_of_two(unsigned int x)
 static int init(struct ao *ao)
 {
     if (SDL_WasInit(SDL_INIT_AUDIO)) {
-        mp_msg(MSGT_AO, MSGL_ERR, "[sdl] already initialized\n");
+        MP_ERR(ao, "already initialized\n");
         return -1;
     }
 
@@ -132,7 +132,7 @@ static int init(struct ao *ao)
 
     if (SDL_InitSubSystem(SDL_INIT_AUDIO)) {
         if (!ao->probing)
-            mp_msg(MSGT_AO, MSGL_ERR, "[sdl] SDL_Init failed\n");
+            MP_ERR(ao, "SDL_Init failed\n");
         uninit(ao, true);
         return -1;
     }
@@ -174,24 +174,23 @@ static int init(struct ao *ao)
     desired.callback = audio_callback;
     desired.userdata = ao;
 
-    mp_msg(MSGT_AO, MSGL_V, "[sdl] requested format: %d Hz, %d channels, %x, "
-           "buffer size: %d samples\n",
-           (int) desired.freq, (int) desired.channels,
-           (int) desired.format, (int) desired.samples);
+    MP_VERBOSE(ao, "requested format: %d Hz, %d channels, %x, "
+               "buffer size: %d samples\n",
+               (int) desired.freq, (int) desired.channels,
+               (int) desired.format, (int) desired.samples);
 
     obtained = desired;
     if (SDL_OpenAudio(&desired, &obtained)) {
         if (!ao->probing)
-            mp_msg(MSGT_AO, MSGL_ERR, "[sdl] could not open audio: %s\n",
-                SDL_GetError());
+            MP_ERR(ao, "could not open audio: %s\n", SDL_GetError());
         uninit(ao, true);
         return -1;
     }
 
-    mp_msg(MSGT_AO, MSGL_V, "[sdl] obtained format: %d Hz, %d channels, %x, "
-           "buffer size: %d samples\n",
-           (int) obtained.freq, (int) obtained.channels,
-           (int) obtained.format, (int) obtained.samples);
+    MP_VERBOSE(ao, "obtained format: %d Hz, %d channels, %x, "
+               "buffer size: %d samples\n",
+               (int) obtained.freq, (int) obtained.channels,
+               (int) obtained.format, (int) obtained.samples);
 
     switch (obtained.format) {
         case AUDIO_U8: ao->format = AF_FORMAT_U8; break;
@@ -214,8 +213,7 @@ static int init(struct ao *ao)
 #endif
         default:
             if (!ao->probing)
-                mp_msg(MSGT_AO, MSGL_ERR,
-                       "[sdl] could not find matching format\n");
+                MP_ERR(ao, "could not find matching format\n");
             uninit(ao, true);
             return -1;
     }
@@ -229,13 +227,13 @@ static int init(struct ao *ao)
     priv->buffer = av_fifo_alloc(obtained.size * priv->bufcnt);
     priv->buffer_mutex = SDL_CreateMutex();
     if (!priv->buffer_mutex) {
-        mp_msg(MSGT_AO, MSGL_ERR, "[sdl] SDL_CreateMutex failed\n");
+        MP_ERR(ao, "SDL_CreateMutex failed\n");
         uninit(ao, true);
         return -1;
     }
     priv->underrun_cond = SDL_CreateCond();
     if (!priv->underrun_cond) {
-        mp_msg(MSGT_AO, MSGL_ERR, "[sdl] SDL_CreateCond failed\n");
+        MP_ERR(ao, "SDL_CreateCond failed\n");
         uninit(ao, true);
         return -1;
     }

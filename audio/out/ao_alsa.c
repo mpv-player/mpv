@@ -73,8 +73,7 @@ struct priv {
 #define CHECK_ALSA_ERROR(message) \
     do { \
         if (err < 0) { \
-            mp_msg(MSGT_VO, MSGL_ERR, "[AO_ALSA] %s: %s\n", \
-                   (message), snd_strerror(err)); \
+            MP_ERR(ao, "%s: %s\n", (message), snd_strerror(err)); \
             goto alsa_error; \
         } \
     } while (0)
@@ -94,10 +93,10 @@ static void alsa_error_handler(const char *file, int line, const char *function,
     va_end(va);
 
     if (err) {
-        mp_msg(MSGT_AO, MSGL_ERR, "[AO_ALSA] alsa-lib: %s:%i:(%s) %s: %s\n",
+        mp_msg(MSGT_AO, MSGL_ERR, "alsa-lib: %s:%i:(%s) %s: %s\n",
                file, line, function, tmp, snd_strerror(err));
     } else {
-        mp_msg(MSGT_AO, MSGL_ERR, "[AO_ALSA] alsa-lib: %s:%i:(%s) %s\n",
+        mp_msg(MSGT_AO, MSGL_ERR, "alsa-lib: %s:%i:(%s) %s\n",
                file, line, function, tmp);
     }
 }
@@ -145,10 +144,9 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 
         elem = snd_mixer_find_selem(handle, sid);
         if (!elem) {
-            mp_tmsg(MSGT_AO, MSGL_ERR,
-                    "[AO_ALSA] Unable to find simple control '%s',%i.\n",
-                    snd_mixer_selem_id_get_name(sid),
-                    snd_mixer_selem_id_get_index(sid));
+            MP_VERBOSE(ao, "Unable to find simple control '%s',%i.\n",
+                       snd_mixer_selem_id_get_name(sid),
+                       snd_mixer_selem_id_get_index(sid));
             goto alsa_error;
         }
 
@@ -164,15 +162,14 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             err = snd_mixer_selem_set_playback_volume
                     (elem, SND_MIXER_SCHN_FRONT_LEFT, set_vol);
             CHECK_ALSA_ERROR("Error setting left channel");
-            mp_msg(MSGT_AO, MSGL_DBG2, "left=%li, ", set_vol);
+            MP_DBG(ao, "left=%li, ", set_vol);
 
             set_vol = vol->right / f_multi + pmin + 0.5;
 
             err = snd_mixer_selem_set_playback_volume
                     (elem, SND_MIXER_SCHN_FRONT_RIGHT, set_vol);
             CHECK_ALSA_ERROR("Error setting right channel");
-            mp_msg(MSGT_AO, MSGL_DBG2,
-                   "right=%li, pmin=%li, pmax=%li, mult=%f\n",
+            MP_DBG(ao, "right=%li, pmin=%li, pmax=%li, mult=%f\n",
                    set_vol, pmin, pmax,
                    f_multi);
             break;
@@ -185,8 +182,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
             snd_mixer_selem_get_playback_volume
                 (elem, SND_MIXER_SCHN_FRONT_RIGHT, &get_vol);
             vol->right = (get_vol - pmin) * f_multi;
-            mp_msg(MSGT_AO, MSGL_DBG2, "left=%f, right=%f\n", vol->left,
-                   vol->right);
+            MP_DBG(ao, "left=%f, right=%f\n", vol->left, vol->right);
             break;
         }
         case AOCONTROL_SET_MUTE: {
@@ -303,9 +299,8 @@ static const char *select_chmap(struct ao *ao)
     }
 
     char *name = mp_chmap_to_str(&ao->channels);
-    mp_tmsg(MSGT_AO, MSGL_ERR,
-            "[AO_ALSA] channel layout %s (%d ch) not supported.\n",
-            name, ao->channels.num);
+    MP_ERR(ao, "channel layout %s (%d ch) not supported.\n",
+           name, ao->channels.num);
     talloc_free(name);
     return "default";
 }
@@ -370,9 +365,8 @@ static int init(struct ao *ao)
 
     struct priv *p = ao->priv;
 
-    mp_msg(MSGT_AO, MSGL_V,
-           "alsa-init: requested format: %d Hz, %d channels, %x\n",
-           ao->samplerate, ao->channels.num, ao->format);
+    MP_VERBOSE(ao, "requested format: %d Hz, %d channels, %x\n",
+               ao->samplerate, ao->channels.num, ao->format);
 
     p->prepause_frames = 0;
     p->delay_before_pause = 0;
@@ -386,9 +380,8 @@ static int init(struct ao *ao)
     const char *device;
     if (AF_FORMAT_IS_IEC61937(ao->format)) {
         device = "iec958";
-        mp_msg(MSGT_AO, MSGL_V,
-               "alsa-spdif-init: playing AC3/iec61937/iec958, %i channels\n",
-               ao->channels.num);
+        MP_VERBOSE(ao, "playing AC3/iec61937/iec958, %i channels\n",
+                   ao->channels.num);
     } else {
         device = select_chmap(ao);
         if (strcmp(device, "default") != 0 && ao->format == AF_FORMAT_FLOAT_NE)
@@ -400,11 +393,11 @@ static int init(struct ao *ao)
     if (p->cfg_device && p->cfg_device[0])
         device = p->cfg_device;
 
-    mp_msg(MSGT_AO, MSGL_V, "alsa-init: using device %s\n", device);
+    MP_VERBOSE(ao, "using device: %s\n", device);
 
     p->can_pause = 1;
 
-    mp_msg(MSGT_AO, MSGL_V, "alsa-init: using ALSA %s\n", snd_asoundlib_version());
+    MP_VERBOSE(ao, "using ALSA version: %s\n", snd_asoundlib_version());
     snd_lib_error_set_handler(alsa_error_handler);
 
     int open_mode = p->cfg_block ? 0 : SND_PCM_NONBLOCK;
@@ -413,7 +406,7 @@ static int init(struct ao *ao)
     err = try_open_device(ao, device, open_mode, isac3);
     if (err < 0) {
         if (err != -EBUSY && !p->cfg_block) {
-            mp_tmsg(MSGT_AO, MSGL_INFO, "[AO_ALSA] Open in nonblock-mode "
+            MP_WARN(ao, "Open in nonblock-mode "
                     "failed, trying to open in block-mode.\n");
             err = try_open_device(ao, device, 0, isac3);
         }
@@ -422,11 +415,9 @@ static int init(struct ao *ao)
 
     err = snd_pcm_nonblock(p->alsa, 0);
     if (err < 0) {
-        mp_tmsg(MSGT_AO, MSGL_ERR,
-                "[AL_ALSA] Error setting block-mode %s.\n",
-                snd_strerror(err));
+        MP_ERR(ao, "Error setting block-mode: %s.\n", snd_strerror(err));
     } else {
-        mp_msg(MSGT_AO, MSGL_V, "alsa-init: pcm opened in blocking mode\n");
+        MP_VERBOSE(ao, "pcm opened in blocking mode\n");
     }
 
     snd_pcm_hw_params_t *alsa_hwparams;
@@ -451,8 +442,8 @@ static int init(struct ao *ao)
 
     err = snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt);
     if (err < 0) {
-        mp_tmsg(MSGT_AO, MSGL_INFO, "[AO_ALSA] Format %s is not supported "
-                "by hardware, trying default.\n", af_fmt2str_short(ao->format));
+        MP_INFO(ao, "Format %s is not supported by hardware, trying default.\n",
+                af_fmt2str_short(ao->format));
         p->alsa_fmt = SND_PCM_FORMAT_S16_LE;
         if (AF_FORMAT_IS_AC3(ao->format))
             ao->format = AF_FORMAT_AC3_LE;
@@ -471,8 +462,7 @@ static int init(struct ao *ao)
     CHECK_ALSA_ERROR("Unable to set channels");
 
     if (num_channels != ao->channels.num) {
-        mp_tmsg(MSGT_AO, MSGL_ERR,
-                "[AO_ALSA] Couldn't get requested number of channels.\n");
+        MP_ERR(ao, "Couldn't get requested number of channels.\n");
         mp_chmap_from_channels_alsa(&ao->channels, num_channels);
     }
 
@@ -508,13 +498,12 @@ static int init(struct ao *ao)
     CHECK_ALSA_ERROR("Unable to get buffersize");
 
     p->buffersize = bufsize * p->bytes_per_sample;
-    mp_msg(MSGT_AO, MSGL_V, "alsa-init: got buffersize=%i\n",
-           p->buffersize);
+    MP_VERBOSE(ao, "got buffersize=%i\n", p->buffersize);
 
     err = snd_pcm_hw_params_get_period_size(alsa_hwparams, &chunk_size, NULL);
     CHECK_ALSA_ERROR("Unable to get period size");
 
-    mp_msg(MSGT_AO, MSGL_V, "alsa-init: got period size %li\n", chunk_size);
+    MP_VERBOSE(ao, "got period size %li\n", chunk_size);
     p->outburst = chunk_size * p->bytes_per_sample;
 
     /* setting software parameters */
@@ -546,10 +535,9 @@ static int init(struct ao *ao)
 
     p->can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
 
-    mp_msg(MSGT_AO, MSGL_V,
-            "alsa: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
-            ao->samplerate, ao->channels.num, (int)p->bytes_per_sample,
-            p->buffersize, snd_pcm_format_description(p->alsa_fmt));
+    MP_VERBOSE(ao, "opened: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
+               ao->samplerate, ao->channels.num, (int)p->bytes_per_sample,
+               p->buffersize, snd_pcm_format_description(p->alsa_fmt));
 
     return 0;
 
@@ -573,7 +561,7 @@ static void uninit(struct ao *ao, bool immed)
         err = snd_pcm_close(p->alsa);
         CHECK_ALSA_ERROR("pcm close error");
 
-        mp_msg(MSGT_AO, MSGL_V, "alsa-uninit: pcm closed\n");
+        MP_VERBOSE(ao, "uninit: pcm closed\n");
     }
 
 alsa_error:
@@ -590,8 +578,8 @@ static void audio_pause(struct ao *ao)
         p->delay_before_pause = get_delay(ao);
         err = snd_pcm_pause(p->alsa, 1);
         CHECK_ALSA_ERROR("pcm pause error");
-        mp_msg(MSGT_AO, MSGL_V, "alsa-pause: pause supported by hardware\n");
     } else {
+        MP_VERBOSE(ao, "pause not supported by hardware\n");
         if (snd_pcm_delay(p->alsa, &p->prepause_frames) < 0
             || p->prepause_frames < 0)
             p->prepause_frames = 0;
@@ -610,16 +598,15 @@ static void audio_resume(struct ao *ao)
     int err;
 
     if (snd_pcm_state(p->alsa) == SND_PCM_STATE_SUSPENDED) {
-        mp_tmsg(MSGT_AO, MSGL_INFO,
-                "[AO_ALSA] Pcm in suspend mode, trying to resume.\n");
+        MP_INFO(ao, "PCM in suspend mode, trying to resume.\n");
         while ((err = snd_pcm_resume(p->alsa)) == -EAGAIN)
             sleep(1);
     }
     if (p->can_pause) {
         err = snd_pcm_pause(p->alsa, 0);
         CHECK_ALSA_ERROR("pcm resume error");
-        mp_msg(MSGT_AO, MSGL_V, "alsa-resume: resume supported by hardware\n");
     } else {
+        MP_VERBOSE(ao, "resume not supported by hardware\n");
         err = snd_pcm_prepare(p->alsa);
         CHECK_ALSA_ERROR("pcm prepare error");
         if (p->prepause_frames) {
@@ -664,10 +651,8 @@ static int play(struct ao *ao, void *data, int len, int flags)
         len = len / p->outburst * p->outburst;
     num_frames = len / p->bytes_per_sample;
 
-    //mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: frames=%i, len=%i\n",num_frames,len);
-
     if (!p->alsa) {
-        mp_tmsg(MSGT_AO, MSGL_ERR, "[AO_ALSA] Device configuration error.");
+        MP_ERR(ao, "Device configuration error.");
         return 0;
     }
 
@@ -681,16 +666,12 @@ static int play(struct ao *ao, void *data, int len, int flags)
             /* nothing to do */
             res = 0;
         } else if (res == -ESTRPIPE) {  /* suspend */
-            mp_tmsg(MSGT_AO, MSGL_INFO,
-                    "[AO_ALSA] Pcm in suspend mode, trying to resume.\n");
+            MP_INFO(ao, "PCM in suspend mode, trying to resume.\n");
             while ((res = snd_pcm_resume(p->alsa)) == -EAGAIN)
                 sleep(1);
         }
         if (res < 0) {
-            mp_tmsg(MSGT_AO, MSGL_ERR, "[AO_ALSA] Write error: %s\n",
-                    snd_strerror(res));
-            mp_tmsg(MSGT_AO, MSGL_INFO,
-                    "[AO_ALSA] Trying to reset soundcard.\n");
+            MP_ERR(ao, "Write error: %s\n", snd_strerror(res));
             res = snd_pcm_prepare(p->alsa);
             int err = res;
             CHECK_ALSA_ERROR("pcm prepare error");

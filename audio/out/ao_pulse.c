@@ -57,9 +57,9 @@ struct priv {
     char *cfg_sink;
 };
 
-#define GENERIC_ERR_MSG(ctx, str) \
-    mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] "str": %s\n", \
-           pa_strerror(pa_context_errno(ctx)))
+#define GENERIC_ERR_MSG(str) \
+    MP_ERR(ao, str": %s\n", \
+           pa_strerror(pa_context_errno(((struct priv *)ao->priv)->context)))
 
 static void context_state_cb(pa_context *c, void *userdata)
 {
@@ -247,20 +247,19 @@ static int init(struct ao *ao)
      * hangs somewhen. */
     if (strncmp(version, "0.9.1", 5) == 0 && version[5] >= '1'
         && version[5] <= '4') {
-        mp_msg(MSGT_AO, MSGL_WARN,
-               "[pulse] working around probably broken pause functionality,\n"
-               "        see http://www.pulseaudio.org/ticket/440\n");
+        MP_WARN(ao, "working around probably broken pause functionality,\n"
+                    "        see http://www.pulseaudio.org/ticket/440\n");
         priv->broken_pause = true;
     }
 
     if (!(priv->mainloop = pa_threaded_mainloop_new())) {
-        mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Failed to allocate main loop\n");
+        MP_ERR(ao, "Failed to allocate main loop\n");
         goto fail;
     }
 
     if (!(priv->context = pa_context_new(pa_threaded_mainloop_get_api(
                                  priv->mainloop), PULSE_CLIENT_NAME))) {
-        mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Failed to allocate context\n");
+        MP_ERR(ao, "Failed to allocate context\n");
         goto fail;
     }
 
@@ -286,8 +285,7 @@ static int init(struct ao *ao)
     const struct format_map *fmt_map = format_maps;
     while (fmt_map->mp_format != ao->format) {
         if (fmt_map->mp_format == AF_FORMAT_UNKNOWN) {
-            mp_msg(MSGT_AO, MSGL_V,
-                   "AO: [pulse] Unsupported format, using default\n");
+            MP_VERBOSE(ao, "Unsupported format, using default\n");
             fmt_map = format_maps;
             break;
         }
@@ -297,7 +295,7 @@ static int init(struct ao *ao)
     ss.format = fmt_map->pa_format;
 
     if (!pa_sample_spec_valid(&ss)) {
-        mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Invalid sample spec\n");
+        MP_ERR(ao, "Invalid sample spec\n");
         goto fail;
     }
 
@@ -342,7 +340,7 @@ fail:
     if (priv->context) {
         if (!(pa_context_errno(priv->context) == PA_ERR_CONNECTIONREFUSED
               && ao->probing))
-            GENERIC_ERR_MSG(priv->context, "Init failed");
+            GENERIC_ERR_MSG("Init failed");
     }
     uninit(ao, true);
     return -1;
@@ -355,7 +353,7 @@ static void cork(struct ao *ao, bool pause)
     priv->retval = 0;
     if (!waitop(priv, pa_stream_cork(priv->stream, pause, success_cb, ao)) ||
         !priv->retval)
-        GENERIC_ERR_MSG(priv->context, "pa_stream_cork() failed");
+        GENERIC_ERR_MSG("pa_stream_cork() failed");
 }
 
 // Play the specified data to the pulseaudio server
@@ -365,7 +363,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
     pa_threaded_mainloop_lock(priv->mainloop);
     if (pa_stream_write(priv->stream, data, len, NULL, 0,
                         PA_SEEK_RELATIVE) < 0) {
-        GENERIC_ERR_MSG(priv->context, "pa_stream_write() failed");
+        GENERIC_ERR_MSG("pa_stream_write() failed");
         len = -1;
     }
     if (flags & AOPLAY_FINAL_CHUNK) {
@@ -387,7 +385,7 @@ static void reset(struct ao *ao)
     priv->retval = 0;
     if (!waitop(priv, pa_stream_flush(priv->stream, success_cb, ao)) ||
         !priv->retval)
-        GENERIC_ERR_MSG(priv->context, "pa_stream_flush() failed");
+        GENERIC_ERR_MSG("pa_stream_flush() failed");
     cork(ao, false);
 }
 
@@ -438,20 +436,20 @@ static float get_delay(struct ao *ao)
     struct priv *priv = ao->priv;
     pa_threaded_mainloop_lock(priv->mainloop);
     if (!waitop(priv, pa_stream_update_timing_info(priv->stream, NULL, NULL))) {
-        GENERIC_ERR_MSG(priv->context, "pa_stream_update_timing_info() failed");
+        GENERIC_ERR_MSG("pa_stream_update_timing_info() failed");
         return 0;
     }
     pa_threaded_mainloop_lock(priv->mainloop);
     const pa_timing_info *ti = pa_stream_get_timing_info(priv->stream);
     if (!ti) {
         pa_threaded_mainloop_unlock(priv->mainloop);
-        GENERIC_ERR_MSG(priv->context, "pa_stream_get_timing_info() failed");
+        GENERIC_ERR_MSG("pa_stream_get_timing_info() failed");
         return 0;
     }
     const struct pa_sample_spec *ss = pa_stream_get_sample_spec(priv->stream);
     if (!ss) {
         pa_threaded_mainloop_unlock(priv->mainloop);
-        GENERIC_ERR_MSG(priv->context, "pa_stream_get_sample_spec() failed");
+        GENERIC_ERR_MSG("pa_stream_get_sample_spec() failed");
         return 0;
     }
     // data left in PulseAudio's main buffers (not written to sink yet)
@@ -485,7 +483,7 @@ static void info_func(struct pa_context *c, const struct pa_sink_input_info *i,
     struct ao *ao = userdata;
     struct priv *priv = ao->priv;
     if (is_last < 0) {
-        GENERIC_ERR_MSG(priv->context, "Failed to get sink input info");
+        GENERIC_ERR_MSG("Failed to get sink input info");
         return;
     }
     if (!i)
@@ -504,8 +502,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         pa_threaded_mainloop_lock(priv->mainloop);
         if (!waitop(priv, pa_context_get_sink_input_info(priv->context, devidx,
                                                          info_func, ao))) {
-            GENERIC_ERR_MSG(priv->context,
-                            "pa_stream_get_sink_input_info() failed");
+            GENERIC_ERR_MSG("pa_stream_get_sink_input_info() failed");
             return CONTROL_ERROR;
         }
         // Warning: some information in pi might be unaccessible, because
@@ -548,8 +545,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
                                                  &volume, NULL, NULL);
             if (!o) {
                 pa_threaded_mainloop_unlock(priv->mainloop);
-                GENERIC_ERR_MSG(priv->context,
-                                "pa_context_set_sink_input_volume() failed");
+                GENERIC_ERR_MSG("pa_context_set_sink_input_volume() failed");
                 return CONTROL_ERROR;
             }
         } else if (cmd == AOCONTROL_SET_MUTE) {
@@ -558,8 +554,7 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
                                                *mute, NULL, NULL);
             if (!o) {
                 pa_threaded_mainloop_unlock(priv->mainloop);
-                GENERIC_ERR_MSG(priv->context,
-                                "pa_context_set_sink_input_mute() failed");
+                GENERIC_ERR_MSG("pa_context_set_sink_input_mute() failed");
                 return CONTROL_ERROR;
             }
         } else

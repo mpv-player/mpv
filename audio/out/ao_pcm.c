@@ -141,19 +141,16 @@ static int init(struct ao *ao)
 
     ao->bps = ao->channels.num * ao->samplerate * (af_fmt2bits(ao->format) / 8);
 
-    mp_tmsg(MSGT_AO, MSGL_INFO, "[AO PCM] File: %s (%s)\n"
-            "PCM: Samplerate: %d Hz   Channels: %d   Format: %s\n",
+    MP_INFO(ao, "File: %s (%s)\nPCM: Samplerate: %d Hz Channels: %d Format: %s\n",
             priv->outputfilename,
             priv->waveheader ? "WAVE" : "RAW PCM", ao->samplerate,
             ao->channels.num, af_fmt2str_short(ao->format));
-    mp_tmsg(MSGT_AO, MSGL_INFO,
-            "[AO PCM] Info: Faster dumping is achieved with -no-video\n"
-            "[AO PCM] Info: To write WAVE files use -ao pcm:waveheader (default).\n");
+    MP_INFO(ao, "Info: Faster dumping is achieved with -no-video\n");
+    MP_INFO(ao, "Info: To write WAVE files use -ao pcm:waveheader (default).\n");
 
     priv->fp = fopen(priv->outputfilename, "wb");
     if (!priv->fp) {
-        mp_tmsg(MSGT_AO, MSGL_ERR, "[AO PCM] Failed to open %s for writing!\n",
-                priv->outputfilename);
+        MP_ERR(ao, "Failed to open %s for writing!\n", priv->outputfilename);
         return -1;
     }
     if (priv->waveheader)  // Reserve space for wave header
@@ -177,11 +174,10 @@ static void uninit(struct ao *ao, bool cut_audio)
             GetFileType((HANDLE)_get_osfhandle(_fileno(priv->fp)));
 #endif
         if (broken_seek || fseek(priv->fp, 0, SEEK_SET) != 0)
-            mp_msg(MSGT_AO, MSGL_ERR, "Could not seek to start, "
-                   "WAV size headers not updated!\n");
+            MP_ERR(ao, "Could not seek to start, WAV size headers not updated!\n");
         else {
             if (priv->data_length > 0xfffff000) {
-                mp_msg(MSGT_AO, MSGL_ERR, "File larger than allowed for "
+                MP_ERR(ao, "File larger than allowed for "
                        "WAV files, may play truncated!\n");
                 priv->data_length = 0xfffff000;
             }

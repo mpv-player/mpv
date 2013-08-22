@@ -71,13 +71,7 @@ static int init(struct ao *ao)
     AVCodec *codec;
 
     if (!encode_lavc_available(ao->encode_lavc_ctx)) {
-        mp_msg(MSGT_ENCODE, MSGL_ERR,
-               "ao-lavc: the option --o (output file) must be specified\n");
-        return -1;
-    }
-
-    if (ac->stream) {
-        mp_msg(MSGT_ENCODE, MSGL_ERR, "ao-lavc: rejecting reinitialization\n");
+        MP_ERR(ao, "the option --o (output file) must be specified\n");
         return -1;
     }
 
@@ -85,7 +79,7 @@ static int init(struct ao *ao)
                                           AVMEDIA_TYPE_AUDIO);
 
     if (!ac->stream) {
-        mp_msg(MSGT_ENCODE, MSGL_ERR, "ao-lavc: could not get a new audio stream\n");
+        MP_ERR(ao, "could not get a new audio stream\n");
         return -1;
     }
 
@@ -243,8 +237,7 @@ out_takefirst:
         }
         if (!found_format && !found_planar_format) {
             // shouldn't happen
-            mp_msg(MSGT_ENCODE, MSGL_ERR,
-                   "ao-lavc: sample format not found\n");
+            MP_ERR(ao, "sample format not found\n");
         }
     }
 
@@ -285,8 +278,7 @@ out_takefirst:
     ao->priv = ac;
 
     if (ac->planarize)
-        mp_msg(MSGT_ENCODE, MSGL_WARN,
-                "ao-lavc: need to planarize audio data\n");
+        MP_WARN(ao, "need to planarize audio data\n");
 
     return 0;
 }
@@ -311,8 +303,7 @@ static void uninit(struct ao *ao, bool cut_audio)
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
 
     if (!encode_lavc_start(ectx)) {
-        mp_msg(MSGT_ENCODE, MSGL_WARN,
-                "ao-lavc: not even ready to encode audio at end -> dropped");
+        MP_WARN(ao, "not even ready to encode audio at end -> dropped");
         return;
     }
 
@@ -329,8 +320,7 @@ static void uninit(struct ao *ao, bool cut_audio)
                               ac->sample_size, ac->sample_padding);
             int written = play(ao, paddingbuf, ao->buffer.len + extralen, 0);
             if (written < ao->buffer.len) {
-                mp_msg(MSGT_ENCODE, MSGL_ERR,
-                        "ao-lavc: did not write enough data at the end\n");
+                MP_ERR(ao, "did not write enough data at the end\n");
             }
             talloc_free(paddingbuf);
             ao->buffer.len = 0;
@@ -392,7 +382,7 @@ static int encode(struct ao *ao, double apts, void *data)
                                      ac->stream->codec->sample_fmt, data,
                                      audiolen, 1))
         {
-            mp_msg(MSGT_ENCODE, MSGL_ERR, "ao-lavc: error filling\n");
+            MP_ERR(ao, "error filling\n");
             return -1;
         }
 
@@ -408,9 +398,8 @@ static int encode(struct ao *ao, double apts, void *data)
         if (ac->lastpts != MP_NOPTS_VALUE && frame_pts <= ac->lastpts) {
             // this indicates broken video
             // (video pts failing to increase fast enough to match audio)
-            mp_msg(MSGT_ENCODE, MSGL_WARN, "ao-lavc: audio frame pts went backwards "
-                    "(%d <- %d), autofixed\n", (int)frame->pts,
-                    (int)ac->lastpts);
+            MP_WARN(ao, "audio frame pts went backwards (%d <- %d), autofixed\n",
+                    (int)frame->pts, (int)ac->lastpts);
             frame_pts = ac->lastpts + 1;
             frame->pts = av_rescale_q(frame_pts, ac->worst_time_base, ac->stream->codec->time_base);
         }
@@ -436,17 +425,15 @@ static int encode(struct ao *ao, double apts, void *data)
         status = avcodec_encode_audio2(ac->stream->codec, &packet, NULL, &gotpacket);
     }
 
-    if(status)
-    {
-        mp_msg(MSGT_ENCODE, MSGL_ERR, "ao-lavc: error encoding\n");
+    if(status) {
+        MP_ERR(ao, "error encoding\n");
         return -1;
     }
 
     if(!gotpacket)
         return 0;
 
-    mp_msg(MSGT_ENCODE, MSGL_DBG2,
-           "ao-lavc: got pts %f (playback time: %f); out size: %d\n",
+    MP_DBG(ao, "got pts %f (playback time: %f); out size: %d\n",
            apts, realapts, packet.size);
 
     encode_lavc_write_stats(ao->encode_lavc_ctx, ac->stream);
@@ -455,7 +442,7 @@ static int encode(struct ao *ao, double apts, void *data)
 
     // Do we need this at all? Better be safe than sorry...
     if (packet.pts == AV_NOPTS_VALUE) {
-        mp_msg(MSGT_ENCODE, MSGL_WARN, "ao-lavc: encoder lost pts, why?\n");
+        MP_WARN(ao, "encoder lost pts, why?\n");
         if (ac->savepts != MP_NOPTS_VALUE)
             packet.pts = ac->savepts;
     }
@@ -475,7 +462,7 @@ static int encode(struct ao *ao, double apts, void *data)
     ac->savepts = MP_NOPTS_VALUE;
 
     if (encode_lavc_write_frame(ao->encode_lavc_ctx, &packet) < 0) {
-        mp_msg(MSGT_ENCODE, MSGL_ERR, "ao-lavc: error writing at %f %f/%f\n",
+        MP_ERR(ao, "error writing at %f %f/%f\n",
                realapts, (double) ac->stream->time_base.num,
                (double) ac->stream->time_base.den);
         return -1;
@@ -501,13 +488,11 @@ static int play(struct ao *ao, void *data, int len, int flags)
     len /= ac->sample_size * ao->channels.num;
 
     if (!encode_lavc_start(ectx)) {
-        mp_msg(MSGT_ENCODE, MSGL_WARN,
-                "ao-lavc: not ready yet for encoding audio\n");
+        MP_WARN(ao, "not ready yet for encoding audio\n");
         return 0;
     }
     if (pts == MP_NOPTS_VALUE) {
-        mp_msg(MSGT_ENCODE, MSGL_WARN,
-                "ao-lavc: frame without pts, please report; synthesizing pts instead\n");
+        MP_WARN(ao, "frame without pts, please report; synthesizing pts instead\n");
         // synthesize pts from previous expected next pts
         pts = ac->expected_next_pts;
     }
@@ -516,19 +501,21 @@ static int play(struct ao *ao, void *data, int len, int flags)
         //if (ac->stream->codec->time_base.num / ac->stream->codec->time_base.den >= ac->stream->time_base.num / ac->stream->time_base.den)
         if (ac->stream->codec->time_base.num * (double) ac->stream->time_base.den >=
                 ac->stream->time_base.num * (double) ac->stream->codec->time_base.den) {
-            mp_msg(MSGT_ENCODE, MSGL_V, "ao-lavc: NOTE: using codec time base "
-                   "(%d/%d) for pts adjustment; the stream base (%d/%d) is "
-                   "not worse.\n", (int)ac->stream->codec->time_base.num,
-                   (int)ac->stream->codec->time_base.den, (int)ac->stream->time_base.num,
-                   (int)ac->stream->time_base.den);
+            MP_VERBOSE(ao, "NOTE: using codec time base (%d/%d) for pts "
+                       "adjustment; the stream base (%d/%d) is not worse.\n",
+                       (int)ac->stream->codec->time_base.num,
+                       (int)ac->stream->codec->time_base.den,
+                       (int)ac->stream->time_base.num,
+                       (int)ac->stream->time_base.den);
             ac->worst_time_base = ac->stream->codec->time_base;
             ac->worst_time_base_is_stream = 0;
         } else {
-            mp_msg(MSGT_ENCODE, MSGL_WARN, "ao-lavc: NOTE: not using codec time "
-                   "base (%d/%d) for pts adjustment; the stream base (%d/%d) "
-                   "is worse.\n", (int)ac->stream->codec->time_base.num,
-                   (int)ac->stream->codec->time_base.den, (int)ac->stream->time_base.num,
-                   (int)ac->stream->time_base.den);
+            MP_WARN(ao, "NOTE: not using codec time base (%d/%d) for pts "
+                    "adjustment; the stream base (%d/%d) is worse.\n",
+                    (int)ac->stream->codec->time_base.num,
+                    (int)ac->stream->codec->time_base.den,
+                    (int)ac->stream->time_base.num,
+                    (int)ac->stream->time_base.den);
             ac->worst_time_base = ac->stream->time_base;
             ac->worst_time_base_is_stream = 1;
         }
@@ -596,7 +583,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
             */
             int finalbufpos = len - (len - bufpos) % ac->aframesize;
             if (finalbufpos < 0) {
-                mp_msg(MSGT_ENCODE, MSGL_WARN, "ao-lavc: cannot attain the "
+                MP_WARN(ao, "cannot attain the "
                        "exact requested audio sync; shifting by %d frames\n",
                        -finalbufpos);
                 bufpos -= finalbufpos;
@@ -611,8 +598,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
             ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
         }
         else if (fabs(nextpts + ectx->discontinuity_pts_offset - ectx->next_in_pts) > 30) {
-            mp_msg(MSGT_ENCODE, MSGL_WARN,
-                    "ao-lavc: detected an unexpected discontinuity (pts jumped by "
+            MP_WARN(ao, "detected an unexpected discontinuity (pts jumped by "
                     "%f seconds)\n",
                     nextpts + ectx->discontinuity_pts_offset - ectx->next_in_pts);
             ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;

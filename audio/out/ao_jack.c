@@ -190,7 +190,7 @@ static int init(struct ao *ao)
         open_options |= JackNoStartServer;
     p->client = jack_client_open(p->cfg_client_name, open_options, NULL);
     if (!p->client) {
-        mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] cannot open server\n");
+        MP_FATAL(ao, "cannot open server\n");
         goto err_out;
     }
     jack_set_process_callback(p->client, outputaudio, ao);
@@ -201,7 +201,7 @@ static int init(struct ao *ao)
             port_flags |= JackPortIsPhysical;
         matching_ports = jack_get_ports(p->client, port_name, NULL, port_flags);
         if (!matching_ports || !matching_ports[0]) {
-            mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] no physical ports available\n");
+            MP_FATAL(ao, "no physical ports available\n");
             goto err_out;
         }
         i = 1;
@@ -220,19 +220,19 @@ static int init(struct ao *ao)
             jack_port_register(p->client, pname, JACK_DEFAULT_AUDIO_TYPE,
                                JackPortIsOutput, 0);
         if (!p->ports[i]) {
-            mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] not enough ports available\n");
+            MP_FATAL(ao, "not enough ports available\n");
             goto err_out;
         }
     }
     if (jack_activate(p->client)) {
-        mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] activate failed\n");
+        MP_FATAL(ao, "activate failed\n");
         goto err_out;
     }
     for (i = 0; i < p->num_ports; i++) {
         if (jack_connect(p->client, jack_port_name(p->ports[i]),
                          matching_ports[i]))
         {
-            mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] connecting failed\n");
+            MP_FATAL(ao, "connecting failed\n");
             goto err_out;
         }
     }
