@@ -35,6 +35,7 @@
 
 struct priv {
     int frame_size;
+    int read_frames;
     double frame_rate;
 };
 
@@ -107,6 +108,7 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
     *p = (struct priv) {
         .frame_size = samplesize * sh_audio->channels.num,
         .frame_rate = samplerate,
+        .read_frames = samplerate,
     };
 
     return 0;
@@ -191,6 +193,7 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
     *p = (struct priv) {
         .frame_size = imgsize,
         .frame_rate = fps,
+        .read_frames = 1,
     };
 
     return 0;
@@ -203,7 +206,7 @@ static int raw_fill_buffer(demuxer_t *demuxer)
     if (demuxer->stream->eof)
         return 0;
 
-    struct demux_packet *dp = new_demux_packet(p->frame_size);
+    struct demux_packet *dp = new_demux_packet(p->frame_size * p->read_frames);
     dp->pos = stream_tell(demuxer->stream) - demuxer->movi_start;
     dp->pts = (dp->pos  / p->frame_size) / p->frame_rate;
 
