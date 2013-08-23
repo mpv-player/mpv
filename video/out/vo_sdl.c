@@ -280,27 +280,27 @@ static bool try_create_renderer(struct vo *vo, int i, const char *driver,
                                   w, h,
                                   SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN);
     if (!vc->window) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_CreateWindow failedd\n");
+        MP_ERR(vo, "SDL_CreateWindow failedd\n");
         destroy_renderer(vo);
         return false;
     }
 
     vc->renderer = SDL_CreateRenderer(vc->window, i, 0);
     if (!vc->renderer) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_CreateRenderer failed\n");
+        MP_ERR(vo, "SDL_CreateRenderer failed\n");
         destroy_renderer(vo);
         return false;
     }
 
     if (SDL_GetRendererInfo(vc->renderer, &vc->renderer_info)) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_GetRendererInfo failed\n");
+        MP_ERR(vo, "SDL_GetRendererInfo failed\n");
         destroy_renderer(vo);
         return false;
     }
 
     if (!is_good_renderer(&vc->renderer_info, NULL, vc->allow_sw,
                           &vc->osd_format)) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] Renderer '%s' does not fulfill "
+        MP_ERR(vo, "Renderer '%s' does not fulfill "
                                   "requirements on this system\n",
                                   vc->renderer_info.name);
         destroy_renderer(vo);
@@ -308,7 +308,7 @@ static bool try_create_renderer(struct vo *vo, int i, const char *driver,
     }
 
     if (vc->renderer_index != i) {
-        mp_msg(MSGT_VO, MSGL_INFO, "[sdl] Using %s\n", vc->renderer_info.name);
+        MP_INFO(vo, "Using %s\n", vc->renderer_info.name);
         vc->renderer_index = i;
     }
 
@@ -335,7 +335,7 @@ static int init_renderer(struct vo *vo, int w, int h)
         if (try_create_renderer(vo, i, NULL, w, h))
             return 0;
 
-    mp_msg(MSGT_VO, MSGL_ERR, "[sdl] No supported renderer\n");
+    MP_ERR(vo, "No supported renderer\n");
     return -1;
 }
 
@@ -388,7 +388,7 @@ static void set_fullscreen(struct vo *vo)
         flags |= fs_flag;
 
     if (SDL_SetWindowFullscreen(vc->window, flags)) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_SetWindowFullscreen failed\n");
+        MP_ERR(vo, "SDL_SetWindowFullscreen failed\n");
         return;
     }
 
@@ -426,7 +426,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                 if (format == formats[j].mpv)
                     texfmt = formats[j].sdl;
     if (texfmt == SDL_PIXELFORMAT_UNKNOWN) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] Invalid pixel format\n");
+        MP_ERR(vo, "Invalid pixel format\n");
         return -1;
     }
 
@@ -434,7 +434,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     vc->tex = SDL_CreateTexture(vc->renderer, texfmt,
                                 SDL_TEXTUREACCESS_STREAMING, width, height);
     if (!vc->tex) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] Could not create a texture\n");
+        MP_ERR(vo, "Could not create a texture\n");
         return -1;
     }
 
@@ -446,7 +446,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     case 3:
         break;
     default:
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] Invalid plane count\n");
+        MP_ERR(vo, "Invalid plane count\n");
         SDL_DestroyTexture(vc->tex);
         vc->tex = NULL;
         return -1;
@@ -580,7 +580,7 @@ static inline void upload_to_texture(struct vo *vo, SDL_Texture *tex,
     void *pixels;
     int pitch;
     if (SDL_LockTexture(tex, NULL, &pixels, &pitch)) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] Could not lock texture\n");
+        MP_ERR(vo, "Could not lock texture\n");
     } else {
         SDL_ConvertPixels(w, h, SDL_PIXELFORMAT_ARGB8888,
                           bitmap, stride,
@@ -659,7 +659,7 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
                         vc->osd_format.sdl, SDL_TEXTUREACCESS_STREAMING,
                         bmp->w, bmp->h);
             if (!target->tex) {
-                mp_msg(MSGT_VO, MSGL_ERR, "[sdl] Could not create texture\n");
+                MP_ERR(vo, "Could not create texture\n");
             }
             if (target->tex) {
                 SDL_SetTextureBlendMode(target->tex,
@@ -678,7 +678,7 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
                         vc->osd_format.sdl, SDL_TEXTUREACCESS_STREAMING,
                         bmp->w, bmp->h);
             if (!target->tex2) {
-                mp_msg(MSGT_VO, MSGL_ERR, "[sdl] Could not create texture\n");
+                MP_ERR(vo, "Could not create texture\n");
             }
             if (target->tex2) {
                 SDL_SetTextureBlendMode(target->tex2,
@@ -733,7 +733,7 @@ static int preinit(struct vo *vo)
     struct priv *vc = vo->priv;
 
     if (SDL_WasInit(SDL_INIT_VIDEO)) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] already initialized\n");
+        MP_ERR(vo, "already initialized\n");
         return -1;
     }
 
@@ -748,7 +748,7 @@ static int preinit(struct vo *vo)
                             SDL_HINT_OVERRIDE);
 
     if (SDL_InitSubSystem(SDL_INIT_VIDEO)) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_Init failed\n");
+        MP_ERR(vo, "SDL_Init failed\n");
         return -1;
     }
 
@@ -826,7 +826,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
     if (mpi) {
         if (SDL_LockTexture(vc->tex, NULL, &pixels, &pitch)) {
-            mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_LockTexture failed\n");
+            MP_ERR(vo, "SDL_LockTexture failed\n");
             return;
         }
 
@@ -884,7 +884,7 @@ static void update_screeninfo(struct vo *vo)
     SDL_DisplayMode mode;
     if (SDL_GetCurrentDisplayMode(SDL_GetWindowDisplayIndex(vc->window),
                                   &mode)) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_GetCurrentDisplayMode failed\n");
+        MP_ERR(vo, "SDL_GetCurrentDisplayMode failed\n");
         return;
     }
     struct mp_vo_opts *opts = vo->opts;
@@ -906,7 +906,7 @@ static struct mp_image *get_window_screenshot(struct vo *vo)
                                                                 vo->dheight);
     if (SDL_RenderReadPixels(vc->renderer, NULL, vc->osd_format.sdl,
                              image->planes[0], image->stride[0])) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[sdl] SDL_RenderReadPixels failed\n");
+        MP_ERR(vo, "SDL_RenderReadPixels failed\n");
         talloc_free(image);
         return NULL;
     }

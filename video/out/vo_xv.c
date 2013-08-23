@@ -180,7 +180,7 @@ static int xv_find_atom(struct vo *vo, uint32_t xv_port, const char *name,
 static int xv_set_eq(struct vo *vo, uint32_t xv_port, const char *name,
                      int value)
 {
-    mp_dbg(MSGT_VO, MSGL_V, "xv_set_eq called! (%s, %d)\n", name, value);
+    MP_VERBOSE(vo, "xv_set_eq called! (%s, %d)\n", name, value);
 
     int min, max;
     int atom = xv_find_atom(vo, xv_port, name, false, &min, &max);
@@ -205,8 +205,7 @@ static int xv_get_eq(struct vo *vo, uint32_t xv_port, const char *name,
         XvGetPortAttribute(vo->x11->display, xv_port, atom, &port_value);
 
         *value = (port_value - min) * 200 / (max - min) - 100;
-        mp_dbg(MSGT_VO, MSGL_V, "xv_get_eq called! (%s, %d)\n",
-               name, *value);
+        MP_VERBOSE(vo, "xv_get_eq called! (%s, %d)\n", name, *value);
         return VO_TRUE;
     }
     return VO_FALSE;
@@ -266,52 +265,46 @@ static void xv_get_max_img_dim(struct vo *vo, uint32_t *width, uint32_t *height)
         }
     }
 
-    mp_msg(MSGT_VO, MSGL_V,
-           "[xv] Maximum source image dimensions: %ux%u\n",
-           *width, *height);
+    MP_VERBOSE(vo, "Maximum source image dimensions: %ux%u\n", *width, *height);
 
     XvFreeEncodingInfo(encodings);
 }
 
-static void xv_print_ck_info(struct xvctx *xv)
+static void xv_print_ck_info(struct vo *vo)
 {
-    mp_msg(MSGT_VO, MSGL_V, "[xv] ");
+    struct xvctx *xv = vo->priv;
 
     switch (xv->xv_ck_info.method) {
     case CK_METHOD_NONE:
-        mp_msg(MSGT_VO, MSGL_V, "Drawing no colorkey.\n");
+        MP_VERBOSE(vo, "Drawing no colorkey.\n");
         return;
     case CK_METHOD_AUTOPAINT:
-        mp_msg(MSGT_VO, MSGL_V, "Colorkey is drawn by Xv.");
+        MP_VERBOSE(vo, "Colorkey is drawn by Xv.\n");
         break;
     case CK_METHOD_MANUALFILL:
-        mp_msg(MSGT_VO, MSGL_V, "Drawing colorkey manually.");
+        MP_VERBOSE(vo, "Drawing colorkey manually.\n");
         break;
     case CK_METHOD_BACKGROUND:
-        mp_msg(MSGT_VO, MSGL_V, "Colorkey is drawn as window background.");
+        MP_VERBOSE(vo, "Colorkey is drawn as window background.\n");
         break;
     }
 
-    mp_msg(MSGT_VO, MSGL_V, "\n[xv] ");
-
     switch (xv->xv_ck_info.source) {
     case CK_SRC_CUR:
-        mp_msg(MSGT_VO, MSGL_V, "Using colorkey from Xv (0x%06lx).\n",
-               xv->xv_colorkey);
+        MP_VERBOSE(vo, "Using colorkey from Xv (0x%06lx).\n", xv->xv_colorkey);
         break;
     case CK_SRC_USE:
         if (xv->xv_ck_info.method == CK_METHOD_AUTOPAINT) {
-            mp_msg(MSGT_VO, MSGL_V, "Ignoring colorkey from mpv (0x%06lx).\n",
-                   xv->xv_colorkey);
+            MP_VERBOSE(vo, "Ignoring colorkey from mpv (0x%06lx).\n",
+                       xv->xv_colorkey);
         } else {
-            mp_msg(MSGT_VO, MSGL_V,
-                   "Using colorkey from mpv (0x%06lx). Use -colorkey to change.\n",
-                   xv->xv_colorkey);
+            MP_VERBOSE(vo, "Using colorkey from mpv (0x%06lx). Use -colorkey to change.\n",
+                       xv->xv_colorkey);
         }
         break;
     case CK_SRC_SET:
-        mp_msg(MSGT_VO, MSGL_V, "Setting and using colorkey from mpv (0x%06lx)."
-               " Use -colorkey to change.\n", xv->xv_colorkey);
+        MP_VERBOSE(vo, "Setting and using colorkey from mpv (0x%06lx)."
+                   " Use -colorkey to change.\n", xv->xv_colorkey);
         break;
     }
 }
@@ -336,8 +329,8 @@ static int xv_init_colorkey(struct vo *vo)
             if (rez == Success)
                 ctx->xv_colorkey = colorkey_ret;
             else {
-                mp_msg(MSGT_VO, MSGL_FATAL, "[xv] Couldn't get colorkey!"
-                       "Maybe the selected Xv port has no overlay.\n");
+                MP_FATAL(vo, "Couldn't get colorkey! "
+                         "Maybe the selected Xv port has no overlay.\n");
                 return 0; // error getting colorkey
             }
         } else {
@@ -350,7 +343,7 @@ static int xv_init_colorkey(struct vo *vo)
                 rez = XvSetPortAttribute(display, ctx->xv_port, xv_atom,
                                          ctx->colorkey);
                 if (rez != Success) {
-                    mp_msg(MSGT_VO, MSGL_FATAL, "[xv] Couldn't set colorkey!\n");
+                    MP_FATAL(vo, "Couldn't set colorkey!\n");
                     return 0; // error setting colorkey
                 }
             }
@@ -375,7 +368,7 @@ static int xv_init_colorkey(struct vo *vo)
     } else // do no colorkey drawing at all
         ctx->xv_ck_info.method = CK_METHOD_NONE;
 
-    xv_print_ck_info(ctx);
+    xv_print_ck_info(vo);
 
     return 1;
 }
@@ -448,7 +441,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if ((ctx->max_width != 0 && ctx->max_height != 0)
         && (ctx->image_width > ctx->max_width
             || ctx->image_height > ctx->max_height)) {
-        mp_tmsg(MSGT_VO, MSGL_ERR, "Source image dimensions are too high: %ux%u (maximum is %ux%u)\n",
+        MP_ERR(vo, "Source image dimensions are too high: %ux%u (maximum is %ux%u)\n",
                ctx->image_width, ctx->image_height, ctx->max_width,
                ctx->max_height);
         return -1;
@@ -457,9 +450,9 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     /* check image formats */
     ctx->xv_format = 0;
     for (i = 0; i < ctx->formats; i++) {
-        mp_msg(MSGT_VO, MSGL_V, "Xvideo image format: 0x%x (%4.4s) %s\n",
-               ctx->fo[i].id, (char *) &ctx->fo[i].id,
-               (ctx->fo[i].format == XvPacked) ? "packed" : "planar");
+        MP_VERBOSE(vo, "Xvideo image format: 0x%x (%4.4s) %s\n",
+                   ctx->fo[i].id, (char *) &ctx->fo[i].id,
+                   (ctx->fo[i].format == XvPacked) ? "packed" : "planar");
         if (ctx->fo[i].id == find_xv_format(format))
             ctx->xv_format = ctx->fo[i].id;
     }
@@ -472,8 +465,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     if (ctx->xv_ck_info.method == CK_METHOD_BACKGROUND)
         XSetWindowBackground(x11->display, x11->window, ctx->xv_colorkey);
 
-    mp_msg(MSGT_VO, MSGL_V, "using Xvideo port %d for hw scaling\n",
-           ctx->xv_port);
+    MP_VERBOSE(vo, "using Xvideo port %d for hw scaling\n", ctx->xv_port);
 
     // In case config has been called before
     for (i = 0; i < ctx->num_buffers; i++)
@@ -506,7 +498,7 @@ static void allocate_xvimage(struct vo *vo, int foo)
                                 + ShmCompletion;
     } else {
         ctx->Shmem_Flag = 0;
-        mp_tmsg(MSGT_VO, MSGL_INFO, "[VO_XV] Shared memory not supported\nReverting to normal Xv.\n");
+        MP_INFO(vo, "Shared memory not supported\nReverting to normal Xv.\n");
     }
     if (ctx->Shmem_Flag) {
         ctx->xvimage[foo] =
@@ -629,8 +621,8 @@ static void wait_for_completion(struct vo *vo, int max_outstanding)
     if (ctx->Shmem_Flag) {
         while (x11->ShmCompletionWaitCount > max_outstanding) {
             if (!ctx->Shm_Warned_Slow) {
-                mp_msg(MSGT_VO, MSGL_WARN, "[VO_XV] X11 can't keep up! Waiting"
-                                           " for XShm completion events...\n");
+                MP_WARN(vo, "X11 can't keep up! Waiting"
+                        " for XShm completion events...\n");
                 ctx->Shm_Warned_Slow = 1;
             }
             mp_sleep_us(1000);
@@ -738,7 +730,7 @@ static int preinit(struct vo *vo)
     /* check for Xvideo extension */
     unsigned int ver, rel, req, ev, err;
     if (Success != XvQueryExtension(x11->display, &ver, &rel, &req, &ev, &err)) {
-        mp_tmsg(MSGT_VO, MSGL_ERR, "[VO_XV] Sorry, Xv not supported by this X11 version/driver\n[VO_XV] ******** Try with  -vo x11 *********\n");
+        MP_ERR(vo, "Xv not supported by this X11 version/driver\n");
         goto error;
     }
 
@@ -746,7 +738,7 @@ static int preinit(struct vo *vo)
     if (Success !=
         XvQueryAdaptors(x11->display, DefaultRootWindow(x11->display),
                         &ctx->adaptors, &ctx->ai)) {
-        mp_tmsg(MSGT_VO, MSGL_ERR, "[VO_XV] XvQueryAdaptors failed.\n");
+        MP_ERR(vo, "XvQueryAdaptors failed.\n");
         goto error;
     }
 
@@ -771,7 +763,7 @@ static int preinit(struct vo *vo)
             if (XvGrabPort(x11->display, ctx->xv_port, CurrentTime))
                 ctx->xv_port = 0;
         } else {
-            mp_tmsg(MSGT_VO, MSGL_WARN, "[VO_XV] Invalid port parameter, overriding with port 0.\n");
+            MP_WARN(vo, "Invalid port parameter, overriding with port 0.\n");
             ctx->xv_port = 0;
         }
     }
@@ -786,30 +778,28 @@ static int preinit(struct vo *vo)
                  xv_p < ctx->ai[i].base_id + ctx->ai[i].num_ports; ++xv_p)
                 if (!XvGrabPort(x11->display, xv_p, CurrentTime)) {
                     ctx->xv_port = xv_p;
-                    mp_msg(MSGT_VO, MSGL_V,
-                           "[VO_XV] Using Xv Adapter #%d (%s)\n",
-                           i, ctx->ai[i].name);
+                    MP_VERBOSE(vo, "Using Xv Adapter #%d (%s)\n",
+                               i, ctx->ai[i].name);
                     break;
                 } else {
-                    mp_tmsg(MSGT_VO, MSGL_WARN, "[VO_XV] Could not grab port %i.\n",
-                           (int) xv_p);
+                    MP_WARN(vo, "Could not grab port %i.\n", (int) xv_p);
                     ++busy_ports;
                 }
         }
     }
     if (!ctx->xv_port) {
         if (busy_ports)
-            mp_tmsg(MSGT_VO, MSGL_ERR,
-                "[VO_XV] Could not find free Xvideo port - maybe another process is already\n"\
-                "[VO_XV] using it. Close all video applications, and try again. If that does\n"\
-                "[VO_XV] not help, see 'mpv -vo help' for other (non-xv) video out drivers.\n");
+            MP_ERR(vo,
+                   "Could not find free Xvideo port - maybe another process is already\n"\
+                   "using it. Close all video applications, and try again. If that does\n"\
+                   "not help, see 'mpv -vo help' for other (non-xv) video out drivers.\n");
         else
-            mp_tmsg(MSGT_VO, MSGL_ERR,
-                "[VO_XV] It seems there is no Xvideo support for your video card available.\n"\
-                "[VO_XV] Run 'xvinfo' to verify its Xv support and read\n"\
-                "[VO_XV] DOCS/HTML/en/video.html#xv!\n"\
-                "[VO_XV] See 'mpv -vo help' for other (non-xv) video out drivers.\n"\
-                "[VO_XV] Try -vo x11.\n");
+            MP_ERR(vo,
+                   "It seems there is no Xvideo support for your video card available.\n"\
+                   "Run 'xvinfo' to verify its Xv support and read\n"\
+                   "DOCS/HTML/en/video.html#xv!\n"\
+                   "See 'mpv -vo help' for other (non-xv) video out drivers.\n"\
+                   "Try -vo x11.\n");
         goto error;
     }
 

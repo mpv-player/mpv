@@ -70,7 +70,7 @@ static unsigned int gmask = 0x00ff00;
 static unsigned int bmask = 0x0000ff;
 static unsigned int amask = 0;
 
-static int resize(void)
+static int resize(struct vo *vo)
 {
     screen_w = caca_get_canvas_width(canvas);
     screen_h = caca_get_canvas_height(canvas);
@@ -82,7 +82,7 @@ static int resize(void)
                                 depth * image_width,
                                 rmask, gmask, bmask, amask);
     if (dither == NULL) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "vo_caca: caca_create_dither failed!\n");
+        MP_FATAL(vo, "caca_create_dither failed!\n");
         return ENOSYS;
     }
     dither_buffer =
@@ -105,7 +105,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     image_width  = width;
     image_format = format;
 
-    return resize();
+    return resize(vo);
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)
@@ -166,7 +166,7 @@ static void check_events(struct vo *vo)
         switch (cev.type) {
         case CACA_EVENT_RESIZE:
             caca_refresh_display(display);
-            resize();
+            resize(vo);
             break;
         case CACA_EVENT_QUIT:
             mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
@@ -250,14 +250,14 @@ static int preinit(struct vo *vo)
 {
     canvas = caca_create_canvas(0, 0);
     if (canvas == NULL) {
-        mp_msg(MSGT_VO, MSGL_ERR, "vo_caca: failed to create canvas\n");
+        MP_ERR(vo, "failed to create canvas\n");
         return ENOSYS;
     }
 
     display = caca_create_display(canvas);
 
     if (display == NULL) {
-        mp_msg(MSGT_VO, MSGL_ERR, "vo_caca: failed to create display\n");
+        MP_ERR(vo, "failed to create display\n");
         caca_free_canvas(canvas);
         return ENOSYS;
     }

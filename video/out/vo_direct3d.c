@@ -114,6 +114,8 @@ struct osdpart {
 /* Global variables "priv" structure. I try to keep their count low.
  */
 typedef struct d3d_priv {
+    struct mp_log *log;
+
     int opt_prefer_stretchrect;
     int opt_disable_textures;
     int opt_disable_stretchrect;
@@ -264,7 +266,7 @@ static bool d3d_begin_scene(d3d_priv *priv)
 {
     if (!priv->d3d_in_scene) {
         if (FAILED(IDirect3DDevice9_BeginScene(priv->d3d_device))) {
-            mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>BeginScene failed.\n");
+            MP_ERR(priv, "BeginScene failed.\n");
             return false;
         }
         priv->d3d_in_scene = true;
@@ -354,9 +356,7 @@ static bool d3dtex_allocate(d3d_priv *priv, struct d3dtex *tex, D3DFORMAT fmt,
     if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device, tw, th, 1,
         D3DUSAGE_DYNAMIC, fmt, memtype, &tex->system, NULL)))
     {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d>Allocating %dx%d texture in system RAM failed.\n",
-               w, h);
+        MP_ERR(priv, "Allocating %dx%d texture in system RAM failed.\n", w, h);
         goto error_exit;
     }
 
@@ -364,9 +364,7 @@ static bool d3dtex_allocate(d3d_priv *priv, struct d3dtex *tex, D3DFORMAT fmt,
         if (FAILED(IDirect3DDevice9_CreateTexture(priv->d3d_device, tw, th, 1,
             D3DUSAGE_DYNAMIC, fmt, D3DPOOL_DEFAULT, &tex->device, NULL)))
         {
-            mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d>Allocating %dx%d texture in video RAM failed.\n",
-               w, h);
+            MP_ERR(priv, "Allocating %dx%d texture in video RAM failed.\n", w, h);
             goto error_exit;
         }
     }
@@ -417,8 +415,7 @@ static void d3d_unlock_video_objects(d3d_priv *priv)
     }
 
     if (any_failed) {
-        mp_msg(MSGT_VO, MSGL_V,
-               "<vo_direct3d>Unlocking video objects failed.\n");
+        MP_VERBOSE(priv, "Unlocking video objects failed.\n");
     }
 }
 
@@ -444,7 +441,7 @@ static void d3d_destroy_video_objects(d3d_priv *priv)
  */
 static void destroy_d3d_surfaces(d3d_priv *priv)
 {
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>destroy_d3d_surfaces called.\n");
+    MP_VERBOSE(priv, "destroy_d3d_surfaces called.\n");
 
     d3d_destroy_video_objects(priv);
 
@@ -480,12 +477,12 @@ static bool d3d_configure_video_objects(d3d_priv *priv)
                                      priv->src_width >> plane->shift_x,
                                      priv->src_height >> plane->shift_y))
                 {
-                    mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Allocating plane %d"
+                    MP_ERR(priv, "Allocating plane %d"
                            " failed.\n", n);
                     return false;
                 }
 
-                mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Allocated plane %d:"
+                MP_VERBOSE(priv, "Allocated plane %d:"
                        " %d bit, shift=%d/%d size=%d/%d (%d/%d).\n", n,
                        plane->bits_per_pixel,
                        plane->shift_x, plane->shift_y,
@@ -504,7 +501,7 @@ static bool d3d_configure_video_objects(d3d_priv *priv)
                 FAILED(IDirect3DDevice9_CreatePixelShader(priv->d3d_device,
                     (DWORD *)priv->pixel_shader_data, &priv->pixel_shader)))
             {
-                mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Failed to create "
+                MP_ERR(priv, "Failed to create "
                        "YUV conversion pixel shader.\n");
                 return false;
             }
@@ -517,8 +514,7 @@ static bool d3d_configure_video_objects(d3d_priv *priv)
                 priv->d3d_device, priv->src_width, priv->src_height,
                 priv->movie_src_fmt, D3DPOOL_DEFAULT, &priv->d3d_surface, NULL)))
         {
-            mp_msg(MSGT_VO, MSGL_ERR,
-                "<vo_direct3d>Allocating offscreen surface failed.\n");
+            MP_ERR(priv, "Allocating offscreen surface failed.\n");
             return false;
         }
     }
@@ -535,7 +531,7 @@ static bool d3d_lock_video_textures(d3d_priv *priv)
             if (FAILED(IDirect3DTexture9_LockRect(plane->texture.system, 0,
                                                   &plane->locked_rect, NULL, 0)))
             {
-                mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Texture lock failure.\n");
+                MP_VERBOSE(priv, "Texture lock failure.\n");
                 d3d_unlock_video_objects(priv);
                 return false;
             }
@@ -565,13 +561,13 @@ static void d3d_clear_video_textures(d3d_priv *priv)
 // done.
 static bool create_d3d_surfaces(d3d_priv *priv)
 {
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>create_d3d_surfaces called.\n");
+    MP_VERBOSE(priv, "create_d3d_surfaces called.\n");
 
     if (!priv->d3d_backbuf &&
         FAILED(IDirect3DDevice9_GetBackBuffer(priv->d3d_device, 0, 0,
                                               D3DBACKBUFFER_TYPE_MONO,
                                               &priv->d3d_backbuf))) {
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Allocating backbuffer failed.\n");
+        MP_ERR(priv, "Allocating backbuffer failed.\n");
         return 0;
     }
 
@@ -614,16 +610,14 @@ static bool init_d3d(d3d_priv *priv)
 
     priv->d3d_handle = priv->pDirect3DCreate9(D3D_SDK_VERSION);
     if (!priv->d3d_handle) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d>Initializing Direct3D failed.\n");
+        MP_ERR(priv, "Initializing Direct3D failed.\n");
         return false;
     }
 
     if (FAILED(IDirect3D9_GetAdapterDisplayMode(priv->d3d_handle,
                                                 D3DADAPTER_DEFAULT,
                                                 &disp_mode))) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d>Reading display mode failed.\n");
+        MP_ERR(priv, "Reading display mode failed.\n");
         return false;
     }
 
@@ -631,17 +625,15 @@ static bool init_d3d(d3d_priv *priv)
     priv->cur_backbuf_width = disp_mode.Width;
     priv->cur_backbuf_height = disp_mode.Height;
 
-    mp_msg(MSGT_VO, MSGL_V,
-           "<vo_direct3d>Setting backbuffer dimensions to (%dx%d).\n",
-           disp_mode.Width, disp_mode.Height);
+    MP_VERBOSE(priv, "Setting backbuffer dimensions to (%dx%d).\n",
+               disp_mode.Width, disp_mode.Height);
 
     if (FAILED(IDirect3D9_GetDeviceCaps(priv->d3d_handle,
                                         D3DADAPTER_DEFAULT,
                                         DEVTYPE,
                                         &disp_caps)))
     {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d>Reading display capabilities failed.\n");
+        MP_ERR(priv, "Reading display capabilities failed.\n");
         return false;
     }
 
@@ -658,13 +650,12 @@ static bool init_d3d(d3d_priv *priv)
     if (priv->opt_force_power_of_2)
         priv->device_caps_power2_only = 1;
 
-    mp_msg(MSGT_VO, MSGL_V,
-           "<vo_direct3d>device_caps_power2_only %d, device_caps_square_only %d\n"
-           "<vo_direct3d>device_texture_sys %d\n"
-           "<vo_direct3d>max_texture_width %d, max_texture_height %d\n",
-           priv->device_caps_power2_only, priv->device_caps_square_only,
-           priv->device_texture_sys, priv->max_texture_width,
-           priv->max_texture_height);
+    MP_VERBOSE(priv, "device_caps_power2_only %d, device_caps_square_only %d\n"
+               "device_texture_sys %d\n"
+               "max_texture_width %d, max_texture_height %d\n",
+               priv->device_caps_power2_only, priv->device_caps_square_only,
+               priv->device_texture_sys, priv->max_texture_width,
+               priv->max_texture_height);
 
     return true;
 }
@@ -724,22 +715,19 @@ static bool change_d3d_backbuffer(d3d_priv *priv)
                                            | D3DCREATE_FPU_PRESERVE,
                                            &present_params, &priv->d3d_device)))
         {
-            mp_msg(MSGT_VO, MSGL_V,
-                   "<vo_direct3d>Creating Direct3D device failed.\n");
+            MP_VERBOSE(priv, "Creating Direct3D device failed.\n");
             return 0;
         }
     } else {
         if (FAILED(IDirect3DDevice9_Reset(priv->d3d_device, &present_params))) {
-            mp_msg(MSGT_VO, MSGL_ERR,
-                   "<vo_direct3d>Reseting Direct3D device failed.\n");
+            MP_ERR(priv, "Reseting Direct3D device failed.\n");
             return 0;
         }
     }
 
-    mp_msg(MSGT_VO, MSGL_V,
-           "<vo_direct3d>New backbuffer (%dx%d), VO (%dx%d)\n",
-           present_params.BackBufferWidth, present_params.BackBufferHeight,
-           window_w, window_h);
+    MP_VERBOSE(priv, "New backbuffer (%dx%d), VO (%dx%d)\n",
+               present_params.BackBufferWidth, present_params.BackBufferHeight,
+               window_w, window_h);
 
     return 1;
 }
@@ -750,7 +738,7 @@ static bool change_d3d_backbuffer(d3d_priv *priv)
  */
 static int reconfigure_d3d(d3d_priv *priv)
 {
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>reconfigure_d3d called.\n");
+    MP_VERBOSE(priv, "reconfigure_d3d called.\n");
 
     destroy_d3d_surfaces(priv);
 
@@ -781,7 +769,7 @@ static bool resize_d3d(d3d_priv *priv)
 {
     D3DVIEWPORT9 vp = {0, 0, priv->vo->dwidth, priv->vo->dheight, 0, 1};
 
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>resize_d3d called.\n");
+    MP_VERBOSE(priv, "resize_d3d called.\n");
 
     /* Make sure that backbuffer is large enough to accomodate the new
        viewport dimensions. Grow it if necessary. */
@@ -808,7 +796,7 @@ static bool resize_d3d(d3d_priv *priv)
         return 0;
 
     if (FAILED(IDirect3DDevice9_SetViewport(priv->d3d_device, &vp))) {
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Setting viewport failed.\n");
+        MP_ERR(priv, "Setting viewport failed.\n");
         return 0;
     }
 
@@ -827,7 +815,7 @@ static bool resize_d3d(d3d_priv *priv)
  */
 static void uninit_d3d(d3d_priv *priv)
 {
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>uninit_d3d called.\n");
+    MP_VERBOSE(priv, "uninit_d3d called.\n");
 
     destroy_d3d_surfaces(priv);
 
@@ -836,7 +824,7 @@ static void uninit_d3d(d3d_priv *priv)
     priv->d3d_device = NULL;
 
     if (priv->d3d_handle) {
-        mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Stopping Direct3D.\n");
+        MP_VERBOSE(priv, "Stopping Direct3D.\n");
         IDirect3D9_Release(priv->d3d_handle);
     }
     priv->d3d_handle = NULL;
@@ -913,8 +901,7 @@ static uint32_t d3d_draw_frame(d3d_priv *priv)
                                                 priv->d3d_backbuf,
                                                 &priv->fs_movie_rect,
                                                 D3DTEXF_LINEAR))) {
-            mp_msg(MSGT_VO, MSGL_ERR,
-                "<vo_direct3d>Copying frame to the backbuffer failed.\n");
+            MP_ERR(priv, "Copying frame to the backbuffer failed.\n");
             return VO_ERROR;
         }
     }
@@ -979,13 +966,13 @@ static D3DFORMAT check_format(d3d_priv *priv, uint32_t movie_fmt,
                             priv->desktop_fmt);
             }
             if (FAILED(res)) {
-                mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Rejected image format "
+                MP_VERBOSE(priv, "Rejected image format "
                        "(%s): %s\n", type, vo_format_name(cur->mplayer_fmt));
                 return 0;
             }
 
-            mp_msg(MSGT_VO, MSGL_DBG2, "<vo_direct3d>Accepted image format "
-                   "(%s): %s\n", type, vo_format_name(cur->mplayer_fmt));
+            MP_DBG(priv, "Accepted image format (%s): %s\n",
+                   type, vo_format_name(cur->mplayer_fmt));
 
             return cur->fourcc;
         }
@@ -1037,7 +1024,7 @@ static bool init_rendering_mode(d3d_priv *priv, uint32_t fmt, bool initialize)
     if (!(blit_d3dfmt || shader_d3dfmt || texture_d3dfmt))
         return false;
 
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Accepted rendering methods for "
+    MP_VERBOSE(priv, "Accepted rendering methods for "
            "format='%s': StretchRect=%#x, Texture=%#x, Texture+Shader=%#x.\n",
            vo_format_name(fmt), blit_d3dfmt, texture_d3dfmt, shader_d3dfmt);
 
@@ -1066,7 +1053,7 @@ static bool init_rendering_mode(d3d_priv *priv, uint32_t fmt, bool initialize)
     }
 
     if (priv->use_textures) {
-        mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Using 3D rendering.\n");
+        MP_VERBOSE(priv, "Using 3D rendering.\n");
 
         struct texplane *planes = &priv->planes[0];
         planes[0].shift_x = planes[0].shift_y = 0;
@@ -1078,7 +1065,7 @@ static bool init_rendering_mode(d3d_priv *priv, uint32_t fmt, bool initialize)
             planes[0].bits_per_pixel = imgfmt_any_rnd_depth(priv->image_format);
             planes[0].d3d_format = texture_d3dfmt;
         } else {
-            mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Using YUV shaders.\n");
+            MP_VERBOSE(priv, "Using YUV shaders.\n");
 
             struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(priv->image_format);
             priv->plane_count = 3;
@@ -1098,7 +1085,7 @@ static bool init_rendering_mode(d3d_priv *priv, uint32_t fmt, bool initialize)
         }
 
     } else {
-        mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Using StretchRect.\n");
+        MP_VERBOSE(priv, "Using StretchRect.\n");
 
         priv->movie_src_fmt = blit_d3dfmt;
     }
@@ -1161,6 +1148,7 @@ static int preinit(struct vo *vo)
 {
     d3d_priv *priv = vo->priv;
     priv->vo = vo;
+    priv->log = vo->log;
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osdpart *osd = talloc_ptrtype(priv, osd);
@@ -1172,16 +1160,14 @@ static int preinit(struct vo *vo)
 
     priv->d3d9_dll = LoadLibraryA("d3d9.dll");
     if (!priv->d3d9_dll) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d>Unable to dynamically load d3d9.dll\n");
+        MP_ERR(priv, "Unable to dynamically load d3d9.dll\n");
         goto err_out;
     }
 
     priv->pDirect3DCreate9 = (void *)GetProcAddress(priv->d3d9_dll,
                                                     "Direct3DCreate9");
     if (!priv->pDirect3DCreate9) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "<vo_direct3d>Unable to find entry point of Direct3DCreate9\n");
+        MP_ERR(priv, "Unable to find entry point of Direct3DCreate9\n");
         goto err_out;
     }
 
@@ -1192,8 +1178,7 @@ static int preinit(struct vo *vo)
      * fullscreen dimensions and does other useful stuff.
      */
     if (!vo_w32_init(vo)) {
-        mp_msg(MSGT_VO, MSGL_V,
-               "<vo_direct3d>Configuring onscreen window failed.\n");
+        MP_VERBOSE(priv, "Configuring onscreen window failed.\n");
         goto err_out;
     }
 
@@ -1290,7 +1275,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
      * the given coordinates.
      */
     if (!vo_w32_config(vo, d_width, d_height, options)) {
-        mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Creating window failed.\n");
+        MP_VERBOSE(priv, "Creating window failed.\n");
         return VO_ERROR;
     }
 
@@ -1320,7 +1305,7 @@ static void flip_page(struct vo *vo)
 
     if (priv->d3d_device && priv->d3d_in_scene) {
         if (FAILED(IDirect3DDevice9_EndScene(priv->d3d_device))) {
-            mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>EndScene failed.\n");
+            MP_ERR(priv, "EndScene failed.\n");
         }
     }
     priv->d3d_in_scene = false;
@@ -1328,14 +1313,12 @@ static void flip_page(struct vo *vo)
     RECT rect = {0, 0, vo->dwidth, vo->dheight};
     if (!priv->d3d_device ||
         FAILED(IDirect3DDevice9_Present(priv->d3d_device, &rect, 0, 0, 0))) {
-        mp_msg(MSGT_VO, MSGL_V,
-               "<vo_direct3d>Trying to reinitialize uncooperative video adapter.\n");
+        MP_VERBOSE(priv, "Trying to reinitialize uncooperative video adapter.\n");
         if (!reconfigure_d3d(priv)) {
-            mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>Reinitialization failed.\n");
+            MP_VERBOSE(priv, "Reinitialization failed.\n");
             return;
         } else {
-            mp_msg(MSGT_VO, MSGL_V,
-                   "<vo_direct3d>Video adapter reinitialized.\n");
+            MP_VERBOSE(priv, "Video adapter reinitialized.\n");
         }
     }
 }
@@ -1347,7 +1330,7 @@ static void uninit(struct vo *vo)
 {
     d3d_priv *priv = vo->priv;
 
-    mp_msg(MSGT_VO, MSGL_V, "<vo_direct3d>uninit called.\n");
+    MP_VERBOSE(priv, "uninit called.\n");
 
     uninit_d3d(priv);
     vo_w32_uninit(vo);
@@ -1381,7 +1364,7 @@ static bool get_video_buffer(d3d_priv *priv, struct mp_image *out)
             if (FAILED(IDirect3DSurface9_LockRect(priv->d3d_surface,
                                                   &priv->locked_rect, NULL, 0)))
             {
-                mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>Surface lock failed.\n");
+                MP_ERR(priv, "Surface lock failed.\n");
                 return false;
             }
         }
@@ -1463,7 +1446,7 @@ static mp_image_t *get_window_screenshot(d3d_priv *priv)
     int width, height;
 
     if (FAILED(IDirect3DDevice9_GetDisplayMode(priv->d3d_device, 0, &mode))) {
-        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>GetDisplayMode failed.\n");
+        MP_ERR(priv, "GetDisplayMode failed.\n");
         goto error_exit;
     }
 
@@ -1472,14 +1455,14 @@ static mp_image_t *get_window_screenshot(d3d_priv *priv)
         mode.Width, mode.Height, D3DFMT_A8R8G8B8, D3DPOOL_SYSTEMMEM, &surface,
         NULL)))
     {
-        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>Couldn't create surface.\n");
+        MP_ERR(priv, "Couldn't create surface.\n");
         goto error_exit;
     }
 
     if (FAILED(IDirect3DDevice9_GetFrontBufferData(priv->d3d_device, 0,
         surface)))
     {
-        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>Couldn't copy frontbuffer.\n");
+        MP_ERR(priv, "Couldn't copy frontbuffer.\n");
         goto error_exit;
     }
 
@@ -1532,7 +1515,7 @@ static bool upload_osd(d3d_priv *priv, struct osdpart *osd,
     osd->packer->padding = imgs->scaled; // assume 2x2 filter on scaling
     int r = packer_pack_from_subbitmaps(osd->packer, imgs);
     if (r < 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "<vo_direct3d>OSD bitmaps do not fit on "
+        MP_ERR(priv, "OSD bitmaps do not fit on "
             "a surface with the maximum supported size %dx%d.\n",
             osd->packer->w_max, osd->packer->h_max);
         return false;
@@ -1548,7 +1531,7 @@ static bool upload_osd(d3d_priv *priv, struct osdpart *osd,
         int new_h = osd->packer->h;
         d3d_fix_texture_size(priv, &new_w, &new_h);
 
-        mp_msg(MSGT_VO, MSGL_DBG2, "<vo_direct3d>reallocate OSD surface.\n");
+        MP_DBG(priv, "reallocate OSD surface.\n");
 
         d3dtex_release(priv, &osd->texture);
         d3dtex_allocate(priv, &osd->texture, fmt, new_w, new_h);
@@ -1566,7 +1549,7 @@ static bool upload_osd(d3d_priv *priv, struct osdpart *osd,
     if (FAILED(IDirect3DTexture9_LockRect(osd->texture.system, 0, &locked_rect,
                                           &dirty_rc, 0)))
     {
-        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>OSD texture lock failed.\n");
+        MP_ERR(priv, "OSD texture lock failed.\n");
         return false;
     }
 
@@ -1575,7 +1558,7 @@ static bool upload_osd(d3d_priv *priv, struct osdpart *osd,
                            locked_rect.Pitch);
 
     if (FAILED(IDirect3DTexture9_UnlockRect(osd->texture.system, 0))) {
-        mp_msg(MSGT_VO,MSGL_ERR, "<vo_direct3d>OSD texture unlock failed.\n");
+        MP_ERR(priv, "OSD texture unlock failed.\n");
         return false;
     }
 

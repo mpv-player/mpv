@@ -139,8 +139,8 @@ bool mp_msg_test_log(struct mp_log *log, int lev);
 
 char *mp_gtext(const char *string);
 
+// Note: using mp_msg_log or the MP_ERR/... macros is preferred.
 void mp_msg_va(int mod, int lev, const char *format, va_list va);
-
 void mp_msg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
 void mp_tmsg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
 #define mp_dbg mp_msg

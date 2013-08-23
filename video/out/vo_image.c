@@ -54,10 +54,9 @@ struct priv {
     struct mp_csp_details colorspace;
 };
 
-static bool checked_mkdir(const char *buf)
+static bool checked_mkdir(struct vo *vo, const char *buf)
 {
-    mp_msg(MSGT_VO, MSGL_INFO, "[vo_image] Creating output directory '%s'...\n",
-           buf);
+    MP_INFO(vo, "Creating output directory '%s'...\n", buf);
     if (mkdir(buf, 0755) < 0) {
         char *errstr = strerror(errno);
         if (errno == EEXIST) {
@@ -65,8 +64,7 @@ static bool checked_mkdir(const char *buf)
             if (mp_stat(buf, &stat_p ) == 0 && S_ISDIR(stat_p.st_mode))
                 return true;
         }
-        mp_msg(MSGT_VO, MSGL_ERR, "[vo_image] Error creating output directory"
-               ": %s\n", errstr);
+        MP_ERR(vo, "Error creating output directory: %s\n", errstr);
         return false;
     }
     return true;
@@ -84,7 +82,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     p->d_height = d_height;
 
     if (p->outdir && vo->config_count < 1)
-        if (!checked_mkdir(p->outdir))
+        if (!checked_mkdir(vo, p->outdir))
             return -1;
 
     return 0;
@@ -131,7 +129,7 @@ static void flip_page(struct vo *vo)
     if (p->outdir && strlen(p->outdir))
         filename = mp_path_join(t, bstr0(p->outdir), bstr0(filename));
 
-    mp_msg(MSGT_VO, MSGL_STATUS, "\nSaving %s\n", filename);
+    MP_INFO(vo, "Saving %s\n", filename);
     write_image(p->current, p->opts, filename);
 
     talloc_free(t);

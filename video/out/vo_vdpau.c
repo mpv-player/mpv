@@ -169,8 +169,9 @@ struct vdpctx {
 
 static bool status_ok(struct vo *vo);
 
-static int change_vdptime_sync(struct vdpctx *vc, int64_t *t)
+static int change_vdptime_sync(struct vo *vo, int64_t *t)
 {
+    struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
     VdpTime vdp_time;
@@ -185,7 +186,7 @@ static int change_vdptime_sync(struct vdpctx *vc, int64_t *t)
         else
             vdp_time = old;
     }
-    mp_msg(MSGT_VO, MSGL_DBG2, "[vdpau] adjusting VdpTime offset by %f µs\n",
+    MP_DBG(vo, "adjusting VdpTime offset by %f µs\n",
            (int64_t)(vdp_time - old) / 1000.);
     vc->last_vdp_time = vdp_time;
     vc->last_sync_update = t1;
@@ -199,7 +200,7 @@ static uint64_t sync_vdptime(struct vo *vo)
 
     uint64_t t = mp_time_us();
     if (t - vc->last_sync_update > 5000000)
-        change_vdptime_sync(vc, &t);
+        change_vdptime_sync(vo, &t);
     uint64_t now = (t - vc->last_sync_update) * 1000ULL + vc->last_vdp_time;
     // Make sure nanosecond inaccuracies don't make things inconsistent
     now = FFMAX(now, vc->recent_vsync_time);
@@ -419,7 +420,7 @@ static void resize(struct vo *vo)
                                                 vc->output_surface_height,
                                                 &vc->output_surfaces[i]);
             CHECK_ST_WARNING("Error when calling vdp_output_surface_create");
-            mp_msg(MSGT_VO, MSGL_DBG2, "vdpau out create: %u\n",
+            MP_DBG(vo, "vdpau out create: %u\n",
                    vc->output_surfaces[i]);
         }
     }
@@ -463,11 +464,10 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
     vc->mpvdp.vdp_device = vc->vdp_device;
     if (vdp_st != VDP_STATUS_OK) {
         if (vc->is_preempted)
-            mp_msg(MSGT_VO, MSGL_DBG2, "[vdpau] Error calling "
-                   "vdp_device_create_x11 while preempted: %d\n", vdp_st);
+            MP_DBG(vo, "Error calling vdp_device_create_x11 while preempted: %d\n",
+                   vdp_st);
         else
-            mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error when calling "
-                   "vdp_device_create_x11: %d\n", vdp_st);
+            MP_ERR(vo, "Error when calling vdp_device_create_x11: %d\n", vdp_st);
         return -1;
     }
 
@@ -476,8 +476,8 @@ static int win_x11_init_vdpau_procs(struct vo *vo)
         vdp_st = get_proc_address(vc->vdp_device, dsc->id,
                                       (void **)((char *)vdp + dsc->offset));
         if (vdp_st != VDP_STATUS_OK) {
-            mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error when calling "
-                   "vdp_get_proc_address(function id %d): %s\n", dsc->id,
+            MP_ERR(vo, "Error when calling vdp_get_proc_address(function "
+                   "id %d): %s\n",  dsc->id,
                    vdp->get_error_string ? vdp->get_error_string(vdp_st) : "?");
             return -1;
         }
@@ -513,8 +513,8 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
         vdp_st = vdp->presentation_queue_create(vc->vdp_device, vc->flip_target,
                                                 &vc->flip_queue);
         if (vc->is_preempted && vdp_st != VDP_STATUS_OK) {
-            mp_msg(MSGT_VO, MSGL_DBG2, "[vdpau] Failed to create flip queue "
-                   "while preempted: %s\n", vdp->get_error_string(vdp_st));
+            MP_DBG(vo, "Failed to create flip queue while preempted: %s\n",
+                   vdp->get_error_string(vdp_st));
             return -1;
         } else
             CHECK_ST_ERROR("Error when calling vdp_presentation_queue_create");
@@ -540,41 +540,39 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
 
     vc->vsync_interval = 1;
     if (vc->composite_detect && vo_x11_screen_is_composited(vo)) {
-        mp_msg(MSGT_VO, MSGL_INFO, "[vdpau] Compositing window manager "
-               "detected. Assuming timing info is inaccurate.\n");
+        MP_INFO(vo, "Compositing window manager detected. Assuming timing info "
+                "is inaccurate.\n");
     } else if (vc->user_fps > 0) {
         vc->vsync_interval = 1e9 / vc->user_fps;
-        mp_msg(MSGT_VO, MSGL_INFO, "[vdpau] Assuming user-specified display "
-               "refresh rate of %.3f Hz.\n", vc->user_fps);
+        MP_INFO(vo, "Assuming user-specified display refresh rate of %.3f Hz.\n",
+                vc->user_fps);
     } else if (vc->user_fps == 0) {
 #ifdef CONFIG_XF86VM
         double fps = vo_x11_vm_get_fps(vo);
         if (!fps)
-            mp_msg(MSGT_VO, MSGL_WARN, "[vdpau] Failed to get display FPS\n");
+            MP_WARN(vo, "Failed to get display FPS\n");
         else {
             vc->vsync_interval = 1e9 / fps;
             // This is verbose, but I'm not yet sure how common wrong values are
-            mp_msg(MSGT_VO, MSGL_INFO,
-                   "[vdpau] Got display refresh rate %.3f Hz.\n"
-                   "[vdpau] If that value looks wrong give the "
-                   "-vo vdpau:fps=X suboption manually.\n", fps);
+            MP_INFO(vo, "Got display refresh rate %.3f Hz.\n", fps);
+            MP_INFO(vo, "If that value looks wrong give the "
+                    "-vo vdpau:fps=X suboption manually.\n");
         }
 #else
-        mp_msg(MSGT_VO, MSGL_INFO, "[vdpau] This binary has been compiled "
-               "without XF86VidMode support.\n");
-        mp_msg(MSGT_VO, MSGL_INFO, "[vdpau] Can't use vsync-aware timing "
-               "without manually provided -vo vdpau:fps=X suboption.\n");
+        MP_INFO(vo, "This binary has been compiled without XF86VidMode support.\n");
+        MP_INFO(vo, "Can't use vsync-aware timing without manually provided "
+                "-vo vdpau:fps=X suboption.\n");
 #endif
     } else
-        mp_msg(MSGT_VO, MSGL_V, "[vdpau] framedrop/timing logic disabled by "
-               "user.\n");
+        MP_VERBOSE(vo, "framedrop/timing logic disabled by user.\n");
 
     return 0;
 }
 
-static int set_video_attribute(struct vdpctx *vc, VdpVideoMixerAttribute attr,
+static int set_video_attribute(struct vo *vo, VdpVideoMixerAttribute attr,
                                const void *value, char *attr_name)
 {
+    struct vdpctx *vc = vo->priv;
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
 
@@ -584,8 +582,8 @@ static int set_video_attribute(struct vdpctx *vc, VdpVideoMixerAttribute attr,
     vdp_st = vdp->video_mixer_set_attribute_values(vc->video_mixer, 1, &attr,
                                                    &value);
     if (vdp_st != VDP_STATUS_OK) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Error setting video mixer "
-               "attribute %s: %s\n", attr_name, vdp->get_error_string(vdp_st));
+        MP_ERR(vo, "Error setting video mixer attribute %s: %s\n", attr_name,
+               vdp->get_error_string(vdp_st));
         return -1;
     }
     return 0;
@@ -595,7 +593,7 @@ static void update_csc_matrix(struct vo *vo)
 {
     struct vdpctx *vc = vo->priv;
 
-    mp_msg(MSGT_VO, MSGL_V, "[vdpau] Updating CSC matrix\n");
+    MP_VERBOSE(vo, "Updating CSC matrix\n");
 
     // VdpCSCMatrix happens to be compatible with mplayer's CSC matrix type
     // both are float[3][4]
@@ -606,11 +604,11 @@ static void update_csc_matrix(struct vo *vo)
     mp_csp_copy_equalizer_values(&cparams, &vc->video_eq);
     mp_get_yuv2rgb_coeffs(&cparams, matrix);
 
-    set_video_attribute(vc, VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX,
+    set_video_attribute(vo, VDP_VIDEO_MIXER_ATTRIBUTE_CSC_MATRIX,
                         &matrix, "CSC matrix");
 }
 
-#define SET_VIDEO_ATTR(attr_name, attr_type, value) set_video_attribute(vc, \
+#define SET_VIDEO_ATTR(attr_name, attr_type, value) set_video_attribute(vo, \
                  VDP_VIDEO_MIXER_ATTRIBUTE_ ## attr_name, &(attr_type){value},\
                  # attr_name)
 static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
@@ -659,8 +657,8 @@ static int create_vdp_mixer(struct vo *vo, VdpChromaType vdp_chroma_type)
         if (hqscaling_available)
             features[feature_count++] = hqscaling_feature;
         else
-            mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Your hardware or VDPAU "
-                   "library does not support requested hqscaling.\n");
+            MP_ERR(vo, "Your hardware or VDPAU library does not support "
+                   "requested hqscaling.\n");
     }
 
     vdp_st = vdp->video_mixer_create(vc->vdp_device, feature_count, features,
@@ -814,8 +812,7 @@ static int handle_preemption(struct vo *vo)
         mark_vdpau_objects_uninitialized(vo);
     vc->preemption_acked = true;
     if (!vc->preemption_user_notified) {
-        mp_tmsg(MSGT_VO, MSGL_ERR, "[vdpau] Got display preemption notice! "
-                "Will attempt to recover.\n");
+        MP_ERR(vo, "Got display preemption notice! Will attempt to recover.\n");
         vc->preemption_user_notified = true;
     }
     /* Trying to initialize seems to be quite slow, so only try once a
@@ -832,7 +829,7 @@ static int handle_preemption(struct vo *vo)
     vc->mpvdp.is_preempted = false;
     vc->mpvdp.preemption_counter++;
     vc->preemption_user_notified = false;
-    mp_tmsg(MSGT_VO, MSGL_INFO, "[vdpau] Recovered from display preemption.\n");
+    MP_INFO(vo, "Recovered from display preemption.\n");
     return 1;
 }
 
@@ -983,16 +980,16 @@ static void generate_osd_part(struct vo *vo, struct sub_bitmaps *imgs)
     sfc->packer->padding = imgs->scaled; // assume 2x2 filter on scaling
     int r = packer_pack_from_subbitmaps(sfc->packer, imgs);
     if (r < 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] OSD bitmaps do not fit on "
-               "a surface with the maximum supported size\n");
+        MP_ERR(vo, "OSD bitmaps do not fit on a surface with the maximum "
+               "supported size\n");
         return;
     } else if (r == 1) {
         if (sfc->surface != VDP_INVALID_HANDLE) {
             vdp_st = vdp->bitmap_surface_destroy(sfc->surface);
             CHECK_ST_WARNING("Error when calling vdp_bitmap_surface_destroy");
         }
-        mp_msg(MSGT_VO, MSGL_V, "[vdpau] Allocating a %dx%d surface for "
-               "OSD bitmaps.\n", sfc->packer->w, sfc->packer->h);
+        MP_VERBOSE(vo, "Allocating a %dx%d surface for OSD bitmaps.\n",
+                   sfc->packer->w, sfc->packer->h);
         vdp_st = vdp->bitmap_surface_create(vc->vdp_device, format,
                                             sfc->packer->w, sfc->packer->h,
                                             true, &sfc->surface);
@@ -1091,9 +1088,9 @@ static int update_presentation_queue_status(struct vo *vo)
         if (vc->vsync_interval > 1) {
             uint64_t qtime = vc->queue_time[vc->query_surface_num];
             if (vtime < qtime + vc->vsync_interval / 2)
-                mp_msg(MSGT_VO, MSGL_V, "[vdpau] Frame shown too early\n");
+                MP_VERBOSE(vo, "Frame shown too early\n");
             if (vtime > qtime + vc->vsync_interval)
-                mp_msg(MSGT_VO, MSGL_V, "[vdpau] Frame shown late\n");
+                MP_VERBOSE(vo, "Frame shown late\n");
         }
         vc->query_surface_num = WRAP_ADD(vc->query_surface_num, 1,
                                          vc->num_output_surfaces);
@@ -1101,8 +1098,7 @@ static int update_presentation_queue_status(struct vo *vo)
     }
     int num_queued = WRAP_ADD(vc->surface_num, -vc->query_surface_num,
                               vc->num_output_surfaces);
-    mp_msg(MSGT_VO, MSGL_DBG3, "[vdpau] Queued surface count (before add): "
-           "%d\n", num_queued);
+    MP_DBG(vo, "Queued surface count (before add): %d\n", num_queued);
     return num_queued;
 }
 
@@ -1266,7 +1262,7 @@ static struct mp_image *get_video_surface(struct mp_vdpau_ctx *ctx, int fmt,
             e->w = w;
             e->h = h;
             if (vc->is_preempted) {
-                mp_msg(MSGT_VO, MSGL_WARN, "[vdpau] Preempted, no surface.\n");
+                MP_WARN(vo, "Preempted, no surface.\n");
             } else {
                 vdp_st = vdp->video_surface_create(vc->vdp_device, chroma,
                                                    w, h, &e->surface);
@@ -1276,8 +1272,7 @@ static struct mp_image *get_video_surface(struct mp_vdpau_ctx *ctx, int fmt,
         }
     }
 
-    mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] no surfaces available in "
-           "get_video_surface\n");
+    MP_ERR(vo, "no surfaces available in get_video_surface\n");
     // TODO: this probably breaks things forever, provide a dummy buffer?
     return NULL;
 }
@@ -1302,8 +1297,7 @@ static VdpOutputSurface get_rgb_surface(struct vo *vo)
     in_use:;
     }
 
-    mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] no surfaces available in "
-           "get_rgb_surface\n");
+    MP_ERR(vo, "no surfaces available in get_rgb_surface\n");
     return VDP_INVALID_HANDLE;
 }
 

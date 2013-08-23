@@ -107,8 +107,6 @@ static int format2oss(int format)
         if (format_table[n][1] == format)
             return format_table[n][0];
     }
-    mp_msg(MSGT_AO, MSGL_V, "OSS: Unknown/not supported internal format: %s\n",
-           af_fmt2str_short(format));
     return -1;
 }
 
@@ -118,8 +116,6 @@ static int oss2format(int format)
         if (format_table[n][0] == format)
             return format_table[n][1];
     }
-    mp_tmsg(MSGT_GLOBAL, MSGL_ERR, "[AO OSS] Unknown/Unsupported OSS format: %x.\n",
-            format);
     return -1;
 }
 
@@ -204,16 +200,15 @@ static int init(struct ao *ao)
     if (p->cfg_oss_mixer_channel && p->cfg_oss_mixer_channel[0])
         mchan = p->cfg_oss_mixer_channel;
 
-    mp_msg(MSGT_AO, MSGL_V, "ao2: %d Hz  %d chans  %s\n", ao->samplerate,
-           ao->channels.num, af_fmt2str_short(ao->format));
+    MP_VERBOSE(ao, "%d Hz  %d chans  %s\n", ao->samplerate,
+               ao->channels.num, af_fmt2str_short(ao->format));
 
     if (mchan) {
         int fd, devs, i;
 
         if ((fd = open(p->oss_mixer_device, O_RDONLY)) == -1) {
-            mp_tmsg(MSGT_AO, MSGL_ERR,
-                    "[AO OSS] audio_setup: Can't open mixer device %s: %s\n",
-                    p->oss_mixer_device, strerror(errno));
+            MP_ERR(ao, "Can't open mixer device %s: %s\n",
+                   p->oss_mixer_device, strerror(errno));
         } else {
             ioctl(fd, SOUND_MIXER_READ_DEVMASK, &devs);
             close(fd);
@@ -221,9 +216,8 @@ static int init(struct ao *ao)
             for (i = 0; i < SOUND_MIXER_NRDEVICES; i++) {
                 if (!strcasecmp(mixer_channels[i], mchan)) {
                     if (!(devs & (1 << i))) {
-                        mp_tmsg(MSGT_AO, MSGL_ERR, "[AO OSS] audio_setup: "
-                                "Audio card mixer does not have channel '%s', "
-                                "using default.\n", mchan);
+                        MP_ERR(ao, "Audio card mixer does not have "
+                               "channel '%s', using default.\n", mchan);
                         i = SOUND_MIXER_NRDEVICES + 1;
                         break;
                     }
@@ -232,20 +226,17 @@ static int init(struct ao *ao)
                 }
             }
             if (i == SOUND_MIXER_NRDEVICES) {
-                mp_tmsg(MSGT_AO, MSGL_ERR, "[AO OSS] audio_setup: Audio card "
-                        "mixer does not have channel '%s', using default.\n",
-                        mchan);
+                MP_ERR(ao, "Audio card mixer does not have "
+                       "channel '%s', using default.\n", mchan);
             }
         }
     } else {
         p->oss_mixer_channel = SOUND_MIXER_PCM;
     }
 
-    mp_msg(MSGT_AO, MSGL_V, "audio_setup: using '%s' dsp device\n", p->dsp);
-    mp_msg(MSGT_AO, MSGL_V, "audio_setup: using '%s' mixer device\n",
-           p->oss_mixer_device);
-    mp_msg(MSGT_AO, MSGL_V, "audio_setup: using '%s' mixer device\n",
-           mixer_channels[p->oss_mixer_channel]);
+    MP_VERBOSE(ao, "using '%s' dsp device\n", p->dsp);
+    MP_VERBOSE(ao, "using '%s' mixer device\n", p->oss_mixer_device);
+    MP_VERBOSE(ao, "using '%s' mixer device\n", mixer_channels[p->oss_mixer_channel]);
 
 #ifdef __linux__
     p->audio_fd = open(p->dsp, O_WRONLY | O_NONBLOCK);
@@ -253,17 +244,14 @@ static int init(struct ao *ao)
     p->audio_fd = open(p->dsp, O_WRONLY);
 #endif
     if (p->audio_fd < 0) {
-        mp_tmsg(MSGT_AO, MSGL_ERR,
-                "[AO OSS] audio_setup: Can't open audio device %s: %s\n",
-                p->dsp, strerror(errno));
+        MP_ERR(ao, "Can't open audio device %s: %s\n", p->dsp, strerror(errno));
         return -1;
     }
 
 #ifdef __linux__
     /* Remove the non-blocking flag */
     if (fcntl(p->audio_fd, F_SETFL, 0) < 0) {
-        mp_tmsg(MSGT_AO, MSGL_ERR, "[AO OSS] audio_setup: Can't make file "
-                "descriptor blocking: %s\n", strerror(errno));
+        MP_ERR(ao, "Can't make file descriptor blocking: %s\n",  strerror(errno));
         return -1;
     }
 #endif
@@ -281,6 +269,8 @@ ac3_retry:
         ao->format = AF_FORMAT_AC3_NE;
     oss_format = format2oss(ao->format);
     if (oss_format == -1) {
+        MP_VERBOSE(ao, "Unknown/not supported internal format: %s\n",
+                   af_fmt2str_short(ao->format));
 #if BYTE_ORDER == BIG_ENDIAN
         oss_format = AFMT_S16_BE;
 #else
@@ -291,19 +281,20 @@ ac3_retry:
     if (ioctl(p->audio_fd, SNDCTL_DSP_SETFMT, &oss_format) < 0 ||
         oss_format != format2oss(ao->format))
     {
-        mp_tmsg(MSGT_AO, MSGL_WARN, "[AO OSS] Can't set audio device %s to %s "
-                "output, trying %s...\n", p->dsp, af_fmt2str_short(ao->format),
+        MP_WARN(ao, "Can't set audio device %s to %s output, trying %s...\n",
+                p->dsp, af_fmt2str_short(ao->format),
                 af_fmt2str_short(AF_FORMAT_S16_NE));
         ao->format = AF_FORMAT_S16_NE;
         goto ac3_retry;
     }
 
     ao->format = oss2format(oss_format);
-    if (ao->format == -1)
+    if (ao->format == -1) {
+        MP_ERR(ao, "Unknown/Unsupported OSS format: %x.\n", oss_format);
         return -1;
+    }
 
-    mp_msg(MSGT_AO, MSGL_V, "audio_setup: sample format: %s\n",
-           af_fmt2str_short(ao->format));
+    MP_VERBOSE(ao, "sample format: %s\n", af_fmt2str_short(ao->format));
 
     if (!AF_FORMAT_IS_AC3(ao->format)) {
         struct mp_chmap_sel sel = {0};
@@ -317,45 +308,39 @@ ac3_retry:
             if (ioctl(p->audio_fd, SNDCTL_DSP_CHANNELS, &nchannels) == -1 ||
                 nchannels != reqchannels)
             {
-                mp_tmsg(MSGT_AO, MSGL_ERR, "[AO OSS] audio_setup: Failed to "
-                        "set audio device to %d channels.\n", reqchannels);
+                MP_ERR(ao, "Failed to set audio device to %d channels.\n",
+                       reqchannels);
                 return -1;
             }
         } else {
             int c = reqchannels - 1;
             if (ioctl(p->audio_fd, SNDCTL_DSP_STEREO, &c) == -1) {
-                mp_tmsg(MSGT_AO, MSGL_ERR, "[AO OSS] audio_setup: Failed to "
-                        "set audio device to %d channels.\n", reqchannels);
+                MP_ERR(ao, "Failed to set audio device to %d channels.\n",
+                       reqchannels);
                 return -1;
             }
             if (!ao_chmap_sel_get_def(ao, &sel, &ao->channels, c + 1))
                 return -1;
         }
-        mp_msg(MSGT_AO, MSGL_V,
-               "audio_setup: using %d channels (requested: %d)\n",
-               ao->channels.num, reqchannels);
+        MP_VERBOSE(ao, "using %d channels (requested: %d)\n",
+                   ao->channels.num, reqchannels);
         // set rate
         ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &ao->samplerate);
-        mp_msg(MSGT_AO, MSGL_V, "audio_setup: using %d Hz samplerate\n",
-               ao->samplerate);
+        MP_VERBOSE(ao, "using %d Hz samplerate\n", ao->samplerate);
     }
 
     if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &p->zz) == -1) {
         int r = 0;
-        mp_tmsg(MSGT_AO, MSGL_WARN, "[AO OSS] audio_setup: driver doesn't "
-                "support SNDCTL_DSP_GETOSPACE\n");
+        MP_WARN(ao, "driver doesn't support SNDCTL_DSP_GETOSPACE\n");
         if (ioctl(p->audio_fd, SNDCTL_DSP_GETBLKSIZE, &r) == -1)
-            mp_msg(MSGT_AO, MSGL_V, "audio_setup: %d bytes/frag (config.h)\n",
-                   p->outburst);
+            MP_VERBOSE(ao, "%d bytes/frag (config.h)\n", p->outburst);
         else {
             p->outburst = r;
-            mp_msg(MSGT_AO, MSGL_V, "audio_setup: %d bytes/frag (GETBLKSIZE)\n",
-                   p->outburst);
+            MP_VERBOSE(ao, "%d bytes/frag (GETBLKSIZE)\n", p->outburst);
         }
     } else {
-        mp_msg(MSGT_AO, MSGL_V,
-               "audio_setup: frags: %3d/%d  (%d bytes/frag)  free: %6d\n",
-               p->zz.fragments, p->zz.fragstotal, p->zz.fragsize, p->zz.bytes);
+        MP_VERBOSE(ao, "frags: %3d/%d  (%d bytes/frag)  free: %6d\n",
+                   p->zz.fragments, p->zz.fragstotal, p->zz.fragsize, p->zz.bytes);
         p->buffersize = p->zz.bytes;
         p->outburst = p->zz.fragsize;
     }
@@ -381,9 +366,8 @@ ac3_retry:
         }
         free(data);
         if (p->buffersize == 0) {
-            mp_tmsg(MSGT_AO, MSGL_ERR, "[AO OSS]\n   ***  Your audio driver "
-                    "DOES NOT support select()  ***\n Recompile mpv with "
-                    "#undef HAVE_AUDIO_SELECT in config.h !\n\n");
+            MP_ERR(ao, "***  Your audio driver DOES NOT support select()  ***\n");
+            MP_ERR(ao, "Recompile mpv with #undef HAVE_AUDIO_SELECT in config.h!\n");
             return -1;
         }
 #endif
@@ -433,8 +417,8 @@ static void reset(struct ao *ao)
     close_device(ao);
     p->audio_fd = open(p->dsp, O_WRONLY);
     if (p->audio_fd < 0) {
-        mp_tmsg(MSGT_AO, MSGL_ERR, "[AO OSS]\nFatal error: *** CANNOT "
-                "RE-OPEN / RESET AUDIO DEVICE *** %s\n", strerror(errno));
+        MP_ERR(ao, "Fatal error: *** CANNOT "
+               "RE-OPEN / RESET AUDIO DEVICE *** %s\n", strerror(errno));
         return;
     }
 

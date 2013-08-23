@@ -152,23 +152,8 @@ static void UninitDirectSound(struct ao *ao)
         FreeLibrary(p->hdsound_dll);
         p->hdsound_dll = NULL;
     }
-    mp_msg(MSGT_AO, MSGL_V, "ao_dsound: DirectSound uninitialized\n");
+    MP_VERBOSE(ao, "DirectSound uninitialized\n");
 }
-
-/**
-\brief print the commandline help
-*/
-static void print_help(void)
-{
-    mp_msg(MSGT_AO, MSGL_FATAL,
-           "\n-ao dsound commandline help:\n"
-           "Example: mpv -ao dsound:device=1\n"
-           "  sets 1st device\n"
-           "\nOptions:\n"
-           "  device=<device-number>\n"
-           "    Sets device number, use -v to get a list\n");
-}
-
 
 /**
 \brief enumerate direct sound devices
@@ -180,13 +165,13 @@ static BOOL CALLBACK DirectSoundEnum(LPGUID guid, LPCSTR desc, LPCSTR module,
     struct ao *ao = context;
     struct priv *p = ao->priv;
 
-    mp_msg(MSGT_AO, MSGL_V, "%i %s ", p->device_index, desc);
+    MP_VERBOSE(ao, "%i %s ", p->device_index, desc);
     if (p->device_num == p->device_index) {
-        mp_msg(MSGT_AO, MSGL_V, "<--");
+        MP_VERBOSE(ao, "<--");
         if (guid)
             memcpy(&p->device, guid, sizeof(GUID));
     }
-    mp_msg(MSGT_AO, MSGL_V, "\n");
+    MP_VERBOSE(ao, "\n");
     p->device_index++;
     return TRUE;
 }
@@ -210,7 +195,7 @@ static int InitDirectSound(struct ao *ao)
 
     p->hdsound_dll = LoadLibrary("DSOUND.DLL");
     if (p->hdsound_dll == NULL) {
-        mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: cannot load DSOUND.DLL\n");
+        MP_ERR(ao, "cannot load DSOUND.DLL\n");
         return 0;
     }
     OurDirectSoundCreate = (void *)GetProcAddress(p->hdsound_dll,
@@ -219,21 +204,20 @@ static int InitDirectSound(struct ao *ao)
                                                      "DirectSoundEnumerateA");
 
     if (OurDirectSoundCreate == NULL || OurDirectSoundEnumerate == NULL) {
-        mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: GetProcAddress FAILED\n");
+        MP_ERR(ao, "GetProcAddress FAILED\n");
         FreeLibrary(p->hdsound_dll);
         return 0;
     }
 
     // Enumerate all directsound p->devices
-    mp_msg(MSGT_AO, MSGL_V, "ao_dsound: Output Devices:\n");
+    MP_VERBOSE(ao, "Output Devices:\n");
     OurDirectSoundEnumerate(DirectSoundEnum, ao);
 
     // Create the direct sound object
     if (FAILED(OurDirectSoundCreate((p->device_num) ? &p->device : NULL,
                                     &p->hds, NULL)))
     {
-        mp_msg(MSGT_AO, MSGL_ERR,
-               "ao_dsound: cannot create a DirectSound device\n");
+        MP_ERR(ao, "cannot create a DirectSound device\n");
         FreeLibrary(p->hdsound_dll);
         return 0;
     }
@@ -251,22 +235,20 @@ static int InitDirectSound(struct ao *ao)
     if (IDirectSound_SetCooperativeLevel(p->hds, GetDesktopWindow(),
                                          DSSCL_EXCLUSIVE))
     {
-        mp_msg(MSGT_AO, MSGL_ERR,
-               "ao_dsound: cannot set direct sound cooperative level\n");
+        MP_ERR(ao, "cannot set direct sound cooperative level\n");
         IDirectSound_Release(p->hds);
         FreeLibrary(p->hdsound_dll);
         return 0;
     }
-    mp_msg(MSGT_AO, MSGL_V, "ao_dsound: DirectSound initialized\n");
+    MP_VERBOSE(ao, "DirectSound initialized\n");
 
     memset(&dscaps, 0, sizeof(DSCAPS));
     dscaps.dwSize = sizeof(DSCAPS);
     if (DS_OK == IDirectSound_GetCaps(p->hds, &dscaps)) {
         if (dscaps.dwFlags & DSCAPS_EMULDRIVER)
-            mp_msg(MSGT_AO, MSGL_V,
-                   "ao_dsound: DirectSound is emulated, waveOut may give better performance\n");
+            MP_VERBOSE(ao, "DirectSound is emulated\n");
     } else {
-        mp_msg(MSGT_AO, MSGL_V, "ao_dsound: cannot get device capabilities\n");
+        MP_VERBOSE(ao, "cannot get device capabilities\n");
     }
 
     return 1;
@@ -424,9 +406,8 @@ static int init(struct ao *ao)
     case AF_FORMAT_U8:
         break;
     default:
-        mp_msg(MSGT_AO, MSGL_V,
-               "ao_dsound: format %s not supported defaulting to Signed 16-bit Little-Endian\n",
-               af_fmt2str_short(format));
+        MP_VERBOSE(ao, "format %s not supported defaulting to Signed 16-bit Little-Endian\n",
+                   af_fmt2str_short(format));
         format = AF_FORMAT_S16_LE;
     }
     //set our audio parameters
@@ -434,11 +415,10 @@ static int init(struct ao *ao)
     ao->format = format;
     ao->bps = ao->channels.num * rate * (af_fmt2bits(format) >> 3);
     int buffersize = ao->bps; // space for 1 sec
-    mp_msg(MSGT_AO, MSGL_V,
-           "ao_dsound: Samplerate:%iHz Channels:%i Format:%s\n", rate,
-           ao->channels.num, af_fmt2str_short(format));
-    mp_msg(MSGT_AO, MSGL_V, "ao_dsound: Buffersize:%d bytes (%d msec)\n",
-           buffersize, buffersize / ao->bps * 1000);
+    MP_VERBOSE(ao, "Samplerate:%iHz Channels:%i Format:%s\n", rate,
+               ao->channels.num, af_fmt2str_short(format));
+    MP_VERBOSE(ao, "Buffersize:%d bytes (%d msec)\n",
+               buffersize, buffersize / ao->bps * 1000);
 
     //fill waveformatex
     ZeroMemory(&wformat, sizeof(WAVEFORMATEXTENSIBLE));
@@ -494,19 +474,16 @@ static int init(struct ao *ao)
     res = IDirectSound_CreateSoundBuffer(p->hds, &dsbpridesc, &p->hdspribuf, NULL);
     if (res != DS_OK) {
         UninitDirectSound(ao);
-        mp_msg(MSGT_AO, MSGL_ERR,
-               "ao_dsound: cannot create primary buffer (%s)\n",
-               dserr2str(res));
+        MP_ERR(ao, "cannot create primary buffer (%s)\n", dserr2str(res));
         return -1;
     }
     res = IDirectSoundBuffer_SetFormat(p->hdspribuf, (WAVEFORMATEX *)&wformat);
     if (res != DS_OK) {
-        mp_msg(MSGT_AO, MSGL_WARN,
-               "ao_dsound: cannot set primary buffer format (%s), using "
-               "standard setting (bad quality)", dserr2str(res));
+        MP_WARN(ao, "cannot set primary buffer format (%s), using "
+                "standard setting (bad quality)", dserr2str(res));
     }
 
-    mp_msg(MSGT_AO, MSGL_V, "ao_dsound: primary buffer created\n");
+    MP_VERBOSE(ao, "primary buffer created\n");
 
     // now create the stream buffer
 
@@ -519,13 +496,12 @@ static int init(struct ao *ao)
         }
         if (res != DS_OK) {
             UninitDirectSound(ao);
-            mp_msg(MSGT_AO, MSGL_ERR,
-                   "ao_dsound: cannot create secondary (stream)buffer (%s)\n",
+            MP_ERR(ao, "cannot create secondary (stream)buffer (%s)\n",
                    dserr2str(res));
             return -1;
         }
     }
-    mp_msg(MSGT_AO, MSGL_V, "ao_dsound: secondary (stream)buffer created\n");
+    MP_VERBOSE(ao, "secondary (stream)buffer created\n");
     return 0;
 }
 
