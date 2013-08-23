@@ -104,9 +104,10 @@ static bool resize(struct vo *vo);
  * the 'best' available TrueColor visual that has a decent color
  * depth (at least 15bit).  If there are multiple visuals with depth
  * >= 15bit, we prefer visuals with a smaller color depth. */
-static int find_depth_from_visuals(Display * dpy, int screen,
-                                   Visual ** visual_return)
+static int find_depth_from_visuals(struct vo *vo, Visual ** visual_return)
 {
+    Display *dpy = vo->x11->display;
+    int screen = vo->x11->screen;
     XVisualInfo visual_tmpl;
     XVisualInfo *visuals;
     int nvisuals, i;
@@ -122,8 +123,8 @@ static int find_depth_from_visuals(Display * dpy, int screen,
     {
         for (i = 0; i < nvisuals; i++)
         {
-            mp_msg(MSGT_VO, MSGL_V,
-                   "vo: X11 truecolor visual %#lx, depth %d, R:%lX G:%lX B:%lX\n",
+            MP_VERBOSE(vo,
+                  "truecolor visual %#lx, depth %d, R:%lX G:%lX B:%lX\n",
                    visuals[i].visualid, visuals[i].depth,
                    visuals[i].red_mask, visuals[i].green_mask,
                    visuals[i].blue_mask);
@@ -160,8 +161,7 @@ static void getMyXImage(struct priv *p, int foo)
                                     + ShmCompletion;
     } else {
         p->Shmem_Flag = 0;
-        mp_msg(MSGT_VO, MSGL_WARN,
-               "Shared memory not supported\nReverting to normal Xlib\n");
+        MP_WARN(vo, "Shared memory not supported\nReverting to normal Xlib\n");
     }
 
     if (p->Shmem_Flag) {
@@ -170,8 +170,7 @@ static void getMyXImage(struct priv *p, int foo)
                             ZPixmap, NULL, &p->Shminfo[foo], p->image_width,
                             p->image_height);
         if (p->myximage[foo] == NULL) {
-            mp_msg(MSGT_VO, MSGL_WARN,
-                   "Shared memory error,disabling ( Ximage error )\n");
+            MP_WARN(vo, "Shared memory error,disabling ( Ximage error )\n");
             goto shmemerror;
         }
         p->Shminfo[foo].shmid = shmget(IPC_PRIVATE,
@@ -180,18 +179,16 @@ static void getMyXImage(struct priv *p, int foo)
                                        IPC_CREAT | 0777);
         if (p->Shminfo[foo].shmid < 0) {
             XDestroyImage(p->myximage[foo]);
-            mp_msg(MSGT_VO, MSGL_V, "%s\n", strerror(errno));
+            MP_VERBOSE(vo, "%s\n", strerror(errno));
             //perror( strerror( errno ) );
-            mp_msg(MSGT_VO, MSGL_WARN,
-                   "Shared memory error,disabling ( seg id error )\n");
+            MP_WARN(vo, "Shared memory error,disabling ( seg id error )\n");
             goto shmemerror;
         }
         p->Shminfo[foo].shmaddr = (char *) shmat(p->Shminfo[foo].shmid, 0, 0);
 
         if (p->Shminfo[foo].shmaddr == ((char *) -1)) {
             XDestroyImage(p->myximage[foo]);
-            mp_msg(MSGT_VO, MSGL_WARN,
-                   "Shared memory error,disabling ( address error )\n");
+            MP_WARN(vo, "Shared memory error,disabling ( address error )\n");
             goto shmemerror;
         }
         p->myximage[foo]->data = p->Shminfo[foo].shmaddr;
@@ -204,7 +201,7 @@ static void getMyXImage(struct priv *p, int foo)
         shmctl(p->Shminfo[foo].shmid, IPC_RMID, 0);
 
         if (!p->firstTime) {
-            mp_msg(MSGT_VO, MSGL_V, "Sharing memory.\n");
+            MP_VERBOSE(vo, "Sharing memory.\n");
             p->firstTime = 1;
         }
     } else {
@@ -302,8 +299,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
     if (p->depth != 15 && p->depth != 16 && p->depth != 24 && p->depth != 32) {
         Visual *visual;
 
-        p->depth = find_depth_from_visuals(vo->x11->display, vo->x11->screen,
-                                           &visual);
+        p->depth = find_depth_from_visuals(vo, &visual);
     }
     if (!XMatchVisualInfo(vo->x11->display, vo->x11->screen, p->depth,
                           DirectColor, &p->vinfo)
@@ -371,9 +367,8 @@ static bool resize(struct vo *vo)
         fmte++;
     }
     if (!fmte->mpfmt) {
-        mp_msg(
-            MSGT_VO, MSGL_ERR,
-            "X server image format not supported, please contact the developers\n");
+        MP_ERR(vo, "X server image format not supported,"
+                   " please contact the developers\n");
         return -1;
     }
     p->bpp = p->myximage[0]->bits_per_pixel;
@@ -458,8 +453,8 @@ static void wait_for_completion(struct vo *vo, int max_outstanding)
     if (ctx->Shmem_Flag) {
         while (x11->ShmCompletionWaitCount > max_outstanding) {
             if (!ctx->Shm_Warned_Slow) {
-                mp_msg(MSGT_VO, MSGL_WARN, "[VO_X11] X11 can't keep up! Waiting"
-                                           " for XShm completion events...\n");
+                MP_WARN(vo, "can't keep up! Waiting"
+                            " for XShm completion events...\n");
                 ctx->Shm_Warned_Slow = 1;
             }
             mp_sleep_us(1000);
@@ -511,9 +506,8 @@ static int redraw_frame(struct vo *vo)
 static int query_format(struct vo *vo, uint32_t format)
 {
     struct priv *p = vo->priv;
-    mp_msg(MSGT_VO, MSGL_DBG2,
-           "vo_x11: query_format was called: %x (%s)\n", format,
-           vo_format_name(format));
+    MP_DBG(vo, "query_format was called: %x (%s)\n", format,
+            vo_format_name(format));
     if (IMGFMT_IS_RGB(format)) {
         for (int n = 0; fmt2Xfmt[n].mpfmt; n++) {
             if (fmt2Xfmt[n].mpfmt == format) {
@@ -548,7 +542,7 @@ static void find_x11_depth(struct vo *vo)
     {
         Visual *visual;
 
-        depth = find_depth_from_visuals(x11->display, x11->screen, &visual);
+        depth = find_depth_from_visuals(vo, &visual);
         if (depth != -1)
             mXImage = XCreateImage(x11->display, visual, depth, ZPixmap,
                                    0, NULL, 1, 1, 8, 1);
@@ -571,8 +565,7 @@ static void find_x11_depth(struct vo *vo)
             ximage_depth = bpp;     // by A'rpi
         mask =
             mXImage->red_mask | mXImage->green_mask | mXImage->blue_mask;
-        mp_msg(MSGT_VO, MSGL_V,
-               "vo: X11 color mask:  %X  (R:%lX G:%lX B:%lX)\n", mask,
+        MP_VERBOSE(vo, "color mask:  %X  (R:%lX G:%lX B:%lX)\n", mask,
                mXImage->red_mask, mXImage->green_mask, mXImage->blue_mask);
         XDestroyImage(mXImage);
     }
@@ -584,8 +577,7 @@ static void find_x11_depth(struct vo *vo)
             ximage_depth = 16;
     }
 
-    mp_msg(MSGT_VO, MSGL_V, "vo: X11 depth %d and %d bpp.\n", depth,
-           ximage_depth);
+    MP_VERBOSE(vo, "depth %d and %d bpp.\n", depth, ximage_depth);
 
     p->ximage_depth = ximage_depth;
 }
