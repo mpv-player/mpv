@@ -523,7 +523,7 @@ int vo_cocoa_check_events(struct vo *vo)
 
 void vo_cocoa_fullscreen(struct vo *vo)
 {
-    if (![NSThread isMainThread]) {
+    if (![NSThread isMainThread] && resize_callback_registered(vo)) {
         // This is the secondary thread, unlock since we are going to invoke a
         // method synchronously on the GUI thread using Cocoa.
         vo_cocoa_set_current_context(vo, false);
@@ -535,7 +535,7 @@ void vo_cocoa_fullscreen(struct vo *vo)
                              waitUntilDone:YES];
 
 
-    if (![NSThread isMainThread]) {
+    if (![NSThread isMainThread] && resize_callback_registered(vo)) {
         // Now lock again!
         vo_cocoa_set_current_context(vo, true);
     }
