@@ -65,24 +65,17 @@ struct vo_wayland_state {
     struct {
         int32_t width;
         int32_t height;
-        int32_t p_width; // previous sizes for leaving fullscreen
+        int32_t p_width;  // previous sizes for leaving fullscreen
         int32_t p_height;
+        int32_t sh_width; // sheduled width for resizing
+        int32_t sh_height;
+        int32_t sh_x;     // x, y calculated with the drag edges for moving
+        int32_t sh_y;
         float aspect;
 
         struct wl_surface *surface;
         struct wl_shell_surface *shell_surface;
         int events; /* mplayer events (VO_EVENT_RESIZE) */
-
-        /* Because the egl windows have a special resize windw function we have to
-         * register it first before doing any resizing.
-         * This makes us independet from the output driver */
-        void (*resize_func) (struct vo_wayland_state *wl,
-                             uint32_t edges,
-                             int32_t width,
-                             int32_t height,
-                             void *user_data);
-
-        void *resize_func_data;
     } window;
 
     struct {

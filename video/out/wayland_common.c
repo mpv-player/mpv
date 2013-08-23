@@ -56,10 +56,10 @@ static int lookupkey(int key);
 
 static void hide_cursor(struct vo_wayland_state * wl);
 static void show_cursor(struct vo_wayland_state * wl);
-static void resize_window(struct vo_wayland_state *wl,
-                          uint32_t edges,
-                          int32_t width,
-                          int32_t height);
+static void shedule_resize(struct vo_wayland_state *wl,
+                           uint32_t edges,
+                           int32_t width,
+                           int32_t height);
 
 static void vo_wayland_fullscreen (struct vo *vo);
 
@@ -127,7 +127,7 @@ static void ssurface_handle_configure(void *data,
                                       int32_t height)
 {
     struct vo_wayland_state *wl = data;
-    resize_window(wl, edges, width, height);
+    shedule_resize(wl, edges, width, height);
 }
 
 static void ssurface_handle_popup_done(void *data,
@@ -545,20 +545,62 @@ static void show_cursor (struct vo_wayland_state *wl)
     wl_surface_commit(wl->cursor.surface);
 }
 
-static void resize_window(struct vo_wayland_state *wl,
-                          uint32_t edges,
-                          int32_t width,
-                          int32_t height)
+static void shedule_resize(struct vo_wayland_state *wl,
+                           uint32_t edges,
+                           int32_t width,
+                           int32_t height)
 {
-    MP_VERBOSE(wl, "resizing %dx%d -> %dx%d\n", wl->window.width,
-            wl->window.height, width, height);
-    if (wl->window.resize_func && wl->window.resize_func_data) {
-        wl->window.resize_func(wl, edges, width, height,
-                               wl->window.resize_func_data);
-        wl->window.events |= VO_EVENT_RESIZE;
+    int32_t minimum_size = 150;
+    int32_t x, y;
+    float temp_aspect = width / (float) MPMAX(height, 1);
+
+    if (width < minimum_size)
+        width = minimum_size;
+
+    if (height < minimum_size)
+        height = minimum_size;
+
+    /* if only the height is changed we have to calculate the width
+     * in any other case we calculate the height */
+    switch (edges) {
+        case WL_SHELL_SURFACE_RESIZE_TOP:
+        case WL_SHELL_SURFACE_RESIZE_BOTTOM:
+            width = wl->window.aspect * height;
+            break;
+        case WL_SHELL_SURFACE_RESIZE_LEFT:
+        case WL_SHELL_SURFACE_RESIZE_RIGHT:
+        case WL_SHELL_SURFACE_RESIZE_TOP_LEFT:    // just a preference
+        case WL_SHELL_SURFACE_RESIZE_TOP_RIGHT:
+        case WL_SHELL_SURFACE_RESIZE_BOTTOM_LEFT:
+        case WL_SHELL_SURFACE_RESIZE_BOTTOM_RIGHT:
+            height = (1 / wl->window.aspect) * width;
+            break;
+        default:
+            if (wl->window.aspect < temp_aspect)
+                width = wl->window.aspect * height;
+            else
+                height = (1 / wl->window.aspect) * width;
+            break;
     }
+
+    wl->vo->dwidth = width;
+    wl->vo->dheight = height;
+
+    if (edges & WL_SHELL_SURFACE_RESIZE_LEFT)
+        x = wl->window.width - width;
     else
-        MP_WARN(wl, "no resizing possible\n");
+        x = 0;
+
+    if (edges & WL_SHELL_SURFACE_RESIZE_TOP)
+        y = wl->window.height - height;
+    else
+        y = 0;
+
+    wl->window.sh_width = width;
+    wl->window.sh_height = height;
+    wl->window.sh_x = x;
+    wl->window.sh_y = y;
+    wl->window.events |= VO_EVENT_RESIZE;
 }
 
 
@@ -747,7 +789,7 @@ static void vo_wayland_fullscreen (struct vo *vo)
     else {
         MP_VERBOSE(wl, "leaving fullscreen\n");
         wl_shell_surface_set_toplevel(wl->window.shell_surface);
-        resize_window(wl, 0, wl->window.p_width, wl->window.p_height);
+        shedule_resize(wl, 0, wl->window.p_width, wl->window.p_height);
     }
 }
 
@@ -755,7 +797,6 @@ static int vo_wayland_check_events (struct vo *vo)
 {
     struct vo_wayland_state *wl = vo->wayland;
     struct wl_display *dp = wl->display.display;
-    int ret;
 
     wl_display_dispatch_pending(dp);
     wl_display_flush(dp);
@@ -780,10 +821,8 @@ static int vo_wayland_check_events (struct vo *vo)
             wl_display_flush(dp);
     }
 
-    ret = wl->window.events;
-    wl->window.events = 0;
-
-    return ret;
+    // window events are reset by the resizing code
+    return wl->window.events;
 }
 
 static void vo_wayland_update_screeninfo (struct vo *vo)
