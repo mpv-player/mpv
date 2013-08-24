@@ -30,6 +30,12 @@
 #include "mpvcore/bstr.h"
 #include "sd.h"
 
+#if LIBAVCODEC_VERSION_MICRO >= 100
+#define HAVE_AV_WEBVTT (LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(55, 13, 100))
+#else
+#define HAVE_AV_WEBVTT 0
+#endif
+
 struct sd_lavc_priv {
     AVCodecContext *avctx;
 };
@@ -110,6 +116,8 @@ static int init(struct sd *sd)
     talloc_free(priv);
     return -1;
 }
+
+#if HAVE_AV_WEBVTT
 
 // FFmpeg WebVTT packets are pre-parsed in some way. The FFmpeg Matroska
 // demuxer does this on its own. In order to free our demuxer_mkv.c from
@@ -212,6 +220,15 @@ static int parse_webvtt(AVPacket *in, AVPacket *pkt)
     pkt->convergence_duration = in->convergence_duration;
     return 0;
 }
+
+#else
+
+static int parse_webvtt(AVPacket *in, AVPacket *pkt)
+{
+    return -1;
+}
+
+#endif
 
 static void decode(struct sd *sd, struct demux_packet *packet)
 {
