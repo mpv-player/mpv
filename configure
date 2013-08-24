@@ -2819,6 +2819,7 @@ else
 fi
 echores "$libpostproc"
 
+def_vda='#define CONFIG_VDA 0'
 
 if darwin ; then
 
