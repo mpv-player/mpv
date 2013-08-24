@@ -404,8 +404,6 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     vo->dheight = d_height;
 
     struct mp_image_params p2 = *params;
-    p2.d_w = vo->aspdat.prew;
-    p2.d_h = vo->aspdat.preh;
 
     int ret;
     if (vo->driver->reconfig) {

@@ -2509,6 +2509,7 @@ static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
     struct sh_video *sh_video = mpctx->sh_video;
 
     frame->pts = sh_video->pts;
+    mp_image_set_params(frame, sh_video->vf_input);
     vf_filter_frame(sh_video->vfilter, frame);
     filter_output_queued_frame(mpctx);
 }

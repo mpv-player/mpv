@@ -440,9 +440,7 @@ static mp_image_t *get_screenshot(struct vo *vo)
     if (!p->original_image)
         return NULL;
 
-    struct mp_image *res = mp_image_new_ref(p->original_image);
-    mp_image_set_display_size(res, vo->aspdat.prew, vo->aspdat.preh);
-    return res;
+    return mp_image_new_ref(p->original_image);
 }
 
 static void wait_for_completion(struct vo *vo, int max_outstanding)

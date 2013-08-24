@@ -650,9 +650,7 @@ static mp_image_t *get_screenshot(struct vo *vo)
     if (!ctx->original_image)
         return NULL;
 
-    struct mp_image *res = mp_image_new_ref(ctx->original_image);
-    mp_image_set_display_size(res, vo->aspdat.prew, vo->aspdat.preh);
-    return res;
+    return mp_image_new_ref(ctx->original_image);
 }
 
 static void draw_image(struct vo *vo, mp_image_t *mpi)

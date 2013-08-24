@@ -155,6 +155,7 @@ static void vf_fix_img_params(struct mp_image *img, struct mp_image_params *p)
     img->colorspace = p->colorspace;
     img->levels = p->colorlevels;
     img->chroma_location = p->chroma_location;
+    mp_image_set_display_size(img, p->d_w, p->d_h);
 }
 
 // Get a new image for filter output, with size and pixel format according to
