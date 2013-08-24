@@ -45,13 +45,7 @@ struct priv {
     char *outdir;
 
     struct mp_image *current;
-
     int frame;
-
-    uint32_t d_width;
-    uint32_t d_height;
-
-    struct mp_csp_details colorspace;
 };
 
 static bool checked_mkdir(struct vo *vo, const char *buf)
@@ -70,16 +64,10 @@ static bool checked_mkdir(struct vo *vo, const char *buf)
     return true;
 }
 
-static int config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  uint32_t format)
+static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct priv *p = vo->priv;
-
     mp_image_unrefp(&p->current);
-
-    p->d_width = d_width;
-    p->d_height = d_height;
 
     if (p->outdir && vo->config_count < 1)
         if (!checked_mkdir(vo, p->outdir))
@@ -93,9 +81,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct priv *p = vo->priv;
 
     mp_image_setrefp(&p->current, mpi);
-
-    mp_image_set_display_size(p->current, p->d_width, p->d_height);
-    mp_image_set_colorspace_details(p->current, &p->colorspace);
 }
 
 static void draw_osd(struct vo *vo, struct osd_state *osd)
@@ -158,15 +143,7 @@ static int preinit(struct vo *vo)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    struct priv *p = vo->priv;
-
     switch (request) {
-    case VOCTRL_SET_YUV_COLORSPACE:
-        p->colorspace = *(struct mp_csp_details *)data;
-        return true;
-    case VOCTRL_GET_YUV_COLORSPACE:
-        *(struct mp_csp_details *)data = p->colorspace;
-        return true;
     // prevent random frame stepping by frontend
     case VOCTRL_REDRAW_FRAME:
         return true;
@@ -185,9 +162,6 @@ const struct vo_driver video_out_image =
         ""
     },
     .priv_size = sizeof(struct priv),
-    .priv_defaults = &(const struct priv) {
-        .colorspace = MP_CSP_DETAILS_DEFAULTS,
-    },
     .options = (const struct m_option[]) {
         OPT_SUBSTRUCT("", opts, image_writer_conf, 0),
         OPT_STRING("outdir", outdir, 0),
@@ -195,7 +169,7 @@ const struct vo_driver video_out_image =
     },
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .draw_osd = draw_osd,
