@@ -34,8 +34,17 @@ struct sd_lavc_priv {
     AVCodecContext *avctx;
 };
 
+static const char *get_lavc_format(const char *format)
+{
+    // For the hack involving parse_webvtt().
+    if (format && strcmp(format, "webvtt-webm") == 0)
+        format = "webvtt";
+    return format;
+}
+
 static bool supports_format(const char *format)
 {
+    format = get_lavc_format(format);
     enum AVCodecID cid = mp_codec_to_av_codec_id(format);
     const AVCodecDescriptor *desc = avcodec_descriptor_get(cid);
     if (!desc)
@@ -69,7 +78,8 @@ static int init(struct sd *sd)
 {
     struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
     AVCodecContext *avctx = NULL;
-    AVCodec *codec = avcodec_find_decoder(mp_codec_to_av_codec_id(sd->codec));
+    const char *fmt = get_lavc_format(sd->codec);
+    AVCodec *codec = avcodec_find_decoder(mp_codec_to_av_codec_id(fmt));
     if (!codec)
         goto error;
     avctx = avcodec_alloc_context3(codec);
@@ -101,6 +111,108 @@ static int init(struct sd *sd)
     return -1;
 }
 
+// FFmpeg WebVTT packets are pre-parsed in some way. The FFmpeg Matroska
+// demuxer does this on its own. In order to free our demuxer_mkv.c from
+// codec-specific crud, we do this here.
+// Copied from libavformat/matroskadec.c (FFmpeg 818ebe9 / 2013-08-19)
+// License: LGPL v2.1 or later
+// Author header: The FFmpeg Project
+// Modified in some ways.
+static int parse_webvtt(AVPacket *in, AVPacket *pkt)
+{
+    uint8_t *id, *settings, *text, *buf;
+    int id_len, settings_len, text_len;
+    uint8_t *p, *q;
+    int err;
+
+    uint8_t *data = in->data;
+    int data_len = in->size;
+
+    if (data_len <= 0)
+        return AVERROR_INVALIDDATA;
+
+    p = data;
+    q = data + data_len;
+
+    id = p;
+    id_len = -1;
+    while (p < q) {
+        if (*p == '\r' || *p == '\n') {
+            id_len = p - id;
+            if (*p == '\r')
+                p++;
+            break;
+        }
+        p++;
+    }
+
+    if (p >= q || *p != '\n')
+        return AVERROR_INVALIDDATA;
+    p++;
+
+    settings = p;
+    settings_len = -1;
+    while (p < q) {
+        if (*p == '\r' || *p == '\n') {
+            settings_len = p - settings;
+            if (*p == '\r')
+                p++;
+            break;
+        }
+        p++;
+    }
+
+    if (p >= q || *p != '\n')
+        return AVERROR_INVALIDDATA;
+    p++;
+
+    text = p;
+    text_len = q - p;
+    while (text_len > 0) {
+        const int len = text_len - 1;
+        const uint8_t c = p[len];
+        if (c != '\r' && c != '\n')
+            break;
+        text_len = len;
+    }
+
+    if (text_len <= 0)
+        return AVERROR_INVALIDDATA;
+
+    err = av_new_packet(pkt, text_len);
+    if (err < 0)
+        return AVERROR(err);
+
+    memcpy(pkt->data, text, text_len);
+
+    if (id_len > 0) {
+        buf = av_packet_new_side_data(pkt,
+                                      AV_PKT_DATA_WEBVTT_IDENTIFIER,
+                                      id_len);
+        if (buf == NULL) {
+            av_free_packet(pkt);
+            return AVERROR(ENOMEM);
+        }
+        memcpy(buf, id, id_len);
+    }
+
+    if (settings_len > 0) {
+        buf = av_packet_new_side_data(pkt,
+                                      AV_PKT_DATA_WEBVTT_SETTINGS,
+                                      settings_len);
+        if (buf == NULL) {
+            av_free_packet(pkt);
+            return AVERROR(ENOMEM);
+        }
+        memcpy(buf, settings, settings_len);
+    }
+
+    pkt->pts = in->pts;
+    pkt->duration = in->duration;
+    pkt->convergence_duration = in->convergence_duration;
+    return 0;
+}
+
 static void decode(struct sd *sd, struct demux_packet *packet)
 {
     struct sd_lavc_priv *priv = sd->priv;
@@ -108,11 +220,20 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     double ts = av_q2d(av_inv_q(avctx->time_base));
     AVSubtitle sub = {0};
     AVPacket pkt;
+    AVPacket parsed_pkt = {0};
     int ret, got_sub;
 
     mp_set_av_packet(&pkt, packet);
     pkt.pts = packet->pts == MP_NOPTS_VALUE ? AV_NOPTS_VALUE : packet->pts * ts;
     pkt.duration = packet->duration * ts;
+
+    if (sd->codec && strcmp(sd->codec, "webvtt-webm") == 0) {
+        if (parse_webvtt(&pkt, &parsed_pkt) < 0) {
+            mp_msg(MSGT_OSD, MSGL_ERR, "Error parsing subtitle\n");
+            goto done;
+        }
+        pkt = parsed_pkt;
+    }
 
     ret = avcodec_decode_subtitle2(avctx, &sub, &got_sub, &pkt);
     if (ret < 0) {
@@ -130,7 +251,9 @@ static void decode(struct sd *sd, struct demux_packet *packet)
         }
     }
 
+done:
     avsubtitle_free(&sub);
+    av_free_packet(&parsed_pkt);
 }
 
 static void reset(struct sd *sd)

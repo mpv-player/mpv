@@ -1614,6 +1614,8 @@ static const char *mkv_sub_tag[][2] = {
     { MKV_S_TEXTASCII,  "subrip"},
     { MKV_S_TEXTUTF8,   "subrip"},
     { MKV_S_PGS,        "hdmv_pgs_subtitle"},
+    { MKV_S_WEBVTT_S,   "webvtt-webm"},
+    { MKV_S_WEBVTT_C,   "webvtt-webm"},
     {0}
 };
 
