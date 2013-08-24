@@ -1973,6 +1973,12 @@ void gl_video_config(struct gl_video *p, struct mp_image_params *params)
     p->image_dw = params->d_w;
     p->image_dh = params->d_h;
     p->image_params = *params;
+
+    struct mp_csp_details csp = MP_CSP_DETAILS_DEFAULTS;
+    csp.levels_in = params->colorlevels;
+    csp.levels_out = params->outputlevels;
+    csp.format = params->colorspace;
+    p->colorspace = csp;
 }
 
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b)
@@ -2044,16 +2050,6 @@ bool gl_video_get_csp_override(struct gl_video *p, struct mp_csp_details *csp)
 {
     *csp = p->colorspace;
     return true;
-}
-
-bool gl_video_set_csp_override(struct gl_video *p, struct mp_csp_details *csp)
-{
-    if (p->is_yuv) {
-        p->colorspace = *csp;
-        update_all_uniforms(p);
-        return true;
-    }
-    return false;
 }
 
 bool gl_video_set_equalizer(struct gl_video *p, const char *name, int val)

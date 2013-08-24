@@ -157,6 +157,7 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
         p.colorspace = opts->requested_colorspace;
     if (opts->requested_input_range != MP_CSP_LEVELS_AUTO)
         p.colorlevels = opts->requested_input_range;
+    p.outputlevels = opts->requested_output_range;
 
     // Detect colorspace from resolution.
     // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.).
@@ -183,8 +184,6 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
     if (!sh->vf_input)
         sh->vf_input = talloc(sh, struct mp_image_params);
     *sh->vf_input = p;
-
-    set_video_output_levels(sh);
 
     if (opts->gamma_gamma != 1000)
         set_video_colors(sh, "gamma", opts->gamma_gamma);

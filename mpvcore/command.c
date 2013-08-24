@@ -1164,8 +1164,8 @@ static int mp_property_colormatrix(m_option_t *prop, int action, void *arg,
     struct MPOpts *opts = mpctx->opts;
 
     struct mp_csp_details vo_csp = {0};
-    if (mpctx->sh_video && mpctx->sh_video->vfilter)
-        vf_control(mpctx->sh_video->vfilter, VFCTRL_GET_YUV_COLORSPACE, &vo_csp);
+    if (mpctx->video_out)
+        vo_control(mpctx->video_out, VOCTRL_GET_YUV_COLORSPACE, &vo_csp);
 
     struct mp_image_params vd_csp = {0};
     if (mpctx->sh_video)
@@ -1198,8 +1198,8 @@ static int mp_property_colormatrix_input_range(m_option_t *prop, int action,
     struct MPOpts *opts = mpctx->opts;
 
     struct mp_csp_details vo_csp = {0};
-    if (mpctx->sh_video && mpctx->sh_video->vfilter)
-        vf_control(mpctx->sh_video->vfilter, VFCTRL_GET_YUV_COLORSPACE, &vo_csp );
+    if (mpctx->video_out)
+        vo_control(mpctx->video_out, VOCTRL_GET_YUV_COLORSPACE, &vo_csp );
 
     struct mp_image_params vd_csp = {0};
     if (mpctx->sh_video)
@@ -1226,21 +1226,15 @@ static int mp_property_colormatrix_input_range(m_option_t *prop, int action,
 static int mp_property_colormatrix_output_range(m_option_t *prop, int action,
                                                 void *arg, MPContext *mpctx)
 {
-    if (action != M_PROPERTY_PRINT) {
-        int r = mp_property_generic_option(prop, action, arg, mpctx);
-        if (action == M_PROPERTY_SET) {
-            if (mpctx->sh_video)
-                set_video_output_levels(mpctx->sh_video);
-        }
-        return r;
-    }
+    if (action != M_PROPERTY_PRINT)
+        return video_refresh_property_helper(prop, action, arg, mpctx);
 
     struct MPOpts *opts = mpctx->opts;
 
     int req = opts->requested_output_range;
     struct mp_csp_details actual = {0};
-    if (mpctx->sh_video && mpctx->sh_video->vfilter)
-        vf_control(mpctx->sh_video->vfilter, VFCTRL_GET_YUV_COLORSPACE, &actual);
+    if (mpctx->video_out)
+        vo_control(mpctx->video_out, VOCTRL_GET_YUV_COLORSPACE, &actual);
 
     char *res = talloc_asprintf(NULL, "%s", mp_csp_levels_names[req]);
     if (!actual.levels_out) {

@@ -101,34 +101,6 @@ int get_video_colors(sh_video_t *sh_video, const char *item, int *value)
     return 0;
 }
 
-// Return the effective video image parameters. Might be different from VO,
-// and might be different from actual video bitstream/container params.
-// This is affected by user-specified overrides (aspect, colorspace...).
-bool get_video_params(struct sh_video *sh, struct mp_image_params *p)
-{
-    if (!sh->vf_input)
-        return false;
-
-    *p = *sh->vf_input;
-    return true;
-}
-
-void set_video_output_levels(struct sh_video *sh)
-{
-    struct MPOpts *opts = sh->opts;
-
-    if (!sh->vfilter)
-        return;
-
-    struct mp_csp_details csp;
-    if (vf_control(sh->vfilter, VFCTRL_GET_YUV_COLORSPACE, &csp) > 0) {
-        csp.levels_out = opts->requested_output_range;
-        if (csp.levels_out == MP_CSP_LEVELS_AUTO)
-            csp.levels_out = MP_CSP_LEVELS_PC;
-        vf_control(sh->vfilter, VFCTRL_SET_YUV_COLORSPACE, &csp);
-    }
-}
-
 void resync_video_stream(sh_video_t *sh_video)
 {
     vd_control(sh_video, VDCTRL_RESYNC_STREAM, NULL);

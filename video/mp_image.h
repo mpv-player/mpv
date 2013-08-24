@@ -37,6 +37,9 @@
 #define MP_IMGFIELD_BOTTOM 0x10
 #define MP_IMGFIELD_INTERLACED 0x20
 
+// Describes image parameters that usually stay constant.
+// New fields can be added in the future. Code changing the parameters should
+// usually copy the whole struct, so that fields added later will be preserved.
 struct mp_image_params {
     enum mp_imgfmt imgfmt;      // pixel format
     int w, h;                   // image dimensions
@@ -44,6 +47,10 @@ struct mp_image_params {
     enum mp_csp colorspace;
     enum mp_csp_levels colorlevels;
     enum mp_chroma_location chroma_location;
+    // The image should be converted to these levels. Unlike colorlevels, it
+    // does not describe the current state of the image. (Somewhat similar to
+    // d_w/d_h vs. w/h.)
+    enum mp_csp_levels outputlevels;
 };
 
 /* Memory management:

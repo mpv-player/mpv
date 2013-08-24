@@ -179,6 +179,14 @@ struct mp_sws_context *mp_sws_alloc(void *talloc_parent)
 // Optional, but possibly useful to avoid having to handle mp_sws_scale errors.
 int mp_sws_reinit(struct mp_sws_context *ctx)
 {
+    struct mp_image_params *src = &ctx->src;
+    struct mp_image_params *dst = &ctx->dst;
+
+    // Neutralize unsupported or ignored parameters.
+    src->d_w = dst->d_w = 0;
+    src->d_h = dst->d_h = 0;
+    src->outputlevels = dst->outputlevels = MP_CSP_LEVELS_AUTO;
+
     if (cache_valid(ctx))
         return 0;
 
@@ -186,9 +194,6 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     ctx->sws = sws_alloc_context();
     if (!ctx->sws)
         return -1;
-
-    struct mp_image_params *src = &ctx->src;
-    struct mp_image_params *dst = &ctx->dst;
 
     mp_image_params_guess_csp(src); // sanitize colorspace/colorlevels
     mp_image_params_guess_csp(dst);

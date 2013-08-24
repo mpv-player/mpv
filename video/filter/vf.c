@@ -499,6 +499,7 @@ int vf_next_config(struct vf_instance *vf,
         .colorspace = vf->fmt_in.params.colorspace,
         .colorlevels = vf->fmt_in.params.colorlevels,
         .chroma_location = vf->fmt_in.params.chroma_location,
+        .outputlevels = vf->fmt_in.params.outputlevels,
     };
     // Fix csp in case of pixel format change
     mp_image_params_guess_csp(&p);
