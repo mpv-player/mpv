@@ -70,7 +70,6 @@ struct cv_functions {
     void (*bind_texture)(struct vo *vo);
     void (*unbind_texture)(struct vo *vo);
     mp_image_t *(*get_screenshot)(struct vo *vo);
-    int (*set_colormatrix)(struct vo *vo, struct mp_csp_details *csp);
 };
 
 struct priv {
@@ -246,10 +245,9 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
     mpgl_osd_draw_legacy(p->osd, osd, p->osd_res);
 }
 
-static CFStringRef get_cv_csp_matrix(struct vo *vo)
+static CFStringRef get_cv_csp_matrix(enum mp_csp format)
 {
-    struct priv *p = vo->priv;
-    switch (p->colorspace.format) {
+    switch (format) {
         case MP_CSP_BT_601:
             return kCVImageBufferYCbCrMatrix_ITU_R_601_4;
         case MP_CSP_BT_709:
@@ -261,28 +259,16 @@ static CFStringRef get_cv_csp_matrix(struct vo *vo)
     }
 }
 
-static int set_yuv_colorspace(struct vo *vo, CVPixelBufferRef pbuf,
-                              struct mp_csp_details *csp)
+static void apply_csp(struct vo *vo, CVPixelBufferRef pbuf)
 {
     struct priv *p = vo->priv;
-    p->colorspace = *csp;
-    CFStringRef cv_csp = get_cv_csp_matrix(vo);
+    CFStringRef matrix = get_cv_csp_matrix(p->colorspace.format);
+    assert(matrix);
 
-    if (cv_csp) {
-        CVBufferSetAttachment(p->cv.pbuf, kCVImageBufferYCbCrMatrixKey, cv_csp,
-                kCVAttachmentMode_ShouldNotPropagate);
-        vo->want_redraw = true;
-        return VO_TRUE;
-    } else {
-        return VO_NOTIMPL;
-    }
-}
-
-static int get_yuv_colorspace(struct vo *vo, struct mp_csp_details *csp)
-{
-    struct priv *p = vo->priv;
-    *csp = p->colorspace;
-    return VO_TRUE;
+    CVPixelBufferLockBaseAddress(pbuf, 0);
+    CVBufferSetAttachment(pbuf, kCVImageBufferYCbCrMatrixKey, matrix,
+        kCVAttachmentMode_ShouldPropagate);
+    CVPixelBufferUnlockBaseAddress(pbuf, 0);
 }
 
 static int get_image_fmt(struct vo *vo, CVPixelBufferRef pbuf)
@@ -338,10 +324,17 @@ static int control(struct vo *vo, uint32_t request, void *data)
         case VOCTRL_REDRAW_FRAME:
             do_render(vo);
             return VO_TRUE;
-        case VOCTRL_SET_YUV_COLORSPACE:
-            return p->fns.set_colormatrix(vo, data);
+        case VOCTRL_SET_YUV_COLORSPACE: {
+            struct mp_csp_details csp = *(struct mp_csp_details *)data;
+            if (get_cv_csp_matrix(csp.format)) {
+                p->colorspace = csp;
+                return VO_TRUE;
+            } else
+                return VO_NOTIMPL;
+        }
         case VOCTRL_GET_YUV_COLORSPACE:
-            return get_yuv_colorspace(vo, data);
+            *(struct mp_csp_details *)data = p->colorspace;
+            return VO_TRUE;
         case VOCTRL_SCREENSHOT: {
             struct voctrl_screenshot_args *args = data;
             if (args->full_window)
@@ -407,6 +400,8 @@ static void upload_opengl_texture(struct vo *vo, struct mp_image *mpi)
                     NULL, NULL, NULL, &p->cv.pbuf);
         if(error != kCVReturnSuccess)
             MP_ERR(vo, "Failed to create PixelBuffer(%d)\n", error);
+
+        apply_csp(vo, p->cv.pbuf);
     }
 
     struct quad *q = p->quad;
@@ -428,12 +423,6 @@ static mp_image_t *cv_get_screenshot(struct vo *vo)
     return get_screenshot(vo, p->cv.pbuf);
 }
 
-static int cv_set_colormatrix(struct vo *vo, struct mp_csp_details *csp)
-{
-    struct priv *p = vo->priv;
-    return set_yuv_colorspace(vo, p->cv.pbuf, csp);
-}
-
 static struct cv_functions cv_functions = {
     .init            = dummy_cb,
     .uninit          = cv_uninit,
@@ -441,7 +430,6 @@ static struct cv_functions cv_functions = {
     .unbind_texture  = cv_unbind_texture,
     .prepare_texture = upload_opengl_texture,
     .get_screenshot  = cv_get_screenshot,
-    .set_colormatrix = cv_set_colormatrix,
 };
 
 #if CONFIG_VDA
@@ -494,6 +482,7 @@ static void extract_texture_from_iosurface(struct vo *vo, struct mp_image *mpi)
     struct priv *p = vo->priv;
     CVPixelBufferRelease(p->dr.pbuf);
     p->dr.pbuf = (CVPixelBufferRef)mpi->planes[3];
+    apply_csp(co, p->dr.pbuf);
     CVPixelBufferRetain(p->dr.pbuf);
     IOSurfaceRef surface = CVPixelBufferGetIOSurface(p->dr.pbuf);
     MP_DBG(vo, "iosurface id: %d\n", IOSurfaceGetID(surface));
@@ -524,12 +513,6 @@ static mp_image_t *iosurface_get_screenshot(struct vo *vo)
     return get_screenshot(vo, p->dr.pbuf);
 }
 
-static int iosurface_set_colormatrix(struct vo *vo, struct mp_csp_details *csp)
-{
-    struct priv *p = vo->priv;
-    return set_yuv_colorspace(vo, p->dr.pbuf, csp);
-}
-
 static struct cv_functions iosurface_functions = {
     .init            = iosurface_init,
     .uninit          = iosurface_uninit,
@@ -537,7 +520,6 @@ static struct cv_functions iosurface_functions = {
     .unbind_texture  = iosurface_unbind_texture,
     .prepare_texture = extract_texture_from_iosurface,
     .get_screenshot  = iosurface_get_screenshot,
-    .set_colormatrix = iosurface_set_colormatrix,
 };
 #endif /* CONFIG_VDA */
 
