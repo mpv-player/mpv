@@ -654,6 +654,7 @@ static struct mp_image *get_screenshot(struct priv *p)
         return NULL;
     struct mp_image_params params = p->image_params;
     params.imgfmt = img->imgfmt;
+    mp_image_params_guess_csp(&params); // ensure colorspace consistency
     mp_image_set_params(img, &params);
     return img;
 }
