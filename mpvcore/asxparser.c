@@ -449,7 +449,6 @@ asx_parse_ref(ASX_Parser_t* parser, char** attribs) {
 
 static void asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs) {
   char *href;
-  stream_t* stream;
 
   if(parser->deep > 0)
     return;
@@ -459,16 +458,8 @@ static void asx_parse_entryref(ASX_Parser_t* parser,char* buffer,char** _attribs
     asx_warning_attrib_required(parser,"ENTRYREF" ,"HREF" );
     return;
   }
-  stream=stream_open(href, NULL);
-  if(!stream) {
-    mp_msg(MSGT_PLAYTREE,MSGL_WARN,"Can't open playlist %s\n",href);
-    free(href);
-    return;
-  }
-
-  mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Not recursively loading playlist %s\n",href);
-
-  free_stream(stream);
+  mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Recursive playlist %s\n", href);
+  playlist_add_file(parser->pl, href);
   free(href);
   //mp_msg(MSGT_PLAYTREE,MSGL_INFO,"Need to implement entryref\n");
 }

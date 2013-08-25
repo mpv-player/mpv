@@ -171,8 +171,9 @@ SOURCES = talloc.c \
           demux/demux_lavf.c \
           demux/demux_mf.c \
           demux/demux_mkv.c \
-          demux/demux_subreader.c \
+          demux/demux_playlist.c \
           demux/demux_raw.c \
+          demux/demux_subreader.c \
           demux/ebml.c \
           demux/mf.c \
           mpvcore/asxparser.c \

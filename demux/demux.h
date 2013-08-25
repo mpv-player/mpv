@@ -182,6 +182,9 @@ typedef struct demuxer {
     // for trivial demuxers which just read the whole file for codec to use
     struct bstr file_contents;
 
+    // If the file is a playlist file
+    struct playlist *playlist;
+
     void *priv;   // demuxer-specific internal data
     char **info;  // metadata
     struct MPOpts *opts;

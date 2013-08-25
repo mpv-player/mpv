@@ -2319,7 +2319,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_LOADLIST: {
         char *filename = cmd->args[0].v.s;
         bool append = cmd->args[1].v.i;
-        struct playlist *pl = playlist_parse_file(filename);
+        struct playlist *pl = playlist_parse_file(filename, opts);
         if (pl) {
             if (!append)
                 playlist_clear(mpctx->playlist);

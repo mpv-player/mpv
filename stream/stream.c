@@ -742,6 +742,7 @@ static int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
     cache->url = talloc_strdup(cache, orig->url);
     cache->mime_type = talloc_strdup(cache, orig->mime_type);
     cache->lavf_type = talloc_strdup(cache, orig->lavf_type);
+    cache->safe_origin = orig->safe_origin;
     cache->opts = orig->opts;
     cache->start_pos = orig->start_pos;
     cache->end_pos = orig->end_pos;
@@ -862,6 +863,8 @@ unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
     int len;
     const unsigned char *end;
     unsigned char *ptr = mem;
+    if (utf16 == -1)
+        utf16 = 0;
     if (max < 1)
         return NULL;
     max--; // reserve one for 0-termination
@@ -889,6 +892,21 @@ unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
     if (s->eof && ptr == mem)
         return NULL;
     return mem;
+}
+
+static const char *bom[3] = {"\xEF\xBB\xBF", "\xFF\xFE", "\xFE\xFF"};
+
+// Return utf16 argument for stream_read_line
+int stream_skip_bom(struct stream *s)
+{
+    bstr data = stream_peek(s, 4);
+    for (int n = 0; n < 3; n++) {
+        if (bstr_startswith0(data, bom[n])) {
+            stream_skip(s, strlen(bom[n]));
+            return n;
+        }
+    }
+    return -1; // default to 8 bit codepages
 }
 
 // Read the rest of the stream into memory (current pos to EOF), and return it.

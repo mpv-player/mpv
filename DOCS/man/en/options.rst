@@ -1198,6 +1198,22 @@
 ``--list-properties``
     Print a list of the available properties.
 
+``--load-unsafe-playlists``
+    Normally, something like ``mpv playlist.m3u`` won't load the playlist. This
+    is because the playlist code is unsafe. (This is the same in all other
+    variations of MPlayer.)
+
+    See ``--playlist`` for details.
+
+    Note: this option will allow opening playlists using the ``playlist``
+    special demuxer. The ``--playlist`` uses different code, and supports more
+    playlist formats than the playlist demuxer. This means that for now, the
+    ``--playlist`` option should always be used if you intend to open playlists.
+    Background: the special demuxer contains newly written code, while the
+    ``--playlist`` option uses the old MPlayer code. Adding support for more
+    playlist formats to the special demuxer is work in progress, and eventually
+    the old code should disappear.
+
 ``--loop=<number|inf|no>``
     Loops playback ``<number>`` times. ``inf`` means forever and ``no`` disables
     looping. If several files are specified on command line, the entire playlist

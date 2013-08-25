@@ -356,8 +356,6 @@ void build_cue_timeline(struct MPContext *mpctx)
         }
     }
 
-    add_source(mpctx, mpctx->demuxer);
-
     for (size_t i = 0; i < file_count; i++) {
         if (!open_source(mpctx, files[i]))
             goto out;

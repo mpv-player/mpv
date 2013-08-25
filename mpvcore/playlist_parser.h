@@ -21,14 +21,9 @@
 
 #include <stdbool.h>
 
-struct stream;
+struct MPOpts;
 struct playlist;
 
-// Parse the given stream as playlist. Append entries to pl. Return whether
-// there was an error when parsing.
-// deep = Parser depth. Some formats allow including other files,
-struct playlist *playlist_parse(struct stream* stream);
-struct playlist *playlist_probe_and_parse(struct stream* stream);
-struct playlist *playlist_parse_file(const char *file);
+struct playlist *playlist_parse_file(const char *file, struct MPOpts *opts);
 
 #endif

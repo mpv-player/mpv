@@ -150,6 +150,7 @@ typedef struct stream {
     char *mime_type; // when HTTP streaming is used
     char *demuxer; // request demuxer to be used
     char *lavf_type; // name of expected demuxer type for lavf
+    bool safe_origin; // used for playlists that can be opened safely
     struct MPOpts *opts;
 
     FILE *capture_file;
@@ -208,6 +209,7 @@ inline static uint64_t stream_read_qword(stream_t *s)
 
 unsigned char *stream_read_line(stream_t *s, unsigned char *mem, int max,
                                 int utf16);
+int stream_skip_bom(struct stream *s);
 
 inline static int stream_eof(stream_t *s)
 {

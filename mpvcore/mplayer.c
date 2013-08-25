@@ -4133,6 +4133,19 @@ static void stream_dump(struct MPContext *mpctx)
     }
 }
 
+// Replace the current playlist entry with playlist contents. Moves the entries
+// from the given playlist pl, so the entries don't actually need to be copied.
+static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
+{
+    if (mpctx->demuxer->playlist->first) {
+        playlist_transfer_entries(mpctx->playlist, mpctx->demuxer->playlist);
+        if (mpctx->playlist->current)
+            playlist_remove(mpctx->playlist, mpctx->playlist->current);
+    } else {
+        MP_WARN(mpctx, "Empty playlist!\n");
+    }
+}
+
 // Start playing the current playlist entry.
 // Handle initialization and deinitialization.
 static void play_current_file(struct MPContext *mpctx)
@@ -4213,11 +4226,7 @@ static void play_current_file(struct MPContext *mpctx)
     mpctx->resolve_result = resolve_url(stream_filename, opts);
     if (mpctx->resolve_result) {
         if (mpctx->resolve_result->playlist) {
-            // Replace entry with playlist contents
-            playlist_transfer_entries(mpctx->playlist,
-                                      mpctx->resolve_result->playlist);
-            if (mpctx->playlist->current)
-                playlist_remove(mpctx->playlist, mpctx->playlist->current);
+            transfer_playlist(mpctx, mpctx->resolve_result->playlist);
             goto terminate_playback;
         }
         stream_filename = mpctx->resolve_result->url;
@@ -4258,9 +4267,26 @@ goto_reopen_demuxer: ;
 
     mpctx->demuxer = demux_open(mpctx->stream, opts->demuxer_name, NULL, opts);
     mpctx->master_demuxer = mpctx->demuxer;
-
     if (!mpctx->demuxer) {
         mp_tmsg(MSGT_CPLAYER, MSGL_ERR, "Failed to recognize file format.\n");
+        goto terminate_playback;
+    }
+
+    MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources, mpctx->demuxer);
+
+    mpctx->initialized_flags |= INITIALIZED_DEMUXER;
+
+    if (mpctx->demuxer->playlist) {
+        if (mpctx->demuxer->stream->safe_origin || opts->load_unsafe_playlists) {
+            transfer_playlist(mpctx, mpctx->demuxer->playlist);
+        } else {
+            MP_ERR(mpctx, "\nThis looks like a playlist, but playlist support "
+                   "will not be used automatically.\nThe main problem with "
+                   "playlist safety is that playlist entries can be arbitrary,\n"
+                   "and an attacker could make mpv poke around in your local "
+                   "filesystem or network.\nUse --playlist=file or the "
+                   "--load-unsafe-playlists option to load them anyway.\n");
+        }
         goto terminate_playback;
     }
 
@@ -4274,11 +4300,6 @@ goto_reopen_demuxer: ;
         build_cue_timeline(mpctx);
 
     print_timeline(mpctx);
-
-    if (!mpctx->num_sources) {
-        MP_TARRAY_APPEND(NULL, mpctx->sources, mpctx->num_sources,
-                         mpctx->demuxer);
-    }
 
     if (mpctx->timeline) {
         // With Matroska, the "master" file usually dictates track layout etc.
@@ -4297,8 +4318,6 @@ goto_reopen_demuxer: ;
     mpctx->timeline_part = 0;
     if (mpctx->timeline)
         timeline_set_part(mpctx, mpctx->timeline_part, true);
-
-    mpctx->initialized_flags |= INITIALIZED_DEMUXER;
 
     add_subtitle_fonts_from_sources(mpctx);
 
