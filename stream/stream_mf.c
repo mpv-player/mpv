@@ -38,7 +38,7 @@ mf_stream_open (stream_t *stream, int mode)
 }
 
 const stream_info_t stream_info_mf = {
-  "mf",
-  mf_stream_open,
-  { "mf", NULL },
+    .name = "mf",
+    .open = mf_stream_open,
+    .protocols = (const char*[]){ "mf", NULL },
 };

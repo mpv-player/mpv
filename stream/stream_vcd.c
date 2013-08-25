@@ -177,7 +177,7 @@ static int open_s(stream_t *stream,int mode)
 }
 
 const stream_info_t stream_info_vcd = {
-  "vcd",
-  open_s,
-  { "vcd", NULL },
+    .name = "vcd",
+    .open = open_s,
+    .protocols = (const char*[]){ "vcd", NULL },
 };

@@ -111,11 +111,11 @@ typedef struct stream_info_st {
     const char *name;
     // opts is set from ->opts
     int (*open)(struct stream *st, int mode);
-    const char *protocols[MAX_STREAM_PROTOCOLS];
+    const char **protocols;
     int priv_size;
     const void *priv_defaults;
     const struct m_option *options;
-    const char *url_options[][2];
+    const char **url_options;
 } stream_info_t;
 
 typedef struct stream {

@@ -1757,7 +1757,7 @@ pvr_force_freq_step (stream_t *stream, int step)
 }
 
 const stream_info_t stream_info_pvr = {
-  "pvr",
-  pvr_stream_open,
-  { "pvr", NULL },
+    .name = "pvr",
+    .open = pvr_stream_open,
+    .protocols = (const char*[]){ "pvr", NULL },
 };

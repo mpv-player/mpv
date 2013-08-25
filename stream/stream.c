@@ -150,9 +150,12 @@ void mp_url_unescape_inplace(char *buf)
 
 static const char *find_url_opt(struct stream *s, const char *opt)
 {
-    for (int n = 0; s->info->url_options && s->info->url_options[n][0]; n++) {
-        if (strcmp(s->info->url_options[n][0], opt) == 0)
-            return s->info->url_options[n][1];
+    for (int n = 0; s->info->url_options && s->info->url_options[n]; n++) {
+        const char *entry = s->info->url_options[n];
+        const char *t = strchr(entry, '=');
+        assert(t);
+        if (strncmp(opt, entry, t - entry) == 0)
+            return t + 1;
     }
     return NULL;
 }

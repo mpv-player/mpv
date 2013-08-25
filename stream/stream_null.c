@@ -32,7 +32,7 @@ static int open_s(stream_t *stream,int mode)
 
 
 const stream_info_t stream_info_null = {
-  "null",
-  open_s,
-  { "null", NULL },
+    .name = "null",
+    .open = open_s,
+    .protocols = (const char*[]){ "null", NULL },
 };

@@ -34,5 +34,5 @@ static int open_f(stream_t *stream, int mode)
 const stream_info_t stream_info_avdevice = {
     .name = "avdevice",
     .open = open_f,
-    .protocols = { "avdevice", "av", NULL },
+    .protocols = (const char*[]){ "avdevice", "av", NULL },
 };

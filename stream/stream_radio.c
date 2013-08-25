@@ -959,15 +959,15 @@ static void close_s(struct stream *stream){
 }
 
 const stream_info_t stream_info_radio = {
-    "radio",
-    open_s,
-    { "radio", NULL },
+    .name = "radio",
+    .open = open_s,
+    .protocols = (const char*[]){ "radio", NULL },
     .priv_size = sizeof(radio_param_t),
     .priv_defaults = &stream_radio_defaults,
     .options = stream_opts_fields,
-    .url_options = {
-        {"hostname", "freqchannel"},
-        {"filename", "capture"},
-        {0}
+    .url_options = (const char*[]){
+        "hostname=freqchannel",
+        "filename=capture",
+        NULL
     },
 };

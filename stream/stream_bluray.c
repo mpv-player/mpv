@@ -402,15 +402,15 @@ err_no_info:
 }
 
 const stream_info_t stream_info_bluray = {
-    "bd",
-    bluray_stream_open,
-    { "bd", "br", "bluray", NULL },
+    .name = "bd",
+    .open = bluray_stream_open,
+    .protocols = (const char*[]){ "bd", "br", "bluray", NULL },
     .priv_defaults = &bluray_stream_priv_dflts,
     .priv_size = sizeof(struct bluray_priv_s),
     .options = bluray_stream_opts_fields,
-    .url_options = {
-        {"hostname", "title"},
-        {"filename", "device"},
-        {0}
+    .url_options = (const char*[]){
+        "hostname=title",
+        "filename=device",
+        NULL
     },
 };

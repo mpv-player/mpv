@@ -830,15 +830,15 @@ dvb_config_t *dvb_get_config(void)
 
 
 const stream_info_t stream_info_dvb = {
-	"dvbin",
-	dvb_open,
-	{ "dvb", NULL },
+    .name = "dvbin",
+    .open = dvb_open,
+    .protocols = (const char*[]){ "dvb", NULL },
     .priv_size = sizeof(dvb_priv_t),
     .priv_defaults = &stream_defaults,
     .options = stream_params,
-    .url_options = {
-        {"hostname", "prog"},
-        {"username", "card"},
-        {0}
+    .url_options = (const char*[]){
+        "hostname=prog",
+        "username=card",
+        NULL
     },
 };

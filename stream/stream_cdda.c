@@ -460,16 +460,16 @@ static int open_cdda(stream_t *st, int m)
 }
 
 const stream_info_t stream_info_cdda = {
-    "cdda",
-    open_cdda,
-    {"cdda", NULL },
+    .name = "cdda",
+    .open = open_cdda,
+    .protocols = (const char*[]){"cdda", NULL },
     .priv_size = sizeof(cdda_priv),
     .priv_defaults = &cdda_dflts,
     .options = cdda_params_fields,
-    .url_options = {
-        {"hostname", "span"},
-        {"port",     "speed"},
-        {"filename", "device"},
-        {0}
+    .url_options = (const char*[]){
+        "hostname=span",
+        "port=speed",
+        "filename=device",
+        NULL
     },
 };

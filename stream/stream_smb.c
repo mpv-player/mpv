@@ -166,7 +166,7 @@ static int open_f (stream_t *stream, int mode)
 }
 
 const stream_info_t stream_info_smb = {
-  "smb",
-  open_f,
-  {"smb", NULL},
+    .name = "smb",
+    .open = open_f,
+    .protocols = (const char*[]){"smb", NULL},
 };
