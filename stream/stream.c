@@ -76,7 +76,7 @@ extern const stream_info_t stream_info_ifo;
 extern const stream_info_t stream_info_dvd;
 extern const stream_info_t stream_info_bluray;
 
-static const stream_info_t *const auto_open_streams[] = {
+static const stream_info_t *const stream_list[] = {
 #ifdef CONFIG_VCD
     &stream_info_vcd,
 #endif
@@ -210,15 +210,48 @@ static stream_t *new_stream(void)
     return s;
 }
 
-static stream_t *open_stream_plugin(const stream_info_t *sinfo,
-                                    const char *url, const char *path, int mode,
-                                    struct MPOpts *options, int *ret)
+static const char *match_proto(const char *url, const char *proto)
 {
+    int l = strlen(proto);
+    if (l > 0) {
+        if (strncasecmp(url, proto, l) == 0 && strncmp("://", url + l, 3) == 0)
+            return url + l + 3;
+    } else {
+        // pure filenames (including "/path" and "./path")
+        if (url[0] == '/' || url[0] == '.' || !strstr(url, "://"))
+            return url;
+    }
+    return NULL;
+}
+
+static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
+                         const char *url, int flags, struct MPOpts *options,
+                         struct stream **ret)
+{
+    if (sinfo->stream_filter != !!underlying)
+        return STREAM_NO_MATCH;
+    if (sinfo->stream_filter && (flags & STREAM_NO_FILTERS))
+        return STREAM_NO_MATCH;
+
+    const char *path = NULL;
+    // Stream filters use the original URL, with no protocol matching at all.
+    if (!sinfo->stream_filter) {
+        for (int n = 0; sinfo->protocols && sinfo->protocols[n]; n++) {
+            path = match_proto(url, sinfo->protocols[n]);
+            if (path)
+                break;
+        }
+
+        if (!path)
+            return STREAM_NO_MATCH;
+    }
+
     stream_t *s = new_stream();
     s->info = sinfo;
     s->opts = options;
     s->url = talloc_strdup(s, url);
     s->path = talloc_strdup(s, path);
+    s->source = underlying;
 
     // Parse options
     if (sinfo->priv_size) {
@@ -232,17 +265,16 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
         if (s->info->url_options && !parse_url(s, config)) {
             mp_tmsg(MSGT_OPEN, MSGL_ERR, "URL parsing failed on url %s\n", url);
             talloc_free(s);
-            *ret = STREAM_ERROR;
-            return NULL;
+            return STREAM_ERROR;
         }
     }
 
     s->flags = 0;
-    s->mode = mode;
-    *ret = sinfo->open(s, mode);
-    if ((*ret) != STREAM_OK) {
+    s->mode = flags & (STREAM_READ | STREAM_WRITE);
+    int r = sinfo->open(s, s->mode);
+    if (r != STREAM_OK) {
         talloc_free(s);
-        return NULL;
+        return r;
     }
 
     if (!s->read_chunk)
@@ -256,8 +288,6 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     if (s->flags & MP_STREAM_FAST_SKIPPING)
         s->flags |= MP_STREAM_SEEK_FW;
 
-    s->mode = mode;
-
     s->uncached_type = s->type;
 
     mp_msg(MSGT_OPEN, MSGL_V, "[stream] [%s] %s\n", sinfo->name, url);
@@ -265,67 +295,57 @@ static stream_t *open_stream_plugin(const stream_info_t *sinfo,
     if (s->mime_type)
         mp_msg(MSGT_OPEN, MSGL_V, "Mime-type: '%s'\n", s->mime_type);
 
-    return s;
+    *ret = s;
+    return STREAM_OK;
 }
 
-static const char *match_proto(const char *url, const char *proto)
+struct stream *stream_create(const char *url, int flags, struct MPOpts *options)
 {
-    int l = strlen(proto);
-    if (l > 0) {
-        if (strncasecmp(url, proto, l) == 0 && strncmp("://", url + l, 3) == 0)
-            return url + l + 3;
-    } else {
-        // pure filenames
-        if (!strstr(url, "://"))
-            return url;
-    }
-    return NULL;
-}
-
-static stream_t *open_stream_full(const char *url, int mode,
-                                  struct MPOpts *options)
-{
-    int i, j, r;
-    const stream_info_t *sinfo;
-    stream_t *s;
-
+    struct stream *s = NULL;
     assert(url);
 
-    for (i = 0; auto_open_streams[i]; i++) {
-        sinfo = auto_open_streams[i];
-        if (!sinfo->protocols) {
-            mp_msg(MSGT_OPEN, MSGL_WARN,
-                   "Stream type %s has protocols == NULL, it's a bug\n",
-                   sinfo->name);
+    // Open stream proper
+    for (int i = 0; stream_list[i]; i++) {
+        int r = open_internal(stream_list[i], NULL, url, flags, options, &s);
+        if (r == STREAM_OK)
+            break;
+        if (r == STREAM_NO_MATCH || r == STREAM_UNSUPPORTED)
             continue;
-        }
-        for (j = 0; sinfo->protocols[j]; j++) {
-            const char *path = match_proto(url, sinfo->protocols[j]);
-            if (path) {
-                s = open_stream_plugin(sinfo, url, path, mode, options, &r);
-                if (s)
-                    return s;
-                if (r != STREAM_UNSUPPORTED) {
-                    mp_tmsg(MSGT_OPEN, MSGL_ERR, "Failed to open %s.\n", url);
-                    return NULL;
-                }
-                break;
-            }
+        if (r != STREAM_OK) {
+            mp_tmsg(MSGT_OPEN, MSGL_ERR, "Failed to open %s.\n", url);
+            return NULL;
         }
     }
 
-    mp_tmsg(MSGT_OPEN, MSGL_ERR, "No stream found to handle url %s\n", url);
-    return NULL;
+    if (!s) {
+        mp_tmsg(MSGT_OPEN, MSGL_ERR, "No stream found to handle url %s\n", url);
+        return NULL;
+    }
+
+    // Open stream filters
+    for (;;) {
+        struct stream *new = NULL;
+        for (int i = 0; stream_list[i]; i++) {
+            int r = open_internal(stream_list[i], s, s->url, flags, options, &new);
+            if (r == STREAM_OK)
+                break;
+        }
+        if (!new)
+            break;
+        s = new;
+    }
+
+    return s;
 }
 
 struct stream *stream_open(const char *filename, struct MPOpts *options)
 {
-    return open_stream_full(filename, STREAM_READ, options);
+    return stream_create(filename, STREAM_READ, options);
 }
 
 stream_t *open_output_stream(const char *filename, struct MPOpts *options)
 {
-    return open_stream_full(filename, STREAM_WRITE, options);
+    return stream_create(filename, STREAM_WRITE, options);
 }
 
 static int stream_reconnect(stream_t *s)
@@ -673,6 +693,7 @@ void free_stream(stream_t *s)
     if (s->close)
         s->close(s);
     free_stream(s->uncached_stream);
+    free_stream(s->source);
     talloc_free(s);
 }
 
