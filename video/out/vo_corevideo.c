@@ -70,6 +70,8 @@ struct cv_functions {
     void (*bind_texture)(struct vo *vo);
     void (*unbind_texture)(struct vo *vo);
     mp_image_t *(*get_screenshot)(struct vo *vo);
+    int (*get_yuv_colorspace)(struct vo *vo, struct mp_csp_details *csp);
+    int (*set_yuv_colorspace)(struct vo *vo, struct mp_csp_details *csp);
 };
 
 struct priv {
@@ -271,6 +273,13 @@ static void apply_csp(struct vo *vo, CVPixelBufferRef pbuf)
     CVPixelBufferUnlockBaseAddress(pbuf, 0);
 }
 
+static int get_yuv_colorspace(struct vo *vo, struct mp_csp_details *csp)
+{
+    struct priv *p = vo->priv;
+    *(struct mp_csp_details *)csp = p->colorspace;
+    return VO_TRUE;
+}
+
 static int get_image_fmt(struct vo *vo, CVPixelBufferRef pbuf)
 {
     OSType pixfmt = CVPixelBufferGetPixelFormatType(pbuf);
@@ -324,17 +333,10 @@ static int control(struct vo *vo, uint32_t request, void *data)
         case VOCTRL_REDRAW_FRAME:
             do_render(vo);
             return VO_TRUE;
-        case VOCTRL_SET_YUV_COLORSPACE: {
-            struct mp_csp_details csp = *(struct mp_csp_details *)data;
-            if (get_cv_csp_matrix(csp.format)) {
-                p->colorspace = csp;
-                return VO_TRUE;
-            } else
-                return VO_NOTIMPL;
-        }
+        case VOCTRL_SET_YUV_COLORSPACE:
+            return p->fns.set_yuv_colorspace(vo, data);
         case VOCTRL_GET_YUV_COLORSPACE:
-            *(struct mp_csp_details *)data = p->colorspace;
-            return VO_TRUE;
+            return p->fns.get_yuv_colorspace(vo, data);
         case VOCTRL_SCREENSHOT: {
             struct voctrl_screenshot_args *args = data;
             if (args->full_window)
@@ -423,13 +425,26 @@ static mp_image_t *cv_get_screenshot(struct vo *vo)
     return get_screenshot(vo, p->cv.pbuf);
 }
 
+static int cv_set_yuv_colorspace(struct vo *vo, struct mp_csp_details *csp)
+{
+    struct priv *p = vo->priv;
+
+    if (get_cv_csp_matrix(csp->format)) {
+        p->colorspace = *csp;
+        return VO_TRUE;
+    } else
+        return VO_NOTIMPL;
+}
+
 static struct cv_functions cv_functions = {
-    .init            = dummy_cb,
-    .uninit          = cv_uninit,
-    .bind_texture    = cv_bind_texture,
-    .unbind_texture  = cv_unbind_texture,
-    .prepare_texture = upload_opengl_texture,
-    .get_screenshot  = cv_get_screenshot,
+    .init               = dummy_cb,
+    .uninit             = cv_uninit,
+    .bind_texture       = cv_bind_texture,
+    .unbind_texture     = cv_unbind_texture,
+    .prepare_texture    = upload_opengl_texture,
+    .get_screenshot     = cv_get_screenshot,
+    .get_yuv_colorspace = get_yuv_colorspace,
+    .set_yuv_colorspace = cv_set_yuv_colorspace,
 };
 
 #if CONFIG_VDA
@@ -482,7 +497,6 @@ static void extract_texture_from_iosurface(struct vo *vo, struct mp_image *mpi)
     struct priv *p = vo->priv;
     CVPixelBufferRelease(p->dr.pbuf);
     p->dr.pbuf = (CVPixelBufferRef)mpi->planes[3];
-    apply_csp(co, p->dr.pbuf);
     CVPixelBufferRetain(p->dr.pbuf);
     IOSurfaceRef surface = CVPixelBufferGetIOSurface(p->dr.pbuf);
     MP_DBG(vo, "iosurface id: %d\n", IOSurfaceGetID(surface));
@@ -513,13 +527,25 @@ static mp_image_t *iosurface_get_screenshot(struct vo *vo)
     return get_screenshot(vo, p->dr.pbuf);
 }
 
+static int iosurface_set_yuv_csp(struct vo *vo, struct mp_csp_details *csp)
+{
+    if (csp->format == MP_CSP_BT_601) {
+        struct priv *p = vo->priv;
+        p->colorspace = *csp;
+        return VO_TRUE;
+    } else
+        return VO_NOTIMPL;
+}
+
 static struct cv_functions iosurface_functions = {
-    .init            = iosurface_init,
-    .uninit          = iosurface_uninit,
-    .bind_texture    = iosurface_bind_texture,
-    .unbind_texture  = iosurface_unbind_texture,
-    .prepare_texture = extract_texture_from_iosurface,
-    .get_screenshot  = iosurface_get_screenshot,
+    .init               = iosurface_init,
+    .uninit             = iosurface_uninit,
+    .bind_texture       = iosurface_bind_texture,
+    .unbind_texture     = iosurface_unbind_texture,
+    .prepare_texture    = extract_texture_from_iosurface,
+    .get_screenshot     = iosurface_get_screenshot,
+    .get_yuv_colorspace = get_yuv_colorspace,
+    .set_yuv_colorspace = iosurface_set_yuv_csp,
 };
 #endif /* CONFIG_VDA */
 
