@@ -47,11 +47,7 @@ int af_fmt2bits(int format)
 char* af_fmt2str(int format, char* str, int size)
 {
     const char *name = af_fmt2str_short(format);
-    if (name) {
-        snprintf(str, size, "%s", name);
-    } else {
-        snprintf(str, size, "%#x", format);
-    }
+    snprintf(str, size, "%s", name);
     return str;
 }
 
@@ -105,11 +101,6 @@ const char *af_fmt2str_short(int format)
     return "??";
 }
 
-static bool af_fmt_valid(int format)
-{
-    return (format & AF_FORMAT_MASK) == format;
-}
-
 int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int samplerate)
 {
     int bps      = (af_fmt2bits(format) / 8);
@@ -122,13 +113,6 @@ int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int sampler
 
 int af_str2fmt_short(bstr str)
 {
-    if (bstr_startswith0(str, "0x")) {
-        bstr rest;
-        int fmt = bstrtoll(str, &rest, 16);
-        if (rest.len == 0 && af_fmt_valid(fmt))
-            return fmt;
-    }
-
     for (int i = 0; af_fmtstr_table[i].name; i++)
         if (!bstrcasecmp0(str, af_fmtstr_table[i].name))
             return af_fmtstr_table[i].format;
