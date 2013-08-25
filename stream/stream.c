@@ -732,9 +732,6 @@ static int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
     if (orig->mode != STREAM_READ)
         return 1;
 
-    // Can't handle a loaded buffer.
-    orig->buf_len = orig->buf_pos = 0;
-
     stream_t *cache = new_stream();
     cache->uncached_type = orig->type;
     cache->uncached_stream = orig;
