@@ -657,7 +657,11 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
             NSApplicationPresentationDefault;
 
         if ([s->fs_screen hasMenubar])
-            popts |= NSApplicationPresentationAutoHideMenuBar;
+            // Cocoa raises an exception when autohiding the menubar but
+            // not the dock. They probably got bored while programming the
+            // multi screen support and took some shortcuts (tested on 10.8).
+            popts |= NSApplicationPresentationAutoHideMenuBar |
+                     NSApplicationPresentationAutoHideDock;
 
         if ([s->fs_screen hasDock])
             popts |= NSApplicationPresentationAutoHideDock;
