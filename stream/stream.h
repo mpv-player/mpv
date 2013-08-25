@@ -271,5 +271,6 @@ typedef struct {
 } stream_language_t;
 
 void mp_url_unescape_inplace(char *buf);
+char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok);
 
 #endif /* MPLAYER_STREAM_H */

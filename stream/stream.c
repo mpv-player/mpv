@@ -75,6 +75,8 @@ extern const stream_info_t stream_info_file;
 extern const stream_info_t stream_info_ifo;
 extern const stream_info_t stream_info_dvd;
 extern const stream_info_t stream_info_bluray;
+extern const stream_info_t stream_info_rar_filter;
+extern const stream_info_t stream_info_rar_entry;
 
 static const stream_info_t *const stream_list[] = {
 #ifdef CONFIG_VCD
@@ -111,6 +113,8 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_memory,
     &stream_info_null,
     &stream_info_mf,
+    &stream_info_rar_filter,
+    &stream_info_rar_entry,
     &stream_info_file,
     NULL
 };
@@ -146,6 +150,36 @@ void mp_url_unescape_inplace(char *buf)
         buf[o++] = c;
     }
     buf[o++] = '\0';
+}
+
+// Escape according to http://tools.ietf.org/html/rfc3986#section-2.1
+// Only unreserved characters are not escaped.
+// The argument ok (if not NULL) is as follows:
+//      ok[0] != '~': additional characters that are not escaped
+//      ok[0] == '~': do not escape anything but these characters
+//                    (can't override the unreserved characters, which are
+//                     never escaped, and '%', which is always escaped)
+char *mp_url_escape(void *talloc_ctx, const char *s, const char *ok)
+{
+    int len = strlen(s);
+    char *buf = talloc_array(talloc_ctx, char, len * 3 + 1);
+    int o = 0;
+    for (int i = 0; i < len; i++) {
+        unsigned char c = s[i];
+        if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+            (c >= '0' && c <= '9') || strchr("-._~", c) ||
+            (ok && ((ok[0] != '~') == !!strchr(ok, c)) && c != '%'))
+        {
+            buf[o++] = c;
+        } else {
+            const char hex[] = "0123456789ABCDEF";
+            buf[o++] = '%';
+            buf[o++] = hex[c / 16];
+            buf[o++] = hex[c % 16];
+        }
+    }
+    buf[o++] = '\0';
+    return buf;
 }
 
 static const char *find_url_opt(struct stream *s, const char *opt)

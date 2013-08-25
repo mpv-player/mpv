@@ -604,6 +604,10 @@ struct demuxer *demux_open(struct stream *stream, char *force_format,
         }
     }
 
+    // Peek this much data to avoid that stream_read() run by some demuxers
+    // or stream filters will flush previous peeked data.
+    stream_peek(stream, STREAM_BUFFER_SIZE);
+
     // Test demuxers from first to last, one pass for each check_levels[] entry
     for (int pass = 0; check_levels[pass] != -1; pass++) {
         enum demux_check level = check_levels[pass];
