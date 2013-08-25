@@ -150,7 +150,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
   }
   case AF_CONTROL_COMMAND_LINE:{
     int format = af_str2fmt_short(bstr0(arg));
-    if (format == -1) {
+    if (!format) {
       mp_msg(MSGT_AFILTER, MSGL_ERR, "[format] %s is not a valid format\n", (char *)arg);
       return AF_ERROR;
     }

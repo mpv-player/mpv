@@ -133,5 +133,5 @@ int af_str2fmt_short(bstr str)
         if (!bstrcasecmp0(str, af_fmtstr_table[i].name))
             return af_fmtstr_table[i].format;
 
-    return -1;
+    return 0;
 }

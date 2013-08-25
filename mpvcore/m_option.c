@@ -1601,7 +1601,7 @@ static int parse_afmt(const m_option_t *opt, struct bstr name,
     }
 
     int fmt = af_str2fmt_short(param);
-    if (fmt == -1) {
+    if (!fmt) {
         mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                "Option %.*s: unknown format name: '%.*s'\n",
                BSTR_P(name), BSTR_P(param));

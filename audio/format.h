@@ -43,11 +43,6 @@
 #define AF_FORMAT_US		(1<<1) // Unsigned
 #define AF_FORMAT_SIGN_MASK	(1<<1)
 
-// Fixed or floating point
-#define AF_FORMAT_I		(0<<2) // Int
-#define AF_FORMAT_F		(1<<2) // Foating point
-#define AF_FORMAT_POINT_MASK	(1<<2)
-
 // Bits used
 #define AF_FORMAT_8BIT		(0<<3)
 #define AF_FORMAT_16BIT		(1<<3)
@@ -62,7 +57,12 @@
 #define AF_FORMAT_IEC61937      (6<<6)
 #define AF_FORMAT_SPECIAL_MASK	(7<<6)
 
-#define AF_FORMAT_MASK          ((1<<9)-1)
+// Fixed or floating point
+#define AF_FORMAT_I             (1<<9) // Int
+#define AF_FORMAT_F             (2<<9) // Foating point
+#define AF_FORMAT_POINT_MASK    (3<<9)
+
+#define AF_FORMAT_MASK          ((1<<11)-1)
 
 // PREDEFINED formats
 
@@ -117,7 +117,7 @@
 #define AF_FORMAT_IEC61937_NE AF_FORMAT_IEC61937_LE
 #endif
 
-#define AF_FORMAT_UNKNOWN (-1)
+#define AF_FORMAT_UNKNOWN 0
 
 #define AF_FORMAT_IS_AC3(fmt) (((fmt) & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_AC3)
 #define AF_FORMAT_IS_IEC61937(fmt) (AF_FORMAT_IS_AC3(fmt) || ((fmt) & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_IEC61937)
