@@ -142,18 +142,17 @@ static int init_gl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     return 1;
 }
 
-static int config(struct vo *vo, uint32_t width, uint32_t height,
-                  uint32_t d_width, uint32_t d_height, uint32_t flags,
-                  uint32_t format)
+static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct priv *p = vo->priv;
     p->fns.uninit(vo);
 
-    p->image_width = width;
-    p->image_height = height;
+    p->image_width  = params->w;
+    p->image_height = params->h;
 
     int mpgl_caps = MPGL_CAP_GL_LEGACY;
-    if (!mpgl_config_window(p->mpglctx, mpgl_caps, d_width, d_height, flags))
+    if (!mpgl_config_window(
+            p->mpglctx, mpgl_caps, params->d_w, params->d_h, flags))
         return -1;
 
     init_gl(vo, vo->dwidth, vo->dheight);
@@ -598,7 +597,7 @@ const struct vo_driver video_out_corevideo = {
     },
     .preinit = preinit,
     .query_format = query_format,
-    .config = config,
+    .reconfig = reconfig,
     .control = control,
     .draw_image = draw_image,
     .draw_osd = draw_osd,
