@@ -152,7 +152,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 
     int mpgl_caps = MPGL_CAP_GL_LEGACY;
     if (!mpgl_config_window(
-            p->mpglctx, mpgl_caps, params->d_w, params->d_h, flags))
+            p->mpglctx, mpgl_caps, vo->dwidth, vo->dheight, flags))
         return -1;
 
     init_gl(vo, vo->dwidth, vo->dheight);
