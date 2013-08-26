@@ -2833,7 +2833,8 @@ if test "$_vda" = auto ; then
  _vda=no
  if test "$_avutil_has_refcounting" = "yes" ; then
    header_check VideoDecodeAcceleration/VDADecoder.h &&
-     header_check libavcodec/vda.h && _vda=yes
+   statement_check libavcodec/vda.h 'ff_vda_create_decoder(NULL, NULL, NULL)' &&
+   _vda=yes
  else
    res_comment="libavutil too old"
  fi
