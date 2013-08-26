@@ -64,17 +64,16 @@
 #include "osdep/macosx_events.h"
 #endif
 
-#define MP_MAX_KEY_DOWN 4
-
 #if HAVE_PTHREADS
 #include <pthread.h>
-static pthread_mutex_t queue_mutex = PTHREAD_MUTEX_INITIALIZER;
-#define queue_lock()   pthread_mutex_lock(&queue_mutex)
-#define queue_unlock() pthread_mutex_unlock(&queue_mutex)
+#define input_lock(ictx)   pthread_mutex_lock(&ictx->mutex)
+#define input_unlock(ictx) pthread_mutex_unlock(&ictx->mutex)
 #else
-#define queue_lock() 0
-#define queue_unlock() 0
+#define input_lock(ictx) 0
+#define input_unlock(ictx) 0
 #endif
+
+#define MP_MAX_KEY_DOWN 4
 
 struct cmd_bind {
     int keys[MP_MAX_KEY_DOWN];
@@ -513,6 +512,10 @@ struct cmd_queue {
 };
 
 struct input_ctx {
+#if HAVE_PTHREADS
+    pthread_mutex_t mutex;
+#endif
+
     bool using_ar;
     bool using_cocoa_media_keys;
 
@@ -663,30 +666,25 @@ bool mp_input_is_abort_cmd(int cmd_id)
 
 static int queue_count_cmds(struct cmd_queue *queue)
 {
-    queue_lock();
     int res = 0;
     for (struct mp_cmd *cmd = queue->first; cmd; cmd = cmd->queue_next)
         res++;
-    queue_unlock();
     return res;
 }
 
 static bool queue_has_abort_cmds(struct cmd_queue *queue)
 {
-    queue_lock();
     bool ret = false;
     for (struct mp_cmd *cmd = queue->first; cmd; cmd = cmd->queue_next)
         if (mp_input_is_abort_cmd(cmd->id)) {
             ret = true;
             break;
         }
-    queue_unlock();
     return ret;
 }
 
 static void queue_remove(struct cmd_queue *queue, struct mp_cmd *cmd)
 {
-    queue_lock();
     struct mp_cmd **p_prev = &queue->first;
     while (*p_prev != cmd) {
         p_prev = &(*p_prev)->queue_next;
@@ -694,13 +692,11 @@ static void queue_remove(struct cmd_queue *queue, struct mp_cmd *cmd)
     // if this fails, cmd was not in the queue
     assert(*p_prev == cmd);
     *p_prev = cmd->queue_next;
-    queue_unlock();
 }
 
 static void queue_add(struct cmd_queue *queue, struct mp_cmd *cmd,
                       bool at_head)
 {
-    queue_lock();
     if (at_head) {
         cmd->queue_next = queue->first;
         queue->first = cmd;
@@ -711,15 +707,12 @@ static void queue_add(struct cmd_queue *queue, struct mp_cmd *cmd,
         *p_prev = cmd;
         cmd->queue_next = NULL;
     }
-    queue_unlock();
 }
 
 static struct mp_cmd *queue_peek(struct cmd_queue *queue)
 {
     struct mp_cmd *ret = NULL;
-    queue_lock();
     ret = queue->first;
-    queue_unlock();
     return ret;
 }
 
@@ -749,14 +742,16 @@ int mp_input_add_cmd_fd(struct input_ctx *ictx, int unix_fd, int select,
         return 0;
     }
 
+    input_lock(ictx);
     struct input_fd *fd = mp_input_add_fd(ictx);
-    if (!fd)
-        return 0;
-    fd->fd = unix_fd;
-    fd->select = select;
-    fd->read_cmd = read_func ? read_func : default_cmd_func;
-    fd->close_func = close_func;
-    return 1;
+    if (fd) {
+        fd->fd = unix_fd;
+        fd->select = select;
+        fd->read_cmd = read_func ? read_func : default_cmd_func;
+        fd->close_func = close_func;
+    }
+    input_unlock(ictx);
+    return !!fd;
 }
 
 int mp_input_add_key_fd(struct input_ctx *ictx, int unix_fd, int select,
@@ -770,15 +765,17 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int unix_fd, int select,
     }
     assert(read_func);
 
+    input_lock(ictx);
     struct input_fd *fd = mp_input_add_fd(ictx);
-    if (!fd)
-        return 0;
-    fd->fd = unix_fd;
-    fd->select = select;
-    fd->read_key = read_func;
-    fd->close_func = close_func;
-    fd->ctx = ctx;
-    return 1;
+    if (fd) {
+        fd->fd = unix_fd;
+        fd->select = select;
+        fd->read_key = read_func;
+        fd->close_func = close_func;
+        fd->ctx = ctx;
+    }
+    input_unlock(ictx);
+    return !!fd;
 }
 
 
@@ -805,7 +802,9 @@ static void mp_input_rm_fd(struct input_ctx *ictx, int fd)
 
 void mp_input_rm_key_fd(struct input_ctx *ictx, int fd)
 {
+    input_lock(ictx);
     mp_input_rm_fd(ictx, fd);
+    input_unlock(ictx);
 }
 
 static int parse_cycle_dir(const struct m_option *opt, struct bstr name,
@@ -1524,12 +1523,15 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code)
 
 void mp_input_put_key(struct input_ctx *ictx, int code)
 {
+    input_lock(ictx);
     double now = mp_time_sec();
     int doubleclick_time = ictx->doubleclick_time;
     // ignore system-doubleclick if we generate these events ourselves
     int unmod = code & ~MP_KEY_MODIFIER_MASK;
-    if (doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod))
+    if (doubleclick_time && MP_KEY_IS_MOUSE_BTN_DBL(unmod)) {
+        input_unlock(ictx);
         return;
+    }
     mp_input_feed_key(ictx, code);
     if (code & MP_KEY_STATE_DOWN) {
         code &= ~MP_KEY_STATE_DOWN;
@@ -1542,6 +1544,7 @@ void mp_input_put_key(struct input_ctx *ictx, int code)
         ictx->last_doubleclick_key_down = code;
         ictx->last_doubleclick_time = now;
     }
+    input_unlock(ictx);
 }
 
 void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t)
@@ -1556,14 +1559,15 @@ void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t)
 
 void mp_input_put_axis(struct input_ctx *ictx, int direction, double value)
 {
+    input_lock(ictx);
     struct mp_cmd *cmd = interpret_key(ictx, direction);
-    if (!cmd)
-        return;
+    if (cmd) {
+        cmd->scale = value;
 
-    cmd->scale = value;
-
-    ictx->got_new_events = true;
-    add_key_cmd(ictx, cmd);
+        ictx->got_new_events = true;
+        add_key_cmd(ictx, cmd);
+    }
+    input_unlock(ictx);
 }
 
 static void trigger_mouse_leave(struct input_ctx *ictx, char *new_section)
@@ -1585,9 +1589,12 @@ static void trigger_mouse_leave(struct input_ctx *ictx, char *new_section)
 
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
 {
+    input_lock(ictx);
     // we're already there
-    if (ictx->mouse_vo_x == x && ictx->mouse_vo_y == y)
+    if (ictx->mouse_vo_x == x && ictx->mouse_vo_y == y) {
+        input_unlock(ictx);
         return;
+    }
 
     ictx->mouse_event_counter++;
     ictx->mouse_vo_x = x;
@@ -1598,12 +1605,13 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
 
     trigger_mouse_leave(ictx, cmd ? cmd->input_section : NULL);
 
-    if (!cmd)
-        return;
-    cmd->mouse_move = true;
-    cmd->mouse_x = x;
-    cmd->mouse_y = y;
-    add_key_cmd(ictx, cmd);
+    if (cmd) {
+        cmd->mouse_move = true;
+        cmd->mouse_x = x;
+        cmd->mouse_y = y;
+        add_key_cmd(ictx, cmd);
+    }
+    input_unlock(ictx);
 }
 
 static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
@@ -1751,10 +1759,11 @@ static void read_all_events(struct input_ctx *ictx, int time)
 
 int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
 {
+    input_lock(ictx);
     ictx->got_new_events = true;
-    if (!cmd)
-        return 0;
-    queue_add(&ictx->control_cmd_queue, cmd, false);
+    if (cmd)
+        queue_add(&ictx->control_cmd_queue, cmd, false);
+    input_unlock(ictx);
     return 1;
 }
 
@@ -1764,6 +1773,7 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
  */
 mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
 {
+    input_lock(ictx);
     if (async_quit_request) {
         struct mp_cmd *cmd = mp_input_parse_cmd(bstr0("quit 1"), "");
         queue_add(&ictx->control_cmd_queue, cmd, true);
@@ -1781,24 +1791,23 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
             queue_add(queue, repeated, false);
     }
     struct mp_cmd *ret = queue_peek(queue);
-    if (!ret)
-        return NULL;
-
-    if (!peek_only) {
+    if (ret && !peek_only) {
         queue_remove(queue, ret);
         if (ret->mouse_move) {
             ictx->mouse_x = ret->mouse_x;
             ictx->mouse_y = ret->mouse_y;
         }
     }
-
+    input_unlock(ictx);
     return ret;
 }
 
 void mp_input_get_mouse_pos(struct input_ctx *ictx, int *x, int *y)
 {
+    input_lock(ictx);
     *x = ictx->mouse_x;
     *y = ictx->mouse_y;
+    input_unlock(ictx);
 }
 
 void mp_cmd_free(mp_cmd_t *cmd)
@@ -2036,6 +2045,7 @@ static char *normalize_section(struct input_ctx *ictx, char *name)
 
 void mp_input_disable_section(struct input_ctx *ictx, char *name)
 {
+    input_lock(ictx);
     name = normalize_section(ictx, name);
 
     // Remove old section, or make sure it's on top if re-enabled
@@ -2047,10 +2057,12 @@ void mp_input_disable_section(struct input_ctx *ictx, char *name)
             ictx->num_active_sections--;
         }
     }
+    input_unlock(ictx);
 }
 
 void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
 {
+    input_lock(ictx);
     name = normalize_section(ictx, name);
 
     mp_input_disable_section(ictx, name);
@@ -2059,30 +2071,40 @@ void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
         ictx->active_sections[ictx->num_active_sections++] =
             (struct active_section) {name, flags};
     }
+    input_unlock(ictx);
 }
 
 void mp_input_disable_all_sections(struct input_ctx *ictx)
 {
+    input_lock(ictx);
     ictx->num_active_sections = 0;
+    input_unlock(ictx);
 }
 
 void mp_input_set_section_mouse_area(struct input_ctx *ictx, char *name,
                                      int x0, int y0, int x1, int y1)
 {
+    input_lock(ictx);
     struct cmd_bind_section *s = get_bind_section(ictx, bstr0(name));
     s->mouse_area = (struct mp_rect){x0, y0, x1, y1};
     s->mouse_area_set = x0 != x1 && y0 != y1;
+    input_unlock(ictx);
 }
 
 bool mp_input_test_mouse_active(struct input_ctx *ictx, int x, int y)
 {
+    input_lock(ictx);
+    bool res = false;
     for (int i = 0; i < ictx->num_active_sections; i++) {
         char *name = ictx->active_sections[i].name;
         struct cmd_bind_section *s = get_bind_section(ictx, bstr0(name));
-        if (s->mouse_area_set && test_rect(&s->mouse_area, x, y))
-            return true;
+        if (s->mouse_area_set && test_rect(&s->mouse_area, x, y)) {
+            res = true;
+            break;
+        }
     }
-    return false;
+    input_unlock(ictx);
+    return res;
 }
 
 bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y)
@@ -2108,6 +2130,7 @@ void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
 {
     if (!name || !name[0])
         return; // parse_config() changes semantics with restrict_section==empty
+    input_lock(ictx);
     if (contents) {
         parse_config(ictx, builtin, bstr0(contents), location, name);
     } else {
@@ -2117,6 +2140,7 @@ void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
         struct cmd_bind_section *bs = get_bind_section(ictx, bstr0(name));
         remove_binds(bs, builtin);
     }
+    input_unlock(ictx);
 }
 
 struct input_ctx *mp_input_init(struct MPOpts *opts)
@@ -2134,6 +2158,15 @@ struct input_ctx *mp_input_init(struct MPOpts *opts)
         .test = input_conf->test,
         .wakeup_pipe = {-1, -1},
     };
+
+#if HAVE_PTHREADS
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&ictx->mutex, &attr);
+    pthread_mutexattr_destroy(&attr);
+#endif
+
     mp_input_enable_section(ictx, NULL, 0);
 
     parse_config(ictx, true, bstr0(builtin_input_conf), "<builtin>", NULL);
@@ -2265,6 +2298,7 @@ void mp_input_uninit(struct input_ctx *ictx)
     clear_queue(&ictx->key_cmd_queue);
     clear_queue(&ictx->control_cmd_queue);
     talloc_free(ictx->current_down_cmd);
+    pthread_mutex_destroy(&ictx->mutex);
     talloc_free(ictx);
 }
 
@@ -2298,8 +2332,21 @@ static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam)
 
 void mp_input_wakeup(struct input_ctx *ictx)
 {
+    // Safe without locking
     if (ictx->wakeup_pipe[1] >= 0)
         write(ictx->wakeup_pipe[1], &(char){0}, 1);
+}
+
+static bool test_abort(struct input_ctx *ictx)
+{
+    if (async_quit_request || queue_has_abort_cmds(&ictx->key_cmd_queue) ||
+        queue_has_abort_cmds(&ictx->control_cmd_queue))
+    {
+        mp_tmsg(MSGT_INPUT, MSGL_WARN, "Received command to move to "
+                "another file. Aborting current processing.\n");
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -2307,24 +2354,24 @@ void mp_input_wakeup(struct input_ctx *ictx)
  */
 int mp_input_check_interrupt(struct input_ctx *ictx, int time)
 {
-    for (int i = 0; ; i++) {
-        if (async_quit_request || queue_has_abort_cmds(&ictx->key_cmd_queue) ||
-                queue_has_abort_cmds(&ictx->control_cmd_queue)) {
-            mp_tmsg(MSGT_INPUT, MSGL_WARN, "Received command to move to "
-                   "another file. Aborting current processing.\n");
-            return true;
-        }
-        if (i)
-            return false;
+    input_lock(ictx);
+    bool res = test_abort(ictx);
+    if (!res) {
         read_all_events(ictx, time);
+        res = test_abort(ictx);
     }
+    input_unlock(ictx);
+    return res;
 }
 
 unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
 {
     // Make the frontend always display the mouse cursor (as long as it's not
     // forced invisible) if mouse input is desired.
+    input_lock(ictx);
     if (mp_input_test_mouse_active(ictx, ictx->mouse_x, ictx->mouse_y))
         ictx->mouse_event_counter++;
-    return ictx->mouse_event_counter;
+    int ret = ictx->mouse_event_counter;
+    input_unlock(ictx);
+    return ret;
 }
