@@ -1705,7 +1705,7 @@ fi #if darwin
 echocheck "Wayland"
 if test "$_wayland" != no; then
  _wayland="no"
-  pkg_config_add "wayland-client >= 1.0.0 wayland-egl >= 9.0.0 wayland-cursor >= 1.0.0 xkbcommon >= 0.3.0" \
+  pkg_config_add "wayland-client >= 1.0.0 wayland-cursor >= 1.0.0 xkbcommon >= 0.3.0" \
   && _wayland="yes"
 fi
 if test "$_wayland" = yes; then
@@ -2046,7 +2046,8 @@ EOF
       fi
     done
   fi
-  if test "$_wayland" = yes && cc_check -DGL_WAYLAND -lGL -lEGL ; then
+  if test "$_wayland" = yes && cc_check -DGL_WAYLAND -lGL -lEGL &&
+      pkg_config_add "wayland-egl >= 9.0.0"; then
     _gl=yes
     _gl_wayland=yes
     libs_mplayer="$libs_mplayer -lGL -lEGL"
