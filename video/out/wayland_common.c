@@ -220,13 +220,13 @@ static void keyboard_handle_keymap(void *data,
     close(fd);
 
     if (!wl->input.xkb.keymap) {
-        MP_ERR(wl, "failed to compile keymap\n");
+        MP_ERR(wl->vo, "failed to compile keymap\n");
         return;
     }
 
     wl->input.xkb.state = xkb_state_new(wl->input.xkb.keymap);
     if (!wl->input.xkb.state) {
-        MP_ERR(wl, "failed to create XKB state\n");
+        MP_ERR(wl->vo, "failed to create XKB state\n");
         xkb_map_unref(wl->input.xkb.keymap);
         wl->input.xkb.keymap = NULL;
         return;
@@ -628,7 +628,7 @@ static bool create_window (struct vo_wayland_state *wl)
                                                           wl->window.surface);
 
     if (!wl->window.shell_surface) {
-        MP_ERR(wl, "creating shell surface failed\n");
+        MP_ERR(wl->vo, "creating shell surface failed\n");
         return false;
     }
 
@@ -678,7 +678,7 @@ static bool create_input (struct vo_wayland_state *wl)
     wl->input.xkb.context = xkb_context_new(0);
 
     if (!wl->input.xkb.context) {
-        MP_ERR(wl, "failed to initialize input\n");
+        MP_ERR(wl->vo, "failed to initialize input\n");
         return false;
     }
 
@@ -706,14 +706,13 @@ int vo_wayland_init (struct vo *vo)
     vo->wayland = talloc_zero(NULL, struct vo_wayland_state);
     struct vo_wayland_state *wl = vo->wayland;
     wl->vo = vo;
-    wl->log = mp_log_new(wl, vo->log, "wayland");
 
     if (!create_input(wl)
         || !create_display(wl)
         || !create_window(wl)
         || !create_cursor(wl))
     {
-        MP_ERR(wl, "failed to initialize backend\n");
+        MP_ERR(wl->vo, "failed to initialize backend\n");
         return false;
     }
 
@@ -763,7 +762,7 @@ static void vo_wayland_fullscreen (struct vo *vo)
     struct wl_output *fs_output = wl->display.fs_output;
 
     if (vo->opts->fullscreen) {
-        MP_VERBOSE(wl, "going fullscreen\n");
+        MP_VERBOSE(wl->vo, "going fullscreen\n");
         wl->window.p_width = wl->window.width;
         wl->window.p_height = wl->window.height;
         wl_shell_surface_set_fullscreen(wl->window.shell_surface,
@@ -772,7 +771,7 @@ static void vo_wayland_fullscreen (struct vo *vo)
     }
 
     else {
-        MP_VERBOSE(wl, "leaving fullscreen\n");
+        MP_VERBOSE(wl->vo, "leaving fullscreen\n");
         wl_shell_surface_set_toplevel(wl->window.shell_surface);
         shedule_resize(wl, 0, wl->window.p_width, wl->window.p_height);
     }
@@ -799,7 +798,7 @@ static int vo_wayland_check_events (struct vo *vo)
      * are events to read from the file descriptor through poll */
     if (poll(&fd, 1, 0) > 0) {
         if (fd.revents & POLLERR || fd.revents & POLLHUP)
-            MP_ERR(wl, "error occurred on the display fd\n");
+            MP_ERR(wl->vo, "error occurred on the display fd\n");
         if (fd.revents & POLLIN)
             wl_display_dispatch(dp);
         if (fd.revents & POLLOUT)
@@ -842,7 +841,7 @@ static void vo_wayland_update_screeninfo (struct vo *vo)
     }
 
     if (!mode_received) {
-        MP_ERR(wl, "no output mode detected\n");
+        MP_ERR(wl->vo, "no output mode detected\n");
         return;
     }
 

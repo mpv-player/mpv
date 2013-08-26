@@ -43,7 +43,6 @@ struct vo_wayland_output {
 
 struct vo_wayland_state {
     struct vo *vo;
-    struct mp_log* log;
 
     struct {
         int fd;
