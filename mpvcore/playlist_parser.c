@@ -376,41 +376,6 @@ static bool parse_pls(play_tree_parser_t* p) {
   return true;
 }
 
-/*
- Reference Ini-Format: Each entry is assumed a reference
- */
-static bool parse_ref_ini(play_tree_parser_t* p) {
-  char *line,*v;
-
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying reference-ini playlist...\n");
-  if (!(line = play_tree_parser_get_line(p)))
-    return NULL;
-  strstrip(line);
-  if(strcasecmp(line,"[Reference]"))
-    return NULL;
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected reference-ini playlist format\n");
-  play_tree_parser_stop_keeping(p);
-  line = play_tree_parser_get_line(p);
-  if(!line)
-    return NULL;
-  while(line) {
-    strstrip(line);
-    if(strncasecmp(line,"Ref",3) == 0) {
-      v = pls_entry_get_value(line+3);
-      if(!v)
-	mp_msg(MSGT_PLAYTREE,MSGL_ERR,"No value in entry %s\n",line);
-      else
-      {
-        mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding entry %s\n",v);
-        playlist_add_file(p->pl, v);
-      }
-    }
-    line = play_tree_parser_get_line(p);
-  }
-
-  return true;
-}
-
 static bool parse_smil(play_tree_parser_t* p) {
   int entrymode=0;
   char* line,source[512],*pos,*s_start,*s_end,*src_line;
@@ -693,7 +658,6 @@ typedef bool (*parser_fn)(play_tree_parser_t *);
 static const parser_fn pl_parsers[] = {
     parse_asx,
     parse_pls,
-    parse_ref_ini,
     parse_smil,
     parse_nsc,
     parse_textplain

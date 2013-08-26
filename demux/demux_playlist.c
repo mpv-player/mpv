@@ -69,10 +69,26 @@ static int parse_m3u(struct pl_parser *p)
     if (p->probing)
         return 0;
     while (!pl_eof(p)) {
-        line = bstr_lstrip(pl_get_line(p));
+        line = bstr_strip(pl_get_line(p));
         if (line.len == 0 || bstr_startswith0(line, "#"))
             continue;
         pl_add(p, line);
+    }
+    return 0;
+}
+
+static int parse_ref_init(struct pl_parser *p)
+{
+    bstr line = bstr_strip(pl_get_line(p));
+    if (!bstr_equals0(line, "[Reference]"))
+        return -1;
+    while (!pl_eof(p)) {
+        line = bstr_strip(pl_get_line(p));
+        if (bstr_case_startswith(line, bstr0("Ref"))) {
+            bstr_split_tok(line, "=", &(bstr){0}, &line);
+            if (line.len)
+                pl_add(p, line);
+        }
     }
     return 0;
 }
@@ -84,6 +100,7 @@ struct pl_format {
 
 static const struct pl_format formats[] = {
     {"m3u", parse_m3u},
+    {"ini", parse_ref_init},
 };
 
 static const struct pl_format *probe_pl(struct pl_parser *p, bool force)
