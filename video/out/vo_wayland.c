@@ -525,6 +525,7 @@ static int query_format(struct vo *vo, uint32_t format)
 static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
 {
     struct priv *p = vo->priv;
+    mp_image_unrefp(&p->original_image);
 
     p->width = vo->dwidth;
     p->height = vo->dheight;
@@ -567,6 +568,8 @@ static void uninit(struct vo *vo)
     struct priv *p = vo->priv;
     for (int i = 0; i < MAX_BUFFERS; ++i)
         destroy_shm_buffer(&p->buffers[i]);
+
+    talloc_free(p->original_image);
 
     vo_wayland_uninit(vo);
 }

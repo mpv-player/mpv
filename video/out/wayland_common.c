@@ -687,8 +687,12 @@ static bool create_input (struct vo_wayland_state *wl)
 
 static void destroy_input (struct vo_wayland_state *wl)
 {
-    if (wl->input.keyboard)
+    if (wl->input.keyboard) {
         wl_keyboard_destroy(wl->input.keyboard);
+        xkb_map_unref(wl->input.xkb.keymap);
+        xkb_state_unref(wl->input.xkb.state);
+        xkb_context_unref(wl->input.xkb.context);
+    }
 
     if (wl->input.pointer)
         wl_pointer_destroy(wl->input.pointer);
@@ -696,7 +700,6 @@ static void destroy_input (struct vo_wayland_state *wl)
     if (wl->input.seat)
         wl_seat_destroy(wl->input.seat);
 
-    xkb_context_unref(wl->input.xkb.context);
 }
 
 /*** mplayer2 interface ***/
