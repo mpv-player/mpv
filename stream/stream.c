@@ -550,7 +550,7 @@ struct bstr stream_peek(stream_t *s, int len)
         memmove(s->buffer, &s->buffer[s->buf_pos], buf_valid);
         // Fill rest of the buffer.
         while (buf_valid < len) {
-            int chunk = len - buf_valid;
+            int chunk = MPMAX(len - buf_valid, STREAM_BUFFER_SIZE);
             if (s->sector_size)
                 chunk = STREAM_BUFFER_SIZE;
             assert(buf_valid + chunk <= TOTAL_BUFFER_SIZE);
