@@ -49,43 +49,42 @@ static const struct wl_shm_listener shm_listener;
 struct fmtentry {
     enum wl_shm_format wl_fmt;
     enum mp_imgfmt     mp_fmt;
-    bool hw_support;
 };
 
 // the first 2 Formats should be available on most platforms
 // all other formats are optional
 // the waylad byte order is reversed
-static struct fmtentry fmttable[] = {
-    {WL_SHM_FORMAT_ARGB8888, IMGFMT_BGRA, false}, // 8b 8g 8r 8a
-    {WL_SHM_FORMAT_XRGB8888, IMGFMT_BGR0, false},
-    {WL_SHM_FORMAT_RGB332,   IMGFMT_BGR8, false}, // 3b 3g 2r
-    {WL_SHM_FORMAT_BGR233,   IMGFMT_RGB8, false}, // 3r 3g 3b,
-    {WL_SHM_FORMAT_XRGB4444, IMGFMT_BGR12_LE, false}, // 4b 4g 4r 4a
-    {WL_SHM_FORMAT_XBGR4444, IMGFMT_RGB12_LE, false}, // 4r 4g 4b 4a
-    {WL_SHM_FORMAT_RGBX4444, IMGFMT_RGB12_BE, false}, // 4a 4b 4g 4r
-    {WL_SHM_FORMAT_BGRX4444, IMGFMT_BGR12_BE, false}, // 4a 4r 4g 4b
-    {WL_SHM_FORMAT_ARGB4444, IMGFMT_BGR12_LE, false},
-    {WL_SHM_FORMAT_ABGR4444, IMGFMT_RGB12_LE, false},
-    {WL_SHM_FORMAT_RGBA4444, IMGFMT_RGB12_BE, false},
-    {WL_SHM_FORMAT_BGRA4444, IMGFMT_BGR12_BE, false},
-    {WL_SHM_FORMAT_XRGB1555, IMGFMT_BGR15_LE, false}, // 5b 5g 5r 1a
-    {WL_SHM_FORMAT_XBGR1555, IMGFMT_RGB15_LE, false}, // 5r 5g 5b 1a
-    {WL_SHM_FORMAT_RGBX5551, IMGFMT_RGB15_BE, false}, // 1a 5g 5b 5r
-    {WL_SHM_FORMAT_BGRX5551, IMGFMT_BGR15_BE, false}, // 1a 5r 5g 5b
-    {WL_SHM_FORMAT_ARGB1555, IMGFMT_BGR15_LE, false},
-    {WL_SHM_FORMAT_ABGR1555, IMGFMT_RGB15_LE, false},
-    {WL_SHM_FORMAT_RGBA5551, IMGFMT_RGB15_BE, false},
-    {WL_SHM_FORMAT_BGRA5551, IMGFMT_BGR15_BE, false},
-    {WL_SHM_FORMAT_RGB565,   IMGFMT_BGR16_LE, false}, // 5b 6g 5r
-    {WL_SHM_FORMAT_BGR565,   IMGFMT_RGB16_LE, false}, // 5r 6g 5b
-    {WL_SHM_FORMAT_RGB888,   IMGFMT_BGR24,    false}, // 8b 8g 8r
-    {WL_SHM_FORMAT_BGR888,   IMGFMT_RGB24,    false}, // 8r 8g 8b
-    {WL_SHM_FORMAT_XBGR8888, IMGFMT_RGB0, false},
-    {WL_SHM_FORMAT_RGBX8888, IMGFMT_0BGR, false},
-    {WL_SHM_FORMAT_BGRX8888, IMGFMT_0RGB, false},
-    {WL_SHM_FORMAT_ABGR8888, IMGFMT_RGBA, false},
-    {WL_SHM_FORMAT_RGBA8888, IMGFMT_ABGR, false},
-    {WL_SHM_FORMAT_BGRA8888, IMGFMT_ARGB, false},
+static const struct fmtentry fmttable[] = {
+    {WL_SHM_FORMAT_ARGB8888, IMGFMT_BGRA}, // 8b 8g 8r 8a
+    {WL_SHM_FORMAT_XRGB8888, IMGFMT_BGR0},
+    {WL_SHM_FORMAT_RGB332,   IMGFMT_BGR8}, // 3b 3g 2r
+    {WL_SHM_FORMAT_BGR233,   IMGFMT_RGB8}, // 3r 3g 3b,
+    {WL_SHM_FORMAT_XRGB4444, IMGFMT_BGR12_LE}, // 4b 4g 4r 4a
+    {WL_SHM_FORMAT_XBGR4444, IMGFMT_RGB12_LE}, // 4r 4g 4b 4a
+    {WL_SHM_FORMAT_RGBX4444, IMGFMT_RGB12_BE}, // 4a 4b 4g 4r
+    {WL_SHM_FORMAT_BGRX4444, IMGFMT_BGR12_BE}, // 4a 4r 4g 4b
+    {WL_SHM_FORMAT_ARGB4444, IMGFMT_BGR12_LE},
+    {WL_SHM_FORMAT_ABGR4444, IMGFMT_RGB12_LE},
+    {WL_SHM_FORMAT_RGBA4444, IMGFMT_RGB12_BE},
+    {WL_SHM_FORMAT_BGRA4444, IMGFMT_BGR12_BE},
+    {WL_SHM_FORMAT_XRGB1555, IMGFMT_BGR15_LE}, // 5b 5g 5r 1a
+    {WL_SHM_FORMAT_XBGR1555, IMGFMT_RGB15_LE}, // 5r 5g 5b 1a
+    {WL_SHM_FORMAT_RGBX5551, IMGFMT_RGB15_BE}, // 1a 5g 5b 5r
+    {WL_SHM_FORMAT_BGRX5551, IMGFMT_BGR15_BE}, // 1a 5r 5g 5b
+    {WL_SHM_FORMAT_ARGB1555, IMGFMT_BGR15_LE},
+    {WL_SHM_FORMAT_ABGR1555, IMGFMT_RGB15_LE},
+    {WL_SHM_FORMAT_RGBA5551, IMGFMT_RGB15_BE},
+    {WL_SHM_FORMAT_BGRA5551, IMGFMT_BGR15_BE},
+    {WL_SHM_FORMAT_RGB565,   IMGFMT_BGR16_LE}, // 5b 6g 5r
+    {WL_SHM_FORMAT_BGR565,   IMGFMT_RGB16_LE}, // 5r 6g 5b
+    {WL_SHM_FORMAT_RGB888,   IMGFMT_BGR24}, // 8b 8g 8r
+    {WL_SHM_FORMAT_BGR888,   IMGFMT_RGB24}, // 8r 8g 8b
+    {WL_SHM_FORMAT_XBGR8888, IMGFMT_RGB0},
+    {WL_SHM_FORMAT_RGBX8888, IMGFMT_0BGR},
+    {WL_SHM_FORMAT_BGRX8888, IMGFMT_0RGB},
+    {WL_SHM_FORMAT_ABGR8888, IMGFMT_RGBA},
+    {WL_SHM_FORMAT_RGBA8888, IMGFMT_ABGR},
+    {WL_SHM_FORMAT_BGRA8888, IMGFMT_ARGB},
 };
 
 #define MAX_FORMAT_ENTRIES (sizeof(fmttable) / sizeof(fmttable[0]))
@@ -100,11 +99,18 @@ struct buffer {
     size_t shm_size;
 };
 
+struct supported_format {
+    const struct fmtentry *fmt;
+    bool is_alpha;
+    struct wl_list link;
+};
+
 struct priv {
     struct vo *vo;
     struct vo_wayland_state *wl;
 
-    struct fmtentry *pref_format;
+    struct wl_list format_list;
+    const struct fmtentry *pref_format;
     int bytes_per_pixel;
     int stride;
 
@@ -205,6 +211,11 @@ static int os_create_anonymous_file(off_t size)
     }
 
     return fd;
+}
+
+static bool is_alpha_format(const struct fmtentry *fmt)
+{
+    return !!(mp_imgfmt_get_desc(fmt->mp_fmt).flags & MP_IMGFLAG_ALPHA);
 }
 
 static void buffer_swap(struct priv *p)
@@ -459,7 +470,10 @@ static void shm_handle_format(void *data,
         if (fmttable[i].wl_fmt == format) {
             MP_INFO(p->vo, "format %s supported by hw\n",
                     mp_imgfmt_to_name(fmttable[i].mp_fmt));
-            fmttable[i].hw_support = true;
+            struct supported_format *sf = talloc(p, struct supported_format);
+            sf->fmt = &fmttable[i];
+            sf->is_alpha = is_alpha_format(sf->fmt);
+            wl_list_insert(&p->format_list, &sf->link);
         }
     }
 }
@@ -511,8 +525,10 @@ static void flip_page(struct vo *vo)
 
 static int query_format(struct vo *vo, uint32_t format)
 {
-    for (int i = 0; i < MAX_FORMAT_ENTRIES; ++i) {
-        if (fmttable[i].mp_fmt == format && fmttable[i].hw_support)
+    struct priv *p = vo->priv;
+    struct supported_format *sf;
+    wl_list_for_each_reverse(sf, &p->format_list, link) {
+        if (sf->fmt->mp_fmt == format)
             return VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_CSP_SUPPORTED;
     }
 
@@ -531,24 +547,35 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
     p->height = vo->dheight;
     p->in_format = *fmt;
 
+    struct supported_format *sf;
+
     // find the same format first
-    for (int i = 0; !p->pref_format && i < MAX_FORMAT_ENTRIES; ++i) {
-        if (fmttable[i].mp_fmt == fmt->imgfmt && fmttable[i].hw_support)
-            p->pref_format = &fmttable[i];
+    wl_list_for_each(sf, &p->format_list, link) {
+        if (sf->fmt->mp_fmt == fmt->imgfmt && (p->enable_alpha == sf->is_alpha)) {
+            p->pref_format = sf->fmt;
+            break;
+        }
     }
 
     // if the format is not supported choose one of the fancy formats next
-    // the default formats are always first so begin with the last
-    for (int i = MAX_FORMAT_ENTRIES-1; !p->pref_format && i >= 0; --i) {
-        if (fmttable[i].hw_support)
-            p->pref_format = &fmttable[i];
+    // the default formats are always last
+    if (!p->pref_format) {
+        wl_list_for_each(sf, &p->format_list, link) {
+            if (p->enable_alpha == sf->is_alpha) {
+                p->pref_format = sf->fmt;
+                break;
+            }
+        }
     }
 
-    if (p->use_default)
-        p->pref_format = &fmttable[DEFAULT_FORMAT_ENTRY];
+    // if use default is enable overwrite the auto selected one
+    if (p->use_default) {
+        if (p->enable_alpha)
+            p->pref_format = &fmttable[DEFAULT_ALPHA_FORMAT_ENTRY];
+        else
+            p->pref_format = &fmttable[DEFAULT_FORMAT_ENTRY];
+    }
 
-    if (p->enable_alpha)
-        p->pref_format = &fmttable[DEFAULT_ALPHA_FORMAT_ENTRY];
 
     p->bytes_per_pixel = mp_imgfmt_get_desc(p->pref_format->mp_fmt).bytes[0];
     MP_VERBOSE(vo, "bytes per pixel: %d\n", p->bytes_per_pixel);
@@ -589,6 +616,8 @@ static int preinit(struct vo *vo)
 
     p->front_buffer = &p->buffers[1];
     p->back_buffer = &p->buffers[0];
+
+    wl_list_init(&p->format_list);
 
     wl_shm_add_listener(p->wl->display.shm, &shm_listener, p);
     wl_display_dispatch(p->wl->display.display);
