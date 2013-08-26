@@ -393,6 +393,16 @@ static bool resize(struct priv *p)
     wl->window.width = p->dst_w;
     wl->window.height = p->dst_h;
 
+    // if no alpha enabled format is used then create an opaque region to allow
+    // the compositor to optimize the drawing of the window
+    if (!p->enable_alpha) {
+        struct wl_region *opaque =
+            wl_compositor_create_region(wl->display.compositor);
+        wl_region_add(opaque, 0, 0, p->dst_w, p->dst_h);
+        wl_surface_set_opaque_region(wl->window.surface, opaque);
+        wl_region_destroy(opaque);
+    }
+
     // a redraw should happen at this point
     wl_surface_attach(wl->window.surface, p->front_buffer->wlbuf, x, y);
     wl_surface_damage(wl->window.surface, 0, 0, p->dst_w, p->dst_h);
