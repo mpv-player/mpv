@@ -1704,9 +1704,17 @@ fi #if darwin
 
 echocheck "Wayland"
 if test "$_wayland" != no; then
+  cat > $TMPC << EOF
+#include <wayland-client.h>
+int main(int argc, char *argv[]) {
+  WL_SHM_FORMAT_C8;
+  return 0;
+}
+EOF
+
  _wayland="no"
-  pkg_config_add "wayland-client >= 1.0.0 wayland-cursor >= 1.0.0 xkbcommon >= 0.3.0" \
-  && _wayland="yes"
+  pkg_config_add "wayland-client >= 1.2.0 wayland-cursor >= 1.2.0 xkbcommon >= 0.3.0" \
+      && cc_check -lwayland-client && _wayland="yes"
 fi
 if test "$_wayland" = yes; then
   res_comment=""
