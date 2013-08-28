@@ -433,7 +433,6 @@ static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
     GL *gl = p->gl;
     bool res = true;
 
-    assert(gl->mpgl_caps & MPGL_CAP_FB);
     assert(!fbo->fbo);
     assert(!fbo->texture);
 
@@ -445,6 +444,9 @@ static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
     tex_size(p, w, h, &fbo->tex_w, &fbo->tex_h);
 
     MP_VERBOSE(p, "Create FBO: %dx%d\n", fbo->tex_w, fbo->tex_h);
+
+    if (!(gl->mpgl_caps & MPGL_CAP_FB))
+        return false;
 
     gl->GenFramebuffers(1, &fbo->fbo);
     gl->GenTextures(1, &fbo->texture);
@@ -1713,10 +1715,10 @@ static void check_gl_features(struct gl_video *p)
     }
 
     // fruit dithering mode and the 3D lut use this texture format
-    if ((p->opts.dither_depth >= 0 && p->opts.dither_algo == 0) ||
-        p->use_lut_3d)
+    if (have_fbo && ((p->opts.dither_depth >= 0 && p->opts.dither_algo == 0) ||
+                     p->use_lut_3d))
     {
-        // doesn't disalbe anything; it's just for the log
+        // doesn't disable anything; it's just for the log
         MP_VERBOSE(p, "Testing GL_R16 FBO (dithering/LUT)\n");
         test_fbo(p, GL_R16);
     }
