@@ -1298,6 +1298,8 @@ static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
         struct active_section *s = &ictx->active_sections[i];
         struct cmd_bind *bind = find_bind_for_key_section(ictx, s->name, n, keys);
         if (bind) {
+            if (bind->is_builtin && !ictx->default_bindings)
+                goto skip;
             struct cmd_bind_section *bs = bind->owner;
             for (int x = 0; x < n; x++) {
                 if (MP_KEY_DEPENDS_ON_MOUSE_POS(keys[x]) && bs->mouse_area_set &&
