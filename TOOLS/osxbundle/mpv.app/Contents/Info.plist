@@ -35,7 +35,7 @@
           <string>wma</string>
         </array>
         <key>CFBundleTypeIconFile</key>
-        <string>audio.icns</string>
+        <string>document.icns</string>
         <key>CFBundleTypeName</key>
         <string>Audio file</string>
         <key>CFBundleTypeRole</key>
@@ -122,7 +122,7 @@
           <string>wmv</string>
         </array>
         <key>CFBundleTypeIconFile</key>
-        <string>movie.icns</string>
+        <string>document.icns</string>
         <key>CFBundleTypeName</key>
         <string>Movie file</string>
         <key>CFBundleTypeRole</key>
@@ -157,7 +157,7 @@
           <string>utf</string>
         </array>
         <key>CFBundleTypeIconFile</key>
-        <string>subtitles.icns</string>
+        <string>document.icns</string>
         <key>CFBundleTypeName</key>
         <string>Subtitles file</string>
         <key>CFBundleTypeRole</key>
