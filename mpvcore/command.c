@@ -2648,6 +2648,9 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
+    case MP_CMD_IGNORE:
+        break;
+
     default:
         mp_msg(MSGT_CPLAYER, MSGL_V,
                "Received unknown cmd %s\n", cmd->name);

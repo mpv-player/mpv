@@ -1374,6 +1374,12 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
     mp_cmd_t *ret = mp_input_parse_cmd(bstr0(cmd->cmd), cmd->location);
     if (ret) {
         ret->input_section = cmd->owner->section;
+        if (mp_msg_test(MSGT_INPUT, MSGL_DBG2)) {
+            char *keyname = get_key_combo_name(keys, n);
+            mp_msg(MSGT_INPUT, MSGL_DBG2, "key '%s' -> '%s' in '%s'\n",
+                   keyname, cmd->cmd, ret->input_section);
+            talloc_free(keyname);
+        }
     } else {
         char *key_buf = get_key_combo_name(keys, n);
         mp_tmsg(MSGT_INPUT, MSGL_ERR,
@@ -1394,6 +1400,8 @@ static void update_mouse_section(struct input_ctx *ictx)
     ictx->mouse_section = new_section;
 
     if (strcmp(old, ictx->mouse_section) != 0) {
+        mp_msg(MSGT_INPUT, MSGL_DBG2, "input: switch section %s -> %s\n",
+               old, ictx->mouse_section);
         struct mp_cmd *cmd =
             get_cmd_from_keys(ictx, old, 1, (int[]){MP_KEY_MOUSE_LEAVE});
         if (cmd)
@@ -1444,6 +1452,15 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
     int unmod = code & ~MP_KEY_MODIFIER_MASK;
     if (unmod >= 32 && unmod < MP_KEY_BASE)
         code &= ~MP_KEY_MODIFIER_SHIFT;
+
+    if (mp_msg_test(MSGT_INPUT, MSGL_DBG2)) {
+        int noflags = code & ~(MP_KEY_STATE_DOWN | MP_KEY_STATE_UP);
+        char *key = get_key_name(noflags, NULL);
+        mp_msg(MSGT_INPUT, MSGL_DBG2, "input: key code=%#x '%s'%s%s\n",
+               code, key, (code & MP_KEY_STATE_DOWN) ? " down" : "",
+               (code & MP_KEY_STATE_UP) ? " up" : "");
+        talloc_free(key);
+    }
 
     if (!(code & MP_KEY_STATE_UP) && ictx->num_key_down >= MP_MAX_KEY_DOWN) {
         mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many key down events "
@@ -1556,7 +1573,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code)
 {
     ictx->got_new_events = true;
     if (code == MP_INPUT_RELEASE_ALL) {
-        mp_msg(MSGT_INPUT, MSGL_V, "input: release all\n");
+        mp_msg(MSGT_INPUT, MSGL_DBG2, "input: release all\n");
         ictx->num_key_down = 0;
         release_down_cmd(ictx);
         update_mouse_section(ictx);
@@ -1565,7 +1582,6 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code)
     int unmod = code & ~MP_KEY_MODIFIER_MASK;
     if (MP_KEY_DEPENDS_ON_MOUSE_POS(unmod))
         ictx->mouse_event_counter++;
-    mp_msg(MSGT_INPUT, MSGL_V, "input: key code=%#x\n", code);
     struct mp_cmd *cmd = interpret_key(ictx, code);
     if (!cmd)
         return;
@@ -1636,6 +1652,8 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
         input_unlock(ictx);
         return;
     }
+
+    mp_msg(MSGT_INPUT, MSGL_DBG2, "input: mouse move %d/%d\n", x, y);
 
     ictx->mouse_event_counter++;
     ictx->mouse_vo_x = x;
