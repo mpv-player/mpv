@@ -93,11 +93,10 @@ static NSString *escape_loadfile_name(NSString *input)
         self.eventsResponder = [[[EventsResponder alloc] init] autorelease];
         self.willStopOnOpenEvent = NO;
 
-        [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask
+        [NSEvent addLocalMonitorForEventsMatchingMask:NSKeyDownMask|NSKeyUpMask
                                               handler:^(NSEvent *event) {
-            return [self.eventsResponder handleKeyDown:event];
+            return [self.eventsResponder handleKey:event];
         }];
-
     }
 
     return self;

@@ -252,8 +252,10 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
                 andMapping:keymap];
 }
 
-- (NSEvent*)handleKeyDown:(NSEvent *)event
+- (NSEvent*)handleKey:(NSEvent *)event
 {
+    if ([event isARepeat]) return nil;
+
     NSString *chars;
 
     if (RightAltPressed([event modifierFlags]))
@@ -316,9 +318,19 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
     return mask;
 }
 
+- (int)mapTypeModifiers:(NSEventType)type
+{
+    NSDictionary *map = @{
+        @(NSKeyDown) : @(MP_KEY_STATE_DOWN),
+        @(NSKeyUp)   : @(MP_KEY_STATE_UP),
+    };
+    return [map[@(type)] intValue];
+}
+
 - (int)keyModifierMask:(NSEvent *)event
 {
-    return [self mapKeyModifiers:[event modifierFlags]];
+    return [self mapKeyModifiers:[event modifierFlags]] |
+        [self mapTypeModifiers:[event type]];
 }
 
 -(BOOL)handleKey:(int)key withMask:(int)mask andMapping:(NSDictionary *)mapping

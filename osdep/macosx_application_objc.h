@@ -22,7 +22,7 @@
 
 @interface EventsResponder : NSObject <HIDRemoteDelegate>
 - (BOOL)handleMediaKey:(NSEvent *)event;
-- (NSEvent *)handleKeyDown:(NSEvent *)event;
+- (NSEvent *)handleKey:(NSEvent *)event;
 - (void)startAppleRemote;
 - (void)stopAppleRemote;
 - (void)startMediaKeys;
