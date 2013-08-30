@@ -584,6 +584,8 @@ int async_quit_request;
 static int print_key_list(m_option_t *cfg, char *optname, char *optparam);
 static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam);
 
+static void add_key_cmd(struct input_ctx *ictx, struct mp_cmd *cmd);
+
 #define OPT_BASE_STRUCT struct MPOpts
 
 // Our command line options
@@ -1283,6 +1285,8 @@ static struct cmd_bind *find_bind_for_key_section(struct input_ctx *ictx,
 
     // Prefer user-defined keys over builtin bindings
     for (int builtin = 0; builtin < 2; builtin++) {
+        if (builtin && !ictx->default_bindings)
+            break;
         for (int n = 0; n < bs->num_binds; n++) {
             if (bs->binds[n].is_builtin == (bool)builtin &&
                 bind_matches_key(&bs->binds[n], num_keys, keys))
@@ -1292,6 +1296,24 @@ static struct cmd_bind *find_bind_for_key_section(struct input_ctx *ictx,
     return NULL;
 }
 
+static bool any_mouse_buttons_down(int num_keys, int *keys)
+{
+    for (int n = 0; n < num_keys; n++) {
+        if (MP_KEY_IS_MOUSE_BTN_SINGLE(keys[n]))
+            return true;
+    }
+    return false;
+}
+
+static bool depends_on_mouse_pos(int num_keys, int *keys)
+{
+    for (int n = 0; n < num_keys; n++) {
+        if (MP_KEY_DEPENDS_ON_MOUSE_POS(keys[n]))
+            return true;
+    }
+    return false;
+}
+
 static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
                                               char *force_section,
                                               int n, int *keys)
@@ -1299,21 +1321,29 @@ static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
     if (force_section)
         return find_bind_for_key_section(ictx, force_section, n, keys);
 
+    bool use_mouse = depends_on_mouse_pos(n, keys);
+    // Check global state, because MOUSE_MOVE in particular does not include
+    // the global state in n/keys.
+    bool mouse_down = any_mouse_buttons_down(ictx->num_key_down, ictx->key_down);
+
+    // First look whether a mouse section is capturing all mouse input
+    // exclusively (regardless of the active section stack order).
+    if (use_mouse && mouse_down) {
+        struct cmd_bind *bind =
+            find_bind_for_key_section(ictx, ictx->mouse_section, n, keys);
+        if (bind)
+            return bind;
+    }
+
     for (int i = ictx->num_active_sections - 1; i >= 0; i--) {
         struct active_section *s = &ictx->active_sections[i];
         struct cmd_bind *bind = find_bind_for_key_section(ictx, s->name, n, keys);
         if (bind) {
-            if (bind->is_builtin && !ictx->default_bindings)
-                goto skip;
             struct cmd_bind_section *bs = bind->owner;
-            for (int x = 0; x < n; x++) {
-                if (MP_KEY_DEPENDS_ON_MOUSE_POS(keys[x]) && bs->mouse_area_set &&
-                    !test_rect(&bs->mouse_area, ictx->mouse_vo_x, ictx->mouse_vo_y))
-                    goto skip;
-            }
-            return bind;
+            if (!use_mouse || !bs->mouse_area_set ||
+                test_rect(&bs->mouse_area, ictx->mouse_vo_x, ictx->mouse_vo_y))
+                return bind;
         }
-    skip: ;
         if (s->flags & MP_INPUT_EXCLUSIVE)
             break;
     }
@@ -1351,6 +1381,24 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
         talloc_free(key_buf);
     }
     return ret;
+}
+
+static void update_mouse_section(struct input_ctx *ictx)
+{
+    struct cmd_bind *cmd =
+        find_any_bind_for_key(ictx, NULL, 1, (int[]){MP_KEY_MOUSE_MOVE});
+
+    char *new_section = cmd ? cmd->owner->section : "default";
+
+    char *old = ictx->mouse_section;
+    ictx->mouse_section = new_section;
+
+    if (strcmp(old, ictx->mouse_section) != 0) {
+        struct mp_cmd *cmd =
+            get_cmd_from_keys(ictx, old, 1, (int[]){MP_KEY_MOUSE_LEAVE});
+        if (cmd)
+            add_key_cmd(ictx, cmd);
+    }
 }
 
 static void release_down_cmd(struct input_ctx *ictx)
@@ -1413,6 +1461,7 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         release_down_cmd(ictx);
         ictx->key_down[ictx->num_key_down] = code & ~MP_KEY_STATE_DOWN;
         ictx->num_key_down++;
+        update_mouse_section(ictx);
         ictx->last_key_down = mp_time_us();
         ictx->ar_state = 0;
         ictx->current_down_cmd = get_cmd_from_keys(ictx, NULL, ictx->num_key_down,
@@ -1425,6 +1474,7 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
             remove_key_down(ictx, code);
             release_down_cmd(ictx);
         }
+        update_mouse_section(ictx);
         return NULL;
     } else {
         // Press of key with no separate down/up events
@@ -1432,6 +1482,7 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
             // Mixing press events and up/down with the same key is not allowed
             mp_tmsg(MSGT_INPUT, MSGL_WARN, "Mixing key presses and up/down.\n");
         }
+        update_mouse_section(ictx);
         // Add temporarily (include ongoing down/up events)
         int num_key_down = ictx->num_key_down;
         int key_down[MP_MAX_KEY_DOWN];
@@ -1508,6 +1559,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code)
         mp_msg(MSGT_INPUT, MSGL_V, "input: release all\n");
         ictx->num_key_down = 0;
         release_down_cmd(ictx);
+        update_mouse_section(ictx);
         return;
     }
     int unmod = code & ~MP_KEY_MODIFIER_MASK;
@@ -1576,23 +1628,6 @@ void mp_input_put_axis(struct input_ctx *ictx, int direction, double value)
     input_unlock(ictx);
 }
 
-static void trigger_mouse_leave(struct input_ctx *ictx, char *new_section)
-{
-    if (!new_section)
-        new_section = "default";
-
-    char *old = ictx->mouse_section;
-    ictx->mouse_section = new_section;
-
-    if (old && strcmp(old, ictx->mouse_section) != 0) {
-        struct mp_cmd *cmd =
-            get_cmd_from_keys(ictx, old, 1, (int[]){MP_KEY_MOUSE_LEAVE});
-        if (cmd)
-            add_key_cmd(ictx, cmd);
-    }
-}
-
-
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
 {
     input_lock(ictx);
@@ -1606,10 +1641,9 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
     ictx->mouse_vo_x = x;
     ictx->mouse_vo_y = y;
 
+    update_mouse_section(ictx);
     struct mp_cmd *cmd =
         get_cmd_from_keys(ictx, NULL, 1, (int[]){MP_KEY_MOUSE_MOVE});
-
-    trigger_mouse_leave(ictx, cmd ? cmd->input_section : NULL);
 
     if (cmd) {
         cmd->mouse_move = true;
@@ -2161,6 +2195,7 @@ struct input_ctx *mp_input_init(struct MPOpts *opts)
         .ar_delay = input_conf->ar_delay,
         .ar_rate = input_conf->ar_rate,
         .default_bindings = input_conf->default_bindings,
+        .mouse_section = "default",
         .test = input_conf->test,
         .wakeup_pipe = {-1, -1},
     };
