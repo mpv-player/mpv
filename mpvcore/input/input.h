@@ -116,6 +116,8 @@ enum mp_input_section_flags {
     // other sections for it (like the default section). Instead, an unbound
     // key warning will be printed.
     MP_INPUT_EXCLUSIVE = 1,
+    // Let mp_input_test_dragging() return true, even if inside the mouse area.
+    MP_INPUT_ALLOW_VO_DRAGGING = 2,
 };
 
 struct input_ctx;
