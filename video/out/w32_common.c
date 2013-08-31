@@ -231,11 +231,21 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             w32->tracking = FALSE;
             mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
             break;
-        case WM_MOUSEMOVE:
+        case WM_MOUSEMOVE: {
             if (!w32->tracking)
-                w32->tracking = TrackMouseEvent(&w32->trackEvent);;
-            vo_mouse_movement(vo, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+                w32->tracking = TrackMouseEvent(&w32->trackEvent);
+            // Windows can send spurious mouse events, which would make the mpv
+            // core unhide the mouse cursor on completely unrelated events. See:
+            //  https://blogs.msdn.com/b/oldnewthing/archive/2003/10/01/55108.aspx
+            int x = GET_X_LPARAM(lParam);
+            int y = GET_Y_LPARAM(lParam);
+            if (x != w32->mouse_x || y != w32->mouse_y) {
+                w32->mouse_x = x;
+                w32->mouse_y = y;
+                vo_mouse_movement(vo, x, y);
+            }
             break;
+        }
         case WM_LBUTTONDOWN:
             mouse_button = MP_MOUSE_BTN0 | MP_KEY_STATE_DOWN;
             break;

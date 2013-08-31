@@ -52,6 +52,9 @@ struct vo_w32_state {
 
     BOOL tracking;
     TRACKMOUSEEVENT trackEvent;
+
+    int mouse_x;
+    int mouse_y;
 };
 
 struct vo;
