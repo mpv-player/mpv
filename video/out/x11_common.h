@@ -117,6 +117,7 @@ struct vo_x11_state {
     Atom XA_NET_WM_PID;
     Atom XA_NET_WM_NAME;
     Atom XA_NET_WM_ICON_NAME;
+    Atom XA_NET_WM_ICON;
     Atom XA_WIN_PROTOCOLS;
     Atom XA_WIN_LAYER;
     Atom XA_WIN_HINTS;

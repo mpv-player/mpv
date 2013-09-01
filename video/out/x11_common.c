@@ -66,6 +66,10 @@
 #include <X11/XF86keysym.h>
 #endif
 
+#if CONFIG_ZLIB
+#include <zlib.h>
+#endif
+
 #include "mpvcore/input/input.h"
 #include "mpvcore/input/keycodes.h"
 
@@ -127,6 +131,10 @@ typedef struct
     long input_mode;
     long state;
 } MotifWmHints;
+
+static const char x11_icon[] =
+#include "video/out/x11_icon.inc"
+;
 
 static void vo_x11_update_geometry(struct vo *vo);
 static void vo_x11_fullscreen(struct vo *vo);
@@ -371,6 +379,7 @@ static void init_atoms(struct vo_x11_state *x11)
     XA_INIT(_NET_WM_PID);
     XA_INIT(_NET_WM_NAME);
     XA_INIT(_NET_WM_ICON_NAME);
+    XA_INIT(_NET_WM_ICON);
     XA_INIT(_WIN_PROTOCOLS);
     XA_INIT(_WIN_LAYER);
     XA_INIT(_WIN_HINTS);
@@ -945,6 +954,100 @@ static void vo_x11_update_window_title(struct vo *vo)
     vo_x11_set_property_utf8(vo, x11->XA_NET_WM_ICON_NAME, title);
 }
 
+#if CONFIG_ZLIB
+static bstr decompress_gz(bstr in)
+{
+    bstr res = {0};
+    z_stream zstream;
+    uint8_t *dest;
+    size_t size = in.len;
+    int result;
+
+    zstream.zalloc = (alloc_func) 0;
+    zstream.zfree = (free_func) 0;
+    zstream.opaque = (voidpf) 0;
+    // 32 for gzip header, 15 for max. window bits
+    if (inflateInit2(&zstream, 32 + 15) != Z_OK)
+        goto error;
+    zstream.next_in = (Bytef *) in.start;
+    zstream.avail_in = size;
+
+    dest = NULL;
+    zstream.avail_out = size;
+    do {
+        size += 4000;
+        dest = talloc_realloc_size(NULL, dest, size);
+        zstream.next_out = (Bytef *) (dest + zstream.total_out);
+        result = inflate(&zstream, Z_NO_FLUSH);
+        if (result != Z_OK && result != Z_STREAM_END) {
+            talloc_free(dest);
+            dest = NULL;
+            inflateEnd(&zstream);
+            goto error;
+        }
+        zstream.avail_out += 4000;
+    } while (zstream.avail_out == 4000 && zstream.avail_in != 0
+             && result != Z_STREAM_END);
+
+    size = zstream.total_out;
+    inflateEnd(&zstream);
+
+    res.start = dest;
+    res.len = size;
+error:
+    return res;
+}
+#else
+static bstr decompress_gz(bstr in)
+{
+    return (bstr){0};
+}
+#endif
+
+#define MAX_ICONS 10
+
+static void vo_x11_set_wm_icon(struct vo_x11_state *x11)
+{
+    int num_icons = 0;
+    void *icon_data[MAX_ICONS];
+    int icon_w[MAX_ICONS], icon_h[MAX_ICONS];
+
+    bstr uncompressed = decompress_gz((bstr){(char *)x11_icon, sizeof(x11_icon)});
+    bstr data = uncompressed;
+    while (data.len && num_icons < MAX_ICONS) {
+        bstr line = bstr_getline(data, &data);
+        if (bstr_eatstart0(&line, "icon: ")) {
+            int w, h;
+            if (bstr_sscanf(line, "%d %d", &w, &h) == 2) {
+                int size = w * h * 4;
+                icon_w[num_icons] = w;
+                icon_h[num_icons] = h;
+                icon_data[num_icons] = data.start;
+                num_icons++;
+                data = bstr_cut(data, size);
+            }
+        }
+    }
+
+    size_t icon_size = 0;
+    for (int n = 0; n < num_icons; n++)
+        icon_size += sizeof(long) * (2 + icon_w[n] * icon_h[n]);
+    long *icon = talloc_array(NULL, long, icon_size);
+    long *cur = icon;
+    for (int n = 0; n < num_icons; n++) {
+        *cur++ = icon_w[n];
+        *cur++ = icon_h[n];
+        uint32_t *src = icon_data[n];
+        for (int i = 0; i < icon_h[n] * icon_w[n]; i++)
+            *cur++ = src[i];
+    }
+
+    XChangeProperty(x11->display, x11->window, x11->XA_NET_WM_ICON,
+                    XA_CARDINAL, 32, PropModeReplace, (char *)icon, icon_size);
+    talloc_free(icon);
+    talloc_free(uncompressed.start);
+}
+
 static void find_default_visual(struct vo_x11_state *x11, XVisualInfo *vis)
 {
     Display *display = x11->display;
@@ -994,6 +1097,7 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis, int x, int y,
                          XNFocusWindow, x11->window,
                          NULL);
 
+    vo_x11_set_wm_icon(x11);
     vo_x11_update_window_title(vo);
 }
 

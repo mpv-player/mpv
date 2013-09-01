@@ -373,6 +373,10 @@ video/out/gl_video.c: video/out/gl_video_shaders.h
 video/out/gl_video_shaders.h: TOOLS/file2string.pl video/out/gl_video_shaders.glsl
 	./$^ >$@
 
+video/out/x11_common.c: video/out/x11_icon.inc
+video/out/x11_icon.inc: TOOLS/file2string.pl video/out/x11_icon.bin
+	./$^ >$@
+
 sub/osd_libass.c: sub/osd_font.h
 sub/osd_font.h: TOOLS/file2string.pl sub/osd_font.otf
 	./$^ >$@
@@ -446,6 +450,7 @@ clean:
 	-$(RM) video/out/vdpau_template.c
 	-$(RM) demux/ebml_types.h demux/ebml_defs.c
 	-$(RM) video/out/gl_video_shaders.h
+	-$(RM) video/out/x11_icon.inc
 	-$(RM) sub/osd_font.h
 
 distclean: clean
