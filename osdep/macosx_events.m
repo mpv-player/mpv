@@ -159,7 +159,8 @@ void cocoa_uninit_media_keys(void) {
 
 void cocoa_put_key(int keycode)
 {
-    mp_input_put_key(mpv_shared_app().inputContext, keycode);
+    if (mpv_shared_app().inputContext)
+        mp_input_put_key(mpv_shared_app().inputContext, keycode);
 }
 
 void cocoa_put_key_with_modifiers(int keycode, int modifiers)
