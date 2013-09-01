@@ -794,7 +794,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     NSTrackingAreaOptions trackingOptions =
         NSTrackingEnabledDuringMouseDrag |
         NSTrackingMouseEnteredAndExited | NSTrackingMouseMoved |
-        NSTrackingActiveInActiveApp;
+        NSTrackingActiveAlways;
 
     self.tracker =
         [[[NSTrackingArea alloc] initWithRect:[self bounds]
