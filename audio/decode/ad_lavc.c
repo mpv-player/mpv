@@ -389,13 +389,15 @@ static int decode_new_packet(struct sh_audio *sh)
     }
     int got_frame = 0;
     int ret = avcodec_decode_audio4(avctx, priv->avframe, &got_frame, &pkt);
-    if (ret > 0) {
+    // At least "shorten" decodes sub-frames, instead of the whole packet.
+    // At least "mpc8" can return 0 and wants the packet again next time.
+    if (ret >= 0) {
         ret = FFMIN(ret, mpkt->len); // sanity check against decoder overreads
         mpkt->buffer += ret;
         mpkt->len    -= ret;
         mpkt->pts = MP_NOPTS_VALUE; // don't reset PTS next time
     }
-    if (mpkt->len == 0 || ret <= 0) {
+    if (mpkt->len == 0 || ret < 0) {
         talloc_free(mpkt);
         priv->packet = NULL;
     }
