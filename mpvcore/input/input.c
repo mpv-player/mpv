@@ -1737,12 +1737,14 @@ static void input_wait_read(struct input_ctx *ictx, int time)
     tv.tv_sec = time / 1000;
     tv.tv_usec = (time % 1000) * 1000;
     time_val = &tv;
+    input_unlock(ictx);
     if (select(max_fd + 1, &fds, NULL, NULL, time_val) < 0) {
         if (errno != EINTR)
             mp_tmsg(MSGT_INPUT, MSGL_ERR, "Select error: %s\n",
                     strerror(errno));
         FD_ZERO(&fds);
     }
+    input_lock(ictx);
     for (int i = 0; i < ictx->num_fds; i++) {
         if (ictx->fds[i].select && !FD_ISSET(ictx->fds[i].fd, &fds))
             continue;
