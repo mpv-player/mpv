@@ -52,7 +52,7 @@
 #define MP_KEY_DOWN     (MP_KEY_CRSR+2)
 #define MP_KEY_UP       (MP_KEY_CRSR+3)
 
-/* Multimedia keyboard/remote keys */
+/* Multimedia/internet keyboard/remote keys */
 #define MP_KEY_MM_BASE          (MP_KEY_BASE+0x20)
 #define MP_KEY_POWER            (MP_KEY_MM_BASE+0)
 #define MP_KEY_MENU             (MP_KEY_MM_BASE+1)
@@ -67,6 +67,12 @@
 #define MP_KEY_VOLUME_UP        (MP_KEY_MM_BASE+10)
 #define MP_KEY_VOLUME_DOWN      (MP_KEY_MM_BASE+11)
 #define MP_KEY_MUTE             (MP_KEY_MM_BASE+12)
+#define MP_KEY_HOMEPAGE         (MP_KEY_MM_BASE+13)
+#define MP_KEY_WWW              (MP_KEY_MM_BASE+14)
+#define MP_KEY_MAIL             (MP_KEY_MM_BASE+15)
+#define MP_KEY_FAVORITES        (MP_KEY_MM_BASE+16)
+#define MP_KEY_SEARCH           (MP_KEY_MM_BASE+17)
+#define MP_KEY_SLEEP            (MP_KEY_MM_BASE+18)
 
 /*  Function keys  */
 #define MP_KEY_F (MP_KEY_BASE+0x40)

@@ -552,6 +552,9 @@ static const struct mp_keymap keymap[] = {
     {XF86XK_AudioNext, MP_KEY_NEXT}, {XF86XK_AudioMute, MP_KEY_MUTE},
     {XF86XK_AudioLowerVolume, MP_KEY_VOLUME_DOWN},
     {XF86XK_AudioRaiseVolume, MP_KEY_VOLUME_UP},
+    {XF86XK_HomePage, MP_KEY_HOMEPAGE}, {XF86XK_WWW, MP_KEY_WWW},
+    {XF86XK_Mail, MP_KEY_MAIL}, {XF86XK_Favorites, MP_KEY_FAVORITES},
+    {XF86XK_Search, MP_KEY_SEARCH}, {XF86XK_Sleep, MP_KEY_SLEEP},
 #endif
 
     {0, 0}

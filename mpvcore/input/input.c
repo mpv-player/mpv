@@ -451,6 +451,12 @@ static const struct key_name key_names[] = {
   { MP_KEY_VOLUME_UP,   "VOLUME_UP" },
   { MP_KEY_VOLUME_DOWN, "VOLUME_DOWN" },
   { MP_KEY_MUTE,        "MUTE" },
+  { MP_KEY_HOMEPAGE,    "HOMEPAGE" },
+  { MP_KEY_WWW,         "WWW" },
+  { MP_KEY_MAIL,        "MAIL" },
+  { MP_KEY_FAVORITES,   "FAVORITES" },
+  { MP_KEY_SEARCH,      "SEARCH" },
+  { MP_KEY_SLEEP,       "SLEEP" },
 
   // These are kept for backward compatibility
   { MP_KEY_PAUSE,   "XF86_PAUSE" },
