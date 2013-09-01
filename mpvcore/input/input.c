@@ -2169,7 +2169,15 @@ struct input_ctx *mp_input_init(struct MPOpts *opts)
 
     mp_input_enable_section(ictx, NULL, 0);
 
-    parse_config(ictx, true, bstr0(builtin_input_conf), "<builtin>", NULL);
+    // "Uncomment" the default key bindings in etc/input.conf and add them.
+    // All lines that do not start with '# ' are parsed.
+    bstr builtin = bstr0(builtin_input_conf);
+    while (builtin.len) {
+        bstr line = bstr_getline(builtin, &builtin);
+        bstr_eatstart0(&line, "#");
+        if (!bstr_startswith0(line, " "))
+            parse_config(ictx, true, line, "<builtin>", NULL);
+    }
 
 #ifndef __MINGW32__
     long ret = pipe(ictx->wakeup_pipe);
