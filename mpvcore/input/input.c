@@ -429,10 +429,6 @@ static const struct key_name key_names[] = {
   { MP_AR_VDOWN,        "AR_VDOWN" },
   { MP_AR_VDOWN_HOLD,   "AR_VDOWN_HOLD" },
 
-  { MP_MK_PLAY,         "MK_PLAY" },
-  { MP_MK_PREV,         "MK_PREV" },
-  { MP_MK_NEXT,         "MK_NEXT" },
-
   { MP_AXIS_UP,         "AXIS_UP" },
   { MP_AXIS_DOWN,       "AXIS_DOWN" },
   { MP_AXIS_LEFT,       "AXIS_LEFT" },
