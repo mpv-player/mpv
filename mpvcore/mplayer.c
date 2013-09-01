@@ -565,6 +565,10 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     timeEndPeriod(1);
 #endif
 
+#ifdef CONFIG_COCOA
+    cocoa_set_input_context(NULL);
+#endif
+
     mp_input_uninit(mpctx->input);
 
     osd_free(mpctx->osd);
