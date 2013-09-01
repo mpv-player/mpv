@@ -322,10 +322,10 @@ Optional features:
   --disable-libass-osd   disable OSD rendering with libass [autodetect]
   --enable-rpath         enable runtime linker path for extra libs [disabled]
   --disable-libpostproc  disable postprocess filter (vf_pp) [autodetect]
-  --disable-libavdevice  enable libavdevice demuxers [autodetect]
-  --disable-libavfilter  enable libavfilter [autodetect]
-  --disable-vf-lavfi     enable vf_lavfi libavfilter bridge [audodetect]
-  --disable-af-lavfi     enable af_lavfi libavfilter bridge [audodetect]
+  --disable-libavdevice  disable libavdevice demuxers [autodetect]
+  --disable-libavfilter  disable libavfilter [autodetect]
+  --disable-vf-lavfi     disable vf_lavfi libavfilter bridge [audodetect]
+  --disable-af-lavfi     disable af_lavfi libavfilter bridge [audodetect]
 
 Codecs:
   --enable-mng              enable MNG input support [autodetect]
