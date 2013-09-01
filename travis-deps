@@ -36,8 +36,12 @@ class TravisDepsBuilder
   end
 
   def compile(dirname)
-    sh "cd #{dirname} && ./configure && make && sudo make install"
+    sh "cd #{dirname} && #{configure} && make && sudo make install"
     sh "cd $TRAVIS_BUILD_DIR"
+  end
+
+  def configure
+    "./configure"
   end
 
   def sh(command)
@@ -65,6 +69,10 @@ class Libav < TravisDepsBuilder
         :url    => "git://github.com/FFmpeg/FFmpeg.git"
       }
     }
+  end
+
+  def configure
+    [super, "--disable-doc"].join(" ")
   end
 end
 
