@@ -570,8 +570,7 @@ struct input_ctx {
     struct input_fd fds[MP_MAX_FDS];
     unsigned int num_fds;
 
-    struct cmd_queue key_cmd_queue;
-    struct cmd_queue control_cmd_queue;
+    struct cmd_queue cmd_queue;
 
     int wakeup_pipe[2];
 };
@@ -1414,7 +1413,7 @@ static void release_down_cmd(struct input_ctx *ictx)
 {
     if (ictx->current_down_cmd && ictx->current_down_cmd->key_up_follows) {
         ictx->current_down_cmd->key_up_follows = false;
-        queue_add(&ictx->key_cmd_queue, ictx->current_down_cmd, false);
+        queue_add(&ictx->cmd_queue, ictx->current_down_cmd, false);
     } else {
         talloc_free(ictx->current_down_cmd);
     }
@@ -1551,7 +1550,7 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
 
 static void add_key_cmd(struct input_ctx *ictx, struct mp_cmd *cmd)
 {
-    struct cmd_queue *queue = &ictx->key_cmd_queue;
+    struct cmd_queue *queue = &ictx->cmd_queue;
     if (queue_count_cmds(queue) >= ictx->key_fifo_size &&
             (!mp_input_is_abort_cmd(cmd->id) || queue_has_abort_cmds(queue)))
     {
@@ -1676,7 +1675,7 @@ static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
         struct mp_cmd *cmd = mp_input_parse_cmd(bstr0(text), "<pipe>");
         talloc_free(text);
         if (cmd)
-            queue_add(&ictx->control_cmd_queue, cmd, false);
+            queue_add(&ictx->cmd_queue, cmd, false);
         if (!cmd_fd->got_cmd)
             return;
     }
@@ -1817,7 +1816,7 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
     input_lock(ictx);
     ictx->got_new_events = true;
     if (cmd)
-        queue_add(&ictx->control_cmd_queue, cmd, false);
+        queue_add(&ictx->cmd_queue, cmd, false);
     input_unlock(ictx);
     return 1;
 }
@@ -1831,15 +1830,13 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
     input_lock(ictx);
     if (async_quit_request) {
         struct mp_cmd *cmd = mp_input_parse_cmd(bstr0("quit 1"), "");
-        queue_add(&ictx->control_cmd_queue, cmd, true);
+        queue_add(&ictx->cmd_queue, cmd, true);
     }
 
-    if (ictx->control_cmd_queue.first || ictx->key_cmd_queue.first)
+    if (ictx->cmd_queue.first)
         time = 0;
     read_all_events(ictx, time);
-    struct cmd_queue *queue = &ictx->control_cmd_queue;
-    if (!queue->first)
-        queue = &ictx->key_cmd_queue;
+    struct cmd_queue *queue = &ictx->cmd_queue;
     if (!queue->first) {
         struct mp_cmd *repeated = check_autorepeat(ictx);
         if (repeated)
@@ -2366,8 +2363,7 @@ void mp_input_uninit(struct input_ctx *ictx)
         if (ictx->wakeup_pipe[i] != -1)
             close(ictx->wakeup_pipe[i]);
     }
-    clear_queue(&ictx->key_cmd_queue);
-    clear_queue(&ictx->control_cmd_queue);
+    clear_queue(&ictx->cmd_queue);
     talloc_free(ictx->current_down_cmd);
     input_destroy(ictx);
     talloc_free(ictx);
@@ -2410,9 +2406,7 @@ void mp_input_wakeup(struct input_ctx *ictx)
 
 static bool test_abort(struct input_ctx *ictx)
 {
-    if (async_quit_request || queue_has_abort_cmds(&ictx->key_cmd_queue) ||
-        queue_has_abort_cmds(&ictx->control_cmd_queue))
-    {
+    if (async_quit_request || queue_has_abort_cmds(&ictx->cmd_queue)) {
         mp_tmsg(MSGT_INPUT, MSGL_WARN, "Received command to move to "
                 "another file. Aborting current processing.\n");
         return true;
