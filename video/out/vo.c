@@ -490,12 +490,15 @@ static void clamp_size(int size, int *start, int *end)
 #define VID_SRC_ROUND_UP(x) (((x) + 1) & ~1)
 
 static void src_dst_split_scaling(int src_size, int dst_size,
-                                  int scaled_src_size,
+                                  int scaled_src_size, bool unscaled,
                                   float zoom, float align, float pan,
                                   int *src_start, int *src_end,
                                   int *dst_start, int *dst_end,
                                   int *osd_margin_a, int *osd_margin_b)
 {
+    if (unscaled)
+        scaled_src_size = src_size;
+
     scaled_src_size += zoom * src_size;
     align = (align + 1) / 2;
 
@@ -520,6 +523,17 @@ static void src_dst_split_scaling(int src_size, int dst_size,
         int border = (*dst_end - dst_size) * s_src / s_dst;
         *src_end -= VID_SRC_ROUND_UP(border);
         *dst_end = dst_size;
+    }
+
+    if (unscaled && zoom == 1.0) {
+        // Force unscaled by reducing the range for src or dst
+        int src_s = *src_end - *src_start;
+        int dst_s = *dst_end - *dst_start;
+        if (src_s > dst_s) {
+            *src_end = *src_start + dst_s;
+        } else if (src_s < dst_s) {
+            *dst_end = *dst_start + src_s;
+        }
     }
 
     // For sanity: avoid bothering VOs with corner cases
@@ -549,11 +563,11 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
     if (opts->keepaspect) {
         int scaled_width, scaled_height;
         aspect_calc_panscan(vo, &scaled_width, &scaled_height);
-        src_dst_split_scaling(src_w, vo->dwidth, scaled_width,
+        src_dst_split_scaling(src_w, vo->dwidth, scaled_width, opts->unscaled,
                               opts->zoom, opts->align_x, opts->pan_x,
                               &src.x0, &src.x1, &dst.x0, &dst.x1,
                               &osd.ml, &osd.mr);
-        src_dst_split_scaling(src_h, vo->dheight, scaled_height,
+        src_dst_split_scaling(src_h, vo->dheight, scaled_height, opts->unscaled,
                               opts->zoom, opts->align_y, opts->pan_y,
                               &src.y0, &src.y1, &dst.y0, &dst.y1,
                               &osd.mt, &osd.mb);

@@ -2498,6 +2498,18 @@
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
+``--video-unscaled=<value>``
+    Disable scaling of the video. If the window is larger than the video,
+    black bars are added. Otherwise, the video is cropped. The video still
+    can be influenced by the other ``--video-...`` options. (If the
+    ``--video-zoom`` option is set to a value other than ``1``, scaling is
+    enabled, but the video isn't automatically scaled to the window size.)
+
+    Note that the scaler algorithm may still be used, even if the video isn't
+    scaled. For example, this can influence chroma conversion.
+
+    This option is disabled if the ``--no-keepaspect`` option is used.
+
 ``--video-zoom=<value>``
     Adjust the video display scale factor by the given value. The unit is in
     fractions of original video size.

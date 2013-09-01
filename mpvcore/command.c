@@ -1782,6 +1782,7 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("video-align-y", panscan_property_helper),
     M_OPTION_PROPERTY_CUSTOM("video-pan-x", panscan_property_helper),
     M_OPTION_PROPERTY_CUSTOM("video-pan-y", panscan_property_helper),
+    M_OPTION_PROPERTY_CUSTOM("video-unscaled", panscan_property_helper),
     { "video-format", mp_property_video_format, CONF_TYPE_STRING,
       0, 0, 0, NULL },
     { "video-codec", mp_property_video_codec, CONF_TYPE_STRING,

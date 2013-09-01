@@ -587,6 +587,7 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("video-pan-y", vo.pan_y, 0, -3.0, 3.0),
     OPT_FLOATRANGE("video-align-x", vo.align_x, 0, -1.0, 1.0),
     OPT_FLOATRANGE("video-align-y", vo.align_y, 0, -1.0, 1.0),
+    OPT_FLAG("video-unscaled", vo.unscaled, 0),
     OPT_FLAG("force-rgba-osd-rendering", force_rgba_osd, 0),
     OPT_CHOICE("colormatrix", requested_colorspace, 0,
                ({"auto", MP_CSP_AUTO},

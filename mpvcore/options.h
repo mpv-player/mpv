@@ -22,6 +22,7 @@ typedef struct mp_vo_opts {
     float zoom;
     float pan_x, pan_y;
     float align_x, align_y;
+    int unscaled;
 
     struct m_geometry geometry;
     struct m_geometry autofit;
