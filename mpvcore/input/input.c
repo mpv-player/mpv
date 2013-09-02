@@ -581,8 +581,6 @@ int async_quit_request;
 static int print_key_list(m_option_t *cfg, char *optname, char *optparam);
 static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam);
 
-static void add_key_cmd(struct input_ctx *ictx, struct mp_cmd *cmd);
-
 #define OPT_BASE_STRUCT struct MPOpts
 
 // Our command line options
@@ -1405,7 +1403,7 @@ static void update_mouse_section(struct input_ctx *ictx)
         struct mp_cmd *cmd =
             get_cmd_from_keys(ictx, old, 1, (int[]){MP_KEY_MOUSE_LEAVE});
         if (cmd)
-            add_key_cmd(ictx, cmd);
+            queue_add(&ictx->cmd_queue, cmd, false);
     }
 }
 
@@ -1442,7 +1440,26 @@ static void remove_key_down(struct input_ctx *ictx, int code)
     }
 }
 
-static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
+// Whether a command can deal with redundant key up events.
+static bool key_updown_ok(enum mp_command_type cmd)
+{
+    switch (cmd) {
+    default:
+        return false;
+    }
+}
+
+// We don't want the append to the command queue indefinitely, because that
+// could lead to situations where recovery would take too long. On the other
+// hand, don't drop commands that will abort playback.
+static bool should_drop_cmd(struct input_ctx *ictx, struct mp_cmd *cmd)
+{
+    struct cmd_queue *queue = &ictx->cmd_queue;
+    return (queue_count_cmds(queue) >= ictx->key_fifo_size &&
+            (!mp_input_is_abort_cmd(cmd->id) || queue_has_abort_cmds(queue)));
+}
+
+static void interpret_key(struct input_ctx *ictx, int code, double scale)
 {
     /* On normal keyboards shift changes the character code of non-special
      * keys, so don't count the modifier separately for those. In other words
@@ -1465,15 +1482,20 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
     if (!(code & MP_KEY_STATE_UP) && ictx->num_key_down >= MP_MAX_KEY_DOWN) {
         mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many key down events "
                 "at the same time\n");
-        return NULL;
+        return;
     }
 
+    if (MP_KEY_DEPENDS_ON_MOUSE_POS(unmod))
+        ictx->mouse_event_counter++;
+    ictx->got_new_events = true;
+
     bool key_was_down = find_key_down(ictx, code) >= 0;
+    struct mp_cmd *cmd = NULL;
 
     if (code & MP_KEY_STATE_DOWN) {
         // Check if we don't already have this key as pushed
         if (key_was_down)
-            return NULL;
+            return;
         // Cancel current down-event (there can be only one)
         release_down_cmd(ictx);
         ictx->key_down[ictx->num_key_down] = code & ~MP_KEY_STATE_DOWN;
@@ -1481,18 +1503,21 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
         update_mouse_section(ictx);
         ictx->last_key_down = mp_time_us();
         ictx->ar_state = 0;
-        ictx->current_down_cmd = get_cmd_from_keys(ictx, NULL, ictx->num_key_down,
-                                                   ictx->key_down);
-        if (ictx->current_down_cmd && (code & MP_KEY_EMIT_ON_UP))
-            ictx->current_down_cmd->key_up_follows = true;
-        return mp_cmd_clone(ictx->current_down_cmd);
+        cmd = get_cmd_from_keys(ictx, NULL, ictx->num_key_down, ictx->key_down);
+        if (should_drop_cmd(ictx, cmd)) {
+            ictx->num_key_down--;
+            talloc_free(cmd);
+            return;
+        }
+        if (cmd && (code & MP_KEY_EMIT_ON_UP))
+            cmd->key_up_follows = true;
+        ictx->current_down_cmd = mp_cmd_clone(cmd);
     } else if (code & MP_KEY_STATE_UP) {
         if (key_was_down) {
             remove_key_down(ictx, code);
             release_down_cmd(ictx);
         }
         update_mouse_section(ictx);
-        return NULL;
     } else {
         // Press of key with no separate down/up events
         if (key_was_down) {
@@ -1509,14 +1534,33 @@ static mp_cmd_t *interpret_key(struct input_ctx *ictx, int code)
             // Don't emit "MOUSE_BTN0+MOUSE_BTN0_DBL", just "MOUSE_BTN0_DBL"
             int btn = code - MP_MOUSE_BTN0_DBL + MP_MOUSE_BTN0;
             if (!num_key_down || key_down[num_key_down - 1] != btn)
-                return NULL;
+                return;
             key_down[num_key_down - 1] = code;
         } else {
             key_down[num_key_down] = code;
             num_key_down++;
         }
-        return get_cmd_from_keys(ictx, NULL, num_key_down, key_down);
+        cmd = get_cmd_from_keys(ictx, NULL, num_key_down, key_down);
+        if (should_drop_cmd(ictx, cmd)) {
+            talloc_free(cmd);
+            return;
+        }
     }
+
+    if (!cmd)
+        return;
+
+    // Prevent redundant key-down events from being added to the queue. In some
+    // cases (like MP_CMD_SEEK commands), duplicated events might severely
+    // confuse the frontend.
+    if (cmd->key_up_follows && !key_updown_ok(cmd->id)) {
+        talloc_free(cmd);
+        return;
+    }
+
+    cmd->scale = scale;
+
+    queue_add(&ictx->cmd_queue, cmd, false);
 }
 
 static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
@@ -1548,27 +1592,6 @@ static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
     return NULL;
 }
 
-static void add_key_cmd(struct input_ctx *ictx, struct mp_cmd *cmd)
-{
-    struct cmd_queue *queue = &ictx->cmd_queue;
-    if (queue_count_cmds(queue) >= ictx->key_fifo_size &&
-            (!mp_input_is_abort_cmd(cmd->id) || queue_has_abort_cmds(queue)))
-    {
-        talloc_free(cmd);
-        return;
-    }
-    queue_add(queue, cmd, false);
-}
-
-// Whether a command can deal with redundant key up events.
-static bool key_updown_ok(enum mp_command_type cmd)
-{
-    switch (cmd) {
-    default:
-        return false;
-    }
-}
-
 static void mp_input_feed_key(struct input_ctx *ictx, int code)
 {
     ictx->got_new_events = true;
@@ -1579,20 +1602,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code)
         update_mouse_section(ictx);
         return;
     }
-    int unmod = code & ~MP_KEY_MODIFIER_MASK;
-    if (MP_KEY_DEPENDS_ON_MOUSE_POS(unmod))
-        ictx->mouse_event_counter++;
-    struct mp_cmd *cmd = interpret_key(ictx, code);
-    if (!cmd)
-        return;
-    // Prevent redundant key-down events from being added to the queue. In some
-    // cases (like MP_CMD_SEEK commands), duplicated events might severely
-    // confuse the frontend.
-    if (cmd->key_up_follows && !key_updown_ok(cmd->id)) {
-        talloc_free(cmd);
-        return;
-    }
-    add_key_cmd(ictx, cmd);
+    interpret_key(ictx, code, 1);
 }
 
 void mp_input_put_key(struct input_ctx *ictx, int code)
@@ -1634,13 +1644,7 @@ void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t)
 void mp_input_put_axis(struct input_ctx *ictx, int direction, double value)
 {
     input_lock(ictx);
-    struct mp_cmd *cmd = interpret_key(ictx, direction);
-    if (cmd) {
-        cmd->scale = value;
-
-        ictx->got_new_events = true;
-        add_key_cmd(ictx, cmd);
-    }
+    interpret_key(ictx, direction, value);
     input_unlock(ictx);
 }
 
@@ -1661,7 +1665,11 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
         cmd->mouse_move = true;
         cmd->mouse_x = x;
         cmd->mouse_y = y;
-        add_key_cmd(ictx, cmd);
+        if (should_drop_cmd(ictx, cmd)) {
+            talloc_free(cmd);
+        } else {
+            queue_add(&ictx->cmd_queue, cmd, false);
+        }
     }
     input_unlock(ictx);
 }
