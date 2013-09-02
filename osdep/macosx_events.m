@@ -313,6 +313,8 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 {
     if (key > 0) {
         cocoa_put_key(key | mask);
+        if (mask & MP_KEY_STATE_UP)
+            cocoa_put_key(MP_INPUT_RELEASE_ALL);
         return YES;
     } else {
         return NO;
