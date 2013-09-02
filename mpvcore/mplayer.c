@@ -638,12 +638,23 @@ static void mk_config_dir(char *subdir)
     talloc_free(tmp);
 }
 
+static void mk_cache_dir(char *subdir)
+{
+    void *tmp = talloc_new(NULL);
+    char *cachedir = talloc_steal(tmp, mp_find_user_cache_file(""));
+    if (subdir)
+        cachedir = mp_path_join(tmp, bstr0(cachedir), bstr0(subdir));
+    mkdir(cachedir, 0777);
+    talloc_free(tmp);
+}
+
 static int cfg_include(struct m_config *conf, char *filename, int flags)
 {
     return m_config_parse_config_file(conf, filename, flags);
 }
 
 #define DEF_CONFIG "# Write your default config options here!\n\n\n"
+#define MP_WATCH_LATER_CACHE "watch_later"
 
 static bool parse_cfgfiles(struct MPContext *mpctx, m_config_t *conf)
 {
@@ -655,6 +666,8 @@ static bool parse_cfgfiles(struct MPContext *mpctx, m_config_t *conf)
     if (!m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf", 0) < 0)
         return false;
     mk_config_dir(NULL);
+    mk_cache_dir(NULL);
+    mk_cache_dir(MP_WATCH_LATER_CACHE);
     if ((conffile = mp_find_user_config_file("config")) == NULL)
         mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
                 "mp_find_user_config_file(\"config\") problem\n");
@@ -789,10 +802,10 @@ static bool might_be_an_url(bstr f)
     return bstr_find0(f, "://") >= 0;
 }
 
-#define MP_WATCH_LATER_CONF "watch_later"
-
 static char *get_playback_resume_config_filename(const char *fname)
 {
+    char *watch_later_dir = mp_find_user_cache_file(MP_WATCH_LATER_CACHE);
+
     char *res = NULL;
     void *tmp = talloc_new(NULL);
     const char *realpath = fname;
@@ -808,9 +821,8 @@ static char *get_playback_resume_config_filename(const char *fname)
     for (int i = 0; i < 16; i++)
         conf = talloc_asprintf_append(conf, "%02X", md5[i]);
 
-    conf = talloc_asprintf(tmp, "%s/%s", MP_WATCH_LATER_CONF, conf);
-
-    res = mp_find_user_config_file(conf);
+    res = mp_path_join(NULL, bstr0(watch_later_dir), bstr0(conf));
+    talloc_free(conf);
 
 exit:
     talloc_free(tmp);
@@ -863,8 +875,6 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     int percent = get_percent_pos(mpctx);
     if (percent < 1 || percent > 99 || pos == MP_NOPTS_VALUE)
         goto exit;
-
-    mk_config_dir(MP_WATCH_LATER_CONF);
 
     char *conffile = get_playback_resume_config_filename(mpctx->filename);
     talloc_steal(tmp, conffile);

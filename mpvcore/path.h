@@ -36,6 +36,9 @@ char *mp_find_global_config_file(const char *filename);
 // Search for the input filename in the user configuration location.
 char *mp_find_user_config_file(const char *filename);
 
+// Search for the input filename in the user cache location.
+char *mp_find_user_cache_file(const char *filename);
+
 // Return pointer to filename part of path
 
 char *mp_basename(const char *path);
