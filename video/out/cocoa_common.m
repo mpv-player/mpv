@@ -50,12 +50,13 @@
 @property(nonatomic, assign) struct vo *videoOutput;
 @end
 
-@interface GLMPlayerOpenGLView : NSView
+@interface GLMPlayerOpenGLView : NSView {
+    BOOL hasMouseDown;
+}
 @property(nonatomic, retain) NSTrackingArea *tracker;
 @property(nonatomic, assign) struct vo *videoOutput;
-- (BOOL)containsMouseLocation;
+- (BOOL)canHideCursor;
 - (void)recalcDraggableState;
-@property(nonatomic, assign, getter=hasMouseDown) BOOL mouseDown;
 @end
 
 @interface NSScreen (mpvadditions)
@@ -169,8 +170,7 @@ static void vo_cocoa_set_cursor_visibility(struct vo *vo, bool visible)
 
     if (visible) {
         CGDisplayShowCursor(kCGDirectMainDisplay);
-    } else if (vo->opts->fullscreen && ![s->view hasMouseDown] &&
-               [s->view containsMouseLocation]) {
+    } else if ([s->view canHideCursor]) {
         CGDisplayHideCursor(kCGDirectMainDisplay);
     }
 }
@@ -782,7 +782,6 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 @implementation GLMPlayerOpenGLView
 @synthesize tracker = _tracker;
 @synthesize videoOutput = _video_output;
-@synthesize mouseDown = _mouse_down;
 // mpv uses flipped coordinates, because X11 uses those. So let's just use them
 // as well without having to do any coordinate conversion of mouse positions.
 - (BOOL)isFlipped { return YES; }
@@ -826,6 +825,13 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 - (BOOL)acceptsFirstResponder { return YES; }
 - (BOOL)becomeFirstResponder { return YES; }
 - (BOOL)resignFirstResponder { return YES; }
+
+- (BOOL)canHideCursor
+{
+    struct vo *vo = self.videoOutput;
+    return vo->opts->fullscreen && !self->hasMouseDown &&
+        [self containsMouseLocation];
+}
 
 - (void)recalcDraggableState
 {
@@ -908,7 +914,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (void)putMouseEvent:(NSEvent *)event withState:(int)state
 {
-    self.mouseDown = (state == MP_KEY_STATE_DOWN);
+    self->hasMouseDown = (state == MP_KEY_STATE_DOWN);
     int mp_key = (MP_MOUSE_BTN0 + [event mpvButtonNumber]);
     cocoa_put_key_with_modifiers(mp_key | state, [event modifierFlags]);
 }
