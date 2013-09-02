@@ -697,19 +697,19 @@ static void queue_remove(struct cmd_queue *queue, struct mp_cmd *cmd)
     *p_prev = cmd->queue_next;
 }
 
-static void queue_add(struct cmd_queue *queue, struct mp_cmd *cmd,
-                      bool at_head)
+static void queue_add_head(struct cmd_queue *queue, struct mp_cmd *cmd)
 {
-    if (at_head) {
-        cmd->queue_next = queue->first;
-        queue->first = cmd;
-    } else {
-        struct mp_cmd **p_prev = &queue->first;
-        while (*p_prev)
-            p_prev = &(*p_prev)->queue_next;
-        *p_prev = cmd;
-        cmd->queue_next = NULL;
-    }
+    cmd->queue_next = queue->first;
+    queue->first = cmd;
+}
+
+static void queue_add_tail(struct cmd_queue *queue, struct mp_cmd *cmd)
+{
+    struct mp_cmd **p_prev = &queue->first;
+    while (*p_prev)
+        p_prev = &(*p_prev)->queue_next;
+    *p_prev = cmd;
+    cmd->queue_next = NULL;
 }
 
 static struct mp_cmd *queue_peek(struct cmd_queue *queue)
@@ -1403,7 +1403,7 @@ static void update_mouse_section(struct input_ctx *ictx)
         struct mp_cmd *cmd =
             get_cmd_from_keys(ictx, old, 1, (int[]){MP_KEY_MOUSE_LEAVE});
         if (cmd)
-            queue_add(&ictx->cmd_queue, cmd, false);
+            queue_add_tail(&ictx->cmd_queue, cmd);
     }
 }
 
@@ -1411,7 +1411,7 @@ static void release_down_cmd(struct input_ctx *ictx)
 {
     if (ictx->current_down_cmd && ictx->current_down_cmd->key_up_follows) {
         ictx->current_down_cmd->key_up_follows = false;
-        queue_add(&ictx->cmd_queue, ictx->current_down_cmd, false);
+        queue_add_tail(&ictx->cmd_queue, ictx->current_down_cmd);
     } else {
         talloc_free(ictx->current_down_cmd);
     }
@@ -1560,7 +1560,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
 
     cmd->scale = scale;
 
-    queue_add(&ictx->cmd_queue, cmd, false);
+    queue_add_tail(&ictx->cmd_queue, cmd);
 }
 
 static mp_cmd_t *check_autorepeat(struct input_ctx *ictx)
@@ -1668,7 +1668,7 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
         if (should_drop_cmd(ictx, cmd)) {
             talloc_free(cmd);
         } else {
-            queue_add(&ictx->cmd_queue, cmd, false);
+            queue_add_tail(&ictx->cmd_queue, cmd);
         }
     }
     input_unlock(ictx);
@@ -1683,7 +1683,7 @@ static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
         struct mp_cmd *cmd = mp_input_parse_cmd(bstr0(text), "<pipe>");
         talloc_free(text);
         if (cmd)
-            queue_add(&ictx->cmd_queue, cmd, false);
+            queue_add_tail(&ictx->cmd_queue, cmd);
         if (!cmd_fd->got_cmd)
             return;
     }
@@ -1824,7 +1824,7 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
     input_lock(ictx);
     ictx->got_new_events = true;
     if (cmd)
-        queue_add(&ictx->cmd_queue, cmd, false);
+        queue_add_tail(&ictx->cmd_queue, cmd);
     input_unlock(ictx);
     return 1;
 }
@@ -1838,7 +1838,7 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
     input_lock(ictx);
     if (async_quit_request) {
         struct mp_cmd *cmd = mp_input_parse_cmd(bstr0("quit 1"), "");
-        queue_add(&ictx->cmd_queue, cmd, true);
+        queue_add_head(&ictx->cmd_queue, cmd);
     }
 
     if (ictx->cmd_queue.first)
@@ -1848,7 +1848,7 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
     if (!queue->first) {
         struct mp_cmd *repeated = check_autorepeat(ictx);
         if (repeated)
-            queue_add(queue, repeated, false);
+            queue_add_tail(queue, repeated);
     }
     struct mp_cmd *ret = queue_peek(queue);
     if (ret && !peek_only) {
