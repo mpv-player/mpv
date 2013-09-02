@@ -719,6 +719,14 @@ static struct mp_cmd *queue_peek(struct cmd_queue *queue)
     return ret;
 }
 
+static struct mp_cmd *queue_peek_tail(struct cmd_queue *queue)
+{
+    struct mp_cmd *cur = queue->first;
+    while (cur && cur->queue_next)
+        cur = cur->queue_next;
+    return cur;
+}
+
 static struct input_fd *mp_input_add_fd(struct input_ctx *ictx)
 {
     if (ictx->num_fds == MP_MAX_FDS) {
@@ -1668,6 +1676,12 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
         if (should_drop_cmd(ictx, cmd)) {
             talloc_free(cmd);
         } else {
+            // Coalesce with previous mouse move events (i.e. replace it)
+            struct mp_cmd *tail = queue_peek_tail(&ictx->cmd_queue);
+            if (tail && tail->mouse_move) {
+                queue_remove(&ictx->cmd_queue, tail);
+                talloc_free(tail);
+            }
             queue_add_tail(&ictx->cmd_queue, cmd);
         }
     }
