@@ -253,31 +253,6 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
                 andMapping:keymap];
 }
 
-- (NSEvent*)handleKey:(NSEvent *)event
-{
-    if ([event isARepeat]) return nil;
-
-    NSString *chars;
-
-    if (RightAltPressed([event modifierFlags]))
-        chars = [event characters];
-    else
-        chars = [event charactersIgnoringModifiers];
-
-    int key = convert_key([event keyCode], *[chars UTF8String]);
-
-    if (key > -1) {
-        if ([self isAppKeyEquivalent:chars withEvent:event])
-            // propagate the event in case this is a menu key equivalent
-            return event;
-
-        key |= [self keyModifierMask:event];
-        cocoa_put_key(key);
-    }
-
-    return nil;
-}
-
 - (void)hidRemote:(HIDRemote *)remote
     eventWithButton:(HIDRemoteButtonCode)buttonCode
           isPressed:(BOOL)isPressed
@@ -334,14 +309,43 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
         [self mapTypeModifiers:[event type]];
 }
 
--(BOOL)handleKey:(int)key withMask:(int)mask andMapping:(NSDictionary *)mapping
+-(BOOL)handleMPKey:(int)key withMask:(int)mask
 {
-    int mpkey = [mapping[@(key)] intValue];
-    if (mpkey > 0) {
-        cocoa_put_key(mpkey | mask);
+    if (key > 0) {
+        cocoa_put_key(key | mask);
         return YES;
     } else {
         return NO;
     }
+}
+
+-(BOOL)handleKey:(int)key withMask:(int)mask andMapping:(NSDictionary *)mapping
+{
+    int mpkey = [mapping[@(key)] intValue];
+    return [self handleMPKey:mpkey withMask:mpkey];
+}
+
+- (NSEvent*)handleKey:(NSEvent *)event
+{
+    if ([event isARepeat]) return nil;
+
+    NSString *chars;
+
+    if (RightAltPressed([event modifierFlags]))
+        chars = [event characters];
+    else
+        chars = [event charactersIgnoringModifiers];
+
+    int key = convert_key([event keyCode], *[chars UTF8String]);
+
+    if (key > -1) {
+        if ([self isAppKeyEquivalent:chars withEvent:event])
+            // propagate the event in case this is a menu key equivalent
+            return event;
+
+        [self handleMPKey:key withMask:[self keyModifierMask:event]];
+    }
+
+    return nil;
 }
 @end
