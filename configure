@@ -1702,7 +1702,7 @@ depends_on_application_services(){
 
 fi #if darwin
 
-_wlver="1.2.90"
+_wlver="1.2.0"
 echocheck "Wayland"
 if test "$_wayland" = yes || test "$_wayland" = auto; then
  _wayland="no"
