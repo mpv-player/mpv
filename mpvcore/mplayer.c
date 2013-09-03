@@ -4154,10 +4154,12 @@ static void play_current_file(struct MPContext *mpctx)
     if (opts->reset_options) {
         for (int n = 0; opts->reset_options[n]; n++) {
             const char *opt = opts->reset_options[n];
-            if (strcmp(opt, "all") == 0) {
-                m_config_backup_all_opts(mpctx->mconfig);
-            } else {
-                m_config_backup_opt(mpctx->mconfig, opt);
+            if (opt[0]) {
+                if (strcmp(opt, "all") == 0) {
+                    m_config_backup_all_opts(mpctx->mconfig);
+                } else {
+                    m_config_backup_opt(mpctx->mconfig, opt);
+                }
             }
         }
     }
