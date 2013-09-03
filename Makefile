@@ -44,11 +44,15 @@ SOURCES-$(LIBBS2B)              += audio/filter/af_bs2b.c
 SOURCES-$(LIBPOSTPROC)          += video/filter/vf_pp.c
 SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
-SOURCES-$(COCOA)                += video/out/cocoa_common.m \
-                                   osdep/path-macosx.m \
+SOURCES-$(COCOA)                += video/out/cocoa/view.m \
+                                   video/out/cocoa/window.m \
+                                   video/out/cocoa/additions.m \
+                                   video/out/cocoa_common.m \
                                    osdep/macosx_application.m \
                                    osdep/macosx_events.m \
-                                   osdep/ar/HIDRemote.m
+                                   osdep/ar/HIDRemote.m \
+                                   osdep/path-macosx.m
+
 SOURCES-$(MNG)                  += demux/demux_mng.c
 SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
 
