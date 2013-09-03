@@ -729,8 +729,12 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
     /* get IMAGE FORMAT */
     int fourcc;
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_FORMAT, &fourcc);
-    sh_video->gsh->codec = "rawvideo";
-    sh_video->format = fourcc;
+    if (fourcc == MP_FOURCC_MJPEG) {
+        sh_video->gsh->codec = "mjpeg";
+    } else {
+        sh_video->gsh->codec = "rawvideo";
+        sh_video->format = fourcc;
+    }
 
     /* set FPS and FRAMETIME */
 
