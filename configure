@@ -1702,30 +1702,24 @@ depends_on_application_services(){
 
 fi #if darwin
 
+_wlver="1.2.90"
 echocheck "Wayland"
-if test "$_wayland" != no; then
-  cat > $TMPC << EOF
-#include <wayland-client.h>
-int main(int argc, char *argv[]) {
-  WL_SHM_FORMAT_C8;
-  return 0;
-}
-EOF
-
+if test "$_wayland" = yes || test "$_wayland" = auto; then
  _wayland="no"
-  pkg_config_add "wayland-client >= 1.2.0 wayland-cursor >= 1.2.0 xkbcommon >= 0.3.0" \
-      && cc_check -lwayland-client && _wayland="yes"
+ pkg_config_add "wayland-client >= $_wlver wayland-cursor >= $_wlver xkbcommon >= 0.3.0" \
+     && _wayland="yes"
 fi
 if test "$_wayland" = yes; then
   res_comment=""
   def_wayland='#define CONFIG_WAYLAND'
   vomodules="wayland $vomodules"
 else
+  res_comment="version >= $_wlver"
   def_wayland='#undef CONFIG_WAYLAND'
-  res_comment=""
   novomodules="wayland $novomodules"
 fi
 echores "$_wayland"
+unset _wlver
 
 echocheck "X11 headers presence"
   _x11_headers="no"
