@@ -40,6 +40,7 @@
 #include "mpvcore/mp_common.h"
 #include "mpvcore/bstr.h"
 #include "mpvcore/mp_msg.h"
+#include "mpvcore/path.h"
 #include "osdep/timer.h"
 #include "stream.h"
 #include "demux/demux.h"
@@ -250,10 +251,8 @@ static const char *match_proto(const char *url, const char *proto)
     if (l > 0) {
         if (strncasecmp(url, proto, l) == 0 && strncmp("://", url + l, 3) == 0)
             return url + l + 3;
-    } else {
-        // pure filenames (including "/path" and "./path")
-        if (url[0] == '/' || url[0] == '.' || !strstr(url, "://"))
-            return url;
+    } else if (!mp_is_url(bstr0(url))) {
+        return url; // pure filenames
     }
     return NULL;
 }

@@ -63,4 +63,6 @@ char *mp_getcwd(void *talloc_ctx);
 bool mp_path_exists(const char *path);
 bool mp_path_isdir(const char *path);
 
+bool mp_is_url(bstr path);
+
 #endif /* MPLAYER_PATH_H */

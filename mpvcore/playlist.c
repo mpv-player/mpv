@@ -176,17 +176,12 @@ struct playlist_entry *playlist_get_next(struct playlist *pl, int direction)
     return pl->current_was_replaced ? pl->current : pl->current->next;
 }
 
-static bool might_be_an_url(bstr f)
-{
-    return bstr_find0(f, "://") >= 0;
-}
-
 void playlist_add_base_path(struct playlist *pl, bstr base_path)
 {
     if (base_path.len == 0 || bstrcmp0(base_path, ".") == 0)
         return;
     for (struct playlist_entry *e = pl->first; e; e = e->next) {
-        if (!might_be_an_url(bstr0(e->filename))) {
+        if (!mp_is_url(bstr0(e->filename))) {
             char *new_file = mp_path_join(e, base_path, bstr0(e->filename));
             talloc_free(e->filename);
             e->filename = new_file;

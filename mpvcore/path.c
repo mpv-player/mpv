@@ -227,3 +227,11 @@ bool mp_path_isdir(const char *path)
     struct stat st;
     return mp_stat(path, &st) == 0 && S_ISDIR(st.st_mode);
 }
+
+// Return false if it's considered a normal local filesystem path.
+bool mp_is_url(bstr path)
+{
+    // The URL check is a bit murky, but "/path" and "./path" are never URLs.
+    return path.len && path.start[0] != '/' && path.start[0] != '.' &&
+           bstr_find0(path, "://") >= 0;
+}
