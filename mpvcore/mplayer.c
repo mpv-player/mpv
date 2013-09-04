@@ -857,8 +857,7 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         goto exit;
 
     double pos = get_current_time(mpctx);
-    int percent = get_percent_pos(mpctx);
-    if (percent < 1 || percent > 99 || pos == MP_NOPTS_VALUE)
+    if (pos == MP_NOPTS_VALUE)
         goto exit;
 
     mk_config_dir(MP_WATCH_LATER_CONF);
@@ -4471,7 +4470,8 @@ goto_reopen_demuxer: ;
 
 terminate_playback:  // don't jump here after ao/vo/getch initialization!
 
-    if (opts->position_save_on_quit && mpctx->stop_play != PT_RESTART)
+    if (opts->position_save_on_quit && mpctx->stop_play != PT_RESTART &&
+        mpctx->stop_play != AT_END_OF_FILE)
         mp_write_watch_later_conf(mpctx);
 
     if (mpctx->step_frames)
