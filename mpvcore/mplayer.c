@@ -898,6 +898,23 @@ static void load_playback_resume(m_config_t *conf, const char *file)
     talloc_free(fname);
 }
 
+// Returns the first file that has a resume config.
+// Compared to hashing the playlist file or contents and managing separate
+// resume file for them, this is simpler, and also has the nice property
+// that appending to a playlist doesn't interfere with resuming (especially
+// if the playlist comes from the command line).
+struct playlist_entry *mp_resume_playlist(struct playlist *playlist)
+{
+    for (struct playlist_entry *e = playlist->first; e; e = e->next) {
+        char *conf = get_playback_resume_config_filename(e->filename);
+        bool exists = conf && mp_path_exists(conf);
+        talloc_free(conf);
+        if (exists)
+            return e;
+    }
+    return NULL;
+}
+
 static void load_per_file_options(m_config_t *conf,
                                   struct playlist_param *params,
                                   int params_count)
@@ -4757,7 +4774,10 @@ static int mpv_main(int argc, char *argv[])
 
     if (opts->shuffle)
         playlist_shuffle(mpctx->playlist);
-    mpctx->playlist->current = mpctx->playlist->first;
+
+    mpctx->playlist->current = mp_resume_playlist(mpctx->playlist);
+    if (!mpctx->playlist->current)
+        mpctx->playlist->current = mpctx->playlist->first;
 
     play_files(mpctx);
 

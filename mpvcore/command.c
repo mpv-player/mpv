@@ -2332,8 +2332,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             playlist_transfer_entries(mpctx->playlist, pl);
             talloc_free(pl);
 
-            if (!append && mpctx->playlist->first)
-                mp_set_playlist_entry(mpctx, mpctx->playlist->first);
+            if (!append && mpctx->playlist->first) {
+                struct playlist_entry *e = mp_resume_playlist(mpctx->playlist);
+                mp_set_playlist_entry(mpctx, e ? e : mpctx->playlist->first);
+            }
         } else {
             mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
                     "\nUnable to load playlist %s.\n", filename);

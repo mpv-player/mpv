@@ -334,6 +334,7 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction);
 int mp_get_cache_percent(struct MPContext *mpctx);
 void mp_write_watch_later_conf(struct MPContext *mpctx);
 void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
+struct playlist_entry *mp_resume_playlist(struct playlist *pl);
 void mp_force_video_refresh(struct MPContext *mpctx);
 
 void mp_print_version(int always);
