@@ -155,8 +155,13 @@ static int mp_property_filename(m_option_t *prop, int action, void *arg,
 {
     if (!mpctx->filename)
         return M_PROPERTY_UNAVAILABLE;
-    char *f = (char *)mp_basename(mpctx->filename);
-    return m_property_strdup_ro(prop, action, arg, (*f) ? f : mpctx->filename);
+    char *filename = talloc_strdup(NULL, mpctx->filename);
+    if (mp_is_url(bstr0(filename)))
+        mp_url_unescape_inplace(filename);
+    char *f = (char *)mp_basename(filename);
+    int r = m_property_strdup_ro(prop, action, arg, f[0] ? f : filename);
+    talloc_free(filename);
+    return r;
 }
 
 static int mp_property_media_title(m_option_t *prop, int action, void *arg,
