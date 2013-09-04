@@ -231,7 +231,15 @@ bool mp_path_isdir(const char *path)
 // Return false if it's considered a normal local filesystem path.
 bool mp_is_url(bstr path)
 {
-    // The URL check is a bit murky, but "/path" and "./path" are never URLs.
-    return path.len && path.start[0] != '/' && path.start[0] != '.' &&
-           bstr_find0(path, "://") >= 0;
+    int proto = bstr_find0(path, "://");
+    if (proto < 0)
+        return false;
+    // The protocol part must be alphanumeric, otherwise it's not an URL.
+    for (int i = 0; i < proto; i++) {
+        unsigned char c = path.start[i];
+        if (!(c >= 'a' && c <= 'z') && !(c >= 'A' && c <= 'Z') &&
+            !(c >= '0' && c <= '9') && c != '_')
+            return false;
+    }
+    return true;
 }
