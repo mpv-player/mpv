@@ -1029,9 +1029,9 @@ static void vo_x11_set_wm_icon(struct vo_x11_state *x11)
         }
     }
 
-    size_t icon_size = 0;
+    int icon_size = 0;
     for (int n = 0; n < num_icons; n++)
-        icon_size += sizeof(long) * (2 + icon_w[n] * icon_h[n]);
+        icon_size += 2 + icon_w[n] * icon_h[n];
     long *icon = talloc_array(NULL, long, icon_size);
     long *cur = icon;
     for (int n = 0; n < num_icons; n++) {
@@ -1043,7 +1043,8 @@ static void vo_x11_set_wm_icon(struct vo_x11_state *x11)
     }
 
     XChangeProperty(x11->display, x11->window, x11->XA_NET_WM_ICON,
-                    XA_CARDINAL, 32, PropModeReplace, (char *)icon, icon_size);
+                    XA_CARDINAL, 32, PropModeReplace,
+                    (unsigned char *)icon, icon_size);
     talloc_free(icon);
     talloc_free(uncompressed.start);
 }
