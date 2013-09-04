@@ -891,6 +891,8 @@ static void load_playback_resume(m_config_t *conf, const char *file)
     if (fname) {
         // Never apply the saved start position to following files
         m_config_backup_opt(conf, "start");
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Resuming playback. This behavior can "
+               "be disabled with --no-resume-playback.\n");
         try_load_config(conf, fname, false);
         unlink(fname);
     }
