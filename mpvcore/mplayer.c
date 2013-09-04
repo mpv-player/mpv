@@ -4470,8 +4470,7 @@ goto_reopen_demuxer: ;
 
 terminate_playback:  // don't jump here after ao/vo/getch initialization!
 
-    if (opts->position_save_on_quit && mpctx->stop_play != PT_RESTART &&
-        mpctx->stop_play != AT_END_OF_FILE)
+    if (opts->position_save_on_quit && mpctx->stop_play == PT_QUIT)
         mp_write_watch_later_conf(mpctx);
 
     if (mpctx->step_frames)

@@ -1760,8 +1760,10 @@
 ``--save-position-on-quit``
     Always save the current playback position on quit. When this file is
     played again later, the player will seek to the old playback position on
-    start. This affects any form of stopping playback (quitting, going to the
-    next file).
+    start. This does not happen if playback of a file is stopped in any other
+    way than quitting. For example, going to the next file in the playlist
+    will not save the position, and start playback at beginning the next time
+    the file is played.
 
     This behavior is disabled by default, but is always available when quitting
     the player with Shift+Q.
