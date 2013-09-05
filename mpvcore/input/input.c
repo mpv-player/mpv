@@ -1363,9 +1363,12 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
     }
 
     if (cmd == NULL) {
+        int msgl = MSGL_WARN;
+        if (n == 1 && (keys[0] == MP_KEY_MOUSE_MOVE ||
+                       keys[0] == MP_KEY_MOUSE_LEAVE))
+            msgl = MSGL_DBG2;
         char *key_buf = get_key_combo_name(keys, n);
-        mp_tmsg(MSGT_INPUT, MSGL_WARN,
-                "No bind found for key '%s'.\n", key_buf);
+        mp_tmsg(MSGT_INPUT, msgl, "No bind found for key '%s'.\n", key_buf);
         talloc_free(key_buf);
         return NULL;
     }
