@@ -324,7 +324,7 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 -(BOOL)handleKey:(int)key withMask:(int)mask andMapping:(NSDictionary *)mapping
 {
     int mpkey = [mapping[@(key)] intValue];
-    return [self handleMPKey:mpkey withMask:mpkey];
+    return [self handleMPKey:mpkey withMask:mask];
 }
 
 - (NSEvent*)handleKey:(NSEvent *)event
