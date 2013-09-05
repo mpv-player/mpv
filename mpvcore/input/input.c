@@ -1343,8 +1343,9 @@ static struct cmd_bind *find_any_bind_for_key(struct input_ctx *ictx,
         struct cmd_bind *bind = find_bind_for_key_section(ictx, s->name, n, keys);
         if (bind) {
             struct cmd_bind_section *bs = bind->owner;
-            if (!use_mouse || !bs->mouse_area_set ||
-                test_rect(&bs->mouse_area, ictx->mouse_vo_x, ictx->mouse_vo_y))
+            if (!use_mouse || (bs->mouse_area_set && test_rect(&bs->mouse_area,
+                                                               ictx->mouse_vo_x,
+                                                               ictx->mouse_vo_y)))
                 return bind;
         }
         if (s->flags & MP_INPUT_EXCLUSIVE)
@@ -1668,6 +1669,8 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
     update_mouse_section(ictx);
     struct mp_cmd *cmd =
         get_cmd_from_keys(ictx, NULL, 1, (int[]){MP_KEY_MOUSE_MOVE});
+    if (!cmd)
+        cmd = mp_input_parse_cmd(bstr0("ignore"), "<internal>");
 
     if (cmd) {
         cmd->mouse_move = true;
@@ -2185,7 +2188,7 @@ static bool test_mouse(struct input_ctx *ictx, int x, int y, int rej_flags)
 
 bool mp_input_test_mouse_active(struct input_ctx *ictx, int x, int y)
 {
-    return test_mouse(ictx, x, y, 0);
+    return test_mouse(ictx, x, y, MP_INPUT_ALLOW_HIDE_CURSOR);
 }
 
 bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y)
@@ -2249,7 +2252,10 @@ struct input_ctx *mp_input_init(struct MPOpts *opts)
     pthread_mutexattr_destroy(&attr);
 #endif
 
-    mp_input_enable_section(ictx, NULL, 0);
+    // Setup default section, so that it does nothing.
+    mp_input_enable_section(ictx, NULL, MP_INPUT_ALLOW_VO_DRAGGING |
+                                        MP_INPUT_ALLOW_HIDE_CURSOR);
+    mp_input_set_section_mouse_area(ictx, NULL, INT_MIN, INT_MIN, INT_MAX, INT_MAX);
 
     // "Uncomment" the default key bindings in etc/input.conf and add them.
     // All lines that do not start with '# ' are parsed.
