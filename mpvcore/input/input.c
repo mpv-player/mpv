@@ -66,11 +66,13 @@
 
 #if HAVE_PTHREADS
 #include <pthread.h>
-#define input_lock(ictx)   pthread_mutex_lock(&ictx->mutex)
-#define input_unlock(ictx) pthread_mutex_unlock(&ictx->mutex)
+#define input_lock(ictx)    pthread_mutex_lock(&ictx->mutex)
+#define input_unlock(ictx)  pthread_mutex_unlock(&ictx->mutex)
+#define input_destroy(ictx) pthread_mutex_destroy(&ictx->mutex)
 #else
 #define input_lock(ictx) 0
 #define input_unlock(ictx) 0
+#define input_destroy(ictx) 0
 #endif
 
 #define MP_MAX_KEY_DOWN 4
@@ -2364,7 +2366,7 @@ void mp_input_uninit(struct input_ctx *ictx)
     clear_queue(&ictx->key_cmd_queue);
     clear_queue(&ictx->control_cmd_queue);
     talloc_free(ictx->current_down_cmd);
-    pthread_mutex_destroy(&ictx->mutex);
+    input_destroy(ictx);
     talloc_free(ictx);
 }
 
