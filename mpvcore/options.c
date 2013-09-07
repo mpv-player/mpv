@@ -550,7 +550,7 @@ const m_option_t mp_opts[] = {
                 {"auto", SOFTVOL_AUTO})),
     OPT_FLOATRANGE("softvol-max", softvol_max, 0, 10, 10000),
     OPT_INTRANGE("volstep", volstep, 0, 0, 100),
-    OPT_FLOATRANGE("volume", mixer_init_volume, 0, -1, 10000),
+    OPT_FLOATRANGE("volume", mixer_init_volume, 0, -1, 100),
     OPT_CHOICE("mute", mixer_init_mute, M_OPT_OPTIONAL_PARAM,
                ({"auto", -1},
                 {"no", 0},

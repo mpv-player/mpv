@@ -1927,6 +1927,12 @@
     current level. With values below 100 the initial volume (which is 100%)
     will be above the maximum, which e.g. the OSD cannot display correctly.
 
+    Note: the maximum value of ``--volume`` as well as the ``volume`` property
+    is always 100. Likewise, the volume OSD bar always goes from 0 to 100.
+    This means that with ``--softvol-max=200``, ``--volume=100`` means
+    maximum amplification, i.e. amplify by 200%. The default volume will be
+    ``50`` in this case (meaning no amplification).
+
 ``--speed=<0.01-100>``
     Slow down or speed up playback by the factor given as parameter.
 
