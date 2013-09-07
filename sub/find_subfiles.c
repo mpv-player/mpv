@@ -87,7 +87,6 @@ static void append_dir_subtitles(struct MPOpts *opts,
 {
     char *sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", "js", "ass", NULL};
     void *tmpmem = talloc_new(NULL);
-    FILE *f;
     assert(strlen(fname) < 1e6);
 
     if (mp_is_url(bstr0(fname)))
@@ -174,11 +173,10 @@ static void append_dir_subtitles(struct MPOpts *opts,
                 prio++;
 #endif
             char *subpath = mp_path_join(*slist, path, dename);
-            if ((f = fopen(subpath, "rt"))) {
+            if (mp_path_exists(subpath)) {
                 MP_GROW_ARRAY(*slist, *nsub);
                 struct subfn *sub = *slist + (*nsub)++;
 
-                fclose(f);
                 sub->priority = prio;
                 sub->fname    = subpath;
             } else
