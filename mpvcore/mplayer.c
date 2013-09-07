@@ -3951,13 +3951,13 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
     // check .sub
     if (mpctx->opts->sub_name) {
         for (int i = 0; mpctx->opts->sub_name[i] != NULL; ++i)
-            mp_add_subtitles(mpctx, mpctx->opts->sub_name[i], 0);
+            mp_add_subtitles(mpctx, mpctx->opts->sub_name[i]);
     }
     if (mpctx->opts->sub_auto) { // auto load sub file ...
         char **tmp = find_text_subtitles(mpctx->opts, mpctx->filename);
         int nsub = MP_TALLOC_ELEMS(tmp);
         for (int i = 0; i < nsub; i++) {
-            struct track *track = mp_add_subtitles(mpctx, tmp[i], 1);
+            struct track *track = mp_add_subtitles(mpctx, tmp[i]);
             if (track)
                 track->auto_loaded = true;
         }
@@ -4025,7 +4025,7 @@ static void open_audiofiles_from_options(struct MPContext *mpctx)
                        opts->audio_stream_cache, STREAM_AUDIO);
 }
 
-struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename, int noerr)
+struct track *mp_add_subtitles(struct MPContext *mpctx, char *filename)
 {
     struct MPOpts *opts = mpctx->opts;
     return open_external_file(mpctx, filename, opts->sub_demuxer_name, 0,
