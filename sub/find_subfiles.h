@@ -19,8 +19,6 @@
 #ifndef MPLAYER_FIND_SUBFILES_H
 #define MPLAYER_FIND_SUBFILES_H
 
-#define MAX_SUBTITLE_FILES 128
-
 struct MPOpts;
 
 char **find_text_subtitles(struct MPOpts *opts, const char *fname);

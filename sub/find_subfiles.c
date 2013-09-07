@@ -66,11 +66,6 @@ static struct bstr guess_lang_from_filename(struct bstr name)
     return (struct bstr){name.start + i + 1, n};
 }
 
-struct sub_list {
-    struct subfn subs[MAX_SUBTITLE_FILES];
-    void *ctx;
-};
-
 /**
  * @brief Append all the subtitles in the given path matching fname
  * @param opts MPlayer options
@@ -87,7 +82,6 @@ static void append_dir_subtitles(struct MPOpts *opts,
 {
     char *sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", "js", "ass", NULL};
     void *tmpmem = talloc_new(NULL);
-    assert(strlen(fname) < 1e6);
 
     if (mp_is_url(bstr0(fname)))
         goto out;
