@@ -190,57 +190,31 @@
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
         <key>CFBundleURLName</key>
-        <string>Real Time (Streaming) Protocol</string>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>rtp</string>
-          <string>rtsp</string>
-        </array>
-      </dict>
-      <dict>
-        <key>CFBundleTypeRole</key>
-        <string>Viewer</string>
-        <key>CFBundleURLName</key>
-        <string>File over HTTP/FTP/UDP</string>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>icyx</string>
-          <string>udp</string>
-          <string>ftp</string>
-          <string>http_proxy</string>
-          <string>http</string>
-        </array>
-      </dict>
-      <dict>
-        <key>CFBundleTypeRole</key>
-        <string>Viewer</string>
-        <key>CFBundleURLName</key>
-        <string>Microsoft Media Services</string>
+        <string>Streaming Protocol</string>
         <key>CFBundleURLSchemes</key>
         <array>
           <string>mms</string>
+          <string>mmst</string>
+          <string>http</string>
+          <string>httpproxy</string>
+          <string>rtp</string>
+          <string>rtsp</string>
+          <string>ftp</string>
+          <string>udp</string>
+          <string>smb</string>
         </array>
       </dict>
       <dict>
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
         <key>CFBundleURLName</key>
-        <string>Cuesheet</string>
+        <string>CD/DVD/Bluray Media</string>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>cue</string>
-        </array>
-      </dict>
-      <dict>
-        <key>CFBundleTypeRole</key>
-        <string>Viewer</string>
-        <key>CFBundleURLName</key>
-        <string>CD/DVD Media</string>
-        <key>CFBundleURLSchemes</key>
-        <array>
-          <string>dvdnav</string>
+          <string>cdda</string>
           <string>dvd</string>
           <string>vcd</string>
+          <string>bd</string>
         </array>
       </dict>
     </array>

@@ -97,9 +97,23 @@ static NSString *escape_loadfile_name(NSString *input)
                                               handler:^(NSEvent *event) {
             return [self.eventsResponder handleKey:event];
         }];
+
+        NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
+        [em setEventHandler:self
+                andSelector:@selector(getUrl:withReplyEvent:)
+              forEventClass:kInternetEventClass
+                 andEventID:kAEGetURL];
     }
 
     return self;
+}
+
+- (void)dealloc
+{
+    NSAppleEventManager *em = [NSAppleEventManager sharedAppleEventManager];
+    [em removeEventHandlerForEventClass:kInternetEventClass
+                             andEventID:kAEGetURL];
+    [super dealloc];
 }
 
 #define _R(P, T, E, K) \
@@ -219,6 +233,22 @@ static NSString *escape_loadfile_name(NSString *input)
          withReplyEvent:(NSAppleEventDescriptor*)r
 {
     [self stopPlayback];
+}
+
+- (void)getUrl:(NSAppleEventDescriptor *)event
+    withReplyEvent:(NSAppleEventDescriptor *)replyEvent
+{
+    NSString *url =
+        [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
+
+    self.files = @[url];
+
+    if (self.willStopOnOpenEvent) {
+        self.willStopOnOpenEvent = NO;
+        cocoa_stop_runloop();
+    } else {
+        [self handleFiles];
+    }
 }
 
 - (void)application:(NSApplication *)sender openFiles:(NSArray *)filenames
