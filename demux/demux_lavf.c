@@ -862,12 +862,31 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags)
         // API by default, because there are some major issues.
         // Set max_ts==ts, so that demuxing starts from an earlier position in
         // the worst case.
-        int r = avformat_seek_file(priv->avfc, -1, INT64_MIN,
-                                   priv->last_pts, priv->last_pts, avsflags);
+        // To make this horrible situation even worse, some lavf demuxers have
+        // broken timebase handling (everything that uses
+        // ff_subtitles_queue_seek()), and always uses the stream timebase. So
+        // we use the timebase and stream index of the first enabled stream
+        // (i.e. a stream which can participate in seeking).
+        int stream_index = -1;
+        AVRational time_base = {1, AV_TIME_BASE};
+        for (int n = 0; n < priv->num_streams; n++) {
+            struct sh_stream *stream = priv->streams[n];
+            AVStream *st = priv->avfc->streams[n];
+            if (stream && st->discard != AVDISCARD_ALL) {
+                stream_index = n;
+                time_base = st->time_base;
+                break;
+            }
+        }
+        int64_t pts = priv->last_pts;
+        if (pts != AV_NOPTS_VALUE)
+            pts = pts / (double)AV_TIME_BASE * av_q2d(av_inv_q(time_base));
+        int r = avformat_seek_file(priv->avfc, stream_index, INT64_MIN,
+                                   pts, pts, avsflags);
         // Similar issue as in the normal seeking codepath.
         if (r < 0) {
-            avformat_seek_file(priv->avfc, -1, INT64_MIN,
-                               priv->last_pts, INT64_MAX, avsflags);
+            avformat_seek_file(priv->avfc, stream_index, INT64_MIN,
+                               pts, INT64_MAX, avsflags);
         }
     }
 }
