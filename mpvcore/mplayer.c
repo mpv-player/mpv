@@ -3957,9 +3957,15 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
         char **tmp = find_text_subtitles(mpctx->opts, mpctx->filename);
         int nsub = MP_TALLOC_ELEMS(tmp);
         for (int i = 0; i < nsub; i++) {
-            struct track *track = mp_add_subtitles(mpctx, tmp[i]);
+            char *filename = tmp[i];
+            for (int n = 0; n < mpctx->num_sources; n++) {
+                if (strcmp(mpctx->sources[n]->stream->url, filename) == 0)
+                    goto skip;
+            }
+            struct track *track = mp_add_subtitles(mpctx, filename);
             if (track)
                 track->auto_loaded = true;
+        skip:;
         }
         talloc_free(tmp);
     }

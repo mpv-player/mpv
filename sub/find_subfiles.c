@@ -172,6 +172,10 @@ static void append_dir_subtitles(struct MPOpts *opts,
                 MP_GROW_ARRAY(*slist, *nsub);
                 struct subfn *sub = *slist + (*nsub)++;
 
+                // annoying and redundant
+                if (strncmp(subpath, "./", 2) == 0)
+                    subpath += 2;
+
                 sub->priority = prio;
                 sub->fname    = subpath;
             } else
