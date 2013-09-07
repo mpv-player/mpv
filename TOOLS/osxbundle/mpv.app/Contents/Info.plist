@@ -190,6 +190,16 @@
         <key>CFBundleTypeRole</key>
         <string>Viewer</string>
         <key>CFBundleURLName</key>
+        <string>mpv Custom Protocol</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>mpv</string>
+        </array>
+      </dict>
+      <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Viewer</string>
+        <key>CFBundleURLName</key>
         <string>Streaming Protocol</string>
         <key>CFBundleURLSchemes</key>
         <array>

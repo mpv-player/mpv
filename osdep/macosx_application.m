@@ -26,6 +26,8 @@
 #include "osdep/macosx_application_objc.h"
 #include "osdep/macosx_compat.h"
 
+#define MPV_PROTOCOL @"mpv://"
+
 static pthread_t playback_thread_id;
 
 @interface Application (PrivateMethods)
@@ -240,6 +242,11 @@ static NSString *escape_loadfile_name(NSString *input)
 {
     NSString *url =
         [[event paramDescriptorForKeyword:keyDirectObject] stringValue];
+
+    url = [url stringByReplacingOccurrencesOfString:MPV_PROTOCOL
+                withString:@""
+                   options:NSAnchoredSearch
+                     range:NSMakeRange(0, [MPV_PROTOCOL length])];
 
     self.files = @[url];
 
