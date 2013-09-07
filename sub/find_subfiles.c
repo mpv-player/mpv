@@ -13,6 +13,19 @@
 #include "sub/find_subfiles.h"
 #include "sub/sub.h"
 
+static const char *sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt",
+                                 "smi", "rt", "txt", "ssa", "aqt", "jss",
+                                 "js", "ass", NULL};
+
+static bool is_sub_ext(bstr ext)
+{
+    for (int n = 0; sub_exts[n]; n++) {
+        if (bstrcasecmp(bstr0(sub_exts[n]), ext) == 0)
+            return true;
+    }
+    return false;
+}
+
 static struct bstr strip_ext(struct bstr str)
 {
     int dotpos = bstrrchr(str, '.');
@@ -33,6 +46,13 @@ struct subfn {
     int priority;
     char *fname;
 };
+
+static int compare_sub_filename(const void *a, const void *b)
+{
+    const struct subfn *s1 = a;
+    const struct subfn *s2 = b;
+    return strcoll(s1->fname, s2->fname);
+}
 
 static int compare_sub_priority(const void *a, const void *b)
 {
@@ -80,7 +100,6 @@ static void append_dir_subtitles(struct MPOpts *opts,
                                  struct bstr path, const char *fname,
                                  int limit_fuzziness)
 {
-    char *sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt", "smi", "rt", "txt", "ssa", "aqt", "jss", "js", "ass", NULL};
     void *tmpmem = talloc_new(NULL);
 
     if (mp_is_url(bstr0(fname)))
@@ -112,22 +131,8 @@ static void append_dir_subtitles(struct MPOpts *opts,
         struct bstr tmp_fname_trim = bstr_strip(tmp_fname_noext);
 
         // does it end with a subtitle extension?
-#ifdef CONFIG_ICONV
-#ifdef CONFIG_ENCA
-        int i = (opts->sub_cp && strncasecmp(opts->sub_cp, "enca", 4) != 0) ? 3 : 0;
-#else
-        int i = opts->sub_cp ? 3 : 0;
-#endif
-#else
-        int i = 0;
-#endif
-        while (1) {
-            if (!sub_exts[i])
-                goto next_sub;
-            if (bstrcasecmp(bstr0(sub_exts[i]), tmp_fname_ext) == 0)
-                break;
-            i++;
-        }
+        if (!is_sub_ext(tmp_fname_ext))
+            goto next_sub;
 
         // we have a (likely) subtitle file
         int prio = 0;
@@ -162,10 +167,6 @@ static void append_dir_subtitles(struct MPOpts *opts,
                "\"%s\"  Priority: %d\n", de->d_name, prio);
         if (prio) {
             prio += prio;
-#ifdef CONFIG_ICONV
-            if (i < 4) // prefer UTF-8 coded, or idx over sub (vobsubs)
-                prio++;
-#endif
             char *subpath = mp_path_join(*slist, path, dename);
             if (mp_path_exists(subpath)) {
                 MP_GROW_ARRAY(*slist, *nsub);
@@ -186,6 +187,33 @@ static void append_dir_subtitles(struct MPOpts *opts,
     talloc_free(tmpmem);
 }
 
+static bool case_endswith(const char *s, const char *end)
+{
+    size_t len = strlen(s);
+    size_t elen = strlen(end);
+    return len >= elen && strcasecmp(s + len - elen, end) == 0;
+}
+
+// Drop .sub file if .idx file exists.
+// Assumes slist is sorted by compare_sub_filename.
+static void filter_subidx(struct subfn **slist, int *nsub)
+{
+    const char *prev = NULL;
+    for (int n = 0; n < *nsub; n++) {
+        const char *fname = (*slist)[n].fname;
+        if (case_endswith(fname, ".idx")) {
+            prev = fname;
+        } else if (case_endswith(fname, ".sub")) {
+            if (strncmp(prev, fname, strlen(fname) - 4) == 0)
+                (*slist)[n].priority = -1;
+        }
+    }
+    for (int n = *nsub; n >= 0; n--) {
+        if ((*slist)[n].priority < 0)
+            MP_TARRAY_REMOVE_AT(*slist, *nsub, n);
+    }
+}
+
 char **find_text_subtitles(struct MPOpts *opts, const char *fname)
 {
     char **subnames = NULL;
@@ -204,11 +232,16 @@ char **find_text_subtitles(struct MPOpts *opts, const char *fname)
         }
     }
 
-    // Load subtitles in ~/.mplayer/sub limiting sub fuzziness
+    // Load subtitles in ~/.mpv/sub limiting sub fuzziness
     char *mp_subdir = mp_find_user_config_file("sub/");
     if (mp_subdir)
         append_dir_subtitles(opts, &slist, &n, bstr0(mp_subdir), fname, 1);
     talloc_free(mp_subdir);
+
+    // Sort by name for filter_subidx()
+    qsort(slist, n, sizeof(*slist), compare_sub_filename);
+
+    filter_subidx(&slist, &n);
 
     // Sort subs by priority and append them
     qsort(slist, n, sizeof(*slist), compare_sub_priority);
