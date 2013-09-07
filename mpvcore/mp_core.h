@@ -107,10 +107,9 @@ struct track {
     // If the track's stream changes with the timeline (ordered chapters).
     bool under_timeline;
 
-    // NULL if not backed by a demuxer (e.g. external subtitles).
     // Value can change if under_timeline==true.
     struct demuxer *demuxer;
-    // Invariant: (!demuxer && !stream) || stream->demuxer == demuxer
+    // Invariant: !stream || stream->demuxer == demuxer
     struct sh_stream *stream;
 
     // For external subtitles, which are read fully on init. Do not attempt
