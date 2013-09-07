@@ -90,6 +90,9 @@ static void append_dir_subtitles(struct MPOpts *opts,
     FILE *f;
     assert(strlen(fname) < 1e6);
 
+    if (mp_is_url(bstr0(fname)))
+        goto out;
+
     struct bstr f_fname = bstr0(mp_basename(fname));
     struct bstr f_fname_noext = bstrdup(tmpmem, strip_ext(f_fname));
     bstr_lower(f_fname_noext);
