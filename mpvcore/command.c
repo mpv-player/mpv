@@ -389,10 +389,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
         *(int *) arg = chapter;
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
-        char *chapter_name = chapter_display_name(mpctx, chapter);
-        if (!chapter_name)
-            return M_PROPERTY_UNAVAILABLE;
-        *(char **) arg = chapter_name;
+        *(char **) arg = chapter_display_name(mpctx, chapter);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SWITCH:
@@ -403,8 +400,6 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
             step_all = ROUND(sarg->inc);
             // Check threshold for relative backward seeks
             if (mpctx->opts->chapter_seek_threshold >= 0 && step_all < 0) {
-                if (chapter < -1)
-                    return M_PROPERTY_UNAVAILABLE;
                 double current_chapter_start =
                     chapter_start_time(mpctx, chapter);
                 // If we are far enough into a chapter, seek back to the
