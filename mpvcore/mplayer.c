@@ -546,6 +546,9 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
             ao_uninit(mpctx->ao, mpctx->stop_play != AT_END_OF_FILE);
         mpctx->ao = NULL;
     }
+
+    if (mask & INITIALIZED_PLAYBACK)
+        mpctx->initialized_flags &= ~INITIALIZED_PLAYBACK;
 }
 
 static MP_NORETURN void exit_player(struct MPContext *mpctx,
@@ -4171,6 +4174,7 @@ static void play_current_file(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
 
+    mpctx->initialized_flags |= INITIALIZED_PLAYBACK;
     mpctx->stop_play = 0;
     mpctx->filename = NULL;
 
