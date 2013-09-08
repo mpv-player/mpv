@@ -636,39 +636,38 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-/// Demuxer meta data
-static int mp_property_metadata(m_option_t *prop, int action, void *arg,
-                                MPContext *mpctx)
+static int tag_property(m_option_t *prop, int action, void *arg,
+                        struct mp_tags *tags)
 {
-    struct demuxer *demuxer = mpctx->master_demuxer;
-    if (!demuxer)
-        return M_PROPERTY_UNAVAILABLE;
-
     static const m_option_t key_type =
     {
-        "metadata", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL
+        "tags", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL
     };
 
     switch (action) {
     case M_PROPERTY_GET: {
         char **slist = NULL;
-        m_option_copy(prop, &slist, &demuxer->info);
+        int num = 0;
+        for (int n = 0; n < tags->num_keys; n++) {
+            MP_TARRAY_APPEND(NULL, slist, num, tags->keys[n]);
+            MP_TARRAY_APPEND(NULL, slist, num, tags->values[n]);
+        }
+        MP_TARRAY_APPEND(NULL, slist, num, NULL);
         *(char ***)arg = slist;
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_PRINT: {
-        char **list = demuxer->info;
         char *res = NULL;
-        for (int n = 0; list && list[n]; n += 2) {
+        for (int n = 0; n < tags->num_keys; n++) {
             res = talloc_asprintf_append_buffer(res, "%s: %s\n",
-                                                list[n], list[n + 1]);
+                                                tags->keys[n], tags->values[n]);
         }
         *(char **)arg = res;
         return res ? M_PROPERTY_OK : M_PROPERTY_UNAVAILABLE;
     }
     case M_PROPERTY_KEY_ACTION: {
         struct m_property_action_arg *ka = arg;
-        char *meta = demux_info_get(demuxer, ka->key);
+        char *meta = mp_tags_get_str(tags, ka->key);
         if (!meta)
             return M_PROPERTY_UNKNOWN;
         switch (ka->action) {
@@ -682,6 +681,17 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
     }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+/// Demuxer meta data
+static int mp_property_metadata(m_option_t *prop, int action, void *arg,
+                                MPContext *mpctx)
+{
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    if (!demuxer)
+        return M_PROPERTY_UNAVAILABLE;
+
+    return tag_property(prop, action, arg, demuxer->metadata);
 }
 
 static int mp_property_pause(m_option_t *prop, int action, void *arg,
