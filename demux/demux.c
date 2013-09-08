@@ -870,16 +870,31 @@ void demuxer_sort_chapters(demuxer_t *demuxer)
 }
 
 int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
-                        uint64_t start, uint64_t end)
+                        uint64_t start, uint64_t end, uint64_t demuxer_id)
 {
     struct demux_chapter new = {
         .original_index = demuxer->num_chapters,
         .start = start,
         .end = end,
         .name = name.len ? bstrdup0(demuxer, name) : NULL,
+        .metadata = talloc_zero(demuxer, struct mp_tags),
+        .demuxer_id = demuxer_id,
     };
+    mp_tags_set_bstr(new.metadata, bstr0("title"), name);
     MP_TARRAY_APPEND(demuxer, demuxer->chapters, demuxer->num_chapters, new);
     return 0;
+}
+
+void demuxer_add_chapter_info(struct demuxer *demuxer, uint64_t demuxer_id,
+                              bstr key, bstr value)
+{
+    for (int n = 0; n < demuxer->num_chapters; n++) {
+        struct demux_chapter *ch = &demuxer->chapters[n];
+        if (ch->demuxer_id == demuxer_id) {
+            mp_tags_set_bstr(ch->metadata, key, value);
+            return;
+        }
+    }
 }
 
 static void add_stream_chapters(struct demuxer *demuxer)
@@ -892,7 +907,7 @@ static void add_stream_chapters(struct demuxer *demuxer)
         if (stream_control(demuxer->stream, STREAM_CTRL_GET_CHAPTER_TIME, &p)
                 != STREAM_OK)
             return;
-        demuxer_add_chapter(demuxer, bstr0(""), p * 1e9, 0);
+        demuxer_add_chapter(demuxer, bstr0(""), p * 1e9, 0, 0);
     }
 }
 

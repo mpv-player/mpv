@@ -122,6 +122,8 @@ typedef struct demux_chapter
     int original_index;
     uint64_t start, end;
     char *name;
+    struct mp_tags *metadata;
+    uint64_t demuxer_id; // for mapping to internal demuxer data structures
 } demux_chapter_t;
 
 struct matroska_data {
@@ -253,7 +255,9 @@ void demuxer_help(void);
 int demuxer_add_attachment(struct demuxer *demuxer, struct bstr name,
                            struct bstr type, struct bstr data);
 int demuxer_add_chapter(struct demuxer *demuxer, struct bstr name,
-                        uint64_t start, uint64_t end);
+                        uint64_t start, uint64_t end, uint64_t demuxer_id);
+void demuxer_add_chapter_info(struct demuxer *demuxer, uint64_t demuxer_id,
+                              bstr key, bstr value);
 int demuxer_seek_chapter(struct demuxer *demuxer, int chapter,
                          double *seek_pts);
 void demuxer_sort_chapters(demuxer_t *demuxer);

@@ -694,6 +694,19 @@ static int mp_property_metadata(m_option_t *prop, int action, void *arg,
     return tag_property(prop, action, arg, demuxer->metadata);
 }
 
+static int mp_property_chapter_metadata(m_option_t *prop, int action, void *arg,
+                                        MPContext *mpctx)
+{
+    struct demuxer *demuxer = mpctx->master_demuxer;
+    int chapter = get_current_chapter(mpctx);
+    if (!demuxer || chapter < 0)
+        return M_PROPERTY_UNAVAILABLE;
+
+    assert(chapter < demuxer->num_chapters);
+
+    return tag_property(prop, action, arg, demuxer->chapters[chapter].metadata);
+}
+
 static int mp_property_pause(m_option_t *prop, int action, void *arg,
                              void *ctx)
 {
@@ -1741,8 +1754,8 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "editions", mp_property_editions, CONF_TYPE_INT },
     { "angle", mp_property_angle, &m_option_type_dummy },
-    { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST,
-      0, 0, 0, NULL },
+    { "metadata", mp_property_metadata, CONF_TYPE_STRING_LIST },
+    { "chapter-metadata", mp_property_chapter_metadata, CONF_TYPE_STRING_LIST },
     M_OPTION_PROPERTY_CUSTOM("pause", mp_property_pause),
     { "cache", mp_property_cache, CONF_TYPE_INT },
     M_OPTION_PROPERTY("pts-association-mode"),

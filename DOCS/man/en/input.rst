@@ -412,6 +412,7 @@ Name                            W Comment
 ``angle``                       x current DVD angle
 ``metadata``                      metadata key/value pairs
 ``metadata/<key>``                value of metadata entry ``<key>``
+``chapter-metadata``              metadata of current chapter (works similar)
 ``pause``                       x pause status (bool)
 ``cache``                         network cache fill state (0-100)
 ``pts-association-mode``        x see ``--pts-association-mode``

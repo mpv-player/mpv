@@ -878,7 +878,8 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                    BSTR_P(name));
 
             if (idx == selected_edition){
-                demuxer_add_chapter(demuxer, name, chapter.start, chapter.end);
+                demuxer_add_chapter(demuxer, name, chapter.start, chapter.end,
+                                    ca->chapter_uid);
                 if (editions[idx].edition_flag_ordered) {
                     chapter.name = talloc_strndup(m_chapters, name.start,
                                                   name.len);
@@ -913,11 +914,21 @@ static int demux_mkv_read_tags(demuxer_t *demuxer)
     for (int i = 0; i < tags.n_tag; i++) {
         struct ebml_tag tag = tags.tag[i];
         if (tag.targets.target_track_uid  || tag.targets.target_edition_uid ||
-            tag.targets.target_chapter_uid || tag.targets.target_attachment_uid)
+            tag.targets.target_attachment_uid)
             continue;
 
-        for (int j = 0; j < tag.n_simple_tag; j++)
-            demux_info_add_bstr(demuxer, tag.simple_tag[j].tag_name, tag.simple_tag[j].tag_string);
+        if (tag.targets.target_chapter_uid) {
+            for (int j = 0; j < tag.n_simple_tag; j++) {
+                demuxer_add_chapter_info(demuxer, tag.targets.target_chapter_uid,
+                                         tag.simple_tag[j].tag_name,
+                                         tag.simple_tag[j].tag_string);
+            }
+        } else {
+            for (int j = 0; j < tag.n_simple_tag; j++) {
+                demux_info_add_bstr(demuxer, tag.simple_tag[j].tag_name,
+                                    tag.simple_tag[j].tag_string);
+            }
+        }
     }
 
     talloc_free(parse_ctx.talloc_ctx);

@@ -627,7 +627,12 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
                                       (AVRational){1, 1000000000});
         t = av_dict_get(c->metadata, "title", NULL, 0);
         demuxer_add_chapter(demuxer, t ? bstr0(t->value) : bstr0(NULL),
-                            start, end);
+                            start, end, i);
+        AVDictionaryEntry *t = NULL;
+        while ((t = av_dict_get(c->metadata, "", t, AV_DICT_IGNORE_SUFFIX))) {
+            demuxer_add_chapter_info(demuxer, i, bstr0(t->key),
+                                     bstr0(t->value));
+        }
     }
 
     add_new_streams(demuxer);
