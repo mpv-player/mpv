@@ -3379,8 +3379,6 @@ static void handle_cursor_autohide(struct MPContext *mpctx)
         return;
 
     bool mouse_cursor_visible = mpctx->mouse_cursor_visible;
-    if (opts->cursor_autohide_delay == -1)
-        mouse_cursor_visible = true;
 
     unsigned mouse_event_ts = mp_input_get_mouse_event_counter(mpctx->input);
     if (mpctx->mouse_event_ts != mouse_event_ts) {
