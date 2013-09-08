@@ -12,7 +12,7 @@ a movie player
 ##############
 
 :Author: wm4
-:Date: 2013-07-08
+:Date: 2013-09-08
 :Copyright: GPLv3
 :Version: git
 :Manual section: 1
@@ -410,7 +410,7 @@ profile name ``default`` to continue with normal options.
     ::
 
         [vo.vdpau]
-        # Use hardware decoding (this might break playback of some h264 files)
+        # Use hardware decoding (might break playback of some h264 files)
         hwdec=vdpau
 
         [protocol.dvd]

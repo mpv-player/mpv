@@ -679,8 +679,10 @@
 
     .. admonition:: Example
 
-        - ``mpv sample-720x576.yuv --demuxer=rawvideo --demuxer-rawvideo=w=720:h=576``
-          Play a raw YUV sample.
+        Play a raw YUV sample::
+
+            mpv sample-720x576.yuv --demuxer=rawvideo \
+            --demuxer-rawvideo=w=720:h=576
 
 ``--demuxer-rawvideo-format=<value>``
     Colorspace (fourcc) in hex or string for ``--demuxer=rawvideo``
@@ -1039,7 +1041,10 @@
 
     .. admonition:: Example
 
-        ``mpv --http-header-fields='Field1: value1','Field2: value2' http://localhost:1234``
+        ::
+
+            mpv --http-header-fields='Field1: value1','Field2: value2' \
+            http://localhost:1234
 
         Will generate HTTP request::
 
