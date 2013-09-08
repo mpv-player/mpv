@@ -279,7 +279,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             break;
     }
 
-    if (mouse_button && !vo->opts->nomouse_input) {
+    if (mouse_button && vo->opts->enable_mouse_movements) {
         int x = GET_X_LPARAM(lParam);
         int y = GET_Y_LPARAM(lParam);
         mouse_button |= mod_state(vo);

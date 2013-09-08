@@ -32,7 +32,6 @@ typedef struct mp_vo_opts {
     int keepaspect;
     int border;
 
-    int nomouse_input;
     int enable_mouse_movements;
 
     int64_t WinID;

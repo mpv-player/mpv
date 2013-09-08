@@ -1632,7 +1632,7 @@ static void vo_x11_selectinput_witherr(struct vo *vo,
                                        Window w,
                                        long event_mask)
 {
-    if (vo->opts->nomouse_input)
+    if (!vo->opts->enable_mouse_movements)
         event_mask &= ~(ButtonPressMask | ButtonReleaseMask);
 
     XSelectInput(display, w, NoEventMask);

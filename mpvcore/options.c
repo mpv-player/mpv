@@ -614,7 +614,6 @@ const m_option_t mp_opts[] = {
 #endif
     OPT_STRING("heartbeat-cmd", heartbeat_cmd, 0),
     OPT_FLOAT("heartbeat-interval", heartbeat_interval, CONF_MIN, 0),
-    OPT_FLAG_CONSTANTS("mouseinput", vo.nomouse_input, 0, 1, 0),
 
     OPT_CHOICE_OR_INT("screen", vo.screen_id, 0, 0, 32,
                       ({"default", -1})),
@@ -756,7 +755,6 @@ const struct MPOpts mp_default_opts = {
         .monitor_pixel_aspect = 1.0,
         .screen_id = -1,
         .fsscreen_id = -1,
-        .nomouse_input = 0,
         .enable_mouse_movements = 1,
         .fsmode = 0,
         .panscan = 0.0f,

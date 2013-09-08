@@ -1250,13 +1250,10 @@
     1). A value of 1 means square pixels (correct for (almost?) all LCDs). See
     also ``--monitoraspect`` and ``--aspect``.
 
-``--mouse-movements``
+``--mouse-movements``, ``--no-mouse-movements``
     Permit mpv to receive pointer events reported by the video output
     driver. Necessary to select the buttons in DVD menus. Supported for
     X11-based VOs (x11, xv, etc) and the gl, direct3d and corevideo VOs.
-
-``--mouseinput``, ``--no-mouseinput``
-    ``--no-mouseinput`` disables mouse button press/release input.
 
 ``--no-msgcolor``
     Disable colorful console output on terminals.
