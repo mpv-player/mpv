@@ -188,13 +188,16 @@ typedef struct mkv_demuxer {
 
     uint64_t skip_to_timecode;
     int v_skip_to_keyframe, a_skip_to_keyframe;
-    bool subtitle_preroll;
+    int subtitle_preroll;
 } mkv_demuxer_t;
 
 #define REALHEADER_SIZE    16
 #define RVPROPERTIES_SIZE  34
 #define RAPROPERTIES4_SIZE 56
 #define RAPROPERTIES5_SIZE 70
+
+// Maximum number of subtitle packets that are accepted for pre-roll.
+#define NUM_SUB_PREROLL_PACKETS 100
 
 /**
  * \brief ensures there is space for at least one additional element
@@ -2266,7 +2269,10 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         if (mkv_d->v_skip_to_keyframe)
             use_this_block = 0;
     } else if (track->type == MATROSKA_TRACK_SUBTITLE) {
-        use_this_block |= mkv_d->subtitle_preroll;
+        if (!use_this_block && mkv_d->subtitle_preroll) {
+            mkv_d->subtitle_preroll--;
+            use_this_block = 1;
+        }
         if (use_this_block) {
             if (laces > 1) {
                 mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Subtitles use Matroska "
@@ -2313,7 +2319,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         if (stream->type == STREAM_VIDEO) {
             mkv_d->v_skip_to_keyframe = 0;
             mkv_d->skip_to_timecode = 0;
-            mkv_d->subtitle_preroll = false;
+            mkv_d->subtitle_preroll = 0;
         } else if (stream->type == STREAM_AUDIO)
             mkv_d->a_skip_to_keyframe = 0;
 
@@ -2594,7 +2600,10 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
                 a_tnum = track->tnum;
         }
     }
-    mkv_d->subtitle_preroll = (flags & SEEK_SUBPREROLL) && st_active[STREAM_SUB];
+    mkv_d->subtitle_preroll = 0;
+    if ((flags & SEEK_SUBPREROLL) && st_active[STREAM_SUB] &&
+        st_active[STREAM_VIDEO])
+        mkv_d->subtitle_preroll = NUM_SUB_PREROLL_PACKETS;
     if (!(flags & (SEEK_BACKWARD | SEEK_FORWARD))) {
         if (flags & SEEK_ABSOLUTE || rel_seek_secs < 0)
             flags |= SEEK_BACKWARD;
