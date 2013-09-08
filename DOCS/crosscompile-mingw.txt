@@ -5,9 +5,10 @@ http://mingw-w64.sourceforge.net.
 You have to run mpv's configure with these arguments:
     ./configure --enable-cross-compile --target=i686-w64-mingw32
 
-Using MXE to setup a MinGW-w64 environment is recommended: http://mxe.cc
-Currently, using an experimental branch of MXE is required:
-    https://github.com/tonytheodore/mxe.git
+Using mingw-w64-cmake to setup a MinGW-w64 environment is recommended (this will
+also build mpv and its dependencies): https://github.com/lachs0r/mingw-w64-cmake
+
+Alternatively, use MXE: http://mxe.cc
 
 Warning: the original MinGW (http://www.mingw.org) is unsupported.
 
@@ -18,11 +19,10 @@ Example with MXE
 ================
 
 # Download MXE. Note that compiling the required packages requires about 1 GB
-# or more! We are using an experimental repository, which supports MinGW-w64.
-# The official MXE supports classic MinGW only, which doesn't work with mpv.
+# or more!
 
 cd /opt
-git clone https://github.com/tonytheodore/mxe.git mingw
+git clone https://github.com/mxe/mxe
 cd mingw
 
 # Edit the MXE target, so that MinGW-w64 for 32 bit targets is built.
@@ -38,11 +38,6 @@ make libass
 make jpeg
 make pthreads
 
-# Older MXE and MinGW-w64 snapshots don't provide up-to-date OpenGL headers.
-
-wget http://www.opengl.org/registry/api/glext.h
-mv glext.h usr/i686-w64-mingw32/include/GL/
-
 # Build mpv. The target will be used to automatically select the name of the
 # build tools involved (e.g. it will use i686-w64-mingw32-gcc).
 
@@ -52,9 +47,6 @@ export PATH=/opt/mingw/usr/bin/:$PATH
 ./configure --enable-cross-compile --target=i686-w64-mingw32
 make
 
-# This should work. For some reason, the resulting .exe will depend on the DLL
-# /opt/mingw/usr/i686-w64-mingw32/bin/libwinpthread-1.dll because pthreads-w32
-# folks don't like static linking. How to enable static linking is left as
-# exercise to the reader. Passsing --disable-pthreads to mpv's configure will
-# get rid of the dependency, but may disable some features (such as the stream
-# cache).
+# This should work. Note however that MXE’s ffmpeg package might be very old
+# in order to avoid breaking e.g. xine-lib, so you might want to update that
+# or build it manually as well.
