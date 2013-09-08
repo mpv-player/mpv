@@ -3327,6 +3327,14 @@ static void update_avsync(struct MPContext *mpctx)
     }
 }
 
+static void handle_metadata_update(struct MPContext *mpctx)
+{
+    if (mp_time_sec() > mpctx->last_metadata_update + 2) {
+        demux_info_update(mpctx->demuxer);
+        mpctx->last_metadata_update = mp_time_sec();
+    }
+}
+
 static void handle_pause_on_low_cache(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -3344,6 +3352,150 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
             pause_player(mpctx);
             mpctx->paused_for_cache = true;
             opts->pause = prev_paused_user;
+        }
+    }
+}
+
+static void handle_heartbeat_cmd(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    if (opts->heartbeat_cmd) {
+        double now = mp_time_sec();
+        if (now - mpctx->last_heartbeat > opts->heartbeat_interval) {
+            mpctx->last_heartbeat = now;
+            system(opts->heartbeat_cmd);
+        }
+    }
+}
+
+static void handle_cursor_autohide(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    struct vo *vo = mpctx->video_out;
+
+    if (!vo)
+        return;
+
+    bool mouse_cursor_visible = mpctx->mouse_cursor_visible;
+    if (opts->cursor_autohide_delay == -1)
+        mouse_cursor_visible = true;
+
+    unsigned mouse_event_ts = mp_input_get_mouse_event_counter(mpctx->input);
+    if (mpctx->mouse_event_ts != mouse_event_ts) {
+        mpctx->mouse_event_ts = mouse_event_ts;
+        mpctx->mouse_timer =
+            mp_time_sec() + opts->cursor_autohide_delay / 1000.0;
+        mouse_cursor_visible = true;
+    }
+
+    if (mp_time_sec() >= mpctx->mouse_timer)
+        mouse_cursor_visible = false;
+
+    if (opts->cursor_autohide_delay == -1)
+        mouse_cursor_visible = true;
+
+    if (opts->cursor_autohide_delay == -2)
+        mouse_cursor_visible = false;
+
+    if (opts->cursor_autohide_fs && !opts->vo.fullscreen)
+        mouse_cursor_visible = true;
+
+    if (mouse_cursor_visible != mpctx->mouse_cursor_visible)
+        vo_control(vo, VOCTRL_SET_CURSOR_VISIBILITY, &mouse_cursor_visible);
+    mpctx->mouse_cursor_visible = mouse_cursor_visible;
+}
+
+static void handle_seek_coalesce(struct MPContext *mpctx)
+{
+    mp_cmd_t *cmd;
+    while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
+        /* Allow running consecutive seek commands to combine them,
+         * but execute the seek before running other commands.
+         * If the user seeks continuously (keeps arrow key down)
+         * try to finish showing a frame from one location before doing
+         * another seek (which could lead to unchanging display). */
+        if ((mpctx->seek.type && cmd->id != MP_CMD_SEEK) ||
+            (mpctx->restart_playback && cmd->id == MP_CMD_SEEK &&
+             mp_time_sec() - mpctx->start_timestamp < 0.3))
+            break;
+        cmd = mp_input_get_cmd(mpctx->input, 0, 0);
+        run_command(mpctx, cmd);
+        mp_cmd_free(cmd);
+        if (mpctx->stop_play)
+            break;
+    }
+}
+
+static void handle_backstep(struct MPContext *mpctx)
+{
+    if (!mpctx->backstep_active)
+        return;
+
+    double current_pts = mpctx->last_vo_pts;
+    mpctx->backstep_active = false;
+    bool demuxer_ok = mpctx->demuxer && mpctx->demuxer->accurate_seek;
+    if (demuxer_ok && mpctx->sh_video && current_pts != MP_NOPTS_VALUE) {
+        double seek_pts = find_previous_pts(mpctx, current_pts);
+        if (seek_pts != MP_NOPTS_VALUE) {
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, 1);
+        } else {
+            double last = get_last_frame_pts(mpctx);
+            if (last != MP_NOPTS_VALUE && last >= current_pts &&
+                mpctx->backstep_start_seek_ts != mpctx->vo_pts_history_seek_ts)
+            {
+                mp_msg(MSGT_CPLAYER, MSGL_ERR, "Backstep failed.\n");
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, current_pts, 1);
+            } else if (!mpctx->hrseek_active) {
+                mp_msg(MSGT_CPLAYER, MSGL_V, "Start backstep indexing.\n");
+                // Force it to index the video up until current_pts.
+                // The whole point is getting frames _before_ that PTS,
+                // so apply an arbitrary offset. (In theory the offset
+                // has to be large enough to reach the previous frame.)
+                seek(mpctx, (struct seek_params){
+                            .type = MPSEEK_ABSOLUTE,
+                            .amount = current_pts - 1.0,
+                            }, false);
+                // Don't leave hr-seek mode. If all goes right, hr-seek
+                // mode is cancelled as soon as the frame before
+                // current_pts is found during hr-seeking.
+                // Note that current_pts should be part of the index,
+                // otherwise we can't find the previous frame, so set the
+                // seek target an arbitrary amount of time after it.
+                if (mpctx->hrseek_active) {
+                    mpctx->hrseek_pts = current_pts + 10.0;
+                    mpctx->hrseek_framedrop = false;
+                    mpctx->backstep_active = true;
+                }
+            } else {
+                mpctx->backstep_active = true;
+            }
+        }
+    }
+}
+
+static void handle_sstep(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    if (opts->step_sec > 0 && !mpctx->stop_play && !mpctx->paused &&
+        !mpctx->restart_playback)
+    {
+        set_osd_function(mpctx, OSD_FFW);
+        queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, 0);
+    }
+}
+
+static void handle_keep_open(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    if (opts->keep_open && mpctx->stop_play == AT_END_OF_FILE) {
+        mpctx->stop_play = KEEP_PLAYING;
+        pause_player(mpctx);
+        if (mpctx->video_out && !mpctx->video_out->hasframe) {
+            // Force screen refresh to make OSD usable
+            double seek_to = mpctx->last_vo_pts;
+            if (seek_to == MP_NOPTS_VALUE)
+                seek_to = 0; // arbitrary default
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_to, 1);
         }
     }
 }
@@ -3451,41 +3603,9 @@ static void run_playloop(struct MPContext *mpctx)
         // ================================================================
         vo_check_events(vo);
 
-        bool mouse_cursor_visible = mpctx->mouse_cursor_visible;
-        if (opts->cursor_autohide_delay == -1)
-            mouse_cursor_visible = true;
+        handle_cursor_autohide(mpctx);
 
-        unsigned mouse_event_ts = mp_input_get_mouse_event_counter(mpctx->input);
-        if (mpctx->mouse_event_ts != mouse_event_ts) {
-            mpctx->mouse_event_ts = mouse_event_ts;
-            mpctx->mouse_timer =
-                mp_time_sec() + opts->cursor_autohide_delay / 1000.0;
-            mouse_cursor_visible = true;
-        }
-
-        if (mp_time_sec() >= mpctx->mouse_timer)
-            mouse_cursor_visible = false;
-
-        if (opts->cursor_autohide_delay == -1)
-            mouse_cursor_visible = true;
-
-        if (opts->cursor_autohide_delay == -2)
-            mouse_cursor_visible = false;
-
-        if (opts->cursor_autohide_fs && !opts->vo.fullscreen)
-            mouse_cursor_visible = true;
-
-        if (mouse_cursor_visible != mpctx->mouse_cursor_visible)
-            vo_control(vo, VOCTRL_SET_CURSOR_VISIBILITY, &mouse_cursor_visible);
-        mpctx->mouse_cursor_visible = mouse_cursor_visible;
-
-        if (opts->heartbeat_cmd) {
-            double now = mp_time_sec();
-            if (now - mpctx->last_heartbeat > opts->heartbeat_interval) {
-                mpctx->last_heartbeat = now;
-                system(opts->heartbeat_cmd);
-            }
-        }
+        handle_heartbeat_cmd(mpctx);
 
         if (!video_left || (mpctx->paused && !mpctx->restart_playback))
             break;
@@ -3728,95 +3848,17 @@ static void run_playloop(struct MPContext *mpctx)
             mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
     }
 
-    if (mp_time_sec() > mpctx->last_metadata_update + 2) {
-        demux_info_update(mpctx->demuxer);
-        mpctx->last_metadata_update = mp_time_sec();
-    }
-
-    //================= Keyboard events, SEEKing ====================
+    handle_metadata_update(mpctx);
 
     handle_pause_on_low_cache(mpctx);
 
-    mp_cmd_t *cmd;
-    while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
-        /* Allow running consecutive seek commands to combine them,
-         * but execute the seek before running other commands.
-         * If the user seeks continuously (keeps arrow key down)
-         * try to finish showing a frame from one location before doing
-         * another seek (which could lead to unchanging display). */
-        if ((mpctx->seek.type && cmd->id != MP_CMD_SEEK) ||
-            (mpctx->restart_playback && cmd->id == MP_CMD_SEEK &&
-             mp_time_sec() - mpctx->start_timestamp < 0.3))
-            break;
-        cmd = mp_input_get_cmd(mpctx->input, 0, 0);
-        run_command(mpctx, cmd);
-        mp_cmd_free(cmd);
-        if (mpctx->stop_play)
-            break;
-    }
+    handle_seek_coalesce(mpctx);
 
-    if (mpctx->backstep_active) {
-        double current_pts = mpctx->last_vo_pts;
-        mpctx->backstep_active = false;
-        bool demuxer_ok = mpctx->demuxer && mpctx->demuxer->accurate_seek;
-        if (demuxer_ok && mpctx->sh_video && current_pts != MP_NOPTS_VALUE) {
-            double seek_pts = find_previous_pts(mpctx, current_pts);
-            if (seek_pts != MP_NOPTS_VALUE) {
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, 1);
-            } else {
-                double last = get_last_frame_pts(mpctx);
-                if (last != MP_NOPTS_VALUE && last >= current_pts &&
-                    mpctx->backstep_start_seek_ts != mpctx->vo_pts_history_seek_ts)
-                {
-                    mp_msg(MSGT_CPLAYER, MSGL_ERR, "Backstep failed.\n");
-                    queue_seek(mpctx, MPSEEK_ABSOLUTE, current_pts, 1);
-                } else if (!mpctx->hrseek_active) {
-                    mp_msg(MSGT_CPLAYER, MSGL_V, "Start backstep indexing.\n");
-                    // Force it to index the video up until current_pts.
-                    // The whole point is getting frames _before_ that PTS,
-                    // so apply an arbitrary offset. (In theory the offset
-                    // has to be large enough to reach the previous frame.)
-                    seek(mpctx, (struct seek_params){
-                                .type = MPSEEK_ABSOLUTE,
-                                .amount = current_pts - 1.0,
-                                }, false);
-                    // Don't leave hr-seek mode. If all goes right, hr-seek
-                    // mode is cancelled as soon as the frame before
-                    // current_pts is found during hr-seeking.
-                    // Note that current_pts should be part of the index,
-                    // otherwise we can't find the previous frame, so set the
-                    // seek target an arbitrary amount of time after it.
-                    if (mpctx->hrseek_active) {
-                        mpctx->hrseek_pts = current_pts + 10.0;
-                        mpctx->hrseek_framedrop = false;
-                        mpctx->backstep_active = true;
-                    }
-                } else {
-                    mpctx->backstep_active = true;
-                }
-            }
-        }
-    }
+    handle_backstep(mpctx);
 
-    // handle -sstep
-    if (opts->step_sec > 0 && !mpctx->stop_play && !mpctx->paused &&
-        !mpctx->restart_playback)
-    {
-        set_osd_function(mpctx, OSD_FFW);
-        queue_seek(mpctx, MPSEEK_RELATIVE, opts->step_sec, 0);
-    }
+    handle_sstep(mpctx);
 
-    if (opts->keep_open && mpctx->stop_play == AT_END_OF_FILE) {
-        mpctx->stop_play = KEEP_PLAYING;
-        pause_player(mpctx);
-        if (mpctx->video_out && !mpctx->video_out->hasframe) {
-            // Force screen refresh to make OSD usable
-            double seek_to = mpctx->last_vo_pts;
-            if (seek_to == MP_NOPTS_VALUE)
-                seek_to = 0; // arbitrary default
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_to, 1);
-        }
-    }
+    handle_keep_open(mpctx);
 
     execute_queued_seek(mpctx);
 }
