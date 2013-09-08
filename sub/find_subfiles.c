@@ -212,7 +212,7 @@ static void filter_subidx(struct subfn **slist, int *nsub)
                 (*slist)[n].priority = -1;
         }
     }
-    for (int n = *nsub; n >= 0; n--) {
+    for (int n = *nsub - 1; n >= 0; n--) {
         if ((*slist)[n].priority < 0)
             MP_TARRAY_REMOVE_AT(*slist, *nsub, n);
     }
