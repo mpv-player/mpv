@@ -265,7 +265,9 @@ Available video output drivers are:
 
 
         There are some more filters. For a complete list, pass ``help`` as
-        value, e.g.: ``mpv --vo=opengl:lscale=help``
+        value, e.g.::
+
+            mpv --vo=opengl:lscale=help
 
     ``lparam1=<value>``
         Set filter parameters. Ignored if the filter is not tunable. These are
@@ -609,8 +611,7 @@ Available video output drivers are:
     The following options are only useful if writing your own fragment programs.
 
     ``customprog=<filename>``
-        Load a custom fragment program from ``<filename>``. See
-        ``TOOLS/edgedect.fp`` for an example.
+        Load a custom fragment program from ``<filename>``.
     ``customtex=<filename>``
         Load a custom "gamma ramp" texture from ``<filename>``. This can be used
         in combination with ``yuv=4`` or with the ``customprog`` option.

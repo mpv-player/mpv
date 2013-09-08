@@ -313,12 +313,12 @@ Available filters are:
             channels 0 and 1 into output channel 2 (which could be sent to a
             subwoofer for example).
 
-        .. note::
+    .. note::
 
-            If you just want to force remixing to a certain output channel
-            layout, it is easier to use the ``force`` filter. For example,
-            ``mpv '--af=force=channels=5.1' '--channels=5.1'`` would always
-            force remixing audio to 5.1 and output it like this.
+        If you just want to force remixing to a certain output channel layout,
+        it is easier to use the ``force`` filter. For example,
+        ``mpv '--af=force=channels=5.1' '--channels=5.1'`` would always force
+        remixing audio to 5.1 and output it like this.
 
 ``sub[=fc:ch]``
     Adds a subwoofer channel to the audio stream. The audio data used for
