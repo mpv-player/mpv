@@ -179,7 +179,6 @@ void vo_cocoa_uninit(struct vo *vo)
 {
     dispatch_sync(dispatch_get_main_queue(), ^{
         struct vo_cocoa_state *s = vo->cocoa;
-        vo_cocoa_set_cursor_visibility(vo, true);
         enable_power_management(vo);
         [NSApp setPresentationOptions:NSApplicationPresentationDefault];
 
@@ -545,11 +544,9 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_SCREENINFO:
         vo_cocoa_update_screen_info(vo);
         return VO_TRUE;
-    case VOCTRL_SET_CURSOR_VISIBILITY: {
-        bool visible = *(bool *)arg;
-        vo_cocoa_set_cursor_visibility(vo, visible);
+    case VOCTRL_SET_CURSOR_VISIBILITY:
+        vo_cocoa_set_cursor_visibility(vo, *(bool *)arg);
         return VO_TRUE;
-    }
     case VOCTRL_UPDATE_WINDOW_TITLE: {
         cocoa_set_window_title(vo, (const char *) arg);
         return VO_TRUE;
@@ -691,14 +688,6 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
         [self toggleViewFullscreen:opts->fullscreen];
     }
 
-    // Do common work such as setting mouse visibility and actually setting
-    // the new fullscreen state
-    if (opts->fullscreen) {
-        vo_cocoa_set_cursor_visibility(self.videoOutput, false);
-    } else {
-        vo_cocoa_set_cursor_visibility(self.videoOutput, true);
-    }
-
     [s->view recalcDraggableState];
 
     // Change window size if the core attempted to change it while we were in
@@ -816,9 +805,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 
 - (BOOL)canHideCursor
 {
-    struct vo *vo = self.videoOutput;
-    return vo->opts->fullscreen && !self->hasMouseDown &&
-        [self containsMouseLocation];
+    return !self->hasMouseDown && [self containsMouseLocation];
 }
 
 - (void)recalcDraggableState
@@ -842,7 +829,6 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 - (void)mouseExited:(NSEvent *)event
 {
     cocoa_put_key(MP_KEY_MOUSE_LEAVE);
-    vo_cocoa_set_cursor_visibility(self.videoOutput, true);
 }
 
 - (void)signalMouseMovement:(NSEvent *)event
