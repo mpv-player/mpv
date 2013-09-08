@@ -1167,6 +1167,7 @@ static const videocodec_info_t vinfo[] = {
     {MKV_V_VP8,       mmioFOURCC('V', 'P', '8', '0'), 0},
     {MKV_V_VP9,       mmioFOURCC('V', 'P', '9', '0'), 0},
     {MKV_V_DIRAC,     mmioFOURCC('d', 'r', 'a', 'c'), 0},
+    {MKV_V_PRORES,    mmioFOURCC('p', 'r', '0', '0'), 0},
     {NULL, 0, 0}
 };
 
@@ -2173,6 +2174,14 @@ static void mkv_parse_packet(mkv_track_t *track, bstr *buffer)
             buffer->len = size;
         }
 #endif
+    } else if (track->codec_id && strcmp(track->codec_id, MKV_V_PRORES) == 0) {
+        size_t newlen = buffer->len + 8;
+        char *data = talloc_size(NULL, newlen);
+        AV_WB32(data + 0, newlen);
+        AV_WB32(data + 4, MKBETAG('i', 'c', 'p', 'f'));
+        memcpy(data + 8, buffer->start, buffer->len);
+        buffer->start = data;
+        buffer->len = newlen;
     }
 }
 

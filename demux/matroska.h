@@ -79,6 +79,7 @@
 #define MKV_V_MJPEG      "V_MJPEG"
 #define MKV_V_UNCOMPRESSED "V_UNCOMPRESSED"
 #define MKV_V_DIRAC      "V_DIRAC"
+#define MKV_V_PRORES     "V_PRORES"
 
 #define MKV_S_TEXTASCII  "S_TEXT/ASCII"
 #define MKV_S_TEXTUTF8   "S_TEXT/UTF8"

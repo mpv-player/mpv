@@ -312,6 +312,7 @@ static const struct mp_codec_tag mp_video_codec_tags[] = {
     {MKTAG('V', 'Q', 'A', 'V'), "ws_vqa"},
     {MKTAG('C', '9', '3', 'V'), "c93"},
     {MKTAG('V', 'P', '9', '0'), "vp9"},
+    {MKTAG('p', 'r', '0', '0'), "prores"},
     {0},
 };
 
