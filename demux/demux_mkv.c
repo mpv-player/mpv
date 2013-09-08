@@ -372,7 +372,7 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
                mkv_d->duration);
     }
     if (info.n_title) {
-        demux_info_add_bstr(demuxer, bstr0("title"), info.title);
+        demux_info_add_bstr(demuxer, bstr0("TITLE"), info.title);
     }
     if (info.n_segment_uid) {
         int len = info.segment_uid.len;

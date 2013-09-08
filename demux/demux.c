@@ -880,7 +880,7 @@ int demuxer_add_chapter(demuxer_t *demuxer, struct bstr name,
         .metadata = talloc_zero(demuxer, struct mp_tags),
         .demuxer_id = demuxer_id,
     };
-    mp_tags_set_bstr(new.metadata, bstr0("title"), name);
+    mp_tags_set_bstr(new.metadata, bstr0("TITLE"), name);
     MP_TARRAY_APPEND(demuxer, demuxer->chapters, demuxer->num_chapters, new);
     return 0;
 }
