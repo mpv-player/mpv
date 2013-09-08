@@ -365,6 +365,7 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     if (missing_time)
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "There are %.3f seconds missing "
                "from the timeline!\n", missing_time / 1e9);
+    talloc_free(mpctx->sources);
     mpctx->sources = sources;
     mpctx->num_sources = num_sources;
     mpctx->timeline = timeline;

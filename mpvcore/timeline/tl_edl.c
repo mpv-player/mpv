@@ -349,6 +349,7 @@ void build_edl_timeline(struct MPContext *mpctx)
 
     struct demuxer **sources = talloc_array_ptrtype(NULL, sources,
                                                     num_sources + 1);
+    talloc_free(mpctx->sources);
     mpctx->sources = sources;
     sources[0] = mpctx->demuxer;
     mpctx->num_sources = 1;
