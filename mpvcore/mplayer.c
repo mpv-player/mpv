@@ -2402,7 +2402,7 @@ int reinit_video_chain(struct MPContext *mpctx)
                     "the selected video_out (-vo) device.\n");
             goto err_out;
         }
-        if (opts->vo.cursor_autohide_delay != -1) {
+        if (opts->cursor_autohide_delay != -1) {
             vo_control(mpctx->video_out, VOCTRL_SET_CURSOR_VISIBILITY,
                        &(bool){false});
         }
@@ -3457,12 +3457,12 @@ static void run_playloop(struct MPContext *mpctx)
         unsigned mouse_event_ts = mp_input_get_mouse_event_counter(mpctx->input);
         if (mpctx->mouse_event_ts != mouse_event_ts) {
             mpctx->mouse_event_ts = mouse_event_ts;
-            if (opts->vo.cursor_autohide_delay > -1) {
+            if (opts->cursor_autohide_delay > -1) {
                 vo_control(vo, VOCTRL_SET_CURSOR_VISIBILITY, &(bool){true});
-                if (opts->vo.cursor_autohide_delay >= 0) {
+                if (opts->cursor_autohide_delay >= 0) {
                     mpctx->mouse_waiting_hide = 1;
                     mpctx->mouse_timer =
-                        mp_time_sec() + opts->vo.cursor_autohide_delay / 1000.0;
+                        mp_time_sec() + opts->cursor_autohide_delay / 1000.0;
                 }
             }
         }

@@ -34,7 +34,6 @@ typedef struct mp_vo_opts {
 
     int nomouse_input;
     int enable_mouse_movements;
-    int cursor_autohide_delay;
 
     int64_t WinID;
 
@@ -70,6 +69,8 @@ typedef struct MPOpts {
     int gamma_hue;
 
     int stop_screensaver;
+    int cursor_autohide_delay;
+
     int requested_colorspace;
     int requested_input_range;
     int requested_output_range;

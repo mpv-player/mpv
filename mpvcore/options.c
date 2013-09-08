@@ -604,7 +604,7 @@ const m_option_t mp_opts[] = {
                 {"limited", MP_CSP_LEVELS_TV},
                 {"full", MP_CSP_LEVELS_PC})),
 
-    OPT_CHOICE_OR_INT("cursor-autohide", vo.cursor_autohide_delay, 0,
+    OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),
     OPT_FLAG("stop-screensaver", stop_screensaver, 0),
 
@@ -753,7 +753,6 @@ const struct MPOpts mp_default_opts = {
     .volstep = 3,
     .vo = {
         .video_driver_list = NULL,
-        .cursor_autohide_delay = 1000,
         .monitor_pixel_aspect = 1.0,
         .screen_id = -1,
         .fsscreen_id = -1,
@@ -768,6 +767,7 @@ const struct MPOpts mp_default_opts = {
     .wintitle = "mpv - ${media-title}",
     .heartbeat_interval = 30.0,
     .stop_screensaver = 1,
+    .cursor_autohide_delay = 1000,
     .gamma_gamma = 1000,
     .gamma_brightness = 1000,
     .gamma_contrast = 1000,
