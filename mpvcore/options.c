@@ -606,6 +606,7 @@ const m_option_t mp_opts[] = {
 
     OPT_CHOICE_OR_INT("cursor-autohide", cursor_autohide_delay, 0,
                       0, 30000, ({"no", -1}, {"always", -2})),
+    OPT_FLAG("cursor-autohide-fs-only", cursor_autohide_fs, 0),
     OPT_FLAG("stop-screensaver", stop_screensaver, 0),
 
     OPT_INT64("wid", vo.WinID, CONF_GLOBAL),

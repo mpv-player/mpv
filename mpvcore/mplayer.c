@@ -2402,10 +2402,7 @@ int reinit_video_chain(struct MPContext *mpctx)
                     "the selected video_out (-vo) device.\n");
             goto err_out;
         }
-        if (opts->cursor_autohide_delay != -1) {
-            vo_control(mpctx->video_out, VOCTRL_SET_CURSOR_VISIBILITY,
-                       &(bool){false});
-        }
+        mpctx->mouse_cursor_visible = true;
         mpctx->initialized_flags |= INITIALIZED_VO;
     }
 
@@ -3454,25 +3451,33 @@ static void run_playloop(struct MPContext *mpctx)
         // ================================================================
         vo_check_events(vo);
 
+        bool mouse_cursor_visible = mpctx->mouse_cursor_visible;
+        if (opts->cursor_autohide_delay == -1)
+            mouse_cursor_visible = true;
+
         unsigned mouse_event_ts = mp_input_get_mouse_event_counter(mpctx->input);
         if (mpctx->mouse_event_ts != mouse_event_ts) {
             mpctx->mouse_event_ts = mouse_event_ts;
-            if (opts->cursor_autohide_delay > -1) {
-                vo_control(vo, VOCTRL_SET_CURSOR_VISIBILITY, &(bool){true});
-                if (opts->cursor_autohide_delay >= 0) {
-                    mpctx->mouse_waiting_hide = 1;
-                    mpctx->mouse_timer =
-                        mp_time_sec() + opts->cursor_autohide_delay / 1000.0;
-                }
-            }
+            mpctx->mouse_timer =
+                mp_time_sec() + opts->cursor_autohide_delay / 1000.0;
+            mouse_cursor_visible = true;
         }
 
-        if (mpctx->mouse_waiting_hide == 1 &&
-            mp_time_sec() >= mpctx->mouse_timer)
-        {
-            vo_control(vo, VOCTRL_SET_CURSOR_VISIBILITY, &(bool){false});
-            mpctx->mouse_waiting_hide = 2;
-        }
+        if (mp_time_sec() >= mpctx->mouse_timer)
+            mouse_cursor_visible = false;
+
+        if (opts->cursor_autohide_delay == -1)
+            mouse_cursor_visible = true;
+
+        if (opts->cursor_autohide_delay == -2)
+            mouse_cursor_visible = false;
+
+        if (opts->cursor_autohide_fs && !opts->vo.fullscreen)
+            mouse_cursor_visible = true;
+
+        if (mouse_cursor_visible != mpctx->mouse_cursor_visible)
+            vo_control(vo, VOCTRL_SET_CURSOR_VISIBILITY, &mouse_cursor_visible);
+        mpctx->mouse_cursor_visible = mouse_cursor_visible;
 
         if (opts->heartbeat_cmd) {
             double now = mp_time_sec();

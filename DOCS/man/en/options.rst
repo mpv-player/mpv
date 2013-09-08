@@ -566,6 +566,11 @@
     ``no`` will disable cursor autohide. ``always`` means the cursor will stay
     hidden.
 
+``--cursor-autohide-fs-only``
+    If this option is given, the cursor is always visible in windowed mode. In
+    fullscreen mode, the cursor is shown or hidden according to
+    ``--cursor-autohide``.
+
 ``--audio-delay=<sec>``
     Audio delay in seconds (positive or negative float value). Negative values
     delay the audio, and positive values delay the video.

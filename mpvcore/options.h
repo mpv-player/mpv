@@ -69,6 +69,7 @@ typedef struct MPOpts {
 
     int stop_screensaver;
     int cursor_autohide_delay;
+    int cursor_autohide_fs;
 
     int requested_colorspace;
     int requested_input_range;
