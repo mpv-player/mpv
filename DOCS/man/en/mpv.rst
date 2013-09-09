@@ -1,9 +1,3 @@
-..
-    Hint: To generate a nicely formatted XeLaTeX document from this file, use
-    rst2xetex --use-latex-docinfo --use-latex-toc --hyperlink-color=MidnightBlue --latex-preamble="\usepackage[usenames,dvipsnames]{xcolor}\usepackage{fullpage}\setmainfont{Droid Sans}\setsansfont{Linux Biolinum O}\setmonofont[HyphenChar=None]{DejaVu Sans Mono}" mpv.rst
-
-    You might want to put the .. contents:: directive below to generate a TOC.
-
 mpv
 ###
 
@@ -17,6 +11,11 @@ a movie player
 :Version: git
 :Manual section: 1
 :Manual group: multimedia
+
+.. raw:: latex
+
+    \tableofcontents
+    \pagebreak
 
 SYNOPSIS
 ========

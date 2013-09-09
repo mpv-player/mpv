@@ -286,6 +286,7 @@ Installation directories:
   --datadir=DIR          directory for installing machine independent
                          data files (skins, etc) [PREFIX/share/mpv]
   --mandir=DIR           directory for installing man pages [PREFIX/share/man]
+  --docdir=DIR           directory for installing other docs [PREFIX/share/doc]
   --confdir=DIR          directory for installing configuration files
                          [PREFIX/etc/mpv]
   --localedir=DIR        directory for gettext locales [PREFIX/share/locale]
@@ -382,6 +383,7 @@ Miscellaneous options:
   --enable-static        build a statically linked binary
   --with-install=PATH    path to a custom install program
   --disable-manpage      do not build and install manpage [auto]
+  --disable-pdf          do not build and install PDF manual [auto]
   --disable-build-date   do not include binary compile time
 
 Advanced options:
@@ -495,6 +497,7 @@ _priority=no
 def_dos_paths="#define HAVE_DOS_PATHS 0"
 def_priority="#undef CONFIG_PRIORITY"
 _build_man=auto
+_build_pdf=auto
 _build_date=yes
 for ac_option do
   case "$ac_option" in
@@ -509,6 +512,9 @@ for ac_option do
     ;;
   --mandir=*)
     _mandir=$(echo $ac_option | cut -d '=' -f 2)
+    ;;
+  --docdir=*)
+    _docdir=$(echo $ac_option | cut -d '=' -f 2)
     ;;
   --confdir=*)
     _confdir=$(echo $ac_option | cut -d '=' -f 2)
@@ -721,6 +727,8 @@ for ac_option do
 
   --enable-manpage) _build_man=yes ;;
   --disable-manpage) _build_man=no ;;
+  --enable-pdf) _build_pdf=yes ;;
+  --disable-pdf) _build_pdf=no ;;
 
   --enable-build-date) _build_date=yes ;;
   --disable-build-date) _build_date=no ;;
@@ -735,6 +743,7 @@ done
 # Atmos: moved this here, to be correct, if --prefix is specified
 test -z "$_bindir"  && _bindir="$_prefix/bin"
 test -z "$_mandir"  && _mandir="$_prefix/share/man"
+test -z "$_docdir"  && _docdir="$_prefix/share/doc"
 test -z "$_confdir" && _confdir="$_prefix/etc/mpv"
 test -z "$_localedir"  && _localedir="$_prefix/share/locale"
 
@@ -927,6 +936,21 @@ else
     _build_man=no
 fi
 echores "$_build_man"
+
+_rst2latex=rst2latex
+if [ -f "$(which rst2latex.py)" ] ; then
+  _rst2latex=rst2latex.py
+fi
+
+echocheck "whether to build manual PDFs with rst2latex"
+if test "$_build_pdf" = auto ; then
+    _build_pdf=no
+    command_check "$_rst2latex" --version &&
+    command_check pdflatex -version && _build_pdf=yes
+else
+    _build_pdf=no
+fi
+echores "$_build_pdf"
 
 echocheck "whether to print binary build date"
 if test "$_build_date" = yes ; then
@@ -3071,6 +3095,7 @@ CONFIGURATION = $configuration
 prefix  = \$(DESTDIR)$_prefix
 BINDIR  = \$(DESTDIR)$_bindir
 MANDIR  = \$(DESTDIR)$_mandir
+DOCDIR  = \$(DESTDIR)$_docdir
 CONFDIR = \$(DESTDIR)$_confdir
 LOCALEDIR = \$(DESTDIR)$_localedir
 
@@ -3089,6 +3114,8 @@ GETCH = $_getch
 TIMER = $_timer
 RST2MAN = $_rst2man
 BUILD_MAN = $_build_man
+RST2LATEX = $_rst2latex
+BUILD_PDF = $_build_pdf
 
 EXESUF      = $_exesuf
 EXESUFS_ALL = .exe
