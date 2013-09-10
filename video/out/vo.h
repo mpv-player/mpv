@@ -239,6 +239,8 @@ struct vo {
     int config_ok;      // Last config call was successful?
     int config_count;   // Total number of successful config calls
 
+    bool probing;
+
     bool untimed;       // non-interactive, don't do sleep calls in playloop
 
     bool frame_loaded;  // Is there a next frame the VO could flip to?
