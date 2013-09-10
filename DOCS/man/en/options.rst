@@ -69,8 +69,7 @@
     Specify a priority list of audio languages to use. Different container
     formats employ different language codes. DVDs use ISO 639-1 two-letter
     language codes, Matroska, MPEG-TS and NUT use ISO 639-2 three-letter
-    language codes, while OGM uses a free-form identifier. mpv prints the
-    available languages when run in verbose (``-v``) mode. See also ``--aid``.
+    language codes, while OGM uses a free-form identifier. See also ``--aid``.
 
     .. admonition:: Examples
 
@@ -183,7 +182,7 @@
     offset scale factor, not what the video filter chain or the video output
     use.
 
-``--ass-vsfilter-color-compat=<basic|full|force-601|no``
+``--ass-vsfilter-color-compat=<basic|full|force-601|no>``
     Mangle colors like (xy-)vsfilter do (default: basic). Historically, VSFilter
     was not colorspace aware. This was no problem as long as the colorspace
     used for SD video (BT.601) was used. But when everything switched to HD
@@ -249,8 +248,8 @@
     See ``--geometry`` for details how this is handled with multi-monitor
     setups.
 
-    Use ``--autofit-larger`` instead if you do not want the window to get
-    larger.
+    Use ``--autofit-larger`` instead if you just want to limit the maximum size
+    of the window, rather than always forcing a window size.
 
     Use ``--geometry`` if you want to force both window width and height to a
     specific size.
@@ -307,17 +306,6 @@
     out. This delay in reaction time to sudden A/V offsets should be the only
     side-effect of turning this option on, for all sound drivers.
 
-``--bandwidth=<bytes>``
-    Specify the maximum bandwidth for network streaming (for servers that are
-    able to send content in different bitrates). Useful if you want to watch
-    live streamed media behind a slow connection. With Real RTSP streaming, it
-    is also used to set the maximum delivery bandwidth allowing faster cache
-    filling and stream dumping.
-
-    .. note::
-
-        Probably broken/useless.
-
 ``--untimed``
     Do not sleep when outputting video frames. Useful for benchmarks when used
     with ``--no-audio.``
@@ -330,6 +318,10 @@
     (Blu-ray only)
     Specify the Blu-ray disc location. Must be a directory with Blu-ray
     structure.
+
+    .. admonition:: Example
+
+        ``mpv bd:// --bluray-device=/path/to/bd/``
 
 ``--border``, ``--no-border``
     Play movie with window border and decorations. Since this is on by
@@ -357,7 +349,7 @@
 
 ``--cache-default=<kBytes|no>``
     Set the size of the cache in kilobytes (default: 320 KB). Using ``no``
-    will not automatically enable the cache e.h. when playing from a network
+    will not automatically enable the cache e.g. when playing from a network
     stream. Note that using ``--cache`` will always override this option.
 
 ``--cache-pause=<no|percentage>``
@@ -433,11 +425,6 @@
     libavcodec downmixes the audio into the requested number of channels if
     possible.
 
-    .. note::
-
-        This option is honored by codecs (AC-3 only), filters (surround) and
-        audio output drivers (OSS at least).
-
     The ``--channels`` option either takes a channel number or an explicit
     channel layout. Channel numbers refer to default layouts, e.g. 2 channels
     refer to stereo, 6 refers to 5.1.
@@ -445,6 +432,13 @@
     See ``--channels=help`` output for defined default layouts. This also
     lists speaker names, which can be used to express arbitrary channel
     layouts (e.g. ``fl-fr-lfe`` is 2.1).
+
+    .. note::
+
+        Currently, this option is not very useful. The main effect of this
+        option is that automatic stereo downmixing is disabled. It depends
+        mainly on the selected audio output and the associated audio subsystem
+        how playback of files with surround audio will behave.
 
 ``--chapter=<start[-end]>``
     Specify which chapter to start playing at. Optionally specify which
@@ -596,7 +590,7 @@
 
     This is default in order to reduce latency when opening HTTP streams.
 
-``--demuxer-lavf-format=<value>``
+``--demuxer-lavf-format=<name>``
     Force a specific libavformat demuxer.
 
 ``--demuxer-lavf-genpts-mode=<auto|lavf|builtin|no>``
@@ -686,7 +680,7 @@
 
 ``--demuxer-rawvideo-format=<value>``
     Colorspace (fourcc) in hex or string for ``--demuxer=rawvideo``
-    (default: YV12).
+    (default: ``YV12``).
 
 ``--demuxer-rawvideo-mp-format=<value>``
     Colorspace by internal video format for ``--demuxer=rawvideo``. Use
@@ -721,6 +715,10 @@
     Specify the DVD device or .iso filename (default: ``/dev/dvd``). You can
     also specify a directory that contains files previously copied directly
     from a DVD (with e.g. vobcopy).
+
+    .. admonition:: Example
+
+        ``mpv dvd:// --dvd-device=/path/to/dvd/``
 
 ``--dvd-speed=<speed>``
     Try to limit DVD speed (default: 0, no change). DVD base speed is 1385
@@ -764,7 +762,7 @@
 
 ``--no-fixed-vo``, ``--fixed-vo``
     ``--no-fixed-vo`` enforces closing and reopening the video window for
-    multiple files (one (un)initialization for all files).
+    multiple files (one (un)initialization for each file).
 
 ``--flip``
     Flip image upside-down.
@@ -973,11 +971,7 @@
     See also ``--autofit`` and ``--autofit-larger`` for fitting the window into
     a given size without changing aspect ratio.
 
-``--grabpointer``, ``--no-grabpointer``
-    ``--no-grabpointer`` tells the player to not grab the mouse pointer after a
-    video mode change (``--vm``). Useful for multihead setups.
-
-``--heartbeat-cmd``
+``--heartbeat-cmd=<command>``
     Command that is executed every 30 seconds during playback via *system()* -
     i.e. using the shell. The time between the commands can be customized with
     the ``--heartbeat-interval`` option.
@@ -1070,8 +1064,8 @@
 
     :no:        always use software decoding (default)
     :auto:      see below
-    :vdpau:     requires ``--vo=vdpau``
-    :vaapi:     requires ``--vo=vaapi``
+    :vdpau:     requires ``--vo=vdpau`` (Linux only)
+    :vaapi:     requires ``--vo=vaapi`` (Linux with Intel GPUs only)
     :vda:       requires ``--vo=corevideo`` (OSX only)
     :crystalhd: Broadcom Crystal HD
 
@@ -1345,8 +1339,9 @@
 ``--no-sub``
     Do not select any subtitle when the file is loaded.
 
-``--no-sub-visibility``
-    Disable display of subtitles, but still select and decode them.
+``--sub-visibility``, ``--no-sub-visibility``
+    Can be used to disable display of subtitles, but still select and decode
+    them.
 
 ``--no-video``
     Do not play video. With some demuxers this may not work. In those cases
@@ -1372,13 +1367,15 @@
 
 ``--osd-bar-align-x=<-1-1>``
     Position of the OSD bar. -1 is far left, 0 is centered, 1 is far right.
+    Fractional values (like 0.5) are allowed.
 
 ``--osd-bar-align-y=<-1-1>``
     Position of the OSD bar. -1 is top, 0 is centered, 1 is bottom.
+    Fractional values (like 0.5) are allowed.
 
 ``--osd-bar-w=<1-100>``
     Width of the OSD bar, in percentage of the screen width (default: 75).
-    A value of 0.5 means the bar is half the screen wide.
+    A value of 50 means the bar is half the screen wide.
 
 ``--osd-bar-h=<0.1-50>``
     Height of the OSD bar, in percentage of the screen height (default: 3.125).
@@ -1412,8 +1409,8 @@
     For example, ``#FF0000`` is red. This is similar to web colors.
 
     You can specify transparency by specifying an alpha value in the form
-    ``#AARRGGBB``. 0 is fully transparent, while ``FF`` is opaque (opaque is
-    default with the shorter color specification).
+    ``#AARRGGBB``. ``00`` is fully transparent, while ``FF`` is opaque (opaque
+    is default with the shorter color specification).
 
     .. admonition:: Examples
 
@@ -1510,7 +1507,7 @@
 
 ``--playing-msg=<string>``
     Print out a string after starting playback. The string is expanded for
-    properties, e.g. ``--playing-msg=file: ${filename}`` will print the string
+    properties, e.g. ``--playing-msg='file: ${filename}'`` will print the string
     ``file:`` followed by a space and the currently played filename.
 
     See `Property Expansion`_.
@@ -1641,6 +1638,8 @@
     Particularly useful on slow terminals or broken ones which do not properly
     handle carriage return (i.e. ``\r``).
 
+    Also see ``--really-quiet`` and ``--msglevel``.
+
 ``--quvi-format=<best|default|...>``
     Video format/quality that is directly passed to libquvi (default: ``best``).
     This is used when opening links to streaming sites like YouTube. The
@@ -1755,10 +1754,6 @@
         - ``--reset-on-next-file=""``
           Do not reset pause mode.
 
-``--reuse-socket``
-    (udp:// only)
-    Allows a socket to be reused by other processes as soon as it is closed.
-
 ``--saturation=<-100-100>``
     Adjust the saturation of the video signal (default: 0). You can get
     grayscale output with this option. Not supported by all video output
@@ -1784,12 +1779,12 @@
     multiple displays), this option tells mpv which screen to display the
     movie on.
 
-    This option does not always work. In these cases, try to use ``--geometry``
-    to position the window explicitly.
-
     .. admonition:: Note (X11)
 
-        This option does not work properly with all window managers.
+        This option does not work properly with all window managers. In these
+        cases, you can try to use ``--geometry`` to position the window
+        explicitly. It's also possible that the window manager provides native
+        features to control which screens application windows should use.
 
     See also ``--fs-screen``.
 
@@ -1904,8 +1899,7 @@
     Specify a priority list of subtitle languages to use. Different container
     formats employ different language codes. DVDs use ISO 639-1 two letter
     language codes, Matroska uses ISO 639-2 three letter language codes while
-    OGM uses a free-form identifier. mpv prints the available languages
-    when run in verbose (``-v``) mode. See also ``--sid``.
+    OGM uses a free-form identifier. See also ``--sid``.
 
     .. admonition:: Examples
 
@@ -1959,11 +1953,13 @@
     current level. With values below 100 the initial volume (which is 100%)
     will be above the maximum, which e.g. the OSD cannot display correctly.
 
-    Note: the maximum value of ``--volume`` as well as the ``volume`` property
-    is always 100. Likewise, the volume OSD bar always goes from 0 to 100.
-    This means that with ``--softvol-max=200``, ``--volume=100`` means
-    maximum amplification, i.e. amplify by 200%. The default volume will be
-    ``50`` in this case (meaning no amplification).
+    .. admonition:: Note
+
+        The maximum value of ``--volume`` as well as the ``volume`` property
+        is always 100. Likewise, the volume OSD bar always goes from 0 to 100.
+        This means that with ``--softvol-max=200``, ``--volume=100`` sets
+        maximum amplification, i.e. amplify by 200%. The default volume (no
+        change in volume) will be ``50`` in this case.
 
 ``--speed=<0.01-100>``
     Slow down or speed up playback by the factor given as parameter.
@@ -2023,7 +2019,8 @@
 
 ``--stop-screensaver``, ``--no-stop-screensaver``
     Turns off the screensaver (or screen blanker and similar mechanisms) at
-    startup and turns it on again on exit (default: yes).
+    startup and turns it on again on exit (default: yes). The screensaver is
+    always reenabled when the player is paused.
 
     This is not supported on all video outputs or platforms. Sometimes it is
     implemented, but does not work (happens often on GNOME). You might be able
@@ -2068,10 +2065,12 @@
     which means it will try to use UTF-8, otherwise the ``UTF-8-BROKEN``
     pseudo codepage (see below).
 
-    Warning: if you force the charset, even subtitles that are known to be
-    UTF-8 will be recoded, which is perhaps not what you expect. Prefix
-    codepages with ``utf8:`` if you want the codepage to be used only if the
-    input is not valid UTF-8.
+    .. admonition:: Warning
+
+        If you force the charset, even subtitles that are known to be
+        UTF-8 will be recoded, which is perhaps not what you expect. Prefix
+        codepages with ``utf8:`` if you want the codepage to be used only if the
+        input is not valid UTF-8.
 
     .. admonition:: Examples
 
@@ -2081,11 +2080,11 @@
 
     The pseudo codepage ``UTF-8-BROKEN`` is used internally. If this is used
     as codepage, the subtitle will be interpreted as UTF-8, but with "Latin 1"
-    as fallback for bytes which are not valid UTF-8 sequences. This codepage
-    name is never passed to iconv.
+    as fallback for bytes which are not valid UTF-8 sequences. iconv is never
+    involved in this mode.
 
-    If the player was compiled with ENCA support, you can use special syntax
-    to use that::
+    If the player was compiled with ENCA support, you can control it with the
+    following syntax::
 
         ``--subcp=enca:<language>:<fallback codepage>``
 
@@ -2165,10 +2164,10 @@
     to fix the playback speed for frame-based subtitle formats. Works for
     external text subtitles only.
 
-    .. admonition:: Examples
+    .. admonition:: Example
 
-        - ``--sub-speed=25/23.976`` plays frame based subtitles which have been
-          loaded assuming a framerate of 23.976 at 25 FPS.
+        `--sub-speed=25/23.976`` plays frame based subtitles which have been
+        loaded assuming a framerate of 23.976 at 25 FPS.
 
 ``--sws=<n>``
     Specify the software scaler algorithm to be used with ``--vf=scale``. This
@@ -2210,7 +2209,9 @@
     .. warning::
 
         There is a danger of this causing significant CPU usage, depending on
-        the properties used and the window manager.
+        the properties used and the window manager. Changing the window title
+        is often a slow operation, and if the title changes every frame,
+        playback can be ruined.
 
 ``--tv=<option1:option2:...>``
     This option tunes various properties of the TV capture module. For
@@ -2513,7 +2514,7 @@
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
-``--video-unscaled=<value>``
+``--video-unscaled``
     Disable scaling of the video. If the window is larger than the video,
     black bars are added. Otherwise, the video is cropped. The video still
     can be influenced by the other ``--video-...`` options. (If the

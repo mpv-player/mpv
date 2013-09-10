@@ -35,7 +35,7 @@ Newlines always start a new binding. ``#`` starts a comment (outside of quoted
 string arguments). To bind commands to the ``#`` key, ``SHARP`` can be used.
 
 ``<key>`` is either the literal character the key produces (ASCII or Unicode
-character), or a symbol name.
+character), or a symbolic name (as printed by ``--input-keylist``).
 
 ``<section>`` (braced with ``{`` and ``}``) is the input section for this
 command.
@@ -326,6 +326,9 @@ should be replaced by properties), ``stop`` (questionable use), ``get_property``
 Input Command Prefixes
 ----------------------
 
+These prefixes are placed between key name and the actual command. Multiple
+prefixes can be specified. They are separated by whitespace.
+
 ``osd-auto`` (default)
     Use the default behavior for this command.
 ``no-osd``
@@ -390,7 +393,7 @@ Name                            W Comment
 ``speed``                       x see ``--speed``
 ``filename``                      currently played file (path stripped)
 ``path``                          currently played file (full path)
-``media-title``                   filename or libquvi ``QUVIPROP_PAGETITLE``
+``media-title``                   filename, title tag, or libquvi ``QUVIPROP_PAGETITLE``
 ``demuxer``
 ``stream-path``                   filename (full path) of stream layer filename
 ``stream-pos``                  x byte position in source stream
@@ -463,7 +466,7 @@ Name                            W Comment
 ``sub``                         x alias for ``sid``
 ``sub-delay``                   x see ``--sub-delay``
 ``sub-pos``                     x see ``--sub-pos``
-``sub-visibility``              x whether current subtitle is rendered
+``sub-visibility``              x see ``--sub-visibility``
 ``sub-forced-only``             x see ``--sub-forced-only``
 ``sub-scale``                   x subtitle font size multiplicator
 ``ass-use-margins``             x see ``--ass-use-margins``
@@ -477,7 +480,7 @@ Name                            W Comment
 ``playlist-pos``                  current position on playlist
 ``playlist-count``                number of total playlist entries
 ``playlist``                      playlist, current entry marked
-``track-list``                    list of audio/video/sub tracks, cur. entr. marked
+``track-list``                    list of audio/video/sub tracks, current entry marked
 ``chapter-list``                  list of chapters, current entry marked
 ``quvi-format``                 x see ``--quvi-format``
 ``af``                          x see ``--af``

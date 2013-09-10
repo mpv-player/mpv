@@ -203,8 +203,7 @@ corresponding adjustment, or the software equalizer (``--vf=eq``).)
 7 and 8
     Adjust saturation.
 
-(The following keys are valid only when using the corevideo video output
-driver.)
+(The following keys are valid only on OSX.)
 
 command + 0
     Resize movie window to half its original size.
@@ -233,7 +232,7 @@ PREVIOUS and NEXT
     Seek backward/forward 1 minute.
 
 (The following keys are only valid if you compiled with TV or DVB input
-support and will take precedence over the keys defined above.)
+support.)
 
 h and k
     Select previous/next channel.
@@ -251,24 +250,6 @@ button 3 and button 4
     Seek backward/forward 1 minute.
 
 button 5 and button 6
-    Decrease/increase volume.
-
-Joystick Control
-----------------
-
-left and right
-    Seek backward/forward 10 seconds.
-
-up and down
-    Seek forward/backward 1 minute.
-
-button 1
-    Pause.
-
-button 2
-    Toggle OSD states: none / seek / seek + timer / seek + timer + total time.
-
-button 3 and button 4
     Decrease/increase volume.
 
 
@@ -314,6 +295,8 @@ File            Active options
 file1.mkv       ``--a --b --c``
 file2.mkv       ``--a --b --c``
 =============== ===========================
+
+(This is different from MPlayer and mplayer2.)
 
 Also, if any option is changed at runtime (via input commands), they are not
 reset when a new file is played.
@@ -499,7 +482,7 @@ behavior of mpv.
 
 FFmpeg/Libav:
     This library accesses various environment variables. However, they are not
-    centrally documented, and documenting them is not our job. Therefore, the
+    centrally documented, and documenting them is not our job. Therefore, this
     list is incomplete.
 
     Notable environment variables:
@@ -602,12 +585,9 @@ FILES
 EXAMPLES OF MPV USAGE
 =====================
 
-Quickstart Blu-ray playing:
+Blu-ray playback:
     - ``mpv bd:////path/to/disc``
     - ``mpv bd:// --bluray-device=/path/to/disc``
-
-Quickstart DVD playing:
-    ``mpv dvd://1``
 
 Play in Japanese with English subtitles:
     ``mpv dvd://1 --alang=ja --slang=en``
@@ -644,6 +624,6 @@ mpv is a MPlayer fork based on mplayer2, which in turn is a fork of MPlayer.
 MPlayer was initially written by Arpad Gereoffy. See the ``AUTHORS`` file for
 a list of some of the many other contributors.
 
-MPlayer is (C) 2000-2012 The MPlayer Team
+MPlayer is (C) 2000-2013 The MPlayer Team
 
 This man page was written mainly by Gabucino, Jonas Jermann and Diego Biurrun.

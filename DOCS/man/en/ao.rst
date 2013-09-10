@@ -36,7 +36,7 @@ Available audio output drivers are:
         Set the name of the mixer element (default: ``Master``). This is for
         example ``PCM`` or ``Master``.
     ``mixer-index=<number>``
-        Set the index of the mixer channel (default: 0). Consider the output
+        Set the index of the mixer channel (default: 0). Consider the output of
         "``amixer scontrols``", then the index is the number that follows the
         name of the element.
 

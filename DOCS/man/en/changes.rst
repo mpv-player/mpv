@@ -185,8 +185,8 @@ input.conf and Slave Commands
 
     This lists only commands that are not always gracefully handled by the
     internal legacy translation layer. If an input.conf contains any legacy
-    commands, they will be displayed with ``-v`` when it is loaded, and show
-    and the replacement commands.
+    commands, a warning will be printed when starting the player. The warnings
+    also show the replacement commands.
 
     Properties containing ``_`` to separate words use ``-`` instead.
 
@@ -225,7 +225,7 @@ input.conf and Slave Commands
     +--------------------------------+----------------------------------------+
     | ``show_chapters``              | ``show_text ${chapter-list}``          |
     +--------------------------------+----------------------------------------+
-    | ``af_switch``, ``af_add``, ... | ``af [set|add|...]``                   |
+    | ``af_switch``, ``af_add``, ... | ``af set|add|...``                     |
     +--------------------------------+----------------------------------------+
 
 Other
