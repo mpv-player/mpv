@@ -496,17 +496,22 @@ static int mp_property_edition(m_option_t *prop, int action, void *arg,
 }
 
 static struct mp_resolve_src *find_source(struct mp_resolve_result *res,
-                                          char *url)
+                                          char *encid, char *url)
 {
     if (res->num_srcs == 0)
         return NULL;
 
     int src = 0;
     for (int n = 0; n < res->num_srcs; n++) {
-        if (strcmp(res->srcs[n]->url, res->url) == 0) {
+        char *s_url = res->srcs[n]->url;
+        char *s_encid = res->srcs[n]->encid;
+        if (url && s_url && strcmp(url, s_url) == 0) {
             src = n;
             break;
         }
+        // Prefer source URL if possible; so continue in case encid isn't unique
+        if (encid && s_encid && strcmp(encid, s_encid) == 0)
+            src = n;
     }
     return res->srcs[src];
 }
@@ -514,11 +519,12 @@ static struct mp_resolve_src *find_source(struct mp_resolve_result *res,
 static int mp_property_quvi_format(m_option_t *prop, int action, void *arg,
                                    MPContext *mpctx)
 {
+    struct MPOpts *opts = mpctx->opts;
     struct mp_resolve_result *res = mpctx->resolve_result;
     if (!res || !res->num_srcs)
         return M_PROPERTY_UNAVAILABLE;
 
-    struct mp_resolve_src *cur = find_source(res, res->url);
+    struct mp_resolve_src *cur = find_source(res, opts->quvi_format, res->url);
     if (!cur)
         return M_PROPERTY_UNAVAILABLE;
 

@@ -38,7 +38,7 @@ struct mp_resolve_result {
 };
 
 struct mp_resolve_src {
-    char *url;
+    char *url;       // can be NULL; otherwise it's the exact video URL
     char *encid;     // indicates quality level, contents are libquvi specific
 };
 
