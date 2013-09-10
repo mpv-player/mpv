@@ -107,6 +107,11 @@ typedef struct MPGLContext {
     // (Might be different from the actual version in gl->version.)
     int requested_gl_version;
 
+    // During initialization: if true, we are trying to find out whether this
+    // backend works at all, and error messages on initialization failure
+    // should be suppressed.
+    bool probing;
+
     void (*swapGlBuffers)(struct MPGLContext *);
     int (*check_events)(struct vo *vo);
     int (*vo_init)(struct vo *vo);
