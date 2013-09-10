@@ -559,10 +559,10 @@ static int mp_property_titles(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
 {
     struct demuxer *demuxer = mpctx->master_demuxer;
-    if (!demuxer)
+    unsigned int num_titles;
+    if (!demuxer || stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_TITLES,
+                                   &num_titles) < 1)
         return M_PROPERTY_UNAVAILABLE;
-    int num_titles = 0;
-    stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_TITLES, &num_titles);
     return m_property_int_ro(prop, action, arg, num_titles);
 }
 
