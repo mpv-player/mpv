@@ -901,11 +901,13 @@ static MPGLContext *init_backend(struct vo *vo, MPGLSetBackendFn set_backend,
         .vo = vo,
         .probing = probing,
     };
+    vo->probing = probing;
     set_backend(ctx);
     if (!ctx->vo_init(vo)) {
         talloc_free(ctx);
         ctx = NULL;
     }
+    vo->probing = false;
     return ctx;
 }
 
