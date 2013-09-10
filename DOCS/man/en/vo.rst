@@ -22,12 +22,9 @@ in the list. Suboptions are optional and can mostly be omitted.
 Available video output drivers are:
 
 ``xv`` (X11 only)
-    Uses the XVideo extension to enable hardware-accelerated playback. This is
+    Uses the XVideo extension to enable hardware-accelerated display. This is
     the most compatible VO on X, but may be low-quality, and has issues with
     OSD and subtitle display.
-    For information about what colorkey is used and how it is drawn, run
-    mpv with the ``-v`` option and look out for the lines tagged with ``[xv
-    common]`` at the beginning.
 
     ``adaptor=<number>``
         Select a specific XVideo adaptor (check xvinfo results).
