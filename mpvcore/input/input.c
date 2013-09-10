@@ -41,6 +41,7 @@
 #include "keycodes.h"
 #include "osdep/timer.h"
 #include "mpvcore/mp_msg.h"
+#include "mpvcore/mpv_global.h"
 #include "mpvcore/m_config.h"
 #include "mpvcore/m_option.h"
 #include "mpvcore/path.h"
@@ -519,6 +520,7 @@ struct input_ctx {
 #if HAVE_PTHREADS
     pthread_mutex_t mutex;
 #endif
+    struct mp_log *log;
 
     bool using_ar;
     bool using_cocoa_media_keys;
@@ -748,8 +750,7 @@ int mp_input_add_cmd_fd(struct input_ctx *ictx, int unix_fd, int select,
                         int close_func(int fd))
 {
     if (select && unix_fd < 0) {
-        mp_msg(MSGT_INPUT, MSGL_ERR,
-               "Invalid fd %d in mp_input_add_cmd_fd", unix_fd);
+        MP_ERR(ictx, "Invalid fd %d in mp_input_add_cmd_fd", unix_fd);
         return 0;
     }
 
@@ -770,8 +771,7 @@ int mp_input_add_key_fd(struct input_ctx *ictx, int unix_fd, int select,
                         int close_func(int fd), void *ctx)
 {
     if (select && unix_fd < 0) {
-        mp_msg(MSGT_INPUT, MSGL_ERR,
-               "Invalid fd %d in mp_input_add_key_fd", unix_fd);
+        MP_ERR(ictx, "Invalid fd %d in mp_input_add_key_fd", unix_fd);
         return 0;
     }
     assert(read_func);
@@ -1232,7 +1232,7 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
     if (!count)
         msg = talloc_asprintf_append(msg, "(nothing)");
 
-    mp_msg(MSGT_INPUT, MSGL_V, "[input] %s\n", msg);
+    MP_VERBOSE(ictx, "%s\n", msg);
 
     mp_cmd_t *res = mp_input_parse_cmd(bstr0("show_text \"\""), "");
     res->args[0].v.s = talloc_steal(res, msg);
@@ -1381,9 +1381,9 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
     mp_cmd_t *ret = mp_input_parse_cmd(bstr0(cmd->cmd), cmd->location);
     if (ret) {
         ret->input_section = cmd->owner->section;
-        if (mp_msg_test(MSGT_INPUT, MSGL_DBG2)) {
+        if (mp_msg_test_log(ictx->log, MSGL_DBG2)) {
             char *keyname = get_key_combo_name(keys, n);
-            mp_msg(MSGT_INPUT, MSGL_DBG2, "key '%s' -> '%s' in '%s'\n",
+            MP_DBG(ictx, "key '%s' -> '%s' in '%s'\n",
                    keyname, cmd->cmd, ret->input_section);
             talloc_free(keyname);
         }
@@ -1407,7 +1407,7 @@ static void update_mouse_section(struct input_ctx *ictx)
     ictx->mouse_section = new_section;
 
     if (strcmp(old, ictx->mouse_section) != 0) {
-        mp_msg(MSGT_INPUT, MSGL_DBG2, "input: switch section %s -> %s\n",
+        MP_DBG(ictx, "input: switch section %s -> %s\n",
                old, ictx->mouse_section);
         struct mp_cmd *cmd =
             get_cmd_from_keys(ictx, old, 1, (int[]){MP_KEY_MOUSE_LEAVE});
@@ -1481,10 +1481,10 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
     if (unmod >= 32 && unmod < MP_KEY_BASE)
         code &= ~MP_KEY_MODIFIER_SHIFT;
 
-    if (mp_msg_test(MSGT_INPUT, MSGL_DBG2)) {
+    if (mp_msg_test_log(ictx->log, MSGL_DBG2)) {
         int noflags = code & ~(MP_KEY_STATE_DOWN | MP_KEY_STATE_UP);
         char *key = get_key_name(noflags, NULL);
-        mp_msg(MSGT_INPUT, MSGL_DBG2, "input: key code=%#x '%s'%s%s\n",
+        MP_DBG(ictx, "key code=%#x '%s'%s%s\n",
                code, key, (code & MP_KEY_STATE_DOWN) ? " down" : "",
                (code & MP_KEY_STATE_UP) ? " up" : "");
         talloc_free(key);
@@ -1577,7 +1577,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
 static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
 {
     if (code == MP_INPUT_RELEASE_ALL) {
-        mp_msg(MSGT_INPUT, MSGL_DBG2, "input: release all\n");
+        MP_DBG(ictx, "release all\n");
         ictx->num_key_down = 0;
         release_down_cmd(ictx);
         update_mouse_section(ictx);
@@ -1630,7 +1630,7 @@ void mp_input_put_axis(struct input_ctx *ictx, int direction, double value)
 void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
 {
     input_lock(ictx);
-    mp_msg(MSGT_INPUT, MSGL_DBG2, "input: mouse move %d/%d\n", x, y);
+    MP_DBG(ictx, "mouse move %d/%d\n", x, y);
 
     ictx->mouse_event_counter++;
     ictx->mouse_vo_x = x;
@@ -2093,22 +2093,21 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
 static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
 {
     if (!mp_path_exists(file)) {
-        mp_msg(MSGT_INPUT, warn ? MSGL_ERR : MSGL_V,
+        MP_MSG(ictx, warn ? MSGL_ERR : MSGL_V,
                "Input config file %s not found.\n", file);
         return 0;
     }
     stream_t *s = stream_open(file, NULL);
     if (!s) {
-        mp_msg(MSGT_INPUT, MSGL_ERR, "Can't open input config file %s.\n", file);
+        MP_ERR(ictx, "Can't open input config file %s.\n", file);
         return 0;
     }
     bstr res = stream_read_complete(s, NULL, 1000000);
     free_stream(s);
-    mp_msg(MSGT_INPUT, MSGL_V, "Parsing input config file %s\n", file);
+    MP_VERBOSE(ictx, "Parsing input config file %s\n", file);
     int n_binds = parse_config(ictx, false, res, file, NULL);
     talloc_free(res.start);
-    mp_msg(MSGT_INPUT, MSGL_V, "Input config file %s parsed: %d binds\n",
-           file, n_binds);
+    MP_VERBOSE(ictx, "Input config file %s parsed: %d binds\n", file, n_binds);
     return 1;
 }
 
@@ -2227,12 +2226,13 @@ void mp_input_define_section(struct input_ctx *ictx, char *name, char *location,
     input_unlock(ictx);
 }
 
-struct input_ctx *mp_input_init(struct MPOpts *opts)
+struct input_ctx *mp_input_init(struct mpv_global *global)
 {
-    struct input_conf *input_conf = &opts->input;
+    struct input_conf *input_conf = &global->opts->input;
 
     struct input_ctx *ictx = talloc_ptrtype(NULL, ictx);
     *ictx = (struct input_ctx){
+        .log = mp_log_new(ictx, global->log, "input"),
         .key_fifo_size = input_conf->key_fifo_size,
         .doubleclick_time = input_conf->doubleclick_time,
         .ar_state = -1,
@@ -2276,8 +2276,7 @@ struct input_ctx *mp_input_init(struct MPOpts *opts)
         ret = fcntl(ictx->wakeup_pipe[i], F_SETFL, ret | O_NONBLOCK);
     }
     if (ret < 0)
-        mp_msg(MSGT_INPUT, MSGL_ERR,
-               "Failed to initialize wakeup pipe: %s\n", strerror(errno));
+        MP_ERR(ictx, "Failed to initialize wakeup pipe: %s\n", strerror(errno));
     else
         mp_input_add_key_fd(ictx, ictx->wakeup_pipe[0], true, read_wakeup,
                             NULL, NULL);
@@ -2286,15 +2285,15 @@ struct input_ctx *mp_input_init(struct MPOpts *opts)
     bool config_ok = false;
     if (input_conf->config_file)
         config_ok = parse_config_file(ictx, input_conf->config_file, true);
-    if (!config_ok && opts->load_config) {
+    if (!config_ok && global->opts->load_config) {
         // Try global conf dir
         char *file = mp_find_config_file("input.conf");
         config_ok = file && parse_config_file(ictx, file, false);
         talloc_free(file);
     }
     if (!config_ok) {
-        mp_msg(MSGT_INPUT, MSGL_V, "Falling back on default (hardcoded) "
-               "input config\n");
+        MP_VERBOSE(ictx, "Falling back on default (hardcoded) "
+                   "input config\n");
     }
 
 #ifdef CONFIG_JOYSTICK

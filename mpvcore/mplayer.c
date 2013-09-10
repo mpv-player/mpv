@@ -3978,7 +3978,7 @@ static int read_keys(void *ctx, int fd)
 
 static void init_input(struct MPContext *mpctx)
 {
-    mpctx->input = mp_input_init(mpctx->opts);
+    mpctx->input = mp_input_init(mpctx->global);
     if (mpctx->opts->slave_mode)
         mp_input_add_cmd_fd(mpctx->input, 0, USE_FD0_CMD_SELECT, MP_INPUT_SLAVE_CMD_FUNC, NULL);
     else if (mpctx->opts->consolecontrols)

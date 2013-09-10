@@ -266,8 +266,8 @@ bool mp_input_test_mouse_active(struct input_ctx *ictx, int x, int y);
 bool mp_input_test_dragging(struct input_ctx *ictx, int x, int y);
 
 // Initialize the input system
-struct MPOpts;
-struct input_ctx *mp_input_init(struct MPOpts *opts);
+struct mpv_global;
+struct input_ctx *mp_input_init(struct mpv_global *global);
 
 void mp_input_uninit(struct input_ctx *ictx);
 
