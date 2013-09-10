@@ -4164,6 +4164,36 @@ static struct mp_resolve_result *resolve_url(const char *filename,
 #endif
 }
 
+static void print_resolve_contents(struct mp_log *log,
+                                   struct mp_resolve_result *res)
+{
+    mp_msg_log(log, MSGL_V, "Resolve:\n");
+    mp_msg_log(log, MSGL_V, "  title: %s\n", res->title);
+    mp_msg_log(log, MSGL_V, "  url: %s\n", res->url);
+    for (int n = 0; n < res->num_srcs; n++) {
+        mp_msg_log(log, MSGL_V, "  source %d:\n", n);
+        if (res->srcs[n]->url)
+            mp_msg_log(log, MSGL_V, "    url: %s\n", res->srcs[n]->url);
+        if (res->srcs[n]->encid)
+            mp_msg_log(log, MSGL_V, "    encid: %s\n", res->srcs[n]->encid);
+    }
+    for (int n = 0; n < res->num_subs; n++) {
+        mp_msg_log(log, MSGL_V, "  subtitle %d:\n", n);
+        if (res->subs[n]->url)
+            mp_msg_log(log, MSGL_V, "    url: %s\n", res->subs[n]->url);
+        if (res->subs[n]->lang)
+            mp_msg_log(log, MSGL_V, "    lang: %s\n", res->subs[n]->lang);
+        if (res->subs[n]->data) {
+            mp_msg_log(log, MSGL_V, "    data: %d bytes\n",
+                       strlen(res->subs[n]->data));
+        }
+    }
+    if (res->playlist) {
+        mp_msg_log(log, MSGL_V, "  playlist with %d entries\n",
+                   playlist_entry_count(res->playlist));
+    }
+}
+
 // Waiting for the slave master to send us a new file to play.
 static void idle_loop(struct MPContext *mpctx)
 {
@@ -4305,6 +4335,7 @@ static void play_current_file(struct MPContext *mpctx)
     char *stream_filename = mpctx->filename;
     mpctx->resolve_result = resolve_url(stream_filename, opts);
     if (mpctx->resolve_result) {
+        print_resolve_contents(mpctx->log, mpctx->resolve_result);
         if (mpctx->resolve_result->playlist) {
             transfer_playlist(mpctx, mpctx->resolve_result->playlist);
             goto terminate_playback;
