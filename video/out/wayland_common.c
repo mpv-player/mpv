@@ -569,8 +569,11 @@ static bool create_display (struct vo_wayland_state *wl)
 {
     wl->display.display = wl_display_connect(NULL);
 
-    if (!wl->display.display)
+    if (!wl->display.display) {
+        MP_ERR(wl->vo, "failed to connect to a wayland server: "
+                       "check if a wayland compositor is running\n");
         return false;
+    }
 
     wl_list_init(&wl->display.output_list);
     wl->display.registry = wl_display_get_registry(wl->display.display);
@@ -644,7 +647,7 @@ static bool create_input (struct vo_wayland_state *wl)
     wl->input.xkb.context = xkb_context_new(0);
 
     if (!wl->input.xkb.context) {
-        MP_ERR(wl, "failed to initialize input\n");
+        MP_ERR(wl->vo, "failed to initialize input: check xkbcommon\n");
         return false;
     }
 
@@ -680,7 +683,6 @@ int vo_wayland_init (struct vo *vo)
         || !create_window(wl)
         || !create_cursor(wl))
     {
-        MP_ERR(wl, "failed to initialize backend\n");
         return false;
     }
 
