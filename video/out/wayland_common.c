@@ -593,8 +593,9 @@ static bool create_display (struct vo_wayland_state *wl)
     wl->display.display = wl_display_connect(NULL);
 
     if (!wl->display.display) {
-        MP_ERR(wl->vo, "failed to connect to a wayland server: "
-                       "check if a wayland compositor is running\n");
+        if (!wl->vo->probing)
+            MP_ERR(wl->vo, "failed to connect to a wayland server: "
+                           "check if a wayland compositor is running\n");
         return false;
     }
 
