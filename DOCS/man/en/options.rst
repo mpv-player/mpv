@@ -1660,9 +1660,10 @@
         The following explanations are relevant:
         `<http://quvi.sourceforge.net/doc/0.9/glossary_termino.html#m_stream_id>`_
 
-        With 0.9.x, the ``quvi-format`` property can be used at runtime to cycle
-        through the list of formats. Unfortunately, this resets the playback
-        position and is slow too.
+    The ``quvi-format`` property can be used at runtime to cycle through the
+    list of formats. Unfortunately, this is slow. On libquvi 0.4.x, this
+    functionality is limited to switching between ``best`` and ``default`` if
+    the ``cycle`` input command is used.
 
 ``--radio=<option1:option2:...>``
     These options set various parameters of the radio capture module. For

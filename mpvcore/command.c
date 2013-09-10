@@ -534,6 +534,13 @@ static int mp_property_quvi_format(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     case M_PROPERTY_SET: {
         mpctx->stop_play = PT_RESTART;
+        // Make it restart at the same position. This will have disastrous
+        // consequences if the stream is not arbitrarily seekable, but whatever.
+        m_config_backup_opt(mpctx->mconfig, "start");
+        opts->play_start = (struct m_rel_time) {
+            .type = REL_TIME_ABSOLUTE,
+            .pos = get_current_time(mpctx),
+        };
         break;
     }
     case M_PROPERTY_SWITCH: {

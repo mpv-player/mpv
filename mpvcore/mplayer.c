@@ -4549,7 +4549,8 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     uninit_player(mpctx, uninitialize_parts);
 
     // xxx handle this as INITIALIZED_CONFIG?
-    m_config_restore_backups(mpctx->mconfig);
+    if (mpctx->stop_play != PT_RESTART)
+        m_config_restore_backups(mpctx->mconfig);
 
     mpctx->filename = NULL;
     talloc_free(mpctx->resolve_result);
