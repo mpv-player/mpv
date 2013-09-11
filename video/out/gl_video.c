@@ -343,7 +343,7 @@ static void default_tex_params(struct GL *gl, GLenum target, GLint filter)
 static void debug_check_gl(struct gl_video *p, const char *msg)
 {
     if (p->gl_debug)
-        glCheckError(p->gl, msg);
+        glCheckError(p->gl, p->log, msg);
 }
 
 void gl_video_set_debug(struct gl_video *p, bool enable)
@@ -1685,11 +1685,11 @@ static bool test_fbo(struct gl_video *p, GLenum format)
             MP_VERBOSE(p, "   %s: %a\n", val_names[i], val - pixel);
         }
         gl->BindFramebuffer(GL_FRAMEBUFFER, 0);
-        glCheckError(gl, "after FBO read");
+        glCheckError(gl, p->log, "after FBO read");
         success = true;
     }
     fbotex_uninit(p, &fbo);
-    glCheckError(gl, "FBO test");
+    glCheckError(gl, p->log, "FBO test");
     gl->ClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     return success;
 }

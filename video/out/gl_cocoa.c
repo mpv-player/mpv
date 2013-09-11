@@ -30,7 +30,7 @@ static bool config_window_cocoa(struct MPGLContext *ctx, uint32_t d_width,
     if (rv != 0)
         return false;
 
-    mpgl_load_functions(ctx->gl, (void *)vo_cocoa_glgetaddr, NULL);
+    mpgl_load_functions(ctx->gl, (void *)vo_cocoa_glgetaddr, NULL, ctx->vo->log);
 
     ctx->depth_r = vo_cocoa_cgl_color_size(ctx->vo);
     ctx->depth_g = vo_cocoa_cgl_color_size(ctx->vo);

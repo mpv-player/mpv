@@ -64,7 +64,7 @@ void glClearTex(GL *gl, GLenum target, GLenum format, GLenum type,
                 int x, int y, int w, int h, uint8_t val, void **scratch);
 void glDownloadTex(GL *gl, GLenum target, GLenum format, GLenum type,
                    void *dataptr, int stride);
-void glCheckError(GL *gl, const char *info);
+void glCheckError(GL *gl, struct mp_log *log, const char *info);
 mp_image_t *glGetWindowScreenshot(GL *gl);
 
 #define GL_3D_RED_CYAN        1
@@ -167,7 +167,7 @@ void mpgl_set_backend_wayland(MPGLContext *ctx);
 void *mp_getdladdr(const char *s);
 
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
-                         const char *ext2);
+                         const char *ext2, struct mp_log *log);
 
 // print a multi line string with line numbers (e.g. for shader sources)
 // log, lev: module and log level, as in mp_msg()

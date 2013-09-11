@@ -63,14 +63,14 @@ static const char *gl_error_to_string(GLenum error)
     }
 }
 
-void glCheckError(GL *gl, const char *info)
+void glCheckError(GL *gl, struct mp_log *log, const char *info)
 {
     for (;;) {
         GLenum error = gl->GetError();
         if (error == GL_NO_ERROR)
             break;
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] %s: OpenGL error %s.\n", info,
-               gl_error_to_string(error));
+        mp_msg_log(log, MSGL_ERR, "%s: OpenGL error %s.\n", info,
+                   gl_error_to_string(error));
     }
 }
 
@@ -121,13 +121,13 @@ static const struct feature features[] = {
     {0},
 };
 
-static void list_features(int set, int msgl, bool invert)
+static void list_features(int set, struct mp_log *log, int msgl, bool invert)
 {
     for (const struct feature *f = &features[0]; f->id; f++) {
         if (invert == !(f->id & set))
-            mp_msg(MSGT_VO, msgl, " [%s]", f->name);
+            mp_msg_log(log, msgl, " [%s]", f->name);
     }
-    mp_msg(MSGT_VO, msgl, "\n");
+    mp_msg_log(log, msgl, "\n");
 }
 
 // This guesses if the current GL context is a suspected software renderer.
@@ -457,10 +457,11 @@ struct gl_functions gl_functions[] = {
 // GL context. Called by the backend.
 // getProcAddress: function to resolve function names, may be NULL
 // ext2: an extra extension string
+// log: used to output messages
 // Note: if you create a CONTEXT_FORWARD_COMPATIBLE_BIT_ARB with OpenGL 3.0,
 //       you must append "GL_ARB_compatibility" to ext2.
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
-                         const char *ext2)
+                         const char *ext2, struct mp_log *log)
 {
     talloc_free_children(gl);
     *gl = (GL) {
@@ -478,12 +479,12 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
     const char *version = gl->GetString(GL_VERSION);
     sscanf(version, "%d.%d", &major, &minor);
     gl->version = MPGL_VER(major, minor);
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Detected OpenGL %d.%d.\n", major, minor);
+    mp_msg_log(log, MSGL_V, "Detected OpenGL %d.%d.\n", major, minor);
 
-    mp_msg(MSGT_VO, MSGL_V, "GL_VENDOR='%s'\n",   gl->GetString(GL_VENDOR));
-    mp_msg(MSGT_VO, MSGL_V, "GL_RENDERER='%s'\n", gl->GetString(GL_RENDERER));
-    mp_msg(MSGT_VO, MSGL_V, "GL_VERSION='%s'\n",  gl->GetString(GL_VERSION));
-    mp_msg(MSGT_VO, MSGL_V, "GL_SHADING_LANGUAGE_VERSION='%s'\n",
+    mp_msg_log(log, MSGL_V, "GL_VENDOR='%s'\n",   gl->GetString(GL_VENDOR));
+    mp_msg_log(log, MSGL_V, "GL_RENDERER='%s'\n", gl->GetString(GL_RENDERER));
+    mp_msg_log(log, MSGL_V, "GL_VERSION='%s'\n",  gl->GetString(GL_VERSION));
+    mp_msg_log(log, MSGL_V, "GL_SHADING_LANGUAGE_VERSION='%s'\n",
                             gl->GetString(GL_SHADING_LANGUAGE_VERSION));
 
     // Note: This code doesn't handle CONTEXT_FORWARD_COMPATIBLE_BIT_ARB
@@ -520,9 +521,9 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
     }
 
     if (has_legacy)
-        mp_msg(MSGT_VO, MSGL_V, "[gl] OpenGL legacy compat. found.\n");
-    mp_msg(MSGT_VO, MSGL_DBG2, "[gl] Combined OpenGL extensions string:\n%s\n",
-           gl->extensions);
+        mp_msg_log(log, MSGL_V, "OpenGL legacy compat. found.\n");
+    mp_msg_log(log, MSGL_DBG2, "Combined OpenGL extensions string:\n%s\n",
+               gl->extensions);
 
     for (int n = 0; n < sizeof(gl_functions) / sizeof(gl_functions[0]); n++) {
         struct gl_functions *section = &gl_functions[n];
@@ -566,11 +567,11 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
             if (!ptr) {
                 all_loaded = false;
                 if (!section->partial_ok) {
-                    mp_msg(MSGT_VO, MSGL_V, "[gl] Required function '%s' not "
-                           "found for %s/%d.%d.\n", fn->funcnames[0],
-                           section->extension ? section->extension : "native",
-                           MPGL_VER_GET_MAJOR(section->ver_core),
-                           MPGL_VER_GET_MINOR(section->ver_core));
+                    mp_msg_log(log, MSGL_V, "Required function '%s' not "
+                               "found for %s/%d.%d.\n", fn->funcnames[0],
+                               section->extension ? section->extension : "native",
+                               MPGL_VER_GET_MAJOR(section->ver_core),
+                               MPGL_VER_GET_MINOR(section->ver_core));
                     break;
                 }
             }
@@ -604,8 +605,8 @@ void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),
     if (!is_software_gl(gl))
         gl->mpgl_caps |= MPGL_CAP_NO_SW;
 
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Detected OpenGL features:");
-    list_features(gl->mpgl_caps, MSGL_V, false);
+    mp_msg_log(log, MSGL_V, "Detected OpenGL features:");
+    list_features(gl->mpgl_caps, log, MSGL_V, false);
 }
 
 /**
@@ -936,15 +937,13 @@ bool mpgl_config_window(struct MPGLContext *ctx, int gl_caps, uint32_t d_width,
         if (!missing)
             return true;
 
-        mp_msg(MSGT_VO, MSGL_WARN, "[gl] Missing OpenGL features:");
-        list_features(missing, MSGL_WARN, false);
-        if (missing & MPGL_CAP_NO_SW) {
-            mp_msg(MSGT_VO, MSGL_WARN, "[gl] Rejecting suspected software "
-                    "OpenGL renderer.\n");
-        }
+        MP_WARN(ctx->vo, "Missing OpenGL features:");
+        list_features(missing, ctx->vo->log, MSGL_WARN, false);
+        if (missing & MPGL_CAP_NO_SW)
+            MP_WARN(ctx->vo, "Rejecting suspected software OpenGL renderer.\n");
     }
 
-    mp_msg(MSGT_VO, MSGL_ERR, "[gl] OpenGL context creation failed!\n");
+    MP_ERR(ctx->vo, "OpenGL context creation failed!\n");
     return false;
 }
 

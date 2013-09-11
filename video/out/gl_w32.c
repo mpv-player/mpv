@@ -67,7 +67,7 @@ static bool create_context_w32_old(struct MPGLContext *ctx)
 
     *context = new_context;
 
-    mpgl_load_functions(ctx->gl, w32gpa, NULL);
+    mpgl_load_functions(ctx->gl, w32gpa, NULL, ctx->vo->log);
     res = true;
 
 out:
@@ -149,7 +149,7 @@ static bool create_context_w32_gl3(struct MPGLContext *ctx)
     }
 
     /* update function pointers */
-    mpgl_load_functions(ctx->gl, w32gpa, NULL);
+    mpgl_load_functions(ctx->gl, w32gpa, NULL, ctx->vo->log);
 
     int pfmt = GetPixelFormat(windc);
     PIXELFORMATDESCRIPTOR pfd;

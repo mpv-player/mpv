@@ -139,9 +139,10 @@ static bool egl_create_context(struct vo_wayland_state *wl,
 
     eglstr = eglQueryString(egl_ctx->egl.dpy, EGL_EXTENSIONS);
 
-    mpgl_load_functions(gl, (void*(*)(const GLubyte*))eglGetProcAddress, eglstr);
+    mpgl_load_functions(gl, (void*(*)(const GLubyte*))eglGetProcAddress, eglstr,
+                        wl->vo->log);
     if (!gl->BindProgram)
-        mpgl_load_functions(gl, NULL, eglstr);
+        mpgl_load_functions(gl, NULL, eglstr, wl->vo->log);
 
     return true;
 }
