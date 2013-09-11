@@ -45,13 +45,14 @@ static const struct osd_fmt_entry osd_to_gl_legacy_formats[SUBBITMAP_COUNT] = {
     [SUBBITMAP_RGBA] =   {GL_RGBA,  GL_BGRA,  GL_UNSIGNED_BYTE},
 };
 
-struct mpgl_osd *mpgl_osd_init(GL *gl, bool legacy)
+struct mpgl_osd *mpgl_osd_init(GL *gl, struct mp_log *log, bool legacy)
 {
     GLint max_texture_size;
     gl->GetIntegerv(GL_MAX_TEXTURE_SIZE, &max_texture_size);
 
     struct mpgl_osd *ctx = talloc_ptrtype(NULL, ctx);
     *ctx = (struct mpgl_osd) {
+        .log = log,
         .gl = gl,
         .fmt_table = legacy ? osd_to_gl_legacy_formats : osd_to_gl3_formats,
         .scratch = talloc_zero_size(ctx, 1),
@@ -121,8 +122,8 @@ static bool upload_pbo(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     if (!success) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Error: can't upload subtitles! "
-                                    "Remove the 'pbo' suboption.\n");
+        MP_FATAL(ctx, "Error: can't upload subtitles! "
+                 "Remove the 'pbo' suboption.\n");
     }
 
     return success;
@@ -157,9 +158,8 @@ static bool upload_osd(struct mpgl_osd *ctx, struct mpgl_osd_part *osd,
     osd->packer->padding = ctx->scaled || imgs->scaled;
     int r = packer_pack_from_subbitmaps(osd->packer, imgs);
     if (r < 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] OSD bitmaps do not fit on "
-               "a surface with the maximum supported size %dx%d.\n",
-               osd->packer->w_max, osd->packer->h_max);
+        MP_ERR(ctx, "OSD bitmaps do not fit on a surface with the maximum "
+               "supported size %dx%d.\n", osd->packer->w_max, osd->packer->h_max);
         return false;
     }
 

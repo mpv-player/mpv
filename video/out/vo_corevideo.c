@@ -130,7 +130,7 @@ static int init_gl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     gl->TexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
     if (!p->osd)
-        p->osd = mpgl_osd_init(gl, true);
+        p->osd = mpgl_osd_init(gl, vo->log, true);
 
     resize(vo);
 

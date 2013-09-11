@@ -1083,7 +1083,7 @@ static void recreate_osd(struct gl_video *p)
 {
     if (p->osd)
         mpgl_osd_destroy(p->osd);
-    p->osd = mpgl_osd_init(p->gl, false);
+    p->osd = mpgl_osd_init(p->gl, p->log, false);
     p->osd->use_pbo = p->opts.pbo;
 }
 

@@ -1693,7 +1693,7 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     }
 
     if (gl->BindTexture) {
-        p->osd = mpgl_osd_init(gl, true);
+        p->osd = mpgl_osd_init(gl, vo->log, true);
         p->osd->scaled = p->scaled_osd;
     }
 
