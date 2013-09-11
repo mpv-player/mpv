@@ -55,12 +55,12 @@ static bool create_context_w32_old(struct MPGLContext *ctx)
 
     HGLRC new_context = wglCreateContext(windc);
     if (!new_context) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GL context!\n");
+        MP_FATAL(ctx->vo, "Could not create GL context!\n");
         goto out;
     }
 
     if (!wglMakeCurrent(windc, new_context)) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GL context!\n");
+        MP_FATAL(ctx->vo, "Could not set GL context!\n");
         wglDeleteContext(new_context);
         goto out;
     }
@@ -89,13 +89,13 @@ static bool create_context_w32_gl3(struct MPGLContext *ctx)
 
     new_context = wglCreateContext(windc);
     if (!new_context) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create GL context!\n");
+        MP_FATAL(ctx->vo, "Could not create GL context!\n");
         return false;
     }
 
     // set context
     if (!wglMakeCurrent(windc, new_context)) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GL context!\n");
+        MP_FATAL(ctx->vo, "Could not set GL context!\n");
         goto out;
     }
 
@@ -135,8 +135,7 @@ static bool create_context_w32_gl3(struct MPGLContext *ctx)
     }
     if (! *context) {
         int err = GetLastError();
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not create an OpenGL 3.x"
-                                    " context: error 0x%x\n", err);
+        MP_FATAL(ctx->vo, "Could not create an OpenGL 3.x context: error 0x%x\n", err);
         goto out;
     }
 
@@ -144,7 +143,7 @@ static bool create_context_w32_gl3(struct MPGLContext *ctx)
     wglDeleteContext(new_context);
 
     if (!wglMakeCurrent(windc, *context)) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Could not set GL3 context!\n");
+        MP_FATAL(ctx->vo, "Could not set GL3 context!\n");
         wglDeleteContext(*context);
         return false;
     }
@@ -163,8 +162,7 @@ static bool create_context_w32_gl3(struct MPGLContext *ctx)
     return true;
 
 unsupported:
-    mp_msg(MSGT_VO, MSGL_ERR, "[gl] The current OpenGL implementation does"
-                              " not support OpenGL 3.x \n");
+    MP_ERR(ctx->vo, "The current OpenGL implementation does not support OpenGL 3.x \n");
 out:
     wglDeleteContext(new_context);
     return false;
