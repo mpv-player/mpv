@@ -37,7 +37,7 @@ void aspect_save_videores(struct vo *vo, int w, int h, int d_w, int d_h)
 
 void aspect_save_screenres(struct vo *vo, int scrw, int scrh)
 {
-    mp_msg(MSGT_VO, MSGL_DBG2, "aspect_save_screenres %dx%d\n", scrw, scrh);
+    MP_DBG(vo, "aspect_save_screenres %dx%d\n", scrw, scrh);
     struct mp_vo_opts *opts = vo->opts;
     if (scrw <= 0 && scrh <= 0)
         scrw = 1024;
@@ -70,11 +70,11 @@ static void aspect_calc(struct vo *vo, int *srcw, int *srch)
     int fitw = FFMAX(1, vo->dwidth);
     int fith = FFMAX(1, vo->dheight);
 
-    mp_msg(MSGT_VO, MSGL_DBG2, "aspect(0) fitin: %dx%d monitor_par: %.2f\n",
+    MP_DBG(vo, "aspect(0) fitin: %dx%d monitor_par: %.2f\n",
            fitw, fith, aspdat->monitor_par);
     *srcw = fitw;
     *srch = (float)fitw / aspdat->prew * aspdat->preh / pixelaspect;
-    mp_msg(MSGT_VO, MSGL_DBG2, "aspect(1) wh: %dx%d (org: %dx%d)\n",
+    MP_DBG(vo, "aspect(1) wh: %dx%d (org: %dx%d)\n",
            *srcw, *srch, aspdat->prew, aspdat->preh);
     if (*srch > fith || *srch < aspdat->orgh) {
         int tmpw = (float)fith / aspdat->preh * aspdat->prew * pixelaspect;
@@ -82,11 +82,10 @@ static void aspect_calc(struct vo *vo, int *srcw, int *srch)
             *srch = fith;
             *srcw = tmpw;
         } else if (*srch > fith) {
-            mp_tmsg(MSGT_VO, MSGL_WARN,
-                    "[ASPECT] Warning: No suitable new res found!\n");
+            MP_WARN(vo, "No suitable new aspect found!\n");
         }
     }
-    mp_msg(MSGT_VO, MSGL_DBG2, "aspect(2) wh: %dx%d (org: %dx%d)\n",
+    MP_DBG(vo, "aspect(2) wh: %dx%d (org: %dx%d)\n",
            *srcw, *srch, aspdat->prew, aspdat->preh);
 }
 
