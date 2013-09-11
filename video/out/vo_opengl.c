@@ -318,7 +318,7 @@ static int preinit(struct vo *vo)
     gl_video_set_options(p->renderer, p->renderer_opts);
 
     if (p->icc_opts->profile) {
-        struct lut3d *lut3d = mp_load_icc(p->icc_opts);
+        struct lut3d *lut3d = mp_load_icc(p->icc_opts, vo->log);
         if (!lut3d)
             goto err_out;
         gl_video_set_lut3d(p->renderer, lut3d);

@@ -11,6 +11,7 @@ struct mp_icc_opts {
 };
 
 struct lut3d;
-struct lut3d *mp_load_icc(struct mp_icc_opts *opts);
+struct mp_log;
+struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log);
 
 #endif

@@ -76,10 +76,15 @@ const struct m_sub_options mp_icc_conf = {
     },
 };
 
+// lcms2 only provides a global error handler function, so we have to do this.
+// Not setting a lcms2 error handler will suppress any error messages.
+static struct mp_log *lcms2_dumb_crap;
+
 static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
                                 const char *msg)
 {
-    mp_msg(MSGT_VO, MSGL_ERR, "[gl] lcms2: %s\n", msg);
+    if (lcms2_dumb_crap)
+        mp_msg_log(lcms2_dumb_crap, MSGL_ERR, "lcms2: %s\n", msg);
 }
 
 static struct bstr load_file(void *talloc_ctx, const char *filename)
@@ -95,7 +100,7 @@ static struct bstr load_file(void *talloc_ctx, const char *filename)
 
 #define LUT3D_CACHE_HEADER "mpv 3dlut cache 1.0\n"
 
-struct lut3d *mp_load_icc(struct mp_icc_opts *opts)
+struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log)
 {
     int s_r, s_g, s_b;
     if (!parse_3dlut_size(opts->size_str, &s_r, &s_g, &s_b))
@@ -107,7 +112,7 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts)
     void *tmp = talloc_new(NULL);
     uint16_t *output = talloc_array(tmp, uint16_t, s_r * s_g * s_b * 3);
 
-    mp_msg(MSGT_VO, MSGL_INFO, "[gl] Opening ICC profile '%s'\n", opts->profile);
+    mp_msg_log(log, MSGL_INFO, "Opening ICC profile '%s'\n", opts->profile);
     struct bstr iccdata = load_file(tmp, opts->profile);
     if (!iccdata.len)
         goto error_exit;
@@ -117,8 +122,8 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts)
 
     // check cache
     if (opts->cache) {
-        mp_msg(MSGT_VO, MSGL_INFO, "[gl] Opening 3D LUT cache in file '%s'.\n",
-               opts->cache);
+        mp_msg_log(log, MSGL_INFO, "Opening 3D LUT cache in file '%s'.\n",
+                   opts->cache);
         struct bstr cachedata = load_file(tmp, opts->cache);
         if (bstr_eatstart(&cachedata, bstr0(LUT3D_CACHE_HEADER))
             && bstr_eatstart(&cachedata, bstr0(cache_info))
@@ -128,10 +133,11 @@ struct lut3d *mp_load_icc(struct mp_icc_opts *opts)
             memcpy(output, cachedata.start, cachedata.len);
             goto done;
         } else {
-            mp_msg(MSGT_VO, MSGL_WARN, "[gl] 3D LUT cache invalid!\n");
+            mp_msg_log(log, MSGL_WARN, "3D LUT cache invalid!\n");
         }
     }
 
+    lcms2_dumb_crap = log;
     cmsSetLogErrorHandler(lcms2_error_handler);
 
     cmsHPROFILE profile = cmsOpenProfileFromMem(iccdata.start, iccdata.len);
@@ -193,11 +199,15 @@ done: ;
         .size = {s_r, s_g, s_b},
     };
 
+    lcms2_dumb_crap = NULL;
+    cmsSetLogErrorHandler(NULL);
     talloc_free(tmp);
     return lut;
 
 error_exit:
-    mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Error loading ICC profile.\n");
+    mp_msg_log(log, MSGL_FATAL, "Error loading ICC profile.\n");
+    lcms2_dumb_crap = NULL;
+    cmsSetLogErrorHandler(NULL);
     talloc_free(tmp);
     return NULL;
 }
@@ -210,9 +220,9 @@ const struct m_sub_options mp_icc_conf = {
     .defaults = &(const struct mp_icc_opts) {0},
 };
 
-struct lut3d *mp_load_icc(struct mp_icc_opts *opts)
+struct lut3d *mp_load_icc(struct mp_icc_opts *opts, struct mp_log *log)
 {
-    mp_msg(MSGT_VO, MSGL_FATAL, "[gl] LCMS2 support not compiled.\n");
+    mp_msg_log(log, MSGL_FATAL, "LCMS2 support not compiled.\n");
     return NULL;
 }
 
