@@ -181,7 +181,7 @@ static void vo_x11_ewmh_fullscreen(struct vo_x11_state *x11, int action)
                         SubstructureRedirectMask | SubstructureNotifyMask,
                         &xev))
         {
-            mp_tmsg(MSGT_VO, MSGL_ERR, "\nX11: Couldn't send EWMH fullscreen event!\n");
+            MP_ERR(x11, "Couldn't send EWMH fullscreen event!\n");
         }
     }
 }
@@ -268,26 +268,26 @@ void fstype_help(void)
     mp_msg(MSGT_VO, MSGL_INFO, "\n");
 }
 
-static void fstype_dump(int fstype)
+static void fstype_dump(struct vo_x11_state *x11)
 {
+    int fstype = x11->fs_type;
     if (fstype) {
-        mp_msg(MSGT_VO, MSGL_V, "[x11] Current fstype setting honours");
+        MP_VERBOSE(x11, "Current fstype setting honours");
         if (fstype & vo_wm_LAYER)
-            mp_msg(MSGT_VO, MSGL_V, " LAYER");
+            MP_VERBOSE(x11, " LAYER");
         if (fstype & vo_wm_FULLSCREEN)
-            mp_msg(MSGT_VO, MSGL_V, " FULLSCREEN");
+            MP_VERBOSE(x11, " FULLSCREEN");
         if (fstype & vo_wm_STAYS_ON_TOP)
-            mp_msg(MSGT_VO, MSGL_V, " STAYS_ON_TOP");
+            MP_VERBOSE(x11, " STAYS_ON_TOP");
         if (fstype & vo_wm_ABOVE)
-            mp_msg(MSGT_VO, MSGL_V, " ABOVE");
+            MP_VERBOSE(x11, " ABOVE");
         if (fstype & vo_wm_BELOW)
-            mp_msg(MSGT_VO, MSGL_V, " BELOW");
+            MP_VERBOSE(x11, " BELOW");
         if (fstype & vo_wm_MWM)
-            mp_msg(MSGT_VO, MSGL_V, " mwm_hack");
-        mp_msg(MSGT_VO, MSGL_V, " X atoms\n");
+            MP_VERBOSE(x11, " mwm_hack");
+        MP_VERBOSE(x11, " X atoms\n");
     } else {
-        mp_msg(MSGT_VO, MSGL_V,
-               "[x11] Current fstype setting doesn't honour any X atoms\n");
+        MP_VERBOSE(x11, "Current fstype setting doesn't honour any X atoms\n");
     }
 }
 
@@ -295,7 +295,7 @@ static int net_wm_support_state_test(struct vo_x11_state *x11, Atom atom)
 {
 #define NET_WM_STATE_TEST(x) { \
     if (atom == x11->XA_NET_WM_STATE_##x) { \
-        mp_msg( MSGT_VO,MSGL_V, "[x11] Detected wm supports " #x " state.\n" ); \
+        MP_VERBOSE(x11, "Detected wm supports " #x " state.\n" ); \
         return vo_wm_##x; \
     } \
 }
@@ -333,7 +333,7 @@ static int vo_wm_detect(struct vo *vo)
 
 // -- supports layers
     if (x11_get_property(x11, x11->XA_WIN_PROTOCOLS, &args, &nitems)) {
-        mp_msg(MSGT_VO, MSGL_V, "[x11] Detected wm supports layers.\n");
+        MP_VERBOSE(x11, "Detected wm supports layers.\n");
         int metacity_hack = 0;
         for (i = 0; i < nitems; i++) {
             if (args[i] == x11->XA_WIN_LAYER) {
@@ -350,20 +350,19 @@ static int vo_wm_detect(struct vo *vo)
         if (wm && (metacity_hack == 1)) {
             // metacity claims to support layers, but it is not the truth :-)
             wm ^= vo_wm_LAYER;
-            mp_msg(MSGT_VO, MSGL_V,
-                   "[x11] Using workaround for Metacity bugs.\n");
+            MP_VERBOSE(x11, "Using workaround for Metacity bugs.\n");
         }
     }
 // --- netwm
     if (x11_get_property(x11, x11->XA_NET_SUPPORTED, &args, &nitems)) {
-        mp_msg(MSGT_VO, MSGL_V, "[x11] Detected wm supports NetWM.\n");
+        MP_VERBOSE(x11, "Detected wm supports NetWM.\n");
         for (i = 0; i < nitems; i++)
             wm |= net_wm_support_state_test(vo->x11, args[i]);
         XFree(args);
     }
 
     if (wm == 0)
-        mp_msg(MSGT_VO, MSGL_V, "[x11] Unknown wm type...\n");
+        MP_VERBOSE(x11, "Unknown wm type...\n");
     return wm;
 }
 
@@ -446,6 +445,7 @@ int vo_x11_init(struct vo *vo)
 
     struct vo_x11_state *x11 = talloc_ptrtype(NULL, x11);
     *x11 = (struct vo_x11_state){
+        .log = mp_log_new(x11, vo->log, "x11"),
         .olddecor = MWM_DECOR_ALL,
         .oldfuncs = MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE |
                     MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE,
@@ -458,12 +458,11 @@ int vo_x11_init(struct vo *vo)
 
     dispName = XDisplayName(NULL);
 
-    mp_msg(MSGT_VO, MSGL_V, "X11 opening display: %s\n", dispName);
+    MP_VERBOSE(x11, "X11 opening display: %s\n", dispName);
 
     x11->display = XOpenDisplay(dispName);
     if (!x11->display) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "vo: couldn't open the X11 display (%s)!\n", dispName);
+        MP_ERR(x11, "couldn't open the X11 display (%s)!\n", dispName);
         talloc_free(x11);
         vo->x11 = NULL;
         return 0;
@@ -500,15 +499,15 @@ int vo_x11_init(struct vo *vo)
         x11->display_is_local = 1;
     else
         x11->display_is_local = 0;
-    mp_msg(MSGT_VO, MSGL_V, "vo: X11 running at %dx%d (\"%s\" => %s display)\n",
-           opts->screenwidth, opts->screenheight, dispName,
-           x11->display_is_local ? "local" : "remote");
+    MP_VERBOSE(x11, "X11 running at %dx%d (\"%s\" => %s display)\n",
+               opts->screenwidth, opts->screenheight, dispName,
+               x11->display_is_local ? "local" : "remote");
 
     x11->wm_type = vo_wm_detect(vo);
 
     x11->fs_type = vo_x11_get_fs_type(vo);
 
-    fstype_dump(x11->fs_type);
+    fstype_dump(x11);
 
     vo->event_fd = ConnectionNumber(x11->display);
 
@@ -683,7 +682,7 @@ void vo_x11_uninit(struct vo *vo)
     if (x11->colormap != None)
         XFreeColormap(vo->x11->display, x11->colormap);
 
-    mp_msg(MSGT_VO, MSGL_V, "vo: uninit ...\n");
+    MP_VERBOSE(x11, "uninit ...\n");
     if (x11->xim)
         XCloseIM(x11->xim);
     XSetErrorHandler(NULL);
@@ -807,7 +806,7 @@ int vo_x11_check_events(struct vo *vo)
             x11->fs_flip = 0;
             break;
         case DestroyNotify:
-            mp_msg(MSGT_VO, MSGL_WARN, "Our window was destroyed, exiting\n");
+            MP_WARN(x11, "Our window was destroyed, exiting\n");
             mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
             break;
         case ClientMessage:
@@ -904,8 +903,7 @@ static int vo_x11_get_gnome_layer(struct vo_x11_state *x11, Window win)
                            (unsigned char **) &args) == Success
         && nitems > 0 && args)
     {
-        mp_msg(MSGT_VO, MSGL_V, "[x11] original window layer is %d.\n",
-               *args);
+        MP_VERBOSE(x11, "original window layer is %d.\n", *args);
         return *args;
     }
     return WIN_LAYER_NORMAL;
@@ -1259,8 +1257,8 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
         // if not fullscreen, stay on default layer
         xev.data.l[0] = layer ? x11->fs_layer : x11->orig_layer;
         xev.data.l[1] = CurrentTime;
-        mp_msg(MSGT_VO, MSGL_V, "[x11] Layered style stay on top (layer %ld).\n",
-               xev.data.l[0]);
+        MP_VERBOSE(x11, "Layered style stay on top (layer %ld).\n",
+                   xev.data.l[0]);
         XSendEvent(x11->display, x11->rootwin, False, SubstructureNotifyMask,
                    (XEvent *) &xev);
     } else if (x11->fs_type & vo_wm_NETWM) {
@@ -1290,9 +1288,8 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
         XSendEvent(x11->display, x11->rootwin, False, SubstructureRedirectMask,
                    (XEvent *) &xev);
         state = XGetAtomName(x11->display, xev.data.l[1]);
-        mp_msg(MSGT_VO, MSGL_V,
-               "[x11] NET style stay on top (layer %d). Using state %s.\n",
-               layer, state);
+        MP_VERBOSE(x11, "NET style stay on top (layer %d). Using state %s.\n",
+                   layer, state);
         XFree(state);
     }
 }
@@ -1579,7 +1576,7 @@ static void saver_on(struct vo_x11_state *x11)
         int nothing;
         if (DPMSQueryExtension(mDisplay, &nothing, &nothing)) {
             if (!DPMSEnable(mDisplay)) {    // restoring power saving settings
-                mp_msg(MSGT_VO, MSGL_WARN, "DPMS not available?\n");
+                MP_WARN(x11, "DPMS not available?\n");
             } else {
                 // DPMS does not seem to be enabled unless we call DPMSInfo
                 BOOL onoff;
@@ -1588,9 +1585,9 @@ static void saver_on(struct vo_x11_state *x11)
                 DPMSForceLevel(mDisplay, DPMSModeOn);
                 DPMSInfo(mDisplay, &state, &onoff);
                 if (onoff) {
-                    mp_msg(MSGT_VO, MSGL_V, "Successfully enabled DPMS\n");
+                    MP_VERBOSE(x11, "Successfully enabled DPMS\n");
                 } else {
-                    mp_msg(MSGT_VO, MSGL_WARN, "Could not enable DPMS\n");
+                    MP_WARN(x11, "Could not enable DPMS\n");
                 }
             }
         }
@@ -1618,10 +1615,10 @@ static void saver_off(struct vo_x11_state *x11)
         if (onoff) {
             Status stat;
 
-            mp_msg(MSGT_VO, MSGL_V, "Disabling DPMS\n");
+            MP_VERBOSE(x11, "Disabling DPMS\n");
             x11->dpms_disabled = 1;
             stat = DPMSDisable(mDisplay);       // monitor powersave off
-            mp_msg(MSGT_VO, MSGL_V, "DPMSDisable stat: %d\n", stat);
+            MP_VERBOSE(x11, "DPMSDisable stat: %d\n", stat);
         }
     }
 #endif
@@ -1651,7 +1648,7 @@ static void vo_x11_selectinput_witherr(struct vo *vo,
         if ((event_mask & bad) && (a.all_event_masks & bad) &&
             ((a.your_event_mask & bad) != (event_mask & bad)))
         {
-            mp_msg(MSGT_VO, MSGL_ERR, "X11 error: error during XSelectInput "
+            MP_ERR(vo->x11, "X11 error: error during XSelectInput "
                    "call, trying without mouse events\n");
             XSelectInput(display, w, event_mask & ~bad);
         }

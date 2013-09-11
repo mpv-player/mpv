@@ -30,6 +30,7 @@ struct vo;
 struct mp_rect;
 
 struct vo_x11_state {
+    struct mp_log *log;
     Display *display;
     Window window;
     Window rootwin;
