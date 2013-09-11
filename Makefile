@@ -294,11 +294,12 @@ DIRS =  . \
         audio/decode \
         audio/filter \
         audio/out \
-        core \
+        mpvcore \
         mpvcore/input \
         mpvcore/timeline \
         demux \
         osdep \
+        osdep/ar \
         stream \
         sub \
         video \
