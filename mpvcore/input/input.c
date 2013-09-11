@@ -1515,7 +1515,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
         ictx->last_key_down = mp_time_us();
         ictx->ar_state = 0;
         cmd = get_cmd_from_keys(ictx, NULL, ictx->num_key_down, ictx->key_down);
-        if (should_drop_cmd(ictx, cmd)) {
+        if (cmd && should_drop_cmd(ictx, cmd)) {
             ictx->num_key_down--;
             talloc_free(cmd);
             return;
@@ -1552,7 +1552,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
             num_key_down++;
         }
         cmd = get_cmd_from_keys(ictx, NULL, num_key_down, key_down);
-        if (should_drop_cmd(ictx, cmd)) {
+        if (cmd && should_drop_cmd(ictx, cmd)) {
             talloc_free(cmd);
             return;
         }
