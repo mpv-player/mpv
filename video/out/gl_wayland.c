@@ -24,7 +24,6 @@
 #include "gl_common.h"
 
 struct egl_context {
-    struct mp_log *log;
     EGLSurface egl_surface;
 
     struct wl_egl_window *egl_window;
@@ -50,10 +49,10 @@ static void egl_resize(struct vo_wayland_state *wl,
                                     &wl->window.width,
                                     &wl->window.height);
 
-    MP_VERBOSE(ctx, "resizing %dx%d -> %dx%d\n", wl->window.width,
-                                                 wl->window.height,
-                                                 width,
-                                                 height);
+    MP_VERBOSE(wl, "resizing %dx%d -> %dx%d\n", wl->window.width,
+                                                wl->window.height,
+                                                width,
+                                                height);
 
     if (x != 0)
         x = wl->window.width - width;
@@ -102,7 +101,7 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     if (eglInitialize(egl_ctx->egl.dpy, &major, &minor) != EGL_TRUE)
         return false;
 
-    MP_VERBOSE(egl_ctx, "EGL version %d.%d\n", major, minor);
+    MP_VERBOSE(wl, "EGL version %d.%d\n", major, minor);
 
     EGLint context_attribs[] = {
         EGL_CONTEXT_MAJOR_VERSION_KHR,
@@ -141,9 +140,9 @@ static bool egl_create_context(struct vo_wayland_state *wl,
     eglstr = eglQueryString(egl_ctx->egl.dpy, EGL_EXTENSIONS);
 
     mpgl_load_functions(gl, (void*(*)(const GLubyte*))eglGetProcAddress, eglstr,
-                        wl->vo->log);
+                        wl->log);
     if (!gl->BindProgram)
-        mpgl_load_functions(gl, NULL, eglstr, wl->vo->log);
+        mpgl_load_functions(gl, NULL, eglstr, wl->log);
 
     return true;
 }
@@ -180,8 +179,6 @@ static bool config_window_wayland(struct MPGLContext *ctx,
     struct vo_wayland_state * wl = ctx->vo->wayland;
     bool enable_alpha = !!(flags & VOFLAG_ALPHA);
     bool ret = false;
-
-    egl_ctx->log = mp_log_new(egl_ctx, wl->log, "EGL");
 
     if (!vo_wayland_config(ctx->vo, d_width, d_height, flags))
         return false;
