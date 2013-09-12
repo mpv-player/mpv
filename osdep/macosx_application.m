@@ -432,11 +432,20 @@ static bool psn_matches_current_process(char *psn_arg_to_check)
     return [real_psn isEqualToString:in_psn];
 }
 
+static bool bundle_started_from_finder(int argc, char **argv)
+{
+    bool bundle_detected     = [[NSBundle mainBundle] bundleIdentifier];
+    bool pre_mavericks_args  = argc==2 && psn_matches_current_process(argv[1]);
+    bool post_mavericks_args = argc==0;
+
+    return bundle_detected && (pre_mavericks_args || post_mavericks_args);
+}
+
 void macosx_finder_args_preinit(int *argc, char ***argv)
 {
     Application *app = mpv_shared_app();
 
-    if (*argc==2 && psn_matches_current_process((*argv)[1])) {
+    if (bundle_started_from_finder(*argc, *argv)) {
         macosx_redirect_output_to_logfile("mpv");
         macosx_wait_fileopen_events();
 
