@@ -454,6 +454,7 @@ static void uninit_avctx(sh_video_t *sh)
 #if !HAVE_AVUTIL_REFCOUNTING
     mp_buffer_pool_free(&ctx->dr1_buffer_pool);
 #endif
+    ctx->last_sample_aspect_ratio = (AVRational){0, 0};
 }
 
 static void uninit(sh_video_t *sh)
