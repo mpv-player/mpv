@@ -78,9 +78,9 @@ char *mp_find_config_file(const char *filename)
 char *mp_find_user_config_file(const char *filename)
 {
     char *homedir = NULL, *buff = NULL;
+    static char *homepath = NULL;
 #ifdef __MINGW32__
     char *config_dir = "mpv";
-    static char *homepath = NULL;
 
     if (homepath == NULL) {
         char buf[MAX_PATH];
@@ -92,7 +92,10 @@ char *mp_find_user_config_file(const char *filename)
     }
 #else
     char *config_dir = ".mpv";
-    static char *homepath = getenv("HOME");
+
+    if (homepath == NULL) {
+        homepath = getenv("HOME");
+    }
 #endif
 #if defined(__MINGW32__) || defined(__CYGWIN__)
     char *temp = NULL;
