@@ -768,7 +768,7 @@ static void vo_wayland_fullscreen (struct vo *vo)
     struct wl_output *fs_output = wl->display.fs_output;
 
     if (vo->opts->fullscreen) {
-        MP_VERBOSE(wl, "going fullscreen\n");
+        MP_DBG(wl, "going fullscreen\n");
         wl->window.p_width = wl->window.width;
         wl->window.p_height = wl->window.height;
         wl_shell_surface_set_fullscreen(wl->window.shell_surface,
@@ -777,7 +777,7 @@ static void vo_wayland_fullscreen (struct vo *vo)
     }
 
     else {
-        MP_VERBOSE(wl, "leaving fullscreen\n");
+        MP_DBG(wl, "leaving fullscreen\n");
         wl_shell_surface_set_toplevel(wl->window.shell_surface);
         shedule_resize(wl, 0, wl->window.p_width, wl->window.p_height);
     }
