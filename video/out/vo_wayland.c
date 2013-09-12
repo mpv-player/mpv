@@ -138,10 +138,14 @@ struct priv {
     struct buffer buffers[MAX_BUFFERS];
     struct buffer *front_buffer;
     struct buffer *back_buffer;
+    struct buffer tmp_buffer;
 
     struct mp_image *original_image;
     int width;  // width of the original image
     int height;
+
+    int x, y; // coords for resizing
+    bool resize_attach;
 
     // options
     int enable_alpha;
@@ -369,6 +373,13 @@ static mp_image_t *get_screenshot(struct priv *p)
 static bool resize(struct priv *p)
 {
     struct vo_wayland_state *wl = p->wl;
+
+    // if the newly resized buffer isn't attached, then don't resize again,
+    // because the front buffer might be empty and the temporary buffer might
+    // still be valid
+    if (p->resize_attach)
+        return false;
+
     int32_t x = wl->window.sh_x;
     int32_t y = wl->window.sh_y;
     wl->vo->dwidth = wl->window.sh_width;
@@ -406,6 +417,11 @@ static bool resize(struct priv *p)
     if (mp_sws_reinit(p->sws) < 0)
         return false;
 
+    // copy pointers
+    p->tmp_buffer = *p->front_buffer;
+    p->front_buffer->shm_data = NULL;
+    p->front_buffer->wlbuf = NULL;
+
     if (!reinit_shm_buffers(p, p->dst_w, p->dst_h)) {
         MP_ERR(wl, "failed to resize buffers\n");
         return false;
@@ -424,11 +440,9 @@ static bool resize(struct priv *p)
         wl_region_destroy(opaque);
     }
 
-    // a redraw should happen at this point
-    wl_surface_attach(wl->window.surface, p->front_buffer->wlbuf, x, y);
-    wl_surface_damage(wl->window.surface, 0, 0, p->dst_w, p->dst_h);
-    wl_surface_commit(wl->window.surface);
-
+    p->x = x;
+    p->y = y;
+    p->resize_attach = true;
     p->wl->window.events = 0;
     p->vo->want_redraw = true;
     return true;
@@ -454,6 +468,26 @@ static void frame_handle_redraw(void *data,
     struct priv *p = data;
     struct vo_wayland_state *wl = p->wl;
     struct buffer *buf = buffer_get_front(p);
+
+    if (p->resize_attach) {
+        wl_surface_attach(wl->window.surface, buf->wlbuf, p->x, p->y);
+        wl_surface_damage(wl->window.surface, 0, 0, p->dst_w, p->dst_h);
+        wl_surface_commit(wl->window.surface);
+
+        if (callback)
+            wl_callback_destroy(callback);
+
+        p->redraw_callback = NULL;
+        buffer_finalise_front(p);
+        p->resize_attach = false;
+
+        destroy_shm_buffer(&p->tmp_buffer);
+
+        // I have to destroy the callback and return early to avoid black flickers
+        // I don't exactly know why this, but I guess the back buffer is still
+        // empty. The callback loop will be restored on the next flip_page call
+        return;
+    }
 
     wl_surface_attach(wl->window.surface, buf->wlbuf, 0, 0);
     wl_surface_damage(wl->window.surface, 0, 0, p->dst_w, p->dst_h);
@@ -500,8 +534,10 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     struct priv *p = vo->priv;
     struct buffer *buf = buffer_get_back(p);
 
-    if (!buf)
+    if (!buf) {
+        MP_WARN(p->wl, "can't draw, back buffer is busy\n");
         return;
+    }
 
     struct mp_image src = *mpi;
     struct mp_rect src_rc = p->src;
@@ -529,8 +565,10 @@ static void flip_page(struct vo *vo)
 
     buffer_swap(p);
 
-    if (!p->redraw_callback)
+    if (!p->redraw_callback) {
+        MP_INFO(p->wl, "restart frame callback\n");
         frame_handle_redraw(p, NULL, 0);
+    }
 }
 
 static int query_format(struct vo *vo, uint32_t format)
