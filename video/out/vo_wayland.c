@@ -300,13 +300,13 @@ static bool create_shm_buffer(struct priv *p,
 
     fd = os_create_anonymous_file(size);
     if (fd < 0) {
-        MP_ERR(p->vo, "creating a buffer file for %d B failed: %m", size);
+        MP_ERR(p->wl, "creating a buffer file for %d B failed: %m", size);
         return false;
     }
 
     data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (data == MAP_FAILED) {
-        MP_ERR(p->vo, "mmap failed: %m\n");
+        MP_ERR(p->wl, "mmap failed: %m\n");
         close(fd);
         return false;
     }
@@ -380,10 +380,10 @@ static bool resize(struct priv *p)
     p->dst_w = p->dst.x1 - p->dst.x0;
     p->dst_h = p->dst.y1 - p->dst.y0;
 
-    MP_DBG(p->vo, "resizing %dx%d -> %dx%d\n", wl->window.width,
-                                               wl->window.height,
-                                               p->dst_w,
-                                               p->dst_h);
+    MP_DBG(wl, "resizing %dx%d -> %dx%d\n", wl->window.width,
+                                            wl->window.height,
+                                            p->dst_w,
+                                            p->dst_h);
 
     if (x != 0)
         x = wl->window.width - p->dst_w;
@@ -407,7 +407,7 @@ static bool resize(struct priv *p)
         return false;
 
     if (!reinit_shm_buffers(p, p->dst_w, p->dst_h)) {
-        MP_ERR(p->vo, "failed to resize buffers\n");
+        MP_ERR(wl, "failed to resize buffers\n");
         return false;
     }
 
@@ -478,7 +478,7 @@ static void shm_handle_format(void *data,
     struct priv *p = data;
     for (int i = 0; i < MAX_FORMAT_ENTRIES; ++i) {
         if (fmttable[i].wl_fmt == format) {
-            MP_INFO(p->vo, "format %s supported by hw\n",
+            MP_INFO(p->wl, "format %s supported by hw\n",
                     mp_imgfmt_to_name(fmttable[i].mp_fmt));
             struct supported_format *sf = talloc(p, struct supported_format);
             sf->fmt = &fmttable[i];
@@ -588,10 +588,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
 
 
     p->bytes_per_pixel = mp_imgfmt_get_desc(p->pref_format->mp_fmt).bytes[0];
-    MP_VERBOSE(vo, "bytes per pixel: %d\n", p->bytes_per_pixel);
+    MP_VERBOSE(p->wl, "bytes per pixel: %d\n", p->bytes_per_pixel);
 
     if (!reinit_shm_buffers(p, p->width, p->height)) {
-        MP_ERR(vo, "failed to initialise buffers\n");
+        MP_ERR(p->wl, "failed to initialise buffers\n");
         return -1;
     }
 
@@ -616,7 +616,7 @@ static int preinit(struct vo *vo)
     struct priv *p = vo->priv;
 
     if (!vo_wayland_init(vo)) {
-        MP_ERR(vo, "could not initalise backend\n");
+        MP_ERR(p->wl, "could not initalise backend\n");
         return -1;
     }
 
