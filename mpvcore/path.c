@@ -46,7 +46,7 @@
 #include <sys/cygwin.h>
 #endif
 
-#ifdef CONFIG_MACOSX_BUNDLE
+#ifdef CONFIG_COCOA
 #include "osdep/macosx_bundle.h"
 #endif
 
@@ -54,7 +54,7 @@
 typedef char *(*lookup_fun)(const char *);
 static const lookup_fun config_lookup_functions[] = {
     mp_find_user_config_file,
-#ifdef CONFIG_MACOSX_BUNDLE
+#ifdef CONFIG_COCOA
     get_bundled_path,
 #endif
     mp_find_global_config_file,

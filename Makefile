@@ -44,8 +44,8 @@ SOURCES-$(LIBBS2B)              += audio/filter/af_bs2b.c
 SOURCES-$(LIBPOSTPROC)          += video/filter/vf_pp.c
 SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
-SOURCES-$(MACOSX_BUNDLE)        += osdep/macosx_bundle.m
 SOURCES-$(COCOA)                += video/out/cocoa_common.m \
+                                   osdep/macosx_bundle.m \
                                    osdep/macosx_application.m \
                                    osdep/macosx_events.m \
                                    osdep/ar/HIDRemote.m
