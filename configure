@@ -316,7 +316,6 @@ Optional features:
   --disable-bluray       disable Blu-ray support [autodetect]
   --disable-dvdread      disable libdvdread [autodetect]
   --disable-enca         disable ENCA charset oracle library [autodetect]
-  --enable-macosx-bundle enable Mac OS X bundle file locations [disabled]
   --disable-pthreads     disable Posix threads support [autodetect]
   --disable-libass       disable subtitle rendering with libass [autodetect]
   --disable-libass-osd   disable OSD rendering with libass [autodetect]
@@ -474,7 +473,6 @@ _cdda=auto
 _coreaudio=auto
 _corevideo=auto
 _cocoa=auto
-_macosx_bundle=no
 _enca=auto
 _pthreads=auto
 _ass=auto
@@ -708,7 +706,6 @@ for ac_option do
   --disable-corevideo) _corevideo=no ;;
   --enable-cocoa) _cocoa=yes ;;
   --disable-cocoa) _cocoa=no ;;
-  --enable-macosx-bundle) _macosx_bundle=yes ;;
 
   --enable-manpage) _build_man=yes ;;
   --disable-manpage) _build_man=no ;;
@@ -1545,19 +1542,6 @@ else
 fi
 echores "$_sys_sysinfo"
 
-
-if darwin; then
-
-echocheck "Mac OS X Bundle file locations"
-if test "$_macosx_bundle" = yes ; then
-  extra_ldflags="$extra_ldflags -headerpad_max_install_names"
-  def_macosx_bundle='#define CONFIG_MACOSX_BUNDLE 1'
-else
-  def_macosx_bundle='#undef CONFIG_MACOSX_BUNDLE'
-fi
-echores "$_macosx_bundle"
-
-fi #if darwin
 
 echocheck "pkg-config"
 if $($_pkg_config --version > /dev/null 2>&1); then
@@ -3078,7 +3062,6 @@ LIBQUVI = $_libquvi4
 LIBQUVI9 = $_libquvi9
 LIBGUESS = $_libguess
 LIRC = $_lirc
-MACOSX_BUNDLE = $_macosx_bundle
 MNG = $_mng
 MPG123 = $_mpg123
 OPENAL = $_openal
@@ -3164,7 +3147,6 @@ $def_termios
 $def_dl
 $def_dos_paths
 $def_iconv
-$def_macosx_bundle
 $def_priority
 
 
