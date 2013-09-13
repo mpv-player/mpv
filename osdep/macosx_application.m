@@ -436,7 +436,7 @@ static bool bundle_started_from_finder(int argc, char **argv)
 {
     bool bundle_detected     = [[NSBundle mainBundle] bundleIdentifier];
     bool pre_mavericks_args  = argc==2 && psn_matches_current_process(argv[1]);
-    bool post_mavericks_args = argc==0;
+    bool post_mavericks_args = argc==1;
 
     return bundle_detected && (pre_mavericks_args || post_mavericks_args);
 }
