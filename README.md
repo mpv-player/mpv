@@ -62,7 +62,7 @@ to configure.
 Bug reports
 -----------
 
-Please use the [issue tracker][issue tracker] provided by GitHub to send us bug
+Please use the [issue tracker][issue-tracker] provided by GitHub to send us bug
 reports or feature requests.
 
 Contributing
@@ -75,9 +75,21 @@ make code review easier for both parties later on.
 Contacts
 --------
 
-You can find us on IRC in `#mpv-player` on `irc.freenode.net`
+These forms of contact are meant to ask questions about mpv usage, give
+feedback on mpv and discuss it's development.
+
+If possible, please avoid posting bugs here and use the [issue tracker][issue-tracker]
+instead.
+
+ - **Users IRC Channel**: `#mpv-player` on `irc.freenode.net`
+ - **Users Mailing List**: `mpv-users@googlegroups.com` ([Archive / Subscribe][mpv-users]).
+ - **Devel Mailing List**: `mpv-devel@googlegroups.com` ([Archive / Subscribe][mpv-devel])
+
+To contact the `mpv` team in private write to `mpv-team@googlegroups.com`.
 
 [changes]: https://github.com/mpv-player/mpv/blob/master/DOCS/man/en/changes.rst
 [mpv-build]: https://github.com/mpv-player/mpv-build
 [homebrew-mpv]: https://github.com/mpv-player/homebrew-mpv
-[issue tracker]:  https://github.com/mpv-player/mpv/issues
+[issue-tracker]:  https://github.com/mpv-player/mpv/issues
+[mpv-users]: https://groups.google.com/forum/?hl=en#!forum/mpv-users
+[mpv-devel]: https://groups.google.com/forum/?hl=en#!forum/mpv-devel
