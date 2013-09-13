@@ -4349,7 +4349,7 @@ static void play_current_file(struct MPContext *mpctx)
         ass_set_style_overrides(mpctx->ass_library, opts->ass_force_style_list);
 #endif
 
-    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Playing %s.\n", mpctx->filename);
+    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Playing: %s\n", mpctx->filename);
 
     //============ Open & Sync STREAM --- fork cache2 ====================
 
