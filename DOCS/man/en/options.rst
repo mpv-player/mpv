@@ -569,6 +569,21 @@
     Audio delay in seconds (positive or negative float value). Negative values
     delay the audio, and positive values delay the video.
 
+``--deinterlace=<yes|no|auto>``
+    Enable or disable interlacing (default: auto, which usually means no).
+    Interlaced video shows ugly comb-like artifacts, which are visible on
+    fast movement. Enabling this typically inserts the yadif video filter in
+    order to deinterlace the video, or lets the video output apply deinterlacing
+    if supported.
+
+    This behaves exactly like the ``deinterlace`` input property (usually
+    mapped to ``Shift+D``).
+
+    ``auto`` is a technicality. Strictly speaking, the default for this option
+    is deinterlacing disabled, but the ``auto`` case is needed if ``yadif`` was
+    added to the filter chain manually with ``--vf``. Then the core shouldn't
+    disable deinterlacing just because the ``--deinterlace`` was not set.
+
 ``--demuxer=<[+]name>``
     Force demuxer type. Use a '+' before the name to force it; this will skip
     some checks. Give the demuxer name as printed by ``--demuxer=help``.

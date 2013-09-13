@@ -840,6 +840,7 @@ static const char *backup_properties[] = {
     "contrast",
     "saturation",
     "hue",
+    "deinterlace",
     "panscan",
     "aid",
     "vid",
@@ -2438,6 +2439,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     sh_video->last_pts = MP_NOPTS_VALUE;
     sh_video->num_buffered_pts = 0;
     sh_video->next_frame_time = 0;
+    mpctx->last_vf_reconfig_count = 0;
     mpctx->restart_playback = true;
     mpctx->sync_audio_to_video = !sh_video->gsh->attached_picture;
     mpctx->delay = 0;
@@ -2524,9 +2526,34 @@ static bool load_next_vo_frame(struct MPContext *mpctx, bool eof)
     return false;
 }
 
+static void init_filter_params(struct MPContext *mpctx)
+{
+    struct MPOpts *opts = mpctx->opts;
+    struct sh_video *sh_video = mpctx->sh_video;
+
+    // Note that the video decoder already initializes the filter chain. This
+    // might recreate the chain a second time, which is not very elegant, but
+    // allows us to test whether enabling deinterlacing works with the current
+    // video format and other filters.
+    if (sh_video->vf_initialized != 1)
+        return;
+
+    if (sh_video->vf_reconfig_count <= mpctx->last_vf_reconfig_count) {
+        if (opts->deinterlace >= 0) {
+            mp_property_do("deinterlace", M_PROPERTY_SET, &opts->deinterlace,
+                           mpctx);
+        }
+    }
+    // Setting filter params has to be "stable" (no change if params already
+    // set) - checking the reconfig count is just an optimization.
+    mpctx->last_vf_reconfig_count = sh_video->vf_reconfig_count;
+}
+
 static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
 {
     struct sh_video *sh_video = mpctx->sh_video;
+
+    init_filter_params(mpctx);
 
     frame->pts = sh_video->pts;
     mp_image_set_params(frame, sh_video->vf_input);

@@ -432,7 +432,7 @@ Name                            W Comment
 ``audio``                       x alias for ``aid``
 ``balance``                     x audio channel balance
 ``fullscreen``                  x see ``--fullscreen``
-``deinterlace``                 x deinterlacing, if available (bool)
+``deinterlace``                 x similar to ``--deinterlace``
 ``colormatrix``                 x see ``--colormatrix``
 ``colormatrix-input-range``     x see ``--colormatrix-input-range``
 ``colormatrix-output-range``    x see ``--colormatrix-output-range``

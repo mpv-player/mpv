@@ -56,6 +56,8 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
     int vocfg_flags = 0;
     struct mp_image_params p = *params;
 
+    sh->vf_reconfig_count++;
+
     if (!p.w || !p.h) {
         // ideally, this should be dead code
         mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Unknown size, using container size.\n");

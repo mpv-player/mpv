@@ -131,6 +131,7 @@ typedef struct sh_video {
     struct vf_instance *vfilter;  // video filter chain
     const struct vd_functions *vd_driver;
     int vf_initialized;   // -1 failed, 0 not done, 1 done
+    long vf_reconfig_count; // incremented each mpcodecs_reconfig_vo() call
     struct mp_image_params *vf_input; // video filter input params
     struct mp_hwdec_info *hwdec_info; // video output hwdec handles
     // win32-compatible codec parameters:

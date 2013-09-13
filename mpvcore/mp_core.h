@@ -229,6 +229,8 @@ typedef struct MPContext {
     double last_vo_pts;
     // Video PTS, or audio PTS if video has ended.
     double playback_pts;
+    // Used to determine whether the video filter chain was rebuilt.
+    long last_vf_reconfig_count;
 
     // History of video frames timestamps that were queued in the VO
     // This includes even skipped frames during hr-seek

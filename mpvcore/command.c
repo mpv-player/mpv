@@ -1155,10 +1155,13 @@ static void set_deinterlacing(struct MPContext *mpctx, bool enable)
         if (!enable)
             change_video_filters(mpctx, "del", VF_DEINTERLACE);
     } else {
-        int arg = enable;
-        if (vf->control(vf, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
-            change_video_filters(mpctx, "add", VF_DEINTERLACE);
+        if ((get_deinterlacing(mpctx) > 0) != enable) {
+            int arg = enable;
+            if (vf->control(vf, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
+                change_video_filters(mpctx, "add", VF_DEINTERLACE);
+        }
     }
+    mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
 }
 
 static int mp_property_deinterlace(m_option_t *prop, int action,

@@ -461,6 +461,11 @@ const m_option_t mp_opts[] = {
     OPT_SETTINGSLIST("af*", af_settings, 0, &af_obj_list),
     OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
 
+    OPT_CHOICE("deinterlace", deinterlace, M_OPT_OPTIONAL_PARAM,
+               ({"auto", -1},
+                {"no", 0},
+                {"yes", 1}, {"", 1})),
+
     OPT_STRING("ad", audio_decoders, 0),
     OPT_STRING("vd", video_decoders, 0),
 
@@ -745,6 +750,7 @@ const struct MPOpts mp_default_opts = {
     .audio_driver_list = NULL,
     .audio_decoders = "-spdif:*", // never select spdif by default
     .video_decoders = NULL,
+    .deinterlace = -1,
     .fixed_vo = 1,
     .softvol = SOFTVOL_AUTO,
     .softvol_max = 200,
