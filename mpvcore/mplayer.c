@@ -867,6 +867,8 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
     if (!conffile)
         goto exit;
 
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "Saving state.\n");
+
     FILE *file = fopen(conffile, "wb");
     if (!file)
         goto exit;
