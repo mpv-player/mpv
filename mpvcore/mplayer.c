@@ -841,6 +841,8 @@ static const char *backup_properties[] = {
     "saturation",
     "hue",
     "deinterlace",
+    "vf",
+    "af",
     "panscan",
     "aid",
     "vid",
