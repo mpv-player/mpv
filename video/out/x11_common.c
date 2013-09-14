@@ -462,10 +462,15 @@ int vo_x11_init(struct vo *vo)
 
     x11->display = XOpenDisplay(dispName);
     if (!x11->display) {
-        if (!(vo->probing && !dispName[0])) {
-            mp_msg(MSGT_VO, MSGL_ERR,
-                   "vo: couldn't open the X11 display (%s)!\n", dispName);
+        if (!dispName[0]) {
+        	if(vo->probing)
+				mp_msg(MSGT_VO, MSGL_ERR,
+					   "vo: couldn't open the X11 display (%s)!\n", dispName);
+        	else
+				mp_msg(MSGT_VO, MSGL_V,
+					   "vo: couldn't open the X11 display (%s)! Skipping\n", dispName);
         }
+
         talloc_free(x11);
         vo->x11 = NULL;
         return 0;
