@@ -93,6 +93,23 @@ static int parse_ref_init(struct pl_parser *p)
     return 0;
 }
 
+static int parse_mov_rtsptext(struct pl_parser *p)
+{
+    bstr line = pl_get_line(p);
+    if (!bstr_eatstart(&line, bstr0("RTSPtext")))
+        return -1;
+    if (p->probing)
+        return 0;
+    line = bstr_strip(line);
+    do {
+	    if (bstr_case_startswith(line, bstr0("rtsp://"))) {
+            pl_add(p, line);
+            return 0;
+        }
+    } while (!pl_eof(p) && (line = bstr_strip(pl_get_line(p))).len);
+    return -1;
+}
+
 struct pl_format {
     const char *name;
     int (*parse)(struct pl_parser *p);
@@ -101,6 +118,7 @@ struct pl_format {
 static const struct pl_format formats[] = {
     {"m3u", parse_m3u},
     {"ini", parse_ref_init},
+    {"mov", parse_mov_rtsptext},
 };
 
 static const struct pl_format *probe_pl(struct pl_parser *p, bool force)
