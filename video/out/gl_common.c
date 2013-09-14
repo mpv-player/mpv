@@ -858,11 +858,13 @@ static struct backend backends[] = {
 #ifdef CONFIG_GL_WIN32
     {"win", mpgl_set_backend_w32},
 #endif
-#ifdef CONFIG_GL_X11
-    {"x11", mpgl_set_backend_x11},
-#endif
+
+//Add the wayland backend before x11, in order to probe for a wayland-server before a x11-server and avoid using xwayland
 #ifdef CONFIG_GL_WAYLAND
     {"wayland", mpgl_set_backend_wayland},
+#endif
+#ifdef CONFIG_GL_X11
+    {"x11", mpgl_set_backend_x11},
 #endif
     {0}
 };
