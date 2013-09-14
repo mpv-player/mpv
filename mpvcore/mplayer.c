@@ -4213,7 +4213,7 @@ static void print_resolve_contents(struct mp_log *log,
         if (res->subs[n]->lang)
             mp_msg_log(log, MSGL_V, "    lang: %s\n", res->subs[n]->lang);
         if (res->subs[n]->data) {
-            mp_msg_log(log, MSGL_V, "    data: %d bytes\n",
+            mp_msg_log(log, MSGL_V, "    data: %zd bytes\n",
                        strlen(res->subs[n]->data));
         }
     }

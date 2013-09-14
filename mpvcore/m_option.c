@@ -2409,7 +2409,7 @@ static void append_param(char **res, char *param)
         *res = talloc_strdup_append(*res, param);
     } else {
         // Simple escaping: %BYTECOUNT%STRING
-        *res = talloc_asprintf_append(*res, "%%%d%%%s", strlen(param), param);
+        *res = talloc_asprintf_append(*res, "%%%zd%%%s", strlen(param), param);
     }
 }
 
