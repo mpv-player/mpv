@@ -86,6 +86,7 @@
           <string>VCD</string>
           <string>VFW</string>
           <string>VOB</string>
+          <string>WEBM</string>
           <string>WMV</string>
           <string>asf</string>
           <string>avi</string>
@@ -119,6 +120,7 @@
           <string>vcd</string>
           <string>vfw</string>
           <string>vob</string>
+          <string>webm</string>
           <string>wmv</string>
         </array>
         <key>CFBundleTypeIconFile</key>
