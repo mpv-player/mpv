@@ -496,7 +496,7 @@ static int get_chapter_time(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int titl
             last_cell = pgc->program_map[ptt[i].pgn];
         else
             last_cell = 0;
-        do {
+        while (cell < last_cell) {
             if(!(pgc->cell_playback[cell-1].block_type == BLOCK_TYPE_ANGLE_BLOCK &&
                  pgc->cell_playback[cell-1].block_mode != BLOCK_MODE_FIRST_CELL)
             ) {
@@ -508,7 +508,7 @@ static int get_chapter_time(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int titl
                 cur++;
             }
             cell++;
-        } while(cell < last_cell);
+        }
     }
     return 0;
 }
