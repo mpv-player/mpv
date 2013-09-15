@@ -989,7 +989,8 @@
 ``--heartbeat-cmd=<command>``
     Command that is executed every 30 seconds during playback via *system()* -
     i.e. using the shell. The time between the commands can be customized with
-    the ``--heartbeat-interval`` option.
+    the ``--heartbeat-interval`` option. The command is not run while playback
+    is paused.
 
     .. note::
 
@@ -1002,7 +1003,8 @@
     This can be "misused" to disable screensavers that do not support the
     proper X API (see also ``--stop-screensaver``). If you think this is too
     complicated, ask the author of the screensaver program to support the
-    proper X APIs.
+    proper X APIs. Note that the ``--stop-screensaver`` does not influence the
+    heartbeat code at all.
 
     .. admonition:: Example for xscreensaver
 

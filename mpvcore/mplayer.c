@@ -3392,7 +3392,7 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
 static void handle_heartbeat_cmd(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    if (opts->heartbeat_cmd) {
+    if (opts->heartbeat_cmd && !mpctx->paused) {
         double now = mp_time_sec();
         if (now - mpctx->last_heartbeat > opts->heartbeat_interval) {
             mpctx->last_heartbeat = now;
