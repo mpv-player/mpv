@@ -187,20 +187,16 @@ static char *create_fname(struct MPContext *mpctx, char *template,
             break;
         }
         case 'w': {
-            if (template[0] != '{')
+            char tfmt = *template;
+            if (!tfmt)
                 goto error_exit;
             template++;
-            char *end = strchr(template, '}');
-            if (!end)
-                goto error_exit;
-            char *fmt = talloc_strndup(res, template, end - template);
-            char *s = mp_format_time_fmt(fmt, get_current_time(mpctx));
+            char fmtstr[] = {'%', tfmt, '\0'};
+            char *s = mp_format_time_fmt(fmtstr, get_current_time(mpctx));
             if (!s)
                 goto error_exit;
             append_filename(&res, s);
             talloc_free(s);
-            talloc_free(fmt);
-            template = end + 1;
             break;
         }
         case 't': {

@@ -1880,27 +1880,26 @@
             numbers would be more intuitive, but are not easily implementable
             because container formats usually use time stamps for identifying
             frames.)
-    ``%w{X}``
-        Specify the current playback time using the format string ``X``. The
-        nested time format string is contained within ``{`` and ``}``.
-        ``%p`` is like ``%w{%H:%M:%S}``, and ``%P`` is like ``%w{%H:%M:%S.%T}``.
+    ``%wX``
+        Specify the current playback time using the format string ``X``.
+        ``%p`` is like ``%wH:%wM:%wS``, and ``%P`` is like ``%wH:%wM:%wS.%wT``.
 
         Valid format specifiers:
-            ``%H``
+            ``%wH``
                 hour (padded with 0 to two digits)
-            ``%h``
+            ``%wh``
                 hour (not padded)
-            ``%M``
+            ``%wM``
                 minutes (00-59)
-            ``%m``
-                total minutes (includes hours, unlike ``%M``)
-            ``%S``
+            ``%wm``
+                total minutes (includes hours, unlike ``%wM``)
+            ``%wS``
                 seconds (00-59)
-            ``%s``
+            ``%ws``
                 total seconds (includes hours and minutes)
-            ``%f``
-                like ``%s``, but as float
-            ``%T``
+            ``%wf``
+                like ``%ws``, but as float
+            ``%wT``
                 milliseconds (000-999)
 
     ``%tX``
