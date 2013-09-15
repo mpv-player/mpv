@@ -1459,7 +1459,8 @@ static int mp_property_aspect(m_option_t *prop, int action, void *arg,
         if (f < 0.1)
             f = (float)mpctx->sh_video->disp_w / mpctx->sh_video->disp_h;
         mpctx->opts->movie_aspect = f;
-        video_reinit_vo(mpctx->sh_video);
+        reinit_video_filters(mpctx);
+        mp_force_video_refresh(mpctx);
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_GET:
