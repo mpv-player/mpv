@@ -1,0 +1,21 @@
+[Desktop Entry]
+Type=Application
+Name=mpv Media Player
+Name[ca]=Reproductor multimèdia mpv
+Name[pl]=mpv odtwarzacz multimedialny
+GenericName=Multimedia player
+Comment=Play movies and songs
+Comment[ca]=Reproduïu vídeos i cançons
+Comment[de]=Filme und Musik abspielen
+Comment[es]=Reproduzca vídeos y canciones
+Comment[fr]=Lecteur multimédia
+Comment[it]=Lettore multimediale
+Comment[zh]=多媒体播放器
+Comment[pl]=Odtwarzaj filmy i muzykę
+Icon=mpv
+TryExec=mpv
+Exec=mpv --really-quiet -- %F
+Terminal=false
+NoDisplay=true
+Categories=AudioVideo;Audio;Video;Player;TV;
+MimeType=application/ogg;application/x-ogg;application/sdp;application/smil;application/x-smil;application/streamingmedia;application/x-streamingmedia;application/vnd.rn-realmedia;application/vnd.rn-realmedia-vbr;audio/aac;audio/x-aac;audio/m4a;audio/x-m4a;audio/mp1;audio/x-mp1;audio/mp2;audio/x-mp2;audio/mp3;audio/x-mp3;audio/mpeg;audio/x-mpeg;audio/mpegurl;audio/x-mpegurl;audio/mpg;audio/x-mpg;audio/rn-mpeg;audio/scpls;audio/x-scpls;audio/vnd.rn-realaudio;audio/wav;audio/x-pn-windows-pcm;audio/x-realaudio;audio/x-pn-realaudio;audio/x-ms-wma;audio/x-pls;audio/x-wav;video/mpeg;video/x-mpeg;video/x-mpeg2;video/mp4;video/msvideo;video/x-msvideo;video/quicktime;video/vnd.rn-realvideo;video/x-ms-afs;video/x-ms-asf;video/x-ms-wmv;video/x-ms-wmx;video/x-ms-wvxvideo;video/x-avi;video/x-fli;video/x-flv;video/x-theora;video/x-matroska;video/webm;audio/x-flac;
