@@ -197,7 +197,8 @@ typedef struct mkv_demuxer {
 #define RAPROPERTIES5_SIZE 70
 
 // Maximum number of subtitle packets that are accepted for pre-roll.
-#define NUM_SUB_PREROLL_PACKETS 100
+// (Subtitle packets added before first A/V keyframe packet is found with seek.)
+#define NUM_SUB_PREROLL_PACKETS 500
 
 /**
  * \brief ensures there is space for at least one additional element
@@ -2269,9 +2270,16 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
         if (mkv_d->v_skip_to_keyframe)
             use_this_block = 0;
     } else if (track->type == MATROSKA_TRACK_SUBTITLE) {
-        if (!use_this_block && mkv_d->subtitle_preroll) {
-            mkv_d->subtitle_preroll--;
+        if (!use_this_block && mkv_d->subtitle_preroll)
             use_this_block = 1;
+        if (use_this_block) {
+            if (mkv_d->subtitle_preroll) {
+                mkv_d->subtitle_preroll--;
+            } else {
+                // This could overflow the demuxer queue.
+                if (mkv_d->a_skip_to_keyframe || mkv_d->v_skip_to_keyframe)
+                    use_this_block = 0;
+            }
         }
         if (use_this_block) {
             if (laces > 1) {
@@ -2563,7 +2571,7 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
 
     if (index) {        /* We've found an entry. */
         uint64_t seek_pos = index->filepos;
-        if (mkv_d->subtitle_preroll) {
+        if (flags & SEEK_SUBPREROLL) {
             uint64_t prev_target = 0;
             for (int i = 0; i < mkv_d->num_indexes; i++) {
                 if (seek_id < 0 || mkv_d->indexes[i].tnum == seek_id) {
@@ -2600,10 +2608,9 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
                 a_tnum = track->tnum;
         }
     }
-    mkv_d->subtitle_preroll = 0;
-    if ((flags & SEEK_SUBPREROLL) && st_active[STREAM_SUB] &&
-        st_active[STREAM_VIDEO])
-        mkv_d->subtitle_preroll = NUM_SUB_PREROLL_PACKETS;
+    mkv_d->subtitle_preroll = NUM_SUB_PREROLL_PACKETS;
+    if (!st_active[STREAM_SUB] || !st_active[STREAM_VIDEO])
+        flags &= ~SEEK_SUBPREROLL;
     if (!(flags & (SEEK_BACKWARD | SEEK_FORWARD))) {
         if (flags & SEEK_ABSOLUTE || rel_seek_secs < 0)
             flags |= SEEK_BACKWARD;
@@ -2632,14 +2639,13 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
         if (!index)
             stream_seek(demuxer->stream, old_pos);
 
-        if (st_active[STREAM_VIDEO])
-            mkv_d->v_skip_to_keyframe = 1;
+        mkv_d->v_skip_to_keyframe = st_active[STREAM_VIDEO];
+        mkv_d->a_skip_to_keyframe = st_active[STREAM_AUDIO];
         if (flags & SEEK_FORWARD)
             mkv_d->skip_to_timecode = target_timecode;
         else
             mkv_d->skip_to_timecode = index ? index->timecode * mkv_d->tc_scale
                                             : 0;
-        mkv_d->a_skip_to_keyframe = 1;
 
         demux_mkv_fill_buffer(demuxer);
     } else if ((demuxer->movi_end <= 0) || !(flags & SEEK_ABSOLUTE))
@@ -2675,10 +2681,9 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
         mkv_d->cluster_end = 0;
         stream_seek(s, index->filepos);
 
-        if (st_active[STREAM_VIDEO])
-            mkv_d->v_skip_to_keyframe = 1;
+        mkv_d->v_skip_to_keyframe = st_active[STREAM_VIDEO];
+        mkv_d->a_skip_to_keyframe = st_active[STREAM_AUDIO];
         mkv_d->skip_to_timecode = index->timecode * mkv_d->tc_scale;
-        mkv_d->a_skip_to_keyframe = 1;
 
         demux_mkv_fill_buffer(demuxer);
     }
