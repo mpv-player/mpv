@@ -1791,7 +1791,7 @@ static void reset_subtitles(struct MPContext *mpctx)
     osd_changed(mpctx->osd, OSDTYPE_SUB);
 }
 
-static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
+static void update_subtitles(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
     if (!(mpctx->initialized_flags & INITIALIZED_SUB))
@@ -1810,7 +1810,7 @@ static void update_subtitles(struct MPContext *mpctx, double refpts_tl)
 
     mpctx->osd->video_offset = track->under_timeline ? mpctx->video_offset : 0;
 
-    double refpts_s = refpts_tl - mpctx->osd->video_offset;
+    double refpts_s = mpctx->playback_pts - mpctx->osd->video_offset;
     double curpts_s = refpts_s + opts->sub_delay;
 
     if (!track->preloaded) {
@@ -2792,8 +2792,6 @@ static bool redraw_osd(struct MPContext *mpctx)
     if (vo_redraw_frame(vo) < 0)
         return false;
 
-    if (mpctx->sh_video)
-        update_subtitles(mpctx, mpctx->sh_video->pts);
     draw_osd(mpctx);
 
     vo_flip_page(vo, 0, -1);
@@ -3513,7 +3511,7 @@ static void run_playloop(struct MPContext *mpctx)
         mpctx->video_pts = sh_video->pts;
         mpctx->last_vo_pts = mpctx->video_pts;
         mpctx->playback_pts = mpctx->video_pts;
-        update_subtitles(mpctx, sh_video->pts);
+        update_subtitles(mpctx);
         update_osd_msg(mpctx);
         draw_osd(mpctx);
 
@@ -3600,10 +3598,9 @@ static void run_playloop(struct MPContext *mpctx)
         }
         mpctx->playback_pts = a_pos;
         print_status(mpctx);
-
-        if (!mpctx->sh_video)
-            update_subtitles(mpctx, a_pos);
     }
+
+    update_subtitles(mpctx);
 
     /* It's possible for the user to simultaneously switch both audio
      * and video streams to "disabled" at runtime. Handle this by waiting
