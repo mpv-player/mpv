@@ -42,7 +42,8 @@
 
 enum stop_play_reason {
     KEEP_PLAYING = 0,   // must be 0, numeric values of others do not matter
-    AT_END_OF_FILE,     // file has ended normally, prepare to play next
+    AT_END_OF_FILE,     // file has ended, prepare to play next
+                        // also returned on unrecoverable playback errors
     PT_NEXT_ENTRY,      // prepare to play next entry in playlist
     PT_CURRENT_ENTRY,   // prepare to play mpctx->playlist->current
     PT_STOP,            // stop playback, clear playlist
@@ -332,7 +333,8 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
 struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);
-struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction);
+struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
+                                    bool force);
 int mp_get_cache_percent(struct MPContext *mpctx);
 void mp_write_watch_later_conf(struct MPContext *mpctx);
 void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);

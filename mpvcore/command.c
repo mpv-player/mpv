@@ -2295,7 +2295,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         int dir = cmd->id == MP_CMD_PLAYLIST_PREV ? -1 : +1;
         int force = cmd->args[0].v.i;
 
-        struct playlist_entry *e = mp_next_file(mpctx, dir);
+        struct playlist_entry *e = mp_next_file(mpctx, dir, force);
         if (!e && !force)
             break;
         mpctx->playlist->current = e;

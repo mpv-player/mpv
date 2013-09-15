@@ -4287,6 +4287,7 @@ static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
 static void play_current_file(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
+    double playback_start = -1e100;
 
     mpctx->initialized_flags |= INITIALIZED_PLAYBACK;
     mpctx->stop_play = 0;
@@ -4574,6 +4575,7 @@ goto_reopen_demuxer: ;
     if (mpctx->opts->pause)
         pause_player(mpctx);
 
+    playback_start = mp_time_sec();
     mpctx->error_playing = false;
     while (!mpctx->stop_play)
         run_playloop(mpctx);
@@ -4590,6 +4592,9 @@ goto_reopen_demuxer: ;
 #endif
 
 terminate_playback:  // don't jump here after ao/vo/getch initialization!
+
+    if (mpctx->stop_play == KEEP_PLAYING)
+        mpctx->stop_play = AT_END_OF_FILE;
 
     if (opts->position_save_on_quit && mpctx->stop_play == PT_QUIT)
         mp_write_watch_later_conf(mpctx);
@@ -4622,13 +4627,26 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     mpctx->osd->ass_renderer = NULL;
     ass_clear_fonts(mpctx->ass_library);
 #endif
+
+    // Played/paused for longer than 3 seconds -> ok
+    bool playback_failed = mpctx->stop_play == AT_END_OF_FILE &&
+                (playback_start < 0 || mp_time_sec() - playback_start < 3.0);
+    if (mpctx->playlist->current && !mpctx->playlist->current_was_replaced)
+        mpctx->playlist->current->playback_failed = playback_failed;
 }
 
 // Determine the next file to play. Note that if this function returns non-NULL,
 // it can have side-effects and mutate mpctx.
-struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction)
+//  direction: -1 (previous) or +1 (next)
+//  force: if true, don't skip playlist entries marked as failed
+struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
+                                    bool force)
 {
     struct playlist_entry *next = playlist_get_next(mpctx->playlist, direction);
+    if (direction < 0 && !force) {
+        while (next && next->playback_failed)
+            next = next->prev;
+    }
     if (!next && mpctx->opts->loop_times >= 0) {
         if (direction > 0) {
             if (mpctx->opts->shuffle)
@@ -4641,6 +4659,17 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction)
             }
         } else {
             next = mpctx->playlist->last;
+        }
+        if (!force && next && next->playback_failed) {
+            bool all_failed = true;
+            struct playlist_entry *cur;
+            for (cur = mpctx->playlist->first; cur; cur = cur->next) {
+                all_failed &= cur->playback_failed;
+                if (!all_failed)
+                    break;
+            }
+            if (all_failed)
+                next = NULL;
         }
     }
     return next;
@@ -4678,7 +4707,7 @@ static void play_files(struct MPContext *mpctx)
         struct playlist_entry *new_entry = NULL;
 
         if (mpctx->stop_play == PT_NEXT_ENTRY) {
-            new_entry = mp_next_file(mpctx, +1);
+            new_entry = mp_next_file(mpctx, +1, false);
         } else if (mpctx->stop_play == PT_CURRENT_ENTRY) {
             new_entry = mpctx->playlist->current;
         } else if (mpctx->stop_play == PT_RESTART) {
