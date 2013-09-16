@@ -413,25 +413,39 @@ static void macosx_redirect_output_to_logfile(const char *filename)
     [pool release];
 }
 
-static bool psn_matches_current_process(char *psn_arg_to_check)
+static void get_system_version(int* major, int* minor, int* bugfix)
 {
-    ProcessSerialNumber psn;
-    GetCurrentProcess(&psn);
-
-    NSString *in_psn   = [NSString stringWithUTF8String:psn_arg_to_check];
-    NSString *real_psn = [NSString stringWithFormat:@"-psn_%u_%u",
-                                   psn.highLongOfPSN, psn.lowLongOfPSN];
-
-    return [real_psn isEqualToString:in_psn];
+    static dispatch_once_t once_token;
+    static int s_major  = 0;
+    static int s_minor  = 0;
+    static int s_bugfix = 0;
+    dispatch_once(&once_token, ^{
+        NSString *version_plist =
+            @"/System/Library/CoreServices/SystemVersion.plist";
+        NSString *version_string =
+            [NSDictionary dictionaryWithContentsOfFile:version_plist]
+                [@"ProductVersion"];
+        NSArray* versions = [version_string componentsSeparatedByString:@"."];
+        int count = [versions count];
+        if (count >= 1)
+            s_major = [versions[0] intValue];
+        if (count >= 2)
+            s_minor = [versions[1] intValue];
+        if (count >= 3)
+            s_bugfix = [versions[2] intValue];
+    });
+    *major  = s_major;
+    *minor  = s_minor;
+    *bugfix = s_bugfix;
 }
 
 static bool bundle_started_from_finder(int argc, char **argv)
 {
-    bool bundle_detected     = [[NSBundle mainBundle] bundleIdentifier];
-    bool pre_mavericks_args  = argc==2 && psn_matches_current_process(argv[1]);
-    bool post_mavericks_args = argc==1;
-
-    return bundle_detected && (pre_mavericks_args || post_mavericks_args);
+    bool bundle_detected = [[NSBundle mainBundle] bundleIdentifier];
+    int major, minor, bugfix;
+    get_system_version(&major, &minor, &bugfix);
+    bool finder_args = ((major == 10) && (minor >= 9)) ? argc==1 : argc==2;
+    return bundle_detected && finder_args;
 }
 
 void macosx_finder_args_preinit(int *argc, char ***argv)
