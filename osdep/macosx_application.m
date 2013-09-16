@@ -413,25 +413,35 @@ static void macosx_redirect_output_to_logfile(const char *filename)
     [pool release];
 }
 
-static bool psn_matches_current_process(char *psn_arg_to_check)
+static void get_system_version(int* major, int* minor, int* bugfix)
 {
-    ProcessSerialNumber psn;
-    GetCurrentProcess(&psn);
-
-    NSString *in_psn   = [NSString stringWithUTF8String:psn_arg_to_check];
-    NSString *real_psn = [NSString stringWithFormat:@"-psn_%u_%u",
-                                   psn.highLongOfPSN, psn.lowLongOfPSN];
-
-    return [real_psn isEqualToString:in_psn];
+	static dispatch_once_t onceToken;
+	static int mMajor = 10;
+	static int mMinor = 8;
+	static int mBugfix = 0;
+	dispatch_once(&onceToken, ^{
+		NSString* versionString = [[NSDictionary dictionaryWithContentsOfFile:@"/System/Library/CoreServices/SystemVersion.plist"] objectForKey:@"ProductVersion"];
+		NSArray* versions = [versionString componentsSeparatedByString:@"."];
+		int count = [versions count];
+		if (count >= 1)
+			mMajor = [[versions objectAtIndex:0] intValue];
+		if (count >= 2)
+			mMinor = [[versions objectAtIndex:1] intValue];
+		if (count >= 3)
+			mBugfix = [[versions objectAtIndex:2] intValue];
+	});
+	*major = mMajor;
+	*minor = mMinor;
+	*bugfix = mBugfix;
 }
 
 static bool bundle_started_from_finder(int argc, char **argv)
 {
-    bool bundle_detected     = [[NSBundle mainBundle] bundleIdentifier];
-    bool pre_mavericks_args  = argc==2 && psn_matches_current_process(argv[1]);
-    bool post_mavericks_args = argc==1;
-
-    return bundle_detected && (pre_mavericks_args || post_mavericks_args);
+	bool bundle_detected = ([[NSBundle mainBundle] bundleIdentifier] != nil);
+	int major = 10, minor = 8, bugfix = 0;
+	get_system_version(&major, &minor, &bugfix);
+	bool args = ((major == 10) && (minor >= 9)) ? argc==1 : argc==2;
+	return bundle_detected && args;
 }
 
 void macosx_finder_args_preinit(int *argc, char ***argv)
