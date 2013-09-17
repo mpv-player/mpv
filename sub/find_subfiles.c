@@ -208,7 +208,7 @@ static void filter_subidx(struct subfn **slist, int *nsub)
         if (case_endswith(fname, ".idx")) {
             prev = fname;
         } else if (case_endswith(fname, ".sub")) {
-            if (strncmp(prev, fname, strlen(fname) - 4) == 0)
+            if (prev && strncmp(prev, fname, strlen(fname) - 4) == 0)
                 (*slist)[n].priority = -1;
         }
     }
