@@ -31,6 +31,7 @@
 #include "video/fmt-conversion.h"
 #include "video/vaapi.h"
 #include "video/decode/dec_video.h"
+#include "video/filter/vf.h"
 
 /*
  * The VAAPI decoder can work only with surfaces passed to the decoder at
@@ -44,11 +45,12 @@
  * buffering (i.e. not trying to reuse a surface while it's busy).
  */
 #define ADDTIONAL_SURFACES 3
+#define VF_VAAPI_SURFACES 2
 
 // Magic number taken from original MPlayer vaapi patch.
 #define MAX_DECODER_SURFACES 21
 
-#define MAX_SURFACES (MAX_DECODER_SURFACES + ADDTIONAL_SURFACES)
+#define MAX_SURFACES (MAX_DECODER_SURFACES + ADDTIONAL_SURFACES + VF_VAAPI_SURFACES)
 
 struct priv {
     struct mp_vaapi_ctx *ctx;
@@ -167,7 +169,7 @@ static int is_direct_mapping(VADisplay display)
 // surface needed. Then we free these surfaces, and rely on the fact that
 // vo_vaapi.c keeps the released surfaces in the pool, and only allocates
 // new surfaces out of that pool.
-static int preallocate_surfaces(struct lavc_ctx *ctx, int va_rt_format, int num)
+static int preallocate_surfaces(struct lavc_ctx *ctx, int num)
 {
     struct priv *p = ctx->hwdec_priv;
     int res = -1;
@@ -177,7 +179,7 @@ static int preallocate_surfaces(struct lavc_ctx *ctx, int va_rt_format, int num)
     p->ctx->flush(p->ctx); // free previously allocated surfaces
 
     for (int n = 0; n < num; n++) {
-        tmp_surfaces[n] = p->ctx->get_surface(p->ctx, va_rt_format, p->format,
+        tmp_surfaces[n] = p->ctx->get_surface(p->ctx, p->format,
                                               p->w, p->h);
         if (!tmp_surfaces[n])
             goto done;
@@ -268,13 +270,23 @@ static int create_decoder(struct lavc_ctx *ctx)
         num_surfaces *= 2;
     }
     num_surfaces = MPMIN(num_surfaces, MAX_DECODER_SURFACES) + ADDTIONAL_SURFACES;
+    struct sh_video *sh = ctx->avctx->opaque;
+    if (sh && sh->vfilter) {
+        struct vf_instance *next = sh->vfilter;
+        while (next) {
+            if (!strcmp(next->info->name, "vaapi")) {
+                num_surfaces += VF_VAAPI_SURFACES;
+                break;
+            }
+        }
+    }
 
     if (num_surfaces > MAX_SURFACES) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Internal error: too many surfaces.\n");
         goto error;
     }
 
-    if (preallocate_surfaces(ctx, VA_RT_FORMAT_YUV420, num_surfaces) < 0) {
+    if (preallocate_surfaces(ctx, num_surfaces) < 0) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Could not allocate surfaces.\n");
         goto error;
     }
@@ -298,7 +310,7 @@ static int create_decoder(struct lavc_ctx *ctx)
                                    &attrib, 1);
     if (!check_va_status(status, "vaGetConfigAttributes()"))
         goto error;
-    if ((attrib.value & VA_RT_FORMAT_YUV420) == 0) {
+    if ((attrib.value & p->ctx->rt_format) == 0) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Chroma format not supported.\n");
         goto error;
     }
@@ -339,7 +351,7 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int format,
             return NULL;
     }
 
-    struct mp_image *img = p->ctx->get_surface(p->ctx, VA_RT_FORMAT_YUV420,
+    struct mp_image *img = p->ctx->get_surface(p->ctx,
                                                format, p->w, p->h);
     if (img) {
         for (int n = 0; n < MAX_SURFACES; n++) {
@@ -375,7 +387,8 @@ static int init(struct lavc_ctx *ctx)
     ctx->hwdec_priv = p;
 
     p->display = p->ctx->display;
-
+    p->ctx->rt_format = VA_RT_FORMAT_YUV420;
+    
     p->va_context->display = p->display;
     p->va_context->config_id = VA_INVALID_ID;
     p->va_context->context_id = VA_INVALID_ID;

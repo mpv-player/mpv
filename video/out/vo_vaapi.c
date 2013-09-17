@@ -98,8 +98,6 @@ struct priv {
 
     int                      output_surface;
     int                      visible_surface;
-    int                      deint;
-    int                      deint_type;
     int                      scaling;
     int                      force_scaled_osd;
 
@@ -285,6 +283,10 @@ static struct mp_image *get_surface(struct mp_vaapi_ctx *ctx, int va_rt_format,
     return mp_image_new_custom_ref(&img, surface, release_video_surface);
 }
 
+static struct mp_image *get_surface_hwdec(struct mp_vaapi_ctx *ctx, int format, int w, int h) {
+    return get_surface(ctx, ctx->rt_format, format, w, h);
+}
+
 // This should be called only by code that is going to preallocate surfaces
 // (and by uninit). Otherwise, hw decoder init might get confused by
 // accidentally releasing hw decoder preallocated surfaces.
@@ -411,25 +413,6 @@ static int query_format(struct vo *vo, uint32_t format)
     return 0;
 }
 
-static inline int get_field_flags(struct priv *p, int i, int flags)
-{
-    return (p->deint && (flags & MP_IMGFIELD_INTERLACED) ?
-            (((!!(flags & MP_IMGFIELD_TOP_FIRST)) ^ i) == 0 ?
-             VA_BOTTOM_FIELD : VA_TOP_FIELD) : VA_FRAME_PICTURE);
-}
-
-static inline int get_colorspace_flags(struct priv *p)
-{
-#if USE_VAAPI_COLORSPACE
-    switch (p->image_params.colorspace) {
-    case MP_CSP_BT_601:         return VA_SRC_BT601;
-    case MP_CSP_BT_709:         return VA_SRC_BT709;
-    case MP_CSP_SMPTE_240M:     return VA_SRC_SMPTE_240;
-    }
-#endif
-    return 0;
-}
-
 static bool render_to_screen(struct priv *p, struct mp_image *mpi)
 {
     bool res = true;
@@ -457,26 +440,22 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
         }
     }
 
-    for (int i = 0; i <= !!(p->deint > 1); i++) {
-        unsigned int flags = (get_field_flags(p, i, mpi->fields) |
-                              get_colorspace_flags(p) |
-                              p->scaling);
-        status = vaPutSurface(p->display,
-                              surface->id,
-                              p->vo->x11->window,
-                              p->src_rect.x0,
-                              p->src_rect.y0,
-                              p->src_rect.x1 - p->src_rect.x0,
-                              p->src_rect.y1 - p->src_rect.y0,
-                              p->dst_rect.x0,
-                              p->dst_rect.y0,
-                              p->dst_rect.x1 - p->dst_rect.x0,
-                              p->dst_rect.y1 - p->dst_rect.y0,
-                              NULL, 0,
-                              flags);
-        if (!check_va_status(status, "vaPutSurface()"))
-            res = false;
-    }
+    unsigned int flags = (get_va_colorspace_flag(p->image_params.colorspace) | p->scaling);
+    status = vaPutSurface(p->display,
+                          surface->id,
+                          p->vo->x11->window,
+                          p->src_rect.x0,
+                          p->src_rect.y0,
+                          p->src_rect.x1 - p->src_rect.x0,
+                          p->src_rect.y1 - p->src_rect.y0,
+                          p->dst_rect.x0,
+                          p->dst_rect.y0,
+                          p->dst_rect.x1 - p->dst_rect.x0,
+                          p->dst_rect.y1 - p->dst_rect.y0,
+                          NULL, 0,
+                          flags);
+    if (!check_va_status(status, "vaPutSurface()"))
+        res = false;
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct vaapi_osd_part *part = &p->osd_parts[n];
@@ -863,12 +842,6 @@ static int control(struct vo *vo, uint32_t request, void *data)
     struct priv *p = vo->priv;
 
     switch (request) {
-    case VOCTRL_GET_DEINTERLACE:
-        *(int*)data = !!p->deint;
-        return VO_TRUE;
-    case VOCTRL_SET_DEINTERLACE:
-        p->deint = *(int*)data ? p->deint_type : 0;
-        return VO_TRUE;
     case VOCTRL_GET_HWDEC_INFO: {
         struct mp_hwdec_info *arg = data;
         arg->vaapi_ctx = &p->mpvaapi;
@@ -954,9 +927,10 @@ static int preinit(struct vo *vo)
     MP_VERBOSE(vo, "VA API version %d.%d\n", major_version, minor_version);
 
     p->mpvaapi.display = p->display;
+    p->mpvaapi.rt_format = VA_RT_FORMAT_YUV420;
     p->mpvaapi.priv = vo;
     p->mpvaapi.flush = flush_surfaces;
-    p->mpvaapi.get_surface = get_surface;
+    p->mpvaapi.get_surface = get_surface_hwdec;
 
     int max_image_formats = vaMaxNumImageFormats(p->display);
     p->va_image_formats = talloc_array(vo, VAImageFormat, max_image_formats);
@@ -1034,8 +1008,6 @@ const struct vo_driver video_out_vaapi = {
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .scaling = VA_FILTER_SCALING_DEFAULT,
-        .deint_type = 2,
-        .deint = 0,
     },
     .options = (const struct m_option[]) {
 #if USE_VAAPI_SCALING
@@ -1045,10 +1017,6 @@ const struct vo_driver video_out_vaapi = {
                     {"hq", VA_FILTER_SCALING_HQ},
                     {"nla", VA_FILTER_SCALING_NL_ANAMORPHIC})),
 #endif
-        OPT_CHOICE("deint", deint_type, 0,
-                   ({"no", 0},
-                    {"first-field", 1},
-                    {"bob", 2})),
         OPT_FLAG("scaled-osd", force_scaled_osd, 0),
         {0}
     },

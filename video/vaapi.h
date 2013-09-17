@@ -52,6 +52,7 @@
 #endif
 
 #include "mpvcore/mp_msg.h"
+#include "csputils.h"
 
 static inline bool check_va_status(VAStatus status, const char *msg)
 {
@@ -62,9 +63,22 @@ static inline bool check_va_status(VAStatus status, const char *msg)
     return true;
 }
 
+static inline int get_va_colorspace_flag(enum mp_csp csp)
+{
+#if USE_VAAPI_COLORSPACE
+    switch (csp) {
+    case MP_CSP_BT_601:         return VA_SRC_BT601;
+    case MP_CSP_BT_709:         return VA_SRC_BT709;
+    case MP_CSP_SMPTE_240M:     return VA_SRC_SMPTE_240;
+    }
+#endif
+    return 0;
+}
+
 struct mp_vaapi_ctx {
     VADisplay display;
-    struct mp_image *(*get_surface)(struct mp_vaapi_ctx *ctx, int va_format,
+    int rt_format;
+    struct mp_image *(*get_surface)(struct mp_vaapi_ctx *ctx,
                                     int mp_format, int w, int h);
     void (*flush)(struct mp_vaapi_ctx *ctx);
     void *priv; // for VO
