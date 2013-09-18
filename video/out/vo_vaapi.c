@@ -80,7 +80,14 @@ struct vaapi_osd_part {
     struct osd_conv_cache *conv_cache;
 };
 
+struct vaapi_surface_pool {
+    int                      num_surfaces;
+    struct vaapi_surface   **surfaces;
+    int                      lru_counter;
+};
+
 #define MAX_OUTPUT_SURFACES 2
+#define MAX_SURFACE_POOLS   2
 
 struct priv {
     struct mp_log           *log;
@@ -105,9 +112,7 @@ struct priv {
     struct vaapi_osd_part    osd_parts[MAX_OSD_PARTS];
     bool                     osd_screen;
 
-    int                      num_video_surfaces;
-    struct vaapi_surface   **video_surfaces;
-    int                      video_surface_lru_counter;
+    struct vaapi_surface_pool pool[MAX_SURFACE_POOLS];
 
     VAImageFormat           *va_image_formats;
     int                      va_num_image_formats;
@@ -171,15 +176,18 @@ static struct vaapi_surface *to_vaapi_surface(struct priv *p,
     // Note: we _could_ use planes[1] or planes[2] to store a vaapi_surface
     //       pointer, but I just don't trust libavcodec enough.
     VASurfaceID id = (uintptr_t)img->planes[3];
-    for (int n = 0; n < p->num_video_surfaces; n++) {
-        struct vaapi_surface *s = p->video_surfaces[n];
-        if (s->id == id)
-            return s;
+    for (int i=0; i<MAX_SURFACE_POOLS; ++i) {
+        struct vaapi_surface_pool *pool = &p->pool[i];
+        for (int n = 0; n < pool->num_surfaces; n++) {
+            struct vaapi_surface *s = pool->surfaces[n];
+            if (s->id == id)
+                return s;
+        }
     }
     return NULL;
 }
 
-static struct vaapi_surface *alloc_vaapi_surface(struct priv *p, int w, int h,
+static struct vaapi_surface *alloc_vaapi_surface(struct priv *p, struct vaapi_surface_pool *pool, int w, int h,
                                                  int va_format)
 {
     VAStatus status;
@@ -190,8 +198,8 @@ static struct vaapi_surface *alloc_vaapi_surface(struct priv *p, int w, int h,
         return NULL;
 
     struct vaapi_surface *surface = NULL;
-    for (int n = 0; n < p->num_video_surfaces; n++) {
-        struct vaapi_surface *s = p->video_surfaces[n];
+    for (int n = 0; n < pool->num_surfaces; n++) {
+        struct vaapi_surface *s = pool->surfaces[n];
         if (s->id == VA_INVALID_ID) {
             surface = s;
             break;
@@ -199,7 +207,7 @@ static struct vaapi_surface *alloc_vaapi_surface(struct priv *p, int w, int h,
     }
     if (!surface) {
         surface = talloc_ptrtype(NULL, surface);
-        MP_TARRAY_APPEND(p, p->video_surfaces, p->num_video_surfaces, surface);
+        MP_TARRAY_APPEND(p, pool->surfaces, pool->num_surfaces, surface);
     }
 
     *surface = (struct vaapi_surface) {
@@ -228,13 +236,13 @@ static void destroy_vaapi_surface(struct priv *p, struct vaapi_surface *s)
     s->va_format = -1;
 }
 
-static struct vaapi_surface *get_vaapi_surface(struct priv *p, int w, int h,
+static struct vaapi_surface *get_vaapi_surface(struct priv *p, int pool_index, int w, int h,
                                                int va_format)
 {
     struct vaapi_surface *best = NULL;
-
-    for (int n = 0; n < p->num_video_surfaces; n++) {
-        struct vaapi_surface *s = p->video_surfaces[n];
+    struct vaapi_surface_pool *pool = &p->pool[pool_index];
+    for (int n = 0; n < pool->num_surfaces; n++) {
+        struct vaapi_surface *s = pool->surfaces[n];
         if (!s->is_used && s->w == w && s->h == h && s->va_format == va_format) {
             if (!best || best->order > s->order)
                 best = s;
@@ -242,11 +250,11 @@ static struct vaapi_surface *get_vaapi_surface(struct priv *p, int w, int h,
     }
 
     if (!best)
-        best = alloc_vaapi_surface(p, w, h, va_format);
+        best = alloc_vaapi_surface(p, pool, w, h, va_format);
 
     if (best) {
         best->is_used = true;
-        best->order = ++p->video_surface_lru_counter;
+        best->order = ++pool->lru_counter;
     }
     return best;
 }
@@ -259,19 +267,16 @@ static void release_video_surface(void *ptr)
         destroy_vaapi_surface(surface->p, surface);
 }
 
-static struct mp_image *get_surface(struct mp_vaapi_ctx *ctx, int va_rt_format,
+static struct mp_image *get_surface(struct priv *p, bool for_dec, int va_rt_format,
                                     int mp_format, int w, int h)
 {
     assert(IMGFMT_IS_VAAPI(mp_format));
-
-    struct vo *vo = ctx->priv;
-    struct priv *p = vo->priv;
 
     struct mp_image img = {0};
     mp_image_setfmt(&img, mp_format);
     mp_image_set_size(&img, w, h);
 
-    struct vaapi_surface *surface = get_vaapi_surface(p, w, h, va_rt_format);
+    struct vaapi_surface *surface = get_vaapi_surface(p, !!for_dec, w, h, va_rt_format);
     if (!surface)
         return NULL;
 
@@ -283,8 +288,10 @@ static struct mp_image *get_surface(struct mp_vaapi_ctx *ctx, int va_rt_format,
     return mp_image_new_custom_ref(&img, surface, release_video_surface);
 }
 
-static struct mp_image *get_surface_hwdec(struct mp_vaapi_ctx *ctx, int format, int w, int h) {
-    return get_surface(ctx, ctx->rt_format, format, w, h);
+static struct mp_image *get_surface_external(struct mp_vaapi_ctx *ctx, bool for_dec, int format, int w, int h) {
+    struct vo *vo = ctx->priv;
+    struct priv *p = vo->priv;
+    return get_surface(p, for_dec, ctx->rt_format, format, w, h);
 }
 
 // This should be called only by code that is going to preallocate surfaces
@@ -295,12 +302,15 @@ static void flush_surfaces(struct mp_vaapi_ctx *ctx)
     struct vo *vo = ctx->priv;
     struct priv *p = vo->priv;
 
-    for (int n = 0; n < p->num_video_surfaces; n++) {
-        struct vaapi_surface *s = p->video_surfaces[n];
-        if (s->is_used) {
-            s->is_dead = true;
-        } else {
-            destroy_vaapi_surface(p, s);
+    for (int i=0; i<MAX_SURFACE_POOLS; ++i) {
+        struct vaapi_surface_pool *pool = &p->pool[i];
+        for (int n = 0; n < pool->num_surfaces; n++) {
+            struct vaapi_surface *s = pool->surfaces[n];
+            if (s->is_used) {
+                s->is_dead = true;
+            } else {
+                destroy_vaapi_surface(p, s);
+            }
         }
     }
 }
@@ -340,7 +350,7 @@ static int alloc_swdec_surfaces(struct priv *p, int w, int h, int format)
     for (int i = 0; i < MAX_OUTPUT_SURFACES; i++) {
         // WTF: no mapping from VAImageFormat -> VA_RT_FORMAT_
         struct mp_image *img =
-            get_surface(&p->mpvaapi, VA_RT_FORMAT_YUV420, IMGFMT_VAAPI, w, h);
+            get_surface(p, false, VA_RT_FORMAT_YUV420, IMGFMT_VAAPI, w, h);
         struct vaapi_surface *s = to_vaapi_surface(p, img);
         if (!s)
             return -1;
@@ -884,13 +894,16 @@ static void uninit(struct vo *vo)
 
     free_video_specific(p);
 
-    for (int n = 0; n < p->num_video_surfaces; n++) {
-        struct vaapi_surface *surface = p->video_surfaces[n];
-        // Nothing is allowed to reference HW surfaces past VO lifetime.
-        assert(!surface->is_used);
-        talloc_free(surface);
+    for (int i=0; i<MAX_SURFACE_POOLS; ++i) {
+        struct vaapi_surface_pool *pool = &p->pool[i];
+        for (int n = 0; n < pool->num_surfaces; n++) {
+            struct vaapi_surface *surface = pool->surfaces[n];
+            // Nothing is allowed to reference HW surfaces past VO lifetime.
+            assert(!surface->is_used);
+            talloc_free(surface);
+        }
+        pool->num_surfaces = 0;
     }
-    p->num_video_surfaces = 0;
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct vaapi_osd_part *part = &p->osd_parts[n];
@@ -930,7 +943,7 @@ static int preinit(struct vo *vo)
     p->mpvaapi.rt_format = VA_RT_FORMAT_YUV420;
     p->mpvaapi.priv = vo;
     p->mpvaapi.flush = flush_surfaces;
-    p->mpvaapi.get_surface = get_surface_hwdec;
+    p->mpvaapi.get_surface = get_surface_external;
 
     int max_image_formats = vaMaxNumImageFormats(p->display);
     p->va_image_formats = talloc_array(vo, VAImageFormat, max_image_formats);

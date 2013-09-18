@@ -45,12 +45,11 @@
  * buffering (i.e. not trying to reuse a surface while it's busy).
  */
 #define ADDTIONAL_SURFACES 3
-#define VF_VAAPI_SURFACES 2
 
 // Magic number taken from original MPlayer vaapi patch.
 #define MAX_DECODER_SURFACES 21
 
-#define MAX_SURFACES (MAX_DECODER_SURFACES + ADDTIONAL_SURFACES + VF_VAAPI_SURFACES)
+#define MAX_SURFACES (MAX_DECODER_SURFACES + ADDTIONAL_SURFACES)
 
 struct priv {
     struct mp_vaapi_ctx *ctx;
@@ -179,7 +178,7 @@ static int preallocate_surfaces(struct lavc_ctx *ctx, int num)
     p->ctx->flush(p->ctx); // free previously allocated surfaces
 
     for (int n = 0; n < num; n++) {
-        tmp_surfaces[n] = p->ctx->get_surface(p->ctx, p->format,
+        tmp_surfaces[n] = p->ctx->get_surface(p->ctx, true, p->format,
                                               p->w, p->h);
         if (!tmp_surfaces[n])
             goto done;
@@ -270,16 +269,6 @@ static int create_decoder(struct lavc_ctx *ctx)
         num_surfaces *= 2;
     }
     num_surfaces = MPMIN(num_surfaces, MAX_DECODER_SURFACES) + ADDTIONAL_SURFACES;
-    struct sh_video *sh = ctx->avctx->opaque;
-    if (sh && sh->vfilter) {
-        struct vf_instance *next = sh->vfilter;
-        while (next) {
-            if (!strcmp(next->info->name, "vaapi")) {
-                num_surfaces += VF_VAAPI_SURFACES;
-                break;
-            }
-        }
-    }
 
     if (num_surfaces > MAX_SURFACES) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Internal error: too many surfaces.\n");
@@ -351,7 +340,7 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int format,
             return NULL;
     }
 
-    struct mp_image *img = p->ctx->get_surface(p->ctx,
+    struct mp_image *img = p->ctx->get_surface(p->ctx, true,
                                                format, p->w, p->h);
     if (img) {
         for (int n = 0; n < MAX_SURFACES; n++) {

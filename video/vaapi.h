@@ -78,7 +78,7 @@ static inline int get_va_colorspace_flag(enum mp_csp csp)
 struct mp_vaapi_ctx {
     VADisplay display;
     int rt_format;
-    struct mp_image *(*get_surface)(struct mp_vaapi_ctx *ctx,
+    struct mp_image *(*get_surface)(struct mp_vaapi_ctx *ctx, bool for_dec,
                                     int mp_format, int w, int h);
     void (*flush)(struct mp_vaapi_ctx *ctx);
     void *priv; // for VO

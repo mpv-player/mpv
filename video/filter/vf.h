@@ -106,8 +106,7 @@ typedef struct vf_seteq {
 /* Hack to make the OSD state object available to vf_sub which
  * access OSD/subtitle state outside of normal OSD draw time. */
 #define VFCTRL_SET_OSD_OBJ 20
-
-#define VFCTRL_GET_HWDEC_INFO 1001 // for vf_vaapi
+#define VFCTRL_GET_HWDEC_INFO 21 // for hwdec filters
 
 int vf_control(struct vf_instance *vf, int cmd, void *arg);
 

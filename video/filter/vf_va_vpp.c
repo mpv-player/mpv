@@ -118,7 +118,7 @@ static inline VASurfaceID get_id(struct mp_image *mpi) {
 static struct mp_image *render(struct vf_priv_s *p, struct mp_image *in, uint flags) {
     if (!p->pipe.filters)
         return NULL;
-    struct mp_image *out = p->hwdec.vaapi_ctx->get_surface(p->hwdec.vaapi_ctx, IMGFMT_VAAPI, in->w, in->h);
+    struct mp_image *out = p->hwdec.vaapi_ctx->get_surface(p->hwdec.vaapi_ctx, false, IMGFMT_VAAPI, in->w, in->h);
     if (!out)
         return NULL;
     VASurfaceID target = get_id(out);
@@ -189,6 +189,7 @@ static int process(struct vf_priv_s *p, struct mp_image *in, struct mp_image **o
 static int filter_ext(struct vf_instance *vf, struct mp_image *in) {
     struct vf_priv_s *p = vf->priv;
     struct mp_image *out1, *out2;
+    const double pts = in->pts;
     const int num = process(p, in, &out1, &out2);
     if (!num)
         vf_add_output_frame(vf, in);
@@ -198,6 +199,7 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *in) {
             vf_add_output_frame(vf, out2);
         talloc_free(in);
     }
+    p->prev_pts = pts;
     return 0;
 }
 
@@ -315,10 +317,7 @@ static int vf_open(vf_instance_t *vf, char *args) {
     vf->control = control;
 
     struct vf_priv_s *p = vf->priv;
-    struct vf_instance *vo = vf->next;
-    while (vo->next)
-        vo = vo->next;
-    if (vf_control(vo, VFCTRL_GET_HWDEC_INFO, &p->hwdec) <= 0 || !p->hwdec.vaapi_ctx || !p->hwdec.vaapi_ctx->display)
+    if (vf_control(vf->next, VFCTRL_GET_HWDEC_INFO, &p->hwdec) <= 0 || !p->hwdec.vaapi_ctx || !p->hwdec.vaapi_ctx->display)
         return CONTROL_ERROR;
     p->display = p->hwdec.vaapi_ctx->display;
     if (initialize(p))
@@ -337,8 +336,8 @@ static const m_option_t vf_opts_fields[] = {
 };
 
 const vf_info_t vf_info_vaapi = {
-    .info = "VA-API Video Post-process filter",
-    .name = "vaapi",
+    .info = "VA-API Video Post-Process Filter",
+    .name = "va-vpp",
     .author = "xylosper",
     .comment = "",
     .vf_open = vf_open,
