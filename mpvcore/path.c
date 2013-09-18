@@ -78,12 +78,12 @@ char *mp_find_config_file(const char *filename)
 char *mp_find_user_config_file(const char *filename)
 {
     char *homedir = NULL, *buff = NULL;
-    static char *homepath = NULL;
+    char *homepath = NULL;
 #ifdef __MINGW32__
     char *config_dir = "mpv";
+    char buf[MAX_PATH];
 
     if (homepath == NULL) {
-        char buf[MAX_PATH];
         if (SHGetFolderPathA(NULL, CSIDL_LOCAL_APPDATA|CSIDL_FLAG_CREATE, NULL,
             SHGFP_TYPE_CURRENT, buf) == S_OK) {
 
