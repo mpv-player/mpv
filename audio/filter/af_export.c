@@ -100,8 +100,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
       s->buf[i] = (uint8_t *)s->buf[0] + i*s->sz*af->data->bps;
 
     if (!s->filename) {
-        mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] No filename set.\n",
-               s->filename);
+        mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] No filename set.\n");
         return AF_ERROR;
     }
 
