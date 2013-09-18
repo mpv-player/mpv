@@ -57,6 +57,7 @@
 @property(nonatomic, assign) struct vo *videoOutput;
 - (BOOL)canHideCursor;
 - (void)recalcDraggableState;
+- (void)signalMousePosition;
 @end
 
 @interface NSScreen (mpvadditions)
@@ -729,6 +730,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
             .height = self.videoOutput->cocoa->aspdat.preh * multiplier
         };
         [self setCenteredContentSize:size];
+        [(GLMPlayerOpenGLView *)self.contentView signalMousePosition];
     }
 }
 
@@ -831,6 +833,12 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 - (void)mouseExited:(NSEvent *)event
 {
     cocoa_put_key(MP_KEY_MOUSE_LEAVE);
+}
+
+- (void)signalMousePosition
+{
+    NSPoint p = [self convertPoint:[self mouseLocation] fromView:nil];
+    vo_mouse_movement(self.videoOutput, p.x, p.y);
 }
 
 - (void)signalMouseMovement:(NSEvent *)event
