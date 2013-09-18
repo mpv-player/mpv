@@ -164,14 +164,16 @@ int vo_cocoa_init(struct vo *vo)
     return 1;
 }
 
-static void vo_cocoa_set_cursor_visibility(struct vo *vo, bool visible)
+static void vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
-    if (visible) {
+    if (*visible) {
         CGDisplayShowCursor(kCGDirectMainDisplay);
     } else if ([s->view canHideCursor]) {
         CGDisplayHideCursor(kCGDirectMainDisplay);
+    } else {
+        *visible = true;
     }
 }
 
@@ -545,7 +547,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         vo_cocoa_update_screen_info(vo);
         return VO_TRUE;
     case VOCTRL_SET_CURSOR_VISIBILITY:
-        vo_cocoa_set_cursor_visibility(vo, *(bool *)arg);
+        vo_cocoa_set_cursor_visibility(vo, arg);
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE: {
         cocoa_set_window_title(vo, (const char *) arg);
