@@ -63,6 +63,7 @@ static const struct vf_priv_s vf_priv_default = {
     .prev_pts = MP_NOPTS_VALUE,
     .config = VA_INVALID_ID,
     .context = VA_INVALID_ID,
+    .deint_type = 2,
 };
 
 static inline void realloc_refs(struct surface_refs *refs, int num) {
