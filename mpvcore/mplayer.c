@@ -454,7 +454,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         if (mpctx->sh_audio)
             uninit_audio(mpctx->sh_audio);
         cleanup_demux_stream(mpctx, STREAM_AUDIO);
-        mpctx->mixer.afilter = NULL;
+        mpctx->mixer.af = NULL;
     }
 
     if (mask & INITIALIZED_SUB) {
@@ -542,7 +542,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     if (mask & INITIALIZED_AO) {
         mpctx->initialized_flags &= ~INITIALIZED_AO;
         if (mpctx->mixer.ao)
-            mixer_uninit(&mpctx->mixer);
+            mixer_uninit_audio(&mpctx->mixer);
         mpctx->mixer.ao = NULL;
         if (mpctx->ao)
             ao_uninit(mpctx->ao, mpctx->stop_play != AT_END_OF_FILE);
@@ -1628,11 +1628,7 @@ static int recreate_audio_filters(struct MPContext *mpctx)
         return -1;
     }
 
-    mpctx->mixer.afilter = mpctx->sh_audio->afilter;
-    mpctx->mixer.volstep = opts->volstep;
-    mpctx->mixer.softvol = opts->softvol;
-    mpctx->mixer.softvol_max = opts->softvol_max;
-    mixer_reinit(&mpctx->mixer, mpctx->ao);
+    mixer_reinit_audio(&mpctx->mixer, mpctx->ao, mpctx->sh_audio->afilter);
     if (!(mpctx->initialized_flags & INITIALIZED_VOL)) {
         if (opts->mixer_init_volume >= 0) {
             mixer_setvolume(&mpctx->mixer, opts->mixer_init_volume,
@@ -4859,6 +4855,7 @@ static int mpv_main(int argc, char *argv[])
     init_libav();
     GetCpuCaps(&gCpuCaps);
     screenshot_init(mpctx);
+    mpctx->mixer.opts = opts;
 
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, argc, argv);

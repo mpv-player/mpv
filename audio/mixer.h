@@ -28,11 +28,10 @@ enum {
 };
 
 typedef struct mixer {
+    struct MPOpts *opts;
     struct ao *ao;
-    struct af_stream *afilter;
-    int volstep;
+    struct af_stream *af;
     int softvol;
-    float softvol_max;
     bool muted;
     bool muted_by_us;
     bool muted_using_volume;
@@ -45,8 +44,8 @@ typedef struct mixer {
     bool user_set_volume;
 } mixer_t;
 
-void mixer_reinit(struct mixer *mixer, struct ao *ao);
-void mixer_uninit(struct mixer *mixer);
+void mixer_reinit_audio(struct mixer *mixer, struct ao *ao, struct af_stream *af);
+void mixer_uninit_audio(struct mixer *mixer);
 void mixer_getvolume(mixer_t *mixer, float *l, float *r);
 void mixer_setvolume(mixer_t *mixer, float l, float r);
 void mixer_incvolume(mixer_t *mixer);
