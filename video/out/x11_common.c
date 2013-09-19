@@ -463,7 +463,7 @@ int vo_x11_init(struct vo *vo)
     x11->display = XOpenDisplay(dispName);
     if (!x11->display) {
         MP_MSG(x11, vo->probing ? MSGL_V : MSGL_ERR,
-               "vo: couldn't open the X11 display (%s)!\n", dispName);
+               "couldn't open the X11 display (%s)!\n", dispName);
 
         talloc_free(x11);
         vo->x11 = NULL;
@@ -481,7 +481,7 @@ int vo_x11_init(struct vo *vo)
     x11->xim = XOpenIM(x11->display, NULL, NULL, NULL);
     if (!x11->xim) {
         MP_MSG(x11, vo->probing ? MSGL_V : MSGL_ERR,
-               "vo: couldn't find a valid X input method!\n");
+               "couldn't find a valid X input method!\n");
 
         XCloseDisplay(x11->display);
         talloc_free(x11);
