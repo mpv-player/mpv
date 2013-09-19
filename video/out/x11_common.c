@@ -479,6 +479,15 @@ int vo_x11_init(struct vo *vo)
     }
 
     x11->xim = XOpenIM(x11->display, NULL, NULL, NULL);
+    if (!x11->xim) {
+        MP_MSG(x11, vo->probing ? MSGL_V : MSGL_ERR,
+               "vo: couldn't find a valid X input method!\n");
+
+        XCloseDisplay(x11->display);
+        talloc_free(x11);
+        vo->x11 = NULL;
+        return 0;
+    }
 
     init_atoms(vo->x11);
 
