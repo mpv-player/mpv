@@ -805,8 +805,12 @@ static int vo_wayland_check_events (struct vo *vo)
      * when pausing no input events get queued so we have to check if there
      * are events to read from the file descriptor through poll */
     if (poll(&fd, 1, 0) > 0) {
-        if (fd.revents & POLLERR || fd.revents & POLLHUP)
-            MP_ERR(wl, "error occurred on the display fd\n");
+        if (fd.revents & POLLERR || fd.revents & POLLHUP) {
+            MP_FATAL(wl, "error occurred on the display fd: "
+                         "closing file descriptor\n");
+            close(wl->display.display_fd);
+            mp_input_put_key(vo->input_ctx, MP_KEY_CLOSE_WIN);
+        }
         if (fd.revents & POLLIN)
             wl_display_dispatch(dp);
         if (fd.revents & POLLOUT)
