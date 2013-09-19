@@ -762,10 +762,6 @@ static int mp_property_clock(m_option_t *prop, int action, void *arg,
 static int mp_property_volume(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
 {
-
-    if (!mpctx->sh_audio)
-        return M_PROPERTY_UNAVAILABLE;
-
     switch (action) {
     case M_PROPERTY_GET:
         mixer_getbothvolume(&mpctx->mixer, arg);
@@ -789,10 +785,6 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
 static int mp_property_mute(m_option_t *prop, int action, void *arg,
                             MPContext *mpctx)
 {
-
-    if (!mpctx->sh_audio)
-        return M_PROPERTY_UNAVAILABLE;
-
     switch (action) {
     case M_PROPERTY_SET:
         mixer_setmute(&mpctx->mixer, *(int *) arg);
