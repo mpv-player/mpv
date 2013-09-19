@@ -3436,7 +3436,7 @@ static void handle_cursor_autohide(struct MPContext *mpctx)
     mpctx->mouse_cursor_visible = mouse_cursor_visible;
 }
 
-static void handle_seek_coalesce(struct MPContext *mpctx)
+static void handle_input_and_seek_coalesce(struct MPContext *mpctx)
 {
     mp_cmd_t *cmd;
     while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
@@ -3882,7 +3882,7 @@ static void run_playloop(struct MPContext *mpctx)
 
     handle_pause_on_low_cache(mpctx);
 
-    handle_seek_coalesce(mpctx);
+    handle_input_and_seek_coalesce(mpctx);
 
     handle_backstep(mpctx);
 
