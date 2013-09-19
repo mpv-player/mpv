@@ -1452,13 +1452,6 @@
         options) are ignored when ASS-subtitles are rendered, unless the
         ``--no-ass`` option is specified.
 
-    .. note::
-
-        By default the OS X Application Bundle ships with a default fontconfig
-        fonts.conf that looks for fonts in the ``~/.mpv/fonts`` folder. It does
-        not include standard OS X paths to reduce the time spent to build
-        fontconfig's cache.
-
 ``--osd-font-size=<size>``, ``--sub-text-font-size=<size>``
     Specify the OSD/sub font size. The unit is the size in scaled pixels at a
     window height of 720. The actual pixel size is scaled with the window
