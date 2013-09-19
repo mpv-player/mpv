@@ -21,6 +21,7 @@
 
 #include <stdbool.h>
 
+// Values of MPOpts.softvol
 enum {
     SOFTVOL_NO = 0,
     SOFTVOL_YES = 1,
@@ -31,19 +32,22 @@ typedef struct mixer {
     struct MPOpts *opts;
     struct ao *ao;
     struct af_stream *af;
-    int softvol;
-    bool muted;
-    bool muted_by_us;
-    bool muted_using_volume;
+    // Static, dependent on ao/softvol settings
+    bool softvol;                       // use AO (true) or af_volume (false)
+    bool emulate_mute;                  // if true, emulate mute with volume=0
+    // Last known values (possibly out of sync with reality)
     float vol_l, vol_r;
+    bool muted;
+    // Used to decide whether we should unmute on uninit
+    bool muted_by_us;
     /* Contains ao driver name or "softvol" if volume is not persistent
      * and needs to be restored after the driver is reinitialized. */
-    const char *restore_volume;
+    const char *driver;
+    // Other stuff
     float balance;
-    bool user_set_mute;
-    bool user_set_volume;
 } mixer_t;
 
+void mixer_init(struct mixer *mixer, struct MPOpts *opts);
 void mixer_reinit_audio(struct mixer *mixer, struct ao *ao, struct af_stream *af);
 void mixer_uninit_audio(struct mixer *mixer);
 void mixer_getvolume(mixer_t *mixer, float *l, float *r);
