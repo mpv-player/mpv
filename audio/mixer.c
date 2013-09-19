@@ -155,8 +155,6 @@ static void addvolume(struct mixer *mixer, float d)
     float vol_l, vol_r;
     mixer_getvolume(mixer, &vol_l, &vol_r);
     mixer_setvolume(mixer, vol_l + d, vol_r + d);
-    if (d > 0)
-        mixer_setmute(mixer, false);
 }
 
 void mixer_incvolume(mixer_t *mixer)
