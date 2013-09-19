@@ -57,6 +57,7 @@ struct vf_priv_s {
     VADisplay display;
     struct mp_hwdec_info hwdec;
     struct pipeline pipe;
+    va_surface_pool_t *pool;
 };
 
 static const struct vf_priv_s vf_priv_default = {
@@ -112,21 +113,16 @@ static inline int get_deint_field(struct vf_priv_s *p, int i, const mp_image_t *
     return !!(mpi->fields & MP_IMGFIELD_TOP_FIRST) ^ i ? VA_TOP_FIELD : VA_BOTTOM_FIELD;
 }
 
-static inline VASurfaceID get_id(struct mp_image *mpi) {
-    return (uintptr_t)(void*)mpi->planes[0];
-}
-
-static struct mp_image *render(struct vf_priv_s *p, struct mp_image *in, uint flags) {
-    if (!p->pipe.filters)
+static struct mp_image *render(struct vf_priv_s *p, va_surface_t *in, uint flags) {
+    if (!p->pipe.filters || !in)
         return NULL;
-    struct mp_image *out = p->hwdec.vaapi_ctx->get_surface(p->hwdec.vaapi_ctx, false, IMGFMT_VAAPI, in->w, in->h);
+    va_surface_t *out = va_surface_pool_get(p->pool, in->w, in->h);
     if (!out)
         return NULL;
-    VASurfaceID target = get_id(out);
     enum {Begun = 1, Rendered = 2};
     int state = 0;
     do { // not a loop, just for break
-        VAStatus status = vaBeginPicture(p->display, p->context, target);
+        VAStatus status = vaBeginPicture(p->display, p->context, out->id);
         if (!is_success(status, "vaBeginPicture()"))
             break;
         state |= Begun;
@@ -138,7 +134,7 @@ static struct mp_image *render(struct vf_priv_s *p, struct mp_image *in, uint fl
         status = vaMapBuffer(p->display, buffer, (void**)&param);
         if (!is_success(status, "vaMapBuffer()"))
             break;
-        param->surface = get_id(in);
+        param->surface = in->id;
         param->surface_region = NULL;
         param->output_region = NULL;
         param->output_background_color = 0;
@@ -158,8 +154,8 @@ static struct mp_image *render(struct vf_priv_s *p, struct mp_image *in, uint fl
     if (state & Begun)
         vaEndPicture(p->display, p->context);
     if (state & Rendered)
-        return out;
-    talloc_free(out);
+        return va_surface_wrap(out);
+    va_surface_unref(&out);
     return NULL;
 }
 
@@ -168,9 +164,10 @@ static int process(struct vf_priv_s *p, struct mp_image *in, struct mp_image **o
     const bool deint = p->do_deint && p->deint_type > 0;
     if (!update_pipeline(p, deint) || !p->pipe.filters) // no filtering
         return 0;
+    va_surface_t *surface = va_surface_in_mp_image(in);
     const uint csp = get_va_colorspace_flag(p->params.colorspace);
     const uint field = get_deint_field(p, 0, in);
-    *out1 = render(p, in, field | csp);
+    *out1 = render(p, surface, field | csp);
     if (!*out1) // cannot render
         return 0;
     mp_image_copy_attributes(*out1, in);
@@ -179,7 +176,7 @@ static int process(struct vf_priv_s *p, struct mp_image *in, struct mp_image **o
     const double add = (in->pts - p->prev_pts)*0.5;
     if (p->prev_pts == MP_NOPTS_VALUE || add <= 0.0 || add > 0.5) // no pts, skip it
         return 1;
-    *out2 = render(p, in, get_deint_field(p, 1, in) | csp);
+    *out2 = render(p, surface, get_deint_field(p, 1, in) | csp);
     if (!*out2) // cannot render
         return 1;
     mp_image_copy_attributes(*out2, in);
@@ -187,8 +184,32 @@ static int process(struct vf_priv_s *p, struct mp_image *in, struct mp_image **o
     return 2;
 }
 
+static mp_image_t *upload(struct vf_priv_s *p, mp_image_t *in) {
+    va_surface_t *surface = va_surface_pool_get_by_imgfmt(p->pool, in->imgfmt, in->w, in->h);
+    if (!surface)
+        surface = va_surface_pool_get(p->pool, in->w, in->h); // dummy
+    else
+        va_surface_upload(surface, in);
+    mp_image_t *out = va_surface_wrap(surface);
+    mp_image_copy_attributes(out, in);
+    return out;
+}
+
 static int filter_ext(struct vf_instance *vf, struct mp_image *in) {
     struct vf_priv_s *p = vf->priv;
+
+    va_surface_t *surface = va_surface_in_mp_image(in);
+    const int rt_format = surface ? surface->rt_format : VA_RT_FORMAT_YUV420;
+    if (!p->pool || va_surface_pool_rt_format(p->pool) != rt_format) {
+        va_surface_pool_unref(&p->pool);
+        p->pool = va_surface_pool_ref(p->display, rt_format, NULL);
+    }
+    if (!surface) {
+        mp_image_t *tmp = upload(p, in);
+        talloc_free(in);
+        in = tmp;
+    }
+
     struct mp_image *out1, *out2;
     const double pts = in->pts;
     const int num = process(p, in, &out1, &out2);
@@ -206,9 +227,9 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *in) {
 
 static int reconfig(struct vf_instance *vf, struct mp_image_params *params, int flags) {
     struct vf_priv_s *p = vf->priv;
-    if (params->imgfmt != IMGFMT_VAAPI)
-        return false;
+    p->prev_pts = MP_NOPTS_VALUE;
     p->params = *params;
+    params->imgfmt = IMGFMT_VAAPI;
     return vf_next_reconfig(vf, params, flags);
 }
 
@@ -222,15 +243,13 @@ static void uninit(struct vf_instance *vf){
         vaDestroyConfig(p->display, p->config);
     free(p->pipe.forward.surfaces);
     free(p->pipe.backward.surfaces);
+    va_surface_pool_unref(&p->pool);
 }
 
-static int query_format(struct vf_instance *vf, unsigned int fmt){
-    switch(fmt){
-    case IMGFMT_VAAPI: {
-        return vf_next_query_format(vf,fmt);
-    } default:
-        return 0;
-    }
+static int query_format(struct vf_instance *vf, unsigned int imgfmt) {
+    if (IMGFMT_IS_VAAPI(imgfmt) || va_image_format_from_imgfmt(imgfmt))
+        return vf_next_query_format(vf, IMGFMT_VAAPI);
+    return 0;
 }
 
 static int control(struct vf_instance *vf, int request, void* data){
@@ -318,7 +337,9 @@ static int vf_open(vf_instance_t *vf, char *args) {
     vf->control = control;
 
     struct vf_priv_s *p = vf->priv;
-    if (vf_control(vf->next, VFCTRL_GET_HWDEC_INFO, &p->hwdec) <= 0 || !p->hwdec.vaapi_ctx || !p->hwdec.vaapi_ctx->display)
+    if (vf_control(vf->next, VFCTRL_GET_HWDEC_INFO, &p->hwdec) <= 0)
+        return CONTROL_ERROR;
+    if (!p->hwdec.vaapi_ctx || !p->hwdec.vaapi_ctx->display)
         return CONTROL_ERROR;
     p->display = p->hwdec.vaapi_ctx->display;
     if (initialize(p))
