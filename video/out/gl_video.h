@@ -44,7 +44,7 @@ struct gl_video_opts {
     int temporal_dither;
     int fbo_format;
     int stereo_mode;
-    int enable_alpha;
+    int alpha_mode;
     int chroma_location;
 };
 

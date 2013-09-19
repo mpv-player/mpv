@@ -387,6 +387,9 @@ void main() {
     color = floor(color * dither_quantization + dither_value + dither_center) /
                 dither_quantization;
 #endif
+#ifdef USE_ALPHA_BLEND
+    color = color * alpha;
+#endif
 #ifdef USE_ALPHA
     out_color = vec4(color, alpha);
 #else
