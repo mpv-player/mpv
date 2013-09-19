@@ -44,14 +44,12 @@ static void checkvolume(struct mixer *mixer)
         mixer->softvol = SOFTVOL_YES;
         if (!mixer->af)
             return;
-        float db_vals[AF_NCH];
+        float vals[AF_NCH];
         if (!af_control_any_rev(mixer->af,
-                        AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET, db_vals))
-            db_vals[0] = db_vals[1] = 1.0;
-        else
-            af_from_dB(2, db_vals, db_vals, 20.0, -200.0, 60.0);
-        vol.left = (db_vals[0] / (mixer->opts->softvol_max / 100.0)) * 100.0;
-        vol.right = (db_vals[1] / (mixer->opts->softvol_max / 100.0)) * 100.0;
+                                AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET, vals))
+            vals[0] = vals[1] = 1.0;
+        vol.left = (vals[0] / (mixer->opts->softvol_max / 100.0)) * 100.0;
+        vol.right = (vals[1] / (mixer->opts->softvol_max / 100.0)) * 100.0;
     }
     float l = mixer->vol_l;
     float r = mixer->vol_r;
@@ -99,24 +97,21 @@ static void setvolume_internal(mixer_t *mixer, float l, float r)
     mixer->restore_volume = "softvol";
     if (!mixer->af)
         return;
-    // af_volume uses values in dB
-    float db_vals[AF_NCH];
-    int i;
-    db_vals[0] = (l / 100.0) * (mixer->opts->softvol_max / 100.0);
-    db_vals[1] = (r / 100.0) * (mixer->opts->softvol_max / 100.0);
-    for (i = 2; i < AF_NCH; i++)
-        db_vals[i] = ((l + r) / 100.0) * (mixer->opts->softvol_max / 100.0) / 2.0;
-    af_to_dB(AF_NCH, db_vals, db_vals, 20.0);
+    float vals[AF_NCH];
+    vals[0] = l / 100.0 * mixer->opts->softvol_max / 100.0;
+    vals[1] = r / 100.0 * mixer->opts->softvol_max / 100.0;
+    for (int i = 2; i < AF_NCH; i++)
+        vals[i] = (vals[0] + vals[1]) / 2.0;
     if (!af_control_any_rev(mixer->af,
                             AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET,
-                            db_vals))
+                            vals))
     {
         mp_tmsg(MSGT_GLOBAL, mixer->softvol ? MSGL_V : MSGL_WARN,
                 "[Mixer] No hardware mixing, inserting volume filter.\n");
         if (!(af_add(mixer->af, "volume", NULL)
               && af_control_any_rev(mixer->af,
                                     AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET,
-                                    db_vals)))
+                                    vals)))
             mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
                     "[Mixer] No volume control available.\n");
     }
