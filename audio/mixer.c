@@ -17,6 +17,7 @@
  */
 
 #include <string.h>
+#include <stdio.h>
 
 #include <libavutil/common.h>
 
@@ -24,6 +25,7 @@
 #include "audio/out/ao.h"
 #include "audio/filter/af.h"
 #include "mpvcore/mp_msg.h"
+#include "talloc.h"
 #include "mixer.h"
 
 void mixer_init(struct mixer *mixer, struct MPOpts *opts)
@@ -228,6 +230,14 @@ void mixer_setbalance(mixer_t *mixer, float val)
                             AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val);
 }
 
+char *mixer_get_volume_restore_data(struct mixer *mixer)
+{
+    if (!mixer->driver[0])
+        return NULL;
+    return talloc_asprintf(NULL, "%s:%f:%f:%d", mixer->driver, mixer->vol_l,
+                           mixer->vol_r, mixer->muted_by_us);
+}
+
 static void probe_softvol(struct mixer *mixer)
 {
     if (mixer->opts->softvol == SOFTVOL_AUTO) {
@@ -286,10 +296,28 @@ static void restore_volume(struct mixer *mixer)
     if (opts->mixer_init_mute >= 0)
         force_mute = opts->mixer_init_mute;
 
+    // Set parameters from playback resume.
+    char *restore_data = mixer->opts->mixer_restore_volume_data;
+    if (restore && restore_data && restore_data[0]) {
+        char drv[40];
+        float v_l, v_r;
+        int m;
+        if (sscanf(restore_data, "%39[^:]:%f:%f:%d", drv, &v_l, &v_r, &m) == 4) {
+            if (strcmp(mixer->driver, drv) == 0) {
+                force_vol_l = v_l;
+                force_vol_r = v_r;
+                force_mute = !!m;
+            }
+        }
+        talloc_free(restore_data);
+        mixer->opts->mixer_restore_volume_data = NULL;
+    }
+
     // Using --volume should not reset the volume on every file (i.e. reinit),
     // OTOH mpv --{ --volume 10 f1.mkv --} --{ --volume 20 f2.mkv --} must work.
     // Resetting the option volumes to "auto" (-1) is easiest. If file local
-    // options (as shown above) are used, these are reset to other values.
+    // options (as shown above) are used, the option handler code will reset
+    // them to other values, and force the volume to be reset as well.
     opts->mixer_init_volume = -1;
     opts->mixer_init_mute = -1;
 

@@ -59,5 +59,6 @@ void mixer_setmute(mixer_t *mixer, bool mute);
 bool mixer_getmute(mixer_t *mixer);
 void mixer_getbalance(mixer_t *mixer, float *bal);
 void mixer_setbalance(mixer_t *mixer, float bal);
+char *mixer_get_volume_restore_data(struct mixer *mixer);
 
 #endif /* MPLAYER_MIXER_H */

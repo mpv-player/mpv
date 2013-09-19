@@ -804,6 +804,21 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+static int mp_property_volrestore(m_option_t *prop, int action,
+                                   void *arg, MPContext *mpctx)
+{
+    switch (action) {
+    case M_PROPERTY_GET: {
+        char *s = mixer_get_volume_restore_data(&mpctx->mixer);
+        *(char **)arg = s;
+        return s ? M_PROPERTY_OK : M_PROPERTY_UNAVAILABLE;
+    }
+    case M_PROPERTY_SET:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+    return mp_property_generic_option(prop, action, arg, mpctx);
+}
+
 /// Audio delay (RW)
 static int mp_property_audio_delay(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
@@ -1806,6 +1821,7 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("aid", mp_property_audio),
     { "balance", mp_property_balance, CONF_TYPE_FLOAT,
       M_OPT_RANGE, -1, 1, NULL },
+    M_OPTION_PROPERTY_CUSTOM("volume-restore-data", mp_property_volrestore),
 
     // Video
     M_OPTION_PROPERTY_CUSTOM("fullscreen", mp_property_fullscreen),
