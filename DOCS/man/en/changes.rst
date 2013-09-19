@@ -169,6 +169,7 @@ Command Line Switches
     ``--mixer``                 AO suboptions (``alsa``, ``oss``)
     ``--mixer-channel``         AO suboptions (``alsa``, ``oss``)
     ``--ao=alsa:device=hw=0.3`` ``--ao=alsa:device=[hw:0,3]``
+    ``-af volnorm``             ``--af=drc`` (renamed)
     =========================== ========================================
 
 .. note::
