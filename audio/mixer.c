@@ -28,11 +28,35 @@
 #include "talloc.h"
 #include "mixer.h"
 
-void mixer_init(struct mixer *mixer, struct MPOpts *opts)
+struct mixer {
+    struct MPOpts *opts;
+    struct ao *ao;
+    struct af_stream *af;
+    // Static, dependent on ao/softvol settings
+    bool softvol;                       // use AO (true) or af_volume (false)
+    bool emulate_mute;                  // if true, emulate mute with volume=0
+    // Last known values (possibly out of sync with reality)
+    float vol_l, vol_r;
+    bool muted;
+    // Used to decide whether we should unmute on uninit
+    bool muted_by_us;
+    /* Contains ao driver name or "softvol" if volume is not persistent
+     * and needs to be restored after the driver is reinitialized. */
+    const char *driver;
+    // Other stuff
+    float balance;
+};
+
+struct mixer *mixer_init(void *talloc_ctx, struct MPOpts *opts)
 {
-    mixer->opts = opts;
-    mixer->vol_l = mixer->vol_r = 100;
-    mixer->driver = "";
+    struct mixer *mixer = talloc_ptrtype(talloc_ctx, mixer);
+    *mixer = (struct mixer) {
+        .opts = opts,
+        .vol_l = 100,
+        .vol_r = 100,
+        .driver = "",
+    };
+    return mixer;
 }
 
 static void checkvolume(struct mixer *mixer)
@@ -73,14 +97,14 @@ static void checkvolume(struct mixer *mixer)
     mixer->muted_by_us &= mixer->muted;
 }
 
-void mixer_getvolume(mixer_t *mixer, float *l, float *r)
+void mixer_getvolume(struct mixer *mixer, float *l, float *r)
 {
     checkvolume(mixer);
     *l = mixer->vol_l;
     *r = mixer->vol_r;
 }
 
-static void setvolume_internal(mixer_t *mixer, float l, float r)
+static void setvolume_internal(struct mixer *mixer, float l, float r)
 {
     struct ao_control_vol vol = {.left = l, .right = r};
     if (!mixer->softvol) {
@@ -108,7 +132,7 @@ static void setvolume_internal(mixer_t *mixer, float l, float r)
     }
 }
 
-void mixer_setvolume(mixer_t *mixer, float l, float r)
+void mixer_setvolume(struct mixer *mixer, float l, float r)
 {
     checkvolume(mixer);  // to check mute status
     if (mixer->vol_l == l && mixer->vol_r == r)
@@ -119,7 +143,7 @@ void mixer_setvolume(mixer_t *mixer, float l, float r)
         setvolume_internal(mixer, mixer->vol_l, mixer->vol_r);
 }
 
-void mixer_getbothvolume(mixer_t *mixer, float *b)
+void mixer_getbothvolume(struct mixer *mixer, float *b)
 {
     float mixer_l, mixer_r;
     mixer_getvolume(mixer, &mixer_l, &mixer_r);
@@ -159,17 +183,17 @@ static void addvolume(struct mixer *mixer, float d)
     mixer_setvolume(mixer, vol_l + d, vol_r + d);
 }
 
-void mixer_incvolume(mixer_t *mixer)
+void mixer_incvolume(struct mixer *mixer)
 {
     addvolume(mixer, mixer->opts->volstep);
 }
 
-void mixer_decvolume(mixer_t *mixer)
+void mixer_decvolume(struct mixer *mixer)
 {
     addvolume(mixer, -mixer->opts->volstep);
 }
 
-void mixer_getbalance(mixer_t *mixer, float *val)
+void mixer_getbalance(struct mixer *mixer, float *val)
 {
     if (mixer->af)
         af_control_any_rev(mixer->af,
@@ -189,7 +213,7 @@ void mixer_getbalance(mixer_t *mixer, float *val)
  * are significantly below 1 will be overwritten with much higher values.
  */
 
-void mixer_setbalance(mixer_t *mixer, float val)
+void mixer_setbalance(struct mixer *mixer, float val)
 {
     float level[AF_NCH];
     int i;

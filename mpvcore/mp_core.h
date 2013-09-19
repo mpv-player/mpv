@@ -22,7 +22,6 @@
 #include <stdbool.h>
 
 #include "mpvcore/options.h"
-#include "audio/mixer.h"
 #include "demux/demux.h"
 
 // definitions used internally by the core player code
@@ -179,7 +178,7 @@ typedef struct MPContext {
     // demuxer defines metadata), or special purpose demuxers like TV.
     struct demuxer *master_demuxer;
 
-    mixer_t mixer;
+    struct mixer *mixer;
     struct ao *ao;
     struct vo *video_out;
 

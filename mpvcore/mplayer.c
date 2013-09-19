@@ -449,7 +449,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
     if (mask & INITIALIZED_ACODEC) {
         mpctx->initialized_flags &= ~INITIALIZED_ACODEC;
-        mixer_uninit_audio(&mpctx->mixer);
+        mixer_uninit_audio(mpctx->mixer);
         if (mpctx->sh_audio)
             uninit_audio(mpctx->sh_audio);
         cleanup_demux_stream(mpctx, STREAM_AUDIO);
@@ -1608,7 +1608,7 @@ static int recreate_audio_filters(struct MPContext *mpctx)
         return -1;
     }
 
-    mixer_reinit_audio(&mpctx->mixer, mpctx->ao, mpctx->sh_audio->afilter);
+    mixer_reinit_audio(mpctx->mixer, mpctx->ao, mpctx->sh_audio->afilter);
 
     return 0;
 }
@@ -4826,7 +4826,7 @@ static int mpv_main(int argc, char *argv[])
     init_libav();
     GetCpuCaps(&gCpuCaps);
     screenshot_init(mpctx);
-    mixer_init(&mpctx->mixer, opts);
+    mpctx->mixer = mixer_init(mpctx, opts);
 
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, argc, argv);

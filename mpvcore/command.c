@@ -764,17 +764,17 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
 {
     switch (action) {
     case M_PROPERTY_GET:
-        mixer_getbothvolume(&mpctx->mixer, arg);
+        mixer_getbothvolume(mpctx->mixer, arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
-        mixer_setvolume(&mpctx->mixer, *(float *) arg, *(float *) arg);
+        mixer_setvolume(mpctx->mixer, *(float *) arg, *(float *) arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_SWITCH: {
         struct m_property_switch_arg *sarg = arg;
         if (sarg->inc <= 0)
-            mixer_decvolume(&mpctx->mixer);
+            mixer_decvolume(mpctx->mixer);
         else
-            mixer_incvolume(&mpctx->mixer);
+            mixer_incvolume(mpctx->mixer);
         return M_PROPERTY_OK;
     }
     }
@@ -787,10 +787,10 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
 {
     switch (action) {
     case M_PROPERTY_SET:
-        mixer_setmute(&mpctx->mixer, *(int *) arg);
+        mixer_setmute(mpctx->mixer, *(int *) arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(int *)arg =  mixer_getmute(&mpctx->mixer);
+        *(int *)arg =  mixer_getmute(mpctx->mixer);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -801,7 +801,7 @@ static int mp_property_volrestore(m_option_t *prop, int action,
 {
     switch (action) {
     case M_PROPERTY_GET: {
-        char *s = mixer_get_volume_restore_data(&mpctx->mixer);
+        char *s = mixer_get_volume_restore_data(mpctx->mixer);
         *(char **)arg = s;
         return s ? M_PROPERTY_OK : M_PROPERTY_UNAVAILABLE;
     }
@@ -906,11 +906,11 @@ static int mp_property_balance(m_option_t *prop, int action, void *arg,
 
     switch (action) {
     case M_PROPERTY_GET:
-        mixer_getbalance(&mpctx->mixer, arg);
+        mixer_getbalance(mpctx->mixer, arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_PRINT: {
         char **str = arg;
-        mixer_getbalance(&mpctx->mixer, &bal);
+        mixer_getbalance(mpctx->mixer, &bal);
         if (bal == 0.f)
             *str = talloc_strdup(NULL, "center");
         else if (bal == -1.f)
@@ -925,7 +925,7 @@ static int mp_property_balance(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_OK;
     }
     case M_PROPERTY_SET:
-        mixer_setbalance(&mpctx->mixer, *(float *)arg);
+        mixer_setbalance(mpctx->mixer, *(float *)arg);
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
