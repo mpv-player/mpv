@@ -455,6 +455,7 @@ int vo_x11_init(struct vo *vo)
     if (!x11->display) {
         mp_msg(MSGT_VO, MSGL_ERR,
                "vo: couldn't open the X11 display (%s)!\n", dispName);
+
         talloc_free(x11);
         vo->x11 = NULL;
         return 0;
@@ -469,6 +470,9 @@ int vo_x11_init(struct vo *vo)
     }
 
     x11->xim = XOpenIM(x11->display, NULL, NULL, NULL);
+    if (!x11->xim)
+        mp_msg(MSGT_VO, MSGL_WARN,
+               "x11: XOpenIM() failed. Unicode input will not work.\n");
 
     init_atoms(vo->x11);
 
@@ -982,11 +986,13 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis, int x, int y,
         x11->mouse_cursor_hidden = false;
         vo_set_cursor_hidden(vo, true);
     }
-    x11->xic = XCreateIC(x11->xim,
-                         XNInputStyle, XIMPreeditNone | XIMStatusNone,
-                         XNClientWindow, x11->window,
-                         XNFocusWindow, x11->window,
-                         NULL);
+    if (x11->xim) {
+        x11->xic = XCreateIC(x11->xim,
+                             XNInputStyle, XIMPreeditNone | XIMStatusNone,
+                             XNClientWindow, x11->window,
+                             XNFocusWindow, x11->window,
+                             NULL);
+    }
 
     vo_x11_update_window_title(vo);
 }
