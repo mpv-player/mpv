@@ -214,6 +214,31 @@ static void append_str(char **s, int *len, bstr append)
     *len = *len + append.len;
 }
 
+static int expand_property(const m_option_t *prop_list, char **ret, int *ret_len,
+                           bstr prop, bool silent_error, void *ctx)
+{
+    bool cond_yes = bstr_eatstart0(&prop, "?");
+    bool cond_no = !cond_yes && bstr_eatstart0(&prop, "!");
+    bool raw = bstr_eatstart0(&prop, "=");
+    int method =
+        (raw || cond_yes || cond_no) ? M_PROPERTY_GET_STRING : M_PROPERTY_PRINT;
+
+    char *s = NULL;
+    int r = m_property_do_bstr(prop_list, prop, method, &s, ctx);
+    bool skip;
+    if (cond_yes || cond_no) {
+        skip = (!!s != cond_yes);
+    } else {
+        skip = !!s;
+        char *append = s;
+        if (!s && !silent_error && !raw)
+            append = (r == M_PROPERTY_UNAVAILABLE) ? "(unavailable)" : "(error)";
+        append_str(ret, ret_len, bstr0(append));
+    }
+    talloc_free(s);
+    return skip;
+}
+
 char *m_properties_expand_string(const m_option_t *prop_list, char *str0,
                                  void *ctx)
 {
@@ -240,26 +265,8 @@ char *m_properties_expand_string(const m_option_t *prop_list, char *str0,
             bool have_fallback = bstr_eatstart0(&str, ":");
 
             if (!skip) {
-                bool cond_yes = bstr_eatstart0(&name, "?");
-                bool cond_no = !cond_yes && bstr_eatstart0(&name, "!");
-                bool raw = bstr_eatstart0(&name, "=");
-                int method = (raw || cond_yes || cond_no)
-                             ? M_PROPERTY_GET_STRING : M_PROPERTY_PRINT;
-
-                char *s = NULL;
-                int r = m_property_do_bstr(prop_list, name, method, &s, ctx);
-                if (cond_yes || cond_no) {
-                    skip = (!!s != cond_yes);
-                } else {
-                    skip = !!s;
-                    char *append = s;
-                    if (!s && !have_fallback && !raw) {
-                        append = r == M_PROPERTY_UNAVAILABLE
-                                 ? "(unavailable)" : "(error)";
-                    }
-                    append_str(&ret, &ret_len, bstr0(append));
-                }
-                talloc_free(s);
+                skip = expand_property(prop_list, &ret, &ret_len, name,
+                                       have_fallback, ctx);
                 if (skip)
                     skip_level = level;
             }
