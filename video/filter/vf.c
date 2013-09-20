@@ -251,7 +251,7 @@ static struct vf_instance *vf_open(struct MPOpts *opts, vf_instance_t *next,
         goto error;
     vf->priv = priv;
     int retcode = vf->info->vf_open(vf, (char *)args);
-    if (retcode < 0)
+    if (retcode < 1)
         goto error;
     return vf;
 
