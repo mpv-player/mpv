@@ -245,8 +245,8 @@ static int expand_property(const m_option_t *prop_list, char **ret, int *ret_len
     return skip;
 }
 
-char *m_properties_expand_string(const m_option_t *prop_list, char *str0,
-                                 void *ctx)
+char *m_properties_expand_string(const m_option_t *prop_list,
+                                 const char *str0, void *ctx)
 {
     char *ret = NULL;
     int ret_len = 0;

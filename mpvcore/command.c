@@ -1916,7 +1916,7 @@ int mp_property_do(const char *name, int action, void *val,
     return m_property_do(mp_properties, name, action, val, ctx);
 }
 
-char *mp_property_expand_string(struct MPContext *mpctx, char *str)
+char *mp_property_expand_string(struct MPContext *mpctx, const char *str)
 {
     return m_properties_expand_string(mp_properties, str, mpctx);
 }
@@ -1945,8 +1945,10 @@ static struct property_osd_display {
     int osd_id;
     // Needs special ways to display the new value (seeks are delayed)
     int seek_msg, seek_bar;
-    // Separator between option name and value (default: ": ")
-    const char *sep;
+    // Free-form message (if NULL, osd_name or the property name is used)
+    const char *msg;
+    // Extra free-from message (just for volume)
+    const char *extra_msg;
 } property_osd_display[] = {
     // general
     { "loop", _("Loop") },
@@ -1987,8 +1989,8 @@ static struct property_osd_display {
     { "sub-scale", _("Sub Scale")},
     { "ass-vsfilter-aspect-compat", _("Subtitle VSFilter aspect compat")},
     { "ass-style-override", _("ASS subtitle style override")},
-    { "vf*", _("Video filters"), .sep = ":\n"},
-    { "af*", _("Audio filters"), .sep = ":\n"},
+    { "vf*", _("Video filters"), .msg = "Video filters:\n${vf}"},
+    { "af*", _("Audio filters"), .msg = "Audio filters:\n${af}"},
 #ifdef CONFIG_TV
     { "tv-brightness", _("Brightness"), .osd_progbar = OSD_BRIGHTNESS },
     { "tv-hue", _("Hue"), .osd_progbar = OSD_HUE},
@@ -2010,6 +2012,8 @@ static void show_property_osd(MPContext *mpctx, const char *pname,
 
     int osd_progbar = 0;
     const char *osd_name = NULL;
+    const char *msg = NULL;
+    const char *extra_msg = NULL;
 
     // look for the command
     for (p = property_osd_display; p->name; p++) {
@@ -2022,10 +2026,18 @@ static void show_property_osd(MPContext *mpctx, const char *pname,
     if (!p->name)
         p = NULL;
 
+    if (p) {
+        msg = p->msg;
+        extra_msg = p->extra_msg;
+    }
+
     if (osd_mode != MP_ON_OSD_AUTO) {
         osd_name = osd_name ? osd_name : prop.name;
-        if (!(osd_mode & MP_ON_OSD_MSG))
+        if (!(osd_mode & MP_ON_OSD_MSG)) {
             osd_name = NULL;
+            msg = NULL;
+            extra_msg = NULL;
+        }
         osd_progbar = osd_progbar ? osd_progbar : ' ';
         if (!(osd_mode & MP_ON_OSD_BAR))
             osd_progbar = 0;
@@ -2035,6 +2047,12 @@ static void show_property_osd(MPContext *mpctx, const char *pname,
         mpctx->add_osd_seek_info |=
             (osd_name ? p->seek_msg : 0) | (osd_progbar ? p->seek_bar : 0);
         return;
+    }
+
+    char buf[40] = {0};
+    if (!msg && osd_name) {
+        snprintf(buf, sizeof(buf), "%s: ${%s}", osd_name, prop.name);
+        msg = buf;
     }
 
     if (osd_progbar && (prop.flags & CONF_RANGE) == CONF_RANGE) {
@@ -2051,30 +2069,29 @@ static void show_property_osd(MPContext *mpctx, const char *pname,
                 set_osd_bar(mpctx, osd_progbar, osd_name, prop.min, prop.max, f);
         }
         if (ok && osd_mode == MP_ON_OSD_AUTO && opts->osd_bar_visible)
-            return;
+            msg = NULL;
     }
 
-    if (osd_name) {
-        char *val = NULL;
-        int r = mp_property_do(prop.name, M_PROPERTY_PRINT, &val, mpctx);
-        if (r == M_PROPERTY_UNAVAILABLE) {
-            set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, opts->osd_duration,
-                         "%s: (unavailable)", osd_name);
-        } else if (r >= 0 && val) {
-            int osd_id = 0;
-            const char *sep = NULL;
-            if (p) {
-                int index = p - property_osd_display;
-                osd_id = p->osd_id ? p->osd_id : OSD_MSG_PROPERTY + index;
-                sep = p->sep;
-            }
-            if (!sep)
-                sep = ": ";
-            set_osd_tmsg(mpctx, osd_id, 1, opts->osd_duration,
-                         "%s%s%s", osd_name, sep, val);
-            talloc_free(val);
-        }
+    void *tmp = talloc_new(NULL);
+    char *osd_msg = NULL;
+    if (msg)
+        osd_msg = talloc_steal(tmp, mp_property_expand_string(mpctx, msg));
+    if (extra_msg) {
+        char *t = talloc_steal(tmp, mp_property_expand_string(mpctx, extra_msg));
+        osd_msg = talloc_asprintf(tmp, "%s%s%s", osd_msg ? osd_msg : "",
+                                  osd_msg && osd_msg[0] ? " " : "", t);
     }
+
+    if (osd_msg && osd_msg[0]) {
+        int osd_id = 0;
+        if (p) {
+            int index = p - property_osd_display;
+            osd_id = p->osd_id ? p->osd_id : OSD_MSG_PROPERTY + index;
+        }
+        set_osd_tmsg(mpctx, osd_id, 1, opts->osd_duration, "%s", osd_msg);
+    }
+
+    talloc_free(tmp);
 }
 
 static const char *property_error_string(int error_value)

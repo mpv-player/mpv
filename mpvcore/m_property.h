@@ -124,8 +124,8 @@ void m_properties_print_help_list(const struct m_option* list);
 // STR is recursively expanded using the same rules.
 // "$$" can be used to escape "$", and "$}" to escape "}".
 // "$>" disables parsing of "$" for the rest of the string.
-char* m_properties_expand_string(const struct m_option* prop_list, char *str,
-                                 void *ctx);
+char* m_properties_expand_string(const struct m_option* prop_list,
+                                 const char *str, void *ctx);
 
 // Trivial helpers for implementing properties.
 int m_property_int_ro(const struct m_option* prop, int action, void* arg,
