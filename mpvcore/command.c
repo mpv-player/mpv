@@ -1180,7 +1180,7 @@ static void set_deinterlacing(struct MPContext *mpctx, bool enable)
         if ((get_deinterlacing(mpctx) > 0) != enable) {
             int arg = enable;
             if (vf->control(vf, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
-                probe_deint_filters(mpctx, "add");
+                probe_deint_filters(mpctx, "pre");
         }
     }
     mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
