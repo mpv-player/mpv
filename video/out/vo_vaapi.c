@@ -89,7 +89,8 @@ struct priv {
     struct vaapi_osd_part    osd_parts[MAX_OSD_PARTS];
     bool                     osd_screen;
 
-    va_surface_pool_t       *pool;
+    struct va_surface_pool  *pool;
+    struct va_image_formats *va_image_formats;
     VAImageFormat           *va_subpic_formats;
     unsigned int            *va_subpic_flags;
     int                      va_num_subpic_formats;
@@ -126,7 +127,7 @@ static bool alloc_swdec_surfaces(struct priv *p, int w, int h, int imgfmt)
 {
     free_video_specific(p);
     for (int i = 0; i < MAX_OUTPUT_SURFACES; i++) {
-        p->swdec_surfaces[i] = va_surface_pool_get_wrapped(p->pool, imgfmt, w, h);
+        p->swdec_surfaces[i] = va_surface_pool_get_wrapped(p->pool, p->va_image_formats, imgfmt, w, h);
         if (!p->swdec_surfaces[i])
             return false;
     }
@@ -160,9 +161,10 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     return 0;
 }
 
-static int query_format(struct vo *vo, uint32_t format)
+static int query_format(struct vo *vo, uint32_t imgfmt)
 {
-    if (IMGFMT_IS_VAAPI(format) || va_image_format_from_imgfmt(format))
+    struct priv *p = vo->priv;
+    if (IMGFMT_IS_VAAPI(imgfmt) || va_image_format_from_imgfmt(p->va_image_formats, imgfmt))
         return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
 
     return 0;
@@ -173,7 +175,7 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
     bool res = true;
     VAStatus status;
 
-    va_surface_t *surface = va_surface_in_mp_image(mpi);
+    struct va_surface *surface = va_surface_in_mp_image(mpi);
     if (!surface)
         return false;
 
@@ -234,13 +236,13 @@ static void flip_page(struct vo *vo)
     p->output_surface = (p->output_surface + 1) % MAX_OUTPUT_SURFACES;
 }
 
-static void draw_image(struct vo *vo, mp_image_t *mpi)
+static void draw_image(struct vo *vo, struct mp_image *mpi)
 {
     struct priv *p = vo->priv;
 
     if (!IMGFMT_IS_VAAPI(mpi->imgfmt)) {
-        mp_image_t *wrapper = p->swdec_surfaces[p->output_surface];
-        va_surface_t *surface = va_surface_in_mp_image(wrapper);
+        struct mp_image *wrapper = p->swdec_surfaces[p->output_surface];
+        struct va_surface *surface = va_surface_in_mp_image(wrapper);
         if (!surface)
             return;
         if (!va_surface_upload(surface, mpi))
@@ -254,10 +256,10 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 
 static struct mp_image *get_screenshot(struct priv *p)
 {
-    va_surface_t *surface = va_surface_in_mp_image(p->output_surfaces[p->visible_surface]);
+    struct va_surface *surface = va_surface_in_mp_image(p->output_surfaces[p->visible_surface]);
     if (!surface)
         return NULL;
-    struct mp_image *img = va_surface_download(surface);
+    struct mp_image *img = va_surface_download(surface, p->va_image_formats);
     if (!img)
         return NULL;
     struct mp_image_params params = p->image_params;
@@ -512,13 +514,19 @@ static void uninit(struct vo *vo)
     struct priv *p = vo->priv;
 
     free_video_specific(p);
-    va_surface_pool_unref(&p->pool);
+    va_surface_pool_release(p->pool);
+    va_image_formats_release(p->mpvaapi.image_formats);
 
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct vaapi_osd_part *part = &p->osd_parts[n];
         free_subpicture(p, &part->image);
     }
-    va_display_unref();
+
+    if (p->display) {
+        vaTerminate(p->display);
+        p->display = NULL;
+    }
+
     vo_x11_uninit(vo);
 }
 
@@ -533,12 +541,21 @@ static int preinit(struct vo *vo)
     if (!vo_x11_init(vo))
         return -1;
 
-    p->display = va_display_ref(vo->x11->display);
+    p->display = vaGetDisplay(vo->x11->display);
     if (!p->display)
         return -1;
-    p->pool = va_surface_pool_ref(p->display, VA_RT_FORMAT_YUV420, NULL);
+
+    int major_version, minor_version;
+    status = vaInitialize(p->display, &major_version, &minor_version);
+    if (!check_va_status(status, "vaInitialize()"))
+        return -1;
+    MP_VERBOSE(vo, "VA API version %d.%d\n", major_version, minor_version);
+
+    p->pool = va_surface_pool_alloc(p->display, VA_RT_FORMAT_YUV420);
+    p->va_image_formats = va_image_formats_alloc(p->display);
 
     p->mpvaapi.display = p->display;
+    p->mpvaapi.image_formats = p->va_image_formats;
     p->mpvaapi.priv = vo;
 
     int max_subpic_formats = vaMaxNumSubpictureFormats(p->display);

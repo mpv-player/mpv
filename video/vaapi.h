@@ -93,44 +93,46 @@ static inline int get_va_colorspace_flag(enum mp_csp csp)
 
 struct mp_vaapi_ctx {
     VADisplay display;
+    struct va_image_formats *image_formats;
     void *priv; // for VO
 };
 
-typedef struct va_surface_pool va_surface_pool_t;
+struct va_surface_pool;
+struct va_image_formats;
 
-typedef struct va_surface {
+struct va_surface {
     VASurfaceID id;      // VA_INVALID_ID if unallocated
     int w, h, rt_format; // parameters of allocated image (0/0/-1 unallocated)
 
     struct va_surface_priv *p;
-} va_surface_t;
+};
 
-VADisplay          va_display_ref(Display *x11);
-void               va_display_unref(void);
-
-enum mp_imgfmt     va_fourcc_to_imgfmt(uint32_t fourcc);
-VAImageFormat *    va_image_format_from_imgfmt(int imgfmt);
-VAImageFormat *    va_image_formats_available(void);
-int                va_image_formats_available_num(void);
-bool               va_image_map(VADisplay display, VAImage *image, mp_image_t *mpi);
-bool               va_image_unmap(VADisplay display, VAImage *image);
+enum mp_imgfmt           va_fourcc_to_imgfmt(uint32_t fourcc);
+uint32_t                 va_fourcc_from_imgfmt(int imgfmt);
+struct va_image_formats *va_image_formats_alloc(VADisplay display);
+void                     va_image_formats_release(struct va_image_formats *formats);
+VAImageFormat *          va_image_format_from_imgfmt(const struct va_image_formats *formats, int imgfmt);
+bool                     va_image_map(VADisplay display, VAImage *image, struct mp_image *mpi);
+bool                     va_image_unmap(VADisplay display, VAImage *image);
 
 // ctx can be NULL. pool can be shared by specifying the same ctx value.
-va_surface_pool_t *va_surface_pool_ref(VADisplay display, int rt_format, void *ctx);
-void               va_surface_pool_unref(va_surface_pool_t **pool);
-void               va_surface_pool_clear(va_surface_pool_t *pool);
-bool               va_surface_pool_reserve(va_surface_pool_t *pool, int count, int w, int h);
-int                va_surface_pool_rt_format(const va_surface_pool_t *pool);
-va_surface_t *     va_surface_pool_get_by_imgfmt(va_surface_pool_t *pool, int imgfmt, int w, int h);
-va_surface_t *     va_surface_pool_get(va_surface_pool_t *pool, int w, int h);
-mp_image_t *       va_surface_pool_get_wrapped(va_surface_pool_t *pool, int imgfmt, int w, int h);
+struct va_surface_pool * va_surface_pool_alloc(VADisplay display, int rt_format);
+void                     va_surface_pool_release(struct va_surface_pool *pool);
+void                     va_surface_pool_releasep(struct va_surface_pool **pool);
+void                     va_surface_pool_clear(struct va_surface_pool *pool);
+bool                     va_surface_pool_reserve(struct va_surface_pool *pool, int count, int w, int h);
+int                      va_surface_pool_rt_format(const struct va_surface_pool *pool);
+struct va_surface *      va_surface_pool_get(struct va_surface_pool *pool, int w, int h);
+struct va_surface *      va_surface_pool_get_by_imgfmt(struct va_surface_pool *pool, const struct va_image_formats *formats, int imgfmt, int w, int h);
+struct mp_image *        va_surface_pool_get_wrapped(struct va_surface_pool *pool, const struct va_image_formats *formats, int imgfmt, int w, int h);
 
-void               va_surface_unref(va_surface_t **surface);
-va_surface_t *     va_surface_in_mp_image(mp_image_t *mpi);
-mp_image_t *       va_surface_wrap(va_surface_t *surface); // takes ownership
-VASurfaceID        va_surface_id(const va_surface_t *surface);
-VASurfaceID        va_surface_id_in_mp_image(const mp_image_t *mpi);
-bool               va_surface_upload(va_surface_t *surface, const mp_image_t *mpi);
-mp_image_t *       va_surface_download(const va_surface_t *surface);
+void                     va_surface_release(struct va_surface *surface);
+void                     va_surface_releasep(struct va_surface **surface);
+struct va_surface *      va_surface_in_mp_image(struct mp_image *mpi);
+struct mp_image *        va_surface_wrap(struct va_surface *surface); // takes ownership
+VASurfaceID              va_surface_id(const struct va_surface *surface);
+VASurfaceID              va_surface_id_in_mp_image(const struct mp_image *mpi);
+bool                     va_surface_upload(struct va_surface *surface, const struct mp_image *mpi);
+struct mp_image *        va_surface_download(const struct va_surface *surface, const struct va_image_formats *formats);
 
 #endif
