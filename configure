@@ -1869,6 +1869,8 @@ echores "$_vdpau"
 
 
 echocheck "VAAPI"
+_vaapi_vpp=no
+def_vaapi_vpp='#define CONFIG_VAAPI_VPP 0'
 if test "$_vaapi" = auto && test "$_x11" = yes ; then
   _vaapi=no
   if test "$_dl" = yes ; then
@@ -1883,6 +1885,15 @@ else
   novomodules="vaapi $novomodules"
 fi
 echores "$_vaapi"
+
+if test "$_vaapi" = yes ; then
+  echocheck "VAAPI VPP"
+  if pkg-config 'libva >= 0.34.0' ; then
+    _vaapi_vpp=yes
+    def_vaapi_vpp='#define CONFIG_VAAPI_VPP 1'
+  fi
+  echores "$_vaapi_vpp"
+fi
 
 
 echocheck "Xinerama"
@@ -3173,6 +3184,7 @@ VDPAU_DEC_OLD = $_vdpau_dec_old
 VDA = $_vda
 VDA_REFCOUNTING = $_vda_refcounting
 VAAPI = $_vaapi
+VAAPI_VPP = $_vaapi_vpp
 WIN32 = $_win32
 X11 = $_x11
 WAYLAND = $_wayland
@@ -3351,6 +3363,7 @@ $def_vdpau
 $def_vda
 $def_vda_refcounting
 $def_vaapi
+$def_vaapi_vpp
 $def_vm
 $def_x11
 $def_wayland

@@ -70,6 +70,7 @@ extern const vf_info_t vf_info_yadif;
 extern const vf_info_t vf_info_stereo3d;
 extern const vf_info_t vf_info_dlopen;
 extern const vf_info_t vf_info_lavfi;
+extern const vf_info_t vf_info_vaapi;
 
 // list of available filters:
 static const vf_info_t *const filter_list[] = {
@@ -111,6 +112,9 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_stereo3d,
 #ifdef CONFIG_DLOPEN
     &vf_info_dlopen,
+#endif
+#if CONFIG_VAAPI_VPP
+    &vf_info_vaapi,
 #endif
     NULL
 };

@@ -861,3 +861,20 @@ Available filters are:
 
     ``a3=<string>``
         Specify the fourth parameter to pass to the library.
+
+``vavpp``
+    VA-API video post processing. Works with ``--vo=vaapi`` only. Currently
+    deinterlaces. This filter is automatically inserted if deinterlacing is
+    requested (either using the ``D`` key, by default mapped to the command
+    ``cycle deinterlace``, or the ``--deinterlace`` option).
+
+    ``deint=<method>``
+        Select the deinterlacing algorithm.
+
+        no
+            Don't perform deinterlacing.
+        first-field
+            Show only first field (going by ``--field-dominance``).
+        bob
+            bob deinterlacing (default).
+
