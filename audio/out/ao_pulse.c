@@ -297,11 +297,11 @@ static int init(struct ao *ao)
 
     if (!pa_sample_spec_valid(&ss)) {
         MP_ERR(ao, "Invalid sample spec\n");
-        goto fail;
+        goto unlock_and_fail;
     }
 
     if (!select_chmap(ao, &map))
-        goto fail;
+        goto unlock_and_fail;
 
     if (!(proplist = pa_proplist_new())) {
         MP_ERR(ao, "Failed to allocate proplist\n");
