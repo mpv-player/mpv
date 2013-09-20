@@ -1960,7 +1960,8 @@ static struct property_osd_display {
     { "speed", _("Speed") },
     { "clock", _("Clock") },
     // audio
-    { "volume", _("Volume"), .osd_progbar = OSD_VOLUME },
+    { "volume", _("Volume"),
+      .extra_msg = "${?mute==yes:(Muted)}", .osd_progbar = OSD_VOLUME },
     { "mute", _("Mute") },
     { "audio-delay", _("A-V delay") },
     { "audio", _("Audio") },
