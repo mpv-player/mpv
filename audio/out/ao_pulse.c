@@ -299,11 +299,11 @@ static int init(struct ao *ao)
 
     if (!pa_sample_spec_valid(&ss)) {
         mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Invalid sample spec\n");
-        goto fail;
+        goto unlock_and_fail;
     }
 
     if (!select_chmap(ao, &map))
-        goto fail;
+        goto unlock_and_fail;
 
     if (!(proplist = pa_proplist_new())) {
         mp_msg(MSGT_AO, MSGL_ERR, "AO: [pulse] Failed to allocate proplist\n");
