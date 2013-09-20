@@ -509,15 +509,27 @@ The following expansions are supported:
     fails, expand to an error string. (Use ``${NAME:}`` with a trailing
     ``:`` to expand to an empty string instead.)
     If ``NAME`` is prefixed with ``=``, expand to the raw value of the property
-    (see below).
+    (see section below).
 ``${NAME:STR}``
     Expands to the value of the property ``NAME``, or ``STR`` if the
     property cannot be retrieved. ``STR`` is expanded recursively.
+``${?NAME:STR}``
+    Expands to ``STR`` (recursively) if the property ``NAME`` is available.
 ``${!NAME:STR}``
     Expands to ``STR`` (recursively) if the property ``NAME`` cannot be
     retrieved.
-``${?NAME:STR}``
-    Expands to ``STR`` (recursively) if the property ``NAME`` is available.
+``${?NAME==VALUE:STR}``
+    Expands to ``STR`` (recursively) if the property ``NAME`` expands to a
+    string equal to ``VALUE``. You can prefix ``NAME`` with ``=`` in order to
+    compare the raw value of a property (see section below). If the property
+    is unavailable, or other errors happen when retrieving it, the value is
+    never considered equal.
+    Note that ``VALUE`` can't contain any of the characters ``:`` or ``}``.
+    Also, it is possible that escaping with ``"`` or ``%`` might be added in
+    the future, should the need arise.
+``${!NAME==VALUE:STR}``
+    Same as with the ``?`` variant, but ``STR`` is expanded if the value is
+    not equal. (Using the same semantics as with ``?``.)
 ``$$``
     Expands to ``$``.
 ``$}``
