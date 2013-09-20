@@ -27,7 +27,7 @@ static inline bool is_success(VAStatus status, const char *msg)
 {
     if (status == VA_STATUS_SUCCESS)
         return true;
-    mp_msg(MSGT_VFILTER, MSGL_ERR, "[vf_vaapi] %s: %s\n", msg, vaErrorStr(status));
+    mp_msg(MSGT_VFILTER, MSGL_ERR, "[vavpp] %s: %s\n", msg, vaErrorStr(status));
     return false;
 }
 
@@ -341,6 +341,7 @@ static bool initialize(struct vf_priv_s *p)
         p->buffers[p->num_buffers++] = buffers[VAProcFilterDeinterlacing];
     else
         p->deint_type = 0;
+    p->do_deint = !!p->deint_type;
     // next filters: p->buffers[p->num_buffers++] = buffers[next_filter];
     return true;
 }
@@ -378,7 +379,7 @@ static const m_option_t vf_opts_fields[] = {
 
 const vf_info_t vf_info_vaapi = {
     .info = "VA-API Video Post-Process Filter",
-    .name = "va-vpp",
+    .name = "vavpp",
     .author = "xylosper",
     .comment = "",
     .vf_open = vf_open,
