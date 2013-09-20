@@ -68,8 +68,8 @@
 
 #include "mpvcore/mp_core.h"
 
-static void change_video_filters(MPContext *mpctx, const char *cmd,
-                                 const char *arg);
+static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
+                        const char *cmd, const char *arg);
 static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
                        struct m_obj_settings *new_chain);
 
@@ -1135,11 +1135,26 @@ static int mp_property_fullscreen(m_option_t *prop,
 
 #define VF_DEINTERLACE_LABEL "deinterlace"
 
+static const char *deint_filters[] = {
 #ifdef CONFIG_VF_LAVFI
-#define VF_DEINTERLACE "@" VF_DEINTERLACE_LABEL ":lavfi=yadif"
-#else
-#define VF_DEINTERLACE "@" VF_DEINTERLACE_LABEL ":yadif"
+    "lavfi=yadif",
 #endif
+    "yadif",
+    NULL
+};
+
+static int probe_deint_filters(struct MPContext *mpctx, const char *cmd)
+{
+    for (int n = 0; deint_filters[n]; n++) {
+        char filter[80];
+        // add a label so that removing the filter is easier
+        snprintf(filter, sizeof(filter), "@%s:%s", VF_DEINTERLACE_LABEL,
+                 deint_filters[n]);
+        if (edit_filters(mpctx, STREAM_VIDEO, cmd, filter) >= 0)
+            return 0;
+    }
+    return -1;
+}
 
 static int get_deinterlacing(struct MPContext *mpctx)
 {
@@ -1160,12 +1175,12 @@ static void set_deinterlacing(struct MPContext *mpctx, bool enable)
     vf_instance_t *vf = mpctx->sh_video->vfilter;
     if (vf_find_by_label(vf, VF_DEINTERLACE_LABEL)) {
         if (!enable)
-            change_video_filters(mpctx, "del", VF_DEINTERLACE);
+            edit_filters(mpctx, STREAM_VIDEO, "del", "@" VF_DEINTERLACE_LABEL);
     } else {
         if ((get_deinterlacing(mpctx) > 0) != enable) {
             int arg = enable;
             if (vf->control(vf, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
-                change_video_filters(mpctx, "add", VF_DEINTERLACE);
+                probe_deint_filters(mpctx, "add");
         }
     }
     mpctx->opts->deinterlace = get_deinterlacing(mpctx) > 0;
@@ -2160,12 +2175,6 @@ static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
         }
     }
     return r;
-}
-
-static void change_video_filters(MPContext *mpctx, const char *cmd,
-                                 const char *arg)
-{
-    edit_filters(mpctx, STREAM_VIDEO, cmd, arg);
 }
 
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
