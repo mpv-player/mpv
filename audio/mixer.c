@@ -238,7 +238,6 @@ void mixer_setbalance(struct mixer *mixer, float val)
         return;
     }
 
-    af_init(mixer->af);
     /* make all other channels pass thru since by default pan blocks all */
     memset(level, 0, sizeof(level));
     for (i = 2; i < AF_NCH; i++) {
