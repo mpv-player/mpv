@@ -565,6 +565,7 @@ const m_option_t mp_opts[] = {
                ({"auto", -1},
                 {"no", 0},
                 {"yes", 1}, {"", 1})),
+    OPT_STRING("volume-restore-data", mixer_restore_volume_data, 0),
     OPT_FLAG("gapless-audio", gapless_audio, 0),
 
     // set screen dimensions (when not detectable or virtual!=visible)

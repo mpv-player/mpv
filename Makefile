@@ -45,7 +45,7 @@ SOURCES-$(LIBPOSTPROC)          += video/filter/vf_pp.c
 SOURCES-$(LIBSMBCLIENT)         += stream/stream_smb.c
 
 SOURCES-$(COCOA)                += video/out/cocoa_common.m \
-                                   osdep/macosx_bundle.m \
+                                   osdep/path-macosx.m \
                                    osdep/macosx_application.m \
                                    osdep/macosx_events.m \
                                    osdep/ar/HIDRemote.m
@@ -54,6 +54,7 @@ SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
 
 SOURCES-$(NEED_GETTIMEOFDAY)    += osdep/gettimeofday.c
 SOURCES-$(NEED_GLOB)            += osdep/glob-win.c
+SOURCES-$(WIN32)                += osdep/path-win.c
 
 SOURCES-$(PRIORITY)             += osdep/priority.c
 SOURCES-$(PVR)                  += stream/stream_pvr.c

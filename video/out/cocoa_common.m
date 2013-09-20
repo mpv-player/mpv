@@ -57,6 +57,7 @@
 @property(nonatomic, assign) struct vo *videoOutput;
 - (BOOL)canHideCursor;
 - (void)recalcDraggableState;
+- (void)signalMousePosition;
 @end
 
 @interface NSScreen (mpvadditions)
@@ -164,14 +165,16 @@ int vo_cocoa_init(struct vo *vo)
     return 1;
 }
 
-static void vo_cocoa_set_cursor_visibility(struct vo *vo, bool visible)
+static void vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
-    if (visible) {
+    if (*visible) {
         CGDisplayShowCursor(kCGDirectMainDisplay);
     } else if ([s->view canHideCursor]) {
         CGDisplayHideCursor(kCGDirectMainDisplay);
+    } else {
+        *visible = true;
     }
 }
 
@@ -545,7 +548,7 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
         vo_cocoa_update_screen_info(vo);
         return VO_TRUE;
     case VOCTRL_SET_CURSOR_VISIBILITY:
-        vo_cocoa_set_cursor_visibility(vo, *(bool *)arg);
+        vo_cocoa_set_cursor_visibility(vo, arg);
         return VO_TRUE;
     case VOCTRL_UPDATE_WINDOW_TITLE: {
         cocoa_set_window_title(vo, (const char *) arg);
@@ -727,6 +730,7 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
             .height = self.videoOutput->cocoa->aspdat.preh * multiplier
         };
         [self setCenteredContentSize:size];
+        [(GLMPlayerOpenGLView *)self.contentView signalMousePosition];
     }
 }
 
@@ -829,6 +833,12 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
 - (void)mouseExited:(NSEvent *)event
 {
     cocoa_put_key(MP_KEY_MOUSE_LEAVE);
+}
+
+- (void)signalMousePosition
+{
+    NSPoint p = [self convertPoint:[self mouseLocation] fromView:nil];
+    vo_mouse_movement(self.videoOutput, p.x, p.y);
 }
 
 - (void)signalMouseMovement:(NSEvent *)event

@@ -17,14 +17,14 @@
  */
 
 #import <Foundation/Foundation.h>
-#include "osdep/macosx_bundle.h"
 #include "mpvcore/path.h"
+#include "osdep/path.h"
 
-char *get_bundled_path(const char *file)
+char *mp_get_macosx_bundled_path(const char *file)
 {
-  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-  NSString *path = [[NSBundle mainBundle] resourcePath];
-  char *rv =  mp_path_join(NULL, bstr0([path UTF8String]), bstr0(file));
-  [pool release];
-  return rv;
+    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+    NSString *path = [[NSBundle mainBundle] resourcePath];
+    char *rv = mp_path_join(NULL, bstr0([path UTF8String]), bstr0(file));
+    [pool release];
+    return rv;
 }

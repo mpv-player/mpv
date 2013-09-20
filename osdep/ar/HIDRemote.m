@@ -187,33 +187,6 @@ static HIDRemote *sHIDRemote = nil;
 
 + (BOOL)isCandelairInstallationRequiredForRemoteMode:(HIDRemoteMode)remoteMode
 {
-	SInt32 systemVersion = 0;
-	
-	// Determine OS version
-	if (Gestalt(gestaltSystemVersion, &systemVersion) == noErr)
-	{
-		switch (systemVersion)
-		{
-			case 0x1060: // OS 10.6
-			case 0x1061: // OS 10.6.1
-				// OS X 10.6(.0) and OS X 10.6.1 require the Candelair driver for to be installed,
-				// so that third party apps can acquire an exclusive lock on the receiver HID Device
-				// via IOKit.
-
-				switch (remoteMode)
-				{
-					case kHIDRemoteModeExclusive:
-					case kHIDRemoteModeExclusiveAuto:
-						if (![self isCandelairInstalled])
-						{
-							return (YES);
-						}
-					break;
-				}
-			break;
-		}
-	}
-	
 	return (NO);
 }
 
@@ -1405,23 +1378,7 @@ static HIDRemote *sHIDRemote = nil;
 					{
 						if ([(NSString *)ioKitClassName isEqual:@"AppleIRController"])
 						{
-							SInt32 systemVersion;
-							
-							if (Gestalt(gestaltSystemVersion, &systemVersion) == noErr)
-							{
-								if (systemVersion >= 0x1062)
-								{
-									// Support for the Aluminum Remote was added only with OS 10.6.2. Previous versions can not distinguish
-									// between the Center and the new, seperate Play/Pause button. They'll recognize both as presses of the
-									// "Center" button.
-									//
-									// You CAN, however, receive Aluminum Remote button presses even under OS 10.5 when using Remote Buddy's
-									// Virtual Remote. While Remote Buddy does support the Aluminum Remote across all OS releases it runs on,
-									// its Virtual Remote can only emulate Aluminum Remote button presses under OS 10.5 and up in order not to
-									// break compatibility with applications whose IR Remote code relies on driver internals. [13-Nov-09]
-									supportLevel = kHIDRemoteAluminumRemoteSupportLevelNative;
-								}
-							}
+							supportLevel = kHIDRemoteAluminumRemoteSupportLevelNative;
 						}
 						
 						CFRelease(ioKitClassName);

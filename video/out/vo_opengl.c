@@ -144,7 +144,7 @@ static bool config_window(struct gl_priv *p, uint32_t d_width,
     if (p->renderer_opts->stereo_mode == GL_3D_QUADBUFFER)
         flags |= VOFLAG_STEREO;
 
-    if (p->renderer_opts->enable_alpha)
+    if (p->renderer_opts->alpha_mode == 1)
         flags |= VOFLAG_ALPHA;
 
     if (p->use_gl_debug)

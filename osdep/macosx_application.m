@@ -439,13 +439,22 @@ static void get_system_version(int* major, int* minor, int* bugfix)
     *bugfix = s_bugfix;
 }
 
+static bool is_psn_argument(char *psn_arg_to_check)
+{
+    NSString *psn_arg = [NSString stringWithUTF8String:psn_arg_to_check];
+    return [psn_arg hasPrefix:@"-psn_"];
+}
+
 static bool bundle_started_from_finder(int argc, char **argv)
 {
     bool bundle_detected = [[NSBundle mainBundle] bundleIdentifier];
     int major, minor, bugfix;
     get_system_version(&major, &minor, &bugfix);
-    bool finder_args = ((major == 10) && (minor >= 9)) ? argc==1 : argc==2;
-    return bundle_detected && finder_args;
+    if ((major == 10) && (minor >= 9)) {
+        return bundle_detected && argc==1;
+    } else {
+        return bundle_detected && argc==2 && is_psn_argument(argv[1]);
+    }
 }
 
 void macosx_finder_args_preinit(int *argc, char ***argv)

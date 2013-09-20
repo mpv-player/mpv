@@ -454,13 +454,20 @@ Available video output drivers are:
         Default is 128x256x64.
         Sizes must be a power of two, and 256 at most.
 
-    ``alpha``
-        Try to create a framebuffer with alpha component. This only makes sense
-        if the video contains alpha information (which is extremely rare). May
-        not be supported on all platforms. If alpha framebuffers are
-        unavailable, it silently falls back on a normal framebuffer. Note
-        that when using FBO indirections (such as with ``opengl-hq``), an FBO
-        format with alpha must be specified with the ``fbo-format`` option.
+    ``alpha=<blend|yes|no>``
+        Decides what to do if the input has an alpha component (default: blend).
+
+        blend
+            Blend the frame against a black background.
+        yes
+            Try to create a framebuffer with alpha component. This only makes sense
+            if the video contains alpha information (which is extremely rare). May
+            not be supported on all platforms. If alpha framebuffers are
+            unavailable, it silently falls back on a normal framebuffer. Note
+            that when using FBO indirections (such as with ``opengl-hq``), an FBO
+            format with alpha must be specified with the ``fbo-format`` option.
+        no
+            Ignore alpha component.
 
     ``chroma-location=<auto|center|left>``
         Set the YUV chroma sample location. auto means use the bitstream

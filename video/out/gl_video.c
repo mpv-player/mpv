@@ -271,6 +271,7 @@ static const struct gl_video_opts gl_video_opts_def = {
     .scale_sep = 1,
     .scalers = { "bilinear", "bilinear" },
     .scaler_params = {NAN, NAN},
+    .alpha_mode = 2,
 };
 
 
@@ -319,7 +320,10 @@ const struct m_sub_options gl_video_conf = {
                    ({"auto",   MP_CHROMA_AUTO},
                     {"center", MP_CHROMA_CENTER},
                     {"left",   MP_CHROMA_LEFT})),
-        OPT_FLAG("alpha", enable_alpha, 0),
+        OPT_CHOICE("alpha", alpha_mode, M_OPT_OPTIONAL_PARAM,
+                   ({"no", 0},
+                    {"yes", 1}, {"", 1},
+                    {"blend", 2})),
         {0}
     },
     .size = sizeof(struct gl_video_opts),
@@ -779,8 +783,8 @@ static void compile_shaders(struct gl_video *p)
                                    shader_prelude, PRELUDE_END);
 
     // Need to pass alpha through the whole chain. (Not needed for OSD shaders.)
-    bool use_alpha = p->opts.enable_alpha && p->has_alpha;
-    shader_def_opt(&header, "USE_ALPHA", use_alpha);
+    if (p->opts.alpha_mode == 1)
+        shader_def_opt(&header, "USE_ALPHA", p->has_alpha);
 
     char *header_osd = talloc_strdup(tmp, header);
     shader_def_opt(&header_osd, "USE_OSD_LINEAR_CONV", p->opts.srgb &&
@@ -831,8 +835,10 @@ static void compile_shaders(struct gl_video *p)
     shader_def_opt(&header_conv, "USE_INPUT_GAMMA", convert_input_gamma);
     shader_def_opt(&header_conv, "USE_COLORMATRIX", !p->is_rgb);
     shader_def_opt(&header_conv, "USE_CONV_GAMMA", convert_input_to_linear);
-    if (use_alpha && p->plane_count > 3)
+    if (p->opts.alpha_mode > 0 && p->has_alpha && p->plane_count > 3)
         shader_def(&header_conv, "USE_ALPHA_PLANE", "3");
+    if (p->opts.alpha_mode == 2 && p->has_alpha)
+        shader_def(&header_conv, "USE_ALPHA_BLEND", "1");
 
     shader_def_opt(&header_final, "USE_LINEAR_CONV_INV", p->use_lut_3d);
     shader_def_opt(&header_final, "USE_GAMMA_POW", p->opts.gamma);

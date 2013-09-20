@@ -443,18 +443,16 @@ static void uninit_subs(struct demuxer *demuxer)
 
 void uninit_player(struct MPContext *mpctx, unsigned int mask)
 {
-    struct MPOpts *opts = mpctx->opts;
-
     mask &= mpctx->initialized_flags;
 
     mp_msg(MSGT_CPLAYER, MSGL_DBG2, "\n*** uninit(0x%X)\n", mask);
 
     if (mask & INITIALIZED_ACODEC) {
         mpctx->initialized_flags &= ~INITIALIZED_ACODEC;
+        mixer_uninit_audio(mpctx->mixer);
         if (mpctx->sh_audio)
             uninit_audio(mpctx->sh_audio);
         cleanup_demux_stream(mpctx, STREAM_AUDIO);
-        mpctx->mixer.afilter = NULL;
     }
 
     if (mask & INITIALIZED_SUB) {
@@ -526,24 +524,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         getch2_disable();
     }
 
-    if (mask & INITIALIZED_VOL) {
-        mpctx->initialized_flags &= ~INITIALIZED_VOL;
-        if (mpctx->mixer.ao) {
-            // Normally the mixer remembers volume, but do it even if the
-            // volume is set explicitly with --volume=... (so that the same
-            // volume is restored on reinit)
-            if (opts->mixer_init_volume >= 0 && mpctx->mixer.user_set_volume)
-                mixer_getbothvolume(&mpctx->mixer, &opts->mixer_init_volume);
-            if (opts->mixer_init_mute >= 0 && mpctx->mixer.user_set_mute)
-                opts->mixer_init_mute = mixer_getmute(&mpctx->mixer);
-        }
-    }
-
     if (mask & INITIALIZED_AO) {
         mpctx->initialized_flags &= ~INITIALIZED_AO;
-        if (mpctx->mixer.ao)
-            mixer_uninit(&mpctx->mixer);
-        mpctx->mixer.ao = NULL;
         if (mpctx->ao)
             ao_uninit(mpctx->ao, mpctx->stop_play != AT_END_OF_FILE);
         mpctx->ao = NULL;
@@ -637,9 +619,11 @@ static void mk_config_dir(char *subdir)
 {
     void *tmp = talloc_new(NULL);
     char *confdir = talloc_steal(tmp, mp_find_user_config_file(""));
-    if (subdir)
-        confdir = mp_path_join(tmp, bstr0(confdir), bstr0(subdir));
-    mkdir(confdir, 0777);
+    if (confdir) {
+        if (subdir)
+            confdir = mp_path_join(tmp, bstr0(confdir), bstr0(subdir));
+        mkdir(confdir, 0777);
+    }
     talloc_free(tmp);
 }
 
@@ -825,8 +809,7 @@ static const char *backup_properties[] = {
     "speed",
     "edition",
     "pause",
-    //"volume",
-    //"mute",
+    "volume-restore-data",
     "audio-delay",
     //"balance",
     "fullscreen",
@@ -1616,7 +1599,6 @@ static int build_afilter_chain(struct MPContext *mpctx)
 
 static int recreate_audio_filters(struct MPContext *mpctx)
 {
-    struct MPOpts *opts = mpctx->opts;
     assert(mpctx->sh_audio);
 
     // init audio filters:
@@ -1626,20 +1608,7 @@ static int recreate_audio_filters(struct MPContext *mpctx)
         return -1;
     }
 
-    mpctx->mixer.afilter = mpctx->sh_audio->afilter;
-    mpctx->mixer.volstep = opts->volstep;
-    mpctx->mixer.softvol = opts->softvol;
-    mpctx->mixer.softvol_max = opts->softvol_max;
-    mixer_reinit(&mpctx->mixer, mpctx->ao);
-    if (!(mpctx->initialized_flags & INITIALIZED_VOL)) {
-        if (opts->mixer_init_volume >= 0) {
-            mixer_setvolume(&mpctx->mixer, opts->mixer_init_volume,
-                            opts->mixer_init_volume);
-        }
-        if (opts->mixer_init_mute >= 0)
-            mixer_setmute(&mpctx->mixer, opts->mixer_init_mute);
-        mpctx->initialized_flags |= INITIALIZED_VOL;
-    }
+    mixer_reinit_audio(mpctx->mixer, mpctx->ao, mpctx->sh_audio->afilter);
 
     return 0;
 }
@@ -1664,7 +1633,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     init_demux_stream(mpctx, STREAM_AUDIO);
     if (!mpctx->sh_audio) {
-        uninit_player(mpctx, INITIALIZED_VOL | INITIALIZED_AO);
+        uninit_player(mpctx, INITIALIZED_AO);
         goto no_audio;
     }
 
@@ -1735,7 +1704,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     return;
 
 init_error:
-    uninit_player(mpctx, INITIALIZED_ACODEC | INITIALIZED_AO | INITIALIZED_VOL);
+    uninit_player(mpctx, INITIALIZED_ACODEC | INITIALIZED_AO);
     cleanup_demux_stream(mpctx, STREAM_AUDIO);
 no_audio:
     mpctx->current_track[STREAM_AUDIO] = NULL;
@@ -2042,7 +2011,7 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
         uninit_player(mpctx, INITIALIZED_VCODEC |
                         (mpctx->opts->fixed_vo && track ? 0 : INITIALIZED_VO));
     } else if (type == STREAM_AUDIO) {
-        uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC | INITIALIZED_VOL);
+        uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
     } else if (type == STREAM_SUB) {
         uninit_player(mpctx, INITIALIZED_SUB);
     }
@@ -2282,7 +2251,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
              * while displaying video, then doing the output format switch.
              */
             if (!mpctx->opts->gapless_audio)
-                uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_VOL);
+                uninit_player(mpctx, INITIALIZED_AO);
             reinit_audio_chain(mpctx);
             return -1;
         } else if (res == ASYNC_PLAY_DONE)
@@ -2911,7 +2880,7 @@ static bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
     enum stop_play_reason orig_stop_play = mpctx->stop_play;
     if (!mpctx->sh_video && mpctx->stop_play == KEEP_PLAYING)
         mpctx->stop_play = AT_END_OF_FILE;  // let audio uninit drain data
-    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts->fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts->gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_VOL | INITIALIZED_ACODEC | INITIALIZED_SUB);
+    uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts->fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts->gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_ACODEC | INITIALIZED_SUB);
     mpctx->stop_play = orig_stop_play;
 
     mpctx->demuxer = n->source;
@@ -3434,7 +3403,7 @@ static void handle_cursor_autohide(struct MPContext *mpctx)
     mpctx->mouse_cursor_visible = mouse_cursor_visible;
 }
 
-static void handle_seek_coalesce(struct MPContext *mpctx)
+static void handle_input_and_seek_coalesce(struct MPContext *mpctx)
 {
     mp_cmd_t *cmd;
     while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
@@ -3880,7 +3849,7 @@ static void run_playloop(struct MPContext *mpctx)
 
     handle_pause_on_low_cache(mpctx);
 
-    handle_seek_coalesce(mpctx);
+    handle_input_and_seek_coalesce(mpctx);
 
     handle_backstep(mpctx);
 
@@ -4857,6 +4826,7 @@ static int mpv_main(int argc, char *argv[])
     init_libav();
     GetCpuCaps(&gCpuCaps);
     screenshot_init(mpctx);
+    mpctx->mixer = mixer_init(mpctx, opts);
 
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, argc, argv);

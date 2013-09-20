@@ -99,6 +99,11 @@ static int control(struct af_instance* af, int cmd, void* arg)
     for(i = 1; i < af->data->nch; i++)
       s->buf[i] = (uint8_t *)s->buf[0] + i*s->sz*af->data->bps;
 
+    if (!s->filename) {
+        mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] No filename set.\n");
+        return AF_ERROR;
+    }
+
     // Init memory mapping
     s->fd = open(s->filename, O_RDWR | O_CREAT | O_TRUNC, 0640);
     mp_msg(MSGT_AFILTER, MSGL_INFO, "[export] Exporting to file: %s\n", s->filename);

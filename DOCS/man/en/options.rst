@@ -2589,6 +2589,18 @@
     Set the startup volume. A value of -1 (the default) will not change the
     volume. See also ``--softvol``.
 
+``--volume-restore-data=<string>``
+    Used internally for use by playback resume (e.g. with ``quit_watch_later``).
+    Restoring value has to be done carefully, because different AOs as well as
+    softvol can have different value ranges, and we don't want to restore
+    volume if setting the volume changes it system wide. The normal options
+    (like ``--volume``) would always set the volume. This option was added for
+    restoring volume in a safer way (by storing the method used to set the
+    volume), and is not generally useful. Its semantics are considered private
+    to mpv.
+
+    Do not use.
+
 ``--wid=<ID>``
     (X11 and Windows only)
     This tells mpv to attach to an existing window. The ID is interpreted as

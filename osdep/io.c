@@ -58,6 +58,12 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s)
 #include <io.h>
 #include <fcntl.h>
 
+#ifdef HAVE_PTHREADS
+#include <pthread.h>
+#endif
+
+#include "mpvcore/mp_talloc.h"
+
 //http://git.libav.org/?p=libav.git;a=blob;f=cmdutils.c;h=ade3f10ce2fc030e32e375a85fbd06c26d43a433#l161
 
 static char** win32_argv_utf8;
@@ -253,6 +259,60 @@ int mp_mkdir(const char *path, int mode)
     int res = _wmkdir(wpath);
     talloc_free(wpath);
     return res;
+}
+
+static char **utf8_environ;
+static void *utf8_environ_ctx;
+
+static void free_env(void)
+{
+    talloc_free(utf8_environ_ctx);
+    utf8_environ_ctx = NULL;
+    utf8_environ = NULL;
+}
+
+// Note: UNIX getenv() returns static strings, and we try to do the same. Since
+// using putenv() is not multithreading safe, we don't expect env vars to change
+// at runtime, and converting/allocating them in advance is ok.
+static void init_getenv(void)
+{
+    if (utf8_environ_ctx)
+        return;
+    wchar_t *wenv = GetEnvironmentStringsW();
+    if (!wenv)
+        return;
+    utf8_environ_ctx = talloc_new(NULL);
+    int num_env = 0;
+    while (1) {
+        size_t len = wcslen(wenv);
+        if (!len)
+            break;
+        char *s = mp_to_utf8(utf8_environ_ctx, wenv);
+        MP_TARRAY_APPEND(utf8_environ_ctx, utf8_environ, num_env, s);
+        wenv += len + 1;
+    }
+    MP_TARRAY_APPEND(utf8_environ_ctx, utf8_environ, num_env, NULL);
+    // Avoid showing up in leak detectors etc.
+    atexit(free_env);
+}
+
+char *mp_getenv(const char *name)
+{
+#ifdef HAVE_PTHREADS
+    static pthread_once_t once_init_getenv = PTHREAD_ONCE_INIT;
+    pthread_once(&once_init_getenv, init_getenv);
+#else
+    init_getenv();
+#endif
+    // Copied from musl, http://git.musl-libc.org/cgit/musl/tree/COPYRIGHT
+    // Copyright © 2005-2013 Rich Felker, standard MIT license
+    int i;
+    size_t l = strlen(name);
+    if (!utf8_environ || !*name || strchr(name, '=')) return NULL;
+    for (i=0; utf8_environ[i] && (strncmp(name, utf8_environ[i], l)
+            || utf8_environ[i][l] != '='); i++) {}
+    if (utf8_environ[i]) return utf8_environ[i] + l+1;
+    return NULL;
 }
 
 #endif // __MINGW32__

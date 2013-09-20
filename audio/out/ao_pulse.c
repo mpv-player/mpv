@@ -232,6 +232,7 @@ static int init(struct ao *ao)
 {
     struct pa_sample_spec ss;
     struct pa_channel_map map;
+    pa_proplist *proplist = NULL;
     struct priv *priv = ao->priv;
     char *host = priv->cfg_host && priv->cfg_host[0] ? priv->cfg_host : NULL;
     char *sink = priv->cfg_sink && priv->cfg_sink[0] ? priv->cfg_sink : NULL;
@@ -296,15 +297,25 @@ static int init(struct ao *ao)
 
     if (!pa_sample_spec_valid(&ss)) {
         MP_ERR(ao, "Invalid sample spec\n");
-        goto fail;
+        goto unlock_and_fail;
     }
 
     if (!select_chmap(ao, &map))
-        goto fail;
-
-    if (!(priv->stream = pa_stream_new(priv->context, "audio stream", &ss,
-                                       &map)))
         goto unlock_and_fail;
+
+    if (!(proplist = pa_proplist_new())) {
+        MP_ERR(ao, "Failed to allocate proplist\n");
+        goto unlock_and_fail;
+    }
+    (void)pa_proplist_sets(proplist, PA_PROP_MEDIA_ROLE, "video");
+
+    if (!(priv->stream = pa_stream_new_with_proplist(priv->context,
+                                                     "audio stream", &ss,
+                                                     &map, proplist)))
+        goto unlock_and_fail;
+
+    pa_proplist_free(proplist);
+    proplist = NULL;
 
     pa_stream_set_state_callback(priv->stream, stream_state_cb, ao);
     pa_stream_set_write_callback(priv->stream, stream_request_cb, ao);
@@ -342,6 +353,10 @@ fail:
               && ao->probing))
             GENERIC_ERR_MSG("Init failed");
     }
+
+    if (proplist)
+        pa_proplist_free(proplist);
+
     uninit(ao, true);
     return -1;
 }

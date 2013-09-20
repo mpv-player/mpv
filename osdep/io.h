@@ -43,9 +43,11 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s);
 // applies to unicode paths encoded with wchar_t (2 bytes on Windows). The UTF-8
 // version could end up bigger in memory. In the worst case each wchar_t is
 // encoded to 3 bytes in UTF-8, so in the worst case we have:
-//      wcslen(wpath) <= strlen(utf8path) * 3
+//      wcslen(wpath) * 3 <= strlen(utf8path)
 // Thus we need MP_PATH_MAX as the UTF-8/char version of PATH_MAX.
-#define MP_PATH_MAX (FILENAME_MAX * 3)
+// Also make sure there's free space for the terminating \0.
+// (For codepoints encoded as UTF-16 surrogate pairs, UTF-8 has the same length.)
+#define MP_PATH_MAX (FILENAME_MAX * 3 + 1)
 
 void mp_get_converted_argv(int *argc, char ***argv);
 
@@ -59,6 +61,7 @@ DIR *mp_opendir(const char *path);
 struct dirent *mp_readdir(DIR *dir);
 int mp_closedir(DIR *dir);
 int mp_mkdir(const char *path, int mode);
+char *mp_getenv(const char *name);
 
 // NOTE: stat is not overridden with mp_stat, because MinGW-w64 defines it as
 //       macro.
@@ -72,6 +75,7 @@ int mp_mkdir(const char *path, int mode);
 #define readdir(...) mp_readdir(__VA_ARGS__)
 #define closedir(...) mp_closedir(__VA_ARGS__)
 #define mkdir(...) mp_mkdir(__VA_ARGS__)
+#define getenv(...) mp_getenv(__VA_ARGS__)
 
 #else /* __MINGW32__ */
 
