@@ -438,7 +438,7 @@ Available filters are:
 
 ``drc[=method:target]``
     Applies dynamic range compression. This maximizes the volume by compressing
-    the audio signal's dynamic range.
+    the audio signal's dynamic range. (Formerly called ``volnorm``.)
 
     ``<method>``
         Sets the used method.

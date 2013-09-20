@@ -437,8 +437,6 @@ static int af_fix_rate(struct af_stream *s, struct af_instance **p_af,
 // state (for example, format filters that were tentatively inserted stay
 // inserted).
 // In that case, you should always rebuild the filter chain, or abort.
-// Also, note that for complete reinit, fixup_output_format() may have to be
-// called after this function.
 static int af_reinit(struct af_stream *s)
 {
     // Start with the second filter, as the first filter is the special input
@@ -496,7 +494,12 @@ static int af_reinit(struct af_stream *s)
 
     af_print_filter_chain(s, NULL, MSGL_V);
 
-    return AF_OK;
+    /* Set previously unset fields in s->output to those of the filter chain
+     * output. This is used to make the output format fixed, and even if you
+     * insert new filters or change the input format, the output format won't
+     * change. (Audio outputs generally can't change format at runtime.) */
+    af_copy_unset_fields(&s->output, &s->filter_output);
+    return af_config_equals(&s->output, &s->filter_output) ? AF_OK : AF_ERROR;
 
 negotiate_error:
     mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Unable to correct audio format. "
@@ -547,21 +550,6 @@ void af_destroy(struct af_stream *s)
     talloc_free(s);
 }
 
-/*
- * Set previously unset fields in s->output to those of the filter chain
- * output. This is used to make the output format fixed, and even if you insert
- * new filters or change the input format, the output format won't change.
- * \return AF_ERROR on error, AF_OK if successful.
- */
-static int fixup_output_format(struct af_stream *s)
-{
-    if (AF_OK != af_reinit(s))
-        return AF_ERROR;
-
-    af_copy_unset_fields(&s->output, &s->filter_output);
-    return af_config_equals(&s->output, &s->filter_output) ? AF_OK : AF_ERROR;
-}
-
 /* Initialize the stream "s". This function creates a new filter list
    if necessary according to the values set in input and output. Input
    and output should contain the format of the current movie and the
@@ -586,23 +574,18 @@ int af_init(struct af_stream *s)
         // Add all filters in the list (if there are any)
         struct m_obj_settings *list = s->opts->af_settings;
         for (int i = 0; list && list[i].name; i++) {
-            if (!af_prepend(s, s->last, list[i].name, list[i].attribs))
+            if (!af_prepend(s, s->last, list[i].name, list[i].attribs)) {
+                af_uninit(s);
                 return -1;
+            }
         }
     }
 
     remove_auto_inserted_filters(s);
 
-    // Init filters
-    if (AF_OK != af_reinit(s))
-        return -1;
-
-    if (AF_OK != fixup_output_format(s)) {
+    if (af_reinit(s) != AF_OK) {
         // Something is stuffed audio out will not work
-        mp_msg(
-            MSGT_AFILTER, MSGL_ERR,
-            "[libaf] Unable to setup filter system can not"
-            " meet sound-card demands, please send a bug report. \n");
+        mp_msg(MSGT_AFILTER, MSGL_ERR, "Could not create audio filter chain.\n");
         af_uninit(s);
         return -1;
     }
@@ -628,7 +611,7 @@ struct af_instance *af_add(struct af_stream *s, char *name, char **args)
         return NULL;
 
     // Reinitalize the filter list
-    if (af_reinit(s) != AF_OK || fixup_output_format(s) != AF_OK) {
+    if (af_reinit(s) != AF_OK) {
         af_uninit(s);
         af_init(s);
         return NULL;

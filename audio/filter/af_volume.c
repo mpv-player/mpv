@@ -81,17 +81,22 @@ static int control(struct af_instance* af, int cmd, void* arg)
     }
     return af_test_output(af,(struct mp_audio*)arg);
   case AF_CONTROL_COMMAND_LINE:{
-    float v=0.0;
+    float v=1000.0;
     float vol[AF_NCH];
     int   i;
     sscanf((char*)arg,"%f:%i:%i", &v, &s->soft, &s->fast);
-    for(i=0;i<AF_NCH;i++) vol[i]=v;
+    float dest = 0.0;
+    if (v < 1000)
+      af_from_dB(1,&v,&dest,20.0,-200.0,60.0);
+    for(i=0;i<AF_NCH;i++) vol[i]=dest;
     return control(af,AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET, vol);
   }
   case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET:
-    return af_from_dB(AF_NCH,(float*)arg,s->level,20.0,-200.0,60.0);
+      memcpy(s->level, arg, sizeof(float) * AF_NCH);
+      return AF_OK;
   case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET:
-    return af_to_dB(AF_NCH,s->level,(float*)arg,20.0);
+      memcpy(arg, s->level, sizeof(float) * AF_NCH);
+      return AF_OK;
   case AF_CONTROL_PRE_DESTROY:{
     float m = 0.0;
     int i;

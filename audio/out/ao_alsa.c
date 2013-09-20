@@ -38,7 +38,6 @@
 #include "config.h"
 #include "mpvcore/options.h"
 #include "mpvcore/m_option.h"
-#include "audio/mixer.h"
 #include "mpvcore/mp_msg.h"
 
 #define ALSA_PCM_NEW_HW_PARAMS_API
