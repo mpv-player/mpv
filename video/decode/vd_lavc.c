@@ -344,7 +344,8 @@ static void init_avctx(sh_video_t *sh, const char *decoder,
 
     ctx->do_dr1 = ctx->do_hw_dr1 = 0;
     ctx->pix_fmt = PIX_FMT_NONE;
-    ctx->vo_initialized = 0;
+    ctx->image_params = (struct mp_image_params){0};
+    ctx->vo_image_params = (struct mp_image_params){0};
     ctx->hwdec = hwdec;
     ctx->pic = avcodec_alloc_frame();
     ctx->avctx = avcodec_alloc_context3(lavc_codec);
@@ -465,7 +466,7 @@ static void uninit(sh_video_t *sh)
     talloc_free(ctx);
 }
 
-static int init_vo(sh_video_t *sh, AVFrame *frame)
+static void update_image_params(sh_video_t *sh, AVFrame *frame)
 {
     vd_ffmpeg_ctx *ctx = sh->context;
     int width = frame->width;
@@ -479,10 +480,9 @@ static int init_vo(sh_video_t *sh, AVFrame *frame)
 
     if (av_cmp_q(frame->sample_aspect_ratio, ctx->last_sample_aspect_ratio) ||
             width != sh->disp_w || height != sh->disp_h ||
-            pix_fmt != ctx->pix_fmt || !ctx->vo_initialized)
+            pix_fmt != ctx->pix_fmt || !ctx->image_params.imgfmt)
     {
         mp_image_pool_clear(ctx->non_dr1_pool);
-        ctx->vo_initialized = 0;
         mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
 
         // Do not overwrite s->aspect on the first call, so that a container
@@ -512,13 +512,7 @@ static int init_vo(sh_video_t *sh, AVFrame *frame)
             .chroma_location =
                 avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
         };
-
-        if (mpcodecs_reconfig_vo(sh, &ctx->image_params) < 0)
-            return -1;
-
-        ctx->vo_initialized = 1;
     }
-    return 0;
 }
 
 static enum PixelFormat get_format_hwdec(struct AVCodecContext *avctx,
@@ -740,16 +734,25 @@ static int decode(struct sh_video *sh, struct demux_packet *packet,
     if (!got_picture)
         return 0;                     // skipped image
 
-    if (init_vo(sh, pic) < 0)
-        return -1;
+    update_image_params(sh, pic);
 
     struct mp_image *mpi = image_from_decoder(sh);
     assert(mpi->planes[0]);
+    mp_image_set_params(mpi, &ctx->image_params);
 
     if (ctx->hwdec && ctx->hwdec->process_image)
         mpi = ctx->hwdec->process_image(ctx, mpi);
 
-    mp_image_set_params(mpi, &ctx->image_params);
+    struct mp_image_params vo_params;
+    mp_image_params_from_image(&vo_params, mpi);
+
+    if (!mp_image_params_equals(&vo_params, &ctx->vo_image_params)) {
+        if (mpcodecs_reconfig_vo(sh, &vo_params) < 0) {
+            talloc_free(mpi);
+            return -1;
+        }
+        ctx->vo_image_params = vo_params;
+    }
 
     *out_image = mpi;
     return 1;
@@ -803,12 +806,12 @@ static int control(sh_video_t *sh, int cmd, void *arg)
         *(int *)arg = delay;
         return CONTROL_TRUE;
     case VDCTRL_REINIT_VO:
-        if (ctx->vo_initialized)
-            mpcodecs_reconfig_vo(sh, &ctx->image_params);
+        if (ctx->vo_image_params.imgfmt)
+            mpcodecs_reconfig_vo(sh, &ctx->vo_image_params);
         return true;
     case VDCTRL_GET_PARAMS:
-        *(struct mp_image_params *)arg = ctx->image_params;
-        return ctx->vo_initialized ? true : CONTROL_NA;
+        *(struct mp_image_params *)arg = ctx->vo_image_params;
+        return ctx->vo_image_params.imgfmt ? true : CONTROL_NA;
     }
     return CONTROL_UNKNOWN;
 }
