@@ -1772,6 +1772,11 @@
         - ``--reset-on-next-file=""``
           Do not reset pause mode.
 
+``--rtsp-transport=<lavf|udp|tcp|http>``
+    Select RTSP transport method (default: tcp). This selects the underlying
+    network transport when playing ``rtsp://...`` URLs. The value ``lavf``
+    leaves the decision to libavformat.
+
 ``--saturation=<-100-100>``
     Adjust the saturation of the video signal (default: 0). You can get
     grayscale output with this option. Not supported by all video output

@@ -86,7 +86,7 @@ static const stream_info_t *const stream_list[] = {
 #ifdef CONFIG_CDDA
     &stream_info_cdda,
 #endif
-    &stream_info_ffmpeg, // use for rstp:// before http fallback
+    &stream_info_ffmpeg,
     &stream_info_avdevice,
 #ifdef CONFIG_DVBIN
     &stream_info_dvb,

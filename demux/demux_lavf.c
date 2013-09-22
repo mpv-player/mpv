@@ -603,11 +603,32 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         avfc->pb = priv->pb;
     }
 
-    if (avformat_open_input(&avfc, priv->filename, priv->avif, NULL) < 0) {
+    AVDictionary *dopts = NULL;
+
+    if (matches_avinputformat_name(priv, "rtsp")) {
+        const char *transport = NULL;
+        switch (opts->network_rtsp_transport) {
+        case 1: transport = "udp";  break;
+        case 2: transport = "tcp";  break;
+        case 3: transport = "http"; break;
+        }
+        if (transport)
+            av_dict_set(&dopts, "rtsp_transport", transport, 0);
+    }
+
+    if (avformat_open_input(&avfc, priv->filename, priv->avif, &dopts) < 0) {
         mp_msg(MSGT_HEADER, MSGL_ERR,
                "LAVF_header: avformat_open_input() failed\n");
+        av_dict_free(&dopts);
         return -1;
     }
+
+    t = NULL;
+    while ((t = av_dict_get(dopts, "", t, AV_DICT_IGNORE_SUFFIX))) {
+        mp_msg(MSGT_OPEN, MSGL_V, "[lavf] Could not set demux option %s=%s\n",
+               t->key, t->value);
+    }
+    av_dict_free(&dopts);
 
     priv->avfc = avfc;
     if (avformat_find_stream_info(avfc, NULL) < 0) {

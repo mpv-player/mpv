@@ -382,6 +382,11 @@ const m_option_t mp_opts[] = {
     {"referrer", &network_referrer, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"cookies", &network_cookies_enabled, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"cookies-file", &cookies_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    OPT_CHOICE("rtsp-transport", network_rtsp_transport, 0,
+               ({"lavf", 0},
+                {"udp", 1},
+                {"tcp", 2},
+                {"http", 3})),
 
 // ------------------------- demuxer options --------------------
 
@@ -794,6 +799,7 @@ const struct MPOpts mp_default_opts = {
     .stream_cache_min_percent = 20.0,
     .stream_cache_seek_min_percent = 50.0,
     .stream_cache_pause = 10.0,
+    .network_rtsp_transport = 2,
     .chapterrange = {-1, -1},
     .edition_id = -1,
     .default_max_pts_correction = -1,

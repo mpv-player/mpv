@@ -98,6 +98,7 @@ typedef struct MPOpts {
     int stream_cache_def_size;
     float stream_cache_min_percent;
     float stream_cache_seek_min_percent;
+    int network_rtsp_transport;
     int stream_cache_pause;
     int chapterrange[2];
     int edition_id;
