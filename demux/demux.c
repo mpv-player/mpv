@@ -745,7 +745,7 @@ int demux_info_print(demuxer_t *demuxer)
     struct mp_tags *info = demuxer->metadata;
     int n;
 
-    if (!info)
+    if (!info || !info->num_keys)
         return 0;
 
     mp_tmsg(MSGT_DEMUX, MSGL_INFO, "Clip info:\n");
