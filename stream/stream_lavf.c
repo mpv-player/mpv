@@ -202,6 +202,12 @@ static int open_f(stream_t *stream, int mode)
         goto out;
     }
 
+    AVDictionaryEntry *t = NULL;
+    while ((t = av_dict_get(dict, "", t, AV_DICT_IGNORE_SUFFIX))) {
+        mp_msg(MSGT_OPEN, MSGL_V, "[ffmpeg] Could not set stream option %s=%s\n",
+               t->key, t->value);
+    }
+
     if (mp_avio_has_opts(avio)) {
         uint8_t *mt = NULL;
         if (av_opt_get(avio, "mime_type", AV_OPT_SEARCH_CHILDREN, &mt) >= 0) {
