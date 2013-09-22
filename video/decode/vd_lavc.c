@@ -86,6 +86,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_vdpau;
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau_old;
 const struct vd_lavc_hwdec mp_vd_lavc_vda;
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi;
+const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy;
 
 static const struct vd_lavc_hwdec mp_vd_lavc_crystalhd = {
     .type = HWDEC_CRYSTALHD,
@@ -114,6 +115,7 @@ static const struct vd_lavc_hwdec *hwdec_list[] = {
     &mp_vd_lavc_crystalhd,
 #if CONFIG_VAAPI
     &mp_vd_lavc_vaapi,
+    &mp_vd_lavc_vaapi_copy,
 #endif
     NULL
 };

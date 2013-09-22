@@ -1083,6 +1083,7 @@
     :auto:      see below
     :vdpau:     requires ``--vo=vdpau`` (Linux only)
     :vaapi:     requires ``--vo=vaapi`` (Linux with Intel GPUs only)
+    :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
     :vda:       requires ``--vo=corevideo`` (OSX only)
     :crystalhd: Broadcom Crystal HD
 
@@ -1091,6 +1092,9 @@
     if you are not using ``--vo=vdpau``, vdpau decoding will never be enabled.
     Also note that if the first found method doesn't actually work, it will
     always fall back to software decoding, instead of trying the next method.
+
+    The ``vaapi-copy`` function allows you to use vaapi with any VO. Because
+    this copies the decoded video back to system RAM, it's quite inefficient.
 
 ``--hwdec-codecs=<codec1,codec2,...|all>``
     Allow hardware decoding for a given list of codecs only. The default is the

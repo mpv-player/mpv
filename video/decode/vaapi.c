@@ -25,6 +25,8 @@
 #include <libavcodec/vaapi.h>
 #include <libavutil/common.h>
 
+#include <X11/Xlib.h>
+
 #include "lavc.h"
 #include "mpvcore/mp_common.h"
 #include "mpvcore/av_common.h"
@@ -54,6 +56,7 @@
 struct priv {
     struct mp_vaapi_ctx *ctx;
     VADisplay display;
+    Display *x11_display;
 
     // libavcodec shared struct
     struct vaapi_context *va_context;
@@ -64,6 +67,8 @@ struct priv {
 
     struct va_surface_pool *pool;
     int rt_format;
+
+    bool printed_readback_warning;
 };
 
 struct profile_entry {
@@ -342,6 +347,38 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int format,
     return NULL;
 }
 
+
+static void destroy_va_dummy_ctx(struct priv *p)
+{
+    if (p->x11_display)
+        XCloseDisplay(p->x11_display);
+    p->x11_display = NULL;
+    va_destroy(p->ctx);
+    p->ctx = NULL;
+}
+
+// Creates a "private" VADisplay, disconnected from the VO. We just create a
+// new X connection, because that's simpler. (We could also pass the X
+// connection along with struct mp_hwdec_info, if we wanted.)
+static bool create_va_dummy_ctx(struct priv *p)
+{
+    p->x11_display = XOpenDisplay(NULL);
+    if (!p->x11_display)
+        goto destroy_ctx;
+    VADisplay *display = vaGetDisplay(p->x11_display);
+    if (!display)
+        goto destroy_ctx;
+    p->ctx = va_initialize(display);
+    if (!p->ctx) {
+        vaTerminate(display);
+        goto destroy_ctx;
+    }
+    return true;
+destroy_ctx:
+    destroy_va_dummy_ctx(p);
+    return false;
+}
+
 static void uninit(struct lavc_ctx *ctx)
 {
     struct priv *p = ctx->hwdec_priv;
@@ -350,20 +387,30 @@ static void uninit(struct lavc_ctx *ctx)
         return;
 
     destroy_decoder(ctx);
-
     va_surface_pool_release(p->pool);
+
+    if (p->x11_display)
+        destroy_va_dummy_ctx(p);
+
     talloc_free(p);
     ctx->hwdec_priv = NULL;
 }
 
-static int init(struct lavc_ctx *ctx)
+static int init_with_vactx(struct lavc_ctx *ctx, struct mp_vaapi_ctx *vactx)
 {
     struct priv *p = talloc_ptrtype(NULL, p);
     *p = (struct priv) {
-        .ctx = ctx->hwdec_info->vaapi_ctx,
+        .ctx = vactx,
         .va_context = &p->va_context_storage,
         .rt_format = VA_RT_FORMAT_YUV420
     };
+
+    if (!p->ctx)
+        create_va_dummy_ctx(p);
+    if (!p->ctx) {
+        talloc_free(p);
+        return -1;
+    }
 
     p->display = p->ctx->display;
     p->pool = va_surface_pool_alloc(p->display, p->rt_format);
@@ -378,6 +425,12 @@ static int init(struct lavc_ctx *ctx)
     return 0;
 }
 
+static int init(struct lavc_ctx *ctx)
+{
+    if (!ctx->hwdec_info->vaapi_ctx)
+        return -1;
+    return init_with_vactx(ctx, ctx->hwdec_info->vaapi_ctx);
+}
 
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                  const char *decoder)
@@ -389,6 +442,44 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
     return 0;
 }
 
+static int probe_copy(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
+                      const char *decoder)
+{
+    struct priv dummy = {0};
+    if (!create_va_dummy_ctx(&dummy))
+        return HWDEC_ERR_NO_CTX;
+    destroy_va_dummy_ctx(&dummy);
+    if (!find_codec(mp_codec_to_av_codec_id(decoder)))
+        return HWDEC_ERR_NO_CODEC;
+    return 0;
+}
+
+static int init_copy(struct lavc_ctx *ctx)
+{
+    return init_with_vactx(ctx, NULL);
+}
+
+static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)
+{
+    struct priv *p = ctx->hwdec_priv;
+
+    struct va_surface *surface = va_surface_in_mp_image(img);
+    if (surface) {
+        struct mp_image *simg =
+            va_surface_download(surface, p->ctx->image_formats);
+        if (simg) {
+            if (!p->printed_readback_warning) {
+                mp_msg(MSGT_VO, MSGL_WARN, "[vaapi] Using GPU readback. This "
+                       "is usually inefficient.\n");
+                p->printed_readback_warning = true;
+            }
+            talloc_free(img);
+            return simg;
+        }
+    }
+    return img;
+}
+
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .type = HWDEC_VAAPI,
     .image_formats = (const int[]) {IMGFMT_VAAPI, IMGFMT_VAAPI_MPEG2_IDCT,
@@ -397,4 +488,15 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .init = init,
     .uninit = uninit,
     .allocate_image = allocate_image,
+};
+
+const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
+    .type = HWDEC_VAAPI_COPY,
+    .image_formats = (const int[]) {IMGFMT_VAAPI, IMGFMT_VAAPI_MPEG2_IDCT,
+                                    IMGFMT_VAAPI_MPEG2_MOCO, 0},
+    .probe = probe_copy,
+    .init = init_copy,
+    .uninit = uninit,
+    .allocate_image = allocate_image,
+    .process_image = copy_image,
 };
