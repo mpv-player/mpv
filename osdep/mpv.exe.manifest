@@ -3,7 +3,7 @@
     <assemblyIdentity
         version="0.0.9.0"
         processorArchitecture="*"
-        name="mpv - The Movie Player"
+        name="mpv - video player"
         type="win32"
     />
     <description>mpv - The Movie Player</description>

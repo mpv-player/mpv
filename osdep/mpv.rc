@@ -32,13 +32,13 @@ FILETYPE VFT_APP
         BLOCK "000004b0" // LANG_NEUTRAL,UNICODE_CP
         {
             VALUE "Comments","mpv is distributed under the terms of the GNU General Public License Version 3.\000"
-            VALUE "CompanyName", "\000"
-            VALUE "FileDescription", "mpv - Movie Player\000"
+            VALUE "CompanyName", "mpv\000"
+            VALUE "FileDescription", "mpv - video player\000"
             VALUE "FileVersion",VERSION
-            VALUE "LegalCopyright", " (C) 2000-2013 MPlayer Team and others\000"
+            VALUE "LegalCopyright", " (C) 2000-2013 mpv/mplayer2/MPlayer\000"
             //VALUE "LegalTrademarks"," \000";
             VALUE "OriginalFilename", "mpv.exe\000"
-            VALUE "ProductName", "mpv - The Movie Player\000"
+            VALUE "ProductName", "mpv - video player\000"
             VALUE "ProductVersion",VERSION
             //VALUE "SpecialBuild","\000"
         }
