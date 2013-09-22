@@ -50,8 +50,6 @@
 
 #include "mpvcore/mp_msg.h"
 
-extern char *cdrom_device;
-
 typedef struct {
     cdrom_drive_t *cd;
     cdrom_paranoia_t *cdp;

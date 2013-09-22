@@ -53,8 +53,6 @@ extern char *lirc_configfile;
 extern int mp_msg_color;
 extern int mp_msg_module;
 
-extern int dvd_speed; /* stream/stream_dvd.c */
-
 /* defined in demux: */
 extern const m_option_t demux_rawaudio_opts[];
 extern const m_option_t demux_rawvideo_opts[];
@@ -177,8 +175,6 @@ static const m_option_t scaler_filter_conf[]={
     {"cs", &sws_chr_sharpen, CONF_TYPE_FLOAT, 0, -100.0, 100.0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
-
-extern char *dvd_device, *cdrom_device;
 
 extern double mf_fps;
 extern char * mf_type;

@@ -2411,7 +2411,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             talloc_free(pl);
 
             if (!append && mpctx->playlist->first) {
-                struct playlist_entry *e = mp_resume_playlist(mpctx->playlist);
+                struct playlist_entry *e =
+                    mp_resume_playlist(mpctx->playlist, opts);
                 mp_set_playlist_entry(mpctx, e ? e : mpctx->playlist->first);
             }
         } else {

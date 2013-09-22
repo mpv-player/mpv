@@ -777,17 +777,28 @@ static void load_per_file_config(m_config_t *conf, const char * const file,
 
 #define MP_WATCH_LATER_CONF "watch_later"
 
-static char *get_playback_resume_config_filename(const char *fname)
+static char *get_playback_resume_config_filename(const char *fname,
+                                                 struct MPOpts *opts)
 {
     char *res = NULL;
     void *tmp = talloc_new(NULL);
     const char *realpath = fname;
-    if (!mp_is_url(bstr0(fname))) {
+    bstr bfname = bstr0(fname);
+    if (!mp_is_url(bfname)) {
         char *cwd = mp_getcwd(tmp);
         if (!cwd)
             goto exit;
         realpath = mp_path_join(tmp, bstr0(cwd), bstr0(fname));
     }
+#ifdef CONFIG_DVDREAD
+    if (bstr_startswith0(bfname, "dvd://"))
+        realpath = talloc_asprintf(tmp, "%s - %s", realpath, dvd_device);
+#endif
+#ifdef CONFIG_LIBBLURAY
+    if (bstr_startswith0(bfname, "br://") || bstr_startswith0(bfname, "bd://") ||
+        bstr_startswith0(bfname, "bluray://"))
+        realpath = talloc_asprintf(tmp, "%s - %s", realpath, bluray_device);
+#endif
     uint8_t md5[16];
     av_md5_sum(md5, realpath, strlen(realpath));
     char *conf = talloc_strdup(tmp, "");
@@ -853,7 +864,8 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
 
     mk_config_dir(MP_WATCH_LATER_CONF);
 
-    char *conffile = get_playback_resume_config_filename(mpctx->filename);
+    char *conffile = get_playback_resume_config_filename(mpctx->filename,
+                                                         mpctx->opts);
     talloc_steal(tmp, conffile);
     if (!conffile)
         goto exit;
@@ -880,7 +892,7 @@ exit:
 
 static void load_playback_resume(m_config_t *conf, const char *file)
 {
-    char *fname = get_playback_resume_config_filename(file);
+    char *fname = get_playback_resume_config_filename(file, conf->optstruct);
     if (fname && mp_path_exists(fname)) {
         // Never apply the saved start position to following files
         m_config_backup_opt(conf, "start");
@@ -897,10 +909,11 @@ static void load_playback_resume(m_config_t *conf, const char *file)
 // resume file for them, this is simpler, and also has the nice property
 // that appending to a playlist doesn't interfere with resuming (especially
 // if the playlist comes from the command line).
-struct playlist_entry *mp_resume_playlist(struct playlist *playlist)
+struct playlist_entry *mp_resume_playlist(struct playlist *playlist,
+                                          struct MPOpts *opts)
 {
     for (struct playlist_entry *e = playlist->first; e; e = e->next) {
-        char *conf = get_playback_resume_config_filename(e->filename);
+        char *conf = get_playback_resume_config_filename(e->filename, opts);
         bool exists = conf && mp_path_exists(conf);
         talloc_free(conf);
         if (exists)
@@ -4892,7 +4905,7 @@ static int mpv_main(int argc, char *argv[])
     if (opts->shuffle)
         playlist_shuffle(mpctx->playlist);
 
-    mpctx->playlist->current = mp_resume_playlist(mpctx->playlist);
+    mpctx->playlist->current = mp_resume_playlist(mpctx->playlist, opts);
     if (!mpctx->playlist->current)
         mpctx->playlist->current = mpctx->playlist->first;
 
