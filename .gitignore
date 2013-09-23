@@ -19,4 +19,8 @@
 /demux/ebml_types.h
 /sub/osd_font.h
 /DOCS/man/*/mpv.1
-
+/DOCS/man/*/mpv.aux
+/DOCS/man/*/mpv.log
+/DOCS/man/*/mpv.out
+/DOCS/man/*/mpv.pdf
+/DOCS/man/*/mpv.toc
