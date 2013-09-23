@@ -154,9 +154,9 @@ void mp_ass_configure_fonts(ASS_Renderer *priv, struct osd_style_opts *opts)
         default_font = NULL;
     }
 
-    mp_msg(MSGT_ASS, MSGL_V, "[ass] Setting up fonts...\n");
+    mp_msg(MSGT_ASS, MSGL_V, "Setting up fonts...\n");
     ass_set_fonts(priv, default_font, opts->font, 1, config, 1);
-    mp_msg(MSGT_ASS, MSGL_V, "[ass] Done.\n");
+    mp_msg(MSGT_ASS, MSGL_V, "Done.\n");
 
     talloc_free(default_font);
     talloc_free(config);
@@ -211,7 +211,6 @@ static int map_ass_level[] = {
 static void message_callback(int level, const char *format, va_list va, void *ctx)
 {
     level = map_ass_level[level];
-    mp_msg(MSGT_ASS, level, "[ass] ");
     mp_msg_va(MSGT_ASS, level, format, va);
     // libass messages lack trailing \n
     mp_msg(MSGT_ASS, level, "\n");
