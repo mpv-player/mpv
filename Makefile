@@ -451,8 +451,8 @@ install-mpv-man-en: DOCS/man/en/mpv.1
 install-mpv-pdf:  install-mpv-pdf-en
 
 install-mpv-pdf-en: DOCS/man/en/mpv.pdf
-	if test ! -d $(DOCDIR)/mpv ; then $(INSTALL) -d $(DOCDIR)/mpv ; fi
-	$(INSTALL) -m 644 DOCS/man/en/mpv.pdf $(DOCDIR)/mpv/
+	if test ! -d $(DOCDIR) ; then $(INSTALL) -d $(DOCDIR) ; fi
+	$(INSTALL) -m 644 DOCS/man/en/mpv.pdf $(DOCDIR)/
 
 ICONSIZES = 16x16 32x32 64x64
 
@@ -476,7 +476,7 @@ uninstall:
 	$(RM) $(BINDIR)/mpv$(EXESUF)
 	$(RM) $(MANDIR)/man1/mpv.1
 	$(RM) $(MANDIR)/en/man1/mpv.1
-	$(RM) $(DOCDIR)/mpv/mpv.pdf
+	$(RM) $(DOCDIR)/mpv.pdf
 	$(RM) $(prefix)/share/applications/mpv.desktop
 	$(RM) $(foreach size,$(ICONSIZES),$(prefix)/share/icons/hicolor/$(size)/apps/mpv.png)
 
