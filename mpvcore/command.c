@@ -2050,11 +2050,10 @@ static void show_property_osd(MPContext *mpctx, const char *pname,
         return;
     }
 
-    char buf[40] = {0};
-    if (!msg && osd_name) {
-        snprintf(buf, sizeof(buf), "%s: ${%s}", osd_name, prop.name);
-        msg = buf;
-    }
+    void *tmp = talloc_new(NULL);
+
+    if (!msg && osd_name)
+        msg = talloc_asprintf(tmp, "%s: ${%s}", osd_name, prop.name);
 
     if (osd_progbar && (prop.flags & CONF_RANGE) == CONF_RANGE) {
         bool ok = false;
@@ -2073,7 +2072,6 @@ static void show_property_osd(MPContext *mpctx, const char *pname,
             msg = NULL;
     }
 
-    void *tmp = talloc_new(NULL);
     char *osd_msg = NULL;
     if (msg)
         osd_msg = talloc_steal(tmp, mp_property_expand_string(mpctx, msg));
