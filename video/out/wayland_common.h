@@ -71,6 +71,8 @@ struct vo_wayland_state {
         float aspect;
 
         struct wl_surface *surface;
+        int32_t surf_x;
+        int32_t surf_y;
         struct wl_shell_surface *shell_surface;
         int events; /* mplayer events (VO_EVENT_RESIZE) */
     } window;
