@@ -313,8 +313,6 @@ static void pointer_handle_enter(void *data,
     wl->cursor.serial = serial;
     wl->cursor.pointer = pointer;
 
-    /* Release the left button on pointer enter again
-     * because after moving the shell surface no release event is sent */
     show_cursor(wl);
 }
 
