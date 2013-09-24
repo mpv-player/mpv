@@ -88,36 +88,30 @@ static int init(struct sd *sd)
 
 static void decode(struct sd *sd, struct demux_packet *packet)
 {
-    void *data = packet->buffer;
-    int data_len = packet->len;
-    double pts = packet->pts;
-    double duration = packet->duration;
-    unsigned char *text = data;
     struct sd_ass_priv *ctx = sd->priv;
     ASS_Track *track = ctx->ass_track;
+    long long ipts = packet->pts * 1000 + 0.5;
+    long long iduration = packet->duration * 1000 + 0.5;
     if (strcmp(sd->codec, "ass") == 0) {
-        ass_process_chunk(track, data, data_len,
-                          (long long)(pts*1000 + 0.5),
-                          (long long)(duration*1000 + 0.5));
+        ass_process_chunk(track, packet->buffer, packet->len, ipts, iduration);
         return;
     } else if (strcmp(sd->codec, "ssa") == 0) {
         // broken ffmpeg ASS packet format
         ctx->flush_on_seek = true;
-        ass_process_data(track, data, data_len);
+        ass_process_data(track, packet->buffer, packet->len);
         return;
     }
     // plaintext subs
-    if (pts == MP_NOPTS_VALUE) {
+    if (packet->pts == MP_NOPTS_VALUE) {
         mp_msg(MSGT_SUBREADER, MSGL_WARN, "Subtitle without pts, ignored\n");
         return;
     }
-    long long ipts = pts * 1000 + 0.5;
-    long long iduration = duration * 1000 + 0.5;
-    if (duration <= 0) {
+    if (packet->duration <= 0) {
         mp_msg(MSGT_SUBREADER, MSGL_WARN, "Subtitle without duration or "
-               "duration set to 0 at pts %f, ignored\n", pts);
+               "duration set to 0 at pts %f, ignored\n", packet->pts);
         return;
     }
+    unsigned char *text = packet->buffer;
     if (!sd->no_remove_duplicates) {
         for (int i = 0; i < track->n_events; i++) {
             if (track->events[i].Start == ipts
