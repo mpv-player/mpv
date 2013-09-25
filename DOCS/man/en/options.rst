@@ -122,15 +122,20 @@
 
         Using this option may lead to incorrect subtitle rendering.
 
-``--ass-hinting=<type>``
+``--ass-hinting=none|light|normal|native``
     Set font hinting type. <type> can be:
 
-    :0:       no hinting
-    :1:       FreeType autohinter, light mode
-    :2:       FreeType autohinter, normal mode
-    :3:       font native hinter
+    :none:       no hinting (default)
+    :light:      FreeType autohinter, light mode
+    :normal:     FreeType autohinter, normal mode
+    :native:     font native hinter
 
-    The default value is 0 (no hinting).
+    .. admonition:: Warning
+
+        Enabling hinting can lead to mispositioned text (in situations it's
+        supposed to match up with video background), or reduce the smoothness
+        of animations with some badly authored ASS scripts. It is recommended
+        to not use this option, unless really needed.
 
 ``--ass-line-spacing=<value>``
     Set line spacing value for SSA/ASS renderer.

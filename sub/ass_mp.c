@@ -132,7 +132,7 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
 #endif
         set_line_spacing = opts->ass_line_spacing;
         set_font_scale = opts->sub_scale;
-        set_hinting = opts->ass_hinting & 3; // +4 was for no hinting if scaled
+        set_hinting = opts->ass_hinting;
     }
 
     ass_set_use_margins(priv, set_use_margins);
