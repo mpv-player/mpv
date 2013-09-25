@@ -40,6 +40,10 @@
     do { type SWAP_tmp = b; b = a; a = SWAP_tmp; } while (0)
 #define MP_ARRAY_SIZE(s) (sizeof(s) / sizeof((s)[0]))
 
+// align must be a power of two (align >= 1), x >= 0
+#define MP_ALIGN_UP(x, align) (((x) + (align) - 1) & ~((align) - 1))
+#define MP_ALIGN_DOWN(x, align) ((x) & ~((align) - 1))
+
 #define CONTROL_OK 1
 #define CONTROL_TRUE 1
 #define CONTROL_FALSE 0
