@@ -31,6 +31,7 @@
 #include "video/fmt-conversion.h"
 #include "video/vaapi.h"
 #include "video/decode/dec_video.h"
+#include "video/filter/vf.h"
 
 /*
  * The VAAPI decoder can work only with surfaces passed to the decoder at
@@ -60,6 +61,9 @@ struct priv {
 
     int format, w, h;
     VASurfaceID surfaces[MAX_SURFACES];
+
+    struct va_surface_pool *pool;
+    int rt_format;
 };
 
 struct profile_entry {
@@ -159,36 +163,23 @@ static int is_direct_mapping(VADisplay display)
     return 0;
 }
 
-// Make vo_vaapi.c pool the required number of surfaces.
-// This is very touchy: vo_vaapi.c must not free surfaces while we decode,
-// and we must allocate only surfaces that were passed to the decoder on
-// creation.
-// We achieve this by deleting all previous surfaces, then allocate every
-// surface needed. Then we free these surfaces, and rely on the fact that
-// vo_vaapi.c keeps the released surfaces in the pool, and only allocates
-// new surfaces out of that pool.
-static int preallocate_surfaces(struct lavc_ctx *ctx, int va_rt_format, int num)
+// We must allocate only surfaces that were passed to the decoder on creation.
+// We achieve this by reserving surfaces in the pool as needed.
+// Releasing surfaces is necessary after filling the surface id list so
+// that reserved surfaces can be reused for decoding.
+static bool preallocate_surfaces(struct lavc_ctx *ctx, int num)
 {
     struct priv *p = ctx->hwdec_priv;
-    int res = -1;
-
-    struct mp_image *tmp_surfaces[MAX_SURFACES] = {0};
-
-    p->ctx->flush(p->ctx); // free previously allocated surfaces
-
-    for (int n = 0; n < num; n++) {
-        tmp_surfaces[n] = p->ctx->get_surface(p->ctx, va_rt_format, p->format,
-                                              p->w, p->h);
-        if (!tmp_surfaces[n])
-            goto done;
-        p->surfaces[n] = (uintptr_t)tmp_surfaces[n]->planes[3];
+    if (!va_surface_pool_reserve(p->pool, num, p->w, p->h)) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Could not allocate surfaces.\n");
+        return false;
     }
-    res = 0;
-
-done:
-    for (int n = 0; n < num; n++)
-        talloc_free(tmp_surfaces[n]);
-    return res;
+    for (int i=0; i<num; ++i) {
+        struct va_surface *s = va_surface_pool_get(p->pool, p->w, p->h);
+        p->surfaces[i] = s->id;
+        va_surface_release(s);
+    }
+    return true;
 }
 
 static void destroy_decoder(struct lavc_ctx *ctx)
@@ -274,7 +265,7 @@ static int create_decoder(struct lavc_ctx *ctx)
         goto error;
     }
 
-    if (preallocate_surfaces(ctx, VA_RT_FORMAT_YUV420, num_surfaces) < 0) {
+    if (!preallocate_surfaces(ctx, num_surfaces)) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Could not allocate surfaces.\n");
         goto error;
     }
@@ -298,7 +289,7 @@ static int create_decoder(struct lavc_ctx *ctx)
                                    &attrib, 1);
     if (!check_va_status(status, "vaGetConfigAttributes()"))
         goto error;
-    if ((attrib.value & VA_RT_FORMAT_YUV420) == 0) {
+    if ((attrib.value & p->rt_format) == 0) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Chroma format not supported.\n");
         goto error;
     }
@@ -339,14 +330,13 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int format,
             return NULL;
     }
 
-    struct mp_image *img = p->ctx->get_surface(p->ctx, VA_RT_FORMAT_YUV420,
-                                               format, p->w, p->h);
-    if (img) {
+    struct va_surface *s = va_surface_pool_get(p->pool, p->w, p->h);
+    if (s) {
         for (int n = 0; n < MAX_SURFACES; n++) {
-            if (p->surfaces[n] == (uintptr_t)img->planes[3])
-                return img;
+            if (p->surfaces[n] == s->id)
+                return va_surface_wrap(s);
         }
-        talloc_free(img);
+        va_surface_release(s);
     }
     mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Insufficient number of surfaces.\n");
     return NULL;
@@ -363,6 +353,7 @@ static void uninit(struct lavc_ctx *ctx)
 
     talloc_free(p);
     ctx->hwdec_priv = NULL;
+    va_surface_pool_release(p->pool);
 }
 
 static int init(struct lavc_ctx *ctx)
@@ -371,16 +362,18 @@ static int init(struct lavc_ctx *ctx)
     *p = (struct priv) {
         .ctx = ctx->hwdec_info->vaapi_ctx,
         .va_context = &p->va_context_storage,
+        .rt_format = VA_RT_FORMAT_YUV420
     };
-    ctx->hwdec_priv = p;
 
     p->display = p->ctx->display;
+    p->pool = va_surface_pool_alloc(p->display, p->rt_format);
 
     p->va_context->display = p->display;
     p->va_context->config_id = VA_INVALID_ID;
     p->va_context->context_id = VA_INVALID_ID;
 
     ctx->avctx->hwaccel_context = p->va_context;
+    ctx->hwdec_priv = p;
 
     return 0;
 }
