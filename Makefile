@@ -123,6 +123,8 @@ SOURCES-$(WAYLAND)              += video/out/vo_wayland.c video/out/wayland_comm
 SOURCES-$(VF_LAVFI)             += video/filter/vf_lavfi.c
 SOURCES-$(AF_LAVFI)             += audio/filter/af_lavfi.c
 
+SOURCES-$(LUA)                  += mpvcore/mp_lua.c
+
 ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
     SOURCES-yes                 += video/decode/lavc_dr1.c
 endif
@@ -397,6 +399,14 @@ sub/osd_libass.c: sub/osd_font.h
 sub/osd_font.h: TOOLS/file2string.pl sub/osd_font.otf
 	./$^ >$@
 
+mpvcore/mp_lua.c: mpvcore/lua/defaults.inc
+mpvcore/lua/defaults.inc: TOOLS/file2string.pl mpvcore/lua/defaults.lua
+	./$^ >$@
+
+mpvcore/mp_lua.c: mpvcore/lua/assdraw.inc
+mpvcore/lua/assdraw.inc: TOOLS/file2string.pl mpvcore/lua/assdraw.lua
+	./$^ >$@
+
 # ./configure must be rerun if it changed
 config.mak: configure
 	@echo "############################################################"
@@ -495,6 +505,8 @@ clean:
 	-$(RM) video/out/gl_video_shaders.h
 	-$(RM) video/out/x11_icon.inc
 	-$(RM) sub/osd_font.h
+	-$(RM) mpvcore/lua/defaults.inc
+	-$(RM) mpvcore/lua/assdraw.inc
 
 distclean: clean
 	-$(RM) config.log config.mak config.h TAGS tags

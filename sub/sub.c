@@ -304,3 +304,14 @@ void osd_changed_all(struct osd_state *osd)
     for (int n = 0; n < MAX_OSD_PARTS; n++)
         osd_changed(osd, n);
 }
+
+// Scale factor to translate OSD coordinates to what the obj uses internally.
+// osd_coordinates * (sh, sh) = obj_coordinates
+void osd_object_get_scale_factor(struct osd_state *osd, struct osd_object *obj,
+                                 double *sw, double *sh)
+{
+    int nw, nh;
+    osd_object_get_resolution(osd, obj, &nw, &nh);
+    *sw = nw / (double)obj->vo_res.w;
+    *sh = nh / (double)obj->vo_res.h;
+}

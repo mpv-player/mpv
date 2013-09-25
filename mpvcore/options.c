@@ -344,6 +344,10 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("config", load_config, CONF_GLOBAL | CONF_NOCFG | CONF_PRE_PARSE),
     OPT_STRINGLIST("reset-on-next-file", reset_options, CONF_GLOBAL),
 
+#ifdef CONFIG_LUA
+    OPT_STRINGLIST("lua", lua_files, CONF_GLOBAL),
+#endif
+
 // ------------------------- stream options --------------------
 
 #ifdef CONFIG_STREAM_CACHE

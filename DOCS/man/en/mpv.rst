@@ -441,6 +441,8 @@ OPTIONS
 
 .. include:: input.rst
 
+.. include:: lua.rst
+
 .. include:: changes.rst
 
 ENVIRONMENT VARIABLES

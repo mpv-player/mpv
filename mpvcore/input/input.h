@@ -85,6 +85,9 @@ enum mp_command_type {
     /// Video output commands
     MP_CMD_VO_CMDLINE,
 
+    /// Internal for Lua scripts
+    MP_CMD_SCRIPT_DISPATCH,
+
     // Internal
     MP_CMD_COMMAND_LIST, // list of sub-commands in args[0].v.p
 };

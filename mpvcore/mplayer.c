@@ -149,6 +149,8 @@
 #include "mpvcore/mp_core.h"
 #include "mpvcore/options.h"
 
+#include "mp_lua.h"
+
 const char mp_help_text[] = _(
 "Usage:   mpv [options] [url|path/]filename\n"
 "\n"
@@ -547,6 +549,10 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 #endif
 
     mpctx->encode_lavc_ctx = NULL;
+
+#ifdef CONFIG_LUA
+    mp_lua_uninit(mpctx);
+#endif
 
 #if defined(__MINGW32__) || defined(__CYGWIN__)
     timeEndPeriod(1);
@@ -1028,6 +1034,8 @@ static struct track *add_stream_track(struct MPContext *mpctx,
 
     demuxer_select_track(track->demuxer, stream, false);
 
+    mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
+
     return track;
 }
 
@@ -1057,6 +1065,8 @@ static void add_dvd_tracks(struct MPContext *mpctx)
             struct stream_lang_req req = {.type = STREAM_SUB, .id = n};
             stream_control(stream, STREAM_CTRL_GET_LANG, &req);
             track->lang = talloc_strdup(track, req.name);
+
+            mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
         }
     }
     demuxer_enable_autoselect(demuxer);
@@ -2035,12 +2045,15 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
     if (type == STREAM_VIDEO) {
         mpctx->opts->video_id = user_tid;
         reinit_video_chain(mpctx);
+        mp_notify_property(mpctx, "vid");
     } else if (type == STREAM_AUDIO) {
         mpctx->opts->audio_id = user_tid;
         reinit_audio_chain(mpctx);
+        mp_notify_property(mpctx, "aid");
     } else if (type == STREAM_SUB) {
         mpctx->opts->sub_id = user_tid;
         reinit_subs(mpctx);
+        mp_notify_property(mpctx, "sid");
     }
 
     talloc_free(mpctx->track_layout_hash);
@@ -2083,6 +2096,9 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
     }
     mpctx->num_tracks--;
     talloc_free(track);
+
+    mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
+
     return true;
 }
 
@@ -2761,6 +2777,8 @@ static double update_video(struct MPContext *mpctx, double endpts)
 
 void pause_player(struct MPContext *mpctx)
 {
+    mp_notify_property(mpctx, "pause");
+
     mpctx->opts->pause = 1;
 
     if (mpctx->video_out)
@@ -2790,6 +2808,8 @@ void pause_player(struct MPContext *mpctx)
 
 void unpause_player(struct MPContext *mpctx)
 {
+    mp_notify_property(mpctx, "pause");
+
     mpctx->opts->pause = 0;
 
     if (mpctx->video_out && mpctx->opts->stop_screensaver)
@@ -3418,6 +3438,8 @@ static void handle_cursor_autohide(struct MPContext *mpctx)
 
 static void handle_input_and_seek_coalesce(struct MPContext *mpctx)
 {
+    mp_flush_events(mpctx);
+
     mp_cmd_t *cmd;
     while ((cmd = mp_input_get_cmd(mpctx->input, 0, 1)) != NULL) {
         /* Allow running consecutive seek commands to combine them,
@@ -4216,6 +4238,7 @@ static void idle_loop(struct MPContext *mpctx)
                                         false)));
         run_command(mpctx, cmd);
         mp_cmd_free(cmd);
+        mp_flush_events(mpctx);
     }
 }
 
@@ -4269,6 +4292,10 @@ static void play_current_file(struct MPContext *mpctx)
     double playback_start = -1e100;
 
     mpctx->initialized_flags |= INITIALIZED_PLAYBACK;
+
+    mp_notify(mpctx, MP_EVENT_START_FILE, NULL);
+    mp_flush_events(mpctx);
+
     mpctx->stop_play = 0;
     mpctx->filename = NULL;
 
@@ -4612,6 +4639,10 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
                 (playback_start < 0 || mp_time_sec() - playback_start < 3.0);
     if (mpctx->playlist->current && !mpctx->playlist->current_was_replaced)
         mpctx->playlist->current->playback_failed = playback_failed;
+
+    mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
+    mp_notify(mpctx, MP_EVENT_END_FILE, NULL);
+    mp_flush_events(mpctx);
 }
 
 // Determine the next file to play. Note that if this function returns non-NULL,
@@ -4840,6 +4871,7 @@ static int mpv_main(int argc, char *argv[])
     GetCpuCaps(&gCpuCaps);
     screenshot_init(mpctx);
     mpctx->mixer = mixer_init(mpctx, opts);
+    command_init(mpctx);
 
     // Preparse the command line
     m_config_preparse_command_line(mpctx->mconfig, argc, argv);
@@ -4901,6 +4933,12 @@ static int mpv_main(int argc, char *argv[])
 #endif
 
     mpctx->osd = osd_create(opts, mpctx->ass_library);
+
+#ifdef CONFIG_LUA
+    // Lua user scripts can call arbitrary functions. Load them at a point
+    // where this is safe.
+    mp_lua_init(mpctx);
+#endif
 
     if (opts->shuffle)
         playlist_shuffle(mpctx->playlist);

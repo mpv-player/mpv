@@ -229,6 +229,8 @@ static const mp_cmd_t mp_cmds[] = {
 
   { MP_CMD_VO_CMDLINE, "vo_cmdline", { ARG_STRING } },
 
+  { MP_CMD_SCRIPT_DISPATCH, "script_dispatch", { ARG_STRING, ARG_INT } },
+
   {0}
 };
 
@@ -528,6 +530,7 @@ struct input_ctx {
     // Autorepeat stuff
     short ar_state;
     int64_t last_ar;
+
     // Autorepeat config
     unsigned int ar_delay;
     unsigned int ar_rate;
@@ -1455,6 +1458,8 @@ static void remove_key_down(struct input_ctx *ictx, int code)
 static bool key_updown_ok(enum mp_command_type cmd)
 {
     switch (cmd) {
+    case MP_CMD_SCRIPT_DISPATCH:
+        return true;
     default:
         return false;
     }

@@ -293,6 +293,9 @@ Installation directories:
 
 Optional features:
   --disable-encoding     disable encoding functionality [enable]
+  --disable-lua          disable Lua scripting support [autodetect]
+  --lua=LUA              select Lua package which should be autodetected
+                         Choices: 51 51deb 52 52deb luajit
   --disable-libguess     disable libguess [autodetect]
   --enable-terminfo      use terminfo database for key codes [autodetect]
   --enable-termcap       use termcap database for key codes [autodetect]
@@ -485,6 +488,7 @@ _pthreads=auto
 _ass=auto
 _libass_osd=auto
 _rpath=no
+lua=auto
 libpostproc=auto
 libavfilter=auto
 vf_lavfi=auto
@@ -679,6 +683,9 @@ for ac_option do
   --disable-libavresample) _disable_avresample=yes ;;
   --enable-libavresample) _disable_avresample=no   ;;
 
+  --enable-lua)         lua=yes         ;;
+  --disable-lua)        lua=no          ;;
+  --lua=*)              lua_pkg=$(echo $ac_option | cut -d '=' -f 2) ;;
   --enable-lirc)        _lirc=yes       ;;
   --disable-lirc)       _lirc=no        ;;
   --enable-lircc)       _lircc=yes      ;;
@@ -2982,6 +2989,111 @@ fi
 echores "$_pvr"
 
 
+# Note: Lua has no official .pc file, so there are different OS-specific ones.
+# Also, we support luajit, which is compatible to 5.1.
+# The situation is further complicated by distros supporting multiple Lua
+# versions, without ensuring libraries linking to conflicting Lua libs don't
+# cause issues. This is a real problem with libquvi.
+
+cat > $TMPC << EOF
+#include <stdlib.h>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
+EOF
+# abuse $TMPH file as second temp file
+cat > $TMPH << EOF
+void test_lua(void) {
+    lua_State *L = luaL_newstate();
+    lua_pushstring(L, "test");
+    lua_setglobal(L, "test");
+}
+void test_other(void) {
+EOF
+
+# test all other Lua using packages (hack that gives us time)
+if test "$_libquvi4" = yes ; then
+
+echo "#include <quvi/quvi.h>" >> $TMPC
+cat >> $TMPH << EOF
+    quvi_t q;
+    if (quvi_init(&q) == QUVI_OK)
+        quvi_supported(q, "http://nope");
+EOF
+
+fi
+
+if test "$_libquvi9" = yes ; then
+
+echo "#include <quvi.h>" >> $TMPC
+cat >> $TMPH << EOF
+    quvi_t q = quvi_new();
+    if (quvi_ok(q))
+        quvi_supports(q, "http://nope", QUVI_SUPPORTS_MODE_OFFLINE, QUVI_SUPPORTS_TYPE_MEDIA);
+EOF
+
+fi
+
+cat >> $TMPH << EOF
+}
+int main(void) {
+    test_lua();
+    test_other();
+    return 0;
+}
+EOF
+
+cat $TMPH >> $TMPC
+
+test_lua() {
+    # changed by pkg_config_add
+    old_extra_cflags="$extra_cflags"
+    old_libs_mplayer="$libs_mplayer"
+    echocheck "Lua $2 ($1)"
+    if test "$lua" = yes ; then
+        echores "no"
+        return 1
+    fi
+    if test "x$lua_pkg" != "x" && test "$lua_pkg" != "$1" ; then
+        echores "no"
+        return 1
+    fi
+    if pkg_config_add "$2" ; then
+        if test $_cross_compile = no ; then
+            if cc_check && tmp_run ; then
+                echo > /dev/null # idiot NOP
+            else
+                extra_cflags="$old_extra_cflags"
+                libs_mplayer="$old_libs_mplayer"
+                echores "no - does not run"
+                return 1
+            fi
+        fi
+        lua=yes
+    fi
+    echores "$lua"
+    test "$lua" = yes
+    return $?
+}
+
+if test "$lua" = auto ; then
+
+lua=no
+test_lua 51 "lua >= 5.1.0 lua < 5.2.0"
+test_lua 51deb "lua5.1 >= 5.1.0" # debian
+test_lua luajit "luajit >= 2.0.0"
+# assume all our dependencies (libquvi in particular) link with 5.1
+test_lua 52 "lua >= 5.2.0"
+test_lua 52deb "lua5.2 >= 5.2.0" # debian
+
+fi
+
+if test "$lua" = yes ; then
+    def_lua='#define CONFIG_LUA 1'
+else
+    def_lua='#undef CONFIG_LUA'
+fi
+
 echocheck "encoding"
 if test "$_encoding" = yes ; then
     def_encoding="#define CONFIG_ENCODING 1"
@@ -3155,6 +3267,7 @@ DUMMY_OSD = $_dummy_osd
 LIBBLURAY = $_bluray
 LIBBS2B = $_libbs2b
 LCMS2 = $_lcms2
+LUA = $lua
 LIBPOSTPROC = $libpostproc
 LIBAVDEVICE = $libavdevice
 LIBAVFILTER = $libavfilter
@@ -3341,6 +3454,7 @@ $def_libquvi9
 $def_libguess
 
 $def_lcms2
+$def_lua
 
 
 /* libvo options */

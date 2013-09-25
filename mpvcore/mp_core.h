@@ -166,6 +166,8 @@ typedef struct MPContext {
     struct track **tracks;
     int num_tracks;
 
+    char *track_layout_hash;
+
     // Selected tracks. NULL if no track selected.
     struct track *current_track[STREAM_TYPE_COUNT];
 
@@ -291,10 +293,9 @@ typedef struct MPContext {
     bool drop_message_shown;
 
     struct screenshot_ctx *screenshot_ctx;
-
-    char *track_layout_hash;
-
+    struct command_ctx *command_ctx;
     struct encode_lavc_context *encode_lavc_ctx;
+    struct lua_ctx *lua_ctx;
 } MPContext;
 
 

@@ -68,6 +68,8 @@
 
 #include "mpvcore/mp_core.h"
 
+#include "mp_lua.h"
+
 static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
                         const char *cmd, const char *arg);
 static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
@@ -1913,6 +1915,11 @@ static const m_option_t mp_properties[] = {
     {0},
 };
 
+const struct m_option *mp_get_property_list(void)
+{
+    return mp_properties;
+}
+
 int mp_property_do(const char *name, int action, void *val,
                    struct MPContext *ctx)
 {
@@ -2729,6 +2736,15 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                          cmd->args[1].v.s, msg_osd);
         break;
 
+    case MP_CMD_SCRIPT_DISPATCH:
+        if (mpctx->lua_ctx) {
+#ifdef CONFIG_LUA
+            mp_lua_script_dispatch(mpctx, cmd->args[0].v.s, cmd->args[1].v.i,
+                            cmd->key_up_follows ? "keyup_follows" : "press");
+#endif
+        }
+        break;
+
     case MP_CMD_COMMAND_LIST: {
         for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next)
             run_command(mpctx, sub);
@@ -2753,5 +2769,61 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         else
             pause_player(mpctx);
         break;
+    }
+}
+
+struct command_ctx {
+    int events;
+};
+
+void command_init(struct MPContext *mpctx)
+{
+    mpctx->command_ctx = talloc_zero(mpctx, struct command_ctx);
+}
+
+// Notify that a property might have changed.
+void mp_notify_property(struct MPContext *mpctx, const char *property)
+{
+    mp_notify(mpctx, MP_EVENT_PROPERTY, (void *)property);
+}
+
+void mp_notify(struct MPContext *mpctx, enum mp_event event, void *arg)
+{
+    struct command_ctx *ctx = mpctx->command_ctx;
+    ctx->events |= 1u << event;
+}
+
+static void handle_script_event(struct MPContext *mpctx, const char *name,
+                                const char *arg)
+{
+#ifdef CONFIG_LUA
+    mp_lua_event(mpctx, name, arg);
+#endif
+}
+
+void mp_flush_events(struct MPContext *mpctx)
+{
+    struct command_ctx *ctx = mpctx->command_ctx;
+
+    ctx->events |= (1u << MP_EVENT_TICK);
+
+    for (int n = 0; n < 16; n++) {
+        enum mp_event event = n;
+        unsigned mask = 1 << event;
+        if (ctx->events & mask) {
+            // The event handler could set event flags again; in this case let
+            // the next mp_flush_events() call handle it to avoid infinite loops.
+            ctx->events &= ~mask;
+            const char *name = NULL;
+            switch (event) {
+            case MP_EVENT_TICK:             name = "tick"; break;
+            case MP_EVENT_TRACKS_CHANGED:   name = "track-layout"; break;
+            case MP_EVENT_START_FILE:       name = "start"; break;
+            case MP_EVENT_END_FILE:         name = "end"; break;
+            default: ;
+            }
+            if (name)
+                handle_script_event(mpctx, name, "");
+        }
     }
 }

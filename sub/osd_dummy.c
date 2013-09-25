@@ -23,3 +23,10 @@ void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
 {
     *out_imgs = (struct sub_bitmaps) {0};
 }
+
+void osd_object_get_resolution(struct osd_state *osd, struct osd_object *obj,
+                               int *out_w, int *out_h)
+{
+    *out_w = 0;
+    *out_h = 0;
+}

@@ -90,6 +90,8 @@ enum mp_osdtype {
     OSDTYPE_PROGBAR,
     OSDTYPE_OSD,
 
+    OSDTYPE_EXTERNAL,
+
     MAX_OSD_PARTS
 };
 
@@ -137,6 +139,9 @@ struct osd_state {
     float progbar_value;   // range 0.0-1.0
     float *progbar_stops;  // used for chapter indicators (0.0-1.0 each)
     int progbar_num_stops;
+    // OSDTYPE_EXTERNAL
+    char *external;
+    int external_res_x, external_res_y;
     // OSDTYPE_SUB
     struct dec_sub *dec_sub;
 
@@ -219,10 +224,15 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
                          double video_pts, int draw_flags,
                          struct mp_image_pool *pool, struct mp_image *dest);
 
+void osd_object_get_scale_factor(struct osd_state *osd, struct osd_object *obj,
+                                 double *sw, double *sh);
+
 // defined in osd_libass.c and osd_dummy.c
 
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
                             struct sub_bitmaps *out_imgs);
+void osd_object_get_resolution(struct osd_state *osd, struct osd_object *obj,
+                               int *out_w, int *out_h);
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
 void osd_init_backend(struct osd_state *osd);
 void osd_destroy_backend(struct osd_state *osd);

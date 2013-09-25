@@ -1258,6 +1258,10 @@
     looping. If several files are specified on command line, the entire playlist
     is looped.
 
+``--lua=<filename>``
+    Load a Lua script. You can load multiple scripts by separating them with
+    commas (``,``).
+
 ``--mc=<seconds/frame>``
     Maximum A-V sync correction per frame (in seconds)
 

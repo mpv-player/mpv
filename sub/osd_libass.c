@@ -347,6 +347,38 @@ static void update_progbar(struct osd_state *osd, struct osd_object *obj)
     ass_draw_reset(d);
 }
 
+static void update_external(struct osd_state *osd, struct osd_object *obj)
+{
+    create_osd_ass_track(osd, obj);
+    clear_obj(obj);
+
+    if (osd->external_res_x < 1 || osd->external_res_y < 1)
+        return;
+
+    ASS_Track *track = obj->osd_track;
+
+    if (track->PlayResX != osd->external_res_x ||
+        track->PlayResY != osd->external_res_y)
+    {
+        track->PlayResX = osd->external_res_x;
+        track->PlayResY = osd->external_res_y;
+        // Force libass to clear its internal cache - it doesn't check for
+        // PlayRes changes itself.
+        ass_set_frame_size(osd->osd_render, 1, 1);
+    }
+
+    bstr t = bstr0(osd->external);
+    while (t.len) {
+        bstr line;
+        bstr_split_tok(t, "\n", &line, &t);
+        if (line.len) {
+            char *tmp = bstrdup0(NULL, line);
+            add_osd_ass_event(obj->osd_track, tmp);
+            talloc_free(tmp);
+        }
+    }
+}
+
 static void update_sub(struct osd_state *osd, struct osd_object *obj)
 {
     struct MPOpts *opts = osd->opts;
@@ -386,6 +418,9 @@ static void update_object(struct osd_state *osd, struct osd_object *obj)
     case OSDTYPE_PROGBAR:
         update_progbar(osd, obj);
         break;
+    case OSDTYPE_EXTERNAL:
+        update_external(osd, obj);
+        break;
     }
 }
 
@@ -404,4 +439,11 @@ void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
     mp_ass_render_frame(osd->osd_render, obj->osd_track, 0,
                         &obj->parts_cache, out_imgs);
     talloc_steal(obj, obj->parts_cache);
+}
+
+void osd_object_get_resolution(struct osd_state *osd, struct osd_object *obj,
+                               int *out_w, int *out_h)
+{
+    *out_w = obj->osd_track ? obj->osd_track->PlayResX : 0;
+    *out_h = obj->osd_track ? obj->osd_track->PlayResY : 0;
 }
