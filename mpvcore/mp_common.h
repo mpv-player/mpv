@@ -36,6 +36,8 @@
 
 #define MPMAX(a, b) ((a) > (b) ? (a) : (b))
 #define MPMIN(a, b) ((a) > (b) ? (b) : (a))
+#define MPSWAP(type, a, b) \
+    do { type SWAP_tmp = b; b = a; a = SWAP_tmp; } while (0)
 #define MP_ARRAY_SIZE(s) (sizeof(s) / sizeof((s)[0]))
 
 #define CONTROL_OK 1

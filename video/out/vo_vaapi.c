@@ -27,9 +27,6 @@
 #include <X11/Xutil.h>
 #include <va/va_x11.h>
 
-#include <libavutil/common.h>
-#include <libavcodec/vaapi.h>
-
 #include "config.h"
 #include "mpvcore/mp_msg.h"
 #include "video/out/vo.h"

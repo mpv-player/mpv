@@ -16,9 +16,9 @@
  */
 
 #include <assert.h>
-#include <libavutil/avutil.h>
 
 #include "vaapi.h"
+#include "mpvcore/mp_common.h"
 #include "mpvcore/mp_msg.h"
 #include "mp_image.h"
 #include "img_format.h"
@@ -439,8 +439,8 @@ bool va_image_map(VADisplay display, VAImage *image, struct mp_image *mpi)
     }
 
     if (image->format.fourcc == VA_FOURCC_YV12) {
-        FFSWAP(unsigned int, mpi->stride[1], mpi->stride[2]);
-        FFSWAP(uint8_t *, mpi->planes[1], mpi->planes[2]);
+        MPSWAP(unsigned int, mpi->stride[1], mpi->stride[2]);
+        MPSWAP(uint8_t *, mpi->planes[1], mpi->planes[2]);
     }
 
     return true;
