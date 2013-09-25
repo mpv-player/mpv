@@ -940,10 +940,14 @@ if [ -f "$(which rst2latex.py)" ] ; then
 fi
 
 echocheck "whether to build manual PDFs with rst2latex"
+texcheck() {
+    echo test | $_rst2latex --config=DOCS/man/docutils.conf | pdflatex -halt-on-error -draftmode
+}
+
 if test "$_build_pdf" = auto ; then
     _build_pdf=no
-    command_check "$_rst2latex" --version &&
-    command_check pdflatex -version && _build_pdf=yes
+    command_check texcheck && _build_pdf=yes
+    rm -f texput.{log,aux,out}
 else
     _build_pdf=no
 fi
