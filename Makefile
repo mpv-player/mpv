@@ -407,6 +407,10 @@ mpvcore/mp_lua.c: mpvcore/lua/assdraw.inc
 mpvcore/lua/assdraw.inc: TOOLS/file2string.pl mpvcore/lua/assdraw.lua
 	./$^ >$@
 
+mpvcore/mp_lua.c: mpvcore/lua/osc.inc
+mpvcore/lua/osc.inc: TOOLS/file2string.pl mpvcore/lua/osc.lua
+	./$^ >$@
+
 # ./configure must be rerun if it changed
 config.mak: configure
 	@echo "############################################################"
@@ -507,6 +511,7 @@ clean:
 	-$(RM) sub/osd_font.h
 	-$(RM) mpvcore/lua/defaults.inc
 	-$(RM) mpvcore/lua/assdraw.inc
+	-$(RM) mpvcore/lua/osc.inc
 
 distclean: clean
 	-$(RM) config.log config.mak config.h TAGS tags

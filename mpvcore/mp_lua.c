@@ -29,6 +29,9 @@ static const char *builtin_lua_scripts[][2] = {
     {"mp.assdraw",
 #   include "lua/assdraw.inc"
     },
+    {"@osc",
+#   include "lua/osc.inc"
+    },
     {0}
 };
 
@@ -660,6 +663,8 @@ void mp_lua_init(struct MPContext *mpctx)
 {
     mpctx->lua_ctx = talloc_zero(NULL, struct lua_ctx);
     // Load scripts from options
+    if (mpctx->opts->lua_load_osc)
+        mp_lua_load_script(mpctx, "@osc");
     char **files = mpctx->opts->lua_files;
     for (int n = 0; files && files[n]; n++) {
         if (files[n][0])

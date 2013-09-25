@@ -346,6 +346,7 @@ const m_option_t mp_opts[] = {
 
 #ifdef CONFIG_LUA
     OPT_STRINGLIST("lua", lua_files, CONF_GLOBAL),
+    OPT_FLAG("osc", lua_load_osc, CONF_GLOBAL),
 #endif
 
 // ------------------------- stream options --------------------
