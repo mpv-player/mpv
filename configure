@@ -941,13 +941,12 @@ fi
 
 echocheck "whether to build manual PDFs with rst2latex"
 texcheck() {
-    echo test | $_rst2latex --config=DOCS/man/docutils.conf | pdflatex -halt-on-error -draftmode
+    echo test | $_rst2latex --config=DOCS/man/docutils.conf | pdflatex -halt-on-error -draftmode -output-directory="$mplayer_tmpdir"
 }
 
 if test "$_build_pdf" = auto ; then
     _build_pdf=no
     command_check texcheck && _build_pdf=yes
-    rm -f texput.{log,aux,out}
 else
     _build_pdf=no
 fi
