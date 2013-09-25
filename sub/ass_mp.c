@@ -139,6 +139,9 @@ void mp_ass_configure(ASS_Renderer *priv, struct MPOpts *opts,
 #if LIBASS_VERSION >= 0x01010000
     ass_set_line_position(priv, set_sub_pos);
 #endif
+#if LIBASS_VERSION >= 0x01000000
+    ass_set_shaper(priv, opts->ass_shaper);
+#endif
     ass_set_font_scale(priv, set_font_scale);
     ass_set_hinting(priv, set_hinting);
     ass_set_line_spacing(priv, set_line_spacing);

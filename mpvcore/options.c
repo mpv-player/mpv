@@ -540,6 +540,8 @@ const m_option_t mp_opts[] = {
     OPT_STRING("ass-styles", ass_styles_file, 0),
     OPT_CHOICE("ass-hinting", ass_hinting, 0,
                ({"none", 0}, {"light", 1}, {"normal", 2}, {"native", 3})),
+    OPT_CHOICE("ass-shaper", ass_shaper, 0,
+               ({"simple", 0}, {"complex", 1})),
     OPT_CHOICE("ass-style-override", ass_style_override, 0,
                ({"no", 0}, {"yes", 1})),
     OPT_FLAG("osd-bar", osd_bar_visible, 0),
@@ -829,6 +831,7 @@ const struct MPOpts mp_default_opts = {
     .ass_vsfilter_color_compat = 1,
     .ass_vsfilter_blur_compat = 1,
     .ass_style_override = 1,
+    .ass_shaper = 1,
     .use_embedded_fonts = 1,
     .suboverlap_enabled = 0,
 #ifdef CONFIG_ENCA

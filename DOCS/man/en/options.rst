@@ -140,6 +140,15 @@
 ``--ass-line-spacing=<value>``
     Set line spacing value for SSA/ASS renderer.
 
+``--ass-shaper=simple|complex``
+    Set the text layout engine used by libass.
+
+    :simple:   uses Fribidi only, fast, doesn't render some languages correctly
+    :complex:  uses HarfBuzz, slower, wider language support
+
+    ``complex`` is the default. If libass hasn't been compiled against HarfBuzz,
+    libass silently reverts to ``simple``.
+
 ``--ass-styles=<filename>``
     Load all SSA/ASS styles found in the specified file and use them for
     rendering text subtitles. The syntax of the file is exactly like the ``[V4
