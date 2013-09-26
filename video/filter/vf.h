@@ -150,6 +150,7 @@ void vf_print_filter_chain(int msglevel, struct vf_instance *vf);
 
 void vf_rescale_dsize(int *d_width, int *d_height, int old_w, int old_h,
                       int new_w, int new_h);
+void vf_set_dar(int *d_width, int *d_height, int w, int h, double dar);
 
 static inline int norm_qscale(int qscale, int type)
 {

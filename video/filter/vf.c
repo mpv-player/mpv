@@ -587,6 +587,21 @@ void vf_rescale_dsize(int *d_width, int *d_height, int old_w, int old_h,
     *d_height = *d_height * new_h / old_h;
 }
 
+// Set *d_width/*d_height to display aspect ratio with the givem source size
+void vf_set_dar(int *d_w, int *d_h, int w, int h, double dar)
+{
+    *d_w = w;
+    *d_h = h;
+    if (dar > 0.01) {
+        *d_w = h * dar;
+        // we don't like horizontal downscale
+        if (*d_w < w) {
+            *d_w = w;
+            *d_h = w / dar;
+        }
+    }
+}
+
 void vf_detc_init_pts_buf(struct vf_detc_pts_buf *p)
 {
     p->inpts_prev = MP_NOPTS_VALUE;
