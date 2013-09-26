@@ -1429,18 +1429,22 @@ static int mp_property_video_bitrate(m_option_t *prop, int action,
 static int mp_property_width(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
-    if (!mpctx->sh_video)
+    struct sh_video *sh = mpctx->sh_video;
+    if (!sh)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_int_ro(prop, action, arg, mpctx->sh_video->disp_w);
+    return m_property_int_ro(prop, action, arg,
+                             sh->vf_input ? sh->vf_input->w : sh->disp_w);
 }
 
 /// Video display height (RO)
 static int mp_property_height(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
 {
-    if (!mpctx->sh_video)
+    struct sh_video *sh = mpctx->sh_video;
+    if (!sh)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_int_ro(prop, action, arg, mpctx->sh_video->disp_h);
+    return m_property_int_ro(prop, action, arg,
+                             sh->vf_input ? sh->vf_input->h : sh->disp_h);
 }
 
 static int property_vo_wh(m_option_t *prop, int action, void *arg,

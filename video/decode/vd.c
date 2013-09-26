@@ -58,12 +58,9 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
 
     sh->vf_reconfig_count++;
 
-    sh->disp_w = p.w;
-    sh->disp_h = p.h;
-
     mp_msg(MSGT_DECVIDEO, MSGL_V,
            "VIDEO:  %dx%d  %5.3f fps  %5.1f kbps (%4.1f kB/s)\n",
-           sh->disp_w, sh->disp_h, sh->fps, sh->i_bps * 0.008,
+           p.w, p.h, sh->fps, sh->i_bps * 0.008,
            sh->i_bps / 1000.0);
 
     mp_msg(MSGT_DECVIDEO, MSGL_V, "VDec: vo config request - %d x %d (%s)\n",
