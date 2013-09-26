@@ -58,23 +58,13 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
 
     sh->vf_reconfig_count++;
 
-    if (!p.w || !p.h) {
-        // ideally, this should be dead code
-        mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Unknown size, using container size.\n");
-        p.w = sh->disp_w;
-        p.h = sh->disp_h;
-    } else {
-        sh->disp_w = p.w;
-        sh->disp_h = p.h;
-    }
+    sh->disp_w = p.w;
+    sh->disp_h = p.h;
 
     mp_msg(MSGT_DECVIDEO, MSGL_V,
            "VIDEO:  %dx%d  %5.3f fps  %5.1f kbps (%4.1f kB/s)\n",
            sh->disp_w, sh->disp_h, sh->fps, sh->i_bps * 0.008,
            sh->i_bps / 1000.0);
-
-    if (!sh->disp_w || !sh->disp_h)
-        return -1;
 
     mp_msg(MSGT_DECVIDEO, MSGL_V, "VDec: vo config request - %d x %d (%s)\n",
            p.w, p.h, vo_format_name(p.imgfmt));
@@ -130,8 +120,8 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
     else if (sh->stream_aspect != 0.0)
         sh->aspect = sh->stream_aspect;
 
-    int d_w = sh->disp_w;
-    int d_h = sh->disp_h;
+    int d_w = p.w;
+    int d_h = p.h;
 
     if (sh->aspect > 0.01) {
         int new_w = d_h * sh->aspect;
