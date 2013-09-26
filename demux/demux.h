@@ -148,6 +148,7 @@ typedef struct demux_attachment
 } demux_attachment_t;
 
 struct demuxer_params {
+    int matroska_num_wanted_uids;
     unsigned char (*matroska_wanted_uids)[16];
     int matroska_wanted_segment;
     bool *matroska_was_valid;

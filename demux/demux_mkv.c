@@ -394,7 +394,7 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
         unsigned char (*uids)[16] = demuxer->params->matroska_wanted_uids;
         if (!info.n_segment_uid)
             uids = NULL;
-        for (int i = 0; i < MP_TALLOC_ELEMS(uids); i++) {
+        for (int i = 0; i < demuxer->params->matroska_num_wanted_uids; i++) {
             if (!memcmp(info.segment_uid.start, uids[i], 16))
                 goto out;
         }

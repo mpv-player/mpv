@@ -155,6 +155,7 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer **sources,
 {
     bool was_valid = false;
     struct demuxer_params params = {
+        .matroska_num_wanted_uids = num_sources,
         .matroska_wanted_uids = uid_map,
         .matroska_wanted_segment = segment,
         .matroska_was_valid = &was_valid,
