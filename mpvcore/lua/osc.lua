@@ -7,10 +7,9 @@ local msg = require 'mp.msg'
 -- Parameters
 --
 
+-- default user option values
+-- do not touch, change them in plugin_osc.conf
 local user_opts = {
-    -- default user option values
-    -- do not touch, change them in plugin_osc.conf
-
     scaleWindowed = 1,                      -- scaling of the controller when windowed
     scaleFullscreen = 1,                    -- scaling of the controller when fullscreen
     vidscale = true,                        -- scale the controller with the video?
@@ -18,7 +17,7 @@ local user_opts = {
     halign = 0,                             -- horizontal alignment, -1 (left) to 1 (right)
     fadeduration = 200,                     -- duration of fade out in ms, 0 = no fade
     deadzonedist = 0.15,                    -- distance between OSC and deadzone
-    iAmAProgrammer = false,                 -- start counting stuff at 0 and disable OSC internal playlist management (and some functions that depend on it)
+    iAmAProgrammer = false,                 -- use native mpv counting and disable OSC internal playlist management (and some functions that depend on it)
 }
 
 local osc_param = {
@@ -35,15 +34,15 @@ local osc_param = {
 }
 
 local osc_styles = {
-    bigButtons = "{\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs50\\fnmpv-osd-symbols}",
-    smallButtonsL = "{\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs20\\fnmpv-osd-symbols}",
+    bigButtons = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs50\\fnmpv-osd-symbols}",
+    smallButtonsL = "{\\3a&HFF&\\4a&HFF&\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs20\\fnmpv-osd-symbols}",
     smallButtonsLlabel = "{\\fs17\\fn" .. mp.property_get("options/osd-font") .. "}",
-    smallButtonsR = "{\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs30\\fnmpv-osd-symbols}",
+    smallButtonsR = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs30\\fnmpv-osd-symbols}",
 
     elementDown = "{\\1c&H999999}",
-    timecodes = "{\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs20}",
-    vidtitle = "{\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs12}",
-    box = "{\\bord1\\1c&H000000\\3c&HFFFFFF}",
+    timecodes = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs20}",
+    vidtitle = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs12}",
+    box = "{\\rDefault\\blur0\\bord1\\1c&H000000\\3c&HFFFFFF}",
 }
 
 -- internal states, do not touch
@@ -239,6 +238,11 @@ function get_align(align, frame, obj, margin)
     return (frame / 2) + (((frame / 2) - margin - (obj / 2)) * align)
 end
 
+-- multiplies two alpha values, formular can probably be improved
+function mult_alpha(alphaA, alphaB)
+    return 255 - (((1-(alphaA/255)) * (1-(alphaB/255))) * 255)
+end
+
 --
 -- Tracklist Management
 --
@@ -351,7 +355,10 @@ function register_element(type, x, y, an, w, h, style, content, eventresponder, 
     if metainfo.enabled == nil then metainfo.enabled = true end         -- element clickable?
     if metainfo.styledown == nil then metainfo.styledown = true end     -- should the element be styled with the elementDown style when clicked?
     if metainfo.softrepeat == nil then metainfo.softrepeat = false end  -- should the *_down event be executed with "hold for repeat" behaviour?
-    if metainfo.alpha == nil then metainfo.alpha = 0 end                -- alpha of the element, 0 = opaque, 255 = transparent
+    if metainfo.alpha1 == nil then metainfo.alpha1 = 0 end              -- alpha1 of the element, 0 = opaque, 255 = transparent (primary fill alpha)
+    if metainfo.alpha2 == nil then metainfo.alpha2 = 255 end            -- alpha1 of the element, 0 = opaque, 255 = transparent (secondary fill alpha)
+    if metainfo.alpha3 == nil then metainfo.alpha3 = 255 end            -- alpha1 of the element, 0 = opaque, 255 = transparent (border alpha)
+    if metainfo.alpha4 == nil then metainfo.alpha4 = 255 end            -- alpha1 of the element, 0 = opaque, 255 = transparent (shadow alpha)
 
     if metainfo.visible then
         local ass = assdraw.ass_new()
@@ -364,7 +371,7 @@ function register_element(type, x, y, an, w, h, style, content, eventresponder, 
 
         -- if the element is supposed to be disabled, style it accordingly and kill the eventresponders
         if metainfo.enabled == false then
-            metainfo.alpha = 136
+            metainfo.alpha1 = 136
             eventresponder = nil
         end
 
@@ -492,15 +499,19 @@ function render_elements(master_ass)
         elem_ass:merge(elem_ass1)
 
         --alpha
-        local alpha = element.metainfo.alpha
+        local alpha1 = element.metainfo.alpha1
+        local alpha2 = element.metainfo.alpha2
+        local alpha3 = element.metainfo.alpha3
+        local alpha4 = element.metainfo.alpha4
 
         if not(state.animation == nil) then
-            alpha = 255 - (((1-(alpha/255)) * (1-(state.animation/255))) * 255)
+            alpha1 = mult_alpha(element.metainfo.alpha1, state.animation)
+            alpha2 = mult_alpha(element.metainfo.alpha2, state.animation)
+            alpha3 = mult_alpha(element.metainfo.alpha3, state.animation)
+            alpha4 = mult_alpha(element.metainfo.alpha4, state.animation)
         end
 
-        if (alpha > 0) then
-            elem_ass:append(string.format("{\\alpha&H%X&}",alpha))
-        end
+        elem_ass:append(string.format("{\\1a&H%X&\\2a&H%X&\\3a&H%X&\\4a&H%X&}", alpha1, alpha2, alpha3, alpha4))
 
 
         if state.active_element == n then
@@ -664,7 +675,8 @@ function osc_init()
     --
 
     local metainfo = {}
-    metainfo.alpha = 80
+    metainfo.alpha1 = 80
+    metainfo.alpha3 = 80
     register_box(posX, posY, 5, osc_w, osc_h, osc_r, osc_styles.box, metainfo)
 
     --
