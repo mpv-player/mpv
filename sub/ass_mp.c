@@ -39,7 +39,8 @@
 
 // res_y should be track->PlayResY
 // It determines scaling of font sizes and more.
-void mp_ass_set_style(ASS_Style *style, int res_y, struct osd_style_opts *opts)
+void mp_ass_set_style(ASS_Style *style, int res_y,
+                      const struct osd_style_opts *opts)
 {
     if (opts->font) {
         free(style->FontName);

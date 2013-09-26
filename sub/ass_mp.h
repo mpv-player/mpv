@@ -44,7 +44,8 @@ struct MPOpts;
 struct mp_osd_res;
 struct osd_style_opts;
 
-void mp_ass_set_style(ASS_Style *style, int res_y, struct osd_style_opts *opts);
+void mp_ass_set_style(ASS_Style *style, int res_y,
+                      const struct osd_style_opts *opts);
 
 void mp_ass_add_default_styles(ASS_Track *track, struct MPOpts *opts);
 

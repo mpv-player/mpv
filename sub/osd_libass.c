@@ -90,6 +90,13 @@ static void create_osd_ass_track(struct osd_state *osd, struct osd_object *obj)
         mp_ass_set_style(style, MP_ASS_FONT_PLAYRESY, osd->opts->osd_style);
         // Set to neutral base direction, as opposed to VSFilter LTR default
         style->Encoding = -1;
+
+        sid = ass_alloc_style(track);
+        style = track->styles + sid;
+        style->Name = strdup("Default");
+        const struct osd_style_opts *def = osd_style_conf.defaults;
+        mp_ass_set_style(style, MP_ASS_FONT_PLAYRESY, def);
+        style->Encoding = -1;
     }
 
     obj->osd_track = track;
