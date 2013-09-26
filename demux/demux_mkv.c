@@ -785,6 +785,12 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
     struct MPOpts *opts = demuxer->opts;
     stream_t *s = demuxer->stream;
     int wanted_edition = opts->edition_id;
+    uint64_t wanted_edition_uid = demuxer->matroska_data.uid.edition;
+
+    /* A specific edition UID was requested; ignore the user option which is
+     * only applicable to the top-level file. */
+    if (wanted_edition_uid)
+        wanted_edition = -1;
 
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] /---- [ parsing chapters ] ---------\n");
     struct ebml_chapters file_chapters = {};
@@ -793,7 +799,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                           &ebml_chapters_desc) < 0)
         return -1;
 
-    int selected_edition = 0;
+    int selected_edition = -1;
     int num_editions = file_chapters.n_edition_entry;
     struct ebml_edition_entry *editions = file_chapters.edition_entry;
     if (wanted_edition >= 0 && wanted_edition < num_editions) {
@@ -802,11 +808,24 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                selected_edition);
     } else
         for (int i = 0; i < num_editions; i++)
-            if (editions[i].edition_flag_default) {
+            if (wanted_edition_uid &&
+                editions[i].edition_uid == wanted_edition_uid) {
+                selected_edition = i;
+                break;
+            } else if (editions[i].edition_flag_default) {
                 selected_edition = i;
                 mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Default edition: %d\n", i);
                 break;
             }
+    if (selected_edition < 0) {
+        if (wanted_edition_uid) {
+            mp_msg(MSGT_DEMUX, MSGL_ERR,
+                   "[mkv] Unable to find expected edition uid: %"PRIu64"\n",
+                   wanted_edition_uid);
+            return -1;
+        } else
+            selected_edition = 0;
+    }
     struct matroska_chapter *m_chapters = NULL;
     if (editions[selected_edition].edition_flag_ordered) {
         int count = editions[selected_edition].n_chapter_atom;

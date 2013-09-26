@@ -175,7 +175,10 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer **sources,
             struct matroska_segment_uid *uid = uids + i;
             if (sources[i])
                 continue;
-            if (!memcmp(uid->segment, m->uid.segment, 16)) {
+            /* Accept the source if the segment uid matches and the edition
+             * either matches or isn't specified. */
+            if (!memcmp(uid->segment, m->uid.segment, 16) &&
+                (!uid->edition || uid->edition == m->uid.edition)) {
                 mp_msg(MSGT_CPLAYER, MSGL_INFO, "Match for source %d: %s\n",
                        i, d->filename);
 
@@ -294,7 +297,11 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
             memcpy(c->uid.segment, m->uid.segment, 16);
 
         for (int j = 0; j < num_sources; j++)
-            if (!memcmp(c->uid.segment, uids[j].segment, 16))
+            /* If there isn't a segment uid, we are the source. If the segment
+             * uid is our segment uid and the edition matches. We can't accept
+             * the "don't care" edition value of 0 since the user may have
+             * requested a non-default edition. */
+            if (demux_matroska_uid_cmp(&c->uid, uids + j))
                 goto found1;
         memcpy(uids + num_sources, &c->uid, sizeof(c->uid));
         sources[num_sources] = NULL;
@@ -321,7 +328,7 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
 
         int j;
         for (j = 0; j < num_sources; j++) {
-            if (!memcmp(c->uid.segment, uids[j].segment, 16))
+            if (demux_matroska_uid_cmp(&c->uid, uids + j))
                 goto found2;
         }
         missing_time += c->end - c->start;
