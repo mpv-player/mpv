@@ -497,8 +497,10 @@ const m_option_t mp_opts[] = {
     // scaling:
     {"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
     {"ssf", (void *) scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-    OPT_FLOATRANGE("aspect", movie_aspect, 0, 0.1, 10.0),
-    OPT_FLOAT_STORE("no-aspect", movie_aspect, 0, 0),
+    // -1 means auto aspect (prefer container size until aspect change)
+    //  0 means square pixels
+    OPT_FLOATRANGE("aspect", movie_aspect, 0, -1.0, 10.0),
+    OPT_FLOAT_STORE("no-aspect", movie_aspect, 0, 0.0),
 
     OPT_FLAG_CONSTANTS("flip", flip, 0, 0, 1),
 

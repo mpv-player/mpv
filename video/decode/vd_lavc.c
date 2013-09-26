@@ -492,8 +492,9 @@ static void update_image_params(sh_video_t *sh, AVFrame *frame)
         // But set it even if the sample aspect did not change, since a
         // resolution change can cause an aspect change even if the
         // _sample_ aspect is unchanged.
-        if (sh->aspect == 0 || ctx->last_sample_aspect_ratio.den)
-            sh->aspect = aspect;
+        float use_aspect = sh->aspect;
+        if (use_aspect == 0 || ctx->last_sample_aspect_ratio.den)
+            use_aspect = aspect;
         ctx->last_sample_aspect_ratio = frame->sample_aspect_ratio;
         sh->disp_w = width;
         sh->disp_h = height;
@@ -501,14 +502,15 @@ static void update_image_params(sh_video_t *sh, AVFrame *frame)
         ctx->pix_fmt = pix_fmt;
         ctx->best_csp = pixfmt2imgfmt(pix_fmt);
 
+        int d_w, d_h;
+        vf_set_dar(&d_w, &d_h, width, height, use_aspect);
+
         ctx->image_params = (struct mp_image_params) {
             .imgfmt = ctx->best_csp,
             .w = width,
             .h = height,
-            // Ideally, we should also set aspect ratio, but we aren't there yet
-            // - so vd.c calculates display size from sh->aspect.
-            .d_w = width,
-            .d_h = height,
+            .d_w = d_w,
+            .d_h = d_h,
             .colorspace = avcol_spc_to_mp_csp(ctx->avctx->colorspace),
             .colorlevels = avcol_range_to_mp_csp_levels(ctx->avctx->color_range),
             .chroma_location =

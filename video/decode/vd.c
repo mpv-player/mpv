@@ -115,12 +115,13 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
     }
     // time to do aspect ratio corrections...
 
-    if (opts->movie_aspect > -1.0)
-        sh->aspect = opts->movie_aspect;        // cmdline overrides autodetect
-    else if (sh->stream_aspect != 0.0)
-        sh->aspect = sh->stream_aspect;
+    float force_aspect = opts->movie_aspect;
+    if (force_aspect > -1.0 && sh->stream_aspect != 0.0)
+        force_aspect = sh->stream_aspect;
 
-    vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, sh->aspect);
+    if (force_aspect >= 0)
+        vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, force_aspect);
+
     if (abs(p.d_w - p.w) >= 4 || abs(p.d_h - p.h) >= 4) {
         mp_tmsg(MSGT_CPLAYER, MSGL_V, "Aspect ratio is %.2f:1 - "
                 "scaling to correct movie aspect.\n", sh->aspect);

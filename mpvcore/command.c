@@ -1478,21 +1478,29 @@ static int mp_property_fps(m_option_t *prop, int action, void *arg,
 static int mp_property_aspect(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
 {
+    struct sh_video *sh_video = mpctx->sh_video;
     if (!mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_SET: {
-        float f = *(float *)arg;
-        if (f < 0.1)
-            f = (float)mpctx->sh_video->disp_w / mpctx->sh_video->disp_h;
-        mpctx->opts->movie_aspect = f;
+        mpctx->opts->movie_aspect = *(float *)arg;
         reinit_video_filters(mpctx);
         mp_force_video_refresh(mpctx);
         return M_PROPERTY_OK;
     }
-    case M_PROPERTY_GET:
-        *(float *)arg = mpctx->sh_video->aspect;
+    case M_PROPERTY_GET: {
+        float aspect = -1;
+        struct mp_image_params *params = sh_video->vf_input;
+        if (params && params->d_w && params->d_h) {
+            aspect = (float)params->d_w / params->d_h;
+        } else if (sh_video->disp_w && sh_video->disp_h) {
+            aspect = (float)sh_video->disp_w / sh_video->disp_h;
+        }
+        if (aspect <= 0)
+            return M_PROPERTY_UNAVAILABLE;
+        *(float *)arg = aspect;
         return M_PROPERTY_OK;
+    }
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
@@ -1874,7 +1882,7 @@ static const m_option_t mp_properties[] = {
     { "fps", mp_property_fps, CONF_TYPE_FLOAT,
       0, 0, 0, NULL },
     { "aspect", mp_property_aspect, CONF_TYPE_FLOAT,
-      CONF_RANGE, 0, 10, NULL },
+      CONF_RANGE, -1, 10, NULL },
     M_OPTION_PROPERTY_CUSTOM("vid", mp_property_video),
     { "program", mp_property_program, CONF_TYPE_INT,
       CONF_RANGE, -1, 65535, NULL },
