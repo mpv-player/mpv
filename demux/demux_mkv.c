@@ -850,13 +850,13 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                 if (len != sizeof(chapter.uid.segment))
                     mp_msg(MSGT_DEMUX, warn_level,
                            "[mkv] Chapter segment uid bad length %d\n", len);
-                else if (ca->n_chapter_segment_edition_uid) {
-                    mp_tmsg(MSGT_DEMUX, warn_level, "[mkv] Warning: "
-                            "unsupported edition recursion in chapter; "
-                            "will skip on playback!\n");
-                } else {
+                else {
                     memcpy(chapter.uid.segment, ca->chapter_segment_uid.start,
                            len);
+                    if (ca->n_chapter_segment_edition_uid)
+                        chapter.uid.edition = ca->chapter_segment_edition_uid;
+                    else
+                        chapter.uid.edition = 0;
                     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Chapter segment uid ");
                     for (int n = 0; n < len; n++)
                         mp_msg(MSGT_DEMUX, MSGL_V, "%02x ",
