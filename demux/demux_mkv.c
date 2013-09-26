@@ -394,8 +394,10 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
         if (info.n_segment_uid) {
             for (int i = 0; i < demuxer->params->matroska_num_wanted_uids; i++) {
                 struct matroska_segment_uid *uid = demuxer->params->matroska_wanted_uids + i;
-                if (!memcmp(info.segment_uid.start, uid->segment, 16))
+                if (!memcmp(info.segment_uid.start, uid->segment, 16)) {
+                    demuxer->matroska_data.uid.edition = uid->edition;
                     goto out;
+                }
             }
         }
         mp_tmsg(MSGT_DEMUX, MSGL_INFO,
