@@ -341,7 +341,7 @@ static VAImage *va_surface_image_alloc(struct va_surface *surface,
     va_surface_image_destroy(surface);
 
     VAStatus status = vaDeriveImage(p->display, surface->id, &p->image);
-    if (check_va_status(status, "vaDeriveImage()")) {
+    if (status != VA_STATUS_SUCCESS) {
         /* vaDeriveImage() is supported, check format */
         if (p->image.format.fourcc == format->fourcc &&
                 p->image.width == surface->w && p->image.height == surface->h) {
