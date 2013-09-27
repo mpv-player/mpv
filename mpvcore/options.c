@@ -47,6 +47,8 @@ int   network_cookies_enabled = 0;
 char *network_useragent="mpv " VERSION;
 char *network_referrer=NULL;
 char **network_http_header_fields=NULL;
+int   network_tls_verify;
+char *network_tls_ca_file;
 
 extern char *lirc_configfile;
 
@@ -388,6 +390,8 @@ const m_option_t mp_opts[] = {
                 {"udp", 1},
                 {"tcp", 2},
                 {"http", 3})),
+    {"tls-verify", &network_tls_verify, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+    {"tls-ca-file", &network_tls_ca_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 // ------------------------- demuxer options --------------------
 

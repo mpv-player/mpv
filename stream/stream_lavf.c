@@ -179,6 +179,9 @@ static int open_f(stream_t *stream, int mode)
         av_dict_set(&dict, "user-agent", network_useragent, 0);
     if (network_cookies_enabled)
         av_dict_set(&dict, "cookies", talloc_steal(temp, cookies_lavf()), 0);
+    av_dict_set(&dict, "tls_verify", network_tls_verify ? "1" : "0", 0);
+    if (network_tls_ca_file)
+        av_dict_set(&dict, "ca_file", network_tls_ca_file, 0);
     char *cust_headers = talloc_strdup(temp, "");
     if (network_referrer) {
         cust_headers = talloc_asprintf_append(cust_headers, "Referer: %s\r\n",

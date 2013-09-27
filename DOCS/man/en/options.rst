@@ -2283,6 +2283,14 @@
         is often a slow operation, and if the title changes every frame,
         playback can be ruined.
 
+``--tls-ca-file=<filename>``
+    Certificate authority database file for use with TLS. (Silently fails with
+    older ffmpeg or libav versions.)
+
+``--tls-verify``
+    Verify peer certificates when using TLS (e.g. with ``https://...``).
+     (Silently fails with older ffmpeg or libav versions.)
+
 ``--tv=<option1:option2:...>``
     This option tunes various properties of the TV capture module. For
     watching TV with mpv, use ``tv://`` or ``tv://<channel_number>`` or

@@ -281,6 +281,8 @@ extern char **network_http_header_fields;
 extern char *network_useragent;
 extern char *network_referrer;
 extern int   network_cookies_enabled;
+extern int   network_tls_verify;
+extern char *network_tls_ca_file;
 extern char *cookies_file;
 
 extern const m_option_t mp_opts[];
