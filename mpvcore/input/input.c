@@ -1586,6 +1586,14 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
         update_mouse_section(ictx);
         return;
     }
+    if (code == MP_KEY_MOUSE_LEAVE) {
+        update_mouse_section(ictx);
+        struct mp_cmd *cmd = get_cmd_from_keys(ictx, NULL, 1, (int[]){code});
+        if (cmd)
+            queue_add_tail(&ictx->cmd_queue, cmd);
+        ictx->got_new_events = true;
+        return;
+    }
     double now = mp_time_sec();
     int doubleclick_time = ictx->doubleclick_time;
     // ignore system-doubleclick if we generate these events ourselves
