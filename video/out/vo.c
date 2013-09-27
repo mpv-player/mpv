@@ -601,5 +601,7 @@ void vo_mouse_movement(struct vo *vo, int posx, int posy)
 {
     if (!vo->opts->enable_mouse_movements)
         return;
-    mp_input_set_mouse_pos(vo->input_ctx, posx, posy);
+    float p[2] = {posx, posy};
+    vo_control(vo, VOCTRL_WINDOW_TO_OSD_COORDS, p);
+    mp_input_set_mouse_pos(vo->input_ctx, p[0], p[1]);
 }

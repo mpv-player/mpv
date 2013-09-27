@@ -85,19 +85,6 @@ static char *format_delay(double time)
     return talloc_asprintf(NULL, "%d ms", ROUND(time * 1000));
 }
 
-// Get current mouse position in OSD coordinate space.
-void mp_get_osd_mouse_pos(struct MPContext *mpctx, float *x, float *y)
-{
-    int wx, wy;
-    mp_input_get_mouse_pos(mpctx->input, &wx, &wy);
-    float p[2] = {wx, wy};
-    // Raw window coordinates (VO mouse events) to OSD resolution.
-    if (mpctx->video_out)
-        vo_control(mpctx->video_out, VOCTRL_WINDOW_TO_OSD_COORDS, p);
-    *x = p[0];
-    *y = p[1];
-}
-
 // Property-option bridge.
 static int mp_property_generic_option(struct m_option *prop, int action,
                                       void *arg, MPContext *mpctx)

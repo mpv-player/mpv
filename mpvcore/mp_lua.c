@@ -457,8 +457,8 @@ static int script_get_screen_size(lua_State *L)
 static int script_get_mouse_pos(lua_State *L)
 {
     struct MPContext *mpctx = get_mpctx(L);
-    float px, py;
-    mp_get_osd_mouse_pos(mpctx, &px, &py);
+    int px, py;
+    mp_input_get_mouse_pos(mpctx->input, &px, &py);
     double sw, sh;
     osd_object_get_scale_factor(mpctx->osd, mpctx->osd->objs[OSDTYPE_EXTERNAL],
                                 &sw, &sh);
