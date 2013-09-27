@@ -10,6 +10,8 @@ local msg = require 'mp.msg'
 -- default user option values
 -- do not touch, change them in plugin_osc.conf
 local user_opts = {
+    showWindowed = true,                    -- show OSC when windowed?
+    showFullscreen = true,                  -- show OSC when fullscreen?
     scaleWindowed = 1,                      -- scaling of the controller when windowed
     scaleFullscreen = 1,                    -- scaling of the controller when fullscreen
     vidscale = true,                        -- scale the controller with the video?
@@ -35,7 +37,7 @@ local osc_param = {
 
 local osc_styles = {
     bigButtons = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs50\\fnmpv-osd-symbols}",
-    smallButtonsL = "{\\3a&HFF&\\4a&HFF&\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs20\\fnmpv-osd-symbols}",
+    smallButtonsL = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs20\\fnmpv-osd-symbols}",
     smallButtonsLlabel = "{\\fs17\\fn" .. mp.property_get("options/osd-font") .. "}",
     smallButtonsR = "{\\blur0\\bord0\\1c&HFFFFFF\\3c&HFFFFFF\\fs30\\fnmpv-osd-symbols}",
 
@@ -1149,9 +1151,17 @@ function process_event(source, what)
     end
 end
 
+function tick()
+    if (mp.property_get("fullscreen") == "yes" and user_opts.showFullscreen) or (mp.property_get("fullscreen") == "no" and user_opts.showWindowed) then
+        render()
+    else
+        mp.set_osd_ass(osc_param.playresy, osc_param.playresy, "")
+    end
+end
+
 function mp_event(name, arg)
     if name == "tick" then
-        render()
+        tick()
     elseif name == "start" or name == "track-layout" then
         request_init()
     elseif name == "end" then
