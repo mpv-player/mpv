@@ -483,6 +483,7 @@ struct key_name modifier_names[] = {
 #define MP_MAX_FDS 10
 
 struct input_fd {
+    struct mp_log *log;
     int fd;
     int (*read_key)(void *ctx, int fd);
     int (*read_cmd)(int fd, char *dest, int size);
@@ -735,12 +736,13 @@ static struct mp_cmd *queue_peek_tail(struct cmd_queue *queue)
 static struct input_fd *mp_input_add_fd(struct input_ctx *ictx)
 {
     if (ictx->num_fds == MP_MAX_FDS) {
-        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many file descriptors.\n");
+        MP_ERR(ictx, "Too many file descriptors.\n");
         return NULL;
     }
 
     struct input_fd *fd = &ictx->fds[ictx->num_fds];
     *fd = (struct input_fd){
+        .log = ictx->log,
         .fd = -1,
     };
     ictx->num_fds++;
@@ -887,7 +889,8 @@ error:
 
 // If dest is non-NULL when calling this function, append the command to the
 // list formed by dest->queue_next, otherwise just set *dest = new_cmd;
-static int parse_cmd(struct mp_cmd **dest, bstr str, const char *loc)
+static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
+                     const char *loc)
 {
     int pausing = 0;
     int on_osd = MP_ON_OSD_AUTO;
@@ -903,9 +906,8 @@ static int parse_cmd(struct mp_cmd **dest, bstr str, const char *loc)
         bool silent = bstr_eatstart0(&old, "!");
         if (bstrcasecmp(bstr_splice(str, 0, old.len), old) == 0) {
             if (!silent) {
-                mp_tmsg(MSGT_INPUT, MSGL_WARN, "Warning: command '%.*s' is "
-                        "deprecated, replaced with '%s' at %s.\n",
-                        BSTR_P(old), entry->new, loc);
+                MP_WARN(ictx, "Warning: command '%.*s' is deprecated, replaced "
+                        "with '%s' at %s.\n", BSTR_P(old), entry->new, loc);
             }
             bstr s = bstr_cut(str, old.len);
             str = bstr0(talloc_asprintf(tmp, "%s%.*s", entry->new, BSTR_P(s)));
@@ -950,8 +952,7 @@ static int parse_cmd(struct mp_cmd **dest, bstr str, const char *loc)
     }
 
     if (mp_cmds[cmd_idx].name == NULL) {
-        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command '%.*s' not found.\n",
-                BSTR_P(str));
+        MP_ERR(ictx, "Command '%.*s' not found.\n", BSTR_P(str));
         goto error;
     }
 
@@ -976,13 +977,13 @@ static int parse_cmd(struct mp_cmd **dest, bstr str, const char *loc)
         bstr arg = {0};
         if (bstr_eatstart0(&str, "\"")) {
             if (!read_escaped_string(tmp, &str, &arg)) {
-                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
-                        "has broken string escapes.\n", cmd->name, i + 1);
+                MP_ERR(ictx, "Command %s: argument %d has broken string escapes.\n",
+                       cmd->name, i + 1);
                 goto error;
             }
             if (!bstr_eatstart0(&str, "\"")) {
-                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d is "
-                        "unterminated.\n", cmd->name, i + 1);
+                MP_ERR(ictx, "Command %s: argument %d is unterminated.\n",
+                       cmd->name, i + 1);
                 goto error;
             }
         } else {
@@ -995,9 +996,8 @@ static int parse_cmd(struct mp_cmd **dest, bstr str, const char *loc)
         cmdarg->v = ((struct mp_cmd_arg) {{0}}).v;
         int r = m_option_parse(&cmdarg->type, bstr0(cmd->name), arg, &cmdarg->v);
         if (r < 0) {
-            mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s: argument %d "
-                    "can't be parsed: %s.\n", cmd->name, i + 1,
-                    m_option_strerror(r));
+            MP_ERR(ictx, "Command %s: argument %d can't be parsed: %s.\n",
+                   cmd->name, i + 1, m_option_strerror(r));
             goto error;
         }
         if (cmdarg->type.type == &m_option_type_string)
@@ -1011,8 +1011,8 @@ static int parse_cmd(struct mp_cmd **dest, bstr str, const char *loc)
 
     bstr dummy;
     if (read_token(str, &dummy, &dummy)) {
-        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s has trailing unused "
-                "arguments: '%.*s'.\n", cmd->name, BSTR_P(str));
+        MP_ERR(ictx, "Command %s has trailing unused arguments: '%.*s'.\n",
+               cmd->name, BSTR_P(str));
         // Better make it fatal to make it clear something is wrong.
         goto error;
     }
@@ -1024,9 +1024,8 @@ static int parse_cmd(struct mp_cmd **dest, bstr str, const char *loc)
         min_args++;
     }
     if (cmd->nargs < min_args) {
-        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command %s requires at least %d "
-                "arguments, we found only %d so far.\n", cmd->name, min_args,
-                cmd->nargs);
+        MP_ERR(ictx, "Command %s requires at least %d arguments, we found "
+               "only %d so far.\n", cmd->name, min_args, cmd->nargs);
         goto error;
     }
 
@@ -1039,7 +1038,7 @@ static int parse_cmd(struct mp_cmd **dest, bstr str, const char *loc)
 
     next = bstr_strip(next);
     if (next.len) {
-        if (parse_cmd(dest, next, loc) < 0) {
+        if (parse_cmd(ictx, dest, next, loc) < 0) {
             *dest = NULL;
             goto error;
         }
@@ -1049,16 +1048,16 @@ static int parse_cmd(struct mp_cmd **dest, bstr str, const char *loc)
     return 1;
 
 error:
-    mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command was defined at %s.\n", loc);
+    MP_ERR(ictx, "Command was defined at %s.\n", loc);
     talloc_free(cmd);
     talloc_free(tmp);
     return -1;
 }
 
-mp_cmd_t *mp_input_parse_cmd(bstr str, const char *loc)
+mp_cmd_t *mp_input_parse_cmd(struct input_ctx *ictx, bstr str, const char *loc)
 {
     struct mp_cmd *cmd = NULL;
-    if (parse_cmd(&cmd, str, loc) < 0) {
+    if (parse_cmd(ictx, &cmd, str, loc) < 0) {
         assert(!cmd);
     }
     // Other input.c code uses queue_next for its own purposes, so explicitly
@@ -1103,9 +1102,8 @@ static int read_cmd(struct input_fd *mp_fd, char **ret)
             switch (r) {
             case MP_INPUT_ERROR:
             case MP_INPUT_DEAD:
-                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Error while reading "
-                        "command file descriptor %d: %s\n",
-                        mp_fd->fd, strerror(errno));
+                MP_ERR(mp_fd, "Error while reading command file descriptor %d: %s\n",
+                       mp_fd->fd, strerror(errno));
             case MP_INPUT_NOTHING:
                 return r;
             case MP_INPUT_RETRY:
@@ -1134,9 +1132,8 @@ static int read_cmd(struct input_fd *mp_fd, char **ret)
         if (!end) {
             // If buffer is full we must drop all until the next \n
             if (mp_fd->size - mp_fd->pos <= 1) {
-                mp_tmsg(MSGT_INPUT, MSGL_ERR, "Command buffer of file "
-                        "descriptor %d is full: dropping content.\n",
-                        mp_fd->fd);
+                MP_ERR(mp_fd, "Command buffer of file descriptor %d is full: "
+                       "dropping content.\n", mp_fd->fd);
                 mp_fd->pos = 0;
                 mp_fd->drop = 1;
             }
@@ -1193,10 +1190,12 @@ static int read_wakeup(void *ctx, int fd)
 
 static bool bind_matches_key(struct cmd_bind *bind, int n, const int *keys);
 
-static void append_bind_info(char **pmsg, struct cmd_bind *bind)
+static void append_bind_info(struct input_ctx *ictx, char **pmsg,
+                             struct cmd_bind *bind)
 {
     char *msg = *pmsg;
-    struct mp_cmd *cmd = mp_input_parse_cmd(bstr0(bind->cmd), bind->location);
+    struct mp_cmd *cmd = mp_input_parse_cmd(ictx, bstr0(bind->cmd),
+                                            bind->location);
     bstr stripped = cmd ? cmd->original : bstr0(bind->cmd);
     msg = talloc_asprintf_append(msg, " '%.*s'", BSTR_P(stripped));
     if (!cmd)
@@ -1226,7 +1225,7 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
             if (bind_matches_key(&bs->binds[i], n, keys)) {
                 count++;
                 msg = talloc_asprintf_append(msg, "%d. ", count);
-                append_bind_info(&msg, &bs->binds[i]);
+                append_bind_info(ictx, &msg, &bs->binds[i]);
                 msg = talloc_asprintf_append(msg, "\n");
             }
         }
@@ -1237,7 +1236,7 @@ static mp_cmd_t *handle_test(struct input_ctx *ictx, int n, int *keys)
 
     MP_VERBOSE(ictx, "%s\n", msg);
 
-    mp_cmd_t *res = mp_input_parse_cmd(bstr0("show_text \"\""), "");
+    mp_cmd_t *res = mp_input_parse_cmd(ictx, bstr0("show_text \"\""), "");
     res->args[0].v.s = talloc_steal(res, msg);
     return res;
 }
@@ -1377,11 +1376,11 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
                        keys[0] == MP_KEY_MOUSE_LEAVE))
             msgl = MSGL_DBG2;
         char *key_buf = get_key_combo_name(keys, n);
-        mp_tmsg(MSGT_INPUT, msgl, "No bind found for key '%s'.\n", key_buf);
+        MP_MSG(ictx, msgl, "No bind found for key '%s'.\n", key_buf);
         talloc_free(key_buf);
         return NULL;
     }
-    mp_cmd_t *ret = mp_input_parse_cmd(bstr0(cmd->cmd), cmd->location);
+    mp_cmd_t *ret = mp_input_parse_cmd(ictx, bstr0(cmd->cmd), cmd->location);
     if (ret) {
         ret->input_section = cmd->owner->section;
         if (mp_msg_test_log(ictx->log, MSGL_DBG2)) {
@@ -1392,8 +1391,8 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
         }
     } else {
         char *key_buf = get_key_combo_name(keys, n);
-        mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                "Invalid command for bound key '%s': '%s'\n", key_buf, cmd->cmd);
+        MP_ERR(ictx, "Invalid command for bound key '%s': '%s'\n",
+               key_buf, cmd->cmd);
         talloc_free(key_buf);
     }
     return ret;
@@ -1496,8 +1495,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
     }
 
     if (!(code & MP_KEY_STATE_UP) && ictx->num_key_down >= MP_MAX_KEY_DOWN) {
-        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Too many key down events "
-                "at the same time\n");
+        MP_ERR(ictx, "Too many key down events at the same time\n");
         return;
     }
 
@@ -1538,7 +1536,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
         // Press of key with no separate down/up events
         if (key_was_down) {
             // Mixing press events and up/down with the same key is not allowed
-            mp_tmsg(MSGT_INPUT, MSGL_WARN, "Mixing key presses and up/down.\n");
+            MP_WARN(ictx, "Mixing key presses and up/down.\n");
         }
         update_mouse_section(ictx);
         // Add temporarily (include ongoing down/up events)
@@ -1645,7 +1643,7 @@ void mp_input_set_mouse_pos(struct input_ctx *ictx, int x, int y)
     struct mp_cmd *cmd =
         get_cmd_from_keys(ictx, NULL, 1, (int[]){MP_KEY_MOUSE_MOVE});
     if (!cmd)
-        cmd = mp_input_parse_cmd(bstr0("ignore"), "<internal>");
+        cmd = mp_input_parse_cmd(ictx, bstr0("ignore"), "<internal>");
 
     if (cmd) {
         cmd->mouse_move = true;
@@ -1673,7 +1671,7 @@ static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
     char *text;
     while ((r = read_cmd(cmd_fd, &text)) >= 0) {
         ictx->got_new_events = true;
-        struct mp_cmd *cmd = mp_input_parse_cmd(bstr0(text), "<pipe>");
+        struct mp_cmd *cmd = mp_input_parse_cmd(ictx, bstr0(text), "<pipe>");
         talloc_free(text);
         if (cmd)
             queue_add_tail(&ictx->cmd_queue, cmd);
@@ -1681,8 +1679,7 @@ static void read_cmd_fd(struct input_ctx *ictx, struct input_fd *cmd_fd)
             return;
     }
     if (r == MP_INPUT_ERROR)
-        mp_tmsg(MSGT_INPUT, MSGL_ERR, "Error on command file descriptor %d\n",
-                cmd_fd->fd);
+        MP_ERR(ictx, "Error on command file descriptor %d\n", cmd_fd->fd);
     else if (r == MP_INPUT_DEAD)
         cmd_fd->dead = true;
 }
@@ -1696,11 +1693,9 @@ static void read_key_fd(struct input_ctx *ictx, struct input_fd *key_fd)
     }
 
     if (code == MP_INPUT_ERROR)
-        mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                "Error on key input file descriptor %d\n", key_fd->fd);
+        MP_ERR(ictx, "Error on key input file descriptor %d\n", key_fd->fd);
     else if (code == MP_INPUT_DEAD) {
-        mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                "Dead key input on file descriptor %d\n", key_fd->fd);
+        MP_ERR(ictx, "Dead key input on file descriptor %d\n", key_fd->fd);
         key_fd->dead = true;
     }
 }
@@ -1745,8 +1740,7 @@ static void input_wait_read(struct input_ctx *ictx, int time)
     input_unlock(ictx);
     if (select(max_fd + 1, &fds, NULL, NULL, time_val) < 0) {
         if (errno != EINTR)
-            mp_tmsg(MSGT_INPUT, MSGL_ERR, "Select error: %s\n",
-                    strerror(errno));
+            MP_ERR(ictx, "Select error: %s\n", strerror(errno));
         FD_ZERO(&fds);
     }
     input_lock(ictx);
@@ -1859,7 +1853,7 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
 {
     input_lock(ictx);
     if (async_quit_request) {
-        struct mp_cmd *cmd = mp_input_parse_cmd(bstr0("quit 1"), "");
+        struct mp_cmd *cmd = mp_input_parse_cmd(ictx, bstr0("quit 1"), "");
         queue_add_head(&ictx->cmd_queue, cmd);
     }
 
@@ -2056,9 +2050,8 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
         struct bstr keyname = bstr_split(line, WHITESPACE, &command);
         command = bstr_strip(command);
         if (command.len == 0) {
-            mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                    "Unfinished key binding: %.*s at %s\n", BSTR_P(line),
-                    cur_loc);
+            MP_ERR(ictx, "Unfinished key binding: %.*s at %s\n", BSTR_P(line),
+                   cur_loc);
             continue;
         }
         char *name = bstrdup0(NULL, keyname);
@@ -2066,8 +2059,7 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
         int num_keys = 0;
         if (!get_input_from_name(name, &num_keys, keys)) {
             talloc_free(name);
-            mp_tmsg(MSGT_INPUT, MSGL_ERR,
-                    "Unknown key '%.*s' at %s\n", BSTR_P(keyname), cur_loc);
+            MP_ERR(ictx, "Unknown key '%.*s' at %s\n", BSTR_P(keyname), cur_loc);
             continue;
         }
         talloc_free(name);
@@ -2087,7 +2079,7 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
         n_binds++;
 
         // Print warnings if invalid commands are encountered.
-        talloc_free(mp_input_parse_cmd(command, cur_loc));
+        talloc_free(mp_input_parse_cmd(ictx, command, cur_loc));
     }
 
     talloc_free(cur_loc);
@@ -2305,7 +2297,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     if (input_conf->use_joystick) {
         int fd = mp_input_joystick_init(input_conf->js_dev);
         if (fd < 0)
-            mp_tmsg(MSGT_INPUT, MSGL_ERR, "Can't init input joystick\n");
+            MP_ERR(ictx, "Can't init input joystick\n");
         else
             mp_input_add_key_fd(ictx, fd, 1, mp_input_joystick_read,
                                 close, NULL);
@@ -2356,8 +2348,8 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
         if (in_file_fd >= 0)
             mp_input_add_cmd_fd(ictx, in_file_fd, 1, NULL, close);
         else
-            mp_tmsg(MSGT_INPUT, MSGL_ERR, "Can't open %s: %s\n",
-                    input_conf->in_file, strerror(errno));
+            MP_ERR(ictx, "Can't open %s: %s\n", input_conf->in_file,
+                   strerror(errno));
     }
 
     return ictx;
@@ -2439,8 +2431,8 @@ void mp_input_wakeup(struct input_ctx *ictx)
 static bool test_abort(struct input_ctx *ictx)
 {
     if (async_quit_request || queue_has_abort_cmds(&ictx->cmd_queue)) {
-        mp_tmsg(MSGT_INPUT, MSGL_WARN, "Received command to move to "
-                "another file. Aborting current processing.\n");
+        MP_WARN(ictx, "Received command to move to another file. "
+                "Aborting current processing.\n");
         return true;
     }
     return false;

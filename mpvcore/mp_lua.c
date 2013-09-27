@@ -370,7 +370,7 @@ static int script_send_command(lua_State *L)
     struct MPContext *mpctx = get_mpctx(L);
     const char *s = luaL_checkstring(L, 1);
 
-    mp_cmd_t *cmd = mp_input_parse_cmd(bstr0((char*)s), "<lua>");
+    mp_cmd_t *cmd = mp_input_parse_cmd(mpctx->input, bstr0((char*)s), "<lua>");
     if (!cmd)
         luaL_error(L, "error parsing command");
     mp_input_queue_cmd(mpctx->input, cmd);
