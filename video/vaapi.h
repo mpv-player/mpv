@@ -72,6 +72,8 @@
 
 #include "mp_image.h"
 
+struct mp_image_pool;
+
 struct mp_vaapi_ctx {
     VADisplay display;
     struct va_image_formats *image_formats;
@@ -117,6 +119,8 @@ struct mp_image *        va_surface_wrap(struct va_surface *surface); // takes o
 VASurfaceID              va_surface_id(const struct va_surface *surface);
 VASurfaceID              va_surface_id_in_mp_image(const struct mp_image *mpi);
 bool                     va_surface_upload(struct va_surface *surface, const struct mp_image *mpi);
-struct mp_image *        va_surface_download(const struct va_surface *surface, const struct va_image_formats *formats);
+struct mp_image *        va_surface_download(struct va_surface *surface,
+                                             const struct va_image_formats *formats,
+                                             struct mp_image_pool *pool);
 
 #endif

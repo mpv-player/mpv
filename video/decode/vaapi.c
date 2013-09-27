@@ -32,6 +32,7 @@
 #include "mpvcore/av_common.h"
 #include "video/fmt-conversion.h"
 #include "video/vaapi.h"
+#include "video/mp_image_pool.h"
 #include "video/decode/dec_video.h"
 #include "video/filter/vf.h"
 
@@ -68,6 +69,7 @@ struct priv {
     struct va_surface_pool *pool;
     int rt_format;
 
+    struct mp_image_pool *sw_pool;
     bool printed_readback_warning;
 };
 
@@ -414,6 +416,7 @@ static int init_with_vactx(struct lavc_ctx *ctx, struct mp_vaapi_ctx *vactx)
 
     p->display = p->ctx->display;
     p->pool = va_surface_pool_alloc(p->display, p->rt_format);
+    p->sw_pool = talloc_steal(p, mp_image_pool_new(17));
 
     p->va_context->display = p->display;
     p->va_context->config_id = VA_INVALID_ID;
@@ -466,7 +469,7 @@ static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)
     struct va_surface *surface = va_surface_in_mp_image(img);
     if (surface) {
         struct mp_image *simg =
-            va_surface_download(surface, p->ctx->image_formats);
+            va_surface_download(surface, p->ctx->image_formats, p->sw_pool);
         if (simg) {
             if (!p->printed_readback_warning) {
                 mp_msg(MSGT_VO, MSGL_WARN, "[vaapi] Using GPU readback. This "

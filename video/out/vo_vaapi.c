@@ -266,7 +266,8 @@ static struct mp_image *get_screenshot(struct priv *p)
         va_surface_in_mp_image(p->output_surfaces[p->visible_surface]);
     if (!surface)
         return NULL;
-    struct mp_image *img = va_surface_download(surface, p->va_image_formats);
+    struct mp_image *img =
+        va_surface_download(surface, p->va_image_formats, NULL);
     if (!img)
         return NULL;
     struct mp_image_params params = p->image_params;

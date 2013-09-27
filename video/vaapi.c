@@ -22,6 +22,7 @@
 #include "mpvcore/mp_msg.h"
 #include "mp_image.h"
 #include "img_format.h"
+#include "mp_image_pool.h"
 
 #define VA_VERBOSE(...) mp_msg(MSGT_VO, MSGL_V, "[vaapi] "  __VA_ARGS__)
 #define VA_ERROR(...) mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] "  __VA_ARGS__)
@@ -168,7 +169,7 @@ struct va_surface_pool {
 
 typedef struct va_surface_priv {
     VADisplay display;
-    VAImage image;       // used for sofwtare decoding case
+    VAImage image;       // used for software decoding case
     bool is_derived;     // is image derived by vaDeriveImage()?
     bool is_used;        // referenced
     bool is_dead;        // used, but deallocate VA objects as soon as possible
@@ -476,44 +477,66 @@ bool va_surface_upload(struct va_surface *surface, const struct mp_image *mpi)
     return true;
 }
 
-struct mp_image *va_surface_download(const struct va_surface *surface,
-                                     const struct va_image_formats *formats)
+static struct mp_image *try_download(struct va_surface *surface,
+                                     VAImageFormat *format,
+                                     struct mp_image_pool *pool)
+{
+    VAStatus status;
+
+    enum mp_imgfmt imgfmt = va_fourcc_to_imgfmt(format->fourcc);
+    if (imgfmt == IMGFMT_NONE)
+        return NULL;
+
+    if (!va_surface_image_alloc(surface, format))
+        return NULL;
+
+    VAImage *image = &surface->p->image;
+
+    if (!surface->p->is_derived) {
+        status = vaGetImage(surface->p->display, surface->id, 0, 0,
+                            surface->w, surface->h, image->image_id);
+        if (status != VA_STATUS_SUCCESS)
+            return NULL;
+    }
+
+    struct mp_image *dst = NULL;
+    struct mp_image tmp;
+    if (va_image_map(surface->p->display, image, &tmp)) {
+        assert(tmp.imgfmt == imgfmt);
+        dst = pool ? mp_image_pool_get(pool, imgfmt, tmp.w, tmp.h)
+                    : mp_image_alloc(imgfmt, tmp.w, tmp.h);
+        mp_image_copy(dst, &tmp);
+        va_image_unmap(surface->p->display, image);
+    }
+    return dst;
+}
+
+// pool is optional (used for allocating returned images).
+// Note: unlike va_surface_upload(), this will attempt to (re)create the
+//       VAImage stored with the va_surface.
+struct mp_image *va_surface_download(struct va_surface *surface,
+                                     const struct va_image_formats *formats,
+                                     struct mp_image_pool *pool)
 {
     VAStatus status = vaSyncSurface(surface->p->display, surface->id);
     if (!check_va_status(status, "vaSyncSurface()"))
         return NULL;
 
+    VAImage *image = &surface->p->image;
+    if (image->image_id != VA_INVALID_ID) {
+        struct mp_image *mpi = try_download(surface, &image->format, pool);
+        if (mpi)
+            return mpi;
+    }
+
     // We have no clue which format will work, so try them all.
-    // This code is just for screenshots, so it's ok not to cache the right
-    // format (to prevent unnecessary work), and we don't attempt to use
-    // vaDeriveImage() for direct access either.
     for (int i = 0; i < formats->num; i++) {
         VAImageFormat *format = &formats->entries[i];
-        const enum mp_imgfmt imgfmt = va_fourcc_to_imgfmt(format->fourcc);
-        if (imgfmt == IMGFMT_NONE)
-            continue;
-        VAImage image;
-        status = vaCreateImage(surface->p->display, format,
-                               surface->w, surface->h, &image);
-        if (!check_va_status(status, "vaCreateImage()"))
-            continue;
-        status = vaGetImage(surface->p->display, surface->id, 0, 0,
-                            surface->w, surface->h, image.image_id);
-        if (status != VA_STATUS_SUCCESS) {
-            vaDestroyImage(surface->p->display, image.image_id);
-            continue;
-        }
-        struct mp_image *dst = NULL;
-        struct mp_image tmp;
-        if (va_image_map(surface->p->display, &image, &tmp)) {
-            assert(tmp.imgfmt == imgfmt);
-            dst = mp_image_alloc(imgfmt, tmp.w, tmp.h);
-            mp_image_copy(dst, &tmp);
-            va_image_unmap(surface->p->display, &image);
-        }
-        vaDestroyImage(surface->p->display, image.image_id);
-        return dst;
+        struct mp_image *mpi = try_download(surface, format, pool);
+        if (mpi)
+            return mpi;
     }
+
     VA_ERROR("failed to get surface data.\n");
     return NULL;
 }
