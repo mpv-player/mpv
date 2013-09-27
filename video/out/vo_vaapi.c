@@ -249,10 +249,10 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
     if (!IMGFMT_IS_VAAPI(mpi->imgfmt)) {
         struct mp_image *wrapper = p->swdec_surfaces[p->output_surface];
         struct va_surface *surface = va_surface_in_mp_image(wrapper);
-        if (!surface)
+        if (!surface || !va_surface_upload(surface, mpi)) {
+            MP_WARN(vo, "Could not upload surface.\n");
             return;
-        if (!va_surface_upload(surface, mpi))
-            return;
+        }
         mp_image_copy_attributes(wrapper, mpi);
         mpi = wrapper;
     }

@@ -453,16 +453,19 @@ bool va_image_unmap(VADisplay display, VAImage *image)
     return check_va_status(status, "vaUnmapBuffer()");
 }
 
-bool va_surface_upload(struct va_surface *surface, const struct mp_image *mpi)
+bool va_surface_upload(struct va_surface *surface, struct mp_image *mpi)
 {
     va_surface_priv_t *p = surface->p;
     if (p->image.image_id == VA_INVALID_ID)
         return false;
 
+    if (va_fourcc_to_imgfmt(p->image.format.fourcc) != mpi->imgfmt)
+        return false;
+
     struct mp_image img;
     if (!va_image_map(p->display, &p->image, &img))
         return false;
-    mp_image_copy(&img, (struct mp_image*)mpi);
+    mp_image_copy(&img, mpi);
     va_image_unmap(p->display, &p->image);
 
     if (!p->is_derived) {
