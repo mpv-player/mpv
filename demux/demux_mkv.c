@@ -392,11 +392,11 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     }
     if (demuxer->params && demuxer->params->matroska_wanted_uids) {
         unsigned char (*uids)[16] = demuxer->params->matroska_wanted_uids;
-        if (!info.n_segment_uid)
-            uids = NULL;
-        for (int i = 0; i < demuxer->params->matroska_num_wanted_uids; i++) {
-            if (!memcmp(info.segment_uid.start, uids[i], 16))
-                goto out;
+        if (info.n_segment_uid) {
+            for (int i = 0; i < demuxer->params->matroska_num_wanted_uids; i++) {
+                if (!memcmp(info.segment_uid.start, uids[i], 16))
+                    goto out;
+            }
         }
         mp_tmsg(MSGT_DEMUX, MSGL_INFO,
                 "[mkv] This is not one of the wanted files. "
