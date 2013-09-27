@@ -181,7 +181,7 @@ static NSString *escape_loadfile_name(NSString *input)
 - (void)stopMPV:(char *)cmd
 {
     if (self.inputContext) {
-        mp_cmd_t *cmdt = mp_input_parse_cmd(bstr0(cmd), "");
+        mp_cmd_t *cmdt = mp_input_parse_cmd(self.inputContext, bstr0(cmd), "");
         mp_input_queue_cmd(self.inputContext, cmdt);
     } else {
         terminate_cocoa_application();
@@ -291,7 +291,7 @@ static NSString *escape_loadfile_name(NSString *input)
         const char *file = [escape_loadfile_name(obj) UTF8String];
         const char *append = (i == 0) ? "" : " append";
         char *cmd = talloc_asprintf(ctx, "raw loadfile \"%s\"%s", file, append);
-        mp_cmd_t *cmdt = mp_input_parse_cmd(bstr0(cmd), "");
+        mp_cmd_t *cmdt = mp_input_parse_cmd(self.inputContext, bstr0(cmd), "");
         mp_input_queue_cmd(self.inputContext, cmdt);
     }];
     talloc_free(ctx);
