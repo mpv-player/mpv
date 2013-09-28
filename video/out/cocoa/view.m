@@ -94,8 +94,7 @@
 
 - (NSPoint)mouseLocation
 {
-    NSPoint wLoc = [self.window mouseLocationOutsideOfEventStream];
-    return [self convertPoint:wLoc fromView:nil];
+    return [self.window mouseLocationOutsideOfEventStream];
 }
 
 - (BOOL)containsMouseLocation
@@ -103,10 +102,11 @@
     NSRect vF  = [[self.window screen] visibleFrame];
     NSRect vFW = [self.window convertRectFromScreen:vF];
     NSRect vFV = [self convertRect:vFW fromView:nil];
+    NSPoint pt = [self convertPoint:[self mouseLocation] fromView:nil];
 
     // clip bounds to current visibleFrame
     NSRect clippedBounds = CGRectIntersection([self bounds], vFV);
-    return CGRectContainsPoint(clippedBounds, [self mouseLocation]);
+    return CGRectContainsPoint(clippedBounds, pt);
 }
 
 - (BOOL)acceptsFirstMouse:(NSEvent *)theEvent { return YES; }
@@ -140,15 +140,25 @@
     [self signalMousePosition];
 }
 
+- (NSPoint)convertPointToPixels:(NSPoint)point
+{
+    point = [self convertPoint:point fromView:nil];
+    point = [self convertPointToBacking:point];
+    // flip y since isFlipped returning YES doesn't affect the backing
+    // coordinate system
+    point.y = -point.y;
+    return point;
+}
+
 - (void)signalMousePosition
 {
-    NSPoint p = [self convertPoint:[self mouseLocation] fromView:nil];
+    NSPoint p = [self convertPointToPixels:[self mouseLocation]];
     [self.adapter signalMouseMovement:p];
 }
 
 - (void)signalMouseMovement:(NSEvent *)event
 {
-    NSPoint p = [self convertPoint:[event locationInWindow] fromView:nil];
+    NSPoint p = [self convertPointToPixels:[event locationInWindow]];
     [self.adapter signalMouseMovement:p];
 }
 
