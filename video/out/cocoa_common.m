@@ -65,6 +65,8 @@ struct vo_cocoa_state {
 
     NSLock *lock;
     bool enable_resize_redraw;
+    void *ctx;
+    void (*gl_clear)(void *ctx);
     void (*resize_redraw)(struct vo *vo, int w, int h);
 
     struct mp_log *log;
@@ -161,6 +163,14 @@ void vo_cocoa_register_resize_callback(struct vo *vo,
 {
     struct vo_cocoa_state *s = vo->cocoa;
     s->resize_redraw = cb;
+}
+
+void vo_cocoa_register_gl_clear_callback(struct vo *vo, void *ctx,
+                                         void (*cb)(void *ctx))
+{
+    struct vo_cocoa_state *s = vo->cocoa;
+    s->ctx = ctx;
+    s->gl_clear = cb;
 }
 
 static int get_screen_handle(struct vo *vo, int identifier, NSWindow *window,
@@ -361,8 +371,7 @@ static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
         s->resize_redraw(vo, width, height);
         s->skip_next_swap_buffer = true;
     } else {
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        s->gl_clear(s->ctx);
     }
 
     [s->gl_ctx flushBuffer];
