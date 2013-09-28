@@ -20,6 +20,9 @@
 #import <Cocoa/Cocoa.h>
 #import <CoreServices/CoreServices.h> // for CGDisplayHideCursor
 #import <IOKit/pwr_mgt/IOPMLib.h>
+#ifdef __MAC_10_9
+#import <OpenGL/gl.h>
+#endif
 #include <dlfcn.h>
 
 #include "cocoa_common.h"
