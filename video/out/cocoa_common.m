@@ -353,8 +353,7 @@ static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
     if (!s->resize_redraw)
         return;
 
-    if (!s->inside_sync_section)
-        vo_cocoa_set_current_context(vo, true);
+    vo_cocoa_set_current_context(vo, true);
 
     [s->gl_ctx update];
 
@@ -367,9 +366,7 @@ static void vo_cocoa_resize_redraw(struct vo *vo, int width, int height)
     }
 
     [s->gl_ctx flushBuffer];
-
-    if (!s->inside_sync_section)
-        vo_cocoa_set_current_context(vo, false);
+    vo_cocoa_set_current_context(vo, false);
 }
 
 int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
@@ -428,6 +425,11 @@ int vo_cocoa_config_window(struct vo *vo, uint32_t d_width,
 void vo_cocoa_set_current_context(struct vo *vo, bool current)
 {
     struct vo_cocoa_state *s = vo->cocoa;
+
+    if (s->inside_sync_section) {
+         return;
+    }
+
     if (current) {
         [s->lock lock];
         [s->gl_ctx makeCurrentContext];
