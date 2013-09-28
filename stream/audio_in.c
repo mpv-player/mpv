@@ -53,6 +53,12 @@ int audio_in_init(audio_in_t *ai, int type)
 	ai->oss.device = strdup("/dev/dsp");
 	return 0;
 #endif
+#ifdef CONFIG_SNDIO
+    case AUDIO_IN_SNDIO:
+	ai->sndio.hdl = NULL;
+	ai->sndio.device = strdup("default");
+	return 0;
+#endif
     default:
 	return -1;
     }
@@ -71,6 +77,12 @@ int audio_in_setup(audio_in_t *ai)
 #ifdef CONFIG_OSS_AUDIO
     case AUDIO_IN_OSS:
 	if (ai_oss_init(ai) < 0) return -1;
+	ai->setup = 1;
+	return 0;
+#endif
+#ifdef CONFIG_SNDIO
+    case AUDIO_IN_SNDIO:
+	if (ai_sndio_init(ai) < 0) return -1;
 	ai->setup = 1;
 	return 0;
 #endif
@@ -96,6 +108,13 @@ int audio_in_set_samplerate(audio_in_t *ai, int rate)
 	if (ai_oss_set_samplerate(ai) < 0) return -1;
 	return ai->samplerate;
 #endif
+#ifdef CONFIG_SNDIO
+    case AUDIO_IN_SNDIO:
+	ai->req_samplerate = rate;
+	if (!ai->setup) return 0;
+	if (ai_sndio_setup(ai) < 0) return -1;
+	return ai->samplerate;
+#endif
     default:
 	return -1;
     }
@@ -117,6 +136,13 @@ int audio_in_set_channels(audio_in_t *ai, int channels)
 	if (!ai->setup) return 0;
 	if (ai_oss_set_channels(ai) < 0) return -1;
 	return ai->channels;
+#endif
+#ifdef CONFIG_SNDIO
+    case AUDIO_IN_SNDIO:
+       ai->req_channels = channels;
+       if (!ai->setup) return 0;
+       if (ai_sndio_setup(ai) < 0) return -1;
+       return ai->channels;
 #endif
     default:
 	return -1;
@@ -146,6 +172,12 @@ int audio_in_set_device(audio_in_t *ai, char *device)
 	ai->oss.device = strdup(device);
 	return 0;
 #endif
+#ifdef CONFIG_SNDIO
+    case AUDIO_IN_SNDIO:
+       if (ai->sndio.device) free(ai->sndio.device);
+       ai->sndio.device = strdup(device);
+       return 0;
+#endif
     default:
 	return -1;
     }
@@ -171,6 +203,13 @@ int audio_in_uninit(audio_in_t *ai)
 	    ai->setup = 0;
 	    return 0;
 #endif
+#ifdef CONFIG_SNDIO
+       case AUDIO_IN_SNDIO:
+           if (ai->sndio.hdl)
+               sio_close(ai->sndio.hdl);
+           ai->setup = 0;
+           return 0;
+#endif
 	}
     }
     return -1;
@@ -186,6 +225,12 @@ int audio_in_start_capture(audio_in_t *ai)
 #ifdef CONFIG_OSS_AUDIO
     case AUDIO_IN_OSS:
 	return 0;
+#endif
+#ifdef CONFIG_SNDIO
+    case AUDIO_IN_SNDIO:
+       if (!sio_start(ai->sndio.hdl))
+           return -1;
+       return 0;
 #endif
     default:
 	return -1;
@@ -220,6 +265,20 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
 #ifdef CONFIG_OSS_AUDIO
     case AUDIO_IN_OSS:
 	ret = read(ai->oss.audio_fd, buffer, ai->blocksize);
+       if (ret != ai->blocksize) {
+           if (ret < 0) {
+               mp_msg(MSGT_TV, MSGL_ERR, "\nError reading audio: %s\n", strerror(errno));
+
+           } else {
+               mp_msg(MSGT_TV, MSGL_ERR, "\nNot enough audio samples!\n");
+           }
+           return -1;
+       }
+       return ret;
+#endif
+#ifdef CONFIG_SNDIO
+    case AUDIO_IN_SNDIO:
+       ret = sio_read(ai->sndio.hdl, buffer, ai->blocksize);
 	if (ret != ai->blocksize) {
 	    if (ret < 0) {
 		mp_tmsg(MSGT_TV, MSGL_ERR, "\nError reading audio: %s\n", strerror(errno));

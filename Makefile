@@ -25,6 +25,7 @@ include config.mak
 
 SOURCES_AUDIO_INPUT-$(ALSA)     += stream/ai_alsa1x.c
 SOURCES_AUDIO_INPUT-$(OSS)      += stream/ai_oss.c
+SOURCES_AUDIO_INPUT-$(SNDIO)    += stream/ai_sndio.c
 SOURCES-$(AUDIO_INPUT)          += $(SOURCES_AUDIO_INPUT-yes)
 SOURCES-$(CDDA)                 += stream/stream_cdda.c \
                                    stream/cdinfo.c
@@ -111,6 +112,7 @@ SOURCES-$(OSS)                  += audio/out/ao_oss.c
 SOURCES-$(PULSE)                += audio/out/ao_pulse.c
 SOURCES-$(PORTAUDIO)            += audio/out/ao_portaudio.c
 SOURCES-$(RSOUND)               += audio/out/ao_rsound.c
+SOURCES-$(SNDIO)                += audio/out/ao_sndio.c
 SOURCES-$(VDPAU)                += video/vdpau.c video/out/vo_vdpau.c
 SOURCES-$(VDA)                  += video/decode/vda.c
 SOURCES-$(VDPAU_DEC)            += video/decode/vdpau.c

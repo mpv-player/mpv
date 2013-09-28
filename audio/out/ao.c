@@ -35,6 +35,7 @@
 extern const struct ao_driver audio_out_oss;
 extern const struct ao_driver audio_out_coreaudio;
 extern const struct ao_driver audio_out_rsound;
+extern const struct ao_driver audio_out_sndio;
 extern const struct ao_driver audio_out_pulse;
 extern const struct ao_driver audio_out_jack;
 extern const struct ao_driver audio_out_openal;
@@ -54,6 +55,9 @@ static const struct ao_driver * const audio_out_drivers[] = {
 #endif
 #ifdef CONFIG_PULSE
     &audio_out_pulse,
+#endif
+#ifdef CONFIG_SNDIO
+    &audio_out_sndio,
 #endif
 #ifdef CONFIG_ALSA
     &audio_out_alsa,

@@ -364,6 +364,7 @@ Audio output:
   --disable-alsa         disable ALSA audio output [autodetect]
   --disable-ossaudio     disable OSS audio output [autodetect]
   --disable-rsound       disable RSound audio output [autodetect]
+  --disable-sndio        disable sndio audio output [autodetect]
   --disable-pulse        disable Pulseaudio audio output [autodetect]
   --disable-portaudio    disable PortAudio audio output [autodetect]
   --disable-jack         disable JACK audio output [autodetect]
@@ -459,6 +460,7 @@ _lcms2=auto
 _xinerama=auto
 _vm=auto
 _xf86keysym=auto
+_sndio=auto
 _alsa=auto
 _select=yes
 _radio=no
@@ -625,6 +627,8 @@ for ac_option do
   --disable-ossaudio)   _ossaudio=no    ;;
   --enable-rsound)      _rsound=yes     ;;
   --disable-rsound)     _rsound=no      ;;
+  --enable-sndio)       _sndio=yes      ;;
+  --disable-sndio)      _sndio=no       ;;
   --enable-pulse)       _pulse=yes      ;;
   --disable-pulse)      _pulse=no       ;;
   --enable-portaudio)   _portaudio=yes  ;;
@@ -2323,6 +2327,23 @@ else
 fi
 
 
+echocheck "sndio"
+if test "$_sndio" = auto ; then
+   _sndio=no
+   statement_check sndio.h 'struct sio_par par; sio_initpar(&par);' -lsndio && _sndio=yes
+fi
+echores "$_sndio"
+
+if test "$_sndio" = yes ; then
+  def_sndio='#define CONFIG_SNDIO 1'
+  aomodules="sndio $_aomodules"
+  libs_mplayer="$libs_mplayer -lsndio"
+else
+  def_sndio='#undef CONFIG_SNDIO'
+  noaomodules="sndio $_noaomodules"
+fi
+
+
 echocheck "pulse"
 if test "$_pulse" = auto ; then
   _pulse=no
@@ -3290,6 +3311,7 @@ PVR = $_pvr
 RADIO=$_radio
 RADIO_CAPTURE=$_radio_capture
 RSOUND = $_rsound
+SNDIO = $_sndio
 STREAM_CACHE = $_stream_cache
 TV = $_tv
 TV_V4L2 = $_tv_v4l2
@@ -3426,6 +3448,7 @@ $def_ossaudio_devmixer
 $def_pulse
 $def_portaudio
 $def_rsound
+$def_sndio
 
 $def_ladspa
 $def_libbs2b

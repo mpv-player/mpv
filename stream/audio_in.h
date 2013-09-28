@@ -21,6 +21,7 @@
 
 #define AUDIO_IN_ALSA 1
 #define AUDIO_IN_OSS 2
+#define AUDIO_IN_SNDIO 3
 
 #include "config.h"
 
@@ -45,6 +46,16 @@ typedef struct {
 } ai_oss_t;
 #endif
 
+#ifdef CONFIG_SNDIO
+#include <sndio.h>
+
+typedef struct {
+    char *device;
+
+    struct sio_hdl *hdl;
+} ai_sndio_t;
+#endif
+
 typedef struct
 {
     int type;
@@ -67,6 +78,9 @@ typedef struct
 #ifdef CONFIG_OSS_AUDIO
     ai_oss_t oss;
 #endif
+#ifdef CONFIG_SNDIO
+    ai_sndio_t sndio;
+#endif
 } audio_in_t;
 
 int audio_in_init(audio_in_t *ai, int type);
@@ -88,6 +102,11 @@ int ai_alsa_xrun(audio_in_t *ai);
 int ai_oss_set_samplerate(audio_in_t *ai);
 int ai_oss_set_channels(audio_in_t *ai);
 int ai_oss_init(audio_in_t *ai);
+#endif
+
+#ifdef CONFIG_SNDIO
+int ai_sndio_setup(audio_in_t *ai);
+int ai_sndio_init(audio_in_t *ai);
 #endif
 
 #endif /* MPLAYER_AUDIO_IN_H */
