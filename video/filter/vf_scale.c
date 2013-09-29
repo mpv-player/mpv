@@ -353,37 +353,16 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 
 static int control(struct vf_instance *vf, int request, void *data)
 {
-    int r;
-    vf_equalizer_t *eq;
     struct mp_sws_context *sws = vf->priv->sws;
 
     switch (request) {
     case VFCTRL_GET_EQUALIZER:
-        eq = data;
-        if (!strcmp(eq->item, "brightness"))
-            eq->value =  ((sws->brightness * 100) + (1 << 15)) >> 16;
-        else if (!strcmp(eq->item, "contrast"))
-            eq->value = (((sws->contrast  * 100) + (1 << 15)) >> 16) - 100;
-        else if (!strcmp(eq->item, "saturation"))
-            eq->value = (((sws->saturation * 100) + (1 << 15)) >> 16) - 100;
-        else
+        if (mp_sws_get_vf_equalizer(sws, data) < 1)
             break;
         return CONTROL_TRUE;
     case VFCTRL_SET_EQUALIZER:
-        eq = data;
-        if (!strcmp(eq->item, "brightness"))
-            sws->brightness = ((eq->value << 16) + 50) / 100;
-        else if (!strcmp(eq->item, "contrast"))
-            sws->contrast   = (((eq->value + 100) << 16) + 50) / 100;
-        else if (!strcmp(eq->item, "saturation"))
-            sws->saturation = (((eq->value + 100) << 16) + 50) / 100;
-        else
+        if (mp_sws_get_vf_equalizer(sws, data) < 1)
             break;
-
-        r = mp_sws_reinit(sws);
-        if (r < 0)
-            break;
-
         return CONTROL_TRUE;
     default:
         break;

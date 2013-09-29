@@ -53,6 +53,10 @@ void mp_sws_set_from_cmdline(struct mp_sws_context *ctx);
 int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
                  struct mp_image *src);
 
+struct vf_seteq;
+int mp_sws_set_vf_equalizer(struct mp_sws_context *sws, struct vf_seteq *eq);
+int mp_sws_get_vf_equalizer(struct mp_sws_context *sws, struct vf_seteq *eq);
+
 #endif /* MP_SWS_UTILS_H */
 
 // vim: ts=4 sw=4 et tw=80

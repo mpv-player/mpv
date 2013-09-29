@@ -29,6 +29,7 @@
 #include "fmt-conversion.h"
 #include "csputils.h"
 #include "mpvcore/mp_msg.h"
+#include "video/filter/vf.h"
 
 //global sws_flags from the command line
 int sws_flags = 2;
@@ -307,6 +308,33 @@ void mp_image_sw_blur_scale(struct mp_image *dst, struct mp_image *src,
     ctx->force_reload = true;
     mp_sws_scale(ctx, dst, src);
     talloc_free(ctx);
+}
+
+int mp_sws_get_vf_equalizer(struct mp_sws_context *sws, struct vf_seteq *eq)
+{
+    if (!strcmp(eq->item, "brightness"))
+        eq->value =  ((sws->brightness * 100) + (1 << 15)) >> 16;
+    else if (!strcmp(eq->item, "contrast"))
+        eq->value = (((sws->contrast  * 100) + (1 << 15)) >> 16) - 100;
+    else if (!strcmp(eq->item, "saturation"))
+        eq->value = (((sws->saturation * 100) + (1 << 15)) >> 16) - 100;
+    else
+        return 0;
+    return 1;
+}
+
+int mp_sws_set_vf_equalizer(struct mp_sws_context *sws, struct vf_seteq *eq)
+{
+    if (!strcmp(eq->item, "brightness"))
+        sws->brightness = ((eq->value << 16) + 50) / 100;
+    else if (!strcmp(eq->item, "contrast"))
+        sws->contrast   = (((eq->value + 100) << 16) + 50) / 100;
+    else if (!strcmp(eq->item, "saturation"))
+        sws->saturation = (((eq->value + 100) << 16) + 50) / 100;
+    else
+        return 0;
+
+    return mp_sws_reinit(sws) >= 0 ? 1 : -1;
 }
 
 // vim: ts=4 sw=4 et tw=80
