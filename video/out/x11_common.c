@@ -145,8 +145,6 @@ static void saver_off(struct vo_x11_state *x11);
 static void vo_x11_selectinput_witherr(struct vo *vo, Display *display,
                                        Window w, long event_mask);
 static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer);
-static void vo_x11_create_colormap(struct vo_x11_state *x11,
-                                   XVisualInfo *vinfo);
 
 /*
  * Sends the EWMH fullscreen state event.
@@ -1073,7 +1071,11 @@ static void vo_x11_create_window(struct vo *vo, XVisualInfo *vis, int x, int y,
         find_default_visual(x11, vis);
     }
 
-    vo_x11_create_colormap(x11, vis);
+    if (x11->colormap == None) {
+        x11->colormap = XCreateColormap(x11->display, x11->rootwin,
+                                        vis->visual, AllocNone);
+    }
+
     unsigned long xswamask = CWBorderPixel | CWColormap;
     XSetWindowAttributes xswa = {
         .border_pixel = 0,
@@ -1679,148 +1681,6 @@ double vo_x11_vm_get_fps(struct vo *vo)
     return 0;
 }
 #endif
-
-
-static void vo_x11_create_colormap(struct vo_x11_state *x11,
-                                   XVisualInfo *vinfo)
-{
-    unsigned k, r, g, b, ru, gu, bu, m, rv, gv, bv, rvu, gvu, bvu;
-
-    if (x11->colormap != None)
-        return;
-
-    if (vinfo->class != DirectColor) {
-        x11->colormap = XCreateColormap(x11->display, x11->rootwin,
-                                        vinfo->visual, AllocNone);
-        return;
-    }
-
-    // DirectColor is requested by vo_x11 by default, for the equalizer
-
-    x11->cm_size = vinfo->colormap_size;
-    x11->red_mask = vinfo->red_mask;
-    x11->green_mask = vinfo->green_mask;
-    x11->blue_mask = vinfo->blue_mask;
-    ru = (x11->red_mask & (x11->red_mask - 1)) ^ x11->red_mask;
-    gu = (x11->green_mask & (x11->green_mask - 1)) ^ x11->green_mask;
-    bu = (x11->blue_mask & (x11->blue_mask - 1)) ^ x11->blue_mask;
-    rvu = 65536ull * ru / (x11->red_mask + ru);
-    gvu = 65536ull * gu / (x11->green_mask + gu);
-    bvu = 65536ull * bu / (x11->blue_mask + bu);
-    r = g = b = 0;
-    rv = gv = bv = 0;
-    m = DoRed | DoGreen | DoBlue;
-    for (k = 0; k < x11->cm_size; k++) {
-        int t;
-
-        x11->cols[k].pixel = r | g | b;
-        x11->cols[k].red = rv;
-        x11->cols[k].green = gv;
-        x11->cols[k].blue = bv;
-        x11->cols[k].flags = m;
-        t = (r + ru) & x11->red_mask;
-        if (t < r)
-            m &= ~DoRed;
-        r = t;
-        t = (g + gu) & x11->green_mask;
-        if (t < g)
-            m &= ~DoGreen;
-        g = t;
-        t = (b + bu) & x11->blue_mask;
-        if (t < b)
-            m &= ~DoBlue;
-        b = t;
-        rv += rvu;
-        gv += gvu;
-        bv += bvu;
-    }
-    x11->colormap = XCreateColormap(x11->display, x11->rootwin, vinfo->visual,
-                                    AllocAll);
-    XStoreColors(x11->display, x11->colormap, x11->cols, x11->cm_size);
-}
-
-static int transform_color(float val,
-                           float brightness, float contrast, float gamma)
-{
-    float s = pow(val, gamma);
-    s = (s - 0.5) * contrast + 0.5;
-    s += brightness;
-    if (s < 0)
-        s = 0;
-    if (s > 1)
-        s = 1;
-    return (unsigned short) (s * 65535);
-}
-
-uint32_t vo_x11_set_equalizer(struct vo *vo, const char *name, int value)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    float gamma, brightness, contrast;
-    float rf, gf, bf;
-    int k;
-    int red_mask = x11->red_mask;
-    int green_mask = x11->green_mask;
-    int blue_mask = x11->blue_mask;
-
-    /*
-     * IMPLEMENTME: consider using XF86VidModeSetGammaRamp in the case
-     * of TrueColor-ed window but be careful:
-     * Unlike the colormaps, which are private for the X client
-     * who created them and thus automatically destroyed on client
-     * disconnect, this gamma ramp is a system-wide (X-server-wide)
-     * setting and _must_ be restored before the process exits.
-     * Unforunately when the process crashes (or gets killed
-     * for some reason) it is impossible to restore the setting,
-     * and such behaviour could be rather annoying for the users.
-     */
-    if (x11->colormap == None)
-        return VO_NOTAVAIL;
-
-    if (!strcasecmp(name, "brightness"))
-        x11->vo_brightness = value;
-    else if (!strcasecmp(name, "contrast"))
-        x11->vo_contrast = value;
-    else if (!strcasecmp(name, "gamma"))
-        x11->vo_gamma = value;
-    else
-        return VO_NOTIMPL;
-
-    brightness = 0.01 * x11->vo_brightness;
-    contrast = tan(0.0095 * (x11->vo_contrast + 100) * M_PI / 4);
-    gamma = pow(2, -0.02 * x11->vo_gamma);
-
-    rf = (float) ((red_mask & (red_mask - 1)) ^ red_mask) / red_mask;
-    gf = (float) ((green_mask & (green_mask - 1)) ^ green_mask) /
-         green_mask;
-    bf = (float) ((blue_mask & (blue_mask - 1)) ^ blue_mask) / blue_mask;
-
-    /* now recalculate the colormap using the newly set value */
-    for (k = 0; k < x11->cm_size; k++) {
-        x11->cols[k].red   = transform_color(rf * k, brightness, contrast, gamma);
-        x11->cols[k].green = transform_color(gf * k, brightness, contrast, gamma);
-        x11->cols[k].blue  = transform_color(bf * k, brightness, contrast, gamma);
-    }
-
-    XStoreColors(vo->x11->display, x11->colormap, x11->cols, x11->cm_size);
-    XFlush(vo->x11->display);
-    return VO_TRUE;
-}
-
-uint32_t vo_x11_get_equalizer(struct vo *vo, const char *name, int *value)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    if (x11->colormap == None)
-        return VO_NOTAVAIL;
-    if (!strcasecmp(name, "brightness"))
-        *value = x11->vo_brightness;
-    else if (!strcasecmp(name, "contrast"))
-        *value = x11->vo_contrast;
-    else if (!strcasecmp(name, "gamma"))
-        *value = x11->vo_gamma;
-    else
-        return VO_NOTIMPL;
-    return VO_TRUE;
-}
 
 bool vo_x11_screen_is_composited(struct vo *vo)
 {

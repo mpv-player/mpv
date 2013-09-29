@@ -29,6 +29,7 @@
 #include "video/csputils.h"
 #include "video/mp_image.h"
 #include "video/vfcap.h"
+#include "video/filter/vf.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -302,13 +303,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *fmt, int flags)
         p->depth = find_depth_from_visuals(vo, &visual);
     }
     if (!XMatchVisualInfo(vo->x11->display, vo->x11->screen, p->depth,
-                          DirectColor, &p->vinfo)
-         || (vo->opts->WinID > 0
-             && p->vinfo.visualid != XVisualIDFromVisual(p->attribs.visual)))
-    {
-        XMatchVisualInfo(vo->x11->display, vo->x11->screen, p->depth, TrueColor,
-                         &p->vinfo);
-    }
+                          TrueColor, &p->vinfo))
+        return -1;
 
     vo_x11_config_vo_window(vo, &p->vinfo, vo->dx, vo->dy, vo->dwidth,
                             vo->dheight, flags, "x11");
@@ -612,12 +608,19 @@ static int control(struct vo *vo, uint32_t request, void *data)
     case VOCTRL_SET_EQUALIZER:
     {
         struct voctrl_set_equalizer_args *args = data;
-        return vo_x11_set_equalizer(vo, args->name, args->value);
+        struct vf_seteq eq = {args->name, args->value};
+        if (mp_sws_set_vf_equalizer(p->sws, &eq) == 0)
+            break;
+        return true;
     }
     case VOCTRL_GET_EQUALIZER:
     {
         struct voctrl_get_equalizer_args *args = data;
-        return vo_x11_get_equalizer(vo, args->name, args->valueptr);
+        struct vf_seteq eq = {args->name};
+        if (mp_sws_get_vf_equalizer(p->sws, &eq) == 0)
+            break;
+        *(int *)args->valueptr = eq.value;
+        return true;
     }
     case VOCTRL_GET_PANSCAN:
         return VO_TRUE;
