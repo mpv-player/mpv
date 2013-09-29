@@ -12,6 +12,8 @@ version 2 with an explicit "or later" clause or a compatible license
 which are LGPL 3+.
 Thus MPlayer as a whole can be redistributed under terms compatible with
 the GNU General Public License, version 3; see the LICENSE file for details.
+(Note: this is probably a mistake. MPlayer never used talloc, and MPlayer is
+actually strictly GPLv2 only because has some GPLv2-only files.)
 
 MPlayer includes code from several external sources. General information and
 license details are listed below:
