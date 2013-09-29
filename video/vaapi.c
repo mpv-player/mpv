@@ -341,7 +341,7 @@ static VAImage *va_surface_image_alloc(struct va_surface *surface,
     va_surface_image_destroy(surface);
 
     VAStatus status = vaDeriveImage(p->display, surface->id, &p->image);
-    if (status != VA_STATUS_SUCCESS) {
+    if (status == VA_STATUS_SUCCESS) {
         /* vaDeriveImage() is supported, check format */
         if (p->image.format.fourcc == format->fourcc &&
                 p->image.width == surface->w && p->image.height == surface->h) {
@@ -349,11 +349,11 @@ static VAImage *va_surface_image_alloc(struct va_surface *surface,
             VA_VERBOSE("Using vaDeriveImage()\n");
         } else {
             vaDestroyImage(p->display, p->image.image_id);
-            p->image.image_id = VA_INVALID_ID;
             status = VA_STATUS_ERROR_OPERATION_FAILED;
         }
     }
     if (status != VA_STATUS_SUCCESS) {
+        p->image.image_id = VA_INVALID_ID;
         status = vaCreateImage(p->display, format, surface->w, surface->h,
                                &p->image);
         if (!check_va_status(status, "vaCreateImage()")) {
