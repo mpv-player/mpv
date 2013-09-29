@@ -148,6 +148,8 @@ typedef struct MPContext {
     bool has_quit_custom_rc;
     bool error_playing;
 
+    int64_t shown_vframes, shown_aframes;
+
     struct demuxer **sources;
     int num_sources;
 

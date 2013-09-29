@@ -2146,6 +2146,7 @@ static int write_to_ao(struct MPContext *mpctx, void *data, int len, int flags,
     ao->pts = pts;
     int played = ao_play(mpctx->ao, data, len, flags);
     if (played > 0) {
+        mpctx->shown_aframes += played / (af_fmt2bits(ao->format) / 8);
         mpctx->delay += played / bps;
         // Keep correct pts for remaining data - could be used to flush
         // remaining buffer when closing ao.
@@ -3734,6 +3735,7 @@ static void run_playloop(struct MPContext *mpctx)
             // For print_status - VO call finishing early is OK for sync
             mpctx->time_frame -= get_relative_time(mpctx);
         }
+        mpctx->shown_vframes++;
         if (mpctx->restart_playback) {
             if (mpctx->sync_audio_to_video) {
                 mpctx->syncing_audio = true;
@@ -4298,6 +4300,8 @@ static void play_current_file(struct MPContext *mpctx)
 
     mpctx->stop_play = 0;
     mpctx->filename = NULL;
+    mpctx->shown_aframes = 0;
+    mpctx->shown_vframes = 0;
 
     if (mpctx->playlist->current)
         mpctx->filename = mpctx->playlist->current->filename;
@@ -4635,10 +4639,14 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
 #endif
 
     // Played/paused for longer than 3 seconds -> ok
-    bool playback_failed = mpctx->stop_play == AT_END_OF_FILE &&
+    bool playback_short = mpctx->stop_play == AT_END_OF_FILE &&
                 (playback_start < 0 || mp_time_sec() - playback_start < 3.0);
-    if (mpctx->playlist->current && !mpctx->playlist->current_was_replaced)
-        mpctx->playlist->current->playback_failed = playback_failed;
+    bool init_failed = mpctx->stop_play == AT_END_OF_FILE &&
+                (mpctx->shown_aframes == 0 && mpctx->shown_vframes == 0);
+    if (mpctx->playlist->current && !mpctx->playlist->current_was_replaced) {
+        mpctx->playlist->current->playback_short = playback_short;
+        mpctx->playlist->current->init_failed = init_failed;
+    }
 
     mp_notify(mpctx, MP_EVENT_TRACKS_CHANGED, NULL);
     mp_notify(mpctx, MP_EVENT_END_FILE, NULL);
@@ -4654,7 +4662,7 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
 {
     struct playlist_entry *next = playlist_get_next(mpctx->playlist, direction);
     if (direction < 0 && !force) {
-        while (next && next->playback_failed)
+        while (next && next->playback_short)
             next = next->prev;
     }
     if (!next && mpctx->opts->loop_times >= 0) {
@@ -4670,11 +4678,11 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
         } else {
             next = mpctx->playlist->last;
         }
-        if (!force && next && next->playback_failed) {
+        if (!force && next && next->init_failed) {
             bool all_failed = true;
             struct playlist_entry *cur;
             for (cur = mpctx->playlist->first; cur; cur = cur->next) {
-                all_failed &= cur->playback_failed;
+                all_failed &= cur->init_failed;
                 if (!all_failed)
                     break;
             }
