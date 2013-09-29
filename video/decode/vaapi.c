@@ -131,8 +131,6 @@ static int find_entrypoint(int format, VAEntrypoint *ep, int num_ep)
     int entrypoint = -1;
     switch (format) {
     case IMGFMT_VAAPI:              entrypoint = VAEntrypointVLD;    break;
-    case IMGFMT_VAAPI_MPEG2_IDCT:   entrypoint = VAEntrypointIDCT;   break;
-    case IMGFMT_VAAPI_MPEG2_MOCO:   entrypoint = VAEntrypointMoComp; break;
     }
     for (int n = 0; n < num_ep; n++) {
         if (ep[n] == entrypoint)
@@ -485,8 +483,7 @@ static struct mp_image *copy_image(struct lavc_ctx *ctx, struct mp_image *img)
 
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
     .type = HWDEC_VAAPI,
-    .image_formats = (const int[]) {IMGFMT_VAAPI, IMGFMT_VAAPI_MPEG2_IDCT,
-                                    IMGFMT_VAAPI_MPEG2_MOCO, 0},
+    .image_formats = (const int[]) {IMGFMT_VAAPI, 0},
     .probe = probe,
     .init = init,
     .uninit = uninit,
@@ -495,8 +492,7 @@ const struct vd_lavc_hwdec mp_vd_lavc_vaapi = {
 
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy = {
     .type = HWDEC_VAAPI_COPY,
-    .image_formats = (const int[]) {IMGFMT_VAAPI, IMGFMT_VAAPI_MPEG2_IDCT,
-                                    IMGFMT_VAAPI_MPEG2_MOCO, 0},
+    .image_formats = (const int[]) {IMGFMT_VAAPI, 0},
     .probe = probe_copy,
     .init = init_copy,
     .uninit = uninit,
