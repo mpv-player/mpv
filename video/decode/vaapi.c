@@ -283,7 +283,7 @@ static int create_decoder(struct lavc_ctx *ctx)
     if (!check_va_status(status, "vaQueryConfigEntrypoints()"))
         goto error;
 
-    VAEntrypoint entrypoint = find_entrypoint(p->format, ep, num_ep);
+    int entrypoint = find_entrypoint(p->format, ep, num_ep);
     if (entrypoint < 0) {
         mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Could not find VA entrypoint.\n");
         goto error;
