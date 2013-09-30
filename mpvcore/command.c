@@ -65,10 +65,20 @@
 #include "stream/stream_dvd.h"
 #endif
 #include "screenshot.h"
+#ifdef HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif
 
 #include "mpvcore/mp_core.h"
 
 #include "mp_lua.h"
+
+struct command_ctx {
+    int events;
+
+#define OVERLAY_MAX_ID 64
+    void *overlay_map[OVERLAY_MAX_ID];
+};
 
 static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
                         const char *cmd, const char *arg);
@@ -2227,6 +2237,113 @@ static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
     return r;
 }
 
+#ifdef HAVE_SYS_MMAN_H
+
+static int ext2_sub_find(struct MPContext *mpctx, int id)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    struct sub_bitmaps *sub = &mpctx->osd->external2;
+    void *p = NULL;
+    if (id >= 0 && id < OVERLAY_MAX_ID)
+        p = cmd->overlay_map[id];
+    if (sub && p) {
+        for (int n = 0; n < sub->num_parts; n++) {
+            if (sub->parts[n].bitmap == p)
+                return n;
+        }
+    }
+    return -1;
+}
+
+static int ext2_sub_alloc(struct MPContext *mpctx)
+{
+    struct osd_state *osd = mpctx->osd;
+    struct sub_bitmaps *sub = &osd->external2;
+    struct sub_bitmap b = {0};
+    MP_TARRAY_APPEND(osd, sub->parts, sub->num_parts, b);
+    return sub->num_parts - 1;
+}
+
+static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
+                       char *file, int offset, char *fmt, int w, int h,
+                       int stride)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    struct osd_state *osd = mpctx->osd;
+    if (strcmp(fmt, "bgra") != 0) {
+        MP_ERR(mpctx, "overlay_add: unsupported OSD format '%s'\n", fmt);
+        return -1;
+    }
+    if (id < 0 || id >= OVERLAY_MAX_ID) {
+        MP_ERR(mpctx, "overlay_add: invalid id %d\n", id);
+        return -1;
+    }
+    int fd = -1;
+    bool close_fd = true;
+    if (file[0] == '@') {
+        char *end;
+        fd = strtol(&file[1], &end, 10);
+        if (!file[1] || end[0])
+            fd = -1;
+        close_fd = false;
+    } else {
+        fd = open(file, O_RDONLY | O_BINARY);
+    }
+    void *p = mmap(NULL, h * stride, PROT_READ, MAP_SHARED, fd, offset);
+    if (fd >= 0 && close_fd)
+        close(fd);
+    if (!p) {
+        MP_ERR(mpctx, "overlay_add: could not open or map '%s'\n", file);
+        return -1;
+    }
+    int index = ext2_sub_find(mpctx, id);
+    if (index < 0)
+        index = ext2_sub_alloc(mpctx);
+    if (index < 0) {
+        munmap(p, h * stride);
+        return -1;
+    }
+    cmd->overlay_map[id] = p;
+    osd->external2.parts[index] = (struct sub_bitmap) {
+        .bitmap = p,
+        .stride = stride,
+        .x = x, .y = y,
+        .w = w, .h = h,
+        .dw = w, .dh = h,
+    };
+    osd->external2.bitmap_id = osd->external2.bitmap_pos_id = 1;
+    osd->external2.format = SUBBITMAP_RGBA;
+    osd->want_redraw = true;
+    return 0;
+}
+
+static void overlay_remove(struct MPContext *mpctx, int id)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    struct osd_state *osd = mpctx->osd;
+    int index = ext2_sub_find(mpctx, id);
+    if (index >= 0) {
+        struct sub_bitmaps *sub = &osd->external2;
+        struct sub_bitmap *part = &sub->parts[index];
+        munmap(part->bitmap, part->h * part->stride);
+        MP_TARRAY_REMOVE_AT(sub->parts, sub->num_parts, index);
+        cmd->overlay_map[id] = NULL;
+        sub->bitmap_id = sub->bitmap_pos_id = 1;
+    }
+}
+
+static void overlay_uninit(struct MPContext *mpctx)
+{
+    for (int id = 0; id < OVERLAY_MAX_ID; id++)
+        overlay_remove(mpctx, id);
+}
+
+#else
+
+static void overlay_uninit(struct MPContext *mpctx){}
+
+#endif
+
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -2775,6 +2892,19 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         }
         break;
 
+#ifdef HAVE_SYS_MMAN_H
+    case MP_CMD_OVERLAY_ADD:
+        overlay_add(mpctx,
+                    cmd->args[0].v.i, cmd->args[1].v.i, cmd->args[2].v.i,
+                    cmd->args[3].v.s, cmd->args[4].v.i, cmd->args[5].v.s,
+                    cmd->args[6].v.i, cmd->args[7].v.i, cmd->args[8].v.i);
+        break;
+
+    case MP_CMD_OVERLAY_REMOVE:
+        overlay_remove(mpctx, cmd->args[0].v.i);
+        break;
+#endif
+
     case MP_CMD_COMMAND_LIST: {
         for (struct mp_cmd *sub = cmd->args[0].v.p; sub; sub = sub->queue_next)
             run_command(mpctx, sub);
@@ -2802,13 +2932,16 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     }
 }
 
-struct command_ctx {
-    int events;
-};
+void command_uninit(struct MPContext *mpctx)
+{
+    overlay_uninit(mpctx);
+    talloc_free(mpctx->command_ctx);
+    mpctx->command_ctx = NULL;
+}
 
 void command_init(struct MPContext *mpctx)
 {
-    mpctx->command_ctx = talloc_zero(mpctx, struct command_ctx);
+    mpctx->command_ctx = talloc_zero(NULL, struct command_ctx);
 }
 
 // Notify that a property might have changed.

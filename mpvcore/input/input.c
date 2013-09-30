@@ -232,6 +232,11 @@ static const mp_cmd_t mp_cmds[] = {
 
   { MP_CMD_SCRIPT_DISPATCH, "script_dispatch", { ARG_STRING, ARG_INT } },
 
+  { MP_CMD_OVERLAY_ADD, "overlay_add",
+      { ARG_INT, ARG_INT, ARG_INT, ARG_STRING, ARG_INT, ARG_STRING, ARG_INT,
+        ARG_INT, ARG_INT }},
+  { MP_CMD_OVERLAY_REMOVE, "overlay_remove", { ARG_INT } },
+
   {0}
 };
 

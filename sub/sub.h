@@ -91,6 +91,7 @@ enum mp_osdtype {
     OSDTYPE_OSD,
 
     OSDTYPE_EXTERNAL,
+    OSDTYPE_EXTERNAL2,
 
     MAX_OSD_PARTS
 };
@@ -144,6 +145,8 @@ struct osd_state {
     // OSDTYPE_EXTERNAL
     char *external;
     int external_res_x, external_res_y;
+    // OSDTYPE_EXTERNAL2
+    struct sub_bitmaps external2;
     // OSDTYPE_SUB
     struct dec_sub *dec_sub;
 

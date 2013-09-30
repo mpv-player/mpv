@@ -23,6 +23,7 @@ struct MPContext;
 struct mp_cmd;
 
 void command_init(struct MPContext *mpctx);
+void command_uninit(struct MPContext *mpctx);
 
 void run_command(struct MPContext *mpctx, struct mp_cmd *cmd);
 char *mp_property_expand_string(struct MPContext *mpctx, const char *str);

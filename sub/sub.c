@@ -163,6 +163,11 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
                 sub_pts -= osd->video_offset - opts->sub_delay;
             sub_get_bitmaps(osd->dec_sub, obj->vo_res, sub_pts, out_imgs);
         }
+    } else if (obj->type == OSDTYPE_EXTERNAL2) {
+        if (osd->external2.format) {
+            *out_imgs = osd->external2;
+            osd->external2.bitmap_id = osd->external2.bitmap_pos_id = 0;
+        }
     } else {
         osd_object_get_bitmaps(osd, obj, out_imgs);
     }
