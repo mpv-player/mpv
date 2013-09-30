@@ -222,6 +222,9 @@ void osd_draw(struct osd_state *osd, struct mp_osd_res res,
     if (draw_flags & OSD_DRAW_SUB_FILTER)
         draw_flags |= OSD_DRAW_SUB_ONLY;
 
+    if (!(draw_flags & OSD_DRAW_SUB_ONLY))
+        osd->last_vo_res = res;
+
     for (int n = 0; n < MAX_OSD_PARTS; n++) {
         struct osd_object *obj = osd->objs[n];
 

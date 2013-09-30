@@ -1458,6 +1458,25 @@ static int mp_property_dheight(m_option_t *prop, int action, void *arg,
     return property_vo_wh(prop, action, arg, mpctx, false);
 }
 
+static int mp_property_osd_w(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
+{
+    return m_property_int_ro(prop, action, arg, mpctx->osd->last_vo_res.w);
+}
+
+static int mp_property_osd_h(m_option_t *prop, int action, void *arg,
+                             MPContext *mpctx)
+{
+    return m_property_int_ro(prop, action, arg, mpctx->osd->last_vo_res.w);
+}
+
+static int mp_property_osd_par(m_option_t *prop, int action, void *arg,
+                               MPContext *mpctx)
+{
+    return m_property_double_ro(prop, action, arg,
+                                mpctx->osd->last_vo_res.display_par);
+}
+
 /// Video fps (RO)
 static int mp_property_fps(m_option_t *prop, int action, void *arg,
                            MPContext *mpctx)
@@ -1879,6 +1898,10 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("vid", mp_property_video),
     { "program", mp_property_program, CONF_TYPE_INT,
       CONF_RANGE, -1, 65535, NULL },
+
+    { "osd-width", mp_property_osd_w, CONF_TYPE_INT },
+    { "osd-height", mp_property_osd_h, CONF_TYPE_INT },
+    { "osd-par", mp_property_osd_par, CONF_TYPE_DOUBLE },
 
     // Subs
     M_OPTION_PROPERTY_CUSTOM("sid", mp_property_sub),

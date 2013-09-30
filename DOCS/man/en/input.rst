@@ -463,6 +463,9 @@ Name                            W Comment
 ``dwidth``                        video width (after filters and aspect scaling)
 ``dheight``                       video height
 ``aspect``                      x video aspect
+``osd-width``                     last known OSD width (can be 0)
+``osd-height``                    last known OSD height (can be 0)
+``osd-par``                       last known OSD display pixel aspect (can be 0)
 ``vid``                         x current video track (similar to ``--vid``)
 ``video``                       x alias for ``vid``
 ``video-align-x``               x see ``--video-align-x``

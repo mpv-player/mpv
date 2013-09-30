@@ -128,6 +128,8 @@ struct osd_state {
     bool render_subs_in_filter;
     bool render_bitmap_subs;
 
+    struct mp_osd_res last_vo_res;
+
     bool want_redraw;
 
     // OSDTYPE_OSD
