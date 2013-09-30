@@ -169,7 +169,7 @@ static int init(struct ao *ao)
     struct priv *p = ao->priv;
     const char **matching_ports = NULL;
     char *port_name = p->cfg_port && p->cfg_port[0] ? p->cfg_port : NULL;
-    jack_options_t open_options = JackUseExactName;
+    jack_options_t open_options = JackNullOption;
     int port_flags = JackPortIsInput;
     int i;
 
