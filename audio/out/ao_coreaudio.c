@@ -267,14 +267,16 @@ static int init(struct ao *ao)
         selected_device = p->opt_device_id;
     }
 
-    char *device_name;
-    err = CA_GET_STR(selected_device, kAudioObjectPropertyName, &device_name);
-    CHECK_CA_ERROR("could not get selected audio device name");
+    if (mp_msg_test_log(ao->log, MSGL_V)) {
+        char *name;
+        err = CA_GET_STR(selected_device, kAudioObjectPropertyName, &name);
+        CHECK_CA_ERROR("could not get selected audio device name");
 
-    MP_VERBOSE(ao, "selected audio output device: %s (%" PRIu32 ")\n",
-                   device_name, selected_device);
+        MP_VERBOSE(ao, "selected audio output device: %s (%" PRIu32 ")\n",
+                       name, selected_device);
 
-    talloc_free(device_name);
+        talloc_free(name);
+    }
 
     // Save selected device id
     p->device = selected_device;
