@@ -3523,14 +3523,8 @@ static void handle_keep_open(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     if (opts->keep_open && mpctx->stop_play == AT_END_OF_FILE) {
         mpctx->stop_play = KEEP_PLAYING;
+        mpctx->playback_pts = mpctx->last_vo_pts;
         pause_player(mpctx);
-        if (mpctx->video_out && !mpctx->video_out->hasframe) {
-            // Force screen refresh to make OSD usable
-            double seek_to = mpctx->last_vo_pts;
-            if (seek_to == MP_NOPTS_VALUE)
-                seek_to = 0; // arbitrary default
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_to, 1);
-        }
     }
 }
 
