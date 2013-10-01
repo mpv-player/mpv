@@ -97,6 +97,10 @@ struct vdpctx {
         mp_image_t *mpi;
     } buffered_video[NUM_BUFFERED_VIDEO];
     int                                deint_queue_pos;
+
+    // State for redrawing the screen after seek-reset
+    int                                prev_deint_queue_pos;
+
     int                                output_surface_width, output_surface_height;
 
     int                                force_yuv;
@@ -222,7 +226,13 @@ static int render_video_to_output_surface(struct vo *vo,
     struct vdp_functions *vdp = vc->vdp;
     VdpTime dummy;
     VdpStatus vdp_st;
-    if (vc->deint_queue_pos < 0) {
+    struct buffered_video_surface *bv = vc->buffered_video;
+    int dp = vc->deint_queue_pos;
+
+    // Redraw frame from before seek reset?
+    if (dp < 0)
+        dp = vc->prev_deint_queue_pos;
+    if (dp < 0) {
         // At least clear the screen if there is nothing to render
         int flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_0;
         vdp_st = vdp->output_surface_render_output_surface(output_surface,
@@ -231,9 +241,6 @@ static int render_video_to_output_surface(struct vo *vo,
                                                            flags);
         return -1;
     }
-
-    struct buffered_video_surface *bv = vc->buffered_video;
-    unsigned int dp = vc->deint_queue_pos;
 
     vdp_st = vdp->presentation_queue_block_until_surface_idle(vc->flip_queue,
                                                               output_surface,
@@ -362,19 +369,28 @@ static void add_new_video_surface(struct vo *vo, VdpVideoSurface surface,
     set_next_frame_info(vo, false);
 }
 
-static void forget_frames(struct vo *vo)
+static void forget_frames(struct vo *vo, bool seek_reset)
 {
     struct vdpctx *vc = vo->priv;
 
+    if (seek_reset) {
+        if (vc->deint_queue_pos >= 0)
+            vc->prev_deint_queue_pos = vc->deint_queue_pos;
+    } else {
+        vc->prev_deint_queue_pos = -1001;
+    }
+
     vc->deint_queue_pos = -1001;
     vc->dropped_frame = false;
-    for (int i = 0; i < NUM_BUFFERED_VIDEO; i++) {
-        struct buffered_video_surface *p = vc->buffered_video + i;
-        mp_image_unrefp(&p->mpi);
-        *p = (struct buffered_video_surface){
-            .surface = VDP_INVALID_HANDLE,
-            .rgb_surface = VDP_INVALID_HANDLE,
-        };
+    if (vc->prev_deint_queue_pos < 0) {
+        for (int i = 0; i < NUM_BUFFERED_VIDEO; i++) {
+            struct buffered_video_surface *p = vc->buffered_video + i;
+            mp_image_unrefp(&p->mpi);
+            *p = (struct buffered_video_surface){
+                .surface = VDP_INVALID_HANDLE,
+                .rgb_surface = VDP_INVALID_HANDLE,
+            };
+        }
     }
 }
 
@@ -704,7 +720,7 @@ static void free_video_specific(struct vo *vo)
     struct vdp_functions *vdp = vc->vdp;
     VdpStatus vdp_st;
 
-    forget_frames(vo);
+    forget_frames(vo, false);
 
     if (vc->video_mixer != VDP_INVALID_HANDLE) {
         vdp_st = vdp->video_mixer_destroy(vc->video_mixer);
@@ -775,7 +791,7 @@ static int initialize_vdpau_objects(struct vo *vo)
             return -1;
     }
 
-    forget_frames(vo);
+    forget_frames(vo, false);
     resize(vo);
     return 0;
 }
@@ -788,7 +804,7 @@ static void mark_vdpau_objects_uninitialized(struct vo *vo)
         vc->video_surfaces[i].surface = VDP_INVALID_HANDLE;
     for (int i = 0; i < NUM_BUFFERED_VIDEO; i++)
         vc->rgb_surfaces[i] = VDP_INVALID_HANDLE;
-    forget_frames(vo);
+    forget_frames(vo, false);
     vc->black_pixel = VDP_INVALID_HANDLE;
     vc->video_mixer = VDP_INVALID_HANDLE;
     vc->flip_queue = VDP_INVALID_HANDLE;
@@ -1317,6 +1333,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     VdpOutputSurface rgb_surface = VDP_INVALID_HANDLE;
     VdpStatus vdp_st;
 
+    // Forget previous frames, as we can display a new one now.
+    vc->prev_deint_queue_pos = -1001;
+
     if (IMGFMT_IS_VDPAU(vc->image_format)) {
         surface = (VdpVideoSurface)(intptr_t)mpi->planes[3];
         reserved_mpi = mp_image_new_ref(mpi);
@@ -1636,7 +1655,7 @@ static int control(struct vo *vo, uint32_t request, void *data)
             video_to_output_surface(vo);
         return true;
     case VOCTRL_RESET:
-        forget_frames(vo);
+        forget_frames(vo, true);
         return true;
     case VOCTRL_SCREENSHOT: {
         if (!status_ok(vo))
