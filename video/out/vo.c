@@ -202,7 +202,7 @@ void vo_queue_image(struct vo *vo, struct mp_image *mpi)
 
 int vo_redraw_frame(struct vo *vo)
 {
-    if (!vo->config_ok || !vo->hasframe)
+    if (!vo->config_ok)
         return -1;
     if (vo_control(vo, VOCTRL_REDRAW_FRAME, NULL) == true) {
         vo->want_redraw = false;
@@ -214,7 +214,7 @@ int vo_redraw_frame(struct vo *vo)
 
 bool vo_get_want_redraw(struct vo *vo)
 {
-    if (!vo->config_ok || !vo->hasframe)
+    if (!vo->config_ok)
         return false;
     return vo->want_redraw;
 }
@@ -289,7 +289,6 @@ void vo_seek_reset(struct vo *vo)
 {
     vo_control(vo, VOCTRL_RESET, NULL);
     vo->frame_loaded = false;
-    vo->hasframe = false;
     mp_image_unrefp(&vo->waiting_mpi);
 }
 

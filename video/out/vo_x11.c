@@ -490,8 +490,10 @@ static int redraw_frame(struct vo *vo)
 {
     struct priv *p = vo->priv;
 
-    if (!p->original_image)
+    if (!p->original_image) {
+        vo_x11_clear_background(vo, &(struct mp_rect){0, 0, vo->dwidth, vo->dheight});
         return false;
+    }
 
     draw_image(vo, p->original_image);
     return true;
@@ -628,7 +630,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         resize(vo);
         return VO_TRUE;
     case VOCTRL_REDRAW_FRAME:
-        return redraw_frame(vo);
+        redraw_frame(vo);
+        return true;
     case VOCTRL_WINDOW_TO_OSD_COORDS: {
         // OSD is rendered into the scaled image
         float *c = data;

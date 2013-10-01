@@ -91,6 +91,9 @@ struct priv {
 
     struct va_surface_pool  *pool;
     struct va_image_formats *va_image_formats;
+
+    struct va_surface       *black_surface;
+
     VAImageFormat           *va_subpic_formats;
     unsigned int            *va_subpic_flags;
     int                      va_num_subpic_formats;
@@ -118,6 +121,8 @@ static void flush_output_surfaces(struct priv *p)
 static void free_video_specific(struct priv *p)
 {
     flush_output_surfaces(p);
+
+    va_surface_releasep(&p->black_surface);
 
     for (int n = 0; n < MAX_OUTPUT_SURFACES; n++)
         mp_image_unrefp(&p->swdec_surfaces[n]);
@@ -149,6 +154,8 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 {
     struct priv *p = vo->priv;
 
+    free_video_specific(p);
+
     vo_x11_config_vo_window(vo, NULL, vo->dx, vo->dy, vo->dwidth, vo->dheight,
                             flags, "vaapi");
 
@@ -173,10 +180,29 @@ static int query_format(struct vo *vo, uint32_t imgfmt)
 
 static bool render_to_screen(struct priv *p, struct mp_image *mpi)
 {
-    bool res = true;
     VAStatus status;
 
     VASurfaceID surface = va_surface_id_in_mp_image(mpi);
+    if (surface == VA_INVALID_ID) {
+        if (!p->black_surface) {
+            int w = p->image_params.w, h = p->image_params.h;
+            // 4:2:0 should work everywhere
+            int fmt = IMGFMT_420P;
+            p->black_surface =
+                va_surface_pool_get_by_imgfmt(p->pool, p->va_image_formats,
+                                              fmt, w, h);
+            if (p->black_surface) {
+                struct mp_image *img = mp_image_alloc(fmt, w, h);
+                mp_image_clear(img, 0, 0, w, h);
+                if (!va_surface_upload(p->black_surface, img))
+                    va_surface_releasep(&p->black_surface);
+                talloc_free(img);
+            }
+        }
+        surface = va_surface_id(p->black_surface);
+    }
+
+    int fields = mpi ? mpi->fields : 0;
     if (surface == VA_INVALID_ID)
         return false;
 
@@ -199,9 +225,8 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
     }
 
     int flags = va_get_colorspace_flag(p->image_params.colorspace) | p->scaling;
-    if (p->deint && (mpi->fields & MP_IMGFIELD_INTERLACED)) {
-        flags |= (mpi->fields & MP_IMGFIELD_TOP_FIRST) ?
-                                            VA_BOTTOM_FIELD : VA_TOP_FIELD;
+    if (p->deint && (fields & MP_IMGFIELD_INTERLACED)) {
+        flags |= (fields & MP_IMGFIELD_TOP_FIRST) ? VA_BOTTOM_FIELD : VA_TOP_FIELD;
     } else {
         flags |= VA_FRAME_PICTURE;
     }
@@ -230,7 +255,7 @@ static bool render_to_screen(struct priv *p, struct mp_image *mpi)
         }
     }
 
-    return res;
+    return true;
 }
 
 static void flip_page(struct vo *vo)
@@ -505,7 +530,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         return get_equalizer(p, eq->name, eq->valueptr);
     }
     case VOCTRL_REDRAW_FRAME:
-        return redraw_frame(p);
+        redraw_frame(p);
+        return true;
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         args->out_image = get_screenshot(p);

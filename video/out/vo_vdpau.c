@@ -222,8 +222,15 @@ static int render_video_to_output_surface(struct vo *vo,
     struct vdp_functions *vdp = vc->vdp;
     VdpTime dummy;
     VdpStatus vdp_st;
-    if (vc->deint_queue_pos < 0)
+    if (vc->deint_queue_pos < 0) {
+        // At least clear the screen if there is nothing to render
+        int flags = VDP_OUTPUT_SURFACE_RENDER_ROTATE_0;
+        vdp_st = vdp->output_surface_render_output_surface(output_surface,
+                                                           NULL, vc->black_pixel,
+                                                           NULL, NULL, NULL,
+                                                           flags);
         return -1;
+    }
 
     struct buffered_video_surface *bv = vc->buffered_video;
     unsigned int dp = vc->deint_queue_pos;

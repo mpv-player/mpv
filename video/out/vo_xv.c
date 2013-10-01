@@ -848,7 +848,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
         *cspc = ctx->cached_csp;
         return true;
     case VOCTRL_REDRAW_FRAME:
-        return redraw_frame(vo);
+        redraw_frame(vo);
+        return true;
     case VOCTRL_SCREENSHOT: {
         struct voctrl_screenshot_args *args = data;
         args->out_image = get_screenshot(vo);

@@ -130,6 +130,8 @@ typedef struct d3d_priv {
 
     struct vo *vo;
 
+    bool have_image;
+
     D3DLOCKED_RECT locked_rect; /**< The locked offscreen surface */
     RECT fs_movie_rect;         /**< Rect (upscaled) of the movie when displayed
                                 in fullscreen */
@@ -842,6 +844,9 @@ static uint32_t d3d_draw_frame(d3d_priv *priv)
 
     IDirect3DDevice9_Clear(priv->d3d_device, 0, NULL, D3DCLEAR_TARGET, 0, 0, 0);
 
+    if (!priv->have_image)
+        return VO_TRUE;
+
     if (priv->use_textures) {
 
         for (n = 0; n < priv->plane_count; n++) {
@@ -1271,6 +1276,8 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 {
     d3d_priv *priv = vo->priv;
 
+    priv->have_image = false;
+
     /* w32_common framework call. Creates window on the screen with
      * the given coordinates.
      */
@@ -1412,12 +1419,17 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
         }
     }
 
+    priv->have_image = true;
+
     d3d_draw_frame(priv);
 }
 
 static mp_image_t *get_screenshot(d3d_priv *priv)
 {
     if (!priv->d3d_device)
+        return NULL;
+
+    if (!priv->have_image)
         return NULL;
 
     struct mp_image buffer;

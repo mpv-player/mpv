@@ -179,6 +179,7 @@ struct gl_video {
     int plane_count;
 
     struct video_image image;
+    bool have_image;
 
     struct fbotex indirect_fbo;         // RGB target
     struct fbotex scale_sep_fbo;        // first pass when doing 2 pass scaling
@@ -1353,6 +1354,11 @@ void gl_video_render_frame(struct gl_video *p)
         gl->Clear(GL_COLOR_BUFFER_BIT);
     }
 
+    if (!p->have_image) {
+        gl->Clear(GL_COLOR_BUFFER_BIT);
+        return;
+    }
+
     // Order of processing:
     //  [indirect -> [scale_sep ->]] final
 
@@ -1571,6 +1577,8 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
     }
     gl->ActiveTexture(GL_TEXTURE0);
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+
+    p->have_image = true;
 }
 
 struct mp_image *gl_video_download_image(struct gl_video *p)
@@ -1579,7 +1587,7 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
 
     struct video_image *vimg = &p->image;
 
-    if (!vimg->planes[0].gl_texture)
+    if (!p->have_image || !vimg->planes[0].gl_texture)
         return NULL;
 
     assert(p->image_format == p->image_params.imgfmt);
@@ -1991,6 +1999,8 @@ void gl_video_config(struct gl_video *p, struct mp_image_params *params)
     csp.levels_out = params->outputlevels;
     csp.format = params->colorspace;
     p->colorspace = csp;
+
+    p->have_image = false;
 }
 
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b)

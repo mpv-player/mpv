@@ -417,7 +417,7 @@ struct va_surface *va_surface_in_mp_image(struct mp_image *mpi)
 
 VASurfaceID va_surface_id(const struct va_surface *surface)
 {
-    return surface->id;
+    return surface ? surface->id : VA_INVALID_ID;
 }
 
 bool va_image_map(VADisplay display, VAImage *image, struct mp_image *mpi)
