@@ -406,6 +406,9 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     vo->dwidth = d_width;
     vo->dheight = d_height;
 
+    talloc_free(vo->params);
+    vo->params = NULL;
+
     struct mp_image_params p2 = *params;
 
     int ret;
@@ -419,6 +422,8 @@ int vo_reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     }
     vo->config_ok = (ret >= 0);
     vo->config_count += vo->config_ok;
+    if (vo->config_ok)
+        vo->params = talloc_memdup(vo, &p2, sizeof(p2));
     if (vo->registered_fd == -1 && vo->event_fd != -1 && vo->config_ok) {
         mp_input_add_key_fd(vo->input_ctx, vo->event_fd, 1, event_fd_callback,
                             NULL, vo);

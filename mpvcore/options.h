@@ -50,6 +50,7 @@ typedef struct MPOpts {
 
     struct m_obj_settings *audio_driver_list;
     int fixed_vo;
+    int force_vo;
     int softvol;
     float mixer_init_volume;
     int mixer_init_mute;

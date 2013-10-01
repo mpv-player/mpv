@@ -778,7 +778,6 @@ static struct mp_image *decode_with_fallback(struct sh_video *sh,
     // Failed hardware decoding? Try again in software.
     if (ctx->software_fallback_decoder) {
         uninit_avctx(sh);
-        sh->vf_initialized = 0;
         mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Error using hardware "
                 "decoding, falling back to software decoding.\n");
         const char *decoder = ctx->software_fallback_decoder;

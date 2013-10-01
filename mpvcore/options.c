@@ -567,6 +567,7 @@ const m_option_t mp_opts[] = {
     OPT_SETTINGSLIST("vo", vo.video_driver_list, 0, &vo_obj_list),
     OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list),
     OPT_FLAG("fixed-vo", fixed_vo, CONF_GLOBAL),
+    OPT_FLAG("force-window", force_vo, CONF_GLOBAL),
     OPT_FLAG("ontop", vo.ontop, 0),
     OPT_FLAG("border", vo.border, 0),
 

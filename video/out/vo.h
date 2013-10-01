@@ -238,6 +238,7 @@ struct vo {
     struct mp_log *log; // Using e.g. "[vo/vdpau]" as prefix
     int config_ok;      // Last config call was successful?
     int config_count;   // Total number of successful config calls
+    struct mp_image_params *params; // Configured parameters (as in vo_reconfig)
 
     bool probing;
 

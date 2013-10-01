@@ -1556,7 +1556,7 @@ static void update_osd_msg(struct MPContext *mpctx)
     // Look if we have a msg
     mp_osd_msg_t *msg = get_osd_msg(mpctx);
     if (msg && !msg->show_position) {
-        if (mpctx->sh_video && opts->term_osd != 1) {
+        if (mpctx->video_out && opts->term_osd != 1) {
             osd_set_text(osd, msg->msg);
         } else if (opts->term_osd) {
             if (strcmp(mpctx->terminal_osd_text, msg->msg)) {
@@ -1576,7 +1576,7 @@ static void update_osd_msg(struct MPContext *mpctx)
     if (msg && msg->show_position)
         osd_level = 3;
 
-    if (mpctx->sh_video && opts->term_osd != 1) {
+    if (mpctx->video_out && opts->term_osd != 1) {
         // fallback on the timer
         char *text = NULL;
 
@@ -2031,8 +2031,10 @@ void mp_switch_track(struct MPContext *mpctx, enum stream_type type,
         return;
 
     if (type == STREAM_VIDEO) {
-        uninit_player(mpctx, INITIALIZED_VCODEC |
-                        (mpctx->opts->fixed_vo && track ? 0 : INITIALIZED_VO));
+        int uninit = INITIALIZED_VCODEC;
+        if (!mpctx->opts->force_vo)
+            uninit |= mpctx->opts->fixed_vo && track ? 0 : INITIALIZED_VO;
+        uninit_player(mpctx, uninit);
     } else if (type == STREAM_AUDIO) {
         uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_ACODEC);
     } else if (type == STREAM_SUB) {
@@ -2380,7 +2382,8 @@ int reinit_video_chain(struct MPContext *mpctx)
     init_demux_stream(mpctx, STREAM_VIDEO);
     sh_video_t *sh_video = mpctx->sh_video;
     if (!sh_video) {
-        uninit_player(mpctx, INITIALIZED_VO);
+        if (!opts->force_vo)
+            uninit_player(mpctx, INITIALIZED_VO);
         goto no_video;
     }
 
@@ -2453,7 +2456,8 @@ int reinit_video_chain(struct MPContext *mpctx)
     return 1;
 
 err_out:
-    uninit_player(mpctx, INITIALIZED_VO);
+    if (!opts->force_vo)
+        uninit_player(mpctx, INITIALIZED_VO);
     cleanup_demux_stream(mpctx, STREAM_VIDEO);
 no_video:
     mpctx->current_track[STREAM_VIDEO] = NULL;
@@ -3528,6 +3532,41 @@ static void handle_keep_open(struct MPContext *mpctx)
     }
 }
 
+// Execute a forceful refresh of the VO window, if it hasn't had a valid frame
+// for a while. The problem is that a VO with no valid frame (vo->hasframe==0)
+// doesn't redraw video and doesn't OSD interaction. So screw it, hard.
+static void handle_force_window(struct MPContext *mpctx)
+{
+    // Don't interfere with real video playback
+    if (mpctx->sh_video)
+        return;
+
+    struct vo *vo = mpctx->video_out;
+    if (!vo)
+        return;
+
+    if (!vo->config_ok) {
+        MP_INFO(mpctx, "Creating non-video VO window.\n");
+        // Pick whatever works
+        int config_format = 0;
+        for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++) {
+            if (vo->driver->query_format(vo, fmt)) {
+                config_format = fmt;
+                break;
+            }
+        }
+        int w = 640;
+        int h = 480;
+        struct mp_image_params p = {
+            .imgfmt = config_format,
+            .w = w,   .h = h,
+            .d_w = w, .d_h = h,
+        };
+        vo_reconfig(vo, &p, 0);
+        redraw_osd(mpctx);
+    }
+}
+
 static double get_wakeup_period(struct MPContext *mpctx)
 {
     /* Even if we can immediately wake up in response to most input events,
@@ -3593,6 +3632,11 @@ static void run_playloop(struct MPContext *mpctx)
         audio_left = status > -2;
     }
 
+    if (mpctx->video_out) {
+        vo_check_events(mpctx->video_out);
+        handle_cursor_autohide(mpctx);
+    }
+
     double buffered_audio = -1;
     while (mpctx->sh_video) {   // never loops, for "break;" only
         struct vo *vo = mpctx->video_out;
@@ -3606,12 +3650,16 @@ static void run_playloop(struct MPContext *mpctx)
                 mp_tmsg(MSGT_CPLAYER, MSGL_FATAL,
                         "\nFATAL: Could not initialize video filters (-vf) "
                         "or video output (-vo).\n");
-                uninit_player(mpctx, INITIALIZED_VCODEC | INITIALIZED_VO);
+                int uninit = INITIALIZED_VCODEC;
+                if (!opts->force_vo)
+                    uninit |= INITIALIZED_VO;
+                uninit_player(mpctx, uninit);
                 cleanup_demux_stream(mpctx, STREAM_VIDEO);
                 mpctx->current_track[STREAM_VIDEO] = NULL;
                 if (!mpctx->current_track[STREAM_AUDIO])
                     mpctx->stop_play = PT_NEXT_ENTRY;
                 mpctx->error_playing = true;
+                handle_force_window(mpctx);
                 break;
             }
             video_left = frame_time >= 0;
@@ -3627,11 +3675,6 @@ static void run_playloop(struct MPContext *mpctx)
 
         if (endpts != MP_NOPTS_VALUE)
             video_left &= mpctx->sh_video->pts < endpts;
-
-        // ================================================================
-        vo_check_events(vo);
-
-        handle_cursor_autohide(mpctx);
 
         handle_heartbeat_cmd(mpctx);
 
@@ -3857,7 +3900,7 @@ static void run_playloop(struct MPContext *mpctx)
                 audio_sleep = 0.020;
         }
         sleeptime = FFMIN(sleeptime, audio_sleep);
-        if (sleeptime > 0 && mpctx->sh_video) {
+        if (sleeptime > 0 && mpctx->video_out && mpctx->video_out->config_ok) {
             bool want_redraw = vo_get_want_redraw(mpctx->video_out);
             if (mpctx->video_out->driver->draw_osd)
                 want_redraw |= mpctx->osd->want_redraw;
@@ -3887,6 +3930,8 @@ static void run_playloop(struct MPContext *mpctx)
     handle_sstep(mpctx);
 
     handle_keep_open(mpctx);
+
+    handle_force_window(mpctx);
 
     execute_queued_seek(mpctx);
 }
@@ -4227,7 +4272,11 @@ static void idle_loop(struct MPContext *mpctx)
     while (mpctx->opts->player_idle_mode && !mpctx->playlist->current
            && mpctx->stop_play != PT_QUIT)
     {
-        uninit_player(mpctx, INITIALIZED_AO | INITIALIZED_VO);
+        int uninit = INITIALIZED_AO;
+        if (!mpctx->opts->force_vo)
+            uninit |= INITIALIZED_VO;
+        uninit_player(mpctx, uninit);
+        handle_force_window(mpctx);
         mp_cmd_t *cmd;
         while (!(cmd = mp_input_get_cmd(mpctx->input,
                                         get_wakeup_period(mpctx) * 1000,
@@ -4925,6 +4974,7 @@ static int mpv_main(int argc, char *argv[])
         m_config_set_option0(mpctx->mconfig, "vo", "lavc");
         m_config_set_option0(mpctx->mconfig, "ao", "lavc");
         m_config_set_option0(mpctx->mconfig, "fixed-vo", "yes");
+        m_config_set_option0(mpctx->mconfig, "force-window", "no");
         m_config_set_option0(mpctx->mconfig, "gapless-audio", "yes");
         mp_input_enable_section(mpctx->input, "encode", MP_INPUT_EXCLUSIVE);
     }
@@ -4935,6 +4985,19 @@ static int mpv_main(int argc, char *argv[])
 #endif
 
     mpctx->osd = osd_create(opts, mpctx->ass_library);
+
+    if (opts->force_vo) {
+        opts->fixed_vo = 1;
+        mpctx->video_out = init_best_video_out(mpctx->global, mpctx->input,
+                                               mpctx->encode_lavc_ctx);
+        if (!mpctx->video_out) {
+            mp_tmsg(MSGT_CPLAYER, MSGL_FATAL, "Error opening/initializing "
+                    "the selected video_out (-vo) device.\n");
+            exit_player(mpctx, EXIT_ERROR);
+        }
+        mpctx->mouse_cursor_visible = true;
+        mpctx->initialized_flags |= INITIALIZED_VO;
+    }
 
 #ifdef CONFIG_LUA
     // Lua user scripts can call arbitrary functions. Load them at a point
