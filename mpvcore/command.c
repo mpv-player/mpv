@@ -1502,7 +1502,7 @@ static int mp_property_aspect(m_option_t *prop, int action, void *arg,
 static int property_osd_helper(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
-    if (!mpctx->sh_video)
+    if (!mpctx->video_out)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_SET)
         osd_changed_all(mpctx->osd);
@@ -1521,7 +1521,7 @@ static int mp_property_sub_delay(m_option_t *prop, int action, void *arg,
                                  MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    if (!mpctx->sh_video)
+    if (!mpctx->video_out)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
@@ -1535,7 +1535,7 @@ static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
                                MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    if (!mpctx->sh_video)
+    if (!mpctx->video_out)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_PRINT) {
         *(char **)arg = talloc_asprintf(NULL, "%d/100", opts->sub_pos);
@@ -2205,7 +2205,6 @@ static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
     struct MPOpts *opts = mpctx->opts;
-    sh_video_t *const sh_video = mpctx->sh_video;
     int osd_duration = opts->osd_duration;
     bool auto_osd = cmd->on_osd == MP_ON_OSD_AUTO;
     bool msg_osd = auto_osd || (cmd->on_osd & MP_ON_OSD_MSG);
@@ -2364,8 +2363,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_OSD: {
         int v = cmd->args[0].v.i;
-        int max = (opts->term_osd
-                   && !sh_video) ? MAX_TERM_OSD_LEVEL : MAX_OSD_LEVEL;
+        int max = (opts->term_osd && !mpctx->video_out) ? MAX_TERM_OSD_LEVEL
+                                                        : MAX_OSD_LEVEL;
         if (opts->osd_level > max)
             opts->osd_level = max;
         if (v < 0)
@@ -2657,9 +2656,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #endif /* CONFIG_TV */
 
     case MP_CMD_SUB_ADD:
-        if (sh_video) {
-            mp_add_subtitles(mpctx, cmd->args[0].v.s);
-        }
+        mp_add_subtitles(mpctx, cmd->args[0].v.s);
         break;
 
     case MP_CMD_SUB_REMOVE: {
@@ -2671,8 +2668,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_SUB_RELOAD: {
         struct track *sub = mp_track_by_tid(mpctx, STREAM_SUB, cmd->args[0].v.i);
-        if (sh_video && sub && sub->is_external && sub->external_filename)
-        {
+        if (sub && sub->is_external && sub->external_filename) {
             struct track *nsub = mp_add_subtitles(mpctx, sub->external_filename);
             if (nsub) {
                 mp_remove_track(mpctx, sub);

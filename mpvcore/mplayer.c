@@ -1454,7 +1454,7 @@ static void set_osd_subtitle(struct MPContext *mpctx, const char *text)
         text = "";
     if (strcmp(mpctx->osd->sub_text, text) != 0) {
         osd_set_sub(mpctx->osd, text);
-        if (!mpctx->sh_video) {
+        if (!mpctx->video_out) {
             rm_osd_msg(mpctx, OSD_MSG_SUB_BASE);
             if (text && text[0])
                 set_osd_msg(mpctx, OSD_MSG_SUB_BASE, 1, INT_MAX, "%s", text);
@@ -1860,7 +1860,7 @@ static void update_subtitles(struct MPContext *mpctx)
         }
     }
 
-    if (!mpctx->osd->render_bitmap_subs || !mpctx->sh_video)
+    if (!mpctx->osd->render_bitmap_subs || !mpctx->video_out)
         set_osd_subtitle(mpctx, sub_get_text(dec_sub, curpts_s));
 }
 
