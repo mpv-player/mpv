@@ -313,6 +313,8 @@ static int mp_property_avsync(m_option_t *prop, int action, void *arg,
 {
     if (!mpctx->sh_audio || !mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
+    if (mpctx->last_av_difference == MP_NOPTS_VALUE)
+        return M_PROPERTY_UNAVAILABLE;
     return m_property_double_ro(prop, action, arg, mpctx->last_av_difference);
 }
 
