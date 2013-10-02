@@ -94,19 +94,21 @@ typedef struct vf_seteq {
     int value;
 } vf_equalizer_t;
 
-#define VFCTRL_SEEK_RESET 1 // reset on picture and PTS discontinuities
-#define VFCTRL_QUERY_MAX_PP_LEVEL 4 // query max postprocessing level (if any)
-#define VFCTRL_SET_PP_LEVEL 5       // set postprocessing level
-#define VFCTRL_SET_EQUALIZER 6 // set color options (brightness,contrast etc)
-#define VFCTRL_GET_EQUALIZER 8 // get color options (brightness,contrast etc)
-#define VFCTRL_SCREENSHOT      14  // Take screenshot, arg is voctrl_screenshot_args
-#define VFCTRL_INIT_OSD        15  // Filter OSD renderer present?
-#define VFCTRL_SET_DEINTERLACE 18  // Set deinterlacing status
-#define VFCTRL_GET_DEINTERLACE 19  // Get deinterlacing status
-/* Hack to make the OSD state object available to vf_sub which
- * access OSD/subtitle state outside of normal OSD draw time. */
-#define VFCTRL_SET_OSD_OBJ 20
-#define VFCTRL_GET_HWDEC_INFO 21 // for hwdec filters
+enum vf_ctrl {
+    VFCTRL_SEEK_RESET = 1,   // reset on picture and PTS discontinuities
+    VFCTRL_QUERY_MAX_PP_LEVEL, // query max postprocessing level (if any)
+    VFCTRL_SET_PP_LEVEL,     // set postprocessing level
+    VFCTRL_SET_EQUALIZER,    // set color options (brightness,contrast etc)
+    VFCTRL_GET_EQUALIZER,    // get color options (brightness,contrast etc)
+    VFCTRL_SCREENSHOT,       // Take screenshot, arg is voctrl_screenshot_args
+    VFCTRL_INIT_OSD,         // Filter OSD renderer present?
+    VFCTRL_SET_DEINTERLACE,  // Set deinterlacing status
+    VFCTRL_GET_DEINTERLACE,  // Get deinterlacing status
+    /* Hack to make the OSD state object available to vf_sub which
+     * access OSD/subtitle state outside of normal OSD draw time. */
+    VFCTRL_SET_OSD_OBJ,
+    VFCTRL_GET_HWDEC_INFO,   // for hwdec filters
+};
 
 int vf_control(struct vf_instance *vf, int cmd, void *arg);
 

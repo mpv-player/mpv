@@ -40,10 +40,12 @@ typedef struct vd_functions
 // NULL terminated array of all drivers
 extern const vd_functions_t *const mpcodecs_vd_drivers[];
 
-#define VDCTRL_GET_PARAMS 1 // retrieve struct mp_image_params
-#define VDCTRL_RESYNC_STREAM 8 // reset decode state after seeking
-#define VDCTRL_QUERY_UNSEEN_FRAMES 9 // current decoder lag
-#define VDCTRL_REINIT_VO 10 // reinit filter/VO chain
+enum vd_ctrl {
+    VDCTRL_GET_PARAMS = 1, // retrieve struct mp_image_params
+    VDCTRL_RESYNC_STREAM, // reset decode state after seeking
+    VDCTRL_QUERY_UNSEEN_FRAMES, // current decoder lag
+    VDCTRL_REINIT_VO, // reinit filter/VO chain
+};
 
 int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params);
 

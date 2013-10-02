@@ -39,6 +39,8 @@ struct ad_functions {
                         int maxlen);
 };
 
-#define ADCTRL_RESYNC_STREAM 1   // resync, called after seeking
+enum ad_ctrl {
+    ADCTRL_RESYNC_STREAM = 1,   // resync, called after seeking
+};
 
 #endif /* MPLAYER_AD_H */
