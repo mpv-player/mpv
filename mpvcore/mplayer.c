@@ -2857,6 +2857,8 @@ static bool redraw_osd(struct MPContext *mpctx)
 
 void add_step_frame(struct MPContext *mpctx, int dir)
 {
+    if (!mpctx->sh_video)
+        return;
     if (dir > 0) {
         mpctx->step_frames += 1;
         unpause_player(mpctx);
@@ -3363,6 +3365,26 @@ static void update_avsync(struct MPContext *mpctx)
         mp_tmsg(MSGT_AVSYNC, MSGL_WARN, "%s", mp_gtext(av_desync_help_text));
         mpctx->drop_message_shown = true;
     }
+}
+
+static bool handle_osd_redraw(struct MPContext *mpctx)
+{
+    if (!mpctx->video_out || !mpctx->video_out->config_ok)
+        return false;
+    bool want_redraw = vo_get_want_redraw(mpctx->video_out);
+    if (mpctx->video_out->driver->draw_osd)
+        want_redraw |= mpctx->osd->want_redraw;
+    mpctx->osd->want_redraw = false;
+    if (want_redraw) {
+        if (redraw_osd(mpctx)) {
+            return true;
+        } else if (mpctx->paused) {
+            // force redrawing OSD by framestepping
+            add_step_frame(mpctx, 1);
+            return true;
+        }
+    }
+    return false;
 }
 
 static void handle_metadata_update(struct MPContext *mpctx)
@@ -3900,20 +3922,9 @@ static void run_playloop(struct MPContext *mpctx)
                 audio_sleep = 0.020;
         }
         sleeptime = FFMIN(sleeptime, audio_sleep);
-        if (sleeptime > 0 && mpctx->video_out && mpctx->video_out->config_ok) {
-            bool want_redraw = vo_get_want_redraw(mpctx->video_out);
-            if (mpctx->video_out->driver->draw_osd)
-                want_redraw |= mpctx->osd->want_redraw;
-            mpctx->osd->want_redraw = false;
-            if (want_redraw) {
-                if (redraw_osd(mpctx)) {
-                    sleeptime = 0;
-                } else if (mpctx->paused && video_left) {
-                    // force redrawing OSD by framestepping
-                    add_step_frame(mpctx, 1);
-                    sleeptime = 0;
-                }
-            }
+        if (sleeptime > 0) {
+            if (handle_osd_redraw(mpctx))
+                sleeptime = 0;
         }
         if (sleeptime > 0)
             mp_input_get_cmd(mpctx->input, sleeptime * 1000, true);
@@ -4277,11 +4288,15 @@ static void idle_loop(struct MPContext *mpctx)
             uninit |= INITIALIZED_VO;
         uninit_player(mpctx, uninit);
         handle_force_window(mpctx);
-        mp_cmd_t *cmd;
-        while (!(cmd = mp_input_get_cmd(mpctx->input,
-                                        get_wakeup_period(mpctx) * 1000,
-                                        false)));
-        run_command(mpctx, cmd);
+        if (mpctx->video_out)
+            vo_check_events(mpctx->video_out);
+        update_osd_msg(mpctx);
+        handle_osd_redraw(mpctx);
+        mp_cmd_t *cmd = mp_input_get_cmd(mpctx->input,
+                                         get_wakeup_period(mpctx) * 1000,
+                                         false);
+        if (cmd)
+            run_command(mpctx, cmd);
         mp_cmd_free(cmd);
         mp_flush_events(mpctx);
     }
