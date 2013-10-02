@@ -1390,7 +1390,7 @@ void set_osd_bar(struct MPContext *mpctx, int type, const char *name,
     if (opts->osd_level < 1 || !opts->osd_bar_visible)
         return;
 
-    if (mpctx->sh_video && opts->term_osd != 1) {
+    if (mpctx->video_out && opts->term_osd != 1) {
         mpctx->osd_visible = mp_time_sec() + opts->osd_duration / 1000.0;
         mpctx->osd->progbar_type = type;
         mpctx->osd->progbar_value = (val - min) / (max - min);
