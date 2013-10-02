@@ -74,7 +74,7 @@ enum mp_command_type {
     MP_CMD_DISABLE_INPUT_SECTION,
 
     /// DVB commands
-    MP_CMD_DVB_SET_CHANNEL = 5101,
+    MP_CMD_DVB_SET_CHANNEL,
 
     /// Audio Filter commands
     MP_CMD_AF,
