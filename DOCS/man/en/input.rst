@@ -226,6 +226,15 @@ List of Input Commands
     ``<skip>`` subtitle events is displayed. ``<skip>`` can be negative to step
     backwards.
 
+``sub_seek <skip>``
+    Seek to the next (skip set to 1) or the previous (skip set to -1) subtitle.
+    This is similar to ``sub_step``, except that it seeks video and audio
+    instead of adjusting the subtitle delay.
+
+    Like with ``sub_step``, this works with external text subtitles only. For
+    embedded text subtitles (like with Matroska), this works only with subtitle
+    events that have already been displayed.
+
 ``osd [<level>]``
     Toggle OSD level. If ``<level>`` is specified, set the OSD mode
     (see ``--osd-level`` for valid values).
