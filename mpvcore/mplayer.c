@@ -3555,7 +3555,7 @@ static void handle_force_window(struct MPContext *mpctx)
                 break;
             }
         }
-        int w = 640;
+        int w = 960;
         int h = 480;
         struct mp_image_params p = {
             .imgfmt = config_format,
