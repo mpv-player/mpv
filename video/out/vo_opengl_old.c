@@ -123,7 +123,7 @@ static int glCreatePPMTex(GL *gl, GLenum target, GLenum fmt, GLint filter,
 static void glDrawTex(GL *gl, GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                       GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
                       int sx, int sy, int rect_tex, int is_yv12, int flip);
-static int loadGPUProgram(GL *gl, GLenum target, char *prog);
+static int loadGPUProgram(struct vo *vo, GL *gl, GLenum target, char *prog);
 //! do not use YUV conversion, this should always stay 0
 #define YUV_CONVERSION_NONE 0
 //! use nVidia specific register combiners for YUV conversion
@@ -193,7 +193,8 @@ typedef struct {
 } gl_conversion_params_t;
 
 static int glAutodetectYUVConversion(GL *gl);
-static void glSetupYUVConversion(GL *gl, gl_conversion_params_t *params);
+static void glSetupYUVConversion(struct vo *vo, GL *gl,
+                                 gl_conversion_params_t *params);
 static void glEnableYUVConversion(GL *gl, GLenum target, int type);
 static void glDisableYUVConversion(GL *gl, GLenum target, int type);
 
@@ -428,16 +429,15 @@ static int glCreatePPMTex(GL *gl, GLenum target, GLenum fmt, GLint filter,
  * \param text if set use the GL_ATI_text_fragment_shader API as
  *             used on OS X.
  */
-static void glSetupYUVFragmentATI(GL *gl, struct mp_csp_params *csp_params,
-                                  int text)
+static void glSetupYUVFragmentATI(struct vo *vo, GL *gl,
+                                  struct mp_csp_params *csp_params, int text)
 {
     GLint i;
     float yuv2rgb[3][4];
 
     gl->GetIntegerv(GL_MAX_TEXTURE_UNITS, &i);
     if (i < 3)
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "[gl] 3 texture units needed for YUV combiner (ATI) support (found %i)\n", i);
+        MP_ERR(vo, "3 texture units needed for YUV combiner (ATI) support (found %i)\n", i);
 
     mp_get_yuv2rgb_coeffs(csp_params, yuv2rgb);
     for (i = 0; i < 3; i++) {
@@ -460,13 +460,12 @@ static void glSetupYUVFragmentATI(GL *gl, struct mp_csp_params *csp_params,
         if (!gl->BeginFragmentShader || !gl->EndFragmentShader ||
             !gl->SetFragmentShaderConstant || !gl->SampleMap ||
             !gl->ColorFragmentOp2 || !gl->ColorFragmentOp3) {
-            mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Combiner (ATI) functions missing!\n");
+            MP_ERR(vo, "Combiner (ATI) functions missing!\n");
             return;
         }
         gl->GetIntegerv(GL_NUM_FRAGMENT_REGISTERS_ATI, &i);
         if (i < 3)
-            mp_msg(MSGT_VO, MSGL_ERR,
-                   "[gl] 3 registers needed for YUV combiner (ATI) support (found %i)\n", i);
+            MP_ERR(vo, "3 registers needed for YUV combiner (ATI) support (found %i)\n", i);
         gl->BeginFragmentShader();
         gl->SetFragmentShaderConstant(GL_CON_0_ATI, c0);
         gl->SetFragmentShaderConstant(GL_CON_1_ATI, c1);
@@ -514,9 +513,8 @@ static void glSetupYUVFragmentATI(GL *gl, struct mp_csp_params *csp_params,
                  yuv2rgb[0][1], yuv2rgb[1][1], yuv2rgb[2][1],
                  yuv2rgb[0][2], yuv2rgb[1][2], yuv2rgb[2][2],
                  yuv2rgb[0][3], yuv2rgb[1][3], yuv2rgb[2][3]);
-        mp_msg(MSGT_VO, MSGL_DBG2, "[gl] generated fragment program:\n%s\n",
-               buffer);
-        loadGPUProgram(gl, GL_TEXT_FRAGMENT_SHADER_ATI, buffer);
+        MP_DBG(vo, "generated fragment program:\n%s\n", buffer);
+        loadGPUProgram(vo, gl, GL_TEXT_FRAGMENT_SHADER_ATI, buffer);
     }
 }
 
@@ -833,7 +831,8 @@ static const char noise_filt_template[] =
  * \param texu contains next free texture unit number
  * \param texs texture unit ids for the scaler are stored in this array
  */
-static void create_scaler_textures(GL *gl, int scaler, int *texu, char *texs)
+static void create_scaler_textures(struct vo *vo, GL *gl, int scaler, int *texu,
+                                   char *texs)
 {
     switch (scaler) {
     case YUV_SCALER_BILIN:
@@ -848,7 +847,7 @@ static void create_scaler_textures(GL *gl, int scaler, int *texu, char *texs)
         texs[0] += '0';
         break;
     default:
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown scaler type %i\n", scaler);
+        MP_ERR(vo, "unknown scaler type %i\n", scaler);
     }
 }
 
@@ -862,7 +861,8 @@ static void create_scaler_textures(GL *gl, int scaler, int *texu, char *texs)
  * \param texu contains next free texture unit number
  * \param texs texture unit ids for the conversion are stored in this array
  */
-static void create_conv_textures(GL *gl, gl_conversion_params_t *params,
+static void create_conv_textures(struct vo *vo, GL *gl,
+                                 gl_conversion_params_t *params,
                                  int *texu, char *texs)
 {
     unsigned char *lookup_data = NULL;
@@ -891,7 +891,7 @@ static void create_conv_textures(GL *gl, gl_conversion_params_t *params,
     {
         int sz = LOOKUP_3DRES + 2; // texture size including borders
         if (!gl->TexImage3D) {
-            mp_msg(MSGT_VO, MSGL_ERR, "[gl] Missing 3D texture function!\n");
+            MP_ERR(vo, "Missing 3D texture function!\n");
             break;
         }
         texs[0] = (*texu)++;
@@ -913,7 +913,7 @@ static void create_conv_textures(GL *gl, gl_conversion_params_t *params,
     }
     break;
     default:
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n", conv);
+        MP_ERR(vo, "unknown conversion type %i\n", conv);
     }
     free(lookup_data);
 }
@@ -1015,32 +1015,31 @@ static const struct {
  * \param prog program string
  * \return 1 on success, 0 otherwise
  */
-static int loadGPUProgram(GL *gl, GLenum target, char *prog)
+static int loadGPUProgram(struct vo *vo, GL *gl, GLenum target, char *prog)
 {
     int i;
     GLint cur = 0, max = 0, err = 0;
     if (!gl->ProgramString) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] Missing GPU program function\n");
+        MP_ERR(vo, "Missing GPU program function\n");
         return 0;
     }
     gl->ProgramString(target, GL_PROGRAM_FORMAT_ASCII, strlen(prog), prog);
     gl->GetIntegerv(GL_PROGRAM_ERROR_POSITION, &err);
     if (err != -1) {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "[gl] Error compiling fragment program, make sure your card supports\n"
-               "[gl]   GL_ARB_fragment_program (use glxinfo to check).\n"
-               "[gl]   Error message:\n  %s at %.10s\n",
+        MP_ERR(vo,
+               "Error compiling fragment program, make sure your card supports\n"
+               "  GL_ARB_fragment_program (use glxinfo to check).\n"
+               "  Error message:\n  %s at %.10s\n",
                gl->GetString(GL_PROGRAM_ERROR_STRING), &prog[err]);
         return 0;
     }
     if (!gl->GetProgramivARB || !mp_msg_test(MSGT_VO, MSGL_DBG2))
         return 1;
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Program statistics:\n");
+    MP_VERBOSE(vo, "Program statistics:\n");
     for (i = 0; progstats[i].name; i++) {
         gl->GetProgramivARB(target, progstats[i].cur, &cur);
         gl->GetProgramivARB(target, progstats[i].max, &max);
-        mp_msg(MSGT_VO, MSGL_V, "[gl]   %s: %i/%i\n", progstats[i].name, cur,
-               max);
+        MP_VERBOSE(vo, "  %s: %i/%i\n", progstats[i].name, cur, max);
     }
     return 1;
 }
@@ -1052,7 +1051,8 @@ static int loadGPUProgram(GL *gl, GLenum target, char *prog)
  * \param parms struct containing parameters like conversion and scaler type,
  *              brightness, ...
  */
-static void glSetupYUVFragprog(GL *gl, gl_conversion_params_t *params)
+static void glSetupYUVFragprog(struct vo *vo, GL *gl,
+                               gl_conversion_params_t *params)
 {
     int type = params->type;
     int texw = params->texw;
@@ -1076,12 +1076,12 @@ static void glSetupYUVFragprog(GL *gl, gl_conversion_params_t *params)
     // for red, green, blue and the constant offsets
     float yuv2rgb[3][4];
     int noise = params->noise_strength != 0;
-    create_conv_textures(gl, params, &cur_texu, conv_texs);
-    create_scaler_textures(gl, YUV_LUM_SCALER(type), &cur_texu, lum_scale_texs);
+    create_conv_textures(vo, gl, params, &cur_texu, conv_texs);
+    create_scaler_textures(vo, gl, YUV_LUM_SCALER(type), &cur_texu, lum_scale_texs);
     if (YUV_CHROM_SCALER(type) == YUV_LUM_SCALER(type))
         memcpy(chrom_scale_texs, lum_scale_texs, sizeof(chrom_scale_texs));
     else
-        create_scaler_textures(gl, YUV_CHROM_SCALER(type), &cur_texu,
+        create_scaler_textures(vo, gl, YUV_CHROM_SCALER(type), &cur_texu,
                                chrom_scale_texs);
 
     if (noise) {
@@ -1091,11 +1091,10 @@ static void glSetupYUVFragprog(GL *gl, gl_conversion_params_t *params)
 
     gl->GetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &i);
     if (i < cur_texu)
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "[gl] %i texture units needed for this type of YUV fragment support (found %i)\n",
+        MP_ERR(vo, "%i texture units needed for this type of YUV fragment support (found %i)\n",
                cur_texu, i);
     if (!gl->ProgramString) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[gl] ProgramString function missing!\n");
+        MP_FATAL(vo, "ProgramString function missing!\n");
         return;
     }
     append_template(prog, prog_hdr);
@@ -1122,8 +1121,7 @@ static void glSetupYUVFragprog(GL *gl, gl_conversion_params_t *params)
         append_template(prog, yuv_lookup3d_prog_template);
         break;
     default:
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n",
-               YUV_CONVERSION(type));
+        MP_ERR(vo, "unknown conversion type %i\n", YUV_CONVERSION(type));
         break;
     }
     for (int r = 0; r < 3; r++) {
@@ -1156,9 +1154,8 @@ static void glSetupYUVFragprog(GL *gl, gl_conversion_params_t *params)
 
     append_template(prog, "MOV result.color.rgb, res;\nEND");
 
-    mp_msg(MSGT_VO, MSGL_DBG2, "[gl] generated fragment program:\n%s\n",
-           yuv_prog);
-    loadGPUProgram(gl, GL_FRAGMENT_PROGRAM, yuv_prog);
+    MP_DBG(vo, "generated fragment program:\n%s\n", yuv_prog);
+    loadGPUProgram(vo, gl, GL_FRAGMENT_PROGRAM, yuv_prog);
     talloc_free(yuv_prog);
 }
 
@@ -1185,7 +1182,8 @@ static int glAutodetectYUVConversion(GL *gl)
  *              brightness, ...
  * \ingroup glconversion
  */
-static void glSetupYUVConversion(GL *gl, gl_conversion_params_t *params)
+static void glSetupYUVConversion(struct vo *vo, GL *gl,
+                                 gl_conversion_params_t *params)
 {
     if (params->chrom_texw == 0)
         params->chrom_texw = 1;
@@ -1193,22 +1191,21 @@ static void glSetupYUVConversion(GL *gl, gl_conversion_params_t *params)
         params->chrom_texh = 1;
     switch (YUV_CONVERSION(params->type)) {
     case YUV_CONVERSION_COMBINERS_ATI:
-        glSetupYUVFragmentATI(gl, &params->csp_params, 0);
+        glSetupYUVFragmentATI(vo, gl, &params->csp_params, 0);
         break;
     case YUV_CONVERSION_TEXT_FRAGMENT:
-        glSetupYUVFragmentATI(gl, &params->csp_params, 1);
+        glSetupYUVFragmentATI(vo, gl, &params->csp_params, 1);
         break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT:
     case YUV_CONVERSION_FRAGMENT_POW:
-        glSetupYUVFragprog(gl, params);
+        glSetupYUVFragprog(vo, gl, params);
         break;
     case YUV_CONVERSION_NONE:
         break;
     default:
-        mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n",
-               YUV_CONVERSION(params->type));
+        MP_ERR(vo, "unknown conversion type %i\n", YUV_CONVERSION(params->type));
     }
 }
 
@@ -1358,7 +1355,7 @@ static void resize(struct vo *vo, int x, int y)
     struct gl_priv *p = vo->priv;
     GL *gl = p->gl;
 
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Resize: %dx%d\n", x, y);
+    MP_VERBOSE(vo, "Resize: %dx%d\n", x, y);
     gl->Viewport(0, 0, x, y);
 
     vo_get_src_dst_rects(vo, &p->src_rect, &p->dst_rect, &p->osd_res);
@@ -1410,17 +1407,16 @@ static void update_yuvconv(struct vo *vo)
     params.chrom_texh = params.texh >> desc.chroma_ys;
     params.csp_params.input_bits = depth;
     params.csp_params.texture_bits = depth+7 & ~7;
-    glSetupYUVConversion(gl, &params);
+    glSetupYUVConversion(vo, gl, &params);
     if (p->custom_prog) {
         FILE *f = fopen(p->custom_prog, "rb");
         if (!f) {
-            mp_msg(MSGT_VO, MSGL_WARN,
-                   "[gl] Could not read customprog %s\n", p->custom_prog);
+            MP_WARN(vo, "Could not read customprog %s\n", p->custom_prog);
         } else {
             char *prog = calloc(1, MAX_CUSTOM_PROG_SIZE + 1);
             fread(prog, 1, MAX_CUSTOM_PROG_SIZE, f);
             fclose(f);
-            loadGPUProgram(gl, GL_FRAGMENT_PROGRAM, prog);
+            loadGPUProgram(vo, gl, GL_FRAGMENT_PROGRAM, prog);
             free(prog);
         }
         gl->ProgramEnvParameter4f(GL_FRAGMENT_PROGRAM, 0,
@@ -1431,8 +1427,7 @@ static void update_yuvconv(struct vo *vo)
     if (p->custom_tex) {
         FILE *f = fopen(p->custom_tex, "rb");
         if (!f) {
-            mp_msg(MSGT_VO, MSGL_WARN,
-                   "[gl] Could not read customtex %s\n", p->custom_tex);
+            MP_WARN(vo, "Could not read customtex %s\n", p->custom_tex);
         } else {
             int width, height, maxval;
             gl->ActiveTexture(GL_TEXTURE3);
@@ -1443,8 +1438,7 @@ static void update_yuvconv(struct vo *vo)
                                           1.0 / width, 1.0 / height,
                                           width, height);
             } else
-                mp_msg(MSGT_VO, MSGL_WARN,
-                       "[gl] Error parsing customtex %s\n", p->custom_tex);
+                MP_WARN(vo, "Error parsing customtex %s\n", p->custom_tex);
             fclose(f);
             gl->ActiveTexture(GL_TEXTURE0);
         }
@@ -1531,11 +1525,11 @@ static void autodetectGlExtensions(struct vo *vo)
     const char *renderer   = gl->GetString(GL_RENDERER);
     int is_ati = vendor && strstr(vendor, "ATI") != NULL;
     int ati_broken_pbo = 0;
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Running on OpenGL '%s' by '%s', version '%s'\n",
-           renderer, vendor, version);
+    MP_VERBOSE(vo, "Running on OpenGL '%s' by '%s', version '%s'\n",
+               renderer, vendor, version);
     if (is_ati && strncmp(version, "2.1.", 4) == 0) {
         int ver = atoi(version + 4);
-        mp_msg(MSGT_VO, MSGL_V, "[gl] Detected ATI driver version: %i\n", ver);
+        MP_VERBOSE(vo, "Detected ATI driver version: %i\n", ver);
         ati_broken_pbo = ver && ver < 8395;
     }
     if (p->ati_hack == -1)
@@ -1582,17 +1576,16 @@ static void autodetectGlExtensions(struct vo *vo)
                                                 : GL_TEXTURE_INTENSITY_SIZE;
         GLint size = 8;
         gl->GetTexLevelParameteriv(target, 0, tex_size_token, &size);
-        mp_msg(MSGT_VO, MSGL_V, "[gl] 16 bit texture depth: %d.\n", size);
+        MP_VERBOSE(vo, "16 bit texture depth: %d.\n", size);
         p->max_tex_component_size = size;
     }
 
     if (is_ati && (p->lscale == 1 || p->lscale == 2 || p->cscale == 1 || p->cscale == 2))
-        mp_msg(MSGT_VO, MSGL_WARN, "[gl] Selected scaling mode may be broken on"
-               " ATI cards.\n"
-               "Tell _them_ to fix GL_REPEAT if you have issues.\n");
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Settings after autodetection: ati-hack = %i, "
-           "force-pbo = %i, rectangle = %i, yuv = %i\n",
-           p->ati_hack, p->force_pbo, p->use_rectangle, p->use_yuv);
+        MP_WARN(vo, "Selected scaling mode may be broken on"
+                " ATI cards.\nTell _them_ to fix GL_REPEAT if you have issues.\n");
+    MP_VERBOSE(vo, "Settings after autodetection: ati-hack = %i, "
+               "force-pbo = %i, rectangle = %i, yuv = %i\n",
+               p->ati_hack, p->force_pbo, p->use_rectangle, p->use_yuv);
 }
 
 static GLint get_scale_type(struct vo *vo, int chroma)
@@ -1638,8 +1631,8 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     gl->DrawBuffer(GL_BACK);
     gl->TexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Creating %dx%d texture...\n",
-           p->texture_width, p->texture_height);
+    MP_VERBOSE(vo, "Creating %dx%d texture...\n",
+               p->texture_width, p->texture_height);
 
     glCreateClearTex(gl, p->target, p->texfmt, p->gl_format,
                      p->gl_type, scale_type,
@@ -1682,8 +1675,7 @@ static int initGl(struct vo *vo, uint32_t d_width, uint32_t d_height)
     if (p->is_yuv || p->custom_prog) {
         if ((MASK_NOT_COMBINERS & (1 << p->use_yuv)) || p->custom_prog) {
             if (!gl->GenPrograms || !gl->BindProgram)
-                mp_msg(MSGT_VO, MSGL_ERR,
-                       "[gl] fragment program functions missing!\n");
+                MP_ERR(vo, "fragment program functions missing!\n");
             else {
                 gl->GenPrograms(1, &p->fragprog);
                 gl->BindProgram(GL_FRAGMENT_PROGRAM, p->fragprog);
@@ -1821,8 +1813,7 @@ static bool get_image(struct vo *vo, mp_image_t *mpi, int *th, bool *cplane)
     int needed_size;
     if (!gl->GenBuffers || !gl->BindBuffer || !gl->BufferData || !gl->MapBuffer) {
         if (!p->err_shown)
-            mp_msg(MSGT_VO, MSGL_ERR, "[gl] extensions missing for dr\n"
-                   "Expect a _major_ speed penalty\n");
+            MP_ERR(vo, "extensions missing for dr\nExpect a _major_ speed penalty\n");
         p->err_shown = 1;
         return false;
     }
@@ -1851,7 +1842,7 @@ static bool get_image(struct vo *vo, mp_image_t *mpi, int *th, bool *cplane)
     gl->BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     if (!mpi->planes[0]) {
         if (!p->err_shown)
-            mp_msg(MSGT_VO, MSGL_ERR, "[gl] could not acquire buffer for dr\n"
+            MP_ERR(vo, "could not acquire buffer for dr\n"
                    "Expect a _major_ speed penalty\n");
         p->err_shown = 1;
         return false;
@@ -2082,8 +2073,8 @@ static int preinit(struct vo *vo)
     struct gl_priv *p = vo->priv;
 
     if (p->use_yuv == 1) {
-        mp_msg(MSGT_VO, MSGL_WARN, "[gl] yuv=1 (nVidia register combiners) have"
-               " been removed, using yuv=2 instead.\n");
+        MP_WARN(vo, "yuv=1 (nVidia register combiners) have"
+                " been removed, using yuv=2 instead.\n");
         p->use_yuv = 2;
     }
 
@@ -2097,8 +2088,8 @@ static int preinit(struct vo *vo)
             goto err_out;
         autodetectGlExtensions(vo);
     }
-    mp_msg(MSGT_VO, MSGL_V, "[gl] Using %d as slice height "
-           "(0 means image height).\n", p->slice_height);
+    MP_VERBOSE(vo, "Using %d as slice height "
+               "(0 means image height).\n", p->slice_height);
 
     return 0;
 
