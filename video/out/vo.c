@@ -289,6 +289,7 @@ void vo_seek_reset(struct vo *vo)
 {
     vo_control(vo, VOCTRL_RESET, NULL);
     vo->frame_loaded = false;
+    vo->hasframe = false;
     mp_image_unrefp(&vo->waiting_mpi);
 }
 
