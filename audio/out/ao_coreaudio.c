@@ -112,6 +112,7 @@ static OSStatus render_cb_lpcm(void *ctx, AudioUnitRenderActionFlags *aflags,
     if (mp_ring_buffered(p->buffer) < requested) {
         MP_VERBOSE(ao, "buffer underrun\n");
         audio_pause(ao);
+        memset(buf.mData, 0, requested);
     } else {
         mp_ring_read(p->buffer, buf.mData, requested);
     }
