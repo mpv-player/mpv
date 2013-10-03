@@ -162,6 +162,8 @@ static GLXFBConfig select_fb_config(struct vo *vo, const int *attribs, int flags
     if (flags & VOFLAG_ALPHA) {
         for (int n = 0; n < fbcount; n++) {
             XVisualInfo *v = glXGetVisualFromFBConfig(vo->x11->display, fbc[n]);
+            if (!v)
+                continue;
             // This is a heuristic at best. Note that normal 8 bit Visuals use
             // a depth of 24, even if the pixels are padded to 32 bit. If the
             // depth is higher than 24, the remaining bits must be alpha.
@@ -252,6 +254,10 @@ static bool config_window_x11(struct MPGLContext *ctx, uint32_t d_width,
 
     glx_ctx->fbc = fbc;
     glx_ctx->vinfo = glXGetVisualFromFBConfig(vo->x11->display, fbc);
+    if (!glx_ctx->vinfo) {
+        MP_ERR(vo, "Selected GLX FB config has no associated X visual\n");
+        return false;
+    }
 
     MP_VERBOSE(vo, "GLX chose visual with ID 0x%x\n", (int)glx_ctx->vinfo->visualid);
 
