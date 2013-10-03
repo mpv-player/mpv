@@ -201,6 +201,7 @@ static const char av_desync_help_text[] = _(
 
 static void reset_subtitles(struct MPContext *mpctx);
 static void reinit_subs(struct MPContext *mpctx);
+static void handle_force_window(struct MPContext *mpctx, bool reconfig);
 
 static double get_relative_time(struct MPContext *mpctx)
 {
@@ -2381,11 +2382,8 @@ int reinit_video_chain(struct MPContext *mpctx)
     assert(!(mpctx->initialized_flags & INITIALIZED_VCODEC));
     init_demux_stream(mpctx, STREAM_VIDEO);
     sh_video_t *sh_video = mpctx->sh_video;
-    if (!sh_video) {
-        if (!opts->force_vo)
-            uninit_player(mpctx, INITIALIZED_VO);
+    if (!sh_video)
         goto no_video;
-    }
 
     mp_tmsg(MSGT_CPLAYER, MSGL_V, "[V] fourcc:0x%X  "
             "size:%dx%d  fps:%5.3f\n",
@@ -2451,17 +2449,15 @@ int reinit_video_chain(struct MPContext *mpctx)
     mpctx->delay = 0;
     mpctx->vo_pts_history_seek_ts++;
 
+    vo_seek_reset(mpctx->video_out);
     reset_subtitles(mpctx);
 
     return 1;
 
 err_out:
-    if (!opts->force_vo)
-        uninit_player(mpctx, INITIALIZED_VO);
-    cleanup_demux_stream(mpctx, STREAM_VIDEO);
 no_video:
-    mpctx->current_track[STREAM_VIDEO] = NULL;
-    mpctx->sync_audio_to_video = false;
+    uninit_player(mpctx, INITIALIZED_VCODEC | (opts->force_vo ? 0 : INITIALIZED_VO));
+    handle_force_window(mpctx, true);
     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Video: no video\n");
     return 0;
 }
@@ -3557,7 +3553,7 @@ static void handle_keep_open(struct MPContext *mpctx)
 // Execute a forceful refresh of the VO window, if it hasn't had a valid frame
 // for a while. The problem is that a VO with no valid frame (vo->hasframe==0)
 // doesn't redraw video and doesn't OSD interaction. So screw it, hard.
-static void handle_force_window(struct MPContext *mpctx)
+static void handle_force_window(struct MPContext *mpctx, bool reconfig)
 {
     // Don't interfere with real video playback
     if (mpctx->sh_video)
@@ -3567,7 +3563,7 @@ static void handle_force_window(struct MPContext *mpctx)
     if (!vo)
         return;
 
-    if (!vo->config_ok) {
+    if (!vo->config_ok || reconfig) {
         MP_INFO(mpctx, "Creating non-video VO window.\n");
         // Pick whatever works
         int config_format = 0;
@@ -3676,12 +3672,11 @@ static void run_playloop(struct MPContext *mpctx)
                 if (!opts->force_vo)
                     uninit |= INITIALIZED_VO;
                 uninit_player(mpctx, uninit);
-                cleanup_demux_stream(mpctx, STREAM_VIDEO);
                 mpctx->current_track[STREAM_VIDEO] = NULL;
                 if (!mpctx->current_track[STREAM_AUDIO])
                     mpctx->stop_play = PT_NEXT_ENTRY;
                 mpctx->error_playing = true;
-                handle_force_window(mpctx);
+                handle_force_window(mpctx, true);
                 break;
             }
             video_left = frame_time >= 0;
@@ -3942,7 +3937,7 @@ static void run_playloop(struct MPContext *mpctx)
 
     handle_keep_open(mpctx);
 
-    handle_force_window(mpctx);
+    handle_force_window(mpctx, false);
 
     execute_queued_seek(mpctx);
 }
@@ -4280,14 +4275,18 @@ static void print_resolve_contents(struct mp_log *log,
 static void idle_loop(struct MPContext *mpctx)
 {
     // ================= idle loop (STOP state) =========================
+    bool need_reinit = true;
     while (mpctx->opts->player_idle_mode && !mpctx->playlist->current
            && mpctx->stop_play != PT_QUIT)
     {
+        if (need_reinit)
+            handle_force_window(mpctx, true);
+        need_reinit = false;
         int uninit = INITIALIZED_AO;
         if (!mpctx->opts->force_vo)
             uninit |= INITIALIZED_VO;
         uninit_player(mpctx, uninit);
-        handle_force_window(mpctx);
+        handle_force_window(mpctx, false);
         if (mpctx->video_out)
             vo_check_events(mpctx->video_out);
         update_osd_msg(mpctx);
