@@ -1169,6 +1169,7 @@ static const videocodec_info_t vinfo[] = {
     {MKV_V_VP9,       mmioFOURCC('V', 'P', '9', '0'), 0},
     {MKV_V_DIRAC,     mmioFOURCC('d', 'r', 'a', 'c'), 0},
     {MKV_V_PRORES,    mmioFOURCC('p', 'r', '0', '0'), 0},
+    {MKV_V_HEVC,      mmioFOURCC('H', 'E', 'V', 'C'), 1},
     {NULL, 0, 0}
 };
 
