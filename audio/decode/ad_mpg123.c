@@ -1,7 +1,7 @@
 /*
  * MPEG 1.0/2.0/2.5 audio layer I, II, III decoding with libmpg123
  *
- * Copyright (C) 2010-2012 Thomas Orgis <thomas@orgis.org>
+ * Copyright (C) 2010-2013 Thomas Orgis <thomas@orgis.org>
  *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@
 
 struct ad_mpg123_context {
     mpg123_handle *handle;
+    char new_format;
 #ifdef AD_MPG123_MEAN_BITRATE
     /* Running mean for bit rate, stream length estimation. */
     float mean_rate;
@@ -95,7 +96,9 @@ static int preinit(sh_audio_t *sh)
      * Let's try to run with the default for now. */
 
     /* That would produce floating point output.
-     * You can get 32 and 24 bit ints, even 8 bit via format matrix. */
+     * You can get 32 and 24 bit ints, even 8 bit via format matrix.
+     * If wanting a specific encoding here, configure format matrix and
+     * make sure it is in set_format(). */
     /* mpg123_param(con->handle, MPG123_ADD_FLAGS, MPG123_FORCE_FLOAT, 0.); */
 
     /* Example for RVA choice (available since libmpg123 1.0.0):
@@ -184,6 +187,59 @@ static void print_header_compact(struct mpg123_frameinfo *i)
            smodes[i->mode]);
 }
 
+/* libmpg123 has a new format ready; query and store, return return value
+   of mpg123_getformat() */
+static int set_format(sh_audio_t *sh, struct ad_mpg123_context *con)
+{
+    int ret;
+    long rate;
+    int channels;
+    int encoding;
+    ret = mpg123_getformat(con->handle, &rate, &channels, &encoding);
+    if(ret == MPG123_OK) {
+        mp_chmap_from_channels(&sh->channels, channels);
+        sh->samplerate = rate;
+        /* Without external force, mpg123 will always choose signed encoding,
+         * and non-16-bit only on builds that don't support it.
+         * Be reminded that it doesn't matter to the MPEG file what encoding
+         * is produced from it. */
+        switch (encoding) {
+        case MPG123_ENC_SIGNED_8:
+            sh->sample_format = AF_FORMAT_S8;
+            sh->samplesize    = 1;
+            break;
+        case MPG123_ENC_SIGNED_16:
+            sh->sample_format = AF_FORMAT_S16_NE;
+            sh->samplesize    = 2;
+            break;
+        /* To stay compatible with the oldest libmpg123 headers, do not rely
+         * on float and 32 bit encoding symbols being defined.
+         * Those formats came later */
+        case 0x1180: /* MPG123_ENC_SIGNED_32 */
+            sh->sample_format = AF_FORMAT_S32_NE;
+            sh->samplesize    = 4;
+            break;
+        case 0x200: /* MPG123_ENC_FLOAT_32 */
+            sh->sample_format = AF_FORMAT_FLOAT_NE;
+            sh->samplesize    = 4;
+            break;
+        default:
+            /* This means we got a funny custom build of libmpg123 that only supports an unknown format. */
+            mp_msg(MSGT_DECAUDIO, MSGL_ERR,
+                   "Bad encoding from mpg123: %i.\n", encoding);
+            return MPG123_ERR;
+        }
+#ifdef AD_MPG123_FRAMEWISE
+        /* Going to decode directly to MPlayer's memory. It is important
+         * to have MPG123_AUTO_RESAMPLE disabled for the buffer size
+         * being an all-time limit. */
+        sh->audio_out_minsize = 1152 * 2 * sh->samplesize;
+#endif
+        con->new_format = 0;
+    }
+    return ret;
+}
+
 /* This tries to extract a requested amount of decoded data.
  * Even when you request 0 bytes, it will feed enough input so that
  * the decoder _could_ have delivered something.
@@ -213,6 +269,9 @@ static int decode_a_bit(sh_audio_t *sh, unsigned char *buf, int count)
      * This will be handled in init(). */
     do {
         size_t got_now = 0;
+        /* Fetch new format now, after old data has been used. */
+        if(con->new_format)
+            ret = set_format(sh, con);
 
         /* Feed the decoder. This will only fire from the second round on. */
         if (ret == MPG123_NEED_MORE) {
@@ -237,6 +296,15 @@ static int decode_a_bit(sh_audio_t *sh, unsigned char *buf, int count)
             talloc_free(pkt);
             if (ret == MPG123_ERR)
                 break;
+
+            /* Indication of format change is possible here (from mpg123_decode()). */
+            if(ret == MPG123_NEW_FORMAT) {
+                con->new_format = 1;
+                if(got)
+                    break; /* Do not switch format during a chunk. */
+
+                ret = set_format(sh, con);
+            }
         }
         /* Theoretically, mpg123 could return MPG123_DONE, so be prepared.
          * Should not happen in our usage, but it is a valid return code. */
@@ -247,7 +315,7 @@ static int decode_a_bit(sh_audio_t *sh, unsigned char *buf, int count)
          * for the loop condition. */
 #ifdef AD_MPG123_FRAMEWISE
         if (!buf) { /* fake call just for feeding to get format */
-            ret = mpg123_getformat(con->handle, NULL, NULL, NULL);
+            ret = set_format(sh, con);
         } else { /* This is the decoding. One frame at a time. */
             ret = mpg123_replace_buffer(con->handle, buf, count);
             if (ret == MPG123_OK)
@@ -261,6 +329,15 @@ static int decode_a_bit(sh_audio_t *sh, unsigned char *buf, int count)
         got += got_now;
         sh->pts_bytes += got_now;
 
+        /* Indication of format change should happen here. */
+        if(ret == MPG123_NEW_FORMAT) {
+            con->new_format = 1;
+            if(got)
+                break; /* Do not switch format during a chunk. */
+
+            ret = set_format(sh, con);
+        }
+
 #ifdef AD_MPG123_FRAMEWISE
     } while (ret == MPG123_NEED_MORE || (got == 0 && count != 0));
 #else
@@ -270,8 +347,6 @@ static int decode_a_bit(sh_audio_t *sh, unsigned char *buf, int count)
     if (ret == MPG123_ERR) {
         mp_msg(MSGT_DECAUDIO, MSGL_ERR, "mpg123 decoding failed: %s\n",
                mpg123_strerror(con->handle));
-        mpg123_close(con->handle);
-        return -1;
     }
 
     return got;
@@ -290,39 +365,29 @@ static int reopen_stream(sh_audio_t *sh)
     /* Open and make sure we have fed enough data to get stream properties. */
     if (MPG123_OK == mpg123_open_feed(con->handle) &&
         /* Feed data until mpg123 is ready (has found stream beginning). */
-        !decode_a_bit(sh, NULL, 0)) {
+        !decode_a_bit(sh, NULL, 0) &&
+        set_format(sh, con) == MPG123_OK) { /* format setting again just for return value */
         return 1;
     } else {
         mp_msg(MSGT_DECAUDIO, MSGL_ERR,
                "mpg123 failed to reopen stream: %s\n",
                mpg123_strerror(con->handle));
-        mpg123_close(con->handle);
         return 0;
     }
 }
 
 /* Now we really start accessing some data and determining file format.
- * Paranoia note: The mpg123_close() on errors is not really necessary,
- * But it ensures that we don't accidentally continue decoding with a
- * bad state (possibly interpreting the format badly or whatnot). */
+ * Format now is allowed to change on-the-fly. Here is the only point
+ * that has MPlayer react to errors. We have to pray that exceptional
+ * erros in other places simply cannot occur. */
 static int init(sh_audio_t *sh, const char *decoder)
 {
-    long rate    = 0;
-    int channels = 0;
-    int encoding = 0;
     mpg123_id3v2 *v2;
     struct mpg123_frameinfo finfo;
     struct ad_mpg123_context *con = sh->context;
 
-    /* We're open about any output format that libmpg123 will suggest.
-     * Note that a standard build will always default to 16 bit signed and
-     * the native sample rate of the file. */
-    if (MPG123_OK == mpg123_format_all(con->handle) &&
-        reopen_stream(sh) &&
-        MPG123_OK == mpg123_getformat(con->handle, &rate, &channels, &encoding) &&
-        /* Forbid the format to change later on. */
-        MPG123_OK == mpg123_format_none(con->handle) &&
-        MPG123_OK == mpg123_format(con->handle, rate, channels, encoding) &&
+    con->new_format = 0;
+    if (reopen_stream(sh) &&
         /* Get MPEG header info. */
         MPG123_OK == mpg123_info(con->handle, &finfo) &&
         /* Since we queried format, mpg123 should have read past ID3v2 tags.
@@ -344,50 +409,11 @@ static int init(sh_audio_t *sh, const char *decoder)
         con->mean_count = 0;
 #endif
         con->vbr = (finfo.vbr != MPG123_CBR);
-        mp_chmap_from_channels(&sh->channels, channels);
-        sh->samplerate = rate;
-        /* Without external force, mpg123 will always choose signed encoding,
-         * and non-16-bit only on builds that don't support it.
-         * Be reminded that it doesn't matter to the MPEG file what encoding
-         * is produced from it. */
-        switch (encoding) {
-        case MPG123_ENC_SIGNED_8:
-            sh->sample_format = AF_FORMAT_S8;
-            sh->samplesize    = 1;
-            break;
-        case MPG123_ENC_SIGNED_16:
-            sh->sample_format = AF_FORMAT_S16_NE;
-            sh->samplesize    = 2;
-            break;
-        /* To stay compatible with the oldest libmpg123 headers, do not rely
-         * on float and 32 bit encoding symbols being defined.
-         * Those formats came later */
-        case 0x1180: /* MPG123_ENC_SIGNED_32 */
-            sh->sample_format = AF_FORMAT_S32_NE;
-            sh->samplesize    = 4;
-            break;
-        case 0x200: /* MPG123_ENC_FLOAT_32 */
-            sh->sample_format = AF_FORMAT_FLOAT_NE;
-            sh->samplesize    = 4;
-            break;
-        default:
-            mp_msg(MSGT_DECAUDIO, MSGL_ERR,
-                   "Bad encoding from mpg123: %i.\n", encoding);
-            mpg123_close(con->handle);
-            return 0;
-        }
-#ifdef AD_MPG123_FRAMEWISE
-        /* Going to decode directly to MPlayer's memory. It is important
-         * to have MPG123_AUTO_RESAMPLE disabled for the buffer size
-         * being an all-time limit. */
-        sh->audio_out_minsize = 1152 * 2 * sh->samplesize;
-#endif
 
         return 1;
     } else {
         mp_msg(MSGT_DECAUDIO, MSGL_ERR, "mpg123 init error: %s\n",
                mpg123_strerror(con->handle));
-        mpg123_close(con->handle);
         return 0;
     }
 }
@@ -432,6 +458,7 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf, int minlen,
     int bytes;
 
     bytes = decode_a_bit(sh, buf, maxlen);
+    /* This EOF is ignored, apparently, until input data is exhausted. */
     if (bytes == 0)
         return -1;              /* EOF */
 
