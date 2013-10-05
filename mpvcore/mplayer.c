@@ -2457,6 +2457,7 @@ int reinit_video_chain(struct MPContext *mpctx)
 err_out:
 no_video:
     uninit_player(mpctx, INITIALIZED_VCODEC | (opts->force_vo ? 0 : INITIALIZED_VO));
+    cleanup_demux_stream(mpctx, STREAM_VIDEO);
     handle_force_window(mpctx, true);
     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Video: no video\n");
     return 0;
