@@ -149,14 +149,14 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
 }
 
 // segment = get Nth segment of a multi-segment file
-static bool check_file_seg(struct MPContext *mpctx, struct demuxer **sources,
-                           int num_sources, struct matroska_segment_uid *uids,
+static bool check_file_seg(struct MPContext *mpctx, struct demuxer ***sources,
+                           int *num_sources, struct matroska_segment_uid **uids,
                            char *filename, int segment)
 {
     bool was_valid = false;
     struct demuxer_params params = {
-        .matroska_num_wanted_uids = num_sources,
-        .matroska_wanted_uids = uids,
+        .matroska_num_wanted_uids = *num_sources,
+        .matroska_wanted_uids = *uids,
         .matroska_wanted_segment = segment,
         .matroska_was_valid = &was_valid,
     };
@@ -171,9 +171,10 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer **sources,
     }
     if (d->type == DEMUXER_TYPE_MATROSKA) {
         struct matroska_data *m = &d->matroska_data;
-        for (int i = 1; i < num_sources; i++) {
-            struct matroska_segment_uid *uid = uids + i;
-            if (sources[i])
+
+        for (int i = 1; i < *num_sources; i++) {
+            struct matroska_segment_uid *uid = *uids + i;
+            if ((*sources)[i])
                 continue;
             /* Accept the source if the segment uid matches and the edition
              * either matches or isn't specified. */
@@ -185,7 +186,21 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer **sources,
                 if (enable_cache(mpctx, &s, &d, &params) < 0)
                     continue;
 
-                sources[i] = d;
+                for (int j = 0; j < m->num_ordered_chapters; j++) {
+                    struct matroska_chapter *c = m->ordered_chapters + j;
+
+                    if (!c->has_segment_uid)
+                        continue;
+
+                    /* Set the requested segment. */
+                    MP_TARRAY_GROW(NULL, *uids, *num_sources);
+                    memcpy((*uids) + *num_sources, &c->uid, sizeof(c->uid));
+
+                    /* Add a new source slot. */
+                    MP_TARRAY_APPEND(NULL, *sources, *num_sources, NULL);
+                }
+
+                (*sources)[i] = d;
                 return true;
             }
         }
@@ -195,8 +210,8 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer **sources,
     return was_valid;
 }
 
-static void check_file(struct MPContext *mpctx, struct demuxer **sources,
-                       int num_sources, struct matroska_segment_uid *uids,
+static void check_file(struct MPContext *mpctx, struct demuxer ***sources,
+                       int *num_sources, struct matroska_segment_uid **uids,
                        char *filename, int first)
 {
     for (int segment = first; ; segment++) {
@@ -216,13 +231,13 @@ static bool missing(struct demuxer **sources, int num_sources)
 }
 
 static int find_ordered_chapter_sources(struct MPContext *mpctx,
-                                        struct demuxer **sources,
-                                        int num_sources,
-                                        struct matroska_segment_uid *uids)
+                                        struct demuxer ***sources,
+                                        int *num_sources,
+                                        struct matroska_segment_uid **uids)
 {
     int num_filenames = 0;
     char **filenames = NULL;
-    if (num_sources > 1) {
+    if (*num_sources > 1) {
         char *main_filename = mpctx->demuxer->filename;
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "This file references data from "
                "other sources.\n");
@@ -239,29 +254,34 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
         check_file(mpctx, sources, num_sources, uids, main_filename, 1);
     }
 
-    for (int i = 0; i < num_filenames; i++) {
-        if (!missing(sources, num_sources))
-            break;
-        mp_msg(MSGT_CPLAYER, MSGL_INFO, "Checking file %s\n", filenames[i]);
-        check_file(mpctx, sources, num_sources, uids, filenames[i], 0);
-    }
+    int old_source_count;
+    do {
+        old_source_count = *num_sources;
+        for (int i = 0; i < num_filenames; i++) {
+            if (!missing(*sources, *num_sources))
+                break;
+            mp_msg(MSGT_CPLAYER, MSGL_INFO, "Checking file %s\n", filenames[i]);
+            check_file(mpctx, sources, num_sources, uids, filenames[i], 0);
+        }
+    /* Loop while we have new sources to look for. */
+    } while (old_source_count != *num_sources);
 
     talloc_free(filenames);
-    if (missing(sources, num_sources)) {
+    if (missing(*sources, *num_sources)) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "Failed to find ordered chapter part!\n"
                "There will be parts MISSING from the video!\n");
         int j = 1;
-        for (int i = 1; i < num_sources; i++)
-            if (sources[i]) {
-                struct matroska_segment_uid *source_uid = uids + i;
-                struct matroska_segment_uid *target_uid = uids + j;
-                sources[j] = sources[i];
+        for (int i = 1; i < *num_sources; i++)
+            if ((*sources)[i]) {
+                struct matroska_segment_uid *source_uid = *uids + i;
+                struct matroska_segment_uid *target_uid = *uids + j;
+                (*sources)[j] = (*sources)[i];
                 memcpy(target_uid, source_uid, sizeof(*source_uid));
                 j++;
             }
-        num_sources = j;
+        *num_sources = j;
     }
-    return num_sources;
+    return *num_sources;
 }
 
 static void add_timeline_part(struct MPOpts *opts,
@@ -387,8 +407,8 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
         num_sources++;
     }
 
-    num_sources = find_ordered_chapter_sources(mpctx, sources, num_sources,
-                                               uids);
+    num_sources = find_ordered_chapter_sources(mpctx, &sources, &num_sources,
+                                               &uids);
     talloc_free(uids);
 
     struct timeline_part *timeline = talloc_array_ptrtype(NULL, timeline, 0);
