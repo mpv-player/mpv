@@ -4719,9 +4719,13 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
                                     bool force)
 {
     struct playlist_entry *next = playlist_get_next(mpctx->playlist, direction);
-    if (direction < 0 && !force) {
+    if (next && direction < 0 && !force) {
+        // Don't jump to files that would immediately go to next file anyway
         while (next && next->playback_short)
             next = next->prev;
+        // Always allow jumping to first file
+        if (!next && mpctx->opts->loop_times < 0)
+            next = mpctx->playlist->first;
     }
     if (!next && mpctx->opts->loop_times >= 0) {
         if (direction > 0) {
@@ -4735,8 +4739,12 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
             }
         } else {
             next = mpctx->playlist->last;
+            // Don't jump to files that would immediately go to next file anyway
+            while (next && next->playback_short)
+                next = next->prev;
         }
         if (!force && next && next->init_failed) {
+            // Don't endless loop if no file in playlist is playable
             bool all_failed = true;
             struct playlist_entry *cur;
             for (cur = mpctx->playlist->first; cur; cur = cur->next) {
