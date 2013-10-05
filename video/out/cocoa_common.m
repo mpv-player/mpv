@@ -27,6 +27,7 @@
 #include "video/out/cocoa/view.h"
 #import "video/out/cocoa/mpvadapter.h"
 
+#include "osdep/macosx_compat.h"
 #include "osdep/macosx_application.h"
 #include "osdep/macosx_events.h"
 

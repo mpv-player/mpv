@@ -16,6 +16,7 @@
  */
 
 #import "additions.h"
+#include "osdep/macosx_compat.h"
 
 @implementation NSScreen (mpvadditions)
 - (BOOL)hasDock
