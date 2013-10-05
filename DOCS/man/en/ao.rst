@@ -174,6 +174,15 @@ Available audio output drivers are:
         Set the TCP port used for connecting to the server (default: 12345).
         Not used if connecting to a Unix domain socket.
 
+``sndio``
+    Audio output to the OpenBSD sndio sound system
+
+    (Note: only supports mono, stereo, 4.0, 5.1 and 7.1 channel
+    layouts.)
+
+    ``device=<device>``
+        sndio device to use (default: ``$AUDIODEVICE``, resp. ``snd0``).
+
 ``wasapi``
     Audio output to the Windows Audio Session API.
 
