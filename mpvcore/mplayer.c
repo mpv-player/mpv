@@ -921,6 +921,8 @@ static void load_playback_resume(m_config_t *conf, const char *file)
 struct playlist_entry *mp_resume_playlist(struct playlist *playlist,
                                           struct MPOpts *opts)
 {
+    if (!opts->position_resume)
+        return NULL;
     for (struct playlist_entry *e = playlist->first; e; e = e->next) {
         char *conf = get_playback_resume_config_filename(e->filename, opts);
         bool exists = conf && mp_path_exists(conf);
