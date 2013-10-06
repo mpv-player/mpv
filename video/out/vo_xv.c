@@ -653,6 +653,7 @@ static mp_image_t *get_screenshot(struct vo *vo)
     return mp_image_new_ref(ctx->original_image);
 }
 
+// Note: redraw_frame() can call this with NULL.
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct xvctx *ctx = vo->priv;
@@ -660,7 +661,11 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     wait_for_completion(vo, ctx->num_buffers - 1);
 
     struct mp_image xv_buffer = get_xv_buffer(vo, ctx->current_buf);
-    mp_image_copy(&xv_buffer, mpi);
+    if (mpi) {
+        mp_image_copy(&xv_buffer, mpi);
+    } else {
+        mp_image_clear(&xv_buffer, 0, 0, xv_buffer.w, xv_buffer.h);
+    }
 
     mp_image_setrefp(&ctx->original_image, mpi);
 }
@@ -668,9 +673,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 static int redraw_frame(struct vo *vo)
 {
     struct xvctx *ctx = vo->priv;
-
-    if (!ctx->original_image)
-        return false;
 
     draw_image(vo, ctx->original_image);
     return true;

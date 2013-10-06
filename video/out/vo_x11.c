@@ -468,20 +468,26 @@ static void flip_page(struct vo *vo)
         XSync(vo->x11->display, False);
 }
 
+// Note: redraw_frame() can call this with NULL.
 static void draw_image(struct vo *vo, mp_image_t *mpi)
 {
     struct priv *p = vo->priv;
 
     wait_for_completion(vo, p->num_buffers - 1);
 
-    struct mp_image src = *mpi;
-    struct mp_rect src_rc = p->src;
-    src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, src.fmt.align_x);
-    src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, src.fmt.align_y);
-    mp_image_crop_rc(&src, src_rc);
-
     struct mp_image img = get_x_buffer(p, p->current_buf);
-    mp_sws_scale(p->sws, &img, &src);
+
+    if (mpi) {
+        struct mp_image src = *mpi;
+        struct mp_rect src_rc = p->src;
+        src_rc.x0 = MP_ALIGN_DOWN(src_rc.x0, src.fmt.align_x);
+        src_rc.y0 = MP_ALIGN_DOWN(src_rc.y0, src.fmt.align_y);
+        mp_image_crop_rc(&src, src_rc);
+
+        mp_sws_scale(p->sws, &img, &src);
+    } else {
+        mp_image_clear(&img, 0, 0, img.w, img.h);
+    }
 
     mp_image_setrefp(&p->original_image, mpi);
 }
@@ -489,11 +495,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 static int redraw_frame(struct vo *vo)
 {
     struct priv *p = vo->priv;
-
-    if (!p->original_image) {
-        vo_x11_clear_background(vo, &(struct mp_rect){0, 0, vo->dwidth, vo->dheight});
-        return false;
-    }
 
     draw_image(vo, p->original_image);
     return true;
