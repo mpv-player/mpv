@@ -14,6 +14,7 @@ local user_opts = {
     showFullscreen = true,                  -- show OSC when fullscreen?
     scaleWindowed = 1,                      -- scaling of the controller when windowed
     scaleFullscreen = 1,                    -- scaling of the controller when fullscreen
+    scaleForcedWindow = 2,                  -- scaling of the controller when rendered on a forced (dummy) window
     vidscale = true,                        -- scale the controller with the video?
     valign = 0.8,                           -- vertical alignment, -1 (top) to 1 (bottom)
     halign = 0,                             -- horizontal alignment, -1 (left) to 1 (right)
@@ -86,14 +87,14 @@ function typeconv(desttypeval, val)
         elseif val == "no" then
             val = false
         else
-            msg.error("Error: Can't convert " .. val .." to boolean!")
+            msg.error("Error: Can't convert " .. val .. " to boolean!")
             val = nil
         end
     elseif type(desttypeval) == "number" then
         if not (tonumber(val) == nil) then
             val = tonumber(val)
         else
-            msg.error("Error: Can't convert " .. val .." to number!")
+            msg.error("Error: Can't convert " .. val .. " to number!")
             val = nil
         end
     end
@@ -645,7 +646,9 @@ function osc_init()
     local display_w, display_h, display_aspect = mp.get_screen_size()
     local scale = 1
 
-    if (mp.property_get("fullscreen") == "yes") then
+    if (mp.property_get("video") == "no") then -- dummy/forced window
+        scale = user_opts.scaleForcedWindow
+    elseif (mp.property_get("fullscreen") == "yes") then
         scale = user_opts.scaleFullscreen
     else
         scale = user_opts.scaleWindowed
