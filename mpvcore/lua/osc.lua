@@ -20,7 +20,7 @@ local user_opts = {
     halign = 0,                             -- horizontal alignment, -1 (left) to 1 (right)
     fadeduration = 200,                     -- duration of fade out in ms, 0 = no fade
     deadzonedist = 0.15,                    -- distance between OSC and deadzone
-    iAmAProgrammer = false,                 -- use native mpv counting and disable OSC internal playlist management (and some functions that depend on it)
+    iAmAProgrammer = false,                 -- use native mpv values and disable OSC internal playlist management (and some functions that depend on it)
 }
 
 local osc_param = {
@@ -953,6 +953,26 @@ function osc_init()
 
     eventresponder.mouse_btn0_up = function () state.tc_ms = not state.tc_ms end
     register_button(posX - pos_offsetX, bottomrowY, 4, 110, 18, osc_styles.timecodes, contentF, eventresponder, metainfo)
+
+    -- center (Cache)
+    local metainfo = {}
+    local eventresponder = {}
+
+    local contentF = function (ass)
+        local cache = mp.property_get("cache")
+        if not (cache == nil) then
+            cache = tonumber(mp.property_get("cache"))
+            if (cache < 48) then
+                if not (user_opts.iAmAProgrammer) then
+                    ass:append("Cache: " .. (cache*2) .."%")
+                else
+                    ass:append("Cache: " .. (cache) .."%")
+                end
+            end
+        end
+    end
+    register_button(posX, bottomrowY, 5, 110, 18, osc_styles.timecodes, contentF, eventresponder, metainfo)
+
 
     -- right (total/remaining time)
     -- do we have a usuable duration?
