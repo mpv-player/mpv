@@ -963,11 +963,7 @@ function osc_init()
         if not (cache == nil) then
             cache = tonumber(mp.property_get("cache"))
             if (cache < 48) then
-                if not (user_opts.iAmAProgrammer) then
-                    ass:append("Cache: " .. (cache*2) .."%")
-                else
-                    ass:append("Cache: " .. (cache) .."%")
-                end
+                ass:append("Cache: " .. (cache) .."%")
             end
         end
     end
