@@ -289,8 +289,11 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     switch (cmd) {
     case SD_CTRL_SUB_STEP: {
         double *a = arg;
-        a[0] = ass_step_sub(ctx->ass_track, a[0] * 1000 + .5, a[1]) / 1000.0;
-        return CONTROL_OK;
+        long long res = ass_step_sub(ctx->ass_track, a[0] * 1000 + 0.5, a[1]);
+        if (!res)
+            return false;
+        a[0] = res / 1000.0;
+        return true;
     case SD_CTRL_SET_VIDEO_PARAMS:
         ctx->video_params = *(struct mp_image_params *)arg;
         return CONTROL_OK;

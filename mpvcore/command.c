@@ -2502,6 +2502,11 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                     set_osd_tmsg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
                                  "Sub delay: %d ms", ROUND(opts->sub_delay * 1000));
                 } else {
+                    // We can easily get stuck by failing to seek to the video
+                    // frame which actually shows the sub first (because video
+                    // frame PTS and sub PTS rarely match exactly). Add some
+                    // rounding for the mess of it.
+                    a[0] += 0.01 * (a[1] > 0 ? 1 : -1);
                     queue_seek(mpctx, MPSEEK_RELATIVE, a[0], 1);
                     set_osd_function(mpctx, (a[0] > 0) ? OSD_FFW : OSD_REW);
                     if (bar_osd)
