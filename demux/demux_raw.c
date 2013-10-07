@@ -53,8 +53,8 @@ const m_option_t demux_rawaudio_opts[] = {
 static int vformat = MP_FOURCC_I420;
 static int mp_format;
 static char *codec;
-static int width = 0;
-static int height = 0;
+static int width = 1280;
+static int height = 720;
 static float fps = 25;
 static int imgsize = 0;
 
