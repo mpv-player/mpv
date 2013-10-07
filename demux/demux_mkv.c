@@ -377,24 +377,24 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     }
     if (info.n_segment_uid) {
         int len = info.segment_uid.len;
-        if (len != sizeof(demuxer->matroska_data.segment_uid)) {
+        if (len != sizeof(demuxer->matroska_data.uid.segment)) {
             mp_msg(MSGT_DEMUX, MSGL_INFO,
                    "[mkv] segment uid invalid length %d\n", len);
         } else {
-            memcpy(demuxer->matroska_data.segment_uid, info.segment_uid.start,
+            memcpy(demuxer->matroska_data.uid.segment, info.segment_uid.start,
                    len);
             mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] | + segment uid");
             for (int i = 0; i < len; i++)
                 mp_msg(MSGT_DEMUX, MSGL_V, " %02x",
-                       demuxer->matroska_data.segment_uid[i]);
+                       demuxer->matroska_data.uid.segment[i]);
             mp_msg(MSGT_DEMUX, MSGL_V, "\n");
         }
     }
     if (demuxer->params && demuxer->params->matroska_wanted_uids) {
-        unsigned char (*uids)[16] = demuxer->params->matroska_wanted_uids;
         if (info.n_segment_uid) {
             for (int i = 0; i < demuxer->params->matroska_num_wanted_uids; i++) {
-                if (!memcmp(info.segment_uid.start, uids[i], 16))
+                struct matroska_segment_uid *uid = demuxer->params->matroska_wanted_uids + i;
+                if (!memcmp(info.segment_uid.start, uid->segment, 16))
                     goto out;
             }
         }
@@ -847,7 +847,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
             if (ca->n_chapter_segment_uid) {
                 chapter.has_segment_uid = true;
                 int len = ca->chapter_segment_uid.len;
-                if (len != sizeof(chapter.segment_uid))
+                if (len != sizeof(chapter.uid.segment))
                     mp_msg(MSGT_DEMUX, warn_level,
                            "[mkv] Chapter segment uid bad length %d\n", len);
                 else if (ca->n_chapter_segment_edition_uid) {
@@ -855,12 +855,12 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                             "unsupported edition recursion in chapter; "
                             "will skip on playback!\n");
                 } else {
-                    memcpy(chapter.segment_uid, ca->chapter_segment_uid.start,
+                    memcpy(chapter.uid.segment, ca->chapter_segment_uid.start,
                            len);
                     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Chapter segment uid ");
                     for (int n = 0; n < len; n++)
                         mp_msg(MSGT_DEMUX, MSGL_V, "%02x ",
-                               chapter.segment_uid[n]);
+                               chapter.uid.segment[n]);
                     mp_msg(MSGT_DEMUX, MSGL_V, "\n");
                 }
             }
@@ -2737,3 +2737,10 @@ const demuxer_desc_t demuxer_desc_matroska = {
     .seek = demux_mkv_seek,
     .control = demux_mkv_control
 };
+
+bool demux_matroska_uid_cmp(struct matroska_segment_uid *a,
+                            struct matroska_segment_uid *b)
+{
+    return (!memcmp(a->segment, b->segment, 16) &&
+            a->edition == b->edition);
+}
