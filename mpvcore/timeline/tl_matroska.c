@@ -328,8 +328,11 @@ static void build_timeline_loop(struct MPOpts *opts,
                                 uint64_t *last_end_time,
                                 struct timeline_part **timeline,
                                 struct chapter *chapters,
-                                int *part_count)
+                                int *part_count,
+                                uint64_t skip,
+                                uint64_t limit)
 {
+    uint64_t local_starttime = 0;
     struct demuxer *source = sources[current_source];
     struct matroska_data *m = &source->matroska_data;
 
@@ -337,9 +340,17 @@ static void build_timeline_loop(struct MPOpts *opts,
         struct matroska_chapter *c = m->ordered_chapters + i;
         uint64_t chapter_length = c->end - c->start;
 
-        /* Fill in the segment uid with the current one if one isn't requested. */
+        /* Fill in the uid with the current one if one isn't requested. */
         if (!c->has_segment_uid)
             memcpy(&c->uid, &m->uid, sizeof(c->uid));
+
+        /* "Seek" to the end of the chapter. */
+        local_starttime += chapter_length;
+
+        /* If we're before the start time for the chapter, skip to the next
+         * one. */
+        if (local_starttime <= skip)
+            continue;
 
         /* Look for the source for this chapter. */
         for (int j = 0; j < num_sources; j++) {
@@ -350,11 +361,34 @@ static void build_timeline_loop(struct MPOpts *opts,
             if (!demux_matroska_uid_cmp(&c->uid, &linked_m->uid))
                 continue;
 
-            chapters[i].start = *starttime / 1e9;
-            chapters[i].name = talloc_strdup(chapters, c->name);
+            /* TODO: Add option to support recursive chapters when loading
+             * recursive ordered chapter editions? If so, more code will be
+             * needed to add chapters for external non-ordered segment loading
+             * as well since that part is not recursive. */
+            if (!limit) {
+                chapters[i].start = *starttime / 1e9;
+                chapters[i].name = talloc_strdup(chapters, c->name);
+            }
 
-            add_timeline_part(opts, linked_source, timeline, part_count,
-                              c->start, last_end_time, starttime);
+            /* If we're the source or it's a non-ordered edition reference,
+             * just add a timeline part from the source. */
+            if (current_source == j || !linked_m->num_ordered_chapters) {
+                add_timeline_part(opts, linked_source, timeline, part_count,
+                                  c->start, last_end_time, starttime);
+            /* Otherwise, we have an ordered edition as the source. Since this
+             * can jump around all over the place, we need to build up the
+             * timeline parts for each of its chapters, but not add them as
+             * chapters. */
+            } else {
+                build_timeline_loop(opts, sources, num_sources, j, starttime,
+                                    missing_time, last_end_time, timeline,
+                                    chapters, part_count, c->start, c->end);
+                /* The loop call has added time as needed (we can't add it here
+                 * due to 'join_diff' in the add_timeline_part function. Since
+                 * the time has already been added as needed, the chapter has
+                 * an effective 0 length at this point. */
+                chapter_length = 0;
+            }
             *last_end_time = c->end;
             goto found;
         }
@@ -363,7 +397,17 @@ static void build_timeline_loop(struct MPOpts *opts,
         *missing_time += chapter_length;
     found:;
         *starttime += chapter_length;
+        /* If we're after the limit on this chapter, stop here. */
+        if (limit && local_starttime >= limit) {
+            /* Back up the global start time by the overflow. */
+            *starttime -= local_starttime - limit;
+            break;
+        }
     }
+
+    /* If we stopped before the limit, add up the missing time. */
+    if (local_starttime < limit)
+        *missing_time += limit - local_starttime;
 }
 
 void build_ordered_chapter_timeline(struct MPContext *mpctx)
@@ -419,7 +463,7 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     int part_count = 0;
     build_timeline_loop(opts, sources, num_sources, 0, &starttime,
                         &missing_time, &last_end_time, &timeline,
-                        chapters, &part_count);
+                        chapters, &part_count, 0, 0);
 
     if (!part_count) {
         // None of the parts come from the file itself???
