@@ -100,7 +100,7 @@ static void read_memcpy_cb(void *ctx, void *src, int len)
 
 int mp_ring_read(struct mp_ring *buffer, unsigned char *dest, int len)
 {
-    return mp_ring_read_cb(buffer, dest, len, read_memcpy_cb);
+    return mp_ring_read_cb(buffer, &dest, len, read_memcpy_cb);
 }
 
 int mp_ring_write(struct mp_ring *buffer, unsigned char *src, int len)
