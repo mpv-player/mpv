@@ -291,7 +291,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
                 struct matroska_segment_uid *source_uid = *uids + i;
                 struct matroska_segment_uid *target_uid = *uids + j;
                 (*sources)[j] = (*sources)[i];
-                memcpy(target_uid, source_uid, sizeof(*source_uid));
+                memmove(target_uid, source_uid, sizeof(*source_uid));
                 j++;
             }
         *num_sources = j;
