@@ -35,7 +35,9 @@
 
 - (BOOL)hasMenubar
 {
-    return [self isEqual: [NSScreen screens][0]];
+    NSRect vF = [self visibleFrame];
+    NSRect f  = [self frame];
+    return f.size.height + f.origin.y > vF.size.height + vF.origin.y;
 }
 @end
 
