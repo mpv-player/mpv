@@ -148,6 +148,18 @@ static int enable_cache(struct MPContext *mpctx, struct stream **stream,
     return 1;
 }
 
+static bool has_source_request(struct matroska_segment_uid *uids,
+                               int num_sources,
+                               struct matroska_segment_uid *new_uid)
+{
+    for (int i = 0; i < num_sources; ++i) {
+        if (demux_matroska_uid_cmp(uids + i, new_uid))
+            return true;
+    }
+
+    return false;
+}
+
 // segment = get Nth segment of a multi-segment file
 static bool check_file_seg(struct MPContext *mpctx, struct demuxer ***sources,
                            int *num_sources, struct matroska_segment_uid **uids,
@@ -190,6 +202,9 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer ***sources,
                     struct matroska_chapter *c = m->ordered_chapters + j;
 
                     if (!c->has_segment_uid)
+                        continue;
+
+                    if (has_source_request(*uids, *num_sources, &c->uid))
                         continue;
 
                     /* Set the requested segment. */
@@ -444,6 +459,9 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
          * "don't care" edition value of 0 since the user may have requested a
          * non-default edition. */
         if (!c->has_segment_uid || demux_matroska_uid_cmp(&c->uid, &m->uid))
+            continue;
+
+        if (has_source_request(uids, num_sources, &c->uid))
             continue;
 
         memcpy(uids + num_sources, &c->uid, sizeof(c->uid));
