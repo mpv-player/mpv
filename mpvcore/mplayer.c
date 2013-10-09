@@ -4736,9 +4736,9 @@ struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
             if (mpctx->opts->shuffle)
                 playlist_shuffle(mpctx->playlist);
             next = mpctx->playlist->first;
-            if (next && mpctx->opts->loop_times > 0) {
+            if (next && mpctx->opts->loop_times > 1) {
                 mpctx->opts->loop_times--;
-                if (mpctx->opts->loop_times == 0)
+                if (mpctx->opts->loop_times == 1)
                     mpctx->opts->loop_times = -1;
             }
         } else {
