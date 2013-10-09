@@ -1267,10 +1267,11 @@
     playlist formats to the special demuxer is work in progress, and eventually
     the old code should disappear.
 
-``--loop=<number|inf|no>``
-    Loops playback ``<number>`` times. ``inf`` means forever and ``no`` disables
-    looping. If several files are specified on command line, the entire playlist
-    is looped.
+``--loop=<N|inf|no>``
+    Loops playback ``N`` times. A value of ``1`` plays it one time (default),
+    ``2`` two times, etc. ``inf`` means forever. ``no`` is the same as ``1`` and
+    disables looping. If several files are specified on command line, the
+    entire playlist is looped.
 
 ``--lua=<filename>``
     Load a Lua script. You can load multiple scripts by separating them with

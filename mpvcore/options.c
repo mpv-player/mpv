@@ -681,8 +681,8 @@ const m_option_t mp_opts[] = {
     {"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 
-    OPT_CHOICE_OR_INT("loop", loop_times, M_OPT_GLOBAL, 1, 10000,
-                      ({"no", -1}, {"0", -1},
+    OPT_CHOICE_OR_INT("loop", loop_times, M_OPT_GLOBAL, 2, 10000,
+                      ({"no", -1}, {"1", -1},
                        {"inf", 0})),
 
     OPT_FLAG("resume-playback", position_resume, 0),
