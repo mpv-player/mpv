@@ -36,6 +36,7 @@ struct mixer;
 struct mixer *mixer_init(void *talloc_ctx, struct MPOpts *opts);
 void mixer_reinit_audio(struct mixer *mixer, struct ao *ao, struct af_stream *af);
 void mixer_uninit_audio(struct mixer *mixer);
+bool mixer_audio_initialized(struct mixer *mixer);
 void mixer_getvolume(struct mixer *mixer, float *l, float *r);
 void mixer_setvolume(struct mixer *mixer, float l, float r);
 void mixer_incvolume(struct mixer *mixer);

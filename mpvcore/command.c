@@ -768,9 +768,13 @@ static int mp_property_volume(m_option_t *prop, int action, void *arg,
         mixer_getbothvolume(mpctx->mixer, arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_SET:
+        if (!mixer_audio_initialized(mpctx->mixer))
+            return M_PROPERTY_ERROR;
         mixer_setvolume(mpctx->mixer, *(float *) arg, *(float *) arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_SWITCH: {
+        if (!mixer_audio_initialized(mpctx->mixer))
+            return M_PROPERTY_ERROR;
         struct m_property_switch_arg *sarg = arg;
         if (sarg->inc <= 0)
             mixer_decvolume(mpctx->mixer);
@@ -788,6 +792,8 @@ static int mp_property_mute(m_option_t *prop, int action, void *arg,
 {
     switch (action) {
     case M_PROPERTY_SET:
+        if (!mixer_audio_initialized(mpctx->mixer))
+            return M_PROPERTY_ERROR;
         mixer_setmute(mpctx->mixer, *(int *) arg);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:

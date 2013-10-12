@@ -59,6 +59,11 @@ struct mixer *mixer_init(void *talloc_ctx, struct MPOpts *opts)
     return mixer;
 }
 
+bool mixer_audio_initialized(struct mixer *mixer)
+{
+    return !!mixer->ao;
+}
+
 static void checkvolume(struct mixer *mixer)
 {
     if (!mixer->ao)
