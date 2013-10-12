@@ -17,6 +17,7 @@
 
 #include <stdbool.h>
 #include <assert.h>
+#include <locale.h>
 
 #include <quvi.h>
 
@@ -146,5 +147,11 @@ struct mp_resolve_result *mp_resolve_quvi(const char *url, struct MPOpts *opts)
         talloc_free(res);
         res = NULL;
     }
+
+    // libkdecore calls setlocale(LC_ALL, ""), which breaks basic C string
+    // processing functions. libkdecore can be loaded by libproxy, which is
+    // used by libquvi9. This is a rather dirty workaround to reset locales.
+    setlocale(LC_ALL, "C");
+
     return res;
 }
