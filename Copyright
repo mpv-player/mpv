@@ -1,37 +1,19 @@
 mpv is a fork of mplayer2, which is a fork of MPlayer.
-Original MPlayer Copyright file follows below.
 
-MPlayer was originally written by Árpád Gereöffy and has been extended and
-worked on by many more since then, see the AUTHORS file for an (incomplete)
-list. MPlayer as a whole is copyrighted by the MPlayer team. Individual
-copyright notices can be found in file headers.
+mpv as a whole is licensed as GPL version 2 or later (see LICENSE). Most source
+files are GPLv2+, but some files are available under a more liberal license,
+such as LGPLv2+, BSD, MIT, ISC, and possibly others. Look at the copyright
+header of each source file, and grep the sources for "Copyright" if you need
+to know details. Files without Copyright notice are licensed as LGPLv2+.
 
-Most files in MPlayer are licensed under the GNU General Public License,
-version 2 with an explicit "or later" clause or a compatible license
-(LGPL 2.1+, MIT/BSD). An exception are the files talloc.c and talloc.h,
-which are LGPL 3+.
-Thus MPlayer as a whole can be redistributed under terms compatible with
-the GNU General Public License, version 3; see the LICENSE file for details.
-(Note: this is probably a mistake. MPlayer never used talloc, and MPlayer is
-actually strictly GPLv2 only because has some GPLv2-only files.)
+For information about authors and contributors, consult the git log, which
+contains the complete SVN and CVS history as well.
 
-MPlayer includes code from several external sources. General information and
-license details are listed below:
+Note that mplayer2 as a whole is licensed under GPLv3+. This is because it uses
+a copy of talloc (part of Samba), which is LGPLv3+, and the next compatible
+license for this mix is GPLv3+.
 
-Name:       a couple of files copied from FFmpeg
-Version:    updated to different versions
-URL:        http://www.ffmpeg.org
-Directory:  compat/x86_cpu.h
-Copyright:  Many, see individual files for copyright notices.
-License:    GNU Lesser General Public License
-
-
-Name:       dvbstream
-Version:    0.4.3-pre3 (CVS checkout)
-URL:        http://sourceforge.net/projects/dvbtools/
-Directory:  stream/dvbin.h stream/stream_dvb.c
-Copyright:  2001-2002 Dave Chapman <dave@dchapman.com>
-License:    GNU General Public License
-
-
-This is not a complete list. grep the sources for "Copyright".
+MPlayer as a whole is licensed under GPLv2 (incompatible to GPLv3!), because
+some files are licensed to GPLv2 (and _not_ any later version of the license).
+In particular, this affects the file libmpdemux/demux_ty_osd.c. It is disabled
+under mplayer2, and has been removed from mpv.

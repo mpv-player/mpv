@@ -6,7 +6,7 @@ a movie player
 ##############
 
 :Author: wm4
-:Copyright: GPLv3
+:Copyright: GPLv2+
 :Manual section: 1
 :Manual group: multimedia
 

@@ -36,6 +36,7 @@ General Changes for MPlayer to mplayer2
 General Changes for mplayer2 to mpv
 -----------------------------------
 
+* Switch back to GPLv2+.
 * Removal of lots of unneeded code to encourage developer activity (less
   obscure scary zombie code that kills any desire for hacking the codebase)
 * Removal of dust and dead bodies (code-wise), such as kernel drivers for

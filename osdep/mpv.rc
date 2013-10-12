@@ -31,7 +31,7 @@ FILETYPE VFT_APP
     {
         BLOCK "000004b0" // LANG_NEUTRAL,UNICODE_CP
         {
-            VALUE "Comments","mpv is distributed under the terms of the GNU General Public License Version 3.\000"
+            VALUE "Comments","mpv is distributed under the terms of the GNU General Public License Version 2 or later.\000"
             VALUE "CompanyName", "mpv\000"
             VALUE "FileDescription", "mpv - video player\000"
             VALUE "FileVersion",VERSION

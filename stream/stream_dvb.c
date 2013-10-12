@@ -5,7 +5,8 @@ dvbstream
 
 Original authors: Nico, probably Arpi
 
-The latest version can be found at http://www.linuxstb.org/dvbstream
+Some code based on dvbstream, 0.4.3-pre3 (CVS checkout),
+http://sourceforge.net/projects/dvbtools/
 
 Modified for use with MPlayer, for details see the changelog at
 http://svn.mplayerhq.hu/mplayer/trunk/
