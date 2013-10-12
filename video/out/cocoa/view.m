@@ -171,7 +171,7 @@
 - (void)otherMouseDown:(NSEvent *)evt { [self mouseDownEvent:evt]; }
 - (void)otherMouseUp:(NSEvent *)evt   { [self mouseUpEvent:evt]; }
 
-- (void)scrollWheel:(NSEvent *)event
+- (void)preciseScroll:(NSEvent *)event
 {
     CGFloat delta;
     int cmd;
@@ -179,15 +179,18 @@
     if (FFABS([event deltaY]) >= FFABS([event deltaX])) {
         delta = [event deltaY] * 0.1;
         cmd   = delta > 0 ? MP_AXIS_UP : MP_AXIS_DOWN;
-        delta = FFABS(delta);
     } else {
         delta = [event deltaX] * 0.1;
         cmd   = delta > 0 ? MP_AXIS_RIGHT : MP_AXIS_LEFT;
-        delta = FFABS(delta);
     }
 
+    [self.adapter putAxis:cmd delta:FFABS(delta)];
+}
+
+- (void)scrollWheel:(NSEvent *)event
+{
     if ([event hasPreciseScrollingDeltas]) {
-        [self.adapter putAxis:cmd delta:delta];
+        [self preciseScroll:event];
     } else {
         const int modifiers = [event modifierFlags];
         const int mpkey = [event deltaY] > 0 ? MP_MOUSE_BTN3 : MP_MOUSE_BTN4;
