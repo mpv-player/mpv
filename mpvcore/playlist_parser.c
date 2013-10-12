@@ -648,7 +648,8 @@ struct playlist *playlist_parse_file(const char *file, struct MPOpts *opts)
   struct playlist *ret = do_parse(stream, true);
   free_stream(stream);
 
-  playlist_add_base_path(ret, mp_dirname(file));
+  if (ret)
+    playlist_add_base_path(ret, mp_dirname(file));
 
   return ret;
 

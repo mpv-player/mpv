@@ -178,7 +178,7 @@ struct playlist_entry *playlist_get_next(struct playlist *pl, int direction)
 
 void playlist_add_base_path(struct playlist *pl, bstr base_path)
 {
-    if (!pl || base_path.len == 0 || bstrcmp0(base_path, ".") == 0)
+    if (base_path.len == 0 || bstrcmp0(base_path, ".") == 0)
         return;
     for (struct playlist_entry *e = pl->first; e; e = e->next) {
         if (!mp_is_url(bstr0(e->filename))) {
