@@ -1,0 +1,39 @@
+TA ("Tree Allocator") is a wrapper around malloc() and related functions,
+adding features like automatically free sub-trees of memory allocations if
+a parent allocation is freed.
+
+Generally, the idea is that every TA allocation can have a parent (indicated
+by the ta_parent argument in allocation function calls). If a parent is freed,
+its child allocations are automatically freed as well. It's also allowed the
+free a child before the parent, or to move a child to another parent with
+ta_set_parent().
+
+It also provides a bunch of convenience macros and debugging facilities.
+
+The TA functions are documented in the implementation files (ta.c, ta_utils.c).
+
+TA is intended to be useable as library independent from mpv. It doesn't
+depend on anything mpv specific.
+
+Note:
+-----
+
+mpv doesn't use the TA API yet for two reasons: first, the TA API is not
+necessarily finalized yet. Second, it should be easily possible to revert
+the commit adding TA, and changing all the code would not allow this.
+
+Especially the naming schema for some TA functions is still somewhat
+undecided. (The talloc naming is a bit verbose at times.)
+
+For now, mpv goes through a talloc wrapper, which maps the talloc API to TA.
+New code should still use talloc as well. At one point, all talloc calls
+will be replaced with TA calls, and the talloc wrapper will be removed.
+
+Documentation for the talloc API is here:
+
+    http://git.samba.org/?p=samba.git;a=blob;f=lib/talloc/talloc.h;hb=HEAD
+
+There are some minor differences with mpv's talloc bridge. mpv calls abort()
+on allocation failures, and the talloc_set_destructor() signature is slightly
+different. libtalloc also has a weird 256MB limit per allocation. The talloc
+wrapper supports only a strict subset of libtalloc functionality used by mpv.
