@@ -2401,12 +2401,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
             show_property_osd(mpctx, cmd->args[0].v.s, cmd->on_osd);
         } else if (r == M_PROPERTY_UNKNOWN) {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                   "Unknown property: '%s'\n", cmd->args[0].v.s);
+            set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+                        "Unknown property: '%s'", cmd->args[0].v.s);
         } else if (r <= 0) {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                   "Failed to set property '%s' to '%s'.\n",
-                   cmd->args[0].v.s, cmd->args[1].v.s);
+            set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+                        "Failed to set property '%s' to '%s'",
+                        cmd->args[0].v.s, cmd->args[1].v.s);
         }
         break;
     }
@@ -2424,12 +2424,12 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
             show_property_osd(mpctx, cmd->args[0].v.s, cmd->on_osd);
         } else if (r == M_PROPERTY_UNKNOWN) {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                   "Unknown property: '%s'\n", cmd->args[0].v.s);
+            set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+                        "Unknown property: '%s'", cmd->args[0].v.s);
         } else if (r <= 0) {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                   "Failed to increment property '%s' by %g.\n",
-                   cmd->args[0].v.s, s.inc);
+            set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+                        "Failed to increment property '%s' by %g",
+                        cmd->args[0].v.s, s.inc);
         }
         break;
     }
