@@ -58,11 +58,10 @@ struct image_flags {
     bool pool_alive;            // the mp_image_pool references this
 };
 
-static int image_pool_destructor(void *ptr)
+static void image_pool_destructor(void *ptr)
 {
     struct mp_image_pool *pool = ptr;
     mp_image_pool_clear(pool);
-    return 0;
 }
 
 struct mp_image_pool *mp_image_pool_new(int max_count)

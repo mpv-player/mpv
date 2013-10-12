@@ -62,11 +62,10 @@ struct m_refcount {
 };
 
 // Only for checking API usage
-static int m_refcount_destructor(void *ptr)
+static void m_refcount_destructor(void *ptr)
 {
     struct m_refcount *ref = ptr;
     assert(ref->refcount == 0);
-    return 0;
 }
 
 // Starts out with refcount==1, caller can set .arg and .free and .ext_*
@@ -165,11 +164,10 @@ void mp_image_setfmt(struct mp_image *mpi, unsigned int out_fmt)
     mp_image_set_size(mpi, mpi->w, mpi->h);
 }
 
-static int mp_image_destructor(void *ptr)
+static void mp_image_destructor(void *ptr)
 {
     mp_image_t *mpi = ptr;
     m_refcount_unref(mpi->refcount);
-    return 0;
 }
 
 static int mp_chroma_div_up(int size, int shift)

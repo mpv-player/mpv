@@ -135,7 +135,7 @@ struct talloc_reference_handle {
 	void *ptr;
 };
 
-typedef int (*talloc_destructor_t)(void *);
+typedef void (*talloc_destructor_t)(void *);
 
 struct talloc_chunk {
 	struct talloc_chunk *next, *prev;
@@ -406,11 +406,8 @@ void *talloc_pool(const void *context, size_t size)
 
 /*
   setup a destructor to be called on free of a pointer
-  the destructor should return 0 on success, or -1 on failure.
-  if the destructor fails then the free is failed, and the memory can
-  be continued to be used
 */
-void _talloc_set_destructor(const void *ptr, int (*destructor)(void *))
+void _talloc_set_destructor(const void *ptr, void (*destructor)(void *))
 {
 	struct talloc_chunk *tc = talloc_chunk_from_ptr(ptr);
 	tc->destructor = destructor;
@@ -432,12 +429,11 @@ int talloc_increase_ref_count(const void *ptr)
 
   this is referenced by a function pointer and should not be inline
 */
-static int talloc_reference_destructor(void *ptr)
+static void talloc_reference_destructor(void *ptr)
 {
 	struct talloc_reference_handle *handle = ptr;
 	struct talloc_chunk *ptr_tc = talloc_chunk_from_ptr(handle->ptr);
 	_TLIST_REMOVE(ptr_tc->refs, handle);
-	return 0;
 }
 
 /*
@@ -539,10 +535,7 @@ static inline int _talloc_free(void *ptr)
 			return -1;
 		}
 		tc->destructor = (talloc_destructor_t)-1;
-		if (d(ptr) == -1) {
-			tc->destructor = d;
-			return -1;
-		}
+		d(ptr);
 		tc->destructor = NULL;
 	}
 
@@ -1651,10 +1644,9 @@ void *talloc_realloc_fn(const void *context, void *ptr, size_t size)
 }
 
 
-static int talloc_autofree_destructor(void *ptr)
+static void talloc_autofree_destructor(void *ptr)
 {
 	autofree_context = NULL;
-	return 0;
 }
 
 static void talloc_autofree(void)

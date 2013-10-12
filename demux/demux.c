@@ -116,12 +116,11 @@ static void ds_free_packs(struct demux_stream *ds)
     ds->eof = 0;
 }
 
-static int packet_destroy(void *ptr)
+static void packet_destroy(void *ptr)
 {
     struct demux_packet *dp = ptr;
     talloc_free(dp->avpacket);
     free(dp->allocation);
-    return 0;
 }
 
 static struct demux_packet *create_packet(size_t len)
@@ -193,10 +192,9 @@ void free_demux_packet(struct demux_packet *dp)
     talloc_free(dp);
 }
 
-static int destroy_avpacket(void *pkt)
+static void destroy_avpacket(void *pkt)
 {
     av_free_packet(pkt);
-    return 0;
 }
 
 struct demux_packet *demux_copy_packet(struct demux_packet *dp)

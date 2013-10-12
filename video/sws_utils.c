@@ -150,13 +150,12 @@ static bool cache_valid(struct mp_sws_context *ctx)
            ctx->saturation == old->saturation;
 }
 
-static int free_mp_sws(void *p)
+static void free_mp_sws(void *p)
 {
     struct mp_sws_context *ctx = p;
     sws_freeContext(ctx->sws);
     sws_freeFilter(ctx->src_filter);
     sws_freeFilter(ctx->dst_filter);
-    return 0;
 }
 
 // You're supposed to set your scaling parameters on the returned context.

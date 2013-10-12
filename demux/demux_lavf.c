@@ -717,10 +717,9 @@ static void seek_reset(demuxer_t *demux)
     priv->num_packets = 0;
 }
 
-static int destroy_avpacket(void *pkt)
+static void destroy_avpacket(void *pkt)
 {
     av_free_packet(pkt);
-    return 0;
 }
 
 static int read_more_av_packets(demuxer_t *demux)

@@ -180,13 +180,12 @@ static void add_options(struct m_config *config,
                         struct m_config_option *parent,
                         const struct m_option *defs);
 
-static int config_destroy(void *p)
+static void config_destroy(void *p)
 {
     struct m_config *config = p;
     m_config_restore_backups(config);
     for (struct m_config_option *copt = config->opts; copt; copt = copt->next)
         m_option_free(copt->opt, copt->data);
-    return 0;
 }
 
 struct m_config *m_config_new(void *talloc_parent, size_t size,
