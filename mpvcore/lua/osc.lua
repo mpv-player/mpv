@@ -1061,7 +1061,7 @@ function render()
 
 
 
-    if not (state.showtime == nil) and (state.showtime + (user_opts.hidetimeout/1000) < now) and (state.active_element == nil)
+    if not (state.showtime == nil) and (user_opts.hidetimeout >= 0) and (state.showtime + (user_opts.hidetimeout/1000) < now) and (state.active_element == nil)
         and not (mouseX >= osc_param.posX - (osc_param.osc_w / 2) and mouseX <= osc_param.posX + (osc_param.osc_w / 2)
             and mouseY >= osc_param.posY - (osc_param.osc_h / 2) and mouseY <= osc_param.posY + (osc_param.osc_h / 2)) then
         hide_osc()
@@ -1219,7 +1219,7 @@ mp.set_key_bindings({
     {"mouse_move",              function(e) process_event("mouse_move", nil) end},
     {"mouse_leave",             mouse_leave},
 }, "showhide")
-mp.enable_key_bindings("showhide", "allow-vo-dragging")
+mp.enable_key_bindings("showhide", "allow-vo-dragging|allow-hide-cursor")
 
 --mouse input bindings
 mp.set_key_bindings({
