@@ -18,8 +18,10 @@ local user_opts = {
     vidscale = true,                        -- scale the controller with the video?
     valign = 0.8,                           -- vertical alignment, -1 (top) to 1 (bottom)
     halign = 0,                             -- horizontal alignment, -1 (left) to 1 (right)
+    hidetimeout = 500,                      -- duration in ms until the OSC hides if no mouse movement
     fadeduration = 200,                     -- duration of fade out in ms, 0 = no fade
-    deadzonedist = 0.15,                    -- distance between OSC and deadzone
+    deadzonesize = 0,                    -- distance between OSC and deadzone
+    minmousemove = 1,                       -- minimum amount of pixeles the mouse has to move between ticks to make the OSC show up
     iAmAProgrammer = false,                 -- use native mpv values and disable OSC internal playlist management (and some functions that depend on it)
 }
 
@@ -50,6 +52,7 @@ local osc_styles = {
 
 -- internal states, do not touch
 local state = {
+    showtime,                               -- time of last invokation (last mouse move)
     osc_visible = false,
     anistart,                               -- time when the animation started
     anitype,                                -- current type of animation
@@ -62,6 +65,7 @@ local state = {
     mp_screen_sizeX, mp_screen_sizeY,       -- last screen-resolution, to detect resolution changes to issue reINITs
     initREQ = false,                        -- is a re-init request pending?
     last_seek,                              -- last seek position, to avoid deadlocks by repeatedly seeking to the same position
+    last_mouseX, last_mouseY,                -- last mouse position, to detect siginificant mouse movement
     message_text,
     message_timeout,
 }
@@ -1004,6 +1008,9 @@ end
 
 function show_osc()
 
+    --remember last time of invokation (mouse move)
+    state.showtime = mp.get_timer()
+
     state.osc_visible = true
 
     if (user_opts.fadeduration > 0) then
@@ -1030,9 +1037,10 @@ function request_init()
     state.initREQ = true
 end
 
--- called by mpv on every frame
 function render()
     local current_screen_sizeX, current_screen_sizeY = mp.get_screen_size()
+    local mouseX, mouseY = mp.get_mouse_pos()
+    local now = mp.get_timer()
 
     if not (state.mp_screen_sizeX == current_screen_sizeX and state.mp_screen_sizeY == current_screen_sizeY) then
     -- display changed, reinit everything
@@ -1040,14 +1048,27 @@ function render()
         state.mp_screen_sizeX, state.mp_screen_sizeY = current_screen_sizeX, current_screen_sizeY
     end
 
+
     if state.initREQ then
         osc_init()
         state.initREQ = false
+
+        -- store initial mouse position
+        if (state.last_mouseX == nil or state.last_mouseY == nil) and not (mouseX == nil or mouseY == nil) then
+            state.last_mouseX, state.last_mouseY = mouseX, mouseY
+        end
     end
 
-    if not(state.anitype == nil) then
 
-        local now = mp.get_timer()
+
+    if not (state.showtime == nil) and (state.showtime + (user_opts.hidetimeout/1000) < now) and (state.active_element == nil)
+        and not (mouseX >= osc_param.posX - (osc_param.osc_w / 2) and mouseX <= osc_param.posX + (osc_param.osc_w / 2)
+            and mouseY >= osc_param.posY - (osc_param.osc_h / 2) and mouseY <= osc_param.posY + (osc_param.osc_h / 2)) then
+        hide_osc()
+    end
+
+
+    if not(state.anitype == nil) then
 
         if (state.anistart == nil) then
             state.anistart = now
@@ -1089,13 +1110,13 @@ function render()
     local area_y0, area_y1
     if user_opts.valign > 0 then
         -- deadzone above OSC
-        area_y0 = get_align(1 - user_opts.deadzonedist, osc_param.posY - (osc_param.osc_h / 2), 0, 0)
+        area_y0 = get_align(-1 + (2*user_opts.deadzonesize), osc_param.posY - (osc_param.osc_h / 2), 0, 0)
         area_y1 = osc_param.playresy
     else
         -- deadzone below OSC
         area_y0 = 0
         area_y1 = (osc_param.posY + (osc_param.osc_h / 2))
-         + get_align(-1 + user_opts.deadzonedist, osc_param.playresy - (osc_param.posY + (osc_param.osc_h / 2)), 0, 0)
+         + get_align(1 - (2*user_opts.deadzonesize), osc_param.playresy - (osc_param.posY + (osc_param.osc_h / 2)), 0, 0)
     end
 
     --mouse show/hide area
@@ -1155,7 +1176,11 @@ function process_event(source, what)
         state.last_seek = nil
 
     elseif source == "mouse_move" then
-        show_osc()
+        local mouseX, mouseY = mp.get_mouse_pos()
+        if (math.abs(mouseX - state.last_mouseX) >= user_opts.minmousemove) or (math.abs(mouseY - state.last_mouseY) >= user_opts.minmousemove) then
+            show_osc()
+        end
+        state.last_mouseX, state.last_mouseY = mouseX, mouseY
 
         if not (state.active_element == nil) then
 
@@ -1169,6 +1194,8 @@ function process_event(source, what)
         end
     end
 end
+
+-- called by mpv on every frame
 
 function tick()
     if (mp.property_get("fullscreen") == "yes" and user_opts.showFullscreen) or (mp.property_get("fullscreen") == "no" and user_opts.showWindowed) then
