@@ -143,11 +143,6 @@ static int preinit(struct vo *vo)
 
 static int control(struct vo *vo, uint32_t request, void *data)
 {
-    switch (request) {
-    // prevent random frame stepping by frontend
-    case VOCTRL_REDRAW_FRAME:
-        return true;
-    }
     return VO_NOTIMPL;
 }
 

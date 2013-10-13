@@ -3377,13 +3377,8 @@ static bool handle_osd_redraw(struct MPContext *mpctx)
         want_redraw |= mpctx->osd->want_redraw;
     mpctx->osd->want_redraw = false;
     if (want_redraw) {
-        if (redraw_osd(mpctx)) {
+        if (redraw_osd(mpctx))
             return true;
-        } else if (mpctx->paused) {
-            // force redrawing OSD by framestepping
-            add_step_frame(mpctx, 1);
-            return true;
-        }
     }
     return false;
 }
