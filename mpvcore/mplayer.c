@@ -5009,6 +5009,9 @@ static int mpv_main(int argc, char *argv[])
 
 #ifdef CONFIG_ASS
     mpctx->ass_library = mp_ass_init(opts);
+#else
+    mp_msg(MSGT_CPLAYER, MSGL_WARN, "Compiled without libass.\n");
+    mp_msg(MSGT_CPLAYER, MSGL_WARN, "There will be no OSD and no text subs.\n");
 #endif
 
     mpctx->osd = osd_create(opts, mpctx->ass_library);
