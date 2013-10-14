@@ -860,6 +860,17 @@ static const char *backup_properties[] = {
     0
 };
 
+// Should follow what parser-cfg.c does/needs
+static bool needs_config_quoting(const char *s)
+{
+    for (int i = 0; s && s[i]; i++) {
+        unsigned char c = s[i];
+        if (!isprint(c) || isspace(c) || c == '#' || c == '\'' || c == '"')
+            return true;
+    }
+    return false;
+}
+
 void mp_write_watch_later_conf(struct MPContext *mpctx)
 {
     void *tmp = talloc_new(NULL);
@@ -889,8 +900,14 @@ void mp_write_watch_later_conf(struct MPContext *mpctx)
         const char *pname = backup_properties[i];
         char *val = NULL;
         int r = mp_property_do(pname, M_PROPERTY_GET_STRING, &val, mpctx);
-        if (r == M_PROPERTY_OK)
-            fprintf(file, "%s=%s\n", pname, val);
+        if (r == M_PROPERTY_OK) {
+            if (needs_config_quoting(val)) {
+                // e.g. '%6%STRING'
+                fprintf(file, "%s=%%%d%%%s\n", pname, (int)strlen(val), val);
+            } else {
+                fprintf(file, "%s=%s\n", pname, val);
+            }
+        }
         talloc_free(val);
     }
     fclose(file);
