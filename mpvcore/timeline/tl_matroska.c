@@ -539,7 +539,10 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     };
     MP_TARRAY_APPEND(NULL, timeline, part_count, new);
 
-    if (missing_time)
+    /* Ignore anything less than a millisecond when reporting missing time. If
+     * users really notice less than a millisecond missing, maybe this can be
+     * revisited. */
+    if (missing_time >= 1e6)
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "There are %.3f seconds missing "
                "from the timeline!\n", missing_time / 1e9);
     talloc_free(mpctx->sources);
