@@ -391,8 +391,37 @@ static void build_timeline_loop(struct MPOpts *opts,
             /* If we're the source or it's a non-ordered edition reference,
              * just add a timeline part from the source. */
             if (current_source == j || !linked_m->num_ordered_chapters) {
-                int64_t join_diff = add_timeline_part(opts, linked_source, timeline, part_count,
-                                                      c->start, last_end_time, starttime);
+                double source_full_length_seconds = demuxer_get_time_length(linked_source);
+                /* Some accuracy lost, but not enough to care. (Over one
+                 * million parts, a nanosecond off here could add up to a
+                 * millisecond and trigger a false-positive error message, but
+                 * if that's your biggest problem at that point,
+                 * congratulations. */
+                uint64_t source_full_length = source_full_length_seconds * 1e9;
+                uint64_t source_length = source_full_length - c->start;
+                int64_t join_diff = 0;
+
+                /* If the chapter starts after the end of a source, there's
+                 * nothing we can get from it. Instead, mark the entire chapter
+                 * as missing and make the chapter length 0. */
+                if (source_full_length <= c->start) {
+                    *missing_time += chapter_length;
+                    chapter_length = 0;
+                    goto found;
+                }
+
+                /* If the source length starting at the chapter start is
+                 * shorter than the chapter it is supposed to fill, add the gap
+                 * to missing_time. Also, modify the chapter length to be what
+                 * we actually have to avoid playing off the end of the file
+                 * and not switching to the next source. */
+                if (source_length < chapter_length) {
+                    *missing_time += chapter_length - source_length;
+                    chapter_length = source_length;
+                }
+
+                join_diff = add_timeline_part(opts, linked_source, timeline, part_count,
+                                              c->start, last_end_time, starttime);
 
                 /* If we merged two chapters into a single part due to them
                  * being off by a few frames, we need to change the limit to
