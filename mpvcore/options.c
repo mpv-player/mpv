@@ -802,6 +802,7 @@ const struct MPOpts mp_default_opts = {
     .osd_bar_w = 75.0,
     .osd_bar_h = 3.125,
     .osd_scale = 1,
+    .lua_load_osc = 1,
     .loop_times = -1,
     .ordered_chapters = 1,
     .chapter_merge_threshold = 100,
