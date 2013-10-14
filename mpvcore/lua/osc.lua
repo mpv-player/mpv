@@ -20,8 +20,8 @@ local user_opts = {
     halign = 0,                             -- horizontal alignment, -1 (left) to 1 (right)
     hidetimeout = 500,                      -- duration in ms until the OSC hides if no mouse movement
     fadeduration = 200,                     -- duration of fade out in ms, 0 = no fade
-    deadzonesize = 0,                    -- distance between OSC and deadzone
-    minmousemove = 1,                       -- minimum amount of pixeles the mouse has to move between ticks to make the OSC show up
+    deadzonesize = 0,                       -- size of deadzone
+    minmousemove = 3,                       -- minimum amount of pixeles the mouse has to move between ticks to make the OSC show up
     iAmAProgrammer = false,                 -- use native mpv values and disable OSC internal playlist management (and some functions that depend on it)
 }
 
@@ -1123,10 +1123,15 @@ function render()
     mp.set_mouse_area(0, area_y0, osc_param.playresx, area_y1, "showhide")
 
     --mouse input area
-    mp.set_mouse_area(
-        osc_param.posX - (osc_param.osc_w / 2), osc_param.posY - (osc_param.osc_h / 2),
-        osc_param.posX + (osc_param.osc_w / 2), osc_param.posY + (osc_param.osc_h / 2),
-        "input")
+    if state.osc_visible then -- activate only when OSC is actually visible
+        mp.set_mouse_area(
+            osc_param.posX - (osc_param.osc_w / 2), osc_param.posY - (osc_param.osc_h / 2),
+            osc_param.posX + (osc_param.osc_w / 2), osc_param.posY + (osc_param.osc_h / 2),
+            "input")
+        mp.enable_key_bindings("input")
+    else
+        mp.disable_key_bindings("input")
+    end
 
 end
 
