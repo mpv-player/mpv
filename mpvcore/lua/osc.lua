@@ -18,7 +18,7 @@ local user_opts = {
     vidscale = true,                        -- scale the controller with the video?
     valign = 0.8,                           -- vertical alignment, -1 (top) to 1 (bottom)
     halign = 0,                             -- horizontal alignment, -1 (left) to 1 (right)
-    hidetimeout = 500,                      -- duration in ms until the OSC hides if no mouse movement
+    hidetimeout = 500,                      -- duration in ms until the OSC hides if no mouse movement, negative value disables autohide
     fadeduration = 200,                     -- duration of fade out in ms, 0 = no fade
     deadzonesize = 0,                       -- size of deadzone
     minmousemove = 3,                       -- minimum amount of pixeles the mouse has to move between ticks to make the OSC show up
@@ -121,16 +121,7 @@ function read_config(options, identifier)
     local conffile = mp.find_config_file(conffilename)
     local f = io.open(conffile,"r")
     if f == nil then
-        msg.info(conffile.." does not exist, creating it ...")
-        -- so create it, write default options
-        local f = io.open(conffile,"w+")
-        f:write("# Config file for "..identifier.."\n# <-- works only at beginning of line.\n# Do not have any spare spaces flying around.\n\n")
-        -- iterate over the options table
-        for key, value in pairs(options) do
-            f:write("#" .. key .. "=" .. val2str(value) .. "\n")
-        end
-        io.close(f)
-
+        -- config not found
     else
         -- config exists, read values
         local linecounter = 1
@@ -1042,13 +1033,13 @@ function render()
     local mouseX, mouseY = mp.get_mouse_pos()
     local now = mp.get_timer()
 
+    -- check if display changed, if so request reinit
     if not (state.mp_screen_sizeX == current_screen_sizeX and state.mp_screen_sizeY == current_screen_sizeY) then
-    -- display changed, reinit everything
         request_init()
         state.mp_screen_sizeX, state.mp_screen_sizeY = current_screen_sizeX, current_screen_sizeY
     end
 
-
+    -- init management
     if state.initREQ then
         osc_init()
         state.initREQ = false
@@ -1059,22 +1050,21 @@ function render()
         end
     end
 
-
-
+    -- autohide
     if not (state.showtime == nil) and (user_opts.hidetimeout >= 0) and (state.showtime + (user_opts.hidetimeout/1000) < now) and (state.active_element == nil)
         and not (mouseX >= osc_param.posX - (osc_param.osc_w / 2) and mouseX <= osc_param.posX + (osc_param.osc_w / 2)
             and mouseY >= osc_param.posY - (osc_param.osc_h / 2) and mouseY <= osc_param.posY + (osc_param.osc_h / 2)) then
         hide_osc()
     end
 
-
+    -- fade animation
     if not(state.anitype == nil) then
 
         if (state.anistart == nil) then
             state.anistart = now
         end
 
-        if (now < state.anistart + (user_opts.fadeduration/1000)  ) then
+        if (now < state.anistart + (user_opts.fadeduration/1000)) then
 
             if (state.anitype == "in") then --fade in
                 state.osc_visible = true
@@ -1095,14 +1085,18 @@ function render()
         state.anitype =  nil
     end
 
+    -- actual rendering
     local ass = assdraw.ass_new()
 
+    -- Messages
     render_message(ass)
 
+    -- actual OSC
     if state.osc_visible then
         render_elements(ass)
     end
 
+    -- submit
     local w, h, aspect = mp.get_screen_size()
     mp.set_osd_ass(osc_param.playresy * aspect, osc_param.playresy, ass.text)
 
@@ -1182,7 +1176,9 @@ function process_event(source, what)
 
     elseif source == "mouse_move" then
         local mouseX, mouseY = mp.get_mouse_pos()
-        if (math.abs(mouseX - state.last_mouseX) >= user_opts.minmousemove) or (math.abs(mouseY - state.last_mouseY) >= user_opts.minmousemove) then
+        if (user_opts.minmousemove == 0)
+            or ((math.abs(mouseX - state.last_mouseX) >= user_opts.minmousemove)
+             or (math.abs(mouseY - state.last_mouseY) >= user_opts.minmousemove)) then
             show_osc()
         end
         state.last_mouseX, state.last_mouseY = mouseX, mouseY
@@ -1201,7 +1197,6 @@ function process_event(source, what)
 end
 
 -- called by mpv on every frame
-
 function tick()
     if (mp.property_get("fullscreen") == "yes" and user_opts.showFullscreen) or (mp.property_get("fullscreen") == "no" and user_opts.showWindowed) then
         render()
