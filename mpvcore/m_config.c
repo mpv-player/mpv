@@ -726,10 +726,10 @@ struct m_profile *m_config_add_profile(struct m_config *config, char *name)
     return p;
 }
 
-void m_profile_set_desc(struct m_profile *p, char *desc)
+void m_profile_set_desc(struct m_profile *p, bstr desc)
 {
     talloc_free(p->desc);
-    p->desc = talloc_strdup(p, desc);
+    p->desc = bstrdup0(p, desc);
 }
 
 int m_config_set_profile_option(struct m_config *config, struct m_profile *p,

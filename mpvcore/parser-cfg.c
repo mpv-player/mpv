@@ -229,7 +229,7 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
         bstr bparam = bstr0(param);
 
         if (profile && bstr_equals0(bopt, "profile-desc")) {
-            m_profile_set_desc(profile, param);
+            m_profile_set_desc(profile, bparam);
             goto nextline;
         }
 
@@ -239,8 +239,8 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
         if (tmp < 0) {
             PRINT_LINENUM;
             mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                   "error parsing option %s=%s: %s\n",
-                   opt, param, m_option_strerror(tmp));
+                   "error parsing option %.*s=%.*s: %s\n",
+                   BSTR_P(bopt), BSTR_P(bparam), m_option_strerror(tmp));
             continue;
         }
 
@@ -252,7 +252,8 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
         if (tmp < 0) {
             PRINT_LINENUM;
             mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-                   "setting option %s='%s' failed.\n", opt, param);
+                   "setting option %.*s='%.*s' failed.\n",
+                   BSTR_P(bopt), BSTR_P(bparam));
             continue;
             /* break */
         }
