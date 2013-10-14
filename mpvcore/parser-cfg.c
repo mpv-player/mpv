@@ -173,20 +173,44 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
                     }
                 }
                 line_pos++;                 /* skip the closing " or ' */
-            } else {
-                for (param_pos = 0; isprint(line[line_pos])
-                        && !isspace(line[line_pos])
-                        && line[line_pos] != '#'; /* NOTHING */) {
-                    param[param_pos++] = line[line_pos++];
-                    if (param_pos >= MAX_PARAM_LEN) {
+                goto param_done;
+            }
+
+            if (line[line_pos] == '%') {
+                char *start = &line[line_pos + 1];
+                char *end = start;
+                unsigned long len = strtoul(start, &end, 10);
+                if (start != end && end[0] == '%') {
+                    if (len >= MAX_PARAM_LEN - 1 ||
+                        strlen(end + 1) < len)
+                    {
                         PRINT_LINENUM;
-                        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "too long parameter\n");
+                        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "bogus %% length\n");
                         ret = -1;
                         errors++;
                         goto nextline;
                     }
+                    param_pos = snprintf(param, sizeof(param), "%.*s",
+                                         (int)len, end + 1);
+                    line_pos += 1 + (end - start) + 1 + len;
+                    goto param_done;
                 }
             }
+
+            for (param_pos = 0; isprint(line[line_pos])
+                    && !isspace(line[line_pos])
+                    && line[line_pos] != '#'; /* NOTHING */) {
+                param[param_pos++] = line[line_pos++];
+                if (param_pos >= MAX_PARAM_LEN) {
+                    PRINT_LINENUM;
+                    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "too long parameter\n");
+                    ret = -1;
+                    errors++;
+                    goto nextline;
+                }
+            }
+
+        param_done:
 
             while (isspace(line[line_pos]))
                 ++line_pos;
