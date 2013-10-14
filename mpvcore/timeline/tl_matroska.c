@@ -299,13 +299,13 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
     return *num_sources;
 }
 
-static void add_timeline_part(struct MPOpts *opts,
-                              struct demuxer *source,
-                              struct timeline_part **timeline,
-                              int *part_count,
-                              uint64_t start,
-                              uint64_t *last_end_time,
-                              uint64_t *starttime)
+static int64_t add_timeline_part(struct MPOpts *opts,
+                                 struct demuxer *source,
+                                 struct timeline_part **timeline,
+                                 int *part_count,
+                                 uint64_t start,
+                                 uint64_t *last_end_time,
+                                 uint64_t *starttime)
 {
     /* Only add a separate part if the time or file actually changes.
      * Matroska files have chapter divisions that are redundant from
@@ -331,7 +331,10 @@ static void add_timeline_part(struct MPOpts *opts,
         mp_msg(MSGT_CPLAYER, MSGL_V, "Merging timeline part %d with "
                "offset %g ms.\n", *part_count, join_diff / 1e6);
         *starttime += join_diff;
+        return join_diff;
     }
+
+    return 0;
 }
 
 static void build_timeline_loop(struct MPOpts *opts,
@@ -388,8 +391,19 @@ static void build_timeline_loop(struct MPOpts *opts,
             /* If we're the source or it's a non-ordered edition reference,
              * just add a timeline part from the source. */
             if (current_source == j || !linked_m->num_ordered_chapters) {
-                add_timeline_part(opts, linked_source, timeline, part_count,
-                                  c->start, last_end_time, starttime);
+                int64_t join_diff = add_timeline_part(opts, linked_source, timeline, part_count,
+                                                      c->start, last_end_time, starttime);
+
+                /* If we merged two chapters into a single part due to them
+                 * being off by a few frames, we need to change the limit to
+                 * avoid chopping the end of the intended chapter (the adding
+                 * frames case) or showing extra content (the removing frames
+                 * case). Also update chapter_length to incorporate the extra
+                 * time. */
+                if (limit) {
+                    limit += join_diff;
+                    chapter_length += join_diff;
+                }
             /* Otherwise, we have an ordered edition as the source. Since this
              * can jump around all over the place, we need to build up the
              * timeline parts for each of its chapters, but not add them as
