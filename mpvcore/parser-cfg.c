@@ -228,6 +228,9 @@ int m_config_parse_config_file(m_config_t *config, const char *conffile,
         bstr bopt = bstr0(opt);
         bstr bparam = bstr0(param);
 
+        if (bopt.len >= 3)
+            bstr_eatstart0(&bopt, "--");
+
         if (profile && bstr_equals0(bopt, "profile-desc")) {
             m_profile_set_desc(profile, bparam);
             goto nextline;
