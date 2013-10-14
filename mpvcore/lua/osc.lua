@@ -121,7 +121,7 @@ function read_config(options, identifier)
     local conffile = mp.find_config_file(conffilename)
     local f = io.open(conffile,"r")
     if f == nil then
-        msg.warn(conffile.." does not exist, creating it ...")
+        msg.info(conffile.." does not exist, creating it ...")
         -- so create it, write default options
         local f = io.open(conffile,"w+")
         f:write("# Config file for "..identifier.."\n# <-- works only at beginning of line.\n# Do not have any spare spaces flying around.\n\n")
