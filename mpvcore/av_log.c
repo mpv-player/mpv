@@ -41,6 +41,13 @@
 #include <libavfilter/avfilter.h>
 #endif
 
+#ifdef CONFIG_LIBAVRESAMPLE
+#include <libavresample/avresample.h>
+#endif
+#ifdef CONFIG_LIBSWRESAMPLE
+#include <libswresample/swresample.h>
+#endif
+
 static int av_log_level_to_mp_level(int av_level)
 {
     if (av_level > AV_LOG_VERBOSE)
@@ -140,22 +147,30 @@ void init_libav(void)
 }
 
 #define V(x) (x)>>16, (x)>>8 & 255, (x) & 255
-static void print_version(char *name, unsigned buildv, unsigned runv)
+static void print_version(int v, char *name, unsigned buildv, unsigned runv)
 {
-
-    if (buildv == runv)
-        mp_msg(MSGT_CPLAYER, MSGL_V, "Compiled against %s version %d.%d.%d\n",
-               name, V(buildv));
-    else
-        mp_msg(MSGT_CPLAYER, MSGL_V, "Compiled against %s version %d.%d.%d "
-               "(runtime %d.%d.%d)\n", name, V(buildv), V(runv));
+    mp_msg(MSGT_CPLAYER, v, "   %-15s %d.%d.%d", name, V(buildv));
+    if (buildv != runv)
+        mp_msg(MSGT_CPLAYER, v, " (runtime %d.%d.%d)", V(runv));
+    mp_msg(MSGT_CPLAYER, v, "\n");
 }
 #undef V
 
-void print_libav_versions(void)
+void print_libav_versions(int v)
 {
-    print_version("libavutil", LIBAVUTIL_VERSION_INT, avutil_version());
-    print_version("libavcodec", LIBAVCODEC_VERSION_INT, avcodec_version());
-    print_version("libavformat", LIBAVFORMAT_VERSION_INT, avformat_version());
-    print_version("libswscale", LIBSWSCALE_VERSION_INT, swscale_version());
+    mp_msg(MSGT_CPLAYER, v, "%s library versions:\n", LIB_PREFIX);
+
+    print_version(v, "libavutil",     LIBAVUTIL_VERSION_INT,     avutil_version());
+    print_version(v, "libavcodec",    LIBAVCODEC_VERSION_INT,    avcodec_version());
+    print_version(v, "libavformat",   LIBAVFORMAT_VERSION_INT,   avformat_version());
+    print_version(v, "libswscale",    LIBSWSCALE_VERSION_INT,    swscale_version());
+#ifdef CONFIG_LIBAVFILTER
+    print_version(v, "libavfilter",   LIBAVFILTER_VERSION_INT,   avfilter_version());
+#endif
+#ifdef CONFIG_LIBAVRESAMPLE
+    print_version(v, "libavresample", LIBAVRESAMPLE_VERSION_INT, avresample_version());
+#endif
+#ifdef CONFIG_LIBSWRESAMPLE
+    print_version(v, "libswresample", LIBSWRESAMPLE_VERSION_INT, swresample_version());
+#endif
 }

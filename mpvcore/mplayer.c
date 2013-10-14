@@ -4822,8 +4822,11 @@ void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e)
 
 void mp_print_version(int always)
 {
-    mp_msg(MSGT_CPLAYER, always ? MSGL_INFO : MSGL_V,
+    int v = always ? MSGL_INFO : MSGL_V;
+    mp_msg(MSGT_CPLAYER, v,
            "%s (C) 2000-2013 mpv/MPlayer/mplayer2 projects\n built on %s\n", mplayer_version, mplayer_builddate);
+    print_libav_versions(v);
+    mp_msg(MSGT_CPLAYER, v, "\n");
 }
 
 static bool handle_help_options(struct MPContext *mpctx)
@@ -4950,7 +4953,6 @@ static int mpv_main(int argc, char *argv[])
     m_config_preparse_command_line(mpctx->mconfig, argc, argv);
 
     mp_print_version(false);
-    print_libav_versions();
 
     if (!parse_cfgfiles(mpctx, mpctx->mconfig))
         exit_player(mpctx, EXIT_ERROR);
