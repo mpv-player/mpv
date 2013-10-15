@@ -147,7 +147,7 @@ Command Line Switches
     ``-xineramascreen``         ``--screen`` (different values)
     ``-ss``                     ``--start``
     ``-endpos``                 ``--length``
-    ``--cursor-autohide-delay`` ``--cursor-autohide``
+    ``-cursor-autohide-delay``  ``--cursor-autohide``
     ``-sub-fuzziness``          ``--autosub-match``
     ``-subfont``                ``--sub-text-font``
     ``-font``                   ``--osd-font``
@@ -170,10 +170,12 @@ Command Line Switches
     ``-lavfdopts``              ``--demuxer-lavf-...``
     ``-rawaudio ...``           ``--demuxer-rawaudio-...``
     ``-rawvideo ...``           ``--demuxer-rawvideo-...``
-    ``--mixer``                 AO suboptions (``alsa``, ``oss``)
-    ``--mixer-channel``         AO suboptions (``alsa``, ``oss``)
-    ``--ao=alsa:device=hw=0.3`` ``--ao=alsa:device=[hw:0,3]``
+    ``-mixer``                  AO suboptions (``alsa``, ``oss``)
+    ``-mixer-channel``          AO suboptions (``alsa``, ``oss``)
+    ``-ao alsa:device=hw=0.3``  ``--ao=alsa:device=[hw:0,3]``
     ``-af volnorm``             ``--af=drc`` (renamed)
+    ``-zoom``                   Inverse available as ``--video-unscaled``
+    ``-panscanrange``           ``--video-zoom``, ``--video-pan-x/y``
     =========================== ========================================
 
 .. note::
