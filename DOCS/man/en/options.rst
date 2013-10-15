@@ -1,3 +1,6 @@
+OPTIONS
+=======
+
 ``--ad=<[+|-]family1:(*|decoder1),[+|-]family2:(*|decoder2),...[-]>``
     Specify a priority list of audio decoders to be used, according to their
     family and decoder name. Entries like ``family:*`` prioritize all decoders

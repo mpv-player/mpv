@@ -424,9 +424,6 @@ taking screenshots is handled by the VOs, and adding the screenshot filter will
 break hardware decoding. (The filter may still be useful for taking screenshots
 at a certain point within the video chain when using multiple video filters.)
 
-OPTIONS
-=======
-
 .. include:: options.rst
 
 .. include:: ao.rst
@@ -440,6 +437,8 @@ OPTIONS
 .. include:: encode.rst
 
 .. include:: input.rst
+
+.. include:: osc.rst
 
 .. include:: lua.rst
 
