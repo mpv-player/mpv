@@ -779,9 +779,6 @@ int vo_x11_check_events(struct vo *vo)
         case MotionNotify:
             vo_mouse_movement(vo, Event.xmotion.x, Event.xmotion.y);
             break;
-        case EnterNotify:
-            vo_mouse_movement(vo, Event.xcrossing.x, Event.xcrossing.y);
-            break;
         case LeaveNotify:
             mp_input_put_key(vo->input_ctx, MP_KEY_MOUSE_LEAVE);
             break;
@@ -1121,8 +1118,7 @@ static void vo_x11_map_window(struct vo *vo, int x, int y, int w, int h)
                                StructureNotifyMask | ExposureMask |
                                KeyPressMask | KeyReleaseMask |
                                ButtonPressMask | ButtonReleaseMask |
-                               PointerMotionMask | EnterWindowMask |
-                               LeaveWindowMask);
+                               PointerMotionMask | LeaveWindowMask);
     XMapWindow(x11->display, x11->window);
     vo_x11_clearwindow(vo, x11->window);
 }
