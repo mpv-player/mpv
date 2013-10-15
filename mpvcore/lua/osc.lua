@@ -21,7 +21,7 @@ local user_opts = {
     hidetimeout = 500,                      -- duration in ms until the OSC hides if no mouse movement, negative value disables autohide
     fadeduration = 200,                     -- duration of fade out in ms, 0 = no fade
     deadzonesize = 0,                       -- size of deadzone
-    minmousemove = 3,                       -- minimum amount of pixeles the mouse has to move between ticks to make the OSC show up
+    minmousemove = 3,                       -- minimum amount of pixels the mouse has to move between ticks to make the OSC show up
     iAmAProgrammer = false,                 -- use native mpv values and disable OSC internal playlist management (and some functions that depend on it)
 }
 
@@ -1022,6 +1022,8 @@ end
 
 function mouse_leave()
     hide_osc()
+    -- reset mouse position
+    state.last_mouseX, state.last_mouseY = nil, nil
 end
 
 function request_init()
@@ -1176,9 +1178,12 @@ function process_event(source, what)
 
     elseif source == "mouse_move" then
         local mouseX, mouseY = mp.get_mouse_pos()
-        if (user_opts.minmousemove == 0)
-            or ((math.abs(mouseX - state.last_mouseX) >= user_opts.minmousemove)
-             or (math.abs(mouseY - state.last_mouseY) >= user_opts.minmousemove)) then
+        if (user_opts.minmousemove == 0) or
+            (not ((state.last_mouseX == nil) or (state.last_mouseY == nil)) and
+                ((math.abs(mouseX - state.last_mouseX) >= user_opts.minmousemove)
+                    or (math.abs(mouseY - state.last_mouseY) >= user_opts.minmousemove)
+                )
+            ) then
             show_osc()
         end
         state.last_mouseX, state.last_mouseY = mouseX, mouseY
