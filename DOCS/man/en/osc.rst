@@ -5,6 +5,9 @@ The On Screen Controller (short: OSC) is a minimal GUI integrated with mpv to
 offer basic mouse-controllability. It is intended to make interaction easier
 for new users and to enable precise and direct seeking.
 
+The OSC is enabled by default if mpv was compiled with lua support. It can be
+disabled using ``--osc=no``.
+
 Using the OSC
 -------------
 
