@@ -15,17 +15,19 @@ player window and will hide if the mouse is not moved outside the OSC for
 The Interface
 ~~~~~~~~~~~~~
 
-+------------------------------+-----------+--------------------------------+
-| playlist prev                |   title   |                  playlist next |
-+-------+-----------+----------++------+---+-------+-----------+------------+
-| audio |           |           |      |           |           |            |
-+-------+ skip back | seek back | play | seek frwd | skip frwd | fullscreen |
-| sub   |           |           |      |           |           |            |
-+-------+-----------+-----------+------+-----------+-----------+------------+
-|                                 seekbar                                   |
-+-----------------------------+--------------+------------------------------+
-| time passed                 | cache status |               time remaining |
-+-----------------------------+--------------+------------------------------+
+::
+
+    +------------------+-----------+--------------------+
+    | playlist prev    |   title   |      playlist next |
+    +-------+------+---+--+------+-+----+------+--------+
+    | audio | skip | seek |      | seek | skip |  full  |
+    +-------+ back | back | play | frwd | frwd | screen |
+    | sub   |      |      |      |      |      |        |
+    +-------+------+------+------+------+------+--------+
+    |                     seekbar                       |
+    +----------------+--------------+-------------------+
+    | time passed    | cache status |    time remaining |
+    +----------------+--------------+-------------------+
 
 
 playlist prev
@@ -36,6 +38,7 @@ playlist prev
 
 title
     | Displays current media-title or filename
+
     =============   ================================================
     left-click      show playlist position and length and full title
     right-click     show filename
@@ -49,6 +52,7 @@ playlist next
 
 audio and sub
     | Displays selected track and amount of available tracks
+
     =============   ================================================
     left-click      cycle audio/sub tracks forward
     right-click     cycle audio/sub tracks backwards
@@ -93,12 +97,14 @@ fullscreen
 
 seekbar
     | Indicates current playback position and position of chapters
+
     =============   ================================================
     left-click      seek to position
     =============   ================================================
 
 time passed
     | Shows current playback position timestamp
+
     =============   ================================================
     left-click      toggle displaying timecodes with milliseconds
     =============   ================================================
@@ -108,6 +114,7 @@ cache status
 
 time remaining
     | Shows remaining playback time timestamp
+
     =============   ================================================
     left-click      toggle between total and remaining time
     =============   ================================================
