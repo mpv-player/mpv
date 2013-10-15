@@ -10,11 +10,11 @@ local msg = require 'mp.msg'
 -- default user option values
 -- do not touch, change them in plugin_osc.conf
 local user_opts = {
-    show-windowed = true,                    -- show OSC when windowed?
-    show-fullscreen = true,                  -- show OSC when fullscreen?
-    scale-windowed = 1,                      -- scaling of the controller when windowed
-    scale-fullscreen = 1,                    -- scaling of the controller when fullscreen
-    scale-forcedwindow = 2,                  -- scaling of the controller when rendered on a forced (dummy) window
+    showwindowed = true,                    -- show OSC when windowed?
+    showfullscreen = true,                  -- show OSC when fullscreen?
+    scalewindowed = 1,                      -- scaling of the controller when windowed
+    scalefullscreen = 1,                    -- scaling of the controller when fullscreen
+    scaleforcedwindow = 2,                  -- scaling of the controller when rendered on a forced (dummy) window
     vidscale = true,                        -- scale the controller with the video?
     valign = 0.8,                           -- vertical alignment, -1 (top) to 1 (bottom)
     halign = 0,                             -- horizontal alignment, -1 (left) to 1 (right)
@@ -222,7 +222,7 @@ function get_slider_value(element)
 end
 
 function countone(val)
-    if not (user_opts.iAmAProgrammer) then
+    if not (user_opts.iamaprogrammer) then
         val = val + 1
     end
     return val
@@ -642,11 +642,11 @@ function osc_init()
     local scale = 1
 
     if (mp.property_get("video") == "no") then -- dummy/forced window
-        scale = user_opts.scaleForcedWindow
+        scale = user_opts.scaleforcedwindow
     elseif (mp.property_get("fullscreen") == "yes") then
-        scale = user_opts.scaleFullscreen
+        scale = user_opts.scalefullscreen
     else
-        scale = user_opts.scaleWindowed
+        scale = user_opts.scalewindowed
     end
 
 
@@ -791,7 +791,7 @@ function osc_init()
     -- Smaller buttons
     --
 
-    if not (user_opts.iAmAProgrammer) then
+    if not (user_opts.iamaprogrammer) then
         update_tracklist()
     end
 
@@ -801,7 +801,7 @@ function osc_init()
     local eventresponder = {}
     local contentF
 
-    if not (user_opts.iAmAProgrammer) then
+    if not (user_opts.iamaprogrammer) then
         metainfo.enabled = (#tracks_osc.audio > 0)
 
         contentF = function (ass)
@@ -838,7 +838,7 @@ function osc_init()
     local eventresponder = {}
     local contentF
 
-    if not (user_opts.iAmAProgrammer) then
+    if not (user_opts.iamaprogrammer) then
         metainfo.enabled = (#tracks_osc.sub > 0)
 
         contentF = function (ass)
@@ -1203,7 +1203,7 @@ end
 
 -- called by mpv on every frame
 function tick()
-    if (mp.property_get("fullscreen") == "yes" and user_opts.showFullscreen) or (mp.property_get("fullscreen") == "no" and user_opts.showWindowed) then
+    if (mp.property_get("fullscreen") == "yes" and user_opts.showfullscreen) or (mp.property_get("fullscreen") == "no" and user_opts.showwindowed) then
         render()
     else
         mp.set_osd_ass(osc_param.playresy, osc_param.playresy, "")
