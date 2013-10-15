@@ -10,11 +10,11 @@ local msg = require 'mp.msg'
 -- default user option values
 -- do not touch, change them in plugin_osc.conf
 local user_opts = {
-    showWindowed = true,                    -- show OSC when windowed?
-    showFullscreen = true,                  -- show OSC when fullscreen?
-    scaleWindowed = 1,                      -- scaling of the controller when windowed
-    scaleFullscreen = 1,                    -- scaling of the controller when fullscreen
-    scaleForcedWindow = 2,                  -- scaling of the controller when rendered on a forced (dummy) window
+    show-windowed = true,                    -- show OSC when windowed?
+    show-fullscreen = true,                  -- show OSC when fullscreen?
+    scale-windowed = 1,                      -- scaling of the controller when windowed
+    scale-fullscreen = 1,                    -- scaling of the controller when fullscreen
+    scale-forcedwindow = 2,                  -- scaling of the controller when rendered on a forced (dummy) window
     vidscale = true,                        -- scale the controller with the video?
     valign = 0.8,                           -- vertical alignment, -1 (top) to 1 (bottom)
     halign = 0,                             -- horizontal alignment, -1 (left) to 1 (right)
@@ -22,7 +22,7 @@ local user_opts = {
     fadeduration = 200,                     -- duration of fade out in ms, 0 = no fade
     deadzonesize = 0,                       -- size of deadzone
     minmousemove = 3,                       -- minimum amount of pixels the mouse has to move between ticks to make the OSC show up
-    iAmAProgrammer = false,                 -- use native mpv values and disable OSC internal playlist management (and some functions that depend on it)
+    iamaprogrammer = false,                 -- use native mpv values and disable OSC internal playlist management (and some functions that depend on it)
 }
 
 local osc_param = {
