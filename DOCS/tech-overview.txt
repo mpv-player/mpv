@@ -76,6 +76,12 @@ talloc.h & talloc.c:
           replacement. It works on top of system malloc and provides additional
           features that are supposed to make memory management easier.
 
+    Warning: actually, we're not using talloc anymore. talloc in mpv has been
+             replaced by a custom re-implementation (TA in ta/). It provides
+             some talloc emulation (just the parts needed by mpv). We will get
+             rid of the talloc emulation later and use TA natively.
+             (See ta/README for details.)
+
 mpvcore/mp_core.h:
     Data structures for mplayer.c and command.c. They are usually not accessed
     by other parts of mpv for the sake of modularization.
