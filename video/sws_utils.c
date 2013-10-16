@@ -24,6 +24,7 @@
 
 #include "sws_utils.h"
 
+#include "mpvcore/mp_common.h"
 #include "video/mp_image.h"
 #include "video/img_format.h"
 #include "fmt-conversion.h"
@@ -327,7 +328,7 @@ int mp_sws_set_vf_equalizer(struct mp_sws_context *sws, struct vf_seteq *eq)
     if (!strcmp(eq->item, "brightness"))
         sws->brightness = ((eq->value << 16) + 50) / 100;
     else if (!strcmp(eq->item, "contrast"))
-        sws->contrast   = (((eq->value + 100) << 16) + 50) / 100;
+        sws->contrast   = MPMAX(1, (((eq->value + 100) << 16) + 50) / 100);
     else if (!strcmp(eq->item, "saturation"))
         sws->saturation = (((eq->value + 100) << 16) + 50) / 100;
     else
