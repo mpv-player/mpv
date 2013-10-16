@@ -469,6 +469,9 @@ static void build_timeline_loop(struct MPOpts *opts,
         /* We're missing a part of the chapter, so add it to the accounting. */
         account_missing_time(missing_time, chapter_length,
                 "the source for a chapter could not be found");
+        /* We don't have the source, but don't leave a gap in the timeline for
+         * the source. */
+        chapter_length = 0;
     found:;
         *starttime += chapter_length;
         /* If we're after the limit on this chapter, stop here. */
