@@ -337,6 +337,19 @@ static int64_t add_timeline_part(struct MPOpts *opts,
     return 0;
 }
 
+static void account_missing_time(uint64_t *total_time,
+                                 uint64_t new_time,
+                                 const char *message)
+{
+    if (!new_time)
+        return;
+
+    *total_time += new_time;
+    mp_msg(MSGT_CPLAYER, MSGL_HINT,
+           "missing %"PRIu64" nanoseconds: %s\n",
+           new_time, message);
+}
+
 static void build_timeline_loop(struct MPOpts *opts,
                                 struct demuxer **sources,
                                 int num_sources,
@@ -405,7 +418,8 @@ static void build_timeline_loop(struct MPOpts *opts,
                  * nothing we can get from it. Instead, mark the entire chapter
                  * as missing and make the chapter length 0. */
                 if (source_full_length <= c->start) {
-                    *missing_time += chapter_length;
+                    account_missing_time(missing_time, chapter_length,
+                            "referenced segment ends before the requested start time");
                     chapter_length = 0;
                     goto found;
                 }
@@ -416,7 +430,8 @@ static void build_timeline_loop(struct MPOpts *opts,
                  * we actually have to avoid playing off the end of the file
                  * and not switching to the next source. */
                 if (source_length < chapter_length) {
-                    *missing_time += chapter_length - source_length;
+                    account_missing_time(missing_time, chapter_length - source_length,
+                            "referenced segment ends before the requested end time");
                     chapter_length = source_length;
                 }
 
@@ -452,7 +467,8 @@ static void build_timeline_loop(struct MPOpts *opts,
         }
 
         /* We're missing a part of the chapter, so add it to the accounting. */
-        *missing_time += chapter_length;
+        account_missing_time(missing_time, chapter_length,
+                "the source for a chapter could not be found");
     found:;
         *starttime += chapter_length;
         /* If we're after the limit on this chapter, stop here. */
@@ -465,7 +481,8 @@ static void build_timeline_loop(struct MPOpts *opts,
 
     /* If we stopped before the limit, add up the missing time. */
     if (local_starttime < limit)
-        *missing_time += limit - local_starttime;
+        account_missing_time(missing_time, limit - local_starttime,
+                "nested ordered chapter segment is shorter than the requested end time");
 }
 
 void build_ordered_chapter_timeline(struct MPContext *mpctx)
