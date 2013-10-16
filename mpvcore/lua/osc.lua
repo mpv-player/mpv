@@ -52,7 +52,7 @@ local osc_styles = {
 
 -- internal states, do not touch
 local state = {
-    showtime,                               -- time of last invokation (last mouse move)
+    showtime,                               -- time of last invocation (last mouse move)
     osc_visible = false,
     anistart,                               -- time when the animation started
     anitype,                                -- current type of animation
@@ -636,7 +636,7 @@ function osc_init()
     -- kill old Elements
     elements = {}
 
-    -- set canvas resolution acording to display aspect and scaling setting
+    -- set canvas resolution according to display aspect and scaling setting
     local baseResY = 720
     local display_w, display_h, display_aspect = mp.get_screen_size()
     local scale = 1
@@ -999,7 +999,7 @@ end
 
 function show_osc()
 
-    --remember last time of invokation (mouse move)
+    --remember last time of invocation (mouse move)
     state.showtime = mp.get_timer()
 
     state.osc_visible = true
