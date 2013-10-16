@@ -2108,7 +2108,7 @@ OPTIONS
 ``--stop-screensaver``, ``--no-stop-screensaver``
     Turns off the screensaver (or screen blanker and similar mechanisms) at
     startup and turns it on again on exit (default: yes). The screensaver is
-    always reenabled when the player is paused.
+    always re-enabled when the player is paused.
 
     This is not supported on all video outputs or platforms. Sometimes it is
     implemented, but does not work (happens often on GNOME). You might be able
