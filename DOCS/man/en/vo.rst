@@ -776,4 +776,4 @@ Available video output drivers are:
 
     ``alpha``
         Use a buffer format that supports videos and images with alpha
-        informations
+        information
