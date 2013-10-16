@@ -128,14 +128,19 @@ typedef struct demux_chapter
     uint64_t demuxer_id; // for mapping to internal demuxer data structures
 } demux_chapter_t;
 
+struct matroska_segment_uid {
+    unsigned char segment[16];
+    uint64_t edition;
+};
+
 struct matroska_data {
-    unsigned char segment_uid[16];
+    struct matroska_segment_uid uid;
     // Ordered chapter information if any
     struct matroska_chapter {
         uint64_t start;
         uint64_t end;
         bool has_segment_uid;
-        unsigned char segment_uid[16];
+        struct matroska_segment_uid uid;
         char *name;
     } *ordered_chapters;
     int num_ordered_chapters;
@@ -151,7 +156,7 @@ typedef struct demux_attachment
 
 struct demuxer_params {
     int matroska_num_wanted_uids;
-    unsigned char (*matroska_wanted_uids)[16];
+    struct matroska_segment_uid *matroska_wanted_uids;
     int matroska_wanted_segment;
     bool *matroska_was_valid;
     struct ass_library *ass_library;
@@ -300,5 +305,8 @@ void mp_tags_set_str(struct mp_tags *tags, const char *key, const char *value);
 void mp_tags_set_bstr(struct mp_tags *tags, bstr key, bstr value);
 char *mp_tags_get_str(struct mp_tags *tags, const char *key);
 char *mp_tags_get_bstr(struct mp_tags *tags, bstr key);
+
+bool demux_matroska_uid_cmp(struct matroska_segment_uid *a,
+                            struct matroska_segment_uid *b);
 
 #endif /* MPLAYER_DEMUXER_H */
