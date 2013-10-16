@@ -361,7 +361,7 @@ static int control(struct vf_instance *vf, int request, void *data)
             break;
         return CONTROL_TRUE;
     case VFCTRL_SET_EQUALIZER:
-        if (mp_sws_get_vf_equalizer(sws, data) < 1)
+        if (mp_sws_set_vf_equalizer(sws, data) < 1)
             break;
         return CONTROL_TRUE;
     default:
