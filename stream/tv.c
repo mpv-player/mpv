@@ -473,16 +473,10 @@ static int open_tv(tvi_handle_t *tvh)
     /* set some params got from cmdline */
     funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tvh->tv_param->input);
 
-#if defined(CONFIG_TV_V4L2)
-    if (0
-#ifdef CONFIG_TV_V4L2
-    || (!strcmp(tvh->tv_param->driver, "v4l2") && tvh->tv_param->normid >= 0)
-#endif
-    )
+    if ((!strcmp(tvh->tv_param->driver, "v4l2") && tvh->tv_param->normid >= 0))
 	tv_set_norm_i(tvh, tvh->tv_param->normid);
     else
-#endif
-    tv_set_norm(tvh,tvh->tv_param->norm);
+        tv_set_norm(tvh,tvh->tv_param->norm);
 
     /* limits on w&h are norm-dependent -- JM */
     if (tvh->tv_param->width != -1 && tvh->tv_param->height != -1) {
