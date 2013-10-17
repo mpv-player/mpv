@@ -18,6 +18,7 @@ local user_opts = {
     vidscale = true,                        -- scale the controller with the video?
     valign = 0.8,                           -- vertical alignment, -1 (top) to 1 (bottom)
     halign = 0,                             -- horizontal alignment, -1 (left) to 1 (right)
+    boxalpha = 80,                          -- alpha of the background box, 0 (opaque) to 255 (fully transparent)
     hidetimeout = 500,                      -- duration in ms until the OSC hides if no mouse movement, negative value disables autohide
     fadeduration = 200,                     -- duration of fade out in ms, 0 = no fade
     deadzonesize = 0,                       -- size of deadzone
@@ -675,8 +676,8 @@ function osc_init()
     --
 
     local metainfo = {}
-    metainfo.alpha1 = 80
-    metainfo.alpha3 = 80
+    metainfo.alpha1 = user_opts.boxalpha
+    metainfo.alpha3 = user_opts.boxalpha
     register_box(posX, posY, 5, osc_w, osc_h, osc_r, osc_styles.box, metainfo)
 
     --
