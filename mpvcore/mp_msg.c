@@ -30,11 +30,6 @@
 #include "osdep/getch2.h"
 #include "osdep/io.h"
 
-#ifdef CONFIG_GETTEXT
-#include <locale.h>
-#include <libintl.h>
-#endif
-
 #ifndef __MINGW32__
 #include <signal.h>
 #endif
@@ -122,14 +117,6 @@ static void mp_msg_do_init(void){
     for(i=0;i<MSGT_MAX;i++) mp_msg_levels[i] = -2;
     mp_msg_cancolor = isatty(fileno(stdout));
     mp_msg_levels[MSGT_IDENTIFY] = -1; // no -identify output by default
-#ifdef CONFIG_GETTEXT
-    textdomain("mpv");
-    char *localedir = getenv("MPV_LOCALEDIR");
-    if (localedir == NULL && strlen(MPLAYER_LOCALEDIR))
-        localedir = MPLAYER_LOCALEDIR;
-    bindtextdomain("mpv", localedir);
-    bind_textdomain_codeset("mpv", "UTF-8");
-#endif
 }
 
 int mp_msg_test(int mod, int lev)
@@ -269,67 +256,6 @@ void mp_msg(int mod, int lev, const char *format, ...)
     va_end(va);
 }
 
-char *mp_gtext(const char *string)
-{
-#ifdef CONFIG_GETTEXT
-    /* gettext expects the global locale to be set with
-     * setlocale(LC_ALL, ""). However doing that would suck for a
-     * couple of reasons (locale stuff is badly designed and sucks in
-     * general).
-     *
-     * First, setting the locale, especially LC_CTYPE, changes the
-     * behavior of various C functions and we don't want that - we
-     * want isalpha() for example to always behave like in the C
-     * locale.
-
-     * Second, there is no way to enforce a sane character set. All
-     * strings inside MPlayer must always be in utf-8, not in the
-     * character set specified by the system locale which could be
-     * something different and completely insane. The locale system
-     * lacks any way to say "set LC_CTYPE to utf-8, ignoring the
-     * default system locale if it specifies something different". We
-     * could try to work around that flaw by leaving LC_CTYPE to the C
-     * locale and only setting LC_MESSAGES (which is the variable that
-     * must be set to tell gettext which language to translate
-     * to). However if we leave LC_MESSAGES set then things like
-     * strerror() may produce completely garbled output when they try
-     * to translate their results but then try to convert some
-     * translated non-ASCII text to the character set specified by
-     * LC_CTYPE which would still be in the C locale (this doesn't
-     * affect gettext itself because it supports specifying the
-     * character set directly with bind_textdomain_codeset()).
-     *
-     * So the only solution (at least short of trying to work around
-     * things possibly producing non-utf-8 output) is to leave all the
-     * locale variables unset. Note that this means it's not possible
-     * to get translated output from any libraries we call if they
-     * only rely on the broken locale system to specify the language
-     * to use; this is the case with libc for example.
-     *
-     * The locale changing below is rather ugly, but hard to avoid.
-     * gettext doesn't support specifying the translation target
-     * directly, only through locale.
-     * The main actual problem this could cause is interference with
-     * other threads; that could be avoided with thread-specific
-     * locale changes, but such functionality is less standard and I
-     * think it's not worth adding pre-emptively unless someone sees
-     * an actual problem case.
-     */
-    setlocale(LC_MESSAGES, "");
-    string = gettext(string);
-    setlocale(LC_MESSAGES, "C");
-#endif
-    return (char *)string;
-}
-
-void mp_tmsg(int mod, int lev, const char *format, ...)
-{
-    va_list va;
-    va_start(va, format);
-    mp_msg_va(mod, lev, mp_gtext(format), va);
-    va_end(va);
-}
-
 // legacy names
 static const char *module_text[MSGT_MAX] = {
     "global",
@@ -459,13 +385,5 @@ void mp_msg_log(struct mp_log *log, int lev, const char *format, ...)
     va_list va;
     va_start(va, format);
     mp_msg_log_va(log, lev, format, va);
-    va_end(va);
-}
-
-void mp_tmsg_log(struct mp_log *log, int lev, const char *format, ...)
-{
-    va_list va;
-    va_start(va, format);
-    mp_msg_log_va(log, lev, mp_gtext(format), va);
     va_end(va);
 }

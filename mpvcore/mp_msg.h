@@ -137,20 +137,18 @@ bool mp_msg_test_log(struct mp_log *log, int lev);
 #include "config.h"
 #include "mpvcore/mp_common.h"
 
-char *mp_gtext(const char *string);
+#define mp_gtext(x) ((char*)(x))
 
 // Note: using mp_msg_log or the MP_ERR/... macros is preferred.
 void mp_msg_va(int mod, int lev, const char *format, va_list va);
 void mp_msg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
-void mp_tmsg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
+#define mp_tmsg mp_msg
 #define mp_dbg mp_msg
 
 struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
                           const char *name);
 
 void mp_msg_log(struct mp_log *log, int lev, const char *format, ...)
-    PRINTF_ATTRIBUTE(3, 4);
-void mp_tmsg_log(struct mp_log *log, int lev, const char *format, ...)
     PRINTF_ATTRIBUTE(3, 4);
 
 // Convenience macros, typically called with a pointer to a context struct

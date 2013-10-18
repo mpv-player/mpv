@@ -289,7 +289,6 @@ Installation directories:
   --docdir=DIR           directory for installing docs [PREFIX/share/doc/mpv]
   --confdir=DIR          directory for installing configuration files
                          [PREFIX/etc/mpv]
-  --localedir=DIR        directory for gettext locales [PREFIX/share/locale]
 
 Optional features:
   --disable-encoding     disable encoding functionality [enable]
@@ -373,9 +372,6 @@ Audio output:
   --disable-dsound       disable DirectSound audio output [autodetect]
   --disable-wasapi       disable WASAPI (event mode) audio output [autodetect]
   --disable-select       disable using select() on the audio device [enable]
-
-Localization options:
-  --enable-gettext       enable gettext() usage [disable]
 
 Miscellaneous options:
   --enable-cross-compile enable cross-compilation [disable]
@@ -480,7 +476,6 @@ _terminfo=auto
 _termcap=auto
 _termios=auto
 _shm=auto
-_gettext=no
 _cdda=auto
 _coreaudio=auto
 _corevideo=auto
@@ -522,9 +517,6 @@ for ac_option do
     ;;
   --confdir=*)
     _confdir=$(echo $ac_option | cut -d '=' -f 2)
-    ;;
-  --localedir=*)
-    _localedir=$(echo $ac_option | cut -d '=' -f 2)
     ;;
 
   --with-install=*)
@@ -581,8 +573,6 @@ for ac_option do
   --disable-optimization)
     _opt=
     ;;
-  --enable-gettext)                 _gettext=yes                ;;
-  --disable-gettext)                _gettext=no                 ;;
   --enable-cross-compile)           _cross_compile=yes          ;;
   --disable-cross-compile)          _cross_compile=no           ;;
   --enable-encoding)    _encoding=yes   ;;
@@ -753,7 +743,6 @@ test -z "$_bindir"  && _bindir="$_prefix/bin"
 test -z "$_mandir"  && _mandir="$_prefix/share/man"
 test -z "$_docdir"  && _docdir="$_prefix/share/doc/mpv"
 test -z "$_confdir" && _confdir="$_prefix/etc/mpv"
-test -z "$_localedir"  && _localedir="$_prefix/share/locale"
 
 for tmpdir in "$TMPDIR" "$TEMPDIR" "/tmp" ; do
   test "$tmpdir" && break
@@ -1258,15 +1247,6 @@ else
   _ld_lm=""
   echores "no"
 fi
-
-
-echocheck "gettext support"
-if test "$_gettext" = yes; then
-  def_gettext="#define CONFIG_GETTEXT 1"
-else
-  def_gettext="#undef CONFIG_GETTEXT"
-fi
-echores "$_gettext"
 
 
 echocheck "nanosleep"
@@ -3228,7 +3208,6 @@ BINDIR  = \$(DESTDIR)$_bindir
 MANDIR  = \$(DESTDIR)$_mandir
 DOCDIR  = \$(DESTDIR)$_docdir
 CONFDIR = \$(DESTDIR)$_confdir
-LOCALEDIR = \$(DESTDIR)$_localedir
 
 CC      = $_cc
 CXX     = $_cc
@@ -3358,9 +3337,6 @@ cat > $TMPH << EOF
 #define CONFIGURATION "$configuration"
 
 #define MPLAYER_CONFDIR "$_confdir"
-#define MPLAYER_LOCALEDIR "$_localedir"
-
-$def_gettext
 
 
 /* system headers */
