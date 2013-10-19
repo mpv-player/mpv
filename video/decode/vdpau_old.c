@@ -257,6 +257,7 @@ static struct mp_image *process_image(struct lavc_ctx *ctx, struct mp_image *img
 }
 
 const struct vd_lavc_hwdec mp_vd_lavc_vdpau_old = {
+    .type = HWDEC_VDPAU,
     .image_formats = (const int[]) {
         IMGFMT_VDPAU_MPEG1, IMGFMT_VDPAU_MPEG2, IMGFMT_VDPAU_H264,
         IMGFMT_VDPAU_WMV3, IMGFMT_VDPAU_VC1, IMGFMT_VDPAU_MPEG4,
