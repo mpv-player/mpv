@@ -23,20 +23,18 @@
 #include "compat/compiler.h"
 
 #define MP_TALLOC_ELEMS(p) (talloc_get_size(p) / sizeof((p)[0]))
-#define MP_GROW_ARRAY(p, nextidx) do {          \
-    if ((nextidx) == MP_TALLOC_ELEMS(p))        \
-        (p) = talloc_realloc_size(NULL, p, talloc_get_size(p) * 2); } while (0)
-#define MP_RESIZE_ARRAY(ctx, p, count) do {     \
+
+#define MP_RESIZE_ARRAY(ctx, p, count) do {         \
         (p) = talloc_realloc_size((ctx), p, (count) * sizeof((p)[0])); } while (0)
 
 #define MP_TARRAY_GROW(ctx, p, nextidx)             \
     do {                                            \
         size_t nextidx_ = (nextidx);                \
-        size_t nelems_ = MP_TALLOC_ELEMS(p);        \
-        if (nextidx_ >= nelems_)                    \
-            (p) = talloc_realloc_size(ctx, p,       \
-                  (nextidx_ + 1) * sizeof((p)[0]) * 2);\
+        if (nextidx_ >= MP_TALLOC_ELEMS(p))         \
+            MP_RESIZE_ARRAY(ctx, p, (nextidx_ + 1) * 2);\
     } while (0)
+
+#define MP_GROW_ARRAY(p, nextidx) MP_TARRAY_GROW(NULL, p, nextidx)
 
 #define MP_TARRAY_APPEND(ctx, p, idxvar, ...)       \
     do {                                            \
