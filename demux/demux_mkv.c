@@ -826,13 +826,6 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
         } else
             selected_edition = 0;
     }
-    struct matroska_chapter *m_chapters = NULL;
-    if (editions[selected_edition].edition_flag_ordered) {
-        int count = editions[selected_edition].n_chapter_atom;
-        m_chapters = talloc_array_ptrtype(demuxer, m_chapters, count);
-        demuxer->matroska_data.ordered_chapters = m_chapters;
-        demuxer->matroska_data.num_ordered_chapters = count;
-    }
 
     for (int idx = 0; idx < num_editions; idx++) {
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] New edition %d\n", idx);
@@ -843,7 +836,17 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
         if (editions[idx].n_edition_flag_ordered)
             mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Ordered chapter flag: %"PRIu64
                    "\n", editions[idx].edition_flag_ordered);
-        for (int i = 0; i < editions[idx].n_chapter_atom; i++) {
+
+        int chapter_count = editions[idx].n_chapter_atom;
+
+        struct matroska_chapter *m_chapters = NULL;
+        if (idx == selected_edition && editions[idx].edition_flag_ordered) {
+            m_chapters = talloc_array_ptrtype(demuxer, m_chapters, chapter_count);
+            demuxer->matroska_data.ordered_chapters = m_chapters;
+            demuxer->matroska_data.num_ordered_chapters = chapter_count;
+        }
+
+        for (int i = 0; i < chapter_count; i++) {
             struct ebml_chapter_atom *ca = editions[idx].chapter_atom + i;
             struct matroska_chapter chapter = { };
             struct bstr name = { "(unnamed)", 9 };
@@ -899,14 +902,13 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                    (int) (chapter.end % 1000000000),
                    BSTR_P(name));
 
-            if (idx == selected_edition){
+            if (idx == selected_edition) {
                 demuxer_add_chapter(demuxer, name, chapter.start, chapter.end,
                                     ca->chapter_uid);
-                if (editions[idx].edition_flag_ordered) {
-                    chapter.name = talloc_strndup(m_chapters, name.start,
-                                                  name.len);
-                    m_chapters[i] = chapter;
-                }
+            }
+            if (m_chapters) {
+                chapter.name = talloc_strndup(m_chapters, name.start, name.len);
+                m_chapters[i] = chapter;
             }
         }
     }
