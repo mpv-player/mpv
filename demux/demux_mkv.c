@@ -359,8 +359,8 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     mkv_d->tc_scale = 1000000;
     mkv_d->duration = 0;
 
-    struct ebml_info info = {};
-    struct ebml_parse_ctx parse_ctx = {};
+    struct ebml_info info = {{0}};
+    struct ebml_parse_ctx parse_ctx = {0};
     if (ebml_read_element(s, &parse_ctx, &info, &ebml_info_desc) < 0)
         return -1;
     if (info.n_timecode_scale) {
@@ -420,7 +420,7 @@ static void parse_trackencodings(struct demuxer *demuxer,
 
     for (int n_enc = 0; n_enc < encodings->n_content_encoding; n_enc++) {
         struct ebml_content_encoding *enc = encodings->content_encoding + n_enc;
-        struct mkv_content_encoding e = {};
+        struct mkv_content_encoding e = {0};
         e.order = enc->content_encoding_order;
         if (enc->n_content_encoding_scope)
             e.scope = enc->content_encoding_scope;
@@ -675,8 +675,8 @@ static int demux_mkv_read_tracks(demuxer_t *demuxer)
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     stream_t *s = demuxer->stream;
 
-    struct ebml_tracks tracks = {};
-    struct ebml_parse_ctx parse_ctx = {};
+    struct ebml_tracks tracks = {0};
+    struct ebml_parse_ctx parse_ctx = {0};
     if (ebml_read_element(s, &parse_ctx, &tracks, &ebml_tracks_desc) < 0)
         return -1;
 
@@ -734,8 +734,8 @@ static int demux_mkv_read_cues(demuxer_t *demuxer)
     }
 
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] /---- [ parsing cues ] -----------\n");
-    struct ebml_cues cues = {};
-    struct ebml_parse_ctx parse_ctx = {};
+    struct ebml_cues cues = {0};
+    struct ebml_parse_ctx parse_ctx = {0};
     if (ebml_read_element(s, &parse_ctx, &cues, &ebml_cues_desc) < 0)
         return -1;
 
@@ -801,8 +801,8 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
         wanted_edition = -1;
 
     mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] /---- [ parsing chapters ] ---------\n");
-    struct ebml_chapters file_chapters = {};
-    struct ebml_parse_ctx parse_ctx = {};
+    struct ebml_chapters file_chapters = {0};
+    struct ebml_parse_ctx parse_ctx = {0};
     if (ebml_read_element(s, &parse_ctx, &file_chapters,
                           &ebml_chapters_desc) < 0)
         return -1;
@@ -859,7 +859,7 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
 
         for (int i = 0; i < chapter_count; i++) {
             struct ebml_chapter_atom *ca = editions[idx].chapter_atom + i;
-            struct matroska_chapter chapter = { };
+            struct matroska_chapter chapter = {0};
             struct bstr name = { "(unnamed)", 9 };
 
             if (!ca->n_chapter_time_start)
@@ -941,8 +941,8 @@ static int demux_mkv_read_tags(demuxer_t *demuxer)
 {
     stream_t *s = demuxer->stream;
 
-    struct ebml_parse_ctx parse_ctx = {};
-    struct ebml_tags           tags = {};
+    struct ebml_parse_ctx parse_ctx = {0};
+    struct ebml_tags           tags = {0};
     if (ebml_read_element(s, &parse_ctx, &tags, &ebml_tags_desc) < 0)
         return -1;
 
@@ -977,8 +977,8 @@ static int demux_mkv_read_attachments(demuxer_t *demuxer)
     mp_msg(MSGT_DEMUX, MSGL_V,
            "[mkv] /---- [ parsing attachments ] ---------\n");
 
-    struct ebml_attachments attachments = {};
-    struct ebml_parse_ctx parse_ctx = {};
+    struct ebml_attachments attachments = {0};
+    struct ebml_parse_ctx parse_ctx = {0};
     if (ebml_read_element(s, &parse_ctx, &attachments,
                           &ebml_attachments_desc) < 0)
         return -1;
@@ -1011,8 +1011,8 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
     struct mkv_demuxer *mkv_d = demuxer->priv;
     struct stream *s = demuxer->stream;
     int res = 0;
-    struct ebml_seek_head seekhead = {};
-    struct ebml_parse_ctx parse_ctx = {};
+    struct ebml_seek_head seekhead = {0};
+    struct ebml_parse_ctx parse_ctx = {0};
 
     mp_msg(MSGT_DEMUX, MSGL_V,
            "[mkv] /---- [ parsing seek head ] ---------\n");
@@ -1730,7 +1730,7 @@ static int read_ebml_header(demuxer_t *demuxer)
 
     if (ebml_read_id(s, NULL) != EBML_ID_EBML)
         return 0;
-    struct ebml_ebml ebml_master = {};
+    struct ebml_ebml ebml_master = {0};
     struct ebml_parse_ctx parse_ctx = { .no_error_messages = true };
     if (ebml_read_element(s, &parse_ctx, &ebml_master, &ebml_ebml_desc) < 0)
         return 0;
