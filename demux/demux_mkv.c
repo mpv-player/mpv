@@ -832,6 +832,9 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
         m_chapters = talloc_array_ptrtype(demuxer, m_chapters, count);
         demuxer->matroska_data.ordered_chapters = m_chapters;
         demuxer->matroska_data.num_ordered_chapters = count;
+    } else {
+        demuxer->matroska_data.ordered_chapters = NULL;
+        demuxer->matroska_data.num_ordered_chapters = 0;
     }
 
     for (int idx = 0; idx < num_editions; idx++) {
