@@ -1598,17 +1598,12 @@ echores "$_libguess"
 
 
 echocheck "Samba support (libsmbclient)"
-if test "$_smb" = yes; then
-  libs_mplayer="$libs_mplayer -lsmbclient"
+if test "$_smb" = auto ; then
+    _smb=no
+    if pkg_config_add 'smbclient >= 0.2.0' ; then
+        _smb=yes
+    fi
 fi
-if test "$_smb" = auto; then
-  _smb=no
-  for _ld_tmp in "-lsmbclient" "-lsmbclient $_ld_dl" "-lsmbclient $_ld_dl -lnsl" "-lsmbclient $_ld_dl -lssl -lnsl" ; do
-    statement_check libsmbclient.h 'smbc_opendir("smb://")' $_ld_tmp &&
-      libs_mplayer="$libs_mplayer $_ld_tmp" && _smb=yes && break
-  done
-fi
-
 if test "$_smb" = yes; then
     def_smb="#define CONFIG_LIBSMBCLIENT 1"
     inputmodules="smb $inputmodules"
