@@ -2750,6 +2750,17 @@ fi
 echores "$_avcodec_has_chroma_pos_api"
 
 
+echocheck "libavcodec metadata update side data"
+_avcodec_has_metadata_update_side_data=no
+statement_check libavcodec/avcodec.h 'enum AVPacketSideDataType type = AV_PKT_DATA_METADATA_UPDATE' && _avcodec_has_metadata_update_side_data=yes
+if test "$_avcodec_has_metadata_update_side_data" = yes ; then
+  def_avcodec_has_metadata_update_side_data='#define HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA 1'
+else
+  def_avcodec_has_metadata_update_side_data='#define HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA 0'
+fi
+echores "$_avcodec_has_metadata_update_side_data"
+
+
 echocheck "libavutil QP API"
 _avutil_has_qp_api=no
 statement_check libavutil/frame.h 'av_frame_get_qp_table(NULL, NULL, NULL)' && _avutil_has_qp_api=yes
@@ -3454,6 +3465,7 @@ $def_avutil_has_refcounting
 $def_avutil_has_qp_api
 $def_avcodec_new_vdpau_api
 $def_avcodec_has_chroma_pos_api
+$def_avcodec_has_metadata_update_side_data
 $def_libpostproc
 $def_libavdevice
 $def_libavfilter

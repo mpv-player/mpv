@@ -518,6 +518,23 @@ static void add_metadata(demuxer_t *demuxer, AVDictionary *metadata)
         demux_info_add(demuxer, t->key, t->value);
 }
 
+static void update_metadata(demuxer_t *demuxer, AVPacket *pkt)
+{
+#if HAVE_AVCODEC_METADATA_UPDATE_SIDE_DATA
+    int md_size;
+    const uint8_t *md;
+    md = av_packet_get_side_data(pkt, AV_PKT_DATA_METADATA_UPDATE, &md_size);
+    if (md) {
+        AVDictionary *dict = NULL;
+        av_packet_unpack_dictionary(md, md_size, &dict);
+        if (dict) {
+            add_metadata(demuxer, dict);
+            av_dict_free(&dict);
+        }
+    }
+#endif
+}
+
 static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 {
     struct MPOpts *opts = demuxer->opts;
@@ -542,6 +559,12 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         avfc->flags |= AVFMT_FLAG_GENPTS;
     if (opts->index_mode == 0)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
+    /* Keep side data as side data instead of mashing it into the packet
+     * stream. */
+    if (av_opt_set(avfc, "fflags", "+keepside", 0) < 0) {
+        MP_WARN(demuxer, "demux_lavf, couldn't set option keepdata; "
+                "in-stream metadata updates will be ignored\n");
+    }
 
     if (lavfdopts->probesize) {
         if (av_opt_set_int(avfc, "probesize", lavfdopts->probesize, 0) < 0)
@@ -704,6 +727,8 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     // allocations so we can safely queue the packet for any length of time.
     if (av_dup_packet(pkt) < 0)
         abort();
+
+    update_metadata(demux, pkt);
 
     dp = new_demux_packet_fromdata(pkt->data, pkt->size);
     dp->avpacket = talloc_steal(dp, pkt);
