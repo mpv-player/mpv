@@ -41,6 +41,7 @@
 #define avresample_alloc_context swr_alloc
 #define avresample_open swr_init
 #define avresample_close(x) do { } while(0)
+#define avresample_free swr_free
 #define avresample_available(x) 0
 #define avresample_convert(ctx, out, out_planesize, out_samples, in, in_planesize, in_samples) \
     swr_convert(ctx, out, out_samples, (const uint8_t**)(in), in_samples)
@@ -275,8 +276,10 @@ static void uninit(struct af_instance *af)
     struct af_resample *s = af->priv;
     if (s->avrctx)
         avresample_close(s->avrctx);
+    avresample_free(&s->avrctx);
     if (s->avrctx_out)
         avresample_close(s->avrctx_out);
+    avresample_free(&s->avrctx_out);
 }
 
 static bool needs_reorder(int *reorder, int num_ch)
