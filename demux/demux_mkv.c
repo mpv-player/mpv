@@ -219,10 +219,11 @@ static bool is_parsed_header(struct mkv_demuxer *mkv_d, int64_t pos)
     int high = mkv_d->num_parsed_pos;
     while (high > low + 1) {
         int mid = (high + low) >> 1;
-        if (mkv_d->parsed_pos[mid] > pos)
+        if (mkv_d->parsed_pos[mid] > pos) {
             high = mid;
-        else
+        } else {
             low = mid;
+        }
     }
     if (mkv_d->num_parsed_pos && mkv_d->parsed_pos[low] == pos)
         return true;
@@ -467,9 +468,10 @@ static void parse_trackencodings(struct demuxer *demuxer,
         }
 #endif
         int i;
-        for (i = 0; i < n_enc; i++)
+        for (i = 0; i < n_enc; i++) {
             if (e.order >= ce[i].order)
                 break;
+        }
         ce = talloc_realloc_size(track, ce, (n_enc + 1) * sizeof(*ce));
         memmove(ce + i + 1, ce + i, (n_enc - i) * sizeof(*ce));
         memcpy(ce + i, &e, sizeof(e));
@@ -486,14 +488,16 @@ static void parse_trackaudio(struct demuxer *demuxer, struct mkv_track *track,
         track->a_sfreq = audio->sampling_frequency;
         mp_msg(MSGT_DEMUX, MSGL_V,
                "[mkv] |   + Sampling frequency: %f\n", track->a_sfreq);
-    } else
+    } else {
         track->a_sfreq = 8000;
+    }
     if (audio->n_output_sampling_frequency) {
         track->a_osfreq = audio->output_sampling_frequency;
         mp_msg(MSGT_DEMUX, MSGL_V,
                "[mkv] |   + Output sampling frequency: %f\n", track->a_osfreq);
-    } else
+    } else {
         track->a_osfreq = track->a_sfreq;
+    }
     if (audio->n_bit_depth) {
         track->a_bps = audio->bit_depth;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Bit depth: %u\n",
@@ -503,8 +507,9 @@ static void parse_trackaudio(struct demuxer *demuxer, struct mkv_track *track,
         track->a_channels = audio->channels;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Channels: %u\n",
                track->a_channels);
-    } else
+    } else {
         track->a_channels = 1;
+    }
 }
 
 static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
@@ -566,11 +571,12 @@ static void parse_trackentry(struct demuxer *demuxer,
     track->last_index_entry = -1;
 
     track->tnum = entry->track_number;
-    if (track->tnum)
+    if (track->tnum) {
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Track number: %u\n",
                track->tnum);
-    else
+    } else {
         mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Missing track number!\n");
+    }
 
     if (entry->n_name) {
         track->name = talloc_strndup(track, entry->name.start,
@@ -633,21 +639,23 @@ static void parse_trackentry(struct demuxer *demuxer,
                                          entry->language.len);
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Language: %s\n",
                track->language);
-    } else
+    } else {
         track->language = talloc_strdup(track, "eng");
+    }
 
     if (entry->n_flag_default) {
         track->default_track = entry->flag_default;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Default flag: %u\n",
                track->default_track);
-    } else
+    } else {
         track->default_track = 1;
+    }
 
     if (entry->n_default_duration) {
         track->default_duration = entry->default_duration / 1e9;
-        if (entry->default_duration == 0)
+        if (entry->default_duration == 0) {
             mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Default duration: 0");
-        else {
+        } else {
             if (!track->v_frate)
                 track->v_frate = 1e9 / entry->default_duration;
             mp_msg(MSGT_DEMUX, MSGL_V,
@@ -806,8 +814,8 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
         selected_edition = wanted_edition;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] User-specified edition: %d\n",
                selected_edition);
-    } else
-        for (int i = 0; i < num_editions; i++)
+    } else {
+        for (int i = 0; i < num_editions; i++) {
             if (wanted_edition_uid &&
                 editions[i].edition_uid == wanted_edition_uid) {
                 selected_edition = i;
@@ -817,14 +825,17 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
                 mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Default edition: %d\n", i);
                 break;
             }
+        }
+    }
     if (selected_edition < 0) {
         if (wanted_edition_uid) {
             mp_msg(MSGT_DEMUX, MSGL_ERR,
                    "[mkv] Unable to find expected edition uid: %"PRIu64"\n",
                    wanted_edition_uid);
             return -1;
-        } else
+        } else {
             selected_edition = 0;
+        }
     }
 
     for (int idx = 0; idx < num_editions; idx++) {
@@ -1536,8 +1547,9 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             src += RAPROPERTIES4_SIZE;
             src += src[0] + 1;
             src += src[0] + 1;
-        } else
+        } else {
             src += RAPROPERTIES5_SIZE;
+        }
 
         src += 3;
         if (version == 5)
@@ -1743,7 +1755,8 @@ static int read_ebml_header(demuxer_t *demuxer)
         || (ebml_master.n_ebml_max_size_length
             && ebml_master.ebml_max_size_length > 8)
         || (ebml_master.n_ebml_max_id_length
-            && ebml_master.ebml_max_id_length != 4)) {
+            && ebml_master.ebml_max_id_length != 4))
+    {
         mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] This looks like a Matroska file, "
                "but the header has bad parameters\n");
         talloc_free(parse_ctx.talloc_ctx);
@@ -1831,9 +1844,9 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
 
     display_create_tracks(demuxer);
 
-    if (s->end_pos == 0)
+    if (s->end_pos == 0) {
         demuxer->seekable = 0;
-    else {
+    } else {
         demuxer->movi_start = s->start_pos;
         demuxer->movi_end = s->end_pos;
         demuxer->seekable = 1;
@@ -1992,11 +2005,12 @@ static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
         dp->pts = mkv_d->last_pts;
         track->rv_kf_base = 0;
         track->rv_kf_pts = timestamp;
-    } else
+    } else {
         dp->pts =
             real_fix_timestamp(dp->buffer, timestamp,
                                track->stream->video->bih->biCompression,
                                &track->rv_kf_base, &track->rv_kf_pts, NULL);
+    }
     dp->pos = demuxer->filepos;
     dp->keyframe = keyframe;
 
@@ -2149,8 +2163,9 @@ static int libav_parse_wavpack(mkv_track_t *track, uint8_t *src,
             blocksize = AV_RL32(src);
             src    += 4;
             srclen -= 4;
-        } else
+        } else {
             blocksize = srclen;
+        }
 
         if (blocksize > srclen)
             goto fail;
@@ -2375,8 +2390,9 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
             mkv_d->v_skip_to_keyframe = 0;
             mkv_d->skip_to_timecode = 0;
             mkv_d->subtitle_preroll = 0;
-        } else if (stream->type == STREAM_AUDIO)
+        } else if (stream->type == STREAM_AUDIO) {
             mkv_d->a_skip_to_keyframe = 0;
+        }
 
         return 1;
     }
@@ -2600,7 +2616,7 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
         min_diff = -min_diff;
     min_diff = FFMAX(min_diff, 1);
 
-    for (int i = 0; i < mkv_d->num_indexes; i++)
+    for (int i = 0; i < mkv_d->num_indexes; i++) {
         if (seek_id < 0 || mkv_d->indexes[i].tnum == seek_id) {
             int64_t diff =
                 target_timecode -
@@ -2615,6 +2631,7 @@ static struct mkv_index *seek_with_cues(struct demuxer *demuxer, int seek_id,
             min_diff = diff;
             index = mkv_d->indexes + i;
         }
+    }
 
     if (index) {        /* We've found an entry. */
         uint64_t seek_pos = index->filepos;
@@ -2658,10 +2675,11 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
     if (!st_active[STREAM_SUB] || !st_active[STREAM_VIDEO])
         flags &= ~SEEK_SUBPREROLL;
     if (!(flags & (SEEK_BACKWARD | SEEK_FORWARD))) {
-        if (flags & SEEK_ABSOLUTE || rel_seek_secs < 0)
+        if (flags & SEEK_ABSOLUTE || rel_seek_secs < 0) {
             flags |= SEEK_BACKWARD;
-        else
+        } else {
             flags |= SEEK_FORWARD;
+        }
     }
     // Adjust the target a little bit to catch cases where the target position
     // specifies a keyframe with high, but not perfect, precision.
@@ -2687,11 +2705,12 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
 
         mkv_d->v_skip_to_keyframe = st_active[STREAM_VIDEO];
         mkv_d->a_skip_to_keyframe = st_active[STREAM_AUDIO];
-        if (flags & SEEK_FORWARD)
+        if (flags & SEEK_FORWARD) {
             mkv_d->skip_to_timecode = target_timecode;
-        else
+        } else {
             mkv_d->skip_to_timecode = index ? index->timecode * mkv_d->tc_scale
                                             : 0;
+        }
 
         demux_mkv_fill_buffer(demuxer);
     } else if ((demuxer->movi_end <= 0) || !(flags & SEEK_ABSOLUTE))
