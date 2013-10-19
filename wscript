@@ -396,6 +396,12 @@ Libav libraries ({0}). Aborting.".format(" ".join(libav_pkg_config_checks))
         'name': '--libpostproc',
         'desc': 'libpostproc',
         'func': check_pkg_config('libpostproc', '>= 52.0.0'),
+    }, {
+        'name': 'avcodec-metadata-update-side-data',
+        'desc': 'libavcodec AV_PKT_DATA_METADATA_UPDATE side data type',
+        'func': check_statement('libavcodec/avcodec.h',
+                                'enum AVPacketSideDataType type = AV_PKT_DATA_METADATA_UPDATE',
+                                use='libav')
     }
 ]
 
