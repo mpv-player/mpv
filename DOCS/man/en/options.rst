@@ -1408,6 +1408,11 @@ OPTIONS
     Makes the player window stay on top of other windows. Supported by video
     output drivers which use X11, as well as corevideo.
 
+``--nested-chapters``, ``--no-nested-chapters``
+    Disabled by default.
+    Enable support for Matroska nested chapters. mpv will use nested chapters
+    as chapter boundaries instead of the top-level chapters.
+
 ``--ordered-chapters``, ``--no-ordered-chapters``
     Enabled by default.
     Disable support for Matroska ordered chapters. mpv will not load or

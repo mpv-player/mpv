@@ -90,6 +90,7 @@ typedef struct MPOpts {
     char *stream_dump;
     int loop_times;
     int shuffle;
+    int nested_chapters;
     int ordered_chapters;
     int chapter_merge_threshold;
     double chapter_seek_threshold;
