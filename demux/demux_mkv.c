@@ -893,6 +893,10 @@ static int demux_mkv_read_chapters(struct demuxer *demuxer)
     int selected_edition = -1;
     int num_editions = file_chapters.n_edition_entry;
     struct ebml_edition_entry *editions = file_chapters.edition_entry;
+    /* TODO: wanted_edition should skip over hidden editions since the spec
+     * states that hidden editions should be hidden for users (they are
+     * intended for Control Tracks, a defunct part of the spec related to
+     * menus. */
     if (wanted_edition >= 0 && wanted_edition < num_editions) {
         selected_edition = wanted_edition;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] User-specified edition: %d\n",
