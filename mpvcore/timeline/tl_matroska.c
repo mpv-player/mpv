@@ -195,9 +195,6 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer ***sources,
                 mp_msg(MSGT_CPLAYER, MSGL_INFO, "Match for source %d: %s\n",
                        i, d->filename);
 
-                if (enable_cache(mpctx, &s, &d, &params) < 0)
-                    continue;
-
                 for (int j = 0; j < m->num_ordered_chapters; j++) {
                     struct matroska_chapter *c = m->ordered_chapters + j;
 
@@ -214,6 +211,9 @@ static bool check_file_seg(struct MPContext *mpctx, struct demuxer ***sources,
                     /* Add a new source slot. */
                     MP_TARRAY_APPEND(NULL, *sources, *num_sources, NULL);
                 }
+
+                if (enable_cache(mpctx, &s, &d, &params) < 0)
+                    continue;
 
                 (*sources)[i] = d;
                 return true;
