@@ -438,16 +438,16 @@ void vo_cocoa_set_current_context(struct vo *vo, bool current)
 {
     struct vo_cocoa_state *s = vo->cocoa;
 
-    if (s->inside_sync_section) {
-         return;
-    }
-
     if (current) {
-        [s->lock lock];
+        if (!s->inside_sync_section)
+            [s->lock lock];
+
         [s->gl_ctx makeCurrentContext];
     } else {
         [NSOpenGLContext clearCurrentContext];
-        [s->lock unlock];
+
+        if (!s->inside_sync_section)
+            [s->lock unlock];
     }
 }
 
