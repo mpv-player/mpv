@@ -4242,6 +4242,8 @@ static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
 static struct mp_resolve_result *resolve_url(const char *filename,
                                              struct MPOpts *opts)
 {
+    if (!mp_is_url(bstr0(filename)))
+        return NULL;
 #if defined(CONFIG_LIBQUVI) || defined(CONFIG_LIBQUVI9)
     return mp_resolve_quvi(filename, opts);
 #else
