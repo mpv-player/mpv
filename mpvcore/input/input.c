@@ -1783,7 +1783,7 @@ static void input_wait_read(struct input_ctx *ictx, int time)
  */
 static void read_events(struct input_ctx *ictx, int time)
 {
-    if (ictx->num_key_down) {
+    if (ictx->num_key_down && ictx->ar_rate > 0) {
         time = FFMIN(time, 1000 / ictx->ar_rate);
         time = FFMIN(time, ictx->ar_delay);
     }
