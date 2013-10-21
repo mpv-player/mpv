@@ -131,11 +131,14 @@ extern const struct af_fmt_entry af_fmtstr_table[];
 
 int af_str2fmt_short(bstr str);
 int af_fmt2bits(int format);
+int af_fmt_change_bits(int format, int bits);
 
 // Amount of bytes that contain audio of the given duration, aligned to frames.
 int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int samplerate);
 
 char* af_fmt2str(int format, char* str, int size);
 const char* af_fmt2str_short(int format);
+
+bool af_fmt_is_valid(int format);
 
 #endif /* MPLAYER_AF_FORMAT_H */

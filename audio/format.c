@@ -42,6 +42,27 @@ int af_fmt2bits(int format)
     return 0;
 }
 
+static int bits_to_mask(int bits)
+{
+    switch (bits) {
+        case 8:  return AF_FORMAT_8BIT;
+        case 16: return AF_FORMAT_16BIT;
+        case 24: return AF_FORMAT_24BIT;
+        case 32: return AF_FORMAT_32BIT;
+        case 64: return AF_FORMAT_64BIT;
+    }
+    return 0;
+}
+
+int af_fmt_change_bits(int format, int bits)
+{
+    if (!af_fmt_is_valid(format) || (format & AF_FORMAT_SPECIAL_MASK))
+        return 0;
+    int mask = bits_to_mask(bits);
+    format = (format & ~AF_FORMAT_BITS_MASK) | mask;
+    return af_fmt_is_valid(format) ? format : 0;
+}
+
 /* Convert format to str input str is a buffer for the
    converted string, size is the size of the buffer */
 char* af_fmt2str(int format, char* str, int size)
@@ -89,6 +110,15 @@ const struct af_fmt_entry af_fmtstr_table[] = {
 
     {0}
 };
+
+bool af_fmt_is_valid(int format)
+{
+    for (int i = 0; af_fmtstr_table[i].name; i++) {
+        if (af_fmtstr_table[i].format == format)
+            return true;
+    }
+    return false;
+}
 
 const char *af_fmt2str_short(int format)
 {
