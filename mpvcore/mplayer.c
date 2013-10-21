@@ -185,6 +185,8 @@ static const char av_desync_help_text[] = _(
 "     Download the file instead.\n"
 "- Try to find out whether audio or video is causing this by experimenting\n"
 "  with --no-video and --no-audio.\n"
+"- If you swiched audio or video tracks, try seeking to force\n"
+"  synchronization.\n"
 "If none of this helps you, file a bug report.\n\n");
 
 
