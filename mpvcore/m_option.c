@@ -1808,7 +1808,7 @@ bool m_obj_list_find(struct m_obj_desc *dst, const struct m_obj_list *l,
                     // Assume it's deprecated in this case.
                     // Also, it's used by the VO code only, so whatever.
                     mp_msg(MSGT_CFGPARSER, MSGL_WARN,
-                           "VO driver '%s' has been replaced with '%s'!\n",
+                           "Driver '%s' has been replaced with '%s'!\n",
                            aname, alias);
                 }
                 return true;

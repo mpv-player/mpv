@@ -72,12 +72,12 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         if (in->nch != out->nch || in->bps != out->bps) {
             mp_msg(MSGT_AFILTER, MSGL_ERR,
-                   "[af_force] Forced input/output formats are incompatible.\n");
+                   "[af_format] Forced input/output formats are incompatible.\n");
             return AF_ERROR;
         }
 
         if (priv->fail) {
-            mp_msg(MSGT_AFILTER, MSGL_ERR, "[af_force] Failing on purpose.\n");
+            mp_msg(MSGT_AFILTER, MSGL_ERR, "[af_format] Failing on purpose.\n");
             return AF_ERROR;
         }
 
@@ -116,9 +116,9 @@ static int af_open(struct af_instance *af)
 
 #define OPT_BASE_STRUCT struct priv
 
-struct af_info af_info_force = {
+struct af_info af_info_format = {
     "Force audio format",
-    "force",
+    "format",
     "",
     "",
     0,

@@ -52,12 +52,14 @@ extern struct af_info af_info_karaoke;
 extern struct af_info af_info_scaletempo;
 extern struct af_info af_info_bs2b;
 extern struct af_info af_info_lavfi;
+extern struct af_info af_info_convert24;
+extern struct af_info af_info_convertsignendian;
 
 static struct af_info* filter_list[] = {
     &af_info_dummy,
     &af_info_delay,
     &af_info_channels,
-    &af_info_force,
+    &af_info_format,
     &af_info_volume,
     &af_info_equalizer,
     &af_info_pan,
@@ -85,8 +87,9 @@ static struct af_info* filter_list[] = {
 #ifdef CONFIG_AF_LAVFI
     &af_info_lavfi,
 #endif
-    // Must come last, because it's the fallback format conversion filter
-    &af_info_format,
+    // Must come last, because they're fallback format conversion filter
+    &af_info_convert24,
+    &af_info_convertsignendian,
     NULL
 };
 
@@ -109,6 +112,10 @@ static bool get_desc(struct m_obj_desc *dst, int index)
 const struct m_obj_list af_obj_list = {
     .get_desc = get_desc,
     .description = "audio filters",
+    .aliases = {
+        {"force",     "format"},
+        {0}
+    },
     .legacy_hacks = true, // many filters have custom option parsing
 };
 
@@ -285,7 +292,8 @@ static void af_remove(struct af_stream *s, struct af_instance *af)
     af->prev->next = af->next;
     af->next->prev = af->prev;
 
-    af->uninit(af);
+    if (af->uninit)
+        af->uninit(af);
     talloc_free(af);
 }
 
@@ -334,14 +342,76 @@ static int af_count_filters(struct af_stream *s)
     return count;
 }
 
-static char *af_find_conversion_filter(int srcfmt, int dstfmt)
+// Finds the first conversion filter on the way from srcfmt to dstfmt.
+// Conversions form a DAG: each node is a format/filter pair, and possible
+// conversions are edges. We search the DAG for the shortest path.
+// Some cases visit the same filter multiple times, but with different formats
+// (like u24le->s8), so one node per format or filter separate is not enough.
+// Returns the filter and dest. format for the first conversion step.
+// (So we know what conversion filter with what format to insert next.)
+static char *af_find_conversion_filter(int srcfmt, int *dstfmt)
 {
-    for (int n = 0; filter_list[n]; n++) {
-        struct af_info *af = filter_list[n];
-        if (af->test_conversion && af->test_conversion(srcfmt, dstfmt))
-            return (char *)af->name;
+#define NUM_FMT 64
+#define NUM_FILT 32
+#define NUM_NODES (NUM_FMT * NUM_FILT)
+    for (int n = 0; filter_list[n]; n++)
+        assert(n < NUM_FILT);
+    for (int n = 0; af_fmtstr_table[n].format; n++)
+        assert(n < NUM_FMT);
+
+    bool visited[NUM_NODES] = {0};
+    unsigned char distance[NUM_NODES];
+    short previous[NUM_NODES] = {0};
+    for (int n = 0; n < NUM_NODES; n++) {
+        distance[n] = 255;
+        if (af_fmtstr_table[n % NUM_FMT].format == srcfmt)
+            distance[n] = 0;
     }
-    return NULL;
+
+    while (1) {
+        int next = -1;
+        for (int n = 0; n < NUM_NODES; n++) {
+            if (!visited[n] && (next < 0 || (distance[n] < distance[next])))
+                next = n;
+        }
+        if (next < 0 || distance[next] == 255)
+            return NULL;
+        visited[next] = true;
+
+        int fmt = next % NUM_FMT;
+        if (af_fmtstr_table[fmt].format == *dstfmt) {
+            // Best match found
+            for (int cur = next; cur >= 0; cur = previous[cur] - 1) {
+                if (distance[cur] == 1) {
+                    *dstfmt = af_fmtstr_table[cur % NUM_FMT].format;
+                    return (char *)filter_list[cur / NUM_FMT]->name;
+                }
+            }
+            return NULL;
+        }
+
+        for (int n = 0; filter_list[n]; n++) {
+            struct af_info *af = filter_list[n];
+            if (!af->test_conversion)
+                continue;
+            for (int i = 0; af_fmtstr_table[i].format; i++) {
+                if (i != fmt && af->test_conversion(af_fmtstr_table[fmt].format,
+                                                    af_fmtstr_table[i].format))
+                {
+                    int other = n * NUM_FMT + i;
+                    int ndist = distance[next] + 1;
+                    if (ndist < distance[other]) {
+                        distance[other] = ndist;
+                        previous[other] = next + 1;
+                    }
+                }
+            }
+        }
+    }
+    assert(0);
+#undef NUM_FMT
+#undef NUM_FILT
+#undef NODE_N
 }
 
 static bool af_is_conversion_filter(struct af_instance *af)
@@ -352,7 +422,7 @@ static bool af_is_conversion_filter(struct af_instance *af)
 // in is what af can take as input - insert a conversion filter if the actual
 // input format doesn't match what af expects.
 // Returns:
-//   AF_OK: must call af_reinit() or equivalent, format matches
+//   AF_OK: must call af_reinit() or equivalent, format matches (or is closer)
 //   AF_FALSE: nothing was changed, format matches
 //   else: error
 static int af_fix_format_conversion(struct af_stream *s,
@@ -365,18 +435,21 @@ static int af_fix_format_conversion(struct af_stream *s,
     struct mp_audio actual = *prev->data;
     if (actual.format == in.format)
         return AF_FALSE;
-    if (prev->control(prev, AF_CONTROL_FORMAT_FMT, &in.format) == AF_OK) {
-        *p_af = prev;
-        return AF_OK;
-    }
-    char *filter = af_find_conversion_filter(actual.format, in.format);
+    int dstfmt = in.format;
+    char *filter = af_find_conversion_filter(actual.format, &dstfmt);
     if (!filter)
         return AF_ERROR;
+    if (strcmp(filter, prev->info->name) == 0) {
+        if (prev->control(prev, AF_CONTROL_FORMAT_FMT, &dstfmt) == AF_OK) {
+            *p_af = prev;
+            return AF_OK;
+        }
+    }
     struct af_instance *new = af_prepend(s, af, filter, NULL);
     if (new == NULL)
         return AF_ERROR;
     new->auto_inserted = true;
-    if (AF_OK != (rv = new->control(new, AF_CONTROL_FORMAT_FMT, &in.format)))
+    if (AF_OK != (rv = new->control(new, AF_CONTROL_FORMAT_FMT, &dstfmt)))
         return rv;
     *p_af = new;
     return AF_OK;
@@ -442,7 +515,8 @@ static int af_reinit(struct af_stream *s)
     // Start with the second filter, as the first filter is the special input
     // filter which needs no initialization.
     struct af_instance *af = s->first->next;
-    int max_retry = af_count_filters(s) * 4; // up to 4 retries per filter
+    // Up to 7 retries per filter (channel, rate, 5x format conversions)
+    int max_retry = af_count_filters(s) * 7;
     int retry = 0;
     while (af) {
         if (retry >= max_retry)

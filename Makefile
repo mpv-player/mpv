@@ -150,12 +150,13 @@ SOURCES = audio/audio.c \
           audio/filter/af.c \
           audio/filter/af_center.c \
           audio/filter/af_channels.c \
+          audio/filter/af_convert24.c \
+          audio/filter/af_convertsignendian.c \
           audio/filter/af_delay.c \
           audio/filter/af_dummy.c \
           audio/filter/af_equalizer.c \
           audio/filter/af_extrastereo.c \
           audio/filter/af_force.c \
-          audio/filter/af_format.c \
           audio/filter/af_hrtf.c \
           audio/filter/af_karaoke.c \
           audio/filter/af_lavcac3enc.c \

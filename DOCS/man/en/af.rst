@@ -208,7 +208,7 @@ Available filters are:
             copy channel 0 to channels 0 to 3. Channel 4 and 5 will contain
             silence.
 
-``force=in-format:in-srate:in-channels:out-format:out-srate:out-channels``
+``format=format:srate:channels:out-format:out-srate:out-channels``
     Force a specific audio format/configuration without actually changing the
     audio data. Keep in mind that the filter system might auto-insert actual
     conversion filters before or after this filter if needed.
@@ -218,15 +218,22 @@ Available filters are:
     actually doing a conversion. The data will be 'reinterpreted' by the
     filters or audio outputs following this filter.
 
-    ``<in-format>``
-        Force conversion to this format. See ``format`` filter for valid audio
-        format values.
+    ``<format>``
+        Force conversion to this format. Use ``--af=format=format=help`` to get
+        a list of valid formats. The general form is 'sbe', where 's' denotes
+        the sign (either 's' for signed or 'u' for unsigned), 'b' denotes the
+        number of bits per sample (16, 24 or 32) and 'e' denotes the
+        endianness ('le' means little-endian, 'be' big-endian and 'ne' the
+        endianness of the computer mpv is running on). Valid values (amongst
+        others) are: 's16le', 'u32be' and 'u24ne'. Exceptions to this rule that
+        are also valid format specifiers: u8, s8, floatle, floatbe, floatne,
+        mpeg2, and ac3.
 
-    ``<in-srate>``
+    ``<srate>``
         Force conversion to a specific sample rate. The rate is an integer,
         48000 for example.
 
-    ``<in-channels>``
+    ``<channels>``
         Force mixing to a specific channel layout. See ``--channels`` option
         for possible values.
 
@@ -236,19 +243,21 @@ Available filters are:
 
     ``<out-channels>``
 
-``format[=format]``
-    Convert between different sample formats. Automatically enabled when
-    needed by the audio output or another filter. See also ``--format``.
+    See also ``--format``, ``--srate``, and ``--channels`` for related options.
+    Keep in mind that ``--channels`` does not actually force the number of
+    channels in most cases, while this filter can do this.
 
-    ``<format>``
-        Sets the desired format. The general form is 'sbe', where 's' denotes
-        the sign (either 's' for signed or 'u' for unsigned), 'b' denotes the
-        number of bits per sample (16, 24 or 32) and 'e' denotes the
-        endianness ('le' means little-endian, 'be' big-endian and 'ne' the
-        endianness of the computer mpv is running on). Valid values (amongst
-        others) are: 's16le', 'u32be' and 'u24ne'. Exceptions to this rule that
-        are also valid format specifiers: u8, s8, floatle, floatbe, floatne,
-        mpeg2, and ac3.
+    *NOTE*: this filter used to be named ``force``. Also, unlike the old
+    ``format`` filter, this does not do any actual conversion anymore.
+    Conversion is done by other, automatically inserted filters.
+
+``convert24``
+    Filter for internal use only. Converts between 24-bit and 32-bit sample
+    formats.
+
+``convertsignendian``
+    Filter for internal use only. Converts between signed/unsigned formats
+    and formats with different endian.
 
 ``volume[=v[:sc[:fast]]]``
     Implements software volume control. Use this filter with caution since it
