@@ -587,12 +587,8 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_pulse = {
-    .info = &(const struct ao_info) {
-        "PulseAudio audio output",
-        "pulse",
-        "Lennart Poettering",
-        "",
-    },
+    .description = "PulseAudio audio output",
+    .name      = "pulse",
     .control   = control,
     .init      = init,
     .uninit    = uninit,

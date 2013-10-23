@@ -4,6 +4,9 @@
  * original copyright (C) Timothy J. Wood - Aug 2000
  * ported to MPlayer libao2 by Dan Christiansen
  *
+ * Chris Roccati
+ * Stefano Pigozzi
+ *
  * The S/PDIF part of the code is based on the auhal audio output
  * module from VideoLAN:
  * Copyright (c) 2006 Derk-Jan Hartman <hartman at videolan dot org>
@@ -697,12 +700,8 @@ static void audio_resume(struct ao *ao)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_coreaudio = {
-    .info = &(const struct ao_info) {
-        "CoreAudio (OS X Audio Output)",
-        "coreaudio",
-        "Timothy J. Wood, Dan Christiansen, Chris Roccati & Stefano Pigozzi",
-        "",
-    },
+    .description = "CoreAudio (OS X Audio Output)",
+    .name      = "coreaudio",
     .uninit    = uninit,
     .init      = init,
     .play      = play,

@@ -303,7 +303,7 @@ static void restore_volume(struct mixer *mixer)
     int force_mute = -1;
 
     const char *prev_driver = mixer->driver;
-    mixer->driver = mixer->softvol ? "softvol" : ao->driver->info->short_name;
+    mixer->driver = mixer->softvol ? "softvol" : ao->driver->name;
 
     bool restore = mixer->softvol || ao->no_persistent_volume;
 

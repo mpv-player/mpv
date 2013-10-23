@@ -117,12 +117,8 @@ static float get_delay(struct ao *ao)
 }
 
 const struct ao_driver audio_out_null = {
-    .info = &(const struct ao_info) {
-        "Null audio output",
-        "null",
-        "Tobias Diedrich <ranma+mplayer@tdiedrich.de>",
-        "",
-    },
+    .description = "Null audio output",
+    .name      = "null",
     .init      = init,
     .uninit    = uninit,
     .reset     = reset,

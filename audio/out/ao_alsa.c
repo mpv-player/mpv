@@ -2,6 +2,7 @@
  * ALSA 0.9.x-1.x audio output driver
  *
  * Copyright (C) 2004 Alex Beregszaszi
+ * Zsolt Barat <joy@streamminister.de>
  *
  * modified for real ALSA 0.9.0 support by Zsolt Barat <joy@streamminister.de>
  * additional AC-3 passthrough support by Andy Lo A Foe <andy@alsaplayer.org>
@@ -731,12 +732,8 @@ static float get_delay(struct ao *ao)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_alsa = {
-    .info = &(const struct ao_info) {
-        "ALSA-0.9.x-1.x audio output",
-        "alsa",
-        "Alex Beregszaszi, Zsolt Barat <joy@streamminister.de>",
-        "under development"
-    },
+    .description = "ALSA-0.9.x-1.x audio output",
+    .name      = "alsa",
     .init      = init,
     .uninit    = uninit,
     .control   = control,

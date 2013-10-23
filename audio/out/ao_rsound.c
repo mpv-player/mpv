@@ -179,12 +179,8 @@ static float get_delay(struct ao *ao)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_rsound = {
-    .info      = &(const struct ao_info) {
-        .name       = "RSound output driver",
-        .short_name = "rsound",
-        .author     = "Hans-Kristian Arntzen",
-        .comment    = "",
-    },
+    .description = "RSound output driver",
+    .name      = "rsound",
     .init      = init,
     .uninit    = uninit,
     .reset     = reset,

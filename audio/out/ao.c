@@ -102,8 +102,8 @@ static bool get_desc(struct m_obj_desc *dst, int index)
         return false;
     const struct ao_driver *ao = audio_out_drivers[index];
     *dst = (struct m_obj_desc) {
-        .name = ao->info->short_name,
-        .description = ao->info->name,
+        .name = ao->name,
+        .description = ao->description,
         .priv_size = ao->priv_size,
         .priv_defaults = ao->priv_defaults,
         .options = ao->options,
@@ -189,7 +189,7 @@ autoprobe:
     for (int i = 0; audio_out_drivers[i]; i++) {
         struct ao *ao = ao_create(true, global, input_ctx, encode_lavc_ctx,
                                   samplerate, format, channels,
-                          (char *)audio_out_drivers[i]->info->short_name, NULL);
+                                  (char *)audio_out_drivers[i]->name, NULL);
         if (ao)
             return ao;
     }

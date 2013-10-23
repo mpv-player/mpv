@@ -634,12 +634,8 @@ static float get_delay(struct ao *ao)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_dsound = {
-    .info = &(const struct ao_info) {
-        "Windows DirectSound audio output",
-        "dsound",
-        "Gabor Szecsi <deje@miki.hu>",
-        ""
-    },
+    .description = "Windows DirectSound audio output",
+    .name      = "dsound",
     .init      = init,
     .uninit    = uninit,
     .control   = control,

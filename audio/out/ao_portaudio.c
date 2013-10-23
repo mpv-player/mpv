@@ -372,12 +372,8 @@ static void resume(struct ao *ao)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_portaudio = {
-    .info = &(const struct ao_info) {
-        "PortAudio",
-        "portaudio",
-        "wm4",
-        "",
-    },
+    .description = "PortAudio",
+    .name      = "portaudio",
     .init      = init,
     .uninit    = uninit,
     .reset     = reset,

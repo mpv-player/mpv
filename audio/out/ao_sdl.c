@@ -347,12 +347,8 @@ static float get_delay(struct ao *ao)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_sdl = {
-    .info = &(const struct ao_info) {
-        "SDL Audio",
-        "sdl",
-        "Rudolf Polzer <divVerent@xonotic.org>",
-        ""
-    },
+    .description = "SDL Audio",
+    .name      = "sdl",
     .init      = init,
     .uninit    = uninit,
     .get_space = get_space,

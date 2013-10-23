@@ -43,22 +43,12 @@ typedef struct ao_control_vol {
     float right;
 } ao_control_vol_t;
 
-typedef struct ao_info {
-    /* driver name ("Matrox Millennium G200/G400" */
-    const char *name;
-    /* short name (for config strings) ("mga") */
-    const char *short_name;
-    /* author ("Aaron Holtzman <aholtzma@ess.engr.uvic.ca>") */
-    const char *author;
-    /* any additional comments */
-    const char *comment;
-} ao_info_t;
-
 struct ao;
 
 struct ao_driver {
     bool encode;
-    const struct ao_info *info;
+    const char *name;
+    const char *description;
     int (*control)(struct ao *ao, enum aocontrol cmd, void *arg);
     int (*init)(struct ao *ao);
     void (*uninit)(struct ao *ao, bool cut_audio);

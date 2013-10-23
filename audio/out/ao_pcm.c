@@ -3,6 +3,8 @@
  *
  * This file is part of MPlayer.
  *
+ * Original author: Atmosfear
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -203,12 +205,8 @@ static int play(struct ao *ao, void *data, int len, int flags)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_pcm = {
-    .info = &(const struct ao_info) {
-        "RAW PCM/WAVE file writer audio output",
-        "pcm",
-        "Atmosfear",
-        "",
-    },
+    .description = "RAW PCM/WAVE file writer audio output",
+    .name      = "pcm",
     .init      = init,
     .uninit    = uninit,
     .get_space = get_space,

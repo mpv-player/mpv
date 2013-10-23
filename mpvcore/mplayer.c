@@ -1726,14 +1726,9 @@ void reinit_audio_chain(struct MPContext *mpctx)
         }
         ao->buffer.start = talloc_new(ao);
         char *s = mp_audio_fmt_to_str(ao->samplerate, &ao->channels, ao->format);
-        MP_INFO(mpctx, "AO: [%s] %s\n",
-                ao->driver->info->short_name, s);
+        MP_INFO(mpctx, "AO: [%s] %s\n", ao->driver->name, s);
         talloc_free(s);
-        MP_VERBOSE(mpctx, "AO: Description: %s\nAO: Author: %s\n",
-                   ao->driver->info->name, ao->driver->info->author);
-        if (strlen(ao->driver->info->comment) > 0)
-            MP_VERBOSE(mpctx, "AO: Comment: %s\n",
-                       ao->driver->info->comment);
+        MP_VERBOSE(mpctx, "AO: Description: %s\n", ao->driver->description);
     }
 
     if (recreate_audio_filters(mpctx) < 0)

@@ -3,6 +3,7 @@
  *
  * This file is part of MPlayer.
  *
+ * Original author: A'rpi
  * Support for >2 output channels added 2001-11-25
  * - Steve Davies <steve@daviesfam.org>
  *
@@ -542,12 +543,8 @@ static float get_delay(struct ao *ao)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_oss = {
-    .info = &(const struct ao_info) {
-        "OSS/ioctl audio output",
-        "oss",
-        "A'rpi",
-        ""
-    },
+    .description = "OSS/ioctl audio output",
+    .name      = "oss",
     .init      = init,
     .uninit    = uninit,
     .control   = control,

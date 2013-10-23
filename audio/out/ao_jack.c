@@ -337,12 +337,8 @@ static int play(struct ao *ao, void *data, int len, int flags)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_jack = {
-    .info = &(const struct ao_info) {
-        "JACK audio output",
-        "jack",
-        "Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>",
-        "based on ao_sdl.c"
-    },
+    .description = "JACK audio output",
+    .name        = "jack",
     .init      = init,
     .uninit    = uninit,
     .get_space = get_space,

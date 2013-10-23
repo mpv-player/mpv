@@ -633,12 +633,8 @@ static int play(struct ao *ao, void *data, int len, int flags)
 
 const struct ao_driver audio_out_lavc = {
     .encode = true,
-    .info = &(const struct ao_info) {
-        "audio encoding using libavcodec",
-        "lavc",
-        "Rudolf Polzer <divVerent@xonotic.org>",
-        ""
-    },
+    .description = "audio encoding using libavcodec",
+    .name      = "lavc",
     .init      = init,
     .uninit    = uninit,
     .get_space = get_space,

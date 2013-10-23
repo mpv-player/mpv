@@ -292,12 +292,8 @@ static float get_delay(struct ao *ao)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_openal = {
-    .info = &(const struct ao_info) {
-        "OpenAL audio output",
-        "openal",
-        "Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>",
-        ""
-    },
+    .description = "OpenAL audio output",
+    .name      = "openal",
     .init      = init,
     .uninit    = uninit,
     .control   = control,

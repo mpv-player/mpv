@@ -317,12 +317,8 @@ static void audio_resume(struct ao *ao)
 #define OPT_BASE_STRUCT struct priv
 
 const struct ao_driver audio_out_sndio = {
-    .info = &(const struct ao_info) {
-        "sndio audio output",
-        "sndio",
-        "Alexandre Ratchov <alex@caoua.org>, Christian Neukirchen <chneukirchen@gmail.com>",
-        "under development"
-    },
+    .description = "sndio audio output",
+    .name      = "sndio",
     .init      = init,
     .uninit    = uninit,
     .control   = control,

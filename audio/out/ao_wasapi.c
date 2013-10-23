@@ -1,6 +1,8 @@
 /*
  * This file is part of mpv.
  *
+ * Original author: Jonathan Yong <10walls@gmail.com>
+ *
  * mpv is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -1369,12 +1371,8 @@ static float get_delay(struct ao *ao)
 #define OPT_BASE_STRUCT struct wasapi_state
 
 const struct ao_driver audio_out_wasapi = {
-    .info = &(const struct ao_info) {
-        "Windows WASAPI audio output (event mode)",
-        "wasapi",
-        "Jonathan Yong <10walls@gmail.com>",
-        ""
-    },
+    .description = "Windows WASAPI audio output (event mode)",
+    .name      = "wasapi",
     .init      = init,
     .uninit    = uninit,
     .control   = control,
