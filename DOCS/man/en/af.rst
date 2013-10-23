@@ -325,8 +325,8 @@ Available filters are:
     .. note::
 
         If you just want to force remixing to a certain output channel layout,
-        it is easier to use the ``force`` filter. For example,
-        ``mpv '--af=force=channels=5.1' '--channels=5.1'`` would always force
+        it is easier to use the ``format`` filter. For example,
+        ``mpv '--af=format=channels=5.1' '--channels=5.1'`` would always force
         remixing audio to 5.1 and output it like this.
 
 ``sub[=fc:ch]``
