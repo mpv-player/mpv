@@ -304,6 +304,7 @@ const struct m_sub_options gl_video_conf = {
                     {"rgba",   GL_RGBA},
                     {"rgb8",   GL_RGB8},
                     {"rgb10",  GL_RGB10},
+                    {"rgb10_a2", GL_RGB10_A2},
                     {"rgb16",  GL_RGB16},
                     {"rgb16f", GL_RGB16F},
                     {"rgb32f", GL_RGB32F},
