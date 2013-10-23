@@ -444,10 +444,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 }
 
 const vf_info_t vf_info_ilpack = {
-    "4:2:0 planar -> 4:2:2 packed reinterlacer",
-    "ilpack",
-    "Richard Felker",
-    "",
-    vf_open,
-    NULL
+    .description = "4:2:0 planar -> 4:2:2 packed reinterlacer",
+    .name = "ilpack",
+    .open = vf_open,
 };

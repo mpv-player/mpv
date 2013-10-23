@@ -166,12 +166,9 @@ static int vf_open(vf_instance_t *vf, char *args){
 }
 
 const vf_info_t vf_info_pp = {
-    "postprocessing",
-    "pp",
-    "A'rpi",
-    "",
-    vf_open,
-    NULL
+    .description = "postprocessing",
+    .name = "pp",
+    .open = vf_open,
 };
 
 //===========================================================================//

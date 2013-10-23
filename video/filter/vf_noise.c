@@ -431,12 +431,9 @@ static int vf_open(vf_instance_t *vf, char *args){
 }
 
 const vf_info_t vf_info_noise = {
-    "noise generator",
-    "noise",
-    "Michael Niedermayer",
-    "",
-    vf_open,
-    NULL
+    .description = "noise generator",
+    .name = "noise",
+    .open = vf_open,
 };
 
 //===========================================================================//

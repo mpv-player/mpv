@@ -524,11 +524,9 @@ static const m_option_t vf_opts_fields[] = {
 };
 
 const vf_info_t vf_info_yadif = {
-    "Yet Another DeInterlacing Filter",
-    "yadif",
-    "Michael Niedermayer",
-    "",
-    vf_open,
+    .description = "Yet Another DeInterlacing Filter",
+    .name = "yadif",
+    .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
     .priv_defaults = &vf_priv_default,
     .options = vf_opts_fields,

@@ -147,11 +147,9 @@ static const m_option_t vf_opts_fields[] = {
 };
 
 const vf_info_t vf_info_sub = {
-    "Render subtitles",
-    "sub",
-    "Evgeniy Stepanov",
-    "",
-    vf_open,
+    .description = "Render subtitles",
+    .name = "sub",
+    .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
     .priv_defaults = &vf_priv_dflt,
     .options = vf_opts_fields,

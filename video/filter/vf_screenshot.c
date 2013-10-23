@@ -84,10 +84,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 }
 
 const vf_info_t vf_info_screenshot = {
-    "screenshot to file",
-    "screenshot",
-    "A'rpi, Jindrich Makovicka",
-    "",
-    vf_open,
-    NULL
+    .description = "screenshot to file",
+    .name = "screenshot",
+    .open = vf_open,
 };

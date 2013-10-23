@@ -31,11 +31,9 @@ struct vf_instance;
 struct vf_priv_s;
 
 typedef struct vf_info {
-    const char *info;
+    const char *description;
     const char *name;
-    const char *author;
-    const char *comment;
-    int (*vf_open)(struct vf_instance *vf, char *args);
+    int (*open)(struct vf_instance *vf, char *args);
     void *damn_you;
     int priv_size;
     const void *priv_defaults;

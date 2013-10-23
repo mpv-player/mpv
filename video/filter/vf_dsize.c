@@ -114,10 +114,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 }
 
 const vf_info_t vf_info_dsize = {
-    "reset displaysize/aspect",
-    "dsize",
-    "Rich Felker",
-    "",
-    vf_open,
-    NULL
+    .description = "reset displaysize/aspect",
+    .name = "dsize",
+    .open = vf_open,
 };

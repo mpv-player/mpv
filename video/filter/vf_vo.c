@@ -115,10 +115,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 }
 
 const vf_info_t vf_info_vo = {
-    "libvo wrapper",
-    "vo",
-    "A'rpi",
-    "for internal use",
-    vf_open,
-    NULL
+    .description = "libvo wrapper",
+    .name = "vo",
+    .open = vf_open,
 };

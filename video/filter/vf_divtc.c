@@ -720,10 +720,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 
 const vf_info_t vf_info_divtc =
    {
-   "inverse telecine for deinterlaced video",
-   "divtc",
-   "Ville Saari",
-   "",
-   vf_open,
-   NULL
+   .description = "inverse telecine for deinterlaced video",
+   .name = "divtc",
+   .open = vf_open,
    };

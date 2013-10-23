@@ -334,11 +334,9 @@ static const m_option_t vf_opts_fields[] = {
 };
 
 const vf_info_t vf_info_lavfi = {
-    "libavfilter bridge",
-    "lavfi",
-    "",
-    "",
-    vf_open,
+    .description = "libavfilter bridge",
+    .name = "lavfi",
+    .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
     .priv_defaults = &vf_priv_dflt,
     .options = vf_opts_fields,

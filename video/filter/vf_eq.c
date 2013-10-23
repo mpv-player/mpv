@@ -522,10 +522,7 @@ int vf_open(vf_instance_t *vf, char *args)
 }
 
 const vf_info_t vf_info_eq = {
-  "Software equalizer",
-  "eq",
-  "Hampa Hug, Daniel Moreno, Richard Felker",
-  "",
-  &vf_open,
-  NULL
+    .description = "Software equalizer",
+    .name = "eq",
+    .open = &vf_open,
 };

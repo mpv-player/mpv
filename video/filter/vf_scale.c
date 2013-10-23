@@ -426,11 +426,9 @@ static const m_option_t vf_opts_fields[] = {
 };
 
 const vf_info_t vf_info_scale = {
-    "software scaling",
-    "scale",
-    "A'rpi",
-    "",
-    vf_open,
+    .description = "software scaling",
+    .name = "scale",
+    .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
     .priv_defaults = &vf_priv_dflt,
     .options = vf_opts_fields,

@@ -56,12 +56,9 @@ static int vf_open(vf_instance_t *vf, char *args){
 }
 
 const vf_info_t vf_info_swapuv = {
-    "UV swapper",
-    "swapuv",
-    "Michael Niedermayer",
-    "",
-    vf_open,
-    NULL
+    .description = "UV swapper",
+    .name = "swapuv",
+    .open = vf_open,
 };
 
 //===========================================================================//

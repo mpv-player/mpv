@@ -316,11 +316,9 @@ static const m_option_t vf_opts_fields[] = {
 };
 
 const vf_info_t vf_info_delogo = {
-    "simple logo remover",
-    "delogo",
-    "Jindrich Makovicka, Alex Beregszaszi",
-    "",
-    vf_open,
+    .description = "simple logo remover",
+    .name = "delogo",
+    .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
     .priv_defaults = &vf_priv_dflt,
     .options = vf_opts_fields,

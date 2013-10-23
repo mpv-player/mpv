@@ -263,10 +263,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 }
 
 const vf_info_t vf_info_pullup = {
-    "pullup (from field sequence to frames)",
-    "pullup",
-    "Rich Felker",
-    "",
-    vf_open,
-    NULL
+    .description = "pullup (from field sequence to frames)",
+    .name = "pullup",
+    .open = vf_open,
 };

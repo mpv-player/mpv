@@ -103,12 +103,9 @@ static int vf_open(vf_instance_t *vf, char *args){
 }
 
 const vf_info_t vf_info_mirror = {
-    "horizontal mirror",
-    "mirror",
-    "Eyck",
-    "",
-    vf_open,
-    NULL
+    .description = "horizontal mirror",
+    .name = "mirror",
+    .open = vf_open,
 };
 
 //===========================================================================//

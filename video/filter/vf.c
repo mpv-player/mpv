@@ -126,7 +126,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
     const vf_info_t *vf = filter_list[index];
     *dst = (struct m_obj_desc) {
         .name = vf->name,
-        .description = vf->info,
+        .description = vf->description,
         .priv_size = vf->priv_size,
         .priv_defaults = vf->priv_defaults,
         .options = vf->options,
@@ -254,7 +254,7 @@ static struct vf_instance *vf_open(struct MPOpts *opts, vf_instance_t *next,
     if (m_config_initialize_obj(config, &desc, &priv, &args) < 0)
         goto error;
     vf->priv = priv;
-    int retcode = vf->info->vf_open(vf, (char *)args);
+    int retcode = vf->info->open(vf, (char *)args);
     if (retcode < 1)
         goto error;
     return vf;

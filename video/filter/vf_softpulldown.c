@@ -163,10 +163,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 }
 
 const vf_info_t vf_info_softpulldown = {
-    "mpeg2 soft 3:2 pulldown",
-    "softpulldown",
-    "Tobias Diedrich <ranma+mplayer@tdiedrich.de>",
-    "",
-    vf_open,
-    NULL
+    .description = "mpeg2 soft 3:2 pulldown",
+    .name = "softpulldown",
+    .open = vf_open,
 };

@@ -150,10 +150,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 }
 
 const vf_info_t vf_info_down3dright = {
-	"convert stereo movie from top-bottom to left-right field",
-	"down3dright",
-	"Zdenek Kabelac",
-	"",
-	vf_open,
-	NULL
+    .description = "convert stereo movie from top-bottom to left-right field",
+    .name = "down3dright",
+    .open = vf_open,
 };

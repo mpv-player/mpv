@@ -56,11 +56,9 @@ static const m_option_t vf_opts_fields[] = {
 };
 
 const vf_info_t vf_info_noformat = {
-    "disallow one output format",
-    "noformat",
-    "Joey",
-    "",
-    vf_open,
+    .description = "disallow one output format",
+    .name = "noformat",
+    .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
     .priv_defaults = &vf_priv_dflt,
     .options = vf_opts_fields,

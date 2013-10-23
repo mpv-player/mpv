@@ -395,11 +395,9 @@ static const m_option_t vf_opts_fields[] = {
 };
 
 const vf_info_t vf_info_vaapi = {
-    .info = "VA-API Video Post-Process Filter",
+    .description = "VA-API Video Post-Process Filter",
     .name = "vavpp",
-    .author = "xylosper",
-    .comment = "",
-    .vf_open = vf_open,
+    .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
     .priv_defaults = &vf_priv_default,
     .options = vf_opts_fields,

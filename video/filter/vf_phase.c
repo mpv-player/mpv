@@ -290,10 +290,7 @@ static int vf_open(vf_instance_t *vf, char *args)
 
 const vf_info_t vf_info_phase =
    {
-   "phase shift fields",
-   "phase",
-   "Ville Saari",
-   "",
-   vf_open,
-   NULL
+   .description = "phase shift fields",
+   .name = "phase",
+   .open = vf_open,
    };

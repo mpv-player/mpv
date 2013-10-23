@@ -59,12 +59,9 @@ static int vf_open(vf_instance_t *vf, char *args){
 }
 
 const vf_info_t vf_info_flip = {
-    "flip image upside-down",
-    "flip",
-    "A'rpi",
-    "",
-    vf_open,
-    NULL
+    .description = "flip image upside-down",
+    .name = "flip",
+    .open = vf_open,
 };
 
 //===========================================================================//

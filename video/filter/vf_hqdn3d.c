@@ -356,12 +356,9 @@ static int vf_open(vf_instance_t *vf, char *args){
 }
 
 const vf_info_t vf_info_hqdn3d = {
-    "High Quality 3D Denoiser",
-    "hqdn3d",
-    "Daniel Moreno & A'rpi",
-    "",
-    vf_open,
-    NULL
+    .description = "High Quality 3D Denoiser",
+    .name = "hqdn3d",
+    .open = vf_open,
 };
 
 //===========================================================================//

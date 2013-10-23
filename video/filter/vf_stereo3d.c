@@ -465,11 +465,9 @@ static const m_option_t vf_opts_fields[] = {
 
 //==info struct==//
 const vf_info_t vf_info_stereo3d = {
-    "stereoscopic 3d view",
-    "stereo3d",
-    "Gordon Schmidt",
-    "view stereoscopic videos",
-    vf_open,
+    .description = "stereoscopic 3d view",
+    .name = "stereo3d",
+    .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
     .priv_defaults = &vf_priv_default,
     .options = vf_opts_fields,

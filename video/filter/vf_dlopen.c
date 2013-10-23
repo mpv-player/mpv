@@ -375,11 +375,9 @@ static const m_option_t vf_opts_fields[] = {
 };
 
 const vf_info_t vf_info_dlopen = {
-    "Dynamic library filter",
-    "dlopen",
-    "Rudolf Polzer",
-    "",
-    vf_open,
+    .description = "Dynamic library filter",
+    .name = "dlopen",
+    .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
     .priv_defaults = &vf_priv_dflt,
     .options = vf_opts_fields,

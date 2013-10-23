@@ -125,12 +125,9 @@ static int vf_open(vf_instance_t *vf, char *args){
 }
 
 const vf_info_t vf_info_rotate = {
-    "rotate",
-    "rotate",
-    "A'rpi",
-    "",
-    vf_open,
-    NULL
+    .description = "rotate",
+    .name = "rotate",
+    .open = vf_open,
 };
 
 //===========================================================================//

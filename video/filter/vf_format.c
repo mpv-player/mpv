@@ -80,11 +80,9 @@ static const m_option_t vf_opts_fields[] = {
 };
 
 const vf_info_t vf_info_format = {
-    "force output format",
-    "format",
-    "A'rpi",
-    "FIXME! get_image()/put_image()",
-    vf_open,
+    .description = "force output format",
+    .name = "format",
+    .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
     .priv_defaults = &vf_priv_dflt,
     .options = vf_opts_fields,
