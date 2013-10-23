@@ -40,6 +40,34 @@ struct priv {
     struct mp_audio temp;
 };
 
+static void force_in_params(struct af_instance *af, struct mp_audio *in)
+{
+    struct priv *priv = af->priv;
+
+    if (priv->in_format != AF_FORMAT_UNKNOWN)
+        mp_audio_set_format(in, priv->in_format);
+
+    if (priv->in_channels.num)
+        mp_audio_set_channels(in, &priv->in_channels);
+
+    if (priv->in_srate)
+        in->rate = priv->in_srate;
+}
+
+static void force_out_params(struct af_instance *af, struct mp_audio *out)
+{
+    struct priv *priv = af->priv;
+
+    if (priv->out_format != AF_FORMAT_UNKNOWN)
+        mp_audio_set_format(out, priv->out_format);
+
+    if (priv->out_channels.num)
+        mp_audio_set_channels(out, &priv->out_channels);
+
+    if (priv->out_srate)
+        out->rate = priv->out_srate;
+}
+
 static int control(struct af_instance *af, int cmd, void *arg)
 {
     struct priv *priv = af->priv;
@@ -50,25 +78,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
         struct mp_audio orig_in = *in;
         struct mp_audio *out = af->data;
 
-        if (priv->in_format != AF_FORMAT_UNKNOWN)
-            mp_audio_set_format(in, priv->in_format);
-
-        if (priv->in_channels.num)
-            mp_audio_set_channels(in, &priv->in_channels);
-
-        if (priv->in_srate)
-            in->rate = priv->in_srate;
-
+        force_in_params(af, in);
         mp_audio_copy_config(out, in);
-
-        if (priv->out_format != AF_FORMAT_UNKNOWN)
-            mp_audio_set_format(out, priv->out_format);
-
-        if (priv->out_channels.num)
-            mp_audio_set_channels(out, &priv->out_channels);
-
-        if (priv->out_srate)
-            out->rate = priv->out_srate;
+        force_out_params(af, out);
 
         if (in->nch != out->nch || in->bps != out->bps) {
             mp_msg(MSGT_AFILTER, MSGL_ERR,
@@ -106,6 +118,10 @@ static int af_open(struct af_instance *af)
     af->mul = 1;
     struct priv *priv = af->priv;
     af->data = &priv->data;
+
+    force_in_params(af, af->data);
+    force_out_params(af, af->data);
+
     return AF_OK;
 }
 
