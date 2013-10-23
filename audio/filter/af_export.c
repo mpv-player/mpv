@@ -7,6 +7,8 @@
  *                               the area changes),
  * the rest is payload (non-interleaved).
  *
+ * Authors: Anders; Gustavo Sverzut Barbieri <gustavo.barbieri@ic.unicamp.br>
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -270,10 +272,7 @@ static int af_open( struct af_instance* af )
 
 // Description of this filter
 struct af_info af_info_export = {
-    "Sound export filter",
-    "export",
-    "Anders; Gustavo Sverzut Barbieri <gustavo.barbieri@ic.unicamp.br>",
-    "",
-    AF_FLAGS_REENTRANT,
-    af_open
+    .info = "Sound export filter",
+    .name = "export",
+    .open = af_open,
 };

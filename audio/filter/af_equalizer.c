@@ -213,10 +213,8 @@ static int af_open(struct af_instance* af){
 
 // Description of this filter
 struct af_info af_info_equalizer = {
-  "Equalizer audio filter",
-  "equalizer",
-  "Anders",
-  "",
-  AF_FLAGS_NOT_REENTRANT,
-  af_open
+  .info = "Equalizer audio filter",
+  .name = "equalizer",
+  .flags = AF_FLAGS_NOT_REENTRANT,
+  .open = af_open,
 };

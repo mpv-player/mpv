@@ -119,10 +119,8 @@ static int af_open(struct af_instance* af){
 
 // Description of this filter
 struct af_info af_info_center = {
-    "Audio filter for adding a center channel",
-    "center",
-    "Alex Beregszaszi",
-    "",
-    AF_FLAGS_NOT_REENTRANT,
-    af_open
+    .info = "Audio filter for adding a center channel",
+    .name = "center",
+    .flags = AF_FLAGS_NOT_REENTRANT,
+    .open = af_open,
 };

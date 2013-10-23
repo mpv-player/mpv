@@ -339,10 +339,8 @@ static int af_open(struct af_instance* af){
 
 // Description of this filter
 struct af_info af_info_drc = {
-    "Dynamic range compression filter",
-    "drc",
-    "Alex Beregszaszi & Pierre Lombard",
-    "",
-    AF_FLAGS_NOT_REENTRANT,
-    af_open
+    .info = "Dynamic range compression filter",
+    .name = "drc",
+    .flags = AF_FLAGS_NOT_REENTRANT,
+    .open = af_open,
 };

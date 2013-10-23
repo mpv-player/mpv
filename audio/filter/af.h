@@ -45,8 +45,6 @@ struct af_instance;
 struct af_info {
     const char *info;
     const char *name;
-    const char *author;
-    const char *comment;
     const int flags;
     int (*open)(struct af_instance *vf);
     bool (*test_conversion)(int src_format, int dst_format);

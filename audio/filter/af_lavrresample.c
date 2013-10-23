@@ -3,6 +3,7 @@
  * Copyright (c) 2013 Stefano Pigozzi <stefano.pigozzi@gmail.com>
  *
  * This file is part of mpv.
+ * Based on Michael Niedermayer's lavcresample.
  *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -370,12 +371,9 @@ static int af_open(struct af_instance *af)
 #define OPT_BASE_STRUCT struct af_resample
 
 struct af_info af_info_lavrresample = {
-    "Sample frequency conversion using libavresample",
-    "lavrresample",
-    "Stefano Pigozzi (based on Michael Niedermayer's lavcresample)",
-    "",
-    AF_FLAGS_REENTRANT,
-    af_open,
+    .info = "Sample frequency conversion using libavresample",
+    .name = "lavrresample",
+    .open = af_open,
     .test_conversion = test_conversion,
     .priv_size = sizeof(struct af_resample),
     .priv_defaults = &(const struct af_resample) {

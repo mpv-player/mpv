@@ -162,10 +162,7 @@ static int af_open(struct af_instance* af){
 
 // Description of this filter
 struct af_info af_info_sinesuppress = {
-    "Sine Suppress",
-    "sinesuppress",
-    "Michael Niedermayer",
-    "",
-    0,
-    af_open
+    .info = "Sine Suppress",
+    .name = "sinesuppress",
+    .open = af_open,
 };

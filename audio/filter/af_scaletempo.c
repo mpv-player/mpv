@@ -507,12 +507,9 @@ static int af_open(struct af_instance* af){
 #define OPT_BASE_STRUCT af_scaletempo_t
 
 struct af_info af_info_scaletempo = {
-  "Scale audio tempo while maintaining pitch",
-  "scaletempo",
-  "Robert Juliano",
-  "",
-  AF_FLAGS_REENTRANT,
-  af_open,
+    .info = "Scale audio tempo while maintaining pitch",
+    .name = "scaletempo",
+    .open = af_open,
     .priv_size = sizeof(af_scaletempo_t),
     .priv_defaults = &(const af_scaletempo_t) {
         .ms_stride = 60,

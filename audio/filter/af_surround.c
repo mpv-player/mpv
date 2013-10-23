@@ -262,10 +262,8 @@ static int af_open(struct af_instance* af){
 
 struct af_info af_info_surround =
 {
-        "Surround decoder filter",
-        "surround",
-        "Steve Davies <steve@daviesfam.org>",
-        "",
-        AF_FLAGS_NOT_REENTRANT,
-        af_open
+    .info = "Surround decoder filter",
+    .name = "surround",
+    .flags = AF_FLAGS_NOT_REENTRANT,
+    .open = af_open,
 };

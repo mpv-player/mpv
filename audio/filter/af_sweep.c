@@ -92,10 +92,7 @@ static int af_open(struct af_instance* af){
 }
 
 struct af_info af_info_sweep = {
-  "sine sweep",
-  "sweep",
-  "Michael Niedermayer",
-  "",
-  AF_FLAGS_REENTRANT,
-  af_open
+    .info = "sine sweep",
+    .name = "sweep",
+    .open = af_open,
 };

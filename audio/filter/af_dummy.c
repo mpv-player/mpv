@@ -2,6 +2,8 @@
  * The name speaks for itself. This filter is a dummy and will
  * not blow up regardless of what you do with it.
  *
+ * Original author: Anders
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -67,10 +69,7 @@ static int af_open(struct af_instance* af){
 
 // Description of this filter
 struct af_info af_info_dummy = {
-    "dummy",
-    "dummy",
-    "Anders",
-    "",
-    AF_FLAGS_REENTRANT,
-    af_open
+    .info = "dummy",
+    .name = "dummy",
+    .open = af_open,
 };

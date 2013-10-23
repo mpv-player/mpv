@@ -199,10 +199,8 @@ static int af_open(struct af_instance* af){
 
 // Description of this filter
 struct af_info af_info_volume = {
-    "Volume control audio filter",
-    "volume",
-    "Anders",
-    "",
-    AF_FLAGS_NOT_REENTRANT,
-    af_open
+    .info = "Volume control audio filter",
+    .name = "volume",
+    .flags = AF_FLAGS_NOT_REENTRANT,
+    .open = af_open,
 };

@@ -197,12 +197,9 @@ static int af_open(struct af_instance *af)
 
 /// Description of this filter
 struct af_info af_info_bs2b = {
-    "Bauer stereophonic-to-binaural audio filter",
-    "bs2b",
-    "Andrew Savchenko",
-    "",
-    AF_FLAGS_REENTRANT,
-    af_open,
+    .info = "Bauer stereophonic-to-binaural audio filter",
+    .name = "bs2b",
+    .open = af_open,
     .priv_size = sizeof(struct af_bs2b),
     .options = (const struct m_option[]) {
         OPT_INTRANGE("fcut", fcut, 0, BS2B_MINFCUT, BS2B_MAXFCUT),

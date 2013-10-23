@@ -3,6 +3,8 @@
  * channels and can be used for simple position panning.
  * An extension for this filter would be a reverb.
  *
+ * Original author: Anders
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -188,10 +190,7 @@ static int af_open(struct af_instance* af){
 
 // Description of this filter
 struct af_info af_info_delay = {
-    "Delay audio filter",
-    "delay",
-    "Anders",
-    "",
-    AF_FLAGS_REENTRANT,
-    af_open
+    .info = "Delay audio filter",
+    .name = "delay",
+    .open = af_open,
 };

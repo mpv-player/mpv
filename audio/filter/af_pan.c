@@ -205,10 +205,7 @@ static int af_open(struct af_instance* af){
 
 // Description of this filter
 struct af_info af_info_pan = {
-    "Panning audio filter",
-    "pan",
-    "Anders",
-    "",
-    AF_FLAGS_REENTRANT,
-    af_open
+    .info = "Panning audio filter",
+    .name = "pan",
+    .open = af_open,
 };

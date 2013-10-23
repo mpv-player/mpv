@@ -139,10 +139,8 @@ static int af_open(struct af_instance* af){
 
 // Description of this filter
 struct af_info af_info_extrastereo = {
-    "Increase difference between audio channels",
-    "extrastereo",
-    "Alex Beregszaszi & Pierre Lombard",
-    "",
-    AF_FLAGS_NOT_REENTRANT,
-    af_open
+    .info = "Increase difference between audio channels",
+    .name = "extrastereo",
+    .flags = AF_FLAGS_NOT_REENTRANT,
+    .open = af_open,
 };

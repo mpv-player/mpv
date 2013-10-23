@@ -128,12 +128,9 @@ static int af_open(struct af_instance *af)
 #define OPT_BASE_STRUCT struct priv
 
 struct af_info af_info_format = {
-    "Force audio format",
-    "format",
-    "",
-    "",
-    0,
-    af_open,
+    .info = "Force audio format",
+    .name = "format",
+    .open = af_open,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_AUDIOFORMAT("format", in_format, 0),

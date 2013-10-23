@@ -3,6 +3,8 @@
  * command line parameter channels. It is stupid and can only add
  * silence or copy channels, not mix or filter.
  *
+ * Original author: Anders
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -262,10 +264,7 @@ static int af_open(struct af_instance* af){
 
 // Description of this filter
 struct af_info af_info_channels = {
-  "Insert or remove channels",
-  "channels",
-  "Anders",
-  "",
-  AF_FLAGS_REENTRANT,
-  af_open
+  .info = "Insert or remove channels",
+  .name = "channels",
+  .open = af_open,
 };

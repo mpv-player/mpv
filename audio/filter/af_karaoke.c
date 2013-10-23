@@ -87,10 +87,8 @@ static int af_open(struct af_instance* af){
 
 // Description of this filter
 struct af_info af_info_karaoke = {
-	"Simple karaoke/voice-removal audio filter",
-	"karaoke",
-	"Reynaldo H. Verdejo Pinochet",
-	"",
-	AF_FLAGS_NOT_REENTRANT,
-	af_open
+	.info = "Simple karaoke/voice-removal audio filter",
+	.name = "karaoke",
+	.flags = AF_FLAGS_NOT_REENTRANT,
+	.open = af_open,
 };

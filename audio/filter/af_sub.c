@@ -178,10 +178,8 @@ static int af_open(struct af_instance* af){
 
 // Description of this filter
 struct af_info af_info_sub = {
-    "Audio filter for adding a sub-base channel",
-    "sub",
-    "Anders",
-    "",
-    AF_FLAGS_NOT_REENTRANT,
-    af_open
+    .info = "Audio filter for adding a sub-base channel",
+    .name = "sub",
+    .flags = AF_FLAGS_NOT_REENTRANT,
+    .open = af_open,
 };

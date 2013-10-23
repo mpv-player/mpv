@@ -379,10 +379,7 @@ static int af_open(struct af_instance* af){
 }
 
 struct af_info af_info_lavcac3enc = {
-    "runtime encode to ac3 using libavcodec",
-    "lavcac3enc",
-    "Ulion",
-    "",
-    AF_FLAGS_REENTRANT,
-    af_open
+    .info = "runtime encode to ac3 using libavcodec",
+    .name = "lavcac3enc",
+    .open = af_open,
 };

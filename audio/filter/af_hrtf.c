@@ -3,6 +3,8 @@
  * encoded rear channels into headphone signal using FIR filtering
  * with HRTF.
  *
+ * Author: ylai
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -660,10 +662,7 @@ static int af_open(struct af_instance* af)
 
 /* Description of this filter */
 struct af_info af_info_hrtf = {
-    "HRTF Headphone",
-    "hrtf",
-    "ylai",
-    "",
-    AF_FLAGS_REENTRANT,
-    af_open
+    .info = "HRTF Headphone",
+    .name = "hrtf",
+    .open = af_open,
 };

@@ -307,12 +307,9 @@ static int af_open(struct af_instance *af)
 #define OPT_BASE_STRUCT struct priv
 
 struct af_info af_info_lavfi = {
-    "libavfilter bridge",
-    "lavfi",
-    "",
-    "",
-    0,
-    af_open,
+    .info = "libavfilter bridge",
+    .name = "lavfi",
+    .open = af_open,
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_STRING("graph", cfg_graph, 0),
