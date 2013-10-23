@@ -123,18 +123,6 @@ struct voctrl_screenshot_args {
 #define VOFLAG_GL_DEBUG         0x40  // Hint to request debug OpenGL context
 #define VOFLAG_ALPHA            0x80  // Hint to request alpha framebuffer
 
-typedef struct vo_info_s
-{
-    /* driver name ("Matrox Millennium G200/G400" */
-    const char *name;
-    /* short name (for config strings) ("vdpau") */
-    const char *short_name;
-    /* author ("Aaron Holtzman <aholtzma@ess.engr.uvic.ca>") */
-    const char *author;
-    /* any additional comments */
-    const char *comment;
-} vo_info_t;
-
 struct vo;
 struct osd_state;
 struct mp_image;
@@ -148,7 +136,9 @@ struct vo_driver {
     // Encoding functionality, which can be invoked via --o only.
     bool encode;
 
-    const vo_info_t *info;
+    const char *name;
+    const char *description;
+
     /*
      *   returns: zero on successful initialization, non-zero on error.
      */

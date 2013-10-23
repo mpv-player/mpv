@@ -589,12 +589,8 @@ static int query_format(struct vo *vo, uint32_t format)
 }
 
 const struct vo_driver video_out_corevideo = {
-    .info = &(const vo_info_t) {
-        "Mac OS X Core Video",
-        "corevideo",
-        "Nicolas Plourde <nicolas.plourde@gmail.com> and others",
-        ""
-    },
+    .name = "corevideo",
+    .description = "Mac OS X Core Video",
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,

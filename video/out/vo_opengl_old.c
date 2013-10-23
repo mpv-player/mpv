@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Original author: Reimar Doeffinger <Reimar.Doeffinger@gmx.de>
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -2163,12 +2165,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
 #define OPT_BASE_STRUCT struct gl_priv
 
 const struct vo_driver video_out_opengl_old = {
-    .info = &(const vo_info_t) {
-        "OpenGL",
-        "opengl-old",
-        "Reimar Doeffinger <Reimar.Doeffinger@gmx.de>",
-        ""
-    },
+    .description = "OpenGL (legacy VO, may work better on older GPUs)",
+    .name = "opengl-old",
     .preinit = preinit,
     .query_format = query_format,
     .config = config,

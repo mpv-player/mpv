@@ -2,6 +2,7 @@
  * VA API output module
  *
  * Copyright (C) 2008-2009 Splitted-Desktop Systems
+ * Gwenole Beauchesne <gbeauchesne@splitted-desktop.com>
  *
  * This file is part of MPlayer.
  *
@@ -643,12 +644,8 @@ static int preinit(struct vo *vo)
 #define OPT_BASE_STRUCT struct priv
 
 const struct vo_driver video_out_vaapi = {
-    .info = &(const vo_info_t) {
-        "VA API with X11",
-        "vaapi",
-        "Gwenole Beauchesne <gbeauchesne@splitted-desktop.com> and others",
-        ""
-    },
+    .description = "VA API with X11",
+    .name = "vaapi",
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,

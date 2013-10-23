@@ -44,16 +44,13 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags
         return -1;
     }
 
-    const vo_info_t *info = video_out->driver->info;
+    const struct vo_driver *info = video_out->driver;
     mp_msg(MSGT_CPLAYER, MSGL_INFO, "VO: [%s] %dx%d => %dx%d %s %s\n",
-           info->short_name,
+           info->name,
            p->w, p->h, p->d_w, p->d_h,
            vo_format_name(p->imgfmt),
            (flags & VOFLAG_FLIPPING) ? " [flip]" : "");
-    mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Description: %s\n", info->name);
-    mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Author: %s\n", info->author);
-    if (info->comment && strlen(info->comment) > 0)
-        mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Comment: %s\n", info->comment);
+    mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Description: %s\n", info->description);
 
     return vo_reconfig(video_out, p, flags);
 }

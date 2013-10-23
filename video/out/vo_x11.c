@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Original author: Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -656,12 +658,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
 }
 
 const struct vo_driver video_out_x11 = {
-    .info = &(const vo_info_t) {
-        "X11 ( XImage/Shm )",
-        "x11",
-        "Aaron Holtzman <aholtzma@ess.engr.uvic.ca>",
-        ""
-    },
+    .description = "X11 ( XImage/Shm )",
+    .name = "x11",
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option []){{0}},
     .preinit = preinit,

@@ -1,6 +1,8 @@
 /*
  * This file is part of MPlayer.
  *
+ * Based on vo_gl.c by Reimar Doeffinger.
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -348,12 +350,8 @@ const struct m_option options[] = {
 };
 
 const struct vo_driver video_out_opengl = {
-    .info = &(const vo_info_t) {
-        "Extended OpenGL Renderer",
-        "opengl",
-        "Based on vo_gl.c by Reimar Doeffinger",
-        ""
-    },
+    .description = "Extended OpenGL Renderer",
+    .name = "opengl",
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,
@@ -367,12 +365,8 @@ const struct vo_driver video_out_opengl = {
 };
 
 const struct vo_driver video_out_opengl_hq = {
-    .info = &(const vo_info_t) {
-        "Extended OpenGL Renderer (high quality rendering preset)",
-        "opengl-hq",
-        "Based on vo_gl.c by Reimar Doeffinger",
-        ""
-    },
+    .description = "Extended OpenGL Renderer (high quality rendering preset)",
+    .name = "opengl-hq",
     .preinit = preinit,
     .query_format = query_format,
     .reconfig = reconfig,

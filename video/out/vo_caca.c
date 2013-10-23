@@ -286,12 +286,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
 }
 
 const struct vo_driver video_out_caca = {
-    .info = &(const vo_info_t) {
-        "libcaca",
-        "caca",
-        "Pigeon <pigeon@pigeond.net>",
-        ""
-    },
+    .name = "caca",
+    .description = "libcaca",
     .preinit = preinit,
     .query_format = query_format,
     .config = config,

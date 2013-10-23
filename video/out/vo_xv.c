@@ -3,6 +3,8 @@
  *
  * This file is part of MPlayer.
  *
+ * Original author: Gerd Knorr <kraxel@goldbach.in-berlin.de>
+ *
  * MPlayer is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -55,13 +57,6 @@
 #include "video/csputils.h"
 #include "mpvcore/m_option.h"
 #include "osdep/timer.h"
-
-static const vo_info_t info = {
-    "X11/Xv",
-    "xv",
-    "Gerd Knorr <kraxel@goldbach.in-berlin.de> and others",
-    ""
-};
 
 #define CK_METHOD_NONE       0 // no colorkey drawing
 #define CK_METHOD_BACKGROUND 1 // set colorkey as window background
@@ -878,7 +873,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
 #define OPT_BASE_STRUCT struct xvctx
 
 const struct vo_driver video_out_xv = {
-    .info = &info,
+    .description = "X11/Xv",
+    .name = "xv",
     .preinit = preinit,
     .query_format = query_format,
     .config = config,

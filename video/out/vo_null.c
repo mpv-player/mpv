@@ -67,12 +67,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
 }
 
 const struct vo_driver video_out_null = {
-    .info = &(const vo_info_t) {
-        "Null video output",
-        "null",
-        "Aaron Holtzman <aholtzma@ess.engr.uvic.ca>",
-        ""
-    },
+    .description = "Null video output",
+    .name = "null",
     .preinit = preinit,
     .query_format = query_format,
     .config = config,

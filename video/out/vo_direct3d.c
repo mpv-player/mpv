@@ -1725,15 +1725,9 @@ static const d3d_priv defaults = {
     .video_eq = { MP_CSP_EQ_CAPS_COLORMATRIX },
 };
 
-#define AUTHOR "Georgi Petrov (gogothebee) <gogothebee@gmail.com> and others"
-
 const struct vo_driver video_out_direct3d = {
-    .info = &(const vo_info_t) {
-        "Direct3D 9 Renderer",
-        "direct3d",
-        AUTHOR,
-        ""
-    },
+    .description = "Direct3D 9 Renderer",
+    .name = "direct3d",
     .preinit = preinit,
     .query_format = query_format,
     .config = config,
@@ -1749,12 +1743,8 @@ const struct vo_driver video_out_direct3d = {
 };
 
 const struct vo_driver video_out_direct3d_shaders = {
-    .info = &(const vo_info_t) {
-        "Direct3D 9 Renderer (using shaders for YUV conversion)",
-        "direct3d_shaders",
-        AUTHOR,
-        ""
-    },
+    .description = "Direct3D 9 Renderer (using shaders for YUV conversion)",
+    .name = "direct3d_shaders",
     .preinit = preinit,
     .query_format = query_format,
     .config = config,

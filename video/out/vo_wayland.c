@@ -711,12 +711,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
 #define OPT_BASE_STRUCT struct priv
 const struct vo_driver video_out_wayland = {
-    .info = &(const vo_info_t) {
-        "Wayland SHM video output",
-        "wayland",
-        "Alexander Preisinger <alexander.preisinger@gmail.com>",
-        ""
-    },
+    .description = "Wayland SHM video output",
+    .name = "wayland",
     .priv_size = sizeof(struct priv),
     .preinit = preinit,
     .query_format = query_format,

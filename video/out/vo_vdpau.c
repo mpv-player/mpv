@@ -1,7 +1,7 @@
 /*
  * VDPAU video output driver
  *
- * Copyright (C) 2008 NVIDIA
+ * Copyright (C) 2008 NVIDIA (Rajib Mahapatra <rmahapatra@nvidia.com>)
  * Copyright (C) 2009 Uoti Urpala
  *
  * This file is part of MPlayer.
@@ -1685,12 +1685,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
 const struct vo_driver video_out_vdpau = {
     .buffer_frames = true,
-    .info = &(const struct vo_info_s){
-        "VDPAU with X11",
-        "vdpau",
-        "Rajib Mahapatra <rmahapatra@nvidia.com> and others",
-        ""
-    },
+    .description = "VDPAU with X11",
+    .name = "vdpau",
     .preinit = preinit,
     .query_format = query_format,
     .config = config,

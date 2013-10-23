@@ -118,8 +118,8 @@ static bool get_desc(struct m_obj_desc *dst, int index)
         return false;
     const struct vo_driver *vo = video_out_drivers[index];
     *dst = (struct m_obj_desc) {
-        .name = vo->info->short_name,
-        .description = vo->info->name,
+        .name = vo->name,
+        .description = vo->description,
         .priv_size = vo->priv_size,
         .priv_defaults = vo->priv_defaults,
         .options = vo->options,
@@ -324,7 +324,7 @@ autoprobe:
     // now try the rest...
     for (int i = 0; video_out_drivers[i]; i++) {
         struct vo *vo = vo_create(global, input_ctx, encode_lavc_ctx,
-                          (char *)video_out_drivers[i]->info->short_name, NULL);
+                                  (char *)video_out_drivers[i]->name, NULL);
         if (vo)
             return vo;
     }

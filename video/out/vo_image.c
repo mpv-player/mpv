@@ -150,12 +150,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
 
 const struct vo_driver video_out_image =
 {
-    .info = &(const vo_info_t) {
-        "Write video frames to image files",
-        "image",
-        "wm4",
-        ""
-    },
+    .description = "Write video frames to image files",
+    .name = "image",
     .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_SUBSTRUCT("", opts, image_writer_conf, 0),

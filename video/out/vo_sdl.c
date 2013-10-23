@@ -995,12 +995,8 @@ static int control(struct vo *vo, uint32_t request, void *data)
 #define OPT_BASE_STRUCT struct priv
 
 const struct vo_driver video_out_sdl = {
-    .info = &(const vo_info_t) {
-        "SDL 2.0 Renderer",
-        "sdl",
-        "Rudolf Polzer <divVerent@xonotic.org>",
-        ""
-    },
+    .description = "SDL 2.0 Renderer",
+    .name = "sdl",
     .priv_size = sizeof(struct priv),
     .priv_defaults = &(const struct priv) {
         .renderer_index = -1,
