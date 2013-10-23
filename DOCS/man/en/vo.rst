@@ -320,8 +320,10 @@ Available video output drivers are:
         slightly different gamma.
 
     ``pbo``
-        Enable use of PBOs. This is faster, but can sometimes lead to sporadic
-        and temporary image corruption.
+        Enable use of PBOs. This is slightly faster, but can sometimes lead to
+        sporadic and temporary image corruption (in theory, because reupload
+        is not retried when it fails), and perhaps actually triggers slower
+        paths with drivers that don't support PBOs properly.
 
     ``dither-depth=<N|no|auto>``
         Set dither target depth to N. Default: no.
@@ -478,7 +480,7 @@ Available video output drivers are:
 
     This is equivalent to::
 
-        --vo=opengl:lscale=lanczos2:dither-depth=auto:pbo:fbo-format=rgb16
+        --vo=opengl:lscale=lanczos2:dither-depth=auto:fbo-format=rgb16
 
     Note that some cheaper LCDs do dithering that gravely interferes with
     ``opengl``'s dithering. Disabling dithering with ``dither-depth=no`` helps.

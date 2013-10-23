@@ -383,5 +383,5 @@ const struct vo_driver video_out_opengl_hq = {
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),
     .options = options,
-    .init_option_string = "lscale=lanczos2:dither-depth=auto:pbo:fbo-format=rgb16",
+    .init_option_string = "lscale=lanczos2:dither-depth=auto:fbo-format=rgb16",
 };
