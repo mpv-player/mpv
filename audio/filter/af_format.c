@@ -99,14 +99,9 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     return r;
 }
 
-static void uninit(struct af_instance *af)
-{
-}
-
 static int af_open(struct af_instance *af)
 {
     af->control = control;
-    af->uninit = uninit;
     af->play = play;
     af->mul = 1;
     struct priv *priv = af->priv;
@@ -124,10 +119,6 @@ struct af_info af_info_format = {
     0,
     af_open,
     .priv_size = sizeof(struct priv),
-    .priv_defaults = &(const struct priv) {
-        .in_format = AF_FORMAT_UNKNOWN,
-        .out_format = AF_FORMAT_UNKNOWN,
-    },
     .options = (const struct m_option[]) {
         OPT_AUDIOFORMAT("format", in_format, 0),
         OPT_INTRANGE("srate", in_srate, 0, 1000, 8*48000),
