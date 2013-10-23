@@ -43,6 +43,7 @@
 @property(nonatomic, retain) NSArray *files;
 @property(nonatomic, retain) NSMutableArray *argumentsList;
 @property(nonatomic, assign) BOOL willStopOnOpenEvent;
+@property(nonatomic, retain) NSCondition *input_ready;
 @end
 
 Application *mpv_shared_app(void);
