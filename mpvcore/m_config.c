@@ -606,15 +606,10 @@ int m_config_set_option(struct m_config *config, struct bstr name,
 const struct m_option *m_config_get_option(const struct m_config *config,
                                            struct bstr name)
 {
-    struct m_config_option *co;
-
     assert(config != NULL);
 
-    co = m_config_get_co(config, name);
-    if (co)
-        return co->opt;
-    else
-        return NULL;
+    struct m_config_option *co = m_config_get_co(config, name);
+    return co ? co->opt : NULL;
 }
 
 int m_config_option_requires_param(struct m_config *config, bstr name)
