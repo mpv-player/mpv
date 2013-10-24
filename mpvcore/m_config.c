@@ -361,12 +361,6 @@ static void add_options(struct m_config *config,
         m_config_add_option(config, parent, parent_name, &defs[i]);
 }
 
-// Sub-config that adds all its children to the parent.
-static bool is_merge_opt(const struct m_option *opt)
-{
-    return (opt->type->flags & M_OPT_TYPE_HAS_CHILD) && strlen(opt->name) == 0;
-}
-
 static void m_config_add_option(struct m_config *config,
                                 struct m_config_option *parent,
                                 const char *parent_name,
@@ -374,6 +368,11 @@ static void m_config_add_option(struct m_config *config,
 {
     assert(config != NULL);
     assert(arg != NULL);
+
+    // True if arg is a sub-config that adds all its children to the parent.
+    // arg itself doesn't really exist, then (other than allocating sub-config).
+    bool is_merge_opt =
+        (arg->type->flags & M_OPT_TYPE_HAS_CHILD) && !arg->name[0];
 
     // Allocate a new entry for this option
     struct m_config_option co = {
@@ -393,7 +392,7 @@ static void m_config_add_option(struct m_config *config,
     // Option with children -> add them
     if (arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
         // Merge case: pretend it has no parent
-        const char *new_parent_name = is_merge_opt(arg) ? parent_name : co.name;
+        const char *new_parent_name = is_merge_opt ? parent_name : co.name;
 
         if (arg->type->flags & M_OPT_TYPE_USE_SUBSTRUCT) {
             const struct m_sub_options *subopts = arg->priv;
@@ -431,8 +430,7 @@ static void m_config_add_option(struct m_config *config,
         }
     }
 
-    // pretend that merge options don't exist (only their children matter)
-    if (!is_merge_opt(co.opt))
+    if (!is_merge_opt)
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
 
     add_negation_option(config, &co, parent_name);
