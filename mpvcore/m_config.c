@@ -171,13 +171,9 @@ static void substruct_write_ptr(void *ptr, void *val)
     memcpy(ptr, &val, sizeof(void*));
 }
 
-static struct m_config_option *m_config_add_option(struct m_config *config,
-                                                   const char *prefix,
-                                                   struct m_config_option *parent,
-                                                   const struct m_option *arg);
-
 static void add_options(struct m_config *config,
                         struct m_config_option *parent,
+                        const char *parent_name,
                         const struct m_option *defs);
 
 static void config_destroy(void *p)
@@ -206,7 +202,7 @@ struct m_config *m_config_new(void *talloc_parent, size_t size,
         if (defaults)
             memcpy(config->optstruct, defaults, size);
         if (options)
-            add_options(config, NULL, options);
+            add_options(config, NULL, "", options);
     }
     if (suboptinit) {
         bstr s = bstr0(suboptinit);
@@ -304,11 +300,20 @@ void m_config_backup_all_opts(struct m_config *config)
         ensure_backup(config, co);
 }
 
+static void append_co(struct m_config *config, struct m_config_option *co)
+{
+    struct m_config_option **last = &config->opts;
+    while (*last)
+        last = &(*last)->next;
+    *last = co;
+}
+
 // Given an option --opt, add --no-opt (if applicable).
 static void add_negation_option(struct m_config *config,
-                                struct m_config_option *parent,
-                                const struct m_option *opt)
+                                struct m_config_option *orig,
+                                const char *parent_name)
 {
+    const struct m_option *opt = orig->opt;
     int value;
     if (opt->type == CONF_TYPE_FLAG) {
         value = opt->min;
@@ -329,7 +334,7 @@ static void add_negation_option(struct m_config *config,
     }
     struct m_option *no_opt = talloc_ptrtype(config, no_opt);
     *no_opt = (struct m_option) {
-        .name = talloc_asprintf(no_opt, "no-%s", opt->name),
+        .name = opt->name,
         .type = CONF_TYPE_STORE,
         .flags = opt->flags & (M_OPT_NOCFG | M_OPT_GLOBAL | M_OPT_PRE_PARSE),
         .is_new_option = opt->is_new_option,
@@ -337,26 +342,32 @@ static void add_negation_option(struct m_config *config,
         .offset = opt->offset,
         .max = value,
     };
-    struct m_config_option *co = m_config_add_option(config, "", parent, no_opt);
+    // Add --no-sub-opt
+    struct m_config_option *co = talloc_memdup(config, orig, sizeof(*orig));
+    co->name = talloc_asprintf(config, "no-%s", orig->name);
+    co->opt = no_opt;
     co->is_generated = true;
-    // Consider a parent option "--sub" and a subopt "opt". Then the above
-    // call will add "no-opt". Add "--no-sub-opt" too. (This former call will
-    // also generate "--sub-no-opt", which is not really needed or wanted, but
-    // is a consequence of supporting "--sub=...:no-opt".)
-    if (parent && parent->name && strlen(parent->name)) {
-        no_opt = talloc_memdup(config, no_opt, sizeof(*no_opt));
-        no_opt->name = opt->name;
-        co = m_config_add_option(config, "no-", parent, no_opt);
-        co->is_generated = true;
+    append_co(config, co);
+    // Add --sub-no-opt (unfortunately needed for: "--sub=...:no-opt")
+    if (parent_name[0]) {
+        co = talloc_memdup(config, co, sizeof(*co));
+        co->name = talloc_asprintf(config, "%s-no-%s", parent_name, opt->name);
+        append_co(config, co);
     }
 }
 
+static void m_config_add_option(struct m_config *config,
+                                struct m_config_option *parent,
+                                const char *parent_name,
+                                const struct m_option *arg);
+
 static void add_options(struct m_config *config,
                         struct m_config_option *parent,
+                        const char *parent_name,
                         const struct m_option *defs)
 {
-    for (int i = 0; defs[i].name; i++)
-        m_config_add_option(config, "", parent, defs + i);
+    for (int i = 0; defs && defs[i].name; i++)
+        m_config_add_option(config, parent, parent_name, &defs[i]);
 }
 
 // Sub-config that adds all its children to the parent.
@@ -365,10 +376,10 @@ static bool is_merge_opt(const struct m_option *opt)
     return (opt->type->flags & M_OPT_TYPE_HAS_CHILD) && strlen(opt->name) == 0;
 }
 
-static struct m_config_option *m_config_add_option(struct m_config *config,
-                                                   const char *prefix,
-                                                   struct m_config_option *parent,
-                                                   const struct m_option *arg)
+static void m_config_add_option(struct m_config *config,
+                                struct m_config_option *parent,
+                                const char *parent_name,
+                                const struct m_option *arg)
 {
     assert(config != NULL);
     assert(arg != NULL);
@@ -376,38 +387,32 @@ static struct m_config_option *m_config_add_option(struct m_config *config,
     // Allocate a new entry for this option
     struct m_config_option *co = talloc_zero(config, struct m_config_option);
     co->opt = arg;
+    co->name = (char *)arg->name;
 
     void *optstruct = config->optstruct;
     if (parent && (parent->opt->type->flags & M_OPT_TYPE_USE_SUBSTRUCT))
         optstruct = substruct_read_ptr(parent->data);
     co->data = arg->is_new_option ? (char *)optstruct + arg->offset : arg->p;
 
-    if (parent) {
-        // Merge case: pretend it has no parent (note that we still must follow
-        //             the "real" parent for accessing struct fields)
-        co->parent = is_merge_opt(parent->opt) ? parent->parent : parent;
-    }
-
     // Fill in the full name
-    if (co->parent) {
-        co->name = talloc_asprintf(co, "%s-%s", co->parent->name, arg->name);
-    } else {
-        co->name = (char *)arg->name;
-    }
-    co->name = talloc_asprintf(co, "%s%s", prefix, co->name);
+    if (parent_name[0])
+        co->name = talloc_asprintf(co, "%s-%s", parent_name, co->name);
 
     // Option with children -> add them
     if (arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
+        // Merge case: pretend it has no parent
+        const char *new_parent_name = is_merge_opt(arg) ? parent_name : co->name;
+
         if (arg->type->flags & M_OPT_TYPE_USE_SUBSTRUCT) {
             const struct m_sub_options *subopts = arg->priv;
             if (!substruct_read_ptr(co->data)) {
                 void *subdata = m_config_alloc_struct(config, subopts);
                 substruct_write_ptr(co->data, subdata);
             }
-            add_options(config, co, subopts->opts);
+            add_options(config, co, new_parent_name, subopts->opts);
         } else {
             const struct m_option *sub = arg->p;
-            add_options(config, co, sub);
+            add_options(config, co, new_parent_name, sub);
         }
     } else {
         // Initialize options
@@ -436,15 +441,10 @@ static struct m_config_option *m_config_add_option(struct m_config *config,
 
     // pretend that merge options don't exist (only their children matter)
     if (!is_merge_opt(co->opt)) {
-        struct m_config_option **last = &config->opts;
-        while (*last)
-            last = &(*last)->next;
-        *last = co;
+        append_co(config, co);
     }
 
-    add_negation_option(config, parent, arg);
-
-    return co;
+    add_negation_option(config, co, parent_name);
 }
 
 struct m_config_option *m_config_get_co(const struct m_config *config,

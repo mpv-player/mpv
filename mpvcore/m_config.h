@@ -44,8 +44,6 @@ struct m_config_option {
     const struct m_option *opt;
     // Raw value of the option.
     void *data;
-    // If this is a suboption, the option that contains this option.
-    struct m_config_option *parent;
 };
 
 // Config object
