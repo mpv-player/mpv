@@ -330,7 +330,7 @@ const m_option_t mp_opts[] = {
     { "list-options", NULL, CONF_TYPE_STORE, CONF_NOCFG },
 
     // handled in mplayer.c (looks at the raw argv[])
-    {"leak-report", "", CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG },
+    {"leak-report", NULL, CONF_TYPE_STORE, CONF_GLOBAL | CONF_NOCFG },
 
     OPT_FLAG("shuffle", shuffle, CONF_GLOBAL | CONF_NOCFG),
 
