@@ -1720,6 +1720,13 @@ static const struct m_option opts[] = {
     {0}
 };
 
+static const d3d_priv defaults_noshaders = {
+    .colorspace = MP_CSP_DETAILS_DEFAULTS,
+    .video_eq = { MP_CSP_EQ_CAPS_COLORMATRIX },
+    .opt_disable_shaders = 1,
+    .opt_disable_textures = 1,
+};
+
 static const d3d_priv defaults = {
     .colorspace = MP_CSP_DETAILS_DEFAULTS,
     .video_eq = { MP_CSP_EQ_CAPS_COLORMATRIX },
@@ -1737,9 +1744,8 @@ const struct vo_driver video_out_direct3d = {
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(d3d_priv),
-    .priv_defaults = &defaults,
+    .priv_defaults = &defaults_noshaders,
     .options = opts,
-    .init_option_string = "disable-shaders:disable-textures",
 };
 
 const struct vo_driver video_out_direct3d_shaders = {

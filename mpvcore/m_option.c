@@ -2139,6 +2139,15 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
         skip = true;
     }
 
+    if (_ret && desc.init_options) {
+        struct m_config *config = m_config_from_obj_desc(NULL, &desc);
+        bstr s = bstr0(desc.init_options);
+        m_obj_parse_sub_config(opt, str, &s, config,
+                               M_SETOPT_CHECK_ONLY, &plist);
+        assert(s.len == 0);
+        talloc_free(config);
+    }
+
     if (has_param) {
         if (legacy) {
             // Should perhaps be parsed as escape-able string. But this is a

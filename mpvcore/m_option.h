@@ -107,8 +107,8 @@ struct m_obj_desc {
     // For free use by the implementer of m_obj_list.get_desc
     const void *p;
     // If not NULL, options which should be set before applying other options.
-    // This member is usually set my m_obj_list_find() only.
-    // Only works if options is not NULL.
+    // This member is usually set by m_obj_list_find() only, and read by the
+    // option parser. It's not used anywhere else.
     const char *init_options;
     // Don't list entries with "help"
     bool hidden;

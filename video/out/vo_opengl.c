@@ -200,9 +200,10 @@ static bool reparse_cmdline(struct gl_priv *p, char *args)
     if (strcmp(args, "-") == 0) {
         opts = p->renderer_opts;
     } else {
-        cfg = m_config_new(NULL, sizeof(*opts), gl_video_conf.defaults,
-                           gl_video_conf.opts,
-                           p->vo->driver->init_option_string);
+        const struct gl_priv *vodef = p->vo->driver->priv_defaults;
+        const struct gl_video_opts *def =
+            vodef ? vodef->renderer_opts : gl_video_conf.defaults;
+        cfg = m_config_new(NULL, sizeof(*opts), def, gl_video_conf.opts);
         opts = cfg->optstruct;
         r = m_config_parse_suboptions(cfg, "opengl", args);
     }
@@ -376,6 +377,8 @@ const struct vo_driver video_out_opengl_hq = {
     .flip_page = flip_page,
     .uninit = uninit,
     .priv_size = sizeof(struct gl_priv),
+    .priv_defaults = &(const struct gl_priv){
+        .renderer_opts = (struct gl_video_opts *)&gl_video_opts_hq_def,
+    },
     .options = options,
-    .init_option_string = "lscale=lanczos2:dither-depth=auto:fbo-format=rgb16",
 };

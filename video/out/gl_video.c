@@ -275,6 +275,16 @@ static const struct gl_video_opts gl_video_opts_def = {
     .alpha_mode = 2,
 };
 
+const struct gl_video_opts gl_video_opts_hq_def = {
+    .npot = 1,
+    .dither_depth = 0,
+    .dither_size = 6,
+    .fbo_format = GL_RGB16,
+    .scale_sep = 1,
+    .scalers = { "lanczos2", "bilinear" },
+    .scaler_params = {NAN, NAN},
+    .alpha_mode = 2,
+};
 
 static int validate_scaler_opt(const m_option_t *opt, struct bstr name,
                                struct bstr param);
