@@ -463,10 +463,15 @@ static bool bundle_started_from_finder(int argc, char **argv)
     bool bundle_detected = [[NSBundle mainBundle] bundleIdentifier];
     int major, minor, bugfix;
     get_system_version(&major, &minor, &bugfix);
+    bool with_psn    = bundle_detected && argc==1;
+    bool without_psn = bundle_detected && argc==2 && is_psn_argument(argv[1]);
+
     if ((major == 10) && (minor >= 9)) {
-        return bundle_detected && argc==1;
+        // Looks like opening quarantined files from the finder inserts the
+        // -psn argument while normal files do not. Hurr.
+        return with_psn || without_psn;
     } else {
-        return bundle_detected && argc==2 && is_psn_argument(argv[1]);
+        return with_psn;
     }
 }
 
