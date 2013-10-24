@@ -422,20 +422,15 @@ static struct m_config_option *m_config_add_option(struct m_config *config,
                 // clear the original option (to stop m_option from freeing the
                 // static data), copy it back.
                 // This would leak memory when done on aliased options.
-                bool aliased = false;
                 for (struct m_config_option *i = config->opts; i; i = i->next) {
-                    if (co->data == i->data) {
-                        aliased = true;
-                        break;
-                    }
+                    if (co->data == i->data)
+                        assert(0);
                 }
-                if (!aliased) {
-                    union m_option_value temp = {0};
-                    m_option_copy(arg, &temp, co->data);
-                    memset(co->data, 0, arg->type->size);
-                    m_option_copy(arg, co->data, &temp);
-                    m_option_free(arg, &temp);
-                }
+                union m_option_value temp = {0};
+                m_option_copy(arg, &temp, co->data);
+                memset(co->data, 0, arg->type->size);
+                m_option_copy(arg, co->data, &temp);
+                m_option_free(arg, &temp);
             }
         }
     }
