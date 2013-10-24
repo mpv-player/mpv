@@ -427,10 +427,9 @@ static struct m_config_option *m_config_add_option(struct m_config *config,
                         assert(0);
                 }
                 union m_option_value temp = {0};
-                m_option_copy(arg, &temp, co->data);
+                memcpy(&temp, co->data, arg->type->size);
                 memset(co->data, 0, arg->type->size);
                 m_option_copy(arg, co->data, &temp);
-                m_option_free(arg, &temp);
             }
         }
     }
