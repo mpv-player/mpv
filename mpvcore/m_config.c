@@ -180,8 +180,8 @@ static void config_destroy(void *p)
 {
     struct m_config *config = p;
     m_config_restore_backups(config);
-    for (struct m_config_option *copt = config->opts; copt; copt = copt->next)
-        m_option_free(copt->opt, copt->data);
+    for (int n = 0; n < config->num_opts; n++)
+        m_option_free(config->opts[n].opt, config->opts[n].data);
 }
 
 struct m_config *m_config_new(void *talloc_parent, size_t size,
@@ -296,16 +296,8 @@ void m_config_backup_opt(struct m_config *config, const char *opt)
 
 void m_config_backup_all_opts(struct m_config *config)
 {
-    for (struct m_config_option *co = config->opts; co; co = co->next)
-        ensure_backup(config, co);
-}
-
-static void append_co(struct m_config *config, struct m_config_option *co)
-{
-    struct m_config_option **last = &config->opts;
-    while (*last)
-        last = &(*last)->next;
-    *last = co;
+    for (int n = 0; n < config->num_opts; n++)
+        ensure_backup(config, &config->opts[n]);
 }
 
 // Given an option --opt, add --no-opt (if applicable).
@@ -343,16 +335,15 @@ static void add_negation_option(struct m_config *config,
         .max = value,
     };
     // Add --no-sub-opt
-    struct m_config_option *co = talloc_memdup(config, orig, sizeof(*orig));
-    co->name = talloc_asprintf(config, "no-%s", orig->name);
-    co->opt = no_opt;
-    co->is_generated = true;
-    append_co(config, co);
+    struct m_config_option co = *orig;
+    co.name = talloc_asprintf(config, "no-%s", orig->name);
+    co.opt = no_opt;
+    co.is_generated = true;
+    MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
     // Add --sub-no-opt (unfortunately needed for: "--sub=...:no-opt")
     if (parent_name[0]) {
-        co = talloc_memdup(config, co, sizeof(*co));
-        co->name = talloc_asprintf(config, "%s-no-%s", parent_name, opt->name);
-        append_co(config, co);
+        co.name = talloc_asprintf(config, "%s-no-%s", parent_name, opt->name);
+        MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
     }
 }
 
@@ -385,74 +376,74 @@ static void m_config_add_option(struct m_config *config,
     assert(arg != NULL);
 
     // Allocate a new entry for this option
-    struct m_config_option *co = talloc_zero(config, struct m_config_option);
-    co->opt = arg;
-    co->name = (char *)arg->name;
+    struct m_config_option co = {
+        .opt = arg,
+        .name = (char *)arg->name,
+    };
 
     void *optstruct = config->optstruct;
     if (parent && (parent->opt->type->flags & M_OPT_TYPE_USE_SUBSTRUCT))
         optstruct = substruct_read_ptr(parent->data);
-    co->data = arg->is_new_option ? (char *)optstruct + arg->offset : arg->p;
+    co.data = arg->is_new_option ? (char *)optstruct + arg->offset : arg->p;
 
     // Fill in the full name
     if (parent_name[0])
-        co->name = talloc_asprintf(co, "%s-%s", parent_name, co->name);
+        co.name = talloc_asprintf(config, "%s-%s", parent_name, co.name);
 
     // Option with children -> add them
     if (arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
         // Merge case: pretend it has no parent
-        const char *new_parent_name = is_merge_opt(arg) ? parent_name : co->name;
+        const char *new_parent_name = is_merge_opt(arg) ? parent_name : co.name;
 
         if (arg->type->flags & M_OPT_TYPE_USE_SUBSTRUCT) {
             const struct m_sub_options *subopts = arg->priv;
-            if (!substruct_read_ptr(co->data)) {
+            if (!substruct_read_ptr(co.data)) {
                 void *subdata = m_config_alloc_struct(config, subopts);
-                substruct_write_ptr(co->data, subdata);
+                substruct_write_ptr(co.data, subdata);
             }
-            add_options(config, co, new_parent_name, subopts->opts);
+            add_options(config, &co, new_parent_name, subopts->opts);
         } else {
             const struct m_option *sub = arg->p;
-            add_options(config, co, new_parent_name, sub);
+            add_options(config, &co, new_parent_name, sub);
         }
     } else {
         // Initialize options
-        if (co->data) {
+        if (co.data) {
             if (arg->defval) {
                 // Target data in optstruct is supposed to be cleared (consider
                 // m_option freeing previously set dynamic data).
-                m_option_copy(arg, co->data, arg->defval);
+                m_option_copy(arg, co.data, arg->defval);
             } else if (arg->type->flags & M_OPT_TYPE_DYNAMIC) {
                 // Initialize dynamically managed fields from static data (like
                 // string options): copy the option into temporary memory,
                 // clear the original option (to stop m_option from freeing the
                 // static data), copy it back.
                 // This would leak memory when done on aliased options.
-                for (struct m_config_option *i = config->opts; i; i = i->next) {
-                    if (co->data == i->data)
+                for (int i = 0; i < config->num_opts; i++) {
+                    if (co.data == config->opts[i].data)
                         assert(0);
                 }
                 union m_option_value temp = {0};
-                memcpy(&temp, co->data, arg->type->size);
-                memset(co->data, 0, arg->type->size);
-                m_option_copy(arg, co->data, &temp);
+                memcpy(&temp, co.data, arg->type->size);
+                memset(co.data, 0, arg->type->size);
+                m_option_copy(arg, co.data, &temp);
             }
         }
     }
 
     // pretend that merge options don't exist (only their children matter)
-    if (!is_merge_opt(co->opt)) {
-        append_co(config, co);
-    }
+    if (!is_merge_opt(co.opt))
+        MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
 
-    add_negation_option(config, co, parent_name);
+    add_negation_option(config, &co, parent_name);
 }
 
 struct m_config_option *m_config_get_co(const struct m_config *config,
                                         struct bstr name)
 {
-    struct m_config_option *co;
 
-    for (co = config->opts; co; co = co->next) {
+    for (int n = 0; n < config->num_opts; n++) {
+        struct m_config_option *co = &config->opts[n];
         struct bstr coname = bstr0(co->name);
         if ((co->opt->type->flags & M_OPT_TYPE_ALLOW_WILDCARD)
                 && bstr_endswith0(coname, "*")) {
@@ -468,7 +459,8 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
 const char *m_config_get_positional_option(const struct m_config *config, int n)
 {
     int pos = 0;
-    for (struct m_config_option *co = config->opts; co; co = co->next) {
+    for (int n = 0; n < config->num_opts; n++) {
+        struct m_config_option *co = &config->opts[n];
         if (!co->is_generated) {
             if (pos == n)
                 return co->name;
@@ -636,7 +628,6 @@ static char *get_option_value_string(const struct m_config *config,
 void m_config_print_option_list(const struct m_config *config)
 {
     char min[50], max[50];
-    struct m_config_option *co;
     int count = 0;
 
     if (!config->opts)
@@ -645,7 +636,8 @@ void m_config_print_option_list(const struct m_config *config)
     struct m_config *defaults = get_defaults(config);
 
     mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "Options:\n\n");
-    for (co = config->opts; co; co = co->next) {
+    for (int i = 0; i < config->num_opts; i++) {
+        struct m_config_option *co = &config->opts[i];
         const struct m_option *opt = co->opt;
         if (opt->type->flags & M_OPT_TYPE_HAS_CHILD)
             continue;

@@ -36,7 +36,6 @@ struct m_obj_desc;
 
 // Config option
 struct m_config_option {
-    struct m_config_option *next;
     bool is_generated : 1;
     // Full name (ie option-subopt).
     char *name;
@@ -51,6 +50,7 @@ struct m_config_option {
 typedef struct m_config {
     // Registered options.
     struct m_config_option *opts; // all options, even suboptions
+    int num_opts;
 
     // List of defined profiles.
     struct m_profile *profiles;
