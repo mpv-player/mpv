@@ -15,6 +15,8 @@
  * with mpv.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <libavutil/common.h>
+
 #include "mpvcore/input/keycodes.h"
 
 #include "osdep/macosx_application.h"
@@ -121,8 +123,11 @@
 - (NSRect)constrainFrameRect:(NSRect)nf toScreen:(NSScreen *)screen
 {
     NSRect s = [[self screen] visibleFrame];
-    if (nf.origin.y + nf.size.height > s.origin.y + s.size.height)
+    if (nf.origin.y + nf.size.height > s.origin.y + s.size.height) {
+        nf.size.height = s.size.height;
         nf.origin.y = s.origin.y + s.size.height - nf.size.height;
+    }
+
     return nf;
 }
 
