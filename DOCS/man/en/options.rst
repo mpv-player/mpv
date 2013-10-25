@@ -1045,8 +1045,13 @@ OPTIONS
 
         ``mpv --heartbeat-cmd="gnome-screensaver-command -p" file``
 
+
 ``--heartbeat-interval=<sec>``
     Time between ``--heartbeat-cmd`` invocations in seconds (default: 30).
+
+    .. note::
+
+        This does not affect the normal screensaver operation in any way.
 
 ``--help``
     Show short summary of options.
