@@ -198,13 +198,14 @@ struct m_config *m_config_new(void *talloc_parent, size_t size,
         .optstruct_defaults = defaults,
         .options = options,
     };
-    if (size) { // size==0 means a dummy object is created
+    // size==0 means a dummy object is created
+    if (size) {
         config->optstruct = talloc_zero_size(config, size);
         if (defaults)
             memcpy(config->optstruct, defaults, size);
-        if (options)
-            add_options(config, "", config->optstruct, defaults, options);
     }
+    if (options)
+        add_options(config, "", config->optstruct, defaults, options);
     return config;
 }
 
@@ -213,6 +214,13 @@ struct m_config *m_config_from_obj_desc(void *talloc_parent,
 {
     return m_config_new(talloc_parent, desc->priv_size, desc->priv_defaults,
                         desc->options);
+}
+
+// Like m_config_from_obj_desc(), but don't allocate option struct.
+struct m_config *m_config_from_obj_desc_noalloc(void *talloc_parent,
+                                                struct m_obj_desc *desc)
+{
+    return m_config_new(talloc_parent, 0, desc->priv_defaults, desc->options);
 }
 
 int m_config_set_obj_params(struct m_config *conf, char **args)
@@ -390,7 +398,7 @@ static void m_config_add_option(struct m_config *config,
     if (arg->defval)
         co.default_data = arg->defval;
 
-    if (co.data && !co.default_data)
+    if (!co.default_data)
         co.default_data = &default_value;
 
     // Fill in the full name
@@ -405,8 +413,11 @@ static void m_config_add_option(struct m_config *config,
         if (arg->type->flags & M_OPT_TYPE_USE_SUBSTRUCT) {
             const struct m_sub_options *subopts = arg->priv;
 
-            void *new_optstruct = m_config_alloc_struct(config, subopts);
-            substruct_write_ptr(co.data, new_optstruct);
+            void *new_optstruct = NULL;
+            if (co.data) {
+                new_optstruct = m_config_alloc_struct(config, subopts);
+                substruct_write_ptr(co.data, new_optstruct);
+            }
 
             const void *new_optstruct_def = substruct_read_ptr(co.default_data);
             if (!new_optstruct_def)

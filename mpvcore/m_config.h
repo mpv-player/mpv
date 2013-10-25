@@ -73,6 +73,7 @@ typedef struct m_config {
 // Create a new config object.
 //  talloc_parent: talloc parent context for the m_config allocation
 //  size: size of the optstruct (where option values are stored)
+//        size==0 creates a config object with no option struct allocated
 //  defaults: if not NULL, points to a struct of same type as optstruct, which
 //            contains default values for all options
 //  options: list of options. Each option defines a member of the optstruct
@@ -85,6 +86,9 @@ struct m_config *m_config_new(void *talloc_parent, size_t size,
 
 struct m_config *m_config_from_obj_desc(void *talloc_parent,
                                         struct m_obj_desc *desc);
+
+struct m_config *m_config_from_obj_desc_noalloc(void *talloc_parent,
+                                                struct m_obj_desc *desc);
 
 int m_config_set_obj_params(struct m_config *conf, char **args);
 

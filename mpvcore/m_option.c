@@ -2140,7 +2140,7 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
     }
 
     if (_ret && desc.init_options) {
-        struct m_config *config = m_config_from_obj_desc(NULL, &desc);
+        struct m_config *config = m_config_from_obj_desc_noalloc(NULL, &desc);
         bstr s = bstr0(desc.init_options);
         m_obj_parse_sub_config(opt, str, &s, config,
                                M_SETOPT_CHECK_ONLY, &plist);
@@ -2169,7 +2169,7 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
         } else {
             struct m_config *config = NULL;
             if (!skip)
-                config = m_config_from_obj_desc(NULL, &desc);
+                config = m_config_from_obj_desc_noalloc(NULL, &desc);
             r = m_obj_parse_sub_config(opt, str, pstr, config,
                                        M_SETOPT_CHECK_ONLY,
                                        _ret ? &plist : NULL);
