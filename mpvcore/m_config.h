@@ -63,10 +63,6 @@ typedef struct m_config {
     bool use_profiles;
     int (*includefunc)(struct m_config *conf, char *filename, int flags);
 
-    const void *optstruct_defaults;
-    size_t optstruct_size;
-    const struct m_option *options; // top-level options
-
     void *optstruct; // struct mpopts or other
 } m_config_t;
 

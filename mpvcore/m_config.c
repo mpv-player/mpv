@@ -193,11 +193,7 @@ struct m_config *m_config_new(void *talloc_parent, size_t size,
 {
     struct m_config *config = talloc(talloc_parent, struct m_config);
     talloc_set_destructor(config, config_destroy);
-    *config = (struct m_config) {
-        .optstruct_size = size,
-        .optstruct_defaults = defaults,
-        .options = options,
-    };
+    *config = (struct m_config) {0};
     // size==0 means a dummy object is created
     if (size) {
         config->optstruct = talloc_zero_size(config, size);
