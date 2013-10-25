@@ -337,11 +337,11 @@ static void pointer_handle_motion(void *data,
     struct vo_wayland_state *wl = data;
 
     wl->cursor.pointer = pointer;
-    wl->window.surf_x = wl_fixed_to_int(sx_w);
-    wl->window.surf_y = wl_fixed_to_int(sy_w);
+    wl->window.mouse_x = wl_fixed_to_int(sx_w);
+    wl->window.mouse_y = wl_fixed_to_int(sy_w);
 
-    vo_mouse_movement(wl->vo, wl->window.surf_x,
-                              wl->window.surf_y);
+    vo_mouse_movement(wl->vo, wl->window.mouse_x,
+                              wl->window.mouse_y);
 }
 
 static void pointer_handle_button(void *data,
@@ -357,7 +357,7 @@ static void pointer_handle_button(void *data,
                     ((state == WL_POINTER_BUTTON_STATE_PRESSED)
                     ? MP_KEY_STATE_DOWN : MP_KEY_STATE_UP));
 
-    if (!mp_input_test_dragging(wl->vo->input_ctx, wl->window.surf_x, wl->window.surf_y) &&
+    if (!mp_input_test_dragging(wl->vo->input_ctx, wl->window.mouse_x, wl->window.mouse_y) &&
         (button == BTN_LEFT) && (state == WL_POINTER_BUTTON_STATE_PRESSED))
         wl_shell_surface_move(wl->window.shell_surface, wl->input.seat, serial);
 }

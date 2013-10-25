@@ -73,8 +73,8 @@ struct vo_wayland_state {
         bool is_fullscreen; // don't keep aspect ratio in fullscreen mode
 
         struct wl_surface *surface;
-        int32_t surf_x;
-        int32_t surf_y;
+        int32_t mouse_x; // mouse position inside the surface
+        int32_t mouse_y;
         struct wl_shell_surface *shell_surface;
         int events; /* mplayer events (VO_EVENT_RESIZE) */
     } window;
