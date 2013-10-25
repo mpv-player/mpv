@@ -129,9 +129,10 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
     struct parse_state p = {config, argc, argv};
     while (split_opt(&p)) {
         if (p.is_opt) {
-            int flags = mode == LOCAL ? M_SETOPT_BACKUP | M_SETOPT_CHECK_ONLY : 0;
-            int r;
-            r = m_config_set_option_ext(config, p.arg, p.param, flags);
+            int flags = M_SETOPT_FROM_CMDLINE;
+            if (mode == LOCAL)
+                flags |= M_SETOPT_BACKUP | M_SETOPT_CHECK_ONLY;
+            int r = m_config_set_option_ext(config, p.arg, p.param, flags);
             if (r <= M_OPT_EXIT) {
                 ret = r;
                 goto err_out;
@@ -282,8 +283,8 @@ void m_config_preparse_command_line(m_config_t *config, int argc, char **argv)
         if (p.is_opt) {
             // Ignore non-pre-parse options. They will be set later.
             // Option parsing errors will be handled later as well.
-            m_config_set_option_ext(config, p.arg, p.param,
-                                    M_SETOPT_PRE_PARSE_ONLY);
+            int flags = M_SETOPT_FROM_CMDLINE | M_SETOPT_PRE_PARSE_ONLY;
+            m_config_set_option_ext(config, p.arg, p.param, flags);
             if (bstrcmp0(p.arg, "v") == 0)
                 verbose++;
         }

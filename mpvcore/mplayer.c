@@ -669,6 +669,10 @@ static bool parse_cfgfiles(struct MPContext *mpctx, m_config_t *conf)
     return true;
 }
 
+// Set options file-local, and don't set them if the user set them via the
+// command line.
+#define FILE_LOCAL_FLAGS (M_SETOPT_BACKUP | M_SETOPT_PRESERVE_CMDLINE)
+
 #define PROFILE_CFG_PROTOCOL "protocol."
 
 static void load_per_protocol_config(m_config_t *conf, const char * const file)
@@ -690,7 +694,7 @@ static void load_per_protocol_config(m_config_t *conf, const char * const file)
     if (p) {
         mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
                 "Loading protocol-related profile '%s'\n", protocol);
-        m_config_set_profile(conf, p, M_SETOPT_BACKUP);
+        m_config_set_profile(conf, p, FILE_LOCAL_FLAGS);
     }
 }
 
@@ -713,7 +717,7 @@ static void load_per_extension_config(m_config_t *conf, const char * const file)
     if (p) {
         mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
                 "Loading extension-related profile '%s'\n", extension);
-        m_config_set_profile(conf, p, M_SETOPT_BACKUP);
+        m_config_set_profile(conf, p, FILE_LOCAL_FLAGS);
     }
 }
 
@@ -733,7 +737,7 @@ static void load_per_output_config(m_config_t *conf, char *cfg, char *out)
     if (p) {
         mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
                 "Loading extension-related profile '%s'\n", profile);
-        m_config_set_profile(conf, p, M_SETOPT_BACKUP);
+        m_config_set_profile(conf, p, FILE_LOCAL_FLAGS);
     }
 }
 
@@ -741,12 +745,12 @@ static void load_per_output_config(m_config_t *conf, char *cfg, char *out)
  * Tries to load a config file (in file local mode)
  * @return 0 if file was not found, 1 otherwise
  */
-static int try_load_config(m_config_t *conf, const char *file, bool local)
+static int try_load_config(m_config_t *conf, const char *file, int flags)
 {
     if (!mp_path_exists(file))
         return 0;
     mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Loading config '%s'\n", file);
-    m_config_parse_config_file(conf, file, local ? M_SETOPT_BACKUP : 0);
+    m_config_parse_config_file(conf, file, flags);
     return 1;
 }
 
@@ -769,14 +773,14 @@ static void load_per_file_config(m_config_t *conf, const char * const file,
         char dircfg[MP_PATH_MAX];
         strcpy(dircfg, cfg);
         strcpy(dircfg + (name - cfg), "mpv.conf");
-        try_load_config(conf, dircfg, true);
+        try_load_config(conf, dircfg, FILE_LOCAL_FLAGS);
 
-        if (try_load_config(conf, cfg, true))
+        if (try_load_config(conf, cfg, FILE_LOCAL_FLAGS))
             return;
     }
 
     if ((confpath = mp_find_user_config_file(name)) != NULL) {
-        try_load_config(conf, confpath, true);
+        try_load_config(conf, confpath, FILE_LOCAL_FLAGS);
 
         talloc_free(confpath);
     }
@@ -922,7 +926,7 @@ static void load_playback_resume(m_config_t *conf, const char *file)
         m_config_backup_opt(conf, "start");
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "Resuming playback. This behavior can "
                "be disabled with --no-resume-playback.\n");
-        try_load_config(conf, fname, false);
+        try_load_config(conf, fname, M_SETOPT_PRESERVE_CMDLINE);
         unlink(fname);
     }
     talloc_free(fname);

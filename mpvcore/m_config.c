@@ -495,6 +495,9 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
     if ((flags & M_SETOPT_PRE_PARSE_ONLY) && !(co->opt->flags & M_OPT_PRE_PARSE))
         return 0;
 
+    if ((flags & M_SETOPT_PRESERVE_CMDLINE) && co->is_set_from_cmdline)
+        set = false;
+
     // Check if this option isn't forbidden in the current mode
     if ((flags & M_SETOPT_FROM_CONFIG_FILE) && (co->opt->flags & M_OPT_NOCFG)) {
         mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
@@ -530,7 +533,21 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
         return parse_subopts(config, (char *)co->name, prefix, param, flags);
     }
 
-    return m_option_parse(co->opt, name, param, set ? co->data : NULL);
+    int r = m_option_parse(co->opt, name, param, set ? co->data : NULL);
+
+    if (r >= 0 && set && (flags & M_SETOPT_FROM_CMDLINE)) {
+        co->is_set_from_cmdline = true;
+        // Mark aliases too
+        if (co->data) {
+            for (int n = 0; n < config->num_opts; n++) {
+                struct m_config_option *co2 = &config->opts[n];
+                if (co2->data == co->data)
+                    co2->is_set_from_cmdline = true;
+            }
+        }
+    }
+
+    return r;
 }
 
 static int parse_subopts(struct m_config *config, char *name, char *prefix,

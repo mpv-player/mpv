@@ -36,14 +36,12 @@ struct m_obj_desc;
 
 // Config option
 struct m_config_option {
-    bool is_generated : 1;
-    // Full name (ie option-subopt).
-    const char *name;
-    // Option description.
-    const struct m_option *opt;
-    // Raw value of the option.
-    void *data;
-    const void *default_data;
+    bool is_generated : 1;          // Automatically added ("no-" options)
+    bool is_set_from_cmdline : 1;   // Set by user from command line
+    const char *name;               // Full name (ie option-subopt)
+    const struct m_option *opt;     // Option description
+    void *data;                     // Raw value of the option
+    const void *default_data;       // Raw default value
 };
 
 // Config object
@@ -108,7 +106,9 @@ enum {
     M_SETOPT_PRE_PARSE_ONLY = 1,    // Silently ignore non-M_OPT_PRE_PARSE opt.
     M_SETOPT_CHECK_ONLY = 2,        // Don't set, just check name/value
     M_SETOPT_FROM_CONFIG_FILE = 4,  // Reject M_OPT_NOCFG opt. (print error)
-    M_SETOPT_BACKUP = 8,            // Call m_config_backup_opt() before
+    M_SETOPT_FROM_CMDLINE = 8,      // Mark as set by command line
+    M_SETOPT_BACKUP = 16,           // Call m_config_backup_opt() before
+    M_SETOPT_PRESERVE_CMDLINE = 32, // Don't set if already marked as FROM_CMDLINE
 };
 
 // Set the named option to the given string.
