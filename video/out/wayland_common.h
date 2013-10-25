@@ -70,6 +70,8 @@ struct vo_wayland_state {
         int32_t sh_y;
         float aspect;
 
+        bool is_fullscreen; // don't keep aspect ratio in fullscreen mode
+
         struct wl_surface *surface;
         int32_t surf_x;
         int32_t surf_y;

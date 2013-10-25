@@ -547,31 +547,33 @@ static void shedule_resize(struct vo_wayland_state *wl,
     if (height < minimum_size)
         height = minimum_size;
 
-    /* if only the height is changed we have to calculate the width
-     * in any other case we calculate the height */
-    switch (edges) {
-        case WL_SHELL_SURFACE_RESIZE_TOP:
-        case WL_SHELL_SURFACE_RESIZE_BOTTOM:
-            width = wl->window.aspect * height;
-            break;
-        case WL_SHELL_SURFACE_RESIZE_LEFT:
-        case WL_SHELL_SURFACE_RESIZE_RIGHT:
-        case WL_SHELL_SURFACE_RESIZE_TOP_LEFT:    // just a preference
-        case WL_SHELL_SURFACE_RESIZE_TOP_RIGHT:
-        case WL_SHELL_SURFACE_RESIZE_BOTTOM_LEFT:
-        case WL_SHELL_SURFACE_RESIZE_BOTTOM_RIGHT:
-            height = (1 / wl->window.aspect) * width;
-            break;
-        default:
-            if (wl->window.aspect < temp_aspect)
+    // don't keep the aspect ration in fullscreen mode, because the compositor
+    // shows the desktop in the border regions if the video has not the same
+    // aspect ration as the screen
+    if (!wl->window.is_fullscreen) {
+        /* if only the height is changed we have to calculate the width
+         * in any other case we calculate the height */
+        switch (edges) {
+            case WL_SHELL_SURFACE_RESIZE_TOP:
+            case WL_SHELL_SURFACE_RESIZE_BOTTOM:
                 width = wl->window.aspect * height;
-            else
+                break;
+            case WL_SHELL_SURFACE_RESIZE_LEFT:
+            case WL_SHELL_SURFACE_RESIZE_RIGHT:
+            case WL_SHELL_SURFACE_RESIZE_TOP_LEFT:    // just a preference
+            case WL_SHELL_SURFACE_RESIZE_TOP_RIGHT:
+            case WL_SHELL_SURFACE_RESIZE_BOTTOM_LEFT:
+            case WL_SHELL_SURFACE_RESIZE_BOTTOM_RIGHT:
                 height = (1 / wl->window.aspect) * width;
-            break;
+                break;
+            default:
+                if (wl->window.aspect < temp_aspect)
+                    width = wl->window.aspect * height;
+                else
+                    height = (1 / wl->window.aspect) * width;
+                break;
+        }
     }
-
-    wl->vo->dwidth = width;
-    wl->vo->dheight = height;
 
     if (edges & WL_SHELL_SURFACE_RESIZE_LEFT)
         x = wl->window.width - width;
@@ -588,6 +590,8 @@ static void shedule_resize(struct vo_wayland_state *wl,
     wl->window.sh_x = x;
     wl->window.sh_y = y;
     wl->window.events |= VO_EVENT_RESIZE;
+    wl->vo->dwidth = width;
+    wl->vo->dheight = height;
 }
 
 
@@ -774,6 +778,7 @@ static void vo_wayland_fullscreen (struct vo *vo)
 
     if (vo->opts->fullscreen) {
         MP_DBG(wl, "going fullscreen\n");
+        wl->window.is_fullscreen = true;
         wl->window.p_width = wl->window.width;
         wl->window.p_height = wl->window.height;
         wl_shell_surface_set_fullscreen(wl->window.shell_surface,
@@ -783,6 +788,7 @@ static void vo_wayland_fullscreen (struct vo *vo)
 
     else {
         MP_DBG(wl, "leaving fullscreen\n");
+        wl->window.is_fullscreen = false;
         wl_shell_surface_set_toplevel(wl->window.shell_surface);
         shedule_resize(wl, 0, wl->window.p_width, wl->window.p_height);
     }
