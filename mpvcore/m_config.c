@@ -370,15 +370,9 @@ static void m_config_add_option(struct m_config *config,
     assert(config != NULL);
     assert(arg != NULL);
 
-    // True if arg is a sub-config that adds all its children to the parent.
-    // arg itself doesn't really exist, then (other than allocating sub-config).
-    bool is_merge_opt =
-        (arg->type->flags & M_OPT_TYPE_HAS_CHILD) && !arg->name[0];
-
-    // Allocate a new entry for this option
     struct m_config_option co = {
         .opt = arg,
-        .name = (char *)arg->name,
+        .name = arg->name,
     };
 
     if (arg->is_new_option) {
@@ -398,14 +392,14 @@ static void m_config_add_option(struct m_config *config,
         co.default_data = &default_value;
 
     // Fill in the full name
-    if (parent_name[0])
+    if (!co.name[0]) {
+        co.name = parent_name;
+    } else if (parent_name[0]) {
         co.name = talloc_asprintf(config, "%s-%s", parent_name, co.name);
+    }
 
     // Option with children -> add them
     if (arg->type->flags & M_OPT_TYPE_HAS_CHILD) {
-        // Merge case: pretend it has no parent
-        const char *new_parent_name = is_merge_opt ? parent_name : co.name;
-
         if (arg->type->flags & M_OPT_TYPE_USE_SUBSTRUCT) {
             const struct m_sub_options *subopts = arg->priv;
 
@@ -419,11 +413,11 @@ static void m_config_add_option(struct m_config *config,
             if (!new_optstruct_def)
                 new_optstruct_def = subopts->defaults;
 
-            add_options(config, new_parent_name, new_optstruct,
+            add_options(config, co.name, new_optstruct,
                         new_optstruct_def, subopts->opts);
         } else {
             const struct m_option *sub = arg->p;
-            add_options(config, new_parent_name, optstruct, optstruct_def, sub);
+            add_options(config, co.name, optstruct, optstruct_def, sub);
         }
     } else {
         // Initialize options
@@ -443,7 +437,7 @@ static void m_config_add_option(struct m_config *config,
         }
     }
 
-    if (!is_merge_opt)
+    if (arg->name[0]) // no own name -> hidden
         MP_TARRAY_APPEND(config, config->opts, config->num_opts, co);
 
     add_negation_option(config, &co, parent_name);
@@ -533,7 +527,7 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
         char prefix[110];
         assert(strlen(co->name) < 100);
         sprintf(prefix, "%s-", co->name);
-        return parse_subopts(config, co->name, prefix, param, flags);
+        return parse_subopts(config, (char *)co->name, prefix, param, flags);
     }
 
     return m_option_parse(co->opt, name, param, set ? co->data : NULL);

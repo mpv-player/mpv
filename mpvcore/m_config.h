@@ -38,7 +38,7 @@ struct m_obj_desc;
 struct m_config_option {
     bool is_generated : 1;
     // Full name (ie option-subopt).
-    char *name;
+    const char *name;
     // Option description.
     const struct m_option *opt;
     // Raw value of the option.
