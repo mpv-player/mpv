@@ -1543,7 +1543,7 @@ static void xscreensaver_heartbeat(struct vo_x11_state *x11)
     double time = mp_time_sec();
 
     if (x11->display && x11->screensaver_off &&
-        (time - x11->screensaver_time_last) > 30)
+        (time - x11->screensaver_time_last) >= 10)
     {
         x11->screensaver_time_last = time;
 
