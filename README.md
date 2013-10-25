@@ -63,6 +63,13 @@ mpv's configure script is greedy and automatically enables features as a result
 of autodetection. The cases where you may want to use `--enable-*` are very
 limited.
 
+FFmpeg vs. Libav
+----------------
+
+Generally, mpv should work with the latest release as well as the git version
+of both FFmpeg and Libav. But FFmpeg is preferred, and some mpv features work
+with FFmpeg only. See the [wiki article][ffmpeg_vs_libav] about the issue.
+
 Bug reports
 -----------
 
@@ -97,3 +104,4 @@ To contact the `mpv` team in private write to `mpv-team@googlegroups.com`.
 [issue-tracker]:  https://github.com/mpv-player/mpv/issues
 [mpv-users]: https://groups.google.com/forum/?hl=en#!forum/mpv-users
 [mpv-devel]: https://groups.google.com/forum/?hl=en#!forum/mpv-devel
+[ffmpeg_vs_libav]: https://github.com/mpv-player/mpv/wiki/FFmpeg-versus-Libav
