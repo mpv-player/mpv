@@ -23,6 +23,7 @@ local user_opts = {
     fadeduration = 200,                     -- duration of fade out in ms, 0 = no fade
     deadzonesize = 0,                       -- size of deadzone
     minmousemove = 3,                       -- minimum amount of pixels the mouse has to move between ticks to make the OSC show up
+    seektooltip = false,                    -- display tooltip over the seekbar indicating time at mouse position
     iamaprogrammer = false,                 -- use native mpv values and disable OSC internal playlist management (and some functions that depend on it)
 }
 
@@ -391,6 +392,8 @@ function register_element(type, x, y, an, w, h, style, content, eventresponder, 
             hitbox = hitbox,
             w = w,
             h = h,
+            x = x,
+            y = y,
             content = content,
             eventresponder = eventresponder,
             metainfo = metainfo,
@@ -537,17 +540,13 @@ function render_elements(master_ass)
         if element.type == "slider" then
 
             elem_ass:merge(element.content) -- ASS objects
-            -- draw pos marker
 
+            -- draw pos marker
             local pos = element.metainfo.slider.posF()
 
             if not (pos == nil) then
 
-                if pos > element.metainfo.slider.max then
-                    pos = element.metainfo.slider.max
-                elseif pos < element.metainfo.slider.min then
-                    pos = element.metainfo.slider.min
-                end
+                pos = limit_range(element.metainfo.slider.min, element.metainfo.slider.max, pos)
 
                 local fill_offsetV = element.metainfo.slider.border + element.metainfo.slider.gap
                 local fill_offsetH = element.h/2
@@ -570,6 +569,32 @@ function render_elements(master_ass)
             end
 
             elem_ass:draw_stop()
+
+            -- add tooltip
+            if not (element.metainfo.slider.tooltipF == nil) then
+
+                if mouse_hit(element) then
+                    local sliderpos = get_slider_value(element)
+                    local tooltiplabel = element.metainfo.slider.tooltipF(sliderpos)
+                    local s_min, s_max = element.metainfo.slider.min, element.metainfo.slider.max
+
+                    local an = 2
+                    if (sliderpos < (s_min + 10)) then
+                        an = 1
+                    elseif (sliderpos > (s_max - 10)) then
+                        an = 3
+                    end
+
+                    elem_ass:new_event()
+                    elem_ass:pos(mp.get_mouse_pos(), element.y - (element.h) - 0) -- positioning
+                    elem_ass:an(an)
+                    elem_ass:append(osc_styles.vidtitle) -- styling
+                    elem_ass:append(tooltiplabel)
+
+                end
+            end
+
+
 
         elseif element.type == "box" then
             elem_ass:merge(element.content) -- ASS objects
@@ -914,13 +939,28 @@ function osc_init()
         end
     end
 
+    local tooltipF = function (pos)
+        if not (mp.property_get("length") == nil) then
+            duration = tonumber(mp.property_get("length"))
+            possec = duration * (pos / 100)
+            return mp.format_time(possec)
+        else
+            return nil
+        end
+    end
+
     local metainfo = {}
+
+
     metainfo.enabled = (not (mp.property_get("length") == nil)) and (tonumber(mp.property_get("length")) > 0)
     metainfo.styledown = false
     metainfo.slider = {}
     metainfo.slider.border = 1
     metainfo.slider.gap = 1             -- >1 will draw triangle markers
     metainfo.slider.type = "slider"     -- "bar" for old bar-style filling
+    if (user_opts.seektooltip) then
+        metainfo.slider.tooltipF = tooltipF
+    end
 
     local eventresponder = {}
     local sliderF = function (element)
