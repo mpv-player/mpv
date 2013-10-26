@@ -112,6 +112,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
     int       	len 	= c->len/4;		// Number of samples
     for (int ch = 0; ch < nch; ch++) {
       // Volume control (fader)
+      if (s->level[ch] != 1.0) {
 	for(i=ch;i<len;i+=nch){
 	  register float x 	= a[i];
 	  // Set volume
@@ -125,6 +126,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 	    x=clamp(x,-1.0,1.0);
 	  a[i] = x;
 	}
+      }
     }
   }
   return c;
