@@ -259,7 +259,7 @@ Available filters are:
     Filter for internal use only. Converts between signed/unsigned formats
     and formats with different endian.
 
-``volume[=v[:sc[:fast]]]``
+``volume[=volumedb[:softclip[:s16]]]``
     Implements software volume control. Use this filter with caution since it
     can reduce the signal to noise ratio of the sound. In most cases it is
     best to use the *Master* volume control of your sound card or the volume
@@ -268,24 +268,24 @@ Available filters are:
     *NOTE*: This filter is not reentrant and can therefore only be enabled
     once for every audio stream.
 
-    ``<v>``
+    ``<volumedb>``
         Sets the desired gain in dB for all channels in the stream from -200dB
         to +60dB, where -200dB mutes the sound completely and +60dB equals a
         gain of 1000 (default: 0).
-    ``<sc>``
-        Turns soft clipping on (1) or off (0). Soft-clipping can make the
+    ``<softclip>``
+        Turns soft clipping on. Soft-clipping can make the
         sound more smooth if very high volume levels are used. Enable this
         option if the dynamic range of the loudspeakers is very low.
 
         *WARNING*: This feature creates distortion and should be considered a
         last resort.
-    ``<fast>``
-        Force S16 sample format if set to 1. Lower quality, but might be faster
+    ``<s16>``
+        Force S16 sample format if set. Lower quality, but might be faster
         in some situations.
 
     .. admonition:: Example
 
-        ``mpv --af=volume=10.1:0 media.avi``
+        ``mpv --af=volume=10.1 media.avi``
             Would amplify the sound by 10.1dB and hard-clip if the sound level
             is too high.
 
