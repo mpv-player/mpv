@@ -651,12 +651,18 @@ function osc_init()
     end
 
 
-    if user_opts.vidscale == true then
+    if user_opts.vidscale then
         osc_param.playresy = baseResY / scale
     else
         osc_param.playresy = display_h / scale
     end
     osc_param.playresx = osc_param.playresy * display_aspect
+
+    -- make sure the OSC actually fits into the video
+    if (osc_param.playresx < (osc_param.osc_w + (2 * osc_param.osc_p))) then
+        osc_param.playresy = (osc_param.osc_w + (2 * osc_param.osc_p)) / display_aspect
+        osc_param.playresx = osc_param.playresy * display_aspect
+    end
 
     -- position of the controller according to video aspect and valignment
     osc_param.posX = math.floor(get_align(user_opts.halign, osc_param.playresx, osc_param.osc_w, 0))
