@@ -61,9 +61,6 @@
 #ifdef CONFIG_DVBIN
 #include "stream/dvbin.h"
 #endif
-#ifdef CONFIG_DVDREAD
-#include "stream/stream_dvd.h"
-#endif
 #include "screenshot.h"
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
