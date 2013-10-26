@@ -113,7 +113,7 @@ time passed
     =============   ================================================
 
 cache status
-    | Shows current cache fill status (only visible when below 48%)
+    | Shows current cache fill status (only visible when below 45%)
 
 time remaining
     | Shows remaining playback time timestamp
