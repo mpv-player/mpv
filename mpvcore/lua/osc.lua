@@ -1004,7 +1004,7 @@ function osc_init()
         local cache = mp.property_get("cache")
         if not (cache == nil) then
             cache = tonumber(mp.property_get("cache"))
-            if (cache < 48) then
+            if (cache < 45) then
                 ass:append("Cache: " .. (cache) .."%")
             end
         end
