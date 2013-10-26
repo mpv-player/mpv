@@ -29,6 +29,7 @@
 #include <inttypes.h>
 #include <math.h>
 
+#include "mpvcore/mp_common.h"
 #include "af.h"
 
 #define L   	2      // Storage for filter taps
@@ -143,7 +144,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     for(i=0;i<AF_NCH;i++){
       for(j=0;j<KM;j++){
 	((af_equalizer_t*)af->setup)->g[i][j] =
-	  pow(10.0,clamp(g[j],G_MIN,G_MAX)/20.0)-1.0;
+	  pow(10.0,MPCLAMP(g[j],G_MIN,G_MAX)/20.0)-1.0;
       }
     }
     return AF_OK;

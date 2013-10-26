@@ -27,6 +27,7 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "mpvcore/mp_common.h"
 #include "af.h"
 
 #define FR 0
@@ -150,14 +151,14 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
       // If mono: fake stereo
       if(((struct mp_audio*)arg)->nch == 1){
-	s->nr = min(af->data->nch,2);
+	s->nr = MPMIN(af->data->nch,2);
 	for(i=0;i<s->nr;i++){
 	  s->route[i][FR] = 0;
 	  s->route[i][TO] = i;
 	}
       }
       else{
-	s->nr = min(af->data->nch, ((struct mp_audio*)arg)->nch);
+	s->nr = MPMIN(af->data->nch, ((struct mp_audio*)arg)->nch);
 	for(i=0;i<s->nr;i++){
 	  s->route[i][FR] = i;
 	  s->route[i][TO] = i;

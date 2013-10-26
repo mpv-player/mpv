@@ -26,6 +26,7 @@
 #include <math.h>
 #include <limits.h>
 
+#include "mpvcore/mp_common.h"
 #include "af.h"
 
 // Methods:
@@ -139,14 +140,14 @@ static void method1_int16(af_drc_t *s, struct mp_audio *c)
     s->mul = (1.0 - SMOOTH_MUL) * s->mul + SMOOTH_MUL * neededmul;
 
     // clamp the mul coefficient
-    s->mul = clamp(s->mul, MUL_MIN, MUL_MAX);
+    s->mul = MPCLAMP(s->mul, MUL_MIN, MUL_MAX);
   }
 
   // Scale & clamp the samples
   for (i = 0; i < len; i++)
   {
     tmp = s->mul * data[i];
-    tmp = clamp(tmp, SHRT_MIN, SHRT_MAX);
+    tmp = MPCLAMP(tmp, SHRT_MIN, SHRT_MAX);
     data[i] = tmp;
   }
 
@@ -180,7 +181,7 @@ static void method1_float(af_drc_t *s, struct mp_audio *c)
     s->mul = (1.0 - SMOOTH_MUL) * s->mul + SMOOTH_MUL * neededmul;
 
     // clamp the mul coefficient
-    s->mul = clamp(s->mul, MUL_MIN, MUL_MAX);
+    s->mul = MPCLAMP(s->mul, MUL_MIN, MUL_MAX);
   }
 
   // Scale & clamp the samples
@@ -223,7 +224,7 @@ static void method2_int16(af_drc_t *s, struct mp_audio *c)
     if (avg >= SIL_S16)
     {
 	s->mul = s->mid_s16 / avg;
-	s->mul = clamp(s->mul, MUL_MIN, MUL_MAX);
+	s->mul = MPCLAMP(s->mul, MUL_MIN, MUL_MAX);
     }
   }
 
@@ -231,7 +232,7 @@ static void method2_int16(af_drc_t *s, struct mp_audio *c)
   for (i = 0; i < len; i++)
   {
     tmp = s->mul * data[i];
-    tmp = clamp(tmp, SHRT_MIN, SHRT_MAX);
+    tmp = MPCLAMP(tmp, SHRT_MIN, SHRT_MAX);
     data[i] = tmp;
   }
 
@@ -273,7 +274,7 @@ static void method2_float(af_drc_t *s, struct mp_audio *c)
     if (avg >= SIL_FLOAT)
     {
 	s->mul = s->mid_float / avg;
-	s->mul = clamp(s->mul, MUL_MIN, MUL_MAX);
+	s->mul = MPCLAMP(s->mul, MUL_MIN, MUL_MAX);
     }
   }
 

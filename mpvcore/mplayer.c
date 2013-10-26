@@ -3234,7 +3234,7 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     }
     if (use_range) {
         if (mpctx->opts->play_frames > 0)
-            ans = max(ans, 1.0 -
+            ans = MPMAX(ans, 1.0 -
                     mpctx->max_frames / (double) mpctx->opts->play_frames);
     }
     return ans;

@@ -26,6 +26,7 @@
 #include <math.h>
 #include <limits.h>
 
+#include "mpvcore/mp_common.h"
 #include "af.h"
 
 struct priv {
@@ -73,7 +74,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
             if (vol != 256) {
                 for (int i = ch; i < len; i += nch) {
                     int x = (a[i] * vol) >> 8;
-                    a[i] = clamp(x, SHRT_MIN, SHRT_MAX);
+                    a[i] = MPCLAMP(x, SHRT_MIN, SHRT_MAX);
                 }
             }
         }
@@ -85,7 +86,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
                 for (int i = ch; i < len; i += nch) {
                     float x = a[i];
                     x *= s->level[ch];
-                    a[i] = s->soft ? af_softclip(x) : clamp(x, -1.0, 1.0);
+                    a[i] = s->soft ? af_softclip(x) : MPCLAMP(x, -1.0, 1.0);
                 }
             }
         }

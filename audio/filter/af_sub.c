@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "mpvcore/mp_common.h"
 #include "af.h"
 #include "dsp.h"
 
@@ -70,7 +71,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     if(!arg) return AF_ERROR;
 
     af->data->rate   = ((struct mp_audio*)arg)->rate;
-    mp_audio_set_channels_old(af->data, max(s->ch+1,((struct mp_audio*)arg)->nch));
+    mp_audio_set_channels_old(af->data, MPMAX(s->ch+1,((struct mp_audio*)arg)->nch));
     mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
 
     // Design low-pass filter

@@ -26,6 +26,7 @@
 #include <math.h>
 #include <limits.h>
 
+#include "mpvcore/mp_common.h"
 #include "af.h"
 
 // Data for specific instances of this filter
@@ -93,8 +94,8 @@ static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data)
     l = avg + (int)(s->mul * (a[i] - avg));
     r = avg + (int)(s->mul * (a[i + 1] - avg));
 
-    a[i] = clamp(l, SHRT_MIN, SHRT_MAX);
-    a[i + 1] = clamp(r, SHRT_MIN, SHRT_MAX);
+    a[i] = MPCLAMP(l, SHRT_MIN, SHRT_MAX);
+    a[i + 1] = MPCLAMP(r, SHRT_MIN, SHRT_MAX);
   }
 
   return data;

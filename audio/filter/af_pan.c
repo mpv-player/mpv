@@ -25,6 +25,7 @@
 #include <math.h>
 #include <limits.h>
 
+#include "mpvcore/mp_common.h"
 #include "af.h"
 
 // Data for specific instances of this filter
@@ -126,10 +127,10 @@ static int control(struct af_instance* af, int cmd, void* arg)
     if (s->nch)
       return AF_ERROR;
     if (af->data->nch >= 2) {
-      s->level[0][0] = min(1.f, 1.f - val);
-      s->level[0][1] = max(0.f, val);
-      s->level[1][0] = max(0.f, -val);
-      s->level[1][1] = min(1.f, 1.f + val);
+      s->level[0][0] = MPMIN(1.f, 1.f - val);
+      s->level[0][1] = MPMAX(0.f, val);
+      s->level[1][0] = MPMAX(0.f, -val);
+      s->level[1][1] = MPMIN(1.f, 1.f + val);
     }
     return AF_OK;
   }
