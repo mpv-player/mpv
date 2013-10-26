@@ -958,7 +958,7 @@ function osc_init()
     metainfo.slider.border = 1
     metainfo.slider.gap = 1             -- >1 will draw triangle markers
     metainfo.slider.type = "slider"     -- "bar" for old bar-style filling
-    if (user_opts.seektooltip) then
+    if (user_opts.seektooltip) and (not (mp.property_get("length") == nil)) then
         metainfo.slider.tooltipF = tooltipF
     end
 
