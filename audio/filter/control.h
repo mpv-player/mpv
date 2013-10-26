@@ -56,9 +56,6 @@ typedef struct af_control_ext_s{
 
 // OPTIONAL CALLS
 
-// Called just before destruction of a filter
-#define AF_CONTROL_PRE_DESTROY 		0x00000200 | AF_CONTROL_OPTIONAL
-
 /* Commandline parameters. If there were any commandline parameters
    for this specific filter, they will be given as a char* in the
    argument */

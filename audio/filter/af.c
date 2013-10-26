@@ -285,9 +285,6 @@ static void af_remove(struct af_stream *s, struct af_instance *af)
     mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Removing filter %s \n",
            af->info->name);
 
-    // Notify filter before changing anything
-    af->control(af, AF_CONTROL_PRE_DESTROY, 0);
-
     // Detach pointers
     af->prev->next = af->next;
     af->next->prev = af->prev;
