@@ -28,26 +28,19 @@
 
 #include "af.h"
 
-// Data for specific instances of this filter
-typedef struct af_volume_s
-{
+struct priv {
     float level[AF_NCH];        // Gain level for each channel
     int soft;                   // Enable/disable soft clipping
     int fast;                   // Use fix-point volume control
     float cfg_volume;
-} af_volume_t;
+};
 
-// Initialization and runtime control
 static int control(struct af_instance *af, int cmd, void *arg)
 {
-    af_volume_t *s = af->priv;
+    struct priv *s = af->priv;
 
     switch (cmd) {
     case AF_CONTROL_REINIT:
-        // Sanity check
-        if (!arg)
-            return AF_ERROR;
-
         mp_audio_copy_config(af->data, (struct mp_audio *)arg);
 
         if (s->fast && (((struct mp_audio *)arg)->format != AF_FORMAT_FLOAT_NE))
@@ -66,16 +59,15 @@ static int control(struct af_instance *af, int cmd, void *arg)
     return AF_UNKNOWN;
 }
 
-// Filter data through filter
 static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 {
-    struct mp_audio *c   = data;                        // Current working data
-    af_volume_t *s = af->priv;
-    int nch = c->nch;                  // Number of channels
+    struct mp_audio *c = data;
+    struct priv *s = af->priv;
+    int nch = c->nch;
 
     if (af->data->format == AF_FORMAT_S16_NE) {
-        int16_t *a = (int16_t *)c->audio;     // Audio data
-        int len = c->len / 2;                 // Number of samples
+        int16_t *a = c->audio;
+        int len = c->len / 2;
         for (int ch = 0; ch < nch; ch++) {
             int vol = 256.0 * s->level[ch];
             if (vol != 256) {
@@ -86,17 +78,13 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
             }
         }
     } else if (af->data->format == AF_FORMAT_FLOAT_NE) {
-        float *a = (float *)c->audio;     // Audio data
-        int len = c->len / 4;             // Number of samples
+        float *a = c->audio;
+        int len = c->len / 4;
         for (int ch = 0; ch < nch; ch++) {
-            // Volume control (fader)
             if (s->level[ch] != 1.0) {
                 for (int i = ch; i < len; i += nch) {
                     float x = a[i];
-                    // Set volume
                     x *= s->level[ch];
-                    /* Soft clipping, the sound of a dream, thanks to Jon Wattes
-                       post to Musicdsp.org */
                     a[i] = s->soft ? af_softclip(x) : clamp(x, -1.0, 1.0);
                 }
             }
@@ -107,19 +95,19 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 
 static int af_open(struct af_instance *af)
 {
-    struct af_volume_s *priv = af->priv;
+    struct priv *s = af->priv;
     af->control = control;
     af->play = play;
     af->mul = 1;
     af->data = talloc_zero(af, struct mp_audio);
     float level;
-    af_from_dB(1, &priv->cfg_volume, &level, 20.0, -200.0, 60.0);
+    af_from_dB(1, &s->cfg_volume, &level, 20.0, -200.0, 60.0);
     for (int i = 0; i < AF_NCH; i++)
-        priv->level[i] = level;
+        s->level[i] = level;
     return AF_OK;
 }
 
-#define OPT_BASE_STRUCT struct af_volume_s
+#define OPT_BASE_STRUCT struct priv
 
 // Description of this filter
 struct af_info af_info_volume = {
@@ -127,7 +115,7 @@ struct af_info af_info_volume = {
     .name = "volume",
     .flags = AF_FLAGS_NOT_REENTRANT,
     .open = af_open,
-    .priv_size = sizeof(struct af_volume_s),
+    .priv_size = sizeof(struct priv),
     .options = (const struct m_option[]) {
         OPT_FLOATRANGE("volumedb", cfg_volume, 0, -200, 60),
         OPT_FLAG("softclip", soft, 0),
