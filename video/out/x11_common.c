@@ -605,7 +605,7 @@ static void vo_x11_decoration(struct vo *vo, int d)
 
     vo_MotifHints = XInternAtom(x11->display, "_MOTIF_WM_HINTS", 0);
     if (vo_MotifHints != None) {
-        if (!d) {
+        if (!x11->got_motif_hints) {
             MotifWmHints *mhints = NULL;
 
             XGetWindowProperty(x11->display, x11->window,
@@ -620,6 +620,7 @@ static void vo_x11_decoration(struct vo *vo, int d)
                 XFree(mhints);
             }
         }
+        x11->got_motif_hints = true;
 
         memset(&vo_MotifWmHints, 0, sizeof(MotifWmHints));
         vo_MotifWmHints.flags =
@@ -1498,7 +1499,7 @@ static void vo_x11_ontop(struct vo *vo)
 static void vo_x11_border(struct vo *vo)
 {
     vo->opts->border = !vo->opts->border;
-    vo_x11_decoration(vo, vo->opts->border && !vo->x11->fs);
+    vo_x11_decoration(vo, vo->opts->border);
 }
 
 int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
