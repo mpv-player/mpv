@@ -154,6 +154,7 @@ typedef struct mp_cmd {
     bstr original;
     char *input_section;
     bool key_up_follows;
+    bool repeated;
     bool mouse_move;
     int mouse_x, mouse_y;
     struct mp_cmd *queue_next;

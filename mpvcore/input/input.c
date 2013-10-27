@@ -1877,8 +1877,10 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
     struct cmd_queue *queue = &ictx->cmd_queue;
     if (!queue->first) {
         struct mp_cmd *repeated = check_autorepeat(ictx);
-        if (repeated)
+        if (repeated) {
+            repeated->repeated = true;
             queue_add_tail(queue, repeated);
+        }
     }
     struct mp_cmd *ret = queue_peek(queue);
     if (ret && !peek_only) {
