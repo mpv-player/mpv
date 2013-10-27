@@ -114,7 +114,7 @@ static const struct fmt_entry fmt_table[] = {
     {0}
 };
 
-static void allocate_xvimage(struct vo *, int);
+static bool allocate_xvimage(struct vo *, int);
 static void deallocate_xvimage(struct vo *vo, int foo);
 static struct mp_image get_xv_buffer(struct vo *vo, int buf_index);
 
@@ -473,8 +473,12 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
 
     ctx->num_buffers = 2;
 
-    for (i = 0; i < ctx->num_buffers; i++)
-        allocate_xvimage(vo, i);
+    for (i = 0; i < ctx->num_buffers; i++) {
+        if (!allocate_xvimage(vo, i)) {
+            MP_FATAL(vo, "could not allocate Xv image data\n");
+            return -1;
+        }
+    }
 
     ctx->current_buf = 0;
     ctx->current_ip_buf = 0;
@@ -485,7 +489,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     return 0;
 }
 
-static void allocate_xvimage(struct vo *vo, int foo)
+static bool allocate_xvimage(struct vo *vo, int foo)
 {
     struct xvctx *ctx = vo->priv;
     struct vo_x11_state *x11 = vo->x11;
@@ -506,12 +510,16 @@ static void allocate_xvimage(struct vo *vo, int foo)
                                          ctx->xv_format, NULL,
                                          aligned_w, ctx->image_height,
                                          &ctx->Shminfo[foo]);
+        if (!ctx->xvimage[foo])
+            return false;
 
         ctx->Shminfo[foo].shmid = shmget(IPC_PRIVATE,
                                          ctx->xvimage[foo]->data_size,
                                          IPC_CREAT | 0777);
         ctx->Shminfo[foo].shmaddr = (char *) shmat(ctx->Shminfo[foo].shmid, 0,
                                                    0);
+        if (ctx->Shminfo[foo].shmaddr == (void *)-1)
+            return false;
         ctx->Shminfo[foo].readOnly = False;
 
         ctx->xvimage[foo]->data = ctx->Shminfo[foo].shmaddr;
@@ -525,13 +533,17 @@ static void allocate_xvimage(struct vo *vo, int foo)
             (XvImage *) XvCreateImage(x11->display, ctx->xv_port,
                                       ctx->xv_format, NULL, aligned_w,
                                       ctx->image_height);
+        if (!ctx->xvimage[foo])
+            return false;
         ctx->xvimage[foo]->data = av_malloc(ctx->xvimage[foo]->data_size);
+        if (!ctx->xvimage[foo]->data)
+            return false;
         XSync(x11->display, False);
     }
     struct mp_image img = get_xv_buffer(vo, foo);
     img.w = aligned_w;
     mp_image_clear(&img, 0, 0, img.w, img.h);
-    return;
+    return true;
 }
 
 static void deallocate_xvimage(struct vo *vo, int foo)
@@ -546,7 +558,13 @@ static void deallocate_xvimage(struct vo *vo, int foo)
     {
         av_free(ctx->xvimage[foo]->data);
     }
-    XFree(ctx->xvimage[foo]);
+    if (ctx->xvimage[foo])
+        XFree(ctx->xvimage[foo]);
+
+    ctx->xvimage[foo] = NULL;
+#ifdef HAVE_SHM
+    ctx->Shminfo[foo] = (XShmSegmentInfo){0};
+#endif
 
     XSync(vo->x11->display, False);
     return;
