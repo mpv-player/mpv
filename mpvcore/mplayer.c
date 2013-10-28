@@ -468,6 +468,16 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         reset_subtitles(mpctx);
     }
 
+    if (mask & INITIALIZED_LIBASS) {
+        mpctx->initialized_flags &= ~INITIALIZED_LIBASS;
+#ifdef CONFIG_ASS
+        if (mpctx->osd->ass_renderer)
+            ass_renderer_done(mpctx->osd->ass_renderer);
+        mpctx->osd->ass_renderer = NULL;
+        ass_clear_fonts(mpctx->ass_library);
+#endif
+    }
+
     if (mask & INITIALIZED_VCODEC) {
         mpctx->initialized_flags &= ~INITIALIZED_VCODEC;
         if (mpctx->sh_video)
@@ -4229,14 +4239,21 @@ static void add_subtitle_fonts_from_sources(struct MPContext *mpctx)
             }
         }
     }
+#endif
+}
 
-    // libass seems to misbehave if fonts are changed while a renderer
-    // exists, so we (re)create the renderer after fonts are set.
+static void init_sub_renderer(struct MPContext *mpctx)
+{
+#ifdef CONFIG_ASS
+    assert(!(mpctx->initialized_flags & INITIALIZED_LIBASS));
     assert(!mpctx->osd->ass_renderer);
+
     mpctx->osd->ass_renderer = ass_renderer_init(mpctx->osd->ass_library);
-    if (mpctx->osd->ass_renderer)
+    if (mpctx->osd->ass_renderer) {
         mp_ass_configure_fonts(mpctx->osd->ass_renderer,
                                mpctx->opts->sub_text_style);
+    }
+    mpctx->initialized_flags |= INITIALIZED_LIBASS;
 #endif
 }
 
@@ -4538,6 +4555,9 @@ goto_reopen_demuxer: ;
         timeline_set_part(mpctx, mpctx->timeline_part, true);
 
     add_subtitle_fonts_from_sources(mpctx);
+    // libass seems to misbehave if fonts are changed while a renderer
+    // exists, so we (re)create the renderer after fonts are set.
+    init_sub_renderer(mpctx);
 
     open_subtitles_from_options(mpctx);
     open_subtitles_from_resolve(mpctx);
@@ -4695,13 +4715,6 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     mpctx->filename = NULL;
     talloc_free(mpctx->resolve_result);
     mpctx->resolve_result = NULL;
-
-#ifdef CONFIG_ASS
-    if (mpctx->osd->ass_renderer)
-        ass_renderer_done(mpctx->osd->ass_renderer);
-    mpctx->osd->ass_renderer = NULL;
-    ass_clear_fonts(mpctx->ass_library);
-#endif
 
     // Played/paused for longer than 3 seconds -> ok
     bool playback_short = mpctx->stop_play == AT_END_OF_FILE &&
