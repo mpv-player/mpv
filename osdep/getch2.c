@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <signal.h>
+#include <errno.h>
 #include <sys/ioctl.h>
 
 #ifdef HAVE_TERMIOS
@@ -366,8 +367,10 @@ bool getch2(struct input_ctx *input_ctx)
      * happen if the terminal state change done in getch2_enable()
      * works.
      */
-    if (retval < 1)
-        return retval;
+    if (retval == 0)
+        return false;
+    if (retval == -1)
+        return errno != EBADF && errno != EINVAL;
     getch2_len += retval;
 
     while (getch2_pos < getch2_len) {
