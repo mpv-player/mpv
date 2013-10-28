@@ -340,6 +340,11 @@ void get_screen_size(void) {
 static unsigned char getch2_buf[BUF_LEN];
 static int getch2_len = 0;
 static int getch2_pos = 0;
+static enum {
+    STATE_INITIAL,
+    STATE_UTF8,
+} state = STATE_INITIAL;
+static int utf8_len = 0;
 
 static void walk_buf(unsigned int count) {
     if (!(count < BUF_LEN && count <= getch2_len))
@@ -364,12 +369,6 @@ bool getch2(struct input_ctx *input_ctx)
     if (retval < 1)
         return retval;
     getch2_len += retval;
-
-    static enum {
-        STATE_INITIAL = 0,
-        STATE_UTF8,
-    } state = STATE_INITIAL;
-    static int utf8_len = 0;
 
     while (getch2_pos < getch2_len) {
         unsigned char c = getch2_buf[getch2_pos++];
