@@ -238,29 +238,31 @@ static int x11_errorhandler(Display *display, XErrorEvent *event)
     return 0;
 }
 
+struct fstype {
+    int type;
+    const char *sym;
+    const char *help;
+};
+
+static const struct fstype fstypes[] = {
+    {0,             "none",     "don't set fullscreen window layer"},
+    {vo_wm_LAYER,   "layer",    "use _WIN_LAYER, set layer with layer=<0..15>"},
+    {vo_wm_ABOVE,   "above",    "use _NETWM_STATE_ABOVE"},
+    {vo_wm_FULLSCREEN,   "fullscreen",   "use _NETWM_STATE_FULLSCREEN"},
+    {vo_wm_STAYS_ON_TOP, "stays_on_top", "use _NETWM_STATE_STAYS_ON_TOP"},
+    {vo_wm_BELOW,   "below",    "use _NETWM_STATE_BELOW"},
+    {vo_wm_NETWM,   "netwm",    "force NETWM style"},
+    {vo_wm_MWM,     "mwm_hack", "enable MWM hack"},
+    {0},
+};
+
 void fstype_help(void)
 {
     mp_tmsg(MSGT_VO, MSGL_INFO, "Available fullscreen layer change modes:\n");
-    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FULL_SCREEN_TYPES\n");
-
-    mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "none",
-           "don't set fullscreen window layer");
-    mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "layer",
-           "use _WIN_LAYER hint with default layer");
-    mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "layer=<0..15>",
-           "use _WIN_LAYER hint with a given layer number");
-    mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "netwm",
-           "force NETWM style");
-    mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "above",
-           "use _NETWM_STATE_ABOVE hint if available");
-    mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "below",
-           "use _NETWM_STATE_BELOW hint if available");
-    mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "fullscreen",
-           "use _NETWM_STATE_FULLSCREEN hint if available");
-    mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "stays_on_top",
-           "use _NETWM_STATE_STAYS_ON_TOP hint if available");
-    mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "mwm_hack",
-           "enable MWM hack");
+    for (int n = 0; fstypes[n].sym; n++) {
+        mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", fstypes[n].sym,
+               fstypes[n].help);
+    }
     mp_msg(MSGT_VO, MSGL_INFO,
            "You can also negate the settings with simply putting '-' in the beginning");
     mp_msg(MSGT_VO, MSGL_INFO, "\n");
@@ -270,23 +272,60 @@ static void fstype_dump(struct vo_x11_state *x11)
 {
     int fstype = x11->fs_type;
     if (fstype) {
-        MP_VERBOSE(x11, "Current fstype setting honours");
-        if (fstype & vo_wm_LAYER)
-            MP_VERBOSE(x11, " LAYER");
-        if (fstype & vo_wm_FULLSCREEN)
-            MP_VERBOSE(x11, " FULLSCREEN");
-        if (fstype & vo_wm_STAYS_ON_TOP)
-            MP_VERBOSE(x11, " STAYS_ON_TOP");
-        if (fstype & vo_wm_ABOVE)
-            MP_VERBOSE(x11, " ABOVE");
-        if (fstype & vo_wm_BELOW)
-            MP_VERBOSE(x11, " BELOW");
-        if (fstype & vo_wm_MWM)
-            MP_VERBOSE(x11, " mwm_hack");
-        MP_VERBOSE(x11, " X atoms\n");
+        MP_VERBOSE(x11, "Current fstype setting honours:");
+        for (int n = 0; fstypes[n].sym; n++) {
+            if (fstypes[n].type & fstype)
+                MP_VERBOSE(x11, " %s", fstypes[n].sym);
+        }
+        MP_VERBOSE(x11, "\n");
     } else {
         MP_VERBOSE(x11, "Current fstype setting doesn't honour any X atoms\n");
     }
+}
+
+static int vo_x11_get_fs_type(struct vo *vo)
+{
+    struct vo_x11_state *x11 = vo->x11;
+    unsigned int type = x11->wm_type;
+    char **fstype_list = vo->opts->fstype_list;
+
+    if (fstype_list) {
+        for (int i = 0; fstype_list[i]; i++) {
+            int neg = 0;
+            char *arg = fstype_list[i];
+            unsigned int flag = 0xFF;
+
+            if (arg[0] == '-') {
+                neg = 1;
+                arg = arg + 1;
+            }
+
+            for (int n = 0; fstypes[n].sym; n++) {
+                if (strcmp(arg, fstypes[n].sym) == 0)
+                    flag = fstypes[n].type;
+            }
+
+            if (strncmp(arg, "layer=", 6) == 0) {
+                char *endptr = NULL;
+                int layer = strtol(arg + 6, &endptr, 10);
+
+                if (endptr && *endptr == '\0' && layer >= 0 && layer <= 15)
+                    x11->fs_layer = layer;
+
+                flag = vo_wm_LAYER;
+            }
+
+            if (flag == 0xFF) {
+                MP_ERR(x11, "fstype '%s' unknown\n", arg);
+            } else if (flag == 0) {
+                type = 0;
+            } else {
+                type = neg ? (type & ~flag) : (type | flag);
+            }
+        }
+    }
+
+    return type;
 }
 
 static int net_wm_support_state_test(struct vo_x11_state *x11, Atom atom)
@@ -1297,74 +1336,6 @@ static void vo_x11_setlayer(struct vo *vo, Window vo_window, int layer)
                    layer, state);
         XFree(state);
     }
-}
-
-static int vo_x11_get_fs_type(struct vo *vo)
-{
-    struct vo_x11_state *x11 = vo->x11;
-    int type = x11->wm_type;
-    char **fstype_list = vo->opts->fstype_list;
-    int i;
-
-    if (fstype_list) {
-        for (i = 0; fstype_list[i]; i++) {
-            int neg = 0;
-            char *arg = fstype_list[i];
-
-            if (fstype_list[i][0] == '-') {
-                neg = 1;
-                arg = fstype_list[i] + 1;
-            }
-
-            if (!strncmp(arg, "layer", 5)) {
-                if (!neg && (arg[5] == '=')) {
-                    char *endptr = NULL;
-                    int layer = strtol(fstype_list[i] + 6, &endptr, 10);
-
-                    if (endptr && *endptr == '\0' && layer >= 0
-                        && layer <= 15)
-                        x11->fs_layer = layer;
-                }
-                if (neg)
-                    type &= ~vo_wm_LAYER;
-                else
-                    type |= vo_wm_LAYER;
-            } else if (!strcmp(arg, "above")) {
-                if (neg)
-                    type &= ~vo_wm_ABOVE;
-                else
-                    type |= vo_wm_ABOVE;
-            } else if (!strcmp(arg, "fullscreen")) {
-                if (neg)
-                    type &= ~vo_wm_FULLSCREEN;
-                else
-                    type |= vo_wm_FULLSCREEN;
-            } else if (!strcmp(arg, "stays_on_top")) {
-                if (neg)
-                    type &= ~vo_wm_STAYS_ON_TOP;
-                else
-                    type |= vo_wm_STAYS_ON_TOP;
-            } else if (!strcmp(arg, "below")) {
-                if (neg)
-                    type &= ~vo_wm_BELOW;
-                else
-                    type |= vo_wm_BELOW;
-            } else if (!strcmp(arg, "netwm")) {
-                if (neg)
-                    type &= ~vo_wm_NETWM;
-                else
-                    type |= vo_wm_NETWM;
-            } else if (!strcmp(arg, "mwm_hack")) {
-                if (neg)
-                    type &= ~vo_wm_MWM;
-                else
-                    type |= vo_wm_MWM;
-            } else if (!strcmp(arg, "none"))
-                type = 0;  // clear; keep parsing
-        }
-    }
-
-    return type;
 }
 
 // update x11->win_x, x11->win_y, x11->win_width and x11->win_height with current values of vo->x11->window
