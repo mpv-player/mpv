@@ -31,6 +31,7 @@
 @implementation MpvVideoWindow {
     NSSize _queued_video_size;
     bool   _fs_resize_scheduled;
+    bool   _recenter_window_during_constraint;
 }
 
 @synthesize adapter = _adapter;
@@ -117,6 +118,7 @@
     CGFloat dx = (f.size.width  - ns.width) / 2;
     CGFloat dy = (f.size.height - ns.height - [self titleHeight]) / 2;
     NSRect nf  = NSRectFromCGRect(CGRectInset(NSRectToCGRect(f), dx, dy));
+    self->_recenter_window_during_constraint = true;
     [self setFrame:nf display:NO animate:NO];
 }
 
@@ -124,11 +126,17 @@
 {
     NSRect s = [[self screen] visibleFrame];
     if (nf.origin.y + nf.size.height > s.origin.y + s.size.height) {
-        nf.size.height = s.size.height;
+        if (self->_recenter_window_during_constraint)
+            nf.size.height = s.size.height;
         nf.origin.y = s.origin.y + s.size.height - nf.size.height;
     }
-
     return nf;
+}
+
+- (void)setFrame:(NSRect)frame display:(BOOL)display animate:(BOOL)animate
+{
+    [super setFrame:frame display:display animate:animate];
+    self->_recenter_window_during_constraint = false;
 }
 
 - (void)queueNewVideoSize:(NSSize)new_size
