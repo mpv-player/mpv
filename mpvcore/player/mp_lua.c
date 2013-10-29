@@ -7,18 +7,18 @@
 
 #include "talloc.h"
 
-#include "mp_common.h"
-#include "mp_lua.h"
-#include "mp_core.h"
-#include "mp_msg.h"
-#include "m_property.h"
-#include "m_option.h"
-#include "command.h"
-#include "input/input.h"
-#include "sub/sub.h"
+#include "mpvcore/mp_common.h"
+#include "mpvcore/m_property.h"
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/m_option.h"
+#include "mpvcore/input/input.h"
+#include "mpvcore/path.h"
+#include "mpvcore/bstr.h"
 #include "osdep/timer.h"
-#include "path.h"
-#include "bstr.h"
+#include "sub/sub.h"
+#include "mp_core.h"
+#include "command.h"
+#include "mp_lua.h"
 
 // List of builtin modules and their contents as strings.
 // All these are generated from mpvcore/lua/*.lua

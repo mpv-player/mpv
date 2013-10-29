@@ -65,7 +65,7 @@
 
 #include "mpvcore/mpv_global.h"
 #include "mpvcore/mp_msg.h"
-#include "av_log.h"
+#include "mpvcore/av_log.h"
 
 
 #include "mpvcore/m_option.h"
@@ -77,9 +77,9 @@
 #include "sub/dec_sub.h"
 #include "sub/sd.h"
 
-#include "mpvcore/mp_osd.h"
+#include "mp_osd.h"
 #include "video/out/vo.h"
-#include "mpvcore/screenshot.h"
+#include "screenshot.h"
 
 #include "sub/sub.h"
 #include "mpvcore/cpudetect.h"
@@ -146,7 +146,7 @@
 
 #include "audio/mixer.h"
 
-#include "mpvcore/mp_core.h"
+#include "mp_core.h"
 #include "mpvcore/options.h"
 
 #include "mp_lua.h"
@@ -198,7 +198,7 @@ static const char av_desync_help_text[] = _(
 // ---
 
 #include "mpvcore/mp_common.h"
-#include "mpvcore/command.h"
+#include "command.h"
 
 static void reset_subtitles(struct MPContext *mpctx);
 static void reinit_subs(struct MPContext *mpctx);

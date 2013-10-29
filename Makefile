@@ -129,7 +129,7 @@ SOURCES-$(WAYLAND)              += video/out/vo_wayland.c video/out/wayland_comm
 SOURCES-$(VF_LAVFI)             += video/filter/vf_lavfi.c
 SOURCES-$(AF_LAVFI)             += audio/filter/af_lavfi.c
 
-SOURCES-$(LUA)                  += mpvcore/mp_lua.c
+SOURCES-$(LUA)                  += mpvcore/player/mp_lua.c
 
 ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
     SOURCES-yes                 += video/decode/lavc_dr1.c
@@ -194,7 +194,6 @@ SOURCES = audio/audio.c \
           mpvcore/bstr.c \
           mpvcore/charset_conv.c \
           mpvcore/codecs.c \
-          mpvcore/command.c \
           mpvcore/cpudetect.c \
           mpvcore/m_config.c \
           mpvcore/m_option.c \
@@ -202,19 +201,20 @@ SOURCES = audio/audio.c \
           mpvcore/mp_common.c \
           mpvcore/mp_msg.c \
           mpvcore/mp_ring.c \
-          mpvcore/mplayer.c \
           mpvcore/options.c \
           mpvcore/parser-cfg.c \
           mpvcore/parser-mpcmd.c \
           mpvcore/path.c \
           mpvcore/playlist.c \
           mpvcore/playlist_parser.c \
-          mpvcore/screenshot.c \
           mpvcore/version.c \
           mpvcore/input/input.c \
-          mpvcore/timeline/tl_edl.c \
-          mpvcore/timeline/tl_matroska.c \
-          mpvcore/timeline/tl_cue.c \
+          mpvcore/player/command.c \
+          mpvcore/player/mplayer.c \
+          mpvcore/player/screenshot.c \
+          mpvcore/player/timeline/tl_edl.c \
+          mpvcore/player/timeline/tl_matroska.c \
+          mpvcore/player/timeline/tl_cue.c \
           osdep/io.c \
           osdep/numcores.c \
           osdep/timer.c \
@@ -408,16 +408,16 @@ sub/osd_libass.c: sub/osd_font.h
 sub/osd_font.h: TOOLS/file2string.pl sub/osd_font.otf
 	./$^ >$@
 
-mpvcore/mp_lua.c: mpvcore/lua/defaults.inc
-mpvcore/lua/defaults.inc: TOOLS/file2string.pl mpvcore/lua/defaults.lua
+mpvcore/player/mp_lua.c: mpvcore/player/lua/defaults.inc
+mpvcore/player/lua/defaults.inc: TOOLS/file2string.pl mpvcore/player/lua/defaults.lua
 	./$^ >$@
 
-mpvcore/mp_lua.c: mpvcore/lua/assdraw.inc
-mpvcore/lua/assdraw.inc: TOOLS/file2string.pl mpvcore/lua/assdraw.lua
+mpvcore/player/mp_lua.c: mpvcore/player/lua/assdraw.inc
+mpvcore/player/lua/assdraw.inc: TOOLS/file2string.pl mpvcore/player/lua/assdraw.lua
 	./$^ >$@
 
-mpvcore/mp_lua.c: mpvcore/lua/osc.inc
-mpvcore/lua/osc.inc: TOOLS/file2string.pl mpvcore/lua/osc.lua
+mpvcore/player/mp_lua.c: mpvcore/player/lua/osc.inc
+mpvcore/player/lua/osc.inc: TOOLS/file2string.pl mpvcore/player/lua/osc.lua
 	./$^ >$@
 
 # ./configure must be rerun if it changed
@@ -518,9 +518,9 @@ clean:
 	-$(RM) video/out/gl_video_shaders.h
 	-$(RM) video/out/x11_icon.inc
 	-$(RM) sub/osd_font.h
-	-$(RM) mpvcore/lua/defaults.inc
-	-$(RM) mpvcore/lua/assdraw.inc
-	-$(RM) mpvcore/lua/osc.inc
+	-$(RM) mpvcore/player/lua/defaults.inc
+	-$(RM) mpvcore/player/lua/assdraw.inc
+	-$(RM) mpvcore/player/lua/osc.inc
 
 distclean: clean
 	-$(RM) config.log config.mak config.h TAGS tags
