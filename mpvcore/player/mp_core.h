@@ -338,11 +338,50 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track);
 struct playlist_entry *mp_next_file(struct MPContext *mpctx, int direction,
                                     bool force);
 int mp_get_cache_percent(struct MPContext *mpctx);
+bool mp_get_cache_idle(struct MPContext *mpctx);
 void mp_write_watch_later_conf(struct MPContext *mpctx);
 void mp_set_playlist_entry(struct MPContext *mpctx, struct playlist_entry *e);
 struct playlist_entry *mp_resume_playlist(struct playlist *playlist,
                                           struct MPOpts *opts);
 void mp_force_video_refresh(struct MPContext *mpctx);
+void mp_play_files(struct MPContext *mpctx);
+bool mp_parse_cfgfiles(struct MPContext *mpctx);
+char *mp_get_playback_resume_config_filename(const char *fname,
+                                             struct MPOpts *opts);
+void mp_load_per_protocol_config(struct m_config *conf, const char * const file);
+void mp_load_per_extension_config(struct m_config *conf, const char * const file);
+void mp_load_per_output_config(struct m_config *conf, char *cfg, char *out);
+void mp_load_per_file_config(struct m_config *conf, const char * const file,
+                             bool search_file_dir);
+void mp_load_playback_resume(struct m_config *conf, const char *file);
+double get_main_demux_pts(struct MPContext *mpctx);
+void reset_subtitles(struct MPContext *mpctx);
+void uninit_subs(struct demuxer *demuxer);
+void reinit_subs(struct MPContext *mpctx);
+void stream_dump(struct MPContext *mpctx);
+bool timeline_set_part(struct MPContext *mpctx, int i, bool force);
+double timeline_set_from_time(struct MPContext *mpctx, double pts, bool *need_reset);
+double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t,
+                       double fallback_time);
+double get_play_end_pts(struct MPContext *mpctx);
+double get_relative_time(struct MPContext *mpctx);
+void execute_queued_seek(struct MPContext *mpctx);
+void run_playloop(struct MPContext *mpctx);
+void idle_loop(struct MPContext *mpctx);
+void init_demux_stream(struct MPContext *mpctx, enum stream_type type);
+void cleanup_demux_stream(struct MPContext *mpctx, enum stream_type type);
+void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer);
+void write_status_line(struct MPContext *mpctx, const char *line);
+void update_vo_window_title(struct MPContext *mpctx);
+int fill_audio_out_buffers(struct MPContext *mpctx, double endpts);
+void handle_force_window(struct MPContext *mpctx, bool reconfig);
+void add_frame_pts(struct MPContext *mpctx, double pts);
+double update_video(struct MPContext *mpctx, double endpts);
+void print_status(struct MPContext *mpctx);
+double written_audio_pts(struct MPContext *mpctx);
+void update_fps(struct MPContext *mpctx);
+void update_subtitles(struct MPContext *mpctx);
+void update_osd_msg(struct MPContext *mpctx);
 
 void mp_print_version(int always);
 

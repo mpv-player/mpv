@@ -65,4 +65,6 @@ bool mp_path_isdir(const char *path);
 
 bool mp_is_url(bstr path);
 
+void mp_mk_config_dir(char *subdir);
+
 #endif /* MPLAYER_PATH_H */

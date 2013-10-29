@@ -202,3 +202,15 @@ bool mp_is_url(bstr path)
     }
     return true;
 }
+
+void mp_mk_config_dir(char *subdir)
+{
+    void *tmp = talloc_new(NULL);
+    char *confdir = talloc_steal(tmp, mp_find_user_config_file(""));
+    if (confdir) {
+        if (subdir)
+            confdir = mp_path_join(tmp, bstr0(confdir), bstr0(subdir));
+        mkdir(confdir, 0777);
+    }
+    talloc_free(tmp);
+}

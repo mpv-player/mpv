@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <libavutil/avutil.h>
 
 #include "encode_lavc.h"
 #include "mpvcore/mp_msg.h"
@@ -1033,8 +1034,7 @@ int encode_lavc_getstatus(struct encode_lavc_context *ctx,
     return 0;
 }
 
-void encode_lavc_expect_stream(struct encode_lavc_context *ctx,
-                               enum AVMediaType mt)
+void encode_lavc_expect_stream(struct encode_lavc_context *ctx, int mt)
 {
     CHECK_FAIL(ctx, );
 

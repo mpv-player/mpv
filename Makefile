@@ -209,9 +209,17 @@ SOURCES = audio/audio.c \
           mpvcore/playlist_parser.c \
           mpvcore/version.c \
           mpvcore/input/input.c \
+          mpvcore/player/audio.c \
+          mpvcore/player/configfiles.c \
           mpvcore/player/command.c \
-          mpvcore/player/mplayer.c \
+          mpvcore/player/loadfile.c \
+          mpvcore/player/main.c \
+          mpvcore/player/misc.c \
+          mpvcore/player/osd.c \
+          mpvcore/player/playloop.c \
           mpvcore/player/screenshot.c \
+          mpvcore/player/sub.c \
+          mpvcore/player/video.c \
           mpvcore/player/timeline/tl_edl.c \
           mpvcore/player/timeline/tl_matroska.c \
           mpvcore/player/timeline/tl_cue.c \
