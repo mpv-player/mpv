@@ -35,7 +35,6 @@
 #include "video/mp_image.h"
 
 #include "mp_core.h"
-#include "mp_osd.h"
 
 void uninit_subs(struct demuxer *demuxer)
 {

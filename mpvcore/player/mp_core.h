@@ -21,6 +21,7 @@
 
 #include <stdbool.h>
 
+#include "compat/compiler.h"
 #include "mpvcore/options.h"
 #include "demux/demux.h"
 
@@ -75,6 +76,28 @@ enum mp_osd_seek_info {
     OSD_SEEK_INFO_TEXT          = 2,
     OSD_SEEK_INFO_CHAPTER_TEXT  = 4,
     OSD_SEEK_INFO_EDITION       = 8,
+};
+
+
+enum {
+    OSD_MSG_TEXT = 1,
+    OSD_MSG_SUB_DELAY,
+    OSD_MSG_SPEED,
+    OSD_MSG_OSD_STATUS,
+    OSD_MSG_BAR,
+    OSD_MSG_PAUSE,
+    OSD_MSG_RADIO_CHANNEL,
+    OSD_MSG_TV_CHANNEL,
+
+    // Base id for messages generated from the commmand to property bridge.
+    OSD_MSG_PROPERTY = 0x100,
+    OSD_MSG_SUB_BASE = 0x1000,
+
+    // other constants
+    MAX_OSD_LEVEL = 3,
+    MAX_TERM_OSD_LEVEL = 1,
+    OSD_LEVEL_INVISIBLE = 4,
+    OSD_BAR_SEEK = 256,
 };
 
 enum seek_type {
@@ -358,6 +381,15 @@ void stream_dump(struct MPContext *mpctx);
 // osd.c
 void write_status_line(struct MPContext *mpctx, const char *line);
 void print_status(struct MPContext *mpctx);
+void set_osd_bar(struct MPContext *mpctx, int type, const char* name,
+                 double min, double max, double val);
+void set_osd_msg(struct MPContext *mpctx, int id, int level, int time,
+                 const char* fmt, ...) PRINTF_ATTRIBUTE(5,6);
+void set_osd_tmsg(struct MPContext *mpctx, int id, int level, int time,
+                  const char* fmt, ...) PRINTF_ATTRIBUTE(5,6);
+void rm_osd_msg(struct MPContext *mpctx, int id);
+void set_osd_function(struct MPContext *mpctx, int osd_function);
+void set_osd_subtitle(struct MPContext *mpctx, const char *text);
 
 // playloop.c
 void pause_player(struct MPContext *mpctx);

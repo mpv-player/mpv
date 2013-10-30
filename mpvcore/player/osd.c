@@ -38,7 +38,6 @@
 #include "sub/sub.h"
 
 #include "mp_core.h"
-#include "mp_osd.h"
 #include "command.h"
 
 #define saddf(var, ...) (*(var) = talloc_asprintf_append((*var), __VA_ARGS__))
@@ -368,6 +367,7 @@ static void set_osd_bar_chapters(struct MPContext *mpctx, int type)
     }
 }
 
+// osd_function is the symbol appearing in the video status, such as OSD_PLAY
 void set_osd_function(struct MPContext *mpctx, int osd_function)
 {
     struct MPOpts *opts = mpctx->opts;

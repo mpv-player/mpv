@@ -45,7 +45,6 @@
 #include "mpvcore/m_config.h"
 #include "video/filter/vf.h"
 #include "video/decode/vd.h"
-#include "mp_osd.h"
 #include "video/out/vo.h"
 #include "video/csputils.h"
 #include "audio/mixer.h"

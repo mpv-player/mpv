@@ -47,7 +47,6 @@
 #include "video/out/vo.h"
 
 #include "mp_core.h"
-#include "mp_osd.h"
 #include "screenshot.h"
 #include "command.h"
 
