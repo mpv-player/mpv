@@ -392,7 +392,7 @@ static int mpv_main(int argc, char *argv[])
     mpctx->ass_library = mp_ass_init(opts);
 #else
     MP_WARN(mpctx, "Compiled without libass.\n");
-    MP_WARN(mpctx, "There will be no OSD and no text subs.\n");
+    MP_WARN(mpctx, "There will be no OSD and no text subtitles.\n");
 #endif
 
     mpctx->osd = osd_create(opts, mpctx->ass_library);
