@@ -690,7 +690,7 @@ void vo_x11_uninit(struct vo *vo)
         XFreeGC(vo->x11->display, x11->f_gc);
     if (x11->vo_gc != None)
         XFreeGC(vo->x11->display, x11->vo_gc);
-    if (x11->window != None) {
+    if (x11->window != None && x11->window != x11->rootwin) {
         XClearWindow(x11->display, x11->window);
         XUnmapWindow(x11->display, x11->window);
 
@@ -1163,6 +1163,8 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     struct vo_x11_state *x11 = vo->x11;
 
     if (opts->WinID >= 0) {
+        if (opts->WinID == 0)
+            x11->window = x11->rootwin;
         XSelectInput(x11->display, opts->WinID, StructureNotifyMask);
         vo_x11_update_geometry(vo);
         x = x11->win_x; y = x11->win_y;
@@ -1328,7 +1330,7 @@ static void vo_x11_update_geometry(struct vo *vo)
     unsigned w, h, dummy_uint;
     int dummy_int;
     Window dummy_win;
-    Window win = vo->opts->WinID >= 0 ? vo->opts->WinID : x11->window;
+    Window win = vo->opts->WinID > 0 ? vo->opts->WinID : x11->window;
     XGetGeometry(x11->display, win, &dummy_win, &dummy_int, &dummy_int,
                  &w, &h, &dummy_int, &dummy_uint);
     if (w <= INT_MAX && h <= INT_MAX) {
