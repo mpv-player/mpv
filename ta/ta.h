@@ -131,6 +131,8 @@ void *ta_xrealloc_size(void *ta_parent, void *ptr, size_t size);
 #define ta_zalloc_size(...)     ta_dbg_set_loc(ta_zalloc_size(__VA_ARGS__), TA_LOC)
 #define ta_realloc_size(...)    ta_dbg_set_loc(ta_realloc_size(__VA_ARGS__), TA_LOC)
 #define ta_memdup(...)          ta_dbg_set_loc(ta_memdup(__VA_ARGS__), TA_LOC)
+#define ta_xmemdup(...)         ta_dbg_set_loc(ta_xmemdup(__VA_ARGS__), TA_LOC)
+#define ta_xrealloc_size(...)   ta_dbg_set_loc(ta_xrealloc_size(__VA_ARGS__), TA_LOC)
 #endif
 
 void ta_oom_b(bool b);
