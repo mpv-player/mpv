@@ -42,8 +42,6 @@ void video_reinit_vo(struct sh_video *sh_video);
 int get_current_video_decoder_lag(sh_video_t *sh_video);
 int vd_control(struct sh_video *sh_video, int cmd, void *arg);
 
-extern int divx_quality;
-
 // Used to communicate hardware decoder API handles from VO to video decoder.
 // The VO can set the context pointer for supported APIs.
 struct mp_hwdec_info {
