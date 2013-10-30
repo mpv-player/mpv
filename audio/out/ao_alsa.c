@@ -652,7 +652,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
 
     if (!p->alsa) {
         MP_ERR(ao, "Device configuration error.");
-        return 0;
+        return -1;
     }
 
     if (num_frames == 0)
@@ -678,10 +678,10 @@ static int play(struct ao *ao, void *data, int len, int flags)
         }
     } while (res == 0);
 
-    return res < 0 ? 0 : res * p->bytes_per_sample;
+    return res < 0 ? -1 : res * p->bytes_per_sample;
 
 alsa_error:
-    return 0;
+    return -1;
 }
 
 /* how many byes are free in the buffer */
