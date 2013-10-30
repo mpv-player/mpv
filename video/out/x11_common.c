@@ -371,24 +371,11 @@ static int vo_wm_detect(struct vo *vo)
 // -- supports layers
     if (x11_get_property(x11, x11->XA_WIN_PROTOCOLS, &args, &nitems)) {
         MP_VERBOSE(x11, "Detected wm supports layers.\n");
-        int metacity_hack = 0;
         for (i = 0; i < nitems; i++) {
-            if (args[i] == x11->XA_WIN_LAYER) {
+            if (args[i] == x11->XA_WIN_LAYER)
                 wm |= vo_wm_LAYER;
-                metacity_hack |= 1;
-            } else {
-                /* metacity is the only window manager I know which reports
-                 * supporting only the _WIN_LAYER hint in _WIN_PROTOCOLS.
-                 * (what's more support for it is broken) */
-                metacity_hack |= 2;
-            }
         }
         XFree(args);
-        if (wm && (metacity_hack == 1)) {
-            // metacity claims to support layers, but it is not the truth :-)
-            wm ^= vo_wm_LAYER;
-            MP_VERBOSE(x11, "Using workaround for Metacity bugs.\n");
-        }
     }
 // --- netwm
     if (x11_get_property(x11, x11->XA_NET_SUPPORTED, &args, &nitems)) {
