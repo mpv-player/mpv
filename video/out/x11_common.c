@@ -438,8 +438,7 @@ static void vo_x11_update_screeninfo(struct vo *vo)
         opts->screenheight = x11->ws_height;
     }
 #ifdef CONFIG_XINERAMA
-    if (opts->screen_id >= -1 && XineramaIsActive(x11->display) &&
-        !all_screens)
+    if (opts->screen_id >= -1 && XineramaIsActive(x11->display) && !all_screens)
     {
         int screen = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
         XineramaScreenInfo *screens;
@@ -536,10 +535,7 @@ int vo_x11_init(struct vo *vo)
         dispName += 4;
     else if (strncmp(dispName, "localhost:", 10) == 0)
         dispName += 9;
-    if (*dispName == ':' && atoi(dispName + 1) < 10)
-        x11->display_is_local = 1;
-    else
-        x11->display_is_local = 0;
+    x11->display_is_local = dispName[0] == ':' && atoi(dispName + 1) < 10;
     MP_VERBOSE(x11, "X11 running at %dx%d (\"%s\" => %s display)\n",
                opts->screenwidth, opts->screenheight, dispName,
                x11->display_is_local ? "local" : "remote");
@@ -717,7 +713,7 @@ void vo_x11_uninit(struct vo *vo)
         do {
             XNextEvent(x11->display, &xev);
         } while (xev.type != DestroyNotify ||
-                    xev.xdestroywindow.event != x11->window);
+                 xev.xdestroywindow.event != x11->window);
     }
     if (x11->xic)
         XDestroyIC(x11->xic);
@@ -1420,17 +1416,16 @@ static void vo_x11_fullscreen(struct vo *vo)
             XMoveResizeWindow(x11->display, x11->window, x, y, w, h);
         }
 
-        vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_ADD);      // sends fullscreen state to be added if wm supports EWMH
+        // sends fullscreen state to be added if wm supports EWMH
+        vo_x11_ewmh_fullscreen(x11, _NET_WM_STATE_ADD);
     }
-    {
-        long dummy;
 
-        XGetWMNormalHints(x11->display, x11->window, &x11->vo_hint, &dummy);
-        if (!(x11->vo_hint.flags & PWinGravity))
-            x11->old_gravity = NorthWestGravity;
-        else
-            x11->old_gravity = x11->vo_hint.win_gravity;
-    }
+    XGetWMNormalHints(x11->display, x11->window, &x11->vo_hint, &(long){0});
+    if (!(x11->vo_hint.flags & PWinGravity))
+        x11->old_gravity = NorthWestGravity;
+    else
+        x11->old_gravity = x11->vo_hint.win_gravity;
+
     if (x11->fs_type & vo_wm_MWM) {
         XUnmapWindow(x11->display, x11->window);      // required for MWM
         XWithdrawWindow(x11->display, x11->window, x11->screen);
