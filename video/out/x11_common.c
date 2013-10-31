@@ -1486,6 +1486,19 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_SCREENINFO:
         vo_x11_update_screeninfo(vo);
         return VO_TRUE;
+    case VOCTRL_GET_WINDOW_SIZE: {
+        int *s = arg;
+        if (!x11->window)
+            return VO_FALSE;
+        s[0] = x11->win_width;
+        s[1] = x11->win_height;
+        return VO_TRUE;
+    }
+    case VOCTRL_SET_WINDOW_SIZE: {
+        int *s = arg;
+        vo_x11_highlevel_resize(vo, x11->win_x, x11->win_y, s[0], s[1]);
+        return VO_TRUE;
+    }
     case VOCTRL_SET_CURSOR_VISIBILITY:
         vo_set_cursor_hidden(vo, !(*(bool *)arg));
         return VO_TRUE;

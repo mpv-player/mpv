@@ -71,6 +71,8 @@ enum mp_voctrl {
 
     VOCTRL_UPDATE_SCREENINFO,
     VOCTRL_WINDOW_TO_OSD_COORDS,        // float[2] (x/y)
+    VOCTRL_GET_WINDOW_SIZE,             // int[2] (w/h)
+    VOCTRL_SET_WINDOW_SIZE,             // int[2] (w/h)
 
     VOCTRL_SET_YUV_COLORSPACE,          // struct mp_csp_details*
     VOCTRL_GET_YUV_COLORSPACE,          // struct mp_csp_details*

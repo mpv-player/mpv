@@ -533,6 +533,7 @@ Name                            W Comment
 ``fps``                           container FPS (may contain bogus values)
 ``dwidth``                        video width (after filters and aspect scaling)
 ``dheight``                       video height
+``window-scale``                x window size multiplier (1 means video size)
 ``aspect``                      x video aspect
 ``osd-width``                     last known OSD width (can be 0)
 ``osd-height``                    last known OSD height (can be 0)

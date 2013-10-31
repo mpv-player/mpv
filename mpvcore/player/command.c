@@ -1468,6 +1468,39 @@ static int mp_property_dheight(m_option_t *prop, int action, void *arg,
     return property_vo_wh(prop, action, arg, mpctx, false);
 }
 
+static int mp_property_window_scale(m_option_t *prop, int action, void *arg,
+                                    MPContext *mpctx)
+{
+    struct vo *vo = mpctx->video_out;
+    if (!vo || !vo->hasframe)
+        return M_PROPERTY_UNAVAILABLE;
+
+    int vid_w = vo->aspdat.prew;
+    int vid_h = vo->aspdat.preh;
+    if (vid_w < 1 || vid_h < 1)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch (action) {
+    case M_PROPERTY_SET: {
+        double scale = *(double *)arg;
+        int s[2] = {vid_w * scale, vid_h * scale};
+        if (s[0] > 0 && s[1] > 0 && vo_control(vo, VOCTRL_SET_WINDOW_SIZE, s) > 0)
+            return M_PROPERTY_OK;
+        return M_PROPERTY_UNAVAILABLE;
+    }
+    case M_PROPERTY_GET: {
+        int s[2];
+        if (vo_control(vo, VOCTRL_GET_WINDOW_SIZE, s) <= 0 || s[0] < 1 || s[1] < 1)
+            return M_PROPERTY_UNAVAILABLE;
+        double xs = (double)s[0] / vid_w;
+        double ys = (double)s[1] / vid_h;
+        *(double *)arg = (xs + ys) / 2;
+        return M_PROPERTY_OK;
+    }
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_osd_w(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
@@ -1901,6 +1934,8 @@ static const m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "dwidth", mp_property_dwidth, CONF_TYPE_INT },
     { "dheight", mp_property_dheight, CONF_TYPE_INT },
+    { "window-scale", mp_property_window_scale, CONF_TYPE_DOUBLE,
+      CONF_RANGE, 0.125, 8 },
     { "fps", mp_property_fps, CONF_TYPE_FLOAT,
       0, 0, 0, NULL },
     { "aspect", mp_property_aspect, CONF_TYPE_FLOAT,
