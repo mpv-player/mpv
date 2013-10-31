@@ -346,6 +346,25 @@ static void add_int(const m_option_t *opt, void *val, double add, bool wrap)
     *(int *)val = tmp;
 }
 
+static void multiply_int64(const m_option_t *opt, void *val, double f)
+{
+    double v = *(int64_t *)val * f;
+    int64_t iv = v;
+    if (v < INT64_MIN)
+        iv = INT64_MIN;
+    if (v > INT64_MAX)
+        iv = INT64_MAX;
+    *(int64_t *)val = iv;
+    clamp_int64(opt, val);
+}
+
+static void multiply_int(const m_option_t *opt, void *val, double f)
+{
+    int64_t tmp = *(int *)val;
+    multiply_int64(opt, &tmp, f);
+    *(int *)val = MPCLAMP(tmp, INT_MIN, INT_MAX);
+}
+
 const m_option_type_t m_option_type_int = {
     .name  = "Integer",
     .size  = sizeof(int),
@@ -353,6 +372,7 @@ const m_option_type_t m_option_type_int = {
     .print = print_int,
     .copy  = copy_opt,
     .add = add_int,
+    .multiply = multiply_int,
     .clamp = clamp_int,
 };
 
@@ -363,6 +383,7 @@ const m_option_type_t m_option_type_int64 = {
     .print = print_int,
     .copy  = copy_opt,
     .add = add_int64,
+    .multiply = multiply_int64,
     .clamp = clamp_int64,
 };
 
@@ -644,6 +665,12 @@ static void add_double(const m_option_t *opt, void *val, double add, bool wrap)
     VAL(val) = v;
 }
 
+static void multiply_double(const m_option_t *opt, void *val, double f)
+{
+    *(double *)val *= f;
+    clamp_double(opt, val);
+}
+
 const m_option_type_t m_option_type_double = {
     // double precision float or ratio (numerator[:/]denominator)
     .name  = "Double",
@@ -654,6 +681,7 @@ const m_option_type_t m_option_type_double = {
     .copy  = copy_opt,
     .clamp = clamp_double,
     .add = add_double,
+    .multiply = multiply_double,
 };
 
 #undef VAL
@@ -694,6 +722,13 @@ static void add_float(const m_option_t *opt, void *val, double add, bool wrap)
     VAL(val) = tmp;
 }
 
+static void multiply_float(const m_option_t *opt, void *val, double f)
+{
+    double tmp = VAL(val);
+    multiply_double(opt, &tmp, f);
+    VAL(val) = tmp;
+}
+
 const m_option_type_t m_option_type_float = {
     // floating point number or ratio (numerator[:/]denominator)
     .name  = "Float",
@@ -703,6 +738,7 @@ const m_option_type_t m_option_type_float = {
     .pretty_print = print_float_f3,
     .copy  = copy_opt,
     .add = add_float,
+    .multiply = multiply_float,
     .clamp = clamp_float,
 };
 

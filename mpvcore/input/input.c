@@ -216,6 +216,7 @@ static const mp_cmd_t mp_cmds[] = {
         .optional = true,
         .v.d = 1 },
   }},
+  { MP_CMD_MULTIPLY, "multiply", { ARG_STRING, ARG_DOUBLE } },
 
   { MP_CMD_ENABLE_INPUT_SECTION,  "enable_section",  {
       ARG_STRING,

@@ -66,6 +66,7 @@ enum mp_command_type {
     MP_CMD_RADIO_SET_FREQ,
     MP_CMD_ADD,
     MP_CMD_CYCLE,
+    MP_CMD_MULTIPLY,
     MP_CMD_RADIO_STEP_FREQ,
     MP_CMD_TV_STEP_FREQ,
     MP_CMD_TV_START_SCAN,

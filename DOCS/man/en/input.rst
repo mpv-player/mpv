@@ -112,6 +112,9 @@ List of Input Commands
     overflow, set the property back to the minimum, on underflow set it to the
     maximum. If ``up`` or ``down`` is omitted, assume ``up``.
 
+``multiply <property> <factor>``
+    Multiplies the value of a property with the numeric factor.
+
 ``speed_mult <value>``
     Multiply the ``speed`` property by the given value.
 

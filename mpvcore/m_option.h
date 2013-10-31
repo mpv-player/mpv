@@ -273,6 +273,10 @@ struct m_option_type {
     // the value is clipped, or wraps around to the opposite max/min.
     void (*add)(const m_option_t *opt, void *val, double add, bool wrap);
 
+    // Multiply the value with the factor f. The callback must clip the result
+    // to the valid value range of the option.
+    void (*multiply)(const m_option_t *opt, void *val, double f);
+
     // Clamp the value in val to the option's valid value range.
     // Return values:
     //  M_OPT_OUT_OF_RANGE: val was invalid, and modified (clamped) to be valid
