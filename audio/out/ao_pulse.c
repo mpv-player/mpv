@@ -147,7 +147,6 @@ static const struct format_map {
 };
 
 static const int speaker_map[][2] = {
-  {PA_CHANNEL_POSITION_MONO,                    MP_SPEAKER_ID_FC},
   {PA_CHANNEL_POSITION_FRONT_LEFT,              MP_SPEAKER_ID_FL},
   {PA_CHANNEL_POSITION_FRONT_RIGHT,             MP_SPEAKER_ID_FR},
   {PA_CHANNEL_POSITION_FRONT_CENTER,            MP_SPEAKER_ID_FC},
@@ -174,6 +173,10 @@ static bool chmap_pa_from_mp(pa_channel_map *dst, struct mp_chmap *src)
     if (src->num > PA_CHANNELS_MAX)
         return false;
     dst->channels = src->num;
+    if (mp_chmap_equals(src, &(const struct mp_chmap)MP_CHMAP_INIT_MONO)) {
+        dst->map[0] = PA_CHANNEL_POSITION_MONO;
+        return true;
+    }
     for (int n = 0; n < src->num; n++) {
         int mp_speaker = src->speaker[n];
         int pa_speaker = PA_CHANNEL_POSITION_INVALID;
