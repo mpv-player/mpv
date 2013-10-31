@@ -50,7 +50,6 @@ enum mp_command_type {
     MP_CMD_TV_SET_NORM,
     MP_CMD_FRAME_STEP,
     MP_CMD_FRAME_BACK_STEP,
-    MP_CMD_SPEED_MULT,
     MP_CMD_RUN,
     MP_CMD_SUB_ADD,
     MP_CMD_SUB_REMOVE,

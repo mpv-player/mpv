@@ -115,9 +115,6 @@ List of Input Commands
 ``multiply <property> <factor>``
     Multiplies the value of a property with the numeric factor.
 
-``speed_mult <value>``
-    Multiply the ``speed`` property by the given value.
-
 ``screenshot [subtitles|video|window|- [single|each-frame]]``
     Take a screenshot.
 

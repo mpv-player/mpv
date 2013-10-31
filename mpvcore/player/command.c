@@ -2542,14 +2542,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
     }
 
-    case MP_CMD_SPEED_MULT: {
-        double v = cmd->args[0].v.d * cmd->scale;
-        v *= mpctx->opts->playback_speed;
-        mp_property_do("speed", M_PROPERTY_SET, &v, mpctx);
-        show_property_osd(mpctx, "speed", cmd->on_osd);
-        break;
-    }
-
     case MP_CMD_FRAME_STEP:
         add_step_frame(mpctx, 1);
         break;

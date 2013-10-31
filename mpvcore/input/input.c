@@ -142,7 +142,6 @@ static const mp_cmd_t mp_cmds[] = {
                       {"exact", 1},             {"1", 1},
                       {"keyframes", -1},        {"-1", -1})),
   }},
-  { MP_CMD_SPEED_MULT, "speed_mult", { ARG_DOUBLE } },
   { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
   { MP_CMD_QUIT_WATCH_LATER, "quit_watch_later", },
   { MP_CMD_STOP, "stop", },
@@ -291,6 +290,7 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"show_tracks_osd",         "show_text ${track-list}"},
     {"!show_tracks",            "show_text ${track-list}"},
     {"!show_playlist",          "show_text ${playlist}"},
+    {"!speed_mult",             "multiply speed"},
 
     // Approximate (can fail if user added additional whitespace)
     {"pt_step 1",               "playlist_next"},
