@@ -136,6 +136,12 @@ static void decode(struct sd *sd, struct demux_packet *packet)
     AVSubtitle sub;
     AVPacket pkt;
 
+    // libavformat sets duration==0, even if the duration is unknown.
+    // Assume there are no bitmap subs that actually use duration==0 for
+    // hidden subtitle events.
+    if (duration == 0)
+        duration = -1;
+
     clear(priv);
     av_init_packet(&pkt);
     pkt.data = packet->buffer;
