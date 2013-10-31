@@ -1146,6 +1146,32 @@ static void vo_x11_map_window(struct vo *vo, int x, int y, int w, int h)
     vo_x11_clearwindow(vo, x11->window);
 }
 
+static void vo_x11_highlevel_resize(struct vo *vo, int x, int y, int w, int h)
+{
+    struct mp_vo_opts *opts = vo->opts;
+    struct vo_x11_state *x11 = vo->x11;
+
+    bool reset_pos = opts->force_window_position;
+    if (reset_pos) {
+        x11->nofs_x = x;
+        x11->nofs_y = y;
+    }
+
+    x11->nofs_width = w;
+    x11->nofs_height = h;
+
+    if (opts->fullscreen) {
+        x11->size_changed_during_fs = true;
+        x11->pos_changed_during_fs = reset_pos;
+        vo_x11_sizehint(vo, x, y, w, h, false);
+    } else {
+        vo_x11_move_resize(vo, reset_pos, true, x, y, w, h);
+    }
+
+    vo_x11_update_geometry(vo);
+    update_vo_size(vo);
+}
+
 /* Create and setup a window suitable for display
  * vis: Visual to use for creating the window (NULL for default)
  * x, y: position of window (might be ignored)
@@ -1179,36 +1205,18 @@ void vo_x11_config_vo_window(struct vo *vo, XVisualInfo *vis, int x, int y,
     if (flags & VOFLAG_HIDDEN)
         return;
 
-    bool reset_size = !(x11->old_dwidth == width && x11->old_dheight == height);
-    if (x11->window_hidden) {
-        x11->nofs_x = x;
-        x11->nofs_y = y;
-        reset_size = true;
-    }
-
+    bool reset_size = x11->old_dwidth != width || x11->old_dheight != height;
     x11->old_dwidth = width;
     x11->old_dheight = height;
 
-    if (reset_size) {
+    if (x11->window_hidden) {
+        x11->nofs_x = x;
+        x11->nofs_y = y;
         x11->nofs_width = width;
         x11->nofs_height = height;
-    }
-
-    if (x11->window_hidden) {
         vo_x11_map_window(vo, x, y, width, height);
     } else if (reset_size) {
-        bool reset_pos = opts->force_window_position;
-        if (reset_pos) {
-            x11->nofs_x = x;
-            x11->nofs_y = y;
-        }
-        if (opts->fullscreen) {
-            x11->size_changed_during_fs = true;
-            x11->pos_changed_during_fs = reset_pos;
-            vo_x11_sizehint(vo, x, y, width, height, false);
-        } else {
-            vo_x11_move_resize(vo, reset_pos, true, x, y, width, height);
-        }
+        vo_x11_highlevel_resize(vo, x, y, width, height);
     }
 
     if (opts->ontop)
