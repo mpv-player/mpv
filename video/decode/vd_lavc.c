@@ -349,7 +349,6 @@ static void init_avctx(sh_video_t *sh, const char *decoder,
     ctx->image_params = (struct mp_image_params){0};
     ctx->vo_image_params = (struct mp_image_params){0};
     ctx->hwdec = hwdec;
-    ctx->pic = avcodec_alloc_frame();
     ctx->avctx = avcodec_alloc_context3(lavc_codec);
     AVCodecContext *avctx = ctx->avctx;
     avctx->opaque = sh;
@@ -357,6 +356,14 @@ static void init_avctx(sh_video_t *sh, const char *decoder,
     avctx->codec_id = lavc_codec->id;
 
     avctx->thread_count = lavc_param->threads;
+
+
+#if HAVE_AVUTIL_REFCOUNTING
+    avctx->refcounted_frames = 1;
+    ctx->pic = av_frame_alloc();
+#else
+    ctx->pic = avcodec_alloc_frame();
+#endif
 
     if (ctx->hwdec && ctx->hwdec->allocate_image) {
         ctx->do_hw_dr1         = true;
@@ -369,9 +376,7 @@ static void init_avctx(sh_video_t *sh, const char *decoder,
             return;
         }
     } else {
-#if HAVE_AVUTIL_REFCOUNTING
-        avctx->refcounted_frames = 1;
-#else
+#if !HAVE_AVUTIL_REFCOUNTING
         if (lavc_codec->capabilities & CODEC_CAP_DR1) {
             ctx->do_dr1            = true;
             avctx->get_buffer      = mp_codec_get_buffer;
@@ -449,12 +454,14 @@ static void uninit_avctx(sh_video_t *sh)
     }
 
     av_freep(&ctx->avctx);
-    avcodec_free_frame(&ctx->pic);
 
     if (ctx->hwdec && ctx->hwdec->uninit)
         ctx->hwdec->uninit(ctx);
 
-#if !HAVE_AVUTIL_REFCOUNTING
+#if HAVE_AVUTIL_REFCOUNTING
+    av_frame_free(&ctx->pic);
+#else
+    avcodec_free_frame(&ctx->pic);
     mp_buffer_pool_free(&ctx->dr1_buffer_pool);
 #endif
     ctx->last_sample_aspect_ratio = (AVRational){0, 0};
@@ -603,7 +610,6 @@ static int get_buffer2_hwdec(AVCodecContext *avctx, AVFrame *pic, int flags)
 static void setup_refcounting_hw(AVCodecContext *avctx)
 {
     avctx->get_buffer2 = get_buffer2_hwdec;
-    avctx->refcounted_frames = 1;
 }
 
 #else /* HAVE_AVUTIL_REFCOUNTING */
