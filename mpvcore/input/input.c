@@ -286,11 +286,11 @@ static const struct legacy_cmd legacy_cmds[] = {
     {"osd_show_property_text",  "show_text"},
     {"osd_show_progression",    "show_progress"},
     {"show_chapters_osd",       "show_text ${chapter-list}"},
-    {"!show_chapters",          "show_text ${chapter-list}"},
+    {"show_chapters",           "show_text ${chapter-list}"},
     {"show_tracks_osd",         "show_text ${track-list}"},
-    {"!show_tracks",            "show_text ${track-list}"},
-    {"!show_playlist",          "show_text ${playlist}"},
-    {"!speed_mult",             "multiply speed"},
+    {"show_tracks",             "show_text ${track-list}"},
+    {"show_playlist",           "show_text ${playlist}"},
+    {"speed_mult",              "multiply speed"},
 
     // Approximate (can fail if user added additional whitespace)
     {"pt_step 1",               "playlist_next"},
