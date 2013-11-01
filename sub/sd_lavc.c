@@ -207,6 +207,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
                         struct sub_bitmaps *res)
 {
     struct sd_lavc_priv *priv = sd->priv;
+    struct MPOpts *opts = sd->opts;
 
     if (priv->pts != MP_NOPTS_VALUE && pts < priv->pts)
         return;
@@ -223,7 +224,8 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     int vidh = d.h - d.mt - d.mb;
     double xscale = (double)vidw / inw;
     double yscale = (double)vidh / inh;
-    if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE) {
+    if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&
+            opts->stretch_dvd_subs) {
         // For DVD subs, try to keep the subtitle PAR at display PAR.
         double video_par =
               (priv->video_params.d_w / (double)priv->video_params.d_h)

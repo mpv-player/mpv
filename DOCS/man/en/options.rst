@@ -2088,6 +2088,19 @@ OPTIONS
         ``--start='#2' --end='#4'``
             Plays chapters 2 and 3, and exits.
 
+``--stretch-dvd-subs=<yes|no>``
+    Stretch DVD subtitles when playing anamorphic videos for better looking
+    fonts on badly mastered DVDs. This switch has no effect when the
+    video is stored with square pixels - which for DVD input cannot be the case
+    though.
+
+    Many studios tend to use bitmap fonts designed for square pixels when
+    authoring DVDs, causing the fonts to look stretched on playback on DVD
+    players. This option fixes them, however at the price of possibly
+    misaligning sume subtitles (e.g. sign translations).
+
+    Disabled by default.
+
 ``--ssf=<mode>``
     Specifies software scaler parameters.
 

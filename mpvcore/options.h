@@ -148,6 +148,7 @@ typedef struct MPOpts {
     float sub_fps;
     float sub_speed;
     int forced_subs_only;
+    int stretch_dvd_subs;
     char *quvi_format;
 
     // subreader.c

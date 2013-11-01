@@ -531,6 +531,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("autosub", sub_auto, 0),
     OPT_FLAG("sub-visibility", sub_visibility, 0),
     OPT_FLAG("sub-forced-only", forced_subs_only, 0),
+    OPT_FLAG("stretch-dvd-subs", stretch_dvd_subs, 0),
     OPT_FLAG_CONSTANTS("sub-fix-timing", suboverlap_enabled, 0, 1, 0),
     OPT_CHOICE("autosub-match", sub_match_fuzziness, 0,
                ({"exact", 0}, {"fuzzy", 1}, {"all", 2})),

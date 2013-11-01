@@ -644,6 +644,7 @@ void spudec_set_forced_subs_only(void * const this, const unsigned int flag)
 }
 
 void spudec_get_indexed(void *this, struct mp_osd_res *dim,
+                        double xstretch, double ystretch,
                         struct sub_bitmaps *res)
 {
     spudec_handle_t *spu = this;
@@ -656,10 +657,10 @@ void spudec_get_indexed(void *this, struct mp_osd_res *dim,
     if (spudec_visible(spu) && !empty) {
         double xscale = (double) (dim->w - dim->ml - dim->mr) / spu->orig_frame_width;
         double yscale = (double) (dim->h - dim->mt - dim->mb) / spu->orig_frame_height;
-        part->x = part->x * xscale + dim->ml;
-        part->y = part->y * yscale + dim->mt;
-        part->dw = part->w * xscale;
-        part->dh = part->h * yscale;
+        part->x = part->x * xscale * xstretch + dim->ml + dim->w * (0.5 - 0.5 * xstretch);
+        part->y = part->y * yscale * ystretch + dim->mt + dim->h * (0.5 - 0.5 * ystretch);
+        part->dw = part->w * xscale * xstretch;
+        part->dh = part->h * yscale * ystretch;
         res->num_parts = 1;
         res->scaled = true;
     }
