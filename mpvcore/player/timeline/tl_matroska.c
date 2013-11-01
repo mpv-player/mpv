@@ -506,11 +506,12 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
 
     // +1 because sources/uid_map[0] is original file even if all chapters
     // actually use other sources and need separate entries
-    struct demuxer **sources = talloc_array_ptrtype(NULL, sources,
+    struct demuxer **sources = talloc_zero_array(NULL, struct demuxer *,
                                                     m->num_ordered_chapters+1);
     sources[0] = mpctx->demuxer;
-    struct matroska_segment_uid *uids = talloc_array_ptrtype(NULL, uids,
-                                                    m->num_ordered_chapters + 1);
+    struct matroska_segment_uid *uids =
+        talloc_zero_array(NULL, struct matroska_segment_uid,
+                          m->num_ordered_chapters + 1);
     int num_sources = 1;
     memcpy(uids[0].segment, m->uid.segment, 16);
     uids[0].edition = 0;
@@ -537,7 +538,8 @@ void build_ordered_chapter_timeline(struct MPContext *mpctx)
     talloc_free(uids);
 
     struct timeline_part *timeline = talloc_array_ptrtype(NULL, timeline, 0);
-    struct chapter *chapters = talloc_array_ptrtype(NULL, chapters, m->num_ordered_chapters);
+    struct chapter *chapters =
+        talloc_zero_array(NULL, struct chapter, m->num_ordered_chapters);
     uint64_t starttime = 0;
     uint64_t missing_time = 0;
     uint64_t last_end_time = 0;
