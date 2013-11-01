@@ -142,7 +142,10 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res dim, double pts,
     if (!ctx->is_converted && (!opts->ass_style_override ||
                                opts->ass_vsfilter_aspect_compat))
     {
-        scale = scale * dim.video_par;
+        // Let's use the original video PAR for vsfilter compatibility:
+        scale = scale
+            * (ctx->video_params.d_w / (double)ctx->video_params.d_h)
+            / (ctx->video_params.w   / (double)ctx->video_params.h);
     }
     mp_ass_configure(renderer, opts, &dim);
     ass_set_aspect_ratio(renderer, scale, 1);
