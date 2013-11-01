@@ -461,13 +461,13 @@ struct m_config_option *m_config_get_co(const struct m_config *config,
     return NULL;
 }
 
-const char *m_config_get_positional_option(const struct m_config *config, int n)
+const char *m_config_get_positional_option(const struct m_config *config, int p)
 {
     int pos = 0;
     for (int n = 0; n < config->num_opts; n++) {
         struct m_config_option *co = &config->opts[n];
         if (!co->is_generated) {
-            if (pos == n)
+            if (pos == p)
                 return co->name;
             pos++;
         }
