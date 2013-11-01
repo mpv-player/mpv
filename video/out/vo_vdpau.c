@@ -1356,7 +1356,6 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
             return;
         surface = (VdpVideoSurface)(intptr_t)reserved_mpi->planes[3];
         if (handle_preemption(vo) >= 0) {
-            VdpStatus vdp_st;
             const void *destdata[3] = {mpi->planes[0], mpi->planes[2],
                                        mpi->planes[1]};
             if (vc->image_format == IMGFMT_NV12)

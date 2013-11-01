@@ -188,12 +188,12 @@ static int SkipFile(struct stream *s, int *count, rar_file_t ***file,
     const int name_offset = (hdr->flags & RAR_BLOCK_FILE_HAS_HIGH) ? (7+33) : (7+25);
     if (name_offset + name_size <= hdr->size) {
         const int max_size = name_offset + name_size;
-        bstr data = stream_peek(s, max_size);
-        if (data.len < max_size) {
+        bstr namedata = stream_peek(s, max_size);
+        if (namedata.len < max_size) {
             free(name);
             return -1;
         }
-        memcpy(name, &data.start[name_offset], name_size);
+        memcpy(name, &namedata.start[name_offset], name_size);
     }
 
     rar_file_t *current = NULL;

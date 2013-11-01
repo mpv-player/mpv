@@ -342,8 +342,8 @@ static bool initialize(struct vf_priv_s *p)
             if (!num)
                 continue;
             VAProcDeinterlacingType algorithm = VAProcDeinterlacingBob;
-            for (int i=0; i<num; ++i) { // find Bob
-                if (caps[i].type != algorithm)
+            for (int n=0; n < num; n++) { // find Bob
+                if (caps[n].type != algorithm)
                     continue;
                 VAProcFilterParameterBufferDeinterlacing param;
                 param.type = VAProcFilterDeinterlacing;

@@ -1153,14 +1153,14 @@ if test -z "$CFLAGS" ; then
     WARNFLAGS="-wd167 -wd556 -wd144"
   elif test "$cc_vendor" = "clang"; then
     CFLAGS="$_opt $_debug $_pipe"
-    WARNFLAGS="-Wall -Wno-switch -Wno-logical-op-parentheses -Wpointer-arith -Wundef -Wno-pointer-sign -Wmissing-prototypes"
+    WARNFLAGS="-Wall -Wno-switch -Wno-logical-op-parentheses -Wpointer-arith -Wundef -Wno-pointer-sign -Wmissing-prototypes -Wshadow"
     ERRORFLAGS="-Werror=implicit-function-declaration -Wno-error=deprecated-declarations -Wno-error=unused-function"
   elif test "$cc_vendor" != "gnu" ; then
     CFLAGS="$_opt $_debug $_pipe"
   else
     CFLAGS="$_opt $_debug $_pipe"
     WARNFLAGS="-Wall -Wno-switch -Wno-parentheses -Wpointer-arith -Wredundant-decls"
-    ERRORFLAGS="-Werror-implicit-function-declaration -Wno-error=deprecated-declarations -Wno-error=unused-function"
+    ERRORFLAGS="-Werror-implicit-function-declaration -Wno-error=deprecated-declarations -Wno-error=unused-function -Wshadow"
     extra_ldflags="$extra_ldflags"
   fi
 else

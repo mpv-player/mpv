@@ -311,16 +311,16 @@ static void filter_line_c(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, uint
         int spatial_score= FFABS(cur[-refs-1] - cur[+refs-1]) + FFABS(c-e)
                          + FFABS(cur[-refs+1] - cur[+refs+1]) - 1;
 
-#define CHECK(j)\
-    {   int score= FFABS(cur[-refs-1+j] - cur[+refs-1-j])\
+#define CHECK(x, j)\
+    {   int score##x= FFABS(cur[-refs-1+j] - cur[+refs-1-j])\
                  + FFABS(cur[-refs  +j] - cur[+refs  -j])\
                  + FFABS(cur[-refs+1+j] - cur[+refs+1-j]);\
-        if(score < spatial_score){\
-            spatial_score= score;\
+        if(score##x < spatial_score){\
+            spatial_score= score##x;\
             spatial_pred= (cur[-refs  +j] + cur[+refs  -j])>>1;\
 
-        CHECK(-1) CHECK(-2) }} }}
-        CHECK( 1) CHECK( 2) }} }}
+        CHECK(0, -1) CHECK(1, -2) }} }}
+        CHECK(0,  1) CHECK(1,  2) }} }}
 
         if(p->mode<2){
             int b= (prev2[-2*refs] + next2[-2*refs])>>1;

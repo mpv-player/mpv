@@ -1407,10 +1407,10 @@ static mp_cmd_t *get_cmd_from_keys(struct input_ctx *ictx, char *force_section,
 
 static void update_mouse_section(struct input_ctx *ictx)
 {
-    struct cmd_bind *cmd =
+    struct cmd_bind *bind =
         find_any_bind_for_key(ictx, NULL, 1, (int[]){MP_KEY_MOUSE_MOVE});
 
-    char *new_section = cmd ? cmd->owner->section : "default";
+    char *new_section = bind ? bind->owner->section : "default";
 
     char *old = ictx->mouse_section;
     ictx->mouse_section = new_section;
