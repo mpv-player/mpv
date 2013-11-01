@@ -678,7 +678,7 @@ static void *vbi_grabber(void *data)
     return NULL;
 }
 
-static int control(priv_t *priv, int cmd, void *arg)
+static int do_control(priv_t *priv, int cmd, void *arg)
 {
     struct v4l2_control control;
     struct v4l2_frequency frequency;

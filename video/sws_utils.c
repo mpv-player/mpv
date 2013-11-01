@@ -161,9 +161,9 @@ static void free_mp_sws(void *p)
 
 // You're supposed to set your scaling parameters on the returned context.
 // Free the context with talloc_free().
-struct mp_sws_context *mp_sws_alloc(void *talloc_parent)
+struct mp_sws_context *mp_sws_alloc(void *talloc_ctx)
 {
-    struct mp_sws_context *ctx = talloc_ptrtype(talloc_parent, ctx);
+    struct mp_sws_context *ctx = talloc_ptrtype(talloc_ctx, ctx);
     *ctx = (struct mp_sws_context) {
         .flags = SWS_BILINEAR,
         .contrast = 1 << 16,    // 1.0 in 16.16 fixed point

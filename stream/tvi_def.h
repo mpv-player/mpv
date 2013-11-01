@@ -26,7 +26,7 @@
 
 static int init(priv_t *priv);
 static int uninit(priv_t *priv);
-static int control(priv_t *priv, int cmd, void *arg);
+static int do_control(priv_t *priv, int cmd, void *arg);
 static int start(priv_t *priv);
 static double grab_video_frame(priv_t *priv, char *buffer, int len);
 static int get_video_framesize(priv_t *priv);
@@ -37,7 +37,7 @@ static const tvi_functions_t functions =
 {
     init,
     uninit,
-    control,
+    do_control,
     start,
     grab_video_frame,
     get_video_framesize,

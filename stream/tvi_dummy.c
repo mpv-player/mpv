@@ -67,7 +67,7 @@ static int uninit(priv_t *priv)
     return 1;
 }
 
-static int control(priv_t *priv, int cmd, void *arg)
+static int do_control(priv_t *priv, int cmd, void *arg)
 {
     switch(cmd)
     {

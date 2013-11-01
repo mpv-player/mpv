@@ -65,7 +65,7 @@ typedef struct m_config {
 } m_config_t;
 
 // Create a new config object.
-//  talloc_parent: talloc parent context for the m_config allocation
+//  talloc_ctx: talloc parent context for the m_config allocation
 //  size: size of the optstruct (where option values are stored)
 //        size==0 creates a config object with no option struct allocated
 //  defaults: if not NULL, points to a struct of same type as optstruct, which
@@ -74,14 +74,14 @@ typedef struct m_config {
 //           and a corresponding option switch or sub-option field.
 //  suboptinit: if not NULL, initialize the suboption string (used for presets)
 // Note that the m_config object will keep pointers to defaults and options.
-struct m_config *m_config_new(void *talloc_parent, size_t size,
+struct m_config *m_config_new(void *talloc_ctx, size_t size,
                               const void *defaults,
                               const struct m_option *options);
 
-struct m_config *m_config_from_obj_desc(void *talloc_parent,
+struct m_config *m_config_from_obj_desc(void *talloc_ctx,
                                         struct m_obj_desc *desc);
 
-struct m_config *m_config_from_obj_desc_noalloc(void *talloc_parent,
+struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
                                                 struct m_obj_desc *desc);
 
 int m_config_set_obj_params(struct m_config *conf, char **args);
@@ -208,7 +208,7 @@ int m_config_set_profile_option(struct m_config *config, struct m_profile *p,
 void m_config_set_profile(struct m_config *config, struct m_profile *p,
                           int flags);
 
-void *m_config_alloc_struct(void *talloc_parent,
+void *m_config_alloc_struct(void *talloc_ctx,
                             const struct m_sub_options *subopts);
 
 #endif /* MPLAYER_M_CONFIG_H */

@@ -367,7 +367,7 @@ void gl_video_set_debug(struct gl_video *p, bool enable)
     p->gl_debug = enable;
 }
 
-static void tex_size(struct gl_video *p, int w, int h, int *texw, int *texh)
+static void texture_size(struct gl_video *p, int w, int h, int *texw, int *texh)
 {
     if (p->opts.npot) {
         *texw = w;
@@ -457,7 +457,7 @@ static bool fbotex_init(struct gl_video *p, struct fbotex *fbo, int w, int h,
         .vp_h = h,
     };
 
-    tex_size(p, w, h, &fbo->tex_w, &fbo->tex_h);
+    texture_size(p, w, h, &fbo->tex_w, &fbo->tex_h);
 
     MP_VERBOSE(p, "Create FBO: %dx%d\n", fbo->tex_w, fbo->tex_h);
 
@@ -1243,8 +1243,8 @@ static void init_video(struct gl_video *p)
         plane->w = full_w >> p->image_desc.xs[n];
         plane->h = full_h >> p->image_desc.ys[n];
 
-        tex_size(p, plane->w, plane->h,
-                    &plane->tex_w, &plane->tex_h);
+        texture_size(p, plane->w, plane->h,
+                        &plane->tex_w, &plane->tex_h);
 
         MP_VERBOSE(p, "Texture for plane %d: %dx%d\n",
                    n, plane->tex_w, plane->tex_h);

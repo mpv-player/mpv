@@ -187,11 +187,11 @@ static void config_destroy(void *p)
         m_option_free(config->opts[n].opt, config->opts[n].data);
 }
 
-struct m_config *m_config_new(void *talloc_parent, size_t size,
+struct m_config *m_config_new(void *talloc_ctx, size_t size,
                               const void *defaults,
                               const struct m_option *options)
 {
-    struct m_config *config = talloc(talloc_parent, struct m_config);
+    struct m_config *config = talloc(talloc_ctx, struct m_config);
     talloc_set_destructor(config, config_destroy);
     *config = (struct m_config) {0};
     // size==0 means a dummy object is created
@@ -205,18 +205,18 @@ struct m_config *m_config_new(void *talloc_parent, size_t size,
     return config;
 }
 
-struct m_config *m_config_from_obj_desc(void *talloc_parent,
+struct m_config *m_config_from_obj_desc(void *talloc_ctx,
                                         struct m_obj_desc *desc)
 {
-    return m_config_new(talloc_parent, desc->priv_size, desc->priv_defaults,
+    return m_config_new(talloc_ctx, desc->priv_size, desc->priv_defaults,
                         desc->options);
 }
 
 // Like m_config_from_obj_desc(), but don't allocate option struct.
-struct m_config *m_config_from_obj_desc_noalloc(void *talloc_parent,
+struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
                                                 struct m_obj_desc *desc)
 {
-    return m_config_new(talloc_parent, 0, desc->priv_defaults, desc->options);
+    return m_config_new(talloc_ctx, 0, desc->priv_defaults, desc->options);
 }
 
 int m_config_set_obj_params(struct m_config *conf, char **args)
@@ -748,10 +748,10 @@ void m_config_set_profile(struct m_config *config, struct m_profile *p,
     config->profile_depth--;
 }
 
-void *m_config_alloc_struct(void *talloc_parent,
+void *m_config_alloc_struct(void *talloc_ctx,
                             const struct m_sub_options *subopts)
 {
-    void *substruct = talloc_zero_size(talloc_parent, subopts->size);
+    void *substruct = talloc_zero_size(talloc_ctx, subopts->size);
     if (subopts->defaults)
         memcpy(substruct, subopts->defaults, subopts->size);
     return substruct;

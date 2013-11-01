@@ -99,8 +99,8 @@ static void update_sub(struct vf_priv_s *p, double pts)
     fix_band(p);
 }
 
-static void delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int width, int height,
-                   int logo_x, int logo_y, int logo_w, int logo_h, int band, int show) {
+static void do_delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int width, int height,
+                      int logo_x, int logo_y, int logo_w, int logo_h, int band, int show) {
     int y, x;
     int interp, dist;
     uint8_t *xdst, *xsrc;
@@ -183,12 +183,12 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 
     if (vf->priv->timed_rect)
         update_sub(vf->priv, dmpi->pts);
-    delogo(dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h,
-           vf->priv->xoff, vf->priv->yoff, vf->priv->lw, vf->priv->lh, vf->priv->band, vf->priv->show);
-    delogo(dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w/2, mpi->h/2,
-           vf->priv->xoff/2, vf->priv->yoff/2, vf->priv->lw/2, vf->priv->lh/2, vf->priv->band/2, vf->priv->show);
-    delogo(dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w/2, mpi->h/2,
-           vf->priv->xoff/2, vf->priv->yoff/2, vf->priv->lw/2, vf->priv->lh/2, vf->priv->band/2, vf->priv->show);
+    do_delogo(dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h,
+              vf->priv->xoff, vf->priv->yoff, vf->priv->lw, vf->priv->lh, vf->priv->band, vf->priv->show);
+    do_delogo(dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w/2, mpi->h/2,
+              vf->priv->xoff/2, vf->priv->yoff/2, vf->priv->lw/2, vf->priv->lh/2, vf->priv->band/2, vf->priv->show);
+    do_delogo(dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w/2, mpi->h/2,
+              vf->priv->xoff/2, vf->priv->yoff/2, vf->priv->lw/2, vf->priv->lh/2, vf->priv->band/2, vf->priv->show);
 
     if (dmpi != mpi)
         talloc_free(mpi);

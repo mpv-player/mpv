@@ -268,7 +268,7 @@ static inline void lineNoiseAvg_C(uint8_t *dst, uint8_t *src, int len, int8_t **
 
 /***************************************************************************/
 
-static void noise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int width, int height, FilterParam *fp){
+static void donoise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int width, int height, FilterParam *fp){
 	int8_t *noise= fp->noise;
 	int y;
 	int shift=0;
@@ -324,9 +324,9 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
             mp_image_copy_attributes(dmpi, mpi);
         }
 
-	noise(dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h, &vf->priv->lumaParam);
-	noise(dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w/2, mpi->h/2, &vf->priv->chromaParam);
-	noise(dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w/2, mpi->h/2, &vf->priv->chromaParam);
+	donoise(dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h, &vf->priv->lumaParam);
+	donoise(dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w/2, mpi->h/2, &vf->priv->chromaParam);
+	donoise(dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w/2, mpi->h/2, &vf->priv->chromaParam);
 
 #if HAVE_MMX
 	if(gCpuCaps.hasMMX) __asm__ volatile ("emms\n\t");
