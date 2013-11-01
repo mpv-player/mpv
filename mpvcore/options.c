@@ -864,6 +864,9 @@ const struct MPOpts mp_default_opts = {
     .lavfdopts = {
         .allow_mimetype = 1,
     },
+    .lavc_param = {
+        .check_hw_profile = 1,
+    },
     .input = {
         .key_fifo_size = 7,
         .doubleclick_time = 300,

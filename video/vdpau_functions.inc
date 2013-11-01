@@ -12,6 +12,7 @@ VDP_FUNCTION(VdpBitmapSurfaceQueryCapabilities, VDP_FUNC_ID_BITMAP_SURFACE_QUERY
 VDP_FUNCTION(VdpDecoderCreate, VDP_FUNC_ID_DECODER_CREATE, decoder_create)
 VDP_FUNCTION(VdpDecoderDestroy, VDP_FUNC_ID_DECODER_DESTROY, decoder_destroy)
 VDP_FUNCTION(VdpDecoderRender, VDP_FUNC_ID_DECODER_RENDER, decoder_render)
+VDP_FUNCTION(VdpDecoderQueryCapabilities, VDP_FUNC_ID_DECODER_QUERY_CAPABILITIES, decoder_query_capabilities)
 VDP_FUNCTION(VdpDeviceDestroy, VDP_FUNC_ID_DEVICE_DESTROY, device_destroy)
 VDP_FUNCTION(VdpGenerateCSCMatrix, VDP_FUNC_ID_GENERATE_CSC_MATRIX, generate_csc_matrix)
 VDP_FUNCTION(VdpOutputSurfaceCreate, VDP_FUNC_ID_OUTPUT_SURFACE_CREATE, output_surface_create)

@@ -73,37 +73,27 @@ struct priv {
     bool printed_readback_warning;
 };
 
-struct profile_entry {
-    enum AVCodecID av_codec;
-    int maxrefs;
-    const VAProfile *va_profiles;
+#define PE(av_codec_id, ff_profile, vdp_profile)                \
+    {AV_CODEC_ID_ ## av_codec_id, FF_PROFILE_ ## ff_profile,    \
+     VAProfile ## vdp_profile}
+
+static const struct hwdec_profile_entry profiles[] = {
+    PE(MPEG2VIDEO,  MPEG2_MAIN,         MPEG2Main),
+    PE(MPEG2VIDEO,  MPEG2_SIMPLE,       MPEG2Simple),
+    PE(MPEG4,       MPEG4_ADVANCED_SIMPLE, MPEG4AdvancedSimple),
+    PE(MPEG4,       MPEG4_MAIN,         MPEG4Main),
+    PE(MPEG4,       MPEG4_SIMPLE,       MPEG4Simple),
+    PE(H264,        H264_HIGH,          H264High),
+    PE(H264,        H264_MAIN,          H264Main),
+    PE(H264,        H264_BASELINE,      H264Baseline),
+    PE(VC1,         VC1_ADVANCED,       VC1Advanced),
+    PE(VC1,         VC1_MAIN,           VC1Main),
+    PE(VC1,         VC1_SIMPLE,         VC1Simple),
+    PE(WMV3,        VC1_ADVANCED,       VC1Advanced),
+    PE(WMV3,        VC1_MAIN,           VC1Main),
+    PE(WMV3,        VC1_SIMPLE,         VC1Simple),
+    {0}
 };
-
-#define RP(...) __VA_ARGS__
-
-#define PE(av_codec_id, maxrefs, ...) \
-    {AV_CODEC_ID_ ## av_codec_id,                               \
-     maxrefs, (const VAProfile[]) {RP __VA_ARGS__, -1}}
-
-static const struct profile_entry profiles[] = {
-    PE(MPEG2VIDEO,  2,  (VAProfileMPEG2Main, VAProfileMPEG2Simple)),
-    PE(H264,        16, (VAProfileH264High, VAProfileH264Main,
-                         VAProfileH264Baseline)),
-    PE(WMV3,        2,  (VAProfileVC1Main, VAProfileVC1Simple)),
-    PE(VC1,         2,  (VAProfileVC1Advanced)),
-    PE(MPEG4,       2,  (VAProfileMPEG4Main, VAProfileMPEG4AdvancedSimple,
-                         VAProfileMPEG4Simple)),
-};
-
-static const struct profile_entry *find_codec(enum AVCodecID id)
-{
-    for (int n = 0; n < MP_ARRAY_SIZE(profiles); n++) {
-        if (profiles[n].av_codec == id)
-            return &profiles[n];
-    }
-    return NULL;
-}
-
 
 static const char *str_va_profile(VAProfile profile)
 {
@@ -226,9 +216,9 @@ static int create_decoder(struct lavc_ctx *ctx)
 
     destroy_decoder(ctx);
 
-    const struct profile_entry *pe = find_codec(ctx->avctx->codec_id);
+    const struct hwdec_profile_entry *pe = hwdec_find_profile(ctx, profiles);
     if (!pe) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Unknown codec!\n");
+        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] Unsupported codec or profile.\n");
         goto error;
     }
 
@@ -241,23 +231,18 @@ static int create_decoder(struct lavc_ctx *ctx)
     for (int i = 0; i < num_profiles; i++)
         mp_msg(MSGT_VO, MSGL_DBG2, "  %s\n", str_va_profile(va_profiles[i]));
 
-    VAProfile va_profile = -1;
-    for (int n = 0; ; n++) {
-        if (pe->va_profiles[n] == -1)
-            break;
-        if (has_profile(va_profiles, num_profiles, pe->va_profiles[n])) {
-            va_profile = pe->va_profiles[n];
-            break;
-        }
-    }
-    if (va_profile == -1) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vaapi] No decoder profile available.\n");
+    VAProfile va_profile = pe->hw_profile;
+    if (!has_profile(va_profiles, num_profiles, va_profile)) {
+        mp_msg(MSGT_VO, MSGL_ERR,
+               "[vaapi] Decoder profile '%s' not available.\n",
+               str_va_profile(va_profile));
         goto error;
     }
+
     mp_msg(MSGT_VO, MSGL_V, "[vaapi] Using profile '%s'.\n",
            str_va_profile(va_profile));
 
-    int num_surfaces = pe->maxrefs;
+    int num_surfaces = hwdec_get_max_refs(ctx);
     if (!is_direct_mapping(p->display)) {
         mp_msg(MSGT_VO, MSGL_V, "[vaapi] No direct mapping.\n");
         // Note: not sure why it has to be *=2 rather than +=1.
@@ -438,7 +423,7 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
 {
     if (!info || !info->vaapi_ctx)
         return HWDEC_ERR_NO_CTX;
-    if (!find_codec(mp_codec_to_av_codec_id(decoder)))
+    if (!hwdec_check_codec_support(decoder, profiles))
         return HWDEC_ERR_NO_CODEC;
     return 0;
 }
@@ -450,7 +435,7 @@ static int probe_copy(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
     if (!create_va_dummy_ctx(&dummy))
         return HWDEC_ERR_NO_CTX;
     destroy_va_dummy_ctx(&dummy);
-    if (!find_codec(mp_codec_to_av_codec_id(decoder)))
+    if (!hwdec_check_codec_support(decoder, profiles))
         return HWDEC_ERR_NO_CODEC;
     return 0;
 }

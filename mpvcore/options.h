@@ -217,6 +217,7 @@ typedef struct MPOpts {
         char *skip_frame_str;
         int threads;
         int bitexact;
+        int check_hw_profile;
         char *avopt;
     } lavc_param;
 

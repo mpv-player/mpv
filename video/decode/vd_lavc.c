@@ -78,6 +78,7 @@ const m_option_t lavc_decode_opts_conf[] = {
     OPT_STRING("skipframe", lavc_param.skip_frame_str, 0),
     OPT_INTRANGE("threads", lavc_param.threads, 0, 0, 16),
     OPT_FLAG_CONSTANTS("bitexact", lavc_param.bitexact, 0, 0, CODEC_FLAG_BITEXACT),
+    OPT_FLAG("check-hw-profile", lavc_param.check_hw_profile, 0),
     OPT_STRING("o", lavc_param.avopt, 0),
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -154,6 +155,47 @@ static enum AVDiscard str2AVDiscard(char *str)
     return AVDISCARD_DEFAULT;
 }
 
+// Find the correct profile entry for the current codec and profile.
+// Assumes the table has higher profiles first (for each codec).
+const struct hwdec_profile_entry *hwdec_find_profile(
+    struct lavc_ctx *ctx, const struct hwdec_profile_entry *table)
+{
+    assert(AV_CODEC_ID_NONE == 0);
+    struct lavc_param *lavc_param = &ctx->opts->lavc_param;
+    enum AVCodecID codec = ctx->avctx->codec_id;
+    int profile = ctx->avctx->profile;
+    // Assume nobody cares about these aspects of the profile
+    if (codec == AV_CODEC_ID_H264)
+        profile &= ~(FF_PROFILE_H264_CONSTRAINED | FF_PROFILE_H264_INTRA);
+    for (int n = 0; table[n].av_codec; n++) {
+        if (table[n].av_codec == codec) {
+            if (table[n].ff_profile == FF_PROFILE_UNKNOWN ||
+                profile == FF_PROFILE_UNKNOWN ||
+                table[n].ff_profile == profile ||
+                !lavc_param->check_hw_profile)
+                return &table[n];
+        }
+    }
+    return NULL;
+}
+
+// Check codec support, without checking the profile.
+bool hwdec_check_codec_support(const char *decoder,
+                               const struct hwdec_profile_entry *table)
+{
+    enum AVCodecID codec = mp_codec_to_av_codec_id(decoder);
+    for (int n = 0; table[n].av_codec; n++) {
+        if (table[n].av_codec == codec)
+            return true;
+    }
+    return false;
+}
+
+int hwdec_get_max_refs(struct lavc_ctx *ctx)
+{
+    return ctx->avctx->codec_id == AV_CODEC_ID_H264 ? 16 : 2;
+}
+
 static int hwdec_probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                        const char *decoder, const char **hw_decoder)
 {
@@ -208,6 +250,7 @@ static int init(sh_video_t *sh, const char *decoder)
 {
     vd_ffmpeg_ctx *ctx;
     ctx = sh->context = talloc_zero(NULL, vd_ffmpeg_ctx);
+    ctx->opts = sh->opts;
     ctx->non_dr1_pool = talloc_steal(ctx, mp_image_pool_new(16));
 
     if (bstr_endswith0(bstr0(decoder), "_vdpau")) {

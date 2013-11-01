@@ -22,6 +22,7 @@ enum hwdec_type {
 };
 
 typedef struct lavc_ctx {
+    struct MPOpts *opts;
     AVCodecContext *avctx;
     AVFrame *pic;
     struct vd_lavc_hwdec *hwdec;
@@ -72,6 +73,18 @@ enum {
     HWDEC_ERR_NO_CTX = -2,
     HWDEC_ERR_NO_CODEC = -3,
 };
+
+struct hwdec_profile_entry {
+    enum AVCodecID av_codec;
+    int ff_profile;
+    uint64_t hw_profile;
+};
+
+const struct hwdec_profile_entry *hwdec_find_profile(
+    struct lavc_ctx *ctx, const struct hwdec_profile_entry *table);
+bool hwdec_check_codec_support(const char *decoder,
+                               const struct hwdec_profile_entry *table);
+int hwdec_get_max_refs(struct lavc_ctx *ctx);
 
 // lavc_dr1.c
 int mp_codec_get_buffer(AVCodecContext *s, AVFrame *frame);

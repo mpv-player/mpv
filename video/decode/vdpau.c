@@ -47,18 +47,26 @@ struct profile_entry {
     int maxrefs;
 };
 
-#define PE(av_codec_id, vdp_dcoder_profile, maxrefs)             \
-    {AV_CODEC_ID_ ## av_codec_id,                                \
-     VDP_DECODER_PROFILE_ ## vdp_dcoder_profile,                 \
-     maxrefs}
+#define PE(av_codec_id, ff_profile, vdp_profile)                \
+    {AV_CODEC_ID_ ## av_codec_id, FF_PROFILE_ ## ff_profile,    \
+     VDP_DECODER_PROFILE_ ## vdp_profile}
 
-static const struct profile_entry profiles[] = {
-    PE(MPEG1VIDEO,  MPEG1,          2),
-    PE(MPEG2VIDEO,  MPEG2_MAIN,     2),
-    PE(H264,        H264_HIGH,      16),
-    PE(WMV3,        VC1_MAIN,       2),
-    PE(VC1,         VC1_ADVANCED,   2),
-    PE(MPEG4,       MPEG4_PART2_ASP,2),
+static const struct hwdec_profile_entry profiles[] = {
+    PE(MPEG1VIDEO,  UNKNOWN,            MPEG1),
+    PE(MPEG2VIDEO,  MPEG2_MAIN,         MPEG2_MAIN),
+    PE(MPEG2VIDEO,  MPEG2_SIMPLE,       MPEG2_SIMPLE),
+    PE(MPEG4,       MPEG4_ADVANCED_SIMPLE, MPEG4_PART2_ASP),
+    PE(MPEG4,       MPEG4_SIMPLE,       MPEG4_PART2_SP),
+    PE(H264,        H264_HIGH,          H264_HIGH),
+    PE(H264,        H264_MAIN,          H264_MAIN),
+    PE(H264,        H264_BASELINE,      H264_BASELINE),
+    PE(VC1,         VC1_ADVANCED,       VC1_ADVANCED),
+    PE(VC1,         VC1_MAIN,           VC1_MAIN),
+    PE(VC1,         VC1_SIMPLE,         VC1_SIMPLE),
+    PE(WMV3,        VC1_ADVANCED,       VC1_ADVANCED),
+    PE(WMV3,        VC1_MAIN,           VC1_MAIN),
+    PE(WMV3,        VC1_SIMPLE,         VC1_SIMPLE),
+    {0}
 };
 
 // libavcodec absolutely wants a non-NULL render callback
@@ -100,15 +108,6 @@ static int handle_preemption(struct lavc_ctx *ctx)
     return 0;
 }
 
-static const struct profile_entry *find_codec(enum AVCodecID id)
-{
-    for (int n = 0; n < MP_ARRAY_SIZE(profiles); n++) {
-        if (profiles[n].av_codec == id)
-            return &profiles[n];
-    }
-    return NULL;
-}
-
 static bool create_vdp_decoder(struct lavc_ctx *ctx)
 {
     struct priv *p = ctx->hwdec_priv;
@@ -121,14 +120,32 @@ static bool create_vdp_decoder(struct lavc_ctx *ctx)
     if (p->context.decoder != VDP_INVALID_HANDLE)
         vdp->decoder_destroy(p->context.decoder);
 
-    const struct profile_entry *pe = find_codec(ctx->avctx->codec_id);
+    const struct hwdec_profile_entry *pe = hwdec_find_profile(ctx, profiles);
     if (!pe) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Unknown codec!\n");
+        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Unsupported codec or profile.\n");
         goto fail;
     }
 
-    vdp_st = vdp->decoder_create(p->vdp_device, pe->vdp_profile,
-                                 p->vid_width, p->vid_height, pe->maxrefs,
+    VdpBool supported;
+    uint32_t maxl, maxm, maxw, maxh;
+    vdp_st = vdp->decoder_query_capabilities(p->vdp_device, pe->hw_profile,
+                                             &supported, &maxl, &maxm,
+                                             &maxw, &maxh);
+    CHECK_ST_WARNING("Querying VDPAU decoder capabilities");
+    if (!supported) {
+        mp_msg(MSGT_VO, MSGL_ERR,
+               "[vdpau] Codec or profile not supported by hardware.\n");
+        goto fail;
+    }
+    if (p->vid_width > maxw || p->vid_height > maxh) {
+        mp_msg(MSGT_VO, MSGL_ERR, "[vdpau] Video too large.\n");
+        goto fail;
+    }
+
+    int maxrefs = hwdec_get_max_refs(ctx);
+
+    vdp_st = vdp->decoder_create(p->vdp_device, pe->hw_profile,
+                                 p->vid_width, p->vid_height, maxrefs,
                                  &p->context.decoder);
     CHECK_ST_WARNING("Failed creating VDPAU decoder");
     p->context.render = p->vdp->decoder_render;
@@ -209,7 +226,7 @@ static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
 {
     if (!info || !info->vdpau_ctx)
         return HWDEC_ERR_NO_CTX;
-    if (!find_codec(mp_codec_to_av_codec_id(decoder)))
+    if (!hwdec_check_codec_support(decoder, profiles))
         return HWDEC_ERR_NO_CODEC;
     return 0;
 }
