@@ -359,7 +359,7 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     mkv_d->tc_scale = 1000000;
     mkv_d->duration = 0;
 
-    struct ebml_info info = {{0}};
+    struct ebml_info info = {0};
     struct ebml_parse_ctx parse_ctx = {0};
     if (ebml_read_element(s, &parse_ctx, &info, &ebml_info_desc) < 0)
         return -1;
