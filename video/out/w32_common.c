@@ -733,6 +733,29 @@ int vo_w32_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_SCREENINFO:
         w32_update_xinerama_info(vo);
         return VO_TRUE;
+    case VOCTRL_GET_WINDOW_SIZE: {
+        int *s = arg;
+        if (!w32->window_bounds_initialized)
+            return VO_FALSE;
+        s[0] = w32->current_fs ? w32->prev_width : vo->dwidth;
+        s[1] = w32->current_fs ? w32->prev_height : vo->dheight;
+        return VO_TRUE;
+    }
+    case VOCTRL_SET_WINDOW_SIZE: {
+        int *s = arg;
+        if (!w32->window_bounds_initialized)
+            return VO_FALSE;
+        if (w32->current_fs) {
+            w32->prev_width = s[0];
+            w32->prev_height = s[1];
+        } else {
+            vo->dwidth = s[0];
+            vo->dheight = s[1];
+        }
+        reinit_window_state(vo);
+        *events |= VO_EVENT_RESIZE;
+        return VO_TRUE;
+    }
     case VOCTRL_SET_CURSOR_VISIBILITY:
         w32->cursor_visible = *(bool *)arg;
 
