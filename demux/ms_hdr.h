@@ -19,58 +19,34 @@
 #ifndef MPLAYER_MS_HDR_H
 #define MPLAYER_MS_HDR_H
 
-#include <sys/types.h>
-#include "config.h"
-
 #include "compat/mpbswap.h"
+#include "video/img_fourcc.h"
 
-#ifndef mmioFOURCC
-#define mmioFOURCC( ch0, ch1, ch2, ch3 )                                     \
-    ( (uint32_t)(uint8_t)(ch0) | ( (uint32_t)(uint8_t)(ch1) << 8 ) |         \
-    ( (uint32_t)(uint8_t)(ch2) << 16 ) | ( (uint32_t)(uint8_t)(ch3) << 24 ) )
-#endif
+// These structs must be binary-compatible to the native win32 types,
+// because demux_mkv.c uses them directly.
 
-#ifndef _WAVEFORMATEX_
-#define _WAVEFORMATEX_
-typedef struct __attribute__((__packed__)) _WAVEFORMATEX {
-  unsigned short  wFormatTag;
-  unsigned short  nChannels;
-  unsigned int    nSamplesPerSec;
-  unsigned int    nAvgBytesPerSec;
-  unsigned short  nBlockAlign;
-  unsigned short  wBitsPerSample;
-  unsigned short  cbSize;
-} WAVEFORMATEX, *PWAVEFORMATEX, *NPWAVEFORMATEX, *LPWAVEFORMATEX;
-#endif /* _WAVEFORMATEX_ */
+typedef struct __attribute__((__packed__)) MP_WAVEFORMATEX {
+    unsigned short  wFormatTag;
+    unsigned short  nChannels;
+    unsigned int    nSamplesPerSec;
+    unsigned int    nAvgBytesPerSec;
+    unsigned short  nBlockAlign;
+    unsigned short  wBitsPerSample;
+    unsigned short  cbSize;
+} MP_WAVEFORMATEX;
 
-#ifndef _WAVEFORMATEXTENSIBLE_
-#define _WAVEFORMATEXTENSIBLE_
-typedef struct __attribute__((__packed__)) _WAVEFORMATEXTENSIBLE {
-    WAVEFORMATEX   wf;
-    unsigned short wValidBitsPerSample;
-    unsigned int   dwChannelMask;
-    unsigned int   SubFormat; // Only interested in first 32 bits of guid
-    unsigned int   _guid_remainder[3];
-} WAVEFORMATEXTENSIBLE;
-#endif /* _WAVEFORMATEXTENSIBLE_ */
-
-/* windows.h #includes wingdi.h on MinGW. */
-#if !defined(_BITMAPINFOHEADER_) && !defined(_WINGDI_)
-#define _BITMAPINFOHEADER_
-typedef struct __attribute__((__packed__))
-{
-    int 	biSize;
-    int  	biWidth;
-    int  	biHeight;
-    short 	biPlanes;
-    short 	biBitCount;
-    int 	biCompression;
-    int 	biSizeImage;
-    int  	biXPelsPerMeter;
-    int  	biYPelsPerMeter;
-    int 	biClrUsed;
-    int 	biClrImportant;
-} BITMAPINFOHEADER, *PBITMAPINFOHEADER, *LPBITMAPINFOHEADER;
-#endif
+typedef struct __attribute__((__packed__)) MP_BITMAPINFOHEADER {
+    int     biSize;
+    int     biWidth;
+    int     biHeight;
+    short   biPlanes;
+    short   biBitCount;
+    int     biCompression;
+    int     biSizeImage;
+    int     biXPelsPerMeter;
+    int     biYPelsPerMeter;
+    int     biClrUsed;
+    int     biClrImportant;
+} MP_BITMAPINFOHEADER;
 
 #endif /* MPLAYER_MS_HDR_H */

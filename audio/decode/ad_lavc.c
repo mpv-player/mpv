@@ -190,7 +190,7 @@ static int setup_format(sh_audio_t *sh_audio,
     return 0;
 }
 
-static void set_from_wf(AVCodecContext *avctx, WAVEFORMATEX *wf)
+static void set_from_wf(AVCodecContext *avctx, MP_WAVEFORMATEX *wf)
 {
     avctx->channels = wf->nChannels;
     avctx->sample_rate = wf->nSamplesPerSec;

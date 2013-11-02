@@ -101,7 +101,7 @@ typedef struct sh_audio {
     struct af_stream *afilter;          // the audio filter stream
     const struct ad_functions *ad_driver;
     // win32-compatible codec parameters:
-    WAVEFORMATEX *wf;
+    MP_WAVEFORMATEX *wf;
     // note codec extradata may be either under "wf" or "codecdata"
     unsigned char *codecdata;
     int codecdata_len;
@@ -135,7 +135,7 @@ typedef struct sh_video {
     struct mp_image_params *vf_input; // video filter input params
     struct mp_hwdec_info *hwdec_info; // video output hwdec handles
     // win32-compatible codec parameters:
-    BITMAPINFOHEADER *bih;
+    MP_BITMAPINFOHEADER *bih;
 } sh_video_t;
 
 typedef struct sh_sub {

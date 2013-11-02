@@ -77,7 +77,7 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
 {
     struct sh_stream *sh;
     sh_audio_t *sh_audio;
-    WAVEFORMATEX *w;
+    MP_WAVEFORMATEX *w;
 
     if (check != DEMUX_CHECK_REQUEST && check != DEMUX_CHECK_FORCE)
         return -1;

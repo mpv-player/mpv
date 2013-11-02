@@ -1191,25 +1191,25 @@ typedef struct {
 } videocodec_info_t;
 
 static const videocodec_info_t vinfo[] = {
-    {MKV_V_MJPEG,     mmioFOURCC('m', 'j', 'p', 'g'), 1},
-    {MKV_V_MPEG1,     mmioFOURCC('m', 'p', 'g', '1'), 0},
-    {MKV_V_MPEG2,     mmioFOURCC('m', 'p', 'g', '2'), 0},
-    {MKV_V_MPEG4_SP,  mmioFOURCC('m', 'p', '4', 'v'), 1},
-    {MKV_V_MPEG4_ASP, mmioFOURCC('m', 'p', '4', 'v'), 1},
-    {MKV_V_MPEG4_AP,  mmioFOURCC('m', 'p', '4', 'v'), 1},
-    {MKV_V_MPEG4_AVC, mmioFOURCC('a', 'v', 'c', '1'), 1},
-    {MKV_V_THEORA,    mmioFOURCC('t', 'h', 'e', 'o'), 1},
-    {MKV_V_VP8,       mmioFOURCC('V', 'P', '8', '0'), 0},
-    {MKV_V_VP9,       mmioFOURCC('V', 'P', '9', '0'), 0},
-    {MKV_V_DIRAC,     mmioFOURCC('d', 'r', 'a', 'c'), 0},
-    {MKV_V_PRORES,    mmioFOURCC('p', 'r', '0', '0'), 0},
-    {MKV_V_HEVC,      mmioFOURCC('H', 'E', 'V', 'C'), 1},
+    {MKV_V_MJPEG,     MP_FOURCC('m', 'j', 'p', 'g'), 1},
+    {MKV_V_MPEG1,     MP_FOURCC('m', 'p', 'g', '1'), 0},
+    {MKV_V_MPEG2,     MP_FOURCC('m', 'p', 'g', '2'), 0},
+    {MKV_V_MPEG4_SP,  MP_FOURCC('m', 'p', '4', 'v'), 1},
+    {MKV_V_MPEG4_ASP, MP_FOURCC('m', 'p', '4', 'v'), 1},
+    {MKV_V_MPEG4_AP,  MP_FOURCC('m', 'p', '4', 'v'), 1},
+    {MKV_V_MPEG4_AVC, MP_FOURCC('a', 'v', 'c', '1'), 1},
+    {MKV_V_THEORA,    MP_FOURCC('t', 'h', 'e', 'o'), 1},
+    {MKV_V_VP8,       MP_FOURCC('V', 'P', '8', '0'), 0},
+    {MKV_V_VP9,       MP_FOURCC('V', 'P', '9', '0'), 0},
+    {MKV_V_DIRAC,     MP_FOURCC('d', 'r', 'a', 'c'), 0},
+    {MKV_V_PRORES,    MP_FOURCC('p', 'r', '0', '0'), 0},
+    {MKV_V_HEVC,      MP_FOURCC('H', 'E', 'V', 'C'), 1},
     {NULL, 0, 0}
 };
 
 static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
 {
-    BITMAPINFOHEADER *bih = &(BITMAPINFOHEADER){0};
+    MP_BITMAPINFOHEADER *bih = &(MP_BITMAPINFOHEADER){0};
     unsigned char *extradata;
     unsigned int extradata_size = 0;
     struct sh_stream *sh;
@@ -1217,13 +1217,13 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     bool raw = false;
 
     if (track->ms_compat) {     /* MS compatibility mode */
-        BITMAPINFOHEADER *src;
+        MP_BITMAPINFOHEADER *src;
 
         if (track->private_data == NULL
             || track->private_size < sizeof(*bih))
             return 1;
 
-        src = (BITMAPINFOHEADER *) track->private_data;
+        src = (MP_BITMAPINFOHEADER *) track->private_data;
         bih->biSize = le2me_32(src->biSize);
         bih->biWidth = le2me_32(src->biWidth);
         bih->biHeight = le2me_32(src->biHeight);
@@ -1265,10 +1265,10 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
             bih->biPlanes = 1;
             type2 = AV_RB32(src - 4);
             if (type2 == 0x10003000 || type2 == 0x10003001)
-                bih->biCompression = mmioFOURCC('R', 'V', '1', '3');
+                bih->biCompression = MP_FOURCC('R', 'V', '1', '3');
             else
                 bih->biCompression =
-                    mmioFOURCC('R', 'V', track->codec_id[9], '0');
+                    MP_FOURCC('R', 'V', track->codec_id[9], '0');
             // copy type1 and type2 info from rv properties
             extradata_size = cnt + 8;
             extradata = src - 8;
@@ -1305,7 +1305,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v = sh->video;
     sh_v->gsh->demuxer_id = track->tnum;
     sh_v->gsh->title = talloc_strdup(sh_v, track->name);
-    sh_v->bih = malloc(sizeof(BITMAPINFOHEADER) + extradata_size);
+    sh_v->bih = malloc(sizeof(MP_BITMAPINFOHEADER) + extradata_size);
     if (!sh_v->bih) {
         mp_msg(MSGT_DEMUX, MSGL_FATAL, "Memory allocation failure!\n");
         abort();
@@ -1351,33 +1351,33 @@ static struct mkv_audio_tag {
     { MKV_A_MP2,       0, 0x0055 },
     { MKV_A_MP3,       0, 0x0055 },
     { MKV_A_AC3,       1, 0x2000 },
-    { MKV_A_EAC3,      1, mmioFOURCC('E', 'A', 'C', '3') },
+    { MKV_A_EAC3,      1, MP_FOURCC('E', 'A', 'C', '3') },
     { MKV_A_DTS,       0, 0x2001 },
     { MKV_A_PCM,       0, 0x0001 },
     { MKV_A_PCM_BE,    0, 0x0001 },
-    { MKV_A_AAC_2MAIN, 0, mmioFOURCC('M', 'P', '4', 'A') },
-    { MKV_A_AAC_2LC,   1, mmioFOURCC('M', 'P', '4', 'A') },
-    { MKV_A_AAC_2SSR,  0, mmioFOURCC('M', 'P', '4', 'A') },
-    { MKV_A_AAC_4MAIN, 0, mmioFOURCC('M', 'P', '4', 'A') },
-    { MKV_A_AAC_4LC,   1, mmioFOURCC('M', 'P', '4', 'A') },
-    { MKV_A_AAC_4SSR,  0, mmioFOURCC('M', 'P', '4', 'A') },
-    { MKV_A_AAC_4LTP,  0, mmioFOURCC('M', 'P', '4', 'A') },
-    { MKV_A_AAC,       0, mmioFOURCC('M', 'P', '4', 'A') },
-    { MKV_A_VORBIS,    0, mmioFOURCC('v', 'r', 'b', 's') },
-    { MKV_A_OPUS,      0, mmioFOURCC('O', 'p', 'u', 's') },
-    { MKV_A_OPUS_EXP,  0, mmioFOURCC('O', 'p', 'u', 's') },
-    { MKV_A_QDMC,      0, mmioFOURCC('Q', 'D', 'M', 'C') },
-    { MKV_A_QDMC2,     0, mmioFOURCC('Q', 'D', 'M', '2') },
-    { MKV_A_WAVPACK,   0, mmioFOURCC('W', 'V', 'P', 'K') },
-    { MKV_A_TRUEHD,    0, mmioFOURCC('T', 'R', 'H', 'D') },
-    { MKV_A_FLAC,      0, mmioFOURCC('f', 'L', 'a', 'C') },
-    { MKV_A_ALAC,      0, mmioFOURCC('a', 'L', 'a', 'C') },
-    { MKV_A_REAL28,    0, mmioFOURCC('2', '8', '_', '8') },
-    { MKV_A_REALATRC,  0, mmioFOURCC('a', 't', 'r', 'c') },
-    { MKV_A_REALCOOK,  0, mmioFOURCC('c', 'o', 'o', 'k') },
-    { MKV_A_REALDNET,  0, mmioFOURCC('d', 'n', 'e', 't') },
-    { MKV_A_REALSIPR,  0, mmioFOURCC('s', 'i', 'p', 'r') },
-    { MKV_A_TTA1,      0, mmioFOURCC('T', 'T', 'A', '1') },
+    { MKV_A_AAC_2MAIN, 0, MP_FOURCC('M', 'P', '4', 'A') },
+    { MKV_A_AAC_2LC,   1, MP_FOURCC('M', 'P', '4', 'A') },
+    { MKV_A_AAC_2SSR,  0, MP_FOURCC('M', 'P', '4', 'A') },
+    { MKV_A_AAC_4MAIN, 0, MP_FOURCC('M', 'P', '4', 'A') },
+    { MKV_A_AAC_4LC,   1, MP_FOURCC('M', 'P', '4', 'A') },
+    { MKV_A_AAC_4SSR,  0, MP_FOURCC('M', 'P', '4', 'A') },
+    { MKV_A_AAC_4LTP,  0, MP_FOURCC('M', 'P', '4', 'A') },
+    { MKV_A_AAC,       0, MP_FOURCC('M', 'P', '4', 'A') },
+    { MKV_A_VORBIS,    0, MP_FOURCC('v', 'r', 'b', 's') },
+    { MKV_A_OPUS,      0, MP_FOURCC('O', 'p', 'u', 's') },
+    { MKV_A_OPUS_EXP,  0, MP_FOURCC('O', 'p', 'u', 's') },
+    { MKV_A_QDMC,      0, MP_FOURCC('Q', 'D', 'M', 'C') },
+    { MKV_A_QDMC2,     0, MP_FOURCC('Q', 'D', 'M', '2') },
+    { MKV_A_WAVPACK,   0, MP_FOURCC('W', 'V', 'P', 'K') },
+    { MKV_A_TRUEHD,    0, MP_FOURCC('T', 'R', 'H', 'D') },
+    { MKV_A_FLAC,      0, MP_FOURCC('f', 'L', 'a', 'C') },
+    { MKV_A_ALAC,      0, MP_FOURCC('a', 'L', 'a', 'C') },
+    { MKV_A_REAL28,    0, MP_FOURCC('2', '8', '_', '8') },
+    { MKV_A_REALATRC,  0, MP_FOURCC('a', 't', 'r', 'c') },
+    { MKV_A_REALCOOK,  0, MP_FOURCC('c', 'o', 'o', 'k') },
+    { MKV_A_REALDNET,  0, MP_FOURCC('d', 'n', 'e', 't') },
+    { MKV_A_REALSIPR,  0, MP_FOURCC('s', 'i', 'p', 'r') },
+    { MKV_A_TTA1,      0, MP_FOURCC('T', 'T', 'A', '1') },
     { NULL },
 };
 
@@ -1409,7 +1409,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         if (track->private_size < sizeof(*sh_a->wf))
             goto error;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] track with MS compat audio.\n");
-        WAVEFORMATEX *wf = (WAVEFORMATEX *) track->private_data;
+        MP_WAVEFORMATEX *wf = (MP_WAVEFORMATEX *) track->private_data;
         sh_a->wf = calloc(1, track->private_size);
         sh_a->wf->wFormatTag = le2me_16(wf->wFormatTag);
         sh_a->wf->nChannels = le2me_16(wf->nChannels);
@@ -1459,7 +1459,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         sh_a->wf->nAvgBytesPerSec = 16000;
         sh_a->wf->nBlockAlign = 1152;
     } else if ((track->a_formattag == 0x2000)           /* AC3 */
-               || track->a_formattag == mmioFOURCC('E', 'A', 'C', '3')
+               || track->a_formattag == MP_FOURCC('E', 'A', 'C', '3')
                || (track->a_formattag == 0x2001)) {        /* DTS */
         free(sh_a->wf);
         sh_a->wf = NULL;
@@ -1467,13 +1467,13 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         sh_a->wf->nAvgBytesPerSec = sh_a->channels.num * sh_a->samplerate * 2;
         sh_a->wf->nBlockAlign = sh_a->wf->nAvgBytesPerSec;
         if (!strcmp(track->codec_id, MKV_A_PCM_BE))
-            sh_a->format = mmioFOURCC('t', 'w', 'o', 's');
+            sh_a->format = MP_FOURCC('t', 'w', 'o', 's');
     } else if (!strcmp(track->codec_id, MKV_A_QDMC)
                || !strcmp(track->codec_id, MKV_A_QDMC2)) {
         sh_a->wf->nAvgBytesPerSec = 16000;
         sh_a->wf->nBlockAlign = 1486;
         copy_audio_private_data(sh_a, track);
-    } else if (track->a_formattag == mmioFOURCC('M', 'P', '4', 'A')) {
+    } else if (track->a_formattag == MP_FOURCC('M', 'P', '4', 'A')) {
         int profile, srate_idx;
 
         sh_a->wf->nAvgBytesPerSec = 16000;
@@ -1513,7 +1513,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
                 track->default_duration = 1024.0 / sh_a->samplerate;
             }
         }
-    } else if (track->a_formattag == mmioFOURCC('v', 'r', 'b', 's')) {
+    } else if (track->a_formattag == MP_FOURCC('v', 'r', 'b', 's')) {
         /* VORBIS */
         if (track->private_size == 0 || track->ms_compat && !sh_a->wf->cbSize)
             goto error;
@@ -1525,7 +1525,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         }
     } else if (!strcmp(track->codec_id, MKV_A_OPUS)
                || !strcmp(track->codec_id, MKV_A_OPUS_EXP)) {
-        sh_a->format = mmioFOURCC('O', 'p', 'u', 's');
+        sh_a->format = MP_FOURCC('O', 'p', 'u', 's');
         copy_audio_private_data(sh_a, track);
     } else if (!strncmp(track->codec_id, MKV_A_REALATRC, 7)) {
         if (track->private_size < RAPROPERTIES4_SIZE)
@@ -1561,19 +1561,19 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         memcpy(((char *) (sh_a->wf + 1)), src, codecdata_length);
 
         switch (track->a_formattag) {
-        case mmioFOURCC('a', 't', 'r', 'c'):
+        case MP_FOURCC('a', 't', 'r', 'c'):
             sh_a->wf->nAvgBytesPerSec = atrc_fl2bps[flavor];
             sh_a->wf->nBlockAlign = track->sub_packet_size;
             goto audiobuf;
-        case mmioFOURCC('c', 'o', 'o', 'k'):
+        case MP_FOURCC('c', 'o', 'o', 'k'):
             sh_a->wf->nAvgBytesPerSec = cook_fl2bps[flavor];
             sh_a->wf->nBlockAlign = track->sub_packet_size;
             goto audiobuf;
-        case mmioFOURCC('s', 'i', 'p', 'r'):
+        case MP_FOURCC('s', 'i', 'p', 'r'):
             sh_a->wf->nAvgBytesPerSec = sipr_fl2bps[flavor];
             sh_a->wf->nBlockAlign = track->coded_framesize;
             goto audiobuf;
-        case mmioFOURCC('2', '8', '_', '8'):
+        case MP_FOURCC('2', '8', '_', '8'):
             sh_a->wf->nAvgBytesPerSec = 3600;
             sh_a->wf->nBlockAlign = track->coded_framesize;
         audiobuf:
@@ -1596,7 +1596,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             ptr = track->private_data;
             size = track->private_size;
         } else {
-            sh_a->format = mmioFOURCC('f', 'L', 'a', 'C');
+            sh_a->format = MP_FOURCC('f', 'L', 'a', 'C');
             ptr = track->private_data + sizeof(*sh_a->wf);
             size = track->private_size - sizeof(*sh_a->wf);
         }
@@ -1620,10 +1620,10 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             AV_WB32(data + 8, 0);
             memcpy(data + 12, track->private_data, track->private_size);
         }
-    } else if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K') ||
-               track->a_formattag == mmioFOURCC('T', 'R', 'H', 'D')) {
+    } else if (track->a_formattag == MP_FOURCC('W', 'V', 'P', 'K') ||
+               track->a_formattag == MP_FOURCC('T', 'R', 'H', 'D')) {
         copy_audio_private_data(sh_a, track);
-    } else if (track->a_formattag == mmioFOURCC('T', 'T', 'A', '1')) {
+    } else if (track->a_formattag == MP_FOURCC('T', 'T', 'A', '1')) {
         sh_a->codecdata_len = 30;
         sh_a->codecdata = calloc(1, sh_a->codecdata_len);
         if (!sh_a->codecdata)
@@ -1953,9 +1953,9 @@ static double real_fix_timestamp(unsigned char *buf, unsigned int timestamp, uns
   uint32_t buffer= (s[0]<<24) + (s[1]<<16) + (s[2]<<8) + s[3];
   unsigned int kf=timestamp;
 
-  if(format==mmioFOURCC('R','V','3','0') || format==mmioFOURCC('R','V','4','0')){
+  if(format==MP_FOURCC('R','V','3','0') || format==MP_FOURCC('R','V','4','0')){
     int pict_type;
-    if(format==mmioFOURCC('R','V','3','0')){
+    if(format==MP_FOURCC('R','V','3','0')){
       SKIP_BITS(3);
       pict_type= SHOW_BITS(2);
       SKIP_BITS(2 + 7);
@@ -2030,26 +2030,26 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
     uint32_t size = data.len;
     demux_packet_t *dp;
 
-    if ((track->a_formattag == mmioFOURCC('2', '8', '_', '8'))
-        || (track->a_formattag == mmioFOURCC('c', 'o', 'o', 'k'))
-        || (track->a_formattag == mmioFOURCC('a', 't', 'r', 'c'))
-        || (track->a_formattag == mmioFOURCC('s', 'i', 'p', 'r'))) {
+    if ((track->a_formattag == MP_FOURCC('2', '8', '_', '8'))
+        || (track->a_formattag == MP_FOURCC('c', 'o', 'o', 'k'))
+        || (track->a_formattag == MP_FOURCC('a', 't', 'r', 'c'))
+        || (track->a_formattag == MP_FOURCC('s', 'i', 'p', 'r'))) {
 //      if(!block_bref)
 //        spc = track->sub_packet_cnt = 0;
         switch (track->a_formattag) {
-        case mmioFOURCC('2', '8', '_', '8'):
+        case MP_FOURCC('2', '8', '_', '8'):
             for (int x = 0; x < sph / 2; x++)
                 memcpy(track->audio_buf + x * 2 * w + spc * cfs,
                        buffer + cfs * x, cfs);
             break;
-        case mmioFOURCC('c', 'o', 'o', 'k'):
-        case mmioFOURCC('a', 't', 'r', 'c'):
+        case MP_FOURCC('c', 'o', 'o', 'k'):
+        case MP_FOURCC('a', 't', 'r', 'c'):
             for (int x = 0; x < w / sps; x++)
                 memcpy(track->audio_buf +
                        sps * (sph * x + ((sph + 1) / 2) * (spc & 1) +
                               (spc >> 1)), buffer + sps * x, sps);
             break;
-        case mmioFOURCC('s', 'i', 'p', 'r'):
+        case MP_FOURCC('s', 'i', 'p', 'r'):
             memcpy(track->audio_buf + spc * w, buffer, w);
             if (spc == sph - 1) {
                 int n;
@@ -2205,7 +2205,7 @@ fail:
 
 static void mkv_parse_packet(mkv_track_t *track, bstr *buffer)
 {
-    if (track->a_formattag == mmioFOURCC('W', 'V', 'P', 'K')) {
+    if (track->a_formattag == MP_FOURCC('W', 'V', 'P', 'K')) {
 #if NEED_WAVPACK_PARSE
         int size = buffer->len;
         uint8_t *parsed;

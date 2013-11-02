@@ -310,13 +310,13 @@ static int init(sh_video_t *sh, const char *decoder)
 }
 
 static void set_from_bih(AVCodecContext *avctx, uint32_t format,
-                         BITMAPINFOHEADER *bih)
+                         MP_BITMAPINFOHEADER *bih)
 {
 
     switch (format) {
-    case mmioFOURCC('S','V','Q','3'):
-    case mmioFOURCC('A','V','R','n'):
-    case mmioFOURCC('M','J','P','G'):
+    case MP_FOURCC('S','V','Q','3'):
+    case MP_FOURCC('A','V','R','n'):
+    case MP_FOURCC('M','J','P','G'):
         /* AVRn stores huffman table in AVI header */
         /* Pegasus MJPEG stores it also in AVI header, but it uses the common
          * MJPG fourcc :( */
@@ -329,11 +329,11 @@ static void set_from_bih(AVCodecContext *avctx, uint32_t format,
         memcpy(avctx->extradata, bih + 1, avctx->extradata_size);
         break;
 
-    case mmioFOURCC('R','V','1','0'):
-    case mmioFOURCC('R','V','1','3'):
-    case mmioFOURCC('R','V','2','0'):
-    case mmioFOURCC('R','V','3','0'):
-    case mmioFOURCC('R','V','4','0'):
+    case MP_FOURCC('R','V','1','0'):
+    case MP_FOURCC('R','V','1','3'):
+    case MP_FOURCC('R','V','2','0'):
+    case MP_FOURCC('R','V','3','0'):
+    case MP_FOURCC('R','V','4','0'):
         if (bih->biSize < sizeof(*bih) + 8) {
             // only 1 packet per frame & sub_id from fourcc
            avctx->extradata_size = 8;
@@ -341,7 +341,7 @@ static void set_from_bih(AVCodecContext *avctx, uint32_t format,
                                           FF_INPUT_BUFFER_PADDING_SIZE);
             ((uint32_t *)avctx->extradata)[0] = 0;
             ((uint32_t *)avctx->extradata)[1] =
-                    format == mmioFOURCC('R','V','1','3') ?
+                    format == MP_FOURCC('R','V','1','3') ?
                     0x10003001 : 0x10000000;
         } else {
             // has extra slice header (demux_rm or rm->avi streamcopy)
