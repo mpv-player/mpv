@@ -1490,8 +1490,8 @@ int vo_x11_control(struct vo *vo, int *events, int request, void *arg)
         int *s = arg;
         if (!x11->window)
             return VO_FALSE;
-        s[0] = x11->win_width;
-        s[1] = x11->win_height;
+        s[0] = x11->fs ? x11->nofs_width : x11->win_width;
+        s[1] = x11->fs ? x11->nofs_height : x11->win_height;
         return VO_TRUE;
     }
     case VOCTRL_SET_WINDOW_SIZE: {
