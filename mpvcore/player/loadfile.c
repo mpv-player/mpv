@@ -894,8 +894,9 @@ static void print_resolve_contents(struct mp_log *log,
 // from the given playlist pl, so the entries don't actually need to be copied.
 static void transfer_playlist(struct MPContext *mpctx, struct playlist *pl)
 {
-    if (mpctx->demuxer->playlist->first) {
-        playlist_transfer_entries(mpctx->playlist, mpctx->demuxer->playlist);
+    if (pl->first) {
+        playlist_transfer_entries(mpctx->playlist, pl);
+        // current entry is replaced
         if (mpctx->playlist->current)
             playlist_remove(mpctx->playlist, mpctx->playlist->current);
     } else {

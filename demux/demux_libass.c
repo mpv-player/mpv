@@ -100,6 +100,8 @@ static int d_check_file(struct demuxer *demuxer, enum demux_check check)
     sh->sub->track = track;
     sh->codec = "ass";
 
+    demuxer->seekable = true;
+
     return 0;
 }
 

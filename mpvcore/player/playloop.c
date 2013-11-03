@@ -206,14 +206,19 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
 }
 
 // return -1 if seek failed (non-seekable stream?), 0 otherwise
-static int seek(MPContext *mpctx, struct seek_params seek,
-                bool timeline_fallthrough)
+static int mp_seek(MPContext *mpctx, struct seek_params seek,
+                   bool timeline_fallthrough)
 {
     struct MPOpts *opts = mpctx->opts;
     uint64_t prev_seek_ts = mpctx->vo_pts_history_seek_ts;
 
     if (!mpctx->demuxer)
         return -1;
+
+    if (!mpctx->demuxer->seekable) {
+        MP_ERR(mpctx, "Can't seek in this file.\n");
+        return -1;
+    }
 
     if (mpctx->stop_play == AT_END_OF_FILE)
         mpctx->stop_play = KEEP_PLAYING;
@@ -387,7 +392,7 @@ void queue_seek(struct MPContext *mpctx, enum seek_type type, double amount,
 void execute_queued_seek(struct MPContext *mpctx)
 {
     if (mpctx->seek.type) {
-        seek(mpctx, mpctx->seek, false);
+        mp_seek(mpctx, mpctx->seek, false);
         mpctx->seek = (struct seek_params){0};
     }
 }
@@ -452,11 +457,12 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     if (len > 0 && !demuxer->ts_resets_possible) {
         ans = MPCLAMP((pos - start) / len, 0, 1);
     } else {
-        int64_t size = (demuxer->movi_end - demuxer->movi_start);
+        struct stream *s = demuxer->stream;
+        int64_t size = s->end_pos - s->start_pos;
         int64_t fpos = demuxer->filepos > 0 ?
                        demuxer->filepos : stream_tell(demuxer->stream);
         if (size > 0)
-            ans = MPCLAMP((double)(fpos - demuxer->movi_start) / size, 0, 1);
+            ans = MPCLAMP((double)(fpos - s->start_pos) / size, 0, 1);
     }
     if (use_range) {
         if (mpctx->opts->play_frames > 0)
@@ -812,10 +818,10 @@ static void handle_backstep(struct MPContext *mpctx)
                 // The whole point is getting frames _before_ that PTS,
                 // so apply an arbitrary offset. (In theory the offset
                 // has to be large enough to reach the previous frame.)
-                seek(mpctx, (struct seek_params){
-                            .type = MPSEEK_ABSOLUTE,
-                            .amount = current_pts - 1.0,
-                            }, false);
+                mp_seek(mpctx, (struct seek_params){
+                               .type = MPSEEK_ABSOLUTE,
+                               .amount = current_pts - 1.0,
+                               }, false);
                 // Don't leave hr-seek mode. If all goes right, hr-seek
                 // mode is cancelled as soon as the frame before
                 // current_pts is found during hr-seeking.
@@ -1184,10 +1190,10 @@ void run_playloop(struct MPContext *mpctx)
         && (opts->gapless_audio || buffered_audio < 0.05)
         && (!mpctx->paused || was_restart)) {
         if (end_is_chapter) {
-            seek(mpctx, (struct seek_params){
-                        .type = MPSEEK_ABSOLUTE,
-                        .amount = mpctx->timeline[mpctx->timeline_part+1].start
-                        }, true);
+            mp_seek(mpctx, (struct seek_params){
+                           .type = MPSEEK_ABSOLUTE,
+                           .amount = mpctx->timeline[mpctx->timeline_part+1].start
+                           }, true);
         } else
             mpctx->stop_play = AT_END_OF_FILE;
         sleeptime = 0;

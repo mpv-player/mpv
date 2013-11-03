@@ -318,8 +318,8 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
     if (s->seek && !(s->flags & MP_STREAM_SEEK))
         s->flags |= MP_STREAM_SEEK;
 
-    if (s->flags & MP_STREAM_FAST_SKIPPING)
-        s->flags |= MP_STREAM_SEEK_FW;
+    if (!(s->flags & MP_STREAM_SEEK))
+        s->end_pos = 0;
 
     s->uncached_type = s->type;
 
@@ -386,6 +386,8 @@ static int stream_reconnect(stream_t *s)
 #define MAX_RECONNECT_RETRIES 5
 #define RECONNECT_SLEEP_MS 1000
     if (!s->streaming)
+        return 0;
+    if (!(s->flags & MP_STREAM_SEEK_FW))
         return 0;
     int64_t pos = s->pos;
     for (int retry = 0; retry < MAX_RECONNECT_RETRIES; retry++) {
@@ -601,7 +603,7 @@ static int stream_skip_read(struct stream *s, int64_t len)
 static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 {
     if (newpos != s->pos) {
-        if (!s->seek || !(s->flags & MP_STREAM_SEEK)) {
+        if (newpos > s->pos && !(s->flags & MP_STREAM_SEEK_FW)) {
             mp_tmsg(MSGT_STREAM, MSGL_ERR, "Can not seek in this stream\n");
             return 0;
         }
@@ -628,7 +630,7 @@ static int stream_seek_long(stream_t *s, int64_t pos)
     s->eof = 0;
 
     if (s->mode == STREAM_WRITE) {
-        if (!s->seek || !s->seek(s, pos))
+        if (!(s->flags & MP_STREAM_SEEK) || !s->seek(s, pos))
             return 0;
         return 1;
     }
@@ -640,7 +642,9 @@ static int stream_seek_long(stream_t *s, int64_t pos)
     mp_msg(MSGT_STREAM, MSGL_DBG3, "Seek from %" PRId64 " to %" PRId64
            " (with offset %d)\n", s->pos, pos, (int)(pos - newpos));
 
-    if (!s->seek && (s->flags & MP_STREAM_FAST_SKIPPING) && pos >= s->pos) {
+    if (pos >= s->pos && !(s->flags & MP_STREAM_SEEK) &&
+        (s->flags & MP_STREAM_FAST_SKIPPING))
+    {
         // skipping is handled by generic code below
     } else if (stream_seek_unbuffered(s, newpos) >= 0) {
         return 0;
@@ -709,6 +713,8 @@ int stream_control(stream_t *s, int cmd, void *arg)
 
 void stream_update_size(stream_t *s)
 {
+    if (!(s->flags & MP_STREAM_SEEK))
+        return;
     uint64_t size;
     if (stream_control(s, STREAM_CTRL_GET_SIZE, &size) == STREAM_OK) {
         if (size > s->end_pos)

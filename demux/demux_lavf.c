@@ -584,9 +584,12 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         }
     }
 
-    if (!(priv->avif->flags & AVFMT_NOFILE) &&
-        demuxer->stream->type != STREAMTYPE_AVDEVICE)
+    if ((priv->avif->flags & AVFMT_NOFILE) ||
+        demuxer->stream->type == STREAMTYPE_AVDEVICE)
     {
+        // This might be incorrect.
+        demuxer->seekable = true;
+    } else {
         void *buffer = av_malloc(lavfdopts->buffersize);
         if (!buffer)
             return -1;
@@ -597,9 +600,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
             return -1;
         }
         priv->pb->read_seek = mp_read_seek;
-        priv->pb->seekable = demuxer->stream->end_pos
-                 && (demuxer->stream->flags & MP_STREAM_SEEK) == MP_STREAM_SEEK
-                ? AVIO_SEEKABLE_NORMAL : 0;
+        priv->pb->seekable = demuxer->seekable ? AVIO_SEEKABLE_NORMAL : 0;
         avfc->pb = priv->pb;
     }
 
@@ -857,12 +858,12 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags)
         avsflags = AVSEEK_FLAG_BACKWARD;
 
     if (flags & SEEK_FACTOR) {
-        if (demuxer->movi_end > 0 && demuxer->ts_resets_possible &&
+        struct stream *s = demuxer->stream;
+        if (s->end_pos > 0 && demuxer->ts_resets_possible &&
             !(priv->avif->flags & AVFMT_NO_BYTE_SEEK))
         {
             avsflags |= AVSEEK_FLAG_BYTE;
-            priv->last_pts = (demuxer->movi_end - demuxer->movi_start) *
-                             rel_seek_secs;
+            priv->last_pts = (s->end_pos - s->start_pos) * rel_seek_secs;
         } else if (priv->avfc->duration != 0 &&
                    priv->avfc->duration != AV_NOPTS_VALUE)
         {
@@ -923,12 +924,12 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
     switch (cmd) {
     case DEMUXER_CTRL_GET_TIME_LENGTH:
         if (priv->seek_by_bytes) {
+            struct stream *s = demuxer->stream;
             /* Our bitrate estimate may be better than would be used in
              * otherwise similar fallback code at higher level */
-            if (demuxer->movi_end <= 0)
+            if (s->end_pos <= 0)
                 return DEMUXER_CTRL_DONTKNOW;
-            *(double *)arg = (demuxer->movi_end - demuxer->movi_start) * 8 /
-                             priv->bitrate;
+            *(double *)arg = (s->end_pos - s->start_pos) * 8 / priv->bitrate;
             return DEMUXER_CTRL_GUESS;
         }
         if (priv->avfc->duration == 0 || priv->avfc->duration == AV_NOPTS_VALUE)

@@ -46,6 +46,7 @@
 #include "video/img_format.h"
 #include "video/mp_image_pool.h"
 #include "video/filter/vf.h"
+#include "video/decode/dec_video.h"
 #include "demux/stheader.h"
 #include "demux/demux_packet.h"
 #include "osdep/numcores.h"
@@ -193,6 +194,12 @@ bool hwdec_check_codec_support(const char *decoder,
 int hwdec_get_max_refs(struct lavc_ctx *ctx)
 {
     return ctx->avctx->codec_id == AV_CODEC_ID_H264 ? 16 : 2;
+}
+
+void hwdec_request_api(struct mp_hwdec_info *info, const char *api_name)
+{
+    if (info && info->load_api)
+        info->load_api(info, api_name);
 }
 
 static int hwdec_probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,

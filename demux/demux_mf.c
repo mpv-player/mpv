@@ -85,7 +85,6 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer)
             demux_packet_t *dp = new_demux_packet(data.len);
             memcpy(dp->buffer, data.start, data.len);
             dp->pts = mf->curr_frame / mf->sh->fps;
-            dp->pos = mf->curr_frame;
             dp->keyframe = true;
             demuxer_add_packet(demuxer, demuxer->streams[0], dp);
         }
@@ -200,9 +199,6 @@ static int demux_open_mf(demuxer_t* demuxer, enum demux_check check)
 
   mf->curr_frame = 0;
 
-  demuxer->movi_start = 0;
-  demuxer->movi_end = mf->nr_of_files - 1;
-
   // create a new video stream header
   struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
   sh_video = sh->video;
@@ -214,6 +210,7 @@ static int demux_open_mf(demuxer_t* demuxer, enum demux_check check)
 
   mf->sh = sh_video;
   demuxer->priv=(void*)mf;
+  demuxer->seekable = true;
 
   return 0;
 

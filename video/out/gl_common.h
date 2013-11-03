@@ -164,6 +164,45 @@ void mpgl_set_backend_w32(MPGLContext *ctx);
 void mpgl_set_backend_x11(MPGLContext *ctx);
 void mpgl_set_backend_wayland(MPGLContext *ctx);
 
+struct mp_hwdec_info;
+
+struct gl_hwdec {
+    const struct gl_hwdec_driver *driver;
+    struct mp_log *log;
+    struct MPGLContext *mpgl;
+    struct mp_hwdec_info *info;
+    // For free use by hwdec driver
+    void *priv;
+    // hwdec backends must set this to an IMGFMT_ that has an equivalent
+    // internal representation in gl_video.c as the hardware texture.
+    // It's used to build the rendering chain, and also as screenshot format.
+    int converted_imgfmt;
+};
+
+struct gl_hwdec_driver {
+    // Same name as used by mp_hwdec_info->load_api()
+    const char *api_name;
+    // Test whether the given IMGFMT_ is supported.
+    bool (*query_format)(int imgfmt);
+    // Create the hwdec device. It must fill in hw->info, if applicable.
+    // This also must set hw->converted_imgfmt.
+    int (*create)(struct gl_hwdec *hw);
+    // Prepare for rendering video. (E.g. create textures.)
+    // Called on initialization, and every time the video size changes.
+    int (*reinit)(struct gl_hwdec *hw, int w, int h);
+    // Return textures that contain the given hw_image.
+    // Note that the caller keeps a reference to hw_image until unbind_image
+    // is called, so the callee doesn't need to do that.
+    int (*load_image)(struct gl_hwdec *hw, struct mp_image *hw_image,
+                      GLuint *out_textures);
+    // Undo load_image(). The user of load_image() calls this when the textures
+    // are not needed anymore.
+    void (*unload_image)(struct gl_hwdec *hw);
+    void (*destroy)(struct gl_hwdec *hw);
+};
+
+extern const struct gl_hwdec_driver *mpgl_hwdec_drivers[];
+
 void *mp_getdladdr(const char *s);
 
 void mpgl_load_functions(GL *gl, void *(*getProcAddress)(const GLubyte *),

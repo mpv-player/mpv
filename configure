@@ -1863,6 +1863,8 @@ echores "$_vdpau"
 echocheck "VAAPI"
 _vaapi_vpp=no
 def_vaapi_vpp='#define HAVE_VAAPI_VPP 0'
+_vaapi_glx=no
+def_vaapi_glx='#define HAVE_VAAPI_GLX 0'
 if test "$_vaapi" = auto && test "$_x11" = yes ; then
   _vaapi=no
   if test "$_dl" = yes ; then
@@ -1886,7 +1888,13 @@ if test "$_vaapi" = yes ; then
     _vaapi_vpp=yes
     def_vaapi_vpp='#define HAVE_VAAPI_VPP 1'
   fi
-  echores "$_vaapi_vpp"
+  echores "$_vaapi_glx"
+  echocheck "VAAPI GLX"
+  if pkg_config_add 'libva-glx >= 0.32.0' ; then
+    _vaapi_glx=yes
+    def_vaapi_glx='#define HAVE_VAAPI_GLX 1'
+  fi
+  echores "$_vaapi_glx"
 fi
 
 
@@ -3321,6 +3329,7 @@ VDA = $_vda
 VDA_REFCOUNTING = $_vda_refcounting
 VAAPI = $_vaapi
 VAAPI_VPP = $_vaapi_vpp
+VAAPI_GLX = $_vaapi_glx
 WIN32 = $_win32
 X11 = $_x11
 WAYLAND = $_wayland
@@ -3501,6 +3510,7 @@ $def_vda
 $def_vda_refcounting
 $def_vaapi
 $def_vaapi_vpp
+$def_vaapi_glx
 $def_vaapi_hwaccel
 $def_vm
 $def_x11

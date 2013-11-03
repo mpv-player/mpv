@@ -1029,7 +1029,7 @@ static int demux_mkv_read_seekhead(demuxer_t *demuxer)
             continue;
         }
         uint64_t pos = seek->seek_position + mkv_d->segment_start;
-        if (pos >= demuxer->movi_end) {
+        if (pos >= s->end_pos) {
             mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] SeekHead position beyond "
                    "end of file - incomplete file?\n");
             continue;
@@ -1843,14 +1843,6 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     }
 
     display_create_tracks(demuxer);
-
-    if (s->end_pos == 0) {
-        demuxer->seekable = 0;
-    } else {
-        demuxer->movi_start = s->start_pos;
-        demuxer->movi_end = s->end_pos;
-        demuxer->seekable = 1;
-    }
 
     return 0;
 }
@@ -2713,7 +2705,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
         }
 
         demux_mkv_fill_buffer(demuxer);
-    } else if ((demuxer->movi_end <= 0) || !(flags & SEEK_ABSOLUTE))
+    } else if (!(flags & SEEK_ABSOLUTE))
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] seek unsupported flags\n");
     else {
         stream_t *s = demuxer->stream;
@@ -2729,7 +2721,7 @@ static void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
             return;
         }
 
-        target_filepos = (uint64_t) (demuxer->movi_end * rel_seek_secs);
+        target_filepos = (uint64_t) (s->end_pos * rel_seek_secs);
         for (i = 0; i < mkv_d->num_indexes; i++)
             if (mkv_d->indexes[i].tnum == v_tnum)
                 if ((index == NULL)

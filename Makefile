@@ -121,6 +121,7 @@ SOURCES-$(VAAPI)                += video/out/vo_vaapi.c \
                                    video/decode/vaapi.c \
                                    video/vaapi.c
 SOURCES-$(VAAPI_VPP)            += video/filter/vf_vavpp.c
+SOURCES-$(VAAPI_GLX)            += video/out/gl_hwdec_vaglx.c
 
 SOURCES-$(X11)                  += video/out/vo_x11.c video/out/x11_common.c
 SOURCES-$(XV)                   += video/out/vo_xv.c
