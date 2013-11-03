@@ -100,9 +100,6 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
     w->wBitsPerSample = 8 * samplesize;
     w->cbSize = 0;
 
-    demuxer->movi_start = demuxer->stream->start_pos;
-    demuxer->movi_end = demuxer->stream->end_pos;
-
     struct priv *p = talloc_ptrtype(demuxer, p);
     demuxer->priv = p;
     *p = (struct priv) {
@@ -185,9 +182,6 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
     sh_video->disp_h = height;
     sh_video->i_bps = fps * imgsize;
 
-    demuxer->movi_start = demuxer->stream->start_pos;
-    demuxer->movi_end = demuxer->stream->end_pos;
-
     struct priv *p = talloc_ptrtype(demuxer, p);
     demuxer->priv = p;
     *p = (struct priv) {
@@ -207,7 +201,7 @@ static int raw_fill_buffer(demuxer_t *demuxer)
         return 0;
 
     struct demux_packet *dp = new_demux_packet(p->frame_size * p->read_frames);
-    dp->pos = stream_tell(demuxer->stream) - demuxer->movi_start;
+    dp->pos = stream_tell(demuxer->stream) - demuxer->stream->start_pos;
     dp->pts = (dp->pos  / p->frame_size) / p->frame_rate;
 
     int len = stream_read(demuxer->stream, dp->buffer, dp->len);
