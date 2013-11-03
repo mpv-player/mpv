@@ -2391,6 +2391,7 @@ if test "$_jack" = yes ; then
   def_jack='#define HAVE_JACK 1'
   aomodules="jack $aomodules"
 else
+  def_jack='#define HAVE_JACK 0'
   noaomodules="jack $noaomodules"
 fi
 echores "$_jack"
