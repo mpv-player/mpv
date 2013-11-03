@@ -54,7 +54,7 @@ class Libav < TravisDepsBuilder
     {
       "libav-stable" => {
         :action => :stable,
-        :url    => 'http://libav.org/releases/libav-9.6.tar.gz'
+        :url    => 'http://libav.org/releases/libav-9.10.tar.gz'
       },
       "libav-git" => {
         :action => :git,
