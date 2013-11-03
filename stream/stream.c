@@ -387,6 +387,8 @@ static int stream_reconnect(stream_t *s)
 #define RECONNECT_SLEEP_MS 1000
     if (!s->streaming)
         return 0;
+    if (!s->end_pos || !s->seek || !(s->flags & MP_STREAM_SEEK))
+        return 0;
     int64_t pos = s->pos;
     for (int retry = 0; retry < MAX_RECONNECT_RETRIES; retry++) {
         mp_msg(MSGT_STREAM, MSGL_WARN,
