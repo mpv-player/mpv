@@ -241,6 +241,11 @@ Available video output drivers are:
     Some features are available with OpenGL 3 capable graphics drivers only
     (or if the necessary extensions are available).
 
+    Hardware decoding over OpenGL-interop is supported to some degree. Note
+    that in this mode, some corner case might not be gracefully handled, and
+    colorspace conversion and chroma upsampling is generally in the hand of
+    the hardware decoder APIs.
+
     ``lscale=<filter>``
 
         ``bilinear``

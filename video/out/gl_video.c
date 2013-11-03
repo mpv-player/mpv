@@ -114,6 +114,7 @@ struct texplane {
 struct video_image {
     struct texplane planes[4];
     bool image_flipped;
+    struct mp_image *hwimage;   // if hw decoding is active
 };
 
 struct scaler {
@@ -201,6 +202,9 @@ struct gl_video {
     // Cached because computing it can take relatively long
     int last_dither_matrix_size;
     float *last_dither_matrix;
+
+    struct gl_hwdec *hwdec;
+    bool hwdec_active;
 
     void *scratch;
 };
@@ -1129,7 +1133,7 @@ static void reinit_rendering(struct gl_video *p)
 
     uninit_rendering(p);
 
-    if (!p->image.planes[0].gl_texture)
+    if (!p->image_format)
         return;
 
     for (int n = 0; n < 2; n++)
@@ -1196,17 +1200,41 @@ void gl_video_set_lut3d(struct gl_video *p, struct lut3d *lut3d)
     debug_check_gl(p, "after 3d lut creation");
 }
 
-static void set_image_textures(struct gl_video *p, struct video_image *vimg)
+static void set_image_textures(struct gl_video *p, struct video_image *vimg,
+                               GLuint imgtex[4])
+{
+    GL *gl = p->gl;
+    GLuint dummy[4];
+    if (!imgtex)
+        imgtex = dummy;
+
+    if (p->hwdec_active) {
+        assert(vimg->hwimage);
+        p->hwdec->driver->load_image(p->hwdec, vimg->hwimage, imgtex);
+    } else {
+        for (int n = 0; n < p->plane_count; n++)
+            imgtex[n] = vimg->planes[n].gl_texture;
+    }
+
+    for (int n = 0; n < 4; n++) {
+        gl->ActiveTexture(GL_TEXTURE0 + n);
+        gl->BindTexture(GL_TEXTURE_2D, imgtex[n]);
+    }
+    gl->ActiveTexture(GL_TEXTURE0);
+}
+
+static void unset_image_textures(struct gl_video *p)
 {
     GL *gl = p->gl;
 
-    for (int n = 0; n < p->plane_count; n++) {
-        struct texplane *plane = &vimg->planes[n];
-
+    for (int n = 0; n < 4; n++) {
         gl->ActiveTexture(GL_TEXTURE0 + n);
-        gl->BindTexture(GL_TEXTURE_2D, plane->gl_texture);
+        gl->BindTexture(GL_TEXTURE_2D, 0);
     }
     gl->ActiveTexture(GL_TEXTURE0);
+
+    if (p->hwdec_active)
+        p->hwdec->driver->unload_image(p->hwdec);
 }
 
 static void init_video(struct gl_video *p)
@@ -1243,21 +1271,27 @@ static void init_video(struct gl_video *p)
         plane->w = full_w >> p->image_desc.xs[n];
         plane->h = full_h >> p->image_desc.ys[n];
 
-        texture_size(p, plane->w, plane->h,
-                        &plane->tex_w, &plane->tex_h);
+        if (p->hwdec_active) {
+            // We expect hwdec backends to allocate exact size
+            plane->tex_w = plane->w;
+            plane->tex_h = plane->h;
+        } else {
+            texture_size(p, plane->w, plane->h,
+                            &plane->tex_w, &plane->tex_h);
+
+            gl->ActiveTexture(GL_TEXTURE0 + n);
+            gl->GenTextures(1, &plane->gl_texture);
+            gl->BindTexture(GL_TEXTURE_2D, plane->gl_texture);
+
+            gl->TexImage2D(GL_TEXTURE_2D, 0, plane->gl_internal_format,
+                           plane->tex_w, plane->tex_h, 0,
+                           plane->gl_format, plane->gl_type, NULL);
+
+            default_tex_params(gl, GL_TEXTURE_2D, GL_LINEAR);
+        }
 
         MP_VERBOSE(p, "Texture for plane %d: %dx%d\n",
                    n, plane->tex_w, plane->tex_h);
-
-        gl->ActiveTexture(GL_TEXTURE0 + n);
-        gl->GenTextures(1, &plane->gl_texture);
-        gl->BindTexture(GL_TEXTURE_2D, plane->gl_texture);
-
-        gl->TexImage2D(GL_TEXTURE_2D, 0, plane->gl_internal_format,
-                       plane->tex_w, plane->tex_h, 0,
-                       plane->gl_format, plane->gl_type, NULL);
-
-        default_tex_params(gl, GL_TEXTURE_2D, GL_LINEAR);
     }
     gl->ActiveTexture(GL_TEXTURE0);
 
@@ -1265,6 +1299,11 @@ static void init_video(struct gl_video *p)
     p->texture_h = p->image.planes[0].tex_h;
 
     debug_check_gl(p, "after video texture creation");
+
+    if (p->hwdec_active) {
+        if (p->hwdec->driver->reinit(p->hwdec, p->image_w, p->image_h) < 0)
+            MP_ERR(p, "Initializing hardware ddecoding video texture failed.\n");
+    }
 
     reinit_rendering(p);
 }
@@ -1287,6 +1326,7 @@ static void uninit_video(struct gl_video *p)
         plane->buffer_ptr = NULL;
         plane->buffer_size = 0;
     }
+    mp_image_unrefp(&vimg->hwimage);
 
     fbotex_uninit(p, &p->indirect_fbo);
     fbotex_uninit(p, &p->scale_sep_fbo);
@@ -1373,14 +1413,15 @@ void gl_video_render_frame(struct gl_video *p)
     // Order of processing:
     //  [indirect -> [scale_sep ->]] final
 
-    set_image_textures(p, vimg);
+    GLuint imgtex[4] = {0};
+    set_image_textures(p, vimg, imgtex);
 
     struct fbotex chain = {
         .vp_w = p->image_w,
         .vp_h = p->image_h,
         .tex_w = p->texture_w,
         .tex_h = p->texture_h,
-        .texture = vimg->planes[0].gl_texture,
+        .texture = imgtex[0],
     };
 
     handle_pass(p, &chain, &p->indirect_fbo, p->indirect_program);
@@ -1440,6 +1481,8 @@ void gl_video_render_frame(struct gl_video *p)
     }
 
     gl->UseProgram(0);
+
+    unset_image_textures(p);
 
     p->frames_rendered++;
 
@@ -1552,16 +1595,21 @@ static bool get_image(struct gl_video *p, struct mp_image *mpi)
 void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
 {
     GL *gl = p->gl;
-    int n;
-
-    assert(mpi->num_planes == p->plane_count);
 
     struct video_image *vimg = &p->image;
+
+    if (p->hwdec_active) {
+        mp_image_setrefp(&vimg->hwimage, mpi);
+        p->have_image = true;
+        return;
+    }
+
+    assert(mpi->num_planes == p->plane_count);
 
     mp_image_t mpi2 = *mpi;
     bool pbo = false;
     if (!vimg->planes[0].buffer_ptr && get_image(p, &mpi2)) {
-        for (n = 0; n < p->plane_count; n++) {
+        for (int n = 0; n < p->plane_count; n++) {
             int line_bytes = mpi->plane_w[n] * p->image_desc.bytes[n];
             memcpy_pic(mpi2.planes[n], mpi->planes[n], line_bytes, mpi->plane_h[n],
                        mpi2.stride[n], mpi->stride[n]);
@@ -1570,7 +1618,7 @@ void gl_video_upload_image(struct gl_video *p, struct mp_image *mpi)
         pbo = true;
     }
     vimg->image_flipped = mpi->stride[0] < 0;
-    for (n = 0; n < p->plane_count; n++) {
+    for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
         void *plane_ptr = mpi->planes[n];
         if (pbo) {
@@ -1598,10 +1646,11 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
 
     struct video_image *vimg = &p->image;
 
-    if (!p->have_image || !vimg->planes[0].gl_texture)
+    if (!p->have_image)
         return NULL;
 
-    assert(p->image_format == p->image_params.imgfmt);
+    set_image_textures(p, vimg, NULL);
+
     assert(p->texture_w >= p->image_params.w);
     assert(p->texture_h >= p->image_params.h);
 
@@ -1611,12 +1660,12 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
     for (int n = 0; n < p->plane_count; n++) {
         struct texplane *plane = &vimg->planes[n];
         gl->ActiveTexture(GL_TEXTURE0 + n);
-        gl->BindTexture(GL_TEXTURE_2D, plane->gl_texture);
         glDownloadTex(gl, GL_TEXTURE_2D, plane->gl_format, plane->gl_type,
                       image->planes[n], image->stride[n]);
     }
-    gl->ActiveTexture(GL_TEXTURE0);
-    mp_image_set_params(image, &p->image_params);
+    mp_image_set_attributes(image, &p->image_params);
+
+    unset_image_textures(p);
 
     return image;
 }
@@ -1884,6 +1933,12 @@ static bool init_format(int fmt, struct gl_video *init)
     if (!init)
         init = &dummy;
 
+    init->hwdec_active = false;
+    if (init->hwdec && init->hwdec->driver->query_format(fmt)) {
+        fmt = init->hwdec->converted_imgfmt;
+        init->hwdec_active = true;
+    }
+
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(fmt);
     if (!desc.id)
         return false;
@@ -1985,9 +2040,10 @@ static bool init_format(int fmt, struct gl_video *init)
     return true;
 }
 
-bool gl_video_check_format(int mp_format)
+bool gl_video_check_format(struct gl_video *p, int mp_format)
 {
-    return init_format(mp_format, NULL);
+    struct gl_video tmp = *p;
+    return init_format(mp_format, &tmp);
 }
 
 void gl_video_config(struct gl_video *p, struct mp_image_params *params)
@@ -2012,6 +2068,7 @@ void gl_video_config(struct gl_video *p, struct mp_image_params *params)
     p->colorspace = csp;
 
     p->have_image = false;
+    mp_image_unrefp(&p->image.hwimage);
 }
 
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b)
@@ -2131,4 +2188,10 @@ void gl_video_resize_redraw(struct gl_video *p, int w, int h)
     p->vp_h = h;
     gl_video_render_frame(p);
     mpgl_osd_redraw_cb(p->osd, draw_osd_cb, p);
+}
+
+void gl_video_set_hwdec(struct gl_video *p, struct gl_hwdec *hwdec)
+{
+    p->hwdec = hwdec;
+    mp_image_unrefp(&p->image.hwimage);
 }

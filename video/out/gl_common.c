@@ -1008,3 +1008,7 @@ void mp_log_source(struct mp_log *log, int lev, const char *src)
         src = next;
     }
 }
+
+const struct gl_hwdec_driver *mpgl_hwdec_drivers[] = {
+    NULL
+};
