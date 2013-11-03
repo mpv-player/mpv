@@ -1285,6 +1285,7 @@ echores "$_dl"
 
 
 echocheck "pthread"
+def_pthreads='#define HAVE_PTHREADS 0'
 if linux ; then
   THREAD_CFLAGS=-D_REENTRANT
 elif freebsd || netbsd || openbsd ; then
