@@ -1118,7 +1118,7 @@ OPTIONS
     :no:        always use software decoding (default)
     :auto:      see below
     :vdpau:     requires ``--vo=vdpau`` (Linux only)
-    :vaapi:     requires ``--vo=vaapi`` (Linux with Intel GPUs only)
+    :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux with Intel GPUs only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
     :vda:       requires ``--vo=corevideo`` (OSX only)
     :crystalhd: Broadcom Crystal HD

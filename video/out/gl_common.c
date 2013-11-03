@@ -1009,6 +1009,11 @@ void mp_log_source(struct mp_log *log, int lev, const char *src)
     }
 }
 
+extern const struct gl_hwdec_driver gl_hwdec_vaglx;
+
 const struct gl_hwdec_driver *mpgl_hwdec_drivers[] = {
+#if CONFIG_VAAPI_GLX
+    &gl_hwdec_vaglx,
+#endif
     NULL
 };

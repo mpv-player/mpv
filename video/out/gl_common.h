@@ -185,6 +185,7 @@ struct gl_hwdec_driver {
     // Test whether the given IMGFMT_ is supported.
     bool (*query_format)(int imgfmt);
     // Create the hwdec device. It must fill in hw->info, if applicable.
+    // This also must set hw->converted_imgfmt.
     int (*create)(struct gl_hwdec *hw);
     // Prepare for rendering video. (E.g. create textures.)
     // Called on initialization, and every time the video size changes.
