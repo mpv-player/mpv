@@ -2431,6 +2431,7 @@ fi
 echores "$_alsa"
 
 
+def_coreaudio='#define HAVE_COREAUDIO 0'
 if darwin; then
 echocheck "CoreAudio"
 if test "$_coreaudio" = auto ; then
