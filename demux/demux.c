@@ -533,7 +533,8 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
         .type = desc->type,
         .stream = stream,
         .stream_pts = MP_NOPTS_VALUE,
-        .seekable = 1,
+        .seekable = (stream->flags & MP_STREAM_SEEK) == MP_STREAM_SEEK &&
+                    stream->end_pos > 0,
         .accurate_seek = true,
         .filepos = -1,
         .opts = opts,
@@ -564,6 +565,12 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
         add_stream_chapters(demuxer);
         demuxer_sort_chapters(demuxer);
         demux_info_update(demuxer);
+        // Pretend we can seek if we can't seek, but there's a cache.
+        if (!demuxer->seekable && stream->uncached_stream) {
+            mp_msg(MSGT_DEMUXER, MSGL_WARN,
+                   "File is not seekable, but there's a cache: enabling seeking.\n");
+            demuxer->seekable = true;
+        }
         return demuxer;
     }
 
@@ -632,7 +639,7 @@ void demux_flush(demuxer_t *demuxer)
 int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
     if (!demuxer->seekable) {
-        mp_tmsg(MSGT_SEEK, MSGL_WARN, "Cannot seek in this file.\n");
+        mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "Cannot seek in this file.\n");
         return 0;
     }
 

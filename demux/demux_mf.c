@@ -210,6 +210,7 @@ static int demux_open_mf(demuxer_t* demuxer, enum demux_check check)
 
   mf->sh = sh_video;
   demuxer->priv=(void*)mf;
+  demuxer->seekable = true;
 
   return 0;
 

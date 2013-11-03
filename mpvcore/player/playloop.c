@@ -215,6 +215,11 @@ static int seek(MPContext *mpctx, struct seek_params seek,
     if (!mpctx->demuxer)
         return -1;
 
+    if (!mpctx->demuxer->seekable) {
+        MP_ERR(mpctx, "Can't seek in this file.\n");
+        return -1;
+    }
+
     if (mpctx->stop_play == AT_END_OF_FILE)
         mpctx->stop_play = KEEP_PLAYING;
     bool hr_seek = mpctx->demuxer->accurate_seek && opts->correct_pts;

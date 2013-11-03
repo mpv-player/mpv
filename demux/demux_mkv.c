@@ -1844,12 +1844,6 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
 
     display_create_tracks(demuxer);
 
-    if (s->end_pos == 0) {
-        demuxer->seekable = 0;
-    } else {
-        demuxer->seekable = 1;
-    }
-
     return 0;
 }
 

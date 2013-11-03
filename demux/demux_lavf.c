@@ -584,9 +584,12 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
         }
     }
 
-    if (!(priv->avif->flags & AVFMT_NOFILE) &&
-        demuxer->stream->type != STREAMTYPE_AVDEVICE)
+    if ((priv->avif->flags & AVFMT_NOFILE) ||
+        demuxer->stream->type == STREAMTYPE_AVDEVICE)
     {
+        // This might be incorrect.
+        demuxer->seekable = true;
+    } else {
         void *buffer = av_malloc(lavfdopts->buffersize);
         if (!buffer)
             return -1;
@@ -597,9 +600,7 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
             return -1;
         }
         priv->pb->read_seek = mp_read_seek;
-        priv->pb->seekable = demuxer->stream->end_pos
-                 && (demuxer->stream->flags & MP_STREAM_SEEK) == MP_STREAM_SEEK
-                ? AVIO_SEEKABLE_NORMAL : 0;
+        priv->pb->seekable = demuxer->seekable ? AVIO_SEEKABLE_NORMAL : 0;
         avfc->pb = priv->pb;
     }
 
