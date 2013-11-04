@@ -154,9 +154,9 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         if (p->is_digital) {
             struct priv_d *d = p->digital;
             // Digital output has no volume adjust.
-            int vol = d->muted ? 0 : 100;
+            int digitalvol = d->muted ? 0 : 100;
             *control_vol = (ao_control_vol_t) {
-                .left = vol, .right = vol,
+                .left = digitalvol, .right = digitalvol,
             };
             return CONTROL_TRUE;
         }
@@ -216,7 +216,7 @@ static void print_list(struct ao *ao)
 
     for (int i = 0; i < n_devs; i++) {
         char *name;
-        OSStatus err = CA_GET_STR(devs[i], kAudioObjectPropertyName, &name);
+        err = CA_GET_STR(devs[i], kAudioObjectPropertyName, &name);
 
         if (err == noErr)
             talloc_steal(devs, name);

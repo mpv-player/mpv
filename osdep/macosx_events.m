@@ -242,7 +242,7 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 
 - (BOOL)handleMediaKey:(NSEvent *)event
 {
-    NSDictionary *keymap = @{
+    NSDictionary *keymapd = @{
         @(NX_KEYTYPE_PLAY):    @(MP_KEY_PLAY),
         @(NX_KEYTYPE_REWIND):  @(MP_KEY_PREV),
         @(NX_KEYTYPE_FAST):    @(MP_KEY_NEXT),
@@ -250,7 +250,7 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 
     return [self handleKey:mk_code(event)
                   withMask:[self keyModifierMask:event]
-                andMapping:keymap];
+                andMapping:keymapd];
 }
 
 - (void)hidRemote:(HIDRemote *)remote
@@ -260,7 +260,7 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 {
     if (!isPressed) return;
 
-    NSDictionary *keymap = @{
+    NSDictionary *keymapd = @{
         @(kHIDRemoteButtonCodePlay):       @(MP_AR_PLAY),
         @(kHIDRemoteButtonCodePlayHold):   @(MP_AR_PLAY_HOLD),
         @(kHIDRemoteButtonCodeCenter):     @(MP_AR_CENTER),
@@ -277,7 +277,7 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
         @(kHIDRemoteButtonCodeDownHold):   @(MP_AR_VDOWN_HOLD),
     };
 
-    [self handleKey:buttonCode withMask:0 andMapping:keymap];
+    [self handleKey:buttonCode withMask:0 andMapping:keymapd];
 }
 
 - (int)mapKeyModifiers:(int)cocoaModifiers
