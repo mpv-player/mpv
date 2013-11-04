@@ -191,7 +191,7 @@ struct gl_hwdec_driver {
     // Called on initialization, and every time the video size changes.
     int (*reinit)(struct gl_hwdec *hw, int w, int h);
     // Return textures that contain the given hw_image.
-    // Note that the caller keeps a reference to hw_image until unbind_image
+    // Note that the caller keeps a reference to hw_image until unload_image
     // is called, so the callee doesn't need to do that.
     int (*load_image)(struct gl_hwdec *hw, struct mp_image *hw_image,
                       GLuint *out_textures);

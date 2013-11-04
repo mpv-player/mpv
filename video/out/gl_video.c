@@ -1302,7 +1302,7 @@ static void init_video(struct gl_video *p)
 
     if (p->hwdec_active) {
         if (p->hwdec->driver->reinit(p->hwdec, p->image_w, p->image_h) < 0)
-            MP_ERR(p, "Initializing hardware ddecoding video texture failed.\n");
+            MP_ERR(p, "Initializing hardware decoding video texture failed.\n");
     }
 
     reinit_rendering(p);
