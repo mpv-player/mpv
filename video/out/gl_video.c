@@ -47,11 +47,11 @@ static const char vo_opengl_shaders[] =
 // Pixel width of 1D lookup textures.
 #define LOOKUP_TEXTURE_SIZE 256
 
-// Texture units 0-2 are used by the video, with unit 0 for free use.
-// Units 3-4 are used for scaler LUTs.
-#define TEXUNIT_SCALERS 3
-#define TEXUNIT_3DLUT 5
-#define TEXUNIT_DITHER 6
+// Texture units 0-3 are used by the video, with unit 0 for free use.
+// Units 4-5 are used for scaler LUTs.
+#define TEXUNIT_SCALERS 4
+#define TEXUNIT_3DLUT 6
+#define TEXUNIT_DITHER 7
 
 // lscale/cscale arguments that map directly to shader filter routines.
 // Note that the convolution filters are not included in this list.
