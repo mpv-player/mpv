@@ -316,6 +316,8 @@ const stream_info_t stream_info_ffmpeg = {
   .open = open_f,
   .protocols = (const char*[]){
      "lavf", "ffmpeg", "rtmp", "rtsp", "http", "https", "mms", "mmst", "mmsh",
-     "mmshttp", "udp", "ftp", "rtp", "httpproxy",
+     "mmshttp", "udp", "ftp", "rtp", "httpproxy", "hls", "rtmpe", "rtmps",
+     "rtmpt", "rtmpte", "rtmpts", "srtp", "tcp", "udp", "tls", "unix", "sftp",
+     "md5",
      NULL },
 };
