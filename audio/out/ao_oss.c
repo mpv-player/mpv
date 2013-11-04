@@ -414,6 +414,9 @@ static void reset(struct ao *ao)
 {
     struct priv *p = ao->priv;
     int oss_format;
+#ifdef SNDCTL_DSP_RESET
+    ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
+#else
     close_device(ao);
     p->audio_fd = open(p->dsp, O_WRONLY);
     if (p->audio_fd < 0) {
@@ -424,6 +427,7 @@ static void reset(struct ao *ao)
 
 #if defined(FD_CLOEXEC) && defined(F_SETFD)
     fcntl(p->audio_fd, F_SETFD, FD_CLOEXEC);
+#endif
 #endif
 
     oss_format = format2oss(ao->format);
