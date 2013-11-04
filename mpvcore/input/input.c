@@ -53,15 +53,15 @@
 
 #include "joystick.h"
 
-#ifdef CONFIG_LIRC
+#if HAVE_LIRC
 #include "lirc.h"
 #endif
 
-#ifdef CONFIG_LIRCC
+#if HAVE_LIRCC
 #include <lirc/lircc.h>
 #endif
 
-#ifdef CONFIG_COCOA
+#if HAVE_COCOA
 #include "osdep/macosx_events.h"
 #endif
 
@@ -616,7 +616,7 @@ const m_option_t mp_input_opts[] = {
     OPT_FLAG("joystick", input.use_joystick, CONF_GLOBAL),
     OPT_FLAG("lirc", input.use_lirc, CONF_GLOBAL),
     OPT_FLAG("lircc", input.use_lircc, CONF_GLOBAL),
-#ifdef CONFIG_COCOA
+#if HAVE_COCOA
     OPT_FLAG("ar", input.use_ar, CONF_GLOBAL),
     OPT_FLAG("media-keys", input.use_media_keys, CONF_GLOBAL),
 #endif
@@ -1734,7 +1734,7 @@ static void remove_dead_fds(struct input_ctx *ictx)
     }
 }
 
-#ifdef HAVE_POSIX_SELECT
+#if HAVE_POSIX_SELECT
 
 static void input_wait_read(struct input_ctx *ictx, int time)
 {
@@ -2310,7 +2310,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
                    "input config\n");
     }
 
-#ifdef CONFIG_JOYSTICK
+#if HAVE_JOYSTICK
     if (input_conf->use_joystick) {
         int fd = mp_input_joystick_init(input_conf->js_dev);
         if (fd < 0)
@@ -2321,7 +2321,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     }
 #endif
 
-#ifdef CONFIG_LIRC
+#if HAVE_LIRC
     if (input_conf->use_lirc) {
         int fd = mp_input_lirc_init();
         if (fd > 0)
@@ -2330,7 +2330,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     }
 #endif
 
-#ifdef CONFIG_LIRCC
+#if HAVE_LIRCC
     if (input_conf->use_lircc) {
         int fd = lircc_init("mpv", NULL);
         if (fd >= 0)
@@ -2338,7 +2338,7 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     }
 #endif
 
-#ifdef CONFIG_COCOA
+#if HAVE_COCOA
     if (input_conf->use_ar) {
         cocoa_init_apple_remote();
         ictx->using_ar = true;
@@ -2386,7 +2386,7 @@ void mp_input_uninit(struct input_ctx *ictx)
     if (!ictx)
         return;
 
-#ifdef CONFIG_COCOA
+#if HAVE_COCOA
     if (ictx->using_ar) {
         cocoa_uninit_apple_remote();
     }

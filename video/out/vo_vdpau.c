@@ -570,7 +570,7 @@ static int win_x11_init_vdpau_flip_queue(struct vo *vo)
         MP_INFO(vo, "Assuming user-specified display refresh rate of %.3f Hz.\n",
                 vc->user_fps);
     } else if (vc->user_fps == 0) {
-#ifdef CONFIG_XF86VM
+#if HAVE_XF86VM
         double fps = vo_x11_vm_get_fps(vo);
         if (!fps)
             MP_WARN(vo, "Failed to get display FPS\n");

@@ -58,7 +58,7 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s)
 #include <io.h>
 #include <fcntl.h>
 
-#ifdef HAVE_PTHREADS
+#if HAVE_PTHREADS
 #include <pthread.h>
 #endif
 
@@ -298,7 +298,7 @@ static void init_getenv(void)
 
 char *mp_getenv(const char *name)
 {
-#ifdef HAVE_PTHREADS
+#if HAVE_PTHREADS
     static pthread_once_t once_init_getenv = PTHREAD_ONCE_INIT;
     pthread_once(&once_init_getenv, init_getenv);
 #else

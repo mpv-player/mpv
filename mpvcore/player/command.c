@@ -56,11 +56,11 @@
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 #include "stream/pvr.h"
-#ifdef CONFIG_DVBIN
+#if HAVE_DVBIN
 #include "stream/dvbin.h"
 #endif
 #include "screenshot.h"
-#ifdef HAVE_SYS_MMAN_H
+#if HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
 
@@ -1137,11 +1137,11 @@ static int mp_property_fullscreen(m_option_t *prop,
 #define VF_DEINTERLACE_LABEL "deinterlace"
 
 static const char *deint_filters[] = {
-#ifdef CONFIG_VF_LAVFI
+#if HAVE_VF_LAVFI
     "lavfi=yadif",
 #endif
     "yadif",
-#if CONFIG_VAAPI_VPP
+#if HAVE_VAAPI_VPP
     "vavpp",
 #endif
     NULL
@@ -1608,7 +1608,7 @@ static int mp_property_sub_pos(m_option_t *prop, int action, void *arg,
     return property_osd_helper(prop, action, arg, mpctx);
 }
 
-#ifdef CONFIG_TV
+#if HAVE_TV
 
 static tvi_handle_t *get_tvh(struct MPContext *mpctx)
 {
@@ -1955,7 +1955,7 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("sub-visibility", property_osd_helper),
     M_OPTION_PROPERTY_CUSTOM("sub-forced-only", property_osd_helper),
     M_OPTION_PROPERTY_CUSTOM("sub-scale", property_osd_helper),
-#ifdef CONFIG_ASS
+#if HAVE_LIBASS
     M_OPTION_PROPERTY_CUSTOM("ass-use-margins", property_osd_helper),
     M_OPTION_PROPERTY_CUSTOM("ass-vsfilter-aspect-compat", property_osd_helper),
     M_OPTION_PROPERTY_CUSTOM("ass-style-override", property_osd_helper),
@@ -1964,7 +1964,7 @@ static const m_option_t mp_properties[] = {
     M_OPTION_PROPERTY_CUSTOM("vf*", mp_property_vf),
     M_OPTION_PROPERTY_CUSTOM("af*", mp_property_af),
 
-#ifdef CONFIG_TV
+#if HAVE_TV
     { "tv-brightness", mp_property_tv_color, CONF_TYPE_INT,
       M_OPT_RANGE, -100, 100, .offset = TV_COLOR_BRIGHTNESS },
     { "tv-contrast", mp_property_tv_color, CONF_TYPE_INT,
@@ -2071,7 +2071,7 @@ static struct property_osd_display {
     { "ass-style-override", _("ASS subtitle style override")},
     { "vf*", _("Video filters"), .msg = "Video filters:\n${vf}"},
     { "af*", _("Audio filters"), .msg = "Audio filters:\n${af}"},
-#ifdef CONFIG_TV
+#if HAVE_TV
     { "tv-brightness", _("Brightness"), .osd_progbar = OSD_BRIGHTNESS },
     { "tv-hue", _("Hue"), .osd_progbar = OSD_HUE},
     { "tv-saturation", _("Saturation"), .osd_progbar = OSD_SATURATION },
@@ -2272,7 +2272,7 @@ static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
     return r;
 }
 
-#ifdef HAVE_SYS_MMAN_H
+#if HAVE_SYS_MMAN_H
 
 static int ext2_sub_find(struct MPContext *mpctx, int id)
 {
@@ -2723,7 +2723,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 (bar_osd ? OSD_SEEK_INFO_BAR : 0);
         break;
 
-#ifdef CONFIG_RADIO
+#if HAVE_RADIO
     case MP_CMD_RADIO_STEP_CHANNEL:
         if (mpctx->stream && mpctx->stream->type == STREAMTYPE_RADIO) {
             int v = cmd->args[0].v.i;
@@ -2761,7 +2761,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         break;
 #endif
 
-#ifdef CONFIG_TV
+#if HAVE_TV
     case MP_CMD_TV_START_SCAN:
         if (get_tvh(mpctx))
             tv_start_scan(get_tvh(mpctx), 1);
@@ -2769,27 +2769,27 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_TV_SET_FREQ:
         if (get_tvh(mpctx))
             tv_set_freq(get_tvh(mpctx), cmd->args[0].v.f * 16.0);
-#ifdef CONFIG_PVR
+#if HAVE_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_freq(mpctx->stream, ROUND(cmd->args[0].v.f));
             set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: %s",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_stationname(mpctx->stream));
         }
-#endif /* CONFIG_PVR */
+#endif /* HAVE_PVR */
         break;
 
     case MP_CMD_TV_STEP_FREQ:
         if (get_tvh(mpctx))
             tv_step_freq(get_tvh(mpctx), cmd->args[0].v.f * 16.0);
-#ifdef CONFIG_PVR
+#if HAVE_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_force_freq_step(mpctx->stream, ROUND(cmd->args[0].v.f));
             set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: f %d",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_frequency(mpctx->stream));
         }
-#endif /* CONFIG_PVR */
+#endif /* HAVE_PVR */
         break;
 
     case MP_CMD_TV_SET_NORM:
@@ -2810,7 +2810,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                              "Channel: %s", tv_channel_current->name);
             }
         }
-#ifdef CONFIG_PVR
+#if HAVE_PVR
         else if (mpctx->stream &&
                  mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_channel_step(mpctx->stream, cmd->args[0].v.i);
@@ -2818,8 +2818,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_stationname(mpctx->stream));
         }
-#endif /* CONFIG_PVR */
-#ifdef CONFIG_DVBIN
+#endif /* HAVE_PVR */
+#if HAVE_DVBIN
         if (mpctx->stream->type == STREAMTYPE_DVB) {
             int dir;
             int v = cmd->args[0].v.i;
@@ -2836,7 +2836,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 mpctx->dvbin_reopen = 1;
             }
         }
-#endif /* CONFIG_DVBIN */
+#endif /* HAVE_DVBIN */
         break;
 
     case MP_CMD_TV_SET_CHANNEL:
@@ -2847,17 +2847,17 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                              "Channel: %s", tv_channel_current->name);
             }
         }
-#ifdef CONFIG_PVR
+#if HAVE_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_channel(mpctx->stream, cmd->args[0].v.s);
             set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: %s",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_stationname(mpctx->stream));
         }
-#endif /* CONFIG_PVR */
+#endif /* HAVE_PVR */
         break;
 
-#ifdef CONFIG_DVBIN
+#if HAVE_DVBIN
     case MP_CMD_DVB_SET_CHANNEL:
         if (mpctx->stream->type == STREAMTYPE_DVB) {
             mpctx->last_dvb_step = 1;
@@ -2869,7 +2869,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             }
         }
         break;
-#endif /* CONFIG_DVBIN */
+#endif /* HAVE_DVBIN */
 
     case MP_CMD_TV_LAST_CHANNEL:
         if (get_tvh(mpctx)) {
@@ -2879,14 +2879,14 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                              "Channel: %s", tv_channel_current->name);
             }
         }
-#ifdef CONFIG_PVR
+#if HAVE_PVR
         else if (mpctx->stream && mpctx->stream->type == STREAMTYPE_PVR) {
             pvr_set_lastchannel(mpctx->stream);
             set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration, "%s: %s",
                         pvr_get_current_channelname(mpctx->stream),
                         pvr_get_current_stationname(mpctx->stream));
         }
-#endif /* CONFIG_PVR */
+#endif /* HAVE_PVR */
         break;
 
     case MP_CMD_TV_STEP_NORM:
@@ -2898,7 +2898,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (get_tvh(mpctx))
             tv_step_chanlist(get_tvh(mpctx));
         break;
-#endif /* CONFIG_TV */
+#endif /* HAVE_TV */
 
     case MP_CMD_SUB_ADD:
         mp_add_subtitles(mpctx, cmd->args[0].v.s);
@@ -2978,14 +2978,14 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_SCRIPT_DISPATCH:
         if (mpctx->lua_ctx) {
-#ifdef CONFIG_LUA
+#if HAVE_LUA
             mp_lua_script_dispatch(mpctx, cmd->args[0].v.s, cmd->args[1].v.i,
                             cmd->key_up_follows ? "keyup_follows" : "press");
 #endif
         }
         break;
 
-#ifdef HAVE_SYS_MMAN_H
+#if HAVE_SYS_MMAN_H
     case MP_CMD_OVERLAY_ADD:
         overlay_add(mpctx,
                     cmd->args[0].v.i, cmd->args[1].v.i, cmd->args[2].v.i,
@@ -3052,7 +3052,7 @@ void mp_notify(struct MPContext *mpctx, enum mp_event event, void *arg)
 static void handle_script_event(struct MPContext *mpctx, const char *name,
                                 const char *arg)
 {
-#ifdef CONFIG_LUA
+#if HAVE_LUA
     mp_lua_event(mpctx, name, arg);
 #endif
 }

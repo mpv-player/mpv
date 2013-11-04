@@ -25,7 +25,7 @@
 
 #include "config.h"
 
-#ifdef CONFIG_ALSA
+#if HAVE_ALSA
 #include <alsa/asoundlib.h>
 
 typedef struct {
@@ -38,7 +38,7 @@ typedef struct {
 } ai_alsa_t;
 #endif
 
-#ifdef CONFIG_OSS_AUDIO
+#if HAVE_OSS_AUDIO
 typedef struct {
     char *device;
 
@@ -46,7 +46,7 @@ typedef struct {
 } ai_oss_t;
 #endif
 
-#ifdef CONFIG_SNDIO
+#if HAVE_SNDIO
 #include <sndio.h>
 
 typedef struct {
@@ -72,13 +72,13 @@ typedef struct
     int bytes_per_sample;
     int samplesize;
 
-#ifdef CONFIG_ALSA
+#if HAVE_ALSA
     ai_alsa_t alsa;
 #endif
-#ifdef CONFIG_OSS_AUDIO
+#if HAVE_OSS_AUDIO
     ai_oss_t oss;
 #endif
-#ifdef CONFIG_SNDIO
+#if HAVE_SNDIO
     ai_sndio_t sndio;
 #endif
 } audio_in_t;
@@ -92,19 +92,19 @@ int audio_in_uninit(audio_in_t *ai);
 int audio_in_start_capture(audio_in_t *ai);
 int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer);
 
-#ifdef CONFIG_ALSA
+#if HAVE_ALSA
 int ai_alsa_setup(audio_in_t *ai);
 int ai_alsa_init(audio_in_t *ai);
 int ai_alsa_xrun(audio_in_t *ai);
 #endif
 
-#ifdef CONFIG_OSS_AUDIO
+#if HAVE_OSS_AUDIO
 int ai_oss_set_samplerate(audio_in_t *ai);
 int ai_oss_set_channels(audio_in_t *ai);
 int ai_oss_init(audio_in_t *ai);
 #endif
 
-#ifdef CONFIG_SNDIO
+#if HAVE_SNDIO
 int ai_sndio_setup(audio_in_t *ai);
 int ai_sndio_init(audio_in_t *ai);
 #endif

@@ -494,7 +494,7 @@ libavdevice=auto
 _stream_cache=yes
 _priority=no
 def_dos_paths="#define HAVE_DOS_PATHS 0"
-def_priority="#undef CONFIG_PRIORITY"
+def_priority="#define HAVE_PRIORITY 0"
 _build_man=auto
 _build_pdf=auto
 _build_date=yes
@@ -904,7 +904,7 @@ if win32 ; then
   _timer=timer-win2.c
   _priority=yes
   def_dos_paths="#define HAVE_DOS_PATHS 1"
-  def_priority="#define CONFIG_PRIORITY 1"
+  def_priority="#define HAVE_PRIORITY 1"
 fi
 
 if mingw32 ; then
@@ -1255,7 +1255,7 @@ statement_check time.h 'nanosleep(0, 0)' && _nanosleep=yes
 if test "$_nanosleep" = yes ; then
   def_nanosleep='#define HAVE_NANOSLEEP 1'
 else
-  def_nanosleep='#undef HAVE_NANOSLEEP'
+  def_nanosleep='#define HAVE_NANOSLEEP 0'
 fi
 echores "$_nanosleep"
 
@@ -1266,7 +1266,7 @@ statement_check sys/mman.h 'mmap(0, 0, 0, 0, 0, 0)' && _mman=yes
 if test "$_mman" = yes ; then
   def_mman_h='#define HAVE_SYS_MMAN_H 1'
 else
-  def_mman_h='#undef HAVE_SYS_MMAN_H'
+  def_mman_h='#define HAVE_SYS_MMAN_H 0'
 fi
 echores "$_mman"
 
@@ -1279,12 +1279,13 @@ done
 if test "$_dl" = yes ; then
   def_dl='#define HAVE_LIBDL 1'
 else
-  def_dl='#undef HAVE_LIBDL'
+  def_dl='#define HAVE_LIBDL 0'
 fi
 echores "$_dl"
 
 
 echocheck "pthread"
+def_pthreads='#define HAVE_PTHREADS 0'
 if linux ; then
   THREAD_CFLAGS=-D_REENTRANT
 elif freebsd || netbsd || openbsd ; then
@@ -1319,7 +1320,7 @@ if test "$_pthreads" = yes ; then
   extra_cflags="$extra_cflags $THREAD_CFLAGS"
 else
   res_comment="v4l2 disabled"
-  def_pthreads='#undef HAVE_PTHREADS'
+  def_pthreads='#define HAVE_PTHREADS 0'
   _tv_v4l2=no
 fi
 echores "$_pthreads"
@@ -1343,9 +1344,9 @@ fi
 echocheck "stream cache"
 _stream_cache="$_pthreads"
 if test "$_stream_cache" = yes ; then
-  def_stream_cache='#define CONFIG_STREAM_CACHE'
+  def_stream_cache='#define HAVE_STREAM_CACHE 1'
 else
-  def_stream_cache='#undef CONFIG_STREAM_CACHE'
+  def_stream_cache='#define HAVE_STREAM_CACHE 0'
 fi
 echores "$_stream_cache"
 
@@ -1402,17 +1403,17 @@ EOF
   fi
 fi
 if test "$_iconv" = yes ; then
-  def_iconv='#define CONFIG_ICONV 1'
+  def_iconv='#define HAVE_ICONV 1'
 else
-  def_iconv='#undef CONFIG_ICONV'
+  def_iconv='#define HAVE_ICONV 0'
 fi
 echores "$_iconv"
 
 
 echocheck "soundcard.h"
 _soundcard_h=no
-def_soundcard_h='#undef HAVE_SOUNDCARD_H'
-def_sys_soundcard_h='#undef HAVE_SYS_SOUNDCARD_H'
+def_soundcard_h='#define HAVE_SOUNDCARD_H 0'
+def_sys_soundcard_h='#define HAVE_SYS_SOUNDCARD_H 0'
 for _soundcard_header in "sys/soundcard.h" "soundcard.h"; do
   header_check $_soundcard_header && _soundcard_h=yes &&
     res_comment="$_soundcard_header" && break
@@ -1430,7 +1431,7 @@ echores "$_soundcard_h"
 
 echocheck "sys/videoio.h"
 sys_videoio_h=no
-def_sys_videoio_h='#undef HAVE_SYS_VIDEOIO_H'
+def_sys_videoio_h='#define HAVE_SYS_VIDEOIO_H 0'
 header_check sys/videoio.h && sys_videoio_h=yes &&
     def_sys_videoio_h='#define HAVE_SYS_VIDEOIO_H 1'
 echores "$sys_videoio_h"
@@ -1452,7 +1453,7 @@ if test "$_terminfo" = yes ; then
     _termcap=yes # terminfo provides termcap
   fi
 else
-  def_terminfo='#undef HAVE_TERMINFO'
+  def_terminfo='#define HAVE_TERMINFO 0'
 fi
 echores "$_terminfo"
 
@@ -1469,15 +1470,15 @@ if test "$_termcap" = yes ; then
   def_termcap='#define HAVE_TERMCAP 1'
   test $_ld_tmp && res_comment="using $_ld_tmp"
 else
-  def_termcap='#undef HAVE_TERMCAP'
+  def_termcap='#define HAVE_TERMCAP 0'
 fi
 echores "$_termcap"
 
 
 echocheck "termios"
-def_termios='#undef HAVE_TERMIOS'
-def_termios_h='#undef HAVE_TERMIOS_H'
-def_termios_sys_h='#undef HAVE_SYS_TERMIOS_H'
+def_termios='#define HAVE_TERMIOS 0'
+def_termios_h='#define HAVE_TERMIOS_H 0'
+def_termios_sys_h='#define HAVE_SYS_TERMIOS_H 0'
 if test "$_termios" = auto ; then
   _termios=no
   for _termios_header in "termios.h" "sys/termios.h"; do
@@ -1505,7 +1506,7 @@ fi
 if test "$_shm" = yes ; then
   def_shm='#define HAVE_SHM 1'
 else
-  def_shm='#undef HAVE_SHM'
+  def_shm='#define HAVE_SHM 0'
 fi
 echores "$_shm"
 
@@ -1521,7 +1522,7 @@ cat > $TMPC << EOF
 int main(void) {int nfds = 1; fd_set readfds; struct timeval timeout; select(nfds, &readfds, NULL, NULL, &timeout); return 0; }
 EOF
 _posix_select=no
-def_posix_select='#undef HAVE_POSIX_SELECT'
+def_posix_select='#define HAVE_POSIX_SELECT 0'
 cc_check && _posix_select=yes &&
     def_posix_select='#define HAVE_POSIX_SELECT 1'
 echores "$_posix_select"
@@ -1529,7 +1530,7 @@ echores "$_posix_select"
 
 echocheck "audio select()"
 if test "$_select" = no ; then
-  def_select='#undef HAVE_AUDIO_SELECT'
+  def_select='#define HAVE_AUDIO_SELECT 0'
 elif test  "$_select" = yes ; then
   def_select='#define HAVE_AUDIO_SELECT 1'
 fi
@@ -1543,7 +1544,7 @@ need_glob=no
 if test "$_glob" = yes ; then
   def_glob='#define HAVE_GLOB 1'
 else
-  def_glob='#undef HAVE_GLOB'
+  def_glob='#define HAVE_GLOB 0'
   # HACK! need_glob currently enables compilation of a
   # win32-specific glob()-replacement.
   # Other OS neither need it nor can they use it (mf:// is disabled for them).
@@ -1565,7 +1566,7 @@ statement_check sys/sysinfo.h 'struct sysinfo s_info; s_info.mem_unit=0; sysinfo
 if test "$_sys_sysinfo" = yes ; then
   def_sys_sysinfo_h='#define HAVE_SYS_SYSINFO_H 1'
 else
-  def_sys_sysinfo_h='#undef HAVE_SYS_SYSINFO_H'
+  def_sys_sysinfo_h='#define HAVE_SYS_SYSINFO_H 0'
 fi
 echores "$_sys_sysinfo"
 
@@ -1590,9 +1591,9 @@ if test "$_libguess" = auto ; then
     fi
 fi
 if test "$_libguess" = yes; then
-    def_libguess="#define CONFIG_LIBGUESS 1"
+    def_libguess="#define HAVE_LIBGUESS 1"
 else
-    def_libguess="#undef CONFIG_LIBGUESS"
+    def_libguess="#define HAVE_LIBGUESS 0"
 fi
 echores "$_libguess"
 
@@ -1605,10 +1606,10 @@ if test "$_smb" = auto ; then
     fi
 fi
 if test "$_smb" = yes; then
-    def_smb="#define CONFIG_LIBSMBCLIENT 1"
+    def_smb="#define HAVE_LIBSMBCLIENT 1"
     inputmodules="smb $inputmodules"
 else
-    def_smb="#undef CONFIG_LIBSMBCLIENT"
+    def_smb="#define HAVE_LIBSMBCLIENT 0"
     noinputmodules="smb $noinputmodules"
 fi
 echores "$_smb"
@@ -1622,9 +1623,9 @@ if test "$_libquvi4" = auto ; then
     fi
 fi
 if test "$_libquvi4" = yes; then
-    def_libquvi4="#define CONFIG_LIBQUVI 1"
+    def_libquvi4="#define HAVE_LIBQUVI4 1"
 else
-    def_libquvi4="#undef CONFIG_LIBQUVI"
+    def_libquvi4="#define HAVE_LIBQUVI4 0"
 fi
 echores "$_libquvi4"
 
@@ -1640,9 +1641,9 @@ if test "$_libquvi9" = auto ; then
     fi
 fi
 if test "$_libquvi9" = yes; then
-    def_libquvi9="#define CONFIG_LIBQUVI9 1"
+    def_libquvi9="#define HAVE_LIBQUVI9 1"
 else
-    def_libquvi9="#undef CONFIG_LIBQUVI9"
+    def_libquvi9="#define HAVE_LIBQUVI9 0"
 fi
 echores "$_libquvi9"
 
@@ -1668,9 +1669,9 @@ fi
 if test "$_cocoa" = yes ; then
   libs_mplayer="$libs_mplayer -framework IOKit -framework Cocoa -framework OpenGL"
   extra_ldflags="$extra_ldflags -fobjc-arc" # needed for OS X 10.7
-  def_cocoa='#define CONFIG_COCOA 1'
+  def_cocoa='#define HAVE_COCOA 1'
 else
-  def_cocoa='#undef CONFIG_COCOA'
+  def_cocoa='#define HAVE_COCOA 0'
 fi
 echores "$_cocoa"
 
@@ -1686,10 +1687,10 @@ fi
 if test "$_corevideo" = yes ; then
   vomodules="corevideo $vomodules"
   libs_mplayer="$libs_mplayer -framework QuartzCore"
-  def_corevideo='#define CONFIG_COREVIDEO 1'
+  def_corevideo='#define HAVE_COREVIDEO 1'
 else
   novomodules="corevideo $novomodules"
-  def_corevideo='#undef CONFIG_COREVIDEO'
+  def_corevideo='#define HAVE_COREVIDEO 0'
 fi
 echores "$_corevideo"
 
@@ -1697,6 +1698,9 @@ depends_on_application_services(){
   test "$_corevideo" = yes
 }
 
+else
+  def_cocoa='#define HAVE_COCOA 0'
+  def_corevideo='#define HAVE_COREVIDEO 0'
 fi #if darwin
 
 _wlver="1.2.0"
@@ -1708,11 +1712,11 @@ if test "$_wayland" = yes || test "$_wayland" = auto; then
 fi
 if test "$_wayland" = yes; then
   res_comment=""
-  def_wayland='#define CONFIG_WAYLAND'
+  def_wayland='#define HAVE_WAYLAND'
   vomodules="wayland $vomodules"
 else
   res_comment="version >= $_wlver"
-  def_wayland='#undef CONFIG_WAYLAND'
+  def_wayland='#define HAVE_WAYLAND 0'
   novomodules="wayland $novomodules"
 fi
 echores "$_wayland"
@@ -1770,11 +1774,11 @@ if test "$_x11" = auto && test "$_x11_headers" = yes ; then
   done
 fi
 if test "$_x11" = yes ; then
-  def_x11='#define CONFIG_X11 1'
+  def_x11='#define HAVE_X11 1'
   vomodules="x11 $vomodules"
 else
   _x11=no
-  def_x11='#undef CONFIG_X11'
+  def_x11='#define HAVE_X11 0'
   novomodules="x11 $novomodules"
   res_comment="check if the dev(el) packages are installed"
 fi
@@ -1786,10 +1790,10 @@ if test "$_xss" = auto ; then
   statement_check "X11/extensions/scrnsaver.h" 'XScreenSaverSuspend(NULL, True)' -lXss && _xss=yes
 fi
 if test "$_xss" = yes ; then
-  def_xss='#define CONFIG_XSS 1'
+  def_xss='#define HAVE_XSS 1'
   libs_mplayer="$libs_mplayer -lXss"
 else
-  def_xss='#undef CONFIG_XSS'
+  def_xss='#define HAVE_XSS 0'
 fi
 echores "$_xss"
 
@@ -1809,16 +1813,16 @@ EOF
   statement_check_broken X11/Xlib.h X11/extensions/dpms.h 'DPMSQueryExtension(0, 0, 0)' -lXext && _xdpms4=yes
 fi
 if test "$_xdpms4" = yes ; then
-  def_xdpms='#define CONFIG_XDPMS 1'
+  def_xdpms='#define HAVE_XDPMS 1'
   res_comment="using Xdpms 4"
   echores "yes"
 elif test "$_xdpms3" = yes ; then
-  def_xdpms='#define CONFIG_XDPMS 1'
+  def_xdpms='#define HAVE_XDPMS 1'
   libs_mplayer="$libs_mplayer -lXdpms"
   res_comment="using Xdpms 3"
   echores "yes"
 else
-  def_xdpms='#undef CONFIG_XDPMS'
+  def_xdpms='#define HAVE_XDPMS 0'
   echores "no"
 fi
 
@@ -1830,11 +1834,11 @@ if test "$_xv" = auto && test "$_x11" = yes ; then
 fi
 
 if test "$_xv" = yes ; then
-  def_xv='#define CONFIG_XV 1'
+  def_xv='#define HAVE_XV 1'
   libs_mplayer="$libs_mplayer -lXv"
   vomodules="xv $vomodules"
 else
-  def_xv='#undef CONFIG_XV'
+  def_xv='#define HAVE_XV 0'
   novomodules="xv $novomodules"
 fi
 echores "$_xv"
@@ -1848,10 +1852,10 @@ if test "$_vdpau" = auto && test "$_x11" = yes ; then
   fi
 fi
 if test "$_vdpau" = yes ; then
-  def_vdpau='#define CONFIG_VDPAU 1'
+  def_vdpau='#define HAVE_VDPAU 1'
   vomodules="vdpau $vomodules"
 else
-  def_vdpau='#define CONFIG_VDPAU 0'
+  def_vdpau='#define HAVE_VDPAU 0'
   novomodules="vdpau $novomodules"
 fi
 echores "$_vdpau"
@@ -1859,9 +1863,9 @@ echores "$_vdpau"
 
 echocheck "VAAPI"
 _vaapi_vpp=no
-def_vaapi_vpp='#define CONFIG_VAAPI_VPP 0'
+def_vaapi_vpp='#define HAVE_VAAPI_VPP 0'
 _vaapi_glx=no
-def_vaapi_glx='#define CONFIG_VAAPI_GLX 0'
+def_vaapi_glx='#define HAVE_VAAPI_GLX 0'
 if test "$_vaapi" = auto && test "$_x11" = yes ; then
   _vaapi=no
   if test "$_dl" = yes ; then
@@ -1869,10 +1873,12 @@ if test "$_vaapi" = auto && test "$_x11" = yes ; then
   fi
 fi
 if test "$_vaapi" = yes ; then
-  def_vaapi='#define CONFIG_VAAPI 1'
+  def_vaapi='#define HAVE_VAAPI 1'
+  def_vaapi_hwaccel='#define HAVE_VAAPI_HWACCEL 1'
   vomodules="vaapi $vomodules"
 else
-  def_vaapi='#define CONFIG_VAAPI 0'
+  def_vaapi='#define HAVE_VAAPI 0'
+  def_vaapi_hwaccel='#define HAVE_VAAPI_HWACCEL 0'
   novomodules="vaapi $novomodules"
 fi
 echores "$_vaapi"
@@ -1881,13 +1887,13 @@ if test "$_vaapi" = yes ; then
   echocheck "VAAPI VPP"
   if pkg-config 'libva >= 0.34.0' ; then
     _vaapi_vpp=yes
-    def_vaapi_vpp='#define CONFIG_VAAPI_VPP 1'
+    def_vaapi_vpp='#define HAVE_VAAPI_VPP 1'
   fi
   echores "$_vaapi_glx"
   echocheck "VAAPI GLX"
   if pkg_config_add 'libva-glx >= 0.32.0' ; then
     _vaapi_glx=yes
-    def_vaapi_glx='#define CONFIG_VAAPI_GLX 1'
+    def_vaapi_glx='#define HAVE_VAAPI_GLX 1'
   fi
   echores "$_vaapi_glx"
 fi
@@ -1900,10 +1906,10 @@ if test "$_xinerama" = auto && test "$_x11" = yes ; then
 fi
 
 if test "$_xinerama" = yes ; then
-  def_xinerama='#define CONFIG_XINERAMA 1'
+  def_xinerama='#define HAVE_XINERAMA 1'
   libs_mplayer="$libs_mplayer -lXinerama"
 else
-  def_xinerama='#undef CONFIG_XINERAMA'
+  def_xinerama='#define HAVE_XINERAMA 0'
 fi
 echores "$_xinerama"
 
@@ -1919,10 +1925,10 @@ if test "$_vm" = auto && test "$_x11" = yes ; then
   statement_check_broken X11/Xlib.h X11/extensions/xf86vmode.h 'XF86VidModeQueryExtension(0, 0, 0)' -lXxf86vm && _vm=yes
 fi
 if test "$_vm" = yes ; then
-  def_vm='#define CONFIG_XF86VM 1'
+  def_vm='#define HAVE_XF86VM 1'
   libs_mplayer="$libs_mplayer -lXxf86vm"
 else
-  def_vm='#undef CONFIG_XF86VM'
+  def_vm='#define HAVE_XF86VM 0'
 fi
 echores "$_vm"
 
@@ -1936,9 +1942,9 @@ if test "$_xf86keysym" = auto && test "$_x11" = yes ; then
   return_check X11/XF86keysym.h XF86XK_AudioPause && _xf86keysym=yes
 fi
 if test "$_xf86keysym" = yes ; then
-  def_xf86keysym='#define CONFIG_XF86XK 1'
+  def_xf86keysym='#define HAVE_XF86XK 1'
 else
-  def_xf86keysym='#undef CONFIG_XF86XK'
+  def_xf86keysym='#define HAVE_XF86XK 0'
 fi
 echores "$_xf86keysym"
 
@@ -1949,10 +1955,10 @@ if test "$_caca" = auto ; then
   pkg_config_add 'caca >= 0.99.beta18' && _caca=yes
 fi
 if test "$_caca" = yes ; then
-  def_caca='#define CONFIG_CACA 1'
+  def_caca='#define HAVE_CACA 1'
   vomodules="caca $vomodules"
 else
-  def_caca='#undef CONFIG_CACA'
+  def_caca='#define HAVE_CACA 0'
   novomodules="caca $novomodules"
 fi
 echores "$_caca"
@@ -1982,13 +1988,13 @@ echores "$_dvb"
 if test "$_dvb" = yes ; then
   _dvbin=yes
   inputmodules="dvb $inputmodules"
-  def_dvb='#define CONFIG_DVB 1'
-  def_dvbin='#define CONFIG_DVBIN 1'
+  def_dvb='#define HAVE_DVB 1'
+  def_dvbin='#define HAVE_DVBIN 1'
 else
   _dvbin=no
   noinputmodules="dvb $noinputmodules"
-  def_dvb='#undef CONFIG_DVB'
-  def_dvbin='#undef CONFIG_DVBIN '
+  def_dvb='#define HAVE_DVB 0'
+  def_dvbin='#define HAVE_DVBIN 0 '
 fi
 
 
@@ -1999,10 +2005,10 @@ if test "$_mng" = auto ; then
 fi
 echores "$_mng"
 if test "$_mng" = yes ; then
-  def_mng='#define CONFIG_MNG 1'
+  def_mng='#define HAVE_MNG 1'
   libs_mplayer="$libs_mplayer -lmng -lz"
 else
-  def_mng='#undef CONFIG_MNG'
+  def_mng='#define HAVE_MNG 0'
 fi
 
 echocheck "JPEG support"
@@ -2013,10 +2019,10 @@ fi
 echores "$_jpeg"
 
 if test "$_jpeg" = yes ; then
-  def_jpeg='#define CONFIG_JPEG 1'
+  def_jpeg='#define HAVE_JPEG 1'
   libs_mplayer="$libs_mplayer -ljpeg"
 else
-  def_jpeg='#undef CONFIG_JPEG'
+  def_jpeg='#define HAVE_JPEG 0'
 fi
 
 
@@ -2103,35 +2109,38 @@ EOF
 else
   _gl=no
 fi
+
+def_gl_cocoa='#define HAVE_GL_COCOA 0'
+def_gl_win32='#define HAVE_GL_WIN32 0'
+def_gl_x11='#define HAVE_GL_X11 0'
+def_gl_wayland='#define HAVE_GL_WAYLAND 0'
+
 if test "$_gl" = yes ; then
-  def_gl='#define CONFIG_GL 1'
+  def_gl='#define HAVE_GL 1'
   res_comment="backends:"
   if test "$_gl_cocoa" = yes ; then
-    def_gl_cocoa='#define CONFIG_GL_COCOA 1'
+    def_gl_cocoa='#define HAVE_GL_COCOA 1'
     res_comment="$res_comment cocoa"
   fi
   if test "$_gl_win32" = yes ; then
-    def_gl_win32='#define CONFIG_GL_WIN32 1'
+    def_gl_win32='#define HAVE_GL_WIN32 1'
     res_comment="$res_comment win32"
   fi
   if test "$_gl_x11" = yes ; then
-    def_gl_x11='#define CONFIG_GL_X11 1'
+    def_gl_x11='#define HAVE_GL_X11 1'
     res_comment="$res_comment x11"
   fi
   if test "$_gl_wayland" = yes ; then
-    def_gl_wayland='#define CONFIG_GL_WAYLAND'
+    def_gl_wayland='#define HAVE_GL_WAYLAND'
     res_comment="$res_comment wayland"
   fi
   vomodules="opengl $vomodules"
 else
-  def_gl='#undef CONFIG_GL'
-  def_gl_cocoa='#undef CONFIG_GL_COCOA'
-  def_gl_win32='#undef CONFIG_GL_WIN32'
-  def_gl_x11='#undef CONFIG_GL_X11'
-  def_gl_wayland='#undef CONFIG_GL_WAYLAND'
+  def_gl='#define HAVE_GL 0'
   novomodules="opengl $novomodules"
 fi
 echores "$_gl"
+
 
 
 if win32; then
@@ -2143,10 +2152,10 @@ if test "$_direct3d" = auto ; then
   header_check d3d9.h && _direct3d=yes
 fi
 if test "$_direct3d" = yes ; then
-  def_direct3d='#define CONFIG_DIRECT3D 1'
+  def_direct3d='#define HAVE_DIRECT3D 1'
   vomodules="direct3d $vomodules"
 else
-  def_direct3d='#undef CONFIG_DIRECT3D'
+  def_direct3d='#define HAVE_DIRECT3D 0'
   novomodules="direct3d $novomodules"
 fi
 echores "$_direct3d"
@@ -2158,10 +2167,10 @@ if test "$_dsound" = auto ; then
   header_check dsound.h && _dsound=yes
 fi
 if test "$_dsound" = yes ; then
-  def_dsound='#define CONFIG_DSOUND 1'
+  def_dsound='#define HAVE_DSOUND 1'
   aomodules="dsound $aomodules"
 else
-  def_dsound='#undef CONFIG_DSOUND'
+  def_dsound='#define HAVE_DSOUND 0'
   noaomodules="dsound $noaomodules"
 fi
 echores "$_dsound"
@@ -2198,15 +2207,19 @@ fi
 
 fi
 if test "$_wasapi" = yes ; then
-  def_wasapi='#define CONFIG_WASAPI 1'
+  def_wasapi='#define HAVE_WASAPI 1'
   aomodules="wasapi $aomodules"
   libs_mplayer="$libs_mplayer -lole32"
 else
-  def_wasapi='#undef CONFIG_WASAPI'
+  def_wasapi='#define HAVE_WASAPI 0'
   noaomodules="wasapi $noaomodules"
 fi
 echores "$_wasapi"
 
+else
+  def_direct3d='#define HAVE_DIRECT3D 0'
+  def_dsound='#define HAVE_DSOUND 0'
+  def_wasapi='#define HAVE_WASAPI 0'
 fi #if win32; then
 
 
@@ -2216,24 +2229,24 @@ if test "$_sdl2" = yes ; then
 fi
 if test "$_sdl2" = yes ; then
   _sdl=yes # sdl2 implies sdl
-  def_sdl='#define CONFIG_SDL 1'
-  def_sdl2='#define CONFIG_SDL2 1'
+  def_sdl='#define HAVE_SDL 1'
+  def_sdl2='#define HAVE_SDL2 1'
   vomodules="sdl $vomodules"
   aomodules="sdl $aomodules"
   echores "$_sdl2"
 else
-  def_sdl2='#undef CONFIG_SDL2'
+  def_sdl2='#define HAVE_SDL2 0'
   echores "$_sdl2"
   echocheck "SDL"
   if test "$_sdl" = yes ; then
     pkg_config_add 'sdl' && _sdl=yes
   fi
   if test "$_sdl" = yes ; then
-    def_sdl='#define CONFIG_SDL 1'
+    def_sdl='#define HAVE_SDL 1'
     novomodules="sdl $novomodules"
     aomodules="sdl $aomodules"
   else
-    def_sdl='#undef CONFIG_SDL'
+    def_sdl='#define HAVE_SDL 0'
     novomodules="sdl $novomodules"
     noaomodules="sdl $noaomodules"
   fi
@@ -2254,7 +2267,7 @@ if test "$_ossaudio" = auto ; then
   return_check $_soundcard_header SNDCTL_DSP_SETFRAGMENT && _ossaudio=yes
 fi
 if test "$_ossaudio" = yes ; then
-  def_ossaudio='#define CONFIG_OSS_AUDIO 1'
+  def_ossaudio='#define HAVE_OSS_AUDIO 1'
   aomodules="oss $aomodules"
   cat > $TMPC << EOF
 #include <$_soundcard_header>
@@ -2285,7 +2298,7 @@ EOF
    fi
   def_ossaudio_devmixer='#define PATH_DEV_MIXER "/dev/mixer"'
 else
-  def_ossaudio='#undef CONFIG_OSS_AUDIO'
+  def_ossaudio='#define HAVE_OSS_AUDIO 0'
   def_ossaudio_devdsp='#define PATH_DEV_DSP ""'
   def_ossaudio_devmixer='#define PATH_DEV_MIXER ""'
   noaomodules="oss $noaomodules"
@@ -2301,11 +2314,11 @@ fi
 echores "$_rsound"
 
 if test "$_rsound" = yes ; then
-   def_rsound='#define CONFIG_RSOUND 1'
+   def_rsound='#define HAVE_RSOUND 1'
    aomodules="rsound $aomodules"
    libs_mplayer="$libs_mplayer -lrsound"
 else
-   def_rsound='#undef CONFIG_RSOUND'
+   def_rsound='#define HAVE_RSOUND 0'
    noaomodules="rsound $noaomodules"
 fi
 
@@ -2318,11 +2331,11 @@ fi
 echores "$_sndio"
 
 if test "$_sndio" = yes ; then
-  def_sndio='#define CONFIG_SNDIO 1'
+  def_sndio='#define HAVE_SNDIO 1'
   aomodules="sndio $_aomodules"
   libs_mplayer="$libs_mplayer -lsndio"
 else
-  def_sndio='#undef CONFIG_SNDIO'
+  def_sndio='#define HAVE_SNDIO 0'
   noaomodules="sndio $_noaomodules"
 fi
 
@@ -2337,10 +2350,10 @@ fi
 echores "$_pulse"
 
 if test "$_pulse" = yes ; then
-  def_pulse='#define CONFIG_PULSE 1'
+  def_pulse='#define HAVE_PULSE 1'
   aomodules="pulse $aomodules"
 else
-  def_pulse='#undef CONFIG_PULSE'
+  def_pulse='#define HAVE_PULSE 0'
   noaomodules="pulse $noaomodules"
 fi
 
@@ -2359,10 +2372,10 @@ fi
 echores "$_portaudio"
 
 if test "$_portaudio" = yes ; then
-  def_portaudio='#define CONFIG_PORTAUDIO 1'
+  def_portaudio='#define HAVE_PORTAUDIO 1'
   aomodules="portaudio $aomodules"
 else
-  def_portaudio='#undef CONFIG_PORTAUDIO'
+  def_portaudio='#define HAVE_PORTAUDIO 0'
   noaomodules="portaudio $noaomodules"
 fi
 
@@ -2376,9 +2389,10 @@ if test "$_jack" = auto ; then
 fi
 
 if test "$_jack" = yes ; then
-  def_jack='#define CONFIG_JACK 1'
+  def_jack='#define HAVE_JACK 1'
   aomodules="jack $aomodules"
 else
+  def_jack='#define HAVE_JACK 0'
   noaomodules="jack $noaomodules"
 fi
 echores "$_jack"
@@ -2394,10 +2408,10 @@ fi
 echores "$_openal"
 
 if test "$_openal" = yes ; then
-  def_openal='#define CONFIG_OPENAL 1'
+  def_openal='#define HAVE_OPENAL 1'
   aomodules="openal $aomodules"
 else
-  def_openal='#undef CONFIG_OPENAL'
+  def_openal='#define HAVE_OPENAL 0'
   noaomodules="openal $noaomodules"
 fi
 
@@ -2409,16 +2423,17 @@ if test "$_alsa" = auto ; then
         _alsa=yes
     fi
 fi
-def_alsa='#undef CONFIG_ALSA'
+def_alsa='#define HAVE_ALSA 0'
 if test "$_alsa" = yes ; then
     aomodules="alsa $aomodules"
-    def_alsa='#define CONFIG_ALSA 1'
+    def_alsa='#define HAVE_ALSA 1'
 else
     noaomodules="alsa $noaomodules"
 fi
 echores "$_alsa"
 
 
+def_coreaudio='#define HAVE_COREAUDIO 0'
 if darwin; then
 echocheck "CoreAudio"
 if test "$_coreaudio" = auto ; then
@@ -2433,10 +2448,10 @@ EOF
 fi
 if test "$_coreaudio" = yes ; then
   libs_mplayer="$libs_mplayer -framework CoreAudio -framework AudioUnit -framework AudioToolbox"
-  def_coreaudio='#define CONFIG_COREAUDIO 1'
+  def_coreaudio='#define HAVE_COREAUDIO 1'
   aomodules="coreaudio $aomodules"
 else
-  def_coreaudio='#undef CONFIG_COREAUDIO'
+  def_coreaudio='#define HAVE_COREAUDIO 0'
   noaomodules="coreaudio $noaomodules"
 fi
 echores $_coreaudio
@@ -2478,9 +2493,9 @@ if test "$_vcd" = auto; then
 fi
 if test "$_vcd" = yes; then
   inputmodules="vcd $inputmodules"
-  def_vcd='#define CONFIG_VCD 1'
+  def_vcd='#define HAVE_VCD 1'
 else
-  def_vcd='#undef CONFIG_VCD'
+  def_vcd='#define HAVE_VCD 0'
   noinputmodules="vcd $noinputmodules"
   res_comment="not supported on this OS"
 fi
@@ -2494,10 +2509,10 @@ if test "$_bluray" = auto ; then
   pkg_config_add 'libbluray >= 0.2.1' && _bluray=yes
 fi
 if test "$_bluray" = yes ; then
-  def_bluray='#define CONFIG_LIBBLURAY 1'
+  def_bluray='#define HAVE_LIBBLURAY 1'
   inputmodules="bluray $inputmodules"
 else
-  def_bluray='#undef CONFIG_LIBBLURAY'
+  def_bluray='#define HAVE_LIBBLURAY 0'
   noinputmodules="bluray $noinputmodules"
 fi
 echores "$_bluray"
@@ -2509,10 +2524,10 @@ if test "$_dvdread" = auto ; then
   pkg_config_add 'dvdread >= 4.1.0' && _dvdread=yes
 fi
 if test "$_dvdread" = yes ; then
-  def_dvdread='#define CONFIG_DVDREAD 1'
+  def_dvdread='#define HAVE_DVDREAD 1'
   inputmodules="dvdread $inputmodules"
 else
-  def_dvdread='#undef CONFIG_DVDREAD'
+  def_dvdread='#define HAVE_DVDREAD 0'
   noinputmodules="dvdread $noinputmodules"
 fi
 echores "$_dvdread"
@@ -2527,12 +2542,12 @@ if test "$_libcdio" = auto ; then
 fi
 if test "$_libcdio" = yes ; then
     _cdda='yes'
-    def_cdda='#define CONFIG_CDDA 1'
+    def_cdda='#define HAVE_CDDA 1'
     inputmodules="cdda $inputmodules"
 else
     _libcdio=no
     _cdda='no'
-    def_cdda='#undef CONFIG_CDDA'
+    def_cdda='#define HAVE_CDDA 0'
     noinputmodules="cdda $noinputmodules"
 fi
 echores "$_libcdio"
@@ -2542,12 +2557,12 @@ echocheck "SSA/ASS support"
 if test "$_ass" = auto ; then
     if pkg_config_add libass ; then
         _ass=yes
-        def_ass='#define CONFIG_ASS 1'
+        def_ass='#define HAVE_LIBASS 1'
     else
         die "Unable to find development files for libass. Aborting. If you really mean to compile without libass support use --disable-libass."
     fi
 else
-    def_ass='#undef CONFIG_ASS'
+    def_ass='#define HAVE_LIBASS 0'
 fi
 echores "$_ass"
 
@@ -2570,10 +2585,10 @@ if test "$_enca" = auto ; then
     statement_check enca.h 'enca_get_languages(NULL)' -lenca $_ld_lm && _enca=yes
 fi
     if test "$_enca" = yes ; then
-        def_enca='#define CONFIG_ENCA 1'
+        def_enca='#define HAVE_ENCA 1'
         libs_mplayer="$libs_mplayer -lenca"
     else
-        def_enca='#undef CONFIG_ENCA'
+        def_enca='#define HAVE_ENCA 0'
     fi
 echores "$_enca"
 
@@ -2582,7 +2597,7 @@ echocheck "zlib"
 _zlib=no
 statement_check zlib.h 'inflate(0, Z_NO_FLUSH)' -lz && _zlib=yes
 if test "$_zlib" = yes ; then
-  def_zlib='#define CONFIG_ZLIB 1'
+  def_zlib='#define HAVE_ZLIB 1'
   libs_mplayer="$libs_mplayer -lz"
 else
   die "Unable to find development files for zlib."
@@ -2593,13 +2608,13 @@ echores "$_zlib"
 # Any version of libmpg123 that knows MPG123_RESYNC_LIMIT shall be fine.
 # That is, 1.2.0 onwards. Recommened is 1.14 onwards, though.
 echocheck "mpg123 support"
-def_mpg123='#undef CONFIG_MPG123'
+def_mpg123='#define HAVE_MPG123 0'
 if test "$_mpg123" = auto; then
   _mpg123=no
   pkg_config_add 'libmpg123 >= 1.2.0' && _mpg123=yes
 fi
 if test "$_mpg123" = yes ; then
-  def_mpg123='#define CONFIG_MPG123 1'
+  def_mpg123='#define HAVE_MPG123 1'
   codecmodules="mpg123 $codecmodules"
 else
   nocodecmodules="mpg123 $nocodecmodules"
@@ -2615,9 +2630,9 @@ if test "$_ladspa" = auto ; then
   fi
 fi
 if test "$_ladspa" = yes; then
-  def_ladspa="#define CONFIG_LADSPA 1"
+  def_ladspa="#define HAVE_LADSPA 1"
 else
-  def_ladspa="#undef CONFIG_LADSPA"
+  def_ladspa="#define HAVE_LADSPA 0"
 fi
 echores "$_ladspa"
 
@@ -2629,8 +2644,8 @@ if test "$_libbs2b" = auto ; then
         _libbs2b=yes
     fi
 fi
-def_libbs2b="#undef CONFIG_LIBBS2B"
-test "$_libbs2b" = yes && def_libbs2b="#define CONFIG_LIBBS2B 1"
+def_libbs2b="#define HAVE_LIBBS2B 0"
+test "$_libbs2b" = yes && def_libbs2b="#define HAVE_LIBBS2B 1"
 echores "$_libbs2b"
 
 
@@ -2642,9 +2657,9 @@ if test "$_lcms2" = auto ; then
     fi
 fi
 if test "$_lcms2" = yes; then
-    def_lcms2="#define CONFIG_LCMS2 1"
+    def_lcms2="#define HAVE_LCMS2 1"
 else
-    def_lcms2="#undef CONFIG_LCMS2"
+    def_lcms2="#define HAVE_LCMS2 0"
 fi
 echores "$_lcms2"
 
@@ -2664,12 +2679,16 @@ _resampler=no
 _avresample=no
 _avresample_has_set_channel_mapping=no
 
+
+def_libswresample='#define HAVE_LIBSWRESAMPLE 0'
+def_libavresample='#define HAVE_LIBAVRESAMPLE 0'
+
 echocheck "libavresample >= 1.0.0"
 if test "$_disable_avresample" = no ; then
   if pkg_config_add "libavresample >= 1.0.0" ; then
     _resampler=yes
     _avresample=yes
-    def_resampler='#define CONFIG_LIBAVRESAMPLE'
+    def_libavresample='#define HAVE_LIBAVRESAMPLE 1'
   fi
 fi
 echores "$_resampler"
@@ -2685,7 +2704,7 @@ if test "$_resampler" = no ; then
   echocheck "libswresample >= 0.17.102"
   if pkg_config_add "libswresample >= 0.17.102" ; then
     _resampler=yes
-    def_resampler='#define CONFIG_LIBSWRESAMPLE'
+    def_libswresample='#define HAVE_LIBSWRESAMPLE 1'
   fi
   echores "$_resampler"
 fi
@@ -2706,9 +2725,9 @@ echocheck "libavcodec new vdpau API"
 _avcodec_new_vdpau_api=no
 statement_check libavutil/pixfmt.h 'int x = AV_PIX_FMT_VDPAU' && _avcodec_new_vdpau_api=yes
 if test "$_avcodec_new_vdpau_api" = yes ; then
-  def_avcodec_new_vdpau_api='#define HAVE_AV_CODEC_NEW_VDPAU_API 1'
+  def_avcodec_new_vdpau_api='#define HAVE_AVCODEC_NEW_VDPAU_API 1'
 else
-  def_avcodec_new_vdpau_api='#define HAVE_AV_CODEC_NEW_VDPAU_API 0'
+  def_avcodec_new_vdpau_api='#define HAVE_AVCODEC_NEW_VDPAU_API 0'
 fi
 echores "$_avcodec_new_vdpau_api"
 
@@ -2717,9 +2736,16 @@ _vdpau_dec_old=no
 if test "$_vdpau" = yes ; then
   if test "$_avcodec_new_vdpau_api" = yes ; then
     _vdpau_dec=yes
+    def_vdpau_dec='#define HAVE_VDPAU_HWACCEL 1'
+    def_vdpau_dec_old='#define HAVE_VDPAU_DECODER 0'
   else
     _vdpau_dec_old=yes
+    def_vdpau_dec='#define HAVE_VDPAU_HWACCEL 0'
+    def_vdpau_dec_old='#define HAVE_VDPAU_DECODER 1'
   fi
+else
+  def_vdpau_dec='#define HAVE_VDPAU_HWACCEL 0'
+  def_vdpau_dec_old='#define HAVE_VDPAU_DECODER 0'
 fi
 
 
@@ -2778,9 +2804,9 @@ EOF
     fi
 fi
 if test "$libavfilter" = yes ; then
-    def_libavfilter='#define CONFIG_LIBAVFILTER 1'
+    def_libavfilter='#define HAVE_LIBAVFILTER 1'
 else
-    def_libavfilter='#undef CONFIG_LIBAVFILTER'
+    def_libavfilter='#define HAVE_LIBAVFILTER 0'
 fi
 echores "$libavfilter"
 
@@ -2797,9 +2823,9 @@ if test "$vf_lavfi" = auto ; then
     fi
 fi
 if test "$vf_lavfi" = yes ; then
-    def_vf_lavfi='#define CONFIG_VF_LAVFI 1'
+    def_vf_lavfi='#define HAVE_VF_LAVFI 1'
 else
-    def_vf_lavfi='#undef CONFIG_VF_LAVFI'
+    def_vf_lavfi='#define HAVE_VF_LAVFI 0'
 fi
 echores "$vf_lavfi"
 
@@ -2822,9 +2848,9 @@ if test "$af_lavfi" = auto ; then
     fi
 fi
 if test "$af_lavfi" = yes ; then
-    def_af_lavfi='#define CONFIG_AF_LAVFI 1'
+    def_af_lavfi='#define HAVE_AF_LAVFI 1'
 else
-    def_af_lavfi='#undef CONFIG_AF_LAVFI'
+    def_af_lavfi='#define HAVE_AF_LAVFI 0'
 fi
 echores "$af_lavfi"
 
@@ -2838,9 +2864,9 @@ if test "$libavdevice" = auto ; then
     fi
 fi
 if test "$libavdevice" = yes ; then
-    def_libavdevice='#define CONFIG_LIBAVDEVICE 1'
+    def_libavdevice='#define HAVE_LIBAVDEVICE 1'
 else
-    def_libavdevice='#undef CONFIG_LIBAVDEVICE'
+    def_libavdevice='#define HAVE_LIBAVDEVICE 0'
 fi
 echores "$libavdevice"
 
@@ -2853,13 +2879,11 @@ if test "$libpostproc" = auto ; then
     fi
 fi
 if test "$libpostproc" = yes ; then
-    def_libpostproc='#define CONFIG_LIBPOSTPROC 1'
+    def_libpostproc='#define HAVE_LIBPOSTPROC 1'
 else
-    def_libpostproc='#undef CONFIG_LIBPOSTPROC'
+    def_libpostproc='#define HAVE_LIBPOSTPROC 0'
 fi
 echores "$libpostproc"
-
-def_vda='#define CONFIG_VDA 0'
 
 if darwin ; then
 
@@ -2875,10 +2899,10 @@ if test "$_vda" = auto ; then
  fi
 fi
 if test "$_vda" = yes ; then
-  def_vda='#define CONFIG_VDA 1'
+  def_vda='#define HAVE_VDA_HWACCEL 1'
   libs_mplayer="$libs_mplayer -framework VideoDecodeAcceleration -framework QuartzCore -framework IOSurface"
 else
-  def_vda='#define CONFIG_VDA 0'
+  def_vda='#define HAVE_VDA_HWACCEL 0'
 fi
 echores "$_vda"
 
@@ -2895,16 +2919,19 @@ else
 fi
 echores "$_vda_refcounting"
 
+else
+  def_vda='#define HAVE_VDA_HWACCEL 0'
+  def_vda_refcounting='#define HAVE_VDA_LIBAVCODEC_REFCOUNTING 0'
 fi
 
 
 echocheck "TV interface"
 if test "$_tv" = yes ; then
-  def_tv='#define CONFIG_TV 1'
+  def_tv='#define HAVE_TV 1'
   inputmodules="tv $inputmodules"
 else
   noinputmodules="tv $noinputmodules"
-  def_tv='#undef CONFIG_TV'
+  def_tv='#define HAVE_TV 0'
 fi
 echores "$_tv"
 
@@ -2920,32 +2947,32 @@ if test "$_tv_v4l2" = auto ; then
 fi
 if test "$_tv_v4l2" = yes ; then
   _audio_input=yes
-  def_tv_v4l2='#define CONFIG_TV_V4L2 1'
+  def_tv_v4l2='#define HAVE_TV_V4L2 1'
   inputmodules="tv-v4l2 $inputmodules"
 else
   noinputmodules="tv-v4l2 $noinputmodules"
-  def_tv_v4l2='#undef CONFIG_TV_V4L2'
+  def_tv_v4l2='#define HAVE_TV_V4L2 0'
 fi
 echores "$_tv_v4l2"
 
 
 echocheck "Radio interface"
 if test "$_radio" = yes ; then
-  def_radio='#define CONFIG_RADIO 1'
+  def_radio='#define HAVE_RADIO 1'
   inputmodules="radio $inputmodules"
   if test "$_alsa" != yes -a "$_ossaudio" != yes ; then
     _radio_capture=no
   fi
   if test "$_radio_capture" = yes ; then
     _audio_input=yes
-    def_radio_capture="#define CONFIG_RADIO_CAPTURE 1"
+    def_radio_capture="#define HAVE_RADIO_CAPTURE 1"
   else
-    def_radio_capture="#undef CONFIG_RADIO_CAPTURE"
+    def_radio_capture="#define HAVE_RADIO_CAPTURE 0"
   fi
 else
   noinputmodules="radio $noinputmodules"
-  def_radio='#undef CONFIG_RADIO'
-  def_radio_capture="#undef CONFIG_RADIO_CAPTURE"
+  def_radio='#define HAVE_RADIO 0'
+  def_radio_capture="#define HAVE_RADIO_CAPTURE 0"
   _radio_capture=no
 fi
 echores "$_radio"
@@ -2960,9 +2987,9 @@ if test "$_radio_v4l2" = auto ; then
   fi
 fi
 if test "$_radio_v4l2" = yes ; then
-  def_radio_v4l2='#define CONFIG_RADIO_V4L2 1'
+  def_radio_v4l2='#define HAVE_RADIO_V4L2 1'
 else
-  def_radio_v4l2='#undef CONFIG_RADIO_V4L2'
+  def_radio_v4l2='#define HAVE_RADIO_V4L2 0'
 fi
 echores "$_radio_v4l2"
 
@@ -2984,11 +3011,11 @@ EOF
  fi
 fi
 if test "$_pvr" = yes ; then
-  def_pvr='#define CONFIG_PVR 1'
+  def_pvr='#define HAVE_PVR 1'
   inputmodules="pvr $inputmodules"
 else
   noinputmodules="pvr $noinputmodules"
-  def_pvr='#undef CONFIG_PVR'
+  def_pvr='#define HAVE_PVR 0'
 fi
 echores "$_pvr"
 
@@ -3093,16 +3120,16 @@ test_lua 52deb "lua5.2 >= 5.2.0" # debian
 fi
 
 if test "$lua" = yes ; then
-    def_lua='#define CONFIG_LUA 1'
+    def_lua='#define HAVE_LUA 1'
 else
-    def_lua='#undef CONFIG_LUA'
+    def_lua='#define HAVE_LUA 0'
 fi
 
 echocheck "encoding"
 if test "$_encoding" = yes ; then
-    def_encoding="#define CONFIG_ENCODING 1"
+    def_encoding="#define HAVE_ENCODING 1"
 else
-    def_encoding="#undef CONFIG_ENCODING"
+    def_encoding="#define HAVE_ENCODING 0"
 fi
 echores "$_encoding"
 
@@ -3114,9 +3141,9 @@ if win32 ; then
 fi
 
 if test "$_dlopen" = yes ; then
-  def_dlopen='#define CONFIG_DLOPEN 1'
+  def_dlopen='#define HAVE_DLOPEN 1'
 else
-  def_dlopen='#undef CONFIG_DLOPEN'
+  def_dlopen='#define HAVE_DLOPEN 0'
 fi
 
 #############################################################################
@@ -3144,11 +3171,11 @@ libs_mplayer="$libs_mplayer $_ld_dl"
 
 
 echocheck "joystick"
-def_joystick='#undef CONFIG_JOYSTICK'
+def_joystick='#define HAVE_JOYSTICK 0'
 if test "$_joystick" = yes ; then
   if linux || freebsd ; then
     # TODO add some check
-    def_joystick='#define CONFIG_JOYSTICK 1'
+    def_joystick='#define HAVE_JOYSTICK 1'
   else
     _joystick="no"
     res_comment="unsupported under $system_name"
@@ -3162,10 +3189,10 @@ if test "$_lirc" = auto ; then
   header_check lirc/lirc_client.h -llirc_client && _lirc=yes
 fi
 if test "$_lirc" = yes ; then
-  def_lirc='#define CONFIG_LIRC 1'
+  def_lirc='#define HAVE_LIRC 1'
   libs_mplayer="$libs_mplayer -llirc_client"
 else
-  def_lirc='#undef CONFIG_LIRC'
+  def_lirc='#define HAVE_LIRC 0'
 fi
 echores "$_lirc"
 
@@ -3175,10 +3202,10 @@ if test "$_lircc" = auto ; then
   header_check lirc/lircc.h -llircc && _lircc=yes
 fi
 if test "$_lircc" = yes ; then
-  def_lircc='#define CONFIG_LIRCC 1'
+  def_lircc='#define HAVE_LIRCC 1'
   libs_mplayer="$libs_mplayer -llircc"
 else
-  def_lircc='#undef CONFIG_LIRCC'
+  def_lircc='#define HAVE_LIRCC 0'
 fi
 echores "$_lircc"
 
@@ -3480,11 +3507,14 @@ $def_jpeg
 $def_mng
 $def_v4l2
 $def_vdpau
+$def_vdpau_dec
+$def_vdpau_dec_old
 $def_vda
 $def_vda_refcounting
 $def_vaapi
 $def_vaapi_vpp
 $def_vaapi_glx
+$def_vaapi_hwaccel
 $def_vm
 $def_x11
 $def_wayland
@@ -3497,7 +3527,8 @@ $def_xv
 
 /* FFmpeg */
 $def_encoding
-$def_resampler
+$def_libavresample
+$def_libswresample
 $def_avresample_has_set_channel_mapping
 
 $def_fast_64bit

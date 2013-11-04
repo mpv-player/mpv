@@ -200,7 +200,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
     mpctx->dropped_frames = 0;
     mpctx->playback_pts = MP_NOPTS_VALUE;
 
-#ifdef CONFIG_ENCODING
+#if HAVE_ENCODING
     encode_lavc_discontinuity(mpctx->encode_lavc_ctx);
 #endif
 }
@@ -948,7 +948,7 @@ void run_playloop(struct MPContext *mpctx)
     bool was_restart = mpctx->restart_playback;
     bool new_frame_shown = false;
 
-#ifdef CONFIG_ENCODING
+#if HAVE_ENCODING
     if (encode_lavc_didfail(mpctx->encode_lavc_ctx)) {
         mpctx->stop_play = PT_QUIT;
         return;

@@ -46,27 +46,27 @@
 #include <X11/keysym.h>
 #include <X11/XKBlib.h>
 
-#ifdef CONFIG_XSS
+#if HAVE_XSS
 #include <X11/extensions/scrnsaver.h>
 #endif
 
-#ifdef CONFIG_XDPMS
+#if HAVE_XDPMS
 #include <X11/extensions/dpms.h>
 #endif
 
-#ifdef CONFIG_XINERAMA
+#if HAVE_XINERAMA
 #include <X11/extensions/Xinerama.h>
 #endif
 
-#ifdef CONFIG_XF86VM
+#if HAVE_XF86VM
 #include <X11/extensions/xf86vmode.h>
 #endif
 
-#ifdef CONFIG_XF86XK
+#if HAVE_XF86XK
 #include <X11/XF86keysym.h>
 #endif
 
-#if CONFIG_ZLIB
+#if HAVE_ZLIB
 #include <zlib.h>
 #endif
 
@@ -424,7 +424,7 @@ static void vo_x11_update_screeninfo(struct vo *vo)
         opts->screenwidth = x11->ws_width;
         opts->screenheight = x11->ws_height;
     }
-#ifdef CONFIG_XINERAMA
+#if HAVE_XINERAMA
     if (opts->screen_id >= -1 && XineramaIsActive(x11->display) && !all_screens)
     {
         int screen = opts->fullscreen ? opts->fsscreen_id : opts->screen_id;
@@ -974,7 +974,7 @@ static void vo_x11_update_window_title(struct vo *vo)
     vo_x11_set_property_utf8(vo, x11->XA_NET_WM_ICON_NAME, title);
 }
 
-#if CONFIG_ZLIB
+#if HAVE_ZLIB
 static bstr decompress_gz(bstr in)
 {
     bstr res = {0};
@@ -1530,7 +1530,7 @@ static void xscreensaver_heartbeat(struct vo_x11_state *x11)
 
 static int xss_suspend(Display *mDisplay, Bool suspend)
 {
-#ifndef CONFIG_XSS
+#if !HAVE_XSS
     return 0;
 #else
     int event, error, major, minor;
@@ -1552,7 +1552,7 @@ static void saver_on(struct vo_x11_state *x11)
     x11->screensaver_off = 0;
     if (xss_suspend(mDisplay, False))
         return;
-#ifdef CONFIG_XDPMS
+#if HAVE_XDPMS
     if (x11->dpms_disabled) {
         int nothing;
         if (DPMSQueryExtension(mDisplay, &nothing, &nothing)) {
@@ -1587,7 +1587,7 @@ static void saver_off(struct vo_x11_state *x11)
     x11->screensaver_off = 1;
     if (xss_suspend(mDisplay, True))
         return;
-#ifdef CONFIG_XDPMS
+#if HAVE_XDPMS
     if (DPMSQueryExtension(mDisplay, &nothing, &nothing)) {
         BOOL onoff;
         CARD16 state;
@@ -1636,7 +1636,7 @@ static void vo_x11_selectinput_witherr(struct vo *vo,
     }
 }
 
-#ifdef CONFIG_XF86VM
+#if HAVE_XF86VM
 double vo_x11_vm_get_fps(struct vo *vo)
 {
     struct vo_x11_state *x11 = vo->x11;
@@ -1648,7 +1648,7 @@ double vo_x11_vm_get_fps(struct vo *vo)
         XFree(modeline.private);
     return 1e3 * clock / modeline.htotal / modeline.vtotal;
 }
-#else /* CONFIG_XF86VM */
+#else /* HAVE_XF86VM */
 double vo_x11_vm_get_fps(struct vo *vo)
 {
     return 0;

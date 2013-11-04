@@ -30,7 +30,7 @@
 
 #include "config.h"
 
-#ifdef HAVE_GLOB
+#if HAVE_GLOB
 #include <glob.h>
 #else
 #include "osdep/glob.h"

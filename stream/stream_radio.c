@@ -37,7 +37,7 @@
 
 #include <linux/types.h>
 
-#ifdef CONFIG_RADIO_V4L2
+#if HAVE_RADIO_V4L2
 #include <linux/videodev2.h>
 #endif
 
@@ -48,13 +48,13 @@
 #include "stream_radio.h"
 #include "libavutil/avstring.h"
 
-#ifdef CONFIG_RADIO_CAPTURE
+#if HAVE_RADIO_CAPTURE
 #include "audio_in.h"
 
-#ifdef HAVE_SYS_SOUNDCARD_H
+#if HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
 #else
-#ifdef HAVE_SOUNDCARD_H
+#if HAVE_SOUNDCARD_H
 #include <soundcard.h>
 #else
 #include <linux/soundcard.h>
@@ -93,7 +93,7 @@ typedef struct radio_priv_s {
     float rangehigh;                       ///< highest tunable frequency in MHz
     const struct radio_driver_s*     driver;
     int                 old_snd_volume;
-#ifdef CONFIG_RADIO_CAPTURE
+#if HAVE_RADIO_CAPTURE
     volatile int        do_capture;        ///< is capture enabled
     audio_in_t          audio_in;
     unsigned char*      audio_ringbuffer;
@@ -125,7 +125,7 @@ static const m_option_t stream_opts_fields[] = {
 };
 
 static void close_s(struct stream *stream);
-#ifdef CONFIG_RADIO_CAPTURE
+#if HAVE_RADIO_CAPTURE
 static int clear_buffer(radio_priv_t* priv);
 #endif
 
@@ -221,7 +221,7 @@ static int parse_channels(radio_priv_t* priv,float freq_channel,float* pfreq){
     return STREAM_OK;
 }
 
-#ifdef CONFIG_RADIO_V4L2
+#if HAVE_RADIO_V4L2
 /*****************************************************************
  * \brief get fraction value for using in set_frequency and get_frequency
  * \return STREAM_OK if success, STREAM_ERROR otherwise
@@ -378,7 +378,7 @@ static const radio_driver_t radio_driver_v4l2={
     set_frequency_v4l2,
     get_frequency_v4l2
 };
-#endif /* CONFIG_RADIO_V4L2 */
+#endif /* HAVE_RADIO_V4L2 */
 
 static inline int init_frac(radio_priv_t* priv){
     return priv->driver->init_frac(priv);
@@ -391,7 +391,7 @@ static inline int set_frequency(radio_priv_t* priv,float frequency){
     if(priv->driver->set_frequency(priv,frequency)!=STREAM_OK)
         return STREAM_ERROR;
 
-#ifdef CONFIG_RADIO_CAPTURE
+#if HAVE_RADIO_CAPTURE
     if(clear_buffer(priv)!=STREAM_OK){
         mp_tmsg(MSGT_RADIO,MSGL_ERR,"[radio] Clearing buffer failed: %s\n",strerror(errno));
         return  STREAM_ERROR;
@@ -410,7 +410,7 @@ static inline int get_volume(radio_priv_t* priv,int* volume){
 }
 
 
-#ifndef CONFIG_RADIO_CAPTURE
+#if !HAVE_RADIO_CAPTURE
 /*****************************************************************
  * \brief stub, if capture disabled at compile-time
  * \return STREAM_OK
@@ -441,7 +441,7 @@ static int read_chunk(audio_in_t *ai, unsigned char *buffer)
     int ret;
 
     switch (ai->type) {
-#ifdef CONFIG_ALSA
+#if HAVE_ALSA
     case AUDIO_IN_ALSA:
         //device opened in non-blocking mode
         ret = snd_pcm_readi(ai->alsa.handle, buffer, ai->alsa.chunk_size);
@@ -463,7 +463,7 @@ static int read_chunk(audio_in_t *ai, unsigned char *buffer)
         }
         return ret;
 #endif
-#ifdef CONFIG_OSS_AUDIO
+#if HAVE_OSS_AUDIO
     case AUDIO_IN_OSS:
     {
         int bt=0;
@@ -562,7 +562,7 @@ static int init_audio(radio_priv_t *priv)
 
     priv->do_capture=1;
     mp_tmsg(MSGT_RADIO,MSGL_V,"[radio] Starting capture stuff.\n");
-#ifdef CONFIG_ALSA
+#if HAVE_ALSA
     while ((tmp = strrchr(priv->radio_param->adevice, '='))){
         tmp[0] = ':';
         //adevice option looks like ALSA device name. Switching to ALSA
@@ -584,11 +584,11 @@ static int init_audio(radio_priv_t *priv)
         mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] audio_in_setup call failed: %s\n", strerror(errno));
         return STREAM_ERROR;
     }
-#ifdef CONFIG_OSS_AUDIO
+#if HAVE_OSS_AUDIO
     if(is_oss)
         ioctl(priv->audio_in.oss.audio_fd, SNDCTL_DSP_NONBLOCK, 0);
 #endif
-#ifdef CONFIG_ALSA
+#if HAVE_ALSA
     if(!is_oss)
         snd_pcm_nonblock(priv->audio_in.alsa.handle,1);
 #endif
@@ -616,7 +616,7 @@ static int init_audio(radio_priv_t *priv)
 
     return STREAM_OK;
 }
-#endif /* CONFIG_RADIO_CAPTURE */
+#endif /* HAVE_RADIO_CAPTURE */
 
 /*-------------------------------------------------------------------------
  for call from mplayer.c
@@ -788,7 +788,7 @@ char* radio_get_channel_name(struct stream *stream){
 static int fill_buffer_s(struct stream *s, char *buffer, int max_len){
     int len=max_len;
 
-#ifdef CONFIG_RADIO_CAPTURE
+#if HAVE_RADIO_CAPTURE
     radio_priv_t* priv=(radio_priv_t*)s->priv;
 
     if (priv->do_capture){
@@ -806,7 +806,7 @@ static int fill_buffer_s(struct stream *s, char *buffer, int max_len){
  when no driver explicitly specified first available will be used
  */
 static const radio_driver_t* radio_drivers[]={
-#ifdef CONFIG_RADIO_V4L2
+#if HAVE_RADIO_V4L2
     &radio_driver_v4l2,
 #endif
     0
@@ -837,7 +837,7 @@ static int open_s(stream_t *stream,int mode)
     priv->radio_param=stream->priv;
     stream->priv=NULL;
 
-#ifdef CONFIG_RADIO_CAPTURE
+#if HAVE_RADIO_CAPTURE
     if (priv->radio_param->capture && strncmp("capture",priv->radio_param->capture,7)==0)
         priv->do_capture=1;
     else
@@ -934,7 +934,7 @@ static void close_s(struct stream *stream){
     radio_channels_t * tmp;
     if (!priv) return;
 
-#ifdef CONFIG_RADIO_CAPTURE
+#if HAVE_RADIO_CAPTURE
     free(priv->audio_ringbuffer);
     priv->audio_ringbuffer = NULL;
 

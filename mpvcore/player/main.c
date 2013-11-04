@@ -64,11 +64,11 @@
 #include "command.h"
 #include "screenshot.h"
 
-#ifdef CONFIG_X11
+#if HAVE_X11
 #include "video/out/x11_common.h"
 #endif
 
-#ifdef CONFIG_COCOA
+#if HAVE_COCOA
 #include "osdep/macosx_application.h"
 #endif
 
@@ -109,14 +109,14 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     int rc;
     uninit_player(mpctx, INITIALIZED_ALL);
 
-#ifdef CONFIG_ENCODING
+#if HAVE_ENCODING
     encode_lavc_finish(mpctx->encode_lavc_ctx);
     encode_lavc_free(mpctx->encode_lavc_ctx);
 #endif
 
     mpctx->encode_lavc_ctx = NULL;
 
-#ifdef CONFIG_LUA
+#if HAVE_LUA
     mp_lua_uninit(mpctx);
 #endif
 
@@ -124,7 +124,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     timeEndPeriod(1);
 #endif
 
-#ifdef CONFIG_COCOA
+#if HAVE_COCOA
     cocoa_set_input_context(NULL);
 #endif
 
@@ -134,7 +134,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
 
     osd_free(mpctx->osd);
 
-#ifdef CONFIG_ASS
+#if HAVE_LIBASS
     ass_library_done(mpctx->ass_library);
     mpctx->ass_library = NULL;
 #endif
@@ -179,7 +179,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     mp_msg_uninit(mpctx->global);
     talloc_free(mpctx);
 
-#ifdef CONFIG_COCOA
+#if HAVE_COCOA
     terminate_cocoa_application();
     // never reach here:
     // terminate calls exit itself, just silence compiler warning
@@ -205,7 +205,7 @@ static bool handle_help_options(struct MPContext *mpctx)
         talloc_free(list);
         opt_exit = 1;
     }
-#ifdef CONFIG_X11
+#if HAVE_X11
     if (opts->vo.fstype_list && strcmp(opts->vo.fstype_list[0], "help") == 0) {
         fstype_help();
         mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
@@ -223,7 +223,7 @@ static bool handle_help_options(struct MPContext *mpctx)
         property_print_help();
         opt_exit = 1;
     }
-#ifdef CONFIG_ENCODING
+#if HAVE_ENCODING
     if (encode_lavc_showhelp(mpctx->opts))
         opt_exit = 1;
 #endif
@@ -284,7 +284,7 @@ static void init_input(struct MPContext *mpctx)
     // Set the libstream interrupt callback
     stream_set_interrupt_callback(mp_input_check_interrupt, mpctx->input);
 
-#ifdef CONFIG_COCOA
+#if HAVE_COCOA
     cocoa_set_input_context(mpctx->input);
 #endif
 }
@@ -366,13 +366,13 @@ static int mpv_main(int argc, char *argv[])
         exit_player(mpctx, EXIT_NONE);
     }
 
-#ifdef CONFIG_PRIORITY
+#if HAVE_PRIORITY
     set_priority();
 #endif
 
     init_input(mpctx);
 
-#ifdef CONFIG_ENCODING
+#if HAVE_ENCODING
     if (opts->encode_output.file && *opts->encode_output.file) {
         mpctx->encode_lavc_ctx = encode_lavc_init(&opts->encode_output);
         if(!mpctx->encode_lavc_ctx) {
@@ -388,7 +388,7 @@ static int mpv_main(int argc, char *argv[])
     }
 #endif
 
-#ifdef CONFIG_ASS
+#if HAVE_LIBASS
     mpctx->ass_library = mp_ass_init(opts);
 #else
     MP_WARN(mpctx, "Compiled without libass.\n");
@@ -410,7 +410,7 @@ static int mpv_main(int argc, char *argv[])
         mpctx->initialized_flags |= INITIALIZED_VO;
     }
 
-#ifdef CONFIG_LUA
+#if HAVE_LUA
     // Lua user scripts can call arbitrary functions. Load them at a point
     // where this is safe.
     mp_lua_init(mpctx);
@@ -432,7 +432,7 @@ static int mpv_main(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-#ifdef CONFIG_COCOA
+#if HAVE_COCOA
     return cocoa_main(mpv_main, argc, argv);
 #else
     return mpv_main(argc, argv);

@@ -38,10 +38,10 @@
 #include "mpvcore/options.h"
 #include "mpvcore/mp_msg.h"
 
-#ifdef HAVE_SYS_SOUNDCARD_H
+#if HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
 #else
-#ifdef HAVE_SOUNDCARD_H
+#if HAVE_SOUNDCARD_H
 #include <soundcard.h>
 #endif
 #endif
@@ -349,7 +349,7 @@ ac3_retry:
         // Measuring buffer size:
         void *data;
         p->buffersize = 0;
-#ifdef HAVE_AUDIO_SELECT
+#if HAVE_AUDIO_SELECT
         data = malloc(p->outburst);
         memset(data, 0, p->outburst);
         while (p->buffersize < 0x40000) {
@@ -367,7 +367,7 @@ ac3_retry:
         free(data);
         if (p->buffersize == 0) {
             MP_ERR(ao, "***  Your audio driver DOES NOT support select()  ***\n");
-            MP_ERR(ao, "Recompile mpv with #undef HAVE_AUDIO_SELECT in config.h!\n");
+            MP_ERR(ao, "Recompile mpv with #define HAVE_AUDIO_SELECT 0 in config.h!\n");
             return -1;
         }
 #endif
@@ -456,7 +456,7 @@ static int get_space(struct ao *ao)
 #endif
 
     // check buffer
-#ifdef HAVE_AUDIO_SELECT
+#if HAVE_AUDIO_SELECT
     {
         fd_set rfds;
         struct timeval tv;

@@ -33,18 +33,18 @@
 #include <libavformat/avformat.h>
 #include <libswscale/swscale.h>
 
-#ifdef CONFIG_LIBAVDEVICE
+#if HAVE_LIBAVDEVICE
 #include <libavdevice/avdevice.h>
 #endif
 
-#ifdef CONFIG_LIBAVFILTER
+#if HAVE_LIBAVFILTER
 #include <libavfilter/avfilter.h>
 #endif
 
-#ifdef CONFIG_LIBAVRESAMPLE
+#if HAVE_LIBAVRESAMPLE
 #include <libavresample/avresample.h>
 #endif
-#ifdef CONFIG_LIBSWRESAMPLE
+#if HAVE_LIBSWRESAMPLE
 #include <libswresample/swresample.h>
 #endif
 
@@ -138,10 +138,10 @@ void init_libav(void)
     av_register_all();
     avformat_network_init();
 
-#ifdef CONFIG_LIBAVFILTER
+#if HAVE_LIBAVFILTER
     avfilter_register_all();
 #endif
-#ifdef CONFIG_LIBAVDEVICE
+#if HAVE_LIBAVDEVICE
     avdevice_register_all();
 #endif
 }
@@ -164,13 +164,13 @@ void print_libav_versions(int v)
     print_version(v, "libavcodec",    LIBAVCODEC_VERSION_INT,    avcodec_version());
     print_version(v, "libavformat",   LIBAVFORMAT_VERSION_INT,   avformat_version());
     print_version(v, "libswscale",    LIBSWSCALE_VERSION_INT,    swscale_version());
-#ifdef CONFIG_LIBAVFILTER
+#if HAVE_LIBAVFILTER
     print_version(v, "libavfilter",   LIBAVFILTER_VERSION_INT,   avfilter_version());
 #endif
-#ifdef CONFIG_LIBAVRESAMPLE
+#if HAVE_LIBAVRESAMPLE
     print_version(v, "libavresample", LIBAVRESAMPLE_VERSION_INT, avresample_version());
 #endif
-#ifdef CONFIG_LIBSWRESAMPLE
+#if HAVE_LIBSWRESAMPLE
     print_version(v, "libswresample", LIBSWRESAMPLE_VERSION_INT, swresample_version());
 #endif
 }

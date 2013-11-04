@@ -142,14 +142,14 @@ static bool is_software_gl(GL *gl)
            strcmp(renderer, "Mesa X11") == 0;
 }
 
-#ifdef HAVE_LIBDL
+#if HAVE_LIBDL
 #include <dlfcn.h>
 #endif
 
 void *mp_getdladdr(const char *s)
 {
     void *ret = NULL;
-#ifdef HAVE_LIBDL
+#if HAVE_LIBDL
     void *handle = dlopen(NULL, RTLD_LAZY);
     if (!handle)
         return NULL;
@@ -852,18 +852,18 @@ struct backend {
 };
 
 static struct backend backends[] = {
-#ifdef CONFIG_GL_COCOA
+#if HAVE_GL_COCOA
     {"cocoa", mpgl_set_backend_cocoa},
 #endif
-#ifdef CONFIG_GL_WIN32
+#if HAVE_GL_WIN32
     {"win", mpgl_set_backend_w32},
 #endif
 
 //Add the wayland backend before x11, in order to probe for a wayland-server before a x11-server and avoid using xwayland
-#ifdef CONFIG_GL_WAYLAND
+#if HAVE_GL_WAYLAND
     {"wayland", mpgl_set_backend_wayland},
 #endif
-#ifdef CONFIG_GL_X11
+#if HAVE_GL_X11
     {"x11", mpgl_set_backend_x11},
 #endif
     {0}
@@ -1012,7 +1012,7 @@ void mp_log_source(struct mp_log *log, int lev, const char *src)
 extern const struct gl_hwdec_driver gl_hwdec_vaglx;
 
 const struct gl_hwdec_driver *mpgl_hwdec_drivers[] = {
-#if CONFIG_VAAPI_GLX
+#if HAVE_VAAPI_GLX
     &gl_hwdec_vaglx,
 #endif
     NULL

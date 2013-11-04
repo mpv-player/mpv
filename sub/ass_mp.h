@@ -36,7 +36,7 @@
 // m_color argument
 #define MP_ASS_COLOR(c) MP_ASS_RGBA((c).r, (c).g, (c).b, (c).a)
 
-#ifdef CONFIG_ASS
+#if HAVE_LIBASS
 #include <ass/ass.h>
 #include <ass/ass_types.h>
 
@@ -62,5 +62,5 @@ struct sub_bitmaps;
 void mp_ass_render_frame(ASS_Renderer *renderer, ASS_Track *track, double time,
                          struct sub_bitmap **parts, struct sub_bitmaps *res);
 
-#endif                          /* CONFIG_ASS */
+#endif                          /* HAVE_LIBASS */
 #endif                          /* MPLAYER_ASS_MP_H */

@@ -37,7 +37,7 @@
 
 #include "config.h"
 
-#if CONFIG_ZLIB
+#if HAVE_ZLIB
 #include <zlib.h>
 #endif
 
@@ -267,7 +267,7 @@ static bstr demux_mkv_decode(mkv_track_t *track, bstr data, uint32_t type)
         src = dest;  // output from last iteration is new source
 
         if (enc->comp_algo == 0) {
-#if CONFIG_ZLIB
+#if HAVE_ZLIB
             /* zlib encoded track */
 
             if (size == 0)
@@ -457,7 +457,7 @@ static void parse_trackencodings(struct demuxer *demuxer,
                     "[mkv] algorithm (%" PRIu64 "). Skipping track.\n",
                     track->tnum, e.comp_algo);
         }
-#if !CONFIG_ZLIB
+#if !HAVE_ZLIB
         else if (e.comp_algo == 0) {
             mp_tmsg(MSGT_DEMUX, MSGL_WARN,
                     "[mkv] Track %u was compressed with zlib "

@@ -44,7 +44,7 @@
 
 void update_fps(struct MPContext *mpctx)
 {
-#ifdef CONFIG_ENCODING
+#if HAVE_ENCODING
     struct sh_video *sh_video = mpctx->sh_video;
     if (mpctx->encode_lavc_ctx && sh_video)
         encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, sh_video->fps);
