@@ -359,7 +359,7 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
     mkv_d->tc_scale = 1000000;
     mkv_d->duration = 0;
 
-    struct ebml_info info = {{0}};
+    struct ebml_info info = {0};
     struct ebml_parse_ctx parse_ctx = {0};
     if (ebml_read_element(s, &parse_ctx, &info, &ebml_info_desc) < 0)
         return -1;
@@ -1730,7 +1730,7 @@ static int read_ebml_header(demuxer_t *demuxer)
 
     if (ebml_read_id(s, NULL) != EBML_ID_EBML)
         return 0;
-    struct ebml_ebml ebml_master = {0};
+    struct ebml_ebml ebml_master = {{0}};
     struct ebml_parse_ctx parse_ctx = { .no_error_messages = true };
     if (ebml_read_element(s, &parse_ctx, &ebml_master, &ebml_ebml_desc) < 0)
         return 0;
