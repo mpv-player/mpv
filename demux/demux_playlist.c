@@ -110,6 +110,27 @@ static int parse_mov_rtsptext(struct pl_parser *p)
     return -1;
 }
 
+static int parse_pls(struct pl_parser *p)
+{
+    bstr line = {0};
+    while (!line.len && !pl_eof(p))
+        line = bstr_strip(pl_get_line(p));
+    if (bstrcasecmp0(line, "[playlist]") != 0)
+        return -1;
+    if (p->probing)
+        return 0;
+    while (!pl_eof(p)) {
+        line = bstr_strip(pl_get_line(p));
+        bstr key, value;
+        if (bstr_split_tok(line, "=", &key, &value) &&
+            bstr_case_startswith(key, bstr0("File")))
+        {
+            pl_add(p, value);
+        }
+    }
+    return 0;
+}
+
 struct pl_format {
     const char *name;
     int (*parse)(struct pl_parser *p);
@@ -119,6 +140,7 @@ static const struct pl_format formats[] = {
     {"m3u", parse_m3u},
     {"ini", parse_ref_init},
     {"mov", parse_mov_rtsptext},
+    {"pls", parse_pls},
 };
 
 static const struct pl_format *probe_pl(struct pl_parser *p, bool force)
