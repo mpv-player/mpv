@@ -1712,7 +1712,7 @@ if test "$_wayland" = yes || test "$_wayland" = auto; then
 fi
 if test "$_wayland" = yes; then
   res_comment=""
-  def_wayland='#define HAVE_WAYLAND'
+  def_wayland='#define HAVE_WAYLAND 1'
   vomodules="wayland $vomodules"
 else
   res_comment="version >= $_wlver"
@@ -2131,7 +2131,7 @@ if test "$_gl" = yes ; then
     res_comment="$res_comment x11"
   fi
   if test "$_gl_wayland" = yes ; then
-    def_gl_wayland='#define HAVE_GL_WAYLAND'
+    def_gl_wayland='#define HAVE_GL_WAYLAND 1'
     res_comment="$res_comment wayland"
   fi
   vomodules="opengl $vomodules"
