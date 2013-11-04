@@ -196,6 +196,10 @@ static int init(struct ao *ao)
     struct priv *p = ao->priv;
     int oss_format;
 
+#ifdef SNDCTL_DSP_GETPLAYVOL
+    ao->no_persistent_volume = true;
+#endif
+
     const char *mchan = NULL;
     if (p->cfg_oss_mixer_channel && p->cfg_oss_mixer_channel[0])
         mchan = p->cfg_oss_mixer_channel;
