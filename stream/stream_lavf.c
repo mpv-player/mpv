@@ -219,12 +219,10 @@ static int open_f(stream_t *stream, int mode)
         }
     }
 
-    char *rtmp[] = {"rtmp:", "rtmpt:", "rtmpe:", "rtmpte:", "rtmps:"};
-    for (int i = 0; i < FF_ARRAY_ELEMS(rtmp); i++)
-        if (!strncmp(filename, rtmp[i], strlen(rtmp[i]))) {
-            stream->demuxer = "lavf";
-            stream->lavf_type = "flv";
-        }
+    if (strncmp(filename, "rtmp", 4) == 0) {
+        stream->demuxer = "lavf";
+        stream->lavf_type = "flv";
+    }
     stream->priv = avio;
     int64_t size = avio_size(avio);
     if (size >= 0)
