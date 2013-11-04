@@ -1204,7 +1204,7 @@ static void set_image_textures(struct gl_video *p, struct video_image *vimg,
                                GLuint imgtex[4])
 {
     GL *gl = p->gl;
-    GLuint dummy[4];
+    GLuint dummy[4] = {0};
     if (!imgtex)
         imgtex = dummy;
 
