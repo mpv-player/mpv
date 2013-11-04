@@ -194,9 +194,6 @@ static void uninit(struct lavc_ctx *ctx)
     if (p->context.decoder != VDP_INVALID_HANDLE)
         p->vdp->decoder_destroy(p->context.decoder);
 
-    // Free bitstream buffers allocated by libavcodec
-    av_freep(&p->context.bitstream_buffers);
-
     talloc_free(p);
 
     ctx->hwdec_priv = NULL;
