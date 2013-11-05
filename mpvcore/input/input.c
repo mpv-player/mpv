@@ -208,7 +208,6 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_PLAYLIST_MOVE, "playlist_move", { ARG_INT, ARG_INT } },
   { MP_CMD_RUN, "run", { ARG_STRING } },
 
-  { MP_CMD_KEYDOWN_EVENTS, "key_down_event", { ARG_INT } },
   { MP_CMD_SET, "set", { ARG_STRING,  ARG_STRING } },
   { MP_CMD_GET_PROPERTY, "get_property", { ARG_STRING } },
   { MP_CMD_ADD, "add", { ARG_STRING, OARG_DOUBLE(0) },

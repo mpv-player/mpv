@@ -2940,10 +2940,6 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 #endif
         break;
 
-    case MP_CMD_KEYDOWN_EVENTS:
-        mp_input_put_key(mpctx->input, cmd->args[0].v.i);
-        break;
-
     case MP_CMD_ENABLE_INPUT_SECTION:
         mp_input_enable_section(mpctx->input, cmd->args[0].v.s,
                                 cmd->args[1].v.i == 1 ? MP_INPUT_EXCLUSIVE : 0);

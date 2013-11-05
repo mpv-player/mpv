@@ -54,7 +54,6 @@ enum mp_command_type {
     MP_CMD_SUB_ADD,
     MP_CMD_SUB_REMOVE,
     MP_CMD_SUB_RELOAD,
-    MP_CMD_KEYDOWN_EVENTS,
     MP_CMD_SET,
     MP_CMD_GET_PROPERTY,
     MP_CMD_PRINT_TEXT,
