@@ -557,7 +557,7 @@ static void deallocate_xvimage(struct vo *vo, int foo)
         XFree(ctx->xvimage[foo]);
 
     ctx->xvimage[foo] = NULL;
-#ifdef HAVE_SHM
+#if HAVE_SHM
     ctx->Shminfo[foo] = (XShmSegmentInfo){0};
 #endif
 
