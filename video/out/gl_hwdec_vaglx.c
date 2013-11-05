@@ -79,7 +79,7 @@ static int create(struct gl_hwdec *hw)
         return -1;
     }
     hw->info->vaapi_ctx = p->ctx;
-    hw->converted_imgfmt = IMGFMT_RGBA;
+    hw->converted_imgfmt = IMGFMT_RGB0;
     return 0;
 }
 
