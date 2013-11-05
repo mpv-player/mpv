@@ -157,12 +157,20 @@ const char *mp_imgfmt_to_name(unsigned int fmt)
     return NULL;
 }
 
-static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
+struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 {
-    const AVPixFmtDescriptor *pd = &av_pix_fmt_descriptors[fmt];
-    int mpfmt = pixfmt2imgfmt(fmt);
-    if (!pd || !mpfmt)
+    enum PixelFormat fmt = imgfmt2pixfmt(mpfmt);
+    if (fmt == PIX_FMT_NONE) {
+        const char *name = mp_imgfmt_to_name(mpfmt);
+        if (name) {
+            mp_msg(MSGT_DECVIDEO, MSGL_V,
+                   "libavutil does not know image format '%s'\n", name);
+        }
         return (struct mp_imgfmt_desc) {0};
+    }
+
+    const AVPixFmtDescriptor *pd = &av_pix_fmt_descriptors[fmt];
+    assert(pd);
 
     struct mp_imgfmt_desc desc = {
         .id = mpfmt,
@@ -217,6 +225,9 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
         desc.flags |= MP_IMGFLAG_ALPHA;
 #endif
 
+    if (mpfmt >= IMGFMT_RGB0_START && mpfmt <= IMGFMT_RGB0_END)
+        desc.flags &= ~MP_IMGFLAG_ALPHA;
+
     if (desc.num_planes == pd->nb_components)
         desc.flags |= MP_IMGFLAG_PLANAR;
 
@@ -249,19 +260,6 @@ static struct mp_imgfmt_desc get_avutil_fmt(enum PixelFormat fmt)
         desc.align_x = 8 / desc.bpp[0]; // expect power of 2
 
     return desc;
-}
-
-struct mp_imgfmt_desc mp_imgfmt_get_desc(unsigned int out_fmt)
-{
-    struct mp_imgfmt_desc fmt = {0};
-    enum PixelFormat avfmt = imgfmt2pixfmt(out_fmt);
-    if (avfmt != PIX_FMT_NONE)
-        fmt = get_avutil_fmt(avfmt);
-    if (!fmt.id) {
-        mp_msg(MSGT_DECVIDEO, MSGL_V, "mp_image: unknown out_fmt: 0x%X\n",
-               out_fmt);
-    }
-    return fmt;
 }
 
 // Find a format that is MP_IMGFLAG_YUV_P with the following configuration.

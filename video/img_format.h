@@ -78,7 +78,7 @@ struct mp_imgfmt_desc {
     int8_t ys[MP_MAX_PLANES];
 };
 
-struct mp_imgfmt_desc mp_imgfmt_get_desc(unsigned int out_fmt);
+struct mp_imgfmt_desc mp_imgfmt_get_desc(int imgfmt);
 
 enum mp_imgfmt {
     IMGFMT_NONE = 0,
@@ -176,13 +176,9 @@ enum mp_imgfmt {
 
     // Byte accessed (low address to high address)
     IMGFMT_ARGB,
-    IMGFMT_0RGB,                // "0" is a padding byte (as opposed to alpha)
     IMGFMT_BGRA,
-    IMGFMT_BGR0,
     IMGFMT_ABGR,
-    IMGFMT_0BGR,
     IMGFMT_RGBA,
-    IMGFMT_RGB0,
     IMGFMT_BGR24,               // 3 bytes per pixel
     IMGFMT_RGB24,
     IMGFMT_RGB48_LE,            // 6 bytes per pixel, uint16_t channels
@@ -191,6 +187,15 @@ enum mp_imgfmt {
     IMGFMT_RGBA64_BE,
     IMGFMT_BGRA64_LE,
     IMGFMT_BGRA64_BE,
+
+    // Like e.g. IMGFMT_ARGB, but has a padding byte instead of alpha
+    IMGFMT_0RGB,
+    IMGFMT_BGR0,
+    IMGFMT_0BGR,
+    IMGFMT_RGB0,
+
+    IMGFMT_RGB0_START = IMGFMT_0RGB,
+    IMGFMT_RGB0_END = IMGFMT_RGB0,
 
     // Accessed with bit-shifts (components ordered from LSB to MSB)
     IMGFMT_RGB8,                // r3 g3 b2
