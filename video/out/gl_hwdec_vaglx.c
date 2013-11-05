@@ -83,7 +83,7 @@ static int create(struct gl_hwdec *hw)
     return 0;
 }
 
-static int reinit(struct gl_hwdec *hw, int w, int h)
+static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
 {
     struct priv *p = hw->priv;
     GL *gl = hw->mpgl->gl;
@@ -97,7 +97,7 @@ static int reinit(struct gl_hwdec *hw, int w, int h)
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
+    gl->TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, params->w, params->h, 0,
                    GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
@@ -106,8 +106,8 @@ static int reinit(struct gl_hwdec *hw, int w, int h)
     return check_va_status(status, "vaCreateSurfaceGLX()") ? 0 : -1;
 }
 
-static int load_image(struct gl_hwdec *hw, struct mp_image *hw_image,
-                      GLuint *out_textures)
+static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
+                     GLuint *out_textures)
 {
     struct priv *p = hw->priv;
     VAStatus status;
@@ -125,7 +125,7 @@ static int load_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     return 0;
 }
 
-static void unload_image(struct gl_hwdec *hw)
+static void unmap_image(struct gl_hwdec *hw)
 {
 }
 
@@ -134,7 +134,7 @@ const struct gl_hwdec_driver gl_hwdec_vaglx = {
     .query_format = query_format,
     .create = create,
     .reinit = reinit,
-    .load_image = load_image,
-    .unload_image = unload_image,
+    .map_image = map_image,
+    .unmap_image = unmap_image,
     .destroy = destroy,
 };

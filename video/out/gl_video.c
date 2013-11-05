@@ -1210,7 +1210,7 @@ static void set_image_textures(struct gl_video *p, struct video_image *vimg,
 
     if (p->hwdec_active) {
         assert(vimg->hwimage);
-        p->hwdec->driver->load_image(p->hwdec, vimg->hwimage, imgtex);
+        p->hwdec->driver->map_image(p->hwdec, vimg->hwimage, imgtex);
     } else {
         for (int n = 0; n < p->plane_count; n++)
             imgtex[n] = vimg->planes[n].gl_texture;
@@ -1234,14 +1234,28 @@ static void unset_image_textures(struct gl_video *p)
     gl->ActiveTexture(GL_TEXTURE0);
 
     if (p->hwdec_active)
-        p->hwdec->driver->unload_image(p->hwdec);
+        p->hwdec->driver->unmap_image(p->hwdec);
 }
 
-static void init_video(struct gl_video *p)
+static void init_video(struct gl_video *p, const struct mp_image_params *params)
 {
     GL *gl = p->gl;
 
     check_gl_features(p);
+
+    init_format(params->imgfmt, p);
+
+    p->image_w = params->w;
+    p->image_h = params->h;
+    p->image_dw = params->d_w;
+    p->image_dh = params->d_h;
+    p->image_params = *params;
+
+    struct mp_csp_details csp = MP_CSP_DETAILS_DEFAULTS;
+    csp.levels_in = params->colorlevels;
+    csp.levels_out = params->outputlevels;
+    csp.format = params->colorspace;
+    p->colorspace = csp;
 
     if (p->is_rgb && (p->opts.srgb || p->use_lut_3d)) {
         p->is_linear_rgb = true;
@@ -1301,8 +1315,8 @@ static void init_video(struct gl_video *p)
     debug_check_gl(p, "after video texture creation");
 
     if (p->hwdec_active) {
-        if (p->hwdec->driver->reinit(p->hwdec, p->image_w, p->image_h) < 0)
-            MP_ERR(p, "Initializing hardware decoding video texture failed.\n");
+        if (p->hwdec->driver->reinit(p->hwdec, &p->image_params) < 0)
+            MP_ERR(p, "Initializing texture for hardware decoding failed.\n");
     }
 
     reinit_rendering(p);
@@ -2048,27 +2062,13 @@ bool gl_video_check_format(struct gl_video *p, int mp_format)
 
 void gl_video_config(struct gl_video *p, struct mp_image_params *params)
 {
-    if (p->image_format != params->imgfmt || p->image_w != params->w ||
-        p->image_h != params->h)
-    {
-        uninit_video(p);
-        p->image_w = params->w;
-        p->image_h = params->h;
-        init_format(params->imgfmt, p);
-        init_video(p);
-    }
-    p->image_dw = params->d_w;
-    p->image_dh = params->d_h;
-    p->image_params = *params;
-
-    struct mp_csp_details csp = MP_CSP_DETAILS_DEFAULTS;
-    csp.levels_in = params->colorlevels;
-    csp.levels_out = params->outputlevels;
-    csp.format = params->colorspace;
-    p->colorspace = csp;
-
     p->have_image = false;
     mp_image_unrefp(&p->image.hwimage);
+
+    if (!mp_image_params_equals(&p->image_params, params)) {
+        uninit_video(p);
+        init_video(p, params);
+    }
 }
 
 void gl_video_set_output_depth(struct gl_video *p, int r, int g, int b)
