@@ -31,18 +31,37 @@ struct vdp_functions {
 #undef VDP_FUNCTION
 };
 
+
+#define MAX_VIDEO_SURFACES 50
+
 // Shared state. Objects created from different VdpDevices are often (always?)
 // incompatible to each other, so all code must use a shared VdpDevice.
 struct mp_vdpau_ctx {
     struct vdp_functions *vdp;
+    VdpGetProcAddress *get_proc_address;
     VdpDevice vdp_device;
     bool is_preempted;                  // set to true during unavailability
     uint64_t preemption_counter;        // incremented after _restoring_
-    bool (*status_ok)(struct mp_vdpau_ctx *ctx);
-    struct mp_image *(*get_video_surface)(struct mp_vdpau_ctx *ctx, int fmt,
-                                          VdpChromaType chroma, int w, int h);
-    void *priv; // for VO
+
+    bool preemption_user_notified;
+    double last_preemption_retry_fail;
+
+    struct vo_x11_state *x11;
+
+    // Surface pool
+    struct surface_entry {
+        VdpVideoSurface surface;
+        int fmt, w, h;
+        VdpChromaType chroma;
+        bool in_use;
+    } video_surfaces[MAX_VIDEO_SURFACES];
+
+    struct mp_log *log;
 };
+
+struct mp_vdpau_ctx *mp_vdpau_create_device_x11(struct mp_log *log,
+                                                struct vo_x11_state *x11);
+void mp_vdpau_destroy(struct mp_vdpau_ctx *ctx);
 
 bool mp_vdpau_status_ok(struct mp_vdpau_ctx *ctx);
 
