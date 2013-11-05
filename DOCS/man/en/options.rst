@@ -1420,7 +1420,7 @@ OPTIONS
     chapter order specified for the main file.
 
 ``--osc``, ``--no-osc``
-    Whether to load the on-screen-controller (default: no).
+    Whether to load the on-screen-controller (default: yes).
 
 ``--no-osd-bar``, ``--osd-bar``
     Disable display of the OSD bar. This will make some things (like seeking)
