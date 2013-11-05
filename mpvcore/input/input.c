@@ -141,12 +141,14 @@ static const mp_cmd_t mp_cmds[] = {
       OARG_CHOICE(0, ({"default-precise", 0},   {"0", 0},
                       {"exact", 1},             {"1", 1},
                       {"keyframes", -1},        {"-1", -1})),
-  }},
+    },
+    .allow_auto_repeat = true,
+  },
   { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
   { MP_CMD_QUIT_WATCH_LATER, "quit_watch_later", },
   { MP_CMD_STOP, "stop", },
-  { MP_CMD_FRAME_STEP, "frame_step", },
-  { MP_CMD_FRAME_BACK_STEP, "frame_back_step", },
+  { MP_CMD_FRAME_STEP, "frame_step", .allow_auto_repeat = true },
+  { MP_CMD_FRAME_BACK_STEP, "frame_back_step", .allow_auto_repeat = true },
   { MP_CMD_PLAYLIST_NEXT, "playlist_next", {
       OARG_CHOICE(0, ({"weak", 0},              {"0", 0},
                       {"force", 1},             {"1", 1})),
@@ -155,12 +157,13 @@ static const mp_cmd_t mp_cmds[] = {
       OARG_CHOICE(0, ({"weak", 0},              {"0", 0},
                       {"force", 1},             {"1", 1})),
   }},
-  { MP_CMD_SUB_STEP, "sub_step", { ARG_INT } },
-  { MP_CMD_SUB_SEEK, "sub_seek", { ARG_INT } },
+  { MP_CMD_SUB_STEP, "sub_step", { ARG_INT }, .allow_auto_repeat = true },
+  { MP_CMD_SUB_SEEK, "sub_seek", { ARG_INT }, .allow_auto_repeat = true },
   { MP_CMD_OSD, "osd", { OARG_INT(-1) } },
-  { MP_CMD_PRINT_TEXT, "print_text", { ARG_STRING } },
-  { MP_CMD_SHOW_TEXT, "show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) } },
-  { MP_CMD_SHOW_PROGRESS, "show_progress", },
+  { MP_CMD_PRINT_TEXT, "print_text", { ARG_STRING }, .allow_auto_repeat = true },
+  { MP_CMD_SHOW_TEXT, "show_text", { ARG_STRING, OARG_INT(-1), OARG_INT(0) },
+    .allow_auto_repeat = true},
+  { MP_CMD_SHOW_PROGRESS, "show_progress",  .allow_auto_repeat = true},
   { MP_CMD_SUB_ADD, "sub_add", { ARG_STRING } },
   { MP_CMD_SUB_REMOVE, "sub_remove", { OARG_INT(-1) } },
   { MP_CMD_SUB_RELOAD, "sub_reload", { OARG_INT(-1) } },
@@ -208,14 +211,18 @@ static const mp_cmd_t mp_cmds[] = {
   { MP_CMD_KEYDOWN_EVENTS, "key_down_event", { ARG_INT } },
   { MP_CMD_SET, "set", { ARG_STRING,  ARG_STRING } },
   { MP_CMD_GET_PROPERTY, "get_property", { ARG_STRING } },
-  { MP_CMD_ADD, "add", { ARG_STRING, OARG_DOUBLE(0) } },
+  { MP_CMD_ADD, "add", { ARG_STRING, OARG_DOUBLE(0) },
+    .allow_auto_repeat = true},
   { MP_CMD_CYCLE, "cycle", {
       ARG_STRING,
       { .type = {"", NULL, &m_option_type_cycle_dir},
         .optional = true,
         .v.d = 1 },
-  }},
-  { MP_CMD_MULTIPLY, "multiply", { ARG_STRING, ARG_DOUBLE } },
+    },
+    .allow_auto_repeat = true
+  },
+  { MP_CMD_MULTIPLY, "multiply", { ARG_STRING, ARG_DOUBLE },
+     .allow_auto_repeat = true},
 
   { MP_CMD_ENABLE_INPUT_SECTION,  "enable_section",  {
       ARG_STRING,
@@ -1880,7 +1887,11 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
         struct mp_cmd *repeated = check_autorepeat(ictx);
         if (repeated) {
             repeated->repeated = true;
-            queue_add_tail(queue, repeated);
+            if (repeated->allow_auto_repeat) {
+                queue_add_tail(queue, repeated);
+            } else {
+                talloc_free(repeated);
+            }
         }
     }
     struct mp_cmd *ret = queue_peek(queue);

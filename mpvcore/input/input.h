@@ -158,7 +158,8 @@ typedef struct mp_cmd {
     bool mouse_move;
     int mouse_x, mouse_y;
     struct mp_cmd *queue_next;
-    double scale;                             // for scaling numeric arguments
+    double scale;               // for scaling numeric arguments
+    bool allow_auto_repeat;     // used in command specification
 } mp_cmd_t;
 
 
