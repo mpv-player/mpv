@@ -90,19 +90,6 @@ const struct vd_lavc_hwdec mp_vd_lavc_vda;
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi;
 const struct vd_lavc_hwdec mp_vd_lavc_vaapi_copy;
 
-static const struct vd_lavc_hwdec mp_vd_lavc_crystalhd = {
-    .type = HWDEC_CRYSTALHD,
-    .codec_pairs = (const char *[]) {
-        "mpeg2",        "mpeg2_crystalhd",
-        "msmpeg4",      "msmpeg4_crystalhd",
-        "wmv3",         "wmv3_crystalhd",
-        "vc1",          "vc1_crystalhd",
-        "h264",         "h264_crystalhd",
-        "mpeg4",        "mpeg4_crystalhd",
-        NULL
-    },
-};
-
 static const struct vd_lavc_hwdec *hwdec_list[] = {
 #if HAVE_VDPAU_HWACCEL
     &mp_vd_lavc_vdpau,
@@ -113,7 +100,6 @@ static const struct vd_lavc_hwdec *hwdec_list[] = {
 #if HAVE_VDA_HWACCEL
     &mp_vd_lavc_vda,
 #endif
-    &mp_vd_lavc_crystalhd,
 #if HAVE_VAAPI_HWACCEL
     &mp_vd_lavc_vaapi,
     &mp_vd_lavc_vaapi_copy,
