@@ -249,6 +249,10 @@
 #endif
 #endif
 
+#ifdef GL_NV_vdpau_interop
+#define GLvdpauSurfaceNV GLintptr
+#endif
+
 #undef MP_GET_GL_WORKAROUNDS
 
 #endif

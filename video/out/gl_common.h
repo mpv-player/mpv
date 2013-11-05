@@ -87,6 +87,7 @@ enum {
     MPGL_CAP_SRGB_FB            = (1 << 8),
     MPGL_CAP_FLOAT_TEX          = (1 << 9),
     MPGL_CAP_TEX_RG             = (1 << 10),    // GL_ARB_texture_rg / GL 3.x
+    MPGL_CAP_VDPAU              = (1 << 11),    // GL_NV_vdpau_interop
     MPGL_CAP_NO_SW              = (1 << 30),    // used to block sw. renderers
 };
 
@@ -355,6 +356,15 @@ struct GL {
                                         const GLfloat *);
     void (GLAPIENTRY *UniformMatrix4x3fv)(GLint, GLsizei, GLboolean,
                                           const GLfloat *);
+
+    void (GLAPIENTRY *VDPAUInitNV)(const GLvoid *, const GLvoid *);
+    void (GLAPIENTRY *VDPAUFiniNV)(void);
+    GLvdpauSurfaceNV (GLAPIENTRY *VDPAURegisterOutputSurfaceNV)
+        (GLvoid *, GLenum, GLsizei, const GLuint *);
+    void (GLAPIENTRY *VDPAUUnregisterSurfaceNV)(GLvdpauSurfaceNV);
+    void (GLAPIENTRY *VDPAUSurfaceAccessNV)(GLvdpauSurfaceNV, GLenum);
+    void (GLAPIENTRY *VDPAUMapSurfacesNV)(GLsizei, const GLvdpauSurfaceNV *);
+    void (GLAPIENTRY *VDPAUUnmapSurfacesNV)(GLsizei, const GLvdpauSurfaceNV *);
 };
 
 #endif /* MPLAYER_GL_COMMON_H */

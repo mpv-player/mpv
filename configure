@@ -2142,6 +2142,16 @@ fi
 echores "$_gl"
 
 
+echocheck "VDPAU with OpenGL/X11"
+if test "$_gl_x11" = yes && test "$_vdpau" = yes ; then
+  def_vdpau_gl_x11='#define HAVE_VDPAU_GL_X11 1'
+  _vdpau_gl_x11=yes
+else
+  def_vdpau_gl_x11='#define HAVE_VDPAU_GL_X11 0'
+  _vdpau_gl_x11=no
+fi
+echores "$_vdpau_gl_x11"
+
 
 if win32; then
 
@@ -3328,6 +3338,7 @@ VCD = $_vcd
 VDPAU = $_vdpau
 VDPAU_DEC = $_vdpau_dec
 VDPAU_DEC_OLD = $_vdpau_dec_old
+VDPAU_GL_X11 = $_vdpau_gl_x11
 VDA = $_vda
 VDA_REFCOUNTING = $_vda_refcounting
 VAAPI = $_vaapi
@@ -3509,6 +3520,7 @@ $def_v4l2
 $def_vdpau
 $def_vdpau_dec
 $def_vdpau_dec_old
+$def_vdpau_gl_x11
 $def_vda
 $def_vda_refcounting
 $def_vaapi

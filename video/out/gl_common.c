@@ -445,6 +445,23 @@ struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    // For gl_hwdec_vdpau.c
+    // http://www.opengl.org/registry/specs/NV/vdpau_interop.txt
+    {
+        .extension = "GL_NV_vdpau_interop",
+        .provides = MPGL_CAP_VDPAU,
+        .functions = (struct gl_function[]) {
+            // (only functions needed by us)
+            DEF_FN(VDPAUInitNV),
+            DEF_FN(VDPAUFiniNV),
+            DEF_FN(VDPAURegisterOutputSurfaceNV),
+            DEF_FN(VDPAUUnregisterSurfaceNV),
+            DEF_FN(VDPAUSurfaceAccessNV),
+            DEF_FN(VDPAUMapSurfacesNV),
+            DEF_FN(VDPAUUnmapSurfacesNV),
+            {0}
+        },
+    },
 };
 
 #undef FN_OFFS
@@ -1010,10 +1027,14 @@ void mp_log_source(struct mp_log *log, int lev, const char *src)
 }
 
 extern const struct gl_hwdec_driver gl_hwdec_vaglx;
+extern const struct gl_hwdec_driver gl_hwdec_vdpau;
 
 const struct gl_hwdec_driver *mpgl_hwdec_drivers[] = {
 #if HAVE_VAAPI_GLX
     &gl_hwdec_vaglx,
+#endif
+#if HAVE_VDPAU_GL_X11
+    &gl_hwdec_vdpau,
 #endif
     NULL
 };
