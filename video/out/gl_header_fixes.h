@@ -249,7 +249,7 @@
 #endif
 #endif
 
-#ifdef GL_NV_vdpau_interop
+#ifndef GL_NV_vdpau_interop
 #define GLvdpauSurfaceNV GLintptr
 #endif
 
