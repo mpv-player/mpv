@@ -7,6 +7,7 @@ env:
   - LIBAV=ffmpeg-git
 compiler:
   - clang
+  - gcc
 branches:
   only:
     - master

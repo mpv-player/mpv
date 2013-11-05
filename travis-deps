@@ -62,7 +62,7 @@ class Libav < TravisDepsBuilder
       },
       "ffmpeg-stable" => {
         :action => :stable,
-        :url    => 'http://www.ffmpeg.org/releases/ffmpeg-1.2.1.tar.gz'
+        :url    => 'http://www.ffmpeg.org/releases/ffmpeg-2.1.tar.gz'
       },
       "ffmpeg-git" => {
         :action => :git,
