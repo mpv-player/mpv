@@ -403,15 +403,15 @@ static void uninit(struct ao *ao, bool immed)
     p->audio_fd = -1;
 }
 
+#ifndef SNDCTL_DSP_RESET
 static void close_device(struct ao *ao)
 {
     struct priv *p = ao->priv;
-#ifdef SNDCTL_DSP_RESET
     ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
-#endif
     close(p->audio_fd);
     p->audio_fd = -1;
 }
+#endif
 
 // stop playing and empty buffers (for seeking/pause)
 static void reset(struct ao *ao)
