@@ -19,7 +19,6 @@
 #ifndef MPLAYER_FASTMEMCPY_H
 #define MPLAYER_FASTMEMCPY_H
 
-#include "config.h"
 #include <inttypes.h>
 #include <string.h>
 #include <stddef.h>
@@ -27,34 +26,25 @@
 #define my_memcpy_pic memcpy_pic
 #define memcpy_pic2(d, s, b, h, ds, ss, unused) memcpy_pic(d, s, b, h, ds, ss)
 
-static inline void * memcpy_pic(void * dst, const void * src,
-                                int bytesPerLine, int height,
-                                int dstStride, int srcStride)
+static inline void memcpy_pic(void *dst, const void *src,
+                              int bytesPerLine, int height,
+                              int dstStride, int srcStride)
 {
-	int i;
-	void *retval=dst;
+    if (bytesPerLine == dstStride && dstStride == srcStride) {
+        if (srcStride < 0) {
+            src = (uint8_t*)src + (height - 1) * srcStride;
+            dst = (uint8_t*)dst + (height - 1) * dstStride;
+            srcStride = -srcStride;
+        }
 
-	if(bytesPerLine == dstStride && dstStride == srcStride)
-	{
-		if (srcStride < 0) {
-	    		src = (uint8_t*)src + (height-1)*srcStride;
-	    		dst = (uint8_t*)dst + (height-1)*dstStride;
-	    		srcStride = -srcStride;
-		}
-
-		memcpy(dst, src, srcStride*height);
-	}
-	else
-	{
-		for(i=0; i<height; i++)
-		{
-			memcpy(dst, src, bytesPerLine);
-			src = (uint8_t*)src + srcStride;
-			dst = (uint8_t*)dst + dstStride;
-		}
-	}
-
-	return retval;
+        memcpy(dst, src, srcStride * height);
+    } else {
+        for (int i = 0; i < height; i++) {
+            memcpy(dst, src, bytesPerLine);
+            src = (uint8_t*)src + srcStride;
+            dst = (uint8_t*)dst + dstStride;
+        }
+    }
 }
 
 static inline void memset_pic(void *dst, int fill, int bytesPerLine, int height,
