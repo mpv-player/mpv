@@ -407,7 +407,6 @@ static void uninit(struct ao *ao, bool immed)
 static void close_device(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
     close(p->audio_fd);
     p->audio_fd = -1;
 }
