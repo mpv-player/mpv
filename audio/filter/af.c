@@ -704,16 +704,6 @@ struct mp_audio *af_play(struct af_stream *s, struct mp_audio *data)
     return data;
 }
 
-/* Calculate the minimum output buffer size for given input data d
- * when using the RESIZE_LOCAL_BUFFER macro. The +t+1 part ensures the
- * value is >= len*mul rounded upwards to whole samples even if the
- * double 'mul' is inexact. */
-int af_lencalc(double mul, struct mp_audio *d)
-{
-    int t = d->bps * d->nch;
-    return d->len * mul + t + 1;
-}
-
 // Calculate average ratio of filter output size to input size
 double af_calc_filter_multiplier(struct af_stream *s)
 {
@@ -742,10 +732,23 @@ double af_calc_delay(struct af_stream *s)
     return delay;
 }
 
-/* Helper function called by the macro with the same name this
-   function should not be called directly */
+/* Calculate the minimum output buffer size for given input data d
+ * when using the af_resize_local_buffer function. The +t+1 part ensures the
+ * value is >= len*mul rounded upwards to whole samples even if the
+ * double 'mul' is inexact. */
+static int af_lencalc(double mul, struct mp_audio *d)
+{
+    int t = d->bps * d->nch;
+    return d->len * mul + t + 1;
+}
+
+/* I a local buffer is used (i.e. if the filter doesn't operate on the incoming
+ * buffer), this macro must be called to ensure the buffer is big enough. */
 int af_resize_local_buffer(struct af_instance *af, struct mp_audio *data)
 {
+    if (af->data->len >= af_lencalc(af->mul, data))
+        return AF_OK;
+
     // Calculate new length
     register int len = af_lencalc(af->mul, data);
     mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, "

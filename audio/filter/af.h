@@ -182,14 +182,9 @@ double af_calc_delay(struct af_stream *s);
  * \{
  */
 
-/* Helper function called by the macro with the same name only to be
-   called from inside filters */
 int af_resize_local_buffer(struct af_instance *af, struct mp_audio *data);
 
-/* Helper function used to calculate the exact buffer length needed
-   when buffers are resized. The returned length is >= than what is
-   needed */
-int af_lencalc(double mul, struct mp_audio *data);
+#define RESIZE_LOCAL_BUFFER af_resize_local_buffer
 
 /**
  * \brief convert dB to gain value
@@ -252,15 +247,5 @@ int af_test_output(struct af_instance *af, struct mp_audio *out);
  * \return clipped value
  */
 float af_softclip(float a);
-
-/** \} */ // end of af_filter group, but more functions of this group below
-
-/** Memory reallocation macro: if a local buffer is used (i.e. if the
-   filter doesn't operate on the incoming buffer this macro must be
-   called to ensure the buffer is big enough.
- * \ingroup af_filter
- */
-#define RESIZE_LOCAL_BUFFER(a, d) \
-    ((a->data->len < af_lencalc(a->mul, d)) ? af_resize_local_buffer(a, d) : AF_OK)
 
 #endif /* MPLAYER_AF_H */
