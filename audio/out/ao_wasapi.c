@@ -325,7 +325,7 @@ static int try_format(struct wasapi_state *state,
 
     EnterCriticalSection(&state->print_lock);
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: trying %dch %s @ %dhz\n",
-           channels.num, af_fmt2str_short(af_format), samplerate);
+           channels.num, af_fmt_to_str(af_format), samplerate);
     LeaveCriticalSection(&state->print_lock);
 
     union WAVEFMT u;
@@ -351,7 +351,7 @@ static int try_format(struct wasapi_state *state,
         if (set_ao_format(state, ao, wformat)) {
             EnterCriticalSection(&state->print_lock);
             mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: accepted as %dch %s @ %dhz\n",
-                ao->channels.num, af_fmt2str_short(ao->format), ao->samplerate);
+                ao->channels.num, af_fmt_to_str(ao->format), ao->samplerate);
             LeaveCriticalSection(&state->print_lock);
 
             return 1;
@@ -361,7 +361,7 @@ static int try_format(struct wasapi_state *state,
         if (set_ao_format(state, ao, wformat)) {
             EnterCriticalSection(&state->print_lock);
             mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: %dch %s @ %dhz accepted\n",
-                   ao->channels.num, af_fmt2str_short(af_format), samplerate);
+                   ao->channels.num, af_fmt_to_str(af_format), samplerate);
             LeaveCriticalSection(&state->print_lock);
             return 1;
         }
@@ -418,7 +418,7 @@ static int try_passthrough(struct wasapi_state *state,
 
     EnterCriticalSection(&state->print_lock);
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: trying passthrough for %s...\n",
-        af_fmt2str_short((ao->format&~AF_FORMAT_END_MASK) | AF_FORMAT_LE));
+           af_fmt_to_str((ao->format&~AF_FORMAT_END_MASK) | AF_FORMAT_LE));
     LeaveCriticalSection(&state->print_lock);
 
     HRESULT hr = IAudioClient_IsFormatSupported(state->pAudioClient,

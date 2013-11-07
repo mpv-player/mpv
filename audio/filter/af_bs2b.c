@@ -74,7 +74,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
     switch (cmd) {
     case AF_CONTROL_REINIT: {
         int format;
-        char buf[256];
         // Sanity check
         if (!arg) return AF_ERROR;
 
@@ -150,7 +149,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
         bs2b_set_srate(s->filter, (long)af->data->rate);
         mp_msg(MSGT_AFILTER, MSGL_V, "[bs2b] using format %s\n",
-               af_fmt2str(af->data->format,buf,256));
+               af_fmt_to_str(af->data->format));
 
         return af_test_output(af,(struct mp_audio*)arg);
     }

@@ -407,7 +407,7 @@ static int init(struct ao *ao)
         break;
     default:
         MP_VERBOSE(ao, "format %s not supported defaulting to Signed 16-bit Little-Endian\n",
-                   af_fmt2str_short(format));
+                   af_fmt_to_str(format));
         format = AF_FORMAT_S16_LE;
     }
     //set our audio parameters
@@ -416,7 +416,7 @@ static int init(struct ao *ao)
     ao->bps = ao->channels.num * rate * (af_fmt2bits(format) >> 3);
     int buffersize = ao->bps; // space for 1 sec
     MP_VERBOSE(ao, "Samplerate:%iHz Channels:%i Format:%s\n", rate,
-               ao->channels.num, af_fmt2str_short(format));
+               ao->channels.num, af_fmt_to_str(format));
     MP_VERBOSE(ao, "Buffersize:%d bytes (%d msec)\n",
                buffersize, buffersize / ao->bps * 1000);
 

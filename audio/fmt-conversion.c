@@ -45,7 +45,7 @@ enum AVSampleFormat af_to_avformat(int fmt)
     sample_fmt = audio_conversion_map[i].sample_fmt;
     if (sample_fmt == AF_FORMAT_UNKNOWN)
         mp_msg(MSGT_GLOBAL, MSGL_V, "Unsupported sample format: %s\n",
-                af_fmt2str_short(fmt));
+                af_fmt_to_str(fmt));
     return sample_fmt;
 }
 

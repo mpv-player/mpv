@@ -62,15 +62,6 @@ int af_fmt_change_bits(int format, int bits)
     return af_fmt_is_valid(format) ? format : 0;
 }
 
-/* Convert format to str input str is a buffer for the
-   converted string, size is the size of the buffer */
-char *af_fmt2str(int format, char* str, int size)
-{
-    const char *name = af_fmt2str_short(format);
-    snprintf(str, size, "%s", name);
-    return str;
-}
-
 const struct af_fmt_entry af_fmtstr_table[] = {
     { "mpeg2", AF_FORMAT_MPEG2 },
     { "ac3le", AF_FORMAT_AC3_LE },
@@ -119,7 +110,7 @@ bool af_fmt_is_valid(int format)
     return false;
 }
 
-const char *af_fmt2str_short(int format)
+const char *af_fmt_to_str(int format)
 {
     for (int i = 0; af_fmtstr_table[i].name; i++) {
         if (af_fmtstr_table[i].format == format)

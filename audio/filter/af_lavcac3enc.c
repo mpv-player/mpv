@@ -362,9 +362,8 @@ static int af_open(struct af_instance* af){
             break;
         }
     }
-    char buf[100];
     mp_msg(MSGT_AFILTER, MSGL_V, "[af_lavcac3enc]: in sample format: %s\n",
-           af_fmt2str(s->in_sampleformat, buf, 100));
+           af_fmt_to_str(s->in_sampleformat));
     s->pending_data_size = AF_NCH * AC3_FRAME_SIZE *
         af_fmt2bits(s->in_sampleformat) / 8;
     s->pending_data = malloc(s->pending_data_size);

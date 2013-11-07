@@ -65,7 +65,7 @@ char *mp_audio_fmt_to_str(int srate, const struct mp_chmap *chmap, int format)
 {
     char *chstr = mp_chmap_to_str(chmap);
     char *res = talloc_asprintf(NULL, "%dHz %s %dch %s", srate, chstr,
-                                chmap->num, af_fmt2str_short(format));
+                                chmap->num, af_fmt_to_str(format));
     talloc_free(chstr);
     return res;
 }

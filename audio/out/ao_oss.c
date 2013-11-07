@@ -205,7 +205,7 @@ static int init(struct ao *ao)
         mchan = p->cfg_oss_mixer_channel;
 
     MP_VERBOSE(ao, "%d Hz  %d chans  %s\n", ao->samplerate,
-               ao->channels.num, af_fmt2str_short(ao->format));
+               ao->channels.num, af_fmt_to_str(ao->format));
 
     if (mchan) {
         int fd, devs, i;
@@ -274,7 +274,7 @@ ac3_retry:
     oss_format = format2oss(ao->format);
     if (oss_format == -1) {
         MP_VERBOSE(ao, "Unknown/not supported internal format: %s\n",
-                   af_fmt2str_short(ao->format));
+                   af_fmt_to_str(ao->format));
 #if BYTE_ORDER == BIG_ENDIAN
         oss_format = AFMT_S16_BE;
 #else
@@ -286,8 +286,8 @@ ac3_retry:
         oss_format != format2oss(ao->format))
     {
         MP_WARN(ao, "Can't set audio device %s to %s output, trying %s...\n",
-                p->dsp, af_fmt2str_short(ao->format),
-                af_fmt2str_short(AF_FORMAT_S16_NE));
+                p->dsp, af_fmt_to_str(ao->format),
+                af_fmt_to_str(AF_FORMAT_S16_NE));
         ao->format = AF_FORMAT_S16_NE;
         goto ac3_retry;
     }
@@ -298,7 +298,7 @@ ac3_retry:
         return -1;
     }
 
-    MP_VERBOSE(ao, "sample format: %s\n", af_fmt2str_short(ao->format));
+    MP_VERBOSE(ao, "sample format: %s\n", af_fmt_to_str(ao->format));
 
     if (!AF_FORMAT_IS_AC3(ao->format)) {
         struct mp_chmap_sel sel = {0};

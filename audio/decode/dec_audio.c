@@ -160,7 +160,7 @@ int init_best_audio_codec(sh_audio_t *sh_audio, char *audio_decoders)
         mp_msg(MSGT_DECAUDIO, MSGL_V,
                "AUDIO: %d Hz, %d ch, %s\n",
                sh_audio->samplerate, sh_audio->channels.num,
-               af_fmt2str_short(sh_audio->sample_format));
+               af_fmt_to_str(sh_audio->sample_format));
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
                "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
                sh_audio->i_bps * 8, sh_audio->samplerate, sh_audio->channels.num);

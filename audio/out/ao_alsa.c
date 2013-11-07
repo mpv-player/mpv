@@ -442,7 +442,7 @@ static int init(struct ao *ao)
     err = snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt);
     if (err < 0) {
         MP_INFO(ao, "Format %s is not supported by hardware, trying default.\n",
-                af_fmt2str_short(ao->format));
+                af_fmt_to_str(ao->format));
         p->alsa_fmt = SND_PCM_FORMAT_S16_LE;
         if (AF_FORMAT_IS_AC3(ao->format))
             ao->format = AF_FORMAT_AC3_LE;

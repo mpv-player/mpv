@@ -762,7 +762,6 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
     if (tvh->tv_param->noaudio == 0 && funcs->control(tvh->priv, TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
     {
 	int audio_format;
-	char buf[128];
 
 	/* yeah, audio is present */
 
@@ -785,8 +784,8 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
 		break;
 	    case AF_FORMAT_MPEG2:
 	    default:
-		mp_tmsg(MSGT_TV, MSGL_ERR, "Audio type '%s (%x)' unsupported!\n",
-		    af_fmt2str(audio_format, buf, 128), audio_format);
+		mp_tmsg(MSGT_TV, MSGL_ERR, "Audio type '%s' unsupported!\n",
+		    af_fmt_to_str(audio_format));
 		goto no_audio;
 	}
 
