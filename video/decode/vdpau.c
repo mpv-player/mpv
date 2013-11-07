@@ -69,24 +69,12 @@ static const struct hwdec_profile_entry profiles[] = {
     {0}
 };
 
-// libavcodec absolutely wants a non-NULL render callback
-static VdpStatus dummy_render(
-    VdpDecoder                 decoder,
-    VdpVideoSurface            target,
-    VdpPictureInfo const *     picture_info,
-    uint32_t                   bitstream_buffer_count,
-    VdpBitstreamBuffer const * bitstream_buffers)
-{
-    return VDP_STATUS_DISPLAY_PREEMPTED;
-}
-
 static void mark_uninitialized(struct lavc_ctx *ctx)
 {
     struct priv *p = ctx->hwdec_priv;
 
     p->vdp_device = VDP_INVALID_HANDLE;
     p->context.decoder = VDP_INVALID_HANDLE;
-    p->context.render = dummy_render;
 }
 
 static int handle_preemption(struct lavc_ctx *ctx)
@@ -148,14 +136,12 @@ static bool create_vdp_decoder(struct lavc_ctx *ctx)
                                  p->vid_width, p->vid_height, maxrefs,
                                  &p->context.decoder);
     CHECK_ST_WARNING("Failed creating VDPAU decoder");
-    p->context.render = p->vdp->decoder_render;
     if (vdp_st != VDP_STATUS_OK)
         goto fail;
     return true;
 
 fail:
     p->context.decoder = VDP_INVALID_HANDLE;
-    p->context.render = dummy_render;
     return false;
 }
 
@@ -206,6 +192,8 @@ static int init(struct lavc_ctx *ctx)
         .mpvdp = ctx->hwdec_info->vdpau_ctx,
     };
     ctx->hwdec_priv = p;
+
+    p->context.render = p->vdp->decoder_render;
 
     p->preemption_counter = p->mpvdp->preemption_counter;
     mark_uninitialized(ctx);
