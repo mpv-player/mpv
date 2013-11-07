@@ -38,15 +38,10 @@ static const struct {
 enum AVSampleFormat af_to_avformat(int fmt)
 {
     int i;
-    enum AVSampleFormat sample_fmt;
     for (i = 0; audio_conversion_map[i].fmt; i++)
         if (audio_conversion_map[i].fmt == fmt)
             break;
-    sample_fmt = audio_conversion_map[i].sample_fmt;
-    if (sample_fmt == AV_SAMPLE_FMT_NONE)
-        mp_msg(MSGT_GLOBAL, MSGL_V, "Unsupported sample format: %s\n",
-                af_fmt_to_str(fmt));
-    return sample_fmt;
+    return audio_conversion_map[i].sample_fmt;
 }
 
 int af_from_avformat(enum AVSampleFormat sample_fmt)
