@@ -193,6 +193,7 @@ static int init(struct lavc_ctx *ctx)
     };
     ctx->hwdec_priv = p;
 
+    p->vdp = p->mpvdp->vdp;
     p->context.render = p->vdp->decoder_render;
 
     p->preemption_counter = p->mpvdp->preemption_counter;
