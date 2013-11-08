@@ -225,10 +225,13 @@ static int write_to_ao(struct MPContext *mpctx, void *data, int len, int flags,
         return 0;
     struct ao *ao = mpctx->ao;
     double bps = ao->bps / mpctx->opts->playback_speed;
+    int unitsize = ao->channels.num * af_fmt2bits(ao->format) / 8;
     ao->pts = pts;
     int played = ao_play(mpctx->ao, data, len, flags);
+    assert(played <= len);
+    assert(played % unitsize == 0);
     if (played > 0) {
-        mpctx->shown_aframes += played / (af_fmt2bits(ao->format) / 8);
+        mpctx->shown_aframes += played / unitsize;
         mpctx->delay += played / bps;
         // Keep correct pts for remaining data - could be used to flush
         // remaining buffer when closing ao.
@@ -332,6 +335,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     int playsize;
     int playflags = 0;
     bool audio_eof = false;
+    bool signal_eof = false;
     bool partial_fill = false;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     bool modifiable_audio_format = !(ao->format & AF_FORMAT_SPECIAL_MASK);
@@ -377,7 +381,6 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
                        * ao->bps / opts->playback_speed;
         if (playsize > bytes) {
             playsize = MPMAX(bytes, 0);
-            playflags |= AOPLAY_FINAL_CHUNK;
             audio_eof = true;
             partial_fill = true;
         }
@@ -387,18 +390,24 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     if (playsize > ao->buffer.len) {
         partial_fill = true;
         playsize = ao->buffer.len;
-        if (audio_eof)
-            playflags |= AOPLAY_FINAL_CHUNK;
     }
     playsize -= playsize % unitsize;
     if (!playsize)
         return partial_fill && audio_eof ? -2 : -partial_fill;
 
-    // play audio:
+    if (audio_eof && partial_fill) {
+        if (opts->gapless_audio) {
+            // With gapless audio, delay this to ao_uninit. There must be only
+            // 1 final chunk, and that is handled when calling ao_uninit().
+            signal_eof = true;
+        } else {
+            playflags |= AOPLAY_FINAL_CHUNK;
+        }
+    }
 
+    assert(ao->buffer_playable_size <= ao->buffer.len);
     int played = write_to_ao(mpctx, ao->buffer.start, playsize, playflags,
                              written_audio_pts(mpctx));
-    assert(played % unitsize == 0);
     ao->buffer_playable_size = playsize - played;
 
     if (played > 0) {
@@ -407,8 +416,8 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     } else if (!mpctx->paused && audio_eof && ao_get_delay(ao) < .04) {
         // Sanity check to avoid hanging in case current ao doesn't output
         // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK
-        return -2;
+        signal_eof = true;
     }
 
-    return -partial_fill;
+    return signal_eof ? -2 : -partial_fill;
 }

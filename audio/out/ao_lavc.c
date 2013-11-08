@@ -299,39 +299,11 @@ static int encode(struct ao *ao, double apts, void *data);
 static int play(struct ao *ao, void *data, int len, int flags);
 static void uninit(struct ao *ao, bool cut_audio)
 {
-    struct priv *ac = ao->priv;
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
 
     if (!encode_lavc_start(ectx)) {
         MP_WARN(ao, "not even ready to encode audio at end -> dropped");
         return;
-    }
-
-    if (ac->buffer) {
-        if (ao->buffer.len > 0) {
-            // TRICK: append aframesize-1 samples to the end, then play() will
-            // encode all it can
-            size_t extralen =
-                (ac->aframesize - 1) * ao->channels.num * ac->sample_size;
-            void *paddingbuf = talloc_size(ao, ao->buffer.len + extralen);
-            memcpy(paddingbuf, ao->buffer.start, ao->buffer.len);
-            fill_with_padding((char *) paddingbuf + ao->buffer.len,
-                              extralen / ac->sample_size,
-                              ac->sample_size, ac->sample_padding);
-            int written = play(ao, paddingbuf, ao->buffer.len + extralen, 0);
-            if (written < ao->buffer.len) {
-                MP_ERR(ao, "did not write enough data at the end\n");
-            }
-            talloc_free(paddingbuf);
-            ao->buffer.len = 0;
-        }
-
-        double outpts = ac->expected_next_pts;
-        if (!ectx->options->rawts && ectx->options->copyts)
-            outpts += ectx->discontinuity_pts_offset;
-        outpts += encode_lavc_getoffset(ectx, ac->stream);
-
-        while (encode(ao, outpts, NULL) > 0) ;
     }
 
     ao->priv = NULL;
@@ -484,6 +456,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
     double nextpts;
     double pts = ao->pts;
     double outpts;
+    int bytelen = len;
 
     len /= ac->sample_size * ao->channels.num;
 
@@ -491,6 +464,36 @@ static int play(struct ao *ao, void *data, int len, int flags)
         MP_WARN(ao, "not ready yet for encoding audio\n");
         return 0;
     }
+
+    if (flags & AOPLAY_FINAL_CHUNK) {
+        int written = 0;
+        if (len > 0) {
+            size_t extralen =
+                (ac->aframesize - 1) * ao->channels.num * ac->sample_size;
+            paddingbuf = talloc_size(NULL, bytelen + extralen);
+            memcpy(paddingbuf, data, bytelen);
+            fill_with_padding((char *) paddingbuf + bytelen,
+                              extralen / ac->sample_size,
+                              ac->sample_size, ac->sample_padding);
+            // No danger of recursion, because AOPLAY_FINAL_CHUNK not set
+            written = play(ao, paddingbuf, bytelen + extralen, 0);
+            if (written < bytelen) {
+                MP_ERR(ao, "did not write enough data at the end\n");
+            }
+            talloc_free(paddingbuf);
+            paddingbuf = NULL;
+        }
+
+        outpts = ac->expected_next_pts;
+        if (!ectx->options->rawts && ectx->options->copyts)
+            outpts += ectx->discontinuity_pts_offset;
+        outpts += encode_lavc_getoffset(ectx, ac->stream);
+
+        while (encode(ao, outpts, NULL) > 0) ;
+
+        return FFMIN(written, bytelen);
+    }
+
     if (pts == MP_NOPTS_VALUE) {
         MP_WARN(ao, "frame without pts, please report; synthesizing pts instead\n");
         // synthesize pts from previous expected next pts

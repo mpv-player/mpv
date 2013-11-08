@@ -62,6 +62,8 @@
 
 void uninit_player(struct MPContext *mpctx, unsigned int mask)
 {
+    struct MPOpts *opts = mpctx->opts;
+
     mask &= mpctx->initialized_flags;
 
     MP_DBG(mpctx, "\n*** uninit(0x%X)\n", mask);
@@ -154,9 +156,22 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     }
 
     if (mask & INITIALIZED_AO) {
+        struct ao *ao = mpctx->ao;
         mpctx->initialized_flags &= ~INITIALIZED_AO;
-        if (mpctx->ao)
-            ao_uninit(mpctx->ao, mpctx->stop_play != AT_END_OF_FILE);
+        if (ao) {
+            bool drain = false;
+            // Note: with gapless_audio, stop_play is not correctly set
+            if (opts->gapless_audio || mpctx->stop_play == AT_END_OF_FILE) {
+                drain = true;
+                int len = ao->buffer_playable_size;
+                assert(len <= ao->buffer.len);
+                int played = ao_play(ao, ao->buffer.start, len,
+                                     AOPLAY_FINAL_CHUNK);
+                if (played < len)
+                    MP_WARN(ao, "Audio output truncated at end.\n");
+            }
+            ao_uninit(ao, drain);
+        }
         mpctx->ao = NULL;
     }
 
@@ -1276,6 +1291,13 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
 
     if (mpctx->stop_play == KEEP_PLAYING)
         mpctx->stop_play = AT_END_OF_FILE;
+
+    // Drop audio left in the buffers
+    if (mpctx->stop_play != AT_END_OF_FILE && mpctx->ao) {
+        mpctx->ao->buffer_playable_size = 0;
+        mpctx->ao->buffer.len = 0;
+        ao_reset(mpctx->ao);
+    }
 
     if (opts->position_save_on_quit && mpctx->stop_play == PT_QUIT)
         mp_write_watch_later_conf(mpctx);

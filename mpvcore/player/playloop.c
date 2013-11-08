@@ -254,10 +254,12 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         if (demuxer_amount == -1) {
             assert(!need_reset);
             mpctx->stop_play = AT_END_OF_FILE;
-            // Clear audio from current position
             if (mpctx->sh_audio && !timeline_fallthrough) {
+                // Seek outside of the file -> clear audio from current position
                 ao_reset(mpctx->ao);
                 mpctx->sh_audio->a_buffer_len = 0;
+                mpctx->ao->buffer.len = 0;
+                mpctx->ao->buffer_playable_size = 0;
             }
             return -1;
         }

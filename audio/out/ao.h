@@ -73,7 +73,8 @@ struct ao {
     int bps;                    // bytes per second
     double pts;                 // some mplayer.c state (why is this here?)
     struct bstr buffer;
-    int buffer_playable_size;
+    int buffer_playable_size;   // part of the part of the buffer the AO hasn't
+                                // accepted yet with play()
     bool probing;               // if true, don't fail loudly on init
     bool untimed;
     bool no_persistent_volume;  // the AO does the equivalent of af_volume
