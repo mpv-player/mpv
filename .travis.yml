@@ -20,10 +20,6 @@ notifications-policy: &notifications-policy
   on_failure: always
 
 notifications:
-  email:
-    recipients:
-      - mpv-team@googlegroups.com
-    <<: *notifications-policy
   irc:
     channels:
       - "irc.freenode.org#mpv-player-dev"
