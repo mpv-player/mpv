@@ -509,6 +509,7 @@ static int af_fix_rate(struct af_stream *s, struct af_instance **p_af,
 // In that case, you should always rebuild the filter chain, or abort.
 static int af_reinit(struct af_stream *s)
 {
+    remove_auto_inserted_filters(s);
     // Start with the second filter, as the first filter is the special input
     // filter which needs no initialization.
     struct af_instance *af = s->first->next;
@@ -573,8 +574,8 @@ static int af_reinit(struct af_stream *s)
     return af_config_equals(&s->output, &s->filter_output) ? AF_OK : AF_ERROR;
 
 negotiate_error:
-    mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Unable to correct audio format. "
-           "This error should never occur, please send a bug report.\n");
+    mp_msg(MSGT_AFILTER, MSGL_ERR, "[libaf] Unable to convert audio input "
+           "format to output format.\n");
     af_print_filter_chain(s, af, MSGL_ERR);
     return AF_ERROR;
 }
@@ -651,8 +652,6 @@ int af_init(struct af_stream *s)
             }
         }
     }
-
-    remove_auto_inserted_filters(s);
 
     if (af_reinit(s) != AF_OK) {
         // Something is stuffed audio out will not work
