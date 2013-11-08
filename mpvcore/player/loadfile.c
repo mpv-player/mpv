@@ -1292,12 +1292,8 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     if (mpctx->stop_play == KEEP_PLAYING)
         mpctx->stop_play = AT_END_OF_FILE;
 
-    // Drop audio left in the buffers
-    if (mpctx->stop_play != AT_END_OF_FILE && mpctx->ao) {
-        mpctx->ao->buffer_playable_size = 0;
-        mpctx->ao->buffer.len = 0;
-        ao_reset(mpctx->ao);
-    }
+    if (mpctx->stop_play != AT_END_OF_FILE)
+        clear_audio_output_buffers(mpctx);
 
     if (opts->position_save_on_quit && mpctx->stop_play == PT_QUIT)
         mp_write_watch_later_conf(mpctx);

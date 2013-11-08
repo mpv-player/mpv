@@ -421,3 +421,20 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
 
     return signal_eof ? -2 : -partial_fill;
 }
+
+// Drop data queued for output, or which the AO is currently outputting.
+void clear_audio_output_buffers(struct MPContext *mpctx)
+{
+    if (mpctx->ao) {
+        ao_reset(mpctx->ao);
+        mpctx->ao->buffer.len = 0;
+        mpctx->ao->buffer_playable_size = 0;
+    }
+}
+
+// Drop decoded data queued for filtering.
+void clear_audio_decode_buffers(struct MPContext *mpctx)
+{
+    if (mpctx->sh_audio)
+        mpctx->sh_audio->a_buffer_len = 0;
+}
