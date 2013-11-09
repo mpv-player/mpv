@@ -71,12 +71,12 @@ static void checkvolume(struct mixer *mixer)
 
     ao_control_vol_t vol = {mixer->vol_l, mixer->vol_r};
     if (mixer->softvol) {
-        float vals[AF_NCH];
+        float gain;
         if (!af_control_any_rev(mixer->af,
-                                AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET, vals))
-            vals[0] = vals[1] = 1.0;
-        vol.left = (vals[0] / (mixer->opts->softvol_max / 100.0)) * 100.0;
-        vol.right = (vals[1] / (mixer->opts->softvol_max / 100.0)) * 100.0;
+                                AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET, &gain))
+            gain = 1.0;
+        vol.left = (gain / (mixer->opts->softvol_max / 100.0)) * 100.0;
+        vol.right = (gain / (mixer->opts->softvol_max / 100.0)) * 100.0;
     } else {
         // Rely on the values not changing if the query is not supported
         ao_control(mixer->ao, AOCONTROL_GET_VOLUME, &vol);
@@ -118,20 +118,16 @@ static void setvolume_internal(struct mixer *mixer, float l, float r)
                     "[Mixer] Failed to change audio output volume.\n");
         return;
     }
-    float vals[AF_NCH];
-    vals[0] = l / 100.0 * mixer->opts->softvol_max / 100.0;
-    vals[1] = r / 100.0 * mixer->opts->softvol_max / 100.0;
-    for (int i = 2; i < AF_NCH; i++)
-        vals[i] = (vals[0] + vals[1]) / 2.0;
+    float gain = (l + r) / 2.0 / 100.0 * mixer->opts->softvol_max / 100.0;
     if (!af_control_any_rev(mixer->af,
                             AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET,
-                            vals))
+                            &gain))
     {
         mp_tmsg(MSGT_GLOBAL, MSGL_V, "[Mixer] Inserting volume filter.\n");
         if (!(af_add(mixer->af, "volume", NULL)
               && af_control_any_rev(mixer->af,
                                     AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET,
-                                    vals)))
+                                    &gain)))
             mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
                     "[Mixer] No volume control available.\n");
     }

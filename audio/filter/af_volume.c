@@ -30,7 +30,7 @@
 #include "af.h"
 
 struct priv {
-    float level[AF_NCH];        // Gain level for each channel
+    float level;                // Gain level for each channel
     int soft;                   // Enable/disable soft clipping
     int fast;                   // Use fix-point volume control
     float cfg_volume;
@@ -51,10 +51,10 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
         return af_test_output(af, (struct mp_audio *)arg);
     case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET:
-        memcpy(s->level, arg, sizeof(float) * AF_NCH);
+        s->level = *(float *)arg;
         return AF_OK;
     case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET:
-        memcpy(arg, s->level, sizeof(float) * AF_NCH);
+        *(float *)arg = s->level;
         return AF_OK;
     }
     return AF_UNKNOWN;
@@ -64,30 +64,25 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 {
     struct mp_audio *c = data;
     struct priv *s = af->priv;
-    int nch = c->nch;
 
     if (af->data->format == AF_FORMAT_S16_NE) {
         int16_t *a = c->audio;
         int len = c->len / 2;
-        for (int ch = 0; ch < nch; ch++) {
-            int vol = 256.0 * s->level[ch];
-            if (vol != 256) {
-                for (int i = ch; i < len; i += nch) {
-                    int x = (a[i] * vol) >> 8;
-                    a[i] = MPCLAMP(x, SHRT_MIN, SHRT_MAX);
-                }
+        int vol = 256.0 * s->level;
+        if (vol != 256) {
+            for (int i = 0; i < len; i++) {
+                int x = (a[i] * vol) >> 8;
+                a[i] = MPCLAMP(x, SHRT_MIN, SHRT_MAX);
             }
         }
     } else if (af->data->format == AF_FORMAT_FLOAT_NE) {
         float *a = c->audio;
         int len = c->len / 4;
-        for (int ch = 0; ch < nch; ch++) {
-            if (s->level[ch] != 1.0) {
-                for (int i = ch; i < len; i += nch) {
-                    float x = a[i];
-                    x *= s->level[ch];
-                    a[i] = s->soft ? af_softclip(x) : MPCLAMP(x, -1.0, 1.0);
-                }
+        float vol = s->level;
+        if (vol != 1.0) {
+            for (int i = 0; i < len; i++) {
+                float x = a[i] * vol;
+                a[i] = s->soft ? af_softclip(x) : MPCLAMP(x, -1.0, 1.0);
             }
         }
     }
@@ -101,10 +96,7 @@ static int af_open(struct af_instance *af)
     af->play = play;
     af->mul = 1;
     af->data = talloc_zero(af, struct mp_audio);
-    float level;
-    af_from_dB(1, &s->cfg_volume, &level, 20.0, -200.0, 60.0);
-    for (int i = 0; i < AF_NCH; i++)
-        s->level[i] = level;
+    af_from_dB(1, &s->cfg_volume, &s->level, 20.0, -200.0, 60.0);
     return AF_OK;
 }
 
