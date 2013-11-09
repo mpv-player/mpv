@@ -527,6 +527,8 @@ static int af_reinit(struct af_stream *s)
         in.len = 0;
 
         int rv = af->control(af, AF_CONTROL_REINIT, &in);
+        if (rv == AF_OK && !mp_audio_config_equals(&in, af->prev->data))
+            rv = AF_FALSE; // conversion filter needed
         switch (rv) {
         case AF_OK:
             af = af->next;
