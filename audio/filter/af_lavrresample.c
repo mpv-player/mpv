@@ -126,8 +126,99 @@ static bool test_conversion(int src_format, int dst_format)
            af_to_avformat(dst_format) != AV_SAMPLE_FMT_NONE;
 }
 
-#define ctx_opt_set_int(a,b) av_opt_set_int(s->avrctx, (a), (b), 0)
-#define ctx_opt_set_dbl(a,b) av_opt_set_double(s->avrctx, (a), (b), 0)
+static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
+                           struct mp_audio *out)
+{
+    struct af_resample *s = af->priv;
+
+    enum AVSampleFormat in_samplefmt = af_to_avformat(in->format);
+    enum AVSampleFormat out_samplefmt = af_to_avformat(out->format);
+
+    if (in_samplefmt == AV_SAMPLE_FMT_NONE || out_samplefmt == AV_SAMPLE_FMT_NONE)
+        return AF_ERROR;
+
+    avresample_close(s->avrctx);
+    avresample_close(s->avrctx_out);
+
+    s->ctx.out_rate    = out->rate;
+    s->ctx.in_rate     = in->rate;
+    s->ctx.out_format  = out->format;
+    s->ctx.in_format   = in->format;
+    s->ctx.out_channels= out->channels;
+    s->ctx.in_channels = in->channels;
+    s->ctx.filter_size = s->opts.filter_size;
+    s->ctx.phase_shift = s->opts.phase_shift;
+    s->ctx.linear      = s->opts.linear;
+    s->ctx.cutoff      = s->opts.cutoff;
+
+    av_opt_set_int(s->avrctx, "filter_size",        s->ctx.filter_size, 0);
+    av_opt_set_int(s->avrctx, "phase_shift",        s->ctx.phase_shift, 0);
+    av_opt_set_int(s->avrctx, "linear_interp",      s->ctx.linear, 0);
+
+    av_opt_set_int(s->avrctx, "cutoff",             s->ctx.cutoff, 0);
+
+    if (parse_avopts(s->avrctx, s->avopts) < 0) {
+        mp_msg(MSGT_VFILTER, MSGL_FATAL,
+                "af_lavrresample: could not set opts: '%s'\n", s->avopts);
+        return AF_ERROR;
+    }
+
+    struct mp_chmap map_in = in->channels;
+    struct mp_chmap map_out = out->channels;
+
+    // Try not to do any remixing if at least one is "unknown".
+    if (mp_chmap_is_unknown(&map_in) || mp_chmap_is_unknown(&map_out)) {
+        mp_chmap_set_unknown(&map_in, map_in.num);
+        mp_chmap_set_unknown(&map_out, map_out.num);
+    }
+
+    // unchecked: don't take any channel reordering into account
+    uint64_t in_ch_layout = mp_chmap_to_lavc_unchecked(&map_in);
+    uint64_t out_ch_layout = mp_chmap_to_lavc_unchecked(&map_out);
+
+    av_opt_set_int(s->avrctx, "in_channel_layout",  in_ch_layout, 0);
+    av_opt_set_int(s->avrctx, "out_channel_layout", out_ch_layout, 0);
+
+    av_opt_set_int(s->avrctx, "in_sample_rate",     s->ctx.in_rate, 0);
+    av_opt_set_int(s->avrctx, "out_sample_rate",    s->ctx.out_rate, 0);
+
+    av_opt_set_int(s->avrctx, "in_sample_fmt",      in_samplefmt, 0);
+    av_opt_set_int(s->avrctx, "out_sample_fmt",     out_samplefmt, 0);
+
+    struct mp_chmap in_lavc;
+    mp_chmap_from_lavc(&in_lavc, in_ch_layout);
+    mp_chmap_get_reorder(s->reorder_in, &map_in, &in_lavc);
+
+    struct mp_chmap out_lavc;
+    mp_chmap_from_lavc(&out_lavc, out_ch_layout);
+    mp_chmap_get_reorder(s->reorder_out, &out_lavc, &map_out);
+
+    // Same configuration; we just reorder.
+    av_opt_set_int(s->avrctx_out, "in_channel_layout",  out_ch_layout, 0);
+    av_opt_set_int(s->avrctx_out, "out_channel_layout", out_ch_layout, 0);
+    av_opt_set_int(s->avrctx_out, "in_sample_fmt",      out_samplefmt, 0);
+    av_opt_set_int(s->avrctx_out, "out_sample_fmt",     out_samplefmt, 0);
+    av_opt_set_int(s->avrctx_out, "in_sample_rate",     s->ctx.out_rate, 0);
+    av_opt_set_int(s->avrctx_out, "out_sample_rate",    s->ctx.out_rate, 0);
+
+#if USE_SET_CHANNEL_MAPPING
+    // API has weird requirements, quoting avresample.h:
+    //  * This function can only be called when the allocated context is not open.
+    //  * Also, the input channel layout must have already been set.
+    avresample_set_channel_mapping(s->avrctx, s->reorder_in);
+    avresample_set_channel_mapping(s->avrctx_out, s->reorder_out);
+#endif
+
+    if (avresample_open(s->avrctx) < 0 ||
+        avresample_open(s->avrctx_out) < 0)
+    {
+        mp_msg(MSGT_AFILTER, MSGL_ERR, "[lavrresample] Cannot open "
+                "Libavresample Context. \n");
+        return AF_ERROR;
+    }
+    return AF_OK;
+}
+
 
 static int control(struct af_instance *af, int cmd, void *arg)
 {
@@ -151,102 +242,19 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (mp_chmap_is_empty(&out->channels))
             mp_audio_set_channels(out, &in->channels);
 
-        enum AVSampleFormat in_samplefmt = af_to_avformat(in->format);
-        if (in_samplefmt == AV_SAMPLE_FMT_NONE) {
+        if (af_to_avformat(in->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(in, AF_FORMAT_FLOAT_NE);
-            in_samplefmt = af_to_avformat(in->format);
-        }
-        enum AVSampleFormat out_samplefmt = af_to_avformat(out->format);
-        if (out_samplefmt == AV_SAMPLE_FMT_NONE) {
+        if (af_to_avformat(out->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(out, in->format);
-            out_samplefmt = in_samplefmt;
-        }
 
         af->mul     = (double) (out->rate * out->nch) / (in->rate * in->nch);
         af->delay   = out->nch * s->opts.filter_size / FFMIN(af->mul, 1);
 
         if (needs_lavrctx_reconfigure(s, in, out)) {
-            avresample_close(s->avrctx);
-            avresample_close(s->avrctx_out);
-
-            s->ctx.out_rate    = out->rate;
-            s->ctx.in_rate     = in->rate;
-            s->ctx.out_format  = out->format;
-            s->ctx.in_format   = in->format;
-            s->ctx.out_channels= out->channels;
-            s->ctx.in_channels = in->channels;
-            s->ctx.filter_size = s->opts.filter_size;
-            s->ctx.phase_shift = s->opts.phase_shift;
-            s->ctx.linear      = s->opts.linear;
-            s->ctx.cutoff      = s->opts.cutoff;
-
-            ctx_opt_set_int("filter_size",        s->ctx.filter_size);
-            ctx_opt_set_int("phase_shift",        s->ctx.phase_shift);
-            ctx_opt_set_int("linear_interp",      s->ctx.linear);
-
-            ctx_opt_set_dbl("cutoff",             s->ctx.cutoff);
-
-            if (parse_avopts(s->avrctx, s->avopts) < 0) {
-                mp_msg(MSGT_VFILTER, MSGL_FATAL,
-                       "af_lavrresample: could not set opts: '%s'\n", s->avopts);
-                return AF_ERROR;
-            }
-
-            struct mp_chmap map_in = in->channels;
-            struct mp_chmap map_out = out->channels;
-
-            // Try not to do any remixing if at least one is "unknown".
-            if (mp_chmap_is_unknown(&map_in) || mp_chmap_is_unknown(&map_out)) {
-                mp_chmap_set_unknown(&map_in, map_in.num);
-                mp_chmap_set_unknown(&map_out, map_out.num);
-            }
-
-            // unchecked: don't take any channel reordering into account
-            uint64_t in_ch_layout = mp_chmap_to_lavc_unchecked(&map_in);
-            uint64_t out_ch_layout = mp_chmap_to_lavc_unchecked(&map_out);
-
-            ctx_opt_set_int("in_channel_layout",  in_ch_layout);
-            ctx_opt_set_int("out_channel_layout", out_ch_layout);
-
-            ctx_opt_set_int("in_sample_rate",     s->ctx.in_rate);
-            ctx_opt_set_int("out_sample_rate",    s->ctx.out_rate);
-
-            ctx_opt_set_int("in_sample_fmt",      in_samplefmt);
-            ctx_opt_set_int("out_sample_fmt",     out_samplefmt);
-
-            struct mp_chmap in_lavc;
-            mp_chmap_from_lavc(&in_lavc, in_ch_layout);
-            mp_chmap_get_reorder(s->reorder_in, &map_in, &in_lavc);
-
-            struct mp_chmap out_lavc;
-            mp_chmap_from_lavc(&out_lavc, out_ch_layout);
-            mp_chmap_get_reorder(s->reorder_out, &out_lavc, &map_out);
-
-            // Same configuration; we just reorder.
-            av_opt_set_int(s->avrctx_out, "in_channel_layout", out_ch_layout, 0);
-            av_opt_set_int(s->avrctx_out, "out_channel_layout", out_ch_layout, 0);
-            av_opt_set_int(s->avrctx_out, "in_sample_fmt", out_samplefmt, 0);
-            av_opt_set_int(s->avrctx_out, "out_sample_fmt", out_samplefmt, 0);
-            av_opt_set_int(s->avrctx_out, "in_sample_rate", s->ctx.out_rate, 0);
-            av_opt_set_int(s->avrctx_out, "out_sample_rate", s->ctx.out_rate, 0);
-
-#if USE_SET_CHANNEL_MAPPING
-            // API has weird requirements, quoting avresample.h:
-            //  * This function can only be called when the allocated context is not open.
-            //  * Also, the input channel layout must have already been set.
-            avresample_set_channel_mapping(s->avrctx, s->reorder_in);
-            avresample_set_channel_mapping(s->avrctx_out, s->reorder_out);
-#endif
-
-            if (avresample_open(s->avrctx) < 0 ||
-                avresample_open(s->avrctx_out) < 0)
-            {
-                mp_msg(MSGT_AFILTER, MSGL_ERR, "[lavrresample] Cannot open "
-                       "Libavresample Context. \n");
-                return AF_ERROR;
-            }
+            int r = configure_lavrr(af, in, out);
+            if (r != AF_OK)
+                return r;
         }
-
         return ((in->format == orig_in.format) &&
                 mp_chmap_equals(&in->channels, &orig_in.channels))
                ? AF_OK : AF_FALSE;
