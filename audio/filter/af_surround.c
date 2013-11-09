@@ -91,15 +91,17 @@ static int control(struct af_instance* af, int cmd, void* arg)
   af_surround_t *s = af->setup;
   switch(cmd){
   case AF_CONTROL_REINIT:{
+    struct mp_audio *in = arg;
     float fc;
-    mp_audio_copy_config(af->data, (struct mp_audio*)arg);
-    mp_audio_set_channels_old(af->data, ((struct mp_audio*)arg)->nch*2);
-    mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
-
-    if (af->data->nch != 4){
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[surround] Only stereo input is supported.\n");
-      return AF_DETACH;
+    if (!mp_chmap_is_stereo(&in->channels)) {
+        mp_msg(MSGT_AFILTER, MSGL_ERR, "[surround] Only stereo input is supported.\n");
+        return AF_DETACH;
     }
+
+    mp_audio_set_format(in, AF_FORMAT_FLOAT_NE);
+    mp_audio_copy_config(af->data, in);
+    mp_audio_set_channels_old(af->data, in->nch * 2);
+
     // Surround filer coefficients
     fc = 2.0 * 7000.0/(float)af->data->rate;
     if (-1 == af_filter_design_fir(L, s->w, &fc, LP|HAMMING, 0)){
@@ -122,11 +124,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
 //    printf("%i\n",s->wi);
     s->ri = 0;
 
-    if((af->data->format != ((struct mp_audio*)arg)->format) ||
-       (af->data->bps    != ((struct mp_audio*)arg)->bps)){
-      mp_audio_set_format((struct mp_audio*)arg, af->data->format);
-      return AF_FALSE;
-    }
     return AF_OK;
   }
   case AF_CONTROL_COMMAND_LINE:{
