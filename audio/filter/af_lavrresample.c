@@ -250,14 +250,13 @@ static int control(struct af_instance *af, int cmd, void *arg)
         af->mul     = (double) (out->rate * out->nch) / (in->rate * in->nch);
         af->delay   = out->nch * s->opts.filter_size / FFMIN(af->mul, 1);
 
-        if (needs_lavrctx_reconfigure(s, in, out)) {
-            int r = configure_lavrr(af, in, out);
-            if (r != AF_OK)
-                return r;
-        }
-        return ((in->format == orig_in.format) &&
+        int r = ((in->format == orig_in.format) &&
                 mp_chmap_equals(&in->channels, &orig_in.channels))
-               ? AF_OK : AF_FALSE;
+                ? AF_OK : AF_FALSE;
+
+        if (r == AF_OK && needs_lavrctx_reconfigure(s, in, out))
+            r = configure_lavrr(af, in, out);
+        return r;
     }
     case AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET: {
         if (af_to_avformat(*(int*)arg) == AV_SAMPLE_FMT_NONE)
