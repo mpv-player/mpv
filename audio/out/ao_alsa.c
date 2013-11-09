@@ -304,6 +304,26 @@ static const char *select_chmap(struct ao *ao)
     return "default";
 }
 
+static int map_iec958_srate(int srate)
+{
+    switch (srate) {
+    case 192000:    return IEC958_AES4_CON_ORIGFS_192000;
+    case 12000:     return IEC958_AES4_CON_ORIGFS_12000;
+    case 176400:    return IEC958_AES4_CON_ORIGFS_176400;
+    case 96000:     return IEC958_AES4_CON_ORIGFS_96000;
+    case 8000:      return IEC958_AES4_CON_ORIGFS_8000;
+    case 88200:     return IEC958_AES4_CON_ORIGFS_88200;
+    case 16000:     return IEC958_AES4_CON_ORIGFS_16000;
+    case 24000:     return IEC958_AES4_CON_ORIGFS_24000;
+    case 11025:     return IEC958_AES4_CON_ORIGFS_11025;
+    case 22050:     return IEC958_AES4_CON_ORIGFS_22050;
+    case 32000:     return IEC958_AES4_CON_ORIGFS_32000;
+    case 48000:     return IEC958_AES4_CON_ORIGFS_48000;
+    case 44100:     return IEC958_AES4_CON_ORIGFS_44100;
+    default:        return IEC958_AES4_CON_ORIGFS_NOTID;
+    }
+}
+
 static int try_open_device(struct ao *ao, const char *device, int open_mode)
 {
     struct priv *p = ao->priv;
@@ -311,7 +331,11 @@ static int try_open_device(struct ao *ao, const char *device, int open_mode)
     if (AF_FORMAT_IS_IEC61937(ao->format)) {
         void *tmp = talloc_new(NULL);
         /* to set the non-audio bit, use AES0=6 */
-        char *params = "AES0=6";
+        char *params = talloc_asprintf(tmp,
+                        "AES0=%d,AES1=%d,AES2=0,AES3=%d",
+                        IEC958_AES0_NONAUDIO | IEC958_AES0_PRO_EMPHASIS_NONE,
+                        IEC958_AES1_CON_ORIGINAL | IEC958_AES1_CON_PCM_CODER,
+                        map_iec958_srate(ao->samplerate));
         const char *ac3_device = device;
         int len = strlen(device);
         char *end = strchr(device, ':');
