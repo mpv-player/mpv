@@ -23,15 +23,10 @@
 
 static bool test_conversion(int src_format, int dst_format)
 {
-    if (!(src_format & AF_FORMAT_POINT_MASK) == AF_FORMAT_I)
-        return false;
-    if ((src_format & ~AF_FORMAT_BITS_MASK) !=
-        (dst_format & ~AF_FORMAT_BITS_MASK))
-        return false;
-    int srcbits = src_format & AF_FORMAT_BITS_MASK;
-    int dstbits = dst_format & AF_FORMAT_BITS_MASK;
-    return (srcbits == AF_FORMAT_24BIT && dstbits == AF_FORMAT_32BIT) ||
-           (srcbits == AF_FORMAT_32BIT && dstbits == AF_FORMAT_24BIT);
+    return (src_format == AF_FORMAT_U24_NE && dst_format == AF_FORMAT_U32_NE) ||
+           (src_format == AF_FORMAT_S24_NE && dst_format == AF_FORMAT_S32_NE) ||
+           (src_format == AF_FORMAT_U32_NE && dst_format == AF_FORMAT_U24_NE) ||
+           (src_format == AF_FORMAT_S32_NE && dst_format == AF_FORMAT_S24_NE);
 }
 
 static int control(struct af_instance *af, int cmd, void *arg)
