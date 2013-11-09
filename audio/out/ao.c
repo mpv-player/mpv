@@ -153,6 +153,10 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     if (m_config_set_obj_params(config, args) < 0)
         goto error;
     ao->priv = config->optstruct;
+    char *chmap = mp_chmap_to_str(&ao->channels);
+    MP_VERBOSE(ao, "requested format: %d Hz, %s channels, %s\n",
+               ao->samplerate, chmap, af_fmt_to_str(ao->format));
+    talloc_free(chmap);
     if (ao->driver->init(ao) < 0)
         goto error;
     ao->bps = ao->channels.num * ao->samplerate * af_fmt2bits(ao->format) / 8;

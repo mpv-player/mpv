@@ -375,9 +375,6 @@ static int init(struct ao *ao)
 
     struct priv *p = ao->priv;
 
-    MP_VERBOSE(ao, "requested format: %d Hz, %d channels, %x\n",
-               ao->samplerate, ao->channels.num, ao->format);
-
     p->prepause_frames = 0;
     p->delay_before_pause = 0;
 

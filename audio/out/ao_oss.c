@@ -204,9 +204,6 @@ static int init(struct ao *ao)
     if (p->cfg_oss_mixer_channel && p->cfg_oss_mixer_channel[0])
         mchan = p->cfg_oss_mixer_channel;
 
-    MP_VERBOSE(ao, "%d Hz  %d chans  %s\n", ao->samplerate,
-               ao->channels.num, af_fmt_to_str(ao->format));
-
     if (mchan) {
         int fd, devs, i;
 
