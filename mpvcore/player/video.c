@@ -125,7 +125,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     sh_video->hwdec_info = talloc_zero(sh_video, struct mp_hwdec_info);
     vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, sh_video->hwdec_info);
 
-    update_vo_window_title(mpctx);
+    update_window_title(mpctx, true);
 
     if (stream_control(mpctx->sh_video->gsh->demuxer->stream,
                        STREAM_CTRL_GET_ASPECT_RATIO, &ar) != STREAM_UNSUPPORTED)

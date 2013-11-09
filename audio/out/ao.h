@@ -34,6 +34,8 @@ enum aocontrol {
     // _MUTE commands take a pointer to bool
     AOCONTROL_GET_MUTE,
     AOCONTROL_SET_MUTE,
+    // Has char* as argument, which contains the desired stream title.
+    AOCONTROL_UPDATE_STREAM_TITLE,
 };
 
 #define AOPLAY_FINAL_CHUNK 1

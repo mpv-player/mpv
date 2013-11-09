@@ -153,6 +153,7 @@ typedef struct MPContext {
     struct osd_state *osd;
     struct mp_osd_msg *osd_msg_stack;
     char *terminal_osd_text;
+    char *last_window_title;
 
     int add_osd_seek_info; // bitfield of enum mp_osd_seek_info
     double osd_visible; // for the osd bar only
@@ -377,7 +378,7 @@ double get_play_end_pts(struct MPContext *mpctx);
 double get_relative_time(struct MPContext *mpctx);
 int mp_get_cache_percent(struct MPContext *mpctx);
 bool mp_get_cache_idle(struct MPContext *mpctx);
-void update_vo_window_title(struct MPContext *mpctx);
+void update_window_title(struct MPContext *mpctx, bool force);
 void stream_dump(struct MPContext *mpctx);
 
 // osd.c

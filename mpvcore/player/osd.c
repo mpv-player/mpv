@@ -87,7 +87,7 @@ void print_status(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     sh_video_t * const sh_video = mpctx->sh_video;
 
-    update_vo_window_title(mpctx);
+    update_window_title(mpctx, false);
 
     if (opts->quiet)
         return;

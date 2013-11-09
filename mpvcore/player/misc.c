@@ -34,6 +34,7 @@
 #include "mpvcore/encode.h"
 #include "mpvcore/input/input.h"
 
+#include "audio/out/ao.h"
 #include "stream/stream.h"
 #include "video/out/vo.h"
 
@@ -128,17 +129,28 @@ bool mp_get_cache_idle(struct MPContext *mpctx)
     return idle;
 }
 
-void update_vo_window_title(struct MPContext *mpctx)
+void update_window_title(struct MPContext *mpctx, bool force)
 {
-    if (!mpctx->video_out)
+    if (!mpctx->video_out && !mpctx->ao) {
+        talloc_free(mpctx->last_window_title);
+        mpctx->last_window_title = false;
         return;
+    }
     char *title = mp_property_expand_string(mpctx, mpctx->opts->wintitle);
-    if (!mpctx->video_out->window_title ||
-        strcmp(title, mpctx->video_out->window_title))
+    if (!mpctx->last_window_title || force ||
+        strcmp(title, mpctx->last_window_title) != 0)
     {
-        talloc_free(mpctx->video_out->window_title);
-        mpctx->video_out->window_title = talloc_steal(mpctx, title);
-        vo_control(mpctx->video_out, VOCTRL_UPDATE_WINDOW_TITLE, title);
+        talloc_free(mpctx->last_window_title);
+        mpctx->last_window_title = talloc_steal(mpctx, title);
+
+        if (mpctx->video_out) {
+            mpctx->video_out->window_title = talloc_strdup(mpctx->video_out, title);
+            vo_control(mpctx->video_out, VOCTRL_UPDATE_WINDOW_TITLE, title);
+        }
+
+        if (mpctx->ao) {
+            ao_control(mpctx->ao, AOCONTROL_UPDATE_STREAM_TITLE, title);
+        }
     } else {
         talloc_free(title);
     }

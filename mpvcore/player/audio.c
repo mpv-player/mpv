@@ -152,6 +152,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
         MP_INFO(mpctx, "AO: [%s] %s\n", ao->driver->name, s);
         talloc_free(s);
         MP_VERBOSE(mpctx, "AO: Description: %s\n", ao->driver->description);
+        update_window_title(mpctx, true);
     }
 
     if (recreate_audio_filters(mpctx) < 0)

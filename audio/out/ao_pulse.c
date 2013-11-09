@@ -582,6 +582,19 @@ static int control(struct ao *ao, enum aocontrol cmd, void *arg)
         pa_threaded_mainloop_unlock(priv->mainloop);
         return CONTROL_OK;
     }
+
+    case AOCONTROL_UPDATE_STREAM_TITLE: {
+        char *title = (char *)arg;
+        pa_threaded_mainloop_lock(priv->mainloop);
+        if (!waitop(priv, pa_stream_set_name(priv->stream, title,
+                                             success_cb, ao)))
+        {
+            GENERIC_ERR_MSG("pa_stream_set_name() failed");
+            return CONTROL_ERROR;
+        }
+        return CONTROL_OK;
+    }
+
     default:
         return CONTROL_UNKNOWN;
     }
