@@ -52,7 +52,9 @@ known issues:
 #if HAVE_SYS_VIDEOIO_H
 #include <sys/videoio.h>
 #else
+#ifdef __linux__
 #include <linux/types.h>
+#endif
 #include <linux/videodev2.h>
 #endif
 #if HAVE_LIBV4L2

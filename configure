@@ -2955,6 +2955,8 @@ if test "$_tv_v4l2" = auto ; then
   _tv_v4l2=no
   if test "$_tv" = yes && linux ; then
     header_check_broken sys/time.h linux/videodev2.h && _tv_v4l2=yes
+  elif test "$_tv" = yes && freebsd ; then
+    header_check linux/videodev2.h && _tv_v4l2=yes
   elif test "$_tv" = yes && test "$sys_videoio_h" = "yes" ; then
     _tv_v4l2=yes
   fi
@@ -3009,7 +3011,7 @@ echores "$_radio_capture"
 echocheck "Video 4 Linux 2 Radio interface"
 if test "$_radio_v4l2" = auto ; then
   _radio_v4l2=no
-  if test "$_radio" = yes && linux ; then
+  if test "$_radio" = yes && (linux || freebsd) ; then
     header_check linux/videodev2.h && _radio_v4l2=yes
   fi
 fi
@@ -3028,7 +3030,7 @@ fi
 echocheck "Video 4 Linux 2 MPEG PVR interface"
 if test "$_pvr" = auto ; then
  _pvr=no
- if test "$_tv_v4l2" = yes && linux ; then
+ if test "$_tv_v4l2" = yes ; then
   cat > $TMPC <<EOF
 #include <sys/time.h>
 #include <linux/videodev2.h>

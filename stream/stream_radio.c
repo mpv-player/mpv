@@ -35,7 +35,9 @@
 #include <errno.h>
 #include <unistd.h>
 
+#ifdef __linux__
 #include <linux/types.h>
+#endif
 
 #if HAVE_RADIO_V4L2
 #include <linux/videodev2.h>
