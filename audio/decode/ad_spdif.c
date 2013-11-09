@@ -82,8 +82,12 @@ static int init(sh_audio_t *sh, const char *decoder)
     struct spdifContext *spdif_ctx = talloc_zero(NULL, struct spdifContext);
     sh->context = spdif_ctx;
 
-    AVFormatContext *lavf_ctx  = NULL;
-    if (avformat_alloc_output_context2(&lavf_ctx, NULL, "spdif", NULL) < 0)
+    AVFormatContext *lavf_ctx  = avformat_alloc_context();
+    if (!lavf_ctx)
+        goto fail;
+
+    lavf_ctx->oformat = av_guess_format("spdif", NULL, NULL);
+    if (!lavf_ctx->oformat)
         goto fail;
 
     spdif_ctx->lavf_ctx = lavf_ctx;
@@ -98,8 +102,10 @@ static int init(sh_audio_t *sh, const char *decoder)
         goto fail;
     }
 
-    // Request minimal buffering
+    // Request minimal buffering (not available on Libav)
+#if LIBAVFORMAT_VERSION_MICRO >= 100
     lavf_ctx->pb->direct = 1;
+#endif
 
     AVStream *stream = avformat_new_stream(lavf_ctx, 0);
     if (!stream)
