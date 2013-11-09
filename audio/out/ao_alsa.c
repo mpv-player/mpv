@@ -304,51 +304,38 @@ static const char *select_chmap(struct ao *ao)
     return "default";
 }
 
-static int try_open_device(struct ao *ao, const char *device, int open_mode,
-                           int try_ac3)
+static int try_open_device(struct ao *ao, const char *device, int open_mode)
 {
     struct priv *p = ao->priv;
-    int err, len;
-    char *ac3_device, *args;
 
-    if (try_ac3) {
+    if (AF_FORMAT_IS_IEC61937(ao->format)) {
+        void *tmp = talloc_new(NULL);
         /* to set the non-audio bit, use AES0=6 */
-        len = strlen(device);
-        ac3_device = malloc(len + 7 + 1);
-        if (!ac3_device)
-            return -ENOMEM;
-        strcpy(ac3_device, device);
-        args = strchr(ac3_device, ':');
-        if (!args) {
+        char *params = "AES0=6";
+        const char *ac3_device = device;
+        int len = strlen(device);
+        char *end = strchr(device, ':');
+        if (!end) {
             /* no existing parameters: add it behind device name */
-            strcat(ac3_device, ":AES0=6");
+            ac3_device = talloc_asprintf(tmp, "%s:%s", device, params);
+        } else if (end[1] == '\0') {
+            /* ":" but no parameters */
+            ac3_device = talloc_asprintf(tmp, "%s%s", device, params);
+        } else if (end[1] == '{' && device[len - 1] == '}') {
+            /* parameters in config syntax: add it inside the { } block */
+            ac3_device = talloc_asprintf(tmp, "%.*s %s}", len - 1, device, params);
         } else {
-            do {
-                ++args;
-            } while (isspace(*args));
-            if (*args == '\0') {
-                /* ":" but no parameters */
-                strcat(ac3_device, "AES0=6");
-            } else if (*args != '{') {
-                /* a simple list of parameters: add it at the end of the list */
-                strcat(ac3_device, ",AES0=6");
-            } else {
-                /* parameters in config syntax: add it inside the { } block */
-                do {
-                    --len;
-                } while (len > 0 && isspace(ac3_device[len]));
-                if (ac3_device[len] == '}')
-                    strcpy(ac3_device + len, " AES0=6}");
-            }
+            /* a simple list of parameters: add it at the end of the list */
+            ac3_device = talloc_asprintf(tmp, "%s,%s", device, params);
         }
-        err = snd_pcm_open
-                (&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, open_mode);
-        free(ac3_device);
+        int err = snd_pcm_open
+                    (&p->alsa, ac3_device, SND_PCM_STREAM_PLAYBACK, open_mode);
+        talloc_free(tmp);
         if (!err)
             return 0;
     }
-    return snd_pcm_open
-            (&p->alsa, device, SND_PCM_STREAM_PLAYBACK, open_mode);
+
+    return snd_pcm_open(&p->alsa, device, SND_PCM_STREAM_PLAYBACK, open_mode);
 }
 
 /*
@@ -400,14 +387,13 @@ static int init(struct ao *ao)
     snd_lib_error_set_handler(alsa_error_handler);
 
     int open_mode = p->cfg_block ? 0 : SND_PCM_NONBLOCK;
-    int isac3 =  AF_FORMAT_IS_IEC61937(ao->format);
     //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
-    err = try_open_device(ao, device, open_mode, isac3);
+    err = try_open_device(ao, device, open_mode);
     if (err < 0) {
         if (err != -EBUSY && !p->cfg_block) {
             MP_WARN(ao, "Open in nonblock-mode "
                     "failed, trying to open in block-mode.\n");
-            err = try_open_device(ao, device, 0, isac3);
+            err = try_open_device(ao, device, 0);
         }
         CHECK_ALSA_ERROR("Playback open error");
     }
