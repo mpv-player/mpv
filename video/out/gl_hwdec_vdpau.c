@@ -24,6 +24,10 @@
 #include "video/vdpau.h"
 #include "video/decode/dec_video.h"
 
+// This is a GL_NV_vdpau_interop specification bug, and headers (unfortunately)
+// follow it. I'm not sure about the original nvidia headers.
+#define BRAINDEATH(x) ((void *)(uintptr_t)(x))
+
 static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params);
 
 struct priv {
@@ -151,7 +155,7 @@ static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
     if (!mp_vdpau_status_ok(p->ctx))
         return -1;
 
-    gl->VDPAUInitNV((void *)p->ctx->vdp_device, p->ctx->get_proc_address);
+    gl->VDPAUInitNV(BRAINDEATH(p->ctx->vdp_device), p->ctx->get_proc_address);
 
 #define VDP_NUM_MIXER_PARAMETER 3
     static const VdpVideoMixerParameter parameters[VDP_NUM_MIXER_PARAMETER] = {
@@ -196,7 +200,7 @@ static int reinit(struct gl_hwdec *hw, const struct mp_image_params *params)
     gl->TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     gl->BindTexture(GL_TEXTURE_2D, 0);
 
-    p->vdpgl_surface = gl->VDPAURegisterOutputSurfaceNV((void *)p->vdp_surface,
+    p->vdpgl_surface = gl->VDPAURegisterOutputSurfaceNV(BRAINDEATH(p->vdp_surface),
                                                         GL_TEXTURE_2D,
                                                         1, &p->gl_texture);
     if (!p->vdpgl_surface)
