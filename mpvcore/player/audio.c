@@ -177,7 +177,7 @@ double written_audio_pts(struct MPContext *mpctx)
         return MP_NOPTS_VALUE;
 
     double bps = sh_audio->channels.num * sh_audio->samplerate *
-                 sh_audio->samplesize;
+                 (af_fmt2bits(sh_audio->sample_format) / 8);
 
     // first calculate the end pts of audio that has been output by decoder
     double a_pts = sh_audio->pts;

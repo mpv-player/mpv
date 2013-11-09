@@ -184,7 +184,6 @@ static int setup_format(sh_audio_t *sh_audio,
         sh_audio->channels = lavc_chmap;
         sh_audio->samplerate = samplerate;
         sh_audio->sample_format = sample_format;
-        sh_audio->samplesize = af_fmt2bits(sh_audio->sample_format) / 8;
         return 1;
     }
     return 0;

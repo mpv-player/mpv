@@ -206,22 +206,18 @@ static int set_format(sh_audio_t *sh, struct ad_mpg123_context *con)
         switch (encoding) {
         case MPG123_ENC_SIGNED_8:
             sh->sample_format = AF_FORMAT_S8;
-            sh->samplesize    = 1;
             break;
         case MPG123_ENC_SIGNED_16:
             sh->sample_format = AF_FORMAT_S16_NE;
-            sh->samplesize    = 2;
             break;
         /* To stay compatible with the oldest libmpg123 headers, do not rely
          * on float and 32 bit encoding symbols being defined.
          * Those formats came later */
         case 0x1180: /* MPG123_ENC_SIGNED_32 */
             sh->sample_format = AF_FORMAT_S32_NE;
-            sh->samplesize    = 4;
             break;
         case 0x200: /* MPG123_ENC_FLOAT_32 */
             sh->sample_format = AF_FORMAT_FLOAT_NE;
-            sh->samplesize    = 4;
             break;
         default:
             /* This means we got a funny custom build of libmpg123 that only supports an unknown format. */
@@ -233,7 +229,7 @@ static int set_format(sh_audio_t *sh, struct ad_mpg123_context *con)
         /* Going to decode directly to MPlayer's memory. It is important
          * to have MPG123_AUTO_RESAMPLE disabled for the buffer size
          * being an all-time limit. */
-        sh->audio_out_minsize = 1152 * 2 * sh->samplesize;
+        sh->audio_out_minsize = 1152 * 2 * (af_fmt2bits(sh->sample_format) / 8);
 #endif
         con->new_format = 0;
     }

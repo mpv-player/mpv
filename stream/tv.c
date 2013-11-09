@@ -794,8 +794,6 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
 
 	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_SAMPLERATE,
                    &sh_audio->samplerate);
-	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_SAMPLESIZE,
-                   &sh_audio->samplesize);
         int nchannels = sh_audio->channels.num;
 	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_CHANNELS,
                    &nchannels);
@@ -804,17 +802,18 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
         sh_audio->gsh->codec = "mp-pcm";
 	sh_audio->format = audio_format;
 
+        int samplesize = af_fmt2bits(audio_format) / 8;
+
 	sh_audio->i_bps =
-	    sh_audio->samplerate * sh_audio->samplesize *
-	    sh_audio->channels.num;
+	    sh_audio->samplerate * samplesize * sh_audio->channels.num;
 
 	// emulate WF for win32 codecs:
 	sh_audio->wf = malloc(sizeof(*sh_audio->wf));
 	sh_audio->wf->wFormatTag = sh_audio->format;
 	sh_audio->wf->nChannels = sh_audio->channels.num;
-	sh_audio->wf->wBitsPerSample = sh_audio->samplesize * 8;
+	sh_audio->wf->wBitsPerSample = samplesize * 8;
 	sh_audio->wf->nSamplesPerSec = sh_audio->samplerate;
-	sh_audio->wf->nBlockAlign = sh_audio->samplesize * sh_audio->channels.num;
+	sh_audio->wf->nBlockAlign = samplesize * sh_audio->channels.num;
 	sh_audio->wf->nAvgBytesPerSec = sh_audio->i_bps;
 
 	mp_tmsg(MSGT_DECVIDEO, MSGL_V, "  TV audio: %d channels, %d bits, %d Hz\n",

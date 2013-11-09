@@ -58,7 +58,6 @@ static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
 {
     assert(!sh_audio->initialized);
     resync_audio_stream(sh_audio);
-    sh_audio->samplesize = 4;
     sh_audio->sample_format = AF_FORMAT_FLOAT_NE;
     sh_audio->audio_out_minsize = 8192; // default, preinit() may change it
     if (!sh_audio->ad_driver->preinit(sh_audio)) {
@@ -305,7 +304,8 @@ int decode_audio(sh_audio_t *sh_audio, struct bstr *outbuf, int minlen)
     // Indicates that a filter seems to be buffering large amounts of data
     int huge_filter_buffer = 0;
     // Decoded audio must be cut at boundaries of this many bytes
-    int unitsize = sh_audio->channels.num * sh_audio->samplesize * 16;
+    int bps = af_fmt2bits(sh_audio->sample_format) / 8;
+    int unitsize = sh_audio->channels.num * bps * 16;
 
     /* Filter output size will be about filter_multiplier times input size.
      * If some filter buffers audio in big blocks this might only hold

@@ -974,13 +974,6 @@ static int do_control(priv_t *priv, int cmd, void *arg)
         mp_msg(MSGT_TV, MSGL_V, "%s: get audio samplerate: %d\n",
                info.short_name, *(int *)arg);
         return TVI_CONTROL_TRUE;
-    case TVI_CONTROL_AUD_GET_SAMPLESIZE:
-        init_audio(priv);
-        if (!priv->audio_initialized) return TVI_CONTROL_FALSE;
-        *(int *)arg = priv->audio_in.bytes_per_sample;
-        mp_msg(MSGT_TV, MSGL_V, "%s: get audio samplesize: %d\n",
-               info.short_name, *(int *)arg);
-        return TVI_CONTROL_TRUE;
     case TVI_CONTROL_AUD_GET_CHANNELS:
         init_audio(priv);
         if (!priv->audio_initialized) return TVI_CONTROL_FALSE;
