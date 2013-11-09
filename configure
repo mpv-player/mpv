@@ -310,6 +310,7 @@ Optional features:
   --disable-radio-v4l2   disable Video4Linux2 radio interface [autodetect]
   --disable-tv           disable TV interface (TV/DVB grabbers) [enable]
   --disable-tv-v4l2      disable Video4Linux2 TV interface [autodetect]
+  --disable-libv4l2      disable libv4l2 [autodetect]
   --disable-pvr          disable Video4Linux2 MPEG PVR [autodetect]
   --enable-smb           enable Samba (SMB) input [autodetect]
   --disable-libquvi4     disable libquvi 0.4.x [autodetect]
@@ -462,6 +463,7 @@ _radio_capture=no
 _radio_v4l2=auto
 _tv=yes
 _tv_v4l2=auto
+_libv4l2=auto
 _pvr=auto
 _smb=auto
 _libquvi4=auto
@@ -651,6 +653,8 @@ for ac_option do
   --disable-tv)         _tv=no          ;;
   --enable-tv-v4l2)     _tv_v4l2=yes    ;;
   --disable-tv-v4l2)    _tv_v4l2=no     ;;
+  --enable-libv4l2)     _libv4l2=yes   ;;
+  --disable-libv4l2)    _libv4l2=no    ;;
   --enable-radio)       _radio=yes      ;;
   --enable-radio-capture)       _radio_capture=yes      ;;
   --disable-radio-capture)      _radio_capture=no       ;;
@@ -2946,6 +2950,19 @@ else
 fi
 echores "$_tv_v4l2"
 
+echocheck "libv4l2 support"
+if test "$_libv4l2" = auto ; then
+    _libv4l2=no
+    if pkg_config_add "libv4l2" ; then
+        _libv4l2=yes
+    fi
+fi
+if test "$_libv4l2" = yes; then
+    def_libv4l2="#define HAVE_LIBV4L2 1"
+else
+    def_libv4l2="#define HAVE_LIBV4L2 0"
+fi
+echores "$_libv4l2"
 
 echocheck "Radio interface"
 if test "$_radio" = yes ; then
@@ -3314,6 +3331,7 @@ SNDIO = $_sndio
 STREAM_CACHE = $_stream_cache
 TV = $_tv
 TV_V4L2 = $_tv_v4l2
+LIBV4L2 = $_libv4l2
 VCD = $_vcd
 VDPAU = $_vdpau
 VDPAU_DEC = $_vdpau_dec
@@ -3462,6 +3480,7 @@ $def_radio_capture
 $def_radio_v4l2
 $def_tv
 $def_tv_v4l2
+$def_libv4l2
 
 
 /* font stuff */
