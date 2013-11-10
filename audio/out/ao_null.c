@@ -30,7 +30,8 @@
 
 struct priv {
     double last_time;
-    float buffered_bytes;
+    // All values are in samples
+    float buffered;
     int buffersize;
     int outburst;
 };
@@ -40,9 +41,9 @@ static void drain(struct ao *ao)
     struct priv *priv = ao->priv;
 
     double now = mp_time_sec();
-    priv->buffered_bytes -= (now - priv->last_time) * ao->bps;
-    if (priv->buffered_bytes < 0)
-        priv->buffered_bytes = 0;
+    priv->buffered -= (now - priv->last_time) * ao->samplerate;
+    if (priv->buffered < 0)
+        priv->buffered = 0;
     priv->last_time = now;
 }
 
@@ -51,17 +52,20 @@ static int init(struct ao *ao)
     struct priv *priv = talloc_zero(ao, struct priv);
     ao->priv = priv;
 
-    ao->format = af_fmt_from_planar(ao->format);
-
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_any(&sel);
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         return -1;
 
-    int samplesize = af_fmt2bits(ao->format) / 8;
-    priv->outburst = 256 * ao->channels.num * samplesize;
+    // Minimal unit of audio samples that can be written at once. If play() is
+    // called with sizes not aligned to this, a rounded size will be returned.
+    // (This is not needed by the AO API, but many AOs behave this way.)
+    priv->outburst = 256;
+
     // A "buffer" for about 0.2 seconds of audio
-    priv->buffersize = (int)(ao->samplerate * 0.2 / 256 + 1) * priv->outburst;
+    int bursts = (int)(ao->samplerate * 0.2 + 1) / priv->outburst;
+    priv->buffersize = priv->outburst * bursts;
+
     priv->last_time = mp_time_sec();
 
     return 0;
@@ -76,7 +80,7 @@ static void uninit(struct ao *ao, bool cut_audio)
 static void reset(struct ao *ao)
 {
     struct priv *priv = ao->priv;
-    priv->buffered_bytes = 0;
+    priv->buffered = 0;
 }
 
 // stop playing, keep buffers (for pause)
@@ -96,19 +100,18 @@ static int get_space(struct ao *ao)
     struct priv *priv = ao->priv;
 
     drain(ao);
-    return (priv->buffersize - priv->buffered_bytes) / ao->sstride;
+    return priv->buffersize - priv->buffered;
 }
 
 static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *priv = ao->priv;
-    int len = samples * ao->sstride;
 
-    int maxbursts = (priv->buffersize - priv->buffered_bytes) / priv->outburst;
-    int playbursts = len / priv->outburst;
+    int maxbursts = (priv->buffersize - priv->buffered) / priv->outburst;
+    int playbursts = samples / priv->outburst;
     int bursts = playbursts > maxbursts ? maxbursts : playbursts;
-    priv->buffered_bytes += bursts * priv->outburst;
-    return (bursts * priv->outburst) / ao->sstride;
+    priv->buffered += bursts * priv->outburst;
+    return bursts * priv->outburst;
 }
 
 static float get_delay(struct ao *ao)
@@ -116,7 +119,7 @@ static float get_delay(struct ao *ao)
     struct priv *priv = ao->priv;
 
     drain(ao);
-    return priv->buffered_bytes / ao->bps;
+    return priv->buffered / (double)ao->samplerate;
 }
 
 const struct ao_driver audio_out_null = {
