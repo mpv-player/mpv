@@ -1,0 +1,135 @@
+/*
+ * This file is part of mpv.
+ *
+ * mpv is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * mpv is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <stddef.h>
+#include <limits.h>
+#include <assert.h>
+
+#include "mpvcore/mp_common.h"
+
+#include "audio_buffer.h"
+#include "audio.h"
+#include "format.h"
+
+struct mp_audio_buffer {
+    struct mp_audio *buffer;
+};
+
+struct mp_audio_buffer *mp_audio_buffer_create(void *talloc_ctx)
+{
+    struct mp_audio_buffer *ab = talloc(talloc_ctx, struct mp_audio_buffer);
+    *ab = (struct mp_audio_buffer) {
+        .buffer = talloc_zero(ab, struct mp_audio),
+    };
+    return ab;
+}
+
+// Reinitialize the buffer, set a new format, drop old data.
+// The audio data in fmt is not used, only the format.
+void mp_audio_buffer_reinit(struct mp_audio_buffer *ab, struct mp_audio *fmt)
+{
+    mp_audio_copy_config(ab->buffer, fmt);
+    mp_audio_realloc(ab->buffer, 1);
+    ab->buffer->samples = 0;
+}
+
+void mp_audio_buffer_reinit_fmt(struct mp_audio_buffer *ab, int format,
+                                const struct mp_chmap *channels, int srate)
+{
+    struct mp_audio mpa = {0};
+    mp_audio_set_format(&mpa, format);
+    mp_audio_set_channels(&mpa, channels);
+    mpa.rate = srate;
+    mp_audio_buffer_reinit(ab, &mpa);
+}
+
+void mp_audio_buffer_get_format(struct mp_audio_buffer *ab,
+                                struct mp_audio *out_fmt)
+{
+    *out_fmt = (struct mp_audio){0};
+    mp_audio_copy_config(out_fmt, ab->buffer);
+}
+
+// All integer parameters are in numbers of samples.
+static void copy_samples(struct mp_audio *dst, int dst_offset,
+                         struct mp_audio *src, int src_offset, int length)
+{
+    assert(mp_audio_config_equals(dst, src));
+    assert(length >= 0);
+    assert(dst_offset >= 0 && dst_offset + length <= dst->samples);
+    assert(src_offset >= 0 && src_offset + length <= src->samples);
+    assert(mp_audio_get_allocated_size(dst) >= dst->samples);
+    for (int n = 0; n < dst->num_planes; n++) {
+        memmove((char *)dst->planes[n] + dst_offset * dst->sstride,
+                (char *)src->planes[n] + src_offset * src->sstride,
+                length * dst->sstride);
+    }
+}
+
+// Append data to the end of the buffer.
+// If the buffer is not large enough, it is transparently resized.
+// For now always copies the data.
+void mp_audio_buffer_append(struct mp_audio_buffer *ab, struct mp_audio *mpa)
+{
+    int offset = ab->buffer->samples;
+    ab->buffer->samples += mpa->samples;
+    mp_audio_realloc_min(ab->buffer, ab->buffer->samples);
+    copy_samples(ab->buffer, offset, mpa, 0, mpa->samples);
+}
+
+// Prepend silence to the start of the buffer.
+void mp_audio_buffer_prepend_silence(struct mp_audio_buffer *ab, int samples)
+{
+    assert(samples >= 0);
+    int oldlen = ab->buffer->samples;
+    ab->buffer->samples += samples;
+    mp_audio_realloc_min(ab->buffer, ab->buffer->samples);
+    copy_samples(ab->buffer, samples, ab->buffer, 0, oldlen);
+    mp_audio_fill_silence(ab->buffer, 0, samples);
+}
+
+// Get the start of the current readable buffer.
+void mp_audio_buffer_peek(struct mp_audio_buffer *ab, struct mp_audio *mpa)
+{
+    *mpa = *ab->buffer;
+}
+
+// Skip leading samples. (Used with mp_audio_buffer_peek() to read data.)
+void mp_audio_buffer_skip(struct mp_audio_buffer *ab, int samples)
+{
+    assert(samples >= 0 && samples <= ab->buffer->samples);
+    copy_samples(ab->buffer, 0, ab->buffer, samples,
+                 ab->buffer->samples - samples);
+    ab->buffer->samples -= samples;
+}
+
+void mp_audio_buffer_clear(struct mp_audio_buffer *ab)
+{
+    ab->buffer->samples = 0;
+}
+
+// Return number of buffered audio samples
+int mp_audio_buffer_samples(struct mp_audio_buffer *ab)
+{
+    return ab->buffer->samples;
+}
+
+// Return amount of buffered audio in seconds.
+double mp_audio_buffer_seconds(struct mp_audio_buffer *ab)
+{
+    return ab->buffer->samples / (double)ab->buffer->rate;
+}

@@ -140,6 +140,7 @@ endif
 SOURCES-$(DLOPEN)               += video/filter/vf_dlopen.c
 
 SOURCES = audio/audio.c \
+          audio/audio_buffer.c \
           audio/chmap.c \
           audio/chmap_sel.c \
           audio/fmt-conversion.c \
