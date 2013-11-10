@@ -147,7 +147,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 static void uninit(struct af_instance* af)
 {
   if(af->data)
-    free(af->data->audio);
+    free(af->data->planes[0]);
   free(af->data);
   free(af->setup);
 }
@@ -158,9 +158,9 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
   struct mp_audio*    c    = data;		// Current working data
   struct mp_audio*	l    = af->data;	// Local data
   af_pan_t*  	s    = af->setup; 	// Setup for this instance
-  float*   	in   = c->audio;	// Input audio data
+  float*   	in   = c->planes[0];	// Input audio data
   float*   	out  = NULL;		// Output audio data
-  float*	end  = in+c->len/4; 	// End of loop
+  float*	end  = in+c->samples*c->nch; 	// End of loop
   int		nchi = c->nch;		// Number of input channels
   int		ncho = l->nch;		// Number of output channels
   register int  j,k;
@@ -168,7 +168,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
   if(AF_OK != RESIZE_LOCAL_BUFFER(af,data))
     return NULL;
 
-  out = l->audio;
+  out = l->planes[0];
   // Execute panning
   // FIXME: Too slow
   while(in < end){
@@ -184,8 +184,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
   }
 
   // Set output data
-  c->audio = l->audio;
-  c->len   = c->len / c->nch * l->nch;
+  c->planes[0] = l->planes[0];
   set_channels(c, l->nch);
 
   return c;

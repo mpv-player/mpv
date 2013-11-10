@@ -23,14 +23,19 @@
 
 // Audio data chunk
 struct mp_audio {
-    void *audio; // data buffer
-    int len;    // buffer length (in bytes)
-    int rate;   // sample rate
+    int samples;        // number of samples in data (per channel)
+    void *planes[MP_NUM_CHANNELS]; // data buffer (one per plane)
+    int rate;           // sample rate
     struct mp_chmap channels; // channel layout, use mp_audio_set_*() to set
     int format; // format (AF_FORMAT_...), use mp_audio_set_format() to set
     // Redundant fields, for convenience
-    int nch;    // number of channels (redundant with chmap)
-    int bps;    // bytes per sample (redundant with format)
+    int sstride;        // distance between 2 samples in bytes on a plane
+                        //  interleaved: bps * nch
+                        //  planar:      bps
+    int nch;            // number of channels (redundant with chmap)
+    int spf;            // sub-samples per sample on each plane
+    int num_planes;     // number of planes
+    int bps;            // size of sub-samples (af_fmt2bits(format) / 8)
 };
 
 void mp_audio_set_format(struct mp_audio *mpa, int format);
@@ -42,5 +47,17 @@ bool mp_audio_config_equals(const struct mp_audio *a, const struct mp_audio *b);
 
 char *mp_audio_fmt_to_str(int srate, const struct mp_chmap *chmap, int format);
 char *mp_audio_config_to_str(struct mp_audio *mpa);
+
+void mp_audio_force_interleaved_format(struct mp_audio *mpa);
+
+int mp_audio_psize(struct mp_audio *mpa);
+
+void mp_audio_set_null_data(struct mp_audio *mpa);
+
+void mp_audio_realloc(struct mp_audio *mpa, int samples);
+void mp_audio_realloc_min(struct mp_audio *mpa, int samples);
+int mp_audio_get_allocated_size(struct mp_audio *mpa);
+
+void mp_audio_fill_silence(struct mp_audio *mpa, int start, int length);
 
 #endif

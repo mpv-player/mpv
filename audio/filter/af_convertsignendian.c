@@ -24,6 +24,9 @@
 
 static bool test_conversion(int src_format, int dst_format)
 {
+    if ((src_format & AF_FORMAT_PLANAR) ||
+        (dst_format & AF_FORMAT_PLANAR))
+        return false;
     int src_noend = src_format & ~AF_FORMAT_END_MASK;
     int dst_noend = dst_format & ~AF_FORMAT_END_MASK;
     // We can swap endian for all formats, but sign only for integer formats.
@@ -100,13 +103,13 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 {
     int infmt = data->format;
     int outfmt = af->data->format;
-    size_t len = data->len / data->bps;
+    size_t len = data->samples * data->nch;
 
     if ((infmt & AF_FORMAT_END_MASK) != (outfmt & AF_FORMAT_END_MASK))
-        endian(data->audio, len, data->bps);
+        endian(data->planes[0], len, data->bps);
 
     if ((infmt & AF_FORMAT_SIGN_MASK) != (outfmt & AF_FORMAT_SIGN_MASK))
-        si2us(data->audio, len, data->bps,
+        si2us(data->planes[0], len, data->bps,
               (outfmt & AF_FORMAT_END_MASK) == AF_FORMAT_LE);
 
     mp_audio_set_format(data, outfmt);

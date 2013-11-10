@@ -42,7 +42,7 @@ static struct mp_audio *play_##name(struct af_instance *af, struct mp_audio *dat
 { \
     /* filter is called for all pairs of samples available in the buffer */ \
     bs2b_cross_feed_##name(((struct af_bs2b*)(af->priv))->filter, \
-        (type*)(data->audio), data->len/data->bps/2); \
+        (type*)(data->planes[0]), data->samples); \
 \
     return data; \
 }

@@ -244,8 +244,10 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         if (af_to_avformat(in->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(in, AF_FORMAT_FLOAT_NE);
+        mp_audio_force_interleaved_format(in);
         if (af_to_avformat(out->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(out, in->format);
+        mp_audio_force_interleaved_format(out);
 
         af->mul     = (double) (out->rate * out->nch) / (in->rate * in->nch);
         af->delay   = out->nch * s->opts.filter_size / FFMIN(af->mul, 1);
@@ -306,28 +308,30 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     struct mp_audio *out  = af->data;
 
 
-    int in_size     = data->len;
-    int in_samples  = in_size / (data->bps * data->nch);
+    int in_samples  = data->samples;
+    int in_size     = data->samples * data->sstride;
     int out_samples = avresample_available(s->avrctx) +
         av_rescale_rnd(get_delay(s) + in_samples,
                        s->ctx.out_rate, s->ctx.in_rate, AV_ROUND_UP);
-    int out_size    = out->bps * out_samples * out->nch;
+    int out_size    = out_samples * out->sstride;
 
-    if (talloc_get_size(out->audio) < out_size)
-        out->audio = talloc_realloc_size(out, out->audio, out_size);
+    if (talloc_get_size(out->planes[0]) < out_size)
+        out->planes[0] = talloc_realloc_size(out, out->planes[0], out_size);
 
     af->delay = out->bps * av_rescale_rnd(get_delay(s),
                                           s->ctx.out_rate, s->ctx.in_rate,
                                           AV_ROUND_UP);
 
-#if !USE_SET_CHANNEL_MAPPING
-    reorder_channels(data->audio, s->reorder_in, data->bps, data->nch, in_samples);
+#if USE_SET_CHANNEL_MAPPING
+    (void)in_size;
+#else
+    reorder_channels(data->planes[0], s->reorder_in, data->bps, data->nch, in_samples);
 #endif
 
     if (out_samples) {
         out_samples = avresample_convert(s->avrctx,
-            (uint8_t **) &out->audio, out_size, out_samples,
-            (uint8_t **) &in->audio,  in_size,  in_samples);
+            (uint8_t **) out->planes, out_size, out_samples,
+            (uint8_t **) in->planes,  in_size,  in_samples);
         if (out_samples < 0)
             return NULL; // error
     }
@@ -338,16 +342,16 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     if (needs_reorder(s->reorder_out, out->nch)) {
         if (talloc_get_size(s->reorder_buffer) < out_size)
             s->reorder_buffer = talloc_realloc_size(s, s->reorder_buffer, out_size);
-        data->audio = s->reorder_buffer;
+        data->planes[0] = s->reorder_buffer;
         out_samples = avresample_convert(s->avrctx_out,
-                (uint8_t **) &data->audio, out_size, out_samples,
-                (uint8_t **) &out->audio, out_size, out_samples);
+                (uint8_t **) data->planes, out_size, out_samples,
+                (uint8_t **) out->planes, out_size, out_samples);
     }
 #else
-    reorder_channels(data->audio, s->reorder_out, out->bps, out->nch, out_samples);
+    reorder_channels(data->planes[0], s->reorder_out, out->bps, out->nch, out_samples);
 #endif
 
-    data->len = out->bps * out_samples * out->nch;
+    data->samples = out_samples;
     return data;
 }
 

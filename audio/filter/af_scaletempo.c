@@ -84,7 +84,7 @@ typedef struct af_scaletempo_s
 static int fill_queue(struct af_instance *af, struct mp_audio *data, int offset)
 {
     af_scaletempo_t *s = af->priv;
-    int bytes_in = data->len - offset;
+    int bytes_in = mp_audio_psize(data) - offset;
     int offset_unchanged = offset;
 
     if (s->bytes_to_slide > 0) {
@@ -108,7 +108,7 @@ static int fill_queue(struct af_instance *af, struct mp_audio *data, int offset)
         int bytes_copy = MPMIN(s->bytes_queue - s->bytes_queued, bytes_in);
         assert(bytes_copy >= 0);
         memcpy(s->buf_queue + s->bytes_queued,
-               (int8_t *)data->audio + offset, bytes_copy);
+               (int8_t *)data->planes[0] + offset, bytes_copy);
         s->bytes_queued += bytes_copy;
         offset += bytes_copy;
     }
@@ -221,23 +221,23 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     }
 
     // RESIZE_LOCAL_BUFFER - can't use macro
-    int max_bytes_out = ((int)(data->len / s->bytes_stride_scaled) + 1)
-                        * s->bytes_stride;
-    if (max_bytes_out > af->data->len) {
+    int max_bytes_out = ((int)(mp_audio_psize(data) /
+                            s->bytes_stride_scaled) + 1) * s->bytes_stride;
+    if (max_bytes_out > mp_audio_psize(af->data)) {
         mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, "
                "old len = %i, new len = %i\n", af->info->name,
-               af->data->len, max_bytes_out);
-        af->data->audio = realloc(af->data->audio, max_bytes_out);
-        if (!af->data->audio) {
+               mp_audio_psize(af->data), max_bytes_out);
+        af->data->planes[0] = realloc(af->data->planes[0], max_bytes_out);
+        if (!af->data->planes[0]) {
             mp_msg(MSGT_AFILTER, MSGL_FATAL,
                    "[libaf] Could not allocate memory\n");
             return NULL;
         }
-        af->data->len = max_bytes_out;
+        af->data->samples = max_bytes_out / af->data->sstride;
     }
 
     int offset_in = fill_queue(af, data, 0);
-    int8_t *pout = af->data->audio;
+    int8_t *pout = af->data->planes[0];
     while (s->bytes_queued >= s->bytes_queue) {
         int ti;
         float tf;
@@ -271,8 +271,8 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     // after receiving only a part of that input.
     af->delay = s->bytes_queued - s->bytes_to_slide;
 
-    data->audio = af->data->audio;
-    data->len   = pout - (int8_t *)af->data->audio;
+    data->planes[0] = af->data->planes[0];
+    data->samples   = (pout - (int8_t *)af->data->planes[0]) / af->data->sstride;
     return data;
 }
 
@@ -291,6 +291,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
                "[scaletempo] %.3f speed * %.3f scale_nominal = %.3f\n",
                s->speed, s->scale_nominal, s->scale);
 
+        mp_audio_force_interleaved_format(data);
         mp_audio_copy_config(af->data, data);
 
         if (s->scale == 1.0) {
@@ -456,7 +457,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 static void uninit(struct af_instance *af)
 {
     af_scaletempo_t *s = af->priv;
-    free(af->data->audio);
+    free(af->data->planes[0]);
     free(af->data);
     free(s->buf_queue);
     free(s->buf_overlap);

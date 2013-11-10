@@ -169,6 +169,10 @@ static int control(struct af_instance* af, int cmd, void* arg)
     af->data->rate   = ((struct mp_audio*)arg)->rate;
     mp_audio_set_format(af->data, ((struct mp_audio*)arg)->format);
     af->mul          = (double)af->data->nch / ((struct mp_audio*)arg)->nch;
+    mp_audio_force_interleaved_format(af->data);
+    int r = af_test_output(af,(struct mp_audio*)arg);
+    if (r != AF_OK)
+        return r;
     return check_routes(s,((struct mp_audio*)arg)->nch,af->data->nch);
   case AF_CONTROL_COMMAND_LINE:{
     int nch = 0;
@@ -219,7 +223,7 @@ static void uninit(struct af_instance* af)
 {
   free(af->setup);
   if (af->data)
-      free(af->data->audio);
+      free(af->data->planes[0]);
   free(af->data);
 }
 
@@ -235,16 +239,16 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
     return NULL;
 
   // Reset unused channels
-  memset(l->audio,0,c->len / c->nch * l->nch);
+  memset(l->planes[0],0,mp_audio_psize(c) / c->nch * l->nch);
 
   if(AF_OK == check_routes(s,c->nch,l->nch))
     for(i=0;i<s->nr;i++)
-      copy(c->audio,l->audio,c->nch,s->route[i][FR],
-	   l->nch,s->route[i][TO],c->len,c->bps);
+      copy(c->planes[0],l->planes[0],c->nch,s->route[i][FR],
+	   l->nch,s->route[i][TO],mp_audio_psize(c),c->bps);
 
   // Set output data
-  c->audio = l->audio;
-  c->len   = c->len / c->nch * l->nch;
+  c->planes[0] = l->planes[0];
+  c->samples   = c->samples / c->nch * l->nch;
   mp_audio_set_channels(c, &l->channels);
 
   return c;

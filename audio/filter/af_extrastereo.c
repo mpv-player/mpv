@@ -49,6 +49,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     if(!arg) return AF_ERROR;
 
     mp_audio_copy_config(af->data, (struct mp_audio*)arg);
+    mp_audio_force_interleaved_format(af->data);
     mp_audio_set_num_channels(af->data, 2);
     if (af->data->format == AF_FORMAT_FLOAT_NE)
     {
@@ -83,8 +84,8 @@ static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data)
 {
   af_extrastereo_t *s = af->setup;
   register int i = 0;
-  int16_t *a = (int16_t*)data->audio;	// Audio data
-  int len = data->len/2;		// Number of samples
+  int16_t *a = (int16_t*)data->planes[0];	// Audio data
+  int len = data->samples*data->nch;		// Number of samples
   int avg, l, r;
 
   for (i = 0; i < len; i+=2)
@@ -105,8 +106,8 @@ static struct mp_audio* play_float(struct af_instance* af, struct mp_audio* data
 {
   af_extrastereo_t *s = af->setup;
   register int i = 0;
-  float *a = (float*)data->audio;	// Audio data
-  int len = data->len/4;		// Number of samples
+  float *a = (float*)data->planes[0];	// Audio data
+  int len = data->samples * data->nch;	// Number of samples
   float avg, l, r;
 
   for (i = 0; i < len; i+=2)

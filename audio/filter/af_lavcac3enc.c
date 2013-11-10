@@ -161,7 +161,7 @@ static void uninit(struct af_instance* af)
     af_ac3enc_t *s = af->setup;
 
     if (af->data)
-        free(af->data->audio);
+        free(af->data->planes[0]);
     free(af->data);
     if (s) {
         av_free_packet(&s->pkt);
@@ -183,7 +183,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
     int left, outsize = 0;
     char *buf, *src;
     int max_output_len;
-    int frame_num = (audio->len + s->pending_len) / s->expect_len;
+    int frame_num = (mp_audio_psize(audio) + s->pending_len) / s->expect_len;
     int samplesize = af_fmt2bits(s->in_sampleformat) / 8;
 
     if (s->add_iec61937_header)
@@ -191,23 +191,23 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
     else
         max_output_len = AC3_MAX_CODED_FRAME_SIZE * frame_num;
 
-    if (af->data->len < max_output_len) {
+    if (mp_audio_psize(af->data) < max_output_len) {
         mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, "
-               "old len = %i, new len = %i\n", af->info->name, af->data->len,
-                max_output_len);
-        free(af->data->audio);
-        af->data->audio = malloc(max_output_len);
-        if (!af->data->audio) {
+               "old len = %i, new len = %i\n", af->info->name,
+               mp_audio_psize(af->data), max_output_len);
+        free(af->data->planes[0]);
+        af->data->planes[0] = malloc(max_output_len);
+        if (!af->data->planes[0]) {
             mp_msg(MSGT_AFILTER, MSGL_FATAL, "[libaf] Could not allocate memory \n");
             return NULL;
         }
-        af->data->len = max_output_len;
+        af->data->samples = max_output_len / af->data->sstride;
     }
 
     l = af->data;           // Local data
-    buf = l->audio;
-    src = c->audio;
-    left = c->len;
+    buf = l->planes[0];
+    src = c->planes[0];
+    left = mp_audio_psize(c);
 
 
     while (left > 0) {
@@ -296,7 +296,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
             len = AC3_FRAME_SIZE * 2 * 2;
         }
 
-        assert(buf + len <= (char *)af->data->audio + af->data->len);
+        assert(buf + len <= (char *)af->data->planes[0] + mp_audio_psize(af->data));
         assert(s->pkt.size <= len - header_len);
 
         memcpy(buf + header_len, s->pkt.data, s->pkt.size);
@@ -304,10 +304,10 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
         outsize += len;
         buf += len;
     }
-    c->audio = l->audio;
+    c->planes[0] = l->planes[0];
     mp_audio_set_num_channels(c, 2);
     mp_audio_set_format(c, af->data->format);
-    c->len   = outsize;
+    c->samples = outsize / c->sstride;
     mp_msg(MSGT_AFILTER, MSGL_DBG2, "play return size %d, pending %d\n",
            outsize, s->pending_len);
     return c;

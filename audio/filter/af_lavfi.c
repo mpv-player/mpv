@@ -181,6 +181,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         if (af_to_avformat(in->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(in, AF_FORMAT_FLOAT_NE);
+        mp_audio_force_interleaved_format(in);
 
         if (!mp_chmap_is_lavc(&in->channels))
             mp_chmap_reorder_to_lavc(&in->channels); // will always work
@@ -193,6 +194,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         out->rate = l_out->sample_rate;
 
         mp_audio_set_format(out, af_from_avformat(l_out->format));
+        mp_audio_force_interleaved_format(out);
 
         struct mp_chmap out_cm;
         mp_chmap_from_lavc(&out_cm, l_out->channel_layout);
@@ -228,7 +230,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     int out_frame_size = r->bps * r->channels.num;
 
     AVFrame *frame = av_frame_alloc();
-    frame->nb_samples = data->len / in_frame_size;
+    frame->nb_samples = data->samples;
     frame->format = l_in->format;
 
     // Timebase is 1/sample_rate
@@ -238,7 +240,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     av_frame_set_channel_layout(frame, l_in->channel_layout);
     av_frame_set_sample_rate(frame, l_in->sample_rate);
 
-    frame->data[0] = data->audio;
+    frame->data[0] = data->planes[0];
     frame->extended_data = frame->data;
 
     if (av_buffersrc_add_frame(p->in, frame) < 0) {
@@ -268,11 +270,11 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
         av_frame_free(&frame);
     }
 
-    r->audio = p->out_buffer;
-    r->len = out_len;
+    r->planes[0] = p->out_buffer;
+    r->samples = out_len / r->sstride;
 
-    p->bytes_in += data->len;
-    p->bytes_out += r->len;
+    p->bytes_in += data->samples * data->sstride;
+    p->bytes_out += r->samples * r->sstride;
 
     if (out_pts != AV_NOPTS_VALUE) {
         int64_t num_in_frames = p->bytes_in / in_frame_size;
@@ -280,8 +282,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 
         double out_time = out_pts * av_q2d(p->timebase_out);
         // Need pts past the last output sample.
-        int out_frames = r->len / out_frame_size;
-        out_time += out_frames / (double)r->rate;
+        out_time += r->samples / (double)r->rate;
 
         af->delay = (in_time - out_time) * r->rate * out_frame_size;
     }

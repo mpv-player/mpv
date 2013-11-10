@@ -213,9 +213,9 @@ static struct mp_audio* play( struct af_instance* af, struct mp_audio* data )
 {
   struct mp_audio*   	c   = data;	     // Current working data
   af_export_t* 	s   = af->setup;     // Setup for this instance
-  int16_t* 	a   = c->audio;	     // Incomming sound
+  int16_t* 	a   = c->planes[0];	     // Incomming sound
   int 		nch = c->nch;	     // Number of channels
-  int		len = c->len/c->bps; // Number of sample in data chunk
+  int		len = c->samples*c->nch; // Number of sample in data chunk
   int 		sz  = s->sz;         // buffer size (in samples)
   int 		flag = 0;	     // Set to 1 if buffer is filled
 

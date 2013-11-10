@@ -270,20 +270,20 @@ static int filter_n_bytes(sh_audio_t *sh, struct bstr *outbuf, int len)
 
     // Filter
     struct mp_audio filter_input = {
-        .audio = sh->a_buffer,
-        .len = len,
+        .planes = {sh->a_buffer},
         .rate = sh->samplerate,
     };
     mp_audio_set_format(&filter_input, sh->sample_format);
     mp_audio_set_channels(&filter_input, &sh->channels);
+    filter_input.samples = len / filter_input.sstride;
 
     struct mp_audio *filter_output = af_play(sh->afilter, &filter_input);
     if (!filter_output)
         return -1;
-    set_min_out_buffer_size(outbuf, outbuf->len + filter_output->len);
-    memcpy(outbuf->start + outbuf->len, filter_output->audio,
-           filter_output->len);
-    outbuf->len += filter_output->len;
+    int outlen = filter_output->samples * filter_output->sstride;
+    set_min_out_buffer_size(outbuf, outbuf->len + outlen);
+    memcpy(outbuf->start + outbuf->len, filter_output->planes[0], outlen);
+    outbuf->len += outlen;
 
     // remove processed data from decoder buffer:
     sh->a_buffer_len -= len;
