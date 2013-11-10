@@ -196,13 +196,14 @@ static int get_space(struct ao *ao)
     return 65536;
 }
 
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *priv = ao->priv;
+    int len = samples * ao->sstride;
 
-    fwrite(data, len, 1, priv->fp);
+    fwrite(data[0], len, 1, priv->fp);
     priv->data_length += len;
-    return len;
+    return len / ao->sstride;
 }
 
 #define OPT_BASE_STRUCT struct priv

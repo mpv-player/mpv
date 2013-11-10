@@ -578,10 +578,12 @@ coreaudio_error:
     return CONTROL_ERROR;
 }
 
-static int play(struct ao *ao, void *output_samples, int num_bytes, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *p   = ao->priv;
     struct priv_d *d = p->digital;
+    void *output_samples = data[0];
+    int num_bytes = samples * ao->sstride;
 
     // Check whether we need to reset the digital output stream.
     if (p->is_digital && d->stream_asbd_changed) {
@@ -599,7 +601,7 @@ static int play(struct ao *ao, void *output_samples, int num_bytes, int flags)
     int wrote = mp_ring_write(p->buffer, output_samples, num_bytes);
     audio_resume(ao);
 
-    return wrote;
+    return wrote / ao->sstride;
 }
 
 static void reset(struct ao *ao)
@@ -612,7 +614,7 @@ static void reset(struct ao *ao)
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    return mp_ring_available(p->buffer);
+    return mp_ring_available(p->buffer) / ao->sstride;
 }
 
 static float get_delay(struct ao *ao)

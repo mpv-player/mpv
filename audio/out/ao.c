@@ -159,7 +159,8 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     talloc_free(chmap);
     if (ao->driver->init(ao) < 0)
         goto error;
-    ao->bps = ao->channels.num * ao->samplerate * af_fmt2bits(ao->format) / 8;
+    ao->sstride = ao->channels.num * af_fmt2bits(ao->format) / 8;
+    ao->bps = ao->samplerate * ao->sstride;
     return ao;
 error:
     talloc_free(ao);
@@ -208,7 +209,8 @@ void ao_uninit(struct ao *ao, bool cut_audio)
 
 int ao_play(struct ao *ao, void *data, int len, int flags)
 {
-    return ao->driver->play(ao, data, len, flags);
+    int r = ao->driver->play(ao, &data, len / ao->sstride, flags);
+    return r < 0 ? r : r * ao->sstride;
 }
 
 int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
@@ -229,7 +231,7 @@ double ao_get_delay(struct ao *ao)
 
 int ao_get_space(struct ao *ao)
 {
-    return ao->driver->get_space(ao);
+    return ao->driver->get_space(ao) * ao->sstride;
 }
 
 void ao_reset(struct ao *ao)
@@ -254,10 +256,9 @@ int ao_play_silence(struct ao *ao, int samples)
 {
     if (samples <= 0 || AF_FORMAT_IS_SPECIAL(ao->format))
         return 0;
-    int s = ao->channels.num * (af_fmt2bits(ao->format) / 8);
-    char *p = talloc_size(NULL, samples * s);
-    af_fill_silence(p, samples * s, ao->format);
-    int r = ao_play(ao, p, samples * s, 0);
+    char *p = talloc_size(NULL, samples * ao->sstride);
+    af_fill_silence(p, samples * ao->sstride, ao->format);
+    int r = ao_play(ao, p, samples * ao->sstride, 0);
     talloc_free(p);
     return r;
 }

@@ -56,7 +56,7 @@ struct ao_driver {
     void (*uninit)(struct ao *ao, bool cut_audio);
     void (*reset)(struct ao*ao);
     int (*get_space)(struct ao *ao);
-    int (*play)(struct ao *ao, void *data, int len, int flags);
+    int (*play)(struct ao *ao, void **data, int samples, int flags);
     float (*get_delay)(struct ao *ao);
     void (*pause)(struct ao *ao);
     void (*resume)(struct ao *ao);
@@ -73,6 +73,8 @@ struct ao {
     struct mp_chmap channels;
     int format;
     int bps;                    // bytes per second
+    int sstride;                // size of a sample on each plane
+                                // (format_size*num_channels/num_planes)
     double pts;                 // some mplayer.c state (why is this here?)
     struct bstr buffer;
     int buffer_playable_size;   // part of the part of the buffer the AO hasn't

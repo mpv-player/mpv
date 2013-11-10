@@ -261,7 +261,7 @@ static int get_space(struct ao *ao)
     SDL_LockMutex(priv->buffer_mutex);
     int space = av_fifo_space(priv->buffer);
     SDL_UnlockMutex(priv->buffer_mutex);
-    return space;
+    return space / ao->sstride;
 }
 
 static void pause(struct ao *ao)
@@ -292,20 +292,21 @@ static void resume(struct ao *ao)
         do_resume(ao);
 }
 
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *priv = ao->priv;
+    int len = samples * ao->sstride;
     SDL_LockMutex(priv->buffer_mutex);
     int free = av_fifo_space(priv->buffer);
     if (len > free) len = free;
-    av_fifo_generic_write(priv->buffer, data, len, NULL);
+    av_fifo_generic_write(priv->buffer, data[0], len, NULL);
     SDL_CondSignal(priv->underrun_cond);
     SDL_UnlockMutex(priv->buffer_mutex);
     if (priv->unpause) {
         priv->unpause = 0;
         do_resume(ao);
     }
-    return len;
+    return len / ao->sstride;
 }
 
 static float get_delay(struct ao *ao)

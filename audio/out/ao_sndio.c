@@ -242,16 +242,16 @@ static void reset(struct ao *ao)
 /*
  * play given number of bytes until sio_write() blocks
  */
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *p = ao->priv;
     int n;
 
-    n = sio_write(p->hdl, data, len);
+    n = sio_write(p->hdl, data[0], samples * ao->sstride);
     p->delay += n;
     if (flags & AOPLAY_FINAL_CHUNK)
         reset(ao);
-    return n;
+    return n / ao->sstride;
 }
 
 /*
@@ -271,7 +271,7 @@ static int get_space(struct ao *ao)
         ; /* nothing */
     sio_revents(p->hdl, p->pfd);
 
-    return p->par.bufsz * p->par.pchan * p->par.bps - p->delay;
+    return (p->par.bufsz * p->par.pchan * p->par.bps - p->delay) / ao->sstride;
 }
 
 /*

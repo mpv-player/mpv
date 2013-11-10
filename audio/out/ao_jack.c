@@ -319,19 +319,20 @@ static void audio_resume(struct ao *ao)
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    return mp_ring_available(p->ring);
+    return mp_ring_available(p->ring) / ao->sstride;
 }
 
 /**
  * \brief write data into buffer and reset underrun flag
  */
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *p = ao->priv;
+    int len = samples * ao->sstride;
     if (!(flags & AOPLAY_FINAL_CHUNK))
         len -= len % p->outburst;
     p->underrun = 0;
-    return mp_ring_write(p->ring, data, len);
+    return mp_ring_write(p->ring, data[0], len) / ao->sstride;
 }
 
 #define OPT_BASE_STRUCT struct priv

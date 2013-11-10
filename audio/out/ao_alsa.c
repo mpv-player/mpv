@@ -636,18 +636,12 @@ static void reset(struct ao *ao)
 alsa_error: ;
 }
 
-/*
-    plays 'len' bytes of 'data'
-    returns: number of bytes played
-    modified last at 29.06.02 by jp
-    thanxs for marius <marius@rospot.com> for giving us the light ;)
- */
-
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *p = ao->priv;
     int num_frames;
     snd_pcm_sframes_t res = 0;
+    int len = samples * p->bytes_per_sample;
     if (!(flags & AOPLAY_FINAL_CHUNK))
         len = len / p->outburst * p->outburst;
     num_frames = len / p->bytes_per_sample;
@@ -661,7 +655,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
         return 0;
 
     do {
-        res = snd_pcm_writei(p->alsa, data, num_frames);
+        res = snd_pcm_writei(p->alsa, data[0], num_frames);
 
         if (res == -EINTR) {
             /* nothing to do */
@@ -680,7 +674,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
         }
     } while (res == 0);
 
-    return res < 0 ? -1 : res * p->bytes_per_sample;
+    return res < 0 ? -1 : res;
 
 alsa_error:
     return -1;
@@ -701,7 +695,7 @@ static int get_space(struct ao *ao)
     unsigned space = snd_pcm_status_get_avail(status) * p->bytes_per_sample;
     if (space > p->buffersize) // Buffer underrun?
         space = p->buffersize;
-    return space;
+    return space / p->bytes_per_sample;
 
 alsa_error:
     return 0;

@@ -163,13 +163,13 @@ static void audio_resume(struct ao *ao)
 static int get_space(struct ao *ao)
 {
     struct priv *priv = ao->priv;
-    return rsd_get_avail(priv->rd);
+    return rsd_get_avail(priv->rd) / ao->sstride;
 }
 
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *priv = ao->priv;
-    return rsd_write(priv->rd, data, len);
+    return rsd_write(priv->rd, data[0], samples * ao->sstride) / ao->sstride;
 }
 
 static float get_delay(struct ao *ao)
