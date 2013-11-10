@@ -78,12 +78,12 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
         return NULL;
 
     struct mp_audio *out = af->data;
-    size_t len = data->len / data->bps;
+    size_t len = mp_audio_psize(data) / data->bps;
 
     if (data->bps == 4) {
         for (int s = 0; s < len; s++) {
-            uint32_t val = *((uint32_t *)data->audio + s);
-            uint8_t *ptr = (uint8_t *)out->audio + s * 3;
+            uint32_t val = *((uint32_t *)data->planes[0] + s);
+            uint8_t *ptr = (uint8_t *)out->planes[0] + s * 3;
             ptr[0] = val >> SHIFT(0);
             ptr[1] = val >> SHIFT(1);
             ptr[2] = val >> SHIFT(2);
@@ -91,24 +91,23 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
         mp_audio_set_format(data, af_fmt_change_bits(data->format, 24));
     } else {
         for (int s = 0; s < len; s++) {
-            uint8_t *ptr = (uint8_t *)data->audio + s * 3;
+            uint8_t *ptr = (uint8_t *)data->planes[0] + s * 3;
             uint32_t val = ptr[0] << SHIFT(0)
                          | ptr[1] << SHIFT(1)
                          | ptr[2] << SHIFT(2);
-            *((uint32_t *)out->audio + s) = val;
+            *((uint32_t *)out->planes[0] + s) = val;
         }
         mp_audio_set_format(data, af_fmt_change_bits(data->format, 32));
     }
 
-    data->audio = out->audio;
-    data->len = len * data->bps;
+    data->planes[0] = out->planes[0];
     return data;
 }
 
 static void uninit(struct af_instance* af)
 {
     if (af->data)
-        free(af->data->audio);
+        free(af->data->planes[0]);
 }
 
 static int af_open(struct af_instance *af)

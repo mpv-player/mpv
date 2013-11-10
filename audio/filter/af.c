@@ -523,8 +523,7 @@ static int af_reinit(struct af_stream *s)
         // Check if this is the first filter
         struct mp_audio in = *af->prev->data;
         // Reset just in case...
-        in.audio = NULL;
-        in.len = 0;
+        mp_audio_set_null_data(&in);
 
         int rv = af->control(af, AF_CONTROL_REINIT, &in);
         if (rv == AF_OK && !mp_audio_config_equals(&in, af->prev->data))
@@ -640,8 +639,8 @@ int af_init(struct af_stream *s)
         return -1;
 
     // Precaution in case caller is misbehaving
-    s->input.audio  = s->output.audio  = NULL;
-    s->input.len    = s->output.len    = 0;
+    mp_audio_set_null_data(&s->input);
+    mp_audio_set_null_data(&s->output);
 
     // Check if this is the first call
     if (s->first->next == s->last) {
@@ -731,36 +730,39 @@ double af_calc_delay(struct af_stream *s)
     return delay;
 }
 
-/* Calculate the minimum output buffer size for given input data d
- * when using the af_resize_local_buffer function. The +t+1 part ensures the
- * value is >= len*mul rounded upwards to whole samples even if the
- * double 'mul' is inexact. */
-static int af_lencalc(double mul, struct mp_audio *d)
-{
-    int t = d->bps * d->nch;
-    return d->len * mul + t + 1;
-}
-
 /* I a local buffer is used (i.e. if the filter doesn't operate on the incoming
  * buffer), this macro must be called to ensure the buffer is big enough. */
 int af_resize_local_buffer(struct af_instance *af, struct mp_audio *data)
 {
-    if (af->data->len >= af_lencalc(af->mul, data))
+    assert(data->format);
+
+    if (!af->data->format && !af->data->planes[0]) {
+        // Dummy initialization
+        mp_audio_set_format(af->data, AF_FORMAT_U8);
+    }
+
+    int oldlen = af->data->samples * af->data->sstride;
+
+    /* Calculate the minimum output buffer size for given input data d
+     * when using the af_resize_local_buffer function. The +x part ensures
+     * the value is >= len*mul rounded upwards to whole samples even if the
+     * double 'mul' is inexact. */
+    int newlen = data->samples * data->sstride * af->mul + data->sstride + 1;
+
+    if (oldlen >= newlen)
         return AF_OK;
 
-    // Calculate new length
-    register int len = af_lencalc(af->mul, data);
     mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, "
-           "old len = %i, new len = %i\n", af->info->name, af->data->len, len);
+           "old len = %i, new len = %i\n", af->info->name, oldlen, newlen);
     // If there is a buffer free it
-    free(af->data->audio);
+    free(af->data->planes[0]);
     // Create new buffer and check that it is OK
-    af->data->audio = malloc(len);
-    if (!af->data->audio) {
+    af->data->planes[0] = malloc(newlen);
+    if (!af->data->planes[0]) {
         mp_msg(MSGT_AFILTER, MSGL_FATAL, "[libaf] Could not allocate memory \n");
         return AF_ERROR;
     }
-    af->data->len = len;
+    af->data->samples = newlen / af->data->sstride;
     return AF_OK;
 }
 

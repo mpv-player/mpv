@@ -105,8 +105,9 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     struct mp_audio *r = &priv->temp;
 
     *r = *af->data;
-    r->audio = data->audio;
-    r->len = data->len;
+    for (int n = 0; n < r->nch; n++)
+        r->planes[n] = data->planes[n];
+    r->samples = data->samples;
 
     return r;
 }

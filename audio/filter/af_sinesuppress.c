@@ -94,8 +94,8 @@ static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data)
 {
   af_sinesuppress_t *s = af->setup;
   register int i = 0;
-  int16_t *a = (int16_t*)data->audio;	// Audio data
-  int len = data->len/2;		// Number of samples
+  int16_t *a = (int16_t*)data->planes[0];	// Audio data
+  int len = data->samples*data->nch;		// Number of samples
 
   for (i = 0; i < len; i++)
   {

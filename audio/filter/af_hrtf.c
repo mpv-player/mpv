@@ -367,7 +367,7 @@ static void uninit(struct af_instance *af)
 	free(af->setup);
     }
     if(af->data)
-	free(af->data->audio);
+	free(af->data->planes[0]);
     free(af->data);
 }
 
@@ -385,9 +385,9 @@ damped (without any real 3D acoustical image, however).
 static struct mp_audio* play(struct af_instance *af, struct mp_audio *data)
 {
     af_hrtf_t *s = af->setup;
-    short *in = data->audio; // Input audio data
+    short *in = data->planes[0]; // Input audio data
     short *out = NULL; // Output audio data
-    short *end = in + data->len / sizeof(short); // Loop end
+    short *end = in + data->samples * data->nch; // Loop end
     float common, left, right, diff, left_b, right_b;
     const int dblen = s->dlbuflen, hlen = s->hrflen, blen = s->basslen;
 
@@ -425,7 +425,7 @@ static struct mp_audio* play(struct af_instance *af, struct mp_audio *data)
 		 "channel\n");
     }
 
-    out = af->data->audio;
+    out = af->data->planes[0];
 
     /* MPlayer's 5 channel layout (notation for the variable):
      *
@@ -565,8 +565,7 @@ static struct mp_audio* play(struct af_instance *af, struct mp_audio *data)
     }
 
     /* Set output data */
-    data->audio = af->data->audio;
-    data->len   = data->len / data->nch * 2;
+    data->planes[0] = af->data->planes[0];
     mp_audio_set_num_channels(data, 2);
 
     return data;

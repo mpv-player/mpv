@@ -43,6 +43,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
     switch (cmd) {
     case AF_CONTROL_REINIT:
         mp_audio_copy_config(af->data, (struct mp_audio *)arg);
+        mp_audio_force_interleaved_format(af->data);
 
         if (s->fast && (((struct mp_audio *)arg)->format != AF_FORMAT_FLOAT_NE))
             mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
@@ -66,8 +67,8 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     struct priv *s = af->priv;
 
     if (af->data->format == AF_FORMAT_S16_NE) {
-        int16_t *a = c->audio;
-        int len = c->len / 2;
+        int16_t *a = c->planes[0];
+        int len = c->samples * c->nch;
         int vol = 256.0 * s->level;
         if (vol != 256) {
             for (int i = 0; i < len; i++) {
@@ -76,8 +77,8 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
             }
         }
     } else if (af->data->format == AF_FORMAT_FLOAT_NE) {
-        float *a = c->audio;
-        int len = c->len / 4;
+        float *a = c->planes[0];
+        int len = c->samples * c->nch;
         float vol = s->level;
         if (vol != 1.0) {
             for (int i = 0; i < len; i++) {

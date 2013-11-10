@@ -145,7 +145,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 static void uninit(struct af_instance* af)
 {
   if(af->data)
-    free(af->data->audio);
+    free(af->data->planes[0]);
   free(af->data);
   free(af->setup);
 }
@@ -165,9 +165,9 @@ static float steering_matrix[][12] = {
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* data){
   af_surround_t* s   = (af_surround_t*)af->setup;
   float*	 m   = steering_matrix[0];
-  float*     	 in  = data->audio; 	// Input audio data
+  float*     	 in  = data->planes[0]; 	// Input audio data
   float*     	 out = NULL;		// Output audio data
-  float*	 end = in + data->len / sizeof(float); // Loop end
+  float*	 end = in + data->samples * data->nch;
   int 		 i   = s->i;	// Filter queue index
   int 		 ri  = s->ri;	// Read index for delay queue
   int 		 wi  = s->wi;	// Write index for delay queue
@@ -175,7 +175,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data){
   if (AF_OK != RESIZE_LOCAL_BUFFER(af, data))
     return NULL;
 
-  out = af->data->audio;
+  out = af->data->planes[0];
 
   while(in < end){
     /* Dominance:
@@ -237,8 +237,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data){
   s->i  = i; s->ri = ri; s->wi = wi;
 
   // Set output data
-  data->audio = af->data->audio;
-  data->len   *= 2;
+  data->planes[0] = af->data->planes[0];
   mp_audio_set_channels_old(data, af->data->nch);
 
   return data;
