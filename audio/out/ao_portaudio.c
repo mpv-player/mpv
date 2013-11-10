@@ -242,6 +242,8 @@ static int init(struct ao *ao)
             = Pa_GetDeviceInfo(pa_device)->defaultHighOutputLatency,
     };
 
+    ao->format = af_fmt_from_planar(ao->format);
+
     const struct format_map *fmt = format_maps;
     while (fmt->pa_format) {
         if (fmt->mp_format == ao->format) {

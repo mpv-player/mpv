@@ -130,6 +130,9 @@ static int init(struct ao *ao)
         MP_ERR(ao, "can't open sndio %s\n", p->dev);
         goto error;
     }
+
+    ao->format = af_fmt_from_planar(ao->format);
+
     sio_initpar(&p->par);
     for (i = 0, ap = af_to_par;; i++, ap++) {
         if (i == sizeof(af_to_par) / sizeof(struct af_to_par)) {

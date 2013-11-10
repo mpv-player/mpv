@@ -105,6 +105,7 @@ static int init(struct ao *ao)
     ac->stream->codec->channel_layout = mp_chmap_to_lavc(&ao->channels);
 
     ac->stream->codec->sample_fmt = AV_SAMPLE_FMT_NONE;
+    ao->format = af_fmt_from_planar(ao->format);
 
     {
         // first check if the selected format is somewhere in the list of

@@ -286,6 +286,8 @@ static int init(struct ao *ao)
     ss.channels = ao->channels.num;
     ss.rate = ao->samplerate;
 
+    ao->format = af_fmt_from_planar(ao->format);
+
     const struct format_map *fmt_map = format_maps;
     while (fmt_map->mp_format != ao->format) {
         if (fmt_map->mp_format == AF_FORMAT_UNKNOWN) {

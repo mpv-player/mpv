@@ -51,6 +51,8 @@ static int init(struct ao *ao)
     struct priv *priv = talloc_zero(ao, struct priv);
     ao->priv = priv;
 
+    ao->format = af_fmt_from_planar(ao->format);
+
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_any(&sel);
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))

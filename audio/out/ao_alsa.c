@@ -436,6 +436,8 @@ static int init(struct ao *ao)
             (p->alsa, alsa_hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
     CHECK_ALSA_ERROR("Unable to set access type");
 
+    ao->format = af_fmt_from_planar(ao->format);
+
     p->alsa_fmt = find_alsa_format(ao->format);
     if (p->alsa_fmt == SND_PCM_FORMAT_UNKNOWN) {
         p->alsa_fmt = SND_PCM_FORMAT_S16;

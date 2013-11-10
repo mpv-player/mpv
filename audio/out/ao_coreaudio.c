@@ -285,6 +285,8 @@ static int init(struct ao *ao)
     // Save selected device id
     p->device = selected_device;
 
+    ao->format = af_fmt_from_planar(ao->format);
+
     bool supports_digital = false;
     /* Probe whether device support S/PDIF stream output if input is AC3 stream. */
     if (AF_FORMAT_IS_AC3(ao->format)) {

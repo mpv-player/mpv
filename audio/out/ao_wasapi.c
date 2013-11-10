@@ -1231,6 +1231,7 @@ static void uninit(struct ao *ao, bool immed)
 static int init(struct ao *ao)
 {
     mp_msg(MSGT_AO, MSGL_V, "ao-wasapi: init!\n");
+    ao->format = af_fmt_from_planar(ao->format);
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_waveext(&sel);
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
