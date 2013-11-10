@@ -41,16 +41,21 @@ static int control(struct af_instance *af, int cmd, void *arg)
     struct priv *s = af->priv;
 
     switch (cmd) {
-    case AF_CONTROL_REINIT:
-        mp_audio_copy_config(af->data, (struct mp_audio *)arg);
+    case AF_CONTROL_REINIT: {
+        struct mp_audio *in = arg;
+
+        mp_audio_copy_config(af->data, in);
         mp_audio_force_interleaved_format(af->data);
 
-        if (s->fast && (((struct mp_audio *)arg)->format != AF_FORMAT_FLOAT_NE))
+        if (s->fast && af_fmt_from_planar(in->format) != AF_FORMAT_FLOAT_NE) {
             mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
-        else {
+        } else {
             mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
         }
-        return af_test_output(af, (struct mp_audio *)arg);
+        if (af_fmt_is_planar(in->format))
+            mp_audio_set_format(af->data, af_fmt_to_planar(af->data->format));
+        return af_test_output(af, in);
+    }
     case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET:
         s->level = *(float *)arg;
         return AF_OK;
@@ -61,33 +66,37 @@ static int control(struct af_instance *af, int cmd, void *arg)
     return AF_UNKNOWN;
 }
 
-static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
+static void filter_plane(struct af_instance *af, void *ptr, int num_samples)
 {
-    struct mp_audio *c = data;
     struct priv *s = af->priv;
 
-    if (af->data->format == AF_FORMAT_S16_NE) {
-        int16_t *a = c->planes[0];
-        int len = c->samples * c->nch;
+    if (af_fmt_from_planar(af->data->format) == AF_FORMAT_S16_NE) {
+        int16_t *a = ptr;
         int vol = 256.0 * s->level;
         if (vol != 256) {
-            for (int i = 0; i < len; i++) {
+            for (int i = 0; i < num_samples; i++) {
                 int x = (a[i] * vol) >> 8;
                 a[i] = MPCLAMP(x, SHRT_MIN, SHRT_MAX);
             }
         }
-    } else if (af->data->format == AF_FORMAT_FLOAT_NE) {
-        float *a = c->planes[0];
-        int len = c->samples * c->nch;
+    } else if (af_fmt_from_planar(af->data->format) == AF_FORMAT_FLOAT_NE) {
+        float *a = ptr;
         float vol = s->level;
         if (vol != 1.0) {
-            for (int i = 0; i < len; i++) {
+            for (int i = 0; i < num_samples; i++) {
                 float x = a[i] * vol;
                 a[i] = s->soft ? af_softclip(x) : MPCLAMP(x, -1.0, 1.0);
             }
         }
     }
-    return c;
+}
+
+static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
+{
+    for (int n = 0; n < data->num_planes; n++)
+        filter_plane(af, data->planes[n], data->samples * data->spf);
+
+    return data;
 }
 
 static int af_open(struct af_instance *af)
