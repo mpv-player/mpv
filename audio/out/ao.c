@@ -207,10 +207,9 @@ void ao_uninit(struct ao *ao, bool cut_audio)
     talloc_free(ao);
 }
 
-int ao_play(struct ao *ao, void *data, int len, int flags)
+int ao_play(struct ao *ao, void **data, int samples, int flags)
 {
-    int r = ao->driver->play(ao, &data, len / ao->sstride, flags);
-    return r < 0 ? r : r * ao->sstride;
+    return ao->driver->play(ao, data, samples, flags);
 }
 
 int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
@@ -231,7 +230,7 @@ double ao_get_delay(struct ao *ao)
 
 int ao_get_space(struct ao *ao)
 {
-    return ao->driver->get_space(ao) * ao->sstride;
+    return ao->driver->get_space(ao);
 }
 
 void ao_reset(struct ao *ao)
@@ -258,7 +257,10 @@ int ao_play_silence(struct ao *ao, int samples)
         return 0;
     char *p = talloc_size(NULL, samples * ao->sstride);
     af_fill_silence(p, samples * ao->sstride, ao->format);
-    int r = ao_play(ao, p, samples * ao->sstride, 0);
+    void *tmp[MP_NUM_CHANNELS];
+    for (int n = 0; n < MP_NUM_CHANNELS; n++)
+        tmp[n] = p;
+    int r = ao_play(ao, tmp, samples, 0);
     talloc_free(p);
     return r;
 }

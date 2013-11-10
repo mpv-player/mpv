@@ -38,6 +38,7 @@
 #include "dec_audio.h"
 #include "ad.h"
 #include "audio/format.h"
+#include "audio/audio_buffer.h"
 
 #include "audio/filter/af.h"
 
@@ -230,18 +231,9 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     return 1;
 }
 
-static void set_min_out_buffer_size(struct bstr *outbuf, int len)
-{
-    size_t oldlen = talloc_get_size(outbuf->start);
-    if (oldlen < len) {
-        assert(outbuf->start);  // talloc context should be already set
-        mp_msg(MSGT_DECAUDIO, MSGL_V, "Increasing filtered audio buffer size "
-               "from %zd to %d\n", oldlen, len);
-        outbuf->start = talloc_realloc_size(NULL, outbuf->start, len);
-    }
-}
-
-static int filter_n_bytes(sh_audio_t *sh, struct bstr *outbuf, int len)
+// Filter len bytes of input, put result into outbuf.
+static int filter_n_bytes(sh_audio_t *sh, struct mp_audio_buffer *outbuf,
+                          int len)
 {
     assert(len - 1 + sh->audio_out_minsize <= sh->a_buffer_size);
 
@@ -280,10 +272,7 @@ static int filter_n_bytes(sh_audio_t *sh, struct bstr *outbuf, int len)
     struct mp_audio *filter_output = af_play(sh->afilter, &filter_input);
     if (!filter_output)
         return -1;
-    int outlen = filter_output->samples * filter_output->sstride;
-    set_min_out_buffer_size(outbuf, outbuf->len + outlen);
-    memcpy(outbuf->start + outbuf->len, filter_output->planes[0], outlen);
-    outbuf->len += outlen;
+    mp_audio_buffer_append(outbuf, filter_output);
 
     // remove processed data from decoder buffer:
     sh->a_buffer_len -= len;
@@ -292,20 +281,20 @@ static int filter_n_bytes(sh_audio_t *sh, struct bstr *outbuf, int len)
     return error;
 }
 
-/* Try to get at least minlen decoded+filtered bytes in outbuf
+/* Try to get at least minsamples decoded+filtered samples in outbuf
  * (total length including possible existing data).
  * Return 0 on success, -1 on error/EOF (not distinguished).
- * In the former case outbuf->len is always >= minlen on return.
- * In case of EOF/error it might or might not be.
- * Outbuf.start must be talloc-allocated, and will be reallocated
- * if needed to fit all filter output. */
-int decode_audio(sh_audio_t *sh_audio, struct bstr *outbuf, int minlen)
+ * In the former case outbuf has at least minsamples buffered on return.
+ * In case of EOF/error it might or might not be. */
+int decode_audio(sh_audio_t *sh_audio, struct mp_audio_buffer *outbuf,
+                 int minsamples)
 {
     // Indicates that a filter seems to be buffering large amounts of data
     int huge_filter_buffer = 0;
+    int sstride =
+        af_fmt2bits(sh_audio->sample_format) / 8 * sh_audio->channels.num;
     // Decoded audio must be cut at boundaries of this many bytes
-    int bps = af_fmt2bits(sh_audio->sample_format) / 8;
-    int unitsize = sh_audio->channels.num * bps * 16;
+    int unitsize = sstride * 16;
 
     /* Filter output size will be about filter_multiplier times input size.
      * If some filter buffers audio in big blocks this might only hold
@@ -322,9 +311,13 @@ int decode_audio(sh_audio_t *sh_audio, struct bstr *outbuf, int minlen)
         return -1;
     max_decode_len -= max_decode_len % unitsize;
 
-    while (minlen >= 0 && outbuf->len < minlen) {
+    while (minsamples >= 0 && mp_audio_buffer_samples(outbuf) < minsamples) {
+        struct af_stream *afs = sh_audio->afilter;
+        int out_sstride = afs->output.sstride;
+        int declen = (minsamples - mp_audio_buffer_samples(outbuf))
+                     * out_sstride / filter_multiplier;
         // + some extra for possible filter buffering
-        int declen = (minlen - outbuf->len) / filter_multiplier + (unitsize << 5); 
+        declen += unitsize << 5;
         if (huge_filter_buffer)
             /* Some filter must be doing significant buffering if the estimated
              * input length didn't produce enough output from filters.
@@ -348,15 +341,6 @@ int decode_audio(sh_audio_t *sh_audio, struct bstr *outbuf, int minlen)
     }
     return 0;
 }
-
-void decode_audio_prepend_bytes(struct bstr *outbuf, int count, int byte)
-{
-    set_min_out_buffer_size(outbuf, outbuf->len + count);
-    memmove(outbuf->start + count, outbuf->start, outbuf->len);
-    memset(outbuf->start, byte, count);
-    outbuf->len += count;
-}
-
 
 void resync_audio_stream(sh_audio_t *sh_audio)
 {
