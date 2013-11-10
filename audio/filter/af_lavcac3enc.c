@@ -160,9 +160,6 @@ static void uninit(struct af_instance* af)
 {
     af_ac3enc_t *s = af->setup;
 
-    if (af->data)
-        free(af->data->planes[0]);
-    free(af->data);
     if (s) {
         av_free_packet(&s->pkt);
         if(s->lavc_actx) {
@@ -191,18 +188,8 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
     else
         max_output_len = AC3_MAX_CODED_FRAME_SIZE * frame_num;
 
-    if (mp_audio_psize(af->data) < max_output_len) {
-        mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, "
-               "old len = %i, new len = %i\n", af->info->name,
-               mp_audio_psize(af->data), max_output_len);
-        free(af->data->planes[0]);
-        af->data->planes[0] = malloc(max_output_len);
-        if (!af->data->planes[0]) {
-            mp_msg(MSGT_AFILTER, MSGL_FATAL, "[libaf] Could not allocate memory \n");
-            return NULL;
-        }
-        af->data->samples = max_output_len / af->data->sstride;
-    }
+    mp_audio_realloc_min(af->data, max_output_len / af->data->sstride);
+    af->data->samples = max_output_len / af->data->sstride;
 
     l = af->data;           // Local data
     buf = l->planes[0];
@@ -320,7 +307,6 @@ static int af_open(struct af_instance* af){
     af->uninit=uninit;
     af->play=play;
     af->mul=1;
-    af->data=calloc(1,sizeof(struct mp_audio));
     af->setup=s;
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");

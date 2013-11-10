@@ -61,7 +61,7 @@ struct af_instance {
     struct mp_audio * (*play)(struct af_instance *af, struct mp_audio *data);
     void *setup;  // old field for priv structs
     void *priv;
-    struct mp_audio *data; // configuration for outgoing data stream
+    struct mp_audio *data; // configuration and buffer for outgoing data stream
     struct af_instance *next;
     struct af_instance *prev;
     double delay; /* Delay caused by the filter, in units of bytes read without
@@ -181,10 +181,6 @@ double af_calc_delay(struct af_stream *s);
  * \defgroup af_filter Audio filter helper functions
  * \{
  */
-
-int af_resize_local_buffer(struct af_instance *af, struct mp_audio *data);
-
-#define RESIZE_LOCAL_BUFFER af_resize_local_buffer
 
 /**
  * \brief convert dB to gain value

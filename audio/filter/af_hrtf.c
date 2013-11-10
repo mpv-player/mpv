@@ -366,9 +366,6 @@ static void uninit(struct af_instance *af)
 	free(s->fwrbuf_rr);
 	free(af->setup);
     }
-    if(af->data)
-	free(af->data->planes[0]);
-    free(af->data);
 }
 
 /* Filter data through filter
@@ -391,8 +388,7 @@ static struct mp_audio* play(struct af_instance *af, struct mp_audio *data)
     float common, left, right, diff, left_b, right_b;
     const int dblen = s->dlbuflen, hlen = s->hrflen, blen = s->basslen;
 
-    if(AF_OK != RESIZE_LOCAL_BUFFER(af, data))
-	return NULL;
+    mp_audio_realloc_min(af->data, data->samples);
 
     if(s->print_flag) {
 	s->print_flag = 0;
@@ -603,9 +599,8 @@ static int af_open(struct af_instance* af)
     af->uninit = uninit;
     af->play = play;
     af->mul = 1;
-    af->data = calloc(1, sizeof(struct mp_audio));
     af->setup = calloc(1, sizeof(af_hrtf_t));
-    if((af->data == NULL) || (af->setup == NULL))
+    if(af->setup == NULL)
 	return AF_ERROR;
 
     s = af->setup;

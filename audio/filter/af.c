@@ -201,6 +201,7 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
     *af = (struct af_instance) {
         .info = info,
         .mul = 1,
+        .data = talloc_zero(af, struct mp_audio),
     };
     struct m_config *config = m_config_from_obj_desc(af, &desc);
     if (m_config_initialize_obj(config, &desc, &af->priv, &args) < 0)
@@ -728,42 +729,6 @@ double af_calc_delay(struct af_stream *s)
         af = af->next;
     }
     return delay;
-}
-
-/* I a local buffer is used (i.e. if the filter doesn't operate on the incoming
- * buffer), this macro must be called to ensure the buffer is big enough. */
-int af_resize_local_buffer(struct af_instance *af, struct mp_audio *data)
-{
-    assert(data->format);
-
-    if (!af->data->format && !af->data->planes[0]) {
-        // Dummy initialization
-        mp_audio_set_format(af->data, AF_FORMAT_U8);
-    }
-
-    int oldlen = af->data->samples * af->data->sstride;
-
-    /* Calculate the minimum output buffer size for given input data d
-     * when using the af_resize_local_buffer function. The +x part ensures
-     * the value is >= len*mul rounded upwards to whole samples even if the
-     * double 'mul' is inexact. */
-    int newlen = data->samples * data->sstride * af->mul + data->sstride + 1;
-
-    if (oldlen >= newlen)
-        return AF_OK;
-
-    mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, "
-           "old len = %i, new len = %i\n", af->info->name, oldlen, newlen);
-    // If there is a buffer free it
-    free(af->data->planes[0]);
-    // Create new buffer and check that it is OK
-    af->data->planes[0] = malloc(newlen);
-    if (!af->data->planes[0]) {
-        mp_msg(MSGT_AFILTER, MSGL_FATAL, "[libaf] Could not allocate memory \n");
-        return AF_ERROR;
-    }
-    af->data->samples = newlen / af->data->sstride;
-    return AF_OK;
 }
 
 // documentation in af.h

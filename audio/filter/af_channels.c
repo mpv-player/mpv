@@ -222,9 +222,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
 static void uninit(struct af_instance* af)
 {
   free(af->setup);
-  if (af->data)
-      free(af->data->planes[0]);
-  free(af->data);
 }
 
 // Filter data through filter
@@ -235,8 +232,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
   af_channels_t* s = af->setup;
   int 		 i;
 
-  if(AF_OK != RESIZE_LOCAL_BUFFER(af,data))
-    return NULL;
+  mp_audio_realloc_min(af->data, data->samples);
 
   // Reset unused channels
   memset(l->planes[0],0,mp_audio_psize(c) / c->nch * l->nch);
@@ -260,9 +256,8 @@ static int af_open(struct af_instance* af){
   af->uninit=uninit;
   af->play=play;
   af->mul=1;
-  af->data=calloc(1,sizeof(struct mp_audio));
   af->setup=calloc(1,sizeof(af_channels_t));
-  if((af->data == NULL) || (af->setup == NULL))
+  if(af->setup == NULL)
     return AF_ERROR;
   return AF_OK;
 }

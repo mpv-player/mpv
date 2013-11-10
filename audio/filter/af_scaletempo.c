@@ -47,11 +47,11 @@ typedef struct af_scaletempo_s
     // stride
     float scale;
     float speed;
+    int frames_stride;
     float frames_stride_scaled;
     float frames_stride_error;
     int bytes_per_frame;
     int bytes_stride;
-    float bytes_stride_scaled;
     int bytes_queue;
     int bytes_queued;
     int bytes_to_slide;
@@ -220,21 +220,8 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
         return data;
     }
 
-    // RESIZE_LOCAL_BUFFER - can't use macro
-    int max_bytes_out = ((int)(mp_audio_psize(data) /
-                            s->bytes_stride_scaled) + 1) * s->bytes_stride;
-    if (max_bytes_out > mp_audio_psize(af->data)) {
-        mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, "
-               "old len = %i, new len = %i\n", af->info->name,
-               mp_audio_psize(af->data), max_bytes_out);
-        af->data->planes[0] = realloc(af->data->planes[0], max_bytes_out);
-        if (!af->data->planes[0]) {
-            mp_msg(MSGT_AFILTER, MSGL_FATAL,
-                   "[libaf] Could not allocate memory\n");
-            return NULL;
-        }
-        af->data->samples = max_bytes_out / af->data->sstride;
-    }
+    mp_audio_realloc_min(af->data,
+        ((int)(data->samples / s->frames_stride_scaled) + 1) * s->frames_stride);
 
     int offset_in = fill_queue(af, data, 0);
     int8_t *pout = af->data->planes[0];
@@ -309,15 +296,15 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
         int bps = af->data->bps;
 
-        int frames_stride       = srate * s->ms_stride;
-        s->bytes_stride         = frames_stride * bps * nch;
-        s->bytes_stride_scaled  = s->scale * s->bytes_stride;
-        s->frames_stride_scaled = s->scale * frames_stride;
+        s->frames_stride        = srate * s->ms_stride;
+        s->bytes_stride         = s->frames_stride * bps * nch;
+        s->frames_stride_scaled = s->scale * s->frames_stride;
+        int bytes_stride_scaled = s->scale * s->bytes_stride;
         s->frames_stride_error  = 0;
-        af->mul = (double)s->bytes_stride / s->bytes_stride_scaled;
+        af->mul = (double)s->bytes_stride / bytes_stride_scaled;
         af->delay = 0;
 
-        int frames_overlap = frames_stride * s->percent_overlap;
+        int frames_overlap = s->frames_stride * s->percent_overlap;
         if (frames_overlap <= 0) {
             s->bytes_standing   = s->bytes_stride;
             s->samples_standing = s->bytes_standing / bps;
@@ -402,8 +389,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
         s->bytes_per_frame = bps * nch;
         s->num_channels    = nch;
 
-        s->bytes_queue
-            = (s->frames_search + frames_stride + frames_overlap) * bps * nch;
+        s->bytes_queue = (s->frames_search + s->frames_stride + frames_overlap)
+                         * bps * nch;
         s->buf_queue = realloc(s->buf_queue, s->bytes_queue + UNROLL_PADDING);
         if (!s->buf_queue) {
             mp_msg(MSGT_AFILTER, MSGL_FATAL, "[scaletempo] Out of memory\n");
@@ -457,8 +444,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
 static void uninit(struct af_instance *af)
 {
     af_scaletempo_t *s = af->priv;
-    free(af->data->planes[0]);
-    free(af->data);
     free(s->buf_queue);
     free(s->buf_overlap);
     free(s->buf_pre_corr);
@@ -478,9 +463,6 @@ static int af_open(struct af_instance *af)
     af->uninit    = uninit;
     af->play      = play;
     af->mul       = 1;
-    af->data      = calloc(1, sizeof(struct mp_audio));
-    if (af->data == NULL)
-        return AF_ERROR;
 
     s->speed_tempo = !!(s->speed_opt & SCALE_TEMPO);
     s->speed_pitch = !!(s->speed_opt & SCALE_PITCH);
