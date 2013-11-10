@@ -209,6 +209,7 @@ struct GL {
     void (GLAPIENTRY *DrawBuffer)(GLenum);
     void (GLAPIENTRY *DepthMask)(GLboolean);
     void (GLAPIENTRY *BlendFunc)(GLenum, GLenum);
+    void (GLAPIENTRY *BlendFuncSeparate)(GLenum, GLenum, GLenum, GLenum);
     void (GLAPIENTRY *Flush)(void);
     void (GLAPIENTRY *Finish)(void);
     void (GLAPIENTRY *PixelStorei)(GLenum, GLint);

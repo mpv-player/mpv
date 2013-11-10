@@ -29,10 +29,12 @@ struct osd_fmt_entry {
     GLenum type;
 };
 
-// glBlendFunc() arguments
-static const int blend_factors[SUBBITMAP_COUNT][2] = {
-    [SUBBITMAP_LIBASS] = {GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA},
-    [SUBBITMAP_RGBA] =   {GL_ONE,       GL_ONE_MINUS_SRC_ALPHA},
+// glBlendFuncSeparate() arguments
+static const int blend_factors[SUBBITMAP_COUNT][4] = {
+    [SUBBITMAP_LIBASS] = {GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA,
+                          GL_ONE,       GL_ONE_MINUS_SRC_ALPHA},
+    [SUBBITMAP_RGBA] =   {GL_ONE,       GL_ONE_MINUS_SRC_ALPHA,
+                          GL_ONE,       GL_ONE_MINUS_SRC_ALPHA},
 };
 
 static const struct osd_fmt_entry osd_to_gl3_formats[SUBBITMAP_COUNT] = {
@@ -230,7 +232,13 @@ void mpgl_osd_set_gl_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p)
 
     gl->BindTexture(GL_TEXTURE_2D, p->texture);
     gl->Enable(GL_BLEND);
-    gl->BlendFunc(blend_factors[p->format][0], blend_factors[p->format][1]);
+
+    const int *factors = &blend_factors[p->format][0];
+    if (gl->BlendFuncSeparate) {
+        gl->BlendFuncSeparate(factors[0], factors[1], factors[2], factors[3]);
+    } else {
+        gl->BlendFunc(factors[0], factors[1]);
+    }
 }
 
 void mpgl_osd_unset_gl_state(struct mpgl_osd *ctx, struct mpgl_osd_part *p)

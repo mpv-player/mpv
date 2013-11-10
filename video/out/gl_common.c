@@ -263,6 +263,8 @@ struct gl_functions gl_functions[] = {
             DEF_FN(UniformMatrix2fv),
             DEF_FN(UniformMatrix3fv),
             DEF_FN(TexImage3D),
+            // Added in OpenGL 1.4, but vo_opengl_old doesn't need it
+            DEF_FN(BlendFuncSeparate),
             {0},
         },
     },
