@@ -96,18 +96,19 @@ static int get_space(struct ao *ao)
     struct priv *priv = ao->priv;
 
     drain(ao);
-    return priv->buffersize - priv->buffered_bytes;
+    return (priv->buffersize - priv->buffered_bytes) / ao->sstride;
 }
 
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *priv = ao->priv;
+    int len = samples * ao->sstride;
 
     int maxbursts = (priv->buffersize - priv->buffered_bytes) / priv->outburst;
     int playbursts = len / priv->outburst;
     int bursts = playbursts > maxbursts ? maxbursts : playbursts;
     priv->buffered_bytes += bursts * priv->outburst;
-    return bursts * priv->outburst;
+    return (bursts * priv->outburst) / ao->sstride;
 }
 
 static float get_delay(struct ao *ao)

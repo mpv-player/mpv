@@ -1197,7 +1197,7 @@ static int get_space(struct ao *ao)
     if (!ao || !ao->priv)
         return -1;
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    return mp_ring_available(state->ringbuff);
+    return mp_ring_available(state->ringbuff) / ao->sstride;
 }
 
 static void reset_buffers(struct wasapi_state *state)
@@ -1339,25 +1339,24 @@ static void reset(struct ao *ao)
     reset_buffers(state);
 }
 
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
-    int ret = 0;
     if (!ao || !ao->priv)
-        return ret;
+        return 0;
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
     if (WaitForSingleObject(state->fatal_error, 0) == WAIT_OBJECT_0) {
         /* something bad happened */
-        return ret;
+        return 0;
     }
 
-    ret = mp_ring_write(state->ringbuff, data, len);
+    int ret = mp_ring_write(state->ringbuff, data[0], samples * ao->sstride);
 
     if (!state->is_playing) {
         /* start playing */
         state->is_playing = 1;
         SetEvent(state->hPlay);
     }
-    return ret;
+    return ret / ao->sstride;
 }
 
 static float get_delay(struct ao *ao)

@@ -377,14 +377,14 @@ static void cork(struct ao *ao, bool pause)
 }
 
 // Play the specified data to the pulseaudio server
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *priv = ao->priv;
     pa_threaded_mainloop_lock(priv->mainloop);
-    if (pa_stream_write(priv->stream, data, len, NULL, 0,
+    if (pa_stream_write(priv->stream, data[0], samples * ao->sstride, NULL, 0,
                         PA_SEEK_RELATIVE) < 0) {
         GENERIC_ERR_MSG("pa_stream_write() failed");
-        len = -1;
+        samples = -1;
     }
     if (flags & AOPLAY_FINAL_CHUNK) {
         // Force start in case the stream was too short for prebuf
@@ -392,7 +392,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
         pa_operation_unref(op);
     }
     pa_threaded_mainloop_unlock(priv->mainloop);
-    return len;
+    return samples;
 }
 
 // Reset the audio stream, i.e. flush the playback buffer on the server side
@@ -427,14 +427,14 @@ static void resume(struct ao *ao)
     cork(ao, false);
 }
 
-// Return number of bytes that may be written to the server without blocking
+// Return number of samples that may be written to the server without blocking
 static int get_space(struct ao *ao)
 {
     struct priv *priv = ao->priv;
     pa_threaded_mainloop_lock(priv->mainloop);
     size_t space = pa_stream_writable_size(priv->stream);
     pa_threaded_mainloop_unlock(priv->mainloop);
-    return space;
+    return space / ao->sstride;
 }
 
 // Return the current latency in seconds

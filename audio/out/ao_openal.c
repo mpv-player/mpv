@@ -251,18 +251,19 @@ static int get_space(struct ao *ao)
     queued = NUM_BUF - queued - 3;
     if (queued < 0)
         return 0;
-    return queued * CHUNK_SIZE * ao->channels.num;
+    return (queued * CHUNK_SIZE * ao->channels.num) / ao->sstride;
 }
 
 /**
  * \brief write data into buffer and reset underrun flag
  */
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     ALint state;
     int i, j, k;
     int ch;
-    int16_t *d = data;
+    int16_t *d = data[0];
+    int len = samples * ao->sstride;
     len /= ao->channels.num * CHUNK_SIZE;
     for (i = 0; i < len; i++) {
         for (ch = 0; ch < ao->channels.num; ch++) {
@@ -278,7 +279,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
     alGetSourcei(sources[0], AL_SOURCE_STATE, &state);
     if (state != AL_PLAYING) // checked here in case of an underrun
         alSourcePlayv(ao->channels.num, sources);
-    return len * ao->channels.num * CHUNK_SIZE;
+    return len * ao->channels.num * CHUNK_SIZE / ao->sstride;
 }
 
 static float get_delay(struct ao *ao)
