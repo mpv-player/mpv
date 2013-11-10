@@ -256,7 +256,8 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     // This filter can have a negative delay when scale > 1:
     // output corresponding to some length of input can be decided and written
     // after receiving only a part of that input.
-    af->delay = s->bytes_queued - s->bytes_to_slide;
+    af->delay = (s->bytes_queued - s->bytes_to_slide) / s->scale
+                / af->data->sstride / af->data->rate;
 
     data->planes[0] = af->data->planes[0];
     data->samples   = (pout - (int8_t *)af->data->planes[0]) / af->data->sstride;
@@ -299,9 +300,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
         s->frames_stride        = srate * s->ms_stride;
         s->bytes_stride         = s->frames_stride * bps * nch;
         s->frames_stride_scaled = s->scale * s->frames_stride;
-        int bytes_stride_scaled = s->scale * s->bytes_stride;
         s->frames_stride_error  = 0;
-        af->mul = (double)s->bytes_stride / bytes_stride_scaled;
+        af->mul = 1.0 / s->scale;
         af->delay = 0;
 
         int frames_overlap = s->frames_stride * s->percent_overlap;
@@ -462,7 +462,6 @@ static int af_open(struct af_instance *af)
     af->control   = control;
     af->uninit    = uninit;
     af->play      = play;
-    af->mul       = 1;
 
     s->speed_tempo = !!(s->speed_opt & SCALE_TEMPO);
     s->speed_pitch = !!(s->speed_opt & SCALE_PITCH);

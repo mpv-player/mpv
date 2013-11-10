@@ -203,7 +203,7 @@ double written_audio_pts(struct MPContext *mpctx)
     a_pts -= sh_audio->a_buffer_len / bps;
 
     // Data buffered in audio filters, measured in seconds of "missing" output
-    double buffered_output = af_calc_delay(sh_audio->afilter)  / mpctx->ao->bps;
+    double buffered_output = af_calc_delay(sh_audio->afilter);
 
     // Data that was ready for ao but was buffered because ao didn't fully
     // accept everything to internal buffers yet

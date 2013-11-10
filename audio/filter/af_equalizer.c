@@ -114,7 +114,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
       bp2(s->a[k],s->b[k],F[k]/((float)af->data->rate),Q);
 
     // Calculate how much this plugin adds to the overall time delay
-    af->delay = 2 * af->data->nch * af->data->bps;
+    af->delay = 2.0 / (double)af->data->rate;
 
     // Calculate gain factor to prevent clipping at output
     for(k=0;k<AF_NCH;k++)
@@ -203,7 +203,6 @@ static int af_open(struct af_instance* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul=1;
   af->setup=calloc(1,sizeof(af_equalizer_t));
   if(af->setup == NULL)
     return AF_ERROR;

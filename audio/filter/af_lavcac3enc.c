@@ -88,12 +88,13 @@ static int control(struct af_instance *af, int cmd, void *arg)
         test_output_res = af_test_output(af, data);
 
         s->pending_len = 0;
-        s->expect_len = AC3_FRAME_SIZE * data->nch * af->data->bps;
+        int expect_samples = AC3_FRAME_SIZE;
+        s->expect_len = expect_samples * data->nch * af->data->bps;
         assert(s->expect_len <= s->pending_data_size);
         if (s->add_iec61937_header)
-            af->mul = (double)AC3_FRAME_SIZE * 2 * 2 / s->expect_len;
+            af->mul = 1;
         else
-            af->mul = (double)AC3_MAX_CODED_FRAME_SIZE / s->expect_len;
+            af->mul = (double)(AC3_MAX_CODED_FRAME_SIZE / (2 * 2)) / expect_samples;
 
         mp_msg(MSGT_AFILTER, MSGL_DBG2, "af_lavcac3enc reinit: %d, %d, %f, %d.\n",
                data->nch, data->rate, af->mul, s->expect_len);
@@ -306,7 +307,6 @@ static int af_open(struct af_instance* af){
     af->control=control;
     af->uninit=uninit;
     af->play=play;
-    af->mul=1;
     af->setup=s;
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");

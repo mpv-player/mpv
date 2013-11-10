@@ -53,8 +53,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         assert(test_conversion(in->format, out->format));
 
-        af->mul = (double)out->bps / in->bps;
-
         return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
     }
     case AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET: {

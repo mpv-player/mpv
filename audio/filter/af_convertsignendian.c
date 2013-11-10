@@ -120,7 +120,6 @@ static int af_open(struct af_instance *af)
 {
     af->control = control;
     af->play = play;
-    af->mul = 1;
     return AF_OK;
 }
 

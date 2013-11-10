@@ -53,7 +53,6 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 static int af_open(struct af_instance* af){
   af->control=control;
   af->play=play;
-  af->mul=1;
   return AF_OK;
 }
 

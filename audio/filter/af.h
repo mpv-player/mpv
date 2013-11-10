@@ -64,10 +64,11 @@ struct af_instance {
     struct mp_audio *data; // configuration and buffer for outgoing data stream
     struct af_instance *next;
     struct af_instance *prev;
-    double delay; /* Delay caused by the filter, in units of bytes read without
-                   * corresponding output */
+    double delay; /* Delay caused by the filter, in seconds of audio consumed
+                   * without corresponding output */
     double mul; /* length multiplier: how much does this instance change
-                   the length of the buffer. */
+                 * the number of samples passed though. (Ratio of input
+                 * and output, e.g. mul=4 => 1 sample becomes 4 samples) .*/
     bool auto_inserted; // inserted by af.c, such as conversion filters
 };
 
