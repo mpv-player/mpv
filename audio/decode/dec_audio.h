@@ -22,15 +22,14 @@
 #include "audio/chmap.h"
 #include "demux/stheader.h"
 
-struct bstr;
+struct mp_audio_buffer;
 struct mp_decoder_list;
 
 struct mp_decoder_list *mp_audio_decoder_list(void);
 int init_best_audio_codec(sh_audio_t *sh_audio, char *audio_decoders);
-int decode_audio(sh_audio_t *sh_audio, struct bstr *outbuf, int minlen);
-void decode_audio_prepend_bytes(struct bstr *outbuf, int count, int byte);
+int decode_audio(sh_audio_t *sh_audio, struct mp_audio_buffer *outbuf,
+                 int minsamples);
 void resync_audio_stream(sh_audio_t *sh_audio);
-void skip_audio_frame(sh_audio_t *sh_audio);
 void uninit_audio(sh_audio_t *sh_audio);
 
 int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
