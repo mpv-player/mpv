@@ -324,9 +324,13 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     reorder_channels(data->audio, s->reorder_in, data->bps, data->nch, in_samples);
 #endif
 
-    out_samples = avresample_convert(s->avrctx,
+    if (out_samples) {
+        out_samples = avresample_convert(s->avrctx,
             (uint8_t **) &out->audio, out_size, out_samples,
             (uint8_t **) &in->audio,  in_size,  in_samples);
+        if (out_samples < 0)
+            return NULL; // error
+    }
 
     *data = *out;
 

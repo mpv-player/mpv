@@ -697,8 +697,6 @@ struct mp_audio *af_play(struct af_stream *s, struct mp_audio *data)
     struct af_instance *af = s->first;
     // Iterate through all filters
     do {
-        if (data->len <= 0)
-            break;
         data = af->play(af, data);
         af = af->next;
     } while (af && data);
