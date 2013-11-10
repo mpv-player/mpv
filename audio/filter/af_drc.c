@@ -113,7 +113,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
 // Deallocate memory
 static void uninit(struct af_instance* af)
 {
-    free(af->data);
     free(af->setup);
 }
 
@@ -321,9 +320,8 @@ static int af_open(struct af_instance* af){
   af->uninit=uninit;
   af->play=play;
   af->mul=1;
-  af->data=calloc(1,sizeof(struct mp_audio));
   af->setup=calloc(1,sizeof(af_drc_t));
-  if(af->data == NULL || af->setup == NULL)
+  if(af->setup == NULL)
     return AF_ERROR;
 
   ((af_drc_t*)af->setup)->mul = MUL_INIT;

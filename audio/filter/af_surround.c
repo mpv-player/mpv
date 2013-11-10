@@ -144,9 +144,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
 // Deallocate memory
 static void uninit(struct af_instance* af)
 {
-  if(af->data)
-    free(af->data->planes[0]);
-  free(af->data);
   free(af->setup);
 }
 
@@ -172,8 +169,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data){
   int 		 ri  = s->ri;	// Read index for delay queue
   int 		 wi  = s->wi;	// Write index for delay queue
 
-  if (AF_OK != RESIZE_LOCAL_BUFFER(af, data))
-    return NULL;
+  mp_audio_realloc_min(af->data, data->samples);
 
   out = af->data->planes[0];
 
@@ -248,9 +244,8 @@ static int af_open(struct af_instance* af){
   af->uninit=uninit;
   af->play=play;
   af->mul=2;
-  af->data=calloc(1,sizeof(struct mp_audio));
   af->setup=calloc(1,sizeof(af_surround_t));
-  if(af->data == NULL || af->setup == NULL)
+  if(af->setup == NULL)
     return AF_ERROR;
   ((af_surround_t*)af->setup)->d = 20;
   return AF_OK;

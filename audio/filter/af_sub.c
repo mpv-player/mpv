@@ -123,7 +123,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
 // Deallocate memory
 static void uninit(struct af_instance* af)
 {
-    free(af->data);
     free(af->setup);
 }
 
@@ -167,9 +166,8 @@ static int af_open(struct af_instance* af){
   af->uninit=uninit;
   af->play=play;
   af->mul=1;
-  af->data=calloc(1,sizeof(struct mp_audio));
   af->setup=s=calloc(1,sizeof(af_sub_t));
-  if(af->data == NULL || af->setup == NULL)
+  if(af->setup == NULL)
     return AF_ERROR;
   // Set default values
   s->ch = 5;  	 // Channel nr 6

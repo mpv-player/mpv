@@ -121,7 +121,6 @@ static int af_open(struct af_instance *af)
     af->control = control;
     af->play = play;
     af->mul = 1;
-    af->data = talloc_zero(af, struct mp_audio);
     return AF_OK;
 }
 

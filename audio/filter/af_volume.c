@@ -105,7 +105,6 @@ static int af_open(struct af_instance *af)
     af->control = control;
     af->play = play;
     af->mul = 1;
-    af->data = talloc_zero(af, struct mp_audio);
     af_from_dB(1, &s->cfg_volume, &s->level, 20.0, -200.0, 60.0);
     return AF_OK;
 }

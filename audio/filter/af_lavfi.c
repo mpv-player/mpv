@@ -58,11 +58,6 @@ struct priv {
     AVFilterContext *in;
     AVFilterContext *out;
 
-    // Guarantee that the data stays valid until next filter call
-    char *out_buffer;
-
-    struct mp_audio temp;
-
     int64_t samples_in;
 
     AVRational timebase_out;
@@ -278,8 +273,8 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
         af->delay = (in_time - out_time) * r->rate * r->sstride;
     }
 
-    p->temp = *r;
-    return &p->temp;
+    *data = *r;
+    return data;
 }
 
 static void uninit(struct af_instance *af)

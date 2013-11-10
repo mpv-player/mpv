@@ -74,8 +74,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
 static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 {
-    if (RESIZE_LOCAL_BUFFER(af, data) != AF_OK)
-        return NULL;
+    mp_audio_realloc_min(af->data, data->samples);
 
     struct mp_audio *out = af->data;
     size_t len = mp_audio_psize(data) / data->bps;
@@ -104,18 +103,10 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     return data;
 }
 
-static void uninit(struct af_instance* af)
-{
-    if (af->data)
-        free(af->data->planes[0]);
-}
-
 static int af_open(struct af_instance *af)
 {
     af->control = control;
     af->play = play;
-    af->uninit = uninit;
-    af->data = talloc_zero(af, struct mp_audio);
     return AF_OK;
 }
 

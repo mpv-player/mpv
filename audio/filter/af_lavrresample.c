@@ -381,9 +381,6 @@ static int af_open(struct af_instance *af)
     af->uninit  = uninit;
     af->play    = play;
     af->mul     = 1;
-    af->data    = talloc_zero(s, struct mp_audio);
-
-    af->data->rate   = 0;
 
     if (s->opts.cutoff <= 0.0)
         s->opts.cutoff = af_resample_default_cutoff(s->opts.filter_size);

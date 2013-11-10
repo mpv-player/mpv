@@ -646,7 +646,6 @@ static int control(struct af_instance *af, int cmd, void *arg) {
  */
 
 static void uninit(struct af_instance *af) {
-    free(af->data);
     if (af->setup) {
         af_ladspa_t *setup = (af_ladspa_t*) af->setup;
         const LADSPA_Descriptor *pdes = setup->plugin_descriptor;
@@ -878,14 +877,8 @@ static int af_open(struct af_instance *af) {
     af->play=play;
     af->mul=1;
 
-    af->data = calloc(1, sizeof(struct mp_audio));
-    if (af->data == NULL)
-        return af_ladspa_malloc_failed((char*)af_info_ladspa.name);
-
     af->setup = calloc(1, sizeof(af_ladspa_t));
     if (af->setup == NULL) {
-        free(af->data);
-        af->data=NULL;
         return af_ladspa_malloc_failed((char*)af_info_ladspa.name);
     }
 

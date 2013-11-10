@@ -161,7 +161,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
 static void uninit(struct af_instance *af)
 {
     struct af_bs2b *s = af->priv;
-    free(af->data);
     if (s->filter)
         bs2b_close(s->filter);
 }
@@ -173,12 +172,9 @@ static int af_open(struct af_instance *af)
     af->control = control;
     af->uninit  = uninit;
     af->mul     = 1;
-    if (!(af->data = calloc(1, sizeof(struct mp_audio))))
-        return AF_ERROR;
 
     // NULL means failed initialization
     if (!(s->filter = bs2b_open())) {
-        free(af->data);
         return AF_ERROR;
     }
 

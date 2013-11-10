@@ -35,9 +35,6 @@ struct priv {
     struct mp_chmap out_channels;
 
     int fail;
-
-    struct mp_audio data;
-    struct mp_audio temp;
 };
 
 static void force_in_params(struct af_instance *af, struct mp_audio *in)
@@ -101,15 +98,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
 static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 {
-    struct priv *priv = af->priv;
-    struct mp_audio *r = &priv->temp;
-
-    *r = *af->data;
-    for (int n = 0; n < r->nch; n++)
-        r->planes[n] = data->planes[n];
-    r->samples = data->samples;
-
-    return r;
+    mp_audio_copy_config(data, af->data);
+    return data;
 }
 
 static int af_open(struct af_instance *af)
@@ -117,8 +107,6 @@ static int af_open(struct af_instance *af)
     af->control = control;
     af->play = play;
     af->mul = 1;
-    struct priv *priv = af->priv;
-    af->data = &priv->data;
 
     force_in_params(af, af->data);
     force_out_params(af, af->data);

@@ -160,9 +160,6 @@ static void uninit(struct af_instance* af)
 {
     af_ac3enc_t *s = af->setup;
 
-    if (af->data)
-        free(af->data->planes[0]);
-    free(af->data);
     if (s) {
         av_free_packet(&s->pkt);
         if(s->lavc_actx) {
@@ -320,7 +317,6 @@ static int af_open(struct af_instance* af){
     af->uninit=uninit;
     af->play=play;
     af->mul=1;
-    af->data=calloc(1,sizeof(struct mp_audio));
     af->setup=s;
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");
