@@ -61,11 +61,9 @@ struct priv {
     // Guarantee that the data stays valid until next filter call
     char *out_buffer;
 
-    struct mp_audio data;
     struct mp_audio temp;
 
-    int64_t bytes_in;
-    int64_t bytes_out;
+    int64_t samples_in;
 
     AVRational timebase_out;
 
@@ -129,6 +127,8 @@ static bool recreate_graph(struct af_instance *af, struct mp_audio *config)
     static const enum AVSampleFormat sample_fmts[] = {
         AV_SAMPLE_FMT_U8, AV_SAMPLE_FMT_S16, AV_SAMPLE_FMT_S32,
         AV_SAMPLE_FMT_FLT, AV_SAMPLE_FMT_DBL,
+        AV_SAMPLE_FMT_U8P, AV_SAMPLE_FMT_S16P, AV_SAMPLE_FMT_S32P,
+        AV_SAMPLE_FMT_FLTP, AV_SAMPLE_FMT_DBLP,
         AV_SAMPLE_FMT_NONE
     };
     r = av_opt_set_int_list(out, "sample_fmts", sample_fmts,
@@ -181,7 +181,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         if (af_to_avformat(in->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(in, AF_FORMAT_FLOAT_NE);
-        mp_audio_force_interleaved_format(in);
 
         if (!mp_chmap_is_lavc(&in->channels))
             mp_chmap_reorder_to_lavc(&in->channels); // will always work
@@ -194,7 +193,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
         out->rate = l_out->sample_rate;
 
         mp_audio_set_format(out, af_from_avformat(l_out->format));
-        mp_audio_force_interleaved_format(out);
 
         struct mp_chmap out_cm;
         mp_chmap_from_lavc(&out_cm, l_out->channel_layout);
@@ -220,28 +218,25 @@ static int control(struct af_instance *af, int cmd, void *arg)
 static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 {
     struct priv *p = af->priv;
+    struct mp_audio *r = af->data;
 
     AVFilterLink *l_in = p->in->outputs[0];
-
-    struct mp_audio *r = &p->temp;
-    *r = *af->data;
-
-    int in_frame_size = data->bps * data->channels.num;
-    int out_frame_size = r->bps * r->channels.num;
 
     AVFrame *frame = av_frame_alloc();
     frame->nb_samples = data->samples;
     frame->format = l_in->format;
 
     // Timebase is 1/sample_rate
-    frame->pts = p->bytes_in / in_frame_size;
+    frame->pts = p->samples_in;
 
     av_frame_set_channels(frame, l_in->channels);
     av_frame_set_channel_layout(frame, l_in->channel_layout);
     av_frame_set_sample_rate(frame, l_in->sample_rate);
 
-    frame->data[0] = data->planes[0];
     frame->extended_data = frame->data;
+    for (int n = 0; n < data->num_planes; n++)
+        frame->data[n] = data->planes[n];
+    frame->linesize[0] = frame->nb_samples * data->sstride;
 
     if (av_buffersrc_add_frame(p->in, frame) < 0) {
         av_frame_free(&frame);
@@ -250,7 +245,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     av_frame_free(&frame);
 
     int64_t out_pts = AV_NOPTS_VALUE;
-    size_t out_len = 0;
+    r->samples = 0;
     for (;;) {
         frame = av_frame_alloc();
         if (av_buffersink_get_frame(p->out, frame) < 0) {
@@ -259,35 +254,32 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
             break;
         }
 
-        size_t new_len = out_len + frame->nb_samples * out_frame_size;
-        if (new_len > talloc_get_size(p->out_buffer))
-            p->out_buffer = talloc_realloc(p, p->out_buffer, char, new_len);
-        memcpy(p->out_buffer + out_len, frame->data[0], new_len - out_len);
-        out_len = new_len;
+        mp_audio_realloc_min(r, r->samples + frame->nb_samples);
+        for (int n = 0; n < r->num_planes; n++) {
+            memcpy((char *)r->planes[n] + r->samples * r->sstride,
+                   frame->extended_data[n], frame->nb_samples * r->sstride);
+        }
+        r->samples += frame->nb_samples;
+
         if (out_pts == AV_NOPTS_VALUE)
             out_pts = frame->pts;
 
         av_frame_free(&frame);
     }
 
-    r->planes[0] = p->out_buffer;
-    r->samples = out_len / r->sstride;
-
-    p->bytes_in += data->samples * data->sstride;
-    p->bytes_out += r->samples * r->sstride;
+    p->samples_in += data->samples;
 
     if (out_pts != AV_NOPTS_VALUE) {
-        int64_t num_in_frames = p->bytes_in / in_frame_size;
-        double in_time = num_in_frames / (double)data->rate;
-
+        double in_time = p->samples_in / (double)data->rate;
         double out_time = out_pts * av_q2d(p->timebase_out);
         // Need pts past the last output sample.
         out_time += r->samples / (double)r->rate;
 
-        af->delay = (in_time - out_time) * r->rate * out_frame_size;
+        af->delay = (in_time - out_time) * r->rate * r->sstride;
     }
 
-    return r;
+    p->temp = *r;
+    return &p->temp;
 }
 
 static void uninit(struct af_instance *af)
@@ -301,7 +293,9 @@ static int af_open(struct af_instance *af)
     af->play = play;
     af->mul = 1;
     struct priv *priv = af->priv;
-    af->data = &priv->data;
+    af->data = talloc_zero(priv, struct mp_audio),
+    // Removing this requires fixing AVFrame.data vs. AVFrame.extended_data
+    assert(MP_NUM_CHANNELS <= AV_NUM_DATA_POINTERS);
     return AF_OK;
 }
 
