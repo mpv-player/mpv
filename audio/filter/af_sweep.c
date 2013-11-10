@@ -84,7 +84,6 @@ static int af_open(struct af_instance* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul=1;
   af->setup=calloc(1,sizeof(af_sweept));
   return AF_OK;
 }

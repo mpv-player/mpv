@@ -249,8 +249,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         if (af_to_avformat(out->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(out, in->format);
 
-        af->mul     = (double) (out->rate * out->nch) / (in->rate * in->nch);
-        af->delay   = out->nch * s->opts.filter_size / FFMIN(af->mul, 1);
+        af->mul     = out->rate / (double)in->rate;
 
         int r = ((in->format == orig_in.format) &&
                 mp_chmap_equals(&in->channels, &orig_in.channels))
@@ -333,9 +332,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 
     mp_audio_realloc_min(out, out->samples);
 
-    af->delay = out->bps * av_rescale_rnd(get_delay(s),
-                                          s->ctx.out_rate, s->ctx.in_rate,
-                                          AV_ROUND_UP);
+    af->delay = get_delay(s) / (double)s->ctx.in_rate;
 
 #if !USE_SET_CHANNEL_MAPPING
     do_reorder(in, s->reorder_in);
@@ -380,7 +377,6 @@ static int af_open(struct af_instance *af)
     af->control = control;
     af->uninit  = uninit;
     af->play    = play;
-    af->mul     = 1;
 
     if (s->opts.cutoff <= 0.0)
         s->opts.cutoff = af_resample_default_cutoff(s->opts.filter_size);

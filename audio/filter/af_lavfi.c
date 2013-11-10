@@ -197,7 +197,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         p->timebase_out = l_out->time_base;
 
-        af->mul = (double) (out->rate * out->nch) / (in->rate * in->nch);
+        // Blatantly incorrect; we don't know what the filters do.
+        af->mul = out->rate / (double)in->rate;
 
         return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
     }
@@ -270,7 +271,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
         // Need pts past the last output sample.
         out_time += r->samples / (double)r->rate;
 
-        af->delay = (in_time - out_time) * r->rate * r->sstride;
+        af->delay = in_time - out_time;
     }
 
     *data = *r;
@@ -286,7 +287,6 @@ static int af_open(struct af_instance *af)
     af->control = control;
     af->uninit = uninit;
     af->play = play;
-    af->mul = 1;
     struct priv *priv = af->priv;
     af->data = talloc_zero(priv, struct mp_audio),
     // Removing this requires fixing AVFrame.data vs. AVFrame.extended_data

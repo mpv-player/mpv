@@ -703,12 +703,12 @@ struct mp_audio *af_play(struct af_stream *s, struct mp_audio *data)
     return data;
 }
 
-// Calculate average ratio of filter output size to input size
+// Calculate average ratio of filter output samples to input samples.
+// e.g: num_output_samples = mul * num_input_samples
 double af_calc_filter_multiplier(struct af_stream *s)
 {
     struct af_instance *af = s->first;
     double mul = 1;
-    // Iterate through all filters and calculate total multiplication factor
     do {
         mul *= af->mul;
         af = af->next;
@@ -721,11 +721,9 @@ double af_calc_filter_multiplier(struct af_stream *s)
 double af_calc_delay(struct af_stream *s)
 {
     struct af_instance *af = s->first;
-    register double delay = 0.0;
-    // Iterate through all filters
+    double delay = 0.0;
     while (af) {
         delay += af->delay;
-        delay *= af->mul;
         af = af->next;
     }
     return delay;

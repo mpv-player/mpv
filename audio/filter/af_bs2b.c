@@ -171,7 +171,6 @@ static int af_open(struct af_instance *af)
     struct af_bs2b *s = af->priv;
     af->control = control;
     af->uninit  = uninit;
-    af->mul     = 1;
 
     // NULL means failed initialization
     if (!(s->filter = bs2b_open())) {

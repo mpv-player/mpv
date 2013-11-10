@@ -313,7 +313,6 @@ static int control(struct af_instance *af, int cmd, void* arg)
 	      mp_audio_set_channels_old(af->data, 5);
         mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
 	test_output_res = af_test_output(af, (struct mp_audio*)arg);
-	af->mul = 2.0 / af->data->nch;
 	// after testing input set the real output format
         mp_audio_set_num_channels(af->data, 2);
 	s->print_flag = 1;
@@ -598,7 +597,6 @@ static int af_open(struct af_instance* af)
     af->control = control;
     af->uninit = uninit;
     af->play = play;
-    af->mul = 1;
     af->setup = calloc(1, sizeof(af_hrtf_t));
     if(af->setup == NULL)
 	return AF_ERROR;

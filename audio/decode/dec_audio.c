@@ -312,10 +312,9 @@ int decode_audio(sh_audio_t *sh_audio, struct mp_audio_buffer *outbuf,
     max_decode_len -= max_decode_len % unitsize;
 
     while (minsamples >= 0 && mp_audio_buffer_samples(outbuf) < minsamples) {
-        struct af_stream *afs = sh_audio->afilter;
-        int out_sstride = afs->output.sstride;
-        int declen = (minsamples - mp_audio_buffer_samples(outbuf))
-                     * out_sstride / filter_multiplier;
+        int decsamples = (minsamples - mp_audio_buffer_samples(outbuf))
+                         / filter_multiplier;
+        int declen = decsamples * sstride;
         // + some extra for possible filter buffering
         declen += unitsize << 5;
         if (huge_filter_buffer)
