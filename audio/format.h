@@ -23,6 +23,7 @@
 #ifndef MPLAYER_AF_FORMAT_H
 #define MPLAYER_AF_FORMAT_H
 
+#include <stdbool.h>
 #include <sys/types.h>
 #include "config.h"
 #include "mpvcore/bstr.h"
@@ -64,9 +65,15 @@
 #define AF_FORMAT_F             (2<<9) // Foating point
 #define AF_FORMAT_POINT_MASK    (3<<9)
 
-#define AF_FORMAT_MASK          ((1<<11)-1)
+// Interleaving (planar formats have data for each channel in separate planes)
+#define AF_FORMAT_INTERLEAVED        (0<<11) // must be 0
+#define AF_FORMAT_PLANAR             (1<<11)
+#define AF_FORMAT_INTERLEAVING_MASK  (1<<11)
 
-// PREDEFINED formats
+#define AF_FORMAT_MASK          ((1<<12)-1)
+
+#define AF_INTP (AF_FORMAT_I|AF_FORMAT_PLANAR)
+#define AF_FLTP (AF_FORMAT_F|AF_FORMAT_PLANAR)
 
 // actual sample formats
 enum af_format {
@@ -100,6 +107,13 @@ enum af_format {
     AF_FORMAT_IEC61937_BE = (AF_FORMAT_S_IEC61937|AF_FORMAT_16BIT|AF_FORMAT_BE),
 
     AF_FORMAT_MPEG2     = (AF_FORMAT_S_MPEG2),
+
+    // Planar variants
+    AF_FORMAT_U8P       = (AF_INTP|AF_FORMAT_US|AF_FORMAT_8BIT|AF_FORMAT_NE),
+    AF_FORMAT_S16P      = (AF_INTP|AF_FORMAT_SI|AF_FORMAT_16BIT|AF_FORMAT_NE),
+    AF_FORMAT_S32P      = (AF_INTP|AF_FORMAT_US|AF_FORMAT_32BIT|AF_FORMAT_NE),
+    AF_FORMAT_FLOATP    = (AF_FLTP|AF_FORMAT_32BIT|AF_FORMAT_NE),
+    AF_FORMAT_DOUBLEP   = (AF_FLTP|AF_FORMAT_32BIT|AF_FORMAT_NE),
 
     // Native endian variants
     AF_FORMAT_U16       = AF_SELECT_LE_BE(AF_FORMAT_U16_LE, AF_FORMAT_U16_BE),
@@ -149,6 +163,10 @@ const char *af_fmt_to_str(int format);
 
 int af_fmt2bits(int format);
 int af_fmt_change_bits(int format, int bits);
+
+int af_fmt_to_planar(int format);
+int af_fmt_from_planar(int format);
+bool af_fmt_is_planar(int format);
 
 // Amount of bytes that contain audio of the given duration, aligned to frames.
 int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int samplerate);

@@ -23,7 +23,9 @@
 #include <string.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <assert.h>
 
+#include "mpvcore/mp_common.h"
 #include "audio/filter/af.h"
 
 int af_fmt2bits(int format)
@@ -62,6 +64,46 @@ int af_fmt_change_bits(int format, int bits)
     return af_fmt_is_valid(format) ? format : 0;
 }
 
+static const int planar_formats[][2] = {
+    {AF_FORMAT_U8P,     AF_FORMAT_U8},
+    {AF_FORMAT_S16P,    AF_FORMAT_S16},
+    {AF_FORMAT_S32P,    AF_FORMAT_S32},
+    {AF_FORMAT_FLOATP,  AF_FORMAT_FLOAT},
+    {AF_FORMAT_DOUBLEP, AF_FORMAT_DOUBLE},
+};
+
+// Return the planar format corresponding to the given format.
+// If the format is already planar, return it.
+// Return 0 if there's no equivalent.
+int af_fmt_to_planar(int format)
+{
+    for (int n = 0; n < MP_ARRAY_SIZE(planar_formats); n++) {
+        if (planar_formats[n][1] == format)
+            return planar_formats[n][0];
+        if (planar_formats[n][0] == format)
+            return format;
+    }
+    return 0;
+}
+
+// Return the interleaved format corresponding to the given format.
+// If the format is already interleaved, return it.
+// Always succeeds if format is actually planar; otherwise return 0.
+int af_fmt_from_planar(int format)
+{
+    for (int n = 0; n < MP_ARRAY_SIZE(planar_formats); n++) {
+        if (planar_formats[n][0] == format)
+            return planar_formats[n][1];
+    }
+    return format;
+}
+
+// false for interleaved and AF_FORMAT_UNKNOWN
+bool af_fmt_is_planar(int format)
+{
+    return !!(format & AF_FORMAT_PLANAR);
+}
+
 #define FMT(string, id)                                 \
     {string,            id},
 
@@ -87,6 +129,12 @@ const struct af_fmt_entry af_fmtstr_table[] = {
     FMT_ENDIAN("float",         AF_FORMAT_FLOAT)
     FMT_ENDIAN("double",        AF_FORMAT_DOUBLE)
 
+    FMT("u8p",                  AF_FORMAT_U8P)
+    FMT("s16p",                 AF_FORMAT_S16P)
+    FMT("s32p",                 AF_FORMAT_S32P)
+    FMT("floatp",               AF_FORMAT_FLOATP)
+    FMT("doublep",              AF_FORMAT_DOUBLEP)
+
     {0}
 };
 
@@ -111,6 +159,7 @@ const char *af_fmt_to_str(int format)
 
 int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int samplerate)
 {
+    assert(!af_fmt_is_planar(format));
     int bps      = (af_fmt2bits(format) / 8);
     int framelen = channels * bps;
     int bytes    = seconds  * bps * samplerate;
