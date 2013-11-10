@@ -144,6 +144,8 @@ static int init(struct ao *ao)
         return -1;
     }
 
+    ao->format = af_fmt_from_planar(ao->format);
+
     SDL_AudioSpec desired, obtained;
 
     switch (ao->format) {

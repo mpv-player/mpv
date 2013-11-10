@@ -261,6 +261,8 @@ static int init(struct ao *ao)
     fcntl(p->audio_fd, F_SETFD, FD_CLOEXEC);
 #endif
 
+    ao->format = af_fmt_from_planar(ao->format);
+
     if (AF_FORMAT_IS_AC3(ao->format)) {
         ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &ao->samplerate);
     }

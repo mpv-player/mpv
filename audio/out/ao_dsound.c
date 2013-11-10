@@ -388,7 +388,7 @@ static int init(struct ao *ao)
     WAVEFORMATEXTENSIBLE wformat;
     DSBUFFERDESC dsbpridesc;
     DSBUFFERDESC dsbdesc;
-    int format = ao->format;
+    int format = af_fmt_from_planar(ao->format);
     int rate = ao->samplerate;
 
     if (AF_FORMAT_IS_AC3(format))
