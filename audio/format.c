@@ -127,3 +127,9 @@ int af_str2fmt_short(bstr str)
     }
     return 0;
 }
+
+void af_fill_silence(void *dst, size_t bytes, int format)
+{
+    bool us = (format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_US;
+    memset(dst, us ? 0x80 : 0, bytes);
+}

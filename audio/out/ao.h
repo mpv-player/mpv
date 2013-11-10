@@ -103,6 +103,8 @@ void ao_reset(struct ao *ao);
 void ao_pause(struct ao *ao);
 void ao_resume(struct ao *ao);
 
+int ao_play_silence(struct ao *ao, int samples);
+
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map);
 bool ao_chmap_sel_get_def(struct ao *ao, const struct mp_chmap_sel *s,

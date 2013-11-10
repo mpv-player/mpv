@@ -508,16 +508,13 @@ static int play(struct ao *ao, void *data, int len, int flags)
 static void audio_resume(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    int fillcnt;
 #ifndef SNDCTL_DSP_RESET
     reset(ao);
 #endif
-    fillcnt = get_space(ao) - p->prepause_space;
-    if (fillcnt > 0 && !(ao->format & AF_FORMAT_SPECIAL_MASK)) {
-        void *silence = calloc(fillcnt, 1);
-        play(ao, silence, fillcnt, 0);
-        free(silence);
-    }
+    int fillframes = (get_space(ao) - p->prepause_space) /
+                     (af_fmt2bits(ao->format) / 8 * ao->channels.num);
+    if (fillframes > 0)
+        ao_play_silence(ao, fillframes);
 }
 
 // return: delay in seconds between first and last sample in buffer

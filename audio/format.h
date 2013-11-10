@@ -134,6 +134,9 @@ enum af_format {
     (AF_FORMAT_IS_AC3(fmt) ||      \
      ((fmt) & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_S_IEC61937)
 
+#define AF_FORMAT_IS_SPECIAL(fmt) \
+    ((fmt & AF_FORMAT_SPECIAL_MASK) != 0)
+
 struct af_fmt_entry {
     const char *name;
     int format;
@@ -151,5 +154,7 @@ int af_fmt_change_bits(int format, int bits);
 int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int samplerate);
 
 bool af_fmt_is_valid(int format);
+
+void af_fill_silence(void *dst, size_t bytes, int format);
 
 #endif /* MPLAYER_AF_FORMAT_H */

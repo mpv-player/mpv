@@ -250,6 +250,18 @@ void ao_resume(struct ao *ao)
         ao->driver->resume(ao);
 }
 
+int ao_play_silence(struct ao *ao, int samples)
+{
+    if (samples <= 0 || AF_FORMAT_IS_SPECIAL(ao->format))
+        return 0;
+    int s = ao->channels.num * (af_fmt2bits(ao->format) / 8);
+    char *p = talloc_size(NULL, samples * s);
+    af_fill_silence(p, samples * s, ao->format);
+    int r = ao_play(ao, p, samples * s, 0);
+    talloc_free(p);
+    return r;
+}
+
 bool ao_chmap_sel_adjust(struct ao *ao, const struct mp_chmap_sel *s,
                          struct mp_chmap *map)
 {

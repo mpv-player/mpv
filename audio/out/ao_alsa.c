@@ -78,7 +78,6 @@ struct priv {
     } while (0)
 
 static float get_delay(struct ao *ao);
-static int play(struct ao *ao, void *data, int len, int flags);
 static void uninit(struct ao *ao, bool immed);
 
 static void alsa_error_handler(const char *file, int line, const char *function,
@@ -612,11 +611,8 @@ static void audio_resume(struct ao *ao)
         MP_VERBOSE(ao, "resume not supported by hardware\n");
         err = snd_pcm_prepare(p->alsa);
         CHECK_ALSA_ERROR("pcm prepare error");
-        if (p->prepause_frames) {
-            void *silence = calloc(p->prepause_frames, p->bytes_per_sample);
-            play(ao, silence, p->prepause_frames * p->bytes_per_sample, 0);
-            free(silence);
-        }
+        if (p->prepause_frames)
+            ao_play_silence(ao, p->prepause_frames);
     }
 
 alsa_error: ;
