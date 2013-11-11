@@ -50,8 +50,6 @@ struct priv {
     int pcmhack;
     int aframesize;
     int aframecount;
-    int offset;
-    int offset_left;
     int64_t savepts;
     int framecount;
     int64_t lastpts;
@@ -270,9 +268,6 @@ out_takefirst:
 
     ac->savepts = MP_NOPTS_VALUE;
     ac->lastpts = MP_NOPTS_VALUE;
-    ac->offset = ac->stream->codec->sample_rate *
-                 encode_lavc_getoffset(ao->encode_lavc_ctx, ac->stream);
-    ac->offset_left = ac->offset;
 
     ao->untimed = true;
     ao->priv = ac;
@@ -451,7 +446,6 @@ static int play(struct ao *ao, void *data, int len, int flags)
     struct priv *ac = ao->priv;
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
     int bufpos = 0;
-    int64_t ptsoffset;
     void *paddingbuf = NULL;
     double nextpts;
     double pts = ao->pts;
@@ -540,63 +534,10 @@ static int play(struct ao *ao, void *data, int len, int flags)
         // Absurd, as this range MUST contain at least one multiple of B.
     }
 
-    ptsoffset = ac->offset;
-    // this basically just edits ao->apts for syncing purposes
-
-    if (ectx->options->copyts || ectx->options->rawts) {
-        // we do not send time sync data to the video side,
-        // but we always need the exact pts, even if zero
-    } else {
-        // here we must "simulate" the pts editing
-        // 1. if we have to skip stuff, we skip it
-        // 2. if we have to add samples, we add them
-        // 3. we must still adjust ptsoffset appropriately for AV sync!
-        // invariant:
-        // if no partial skipping is done, the first frame gets ao->apts passed as pts!
-
-        if (ac->offset_left < 0) {
-            if (ac->offset_left <= -len) {
-                // skip whole frame
-                ac->offset_left += len;
-                return len * ac->sample_size * ao->channels.num;
-            } else {
-                // skip part of this frame, buffer/encode the rest
-                bufpos -= ac->offset_left;
-                ptsoffset += ac->offset_left;
-                ac->offset_left = 0;
-            }
-        } else if (ac->offset_left > 0) {
-            // make a temporary buffer, filled with zeroes at the start
-            // (don't worry, only happens once)
-
-            paddingbuf = talloc_size(ac, ac->sample_size * ao->channels.num *
-                                         (ac->offset_left + len));
-            fill_with_padding(paddingbuf, ac->offset_left, ac->sample_size,
-                              ac->sample_padding);
-            data = (char *) paddingbuf + ac->sample_size * ao->channels.num *
-                                         ac->offset_left;
-            bufpos -= ac->offset_left; // yes, negative!
-            ptsoffset += ac->offset_left;
-            ac->offset_left = 0;
-
-            // now adjust the bufpos so the final value of bufpos is positive!
-            /*
-              int cnt = (len - bufpos) / ac->aframesize;
-              int finalbufpos = bufpos + cnt * ac->aframesize;
-            */
-            int finalbufpos = len - (len - bufpos) % ac->aframesize;
-            if (finalbufpos < 0) {
-                MP_WARN(ao, "cannot attain the "
-                       "exact requested audio sync; shifting by %d frames\n",
-                       -finalbufpos);
-                bufpos -= finalbufpos;
-            }
-        }
-    }
-
+    // Fix and apply the discontinuity pts offset.
     if (!ectx->options->rawts && ectx->options->copyts) {
         // fix the discontinuity pts offset
-        nextpts = pts + ptsoffset / (double) ao->samplerate;
+        nextpts = pts;
         if (ectx->discontinuity_pts_offset == MP_NOPTS_VALUE) {
             ectx->discontinuity_pts_offset = ectx->next_in_pts - nextpts;
         }
@@ -609,23 +550,27 @@ static int play(struct ao *ao, void *data, int len, int flags)
 
         outpts = pts + ectx->discontinuity_pts_offset;
     }
-    else
+    else {
         outpts = pts;
+    }
+
+    // Shift pts by the pts offset first.
+    outpts += encode_lavc_getoffset(ectx, ac->stream);
 
     while (len - bufpos >= ac->aframesize) {
         encode(ao,
-               outpts + (bufpos + ptsoffset) / (double) ao->samplerate + encode_lavc_getoffset(ectx, ac->stream),
+               outpts + bufpos / (double) ao->samplerate,
                (char *) data + ac->sample_size * bufpos * ao->channels.num);
         bufpos += ac->aframesize;
     }
 
     talloc_free(paddingbuf);
 
-    // calculate expected pts of next audio frame
-    ac->expected_next_pts = pts + (bufpos + ptsoffset) / (double) ao->samplerate;
+    // Calculate expected pts of next audio frame (input side).
+    ac->expected_next_pts = pts + bufpos / (double) ao->samplerate;
 
+    // Set next allowed input pts value (input side).
     if (!ectx->options->rawts && ectx->options->copyts) {
-        // set next allowed output pts value
         nextpts = ac->expected_next_pts + ectx->discontinuity_pts_offset;
         if (nextpts > ectx->next_in_pts)
             ectx->next_in_pts = nextpts;
