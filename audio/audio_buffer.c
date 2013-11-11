@@ -64,22 +64,6 @@ void mp_audio_buffer_get_format(struct mp_audio_buffer *ab,
     mp_audio_copy_config(out_fmt, ab->buffer);
 }
 
-// All integer parameters are in numbers of samples.
-static void copy_samples(struct mp_audio *dst, int dst_offset,
-                         struct mp_audio *src, int src_offset, int length)
-{
-    assert(mp_audio_config_equals(dst, src));
-    assert(length >= 0);
-    assert(dst_offset >= 0 && dst_offset + length <= dst->samples);
-    assert(src_offset >= 0 && src_offset + length <= src->samples);
-    assert(mp_audio_get_allocated_size(dst) >= dst->samples);
-    for (int n = 0; n < dst->num_planes; n++) {
-        memmove((char *)dst->planes[n] + dst_offset * dst->sstride,
-                (char *)src->planes[n] + src_offset * src->sstride,
-                length * dst->sstride);
-    }
-}
-
 // Append data to the end of the buffer.
 // If the buffer is not large enough, it is transparently resized.
 // For now always copies the data.
@@ -88,7 +72,7 @@ void mp_audio_buffer_append(struct mp_audio_buffer *ab, struct mp_audio *mpa)
     int offset = ab->buffer->samples;
     ab->buffer->samples += mpa->samples;
     mp_audio_realloc_min(ab->buffer, ab->buffer->samples);
-    copy_samples(ab->buffer, offset, mpa, 0, mpa->samples);
+    mp_audio_copy(ab->buffer, offset, mpa, 0, mpa->samples);
 }
 
 // Prepend silence to the start of the buffer.
@@ -98,7 +82,7 @@ void mp_audio_buffer_prepend_silence(struct mp_audio_buffer *ab, int samples)
     int oldlen = ab->buffer->samples;
     ab->buffer->samples += samples;
     mp_audio_realloc_min(ab->buffer, ab->buffer->samples);
-    copy_samples(ab->buffer, samples, ab->buffer, 0, oldlen);
+    mp_audio_copy(ab->buffer, samples, ab->buffer, 0, oldlen);
     mp_audio_fill_silence(ab->buffer, 0, samples);
 }
 
@@ -112,8 +96,8 @@ void mp_audio_buffer_peek(struct mp_audio_buffer *ab, struct mp_audio *out_mpa)
 void mp_audio_buffer_skip(struct mp_audio_buffer *ab, int samples)
 {
     assert(samples >= 0 && samples <= ab->buffer->samples);
-    copy_samples(ab->buffer, 0, ab->buffer, samples,
-                 ab->buffer->samples - samples);
+    mp_audio_copy(ab->buffer, 0, ab->buffer, samples,
+                  ab->buffer->samples - samples);
     ab->buffer->samples -= samples;
 }
 

@@ -60,4 +60,7 @@ int mp_audio_get_allocated_size(struct mp_audio *mpa);
 
 void mp_audio_fill_silence(struct mp_audio *mpa, int start, int length);
 
+void mp_audio_copy(struct mp_audio *dst, int dst_offset,
+                   struct mp_audio *src, int src_offset, int length);
+
 #endif

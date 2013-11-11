@@ -175,3 +175,20 @@ void mp_audio_fill_silence(struct mp_audio *mpa, int start, int length)
         memset((char *)mpa->planes[n] + offset, fillbyte, size);
     }
 }
+
+// All integer parameters are in samples.
+// dst and src can overlap.
+void mp_audio_copy(struct mp_audio *dst, int dst_offset,
+                   struct mp_audio *src, int src_offset, int length)
+{
+    assert(mp_audio_config_equals(dst, src));
+    assert(length >= 0);
+    assert(dst_offset >= 0 && dst_offset + length <= dst->samples);
+    assert(src_offset >= 0 && src_offset + length <= src->samples);
+
+    for (int n = 0; n < dst->num_planes; n++) {
+        memmove((char *)dst->planes[n] + dst_offset * dst->sstride,
+                (char *)src->planes[n] + src_offset * src->sstride,
+                length * dst->sstride);
+    }
+}
