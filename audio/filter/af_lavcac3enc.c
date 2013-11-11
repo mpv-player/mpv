@@ -189,18 +189,8 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
     else
         max_output_len = AC3_MAX_CODED_FRAME_SIZE * frame_num;
 
-    if (mp_audio_psize(af->data) < max_output_len) {
-        mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, "
-               "old len = %i, new len = %i\n", af->info->name,
-               mp_audio_psize(af->data), max_output_len);
-        free(af->data->planes[0]);
-        af->data->planes[0] = malloc(max_output_len);
-        if (!af->data->planes[0]) {
-            mp_msg(MSGT_AFILTER, MSGL_FATAL, "[libaf] Could not allocate memory \n");
-            return NULL;
-        }
-        af->data->samples = max_output_len / af->data->sstride;
-    }
+    mp_audio_realloc_min(af->data, max_output_len / af->data->sstride);
+    af->data->samples = max_output_len / af->data->sstride;
 
     l = af->data;           // Local data
     buf = l->planes[0];
