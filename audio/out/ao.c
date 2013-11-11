@@ -159,7 +159,9 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     talloc_free(chmap);
     if (ao->driver->init(ao) < 0)
         goto error;
-    ao->sstride = ao->channels.num * af_fmt2bits(ao->format) / 8;
+    ao->sstride = af_fmt2bits(ao->format) / 8;
+    if (!af_fmt_is_planar(ao->format))
+        ao->sstride *= ao->channels.num;
     ao->bps = ao->samplerate * ao->sstride;
     return ao;
 error:
