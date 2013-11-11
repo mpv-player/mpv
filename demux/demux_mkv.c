@@ -1355,6 +1355,7 @@ static struct mkv_audio_tag {
     { MKV_A_DTS,       0, 0x2001 },
     { MKV_A_PCM,       0, 0x0001 },
     { MKV_A_PCM_BE,    0, 0x0001 },
+    { MKV_A_PCM_FLT,   0, 0x0003 },
     { MKV_A_AAC_2MAIN, 0, MP_FOURCC('M', 'P', '4', 'A') },
     { MKV_A_AAC_2LC,   1, MP_FOURCC('M', 'P', '4', 'A') },
     { MKV_A_AAC_2SSR,  0, MP_FOURCC('M', 'P', '4', 'A') },
@@ -1464,10 +1465,10 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         free(sh_a->wf);
         sh_a->wf = NULL;
     } else if (track->a_formattag == 0x0001) {  /* PCM || PCM_BE */
-        sh_a->wf->nAvgBytesPerSec = sh_a->channels.num * sh_a->samplerate * 2;
-        sh_a->wf->nBlockAlign = sh_a->wf->nAvgBytesPerSec;
         if (!strcmp(track->codec_id, MKV_A_PCM_BE))
             sh_a->format = MP_FOURCC('t', 'w', 'o', 's');
+    } else if (track->a_formattag == 0x0003) {  /* PCM_FLT */
+        /* ok */
     } else if (!strcmp(track->codec_id, MKV_A_QDMC)
                || !strcmp(track->codec_id, MKV_A_QDMC2)) {
         sh_a->wf->nAvgBytesPerSec = 16000;

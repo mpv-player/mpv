@@ -40,6 +40,7 @@
 #define MKV_A_MP3        "A_MPEG/L3"
 #define MKV_A_PCM        "A_PCM/INT/LIT"
 #define MKV_A_PCM_BE     "A_PCM/INT/BIG"
+#define MKV_A_PCM_FLT    "A_PCM/FLOAT/IEEE"
 #define MKV_A_VORBIS     "A_VORBIS"
 #define MKV_A_OPUS       "A_OPUS"
 #define MKV_A_OPUS_EXP   "A_OPUS/EXPERIMENTAL"

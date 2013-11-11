@@ -68,12 +68,10 @@ const m_option_t ad_lavc_decode_opts_conf[] = {
 struct pcm_map
 {
     int tag;
-    const char *codecs[5]; // {any, 1byte, 2bytes, 3bytes, 4bytes}
+    const char *codecs[6]; // {any, 1byte, 2bytes, 3bytes, 4bytes, 8bytes}
 };
 
-// NOTE: some of these are needed to make rawaudio with demux_mkv and others
-//       work. ffmpeg does similar mapping internally, not part of the public
-//       API. Some of these might be dead leftovers for demux_mov support.
+// NOTE: these are needed to make rawaudio with demux_mkv work.
 static const struct pcm_map tag_map[] = {
     // Microsoft PCM
     {0x0,           {NULL, "pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"}},
@@ -81,26 +79,12 @@ static const struct pcm_map tag_map[] = {
     // MS PCM, Extended
     {0xfffe,        {NULL, "pcm_u8", "pcm_s16le", "pcm_s24le", "pcm_s32le"}},
     // IEEE float
-    {0x3,           {"pcm_f32le"}},
+    {0x3,           {"pcm_f32le", [5] = "pcm_f64le"}},
     // 'raw '
     {0x20776172,    {"pcm_s16be", [1] = "pcm_u8"}},
-    // 'twos'/'sowt'
-    {0x736F7774,    {"pcm_s16be", [1] = "pcm_s8"}},
-    {0x74776F73,    {"pcm_s16be", [1] = "pcm_s8"}},
-    // 'fl32'/'FL32'
-    {0x32336c66,    {"pcm_f32be"}},
-    {0x32334C46,    {"pcm_f32be"}},
-    // '23lf'/'lpcm'
-    {0x666c3332,    {"pcm_f32le"}},
-    {0x6D63706C,    {"pcm_f32le"}},
-    // 'in24', bigendian int24
-    {0x34326e69,    {"pcm_s24be"}},
-    // '42ni', little endian int24, MPlayer internal fourCC
-    {0x696e3234,    {"pcm_s24le"}},
-    // 'in32', bigendian int32
-    {0x32336e69,    {"pcm_s32be"}},
-    // '23ni', little endian int32, MPlayer internal fourCC
-    {0x696e3332,    {"pcm_s32le"}},
+    // 'twos', used by demux_mkv.c internally
+    {MKTAG('t', 'w', 'o', 's'),
+                    {NULL, "pcm_s8", "pcm_s16be", "pcm_s24be", "pcm_s32be"}},
     {-1},
 };
 
@@ -123,6 +107,8 @@ static const struct pcm_map af_map[] = {
     {AF_FORMAT_S32_BE,          {"pcm_s32be"}},
     {AF_FORMAT_FLOAT_LE,        {"pcm_f32le"}},
     {AF_FORMAT_FLOAT_BE,        {"pcm_f32be"}},
+    {AF_FORMAT_DOUBLE_LE,       {"pcm_f64le"}},
+    {AF_FORMAT_DOUBLE_BE,       {"pcm_f64be"}},
     {-1},
 };
 
@@ -130,11 +116,13 @@ static const char *find_pcm_decoder(const struct pcm_map *map, int format,
                                     int bits_per_sample)
 {
     int bytes = (bits_per_sample + 7) / 8;
+    if (bytes == 8)
+        bytes = 5; // 64 bit entry
     for (int n = 0; map[n].tag != -1; n++) {
         const struct pcm_map *entry = &map[n];
         if (entry->tag == format) {
             const char *dec = NULL;
-            if (bytes >= 1 && bytes <= 4)
+            if (bytes >= 1 && bytes <= 5)
                 dec = entry->codecs[bytes];
             if (!dec)
                 dec = entry->codecs[0];

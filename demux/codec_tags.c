@@ -132,7 +132,6 @@ static const struct mp_codec_tag mp_audio_codec_tags[] = {
     {MKTAG('B', 'P', 'C', 'M'), "pcm_bluray"},
     {MKTAG('P', 'L', 'X', 'F'), "pcm_lxf"},
     {MKTAG('T', 'W', 'I', '2'), "twinvq"},
-    {0x20776172,                "pcm"}, // demux_mpg.c dvdpcm
     {0},
 };
 
