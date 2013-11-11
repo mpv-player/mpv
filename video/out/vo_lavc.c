@@ -410,7 +410,9 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
             // we will ONLY encode this frame if it can be encoded at at least
             // vc->mindeltapts after the last encoded frame!
             int64_t skipframes =
-                vc->lastencodedipts + vc->mindeltapts - vc->lastipts;
+                (vc->lastencodedipts == MP_NOPTS_VALUE)
+                    ? 0
+                    : vc->lastencodedipts + vc->mindeltapts - vc->lastipts;
             if (skipframes < 0)
                 skipframes = 0;
 
