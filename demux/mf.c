@@ -43,138 +43,132 @@
 #include "mf.h"
 
 double mf_fps = 25.0;
-char * mf_type = NULL; //"jpg";
+char *mf_type = NULL;  //"jpg";
 
-mf_t* open_mf_pattern(char * filename)
+mf_t *open_mf_pattern(char *filename)
 {
 #if defined(HAVE_GLOB) || defined(__MINGW32__)
- glob_t        gg;
- int           i;
- char        * fname = NULL;
- mf_t        * mf;
- int           error_count = 0;
- int	       count = 0;
+    glob_t gg;
+    char *fname = NULL;
+    mf_t *mf;
+    int error_count = 0;
+    int count = 0;
 
- mf=calloc( 1,sizeof( mf_t ) );
+    mf = calloc(1, sizeof(mf_t));
 
- if( filename[0] == '@' )
-  {
-   FILE *lst_f=fopen(filename + 1,"r");
-   if ( lst_f )
-    {
-     fname=malloc(MP_PATH_MAX);
-     while ( fgets( fname,MP_PATH_MAX,lst_f ) )
-      {
-       /* remove spaces from end of fname */
-       char *t=fname + strlen( fname ) - 1;
-       while ( t > fname && isspace( *t ) ) *(t--)=0;
-       if ( !mp_path_exists( fname ) )
-        {
-         mp_msg( MSGT_STREAM,MSGL_V,"[mf] file not found: '%s'\n",fname );
+    if (filename[0] == '@') {
+        FILE *lst_f = fopen(filename + 1, "r");
+        if (lst_f) {
+            fname = malloc(MP_PATH_MAX);
+            while (fgets(fname, MP_PATH_MAX, lst_f)) {
+                /* remove spaces from end of fname */
+                char *t = fname + strlen(fname) - 1;
+                while (t > fname && isspace(*t))
+                    *(t--) = 0;
+                if (!mp_path_exists(fname)) {
+                    mp_msg(MSGT_STREAM, MSGL_V, "[mf] file not found: '%s'\n",
+                           fname);
+                } else {
+                    mf->names = realloc(mf->names,
+                                        (mf->nr_of_files + 1) * sizeof(char *));
+                    mf->names[mf->nr_of_files] = strdup(fname);
+                    mf->nr_of_files++;
+                }
+            }
+            fclose(lst_f);
+
+            mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] number of files: %d\n",
+                   mf->nr_of_files);
+            goto exit_mf;
         }
-        else
-        {
-         mf->names=realloc( mf->names,( mf->nr_of_files + 1 ) * sizeof( char* ) );
-         mf->names[mf->nr_of_files]=strdup( fname );
-         mf->nr_of_files++;
+        mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] %s is not indirect filelist\n",
+               filename + 1);
+    }
+
+    if (strchr(filename, ',')) {
+        mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] filelist: %s\n", filename);
+        bstr bfilename = bstr0(filename);
+
+        while (bfilename.len) {
+            bstr bfname;
+            bstr_split_tok(bfilename, ",", &bfname, &bfilename);
+            char *fname2 = bstrdup0(NULL, bfname);
+
+            if (!mp_path_exists(fname2))
+                mp_msg(MSGT_STREAM, MSGL_V, "[mf] file not found: '%s'\n",
+                       fname2);
+            else {
+                mf->names =
+                    realloc(mf->names, (mf->nr_of_files + 1) * sizeof(char *));
+                mf->names[mf->nr_of_files] = strdup(fname2);
+                mf->nr_of_files++;
+            }
+            talloc_free(fname2);
         }
-      }
-      fclose( lst_f );
+        mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] number of files: %d\n",
+               mf->nr_of_files);
 
-      mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files );
-      goto exit_mf;
+        goto exit_mf;
     }
-    mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] %s is not indirect filelist\n",filename+1 );
-  }
 
- if( strchr( filename,',') )
-  {
-   mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] filelist: %s\n",filename );
-   bstr bfilename = bstr0(filename);
+    fname = malloc(strlen(filename) + 32);
 
-   while (bfilename.len)
-    {
-     bstr bfname;
-     bstr_split_tok(bfilename, ",", &bfname, &bfilename);
-     char *fname2 = bstrdup0(NULL, bfname);
+    if (!strchr(filename, '%')) {
+        strcpy(fname, filename);
+        if (!strchr(filename, '*'))
+            strcat(fname, "*");
 
-     if ( !mp_path_exists( fname2 ) )
-      {
-       mp_msg( MSGT_STREAM,MSGL_V,"[mf] file not found: '%s'\n",fname2 );
-      }
-      else
-      {
-       mf->names=realloc( mf->names,( mf->nr_of_files + 1 ) * sizeof( char* ) );
-       mf->names[mf->nr_of_files] = strdup(fname2);
-//       mp_msg( MSGT_STREAM,MSGL_V,"[mf] added file %d.: %s\n",mf->nr_of_files,mf->names[mf->nr_of_files] );
-       mf->nr_of_files++;
-      }
-      talloc_free(fname2);
+        mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] search expr: %s\n", fname);
+
+        if (glob(fname, 0, NULL, &gg)) {
+            free(mf);
+            free(fname);
+            return NULL;
+        }
+
+        mf->nr_of_files = 0;
+        mf->names = calloc(gg.gl_pathc, sizeof(char *));
+
+        for (int i = 0; i < gg.gl_pathc; i++) {
+            if (mp_path_isdir(gg.gl_pathv[i]))
+                continue;
+            mf->names[mf->nr_of_files] = strdup(gg.gl_pathv[i]);
+            mf->nr_of_files++;
+        }
+        mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] number of files: %d\n",
+               mf->nr_of_files);
+        globfree(&gg);
+        goto exit_mf;
     }
-   mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files );
 
-   goto exit_mf;
-  }
+    mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] search expr: %s\n", filename);
 
- fname=malloc( strlen( filename ) + 32 );
-
- if ( !strchr( filename,'%' ) )
-  {
-   strcpy( fname,filename );
-   if ( !strchr( filename,'*' ) ) strcat( fname,"*" );
-
-   mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] search expr: %s\n",fname );
-
-   if ( glob( fname,0,NULL,&gg ) )
-    { free( mf ); free( fname ); return NULL; }
-
-   mf->nr_of_files=0;
-   mf->names=calloc( gg.gl_pathc, sizeof( char* ) );
-
-   for( i=0;i < gg.gl_pathc;i++ )
-    {
-     if (mp_path_isdir(gg.gl_pathv[i]))
-       continue;
-     mf->names[mf->nr_of_files]=strdup( gg.gl_pathv[i] );
-     mf->nr_of_files++;
-//     mp_msg( MSGT_STREAM,MSGL_DBG2,"[mf] added file %d.: %s\n",i,mf->names[i] );
+    while (error_count < 5) {
+        sprintf(fname, filename, count++);
+        if (!mp_path_exists(fname)) {
+            error_count++;
+            mp_msg(MSGT_STREAM, MSGL_V, "[mf] file not found: '%s'\n", fname);
+        } else {
+            mf->names =
+                realloc(mf->names, (mf->nr_of_files + 1) * sizeof(char *));
+            mf->names[mf->nr_of_files] = strdup(fname);
+            mf->nr_of_files++;
+        }
     }
-   mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files);
-   globfree( &gg );
-   goto exit_mf;
-  }
 
- mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] search expr: %s\n",filename );
-
- while ( error_count < 5 )
-  {
-   sprintf( fname,filename,count++ );
-   if ( !mp_path_exists( fname ) )
-    {
-     error_count++;
-     mp_msg( MSGT_STREAM,MSGL_V,"[mf] file not found: '%s'\n",fname );
-    }
-    else
-    {
-     mf->names=realloc( mf->names,( mf->nr_of_files + 1 ) * sizeof( char* ) );
-     mf->names[mf->nr_of_files]=strdup( fname );
-//     mp_msg( MSGT_STREAM,MSGL_V,"[mf] added file %d.: %s\n",mf->nr_of_files,mf->names[mf->nr_of_files] );
-     mf->nr_of_files++;
-    }
-  }
-
- mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files );
+    mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] number of files: %d\n",
+           mf->nr_of_files);
 
 exit_mf:
- free( fname );
- return mf;
+    free(fname);
+    return mf;
 #else
- mp_msg(MSGT_STREAM,MSGL_FATAL,"[mf] mf support is disabled on your os\n");
- return 0;
+    mp_msg(MSGT_STREAM, MSGL_FATAL, "[mf] mf support is disabled on your os\n");
+    return 0;
 #endif
 }
 
-mf_t* open_mf_single(char * filename)
+mf_t *open_mf_single(char *filename)
 {
     mf_t *mf = calloc(1, sizeof(mf_t));
     mf->nr_of_files = 1;

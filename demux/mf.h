@@ -22,14 +22,13 @@
 extern double mf_fps;
 extern char * mf_type;
 
-typedef struct
-{
- struct sh_video *sh;
- int curr_frame;
- int nr_of_files;
- char ** names;
- // optional
- struct stream **streams;
+typedef struct mf {
+    struct sh_video *sh;
+    int curr_frame;
+    int nr_of_files;
+    char ** names;
+    // optional
+    struct stream **streams;
 } mf_t;
 
 mf_t* open_mf_pattern(char * filename);

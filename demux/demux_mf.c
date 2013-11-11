@@ -34,7 +34,7 @@
 #include "stheader.h"
 #include "mf.h"
 
-#define MF_MAX_FILE_SIZE (1024*1024*256)
+#define MF_MAX_FILE_SIZE (1024 * 1024 * 256)
 
 static void free_mf(mf_t *mf)
 {
@@ -49,14 +49,18 @@ static void free_mf(mf_t *mf)
 
 static void demux_seek_mf(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
-  mf_t * mf = (mf_t *)demuxer->priv;
-  int newpos = (flags & SEEK_ABSOLUTE)?0:mf->curr_frame - 1;
+    mf_t *mf = demuxer->priv;
+    int newpos = (flags & SEEK_ABSOLUTE) ? 0 : mf->curr_frame - 1;
 
-  if ( flags & SEEK_FACTOR ) newpos+=rel_seek_secs*(mf->nr_of_files - 1);
-   else newpos+=rel_seek_secs * mf->sh->fps;
-  if ( newpos < 0 ) newpos=0;
-  if( newpos >= mf->nr_of_files) newpos=mf->nr_of_files - 1;
-  mf->curr_frame=newpos;
+    if (flags & SEEK_FACTOR)
+        newpos += rel_seek_secs * (mf->nr_of_files - 1);
+    else
+        newpos += rel_seek_secs * mf->sh->fps;
+    if (newpos < 0)
+        newpos = 0;
+    if (newpos >= mf->nr_of_files)
+        newpos = mf->nr_of_files - 1;
+    mf->curr_frame = newpos;
 }
 
 // return value:
@@ -101,52 +105,52 @@ static int demux_mf_fill_buffer(demuxer_t *demuxer)
 // map file extension/type to a codec name
 
 static const struct {
-  const char *type;
-  const char *codec;
+    const char *type;
+    const char *codec;
 } type2format[] = {
-  { "bmp",  "bmp" },
-  { "dpx",  "dpx" },
-  { "j2c",  "jpeg2000" },
-  { "j2k",  "jpeg2000" },
-  { "jp2",  "jpeg2000" },
-  { "jpc",  "jpeg2000" },
-  { "jpeg", "mjpeg" },
-  { "jpg",  "mjpeg" },
-  { "jps",  "mjpeg" },
-  { "jls",  "ljpeg" },
-  { "thm",  "mjpeg" },
-  { "db",   "mjpeg" },
-  { "pcx",  "pcx" },
-  { "png",  "png" },
-  { "pns",  "png" },
-  { "ptx",  "ptx" },
-  { "tga",  "targa" },
-  { "tif",  "tiff" },
-  { "tiff", "tiff" },
-  { "sgi",  "sgi" },
-  { "sun",  "sunrast" },
-  { "ras",  "sunrast" },
-  { "rs",   "sunrast" },
-  { "ra",   "sunrast" },
-  { "im1",  "sunrast" },
-  { "im8",  "sunrast" },
-  { "im24",  "sunrast" },
-  { "im32",  "sunrast" },
-  { "sunras",  "sunrast" },
-  { "xbm",  "xbm" },
-  { "pam",  "pam" },
-  { "pbm",  "pbm" },
-  { "pgm",  "pgm" },
-  { "pgmyuv",  "pgmyuv" },
-  { "ppm",  "ppm" },
-  { "pnm",  "ppm" },
-  { "gif",  "gif" }, // usually handled by demux_lavf
-  { "pix",  "brender_pix" },
-  { "exr",  "exr" },
-  { "pic",  "pictor" },
-  { "xface",  "xface" },
-  { "xwd",  "xwd" },
-  {0}
+    { "bmp",            "bmp" },
+    { "dpx",            "dpx" },
+    { "j2c",            "jpeg2000" },
+    { "j2k",            "jpeg2000" },
+    { "jp2",            "jpeg2000" },
+    { "jpc",            "jpeg2000" },
+    { "jpeg",           "mjpeg" },
+    { "jpg",            "mjpeg" },
+    { "jps",            "mjpeg" },
+    { "jls",            "ljpeg" },
+    { "thm",            "mjpeg" },
+    { "db",             "mjpeg" },
+    { "pcx",            "pcx" },
+    { "png",            "png" },
+    { "pns",            "png" },
+    { "ptx",            "ptx" },
+    { "tga",            "targa" },
+    { "tif",            "tiff" },
+    { "tiff",           "tiff" },
+    { "sgi",            "sgi" },
+    { "sun",            "sunrast" },
+    { "ras",            "sunrast" },
+    { "rs",             "sunrast" },
+    { "ra",             "sunrast" },
+    { "im1",            "sunrast" },
+    { "im8",            "sunrast" },
+    { "im24",           "sunrast" },
+    { "im32",           "sunrast" },
+    { "sunras",         "sunrast" },
+    { "xbm",            "xbm" },
+    { "pam",            "pam" },
+    { "pbm",            "pbm" },
+    { "pgm",            "pgm" },
+    { "pgmyuv",         "pgmyuv" },
+    { "ppm",            "ppm" },
+    { "pnm",            "ppm" },
+    { "gif",            "gif" }, // usually handled by demux_lavf
+    { "pix",            "brender_pix" },
+    { "exr",            "exr" },
+    { "pic",            "pictor" },
+    { "xface",          "xface" },
+    { "xwd",            "xwd" },
+    {0}
 };
 
 static const char *probe_format(mf_t *mf, enum demux_check check)
@@ -167,7 +171,7 @@ static const char *probe_format(mf_t *mf, enum demux_check check)
         if (!mf_type) {
             mp_msg(MSGT_DEMUX, MSGL_ERR,
                    "[demux_mf] file type was not set! (try --mf-type=ext)\n");
-        } else  {
+        } else {
             mp_msg(MSGT_DEMUX, MSGL_ERR,
                    "[demux_mf] --mf-type set to an unknown codec!\n");
         }
@@ -175,67 +179,68 @@ static const char *probe_format(mf_t *mf, enum demux_check check)
     return NULL;
 }
 
-static int demux_open_mf(demuxer_t* demuxer, enum demux_check check)
+static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
 {
-  sh_video_t   *sh_video = NULL;
-  mf_t *mf;
+    sh_video_t *sh_video = NULL;
+    mf_t *mf;
 
-  if (strncmp(demuxer->stream->url, "mf://", 5) == 0 &&
-      demuxer->stream->type == STREAMTYPE_MF)
-  {
-    mf = open_mf_pattern(demuxer->stream->url + 5);
-  } else {
-    mf = open_mf_single(demuxer->stream->url);
-    mf->streams = calloc(1, sizeof(struct stream *));
-    mf->streams[0] = demuxer->stream;
-  }
+    if (strncmp(demuxer->stream->url, "mf://", 5) == 0 &&
+        demuxer->stream->type == STREAMTYPE_MF)
+        mf = open_mf_pattern(demuxer->stream->url + 5);
+    else {
+        mf = open_mf_single(demuxer->stream->url);
+        mf->streams = calloc(1, sizeof(struct stream *));
+        mf->streams[0] = demuxer->stream;
+    }
 
-  if (!mf || mf->nr_of_files < 1)
-    goto error;
+    if (!mf || mf->nr_of_files < 1)
+        goto error;
 
-  const char *codec = probe_format(mf, check);
-  if (!codec)
-    goto error;
+    const char *codec = probe_format(mf, check);
+    if (!codec)
+        goto error;
 
-  mf->curr_frame = 0;
+    mf->curr_frame = 0;
 
-  // create a new video stream header
-  struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
-  sh_video = sh->video;
+    // create a new video stream header
+    struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
+    sh_video = sh->video;
 
-  sh_video->gsh->codec = codec;
-  sh_video->disp_w = 0;
-  sh_video->disp_h = 0;
-  sh_video->fps = mf_fps;
+    sh_video->gsh->codec = codec;
+    sh_video->disp_w = 0;
+    sh_video->disp_h = 0;
+    sh_video->fps = mf_fps;
 
-  mf->sh = sh_video;
-  demuxer->priv=(void*)mf;
-  demuxer->seekable = true;
+    mf->sh = sh_video;
+    demuxer->priv = (void *)mf;
+    demuxer->seekable = true;
 
-  return 0;
+    return 0;
 
 error:
-  free_mf(mf);
-  return -1;
+    free_mf(mf);
+    return -1;
 }
 
-static void demux_close_mf(demuxer_t* demuxer) {
-  mf_t *mf = demuxer->priv;
+static void demux_close_mf(demuxer_t *demuxer)
+{
+    mf_t *mf = demuxer->priv;
 
-  free_mf(mf);
+    free_mf(mf);
 }
 
-static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg) {
-  mf_t *mf = (mf_t *)demuxer->priv;
+static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg)
+{
+    mf_t *mf = demuxer->priv;
 
-  switch(cmd) {
+    switch (cmd) {
     case DEMUXER_CTRL_GET_TIME_LENGTH:
-      *((double *)arg) = (double)mf->nr_of_files / mf->sh->fps;
-      return DEMUXER_CTRL_OK;
+        *((double *)arg) = (double)mf->nr_of_files / mf->sh->fps;
+        return DEMUXER_CTRL_OK;
 
     default:
-      return DEMUXER_CTRL_NOTIMPL;
-  }
+        return DEMUXER_CTRL_NOTIMPL;
+    }
 }
 
 const demuxer_desc_t demuxer_desc_mf = {
