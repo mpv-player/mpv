@@ -30,7 +30,7 @@ void mp_audio_buffer_get_format(struct mp_audio_buffer *ab,
                                 struct mp_audio *out_fmt);
 void mp_audio_buffer_append(struct mp_audio_buffer *ab, struct mp_audio *mpa);
 void mp_audio_buffer_prepend_silence(struct mp_audio_buffer *ab, int samples);
-void mp_audio_buffer_peek(struct mp_audio_buffer *ab, struct mp_audio *mpa);
+void mp_audio_buffer_peek(struct mp_audio_buffer *ab, struct mp_audio *out_mpa);
 void mp_audio_buffer_skip(struct mp_audio_buffer *ab, int samples);
 void mp_audio_buffer_clear(struct mp_audio_buffer *ab);
 int mp_audio_buffer_samples(struct mp_audio_buffer *ab);

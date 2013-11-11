@@ -103,9 +103,9 @@ void mp_audio_buffer_prepend_silence(struct mp_audio_buffer *ab, int samples)
 }
 
 // Get the start of the current readable buffer.
-void mp_audio_buffer_peek(struct mp_audio_buffer *ab, struct mp_audio *mpa)
+void mp_audio_buffer_peek(struct mp_audio_buffer *ab, struct mp_audio *out_mpa)
 {
-    *mpa = *ab->buffer;
+    *out_mpa = *ab->buffer;
 }
 
 // Skip leading samples. (Used with mp_audio_buffer_peek() to read data.)
