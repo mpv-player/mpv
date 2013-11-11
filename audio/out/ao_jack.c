@@ -4,6 +4,8 @@
  * Copyleft 2001 by Felix Bünemann (atmosfear@users.sf.net)
  * and Reimar Döffinger (Reimar.Doeffinger@stud.uni-karlsruhe.de)
  *
+ * Copyleft 2013 by William Light <wrl@illest.net> for the mpv project
+ *
  * This file is part of MPlayer.
  *
  * MPlayer is free software; you can redistribute it and/or modify
@@ -40,15 +42,17 @@
 
 //! size of one chunk, if this is too small MPlayer will start to "stutter"
 //! after a short time of playback
-#define CHUNK_SIZE (24 * 1024)
+#define CHUNK_SIZE (8 * 1024)
 //! number of "virtual" chunks the buffer consists of
 #define NUM_CHUNKS 8
 
+struct port_ring {
+    jack_port_t *port;
+    struct mp_ring *ring;
+};
+
 struct priv {
-    jack_port_t * ports[MP_NUM_CHANNELS];
-    int num_ports; // Number of used ports == number of channels
     jack_client_t *client;
-    int outburst;
     float jack_latency;
     char *cfg_port;
     char *cfg_client_name;
@@ -57,64 +61,13 @@ struct priv {
     int autostart;
     int stdlayout;
     volatile int paused;
-    volatile int underrun; // signals if an underrun occured
+    volatile int underrun;
     volatile float callback_interval;
     volatile float callback_time;
-    struct mp_ring *ring; // buffer for audio data
+
+    int num_ports;
+    struct port_ring ports[MP_NUM_CHANNELS];
 };
-
-static void silence(float **bufs, int cnt, int num_bufs);
-
-struct deinterleave {
-    float **bufs;
-    int num_bufs;
-    int cur_buf;
-    int pos;
-};
-
-static void deinterleave(void *info, void *src, int len)
-{
-    struct deinterleave *di = info;
-    float *s = src;
-    int i;
-    len /= sizeof(float);
-    for (i = 0; i < len; i++) {
-        di->bufs[di->cur_buf++][di->pos] = s[i];
-        if (di->cur_buf >= di->num_bufs) {
-            di->cur_buf = 0;
-            di->pos++;
-        }
-    }
-}
-
-/**
- * \brief read data from buffer and splitting it into channels
- * \param bufs num_bufs float buffers, each will contain the data of one channel
- * \param cnt number of samples to read per channel
- * \param num_bufs number of channels to split the data into
- * \return number of samples read per channel, equals cnt unless there was too
- *         little data in the buffer
- *
- * Assumes the data in the buffer is of type float, the number of bytes
- * read is res * num_bufs * sizeof(float), where res is the return value.
- * If there is not enough data in the buffer remaining parts will be filled
- * with silence.
- */
-static int read_buffer(struct mp_ring *ring, float **bufs, int cnt, int num_bufs)
-{
-    struct deinterleave di = {
-        bufs, num_bufs, 0, 0
-    };
-    int buffered = mp_ring_buffered(ring);
-    if (cnt * sizeof(float) * num_bufs > buffered) {
-        silence(bufs, cnt, num_bufs);
-        cnt = buffered / sizeof(float) / num_bufs;
-    }
-    mp_ring_read_cb(ring, &di, cnt * num_bufs * sizeof(float), deinterleave);
-    return cnt;
-}
-
-// end ring buffer stuff
 
 /**
  * \brief fill the buffers with silence
@@ -122,11 +75,35 @@ static int read_buffer(struct mp_ring *ring, float **bufs, int cnt, int num_bufs
  * \param cnt number of samples in each buffer
  * \param num_bufs number of buffers
  */
-static void silence(float **bufs, int cnt, int num_bufs)
+static void
+silence(float *buf, jack_nframes_t nframes)
 {
-    int i;
-    for (i = 0; i < num_bufs; i++)
-        memset(bufs[i], 0, cnt * sizeof(float));
+    memset(buf, 0, nframes * sizeof(*buf));
+}
+
+static int
+process_port(struct ao *ao, struct port_ring *pr, jack_nframes_t nframes)
+{
+    struct priv *p = ao->priv;
+    int buffered;
+    float *buf;
+
+    buf = jack_port_get_buffer(pr->port, nframes);
+
+    if (p->paused || p->underrun) {
+        silence(buf, nframes);
+        return 0;
+    }
+
+    buffered = mp_ring_buffered(pr->ring) / sizeof(float);
+    if (buffered < nframes) {
+        mp_ring_read(pr->ring, (void *) buf, buffered * sizeof(float));
+        silence(&buf[buffered], nframes - buffered);
+        return 1;
+    }
+
+    mp_ring_read(pr->ring, (void *) buf, nframes * sizeof(float));
+    return 0;
 }
 
 /**
@@ -137,18 +114,23 @@ static void silence(float **bufs, int cnt, int num_bufs)
  *
  * Write silence into buffers if paused or an underrun occured
  */
-static int outputaudio(jack_nframes_t nframes, void *arg)
+static int
+process(jack_nframes_t nframes, void *arg)
 {
     struct ao *ao = arg;
     struct priv *p = ao->priv;
-    float *bufs[MP_NUM_CHANNELS];
-    int i;
-    for (i = 0; i < p->num_ports; i++)
-        bufs[i] = jack_port_get_buffer(p->ports[i], nframes);
-    if (p->paused || p->underrun || !p->ring)
-        silence(bufs, nframes, p->num_ports);
-    else if (read_buffer(p->ring, bufs, nframes, p->num_ports) < nframes)
+    int i, underrun;
+
+    underrun = 0;
+
+    for (i = 0; i < p->num_ports; i++) {
+        if (process_port(ao, &p->ports[i], nframes))
+            underrun = 1;
+    }
+
+    if (underrun)
         p->underrun = 1;
+
     if (p->estimate) {
         float now = mp_time_us() / 1000000.0;
         float diff = p->callback_time + p->callback_interval - now;
@@ -158,6 +140,7 @@ static int outputaudio(jack_nframes_t nframes, void *arg)
             p->callback_time = now;
         p->callback_interval = (float)nframes / (float)ao->samplerate;
     }
+
     return 0;
 }
 
@@ -182,9 +165,8 @@ connect_to_outports(struct ao *ao)
     }
 
     for (i = 0; i < p->num_ports && matching_ports[i]; i++) {
-        if (jack_connect(p->client, jack_port_name(p->ports[i]),
-                         matching_ports[i]))
-        {
+        if (jack_connect(p->client, jack_port_name(p->ports[i].port),
+                         matching_ports[i])) {
             MP_FATAL(ao, "connecting failed\n");
             goto err_connect;
         }
@@ -203,20 +185,23 @@ static int
 create_ports(struct ao *ao, int nports)
 {
     struct priv *p = ao->priv;
+    struct port_ring *pr;
+    char pname[30];
     int i;
 
-    /* register our output ports */
     for (i = 0; i < nports; i++) {
-        char pname[30];
-        snprintf(pname, sizeof(pname), "out_%d", i);
-        p->ports[i] =
-            jack_port_register(p->client, pname, JACK_DEFAULT_AUDIO_TYPE,
-                               JackPortIsOutput, 0);
+        pr = &p->ports[i];
 
-        if (!p->ports[i]) {
+        snprintf(pname, sizeof(pname), "out_%d", i);
+        pr->port = jack_port_register(p->client, pname, JACK_DEFAULT_AUDIO_TYPE,
+                                      JackPortIsOutput, 0);
+
+        if (!pr->port) {
             MP_FATAL(ao, "not enough ports available\n");
             goto err_port_register;
         }
+
+        pr->ring = mp_ring_new(p, NUM_CHUNKS * CHUNK_SIZE);
     }
 
     p->num_ports = nports;
@@ -231,6 +216,8 @@ static int init(struct ao *ao)
     struct priv *p = ao->priv;
     struct mp_chmap_sel sel = {0};
     jack_options_t open_options;
+
+    ao->format = AF_FORMAT_FLOATP;
 
     switch (p->stdlayout) {
     case 0:
@@ -261,7 +248,7 @@ static int init(struct ao *ao)
     if (create_ports(ao, ao->channels.num))
         goto err_create_ports;
 
-    jack_set_process_callback(p->client, outputaudio, ao);
+    jack_set_process_callback(p->client, process, ao);
 
     if (jack_activate(p->client)) {
         MP_FATAL(ao, "activate failed\n");
@@ -275,7 +262,7 @@ static int init(struct ao *ao)
             goto err_connect;
 
     jack_latency_range_t jack_latency_range;
-    jack_port_get_latency_range(p->ports[0], JackPlaybackLatency,
+    jack_port_get_latency_range(p->ports[0].port, JackPlaybackLatency,
                                 &jack_latency_range);
     p->jack_latency = (float)(jack_latency_range.max + jack_get_buffer_size(p->client))
                       / (float)ao->samplerate;
@@ -284,10 +271,6 @@ static int init(struct ao *ao)
     if (!ao_chmap_sel_get_def(ao, &sel, &ao->channels, p->num_ports))
         goto err_chmap_sel_get_def;
 
-    ao->format = AF_FORMAT_FLOAT_NE;
-    int unitsize = ao->channels.num * sizeof(float);
-    p->outburst = (CHUNK_SIZE + unitsize - 1) / unitsize * unitsize;
-    p->ring = mp_ring_new(p, NUM_CHUNKS * p->outburst);
     return 0;
 
 err_chmap_sel_get_def:
@@ -304,14 +287,16 @@ err_chmap:
 static float get_delay(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    int buffered = mp_ring_buffered(p->ring); // could be less
+    int buffered = mp_ring_buffered(p->ports[0].ring); // could be less
     float in_jack = p->jack_latency;
+
     if (p->estimate && p->callback_interval > 0) {
         float elapsed = mp_time_us() / 1000000.0 - p->callback_time;
         in_jack += p->callback_interval - elapsed;
         if (in_jack < 0)
             in_jack = 0;
     }
+
     return (float)buffered / (float)ao->bps + in_jack;
 }
 
@@ -321,8 +306,12 @@ static float get_delay(struct ao *ao)
 static void reset(struct ao *ao)
 {
     struct priv *p = ao->priv;
+    int i;
     p->paused = 1;
-    mp_ring_reset(p->ring);
+
+    for (i = 0; i < p->num_ports; i++)
+        mp_ring_reset(p->ports[i].ring);
+
     p->paused = 0;
 }
 
@@ -330,10 +319,10 @@ static void reset(struct ao *ao)
 static void uninit(struct ao *ao, bool immed)
 {
     struct priv *p = ao->priv;
+
     if (!immed)
         mp_sleep_us(get_delay(ao) * 1000 * 1000);
-    // HACK, make sure jack doesn't loop-output dirty buffers
-    reset(ao);
+
     mp_sleep_us(100 * 1000);
     jack_client_close(p->client);
 }
@@ -359,7 +348,7 @@ static void audio_resume(struct ao *ao)
 static int get_space(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    return mp_ring_available(p->ring) / ao->sstride;
+    return mp_ring_available(p->ports[0].ring) / ao->sstride;
 }
 
 /**
@@ -368,11 +357,19 @@ static int get_space(struct ao *ao)
 static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *p = ao->priv;
-    int len = samples * ao->sstride;
-    if (!(flags & AOPLAY_FINAL_CHUNK))
-        len -= len % p->outburst;
+    struct port_ring *pr;
+    int i, len, ret;
+
+    len = samples * ao->sstride;
+    ret = 0;
+
+    for (i = 0; i < p->num_ports; i++) {
+        pr  = &p->ports[i];
+        ret = mp_ring_write(pr->ring, data[i], len);
+    }
+
     p->underrun = 0;
-    return mp_ring_write(p->ring, data[0], len) / ao->sstride;
+    return ret / ao->sstride;
 }
 
 #define OPT_BASE_STRUCT struct priv
@@ -401,7 +398,7 @@ const struct ao_driver audio_out_jack = {
         OPT_FLAG("autostart", autostart, 0),
         OPT_FLAG("connect", connect, 0),
         OPT_CHOICE("std-channel-layout", stdlayout, 0,
-                   ({"waveext", 0}, {"alsa", 1}, {"any", 2})),
+                ({"waveext", 0}, {"alsa", 1}, {"any", 2})),
         {0}
     },
 };
