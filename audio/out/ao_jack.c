@@ -38,9 +38,6 @@
 
 #include <jack/jack.h>
 
-//! maximum number of channels supported, avoids lots of mallocs
-#define MAX_CHANS MP_NUM_CHANNELS
-
 //! size of one chunk, if this is too small MPlayer will start to "stutter"
 //! after a short time of playback
 #define CHUNK_SIZE (24 * 1024)
@@ -48,7 +45,7 @@
 #define NUM_CHUNKS 8
 
 struct priv {
-    jack_port_t * ports[MAX_CHANS];
+    jack_port_t * ports[MP_NUM_CHANNELS];
     int num_ports; // Number of used ports == number of channels
     jack_client_t *client;
     int outburst;
@@ -144,7 +141,7 @@ static int outputaudio(jack_nframes_t nframes, void *arg)
 {
     struct ao *ao = arg;
     struct priv *p = ao->priv;
-    float *bufs[MAX_CHANS];
+    float *bufs[MP_NUM_CHANNELS];
     int i;
     for (i = 0; i < p->num_ports; i++)
         bufs[i] = jack_port_get_buffer(p->ports[i], nframes);
@@ -164,79 +161,119 @@ static int outputaudio(jack_nframes_t nframes, void *arg)
     return 0;
 }
 
-static int init(struct ao *ao)
+static int
+connect_to_outports(struct ao *ao)
 {
     struct priv *p = ao->priv;
+
+    char *port_name = (p->cfg_port && p->cfg_port[0]) ? p->cfg_port : NULL;
     const char **matching_ports = NULL;
-    char *port_name = p->cfg_port && p->cfg_port[0] ? p->cfg_port : NULL;
-    jack_options_t open_options = JackNullOption;
     int port_flags = JackPortIsInput;
     int i;
 
-    struct mp_chmap_sel sel = {0};
+    if (!port_name)
+        port_flags |= JackPortIsPhysical;
 
-    if (p->stdlayout == 0) {
-        mp_chmap_sel_add_waveext(&sel);
-    } else if (p->stdlayout == 1) {
-        mp_chmap_sel_add_alsa_def(&sel);
-    } else {
-        mp_chmap_sel_add_any(&sel);
+    matching_ports = jack_get_ports(p->client, port_name, NULL, port_flags);
+
+    if (!matching_ports || !matching_ports[0]) {
+        MP_FATAL(ao, "no ports to connect to\n");
+        goto err_get_ports;
     }
 
-    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
-        goto err_out;
-
-    if (!p->autostart)
-        open_options |= JackNoStartServer;
-    p->client = jack_client_open(p->cfg_client_name, open_options, NULL);
-    if (!p->client) {
-        MP_FATAL(ao, "cannot open server\n");
-        goto err_out;
-    }
-    jack_set_process_callback(p->client, outputaudio, ao);
-
-    // list matching ports if connections should be made
-    if (p->connect) {
-        if (!port_name)
-            port_flags |= JackPortIsPhysical;
-        matching_ports = jack_get_ports(p->client, port_name, NULL, port_flags);
-        if (!matching_ports || !matching_ports[0]) {
-            MP_FATAL(ao, "no physical ports available\n");
-            goto err_out;
-        }
-        i = 1;
-        p->num_ports = ao->channels.num;
-        while (matching_ports[i])
-            i++;
-        if (p->num_ports > i)
-            p->num_ports = i;
-    }
-
-    // create out output ports
-    for (i = 0; i < p->num_ports; i++) {
-        char pname[30];
-        snprintf(pname, 30, "out_%d", i);
-        p->ports[i] =
-            jack_port_register(p->client, pname, JACK_DEFAULT_AUDIO_TYPE,
-                               JackPortIsOutput, 0);
-        if (!p->ports[i]) {
-            MP_FATAL(ao, "not enough ports available\n");
-            goto err_out;
-        }
-    }
-    if (jack_activate(p->client)) {
-        MP_FATAL(ao, "activate failed\n");
-        goto err_out;
-    }
-    for (i = 0; i < p->num_ports; i++) {
+    for (i = 0; i < p->num_ports && matching_ports[i]; i++) {
         if (jack_connect(p->client, jack_port_name(p->ports[i]),
                          matching_ports[i]))
         {
             MP_FATAL(ao, "connecting failed\n");
-            goto err_out;
+            goto err_connect;
         }
     }
+
+    free(matching_ports);
+    return 0;
+
+err_connect:
+    free(matching_ports);
+err_get_ports:
+    return -1;
+}
+
+static int
+create_ports(struct ao *ao, int nports)
+{
+    struct priv *p = ao->priv;
+    int i;
+
+    /* register our output ports */
+    for (i = 0; i < nports; i++) {
+        char pname[30];
+        snprintf(pname, sizeof(pname), "out_%d", i);
+        p->ports[i] =
+            jack_port_register(p->client, pname, JACK_DEFAULT_AUDIO_TYPE,
+                               JackPortIsOutput, 0);
+
+        if (!p->ports[i]) {
+            MP_FATAL(ao, "not enough ports available\n");
+            goto err_port_register;
+        }
+    }
+
+    p->num_ports = nports;
+    return 0;
+
+err_port_register:
+    return -1;
+}
+
+static int init(struct ao *ao)
+{
+    struct priv *p = ao->priv;
+    struct mp_chmap_sel sel = {0};
+    jack_options_t open_options;
+
+    switch (p->stdlayout) {
+    case 0:
+        mp_chmap_sel_add_waveext(&sel);
+        break;
+
+    case 1:
+        mp_chmap_sel_add_alsa_def(&sel);
+        break;
+
+    default:
+        mp_chmap_sel_add_any(&sel);
+    }
+
+    if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
+        goto err_chmap;
+
+    open_options = JackNullOption;
+    if (!p->autostart)
+        open_options |= JackNoStartServer;
+
+    p->client = jack_client_open(p->cfg_client_name, open_options, NULL);
+    if (!p->client) {
+        MP_FATAL(ao, "cannot open server\n");
+        goto err_client_open;
+    }
+
+    if (create_ports(ao, ao->channels.num))
+        goto err_create_ports;
+
+    jack_set_process_callback(p->client, outputaudio, ao);
+
+    if (jack_activate(p->client)) {
+        MP_FATAL(ao, "activate failed\n");
+        goto err_activate;
+    }
+
     ao->samplerate = jack_get_sample_rate(p->client);
+
+    if (p->connect)
+        if (connect_to_outports(ao))
+            goto err_connect;
+
     jack_latency_range_t jack_latency_range;
     jack_port_get_latency_range(p->ports[0], JackPlaybackLatency,
                                 &jack_latency_range);
@@ -245,19 +282,22 @@ static int init(struct ao *ao)
     p->callback_interval = 0;
 
     if (!ao_chmap_sel_get_def(ao, &sel, &ao->channels, p->num_ports))
-        goto err_out;
+        goto err_chmap_sel_get_def;
 
     ao->format = AF_FORMAT_FLOAT_NE;
     int unitsize = ao->channels.num * sizeof(float);
     p->outburst = (CHUNK_SIZE + unitsize - 1) / unitsize * unitsize;
     p->ring = mp_ring_new(p, NUM_CHUNKS * p->outburst);
-    free(matching_ports);
     return 0;
 
-err_out:
-    free(matching_ports);
-    if (p->client)
-        jack_client_close(p->client);
+err_chmap_sel_get_def:
+err_connect:
+    jack_deactivate(p->client);
+err_activate:
+err_create_ports:
+    jack_client_close(p->client);
+err_client_open:
+err_chmap:
     return -1;
 }
 
