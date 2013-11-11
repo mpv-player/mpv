@@ -330,7 +330,6 @@ Optional features:
   --disable-af-lavfi     disable af_lavfi libavfilter bridge [audodetect]
 
 Codecs:
-  --enable-mng              enable MNG input support [autodetect]
   --enable-jpeg             enable JPEG input/output support [autodetect]
   --enable-libcdio          enable libcdio support [autodetect]
   --enable-libav            skip Libav autodetection [autodetect]
@@ -432,7 +431,6 @@ _sdl=no
 _sdl2=no
 _dsound=auto
 _wasapi=auto
-_mng=auto
 _jpeg=auto
 _gl=auto
 _aa=auto
@@ -601,8 +599,6 @@ for ac_option do
   --disable-dsound)     _dsound=no      ;;
   --enable-wasapi)      _wasapi=yes     ;;
   --disable-wasapi)     _wasapi=no      ;;
-  --enable-mng)         _mng=yes        ;;
-  --disable-mng)        _mng=no         ;;
   --enable-jpeg)        _jpeg=yes       ;;
   --disable-jpeg)       _jpeg=no        ;;
   --enable-gl)          _gl=yes         ;;
@@ -1998,19 +1994,6 @@ else
 fi
 
 
-echocheck "MNG support"
-if test "$_mng" = auto ; then
-  _mng=no
-  return_statement_check libmng.h 'const char * p_ver = mng_version_text()' '!p_ver || p_ver[0] == 0' -lmng -lz $_ld_lm && _mng=yes
-fi
-echores "$_mng"
-if test "$_mng" = yes ; then
-  def_mng='#define HAVE_MNG 1'
-  libs_mplayer="$libs_mplayer -lmng -lz"
-else
-  def_mng='#define HAVE_MNG 0'
-fi
-
 echocheck "JPEG support"
 if test "$_jpeg" = auto ; then
   _jpeg=no
@@ -3318,7 +3301,6 @@ LIBQUVI = $_libquvi4
 LIBQUVI9 = $_libquvi9
 LIBGUESS = $_libguess
 LIRC = $_lirc
-MNG = $_mng
 MPG123 = $_mpg123
 OPENAL = $_openal
 OSS = $_ossaudio
@@ -3515,7 +3497,6 @@ $def_gl_win32
 $def_gl_x11
 $def_gl_wayland
 $def_jpeg
-$def_mng
 $def_v4l2
 $def_vdpau
 $def_vdpau_dec

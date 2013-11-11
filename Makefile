@@ -54,7 +54,6 @@ SOURCES-$(COCOA)                += video/out/cocoa/view.m \
                                    osdep/ar/HIDRemote.m \
                                    osdep/path-macosx.m
 
-SOURCES-$(MNG)                  += demux/demux_mng.c
 SOURCES-$(MPG123)               += audio/decode/ad_mpg123.c
 
 SOURCES-$(NEED_GETTIMEOFDAY)    += osdep/gettimeofday.c
