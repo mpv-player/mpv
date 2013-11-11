@@ -65,31 +65,37 @@ typedef struct af_ac3enc_s {
 static int control(struct af_instance *af, int cmd, void *arg)
 {
     af_ac3enc_t *s  = af->setup;
-    struct mp_audio *data = arg;
-    int i, bit_rate, test_output_res;
+    int i, bit_rate;
     static const int default_bit_rate[AC3_MAX_CHANNELS+1] = \
         {0, 96000, 192000, 256000, 384000, 448000, 448000};
 
     switch (cmd){
-    case AF_CONTROL_REINIT:
-        if (AF_FORMAT_IS_AC3(data->format) || data->nch < s->min_channel_num)
+    case AF_CONTROL_REINIT: {
+        struct mp_audio *in = arg;
+        struct mp_audio orig_in = *in;
+
+        if (AF_FORMAT_IS_AC3(in->format) || in->nch < s->min_channel_num)
             return AF_DETACH;
 
-        mp_audio_set_format(af->data, s->in_sampleformat);
-        if (data->rate == 48000 || data->rate == 44100 || data->rate == 32000)
-            af->data->rate = data->rate;
-        else
-            af->data->rate = 48000;
-        if (data->nch > AC3_MAX_CHANNELS)
-            mp_audio_set_num_channels(af->data, AC3_MAX_CHANNELS);
-        else
-            mp_audio_set_channels(af->data, &data->channels);
-        mp_chmap_reorder_to_lavc(&af->data->channels);
-        test_output_res = af_test_output(af, data);
+        mp_audio_set_format(in, s->in_sampleformat);
+
+        if (in->rate != 48000 && in->rate != 44100 && in->rate != 32000)
+            in->rate = 48000;
+        af->data->rate = in->rate;
+
+        mp_chmap_reorder_to_lavc(&in->channels);
+        if (in->nch > AC3_MAX_CHANNELS)
+            mp_audio_set_num_channels(in, AC3_MAX_CHANNELS);
+
+        mp_audio_set_format(af->data, AF_FORMAT_AC3_BE);
+        mp_audio_set_num_channels(af->data, 2);
+
+        if (!mp_audio_config_equals(in, &orig_in))
+            return AF_FALSE;
 
         s->pending_len = 0;
         int expect_samples = AC3_FRAME_SIZE;
-        s->expect_len = expect_samples * data->nch * af->data->bps;
+        s->expect_len = expect_samples * in->nch * in->bps;
         assert(s->expect_len <= s->pending_data_size);
         if (s->add_iec61937_header)
             af->mul = 1;
@@ -97,20 +103,20 @@ static int control(struct af_instance *af, int cmd, void *arg)
             af->mul = (double)(AC3_MAX_CODED_FRAME_SIZE / (2 * 2)) / expect_samples;
 
         mp_msg(MSGT_AFILTER, MSGL_DBG2, "af_lavcac3enc reinit: %d, %d, %f, %d.\n",
-               data->nch, data->rate, af->mul, s->expect_len);
+               in->nch, in->rate, af->mul, s->expect_len);
 
-        bit_rate = s->bit_rate ? s->bit_rate : default_bit_rate[af->data->nch];
+        bit_rate = s->bit_rate ? s->bit_rate : default_bit_rate[in->nch];
 
-        if (s->lavc_actx->channels != af->data->nch ||
-                s->lavc_actx->sample_rate != af->data->rate ||
-                s->lavc_actx->bit_rate != bit_rate) {
-
+        if (s->lavc_actx->channels != in->nch ||
+            s->lavc_actx->sample_rate != in->rate ||
+            s->lavc_actx->bit_rate != bit_rate)
+        {
             avcodec_close(s->lavc_actx);
 
             // Put sample parameters
-            s->lavc_actx->channels = af->data->nch;
-            s->lavc_actx->channel_layout = mp_chmap_to_lavc(&af->data->channels);
-            s->lavc_actx->sample_rate = af->data->rate;
+            s->lavc_actx->channels = in->nch;
+            s->lavc_actx->channel_layout = mp_chmap_to_lavc(&in->channels);
+            s->lavc_actx->sample_rate = in->rate;
             s->lavc_actx->bit_rate = bit_rate;
 
             if (avcodec_open2(s->lavc_actx, s->lavc_acodec, NULL) < 0) {
@@ -123,9 +129,8 @@ static int control(struct af_instance *af, int cmd, void *arg)
                    "encoder frame size %d\n", s->lavc_actx->frame_size);
             return AF_ERROR;
         }
-        mp_audio_set_format(af->data, AF_FORMAT_AC3_BE);
-        mp_audio_set_num_channels(af->data, 2);
-        return test_output_res;
+        return AF_OK;
+    }
     case AF_CONTROL_COMMAND_LINE:
         mp_msg(MSGT_AFILTER, MSGL_DBG2, "af_lavcac3enc cmdline: %s.\n", (char*)arg);
         s->bit_rate = 0;
