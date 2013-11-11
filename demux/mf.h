@@ -26,12 +26,12 @@ typedef struct mf {
     struct sh_video *sh;
     int curr_frame;
     int nr_of_files;
-    char ** names;
+    const char **names;
     // optional
     struct stream **streams;
 } mf_t;
 
-mf_t* open_mf_pattern(char * filename);
-mf_t* open_mf_single(char * filename);
+mf_t *open_mf_pattern(void *talloc_ctx, char *filename);
+mf_t *open_mf_single(void *talloc_ctx, char *filename);
 
 #endif /* MPLAYER_MF_H */

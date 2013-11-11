@@ -36,30 +36,35 @@
 #include "osdep/glob.h"
 #endif
 
+#include "talloc.h"
 #include "mpvcore/mp_msg.h"
 #include "stream/stream.h"
 #include "mpvcore/path.h"
+#include "mpvcore/mp_talloc.h"
 
 #include "mf.h"
 
 double mf_fps = 25.0;
 char *mf_type = NULL;  //"jpg";
 
-mf_t *open_mf_pattern(char *filename)
+static void mf_add(mf_t *mf, const char *fname)
+{
+    fname = talloc_strdup(mf, fname);
+    MP_TARRAY_APPEND(mf, mf->names, mf->nr_of_files, fname);
+}
+
+mf_t *open_mf_pattern(void *talloc_ctx, char *filename)
 {
 #if defined(HAVE_GLOB) || defined(__MINGW32__)
-    glob_t gg;
-    char *fname = NULL;
-    mf_t *mf;
     int error_count = 0;
     int count = 0;
 
-    mf = calloc(1, sizeof(mf_t));
+    mf_t *mf = talloc_zero(talloc_ctx, mf_t);
 
     if (filename[0] == '@') {
         FILE *lst_f = fopen(filename + 1, "r");
         if (lst_f) {
-            fname = malloc(MP_PATH_MAX);
+            char *fname = talloc_size(mf, MP_PATH_MAX);
             while (fgets(fname, MP_PATH_MAX, lst_f)) {
                 /* remove spaces from end of fname */
                 char *t = fname + strlen(fname) - 1;
@@ -69,10 +74,7 @@ mf_t *open_mf_pattern(char *filename)
                     mp_msg(MSGT_STREAM, MSGL_V, "[mf] file not found: '%s'\n",
                            fname);
                 } else {
-                    mf->names = realloc(mf->names,
-                                        (mf->nr_of_files + 1) * sizeof(char *));
-                    mf->names[mf->nr_of_files] = strdup(fname);
-                    mf->nr_of_files++;
+                    mf_add(mf, fname);
                 }
             }
             fclose(lst_f);
@@ -92,16 +94,13 @@ mf_t *open_mf_pattern(char *filename)
         while (bfilename.len) {
             bstr bfname;
             bstr_split_tok(bfilename, ",", &bfname, &bfilename);
-            char *fname2 = bstrdup0(NULL, bfname);
+            char *fname2 = bstrdup0(mf, bfname);
 
             if (!mp_path_exists(fname2))
                 mp_msg(MSGT_STREAM, MSGL_V, "[mf] file not found: '%s'\n",
                        fname2);
             else {
-                mf->names =
-                    realloc(mf->names, (mf->nr_of_files + 1) * sizeof(char *));
-                mf->names[mf->nr_of_files] = strdup(fname2);
-                mf->nr_of_files++;
+                mf_add(mf, fname2);
             }
             talloc_free(fname2);
         }
@@ -111,7 +110,7 @@ mf_t *open_mf_pattern(char *filename)
         goto exit_mf;
     }
 
-    fname = malloc(strlen(filename) + 32);
+    char *fname = talloc_size(mf, strlen(filename) + 32);
 
     if (!strchr(filename, '%')) {
         strcpy(fname, filename);
@@ -120,20 +119,16 @@ mf_t *open_mf_pattern(char *filename)
 
         mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] search expr: %s\n", fname);
 
+        glob_t gg;
         if (glob(fname, 0, NULL, &gg)) {
-            free(mf);
-            free(fname);
+            talloc_free(mf);
             return NULL;
         }
-
-        mf->nr_of_files = 0;
-        mf->names = calloc(gg.gl_pathc, sizeof(char *));
 
         for (int i = 0; i < gg.gl_pathc; i++) {
             if (mp_path_isdir(gg.gl_pathv[i]))
                 continue;
-            mf->names[mf->nr_of_files] = strdup(gg.gl_pathv[i]);
-            mf->nr_of_files++;
+            mf_add(mf, gg.gl_pathv[i]);
         }
         mp_msg(MSGT_STREAM, MSGL_INFO, "[mf] number of files: %d\n",
                mf->nr_of_files);
@@ -149,10 +144,7 @@ mf_t *open_mf_pattern(char *filename)
             error_count++;
             mp_msg(MSGT_STREAM, MSGL_V, "[mf] file not found: '%s'\n", fname);
         } else {
-            mf->names =
-                realloc(mf->names, (mf->nr_of_files + 1) * sizeof(char *));
-            mf->names[mf->nr_of_files] = strdup(fname);
-            mf->nr_of_files++;
+            mf_add(mf, fname);
         }
     }
 
@@ -160,7 +152,6 @@ mf_t *open_mf_pattern(char *filename)
            mf->nr_of_files);
 
 exit_mf:
-    free(fname);
     return mf;
 #else
     mp_msg(MSGT_STREAM, MSGL_FATAL, "[mf] mf support is disabled on your os\n");
@@ -168,11 +159,9 @@ exit_mf:
 #endif
 }
 
-mf_t *open_mf_single(char *filename)
+mf_t *open_mf_single(void *talloc_ctx, char *filename)
 {
-    mf_t *mf = calloc(1, sizeof(mf_t));
-    mf->nr_of_files = 1;
-    mf->names = calloc(1, sizeof(char *));
-    mf->names[0] = strdup(filename);
+    mf_t *mf = talloc_zero(talloc_ctx, mf_t);
+    mf_add(mf, filename);
     return mf;
 }

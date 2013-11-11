@@ -28,6 +28,7 @@
 #include "talloc.h"
 #include "config.h"
 #include "mpvcore/mp_msg.h"
+#include "mpvcore/mp_talloc.h"
 
 #include "stream/stream.h"
 #include "demux.h"
@@ -35,17 +36,6 @@
 #include "mf.h"
 
 #define MF_MAX_FILE_SIZE (1024 * 1024 * 256)
-
-static void free_mf(mf_t *mf)
-{
-    if (mf) {
-        for (int n = 0; n < mf->nr_of_files; n++)
-            free(mf->names[n]);
-        free(mf->names);
-        free(mf->streams);
-        free(mf);
-    }
-}
 
 static void demux_seek_mf(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
@@ -186,11 +176,11 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
 
     if (strncmp(demuxer->stream->url, "mf://", 5) == 0 &&
         demuxer->stream->type == STREAMTYPE_MF)
-        mf = open_mf_pattern(demuxer->stream->url + 5);
+        mf = open_mf_pattern(demuxer, demuxer->stream->url + 5);
     else {
-        mf = open_mf_single(demuxer->stream->url);
-        mf->streams = calloc(1, sizeof(struct stream *));
-        mf->streams[0] = demuxer->stream;
+        mf = open_mf_single(demuxer, demuxer->stream->url);
+        int bog = 0;
+        MP_TARRAY_APPEND(mf, mf->streams, bog, demuxer->stream);
     }
 
     if (!mf || mf->nr_of_files < 1)
@@ -218,15 +208,11 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     return 0;
 
 error:
-    free_mf(mf);
     return -1;
 }
 
 static void demux_close_mf(demuxer_t *demuxer)
 {
-    mf_t *mf = demuxer->priv;
-
-    free_mf(mf);
 }
 
 static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg)
