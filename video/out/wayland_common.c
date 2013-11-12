@@ -906,6 +906,18 @@ int vo_wayland_control (struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_SCREENINFO:
         vo_wayland_update_screeninfo(vo);
         return VO_TRUE;
+    case VOCTRL_GET_WINDOW_SIZE: {
+        int *s = arg;
+        s[0] = wl->window.width;
+        s[1] = wl->window.height;
+        return VO_TRUE;
+    }
+    case VOCTRL_SET_WINDOW_SIZE: {
+        int *s = arg;
+        if (!wl->window.is_fullscreen)
+            shedule_resize(wl, 0, s[0], s[1]);
+        return VO_TRUE;
+    }
     case VOCTRL_SET_CURSOR_VISIBILITY:
         if (*(bool *)arg) {
             if (!wl->cursor.visible)
