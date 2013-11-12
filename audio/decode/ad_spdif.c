@@ -19,6 +19,7 @@
  */
 
 #include <string.h>
+#include <assert.h>
 
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
@@ -184,37 +185,43 @@ fail:
     return 0;
 }
 
-static int decode_audio(sh_audio_t *sh, unsigned char *buf,
-                        int minlen, int maxlen)
+static int decode_audio(sh_audio_t *sh, struct mp_audio *buffer, int maxlen)
 {
     struct spdifContext *spdif_ctx = sh->context;
     AVFormatContext     *lavf_ctx  = spdif_ctx->lavf_ctx;
 
+    int sstride = 2 * sh->channels.num;
+    assert(sstride == buffer->sstride);
+
+    if (maxlen < spdif_ctx->iec61937_packet_size)
+        return 0;
+
     spdif_ctx->out_buffer_len  = 0;
     spdif_ctx->out_buffer_size = maxlen;
-    spdif_ctx->out_buffer      = buf;
-    while (spdif_ctx->out_buffer_len + spdif_ctx->iec61937_packet_size < maxlen
-           && spdif_ctx->out_buffer_len < minlen) {
-        struct demux_packet *mpkt = demux_read_packet(sh->gsh);
-        if (!mpkt)
-            break;
-        AVPacket pkt;
-        mp_set_av_packet(&pkt, mpkt);
-        pkt.pts = pkt.dts = 0;
-        mp_msg(MSGT_DECAUDIO, MSGL_V, "spdif packet, size=%d\n", pkt.size);
-        if (mpkt->pts != MP_NOPTS_VALUE) {
-            sh->pts       = mpkt->pts;
-            sh->pts_bytes = 0;
-        }
-        int out_len = spdif_ctx->out_buffer_len;
-        int ret = av_write_frame(lavf_ctx, &pkt);
-        avio_flush(lavf_ctx->pb);
-        sh->pts_bytes += spdif_ctx->out_buffer_len - out_len;
-        talloc_free(mpkt);
-        if (ret < 0)
-            break;
+    spdif_ctx->out_buffer      = buffer->planes[0];
+
+    struct demux_packet *mpkt = demux_read_packet(sh->gsh);
+    if (!mpkt)
+        return 0;
+
+    AVPacket pkt;
+    mp_set_av_packet(&pkt, mpkt);
+    pkt.pts = pkt.dts = 0;
+    mp_msg(MSGT_DECAUDIO, MSGL_V, "spdif packet, size=%d\n", pkt.size);
+    if (mpkt->pts != MP_NOPTS_VALUE) {
+        sh->pts        = mpkt->pts;
+        sh->pts_offset = 0;
     }
-    return spdif_ctx->out_buffer_len;
+    int out_len = spdif_ctx->out_buffer_len;
+    int ret = av_write_frame(lavf_ctx, &pkt);
+    avio_flush(lavf_ctx->pb);
+    sh->pts_offset += (spdif_ctx->out_buffer_len - out_len) / sstride;
+    talloc_free(mpkt);
+    if (ret < 0)
+        return -1;
+
+    buffer->samples = spdif_ctx->out_buffer_len / sstride;
+    return 0;
 }
 
 static int control(sh_audio_t *sh, int cmd, void *arg)

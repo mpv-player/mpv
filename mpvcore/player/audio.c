@@ -180,11 +180,8 @@ no_audio:
 double written_audio_pts(struct MPContext *mpctx)
 {
     sh_audio_t *sh_audio = mpctx->sh_audio;
-    if (!sh_audio)
+    if (!sh_audio || !sh_audio->initialized)
         return MP_NOPTS_VALUE;
-
-    double bps = sh_audio->channels.num * sh_audio->samplerate *
-                 (af_fmt2bits(sh_audio->sample_format) / 8);
 
     // first calculate the end pts of audio that has been output by decoder
     double a_pts = sh_audio->pts;
@@ -194,13 +191,13 @@ double written_audio_pts(struct MPContext *mpctx)
     // sh_audio->pts is the timestamp of the latest input packet with
     // known pts that the decoder has decoded. sh_audio->pts_bytes is
     // the amount of bytes the decoder has written after that timestamp.
-    a_pts += sh_audio->pts_bytes / bps;
+    a_pts += sh_audio->pts_offset / (double)sh_audio->samplerate;
 
     // Now a_pts hopefully holds the pts for end of audio from decoder.
     // Subtract data in buffers between decoder and audio out.
 
     // Decoded but not filtered
-    a_pts -= sh_audio->a_buffer_len / bps;
+    a_pts -= mp_audio_buffer_seconds(sh_audio->decode_buffer);
 
     // Data buffered in audio filters, measured in seconds of "missing" output
     double buffered_output = af_calc_delay(sh_audio->afilter);
@@ -446,6 +443,6 @@ void clear_audio_output_buffers(struct MPContext *mpctx)
 // Drop decoded data queued for filtering.
 void clear_audio_decode_buffers(struct MPContext *mpctx)
 {
-    if (mpctx->sh_audio)
-        mpctx->sh_audio->a_buffer_len = 0;
+    if (mpctx->sh_audio && mpctx->sh_audio->decode_buffer)
+        mp_audio_buffer_clear(mpctx->sh_audio->decode_buffer);
 }

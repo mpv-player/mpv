@@ -38,6 +38,7 @@
 #include "dec_audio.h"
 #include "ad.h"
 #include "audio/format.h"
+#include "audio/audio.h"
 #include "audio/audio_buffer.h"
 
 #include "audio/filter/af.h"
@@ -55,30 +56,28 @@ static const struct ad_functions * const ad_drivers[] = {
     NULL
 };
 
+// At least ad_mpg123 needs to be able to decode this many samples at once
+#define DECODE_MAX_UNIT 1152
+
+// At least 8192 samples, plus hack for ad_mpg123
+#define DECODE_BUFFER_SAMPLES (8192 + DECODE_MAX_UNIT)
+
+// Drop audio buffer and reinit it (after format change)
+static void reinit_audio_buffer(sh_audio_t *sh)
+{
+    mp_audio_buffer_reinit_fmt(sh->decode_buffer, sh->sample_format,
+                               &sh->channels, sh->samplerate);
+    mp_audio_buffer_preallocate_min(sh->decode_buffer, DECODE_BUFFER_SAMPLES);
+}
+
 static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
 {
     assert(!sh_audio->initialized);
     resync_audio_stream(sh_audio);
-    sh_audio->sample_format = AF_FORMAT_FLOAT_NE;
-    sh_audio->audio_out_minsize = 8192; // default, preinit() may change it
     if (!sh_audio->ad_driver->preinit(sh_audio)) {
         mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Audio decoder preinit failed.\n");
         return 0;
     }
-
-    const int base_size = 65536;
-    // At least 64 KiB plus rounding up to next decodable unit size
-    sh_audio->a_buffer_size = base_size + sh_audio->audio_out_minsize;
-
-    mp_tmsg(MSGT_DECAUDIO, MSGL_V,
-            "dec_audio: Allocating %d + %d = %d bytes for output buffer.\n",
-            sh_audio->audio_out_minsize, base_size,
-            sh_audio->a_buffer_size);
-
-    sh_audio->a_buffer = av_mallocz(sh_audio->a_buffer_size);
-    if (!sh_audio->a_buffer)
-        abort();
-    sh_audio->a_buffer_len = 0;
 
     if (!sh_audio->ad_driver->init(sh_audio, decoder)) {
         mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Audio decoder init failed.\n");
@@ -88,12 +87,17 @@ static int init_audio_codec(sh_audio_t *sh_audio, const char *decoder)
 
     sh_audio->initialized = 1;
 
-    if (mp_chmap_is_empty(&sh_audio->channels) || !sh_audio->samplerate) {
+    if (mp_chmap_is_empty(&sh_audio->channels) || !sh_audio->samplerate ||
+        !sh_audio->sample_format)
+    {
         mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Audio decoder did not specify "
                 "audio format!\n");
         uninit_audio(sh_audio); // free buffers
         return 0;
     }
+
+    sh_audio->decode_buffer = mp_audio_buffer_create(NULL);
+    reinit_audio_buffer(sh_audio);
 
     return 1;
 }
@@ -188,7 +192,8 @@ void uninit_audio(sh_audio_t *sh_audio)
     }
     talloc_free(sh_audio->gsh->decoder_desc);
     sh_audio->gsh->decoder_desc = NULL;
-    av_freep(&sh_audio->a_buffer);
+    talloc_free(sh_audio->decode_buffer);
+    sh_audio->decode_buffer = NULL;
 }
 
 
@@ -235,37 +240,44 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
 static int filter_n_bytes(sh_audio_t *sh, struct mp_audio_buffer *outbuf,
                           int len)
 {
-    assert(len - 1 + sh->audio_out_minsize <= sh->a_buffer_size);
-
     int error = 0;
 
-    // Decode more bytes if needed
-    int old_samplerate = sh->samplerate;
-    struct mp_chmap old_channels = sh->channels;
-    int old_sample_format = sh->sample_format;
-    while (sh->a_buffer_len < len) {
-        unsigned char *buf = sh->a_buffer + sh->a_buffer_len;
-        int minlen = len - sh->a_buffer_len;
-        int maxlen = sh->a_buffer_size - sh->a_buffer_len;
-        int ret = sh->ad_driver->decode_audio(sh, buf, minlen, maxlen);
-        int format_change = sh->samplerate != old_samplerate
-                            || !mp_chmap_equals(&sh->channels, &old_channels)
-                            || sh->sample_format != old_sample_format;
-        if (ret <= 0 || format_change) {
-            error = format_change ? -2 : -1;
-            // samples from format-changing call get discarded too
-            len = sh->a_buffer_len;
+    struct mp_audio config;
+    mp_audio_buffer_get_format(sh->decode_buffer, &config);
+
+    while (mp_audio_buffer_samples(sh->decode_buffer) < len) {
+        int maxlen = mp_audio_buffer_get_write_available(sh->decode_buffer);
+        if (maxlen < DECODE_MAX_UNIT)
+            break;
+        struct mp_audio buffer;
+        mp_audio_buffer_get_write_buffer(sh->decode_buffer, maxlen, &buffer);
+        buffer.samples = 0;
+        error = sh->ad_driver->decode_audio(sh, &buffer, maxlen);
+        if (error < 0)
+            break;
+        // Commit the data just read as valid data
+        mp_audio_buffer_finish_write(sh->decode_buffer, buffer.samples);
+        // Format change
+        if (sh->samplerate != config.rate ||
+            !mp_chmap_equals(&sh->channels, &config.channels) ||
+            sh->sample_format != config.format)
+        {
+            // If there are still samples left in the buffer, let them drain
+            // first, and don't signal a format change to the caller yet.
+            if (mp_audio_buffer_samples(sh->decode_buffer) > 0)
+                break;
+            reinit_audio_buffer(sh);
+            error = -2;
             break;
         }
-        sh->a_buffer_len += ret;
     }
 
     // Filter
-    struct mp_audio filter_input = {
-        .planes = {sh->a_buffer},
-    };
-    mp_audio_copy_config(&filter_input, &sh->afilter->input);
-    filter_input.samples = len / filter_input.sstride;
+    struct mp_audio filter_input;
+    mp_audio_buffer_peek(sh->decode_buffer, &filter_input);
+    filter_input.rate = sh->afilter->input.rate; // due to playback speed change
+    len = MPMIN(filter_input.samples, len);
+    filter_input.samples = len;
 
     struct mp_audio *filter_output = af_play(sh->afilter, &filter_input);
     if (!filter_output)
@@ -273,8 +285,7 @@ static int filter_n_bytes(sh_audio_t *sh, struct mp_audio_buffer *outbuf,
     mp_audio_buffer_append(outbuf, filter_output);
 
     // remove processed data from decoder buffer:
-    sh->a_buffer_len -= len;
-    memmove(sh->a_buffer, sh->a_buffer + len, sh->a_buffer_len);
+    mp_audio_buffer_skip(sh->decode_buffer, len);
 
     return error;
 }
@@ -289,33 +300,27 @@ int decode_audio(sh_audio_t *sh_audio, struct mp_audio_buffer *outbuf,
 {
     // Indicates that a filter seems to be buffering large amounts of data
     int huge_filter_buffer = 0;
-    int sstride =
-        af_fmt2bits(sh_audio->sample_format) / 8 * sh_audio->channels.num;
-    // Decoded audio must be cut at boundaries of this many bytes
-    int unitsize = sstride * 16;
+    // Decoded audio must be cut at boundaries of this many samples
+    // (Note: the reason for this is unknown, possibly a refactoring artifact)
+    int unitsize = 16;
 
     /* Filter output size will be about filter_multiplier times input size.
      * If some filter buffers audio in big blocks this might only hold
      * as average over time. */
     double filter_multiplier = af_calc_filter_multiplier(sh_audio->afilter);
 
-    /* If the decoder set audio_out_minsize then it can do the equivalent of
-     * "while (output_len < target_len) output_len += audio_out_minsize;",
-     * so we must guarantee there is at least audio_out_minsize-1 bytes
-     * more space in the output buffer than the minimum length we try to
-     * decode. */
-    int max_decode_len = sh_audio->a_buffer_size - sh_audio->audio_out_minsize;
-    if (!unitsize)
-        return -1;
-    max_decode_len -= max_decode_len % unitsize;
+    int prev_buffered = -1;
+    while (minsamples >= 0) {
+        int buffered = mp_audio_buffer_samples(outbuf);
+        if (minsamples < buffered || buffered == prev_buffered)
+            break;
+        prev_buffered = buffered;
 
-    while (minsamples >= 0 && mp_audio_buffer_samples(outbuf) < minsamples) {
-        int decsamples = (minsamples - mp_audio_buffer_samples(outbuf))
-                         / filter_multiplier;
-        int declen = decsamples * sstride;
+        int decsamples = (minsamples - buffered) / filter_multiplier;
         // + some extra for possible filter buffering
-        declen += unitsize << 5;
-        if (huge_filter_buffer)
+        decsamples += 1 << unitsize;
+
+        if (huge_filter_buffer) {
             /* Some filter must be doing significant buffering if the estimated
              * input length didn't produce enough output from filters.
              * Feed the filters 2k bytes at a time until we have enough output.
@@ -324,15 +329,14 @@ int decode_audio(sh_audio_t *sh_audio, struct mp_audio_buffer *outbuf,
              * to get audio data and buffer video frames in memory while doing
              * so. However the performance impact of either is probably not too
              * significant as long as the value is not completely insane. */
-            declen = 2000;
-        declen -= declen % unitsize;
-        if (declen > max_decode_len)
-            declen = max_decode_len;
-        else
-            /* if this iteration does not fill buffer, we must have lots
-             * of buffering in filters */
-            huge_filter_buffer = 1;
-        int res = filter_n_bytes(sh_audio, outbuf, declen);
+            decsamples = 2000;
+        }
+
+        /* if this iteration does not fill buffer, we must have lots
+         * of buffering in filters */
+        huge_filter_buffer = 1;
+
+        int res = filter_n_bytes(sh_audio, outbuf, decsamples);
         if (res < 0)
             return res;
     }
@@ -342,6 +346,7 @@ int decode_audio(sh_audio_t *sh_audio, struct mp_audio_buffer *outbuf,
 void resync_audio_stream(sh_audio_t *sh_audio)
 {
     sh_audio->pts = MP_NOPTS_VALUE;
+    sh_audio->pts_offset = 0;
     if (!sh_audio->initialized)
         return;
     sh_audio->ad_driver->control(sh_audio, ADCTRL_RESYNC_STREAM, NULL);
