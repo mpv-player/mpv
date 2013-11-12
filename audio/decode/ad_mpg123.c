@@ -27,34 +27,20 @@
 #include "ad.h"
 #include "mpvcore/mp_msg.h"
 
-/* Reducing the ifdeffery to two main variants:
- *   1. most compatible to any libmpg123 version
- *   2. fastest variant with recent libmpg123 (>=1.14)
- * Running variant 2 on older libmpg123 versions may work in
- * principle, but is not supported.
- * So, please leave the check for MPG123_API_VERSION there, m-kay?
- */
 #include <mpg123.h>
 
-/* Enable faster mode of operation with newer libmpg123, avoiding
- * unnecessary memcpy() calls. */
-#if (defined MPG123_API_VERSION) && (MPG123_API_VERSION >= 33)
-#define AD_MPG123_FRAMEWISE
+#if (defined MPG123_API_VERSION) && (MPG123_API_VERSION < 33)
+#error "This should not happen"
 #endif
-
-/* Switch for updating bitrate info of VBR files. Not essential. */
-#define AD_MPG123_MEAN_BITRATE
 
 struct ad_mpg123_context {
     mpg123_handle *handle;
     char new_format;
-#ifdef AD_MPG123_MEAN_BITRATE
     /* Running mean for bit rate, stream length estimation. */
     float mean_rate;
     unsigned int mean_count;
     /* Time delay for updates. */
     short delay;
-#endif
     /* If the stream is actually VBR. */
     char vbr;
 };
@@ -104,17 +90,10 @@ static int preinit(sh_audio_t *sh)
     /* Example for RVA choice (available since libmpg123 1.0.0):
     mpg123_param(con->handle, MPG123_RVA, MPG123_RVA_MIX, 0.0) */
 
-#ifdef AD_MPG123_FRAMEWISE
     /* Prevent funky automatic resampling.
      * This way, we can be sure that one frame will never produce
      * more than 1152 stereo samples. */
     mpg123_param(con->handle, MPG123_REMOVE_FLAGS, MPG123_AUTO_RESAMPLE, 0.);
-#else
-    /* Older mpg123 is vulnerable to concatenated streams when gapless cutting
-     * is enabled (will only play the jingle of a badly constructed radio
-     * stream). The versions using framewise decoding are fine with that. */
-    mpg123_param(con->handle, MPG123_REMOVE_FLAGS, MPG123_GAPLESS, 0.);
-#endif
 
     return 1;
 
@@ -225,12 +204,10 @@ static int set_format(sh_audio_t *sh, struct ad_mpg123_context *con)
                    "Bad encoding from mpg123: %i.\n", encoding);
             return MPG123_ERR;
         }
-#ifdef AD_MPG123_FRAMEWISE
         /* Going to decode directly to MPlayer's memory. It is important
          * to have MPG123_AUTO_RESAMPLE disabled for the buffer size
          * being an all-time limit. */
         sh->audio_out_minsize = 1152 * 2 * (af_fmt2bits(sh->sample_format) / 8);
-#endif
         con->new_format = 0;
     }
     return ret;
@@ -282,13 +259,8 @@ static int decode_a_bit(sh_audio_t *sh, unsigned char *buf, int count)
                 sh->pts_bytes = 0;
             }
 
-#ifdef AD_MPG123_FRAMEWISE
             /* Have to use mpg123_feed() to avoid decoding here. */
             ret = mpg123_feed(con->handle, pkt->buffer, pkt->len);
-#else
-            /* Do not use mpg123_feed(), added in later libmpg123 versions. */
-            ret = mpg123_decode(con->handle, pkt->buffer, pkt->len, NULL, 0, NULL);
-#endif
             talloc_free(pkt);
             if (ret == MPG123_ERR)
                 break;
@@ -309,7 +281,6 @@ static int decode_a_bit(sh_audio_t *sh, unsigned char *buf, int count)
 
         /* Try to decode a bit. This is the return value that counts
          * for the loop condition. */
-#ifdef AD_MPG123_FRAMEWISE
         if (!buf) { /* fake call just for feeding to get format */
             ret = set_format(sh, con);
         } else { /* This is the decoding. One frame at a time. */
@@ -317,10 +288,6 @@ static int decode_a_bit(sh_audio_t *sh, unsigned char *buf, int count)
             if (ret == MPG123_OK)
                 ret = mpg123_decode_frame(con->handle, NULL, NULL, &got_now);
         }
-#else
-        ret = mpg123_decode(con->handle, NULL, 0, buf + got, count - got,
-                            &got_now);
-#endif
 
         got += got_now;
         sh->pts_bytes += got_now;
@@ -334,11 +301,7 @@ static int decode_a_bit(sh_audio_t *sh, unsigned char *buf, int count)
             ret = set_format(sh, con);
         }
 
-#ifdef AD_MPG123_FRAMEWISE
     } while (ret == MPG123_NEED_MORE || (got == 0 && count != 0));
-#else
-    } while (ret == MPG123_NEED_MORE || got < count);
-#endif
 
     if (ret == MPG123_ERR) {
         mp_msg(MSGT_DECAUDIO, MSGL_ERR, "mpg123 decoding failed: %s\n",
@@ -399,11 +362,9 @@ static int init(sh_audio_t *sh, const char *decoder)
          * For VBR, the first frame will be a bad estimate. */
         sh->i_bps = (finfo.bitrate ? finfo.bitrate : compute_bitrate(&finfo))
                     * 1000 / 8;
-#ifdef AD_MPG123_MEAN_BITRATE
         con->delay      = 1;
         con->mean_rate  = 0.;
         con->mean_count = 0;
-#endif
         con->vbr = (finfo.vbr != MPG123_CBR);
 
         return 1;
@@ -425,7 +386,6 @@ static void uninit(sh_audio_t *sh)
     mpg123_exit();
 }
 
-#ifdef AD_MPG123_MEAN_BITRATE
 /* Update mean bitrate. This could be dropped if accurate time display
  * on audio file playback is not desired. */
 static void update_info(sh_audio_t *sh)
@@ -446,7 +406,6 @@ static void update_info(sh_audio_t *sh)
         }
     }
 }
-#endif
 
 static int decode_audio(sh_audio_t *sh, unsigned char *buf, int minlen,
                         int maxlen)
@@ -458,9 +417,7 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf, int minlen,
     if (bytes == 0)
         return -1;              /* EOF */
 
-#ifdef AD_MPG123_MEAN_BITRATE
     update_info(sh);
-#endif
     return bytes;
 }
 
@@ -473,9 +430,7 @@ static int control(sh_audio_t *sh, int cmd, void *arg)
          * Otherwise, we would have funny effects from the gapless code.
          * Oh, and it helps to minimize artifacts from jumping in the stream. */
         if (reopen_stream(sh)) {
-#ifdef AD_MPG123_MEAN_BITRATE
             update_info(sh);
-#endif
             return CONTROL_TRUE;
         } else {
             /* MPlayer ignores this case! It just keeps on decoding.

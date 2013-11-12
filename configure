@@ -2615,13 +2615,11 @@ fi
 echores "$_zlib"
 
 
-# Any version of libmpg123 that knows MPG123_RESYNC_LIMIT shall be fine.
-# That is, 1.2.0 onwards. Recommened is 1.14 onwards, though.
 echocheck "mpg123 support"
 def_mpg123='#define HAVE_MPG123 0'
 if test "$_mpg123" = auto; then
   _mpg123=no
-  pkg_config_add 'libmpg123 >= 1.2.0' && _mpg123=yes
+  pkg_config_add 'libmpg123 >= 1.14.0' && _mpg123=yes
 fi
 if test "$_mpg123" = yes ; then
   def_mpg123='#define HAVE_MPG123 1'
