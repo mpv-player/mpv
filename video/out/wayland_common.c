@@ -208,9 +208,8 @@ static void keyboard_handle_keymap(void *data,
         return;
     }
 
-    wl->input.xkb.keymap = xkb_keymap_new_from_buffer(wl->input.xkb.context,
+    wl->input.xkb.keymap = xkb_keymap_new_from_string(wl->input.xkb.context,
                                                       map_str,
-                                                      size,
                                                       XKB_KEYMAP_FORMAT_TEXT_V1,
                                                       0);
 
