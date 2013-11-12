@@ -17,6 +17,8 @@
 
 #include <assert.h>
 
+#include <libavutil/mem.h>
+
 #include "mpvcore/mp_common.h"
 #include "mpvcore/mp_talloc.h"
 #include "audio.h"
@@ -110,6 +112,16 @@ void mp_audio_set_null_data(struct mp_audio *mpa)
     mpa->samples = 0;
 }
 
+static void mp_audio_destructor(void *ptr)
+{
+    struct mp_audio *mpa = ptr;
+    for (int n = mpa->num_planes; n < MP_NUM_CHANNELS; n++) {
+        // Note: don't free if not allocated by mp_audio_realloc
+        if (mpa->allocated[n])
+            av_free(mpa->planes[n]);
+    }
+}
+
 /* Reallocate the data stored in mpa->planes[n] so that enough samples are
  * available on every plane. The previous data is kept (for the smallest
  * common number of samples before/after resize).
@@ -129,12 +141,24 @@ void mp_audio_realloc(struct mp_audio *mpa, int samples)
     assert(samples >= 0);
     int size = MPMAX(samples * mpa->sstride, 1);
     for (int n = 0; n < mpa->num_planes; n++) {
-        mpa->planes[n] = talloc_realloc_size(mpa, mpa->planes[n], size);
+        if (size != mpa->allocated[n]) {
+            // Note: av_realloc() can't be used (see libavutil doxygen)
+            void *new = av_malloc(size);
+            if (!new)
+                abort();
+            if (mpa->allocated[n])
+                memcpy(new, mpa->planes[n], MPMIN(mpa->allocated[n], size));
+            av_free(mpa->planes[n]);
+            mpa->planes[n] = new;
+            mpa->allocated[n] = size;
+        }
     }
     for (int n = mpa->num_planes; n < MP_NUM_CHANNELS; n++) {
-        talloc_free(mpa->planes[n]);
+        av_free(mpa->planes[n]);
         mpa->planes[n] = NULL;
+        mpa->allocated[n] = 0;
     }
+    talloc_set_destructor(mpa, mp_audio_destructor);
 }
 
 // Like mp_audio_realloc(), but only reallocate if the audio grows in size.
@@ -154,7 +178,7 @@ int mp_audio_get_allocated_size(struct mp_audio *mpa)
 {
     int size = 0;
     for (int n = 0; n < mpa->num_planes; n++) {
-        int s = talloc_get_size(mpa->planes[n]) / mpa->sstride;
+        int s = mpa->allocated[n] / mpa->sstride;
         size = n == 0 ? s : MPMIN(size, s);
     }
     return size;

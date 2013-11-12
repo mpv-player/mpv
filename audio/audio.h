@@ -36,6 +36,9 @@ struct mp_audio {
     int spf;            // sub-samples per sample on each plane
     int num_planes;     // number of planes
     int bps;            // size of sub-samples (af_fmt2bits(format) / 8)
+
+    // private
+    int allocated[MP_NUM_CHANNELS]; // use mp_audio_get_allocated_size()
 };
 
 void mp_audio_set_format(struct mp_audio *mpa, int format);
