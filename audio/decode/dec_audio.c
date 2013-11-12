@@ -263,10 +263,8 @@ static int filter_n_bytes(sh_audio_t *sh, struct mp_audio_buffer *outbuf,
     // Filter
     struct mp_audio filter_input = {
         .planes = {sh->a_buffer},
-        .rate = sh->samplerate,
     };
-    mp_audio_set_format(&filter_input, sh->sample_format);
-    mp_audio_set_channels(&filter_input, &sh->channels);
+    mp_audio_copy_config(&filter_input, &sh->afilter->input);
     filter_input.samples = len / filter_input.sstride;
 
     struct mp_audio *filter_output = af_play(sh->afilter, &filter_input);
