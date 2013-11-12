@@ -497,10 +497,6 @@ static int control(struct af_instance *af, int cmd, void *arg) {
         mp_audio_copy_config(af->data, (struct mp_audio*)arg);
         mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
 
-        /* arg->len is not set here yet, so init of buffers and connecting the
-         * filter, has to be done in play() :-/
-         */
-
         return af_test_output(af, (struct mp_audio*)arg);
     case AF_CONTROL_COMMAND_LINE: {
         char *buf;
@@ -650,7 +646,6 @@ static int control(struct af_instance *af, int cmd, void *arg) {
  */
 
 static void uninit(struct af_instance *af) {
-    free(af->data);
     if (af->setup) {
         af_ladspa_t *setup = (af_ladspa_t*) af->setup;
         const LADSPA_Descriptor *pdes = setup->plugin_descriptor;
@@ -710,8 +705,8 @@ static void uninit(struct af_instance *af) {
 static struct mp_audio* play(struct af_instance *af, struct mp_audio *data) {
     af_ladspa_t *setup = af->setup;
     const LADSPA_Descriptor *pdes = setup->plugin_descriptor;
-    float *audio = (float*)data->audio;
-    int nsamples = data->len/4; /* /4 because it's 32-bit float */
+    float *audio = (float*)data->planes[0];
+    int nsamples = data->samples*data->nch;
     int nch = data->nch;
     int rate = data->rate;
     int i, p;
@@ -721,10 +716,6 @@ static struct mp_audio* play(struct af_instance *af, struct mp_audio *data) {
 
     /* See if it's the first call. If so, setup inbufs/outbufs, instantiate
      * plugin, connect ports and activate plugin
-     */
-
-    /* 2004-12-07: Also check if the buffersize has to be changed!
-     *             data->len is not constant per se! re-init buffers.
      */
 
     if ( (setup->bufsize != nsamples/nch) || (setup->nch != nch) ) {
@@ -884,16 +875,9 @@ static int af_open(struct af_instance *af) {
     af->control=control;
     af->uninit=uninit;
     af->play=play;
-    af->mul=1;
-
-    af->data = calloc(1, sizeof(struct mp_audio));
-    if (af->data == NULL)
-        return af_ladspa_malloc_failed((char*)af_info_ladspa.name);
 
     af->setup = calloc(1, sizeof(af_ladspa_t));
     if (af->setup == NULL) {
-        free(af->data);
-        af->data=NULL;
         return af_ladspa_malloc_failed((char*)af_info_ladspa.name);
     }
 

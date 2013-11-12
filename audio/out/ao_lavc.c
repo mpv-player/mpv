@@ -103,6 +103,7 @@ static int init(struct ao *ao)
     ac->stream->codec->channel_layout = mp_chmap_to_lavc(&ao->channels);
 
     ac->stream->codec->sample_fmt = AV_SAMPLE_FMT_NONE;
+    ao->format = af_fmt_from_planar(ao->format);
 
     {
         // first check if the selected format is somewhere in the list of
@@ -290,8 +291,6 @@ static void fill_with_padding(void *buf, int cnt, int sz, const void *padding)
 }
 
 // close audio device
-static int encode(struct ao *ao, double apts, void *data);
-static int play(struct ao *ao, void *data, int len, int flags);
 static void uninit(struct ao *ao, bool cut_audio)
 {
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
@@ -309,7 +308,7 @@ static int get_space(struct ao *ao)
 {
     struct priv *ac = ao->priv;
 
-    return ac->aframesize * ac->sample_size * ao->channels.num * ac->framecount;
+    return ac->aframesize * ac->framecount;
 }
 
 // must get exactly ac->aframesize amount of data
@@ -438,10 +437,10 @@ static int encode(struct ao *ao, double apts, void *data)
     return packet.size;
 }
 
-// plays 'len' bytes of 'data'
+// plays 'samples' samples of 'ni_data[0]'
 // it should round it down to frame sizes
-// return: number of bytes played
-static int play(struct ao *ao, void *data, int len, int flags)
+// return: number of samples played
+static int play(struct ao *ao, void **ni_data, int samples, int flags)
 {
     struct priv *ac = ao->priv;
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
@@ -450,6 +449,8 @@ static int play(struct ao *ao, void *data, int len, int flags)
     double nextpts;
     double pts = ao->pts;
     double outpts;
+    void *data = ni_data[0];
+    int len = samples * ao->sstride;
     int bytelen = len;
 
     len /= ac->sample_size * ao->channels.num;
@@ -470,8 +471,9 @@ static int play(struct ao *ao, void *data, int len, int flags)
                               extralen / ac->sample_size,
                               ac->sample_size, ac->sample_padding);
             // No danger of recursion, because AOPLAY_FINAL_CHUNK not set
-            written = play(ao, paddingbuf, bytelen + extralen, 0);
-            if (written < bytelen) {
+            written =
+                play(ao, &paddingbuf, (bytelen + extralen) / ao->sstride, 0);
+            if (written * ao->sstride < bytelen) {
                 MP_ERR(ao, "did not write enough data at the end\n");
             }
             talloc_free(paddingbuf);
@@ -485,7 +487,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
 
         while (encode(ao, outpts, NULL) > 0) ;
 
-        return FFMIN(written, bytelen);
+        return (FFMIN(written, bytelen)) / ao->sstride;
     }
 
     if (pts == MP_NOPTS_VALUE) {
@@ -576,7 +578,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
             ectx->next_in_pts = nextpts;
     }
 
-    return bufpos * ac->sample_size * ao->channels.num;
+    return bufpos;
 }
 
 const struct ao_driver audio_out_lavc = {

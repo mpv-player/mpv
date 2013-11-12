@@ -88,6 +88,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     // Sanity check
     if(!arg) return AF_ERROR;
 
+    mp_audio_force_interleaved_format((struct mp_audio*)arg);
     mp_audio_copy_config(af->data, (struct mp_audio*)arg);
 
     if(((struct mp_audio*)arg)->format != (AF_FORMAT_S16_NE)){
@@ -112,15 +113,14 @@ static int control(struct af_instance* af, int cmd, void* arg)
 // Deallocate memory
 static void uninit(struct af_instance* af)
 {
-    free(af->data);
     free(af->setup);
 }
 
 static void method1_int16(af_drc_t *s, struct mp_audio *c)
 {
   register int i = 0;
-  int16_t *data = (int16_t*)c->audio;	// Audio data
-  int len = c->len/2;		// Number of samples
+  int16_t *data = (int16_t*)c->planes[0];	// Audio data
+  int len = c->samples*c->nch;		// Number of samples
   float curavg = 0.0, newavg, neededmul;
   int tmp;
 
@@ -161,8 +161,8 @@ static void method1_int16(af_drc_t *s, struct mp_audio *c)
 static void method1_float(af_drc_t *s, struct mp_audio *c)
 {
   register int i = 0;
-  float *data = (float*)c->audio;	// Audio data
-  int len = c->len/4;		// Number of samples
+  float *data = (float*)c->planes[0];	// Audio data
+  int len = c->samples*c->nch;		// Number of samples
   float curavg = 0.0, newavg, neededmul, tmp;
 
   for (i = 0; i < len; i++)
@@ -198,8 +198,8 @@ static void method1_float(af_drc_t *s, struct mp_audio *c)
 static void method2_int16(af_drc_t *s, struct mp_audio *c)
 {
   register int i = 0;
-  int16_t *data = (int16_t*)c->audio;	// Audio data
-  int len = c->len/2;		// Number of samples
+  int16_t *data = (int16_t*)c->planes[0];	// Audio data
+  int len = c->samples*c->nch;		// Number of samples
   float curavg = 0.0, newavg, avg = 0.0;
   int tmp, totallen = 0;
 
@@ -248,8 +248,8 @@ static void method2_int16(af_drc_t *s, struct mp_audio *c)
 static void method2_float(af_drc_t *s, struct mp_audio *c)
 {
   register int i = 0;
-  float *data = (float*)c->audio;	// Audio data
-  int len = c->len/4;		// Number of samples
+  float *data = (float*)c->planes[0];	// Audio data
+  int len = c->samples*c->nch;		// Number of samples
   float curavg = 0.0, newavg, avg = 0.0, tmp;
   int totallen = 0;
 
@@ -319,10 +319,8 @@ static int af_open(struct af_instance* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul=1;
-  af->data=calloc(1,sizeof(struct mp_audio));
   af->setup=calloc(1,sizeof(af_drc_t));
-  if(af->data == NULL || af->setup == NULL)
+  if(af->setup == NULL)
     return AF_ERROR;
 
   ((af_drc_t*)af->setup)->mul = MUL_INIT;

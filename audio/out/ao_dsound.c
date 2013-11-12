@@ -388,7 +388,7 @@ static int init(struct ao *ao)
     WAVEFORMATEXTENSIBLE wformat;
     DSBUFFERDESC dsbpridesc;
     DSBUFFERDESC dsbdesc;
-    int format = ao->format;
+    int format = af_fmt_from_planar(ao->format);
     int rate = ao->samplerate;
 
     if (AF_FORMAT_IS_AC3(format))
@@ -596,7 +596,7 @@ static int get_space(struct ao *ao)
     int space = check_free_buffer_size(ao);
     if (space < p->min_free_space)
         return 0;
-    return space - p->min_free_space;
+    return (space - p->min_free_space) / ao->sstride;
 }
 
 /**
@@ -606,9 +606,10 @@ static int get_space(struct ao *ao)
 \param flags currently unused
 \return number of played bytes
 */
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *p = ao->priv;
+    int len = samples * ao->sstride;
 
     int space = check_free_buffer_size(ao);
     if (space < len)
@@ -616,7 +617,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
 
     if (!(flags & AOPLAY_FINAL_CHUNK))
         len = (len / p->outburst) * p->outburst;
-    return write_buffer(ao, data, len);
+    return write_buffer(ao, data[0], len) / ao->sstride;
 }
 
 /**

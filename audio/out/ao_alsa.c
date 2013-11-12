@@ -52,12 +52,11 @@
 struct priv {
     snd_pcm_t *alsa;
     snd_pcm_format_t alsa_fmt;
-    size_t bytes_per_sample;
     int can_pause;
     snd_pcm_sframes_t prepause_frames;
     float delay_before_pause;
-    int buffersize;
-    int outburst;
+    int buffersize; // in frames
+    int outburst; // in frames
 
     int cfg_block;
     char *cfg_device;
@@ -251,6 +250,7 @@ static const int mp_to_alsa_format[][2] = {
 
 static int find_alsa_format(int af_format)
 {
+    af_format = af_fmt_from_planar(af_format);
     for (int n = 0; mp_to_alsa_format[n][0] != AF_FORMAT_UNKNOWN; n++) {
         if (mp_to_alsa_format[n][0] == af_format)
             return mp_to_alsa_format[n][1];
@@ -432,10 +432,6 @@ static int init(struct ao *ao)
     err = snd_pcm_hw_params_any(p->alsa, alsa_hwparams);
     CHECK_ALSA_ERROR("Unable to get initial parameters");
 
-    err = snd_pcm_hw_params_set_access
-            (p->alsa, alsa_hwparams, SND_PCM_ACCESS_RW_INTERLEAVED);
-    CHECK_ALSA_ERROR("Unable to set access type");
-
     p->alsa_fmt = find_alsa_format(ao->format);
     if (p->alsa_fmt == SND_PCM_FORMAT_UNKNOWN) {
         p->alsa_fmt = SND_PCM_FORMAT_S16;
@@ -458,6 +454,12 @@ static int init(struct ao *ao)
     err = snd_pcm_hw_params_set_format(p->alsa, alsa_hwparams, p->alsa_fmt);
     CHECK_ALSA_ERROR("Unable to set format");
 
+    snd_pcm_access_t access = af_fmt_is_planar(ao->format)
+                                    ? SND_PCM_ACCESS_RW_NONINTERLEAVED
+                                    : SND_PCM_ACCESS_RW_INTERLEAVED;
+    err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
+    CHECK_ALSA_ERROR("Unable to set access type");
+
     int num_channels = ao->channels.num;
     err = snd_pcm_hw_params_set_channels_near
             (p->alsa, alsa_hwparams, &num_channels);
@@ -478,9 +480,6 @@ static int init(struct ao *ao)
             (p->alsa, alsa_hwparams, &ao->samplerate, NULL);
     CHECK_ALSA_ERROR("Unable to set samplerate-2");
 
-    p->bytes_per_sample = af_fmt2bits(ao->format) / 8;
-    p->bytes_per_sample *= ao->channels.num;
-
     err = snd_pcm_hw_params_set_buffer_time_near
             (p->alsa, alsa_hwparams, &(unsigned int){BUFFER_TIME}, NULL);
     CHECK_ALSA_ERROR("Unable to set buffer time near");
@@ -499,14 +498,14 @@ static int init(struct ao *ao)
     err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &bufsize);
     CHECK_ALSA_ERROR("Unable to get buffersize");
 
-    p->buffersize = bufsize * p->bytes_per_sample;
-    MP_VERBOSE(ao, "got buffersize=%i\n", p->buffersize);
+    p->buffersize = bufsize;
+    MP_VERBOSE(ao, "got buffersize=%i samples\n", p->buffersize);
 
     err = snd_pcm_hw_params_get_period_size(alsa_hwparams, &chunk_size, NULL);
     CHECK_ALSA_ERROR("Unable to get period size");
 
     MP_VERBOSE(ao, "got period size %li\n", chunk_size);
-    p->outburst = chunk_size * p->bytes_per_sample;
+    p->outburst = chunk_size;
 
     /* setting software parameters */
     err = snd_pcm_sw_params_current(p->alsa, alsa_swparams);
@@ -537,8 +536,8 @@ static int init(struct ao *ao)
 
     p->can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
 
-    MP_VERBOSE(ao, "opened: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
-               ao->samplerate, ao->channels.num, (int)p->bytes_per_sample,
+    MP_VERBOSE(ao, "opened: %d Hz/%d channels/%d bps/%d samples buffer/%s\n",
+               ao->samplerate, ao->channels.num, af_fmt2bits(ao->format),
                p->buffersize, snd_pcm_format_description(p->alsa_fmt));
 
     return 0;
@@ -634,32 +633,27 @@ static void reset(struct ao *ao)
 alsa_error: ;
 }
 
-/*
-    plays 'len' bytes of 'data'
-    returns: number of bytes played
-    modified last at 29.06.02 by jp
-    thanxs for marius <marius@rospot.com> for giving us the light ;)
- */
-
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *p = ao->priv;
-    int num_frames;
     snd_pcm_sframes_t res = 0;
     if (!(flags & AOPLAY_FINAL_CHUNK))
-        len = len / p->outburst * p->outburst;
-    num_frames = len / p->bytes_per_sample;
+        samples = samples / p->outburst * p->outburst;
 
     if (!p->alsa) {
         MP_ERR(ao, "Device configuration error.");
         return -1;
     }
 
-    if (num_frames == 0)
+    if (samples == 0)
         return 0;
 
     do {
-        res = snd_pcm_writei(p->alsa, data, num_frames);
+        if (af_fmt_is_planar(ao->format)) {
+            res = snd_pcm_writen(p->alsa, data, samples);
+        } else {
+            res = snd_pcm_writei(p->alsa, data[0], samples);
+        }
 
         if (res == -EINTR) {
             /* nothing to do */
@@ -678,7 +672,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
         }
     } while (res == 0);
 
-    return res < 0 ? -1 : res * p->bytes_per_sample;
+    return res < 0 ? -1 : res;
 
 alsa_error:
     return -1;
@@ -696,7 +690,7 @@ static int get_space(struct ao *ao)
     err = snd_pcm_status(p->alsa, status);
     CHECK_ALSA_ERROR("cannot get pcm status");
 
-    unsigned space = snd_pcm_status_get_avail(status) * p->bytes_per_sample;
+    unsigned space = snd_pcm_status_get_avail(status);
     if (space > p->buffersize) // Buffer underrun?
         space = p->buffersize;
     return space;

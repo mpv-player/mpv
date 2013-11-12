@@ -45,12 +45,12 @@
 #define MAX_CHANS MP_NUM_CHANNELS
 #define NUM_BUF 128
 #define CHUNK_SIZE 512
+#define CHUNK_SAMPLES (CHUNK_SIZE / 2)
 static ALuint buffers[MAX_CHANS][NUM_BUF];
 static ALuint sources[MAX_CHANS];
 
 static int cur_buf[MAX_CHANS];
 static int unqueue_buf[MAX_CHANS];
-static int16_t *tmpbuf;
 
 static struct ao *ao_data;
 
@@ -169,8 +169,7 @@ static int init(struct ao *ao)
     alcGetIntegerv(dev, ALC_FREQUENCY, 1, &freq);
     if (alcGetError(dev) == ALC_NO_ERROR && freq)
         ao->samplerate = freq;
-    ao->format = AF_FORMAT_S16_NE;
-    tmpbuf = malloc(CHUNK_SIZE);
+    ao->format = AF_FORMAT_S16P;
     return 0;
 
 err_out:
@@ -182,7 +181,6 @@ static void uninit(struct ao *ao, bool immed)
 {
     ALCcontext *ctx = alcGetCurrentContext();
     ALCdevice *dev = alcGetContextsDevice(ctx);
-    free(tmpbuf);
     if (!immed) {
         ALint state;
         alGetSourcei(sources[0], AL_SOURCE_STATE, &state);
@@ -251,34 +249,30 @@ static int get_space(struct ao *ao)
     queued = NUM_BUF - queued - 3;
     if (queued < 0)
         return 0;
-    return queued * CHUNK_SIZE * ao->channels.num;
+    return queued * CHUNK_SAMPLES;
 }
 
 /**
  * \brief write data into buffer and reset underrun flag
  */
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     ALint state;
-    int i, j, k;
-    int ch;
-    int16_t *d = data;
-    len /= ao->channels.num * CHUNK_SIZE;
-    for (i = 0; i < len; i++) {
-        for (ch = 0; ch < ao->channels.num; ch++) {
-            for (j = 0, k = ch; j < CHUNK_SIZE / 2; j++, k += ao->channels.num)
-                tmpbuf[j] = d[k];
-            alBufferData(buffers[ch][cur_buf[ch]], AL_FORMAT_MONO16, tmpbuf,
+    int num = samples / CHUNK_SAMPLES;
+    for (int i = 0; i < num; i++) {
+        for (int ch = 0; ch < ao->channels.num; ch++) {
+            int16_t *d = data[ch];
+            d += i * CHUNK_SAMPLES;
+            alBufferData(buffers[ch][cur_buf[ch]], AL_FORMAT_MONO16, d,
                          CHUNK_SIZE, ao->samplerate);
             alSourceQueueBuffers(sources[ch], 1, &buffers[ch][cur_buf[ch]]);
             cur_buf[ch] = (cur_buf[ch] + 1) % NUM_BUF;
         }
-        d += ao->channels.num * CHUNK_SIZE / 2;
     }
     alGetSourcei(sources[0], AL_SOURCE_STATE, &state);
     if (state != AL_PLAYING) // checked here in case of an underrun
         alSourcePlayv(ao->channels.num, sources);
-    return len * ao->channels.num * CHUNK_SIZE;
+    return num * CHUNK_SAMPLES;
 }
 
 static float get_delay(struct ao *ao)
@@ -286,7 +280,7 @@ static float get_delay(struct ao *ao)
     ALint queued;
     unqueue_buffers();
     alGetSourcei(sources[0], AL_BUFFERS_QUEUED, &queued);
-    return queued * CHUNK_SIZE / 2 / (float)ao->samplerate;
+    return queued * CHUNK_SAMPLES / (float)ao->samplerate;
 }
 
 #define OPT_BASE_STRUCT struct priv

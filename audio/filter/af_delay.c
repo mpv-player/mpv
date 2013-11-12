@@ -56,6 +56,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
       free(s->q[i]);
 
     mp_audio_copy_config(af->data, (struct mp_audio*)arg);
+    mp_audio_force_interleaved_format(af->data);
 
     // Allocate new delay queues
     for(i=0;i<af->data->nch;i++){
@@ -111,7 +112,6 @@ static void uninit(struct af_instance* af)
 {
   int i;
 
-  free(af->data);
   for(i=0;i<AF_NCH;i++)
       free(((af_delay_t*)(af->setup))->q[i]);
   free(af->setup);
@@ -123,13 +123,13 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
   struct mp_audio*   	c   = data;	 // Current working data
   af_delay_t*  	s   = af->setup; // Setup for this instance
   int 		nch = c->nch;	 // Number of channels
-  int		len = c->len/c->bps; // Number of sample in data chunk
+  int		len = mp_audio_psize(c)/c->bps; // Number of sample in data chunk
   int		ri  = 0;
   int 		ch,i;
   for(ch=0;ch<nch;ch++){
     switch(c->bps){
     case 1:{
-      int8_t* a = c->audio;
+      int8_t* a = c->planes[0];
       int8_t* q = s->q[ch];
       int wi = s->wi[ch];
       ri = s->ri;
@@ -143,7 +143,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
       break;
     }
     case 2:{
-      int16_t* a = c->audio;
+      int16_t* a = c->planes[0];
       int16_t* q = s->q[ch];
       int wi = s->wi[ch];
       ri = s->ri;
@@ -157,7 +157,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
       break;
     }
     case 4:{
-      int32_t* a = c->audio;
+      int32_t* a = c->planes[0];
       int32_t* q = s->q[ch];
       int wi = s->wi[ch];
       ri = s->ri;
@@ -181,10 +181,8 @@ static int af_open(struct af_instance* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul=1;
-  af->data=calloc(1,sizeof(struct mp_audio));
   af->setup=calloc(1,sizeof(af_delay_t));
-  if(af->data == NULL || af->setup == NULL)
+  if(af->setup == NULL)
     return AF_ERROR;
   return AF_OK;
 }

@@ -313,7 +313,6 @@ static int control(struct af_instance *af, int cmd, void* arg)
 	      mp_audio_set_channels_old(af->data, 5);
         mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
 	test_output_res = af_test_output(af, (struct mp_audio*)arg);
-	af->mul = 2.0 / af->data->nch;
 	// after testing input set the real output format
         mp_audio_set_num_channels(af->data, 2);
 	s->print_flag = 1;
@@ -366,9 +365,6 @@ static void uninit(struct af_instance *af)
 	free(s->fwrbuf_rr);
 	free(af->setup);
     }
-    if(af->data)
-	free(af->data->audio);
-    free(af->data);
 }
 
 /* Filter data through filter
@@ -385,14 +381,13 @@ damped (without any real 3D acoustical image, however).
 static struct mp_audio* play(struct af_instance *af, struct mp_audio *data)
 {
     af_hrtf_t *s = af->setup;
-    short *in = data->audio; // Input audio data
+    short *in = data->planes[0]; // Input audio data
     short *out = NULL; // Output audio data
-    short *end = in + data->len / sizeof(short); // Loop end
+    short *end = in + data->samples * data->nch; // Loop end
     float common, left, right, diff, left_b, right_b;
     const int dblen = s->dlbuflen, hlen = s->hrflen, blen = s->basslen;
 
-    if(AF_OK != RESIZE_LOCAL_BUFFER(af, data))
-	return NULL;
+    mp_audio_realloc_min(af->data, data->samples);
 
     if(s->print_flag) {
 	s->print_flag = 0;
@@ -425,7 +420,7 @@ static struct mp_audio* play(struct af_instance *af, struct mp_audio *data)
 		 "channel\n");
     }
 
-    out = af->data->audio;
+    out = af->data->planes[0];
 
     /* MPlayer's 5 channel layout (notation for the variable):
      *
@@ -565,8 +560,7 @@ static struct mp_audio* play(struct af_instance *af, struct mp_audio *data)
     }
 
     /* Set output data */
-    data->audio = af->data->audio;
-    data->len   = data->len / data->nch * 2;
+    data->planes[0] = af->data->planes[0];
     mp_audio_set_num_channels(data, 2);
 
     return data;
@@ -603,10 +597,8 @@ static int af_open(struct af_instance* af)
     af->control = control;
     af->uninit = uninit;
     af->play = play;
-    af->mul = 1;
-    af->data = calloc(1, sizeof(struct mp_audio));
     af->setup = calloc(1, sizeof(af_hrtf_t));
-    if((af->data == NULL) || (af->setup == NULL))
+    if(af->setup == NULL)
 	return AF_ERROR;
 
     s = af->setup;

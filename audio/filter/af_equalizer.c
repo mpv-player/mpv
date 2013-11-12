@@ -114,7 +114,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
       bp2(s->a[k],s->b[k],F[k]/((float)af->data->rate),Q);
 
     // Calculate how much this plugin adds to the overall time delay
-    af->delay = 2 * af->data->nch * af->data->bps;
+    af->delay = 2.0 / (double)af->data->rate;
 
     // Calculate gain factor to prevent clipping at output
     for(k=0;k<AF_NCH;k++)
@@ -156,7 +156,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
 // Deallocate memory
 static void uninit(struct af_instance* af)
 {
-    free(af->data);
     free(af->setup);
 }
 
@@ -170,9 +169,9 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 
   while(ci--){
     float*	g   = s->g[ci];      // Gain factor
-    float*	in  = ((float*)c->audio)+ci;
-    float*	out = ((float*)c->audio)+ci;
-    float* 	end = in + c->len/4; // Block loop end
+    float*	in  = ((float*)c->planes[0])+ci;
+    float*	out = ((float*)c->planes[0])+ci;
+    float* 	end = in + c->samples*c->nch; // Block loop end
 
     while(in < end){
       register int	k  = 0;		// Frequency band index
@@ -204,10 +203,8 @@ static int af_open(struct af_instance* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul=1;
-  af->data=calloc(1,sizeof(struct mp_audio));
   af->setup=calloc(1,sizeof(af_equalizer_t));
-  if(af->data == NULL || af->setup == NULL)
+  if(af->setup == NULL)
     return AF_ERROR;
   return AF_OK;
 }

@@ -255,7 +255,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
             struct sh_audio *sht = talloc_zero(demuxer, struct sh_audio);
             sht->gsh = sh;
             sht->opts = sh->opts;
-            sht->sample_format = AF_FORMAT_S16_NE;
             sh->audio = sht;
             break;
         }

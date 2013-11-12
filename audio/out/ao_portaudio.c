@@ -242,6 +242,8 @@ static int init(struct ao *ao)
             = Pa_GetDeviceInfo(pa_device)->defaultHighOutputLatency,
     };
 
+    ao->format = af_fmt_from_planar(ao->format);
+
     const struct format_map *fmt = format_maps;
     while (fmt->pa_format) {
         if (fmt->mp_format == ao->format) {
@@ -278,13 +280,13 @@ error_exit:
     return -1;
 }
 
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *priv = ao->priv;
 
     pthread_mutex_lock(&priv->ring_mutex);
 
-    int write_len = mp_ring_write(priv->ring, data, len);
+    int write_len = mp_ring_write(priv->ring, data[0], samples * ao->sstride);
     if (flags & AOPLAY_FINAL_CHUNK)
         priv->play_remaining = true;
 
@@ -293,7 +295,7 @@ static int play(struct ao *ao, void *data, int len, int flags)
     if (Pa_IsStreamStopped(priv->stream) == 1)
         check_pa_ret(Pa_StartStream(priv->stream));
 
-    return write_len;
+    return write_len / ao->sstride;
 }
 
 static int get_space(struct ao *ao)
@@ -306,7 +308,7 @@ static int get_space(struct ao *ao)
 
     pthread_mutex_unlock(&priv->ring_mutex);
 
-    return free;
+    return free / ao->sstride;
 }
 
 static float get_delay(struct ao *ao)

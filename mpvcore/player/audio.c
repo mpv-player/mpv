@@ -30,6 +30,8 @@
 #include "mpvcore/mp_common.h"
 
 #include "audio/mixer.h"
+#include "audio/audio.h"
+#include "audio/audio_buffer.h"
 #include "audio/decode/dec_audio.h"
 #include "audio/filter/af.h"
 #include "audio/out/ao.h"
@@ -147,7 +149,11 @@ void reinit_audio_chain(struct MPContext *mpctx)
             MP_ERR(mpctx, "Could not open/initialize audio device -> no sound.\n");
             goto init_error;
         }
-        ao->buffer.start = talloc_new(ao);
+
+        ao->buffer = mp_audio_buffer_create(ao);
+        mp_audio_buffer_reinit_fmt(ao->buffer, ao->format, &ao->channels,
+                                   ao->samplerate);
+
         char *s = mp_audio_fmt_to_str(ao->samplerate, &ao->channels, ao->format);
         MP_INFO(mpctx, "AO: [%s] %s\n", ao->driver->name, s);
         talloc_free(s);
@@ -174,11 +180,8 @@ no_audio:
 double written_audio_pts(struct MPContext *mpctx)
 {
     sh_audio_t *sh_audio = mpctx->sh_audio;
-    if (!sh_audio)
+    if (!sh_audio || !sh_audio->initialized)
         return MP_NOPTS_VALUE;
-
-    double bps = sh_audio->channels.num * sh_audio->samplerate *
-                 (af_fmt2bits(sh_audio->sample_format) / 8);
 
     // first calculate the end pts of audio that has been output by decoder
     double a_pts = sh_audio->pts;
@@ -188,24 +191,24 @@ double written_audio_pts(struct MPContext *mpctx)
     // sh_audio->pts is the timestamp of the latest input packet with
     // known pts that the decoder has decoded. sh_audio->pts_bytes is
     // the amount of bytes the decoder has written after that timestamp.
-    a_pts += sh_audio->pts_bytes / bps;
+    a_pts += sh_audio->pts_offset / (double)sh_audio->samplerate;
 
     // Now a_pts hopefully holds the pts for end of audio from decoder.
     // Subtract data in buffers between decoder and audio out.
 
     // Decoded but not filtered
-    a_pts -= sh_audio->a_buffer_len / bps;
+    a_pts -= mp_audio_buffer_seconds(sh_audio->decode_buffer);
 
-    // Data buffered in audio filters, measured in bytes of "missing" output
+    // Data buffered in audio filters, measured in seconds of "missing" output
     double buffered_output = af_calc_delay(sh_audio->afilter);
 
     // Data that was ready for ao but was buffered because ao didn't fully
     // accept everything to internal buffers yet
-    buffered_output += mpctx->ao->buffer.len;
+    buffered_output += mp_audio_buffer_seconds(mpctx->ao->buffer);
 
     // Filters divide audio length by playback_speed, so multiply by it
     // to get the length in original units without speedup or slowdown
-    a_pts -= buffered_output * mpctx->opts->playback_speed / mpctx->ao->bps;
+    a_pts -= buffered_output * mpctx->opts->playback_speed;
 
     return a_pts + mpctx->video_offset;
 }
@@ -219,27 +222,40 @@ double playing_audio_pts(struct MPContext *mpctx)
     return pts - mpctx->opts->playback_speed * ao_get_delay(mpctx->ao);
 }
 
-static int write_to_ao(struct MPContext *mpctx, void *data, int len, int flags,
+static int write_to_ao(struct MPContext *mpctx, struct mp_audio *data, int flags,
                        double pts)
 {
     if (mpctx->paused)
         return 0;
     struct ao *ao = mpctx->ao;
-    double bps = ao->bps / mpctx->opts->playback_speed;
-    int unitsize = ao->channels.num * af_fmt2bits(ao->format) / 8;
     ao->pts = pts;
-    int played = ao_play(mpctx->ao, data, len, flags);
-    assert(played <= len);
-    assert(played % unitsize == 0);
+    double real_samplerate = ao->samplerate / mpctx->opts->playback_speed;
+    int played = ao_play(mpctx->ao, data->planes, data->samples, flags);
+    assert(played <= data->samples);
     if (played > 0) {
-        mpctx->shown_aframes += played / unitsize;
-        mpctx->delay += played / bps;
+        mpctx->shown_aframes += played;
+        mpctx->delay += played / real_samplerate;
         // Keep correct pts for remaining data - could be used to flush
         // remaining buffer when closing ao.
-        ao->pts += played / bps;
+        ao->pts += played / real_samplerate;
         return played;
     }
     return 0;
+}
+
+static int write_silence_to_ao(struct MPContext *mpctx, int samples, int flags,
+                               double pts)
+{
+    struct mp_audio tmp = {0};
+    mp_audio_buffer_get_format(mpctx->ao->buffer, &tmp);
+    tmp.samples = samples;
+    char *p = talloc_size(NULL, tmp.samples * tmp.sstride);
+    for (int n = 0; n < tmp.num_planes; n++)
+        tmp.planes[n] = p;
+    mp_audio_fill_silence(&tmp, 0, tmp.samples);
+    int r = write_to_ao(mpctx, &tmp, 0, pts);
+    talloc_free(p);
+    return r;
 }
 
 #define ASYNC_PLAY_DONE -3
@@ -251,14 +267,14 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
     int res;
 
     // Timing info may not be set without
-    res = decode_audio(sh_audio, &ao->buffer, 1);
+    res = decode_audio(sh_audio, ao->buffer, 1);
     if (res < 0)
         return res;
 
-    int bytes;
+    int samples;
     bool did_retry = false;
     double written_pts;
-    double bps = ao->bps / opts->playback_speed;
+    double real_samplerate = ao->samplerate / opts->playback_speed;
     bool hrseek = mpctx->hrseek_active;   // audio only hrseek
     mpctx->hrseek_active = false;
     while (1) {
@@ -269,64 +285,56 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
         else
             ptsdiff = written_pts - mpctx->sh_video->pts - mpctx->delay
                       - mpctx->audio_delay;
-        bytes = ptsdiff * bps;
-        bytes -= bytes % (ao->channels.num * af_fmt2bits(ao->format) / 8);
+        samples = ptsdiff * real_samplerate;
 
         // ogg demuxers give packets without timing
         if (written_pts <= 1 && sh_audio->pts == MP_NOPTS_VALUE) {
             if (!did_retry) {
                 // Try to read more data to see packets that have pts
-                res = decode_audio(sh_audio, &ao->buffer, ao->bps);
+                res = decode_audio(sh_audio, ao->buffer, ao->samplerate);
                 if (res < 0)
                     return res;
                 did_retry = true;
                 continue;
             }
-            bytes = 0;
+            samples = 0;
         }
 
         if (fabs(ptsdiff) > 300 || isnan(ptsdiff))   // pts reset or just broken?
-            bytes = 0;
+            samples = 0;
 
-        if (bytes > 0)
+        if (samples > 0)
             break;
 
         mpctx->syncing_audio = false;
-        int a = MPMIN(-bytes, MPMAX(playsize, 20000));
-        res = decode_audio(sh_audio, &ao->buffer, a);
-        bytes += ao->buffer.len;
-        if (bytes >= 0) {
-            memmove(ao->buffer.start,
-                    ao->buffer.start + ao->buffer.len - bytes, bytes);
-            ao->buffer.len = bytes;
+        int skip_samples = -samples;
+        int a = MPMIN(skip_samples, MPMAX(playsize, 2500));
+        res = decode_audio(sh_audio, ao->buffer, a);
+        if (skip_samples <= mp_audio_buffer_samples(ao->buffer)) {
+            mp_audio_buffer_skip(ao->buffer, skip_samples);
             if (res < 0)
                 return res;
-            return decode_audio(sh_audio, &ao->buffer, playsize);
+            return decode_audio(sh_audio, ao->buffer, playsize);
         }
-        ao->buffer.len = 0;
+        mp_audio_buffer_clear(ao->buffer);
         if (res < 0)
             return res;
     }
     if (hrseek)
         // Don't add silence in audio-only case even if position is too late
         return 0;
-    int fillbyte = 0;
-    if ((ao->format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
-        fillbyte = 0x80;
-    if (bytes >= playsize) {
+    if (samples >= playsize) {
         /* This case could fall back to the one below with
-         * bytes = playsize, but then silence would keep accumulating
-         * in a_out_buffer if the AO accepts less data than it asks for
+         * samples = playsize, but then silence would keep accumulating
+         * in ao->buffer if the AO accepts less data than it asks for
          * in playsize. */
-        char *p = malloc(playsize);
-        memset(p, fillbyte, playsize);
-        write_to_ao(mpctx, p, playsize, 0, written_pts - bytes / bps);
-        free(p);
+        write_silence_to_ao(mpctx, playsize, 0,
+                            written_pts - samples / real_samplerate);
         return ASYNC_PLAY_DONE;
     }
     mpctx->syncing_audio = false;
-    decode_audio_prepend_bytes(&ao->buffer, bytes, fillbyte);
-    return decode_audio(sh_audio, &ao->buffer, playsize);
+    mp_audio_buffer_prepend_silence(ao->buffer, samples);
+    return decode_audio(sh_audio, ao->buffer, playsize);
 }
 
 int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
@@ -340,7 +348,6 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     bool partial_fill = false;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
     bool modifiable_audio_format = !(ao->format & AF_FORMAT_SPECIAL_MASK);
-    int unitsize = ao->channels.num * af_fmt2bits(ao->format) / 8;
 
     if (mpctx->paused)
         playsize = 1;   // just initialize things (audio pts at least)
@@ -359,7 +366,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     if (mpctx->syncing_audio || mpctx->hrseek_active)
         res = audio_start_sync(mpctx, playsize);
     else
-        res = decode_audio(sh_audio, &ao->buffer, playsize);
+        res = decode_audio(sh_audio, ao->buffer, playsize);
 
     if (res < 0) {  // EOF, error or format change
         if (res == -2) {
@@ -378,21 +385,19 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     }
 
     if (endpts != MP_NOPTS_VALUE && modifiable_audio_format) {
-        double bytes = (endpts - written_audio_pts(mpctx) + mpctx->audio_delay)
-                       * ao->bps / opts->playback_speed;
-        if (playsize > bytes) {
-            playsize = MPMAX(bytes, 0);
+        double samples = (endpts - written_audio_pts(mpctx) + mpctx->audio_delay)
+                         * ao->samplerate / opts->playback_speed;
+        if (playsize > samples) {
+            playsize = MPMAX(samples, 0);
             audio_eof = true;
             partial_fill = true;
         }
     }
 
-    assert(ao->buffer.len % unitsize == 0);
-    if (playsize > ao->buffer.len) {
+    if (playsize > mp_audio_buffer_samples(ao->buffer)) {
+        playsize = mp_audio_buffer_samples(ao->buffer);
         partial_fill = true;
-        playsize = ao->buffer.len;
     }
-    playsize -= playsize % unitsize;
     if (!playsize)
         return partial_fill && audio_eof ? -2 : -partial_fill;
 
@@ -406,14 +411,16 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         }
     }
 
-    assert(ao->buffer_playable_size <= ao->buffer.len);
-    int played = write_to_ao(mpctx, ao->buffer.start, playsize, playflags,
-                             written_audio_pts(mpctx));
-    ao->buffer_playable_size = playsize - played;
+    assert(ao->buffer_playable_samples <= mp_audio_buffer_samples(ao->buffer));
+
+    struct mp_audio data;
+    mp_audio_buffer_peek(ao->buffer, &data);
+    data.samples = MPMIN(data.samples, playsize);
+    int played = write_to_ao(mpctx, &data, playflags, written_audio_pts(mpctx));
+    ao->buffer_playable_samples = playsize - played;
 
     if (played > 0) {
-        ao->buffer.len -= played;
-        memmove(ao->buffer.start, ao->buffer.start + played, ao->buffer.len);
+        mp_audio_buffer_skip(ao->buffer, played);
     } else if (!mpctx->paused && audio_eof && ao_get_delay(ao) < .04) {
         // Sanity check to avoid hanging in case current ao doesn't output
         // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK
@@ -428,14 +435,14 @@ void clear_audio_output_buffers(struct MPContext *mpctx)
 {
     if (mpctx->ao) {
         ao_reset(mpctx->ao);
-        mpctx->ao->buffer.len = 0;
-        mpctx->ao->buffer_playable_size = 0;
+        mp_audio_buffer_clear(mpctx->ao->buffer);
+        mpctx->ao->buffer_playable_samples = 0;
     }
 }
 
 // Drop decoded data queued for filtering.
 void clear_audio_decode_buffers(struct MPContext *mpctx)
 {
-    if (mpctx->sh_audio)
-        mpctx->sh_audio->a_buffer_len = 0;
+    if (mpctx->sh_audio && mpctx->sh_audio->decode_buffer)
+        mp_audio_buffer_clear(mpctx->sh_audio->decode_buffer);
 }

@@ -53,8 +53,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         assert(test_conversion(in->format, out->format));
 
-        af->mul = (double)out->bps / in->bps;
-
         return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
     }
     case AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET: {
@@ -74,16 +72,15 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
 static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 {
-    if (RESIZE_LOCAL_BUFFER(af, data) != AF_OK)
-        return NULL;
+    mp_audio_realloc_min(af->data, data->samples);
 
     struct mp_audio *out = af->data;
-    size_t len = data->len / data->bps;
+    size_t len = mp_audio_psize(data) / data->bps;
 
     if (data->bps == 4) {
         for (int s = 0; s < len; s++) {
-            uint32_t val = *((uint32_t *)data->audio + s);
-            uint8_t *ptr = (uint8_t *)out->audio + s * 3;
+            uint32_t val = *((uint32_t *)data->planes[0] + s);
+            uint8_t *ptr = (uint8_t *)out->planes[0] + s * 3;
             ptr[0] = val >> SHIFT(0);
             ptr[1] = val >> SHIFT(1);
             ptr[2] = val >> SHIFT(2);
@@ -91,32 +88,23 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
         mp_audio_set_format(data, af_fmt_change_bits(data->format, 24));
     } else {
         for (int s = 0; s < len; s++) {
-            uint8_t *ptr = (uint8_t *)data->audio + s * 3;
+            uint8_t *ptr = (uint8_t *)data->planes[0] + s * 3;
             uint32_t val = ptr[0] << SHIFT(0)
                          | ptr[1] << SHIFT(1)
                          | ptr[2] << SHIFT(2);
-            *((uint32_t *)out->audio + s) = val;
+            *((uint32_t *)out->planes[0] + s) = val;
         }
         mp_audio_set_format(data, af_fmt_change_bits(data->format, 32));
     }
 
-    data->audio = out->audio;
-    data->len = len * data->bps;
+    data->planes[0] = out->planes[0];
     return data;
-}
-
-static void uninit(struct af_instance* af)
-{
-    if (af->data)
-        free(af->data->audio);
 }
 
 static int af_open(struct af_instance *af)
 {
     af->control = control;
     af->play = play;
-    af->uninit = uninit;
-    af->data = talloc_zero(af, struct mp_audio);
     return AF_OK;
 }
 

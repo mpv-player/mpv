@@ -183,9 +183,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
 */
 static void uninit( struct af_instance* af )
 {
-  free(af->data);
-  af->data = NULL;
-
   if(af->setup){
     af_export_t* s = af->setup;
     if (s->buf)
@@ -213,9 +210,9 @@ static struct mp_audio* play( struct af_instance* af, struct mp_audio* data )
 {
   struct mp_audio*   	c   = data;	     // Current working data
   af_export_t* 	s   = af->setup;     // Setup for this instance
-  int16_t* 	a   = c->audio;	     // Incomming sound
+  int16_t* 	a   = c->planes[0];	     // Incomming sound
   int 		nch = c->nch;	     // Number of channels
-  int		len = c->len/c->bps; // Number of sample in data chunk
+  int		len = c->samples*c->nch; // Number of sample in data chunk
   int 		sz  = s->sz;         // buffer size (in samples)
   int 		flag = 0;	     // Set to 1 if buffer is filled
 
@@ -259,10 +256,8 @@ static int af_open( struct af_instance* af )
   af->control = control;
   af->uninit  = uninit;
   af->play    = play;
-  af->mul=1;
-  af->data    = calloc(1, sizeof(struct mp_audio));
   af->setup   = calloc(1, sizeof(af_export_t));
-  if((af->data == NULL) || (af->setup == NULL))
+  if(af->setup == NULL)
     return AF_ERROR;
 
   ((af_export_t *)af->setup)->filename = mp_find_user_config_file(SHARED_FILE);

@@ -85,7 +85,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
 // Deallocate memory
 static void uninit(struct af_instance* af)
 {
-    free(af->data);
     free(af->setup);
 }
 
@@ -94,8 +93,8 @@ static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data)
 {
   af_sinesuppress_t *s = af->setup;
   register int i = 0;
-  int16_t *a = (int16_t*)data->audio;	// Audio data
-  int len = data->len/2;		// Number of samples
+  int16_t *a = (int16_t*)data->planes[0];	// Audio data
+  int len = data->samples*data->nch;		// Number of samples
 
   for (i = 0; i < len; i++)
   {
@@ -149,10 +148,8 @@ static int af_open(struct af_instance* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play_s16;
-  af->mul=1;
-  af->data=calloc(1,sizeof(struct mp_audio));
   af->setup=calloc(1,sizeof(af_sinesuppress_t));
-  if(af->data == NULL || af->setup == NULL)
+  if(af->setup == NULL)
     return AF_ERROR;
 
   ((af_sinesuppress_t*)af->setup)->freq = 50.0;

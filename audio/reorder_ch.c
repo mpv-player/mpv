@@ -63,38 +63,6 @@ void reorder_to_planar(void *restrict out, const void *restrict in,
         reorder_to_planar_(out, in, size, nchan, nmemb);
 }
 
-static inline void reorder_to_packed_(uint8_t *out, uint8_t **in,
-                                      size_t size, size_t nchan, size_t nmemb)
-{
-    size_t outstep = nchan * size;
-
-    for (size_t c = 0; c < nchan; ++c) {
-        char *outptr = out + c * size;
-        char *inptr = in[c];
-        for (size_t i = 0; i < nmemb; ++i, outptr += outstep, inptr += size) {
-            memcpy(outptr, inptr, size);
-        }
-    }
-}
-
-// out = destination array of packed samples of given size, nmemb frames
-// in[channel] = source array of samples for the given channel
-void reorder_to_packed(uint8_t *out, uint8_t **in,
-                       size_t size, size_t nchan, size_t nmemb)
-{
-    if (nchan == 1)
-        memcpy(out, in, size * nchan * nmemb);
-    // See reorder_to_planar() why this is done this way
-    else if (size == 1)
-        reorder_to_packed_(out, in, 1, nchan, nmemb);
-    else if (size == 2)
-        reorder_to_packed_(out, in, 2, nchan, nmemb);
-    else if (size == 4)
-        reorder_to_packed_(out, in, 4, nchan, nmemb);
-    else
-        reorder_to_packed_(out, in, size, nchan, nmemb);
-}
-
 #define MAX_SAMPLESIZE 8
 
 static void reorder_channels_(uint8_t *restrict data, int *restrict ch_order,

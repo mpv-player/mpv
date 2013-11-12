@@ -159,7 +159,10 @@ static struct ao *ao_create(bool probing, struct mpv_global *global,
     talloc_free(chmap);
     if (ao->driver->init(ao) < 0)
         goto error;
-    ao->bps = ao->channels.num * ao->samplerate * af_fmt2bits(ao->format) / 8;
+    ao->sstride = af_fmt2bits(ao->format) / 8;
+    if (!af_fmt_is_planar(ao->format))
+        ao->sstride *= ao->channels.num;
+    ao->bps = ao->samplerate * ao->sstride;
     return ao;
 error:
     talloc_free(ao);
@@ -206,9 +209,9 @@ void ao_uninit(struct ao *ao, bool cut_audio)
     talloc_free(ao);
 }
 
-int ao_play(struct ao *ao, void *data, int len, int flags)
+int ao_play(struct ao *ao, void **data, int samples, int flags)
 {
-    return ao->driver->play(ao, data, len, flags);
+    return ao->driver->play(ao, data, samples, flags);
 }
 
 int ao_control(struct ao *ao, enum aocontrol cmd, void *arg)
@@ -254,10 +257,12 @@ int ao_play_silence(struct ao *ao, int samples)
 {
     if (samples <= 0 || AF_FORMAT_IS_SPECIAL(ao->format))
         return 0;
-    int s = ao->channels.num * (af_fmt2bits(ao->format) / 8);
-    char *p = talloc_size(NULL, samples * s);
-    af_fill_silence(p, samples * s, ao->format);
-    int r = ao_play(ao, p, samples * s, 0);
+    char *p = talloc_size(NULL, samples * ao->sstride);
+    af_fill_silence(p, samples * ao->sstride, ao->format);
+    void *tmp[MP_NUM_CHANNELS];
+    for (int n = 0; n < MP_NUM_CHANNELS; n++)
+        tmp[n] = p;
+    int r = ao_play(ao, tmp, samples, 0);
     talloc_free(p);
     return r;
 }

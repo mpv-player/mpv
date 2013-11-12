@@ -58,7 +58,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
 // Deallocate memory
 static void uninit(struct af_instance* af)
 {
-    free(af->data);
     free(af->setup);
 }
 
@@ -67,9 +66,9 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   af_sweept *s = af->setup;
   int i, j;
-  int16_t *in = (int16_t*)data->audio;
+  int16_t *in = (int16_t*)data->planes[0];
   int chans   = data->nch;
-  int in_len  = data->len/(2*chans);
+  int in_len  = data->samples;
 
   for(i=0; i<in_len; i++){
       for(j=0; j<chans; j++)
@@ -85,8 +84,6 @@ static int af_open(struct af_instance* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul=1;
-  af->data=calloc(1,sizeof(struct mp_audio));
   af->setup=calloc(1,sizeof(af_sweept));
   return AF_OK;
 }

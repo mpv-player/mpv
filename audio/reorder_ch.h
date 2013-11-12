@@ -27,8 +27,6 @@
 
 void reorder_to_planar(void *restrict out, const void *restrict in,
                        size_t size, size_t nchan, size_t nmemb);
-void reorder_to_packed(uint8_t *out, uint8_t **in,
-                       size_t size, size_t nchan, size_t nmemb);
 
 void reorder_channels(void *restrict data, int *restrict ch_order,
                       size_t sample_size, size_t num_ch, size_t num_frames);

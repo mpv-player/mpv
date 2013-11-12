@@ -27,37 +27,36 @@
 #include "ad.h"
 #include "mpvcore/mp_msg.h"
 
-/* Reducing the ifdeffery to two main variants:
- *   1. most compatible to any libmpg123 version
- *   2. fastest variant with recent libmpg123 (>=1.14)
- * Running variant 2 on older libmpg123 versions may work in
- * principle, but is not supported.
- * So, please leave the check for MPG123_API_VERSION there, m-kay?
- */
 #include <mpg123.h>
 
-/* Enable faster mode of operation with newer libmpg123, avoiding
- * unnecessary memcpy() calls. */
-#if (defined MPG123_API_VERSION) && (MPG123_API_VERSION >= 33)
-#define AD_MPG123_FRAMEWISE
+#if (defined MPG123_API_VERSION) && (MPG123_API_VERSION < 33)
+#error "This should not happen"
 #endif
-
-/* Switch for updating bitrate info of VBR files. Not essential. */
-#define AD_MPG123_MEAN_BITRATE
 
 struct ad_mpg123_context {
     mpg123_handle *handle;
-    char new_format;
-#ifdef AD_MPG123_MEAN_BITRATE
+    bool new_format;
+    int sample_size;
+    bool need_data;
     /* Running mean for bit rate, stream length estimation. */
     float mean_rate;
     unsigned int mean_count;
     /* Time delay for updates. */
     short delay;
-#endif
     /* If the stream is actually VBR. */
     char vbr;
 };
+
+static void uninit(sh_audio_t *sh)
+{
+    struct ad_mpg123_context *con = (struct ad_mpg123_context*) sh->context;
+
+    mpg123_close(con->handle);
+    mpg123_delete(con->handle);
+    talloc_free(sh->context);
+    sh->context = NULL;
+    mpg123_exit();
+}
 
 /* This initializes libmpg123 and prepares the handle, including funky
  * parameters. */
@@ -72,7 +71,7 @@ static int preinit(sh_audio_t *sh)
     if (mpg123_init() != MPG123_OK)
         return 0;
 
-    sh->context = malloc(sizeof(struct ad_mpg123_context));
+    sh->context = talloc_zero(NULL, struct ad_mpg123_context);
     con = sh->context;
     /* Auto-choice of optimized decoder (first argument NULL). */
     con->handle = mpg123_new(NULL, &err);
@@ -104,17 +103,15 @@ static int preinit(sh_audio_t *sh)
     /* Example for RVA choice (available since libmpg123 1.0.0):
     mpg123_param(con->handle, MPG123_RVA, MPG123_RVA_MIX, 0.0) */
 
-#ifdef AD_MPG123_FRAMEWISE
     /* Prevent funky automatic resampling.
      * This way, we can be sure that one frame will never produce
-     * more than 1152 stereo samples. */
+     * more than 1152 stereo samples.
+     * Background:
+     * Going to decode directly to the output buffer. It is important to have
+     * MPG123_AUTO_RESAMPLE disabled for the buffer size being an all-time
+     * limit.
+     * We need at least 1152 samples. dec_audio.c normally guarantees this. */
     mpg123_param(con->handle, MPG123_REMOVE_FLAGS, MPG123_AUTO_RESAMPLE, 0.);
-#else
-    /* Older mpg123 is vulnerable to concatenated streams when gapless cutting
-     * is enabled (will only play the jingle of a badly constructed radio
-     * stream). The versions using framewise decoding are fine with that. */
-    mpg123_param(con->handle, MPG123_REMOVE_FLAGS, MPG123_GAPLESS, 0.);
-#endif
 
     return 1;
 
@@ -126,11 +123,125 @@ static int preinit(sh_audio_t *sh)
         mp_msg(MSGT_DECAUDIO, MSGL_ERR, "mpg123 preinit error: %s\n",
                mpg123_strerror(con->handle));
 
-    if (con->handle)
-        mpg123_delete(con->handle);
-    mpg123_exit();
-    free(sh->context);
-    sh->context = NULL;
+    uninit(sh);
+    return 0;
+}
+
+/* libmpg123 has a new format ready; query and store, return return value
+   of mpg123_getformat() */
+static int set_format(sh_audio_t *sh)
+{
+    struct ad_mpg123_context *con = sh->context;
+    int ret;
+    long rate;
+    int channels;
+    int encoding;
+    ret = mpg123_getformat(con->handle, &rate, &channels, &encoding);
+    if (ret == MPG123_OK) {
+        mp_chmap_from_channels(&sh->channels, channels);
+        sh->samplerate = rate;
+        /* Without external force, mpg123 will always choose signed encoding,
+         * and non-16-bit only on builds that don't support it.
+         * Be reminded that it doesn't matter to the MPEG file what encoding
+         * is produced from it. */
+        switch (encoding) {
+        case MPG123_ENC_SIGNED_8:
+            sh->sample_format = AF_FORMAT_S8;
+            break;
+        case MPG123_ENC_SIGNED_16:
+            sh->sample_format = AF_FORMAT_S16_NE;
+            break;
+        case MPG123_ENC_SIGNED_32:
+            sh->sample_format = AF_FORMAT_S32_NE;
+            break;
+        case MPG123_ENC_FLOAT_32:
+            sh->sample_format = AF_FORMAT_FLOAT_NE;
+            break;
+        default:
+            /* This means we got a funny custom build of libmpg123 that only supports an unknown format. */
+            mp_msg(MSGT_DECAUDIO, MSGL_ERR,
+                   "Bad encoding from mpg123: %i.\n", encoding);
+            return MPG123_ERR;
+        }
+        con->sample_size = channels * (af_fmt2bits(sh->sample_format) / 8);
+        con->new_format = 0;
+    }
+    return ret;
+}
+
+static int feed_new_packet(sh_audio_t *sh)
+{
+    struct ad_mpg123_context *con = sh->context;
+    int ret;
+
+    struct demux_packet *pkt = demux_read_packet(sh->gsh);
+    if (!pkt)
+        return -1; /* EOF. */
+
+    /* Next bytes from that presentation time. */
+    if (pkt->pts != MP_NOPTS_VALUE) {
+        sh->pts        = pkt->pts;
+        sh->pts_offset = 0;
+    }
+
+    /* Have to use mpg123_feed() to avoid decoding here. */
+    ret = mpg123_feed(con->handle, pkt->buffer, pkt->len);
+    talloc_free(pkt);
+
+    if (ret == MPG123_ERR)
+        return -1;
+
+    if (ret == MPG123_NEW_FORMAT)
+        con->new_format = 1;
+
+    return 0;
+}
+
+/* Now we really start accessing some data and determining file format.
+ * Format now is allowed to change on-the-fly. Here is the only point
+ * that has MPlayer react to errors. We have to pray that exceptional
+ * erros in other places simply cannot occur. */
+static int init(sh_audio_t *sh, const char *decoder)
+{
+    struct ad_mpg123_context *con = sh->context;
+    int ret;
+
+    ret = mpg123_open_feed(con->handle);
+    if (ret != MPG123_OK)
+        goto fail;
+
+    for (int n = 0; ; n++) {
+        if (feed_new_packet(sh) < 0) {
+            ret = MPG123_NEED_MORE;
+            goto fail;
+        }
+        size_t got_now = 0;
+        ret = mpg123_decode_frame(con->handle, NULL, NULL, &got_now);
+        if (ret == MPG123_OK || ret == MPG123_NEW_FORMAT) {
+            ret = set_format(sh);
+            if (ret == MPG123_OK)
+                break;
+        }
+        if (ret != MPG123_NEED_MORE)
+            goto fail;
+        // max. 16 retries (randomly chosen number)
+        if (n > 16) {
+            ret = MPG123_NEED_MORE;
+            goto fail;
+        }
+    }
+
+    return 1;
+
+fail:
+    if (ret == MPG123_NEED_MORE) {
+        mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Could not find mp3 stream.\n");
+    } else {
+        mp_msg(MSGT_DECAUDIO, MSGL_ERR, "mpg123 init error: %s\n",
+               mpg123_strerror(con->handle));
+    }
+
+    uninit(sh);
     return 0;
 }
 
@@ -147,293 +258,17 @@ static int compute_bitrate(struct mpg123_frameinfo *i)
                   samples_per_frame[i->version][i->layer] + 0.5);
 }
 
-/* Opted against the header printout from old mp3lib, too much
- * irrelevant info. This is modelled after the mpg123 app's
- * standard output line.
- * If more verbosity is demanded, one can add more detail and
- * also throw in ID3v2 info which libmpg123 collects anyway. */
-static void print_header_compact(struct mpg123_frameinfo *i)
-{
-    static const char *smodes[5] = {
-        "stereo", "joint-stereo", "dual-channel", "mono", "invalid"
-    };
-    static const char *layers[4] = {
-        "Unknown", "I", "II", "III"
-    };
-    static const char *versions[4] = {
-        "1.0", "2.0", "2.5", "x.x"
-    };
-
-    mp_msg(MSGT_DECAUDIO, MSGL_V, "MPEG %s layer %s, ",
-           versions[i->version], layers[i->layer]);
-    switch (i->vbr) {
-    case MPG123_CBR:
-        if (i->bitrate)
-            mp_msg(MSGT_DECAUDIO, MSGL_V, "%d kbit/s", i->bitrate);
-        else
-            mp_msg(MSGT_DECAUDIO, MSGL_V, "%d kbit/s (free format)",
-                   compute_bitrate(i));
-        break;
-    case MPG123_VBR:
-        mp_msg(MSGT_DECAUDIO, MSGL_V, "VBR");
-        break;
-    case MPG123_ABR:
-        mp_msg(MSGT_DECAUDIO, MSGL_V, "%d kbit/s ABR", i->abr_rate);
-        break;
-    default:
-        mp_msg(MSGT_DECAUDIO, MSGL_V, "???");
-    }
-    mp_msg(MSGT_DECAUDIO, MSGL_V, ", %ld Hz %s\n", i->rate,
-           smodes[i->mode]);
-}
-
-/* libmpg123 has a new format ready; query and store, return return value
-   of mpg123_getformat() */
-static int set_format(sh_audio_t *sh, struct ad_mpg123_context *con)
-{
-    int ret;
-    long rate;
-    int channels;
-    int encoding;
-    ret = mpg123_getformat(con->handle, &rate, &channels, &encoding);
-    if(ret == MPG123_OK) {
-        mp_chmap_from_channels(&sh->channels, channels);
-        sh->samplerate = rate;
-        /* Without external force, mpg123 will always choose signed encoding,
-         * and non-16-bit only on builds that don't support it.
-         * Be reminded that it doesn't matter to the MPEG file what encoding
-         * is produced from it. */
-        switch (encoding) {
-        case MPG123_ENC_SIGNED_8:
-            sh->sample_format = AF_FORMAT_S8;
-            break;
-        case MPG123_ENC_SIGNED_16:
-            sh->sample_format = AF_FORMAT_S16_NE;
-            break;
-        /* To stay compatible with the oldest libmpg123 headers, do not rely
-         * on float and 32 bit encoding symbols being defined.
-         * Those formats came later */
-        case 0x1180: /* MPG123_ENC_SIGNED_32 */
-            sh->sample_format = AF_FORMAT_S32_NE;
-            break;
-        case 0x200: /* MPG123_ENC_FLOAT_32 */
-            sh->sample_format = AF_FORMAT_FLOAT_NE;
-            break;
-        default:
-            /* This means we got a funny custom build of libmpg123 that only supports an unknown format. */
-            mp_msg(MSGT_DECAUDIO, MSGL_ERR,
-                   "Bad encoding from mpg123: %i.\n", encoding);
-            return MPG123_ERR;
-        }
-#ifdef AD_MPG123_FRAMEWISE
-        /* Going to decode directly to MPlayer's memory. It is important
-         * to have MPG123_AUTO_RESAMPLE disabled for the buffer size
-         * being an all-time limit. */
-        sh->audio_out_minsize = 1152 * 2 * (af_fmt2bits(sh->sample_format) / 8);
-#endif
-        con->new_format = 0;
-    }
-    return ret;
-}
-
-/* This tries to extract a requested amount of decoded data.
- * Even when you request 0 bytes, it will feed enough input so that
- * the decoder _could_ have delivered something.
- * Returns byte count >= 0, -1 on error.
- *
- * Thoughts on exact pts keeping:
- * We have to assume that MPEG frames are cut in pieces by packet boundaries.
- * Also, it might be possible that the first packet does not contain enough
- * data to ensure initial stream sync... or re-sync on erroneous streams.
- * So we need something robust to relate the decoded byte count to the correct
- * time stamp. This is tricky, though. From the outside, you cannot tell if,
- * after having fed two packets until the first output arrives, one should
- * start counting from the first packet's pts or the second packet's.
- * So, let's just count from the last fed package's pts. If the packets are
- * exactly cut to MPEG frames, this will cause one frame mismatch in the
- * beginning (when mpg123 peeks ahead for the following header), but will
- * be corrected with the third frame already. One might add special code to
- * not increment the base pts past the first packet's after a resync before
- * the first decoded bytes arrived. */
-static int decode_a_bit(sh_audio_t *sh, unsigned char *buf, int count)
-{
-    int ret = MPG123_OK;
-    int got = 0;
-    struct ad_mpg123_context *con = sh->context;
-
-    /* There will be one MPG123_NEW_FORMAT message on first open.
-     * This will be handled in init(). */
-    do {
-        size_t got_now = 0;
-        /* Fetch new format now, after old data has been used. */
-        if(con->new_format)
-            ret = set_format(sh, con);
-
-        /* Feed the decoder. This will only fire from the second round on. */
-        if (ret == MPG123_NEED_MORE) {
-            /* Feed more input data. */
-            struct demux_packet *pkt = demux_read_packet(sh->gsh);
-            if (!pkt)
-                break;          /* Apparently that's it. EOF. */
-
-            /* Next bytes from that presentation time. */
-            if (pkt->pts != MP_NOPTS_VALUE) {
-                sh->pts       = pkt->pts;
-                sh->pts_bytes = 0;
-            }
-
-#ifdef AD_MPG123_FRAMEWISE
-            /* Have to use mpg123_feed() to avoid decoding here. */
-            ret = mpg123_feed(con->handle, pkt->buffer, pkt->len);
-#else
-            /* Do not use mpg123_feed(), added in later libmpg123 versions. */
-            ret = mpg123_decode(con->handle, pkt->buffer, pkt->len, NULL, 0, NULL);
-#endif
-            talloc_free(pkt);
-            if (ret == MPG123_ERR)
-                break;
-
-            /* Indication of format change is possible here (from mpg123_decode()). */
-            if(ret == MPG123_NEW_FORMAT) {
-                con->new_format = 1;
-                if(got)
-                    break; /* Do not switch format during a chunk. */
-
-                ret = set_format(sh, con);
-            }
-        }
-        /* Theoretically, mpg123 could return MPG123_DONE, so be prepared.
-         * Should not happen in our usage, but it is a valid return code. */
-        else if (ret == MPG123_ERR || ret == MPG123_DONE)
-            break;
-
-        /* Try to decode a bit. This is the return value that counts
-         * for the loop condition. */
-#ifdef AD_MPG123_FRAMEWISE
-        if (!buf) { /* fake call just for feeding to get format */
-            ret = set_format(sh, con);
-        } else { /* This is the decoding. One frame at a time. */
-            ret = mpg123_replace_buffer(con->handle, buf, count);
-            if (ret == MPG123_OK)
-                ret = mpg123_decode_frame(con->handle, NULL, NULL, &got_now);
-        }
-#else
-        ret = mpg123_decode(con->handle, NULL, 0, buf + got, count - got,
-                            &got_now);
-#endif
-
-        got += got_now;
-        sh->pts_bytes += got_now;
-
-        /* Indication of format change should happen here. */
-        if(ret == MPG123_NEW_FORMAT) {
-            con->new_format = 1;
-            if(got)
-                break; /* Do not switch format during a chunk. */
-
-            ret = set_format(sh, con);
-        }
-
-#ifdef AD_MPG123_FRAMEWISE
-    } while (ret == MPG123_NEED_MORE || (got == 0 && count != 0));
-#else
-    } while (ret == MPG123_NEED_MORE || got < count);
-#endif
-
-    if (ret == MPG123_ERR) {
-        mp_msg(MSGT_DECAUDIO, MSGL_ERR, "mpg123 decoding failed: %s\n",
-               mpg123_strerror(con->handle));
-    }
-
-    return got;
-}
-
-/* Close, reopen stream. Feed data until we know the format of the stream.
- * 1 on success, 0 on error */
-static int reopen_stream(sh_audio_t *sh)
-{
-    struct ad_mpg123_context *con = (struct ad_mpg123_context*) sh->context;
-
-    mpg123_close(con->handle);
-    /* No resetting of the context:
-     * We do not want to loose the mean bitrate data. */
-
-    /* Open and make sure we have fed enough data to get stream properties. */
-    if (MPG123_OK == mpg123_open_feed(con->handle) &&
-        /* Feed data until mpg123 is ready (has found stream beginning). */
-        !decode_a_bit(sh, NULL, 0) &&
-        set_format(sh, con) == MPG123_OK) { /* format setting again just for return value */
-        return 1;
-    } else {
-        mp_msg(MSGT_DECAUDIO, MSGL_ERR,
-               "mpg123 failed to reopen stream: %s\n",
-               mpg123_strerror(con->handle));
-        return 0;
-    }
-}
-
-/* Now we really start accessing some data and determining file format.
- * Format now is allowed to change on-the-fly. Here is the only point
- * that has MPlayer react to errors. We have to pray that exceptional
- * erros in other places simply cannot occur. */
-static int init(sh_audio_t *sh, const char *decoder)
-{
-    mpg123_id3v2 *v2;
-    struct mpg123_frameinfo finfo;
-    struct ad_mpg123_context *con = sh->context;
-
-    con->new_format = 0;
-    if (reopen_stream(sh) &&
-        /* Get MPEG header info. */
-        MPG123_OK == mpg123_info(con->handle, &finfo) &&
-        /* Since we queried format, mpg123 should have read past ID3v2 tags.
-         * We need to decide if printing of UTF-8 encoded text info is wanted. */
-        MPG123_OK == mpg123_id3(con->handle, NULL, &v2)) {
-        /* If we are here, we passed all hurdles. Yay! Extract the info. */
-        print_header_compact(&finfo);
-        /* Do we want to print out the UTF-8 Id3v2 info?
-        if (v2)
-            print_id3v2(v2); */
-
-        /* Have kb/s, want B/s
-         * For VBR, the first frame will be a bad estimate. */
-        sh->i_bps = (finfo.bitrate ? finfo.bitrate : compute_bitrate(&finfo))
-                    * 1000 / 8;
-#ifdef AD_MPG123_MEAN_BITRATE
-        con->delay      = 1;
-        con->mean_rate  = 0.;
-        con->mean_count = 0;
-#endif
-        con->vbr = (finfo.vbr != MPG123_CBR);
-
-        return 1;
-    } else {
-        mp_msg(MSGT_DECAUDIO, MSGL_ERR, "mpg123 init error: %s\n",
-               mpg123_strerror(con->handle));
-        return 0;
-    }
-}
-
-static void uninit(sh_audio_t *sh)
-{
-    struct ad_mpg123_context *con = (struct ad_mpg123_context*) sh->context;
-
-    mpg123_close(con->handle);
-    mpg123_delete(con->handle);
-    free(sh->context);
-    sh->context = NULL;
-    mpg123_exit();
-}
-
-#ifdef AD_MPG123_MEAN_BITRATE
 /* Update mean bitrate. This could be dropped if accurate time display
  * on audio file playback is not desired. */
 static void update_info(sh_audio_t *sh)
 {
     struct ad_mpg123_context *con = sh->context;
-    if (con->vbr && --con->delay < 1) {
-        struct mpg123_frameinfo finfo;
-        if (MPG123_OK == mpg123_info(con->handle, &finfo)) {
+    struct mpg123_frameinfo finfo;
+    if (mpg123_info(con->handle, &finfo) != MPG123_OK)
+        return;
+
+    if (finfo.vbr != MPG123_CBR) {
+        if (--con->delay < 1) {
             if (++con->mean_count > ((unsigned int) -1) / 2)
                 con->mean_count = ((unsigned int) -1) / 4;
 
@@ -444,47 +279,80 @@ static void update_info(sh_audio_t *sh)
 
             con->delay = 10;
         }
+    } else {
+        sh->i_bps = (finfo.bitrate ? finfo.bitrate : compute_bitrate(&finfo))
+                    * 1000 / 8;
+        con->delay      = 1;
+        con->mean_rate  = 0.;
+        con->mean_count = 0;
     }
 }
-#endif
 
-static int decode_audio(sh_audio_t *sh, unsigned char *buf, int minlen,
-                        int maxlen)
+static int decode_audio(sh_audio_t *sh, struct mp_audio *buffer, int maxlen)
 {
-    int bytes;
+    struct ad_mpg123_context *con = sh->context;
+    void *buf = buffer->planes[0];
+    int ret;
 
-    bytes = decode_a_bit(sh, buf, maxlen);
-    /* This EOF is ignored, apparently, until input data is exhausted. */
-    if (bytes == 0)
-        return -1;              /* EOF */
+    if (con->new_format) {
+        ret = set_format(sh);
+        if (ret == MPG123_OK) {
+            return 0; // let caller handle format change
+        } else if (ret == MPG123_NEED_MORE) {
+            con->need_data = true;
+        } else {
+            goto mpg123_fail;
+        }
+    }
 
-#ifdef AD_MPG123_MEAN_BITRATE
+    if (con->need_data) {
+        if (feed_new_packet(sh) < 0)
+            return -1;
+    }
+
+    size_t got_now = 0;
+    ret = mpg123_replace_buffer(con->handle, buf, maxlen * con->sample_size);
+    if (ret != MPG123_OK)
+        goto mpg123_fail;
+
+    ret = mpg123_decode_frame(con->handle, NULL, NULL, &got_now);
+
+    int got_samples = got_now / con->sample_size;
+    buffer->samples += got_samples;
+    sh->pts_offset += got_samples;
+
+    if (ret == MPG123_NEW_FORMAT) {
+        con->new_format = true;
+    } else if (ret == MPG123_NEED_MORE) {
+        con->need_data = true;
+    } else if (ret != MPG123_OK && ret != MPG123_DONE) {
+        goto mpg123_fail;
+    }
+
     update_info(sh);
-#endif
-    return bytes;
+    return 0;
+
+mpg123_fail:
+    mp_msg(MSGT_DECAUDIO, MSGL_ERR, "mpg123 decoding error: %s\n",
+           mpg123_strerror(con->handle));
+    return -1;
 }
 
 static int control(sh_audio_t *sh, int cmd, void *arg)
 {
+    struct ad_mpg123_context *con = sh->context;
+
     switch (cmd) {
     case ADCTRL_RESYNC_STREAM:
-        /* Close/reopen the stream for mpg123 to make sure it doesn't
-         * think that it still knows the exact stream position.
-         * Otherwise, we would have funny effects from the gapless code.
-         * Oh, and it helps to minimize artifacts from jumping in the stream. */
-        if (reopen_stream(sh)) {
-#ifdef AD_MPG123_MEAN_BITRATE
-            update_info(sh);
-#endif
-            return CONTROL_TRUE;
-        } else {
-            /* MPlayer ignores this case! It just keeps on decoding.
-             * So we have to make sure resync never fails ... */
+        mpg123_close(con->handle);
+
+        if (mpg123_open_feed(con->handle) != MPG123_OK) {
             mp_msg(MSGT_DECAUDIO, MSGL_ERR,
-                   "mpg123 cannot reopen stream for resync.\n");
+                   "mpg123 failed to reopen stream: %s\n",
+                   mpg123_strerror(con->handle));
             return CONTROL_FALSE;
         }
-        break;
+        return CONTROL_TRUE;
     }
     return CONTROL_UNKNOWN;
 }

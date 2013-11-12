@@ -24,6 +24,7 @@
 #include "demux/demux.h"
 
 #include "audio/format.h"
+#include "audio/audio.h"
 
 struct mp_decoder_list;
 
@@ -35,8 +36,7 @@ struct ad_functions {
     int (*init)(sh_audio_t *sh, const char *decoder);
     void (*uninit)(sh_audio_t *sh);
     int (*control)(sh_audio_t *sh, int cmd, void *arg);
-    int (*decode_audio)(sh_audio_t *sh, unsigned char *buffer, int minlen,
-                        int maxlen);
+    int (*decode_audio)(sh_audio_t *sh, struct mp_audio *buffer, int maxlen);
 };
 
 enum ad_ctrl {

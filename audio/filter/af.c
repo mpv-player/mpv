@@ -201,6 +201,7 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
     *af = (struct af_instance) {
         .info = info,
         .mul = 1,
+        .data = talloc_zero(af, struct mp_audio),
     };
     struct m_config *config = m_config_from_obj_desc(af, &desc);
     if (m_config_initialize_obj(config, &desc, &af->priv, &args) < 0)
@@ -523,8 +524,7 @@ static int af_reinit(struct af_stream *s)
         // Check if this is the first filter
         struct mp_audio in = *af->prev->data;
         // Reset just in case...
-        in.audio = NULL;
-        in.len = 0;
+        mp_audio_set_null_data(&in);
 
         int rv = af->control(af, AF_CONTROL_REINIT, &in);
         if (rv == AF_OK && !mp_audio_config_equals(&in, af->prev->data))
@@ -640,8 +640,8 @@ int af_init(struct af_stream *s)
         return -1;
 
     // Precaution in case caller is misbehaving
-    s->input.audio  = s->output.audio  = NULL;
-    s->input.len    = s->output.len    = 0;
+    mp_audio_set_null_data(&s->input);
+    mp_audio_set_null_data(&s->output);
 
     // Check if this is the first call
     if (s->first->next == s->last) {
@@ -703,12 +703,12 @@ struct mp_audio *af_play(struct af_stream *s, struct mp_audio *data)
     return data;
 }
 
-// Calculate average ratio of filter output size to input size
+// Calculate average ratio of filter output samples to input samples.
+// e.g: num_output_samples = mul * num_input_samples
 double af_calc_filter_multiplier(struct af_stream *s)
 {
     struct af_instance *af = s->first;
     double mul = 1;
-    // Iterate through all filters and calculate total multiplication factor
     do {
         mul *= af->mul;
         af = af->next;
@@ -721,47 +721,12 @@ double af_calc_filter_multiplier(struct af_stream *s)
 double af_calc_delay(struct af_stream *s)
 {
     struct af_instance *af = s->first;
-    register double delay = 0.0;
-    // Iterate through all filters
+    double delay = 0.0;
     while (af) {
         delay += af->delay;
-        delay *= af->mul;
         af = af->next;
     }
     return delay;
-}
-
-/* Calculate the minimum output buffer size for given input data d
- * when using the af_resize_local_buffer function. The +t+1 part ensures the
- * value is >= len*mul rounded upwards to whole samples even if the
- * double 'mul' is inexact. */
-static int af_lencalc(double mul, struct mp_audio *d)
-{
-    int t = d->bps * d->nch;
-    return d->len * mul + t + 1;
-}
-
-/* I a local buffer is used (i.e. if the filter doesn't operate on the incoming
- * buffer), this macro must be called to ensure the buffer is big enough. */
-int af_resize_local_buffer(struct af_instance *af, struct mp_audio *data)
-{
-    if (af->data->len >= af_lencalc(af->mul, data))
-        return AF_OK;
-
-    // Calculate new length
-    register int len = af_lencalc(af->mul, data);
-    mp_msg(MSGT_AFILTER, MSGL_V, "[libaf] Reallocating memory in module %s, "
-           "old len = %i, new len = %i\n", af->info->name, af->data->len, len);
-    // If there is a buffer free it
-    free(af->data->audio);
-    // Create new buffer and check that it is OK
-    af->data->audio = malloc(len);
-    if (!af->data->audio) {
-        mp_msg(MSGT_AFILTER, MSGL_FATAL, "[libaf] Could not allocate memory \n");
-        return AF_ERROR;
-    }
-    af->data->len = len;
-    return AF_OK;
 }
 
 // documentation in af.h

@@ -78,7 +78,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
 // Deallocate memory
 static void uninit(struct af_instance* af)
 {
-    free(af->data);
     free(af->setup);
 }
 
@@ -87,9 +86,9 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   struct mp_audio*    c   = data;	 // Current working data
   af_center_t*  s   = af->setup; // Setup for this instance
-  float*   	a   = c->audio;	 // Audio data
-  int		len = c->len/4;	 // Number of samples in current audio block
+  float*   	a   = c->planes[0];	 // Audio data
   int		nch = c->nch;	 // Number of channels
+  int		len = c->samples*c->nch;	 // Number of samples in current audio block
   int		ch  = s->ch;	 // Channel in which to insert the center audio
   register int  i;
 
@@ -108,10 +107,8 @@ static int af_open(struct af_instance* af){
   af->control=control;
   af->uninit=uninit;
   af->play=play;
-  af->mul=1;
-  af->data=calloc(1,sizeof(struct mp_audio));
   af->setup=s=calloc(1,sizeof(af_center_t));
-  if(af->data == NULL || af->setup == NULL)
+  if(af->setup == NULL)
     return AF_ERROR;
   // Set default values
   s->ch = 1;  	 // Channel nr 2

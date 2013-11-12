@@ -92,11 +92,8 @@ typedef struct sh_audio {
     int samplerate;
     struct mp_chmap channels;
     int i_bps; // == bitrate  (compressed bytes/sec)
-    // decoder buffers:
-    int audio_out_minsize;  // minimal output from decoder may be this much
-    char *a_buffer;         // buffer for decoder output
-    int a_buffer_len;
-    int a_buffer_size;
+    // decoder state:
+    struct mp_audio_buffer *decode_buffer;
     struct af_stream *afilter;          // the audio filter stream
     const struct ad_functions *ad_driver;
     // win32-compatible codec parameters:
@@ -104,7 +101,7 @@ typedef struct sh_audio {
     // note codec extradata may be either under "wf" or "codecdata"
     unsigned char *codecdata;
     int codecdata_len;
-    int pts_bytes;   // bytes output by decoder after last known pts
+    int pts_offset; // number of samples output by decoder after last known pts
 } sh_audio_t;
 
 typedef struct sh_video {

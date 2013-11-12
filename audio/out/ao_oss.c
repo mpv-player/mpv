@@ -261,6 +261,8 @@ static int init(struct ao *ao)
     fcntl(p->audio_fd, F_SETFD, FD_CLOEXEC);
 #endif
 
+    ao->format = af_fmt_from_planar(ao->format);
+
     if (AF_FORMAT_IS_AC3(ao->format)) {
         ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &ao->samplerate);
     }
@@ -455,7 +457,7 @@ static int get_space(struct ao *ao)
     if (ioctl(p->audio_fd, SNDCTL_DSP_GETOSPACE, &p->zz) != -1) {
         // calculate exact buffer space:
         playsize = p->zz.fragments * p->zz.fragsize;
-        return playsize;
+        return playsize / ao->sstride;
     }
 #endif
 
@@ -473,14 +475,14 @@ static int get_space(struct ao *ao)
     }
 #endif
 
-    return p->outburst;
+    return p->outburst / ao->sstride;
 }
 
 // stop playing, keep buffers (for pause)
 static void audio_pause(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    p->prepause_space = get_space(ao);
+    p->prepause_space = get_space(ao) * ao->sstride;
 #ifdef SNDCTL_DSP_RESET
     ioctl(p->audio_fd, SNDCTL_DSP_RESET, NULL);
 #else
@@ -491,17 +493,18 @@ static void audio_pause(struct ao *ao)
 // plays 'len' bytes of 'data'
 // it should round it down to outburst*n
 // return: number of bytes played
-static int play(struct ao *ao, void *data, int len, int flags)
+static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *p = ao->priv;
+    int len = samples * ao->sstride;
     if (len == 0)
         return len;
     if (len > p->outburst || !(flags & AOPLAY_FINAL_CHUNK)) {
         len /= p->outburst;
         len *= p->outburst;
     }
-    len = write(p->audio_fd, data, len);
-    return len;
+    len = write(p->audio_fd, data[0], len);
+    return len / ao->sstride;
 }
 
 // resume playing, after audio_pause()
@@ -511,8 +514,7 @@ static void audio_resume(struct ao *ao)
 #ifndef SNDCTL_DSP_RESET
     reset(ao);
 #endif
-    int fillframes = (get_space(ao) - p->prepause_space) /
-                     (af_fmt2bits(ao->format) / 8 * ao->channels.num);
+    int fillframes = get_space(ao) - p->prepause_space / ao->sstride;
     if (fillframes > 0)
         ao_play_silence(ao, fillframes);
 }

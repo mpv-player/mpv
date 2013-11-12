@@ -41,19 +41,13 @@ static int control(struct af_instance* af, int cmd, void* arg)
 	return AF_UNKNOWN;
 }
 
-// Deallocate memory
-static void uninit(struct af_instance* af)
-{
-	free(af->data);
-}
-
 // Filter data through filter
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
 	struct mp_audio*	c	= data;		 // Current working data
-	float*		a	= c->audio;	 // Audio data
-	int			len	= c->len/4;	 // Number of samples in current audio block
+	float*		a	= c->planes[0];	 // Audio data
 	int			nch	= c->nch;	 // Number of channels
+	int			len	= c->samples*nch;	 // Number of samples in current audio block
 	register int  i;
 
 	/*
@@ -74,14 +68,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
 	af->control	= control;
-	af->uninit	= uninit;
 	af->play	= play;
-	af->mul		= 1;
-	af->data	= calloc(1,sizeof(struct mp_audio));
-
-	if(af->data == NULL)
-		return AF_ERROR;
-
 	return AF_OK;
 }
 
