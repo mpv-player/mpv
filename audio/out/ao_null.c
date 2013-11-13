@@ -25,6 +25,7 @@
 
 #include "config.h"
 #include "osdep/timer.h"
+#include "mpvcore/m_option.h"
 #include "audio/format.h"
 #include "ao.h"
 
@@ -35,11 +36,18 @@ struct priv {
     float buffered;
     int buffersize;
     int outburst;
+
+    int untimed;
 };
 
 static void drain(struct ao *ao)
 {
     struct priv *priv = ao->priv;
+
+    if (ao->untimed) {
+        priv->buffered = 0;
+        return;
+    }
 
     if (priv->paused)
         return;
@@ -53,8 +61,9 @@ static void drain(struct ao *ao)
 
 static int init(struct ao *ao)
 {
-    struct priv *priv = talloc_zero(ao, struct priv);
-    ao->priv = priv;
+    struct priv *priv = ao->priv;
+
+    ao->untimed = priv->untimed;
 
     struct mp_chmap_sel sel = {0};
     mp_chmap_sel_add_any(&sel);
@@ -133,6 +142,8 @@ static float get_delay(struct ao *ao)
     return priv->buffered / (double)ao->samplerate;
 }
 
+#define OPT_BASE_STRUCT struct priv
+
 const struct ao_driver audio_out_null = {
     .description = "Null audio output",
     .name      = "null",
@@ -144,4 +155,9 @@ const struct ao_driver audio_out_null = {
     .get_delay = get_delay,
     .pause     = pause,
     .resume    = resume,
+    .priv_size = sizeof(struct priv),
+    .options = (const struct m_option[]) {
+        OPT_FLAG("untimed", untimed, 0),
+        {0}
+    },
 };

@@ -150,7 +150,12 @@ Available audio output drivers are:
 
 ``null``
     Produces no audio output but maintains video playback speed. Use
-    ``--no-audio`` for benchmarking.
+    ``--ao=null:untimed`` for benchmarking.
+
+    ``untimed``
+        Do not simulate timing of a perfect audio device. This means audio
+        decoding will go as fast as possible, instead of timing it to the
+        system clock.
 
 ``pcm``
     Raw PCM/WAVE file writer audio output
