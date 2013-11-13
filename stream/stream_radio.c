@@ -35,8 +35,6 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include <linux/types.h>
-
 #ifdef CONFIG_RADIO_V4L2
 #include <linux/videodev2.h>
 #endif

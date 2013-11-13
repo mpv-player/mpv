@@ -52,7 +52,6 @@ known issues:
 #ifdef HAVE_SYS_VIDEOIO_H
 #include <sys/videoio.h>
 #else
-#include <linux/types.h>
 #include <linux/videodev2.h>
 #endif
 #include "mpvcore/mp_msg.h"
