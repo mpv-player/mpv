@@ -29,6 +29,7 @@
 #include "ao.h"
 
 struct priv {
+    bool paused;
     double last_time;
     // All values are in samples
     float buffered;
@@ -39,6 +40,9 @@ struct priv {
 static void drain(struct ao *ao)
 {
     struct priv *priv = ao->priv;
+
+    if (priv->paused)
+        return;
 
     double now = mp_time_sec();
     priv->buffered -= (now - priv->last_time) * ao->samplerate;
@@ -86,13 +90,19 @@ static void reset(struct ao *ao)
 // stop playing, keep buffers (for pause)
 static void pause(struct ao *ao)
 {
-    // for now, just call reset();
-    reset(ao);
+    struct priv *priv = ao->priv;
+
+    priv->paused = true;
 }
 
-// resume playing, after audio_pause()
+// resume playing, after pause()
 static void resume(struct ao *ao)
 {
+    struct priv *priv = ao->priv;
+
+    drain(ao);
+    priv->paused = false;
+    priv->last_time = mp_time_sec();
 }
 
 static int get_space(struct ao *ao)
@@ -107,6 +117,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *priv = ao->priv;
 
+    resume(ao);
     int maxbursts = (priv->buffersize - priv->buffered) / priv->outburst;
     int playbursts = samples / priv->outburst;
     int bursts = playbursts > maxbursts ? maxbursts : playbursts;
@@ -134,4 +145,3 @@ const struct ao_driver audio_out_null = {
     .pause     = pause,
     .resume    = resume,
 };
-
