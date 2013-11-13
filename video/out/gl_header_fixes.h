@@ -249,6 +249,18 @@
 #endif
 #endif
 
+#ifndef GL_RGB_422_APPLE
+#define GL_RGB_422_APPLE 0x8A1F
+#endif
+
+#ifndef UNSIGNED_SHORT_8_8_APPLE
+#define UNSIGNED_SHORT_8_8_APPLE 0x85BA
+#endif
+
+#ifndef UNSIGNED_SHORT_8_8_APPLE
+#define UNSIGNED_SHORT_8_8_APPLE 0x85BB
+#endif
+
 #ifndef GL_NV_vdpau_interop
 #define GLvdpauSurfaceNV GLintptr
 #endif

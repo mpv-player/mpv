@@ -462,6 +462,16 @@ struct gl_functions gl_functions[] = {
             {0}
         },
     },
+    // Apple Packed YUV Formats
+    // For gl_hwdec_vda.c
+    // http://www.opengl.org/registry/specs/APPLE/rgb_422.txt
+    {
+        .extension = "GL_APPLE_rgb_422",
+        .provides = MPGL_CAP_APPLE_RGB_422,
+        .functions = (struct gl_function[]) {
+            {0}
+        },
+    },
 };
 
 #undef FN_OFFS
@@ -659,6 +669,7 @@ int glFmt2bpp(GLenum format, GLenum type)
     case GL_ALPHA:
         return component_size;
     case GL_YCBCR_MESA:
+    case GL_RGB_422_APPLE:
         return 2;
     case GL_RGB:
     case GL_BGR:

@@ -88,6 +88,7 @@ enum {
     MPGL_CAP_FLOAT_TEX          = (1 << 9),
     MPGL_CAP_TEX_RG             = (1 << 10),    // GL_ARB_texture_rg / GL 3.x
     MPGL_CAP_VDPAU              = (1 << 11),    // GL_NV_vdpau_interop
+    MPGL_CAP_APPLE_RGB_422      = (1 << 12),    // GL_APPLE_rgb_422
     MPGL_CAP_NO_SW              = (1 << 30),    // used to block sw. renderers
 };
 

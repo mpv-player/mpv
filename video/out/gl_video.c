@@ -170,7 +170,7 @@ struct gl_video {
 
     struct mp_imgfmt_desc image_desc;
 
-    bool is_yuv, is_rgb;
+    bool is_yuv, is_rgb, is_packed_yuv;
     bool is_linear_rgb;
     bool has_alpha;
     char color_swizzle[5];
@@ -236,6 +236,12 @@ static const struct fmt_entry gl_byte_formats[] = {
     {0, GL_RG16,    GL_RG,      GL_UNSIGNED_SHORT},     // 2 x 16
     {0, GL_RGB16,   GL_RGB,     GL_UNSIGNED_SHORT},     // 3 x 16
     {0, GL_RGBA16,  GL_RGBA,    GL_UNSIGNED_SHORT},     // 4 x 16
+};
+
+static const struct fmt_entry gl_apple_formats[] = {
+    {IMGFMT_UYVY, GL_RGB, GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE},
+    {IMGFMT_YUYV, GL_RGB, GL_RGB_422_APPLE, GL_UNSIGNED_SHORT_8_8_REV_APPLE},
+    {0}
 };
 
 struct packed_fmt_entry {
@@ -872,7 +878,8 @@ static void compile_shaders(struct gl_video *p)
     if (p->color_swizzle[0])
         shader_def(&header_conv, "USE_COLOR_SWIZZLE", p->color_swizzle);
     shader_def_opt(&header_conv, "USE_SWAP_UV", p->image_format == IMGFMT_NV21);
-    shader_def_opt(&header_conv, "USE_YGRAY", p->is_yuv && p->plane_count == 1);
+    shader_def_opt(&header_conv, "USE_YGRAY", p->is_yuv && !p->is_packed_yuv
+                                              && p->plane_count == 1);
     shader_def_opt(&header_conv, "USE_INPUT_GAMMA", convert_input_gamma);
     shader_def_opt(&header_conv, "USE_COLORMATRIX", !p->is_rgb);
     shader_def_opt(&header_conv, "USE_CONV_GAMMA", convert_input_to_linear);
@@ -2053,6 +2060,20 @@ static bool init_format(int fmt, struct gl_video *init)
                 plane_format[0] = find_tex_format(e->component_size, n_comp);
                 packed_fmt_swizzle(init->color_swizzle, e);
                 init->has_alpha = e->components[3] != 0;
+                break;
+            }
+        }
+    }
+
+    // Packed YUV Apple formats
+    if (init->gl->mpgl_caps & MPGL_CAP_APPLE_RGB_422) {
+        for (const struct fmt_entry *e = gl_apple_formats; e->mp_format; e++) {
+            if (e->mp_format == fmt) {
+                init->is_packed_yuv = true;
+                supported = true;
+                snprintf(init->color_swizzle, sizeof(init->color_swizzle),
+                         "gbra");
+                plane_format[0] = e;
                 break;
             }
         }
