@@ -202,6 +202,8 @@ struct gl_hwdec_driver {
     // Undo map_image(). The user of map_image() calls this when the textures
     // are not needed anymore.
     void (*unmap_image)(struct gl_hwdec *hw);
+    // Return a mp_image downloaded from the GPU (optional)
+    struct mp_image *(*download_image)(struct gl_hwdec *hw);
     void (*destroy)(struct gl_hwdec *hw);
 };
 

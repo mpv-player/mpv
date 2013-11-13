@@ -88,6 +88,8 @@ static void print_vda_error(int lev, char *message, int error_code)
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                  const char *decoder)
 {
+    hwdec_request_api(info, "vda");
+
     if (!find_codec(mp_codec_to_av_codec_id(decoder), FF_PROFILE_UNKNOWN))
         return HWDEC_ERR_NO_CODEC;
     return 0;
@@ -107,6 +109,7 @@ static int init_vda_decoder(struct lavc_ctx *ctx)
         .width             = ctx->avctx->width,
         .height            = ctx->avctx->height,
         .format            = pe->vda_codec,
+        // equals to k2vuyPixelFormat (= YUY2/UYVY)
         .cv_pix_fmt_type   = kCVPixelFormatType_422YpCbCr8,
 
 #if HAVE_VDA_LIBAVCODEC_REFCOUNTING

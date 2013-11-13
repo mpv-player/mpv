@@ -335,6 +335,7 @@ def build(ctx):
         ( "video/out/gl_cocoa.c",                "gl-cocoa" ),
         ( "video/out/gl_common.c",               "gl" ),
         ( "video/out/gl_hwdec_vaglx.c",          "vaapi-glx" ),
+        ( "video/out/gl_hwdec_vda.c",            "vda-gl" ),
         ( "video/out/gl_hwdec_vdpau.c",          "vdpau-gl-x11" ),
         ( "video/out/gl_lcms.c",                 "gl" ),
         ( "video/out/gl_osd.c",                  "gl" ),

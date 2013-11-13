@@ -2851,9 +2851,20 @@ else
 fi
 echores "$_vda_refcounting"
 
+echocheck "VDA with OpenGL"
+if test "$_gl_cocoa" = yes && test "$_vda" = yes ; then
+  def_vda_gl='#define HAVE_VDA_GL 1'
+  _vda_gl=yes
+else
+  def_vda_gl='#define HAVE_VDA_GL 0'
+  _vda_gl=no
+fi
+echores "$_vda_gl"
+
 else
   def_vda='#define HAVE_VDA_HWACCEL 0'
   def_vda_refcounting='#define HAVE_VDA_LIBAVCODEC_REFCOUNTING 0'
+  def_vda_gl='#define HAVE_VDA_GL 0'
 fi
 
 
@@ -3290,6 +3301,7 @@ VDPAU_DEC_OLD = $_vdpau_dec_old
 VDPAU_GL_X11 = $_vdpau_gl_x11
 VDA = $_vda
 VDA_REFCOUNTING = $_vda_refcounting
+VDA_GL = $_vda_gl
 VAAPI = $_vaapi
 VAAPI_VPP = $_vaapi_vpp
 VAAPI_GLX = $_vaapi_glx
@@ -3471,6 +3483,7 @@ $def_vdpau_dec
 $def_vdpau_dec_old
 $def_vdpau_gl_x11
 $def_vda
+$def_vda_gl
 $def_vda_refcounting
 $def_vaapi
 $def_vaapi_vpp

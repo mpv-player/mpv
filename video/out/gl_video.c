@@ -1699,6 +1699,12 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
     if (!p->have_image)
         return NULL;
 
+    if (p->hwdec && p->hwdec->driver->download_image) {
+        struct mp_image *dlimage = p->hwdec->driver->download_image(p->hwdec);
+        mp_image_set_attributes(dlimage, &p->image_params);
+        return dlimage;
+    }
+
     set_image_textures(p, vimg, NULL);
 
     assert(p->texture_w >= p->image_params.w);

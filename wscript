@@ -635,6 +635,11 @@ hwaccel_features = [
             """struct vda_context a = (struct vda_context) {
                    .use_ref_buffer = 1 }""", use='libav')
     }, {
+        'name': '--vda-gl',
+        'desc': 'VDA with OpenGL',
+        'deps': [ 'gl-cocoa', 'vda-hwaccel' ],
+        'func': check_true
+    }, {
         'name': '--vdpau-decoder',
         'desc': 'VDPAU decoder (old)',
         'deps': [ 'vdpau' ],
