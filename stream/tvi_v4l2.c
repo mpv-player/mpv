@@ -102,12 +102,6 @@ typedef struct priv {
     /* video */
     char                        *video_dev;
     int                         video_fd;
-    char                        *vbi_dev;
-    int                         vbi_fd;
-    int                         vbi_bufsize;
-    int                         vbi_shutdown;
-    pthread_t                   vbi_grabber_thread;
-    void                        *priv_vbi;
     int                         mp_format;
     struct v4l2_capability      capability;
     struct v4l2_input           input;
@@ -612,82 +606,6 @@ static int get_control(priv_t *priv, struct v4l2_control *control, int val_signe
     return TVI_CONTROL_TRUE;
 }
 
-static int vbi_get_props(priv_t* priv,tt_stream_props* ptsp)
-{
-    struct v4l2_format fmt;
-    int res;
-    if(!priv || !ptsp)
-        return TVI_CONTROL_FALSE;
-
-    memset(&fmt,0,sizeof(struct v4l2_format));
-    fmt.type=V4L2_BUF_TYPE_VBI_CAPTURE;
-    if((res=ioctl(priv->vbi_fd,VIDIOC_G_FMT,&fmt))<0){
-        mp_msg(MSGT_TV,MSGL_ERR,"vbi_get_props: Query format failed: %x\n",res);
-        return  TVI_CONTROL_FALSE;
-    }
-
-    ptsp->interlaced=(fmt.fmt.vbi.flags& V4L2_VBI_INTERLACED?1:0);
-
-    ptsp->offset=fmt.fmt.vbi.offset;
-    ptsp->sampling_rate=fmt.fmt.vbi.sampling_rate;
-    ptsp->samples_per_line=fmt.fmt.vbi.samples_per_line,
-
-    ptsp->count[0]=fmt.fmt.vbi.count[0];
-    ptsp->count[1]=fmt.fmt.vbi.count[1];
-    ptsp->bufsize = ptsp->samples_per_line * (ptsp->count[0] + ptsp->count[1]);
-
-    mp_msg(MSGT_TV,MSGL_V,"vbi_get_props: sampling_rate=%d,offset:%d,samples_per_line: %d\n interlaced:%s, count=[%d,%d]\n",
-        ptsp->sampling_rate,
-        ptsp->offset,
-        ptsp->samples_per_line,
-        ptsp->interlaced?"Yes":"No",
-        ptsp->count[0],
-        ptsp->count[1]);
-
-    return TVI_CONTROL_TRUE;
-}
-
-static void *vbi_grabber(void *data)
-{
-    priv_t *priv = (priv_t *) data;
-    int bytes,seq,prev_seq;
-    unsigned char* buf;
-    tt_stream_props tsp;
-
-    if(!priv->priv_vbi){
-        mp_msg(MSGT_TV,MSGL_WARN,"vbi: vbi not initialized. stopping thread.\n");
-        return NULL;
-    }
-
-    if(vbi_get_props(priv,&tsp)!=TVI_CONTROL_TRUE)
-        return NULL;
-
-    buf=malloc(tsp.bufsize);
-    seq=0;
-    prev_seq=0;
-    mp_msg(MSGT_TV,MSGL_V,"vbi: vbi capture thread started.\n");
-
-    while (!priv->vbi_shutdown){
-        bytes=read(priv->vbi_fd,buf,tsp.bufsize);
-        if(bytes<0 && errno==EINTR)
-            continue;
-	if (bytes!=tsp.bufsize){
-	    mp_msg(MSGT_TV,MSGL_WARN,"vbi: expecting bytes: %d, got: %d\n",tsp.bufsize,bytes);
-	    break;
-	}
-        seq=*(int*)(buf+bytes-4);
-	if(seq<=1) continue;
-	if (prev_seq && seq!=prev_seq+1){
-	    prev_seq=0;
-	    seq=0;
-	}
-	prev_seq=seq;
-	mp_msg(MSGT_TV,MSGL_DBG3,"grabber: seq:%d\n",seq);
-    }
-    free(buf);
-    return NULL;
-}
-
 static int do_control(priv_t *priv, int cmd, void *arg)
 {
     struct v4l2_control control;
@@ -1043,19 +961,6 @@ static int uninit(priv_t *priv)
 {
     int i, frames, dropped = 0;
 
-    priv->vbi_shutdown=1;
-    if(priv->vbi_grabber_thread)
-        pthread_join(priv->vbi_grabber_thread, NULL);
-
-    priv->priv_vbi=NULL;
-
-    if(priv->vbi_fd){
-        close(priv->vbi_fd);
-        priv->vbi_fd=0;
-    }
-
-    free(priv->vbi_dev);
-    priv->vbi_dev = NULL;
     priv->shutdown = 1;
     if(priv->video_grabber_thread)
         pthread_join(priv->video_grabber_thread, NULL);
@@ -1482,11 +1387,6 @@ static int start(priv_t *priv)
         }
     }
 
-    /* start vbi thread */
-    if(priv->priv_vbi){
-        priv->vbi_shutdown = 0;
-        pthread_create(&priv->vbi_grabber_thread, NULL, vbi_grabber, priv);
-    }
     /* start audio thread */
     priv->shutdown = 0;
     priv->audio_skew_measure_time = 0;
