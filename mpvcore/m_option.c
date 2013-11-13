@@ -2475,9 +2475,15 @@ static char *print_obj_settings_list(const m_option_t *opt, const void *val)
             for (int i = 0; entry->attribs[i * 2 + 0]; i++) {
                 if (i > 0)
                     res = talloc_strdup_append(res, ":");
-                append_param(&res, entry->attribs[i * 2 + 0]);
-                res = talloc_strdup_append(res, "=");
-                append_param(&res, entry->attribs[i * 2 + 1]);
+                if (strcmp(entry->attribs[i * 2 + 0], "_oldargs_") == 0) {
+                    // Compatibility crap; write just the arg without escaping,
+                    // and hope it won't crash and burn.
+                    res = talloc_strdup_append(res, entry->attribs[i * 2 + 1]);
+                } else {
+                    append_param(&res, entry->attribs[i * 2 + 0]);
+                    res = talloc_strdup_append(res, "=");
+                    append_param(&res, entry->attribs[i * 2 + 1]);
+                }
             }
         }
     }
