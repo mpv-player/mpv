@@ -49,8 +49,8 @@ char *mf_type = NULL;  //"jpg";
 
 static void mf_add(mf_t *mf, const char *fname)
 {
-    fname = talloc_strdup(mf, fname);
-    MP_TARRAY_APPEND(mf, mf->names, mf->nr_of_files, fname);
+    char *entry = talloc_strdup(mf, fname);
+    MP_TARRAY_APPEND(mf, mf->names, mf->nr_of_files, entry);
 }
 
 mf_t *open_mf_pattern(void *talloc_ctx, char *filename)

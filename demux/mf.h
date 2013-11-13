@@ -26,7 +26,7 @@ typedef struct mf {
     struct sh_video *sh;
     int curr_frame;
     int nr_of_files;
-    const char **names;
+    char **names;
     // optional
     struct stream **streams;
 } mf_t;
