@@ -37,7 +37,9 @@
 #include <fcntl.h>
 #include <inttypes.h>
 #include <poll.h>
+#ifdef __linux__
 #include <linux/types.h>
+#endif
 #include <linux/videodev2.h>
 
 #include <libavutil/common.h>

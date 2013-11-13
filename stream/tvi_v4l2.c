@@ -52,14 +52,28 @@ known issues:
 #if HAVE_SYS_VIDEOIO_H
 #include <sys/videoio.h>
 #else
+#ifdef __linux__
 #include <linux/types.h>
+#endif
 #include <linux/videodev2.h>
+#endif
+#if HAVE_LIBV4L2
+#include <libv4l2.h>
 #endif
 #include "mpvcore/mp_msg.h"
 #include "video/img_fourcc.h"
 #include "audio/format.h"
 #include "tv.h"
 #include "audio_in.h"
+
+#if HAVE_LIBV4L2
+#define open	v4l2_open
+#define close	v4l2_close
+#define dup	v4l2_dup
+#define ioctl	v4l2_ioctl
+#define mmap	v4l2_mmap
+#define munmap	v4l2_munmap
+#endif
 
 #define info tvi_info_v4l2
 static tvi_handle_t *tvi_init_v4l2(tv_param_t* tv_param);
