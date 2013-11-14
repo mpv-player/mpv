@@ -151,8 +151,10 @@ const struct hwdec_profile_entry *hwdec_find_profile(
     enum AVCodecID codec = ctx->avctx->codec_id;
     int profile = ctx->avctx->profile;
     // Assume nobody cares about these aspects of the profile
-    if (codec == AV_CODEC_ID_H264)
-        profile &= ~(FF_PROFILE_H264_CONSTRAINED | FF_PROFILE_H264_INTRA);
+    if (codec == AV_CODEC_ID_H264) {
+        if (profile == FF_PROFILE_H264_CONSTRAINED_BASELINE)
+            profile = FF_PROFILE_H264_MAIN;
+    }
     for (int n = 0; table[n].av_codec; n++) {
         if (table[n].av_codec == codec) {
             if (table[n].ff_profile == FF_PROFILE_UNKNOWN ||
