@@ -109,7 +109,6 @@ typedef struct MPGLContext {
     int requested_gl_version;
 
     void (*swapGlBuffers)(struct MPGLContext *);
-    int (*check_events)(struct vo *vo);
     int (*vo_init)(struct vo *vo);
     void (*vo_uninit)(struct vo *vo);
     int (*vo_control)(struct vo *vo, int *events, int request, void *arg);

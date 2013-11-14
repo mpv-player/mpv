@@ -206,7 +206,6 @@ void mpgl_set_backend_w32(MPGLContext *ctx)
     ctx->config_window = config_window_w32;
     ctx->releaseGlContext = releaseGlContext_w32;
     ctx->swapGlBuffers = swapGlBuffers_w32;
-    ctx->check_events = vo_w32_check_events;
     ctx->vo_init = vo_w32_init;
     ctx->vo_uninit = vo_w32_uninit;
     ctx->vo_control = vo_w32_control;

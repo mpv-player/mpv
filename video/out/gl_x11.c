@@ -311,7 +311,6 @@ void mpgl_set_backend_x11(MPGLContext *ctx)
     ctx->config_window = config_window_x11;
     ctx->releaseGlContext = releaseGlContext_x11;
     ctx->swapGlBuffers = swapGlBuffers_x11;
-    ctx->check_events = vo_x11_check_events;
     ctx->vo_init = vo_x11_init;
     ctx->vo_uninit = vo_x11_uninit;
     ctx->vo_control = vo_x11_control;

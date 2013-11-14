@@ -70,7 +70,6 @@ void mpgl_set_backend_cocoa(MPGLContext *ctx)
     ctx->config_window = config_window_cocoa;
     ctx->releaseGlContext = releaseGlContext_cocoa;
     ctx->swapGlBuffers = swapGlBuffers_cocoa;
-    ctx->check_events = vo_cocoa_check_events;
     ctx->vo_init = vo_cocoa_init;
     ctx->register_resize_callback = vo_cocoa_register_resize_callback;
     ctx->vo_uninit = vo_cocoa_uninit;
