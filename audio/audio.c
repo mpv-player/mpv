@@ -115,7 +115,7 @@ void mp_audio_set_null_data(struct mp_audio *mpa)
 static void mp_audio_destructor(void *ptr)
 {
     struct mp_audio *mpa = ptr;
-    for (int n = mpa->num_planes; n < MP_NUM_CHANNELS; n++) {
+    for (int n = 0; n < MP_NUM_CHANNELS; n++) {
         // Note: don't free if not allocated by mp_audio_realloc
         if (mpa->allocated[n])
             av_free(mpa->planes[n]);
