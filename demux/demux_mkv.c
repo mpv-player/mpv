@@ -558,8 +558,6 @@ static void parse_trackvideo(struct demuxer *demuxer, struct mkv_track *track,
  */
 static void demux_mkv_free_trackentry(mkv_track_t *track)
 {
-    free(track->audio_buf);
-    free(track->audio_timestamp);
     talloc_free(track);
 }
 
@@ -1305,7 +1303,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
     sh_v = sh->video;
     sh_v->gsh->demuxer_id = track->tnum;
     sh_v->gsh->title = talloc_strdup(sh_v, track->name);
-    sh_v->bih = malloc(sizeof(MP_BITMAPINFOHEADER) + extradata_size);
+    sh_v->bih = talloc_size(sh_v, sizeof(MP_BITMAPINFOHEADER) + extradata_size);
     if (!sh_v->bih) {
         mp_msg(MSGT_DEMUX, MSGL_FATAL, "Memory allocation failure!\n");
         abort();
@@ -1385,7 +1383,7 @@ static struct mkv_audio_tag {
 static void copy_audio_private_data(sh_audio_t *sh, mkv_track_t *track)
 {
     if (!track->ms_compat && track->private_size) {
-        sh->codecdata = malloc(track->private_size);
+        sh->codecdata = talloc_size(sh, track->private_size);
         sh->codecdata_len = track->private_size;
         memcpy(sh->codecdata, track->private_data, track->private_size);
     }
@@ -1411,7 +1409,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             goto error;
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] track with MS compat audio.\n");
         MP_WAVEFORMATEX *wf = (MP_WAVEFORMATEX *) track->private_data;
-        sh_a->wf = calloc(1, track->private_size);
+        sh_a->wf = talloc_zero_size(sh_a, track->private_size);
         sh_a->wf->wFormatTag = le2me_16(wf->wFormatTag);
         sh_a->wf->nChannels = le2me_16(wf->nChannels);
         sh_a->wf->nSamplesPerSec = le2me_32(wf->nSamplesPerSec);
@@ -1429,7 +1427,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             track->a_bps = sh_a->wf->wBitsPerSample;
         track->a_formattag = sh_a->wf->wFormatTag;
     } else {
-        sh_a->wf = calloc(1, sizeof(*sh_a->wf));
+        sh_a->wf = talloc_zero(sh_a, MP_WAVEFORMATEX);
         for (int i = 0; ; i++) {
             struct mkv_audio_tag *t = mkv_audio_tags + i;
             if (t->id == NULL)
@@ -1462,7 +1460,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     } else if ((track->a_formattag == 0x2000)           /* AC3 */
                || track->a_formattag == MP_FOURCC('E', 'A', 'C', '3')
                || (track->a_formattag == 0x2001)) {        /* DTS */
-        free(sh_a->wf);
+        talloc_free(sh_a->wf);
         sh_a->wf = NULL;
     } else if (track->a_formattag == 0x0001) {  /* PCM || PCM_BE */
         if (!strcmp(track->codec_id, MKV_A_PCM_BE))
@@ -1494,7 +1492,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
                 profile = 2;
             else
                 profile = 3;
-            sh_a->codecdata = malloc(5);
+            sh_a->codecdata = talloc_size(sh_a, 5);
             sh_a->codecdata[0] = ((profile + 1) << 3) | ((srate_idx & 0xE) >> 1);
             sh_a->codecdata[1] =
                 ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
@@ -1520,7 +1518,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             goto error;
         if (!track->ms_compat) {
             sh_a->wf->cbSize = track->private_size;
-            sh_a->wf = realloc(sh_a->wf, sizeof(*sh_a->wf) + sh_a->wf->cbSize);
+            sh_a->wf = talloc_realloc_size(sh_a, sh_a->wf,
+                                           sizeof(*sh_a->wf) + sh_a->wf->cbSize);
             memcpy((unsigned char *) (sh_a->wf + 1), track->private_data,
                    sh_a->wf->cbSize);
         }
@@ -1558,7 +1557,8 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         codecdata_length = AV_RB32(src);
         src += 4;
         sh_a->wf->cbSize = codecdata_length;
-        sh_a->wf = realloc(sh_a->wf, sizeof(*sh_a->wf) + sh_a->wf->cbSize);
+        sh_a->wf = talloc_realloc_size(sh_a, sh_a->wf,
+                                       sizeof(*sh_a->wf) + sh_a->wf->cbSize);
         memcpy(((char *) (sh_a->wf + 1)), src, codecdata_length);
 
         switch (track->a_formattag) {
@@ -1579,9 +1579,9 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
             sh_a->wf->nBlockAlign = track->coded_framesize;
         audiobuf:
             track->audio_buf =
-                malloc(track->sub_packet_h * track->audiopk_size);
+                talloc_size(demuxer, track->sub_packet_h * track->audiopk_size);
             track->audio_timestamp =
-                malloc(track->sub_packet_h * sizeof(double));
+                talloc_size(demuxer, track->sub_packet_h * sizeof(double));
             break;
         }
 
@@ -1590,7 +1590,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
                || (track->a_formattag == 0xf1ac)) {
         unsigned char *ptr;
         int size;
-        free(sh_a->wf);
+        talloc_free(sh_a->wf);
         sh_a->wf = NULL;
 
         if (!track->ms_compat) {
@@ -1603,18 +1603,18 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         }
         if (size < 4 || ptr[0] != 'f' || ptr[1] != 'L' || ptr[2] != 'a'
             || ptr[3] != 'C') {
-            sh_a->codecdata = malloc(4);
+            sh_a->codecdata = talloc_size(sh_a, 4);
             sh_a->codecdata_len = 4;
             memcpy(sh_a->codecdata, "fLaC", 4);
         } else {
-            sh_a->codecdata = malloc(size);
+            sh_a->codecdata = talloc_size(sh_a, size);
             sh_a->codecdata_len = size;
             memcpy(sh_a->codecdata, ptr, size);
         }
     } else if (!strcmp(track->codec_id, MKV_A_ALAC)) {
         if (track->private_size && track->private_size < 10000000) {
             sh_a->codecdata_len = track->private_size + 12;
-            sh_a->codecdata = malloc(sh_a->codecdata_len);
+            sh_a->codecdata = talloc_size(sh_a, sh_a->codecdata_len);
             char *data = sh_a->codecdata;
             AV_WB32(data + 0, sh_a->codecdata_len);
             memcpy(data + 4, "alac", 4);
@@ -1626,7 +1626,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
         copy_audio_private_data(sh_a, track);
     } else if (track->a_formattag == MP_FOURCC('T', 'T', 'A', '1')) {
         sh_a->codecdata_len = 30;
-        sh_a->codecdata = calloc(1, sh_a->codecdata_len);
+        sh_a->codecdata = talloc_zero_size(sh_a, sh_a->codecdata_len);
         if (!sh_a->codecdata)
             goto error;
         char *data = sh_a->codecdata;
@@ -1698,7 +1698,7 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
         track->private_data = buffer.start;
         track->private_size = buffer.len;
     }
-    sh->extradata = malloc(track->private_size);
+    sh->extradata = talloc_size(sh, track->private_size);
     memcpy(sh->extradata, track->private_data, track->private_size);
     sh->extradata_len = track->private_size;
     if (track->language && (strcmp(track->language, "und") != 0))

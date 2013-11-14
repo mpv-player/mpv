@@ -89,7 +89,7 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
     sh_audio = sh->audio;
     sh_audio->gsh->codec = "mp-pcm";
     sh_audio->format = aformat;
-    sh_audio->wf = w = malloc(sizeof(*w));
+    sh_audio->wf = w = talloc_zero(sh, MP_WAVEFORMATEX);
     w->wFormatTag = 0;
     sh_audio->channels = channels;
     w->nChannels = sh_audio->channels.num;

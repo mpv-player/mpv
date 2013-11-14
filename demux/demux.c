@@ -273,34 +273,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
     return sh;
 }
 
-static void free_sh_sub(sh_sub_t *sh)
-{
-    free(sh->extradata);
-}
-
-static void free_sh_audio(sh_audio_t *sh)
-{
-    free(sh->wf);
-    free(sh->codecdata);
-}
-
-static void free_sh_video(sh_video_t *sh)
-{
-    free(sh->bih);
-}
-
-static void free_sh_stream(struct sh_stream *sh)
-{
-    ds_free_packs(sh->ds);
-
-    switch (sh->type) {
-    case STREAM_AUDIO: free_sh_audio(sh->audio); break;
-    case STREAM_VIDEO: free_sh_video(sh->video); break;
-    case STREAM_SUB:   free_sh_sub(sh->sub);     break;
-    default: abort();
-    }
-}
-
 void free_demuxer(demuxer_t *demuxer)
 {
     if (!demuxer)
@@ -309,7 +281,7 @@ void free_demuxer(demuxer_t *demuxer)
         demuxer->desc->close(demuxer);
     // free streams:
     for (int n = 0; n < demuxer->num_streams; n++)
-        free_sh_stream(demuxer->streams[n]);
+        ds_free_packs(demuxer->streams[n]->ds);
     talloc_free(demuxer);
 }
 

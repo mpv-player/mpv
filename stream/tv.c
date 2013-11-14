@@ -808,7 +808,7 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
 	    sh_audio->samplerate * samplesize * sh_audio->channels.num;
 
 	// emulate WF for win32 codecs:
-	sh_audio->wf = malloc(sizeof(*sh_audio->wf));
+	sh_audio->wf = talloc_zero(sh_audio, MP_WAVEFORMATEX);
 	sh_audio->wf->wFormatTag = sh_audio->format;
 	sh_audio->wf->nChannels = sh_audio->channels.num;
 	sh_audio->wf->wBitsPerSample = samplesize * 8;
