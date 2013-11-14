@@ -56,10 +56,11 @@ static const struct ad_functions * const ad_drivers[] = {
     NULL
 };
 
-// At least ad_mpg123 needs to be able to decode this many samples at once
-#define DECODE_MAX_UNIT 1152
+// ad_mpg123 needs to be able to decode 1152 samples at once
+// ad_spdif needs up to 8192
+#define DECODE_MAX_UNIT MPMAX(8192, 1152)
 
-// At least 8192 samples, plus hack for ad_mpg123
+// At least 8192 samples, plus hack for ad_mpg123 and ad_spdif
 #define DECODE_BUFFER_SAMPLES (8192 + DECODE_MAX_UNIT)
 
 // Drop audio buffer and reinit it (after format change)

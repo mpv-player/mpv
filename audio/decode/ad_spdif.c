@@ -193,16 +193,16 @@ static int decode_audio(sh_audio_t *sh, struct mp_audio *buffer, int maxlen)
     int sstride = 2 * sh->channels.num;
     assert(sstride == buffer->sstride);
 
-    if (maxlen < spdif_ctx->iec61937_packet_size)
+    if (maxlen * sstride < spdif_ctx->iec61937_packet_size)
         return 0;
 
     spdif_ctx->out_buffer_len  = 0;
-    spdif_ctx->out_buffer_size = maxlen;
+    spdif_ctx->out_buffer_size = maxlen * sstride;
     spdif_ctx->out_buffer      = buffer->planes[0];
 
     struct demux_packet *mpkt = demux_read_packet(sh->gsh);
     if (!mpkt)
-        return 0;
+        return -1;
 
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt);
@@ -212,15 +212,14 @@ static int decode_audio(sh_audio_t *sh, struct mp_audio *buffer, int maxlen)
         sh->pts        = mpkt->pts;
         sh->pts_offset = 0;
     }
-    int out_len = spdif_ctx->out_buffer_len;
     int ret = av_write_frame(lavf_ctx, &pkt);
     avio_flush(lavf_ctx->pb);
-    sh->pts_offset += (spdif_ctx->out_buffer_len - out_len) / sstride;
+    buffer->samples = spdif_ctx->out_buffer_len / sstride;
+    sh->pts_offset += buffer->samples;
     talloc_free(mpkt);
     if (ret < 0)
         return -1;
 
-    buffer->samples = spdif_ctx->out_buffer_len / sstride;
     return 0;
 }
 
