@@ -64,17 +64,18 @@ Available filters are:
     outputting to S/PDIF. If the input sample rate is not 48 kHz, 44.1 kHz or
     32 kHz, it will be resampled to 48 kHz.
 
-    ``<tospdif>``
-        Output raw AC-3 stream if zero or not set, output to S/PDIF for
-        passthrough when ``<tospdif>`` is set non-zero.
-    ``<bitrate>``
-        The bitrate use for the AC-3 stream. Set it to either 384 or 384000
-        to get 384 kbps.
+    ``tospdif=<yes|no>``
+        Output raw AC-3 stream if ``no``, output to S/PDIF for
+        passthrough if ``yes`` (default).
+
+    ``bitrate=<rate>``
+        The bitrate use for the AC-3 stream. Set it to 384 to get 384 kbps.
 
         Valid values: 32, 40, 48, 56, 64, 80, 96, 112, 128,
         160, 192, 224, 256, 320, 384, 448, 512, 576, 640.
 
-        Default bitrate is based on the input channel number:
+        The special value ``default`` selects a default bitrate based on the
+        input channel number:
 
         :1ch: 96
         :2ch: 192
@@ -83,7 +84,7 @@ Available filters are:
         :5ch: 448
         :6ch: 448
 
-    ``<minchn>``
+    ``minchn=<n>``
         If the input channel number is less than ``<minchn>``, the filter will
         detach itself (default: 5).
 

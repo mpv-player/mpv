@@ -51,21 +51,21 @@ typedef struct af_ac3enc_s {
     struct AVCodec        *lavc_acodec;
     struct AVCodecContext *lavc_actx;
     AVPacket pkt;
-    bool planarize;
-    int add_iec61937_header;
     int bit_rate;
     struct mp_audio_buffer *pending;
     int in_samples;     // samples of input per AC3 frame
     int out_samples;    // upper bound on encoded output per AC3 frame
-    int min_channel_num;
     int in_sampleformat;
+
+    int cfg_add_iec61937_header;
+    int cfg_bit_rate;
+    int cfg_min_channel_num;
 } af_ac3enc_t;
 
 // Initialization and runtime control
 static int control(struct af_instance *af, int cmd, void *arg)
 {
     af_ac3enc_t *s  = af->setup;
-    int i, bit_rate;
     static const int default_bit_rate[AC3_MAX_CHANNELS+1] = \
         {0, 96000, 192000, 256000, 384000, 448000, 448000};
 
@@ -74,7 +74,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         struct mp_audio *in = arg;
         struct mp_audio orig_in = *in;
 
-        if (AF_FORMAT_IS_AC3(in->format) || in->nch < s->min_channel_num)
+        if (AF_FORMAT_IS_AC3(in->format) || in->nch < s->cfg_min_channel_num)
             return AF_DETACH;
 
         mp_audio_set_format(in, s->in_sampleformat);
@@ -94,7 +94,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
             return AF_FALSE;
 
         s->in_samples = AC3_FRAME_SIZE;
-        if (s->add_iec61937_header) {
+        if (s->cfg_add_iec61937_header) {
             s->out_samples = AC3_FRAME_SIZE;
         } else {
             s->out_samples = AC3_MAX_CODED_FRAME_SIZE / af->data->sstride;
@@ -106,7 +106,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         mp_msg(MSGT_AFILTER, MSGL_DBG2, "af_lavcac3enc reinit: %d, %d, %f, %d.\n",
                in->nch, in->rate, af->mul, s->in_samples);
 
-        bit_rate = s->bit_rate ? s->bit_rate : default_bit_rate[in->nch];
+        int bit_rate = s->bit_rate ? s->bit_rate : default_bit_rate[in->nch];
 
         if (s->lavc_actx->channels != in->nch ||
             s->lavc_actx->sample_rate != in->rate ||
@@ -132,32 +132,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
         return AF_OK;
     }
-    case AF_CONTROL_COMMAND_LINE:
-        mp_msg(MSGT_AFILTER, MSGL_DBG2, "af_lavcac3enc cmdline: %s.\n", (char*)arg);
-        s->bit_rate = 0;
-        s->min_channel_num = 0;
-        s->add_iec61937_header = 0;
-        sscanf(arg,"%d:%d:%d", &s->add_iec61937_header, &s->bit_rate,
-               &s->min_channel_num);
-        if (s->bit_rate < 1000)
-            s->bit_rate *= 1000;
-        if (s->bit_rate) {
-            for (i = 0; i < 19; ++i)
-                if (ac3_bitrate_tab[i] * 1000 == s->bit_rate)
-                    break;
-            if (i >= 19) {
-                mp_msg(MSGT_AFILTER, MSGL_WARN, "af_lavcac3enc unable set unsupported "
-                       "bitrate %d, use default bitrate (check manpage to see "
-                       "supported bitrates).\n", s->bit_rate);
-                s->bit_rate = 0;
-            }
-        }
-        if (s->min_channel_num == 0)
-            s->min_channel_num = 5;
-        mp_msg(MSGT_AFILTER, MSGL_V, "af_lavcac3enc config spdif:%d, bitrate:%d, "
-               "minchnum:%d.\n", s->add_iec61937_header, s->bit_rate,
-               s->min_channel_num);
-        return AF_OK;
     }
     return AF_UNKNOWN;
 }
@@ -242,7 +216,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
         int header_len = 0;
         char hdr[8];
 
-        if (s->add_iec61937_header && s->pkt.size > 5) {
+        if (s->cfg_add_iec61937_header && s->pkt.size > 5) {
             int bsmod = s->pkt.data[5] & 0x7;
             int len = frame_size;
 
@@ -276,7 +250,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
 
 static int af_open(struct af_instance* af){
 
-    af_ac3enc_t *s = talloc_zero(af, af_ac3enc_t);
+    af_ac3enc_t *s = af->priv;
     af->control=control;
     af->uninit=uninit;
     af->play=play;
@@ -313,11 +287,39 @@ static int af_open(struct af_instance* af){
 
     s->pending = mp_audio_buffer_create(af);
 
+    if (s->cfg_bit_rate) {
+        int i;
+        for (i = 0; i < 19; i++) {
+            if (ac3_bitrate_tab[i] == s->cfg_bit_rate)
+                break;
+        }
+        if (i >= 19) {
+            mp_msg(MSGT_AFILTER, MSGL_WARN, "af_lavcac3enc unable set unsupported "
+                    "bitrate %d, use default bitrate (check manpage to see "
+                    "supported bitrates).\n", s->cfg_bit_rate);
+            s->cfg_bit_rate = 0;
+        }
+    }
+
     return AF_OK;
 }
+
+#define OPT_BASE_STRUCT struct af_ac3enc_s
 
 struct af_info af_info_lavcac3enc = {
     .info = "runtime encode to ac3 using libavcodec",
     .name = "lavcac3enc",
     .open = af_open,
+    .priv_size = sizeof(struct af_ac3enc_s),
+    .priv_defaults = &(const struct af_ac3enc_s){
+        .cfg_add_iec61937_header = 1,
+        .cfg_min_channel_num = 5,
+    },
+    .options = (const struct m_option[]) {
+        OPT_FLAG("tospdif", cfg_add_iec61937_header, 0),
+        OPT_CHOICE_OR_INT("bitrate", cfg_bit_rate, 0, 32, 640,
+                          ({"default", 0})),
+        OPT_INTRANGE("minch", cfg_min_channel_num, 0, 2, 6),
+        {0}
+    },
 };
