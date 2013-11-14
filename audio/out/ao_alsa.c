@@ -458,6 +458,11 @@ static int init(struct ao *ao)
                                     ? SND_PCM_ACCESS_RW_NONINTERLEAVED
                                     : SND_PCM_ACCESS_RW_INTERLEAVED;
     err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
+    if (err < 0 && af_fmt_is_planar(ao->format)) {
+        ao->format = af_fmt_from_planar(ao->format);
+        access = SND_PCM_ACCESS_RW_INTERLEAVED;
+        err = snd_pcm_hw_params_set_access(p->alsa, alsa_hwparams, access);
+    }
     CHECK_ALSA_ERROR("Unable to set access type");
 
     int num_channels = ao->channels.num;
