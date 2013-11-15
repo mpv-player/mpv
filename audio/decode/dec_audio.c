@@ -319,18 +319,18 @@ int decode_audio(sh_audio_t *sh_audio, struct mp_audio_buffer *outbuf,
 
         int decsamples = (minsamples - buffered) / filter_multiplier;
         // + some extra for possible filter buffering
-        decsamples += 1 << unitsize;
+        decsamples += unitsize << 5;
 
         if (huge_filter_buffer) {
             /* Some filter must be doing significant buffering if the estimated
              * input length didn't produce enough output from filters.
-             * Feed the filters 2k bytes at a time until we have enough output.
-             * Very small amounts could make filtering inefficient while large
-             * amounts can make MPlayer demux the file unnecessarily far ahead
+             * Feed the filters 250 samples at a time until we have enough
+             * output. Very small amounts could make filtering inefficient while
+             * large amounts can make mpv demux the file unnecessarily far ahead
              * to get audio data and buffer video frames in memory while doing
              * so. However the performance impact of either is probably not too
              * significant as long as the value is not completely insane. */
-            decsamples = 2000;
+            decsamples = 250;
         }
 
         /* if this iteration does not fill buffer, we must have lots
