@@ -55,6 +55,8 @@ OPTIONS
     DTS-HD tracks can be sent over HDMI but not over the original
     coax/toslink S/PDIF system.
 
+    Note: this feature is broken.
+
     ``--dtshd`` and ``--no-dtshd`` are deprecated aliases.
 
 ``--af=<filter1[=parameter1:parameter2:...],filter2,...>``
