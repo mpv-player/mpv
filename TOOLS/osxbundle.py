@@ -30,24 +30,28 @@ def user_dylib_lst(input_file):
     return [lib for lib in dylib_lst(input_file).split("\n") if
             is_user_lib(lib, input_file)]
 
-def bundle_name(binary_name):
+def bundle_path(binary_name):
     return "%s.app" % binary_name
 
+def bundle_name(binary_name):
+    return os.path.basename(bundle_path(binary_name))
+
 def target_plist(binary_name):
-    return os.path.join(bundle_name(binary_name), 'Contents', 'Info.plist')
+    return os.path.join(bundle_path(binary_name), 'Contents', 'Info.plist')
 
 def target_directory(binary_name):
-    return os.path.join(bundle_name(binary_name), 'Contents', 'MacOS')
+    return os.path.join(bundle_path(binary_name), 'Contents', 'MacOS')
 
 def target_binary(binary_name):
-    return os.path.join(target_directory(binary_name), binary_name)
+    return os.path.join(target_directory(binary_name),
+                        os.path.basename(binary_name))
 
 def copy_bundle(binary_name):
-    if os.path.isdir(bundle_name(binary_name)):
-        shutil.rmtree(bundle_name(binary_name))
+    if os.path.isdir(bundle_path(binary_name)):
+        shutil.rmtree(bundle_path(binary_name))
     shutil.copytree(
         os.path.join('TOOLS', 'osxbundle', bundle_name(binary_name)),
-        bundle_name(binary_name))
+        bundle_path(binary_name))
 
 def copy_binary(binary_name):
     shutil.copy(binary_name, target_binary(binary_name))
