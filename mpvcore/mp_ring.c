@@ -87,31 +87,6 @@ int mp_ring_read(struct mp_ring *buffer, unsigned char *dest, int len)
     return read_len;
 }
 
-int mp_ring_read_cb(struct mp_ring *buffer, void *ctx, int len,
-        void (*func)(void*, void*, int))
-{
-    // The point of this function is defining custom read behaviour, assume
-    // it's a programmers error if func is null.
-    assert(func);
-
-    int size     = mp_ring_size(buffer);
-    int buffered = mp_ring_buffered(buffer);
-    int read_len = FFMIN(len, buffered);
-    int read_ptr = mp_ring_get_rpos(buffer) % size;
-
-    int len1 = FFMIN(size - read_ptr, read_len);
-    int len2 = read_len - len1;
-
-    func(ctx, buffer->buffer + read_ptr, len1);
-    if (len2 > 0)
-        func(ctx, buffer->buffer, len2);
-
-    mp_atomic_add_and_fetch(&buffer->rpos, read_len);
-    mp_memory_barrier();
-
-    return read_len;
-}
-
 int mp_ring_write(struct mp_ring *buffer, unsigned char *src, int len)
 {
     int size      = mp_ring_size(buffer);
