@@ -98,7 +98,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     if(!arg) return AF_ERROR;
 
     mp_audio_copy_config(af->data, (struct mp_audio*)arg);
-    mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
+    mp_audio_set_format(af->data, AF_FORMAT_FLOAT);
 
     // Calculate number of active filters
     s->K=KM;

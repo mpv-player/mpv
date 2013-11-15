@@ -23,10 +23,10 @@
 
 static bool test_conversion(int src_format, int dst_format)
 {
-    return (src_format == AF_FORMAT_U24_NE && dst_format == AF_FORMAT_U32_NE) ||
-           (src_format == AF_FORMAT_S24_NE && dst_format == AF_FORMAT_S32_NE) ||
-           (src_format == AF_FORMAT_U32_NE && dst_format == AF_FORMAT_U24_NE) ||
-           (src_format == AF_FORMAT_S32_NE && dst_format == AF_FORMAT_S24_NE);
+    return (src_format == AF_FORMAT_U24 && dst_format == AF_FORMAT_U32) ||
+           (src_format == AF_FORMAT_S24 && dst_format == AF_FORMAT_S32) ||
+           (src_format == AF_FORMAT_U32 && dst_format == AF_FORMAT_U24) ||
+           (src_format == AF_FORMAT_S32 && dst_format == AF_FORMAT_S24);
 }
 
 static int control(struct af_instance *af, int cmd, void *arg)

@@ -57,15 +57,15 @@ static int control(struct af_instance* af, int cmd, void* arg)
     mp_audio_copy_config(af->data, (struct mp_audio*)arg);
     mp_audio_set_num_channels(af->data, 1);
 #if 0
-    if (((struct mp_audio*)arg)->format == AF_FORMAT_FLOAT_NE)
+    if (((struct mp_audio*)arg)->format == AF_FORMAT_FLOAT)
     {
-	af->data->format = AF_FORMAT_FLOAT_NE;
+	af->data->format = AF_FORMAT_FLOAT;
 	af->data->bps = 4;
 	af->play = play_float;
     }// else
 #endif
     {
-        mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
+        mp_audio_set_format(af->data, AF_FORMAT_S16);
 	af->play = play_s16;
     }
 

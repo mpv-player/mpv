@@ -311,7 +311,7 @@ static int control(struct af_instance *af, int cmd, void* arg)
 	    }
 	    else if (af->data->nch < 5)
 	      mp_audio_set_channels_old(af->data, 5);
-        mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
+        mp_audio_set_format(af->data, AF_FORMAT_S16);
 	test_output_res = af_test_output(af, (struct mp_audio*)arg);
 	// after testing input set the real output format
         mp_audio_set_num_channels(af->data, 2);

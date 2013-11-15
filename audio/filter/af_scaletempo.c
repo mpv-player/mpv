@@ -290,10 +290,10 @@ static int control(struct af_instance *af, int cmd, void *arg)
             return af_test_output(af, data);
         }
 
-        if (data->format == AF_FORMAT_S16_NE) {
+        if (data->format == AF_FORMAT_S16) {
             use_int = 1;
         } else {
-            mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
+            mp_audio_set_format(af->data, AF_FORMAT_FLOAT);
         }
         int bps = af->data->bps;
 

@@ -41,7 +41,7 @@ struct priv {
 
 static struct mp_chmap channels = MP_CHMAP_INIT_STEREO;
 static int samplerate = 44100;
-static int aformat = AF_FORMAT_S16_NE;
+static int aformat = AF_FORMAT_S16;
 
 const m_option_t demux_rawaudio_opts[] = {
     { "channels", &channels, &m_option_type_chmap, CONF_MIN, 1 },

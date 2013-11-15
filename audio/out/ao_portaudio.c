@@ -56,12 +56,12 @@ struct format_map {
 
 static const struct format_map format_maps[] = {
     // first entry is the default format
-    {AF_FORMAT_S16_NE,      paInt16},
-    {AF_FORMAT_S24_NE,      paInt24},
-    {AF_FORMAT_S32_NE,      paInt32},
-    {AF_FORMAT_S8,          paInt8},
-    {AF_FORMAT_U8,          paUInt8},
-    {AF_FORMAT_FLOAT_NE,    paFloat32},
+    {AF_FORMAT_S16,      paInt16},
+    {AF_FORMAT_S24,      paInt24},
+    {AF_FORMAT_S32,      paInt32},
+    {AF_FORMAT_S8,       paInt8},
+    {AF_FORMAT_U8,       paUInt8},
+    {AF_FORMAT_FLOAT,    paFloat32},
     {AF_FORMAT_UNKNOWN,     0}
 };
 

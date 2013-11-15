@@ -89,14 +89,14 @@ static int format_table[][2] = {
     {AFMT_S32_BE,       AF_FORMAT_S32_BE},
 #endif
 #ifdef AFMT_FLOAT
-    {AFMT_FLOAT,        AF_FORMAT_FLOAT_NE},
+    {AFMT_FLOAT,        AF_FORMAT_FLOAT},
 #endif
     // SPECIALS
 #ifdef AFMT_MPEG
     {AFMT_MPEG,         AF_FORMAT_MPEG2},
 #endif
 #ifdef AFMT_AC3
-    {AFMT_AC3,          AF_FORMAT_AC3_NE},
+    {AFMT_AC3,          AF_FORMAT_AC3},
 #endif
     {-1, -1}
 };
@@ -269,7 +269,7 @@ static int init(struct ao *ao)
 
 ac3_retry:
     if (AF_FORMAT_IS_AC3(ao->format))
-        ao->format = AF_FORMAT_AC3_NE;
+        ao->format = AF_FORMAT_AC3;
     oss_format = format2oss(ao->format);
     if (oss_format == -1) {
         MP_VERBOSE(ao, "Unknown/not supported internal format: %s\n",
@@ -279,15 +279,15 @@ ac3_retry:
 #else
         oss_format = AFMT_S16_LE;
 #endif
-        ao->format = AF_FORMAT_S16_NE;
+        ao->format = AF_FORMAT_S16;
     }
     if (ioctl(p->audio_fd, SNDCTL_DSP_SETFMT, &oss_format) < 0 ||
         oss_format != format2oss(ao->format))
     {
         MP_WARN(ao, "Can't set audio device %s to %s output, trying %s...\n",
                 p->dsp, af_fmt_to_str(ao->format),
-                af_fmt_to_str(AF_FORMAT_S16_NE));
-        ao->format = AF_FORMAT_S16_NE;
+                af_fmt_to_str(AF_FORMAT_S16));
+        ao->format = AF_FORMAT_S16;
         goto ac3_retry;
     }
 

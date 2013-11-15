@@ -51,12 +51,12 @@ static int control(struct af_instance* af, int cmd, void* arg)
     mp_audio_copy_config(af->data, (struct mp_audio*)arg);
     mp_audio_force_interleaved_format(af->data);
     mp_audio_set_num_channels(af->data, 2);
-    if (af->data->format == AF_FORMAT_FLOAT_NE)
+    if (af->data->format == AF_FORMAT_FLOAT)
     {
 	af->play = play_float;
     }// else
     {
-        mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
+        mp_audio_set_format(af->data, AF_FORMAT_S16);
 	af->play = play_s16;
     }
 

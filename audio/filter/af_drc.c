@@ -91,8 +91,8 @@ static int control(struct af_instance* af, int cmd, void* arg)
     mp_audio_force_interleaved_format((struct mp_audio*)arg);
     mp_audio_copy_config(af->data, (struct mp_audio*)arg);
 
-    if(((struct mp_audio*)arg)->format != (AF_FORMAT_S16_NE)){
-      mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
+    if(((struct mp_audio*)arg)->format != (AF_FORMAT_S16)){
+      mp_audio_set_format(af->data, AF_FORMAT_FLOAT);
     }
     return af_test_output(af,(struct mp_audio*)arg);
   case AF_CONTROL_COMMAND_LINE:{
@@ -296,14 +296,14 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   af_drc_t *s = af->setup;
 
-  if(af->data->format == (AF_FORMAT_S16_NE))
+  if(af->data->format == (AF_FORMAT_S16))
   {
     if (s->method)
 	method2_int16(s, data);
     else
 	method1_int16(s, data);
   }
-  else if(af->data->format == (AF_FORMAT_FLOAT_NE))
+  else if(af->data->format == (AF_FORMAT_FLOAT))
   {
     if (s->method)
 	method2_float(s, data);

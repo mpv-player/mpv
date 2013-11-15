@@ -387,7 +387,7 @@ static int init(struct ao *ao)
                    ao->channels.num);
     } else {
         device = select_chmap(ao);
-        if (strcmp(device, "default") != 0 && ao->format == AF_FORMAT_FLOAT_NE)
+        if (strcmp(device, "default") != 0 && ao->format == AF_FORMAT_FLOAT)
         {
             // hack - use the converter plugin (why the heck?)
             device = talloc_asprintf(ao, "plug:%s", device);
@@ -435,7 +435,7 @@ static int init(struct ao *ao)
     p->alsa_fmt = find_alsa_format(ao->format);
     if (p->alsa_fmt == SND_PCM_FORMAT_UNKNOWN) {
         p->alsa_fmt = SND_PCM_FORMAT_S16;
-        ao->format = AF_FORMAT_S16_NE;
+        ao->format = AF_FORMAT_S16;
     }
 
     err = snd_pcm_hw_params_test_format(p->alsa, alsa_hwparams, p->alsa_fmt);

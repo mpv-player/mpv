@@ -149,13 +149,13 @@ static int set_format(sh_audio_t *sh)
             sh->sample_format = AF_FORMAT_S8;
             break;
         case MPG123_ENC_SIGNED_16:
-            sh->sample_format = AF_FORMAT_S16_NE;
+            sh->sample_format = AF_FORMAT_S16;
             break;
         case MPG123_ENC_SIGNED_32:
-            sh->sample_format = AF_FORMAT_S32_NE;
+            sh->sample_format = AF_FORMAT_S32;
             break;
         case MPG123_ENC_FLOAT_32:
-            sh->sample_format = AF_FORMAT_FLOAT_NE;
+            sh->sample_format = AF_FORMAT_FLOAT;
             break;
         default:
             /* This means we got a funny custom build of libmpg123 that only supports an unknown format. */

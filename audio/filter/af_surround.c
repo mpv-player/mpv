@@ -98,7 +98,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
         return AF_DETACH;
     }
 
-    mp_audio_set_format(in, AF_FORMAT_FLOAT_NE);
+    mp_audio_set_format(in, AF_FORMAT_FLOAT);
     mp_audio_copy_config(af->data, in);
     mp_audio_set_channels_old(af->data, in->nch * 2);
 

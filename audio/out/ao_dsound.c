@@ -392,7 +392,7 @@ static int init(struct ao *ao)
     int rate = ao->samplerate;
 
     if (AF_FORMAT_IS_AC3(format))
-        format = AF_FORMAT_AC3_NE;
+        format = AF_FORMAT_AC3;
     else {
         struct mp_chmap_sel sel = {0};
         mp_chmap_sel_add_waveext(&sel);
@@ -400,7 +400,7 @@ static int init(struct ao *ao)
             return -1;
     }
     switch (format) {
-    case AF_FORMAT_AC3_NE:
+    case AF_FORMAT_AC3:
     case AF_FORMAT_S24_LE:
     case AF_FORMAT_S16_LE:
     case AF_FORMAT_U8:

@@ -35,7 +35,7 @@ Available filters are:
     This filter is automatically enabled if the audio output does not support
     the audio configuration of the file being played.
 
-    It supports only the following sample formats: u8, s16ne, s32ne, floatne.
+    It supports only the following sample formats: u8, s16, s32, float.
 
     ``filter-size=<length>``
         Length of the filter with respect to the lower sampling rate. (default:
@@ -223,11 +223,11 @@ Available filters are:
         Force conversion to this format. Use ``--af=format=format=help`` to get
         a list of valid formats. The general form is 'sbe', where 's' denotes
         the sign (either 's' for signed or 'u' for unsigned), 'b' denotes the
-        number of bits per sample (16, 24 or 32) and 'e' denotes the
-        endianness ('le' means little-endian, 'be' big-endian and 'ne' the
+        number of bits per sample (16, 24 or 32) and 'e' denotes the endian
+        ('le' means little-endian, 'be' big-endian and leaving it away the
         endianness of the computer mpv is running on). Valid values (amongst
-        others) are: 's16le', 'u32be' and 'u24ne'. Exceptions to this rule that
-        are also valid format specifiers: u8, s8, floatle, floatbe, floatne,
+        others) are: 's16le', 'u32be' and 'u24'. Exceptions to this rule that
+        are also valid format specifiers: u8, s8, floatle, floatbe, float,
         mpeg2, and ac3.
 
     ``<srate>``
@@ -553,7 +553,7 @@ Available filters are:
         ``mpv --af=scaletempo=stride=30:overlap=.50:search=10 media.ogg``
             Would tweak the quality and performace parameters.
 
-        ``mpv --af=format=floatne,scaletempo media.ogg``
+        ``mpv --af=format=float,scaletempo media.ogg``
             Would make scaletempo use float code. Maybe faster on some
             platforms.
 

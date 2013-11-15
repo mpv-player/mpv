@@ -245,7 +245,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
             mp_audio_set_channels(out, &in->channels);
 
         if (af_to_avformat(in->format) == AV_SAMPLE_FMT_NONE)
-            mp_audio_set_format(in, AF_FORMAT_FLOAT_NE);
+            mp_audio_set_format(in, AF_FORMAT_FLOAT);
         if (af_to_avformat(out->format) == AV_SAMPLE_FMT_NONE)
             mp_audio_set_format(out, in->format);
 

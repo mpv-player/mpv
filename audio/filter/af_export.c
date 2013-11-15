@@ -88,7 +88,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     // Accept only int16_t as input format (which sucks)
     mp_audio_copy_config(af->data, (struct mp_audio*)arg);
-    mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
+    mp_audio_set_format(af->data, AF_FORMAT_S16);
 
     // If buffer length isn't set, set it to the default value
     if(s->sz == 0)

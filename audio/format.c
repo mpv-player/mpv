@@ -109,7 +109,6 @@ bool af_fmt_is_planar(int format)
 
 #define FMT_ENDIAN(string, id)                          \
     {string,            id},                            \
-    {string "ne",       id},                            \
     {string "le",       MP_CONCAT(id, _LE)},            \
     {string "be",       MP_CONCAT(id, _BE)},            \
 

@@ -135,7 +135,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
                 break;
             default:
                 af->play = play_f;
-                mp_audio_set_format(af->data, AF_FORMAT_FLOAT_NE);
+                mp_audio_set_format(af->data, AF_FORMAT_FLOAT);
                 break;
         }
 

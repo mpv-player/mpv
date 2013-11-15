@@ -42,7 +42,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
   switch(cmd){
   case AF_CONTROL_REINIT:
     mp_audio_copy_config(af->data, data);
-    mp_audio_set_format(af->data, AF_FORMAT_S16_NE);
+    mp_audio_set_format(af->data, AF_FORMAT_S16);
 
     return af_test_output(af, data);
   case AF_CONTROL_COMMAND_LINE:

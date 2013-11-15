@@ -175,7 +175,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
         struct mp_audio *out = af->data;
 
         if (af_to_avformat(in->format) == AV_SAMPLE_FMT_NONE)
-            mp_audio_set_format(in, AF_FORMAT_FLOAT_NE);
+            mp_audio_set_format(in, AF_FORMAT_FLOAT);
 
         if (!mp_chmap_is_lavc(&in->channels))
             mp_chmap_reorder_to_lavc(&in->channels); // will always work
