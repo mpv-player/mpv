@@ -216,7 +216,6 @@ def build(ctx):
         ( "demux/demux_libass.c",                "libass"),
         ( "demux/demux_mf.c" ),
         ( "demux/demux_mkv.c" ),
-        ( "demux/demux_mng.c",                   "mng"),
         ( "demux/demux_playlist.c" ),
         ( "demux/demux_raw.c" ),
         ( "demux/demux_subreader.c" ),
