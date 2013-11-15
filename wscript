@@ -520,10 +520,6 @@ video_output_features = [
         'desc': 'DVB input module',
         'deps': [ 'dvb' ],
         'func': check_true,
-    } , {
-        'name': '--mng',
-        'desc': 'MNG support',
-        'func': check_cc(fragment=load_fragment('mng.c'), lib=['mng', 'z']),
     }, {
         'name': '--jpeg',
         'desc': 'JPEG support',
