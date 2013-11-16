@@ -331,6 +331,14 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
         // first packet in stream
         ds->head = ds->tail = dp;
     }
+    /* ds_get_packets() can set ds->eof to 1 when another stream runs out of
+     * buffer space. That makes sense because in that situation the calling
+     * code should not count on being able to demux more packets from this
+     * stream. (Can happen with e.g. badly interleaved files.)
+     * In this case, we didn't necessarily reach EOF, and new packet can
+     * appear. */
+    ds->eof = 0;
+
     mp_dbg(MSGT_DEMUXER, MSGL_DBG2,
            "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%"PRIu64" "
            "[packs: A=%d V=%d S=%d]\n", stream_type_name(stream->type),
@@ -380,17 +388,8 @@ static void ds_get_packets(struct sh_stream *sh)
     mp_dbg(MSGT_DEMUXER, MSGL_DBG3, "ds_get_packets (%s) called\n",
            stream_type_name(sh->type));
     while (1) {
-        if (ds->head) {
-            /* The code below can set ds->eof to 1 when another stream runs
-             * out of buffer space. That makes sense because in that situation
-             * the calling code should not count on being able to demux more
-             * packets from this stream.
-             * If however the situation improves and we're called again
-             * despite the eof flag then it's better to clear it to avoid
-             * weird behavior. */
-            ds->eof = 0;
+        if (ds->head)
             return;
-        }
 
         if (demux_check_queue_full(demux))
             break;
