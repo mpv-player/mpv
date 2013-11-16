@@ -612,7 +612,7 @@ radio_and_tv_features = [
     }
 ]
 
-miscellaneous_options = [
+build_options = [
     {
         'name': '--static-build',
         'desc': 'static build',
@@ -669,14 +669,6 @@ def options(opt):
     opt.load('waf_customizations')
     opt.load('features')
 
-    opt.parse_features('miscellaneous options', miscellaneous_options)
-    optional_features = main_dependencies + libav_dependencies
-    opt.parse_features('optional feaures',  optional_features)
-    opt.parse_features('audio outputs',     audio_output_features)
-    opt.parse_features('video outputs',     video_output_features)
-    opt.parse_features('hwaccels',          hwaccel_features)
-    opt.parse_features('radio/tv features', radio_and_tv_features)
-
     group = opt.get_option_group("build and install options")
     for ident, default, desc in _INSTALL_DIRS_LIST:
         group.add_option('--{0}'.format(ident),
@@ -686,7 +678,14 @@ def options(opt):
             help    = 'directory for installing {0} [{1}]' \
                       .format(desc, default))
 
-    opt.parse_features('scripting',             scripting_features)
+    opt.parse_features('build and install options', build_options)
+    optional_features = main_dependencies + libav_dependencies
+    opt.parse_features('optional feaures',  optional_features)
+    opt.parse_features('audio outputs',     audio_output_features)
+    opt.parse_features('video outputs',     video_output_features)
+    opt.parse_features('hwaccels',          hwaccel_features)
+    opt.parse_features('radio/tv features', radio_and_tv_features)
+    opt.parse_features('scripting',         scripting_features)
 
     group = opt.get_option_group("scripting")
     group.add_option('--lua',
@@ -734,7 +733,7 @@ def configure(ctx):
     ctx.load('detections.cpu')
     ctx.load('detections.devices')
 
-    ctx.parse_dependencies(miscellaneous_options)
+    ctx.parse_dependencies(build_options)
     ctx.parse_dependencies(main_dependencies)
     ctx.parse_dependencies(audio_output_features)
     ctx.parse_dependencies(video_output_features)

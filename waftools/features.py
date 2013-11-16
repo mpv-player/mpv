@@ -52,7 +52,7 @@ class Feature(object):
 def add_feature(group, feature):
     Feature(group, feature).add_options()
 
-def parse_features(opt, group, features):
+def parse_features(opt, group_name, features):
     def is_feature(dep):
         return dep['name'].find('--') >= 0
 
@@ -61,7 +61,9 @@ def parse_features(opt, group, features):
         return dep
 
     features = [strip_feature(dep) for dep in features if is_feature(dep)]
-    group = opt.add_option_group(group)
+    group = opt.get_option_group(group_name)
+    if not group:
+        group = opt.add_option_group(group_name)
     [add_feature(group, feature) for feature in features]
 
 OptionsContext.parse_features = parse_features
