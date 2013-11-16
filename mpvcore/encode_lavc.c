@@ -680,7 +680,7 @@ int encode_lavc_open_codec(struct encode_lavc_context *ctx, AVStream *stream)
 
     if (ret < 0)
         encode_lavc_fail(ctx,
-                         "unable to open encoder (see above for the cause)");
+                         "unable to open encoder (see above for the cause)\n");
 
     return ret;
 }
