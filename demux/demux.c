@@ -618,9 +618,9 @@ int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
     // clear demux buffers:
     demux_flush(demuxer);
 
-    /* HACK: assume any demuxer used with these streams can cope with
-     * the stream layer suddenly seeking to a different position under it
-     * (nothing actually implements DEMUXER_CTRL_RESYNC now).
+    /* Note: this is for DVD and BD playback. The stream layer has to do these
+     * seeks, and the demuxer has to react to DEMUXER_CTRL_RESYNC in order to
+     * deal with the suddenly changing stream position.
      */
     struct stream *stream = demuxer->stream;
     if (stream_manages_timeline(stream)) {
