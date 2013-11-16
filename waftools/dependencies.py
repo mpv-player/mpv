@@ -99,6 +99,8 @@ the autodetection check failed.".format(self.identifier)
         self.ctx.end_msg(self.__message__(reason), 'RED')
 
     def fatal_if_needed(self):
+        if self.enabled_option() == False:
+            return
         if self.attributes.get('req', False):
             raise ConfigurationError(self.attributes['fmsg'])
 
