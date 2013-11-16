@@ -310,6 +310,8 @@ static int play(struct ao *ao, void **data, int samples, int flags)
         return 0;
     }
 
+    size_t num_planes = af_fmt_is_planar(ao->format) ? ao->channels.num : 1;
+
     if (flags & AOPLAY_FINAL_CHUNK) {
         int written = 0;
         if (samples > 0) {
@@ -317,7 +319,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
             size_t bytelen = samples * ao->sstride;
             size_t extralen = (ac->aframesize - 1) * ao->sstride;
             void *padded[MP_NUM_CHANNELS];
-            for (int n = 0; n < ao->channels.num; n++) {
+            for (int n = 0; n < num_planes; n++) {
                 padded[n] = talloc_size(tmp, bytelen + extralen);
                 memcpy(padded[n], data[n], bytelen);
                 af_fill_silence((char *)padded[n] + bytelen, extralen, ao->format);
@@ -411,7 +413,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     while (samples - bufpos >= ac->aframesize) {
         void *start[MP_NUM_CHANNELS];
-        for (int n = 0; n < ao->channels.num; n++)
+        for (int n = 0; n < num_planes; n++)
             start[n] = (char *)data[n] + bufpos * ao->sstride;
         encode(ao, outpts + bufpos / (double) ao->samplerate, start);
         bufpos += ac->aframesize;
