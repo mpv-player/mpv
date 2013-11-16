@@ -2,6 +2,7 @@
 
 import sys, os
 sys.path.insert(0, os.path.join(os.getcwd(), 'waftools'))
+from waflib.Configure import conf
 from waftools.checks.generic import *
 from waftools.checks.custom import *
 
@@ -692,6 +693,10 @@ def options(opt):
         type    = 'string',
         dest    = 'LUA_VER',
         help    = "select Lua package which should be autodetected. Choices: 51 51deb 52 52deb luajit")
+
+@conf
+def is_debug_build(ctx):
+    return getattr(ctx.options, 'enable_debug-build')
 
 def configure(ctx):
     ctx.check_waf_version(mini='1.7.13')
