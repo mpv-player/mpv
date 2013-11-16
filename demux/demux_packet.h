@@ -28,7 +28,7 @@ typedef struct demux_packet {
     double pts;
     double duration;
     double stream_pts;
-    int64_t pos; // position in index (AVI) or file (MPG)
+    int64_t pos; // position in source file byte stream
     unsigned char *buffer;
     bool keyframe;
     struct demux_packet *next;

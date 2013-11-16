@@ -458,7 +458,7 @@ double get_current_pos_ratio(struct MPContext *mpctx, bool use_range)
     } else {
         struct stream *s = demuxer->stream;
         int64_t size = s->end_pos - s->start_pos;
-        int64_t fpos = demuxer->filepos > 0 ?
+        int64_t fpos = demuxer->filepos >= 0 ?
                        demuxer->filepos : stream_tell(demuxer->stream);
         if (size > 0)
             ans = MPCLAMP((double)(fpos - s->start_pos) / size, 0, 1);

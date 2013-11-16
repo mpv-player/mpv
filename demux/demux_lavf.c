@@ -707,8 +707,6 @@ static int read_more_av_packets(demuxer_t *demux)
     if (priv->num_packets >= MAX_PKT_QUEUE)
         return -1;
 
-    demux->filepos = stream_tell(demux->stream);
-
     AVPacket *pkt = talloc(NULL, AVPacket);
     if (av_read_frame(priv->avfc, pkt) < 0) {
         talloc_free(pkt);
@@ -795,7 +793,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
         if (pkt->convergence_duration > 0)
             dp->duration = pkt->convergence_duration * av_q2d(st->time_base);
     }
-    dp->pos = demux->filepos;
+    dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
     // Use only one stream for stream_pts, otherwise PTS might be jumpy.
     if (stream->type == STREAM_VIDEO) {

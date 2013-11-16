@@ -133,6 +133,7 @@ static struct demux_packet *create_packet(size_t len)
         .pts = MP_NOPTS_VALUE,
         .duration = -1,
         .stream_pts = MP_NOPTS_VALUE,
+        .pos = -1,
     };
     return dp;
 }
@@ -338,6 +339,9 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
      * In this case, we didn't necessarily reach EOF, and new packet can
      * appear. */
     ds->eof = 0;
+
+    if (dp->pos >= 0)
+        demuxer->filepos = dp->pos;
 
     mp_dbg(MSGT_DEMUXER, MSGL_DBG2,
            "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%"PRIu64" "

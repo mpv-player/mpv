@@ -2004,7 +2004,7 @@ static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
                                track->stream->video->bih->biCompression,
                                &track->rv_kf_base, &track->rv_kf_pts, NULL);
     }
-    dp->pos = demuxer->filepos;
+    dp->pos = mkv_d->last_filepos;
     dp->keyframe = keyframe;
 
     demuxer_add_packet(demuxer, track->stream, dp);
@@ -2083,7 +2083,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
             (track->ra_pts == mkv_d->last_pts) ? 0 : (mkv_d->last_pts);
         track->ra_pts = mkv_d->last_pts;
         if (track->sub_packet_cnt == 0)
-            track->audio_filepos = demuxer->filepos;
+            track->audio_filepos = mkv_d->last_filepos;
         if (++(track->sub_packet_cnt) == sph) {
             int apk_usize = track->stream->audio->wf->nBlockAlign;
             track->sub_packet_cnt = 0;
@@ -2108,7 +2108,7 @@ static void handle_realaudio(demuxer_t *demuxer, mkv_track_t *track,
             dp->pts = mkv_d->last_pts;
         track->ra_pts = mkv_d->last_pts;
 
-        dp->pos = demuxer->filepos;
+        dp->pos = mkv_d->last_filepos;
         dp->keyframe = keyframe;
         demuxer_add_packet(demuxer, track->stream, dp);
     }
@@ -2225,6 +2225,7 @@ struct block_info {
     mkv_track_t *track;
     bstr data;
     void *alloc;
+    int64_t filepos;
 };
 
 static void free_block(struct block_info *block)
@@ -2260,7 +2261,7 @@ static int read_block(demuxer_t *demuxer, struct block_info *block)
     if (!block->alloc)
         goto exit;
     block->data = (bstr){block->alloc, length};
-    demuxer->filepos = stream_tell(s);
+    block->filepos = stream_tell(s);
     if (stream_read(s, block->data.start, block->data.len) != block->data.len)
         goto exit;
 
@@ -2350,7 +2351,7 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
 
     if (use_this_block) {
         mkv_d->last_pts = current_pts;
-        mkv_d->last_filepos = demuxer->filepos;
+        mkv_d->last_filepos = block_info->filepos;
 
         for (int i = 0; i < laces; i++) {
             bstr block = bstr_splice(data, 0, lace_size[i]);
