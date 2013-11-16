@@ -30,9 +30,8 @@ reasons for the failure.
 To build the software you can use `./waf build`, and `./waf install` to install
 it.
 
-NOTE: If you used the old `./configure` shell script you must use
-`make distclean` in order to remove build artifcats from the source directory
-before you can use the waf build system.
+NOTE: Using the old build system (with `./old-configure`) should still work,
+but will be removed in a future version of mpv.
 
 Essential dependencies (incomplete list):
 
