@@ -1,8 +1,9 @@
 # vi: ft=python
 
-import sys, os
+import sys, os, re
 sys.path.insert(0, os.path.join(os.getcwd(), 'waftools'))
 from waflib.Configure import conf
+from waflib import Utils
 from waftools.checks.generic import *
 from waftools.checks.custom import *
 
@@ -699,8 +700,6 @@ def is_debug_build(ctx):
 
 def configure(ctx):
     ctx.check_waf_version(mini='1.7.13')
-
-    import os
     target = os.environ.get('TARGET')
     (cc, pkg_config) = ('cc', 'pkg-config')
 
@@ -714,9 +713,6 @@ def configure(ctx):
     ctx.find_program('rst2man',   var='RST2MAN',   mandatory=False)
     ctx.find_program('rst2latex', var='RST2LATEX', mandatory=False)
     ctx.find_program('pdflatex',  var='PDFLATEX',  mandatory=False)
-
-    import re
-    from waflib import Utils
 
     for ident, _, _ in _INSTALL_DIRS_LIST:
         varname = ident.upper()
