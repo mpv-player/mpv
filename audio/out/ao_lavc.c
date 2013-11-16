@@ -164,13 +164,23 @@ static int init(struct ao *ao)
 }
 
 // close audio device
+static int encode(struct ao *ao, double apts, void **data);
 static void uninit(struct ao *ao, bool cut_audio)
 {
+    struct priv *ac = ao->priv;
     struct encode_lavc_context *ectx = ao->encode_lavc_ctx;
 
     if (!encode_lavc_start(ectx)) {
         MP_WARN(ao, "not even ready to encode audio at end -> dropped");
         return;
+    }
+
+    if (ac->buffer) {
+        double outpts = ac->expected_next_pts;
+        if (!ectx->options->rawts && ectx->options->copyts)
+            outpts += ectx->discontinuity_pts_offset;
+        outpts += encode_lavc_getoffset(ectx, ac->stream);
+        while (encode(ao, outpts, NULL) > 0) ;
     }
 
     ao->priv = NULL;
@@ -331,13 +341,6 @@ static int play(struct ao *ao, void **data, int samples, int flags)
             }
             talloc_free(tmp);
         }
-
-        outpts = ac->expected_next_pts;
-        if (!ectx->options->rawts && ectx->options->copyts)
-            outpts += ectx->discontinuity_pts_offset;
-        outpts += encode_lavc_getoffset(ectx, ac->stream);
-
-        while (encode(ao, outpts, NULL) > 0) ;
 
         return FFMIN(written, samples);
     }
