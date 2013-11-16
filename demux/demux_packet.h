@@ -31,6 +31,7 @@ typedef struct demux_packet {
     int64_t pos; // position in source file byte stream
     unsigned char *buffer;
     bool keyframe;
+    int stream; // source stream index
     struct demux_packet *next;
     void *allocation;
     struct AVPacket *avpacket;   // original libavformat packet (demux_lavf)

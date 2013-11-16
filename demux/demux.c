@@ -134,6 +134,7 @@ static struct demux_packet *create_packet(size_t len)
         .duration = -1,
         .stream_pts = MP_NOPTS_VALUE,
         .pos = -1,
+        .stream = -1,
     };
     return dp;
 }
@@ -321,6 +322,9 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
         talloc_free(dp);
         return 0;
     }
+
+    dp->stream = stream->index;
+    dp->next = NULL;
 
     ds->packs++;
     ds->bytes += dp->len;
