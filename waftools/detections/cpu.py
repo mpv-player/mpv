@@ -1,4 +1,4 @@
-def x86_32(ctx):
+def x86(ctx):
     ctx.define('ARCH_X86', 1)
     ctx.define('ARCH_X86_32', 1)
 
