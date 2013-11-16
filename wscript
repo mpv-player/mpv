@@ -120,7 +120,7 @@ iconv support use --disable-iconv.",
         'name': 'glob-win32-replacement',
         'desc': 'glob() win32 replacement',
         'deps_neg': [ 'glob' ],
-        'deps': [ 'os-win32', 'os-cygwin' ],
+        'deps_any': [ 'os-win32', 'os-cygwin' ],
         'func': check_true
     }, {
         'name': 'setmode',
