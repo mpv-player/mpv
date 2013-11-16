@@ -163,7 +163,7 @@ If you really mean to compile without libass support use --disable-libass."
         'deps': [ 'libass' ],
         'func': check_true,
     }, {
-        'name': '--dummy-osd',
+        'name': 'dummy-osd',
         'desc': 'dummy OSD support',
         'deps_neg': [ 'libass-osd' ],
         'func': check_true,
