@@ -83,8 +83,6 @@ typedef struct lavf_priv {
     int num_streams;
     int cur_program;
     bool use_dts;
-    bool seek_by_bytes;
-    int bitrate;
     char *mime_type;
     bool genpts_hack;
     AVPacket *packets[MAX_PKT_QUEUE];
@@ -685,27 +683,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     demuxer->ts_resets_possible = priv->avif->flags & AVFMT_TS_DISCONT;
 
-    // disabled because unreliable per-stream bitrate values returned
-    // by libavformat trigger this heuristic incorrectly and break things
-#if 0
-    /* libavformat sets bitrate for mpeg based on pts at start and end
-     * of file, which fails for files with pts resets. So calculate our
-     * own bitrate estimate. */
-    if (priv->avif->flags & AVFMT_TS_DISCONT) {
-        for (int i = 0; i < avfc->nb_streams; i++)
-            priv->bitrate += avfc->streams[i]->codec->bit_rate;
-        /* pts-based is more accurate if there are no resets; try to make
-         * a somewhat reasonable guess */
-        if (!avfc->duration || avfc->duration == AV_NOPTS_VALUE
-            || priv->bitrate && (avfc->bit_rate < priv->bitrate / 2
-                                 || avfc->bit_rate > priv->bitrate * 2))
-            priv->seek_by_bytes = true;
-        if (!priv->bitrate)
-            priv->bitrate = 1440000;
-    }
-#endif
-    demuxer->accurate_seek = !priv->seek_by_bytes;
-
     return 0;
 }
 
@@ -839,14 +816,6 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags)
 
     seek_reset(demuxer);
 
-    if (priv->seek_by_bytes) {
-        int64_t pos = demuxer->filepos;
-        rel_seek_secs *= priv->bitrate / 8;
-        pos += rel_seek_secs;
-        av_seek_frame(priv->avfc, -1, pos, AVSEEK_FLAG_BYTE);
-        return;
-    }
-
     if (flags & SEEK_ABSOLUTE)
         priv->last_pts = 0;
     else if (rel_seek_secs < 0)
@@ -923,15 +892,6 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 
     switch (cmd) {
     case DEMUXER_CTRL_GET_TIME_LENGTH:
-        if (priv->seek_by_bytes) {
-            struct stream *s = demuxer->stream;
-            /* Our bitrate estimate may be better than would be used in
-             * otherwise similar fallback code at higher level */
-            if (s->end_pos <= 0)
-                return DEMUXER_CTRL_DONTKNOW;
-            *(double *)arg = (s->end_pos - s->start_pos) * 8 / priv->bitrate;
-            return DEMUXER_CTRL_GUESS;
-        }
         if (priv->avfc->duration == 0 || priv->avfc->duration == AV_NOPTS_VALUE)
             return DEMUXER_CTRL_DONTKNOW;
 
