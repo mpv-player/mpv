@@ -16,6 +16,7 @@ if test -x $(which sha256sum) ; then
         exit 1
     fi
     chmod +x waf
+    echo "To build mpv, run: ./waf configure && ./waf build"
 else
     echo "sha256sum not found. It's up to you to verify the downloaded file."
 fi
