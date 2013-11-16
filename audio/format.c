@@ -181,3 +181,51 @@ void af_fill_silence(void *dst, size_t bytes, int format)
     bool us = (format & AF_FORMAT_SIGN_MASK) == AF_FORMAT_US;
     memset(dst, us ? 0x80 : 0, bytes);
 }
+
+#define FMT_DIFF(type, a, b) (((a) & type) - ((b) & type))
+
+// Returns a "score" that serves as heuristic how lossy or hard a conversion is.
+// If the formats are equal, 1024 is returned. If they are gravely incompatible
+// (like s16<->ac3), INT_MIN is returned. If there is implied loss of precision
+// (like s16->s8), a value <0 is returned.
+int af_format_conversion_score(int dst_format, int src_format)
+{
+    if (dst_format == AF_FORMAT_UNKNOWN || src_format == AF_FORMAT_UNKNOWN)
+        return INT_MIN;
+    if (dst_format == src_format)
+        return 1024;
+    // Just endian swapping (separate because it works for special formats)
+    if ((dst_format & ~AF_FORMAT_END_MASK) == (src_format & ~AF_FORMAT_END_MASK))
+        return 1024 - 2;
+    // Can't be normally converted
+    if (AF_FORMAT_IS_SPECIAL(dst_format) || AF_FORMAT_IS_SPECIAL(src_format))
+        return INT_MIN;
+    int score = 1024;
+    if (FMT_DIFF(AF_FORMAT_INTERLEAVING_MASK, dst_format, src_format))
+        score -= 1;     // has to (de-)planarize
+    if (FMT_DIFF(AF_FORMAT_END_MASK, dst_format, src_format))
+        score -= 2;     // has to swap endian
+    if (FMT_DIFF(AF_FORMAT_SIGN_MASK, dst_format, src_format))
+        score -= 4;     // has to swap sign
+    if (FMT_DIFF(AF_FORMAT_POINT_MASK, dst_format, src_format)) {
+        int dst_bits = dst_format & AF_FORMAT_BITS_MASK;
+        if ((dst_format & AF_FORMAT_POINT_MASK) == AF_FORMAT_F) {
+            // For int->float, always prefer 32 bit float.
+            score -= dst_bits == AF_FORMAT_32BIT ? 8 : 0;
+        } else {
+            // For float->int, always prefer highest bit depth int
+            score -= 8 * (AF_FORMAT_64BIT - dst_bits);
+        }
+    } else {
+        int bits = FMT_DIFF(AF_FORMAT_BITS_MASK, dst_format, src_format);
+        if (bits > 0) {
+            score -= 8 * bits;          // has to add padding
+        } else if (bits < 0) {
+            score -= 1024 - 8 * bits;   // has to reduce bit depth
+        }
+    }
+    // Consider this the worst case.
+    if (FMT_DIFF(AF_FORMAT_POINT_MASK, dst_format, src_format))
+        score -= 2048;  // has to convert float<->int
+    return score;
+}

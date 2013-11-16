@@ -47,6 +47,7 @@
 #define AF_FORMAT_SIGN_MASK     (1<<1)
 
 // Bits used
+// Some code assumes they're sorted by size.
 #define AF_FORMAT_8BIT          (0<<3)
 #define AF_FORMAT_16BIT         (1<<3)
 #define AF_FORMAT_24BIT         (2<<3)
@@ -163,5 +164,7 @@ int af_fmt_seconds_to_bytes(int format, float seconds, int channels, int sampler
 bool af_fmt_is_valid(int format);
 
 void af_fill_silence(void *dst, size_t bytes, int format);
+
+int af_format_conversion_score(int dst_format, int src_format);
 
 #endif /* MPLAYER_AF_FORMAT_H */
