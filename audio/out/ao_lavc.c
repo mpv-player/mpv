@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <limits.h>
 
 #include <libavutil/common.h>
 #include <libavutil/audioconvert.h>
@@ -57,12 +58,38 @@ struct priv {
     int worst_time_base_is_stream;
 };
 
+static void select_format(struct ao *ao, AVCodec *codec)
+{
+    int best_score = INT_MIN;
+    int best_format = 0;
+
+    // Check the encoder's list of supported formats.
+    for (const enum AVSampleFormat *sampleformat = codec->sample_fmts;
+         sampleformat && *sampleformat != AV_SAMPLE_FMT_NONE;
+         ++sampleformat)
+    {
+        int fmt = af_from_avformat(*sampleformat);
+        int score = af_format_conversion_score(fmt, ao->format);
+        if (score > best_score) {
+            best_score = score;
+            best_format = fmt;
+        }
+    }
+
+    if (best_format) {
+        ao->format = best_format;
+    } else {
+        MP_ERR(ao, "sample format not found\n"); // shouldn't happen
+    }
+}
+
 // open & setup audio device
 static int init(struct ao *ao)
 {
     struct priv *ac = talloc_zero(ao, struct priv);
-    const enum AVSampleFormat *sampleformat;
     AVCodec *codec;
+
+    ao->priv = ac;
 
     if (!encode_lavc_available(ao->encode_lavc_ctx)) {
         MP_ERR(ao, "the option --o (output file) must be specified\n");
@@ -100,30 +127,7 @@ static int init(struct ao *ao)
 
     ac->stream->codec->sample_fmt = AV_SAMPLE_FMT_NONE;
 
-    // first check if the selected format is somewhere in the list of
-    // supported formats by the codec
-    for (sampleformat = codec->sample_fmts;
-         sampleformat && *sampleformat != AV_SAMPLE_FMT_NONE;
-         ++sampleformat) {
-        if (ao->format == af_from_avformat(*sampleformat))
-            break;
-    }
-
-    if (!sampleformat || *sampleformat == AV_SAMPLE_FMT_NONE) {
-        // if the selected format is not supported, we have to pick the first
-        // one we CAN support
-        for (sampleformat = codec->sample_fmts;
-             sampleformat && *sampleformat != AV_SAMPLE_FMT_NONE;
-             ++sampleformat) {
-            int format = af_from_avformat(*sampleformat);
-            if (format) {
-                ao->format = format;
-                break;
-            }
-        }
-        if (!sampleformat)
-            MP_ERR(ao, "sample format not found\n"); // shouldn't happen
-    }
+    select_format(ao, codec);
 
     ac->sample_size = af_fmt2bits(ao->format) / 8;
     ac->stream->codec->sample_fmt = af_to_avformat(ao->format);
@@ -158,7 +162,6 @@ static int init(struct ao *ao)
     ac->lastpts = MP_NOPTS_VALUE;
 
     ao->untimed = true;
-    ao->priv = ac;
 
     return 0;
 }
