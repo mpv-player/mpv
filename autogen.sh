@@ -6,8 +6,8 @@ WAFRELEASE=waf-1.7.13
 SHA256HASH=03cc750049350ee01cdbc584b70924e333fcc17ba4a2d04648dab1535538a873
 
 curl https://waf.googlecode.com/files/$WAFRELEASE > waf
-if test -x $(which sha256sum) ; then
-    if echo "$SHA256HASH waf" | sha256sum --strict --check - ; then
+if test -x $(which shasum) ; then
+    if echo "$SHA256HASH *waf" | shasum -c - ; then
         echo "Checksum verified."
     else
         rm -f waf
@@ -18,5 +18,5 @@ if test -x $(which sha256sum) ; then
     chmod +x waf
     echo "To build mpv, run: ./waf configure && ./waf build"
 else
-    echo "sha256sum not found. It's up to you to verify the downloaded file."
+    echo "shasum not found. It's up to you to verify the downloaded file."
 fi
