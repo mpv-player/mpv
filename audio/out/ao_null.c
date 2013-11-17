@@ -18,6 +18,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/*
+ * Note: this does much more than just ignoring audio output. It simulates
+ *       (to some degree) an ideal AO.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -26,18 +31,24 @@
 #include "config.h"
 #include "osdep/timer.h"
 #include "mpvcore/m_option.h"
+#include "mpvcore/mp_msg.h"
 #include "audio/format.h"
 #include "ao.h"
 
 struct priv {
     bool paused;
     double last_time;
-    // All values are in samples
-    float buffered;
-    int buffersize;
-    int outburst;
+    bool playing_final;
+    float buffered;     // samples
+    int buffersize;     // samples
 
     int untimed;
+    float bufferlen;    // seconds
+
+    // Minimal unit of audio samples that can be written at once. If play() is
+    // called with sizes not aligned to this, a rounded size will be returned.
+    // (This is not needed by the AO API, but many AOs behave this way.)
+    int outburst;       // samples
 };
 
 static void drain(struct ao *ao)
@@ -53,9 +64,14 @@ static void drain(struct ao *ao)
         return;
 
     double now = mp_time_sec();
-    priv->buffered -= (now - priv->last_time) * ao->samplerate;
-    if (priv->buffered < 0)
-        priv->buffered = 0;
+    if (priv->buffered > 0) {
+        priv->buffered -= (now - priv->last_time) * ao->samplerate;
+        if (priv->buffered < 0) {
+            if (!priv->playing_final)
+                MP_ERR(ao, "buffer underrun\n");
+            priv->buffered = 0;
+        }
+    }
     priv->last_time = now;
 }
 
@@ -70,13 +86,8 @@ static int init(struct ao *ao)
     if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
         return -1;
 
-    // Minimal unit of audio samples that can be written at once. If play() is
-    // called with sizes not aligned to this, a rounded size will be returned.
-    // (This is not needed by the AO API, but many AOs behave this way.)
-    priv->outburst = 256;
-
-    // A "buffer" for about 0.2 seconds of audio
-    int bursts = (int)(ao->samplerate * 0.2 + 1) / priv->outburst;
+    // A "buffer" for this many seconds of audio
+    int bursts = (int)(ao->samplerate * priv->bufferlen + 1) / priv->outburst;
     priv->buffersize = priv->outburst * bursts;
 
     priv->last_time = mp_time_sec();
@@ -87,6 +98,9 @@ static int init(struct ao *ao)
 // close audio device
 static void uninit(struct ao *ao, bool cut_audio)
 {
+    struct priv *priv = ao->priv;
+    if (!cut_audio && !priv->paused)
+        mp_sleep_us(1000.0 * 1000.0 * priv->buffered / ao->samplerate);
 }
 
 // stop playing and empty buffers (for seeking/pause)
@@ -94,6 +108,7 @@ static void reset(struct ao *ao)
 {
     struct priv *priv = ao->priv;
     priv->buffered = 0;
+    priv->playing_final = false;
 }
 
 // stop playing, keep buffers (for pause)
@@ -101,6 +116,7 @@ static void pause(struct ao *ao)
 {
     struct priv *priv = ao->priv;
 
+    drain(ao);
     priv->paused = true;
 }
 
@@ -125,13 +141,22 @@ static int get_space(struct ao *ao)
 static int play(struct ao *ao, void **data, int samples, int flags)
 {
     struct priv *priv = ao->priv;
+    int accepted;
 
     resume(ao);
-    int maxbursts = (priv->buffersize - priv->buffered) / priv->outburst;
-    int playbursts = samples / priv->outburst;
-    int bursts = playbursts > maxbursts ? maxbursts : playbursts;
-    priv->buffered += bursts * priv->outburst;
-    return bursts * priv->outburst;
+
+    priv->playing_final = flags & AOPLAY_FINAL_CHUNK;
+    if (priv->playing_final) {
+        // Last audio chunk - don't round to outburst.
+        accepted = MPMIN(priv->buffersize - priv->buffered, samples);
+    } else {
+        int maxbursts = (priv->buffersize - priv->buffered) / priv->outburst;
+        int playbursts = samples / priv->outburst;
+        int bursts = playbursts > maxbursts ? maxbursts : playbursts;
+        accepted = bursts * priv->outburst;
+    }
+    priv->buffered += accepted;
+    return accepted;
 }
 
 static float get_delay(struct ao *ao)
@@ -156,8 +181,14 @@ const struct ao_driver audio_out_null = {
     .pause     = pause,
     .resume    = resume,
     .priv_size = sizeof(struct priv),
+    .priv_defaults = &(const struct priv) {
+        .bufferlen = 200,
+        .outburst = 256,
+    },
     .options = (const struct m_option[]) {
         OPT_FLAG("untimed", untimed, 0),
+        OPT_FLOATRANGE("buffer", bufferlen, 0, 0, 100),
+        OPT_INTRANGE("outburst", outburst, 0, 1, 100000),
         {0}
     },
 };

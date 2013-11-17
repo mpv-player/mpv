@@ -157,6 +157,12 @@ Available audio output drivers are:
         decoding will go as fast as possible, instead of timing it to the
         system clock.
 
+    ``buffer``
+        Simulated buffer length in seconds.
+
+    ``outburst``
+        Simulated chunk size in samples.
+
 ``pcm``
     Raw PCM/WAVE file writer audio output
 
