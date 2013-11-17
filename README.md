@@ -19,7 +19,7 @@ Compiling with full features requires development files for several
 external libraries. Below is a list of some important requirements.
 
 The mpv build system uses *waf* but we don't store it in your source tree. The
-script './autogen.sh' will download the latest version of waf that was tested
+script './bootstrap.sh' will download the latest version of waf that was tested
 with the build system.
 
 For a list of the available build options use `./waf configure --help`. If
