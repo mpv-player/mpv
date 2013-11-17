@@ -24,7 +24,7 @@ def check_pthreads_w32_static(ctx, dependency_identifier):
     platform_cflags = '-DPTW32_STATIC_LIB'
     libs = ['pthreadGC2 lws2_32']
     checkfn = check_cc(fragment=pthreads_program, cflags=platform_cflags)
-    check_libs(libs, checkfn)(ctx, dependency_identifier)
+    return check_libs(libs, checkfn)(ctx, dependency_identifier)
 
 def check_iconv(ctx, dependency_identifier):
     iconv_program = load_fragment('iconv.c')
