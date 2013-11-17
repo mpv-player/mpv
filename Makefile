@@ -228,6 +228,7 @@ SOURCES = audio/audio.c \
           osdep/io.c \
           osdep/numcores.c \
           osdep/timer.c \
+          osdep/threads.c \
           stream/cookies.c \
           stream/rar.c \
           stream/stream.c \

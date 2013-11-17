@@ -50,6 +50,7 @@
 #include "config.h"
 
 #include "osdep/timer.h"
+#include "osdep/threads.h"
 
 #include "mpvcore/mp_msg.h"
 
@@ -129,30 +130,6 @@ static int64_t mp_clipi64(int64_t val, int64_t min, int64_t max)
     return val;
 }
 
-// pthread_cond_timedwait() with a relative timeout in seconds
-static int cond_timed_wait(pthread_cond_t *cond, pthread_mutex_t *mutex,
-                           double timeout)
-{
-    struct timespec ts;
-#if defined(_POSIX_TIMERS) && _POSIX_TIMERS > 0
-    clock_gettime(CLOCK_REALTIME, &ts);
-#else
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    ts.tv_sec = tv.tv_sec;
-    ts.tv_nsec = tv.tv_usec * 1000UL;
-#endif
-    unsigned long seconds = (int)timeout;
-    unsigned long nsecs = (timeout - seconds) * 1000000000UL;
-    if (nsecs + ts.tv_nsec >= 1000000000UL) {
-        seconds += 1;
-        nsecs -= 1000000000UL;
-    }
-    ts.tv_sec += seconds;
-    ts.tv_nsec += nsecs;
-    return pthread_cond_timedwait(cond, mutex, &ts);
-}
-
 // Used by the main thread to wakeup the cache thread, and to wait for the
 // cache thread. The cache mutex has to be locked when calling this function.
 // *retry_time should be set to 0 on the first call.
@@ -173,7 +150,7 @@ static int cache_wakeup_and_wait(struct priv *s, double *retry_time)
     double start = mp_time_sec();
 
     pthread_cond_signal(&s->wakeup);
-    cond_timed_wait(&s->wakeup, &s->mutex, CACHE_WAIT_TIME);
+    mpthread_cond_timed_wait(&s->wakeup, &s->mutex, CACHE_WAIT_TIME);
 
     *retry_time += mp_time_sec() - start;
 
@@ -450,7 +427,7 @@ static void *cache_thread(void *arg)
             s->control = CACHE_CTRL_NONE;
         }
         if (s->idle && s->control == CACHE_CTRL_NONE)
-            cond_timed_wait(&s->wakeup, &s->mutex, CACHE_IDLE_SLEEP_TIME);
+            mpthread_cond_timed_wait(&s->wakeup, &s->mutex, CACHE_IDLE_SLEEP_TIME);
     }
     pthread_cond_signal(&s->wakeup);
     pthread_mutex_unlock(&s->mutex);
