@@ -157,7 +157,7 @@ static int configure_lavrr(struct af_instance *af, struct mp_audio *in,
     av_opt_set_int(s->avrctx, "phase_shift",        s->ctx.phase_shift, 0);
     av_opt_set_int(s->avrctx, "linear_interp",      s->ctx.linear, 0);
 
-    av_opt_set_int(s->avrctx, "cutoff",             s->ctx.cutoff, 0);
+    av_opt_set_double(s->avrctx, "cutoff",          s->ctx.cutoff, 0);
 
     if (parse_avopts(s->avrctx, s->avopts) < 0) {
         mp_msg(MSGT_VFILTER, MSGL_FATAL,
