@@ -95,7 +95,7 @@ def fix_dylibs_paths(target_file, dest_dir, root=True):
         fix_dylibs_paths(dylib_dest_path, dest_dir, False)
 
 def apply_plist_template(plist_file, version):
-    sh("sed -i -e 's/{{VERSION}}/%s/g' %s" % (version, plist_file))
+    sh("sed -i -e 's/${VERSION}/%s/g' %s" % (version, plist_file))
 
 def bundle_dependencies(binary_name):
     lib_bundle_directory = os.path.join(target_directory(binary_name), "lib")

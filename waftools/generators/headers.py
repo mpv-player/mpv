@@ -19,7 +19,8 @@ def __write_config_h__(ctx):
 
 def __write_version_h__(ctx):
     ctx.start_msg("Writing header:")
-    ctx.define("VERSION",   __get_version__(ctx))
+    ctx.env.VERSION = __get_version__(ctx)
+    ctx.define("VERSION",   ctx.env.VERSION)
     ctx.define("BUILDDATE", __get_build_date__())
     ctx.write_config_header("version.h")
     ctx.end_msg("version.h", "PINK")
