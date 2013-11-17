@@ -13,7 +13,10 @@ branches:
     - ci
 
 before_install: ./travis-deps libass-stable $LIBAV
-script: ./configure && make
+script:
+  - ./bootstrap.sh
+  - ./waf configure
+  - ./waf build
 
 notifications-policy: &notifications-policy
   on_success: change
