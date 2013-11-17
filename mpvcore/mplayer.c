@@ -4674,7 +4674,9 @@ goto_reopen_demuxer: ;
 #ifdef CONFIG_DVBIN
     if (mpctx->dvbin_reopen) {
         mpctx->stop_play = 0;
-        uninit_player(mpctx, INITIALIZED_ALL - (INITIALIZED_STREAM | INITIALIZED_GETCH2 | (opts->fixed_vo ? INITIALIZED_VO : 0)));
+        uninit_player(mpctx, INITIALIZED_ALL -
+            (INITIALIZED_PLAYBACK | INITIALIZED_STREAM | INITIALIZED_GETCH2 |
+             (opts->fixed_vo ? INITIALIZED_VO : 0)));
         mpctx->dvbin_reopen = 0;
         goto goto_reopen_demuxer;
     }
