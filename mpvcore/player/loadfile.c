@@ -169,10 +169,12 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
                 mp_audio_buffer_peek(ao->buffer, &data);
                 int samples = ao->buffer_playable_samples;
                 assert(samples <= data.samples);
-                int played = ao_play(ao, data.planes, samples,
-                                     AOPLAY_FINAL_CHUNK);
-                if (played < samples)
-                    MP_WARN(ao, "Audio output truncated at end.\n");
+                if (samples > 0) {
+                    int played = ao_play(ao, data.planes, samples,
+                                         AOPLAY_FINAL_CHUNK);
+                    if (played < samples)
+                        MP_WARN(ao, "Audio output truncated at end.\n");
+                }
             }
             ao_uninit(ao, drain);
         }
