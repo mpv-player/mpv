@@ -385,6 +385,18 @@ def build(ctx):
         "ta/ta.c", "ta/ta_talloc.c", "ta/ta_utils.c"
     ]
 
+    cprog_kwargs = {}
+    if ctx.dependency_satisfied('macosx-bundle'):
+        import os
+        basepath = 'TOOLS/osxbundle/mpv.app/Contents'
+        cprog_kwargs['mac_app']   = True
+        cprog_kwargs['mac_plist'] = os.path.join(basepath, 'Info.plist')
+
+        resources_glob  = os.path.join(basepath, 'Resources', '*')
+        resources_nodes = ctx.srcnode.ant_glob(resources_glob)
+        resources       = [node.srcpath() for node in resources_nodes]
+        cprog_kwargs['mac_resources'] = resources
+
     ctx(
         target       = "mpv",
         source       = ctx.filtered_sources(sources),
@@ -392,7 +404,8 @@ def build(ctx):
         includes     = [ctx.bldnode.abspath(), ctx.srcnode.abspath()] + \
                        ctx.dependencies_includes(),
         features     = "c cprogram",
-        install_path = ctx.env.BINDIR
+        install_path = ctx.env.BINDIR,
+        **cprog_kwargs
     )
 
     if ctx.dependency_satisfied("vf-dlopen-filters"):

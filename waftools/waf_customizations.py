@@ -33,3 +33,14 @@ def build(ctx):
     cls = Task.classes['cprogram']
     class cprogram(cls):
         run_str = cls.hcode + '${LAST_LINKFLAGS}'
+
+    cls = Task.classes['macplist']
+    class macplist(cls):
+        def run(self):
+            from waflib import Utils
+            if getattr(self, 'code', None):
+                txt = self.code
+            else:
+                txt = self.inputs[0].read()
+            txt = Utils.subst_vars(txt, self.env)
+            self.outputs[0].write(txt)
