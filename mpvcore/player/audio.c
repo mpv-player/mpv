@@ -44,20 +44,27 @@ static int build_afilter_chain(struct MPContext *mpctx)
     struct sh_audio *sh_audio = mpctx->sh_audio;
     struct ao *ao = mpctx->ao;
     struct MPOpts *opts = mpctx->opts;
+
+    if (!sh_audio->initialized)
+        return 0;
+
+    struct mp_audio in_format;
+    mp_audio_buffer_get_format(mpctx->sh_audio->decode_buffer, &in_format);
+
     int new_srate;
     if (af_control_any_rev(sh_audio->afilter,
                            AF_CONTROL_PLAYBACK_SPEED | AF_CONTROL_SET,
                            &opts->playback_speed))
-        new_srate = sh_audio->samplerate;
+        new_srate = in_format.rate;
     else {
-        new_srate = sh_audio->samplerate * opts->playback_speed;
+        new_srate = in_format.rate * opts->playback_speed;
         if (new_srate != ao->samplerate) {
             // limits are taken from libaf/af_resample.c
             if (new_srate < 8000)
                 new_srate = 8000;
             if (new_srate > 192000)
                 new_srate = 192000;
-            opts->playback_speed = (double)new_srate / sh_audio->samplerate;
+            opts->playback_speed = new_srate / (double)in_format.rate;
         }
     }
     return init_audio_filters(sh_audio, new_srate,
@@ -109,6 +116,9 @@ void reinit_audio_chain(struct MPContext *mpctx)
         mpctx->initialized_flags |= INITIALIZED_ACODEC;
     }
 
+    struct mp_audio in_format;
+    mp_audio_buffer_get_format(mpctx->sh_audio->decode_buffer, &in_format);
+
     int ao_srate = opts->force_srate;
     int ao_format = opts->audio_output_format;
     struct mp_chmap ao_channels = {0};
@@ -119,7 +129,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     } else {
         // Automatic downmix
         if (mp_chmap_is_stereo(&opts->audio_output_channels) &&
-            !mp_chmap_is_stereo(&mpctx->sh_audio->channels))
+            !mp_chmap_is_stereo(&in_format.channels))
         {
             mp_chmap_from_channels(&ao_channels, 2);
         }
@@ -130,7 +140,7 @@ void reinit_audio_chain(struct MPContext *mpctx)
     // or using a special filter.
     if (!init_audio_filters(mpctx->sh_audio,  // preliminary init
                             // input:
-                            mpctx->sh_audio->samplerate,
+                            in_format.rate,
                             // output:
                             &ao_srate, &ao_channels, &ao_format)) {
         MP_ERR(mpctx, "Error at audio filter chain pre-init!\n");
@@ -183,6 +193,9 @@ double written_audio_pts(struct MPContext *mpctx)
     if (!sh_audio || !sh_audio->initialized)
         return MP_NOPTS_VALUE;
 
+    struct mp_audio in_format;
+    mp_audio_buffer_get_format(mpctx->sh_audio->decode_buffer, &in_format);
+
     // first calculate the end pts of audio that has been output by decoder
     double a_pts = sh_audio->pts;
     if (a_pts == MP_NOPTS_VALUE)
@@ -191,7 +204,7 @@ double written_audio_pts(struct MPContext *mpctx)
     // sh_audio->pts is the timestamp of the latest input packet with
     // known pts that the decoder has decoded. sh_audio->pts_bytes is
     // the amount of bytes the decoder has written after that timestamp.
-    a_pts += sh_audio->pts_offset / (double)sh_audio->samplerate;
+    a_pts += sh_audio->pts_offset / (double)in_format.rate;
 
     // Now a_pts hopefully holds the pts for end of audio from decoder.
     // Subtract data in buffers between decoder and audio out.

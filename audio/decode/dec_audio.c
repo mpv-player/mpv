@@ -207,9 +207,9 @@ int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
     struct af_stream *afs = sh_audio->afilter;
 
     // input format: same as codec's output format:
+    mp_audio_buffer_get_format(sh_audio->decode_buffer, &afs->input);
+    // Sample rate can be different when adjusting playback speed
     afs->input.rate = in_samplerate;
-    mp_audio_set_channels(&afs->input, &sh_audio->channels);
-    mp_audio_set_format(&afs->input, sh_audio->sample_format);
 
     // output format: same as ao driver's input format (if missing, fallback to input)
     afs->output.rate = *out_samplerate;
