@@ -657,7 +657,6 @@ static int dvb_open(stream_t *stream, int mode)
 	priv->config = dvb_get_config();
 	if(priv->config == NULL)
 	{
-		free(priv);
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "DVB CONFIGURATION IS EMPTY, exit\n");
 		return STREAM_ERROR;
 	}
@@ -674,7 +673,6 @@ static int dvb_open(stream_t *stream, int mode)
 
 	if(priv->card == -1)
  	{
-		free(priv);
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "NO CONFIGURATION FOUND FOR CARD N. %d, exit\n", p->cfg_card);
  		return STREAM_ERROR;
  	}
@@ -684,7 +682,6 @@ static int dvb_open(stream_t *stream, int mode)
 
 	if(tuner_type == 0)
 	{
-		free(priv);
 		mp_msg(MSGT_DEMUX, MSGL_V, "OPEN_DVB: UNKNOWN OR UNDETECTABLE TUNER TYPE, EXIT\n");
 		return STREAM_ERROR;
 	}
@@ -705,8 +702,6 @@ static int dvb_open(stream_t *stream, int mode)
 
 	if(! dvb_streaming_start(stream, tuner_type, progname))
 	{
-		free(stream->priv);
-		stream->priv = NULL;
 		return STREAM_ERROR;
 	}
 
