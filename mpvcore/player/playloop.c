@@ -167,7 +167,7 @@ void add_step_frame(struct MPContext *mpctx, int dir)
     }
 }
 
-static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
+static void seek_reset(struct MPContext *mpctx, bool reset_ao)
 {
     if (mpctx->sh_video) {
         resync_video_stream(mpctx->sh_video);
@@ -182,7 +182,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
         mpctx->time_frame = 0;
     }
 
-    if (mpctx->sh_audio && reset_ac) {
+    if (mpctx->sh_audio) {
         resync_audio_stream(mpctx->sh_audio);
         if (reset_ao)
             clear_audio_output_buffers(mpctx);
@@ -205,6 +205,9 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao, bool reset_ac)
 }
 
 // return -1 if seek failed (non-seekable stream?), 0 otherwise
+// timeline_fallthrough: true if used to explicitly switch timeline - in this
+//                       case, don't drop buffered AO audio data, so that
+//                       timeline segment transition is seemless
 static int mp_seek(MPContext *mpctx, struct seek_params seek,
                    bool timeline_fallthrough)
 {
@@ -242,9 +245,6 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         seek.amount += get_current_time(mpctx);
     }
 
-    /* At least the liba52 decoder wants to read from the input stream
-     * during initialization, so reinit must be done after the demux_seek()
-     * call that clears possible stream EOF. */
     bool need_reset = false;
     double demuxer_amount = seek.amount;
     if (mpctx->timeline) {
@@ -263,6 +263,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
     }
     if (need_reset) {
         reinit_video_chain(mpctx);
+        reinit_audio_chain(mpctx);
         reinit_subs(mpctx);
     }
 
@@ -286,10 +287,8 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         demuxer_amount -= opts->hr_seek_demuxer_offset;
     int seekresult = demux_seek(mpctx->demuxer, demuxer_amount, demuxer_style);
     if (seekresult == 0) {
-        if (need_reset) {
-            reinit_audio_chain(mpctx);
-            seek_reset(mpctx, !timeline_fallthrough, false);
-        }
+        if (need_reset)
+            seek_reset(mpctx, !timeline_fallthrough);
         return -1;
     }
 
@@ -313,11 +312,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         }
     }
 
-    if (need_reset)
-        reinit_audio_chain(mpctx);
-    /* If we just reinitialized audio it doesn't need to be reset,
-     * and resetting could lose audio some decoders produce during init. */
-    seek_reset(mpctx, !timeline_fallthrough, !need_reset);
+    seek_reset(mpctx, !timeline_fallthrough);
 
     if (timeline_fallthrough) {
         // Important if video reinit happens.
@@ -573,7 +568,7 @@ bool mp_seek_chapter(struct MPContext *mpctx, int chapter)
         if (res >= 0) {
             if (pts == -1) {
                 // for DVD/BD - seek happened via stream layer
-                seek_reset(mpctx, true, true);
+                seek_reset(mpctx, true);
                 mpctx->seek = (struct seek_params){0};
                 return true;
             }
