@@ -169,10 +169,10 @@ SOURCES = audio/audio.c \
           audio/filter/af_sub.c \
           audio/filter/af_surround.c \
           audio/filter/af_sweep.c \
-          audio/filter/af_tools.c \
           audio/filter/af_drc.c \
           audio/filter/af_volume.c \
           audio/filter/filter.c \
+          audio/filter/tools.c \
           audio/filter/window.c \
           audio/out/ao.c \
           audio/out/ao_null.c \
