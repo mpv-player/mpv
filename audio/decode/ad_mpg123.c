@@ -310,6 +310,11 @@ static int decode_audio(sh_audio_t *sh, struct mp_audio *buffer, int maxlen)
             return -1;
     }
 
+    if (sh->samplerate != buffer->rate ||
+        !mp_chmap_equals(&sh->channels, &buffer->channels) ||
+        sh->sample_format != buffer->format)
+        return 0;
+
     size_t got_now = 0;
     ret = mpg123_replace_buffer(con->handle, buf, maxlen * con->sample_size);
     if (ret != MPG123_OK)

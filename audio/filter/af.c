@@ -695,9 +695,11 @@ struct af_instance *af_add(struct af_stream *s, char *name, char **args)
 struct mp_audio *af_play(struct af_stream *s, struct mp_audio *data)
 {
     struct af_instance *af = s->first;
+    assert(mp_audio_config_equals(af->data, data));
     // Iterate through all filters
     do {
         data = af->play(af, data);
+        assert(mp_audio_config_equals(af->data, data));
         af = af->next;
     } while (af && data);
     return data;

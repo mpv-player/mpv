@@ -267,7 +267,6 @@ static int filter_n_bytes(sh_audio_t *sh, struct mp_audio_buffer *outbuf,
             // first, and don't signal a format change to the caller yet.
             if (mp_audio_buffer_samples(sh->decode_buffer) > 0)
                 break;
-            reinit_audio_buffer(sh);
             error = -2;
             break;
         }
@@ -287,6 +286,11 @@ static int filter_n_bytes(sh_audio_t *sh, struct mp_audio_buffer *outbuf,
 
     // remove processed data from decoder buffer:
     mp_audio_buffer_skip(sh->decode_buffer, len);
+
+    // Assume the filter chain is drained from old data at this point.
+    // (If not, the remaining old data is discarded.)
+    if (error == -2)
+        reinit_audio_buffer(sh);
 
     return error;
 }
