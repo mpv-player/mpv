@@ -627,7 +627,7 @@ void af_destroy(struct af_stream *s)
 /* Initialize the stream "s". This function creates a new filter list
    if necessary according to the values set in input and output. Input
    and output should contain the format of the current movie and the
-   formate of the preferred output respectively. The function is
+   format of the preferred output respectively. The function is
    reentrant i.e. if called with an already initialized stream the
    stream will be reinitialized.
    If one of the prefered output parameters is 0 the one that needs
@@ -691,7 +691,8 @@ struct af_instance *af_add(struct af_stream *s, char *name, char **args)
     return new;
 }
 
-// Filter data chunk through the filters in the list
+/* Filter data chunk through the filters in the list.
+ * Warning: input (audio data and struct fields) will be overwritten. */
 struct mp_audio *af_play(struct af_stream *s, struct mp_audio *data)
 {
     struct af_instance *af = s->first;
@@ -719,7 +720,7 @@ double af_calc_filter_multiplier(struct af_stream *s)
     return mul;
 }
 
-/* Calculate the total delay [bytes output] caused by the filters */
+/* Calculate the total delay [seconds of output] caused by the filters */
 double af_calc_delay(struct af_stream *s)
 {
     struct af_instance *af = s->first;
@@ -731,7 +732,8 @@ double af_calc_delay(struct af_stream *s)
     return delay;
 }
 
-// documentation in af.h
+/* Send control to all filters, starting with the last until one accepts the
+ * command with AF_OK. Return the accepting filter. */
 struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg)
 {
     int res = AF_UNKNOWN;

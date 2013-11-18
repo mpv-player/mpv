@@ -87,10 +87,7 @@ struct af_stream {
     struct MPOpts *opts;
 };
 
-/*********************************************
-   // Return values
- */
-
+// Return values
 #define AF_DETACH   2
 #define AF_OK       1
 #define AF_TRUE     1
@@ -99,150 +96,23 @@ struct af_stream {
 #define AF_ERROR   -2
 #define AF_FATAL   -3
 
-
-
-/*********************************************
-   // Export functions
- */
-
-/**
- * \defgroup af_chain Audio filter chain functions
- * \{
- * \param s filter chain
- */
-
 struct af_stream *af_new(struct MPOpts *opts);
 void af_destroy(struct af_stream *s);
-
-/**
- * \brief Initialize the stream "s".
- * \return 0 on success, -1 on failure
- *
- * This function creates a new filter list if necessary, according
- * to the values set in input and output. Input and output should contain
- * the format of the current movie and the format of the preferred output
- * respectively.
- * Filters to convert to the preferred output format are inserted
- * automatically, except when they are set to 0.
- * The function is reentrant i.e. if called with an already initialized
- * stream the stream will be reinitialized.
- */
 int af_init(struct af_stream *s);
-
-/**
- * \brief Uninit and remove all filters from audio filter chain
- */
 void af_uninit(struct af_stream *s);
-
-/**
- * \brief This function adds the filter "name" to the stream s.
- * \param name name of filter to add
- * \return pointer to the new filter, NULL if insert failed
- *
- * The filter will be inserted somewhere nice in the
- * list of filters (i.e. at the beginning unless the
- * first filter is the format filter (why??).
- */
 struct af_instance *af_add(struct af_stream *s, char *name, char **args);
-
-/**
- * \brief filter data chunk through the filters in the list
- * \param data data to play
- * \return resulting data
- * \ingroup af_chain
- */
 struct mp_audio *af_play(struct af_stream *s, struct mp_audio *data);
-
-/**
- * \brief send control to all filters, starting with the last until
- *        one accepts the command with AF_OK.
- * \param cmd filter control command
- * \param arg argument for filter command
- * \return the accepting filter or NULL if none was found
- */
 struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg);
 
-/**
- * \brief calculate average ratio of filter output lenth to input length
- * \return the ratio
- */
 double af_calc_filter_multiplier(struct af_stream *s);
-
-/**
- * \brief Calculate the total delay caused by the filters
- * \return delay in bytes of "missing" output
- */
 double af_calc_delay(struct af_stream *s);
 
-/** \} */ // end of af_chain group
-
-// Helper functions and macros used inside the audio filters
-
-/**
- * \defgroup af_filter Audio filter helper functions
- * \{
- */
-
-/**
- * \brief convert dB to gain value
- * \param n number of values to convert
- * \param in [in] values in dB, <= -200 will become 0 gain
- * \param out [out] gain values
- * \param k input values are divided by this
- * \param mi minimum dB value, input will be clamped to this
- * \param ma maximum dB value, input will be clamped to this
- * \return AF_ERROR on error, AF_OK otherwise
- */
-int af_from_dB(int n, float *in, float *out, float k, float mi, float ma);
-
-/**
- * \brief convert gain value to dB
- * \param n number of values to convert
- * \param in [in] gain values, 0 wil become -200 dB
- * \param out [out] values in dB
- * \param k output values will be multiplied by this
- * \return AF_ERROR on error, AF_OK otherwise
- */
-int af_to_dB(int n, float *in, float *out, float k);
-
-/**
- * \brief convert milliseconds to sample time
- * \param n number of values to convert
- * \param in [in] values in milliseconds
- * \param out [out] sample time values
- * \param rate sample rate
- * \param mi minimum ms value, input will be clamped to this
- * \param ma maximum ms value, input will be clamped to this
- * \return AF_ERROR on error, AF_OK otherwise
- */
-int af_from_ms(int n, float *in, int *out, int rate, float mi, float ma);
-
-/**
- * \brief convert sample time to milliseconds
- * \param n number of values to convert
- * \param in [in] sample time values
- * \param out [out] values in milliseconds
- * \param rate sample rate
- * \return AF_ERROR on error, AF_OK otherwise
- */
-int af_to_ms(int n, int *in, float *out, int rate);
-
-/**
- * \brief test if output format matches
- * \param af audio filter
- * \param out needed format, will be overwritten by available
- *            format if they do not match
- * \return AF_FALSE if formats do not match, AF_OK if they match
- *
- * compares the format, bps, rate and nch values of af->data with out
- */
 int af_test_output(struct af_instance *af, struct mp_audio *out);
 
-/**
- * \brief soft clipping function using sin()
- * \param a input value
- * \return clipped value
- */
+int af_from_dB(int n, float *in, float *out, float k, float mi, float ma);
+int af_to_dB(int n, float *in, float *out, float k);
+int af_from_ms(int n, float *in, int *out, int rate, float mi, float ma);
+int af_to_ms(int n, int *in, float *out, int rate);
 float af_softclip(float a);
 
 #endif /* MPLAYER_AF_H */

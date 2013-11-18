@@ -23,7 +23,7 @@
 #include "af.h"
 
 /* Convert to gain value from dB. Returns AF_OK if of and AF_ERROR if
-   fail */
+ * fail. input <= -200dB will become 0 gain. */
 int af_from_dB(int n, float* in, float* out, float k, float mi, float ma)
 {
   int i = 0;
@@ -41,7 +41,7 @@ int af_from_dB(int n, float* in, float* out, float k, float mi, float ma)
 }
 
 /* Convert from gain value to dB. Returns AF_OK if of and AF_ERROR if
-   fail */
+ * fail. gain=0 will become -200 dB. k is just a multiplier. */
 int af_to_dB(int n, float* in, float* out, float k)
 {
   int i = 0;
@@ -86,7 +86,18 @@ int af_to_ms(int n, int* in, float* out, int rate)
   return AF_OK;
 }
 
-/* Helper function for testing the output format */
+/*
+ * test if output format matches
+ *  af: audio filter
+ *  out: needed format, will be overwritten by available
+ *       format if they do not match
+ *  returns: AF_FALSE if formats do not match, AF_OK if they match
+ *
+ * compares the format, rate and nch values of af->data with out
+ * Note: logically, *out=*af->data always happens, because out contains the
+ *       format only, no actual audio data or memory allocations. *out always
+ *       contains the parameters from af->data after the function returns.
+ */
 int af_test_output(struct af_instance* af, struct mp_audio* out)
 {
   if((af->data->format != out->format) ||
