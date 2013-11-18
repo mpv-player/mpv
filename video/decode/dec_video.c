@@ -29,7 +29,7 @@
 #include "osdep/timer.h"
 
 #include "stream/stream.h"
-#include "demux/demux_packet.h"
+#include "demux/packet.h"
 
 #include "mpvcore/codecs.h"
 

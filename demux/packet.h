@@ -20,7 +20,7 @@
 #define MPLAYER_DEMUX_PACKET_H
 
 #include <stdbool.h>
-#include <sys/types.h>
+#include <inttypes.h>
 
 // Holds one packet/frame/whatever
 typedef struct demux_packet {

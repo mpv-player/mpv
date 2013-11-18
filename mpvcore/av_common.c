@@ -21,7 +21,7 @@
 #include <libavcodec/avcodec.h>
 
 #include "mpvcore/mp_talloc.h"
-#include "demux/demux_packet.h"
+#include "demux/packet.h"
 #include "av_common.h"
 #include "codecs.h"
 

@@ -48,7 +48,7 @@
 #include "video/filter/vf.h"
 #include "video/decode/dec_video.h"
 #include "demux/stheader.h"
-#include "demux/demux_packet.h"
+#include "demux/packet.h"
 #include "osdep/numcores.h"
 #include "video/csputils.h"
 

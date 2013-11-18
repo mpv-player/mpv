@@ -2,7 +2,7 @@
 #define MPLAYER_SD_H
 
 #include "dec_sub.h"
-#include "demux/demux_packet.h"
+#include "demux/packet.h"
 
 struct sd {
     struct MPOpts *opts;

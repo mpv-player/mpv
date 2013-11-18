@@ -27,7 +27,7 @@
 
 #include "mpvcore/bstr.h"
 #include "mpvcore/mp_common.h"
-#include "demux_packet.h"
+#include "packet.h"
 #include "stheader.h"
 
 struct MPOpts;
