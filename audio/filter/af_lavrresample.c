@@ -259,18 +259,18 @@ static int control(struct af_instance *af, int cmd, void *arg)
             r = configure_lavrr(af, in, out);
         return r;
     }
-    case AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET: {
+    case AF_CONTROL_SET_FORMAT: {
         if (af_to_avformat(*(int*)arg) == AV_SAMPLE_FMT_NONE)
             return AF_FALSE;
 
         mp_audio_set_format(af->data, *(int*)arg);
         return AF_OK;
     }
-    case AF_CONTROL_CHANNELS | AF_CONTROL_SET: {
+    case AF_CONTROL_SET_CHANNELS: {
         mp_audio_set_channels(af->data, (struct mp_chmap *)arg);
         return AF_OK;
     }
-    case AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET:
+    case AF_CONTROL_SET_RESAMPLE_RATE:
         out->rate = *(int *)arg;
         return AF_OK;
     }

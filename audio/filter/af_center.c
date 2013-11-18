@@ -57,20 +57,14 @@ static int control(struct af_instance* af, int cmd, void* arg)
   case AF_CONTROL_COMMAND_LINE:{
     int   ch=1;
     sscanf(arg,"%i", &ch);
-    return control(af,AF_CONTROL_CENTER_CH | AF_CONTROL_SET, &ch);
-  }
-  case AF_CONTROL_CENTER_CH | AF_CONTROL_SET: // Requires reinit
-    // Sanity check
-    if((*(int*)arg >= AF_NCH) || (*(int*)arg < 0)){
+    if((ch >= AF_NCH) || (ch < 0)){
       mp_msg(MSGT_AFILTER, MSGL_ERR, "[sub] Center channel number must be between "
-	     " 0 and %i current value is %i\n", AF_NCH-1, *(int*)arg);
+	     " 0 and %i current value is %i\n", AF_NCH-1, ch);
       return AF_ERROR;
     }
-    s->ch = *(int*)arg;
+    s->ch = ch;
     return AF_OK;
-  case AF_CONTROL_CENTER_CH | AF_CONTROL_GET:
-    *(int*)arg = s->ch;
-    return AF_OK;
+  }
   }
   return AF_UNKNOWN;
 }

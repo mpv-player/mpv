@@ -56,10 +56,10 @@ static int control(struct af_instance *af, int cmd, void *arg)
             mp_audio_set_format(af->data, af_fmt_to_planar(af->data->format));
         return af_test_output(af, in);
     }
-    case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET:
+    case AF_CONTROL_SET_VOLUME:
         s->level = *(float *)arg;
         return AF_OK;
-    case AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET:
+    case AF_CONTROL_GET_VOLUME:
         *(float *)arg = s->level;
         return AF_OK;
     }

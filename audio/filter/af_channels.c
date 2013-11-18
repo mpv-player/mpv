@@ -201,11 +201,11 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     struct mp_chmap chmap;
     mp_chmap_from_channels(&chmap, nch);
-    if (AF_OK != af->control(af, AF_CONTROL_CHANNELS | AF_CONTROL_SET, &chmap))
+    if (AF_OK != af->control(af, AF_CONTROL_SET_CHANNELS, &chmap))
       return AF_ERROR;
     return AF_OK;
   }
-  case AF_CONTROL_CHANNELS | AF_CONTROL_SET:
+  case AF_CONTROL_SET_CHANNELS:
     // Reinit must be called after this function has been called
 
     mp_audio_set_channels(af->data, (struct mp_chmap *)arg);

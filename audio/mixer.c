@@ -72,8 +72,7 @@ static void checkvolume(struct mixer *mixer)
     ao_control_vol_t vol = {mixer->vol_l, mixer->vol_r};
     if (mixer->softvol) {
         float gain;
-        if (!af_control_any_rev(mixer->af,
-                                AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_GET, &gain))
+        if (!af_control_any_rev(mixer->af, AF_CONTROL_GET_VOLUME, &gain))
             gain = 1.0;
         vol.left = (gain / (mixer->opts->softvol_max / 100.0)) * 100.0;
         vol.right = (gain / (mixer->opts->softvol_max / 100.0)) * 100.0;
@@ -119,15 +118,10 @@ static void setvolume_internal(struct mixer *mixer, float l, float r)
         return;
     }
     float gain = (l + r) / 2.0 / 100.0 * mixer->opts->softvol_max / 100.0;
-    if (!af_control_any_rev(mixer->af,
-                            AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET,
-                            &gain))
-    {
+    if (!af_control_any_rev(mixer->af, AF_CONTROL_SET_VOLUME, &gain)) {
         mp_tmsg(MSGT_GLOBAL, MSGL_V, "[Mixer] Inserting volume filter.\n");
         if (!(af_add(mixer->af, "volume", NULL)
-              && af_control_any_rev(mixer->af,
-                                    AF_CONTROL_VOLUME_LEVEL | AF_CONTROL_SET,
-                                    &gain)))
+              && af_control_any_rev(mixer->af, AF_CONTROL_SET_VOLUME, &gain)))
             mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
                     "[Mixer] No volume control available.\n");
     }
@@ -197,9 +191,7 @@ void mixer_decvolume(struct mixer *mixer)
 void mixer_getbalance(struct mixer *mixer, float *val)
 {
     if (mixer->af)
-        af_control_any_rev(mixer->af,
-                           AF_CONTROL_PAN_BALANCE | AF_CONTROL_GET,
-                           &mixer->balance);
+        af_control_any_rev(mixer->af, AF_CONTROL_GET_PAN_BALANCE, &mixer->balance);
     *val = mixer->balance;
 }
 
@@ -226,8 +218,7 @@ void mixer_setbalance(struct mixer *mixer, float val)
     if (!mixer->af)
         return;
 
-    if (af_control_any_rev(mixer->af,
-                           AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val))
+    if (af_control_any_rev(mixer->af, AF_CONTROL_SET_PAN_BALANCE, &val))
         return;
 
     if (val == 0 || mixer->ao->channels.num < 2)
@@ -244,14 +235,12 @@ void mixer_setbalance(struct mixer *mixer, float val)
     for (i = 2; i < AF_NCH; i++) {
         arg_ext.ch = i;
         level[i] = 1.f;
-        af_pan_balance->control(af_pan_balance,
-                                AF_CONTROL_PAN_LEVEL | AF_CONTROL_SET,
+        af_pan_balance->control(af_pan_balance, AF_CONTROL_SET_PAN_LEVEL,
                                 &arg_ext);
         level[i] = 0.f;
     }
 
-    af_pan_balance->control(af_pan_balance,
-                            AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET, &val);
+    af_pan_balance->control(af_pan_balance, AF_CONTROL_SET_PAN_BALANCE, &val);
 }
 
 char *mixer_get_volume_restore_data(struct mixer *mixer)

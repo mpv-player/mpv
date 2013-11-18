@@ -161,19 +161,13 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     sscanf(str + i + 1, "%d", &(s->sz));
 
-    return af->control(af, AF_CONTROL_EXPORT_SZ | AF_CONTROL_SET, &s->sz);
-  }
-  case AF_CONTROL_EXPORT_SZ | AF_CONTROL_SET:
-    s->sz = * (int *) arg;
     if((s->sz <= 0) || (s->sz > 2048))
       mp_msg(MSGT_AFILTER, MSGL_ERR, "[export] Buffer size must be between"
 	      " 1 and 2048\n" );
 
     return AF_OK;
-  case AF_CONTROL_EXPORT_SZ | AF_CONTROL_GET:
-    *(int*) arg = s->sz;
-    return AF_OK;
 
+  }
   }
   return AF_UNKNOWN;
 }

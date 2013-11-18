@@ -438,7 +438,7 @@ static int af_fix_format_conversion(struct af_stream *s,
     if (!filter)
         return AF_ERROR;
     if (strcmp(filter, prev->info->name) == 0) {
-        if (prev->control(prev, AF_CONTROL_FORMAT_FMT, &dstfmt) == AF_OK) {
+        if (prev->control(prev, AF_CONTROL_SET_FORMAT, &dstfmt) == AF_OK) {
             *p_af = prev;
             return AF_OK;
         }
@@ -447,7 +447,7 @@ static int af_fix_format_conversion(struct af_stream *s,
     if (new == NULL)
         return AF_ERROR;
     new->auto_inserted = true;
-    if (AF_OK != (rv = new->control(new, AF_CONTROL_FORMAT_FMT, &dstfmt)))
+    if (AF_OK != (rv = new->control(new, AF_CONTROL_SET_FORMAT, &dstfmt)))
         return rv;
     *p_af = new;
     return AF_OK;
@@ -463,7 +463,7 @@ static int af_fix_channels(struct af_stream *s, struct af_instance **p_af,
     struct mp_audio actual = *prev->data;
     if (mp_chmap_equals(&actual.channels, &in.channels))
         return AF_FALSE;
-    if (prev->control(prev, AF_CONTROL_CHANNELS, &in.channels) == AF_OK) {
+    if (prev->control(prev, AF_CONTROL_SET_CHANNELS, &in.channels) == AF_OK) {
         *p_af = prev;
         return AF_OK;
     }
@@ -472,7 +472,7 @@ static int af_fix_channels(struct af_stream *s, struct af_instance **p_af,
     if (new == NULL)
         return AF_ERROR;
     new->auto_inserted = true;
-    if (AF_OK != (rv = new->control(new, AF_CONTROL_CHANNELS, &in.channels)))
+    if (AF_OK != (rv = new->control(new, AF_CONTROL_SET_CHANNELS, &in.channels)))
         return rv;
     *p_af = new;
     return AF_OK;
@@ -487,7 +487,7 @@ static int af_fix_rate(struct af_stream *s, struct af_instance **p_af,
     struct mp_audio actual = *prev->data;
     if (actual.rate == in.rate)
         return AF_FALSE;
-    if (prev->control(prev, AF_CONTROL_RESAMPLE_RATE, &in.rate) == AF_OK) {
+    if (prev->control(prev, AF_CONTROL_SET_RESAMPLE_RATE, &in.rate) == AF_OK) {
         *p_af = prev;
         return AF_OK;
     }
@@ -496,7 +496,7 @@ static int af_fix_rate(struct af_stream *s, struct af_instance **p_af,
     if (new == NULL)
         return AF_ERROR;
     new->auto_inserted = true;
-    if (AF_OK != (rv = new->control(new, AF_CONTROL_RESAMPLE_RATE, &in.rate)))
+    if (AF_OK != (rv = new->control(new, AF_CONTROL_SET_RESAMPLE_RATE, &in.rate)))
         return rv;
     *p_af = new;
     return AF_OK;

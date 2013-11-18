@@ -65,7 +65,16 @@ static int control(struct af_instance* af, int cmd, void* arg)
 	mp_msg(MSGT_AFILTER, MSGL_FATAL, "[delay] Out of memory\n");
     }
 
-    return control(af,AF_CONTROL_DELAY_LEN | AF_CONTROL_SET,s->d);
+    if(AF_OK != af_from_ms(AF_NCH, s->d, s->wi, af->data->rate, 0.0, 1000.0))
+      return AF_ERROR;
+    s->ri = 0;
+    for(i=0;i<AF_NCH;i++){
+      mp_msg(MSGT_AFILTER, MSGL_DBG2, "[delay] Channel %i delayed by %0.3fms\n",
+             i,MPCLAMP(s->d[i],0.0,1000.0));
+      mp_msg(MSGT_AFILTER, MSGL_DBG3, "[delay] Channel %i delayed by %i samples\n",
+             i,s->wi[i]);
+    }
+    return AF_OK;
   }
   case AF_CONTROL_COMMAND_LINE:{
     int n = 1;
@@ -79,29 +88,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
       i++;
     }
     return AF_OK;
-  }
-  case AF_CONTROL_DELAY_LEN | AF_CONTROL_SET:{
-    int i;
-    if(AF_OK != af_from_ms(AF_NCH, arg, s->wi, af->data->rate, 0.0, 1000.0))
-      return AF_ERROR;
-    s->ri = 0;
-    for(i=0;i<AF_NCH;i++){
-      mp_msg(MSGT_AFILTER, MSGL_DBG2, "[delay] Channel %i delayed by %0.3fms\n",
-	     i,MPCLAMP(s->d[i],0.0,1000.0));
-      mp_msg(MSGT_AFILTER, MSGL_DBG3, "[delay] Channel %i delayed by %i samples\n",
-	     i,s->wi[i]);
-    }
-    return AF_OK;
-  }
-  case AF_CONTROL_DELAY_LEN | AF_CONTROL_GET:{
-    int i;
-    for(i=0;i<AF_NCH;i++){
-      if(s->ri > s->wi[i])
-	s->wi[i] = L - (s->ri - s->wi[i]);
-      else
-	s->wi[i] = s->wi[i] - s->ri;
-    }
-    return af_to_ms(AF_NCH, s->wi, arg, af->data->rate);
   }
   }
   return AF_UNKNOWN;

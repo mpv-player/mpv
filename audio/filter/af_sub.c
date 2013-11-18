@@ -87,35 +87,21 @@ static int control(struct af_instance* af, int cmd, void* arg)
     int   ch=5;
     float fc=60.0;
     sscanf(arg,"%f:%i", &fc , &ch);
-    if(AF_OK != control(af,AF_CONTROL_SUB_CH | AF_CONTROL_SET, &ch))
-      return AF_ERROR;
-    return control(af,AF_CONTROL_SUB_FC | AF_CONTROL_SET, &fc);
-  }
-  case AF_CONTROL_SUB_CH | AF_CONTROL_SET: // Requires reinit
     // Sanity check
-    if((*(int*)arg >= AF_NCH) || (*(int*)arg < 0)){
+    if(ch >= AF_NCH || ch < 0){
       mp_msg(MSGT_AFILTER, MSGL_ERR, "[sub] Subwoofer channel number must be between "
-	     " 0 and %i current value is %i\n", AF_NCH-1, *(int*)arg);
+             " 0 and %i current value is %i\n", AF_NCH-1, ch);
       return AF_ERROR;
     }
-    s->ch = *(int*)arg;
-    return AF_OK;
-  case AF_CONTROL_SUB_CH | AF_CONTROL_GET:
-    *(int*)arg = s->ch;
-    return AF_OK;
-  case AF_CONTROL_SUB_FC | AF_CONTROL_SET: // Requires reinit
-    // Sanity check
-    if((*(float*)arg > 300) || (*(float*)arg < 20)){
+    s->ch = ch;
+    if(fc > 300 || fc < 20){
       mp_msg(MSGT_AFILTER, MSGL_ERR, "[sub] Cutoff frequency must be between 20Hz and"
-	     " 300Hz current value is %0.2f",*(float*)arg);
+             " 300Hz current value is %0.2f",fc);
       return AF_ERROR;
     }
-    // Set cutoff frequency
-    s->fc = *(float*)arg;
+    s->fc = fc;
     return AF_OK;
-  case AF_CONTROL_SUB_FC | AF_CONTROL_GET:
-    *(float*)arg = s->fc;
-    return AF_OK;
+  }
   }
   return AF_UNKNOWN;
 }

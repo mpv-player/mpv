@@ -55,7 +55,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
     }
-    case AF_CONTROL_FORMAT_FMT | AF_CONTROL_SET: {
+    case AF_CONTROL_SET_FORMAT: {
         mp_audio_set_format(af->data, *(int*)arg);
         return AF_OK;
     }

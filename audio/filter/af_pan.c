@@ -71,7 +71,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     int   j,k;
     // Read number of outputs
     sscanf((char*)arg,"%i%n", &nch,&n);
-    if(AF_OK != control(af,AF_CONTROL_PAN_NOUT | AF_CONTROL_SET, &nch))
+    if(AF_OK != control(af,AF_CONTROL_SET_PAN_NOUT, &nch))
       return AF_ERROR;
 
     // Read pan values
@@ -90,7 +90,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     }
     return AF_OK;
   }
-  case AF_CONTROL_PAN_LEVEL | AF_CONTROL_SET:{
+  case AF_CONTROL_SET_PAN_LEVEL:{
     int    i;
     int    ch = ((af_control_ext_t*)arg)->ch;
     float* level = ((af_control_ext_t*)arg)->arg;
@@ -100,17 +100,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
       s->level[ch][i] = level[i];
     return AF_OK;
   }
-  case AF_CONTROL_PAN_LEVEL | AF_CONTROL_GET:{
-    int    i;
-    int ch = ((af_control_ext_t*)arg)->ch;
-    float* level = ((af_control_ext_t*)arg)->arg;
-    if (ch >= AF_NCH)
-      return AF_FALSE;
-    for(i=0;i<AF_NCH;i++)
-      level[i] = s->level[ch][i];
-    return AF_OK;
-  }
-  case AF_CONTROL_PAN_NOUT | AF_CONTROL_SET:
+  case AF_CONTROL_SET_PAN_NOUT:
     // Reinit must be called after this function has been called
 
     // Sanity check
@@ -121,7 +111,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     }
     s->nch=((int*)arg)[0];
     return AF_OK;
-  case AF_CONTROL_PAN_BALANCE | AF_CONTROL_SET:{
+  case AF_CONTROL_SET_PAN_BALANCE:{
     float val = *(float*)arg;
     if (s->nch)
       return AF_ERROR;
@@ -133,7 +123,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     }
     return AF_OK;
   }
-  case AF_CONTROL_PAN_BALANCE | AF_CONTROL_GET:
+  case AF_CONTROL_GET_PAN_BALANCE:
     if (s->nch)
       return AF_ERROR;
     *(float*)arg = s->level[0][1] - s->level[1][0];

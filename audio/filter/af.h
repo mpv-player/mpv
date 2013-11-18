@@ -21,6 +21,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <sys/types.h>
 
 #include "config.h"
 
@@ -28,7 +29,6 @@
 #include "audio/format.h"
 #include "audio/chmap.h"
 #include "audio/audio.h"
-#include "control.h"
 #include "mpvcore/mp_msg.h"
 
 struct af_instance;
@@ -95,6 +95,28 @@ struct af_stream {
 #define AF_UNKNOWN -1
 #define AF_ERROR   -2
 #define AF_FATAL   -3
+
+// Parameters for af_control_*
+enum af_control {
+    AF_CONTROL_REINIT = 1,
+    AF_CONTROL_COMMAND_LINE,
+    AF_CONTROL_SET_RESAMPLE_RATE,
+    AF_CONTROL_SET_FORMAT,
+    AF_CONTROL_SET_CHANNELS,
+    AF_CONTROL_SET_VOLUME,
+    AF_CONTROL_GET_VOLUME,
+    AF_CONTROL_SET_PAN_LEVEL,
+    AF_CONTROL_SET_PAN_NOUT,
+    AF_CONTROL_SET_PAN_BALANCE,
+    AF_CONTROL_GET_PAN_BALANCE,
+    AF_CONTROL_SET_PLAYBACK_SPEED,
+};
+
+// Argument for AF_CONTROL_SET_PAN_LEVEL
+typedef struct af_control_ext_s {
+    void* arg;  // Argument
+    int ch;     // Chanel number
+} af_control_ext_t;
 
 struct af_stream *af_new(struct MPOpts *opts);
 void af_destroy(struct af_stream *s);

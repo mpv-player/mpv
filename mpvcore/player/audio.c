@@ -52,8 +52,7 @@ static int build_afilter_chain(struct MPContext *mpctx)
     mp_audio_buffer_get_format(mpctx->sh_audio->decode_buffer, &in_format);
 
     int new_srate;
-    if (af_control_any_rev(sh_audio->afilter,
-                           AF_CONTROL_PLAYBACK_SPEED | AF_CONTROL_SET,
+    if (af_control_any_rev(sh_audio->afilter, AF_CONTROL_SET_PLAYBACK_SPEED,
                            &opts->playback_speed))
         new_srate = in_format.rate;
     else {
