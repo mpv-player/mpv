@@ -746,3 +746,10 @@ struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg)
     }
     return NULL;
 }
+
+/* Send control to all filters. Never stop, even if a filter returns AF_OK. */
+void af_control_all(struct af_stream *s, int cmd, void *arg)
+{
+    for (struct af_instance *af = s->first; af; af = af->next)
+        af->control(af, cmd, arg);
+}

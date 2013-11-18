@@ -99,6 +99,7 @@ struct af_stream {
 // Parameters for af_control_*
 enum af_control {
     AF_CONTROL_REINIT = 1,
+    AF_CONTROL_RESET,
     AF_CONTROL_COMMAND_LINE,
     AF_CONTROL_SET_RESAMPLE_RATE,
     AF_CONTROL_SET_FORMAT,
@@ -125,6 +126,7 @@ void af_uninit(struct af_stream *s);
 struct af_instance *af_add(struct af_stream *s, char *name, char **args);
 struct mp_audio *af_play(struct af_stream *s, struct mp_audio *data);
 struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg);
+void af_control_all(struct af_stream *s, int cmd, void *arg);
 
 double af_calc_filter_multiplier(struct af_stream *s);
 double af_calc_delay(struct af_stream *s);

@@ -93,10 +93,18 @@ static int get_delay(struct af_resample *s)
 {
     return avresample_get_delay(s->avrctx);
 }
+static void drop_all_output(struct af_resample *s)
+{
+    while (avresample_read(s->avrctx, NULL, 1000) > 0) {}
+}
 #else
 static int get_delay(struct af_resample *s)
 {
     return swr_get_delay(s->avrctx, s->ctx.in_rate);
+}
+static void drop_all_output(struct af_resample *s)
+{
+    while (swr_drop_output(s->avrctx, 1000) > 0) {}
 }
 #endif
 
@@ -272,6 +280,9 @@ static int control(struct af_instance *af, int cmd, void *arg)
     }
     case AF_CONTROL_SET_RESAMPLE_RATE:
         out->rate = *(int *)arg;
+        return AF_OK;
+    case AF_CONTROL_RESET:
+        drop_all_output(s);
         return AF_OK;
     }
     return AF_UNKNOWN;

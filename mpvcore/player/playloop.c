@@ -184,6 +184,8 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
 
     if (mpctx->sh_audio) {
         resync_audio_stream(mpctx->sh_audio);
+        if (mpctx->sh_audio->afilter)
+            af_control_all(mpctx->sh_audio->afilter, AF_CONTROL_RESET, NULL);
         if (reset_ao)
             clear_audio_output_buffers(mpctx);
         clear_audio_decode_buffers(mpctx);

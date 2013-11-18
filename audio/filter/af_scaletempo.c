@@ -428,6 +428,11 @@ static int control(struct af_instance *af, int cmd, void *arg)
         }
         return AF_OK;
     }
+    case AF_CONTROL_RESET:
+        s->bytes_queued = 0;
+        s->bytes_to_slide = 0;
+        s->frames_stride_error = 0;
+        memset(s->buf_overlap, 0, s->bytes_overlap);
     }
     return AF_UNKNOWN;
 }
