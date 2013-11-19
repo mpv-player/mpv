@@ -8,8 +8,9 @@ class DependencyError(Exception):
     pass
 
 class Dependency(object):
-    def __init__(self, ctx, satisfied_deps, dependency):
+    def __init__(self, ctx, known_deps, satisfied_deps, dependency):
         self.ctx = ctx
+        self.known_deps = known_deps
         self.satisfied_deps = satisfied_deps
         self.identifier, self.desc = dependency['name'], dependency['desc']
         self.attributes = self.__parse_attributes__(dependency)
@@ -24,6 +25,10 @@ class Dependency(object):
 
     def check(self):
         self.ctx.start_msg('Checking for {0}'.format(self.desc))
+
+        # this doesn't do any check, it's just a guard against programmer's
+        # errors
+        self.ensure_dependency_is_known()
 
         try:
             self.check_disabled()
@@ -40,6 +45,17 @@ class Dependency(object):
             return
 
         self.check_autodetect_func()
+
+    def ensure_dependency_is_known(self):
+        for dep_key in ['deps', 'deps_any', 'deps_neg']:
+            self.known_deps.add(self.identifier)
+            if dep_key in self.attributes:
+                deps = self.attributes[dep_key]
+                deps = set([d for d in deps if not d.startswith('os-')])
+                if not deps <= self.known_deps:
+                    raise ConfigurationError(
+                        "error in dependencies definition: some dependencies in"
+                        " {0} are unknown.".format(deps))
 
     def check_disabled(self):
         if self.enabled_option() == False:
@@ -119,9 +135,11 @@ def configure(ctx):
         target = "os-{0}".format(ctx.env.DEST_OS)
         ctx.start_msg('Detected target OS:')
         ctx.end_msg(target)
+        ctx.env.known_deps.add(target)
         ctx.env.satisfied_deps.add(target)
 
     ctx.deps_msg = {}
+    ctx.env['known_deps'] = set()
     ctx.env['satisfied_deps'] = set()
     __detect_target_os_dependency__(ctx)
 
@@ -136,7 +154,10 @@ def add_optional_message(ctx, dependency_identifier, message):
 @conf
 def parse_dependencies(ctx, dependencies):
     def __check_dependency__(ctx, dependency):
-        Dependency(ctx, ctx.env.satisfied_deps, dependency).check()
+        Dependency(ctx,
+                   ctx.env.known_deps,
+                   ctx.env.satisfied_deps,
+                   dependency).check()
 
     [__check_dependency__(ctx, dependency) for dependency in dependencies]
 
