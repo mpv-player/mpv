@@ -222,7 +222,6 @@ SOURCES = audio/audio.c \
           mpvcore/player/screenshot.c \
           mpvcore/player/sub.c \
           mpvcore/player/video.c \
-          mpvcore/player/timeline/tl_edl.c \
           mpvcore/player/timeline/tl_matroska.c \
           mpvcore/player/timeline/tl_mpv_edl.c \
           mpvcore/player/timeline/tl_cue.c \

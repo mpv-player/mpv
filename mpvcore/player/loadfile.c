@@ -1159,7 +1159,7 @@ goto_reopen_demuxer: ;
         build_ordered_chapter_timeline(mpctx);
 
     if (mpctx->demuxer->type == DEMUXER_TYPE_EDL)
-        build_edl_timeline(mpctx);
+        build_mpv_edl_timeline(mpctx);
 
     if (mpctx->demuxer->type == DEMUXER_TYPE_CUE)
         build_cue_timeline(mpctx);
