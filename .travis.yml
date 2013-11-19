@@ -14,7 +14,7 @@ branches:
 
 before_install: ./travis-deps libass-stable $LIBAV
 script:
-  - ./bootstrap.sh
+  - ./bootstrap.py
   - ./waf configure
   - ./waf build
 
