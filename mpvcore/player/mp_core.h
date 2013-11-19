@@ -376,6 +376,7 @@ double rel_time_to_abs(struct MPContext *mpctx, struct m_rel_time t,
                        double fallback_time);
 double get_play_end_pts(struct MPContext *mpctx);
 double get_relative_time(struct MPContext *mpctx);
+void merge_playlist_files(struct playlist *pl);
 int mp_get_cache_percent(struct MPContext *mpctx);
 bool mp_get_cache_idle(struct MPContext *mpctx);
 void update_window_title(struct MPContext *mpctx, bool force);

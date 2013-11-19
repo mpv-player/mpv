@@ -1292,6 +1292,15 @@ OPTIONS
 ``--media-keys``, ``--no-media-keys``
       OSX only: Enabled by default. Enables/disable media keys support.
 
+``--merge-files``
+    Pretend that all files passed to mpv are concatenated into a single, big
+    file. This uses timeline/EDL support internally. Note that this won't work
+    for ordered chapter files or quvi-resolved URLs (such as youtube links).
+
+    This option is interpreted at program start, and doesn't affect for
+    example files or playlists loaded with the ``loadfile`` or ``loadlist``
+    commands.
+
 ``--mf=<option1:option2:...>``
     Used when decoding from multiple PNG or JPEG files with ``mf://``.
 

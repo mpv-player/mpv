@@ -32,6 +32,7 @@
 #include "mpvcore/mp_common.h"
 #include "mpvcore/resolve.h"
 #include "mpvcore/encode.h"
+#include "mpvcore/playlist.h"
 #include "mpvcore/input/input.h"
 
 #include "audio/out/ao.h"
@@ -183,4 +184,26 @@ void stream_dump(struct MPContext *mpctx)
             talloc_free(cmd);
         }
     }
+}
+
+void merge_playlist_files(struct playlist *pl)
+{
+    if (!pl->first)
+        return;
+    char *edl = talloc_strdup(NULL, "edl://");
+    for (struct playlist_entry *e = pl->first; e; e = e->next) {
+        if (e != pl->first)
+            edl = talloc_strdup_append_buffer(edl, ";");
+        // Escape if needed
+        if (e->filename[strcspn(e->filename, "=%,;\n")] ||
+            bstr_strip(bstr0(e->filename)).len != strlen(e->filename))
+        {
+            // %length%
+            edl = talloc_asprintf_append_buffer(edl, "%%%d%%", strlen(e->filename));
+        }
+        edl = talloc_strdup_append_buffer(edl, e->filename);
+    }
+    playlist_clear(pl);
+    playlist_add_file(pl, edl);
+    talloc_free(edl);
 }

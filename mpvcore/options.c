@@ -694,6 +694,7 @@ const m_option_t mp_opts[] = {
     OPT_DOUBLE("chapter-seek-threshold", chapter_seek_threshold, 0),
 
     OPT_FLAG("load-unsafe-playlists", load_unsafe_playlists, 0),
+    OPT_FLAG("merge-files", merge_files, 0),
 
     // a-v sync stuff:
     OPT_FLAG("correct-pts", correct_pts, 0),
