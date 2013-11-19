@@ -7,6 +7,55 @@ from waflib import Utils
 from waftools.checks.generic import *
 from waftools.checks.custom import *
 
+build_options = [
+    {
+        'name': '--static-build',
+        'desc': 'static build',
+        'default': 'disable',
+        'func': check_true
+    }, {
+        'name': '--build-date',
+        'desc': 'whether to include binary compile time',
+        'default': 'enable',
+        'func': check_true
+    }, {
+        'name': '--debug-build',
+        'desc': 'whether to compile-in debugging information',
+        'default': 'enable',
+        'func': check_true
+    }, {
+        'name': '--manpage-build',
+        'desc': 'manpage generation',
+        'func': check_ctx_vars('RST2MAN')
+    }, {
+        'name': '--pdf-build',
+        'desc': 'pdf manual generation',
+        'func': check_ctx_vars('RST2LATEX', 'PDFLATEX'),
+        'default': 'disable'
+    }, {
+        'name': 'libdl',
+        'desc': 'dynamic loader',
+        'func': check_libs(['dl'], check_statement('dlfcn.h', 'dlopen("", 0)'))
+    }, {
+        'name': 'dlopen',
+        'desc': 'dlopen',
+        'deps_any': [ 'libdl', 'os-win32', 'os-cygwin' ],
+        'func': check_true
+    }, {
+        'name': '--vf-dlopen-filters',
+        'desc': 'compilation of default filters for vf_dlopen',
+        'deps': [ 'dlopen' ],
+        'default': 'disable',
+        'func': check_true
+    }, {
+        'name': '--macosx-bundle',
+        'desc': 'compilation of a Mac OS X Application bundle',
+        'deps': [ 'os-darwin' ],
+        'default': 'disable',
+        'func': check_true
+    }
+]
+
 main_dependencies = [
     {
         'name': 'noexecstack',
@@ -32,15 +81,6 @@ main_dependencies = [
         'name': 'sys-mman-h',
         'desc': 'mman.h',
         'func': check_statement('sys/mman.h', 'mmap(0, 0, 0, 0, 0, 0)')
-    }, {
-        'name': 'libdl',
-        'desc': 'dynamic loader',
-        'func': check_libs(['dl'], check_statement('dlfcn.h', 'dlopen("", 0)'))
-    }, {
-        'name': 'dlopen',
-        'desc': 'dlopen',
-        'deps_any': [ 'libdl', 'os-win32', 'os-cygwin' ],
-        'func': check_true
     }, {
         'name': '--pthreads',
         'desc': 'POSIX threads',
@@ -609,46 +649,6 @@ radio_and_tv_features = [
         'name': '--audio-input',
         'desc': 'audio input support',
         'deps_any': [ 'radio-capture', 'tv-v4l2' ],
-        'func': check_true
-    }
-]
-
-build_options = [
-    {
-        'name': '--static-build',
-        'desc': 'static build',
-        'default': 'disable',
-        'func': check_true
-    }, {
-        'name': '--build-date',
-        'desc': 'whether to include binary compile time',
-        'default': 'enable',
-        'func': check_true
-    }, {
-        'name': '--debug-build',
-        'desc': 'whether to compile-in debugging information',
-        'default': 'enable',
-        'func': check_true
-    }, {
-        'name': '--manpage-build',
-        'desc': 'manpage generation',
-        'func': check_ctx_vars('RST2MAN')
-    }, {
-        'name': '--pdf-build',
-        'desc': 'pdf manual generation',
-        'func': check_ctx_vars('RST2LATEX', 'PDFLATEX'),
-        'default': 'disable'
-    }, {
-        'name': '--vf-dlopen-filters',
-        'desc': 'compilation of default filters for vf_dlopen',
-        'deps': [ 'dlopen' ],
-        'default': 'disable',
-        'func': check_true
-    }, {
-        'name': '--macosx-bundle',
-        'desc': 'compilation of a Mac OS X Application bundle',
-        'deps': [ 'os-darwin' ],
-        'default': 'disable',
         'func': check_true
     }
 ]
