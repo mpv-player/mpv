@@ -1,7 +1,6 @@
 from waftools.checks.generic import *
 
-__all__ = ["check_pthreads", "check_pthreads_w32_static", "check_iconv",
-"check_lua", "check_oss"]
+__all__ = ["check_pthreads", "check_iconv", "check_lua", "check_oss"]
 
 pthreads_program = load_fragment('pthreads.c')
 
@@ -11,18 +10,9 @@ def check_pthreads(ctx, dependency_identifier):
         'freebsd': '-D_THREAD_SAFE',
         'netbsd':  '-D_THREAD_SAFE',
         'openbsd': '-D_THREAD_SAFE',
+        'win32':   '-DPTW32_STATIC_LIB',
     }.get(ctx.env.DEST_OS, '')
-    # XXX: the configure script also checks for just 'pthread' is that
-    # really needed?
     libs    = ['pthreadGC2', 'pthread']
-    checkfn = check_cc(fragment=pthreads_program, cflags=platform_cflags)
-    return check_libs(libs, checkfn)(ctx, dependency_identifier)
-
-def check_pthreads_w32_static(ctx, dependency_identifier):
-    if check_pthreads(ctx, dependency_identifier):
-        return True
-    platform_cflags = '-DPTW32_STATIC_LIB'
-    libs = ['pthreadGC2 lws2_32']
     checkfn = check_cc(fragment=pthreads_program, cflags=platform_cflags)
     return check_libs(libs, checkfn)(ctx, dependency_identifier)
 

@@ -85,11 +85,6 @@ main_dependencies = [
         'name': '--pthreads',
         'desc': 'POSIX threads',
         'func': check_pthreads,
-        'os_specific_checks': {
-            'os-win32': {
-                'func': check_pthreads_w32_static
-            }
-        }
     }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
