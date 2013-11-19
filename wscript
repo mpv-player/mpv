@@ -66,7 +66,7 @@ iconv support use --disable-iconv.",
     }, {
         'name': 'dos-paths',
         'desc': 'w32/dos paths',
-        'deps': [ 'os-win32', 'os-cygwin' ],
+        'deps_any': [ 'os-win32', 'os-cygwin' ],
         'func': check_true
     }, {
         'name': 'priority',
