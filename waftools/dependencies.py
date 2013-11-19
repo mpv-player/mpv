@@ -15,6 +15,13 @@ class Dependency(object):
         self.identifier, self.desc = dependency['name'], dependency['desc']
         self.attributes = self.__parse_attributes__(dependency)
 
+        ctx.env.known_deps.add(self.identifier)
+        for dep_key in ['deps', 'deps_any', 'deps_neg']:
+            if dep_key in self.attributes:
+                deps = self.attributes[dep_key]
+                self.ctx.ensure_dependency_is_known(*deps)
+
+
     def __parse_attributes__(self, dependency):
         if 'os_specific_checks' in dependency:
             all_chks = dependency['os_specific_checks']
@@ -25,10 +32,6 @@ class Dependency(object):
 
     def check(self):
         self.ctx.start_msg('Checking for {0}'.format(self.desc))
-
-        # this doesn't do any check, it's just a guard against programmer's
-        # errors
-        self.ensure_dependency_is_known()
 
         try:
             self.check_disabled()
@@ -45,17 +48,6 @@ class Dependency(object):
             return
 
         self.check_autodetect_func()
-
-    def ensure_dependency_is_known(self):
-        for dep_key in ['deps', 'deps_any', 'deps_neg']:
-            self.known_deps.add(self.identifier)
-            if dep_key in self.attributes:
-                deps = self.attributes[dep_key]
-                deps = set([d for d in deps if not d.startswith('os-')])
-                if not deps <= self.known_deps:
-                    raise ConfigurationError(
-                        "error in dependencies definition: some dependencies in"
-                        " {0} are unknown.".format(deps))
 
     def check_disabled(self):
         if self.enabled_option() == False:
@@ -144,6 +136,15 @@ def configure(ctx):
     __detect_target_os_dependency__(ctx)
 
 @conf
+def ensure_dependency_is_known(ctx, *depnames):
+    deps = set([d for d in depnames if not d.startswith('os-')])
+    if not deps <= ctx.env.known_deps:
+        raise ConfigurationError(
+            "error in dependencies definition: some dependencies in"
+            " {0} are unknown.".format(deps))
+
+
+@conf
 def mark_satisfied(ctx, dependency_identifier):
     ctx.env.satisfied_deps.add(dependency_identifier)
 
@@ -174,8 +175,11 @@ def filtered_sources(ctx, sources):
 
     def __check_filter__(dependency):
         if dependency.find('!') == 0:
-            return dependency.lstrip('!') not in ctx.env.satisfied_deps
+            dependency = dependency.lstrip('!')
+            ctx.ensure_dependency_is_known(dependency)
+            return dependency not in ctx.env.satisfied_deps
         else:
+            ctx.ensure_dependency_is_known(dependency)
             return dependency in ctx.env.satisfied_deps
 
     def __unpack_and_check_filter__(source):
