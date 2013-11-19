@@ -355,6 +355,23 @@ static void preselect_demux_streams(struct MPContext *mpctx)
     }
 }
 
+static struct sh_stream *select_fallback_stream(struct demuxer *d,
+                                                enum stream_type type,
+                                                int index)
+{
+    struct sh_stream *best_stream = NULL;
+    for (int n = 0; n < d->num_streams; n++) {
+        struct sh_stream *s = d->streams[n];
+        if (s->type == type) {
+            best_stream = s;
+            if (index == 0)
+                break;
+            index -= 1;
+        }
+    }
+    return best_stream;
+}
+
 bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
 {
     struct timeline_part *p = mpctx->timeline + mpctx->timeline_part;
@@ -381,6 +398,12 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
             track->stream = demuxer_stream_by_demuxer_id(track->demuxer,
                                                          track->type,
                                                          track->demuxer_id);
+            // EDL can have mismatched files in the same timeline
+            if (!track->stream) {
+                track->stream = select_fallback_stream(track->demuxer,
+                                                       track->type,
+                                                       track->user_tid - 1);
+            }
         }
     }
     preselect_demux_streams(mpctx);
