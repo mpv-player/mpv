@@ -234,6 +234,7 @@ SOURCES = audio/audio.c \
           stream/rar.c \
           stream/stream.c \
           stream/stream_avdevice.c \
+          stream/stream_edl.c \
           stream/stream_file.c \
           stream/stream_lavf.c \
           stream/stream_memory.c \

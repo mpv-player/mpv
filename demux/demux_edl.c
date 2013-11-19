@@ -34,6 +34,10 @@ static bool test_header(struct stream *s, char *header)
 static int try_open_file(struct demuxer *demuxer, enum demux_check check)
 {
     struct stream *s = demuxer->stream;
+    if (s->uncached_type == STREAMTYPE_EDL) {
+        demuxer->file_contents = bstr0(s->url);
+        return 0;
+    }
     if (check >= DEMUX_CHECK_UNSAFE) {
         if (!test_header(s, "mplayer EDL file") &&
             !test_header(s, "mpv EDL v0\n"))

@@ -78,6 +78,7 @@ extern const stream_info_t stream_info_dvd;
 extern const stream_info_t stream_info_bluray;
 extern const stream_info_t stream_info_rar_filter;
 extern const stream_info_t stream_info_rar_entry;
+extern const stream_info_t stream_info_edl;
 
 static const stream_info_t *const stream_list[] = {
 #if HAVE_VCD
@@ -114,6 +115,7 @@ static const stream_info_t *const stream_list[] = {
     &stream_info_memory,
     &stream_info_null,
     &stream_info_mf,
+    &stream_info_edl,
     &stream_info_rar_filter,
     &stream_info_rar_entry,
     &stream_info_file,

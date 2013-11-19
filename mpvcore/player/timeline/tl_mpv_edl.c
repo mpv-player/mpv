@@ -268,8 +268,9 @@ void build_mpv_edl_timeline(struct MPContext *mpctx)
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "Error in EDL.\n");
         return;
     }
-    // Don't allow arbitrary paths
-    fix_filenames(parts, mpctx->demuxer->filename);
+    // Source is .edl and not edl:// => don't allow arbitrary paths
+    if (mpctx->demuxer->stream->uncached_type != STREAMTYPE_EDL)
+        fix_filenames(parts, mpctx->demuxer->filename);
     build_timeline(mpctx, parts);
     talloc_free(parts);
 }

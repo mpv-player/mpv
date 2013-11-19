@@ -43,6 +43,7 @@ enum streamtype {
     STREAMTYPE_PVR,
     STREAMTYPE_TV,
     STREAMTYPE_MF,
+    STREAMTYPE_EDL,
     STREAMTYPE_AVDEVICE,
 };
 

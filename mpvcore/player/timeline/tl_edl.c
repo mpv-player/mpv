@@ -70,7 +70,9 @@ void build_edl_timeline(struct MPContext *mpctx)
     struct bstr *lines = bstr_splitlines(tmpmem, mpctx->demuxer->file_contents);
     int linec = MP_TALLOC_ELEMS(lines);
     struct bstr header = bstr0("mplayer EDL file, version ");
-    if (bstr_startswith0(lines[0], "mpv EDL v0\n")) {
+    if (bstr_startswith0(lines[0], "mpv EDL v0\n") ||
+        mpctx->demuxer->stream->uncached_type == STREAMTYPE_EDL)
+    {
         build_mpv_edl_timeline(mpctx);
         goto out;
     }

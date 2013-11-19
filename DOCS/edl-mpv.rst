@@ -92,3 +92,12 @@ to ``20``, ``param3`` to ``value,escaped``, ``param4`` to ``value2``.
 
 Instead of line breaks, the character ``;`` can be used. Line feed bytes and
 ``;`` are treated equally.
+
+Syntax of EDL URIs
+==================
+
+mpv accepts ``inline`` EDL data in form of ``edl://`` URIs. Other than the
+header, the syntax is exactly the same. It's far more convenient to use ``;``
+instead of line breaks, but that is orthogonal.
+
+Example: ``edl://f1.mkv,length=5,start=10;f2.mkv,30,20;f3.mkv``

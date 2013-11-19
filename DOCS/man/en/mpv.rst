@@ -32,6 +32,7 @@ SYNOPSIS
 | **mpv** \mf://[filemask|\@listfile] [-mf options] [options]
 | **mpv** cdda://track[-endtrack][:speed][/device] [options]
 | **mpv** [file|mms[t]|http|httpproxy|rt[s]p|ftp|udp|smb]://[user:pass\@]URL[:port] [options]
+| **mpv** edl://[edl specification as in edl-mpv.rst]
 
 
 DESCRIPTION
