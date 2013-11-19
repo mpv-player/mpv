@@ -561,12 +561,12 @@ hwaccel_features = [
         'name': '--vdpau-decoder',
         'desc': 'VDPAU decoder (old)',
         'deps': [ 'vdpau' ],
-        'deps_neg': ['av-codec-new-vdpau-api'],
+        'deps_neg': ['avcodec-new-vdpau-api'],
         'func': check_true,
     }, {
         'name': '--vdpau-hwaccel',
         'desc': 'libavcodec VDPAU hwaccel (new)',
-        'deps': [ 'vdpau', 'av-codec-new-vdpau-api' ],
+        'deps': [ 'vdpau', 'avcodec-new-vdpau-api' ],
         'func': check_true,
     }
 ]
