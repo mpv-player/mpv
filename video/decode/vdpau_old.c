@@ -242,6 +242,7 @@ static int init(struct lavc_ctx *ctx)
 static int probe(struct vd_lavc_hwdec *hwdec, struct mp_hwdec_info *info,
                  const char *decoder)
 {
+    hwdec_request_api(info, "vdpau");
     if (!info || !info->vdpau_ctx)
         return HWDEC_ERR_NO_CTX;
     return 0;
