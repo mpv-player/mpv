@@ -70,6 +70,10 @@ void build_edl_timeline(struct MPContext *mpctx)
     struct bstr *lines = bstr_splitlines(tmpmem, mpctx->demuxer->file_contents);
     int linec = MP_TALLOC_ELEMS(lines);
     struct bstr header = bstr0("mplayer EDL file, version ");
+    if (bstr_startswith0(lines[0], "mpv EDL v0\n")) {
+        build_mpv_edl_timeline(mpctx);
+        goto out;
+    }
     if (!linec || !bstr_startswith(lines[0], header)) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "EDL: Bad EDL header!\n");
         goto out;

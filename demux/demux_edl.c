@@ -25,18 +25,19 @@
 #include "demux.h"
 #include "stream/stream.h"
 
+static bool test_header(struct stream *s, char *header)
+{
+    return bstr_equals0(stream_peek(s, strlen(header)), header);
+}
+
+// Note: the real work is handled in tl_mpv_edl.c.
 static int try_open_file(struct demuxer *demuxer, enum demux_check check)
 {
     struct stream *s = demuxer->stream;
     if (check >= DEMUX_CHECK_UNSAFE) {
-        const char header[] = "mplayer EDL file";
-        const int len = sizeof(header) - 1;
-        char buf[len];
-        if (stream_read(s, buf, len) < len)
+        if (!test_header(s, "mplayer EDL file") &&
+            !test_header(s, "mpv EDL v0\n"))
             return -1;
-        if (strncmp(buf, header, len))
-            return -1;
-        stream_seek(s, 0);
     }
     demuxer->file_contents = stream_read_complete(s, demuxer, 1000000);
     if (demuxer->file_contents.start == NULL)
@@ -46,7 +47,7 @@ static int try_open_file(struct demuxer *demuxer, enum demux_check check)
 
 const struct demuxer_desc demuxer_desc_edl = {
     .name = "edl",
-    .desc = "mplayer2 edit decision list",
+    .desc = "Edit decision list",
     .type = DEMUXER_TYPE_EDL,
     .open = try_open_file,
 };
