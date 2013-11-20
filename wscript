@@ -53,6 +53,11 @@ build_options = [
         'deps': [ 'os-darwin' ],
         'default': 'disable',
         'func': check_true
+    }, {
+        'name': 'win32-executable',
+        'desc': 'w32 executable',
+        'deps_any': [ 'os-win32', 'os-cygwin'],
+        'func': check_ctx_vars('WINDRES')
     }
 ]
 
@@ -702,11 +707,12 @@ def is_debug_build(ctx):
 def configure(ctx):
     ctx.check_waf_version(mini='1.7.13')
     target = os.environ.get('TARGET')
-    (cc, pkg_config) = ('cc', 'pkg-config')
+    (cc, pkg_config, windres) = ('cc', 'pkg-config', 'windres')
 
     if target:
         cc         = '-'.join([target, 'gcc'])
         pkg_config = '-'.join([target, pkg_config])
+        windres    = '-'.join([target, windres])
 
     ctx.find_program(cc,          var='CC')
     ctx.find_program(pkg_config,  var='PKG_CONFIG')
@@ -714,6 +720,7 @@ def configure(ctx):
     ctx.find_program('rst2man',   var='RST2MAN',   mandatory=False)
     ctx.find_program('rst2latex', var='RST2LATEX', mandatory=False)
     ctx.find_program('pdflatex',  var='PDFLATEX',  mandatory=False)
+    ctx.find_program(windres,     var='WINDRES',   mandatory=False)
 
     for ident, _, _ in _INSTALL_DIRS_LIST:
         varname = ident.upper()

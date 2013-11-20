@@ -382,10 +382,31 @@ def build(ctx):
         ( "osdep/path-win.c",                    "os-cygwin" ),
         ( "osdep/glob-win.c",                    "glob-win32-replacement" ),
         ( "osdep/priority.c",                    "priority" ),
+        ( "osdep/mpv.rc",                        "win32-executable" ),
 
         ## tree_allocator
         "ta/ta.c", "ta/ta_talloc.c", "ta/ta_utils.c"
     ]
+
+    if ctx.dependency_satisfied('win32-executable'):
+        from waflib import TaskGen
+
+        TaskGen.declare_chain(
+            name    = 'windres',
+            rule    = '${WINDRES} ${WINDRES_FLAGS} ${SRC} ${TGT}',
+            ext_in  = '.rc',
+            ext_out = '-rc.o',
+            color   = 'PINK')
+
+        ctx.env.WINDRES_FLAGS = [
+            '--include-dir={0}'.format(ctx.bldnode.abspath()),
+            '--include-dir={0}'.format(ctx.srcnode.abspath())
+        ]
+
+        for node in 'version.h osdep/mpv.exe.manifest etc/mpv-icon.ico'.split():
+            ctx.add_manual_dependency(
+                ctx.path.find_node('osdep/mpv.rc'),
+                ctx.path.find_node(node))
 
     cprog_kwargs = {}
     if ctx.dependency_satisfied('macosx-bundle'):
