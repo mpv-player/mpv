@@ -106,7 +106,7 @@ iconv support use --disable-iconv.",
     }, {
         'name': 'priority',
         'desc': 'w32 priority API',
-        'deps': [ 'os-win32', 'os-cygwin'],
+        'deps_any': [ 'os-win32', 'os-cygwin'],
         'func': check_true
     }, {
         'name': 'stream-cache',
