@@ -199,8 +199,8 @@ audio/decode/:
 
 audio/filter/:
     Audio filter chain. af_lavrresample is inserted if any form of conversion
-    between audio formats is needed. (af_format.c is also used for some corner
-    cases.)
+    between audio formats is needed. (af_convert24.c and af_convertsignendian.c
+    are also used for some formats not directly supported by FFmpeg.)
 
 audio/out/:
     Audio outputs.
