@@ -241,7 +241,7 @@ bool ta_vasprintf_append(char **str, const char *fmt, va_list ap)
 
 /* Append the formatted string at the end of the allocation of *str. It
  * overwrites the last byte of the allocation too (which is assumed to be the
- * '\0' terminating the sttring). Compared to ta_asprintf_append(), this is
+ * '\0' terminating the string). Compared to ta_asprintf_append(), this is
  * useful if you know that the string ends with the allocation, so that the
  * extra strlen() can be avoided for better performance.
  * Returns false on OOM or snprintf() errors, with *str left untouched.
