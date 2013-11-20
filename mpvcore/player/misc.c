@@ -199,7 +199,7 @@ void merge_playlist_files(struct playlist *pl)
             bstr_strip(bstr0(e->filename)).len != strlen(e->filename))
         {
             // %length%
-            edl = talloc_asprintf_append_buffer(edl, "%%%d%%", strlen(e->filename));
+            edl = talloc_asprintf_append_buffer(edl, "%%%zd%%", strlen(e->filename));
         }
         edl = talloc_strdup_append_buffer(edl, e->filename);
     }
