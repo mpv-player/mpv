@@ -20,25 +20,25 @@ shortcomings:
    part is this pieces are spread apart in the configure and copy pasted for
    any single case. That brings us to..
 
-2) --enable-feature has to ovveride the user and help him understand that he
+2) --enable-feature has to override the user and help him understand that he
    has libraries missing and should install them for the feature to be enabled.
 
 3) Must be customizable, hackable, pleasant to the developer eyes and to work
    with in general.
 
-4) Must have separe configuration and build steps.
+4) Must have separate configuration and build steps.
 
 Goal 2 comes as a given on pretty much any build system, since autotools made
 this behaviour very popular among users (and rightly so).
 
 Goal 1+3 were somewhat harder to accomplish as it looks like all of the build
-systems we evaluted (waf included!) had problems with them. For refence we had
-proof of concept build systems with waf, CMake and autotools.
+systems we evaluated (waf included!) had problems with them. For reference we
+had proof of concept build systems with waf, CMake and autotools.
 
 What puts waf apart from CMake and autotools, is that projects using it use
 Python to program their build system. Also while the Waf Book shows really
-simple API usages, one can write it's own build system on top of waf that is
-tailored to the project's needs.
+simple API usages, you can write your own build system on top of waf that is
+tailored to the project's specific needs.
 
 mpv's custom configure step on top of waf
 =========================================
@@ -84,22 +84,26 @@ interactions with the users.
 
 ``func``: function that will perform the check. These functions are defined in
 ``waftools/checks``. The reusable checks are all functions that return
-functions. The return functions will then be applied using the waf configuration
-context. Their source is a bit convoluted, but it should be easy to pick up
-their usage from the ``wscript``. They mirror some of the shell functions used
-in mplayer in their semantics. If someone expresses some interest I will
-extend this document with official documentation for each function.
+functions. The return functions will then be applied using waf's configuration
+context.
+
+The source code for the reusable checks is a bit convoluted, but it should be
+easy to pick up their usage from the ``wscript``. Their signature mirrors
+the semantics of some of the shell functions used in mplayer.
+
+If someone expresses some interest, I will extend this document with official
+documentation for each check function.
 
 Optional fields
 ---------------
 
-``deps``: list of dependencies of this features. It is a list of names of
-other featues as defined in the ``name`` field (minus the eventual leading
+``deps``: list of dependencies of this feature. It is a list of names of
+other features as defined in the ``name`` field (minus the eventual leading
 ``--``). All of the dependencies must be satisfied. If they are not the check
 will be skipped without even running ``func``.
 
 ``deps_any``: like deps but it is satisfied even if only one of the dependencies
-is satisfied. You can thing of ``deps`` as a 'and' condition and ``deps_any``
+is satisfied. You can think of ``deps`` as a 'and' condition and ``deps_any``
 as a 'or' condition.
 
 ``deps_neg``: like deps but it is satisfied when none of the dependencies is
@@ -135,7 +139,7 @@ mpv's custom build step on top of waf
 =====================================
 
 Build step is pretty much vanilla waf. The only difference being that the list
-of source files can contain both a strings or a tuples. If a tuple is found,
+of source files can contain both strings or tuples. If a tuple is found,
 the second element in the tuple will the used to match the features detected
 in the configure step (the ``name`` field described above). If this feature
 was not enabled during configure, the source file will not be compiled in.
