@@ -157,11 +157,15 @@ static int open_f(stream_t *stream, int mode)
             filename += strlen(prefix[i]);
     if (!strncmp(filename, "rtsp:", 5)) {
         /* This is handled as a special demuxer, without a separate
-         * stream layer. demux_lavf will do all the real work.
+         * stream layer. demux_lavf will do all the real work. Note
+         * that libavformat doesn't even provide a protocol entry for
+         * this (the rtsp demuxer's probe function checks for a "rtsp:"
+         * filename prefix), so it has to be handled specially here.
          */
         stream->seek = NULL;
         stream->demuxer = "lavf";
         stream->lavf_type = "rtsp";
+        talloc_free(temp);
         return STREAM_OK;
     }
     mp_msg(MSGT_OPEN, MSGL_V, "[ffmpeg] Opening %s\n", filename);
