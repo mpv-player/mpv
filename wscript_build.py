@@ -403,7 +403,7 @@ def build(ctx):
             '--include-dir={0}'.format(ctx.srcnode.abspath())
         ]
 
-        for node in 'version.h osdep/mpv.exe.manifest etc/mpv-icon.ico'.split():
+        for node in 'osdep/mpv.exe.manifest etc/mpv-icon.ico'.split():
             ctx.add_manual_dependency(
                 ctx.path.find_node('osdep/mpv.rc'),
                 ctx.path.find_node(node))
