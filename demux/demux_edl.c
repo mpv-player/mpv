@@ -25,27 +25,24 @@
 #include "demux.h"
 #include "stream/stream.h"
 
-static bool test_header(struct stream *s, char *header)
-{
-    return bstr_equals0(stream_peek(s, strlen(header)), header);
-}
+#define HEADER "# mpv EDL v0\n"
 
 // Note: the real work is handled in tl_mpv_edl.c.
 static int try_open_file(struct demuxer *demuxer, enum demux_check check)
 {
     struct stream *s = demuxer->stream;
     if (s->uncached_type == STREAMTYPE_EDL) {
-        demuxer->file_contents = bstr0(s->url);
+        demuxer->file_contents = bstr0(s->path);
         return 0;
     }
     if (check >= DEMUX_CHECK_UNSAFE) {
-        if (!test_header(s, "mplayer EDL file") &&
-            !test_header(s, "mpv EDL v0\n"))
+        if (!bstr_equals0(stream_peek(s, strlen(HEADER)), HEADER))
             return -1;
     }
     demuxer->file_contents = stream_read_complete(s, demuxer, 1000000);
     if (demuxer->file_contents.start == NULL)
         return -1;
+    bstr_eatstart0(&demuxer->file_contents, HEADER);
     return 0;
 }
 

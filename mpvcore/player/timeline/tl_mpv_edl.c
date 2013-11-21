@@ -56,16 +56,14 @@ static bool parse_time(bstr str, double *out_time)
 }
 
 /* Returns a list of parts, or NULL on parse error.
- * Syntax:
- *    url      ::= ['edl://'|'mpv EDL v0\n'] <entry> ( (';' | '\n') <entry> )*
+ * Syntax (without file header or URI prefix):
+ *    url      ::= <entry> ( (';' | '\n') <entry> )*
  *    entry    ::= <param> ( <param> ',' )*
  *    param    ::= [<string> '='] (<string> | '%' <number> '%' <bytes>)
  */
 static struct tl_parts *parse_edl(bstr str)
 {
     struct tl_parts *tl = talloc_zero(NULL, struct tl_parts);
-    if (!bstr_eatstart0(&str, "edl://"))
-        bstr_eatstart0(&str, "mpv EDL v0\n");
     while (str.len) {
         if (bstr_eatstart0(&str, "#"))
             bstr_split_tok(str, "\n", &(bstr){0}, &str);

@@ -7,7 +7,7 @@ segment, and consists of source file, source offset, and segment length.
 
 For example::
 
-    mpv EDL v0
+    # mpv EDL v0
     f1.mkv,10,20
     f2.mkv
     f1.mkv,40,10
@@ -21,6 +21,7 @@ virtual EDL file appears as a single file, instead as a playlist.
 
 The general simplified syntax is:
 
+    # mpv EDL v0
     <filename>
     <filename>,<start in seconds>,<length in seconds>
 
@@ -40,7 +41,7 @@ Syntax of mpv EDL files
 Generally, the format is relatively strict. No superfluous whitespace (except
 empty lines and commented lines) are allowed. You must use UNIX line breaks.
 
-The first line in the file must be ``mpv EDL v0``. This designates that the
+The first line in the file must be ``# mpv EDL v0``. This designates that the
 file uses format version 0, which is not frozen yet and may change any time.
 (If you need a stable EDL file format, make a feature request. Likewise, if
 you have suggestions for improvements, it's not too late yet.)
@@ -84,7 +85,7 @@ implicitly uses the name ``start``.
 
 Example::
 
-    mpv EDL v0
+    # mpv EDL v0
     %18%filename,with,.mkv,10,length=20,param3=%13%value,escaped,param4=value2
 
 this sets ``file`` to ``filename,with,.mkv``, ``start`` to ``10``, ``length``
