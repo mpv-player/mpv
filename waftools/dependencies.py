@@ -164,6 +164,7 @@ def parse_dependencies(ctx, dependencies):
 
 @conf
 def dependency_satisfied(ctx, dependency_identifier):
+    ctx.ensure_dependency_is_known(dependency_identifier)
     return dependency_identifier in ctx.env.satisfied_deps
 
 def filtered_sources(ctx, sources):
