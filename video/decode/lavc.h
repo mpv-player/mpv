@@ -86,8 +86,6 @@ bool hwdec_check_codec_support(const char *decoder,
                                const struct hwdec_profile_entry *table);
 int hwdec_get_max_refs(struct lavc_ctx *ctx);
 
-void hwdec_request_api(struct mp_hwdec_info *info, const char *api_name);
-
 // lavc_dr1.c
 int mp_codec_get_buffer(AVCodecContext *s, AVFrame *frame);
 void mp_codec_release_buffer(AVCodecContext *s, AVFrame *frame);

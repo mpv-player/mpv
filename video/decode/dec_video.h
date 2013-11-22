@@ -54,4 +54,6 @@ struct mp_hwdec_info {
     void *load_api_ctx;
 };
 
+void hwdec_request_api(struct mp_hwdec_info *info, const char *api_name);
+
 #endif /* MPLAYER_DEC_VIDEO_H */
