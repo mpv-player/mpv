@@ -34,6 +34,10 @@ def build(ctx):
     class cprogram(cls):
         run_str = cls.hcode + '${LAST_LINKFLAGS}'
 
+        def __str__(self):
+            tgt_str = ' '.join([a.nice_path() for a in self.outputs])
+            return 'linking -> {0}\n'.format(tgt_str)
+
     cls = Task.classes['macplist']
     class macplist(cls):
         def run(self):
