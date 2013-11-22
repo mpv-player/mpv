@@ -23,6 +23,7 @@
 - (void)signalMouseMovement:(NSPoint)point;
 - (void)putKey:(int)mpkey withModifiers:(int)modifiers;
 - (void)putAxis:(int)mpkey delta:(float)delta;
+- (void)putCommand:(char*)cmd;
 - (void)performAsyncResize:(NSSize)size;
 
 - (BOOL)isInFullScreenMode;

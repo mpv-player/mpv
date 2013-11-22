@@ -629,6 +629,13 @@ int vo_cocoa_cgl_color_size(struct vo *vo)
     mp_input_put_axis(self.vout->input_ctx, mpkey, delta);
 }
 
+- (void)putCommand:(char*)cmd
+{
+    mp_cmd_t *cmdt = mp_input_parse_cmd(self.vout->input_ctx, bstr0(cmd), "");
+    mp_input_queue_cmd(self.vout->input_ctx, cmdt);
+    ta_free(cmd);
+}
+
 - (void)performAsyncResize:(NSSize)size {
     vo_cocoa_resize_redraw(self.vout, size.width, size.height);
 }

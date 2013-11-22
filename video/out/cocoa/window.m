@@ -97,12 +97,8 @@
 
 - (void)mulSize:(float)multiplier
 {
-    if (![self.adapter isInFullScreenMode]) {
-        NSSize size = [self.adapter videoSize];
-        size.width  *= multiplier;
-        size.height *= multiplier;
-        [self setCenteredContentSize:size];
-    }
+    char *cmd = ta_asprintf(NULL, "set window-scale %f", multiplier);
+    [self.adapter putCommand:cmd];
 }
 
 - (int)titleHeight
