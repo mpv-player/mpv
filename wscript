@@ -644,7 +644,7 @@ radio_and_tv_features = [
     }, {
         'name': '--pvr',
         'desc': 'Video4Linux2 MPEG PVR interface',
-        'func': check_cc(fragment='pvr.c'),
+        'func': check_cc(fragment=load_fragment('pvr.c')),
     }, {
         'name': '--audio-input',
         'desc': 'audio input support',
