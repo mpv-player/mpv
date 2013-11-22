@@ -38,10 +38,14 @@ def __add_mingw_flags__(ctx):
     ctx.env.CFLAGS += ['-DBIG_ENDIAN=4321']
     ctx.env.LAST_LINKFLAGS += ['-mconsole']
 
+def __add_cygwin_flags__(ctx):
+    ctx.env.CFLAGS += ['-mwin32']
+
 __compiler_map__ = {
     '__GNUC__':  __add_gcc_flags__,
     '__clang__': __add_clang_flags__,
     '__MINGW32__': __add_mingw_flags__,
+    '__CYGWIN__': __add_cygwin_flags__,
 }
 
 def __apply_map__(ctx, fnmap):
