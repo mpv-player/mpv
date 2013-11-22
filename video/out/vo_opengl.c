@@ -239,10 +239,14 @@ static void request_hwdec_api(struct mp_hwdec_info *info, const char *api_name)
 
 static void get_hwdec_info(struct gl_priv *p, struct mp_hwdec_info *info)
 {
-    info->load_api = request_hwdec_api;
-    info->load_api_ctx = p;
-    if (p->hwdec)
-        *info = *p->hwdec->info;
+    if (p->hwdec) {
+        *info = p->hwdec->info;
+    } else {
+        *info = (struct mp_hwdec_info) {
+            .load_api = request_hwdec_api,
+            .load_api_ctx = p,
+        }
+    }
 }
 
 static void unload_hwdec_driver(struct gl_priv *p)
