@@ -526,6 +526,26 @@ int vo_cocoa_control(struct vo *vo, int *events, int request, void *arg)
     case VOCTRL_UPDATE_SCREENINFO:
         vo_cocoa_update_screen_info(vo);
         return VO_TRUE;
+    case VOCTRL_GET_WINDOW_SIZE: {
+        int *s = arg;
+        vo->cocoa->inside_sync_section = true;
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            NSSize size = [vo->cocoa->view frame].size;
+            s[0] = size.width;
+            s[1] = size.height;
+        });
+        vo->cocoa->inside_sync_section = false;
+        return VO_TRUE;
+    }
+    case VOCTRL_SET_WINDOW_SIZE: {
+        vo->cocoa->inside_sync_section = true;
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            int *s = arg;
+            [vo->cocoa->window queueNewVideoSize:(NSSize){s[0], s[1]}];
+        });
+        vo->cocoa->inside_sync_section = false;
+        return VO_TRUE;
+    }
     case VOCTRL_SET_CURSOR_VISIBILITY:
         vo_cocoa_set_cursor_visibility(vo, arg);
         return VO_TRUE;
