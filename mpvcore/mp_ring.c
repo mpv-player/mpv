@@ -27,7 +27,7 @@
 struct mp_ring {
     uint8_t  *buffer;
 
-    /* Positions of thes first readable/writeable chunks. Do not read this
+    /* Positions of the first readable/writeable chunks. Do not read this
      * fields but use the atomic private accessors `mp_ring_get_wpos`
      * and `mp_ring_get_rpos`. */
     uint32_t rpos, wpos;
