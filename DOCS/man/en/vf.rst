@@ -863,11 +863,10 @@ Available filters are:
         Specify the fourth parameter to pass to the library.
 
 ``vavpp``
-    VA-AP-API video post processing. Works with ``--vo=vaapi`` and ``--vo=opengl``,
-    while decoding with vaapi only. Currently deinterlaces. This filter is
-    automatically inserted if deinterlacing is requested (either using the ``D``
-    key, by default mapped to the command ``cycle deinterlace``, or the
-    ``--deinterlace`` option).
+    VA-AP-API video post processing. Works with ``--vo=vaapi`` and ``--vo=opengl``
+    only. Currently deinterlaces. This filter is automatically inserted if
+    deinterlacing is requested (either using the ``D`` key, by default mapped to
+    the command ``cycle deinterlace``, or the ``--deinterlace`` option).
 
     ``deint=<method>``
         Select the deinterlacing algorithm.
