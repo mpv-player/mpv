@@ -636,7 +636,6 @@ radio_and_tv_features = [
         'name': '--tv-v4l2',
         'desc': 'Video4Linux2 TV interface',
         'func': check_cc(header_name=['sys/time.h', 'linux/videodev2.h'])
-        ## XXX: what the fuck is up with this needing: sys_videoio_h?
     }, {
         'name': '--libv4l2',
         'desc': 'libv4l2 support',
