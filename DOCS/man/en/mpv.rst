@@ -90,6 +90,10 @@ p / SPACE
     Step forward. Pressing once will pause movie, every consecutive press will
     play one frame and then go into pause mode again.
 
+,
+    Step backward. Pressing once will pause movie, every consecutive press will
+    play one frame in reverse and then go into pause mode again.
+
 q / ESC
     Stop playing and quit.
 
