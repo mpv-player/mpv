@@ -67,8 +67,8 @@ static bool is_interleaved(struct MPContext *mpctx, struct track *track)
 
 void reset_subtitles(struct MPContext *mpctx)
 {
-    if (mpctx->sh_sub)
-        sub_reset(mpctx->sh_sub->dec_sub);
+    if (mpctx->d_sub)
+        sub_reset(mpctx->d_sub);
     set_osd_subtitle(mpctx, NULL);
     osd_changed(mpctx->osd, OSDTYPE_SUB);
 }
@@ -80,9 +80,8 @@ void update_subtitles(struct MPContext *mpctx)
         return;
 
     struct track *track = mpctx->current_track[STREAM_SUB];
-    struct sh_sub *sh_sub = mpctx->sh_sub;
-    assert(track && sh_sub);
-    struct dec_sub *dec_sub = sh_sub->dec_sub;
+    struct dec_sub *dec_sub = mpctx->d_sub;
+    assert(track && dec_sub);
 
     if (mpctx->d_video && mpctx->d_video->vf_input) {
         struct mp_image_params params = *mpctx->d_video->vf_input;
@@ -94,14 +93,17 @@ void update_subtitles(struct MPContext *mpctx)
     double refpts_s = mpctx->playback_pts - mpctx->osd->video_offset;
     double curpts_s = refpts_s + opts->sub_delay;
 
-    if (!track->preloaded) {
+    if (!track->preloaded && track->stream) {
+        struct sh_stream *sh_stream = track->stream;
         bool interleaved = is_interleaved(mpctx, track);
 
+        assert(sh_stream->sub->dec_sub == dec_sub);
+
         while (1) {
-            if (interleaved && !demux_has_packet(sh_sub->gsh))
+            if (interleaved && !demux_has_packet(sh_stream))
                 break;
-            double subpts_s = demux_get_next_pts(sh_sub->gsh);
-            if (!demux_has_packet(sh_sub->gsh))
+            double subpts_s = demux_get_next_pts(sh_stream);
+            if (!demux_has_packet(sh_stream))
                 break;
             if (subpts_s > curpts_s) {
                 mp_dbg(MSGT_CPLAYER, MSGL_DBG2,
@@ -114,7 +116,7 @@ void update_subtitles(struct MPContext *mpctx)
                 if (subpts_s > curpts_s + 1 && !interleaved)
                     break;
             }
-            struct demux_packet *pkt = demux_read_packet(sh_sub->gsh);
+            struct demux_packet *pkt = demux_read_packet(sh_stream);
             mp_dbg(MSGT_CPLAYER, MSGL_V, "Sub: c_pts=%5.3f s_pts=%5.3f "
                    "duration=%5.3f len=%d\n", curpts_s, pkt->pts, pkt->duration,
                    pkt->len);
@@ -177,21 +179,27 @@ void reinit_subs(struct MPContext *mpctx)
     assert(!(mpctx->initialized_flags & INITIALIZED_SUB));
 
     init_demux_stream(mpctx, STREAM_SUB);
-    if (!mpctx->sh_sub)
+    struct sh_stream *sh = mpctx->sh[STREAM_SUB];
+
+    // No track selected, or lazily added DVD track (will actually be created
+    // on first sub packet)
+    if (!sh)
         return;
 
-    if (!mpctx->sh_sub->dec_sub)
-        mpctx->sh_sub->dec_sub = sub_create(opts);
+    if (!sh->sub->dec_sub) {
+        assert(!mpctx->d_sub);
+        sh->sub->dec_sub = sub_create(opts);
+    }
 
-    assert(track->demuxer);
-    // Lazily added DVD track - will be created on first sub packet
-    if (!track->stream)
-        return;
+    assert(!mpctx->d_sub || sh->sub->dec_sub == mpctx->d_sub);
+
+    // The decoder is kept in the stream header in order to make ordered
+    // chapters work well.
+    mpctx->d_sub = sh->sub->dec_sub;
 
     mpctx->initialized_flags |= INITIALIZED_SUB;
 
-    struct sh_sub *sh_sub = mpctx->sh_sub;
-    struct dec_sub *dec_sub = sh_sub->dec_sub;
+    struct dec_sub *dec_sub = mpctx->d_sub;
     assert(dec_sub);
 
     if (!sub_is_initialized(dec_sub)) {
@@ -206,14 +214,14 @@ void reinit_subs(struct MPContext *mpctx)
         sub_set_video_fps(dec_sub, fps);
         sub_set_ass_renderer(dec_sub, mpctx->osd->ass_library,
                              mpctx->osd->ass_renderer);
-        sub_init_from_sh(dec_sub, sh_sub);
+        sub_init_from_sh(dec_sub, sh);
 
         // Don't do this if the file has video/audio streams. Don't do it even
         // if it has only sub streams, because reading packets will change the
         // demuxer position.
         if (!track->preloaded && track->is_external) {
             demux_seek(track->demuxer, 0, SEEK_ABSOLUTE);
-            track->preloaded = sub_read_all_packets(dec_sub, sh_sub);
+            track->preloaded = sub_read_all_packets(dec_sub, sh);
         }
     }
 

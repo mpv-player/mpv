@@ -162,15 +162,16 @@ static int sub_init_decoder(struct dec_sub *sub, struct sd *sd)
     return 0;
 }
 
-void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh)
+void sub_init_from_sh(struct dec_sub *sub, struct sh_stream *sh)
 {
     assert(!sub->num_sd);
+    assert(sh && sh->sub);
 
-    if (sh->extradata && !sub->init_sd.extradata)
-        sub_set_extradata(sub, sh->extradata, sh->extradata_len);
+    if (sh->sub->extradata && !sub->init_sd.extradata)
+        sub_set_extradata(sub, sh->sub->extradata, sh->sub->extradata_len);
     struct sd init_sd = sub->init_sd;
-    init_sd.codec = sh->gsh->codec;
-    init_sd.ass_track = sh->track;
+    init_sd.codec = sh->codec;
+    init_sd.ass_track = sh->sub->track;
 
     while (sub->num_sd < MAX_NUM_SD) {
         struct sd *sd = talloc(NULL, struct sd);
@@ -199,7 +200,7 @@ void sub_init_from_sh(struct dec_sub *sub, struct sh_sub *sh)
 
     sub_uninit(sub);
     mp_msg(MSGT_OSD, MSGL_ERR, "Could not find subtitle decoder for format '%s'.\n",
-           sh->gsh->codec ? sh->gsh->codec : "<unknown>");
+           sh->codec ? sh->codec : "<unknown>");
 }
 
 static struct demux_packet *get_decoded_packet(struct sd *sd)
@@ -362,11 +363,12 @@ static void add_packet(struct packet_list *subs, struct demux_packet *pkt)
 
 // Read all packets from the demuxer and decode/add them. Returns false if
 // there are circumstances which makes this not possible.
-bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
+bool sub_read_all_packets(struct dec_sub *sub, struct sh_stream *sh)
 {
+    assert(sh && sh->sub);
     struct MPOpts *opts = sub->opts;
 
-    if (!sub_accept_packets_in_advance(sub) || sh->track || sub->num_sd < 1)
+    if (!sub_accept_packets_in_advance(sub) || sh->sub->track || sub->num_sd < 1)
         return false;
 
     struct packet_list *subs = talloc_zero(NULL, struct packet_list);
@@ -385,7 +387,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
         preprocess = 1;
 
     for (;;) {
-        struct demux_packet *pkt = demux_read_packet(sh->gsh);
+        struct demux_packet *pkt = demux_read_packet(sh);
         if (!pkt)
             break;
         if (preprocess) {
@@ -403,7 +405,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
         }
     }
 
-    if (opts->sub_cp && !sh->is_utf8)
+    if (opts->sub_cp && !sh->sub->is_utf8)
         sub->charset = guess_sub_cp(subs, opts->sub_cp);
 
     if (sub->charset && sub->charset[0] && !mp_charset_is_utf8(sub->charset))
@@ -412,7 +414,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
     double sub_speed = 1.0;
 
     // 23.976 FPS is used as default timebase for frame based formats
-    if (sub->video_fps && sh->frame_based)
+    if (sub->video_fps && sh->sub->frame_based)
         sub_speed *= sub->video_fps / 23.976;
 
     if (opts->sub_fps && sub->video_fps)
@@ -426,7 +428,7 @@ bool sub_read_all_packets(struct dec_sub *sub, struct sh_sub *sh)
     if (!opts->suboverlap_enabled)
         fix_overlaps_and_gaps(subs);
 
-    if (sh->gsh->codec && strcmp(sh->gsh->codec, "microdvd") == 0) {
+    if (sh->codec && strcmp(sh->codec, "microdvd") == 0) {
         // The last subtitle event in MicroDVD subs can have duration unset,
         // which means show the subtitle until end of video.
         // See FFmpeg FATE MicroDVD_capability_tester.sub

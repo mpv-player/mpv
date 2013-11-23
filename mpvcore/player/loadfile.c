@@ -80,9 +80,10 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
     if (mask & INITIALIZED_SUB) {
         mpctx->initialized_flags &= ~INITIALIZED_SUB;
-        if (mpctx->sh_sub)
-            sub_reset(mpctx->sh_sub->dec_sub);
+        if (mpctx->d_sub)
+            sub_reset(mpctx->d_sub);
         cleanup_demux_stream(mpctx, STREAM_SUB);
+        mpctx->d_sub = NULL; // Note: not free'd.
         mpctx->osd->dec_sub = NULL;
         reset_subtitles(mpctx);
     }
@@ -108,13 +109,15 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
     if (mask & INITIALIZED_DEMUXER) {
         mpctx->initialized_flags &= ~INITIALIZED_DEMUXER;
+        assert(!(mpctx->initialized_flags &
+                 (INITIALIZED_VCODEC | INITIALIZED_ACODEC | INITIALIZED_SUB)));
         for (int i = 0; i < mpctx->num_tracks; i++) {
             talloc_free(mpctx->tracks[i]);
         }
         mpctx->num_tracks = 0;
         for (int t = 0; t < STREAM_TYPE_COUNT; t++)
             mpctx->current_track[t] = NULL;
-        assert(!mpctx->d_video && !mpctx->d_audio && !mpctx->sh_sub);
+        assert(!mpctx->d_video && !mpctx->d_audio && !mpctx->d_sub);
         mpctx->master_demuxer = NULL;
         for (int i = 0; i < mpctx->num_sources; i++) {
             uninit_subs(mpctx->sources[i]);
@@ -264,22 +267,12 @@ static void print_file_properties(struct MPContext *mpctx)
     }
 }
 
-static void set_demux_field(struct MPContext *mpctx, enum stream_type type,
-                            struct sh_stream *s)
-{
-    mpctx->sh[type] = s;
-    // redundant fields for convenience access
-    switch(type) {
-        case STREAM_SUB: mpctx->sh_sub = s ? s->sub : NULL; break;
-    }
-}
-
 struct sh_stream *init_demux_stream(struct MPContext *mpctx,
                                     enum stream_type type)
 {
     struct track *track = mpctx->current_track[type];
-    set_demux_field(mpctx, type, track ? track->stream : NULL);
-    struct sh_stream *stream = mpctx->sh[type];
+    struct sh_stream *stream = track ? track->stream : NULL;
+    mpctx->sh[type] = stream;
     if (stream) {
         demuxer_switch_track(stream->demuxer, type, stream);
         if (track->is_external) {
@@ -295,7 +288,7 @@ void cleanup_demux_stream(struct MPContext *mpctx, enum stream_type type)
     struct sh_stream *stream = mpctx->sh[type];
     if (stream)
         demuxer_switch_track(stream->demuxer, type, NULL);
-    set_demux_field(mpctx, type, NULL);
+    mpctx->sh[type] = NULL;
 }
 
 // Switch the demuxers to current track selection. This is possibly important
@@ -1051,7 +1044,7 @@ static void play_current_file(struct MPContext *mpctx)
     assert(mpctx->demuxer == NULL);
     assert(mpctx->d_audio == NULL);
     assert(mpctx->d_video == NULL);
-    assert(mpctx->sh_sub == NULL);
+    assert(mpctx->d_sub == NULL);
 
     char *stream_filename = mpctx->filename;
     mpctx->resolve_result = resolve_url(stream_filename, opts);
