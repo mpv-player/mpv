@@ -123,7 +123,7 @@ static int mp_property_playback_speed(m_option_t *prop, int action,
         opts->playback_speed = *(double *) arg;
         // Adjust time until next frame flip for nosound mode
         mpctx->time_frame *= orig_speed / opts->playback_speed;
-        if (mpctx->sh_audio)
+        if (mpctx->d_audio)
             reinit_audio_chain(mpctx);
         return M_PROPERTY_OK;
     }
@@ -315,7 +315,7 @@ static int mp_property_length(m_option_t *prop, int action, void *arg,
 static int mp_property_avsync(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
 {
-    if (!mpctx->sh_audio || !mpctx->sh_video)
+    if (!mpctx->d_audio || !mpctx->sh_video)
         return M_PROPERTY_UNAVAILABLE;
     if (mpctx->last_av_difference == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
@@ -625,8 +625,8 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
             if (mpctx->sh_video)
                 resync_video_stream(mpctx->sh_video);
 
-            if (mpctx->sh_audio)
-                resync_audio_stream(mpctx->sh_audio);
+            if (mpctx->d_audio)
+                audio_resync_stream(mpctx->d_audio);
         }
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_TYPE: {
@@ -816,7 +816,7 @@ static int mp_property_volrestore(m_option_t *prop, int action,
 static int mp_property_audio_delay(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
 {
-    if (!(mpctx->sh_audio && mpctx->sh_video))
+    if (!(mpctx->d_audio && mpctx->sh_video))
         return M_PROPERTY_UNAVAILABLE;
     float delay = mpctx->opts->audio_delay;
     switch (action) {
@@ -835,7 +835,7 @@ static int mp_property_audio_delay(m_option_t *prop, int action,
 static int mp_property_audio_format(m_option_t *prop, int action,
                                     void *arg, MPContext *mpctx)
 {
-    const char *c = mpctx->sh_audio ? mpctx->sh_audio->gsh->codec : NULL;
+    const char *c = mpctx->d_audio ? mpctx->d_audio->header->codec : NULL;
     return m_property_strdup_ro(prop, action, arg, c);
 }
 
@@ -843,7 +843,7 @@ static int mp_property_audio_format(m_option_t *prop, int action,
 static int mp_property_audio_codec(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
 {
-    const char *c = mpctx->sh_audio ? mpctx->sh_audio->gsh->decoder_desc : NULL;
+    const char *c = mpctx->d_audio ? mpctx->d_audio->decoder_desc : NULL;
     return m_property_strdup_ro(prop, action, arg, c);
 }
 
@@ -851,14 +851,14 @@ static int mp_property_audio_codec(m_option_t *prop, int action,
 static int mp_property_audio_bitrate(m_option_t *prop, int action,
                                      void *arg, MPContext *mpctx)
 {
-    if (!mpctx->sh_audio)
+    if (!mpctx->d_audio)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        *(char **)arg = format_bitrate(mpctx->sh_audio->i_bps);
+        *(char **)arg = format_bitrate(mpctx->d_audio->i_bps);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(int *)arg = mpctx->sh_audio->i_bps;
+        *(int *)arg = mpctx->d_audio->i_bps;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -868,15 +868,15 @@ static int mp_property_audio_bitrate(m_option_t *prop, int action,
 static int mp_property_samplerate(m_option_t *prop, int action, void *arg,
                                   MPContext *mpctx)
 {
-    if (!mpctx->sh_audio)
+    if (!mpctx->d_audio)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
         *(char **)arg = talloc_asprintf(NULL, "%d kHz",
-                                        mpctx->sh_audio->samplerate / 1000);
+                                        mpctx->d_audio->header->audio->samplerate / 1000);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(int *)arg = mpctx->sh_audio->samplerate;
+        *(int *)arg = mpctx->d_audio->header->audio->samplerate;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -886,14 +886,14 @@ static int mp_property_samplerate(m_option_t *prop, int action, void *arg,
 static int mp_property_channels(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx)
 {
-    if (!mpctx->sh_audio)
+    if (!mpctx->d_audio)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        *(char **) arg = mp_chmap_to_str(&mpctx->sh_audio->channels);
+        *(char **) arg = mp_chmap_to_str(&mpctx->d_audio->header->audio->channels);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(int *)arg = mpctx->sh_audio->channels.num;
+        *(int *)arg = mpctx->d_audio->header->audio->channels.num;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;

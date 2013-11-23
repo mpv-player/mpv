@@ -108,7 +108,7 @@ void print_status(struct MPContext *mpctx)
         saddf(&line, "(Paused) ");
     }
 
-    if (mpctx->sh_audio)
+    if (mpctx->d_audio)
         saddf(&line, "A");
     if (mpctx->sh_video)
         saddf(&line, "V");
@@ -131,7 +131,7 @@ void print_status(struct MPContext *mpctx)
         saddf(&line, " x%4.2f", opts->playback_speed);
 
     // A-V sync
-    if (mpctx->sh_audio && sh_video && mpctx->sync_audio_to_video) {
+    if (mpctx->d_audio && sh_video && mpctx->sync_audio_to_video) {
         if (mpctx->last_av_difference != MP_NOPTS_VALUE)
             saddf(&line, " A-V:%7.3f", mpctx->last_av_difference);
         else

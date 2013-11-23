@@ -25,14 +25,32 @@
 struct mp_audio_buffer;
 struct mp_decoder_list;
 
-struct mp_decoder_list *mp_audio_decoder_list(void);
-int init_best_audio_codec(sh_audio_t *sh_audio, char *audio_decoders);
-int decode_audio(sh_audio_t *sh_audio, struct mp_audio_buffer *outbuf,
-                 int minsamples);
-void resync_audio_stream(sh_audio_t *sh_audio);
-void uninit_audio(sh_audio_t *sh_audio);
+struct dec_audio {
+    struct MPOpts *opts;
+    const struct ad_functions *ad_driver;
+    struct sh_stream *header;
+    struct mp_audio_buffer *decode_buffer;
+    struct af_stream *afilter;
+    int initialized;
+    char *decoder_desc;
+    // set by decoder
+    int i_bps;          // input bitrate
+    // last known pts value in output from decoder
+    double pts;
+    // number of samples output by decoder after last known pts
+    int pts_offset;
+    // For free use by the decoder
+    void *priv;
+};
 
-int init_audio_filters(sh_audio_t *sh_audio, int in_samplerate,
+struct mp_decoder_list *audio_decoder_list(void);
+int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders);
+int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
+                 int minsamples);
+void audio_resync_stream(struct dec_audio *d_audio);
+void audio_uninit(struct dec_audio *d_audio);
+
+int audio_init_filters(struct dec_audio *d_audio, int in_samplerate,
                        int *out_samplerate, struct mp_chmap *out_channels,
                        int *out_format);
 

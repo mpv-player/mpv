@@ -48,8 +48,8 @@ struct priv {
     struct demux_packet *packet;
 };
 
-static void uninit(sh_audio_t *sh);
-static int decode_new_packet(struct sh_audio *sh);
+static void uninit(struct dec_audio *da);
+static int decode_new_packet(struct dec_audio *da);
 
 #define OPT_BASE_STRUCT struct MPOpts
 
@@ -128,15 +128,16 @@ static const char *find_pcm_decoder(const struct pcm_map *map, int format,
     return NULL;
 }
 
-static int preinit(sh_audio_t *sh)
+static int preinit(struct dec_audio *da)
 {
     return 1;
 }
 
-static int setup_format(sh_audio_t *sh_audio)
+static int setup_format(struct dec_audio *da)
 {
-    struct priv *priv = sh_audio->context;
+    struct priv *priv = da->priv;
     AVCodecContext *lavc_context = priv->avctx;
+    struct sh_audio *sh_audio = da->header->audio;
 
     int sample_format = af_from_avformat(lavc_context->sample_fmt);
     if (!sample_format)
@@ -181,15 +182,16 @@ static void set_from_wf(AVCodecContext *avctx, MP_WAVEFORMATEX *wf)
     }
 }
 
-static int init(sh_audio_t *sh_audio, const char *decoder)
+static int init(struct dec_audio *da, const char *decoder)
 {
-    struct MPOpts *mpopts = sh_audio->opts;
+    struct MPOpts *mpopts = da->opts;
     struct ad_lavc_param *opts = &mpopts->ad_lavc_param;
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
+    struct sh_audio *sh_audio = da->header->audio;
 
     struct priv *ctx = talloc_zero(NULL, struct priv);
-    sh_audio->context = ctx;
+    da->priv = ctx;
 
     if (sh_audio->wf && strcmp(decoder, "pcm") == 0) {
         decoder = find_pcm_decoder(tag_map, sh_audio->format,
@@ -203,7 +205,7 @@ static int init(sh_audio_t *sh_audio, const char *decoder)
     if (!lavc_codec) {
         mp_tmsg(MSGT_DECAUDIO, MSGL_ERR,
                 "Cannot find codec '%s' in libavcodec...\n", decoder);
-        uninit(sh_audio);
+        uninit(da);
         return 0;
     }
 
@@ -227,7 +229,7 @@ static int init(sh_audio_t *sh_audio, const char *decoder)
         if (parse_avopts(lavc_context, opts->avopt) < 0) {
             mp_msg(MSGT_DECVIDEO, MSGL_ERR,
                    "ad_lavc: setting AVOptions '%s' failed.\n", opts->avopt);
-            uninit(sh_audio);
+            uninit(da);
             return 0;
         }
     }
@@ -256,7 +258,7 @@ static int init(sh_audio_t *sh_audio, const char *decoder)
     /* open it */
     if (avcodec_open2(lavc_context, lavc_codec, NULL) < 0) {
         mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Could not open codec.\n");
-        uninit(sh_audio);
+        uninit(da);
         return 0;
     }
     mp_msg(MSGT_DECAUDIO, MSGL_V, "INFO: libavcodec \"%s\" init OK!\n",
@@ -264,27 +266,27 @@ static int init(sh_audio_t *sh_audio, const char *decoder)
 
     // Decode at least 1 sample:  (to get header filled)
     for (int tries = 1; ; tries++) {
-        int x = decode_new_packet(sh_audio);
+        int x = decode_new_packet(da);
         if (x >= 0 && ctx->frame.samples > 0)
             break;
         if (tries >= 5) {
             mp_msg(MSGT_DECAUDIO, MSGL_ERR,
                    "ad_lavc: initial decode failed\n");
-            uninit(sh_audio);
+            uninit(da);
             return 0;
         }
     }
 
-    sh_audio->i_bps = lavc_context->bit_rate / 8;
+    da->i_bps = lavc_context->bit_rate / 8;
     if (sh_audio->wf && sh_audio->wf->nAvgBytesPerSec)
-        sh_audio->i_bps = sh_audio->wf->nAvgBytesPerSec;
+        da->i_bps = sh_audio->wf->nAvgBytesPerSec;
 
     return 1;
 }
 
-static void uninit(sh_audio_t *sh)
+static void uninit(struct dec_audio *da)
 {
-    struct priv *ctx = sh->context;
+    struct priv *ctx = da->priv;
     if (!ctx)
         return;
     AVCodecContext *lavc_context = ctx->avctx;
@@ -296,13 +298,11 @@ static void uninit(sh_audio_t *sh)
         av_freep(&lavc_context);
     }
     avcodec_free_frame(&ctx->avframe);
-    talloc_free(ctx);
-    sh->context = NULL;
 }
 
-static int control(sh_audio_t *sh, int cmd, void *arg)
+static int control(struct dec_audio *da, int cmd, void *arg)
 {
-    struct priv *ctx = sh->context;
+    struct priv *ctx = da->priv;
     switch (cmd) {
     case ADCTRL_RESYNC_STREAM:
         avcodec_flush_buffers(ctx->avctx);
@@ -314,16 +314,16 @@ static int control(sh_audio_t *sh, int cmd, void *arg)
     return CONTROL_UNKNOWN;
 }
 
-static int decode_new_packet(struct sh_audio *sh)
+static int decode_new_packet(struct dec_audio *da)
 {
-    struct priv *priv = sh->context;
+    struct priv *priv = da->priv;
     AVCodecContext *avctx = priv->avctx;
 
     priv->frame.samples = 0;
 
     struct demux_packet *mpkt = priv->packet;
     if (!mpkt)
-        mpkt = demux_read_packet(sh->gsh);
+        mpkt = demux_read_packet(da->header);
     if (!mpkt)
         return -1;  // error or EOF
 
@@ -335,8 +335,8 @@ static int decode_new_packet(struct sh_audio *sh)
     mp_set_av_packet(&pkt, mpkt);
 
     if (mpkt->pts != MP_NOPTS_VALUE) {
-        sh->pts = mpkt->pts;
-        sh->pts_offset = 0;
+        da->pts = mpkt->pts;
+        da->pts_offset = 0;
     }
     int got_frame = 0;
     int ret = avcodec_decode_audio4(avctx, priv->avframe, &got_frame, &pkt);
@@ -362,13 +362,13 @@ static int decode_new_packet(struct sh_audio *sh)
     if (!got_frame)
         return 0;
 
-    if (setup_format(sh) < 0)
+    if (setup_format(da) < 0)
         return -1;
 
     priv->frame.samples = priv->avframe->nb_samples;
-    mp_audio_set_format(&priv->frame, sh->sample_format);
-    mp_audio_set_channels(&priv->frame, &sh->channels);
-    priv->frame.rate = sh->samplerate;
+    mp_audio_set_format(&priv->frame, da->header->audio->sample_format);
+    mp_audio_set_channels(&priv->frame, &da->header->audio->channels);
+    priv->frame.rate = da->header->audio->samplerate;
     for (int n = 0; n < priv->frame.num_planes; n++)
         priv->frame.planes[n] = priv->avframe->data[n];
 
@@ -377,12 +377,12 @@ static int decode_new_packet(struct sh_audio *sh)
     return 0;
 }
 
-static int decode_audio(sh_audio_t *sh, struct mp_audio *buffer, int maxlen)
+static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxlen)
 {
-    struct priv *priv = sh->context;
+    struct priv *priv = da->priv;
 
     if (!priv->frame.samples) {
-        if (decode_new_packet(sh) < 0)
+        if (decode_new_packet(da) < 0)
             return -1;
     }
 
@@ -392,7 +392,7 @@ static int decode_audio(sh_audio_t *sh, struct mp_audio *buffer, int maxlen)
     buffer->samples = MPMIN(priv->frame.samples, maxlen);
     mp_audio_copy(buffer, 0, &priv->frame, 0, buffer->samples);
     mp_audio_skip_samples(&priv->frame, buffer->samples);
-    sh->pts_offset += buffer->samples;
+    da->pts_offset += buffer->samples;
     return 0;
 }
 

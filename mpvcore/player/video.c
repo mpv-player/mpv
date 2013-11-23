@@ -243,8 +243,8 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
 {
     struct MPOpts *opts = mpctx->opts;
     // check for frame-drop:
-    if (mpctx->sh_audio && !mpctx->ao->untimed &&
-        !demux_stream_eof(mpctx->sh_audio->gsh))
+    if (mpctx->d_audio && !mpctx->ao->untimed &&
+        !demux_stream_eof(mpctx->sh[STREAM_AUDIO]))
     {
         float delay = opts->playback_speed * ao_get_delay(mpctx->ao);
         float d = delay - mpctx->delay;
@@ -314,7 +314,7 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         struct demux_packet *pkt = video_read_frame(mpctx);
         if (!pkt)
             return -1;
-        if (mpctx->sh_audio)
+        if (mpctx->d_audio)
             mpctx->delay -= frame_time;
         // video_read_frame can change fps (e.g. for ASF video)
         update_fps(mpctx);
@@ -469,7 +469,7 @@ double update_video(struct MPContext *mpctx, double endpts)
     }
     double frame_time = sh_video->pts - sh_video->last_pts;
     sh_video->last_pts = sh_video->pts;
-    if (mpctx->sh_audio)
+    if (mpctx->d_audio)
         mpctx->delay -= frame_time;
     return frame_time;
 }

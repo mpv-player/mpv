@@ -194,7 +194,7 @@ static bool handle_help_options(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     int opt_exit = 0;
     if (opts->audio_decoders && strcmp(opts->audio_decoders, "help") == 0) {
-        struct mp_decoder_list *list = mp_audio_decoder_list();
+        struct mp_decoder_list *list = audio_decoder_list();
         mp_print_decoders(MSGT_CPLAYER, MSGL_INFO, "Audio decoders:", list);
         talloc_free(list);
         opt_exit = 1;

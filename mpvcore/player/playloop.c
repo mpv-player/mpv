@@ -96,7 +96,7 @@ void pause_player(struct MPContext *mpctx)
     if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
         vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
 
-    if (mpctx->ao && mpctx->sh_audio)
+    if (mpctx->ao && mpctx->d_audio)
         ao_pause(mpctx->ao);    // pause audio, keep data if possible
 
     // Only print status if there's actually a file being played.
@@ -124,7 +124,7 @@ void unpause_player(struct MPContext *mpctx)
     mpctx->paused = false;
     mpctx->osd_function = 0;
 
-    if (mpctx->ao && mpctx->sh_audio)
+    if (mpctx->ao && mpctx->d_audio)
         ao_resume(mpctx->ao);
     if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);      // resume video
@@ -182,10 +182,10 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
         mpctx->time_frame = 0;
     }
 
-    if (mpctx->sh_audio) {
-        resync_audio_stream(mpctx->sh_audio);
-        if (mpctx->sh_audio->afilter)
-            af_control_all(mpctx->sh_audio->afilter, AF_CONTROL_RESET, NULL);
+    if (mpctx->d_audio) {
+        audio_resync_stream(mpctx->d_audio);
+        if (mpctx->d_audio->afilter)
+            af_control_all(mpctx->d_audio->afilter, AF_CONTROL_RESET, NULL);
         if (reset_ao)
             clear_audio_output_buffers(mpctx);
         clear_audio_decode_buffers(mpctx);
@@ -255,7 +255,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         if (demuxer_amount == -1) {
             assert(!need_reset);
             mpctx->stop_play = AT_END_OF_FILE;
-            if (mpctx->sh_audio && !timeline_fallthrough) {
+            if (mpctx->d_audio && !timeline_fallthrough) {
                 // Seek outside of the file -> clear audio from current position
                 clear_audio_decode_buffers(mpctx);
                 clear_audio_output_buffers(mpctx);
@@ -589,7 +589,7 @@ do_seek:
 
 static void update_avsync(struct MPContext *mpctx)
 {
-    if (!mpctx->sh_audio || !mpctx->sh_video)
+    if (!mpctx->d_audio || !mpctx->sh_video)
         return;
 
     double a_pos = playing_audio_pts(mpctx);
@@ -620,7 +620,7 @@ static void adjust_sync(struct MPContext *mpctx, double frame_time)
 {
     struct MPOpts *opts = mpctx->opts;
 
-    if (!mpctx->sh_audio || mpctx->syncing_audio)
+    if (!mpctx->d_audio || mpctx->syncing_audio)
         return;
 
     double a_pts = written_audio_pts(mpctx) - mpctx->delay;
@@ -969,7 +969,7 @@ void run_playloop(struct MPContext *mpctx)
             mpctx->stop_play = PT_NEXT_ENTRY;
     }
 
-    if (mpctx->sh_audio && !mpctx->restart_playback && !mpctx->ao->untimed) {
+    if (mpctx->d_audio && !mpctx->restart_playback && !mpctx->ao->untimed) {
         int status = fill_audio_out_buffers(mpctx, endpts);
         full_audio_buffers = status >= 0;
         // Not at audio stream EOF yet
@@ -1118,7 +1118,7 @@ void run_playloop(struct MPContext *mpctx)
         if (mpctx->restart_playback) {
             if (mpctx->sync_audio_to_video) {
                 mpctx->syncing_audio = true;
-                if (mpctx->sh_audio)
+                if (mpctx->d_audio)
                     fill_audio_out_buffers(mpctx, endpts);
                 mpctx->restart_playback = false;
             }
@@ -1135,9 +1135,9 @@ void run_playloop(struct MPContext *mpctx)
 
     video_left &= mpctx->sync_audio_to_video; // force no-video semantics
 
-    if (mpctx->sh_audio && (mpctx->restart_playback ? !video_left :
-                            mpctx->ao->untimed && (mpctx->delay <= 0 ||
-                                                   !video_left))) {
+    if (mpctx->d_audio && (mpctx->restart_playback ? !video_left :
+                           mpctx->ao->untimed && (mpctx->delay <= 0 ||
+                                                  !video_left))) {
         int status = fill_audio_out_buffers(mpctx, endpts);
         full_audio_buffers = status >= 0 && !mpctx->ao->untimed;
         // Not at audio stream EOF yet
@@ -1145,7 +1145,7 @@ void run_playloop(struct MPContext *mpctx)
     }
     if (!video_left)
         mpctx->restart_playback = false;
-    if (mpctx->sh_audio && buffered_audio == -1)
+    if (mpctx->d_audio && buffered_audio == -1)
         buffered_audio = mpctx->paused ? 0 : ao_get_delay(mpctx->ao);
 
     update_osd_msg(mpctx);
@@ -1156,7 +1156,7 @@ void run_playloop(struct MPContext *mpctx)
 
     if (!video_left && (!mpctx->paused || was_restart)) {
         double a_pos = 0;
-        if (mpctx->sh_audio) {
+        if (mpctx->d_audio) {
             a_pos = (written_audio_pts(mpctx) -
                      mpctx->opts->playback_speed * buffered_audio);
         }
@@ -1182,7 +1182,7 @@ void run_playloop(struct MPContext *mpctx)
      * should trigger after seek only, when we know there's no audio
      * buffered.
      */
-    if ((mpctx->sh_audio || mpctx->sh_video) && !audio_left && !video_left
+    if ((mpctx->d_audio || mpctx->sh_video) && !audio_left && !video_left
         && (opts->gapless_audio || buffered_audio < 0.05)
         && (!mpctx->paused || was_restart)) {
         if (end_is_chapter) {
@@ -1227,7 +1227,7 @@ void run_playloop(struct MPContext *mpctx)
 
     if (!mpctx->stop_play) {
         double audio_sleep = 9;
-        if (mpctx->sh_audio && !mpctx->paused) {
+        if (mpctx->d_audio && !mpctx->paused) {
             if (mpctx->ao->untimed) {
                 if (!video_left)
                     audio_sleep = 0;

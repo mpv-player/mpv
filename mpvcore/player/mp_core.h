@@ -199,9 +199,10 @@ typedef struct MPContext {
     struct track *current_track[STREAM_TYPE_COUNT];
 
     struct sh_stream *sh[STREAM_TYPE_COUNT];
-    struct sh_audio *sh_audio;          // same as sh[STREAM_AUDIO]->audio
     struct sh_video *sh_video;          // same as sh[STREAM_VIDEO]->video
     struct sh_sub *sh_sub;              // same as sh[STREAM_SUB]->sub
+
+    struct dec_audio *d_audio;
 
     // Uses: accessing metadata (consider ordered chapters case, where the main
     // demuxer defines metadata), or special purpose demuxers like TV.
@@ -357,7 +358,8 @@ struct track *mp_track_by_tid(struct MPContext *mpctx, enum stream_type type,
                               int tid);
 bool timeline_set_part(struct MPContext *mpctx, int i, bool force);
 double timeline_set_from_time(struct MPContext *mpctx, double pts, bool *need_reset);
-void init_demux_stream(struct MPContext *mpctx, enum stream_type type);
+struct sh_stream *init_demux_stream(struct MPContext *mpctx,
+                                    enum stream_type type);
 void cleanup_demux_stream(struct MPContext *mpctx, enum stream_type type);
 void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer);
 bool mp_remove_track(struct MPContext *mpctx, struct track *track);

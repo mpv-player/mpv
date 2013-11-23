@@ -73,8 +73,8 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     if (mask & INITIALIZED_ACODEC) {
         mpctx->initialized_flags &= ~INITIALIZED_ACODEC;
         mixer_uninit_audio(mpctx->mixer);
-        if (mpctx->sh_audio)
-            uninit_audio(mpctx->sh_audio);
+        audio_uninit(mpctx->d_audio);
+        mpctx->d_audio = NULL;
         cleanup_demux_stream(mpctx, STREAM_AUDIO);
     }
 
@@ -113,7 +113,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         mpctx->num_tracks = 0;
         for (int t = 0; t < STREAM_TYPE_COUNT; t++)
             mpctx->current_track[t] = NULL;
-        assert(!mpctx->sh_video && !mpctx->sh_audio && !mpctx->sh_sub);
+        assert(!mpctx->sh_video && !mpctx->d_audio && !mpctx->sh_sub);
         mpctx->master_demuxer = NULL;
         for (int i = 0; i < mpctx->num_sources; i++) {
             uninit_subs(mpctx->sources[i]);
@@ -252,20 +252,21 @@ static void print_file_properties(struct MPContext *mpctx)
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
                "ID_VIDEO_ASPECT=%1.4f\n", mpctx->sh_video->aspect);
     }
-    if (mpctx->sh_audio) {
+    if (mpctx->d_audio) {
+        struct sh_audio *sh_audio = mpctx->d_audio->header->audio;
         /* Assume FOURCC if all bytes >= 0x20 (' ') */
-        if (mpctx->sh_audio->format >= 0x20202020)
+        if (sh_audio->format >= 0x20202020)
             mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-                   "ID_AUDIO_FORMAT=%.4s\n", (char *)&mpctx->sh_audio->format);
+                   "ID_AUDIO_FORMAT=%.4s\n", (char *)&sh_audio->format);
         else
             mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-                   "ID_AUDIO_FORMAT=%d\n", mpctx->sh_audio->format);
+                   "ID_AUDIO_FORMAT=%d\n", sh_audio->format);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_AUDIO_BITRATE=%d\n", mpctx->sh_audio->i_bps * 8);
+               "ID_AUDIO_BITRATE=%d\n", sh_audio->i_bps * 8);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_AUDIO_RATE=%d\n", mpctx->sh_audio->samplerate);
+               "ID_AUDIO_RATE=%d\n", sh_audio->samplerate);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_AUDIO_NCH=%d\n", mpctx->sh_audio->channels.num);
+               "ID_AUDIO_NCH=%d\n", sh_audio->channels.num);
     }
     mp_msg(MSGT_IDENTIFY, MSGL_INFO,
            "ID_LENGTH=%.2f\n", get_time_length(mpctx));
@@ -304,12 +305,12 @@ static void set_demux_field(struct MPContext *mpctx, enum stream_type type,
     // redundant fields for convenience access
     switch(type) {
         case STREAM_VIDEO: mpctx->sh_video = s ? s->video : NULL; break;
-        case STREAM_AUDIO: mpctx->sh_audio = s ? s->audio : NULL; break;
         case STREAM_SUB: mpctx->sh_sub = s ? s->sub : NULL; break;
     }
 }
 
-void init_demux_stream(struct MPContext *mpctx, enum stream_type type)
+struct sh_stream *init_demux_stream(struct MPContext *mpctx,
+                                    enum stream_type type)
 {
     struct track *track = mpctx->current_track[type];
     set_demux_field(mpctx, type, track ? track->stream : NULL);
@@ -321,6 +322,7 @@ void init_demux_stream(struct MPContext *mpctx, enum stream_type type)
             demux_seek(stream->demuxer, pts, SEEK_ABSOLUTE);
         }
     }
+    return stream;
 }
 
 void cleanup_demux_stream(struct MPContext *mpctx, enum stream_type type)
@@ -1082,7 +1084,7 @@ static void play_current_file(struct MPContext *mpctx)
 
     assert(mpctx->stream == NULL);
     assert(mpctx->demuxer == NULL);
-    assert(mpctx->sh_audio == NULL);
+    assert(mpctx->d_audio == NULL);
     assert(mpctx->sh_video == NULL);
     assert(mpctx->sh_sub == NULL);
 
@@ -1229,7 +1231,7 @@ goto_reopen_demuxer: ;
 
     //==================== START PLAYING =======================
 
-    if (!mpctx->sh_video && !mpctx->sh_audio) {
+    if (!mpctx->sh_video && !mpctx->d_audio) {
         MP_FATAL(mpctx, "No video or audio streams selected.\n");
 #if HAVE_DVBIN
         if (mpctx->stream->type == STREAMTYPE_DVB) {
