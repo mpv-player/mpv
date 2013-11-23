@@ -2,6 +2,7 @@
 
 import sys, os, re
 sys.path.insert(0, os.path.join(os.getcwd(), 'waftools'))
+sys.path.insert(0, os.getcwd())
 from waflib.Configure import conf
 from waflib import Utils
 from waftools.checks.generic import *
