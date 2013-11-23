@@ -177,6 +177,7 @@ Command Line Switches
     ``-zoom``                   Inverse available as ``--video-unscaled``
     ``-panscanrange``           ``--video-zoom``, ``--video-pan-x/y``
     ``-pp``                     ``-vf=pp``
+    ``-pphelp``                 ``--vf=pp:help``
     =========================== ========================================
 
 .. note::

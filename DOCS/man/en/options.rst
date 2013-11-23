@@ -1620,9 +1620,6 @@ OPTIONS
 
         FIXME: This needs to be clarified and documented thoroughly.
 
-``--pphelp``
-    See also ``--vf=pp``.
-
 ``--priority=<prio>``
     (Windows only.)
     Set process priority for mpv according to the predefined priorities

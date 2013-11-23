@@ -153,10 +153,16 @@ static int vf_open(vf_instance_t *vf, char *args){
     return 1;
 }
 
+static void print_help(void)
+{
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", pp_help);
+}
+
 const vf_info_t vf_info_pp = {
     .description = "postprocessing",
     .name = "pp",
     .open = vf_open,
+    .print_help = print_help,
 };
 
 //===========================================================================//

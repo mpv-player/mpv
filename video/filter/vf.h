@@ -38,6 +38,7 @@ typedef struct vf_info {
     int priv_size;
     const void *priv_defaults;
     const struct m_option *options;
+    void (*print_help)(void);
 } vf_info_t;
 
 struct vf_format {

@@ -61,7 +61,6 @@ extern const m_option_t demux_rawvideo_opts[];
 extern const m_option_t cdda_opts[];
 
 extern int sws_flags;
-extern const char pp_help[];
 
 extern const char mp_help_text[];
 
@@ -490,10 +489,6 @@ const m_option_t mp_opts[] = {
                 {"vaapi", 4},
                 {"vaapi-copy", 5})),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
-
-#if HAVE_LIBPOSTPROC
-    {"pphelp", (void *) &pp_help, CONF_TYPE_PRINT, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
-#endif
 
     // scaling:
     {"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},

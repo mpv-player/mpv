@@ -250,7 +250,7 @@ Available filters are:
 
     .. note::
 
-        ``--pphelp`` shows a list of available subfilters.
+        ``--vf=pp:help`` shows a list of available subfilters.
 
     Available subfilters are:
 

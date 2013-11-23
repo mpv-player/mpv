@@ -131,6 +131,7 @@ static bool get_desc(struct m_obj_desc *dst, int index)
         .priv_defaults = vf->priv_defaults,
         .options = vf->options,
         .p = vf,
+        .print_help = vf->print_help,
     };
     return true;
 }
