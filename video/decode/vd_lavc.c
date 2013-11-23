@@ -808,6 +808,8 @@ static struct mp_image *decode_with_fallback(struct dec_video *vd,
         init_avctx(vd, decoder, NULL);
         if (ctx->avctx) {
             mpi = NULL;
+            if (vd->vf_initialized < 0)
+                vd->vf_initialized = 0;
             decode(vd, packet, flags, reordered_pts, &mpi);
             return mpi;
         }
