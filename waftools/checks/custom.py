@@ -57,8 +57,9 @@ def check_lua(ctx, dependency_identifier):
     for lua_version, pkgconfig_query in lua_versions:
        if compose_checks(
             check_pkg_config(pkgconfig_query, uselib_store=lua_version),
-            check_cc(fragment=fragment, use=[lua_version] + quvi_lib_storage))\
-                (ctx, dependency_identifier):
+            check_cc(fragment=fragment,
+                     use=[lua_version] + quvi_lib_storage,
+                     execute=True))(ctx, dependency_identifier):
             # XXX: this is a bit of a hack, ask waf developers if I can copy
             # the uselib_store to 'lua'
             ctx.mark_satisfied(lua_version)
