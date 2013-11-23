@@ -233,41 +233,6 @@ static void print_stream(struct MPContext *mpctx, struct track *t)
 static void print_file_properties(struct MPContext *mpctx)
 {
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILENAME=%s\n", mpctx->filename);
-    if (mpctx->sh_video) {
-        /* Assume FOURCC if all bytes >= 0x20 (' ') */
-        if (mpctx->sh_video->format >= 0x20202020)
-            mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-                   "ID_VIDEO_FORMAT=%.4s\n", (char *)&mpctx->sh_video->format);
-        else
-            mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-                   "ID_VIDEO_FORMAT=0x%08X\n", mpctx->sh_video->format);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_VIDEO_BITRATE=%d\n", mpctx->sh_video->i_bps * 8);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_VIDEO_WIDTH=%d\n", mpctx->sh_video->disp_w);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_VIDEO_HEIGHT=%d\n", mpctx->sh_video->disp_h);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_VIDEO_FPS=%5.3f\n", mpctx->sh_video->fps);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_VIDEO_ASPECT=%1.4f\n", mpctx->sh_video->aspect);
-    }
-    if (mpctx->d_audio) {
-        struct sh_audio *sh_audio = mpctx->d_audio->header->audio;
-        /* Assume FOURCC if all bytes >= 0x20 (' ') */
-        if (sh_audio->format >= 0x20202020)
-            mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-                   "ID_AUDIO_FORMAT=%.4s\n", (char *)&sh_audio->format);
-        else
-            mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-                   "ID_AUDIO_FORMAT=%d\n", sh_audio->format);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_AUDIO_BITRATE=%d\n", sh_audio->i_bps * 8);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_AUDIO_RATE=%d\n", sh_audio->samplerate);
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO,
-               "ID_AUDIO_NCH=%d\n", sh_audio->channels.num);
-    }
     mp_msg(MSGT_IDENTIFY, MSGL_INFO,
            "ID_LENGTH=%.2f\n", get_time_length(mpctx));
     int chapter_count = get_chapter_count(mpctx);
