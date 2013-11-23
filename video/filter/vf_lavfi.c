@@ -325,6 +325,45 @@ static int vf_open(vf_instance_t *vf, char *args)
     return 1;
 }
 
+static bool is_single_video_only(const AVFilterPad *pads)
+{
+    if (!pads)
+        return false;
+    return pads[0].name && pads[0].type == AVMEDIA_TYPE_VIDEO && !pads[1].name;
+}
+
+// Does it have exactly one video input and one video output?
+static bool is_usable(const AVFilter *filter)
+{
+    return is_single_video_only(filter->inputs) &&
+           is_single_video_only(filter->outputs);
+}
+
+static void print_help(void)
+{
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "List of libavfilter filters:\n");
+    for (const AVFilter *filter = avfilter_next(NULL); filter;
+         filter = avfilter_next(filter))
+    {
+        if (is_usable(filter)) {
+            mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %-16s %s\n",
+                   filter->name, filter->description);
+        }
+    }
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n"
+        "This lists video->video filters only. Refer to\n"
+        "\n"
+        " https://ffmpeg.org/ffmpeg-filters.html\n"
+        "\n"
+        "to see how to use each filter and what arguments each filter takes.\n"
+        "Also, be sure to quote the FFmpeg filter string properly, e.g.:\n"
+        "\n"
+        " \"--vf=lavfi=[gradfun=20:30]\"\n"
+        "\n"
+        "Otherwise, mpv and libavfilter syntax will conflict.\n"
+        "\n");
+}
+
 #define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
     OPT_STRING("graph", cfg_graph, M_OPT_MIN, .min = 1),
@@ -340,4 +379,5 @@ const vf_info_t vf_info_lavfi = {
     .priv_size = sizeof(struct vf_priv_s),
     .priv_defaults = &vf_priv_dflt,
     .options = vf_opts_fields,
+    .print_help = print_help,
 };
