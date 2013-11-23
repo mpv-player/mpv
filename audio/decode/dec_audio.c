@@ -66,9 +66,7 @@ static const struct ad_functions * const ad_drivers[] = {
 // Drop audio buffer and reinit it (after format change)
 static void reinit_audio_buffer(struct dec_audio *da)
 {
-    struct sh_audio *sh = da->header->audio;
-    mp_audio_buffer_reinit_fmt(da->decode_buffer, sh->sample_format,
-                               &sh->channels, sh->samplerate);
+    mp_audio_buffer_reinit(da->decode_buffer, &da->decoded);
     mp_audio_buffer_preallocate_min(da->decode_buffer, DECODE_BUFFER_SAMPLES);
 }
 
@@ -100,9 +98,8 @@ static int init_audio_codec(struct dec_audio *d_audio, const char *decoder)
 
     d_audio->initialized = 1;
 
-    struct sh_audio *sh = d_audio->header->audio;
-    if (mp_chmap_is_empty(&sh->channels) || !sh->samplerate ||
-        !sh->sample_format)
+    if (!d_audio->decoded.channels.num || !d_audio->decoded.rate ||
+        !d_audio->decoded.format)
     {
         mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Audio decoder did not specify "
                 "audio format!\n");
@@ -177,12 +174,12 @@ int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
                d_audio->decoder_desc);
         mp_msg(MSGT_DECAUDIO, MSGL_V,
                "AUDIO: %d Hz, %d ch, %s\n",
-               d_audio->header->audio->samplerate, d_audio->header->audio->channels.num,
-               af_fmt_to_str(d_audio->header->audio->sample_format));
+               d_audio->decoded.rate, d_audio->decoded.channels.num,
+               af_fmt_to_str(d_audio->decoded.format));
         mp_msg(MSGT_IDENTIFY, MSGL_INFO,
                "ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n" "ID_AUDIO_NCH=%d\n",
-               d_audio->i_bps * 8, d_audio->header->audio->samplerate,
-               d_audio->header->audio->channels.num);
+               d_audio->i_bps * 8, d_audio->decoded.rate,
+               d_audio->decoded.channels.num);
     } else {
         mp_msg(MSGT_DECAUDIO, MSGL_ERR,
                "Failed to initialize an audio decoder for codec '%s'.\n",
@@ -269,11 +266,7 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
         // Commit the data just read as valid data
         mp_audio_buffer_finish_write(da->decode_buffer, buffer.samples);
         // Format change
-        struct sh_audio *sh = da->header->audio;
-        if (sh->samplerate != config.rate ||
-            !mp_chmap_equals(&sh->channels, &config.channels) ||
-            sh->sample_format != config.format)
-        {
+        if (!mp_audio_config_equals(&da->decoded, &config)) {
             // If there are still samples left in the buffer, let them drain
             // first, and don't signal a format change to the caller yet.
             if (mp_audio_buffer_samples(da->decode_buffer) > 0)

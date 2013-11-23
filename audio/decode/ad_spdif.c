@@ -116,57 +116,59 @@ static int init(struct dec_audio *da, const char *decoder)
     AVDictionary *format_opts = NULL;
 
     int num_channels = 0;
-    struct sh_audio *sh = da->header->audio;
+    int sample_format = 0;
+    int samplerate = 0;
     switch (stream->codec->codec_id) {
     case AV_CODEC_ID_AAC:
         spdif_ctx->iec61937_packet_size = 16384;
-        sh->sample_format               = AF_FORMAT_IEC61937_LE;
-        sh->samplerate                  = 48000;
+        sample_format                   = AF_FORMAT_IEC61937_LE;
+        samplerate                      = 48000;
         num_channels                    = 2;
         break;
     case AV_CODEC_ID_AC3:
         spdif_ctx->iec61937_packet_size = 6144;
-        sh->sample_format               = AF_FORMAT_AC3_LE;
-        sh->samplerate                  = 48000;
+        sample_format                   = AF_FORMAT_AC3_LE;
+        samplerate                      = 48000;
         num_channels                    = 2;
         break;
     case AV_CODEC_ID_DTS:
-        if (sh->opts->dtshd) {
+        if (da->opts->dtshd) {
             av_dict_set(&format_opts, "dtshd_rate", "768000", 0); // 4*192000
             spdif_ctx->iec61937_packet_size = 32768;
-            sh->sample_format               = AF_FORMAT_IEC61937_LE;
-            sh->samplerate                  = 192000; // DTS core require 48000
+            sample_format                   = AF_FORMAT_IEC61937_LE;
+            samplerate                      = 192000;
             num_channels                    = 2*4;
         } else {
             spdif_ctx->iec61937_packet_size = 32768;
-            sh->sample_format               = AF_FORMAT_AC3_LE;
-            sh->samplerate                  = 48000;
+            sample_format                   = AF_FORMAT_AC3_LE;
+            samplerate                      = 48000;
             num_channels                    = 2;
         }
         break;
     case AV_CODEC_ID_EAC3:
         spdif_ctx->iec61937_packet_size = 24576;
-        sh->sample_format               = AF_FORMAT_IEC61937_LE;
-        sh->samplerate                  = 192000;
+        sample_format                   = AF_FORMAT_IEC61937_LE;
+        samplerate                      = 192000;
         num_channels                    = 2;
         break;
     case AV_CODEC_ID_MP3:
         spdif_ctx->iec61937_packet_size = 4608;
-        sh->sample_format               = AF_FORMAT_MPEG2;
-        sh->samplerate                  = 48000;
+        sample_format                   = AF_FORMAT_MPEG2;
+        samplerate                      = 48000;
         num_channels                    = 2;
         break;
     case AV_CODEC_ID_TRUEHD:
         spdif_ctx->iec61937_packet_size = 61440;
-        sh->sample_format               = AF_FORMAT_IEC61937_LE;
-        sh->samplerate                  = 192000;
+        sample_format                   = AF_FORMAT_IEC61937_LE;
+        samplerate                      = 192000;
         num_channels                    = 8;
         break;
     default:
         abort();
     }
-    if (num_channels)
-        mp_chmap_from_channels(&sh->channels, num_channels);
+    mp_audio_set_num_channels(&da->decoded, num_channels);
+    mp_audio_set_format(&da->decoded, sample_format);
+    da->decoded.rate = samplerate;
 
     if (avformat_write_header(lavf_ctx, &format_opts) < 0) {
         mp_msg(MSGT_DECAUDIO, MSGL_FATAL,
@@ -190,7 +192,7 @@ static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxle
     struct spdifContext *spdif_ctx = da->priv;
     AVFormatContext     *lavf_ctx  = spdif_ctx->lavf_ctx;
 
-    int sstride = 2 * da->header->audio->channels.num;
+    int sstride = 2 * da->decoded.channels.num;
     assert(sstride == buffer->sstride);
 
     if (maxlen * sstride < spdif_ctx->iec61937_packet_size)

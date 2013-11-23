@@ -151,8 +151,8 @@ static int set_format(struct dec_audio *da)
     int encoding;
     ret = mpg123_getformat(con->handle, &rate, &channels, &encoding);
     if (ret == MPG123_OK) {
-        mp_chmap_from_channels(&da->header->audio->channels, channels);
-        da->header->audio->samplerate = rate;
+        mp_audio_set_num_channels(&da->decoded, channels);
+        da->decoded.rate = rate;
         int af = mpg123_format_to_af(encoding);
         if (!af) {
             /* This means we got a funny custom build of libmpg123 that only supports an unknown format. */
@@ -160,7 +160,7 @@ static int set_format(struct dec_audio *da)
                    "Bad encoding from mpg123: %i.\n", encoding);
             return MPG123_ERR;
         }
-        da->header->audio->sample_format = af;
+        mp_audio_set_format(&da->decoded, af);
         con->sample_size = channels * (af_fmt2bits(af) / 8);
         con->new_format = 0;
     }
@@ -308,9 +308,7 @@ static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxle
             return -1;
     }
 
-    if (da->header->audio->samplerate != buffer->rate ||
-        !mp_chmap_equals(&da->header->audio->channels, &buffer->channels) ||
-        da->header->audio->sample_format != buffer->format)
+    if (!mp_audio_config_equals(&da->decoded, buffer))
         return 0;
 
     size_t got_now = 0;

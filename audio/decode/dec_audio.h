@@ -20,6 +20,7 @@
 #define MPLAYER_DEC_AUDIO_H
 
 #include "audio/chmap.h"
+#include "audio/audio.h"
 #include "demux/stheader.h"
 
 struct mp_audio_buffer;
@@ -34,7 +35,10 @@ struct dec_audio {
     int initialized;
     char *decoder_desc;
     // set by decoder
-    int i_bps;          // input bitrate
+    struct mp_audio decoded;    // format of decoded audio (no data, temporarily
+                                // different from decode_buffer during format
+                                // changes)
+    int i_bps;                  // input bitrate, can change with VBR sources
     // last known pts value in output from decoder
     double pts;
     // number of samples output by decoder after last known pts

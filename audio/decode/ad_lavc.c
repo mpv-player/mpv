@@ -161,9 +161,9 @@ static int setup_format(struct dec_audio *da)
             lavc_chmap = sh_audio->channels;
     }
 
-    sh_audio->channels = lavc_chmap;
-    sh_audio->samplerate = samplerate;
-    sh_audio->sample_format = sample_format;
+    mp_audio_set_channels(&da->decoded, &lavc_chmap);
+    mp_audio_set_format(&da->decoded, sample_format);
+    da->decoded.rate = samplerate;
     return 0;
 }
 
@@ -366,9 +366,7 @@ static int decode_new_packet(struct dec_audio *da)
         return -1;
 
     priv->frame.samples = priv->avframe->nb_samples;
-    mp_audio_set_format(&priv->frame, da->header->audio->sample_format);
-    mp_audio_set_channels(&priv->frame, &da->header->audio->channels);
-    priv->frame.rate = da->header->audio->samplerate;
+    mp_audio_copy_config(&priv->frame, &da->decoded);
     for (int n = 0; n < priv->frame.num_planes; n++)
         priv->frame.planes[n] = priv->avframe->data[n];
 

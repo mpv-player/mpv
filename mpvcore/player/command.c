@@ -48,6 +48,7 @@
 #include "video/out/vo.h"
 #include "video/csputils.h"
 #include "audio/mixer.h"
+#include "audio/audio_buffer.h"
 #include "audio/out/ao.h"
 #include "audio/filter/af.h"
 #include "video/decode/dec_video.h"
@@ -868,15 +869,17 @@ static int mp_property_audio_bitrate(m_option_t *prop, int action,
 static int mp_property_samplerate(m_option_t *prop, int action, void *arg,
                                   MPContext *mpctx)
 {
-    if (!mpctx->d_audio)
+    struct mp_audio fmt = {0};
+    if (mpctx->d_audio)
+        mp_audio_buffer_get_format(mpctx->d_audio->decode_buffer, &fmt);
+    if (!fmt.rate)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        *(char **)arg = talloc_asprintf(NULL, "%d kHz",
-                                        mpctx->d_audio->header->audio->samplerate / 1000);
+        *(char **)arg = talloc_asprintf(NULL, "%d kHz", fmt.rate / 1000);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(int *)arg = mpctx->d_audio->header->audio->samplerate;
+        *(int *)arg = fmt.rate;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;
@@ -886,14 +889,17 @@ static int mp_property_samplerate(m_option_t *prop, int action, void *arg,
 static int mp_property_channels(m_option_t *prop, int action, void *arg,
                                 MPContext *mpctx)
 {
-    if (!mpctx->d_audio)
+    struct mp_audio fmt = {0};
+    if (mpctx->d_audio)
+        mp_audio_buffer_get_format(mpctx->d_audio->decode_buffer, &fmt);
+    if (!fmt.channels.num)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_PRINT:
-        *(char **) arg = mp_chmap_to_str(&mpctx->d_audio->header->audio->channels);
+        *(char **) arg = mp_chmap_to_str(&fmt.channels);
         return M_PROPERTY_OK;
     case M_PROPERTY_GET:
-        *(int *)arg = mpctx->d_audio->header->audio->channels.num;
+        *(int *)arg = fmt.channels.num;
         return M_PROPERTY_OK;
     }
     return M_PROPERTY_NOT_IMPLEMENTED;

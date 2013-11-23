@@ -87,8 +87,6 @@ struct sh_stream {
 
 typedef struct sh_audio {
     SH_COMMON
-    // output format:
-    int sample_format;
     int samplerate;
     struct mp_chmap channels;
     int i_bps; // == bitrate  (compressed bytes/sec)
