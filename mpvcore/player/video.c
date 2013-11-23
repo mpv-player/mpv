@@ -96,7 +96,7 @@ int reinit_video_chain(struct MPContext *mpctx)
         goto no_video;
 
     MP_VERBOSE(mpctx, "[V] fourcc:0x%X  size:%dx%d  fps:%5.3f\n",
-               sh->video->format,
+               sh->format,
                sh->video->disp_w, sh->video->disp_h,
                sh->video->fps);
     if (opts->force_fps)

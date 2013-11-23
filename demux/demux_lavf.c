@@ -394,7 +394,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
             break;
         sh_audio_t *sh_audio = sh->audio;
 
-        sh_audio->format = codec->codec_tag;
+        sh->format = codec->codec_tag;
 
         // probably unneeded
         mp_chmap_from_channels(&sh_audio->channels, codec->channels);
@@ -419,7 +419,7 @@ static void handle_stream(demuxer_t *demuxer, int i)
             sh->attached_picture->keyframe = true;
         }
 
-        sh_video->format = codec->codec_tag;
+        sh->format = codec->codec_tag;
         sh_video->disp_w = codec->width;
         sh_video->disp_h = codec->height;
         /* Try to make up some frame rate value, even if it's not reliable.

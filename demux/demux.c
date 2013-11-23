@@ -247,19 +247,16 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
     switch (sh->type) {
         case STREAM_VIDEO: {
             struct sh_video *sht = talloc_zero(demuxer, struct sh_video);
-            sht->gsh = sh;
             sh->video = sht;
             break;
         }
         case STREAM_AUDIO: {
             struct sh_audio *sht = talloc_zero(demuxer, struct sh_audio);
-            sht->gsh = sh;
             sh->audio = sht;
             break;
         }
         case STREAM_SUB: {
             struct sh_sub *sht = talloc_zero(demuxer, struct sh_sub);
-            sht->gsh = sh;
             sh->sub = sht;
             break;
         }

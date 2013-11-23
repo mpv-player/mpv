@@ -196,7 +196,7 @@ static int demux_open_mf(demuxer_t *demuxer, enum demux_check check)
     struct sh_stream *sh = new_sh_stream(demuxer, STREAM_VIDEO);
     sh_video = sh->video;
 
-    sh_video->gsh->codec = codec;
+    sh->codec = codec;
     sh_video->disp_w = 0;
     sh_video->disp_h = 0;
     sh_video->fps = mf_fps;

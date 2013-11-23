@@ -357,18 +357,21 @@ static const char *lookup_tag(const struct mp_codec_tag *mp_table,
     return id == AV_CODEC_ID_NONE ? NULL : mp_codec_from_av_codec_id(id);
 }
 
-void mp_set_video_codec_from_tag(struct sh_video *sh)
+void mp_set_codec_from_tag(struct sh_stream *sh)
 {
-    sh->gsh->codec = lookup_tag(mp_video_codec_tags,
-                                avformat_get_riff_video_tags(),
-                                sh->format);
-}
-
-void mp_set_audio_codec_from_tag(struct sh_audio *sh)
-{
-    sh->gsh->codec = lookup_tag(mp_audio_codec_tags,
-                                avformat_get_riff_audio_tags(),
-                                sh->format);
+    switch (sh->type) {
+    case STREAM_VIDEO:
+        sh->codec = lookup_tag(mp_video_codec_tags,
+                               avformat_get_riff_video_tags(),
+                               sh->format);
+        break;
+    case STREAM_AUDIO:
+        sh->codec = lookup_tag(mp_audio_codec_tags,
+                               avformat_get_riff_audio_tags(),
+                               sh->format);
+        break;
+    default: ;
+    }
 }
 
 uint32_t mp_video_fourcc_alias(uint32_t fourcc)

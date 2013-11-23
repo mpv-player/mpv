@@ -724,10 +724,10 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
     int fourcc;
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_FORMAT, &fourcc);
     if (fourcc == MP_FOURCC_MJPEG) {
-        sh_video->gsh->codec = "mjpeg";
+        sh_v->codec = "mjpeg";
     } else {
-        sh_video->gsh->codec = "rawvideo";
-        sh_video->format = fourcc;
+        sh_v->codec = "rawvideo";
+        sh_v->format = fourcc;
     }
 
     /* set FPS and FRAMETIME */
@@ -799,8 +799,8 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
                    &nchannels);
         mp_chmap_from_channels(&sh_audio->channels, nchannels);
 
-        sh_audio->gsh->codec = "mp-pcm";
-	sh_audio->format = audio_format;
+        sh_a->codec = "mp-pcm";
+	sh_a->format = audio_format;
 
         int samplesize = af_fmt2bits(audio_format) / 8;
 
@@ -809,7 +809,7 @@ static int demux_open_tv(demuxer_t *demuxer, enum demux_check check)
 
 	// emulate WF for win32 codecs:
 	sh_audio->wf = talloc_zero(sh_audio, MP_WAVEFORMATEX);
-	sh_audio->wf->wFormatTag = sh_audio->format;
+	sh_audio->wf->wFormatTag = sh_a->format;
 	sh_audio->wf->nChannels = sh_audio->channels.num;
 	sh_audio->wf->wBitsPerSample = samplesize * 8;
 	sh_audio->wf->nSamplesPerSec = sh_audio->samplerate;

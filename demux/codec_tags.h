@@ -22,10 +22,8 @@
 
 uint32_t mp_video_fourcc_alias(uint32_t fourcc);
 
-struct sh_video;
-struct sh_audio;
+struct sh_stream;
 
-void mp_set_audio_codec_from_tag(struct sh_audio *sh);
-void mp_set_video_codec_from_tag(struct sh_video *sh);
+void mp_set_codec_from_tag(struct sh_stream *sh);
 
 #endif

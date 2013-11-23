@@ -52,6 +52,9 @@ struct sh_stream {
     // E.g. "h264" (usually corresponds to AVCodecDescriptor.name)
     const char *codec;
 
+    // Usually a FourCC, exact meaning depends on codec.
+    unsigned int format;
+
     // Codec specific header data (set by demux_lavf.c)
     // Other demuxers use sh_audio->wf and sh_video->bih instead.
     struct AVCodecContext *lav_headers;
@@ -68,9 +71,6 @@ struct sh_stream {
 };
 
 typedef struct sh_audio {
-    struct sh_stream *gsh;
-    /* usually a FourCC, exact meaning depends on gsh->codec */
-    unsigned int format;
     int samplerate;
     struct mp_chmap channels;
     int i_bps; // == bitrate  (compressed bytes/sec)
@@ -82,9 +82,6 @@ typedef struct sh_audio {
 } sh_audio_t;
 
 typedef struct sh_video {
-    struct sh_stream *gsh;
-    /* usually a FourCC, exact meaning depends on gsh->codec */
-    unsigned int format;
     float fps;            // frames per second (set only if constant fps)
     float aspect;         // aspect ratio stored in the file (for prescaling)
     int i_bps;            // == bitrate  (compressed bytes/sec)
@@ -93,7 +90,6 @@ typedef struct sh_video {
 } sh_video_t;
 
 typedef struct sh_sub {
-    struct sh_stream *gsh;
     unsigned char *extradata;   // extra header data passed from demuxer
     int extradata_len;
     int frame_based;            // timestamps are frame-based

@@ -183,16 +183,17 @@ static int init(struct dec_audio *da, const char *decoder)
     struct ad_lavc_param *opts = &mpopts->ad_lavc_param;
     AVCodecContext *lavc_context;
     AVCodec *lavc_codec;
-    struct sh_audio *sh_audio = da->header->audio;
+    struct sh_stream *sh = da->header;
+    struct sh_audio *sh_audio = sh->audio;
 
     struct priv *ctx = talloc_zero(NULL, struct priv);
     da->priv = ctx;
 
     if (sh_audio->wf && strcmp(decoder, "pcm") == 0) {
-        decoder = find_pcm_decoder(tag_map, sh_audio->format,
+        decoder = find_pcm_decoder(tag_map, sh->format,
                                    sh_audio->wf->wBitsPerSample);
     } else if (sh_audio->wf && strcmp(decoder, "mp-pcm") == 0) {
-        decoder = find_pcm_decoder(af_map, sh_audio->format, 0);
+        decoder = find_pcm_decoder(af_map, sh->format, 0);
         ctx->force_channel_map = true;
     }
 
@@ -229,7 +230,7 @@ static int init(struct dec_audio *da, const char *decoder)
         }
     }
 
-    lavc_context->codec_tag = sh_audio->format;
+    lavc_context->codec_tag = sh->format;
     lavc_context->sample_rate = sh_audio->samplerate;
     lavc_context->bit_rate = sh_audio->i_bps * 8;
     lavc_context->channel_layout = mp_chmap_to_lavc(&sh_audio->channels);
@@ -247,8 +248,8 @@ static int init(struct dec_audio *da, const char *decoder)
                lavc_context->extradata_size);
     }
 
-    if (sh_audio->gsh->lav_headers)
-        mp_copy_lav_codec_headers(lavc_context, sh_audio->gsh->lav_headers);
+    if (sh->lav_headers)
+        mp_copy_lav_codec_headers(lavc_context, sh->lav_headers);
 
     /* open it */
     if (avcodec_open2(lavc_context, lavc_codec, NULL) < 0) {

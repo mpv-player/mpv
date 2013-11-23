@@ -454,16 +454,16 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     // Do this after the above avopt handling in case it changes values
     ctx->skip_frame = avctx->skip_frame;
 
-    avctx->codec_tag = sh->video->format;
+    avctx->codec_tag = sh->format;
     avctx->coded_width  = sh->video->disp_w;
     avctx->coded_height = sh->video->disp_h;
 
     // demux_mkv
     if (sh->video->bih)
-        set_from_bih(avctx, sh->video->format, sh->video->bih);
+        set_from_bih(avctx, sh->format, sh->video->bih);
 
     if (mp_rawvideo) {
-        avctx->pix_fmt = imgfmt2pixfmt(sh->video->format);
+        avctx->pix_fmt = imgfmt2pixfmt(sh->format);
         avctx->codec_tag = 0;
     }
 

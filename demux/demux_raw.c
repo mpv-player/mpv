@@ -87,8 +87,8 @@ static int demux_rawaudio_open(demuxer_t *demuxer, enum demux_check check)
 
     sh = new_sh_stream(demuxer, STREAM_AUDIO);
     sh_audio = sh->audio;
-    sh_audio->gsh->codec = "mp-pcm";
-    sh_audio->format = aformat;
+    sh->codec = "mp-pcm";
+    sh->format = aformat;
     sh_audio->wf = w = talloc_zero(sh, MP_WAVEFORMATEX);
     w->wFormatTag = 0;
     sh_audio->channels = channels;
@@ -175,8 +175,8 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
 
     sh = new_sh_stream(demuxer, STREAM_VIDEO);
     sh_video = sh->video;
-    sh_video->gsh->codec = decoder;
-    sh_video->format = imgfmt;
+    sh->codec = decoder;
+    sh->format = imgfmt;
     sh_video->fps = fps;
     sh_video->disp_w = width;
     sh_video->disp_h = height;
