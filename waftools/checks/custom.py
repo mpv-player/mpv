@@ -24,19 +24,22 @@ def check_iconv(ctx, dependency_identifier):
     return check_libs(libs, checkfn)(ctx, dependency_identifier)
 
 def check_lua(ctx, dependency_identifier):
-    if 'libquvi4' in ctx.env.satisfied_deps:
+    if ctx.dependency_satisfied('libquvi4'):
+        quvi_lib_storage = [ 'libquvi4' ]
         additional_lua_test_header = '#include <quvi/quvi.h>'
         additional_lua_test_code   = load_fragment('lua_libquvi4.c')
-    elif 'libquvi9' in ctx.env.satisfied_deps:
+    elif ctx.dependency_satisfied('libquvi9'):
+        quvi_lib_storage = [ 'libquvi9' ]
         additional_lua_test_header = '#include <quvi.h>'
         additional_lua_test_code   = load_fragment('lua_libquvi9.c')
     else:
+        quvi_lib_storage = []
         additional_lua_test_header = ''
         additional_lua_test_code   = ''
 
     fragment = load_fragment('lua.c').format(
-        additional_lua_test_header='',
-        additional_lua_test_code='')
+        additional_lua_test_header=additional_lua_test_header,
+        additional_lua_test_code=additional_lua_test_code)
 
     lua_versions = [
         ( '51',     'lua >= 5.1.0 lua < 5.2.0'),
@@ -54,7 +57,7 @@ def check_lua(ctx, dependency_identifier):
     for lua_version, pkgconfig_query in lua_versions:
        if compose_checks(
             check_pkg_config(pkgconfig_query, uselib_store=lua_version),
-            check_cc(fragment=fragment, use=lua_version))\
+            check_cc(fragment=fragment, use=[lua_version] + quvi_lib_storage))\
                 (ctx, dependency_identifier):
             # XXX: this is a bit of a hack, ask waf developers if I can copy
             # the uselib_store to 'lua'
