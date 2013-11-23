@@ -264,7 +264,6 @@ SOURCES = audio/audio.c \
           video/mp_image_pool.c \
           video/sws_utils.c \
           video/decode/dec_video.c \
-          video/decode/vd.c \
           video/decode/vd_lavc.c \
           video/filter/vf.c \
           video/filter/pullup.c \
