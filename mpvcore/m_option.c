@@ -2068,9 +2068,10 @@ static int get_obj_param(bstr opt_name, bstr obj_name, struct m_config *config,
 // If config is NULL, all parameters are accepted without checking.
 // _ret set to NULL can be used for checking-only.
 // flags can contain any M_SETOPT_* flag.
-int m_obj_parse_sub_config(struct bstr opt_name, struct bstr name,
-                           struct bstr *pstr, struct m_config *config,
-                           int flags, char ***ret)
+static int m_obj_parse_sub_config(struct bstr opt_name, struct bstr name,
+                                  struct bstr *pstr, struct m_config *config,
+                                  int flags, void (*print_help_fn)(void),
+                                  char ***ret)
 {
     int nold = 0;
     char **args = NULL;
@@ -2120,6 +2121,8 @@ int m_obj_parse_sub_config(struct bstr opt_name, struct bstr name,
 
 print_help: ;
     if (config) {
+        if (print_help_fn)
+            print_help_fn();
         m_config_print_option_list(config);
     } else {
         mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %.*s doesn't exist.\n",
@@ -2179,7 +2182,7 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
         struct m_config *config = m_config_from_obj_desc_noalloc(NULL, &desc);
         bstr s = bstr0(desc.init_options);
         m_obj_parse_sub_config(opt, str, &s, config,
-                               M_SETOPT_CHECK_ONLY, &plist);
+                               M_SETOPT_CHECK_ONLY, NULL, &plist);
         assert(s.len == 0);
         talloc_free(config);
     }
@@ -2192,9 +2195,13 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
             bstr param = bstr_splice(*pstr, 0, next);
             *pstr = bstr_cut(*pstr, next);
             if (!bstrcmp0(param, "help")) {
-                mp_msg(MSGT_CFGPARSER, MSGL_WARN,
-                       "Option %.*s: %.*s has no option description.\n",
-                       BSTR_P(opt), BSTR_P(str));
+                if (desc.print_help) {
+                    desc.print_help();
+                } else {
+                    mp_msg(MSGT_CFGPARSER, MSGL_WARN,
+                           "Option %.*s: %.*s has no option description.\n",
+                           BSTR_P(opt), BSTR_P(str));
+                }
                 return M_OPT_EXIT - 1;
             }
             if (_ret) {
@@ -2207,7 +2214,7 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
             if (!skip)
                 config = m_config_from_obj_desc_noalloc(NULL, &desc);
             r = m_obj_parse_sub_config(opt, str, pstr, config,
-                                       M_SETOPT_CHECK_ONLY,
+                                       M_SETOPT_CHECK_ONLY, desc.print_help,
                                        _ret ? &plist : NULL);
             talloc_free(config);
             if (r < 0)

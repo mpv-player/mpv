@@ -110,8 +110,10 @@ struct m_obj_desc {
     // This member is usually set by m_obj_list_find() only, and read by the
     // option parser. It's not used anywhere else.
     const char *init_options;
-    // Don't list entries with "help"
+    // Don't list entry with "help"
     bool hidden;
+    // Callback to print custom help if "help" is passed
+    void (*print_help)(void);
 };
 
 // Extra definition needed for \ref m_option_type_obj_settings_list options.
@@ -149,10 +151,6 @@ typedef struct m_obj_settings {
  *  the available object types.
  */
 extern const m_option_type_t m_option_type_obj_settings_list;
-
-int m_obj_parse_sub_config(struct bstr opt_name, struct bstr name,
-                           struct bstr *pstr, struct m_config *config,
-                           int flags, char ***ret);
 
 struct m_opt_choice_alternatives {
     char *name;
