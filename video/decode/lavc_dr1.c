@@ -42,6 +42,7 @@
 #include "config.h"
 
 #include "lavc.h"
+#include "video/decode/dec_video.h"
 
 #if HAVE_PTHREADS
 #include <pthread.h>

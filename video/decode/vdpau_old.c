@@ -31,6 +31,7 @@
 #include "video/fmt-conversion.h"
 #include "video/vdpau.h"
 #include "video/hwdec.h"
+#include "video/decode/dec_video.h"
 
 struct priv {
     struct mp_vdpau_ctx        *mpvdp;
