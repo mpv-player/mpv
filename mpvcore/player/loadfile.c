@@ -99,8 +99,9 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
 
     if (mask & INITIALIZED_VCODEC) {
         mpctx->initialized_flags &= ~INITIALIZED_VCODEC;
-        if (mpctx->sh_video)
-            uninit_video(mpctx->sh_video);
+        if (mpctx->d_video)
+            video_uninit(mpctx->d_video);
+        mpctx->d_video = NULL;
         cleanup_demux_stream(mpctx, STREAM_VIDEO);
         mpctx->sync_audio_to_video = false;
     }
@@ -113,7 +114,7 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         mpctx->num_tracks = 0;
         for (int t = 0; t < STREAM_TYPE_COUNT; t++)
             mpctx->current_track[t] = NULL;
-        assert(!mpctx->sh_video && !mpctx->d_audio && !mpctx->sh_sub);
+        assert(!mpctx->d_video && !mpctx->d_audio && !mpctx->sh_sub);
         mpctx->master_demuxer = NULL;
         for (int i = 0; i < mpctx->num_sources; i++) {
             uninit_subs(mpctx->sources[i]);
@@ -269,7 +270,6 @@ static void set_demux_field(struct MPContext *mpctx, enum stream_type type,
     mpctx->sh[type] = s;
     // redundant fields for convenience access
     switch(type) {
-        case STREAM_VIDEO: mpctx->sh_video = s ? s->video : NULL; break;
         case STREAM_SUB: mpctx->sh_sub = s ? s->sub : NULL; break;
     }
 }
@@ -348,7 +348,7 @@ bool timeline_set_part(struct MPContext *mpctx, int i, bool force)
     if (n->source == p->source && !force)
         return false;
     enum stop_play_reason orig_stop_play = mpctx->stop_play;
-    if (!mpctx->sh_video && mpctx->stop_play == KEEP_PLAYING)
+    if (!mpctx->d_video && mpctx->stop_play == KEEP_PLAYING)
         mpctx->stop_play = AT_END_OF_FILE;  // let audio uninit drain data
     uninit_player(mpctx, INITIALIZED_VCODEC | (mpctx->opts->fixed_vo ? 0 : INITIALIZED_VO) | (mpctx->opts->gapless_audio ? 0 : INITIALIZED_AO) | INITIALIZED_ACODEC | INITIALIZED_SUB);
     mpctx->stop_play = orig_stop_play;
@@ -1050,7 +1050,7 @@ static void play_current_file(struct MPContext *mpctx)
     assert(mpctx->stream == NULL);
     assert(mpctx->demuxer == NULL);
     assert(mpctx->d_audio == NULL);
-    assert(mpctx->sh_video == NULL);
+    assert(mpctx->d_video == NULL);
     assert(mpctx->sh_sub == NULL);
 
     char *stream_filename = mpctx->filename;
@@ -1189,14 +1189,14 @@ goto_reopen_demuxer: ;
 
     //================ SETUP STREAMS ==========================
 
-    if (opts->force_fps && mpctx->sh_video) {
-        mpctx->sh_video->fps = opts->force_fps;
-        MP_INFO(mpctx, "FPS forced to be %5.3f.\n", mpctx->sh_video->fps);
+    if (opts->force_fps && mpctx->d_video) {
+        mpctx->d_video->header->video->fps = opts->force_fps;
+        MP_INFO(mpctx, "FPS forced to be %5.3f.\n", mpctx->d_video->header->video->fps);
     }
 
     //==================== START PLAYING =======================
 
-    if (!mpctx->sh_video && !mpctx->d_audio) {
+    if (!mpctx->d_video && !mpctx->d_audio) {
         MP_FATAL(mpctx, "No video or audio streams selected.\n");
 #if HAVE_DVBIN
         if (mpctx->stream->type == STREAMTYPE_DVB) {

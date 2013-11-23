@@ -63,30 +63,14 @@ struct sh_stream {
     // stream is a picture (such as album art)
     struct demux_packet *attached_picture;
 
-    // Human readable description of the running decoder, or NULL
-    char *decoder_desc;
-
-    // shouldn't exist type of stuff
-    struct MPOpts *opts;
-
     // Internal to demux.c
     struct demux_stream *ds;
 };
 
-#define SH_COMMON                                                       \
-    struct sh_stream *gsh;                                              \
-    struct MPOpts *opts;                                                \
-    /* usually a FourCC, exact meaning depends on gsh->format */        \
-    unsigned int format;                                                \
-    int initialized;                                                    \
-    /* audio: last known pts value in output from decoder               \
-     * video: predicted/interpolated PTS of the current frame */        \
-    double pts;                                                         \
-    /* decoder context */                                               \
-    void *context;                                                      \
-
 typedef struct sh_audio {
-    SH_COMMON
+    struct sh_stream *gsh;
+    /* usually a FourCC, exact meaning depends on gsh->codec */
+    unsigned int format;
     int samplerate;
     struct mp_chmap channels;
     int i_bps; // == bitrate  (compressed bytes/sec)
@@ -98,37 +82,18 @@ typedef struct sh_audio {
 } sh_audio_t;
 
 typedef struct sh_video {
-    SH_COMMON
-    float next_frame_time;
-    double last_pts;
-    double buffered_pts[32];
-    int num_buffered_pts;
-    double codec_reordered_pts;
-    double prev_codec_reordered_pts;
-    int num_reordered_pts_problems;
-    double sorted_pts;
-    double prev_sorted_pts;
-    int num_sorted_pts_problems;
-    int pts_assoc_mode;
-    // output format: (set by demuxer)
+    struct sh_stream *gsh;
+    /* usually a FourCC, exact meaning depends on gsh->codec */
+    unsigned int format;
     float fps;            // frames per second (set only if constant fps)
     float aspect;         // aspect ratio stored in the file (for prescaling)
-    float stream_aspect;  // aspect ratio in media headers (DVD IFO files)
     int i_bps;            // == bitrate  (compressed bytes/sec)
-    int disp_w, disp_h;   // display size (filled by demuxer or decoder)
-    // output driver/filters: (set by libmpcodecs core)
-    struct vf_instance *vfilter;  // video filter chain
-    const struct vd_functions *vd_driver;
-    int vf_initialized;   // -1 failed, 0 not done, 1 done
-    long vf_reconfig_count; // incremented each mpcodecs_reconfig_vo() call
-    struct mp_image_params *vf_input; // video filter input params
-    struct mp_hwdec_info *hwdec_info; // video output hwdec handles
-    // win32-compatible codec parameters:
+    int disp_w, disp_h;   // display size
     MP_BITMAPINFOHEADER *bih;
 } sh_video_t;
 
 typedef struct sh_sub {
-    SH_COMMON
+    struct sh_stream *gsh;
     unsigned char *extradata;   // extra header data passed from demuxer
     int extradata_len;
     int frame_based;            // timestamps are frame-based

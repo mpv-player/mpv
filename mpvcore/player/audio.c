@@ -36,6 +36,7 @@
 #include "audio/filter/af.h"
 #include "audio/out/ao.h"
 #include "demux/demux.h"
+#include "video/decode/dec_video.h"
 
 #include "mp_core.h"
 
@@ -302,7 +303,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
         if (hrseek)
             ptsdiff = written_pts - mpctx->hrseek_pts;
         else
-            ptsdiff = written_pts - mpctx->sh_video->pts - mpctx->delay
+            ptsdiff = written_pts - mpctx->d_video->pts - mpctx->delay
                       - mpctx->audio_delay;
         samples = ptsdiff * real_samplerate;
 
@@ -376,7 +377,7 @@ int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
         playsize = ao_get_space(ao);
 
     // Coming here with hrseek_active still set means audio-only
-    if (!mpctx->sh_video || !mpctx->sync_audio_to_video)
+    if (!mpctx->d_video || !mpctx->sync_audio_to_video)
         mpctx->syncing_audio = false;
     if (!opts->initial_audio_sync || !modifiable_audio_format) {
         mpctx->syncing_audio = false;

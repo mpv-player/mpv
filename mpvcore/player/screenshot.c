@@ -315,8 +315,8 @@ static struct mp_image *screenshot_get(struct MPContext *mpctx, int mode)
         struct voctrl_screenshot_args args =
                             { .full_window = (mode == MODE_FULL_WINDOW) };
 
-        if (mpctx->sh_video && mpctx->sh_video->vfilter) {
-            struct vf_instance *vfilter = mpctx->sh_video->vfilter;
+        if (mpctx->d_video && mpctx->d_video->vfilter) {
+            struct vf_instance *vfilter = mpctx->d_video->vfilter;
             vfilter->control(vfilter, VFCTRL_SCREENSHOT, &args);
         }
 

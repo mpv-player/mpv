@@ -20,24 +20,57 @@
 #define MPLAYER_DEC_VIDEO_H
 
 #include "demux/stheader.h"
+#include "video/hwdec.h"
+#include "video/mp_image.h"
 
 struct osd_state;
 struct mp_decoder_list;
 
-struct mp_decoder_list *mp_video_decoder_list(void);
+struct dec_video {
+    struct MPOpts *opts;
+    struct vf_instance *vfilter;  // video filter chain
+    const struct vd_functions *vd_driver;
+    int vf_initialized;   // -1 failed, 0 not done, 1 done
+    long vf_reconfig_count; // incremented each mpcodecs_reconfig_vo() call
+    struct mp_image_params *vf_input; // video filter input params
+    struct mp_hwdec_info *hwdec_info; // video output hwdec handles
+    int initialized;
+    struct sh_stream *header;
 
-int init_best_video_codec(sh_video_t *sh_video, char* video_decoders);
-void uninit_video(sh_video_t *sh_video);
+    char *decoder_desc;
+
+    void *priv;
+
+    float next_frame_time;
+    double last_pts;
+    double buffered_pts[32];
+    int num_buffered_pts;
+    double codec_reordered_pts;
+    double prev_codec_reordered_pts;
+    int num_reordered_pts_problems;
+    double sorted_pts;
+    double prev_sorted_pts;
+    int num_sorted_pts_problems;
+    int pts_assoc_mode;
+    double pts;
+
+    float stream_aspect;  // aspect ratio in media headers (DVD IFO files)
+    int i_bps;            // == bitrate  (compressed bytes/sec)
+};
+
+struct mp_decoder_list *video_decoder_list(void);
+
+int video_init_best_codec(struct dec_video *d_video, char* video_decoders);
+void video_uninit(struct dec_video *d_video);
 
 struct demux_packet;
-void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
+void *video_decode(struct dec_video *d_video, struct demux_packet *packet,
                    int drop_frame, double pts);
 
-int get_video_colors(sh_video_t *sh_video, const char *item, int *value);
-int set_video_colors(sh_video_t *sh_video, const char *item, int value);
-void resync_video_stream(sh_video_t *sh_video);
-void video_reinit_vo(struct sh_video *sh_video);
-int get_current_video_decoder_lag(sh_video_t *sh_video);
-int vd_control(struct sh_video *sh_video, int cmd, void *arg);
+int video_get_colors(struct dec_video *d_video, const char *item, int *value);
+int video_set_colors(struct dec_video *d_video, const char *item, int value);
+void video_resync_stream(struct dec_video *d_video);
+void video_reinit_vo(struct dec_video *d_video);
+int video_vd_control(struct dec_video *d_video, int cmd, void *arg);
 
 #endif /* MPLAYER_DEC_VIDEO_H */

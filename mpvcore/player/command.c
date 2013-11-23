@@ -316,7 +316,7 @@ static int mp_property_length(m_option_t *prop, int action, void *arg,
 static int mp_property_avsync(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
 {
-    if (!mpctx->d_audio || !mpctx->sh_video)
+    if (!mpctx->d_audio || !mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
     if (mpctx->last_av_difference == MP_NOPTS_VALUE)
         return M_PROPERTY_UNAVAILABLE;
@@ -623,8 +623,8 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
     case M_PROPERTY_SET:
         angle = demuxer_set_angle(demuxer, *(int *)arg);
         if (angle >= 0) {
-            if (mpctx->sh_video)
-                resync_video_stream(mpctx->sh_video);
+            if (mpctx->d_video)
+                video_resync_stream(mpctx->d_video);
 
             if (mpctx->d_audio)
                 audio_resync_stream(mpctx->d_audio);
@@ -817,7 +817,7 @@ static int mp_property_volrestore(m_option_t *prop, int action,
 static int mp_property_audio_delay(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
 {
-    if (!(mpctx->d_audio && mpctx->sh_video))
+    if (!(mpctx->d_audio && mpctx->d_video))
         return M_PROPERTY_UNAVAILABLE;
     float delay = mpctx->opts->audio_delay;
     switch (action) {
@@ -1168,7 +1168,7 @@ static int probe_deint_filters(struct MPContext *mpctx, const char *cmd)
 
 static int get_deinterlacing(struct MPContext *mpctx)
 {
-    vf_instance_t *vf = mpctx->sh_video->vfilter;
+    vf_instance_t *vf = mpctx->d_video->vfilter;
     int enabled = 0;
     if (vf->control(vf, VFCTRL_GET_DEINTERLACE, &enabled) != CONTROL_OK)
         enabled = -1;
@@ -1182,7 +1182,7 @@ static int get_deinterlacing(struct MPContext *mpctx)
 
 static void set_deinterlacing(struct MPContext *mpctx, bool enable)
 {
-    vf_instance_t *vf = mpctx->sh_video->vfilter;
+    vf_instance_t *vf = mpctx->d_video->vfilter;
     if (vf_find_by_label(vf, VF_DEINTERLACE_LABEL)) {
         if (!enable)
             edit_filters(mpctx, STREAM_VIDEO, "del", "@" VF_DEINTERLACE_LABEL);
@@ -1199,7 +1199,7 @@ static void set_deinterlacing(struct MPContext *mpctx, bool enable)
 static int mp_property_deinterlace(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
 {
-    if (!mpctx->sh_video || !mpctx->sh_video->vfilter)
+    if (!mpctx->d_video || !mpctx->d_video->vfilter)
         return M_PROPERTY_UNAVAILABLE;
     switch (action) {
     case M_PROPERTY_GET:
@@ -1218,7 +1218,7 @@ static int video_refresh_property_helper(m_option_t *prop, int action,
 {
     int r = mp_property_generic_option(prop, action, arg, mpctx);
     if (action == M_PROPERTY_SET) {
-        if (mpctx->sh_video) {
+        if (mpctx->d_video) {
             reinit_video_filters(mpctx);
             mp_force_video_refresh(mpctx);
         }
@@ -1239,8 +1239,8 @@ static int mp_property_colormatrix(m_option_t *prop, int action, void *arg,
         vo_control(mpctx->video_out, VOCTRL_GET_YUV_COLORSPACE, &vo_csp);
 
     struct mp_image_params vd_csp = {0};
-    if (mpctx->sh_video)
-        vd_control(mpctx->sh_video, VDCTRL_GET_PARAMS, &vd_csp);
+    if (mpctx->d_video)
+        video_vd_control(mpctx->d_video, VDCTRL_GET_PARAMS, &vd_csp);
 
     char *res = talloc_asprintf(NULL, "%s",
                                 mp_csp_names[opts->requested_colorspace]);
@@ -1273,8 +1273,8 @@ static int mp_property_colormatrix_input_range(m_option_t *prop, int action,
         vo_control(mpctx->video_out, VOCTRL_GET_YUV_COLORSPACE, &vo_csp );
 
     struct mp_image_params vd_csp = {0};
-    if (mpctx->sh_video)
-        vd_control(mpctx->sh_video, VDCTRL_GET_PARAMS, &vd_csp);
+    if (mpctx->d_video)
+        video_vd_control(mpctx->d_video, VDCTRL_GET_PARAMS, &vd_csp);
 
     char *res = talloc_asprintf(NULL, "%s",
                                 mp_csp_levels_names[opts->requested_input_range]);
@@ -1372,7 +1372,7 @@ static int mp_property_border(m_option_t *prop, int action, void *arg,
 static int mp_property_framedrop(m_option_t *prop, int action,
                                  void *arg, MPContext *mpctx)
 {
-    if (!mpctx->sh_video)
+    if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
 
     return mp_property_generic_option(prop, action, arg, mpctx);
@@ -1381,17 +1381,17 @@ static int mp_property_framedrop(m_option_t *prop, int action,
 static int mp_property_video_color(m_option_t *prop, int action, void *arg,
                                    MPContext *mpctx)
 {
-    if (!mpctx->sh_video)
+    if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
 
     switch (action) {
     case M_PROPERTY_SET: {
-        if (set_video_colors(mpctx->sh_video, prop->name, *(int *) arg) <= 0)
+        if (video_set_colors(mpctx->d_video, prop->name, *(int *) arg) <= 0)
             return M_PROPERTY_UNAVAILABLE;
         break;
     }
     case M_PROPERTY_GET:
-        if (get_video_colors(mpctx->sh_video, prop->name, (int *)arg) <= 0)
+        if (video_get_colors(mpctx->d_video, prop->name, (int *)arg) <= 0)
             return M_PROPERTY_UNAVAILABLE;
         // Write new value to option variable
         mp_property_generic_option(prop, M_PROPERTY_SET, arg, mpctx);
@@ -1404,7 +1404,7 @@ static int mp_property_video_color(m_option_t *prop, int action, void *arg,
 static int mp_property_video_format(m_option_t *prop, int action,
                                     void *arg, MPContext *mpctx)
 {
-    const char *c = mpctx->sh_video ? mpctx->sh_video->gsh->codec : NULL;
+    const char *c = mpctx->d_video ? mpctx->d_video->header->codec : NULL;
     return m_property_strdup_ro(prop, action, arg, c);
 }
 
@@ -1412,7 +1412,7 @@ static int mp_property_video_format(m_option_t *prop, int action,
 static int mp_property_video_codec(m_option_t *prop, int action,
                                    void *arg, MPContext *mpctx)
 {
-    const char *c = mpctx->sh_video ? mpctx->sh_video->gsh->decoder_desc : NULL;
+    const char *c = mpctx->d_video ? mpctx->d_video->decoder_desc : NULL;
     return m_property_strdup_ro(prop, action, arg, c);
 }
 
@@ -1421,42 +1421,44 @@ static int mp_property_video_codec(m_option_t *prop, int action,
 static int mp_property_video_bitrate(m_option_t *prop, int action,
                                      void *arg, MPContext *mpctx)
 {
-    if (!mpctx->sh_video)
+    if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
     if (action == M_PROPERTY_PRINT) {
-        *(char **)arg = format_bitrate(mpctx->sh_video->i_bps);
+        *(char **)arg = format_bitrate(mpctx->d_video->i_bps);
         return M_PROPERTY_OK;
     }
-    return m_property_int_ro(prop, action, arg, mpctx->sh_video->i_bps);
+    return m_property_int_ro(prop, action, arg, mpctx->d_video->i_bps);
 }
 
 /// Video display width (RO)
 static int mp_property_width(m_option_t *prop, int action, void *arg,
                              MPContext *mpctx)
 {
-    struct sh_video *sh = mpctx->sh_video;
-    if (!sh)
+    struct dec_video *vd = mpctx->d_video;
+    if (!vd)
         return M_PROPERTY_UNAVAILABLE;
+    struct sh_video *sh = vd->header->video;
     return m_property_int_ro(prop, action, arg,
-                             sh->vf_input ? sh->vf_input->w : sh->disp_w);
+                             vd->vf_input ? vd->vf_input->w : sh->disp_w);
 }
 
 /// Video display height (RO)
 static int mp_property_height(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
 {
-    struct sh_video *sh = mpctx->sh_video;
-    if (!sh)
+    struct dec_video *vd = mpctx->d_video;
+    if (!vd)
         return M_PROPERTY_UNAVAILABLE;
+    struct sh_video *sh = vd->header->video;
     return m_property_int_ro(prop, action, arg,
-                             sh->vf_input ? sh->vf_input->h : sh->disp_h);
+                             vd->vf_input ? vd->vf_input->h : sh->disp_h);
 }
 
 static int property_vo_wh(m_option_t *prop, int action, void *arg,
                           MPContext *mpctx, bool get_w)
 {
     struct vo *vo = mpctx->video_out;
-    if (!mpctx->sh_video && !vo || !vo->hasframe)
+    if (!mpctx->d_video || !vo || !vo->hasframe)
         return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(prop, action, arg,
                              get_w ? vo->aspdat.prew : vo->aspdat.preh);
@@ -1530,18 +1532,19 @@ static int mp_property_osd_par(m_option_t *prop, int action, void *arg,
 static int mp_property_fps(m_option_t *prop, int action, void *arg,
                            MPContext *mpctx)
 {
-    if (!mpctx->sh_video)
+    if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_float_ro(prop, action, arg, mpctx->sh_video->fps);
+    return m_property_float_ro(prop, action, arg, mpctx->d_video->header->video->fps);
 }
 
 /// Video aspect (RO)
 static int mp_property_aspect(m_option_t *prop, int action, void *arg,
                               MPContext *mpctx)
 {
-    struct sh_video *sh_video = mpctx->sh_video;
-    if (!mpctx->sh_video)
+    if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
+    struct dec_video *d_video = mpctx->d_video;
+    struct sh_video *sh_video = d_video->header->video;
     switch (action) {
     case M_PROPERTY_SET: {
         mpctx->opts->movie_aspect = *(float *)arg;
@@ -1551,7 +1554,7 @@ static int mp_property_aspect(m_option_t *prop, int action, void *arg,
     }
     case M_PROPERTY_GET: {
         float aspect = -1;
-        struct mp_image_params *params = sh_video->vf_input;
+        struct mp_image_params *params = d_video->vf_input;
         if (params && params->d_w && params->d_h) {
             aspect = (float)params->d_w / params->d_h;
         } else if (sh_video->disp_w && sh_video->disp_h) {

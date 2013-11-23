@@ -241,7 +241,6 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
         .demuxer = demuxer,
         .index = demuxer->num_streams,
         .demuxer_id = demuxer_id, // may be overwritten by demuxer
-        .opts = demuxer->opts,
         .ds = talloc_zero(sh, struct demux_stream),
     };
     MP_TARRAY_APPEND(demuxer, demuxer->streams, demuxer->num_streams, sh);
@@ -249,21 +248,18 @@ struct sh_stream *new_sh_stream(demuxer_t *demuxer, enum stream_type type)
         case STREAM_VIDEO: {
             struct sh_video *sht = talloc_zero(demuxer, struct sh_video);
             sht->gsh = sh;
-            sht->opts = sh->opts;
             sh->video = sht;
             break;
         }
         case STREAM_AUDIO: {
             struct sh_audio *sht = talloc_zero(demuxer, struct sh_audio);
             sht->gsh = sh;
-            sht->opts = sh->opts;
             sh->audio = sht;
             break;
         }
         case STREAM_SUB: {
             struct sh_sub *sht = talloc_zero(demuxer, struct sh_sub);
             sht->gsh = sh;
-            sht->opts = sh->opts;
             sh->sub = sht;
             break;
         }

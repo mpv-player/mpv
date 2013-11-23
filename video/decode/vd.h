@@ -21,6 +21,7 @@
 
 #include "video/mp_image.h"
 #include "demux/stheader.h"
+#include "dec_video.h"
 
 struct demux_packet;
 struct mp_decoder_list;
@@ -30,10 +31,10 @@ typedef struct vd_functions
 {
     const char *name;
     void (*add_decoders)(struct mp_decoder_list *list);
-    int (*init)(sh_video_t *sh, const char *decoder);
-    void (*uninit)(sh_video_t *sh);
-    int (*control)(sh_video_t *sh, int cmd, void *arg);
-    struct mp_image *(*decode)(struct sh_video *sh, struct demux_packet *pkt,
+    int (*init)(struct dec_video *vd, const char *decoder);
+    void (*uninit)(struct dec_video *vd);
+    int (*control)(struct dec_video *vd, int cmd, void *arg);
+    struct mp_image *(*decode)(struct dec_video *vd, struct demux_packet *pkt,
                                int flags, double *reordered_pts);
 } vd_functions_t;
 
@@ -47,6 +48,6 @@ enum vd_ctrl {
     VDCTRL_REINIT_VO, // reinit filter/VO chain
 };
 
-int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params);
+int mpcodecs_reconfig_vo(struct dec_video *vd, const struct mp_image_params *params);
 
 #endif /* MPLAYER_VD_H */

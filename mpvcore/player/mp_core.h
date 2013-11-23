@@ -199,9 +199,9 @@ typedef struct MPContext {
     struct track *current_track[STREAM_TYPE_COUNT];
 
     struct sh_stream *sh[STREAM_TYPE_COUNT];
-    struct sh_video *sh_video;          // same as sh[STREAM_VIDEO]->video
     struct sh_sub *sh_sub;              // same as sh[STREAM_SUB]->sub
 
+    struct dec_video *d_video;
     struct dec_audio *d_audio;
 
     // Uses: accessing metadata (consider ordered chapters case, where the main

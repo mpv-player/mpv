@@ -33,6 +33,7 @@
 #include "sub/dec_sub.h"
 #include "demux/demux.h"
 #include "video/mp_image.h"
+#include "video/decode/dec_video.h"
 
 #include "mp_core.h"
 
@@ -83,8 +84,8 @@ void update_subtitles(struct MPContext *mpctx)
     assert(track && sh_sub);
     struct dec_sub *dec_sub = sh_sub->dec_sub;
 
-    if (mpctx->sh_video && mpctx->sh_video->vf_input) {
-        struct mp_image_params params = *mpctx->sh_video->vf_input;
+    if (mpctx->d_video && mpctx->d_video->vf_input) {
+        struct mp_image_params params = *mpctx->d_video->vf_input;
         sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &params);
     }
 
@@ -194,9 +195,11 @@ void reinit_subs(struct MPContext *mpctx)
     assert(dec_sub);
 
     if (!sub_is_initialized(dec_sub)) {
-        int w = mpctx->sh_video ? mpctx->sh_video->disp_w : 0;
-        int h = mpctx->sh_video ? mpctx->sh_video->disp_h : 0;
-        float fps = mpctx->sh_video ? mpctx->sh_video->fps : 25;
+        struct sh_video *sh_video =
+            mpctx->d_video ? mpctx->d_video->header->video : NULL;
+        int w = sh_video ? sh_video->disp_w : 0;
+        int h = sh_video ? sh_video->disp_h : 0;
+        float fps = sh_video ? sh_video->fps : 25;
 
         set_dvdsub_fake_extradata(dec_sub, track->demuxer->stream, w, h);
         sub_set_video_res(dec_sub, w, h);

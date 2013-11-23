@@ -93,7 +93,7 @@ void pause_player(struct MPContext *mpctx)
     mpctx->osd_function = 0;
     mpctx->paused_for_cache = false;
 
-    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
+    if (mpctx->video_out && mpctx->d_video && mpctx->video_out->config_ok)
         vo_control(mpctx->video_out, VOCTRL_PAUSE, NULL);
 
     if (mpctx->ao && mpctx->d_audio)
@@ -126,7 +126,7 @@ void unpause_player(struct MPContext *mpctx)
 
     if (mpctx->ao && mpctx->d_audio)
         ao_resume(mpctx->ao);
-    if (mpctx->video_out && mpctx->sh_video && mpctx->video_out->config_ok)
+    if (mpctx->video_out && mpctx->d_video && mpctx->video_out->config_ok)
         vo_control(mpctx->video_out, VOCTRL_RESUME, NULL);      // resume video
     (void)get_relative_time(mpctx);     // ignore time that passed during pause
 }
@@ -153,7 +153,7 @@ static bool redraw_osd(struct MPContext *mpctx)
 
 void add_step_frame(struct MPContext *mpctx, int dir)
 {
-    if (!mpctx->sh_video)
+    if (!mpctx->d_video)
         return;
     if (dir > 0) {
         mpctx->step_frames += 1;
@@ -169,14 +169,14 @@ void add_step_frame(struct MPContext *mpctx, int dir)
 
 static void seek_reset(struct MPContext *mpctx, bool reset_ao)
 {
-    if (mpctx->sh_video) {
-        resync_video_stream(mpctx->sh_video);
+    if (mpctx->d_video) {
+        video_resync_stream(mpctx->d_video);
         vo_seek_reset(mpctx->video_out);
-        if (mpctx->sh_video->vf_initialized == 1)
-            vf_chain_seek_reset(mpctx->sh_video->vfilter);
-        mpctx->sh_video->num_buffered_pts = 0;
-        mpctx->sh_video->last_pts = MP_NOPTS_VALUE;
-        mpctx->sh_video->pts = MP_NOPTS_VALUE;
+        if (mpctx->d_video->vf_initialized == 1)
+            vf_chain_seek_reset(mpctx->d_video->vfilter);
+        mpctx->d_video->num_buffered_pts = 0;
+        mpctx->d_video->last_pts = MP_NOPTS_VALUE;
+        mpctx->d_video->pts = MP_NOPTS_VALUE;
         mpctx->video_pts = MP_NOPTS_VALUE;
         mpctx->delay = 0;
         mpctx->time_frame = 0;
@@ -589,7 +589,7 @@ do_seek:
 
 static void update_avsync(struct MPContext *mpctx)
 {
-    if (!mpctx->d_audio || !mpctx->sh_video)
+    if (!mpctx->d_audio || !mpctx->d_video)
         return;
 
     double a_pos = playing_audio_pts(mpctx);
@@ -624,7 +624,7 @@ static void adjust_sync(struct MPContext *mpctx, double frame_time)
         return;
 
     double a_pts = written_audio_pts(mpctx) - mpctx->delay;
-    double v_pts = mpctx->sh_video->pts;
+    double v_pts = mpctx->d_video->pts;
     double av_delay = a_pts - v_pts;
     // Try to sync vo_flip() so it will *finish* at given time
     av_delay += mpctx->last_vo_flip_duration;
@@ -797,7 +797,7 @@ static void handle_backstep(struct MPContext *mpctx)
     double current_pts = mpctx->last_vo_pts;
     mpctx->backstep_active = false;
     bool demuxer_ok = mpctx->demuxer && mpctx->demuxer->accurate_seek;
-    if (demuxer_ok && mpctx->sh_video && current_pts != MP_NOPTS_VALUE) {
+    if (demuxer_ok && mpctx->d_video && current_pts != MP_NOPTS_VALUE) {
         double seek_pts = find_previous_pts(mpctx, current_pts);
         if (seek_pts != MP_NOPTS_VALUE) {
             queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, 1);
@@ -863,7 +863,7 @@ static void handle_keep_open(struct MPContext *mpctx)
 void handle_force_window(struct MPContext *mpctx, bool reconfig)
 {
     // Don't interfere with real video playback
-    if (mpctx->sh_video)
+    if (mpctx->d_video)
         return;
 
     struct vo *vo = mpctx->video_out;
@@ -982,7 +982,7 @@ void run_playloop(struct MPContext *mpctx)
     }
 
     double buffered_audio = -1;
-    while (mpctx->sh_video) {   // never loops, for "break;" only
+    while (mpctx->d_video) {   // never loops, for "break;" only
         struct vo *vo = mpctx->video_out;
         update_fps(mpctx);
 
@@ -990,7 +990,7 @@ void run_playloop(struct MPContext *mpctx)
         if (!vo->frame_loaded && (!mpctx->paused || mpctx->restart_playback)) {
             double frame_time = update_video(mpctx, endpts);
             mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "*** ftime=%5.3f ***\n", frame_time);
-            if (mpctx->sh_video->vf_initialized < 0) {
+            if (mpctx->d_video->vf_initialized < 0) {
                 MP_FATAL(mpctx, "\nFATAL: Could not initialize video filters "
                          "(-vf) or video output (-vo).\n");
                 int uninit = INITIALIZED_VCODEC;
@@ -1016,7 +1016,7 @@ void run_playloop(struct MPContext *mpctx)
         }
 
         if (endpts != MP_NOPTS_VALUE)
-            video_left &= mpctx->sh_video->pts < endpts;
+            video_left &= mpctx->d_video->pts < endpts;
 
         handle_heartbeat_cmd(mpctx);
 
@@ -1070,8 +1070,7 @@ void run_playloop(struct MPContext *mpctx)
         //=================== FLIP PAGE (VIDEO BLT): ======================
 
         vo_new_frame_imminent(vo);
-        struct sh_video *sh_video = mpctx->sh_video;
-        mpctx->video_pts = sh_video->pts;
+        mpctx->video_pts = mpctx->d_video->pts;
         mpctx->last_vo_pts = mpctx->video_pts;
         mpctx->playback_pts = mpctx->video_pts;
         update_subtitles(mpctx);
@@ -1182,7 +1181,7 @@ void run_playloop(struct MPContext *mpctx)
      * should trigger after seek only, when we know there's no audio
      * buffered.
      */
-    if ((mpctx->d_audio || mpctx->sh_video) && !audio_left && !video_left
+    if ((mpctx->d_audio || mpctx->d_video) && !audio_left && !video_left
         && (opts->gapless_audio || buffered_audio < 0.05)
         && (!mpctx->paused || was_restart)) {
         if (end_is_chapter) {

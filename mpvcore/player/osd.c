@@ -85,7 +85,6 @@ void write_status_line(struct MPContext *mpctx, const char *line)
 void print_status(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
-    sh_video_t * const sh_video = mpctx->sh_video;
 
     update_window_title(mpctx, false);
 
@@ -110,7 +109,7 @@ void print_status(struct MPContext *mpctx)
 
     if (mpctx->d_audio)
         saddf(&line, "A");
-    if (mpctx->sh_video)
+    if (mpctx->d_video)
         saddf(&line, "V");
     saddf(&line, ": ");
 
@@ -131,7 +130,7 @@ void print_status(struct MPContext *mpctx)
         saddf(&line, " x%4.2f", opts->playback_speed);
 
     // A-V sync
-    if (mpctx->d_audio && sh_video && mpctx->sync_audio_to_video) {
+    if (mpctx->d_audio && mpctx->d_video && mpctx->sync_audio_to_video) {
         if (mpctx->last_av_difference != MP_NOPTS_VALUE)
             saddf(&line, " A-V:%7.3f", mpctx->last_av_difference);
         else
@@ -152,7 +151,7 @@ void print_status(struct MPContext *mpctx)
 #endif
     {
         // VO stats
-        if (sh_video && mpctx->drop_frame_cnt)
+        if (mpctx->d_video && mpctx->drop_frame_cnt)
             saddf(&line, " Late: %d", mpctx->drop_frame_cnt);
     }
 

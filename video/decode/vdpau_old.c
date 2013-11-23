@@ -130,8 +130,8 @@ static void draw_slice_hwdec(struct AVCodecContext *s,
                              const AVFrame *src, int offset[4],
                              int y, int type, int height)
 {
-    sh_video_t *sh = s->opaque;
-    struct lavc_ctx *ctx = sh->context;
+    struct dec_video *vd = s->opaque;
+    struct lavc_ctx *ctx = vd->priv;
     struct priv *p = ctx->hwdec_priv;
     struct vdp_functions *vdp = p->vdp;
     VdpStatus vdp_st;

@@ -200,7 +200,7 @@ static bool handle_help_options(struct MPContext *mpctx)
         opt_exit = 1;
     }
     if (opts->video_decoders && strcmp(opts->video_decoders, "help") == 0) {
-        struct mp_decoder_list *list = mp_video_decoder_list();
+        struct mp_decoder_list *list = video_decoder_list();
         mp_print_decoders(MSGT_CPLAYER, MSGL_INFO, "Video decoders:", list);
         talloc_free(list);
         opt_exit = 1;
