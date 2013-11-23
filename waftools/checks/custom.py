@@ -98,8 +98,12 @@ def __check_oss_headers__(ctx, dependency_identifier):
         if os.path.exists(soundcard_h):
             osscflags = '-I{0}'.format(ossincdir)
 
-    real_oss = ctx.check_cc(fragment=load_fragment('oss_audio_header.c'),
-                            use='soundcard', cflags=osscflags)
+    try:
+        real_oss = ctx.check_cc(fragment=load_fragment('oss_audio_header.c'),
+                                use='soundcard', cflags=osscflags)
+    except Exception:
+        real_oss = False
+
     if real_oss:
         ctx.env.CFLAGS.append(osscflags)
 
