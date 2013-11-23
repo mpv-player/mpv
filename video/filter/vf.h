@@ -94,8 +94,6 @@ typedef struct vf_seteq {
 
 enum vf_ctrl {
     VFCTRL_SEEK_RESET = 1,   // reset on picture and PTS discontinuities
-    VFCTRL_QUERY_MAX_PP_LEVEL, // query max postprocessing level (if any)
-    VFCTRL_SET_PP_LEVEL,     // set postprocessing level
     VFCTRL_SET_EQUALIZER,    // set color options (brightness,contrast etc)
     VFCTRL_GET_EQUALIZER,    // get color options (brightness,contrast etc)
     VFCTRL_SCREENSHOT,       // Take screenshot, arg is voctrl_screenshot_args

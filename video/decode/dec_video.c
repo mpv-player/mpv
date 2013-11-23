@@ -64,19 +64,6 @@ int vd_control(struct sh_video *sh_video, int cmd, void *arg)
     return CONTROL_UNKNOWN;
 }
 
-int get_video_quality_max(sh_video_t *sh_video)
-{
-    vf_instance_t *vf = sh_video->vfilter;
-    if (vf) {
-        int ret = vf_control(vf, VFCTRL_QUERY_MAX_PP_LEVEL, NULL);
-        if (ret > 0) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "[PP] Using external postprocessing filter, max q = %d.\n", ret);
-            return ret;
-        }
-    }
-    return 0;
-}
-
 int set_video_colors(sh_video_t *sh_video, const char *item, int value)
 {
     vf_instance_t *vf = sh_video->vfilter;
@@ -322,11 +309,6 @@ int mpcodecs_reconfig_vo(sh_video_t *sh, const struct mp_image_params *params)
 
     mp_msg(MSGT_DECVIDEO, MSGL_V, "VDec: vo config request - %d x %d (%s)\n",
            p.w, p.h, vo_format_name(p.imgfmt));
-
-    if (get_video_quality_max(sh) <= 0 && opts->divx_quality) {
-        // user wants postprocess but no pp filter yet:
-        sh->vfilter = vf = vf_open_filter(opts, vf, "pp", NULL);
-    }
 
     // check if libvo and codec has common outfmt (no conversion):
     int flags = 0;

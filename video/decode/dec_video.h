@@ -33,8 +33,6 @@ struct demux_packet;
 void *decode_video(sh_video_t *sh_video, struct demux_packet *packet,
                    int drop_frame, double pts);
 
-int get_video_quality_max(sh_video_t *sh_video);
-
 int get_video_colors(sh_video_t *sh_video, const char *item, int *value);
 int set_video_colors(sh_video_t *sh_video, const char *item, int value);
 void resync_video_stream(sh_video_t *sh_video);

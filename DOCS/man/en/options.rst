@@ -1620,9 +1620,6 @@ OPTIONS
 
         FIXME: This needs to be clarified and documented thoroughly.
 
-``--pp=<quality>``
-    See also ``--vf=pp``.
-
 ``--pphelp``
     See also ``--vf=pp``.
 

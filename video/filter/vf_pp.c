@@ -84,17 +84,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
     return 0;
 }
 
-static int control(struct vf_instance *vf, int request, void* data){
-    switch(request){
-    case VFCTRL_QUERY_MAX_PP_LEVEL:
-	return PP_QUALITY_MAX;
-    case VFCTRL_SET_PP_LEVEL:
-	vf->priv->pp= *((unsigned int*)data);
-	return CONTROL_TRUE;
-    }
-    return vf_next_control(vf,request,data);
-}
-
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     // pass-through if pp disabled
@@ -143,7 +132,6 @@ static int vf_open(vf_instance_t *vf, char *args){
     int i;
 
     vf->query_format=query_format;
-    vf->control=control;
     vf->config=config;
     vf->filter=filter;
     vf->uninit=uninit;

@@ -180,7 +180,6 @@ typedef struct MPOpts {
     float movie_aspect;
     int flip;
     int field_dominance;
-    int divx_quality;
     char **sub_name;
     char **sub_paths;
     int sub_auto;

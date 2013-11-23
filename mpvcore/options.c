@@ -491,8 +491,6 @@ const m_option_t mp_opts[] = {
                 {"vaapi-copy", 5})),
     OPT_STRING("hwdec-codecs", hwdec_codecs, 0),
 
-    // postprocessing:
-    OPT_INT("pp", divx_quality, 0),
 #if HAVE_LIBPOSTPROC
     {"pphelp", (void *) &pp_help, CONF_TYPE_PRINT, CONF_GLOBAL | CONF_NOCFG, 0, 0, NULL},
 #endif
