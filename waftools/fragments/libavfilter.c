@@ -1,4 +1,5 @@
 #include <libavfilter/avfilter.h>
+void vf_next_query_format(void);
 void vf_next_query_format() {}
 int main(void) {
     avfilter_register_all();
