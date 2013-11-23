@@ -691,9 +691,6 @@ bool mp_remove_track(struct MPContext *mpctx, struct track *track)
 
 static void open_subtitles_from_options(struct MPContext *mpctx)
 {
-    // after reading video params we should load subtitles because
-    // we know fps so now we can adjust subtitle time to ~6 seconds AST
-    // check .sub
     if (mpctx->opts->sub_name) {
         for (int i = 0; mpctx->opts->sub_name[i] != NULL; ++i)
             mp_add_subtitles(mpctx, mpctx->opts->sub_name[i]);
@@ -1179,13 +1176,6 @@ goto_reopen_demuxer: ;
     reinit_video_chain(mpctx);
     reinit_audio_chain(mpctx);
     reinit_subs(mpctx);
-
-    //================ SETUP STREAMS ==========================
-
-    if (opts->force_fps && mpctx->d_video) {
-        mpctx->d_video->header->video->fps = opts->force_fps;
-        MP_INFO(mpctx, "FPS forced to be %5.3f.\n", mpctx->d_video->header->video->fps);
-    }
 
     //==================== START PLAYING =======================
 

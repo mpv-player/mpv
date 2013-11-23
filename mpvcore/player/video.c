@@ -48,7 +48,7 @@ void update_fps(struct MPContext *mpctx)
 #if HAVE_ENCODING
     struct dec_video *d_video = mpctx->d_video;
     if (mpctx->encode_lavc_ctx && d_video)
-        encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, d_video->header->video->fps);
+        encode_lavc_set_video_fps(mpctx->encode_lavc_ctx, d_video->fps);
 #endif
 }
 
@@ -99,14 +99,6 @@ int reinit_video_chain(struct MPContext *mpctx)
                sh->format,
                sh->video->disp_w, sh->video->disp_h,
                sh->video->fps);
-    if (opts->force_fps)
-        sh->video->fps = opts->force_fps;
-    update_fps(mpctx);
-
-    if (!sh->video->fps && !opts->force_fps && !opts->correct_pts) {
-        MP_ERR(mpctx, "FPS not specified in the "
-               "header or invalid, use the -fps option.\n");
-    }
 
     double ar = -1.0;
     //================== Init VIDEO (codec & libvo) ==========================
@@ -129,6 +121,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     d_video->last_pts = MP_NOPTS_VALUE;
     d_video->opts = mpctx->opts;
     d_video->header = sh;
+    d_video->fps = sh->video->fps;
     mpctx->initialized_flags |= INITIALIZED_VCODEC;
 
     vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, &d_video->hwdec_info);
@@ -157,6 +150,16 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     vo_seek_reset(mpctx->video_out);
     reset_subtitles(mpctx);
+
+    if (opts->force_fps) {
+        d_video->fps = opts->force_fps;
+        MP_INFO(mpctx, "FPS forced to be %5.3f.\n", d_video->fps);
+    }
+    if (!sh->video->fps && !opts->force_fps && !opts->correct_pts) {
+        MP_ERR(mpctx, "FPS not specified in the "
+               "header or invalid, use the -fps option.\n");
+    }
+    update_fps(mpctx);
 
     return 1;
 
@@ -247,7 +250,7 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
     {
         float delay = opts->playback_speed * ao_get_delay(mpctx->ao);
         float d = delay - mpctx->delay;
-        float fps = mpctx->d_video->header->video->fps;
+        float fps = mpctx->d_video->fps;
         if (frame_time < 0)
             frame_time = fps > 0 ? 1.0 / fps : 0;
         // we should avoid dropping too many frames in sequence unless we
@@ -266,7 +269,6 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
 static struct demux_packet *video_read_frame(struct MPContext *mpctx)
 {
     struct dec_video *d_video = mpctx->d_video;
-    sh_video_t *sh_video = d_video->header->video;
     demuxer_t *demuxer = d_video->header->demuxer;
     float pts1 = d_video->last_pts;
 
@@ -277,7 +279,7 @@ static struct demux_packet *video_read_frame(struct MPContext *mpctx)
     if (pkt->pts != MP_NOPTS_VALUE)
         d_video->last_pts = pkt->pts;
 
-    float frame_time = sh_video->fps > 0 ? 1.0f / sh_video->fps : 0;
+    float frame_time = d_video->fps > 0 ? 1.0f / d_video->fps : 0;
 
     // override frame_time for variable/unknown FPS formats:
     if (!mpctx->opts->force_fps) {
@@ -287,10 +289,10 @@ static struct demux_packet *video_read_frame(struct MPContext *mpctx)
         if (d >= 0) {
             if (demuxer->type == DEMUXER_TYPE_TV) {
                 if (d > 0)
-                    sh_video->fps = 1.0f / d;
+                    d_video->fps = 1.0f / d;
                 frame_time = d;
             } else {
-                if ((int)sh_video->fps <= 1)
+                if ((int)d_video->fps <= 1)
                     frame_time = d;
             }
         }

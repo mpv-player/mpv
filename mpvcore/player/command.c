@@ -1534,7 +1534,7 @@ static int mp_property_fps(m_option_t *prop, int action, void *arg,
 {
     if (!mpctx->d_video)
         return M_PROPERTY_UNAVAILABLE;
-    return m_property_float_ro(prop, action, arg, mpctx->d_video->header->video->fps);
+    return m_property_float_ro(prop, action, arg, mpctx->d_video->fps);
 }
 
 /// Video aspect (RO)
