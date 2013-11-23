@@ -27,8 +27,9 @@ you think you have support for some feature installed but configure fails to
 detect it, the file `build/config.log` may contain information about the
 reasons for the failure.
 
-To build the software you can use `./waf build`, and `./waf install` to install
-it.
+To build the software you can use `./waf build`: the result of the compilation
+will be located in `build/mpv`. You can use `./waf install` to install mpv
+to the *prefix* after it is compiled.
 
 NOTE: Using the old build system (with `./old-configure`) should still work,
 but will be removed in a future version of mpv.
