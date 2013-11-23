@@ -72,31 +72,23 @@ static void reinit_audio_buffer(struct dec_audio *da)
 
 static void uninit_decoder(struct dec_audio *d_audio)
 {
-    if (d_audio->initialized) {
+    if (d_audio->ad_driver) {
         mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Uninit audio decoder.\n");
         d_audio->ad_driver->uninit(d_audio);
-        d_audio->initialized = 0;
     }
+    d_audio->ad_driver = NULL;
     talloc_free(d_audio->priv);
     d_audio->priv = NULL;
 }
 
 static int init_audio_codec(struct dec_audio *d_audio, const char *decoder)
 {
-    assert(!d_audio->initialized);
-    audio_resync_stream(d_audio);
-    if (!d_audio->ad_driver->preinit(d_audio)) {
-        mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Audio decoder preinit failed.\n");
-        return 0;
-    }
-
     if (!d_audio->ad_driver->init(d_audio, decoder)) {
         mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Audio decoder init failed.\n");
+        d_audio->ad_driver = NULL;
         uninit_decoder(d_audio);
         return 0;
     }
-
-    d_audio->initialized = 1;
 
     if (!d_audio->decoded.channels.num || !d_audio->decoded.rate ||
         !d_audio->decoded.format)
@@ -141,7 +133,8 @@ static const struct ad_functions *find_driver(const char *name)
 
 int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
 {
-    assert(!d_audio->initialized);
+    assert(!d_audio->ad_driver);
+    audio_resync_stream(d_audio);
 
     struct mp_decoder_entry *decoder = NULL;
     struct mp_decoder_list *list =
@@ -161,12 +154,11 @@ int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
             decoder = sel;
             break;
         }
-        d_audio->ad_driver = NULL;
         mp_tmsg(MSGT_DECAUDIO, MSGL_WARN, "Audio decoder init failed for "
                 "%s:%s\n", sel->family, sel->decoder);
     }
 
-    if (d_audio->initialized) {
+    if (d_audio->ad_driver) {
         d_audio->decoder_desc =
             talloc_asprintf(d_audio, "%s [%s:%s]", decoder->desc, decoder->family,
                             decoder->decoder);
@@ -187,7 +179,7 @@ int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
     }
 
     talloc_free(list);
-    return d_audio->initialized;
+    return !!d_audio->ad_driver;
 }
 
 void audio_uninit(struct dec_audio *d_audio)
@@ -356,7 +348,6 @@ void audio_resync_stream(struct dec_audio *d_audio)
 {
     d_audio->pts = MP_NOPTS_VALUE;
     d_audio->pts_offset = 0;
-    if (!d_audio->initialized)
-        return;
-    d_audio->ad_driver->control(d_audio, ADCTRL_RESYNC_STREAM, NULL);
+    if (d_audio->ad_driver)
+        d_audio->ad_driver->control(d_audio, ADCTRL_RESYNC_STREAM, NULL);
 }

@@ -128,11 +128,6 @@ static const char *find_pcm_decoder(const struct pcm_map *map, int format,
     return NULL;
 }
 
-static int preinit(struct dec_audio *da)
-{
-    return 1;
-}
-
 static int setup_format(struct dec_audio *da)
 {
     struct priv *priv = da->priv;
@@ -404,7 +399,6 @@ static void add_decoders(struct mp_decoder_list *list)
 const struct ad_functions ad_lavc = {
     .name = "lavc",
     .add_decoders = add_decoders,
-    .preinit = preinit,
     .init = init,
     .uninit = uninit,
     .control = control,

@@ -72,11 +72,6 @@ static void uninit(struct dec_audio *da)
     }
 }
 
-static int preinit(struct dec_audio *da)
-{
-    return 1;
-}
-
 static int init(struct dec_audio *da, const char *decoder)
 {
     struct spdifContext *spdif_ctx = talloc_zero(NULL, struct spdifContext);
@@ -254,7 +249,6 @@ static void add_decoders(struct mp_decoder_list *list)
 const struct ad_functions ad_spdif = {
     .name = "spdif",
     .add_decoders = add_decoders,
-    .preinit = preinit,
     .init = init,
     .uninit = uninit,
     .control = control,

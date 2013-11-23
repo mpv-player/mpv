@@ -32,7 +32,6 @@ struct dec_audio {
     struct sh_stream *header;
     struct mp_audio_buffer *decode_buffer;
     struct af_stream *afilter;
-    int initialized;
     char *decoder_desc;
     // set by decoder
     struct mp_audio decoded;    // format of decoded audio (no data, temporarily
@@ -43,7 +42,7 @@ struct dec_audio {
     double pts;
     // number of samples output by decoder after last known pts
     int pts_offset;
-    // For free use by the decoder
+    // For free use by the ad_driver
     void *priv;
 };
 

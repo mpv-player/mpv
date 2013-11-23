@@ -201,6 +201,9 @@ static int feed_new_packet(struct dec_audio *da)
  * erros in other places simply cannot occur. */
 static int init(struct dec_audio *da, const char *decoder)
 {
+    if (!preinit(da))
+        return 0;
+
     struct ad_mpg123_context *con = da->priv;
     int ret;
 
@@ -367,7 +370,6 @@ static void add_decoders(struct mp_decoder_list *list)
 const struct ad_functions ad_mpg123 = {
     .name = "mpg123",
     .add_decoders = add_decoders,
-    .preinit = preinit,
     .init = init,
     .uninit = uninit,
     .control = control,

@@ -33,7 +33,6 @@ struct mp_decoder_list;
 struct ad_functions {
     const char *name;
     void (*add_decoders)(struct mp_decoder_list *list);
-    int (*preinit)(struct dec_audio *da);
     int (*init)(struct dec_audio *da, const char *decoder);
     void (*uninit)(struct dec_audio *da);
     int (*control)(struct dec_audio *da, int cmd, void *arg);
