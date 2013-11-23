@@ -36,8 +36,8 @@
 
 struct priv {
     rsound_t *rd;
-    const char *host;
-    const char *port;
+    char *host;
+    char *port;
 };
 
 static int set_format(struct ao *ao)
