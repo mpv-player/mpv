@@ -59,6 +59,7 @@ typedef struct m_config {
     struct m_opt_backup *backup_opts;
 
     bool use_profiles;
+    bool is_toplevel;
     int (*includefunc)(struct m_config *conf, char *filename, int flags);
 
     void *optstruct; // struct mpopts or other

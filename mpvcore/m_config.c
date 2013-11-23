@@ -635,6 +635,7 @@ void m_config_print_option_list(const struct m_config *config)
 {
     char min[50], max[50];
     int count = 0;
+    const char *prefix = config->is_toplevel ? "--" : "";
 
     mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "Options:\n\n");
     for (int i = 0; i < config->num_opts; i++) {
@@ -644,7 +645,7 @@ void m_config_print_option_list(const struct m_config *config)
             continue;
         if (co->is_generated)
             continue;
-        mp_msg(MSGT_CFGPARSER, MSGL_INFO, " --%-30.30s", co->name);
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %s%-30.30s", prefix, co->name);
         if (opt->type == &m_option_type_choice) {
             mp_msg(MSGT_CFGPARSER, MSGL_INFO, " Choices:");
             struct m_opt_choice_alternatives *alt = opt->priv;

@@ -316,6 +316,7 @@ static int mpv_main(int argc, char *argv[])
     mpctx->opts = mpctx->mconfig->optstruct;
     mpctx->mconfig->includefunc = cfg_include;
     mpctx->mconfig->use_profiles = true;
+    mpctx->mconfig->is_toplevel = true;
 
     struct MPOpts *opts = mpctx->opts;
 
