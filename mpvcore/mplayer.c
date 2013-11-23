@@ -2278,6 +2278,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
     bool audio_eof = false;
     bool partial_fill = false;
     sh_audio_t * const sh_audio = mpctx->sh_audio;
+    // Can't adjust the start of audio with spdif pass-through.
     bool modifiable_audio_format = !(ao->format & AF_FORMAT_SPECIAL_MASK);
     int unitsize = ao->channels.num * af_fmt2bits(ao->format) / 8;
 
@@ -2316,7 +2317,7 @@ static int fill_audio_out_buffers(struct MPContext *mpctx, double endpts)
             audio_eof = true;
     }
 
-    if (endpts != MP_NOPTS_VALUE && modifiable_audio_format) {
+    if (endpts != MP_NOPTS_VALUE) {
         double bytes = (endpts - written_audio_pts(mpctx) + mpctx->audio_delay)
                        * ao->bps / opts->playback_speed;
         if (playsize > bytes) {
