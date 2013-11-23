@@ -23,6 +23,7 @@ notifications-policy: &notifications-policy
   on_failure: always
 
 notifications:
+  email: false
   irc:
     channels:
       - "irc.freenode.org#mpv-player-dev"
