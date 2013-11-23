@@ -19,6 +19,8 @@
 #ifndef MPLAYER_DEC_VIDEO_H
 #define MPLAYER_DEC_VIDEO_H
 
+#include <stdbool.h>
+
 #include "demux/stheader.h"
 #include "video/hwdec.h"
 #include "video/mp_image.h"
@@ -34,7 +36,6 @@ struct dec_video {
     long vf_reconfig_count; // incremented each mpcodecs_reconfig_vo() call
     struct mp_image_params *vf_input; // video filter input params
     struct mp_hwdec_info *hwdec_info; // video output hwdec handles
-    int initialized;
     struct sh_stream *header;
 
     char *decoder_desc;
@@ -60,7 +61,7 @@ struct dec_video {
 
 struct mp_decoder_list *video_decoder_list(void);
 
-int video_init_best_codec(struct dec_video *d_video, char* video_decoders);
+bool video_init_best_codec(struct dec_video *d_video, char* video_decoders);
 void video_uninit(struct dec_video *d_video);
 
 struct demux_packet;

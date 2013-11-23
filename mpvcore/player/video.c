@@ -142,9 +142,7 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     recreate_video_filters(mpctx);
 
-    video_init_best_codec(d_video, opts->video_decoders);
-
-    if (!d_video->initialized)
+    if (!video_init_best_codec(d_video, opts->video_decoders))
         goto err_out;
 
     bool saver_state = opts->pause || !opts->stop_screensaver;

@@ -115,28 +115,22 @@ void video_reinit_vo(struct dec_video *d_video)
 
 void video_uninit(struct dec_video *d_video)
 {
-    if (d_video->initialized) {
+    if (d_video->vd_driver) {
         mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Uninit video.\n");
         d_video->vd_driver->uninit(d_video);
     }
     talloc_free(d_video->priv);
-    d_video->priv = NULL;
     vf_uninit_filter_chain(d_video->vfilter);
-    d_video->vfilter = NULL;
     talloc_free(d_video);
 }
 
 static int init_video_codec(struct dec_video *d_video, const char *decoder)
 {
-    assert(!d_video->initialized);
-
     if (!d_video->vd_driver->init(d_video, decoder)) {
         mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Video decoder init failed.\n");
-        //uninit_video(d_video);
         return 0;
     }
 
-    d_video->initialized = 1;
     d_video->prev_codec_reordered_pts = MP_NOPTS_VALUE;
     d_video->prev_sorted_pts = MP_NOPTS_VALUE;
     return 1;
@@ -168,9 +162,9 @@ static const struct vd_functions *find_driver(const char *name)
     return NULL;
 }
 
-int video_init_best_codec(struct dec_video *d_video, char* video_decoders)
+bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
 {
-    assert(!d_video->initialized);
+    assert(!d_video->vd_driver);
 
     struct mp_decoder_entry *decoder = NULL;
     struct mp_decoder_list *list =
@@ -195,7 +189,7 @@ int video_init_best_codec(struct dec_video *d_video, char* video_decoders)
                 "%s:%s\n", sel->family, sel->decoder);
     }
 
-    if (d_video->initialized) {
+    if (d_video->vd_driver) {
         d_video->decoder_desc =
             talloc_asprintf(d_video, "%s [%s:%s]", decoder->desc, decoder->family,
                             decoder->decoder);
@@ -208,7 +202,7 @@ int video_init_best_codec(struct dec_video *d_video, char* video_decoders)
     }
 
     talloc_free(list);
-    return d_video->initialized;
+    return !!d_video->vd_driver;
 }
 
 void *video_decode(struct dec_video *d_video, struct demux_packet *packet,
