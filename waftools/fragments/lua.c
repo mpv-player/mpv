@@ -6,13 +6,13 @@
 // filled on the python side with .format()
 {additional_lua_test_header}
 
-void test_lua(void) {{
+static void test_lua(void) {{
     lua_State *L = luaL_newstate();
     lua_pushstring(L, "test");
     lua_setglobal(L, "test");
 }}
 
-void test_other(void) {{
+static void test_other(void) {{
     // filled on the python side with .format()
     {additional_lua_test_code}
 }}
