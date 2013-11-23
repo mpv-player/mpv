@@ -88,16 +88,16 @@ def __get_osslibdir__():
 def __check_oss_headers__(ctx, dependency_identifier):
     import os
 
-    real_oss = ctx.check_cc(fragment=load_fragment('oss_audio_header.c'),
-                            use='soundcard')
+    osscflags = ''
+    osslibdir = __get_osslibdir__()
+    if osslibdir:
+        ossincdir   = os.path.join(osslibdir, 'include')
+        soundcard_h = os.path.join(ossincdir, 'sys', 'soundcard.h')
+        if os.path.exists(soundcard_h):
+            osscflags = '-I{0}'.format(ossincdir)
 
-    if real_oss:
-        if os.path.exists('/etc/oss.conf'):
-            osslibdir   = __get_osslibdir__()
-            ossincdir   = os.path.join(osslibdir, 'include')
-            soundcard_h = os.path.join(ossincdir, 'sys', 'soundcard.h')
-            if os.path.exists(soundcard_h):
-                ctx.env.CFLAGS.append('-I{0}'.format(ossincdir))
+    ctx.check_cc(fragment=load_fragment('oss_audio_header.c'), use='soundcard',
+                 cflags=osscflags)
 
     return True
 
