@@ -9,6 +9,7 @@
 
 #include "demux/stheader.h"
 #include "video/mp_image.h"
+#include "video/hwdec.h"
 
 // keep in sync with --hwdec option
 enum hwdec_type {

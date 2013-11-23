@@ -30,7 +30,7 @@
 #include "lavc.h"
 #include "video/fmt-conversion.h"
 #include "video/vdpau.h"
-#include "video/decode/dec_video.h"
+#include "video/hwdec.h"
 
 struct priv {
     struct mp_vdpau_ctx        *mpvdp;

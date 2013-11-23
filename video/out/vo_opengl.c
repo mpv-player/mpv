@@ -48,7 +48,7 @@
 #include "gl_osd.h"
 #include "filter_kernels.h"
 #include "video/memcpy_pic.h"
-#include "video/decode/dec_video.h"
+#include "video/hwdec.h"
 #include "gl_video.h"
 #include "gl_lcms.h"
 

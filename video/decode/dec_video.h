@@ -42,18 +42,4 @@ void video_reinit_vo(struct sh_video *sh_video);
 int get_current_video_decoder_lag(sh_video_t *sh_video);
 int vd_control(struct sh_video *sh_video, int cmd, void *arg);
 
-// Used to communicate hardware decoder API handles from VO to video decoder.
-// The VO can set the context pointer for supported APIs.
-struct mp_hwdec_info {
-    struct mp_vdpau_ctx *vdpau_ctx;
-    struct mp_vaapi_ctx *vaapi_ctx;
-    // Can be used to lazily load a requested API.
-    // api_name is e.g. "vdpau" (like the fields above, without "_ctx")
-    // Can be NULL, is idempotent, caller checks _ctx fields for success/access.
-    void (*load_api)(struct mp_hwdec_info *info, const char *api_name);
-    void *load_api_ctx;
-};
-
-void hwdec_request_api(struct mp_hwdec_info *info, const char *api_name);
-
 #endif /* MPLAYER_DEC_VIDEO_H */

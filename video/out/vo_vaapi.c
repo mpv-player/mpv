@@ -39,7 +39,7 @@
 #include "video/vfcap.h"
 #include "video/mp_image.h"
 #include "video/vaapi.h"
-#include "video/decode/dec_video.h"
+#include "video/hwdec.h"
 
 struct vaapi_osd_image {
     int            w, h;

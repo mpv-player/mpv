@@ -22,7 +22,7 @@
 
 #include "gl_common.h"
 #include "video/vdpau.h"
-#include "video/decode/dec_video.h"
+#include "video/hwdec.h"
 
 // This is a GL_NV_vdpau_interop specification bug, and headers (unfortunately)
 // follow it. I'm not sure about the original nvidia headers.

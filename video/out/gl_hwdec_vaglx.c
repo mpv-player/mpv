@@ -26,7 +26,7 @@
 #include "x11_common.h"
 #include "gl_common.h"
 #include "video/vaapi.h"
-#include "video/decode/dec_video.h"
+#include "video/hwdec.h"
 
 struct priv {
     struct mp_vaapi_ctx *ctx;

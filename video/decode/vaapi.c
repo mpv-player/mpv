@@ -33,7 +33,7 @@
 #include "video/fmt-conversion.h"
 #include "video/vaapi.h"
 #include "video/mp_image_pool.h"
-#include "video/decode/dec_video.h"
+#include "video/hwdec.h"
 #include "video/filter/vf.h"
 
 /*

@@ -22,7 +22,7 @@
 #include "mpvcore/options.h"
 #include "vf.h"
 #include "video/vaapi.h"
-#include "video/decode/dec_video.h"
+#include "video/hwdec.h"
 
 static inline bool is_success(VAStatus status, const char *msg)
 {
