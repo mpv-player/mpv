@@ -224,7 +224,7 @@ static bool probe_hwdec(struct dec_video *vd, bool autoprobe, enum hwdec_type ap
         return false;
     }
     const char *hw_decoder = NULL;
-    int r = hwdec_probe(hwdec, vd->hwdec_info, decoder, &hw_decoder);
+    int r = hwdec_probe(hwdec, &vd->hwdec_info, decoder, &hw_decoder);
     if (r >= 0) {
         *use_hwdec = hwdec;
         *use_decoder = hw_decoder;
@@ -380,7 +380,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     if (!lavc_codec)
         return;
 
-    ctx->hwdec_info = vd->hwdec_info;
+    ctx->hwdec_info = &vd->hwdec_info;
 
     ctx->do_dr1 = ctx->do_hw_dr1 = 0;
     ctx->pix_fmt = PIX_FMT_NONE;

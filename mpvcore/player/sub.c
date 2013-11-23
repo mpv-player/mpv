@@ -83,9 +83,10 @@ void update_subtitles(struct MPContext *mpctx)
     struct dec_sub *dec_sub = mpctx->d_sub;
     assert(track && dec_sub);
 
-    if (mpctx->d_video && mpctx->d_video->vf_input) {
-        struct mp_image_params params = *mpctx->d_video->vf_input;
-        sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &params);
+    if (mpctx->d_video) {
+        struct mp_image_params params = mpctx->d_video->vf_input;
+        if (params.imgfmt)
+            sub_control(dec_sub, SD_CTRL_SET_VIDEO_PARAMS, &params);
     }
 
     mpctx->osd->video_offset = track->under_timeline ? mpctx->video_offset : 0;

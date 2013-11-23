@@ -385,9 +385,7 @@ int mpcodecs_reconfig_vo(struct dec_video *d_video,
 
     d_video->vf_initialized = 1;
 
-    if (!d_video->vf_input)
-        d_video->vf_input = talloc(sh, struct mp_image_params);
-    *d_video->vf_input = p;
+    d_video->vf_input = p;
 
     if (opts->gamma_gamma != 1000)
         video_set_colors(d_video, "gamma", opts->gamma_gamma);

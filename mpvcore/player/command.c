@@ -1439,7 +1439,7 @@ static int mp_property_width(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_UNAVAILABLE;
     struct sh_video *sh = vd->header->video;
     return m_property_int_ro(prop, action, arg,
-                             vd->vf_input ? vd->vf_input->w : sh->disp_w);
+                             vd->vf_input.w ? vd->vf_input.w : sh->disp_w);
 }
 
 /// Video display height (RO)
@@ -1451,7 +1451,7 @@ static int mp_property_height(m_option_t *prop, int action, void *arg,
         return M_PROPERTY_UNAVAILABLE;
     struct sh_video *sh = vd->header->video;
     return m_property_int_ro(prop, action, arg,
-                             vd->vf_input ? vd->vf_input->h : sh->disp_h);
+                             vd->vf_input.h ? vd->vf_input.h : sh->disp_h);
 }
 
 static int property_vo_wh(m_option_t *prop, int action, void *arg,
@@ -1554,7 +1554,7 @@ static int mp_property_aspect(m_option_t *prop, int action, void *arg,
     }
     case M_PROPERTY_GET: {
         float aspect = -1;
-        struct mp_image_params *params = d_video->vf_input;
+        struct mp_image_params *params = &d_video->vf_input;
         if (params && params->d_w && params->d_h) {
             aspect = (float)params->d_w / params->d_h;
         } else if (sh_video->disp_w && sh_video->disp_h) {

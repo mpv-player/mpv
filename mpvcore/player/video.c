@@ -131,10 +131,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     d_video->header = sh;
     mpctx->initialized_flags |= INITIALIZED_VCODEC;
 
-    // dynamic allocation only to make stheader.h lighter
-    talloc_free(d_video->hwdec_info);
-    d_video->hwdec_info = talloc_zero(d_video, struct mp_hwdec_info);
-    vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, d_video->hwdec_info);
+    vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, &d_video->hwdec_info);
 
     if (stream_control(sh->demuxer->stream, STREAM_CTRL_GET_ASPECT_RATIO, &ar)
             != STREAM_UNSUPPORTED)
@@ -236,7 +233,7 @@ static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
     init_filter_params(mpctx);
 
     frame->pts = d_video->pts;
-    mp_image_set_params(frame, d_video->vf_input);
+    mp_image_set_params(frame, &d_video->vf_input); // force csp/aspect overrides
     vf_filter_frame(d_video->vfilter, frame);
     filter_output_queued_frame(mpctx);
 }
