@@ -32,7 +32,6 @@ typedef struct lavc_ctx {
     int best_csp;
     struct mp_image_params image_params;
     struct mp_image_params vo_image_params;
-    AVRational last_sample_aspect_ratio;
     enum AVDiscard skip_frame;
     const char *software_fallback_decoder;
 

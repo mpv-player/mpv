@@ -502,7 +502,6 @@ static void uninit_avctx(struct dec_video *vd)
     avcodec_free_frame(&ctx->pic);
     mp_buffer_pool_free(&ctx->dr1_buffer_pool);
 #endif
-    ctx->last_sample_aspect_ratio = (AVRational){0, 0};
 }
 
 static void uninit(struct dec_video *vd)
@@ -517,49 +516,30 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame)
     int height = frame->height;
     float aspect = av_q2d(frame->sample_aspect_ratio) * width / height;
     int pix_fmt = frame->format;
-    struct sh_video *sh = vd->header->video;
 
 #if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(54, 40, 0)
     pix_fmt = ctx->avctx->pix_fmt;
 #endif
 
-    if (av_cmp_q(frame->sample_aspect_ratio, ctx->last_sample_aspect_ratio) ||
-            width != sh->disp_w || height != sh->disp_h ||
-            pix_fmt != ctx->pix_fmt || !ctx->image_params.imgfmt)
-    {
-        mp_image_pool_clear(ctx->non_dr1_pool);
-        mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
-
-        // Do not overwrite s->aspect on the first call, so that a container
-        // aspect if available is preferred.
-        // But set it even if the sample aspect did not change, since a
-        // resolution change can cause an aspect change even if the
-        // _sample_ aspect is unchanged.
-        float use_aspect = sh->aspect;
-        if (use_aspect == 0 || ctx->last_sample_aspect_ratio.den)
-            use_aspect = aspect;
-        ctx->last_sample_aspect_ratio = frame->sample_aspect_ratio;
-        sh->disp_w = width;
-        sh->disp_h = height;
-
+    if (pix_fmt != ctx->pix_fmt) {
         ctx->pix_fmt = pix_fmt;
         ctx->best_csp = pixfmt2imgfmt(pix_fmt);
-
-        int d_w, d_h;
-        vf_set_dar(&d_w, &d_h, width, height, use_aspect);
-
-        ctx->image_params = (struct mp_image_params) {
-            .imgfmt = ctx->best_csp,
-            .w = width,
-            .h = height,
-            .d_w = d_w,
-            .d_h = d_h,
-            .colorspace = avcol_spc_to_mp_csp(ctx->avctx->colorspace),
-            .colorlevels = avcol_range_to_mp_csp_levels(ctx->avctx->color_range),
-            .chroma_location =
-                avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
-        };
     }
+
+    int d_w, d_h;
+    vf_set_dar(&d_w, &d_h, width, height, aspect);
+
+    ctx->image_params = (struct mp_image_params) {
+        .imgfmt = ctx->best_csp,
+        .w = width,
+        .h = height,
+        .d_w = d_w,
+        .d_h = d_h,
+        .colorspace = avcol_spc_to_mp_csp(ctx->avctx->colorspace),
+        .colorlevels = avcol_range_to_mp_csp_levels(ctx->avctx->color_range),
+        .chroma_location =
+            avchroma_location_to_mp(ctx->avctx->chroma_sample_location),
+    };
 }
 
 static enum PixelFormat get_format_hwdec(struct AVCodecContext *avctx,
@@ -793,6 +773,7 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
     mp_image_params_from_image(&vo_params, mpi);
 
     if (!mp_image_params_equals(&vo_params, &ctx->vo_image_params)) {
+        mp_image_pool_clear(ctx->non_dr1_pool);
         if (mpcodecs_reconfig_vo(vd, &vo_params) < 0) {
             talloc_free(mpi);
             return -1;

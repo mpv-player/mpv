@@ -339,13 +339,26 @@ int mpcodecs_reconfig_vo(struct dec_video *d_video,
         d_video->vfilter = vf;
         flip = false;
     }
-    // time to do aspect ratio corrections...
+
+    float decoder_aspect = p.d_w / (float)p.d_h;
+    if (d_video->initial_decoder_aspect == 0)
+        d_video->initial_decoder_aspect = decoder_aspect;
+
+    // We normally prefer the container aspect, unless the decoder aspect
+    // changes at least once.
+    if (d_video->initial_decoder_aspect == decoder_aspect) {
+        if (sh->aspect > 0)
+            vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, sh->aspect);
+    } else {
+        // Even if the aspect switches back, don't use container aspect again.
+        d_video->initial_decoder_aspect = -1;
+    }
 
     float force_aspect = opts->movie_aspect;
     if (force_aspect > -1.0 && d_video->stream_aspect != 0.0)
         force_aspect = d_video->stream_aspect;
 
-    if (force_aspect >= 0)
+    if (force_aspect > 0)
         vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, force_aspect);
 
     if (abs(p.d_w - p.w) >= 4 || abs(p.d_h - p.h) >= 4) {
