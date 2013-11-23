@@ -35,6 +35,7 @@
 #include "osdep/getch2.h"
 #include "osdep/timer.h"
 
+#include "demux/demux.h"
 #include "sub/sub.h"
 
 #include "mp_core.h"

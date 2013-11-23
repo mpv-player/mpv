@@ -40,7 +40,6 @@
 #endif
 
 #include "stream.h"
-#include "demux/demux.h"
 #include "mpvcore/m_option.h"
 #include "mpvcore/mp_msg.h"
 #include "stream_radio.h"

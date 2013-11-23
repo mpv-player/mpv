@@ -21,17 +21,11 @@
 
 #include <stdbool.h>
 
+#include "mpvcore/mp_common.h"
 #include "audio/chmap.h"
 #include "ms_hdr.h"
 struct MPOpts;
 struct demuxer;
-
-enum stream_type {
-    STREAM_VIDEO,
-    STREAM_AUDIO,
-    STREAM_SUB,
-    STREAM_TYPE_COUNT,
-};
 
 // Stream headers:
 

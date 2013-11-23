@@ -53,6 +53,7 @@
 #include "audio/decode/dec_audio.h"
 #include "audio/out/ao.h"
 #include "audio/mixer.h"
+#include "demux/demux.h"
 #include "stream/stream.h"
 #include "sub/ass_mp.h"
 #include "sub/sub.h"

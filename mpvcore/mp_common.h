@@ -52,6 +52,13 @@
 #define CONTROL_ERROR -2
 #define CONTROL_NA -3
 
+enum stream_type {
+    STREAM_VIDEO,
+    STREAM_AUDIO,
+    STREAM_SUB,
+    STREAM_TYPE_COUNT,
+};
+
 extern const char *mplayer_version;
 extern const char *mplayer_builddate;
 

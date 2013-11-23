@@ -36,6 +36,7 @@
 #include "mpvcore/input/input.h"
 
 #include "audio/out/ao.h"
+#include "demux/demux.h"
 #include "stream/stream.h"
 #include "video/out/vo.h"
 

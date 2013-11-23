@@ -40,7 +40,6 @@
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/m_option.h"
 #include "stream.h"
-#include "demux/stheader.h"
 
 #define BLURAY_SECTOR_SIZE     6144
 

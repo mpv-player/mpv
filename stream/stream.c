@@ -43,7 +43,6 @@
 #include "mpvcore/path.h"
 #include "osdep/timer.h"
 #include "stream.h"
-#include "demux/demux.h"
 
 #include "mpvcore/m_option.h"
 #include "mpvcore/m_config.h"

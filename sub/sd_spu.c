@@ -20,7 +20,6 @@
 
 #include "talloc.h"
 #include "mpvcore/options.h"
-#include "demux/stheader.h"
 #include "video/mp_image.h"
 #include "sd.h"
 #include "sub.h"

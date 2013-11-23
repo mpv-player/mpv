@@ -42,7 +42,6 @@
 
 #include "stream_dvd.h"
 #include "stream_dvd_common.h"
-#include "demux/demux.h"
 
 static char* dvd_device_current;
 int dvd_angle=1;
