@@ -791,6 +791,8 @@ static struct mp_image *decode_with_fallback(struct sh_video *sh,
         init_avctx(sh, decoder, NULL);
         if (ctx->avctx) {
             mpi = NULL;
+            if (sh->vf_initialized < 0)
+                sh->vf_initialized = 0;
             decode(sh, packet, flags, reordered_pts, &mpi);
             return mpi;
         }
