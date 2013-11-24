@@ -419,8 +419,6 @@ def build(ctx):
         resources       = [node.srcpath() for node in resources_nodes]
         cprog_kwargs['mac_resources'] = resources
 
-        ctx.install_files(ctx.env.BINDIR, 'mpv')
-
     ctx(
         target       = "mpv",
         source       = ctx.filtered_sources(sources),
@@ -431,6 +429,9 @@ def build(ctx):
         install_path = ctx.env.BINDIR,
         **cprog_kwargs
     )
+
+    if ctx.dependency_satisfied('macosx-bundle'):
+        ctx.install_files(ctx.env.BINDIR, 'mpv')
 
     if ctx.dependency_satisfied("vf-dlopen-filters"):
         dlfilters = "showqscale telecine tile rectangle framestep \
