@@ -3,20 +3,22 @@
 # This script simply downloads waf to the current directory
 
 from __future__ import print_function
-import os, sys, stat, hashlib
+import os, sys, stat, hashlib, subprocess
+
+WAFRELEASE = "waf-1.7.13"
+WAFURL     = "https://waf.googlecode.com/files/" + WAFRELEASE
+SHA256HASH = "03cc750049350ee01cdbc584b70924e333fcc17ba4a2d04648dab1535538a873"
 
 if os.path.exists("waf"):
-    print("Found 'waf', skipping download.")
-    sys.exit(0)
+	wafver = subprocess.check_output(['./waf', '--version']).decode()
+	if WAFRELEASE.split('-')[1] == wafver.split(' ')[1]:
+		print("Found 'waf', skipping download.")
+		sys.exit(0)
 
 try:
     from urllib.request import urlopen
 except:
     from urllib2 import urlopen
-
-WAFRELEASE = "waf-1.7.13"
-WAFURL     = "https://waf.googlecode.com/files/" + WAFRELEASE
-SHA256HASH = "03cc750049350ee01cdbc584b70924e333fcc17ba4a2d04648dab1535538a873"
 
 print("Downloading %s..." % WAFURL)
 waf = urlopen(WAFURL).read()
