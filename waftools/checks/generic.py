@@ -81,7 +81,6 @@ def check_pkg_config(*args, **kw_ext):
         if not result:
             defkey = DependencyInflector(dependency_identifier).define_key()
             ctx.undefine(defkey)
-            return False
         return result
     return fn
 
