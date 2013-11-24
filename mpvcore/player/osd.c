@@ -36,7 +36,7 @@
 #include "osdep/timer.h"
 
 #include "demux/demux.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 
 #include "mp_core.h"
 #include "command.h"

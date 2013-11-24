@@ -30,7 +30,7 @@
 
 #include "config.h"
 #include "vo.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"
 #include "mpvcore/mp_msg.h"

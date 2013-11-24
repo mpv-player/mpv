@@ -22,7 +22,6 @@
 #include "mpvcore/options.h"
 #include "video/mp_image.h"
 #include "sd.h"
-#include "sub.h"
 #include "spudec.h"
 
 struct sd_spu_priv {

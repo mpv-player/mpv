@@ -32,7 +32,7 @@
 #include "talloc.h"
 #include "mpvcore/options.h"
 #include "mpvcore/mp_msg.h"
-#include "sub.h"
+#include "osd.h"
 #include "dec_sub.h"
 #include "img_convert.h"
 #include "draw_bmp.h"

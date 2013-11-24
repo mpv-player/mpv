@@ -1,7 +1,7 @@
 #ifndef MPLAYER_DRAW_BMP_H
 #define MPLAYER_DRAW_BMP_H
 
-#include "sub/sub.h"
+#include "osd.h"
 
 struct mp_image;
 struct sub_bitmaps;

@@ -35,7 +35,7 @@
 #include "stream/tv.h"
 #include "stream/stream_radio.h"
 #include "video/csputils.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 #include "audio/mixer.h"
 #include "audio/filter/af.h"
 #include "audio/decode/dec_audio.h"

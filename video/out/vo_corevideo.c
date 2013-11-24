@@ -31,7 +31,7 @@
 
 #include "talloc.h"
 #include "video/out/vo.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 #include "mpvcore/m_option.h"
 
 #include "video/csputils.h"

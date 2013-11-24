@@ -11,7 +11,6 @@
 #include "mpvcore/path.h"
 #include "mpvcore/mp_common.h"
 #include "sub/find_subfiles.h"
-#include "sub/sub.h"
 
 static const char *sub_exts[] = {"utf", "utf8", "utf-8", "idx", "sub", "srt",
                                  "smi", "rt", "txt", "ssa", "aqt", "jss",

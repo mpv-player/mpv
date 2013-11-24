@@ -37,7 +37,7 @@
 #include "video/fmt-conversion.h"
 #include "video/image_writer.h"
 #include "video/sws_utils.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 #include "mpvcore/m_option.h"
 
 struct priv {

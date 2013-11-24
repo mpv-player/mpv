@@ -42,7 +42,7 @@
 #include "mpvcore/mpv_global.h"
 #include "video/mp_image.h"
 #include "video/vfcap.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 
 //
 // Externally visible list of all vo drivers

@@ -244,6 +244,7 @@ SOURCES = audio/audio.c \
           sub/draw_bmp.c \
           sub/find_subfiles.c \
           sub/img_convert.c \
+          sub/osd.c \
           sub/sd_lavc.c \
           sub/sd_lavc_conv.c \
           sub/sd_lavf_srt.c \
@@ -252,7 +253,6 @@ SOURCES = audio/audio.c \
           sub/sd_spu.c \
           sub/sd_srt.c \
           sub/spudec.c \
-          sub/sub.c \
           ta/ta.c \
           ta/ta_utils.c \
           ta/ta_talloc.c \

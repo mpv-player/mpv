@@ -33,8 +33,7 @@
 
 #include "mpvcore/encode_lavc.h"
 
-#include "sub/sub.h"
-#include "sub/dec_sub.h"
+#include "sub/osd.h"
 
 struct priv {
     uint8_t *buffer;

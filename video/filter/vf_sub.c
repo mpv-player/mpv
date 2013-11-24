@@ -34,7 +34,7 @@
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 #include "sub/dec_sub.h"
 
 #include "video/sws_utils.h"

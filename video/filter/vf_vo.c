@@ -30,8 +30,6 @@
 
 #include "video/out/vo.h"
 
-#include "sub/sub.h"
-
 struct vf_priv_s {
     struct vo *vo;
 };

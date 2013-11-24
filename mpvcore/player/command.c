@@ -38,7 +38,7 @@
 #include "mpvcore/resolve.h"
 #include "mpvcore/playlist.h"
 #include "mpvcore/playlist_parser.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 #include "sub/dec_sub.h"
 #include "mpvcore/m_option.h"
 #include "mpvcore/m_property.h"

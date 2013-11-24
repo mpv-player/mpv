@@ -46,7 +46,7 @@
 #include <X11/extensions/XShm.h>
 #endif
 
-#include "sub/sub.h"
+#include "sub/osd.h"
 #include "sub/draw_bmp.h"
 
 #include "video/sws_utils.h"

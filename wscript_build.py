@@ -262,6 +262,7 @@ def build(ctx):
         ( "sub/draw_bmp.c" ),
         ( "sub/find_subfiles.c" ),
         ( "sub/img_convert.c" ),
+        ( "sub/osd.c" ),
         ( "sub/osd_dummy.c",                     "dummy-osd" ),
         ( "sub/osd_libass.c",                    "libass-osd" ),
         ( "sub/sd_ass.c",                        "libass" ),
@@ -273,7 +274,6 @@ def build(ctx):
         ( "sub/sd_spu.c" ),
         ( "sub/sd_srt.c" ),
         ( "sub/spudec.c" ),
-        ( "sub/sub.c" ),
 
         ## Video
         ( "video/csputils.c" ),

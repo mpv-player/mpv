@@ -24,7 +24,7 @@
 #include "talloc.h"
 
 #include "img_convert.h"
-#include "sub.h"
+#include "osd.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/sws_utils.h"

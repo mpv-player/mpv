@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "sub/sub.h"
+#include "osd.h"
 
 struct sh_stream;
 struct ass_track;

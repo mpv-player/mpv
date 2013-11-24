@@ -36,7 +36,7 @@
 #include "video/filter/vf.h"
 #include "video/out/vo.h"
 #include "video/image_writer.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 
 #include "video/csputils.h"
 

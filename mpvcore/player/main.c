@@ -56,7 +56,7 @@
 #include "demux/demux.h"
 #include "stream/stream.h"
 #include "sub/ass_mp.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 #include "video/decode/dec_video.h"
 #include "video/out/vo.h"
 

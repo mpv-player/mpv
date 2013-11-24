@@ -41,7 +41,7 @@
 #include "audio/out/ao.h"
 #include "demux/demux.h"
 #include "stream/stream.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 #include "video/filter/vf.h"
 #include "video/decode/dec_video.h"
 #include "video/out/vo.h"

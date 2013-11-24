@@ -43,7 +43,7 @@
 #include "mpvcore/mp_msg.h"
 
 #include "spudec.h"
-#include "sub.h"
+#include "osd.h"
 #include "mpvcore/mp_common.h"
 #include "video/csputils.h"
 

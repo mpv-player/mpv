@@ -43,7 +43,7 @@
 #include "vo.h"
 #include "x11_common.h"
 #include "video/csputils.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 #include "mpvcore/m_option.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"

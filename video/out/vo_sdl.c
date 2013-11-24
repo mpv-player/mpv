@@ -38,7 +38,7 @@
 
 #include "osdep/timer.h"
 
-#include "sub/sub.h"
+#include "sub/osd.h"
 
 #include "video/mp_image.h"
 #include "video/vfcap.h"

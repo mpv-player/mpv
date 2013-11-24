@@ -27,7 +27,7 @@
 #include "talloc.h"
 #include "mpvcore/mp_common.h"
 #include "mpvcore/mp_msg.h"
-#include "sub.h"
+#include "osd.h"
 
 static const char osd_font_pfb[] =
 #include "sub/osd_font.h"

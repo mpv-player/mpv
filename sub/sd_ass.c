@@ -30,7 +30,6 @@
 #include "mpvcore/mp_msg.h"
 #include "video/csputils.h"
 #include "video/mp_image.h"
-#include "sub.h"
 #include "dec_sub.h"
 #include "ass_mp.h"
 #include "sd.h"

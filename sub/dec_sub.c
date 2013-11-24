@@ -25,7 +25,6 @@
 #include "config.h"
 #include "demux/demux.h"
 #include "sd.h"
-#include "sub.h"
 #include "dec_sub.h"
 #include "mpvcore/options.h"
 #include "mpvcore/mp_msg.h"

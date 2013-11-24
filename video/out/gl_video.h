@@ -19,7 +19,7 @@
 
 #include <stdbool.h>
 
-#include "sub/sub.h"
+#include "sub/osd.h"
 #include "gl_common.h"
 
 struct lut3d {

@@ -38,7 +38,7 @@
 #include "vo.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 
 #include "gl_common.h"
 #include "gl_osd.h"

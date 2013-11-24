@@ -4,7 +4,7 @@
 
 #include "config.h"
 #include "talloc.h"
-#include "sub.h"
+#include "osd.h"
 
 void osd_init_backend(struct osd_state *osd)
 {

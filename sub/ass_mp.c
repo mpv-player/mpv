@@ -33,7 +33,7 @@
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/path.h"
 #include "ass_mp.h"
-#include "sub/sub.h"
+#include "osd.h"
 #include "stream/stream.h"
 #include "mpvcore/options.h"
 

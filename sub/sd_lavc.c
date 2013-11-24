@@ -28,7 +28,6 @@
 #include "video/mp_image.h"
 #include "sd.h"
 #include "dec_sub.h"
-#include "sub.h"
 
 struct sd_lavc_priv {
     AVCodecContext *avctx;

@@ -5,7 +5,7 @@
 #include <inttypes.h>
 
 #include "gl_common.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 
 struct mpgl_osd_part {
     enum sub_bitmap_format format;

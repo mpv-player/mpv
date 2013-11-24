@@ -44,8 +44,6 @@
 #include "gl_common.h"
 #include "mpvcore/options.h"
 #include "mpvcore/m_option.h"
-#include "sub/sub.h"
-#include "bitmap_packer.h"
 
 //! \defgroup glgeneral OpenGL general helper functions
 

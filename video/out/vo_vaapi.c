@@ -32,7 +32,7 @@
 #include "mpvcore/mp_msg.h"
 #include "video/out/vo.h"
 #include "video/memcpy_pic.h"
-#include "sub/sub.h"
+#include "sub/osd.h"
 #include "sub/img_convert.h"
 #include "x11_common.h"
 
