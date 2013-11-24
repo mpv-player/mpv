@@ -1,5 +1,6 @@
 import os
 from inflectors import DependencyInflector
+from waflib.ConfigSet import ConfigSet
 
 __all__ = [
     "check_pkg_config", "check_cc", "check_statement", "check_libs",
@@ -66,12 +67,22 @@ def check_pkg_config(*args, **kw_ext):
             'package': " ".join(packages),
             'args':    sargs + pkgc_args }
         opts = __merge_options__(dependency_identifier, defaults, kw_ext, kw)
-        if ctx.check_cfg(**opts):
-            return True
-        else:
+
+        # Warning! Megahack incoming: when parsing flags in `parse_flags` waf
+        # uses append_unique. This appends the flags only if they aren't
+        # already present in the list. This causes breakage if one checks for
+        # multiple pkg-config packages in a single call as stuff like -lm is
+        # added only at its first occurrence.
+        original_append_unique  = ConfigSet.append_unique
+        ConfigSet.append_unique = ConfigSet.append_value
+        result = bool(ctx.check_cfg(**opts))
+        ConfigSet.append_unique = original_append_unique
+
+        if not result:
             defkey = DependencyInflector(dependency_identifier).define_key()
             ctx.undefine(defkey)
             return False
+        return result
     return fn
 
 def check_headers(*headers):
