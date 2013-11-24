@@ -122,9 +122,10 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         for (int i = 0; i < mpctx->num_sources; i++) {
             uninit_subs(mpctx->sources[i]);
             struct demuxer *demuxer = mpctx->sources[i];
-            if (demuxer->stream != mpctx->stream)
-                free_stream(demuxer->stream);
+            struct stream *stream = demuxer->stream;
             free_demuxer(demuxer);
+            if (stream != mpctx->stream)
+                free_stream(stream);
         }
         talloc_free(mpctx->sources);
         mpctx->sources = NULL;
