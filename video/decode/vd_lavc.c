@@ -757,8 +757,9 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
     }
     *reordered_pts = (union pts){.i = pic->reordered_opaque}.d;
 
+    // Skipped frame, or delayed output due to multithreaded decoding.
     if (!got_picture)
-        return 0;                     // skipped image
+        return 0;
 
     update_image_params(vd, pic);
 
