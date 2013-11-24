@@ -45,10 +45,10 @@ __compiler_map__ = {
 }
 
 def __apply_map__(ctx, fnmap):
-    if 'CC_ENV_VARS' not in ctx.env:
-        ctx.env.CC_ENV_VARS = str(__get_cc_env_vars__(ctx.env.CC))
+    if not getattr(ctx, 'CC_ENV_VARS', None):
+        ctx.CC_ENV_VARS = str(__get_cc_env_vars__(ctx.env.CC))
     for k, fn in fnmap.items():
-        if ctx.env.CC_ENV_VARS.find(k) > 0:
+        if ctx.CC_ENV_VARS.find(k) > 0:
             fn(ctx)
 
 def configure(ctx):
