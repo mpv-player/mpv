@@ -419,6 +419,8 @@ def build(ctx):
         resources       = [node.srcpath() for node in resources_nodes]
         cprog_kwargs['mac_resources'] = resources
 
+        ctx.install_files(ctx.env.BINDIR, 'mpv')
+
     ctx(
         target       = "mpv",
         source       = ctx.filtered_sources(sources),
