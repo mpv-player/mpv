@@ -15,7 +15,7 @@ class Dependency(object):
         self.identifier, self.desc = dependency['name'], dependency['desc']
         self.attributes = self.__parse_attributes__(dependency)
 
-        ctx.env.known_deps.add(self.identifier)
+        known_deps.add(self.identifier)
         for dep_key in ['deps', 'deps_any', 'deps_neg']:
             if dep_key in self.attributes:
                 deps = self.attributes[dep_key]
@@ -127,18 +127,18 @@ def configure(ctx):
         target = "os-{0}".format(ctx.env.DEST_OS)
         ctx.start_msg('Detected target OS:')
         ctx.end_msg(target)
-        ctx.env.known_deps.add(target)
-        ctx.env.satisfied_deps.add(target)
+        ctx.known_deps.add(target)
+        ctx.satisfied_deps.add(target)
 
     ctx.deps_msg = {}
-    ctx.env['known_deps'] = set()
-    ctx.env['satisfied_deps'] = set()
+    ctx.known_deps = set()
+    ctx.satisfied_deps = set()
     __detect_target_os_dependency__(ctx)
 
 @conf
 def ensure_dependency_is_known(ctx, *depnames):
     deps = set([d for d in depnames if not d.startswith('os-')])
-    if not deps <= ctx.env.known_deps:
+    if not deps <= ctx.known_deps:
         raise ConfigurationError(
             "error in dependencies definition: some dependencies in"
             " {0} are unknown.".format(deps))
@@ -146,7 +146,7 @@ def ensure_dependency_is_known(ctx, *depnames):
 
 @conf
 def mark_satisfied(ctx, dependency_identifier):
-    ctx.env.satisfied_deps.add(dependency_identifier)
+    ctx.satisfied_deps.add(dependency_identifier)
 
 @conf
 def add_optional_message(ctx, dependency_identifier, message):
@@ -156,8 +156,8 @@ def add_optional_message(ctx, dependency_identifier, message):
 def parse_dependencies(ctx, dependencies):
     def __check_dependency__(ctx, dependency):
         Dependency(ctx,
-                   ctx.env.known_deps,
-                   ctx.env.satisfied_deps,
+                   ctx.known_deps,
+                   ctx.satisfied_deps,
                    dependency).check()
 
     [__check_dependency__(ctx, dependency) for dependency in dependencies]
@@ -165,7 +165,17 @@ def parse_dependencies(ctx, dependencies):
 @conf
 def dependency_satisfied(ctx, dependency_identifier):
     ctx.ensure_dependency_is_known(dependency_identifier)
-    return dependency_identifier in ctx.env.satisfied_deps
+    return dependency_identifier in ctx.satisfied_deps
+
+@conf
+def store_dependencies_lists(ctx):
+    ctx.env.known_deps     = list(ctx.known_deps)
+    ctx.env.satisfied_deps = list(ctx.satisfied_deps)
+
+@conf
+def unpack_dependencies_lists(ctx):
+    ctx.known_deps     = set(ctx.env.known_deps)
+    ctx.satisfied_deps = set(ctx.env.satisfied_deps)
 
 def filtered_sources(ctx, sources):
     def __source_file__(source):
@@ -178,10 +188,10 @@ def filtered_sources(ctx, sources):
         if dependency.find('!') == 0:
             dependency = dependency.lstrip('!')
             ctx.ensure_dependency_is_known(dependency)
-            return dependency not in ctx.env.satisfied_deps
+            return dependency not in ctx.satisfied_deps
         else:
             ctx.ensure_dependency_is_known(dependency)
-            return dependency in ctx.env.satisfied_deps
+            return dependency in ctx.satisfied_deps
 
     def __unpack_and_check_filter__(source):
         try:
@@ -195,7 +205,7 @@ def filtered_sources(ctx, sources):
 
 def env_fetch(tx):
     def fn(ctx):
-        deps = list(ctx.env.satisfied_deps)
+        deps = ctx.env.satisfied_deps
         lists = [ctx.env[tx(dep)] for dep in deps if (tx(dep) in ctx.env)]
         return [item for sublist in lists for item in sublist]
     return fn

@@ -755,5 +755,8 @@ def configure(ctx):
     if not ctx.dependency_satisfied('build-date'):
         ctx.env.CFLAGS += ['-DNO_BUILD_TIMESTAMPS']
 
+    ctx.store_dependencies_lists()
+
 def build(ctx):
+    ctx.unpack_dependencies_lists()
     ctx.load('wscript_build')
