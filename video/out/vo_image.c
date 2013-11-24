@@ -95,7 +95,6 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         .w = asp.orgw,
         .h = asp.orgh,
         .display_par = sar / dar,
-        .video_par = dar / sar,
     };
 
     osd_draw_on_image(osd, dim, osd->vo_pts, OSD_DRAW_SUB_ONLY, p->current);

@@ -76,8 +76,7 @@ static bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b)
 {
     return a.w == b.w && a.h == b.h && a.ml == b.ml && a.mt == b.mt
         && a.mr == b.mr && a.mb == b.mb
-        && a.display_par == b.display_par
-        && a.video_par == b.video_par;
+        && a.display_par == b.display_par;
 }
 
 struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)

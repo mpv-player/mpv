@@ -1461,8 +1461,7 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         res = (struct mp_osd_res) {
             .w = p->image_width,
             .h = p->image_height,
-            .display_par = 1.0 / p->osd_res.video_par,
-            .video_par = p->osd_res.video_par,
+            .display_par = 1.0 / vo->aspdat.par,
         };
         gl->MatrixMode(GL_MODELVIEW);
         gl->PushMatrix();

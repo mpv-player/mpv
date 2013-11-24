@@ -73,7 +73,6 @@ static int config(struct vf_instance *vf,
         .mt = vf->priv->opt_top_margin,
         .mb = vf->priv->opt_bottom_margin,
         .display_par = sar / dar,
-        .video_par = dar / sar,
     };
 
     return vf_next_config(vf, vf->priv->outw, vf->priv->outh, d_width,

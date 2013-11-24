@@ -562,7 +562,6 @@ void vo_get_src_dst_rects(struct vo *vo, struct mp_rect *out_src,
         .w = vo->dwidth,
         .h = vo->dheight,
         .display_par = vo->aspdat.monitor_par,
-        .video_par = vo->aspdat.par,
     };
     if (opts->keepaspect) {
         int scaled_width, scaled_height;

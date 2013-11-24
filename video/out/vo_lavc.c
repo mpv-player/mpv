@@ -493,7 +493,6 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
             .w = asp.orgw,
             .h = asp.orgh,
             .display_par = sar / dar,
-            .video_par = dar / sar,
         };
 
         mp_image_set_colorspace_details(vc->lastimg, &vc->colorspace);

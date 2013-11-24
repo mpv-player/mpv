@@ -427,7 +427,6 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         .w = p->image_params.w,
         .h = p->image_params.h,
         .display_par = 1.0 / vo->aspdat.par,
-        .video_par = vo->aspdat.par,
     };
 
     struct mp_osd_res *res;

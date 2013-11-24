@@ -620,7 +620,6 @@ static void draw_osd(struct vo *vo, struct osd_state *osd)
         .w = ctx->image_width,
         .h = ctx->image_height,
         .display_par = 1.0 / vo->aspdat.par,
-        .video_par = vo->aspdat.par,
     };
 
     osd_draw_on_image(osd, res, osd->vo_pts, 0, &img);

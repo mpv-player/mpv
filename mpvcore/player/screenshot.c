@@ -283,7 +283,6 @@ static void add_subs(struct MPContext *mpctx, struct mp_image *image)
         .w = image->w,
         .h = image->h,
         .display_par = sar / dar,
-        .video_par = dar / sar,
     };
 
     osd_draw_on_image(mpctx->osd, res, mpctx->osd->vo_pts,
