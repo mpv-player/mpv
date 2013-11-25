@@ -99,9 +99,9 @@ def __get_osscflags__():
     return osscflags
 
 def __check_oss_headers__(ctx, dependency_identifier):
-    ctx.check_cc(fragment=load_fragment('oss_audio_header.c'), use='soundcard',
-                 cflags=__get_osscflags__())
-
+    fn = check_cc(fragment=load_fragment('oss_audio_header.c'),
+                  use='soundcard', cflags=__get_osscflags__())
+    fn(ctx, dependency_identifier)
     return True
 
 def __check_oss_bsd__(ctxdependency_identifier):
