@@ -1639,6 +1639,8 @@ void mp_input_put_key_utf8(struct input_ctx *ictx, int mods, struct bstr t)
 
 void mp_input_put_axis(struct input_ctx *ictx, int direction, double value)
 {
+    if (value == 0.0)
+        return;
     input_lock(ictx);
     mp_input_feed_key(ictx, direction, value);
     input_unlock(ictx);
