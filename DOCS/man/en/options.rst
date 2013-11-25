@@ -1630,16 +1630,19 @@ OPTIONS
     Use the given profile(s), ``--profile=help`` displays a list of the
     defined profiles.
 
-``--pts-association-mode=<auto|decode|sort>``
+``--pts-association-mode=<decode|sort|auto>``
     Select the method used to determine which container packet timestamp
     corresponds to a particular output frame from the video decoder. Normally
     you should not need to change this option.
 
-    :auto:    Try to pick a working mode from the ones below automatically
-              (default)
-    :decoder: Use decoder reordering functionality.
+    :decoder: Use decoder reordering functionality. Unlike in classic MPlayer
+              and mplayer2, this includes a dTS fallback. (Default.)
     :sort:    Maintain a buffer of unused pts values and use the lowest value
               for the frame.
+    :auto:    Try to pick a working mode from the ones above automatically.
+
+    You can also try to use ``--no-correct-pts`` for files with completely
+    broken timestamps.
 
 ``--pvr=<option1:option2:...>``
     This option tunes various encoding properties of the PVR capture module.

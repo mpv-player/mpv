@@ -211,12 +211,13 @@ struct mp_image *video_decode(struct dec_video *d_video,
 {
     mp_image_t *mpi = NULL;
     struct MPOpts *opts = d_video->opts;
+    bool sort_pts = opts->user_pts_assoc_mode != 1 && opts->correct_pts;
     double pts = packet ? packet->pts : MP_NOPTS_VALUE;
 
     if (pts != MP_NOPTS_VALUE)
         d_video->last_packet_pts = pts;
 
-    if (opts->correct_pts && pts != MP_NOPTS_VALUE) {
+    if (sort_pts && pts != MP_NOPTS_VALUE) {
         int delay = -1;
         video_vd_control(d_video, VDCTRL_QUERY_UNSEEN_FRAMES, &delay);
         if (delay >= 0) {
@@ -270,7 +271,7 @@ struct mp_image *video_decode(struct dec_video *d_video,
         || pts == MP_NOPTS_VALUE)
         d_video->num_reordered_pts_problems++;
     prevpts = d_video->sorted_pts;
-    if (opts->correct_pts) {
+    if (sort_pts) {
         if (d_video->num_buffered_pts) {
             d_video->num_buffered_pts--;
             d_video->sorted_pts =

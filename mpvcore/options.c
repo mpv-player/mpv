@@ -811,6 +811,7 @@ const struct MPOpts mp_default_opts = {
     .edition_id = -1,
     .default_max_pts_correction = -1,
     .correct_pts = 1,
+    .user_pts_assoc_mode = 1,
     .initial_audio_sync = 1,
     .term_osd = 2,
     .consolecontrols = 1,

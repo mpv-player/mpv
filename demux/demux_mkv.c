@@ -2373,6 +2373,8 @@ static int handle_block(demuxer_t *demuxer, struct block_info *block_info)
                      * values being the same) */
                     if (i == 0 || track->default_duration)
                         dp->pts = mkv_d->last_pts + i * track->default_duration;
+                    if (track->ms_compat)
+                        MPSWAP(double, dp->pts, dp->dts);
                     dp->duration = block_duration / 1e9;
                     demuxer_add_packet(demuxer, stream, dp);
                 }
