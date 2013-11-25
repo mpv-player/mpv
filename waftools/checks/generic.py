@@ -56,8 +56,14 @@ def check_cc(**kw_ext):
 def check_pkg_config(*args, **kw_ext):
     def fn(ctx, dependency_identifier, **kw):
         argsl     = list(args)
-        packages  = [el for (i, el) in enumerate(args) if even(i)]
-        sargs     = [i for i in args if i] # remove None
+        packages  = args[::2]
+        verchecks = args[1::2]
+        sargs     = []
+        for i in range(0, len(packages)):
+            if i < len(verchecks):
+                sargs.append(packages[i] + ' ' + verchecks[i])
+            else:
+                sargs.append(packages[i])
         pkgc_args = ["--libs", "--cflags"]
         if ctx.dependency_satisfied('static-build'):
             pkgc_args += ["--static"]
