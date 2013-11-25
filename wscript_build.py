@@ -96,7 +96,6 @@ def build(ctx):
 
     timer_c = {
         'win32':  'osdep/timer-win2.c',
-        'cygwin': 'osdep/timer-win2.c',
         'darwin': 'osdep/timer-darwin.c',
     }.get(ctx.env.DEST_OS, "osdep/timer-linux.c")
 

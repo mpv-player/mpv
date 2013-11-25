@@ -121,7 +121,7 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     mp_lua_uninit(mpctx);
 #endif
 
-#if defined(__MINGW32__) || defined(__CYGWIN__)
+#if defined(__MINGW32__)
     timeEndPeriod(1);
 #endif
 
