@@ -41,11 +41,6 @@ static struct bstr get_ext(struct bstr s)
     return bstr_splice(s, dotpos + 1, s.len);
 }
 
-struct subfn {
-    int priority;
-    char *fname;
-};
-
 static int compare_sub_filename(const void *a, const void *b)
 {
     const struct subfn *s1 = a;
@@ -135,14 +130,15 @@ static void append_dir_subtitles(struct MPOpts *opts,
 
         // we have a (likely) subtitle file
         int prio = 0;
+        char *found_lang = NULL;
         if (opts->sub_lang) {
             if (bstr_startswith(tmp_fname_trim, f_fname_trim)) {
                 struct bstr lang = guess_lang_from_filename(tmp_fname_trim);
                 if (lang.len) {
                     for (int n = 0; opts->sub_lang[n]; n++) {
-                        if (bstr_startswith(lang,
-                                            bstr0(opts->sub_lang[n]))) {
+                        if (bstr_startswith0(lang, opts->sub_lang[n])) {
                             prio = 4; // matches the movie name + lang extension
+                            found_lang = opts->sub_lang[n];
                             break;
                         }
                     }
@@ -177,6 +173,7 @@ static void append_dir_subtitles(struct MPOpts *opts,
 
                 sub->priority = prio;
                 sub->fname    = subpath;
+                sub->lang     = found_lang;
             } else
                 talloc_free(subpath);
         }
@@ -217,9 +214,10 @@ static void filter_subidx(struct subfn **slist, int *nsub)
     }
 }
 
-char **find_text_subtitles(struct MPOpts *opts, const char *fname)
+// Return a list of subtitles found, sorted by priority.
+// Last element is terminated with a fname==NULL entry.
+struct subfn *find_text_subtitles(struct MPOpts *opts, const char *fname)
 {
-    char **subnames = NULL;
     struct subfn *slist = talloc_array_ptrtype(NULL, slist, 1);
     int n = 0;
 
@@ -249,10 +247,8 @@ char **find_text_subtitles(struct MPOpts *opts, const char *fname)
     // Sort subs by priority and append them
     qsort(slist, n, sizeof(*slist), compare_sub_priority);
 
-    subnames = talloc_array_ptrtype(NULL, subnames, n);
-    for (int i = 0; i < n; i++)
-        subnames[i] = talloc_strdup(subnames, slist[i].fname);
+    struct subfn z = {0};
+    MP_TARRAY_APPEND(NULL, slist, n, z);
 
-    talloc_free(slist);
-    return subnames;
+    return slist;
 }

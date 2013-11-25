@@ -21,6 +21,12 @@
 
 struct MPOpts;
 
-char **find_text_subtitles(struct MPOpts *opts, const char *fname);
+struct subfn {
+    int priority;
+    char *fname;
+    char *lang;
+};
+
+struct subfn *find_text_subtitles(struct MPOpts *opts, const char *fname);
 
 #endif /* MPLAYER_FINDFILES_H */
