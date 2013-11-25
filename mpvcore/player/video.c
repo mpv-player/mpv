@@ -236,7 +236,6 @@ static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
 
     init_filter_params(mpctx);
 
-    frame->pts = d_video->pts;
     mp_image_set_params(frame, &d_video->vf_input); // force csp/aspect overrides
     vf_filter_frame(d_video->vfilter, frame);
     filter_output_queued_frame(mpctx);
@@ -284,46 +283,6 @@ static double update_video_attached_pic(struct MPContext *mpctx)
     return 0;
 }
 
-static void determine_frame_pts(struct MPContext *mpctx)
-{
-    struct dec_video *d_video = mpctx->d_video;
-    struct MPOpts *opts = mpctx->opts;
-
-    if (!opts->correct_pts) {
-        double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);
-        double pkt_pts = d_video->last_packet_pts;
-        if (d_video->pts == MP_NOPTS_VALUE)
-            d_video->pts = pkt_pts == MP_NOPTS_VALUE ? 0 : pkt_pts;
-
-        d_video->pts = d_video->pts + frame_time;
-        return;
-    }
-
-    if (opts->user_pts_assoc_mode)
-        d_video->pts_assoc_mode = opts->user_pts_assoc_mode;
-    else if (d_video->pts_assoc_mode == 0) {
-        if (d_video->codec_reordered_pts != MP_NOPTS_VALUE)
-            d_video->pts_assoc_mode = 1;
-        else
-            d_video->pts_assoc_mode = 2;
-    } else {
-        int probcount1 = d_video->num_reordered_pts_problems;
-        int probcount2 = d_video->num_sorted_pts_problems;
-        if (d_video->pts_assoc_mode == 2) {
-            int tmp = probcount1;
-            probcount1 = probcount2;
-            probcount2 = tmp;
-        }
-        if (probcount1 >= probcount2 * 1.5 + 2) {
-            d_video->pts_assoc_mode = 3 - d_video->pts_assoc_mode;
-            MP_WARN(mpctx, "Switching to pts association mode "
-                    "%d.\n", d_video->pts_assoc_mode);
-        }
-    }
-    d_video->pts = d_video->pts_assoc_mode == 1 ?
-                   d_video->codec_reordered_pts : d_video->sorted_pts;
-}
-
 double update_video(struct MPContext *mpctx, double endpts)
 {
     struct dec_video *d_video = mpctx->d_video;
@@ -356,7 +315,6 @@ double update_video(struct MPContext *mpctx, double endpts)
             video_decode(d_video, pkt, framedrop_type);
         talloc_free(pkt);
         if (decoded_frame) {
-            determine_frame_pts(mpctx);
             filter_video(mpctx, decoded_frame);
         } else if (!pkt) {
             if (!load_next_vo_frame(mpctx, true))

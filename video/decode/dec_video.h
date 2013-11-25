@@ -51,6 +51,8 @@ struct dec_video {
     double prev_sorted_pts;
     int num_sorted_pts_problems;
     int pts_assoc_mode;
+
+    // PTS of the last decoded frame (often overwritten by player)
     double pts;
 
     float stream_aspect;  // aspect ratio in media headers (DVD IFO files)
