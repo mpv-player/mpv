@@ -65,7 +65,7 @@ const m_option_t lavfdopts_conf[] = {
     OPT_INTRANGE("probescore", lavfdopts.probescore, 0, 0, 100),
     OPT_STRING("cryptokey", lavfdopts.cryptokey, 0),
     OPT_CHOICE("genpts-mode", lavfdopts.genptsmode, 0,
-               ({"auto", 0}, {"lavf", 1}, {"builtin", 2}, {"no", 3})),
+               ({"lavf", 1}, {"no", 0})),
     OPT_STRING("o", lavfdopts.avopt, 0),
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -83,9 +83,6 @@ typedef struct lavf_priv {
     int num_streams;
     int cur_program;
     char *mime_type;
-    bool genpts_hack;
-    AVPacket *packets[MAX_PKT_QUEUE];
-    int num_packets;
 } lavf_priv_t;
 
 struct format_hack {
@@ -537,18 +534,8 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
 
     if (lavfdopts->cryptokey)
         parse_cryptokey(avfc, lavfdopts->cryptokey);
-    if (matches_avinputformat_name(priv, "avi")) {
-        /* for avi libavformat returns the avi timestamps in .dts,
-         * some made-up stuff that's not really pts in .pts */
-    } else {
-        int mode = lavfdopts->genptsmode;
-        if (mode == 0 && opts->correct_pts)
-            mode = demuxer->stream->uncached_type == STREAMTYPE_DVD ? 2 : 1;
-        if (mode == 1)
-            avfc->flags |= AVFMT_FLAG_GENPTS;
-        if (mode == 2)
-            priv->genpts_hack = true;
-    }
+    if (lavfdopts->genptsmode)
+        avfc->flags |= AVFMT_FLAG_GENPTS;
     if (opts->index_mode == 0)
         avfc->flags |= AVFMT_FLAG_IGNIDX;
 
@@ -683,86 +670,9 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     return 0;
 }
 
-static void seek_reset(demuxer_t *demux)
-{
-    lavf_priv_t *priv = demux->priv;
-
-    for (int n = 0; n < priv->num_packets; n++)
-        talloc_free(priv->packets[n]);
-    priv->num_packets = 0;
-}
-
 static void destroy_avpacket(void *pkt)
 {
     av_free_packet(pkt);
-}
-
-static int read_more_av_packets(demuxer_t *demux)
-{
-    lavf_priv_t *priv = demux->priv;
-
-    if (priv->num_packets >= MAX_PKT_QUEUE)
-        return -1;
-
-    AVPacket *pkt = talloc(NULL, AVPacket);
-    if (av_read_frame(priv->avfc, pkt) < 0) {
-        talloc_free(pkt);
-        return -2; // eof
-    }
-    talloc_set_destructor(pkt, destroy_avpacket);
-
-    add_new_streams(demux);
-
-    assert(pkt->stream_index >= 0 && pkt->stream_index < priv->num_streams);
-    struct sh_stream *stream = priv->streams[pkt->stream_index];
-
-    if (!demuxer_stream_is_selected(demux, stream)) {
-        talloc_free(pkt);
-        return 0; // skip
-    }
-
-    // If the packet has pointers to temporary fields that could be
-    // overwritten/freed by next av_read_frame(), copy them to persistent
-    // allocations so we can safely queue the packet for any length of time.
-    if (av_dup_packet(pkt) < 0)
-        abort();
-
-    priv->packets[priv->num_packets++] = pkt;
-    talloc_steal(priv, pkt);
-    return 1;
-}
-
-static int read_av_packet(demuxer_t *demux, AVPacket **pkt)
-{
-    lavf_priv_t *priv = demux->priv;
-
-    if (priv->num_packets < 1) {
-        int r = read_more_av_packets(demux);
-        if (r <= 0)
-            return r;
-    }
-
-    AVPacket *next = priv->packets[0];
-    if (priv->genpts_hack && next->dts != AV_NOPTS_VALUE) {
-        int n = 1;
-        while (next->pts == AV_NOPTS_VALUE) {
-            while (n >= priv->num_packets) {
-                if (read_more_av_packets(demux) < 0)
-                    goto end; // queue limit or EOF reached - just use as is
-            }
-            AVPacket *cur = priv->packets[n];
-            if (cur->stream_index == next->stream_index) {
-                if (next->dts < cur->dts && cur->pts != cur->dts)
-                    next->pts = cur->dts;
-            }
-            n++;
-        }
-    }
-
-end:
-    MP_TARRAY_REMOVE_AT(priv->packets, priv->num_packets, 0);
-    *pkt = next;
-    return 1;
 }
 
 static int demux_lavf_fill_buffer(demuxer_t *demux)
@@ -771,13 +681,29 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     demux_packet_t *dp;
     mp_msg(MSGT_DEMUX, MSGL_DBG2, "demux_lavf_fill_buffer()\n");
 
-    AVPacket *pkt;
-    int r = read_av_packet(demux, &pkt);
-    if (r <= 0)
-        return r == 0; // don't signal EOF if skipping a packet
+    AVPacket *pkt = talloc(NULL, AVPacket);
+    if (av_read_frame(priv->avfc, pkt) < 0) {
+        talloc_free(pkt);
+        return 0; // eof
+    }
+    talloc_set_destructor(pkt, destroy_avpacket);
 
-    AVStream *st = priv->avfc->streams[pkt->stream_index];
+    add_new_streams(demux);
+
+    assert(pkt->stream_index >= 0 && pkt->stream_index < priv->num_streams);
     struct sh_stream *stream = priv->streams[pkt->stream_index];
+    AVStream *st = priv->avfc->streams[pkt->stream_index];
+
+    if (!demuxer_stream_is_selected(demux, stream)) {
+        talloc_free(pkt);
+        return 1; // don't signal EOF if skipping a packet
+    }
+
+    // If the packet has pointers to temporary fields that could be
+    // overwritten/freed by next av_read_frame(), copy them to persistent
+    // allocations so we can safely queue the packet for any length of time.
+    if (av_dup_packet(pkt) < 0)
+        abort();
 
     dp = new_demux_packet_fromdata(pkt->data, pkt->size);
     dp->avpacket = talloc_steal(dp, pkt);
@@ -812,8 +738,6 @@ static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags)
     int avsflags = 0;
     mp_msg(MSGT_DEMUX, MSGL_DBG2, "demux_seek_lavf(%p, %f, %d)\n",
            demuxer, rel_seek_secs, flags);
-
-    seek_reset(demuxer);
 
     if (flags & SEEK_ABSOLUTE)
         priv->last_pts = 0;
@@ -980,7 +904,6 @@ redo:
         avio_flush(priv->avfc->pb);
         av_seek_frame(priv->avfc, 0, stream_tell(demuxer->stream),
                       AVSEEK_FLAG_BYTE);
-        seek_reset(demuxer);
         avio_flush(priv->avfc->pb);
         return DEMUXER_CTRL_OK;
     default:
