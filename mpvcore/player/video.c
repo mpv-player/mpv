@@ -269,37 +269,19 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
 static struct demux_packet *video_read_frame(struct MPContext *mpctx)
 {
     struct dec_video *d_video = mpctx->d_video;
-    demuxer_t *demuxer = d_video->header->demuxer;
-    float pts1 = d_video->last_pts;
-
+    double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);
     struct demux_packet *pkt = demux_read_packet(d_video->header);
     if (!pkt)
         return NULL; // EOF
 
-    if (pkt->pts != MP_NOPTS_VALUE)
-        d_video->last_pts = pkt->pts;
-
-    float frame_time = d_video->fps > 0 ? 1.0f / d_video->fps : 0;
-
-    // override frame_time for variable/unknown FPS formats:
-    if (!mpctx->opts->force_fps) {
-        double next_pts = demux_get_next_pts(d_video->header);
-        double d = next_pts == MP_NOPTS_VALUE ? d_video->last_pts - pts1
-                                              : next_pts - d_video->last_pts;
-        if (d >= 0) {
-            if (demuxer->type == DEMUXER_TYPE_TV) {
-                if (d > 0)
-                    d_video->fps = 1.0f / d;
-                frame_time = d;
-            } else {
-                if ((int)d_video->fps <= 1)
-                    frame_time = d;
-            }
-        }
+    if (d_video->last_pts == MP_NOPTS_VALUE) {
+        d_video->last_pts = pkt->pts == MP_NOPTS_VALUE ? 0 : pkt->pts;
+        d_video->pts = d_video->last_pts;
     }
 
-    d_video->pts = d_video->last_pts;
-    d_video->next_frame_time = frame_time;
+    double prev = d_video->pts;
+    d_video->pts = d_video->pts + frame_time;
+    d_video->last_pts = prev;
     return pkt;
 }
 
@@ -311,7 +293,7 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         // In nocorrect-pts mode there is no way to properly time these frames
         if (load_next_vo_frame(mpctx, false))
             break;
-        frame_time = d_video->next_frame_time;
+        frame_time = d_video->pts - d_video->last_pts;
         if (mpctx->restart_playback)
             frame_time = 0;
         struct demux_packet *pkt = video_read_frame(mpctx);

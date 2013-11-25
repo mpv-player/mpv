@@ -59,7 +59,6 @@ struct dec_video {
     float initial_decoder_aspect;
 
     // State used only by player/video.c
-    float next_frame_time;
     double last_pts;
 };
 
