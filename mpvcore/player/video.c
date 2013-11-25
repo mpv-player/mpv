@@ -374,8 +374,8 @@ static void determine_frame_pts(struct MPContext *mpctx)
         }
         if (probcount1 >= probcount2 * 1.5 + 2) {
             d_video->pts_assoc_mode = 3 - d_video->pts_assoc_mode;
-            MP_VERBOSE(mpctx, "Switching to pts association mode "
-                       "%d.\n", d_video->pts_assoc_mode);
+            MP_WARN(mpctx, "Switching to pts association mode "
+                    "%d.\n", d_video->pts_assoc_mode);
         }
     }
     d_video->pts = d_video->pts_assoc_mode == 1 ?
