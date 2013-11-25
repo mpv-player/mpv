@@ -213,6 +213,9 @@ struct mp_image *video_decode(struct dec_video *d_video,
     struct MPOpts *opts = d_video->opts;
     double pts = packet ? packet->pts : MP_NOPTS_VALUE;
 
+    if (pts != MP_NOPTS_VALUE)
+        d_video->last_packet_pts = pts;
+
     if (opts->correct_pts && pts != MP_NOPTS_VALUE) {
         int delay = -1;
         video_vd_control(d_video, VDCTRL_QUERY_UNSEEN_FRAMES, &delay);

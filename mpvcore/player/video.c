@@ -119,6 +119,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     struct dec_video *d_video = talloc_zero(NULL, struct dec_video);
     mpctx->d_video = d_video;
     d_video->last_pts = MP_NOPTS_VALUE;
+    d_video->last_packet_pts = MP_NOPTS_VALUE;
     d_video->opts = mpctx->opts;
     d_video->header = sh;
     d_video->fps = sh->video->fps;
@@ -266,56 +267,6 @@ static int check_framedrop(struct MPContext *mpctx, double frame_time)
     return 0;
 }
 
-static struct demux_packet *video_read_frame(struct MPContext *mpctx)
-{
-    struct dec_video *d_video = mpctx->d_video;
-    double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);
-    struct demux_packet *pkt = demux_read_packet(d_video->header);
-    if (!pkt)
-        return NULL; // EOF
-
-    if (d_video->last_pts == MP_NOPTS_VALUE) {
-        d_video->last_pts = pkt->pts == MP_NOPTS_VALUE ? 0 : pkt->pts;
-        d_video->pts = d_video->last_pts;
-    }
-
-    double prev = d_video->pts;
-    d_video->pts = d_video->pts + frame_time;
-    d_video->last_pts = prev;
-    return pkt;
-}
-
-static double update_video_nocorrect_pts(struct MPContext *mpctx)
-{
-    struct dec_video *d_video = mpctx->d_video;
-    double frame_time = 0;
-    while (1) {
-        // In nocorrect-pts mode there is no way to properly time these frames
-        if (load_next_vo_frame(mpctx, false))
-            break;
-        frame_time = d_video->pts - d_video->last_pts;
-        if (mpctx->restart_playback)
-            frame_time = 0;
-        struct demux_packet *pkt = video_read_frame(mpctx);
-        if (!pkt)
-            return -1;
-        if (mpctx->d_audio)
-            mpctx->delay -= frame_time;
-        // video_read_frame can change fps (e.g. for ASF video)
-        update_fps(mpctx);
-        int framedrop_type = check_framedrop(mpctx, frame_time);
-
-        pkt->pts = d_video->pts;
-        void *decoded_frame = video_decode(d_video, pkt, framedrop_type);
-        talloc_free(pkt);
-        if (decoded_frame) {
-            filter_video(mpctx, decoded_frame);
-        }
-        break;
-    }
-    return frame_time;
-}
-
 static double update_video_attached_pic(struct MPContext *mpctx)
 {
     struct dec_video *d_video = mpctx->d_video;
@@ -337,6 +288,16 @@ static void determine_frame_pts(struct MPContext *mpctx)
 {
     struct dec_video *d_video = mpctx->d_video;
     struct MPOpts *opts = mpctx->opts;
+
+    if (!opts->correct_pts) {
+        double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);
+        double pkt_pts = d_video->last_packet_pts;
+        if (d_video->pts == MP_NOPTS_VALUE)
+            d_video->pts = pkt_pts == MP_NOPTS_VALUE ? 0 : pkt_pts;
+
+        d_video->pts = d_video->pts + frame_time;
+        return;
+    }
 
     if (opts->user_pts_assoc_mode)
         d_video->pts_assoc_mode = opts->user_pts_assoc_mode;
@@ -369,8 +330,6 @@ double update_video(struct MPContext *mpctx, double endpts)
     struct dec_video *d_video = mpctx->d_video;
     struct vo *video_out = mpctx->video_out;
     vf_control(d_video->vfilter, VFCTRL_SET_OSD_OBJ, mpctx->osd); // for vf_sub
-    if (!mpctx->opts->correct_pts)
-        return update_video_nocorrect_pts(mpctx);
 
     if (d_video->header->attached_picture)
         return update_video_attached_pic(mpctx);
