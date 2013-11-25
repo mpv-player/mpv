@@ -3424,7 +3424,9 @@ static void handle_pause_on_low_cache(struct MPContext *mpctx)
                 unpause_player(mpctx);
         }
     } else {
-        if (cache >= 0 && cache <= opts->stream_cache_pause && !idle) {
+        if (cache >= 0 && cache <= opts->stream_cache_pause && !idle &&
+            opts->stream_cache_pause < opts->stream_cache_min_percent)
+        {
             bool prev_paused_user = opts->pause;
             pause_player(mpctx);
             mpctx->paused_for_cache = true;
