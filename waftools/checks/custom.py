@@ -76,28 +76,36 @@ def __fail_oss_check__(ctx):
     return False
 
 def __get_osslibdir__():
+    from waflib import Utils
+
     try:
-        cmd = ['sh', '-c', "'source /etc/oss.conf && echo $OSSLIBDIR'"]
+        cmd = ['sh', '-c', '. /etc/oss.conf && echo $OSSLIBDIR']
         p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE,
                                         stdout=Utils.subprocess.PIPE,
                                         stderr=Utils.subprocess.PIPE)
-        return p.communicate()[0]
+        return p.communicate()[0].rstrip()
     except Exception:
         return ""
 
 def __check_oss_headers__(ctx, dependency_identifier):
     import os
 
-    real_oss = ctx.check_cc(fragment=load_fragment('oss_audio_header.c'),
-                            use='soundcard')
+    osscflags = ''
+    osslibdir = __get_osslibdir__()
+    if osslibdir:
+        ossincdir   = os.path.join(osslibdir, 'include')
+        soundcard_h = os.path.join(ossincdir, 'sys', 'soundcard.h')
+        if os.path.exists(soundcard_h):
+            osscflags = '-I{0}'.format(ossincdir)
+
+    try:
+        real_oss = ctx.check_cc(fragment=load_fragment('oss_audio_header.c'),
+                                use='soundcard', cflags=osscflags)
+    except Exception:
+        real_oss = False
 
     if real_oss:
-        if os.path.exists('/etc/oss.conf'):
-            osslibdir   = __get_osslibdir__()
-            ossincdir   = os.path.join(osslibdir, 'include')
-            soundcard_h = os.path.join(ossincdir, 'sys', 'soundcard.h')
-            if os.path.exists(soundcard_h):
-                ctx.env.CFLAGS.append('-I{0}'.format(ossincdir))
+        ctx.env.CFLAGS.append(osscflags)
 
     return True
 
