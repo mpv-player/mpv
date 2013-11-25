@@ -69,8 +69,9 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders);
 void video_uninit(struct dec_video *d_video);
 
 struct demux_packet;
-void *video_decode(struct dec_video *d_video, struct demux_packet *packet,
-                   int drop_frame);
+struct mp_image *video_decode(struct dec_video *d_video,
+                              struct demux_packet *packet,
+                              int drop_frame);
 
 int video_get_colors(struct dec_video *d_video, const char *item, int *value);
 int video_set_colors(struct dec_video *d_video, const char *item, int value);

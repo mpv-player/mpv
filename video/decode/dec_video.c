@@ -205,8 +205,9 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
     return !!d_video->vd_driver;
 }
 
-void *video_decode(struct dec_video *d_video, struct demux_packet *packet,
-                   int drop_frame)
+struct mp_image *video_decode(struct dec_video *d_video,
+                              struct demux_packet *packet,
+                              int drop_frame)
 {
     mp_image_t *mpi = NULL;
     struct MPOpts *opts = d_video->opts;
