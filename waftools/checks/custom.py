@@ -87,9 +87,8 @@ def __get_osslibdir__():
     except Exception:
         return ""
 
-def __check_oss_headers__(ctx, dependency_identifier):
+def __get_osscflags__():
     import os
-
     osscflags = ''
     osslibdir = __get_osslibdir__()
     if osslibdir:
@@ -97,9 +96,11 @@ def __check_oss_headers__(ctx, dependency_identifier):
         soundcard_h = os.path.join(ossincdir, 'sys', 'soundcard.h')
         if os.path.exists(soundcard_h):
             osscflags = '-I{0}'.format(ossincdir)
+    return osscflags
 
+def __check_oss_headers__(ctx, dependency_identifier):
     ctx.check_cc(fragment=load_fragment('oss_audio_header.c'), use='soundcard',
-                 cflags=osscflags)
+                 cflags=__get_osscflags__())
 
     return True
 
@@ -112,7 +113,8 @@ def __check_oss_bsd__(ctxdependency_identifier):
         return __fail_oss_check__(ctx)
 
 def check_oss(ctx, dependency_identifier):
-    func = check_cc(fragment=load_fragment('oss_audio.c'), use='soundcard')
+    func = check_cc(fragment=load_fragment('oss_audio.c'), use='soundcard',
+                    cflags=__get_osscflags__())
     if func(ctx, dependency_identifier):
         ctx.define('PATH_DEV_DSP',   '/dev/dsp')
         ctx.define('PATH_DEV_MIXER', '/dev/mixer')
