@@ -206,10 +206,11 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
 }
 
 void *video_decode(struct dec_video *d_video, struct demux_packet *packet,
-                   int drop_frame, double pts)
+                   int drop_frame)
 {
     mp_image_t *mpi = NULL;
     struct MPOpts *opts = d_video->opts;
+    double pts = packet ? packet->pts : MP_NOPTS_VALUE;
 
     if (opts->correct_pts && pts != MP_NOPTS_VALUE) {
         int delay = -1;
@@ -242,7 +243,7 @@ void *video_decode(struct dec_video *d_video, struct demux_packet *packet,
         }
     }
 
-    mpi = d_video->vd_driver->decode(d_video, packet, drop_frame, &pts);
+    mpi = d_video->vd_driver->decode(d_video, packet, drop_frame);
 
     //------------------------ frame decoded. --------------------
 
@@ -255,6 +256,8 @@ void *video_decode(struct dec_video *d_video, struct demux_packet *packet,
         mpi->fields |= MP_IMGFIELD_TOP_FIRST;
     else if (opts->field_dominance == 1)
         mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
+
+    pts = mpi->pts;
 
     double prevpts = d_video->codec_reordered_pts;
     d_video->prev_codec_reordered_pts = prevpts;

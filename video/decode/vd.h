@@ -35,7 +35,7 @@ typedef struct vd_functions
     void (*uninit)(struct dec_video *vd);
     int (*control)(struct dec_video *vd, int cmd, void *arg);
     struct mp_image *(*decode)(struct dec_video *vd, struct demux_packet *pkt,
-                               int flags, double *reordered_pts);
+                               int flags);
 } vd_functions_t;
 
 // NULL terminated array of all drivers

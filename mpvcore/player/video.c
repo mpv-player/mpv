@@ -323,8 +323,8 @@ static double update_video_nocorrect_pts(struct MPContext *mpctx)
         update_fps(mpctx);
         int framedrop_type = check_framedrop(mpctx, frame_time);
 
-        void *decoded_frame = video_decode(d_video, pkt, framedrop_type,
-                                           d_video->pts);
+        pkt->pts = d_video->pts;
+        void *decoded_frame = video_decode(d_video, pkt, framedrop_type);
         talloc_free(pkt);
         if (decoded_frame) {
             filter_video(mpctx, decoded_frame);
@@ -343,7 +343,7 @@ static double update_video_attached_pic(struct MPContext *mpctx)
         return -1;
 
     struct mp_image *decoded_frame =
-            video_decode(d_video, d_video->header->attached_picture, 0, 0);
+            video_decode(d_video, d_video->header->attached_picture, 0);
     if (decoded_frame)
         filter_video(mpctx, decoded_frame);
     load_next_vo_frame(mpctx, true);
@@ -393,12 +393,9 @@ double update_video(struct MPContext *mpctx, double endpts)
     if (d_video->header->attached_picture)
         return update_video_attached_pic(mpctx);
 
-    double pts;
-
     while (1) {
         if (load_next_vo_frame(mpctx, false))
             break;
-        pts = MP_NOPTS_VALUE;
         struct demux_packet *pkt = NULL;
         while (1) {
             pkt = demux_read_packet(d_video->header);
@@ -409,16 +406,14 @@ double update_video(struct MPContext *mpctx, double endpts)
              * that must have packets at fixed timecode intervals. */
             talloc_free(pkt);
         }
-        if (pkt)
-            pts = pkt->pts;
-        if (pts != MP_NOPTS_VALUE)
-            pts += mpctx->video_offset;
-        if (pts >= mpctx->hrseek_pts - .005)
+        if (pkt && pkt->pts != MP_NOPTS_VALUE)
+            pkt->pts += mpctx->video_offset;
+        if (pkt && pkt->pts >= mpctx->hrseek_pts - .005)
             mpctx->hrseek_framedrop = false;
         int framedrop_type = mpctx->hrseek_active && mpctx->hrseek_framedrop ?
                              1 : check_framedrop(mpctx, -1);
         struct mp_image *decoded_frame =
-            video_decode(d_video, pkt, framedrop_type, pts);
+            video_decode(d_video, pkt, framedrop_type);
         talloc_free(pkt);
         if (decoded_frame) {
             determine_frame_pts(mpctx);
@@ -433,7 +428,7 @@ double update_video(struct MPContext *mpctx, double endpts)
     if (!video_out->frame_loaded)
         return 0;
 
-    pts = video_out->next_pts;
+    double pts = video_out->next_pts;
     if (pts == MP_NOPTS_VALUE) {
         MP_ERR(mpctx, "Video pts after filters MISSING\n");
         // Try to use decoder pts from before filters

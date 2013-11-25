@@ -42,8 +42,6 @@ struct dec_video {
 
     void *priv;
 
-    float next_frame_time;
-    double last_pts;
     double buffered_pts[32];
     int num_buffered_pts;
     double codec_reordered_pts;
@@ -59,6 +57,10 @@ struct dec_video {
     int i_bps;            // == bitrate  (compressed bytes/sec)
     float fps;            // FPS from demuxer or from user override
     float initial_decoder_aspect;
+
+    // State used only by player/video.c
+    float next_frame_time;
+    double last_pts;
 };
 
 struct mp_decoder_list *video_decoder_list(void);
@@ -68,7 +70,7 @@ void video_uninit(struct dec_video *d_video);
 
 struct demux_packet;
 void *video_decode(struct dec_video *d_video, struct demux_packet *packet,
-                   int drop_frame, double pts);
+                   int drop_frame);
 
 int video_get_colors(struct dec_video *d_video, const char *item, int *value);
 int video_set_colors(struct dec_video *d_video, const char *item, int value);

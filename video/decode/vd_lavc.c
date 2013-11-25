@@ -729,12 +729,11 @@ static struct mp_image *image_from_decoder(struct dec_video *vd)
 #endif /* HAVE_AVUTIL_REFCOUNTING */
 
 static int decode(struct dec_video *vd, struct demux_packet *packet,
-                  int flags, double *reordered_pts, struct mp_image **out_image)
+                  int flags, struct mp_image **out_image)
 {
     int got_picture = 0;
     int ret;
     vd_ffmpeg_ctx *ctx = vd->priv;
-    AVFrame *pic = ctx->pic;
     AVCodecContext *avctx = ctx->avctx;
     AVPacket pkt;
 
@@ -747,22 +746,23 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
 
     mp_set_av_packet(&pkt, packet);
 
-    // The avcodec opaque field stupidly supports only int64_t type
+    // We merely pass-through our PTS as an int64_t; libavcodec won't use it.
     union pts { int64_t i; double d; };
-    avctx->reordered_opaque = (union pts){.d = *reordered_pts}.i;
-    ret = avcodec_decode_video2(avctx, pic, &got_picture, &pkt);
+    pkt.pts = (union pts){.d = packet ? packet->pts : MP_NOPTS_VALUE}.i;
+    ret = avcodec_decode_video2(avctx, ctx->pic, &got_picture, &pkt);
     if (ret < 0) {
         mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Error while decoding frame!\n");
         return -1;
     }
-    *reordered_pts = (union pts){.i = pic->reordered_opaque}.d;
 
     // Skipped frame, or delayed output due to multithreaded decoding.
     if (!got_picture)
         return 0;
 
-    update_image_params(vd, pic);
+    update_image_params(vd, ctx->pic);
+    double out_pts = (union pts){.i = ctx->pic->pkt_pts}.d;
 
+    // Note: potentially resets ctx->pic as it is transferred to mpi
     struct mp_image *mpi = image_from_decoder(vd);
     assert(mpi->planes[0]);
     mp_image_set_params(mpi, &ctx->image_params);
@@ -772,6 +772,7 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
 
     struct mp_image_params vo_params;
     mp_image_params_from_image(&vo_params, mpi);
+    mpi->pts = out_pts;
 
     if (!mp_image_params_equals(&vo_params, &ctx->vo_image_params)) {
         mp_image_pool_clear(ctx->non_dr1_pool);
@@ -787,15 +788,14 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
 }
 
 static struct mp_image *decode_with_fallback(struct dec_video *vd,
-                                struct demux_packet *packet,
-                                int flags, double *reordered_pts)
+                                struct demux_packet *packet, int flags)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
     if (!ctx->avctx)
         return NULL;
 
     struct mp_image *mpi = NULL;
-    int res = decode(vd, packet, flags, reordered_pts, &mpi);
+    int res = decode(vd, packet, flags, &mpi);
     if (res >= 0)
         return mpi;
 
@@ -811,7 +811,7 @@ static struct mp_image *decode_with_fallback(struct dec_video *vd,
             mpi = NULL;
             if (vd->vf_initialized < 0)
                 vd->vf_initialized = 0;
-            decode(vd, packet, flags, reordered_pts, &mpi);
+            decode(vd, packet, flags, &mpi);
             return mpi;
         }
     }
