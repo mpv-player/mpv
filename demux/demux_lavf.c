@@ -82,7 +82,6 @@ typedef struct lavf_priv {
     struct sh_stream **streams; // NULL for unknown streams
     int num_streams;
     int cur_program;
-    bool use_dts;
     char *mime_type;
     bool genpts_hack;
     AVPacket *packets[MAX_PKT_QUEUE];
@@ -541,8 +540,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (matches_avinputformat_name(priv, "avi")) {
         /* for avi libavformat returns the avi timestamps in .dts,
          * some made-up stuff that's not really pts in .pts */
-        priv->use_dts = true;
-        demuxer->timestamp_type = TIMESTAMP_TYPE_SORT;
     } else {
         int mode = lavfdopts->genptsmode;
         if (mode == 0 && opts->correct_pts)
@@ -785,14 +782,18 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     dp = new_demux_packet_fromdata(pkt->data, pkt->size);
     dp->avpacket = talloc_steal(dp, pkt);
 
-    int64_t ts = priv->use_dts ? pkt->dts : pkt->pts;
-    if (ts != AV_NOPTS_VALUE) {
-        dp->pts = ts * av_q2d(st->time_base);
-        priv->last_pts = dp->pts * AV_TIME_BASE;
-        dp->duration = pkt->duration * av_q2d(st->time_base);
-        if (pkt->convergence_duration > 0)
-            dp->duration = pkt->convergence_duration * av_q2d(st->time_base);
+    if (pkt->pts != AV_NOPTS_VALUE) {
+        dp->pts = pkt->pts * av_q2d(st->time_base);
+        priv->last_pts = dp->pts;
     }
+    if (pkt->dts != AV_NOPTS_VALUE) {
+        dp->dts = pkt->dts * av_q2d(st->time_base);
+        if (priv->last_pts == AV_NOPTS_VALUE)
+            priv->last_pts = pkt->dts;
+    }
+    dp->duration = pkt->duration * av_q2d(st->time_base);
+    if (pkt->convergence_duration > 0)
+        dp->duration = pkt->convergence_duration * av_q2d(st->time_base);
     dp->pos = pkt->pos;
     dp->keyframe = pkt->flags & AV_PKT_FLAG_KEY;
     // Use only one stream for stream_pts, otherwise PTS might be jumpy.

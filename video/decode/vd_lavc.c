@@ -746,9 +746,6 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
 
     mp_set_av_packet(&pkt, packet);
 
-    // We merely pass-through our PTS as an int64_t; libavcodec won't use it.
-    union pts { int64_t i; double d; };
-    pkt.pts = (union pts){.d = packet ? packet->pts : MP_NOPTS_VALUE}.i;
     ret = avcodec_decode_video2(avctx, ctx->pic, &got_picture, &pkt);
     if (ret < 0) {
         mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Error while decoding frame!\n");
@@ -760,7 +757,7 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
         return 0;
 
     update_image_params(vd, ctx->pic);
-    double out_pts = (union pts){.i = ctx->pic->pkt_pts}.d;
+    double out_pts = mp_get_av_frame_pkt_pdts(ctx->pic);
 
     // Note: potentially resets ctx->pic as it is transferred to mpi
     struct mp_image *mpi = image_from_decoder(vd);

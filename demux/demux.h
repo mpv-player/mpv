@@ -43,12 +43,6 @@ enum demuxer_type {
     DEMUXER_TYPE_CUE,
 };
 
-enum timestamp_type {
-    TIMESTAMP_TYPE_PTS,
-    TIMESTAMP_TYPE_SORT,
-};
-
-
 // DEMUXER control commands/answers
 #define DEMUXER_CTRL_NOTIMPL -1
 #define DEMUXER_CTRL_DONTKNOW 0
@@ -174,7 +168,6 @@ typedef struct demuxer {
     bool accurate_seek;
     // File format allows PTS resets (even if the current file is without)
     bool ts_resets_possible;
-    enum timestamp_type timestamp_type;
     bool warned_queue_overflow;
 
     struct sh_stream **streams;

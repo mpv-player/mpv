@@ -20,7 +20,7 @@
 #include <libavutil/common.h>
 #include <libavcodec/avcodec.h>
 
-#include "mpvcore/mp_talloc.h"
+#include "mpvcore/mp_common.h"
 #include "demux/packet.h"
 #include "av_common.h"
 #include "codecs.h"
@@ -60,11 +60,19 @@ void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st)
     avctx->bits_per_coded_sample    = st->bits_per_coded_sample;
 }
 
+// We merely pass-through our PTS/DTS as an int64_t; libavcodec won't use it.
+union pts { int64_t i; double d; };
+
 // Set dst from mpkt. Note that dst is not refcountable.
 // mpkt can be NULL to generate empty packets (used to flush delayed data).
-// Does not set pts or duration fields.
+// Sets pts/dts to reinterpret-casted mpv values - these are useful for
+// reading back via mp_get_av_frame_okt_pdts(), but they will be non-sense for
+// libavcodec itself. (And normally, libavcodec won't interpret them.)
+// Does not set duration field.
 void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt)
 {
+    assert(sizeof(int64_t) >= sizeof(double));
+
     av_init_packet(dst);
     dst->data = mpkt ? mpkt->buffer : NULL;
     dst->size = mpkt ? mpkt->len : 0;
@@ -76,6 +84,19 @@ void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt)
         dst->side_data = mpkt->avpacket->side_data;
         dst->side_data_elems = mpkt->avpacket->side_data_elems;
     }
+    dst->pts = (union pts){.d = mpkt ? mpkt->pts : MP_NOPTS_VALUE}.i;
+    dst->dts = (union pts){.d = mpkt ? mpkt->dts : MP_NOPTS_VALUE}.i;
+}
+
+// Return the pts/dts from a frame returned by libavcodec. Note that this
+// assumes libavcodec was fed a packet setup with mp_set_av_packet()! If not,
+// the timestamps might contain garbage.
+// Normally, this returns the pts. If the pts is unknown, return dts instead.
+double mp_get_av_frame_pkt_pdts(AVFrame *frame)
+{
+    double pts = (union pts){.i = frame->pkt_pts}.d;
+    double dts = (union pts){.i = frame->pkt_dts}.d;
+    return pts == MP_NOPTS_VALUE ? dts : pts;
 }
 
 void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)

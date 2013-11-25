@@ -26,6 +26,7 @@
 typedef struct demux_packet {
     int len;
     double pts;
+    double dts;
     double duration;
     double stream_pts;
     int64_t pos; // position in source file byte stream

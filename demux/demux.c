@@ -131,6 +131,7 @@ static struct demux_packet *create_packet(size_t len)
     *dp = (struct demux_packet) {
         .len = len,
         .pts = MP_NOPTS_VALUE,
+        .dts = MP_NOPTS_VALUE,
         .duration = -1,
         .stream_pts = MP_NOPTS_VALUE,
         .pos = -1,
@@ -217,6 +218,7 @@ struct demux_packet *demux_copy_packet(struct demux_packet *dp)
         memcpy(new->buffer, dp->buffer, new->len);
     }
     new->pts = dp->pts;
+    new->dts = dp->dts;
     new->duration = dp->duration;
     new->stream_pts = dp->stream_pts;
     return new;
@@ -339,6 +341,11 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
 
     if (dp->pos >= 0)
         demuxer->filepos = dp->pos;
+
+    // For video, PTS determination is not trivial, but for other media types
+    // distinguishing PTS and DTS is not useful.
+    if (stream->type != STREAM_VIDEO && dp->pts == MP_NOPTS_VALUE)
+        dp->pts = dp->dts;
 
     mp_dbg(MSGT_DEMUXER, MSGL_DBG2,
            "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%"PRIu64" "
