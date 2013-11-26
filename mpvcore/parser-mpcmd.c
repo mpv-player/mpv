@@ -239,7 +239,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 } else // dvd:// or dvd://x entry
                     playlist_add_file(files, file0);
             } else
-                playlist_add_file(files, file0);
+                playlist_add_filepath(files, file0);
             talloc_free(tmp);
 
             // Lock stdin if it will be used as input
