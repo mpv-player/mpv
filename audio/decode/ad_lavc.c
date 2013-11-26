@@ -263,9 +263,12 @@ static int init(struct dec_audio *da, const char *decoder)
     // Decode at least 1 sample:  (to get header filled)
     for (int tries = 1; ; tries++) {
         int x = decode_new_packet(da);
-        if (x >= 0 && ctx->frame.samples > 0)
+        if (x >= 0 && ctx->frame.samples > 0) {
+            mp_msg(MSGT_DECAUDIO, MSGL_V,
+                   "Initial decode succeeded after %d packets.\n", tries);
             break;
-        if (tries >= 5) {
+        }
+        if (tries >= 50) {
             mp_msg(MSGT_DECAUDIO, MSGL_ERR,
                    "ad_lavc: initial decode failed\n");
             uninit(da);
