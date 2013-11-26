@@ -14,7 +14,11 @@ def check_pthreads(ctx, dependency_identifier):
     }.get(ctx.env.DEST_OS, '')
     libs    = ['pthreadGC2', 'pthread']
     checkfn = check_cc(fragment=pthreads_program, cflags=platform_cflags)
-    return check_libs(libs, checkfn)(ctx, dependency_identifier)
+    checkfn_nocflags = check_cc(fragment=pthreads_program)
+    for fn in [checkfn, checkfn_nocflags]:
+        if check_libs(libs, fn)(ctx, dependency_identifier):
+            return True
+    return False
 
 def check_iconv(ctx, dependency_identifier):
     iconv_program = load_fragment('iconv.c')
