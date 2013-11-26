@@ -60,7 +60,7 @@ struct dec_video {
     float fps;            // FPS from demuxer or from user override
     float initial_decoder_aspect;
 
-    double last_packet_pts;
+    double last_packet_pdts;
     // State used only by player/video.c
     double last_pts;
 };

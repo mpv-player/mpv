@@ -211,7 +211,7 @@ static void determine_frame_pts(struct dec_video *d_video)
 
     if (!opts->correct_pts) {
         double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);
-        double pkt_pts = d_video->last_packet_pts;
+        double pkt_pts = d_video->last_packet_pdts;
         if (d_video->pts == MP_NOPTS_VALUE)
             d_video->pts = pkt_pts == MP_NOPTS_VALUE ? 0 : pkt_pts;
 
@@ -253,9 +253,11 @@ struct mp_image *video_decode(struct dec_video *d_video,
     struct MPOpts *opts = d_video->opts;
     bool sort_pts = opts->user_pts_assoc_mode != 1 && opts->correct_pts;
     double pts = packet ? packet->pts : MP_NOPTS_VALUE;
+    double dts = packet ? packet->dts : MP_NOPTS_VALUE;
 
-    if (pts != MP_NOPTS_VALUE)
-        d_video->last_packet_pts = pts;
+    double pdts = pts == MP_NOPTS_VALUE ? dts : pts;
+    if (pdts != MP_NOPTS_VALUE)
+        d_video->last_packet_pdts = pdts;
 
     if (sort_pts && pts != MP_NOPTS_VALUE) {
         int delay = -1;

@@ -176,7 +176,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
             vf_chain_seek_reset(mpctx->d_video->vfilter);
         mpctx->d_video->num_buffered_pts = 0;
         mpctx->d_video->last_pts = MP_NOPTS_VALUE;
-        mpctx->d_video->last_packet_pts = MP_NOPTS_VALUE;
+        mpctx->d_video->last_packet_pdts = MP_NOPTS_VALUE;
         mpctx->d_video->pts = MP_NOPTS_VALUE;
         mpctx->video_pts = MP_NOPTS_VALUE;
         mpctx->delay = 0;
