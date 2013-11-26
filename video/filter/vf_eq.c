@@ -133,6 +133,7 @@ void affine_1d_MMX (eq2_param_t *par, unsigned char *dst, unsigned char *src,
   int      pel;
   short    brvec[4];
   short    contvec[4];
+  unsigned wcount = w >> 3;
 
 //  printf("\nmmx: src=%p dst=%p w=%d h=%d ds=%d ss=%d\n",src,dst,w,h,dstride,sstride);
 
@@ -170,7 +171,7 @@ void affine_1d_MMX (eq2_param_t *par, unsigned char *dst, unsigned char *src,
       "decl %%eax \n\t"
       "jnz 1b \n\t"
       : "=r" (src), "=r" (dst)
-      : "0" (src), "1" (dst), "r" (w >> 3), "r" (brvec), "r" (contvec)
+      : "0" (src), "1" (dst), "g" (wcount), "r" (brvec), "r" (contvec)
       : "%eax"
     );
 

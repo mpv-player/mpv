@@ -216,13 +216,16 @@ static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int le
 #if HAVE_MMX
 static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
 	x86_reg mmx_len= len&(~7);
+	uint8_t *src_mmx_len = src+mmx_len;
 
 	__asm__ volatile(
+		"push %%"REG_BP"		\n\t"
+		"mov %0, %%"REG_BP"		\n\t"
 		"mov %5, %%"REG_a"		\n\t"
 		".align 4                       \n\t"
 		"1:				\n\t"
 		"movq (%1, %%"REG_a"), %%mm1	\n\t"
-		"movq (%0, %%"REG_a"), %%mm0	\n\t"
+		"movq (%%"REG_BP", %%"REG_a"), %%mm0	\n\t"
 		"paddb (%2, %%"REG_a"), %%mm1	\n\t"
 		"paddb (%3, %%"REG_a"), %%mm1	\n\t"
 		"movq %%mm0, %%mm2		\n\t"
@@ -243,7 +246,9 @@ static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t 
 		"movq %%mm1, (%4, %%"REG_a")	\n\t"
 		"add $8, %%"REG_a"		\n\t"
 		" js 1b				\n\t"
-		:: "r" (src+mmx_len), "r" (shift[0]+mmx_len), "r" (shift[1]+mmx_len), "r" (shift[2]+mmx_len),
+		"pop %%"REG_BP"			\n\t"
+		:: "g" (src_mmx_len), "r" (shift[0]+mmx_len),
+		   "r" (shift[1]+mmx_len), "r" (shift[2]+mmx_len),
                    "r" (dst+mmx_len), "g" (-mmx_len)
 		: "%"REG_a
 	);
