@@ -136,6 +136,7 @@ static void vo_cocoa_set_cursor_visibility(struct vo *vo, bool *visible)
 
 void vo_cocoa_uninit(struct vo *vo)
 {
+    vo_cocoa_set_current_context(vo, false);
     dispatch_sync(dispatch_get_main_queue(), ^{
         struct vo_cocoa_state *s = vo->cocoa;
         enable_power_management(vo);
@@ -444,9 +445,10 @@ void vo_cocoa_set_current_context(struct vo *vo, bool current)
 
         [s->gl_ctx makeCurrentContext];
     } else {
+        const bool locked = !![NSOpenGLContext currentContext];
         [NSOpenGLContext clearCurrentContext];
 
-        if (!s->inside_sync_section)
+        if (!s->inside_sync_section && locked)
             [s->lock unlock];
     }
 }
