@@ -10,10 +10,10 @@ WAFURL     = "https://waf.googlecode.com/files/" + WAFRELEASE
 SHA256HASH = "03cc750049350ee01cdbc584b70924e333fcc17ba4a2d04648dab1535538a873"
 
 if os.path.exists("waf"):
-	wafver = subprocess.check_output(['./waf', '--version']).decode()
-	if WAFRELEASE.split('-')[1] == wafver.split(' ')[1]:
-		print("Found 'waf', skipping download.")
-		sys.exit(0)
+    wafver = subprocess.check_output(['./waf', '--version']).decode()
+    if WAFRELEASE.split('-')[1] == wafver.split(' ')[1]:
+        print("Found 'waf', skipping download.")
+        sys.exit(0)
 
 try:
     from urllib.request import urlopen
