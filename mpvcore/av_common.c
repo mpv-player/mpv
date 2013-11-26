@@ -66,7 +66,7 @@ union pts { int64_t i; double d; };
 // Set dst from mpkt. Note that dst is not refcountable.
 // mpkt can be NULL to generate empty packets (used to flush delayed data).
 // Sets pts/dts to reinterpret-casted mpv values - these are useful for
-// reading back via mp_get_av_frame_okt_pdts(), but they will be non-sense for
+// reading back via mp_get_av_frame_pkt_pdts(), but they will be non-sense for
 // libavcodec itself. (And normally, libavcodec won't interpret them.)
 // Does not set duration field.
 void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt)
