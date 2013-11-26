@@ -87,7 +87,7 @@ def __get_osslibdir__():
         p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE,
                                         stdout=Utils.subprocess.PIPE,
                                         stderr=Utils.subprocess.PIPE)
-        return p.communicate()[0].rstrip()
+        return p.communicate()[0].decode().rstrip()
     except Exception:
         return ""
 
