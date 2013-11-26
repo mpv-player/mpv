@@ -295,16 +295,7 @@ double update_video(struct MPContext *mpctx, double endpts)
     while (1) {
         if (load_next_vo_frame(mpctx, false))
             break;
-        struct demux_packet *pkt = NULL;
-        while (1) {
-            pkt = demux_read_packet(d_video->header);
-            if (!pkt || pkt->len)
-                break;
-            /* Packets with size 0 are assumed to not correspond to frames,
-             * but to indicate the absence of a frame in formats like AVI
-             * that must have packets at fixed timecode intervals. */
-            talloc_free(pkt);
-        }
+        struct demux_packet *pkt = demux_read_packet(d_video->header);
         if (pkt && pkt->pts != MP_NOPTS_VALUE)
             pkt->pts += mpctx->video_offset;
         if (pkt && pkt->pts >= mpctx->hrseek_pts - .005)
