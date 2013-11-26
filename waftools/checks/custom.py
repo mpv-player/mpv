@@ -81,15 +81,11 @@ def __fail_oss_check__(ctx):
 
 def __get_osslibdir__():
     from waflib import Utils
-
-    try:
-        cmd = ['sh', '-c', '. /etc/oss.conf && echo $OSSLIBDIR']
-        p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE,
-                                        stdout=Utils.subprocess.PIPE,
-                                        stderr=Utils.subprocess.PIPE)
-        return p.communicate()[0].decode().rstrip()
-    except Exception:
-        return ""
+    cmd = ['sh', '-c', '. /etc/oss.conf && echo $OSSLIBDIR']
+    p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE,
+                                    stdout=Utils.subprocess.PIPE,
+                                    stderr=Utils.subprocess.PIPE)
+    return p.communicate()[0].decode().rstrip()
 
 def __get_osscflags__():
     import os
