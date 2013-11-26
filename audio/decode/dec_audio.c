@@ -64,10 +64,17 @@ static const struct ad_functions * const ad_drivers[] = {
 #define DECODE_BUFFER_SAMPLES (8192 + DECODE_MAX_UNIT)
 
 // Drop audio buffer and reinit it (after format change)
-static void reinit_audio_buffer(struct dec_audio *da)
+// Returns whether the format was valid at all.
+static bool reinit_audio_buffer(struct dec_audio *da)
 {
+    if (!mp_audio_config_valid(&da->decoded)) {
+        mp_msg(MSGT_DECAUDIO, MSGL_ERR, "Audio decoder did not specify audio "
+               "format, or requested an unsupported configuration!\n");
+        return false;
+    }
     mp_audio_buffer_reinit(da->decode_buffer, &da->decoded);
     mp_audio_buffer_preallocate_min(da->decode_buffer, DECODE_BUFFER_SAMPLES);
+    return true;
 }
 
 static void uninit_decoder(struct dec_audio *d_audio)
@@ -90,17 +97,11 @@ static int init_audio_codec(struct dec_audio *d_audio, const char *decoder)
         return 0;
     }
 
-    if (!d_audio->decoded.channels.num || !d_audio->decoded.rate ||
-        !d_audio->decoded.format)
-    {
-        mp_tmsg(MSGT_DECAUDIO, MSGL_ERR, "Audio decoder did not specify "
-                "audio format!\n");
+    d_audio->decode_buffer = mp_audio_buffer_create(NULL);
+    if (!reinit_audio_buffer(d_audio)) {
         uninit_decoder(d_audio);
         return 0;
     }
-
-    d_audio->decode_buffer = mp_audio_buffer_create(NULL);
-    reinit_audio_buffer(d_audio);
 
     return 1;
 }
@@ -285,8 +286,10 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
 
     // Assume the filter chain is drained from old data at this point.
     // (If not, the remaining old data is discarded.)
-    if (error == -2)
-        reinit_audio_buffer(da);
+    if (error == -2) {
+        if (!reinit_audio_buffer(da))
+            error = -1; // switch to invalid format
+    }
 
     return error;
 }

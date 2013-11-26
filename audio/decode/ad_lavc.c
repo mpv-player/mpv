@@ -134,15 +134,15 @@ static int setup_format(struct dec_audio *da)
     AVCodecContext *lavc_context = priv->avctx;
     struct sh_audio *sh_audio = da->header->audio;
 
-    int sample_format = af_from_avformat(lavc_context->sample_fmt);
-    if (!sample_format)
-        return -1;
+    // Note: invalid parameters are rejected by dec_audio.c
 
-    int samplerate = lavc_context->sample_rate;
-    if (!samplerate && sh_audio->wf) {
+    mp_audio_set_format(&da->decoded, af_from_avformat(lavc_context->sample_fmt));
+
+    da->decoded.rate = lavc_context->sample_rate;
+    if (!da->decoded.rate && sh_audio->wf) {
         // If not set, try container samplerate.
         // (Maybe this can't happen, and it's an artifact from the past.)
-        samplerate = sh_audio->wf->nSamplesPerSec;
+        da->decoded.rate = sh_audio->wf->nSamplesPerSec;
         mp_tmsg(MSGT_DECAUDIO, MSGL_WARN, "ad_lavc: using container rate.\n");
     }
 
@@ -155,10 +155,8 @@ static int setup_format(struct dec_audio *da)
         if (lavc_chmap.num == sh_audio->channels.num)
             lavc_chmap = sh_audio->channels;
     }
-
     mp_audio_set_channels(&da->decoded, &lavc_chmap);
-    mp_audio_set_format(&da->decoded, sample_format);
-    da->decoded.rate = samplerate;
+
     return 0;
 }
 

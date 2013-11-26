@@ -79,6 +79,12 @@ bool mp_audio_config_equals(const struct mp_audio *a, const struct mp_audio *b)
            mp_chmap_equals(&a->channels, &b->channels);
 }
 
+bool mp_audio_config_valid(const struct mp_audio *mpa)
+{
+    return mp_chmap_is_valid(&mpa->channels) && af_fmt_is_valid(mpa->format)
+        && mpa->rate >= 1 && mpa->rate < 10000000;
+}
+
 char *mp_audio_fmt_to_str(int srate, const struct mp_chmap *chmap, int format)
 {
     char *chstr = mp_chmap_to_str(chmap);
