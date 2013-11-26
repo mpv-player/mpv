@@ -292,9 +292,7 @@ double update_video(struct MPContext *mpctx, double endpts)
     if (d_video->header->attached_picture)
         return update_video_attached_pic(mpctx);
 
-    while (1) {
-        if (load_next_vo_frame(mpctx, false))
-            break;
+    if (!load_next_vo_frame(mpctx, false)) {
         struct demux_packet *pkt = demux_read_packet(d_video->header);
         if (pkt && pkt->pts != MP_NOPTS_VALUE)
             pkt->pts += mpctx->video_offset;
@@ -311,7 +309,6 @@ double update_video(struct MPContext *mpctx, double endpts)
             if (!load_next_vo_frame(mpctx, true))
                 return -1;
         }
-        break;
     }
 
     if (!video_out->frame_loaded)
