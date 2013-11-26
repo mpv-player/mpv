@@ -475,12 +475,6 @@ static int init(struct ao *ao)
         mp_chmap_from_channels_alsa(&ao->channels, num_channels);
     }
 
-    /* workaround for buggy rate plugin (should be fixed in ALSA 1.0.11)
-        prefer our own resampler, since that allows users to choose the resampler,
-        even per file if desired */
-    err = snd_pcm_hw_params_set_rate_resample(p->alsa, alsa_hwparams, 0);
-    CHECK_ALSA_ERROR("Unable to disable resampling");
-
     err = snd_pcm_hw_params_set_rate_near
             (p->alsa, alsa_hwparams, &ao->samplerate, NULL);
     CHECK_ALSA_ERROR("Unable to set samplerate-2");
