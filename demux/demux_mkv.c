@@ -129,7 +129,6 @@ typedef struct mkv_track {
     int realmedia;
     int64_t rv_kf_base;
     int rv_kf_pts;
-    double rv_pts;              /* previous video timestamp */
     double ra_pts;              /* previous audio timestamp */
 
   /** realaudio descrambling */
@@ -1940,49 +1939,43 @@ static int demux_mkv_read_block_lacing(bstr *buffer, int *laces,
 #define SKIP_BITS(n) buffer<<=n
 #define SHOW_BITS(n) ((buffer)>>(32-(n)))
 
-static double real_fix_timestamp(unsigned char *buf, unsigned int timestamp, unsigned int format, int64_t *kf_base, int *kf_pts, double *pts){
-  double v_pts;
-  unsigned char *s = buf + 1 + (*buf+1)*8;
-  uint32_t buffer= (s[0]<<24) + (s[1]<<16) + (s[2]<<8) + s[3];
-  unsigned int kf=timestamp;
+static int64_t real_fix_timestamp(unsigned char *buf, int len, int64_t timestamp,
+                                  unsigned int format, int64_t *kf_base,
+                                  int *kf_pts)
+{
+    if (format != MP_FOURCC('R', 'V', '3', '0') &&
+        format != MP_FOURCC('R', 'V', '4', '0'))
+        return timestamp;
 
-  if(format==MP_FOURCC('R','V','3','0') || format==MP_FOURCC('R','V','4','0')){
-    int pict_type;
-    if(format==MP_FOURCC('R','V','3','0')){
-      SKIP_BITS(3);
-      pict_type= SHOW_BITS(2);
-      SKIP_BITS(2 + 7);
-    }else{
-      SKIP_BITS(1);
-      pict_type= SHOW_BITS(2);
-      SKIP_BITS(2 + 7 + 3);
-    }
-    kf= SHOW_BITS(13);  //    kf= 2*SHOW_BITS(12);
-//    if(pict_type==0)
-    if(pict_type<=1){
-      // I frame, sync timestamps:
-      *kf_base=(int64_t)timestamp-kf;
-      mp_msg(MSGT_DEMUX, MSGL_DBG2,"\nTS: base=%08"PRIX64"\n",*kf_base);
-      kf=timestamp;
+    if (len < 1) // invalid packet
+        return timestamp;
+
+    int offset = 1 + (buf[0] + 1) * 8;
+    if (offset + 4 > len) // invalid packet
+        return timestamp;
+
+    int hdr = AV_RB32(buf + offset);
+    int pict_type, pts;
+    if (format == MP_FOURCC('R', 'V', '3', '0')) {
+        pict_type = (hdr >> 27) & 3;
+        pts       = (hdr >>  7) & 0x1FFF;
     } else {
-      // P/B frame, merge timestamps:
-      int64_t tmp=(int64_t)timestamp-*kf_base;
-      kf|=tmp&(~0x1fff);        // combine with packet timestamp
-      if(kf<tmp-4096) kf+=8192; else // workaround wrap-around problems
-      if(kf>tmp+4096) kf-=8192;
-      kf+=*kf_base;
+        pict_type = (hdr >> 29) & 3;
+        pts       = (hdr >>  6) & 0x1FFF;
     }
-    if(pict_type != 3){ // P || I  frame -> swap timestamps
-        unsigned int tmp=kf;
-        kf=*kf_pts;
-        *kf_pts=tmp;
-//      if(kf<=tmp) kf=0;
+
+    if (pict_type != 3) {
+        *kf_base = timestamp;
+        *kf_pts  = pts;
+    } else {
+        if (pict_type != 3) {
+            timestamp = *kf_base + ((pts - *kf_pts) & 0x1FFF);
+        } else {
+            timestamp = *kf_base - ((*kf_pts - pts) & 0x1FFF);
+        }
     }
-  }
-    v_pts=kf*0.001f;
-//    if(pts && (v_pts<*pts || !kf)) v_pts=*pts+frametime;
-    if(pts) *pts=v_pts;
-    return v_pts;
+
+    return timestamp;
 }
 
 static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
@@ -1990,19 +1983,19 @@ static void handle_realvideo(demuxer_t *demuxer, mkv_track_t *track,
 {
     mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
     demux_packet_t *dp;
-    uint32_t timestamp = mkv_d->last_pts * 1000;
+    int64_t timestamp = mkv_d->last_pts * 1000;
 
     dp = new_demux_packet_from(data.start, data.len);
 
     if (mkv_d->v_skip_to_keyframe) {
         dp->pts = mkv_d->last_pts;
         track->rv_kf_base = 0;
-        track->rv_kf_pts = timestamp;
+        track->rv_kf_pts = 0;
     } else {
         dp->pts =
-            real_fix_timestamp(dp->buffer, timestamp,
+            real_fix_timestamp(dp->buffer, dp->len, timestamp,
                                track->stream->video->bih->biCompression,
-                               &track->rv_kf_base, &track->rv_kf_pts, NULL);
+                               &track->rv_kf_base, &track->rv_kf_pts) * 0.001;
     }
     dp->pos = mkv_d->last_filepos;
     dp->keyframe = keyframe;
