@@ -757,7 +757,7 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
         return 0;
 
     update_image_params(vd, ctx->pic);
-    double out_pts = mp_get_av_frame_pkt_pdts(ctx->pic);
+    mp_get_av_frame_pkt_ts(ctx->pic, &vd->codec_pts, &vd->codec_dts);
 
     // Note: potentially resets ctx->pic as it is transferred to mpi
     struct mp_image *mpi = image_from_decoder(vd);
@@ -769,7 +769,6 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
 
     struct mp_image_params vo_params;
     mp_image_params_from_image(&vo_params, mpi);
-    mpi->pts = out_pts;
 
     if (!mp_image_params_equals(&vo_params, &ctx->vo_image_params)) {
         mp_image_pool_clear(ctx->non_dr1_pool);

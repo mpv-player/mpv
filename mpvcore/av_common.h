@@ -26,7 +26,7 @@ struct demux_packet;
 
 void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st);
 void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt);
-double mp_get_av_frame_pkt_pdts(AVFrame *frame);
+void mp_get_av_frame_pkt_ts(AVFrame *frame, double *out_pts, double *out_dts);
 void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type);
 int mp_codec_to_av_codec_id(const char *codec);
 const char *mp_codec_from_av_codec_id(int codec_id);

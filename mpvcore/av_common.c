@@ -91,12 +91,10 @@ void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt)
 // Return the pts/dts from a frame returned by libavcodec. Note that this
 // assumes libavcodec was fed a packet setup with mp_set_av_packet()! If not,
 // the timestamps might contain garbage.
-// Normally, this returns the pts. If the pts is unknown, return dts instead.
-double mp_get_av_frame_pkt_pdts(AVFrame *frame)
+void mp_get_av_frame_pkt_ts(AVFrame *frame, double *out_pts, double *out_dts)
 {
-    double pts = (union pts){.i = frame->pkt_pts}.d;
-    double dts = (union pts){.i = frame->pkt_dts}.d;
-    return pts == MP_NOPTS_VALUE ? dts : pts;
+    *out_pts = (union pts){.i = frame->pkt_pts}.d;
+    *out_dts = (union pts){.i = frame->pkt_dts}.d;
 }
 
 void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)

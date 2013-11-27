@@ -61,11 +61,14 @@ void video_reset_decoding(struct dec_video *d_video)
     video_vd_control(d_video, VDCTRL_RESET, NULL);
     if (d_video->vf_initialized == 1)
         vf_chain_seek_reset(d_video->vfilter);
-    d_video->prev_codec_reordered_pts = MP_NOPTS_VALUE;
-    d_video->prev_sorted_pts = MP_NOPTS_VALUE;
     d_video->num_buffered_pts = 0;
     d_video->last_pts = MP_NOPTS_VALUE;
     d_video->last_packet_pdts = MP_NOPTS_VALUE;
+    d_video->decoded_pts = MP_NOPTS_VALUE;
+    d_video->codec_pts = MP_NOPTS_VALUE;
+    d_video->codec_dts = MP_NOPTS_VALUE;
+    d_video->sorted_pts = MP_NOPTS_VALUE;
+    d_video->unsorted_pts = MP_NOPTS_VALUE;
     d_video->pts = MP_NOPTS_VALUE;
 }
 
@@ -136,9 +139,6 @@ static int init_video_codec(struct dec_video *d_video, const char *decoder)
         mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Video decoder init failed.\n");
         return 0;
     }
-
-    d_video->prev_codec_reordered_pts = MP_NOPTS_VALUE;
-    d_video->prev_sorted_pts = MP_NOPTS_VALUE;
     return 1;
 }
 
@@ -212,29 +212,65 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
     return !!d_video->vd_driver;
 }
 
-static void determine_frame_pts(struct dec_video *d_video)
+static void add_pts_to_sort(struct dec_video *d_video, double pts)
+{
+    if (pts != MP_NOPTS_VALUE) {
+        int delay = -1;
+        video_vd_control(d_video, VDCTRL_QUERY_UNSEEN_FRAMES, &delay);
+        if (delay >= 0 && delay < d_video->num_buffered_pts)
+            d_video->num_buffered_pts = delay;
+        if (d_video->num_buffered_pts ==
+            sizeof(d_video->buffered_pts) / sizeof(double))
+            mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Too many buffered pts\n");
+        else {
+            int i, j;
+            for (i = 0; i < d_video->num_buffered_pts; i++)
+                if (d_video->buffered_pts[i] < pts)
+                    break;
+            for (j = d_video->num_buffered_pts; j > i; j--)
+                d_video->buffered_pts[j] = d_video->buffered_pts[j - 1];
+            d_video->buffered_pts[i] = pts;
+            d_video->num_buffered_pts++;
+        }
+    }
+}
+
+// Return true if pts1 comes before pts2. pts1 can be MP_NOPTS_VALUE, but pts2
+// always has to be valid. pts1 can't be equal or larger than pts2.
+#define PTS_IS_ORDERED(pts1, pts2) \
+    ((pts2) != MP_NOPTS_VALUE && ((pts1) == MP_NOPTS_VALUE || ((pts1) < (pts2))))
+
+static double retrieve_sorted_pts(struct dec_video *d_video, double codec_pts)
 {
     struct MPOpts *opts = d_video->opts;
 
-    if (!opts->correct_pts) {
-        double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);
-        double pkt_pts = d_video->last_packet_pdts;
-        if (d_video->pts == MP_NOPTS_VALUE)
-            d_video->pts = pkt_pts == MP_NOPTS_VALUE ? 0 : pkt_pts;
-
-        d_video->pts = d_video->pts + frame_time;
-        return;
+    double sorted_pts;
+    if (d_video->num_buffered_pts) {
+        d_video->num_buffered_pts--;
+        sorted_pts = d_video->buffered_pts[d_video->num_buffered_pts];
+    } else {
+        mp_msg(MSGT_CPLAYER, MSGL_ERR,
+                "No pts value from demuxer to use for frame!\n");
+        sorted_pts = MP_NOPTS_VALUE;
     }
+
+    if (!PTS_IS_ORDERED(d_video->sorted_pts, sorted_pts))
+        d_video->num_sorted_pts_problems++;
+    d_video->sorted_pts = sorted_pts;
+
+    if (!PTS_IS_ORDERED(d_video->unsorted_pts, codec_pts))
+        d_video->num_unsorted_pts_problems++;
+    d_video->unsorted_pts = codec_pts;
 
     if (opts->user_pts_assoc_mode)
         d_video->pts_assoc_mode = opts->user_pts_assoc_mode;
     else if (d_video->pts_assoc_mode == 0) {
-        if (d_video->codec_reordered_pts != MP_NOPTS_VALUE)
+        if (codec_pts != MP_NOPTS_VALUE)
             d_video->pts_assoc_mode = 1;
         else
             d_video->pts_assoc_mode = 2;
     } else {
-        int probcount1 = d_video->num_reordered_pts_problems;
+        int probcount1 = d_video->num_unsorted_pts_problems;
         int probcount2 = d_video->num_sorted_pts_problems;
         if (d_video->pts_assoc_mode == 2) {
             int tmp = probcount1;
@@ -248,8 +284,7 @@ static void determine_frame_pts(struct dec_video *d_video)
                    d_video->pts_assoc_mode);
         }
     }
-    d_video->pts = d_video->pts_assoc_mode == 1 ?
-                   d_video->codec_reordered_pts : d_video->sorted_pts;
+    return d_video->pts_assoc_mode == 1 ? codec_pts : sorted_pts;
 }
 
 struct mp_image *video_decode(struct dec_video *d_video,
@@ -265,25 +300,11 @@ struct mp_image *video_decode(struct dec_video *d_video,
     if (pkt_pdts != MP_NOPTS_VALUE)
         d_video->last_packet_pdts = pkt_pdts;
 
-    if (sort_pts && pkt_pdts != MP_NOPTS_VALUE) {
-        int delay = -1;
-        video_vd_control(d_video, VDCTRL_QUERY_UNSEEN_FRAMES, &delay);
-        if (delay >= 0 && delay < d_video->num_buffered_pts)
-            d_video->num_buffered_pts = delay;
-        if (d_video->num_buffered_pts ==
-            sizeof(d_video->buffered_pts) / sizeof(double))
-            mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Too many buffered pts\n");
-        else {
-            int i, j;
-            for (i = 0; i < d_video->num_buffered_pts; i++)
-                if (d_video->buffered_pts[i] < pkt_pdts)
-                    break;
-            for (j = d_video->num_buffered_pts; j > i; j--)
-                d_video->buffered_pts[j] = d_video->buffered_pts[j - 1];
-            d_video->buffered_pts[i] = pkt_pdts;
-            d_video->num_buffered_pts++;
-        }
-    }
+    if (sort_pts)
+        add_pts_to_sort(d_video, pkt_pdts);
+
+    double prev_codec_pts = d_video->codec_pts;
+    double prev_codec_dts = d_video->codec_dts;
 
     struct mp_image *mpi = d_video->vd_driver->decode(d_video, packet, drop_frame);
 
@@ -299,32 +320,43 @@ struct mp_image *video_decode(struct dec_video *d_video,
     else if (opts->field_dominance == 1)
         mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
 
-    double pts = mpi->pts;
+    // Note: the PTS is reordered, but the DTS is not. Both should be monotonic.
+    double pts = d_video->codec_pts;
+    double dts = d_video->codec_dts;
 
-    double prevpts = d_video->codec_reordered_pts;
-    d_video->prev_codec_reordered_pts = prevpts;
-    d_video->codec_reordered_pts = pts;
-    if (prevpts != MP_NOPTS_VALUE && pts <= prevpts
-        || pts == MP_NOPTS_VALUE)
-        d_video->num_reordered_pts_problems++;
-    prevpts = d_video->sorted_pts;
-    if (sort_pts) {
-        if (d_video->num_buffered_pts) {
-            d_video->num_buffered_pts--;
-            d_video->sorted_pts =
-                d_video->buffered_pts[d_video->num_buffered_pts];
-        } else {
-            mp_msg(MSGT_CPLAYER, MSGL_ERR,
-                   "No pts value from demuxer to use for frame!\n");
-            d_video->sorted_pts = MP_NOPTS_VALUE;
-        }
+    if (pts == MP_NOPTS_VALUE) {
+        d_video->codec_pts = prev_codec_pts;
+    } else if (pts <= prev_codec_pts) {
+        d_video->num_codec_pts_problems++;
     }
-    pts = d_video->sorted_pts;
-    if (prevpts != MP_NOPTS_VALUE && pts <= prevpts
-        || pts == MP_NOPTS_VALUE)
-        d_video->num_sorted_pts_problems++;
-    determine_frame_pts(d_video);
-    mpi->pts = d_video->pts;
+
+    if (dts == MP_NOPTS_VALUE) {
+        d_video->codec_dts = prev_codec_dts;
+    } else if (dts <= prev_codec_dts) {
+        d_video->num_codec_dts_problems++;
+    }
+
+    // If PTS is unset, or non-monotonic, fall back to DTS.
+    if ((d_video->num_codec_pts_problems > d_video->num_codec_dts_problems ||
+         pts == MP_NOPTS_VALUE) && dts != MP_NOPTS_VALUE)
+        pts = dts;
+
+    // Alternative PTS determination methods
+    if (!opts->correct_pts) {
+        double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);
+        double base = d_video->last_packet_pdts;
+        pts = d_video->decoded_pts;
+        if (pts == MP_NOPTS_VALUE)
+            pts = base == MP_NOPTS_VALUE ? 0 : base;
+
+        pts += frame_time;
+    } else if (sort_pts) {
+        pts = retrieve_sorted_pts(d_video, pts);
+    }
+
+    mpi->pts = pts;
+    d_video->decoded_pts = pts;
+    d_video->pts = pts;
     return mpi;
 }
 

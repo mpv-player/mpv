@@ -40,17 +40,30 @@ struct dec_video {
 
     char *decoder_desc;
 
-    void *priv;
+    void *priv; // for free use by vd_driver
 
+    // Last PTS from decoder (set with each vd_driver->decode() call)
+    double codec_pts;
+    int num_codec_pts_problems;
+
+    // Last packet DTS from decoder (passed through from source packets)
+    double codec_dts;
+    int num_codec_dts_problems;
+
+    // PTS sorting (obscure, non-default)
     double buffered_pts[32];
     int num_buffered_pts;
-    double codec_reordered_pts;
-    double prev_codec_reordered_pts;
-    int num_reordered_pts_problems;
     double sorted_pts;
-    double prev_sorted_pts;
     int num_sorted_pts_problems;
+    double unsorted_pts;
+    int num_unsorted_pts_problems;
     int pts_assoc_mode;
+
+    // PTS or DTS of packet last read
+    double last_packet_pdts;
+
+    // Final PTS of previously decoded image
+    double decoded_pts;
 
     // PTS of the last decoded frame (often overwritten by player)
     double pts;
@@ -60,7 +73,6 @@ struct dec_video {
     float fps;            // FPS from demuxer or from user override
     float initial_decoder_aspect;
 
-    double last_packet_pdts;
     // State used only by player/video.c
     double last_pts;
 };
