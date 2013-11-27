@@ -206,11 +206,6 @@ static int control(struct af_instance *af, int cmd, void *arg)
 
         return mp_audio_config_equals(in, &orig_in) ? AF_OK : AF_FALSE;
     }
-    case AF_CONTROL_COMMAND_LINE: {
-        talloc_free(p->cfg_graph);
-        p->cfg_graph = talloc_strdup(p, (char *)arg);
-        return AF_OK;
-    }
     }
     return AF_UNKNOWN;
 }
@@ -291,6 +286,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 
 static void uninit(struct af_instance *af)
 {
+    destroy_graph(af);
 }
 
 static int af_open(struct af_instance *af)
