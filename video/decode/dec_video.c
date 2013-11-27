@@ -59,8 +59,14 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
 void video_reset_decoding(struct dec_video *d_video)
 {
     video_vd_control(d_video, VDCTRL_RESET, NULL);
+    if (d_video->vf_initialized == 1)
+        vf_chain_seek_reset(d_video->vfilter);
     d_video->prev_codec_reordered_pts = MP_NOPTS_VALUE;
     d_video->prev_sorted_pts = MP_NOPTS_VALUE;
+    d_video->num_buffered_pts = 0;
+    d_video->last_pts = MP_NOPTS_VALUE;
+    d_video->last_packet_pdts = MP_NOPTS_VALUE;
+    d_video->pts = MP_NOPTS_VALUE;
 }
 
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg)
@@ -165,6 +171,7 @@ static const struct vd_functions *find_driver(const char *name)
 bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
 {
     assert(!d_video->vd_driver);
+    video_reset_decoding(d_video);
 
     struct mp_decoder_entry *decoder = NULL;
     struct mp_decoder_list *list =

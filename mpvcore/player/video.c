@@ -118,8 +118,6 @@ int reinit_video_chain(struct MPContext *mpctx)
 
     struct dec_video *d_video = talloc_zero(NULL, struct dec_video);
     mpctx->d_video = d_video;
-    d_video->last_pts = MP_NOPTS_VALUE;
-    d_video->last_packet_pdts = MP_NOPTS_VALUE;
     d_video->opts = mpctx->opts;
     d_video->header = sh;
     d_video->fps = sh->video->fps;

@@ -349,8 +349,12 @@ int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
 
 void audio_reset_decoding(struct dec_audio *d_audio)
 {
-    d_audio->pts = MP_NOPTS_VALUE;
-    d_audio->pts_offset = 0;
     if (d_audio->ad_driver)
         d_audio->ad_driver->control(d_audio, ADCTRL_RESET, NULL);
+    if (d_audio->afilter)
+        af_control_all(d_audio->afilter, AF_CONTROL_RESET, NULL);
+    d_audio->pts = MP_NOPTS_VALUE;
+    d_audio->pts_offset = 0;
+    if (d_audio->decode_buffer)
+        mp_audio_buffer_clear(d_audio->decode_buffer);
 }
