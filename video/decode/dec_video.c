@@ -249,17 +249,16 @@ struct mp_image *video_decode(struct dec_video *d_video,
                               struct demux_packet *packet,
                               int drop_frame)
 {
-    mp_image_t *mpi = NULL;
     struct MPOpts *opts = d_video->opts;
     bool sort_pts = opts->user_pts_assoc_mode != 1 && opts->correct_pts;
-    double pts = packet ? packet->pts : MP_NOPTS_VALUE;
-    double dts = packet ? packet->dts : MP_NOPTS_VALUE;
+    double pkt_pts = packet ? packet->pts : MP_NOPTS_VALUE;
+    double pkt_dts = packet ? packet->dts : MP_NOPTS_VALUE;
 
-    double pdts = pts == MP_NOPTS_VALUE ? dts : pts;
-    if (pdts != MP_NOPTS_VALUE)
-        d_video->last_packet_pdts = pdts;
+    double pkt_pdts = pkt_pts == MP_NOPTS_VALUE ? pkt_dts : pkt_pts;
+    if (pkt_pdts != MP_NOPTS_VALUE)
+        d_video->last_packet_pdts = pkt_pdts;
 
-    if (sort_pts && pts != MP_NOPTS_VALUE) {
+    if (sort_pts && pkt_pdts != MP_NOPTS_VALUE) {
         int delay = -1;
         video_vd_control(d_video, VDCTRL_QUERY_UNSEEN_FRAMES, &delay);
         if (delay >= 0) {
@@ -281,16 +280,16 @@ struct mp_image *video_decode(struct dec_video *d_video,
         else {
             int i, j;
             for (i = 0; i < d_video->num_buffered_pts; i++)
-                if (d_video->buffered_pts[i] < pts)
+                if (d_video->buffered_pts[i] < pkt_pdts)
                     break;
             for (j = d_video->num_buffered_pts; j > i; j--)
                 d_video->buffered_pts[j] = d_video->buffered_pts[j - 1];
-            d_video->buffered_pts[i] = pts;
+            d_video->buffered_pts[i] = pkt_pdts;
             d_video->num_buffered_pts++;
         }
     }
 
-    mpi = d_video->vd_driver->decode(d_video, packet, drop_frame);
+    struct mp_image *mpi = d_video->vd_driver->decode(d_video, packet, drop_frame);
 
     //------------------------ frame decoded. --------------------
 
@@ -304,7 +303,7 @@ struct mp_image *video_decode(struct dec_video *d_video,
     else if (opts->field_dominance == 1)
         mpi->fields &= ~MP_IMGFIELD_TOP_FIRST;
 
-    pts = mpi->pts;
+    double pts = mpi->pts;
 
     double prevpts = d_video->codec_reordered_pts;
     d_video->prev_codec_reordered_pts = prevpts;
