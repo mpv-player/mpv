@@ -261,19 +261,8 @@ struct mp_image *video_decode(struct dec_video *d_video,
     if (sort_pts && pkt_pdts != MP_NOPTS_VALUE) {
         int delay = -1;
         video_vd_control(d_video, VDCTRL_QUERY_UNSEEN_FRAMES, &delay);
-        if (delay >= 0) {
-            if (delay > d_video->num_buffered_pts)
-#if 0
-                // this is disabled because vd_ffmpeg reports the same lag
-                // after seek even when there are no buffered frames,
-                // leading to incorrect error messages
-                mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Not enough buffered pts\n");
-#else
-                ;
-#endif
-            else
-                d_video->num_buffered_pts = delay;
-        }
+        if (delay >= 0 && delay < d_video->num_buffered_pts)
+            d_video->num_buffered_pts = delay;
         if (d_video->num_buffered_pts ==
             sizeof(d_video->buffered_pts) / sizeof(double))
             mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Too many buffered pts\n");
