@@ -342,7 +342,13 @@ struct mp_image *video_decode(struct dec_video *d_video,
         pts = dts;
 
     // Alternative PTS determination methods
-    if (!opts->correct_pts) {
+    if (sort_pts)
+        pts = retrieve_sorted_pts(d_video, pts);
+
+    if (!opts->correct_pts || pts == MP_NOPTS_VALUE) {
+        if (opts->correct_pts)
+            mp_msg(MSGT_DECVIDEO, MSGL_WARN, "No video PTS! Making something up.\n");
+
         double frame_time = 1.0f / (d_video->fps > 0 ? d_video->fps : 25);
         double base = d_video->last_packet_pdts;
         pts = d_video->decoded_pts;
@@ -350,8 +356,6 @@ struct mp_image *video_decode(struct dec_video *d_video,
             pts = base == MP_NOPTS_VALUE ? 0 : base;
 
         pts += frame_time;
-    } else if (sort_pts) {
-        pts = retrieve_sorted_pts(d_video, pts);
     }
 
     mpi->pts = pts;

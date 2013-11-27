@@ -313,13 +313,6 @@ double update_video(struct MPContext *mpctx, double endpts)
         return 0;
 
     double pts = video_out->next_pts;
-    if (pts == MP_NOPTS_VALUE) {
-        MP_ERR(mpctx, "Video pts after filters MISSING\n");
-        // Try to use decoder pts from before filters
-        pts = d_video->pts;
-        if (pts == MP_NOPTS_VALUE)
-            pts = d_video->last_pts;
-    }
     if (endpts == MP_NOPTS_VALUE || pts < endpts)
         add_frame_pts(mpctx, pts);
     if (mpctx->hrseek_active && pts < mpctx->hrseek_pts - .005) {
