@@ -43,7 +43,7 @@ extern const vd_functions_t *const mpcodecs_vd_drivers[];
 
 enum vd_ctrl {
     VDCTRL_GET_PARAMS = 1, // retrieve struct mp_image_params
-    VDCTRL_RESYNC_STREAM, // reset decode state after seeking
+    VDCTRL_RESET, // reset decode state after seeking
     VDCTRL_QUERY_UNSEEN_FRAMES, // current decoder lag
     VDCTRL_REINIT_VO, // reinit filter/VO chain
 };

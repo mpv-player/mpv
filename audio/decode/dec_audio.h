@@ -50,7 +50,7 @@ struct mp_decoder_list *audio_decoder_list(void);
 int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders);
 int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
                  int minsamples);
-void audio_resync_stream(struct dec_audio *d_audio);
+void audio_reset_decoding(struct dec_audio *d_audio);
 void audio_uninit(struct dec_audio *d_audio);
 
 int audio_init_filters(struct dec_audio *d_audio, int in_samplerate,

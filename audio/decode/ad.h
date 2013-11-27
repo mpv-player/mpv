@@ -40,7 +40,7 @@ struct ad_functions {
 };
 
 enum ad_ctrl {
-    ADCTRL_RESYNC_STREAM = 1,   // resync, called after seeking
+    ADCTRL_RESET = 1,   // flush and reset state, e.g. after seeking
 };
 
 #endif /* MPLAYER_AD_H */

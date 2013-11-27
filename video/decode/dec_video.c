@@ -56,6 +56,13 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
     NULL
 };
 
+void video_reset_decoding(struct dec_video *d_video)
+{
+    video_vd_control(d_video, VDCTRL_RESET, NULL);
+    d_video->prev_codec_reordered_pts = MP_NOPTS_VALUE;
+    d_video->prev_sorted_pts = MP_NOPTS_VALUE;
+}
+
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg)
 {
     const struct vd_functions *vd = d_video->vd_driver;
@@ -99,13 +106,6 @@ int video_get_colors(struct dec_video *d_video, const char *item, int *value)
         }
     }
     return 0;
-}
-
-void video_resync_stream(struct dec_video *d_video)
-{
-    video_vd_control(d_video, VDCTRL_RESYNC_STREAM, NULL);
-    d_video->prev_codec_reordered_pts = MP_NOPTS_VALUE;
-    d_video->prev_sorted_pts = MP_NOPTS_VALUE;
 }
 
 void video_reinit_vo(struct dec_video *d_video)

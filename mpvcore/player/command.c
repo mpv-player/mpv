@@ -624,10 +624,10 @@ static int mp_property_angle(m_option_t *prop, int action, void *arg,
         angle = demuxer_set_angle(demuxer, *(int *)arg);
         if (angle >= 0) {
             if (mpctx->d_video)
-                video_resync_stream(mpctx->d_video);
+                video_reset_decoding(mpctx->d_video);
 
             if (mpctx->d_audio)
-                audio_resync_stream(mpctx->d_audio);
+                audio_reset_decoding(mpctx->d_audio);
         }
         return M_PROPERTY_OK;
     case M_PROPERTY_GET_TYPE: {

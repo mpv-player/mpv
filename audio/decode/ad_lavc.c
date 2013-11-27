@@ -301,7 +301,7 @@ static int control(struct dec_audio *da, int cmd, void *arg)
 {
     struct priv *ctx = da->priv;
     switch (cmd) {
-    case ADCTRL_RESYNC_STREAM:
+    case ADCTRL_RESET:
         avcodec_flush_buffers(ctx->avctx);
         ctx->frame.samples = 0;
         talloc_free(ctx->packet);

@@ -821,7 +821,7 @@ static int control(struct dec_video *vd, int cmd, void *arg)
     vd_ffmpeg_ctx *ctx = vd->priv;
     AVCodecContext *avctx = ctx->avctx;
     switch (cmd) {
-    case VDCTRL_RESYNC_STREAM:
+    case VDCTRL_RESET:
         avcodec_flush_buffers(avctx);
         return CONTROL_TRUE;
     case VDCTRL_QUERY_UNSEEN_FRAMES:;

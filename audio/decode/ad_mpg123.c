@@ -347,7 +347,7 @@ static int control(struct dec_audio *da, int cmd, void *arg)
     struct ad_mpg123_context *con = da->priv;
 
     switch (cmd) {
-    case ADCTRL_RESYNC_STREAM:
+    case ADCTRL_RESET:
         mpg123_close(con->handle);
 
         if (mpg123_open_feed(con->handle) != MPG123_OK) {

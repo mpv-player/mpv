@@ -170,7 +170,7 @@ void add_step_frame(struct MPContext *mpctx, int dir)
 static void seek_reset(struct MPContext *mpctx, bool reset_ao)
 {
     if (mpctx->d_video) {
-        video_resync_stream(mpctx->d_video);
+        video_reset_decoding(mpctx->d_video);
         vo_seek_reset(mpctx->video_out);
         if (mpctx->d_video->vf_initialized == 1)
             vf_chain_seek_reset(mpctx->d_video->vfilter);
@@ -184,7 +184,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
     }
 
     if (mpctx->d_audio) {
-        audio_resync_stream(mpctx->d_audio);
+        audio_reset_decoding(mpctx->d_audio);
         if (mpctx->d_audio->afilter)
             af_control_all(mpctx->d_audio->afilter, AF_CONTROL_RESET, NULL);
         if (reset_ao)

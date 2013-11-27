@@ -135,7 +135,7 @@ static const struct ad_functions *find_driver(const char *name)
 int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
 {
     assert(!d_audio->ad_driver);
-    audio_resync_stream(d_audio);
+    audio_reset_decoding(d_audio);
 
     struct mp_decoder_entry *decoder = NULL;
     struct mp_decoder_list *list =
@@ -347,10 +347,10 @@ int audio_decode(struct dec_audio *d_audio, struct mp_audio_buffer *outbuf,
     return 0;
 }
 
-void audio_resync_stream(struct dec_audio *d_audio)
+void audio_reset_decoding(struct dec_audio *d_audio)
 {
     d_audio->pts = MP_NOPTS_VALUE;
     d_audio->pts_offset = 0;
     if (d_audio->ad_driver)
-        d_audio->ad_driver->control(d_audio, ADCTRL_RESYNC_STREAM, NULL);
+        d_audio->ad_driver->control(d_audio, ADCTRL_RESET, NULL);
 }

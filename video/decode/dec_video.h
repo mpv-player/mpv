@@ -77,7 +77,7 @@ struct mp_image *video_decode(struct dec_video *d_video,
 
 int video_get_colors(struct dec_video *d_video, const char *item, int *value);
 int video_set_colors(struct dec_video *d_video, const char *item, int value);
-void video_resync_stream(struct dec_video *d_video);
+void video_reset_decoding(struct dec_video *d_video);
 void video_reinit_vo(struct dec_video *d_video);
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg);
 
