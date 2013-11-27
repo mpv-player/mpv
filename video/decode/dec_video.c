@@ -69,7 +69,6 @@ void video_reset_decoding(struct dec_video *d_video)
     d_video->codec_dts = MP_NOPTS_VALUE;
     d_video->sorted_pts = MP_NOPTS_VALUE;
     d_video->unsorted_pts = MP_NOPTS_VALUE;
-    d_video->pts = MP_NOPTS_VALUE;
 }
 
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg)
@@ -358,9 +357,14 @@ struct mp_image *video_decode(struct dec_video *d_video,
         pts += frame_time;
     }
 
+    if (d_video->decoded_pts != MP_NOPTS_VALUE && pts < d_video->decoded_pts) {
+        mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Decreasing video pts: %f < %f\n",
+               pts, d_video->decoded_pts);
+        pts = d_video->decoded_pts;
+    }
+
     mpi->pts = pts;
     d_video->decoded_pts = pts;
-    d_video->pts = pts;
     return mpi;
 }
 

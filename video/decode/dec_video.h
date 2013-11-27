@@ -65,9 +65,6 @@ struct dec_video {
     // Final PTS of previously decoded image
     double decoded_pts;
 
-    // PTS of the last decoded frame (often overwritten by player)
-    double pts;
-
     float stream_aspect;  // aspect ratio in media headers (DVD IFO files)
     int i_bps;            // == bitrate  (compressed bytes/sec)
     float fps;            // FPS from demuxer or from user override

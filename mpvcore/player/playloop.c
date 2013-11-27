@@ -173,6 +173,7 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
         video_reset_decoding(mpctx->d_video);
         vo_seek_reset(mpctx->video_out);
         mpctx->video_pts = MP_NOPTS_VALUE;
+        mpctx->video_next_pts = MP_NOPTS_VALUE;
         mpctx->delay = 0;
         mpctx->time_frame = 0;
     }
@@ -616,7 +617,7 @@ static void adjust_sync(struct MPContext *mpctx, double frame_time)
         return;
 
     double a_pts = written_audio_pts(mpctx) - mpctx->delay;
-    double v_pts = mpctx->d_video->pts;
+    double v_pts = mpctx->video_next_pts;
     double av_delay = a_pts - v_pts;
     // Try to sync vo_flip() so it will *finish* at given time
     av_delay += mpctx->last_vo_flip_duration;
@@ -1010,7 +1011,7 @@ void run_playloop(struct MPContext *mpctx)
         }
 
         if (endpts != MP_NOPTS_VALUE)
-            video_left &= mpctx->d_video->pts < endpts;
+            video_left &= mpctx->video_next_pts < endpts;
 
         handle_heartbeat_cmd(mpctx);
 
@@ -1064,7 +1065,7 @@ void run_playloop(struct MPContext *mpctx)
         //=================== FLIP PAGE (VIDEO BLT): ======================
 
         vo_new_frame_imminent(vo);
-        mpctx->video_pts = mpctx->d_video->pts;
+        mpctx->video_pts = mpctx->video_next_pts;
         mpctx->last_vo_pts = mpctx->video_pts;
         mpctx->playback_pts = mpctx->video_pts;
         update_subtitles(mpctx);

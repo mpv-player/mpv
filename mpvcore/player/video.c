@@ -145,6 +145,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     mpctx->restart_playback = true;
     mpctx->sync_audio_to_video = !sh->attached_picture;
     mpctx->delay = 0;
+    mpctx->video_next_pts = MP_NOPTS_VALUE;
     mpctx->vo_pts_history_seek_ts++;
 
     vo_seek_reset(mpctx->video_out);
@@ -277,7 +278,7 @@ static double update_video_attached_pic(struct MPContext *mpctx)
     if (decoded_frame)
         filter_video(mpctx, decoded_frame);
     load_next_vo_frame(mpctx, true);
-    d_video->pts = MP_NOPTS_VALUE;
+    mpctx->video_next_pts = MP_NOPTS_VALUE;
     return 0;
 }
 
@@ -320,29 +321,16 @@ double update_video(struct MPContext *mpctx, double endpts)
         return 0;
     }
     mpctx->hrseek_active = false;
-    d_video->pts = pts;
-    if (d_video->last_pts == MP_NOPTS_VALUE) {
-        d_video->last_pts = d_video->pts;
-    } else if (d_video->last_pts > d_video->pts) {
-        MP_WARN(mpctx, "Decreasing video pts: %f < %f\n",
-                d_video->pts, d_video->last_pts);
-        /* If the difference in pts is small treat it as jitter around the
-         * right value (possibly caused by incorrect timestamp ordering) and
-         * just show this frame immediately after the last one.
-         * Treat bigger differences as timestamp resets and start counting
-         * timing of later frames from the position of this one. */
-        if (d_video->last_pts - d_video->pts > 0.5)
-            d_video->last_pts = d_video->pts;
-        else
-            d_video->pts = d_video->last_pts;
-    } else if (d_video->pts >= d_video->last_pts + 60) {
+    double last_pts = mpctx->video_next_pts;
+    if (last_pts == MP_NOPTS_VALUE)
+        last_pts = pts;
+    double frame_time = MPMAX(0, pts - last_pts);
+    if (frame_time >= 60) {
         // Assume a PTS difference >= 60 seconds is a discontinuity.
-        MP_WARN(mpctx, "Jump in video pts: %f -> %f\n",
-                d_video->last_pts, d_video->pts);
-        d_video->last_pts = d_video->pts;
+        MP_WARN(mpctx, "Jump in video pts: %f -> %f\n", last_pts, pts);
+        frame_time = 0;
     }
-    double frame_time = d_video->pts - d_video->last_pts;
-    d_video->last_pts = d_video->pts;
+    mpctx->video_next_pts = pts;
     if (mpctx->d_audio)
         mpctx->delay -= frame_time;
     return frame_time;

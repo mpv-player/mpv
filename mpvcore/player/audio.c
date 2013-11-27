@@ -303,7 +303,7 @@ static int audio_start_sync(struct MPContext *mpctx, int playsize)
         if (hrseek)
             ptsdiff = written_pts - mpctx->hrseek_pts;
         else
-            ptsdiff = written_pts - mpctx->d_video->pts - mpctx->delay
+            ptsdiff = written_pts - mpctx->video_next_pts - mpctx->delay
                       - mpctx->audio_delay;
         samples = ptsdiff * real_samplerate;
 
