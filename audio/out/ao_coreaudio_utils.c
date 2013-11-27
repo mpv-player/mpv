@@ -336,31 +336,45 @@ bool ca_change_format(struct ao *ao, AudioStreamID stream,
     return format_set;
 }
 
+static const int speaker_map[][2] = {
+    { kAudioChannelLabel_Left,                 MP_SPEAKER_ID_FL   },
+    { kAudioChannelLabel_Right,                MP_SPEAKER_ID_FR   },
+    { kAudioChannelLabel_Center,               MP_SPEAKER_ID_FC   },
+    { kAudioChannelLabel_LFEScreen,            MP_SPEAKER_ID_LFE  },
+    { kAudioChannelLabel_LeftSurround,         MP_SPEAKER_ID_BL   },
+    { kAudioChannelLabel_RightSurround,        MP_SPEAKER_ID_BR   },
+    { kAudioChannelLabel_LeftCenter,           MP_SPEAKER_ID_FLC  },
+    { kAudioChannelLabel_RightCenter,          MP_SPEAKER_ID_FRC  },
+    { kAudioChannelLabel_CenterSurround,       MP_SPEAKER_ID_BC   },
+    { kAudioChannelLabel_LeftSurroundDirect,   MP_SPEAKER_ID_SL   },
+    { kAudioChannelLabel_RightSurroundDirect,  MP_SPEAKER_ID_SR   },
+    { kAudioChannelLabel_TopCenterSurround,    MP_SPEAKER_ID_TC   },
+    { kAudioChannelLabel_VerticalHeightLeft,   MP_SPEAKER_ID_TFL  },
+    { kAudioChannelLabel_VerticalHeightCenter, MP_SPEAKER_ID_TFC  },
+    { kAudioChannelLabel_VerticalHeightRight,  MP_SPEAKER_ID_TFR  },
+    { kAudioChannelLabel_TopBackLeft,          MP_SPEAKER_ID_TBL  },
+    { kAudioChannelLabel_TopBackCenter,        MP_SPEAKER_ID_TBC  },
+    { kAudioChannelLabel_TopBackRight,         MP_SPEAKER_ID_TBR  },
+
+    // unofficial extensions
+    { kAudioChannelLabel_RearSurroundLeft,     MP_SPEAKER_ID_SDL  },
+    { kAudioChannelLabel_RearSurroundRight,    MP_SPEAKER_ID_SDR  },
+    { kAudioChannelLabel_LeftWide,             MP_SPEAKER_ID_WL   },
+    { kAudioChannelLabel_RightWide,            MP_SPEAKER_ID_WR   },
+    { kAudioChannelLabel_LFE2,                 MP_SPEAKER_ID_LFE2 },
+
+    { kAudioChannelLabel_HeadphonesLeft,       MP_SPEAKER_ID_DL   },
+    { kAudioChannelLabel_HeadphonesRight,      MP_SPEAKER_ID_DR   },
+
+    { kAudioChannelLabel_Unknown,              -1 },
+};
+
 static int ca_label_to_mp_speaker_id(AudioChannelLabel label)
 {
-    if (label == kAudioChannelLabel_UseCoordinates ||
-        label == kAudioChannelLabel_Unknown ||
-        label > kAudioChannelLabel_LFE2)
-        return -1;
-
-    if (label <= kAudioChannelLabel_TopBackRight) {
-        return label - 1;
-    } else {
-        // Take care of extra labels after kAudioChannelLabel_TopBackRight
-        switch (label) {
-        case kAudioChannelLabel_RearSurroundLeft:
-            return MP_SPEAKER_ID_SDL;
-        case kAudioChannelLabel_RearSurroundRight:
-            return MP_SPEAKER_ID_SDR;
-        case kAudioChannelLabel_LeftWide:
-            return MP_SPEAKER_ID_WL;
-        case kAudioChannelLabel_RightWide:
-            return MP_SPEAKER_ID_WR;
-        case kAudioChannelLabel_LFE2:
-            return kAudioChannelLabel_LFE2;
-        }
-        return -1;
-    }
+    for (int i = 0; speaker_map[i][0] != kAudioChannelLabel_Unknown; i++)
+        if (speaker_map[i][0] == label)
+            return speaker_map[i][1];
+    return -1;
 }
 
 static bool ca_bitmap_from_ch_desc(struct ao *ao, AudioChannelLayout *layout,
