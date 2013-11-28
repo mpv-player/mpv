@@ -226,7 +226,7 @@ def build(ctx):
         ( "stream/ai_oss.c",                     "oss-audio" ),
         ( "stream/ai_sndio.c",                   "sndio" ),
         ( "stream/audio_in.c",                   "audio-input" ),
-        ( "stream/cache.c",                      "stream-cache"),
+        ( "stream/cache.c" ),
         ( "stream/cdinfo.c",                     "cdda"),
         ( "stream/cookies.c" ),
         ( "stream/dvb_tune.c",                   "dvbin" ),

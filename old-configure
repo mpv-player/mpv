@@ -1325,6 +1325,10 @@ else
 fi
 echores "$_pthreads"
 
+if test "$_pthreads" = no ; then
+  die "Unable to find pthreads support."
+fi
+
 if test "$_pthreads" = yes ; then
 
 # Cargo-cult for -lrt, which is needed on not so recent glibc version for

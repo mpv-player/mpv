@@ -20,6 +20,7 @@
 
 #include <stddef.h>
 #include <stdbool.h>
+#include <pthread.h>
 #include <assert.h>
 
 #include "talloc.h"
@@ -29,19 +30,13 @@
 
 #include "mp_image_pool.h"
 
-#if HAVE_PTHREADS
-#include <pthread.h>
 static pthread_mutex_t pool_mutex = PTHREAD_MUTEX_INITIALIZER;
 #define pool_lock() pthread_mutex_lock(&pool_mutex)
 #define pool_unlock() pthread_mutex_unlock(&pool_mutex)
-#else
-#define pool_lock() 0
-#define pool_unlock() 0
-#endif
 
 // Thread-safety: the pool itself is not thread-safe, but pool-allocated images
-// can be referenced and unreferenced from other threads. (As long as compiled
-// with pthreads, and the image destructors are thread-safe.)
+// can be referenced and unreferenced from other threads. (As long as the image
+// destructors are thread-safe.)
 
 struct mp_image_pool {
     int max_count;

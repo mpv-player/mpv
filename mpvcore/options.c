@@ -352,7 +352,6 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- stream options --------------------
 
-#if HAVE_STREAM_CACHE
     OPT_CHOICE_OR_INT("cache", stream_cache_size, 0, 32, 0x7fffffff,
                       ({"no", 0},
                        {"auto", -1}),
@@ -364,7 +363,7 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("cache-seek-min", stream_cache_seek_min_percent, 0, 0, 99),
     OPT_CHOICE_OR_INT("cache-pause", stream_cache_pause, 0,
                       0, 40, ({"no", -1})),
-#endif /* HAVE_STREAM_CACHE */
+
     {"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #if HAVE_DVDREAD
     {"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL},

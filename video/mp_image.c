@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <pthread.h>
 #include <assert.h>
 
 #include <libavutil/mem.h>
@@ -38,15 +39,9 @@
 
 #include "video/filter/vf.h"
 
-#if HAVE_PTHREADS
-#include <pthread.h>
 static pthread_mutex_t refcount_mutex = PTHREAD_MUTEX_INITIALIZER;
 #define refcount_lock() pthread_mutex_lock(&refcount_mutex)
 #define refcount_unlock() pthread_mutex_unlock(&refcount_mutex)
-#else
-#define refcount_lock() 0
-#define refcount_unlock() 0
-#endif
 
 struct m_refcount {
     void *arg;

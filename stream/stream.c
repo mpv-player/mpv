@@ -809,12 +809,7 @@ static int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
     cache->start_pos = orig->start_pos;
     cache->end_pos = orig->end_pos;
 
-    int res = -1;
-
-#if HAVE_STREAM_CACHE
-    res = stream_cache_init(cache, orig, size, min, seek_limit);
-#endif
-
+    int res = stream_cache_init(cache, orig, size, min, seek_limit);
     if (res <= 0) {
         cache->uncached_stream = NULL; // don't free original stream
         free_stream(cache);

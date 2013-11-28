@@ -29,6 +29,7 @@
 #include <sys/time.h>
 #include <fcntl.h>
 #include <ctype.h>
+#include <pthread.h>
 #include <assert.h>
 
 #include <libavutil/avstring.h>
@@ -65,16 +66,8 @@
 #include "osdep/macosx_events.h"
 #endif
 
-#if HAVE_PTHREADS
-#include <pthread.h>
 #define input_lock(ictx)    pthread_mutex_lock(&ictx->mutex)
 #define input_unlock(ictx)  pthread_mutex_unlock(&ictx->mutex)
-#define input_destroy(ictx) pthread_mutex_destroy(&ictx->mutex)
-#else
-#define input_lock(ictx) 0
-#define input_unlock(ictx) 0
-#define input_destroy(ictx) 0
-#endif
 
 #define MP_MAX_KEY_DOWN 4
 
@@ -549,9 +542,7 @@ struct cmd_queue {
 };
 
 struct input_ctx {
-#if HAVE_PTHREADS
     pthread_mutex_t mutex;
-#endif
     struct mp_log *log;
 
     bool using_ar;
@@ -2299,13 +2290,11 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
         .wakeup_pipe = {-1, -1},
     };
 
-#if HAVE_PTHREADS
     pthread_mutexattr_t attr;
     pthread_mutexattr_init(&attr);
     pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
     pthread_mutex_init(&ictx->mutex, &attr);
     pthread_mutexattr_destroy(&attr);
-#endif
 
     // Setup default section, so that it does nothing.
     mp_input_enable_section(ictx, NULL, MP_INPUT_ALLOW_VO_DRAGGING |
@@ -2447,7 +2436,7 @@ void mp_input_uninit(struct input_ctx *ictx)
     }
     clear_queue(&ictx->cmd_queue);
     talloc_free(ictx->current_down_cmd);
-    input_destroy(ictx);
+    pthread_mutex_destroy(&ictx->mutex);
     talloc_free(ictx);
 }
 

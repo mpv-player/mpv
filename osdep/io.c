@@ -59,10 +59,7 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s)
 
 #include <io.h>
 #include <fcntl.h>
-
-#if HAVE_PTHREADS
 #include <pthread.h>
-#endif
 
 #include "mpvcore/mp_talloc.h"
 
@@ -300,12 +297,8 @@ static void init_getenv(void)
 
 char *mp_getenv(const char *name)
 {
-#if HAVE_PTHREADS
     static pthread_once_t once_init_getenv = PTHREAD_ONCE_INIT;
     pthread_once(&once_init_getenv, init_getenv);
-#else
-    init_getenv();
-#endif
     // Copied from musl, http://git.musl-libc.org/cgit/musl/tree/COPYRIGHT
     // Copyright © 2005-2013 Rich Felker, standard MIT license
     int i;

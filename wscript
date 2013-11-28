@@ -88,9 +88,11 @@ main_dependencies = [
         'desc': 'mman.h',
         'func': check_statement('sys/mman.h', 'mmap(0, 0, 0, 0, 0, 0)')
     }, {
-        'name': '--pthreads',
+        'name': 'pthreads',
         'desc': 'POSIX threads',
         'func': check_pthreads,
+        'req': True,
+        'fmsg': 'Unable to find pthreads support.'
     }, {
         'name': 'librt',
         'desc': 'linking with -lrt',
@@ -113,11 +115,6 @@ iconv support use --disable-iconv.",
         'name': 'priority',
         'desc': 'w32 priority API',
         'deps_any': [ 'os-win32', 'os-cygwin'],
-        'func': check_true
-    }, {
-        'name': 'stream-cache',
-        'desc': 'stream cache',
-        'deps': [ 'pthreads' ],
         'func': check_true
     }, {
         'name': 'soundcard',
