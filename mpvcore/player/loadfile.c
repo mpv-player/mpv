@@ -858,7 +858,7 @@ static struct mp_resolve_result *resolve_url(const char *filename,
 {
     if (!mp_is_url(bstr0(filename)))
         return NULL;
-#if HAVE_LIBQUVI4 || HAVE_LIBQUVI9
+#if HAVE_LIBQUVI
     return mp_resolve_quvi(filename, opts);
 #else
     return NULL;
