@@ -219,6 +219,15 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
 
     if (mpctx->stop_play == AT_END_OF_FILE)
         mpctx->stop_play = KEEP_PLAYING;
+
+    double hr_seek_offset = opts->hr_seek_demuxer_offset;
+    // Always try to compensate for possibly bad demuxers in "special"
+    // situations where we need more robustness from the hr-seek code, even
+    // if the user doesn't use --hr-seek-demuxer-offset.
+    // The value is arbitrary, but should be "good enough" in most situations.
+    if (seek.exact > 1)
+        hr_seek_offset = MPMAX(hr_seek_offset, 0.5); // arbitrary
+
     bool hr_seek = mpctx->demuxer->accurate_seek && opts->correct_pts;
     hr_seek &= seek.exact >= 0 && seek.type != MPSEEK_FACTOR;
     hr_seek &= (opts->hr_seek == 0 && seek.type == MPSEEK_ABSOLUTE) ||
@@ -279,7 +288,7 @@ static int mp_seek(MPContext *mpctx, struct seek_params seek,
         demuxer_style |= SEEK_SUBPREROLL;
 
     if (hr_seek)
-        demuxer_amount -= opts->hr_seek_demuxer_offset;
+        demuxer_amount -= hr_seek_offset;
     int seekresult = demux_seek(mpctx->demuxer, demuxer_amount, demuxer_style);
     if (seekresult == 0) {
         if (need_reset)
@@ -795,14 +804,14 @@ static void handle_backstep(struct MPContext *mpctx)
     if (demuxer_ok && mpctx->d_video && current_pts != MP_NOPTS_VALUE) {
         double seek_pts = find_previous_pts(mpctx, current_pts);
         if (seek_pts != MP_NOPTS_VALUE) {
-            queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, 1);
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, seek_pts, 2);
         } else {
             double last = get_last_frame_pts(mpctx);
             if (last != MP_NOPTS_VALUE && last >= current_pts &&
                 mpctx->backstep_start_seek_ts != mpctx->vo_pts_history_seek_ts)
             {
                 MP_ERR(mpctx, "Backstep failed.\n");
-                queue_seek(mpctx, MPSEEK_ABSOLUTE, current_pts, 1);
+                queue_seek(mpctx, MPSEEK_ABSOLUTE, current_pts, 2);
             } else if (!mpctx->hrseek_active) {
                 MP_VERBOSE(mpctx, "Start backstep indexing.\n");
                 // Force it to index the video up until current_pts.
