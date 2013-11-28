@@ -744,12 +744,12 @@ def configure(ctx):
     ctx.load('detections.devices')
 
     if ctx.env.DEST_OS in ('freebsd', 'openbsd'):
-        ctx.env.CFLAGS.append('-I/usr/local/include')
-        ctx.env.LINKFLAGS.append('-L/usr/local/lib')
+        ctx.env.CFLAGS += ['-I/usr/local/include']
+        ctx.env.LINKFLAGS += ['-L/usr/local/lib']
 
     if ctx.env.DEST_OS == 'netbsd':
-        ctx.env.CFLAGS.append('-I/usr/pkg/include')
-        ctx.env.LINKFLAGS.append('-L/usr/pkg/lib')
+        ctx.env.CFLAGS += ['-I/usr/pkg/include']
+        ctx.env.LINKFLAGS += ['-L/usr/pkg/lib']
 
     ctx.parse_dependencies(build_options)
     ctx.parse_dependencies(main_dependencies)
