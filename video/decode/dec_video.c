@@ -358,8 +358,8 @@ struct mp_image *video_decode(struct dec_video *d_video,
         pts += frame_time;
     }
 
-    if (d_video->decoded_pts != MP_NOPTS_VALUE && pts < d_video->decoded_pts) {
-        mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Decreasing video pts: %f < %f\n",
+    if (d_video->decoded_pts != MP_NOPTS_VALUE && pts <= d_video->decoded_pts) {
+        mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Non-monotonic video pts: %f <= %f\n",
                pts, d_video->decoded_pts);
         pts = d_video->decoded_pts;
     }
