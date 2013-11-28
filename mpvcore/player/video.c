@@ -295,8 +295,11 @@ double update_video(struct MPContext *mpctx, double endpts)
         struct demux_packet *pkt = demux_read_packet(d_video->header);
         if (pkt && pkt->pts != MP_NOPTS_VALUE)
             pkt->pts += mpctx->video_offset;
-        if (pkt && pkt->pts >= mpctx->hrseek_pts - .005)
+        if ((pkt && pkt->pts >= mpctx->hrseek_pts - .005) ||
+            d_video->has_broken_packet_pts)
+        {
             mpctx->hrseek_framedrop = false;
+        }
         int framedrop_type = mpctx->hrseek_active && mpctx->hrseek_framedrop ?
                              1 : check_framedrop(mpctx, -1);
         struct mp_image *decoded_frame =

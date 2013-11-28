@@ -62,6 +62,9 @@ struct dec_video {
     // PTS or DTS of packet last read
     double last_packet_pdts;
 
+    // There was at least one packet with non-sense timestamps.
+    int has_broken_packet_pts; // <0: uninitialized, 0: no problems, 1: broken
+
     // Final PTS of previously decoded image
     double decoded_pts;
 

@@ -171,6 +171,7 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
 {
     assert(!d_video->vd_driver);
     video_reset_decoding(d_video);
+    d_video->has_broken_packet_pts = -10; // needs 10 packets to reach decision
 
     struct mp_decoder_entry *decoder = NULL;
     struct mp_decoder_list *list =
@@ -362,6 +363,11 @@ struct mp_image *video_decode(struct dec_video *d_video,
                pts, d_video->decoded_pts);
         pts = d_video->decoded_pts;
     }
+
+    if (d_video->has_broken_packet_pts < 0)
+        d_video->has_broken_packet_pts++;
+    if (d_video->num_codec_pts_problems || pkt_pts == MP_NOPTS_VALUE)
+        d_video->has_broken_packet_pts = 1;
 
     mpi->pts = pts;
     d_video->decoded_pts = pts;
