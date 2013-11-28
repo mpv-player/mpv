@@ -2437,7 +2437,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     if (!cmd->raw_args) {
         for (int n = 0; n < cmd->nargs; n++) {
-            if (cmd->args[n].type.type == CONF_TYPE_STRING) {
+            if (cmd->args[n].type->type == CONF_TYPE_STRING) {
                 cmd->args[n].v.s =
                     mp_property_expand_string(mpctx, cmd->args[n].v.s);
                 if (!cmd->args[n].v.s)

@@ -92,6 +92,11 @@ struct key_name {
     char *name;
 };
 
+// This does not specify the real destination of the command parameter values,
+// it just provides a dummy for the OPT_ macros.
+#define OPT_BASE_STRUCT struct mp_cmd_arg
+#define ARG(t) "", v. t
+
 /* This array defines all known commands.
  * The first field is an id used to recognize the command.
  * The second is the command name used in slave mode and input.conf.
@@ -99,33 +104,40 @@ struct key_name {
  * (ARG_INT, ARG_FLOAT, ARG_STRING) if any, then optional arguments
  * (OARG_INT(default), etc) if any. The command will be given the default
  * argument value if the user didn't give enough arguments to specify it.
- * A command can take a maximum of MP_CMD_MAX_ARGS arguments (10).
+ * A command can take a maximum of MP_CMD_MAX_ARGS arguments.
  */
 
-#define ARG_INT                 { .type = {"", NULL, &m_option_type_int} }
-#define ARG_FLOAT               { .type = {"", NULL, &m_option_type_float} }
-#define ARG_DOUBLE              { .type = {"", NULL, &m_option_type_double} }
-#define ARG_STRING              { .type = {"", NULL, &m_option_type_string} }
-#define ARG_CHOICE(c)           { .type = {"", NULL, &m_option_type_choice,    \
-                                           M_CHOICES(c)} }
-#define ARG_TIME                { .type = {"", NULL, &m_option_type_time} }
-
-#define OARG_DOUBLE(def)        { .type = {"", NULL, &m_option_type_double},   \
-                                  .optional = true, .v.d = def }
-#define OARG_INT(def)           { .type = {"", NULL, &m_option_type_int},      \
-                                  .optional = true, .v.i = def }
-#define OARG_CHOICE(def, c)     { .type = {"", NULL, &m_option_type_choice,    \
-                                           M_CHOICES(c)},                      \
-                                  .optional = true, .v.i = def }
+#define ARG_INT                 OPT_INT(ARG(i), 0)
+#define ARG_FLOAT               OPT_FLOAT(ARG(f), 0)
+#define ARG_DOUBLE              OPT_DOUBLE(ARG(d), 0)
+#define ARG_STRING              OPT_STRING(ARG(s), 0)
+#define ARG_CHOICE(c)           OPT_CHOICE(ARG(i), 0, c)
+#define ARG_TIME                OPT_TIME(ARG(d), 0)
+#define OARG_DOUBLE(def)        OPT_DOUBLE(ARG(d), 0, OPTDEF_DOUBLE(def))
+#define OARG_INT(def)           OPT_INT(ARG(i), 0, OPTDEF_INT(def))
+#define OARG_CHOICE(def, c)     OPT_CHOICE(ARG(i), 0, c, OPTDEF_INT(def))
 
 static int parse_cycle_dir(const struct m_option *opt, struct bstr name,
                            struct bstr param, void *dst);
 static const struct m_option_type m_option_type_cycle_dir = {
     .name = "up|down",
     .parse = parse_cycle_dir,
+    .size = sizeof(double),
 };
 
-static const mp_cmd_t mp_cmds[] = {
+#define OPT_CYCLEDIR(...) \
+    OPT_GENERAL(double, __VA_ARGS__, .type = &m_option_type_cycle_dir)
+
+#define OARG_CYCLEDIR(def)     OPT_CYCLEDIR(ARG(d), 0, OPTDEF_DOUBLE(def))
+
+struct mp_cmd_def {
+    int id;             // one of MP_CMD_...
+    const char *name;   // user-visible name (as used in input.conf)
+    const struct m_option args[MP_CMD_MAX_ARGS];
+    bool allow_auto_repeat; // react to repeated key events
+};
+
+static const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_IGNORE, "ignore", },
 
   { MP_CMD_RADIO_STEP_CHANNEL, "radio_step_channel", { ARG_INT } },
@@ -214,9 +226,7 @@ static const mp_cmd_t mp_cmds[] = {
     .allow_auto_repeat = true},
   { MP_CMD_CYCLE, "cycle", {
       ARG_STRING,
-      { .type = {"", NULL, &m_option_type_cycle_dir},
-        .optional = true,
-        .v.d = 1 },
+      OARG_CYCLEDIR(1),
     },
     .allow_auto_repeat = true
   },
@@ -245,6 +255,9 @@ static const mp_cmd_t mp_cmds[] = {
 
   {0}
 };
+
+#undef OPT_BASE_STRUCT
+#undef ARG
 
 // Map legacy commands to proper commands
 struct legacy_cmd {
@@ -969,16 +982,35 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
         goto error;
     }
 
+    const struct mp_cmd_def *cmd_def = &mp_cmds[cmd_idx];
     cmd = talloc_ptrtype(NULL, cmd);
-    *cmd = mp_cmds[cmd_idx];
-    cmd->scale = 1;
-    cmd->pausing = pausing;
-    cmd->on_osd = on_osd;
-    cmd->raw_args = raw_args;
+    *cmd = (struct mp_cmd) {
+        .name = (char *)cmd_def->name,
+        .id = cmd_def->id,
+        .pausing = pausing,
+        .on_osd = on_osd,
+        .raw_args = raw_args,
+        .scale = 1,
+        .def = cmd_def,
+    };
+
+    int min_args = 0;
+    for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
+        struct mp_cmd_arg *cmdarg = &cmd->args[i];
+        const struct m_option *opt = &cmd_def->args[i];
+        if (opt->type) {
+            cmdarg->type = opt;
+            if (opt->defval) {
+                memcpy(&cmdarg->v, opt->defval, opt->type->size);
+            } else {
+                min_args++;
+            }
+        }
+    }
 
     for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
         struct mp_cmd_arg *cmdarg = &cmd->args[i];
-        if (!cmdarg->type.type)
+        if (!cmdarg->type)
             break;
         str = bstr_lstrip(str);
         if (eat_token(&str, ";")) {
@@ -1002,19 +1034,19 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
         } else {
             if (!read_token(str, &str, &arg))
                 break;
-            if (cmdarg->optional && bstrcmp0(arg, "-") == 0)
+            if (i >= min_args && bstrcmp0(arg, "-") == 0)
                 continue;
         }
         // Prevent option API from trying to deallocate static strings
-        cmdarg->v = ((struct mp_cmd_arg) {{0}}).v;
-        int r = m_option_parse(&cmdarg->type, bstr0(cmd->name), arg, &cmdarg->v);
+        cmdarg->v = ((struct mp_cmd_arg) {0}).v;
+        int r = m_option_parse(cmdarg->type, bstr0(cmd->name), arg, &cmdarg->v);
         if (r < 0) {
             MP_ERR(ictx, "Command %s: argument %d can't be parsed: %s.\n",
                    cmd->name, i + 1, m_option_strerror(r));
             goto error;
         }
-        if (cmdarg->type.type == &m_option_type_string)
-            cmdarg->v.s = talloc_steal(cmd, cmdarg->v.s);
+        if (cmdarg->type->type == &m_option_type_string)
+            talloc_steal(cmd, cmdarg->v.s);
     }
 
     if (eat_token(&str, ";")) {
@@ -1030,12 +1062,6 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
         goto error;
     }
 
-    int min_args = 0;
-    while (min_args < MP_CMD_MAX_ARGS && cmd->args[min_args].type.type
-           && !cmd->args[min_args].optional)
-    {
-        min_args++;
-    }
     if (cmd->nargs < min_args) {
         MP_ERR(ictx, "Command %s requires at least %d arguments, we found "
                "only %d so far.\n", cmd->name, min_args, cmd->nargs);
@@ -1888,7 +1914,7 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
         struct mp_cmd *repeated = check_autorepeat(ictx);
         if (repeated) {
             repeated->repeated = true;
-            if (repeated->allow_auto_repeat) {
+            if (repeated->def && repeated->def->allow_auto_repeat) {
                 queue_add_tail(queue, repeated);
             } else {
                 talloc_free(repeated);
@@ -1930,8 +1956,8 @@ mp_cmd_t *mp_cmd_clone(mp_cmd_t *cmd)
 
     ret = talloc_memdup(NULL, cmd, sizeof(mp_cmd_t));
     ret->name = talloc_strdup(ret, cmd->name);
-    for (i = 0; i < MP_CMD_MAX_ARGS; i++) {
-        if (cmd->args[i].type.type == &m_option_type_string)
+    for (i = 0; i < ret->nargs; i++) {
+        if (cmd->args[i].type->type == &m_option_type_string)
             ret->args[i].v.s = talloc_strdup(ret, cmd->args[i].v.s);
     }
 
@@ -2433,14 +2459,12 @@ static int print_key_list(m_option_t *cfg, char *optname, char *optparam)
 
 static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam)
 {
-    const mp_cmd_t *cmd;
-    int i, j;
-
-    for (i = 0; (cmd = &mp_cmds[i])->name != NULL; i++) {
-        printf("%-20.20s", cmd->name);
-        for (j = 0; j < MP_CMD_MAX_ARGS && cmd->args[j].type.type; j++) {
-            const char *type = cmd->args[j].type.type->name;
-            if (cmd->args[j].optional)
+    for (int i = 0; mp_cmds[i].name; i++) {
+        const struct mp_cmd_def *def = &mp_cmds[i];
+        printf("%-20.20s", def->name);
+        for (int j = 0; j < MP_CMD_MAX_ARGS && def->args[j].type; j++) {
+            const char *type = def->args[j].type->name;
+            if (def->args[j].defval)
                 printf(" [%s]", type);
             else
                 printf(" %s", type);

@@ -131,8 +131,7 @@ enum mp_input_section_flags {
 struct input_ctx;
 
 struct mp_cmd_arg {
-    struct m_option type;
-    bool optional;
+    const struct m_option *type;
     union {
         int i;
         float f;
@@ -158,7 +157,7 @@ typedef struct mp_cmd {
     int mouse_x, mouse_y;
     struct mp_cmd *queue_next;
     double scale;               // for scaling numeric arguments
-    bool allow_auto_repeat;     // used in command specification
+    const struct mp_cmd_def *def;
 } mp_cmd_t;
 
 

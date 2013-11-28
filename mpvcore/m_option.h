@@ -503,8 +503,10 @@ int m_option_required_params(const m_option_t *opt);
 #define OPTION_PATH_SEPARATOR ':'
 #endif
 
-#define OPTDEF_STR(s) .defval = (void *)&(char * const){s}
-#define OPTDEF_INT(i) .defval = (void *)&(const int){i}
+#define OPTDEF_STR(s)     .defval = (void *)&(char * const){s}
+#define OPTDEF_INT(i)     .defval = (void *)&(const int){i}
+#define OPTDEF_FLOAT(f)   .defval = (void *)&(const float){f}
+#define OPTDEF_DOUBLE(d)  .defval = (void *)&(const double){d}
 
 #define OPT_GENERAL(ctype, optname, varname, flagv, ...)                \
     {.name = optname, .flags = flagv, .is_new_option = 1,               \
