@@ -1622,11 +1622,6 @@ if test "$_libquvi4" = auto ; then
         _libquvi4=yes
     fi
 fi
-if test "$_libquvi4" = yes; then
-    def_libquvi4="#define HAVE_LIBQUVI4 1"
-else
-    def_libquvi4="#define HAVE_LIBQUVI4 0"
-fi
 echores "$_libquvi4"
 
 echocheck "libquvi 0.9.x support"
@@ -1640,12 +1635,13 @@ if test "$_libquvi9" = auto ; then
         _libquvi9=yes
     fi
 fi
-if test "$_libquvi9" = yes; then
-    def_libquvi9="#define HAVE_LIBQUVI9 1"
-else
-    def_libquvi9="#define HAVE_LIBQUVI9 0"
-fi
 echores "$_libquvi9"
+
+if test "$_libquvi9" = yes || test "$_libquvi4" = yes; then
+    def_libquvi9="#define HAVE_LIBQUVI 1"
+else
+    def_libquvi9="#define HAVE_LIBQUVI 0"
+fi
 
 #########
 # VIDEO #
