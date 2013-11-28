@@ -185,9 +185,11 @@ List of Input Commands
 ``playlist_clear``
     Clear the playlist, except the currently played file.
 
-``playlist_remove <index>``
+``playlist_remove current|<index>``
     Remove the playlist entry at the given index. Index values start counting
-    with 0. You cannot remove the entry for the currently played file.
+    with 0. The special value ``current`` removes the current entry. Note that
+    removing the current entry also stops playback and starts playing the next
+    entry.
 
 ``playlist_move <index1> <index2>``
     Move the playlist entry at index1, so that it takes the place of the

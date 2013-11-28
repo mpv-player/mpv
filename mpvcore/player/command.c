@@ -2701,6 +2701,8 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     case MP_CMD_PLAYLIST_REMOVE: {
         struct playlist_entry *e = playlist_entry_from_index(mpctx->playlist,
                                                              cmd->args[0].v.i);
+        if (cmd->args[0].v.i < 0)
+            e = mpctx->playlist->current;
         if (e) {
             // Can't play a removed entry
             if (mpctx->playlist->current == e)

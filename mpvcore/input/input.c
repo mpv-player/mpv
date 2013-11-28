@@ -112,6 +112,7 @@ struct key_name {
 #define ARG_DOUBLE              OPT_DOUBLE(ARG(d), 0)
 #define ARG_STRING              OPT_STRING(ARG(s), 0)
 #define ARG_CHOICE(c)           OPT_CHOICE(ARG(i), 0, c)
+#define ARG_CHOICE_OR_INT(...)  OPT_CHOICE_OR_INT(ARG(i), 0, __VA_ARGS__)
 #define ARG_TIME                OPT_TIME(ARG(d), 0)
 #define OARG_DOUBLE(def)        OPT_DOUBLE(ARG(d), 0, OPTDEF_DOUBLE(def))
 #define OARG_INT(def)           OPT_INT(ARG(i), 0, OPTDEF_INT(def))
@@ -216,7 +217,9 @@ static const struct mp_cmd_def mp_cmds[] = {
                       {"append", 1},           {"1", 1})),
   }},
   { MP_CMD_PLAYLIST_CLEAR, "playlist_clear", },
-  { MP_CMD_PLAYLIST_REMOVE, "playlist_remove", { ARG_INT } },
+  { MP_CMD_PLAYLIST_REMOVE, "playlist_remove", {
+      ARG_CHOICE_OR_INT(0, INT_MAX, ({"current", -1})),
+  }},
   { MP_CMD_PLAYLIST_MOVE, "playlist_move", { ARG_INT, ARG_INT } },
   { MP_CMD_RUN, "run", { ARG_STRING } },
 
