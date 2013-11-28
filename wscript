@@ -497,11 +497,13 @@ video_output_features = [
         'name': '--gl-cocoa',
         'desc': 'OpenGL Cocoa Backend',
         'deps': [ 'cocoa' ],
+        'groups': [ 'gl' ],
         'func': check_true
     } , {
         'name': '--gl-x11',
         'desc': 'OpenGL X11 Backend',
         'deps': [ 'x11' ],
+        'groups': [ 'gl' ],
         'func': check_libs(['GL', 'GL Xdamage'],
                    check_cc(fragment=load_fragment('gl_x11.c'),
                             use=['x11', 'libdl', 'pthreads']))
@@ -509,12 +511,14 @@ video_output_features = [
         'name': '--gl-wayland',
         'desc': 'OpenGL Wayland Backend',
         'deps': [ 'wayland' ],
+        'groups': [ 'gl' ],
         'func': check_pkg_config('wayland-egl', '>= 9.0.0',
                                  'egl',         '>= 9.0.0')
     } , {
         'name': '--gl-win32',
         'desc': 'OpenGL Win32 Backend',
         'deps': [ 'gdi' ],
+        'groups': [ 'gl' ],
         'func': check_statement('windows.h', 'wglCreateContext(0)',
                                 lib='opengl32')
     } , {

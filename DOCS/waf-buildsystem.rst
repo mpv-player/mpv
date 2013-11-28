@@ -135,6 +135,11 @@ For example::
 will override the value of ``func`` with ``check_pthreads_w32_static`` only
 if the target OS of the build is Windows.
 
+``groups``: groups a dependency with another one. This can be used to disabled
+all the grouped dependencies with one ``--disable-``. At the moment this is
+only used for OpenGL backends, where you want to disable them when
+``--disable-gl`` is passed to the configure.
+
 mpv's custom build step on top of waf
 =====================================
 

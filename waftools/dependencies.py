@@ -34,6 +34,7 @@ class Dependency(object):
         self.ctx.start_msg('Checking for {0}'.format(self.desc))
 
         try:
+            self.check_group_disabled()
             self.check_disabled()
             self.check_any_dependencies()
             self.check_dependencies()
@@ -48,6 +49,14 @@ class Dependency(object):
             return
 
         self.check_autodetect_func()
+
+    def check_group_disabled(self):
+        if 'groups' in self.attributes:
+            groups = self.attributes['groups']
+            disabled = (self.enabled_option(g) == False for g in groups)
+            if any(disabled):
+                self.skip()
+                raise DependencyError
 
     def check_disabled(self):
         if self.enabled_option() == False:
@@ -89,15 +98,15 @@ the autodetection check failed.".format(self.identifier)
             self.fail()
             self.fatal_if_needed()
 
-    def enabled_option(self):
+    def enabled_option(self, identifier=None):
         try:
-            return getattr(self.ctx.options, self.enabled_option_repr())
+            return getattr(self.ctx.options, self.enabled_option_repr(identifier))
         except AttributeError:
             pass
         return None
 
-    def enabled_option_repr(self):
-        return "enable_{0}".format(self.identifier)
+    def enabled_option_repr(self, identifier):
+        return "enable_{0}".format(identifier or self.identifier)
 
     def success(self, depname):
         self.ctx.mark_satisfied(depname)
