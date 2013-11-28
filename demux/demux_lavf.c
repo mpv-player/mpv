@@ -441,6 +441,9 @@ static void handle_stream(demuxer_t *demuxer, int i)
                     / (float)(codec->height * codec->sample_aspect_ratio.den);
         sh_video->i_bps = codec->bit_rate / 8;
 
+        // This also applies to vfw-muxed mkv, but we can't detect these easily.
+        sh_video->avi_dts = matches_avinputformat_name(priv, "avi");
+
         mp_msg(MSGT_DEMUX, MSGL_DBG2, "aspect= %d*%d/(%d*%d)\n",
                codec->width, codec->sample_aspect_ratio.num,
                codec->height, codec->sample_aspect_ratio.den);

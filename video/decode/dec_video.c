@@ -262,9 +262,12 @@ static double retrieve_sorted_pts(struct dec_video *d_video, double codec_pts)
         d_video->num_unsorted_pts_problems++;
     d_video->unsorted_pts = codec_pts;
 
-    if (opts->user_pts_assoc_mode)
+    if (d_video->header->video->avi_dts) {
+        // Actually, they don't need to be sorted, we just reuse the buffering.
+        d_video->pts_assoc_mode = 2;
+    } else if (opts->user_pts_assoc_mode) {
         d_video->pts_assoc_mode = opts->user_pts_assoc_mode;
-    else if (d_video->pts_assoc_mode == 0) {
+    } else if (d_video->pts_assoc_mode == 0) {
         if (codec_pts != MP_NOPTS_VALUE)
             d_video->pts_assoc_mode = 1;
         else
@@ -292,7 +295,9 @@ struct mp_image *video_decode(struct dec_video *d_video,
                               int drop_frame)
 {
     struct MPOpts *opts = d_video->opts;
-    bool sort_pts = opts->user_pts_assoc_mode != 1 && opts->correct_pts;
+    bool sort_pts =
+        (opts->user_pts_assoc_mode != 1 || d_video->header->video->avi_dts)
+        && opts->correct_pts;
     double pkt_pts = packet ? packet->pts : MP_NOPTS_VALUE;
     double pkt_dts = packet ? packet->dts : MP_NOPTS_VALUE;
 
