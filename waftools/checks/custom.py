@@ -86,13 +86,13 @@ def check_oss_4front(ctx, dependency_identifier):
     if oss_libdir == '':
         return False
 
-    soundcard_h = os.path.join(oss_libdir, "/include/sys/soundcard.h")
-    include_dir = os.path.join(oss_libdir, "/include")
+    soundcard_h = os.path.join(oss_libdir, "include/sys/soundcard.h")
+    include_dir = os.path.join(oss_libdir, "include")
 
     fn = check_cc(header_name=soundcard_h,
                   defines=['PATH_DEV_DSP="/dev/dsp"',
                            'PATH_DEV_MIXER="/dev/mixer"'],
-                  cflags="-I" + include_dir,
+                  cflags='-I{0}'.format(include_dir),
                   fragment=load_fragment('oss_audio.c'),
                   use='soundcard')
 
