@@ -1169,7 +1169,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
     // Forget previous frames, as we can display a new one now.
     vc->prev_deint_queue_pos = -1001;
 
-    if (IMGFMT_IS_VDPAU(vc->image_format)) {
+    if (vc->image_format == IMGFMT_VDPAU) {
         surface = (VdpVideoSurface)(intptr_t)mpi->planes[3];
         reserved_mpi = mp_image_new_ref(mpi);
     } else if (vc->rgb_mode) {

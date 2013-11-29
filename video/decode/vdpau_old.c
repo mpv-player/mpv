@@ -255,6 +255,7 @@ static struct mp_image *process_image(struct lavc_ctx *ctx, struct mp_image *img
     struct vdpau_render_state *rndr = (void *)img->planes[0];
     img->planes[0] = (void *)"dummy"; // must be non-NULL, otherwise arbitrary
     img->planes[3] = (void *)(intptr_t)rndr->surface;
+    mp_image_setfmt(img, IMGFMT_VDPAU);
     return img;
 }
 

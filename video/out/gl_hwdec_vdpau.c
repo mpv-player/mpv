@@ -42,7 +42,7 @@ struct priv {
 
 static bool query_format(int imgfmt)
 {
-    return IMGFMT_IS_VDPAU(imgfmt);
+    return imgfmt == IMGFMT_VDPAU;
 }
 
 static void mark_vdpau_objects_uninitialized(struct gl_hwdec *hw)
@@ -221,7 +221,7 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
     struct vdp_functions *vdp = p->ctx->vdp;
     VdpStatus vdp_st;
 
-    assert(hw_image && IMGFMT_IS_VDPAU(hw_image->imgfmt));
+    assert(hw_image && hw_image->imgfmt == IMGFMT_VDPAU);
     VdpVideoSurface video_surface = (intptr_t)hw_image->planes[3];
 
     if (handle_preemption(hw) < 0)
