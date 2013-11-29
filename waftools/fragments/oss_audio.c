@@ -1,8 +1,8 @@
-#if HAVE_SOUNDCARD_H
+#if defined(HAVE_SOUNDCARD_H) && HAVE_SOUNDCARD_H
 #include <soundcard.h>
 #endif
 
-#if HAVE_SYS_SOUNDCARD_H
+#if defined(HAVE_SYS_SOUNDCARD_H) && HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
 #endif
 
