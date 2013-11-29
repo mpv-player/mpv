@@ -327,8 +327,8 @@ double update_video(struct MPContext *mpctx, double endpts)
     double last_pts = mpctx->video_next_pts;
     if (last_pts == MP_NOPTS_VALUE)
         last_pts = pts;
-    double frame_time = MPMAX(0, pts - last_pts);
-    if (frame_time >= 60) {
+    double frame_time = pts - last_pts;
+    if (frame_time < 0 || frame_time >= 60) {
         // Assume a PTS difference >= 60 seconds is a discontinuity.
         MP_WARN(mpctx, "Jump in video pts: %f -> %f\n", last_pts, pts);
         frame_time = 0;
