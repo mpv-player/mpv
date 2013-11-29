@@ -117,10 +117,6 @@ iconv support use --disable-iconv.",
         'deps_any': [ 'os-win32', 'os-cygwin'],
         'func': check_true
     }, {
-        'name': 'soundcard',
-        'desc': 'soundcard.h',
-        'func': check_headers('soundcard.h', 'sys/soundcard.h')
-    }, {
         'name': 'videoio',
         'desc': 'videoio.h',
         'func': check_headers('sys/videoio.h')
@@ -387,9 +383,35 @@ audio_output_features = [
         'deps_neg': [ 'sdl2' ],
         'func': check_pkg_config('sdl')
     }, {
+        'name': 'oss-audio-native',
+        'desc': 'OSS (platform-specific OSS implementation)',
+        'func': check_cc(header_name='sys/soundcard.h',
+                         defines=['PATH_DEV_DSP="/dev/dsp"',
+                                  'PATH_DEV_MIXER="/dev/mixer"'],
+                         fragment=load_fragment('oss_audio.c')),
+        'groups' : [ 'oss-audio' ]
+    }, {
+        'name': 'oss-audio-sunaudio',
+        'desc': 'OSS (emulation on top of SunAudio)',
+        'func': check_cc(header_name='soundcard.h',
+                         lib='ossaudio',
+                         defines=['PATH_DEV_DSP="/dev/sound"',
+                                  'PATH_DEV_MIXER="/dev/mixer"'],
+                         fragment=load_fragment('oss_audio_sunaudio.c')),
+        'deps_neg': [ 'oss-audio-native' ],
+        'groups' : [ 'oss-audio' ]
+    }, {
+        'name': 'oss-audio-4front',
+        'desc': 'OSS (implementation from opensound.com)',
+        'func': check_oss_4front,
+        'deps_neg': [ 'oss-audio-native', 'oss-audio-sunaudio' ],
+        'groups' : [ 'oss-audio' ]
+    }, {
         'name': '--oss-audio',
         'desc': 'OSS audio output',
-        'func': check_oss
+        'func': check_true,
+        'deps_any': [ 'oss-audio-native', 'oss-audio-sunaudio',
+                      'oss-audio-4front' ]
     }, {
         'name': '--audio-select',
         'desc': 'audio select()',
@@ -771,6 +793,14 @@ def configure(ctx):
         ctx.options.enable_lua = True
 
     ctx.parse_dependencies(scripting_features)
+
+    ctx.define('HAVE_SYS_SOUNDCARD_H',
+               '(HAVE_OSS_AUDIO_NATIVE || HAVE_OSS_AUDIO_4FRONT)',
+               quote=False)
+
+    ctx.define('HAVE_SOUNDCARD_H',
+               'HAVE_OSS_AUDIO_SUNAUDIO',
+               quote=False)
 
     ctx.load('generators.headers')
 
