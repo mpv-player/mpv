@@ -41,7 +41,28 @@ struct vf_priv_s {
 	int fakecount;
 	char *qbuf;
 	double lastpts;
+        char *args;
 };
+
+static void reset(struct vf_instance *vf)
+{
+    if (vf->priv->ctx)
+        pullup_free_context(vf->priv->ctx);
+    free(vf->priv->qbuf);
+    vf->priv->qbuf = NULL;
+    vf->priv->init = 0;
+    struct pullup_context *c;
+    vf->priv->ctx = c = pullup_alloc_context();
+    vf->priv->fakecount = 1;
+    c->verbose = verbose>0;
+    c->junk_left = c->junk_right = 1;
+    c->junk_top = c->junk_bottom = 4;
+    c->strict_breaks = 0;
+    c->metric_plane = 0;
+    if (vf->priv->args) {
+            sscanf(vf->priv->args, "%d:%d:%d:%d:%d:%d", &c->junk_left, &c->junk_right, &c->junk_top, &c->junk_bottom, &c->strict_breaks, &c->metric_plane);
+    }
+}
 
 static void init_pullup(struct vf_instance *vf, mp_image_t *mpi)
 {
@@ -230,6 +251,7 @@ static int config(struct vf_instance *vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt)
 {
+        reset(vf);
 	if (height&3) return 0;
 	return vf_next_config(vf, width, height, d_width, d_height, flags, outfmt);
 }
@@ -240,25 +262,26 @@ static void uninit(struct vf_instance *vf)
 	free(vf->priv);
 }
 
-static int vf_open(vf_instance_t *vf, char *args)
+static int control(vf_instance_t *vf, int request, void *data)
 {
-	struct vf_priv_s *p;
-	struct pullup_context *c;
+    switch (request) {
+    case VFCTRL_SEEK_RESET:
+        reset(vf);
+        break;
+    }
+    return vf_next_control(vf, request, data);
+}
+
+static int vf_open(vf_instance_t *vf, char *args)
+{;
 	vf->filter = filter;
 	vf->config = config;
 	vf->query_format = query_format;
+        vf->control = control;
 	vf->uninit = uninit;
-	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
-	p->ctx = c = pullup_alloc_context();
-	p->fakecount = 1;
-	c->verbose = verbose>0;
-	c->junk_left = c->junk_right = 1;
-	c->junk_top = c->junk_bottom = 4;
-	c->strict_breaks = 0;
-	c->metric_plane = 0;
-	if (args) {
-		sscanf(args, "%d:%d:%d:%d:%d:%d", &c->junk_left, &c->junk_right, &c->junk_top, &c->junk_bottom, &c->strict_breaks, &c->metric_plane);
-	}
+	vf->priv = calloc(1, sizeof(struct vf_priv_s));
+        vf->priv->args = talloc_strdup(vf, args);
+        reset(vf);
 	return 1;
 }
 
