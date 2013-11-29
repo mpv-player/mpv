@@ -228,7 +228,10 @@ static const struct mp_cmd_def mp_cmds[] = {
     .allow_auto_repeat = true
   },
   { MP_CMD_MULTIPLY, "multiply", { ARG_STRING, ARG_DOUBLE },
-     .allow_auto_repeat = true},
+    .allow_auto_repeat = true},
+
+  { MP_CMD_CYCLE_VALUES, "cycle_values", { ARG_STRING, ARG_STRING, ARG_STRING },
+    .vararg = true, .allow_auto_repeat = true},
 
   { MP_CMD_ENABLE_INPUT_SECTION,  "enable_section",  {
       ARG_STRING,

@@ -71,6 +71,9 @@
 struct command_ctx {
     int events;
 
+    struct cycle_counter *cycle_counters;
+    int num_cycle_counters;
+
 #define OVERLAY_MAX_ID 64
     void *overlay_map[OVERLAY_MAX_ID];
 };
@@ -2388,6 +2391,47 @@ static void overlay_uninit(struct MPContext *mpctx){}
 
 #endif
 
+struct cycle_counter {
+    char **args;
+    int counter;
+};
+
+static bool stringlist_equals(char **l1, char **l2)
+{
+    assert(l1 && l2);
+    for (int i = 0; ; i++) {
+        if (!l1[i] && !l2[i])
+            return true;
+        if (!l1[i] || !l2[i])
+            return false;
+        if (strcmp(l1[i], l2[i]) != 0)
+            return false;
+    }
+}
+
+static char **stringlist_dup(void *talloc_ctx, char **list)
+{
+    int num = 0;
+    char **res = NULL;
+    for (int i = 0; list && list[i]; i++)
+        MP_TARRAY_APPEND(talloc_ctx, res, num, talloc_strdup(talloc_ctx, list[i]));
+    MP_TARRAY_APPEND(talloc_ctx, res, num, NULL);
+    return res;
+}
+
+static int *get_cmd_cycle_counter(struct MPContext *mpctx, char **args)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    for (int n = 0; n < cmd->num_cycle_counters; n++) {
+        struct cycle_counter *ctr = &cmd->cycle_counters[n];
+        if (stringlist_equals(ctr->args, args))
+            return &ctr->counter;
+    }
+    struct cycle_counter ctr = {stringlist_dup(cmd, args), 0};
+    MP_TARRAY_APPEND(cmd, cmd->cycle_counters, cmd->num_cycle_counters, ctr);
+    return &cmd->cycle_counters[cmd->num_cycle_counters - 1].counter;
+}
+
 static int mp_property_multiply(char *property, double f, struct MPContext *mpctx)
 {
     union m_option_value val = {0};
@@ -2529,6 +2573,41 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         } else if (r <= 0) {
             set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
                         "Failed to multiply property '%s' by %g", property, f);
+        }
+        break;
+    }
+
+    case MP_CMD_CYCLE_VALUES: {
+        char *args[MP_CMD_MAX_ARGS + 1] = {0};
+        for (int n = 0; n < cmd->nargs; n++)
+            args[n] = cmd->args[n].v.s;
+        int first = 1, dir = 1;
+        if (strcmp(args[0], "!reverse") == 0) {
+            first += 1;
+            dir = -1;
+        }
+        int *ptr = get_cmd_cycle_counter(mpctx, &args[first - 1]);
+        int count = cmd->nargs - first;
+        if (ptr && count > 0) {
+            int next = *ptr;
+            *ptr += dir;
+            if (*ptr >= count)
+                *ptr = 0;
+            if (*ptr < 0)
+                *ptr = count - 1;
+            char *property = args[first - 1];
+            char *value = args[first + next];
+            int r = mp_property_do(property, M_PROPERTY_SET_STRING, value, mpctx);
+            if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
+                show_property_osd(mpctx, property, cmd->on_osd);
+            } else if (r == M_PROPERTY_UNKNOWN) {
+                set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+                            "Unknown property: '%s'", property);
+            } else if (r <= 0) {
+                set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
+                            "Failed to set property '%s' to '%s'",
+                            property, value);
+            }
         }
         break;
     }

@@ -326,6 +326,24 @@ Input Commands that are Possibly Subject to Change
         - ``b vf set ""`` remove all video filters on ``b``
         - ``c vf toggle lavfi=gradfun`` toggle debanding on ``c``
 
+``cycle_values ["!reverse"] <property> "<value1>" "<value2>" ...``
+    Cycle through a list of values. Each invocation of the command will set the
+    given property to the next value in the list. The command maintains an
+    internal counter which value to pick next, and which is initially 0. It is
+    reset to 0 once the last value is reached.
+
+    The internal counter is associated using the property name and the value
+    list. If multiple commands (bound to different keys) use the same name
+    and value list, they will share the internal counter.
+
+    The special argument ``!reverse`` can be used to cycle the value list in
+    reverse. Compared with a command that just lists the value in reverse, this
+    command will actually share the internal counter with the forward-cycling
+    key binding.
+
+    Note that there is a static limit of (as of this writing) 10 arguments
+    (this limit could be raised on demand).
+
 ``enable_section "<section>" [default|exclusive]``
     Enable all key bindings in the named input section.
 
