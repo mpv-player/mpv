@@ -86,8 +86,8 @@ the autodetection check failed.".format(self.identifier)
     def check_negative_dependencies(self):
         if 'deps_neg' in self.attributes:
             deps = set(self.attributes['deps_neg'])
-            if deps <= self.satisfied_deps:
-                conflicting_deps = deps & self.satisfied_deps
+            conflicting_deps = deps & self.satisfied_deps
+            if len(conflicting_deps) > 0:
                 self.skip("{0} found".format(", ".join(conflicting_deps)), 'CYAN')
                 raise DependencyError
 
