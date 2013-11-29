@@ -93,7 +93,6 @@ def check_oss_4front(ctx, dependency_identifier):
                   defines=['PATH_DEV_DSP="/dev/dsp"',
                            'PATH_DEV_MIXER="/dev/mixer"'],
                   cflags='-I{0}'.format(include_dir),
-                  fragment=load_fragment('oss_audio.c'),
-                  use='soundcard')
+                  fragment=load_fragment('oss_audio.c'))
 
     return fn(ctx, dependency_identifier)

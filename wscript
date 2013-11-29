@@ -385,8 +385,7 @@ audio_output_features = [
         'func': check_cc(header_name='sys/soundcard.h',
                          defines=['PATH_DEV_DSP="/dev/dsp"',
                                   'PATH_DEV_MIXER="/dev/mixer"'],
-                         fragment=load_fragment('oss_audio.c'),
-                         use='soundcard'),
+                         fragment=load_fragment('oss_audio.c')),
         'groups' : [ 'oss-audio' ]
     }, {
         'name': 'oss-audio-sunaudio',
@@ -394,8 +393,7 @@ audio_output_features = [
         'func': check_cc(header_name='soundcard.h',
                          lib='ossaudio',
                          defines='PATH_DEV_DSP="/dev/sound"',
-                         fragment=load_fragment('oss_audio.c'),
-                         use='soundcard'),
+                         fragment=load_fragment('oss_audio_sunaudio.c')),
         'deps_neg': [ 'oss-audio-native' ],
         'groups' : [ 'oss-audio' ]
     }, {
