@@ -1,6 +1,8 @@
 from waftools.checks.generic import *
+from waflib import Utils
+import os
 
-__all__ = ["check_pthreads", "check_iconv", "check_lua", "check_oss"]
+__all__ = ["check_pthreads", "check_iconv", "check_lua", "check_oss_4front"]
 
 pthreads_program = load_fragment('pthreads.c')
 
@@ -72,56 +74,25 @@ def check_lua(ctx, dependency_identifier):
             return True
     return False
 
-# from here on there is the OSS check.. just stop reading here unless you want
-# to die inside a little
-def __fail_oss_check__(ctx):
-    ctx.define('PATH_DEV_DSP', '')
-    ctx.define('PATH_DEV_MIXER', '')
-    return False
-
-def __get_osslibdir__():
-    from waflib import Utils
+def __get_osslibdir():
     cmd = ['sh', '-c', '. /etc/oss.conf && echo $OSSLIBDIR']
     p = Utils.subprocess.Popen(cmd, stdin=Utils.subprocess.PIPE,
                                     stdout=Utils.subprocess.PIPE,
                                     stderr=Utils.subprocess.PIPE)
     return p.communicate()[0].decode().rstrip()
 
-def __get_osscflags__():
-    import os
-    osscflags = ''
-    osslibdir = __get_osslibdir__()
-    if osslibdir:
-        ossincdir   = os.path.join(osslibdir, 'include')
-        soundcard_h = os.path.join(ossincdir, 'sys', 'soundcard.h')
-        if os.path.exists(soundcard_h):
-            osscflags = '-I{0}'.format(ossincdir)
-    return osscflags
+def check_oss_4front(ctx, dependency_identifier):
+    oss_libdir = __get_osslibdir()
+    if oss_libdir == '':
+        return False
 
-def __check_oss_headers__(ctx, dependency_identifier):
-    fn = check_cc(fragment=load_fragment('oss_audio_header.c'),
-                  use='soundcard', cflags=__get_osscflags__())
-    fn(ctx, dependency_identifier)
-    return True
+    soundcard_h = os.path.join(oss_libdir, "/include/sys/soundcard.h")
+    include_dir = os.path.join(oss_libdir, "/include")
 
-def __check_oss_bsd__(ctxdependency_identifier):
-    # add the oss audio library through a check
-    ctx.define('PATH_DEV_DSP', '/dev/sound')
-    if check_cc(lib='ossaudio')(ctx, dependency_identifier):
-        return True
-    else:
-        return __fail_oss_check__(ctx)
+    fn = check_cc(header_name=soundcard_h,
+                  defines=['PATH_DEV_DSP=/dev/dsp', 'PATH_DEV_MIXER=/dev/mixer'],
+                  cflags="-I" + include_dir,
+                  fragment=load_fragment('oss_audio.c'),
+                  use='soundcard')
 
-def check_oss(ctx, dependency_identifier):
-    func = check_cc(fragment=load_fragment('oss_audio.c'), use='soundcard',
-                    cflags=__get_osscflags__())
-    if func(ctx, dependency_identifier):
-        ctx.define('PATH_DEV_DSP',   '/dev/dsp')
-        ctx.define('PATH_DEV_MIXER', '/dev/mixer')
-
-        if ctx.env.DEST_OS in ['openbsd', 'netbsd']:
-            return __check_oss_bsd_library__(ctx, dependency_identifier)
-        else:
-            return __check_oss_headers__(ctx, dependency_identifier)
-
-    return __fail_oss_check__(ctx)
+    return fn(ctx, dependency_identifier)
