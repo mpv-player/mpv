@@ -198,9 +198,24 @@ List of Input Commands
     because index2 refers to the target entry, not the index the entry
     will have after moving.)
 
-``run "<command>"``
-    Run the given command with ``/bin/sh -c``. The string is expanded like in
-    `Property Expansion`_.
+``run "command" "arg1" "arg2" ...``
+    Run the given command. Unlike in MPlayer/mplayer2 and earlier versions of
+    mpv (0.2.x and older), this doesn't call the shell. Instead, the command
+    is run directly, with each argument passed separately. Each argument is
+    expanded like in `Property Expansion`_. Note that there is a static limit
+    of (as of this writing) 10 arguments (this limit could be raised on demand).
+
+    To get the old behavior, use ``/bin/sh`` and ``-c`` as the first two
+    arguments.
+
+    .. admonition:: Example
+
+        ``run "/bin/sh" "-c" "echo ${title} > /tmp/playing"``
+
+        This is not a particularly good example, because it doesn't handle
+        escaping, and a specially prepared file might allow an attacker to
+        execute arbitrary shell commands. It is recommended to write a small
+        shell script, and call that with ``run``.
 
 ``quit [<code>]``
     Exit the player using the given exit code.

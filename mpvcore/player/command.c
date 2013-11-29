@@ -2942,14 +2942,18 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         screenshot_to_file(mpctx, cmd->args[0].v.s, cmd->args[1].v.i, msg_osd);
         break;
 
-    case MP_CMD_RUN:
+    case MP_CMD_RUN: {
 #ifndef __MINGW32__
+        char *args[MP_CMD_MAX_ARGS + 1] = {0};
+        for (int n = 0; n < cmd->nargs; n++)
+            args[n] = cmd->args[n].v.s;
         if (!fork()) {
-            execl("/bin/sh", "sh", "-c", cmd->args[0].v.s, NULL);
+            execvp(args[0], args);
             exit(0);
         }
 #endif
         break;
+    }
 
     case MP_CMD_ENABLE_INPUT_SECTION:
         mp_input_enable_section(mpctx->input, cmd->args[0].v.s,

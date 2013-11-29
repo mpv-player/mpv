@@ -129,6 +129,7 @@ struct mp_cmd_def {
     const char *name;   // user-visible name (as used in input.conf)
     const struct m_option args[MP_CMD_MAX_ARGS];
     bool allow_auto_repeat; // react to repeated key events
+    bool vararg;        // last argument can be given 0 to multiple times
 };
 
 static const struct mp_cmd_def mp_cmds[] = {
@@ -214,7 +215,7 @@ static const struct mp_cmd_def mp_cmds[] = {
       ARG_CHOICE_OR_INT(0, INT_MAX, ({"current", -1})),
   }},
   { MP_CMD_PLAYLIST_MOVE, "playlist_move", { ARG_INT, ARG_INT } },
-  { MP_CMD_RUN, "run", { ARG_STRING } },
+  { MP_CMD_RUN, "run", { ARG_STRING, ARG_STRING }, .vararg = true },
 
   { MP_CMD_SET, "set", { ARG_STRING,  ARG_STRING } },
   { MP_CMD_GET_PROPERTY, "get_property", { ARG_STRING } },
@@ -989,6 +990,10 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
 
     for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
         const struct m_option *opt = &cmd_def->args[i];
+        bool is_vararg = cmd_def->vararg &&
+            (i + 1 >= MP_CMD_MAX_ARGS || !cmd_def->args[i + 1].type); // last arg
+        if (!opt->type && is_vararg && cmd->nargs > 0)
+            opt = cmd->args[cmd->nargs - 1].type;
         if (!opt->type)
             break;
 
@@ -1007,9 +1012,14 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
             }
         } else {
             bool got_token = read_token(str, &str, &arg);
-            // Explicitly select default for an optional argument
-            if (got_token && opt->defval && bstr_equals0(arg, "-"))
-                got_token = false;
+            if (is_vararg) {
+                if (!got_token)
+                    continue;
+            } else {
+                // Explicitly select default for an optional argument
+                if (got_token && opt->defval && bstr_equals0(arg, "-"))
+                    got_token = false;
+            }
             // Skip optional arguments
             if (!got_token && opt->defval) {
                 struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
