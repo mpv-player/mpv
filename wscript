@@ -383,7 +383,6 @@ audio_output_features = [
         'name': 'oss-audio-native',
         'desc': 'OSS (platform-specific OSS implementation)',
         'func': check_cc(header_name='sys/soundcard.h',
-                         lib='ossaudio',
                          defines=['PATH_DEV_DSP=/dev/dsp',
                                   'PATH_DEV_MIXER=/dev/mixer'],
                          fragment=load_fragment('oss_audio.c'),
