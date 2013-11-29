@@ -21,7 +21,7 @@
 
 #include <libavutil/pixfmt.h>
 
-enum PixelFormat imgfmt2pixfmt(int fmt);
-int pixfmt2imgfmt(enum PixelFormat pix_fmt);
+enum AVPixelFormat imgfmt2pixfmt(int fmt);
+int pixfmt2imgfmt(enum AVPixelFormat pix_fmt);
 
 #endif /* MPLAYER_FMT_CONVERSION_H */

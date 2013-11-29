@@ -276,7 +276,7 @@ If you really mean to compile without libass support use --disable-libass."
 ]
 
 libav_pkg_config_checks = [
-    'libavutil',   '> 51.73.0',
+    'libavutil',   '>= 52.3.0',
     'libavcodec',  '> 54.34.0',
     'libavformat', '> 54.19.0',
     'libswscale',  '>= 2.0.0'

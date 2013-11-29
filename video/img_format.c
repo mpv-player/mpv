@@ -157,8 +157,9 @@ const char *mp_imgfmt_to_name(unsigned int fmt)
 
 struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 {
-    enum PixelFormat fmt = imgfmt2pixfmt(mpfmt);
-    if (fmt == PIX_FMT_NONE) {
+    enum AVPixelFormat fmt = imgfmt2pixfmt(mpfmt);
+    const AVPixFmtDescriptor *pd = av_pix_fmt_desc_get(fmt);
+    if (!pd || fmt == AV_PIX_FMT_NONE) {
         const char *name = mp_imgfmt_to_name(mpfmt);
         if (name) {
             mp_msg(MSGT_DECVIDEO, MSGL_V,
@@ -166,9 +167,6 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
         }
         return (struct mp_imgfmt_desc) {0};
     }
-
-    const AVPixFmtDescriptor *pd = &av_pix_fmt_descriptors[fmt];
-    assert(pd);
 
     struct mp_imgfmt_desc desc = {
         .id = mpfmt,
@@ -207,7 +205,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 
     if (mpfmt == IMGFMT_XYZ12_LE || mpfmt == IMGFMT_XYZ12_BE) {
         desc.flags |= MP_IMGFLAG_XYZ;
-    } else if (!(pd->flags & PIX_FMT_RGB) && fmt != PIX_FMT_MONOBLACK &&
+    } else if (!(pd->flags & PIX_FMT_RGB) && fmt != AV_PIX_FMT_MONOBLACK &&
                fmt != PIX_FMT_PAL8)
     {
         desc.flags |= MP_IMGFLAG_YUV;

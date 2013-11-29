@@ -94,7 +94,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
                   uint32_t format)
 {
     struct priv *vc = vo->priv;
-    enum PixelFormat pix_fmt = imgfmt2pixfmt(format);
+    enum AVPixelFormat pix_fmt = imgfmt2pixfmt(format);
     AVRational display_aspect_ratio, image_aspect_ratio;
     AVRational aspect;
 
@@ -135,7 +135,7 @@ static int config(struct vo *vo, uint32_t width, uint32_t height,
     vc->lastframeipts = MP_NOPTS_VALUE;
     vc->lastencodedipts = MP_NOPTS_VALUE;
 
-    if (pix_fmt == PIX_FMT_NONE)
+    if (pix_fmt == AV_PIX_FMT_NONE)
         goto error;  /* imgfmt2pixfmt already prints something */
 
     vc->stream = encode_lavc_alloc_stream(vo->encode_lavc_ctx,
@@ -174,7 +174,7 @@ error:
 
 static int query_format(struct vo *vo, uint32_t format)
 {
-    enum PixelFormat pix_fmt = imgfmt2pixfmt(format);
+    enum AVPixelFormat pix_fmt = imgfmt2pixfmt(format);
 
     if (!vo->encode_lavc_ctx)
         return 0;

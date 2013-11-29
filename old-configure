@@ -2600,7 +2600,7 @@ fi
 echores "$_lcms2"
 
 
-all_libav_libs="libavutil > 51.73.0:libavcodec > 54.34.0:libavformat > 54.19.0:libswscale >= 2.0.0"
+all_libav_libs="libavutil >= 52.3.0:libavcodec > 54.34.0:libavformat > 54.19.0:libswscale >= 2.0.0"
 echocheck "Libav ($all_libav_libs)"
 if test "$ffmpeg" = auto ; then
   IFS=":"   # shell should not be used for programming

@@ -754,19 +754,19 @@ int encode_lavc_write_frame(struct encode_lavc_context *ctx, AVPacket *packet)
 }
 
 int encode_lavc_supports_pixfmt(struct encode_lavc_context *ctx,
-                                enum PixelFormat pix_fmt)
+                                enum AVPixelFormat pix_fmt)
 {
     CHECK_FAIL(ctx, 0);
 
     if (!ctx->vc)
         return 0;
-    if (pix_fmt == PIX_FMT_NONE)
+    if (pix_fmt == AV_PIX_FMT_NONE)
         return 0;
 
     if (!ctx->vc->pix_fmts)
         return VFCAP_CSP_SUPPORTED;
     else {
-        const enum PixelFormat *p;
+        const enum AVPixelFormat *p;
         for (p = ctx->vc->pix_fmts; *p >= 0; ++p) {
             if (pix_fmt == *p)
                 return VFCAP_CSP_SUPPORTED;

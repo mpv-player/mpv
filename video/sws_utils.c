@@ -79,9 +79,9 @@ void mp_sws_set_from_cmdline(struct mp_sws_context *ctx)
 
 bool mp_sws_supported_format(int imgfmt)
 {
-    enum PixelFormat av_format = imgfmt2pixfmt(imgfmt);
+    enum AVPixelFormat av_format = imgfmt2pixfmt(imgfmt);
 
-    return av_format != PIX_FMT_NONE && sws_isSupportedInput(av_format)
+    return av_format != AV_PIX_FMT_NONE && sws_isSupportedInput(av_format)
         && sws_isSupportedOutput(av_format);
 }
 
@@ -204,12 +204,12 @@ int mp_sws_reinit(struct mp_sws_context *ctx)
     if (!src_fmt.id || !dst_fmt.id)
         return -1;
 
-    enum PixelFormat s_fmt = imgfmt2pixfmt(src->imgfmt);
-    if (s_fmt == PIX_FMT_NONE || sws_isSupportedInput(s_fmt) < 1)
+    enum AVPixelFormat s_fmt = imgfmt2pixfmt(src->imgfmt);
+    if (s_fmt == AV_PIX_FMT_NONE || sws_isSupportedInput(s_fmt) < 1)
         return -1;
 
-    enum PixelFormat d_fmt = imgfmt2pixfmt(dst->imgfmt);
-    if (d_fmt == PIX_FMT_NONE || sws_isSupportedOutput(d_fmt) < 1)
+    enum AVPixelFormat d_fmt = imgfmt2pixfmt(dst->imgfmt);
+    if (d_fmt == AV_PIX_FMT_NONE || sws_isSupportedOutput(d_fmt) < 1)
         return -1;
 
     int s_csp = mp_csp_to_sws_colorspace(src->colorspace);
@@ -273,7 +273,7 @@ int mp_sws_scale(struct mp_sws_context *ctx, struct mp_image *dst,
 {
     // Hack for older swscale versions which don't support this.
     // We absolutely need this in the OSD rendering path.
-    if (dst->imgfmt == IMGFMT_GBRP && !sws_isSupportedOutput(PIX_FMT_GBRP))
+    if (dst->imgfmt == IMGFMT_GBRP && !sws_isSupportedOutput(AV_PIX_FMT_GBRP))
         return to_gbrp(dst, src, ctx->flags);
 
     mp_image_params_from_image(&ctx->src, src);

@@ -65,8 +65,8 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
 static void uninit_avctx(struct dec_video *vd);
 static void setup_refcounting_hw(struct AVCodecContext *s);
 
-static enum PixelFormat get_format_hwdec(struct AVCodecContext *avctx,
-                                         const enum PixelFormat *pix_fmt);
+static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
+                                           const enum AVPixelFormat *pix_fmt);
 
 static void uninit(struct dec_video *vd);
 
@@ -383,7 +383,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     ctx->hwdec_info = &vd->hwdec_info;
 
     ctx->do_dr1 = ctx->do_hw_dr1 = 0;
-    ctx->pix_fmt = PIX_FMT_NONE;
+    ctx->pix_fmt = AV_PIX_FMT_NONE;
     ctx->image_params = (struct mp_image_params){0};
     ctx->vo_image_params = (struct mp_image_params){0};
     ctx->hwdec = hwdec;
@@ -542,20 +542,20 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame)
     };
 }
 
-static enum PixelFormat get_format_hwdec(struct AVCodecContext *avctx,
-                                         const enum PixelFormat *fmt)
+static enum AVPixelFormat get_format_hwdec(struct AVCodecContext *avctx,
+                                           const enum AVPixelFormat *fmt)
 {
     struct dec_video *vd = avctx->opaque;
     vd_ffmpeg_ctx *ctx = vd->priv;
 
     mp_msg(MSGT_DECVIDEO, MSGL_V, "Pixel formats supported by decoder:");
-    for (int i = 0; fmt[i] != PIX_FMT_NONE; i++)
+    for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++)
         mp_msg(MSGT_DECVIDEO, MSGL_V, " %s", av_get_pix_fmt_name(fmt[i]));
     mp_msg(MSGT_DECVIDEO, MSGL_V, "\n");
 
     assert(ctx->hwdec);
 
-    for (int i = 0; fmt[i] != PIX_FMT_NONE; i++) {
+    for (int i = 0; fmt[i] != AV_PIX_FMT_NONE; i++) {
         const int *okfmt = ctx->hwdec->image_formats;
         for (int n = 0; okfmt && okfmt[n]; n++) {
             if (imgfmt2pixfmt(okfmt[n]) == fmt[i])
@@ -563,7 +563,7 @@ static enum PixelFormat get_format_hwdec(struct AVCodecContext *avctx,
         }
     }
 
-    return PIX_FMT_NONE;
+    return AV_PIX_FMT_NONE;
 }
 
 static struct mp_image *get_surface_hwdec(struct dec_video *vd, AVFrame *pic)

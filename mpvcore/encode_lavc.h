@@ -79,7 +79,7 @@ struct encode_lavc_context {
 AVStream *encode_lavc_alloc_stream(struct encode_lavc_context *ctx, enum AVMediaType mt);
 void encode_lavc_write_stats(struct encode_lavc_context *ctx, AVStream *stream);
 int encode_lavc_write_frame(struct encode_lavc_context *ctx, AVPacket *packet);
-int encode_lavc_supports_pixfmt(struct encode_lavc_context *ctx, enum PixelFormat format);
+int encode_lavc_supports_pixfmt(struct encode_lavc_context *ctx, enum AVPixelFormat format);
 AVCodec *encode_lavc_get_codec(struct encode_lavc_context *ctx, AVStream *stream);
 int encode_lavc_open_codec(struct encode_lavc_context *ctx, AVStream *stream);
 int encode_lavc_available(struct encode_lavc_context *ctx);

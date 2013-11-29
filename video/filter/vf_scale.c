@@ -157,7 +157,7 @@ static int preferred_conversions[][2] = {
 static int check_outfmt(vf_instance_t *vf, int outfmt)
 {
     enum AVPixelFormat pixfmt = imgfmt2pixfmt(outfmt);
-    if (pixfmt == PIX_FMT_NONE || sws_isSupportedOutput(pixfmt) < 1)
+    if (pixfmt == AV_PIX_FMT_NONE || sws_isSupportedOutput(pixfmt) < 1)
         return 0;
     return vf_next_query_format(vf, outfmt);
 }
@@ -375,7 +375,7 @@ static int control(struct vf_instance *vf, int request, void *data)
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    if (!IMGFMT_IS_HWACCEL(fmt) && imgfmt2pixfmt(fmt) != PIX_FMT_NONE) {
+    if (!IMGFMT_IS_HWACCEL(fmt) && imgfmt2pixfmt(fmt) != AV_PIX_FMT_NONE) {
         if (sws_isSupportedInput(imgfmt2pixfmt(fmt)) < 1)
             return 0;
         unsigned int best = find_best_out(vf, fmt);
