@@ -172,10 +172,6 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
     if (mpctx->d_video) {
         video_reset_decoding(mpctx->d_video);
         vo_seek_reset(mpctx->video_out);
-        mpctx->video_pts = MP_NOPTS_VALUE;
-        mpctx->video_next_pts = MP_NOPTS_VALUE;
-        mpctx->delay = 0;
-        mpctx->time_frame = 0;
     }
 
     if (mpctx->d_audio) {
@@ -186,6 +182,10 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
 
     reset_subtitles(mpctx);
 
+    mpctx->video_pts = MP_NOPTS_VALUE;
+    mpctx->video_next_pts = MP_NOPTS_VALUE;
+    mpctx->delay = 0;
+    mpctx->time_frame = 0;
     mpctx->restart_playback = true;
     mpctx->hrseek_active = false;
     mpctx->hrseek_framedrop = false;
