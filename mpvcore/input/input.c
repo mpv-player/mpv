@@ -861,9 +861,12 @@ static int parse_cycle_dir(const struct m_option *opt, struct bstr name,
 static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
 {
     bstr t = bstr_lstrip(str);
+    // Command separator
+    if (t.len && t.start[0] == ';')
+        return false;
     int next = bstrcspn(t, WHITESPACE "#");
     // Handle comments
-    if (t.len && t.start[next] == '#')
+    if (t.len && next < t.len && t.start[next] == '#')
         t = bstr_splice(t, 0, next);
     if (!t.len)
         return false;
@@ -917,7 +920,6 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
     bool raw_args = false;
     struct mp_cmd *cmd = NULL;
     bstr start = str;
-    bstr next = {0};
     void *tmp = talloc_new(NULL);
 
     str = bstr_lstrip(str);
@@ -988,31 +990,12 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
         .def = cmd_def,
     };
 
-    int min_args = 0;
     for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
-        struct mp_cmd_arg *cmdarg = &cmd->args[i];
         const struct m_option *opt = &cmd_def->args[i];
-        if (opt->type) {
-            cmdarg->type = opt;
-            if (opt->defval) {
-                memcpy(&cmdarg->v, opt->defval, opt->type->size);
-            } else {
-                min_args++;
-            }
-        }
-    }
+        if (!opt->type)
+            break;
 
-    for (int i = 0; i < MP_CMD_MAX_ARGS; i++) {
-        struct mp_cmd_arg *cmdarg = &cmd->args[i];
-        if (!cmdarg->type)
-            break;
         str = bstr_lstrip(str);
-        if (eat_token(&str, ";")) {
-            next = str;
-            str.len = 0;
-            break;
-        }
-        cmd->nargs++;
         bstr arg = {0};
         if (bstr_eatstart0(&str, "\"")) {
             if (!read_escaped_string(tmp, &str, &arg)) {
@@ -1026,26 +1009,36 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
                 goto error;
             }
         } else {
-            if (!read_token(str, &str, &arg))
-                break;
-            if (i >= min_args && bstrcmp0(arg, "-") == 0)
+            bool got_token = read_token(str, &str, &arg);
+            // Explicitly select default for an optional argument
+            if (got_token && opt->defval && bstr_equals0(arg, "-"))
+                got_token = false;
+            // Skip optional arguments
+            if (!got_token && opt->defval) {
+                struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
+                cmdarg->type = opt;
+                memcpy(&cmdarg->v, opt->defval, opt->type->size);
+                cmd->nargs++;
                 continue;
+            }
+            if (!got_token) {
+                MP_ERR(ictx, "Command %s requires more than %d arguments.\n",
+                       cmd->name, cmd->nargs);
+                goto error;
+            }
         }
-        // Prevent option API from trying to deallocate static strings
-        cmdarg->v = ((struct mp_cmd_arg) {0}).v;
-        int r = m_option_parse(cmdarg->type, bstr0(cmd->name), arg, &cmdarg->v);
+
+        struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
+        cmdarg->type = opt;
+        cmd->nargs++;
+        int r = m_option_parse(opt, bstr0(cmd->name), arg, &cmdarg->v);
         if (r < 0) {
             MP_ERR(ictx, "Command %s: argument %d can't be parsed: %s.\n",
                    cmd->name, i + 1, m_option_strerror(r));
             goto error;
         }
-        if (cmdarg->type->type == &m_option_type_string)
+        if (opt->type == &m_option_type_string)
             talloc_steal(cmd, cmdarg->v.s);
-    }
-
-    if (eat_token(&str, ";")) {
-        next = str;
-        str.len = 0;
     }
 
     bstr dummy;
@@ -1056,12 +1049,6 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
         goto error;
     }
 
-    if (cmd->nargs < min_args) {
-        MP_ERR(ictx, "Command %s requires at least %d arguments, we found "
-               "only %d so far.\n", cmd->name, min_args, cmd->nargs);
-        goto error;
-    }
-
     bstr orig = (bstr) {start.start, str.start - start.start};
     cmd->original = bstrdup(cmd, bstr_strip(orig));
 
@@ -1069,9 +1056,9 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
         dest = &(*dest)->queue_next;
     *dest = cmd;
 
-    next = bstr_strip(next);
-    if (next.len) {
-        if (parse_cmd(ictx, dest, next, loc) < 0) {
+    str = bstr_lstrip(str);
+    if (bstr_eatstart0(&str, ";")) {
+        if (parse_cmd(ictx, dest, str, loc) < 0) {
             *dest = NULL;
             goto error;
         }
