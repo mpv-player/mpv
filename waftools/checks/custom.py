@@ -83,8 +83,6 @@ def __get_osslibdir():
 
 def check_oss_4front(ctx, dependency_identifier):
     oss_libdir = __get_osslibdir()
-    if oss_libdir == '':
-        return False
 
     soundcard_h = os.path.join(oss_libdir, "include/sys/soundcard.h")
     include_dir = os.path.join(oss_libdir, "include")

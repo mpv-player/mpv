@@ -26,7 +26,7 @@
 #include <errno.h>
 #include <sys/ioctl.h>
 
-#if HAVE_SYS_SOUNDCARD_H
+#if HAVE_SYS_SOUNDCARD_H || HAVE_OSS_AUDIO_4FRONT
 #include <sys/soundcard.h>
 #else
 #if HAVE_SOUNDCARD_H
