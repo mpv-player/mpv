@@ -38,7 +38,7 @@
 #include "mpvcore/options.h"
 #include "mpvcore/mp_msg.h"
 
-#if HAVE_SYS_SOUNDCARD_H || HAVE_OSS_AUDIO_4FRONT
+#if HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
 #else
 #if HAVE_SOUNDCARD_H

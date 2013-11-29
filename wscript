@@ -117,10 +117,6 @@ iconv support use --disable-iconv.",
         'deps_any': [ 'os-win32', 'os-cygwin'],
         'func': check_true
     }, {
-        'name': 'soundcard',
-        'desc': 'soundcard.h',
-        'func': check_headers('soundcard.h', 'sys/soundcard.h')
-    }, {
         'name': 'videoio',
         'desc': 'videoio.h',
         'func': check_headers('sys/videoio.h')
@@ -790,6 +786,14 @@ def configure(ctx):
         ctx.options.enable_lua = True
 
     ctx.parse_dependencies(scripting_features)
+
+    ctx.define('HAVE_SYS_SOUNDCARD_H',
+               '(HAVE_OSS_AUDIO_NATIVE || HAVE_OSS_AUDIO_4FRONT)',
+               quote=False)
+
+    ctx.define('HAVE_SOUNDCARD_H',
+               'HAVE_OSS_AUDIO_SUNAUDIO',
+               quote=False)
 
     ctx.load('generators.headers')
 
