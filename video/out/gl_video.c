@@ -1948,7 +1948,7 @@ static bool init_format(int fmt, struct gl_video *init)
         init = &dummy;
 
     init->hwdec_active = false;
-    if (init->hwdec && init->hwdec->driver->query_format(fmt)) {
+    if (init->hwdec && init->hwdec->driver->imgfmt == fmt) {
         fmt = init->hwdec->converted_imgfmt;
         init->hwdec_active = true;
     }

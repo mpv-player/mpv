@@ -182,8 +182,8 @@ struct gl_hwdec {
 struct gl_hwdec_driver {
     // Same name as used by mp_hwdec_info->load_api()
     const char *api_name;
-    // Test whether the given IMGFMT_ is supported.
-    bool (*query_format)(int imgfmt);
+    // The hardware surface IMGFMT_ that must be passed to map_image later.
+    int imgfmt;
     // Create the hwdec device. It must fill in hw->info, if applicable.
     // This also must set hw->converted_imgfmt.
     int (*create)(struct gl_hwdec *hw);

@@ -40,11 +40,6 @@ struct priv {
     VdpVideoMixer video_mixer;
 };
 
-static bool query_format(int imgfmt)
-{
-    return imgfmt == IMGFMT_VDPAU;
-}
-
 static void mark_vdpau_objects_uninitialized(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
@@ -253,7 +248,7 @@ static void unmap_image(struct gl_hwdec *hw)
 
 const struct gl_hwdec_driver gl_hwdec_vdpau = {
     .api_name = "vdpau",
-    .query_format = query_format,
+    .imgfmt = IMGFMT_VDPAU,
     .create = create,
     .reinit = reinit,
     .map_image = map_image,

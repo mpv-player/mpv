@@ -35,11 +35,6 @@ struct priv {
     void *vaglx_surface;
 };
 
-static bool query_format(int imgfmt)
-{
-    return imgfmt == IMGFMT_VAAPI;
-}
-
 static void destroy_texture(struct gl_hwdec *hw)
 {
     struct priv *p = hw->priv;
@@ -131,7 +126,7 @@ static void unmap_image(struct gl_hwdec *hw)
 
 const struct gl_hwdec_driver gl_hwdec_vaglx = {
     .api_name = "vaapi",
-    .query_format = query_format,
+    .imgfmt = IMGFMT_VAAPI,
     .create = create,
     .reinit = reinit,
     .map_image = map_image,
