@@ -63,6 +63,7 @@ struct priv {
     char *cfg_mixer_device;
     char *cfg_mixer_name;
     int cfg_mixer_index;
+    int cfg_resample;
 };
 
 #define BUFFER_TIME 500000  // 0.5 s
@@ -475,6 +476,13 @@ static int init(struct ao *ao)
         mp_chmap_from_channels_alsa(&ao->channels, num_channels);
     }
 
+    // Some ALSA drivers have broken delay reporting, so disable the ALSA
+    // resampling plugin by default.
+    if (!p->cfg_resample) {
+        err = snd_pcm_hw_params_set_rate_resample(p->alsa, alsa_hwparams, 0);
+        CHECK_ALSA_ERROR("Unable to disable resampling");
+    }
+
     err = snd_pcm_hw_params_set_rate_near
             (p->alsa, alsa_hwparams, &ao->samplerate, NULL);
     CHECK_ALSA_ERROR("Unable to set samplerate-2");
@@ -743,6 +751,7 @@ const struct ao_driver audio_out_alsa = {
         .cfg_mixer_index = 0,
     },
     .options = (const struct m_option[]) {
+        OPT_FLAG("resample", cfg_resample, 0),
         OPT_STRING("device", cfg_device, 0),
         OPT_FLAG("block", cfg_block, 0),
         OPT_STRING("mixer-device", cfg_mixer_device, 0),
