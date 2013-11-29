@@ -861,14 +861,11 @@ static int parse_cycle_dir(const struct m_option *opt, struct bstr name,
 static bool read_token(bstr str, bstr *out_rest, bstr *out_token)
 {
     bstr t = bstr_lstrip(str);
-    // Command separator
-    if (t.len && t.start[0] == ';')
-        return false;
-    int next = bstrcspn(t, WHITESPACE "#");
-    // Handle comments
-    if (t.len && next < t.len && t.start[next] == '#')
-        t = bstr_splice(t, 0, next);
-    if (!t.len)
+    char nextc = t.len > 0 ? t.start[0] : 0;
+    if (nextc == '#' || nextc == ';')
+        return false; // comment or command separator
+    int next = bstrcspn(t, WHITESPACE);
+    if (!next)
         return false;
     *out_token = bstr_splice(t, 0, next);
     *out_rest = bstr_cut(t, next);
