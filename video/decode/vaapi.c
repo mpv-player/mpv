@@ -212,7 +212,7 @@ static int create_decoder(struct lavc_ctx *ctx)
     VAStatus status;
     int res = -1;
 
-    assert(IMGFMT_IS_VAAPI(p->format));
+    assert(p->format == IMGFMT_VAAPI);
 
     destroy_decoder(ctx);
 
@@ -307,7 +307,7 @@ static struct mp_image *allocate_image(struct lavc_ctx *ctx, int format,
 {
     struct priv *p = ctx->hwdec_priv;
 
-    if (!IMGFMT_IS_VAAPI(format))
+    if (format != IMGFMT_VAAPI)
         return NULL;
 
     if (format != p->format || w != p->w || h != p->h ||

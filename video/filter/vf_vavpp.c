@@ -268,7 +268,7 @@ static void uninit(struct vf_instance *vf)
 static int query_format(struct vf_instance *vf, unsigned int imgfmt)
 {
     struct vf_priv_s *p = vf->priv;
-    if (IMGFMT_IS_VAAPI(imgfmt) || va_image_format_from_imgfmt(p->va->image_formats, imgfmt))
+    if (imgfmt == IMGFMT_VAAPI || va_image_format_from_imgfmt(p->va->image_formats, imgfmt))
         return vf_next_query_format(vf, IMGFMT_VAAPI);
     return 0;
 }

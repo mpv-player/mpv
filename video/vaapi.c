@@ -405,13 +405,13 @@ struct mp_image *va_surface_wrap(struct va_surface *surface)
 
 VASurfaceID va_surface_id_in_mp_image(const struct mp_image *mpi)
 {
-    return mpi && IMGFMT_IS_VAAPI(mpi->imgfmt) ?
+    return mpi && mpi->imgfmt == IMGFMT_VAAPI ?
         (VASurfaceID)(uintptr_t)mpi->planes[3] : VA_INVALID_ID;
 }
 
 struct va_surface *va_surface_in_mp_image(struct mp_image *mpi)
 {
-    return mpi && IMGFMT_IS_VAAPI(mpi->imgfmt) ?
+    return mpi && mpi->imgfmt == IMGFMT_VAAPI ?
         (struct va_surface*)mpi->planes[0] : NULL;
 }
 

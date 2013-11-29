@@ -260,11 +260,6 @@ enum mp_imgfmt {
     IMGFMT_VDA,
 
     IMGFMT_VAAPI,
-    IMGFMT_VAAPI_MPEG2_IDCT,
-    IMGFMT_VAAPI_MPEG2_MOCO,
-
-    IMGFMT_VAAPI_FIRST = IMGFMT_VAAPI,
-    IMGFMT_VAAPI_LAST = IMGFMT_VAAPI_MPEG2_MOCO,
 
 
     IMGFMT_END,
@@ -342,13 +337,8 @@ static inline bool IMGFMT_IS_RGB(unsigned int fmt)
 #define IMGFMT_IS_VDPAU(fmt) \
     (((fmt) >= IMGFMT_VDPAU_FIRST) && ((fmt) <= IMGFMT_VDPAU_LAST))
 
-#define IMGFMT_IS_VDA(fmt) (((fmt) == IMGFMT_VDA))
-
-#define IMGFMT_IS_VAAPI(fmt) \
-    (((fmt) >= IMGFMT_VAAPI_FIRST) && ((fmt) <= IMGFMT_VAAPI_LAST))
-
 #define IMGFMT_IS_HWACCEL(fmt) \
-    (IMGFMT_IS_VDPAU(fmt) || IMGFMT_IS_VAAPI(fmt) || IMGFMT_IS_VDA(fmt))
+    (IMGFMT_IS_VDPAU(fmt) || ((fmt) == IMGFMT_VAAPI) || ((fmt) == IMGFMT_VDA))
 
 
 struct mp_imgfmt_entry {

@@ -160,7 +160,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
     vo_x11_config_vo_window(vo, NULL, vo->dx, vo->dy, vo->dwidth, vo->dheight,
                             flags, "vaapi");
 
-    if (!IMGFMT_IS_VAAPI(params->imgfmt)) {
+    if (params->imgfmt != IMGFMT_VAAPI) {
         if (!alloc_swdec_surfaces(p, params->w, params->h, params->imgfmt))
             return -1;
     }
@@ -173,7 +173,7 @@ static int reconfig(struct vo *vo, struct mp_image_params *params, int flags)
 static int query_format(struct vo *vo, uint32_t imgfmt)
 {
     struct priv *p = vo->priv;
-    if (IMGFMT_IS_VAAPI(imgfmt) || va_image_format_from_imgfmt(p->va_image_formats, imgfmt))
+    if (imgfmt == IMGFMT_VAAPI || va_image_format_from_imgfmt(p->va_image_formats, imgfmt))
         return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
 
     return 0;
@@ -272,7 +272,7 @@ static void draw_image(struct vo *vo, struct mp_image *mpi)
 {
     struct priv *p = vo->priv;
 
-    if (!IMGFMT_IS_VAAPI(mpi->imgfmt)) {
+    if (mpi->imgfmt != IMGFMT_VAAPI) {
         struct mp_image *wrapper = p->swdec_surfaces[p->output_surface];
         struct va_surface *surface = va_surface_in_mp_image(wrapper);
         if (!surface || !va_surface_upload(surface, mpi)) {
