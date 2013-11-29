@@ -392,7 +392,8 @@ audio_output_features = [
         'desc': 'OSS (emulation on top of SunAudio)',
         'func': check_cc(header_name='soundcard.h',
                          lib='ossaudio',
-                         defines='PATH_DEV_DSP="/dev/sound"',
+                         defines=['PATH_DEV_DSP="/dev/sound"',
+                                  'PATH_DEV_MIXER="/dev/mixer"'],
                          fragment=load_fragment('oss_audio_sunaudio.c')),
         'deps_neg': [ 'oss-audio-native' ],
         'groups' : [ 'oss-audio' ]
