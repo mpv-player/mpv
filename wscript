@@ -174,7 +174,7 @@ iconv support use --disable-iconv.",
         'name': '--libsmbclient',
         'desc': 'Samba support',
         'deps': [ 'libdl' ],
-        'func': check_pkg_config('smbclient', '>= 0.2.0'),
+        'func': check_pkg_config('smbclient'),
         'module': 'input',
     }, {
         'name': '--libquvi4',
