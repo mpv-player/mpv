@@ -646,11 +646,6 @@ static int play(struct ao *ao, void **data, int samples, int flags)
     if (!(flags & AOPLAY_FINAL_CHUNK))
         samples = samples / p->outburst * p->outburst;
 
-    if (!p->alsa) {
-        MP_ERR(ao, "Device configuration error.");
-        return -1;
-    }
-
     if (samples == 0)
         return 0;
 
@@ -709,23 +704,20 @@ alsa_error:
 static float get_delay(struct ao *ao)
 {
     struct priv *p = ao->priv;
-    if (p->alsa) {
-        snd_pcm_sframes_t delay;
+    snd_pcm_sframes_t delay;
 
-        if (snd_pcm_state(p->alsa) == SND_PCM_STATE_PAUSED)
-            return p->delay_before_pause;
+    if (snd_pcm_state(p->alsa) == SND_PCM_STATE_PAUSED)
+        return p->delay_before_pause;
 
-        if (snd_pcm_delay(p->alsa, &delay) < 0)
-            return 0;
-
-        if (delay < 0) {
-            /* underrun - move the application pointer forward to catch up */
-            snd_pcm_forward(p->alsa, -delay);
-            delay = 0;
-        }
-        return (float)delay / (float)ao->samplerate;
-    } else
+    if (snd_pcm_delay(p->alsa, &delay) < 0)
         return 0;
+
+    if (delay < 0) {
+        /* underrun - move the application pointer forward to catch up */
+        snd_pcm_forward(p->alsa, -delay);
+        delay = 0;
+    }
+    return (float)delay / (float)ao->samplerate;
 }
 
 #define OPT_BASE_STRUCT struct priv
