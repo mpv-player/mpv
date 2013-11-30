@@ -23,6 +23,8 @@
 #include <stdbool.h>
 #include <assert.h>
 #include <time.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include <libavutil/avstring.h>
 #include <libavutil/common.h>
@@ -3028,10 +3030,19 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         char *args[MP_CMD_MAX_ARGS + 1] = {0};
         for (int n = 0; n < cmd->nargs; n++)
             args[n] = cmd->args[n].v.s;
-        if (!fork()) {
-            execvp(args[0], args);
-            exit(0);
+        pid_t child = fork();
+        if (child == 0) {
+            // Fork twice; the second process will be made child of pid 1 as
+            // soon as the first process exists, and we don't have to care
+            // about having to wait for the second process to terminate.
+            if (fork() == 0) {
+                execvp(args[0], args);
+                _exit(0);
+            }
+            _exit(0);
         }
+        int st;
+        while (child != -1 && waitpid(child, &st, 0) < 0 && errno == EINTR) {}
 #endif
         break;
     }
