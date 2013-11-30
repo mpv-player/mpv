@@ -19,6 +19,23 @@
  */
 
 #include "config.h"
+#include "osdep/io.h"
+
+// Set the CLOEXEC flag on the given fd.
+// On error, false is returned (and errno set).
+bool mp_set_cloexec(int fd)
+{
+#if defined(FD_CLOEXEC) && defined(F_SETFD)
+    if (fd >= 0) {
+        int flags = fcntl(fd, F_GETFD);
+        if (flags == -1)
+            return false;
+        if (fcntl(fd, F_SETFD, flags | FD_CLOEXEC) == -1)
+            return false;
+    }
+#endif
+    return true;
+}
 
 #ifdef _WIN32
 
@@ -27,7 +44,6 @@
 #include <stdio.h>
 #include <stddef.h>
 
-#include "osdep/io.h"
 #include "talloc.h"
 
 //copied and modified from libav

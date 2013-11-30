@@ -99,7 +99,7 @@ static char *load_file(const char *filename, int64_t * length)
 
     mp_msg(MSGT_NETWORK, MSGL_V, "Loading cookie file: %s\n", filename);
 
-    fd = open(filename, O_RDONLY);
+    fd = open(filename, O_RDONLY | O_CLOEXEC);
     if (fd < 0) {
 	mp_msg(MSGT_NETWORK, MSGL_V, "Could not open");
 	goto err_out;

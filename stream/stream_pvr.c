@@ -42,6 +42,8 @@
 #include <libavutil/common.h>
 #include <libavutil/avstring.h>
 
+#include "osdep/io.h"
+
 #include "mpvcore/mp_msg.h"
 
 #include "stream.h"
@@ -1579,7 +1581,7 @@ pvr_stream_open (stream_t *stream, int mode)
   parse_encoder_options (pvr);
 
   /* open device */
-  pvr->dev_fd = open (pvr->video_dev, O_RDWR);
+  pvr->dev_fd = open (pvr->video_dev, O_RDWR | O_CLOEXEC);
   mp_msg (MSGT_OPEN, MSGL_INFO,
           "%s Using device %s\n", LOG_LEVEL_PVR, pvr->video_dev);
   if (pvr->dev_fd == -1)

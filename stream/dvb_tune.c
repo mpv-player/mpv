@@ -34,7 +34,9 @@
 #include <errno.h>
 #include <linux/dvb/dmx.h>
 #include <linux/dvb/frontend.h>
+
 #include "config.h"
+#include "osdep/io.h"
 #include "dvbin.h"
 #include "dvb_tune.h"
 #include "mpvcore/mp_msg.h"
@@ -88,7 +90,7 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 	sprintf(frontend_dev, "/dev/dvb/adapter%d/frontend0", n);
 	sprintf(dvr_dev, "/dev/dvb/adapter%d/dvr0", n);
 	sprintf(demux_dev, "/dev/dvb/adapter%d/demux0", n);
-	priv->fe_fd = open(frontend_dev, O_RDWR | O_NONBLOCK);
+	priv->fe_fd = open(frontend_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 	if(priv->fe_fd < 0)
 	{
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING FRONTEND DEVICE %s: ERRNO %d\n", frontend_dev, errno);
@@ -98,7 +100,7 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 	mp_msg(MSGT_DEMUX, MSGL_V, "DVB_OPEN_DEVICES(%d)\n", demux_cnt);
 	for(i = 0; i < demux_cnt; i++)
 	{
-		priv->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK);
+		priv->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 		if(priv->demux_fds[i] < 0)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING DEMUX 0: %d\n", errno);
@@ -112,7 +114,7 @@ int dvb_open_devices(dvb_priv_t *priv, int n, int demux_cnt)
 	}
 
 
-	priv->dvr_fd = open(dvr_dev, O_RDONLY| O_NONBLOCK);
+	priv->dvr_fd = open(dvr_dev, O_RDONLY| O_NONBLOCK | O_CLOEXEC);
 	if(priv->dvr_fd < 0)
 	{
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR OPENING DVR DEVICE %s: %d\n", dvr_dev, errno);
@@ -143,7 +145,7 @@ int dvb_fix_demuxes(dvb_priv_t *priv, int cnt)
 	{
 		for(i = priv->demux_fds_cnt; i < cnt; i++)
 		{
-			priv->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK);
+			priv->demux_fds[i] = open(demux_dev, O_RDWR | O_NONBLOCK | O_CLOEXEC);
 			mp_msg(MSGT_DEMUX, MSGL_V, "FIX, OPEN fd(%d): %d\n", i, priv->demux_fds[i]);
 			if(priv->demux_fds[i] < 0)
 			{

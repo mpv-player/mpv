@@ -39,11 +39,14 @@
 #include <linux/videodev2.h>
 #endif
 
+#include <libavutil/avstring.h>
+
 #include "stream.h"
 #include "mpvcore/m_option.h"
 #include "mpvcore/mp_msg.h"
 #include "stream_radio.h"
-#include "libavutil/avstring.h"
+
+#include "osdep/io.h"
 
 #if HAVE_RADIO_CAPTURE
 #include "audio_in.h"
@@ -877,7 +880,7 @@ static int open_s(stream_t *stream,int mode)
     stream->close=close_s;
     stream->fill_buffer=fill_buffer_s;
 
-    priv->radio_fd = open(priv->radio_param->device, O_RDONLY);
+    priv->radio_fd = open(priv->radio_param->device, O_RDONLY | O_CLOEXEC);
     if (priv->radio_fd < 0) {
         mp_tmsg(MSGT_RADIO, MSGL_ERR, "[radio] Unable to open '%s': %s\n",
             priv->radio_param->device, strerror(errno));

@@ -39,6 +39,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include "osdep/io.h"
+
 #include "talloc.h"
 #include "af.h"
 #include "mpvcore/path.h"
@@ -107,7 +109,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
     }
 
     // Init memory mapping
-    s->fd = open(s->filename, O_RDWR | O_CREAT | O_TRUNC, 0640);
+    s->fd = open(s->filename, O_RDWR | O_CREAT | O_TRUNC | O_CLOEXEC, 0640);
     mp_msg(MSGT_AFILTER, MSGL_INFO, "[export] Exporting to file: %s\n", s->filename);
     if(s->fd < 0) {
       mp_msg(MSGT_AFILTER, MSGL_FATAL, "[export] Could not open/create file: %s\n",

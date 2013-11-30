@@ -101,11 +101,11 @@ static int open_f(stream_t *stream, int mode)
     };
     stream->priv = priv;
 
-    mode_t m = 0;
+    mode_t m = O_CLOEXEC;
     if (mode == STREAM_READ)
-        m = O_RDONLY;
+        m |= O_RDONLY;
     else if (mode == STREAM_WRITE)
-        m = O_RDWR | O_CREAT | O_TRUNC;
+        m |= O_RDWR | O_CREAT | O_TRUNC;
     else {
         mp_msg(MSGT_OPEN, MSGL_ERR, "[file] Unknown open mode %d\n", mode);
         return STREAM_UNSUPPORTED;

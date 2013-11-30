@@ -20,7 +20,18 @@
 #ifndef MPLAYER_OSDEP_IO
 #define MPLAYER_OSDEP_IO
 
+#include <stdbool.h>
 #include <limits.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+// This is in POSIX.1-2008, but support outside of Linux is scarce.
+#ifndef O_CLOEXEC
+#define O_CLOEXEC 0
+#endif
+
+bool mp_set_cloexec(int fd);
 
 #ifdef _WIN32
 #include <wchar.h>

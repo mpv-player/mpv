@@ -42,10 +42,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include <fcntl.h>
 #include <errno.h>
 
+#include <libavutil/avstring.h>
+
+#include "osdep/io.h"
+
 #include "stream.h"
 #include "mpvcore/m_option.h"
 #include "mpvcore/path.h"
-#include "libavutil/avstring.h"
 
 #include "dvbin.h"
 
@@ -735,7 +738,7 @@ dvb_config_t *dvb_get_config(void)
 	for(i=0; i<MAX_CARDS; i++)
 	{
 		snprintf(filename, sizeof(filename), "/dev/dvb/adapter%d/frontend0", i);
-		fd = open(filename, O_RDONLY|O_NONBLOCK);
+		fd = open(filename, O_RDONLY|O_NONBLOCK|O_CLOEXEC);
 		if(fd < 0)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_V, "DVB_CONFIG, can't open device %s, skipping\n", filename);

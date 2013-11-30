@@ -56,6 +56,8 @@
 #define vcd_close(priv) (close(((mp_vcd_priv_t*)priv)->fd))
 #endif
 
+#include "osdep/io.h"
+
 static int fill_buffer(stream_t *s, char* buffer, int max_len){
   if(s->pos > s->end_pos) /// don't past end of current track
     return 0;
@@ -112,7 +114,7 @@ static int open_s(stream_t *stream,int mode)
 	  OPEN_EXISTING, FILE_FLAG_SEQUENTIAL_SCAN, NULL);
   f = _open_osfhandle((intptr_t)hd, _O_RDONLY);
 #else
-  f=open(dev,O_RDONLY);
+  f=open(dev,O_RDONLY | O_CLOEXEC);
 #endif
   if(f<0){
     mp_tmsg(MSGT_OPEN,MSGL_ERR,"CD-ROM Device '%s' not found.\n",dev);

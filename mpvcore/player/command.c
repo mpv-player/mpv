@@ -65,6 +65,8 @@
 #include <sys/mman.h>
 #endif
 
+#include "osdep/io.h"
+
 #include "mp_core.h"
 #include "mp_lua.h"
 
@@ -2334,7 +2336,7 @@ static int overlay_add(struct MPContext *mpctx, int id, int x, int y,
             fd = -1;
         close_fd = false;
     } else {
-        fd = open(file, O_RDONLY | O_BINARY);
+        fd = open(file, O_RDONLY | O_BINARY | O_CLOEXEC);
     }
     void *p = mmap(NULL, h * stride, PROT_READ, MAP_SHARED, fd, offset);
     if (fd >= 0 && close_fd)

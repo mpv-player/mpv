@@ -39,6 +39,8 @@
 #include <sys/ioctl.h>
 #endif
 
+#include "osdep/io.h"
+
 #include "mpvcore/mp_msg.h"
 #include "stream_dvd_common.h"
 
@@ -104,7 +106,7 @@ void dvd_set_speed(char *device, unsigned speed)
   AV_WB16(buffer + 18, 1000);
   AV_WB16(buffer + 26, 1000);
 
-  fd = open(device, O_RDWR | O_NONBLOCK);
+  fd = open(device, O_RDWR | O_NONBLOCK | O_CLOEXEC);
   if (fd == -1) {
     mp_tmsg(MSGT_OPEN, MSGL_INFO, "Couldn't open DVD device for writing, changing DVD speed needs write access.\n");
     return;

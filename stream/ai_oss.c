@@ -36,6 +36,8 @@
 #endif
 #endif
 
+#include "osdep/io.h"
+
 #include "audio_in.h"
 #include "mpvcore/mp_msg.h"
 
@@ -85,7 +87,7 @@ int ai_oss_init(audio_in_t *ai)
     int err;
     int ioctl_param;
 
-    ai->oss.audio_fd = open(ai->oss.device, O_RDONLY);
+    ai->oss.audio_fd = open(ai->oss.device, O_RDONLY | O_CLOEXEC);
     if (ai->oss.audio_fd < 0)
     {
 	mp_tmsg(MSGT_TV, MSGL_ERR, "Unable to open '%s': %s\n",

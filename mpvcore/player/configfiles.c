@@ -51,7 +51,6 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
     struct MPOpts *opts = mpctx->opts;
     m_config_t *conf = mpctx->mconfig;
     char *conffile;
-    int conffile_fd;
     if (!opts->load_config)
         return true;
     if (!m_config_parse_config_file(conf, MPLAYER_CONFDIR "/mpv.conf", 0) < 0)
@@ -60,11 +59,11 @@ bool mp_parse_cfgfiles(struct MPContext *mpctx)
     if ((conffile = mp_find_user_config_file("config")) == NULL)
         MP_ERR(mpctx, "mp_find_user_config_file(\"config\") problem\n");
     else {
-        if ((conffile_fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY,
-                    0666)) != -1) {
+        int fd = open(conffile, O_CREAT | O_EXCL | O_WRONLY | O_CLOEXEC, 0666);
+        if (fd != -1) {
             MP_INFO(mpctx, "Creating config file: %s\n", conffile);
-            write(conffile_fd, DEF_CONFIG, sizeof(DEF_CONFIG) - 1);
-            close(conffile_fd);
+            write(fd, DEF_CONFIG, sizeof(DEF_CONFIG) - 1);
+            close(fd);
         }
         if (m_config_parse_config_file(conf, conffile, 0) < 0)
             return false;
