@@ -18,6 +18,8 @@
  * with mplayer2.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
+
 #include "config.h"
 #include "osdep/io.h"
 
