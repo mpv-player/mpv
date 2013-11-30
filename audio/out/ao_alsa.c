@@ -388,8 +388,7 @@ static int init(struct ao *ao)
                    ao->channels.num);
     } else {
         device = select_chmap(ao);
-        if (strcmp(device, "default") != 0 && ao->format == AF_FORMAT_FLOAT)
-        {
+        if (strcmp(device, "default") != 0 && (ao->format & AF_FORMAT_F)) {
             // hack - use the converter plugin (why the heck?)
             device = talloc_asprintf(ao, "plug:%s", device);
         }
