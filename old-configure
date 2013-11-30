@@ -3506,6 +3506,10 @@ EOF
 # Do not overwrite an unchanged config.h to avoid superfluous rebuilds.
 cmp -s "$TMPH" old_build/config.h || mv -f "$TMPH" old_build/config.h
 
+# Kill old config.h, as it might interfere with the build. Also get rid of
+# old config.mak, which might be confusing.
+rm -f config.h config.mak
+
 #############################################################################
 
 cat << EOF
