@@ -437,10 +437,11 @@ static void reset(struct ao *ao)
         ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &ao->samplerate);
     ioctl(p->audio_fd, SNDCTL_DSP_SETFMT, &oss_format);
     if (!AF_FORMAT_IS_AC3(ao->format)) {
+        int c = ao->channels.num;
         if (ao->channels.num > 2)
-            ioctl(p->audio_fd, SNDCTL_DSP_CHANNELS, &ao->channels.num);
+            ioctl(p->audio_fd, SNDCTL_DSP_CHANNELS, &c);
         else {
-            int c = ao->channels.num - 1;
+            c--;
             ioctl(p->audio_fd, SNDCTL_DSP_STEREO, &c);
         }
         ioctl(p->audio_fd, SNDCTL_DSP_SPEED, &ao->samplerate);
