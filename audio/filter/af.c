@@ -204,6 +204,8 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
         .data = talloc_zero(af, struct mp_audio),
     };
     struct m_config *config = m_config_from_obj_desc(af, &desc);
+    if (m_config_apply_defaults(config, name, s->opts->af_defs) < 0)
+        goto error;
     if (m_config_initialize_obj(config, &desc, &af->priv, &args) < 0)
         goto error;
 

@@ -11,6 +11,12 @@ syntax is:
 
     To get a full list of available audio filters, see ``--af=help``.
 
+You can also set defaults for each filter. The defaults are applied before the
+normal filter parameters.
+
+``--af-defaults=<filter1[=parameter1:parameter2:...],filter2,...>``
+    Set defaults for each filter.
+
 Audio filters are managed in lists. There are a few commands to manage the
 filter list:
 
@@ -50,9 +56,9 @@ Available filters are:
         entries. (default: no)
     ``no-detach``
         Do not detach if input and output audio format/rate/channels match.
-        You should add this option if you specify additional parameters, as
-        automatically inserted lavrresample instances will use the default
-        settings.
+        (If you just want to set defaults for this filter that will be used
+        even by automatically inserted lavrresample instances, you should
+        prefer setting them with ``--af-defaults=lavrresample:...``.)
     ``o=<string>``
         Set AVOptions on the SwrContext or AVAudioResampleContext. These should
         be documented by FFmpeg or Libav.

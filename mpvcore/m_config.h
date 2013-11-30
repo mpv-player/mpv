@@ -33,6 +33,7 @@ struct m_option;
 struct m_option_type;
 struct m_sub_options;
 struct m_obj_desc;
+struct m_obj_settings;
 
 // Config option
 struct m_config_option {
@@ -86,6 +87,11 @@ struct m_config *m_config_from_obj_desc_noalloc(void *talloc_ctx,
                                                 struct m_obj_desc *desc);
 
 int m_config_set_obj_params(struct m_config *conf, char **args);
+
+// Search for the object with the given name in the defaults list, and apply
+// its parameters.
+int m_config_apply_defaults(struct m_config *config, const char *name,
+                            struct m_obj_settings *defaults);
 
 // Initialize an object (VO/VF/...) in one go, including legacy handling.
 // This is pretty specialized, and is just for convenience.

@@ -466,7 +466,9 @@ const m_option_t mp_opts[] = {
 
 // ------------------------- codec/vfilter options --------------------
 
+    OPT_SETTINGSLIST("af-defaults", af_defs, 0, &af_obj_list),
     OPT_SETTINGSLIST("af*", af_settings, 0, &af_obj_list),
+    OPT_SETTINGSLIST("vf-defaults", vf_defs, 0, &vf_obj_list),
     OPT_SETTINGSLIST("vf*", vf_settings, 0, &vf_obj_list),
 
     OPT_CHOICE("deinterlace", deinterlace, M_OPT_OPTIONAL_PARAM,
@@ -557,7 +559,9 @@ const m_option_t mp_opts[] = {
 
 //---------------------- libao/libvo options ------------------------
     OPT_SETTINGSLIST("vo", vo.video_driver_list, 0, &vo_obj_list),
+    OPT_SETTINGSLIST("vo-defaults", vo.vo_defs, 0, &vo_obj_list),
     OPT_SETTINGSLIST("ao", audio_driver_list, 0, &ao_obj_list),
+    OPT_SETTINGSLIST("ao-defaults", ao_defs, 0, &ao_obj_list),
     OPT_FLAG("fixed-vo", fixed_vo, CONF_GLOBAL),
     OPT_FLAG("force-window", force_vo, CONF_GLOBAL),
     OPT_FLAG("ontop", vo.ontop, 0),

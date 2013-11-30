@@ -10,6 +10,12 @@ syntax is:
 If the list has a trailing ',', mpv will fall back on drivers not contained
 in the list. Suboptions are optional and can mostly be omitted.
 
+You can also set defaults for each driver. The defaults are applied before the
+normal driver parameters.
+
+``--ao-defaults=<driver1[:parameter1:parameter2:...],driver2,...>``
+    Set defaults for each driver.
+
 .. note::
 
     See ``--ao=help`` for a list of compiled-in audio output drivers.

@@ -230,6 +230,26 @@ int m_config_set_obj_params(struct m_config *conf, char **args)
     return 0;
 }
 
+int m_config_apply_defaults(struct m_config *config, const char *name,
+                            struct m_obj_settings *defaults)
+{
+    int r = 0;
+    for (int n = 0; defaults && defaults[n].name; n++) {
+        struct m_obj_settings *entry = &defaults[n];
+        if (name && strcmp(entry->name, name) == 0) {
+            if (entry->attribs && strcmp(entry->attribs[0], "_oldargs_") == 0) {
+                mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                        "Filter '%s' can't take defaults, because it uses "
+                        "custom option parsing.\n", name);
+                return -1;
+            }
+            r = m_config_set_obj_params(config, entry->attribs);
+            break;
+        }
+    }
+    return r;
+}
+
 int m_config_initialize_obj(struct m_config *config, struct m_obj_desc *desc,
                             void **ppriv, char ***pargs)
 {

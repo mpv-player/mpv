@@ -6,7 +6,7 @@
 #include "mpvcore/m_option.h"
 
 typedef struct mp_vo_opts {
-    struct m_obj_settings *video_driver_list;
+    struct m_obj_settings *video_driver_list, *vo_defs;
 
     int screenwidth;
     int screenheight;
@@ -48,7 +48,7 @@ typedef struct MPOpts {
     char **lua_files;
     int lua_load_osc;
 
-    struct m_obj_settings *audio_driver_list;
+    struct m_obj_settings *audio_driver_list, *ao_defs;
     int fixed_vo;
     int force_vo;
     int softvol;
@@ -174,8 +174,8 @@ typedef struct MPOpts {
     int force_srate;
     int dtshd;
     double playback_speed;
-    struct m_obj_settings *vf_settings;
-    struct m_obj_settings *af_settings;
+    struct m_obj_settings *vf_settings, *vf_defs;
+    struct m_obj_settings *af_settings, *af_defs;
     int deinterlace;
     float movie_aspect;
     int flip;

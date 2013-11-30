@@ -251,6 +251,8 @@ static struct vf_instance *vf_open(struct MPOpts *opts, vf_instance_t *next,
         .out_pool = talloc_steal(vf, mp_image_pool_new(16)),
     };
     struct m_config *config = m_config_from_obj_desc(vf, &desc);
+    if (m_config_apply_defaults(config, name, opts->vf_defs) < 0)
+        goto error;
     void *priv = NULL;
     if (m_config_initialize_obj(config, &desc, &priv, &args) < 0)
         goto error;

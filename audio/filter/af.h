@@ -79,7 +79,6 @@ struct af_stream {
     struct af_instance *last;
     // The user sets the input format (what the decoder outputs), and sets some
     // or all fields in output to the output format the AO accepts.
-    // See fixup_output_format().
     struct mp_audio input;
     struct mp_audio output;
     struct mp_audio filter_output;
