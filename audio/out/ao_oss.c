@@ -66,6 +66,19 @@ struct priv {
 
 static const char *mixer_channels[SOUND_MIXER_NRDEVICES] = SOUND_DEVICE_NAMES;
 
+/* like alsa except for 6.1 and 7.1, from pcm/matrix_map.h */
+static const struct mp_chmap oss_layouts[MP_NUM_CHANNELS + 1] = {
+    {0},                                        // empty
+    MP_CHMAP_INIT_MONO,                         // mono
+    MP_CHMAP2(FL, FR),                          // stereo
+    MP_CHMAP3(FL, FR, LFE),                     // 2.1
+    MP_CHMAP4(FL, FR, BL, BR),                  // 4.0
+    MP_CHMAP5(FL, FR, BL, BR, FC),              // 5.0
+    MP_CHMAP6(FL, FR, BL, BR, FC, LFE),         // 5.1
+    MP_CHMAP7(FL, FR, BL, BR, FC, LFE, BC),     // 6.1
+    MP_CHMAP8(FL, FR, BL, BR, FC, LFE, SL, SR), // 7.1
+};
+
 static int format_table[][2] = {
     {AFMT_U8,           AF_FORMAT_U8},
     {AFMT_S8,           AF_FORMAT_S8},
@@ -301,7 +314,8 @@ ac3_retry:
 
     if (!AF_FORMAT_IS_AC3(ao->format)) {
         struct mp_chmap_sel sel = {0};
-        mp_chmap_sel_add_alsa_def(&sel);
+        for (int n = 0; n < MP_NUM_CHANNELS + 1; n++)
+            mp_chmap_sel_add_map(&sel, &oss_layouts[n]);
         if (!ao_chmap_sel_adjust(ao, &sel, &ao->channels))
             return -1;
         int reqchannels = ao->channels.num;
