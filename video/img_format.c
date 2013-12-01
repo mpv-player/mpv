@@ -233,6 +233,11 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
             desc.bytes[p] = desc.bpp[p] / 8;
     }
 
+    // PSEUDOPAL is a complete braindeath nightmare, however it seems various
+    // parts of FFmpeg expect that it has a palette allocated.
+    if (pd->flags & (PIX_FMT_PAL | PIX_FMT_PSEUDOPAL))
+        desc.flags |= MP_IMGFLAG_PAL;
+
     if ((desc.flags & MP_IMGFLAG_YUV) && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED))
     {
         bool same_depth = true;

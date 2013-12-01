@@ -132,7 +132,7 @@ static void mp_image_alloc_planes(struct mp_image *mpi)
         mpi->stride[n] = FFALIGN(line_bytes, SWS_MIN_BYTE_ALIGN);
         plane_size[n] = mpi->stride[n] * alloc_h;
     }
-    if (mpi->imgfmt == IMGFMT_PAL8)
+    if (mpi->fmt.flags & MP_IMGFLAG_PAL)
         plane_size[1] = MP_PALETTE_SIZE;
 
     size_t sum = 0;
@@ -330,7 +330,7 @@ void mp_image_copy(struct mp_image *dst, struct mp_image *src)
         memcpy_pic(dst->planes[n], src->planes[n], line_bytes, dst->plane_h[n],
                    dst->stride[n], src->stride[n]);
     }
-    if (dst->imgfmt == IMGFMT_PAL8)
+    if (dst->fmt.flags & MP_IMGFLAG_PAL)
         memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
 }
 
@@ -349,7 +349,7 @@ void mp_image_copy_attributes(struct mp_image *dst, struct mp_image *src)
         dst->levels = src->levels;
         dst->chroma_location = src->chroma_location;
     }
-    if (dst->imgfmt == IMGFMT_PAL8 && src->imgfmt == IMGFMT_PAL8) {
+    if ((dst->fmt.flags & MP_IMGFLAG_PAL) && (src->fmt.flags & MP_IMGFLAG_PAL)) {
         if (dst->planes[1] && src->planes[1])
             memcpy(dst->planes[1], src->planes[1], MP_PALETTE_SIZE);
     }
