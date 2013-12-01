@@ -112,12 +112,13 @@ void main() {
 }
 
 #!section frag_video
-uniform sampler2D texture0;
-uniform sampler2D texture1;
-uniform sampler2D texture2;
-uniform sampler2D texture3;
+uniform VIDEO_SAMPLER texture0;
+uniform VIDEO_SAMPLER texture1;
+uniform VIDEO_SAMPLER texture2;
+uniform VIDEO_SAMPLER texture3;
 uniform vec2 textures_size[4];
 uniform vec2 chroma_center_offset;
+uniform vec2 chroma_div;
 uniform sampler1D lut_c_1d;
 uniform sampler1D lut_l_1d;
 uniform sampler2D lut_c_2d;
@@ -140,7 +141,7 @@ DECLARE_FRAGPARMS
 #define CONV_NV12 1
 #define CONV_PLANAR 2
 
-vec4 sample_bilinear(sampler2D tex, vec2 texsize, vec2 texcoord) {
+vec4 sample_bilinear(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {
     return texture(tex, texcoord);
 }
 
@@ -161,7 +162,7 @@ vec4 calcweights(float s) {
     return t;
 }
 
-vec4 sample_bicubic_fast(sampler2D tex, vec2 texsize, vec2 texcoord) {
+vec4 sample_bicubic_fast(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {
     vec2 pt = 1 / texsize;
     vec2 fcoord = fract(texcoord * texsize + vec2(0.5, 0.5));
     vec4 parmx = calcweights(fcoord.x);
@@ -222,7 +223,7 @@ float[16] weights16(sampler2D lookup, float f) {
 }
 
 #define CONVOLUTION_SEP_N(NAME, N)                                          \
-    vec4 NAME(sampler2D tex, vec2 texcoord, vec2 pt, float weights[N]) {    \
+    vec4 NAME(VIDEO_SAMPLER tex, vec2 texcoord, vec2 pt, float weights[N]) {\
         vec4 res = vec4(0);                                                 \
         for (int n = 0; n < N; n++) {                                       \
             res += weights[n] * texture(tex, texcoord + pt * n);            \
@@ -240,7 +241,7 @@ CONVOLUTION_SEP_N(convolution_sep16, 16)
 // The dir parameter is (0, 1) or (1, 0), and we expect the shader compiler to
 // remove all the redundant multiplications and additions.
 #define SAMPLE_CONVOLUTION_SEP_N(NAME, N, SAMPLERT, CONV_FUNC, WEIGHTS_FUNC)\
-    vec4 NAME(vec2 dir, SAMPLERT lookup, sampler2D tex, vec2 texsize,       \
+    vec4 NAME(vec2 dir, SAMPLERT lookup, VIDEO_SAMPLER tex, vec2 texsize,   \
               vec2 texcoord) {                                              \
         vec2 pt = (1 / texsize) * dir;                                      \
         float fcoord = dot(fract(texcoord * texsize - 0.5), dir);           \
@@ -258,7 +259,7 @@ SAMPLE_CONVOLUTION_SEP_N(sample_convolution_sep16, 16, sampler2D, convolution_se
 
 
 #define CONVOLUTION_N(NAME, N)                                               \
-    vec4 NAME(sampler2D tex, vec2 texcoord, vec2 pt, float taps_x[N],        \
+    vec4 NAME(VIDEO_SAMPLER tex, vec2 texcoord, vec2 pt, float taps_x[N],    \
               float taps_y[N]) {                                             \
         vec4 res = vec4(0);                                                  \
         for (int y = 0; y < N; y++) {                                        \
@@ -278,7 +279,7 @@ CONVOLUTION_N(convolution12, 12)
 CONVOLUTION_N(convolution16, 16)
 
 #define SAMPLE_CONVOLUTION_N(NAME, N, SAMPLERT, CONV_FUNC, WEIGHTS_FUNC)    \
-    vec4 NAME(SAMPLERT lookup, sampler2D tex, vec2 texsize, vec2 texcoord) {\
+    vec4 NAME(SAMPLERT lookup, VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {\
         vec2 pt = 1 / texsize;                                              \
         vec2 fcoord = fract(texcoord * texsize - 0.5);                      \
         vec2 base = texcoord - fcoord * pt;                                 \
@@ -296,7 +297,7 @@ SAMPLE_CONVOLUTION_N(sample_convolution16, 16, sampler2D, convolution16, weights
 
 
 // Unsharp masking
-vec4 sample_sharpen3(sampler2D tex, vec2 texsize, vec2 texcoord) {
+vec4 sample_sharpen3(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {
     vec2 pt = 1 / texsize;
     vec2 st = pt * 0.5;
     vec4 p = texture(tex, texcoord);
@@ -307,7 +308,7 @@ vec4 sample_sharpen3(sampler2D tex, vec2 texsize, vec2 texcoord) {
     return p + (p - 0.25 * sum) * filter_param1;
 }
 
-vec4 sample_sharpen5(sampler2D tex, vec2 texsize, vec2 texcoord) {
+vec4 sample_sharpen5(VIDEO_SAMPLER tex, vec2 texsize, vec2 texcoord) {
     vec2 pt = 1 / texsize;
     vec2 st1 = pt * 1.2;
     vec4 p = texture(tex, texcoord);
@@ -325,7 +326,14 @@ vec4 sample_sharpen5(sampler2D tex, vec2 texsize, vec2 texcoord) {
 }
 
 void main() {
-    vec2 chr_texcoord = texcoord + chroma_center_offset;
+    vec2 chr_texcoord = texcoord;
+#ifdef USE_RECTANGLE
+    chr_texcoord = chr_texcoord * chroma_div;
+#else
+    // Texture coordinates are [0,1], and chroma plane coordinates are
+    // magically rescaled.
+#endif
+    chr_texcoord = chr_texcoord + chroma_center_offset;
 #ifndef USE_CONV
 #define USE_CONV 0
 #endif

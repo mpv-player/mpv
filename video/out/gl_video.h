@@ -46,6 +46,7 @@ struct gl_video_opts {
     int stereo_mode;
     int alpha_mode;
     int chroma_location;
+    int use_rectangle;
 };
 
 extern const struct m_sub_options gl_video_conf;

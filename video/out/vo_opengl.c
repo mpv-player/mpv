@@ -206,6 +206,7 @@ static void load_hwdec_driver(struct gl_priv *p,
         .log = mp_log_new(hwdec, p->vo->log, drv->api_name),
         .mpgl = p->glctx,
         .info = talloc_zero(hwdec, struct mp_hwdec_info),
+        .gl_texture_target = GL_TEXTURE_2D,
     };
     mpgl_lock(p->glctx);
     if (hwdec->driver->create(hwdec) < 0) {

@@ -486,6 +486,11 @@ Available video output drivers are:
         Set the YUV chroma sample location. auto means use the bitstream
         flags (default: auto).
 
+    ``rectangle-textures``
+        Force use of rectangle textures (default: no). Normally this shouldn't
+        have any advantages over normal textures. Note that hardware decoding
+        overrides this flag.
+
 ``opengl-hq``
     Same as ``opengl``, but with default settings for high quality rendering.
 
