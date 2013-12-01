@@ -550,6 +550,7 @@ struct input_ctx {
     pthread_mutex_t mutex;
     struct mp_log *log;
 
+    bool using_alt_gr;
     bool using_ar;
     bool using_cocoa_media_keys;
 
@@ -634,6 +635,7 @@ const m_option_t mp_input_opts[] = {
     OPT_FLAG("joystick", input.use_joystick, CONF_GLOBAL),
     OPT_FLAG("lirc", input.use_lirc, CONF_GLOBAL),
     OPT_FLAG("lircc", input.use_lircc, CONF_GLOBAL),
+    OPT_FLAG("right-alt-gr", input.use_alt_gr, CONF_GLOBAL),
 #if HAVE_COCOA
     OPT_FLAG("ar", input.use_ar, CONF_GLOBAL),
     OPT_FLAG("media-keys", input.use_media_keys, CONF_GLOBAL),
@@ -2371,6 +2373,10 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
     }
 #endif
 
+    if (input_conf->use_alt_gr) {
+        ictx->using_alt_gr = true;
+    }
+
 #if HAVE_COCOA
     if (input_conf->use_ar) {
         cocoa_init_apple_remote();
@@ -2511,4 +2517,9 @@ unsigned int mp_input_get_mouse_event_counter(struct input_ctx *ictx)
     int ret = ictx->mouse_event_counter;
     input_unlock(ictx);
     return ret;
+}
+
+bool mp_input_use_alt_gr(struct input_ctx *ictx)
+{
+    return ictx->using_alt_gr;
 }

@@ -287,7 +287,9 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
         mask |= MP_KEY_MODIFIER_SHIFT;
     if (cocoaModifiers & NSControlKeyMask)
         mask |= MP_KEY_MODIFIER_CTRL;
-    if (LeftAltPressed(cocoaModifiers))
+    if (LeftAltPressed(cocoaModifiers) || 
+            (!mp_input_use_alt_gr(mpv_shared_app().inputContext) &&
+                RightAltPressed(cocoaModifiers)))
         mask |= MP_KEY_MODIFIER_ALT;
     if (cocoaModifiers & NSCommandKeyMask)
         mask |= MP_KEY_MODIFIER_META;
@@ -333,7 +335,8 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 
     NSString *chars;
 
-    if (RightAltPressed([event modifierFlags]))
+    if (mp_input_use_alt_gr(mpv_shared_app().inputContext) &&
+            RightAltPressed([event modifierFlags]))
         chars = [event characters];
     else
         chars = [event charactersIgnoringModifiers];

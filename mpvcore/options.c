@@ -873,6 +873,7 @@ const struct MPOpts mp_default_opts = {
         .use_joystick = 1,
         .use_lirc = 1,
         .use_lircc = 1,
+        .use_alt_gr = 1,
 #if HAVE_COCOA
         .use_ar = 1,
         .use_media_keys = 1,

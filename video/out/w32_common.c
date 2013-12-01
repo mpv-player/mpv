@@ -203,7 +203,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
             // Windows enables Ctrl+Alt when AltGr (VK_RMENU) is pressed.
             // E.g. AltGr+9 on a German keyboard would yield Ctrl+Alt+[
             // Warning: wine handles this differently. Don't test this on wine!
-            if (key_state(vo, VK_RMENU))
+            if (mp_input_use_alt_gr(vo->input_ctx) && key_state(vo, VK_RMENU))
                 mods &= ~(MP_KEY_MODIFIER_CTRL | MP_KEY_MODIFIER_ALT);
             // Apparently Ctrl+A to Ctrl+Z is special cased, and produces
             // character codes from 1-26. Work it around.
