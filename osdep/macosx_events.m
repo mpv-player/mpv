@@ -174,6 +174,11 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
     HIDRemote *_remote;
 }
 
+- (BOOL)useAltGr
+{
+    return mp_input_use_alt_gr(mpv_shared_app().inputContext);
+}
+
 - (void)startAppleRemote
 {
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -287,7 +292,8 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
         mask |= MP_KEY_MODIFIER_SHIFT;
     if (cocoaModifiers & NSControlKeyMask)
         mask |= MP_KEY_MODIFIER_CTRL;
-    if (LeftAltPressed(cocoaModifiers))
+    if (LeftAltPressed(cocoaModifiers) ||
+        RightAltPressed(cocoaModifiers) && ![self useAltGr])
         mask |= MP_KEY_MODIFIER_ALT;
     if (cocoaModifiers & NSCommandKeyMask)
         mask |= MP_KEY_MODIFIER_META;
@@ -333,7 +339,7 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 
     NSString *chars;
 
-    if (RightAltPressed([event modifierFlags]))
+    if ([self useAltGr] && RightAltPressed([event modifierFlags]))
         chars = [event characters];
     else
         chars = [event charactersIgnoringModifiers];
