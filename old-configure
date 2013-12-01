@@ -2260,7 +2260,7 @@ fi
 echocheck "sndio"
 if test "$_sndio" = auto ; then
    _sndio=no
-   statement_check sndio.h 'struct sio_par par; sio_initpar(&par);' -lsndio && _sndio=yes
+   statement_check sndio.h 'struct sio_par par; sio_initpar(&par); const char *s = SIO_DEVANY' -lsndio && _sndio=yes
 fi
 echores "$_sndio"
 
