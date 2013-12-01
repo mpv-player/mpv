@@ -56,6 +56,13 @@
 #define MP_IMGFLAG_BE 0x4000
 // set if in native (host) endian, or endian independent
 #define MP_IMGFLAG_NE MP_SELECT_LE_BE(MP_IMGFLAG_LE, MP_IMGFLAG_BE)
+// Carries a palette in plane[1] (see IMGFMT_PAL8 for format of the palette).
+// Note that some non-paletted formats have this flag set, because FFmpeg
+// mysteriously expects some formats to carry a palette plane for no apparent
+// reason. FFmpeg developer braindeath?
+// The only real paletted format we support is IMGFMT_PAL8, so check for that
+// format directly if you want an actual paletted format.
+#define MP_IMGFLAG_PAL 0x8000
 
 // Exactly one of these bits is set in mp_imgfmt_desc.flags
 #define MP_IMGFLAG_COLOR_CLASS_MASK \
