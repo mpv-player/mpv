@@ -40,8 +40,6 @@ static void flip_page(struct vo *vo)
 
 static int query_format(struct vo *vo, uint32_t format)
 {
-    if (IMGFMT_IS_HWACCEL(format))
-        return 0;
     return VFCAP_CSP_SUPPORTED;
 }
 
