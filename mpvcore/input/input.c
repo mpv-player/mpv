@@ -1484,7 +1484,7 @@ static void remove_key_down(struct input_ctx *ictx, int code)
     }
 }
 
-// Whether a command can deal with redundant key up events.
+// Whether a command shall be sent on both key down and key up events.
 static bool key_updown_ok(enum mp_command_type cmd)
 {
     switch (cmd) {
@@ -1595,9 +1595,9 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
     if (!cmd)
         return;
 
-    // Prevent redundant key-down events from being added to the queue. In some
-    // cases (like MP_CMD_SEEK commands), duplicated events might severely
-    // confuse the frontend.
+    // Don't emit a command on key-down if the key is designed to emit commands
+    // on key-up (like mouse buttons). Also, if the command specifically should
+    // be sent both on key down and key up, still emit the command.
     if (cmd->key_up_follows && !key_updown_ok(cmd->id)) {
         talloc_free(cmd);
         return;
