@@ -568,6 +568,7 @@ struct input_ctx {
     int key_down[MP_MAX_KEY_DOWN];
     unsigned int num_key_down;
     int64_t last_key_down;
+    bool current_down_cmd_need_release;
     struct mp_cmd *current_down_cmd;
 
     int doubleclick_time;
@@ -1450,9 +1451,20 @@ static void update_mouse_section(struct input_ctx *ictx)
     }
 }
 
-static void release_down_cmd(struct input_ctx *ictx)
+// Called when the currently held-down key is released. This (usually) sends
+// the a key-up versiob of the command associated with the keys that were held
+// down.
+// If the drop_current parameter is set to true, then don't send the key-up
+// command. Unless we've already sent a key-down event, in which case the
+// input receiver (the player) must get a key-up event, or it would get stuck
+// thinking a key is still held down.
+static void release_down_cmd(struct input_ctx *ictx, bool drop_current)
 {
-    if (ictx->current_down_cmd && ictx->current_down_cmd->key_up_follows) {
+    if (ictx->current_down_cmd_need_release)
+        drop_current = false;
+    if (!drop_current && ictx->current_down_cmd &&
+        ictx->current_down_cmd->key_up_follows)
+    {
         ictx->current_down_cmd->key_up_follows = false;
         queue_add_tail(&ictx->cmd_queue, ictx->current_down_cmd);
         ictx->got_new_events = true;
@@ -1460,6 +1472,7 @@ static void release_down_cmd(struct input_ctx *ictx)
         talloc_free(ictx->current_down_cmd);
     }
     ictx->current_down_cmd = NULL;
+    ictx->current_down_cmd_need_release = false;
     ictx->last_key_down = 0;
     ictx->ar_state = -1;
 }
@@ -1542,7 +1555,7 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
         if (key_was_down)
             return;
         // Cancel current down-event (there can be only one)
-        release_down_cmd(ictx);
+        release_down_cmd(ictx, true);
         ictx->key_down[ictx->num_key_down] = code & ~MP_KEY_STATE_DOWN;
         ictx->num_key_down++;
         update_mouse_section(ictx);
@@ -1557,10 +1570,11 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
         if (cmd && (code & MP_KEY_EMIT_ON_UP))
             cmd->key_up_follows = true;
         ictx->current_down_cmd = mp_cmd_clone(cmd);
+        ictx->current_down_cmd_need_release = false;
     } else if (code & MP_KEY_STATE_UP) {
         if (key_was_down) {
             remove_key_down(ictx, code);
-            release_down_cmd(ictx);
+            release_down_cmd(ictx, false);
         }
         update_mouse_section(ictx);
     } else {
@@ -1605,6 +1619,8 @@ static void interpret_key(struct input_ctx *ictx, int code, double scale)
 
     cmd->scale = scale;
 
+    if (cmd->key_up_follows)
+        ictx->current_down_cmd_need_release = true;
     queue_add_tail(&ictx->cmd_queue, cmd);
 }
 
@@ -1613,7 +1629,7 @@ static void mp_input_feed_key(struct input_ctx *ictx, int code, double scale)
     if (code == MP_INPUT_RELEASE_ALL) {
         MP_DBG(ictx, "release all\n");
         ictx->num_key_down = 0;
-        release_down_cmd(ictx);
+        release_down_cmd(ictx, false);
         update_mouse_section(ictx);
         return;
     }
