@@ -151,6 +151,7 @@ static const struct mp_cmd_def mp_cmds[] = {
     },
     .allow_auto_repeat = true,
   },
+  { MP_CMD_REVERT_SEEK, "revert_seek", },
   { MP_CMD_QUIT, "quit", { OARG_INT(0) } },
   { MP_CMD_QUIT_WATCH_LATER, "quit_watch_later", },
   { MP_CMD_STOP, "stop", },

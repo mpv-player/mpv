@@ -86,6 +86,12 @@ List of Input Commands
     keyframes
         Always restart playback at keyframe boundaries (fast).
 
+``revert_seek``
+    Undoes the ``seek`` command, and some other commands that seek (but not
+    necessarily all of them). Calling this command once will jump to the
+    playback position before the seek. Calling it a second time undoes the
+    ``revert_seek`` command itself.
+
 ``frame_step``
     Play one frame, then pause.
 

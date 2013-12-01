@@ -32,6 +32,7 @@
 #include "config.h"
 #include "talloc.h"
 #include "command.h"
+#include "osdep/timer.h"
 #include "mpvcore/mp_common.h"
 #include "mpvcore/input/input.h"
 #include "stream/stream.h"
@@ -75,6 +76,9 @@
 struct command_ctx {
     int events;
 
+    double last_seek_time;
+    double last_seek_pts;
+
     struct cycle_counter *cycle_counters;
     int num_cycle_counters;
 
@@ -86,6 +90,16 @@ static int edit_filters(struct MPContext *mpctx, enum stream_type mediatype,
                         const char *cmd, const char *arg);
 static int set_filters(struct MPContext *mpctx, enum stream_type mediatype,
                        struct m_obj_settings *new_chain);
+
+// Call before a seek, in order to allow revert_seek to undo the seek.
+static void mark_seek(struct MPContext *mpctx)
+{
+    struct command_ctx *cmd = mpctx->command_ctx;
+    double now = mp_time_sec();
+    if (now > cmd->last_seek_time + 2.0 || cmd->last_seek_pts == MP_NOPTS_VALUE)
+        cmd->last_seek_pts = get_current_time(mpctx);
+    cmd->last_seek_time = now;
+}
 
 static char *format_bitrate(int rate)
 {
@@ -397,6 +411,7 @@ static int mp_property_chapter(m_option_t *prop, int action, void *arg,
     }
     case M_PROPERTY_SWITCH:
     case M_PROPERTY_SET: ;
+        mark_seek(mpctx);
         int step_all;
         if (action == M_PROPERTY_SWITCH) {
             struct m_property_switch_arg *sarg = arg;
@@ -2475,6 +2490,7 @@ static bool check_property_autorepeat(char *property,  struct MPContext *mpctx)
 
 void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 {
+    struct command_ctx *cmdctx = mpctx->command_ctx;
     struct MPOpts *opts = mpctx->opts;
     int osd_duration = opts->osd_duration;
     bool auto_osd = cmd->on_osd == MP_ON_OSD_AUTO;
@@ -2500,6 +2516,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         double v = cmd->args[0].v.d * cmd->scale;
         int abs = cmd->args[1].v.i;
         int exact = cmd->args[2].v.i;
+        mark_seek(mpctx);
         if (abs == 2) {   // Absolute seek to a timestamp in seconds
             queue_seek(mpctx, MPSEEK_ABSOLUTE, v, exact);
             set_osd_function(mpctx,
@@ -2515,6 +2532,20 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
         if (msg_or_nobar_osd)
             mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT;
+        break;
+    }
+
+    case MP_CMD_REVERT_SEEK: {
+        double oldpts = cmdctx->last_seek_pts;
+        if (oldpts != MP_NOPTS_VALUE) {
+            cmdctx->last_seek_pts = get_current_time(mpctx);
+            queue_seek(mpctx, MPSEEK_ABSOLUTE, oldpts, 1);
+            set_osd_function(mpctx, OSD_REW);
+            if (bar_osd)
+                mpctx->add_osd_seek_info |= OSD_SEEK_INFO_BAR;
+            if (msg_or_nobar_osd)
+                mpctx->add_osd_seek_info |= OSD_SEEK_INFO_TEXT;
+        }
         break;
     }
 
@@ -2687,6 +2718,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                     // frame PTS and sub PTS rarely match exactly). Add some
                     // rounding for the mess of it.
                     a[0] += 0.01 * (a[1] > 0 ? 1 : -1);
+                    mark_seek(mpctx);
                     queue_seek(mpctx, MPSEEK_RELATIVE, a[0], 1);
                     set_osd_function(mpctx, (a[0] > 0) ? OSD_FFW : OSD_REW);
                     if (bar_osd)
@@ -3137,7 +3169,10 @@ void command_uninit(struct MPContext *mpctx)
 
 void command_init(struct MPContext *mpctx)
 {
-    mpctx->command_ctx = talloc_zero(NULL, struct command_ctx);
+    mpctx->command_ctx = talloc(NULL, struct command_ctx);
+    *mpctx->command_ctx = (struct command_ctx){
+        .last_seek_pts = MP_NOPTS_VALUE,
+    };
 }
 
 // Notify that a property might have changed.
@@ -3183,6 +3218,8 @@ void mp_flush_events(struct MPContext *mpctx)
             }
             if (name)
                 handle_script_event(mpctx, name, "");
+            if (event == MP_EVENT_START_FILE)
+                ctx->last_seek_pts = MP_NOPTS_VALUE;
         }
     }
 }
