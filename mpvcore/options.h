@@ -251,6 +251,7 @@ typedef struct MPOpts {
         int use_joystick;
         int use_lirc;
         int use_lircc;
+        int use_alt_gr;
         int use_ar;
         int use_media_keys;
         int default_bindings;

@@ -1823,6 +1823,10 @@ OPTIONS
         - ``--reset-on-next-file=""``
           Do not reset pause mode.
 
+``--right-alt-gr``, ``--no-right-alt-gr``
+    Use the right Alt key as Alt Gr to produce special characters. If disabled,
+    count the right Alt as an Alt modifier key. Enabled by default.
+
 ``--rtsp-transport=<lavf|udp|tcp|http>``
     Select RTSP transport method (default: tcp). This selects the underlying
     network transport when playing ``rtsp://...`` URLs. The value ``lavf``

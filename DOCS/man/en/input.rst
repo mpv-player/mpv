@@ -31,6 +31,10 @@ General Input Command Syntax
 
 ``[Shift+][Ctrl+][Alt+][Meta+]<key> [{<section>}] [<prefixes>] <command> (<argument>)* [; <command>]``
 
+Note that by default, the right Alt key can be used to create special
+characters, and thus does not register as a modifier. The option
+``--no-right-alt-gr`` changes this behavior.
+
 Newlines always start a new binding. ``#`` starts a comment (outside of quoted
 string arguments). To bind commands to the ``#`` key, ``SHARP`` can be used.
 
