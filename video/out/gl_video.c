@@ -1700,7 +1700,8 @@ struct mp_image *gl_video_download_image(struct gl_video *p)
         return NULL;
 
     if (p->hwdec_active && p->hwdec->driver->download_image) {
-        struct mp_image *dlimage = p->hwdec->driver->download_image(p->hwdec);
+        struct mp_image *dlimage =
+            p->hwdec->driver->download_image(p->hwdec, vimg->hwimage);
         if (dlimage)
             mp_image_set_attributes(dlimage, &p->image_params);
         return dlimage;

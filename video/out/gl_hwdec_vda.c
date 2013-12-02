@@ -102,14 +102,15 @@ static int map_image(struct gl_hwdec *hw, struct mp_image *hw_image,
 
 static void unmap_image(struct gl_hwdec *hw) { }
 
-static struct mp_image *download_image(struct gl_hwdec *hw)
+static struct mp_image *download_image(struct gl_hwdec *hw,
+                                       struct mp_image *hw_image)
 {
-    struct priv *p = hw->priv;
-    CVPixelBufferLockBaseAddress(p->pbuf, 0);
-    void *base = CVPixelBufferGetBaseAddress(p->pbuf);
-    size_t width  = CVPixelBufferGetWidth(p->pbuf);
-    size_t height = CVPixelBufferGetHeight(p->pbuf);
-    size_t stride = CVPixelBufferGetBytesPerRow(p->pbuf);
+    CVPixelBufferRef pbuf = (CVPixelBufferRef)hw_image->planes[3];
+    CVPixelBufferLockBaseAddress(pbuf, 0);
+    void *base = CVPixelBufferGetBaseAddress(pbuf);
+    size_t width  = CVPixelBufferGetWidth(pbuf);
+    size_t height = CVPixelBufferGetHeight(pbuf);
+    size_t stride = CVPixelBufferGetBytesPerRow(pbuf);
 
     struct mp_image img = {0};
     mp_image_setfmt(&img, IMGFMT_UYVY);
@@ -118,7 +119,7 @@ static struct mp_image *download_image(struct gl_hwdec *hw)
     img.stride[0] = stride;
 
     struct mp_image *image = mp_image_new_copy(&img);
-    CVPixelBufferUnlockBaseAddress(p->pbuf, 0);
+    CVPixelBufferUnlockBaseAddress(pbuf, 0);
 
     return image;
 }
