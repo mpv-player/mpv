@@ -33,7 +33,6 @@
 #include "vf.h"
 
 struct vf_priv_s {
-    int display_w, display_h;
     struct mp_image *current;
 };
 
@@ -42,8 +41,6 @@ static int config(struct vf_instance *vf,
                   unsigned int flags, unsigned int outfmt)
 {
     mp_image_unrefp(&vf->priv->current);
-    vf->priv->display_w = d_width;
-    vf->priv->display_h = d_height;
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
@@ -51,8 +48,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     mp_image_unrefp(&vf->priv->current);
     vf->priv->current = talloc_steal(vf, mp_image_new_ref(mpi));
-    mp_image_set_display_size(vf->priv->current, vf->priv->display_w,
-                              vf->priv->display_h);
     return mpi;
 }
 
