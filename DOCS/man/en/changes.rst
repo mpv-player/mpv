@@ -103,6 +103,7 @@ General Changes for mplayer2 to mpv
 * Native VAAPI support
 * OSX: VDA support using libavcodec hwaccel API insted of FFmpeg's decoder. Up
   to 2-2.5x reduction in CPU usage.
+* Make hardware decoding in general work with the ``opengl`` video output.
 * General bug fixes and removal of long-standing issues
 * General code cleanups (including refactoring or rewrites of many parts)
 * Many more changes

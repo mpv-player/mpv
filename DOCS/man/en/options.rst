@@ -1118,7 +1118,7 @@ OPTIONS
     :vdpau:     requires ``--vo=vdpau`` or ``--vo=opengl`` (Linux only)
     :vaapi:     requires ``--vo=opengl`` or ``--vo=vaapi`` (Linux with Intel GPUs only)
     :vaapi-copy: copies video back into system RAM (Linux with Intel GPUs only)
-    :vda:       requires ``--vo=corevideo`` (OSX only)
+    :vda:       requires ``--vo=opengl`` or ``--vo=corevideo`` (OSX only)
 
     ``auto`` tries to automatically enable hardware decoding using the first
     available method. This still depends what VO you are using. For example,
