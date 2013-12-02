@@ -76,10 +76,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
     case IMGFMT_422P:
     case IMGFMT_420P:
     case IMGFMT_411P: ;
-	int caps = vf_next_query_format(vf,fmt);
-        if (caps)
-            caps |= VFCAP_POSTPROC;
-        return caps;
+	return vf_next_query_format(vf,fmt);
     }
     return 0;
 }

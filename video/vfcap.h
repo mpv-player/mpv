@@ -27,7 +27,4 @@
 // driver/filter can do vertical flip (upside-down)
 #define VFCAP_FLIP 0x80
 
-// filter does postprocessing (so you shouldn't scale/filter image before it)
-#define VFCAP_POSTPROC 0x800
-
 #endif /* MPLAYER_VFCAP_H */
