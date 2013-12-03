@@ -426,21 +426,30 @@ Available filters are:
             ``'--vf=lavfi=yadif:o="threads=2,thread_type=slice"'``
                 forces a specific threading configuration.
 
-``noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]``
+``noise[=<strength>[:average][:pattern][:temporal][:uniform][:hq]``
     Adds noise.
 
-    :<0-100>: luma noise
-    :<0-100>: chroma noise
-    :u:       uniform noise (gaussian otherwise)
-    :t:       temporal noise (noise pattern changes between frames)
-    :a:       averaged temporal noise (smoother, but a lot slower)
-    :h:       high quality (slightly better looking, slightly slower)
-    :p:       mix random noise with a (semi)regular pattern
+    ``strength``
+        Set the noise for all components. If you want different strength
+        values for luma and chroma, use libavfilter's noise filter directly
+        (using ``--vf=lavfi=[noise=...]``), or tell the libavfilter developers
+        to stop being stupid.
 
-    .. note::
+    ``average``
+        averaged temporal noise (smoother, but a lot slower)
 
-        Deprecated. Use libavfilter's ``noise`` filter through ``--vf=lavfi``
-        instead.
+    ``pattern``
+        mix random noise with a (semi)regular pattern
+
+    ``temporal``
+        temporal noise (noise pattern changes between frames)
+
+    ``uniform``
+        uniform noise (gaussian otherwise)
+
+    ``hq``
+        high quality (slightly better looking, slightly slower) - not available
+        when using libavfilter
 
 ``hqdn3d[=luma_spatial:chroma_spatial:luma_tmp:chroma_tmp]``
     This filter aims to reduce image noise producing smooth images and making

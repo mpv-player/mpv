@@ -27,12 +27,15 @@
 #include "config.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/cpudetect.h"
+#include "mpvcore/m_option.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"
 #include "video/memcpy_pic.h"
 #include "libavutil/mem.h"
+
+#include "vf_lavfi.h"
 
 #define MAX_NOISE 4096
 #define MAX_SHIFT 1024
@@ -62,6 +65,13 @@ struct vf_priv_s {
 	FilterParam lumaParam;
 	FilterParam chromaParam;
 	unsigned int outfmt;
+        int strength;
+        int averaged;
+        int pattern;
+        int temporal;
+        int uniform;
+        int hq;
+        struct vf_lw_opts *lw_opts;
 };
 
 static int nonTempRandShift_init;
@@ -369,26 +379,13 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
 	return 0;
 }
 
-static void parse(FilterParam *fp, char* args){
-	char *pos;
-	char *max= strchr(args, ':');
-
-	if(!max) max= args + strlen(args);
-
-	fp->strength= atoi(args);
-	pos= strchr(args, 'u');
-	if(pos && pos<max) fp->uniform=1;
-	pos= strchr(args, 't');
-	if(pos && pos<max) fp->temporal=1;
-	pos= strchr(args, 'h');
-	if(pos && pos<max) fp->quality=1;
-	pos= strchr(args, 'p');
-	if(pos && pos<max) fp->pattern=1;
-	pos= strchr(args, 'a');
-	if(pos && pos<max) {
-	    fp->temporal=1;
-	    fp->averaged=1;
-	}
+static void parse(FilterParam *fp, struct vf_priv_s *p){
+	fp->strength= p->strength;
+	fp->uniform=p->uniform;
+	fp->temporal=p->temporal;
+	fp->quality=p->hq;
+	fp->pattern=p->pattern;
+	fp->averaged=p->averaged;
 
 	if(fp->strength) initNoise(fp);
 }
@@ -403,14 +400,18 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->filter=filter;
     vf->query_format=query_format;
     vf->uninit=uninit;
-    vf->priv=malloc(sizeof(struct vf_priv_s));
-    memset(vf->priv, 0, sizeof(struct vf_priv_s));
-    if(args)
+
+#define CH(f) ((f) ? '+' : '-')
+    struct vf_priv_s *p = vf->priv;
+    if (vf_lw_set_graph(vf, p->lw_opts, "noise", "-1:%d:%ca%cp%ct%cu",
+                        p->strength, CH(p->averaged), CH(p->pattern),
+                        CH(p->temporal), CH(p->uniform)) >= 0)
     {
-	char *arg2= strchr(args,':');
-	if(arg2) parse(&vf->priv->chromaParam, arg2+1);
-	parse(&vf->priv->lumaParam, args);
+        return 1;
     }
+
+    parse(&vf->priv->lumaParam, vf->priv);
+    parse(&vf->priv->chromaParam, vf->priv);
 
     // check csp:
     vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_420P);
@@ -435,10 +436,25 @@ static int vf_open(vf_instance_t *vf, char *args){
     return 1;
 }
 
+#define OPT_BASE_STRUCT struct vf_priv_s
 const vf_info_t vf_info_noise = {
     .description = "noise generator",
     .name = "noise",
     .open = vf_open,
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &(const struct vf_priv_s){
+        .strength = 2,
+    },
+    .options = (const struct m_option[]){
+        OPT_INTRANGE("strength", strength, 0, 0, 100),
+        OPT_FLAG("averaged", averaged, 0),
+        OPT_FLAG("pattern", pattern, 0),
+        OPT_FLAG("temporal", temporal, 0),
+        OPT_FLAG("uniform", uniform, 0),
+        OPT_FLAG("hq", hq, 0),
+        OPT_SUBSTRUCT("", lw_opts, vf_lw_conf, 0),
+        {0}
+    },
 };
 
 //===========================================================================//
