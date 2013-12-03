@@ -377,7 +377,7 @@ Available filters are:
             Horizontal deblocking on luminance only, and switch vertical
             deblocking on or off automatically depending on available CPU time.
 
-``lavfi=graph[:sws_flags[:o=opts]]``
+``lavfi=graph[:sws-flags[:o=opts]]``
     Filter video using FFmpeg's libavfilter.
 
     ``<graph>``
@@ -411,7 +411,7 @@ Available filters are:
             ``'--vf=lavfi=graph="gradfun=radius=30:strength=20,vflip"'``
                 Same as before, but uses named parameters for everything.
 
-    ``<sws_flags>``
+    ``<sws-flags>``
         If libavfilter inserts filters for pixel format conversion, this
         option gives the flags which should be passed to libswscale. This
         option is numeric and takes a bit-wise combination of ``SWS_`` flags.
