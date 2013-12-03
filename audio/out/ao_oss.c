@@ -299,12 +299,28 @@ ac3_retry:
     if (oss_format == -1) {
         MP_VERBOSE(ao, "Unknown/not supported internal format: %s\n",
                    af_fmt_to_str(ao->format));
+#if defined(AFMT_S32_LE) && defined(AFMT_S32_BE)
+#if BYTE_ORDER == BIG_ENDIAN
+        oss_format = AFMT_S32_BE;
+#else
+        oss_format = AFMT_S32_LE;
+#endif
+        ao->format = AF_FORMAT_S32;
+#elif defined(AFMT_S24_LE) && defined(AFMT_S24_BE)
+#if BYTE_ORDER == BIG_ENDIAN
+        oss_format = AFMT_S24_BE;
+#else
+        oss_format = AFMT_S24_LE;
+#endif
+        ao->format = AF_FORMAT_S24;
+#else
 #if BYTE_ORDER == BIG_ENDIAN
         oss_format = AFMT_S16_BE;
 #else
         oss_format = AFMT_S16_LE;
 #endif
         ao->format = AF_FORMAT_S16;
+#endif
     }
     if (ioctl(p->audio_fd, SNDCTL_DSP_SETFMT, &oss_format) < 0 ||
         oss_format != format2oss(ao->format))
