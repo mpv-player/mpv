@@ -185,6 +185,15 @@ Command Line Switches
 
     ``-opt val`` becomes ``--opt=val``.
 
+.. note::
+
+    Quite some video filters, video outputs, audio filters, audio outputs, had
+    changes in their option parsing. These aren't mentioned in the table above.
+
+    Also, some video and audio filters have been removed, and you have to use
+    libavfilter (using ``--vf=lavfi=[...]`` or ``--af=lavfi=[...]``) to get
+    them back.
+
 input.conf and Slave Commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
