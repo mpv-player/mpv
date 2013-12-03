@@ -156,7 +156,7 @@ Available filters are:
         :0: Disable accurate rounding (default).
         :1: Enable accurate rounding.
 
-``dsize[=aspect|w:h:aspect-method:r]``
+``dsize[=w:h:aspect-method:r:aspect]``
     Changes the intended display size/aspect at an arbitrary point in the
     filter chain. Aspect can be given as a fraction (4/3) or floating point
     number (1.33). Alternatively, you may specify the exact display width and
@@ -204,6 +204,9 @@ Available filters are:
     ``<r>``
         Rounds up to make both width and height divisible by ``<r>``
         (default: 1).
+
+    ``<aspect>``
+        Force an aspect ratio.
 
 ``format[=fmt[:outfmt]]``
     Restricts the color space for the next filter without doing any conversion.
