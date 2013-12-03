@@ -26,6 +26,7 @@
 #include "config.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/cpudetect.h"
+#include "mpvcore/m_option.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -37,6 +38,7 @@ struct vf_priv_s {
     pp_mode *ppMode[PP_QUALITY_MAX+1];
     void *context;
     unsigned int outfmt;
+    char *arg;
 };
 
 //===========================================================================//
@@ -132,17 +134,13 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->config=config;
     vf->filter=filter;
     vf->uninit=uninit;
-    vf->priv=malloc(sizeof(struct vf_priv_s));
-    vf->priv->context=NULL;
 
     // check csp:
     vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_420P);
     if(!vf->priv->outfmt) return 0; // no csp match :(
 
-    char *name = args ? args : "de";
-
 	for(i=0; i<=PP_QUALITY_MAX; i++){
-            vf->priv->ppMode[i]= pp_get_mode_by_name_and_quality(name, i);
+            vf->priv->ppMode[i]= pp_get_mode_by_name_and_quality(vf->priv->arg, i);
             if(vf->priv->ppMode[i]==NULL) return -1;
         }
 
@@ -153,13 +151,24 @@ static int vf_open(vf_instance_t *vf, char *args){
 static void print_help(void)
 {
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", pp_help);
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO,
+           "Don't forget to quote the filter list, e.g.: '--vf=pp=[tn:64:128:256]'\n\n");
 }
 
+#define OPT_BASE_STRUCT struct vf_priv_s
 const vf_info_t vf_info_pp = {
     .description = "postprocessing",
     .name = "pp",
     .open = vf_open,
     .print_help = print_help,
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &(const struct vf_priv_s){
+        .arg = "de",
+    },
+    .options = (const struct m_option[]){
+        OPT_STRING("filters", arg, 0),
+        {0}
+    },
 };
 
 //===========================================================================//

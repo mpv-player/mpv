@@ -241,7 +241,7 @@ Available filters are:
     ``<fmt>``
         Format name, e.g. rgb15, bgr24, 420p, etc. (default: 420p).
 
-``pp[=filter1[:option1[:option2...]]/[-]filter2...]``
+``pp[=[filter1[:option1[:option2...]]/[-]filter2...]]``
     Enables the specified chain of postprocessing subfilters. Subfilters must
     be separated by '/' and can be disabled by prepending a '-'. Each
     subfilter and some options have a short and a long name that can be used
@@ -260,6 +260,11 @@ Available filters are:
     .. note::
 
         ``--vf=pp:help`` shows a list of available subfilters.
+
+    .. note::
+
+        Unlike in MPlayer or in earlier versions, you must quote the pp string
+        if it contains ``:`` characters, e.g. ``'--vf=pp=[...]'``.
 
     Available subfilters are:
 
@@ -373,10 +378,10 @@ Available filters are:
         ``--vf=pp=de/-al``
             default filters without brightness/contrast correction
 
-        ``--vf=pp=default/tmpnoise:1:2:3``
+        ``--vf=pp=[default/tmpnoise:1:2:3]``
             Enable default filters & temporal denoiser.
 
-        ``--vf=pp=hb:y/vb:a``
+        ``--vf=pp=[hb:y/vb:a]``
             Horizontal deblocking on luminance only, and switch vertical
             deblocking on or off automatically depending on available CPU time.
 
