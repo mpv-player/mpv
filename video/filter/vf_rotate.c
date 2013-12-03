@@ -23,6 +23,7 @@
 
 #include "config.h"
 #include "mpvcore/mp_msg.h"
+#include "mpvcore/m_option.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -119,15 +120,19 @@ static int vf_open(vf_instance_t *vf, char *args){
     vf->reconfig=reconfig;
     vf->filter=filter;
     vf->query_format=query_format;
-    vf->priv=malloc(sizeof(struct vf_priv_s));
-    vf->priv->direction=args?atoi(args):0;
     return 1;
 }
 
+#define OPT_BASE_STRUCT struct vf_priv_s
 const vf_info_t vf_info_rotate = {
     .description = "rotate",
     .name = "rotate",
     .open = vf_open,
+    .priv_size = sizeof(struct vf_priv_s),
+    .options = (const struct m_option[]){
+        OPT_INTRANGE("direction", direction, 0, 0, 7),
+        {0}
+    },
 };
 
 //===========================================================================//
