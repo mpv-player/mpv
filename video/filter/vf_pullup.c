@@ -23,6 +23,7 @@
 #include "config.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/cpudetect.h"
+#include "mpvcore/m_option.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -31,6 +32,7 @@
 #include "video/memcpy_pic.h"
 
 #include "pullup.h"
+#include "vf_lavfi.h"
 
 #undef MAX
 #define MAX(a,b) ((a)>(b)?(a):(b))
@@ -41,7 +43,9 @@ struct vf_priv_s {
 	int fakecount;
 	char *qbuf;
 	double lastpts;
-        char *args;
+        int junk_left, junk_right, junk_top, junk_bottom;
+        int strict_breaks, metric_plane;
+        struct vf_lw_opts *lw_opts;
 };
 
 static void reset(struct vf_instance *vf)
@@ -55,13 +59,12 @@ static void reset(struct vf_instance *vf)
     vf->priv->ctx = c = pullup_alloc_context();
     vf->priv->fakecount = 1;
     c->verbose = verbose>0;
-    c->junk_left = c->junk_right = 1;
-    c->junk_top = c->junk_bottom = 4;
-    c->strict_breaks = 0;
-    c->metric_plane = 0;
-    if (vf->priv->args) {
-            sscanf(vf->priv->args, "%d:%d:%d:%d:%d:%d", &c->junk_left, &c->junk_right, &c->junk_top, &c->junk_bottom, &c->strict_breaks, &c->metric_plane);
-    }
+    c->junk_left = vf->priv->junk_left;
+    c->junk_right = vf->priv->junk_right;
+    c->junk_top = vf->priv->junk_top;
+    c->junk_bottom = vf->priv->junk_bottom;
+    c->strict_breaks = vf->priv->strict_breaks;
+    c->metric_plane = vf->priv->metric_plane;
 }
 
 static void init_pullup(struct vf_instance *vf, mp_image_t *mpi)
@@ -279,14 +282,38 @@ static int vf_open(vf_instance_t *vf, char *args)
 	vf->query_format = query_format;
         vf->control = control;
 	vf->uninit = uninit;
-	vf->priv = calloc(1, sizeof(struct vf_priv_s));
-        vf->priv->args = talloc_strdup(vf, args);
+        struct vf_priv_s *p = vf->priv;
+        const char *pname[3] = {"y", "u", "v"};
+        if (vf_lw_set_graph(vf, p->lw_opts, "pullup", "%d:%d:%d:%d:%d:%s",
+                            p->junk_left, p->junk_right, p->junk_top, p->junk_bottom,
+                            p->strict_breaks, pname[p->metric_plane]) >= 0)
+        {
+            return 1;
+        }
         reset(vf);
 	return 1;
 }
 
+#define OPT_BASE_STRUCT struct vf_priv_s
 const vf_info_t vf_info_pullup = {
     .description = "pullup (from field sequence to frames)",
     .name = "pullup",
     .open = vf_open,
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &(const struct vf_priv_s){
+        .junk_left = 1,
+        .junk_right = 1,
+        .junk_top = 4,
+        .junk_bottom = 4,
+    },
+    .options = (const struct m_option[]){
+        OPT_INT("jl", junk_left, 0),
+        OPT_INT("jr", junk_right, 0),
+        OPT_INT("jt", junk_top, 0),
+        OPT_INT("jb", junk_bottom, 0),
+        OPT_INT("sb", strict_breaks, 0),
+        OPT_CHOICE("mp", metric_plane, 0, ({"y", 0}, {"u", 1}, {"v", 2})),
+        OPT_SUBSTRUCT("", lw_opts, vf_lw_conf, 0),
+        {0}
+    },
 };

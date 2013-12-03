@@ -553,7 +553,7 @@ Available filters are:
         frames in the output.
 
     ``mp`` (metric plane)
-        This option may be set to 1 or 2 to use a chroma plane instead of the
+        This option may be set to ``u`` or ``v`` to use a chroma plane instead of the
         luma plane for doing ``pullup``'s computations. This may improve accuracy
         on very clean source material, but more likely will decrease accuracy,
         especially if there is chroma noise (rainbow effect) or any grayscale
