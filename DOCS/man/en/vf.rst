@@ -680,7 +680,7 @@ Available filters are:
     ``v``
         Verbose operation. Prints the selected mode for each frame and the
         average squared difference between fields for ``t``, ``b``, and ``p``
-        alternatives.
+        alternatives. (Ignored when libavfilter is used.)
 
 ``yadif=[mode[:enabled=yes|no]]``
     Yet another deinterlacing filter
