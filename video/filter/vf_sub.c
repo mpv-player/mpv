@@ -129,7 +129,7 @@ static int control(vf_instance_t *vf, int request, void *data)
     return vf_next_control(vf, request, data);
 }
 
-static int vf_open(vf_instance_t *vf, char *args)
+static int vf_open(vf_instance_t *vf)
 {
     vf->config = config;
     vf->query_format = query_format;

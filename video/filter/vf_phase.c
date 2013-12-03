@@ -266,7 +266,7 @@ static const char *get_lavfi_mode(int mode)
     }
 }
 
-static int vf_open(vf_instance_t *vf, char *args)
+static int vf_open(vf_instance_t *vf)
    {
    vf->filter = filter;
    vf->uninit = uninit;

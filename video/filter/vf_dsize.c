@@ -78,7 +78,7 @@ static int config(struct vf_instance *vf,
     return vf_next_config(vf, width, height, d_width, d_height, flags, outfmt);
 }
 
-static int vf_open(vf_instance_t *vf, char *args)
+static int vf_open(vf_instance_t *vf)
 {
     vf->config = config;
     return 1;

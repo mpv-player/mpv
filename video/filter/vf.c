@@ -138,7 +138,6 @@ static bool get_desc(struct m_obj_desc *dst, int index)
 const struct m_obj_list vf_obj_list = {
     .get_desc = get_desc,
     .description = "video filters",
-    .legacy_hacks = true, // some filters have custom option parsing
 };
 
 int vf_control(struct vf_instance *vf, int cmd, void *arg)
@@ -251,11 +250,10 @@ static struct vf_instance *vf_open(struct MPOpts *opts, vf_instance_t *next,
     struct m_config *config = m_config_from_obj_desc(vf, &desc);
     if (m_config_apply_defaults(config, name, opts->vf_defs) < 0)
         goto error;
-    void *priv = NULL;
-    if (m_config_initialize_obj(config, &desc, &priv, &args) < 0)
+    if (m_config_set_obj_params(config, args) < 0)
         goto error;
-    vf->priv = priv;
-    int retcode = vf->info->open(vf, (char *)args);
+    vf->priv = config->optstruct;
+    int retcode = vf->info->open(vf);
     if (retcode < 1)
         goto error;
     return vf;

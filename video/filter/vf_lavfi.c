@@ -329,7 +329,7 @@ static void uninit(struct vf_instance *vf)
     destroy_graph(vf);
 }
 
-static int vf_open(vf_instance_t *vf, char *args)
+static int vf_open(vf_instance_t *vf)
 {
     vf->reconfig = NULL;
     vf->config = config;
@@ -459,7 +459,7 @@ int vf_lw_set_graph(struct vf_instance *vf, struct vf_lw_opts *lavfi_opts,
     va_end(ap);
     p->old_priv = old_priv;
     // Note: we should be sure vf_open really overwrites _all_ vf callbacks.
-    if (vf_open(vf, NULL) < 1)
+    if (vf_open(vf) < 1)
         abort();
     return 1;
 }

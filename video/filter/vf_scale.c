@@ -396,7 +396,7 @@ static void uninit(struct vf_instance *vf)
 {
 }
 
-static int vf_open(vf_instance_t *vf, char *args)
+static int vf_open(vf_instance_t *vf)
 {
     vf->reconfig = reconfig;
     vf->filter = filter;

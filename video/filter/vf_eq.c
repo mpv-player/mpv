@@ -457,7 +457,7 @@ void uninit (vf_instance_t *vf)
 }
 
 static
-int vf_open(vf_instance_t *vf, char *args)
+int vf_open(vf_instance_t *vf)
 {
   unsigned i;
   vf_eq2_t *eq2;

@@ -33,7 +33,7 @@ struct vf_priv_s;
 typedef struct vf_info {
     const char *description;
     const char *name;
-    int (*open)(struct vf_instance *vf, char *args);
+    int (*open)(struct vf_instance *vf);
     int priv_size;
     const void *priv_defaults;
     const struct m_option *options;

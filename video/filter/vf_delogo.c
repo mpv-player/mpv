@@ -280,7 +280,7 @@ load_error:
     return -1;
 }
 
-static int vf_open(vf_instance_t *vf, char *args){
+static int vf_open(vf_instance_t *vf){
     struct vf_priv_s *p = vf->priv;
     vf->config=config;
     vf->filter=filter;

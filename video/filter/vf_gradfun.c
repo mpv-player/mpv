@@ -368,7 +368,7 @@ static void lavfi_recreate(struct vf_instance *vf)
     vf_lw_update_graph(vf, "gradfun", "%f:%d", p->cfg_thresh, p->radius);
 }
 
-static int vf_open(vf_instance_t *vf, char *args)
+static int vf_open(vf_instance_t *vf)
 {
     vf->filter=filter;
     vf->query_format=query_format;

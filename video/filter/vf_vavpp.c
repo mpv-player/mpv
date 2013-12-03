@@ -363,7 +363,7 @@ static bool initialize(struct vf_priv_s *p)
     return true;
 }
 
-static int vf_open(vf_instance_t *vf, char *args)
+static int vf_open(vf_instance_t *vf)
 {
     vf->reconfig = reconfig;
     vf->filter_ext = filter_ext;

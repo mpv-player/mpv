@@ -282,7 +282,7 @@ static void PrecalcCoefs(int *Ct, double Dist25)
 #define CHROMA_SPATIAL 2
 #define CHROMA_TMP     3
 
-static int vf_open(vf_instance_t *vf, char *args){
+static int vf_open(vf_instance_t *vf){
         struct vf_priv_s *s = vf->priv;
 
 	vf->config=config;

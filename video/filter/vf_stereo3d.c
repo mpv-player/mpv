@@ -459,7 +459,7 @@ static const char *rev_map_name(int val)
     return NULL;
 }
 
-static int vf_open(vf_instance_t *vf, char *args)
+static int vf_open(vf_instance_t *vf)
 {
     vf->config          = config;
     vf->filter          = filter;

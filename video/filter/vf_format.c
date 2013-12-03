@@ -63,7 +63,7 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     return mpi;
 }
 
-static int vf_open(vf_instance_t *vf, char *args){
+static int vf_open(vf_instance_t *vf){
     vf->query_format=query_format;
     if (vf->priv->outfmt) {
         vf->config=config;

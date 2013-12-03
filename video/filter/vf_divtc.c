@@ -604,7 +604,7 @@ static int control(vf_instance_t *vf, int request, void *data)
     return vf_next_control(vf, request, data);
 }
 
-static int vf_open(vf_instance_t *vf, char *args)
+static int vf_open(vf_instance_t *vf)
    {
    struct vf_priv_s *p = vf->priv;
 
