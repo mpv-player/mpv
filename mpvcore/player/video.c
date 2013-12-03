@@ -60,10 +60,10 @@ static void recreate_video_filters(struct MPContext *mpctx)
 
     vf_uninit_filter_chain(d_video->vfilter);
 
-    char *vf_arg[] = {
-        "_oldargs_", (char *)mpctx->video_out, NULL
-    };
-    d_video->vfilter = vf_open_filter(opts, NULL, "vo", vf_arg);
+    d_video->vfilter = vf_open_filter(opts, NULL, "vo", NULL);
+    if (!d_video->vfilter)
+        abort();
+    d_video->vfilter->control(d_video->vfilter, VFCTRL_SET_VO, mpctx->video_out);
 
     d_video->vfilter = append_filters(d_video->vfilter, opts->vf_settings);
 

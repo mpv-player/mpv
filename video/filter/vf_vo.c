@@ -37,6 +37,9 @@ struct vf_priv_s {
 
 static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags)
 {
+    if (!video_out)
+        return -1;
+
     if (p->w <= 0 || p->h <= 0 || p->d_w <= 0 || p->d_h <= 0) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "VO: invalid dimensions!\n");
         return -1;
@@ -55,6 +58,13 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags
 
 static int control(struct vf_instance *vf, int request, void *data)
 {
+    if (request == VFCTRL_SET_VO) {
+        video_out = data;
+        return CONTROL_OK;
+    }
+    if (!video_out)
+        return CONTROL_FALSE;
+
     switch (request) {
     case VFCTRL_GET_DEINTERLACE:
         return vo_control(video_out, VOCTRL_GET_DEINTERLACE, data) == VO_TRUE;
@@ -86,16 +96,17 @@ static int control(struct vf_instance *vf, int request, void *data)
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)
 {
+    if (!video_out)
+        return 0;
     return video_out->driver->query_format(video_out, fmt);
 }
 
 static void uninit(struct vf_instance *vf)
 {
-    if (vf->priv) {
+    if (vf->priv && video_out) {
         /* Allow VO (which may live on to work with another instance of vf_vo)
          * to get rid of numbered-mpi references that will now be invalid. */
         vo_seek_reset(video_out);
-        free(vf->priv);
     }
 }
 
@@ -105,10 +116,6 @@ static int vf_open(vf_instance_t *vf, char *args)
     vf->control = control;
     vf->query_format = query_format;
     vf->uninit = uninit;
-    vf->priv = calloc(1, sizeof(struct vf_priv_s));
-    vf->priv->vo = (struct vo *)args;
-    if (!video_out)
-        return 0;
     return 1;
 }
 
@@ -116,4 +123,5 @@ const vf_info_t vf_info_vo = {
     .description = "libvo wrapper",
     .name = "vo",
     .open = vf_open,
+    .priv_size = sizeof(struct vf_priv_s),
 };

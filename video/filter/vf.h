@@ -103,6 +103,7 @@ enum vf_ctrl {
     /* Hack to make the OSD state object available to vf_sub which
      * access OSD/subtitle state outside of normal OSD draw time. */
     VFCTRL_SET_OSD_OBJ,
+    VFCTRL_SET_VO,
     VFCTRL_GET_HWDEC_INFO,   // for hwdec filters
 };
 
