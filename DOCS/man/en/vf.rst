@@ -504,30 +504,22 @@ Available filters are:
         :0: nearest-neighbor sampling, fast but incorrect
         :1: linear interpolation (default)
 
-``unsharp[=l|cWxH:amount[:l|cWxH:amount]]``
+``unsharp[=lx:ly:la:cx:cy:ca]``
     unsharp mask / gaussian blur
 
-    ``l``
-        Apply effect on luma component.
+    ``l`` is for the luma component, ``c`` for the chroma component. ``x``/``y``
+    is the filter size. ``a`` is the amount.
 
-    ``c``
-        Apply effect on chroma components.
-
-    ``<width>x<height>``
+    ``lx``, ``ly``, ``cx``, ``cy``
         width and height of the matrix, odd sized in both directions (min =
-        3x3, max = 13x11 or 11x13, usually something between 3x3 and 7x7)
+        3:3, max = 13:11 or 11:13, usually something between 3:3 and 7:7)
 
-    ``amount``
+    ``la``, ``ca``
         Relative amount of sharpness/blur to add to the image (a sane range
         should be -1.5-1.5).
 
         :<0: blur
         :>0: sharpen
-
-    .. note::
-
-        Deprecated. Use libavfilter's ``unsharp`` filter through ``--vf=lavfi``
-        instead.
 
 ``swapuv``
     Swap U & V plane.
