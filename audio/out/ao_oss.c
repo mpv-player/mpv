@@ -89,6 +89,18 @@ static int format_table[][2] = {
 #ifdef AFMT_S24_PACKED
     {AFMT_S24_PACKED,   AF_FORMAT_S24_LE},
 #endif
+#ifdef AFMT_U24_LE
+    {AFMT_U24_LE,       AF_FORMAT_U24_LE},
+#endif
+#ifdef AFMT_U24_BE
+    {AFMT_U24_BE,       AF_FORMAT_U24_BE},
+#endif
+#ifdef AFMT_S24_LE
+    {AFMT_S24_LE,       AF_FORMAT_S24_LE},
+#endif
+#ifdef AFMT_S24_BE
+    {AFMT_S24_BE,       AF_FORMAT_S24_BE},
+#endif
 #ifdef AFMT_U32_LE
     {AFMT_U32_LE,       AF_FORMAT_U32_LE},
 #endif
