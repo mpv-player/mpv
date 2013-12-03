@@ -45,6 +45,8 @@
 
 #include "mpvcore/m_option.h"
 
+#include "vf_lavfi.h"
+
 struct vf_priv_s {
     float cfg_thresh;
     int cfg_radius;
@@ -56,6 +58,7 @@ struct vf_priv_s {
                         int width, int thresh, const uint16_t *dithers);
     void (*blur_line)(uint16_t *dc, uint16_t *buf, uint16_t *buf1,
                       uint8_t *src, int sstride, int width);
+    struct vf_lw_opts *lw_opts;
 } const vf_priv_dflt = {
   .cfg_thresh = 1.5,
   .cfg_radius = -1,
@@ -353,6 +356,18 @@ static void uninit(struct vf_instance *vf)
     av_free(vf->priv->buf);
 }
 
+static void lavfi_recreate(struct vf_instance *vf)
+{
+    struct vf_priv_s *p = vf_lw_old_priv(vf);
+    int w = vf->fmt_in.params.w;
+    int h = vf->fmt_in.params.h;
+    p->radius = p->cfg_radius;
+    if (p->cfg_size > -1)
+        p->radius = (p->cfg_size / 100.0f) * sqrtf(w * w + h * h);
+    p->radius = av_clip((p->radius+1)&~1, 4, 32);
+    vf_lw_update_graph(vf, "gradfun", "%f:%d", p->cfg_thresh, p->radius);
+}
+
 static int vf_open(vf_instance_t *vf, char *args)
 {
     vf->filter=filter;
@@ -371,6 +386,13 @@ static int vf_open(vf_instance_t *vf, char *args)
 
     if (!have_radius && !have_size)
         vf->priv->cfg_size = 1.0;
+
+    if (vf_lw_set_graph(vf, vf->priv->lw_opts, "gradfun", "%f:4",
+                        vf->priv->cfg_thresh) >= 0)
+    {
+        vf_lw_set_recreate_cb(vf, lavfi_recreate);
+        return 1;
+    }
 
     vf->priv->thresh = (1<<15)/av_clipf(vf->priv->cfg_thresh,0.51,255);
 
@@ -397,6 +419,7 @@ static const m_option_t vf_opts_fields[] = {
     OPT_FLOATRANGE("strength", cfg_thresh, 0, 0.51, 255),
     OPT_INTRANGE("radius", cfg_radius, 0, 4, 32),
     OPT_FLOATRANGE("size", cfg_size, 0, 0.1, 5.0),
+    OPT_SUBSTRUCT("", lw_opts, vf_lw_conf, 0),
     {0}
 };
 

@@ -830,24 +830,24 @@ Available filters are:
         Deprecated. Use libavfilter's ``stereo3d`` filter through ``--vf=lavfi``
         instead.
 
-``gradfun[=strength[:radius]]``
+``gradfun[=strength[:radius|:size=<size>]]``
     Fix the banding artifacts that are sometimes introduced into nearly flat
     regions by truncation to 8bit color depth. Interpolates the gradients that
     should go where the bands are, and dithers them.
 
     ``<strength>``
         Maximum amount by which the filter will change any one pixel. Also the
-        threshold for detecting nearly flat regions (default: 1.2).
+        threshold for detecting nearly flat regions (default: 1.5).
 
     ``<radius>``
         Neighborhood to fit the gradient to. Larger radius makes for smoother
         gradients, but also prevents the filter from modifying pixels near
-        detailed regions (default: 16).
+        detailed regions (default: disabled).
 
-    .. note::
+    ``<size>``
+        size of the filter in percent of the image diagonal size. This is
+        used to calculate the final radius size (default: 1).
 
-        Deprecated. Use libavfilter's ``gradfun`` filter through ``--vf=lavfi``
-        instead.
 
 ``dlopen=dll[:a0[:a1[:a2[:a3]]]]``
     Loads an external library to filter the image. The library interface
