@@ -456,11 +456,6 @@ Available filters are:
         chroma temporal strength (default:
         ``luma_tmp*chroma_spatial/luma_spatial``)
 
-    .. note::
-
-        Deprecated. Use libavfilter's ``hqdn3d`` filter through ``--vf=lavfi``
-        instead.
-
 ``eq[=gamma:contrast:brightness:saturation:rg:gg:bg:weight]``
     Software equalizer that uses lookup tables (slow), allowing gamma correction
     in addition to simple brightness and contrast adjustment. The parameters are

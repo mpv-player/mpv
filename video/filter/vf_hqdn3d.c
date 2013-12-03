@@ -25,9 +25,12 @@
 #include <math.h>
 
 #include "mpvcore/mp_msg.h"
+#include "mpvcore/m_option.h"
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"
+
+#include "vf_lavfi.h"
 
 #define PARAM1_DEFAULT 4.0
 #define PARAM2_DEFAULT 3.0
@@ -39,6 +42,8 @@ struct vf_priv_s {
         int Coefs[4][512*16];
         unsigned int *Line;
 	unsigned short *Frame[3];
+        double strength[4];
+        struct vf_lw_opts *lw_opts;
 };
 
 
@@ -272,93 +277,55 @@ static void PrecalcCoefs(int *Ct, double Dist25)
     Ct[0] = (Dist25 != 0);
 }
 
+#define LUMA_SPATIAL   0
+#define LUMA_TMP       1
+#define CHROMA_SPATIAL 2
+#define CHROMA_TMP     3
 
 static int vf_open(vf_instance_t *vf, char *args){
-        double LumSpac, LumTmp, ChromSpac, ChromTmp;
-        double Param1, Param2, Param3, Param4;
+        struct vf_priv_s *s = vf->priv;
 
 	vf->config=config;
 	vf->filter=filter;
         vf->query_format=query_format;
         vf->uninit=uninit;
-	vf->priv=malloc(sizeof(struct vf_priv_s));
-        memset(vf->priv, 0, sizeof(struct vf_priv_s));
 
-        if (args)
+        if (vf_lw_set_graph(vf, s->lw_opts, "hqdn3d", "%f:%f:%f:%f",
+                            s->strength[0], s->strength[1],
+                            s->strength[2], s->strength[3]) >= 0)
         {
-            switch(sscanf(args, "%lf:%lf:%lf:%lf",
-                          &Param1, &Param2, &Param3, &Param4
-                         ))
-            {
-            case 0:
-                LumSpac = PARAM1_DEFAULT;
-                LumTmp = PARAM3_DEFAULT;
-
-                ChromSpac = PARAM2_DEFAULT;
-                ChromTmp = LumTmp * ChromSpac / LumSpac;
-                break;
-
-            case 1:
-                LumSpac = Param1;
-                LumTmp = PARAM3_DEFAULT * Param1 / PARAM1_DEFAULT;
-
-                ChromSpac = PARAM2_DEFAULT * Param1 / PARAM1_DEFAULT;
-                ChromTmp = LumTmp * ChromSpac / LumSpac;
-                break;
-
-            case 2:
-                LumSpac = Param1;
-                LumTmp = PARAM3_DEFAULT * Param1 / PARAM1_DEFAULT;
-
-                ChromSpac = Param2;
-                ChromTmp = LumTmp * ChromSpac / LumSpac;
-                break;
-
-            case 3:
-                LumSpac = Param1;
-                LumTmp = Param3;
-
-                ChromSpac = Param2;
-                ChromTmp = LumTmp * ChromSpac / LumSpac;
-                break;
-
-            case 4:
-                LumSpac = Param1;
-                LumTmp = Param3;
-
-                ChromSpac = Param2;
-                ChromTmp = Param4;
-                break;
-
-            default:
-                LumSpac = PARAM1_DEFAULT;
-                LumTmp = PARAM3_DEFAULT;
-
-                ChromSpac = PARAM2_DEFAULT;
-                ChromTmp = LumTmp * ChromSpac / LumSpac;
-            }
-        }
-        else
-        {
-            LumSpac = PARAM1_DEFAULT;
-            LumTmp = PARAM3_DEFAULT;
-
-            ChromSpac = PARAM2_DEFAULT;
-            ChromTmp = LumTmp * ChromSpac / LumSpac;
+            return 1;
         }
 
-        PrecalcCoefs(vf->priv->Coefs[0], LumSpac);
-        PrecalcCoefs(vf->priv->Coefs[1], LumTmp);
-        PrecalcCoefs(vf->priv->Coefs[2], ChromSpac);
-        PrecalcCoefs(vf->priv->Coefs[3], ChromTmp);
+        if (!s->strength[LUMA_SPATIAL])
+            s->strength[LUMA_SPATIAL] = PARAM1_DEFAULT;
+        if (!s->strength[CHROMA_SPATIAL])
+            s->strength[CHROMA_SPATIAL] = PARAM2_DEFAULT * s->strength[LUMA_SPATIAL] / PARAM1_DEFAULT;
+        if (!s->strength[LUMA_TMP])
+            s->strength[LUMA_TMP]   = PARAM3_DEFAULT * s->strength[LUMA_SPATIAL] / PARAM1_DEFAULT;
+        if (!s->strength[CHROMA_TMP])
+            s->strength[CHROMA_TMP] = s->strength[LUMA_TMP] * s->strength[CHROMA_SPATIAL] / s->strength[LUMA_SPATIAL];
+
+        for (int n = 0; n < 4; n++)
+            PrecalcCoefs(vf->priv->Coefs[n], s->strength[n]);
 
 	return 1;
 }
 
+#define OPT_BASE_STRUCT struct vf_priv_s
 const vf_info_t vf_info_hqdn3d = {
     .description = "High Quality 3D Denoiser",
     .name = "hqdn3d",
     .open = vf_open,
+    .priv_size = sizeof(struct vf_priv_s),
+    .options = (const struct m_option[]){
+        OPT_DOUBLE("luma_spatial", strength[0], 0),
+        OPT_DOUBLE("chroma_spatial", strength[1], 0),
+        OPT_DOUBLE("luma_tmp", strength[2], 0),
+        OPT_DOUBLE("chroma_tmp", strength[3], 0),
+        OPT_SUBSTRUCT("", lw_opts, vf_lw_conf, 0),
+        {0}
+    },
 };
 
 //===========================================================================//
