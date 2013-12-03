@@ -701,14 +701,6 @@ Available filters are:
     when inserting yadif with ``--vf``, so using the above methods is
     recommended.
 
-``down3dright[=lines]``
-    Reposition and resize stereoscopic images. Extracts both stereo fields and
-    places them side by side, resizing them to maintain the original movie
-    aspect.
-
-    ``<lines>``
-        number of lines to select from the middle of the image (default: 12)
-
 ``delogo[=x:y:w:h:t:show]``
     Suppresses a TV station logo by a simple interpolation of the surrounding
     pixels. Just set a rectangle covering the logo and watch it disappear (and
