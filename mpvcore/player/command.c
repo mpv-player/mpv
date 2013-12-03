@@ -1165,9 +1165,6 @@ static int mp_property_fullscreen(m_option_t *prop,
 #define VF_DEINTERLACE_LABEL "deinterlace"
 
 static const char *deint_filters[] = {
-#if HAVE_VF_LAVFI
-    "lavfi=yadif",
-#endif
     "yadif",
 #if HAVE_VAAPI_VPP
     "vavpp",

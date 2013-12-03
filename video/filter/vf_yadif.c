@@ -35,6 +35,8 @@
 #include "video/memcpy_pic.h"
 #include "libavutil/common.h"
 
+#include "vf_lavfi.h"
+
 //===========================================================================//
 
 struct vf_priv_s {
@@ -48,6 +50,8 @@ struct vf_priv_s {
     int stride[3];
     uint8_t *ref[4][3];
     int do_deinterlace;
+    // for when using the lavfi wrapper
+    struct vf_lw_opts *lw_opts;
 };
 
 static const struct vf_priv_s vf_priv_default = {
@@ -486,25 +490,25 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
     return 0;
 }
 
-static int control(struct vf_instance *vf, int request, void* data){
-    switch (request){
-      case VFCTRL_GET_DEINTERLACE:
-        *(int*)data = vf->priv->do_deinterlace;
-        return CONTROL_OK;
-      case VFCTRL_SET_DEINTERLACE:
-        vf->priv->do_deinterlace = 2*!!*(int*)data;
-        return CONTROL_OK;
-    }
-    return vf_next_control (vf, request, data);
-}
-
 static int vf_open(vf_instance_t *vf, char *args){
 
     vf->config=config;
     vf->filter_ext=filter_image;
     vf->query_format=query_format;
     vf->uninit=uninit;
-    vf->control=control;
+
+    struct vf_priv_s *p = vf->priv;
+
+    // Earlier libavfilter yadif versions used pure integers for the first
+    // option. We can't/don't handle this, but at least allow usage of the
+    // filter with default settings. So use an empty string for "send_frame".
+    const char *mode[] = {"", "send_field", "send_frame_nospatial",
+                          "send_field_nospatial"};
+
+    if (vf_lw_set_graph(vf, p->lw_opts, "yadif", "%s", mode[p->mode]) >= 0)
+    {
+        return 1;
+    }
 
     vf->priv->parity= -1;
 
@@ -518,8 +522,13 @@ static int vf_open(vf_instance_t *vf, char *args){
 
 #define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
-    OPT_INTRANGE("mode", mode, 0, 0, 3),
-    OPT_INTRANGE("enabled", do_deinterlace, 0, 0, 1),
+    OPT_CHOICE("mode", mode, 0,
+               ({"frame", 0},
+                {"field", 1},
+                {"frame-nospatial", 2},
+                {"field-nospatial", 3})),
+    OPT_FLAG("enabled", do_deinterlace, 0),
+    OPT_SUBSTRUCT("", lw_opts, vf_lw_conf, 0),
     {0}
 };
 

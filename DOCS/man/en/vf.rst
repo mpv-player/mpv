@@ -682,25 +682,28 @@ Available filters are:
     Yet another deinterlacing filter
 
     ``<mode>``
-        :0: Output 1 frame for each frame.
-        :1: Output 1 frame for each field.
-        :2: Like 0 but skips spatial interlacing check.
-        :3: Like 1 but skips spatial interlacing check.
+        :frame: Output 1 frame for each frame.
+        :field: Output 1 frame for each field.
+        :frame-nospatial: Like ``frame`` but skips spatial interlacing check.
+        :field-nospatial: Like ``field`` but skips spatial interlacing check.
 
     ``<enabled>``
         :yes: Filter is active (default).
         :no:  Filter is not active, but can be activated with the ``D`` key
               (or any other key that toggles the ``deinterlace`` property).
 
-    .. note::
-
-        Deprecated. Use libavfilter's ``yadif`` filter through ``--vf=lavfi``
-        instead.
-
-    This filter, or libavfilter's implementation if available, is automatically
-    inserted when using the ``D`` key (or any other key that toggles the
-    ``deinterlace`` property), assuming the video output does not have native
+    This filter, is automatically inserted when using the ``D`` key (or any
+    other key that toggles the ``deinterlace`` property or when using the
+    ``--deinterlace`` switch), assuming the video output does not have native
     deinterlacing support.
+
+    If you just want to set the default mode, put this filter and its options
+    into ``--vf-defaults`` instead, and enable deinterlacing with ``D`` or
+    ``--deinterlace``.
+
+    Also note that the ``D`` key is stupid enough to insert an interlacer twice
+    when inserting yadif with ``--vf``, so using the above methods is
+    recommended.
 
 ``down3dright[=lines]``
     Reposition and resize stereoscopic images. Extracts both stereo fields and
