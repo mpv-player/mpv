@@ -532,11 +532,6 @@ Available filters are:
 ``swapuv``
     Swap U & V plane.
 
-    .. note::
-
-        Deprecated. Use libavfilter's ``swapuv`` filter through ``--vf=lavfi``
-        instead.
-
 ``pullup[=jl:jr:jt:jb:sb:mp]``
     Pulldown reversal (inverse telecine) filter, capable of handling mixed
     hard-telecine, 24000/1001 fps progressive, and 30000/1001 fps progressive
@@ -820,11 +815,6 @@ Available filters are:
             mono output (left eye only)
         ``mr`` or ``mono_right``
             mono output (right eye only)
-
-    .. note::
-
-        Deprecated. Use libavfilter's ``stereo3d`` filter through ``--vf=lavfi``
-        instead.
 
 ``gradfun[=strength[:radius|:size=<size>]]``
     Fix the banding artifacts that are sometimes introduced into nearly flat
