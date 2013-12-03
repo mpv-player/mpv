@@ -32,6 +32,7 @@
 #include "config.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/cpudetect.h"
+#include "mpvcore/m_option.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -74,6 +75,8 @@ typedef struct vf_priv_s {
   unsigned char *buf[3];
 
   int gamma_i, contrast_i, brightness_i, saturation_i;
+
+  double   par[8];
 } vf_eq2_t;
 
 
@@ -450,7 +453,6 @@ void uninit (vf_instance_t *vf)
 {
   if (vf->priv != NULL) {
     free (vf->priv->buf[0]);
-    free (vf->priv);
   }
 }
 
@@ -459,7 +461,7 @@ int vf_open(vf_instance_t *vf, char *args)
 {
   unsigned i;
   vf_eq2_t *eq2;
-  double   par[8];
+  double   *par = vf->priv->par;
 
   vf->control = control;
   vf->query_format = query_format;
@@ -481,29 +483,6 @@ int vf_open(vf_instance_t *vf, char *args)
     eq2->param[i].lut_clean = 0;
   }
 
-  eq2->contrast = 1.0;
-  eq2->brightness = 0.0;
-  eq2->saturation = 1.0;
-
-  eq2->gamma = 1.0;
-  eq2->gamma_weight = 1.0;
-  eq2->rgamma = 1.0;
-  eq2->ggamma = 1.0;
-  eq2->bgamma = 1.0;
-
-  if (args != NULL) {
-    par[0] = 1.0;
-    par[1] = 1.0;
-    par[2] = 0.0;
-    par[3] = 1.0;
-    par[4] = 1.0;
-    par[5] = 1.0;
-    par[6] = 1.0;
-    par[7] = 1.0;
-    sscanf (args, "%lf:%lf:%lf:%lf:%lf:%lf:%lf:%lf",
-      par, par + 1, par + 2, par + 3, par + 4, par + 5, par + 6, par + 7
-    );
-
     eq2->rgamma = par[4];
     eq2->ggamma = par[5];
     eq2->bgamma = par[6];
@@ -517,13 +496,30 @@ int vf_open(vf_instance_t *vf, char *args)
     eq2->brightness_i = (int) (100.0 * vf->priv->brightness);
     set_saturation (eq2, par[3]);
     eq2->saturation_i = (int) (100.0 * vf->priv->saturation) - 100;
-  }
 
   return 1;
 }
 
+#define OPT_BASE_STRUCT struct vf_priv_s
 const vf_info_t vf_info_eq = {
     .description = "Software equalizer",
     .name = "eq",
     .open = &vf_open,
+    .priv_size = sizeof(struct vf_priv_s),
+    .priv_defaults = &(const struct vf_priv_s){
+        .par = {1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0},
+    },
+    .options = (const struct m_option[]){
+#define PARAM(name, n, min_, max_) \
+    OPT_DOUBLE(name, par[n], CONF_RANGE, .min = min_, .max = max_)
+        PARAM("gamma", 0, 0.1, 10),
+        PARAM("contrast", 1, -2, 2),
+        PARAM("brightness", 2, -1, 1),
+        PARAM("saturation", 3, 0, 3),
+        PARAM("rg", 4, 0.1, 10),
+        PARAM("gg", 5, 0.1, 10),
+        PARAM("bg", 6, 0.1, 10),
+        PARAM("weight", 7, 0, 1),
+        {0}
+    },
 };
