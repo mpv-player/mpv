@@ -35,6 +35,8 @@
 #include "libavutil/common.h"
 #include "video/memcpy_pic.h"
 
+#include "vf_lavfi.h"
+
 //==types==//
 typedef enum stereo_code {
     ANAGLYPH_RC_GRAY,   //anaglyph red/cyan gray
@@ -133,6 +135,7 @@ struct vf_priv_s {
     unsigned int width;
     unsigned int height;
     unsigned int row_step;
+    struct vf_lw_opts *lw_opts;
 } const vf_priv_default = {
   {SIDE_BY_SIDE_LR},
   {ANAGLYPH_RC_DUBOIS}
@@ -393,15 +396,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
     return 0;
 }
 
-static int vf_open(vf_instance_t *vf, char *args)
-{
-    vf->config          = config;
-    vf->filter          = filter;
-    vf->query_format    = query_format;
-
-    return 1;
-}
-
 const struct m_opt_choice_alternatives stereo_code_names[] = {
     {"arcg",                             ANAGLYPH_RC_GRAY},
     {"anaglyph_red_cyan_gray",           ANAGLYPH_RC_GRAY},
@@ -454,16 +448,43 @@ const struct m_opt_choice_alternatives stereo_code_names[] = {
     { NULL, 0}
 };
 
+// Fortunately, the short names are the same as the libavfilter port.
+// The long names won't work, though.
+static const char *rev_map_name(int val)
+{
+    for (int n = 0; stereo_code_names[n].name; n++) {
+        if (stereo_code_names[n].value == val)
+            return stereo_code_names[n].name;
+    }
+    return NULL;
+}
+
+static int vf_open(vf_instance_t *vf, char *args)
+{
+    vf->config          = config;
+    vf->filter          = filter;
+    vf->query_format    = query_format;
+
+    if (vf_lw_set_graph(vf, vf->priv->lw_opts, "stereo3d", "%s:%s",
+                        rev_map_name(vf->priv->in.fmt),
+                        rev_map_name(vf->priv->out.fmt)) >= 0)
+    {
+        return 1;
+    }
+
+    return 1;
+}
+
 #define OPT_BASE_STRUCT struct vf_priv_s
 static const m_option_t vf_opts_fields[] = {
     OPT_GENERAL(int, "in", in.fmt, 0, .type = CONF_TYPE_CHOICE,
                 .priv = (void *)stereo_code_names),
     OPT_GENERAL(int, "out", out.fmt, 0, .type = CONF_TYPE_CHOICE,
                 .priv = (void *)stereo_code_names),
+    OPT_SUBSTRUCT("", lw_opts, vf_lw_conf, 0),
     {0}
 };
 
-//==info struct==//
 const vf_info_t vf_info_stereo3d = {
     .description = "stereoscopic 3d view",
     .name = "stereo3d",
