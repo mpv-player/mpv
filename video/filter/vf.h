@@ -34,7 +34,6 @@ typedef struct vf_info {
     const char *description;
     const char *name;
     int (*open)(struct vf_instance *vf, char *args);
-    void *damn_you;
     int priv_size;
     const void *priv_defaults;
     const struct m_option *options;
