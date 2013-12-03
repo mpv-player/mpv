@@ -713,7 +713,7 @@ Available filters are:
     ``<lines>``
         number of lines to select from the middle of the image (default: 12)
 
-``delogo[=x:y:w:h:t]``
+``delogo[=x:y:w:h:t:show]``
     Suppresses a TV station logo by a simple interpolation of the surrounding
     pixels. Just set a rectangle covering the logo and watch it disappear (and
     sometimes something even uglier appear - your mileage may vary).
@@ -730,11 +730,9 @@ Available filters are:
         You can specify a text file to load the coordinates from.  Each line
         must have a timestamp (in seconds, and in ascending order) and the
         ``x:y:w:h:t`` coordinates (``t`` can be omitted).
-
-    .. note::
-
-        Deprecated. Use libavfilter's ``delogo`` or ``removelogo`` filters
-        through ``--vf=lavfi`` instead.
+        (Not supported when using libavfilter.)
+    ``show``
+        Draw a rectangle showing the area defined by x/y/w/h.
 
 ``screenshot``
     Optional filter for screenshot support. This is only needed if the video

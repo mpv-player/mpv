@@ -33,6 +33,7 @@
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "vf.h"
+#include "vf_lavfi.h"
 #include "video/memcpy_pic.h"
 
 #include "mpvcore/m_option.h"
@@ -48,9 +49,10 @@ static struct vf_priv_s {
     } *timed_rect;
     int n_timed_rect;
     int cur_timed_rect;
+    struct vf_lw_opts *lw_opts;
 } const vf_priv_dflt = {
     0,
-    0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 1, 0,
     NULL, NULL, 0, 0,
 };
 
@@ -63,7 +65,6 @@ static struct vf_priv_s {
  */
 static void fix_band(struct vf_priv_s *p)
 {
-    p->show = 0;
     if (p->band < 0) {
         p->band = 4;
         p->show = 1;
@@ -280,9 +281,24 @@ load_error:
 }
 
 static int vf_open(vf_instance_t *vf, char *args){
+    struct vf_priv_s *p = vf->priv;
     vf->config=config;
     vf->filter=filter;
     vf->query_format=query_format;
+
+    int band = p->band;
+    int show = p->show;
+    if (band < 0) {
+        band = 4;
+        show = 1;
+    }
+    if (vf_lw_set_graph(vf, p->lw_opts, "delogo", "%d:%d:%d:%d:%d:%d",
+                        p->xoff, p->yoff, p->lw, p->lh, band, show) >= 0)
+    {
+        if (p->file && p->file[0])
+            mp_msg(MSGT_VFILTER, MSGL_WARN, "delogo: file argument ignored\n");
+        return 1;
+    }
 
     if (vf->priv->file) {
         if (load_timed_rectangles(vf->priv))
@@ -312,6 +328,8 @@ static const m_option_t vf_opts_fields[] = {
     OPT_INT("t", band, 0),
     OPT_INT("band", band, 0), // alias
     OPT_STRING("file", file, 0),
+    OPT_FLAG("show", show, 0),
+    OPT_SUBSTRUCT("", lw_opts, vf_lw_conf, 0),
     {0}
 };
 
