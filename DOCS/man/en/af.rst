@@ -471,7 +471,7 @@ Available filters are:
         This filter can cause distortion with audio signals that have a very
         large dynamic range.
 
-``ladspa=file:label[:controls...]``
+``ladspa=file:label:[<control0>,<control1>,...]``
     Load a LADSPA (Linux Audio Developer's Simple Plugin API) plugin. This
     filter is reentrant, so multiple LADSPA plugins can be used at once.
 
@@ -487,12 +487,21 @@ Available filters are:
         one filter, but others contain many of them. Entering 'help' here
         will list all available filters within the specified library, which
         eliminates the use of 'listplugins' from the LADSPA SDK.
-    ``<controls>``
-        Controls are zero or more floating point values that determine the
-        behavior of the loaded plugin (for example delay, threshold or gain).
+    ``[<control0>,<control1>,...]``
+        Controls are zero or more ``,`` separated floating point values that
+        determine the behavior of the loaded plugin (for example delay,
+        threshold or gain).
         In verbose mode (add ``-v`` to the mpv command line), all
         available controls and their valid ranges are printed. This eliminates
         the use of 'analyseplugin' from the LADSPA SDK.
+        Note that ``,`` is already used by the option parser to separate
+        filters, so you must quote the list of values with ``[...]`` or
+        similar.
+
+    .. admonition:: Example
+
+        ``mpv --af=ladspa='/usr/lib/ladspa/delay.so':delay_5s:[0.5,0.2] media.avi``
+            Does something.
 
 ``karaoke``
     Simple voice removal filter exploiting the fact that voice is usually
