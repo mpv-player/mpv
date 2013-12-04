@@ -506,20 +506,17 @@ const vf_info_t vf_info_eq = {
     .name = "eq",
     .open = &vf_open,
     .priv_size = sizeof(struct vf_priv_s),
-    .priv_defaults = &(const struct vf_priv_s){
-        .par = {1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0},
-    },
     .options = (const struct m_option[]){
-#define PARAM(name, n, min_, max_) \
-    OPT_DOUBLE(name, par[n], CONF_RANGE, .min = min_, .max = max_)
-        PARAM("gamma", 0, 0.1, 10),
-        PARAM("contrast", 1, -2, 2),
-        PARAM("brightness", 2, -1, 1),
-        PARAM("saturation", 3, 0, 3),
-        PARAM("rg", 4, 0.1, 10),
-        PARAM("gg", 5, 0.1, 10),
-        PARAM("bg", 6, 0.1, 10),
-        PARAM("weight", 7, 0, 1),
+#define PARAM(name, n, def, min_, max_) \
+    OPT_DOUBLE(name, par[n], CONF_RANGE, .min = min_, .max = max_, OPTDEF_DOUBLE(def))
+        PARAM("gamma",          0, 1.0, 0.1, 10),
+        PARAM("contrast",       1, 1.0, -2, 2),
+        PARAM("brightness",     2, 0.0, -1, 1),
+        PARAM("saturation",     3, 1.0, 0, 3),
+        PARAM("rg",             4, 1.0, 0.1, 10),
+        PARAM("gg",             5, 1.0, 0.1, 10),
+        PARAM("bg",             6, 1.0, 0.1, 10),
+        PARAM("weight",         7, 1.0, 0, 1),
         {0}
     },
 };
