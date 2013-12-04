@@ -220,21 +220,14 @@ Available filters are:
     audio data. Keep in mind that the filter system might auto-insert actual
     conversion filters before or after this filter if needed.
 
-    All parameters are optional. The ``in-`` variants restrict what the filter
-    accepts as input. The ``out-`` variants change the audio format, without
+    All parameters are optional. The first 3 parameters restrict what the filter
+    accepts as input. The ``out-`` parameters change the audio format, without
     actually doing a conversion. The data will be 'reinterpreted' by the
     filters or audio outputs following this filter.
 
     ``<format>``
         Force conversion to this format. Use ``--af=format=format=help`` to get
-        a list of valid formats. The general form is 'sbe', where 's' denotes
-        the sign (either 's' for signed or 'u' for unsigned), 'b' denotes the
-        number of bits per sample (16, 24 or 32) and 'e' denotes the endian
-        ('le' means little-endian, 'be' big-endian and leaving it away the
-        endianness of the computer mpv is running on). Valid values (amongst
-        others) are: 's16le', 'u32be' and 'u24'. Exceptions to this rule that
-        are also valid format specifiers: u8, s8, floatle, floatbe, float,
-        mpeg2, and ac3.
+        a list of valid formats.
 
     ``<srate>``
         Force conversion to a specific sample rate. The rate is an integer,
