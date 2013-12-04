@@ -321,33 +321,35 @@ static int decode_new_packet(struct dec_audio *da)
     struct demux_packet *mpkt = priv->packet;
     if (!mpkt)
         mpkt = demux_read_packet(da->header);
-    if (!mpkt)
-        return -1;  // error or EOF
 
     priv->packet = talloc_steal(priv, mpkt);
 
-    int in_len = mpkt->len;
+    int in_len = mpkt ? mpkt->len : 0;
 
     AVPacket pkt;
     mp_set_av_packet(&pkt, mpkt, NULL);
 
-    if (mpkt->pts != MP_NOPTS_VALUE) {
+    // If we don't have a PTS yet, use the first packet PTS we can get.
+    if (da->pts == MP_NOPTS_VALUE && mpkt && mpkt->pts != MP_NOPTS_VALUE) {
         da->pts = mpkt->pts;
         da->pts_offset = 0;
     }
+
     int got_frame = 0;
     int ret = avcodec_decode_audio4(avctx, priv->avframe, &got_frame, &pkt);
-    // At least "shorten" decodes sub-frames, instead of the whole packet.
-    // At least "mpc8" can return 0 and wants the packet again next time.
-    if (ret >= 0) {
-        ret = FFMIN(ret, mpkt->len); // sanity check against decoder overreads
-        mpkt->buffer += ret;
-        mpkt->len    -= ret;
-        mpkt->pts = MP_NOPTS_VALUE; // don't reset PTS next time
-    }
-    if (mpkt->len == 0 || ret < 0) {
-        talloc_free(mpkt);
-        priv->packet = NULL;
+    if (mpkt) {
+        // At least "shorten" decodes sub-frames, instead of the whole packet.
+        // At least "mpc8" can return 0 and wants the packet again next time.
+        if (ret >= 0) {
+            ret = FFMIN(ret, mpkt->len); // sanity check against decoder overreads
+            mpkt->buffer += ret;
+            mpkt->len    -= ret;
+            mpkt->pts = MP_NOPTS_VALUE; // don't reset PTS next time
+        }
+        if (mpkt->len == 0 || ret < 0) {
+            talloc_free(mpkt);
+            priv->packet = NULL;
+        }
     }
     // LATM may need many packets to find mux info
     if (ret == AVERROR(EAGAIN))
@@ -357,7 +359,7 @@ static int decode_new_packet(struct dec_audio *da)
         return -1;
     }
     if (!got_frame)
-        return 0;
+        return mpkt ? 0 : -1; // -1: eof
 
     if (setup_format(da) < 0)
         return -1;
@@ -366,6 +368,12 @@ static int decode_new_packet(struct dec_audio *da)
     mp_audio_copy_config(&priv->frame, &da->decoded);
     for (int n = 0; n < priv->frame.num_planes; n++)
         priv->frame.planes[n] = priv->avframe->data[n];
+
+    double out_pts = mp_pts_from_av(priv->avframe->pkt_pts, NULL);
+    if (out_pts != MP_NOPTS_VALUE) {
+        da->pts = out_pts;
+        da->pts_offset = 0;
+    }
 
     mp_dbg(MSGT_DECAUDIO, MSGL_DBG2, "Decoded %d -> %d samples\n", in_len,
            priv->frame.samples);
