@@ -116,7 +116,6 @@ const struct m_obj_list af_obj_list = {
         {"force",     "format"},
         {0}
     },
-    .legacy_hacks = true, // many filters have custom option parsing
 };
 
 static bool af_config_equals(struct mp_audio *a, struct mp_audio *b)
@@ -206,19 +205,13 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
     struct m_config *config = m_config_from_obj_desc(af, &desc);
     if (m_config_apply_defaults(config, name, s->opts->af_defs) < 0)
         goto error;
-    if (m_config_initialize_obj(config, &desc, &af->priv, &args) < 0)
+    if (m_config_set_obj_params(config, args) < 0)
         goto error;
+    af->priv = config->optstruct;
 
     // Initialize the new filter
     if (af->info->open(af) != AF_OK)
         goto error;
-    if (args && af->control) {
-        // Single option string for old filters
-        char *opts = (char *)args; // m_config_initialize_obj did this
-        assert(!af->priv);
-        if (af->control(af, AF_CONTROL_COMMAND_LINE, opts) <= AF_ERROR)
-            goto error;
-    }
 
     return af;
 
