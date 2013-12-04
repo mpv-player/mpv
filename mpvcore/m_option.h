@@ -127,8 +127,6 @@ struct m_obj_list {
     // Allow unknown entries, for which a dummy entry is inserted, and whose
     // options are skipped and ignored.
     bool allow_unknown_entries;
-    // If object has no options set, assume it parses options on its own.
-    bool legacy_hacks;
 };
 
 // Find entry by name

@@ -237,35 +237,11 @@ int m_config_apply_defaults(struct m_config *config, const char *name,
     for (int n = 0; defaults && defaults[n].name; n++) {
         struct m_obj_settings *entry = &defaults[n];
         if (name && strcmp(entry->name, name) == 0) {
-            if (entry->attribs && strcmp(entry->attribs[0], "_oldargs_") == 0) {
-                mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
-                        "Filter '%s' can't take defaults, because it uses "
-                        "custom option parsing.\n", name);
-                return -1;
-            }
             r = m_config_set_obj_params(config, entry->attribs);
             break;
         }
     }
     return r;
-}
-
-int m_config_initialize_obj(struct m_config *config, struct m_obj_desc *desc,
-                            void **ppriv, char ***pargs)
-{
-    if (desc->priv_size) {
-        int r = m_config_set_obj_params(config, *pargs);
-        if (r < 0)
-            return r;
-        *ppriv = config->optstruct;
-        *pargs = NULL;
-    } else if (*pargs && !strcmp((*pargs)[0], "_oldargs_")) {
-        // Handle things which still use the old subopt parser
-        *pargs = (char **)((*pargs)[1]);
-    } else {
-        *pargs = NULL;
-    }
-    return 0;
 }
 
 static void ensure_backup(struct m_config *config, struct m_config_option *co)

@@ -266,27 +266,18 @@ error:
 vf_instance_t *vf_open_filter(struct MPOpts *opts, vf_instance_t *next,
                               const char *name, char **args)
 {
-    if (args && strcmp(args[0], "_oldargs_")) {
+    if (strcmp(name, "vo") != 0) {
         int i, l = 0;
         for (i = 0; args && args[2 * i]; i++)
             l += 1 + strlen(args[2 * i]) + 1 + strlen(args[2 * i + 1]);
         l += strlen(name);
-        {
-            char str[l + 1];
-            char *p = str;
-            p += sprintf(str, "%s", name);
-            for (i = 0; args && args[2 * i]; i++)
-                p += sprintf(p, " %s=%s", args[2 * i], args[2 * i + 1]);
-            mp_msg(MSGT_VFILTER, MSGL_INFO, "%s[%s]\n",
-                   mp_gtext("Opening video filter: "), str);
-        }
-    } else if (strcmp(name, "vo")) {
-        if (args && strcmp(args[0], "_oldargs_") == 0)
-            mp_msg(MSGT_VFILTER, MSGL_INFO, "%s[%s=%s]\n",
-                   mp_gtext("Opening video filter: "), name, args[1]);
-        else
-            mp_msg(MSGT_VFILTER, MSGL_INFO, "%s[%s]\n",
-                   mp_gtext("Opening video filter: "), name);
+        char str[l + 1];
+        char *p = str;
+        p += sprintf(str, "%s", name);
+        for (i = 0; args && args[2 * i]; i++)
+            p += sprintf(p, " %s=%s", args[2 * i], args[2 * i + 1]);
+        mp_msg(MSGT_VFILTER, MSGL_INFO, "%s[%s]\n",
+               "Opening video filter: ", str);
     }
     return vf_open(opts, next, name, args);
 }

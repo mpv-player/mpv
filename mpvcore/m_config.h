@@ -93,11 +93,6 @@ int m_config_set_obj_params(struct m_config *conf, char **args);
 int m_config_apply_defaults(struct m_config *config, const char *name,
                             struct m_obj_settings *defaults);
 
-// Initialize an object (VO/VF/...) in one go, including legacy handling.
-// This is pretty specialized, and is just for convenience.
-int m_config_initialize_obj(struct m_config *config, struct m_obj_desc *desc,
-                            void **ppriv, char ***pargs);
-
 // Make sure the option is backed up. If it's already backed up, do nothing.
 // All backed up options can be restored with m_config_restore_backups().
 void m_config_backup_opt(struct m_config *config, const char *opt);

@@ -2164,11 +2164,8 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
     if (bstr_eatstart0(pstr, "=") || bstr_eatstart0(pstr, ":"))
         has_param = true;
 
-    bool legacy = false;
     bool skip = false;
-    if (m_obj_list_find(&desc, list, str)) {
-        legacy = !desc.priv_size && list->legacy_hacks;
-    } else {
+    if (!m_obj_list_find(&desc, list, str)) {
         if (!list->allow_unknown_entries) {
             mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %.*s: %.*s doesn't exist.\n",
                    BSTR_P(opt), BSTR_P(str));
@@ -2188,38 +2185,15 @@ static int parse_obj_settings(struct bstr opt, struct bstr *pstr,
     }
 
     if (has_param) {
-        if (legacy) {
-            // Should perhaps be parsed as escape-able string. But this is a
-            // compatibility path, so it's not worth the trouble.
-            int next = bstrcspn(*pstr, ",");
-            bstr param = bstr_splice(*pstr, 0, next);
-            *pstr = bstr_cut(*pstr, next);
-            if (!bstrcmp0(param, "help")) {
-                if (desc.print_help) {
-                    desc.print_help();
-                } else {
-                    mp_msg(MSGT_CFGPARSER, MSGL_WARN,
-                           "Option %.*s: %.*s has no option description.\n",
-                           BSTR_P(opt), BSTR_P(str));
-                }
-                return M_OPT_EXIT - 1;
-            }
-            if (_ret) {
-                plist = talloc_zero_array(NULL, char *, 4);
-                plist[0] = talloc_strdup(NULL, "_oldargs_");
-                plist[1] = bstrto0(NULL, param);
-            }
-        } else {
-            struct m_config *config = NULL;
-            if (!skip)
-                config = m_config_from_obj_desc_noalloc(NULL, &desc);
-            r = m_obj_parse_sub_config(opt, str, pstr, config,
-                                       M_SETOPT_CHECK_ONLY, desc.print_help,
-                                       _ret ? &plist : NULL);
-            talloc_free(config);
-            if (r < 0)
-                return r;
-        }
+        struct m_config *config = NULL;
+        if (!skip)
+            config = m_config_from_obj_desc_noalloc(NULL, &desc);
+        r = m_obj_parse_sub_config(opt, str, pstr, config,
+                                   M_SETOPT_CHECK_ONLY, desc.print_help,
+                                   _ret ? &plist : NULL);
+        talloc_free(config);
+        if (r < 0)
+            return r;
     }
     if (!_ret)
         return 1;
@@ -2482,15 +2456,9 @@ static char *print_obj_settings_list(const m_option_t *opt, const void *val)
             for (int i = 0; entry->attribs[i * 2 + 0]; i++) {
                 if (i > 0)
                     res = talloc_strdup_append(res, ":");
-                if (strcmp(entry->attribs[i * 2 + 0], "_oldargs_") == 0) {
-                    // Compatibility crap; write just the arg without escaping,
-                    // and hope it won't crash and burn.
-                    res = talloc_strdup_append(res, entry->attribs[i * 2 + 1]);
-                } else {
-                    append_param(&res, entry->attribs[i * 2 + 0]);
-                    res = talloc_strdup_append(res, "=");
-                    append_param(&res, entry->attribs[i * 2 + 1]);
-                }
+                append_param(&res, entry->attribs[i * 2 + 0]);
+                res = talloc_strdup_append(res, "=");
+                append_param(&res, entry->attribs[i * 2 + 1]);
             }
         }
     }
