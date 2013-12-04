@@ -41,7 +41,7 @@ typedef struct af_center_s
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_center_t* s   = af->setup;
+  af_center_t* s   = af->priv;
 
   switch(cmd){
   case AF_CONTROL_REINIT:{
@@ -54,32 +54,15 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     return af_test_output(af,(struct mp_audio*)arg);
   }
-  case AF_CONTROL_COMMAND_LINE:{
-    int   ch=1;
-    sscanf(arg,"%i", &ch);
-    if((ch >= AF_NCH) || (ch < 0)){
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[sub] Center channel number must be between "
-	     " 0 and %i current value is %i\n", AF_NCH-1, ch);
-      return AF_ERROR;
-    }
-    s->ch = ch;
-    return AF_OK;
-  }
   }
   return AF_UNKNOWN;
-}
-
-// Deallocate memory
-static void uninit(struct af_instance* af)
-{
-    free(af->setup);
 }
 
 // Filter data through filter
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   struct mp_audio*    c   = data;	 // Current working data
-  af_center_t*  s   = af->setup; // Setup for this instance
+  af_center_t*  s   = af->priv; // Setup for this instance
   float*   	a   = c->planes[0];	 // Audio data
   int		nch = c->nch;	 // Number of channels
   int		len = c->samples*c->nch;	 // Number of samples in current audio block
@@ -97,22 +80,20 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
-  af_center_t* s;
   af->control=control;
-  af->uninit=uninit;
   af->play=play;
-  af->setup=s=calloc(1,sizeof(af_center_t));
-  if(af->setup == NULL)
-    return AF_ERROR;
-  // Set default values
-  s->ch = 1;  	 // Channel nr 2
   return AF_OK;
 }
 
-// Description of this filter
+#define OPT_BASE_STRUCT af_center_t
 struct af_info af_info_center = {
     .info = "Audio filter for adding a center channel",
     .name = "center",
     .flags = AF_FLAGS_NOT_REENTRANT,
     .open = af_open,
+    .priv_size = sizeof(af_center_t),
+    .options = (const struct m_option[]) {
+        OPT_INTRANGE("channel", ch, 0, 0, AF_NCH - 1, OPTDEF_INT(1)),
+        {0}
+    },
 };
