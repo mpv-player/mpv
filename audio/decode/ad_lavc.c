@@ -353,10 +353,10 @@ static int decode_new_packet(struct dec_audio *da)
             talloc_free(mpkt);
             priv->packet = NULL;
         }
+        // LATM may need many packets to find mux info
+        if (ret == AVERROR(EAGAIN))
+            return 0;
     }
-    // LATM may need many packets to find mux info
-    if (ret == AVERROR(EAGAIN))
-        return 0;
     if (ret < 0) {
         mp_msg(MSGT_DECAUDIO, MSGL_V, "lavc_audio: error\n");
         return -1;
