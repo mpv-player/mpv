@@ -71,6 +71,7 @@ typedef struct af_hrtf_s {
     /* Cyclic position on the ring buffer */
     int cyc_pos;
     int print_flag;
+    int mode;
 } af_hrtf_t;
 
 /* Convolution on a ring buffer
@@ -286,9 +287,8 @@ static inline void update_ch(af_hrtf_t *s, short *in, const int k)
 /* Initialization and runtime control */
 static int control(struct af_instance *af, int cmd, void* arg)
 {
-    af_hrtf_t *s = af->setup;
+    af_hrtf_t *s = af->priv;
     int test_output_res;
-    char mode;
 
     switch(cmd) {
     case AF_CONTROL_REINIT:
@@ -317,28 +317,6 @@ static int control(struct af_instance *af, int cmd, void* arg)
         mp_audio_set_num_channels(af->data, 2);
 	s->print_flag = 1;
 	return test_output_res;
-    case AF_CONTROL_COMMAND_LINE:
-	sscanf((char*)arg, "%c", &mode);
-	switch(mode) {
-	case 'm':
-	    /* Use matrix rear decoding. */
-	    s->matrix_mode = 1;
-	    break;
-	case 's':
-	    /* Input needs matrix decoding. */
-	    s->decode_mode = HRTF_MIX_MATRIX2CH;
-	    break;
-	case '0':
-	    s->matrix_mode = 0;
-	    break;
-	default:
-	    mp_msg(MSGT_AFILTER, MSGL_ERR,
-		   "[hrtf] Mode is neither 'm', 's', nor '0' (%c).\n",
-		   mode);
-	    return AF_ERROR;
-	}
-	s->print_flag = 1;
-	return AF_OK;
     }
 
     return AF_UNKNOWN;
@@ -347,8 +325,7 @@ static int control(struct af_instance *af, int cmd, void* arg)
 /* Deallocate memory */
 static void uninit(struct af_instance *af)
 {
-    if(af->setup) {
-	af_hrtf_t *s = af->setup;
+	af_hrtf_t *s = af->priv;
 
 	free(s->lf);
 	free(s->rf);
@@ -363,8 +340,6 @@ static void uninit(struct af_instance *af)
 	free(s->fwrbuf_r);
 	free(s->fwrbuf_lr);
 	free(s->fwrbuf_rr);
-	free(af->setup);
-    }
 }
 
 /* Filter data through filter
@@ -380,7 +355,7 @@ damped (without any real 3D acoustical image, however).
 */
 static struct mp_audio* play(struct af_instance *af, struct mp_audio *data)
 {
-    af_hrtf_t *s = af->setup;
+    af_hrtf_t *s = af->priv;
     short *in = data->planes[0]; // Input audio data
     short *out = NULL; // Output audio data
     short *end = in + data->samples * data->nch; // Loop end
@@ -597,11 +572,8 @@ static int af_open(struct af_instance* af)
     af->control = control;
     af->uninit = uninit;
     af->play = play;
-    af->setup = calloc(1, sizeof(af_hrtf_t));
-    if(af->setup == NULL)
-	return AF_ERROR;
 
-    s = af->setup;
+    s = af->priv;
 
     s->dlbuflen = DELAYBUFLEN;
     s->hrflen = HRTFFILTLEN;
@@ -613,6 +585,18 @@ static int af_open(struct af_instance* af)
        channels). */
     s->matrix_mode = 0;
     s->decode_mode = HRTF_MIX_51;
+
+    switch (s->mode) {
+    case 0: /* Use matrix rear decoding. */
+        s->matrix_mode = 1;
+        break;
+    case 1: /* Input needs matrix decoding. */
+        s->decode_mode = HRTF_MIX_MATRIX2CH;
+        break;
+    case 2:
+        s->matrix_mode = 0;
+        break;
+    }
 
     s->print_flag = 1;
 
@@ -652,9 +636,14 @@ static int af_open(struct af_instance* af)
     return AF_OK;
 }
 
-/* Description of this filter */
+#define OPT_BASE_STRUCT af_hrtf_t
 struct af_info af_info_hrtf = {
     .info = "HRTF Headphone",
     .name = "hrtf",
     .open = af_open,
+    .priv_size = sizeof(af_hrtf_t),
+    .options = (const struct m_option[]) {
+        OPT_CHOICE("mode", mode, 0, ({"m", 0}, {"s", 1}, {"0", 2})),
+        {0}
+    },
 };
