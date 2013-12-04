@@ -184,7 +184,7 @@ Available filters are:
             Would amplify the sound in the upper and lower frequency region
             while canceling it almost completely around 1kHz.
 
-``channels=nch[:nr:from1:to1:from2:to2:from3:to3:...]``
+``channels=nch[:routes]``
     Can be used for adding, removing, routing and copying audio channels. If
     only ``<nch>`` is given, the default routing is used. It works as follows:
     If the number of output channels is greater than the number of input
@@ -195,25 +195,32 @@ Available filters are:
 
     ``<nch>``
         number of output channels (1-8)
-    ``<nr>``
-        number of routes (1-8)
-    ``<from1:to1:from2:to2:from3:to3:...>``
-        Pairs of numbers between 0 and 7 that define where to route each
-        channel.
+    ``<routes>``
+        List of ``,`` separated routes, in the form ``from1-to1,from2-to2,...``.
+        Each pair defines where to route each channel. There can be at most
+        8 routes. Without this argument, the default routing is used. Since
+        ``,`` is also used to separate filters, you must quote this argument
+        with ``[...]`` or similar.
 
     .. admonition:: Examples
 
-        ``mpv --af=channels=4:4:0:1:1:0:2:2:3:3 media.avi``
+        ``mpv --af=channels=4:[0-1,1-0,0-2,1-3] media.avi``
             Would change the number of channels to 4 and set up 4 routes that
             swap channel 0 and channel 1 and leave channel 2 and 3 intact.
             Observe that if media containing two channels were played back,
             channels 2 and 3 would contain silence but 0 and 1 would still be
             swapped.
 
-        ``mpv --af=channels=6:4:0:0:0:1:0:2:0:3 media.avi``
+        ``mpv --af=channels=6:[0-0,0-1,0-2,0-3] media.avi``
             Would change the number of channels to 6 and set up 4 routes that
             copy channel 0 to channels 0 to 3. Channel 4 and 5 will contain
             silence.
+
+    .. note::
+
+        You should probably not use this filter. If you want to change the
+        output channel layout, try the ``format`` filter, which can make mpv
+        automatically up- and downmix standard channel layouts.
 
 ``format=format:srate:channels:out-format:out-srate:out-channels``
     Force a specific audio format/configuration without actually changing the

@@ -35,8 +35,9 @@
 
 typedef struct af_channels_s{
   int route[AF_NCH][2];
-  int nr;
+  int nch, nr;
   int router;
+  char *routes;
 }af_channels_t;
 
 // Local function for copying data
@@ -138,9 +139,11 @@ static int check_routes(af_channels_t* s, int nin, int nout)
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_channels_t* s = af->setup;
+  af_channels_t* s = af->priv;
   switch(cmd){
   case AF_CONTROL_REINIT:
+
+    mp_audio_set_channels_old(af->data, s->nch);
 
     // Set default channel assignment
     if(!s->router){
@@ -167,60 +170,11 @@ static int control(struct af_instance* af, int cmd, void* arg)
     }
 
     af->data->rate   = ((struct mp_audio*)arg)->rate;
+    mp_audio_force_interleaved_format((struct mp_audio*)arg);
     mp_audio_set_format(af->data, ((struct mp_audio*)arg)->format);
-    mp_audio_force_interleaved_format(af->data);
-    int r = af_test_output(af,(struct mp_audio*)arg);
-    if (r != AF_OK)
-        return r;
     return check_routes(s,((struct mp_audio*)arg)->nch,af->data->nch);
-  case AF_CONTROL_COMMAND_LINE:{
-    int nch = 0;
-    int n = 0;
-    // Check number of channels and number of routing pairs
-    sscanf(arg, "%i:%i%n", &nch, &s->nr, &n);
-
-    // If router scan commandline for routing pairs
-    if(s->nr){
-      char* cp = &((char*)arg)[n];
-      int ch = 0;
-      // Sanity check
-      if((s->nr < 1) || (s->nr > AF_NCH)){
-	mp_msg(MSGT_AFILTER, MSGL_ERR, "[channels] The number of routing pairs must be"
-	     " between 1 and %i. Current value is %i\n",AF_NCH,s->nr);
-      }
-      s->router = 1;
-      // Scan for pairs on commandline
-      while((*cp == ':') && (ch < s->nr)){
-	sscanf(cp, ":%i:%i%n" ,&s->route[ch][FR], &s->route[ch][TO], &n);
-	mp_msg(MSGT_AFILTER, MSGL_V, "[channels] Routing from channel %i to"
-	       " channel %i\n",s->route[ch][FR],s->route[ch][TO]);
-	cp = &cp[n];
-	ch++;
-      }
-    }
-
-    struct mp_chmap chmap;
-    mp_chmap_from_channels(&chmap, nch);
-    if (AF_OK != af->control(af, AF_CONTROL_SET_CHANNELS, &chmap))
-      return AF_ERROR;
-    return AF_OK;
-  }
-  case AF_CONTROL_SET_CHANNELS:
-    // Reinit must be called after this function has been called
-
-    mp_audio_set_channels(af->data, (struct mp_chmap *)arg);
-    if(!s->router)
-      mp_msg(MSGT_AFILTER, MSGL_V, "[channels] Changing number of channels"
-	     " to %i\n",af->data->nch);
-    return AF_OK;
   }
   return AF_UNKNOWN;
-}
-
-// Deallocate memory
-static void uninit(struct af_instance* af)
-{
-  free(af->setup);
 }
 
 // Filter data through filter
@@ -228,7 +182,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   struct mp_audio*   	 c = data;			// Current working data
   struct mp_audio*   	 l = af->data;	 		// Local data
-  af_channels_t* s = af->setup;
+  af_channels_t* s = af->priv;
   int 		 i;
 
   mp_audio_realloc_min(af->data, data->samples);
@@ -243,7 +197,6 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 
   // Set output data
   c->planes[0] = l->planes[0];
-  c->samples   = c->samples / c->nch * l->nch;
   mp_audio_set_channels(c, &l->channels);
 
   return c;
@@ -251,18 +204,45 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
-  af->control=control;
-  af->uninit=uninit;
-  af->play=play;
-  af->setup=calloc(1,sizeof(af_channels_t));
-  if(af->setup == NULL)
-    return AF_ERROR;
-  return AF_OK;
+    af->control=control;
+    af->play=play;
+    af_channels_t *s = af->priv;
+
+    // If router scan commandline for routing pairs
+    if(s->routes && s->routes[0]){
+        char* cp = s->routes;
+        int ch = 0;
+        // Scan for pairs on commandline
+        do {
+            int n = 0;
+            if (ch >= AF_NCH) {
+                mp_msg(MSGT_AFILTER, MSGL_FATAL,
+                       "[channels] Can't have more than %d routes.\n", AF_NCH);
+                return AF_ERROR;
+            }
+            sscanf(cp, "%i-%i%n" ,&s->route[ch][FR], &s->route[ch][TO], &n);
+            mp_msg(MSGT_AFILTER, MSGL_V, "[channels] Routing from channel %i to"
+                " channel %i\n",s->route[ch][FR],s->route[ch][TO]);
+            cp = &cp[n];
+            ch++;
+        } while(*cp == ',' && *(cp++));
+        s->nr = ch;
+        if (s->nr > 0)
+            s->router = 1;
+    }
+
+    return AF_OK;
 }
 
-// Description of this filter
+#define OPT_BASE_STRUCT af_channels_t
 struct af_info af_info_channels = {
-  .info = "Insert or remove channels",
-  .name = "channels",
-  .open = af_open,
+    .info = "Insert or remove channels",
+    .name = "channels",
+    .open = af_open,
+    .priv_size = sizeof(af_channels_t),
+    .options = (const struct m_option[]) {
+        OPT_INTRANGE("nch", nch, 0, 1, AF_NCH, OPTDEF_INT(2)),
+        OPT_STRING("routes", routes, 0),
+        {0}
+    },
 };
