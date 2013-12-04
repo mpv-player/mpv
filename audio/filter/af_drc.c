@@ -81,8 +81,6 @@ typedef struct af_volume_s
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_drc_t* s   = (af_drc_t*)af->setup;
-
   switch(cmd){
   case AF_CONTROL_REINIT:
     // Sanity check
@@ -95,25 +93,8 @@ static int control(struct af_instance* af, int cmd, void* arg)
       mp_audio_set_format(af->data, AF_FORMAT_FLOAT);
     }
     return af_test_output(af,(struct mp_audio*)arg);
-  case AF_CONTROL_COMMAND_LINE:{
-    int   i = 0;
-    float target = DEFAULT_TARGET;
-    sscanf((char*)arg,"%d:%f", &i, &target);
-    if (i != 1 && i != 2)
-	return AF_ERROR;
-    s->method = i-1;
-    s->mid_s16 = ((float)SHRT_MAX) * target;
-    s->mid_float = target;
-    return AF_OK;
-  }
   }
   return AF_UNKNOWN;
-}
-
-// Deallocate memory
-static void uninit(struct af_instance* af)
-{
-    free(af->setup);
 }
 
 static void method1_int16(af_drc_t *s, struct mp_audio *c)
@@ -294,18 +275,18 @@ static void method2_float(af_drc_t *s, struct mp_audio *c)
 // Filter data through filter
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
-  af_drc_t *s = af->setup;
+  af_drc_t *s = af->priv;
 
   if(af->data->format == (AF_FORMAT_S16))
   {
-    if (s->method)
+    if (s->method == 2)
 	method2_int16(s, data);
     else
 	method1_int16(s, data);
   }
   else if(af->data->format == (AF_FORMAT_FLOAT))
   {
-    if (s->method)
+    if (s->method == 2)
 	method2_float(s, data);
     else
 	method1_float(s, data);
@@ -317,29 +298,31 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 static int af_open(struct af_instance* af){
   int i = 0;
   af->control=control;
-  af->uninit=uninit;
   af->play=play;
-  af->setup=calloc(1,sizeof(af_drc_t));
-  if(af->setup == NULL)
-    return AF_ERROR;
+  af_drc_t *priv = af->priv;
 
-  ((af_drc_t*)af->setup)->mul = MUL_INIT;
-  ((af_drc_t*)af->setup)->lastavg = ((float)SHRT_MAX) * DEFAULT_TARGET;
-  ((af_drc_t*)af->setup)->idx = 0;
-  ((af_drc_t*)af->setup)->mid_s16 = ((float)SHRT_MAX) * DEFAULT_TARGET;
-  ((af_drc_t*)af->setup)->mid_float = DEFAULT_TARGET;
+  priv->mul = MUL_INIT;
+  priv->lastavg = ((float)SHRT_MAX) * DEFAULT_TARGET;
+  priv->idx = 0;
   for (i = 0; i < NSAMPLES; i++)
   {
-     ((af_drc_t*)af->setup)->mem[i].len = 0;
-     ((af_drc_t*)af->setup)->mem[i].avg = 0;
+     priv->mem[i].len = 0;
+     priv->mem[i].avg = 0;
   }
+  priv->mid_s16 = ((float)SHRT_MAX) * priv->mid_float;
   return AF_OK;
 }
 
-// Description of this filter
+#define OPT_BASE_STRUCT af_drc_t
 struct af_info af_info_drc = {
     .info = "Dynamic range compression filter",
     .name = "drc",
     .flags = AF_FLAGS_NOT_REENTRANT,
     .open = af_open,
+    .priv_size = sizeof(af_drc_t),
+    .options = (const struct m_option[]) {
+        OPT_INTRANGE("method", method, 0, 1, 2, OPTDEF_INT(1)),
+        OPT_FLOAT("target", mid_float, 0, OPTDEF_FLOAT(DEFAULT_TARGET)),
+        {0}
+    },
 };
