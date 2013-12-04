@@ -141,9 +141,11 @@ static int control(struct af_instance* af, int cmd, void* arg)
 {
   af_channels_t* s = af->priv;
   switch(cmd){
-  case AF_CONTROL_REINIT:
+  case AF_CONTROL_REINIT: ;
 
-    mp_audio_set_channels_old(af->data, s->nch);
+    struct mp_chmap chmap;
+    mp_chmap_set_unknown(&chmap, s->nch);
+    mp_audio_set_channels(af->data, &chmap);
 
     // Set default channel assignment
     if(!s->router){
