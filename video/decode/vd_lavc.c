@@ -49,7 +49,6 @@
 #include "video/decode/dec_video.h"
 #include "demux/stheader.h"
 #include "demux/packet.h"
-#include "osdep/numcores.h"
 #include "video/csputils.h"
 
 #include "lavc.h"
@@ -393,9 +392,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     avctx->codec_type = AVMEDIA_TYPE_VIDEO;
     avctx->codec_id = lavc_codec->id;
 
-    avctx->thread_count = lavc_param->threads;
-
-
 #if HAVE_AVUTIL_REFCOUNTING
     avctx->refcounted_frames = 1;
     ctx->pic = av_frame_alloc();
@@ -420,17 +416,7 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
             avctx->release_buffer  = mp_codec_release_buffer;
         }
 #endif
-    }
-
-    if (avctx->thread_count == 0) {
-        int threads = default_thread_count();
-        if (threads < 1) {
-            mp_msg(MSGT_DECVIDEO, MSGL_WARN, "[VD_FFMPEG] Could not determine "
-                   "thread count to use, defaulting to 1.\n");
-            threads = 1;
-        }
-        threads = FFMIN(threads, 16);
-        avctx->thread_count = threads;
+        mp_set_avcodec_threads(avctx, lavc_param->threads);
     }
 
     avctx->flags |= lavc_param->bitexact;

@@ -21,9 +21,12 @@
 #include <libavcodec/avcodec.h>
 
 #include "mpvcore/mp_common.h"
+#include "mpvcore/mp_msg.h"
 #include "demux/packet.h"
 #include "av_common.h"
 #include "codecs.h"
+
+#include "osdep/numcores.h"
 
 
 // Copy the codec-related fields from st into avctx. This does not set the
@@ -112,6 +115,22 @@ void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt, AVRational *tb)
         dst->duration = mpkt->duration / av_q2d(*tb);
     dst->pts = mp_pts_to_av(mpkt ? mpkt->pts : MP_NOPTS_VALUE, tb);
     dst->dts = mp_pts_to_av(mpkt ? mpkt->dts : MP_NOPTS_VALUE, tb);
+}
+
+void mp_set_avcodec_threads(AVCodecContext *avctx, int threads)
+{
+    if (threads == 0) {
+        threads = default_thread_count();
+        if (threads < 1) {
+            mp_msg(MSGT_GLOBAL, MSGL_WARN, "Could not determine "
+                   "thread count to use, defaulting to 1.\n");
+            threads = 1;
+        }
+        // Apparently some libavcodec versions have or had trouble with more
+        // than 16 threads, and/or print a warning when using > 16.
+        threads = MPMIN(threads, 16);
+    }
+    avctx->thread_count = threads;
 }
 
 void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)
