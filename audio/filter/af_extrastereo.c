@@ -41,8 +41,6 @@ static struct mp_audio* play_float(struct af_instance* af, struct mp_audio* data
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_extrastereo_t* s   = (af_extrastereo_t*)af->setup;
-
   switch(cmd){
   case AF_CONTROL_REINIT:{
     // Sanity check
@@ -62,26 +60,14 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     return af_test_output(af,(struct mp_audio*)arg);
   }
-  case AF_CONTROL_COMMAND_LINE:{
-    float f;
-    sscanf((char*)arg,"%f", &f);
-    s->mul = f;
-    return AF_OK;
-  }
   }
   return AF_UNKNOWN;
-}
-
-// Deallocate memory
-static void uninit(struct af_instance* af)
-{
-    free(af->setup);
 }
 
 // Filter data through filter
 static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data)
 {
-  af_extrastereo_t *s = af->setup;
+  af_extrastereo_t *s = af->priv;
   register int i = 0;
   int16_t *a = (int16_t*)data->planes[0];	// Audio data
   int len = data->samples*data->nch;		// Number of samples
@@ -103,7 +89,7 @@ static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data)
 
 static struct mp_audio* play_float(struct af_instance* af, struct mp_audio* data)
 {
-  af_extrastereo_t *s = af->setup;
+  af_extrastereo_t *s = af->priv;
   register int i = 0;
   float *a = (float*)data->planes[0];	// Audio data
   int len = data->samples * data->nch;	// Number of samples
@@ -126,20 +112,20 @@ static struct mp_audio* play_float(struct af_instance* af, struct mp_audio* data
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->uninit=uninit;
   af->play=play_s16;
-  af->setup=calloc(1,sizeof(af_extrastereo_t));
-  if(af->setup == NULL)
-    return AF_ERROR;
 
-  ((af_extrastereo_t*)af->setup)->mul = 2.5;
   return AF_OK;
 }
 
-// Description of this filter
+#define OPT_BASE_STRUCT af_extrastereo_t
 struct af_info af_info_extrastereo = {
     .info = "Increase difference between audio channels",
     .name = "extrastereo",
     .flags = AF_FLAGS_NOT_REENTRANT,
     .open = af_open,
+    .priv_size = sizeof(af_extrastereo_t),
+    .options = (const struct m_option[]) {
+        OPT_FLOAT("mul", mul, 0, OPTDEF_FLOAT(2.5)),
+        {0}
+    },
 };
