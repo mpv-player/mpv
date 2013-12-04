@@ -71,7 +71,7 @@ typedef struct af_export_s
 */
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_export_t* s = af->setup;
+  af_export_t* s = af->priv;
   switch (cmd){
   case AF_CONTROL_REINIT:{
     int i=0;
@@ -91,10 +91,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
     // Accept only int16_t as input format (which sucks)
     mp_audio_copy_config(af->data, (struct mp_audio*)arg);
     mp_audio_set_format(af->data, AF_FORMAT_S16);
-
-    // If buffer length isn't set, set it to the default value
-    if(s->sz == 0)
-      s->sz = DEF_SZ;
 
     // Allocate new buffers (as one continuous block)
     s->buf[0] = calloc(s->sz*af->data->nch, af->data->bps);
@@ -141,35 +137,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
     // Use test_output to return FALSE if necessary
     return af_test_output(af, (struct mp_audio*)arg);
   }
-  case AF_CONTROL_COMMAND_LINE:{
-    int i=0;
-    char *str = arg;
-
-    if (!str){
-      talloc_free(s->filename);
-
-      s->filename = mp_find_user_config_file(SHARED_FILE);
-      return AF_OK;
-    }
-
-    while((str[i]) && (str[i] != ':'))
-      i++;
-
-    talloc_free(s->filename);
-
-    s->filename = talloc_array_size(NULL, 1, i + 1);
-    memcpy(s->filename, str, i);
-    s->filename[i] = 0;
-
-    sscanf(str + i + 1, "%d", &(s->sz));
-
-    if((s->sz <= 0) || (s->sz > 2048))
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[export] Buffer size must be between"
-	      " 1 and 2048\n" );
-
-    return AF_OK;
-
-  }
   }
   return AF_UNKNOWN;
 }
@@ -179,8 +146,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 */
 static void uninit( struct af_instance* af )
 {
-  if(af->setup){
-    af_export_t* s = af->setup;
+    af_export_t* s = af->priv;
     if (s->buf)
       free(s->buf[0]);
 
@@ -190,12 +156,6 @@ static void uninit( struct af_instance* af )
 
     if(s->fd > -1)
       close(s->fd);
-
-    talloc_free(s->filename);
-
-    free(af->setup);
-    af->setup = NULL;
-  }
 }
 
 /* Filter data through filter
@@ -205,7 +165,7 @@ static void uninit( struct af_instance* af )
 static struct mp_audio* play( struct af_instance* af, struct mp_audio* data )
 {
   struct mp_audio*   	c   = data;	     // Current working data
-  af_export_t* 	s   = af->setup;     // Setup for this instance
+  af_export_t* 	s   = af->priv;     // Setup for this instance
   int16_t* 	a   = c->planes[0];	     // Incomming sound
   int 		nch = c->nch;	     // Number of channels
   int		len = c->samples*c->nch; // Number of sample in data chunk
@@ -252,18 +212,26 @@ static int af_open( struct af_instance* af )
   af->control = control;
   af->uninit  = uninit;
   af->play    = play;
-  af->setup   = calloc(1, sizeof(af_export_t));
-  if(af->setup == NULL)
-    return AF_ERROR;
+  af_export_t *priv = af->priv;
 
-  ((af_export_t *)af->setup)->filename = mp_find_user_config_file(SHARED_FILE);
+  if (!priv->filename || !priv->filename[0])
+      priv->filename = mp_find_user_config_file(SHARED_FILE);
+
+  if (!priv->filename || !priv->filename[0])
+      return AF_ERROR;
 
   return AF_OK;
 }
 
-// Description of this filter
+#define OPT_BASE_STRUCT af_export_t
 struct af_info af_info_export = {
     .info = "Sound export filter",
     .name = "export",
     .open = af_open,
+    .priv_size = sizeof(af_export_t),
+    .options = (const struct m_option[]) {
+        OPT_STRING("filename", filename, 0),
+        OPT_INTRANGE("buffersamples", sz, 0, 1, 2048, OPTDEF_INT(DEF_SZ)),
+        {0}
+    },
 };
