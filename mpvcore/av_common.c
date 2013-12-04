@@ -63,16 +63,40 @@ void mp_copy_lav_codec_headers(AVCodecContext *avctx, AVCodecContext *st)
 // We merely pass-through our PTS/DTS as an int64_t; libavcodec won't use it.
 union pts { int64_t i; double d; };
 
-// Set dst from mpkt. Note that dst is not refcountable.
-// mpkt can be NULL to generate empty packets (used to flush delayed data).
-// Sets pts/dts to reinterpret-casted mpv values - these are useful for
-// reading back via mp_get_av_frame_pkt_pdts(), but they will be non-sense for
-// libavcodec itself. (And normally, libavcodec won't interpret them.)
-// Does not set duration field.
-void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt)
+// Convert the mpv style timestamp (seconds as double) to a libavcodec style
+// timestamp (integer units in a given timebase).
+//
+// If the given timebase is NULL or invalid, pass through the mpv timestamp by
+// reinterpret casting them to int64_t. In this case, the timestamps will be
+// non-sense for libavcodec, but we expect that it doesn't interpret them,
+// and treats them as opaque.
+int64_t mp_pts_to_av(double mp_pts, AVRational *tb)
 {
     assert(sizeof(int64_t) >= sizeof(double));
+    if (tb && tb->num > 0 && tb->den > 0)
+        return mp_pts == MP_NOPTS_VALUE ? AV_NOPTS_VALUE : mp_pts / av_q2d(*tb);
+    // The + 0.0 is to squash possible negative zero mp_pts, which would
+    // happen to end up as AV_NOPTS_VALUE.
+    return (union pts){.d = mp_pts + 0.0}.i;
+}
 
+// Inverse of mp_pts_to_av(). (The timebases must be exactly the same.)
+double mp_pts_from_av(int64_t av_pts, AVRational *tb)
+{
+    assert(sizeof(int64_t) >= sizeof(double));
+    if (tb && tb->num > 0 && tb->den > 0)
+        return av_pts == AV_NOPTS_VALUE ? MP_NOPTS_VALUE : av_pts * av_q2d(*tb);
+    // Should libavcodec set the PTS to AV_NOPTS_VALUE, it would end up as
+    // non-sense (usually negative zero) when unwrapped to double.
+    return av_pts == AV_NOPTS_VALUE ? MP_NOPTS_VALUE : (union pts){.i = av_pts}.d;
+}
+
+// Set dst from mpkt. Note that dst is not refcountable.
+// mpkt can be NULL to generate empty packets (used to flush delayed data).
+// Sets pts/dts using mp_pts_to_av(ts, tb). (Be aware of the implications.)
+// Set duration field only if tb is set.
+void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt, AVRational *tb)
+{
     av_init_packet(dst);
     dst->data = mpkt ? mpkt->buffer : NULL;
     dst->size = mpkt ? mpkt->len : 0;
@@ -84,17 +108,10 @@ void mp_set_av_packet(AVPacket *dst, struct demux_packet *mpkt)
         dst->side_data = mpkt->avpacket->side_data;
         dst->side_data_elems = mpkt->avpacket->side_data_elems;
     }
-    dst->pts = (union pts){.d = mpkt ? mpkt->pts : MP_NOPTS_VALUE}.i;
-    dst->dts = (union pts){.d = mpkt ? mpkt->dts : MP_NOPTS_VALUE}.i;
-}
-
-// Return the pts/dts from a frame returned by libavcodec. Note that this
-// assumes libavcodec was fed a packet setup with mp_set_av_packet()! If not,
-// the timestamps might contain garbage.
-void mp_get_av_frame_pkt_ts(AVFrame *frame, double *out_pts, double *out_dts)
-{
-    *out_pts = (union pts){.i = frame->pkt_pts}.d;
-    *out_dts = (union pts){.i = frame->pkt_dts}.d;
+    if (mpkt && tb && tb->num > 0 && tb->den > 0)
+        dst->duration = mpkt->duration / av_q2d(*tb);
+    dst->pts = mp_pts_to_av(mpkt ? mpkt->pts : MP_NOPTS_VALUE, tb);
+    dst->dts = mp_pts_to_av(mpkt ? mpkt->dts : MP_NOPTS_VALUE, tb);
 }
 
 void mp_add_lavc_decoders(struct mp_decoder_list *list, enum AVMediaType type)

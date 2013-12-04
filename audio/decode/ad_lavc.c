@@ -329,7 +329,7 @@ static int decode_new_packet(struct dec_audio *da)
     int in_len = mpkt->len;
 
     AVPacket pkt;
-    mp_set_av_packet(&pkt, mpkt);
+    mp_set_av_packet(&pkt, mpkt, NULL);
 
     if (mpkt->pts != MP_NOPTS_VALUE) {
         da->pts = mpkt->pts;

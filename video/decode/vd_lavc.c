@@ -744,7 +744,7 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
     else
         avctx->skip_frame = ctx->skip_frame;
 
-    mp_set_av_packet(&pkt, packet);
+    mp_set_av_packet(&pkt, packet, NULL);
 
     ret = avcodec_decode_video2(avctx, ctx->pic, &got_picture, &pkt);
     if (ret < 0) {
@@ -757,7 +757,8 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
         return 0;
 
     update_image_params(vd, ctx->pic);
-    mp_get_av_frame_pkt_ts(ctx->pic, &vd->codec_pts, &vd->codec_dts);
+    vd->codec_pts = mp_pts_from_av(ctx->pic->pkt_pts, NULL);
+    vd->codec_dts = mp_pts_from_av(ctx->pic->pkt_dts, NULL);
 
     // Note: potentially resets ctx->pic as it is transferred to mpi
     struct mp_image *mpi = image_from_decoder(vd);

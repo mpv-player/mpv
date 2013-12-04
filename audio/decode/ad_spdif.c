@@ -202,7 +202,7 @@ static int decode_audio(struct dec_audio *da, struct mp_audio *buffer, int maxle
         return -1;
 
     AVPacket pkt;
-    mp_set_av_packet(&pkt, mpkt);
+    mp_set_av_packet(&pkt, mpkt, NULL);
     pkt.pts = pkt.dts = 0;
     mp_msg(MSGT_DECAUDIO, MSGL_V, "spdif packet, size=%d\n", pkt.size);
     if (mpkt->pts != MP_NOPTS_VALUE) {
