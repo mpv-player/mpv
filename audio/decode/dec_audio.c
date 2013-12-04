@@ -270,16 +270,15 @@ static int filter_n_bytes(struct dec_audio *da, struct mp_audio_buffer *outbuf,
     }
 
     // Filter
-    struct mp_audio filter_input;
-    mp_audio_buffer_peek(da->decode_buffer, &filter_input);
-    filter_input.rate = da->afilter->input.rate; // due to playback speed change
-    len = MPMIN(filter_input.samples, len);
-    filter_input.samples = len;
+    struct mp_audio filter_data;
+    mp_audio_buffer_peek(da->decode_buffer, &filter_data);
+    filter_data.rate = da->afilter->input.rate; // due to playback speed change
+    len = MPMIN(filter_data.samples, len);
+    filter_data.samples = len;
 
-    struct mp_audio *filter_output = af_play(da->afilter, &filter_input);
-    if (!filter_output)
+    if (af_filter(da->afilter, &filter_data, 0) < 0)
         return -1;
-    mp_audio_buffer_append(outbuf, filter_output);
+    mp_audio_buffer_append(outbuf, &filter_data);
 
     // remove processed data from decoder buffer:
     mp_audio_buffer_skip(da->decode_buffer, len);

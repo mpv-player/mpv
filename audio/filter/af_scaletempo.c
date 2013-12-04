@@ -211,13 +211,13 @@ static void output_overlap_s16(af_scaletempo_t *s, void *buf_out,
 }
 
 // Filter data through filter
-static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
+static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 {
     af_scaletempo_t *s = af->priv;
 
     if (s->scale == 1.0) {
         af->delay = 0;
-        return data;
+        return 0;
     }
 
     mp_audio_realloc_min(af->data,
@@ -261,7 +261,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 
     data->planes[0] = af->data->planes[0];
     data->samples   = (pout - (int8_t *)af->data->planes[0]) / af->data->sstride;
-    return data;
+    return 0;
 }
 
 // Initialization and runtime control
@@ -458,7 +458,7 @@ static int af_open(struct af_instance *af)
 
     af->control   = control;
     af->uninit    = uninit;
-    af->play      = play;
+    af->filter    = filter;
 
     s->speed_tempo = !!(s->speed_opt & SCALE_TEMPO);
     s->speed_pitch = !!(s->speed_opt & SCALE_PITCH);

@@ -96,16 +96,16 @@ static int control(struct af_instance *af, int cmd, void *arg)
     return AF_UNKNOWN;
 }
 
-static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
+static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 {
     mp_audio_copy_config(data, af->data);
-    return data;
+    return 0;
 }
 
 static int af_open(struct af_instance *af)
 {
     af->control = control;
-    af->play = play;
+    af->filter = filter;
 
     force_in_params(af, af->data);
     force_out_params(af, af->data);

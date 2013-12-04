@@ -49,7 +49,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
+static int filter(struct af_instance* af, struct mp_audio* data, int f)
 {
   af_sweept *s = af->priv;
   int i, j;
@@ -64,12 +64,12 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
       if(2*s->x*s->delta >= 3.141592) s->x=0;
   }
 
-  return data;
+  return 0;
 }
 
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->play=play;
+  af->filter=filter;
   return AF_OK;
 }
 

@@ -206,7 +206,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
     return AF_UNKNOWN;
 }
 
-static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
+static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 {
     struct priv *p = af->priv;
     struct mp_audio *r = af->data;
@@ -231,7 +231,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
 
     if (av_buffersrc_add_frame(p->in, frame) < 0) {
         av_frame_free(&frame);
-        return NULL;
+        return -1;
     }
     av_frame_free(&frame);
 
@@ -270,7 +270,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     }
 
     *data = *r;
-    return data;
+    return 0;
 }
 
 static void uninit(struct af_instance *af)
@@ -282,9 +282,7 @@ static int af_open(struct af_instance *af)
 {
     af->control = control;
     af->uninit = uninit;
-    af->play = play;
-    struct priv *priv = af->priv;
-    af->data = talloc_zero(priv, struct mp_audio),
+    af->filter = filter;
     // Removing this requires fixing AVFrame.data vs. AVFrame.extended_data
     assert(MP_NUM_CHANNELS <= AV_NUM_DATA_POINTERS);
     return AF_OK;

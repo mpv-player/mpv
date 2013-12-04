@@ -37,33 +37,33 @@ struct af_bs2b {
     t_bs2bdp filter;    ///< instance of a library filter
 };
 
-#define PLAY(name, type) \
-static struct mp_audio *play_##name(struct af_instance *af, struct mp_audio *data) \
+#define FILTER(name, type) \
+static int filter_##name(struct af_instance *af, struct mp_audio *data, int f) \
 { \
     /* filter is called for all pairs of samples available in the buffer */ \
     bs2b_cross_feed_##name(((struct af_bs2b*)(af->priv))->filter, \
         (type*)(data->planes[0]), data->samples); \
 \
-    return data; \
+    return 0; \
 }
 
-PLAY(f, float)
-PLAY(fbe, float)
-PLAY(fle, float)
-PLAY(s32be, int32_t)
-PLAY(u32be, uint32_t)
-PLAY(s32le, int32_t)
-PLAY(u32le, uint32_t)
-PLAY(s24be, bs2b_int24_t)
-PLAY(u24be, bs2b_uint24_t)
-PLAY(s24le, bs2b_int24_t)
-PLAY(u24le, bs2b_uint24_t)
-PLAY(s16be, int16_t)
-PLAY(u16be, uint16_t)
-PLAY(s16le, int16_t)
-PLAY(u16le, uint16_t)
-PLAY(s8, int8_t)
-PLAY(u8, uint8_t)
+FILTER(f, float)
+FILTER(fbe, float)
+FILTER(fle, float)
+FILTER(s32be, int32_t)
+FILTER(u32be, uint32_t)
+FILTER(s32le, int32_t)
+FILTER(u32le, uint32_t)
+FILTER(s24be, bs2b_int24_t)
+FILTER(u24be, bs2b_uint24_t)
+FILTER(s24le, bs2b_int24_t)
+FILTER(u24le, bs2b_uint24_t)
+FILTER(s16be, int16_t)
+FILTER(u16be, uint16_t)
+FILTER(s16le, int16_t)
+FILTER(u16le, uint16_t)
+FILTER(s8, int8_t)
+FILTER(u8, uint8_t)
 
 
 /// Initialization and runtime control
@@ -86,55 +86,55 @@ static int control(struct af_instance *af, int cmd, void *arg)
            and assign corresponding handlers */
         switch (format) {
             case AF_FORMAT_FLOAT_BE:
-                af->play = play_fbe;
+                af->filter = filter_fbe;
                 break;
             case AF_FORMAT_FLOAT_LE:
-                af->play = play_fle;
+                af->filter = filter_fle;
                 break;
             case AF_FORMAT_S32_BE:
-                af->play = play_s32be;
+                af->filter = filter_s32be;
                 break;
             case AF_FORMAT_U32_BE:
-                af->play = play_u32be;
+                af->filter = filter_u32be;
                 break;
             case AF_FORMAT_S32_LE:
-                af->play = play_s32le;
+                af->filter = filter_s32le;
                 break;
             case AF_FORMAT_U32_LE:
-                af->play = play_u32le;
+                af->filter = filter_u32le;
                 break;
             case AF_FORMAT_S24_BE:
-                af->play = play_s24be;
+                af->filter = filter_s24be;
                 break;
             case AF_FORMAT_U24_BE:
-                af->play = play_u24be;
+                af->filter = filter_u24be;
                 break;
             case AF_FORMAT_S24_LE:
-                af->play = play_s24le;
+                af->filter = filter_s24le;
                 break;
             case AF_FORMAT_U24_LE:
-                af->play = play_u24le;
+                af->filter = filter_u24le;
                 break;
             case AF_FORMAT_S16_BE:
-                af->play = play_s16be;
+                af->filter = filter_s16be;
                 break;
             case AF_FORMAT_U16_BE:
-                af->play = play_u16be;
+                af->filter = filter_u16be;
                 break;
             case AF_FORMAT_S16_LE:
-                af->play = play_s16le;
+                af->filter = filter_s16le;
                 break;
             case AF_FORMAT_U16_LE:
-                af->play = play_u16le;
+                af->filter = filter_u16le;
                 break;
             case AF_FORMAT_S8:
-                af->play = play_s8;
+                af->filter = filter_s8;
                 break;
             case AF_FORMAT_U8:
-                af->play = play_u8;
+                af->filter = filter_u8;
                 break;
             default:
-                af->play = play_f;
+                af->filter = filter_f;
                 mp_audio_set_format(af->data, AF_FORMAT_FLOAT);
                 break;
         }

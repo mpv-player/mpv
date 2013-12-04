@@ -70,7 +70,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 #define SHIFT(x) (((x)+1)*8)
 #endif
 
-static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
+static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 {
     mp_audio_realloc_min(af->data, data->samples);
 
@@ -98,13 +98,13 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     }
 
     data->planes[0] = out->planes[0];
-    return data;
+    return 0;
 }
 
 static int af_open(struct af_instance *af)
 {
     af->control = control;
-    af->play = play;
+    af->filter = filter;
     return AF_OK;
 }
 

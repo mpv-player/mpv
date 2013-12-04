@@ -353,7 +353,7 @@ frequencies).
 2. A bass compensation is introduced to ensure that 0-200 Hz are not
 damped (without any real 3D acoustical image, however).
 */
-static struct mp_audio* play(struct af_instance *af, struct mp_audio *data)
+static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 {
     af_hrtf_t *s = af->priv;
     short *in = data->planes[0]; // Input audio data
@@ -538,7 +538,7 @@ static struct mp_audio* play(struct af_instance *af, struct mp_audio *data)
     data->planes[0] = af->data->planes[0];
     mp_audio_set_num_channels(data, 2);
 
-    return data;
+    return 0;
 }
 
 static int allocate(af_hrtf_t *s)
@@ -571,7 +571,7 @@ static int af_open(struct af_instance* af)
 
     af->control = control;
     af->uninit = uninit;
-    af->play = play;
+    af->filter = filter;
 
     s = af->priv;
 

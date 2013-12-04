@@ -97,7 +97,7 @@ static void uninit(struct af_instance* af)
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
+static int filter(struct af_instance* af, struct mp_audio* data, int flags)
 {
   struct mp_audio*   	c   = data;	 // Current working data
   af_delay_t*  	s   = af->priv; // Setup for this instance
@@ -152,14 +152,14 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
     }
   }
   s->ri = ri;
-  return c;
+  return 0;
 }
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
     af->control=control;
     af->uninit=uninit;
-    af->play=play;
+    af->filter=filter;
     af_delay_t *s = af->priv;
     int n = 1;
     int i = 0;

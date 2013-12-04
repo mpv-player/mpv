@@ -564,7 +564,7 @@ static void uninit(struct af_instance *af) {
  * \return      Either AF_ERROR or AF_OK
  */
 
-static struct mp_audio* play(struct af_instance *af, struct mp_audio *data) {
+static int filter(struct af_instance *af, struct mp_audio *data, int flags) {
     af_ladspa_t *setup = af->priv;
     const LADSPA_Descriptor *pdes = setup->plugin_descriptor;
     float *audio = (float*)data->planes[0];
@@ -574,7 +574,7 @@ static struct mp_audio* play(struct af_instance *af, struct mp_audio *data) {
     int i, p;
 
     if (setup->status !=AF_OK)
-        return data;
+        return -1;
 
     /* See if it's the first call. If so, setup inbufs/outbufs, instantiate
      * plugin, connect ports and activate plugin
@@ -720,7 +720,7 @@ static struct mp_audio* play(struct af_instance *af, struct mp_audio *data) {
 
     /* done */
 
-    return data;
+    return 0;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -736,12 +736,12 @@ static int af_open(struct af_instance *af) {
 
     af->control=control;
     af->uninit=uninit;
-    af->play=play;
+    af->filter=filter;
 
     af_ladspa_t *setup = af->priv;
 
     setup->status = AF_ERROR; /* will be set to AF_OK if
-                                                   * all went OK and play()
+                                                   * all went OK and filter()
                                                    * should proceed.
                                                    */
 

@@ -272,8 +272,7 @@ static void method2_float(af_drc_t *s, struct mp_audio *c)
   s->idx = (s->idx + 1) % NSAMPLES;
 }
 
-// Filter data through filter
-static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
+static int filter(struct af_instance* af, struct mp_audio* data, int flags)
 {
   af_drc_t *s = af->priv;
 
@@ -291,14 +290,14 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
     else
 	method1_float(s, data);
   }
-  return data;
+  return 0;
 }
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   int i = 0;
   af->control=control;
-  af->play=play;
+  af->filter=filter;
   af_drc_t *priv = af->priv;
 
   priv->mul = MUL_INIT;

@@ -99,7 +99,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 #endif
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
+static int filter(struct af_instance* af, struct mp_audio* data, int flags)
 {
   struct mp_audio*    c   = data;	 // Current working data
   af_sub_t*  	s   = af->priv; // Setup for this instance
@@ -117,13 +117,13 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
     IIR(x , s->w[1], s->q[1], a[i+ch]);
   }
 
-  return c;
+  return 0;
 }
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->play=play;
+  af->filter=filter;
   return AF_OK;
 }
 

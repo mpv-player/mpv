@@ -41,18 +41,15 @@ static int control(struct af_instance* af, int cmd, void* arg)
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
+static int filter(struct af_instance* af, struct mp_audio* data, int flags)
 {
-  // Do something necessary to get rid of annoying warning during compile
-  if(!af)
-    mp_msg(MSGT_AFILTER, MSGL_ERR, "EEEK: Argument af == NULL in af_dummy.c play().");
-  return data;
+    return 0;
 }
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->play=play;
+  af->filter=filter;
   return AF_OK;
 }
 

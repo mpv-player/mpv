@@ -151,7 +151,7 @@ static void uninit(struct af_instance* af)
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
+static int filter(struct af_instance* af, struct mp_audio* audio, int flags)
 {
     struct mp_audio *out = af->data;
     af_ac3enc_t *s = af->priv;
@@ -188,7 +188,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
         AVFrame *frame = avcodec_alloc_frame();
         if (!frame) {
             mp_msg(MSGT_AFILTER, MSGL_FATAL, "[libaf] Could not allocate memory \n");
-            return NULL;
+            return -1;
         }
         frame->nb_samples = s->in_samples;
         frame->format = s->lavc_actx->sample_fmt;
@@ -202,7 +202,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
         ret = avcodec_encode_audio2(s->lavc_actx, &s->pkt, frame, &ok);
         if (ret < 0 || !ok) {
             mp_msg(MSGT_AFILTER, MSGL_FATAL, "[lavac3enc] Encode failed.\n");
-            return NULL;
+            return -1;
         }
 
         avcodec_free_frame(&frame);
@@ -245,7 +245,7 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
     mp_audio_buffer_append(s->pending, audio);
 
     *audio = *out;
-    return audio;
+    return 0;
 }
 
 static int af_open(struct af_instance* af){
@@ -253,7 +253,7 @@ static int af_open(struct af_instance* af){
     af_ac3enc_t *s = af->priv;
     af->control=control;
     af->uninit=uninit;
-    af->play=play;
+    af->filter=filter;
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");
     if (!s->lavc_acodec) {

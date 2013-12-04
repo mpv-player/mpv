@@ -41,7 +41,7 @@ typedef struct af_sinesuppress_s
     double pos;
 }af_sinesuppress_t;
 
-static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data);
+static int play_s16(struct af_instance* af, struct mp_audio* data, int f);
 //static struct mp_audio* play_float(struct af_instance* af, struct mp_audio* data);
 
 // Initialization and runtime control
@@ -64,7 +64,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 #endif
     {
         mp_audio_set_format(af->data, AF_FORMAT_S16);
-	af->play = play_s16;
+	af->filter = play_s16;
     }
 
     return af_test_output(af,(struct mp_audio*)arg);
@@ -74,7 +74,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 }
 
 // Filter data through filter
-static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data)
+static int play_s16(struct af_instance* af, struct mp_audio* data, int f)
 {
   af_sinesuppress_t *s = af->priv;
   register int i = 0;
@@ -101,7 +101,7 @@ static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data)
 
    mp_msg(MSGT_AFILTER, MSGL_V, "[sinesuppress] f:%8.2f: amp:%8.2f\n", s->freq, sqrt(s->real*s->real + s->imag*s->imag) / s->ref);
 
-  return data;
+  return 0;
 }
 
 #if 0
@@ -131,7 +131,7 @@ static struct mp_audio* play_float(struct af_instance* af, struct mp_audio* data
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->play=play_s16;
+  af->filter=play_s16;
   return AF_OK;
 }
 

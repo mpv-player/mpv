@@ -331,7 +331,7 @@ static void do_reorder(struct mp_audio *mpa, int *reorder)
 }
 #endif
 
-static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
+static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 {
     struct af_resample *s = af->priv;
     struct mp_audio *in   = data;
@@ -354,7 +354,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
             (uint8_t **) out->planes, out->samples * out->sstride, out->samples,
             (uint8_t **) in->planes,  in->samples  * in->sstride,  in->samples);
         if (out->samples < 0)
-            return NULL; // error
+            return -1; // error
     }
 
     *data = *out;
@@ -378,7 +378,7 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
     do_reorder(data, s->reorder_out);
 #endif
 
-    return data;
+    return 0;
 }
 
 static int af_open(struct af_instance *af)
@@ -387,7 +387,7 @@ static int af_open(struct af_instance *af)
 
     af->control = control;
     af->uninit  = uninit;
-    af->play    = play;
+    af->filter  = filter;
 
     if (s->opts.cutoff <= 0.0)
         s->opts.cutoff = af_resample_default_cutoff(s->opts.filter_size);

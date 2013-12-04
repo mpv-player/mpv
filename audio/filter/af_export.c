@@ -162,7 +162,7 @@ static void uninit( struct af_instance* af )
    af audio filter instance
    data audio data
 */
-static struct mp_audio* play( struct af_instance* af, struct mp_audio* data )
+static int filter( struct af_instance* af, struct mp_audio* data, int flags)
 {
   struct mp_audio*   	c   = data;	     // Current working data
   af_export_t* 	s   = af->priv;     // Setup for this instance
@@ -199,8 +199,7 @@ static struct mp_audio* play( struct af_instance* af, struct mp_audio* data )
 	   &(s->count), sizeof(s->count));
   }
 
-  // We don't modify data, just export it
-  return data;
+  return 0;
 }
 
 /* Allocate memory and set function pointers
@@ -211,7 +210,7 @@ static int af_open( struct af_instance* af )
 {
   af->control = control;
   af->uninit  = uninit;
-  af->play    = play;
+  af->filter  = filter;
   af_export_t *priv = af->priv;
 
   if (!priv->filename || !priv->filename[0])

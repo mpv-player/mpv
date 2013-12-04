@@ -142,7 +142,7 @@ static float steering_matrix[][12] = {
 //static int amp_L = 0, amp_R = 0, amp_C = 0, amp_S = 0;
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance* af, struct mp_audio* data){
+static int filter(struct af_instance* af, struct mp_audio* data, int flags){
   af_surround_t* s   = (af_surround_t*)af->priv;
   float*	 m   = steering_matrix[0];
   float*     	 in  = data->planes[0]; 	// Input audio data
@@ -219,12 +219,12 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data){
   data->planes[0] = af->data->planes[0];
   mp_audio_set_channels_old(data, af->data->nch);
 
-  return data;
+  return 0;
 }
 
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->play=play;
+  af->filter=filter;
   return AF_OK;
 }
 

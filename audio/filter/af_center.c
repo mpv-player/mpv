@@ -59,7 +59,7 @@ static int control(struct af_instance* af, int cmd, void* arg)
 }
 
 // Filter data through filter
-static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
+static int filter(struct af_instance* af, struct mp_audio* data, int flags)
 {
   struct mp_audio*    c   = data;	 // Current working data
   af_center_t*  s   = af->priv; // Setup for this instance
@@ -75,13 +75,13 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
     a[i+ch] = (a[i]/2) + (a[i+1]/2);
   }
 
-  return c;
+  return 0;
 }
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->play=play;
+  af->filter=filter;
   return AF_OK;
 }
 

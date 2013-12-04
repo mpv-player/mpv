@@ -165,9 +165,9 @@ static int output_control(struct af_instance* af, int cmd, void* arg)
     return AF_UNKNOWN;
 }
 
-static struct mp_audio *dummy_play(struct af_instance* af, struct mp_audio* data)
+static int dummy_filter(struct af_instance* af, struct mp_audio* data, int f)
 {
-    return data;
+    return 0;
 }
 
 /* Function for creating a new filter of type name.The name may
@@ -592,7 +592,7 @@ struct af_stream *af_new(struct MPOpts *opts)
     *s->first = (struct af_instance) {
         .info = &in,
         .control = input_control,
-        .play = dummy_play,
+        .filter = dummy_filter,
         .priv = s,
         .data = &s->input,
         .mul = 1.0,
@@ -602,7 +602,7 @@ struct af_stream *af_new(struct MPOpts *opts)
     *s->last = (struct af_instance) {
         .info = &out,
         .control = output_control,
-        .play = dummy_play,
+        .filter = dummy_filter,
         .priv = s,
         .data = &s->filter_output,
         .mul = 1.0,
@@ -687,20 +687,22 @@ struct af_instance *af_add(struct af_stream *s, char *name, char **args)
 }
 
 /* Filter data chunk through the filters in the list.
- * Warning: input (audio data and struct fields) will be overwritten. */
-struct mp_audio *af_play(struct af_stream *s, struct mp_audio *data)
+ * On success, *data is set to the filtered data/format.
+ * Warning: input audio data will be overwritten.
+ */
+int af_filter(struct af_stream *s, struct mp_audio *data, int flags)
 {
     struct af_instance *af = s->first;
     assert(mp_audio_config_equals(af->data, data));
     // Iterate through all filters
     while (af) {
-        data = af->play(af, data);
-        if (!data)
-            return NULL;
+        int r = af->filter(af, data, flags);
+        if (r < 0)
+            return r;
         assert(mp_audio_config_equals(af->data, data));
         af = af->next;
     }
-    return data;
+    return 0;
 }
 
 // Calculate average ratio of filter output samples to input samples.

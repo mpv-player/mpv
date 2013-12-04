@@ -99,7 +99,7 @@ static void si2us(void *data, int len, int bps, bool le)
     } while (i += bps);
 }
 
-static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
+static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 {
     int infmt = data->format;
     int outfmt = af->data->format;
@@ -113,13 +113,13 @@ static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
               (outfmt & AF_FORMAT_END_MASK) == AF_FORMAT_LE);
 
     mp_audio_set_format(data, outfmt);
-    return data;
+    return 0;
 }
 
 static int af_open(struct af_instance *af)
 {
     af->control = control;
-    af->play = play;
+    af->filter = filter;
     return AF_OK;
 }
 

@@ -91,19 +91,19 @@ static void filter_plane(struct af_instance *af, void *ptr, int num_samples)
     }
 }
 
-static struct mp_audio *play(struct af_instance *af, struct mp_audio *data)
+static int filter(struct af_instance *af, struct mp_audio *data, int f)
 {
     for (int n = 0; n < data->num_planes; n++)
         filter_plane(af, data->planes[n], data->samples * data->spf);
 
-    return data;
+    return 0;
 }
 
 static int af_open(struct af_instance *af)
 {
     struct priv *s = af->priv;
     af->control = control;
-    af->play = play;
+    af->filter = filter;
     af_from_dB(1, &s->cfg_volume, &s->level, 20.0, -200.0, 60.0);
     return AF_OK;
 }

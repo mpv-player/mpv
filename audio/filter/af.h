@@ -40,6 +40,9 @@ struct af_instance;
 #define AF_FLAGS_REENTRANT      0x00000000
 #define AF_FLAGS_NOT_REENTRANT  0x00000001
 
+// Flags for af->filter()
+#define AF_FILTER_FLAG_EOF 1
+
 /* Audio filter information not specific for current instance, but for
    a specific filter */
 struct af_info {
@@ -58,7 +61,10 @@ struct af_instance {
     const struct af_info *info;
     int (*control)(struct af_instance *af, int cmd, void *arg);
     void (*uninit)(struct af_instance *af);
-    struct mp_audio * (*play)(struct af_instance *af, struct mp_audio *data);
+    /* flags is a bit mask of AF_FILTER_FLAG_* values
+     * returns 0 on success, negative value on error
+     */
+    int (*filter)(struct af_instance *af, struct mp_audio *data, int flags);
     void *priv;
     struct mp_audio *data; // configuration and buffer for outgoing data stream
     struct af_instance *next;
@@ -121,7 +127,7 @@ void af_destroy(struct af_stream *s);
 int af_init(struct af_stream *s);
 void af_uninit(struct af_stream *s);
 struct af_instance *af_add(struct af_stream *s, char *name, char **args);
-struct mp_audio *af_play(struct af_stream *s, struct mp_audio *data);
+int af_filter(struct af_stream *s, struct mp_audio *data, int flags);
 struct af_instance *af_control_any_rev(struct af_stream *s, int cmd, void *arg);
 void af_control_all(struct af_stream *s, int cmd, void *arg);
 
