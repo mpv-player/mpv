@@ -41,22 +41,29 @@ typedef struct af_delay_s
   int 	wi[AF_NCH];  	// Write index
   int 	ri;		// Read index
   float	d[AF_NCH];   	// Delay [ms]
+  char *delaystr;
 }af_delay_t;
 
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_delay_t* s = af->setup;
+  af_delay_t* s = af->priv;
   switch(cmd){
   case AF_CONTROL_REINIT:{
     int i;
+    struct mp_audio *in = arg;
+
+    if (in->bps != 1 && in->bps != 2 && in->bps != 4) {
+      mp_msg(MSGT_AFILTER, MSGL_FATAL, "[delay] Sample format not supported\n");
+      return AF_ERROR;
+    }
 
     // Free prevous delay queues
     for(i=0;i<af->data->nch;i++)
       free(s->q[i]);
 
-    mp_audio_copy_config(af->data, (struct mp_audio*)arg);
-    mp_audio_force_interleaved_format(af->data);
+    mp_audio_force_interleaved_format(in);
+    mp_audio_copy_config(af->data, in);
 
     // Allocate new delay queues
     for(i=0;i<af->data->nch;i++){
@@ -76,19 +83,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
     }
     return AF_OK;
   }
-  case AF_CONTROL_COMMAND_LINE:{
-    int n = 1;
-    int i = 0;
-    char* cl = arg;
-    while(n && i < AF_NCH ){
-      sscanf(cl,"%f:%n",&s->d[i],&n);
-      if(n==0 || cl[n-1] == '\0')
-	break;
-      cl=&cl[n];
-      i++;
-    }
-    return AF_OK;
-  }
   }
   return AF_UNKNOWN;
 }
@@ -99,15 +93,14 @@ static void uninit(struct af_instance* af)
   int i;
 
   for(i=0;i<AF_NCH;i++)
-      free(((af_delay_t*)(af->setup))->q[i]);
-  free(af->setup);
+      free(((af_delay_t*)(af->priv))->q[i]);
 }
 
 // Filter data through filter
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   struct mp_audio*   	c   = data;	 // Current working data
-  af_delay_t*  	s   = af->setup; // Setup for this instance
+  af_delay_t*  	s   = af->priv; // Setup for this instance
   int 		nch = c->nch;	 // Number of channels
   int		len = mp_audio_psize(c)/c->bps; // Number of sample in data chunk
   int		ri  = 0;
@@ -164,18 +157,34 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
-  af->control=control;
-  af->uninit=uninit;
-  af->play=play;
-  af->setup=calloc(1,sizeof(af_delay_t));
-  if(af->setup == NULL)
-    return AF_ERROR;
-  return AF_OK;
+    af->control=control;
+    af->uninit=uninit;
+    af->play=play;
+    af_delay_t *s = af->priv;
+    int n = 1;
+    int i = 0;
+    char* cl = s->delaystr;
+    while(cl && n && i < AF_NCH ){
+      sscanf(cl,"%f%n",&s->d[i],&n);
+      if(n==0 || cl[n-1] == '\0')
+        break;
+      cl=&cl[n];
+      if (*cl != ',')
+          break;
+      cl++;
+      i++;
+    }
+    return AF_OK;
 }
 
-// Description of this filter
+#define OPT_BASE_STRUCT af_delay_t
 struct af_info af_info_delay = {
     .info = "Delay audio filter",
     .name = "delay",
     .open = af_open,
+    .priv_size = sizeof(af_delay_t),
+    .options = (const struct m_option[]) {
+        OPT_STRING("delays", delaystr, 0),
+        {0}
+    },
 };

@@ -390,12 +390,12 @@ Available filters are:
             Would add surround sound decoding with 15ms delay for the sound to
             the rear speakers.
 
-``delay[=ch1:ch2:...]``
+``delay[=[ch1,ch2,...]]``
     Delays the sound to the loudspeakers such that the sound from the
     different channels arrives at the listening position simultaneously. It is
     only useful if you have more than 2 loudspeakers.
 
-    ``ch1,ch2,...``
+    ``[ch1,ch2,...]``
         The delay in ms that should be imposed on each channel (floating point
         number between 0 and 1000).
 
@@ -414,7 +414,7 @@ Available filters are:
 
     .. admonition:: Example
 
-        ``mpv --af=delay=10.5:10.5:0:0:7:0 media.avi``
+        ``mpv --af=delay=[10.5,10.5,0,0,7,0] media.avi``
             Would delay front left and right by 10.5ms, the two rear channels
             and the subwoofer by 0ms and the center channel by 7ms.
 
