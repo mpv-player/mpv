@@ -700,11 +700,13 @@ struct mp_audio *af_play(struct af_stream *s, struct mp_audio *data)
     struct af_instance *af = s->first;
     assert(mp_audio_config_equals(af->data, data));
     // Iterate through all filters
-    do {
+    while (af) {
         data = af->play(af, data);
+        if (!data)
+            return NULL;
         assert(mp_audio_config_equals(af->data, data));
         af = af->next;
-    } while (af && data);
+    }
     return data;
 }
 
