@@ -296,7 +296,7 @@ Available filters are:
             Would amplify the sound by 10.1dB and hard-clip if the sound level
             is too high.
 
-``pan=n[:L00:L01:L02:...L10:L11:L12:...Ln0:Ln1:Ln2:...]``
+``pan=n[:<matrix>]``
     Mixes channels arbitrarily. Basically a combination of the volume and the
     channels filter that can be used to down-mix many channels to only a few,
     e.g. stereo to mono, or vary the "width" of the center speaker in a
@@ -308,19 +308,23 @@ Available filters are:
 
     ``<n>``
         Number of output channels (1-8).
-    ``<Lij>``
-        How much of input channel i is mixed into output channel j (0-1). So
-        in principle you first have n numbers saying what to do with the first
-        input channel, then n numbers that act on the second input channel
-        etc. If you do not specify any numbers for some input channels, 0 is
-        assumed.
+    ``<matrix>``
+        A list of values ``[L00,L01,L02,...,L10,L11,L12,...,Ln0,Ln1,Ln2,...]``,
+        where each element ``Lij`` means how much of input channel i is mixed
+        into output channel j (range 0-1). So in principle you first have n
+        numbers saying what to do with the first input channel, then n numbers
+        that act on the second input channel etc. If you do not specify any
+        numbers for some input channels, 0 is assumed.
+        Note that the values are separated by ``,``, which is already used
+        by the option parser to separate filters. This is why you must quote
+        the value list with ``[...]`` or similar.
 
     .. admonition:: Examples
 
-        ``mpv --af=pan=1:0.5:0.5 media.avi``
+        ``mpv --af=pan=1:[0.5,0.5] media.avi``
             Would downmix from stereo to mono.
 
-        ``mpv --af=pan=3:1:0:0.5:0:1:0.5 media.avi``
+        ``mpv --af=pan=3:[1,0,0.5,0,1,0.5] media.avi``
             Would give 3 channel output leaving channels 0 and 1 intact, and mix
             channels 0 and 1 into output channel 2 (which could be sent to a
             subwoofer for example).

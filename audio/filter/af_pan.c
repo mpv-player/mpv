@@ -33,6 +33,7 @@ typedef struct af_pan_s
 {
   int nch; // Number of output channels; zero means same as input
   float level[AF_NCH][AF_NCH];	// Gain level for each channel
+  char *matrixstr;
 }af_pan_t;
 
 static void set_channels(struct mp_audio *mpa, int num)
@@ -47,7 +48,7 @@ static void set_channels(struct mp_audio *mpa, int num)
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_pan_t* s = af->setup;
+  af_pan_t* s = af->priv;
 
   switch(cmd){
   case AF_CONTROL_REINIT:
@@ -64,32 +65,6 @@ static int control(struct af_instance* af, int cmd, void* arg)
       return AF_FALSE;
     }
     return AF_OK;
-  case AF_CONTROL_COMMAND_LINE:{
-    int   nch = 0;
-    int   n = 0;
-    char* cp = NULL;
-    int   j,k;
-    // Read number of outputs
-    sscanf((char*)arg,"%i%n", &nch,&n);
-    if(AF_OK != control(af,AF_CONTROL_SET_PAN_NOUT, &nch))
-      return AF_ERROR;
-
-    // Read pan values
-    cp = &((char*)arg)[n];
-    j = 0; k = 0;
-    while((*cp == ':') && (k < AF_NCH)){
-      sscanf(cp, ":%f%n" , &s->level[j][k], &n);
-      mp_msg(MSGT_AFILTER, MSGL_V, "[pan] Pan level from channel %i to"
-	     " channel %i = %f\n",k,j,s->level[j][k]);
-      cp =&cp[n];
-      j++;
-      if(j>=nch){
-	j = 0;
-	k++;
-      }
-    }
-    return AF_OK;
-  }
   case AF_CONTROL_SET_PAN_LEVEL:{
     int    i;
     int    ch = ((af_control_ext_t*)arg)->ch;
@@ -132,18 +107,12 @@ static int control(struct af_instance* af, int cmd, void* arg)
   return AF_UNKNOWN;
 }
 
-// Deallocate memory
-static void uninit(struct af_instance* af)
-{
-  free(af->setup);
-}
-
 // Filter data through filter
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   struct mp_audio*    c    = data;		// Current working data
   struct mp_audio*	l    = af->data;	// Local data
-  af_pan_t*  	s    = af->setup; 	// Setup for this instance
+  af_pan_t*  	s    = af->priv; 	// Setup for this instance
   float*   	in   = c->planes[0];	// Input audio data
   float*   	out  = NULL;		// Output audio data
   float*	end  = in+c->samples*c->nch; 	// End of loop
@@ -177,18 +146,45 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
-  af->control=control;
-  af->uninit=uninit;
-  af->play=play;
-  af->setup=calloc(1,sizeof(af_pan_t));
-  if(af->setup == NULL)
-    return AF_ERROR;
-  return AF_OK;
+    af->control=control;
+    af->play=play;
+    af_pan_t *s = af->priv;
+    int   n = 0;
+    int   j,k;
+
+    int nch = s->nch;
+    if(AF_OK != control(af,AF_CONTROL_SET_PAN_NOUT, &nch))
+        return AF_ERROR;
+
+    // Read pan values
+    char *cp = s->matrixstr;
+    j = 0; k = 0;
+    while(k < AF_NCH){
+        sscanf(cp, "%f%n" , &s->level[j][k], &n);
+        mp_msg(MSGT_AFILTER, MSGL_V, "[pan] Pan level from channel %i to"
+                " channel %i = %f\n",k,j,s->level[j][k]);
+        cp =&cp[n];
+        j++;
+        if(j>=nch){
+            j = 0;
+            k++;
+        }
+        if (*cp != ',')
+            break;
+        cp++;
+    }
+    return AF_OK;
 }
 
-// Description of this filter
+#define OPT_BASE_STRUCT af_pan_t
 struct af_info af_info_pan = {
     .info = "Panning audio filter",
     .name = "pan",
     .open = af_open,
+    .priv_size = sizeof(af_pan_t),
+    .options = (const struct m_option[]) {
+        OPT_INTRANGE("channels", nch, 0, 0, AF_NCH),
+        OPT_STRING("matrix", matrixstr, 0),
+        {0}
+    },
 };
