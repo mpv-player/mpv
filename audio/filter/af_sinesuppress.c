@@ -47,8 +47,6 @@ static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data);
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_sinesuppress_t* s   = (af_sinesuppress_t*)af->setup;
-
   switch(cmd){
   case AF_CONTROL_REINIT:{
     // Sanity check
@@ -71,27 +69,14 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     return af_test_output(af,(struct mp_audio*)arg);
   }
-  case AF_CONTROL_COMMAND_LINE:{
-    float f1,f2;
-    sscanf((char*)arg,"%f:%f", &f1,&f2);
-    s->freq = f1;
-    s->decay = f2;
-    return AF_OK;
-  }
   }
   return AF_UNKNOWN;
-}
-
-// Deallocate memory
-static void uninit(struct af_instance* af)
-{
-    free(af->setup);
 }
 
 // Filter data through filter
 static struct mp_audio* play_s16(struct af_instance* af, struct mp_audio* data)
 {
-  af_sinesuppress_t *s = af->setup;
+  af_sinesuppress_t *s = af->priv;
   register int i = 0;
   int16_t *a = (int16_t*)data->planes[0];	// Audio data
   int len = data->samples*data->nch;		// Number of samples
@@ -146,20 +131,19 @@ static struct mp_audio* play_float(struct af_instance* af, struct mp_audio* data
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->uninit=uninit;
   af->play=play_s16;
-  af->setup=calloc(1,sizeof(af_sinesuppress_t));
-  if(af->setup == NULL)
-    return AF_ERROR;
-
-  ((af_sinesuppress_t*)af->setup)->freq = 50.0;
-  ((af_sinesuppress_t*)af->setup)->decay = 0.0001;
   return AF_OK;
 }
 
-// Description of this filter
+#define OPT_BASE_STRUCT af_sinesuppress_t
 struct af_info af_info_sinesuppress = {
     .info = "Sine Suppress",
     .name = "sinesuppress",
     .open = af_open,
+    .priv_size = sizeof(af_sinesuppress_t),
+    .options = (const struct m_option[]) {
+        OPT_DOUBLE("freq", freq, 0, OPTDEF_DOUBLE(50.0)),
+        OPT_DOUBLE("decay", decay, 0, OPTDEF_DOUBLE(0.0001)),
+        {0}
+    },
 };
