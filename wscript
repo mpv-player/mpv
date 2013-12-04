@@ -540,8 +540,8 @@ video_output_features = [
     } , {
         'name': '--wayland',
         'desc': 'Wayland',
-        'func': check_pkg_config('wayland-client', '>= 1.3.0',
-                                 'wayland-cursor', '>= 1.3.0',
+        'func': check_pkg_config('wayland-client', '>= 1.5.0',
+                                 'wayland-cursor', '>= 1.5.0',
                                  'xkbcommon',      '>= 0.3.0'),
     } , {
         'name': '--x11',
@@ -817,12 +817,13 @@ def configure(ctx):
         pkg_config = '-'.join([target, pkg_config])
         windres    = '-'.join([target, windres])
 
-    ctx.find_program(cc,          var='CC')
-    ctx.find_program(pkg_config,  var='PKG_CONFIG')
-    ctx.find_program('perl',      var='BIN_PERL')
-    ctx.find_program('rst2man',   var='RST2MAN',   mandatory=False)
-    ctx.find_program('rst2pdf',   var='RST2PDF',   mandatory=False)
-    ctx.find_program(windres,     var='WINDRES',   mandatory=False)
+    ctx.find_program(cc,                var='CC')
+    ctx.find_program(pkg_config,        var='PKG_CONFIG')
+    ctx.find_program('perl',            var='BIN_PERL')
+    ctx.find_program('rst2man',         var='RST2MAN',   mandatory=False)
+    ctx.find_program('rst2pdf',         var='RST2PDF',   mandatory=False)
+    ctx.find_program(windres,           var='WINDRES',   mandatory=False)
+    ctx.find_program('wayland-scanner', var='WAYSCAN',   mandatory=False)
 
     for ident, _, _ in _INSTALL_DIRS_LIST:
         varname = ident.upper()
