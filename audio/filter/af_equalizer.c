@@ -68,6 +68,7 @@ typedef struct af_equalizer_s
   int     K; 		   	// Number of used eq bands
   int     channels;        	// Number of channels
   float   gain_factor;     // applied at output to avoid clipping
+  double  p[KM];
 } af_equalizer_t;
 
 // 2nd order Band-pass Filter design
@@ -85,7 +86,7 @@ static void bp2(float* a, float* b, float fc, float q){
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_equalizer_t* s   = (af_equalizer_t*)af->setup;
+  af_equalizer_t* s   = (af_equalizer_t*)af->priv;
 
   switch(cmd){
   case AF_CONTROL_REINIT:{
@@ -136,34 +137,15 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     return af_test_output(af,arg);
   }
-  case AF_CONTROL_COMMAND_LINE:{
-    float g[10]={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
-    int i,j;
-    sscanf((char*)arg,"%f:%f:%f:%f:%f:%f:%f:%f:%f:%f", &g[0], &g[1],
-	   &g[2], &g[3], &g[4], &g[5], &g[6], &g[7], &g[8] ,&g[9]);
-    for(i=0;i<AF_NCH;i++){
-      for(j=0;j<KM;j++){
-	((af_equalizer_t*)af->setup)->g[i][j] =
-	  pow(10.0,MPCLAMP(g[j],G_MIN,G_MAX)/20.0)-1.0;
-      }
-    }
-    return AF_OK;
-  }
   }
   return AF_UNKNOWN;
-}
-
-// Deallocate memory
-static void uninit(struct af_instance* af)
-{
-    free(af->setup);
 }
 
 // Filter data through filter
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   struct mp_audio*       c 	= data;			    	// Current working data
-  af_equalizer_t*  s 	= (af_equalizer_t*)af->setup; 	// Setup
+  af_equalizer_t*  s 	= (af_equalizer_t*)af->priv; 	// Setup
   uint32_t  	   ci  	= af->data->nch; 	    	// Index for channels
   uint32_t	   nch 	= af->data->nch;   	    	// Number of channels
 
@@ -201,18 +183,27 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->uninit=uninit;
   af->play=play;
-  af->setup=calloc(1,sizeof(af_equalizer_t));
-  if(af->setup == NULL)
-    return AF_ERROR;
+  af_equalizer_t *priv = af->priv;
+  for(int i=0;i<AF_NCH;i++){
+      for(int j=0;j<KM;j++){
+        priv->g[i][j] = pow(10.0,MPCLAMP(priv->p[j],G_MIN,G_MAX)/20.0)-1.0;
+      }
+    }
   return AF_OK;
 }
 
-// Description of this filter
+#define OPT_BASE_STRUCT af_equalizer_t
 struct af_info af_info_equalizer = {
   .info = "Equalizer audio filter",
   .name = "equalizer",
   .flags = AF_FLAGS_NOT_REENTRANT,
   .open = af_open,
+  .priv_size = sizeof(af_equalizer_t),
+  .options = (const struct m_option[]) {
+#define BAND(n) OPT_DOUBLE("e" #n, p[n], 0)
+        BAND(0), BAND(1), BAND(2), BAND(3), BAND(4),
+        BAND(5), BAND(6), BAND(7), BAND(8), BAND(9),
+        {0}
+  },
 };
