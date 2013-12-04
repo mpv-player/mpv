@@ -177,7 +177,7 @@ Command Line Switches
     ``-af volnorm``             ``--af=drc`` (renamed)
     ``-zoom``                   Inverse available as ``--video-unscaled``
     ``-panscanrange``           ``--video-zoom``, ``--video-pan-x/y``
-    ``-pp``                     ``'--vf=[pp]'``
+    ``-pp ...``                 ``'--vf=pp=[...]'``
     ``-pphelp``                 ``--vf=pp:help``
     =========================== ========================================
 
