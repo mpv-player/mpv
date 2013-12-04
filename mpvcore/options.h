@@ -225,6 +225,7 @@ typedef struct MPOpts {
     struct ad_lavc_param {
         float ac3drc;
         int downmix;
+        int threads;
         char *avopt;
     } ad_lavc_param;
 

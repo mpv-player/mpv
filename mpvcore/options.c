@@ -858,6 +858,7 @@ const struct MPOpts mp_default_opts = {
     .ad_lavc_param = {
         .ac3drc = 1.,
         .downmix = 1,
+        .threads = 1,
     },
     .lavfdopts = {
         .allow_mimetype = 1,

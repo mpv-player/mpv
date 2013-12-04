@@ -42,6 +42,12 @@ OPTIONS
     requested number of output channels is set with the ``--channels`` option.
     Useful for playing surround audio on a stereo system.
 
+``--ad-lavc-threads=<0-16>``
+    Number of threads to use for decoding. Whether threading is actually
+    supported depends on codec. As of this writing, it's supported for some
+    lossless codecs only. 0 means autodetect number of cores on the
+    machine and use that, up to the maximum of 16 (default: 1).
+
 ``--ad-lavc-o=<key>=<value>[,<key>=<value>[,...]]``
     Pass AVOptions to libavcodec decoder. Note, a patch to make the o=
     unneeded and pass all unknown options through the AVOption system is

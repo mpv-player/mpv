@@ -56,6 +56,7 @@ static int decode_new_packet(struct dec_audio *da);
 const m_option_t ad_lavc_decode_opts_conf[] = {
     OPT_FLOATRANGE("ac3drc", ad_lavc_param.ac3drc, 0, 0, 2),
     OPT_FLAG("downmix", ad_lavc_param.downmix, 0),
+    OPT_INTRANGE("threads", ad_lavc_param.threads, 0, 1, 16),
     OPT_STRING("o", ad_lavc_param.avopt, 0),
     {0}
 };
@@ -248,6 +249,8 @@ static int init(struct dec_audio *da, const char *decoder)
 
     if (sh->lav_headers)
         mp_copy_lav_codec_headers(lavc_context, sh->lav_headers);
+
+    mp_set_avcodec_threads(lavc_context, opts->threads);
 
     /* open it */
     if (avcodec_open2(lavc_context, lavc_codec, NULL) < 0) {
