@@ -403,13 +403,12 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
     ctx->pic = avcodec_alloc_frame();
 #endif
 
-    if (ctx->hwdec && ctx->hwdec->allocate_image) {
+    if (ctx->hwdec) {
         ctx->do_hw_dr1         = true;
         avctx->thread_count    = 1;
-        if (ctx->hwdec->image_formats)
-            avctx->get_format  = get_format_hwdec;
+        avctx->get_format      = get_format_hwdec;
         setup_refcounting_hw(avctx);
-        if (ctx->hwdec->init && ctx->hwdec->init(ctx) < 0) {
+        if (ctx->hwdec->init(ctx) < 0) {
             uninit_avctx(vd);
             return;
         }
