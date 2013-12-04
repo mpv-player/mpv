@@ -63,7 +63,7 @@ typedef struct af_sub_s
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_sub_t* s   = af->setup;
+  af_sub_t* s   = af->priv;
 
   switch(cmd){
   case AF_CONTROL_REINIT:{
@@ -83,33 +83,8 @@ static int control(struct af_instance* af, int cmd, void* arg)
       return AF_ERROR;
     return af_test_output(af,(struct mp_audio*)arg);
   }
-  case AF_CONTROL_COMMAND_LINE:{
-    int   ch=5;
-    float fc=60.0;
-    sscanf(arg,"%f:%i", &fc , &ch);
-    // Sanity check
-    if(ch >= AF_NCH || ch < 0){
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[sub] Subwoofer channel number must be between "
-             " 0 and %i current value is %i\n", AF_NCH-1, ch);
-      return AF_ERROR;
-    }
-    s->ch = ch;
-    if(fc > 300 || fc < 20){
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[sub] Cutoff frequency must be between 20Hz and"
-             " 300Hz current value is %0.2f",fc);
-      return AF_ERROR;
-    }
-    s->fc = fc;
-    return AF_OK;
-  }
   }
   return AF_UNKNOWN;
-}
-
-// Deallocate memory
-static void uninit(struct af_instance* af)
-{
-    free(af->setup);
 }
 
 #ifndef IIR
@@ -127,7 +102,7 @@ static void uninit(struct af_instance* af)
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
   struct mp_audio*    c   = data;	 // Current working data
-  af_sub_t*  	s   = af->setup; // Setup for this instance
+  af_sub_t*  	s   = af->priv; // Setup for this instance
   float*   	a   = c->planes[0];	 // Audio data
   int		len = c->samples*c->nch;	 // Number of samples in current audio block
   int		nch = c->nch;	 // Number of channels
@@ -147,23 +122,21 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 
 // Allocate memory and set function pointers
 static int af_open(struct af_instance* af){
-  af_sub_t* s;
   af->control=control;
-  af->uninit=uninit;
   af->play=play;
-  af->setup=s=calloc(1,sizeof(af_sub_t));
-  if(af->setup == NULL)
-    return AF_ERROR;
-  // Set default values
-  s->ch = 5;  	 // Channel nr 6
-  s->fc = 60; 	 // Cutoff frequency 60Hz
   return AF_OK;
 }
 
-// Description of this filter
+#define OPT_BASE_STRUCT af_sub_t
 struct af_info af_info_sub = {
     .info = "Audio filter for adding a sub-base channel",
     .name = "sub",
     .flags = AF_FLAGS_NOT_REENTRANT,
     .open = af_open,
+    .priv_size = sizeof(af_sub_t),
+    .options = (const struct m_option[]) {
+        OPT_FLOATRANGE("fc", fc, 0, 20, 300, OPTDEF_FLOAT(60.0)),
+        OPT_INTRANGE("ch", ch, 0, 0, AF_NCH - 1, OPTDEF_INT(5)),
+        {0}
+    },
 };
