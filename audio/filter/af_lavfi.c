@@ -210,7 +210,7 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
 {
     struct priv *p = af->priv;
     struct mp_audio *r = af->data;
-
+    bool eof = data->samples == 0 && (flags & AF_FILTER_FLAG_EOF);
     AVFilterLink *l_in = p->in->outputs[0];
 
     AVFrame *frame = av_frame_alloc();
@@ -229,7 +229,7 @@ static int filter(struct af_instance *af, struct mp_audio *data, int flags)
         frame->data[n] = data->planes[n];
     frame->linesize[0] = frame->nb_samples * data->sstride;
 
-    if (av_buffersrc_add_frame(p->in, frame) < 0) {
+    if (av_buffersrc_add_frame(p->in, eof ? NULL : frame) < 0) {
         av_frame_free(&frame);
         return -1;
     }
