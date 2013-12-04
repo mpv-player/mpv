@@ -434,7 +434,8 @@ def build(ctx):
     )
 
     if ctx.dependency_satisfied('macosx-bundle'):
-        ctx.install_files(ctx.env.BINDIR, 'mpv')
+        from waflib import Utils
+        ctx.install_files(ctx.env.BINDIR, 'mpv', chmod=Utils.O755)
 
     if ctx.dependency_satisfied("vf-dlopen-filters"):
         dlfilters = "showqscale telecine tile rectangle framestep \
