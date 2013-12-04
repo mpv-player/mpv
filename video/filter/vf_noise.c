@@ -442,11 +442,8 @@ const vf_info_t vf_info_noise = {
     .name = "noise",
     .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
-    .priv_defaults = &(const struct vf_priv_s){
-        .strength = 2,
-    },
     .options = (const struct m_option[]){
-        OPT_INTRANGE("strength", strength, 0, 0, 100),
+        OPT_INTRANGE("strength", strength, 0, 0, 100, OPTDEF_INT(2)),
         OPT_FLAG("averaged", averaged, 0),
         OPT_FLAG("pattern", pattern, 0),
         OPT_FLAG("temporal", temporal, 0),
