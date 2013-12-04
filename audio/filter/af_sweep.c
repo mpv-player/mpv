@@ -36,7 +36,6 @@ typedef struct af_sweep_s{
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_sweept* s   = (af_sweept*)af->setup;
   struct mp_audio *data= (struct mp_audio*)arg;
 
   switch(cmd){
@@ -45,26 +44,14 @@ static int control(struct af_instance* af, int cmd, void* arg)
     mp_audio_set_format(af->data, AF_FORMAT_S16);
 
     return af_test_output(af, data);
-  case AF_CONTROL_COMMAND_LINE:
-    sscanf((char*)arg,"%lf", &s->delta);
-    return AF_OK;
-/*  case AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET:
-    af->data->rate = *(int*)arg;
-    return AF_OK;*/
   }
   return AF_UNKNOWN;
-}
-
-// Deallocate memory
-static void uninit(struct af_instance* af)
-{
-    free(af->setup);
 }
 
 // Filter data through filter
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 {
-  af_sweept *s = af->setup;
+  af_sweept *s = af->priv;
   int i, j;
   int16_t *in = (int16_t*)data->planes[0];
   int chans   = data->nch;
@@ -82,14 +69,18 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data)
 
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->uninit=uninit;
   af->play=play;
-  af->setup=calloc(1,sizeof(af_sweept));
   return AF_OK;
 }
 
+#define OPT_BASE_STRUCT af_sweept
 struct af_info af_info_sweep = {
     .info = "sine sweep",
     .name = "sweep",
     .open = af_open,
+    .priv_size = sizeof(af_sweept),
+    .options = (const struct m_option[]) {
+        OPT_DOUBLE("delta", delta, 0),
+        {0}
+    },
 };
