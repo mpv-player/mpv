@@ -88,7 +88,7 @@ typedef struct af_surround_s
 // Initialization and runtime control
 static int control(struct af_instance* af, int cmd, void* arg)
 {
-  af_surround_t *s = af->setup;
+  af_surround_t *s = af->priv;
   switch(cmd){
   case AF_CONTROL_REINIT:{
     struct mp_audio *in = arg;
@@ -126,25 +126,8 @@ static int control(struct af_instance* af, int cmd, void* arg)
 
     return AF_OK;
   }
-  case AF_CONTROL_COMMAND_LINE:{
-    float d = 0;
-    sscanf((char*)arg,"%f",&d);
-    if ((d < 0) || (d > 1000)){
-      mp_msg(MSGT_AFILTER, MSGL_ERR, "[surround] Invalid delay time, valid time values"
-	     " are 0ms to 1000ms current value is %0.3f ms\n",d);
-      return AF_ERROR;
-    }
-    s->d = d;
-    return AF_OK;
-  }
   }
   return AF_UNKNOWN;
-}
-
-// Deallocate memory
-static void uninit(struct af_instance* af)
-{
-  free(af->setup);
 }
 
 // The beginnings of an active matrix...
@@ -160,7 +143,7 @@ static float steering_matrix[][12] = {
 
 // Filter data through filter
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* data){
-  af_surround_t* s   = (af_surround_t*)af->setup;
+  af_surround_t* s   = (af_surround_t*)af->priv;
   float*	 m   = steering_matrix[0];
   float*     	 in  = data->planes[0]; 	// Input audio data
   float*     	 out = NULL;		// Output audio data
@@ -241,19 +224,20 @@ static struct mp_audio* play(struct af_instance* af, struct mp_audio* data){
 
 static int af_open(struct af_instance* af){
   af->control=control;
-  af->uninit=uninit;
   af->play=play;
-  af->setup=calloc(1,sizeof(af_surround_t));
-  if(af->setup == NULL)
-    return AF_ERROR;
-  ((af_surround_t*)af->setup)->d = 20;
   return AF_OK;
 }
 
+#define OPT_BASE_STRUCT af_surround_t
 struct af_info af_info_surround =
 {
     .info = "Surround decoder filter",
     .name = "surround",
     .flags = AF_FLAGS_NOT_REENTRANT,
     .open = af_open,
+    .priv_size = sizeof(af_surround_t),
+    .options = (const struct m_option[]) {
+        OPT_FLOATRANGE("d", d, 0, 0, 1000, OPTDEF_FLOAT(20.0)),
+        {0}
+    },
 };
