@@ -136,7 +136,7 @@ Command Line Switches
     =========================== ========================================
     ``-no<opt>``                ``--no-<opt>`` (add a dash)
     ``-nosound``                ``--no-audio``
-    ``-use-filename-title``     ``--title="${filename}"``
+    ``-use-filename-title``     ``--title='${filename}'``
     ``-loop 0``                 ``--loop=inf``
     ``-hardframedrop``          ``--framedrop=hard``
     ``-osdlevel``               ``--osd-level``
