@@ -13,11 +13,6 @@ normal filter parameters.
 ``--vf-defaults=<filter1[=parameter1:parameter2:...],filter2,...>``
     Set defaults for each filter.
 
-Many parameters are optional and set to default values if omitted. To
-explicitly use a default value, set a parameter to '-1'. Parameters ``w:h``
-means width x height in pixels, ``x:y`` means x;y position counted from the
-upper left corner of the bigger image.
-
 .. note::
 
     To get a full list of available video filters, see ``--vf=help``.
