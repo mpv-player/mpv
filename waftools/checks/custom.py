@@ -61,7 +61,7 @@ def check_lua(ctx, dependency_identifier):
             [lv for lv in lua_versions if lv[0] == ctx.options.LUA_VER]
 
     for lua_version, pkgconfig_query in lua_versions:
-       if compose_checks(
+        if compose_checks(
             check_pkg_config(pkgconfig_query, uselib_store=lua_version),
             check_cc(fragment=fragment,
                      use=[lua_version] + quvi_lib_storage,

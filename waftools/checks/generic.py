@@ -1,6 +1,7 @@
 import os
 from inflectors import DependencyInflector
 from waflib.ConfigSet import ConfigSet
+from waflib import Utils
 
 __all__ = [
     "check_pkg_config", "check_cc", "check_statement", "check_libs",
@@ -21,6 +22,12 @@ def __merge_options__(dependency_identifier, *args):
     [options_accu.update(arg) for arg in args if arg]
     return options_accu
 
+def _filter_cc_arguments(ctx, opts):
+    if ctx.env.DEST_OS != Utils.unversioned_sys_platform():
+        # cross compiling, remove execute=True if present
+        if opts['execute'] == True:
+            opts['execute'] = False
+    return opts
 
 def check_libs(libs, function):
     libs = [None] + libs
@@ -42,7 +49,7 @@ def check_statement(header, statement, **kw_ext):
                                  {'fragment':fragment},
                                  __define_options__(dependency_identifier),
                                  kw_ext, kw)
-        return ctx.check_cc(**opts)
+        return ctx.check_cc(**_filter_cc_arguments(ctx, opts))
     return fn
 
 def check_cc(**kw_ext):
@@ -50,7 +57,7 @@ def check_cc(**kw_ext):
         options = __merge_options__(dependency_identifier,
                                     __define_options__(dependency_identifier),
                                     kw_ext, kw)
-        return ctx.check_cc(**options)
+        return ctx.check_cc(**_filter_cc_arguments(ctx, options))
     return fn
 
 def check_pkg_config(*args, **kw_ext):
