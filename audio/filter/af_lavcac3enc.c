@@ -65,7 +65,7 @@ typedef struct af_ac3enc_s {
 // Initialization and runtime control
 static int control(struct af_instance *af, int cmd, void *arg)
 {
-    af_ac3enc_t *s  = af->setup;
+    af_ac3enc_t *s  = af->priv;
     static const int default_bit_rate[AC3_MAX_CHANNELS+1] = \
         {0, 96000, 192000, 256000, 384000, 448000, 448000};
 
@@ -139,7 +139,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
 // Deallocate memory
 static void uninit(struct af_instance* af)
 {
-    af_ac3enc_t *s = af->setup;
+    af_ac3enc_t *s = af->priv;
 
     if (s) {
         av_free_packet(&s->pkt);
@@ -154,7 +154,7 @@ static void uninit(struct af_instance* af)
 static struct mp_audio* play(struct af_instance* af, struct mp_audio* audio)
 {
     struct mp_audio *out = af->data;
-    af_ac3enc_t *s = af->setup;
+    af_ac3enc_t *s = af->priv;
     int num_frames = (audio->samples + mp_audio_buffer_samples(s->pending))
                      / s->in_samples;
 
@@ -254,7 +254,6 @@ static int af_open(struct af_instance* af){
     af->control=control;
     af->uninit=uninit;
     af->play=play;
-    af->setup=s;
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");
     if (!s->lavc_acodec) {

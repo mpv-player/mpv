@@ -59,7 +59,6 @@ struct af_instance {
     int (*control)(struct af_instance *af, int cmd, void *arg);
     void (*uninit)(struct af_instance *af);
     struct mp_audio * (*play)(struct af_instance *af, struct mp_audio *data);
-    void *setup;  // old field for priv structs
     void *priv;
     struct mp_audio *data; // configuration and buffer for outgoing data stream
     struct af_instance *next;

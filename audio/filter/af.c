@@ -139,7 +139,7 @@ static int input_control(struct af_instance* af, int cmd, void* arg)
 {
     switch (cmd) {
     case AF_CONTROL_REINIT:
-        assert(arg == &((struct af_stream *)af->setup)->input);
+        assert(arg == &((struct af_stream *)af->priv)->input);
         return AF_OK;
     }
     return AF_UNKNOWN;
@@ -147,7 +147,7 @@ static int input_control(struct af_instance* af, int cmd, void* arg)
 
 static int output_control(struct af_instance* af, int cmd, void* arg)
 {
-    struct af_stream *s = af->setup;
+    struct af_stream *s = af->priv;
     struct mp_audio *output = &s->output;
     struct mp_audio *filter_output = &s->filter_output;
 
@@ -593,7 +593,7 @@ struct af_stream *af_new(struct MPOpts *opts)
         .info = &in,
         .control = input_control,
         .play = dummy_play,
-        .setup = s,
+        .priv = s,
         .data = &s->input,
         .mul = 1.0,
     };
@@ -603,7 +603,7 @@ struct af_stream *af_new(struct MPOpts *opts)
         .info = &out,
         .control = output_control,
         .play = dummy_play,
-        .setup = s,
+        .priv = s,
         .data = &s->filter_output,
         .mul = 1.0,
     };
