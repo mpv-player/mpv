@@ -49,14 +49,14 @@ struct vf_format {
 typedef struct vf_instance {
     const vf_info_t *info;
 
-    int (*config)(struct vf_instance *vf,
-                  int width, int height, int d_width, int d_height,
-                  unsigned int flags, unsigned int outfmt);
-
-    // Alternative to config() (can pass more image parameters)
     // Note: the callee is allowed to write *params.
     int (*reconfig)(struct vf_instance *vf, struct mp_image_params *params,
                     int flags);
+
+    // Legacy variant, use reconfig instead.
+    int (*config)(struct vf_instance *vf,
+                  int width, int height, int d_width, int d_height,
+                  unsigned int flags, unsigned int outfmt);
 
     int (*control)(struct vf_instance *vf, int request, void *data);
     int (*query_format)(struct vf_instance *vf, unsigned int fmt);
