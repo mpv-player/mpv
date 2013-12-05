@@ -262,7 +262,6 @@ static int config(struct vf_instance *vf,
 static void uninit(struct vf_instance *vf)
 {
 	pullup_free_context(vf->priv->ctx);
-	free(vf->priv);
 }
 
 static int control(vf_instance_t *vf, int request, void *data)

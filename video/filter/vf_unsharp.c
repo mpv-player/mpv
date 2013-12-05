@@ -201,9 +201,6 @@ static void uninit( struct vf_instance *vf ) {
 	av_free( fp->SC[z] );
 	fp->SC[z] = NULL;
     }
-
-    free( vf->priv );
-    vf->priv = NULL;
 }
 
 //===========================================================================//

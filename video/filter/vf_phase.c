@@ -237,7 +237,6 @@ static void uninit(struct vf_instance *vf)
    free(vf->priv->buf[0]);
    free(vf->priv->buf[1]);
    free(vf->priv->buf[2]);
-   free(vf->priv);
    }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)

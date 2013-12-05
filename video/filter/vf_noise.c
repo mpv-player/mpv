@@ -363,9 +363,6 @@ static void uninit(struct vf_instance *vf){
 
 	av_free(vf->priv->lumaParam.noise);
 	vf->priv->lumaParam.noise= NULL;
-
-	free(vf->priv);
-	vf->priv=NULL;
 }
 
 //===========================================================================//
