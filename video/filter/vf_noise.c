@@ -324,13 +324,6 @@ static void donoise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, in
 	if (fp->shiftptr == 3) fp->shiftptr = 0;
 }
 
-static int config(struct vf_instance *vf,
-        int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt){
-
-	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
-}
-
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
         struct mp_image *dmpi = mpi;
@@ -393,7 +386,6 @@ static const unsigned int fmt_list[]={
 };
 
 static int vf_open(vf_instance_t *vf){
-    vf->config=config;
     vf->filter=filter;
     vf->query_format=query_format;
     vf->uninit=uninit;

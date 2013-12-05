@@ -116,13 +116,6 @@ static int filter(struct vf_instance *vf, struct mp_image *mpi)
         return 0;
 }
 
-static int config(struct vf_instance *vf,
-        int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt)
-{
-	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
-}
-
 static int control(vf_instance_t *vf, int request, void *data)
 {
     switch (request) {
@@ -151,7 +144,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 
 static int vf_open(vf_instance_t *vf)
 {
-    vf->config = config;
     vf->filter_ext = filter;
     vf->control = control;
     vf->uninit = uninit;

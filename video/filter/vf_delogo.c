@@ -166,13 +166,6 @@ static void do_delogo(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, 
     }
 }
 
-static int config(struct vf_instance *vf,
-                  int width, int height, int d_width, int d_height,
-                  unsigned int flags, unsigned int outfmt){
-
-    return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
-}
-
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     struct mp_image *dmpi = mpi;
@@ -282,7 +275,6 @@ load_error:
 
 static int vf_open(vf_instance_t *vf){
     struct vf_priv_s *p = vf->priv;
-    vf->config=config;
     vf->filter=filter;
     vf->query_format=query_format;
 

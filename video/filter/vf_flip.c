@@ -28,15 +28,6 @@
 
 #include "video/out/vo.h"
 
-//===========================================================================//
-
-static int config(struct vf_instance *vf, int width, int height,
-                  int d_width, int d_height,
-                  unsigned int flags, unsigned int outfmt)
-{
-    return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
-}
-
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     mp_image_vflip(mpi);
@@ -51,7 +42,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 }
 
 static int vf_open(vf_instance_t *vf){
-    vf->config=config;
     vf->filter=filter;
     vf->query_format = query_format;
     return 1;
@@ -62,5 +52,3 @@ const vf_info_t vf_info_flip = {
     .name = "flip",
     .open = vf_open,
 };
-
-//===========================================================================//

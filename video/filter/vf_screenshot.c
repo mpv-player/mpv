@@ -36,14 +36,6 @@ struct vf_priv_s {
     struct mp_image *current;
 };
 
-static int config(struct vf_instance *vf,
-                  int width, int height, int d_width, int d_height,
-                  unsigned int flags, unsigned int outfmt)
-{
-    mp_image_unrefp(&vf->priv->current);
-    return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
-}
-
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     mp_image_unrefp(&vf->priv->current);
@@ -70,7 +62,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 
 static int vf_open(vf_instance_t *vf)
 {
-    vf->config = config;
     vf->control = control;
     vf->filter = filter;
     vf->query_format = query_format;
