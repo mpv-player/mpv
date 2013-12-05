@@ -25,7 +25,7 @@ def __merge_options__(dependency_identifier, *args):
 def _filter_cc_arguments(ctx, opts):
     if ctx.env.DEST_OS != Utils.unversioned_sys_platform():
         # cross compiling, remove execute=True if present
-        if opts['execute'] == True:
+        if getattr(opts, 'execute', None) == True:
             opts['execute'] = False
     return opts
 
