@@ -151,21 +151,6 @@ void vf_rescale_dsize(int *d_width, int *d_height, int old_w, int old_h,
                       int new_w, int new_h);
 void vf_set_dar(int *d_width, int *d_height, int w, int h, double dar);
 
-static inline int norm_qscale(int qscale, int type)
-{
-    switch (type) {
-    case 0: // MPEG-1
-        return qscale;
-    case 1: // MPEG-2
-        return qscale >> 1;
-    case 2: // H264
-        return qscale >> 2;
-    case 3: // VP56
-        return (63 - qscale + 2) >> 2;
-    }
-    return qscale;
-}
-
 struct vf_detc_pts_buf {
     double inpts_prev, outpts_prev;
     double lastdelta;

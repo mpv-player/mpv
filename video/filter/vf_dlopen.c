@@ -208,6 +208,21 @@ static void uninit(struct vf_instance *vf)
     }
 }
 
+static int norm_qscale(int qscale, int type)
+{
+    switch (type) {
+    case 0: // MPEG-1
+        return qscale;
+    case 1: // MPEG-2
+        return qscale >> 1;
+    case 2: // H264
+        return qscale >> 2;
+    case 3: // VP56
+        return (63 - qscale + 2) >> 2;
+    }
+    return qscale;
+}
+
 static int filter(struct vf_instance *vf, struct mp_image *mpi)
 {
     int i, k;
