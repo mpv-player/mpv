@@ -772,7 +772,7 @@ static int query_format(struct vo *vo, uint32_t format)
 {
     struct priv *vc = vo->priv;
     int i, j;
-    int cap = VFCAP_CSP_SUPPORTED | VFCAP_FLIP;
+    int cap = VFCAP_CSP_SUPPORTED;
     for (i = 0; i < vc->renderer_info.num_texture_formats; ++i)
         for (j = 0; j < sizeof(formats) / sizeof(formats[0]); ++j)
             if (vc->renderer_info.texture_formats[i] == formats[j].sdl)

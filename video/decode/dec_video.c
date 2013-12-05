@@ -384,7 +384,6 @@ int mpcodecs_reconfig_vo(struct dec_video *d_video,
 {
     struct MPOpts *opts = d_video->opts;
     vf_instance_t *vf = d_video->vfilter;
-    int vocfg_flags = 0;
     struct mp_image_params p = *params;
     struct sh_video *sh = d_video->header->video;
 
@@ -429,15 +428,6 @@ int mpcodecs_reconfig_vo(struct dec_video *d_video,
     }
     d_video->vfilter = vf;
 
-    // autodetect flipping
-    bool flip = opts->flip;
-    if (flip && !(flags & VFCAP_FLIP)) {
-        // we need to flip, but no flipping filter avail.
-        vf_add_before_vo(&vf, "flip", NULL);
-        d_video->vfilter = vf;
-        flip = false;
-    }
-
     float decoder_aspect = p.d_w / (float)p.d_h;
     if (d_video->initial_decoder_aspect == 0)
         d_video->initial_decoder_aspect = decoder_aspect;
@@ -479,13 +469,11 @@ int mpcodecs_reconfig_vo(struct dec_video *d_video,
     // Make sure the user-overrides are consistent (no RGB csp for YUV, etc.).
     mp_image_params_guess_csp(&p);
 
-    vocfg_flags = (flip ? VOFLAG_FLIPPING : 0);
-
     // Time to config libvo!
-    mp_msg(MSGT_CPLAYER, MSGL_V, "VO Config (%dx%d->%dx%d,flags=%d,0x%X)\n",
-           p.w, p.h, p.d_w, p.d_h, vocfg_flags, p.imgfmt);
+    mp_msg(MSGT_CPLAYER, MSGL_V, "VO Config (%dx%d->%dx%d,0x%X)\n",
+           p.w, p.h, p.d_w, p.d_h, p.imgfmt);
 
-    if (vf_reconfig_wrapper(vf, &p, vocfg_flags) < 0) {
+    if (vf_reconfig_wrapper(vf, &p, 0) < 0) {
         mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "FATAL: Cannot initialize video driver.\n");
         d_video->vf_initialized = -1;
         return -1;

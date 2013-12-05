@@ -2039,7 +2039,7 @@ static int query_format(struct vo *vo, uint32_t format)
     struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(format);
 
     int depth = desc.plane_bits;
-    int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP;
+    int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     if (format == IMGFMT_RGB24 || format == IMGFMT_RGBA)
         return caps;
     if (p->use_yuv && (desc.flags & MP_IMGFLAG_YUV_P) &&

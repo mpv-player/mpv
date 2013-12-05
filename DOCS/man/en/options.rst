@@ -800,9 +800,6 @@ OPTIONS
     ``--no-fixed-vo`` enforces closing and reopening the video window for
     multiple files (one (un)initialization for each file).
 
-``--flip``
-    Flip image upside-down.
-
 ``--force-rgba-osd-rendering``
     Change how some video outputs render the OSD and text subtitles. This
     does not change appearance of the subtitles and only has performance

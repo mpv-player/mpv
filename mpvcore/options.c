@@ -499,8 +499,6 @@ const m_option_t mp_opts[] = {
     OPT_FLOATRANGE("aspect", movie_aspect, 0, -1.0, 10.0),
     OPT_FLOAT_STORE("no-aspect", movie_aspect, 0, 0.0),
 
-    OPT_FLAG_CONSTANTS("flip", flip, 0, 0, 1),
-
     OPT_CHOICE("field-dominance", field_dominance, 0,
                ({"auto", -1}, {"top", 0}, {"bottom", 1})),
 

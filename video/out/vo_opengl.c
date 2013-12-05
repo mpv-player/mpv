@@ -138,7 +138,7 @@ static void draw_image(struct vo *vo, mp_image_t *mpi)
 static int query_format(struct vo *vo, uint32_t format)
 {
     struct gl_priv *p = vo->priv;
-    int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP;
+    int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     if (!gl_video_check_format(p->renderer, format))
         return 0;
     return caps;

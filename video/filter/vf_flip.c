@@ -34,7 +34,6 @@ static int config(struct vf_instance *vf, int width, int height,
                   int d_width, int d_height,
                   unsigned int flags, unsigned int outfmt)
 {
-    flags &= ~VOFLAG_FLIPPING; // remove the VO flip flag
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 

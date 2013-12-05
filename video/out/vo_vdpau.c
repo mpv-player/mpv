@@ -1272,7 +1272,7 @@ static int query_format(struct vo *vo, uint32_t format)
 {
     struct vdpctx *vc = vo->priv;
 
-    int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIP;
+    int flags = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     if (mp_vdpau_get_format(format, NULL, NULL))
         return flags;
     int rgb_format = get_rgb_format(format);
