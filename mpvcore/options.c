@@ -851,7 +851,7 @@ const struct MPOpts mp_default_opts = {
     .sub_cp = "UTF-8:UTF-8-BROKEN",
 #endif
 
-    .hwdec_codecs = "all",
+    .hwdec_codecs = "h264,vc1,wmv3",
 
     .index_mode = -1,
 

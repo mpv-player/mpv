@@ -1135,12 +1135,20 @@ OPTIONS
     The ``vaapi-copy`` function allows you to use vaapi with any VO. Because
     this copies the decoded video back to system RAM, it's quite inefficient.
 
-``--hwdec-codecs=<codec1,codec2,...|all>``
-    Allow hardware decoding for a given list of codecs only. The default is the
-    special value ``all``, which always allows all codecs.
+    .. note::
 
-    This is usually only needed with broken GPUs, where fallback on software
-    decoding does not work properly.
+        When using this switch, hardware decoding is still only done for some
+        codecs. See ``--hwdec-codecs`` to enable hardware decoding for more
+        codecs.
+
+``--hwdec-codecs=<codec1,codec2,...|all>``
+    Allow hardware decoding for a given list of codecs only. The special value
+    ``all`` always allows all codecs.
+
+    By default this is set to ``h264,vc1,wmv3``.
+
+    This is usually only needed with broken GPUs, where a codec is reported
+    as supported, but decoding causes more problems than it solves.
 
     .. admonition:: Example
 
