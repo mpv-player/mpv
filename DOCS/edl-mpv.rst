@@ -17,9 +17,10 @@ This would skip the first 10 seconds of the file f1.mkv, then play the next
 back to f1.mkv, skip to the 40 second mark, and play 10 seconds, and then
 stop playback. The difference to specifying the files directly on command
 line (and using ``--{ --start=10 --length=20 f1.mkv --}`` etc.) is that the
-virtual EDL file appears as a single file, instead as a playlist.
+virtual EDL file appears as a virtual timeline (like a single file), instead
+as a playlist.
 
-The general simplified syntax is:
+The general simplified syntax is::
 
     # mpv EDL v0
     <filename>
@@ -64,7 +65,7 @@ Syntax::
     param         ::= [ <name> '=' ] ( <value> | '%' <number> '%' <valuebytes> )
 
 The ``name`` string can consist of any characters, except ``=%,;\n``. The
-``value`` string can consist of any characters except to ``,;\n``.
+``value`` string can consist of any characters except of ``,;\n``.
 
 The construct starting with ``%`` allows defining any value with arbitrary
 contents inline, where ``number`` is an integer giving the number of bytes in
@@ -97,7 +98,7 @@ Instead of line breaks, the character ``;`` can be used. Line feed bytes and
 Syntax of EDL URIs
 ==================
 
-mpv accepts ``inline`` EDL data in form of ``edl://`` URIs. Other than the
+mpv accepts inline EDL data in form of ``edl://`` URIs. Other than the
 header, the syntax is exactly the same. It's far more convenient to use ``;``
 instead of line breaks, but that is orthogonal.
 
