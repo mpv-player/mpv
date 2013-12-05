@@ -42,15 +42,13 @@
 
 #include "mpvcore/m_option.h"
 
-static const struct vf_priv_s {
+struct vf_priv_s {
     int opt_top_margin, opt_bottom_margin;
 
     int outh, outw;
 
     struct osd_state *osd;
     struct mp_osd_res dim;
-} vf_priv_dflt = {
-    0
 };
 
 static int config(struct vf_instance *vf,
@@ -150,6 +148,5 @@ const vf_info_t vf_info_sub = {
     .name = "sub",
     .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
-    .priv_defaults = &vf_priv_dflt,
     .options = vf_opts_fields,
 };

@@ -44,7 +44,7 @@
 # define DLLSymbol(handle, name) dlsym(handle, name)
 #endif
 
-static struct vf_priv_s {
+struct vf_priv_s {
     char *cfg_dllname;
     int cfg_argc;
     char *cfg_argv[16];
@@ -69,7 +69,7 @@ static struct vf_priv_s {
     unsigned int outfmt;
 
     int argc;
-} const vf_priv_dflt = {};
+};
 
 struct fmtname {
     const char *name;
@@ -379,7 +379,6 @@ const vf_info_t vf_info_dlopen = {
     .name = "dlopen",
     .open = vf_open,
     .priv_size = sizeof(struct vf_priv_s),
-    .priv_defaults = &vf_priv_dflt,
     .options = vf_opts_fields,
 };
 
