@@ -697,8 +697,15 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
             mp_add_subtitles(mpctx, mpctx->opts->sub_name[i]);
     }
     if (mpctx->opts->sub_auto) { // auto load sub file ...
-        struct subfn *list = find_text_subtitles(mpctx->opts, mpctx->filename);
-        for (int i = 0; list[i].fname; i++) {
+        void *tmp = talloc_new(NULL);
+        char *base_filename = mpctx->filename;
+        char *stream_filename = NULL;
+        if (stream_control(mpctx->stream, STREAM_CTRL_GET_BASE_FILENAME,
+                           &stream_filename) > 0)
+            base_filename = talloc_steal(tmp, stream_filename);
+        struct subfn *list = find_text_subtitles(mpctx->opts, base_filename);
+        talloc_steal(tmp, list);
+        for (int i = 0; list && list[i].fname; i++) {
             char *filename = list[i].fname;
             char *lang = list[i].lang;
             for (int n = 0; n < mpctx->num_sources; n++) {
@@ -713,7 +720,7 @@ static void open_subtitles_from_options(struct MPContext *mpctx)
             }
         skip:;
         }
-        talloc_free(list);
+        talloc_free(tmp);
     }
 }
 

@@ -100,6 +100,7 @@ enum stream_ctrl {
     STREAM_CTRL_GET_DVD_INFO,
     STREAM_CTRL_SET_CONTENTS,
     STREAM_CTRL_GET_METADATA,
+    STREAM_CTRL_GET_BASE_FILENAME,
 };
 
 struct stream_lang_req {

@@ -75,6 +75,17 @@ static void rar_entry_close(stream_t *s)
     RarFileDelete(rar_file);
 }
 
+static int rar_entry_control(stream_t *s, int cmd, void *arg)
+{
+    rar_file_t *rar_file = s->priv;
+    switch (cmd) {
+    case STREAM_CTRL_GET_BASE_FILENAME:
+        *(char **)arg = talloc_strdup(NULL, rar_file->s->url);
+        return STREAM_OK;
+    }
+    return STREAM_UNSUPPORTED;
+}
+
 static int rar_entry_open(stream_t *stream, int mode)
 {
     if (!strchr(stream->path, '|'))
@@ -123,6 +134,7 @@ static int rar_entry_open(stream_t *stream, int mode)
     stream->fill_buffer = rar_entry_fill_buffer;
     stream->seek = rar_entry_seek;
     stream->close = rar_entry_close;
+    stream->control = rar_entry_control;
 
     return STREAM_OK;
 }
