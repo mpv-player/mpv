@@ -453,7 +453,7 @@ audio_output_features = [
         'desc': 'CoreAudio audio output',
         'func': check_cc(
             fragment=load_fragment('coreaudio.c'),
-            framework_name=['CoreAudio', 'AudioUnit', 'AudioToolbox'])
+            framework_name=['CoreFoundation', 'CoreAudio', 'AudioUnit', 'AudioToolbox'])
     }, {
         'name': '--dsound',
         'desc': 'DirectSound audio output',
