@@ -1563,7 +1563,7 @@ static int parse_imgfmt(const m_option_t *opt, struct bstr name,
         return M_OPT_EXIT - 1;
     }
 
-    unsigned int fmt = mp_imgfmt_from_name(param, false);
+    unsigned int fmt = mp_imgfmt_from_name(param, true);
     if (!fmt) {
         mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                "Option %.*s: unknown format name: '%.*s'\n",

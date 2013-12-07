@@ -126,7 +126,7 @@ static int demux_rawvideo_open(demuxer_t *demuxer, enum demux_check check)
 
     const char *decoder = "rawvideo";
     int imgfmt = vformat;
-    if (mp_format) {
+    if (mp_format && !IMGFMT_IS_HWACCEL(mp_format)) {
         decoder = "mp-rawvideo";
         imgfmt = mp_format;
         if (!imgsize) {
