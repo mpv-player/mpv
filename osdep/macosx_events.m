@@ -176,7 +176,10 @@ void cocoa_put_key_with_modifiers(int keycode, int modifiers)
 
 - (BOOL)useAltGr
 {
-    return mp_input_use_alt_gr(mpv_shared_app().inputContext);
+    if (mpv_shared_app().inputContext)
+        return mp_input_use_alt_gr(mpv_shared_app().inputContext);
+    else
+        return YES;
 }
 
 - (void)startAppleRemote
