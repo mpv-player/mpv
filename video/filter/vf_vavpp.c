@@ -284,7 +284,7 @@ static int control(struct vf_instance *vf, int request, void* data)
         p->do_deint = *(int*)data;
         return true;
     default:
-        return vf_next_control (vf, request, data);
+        return CONTROL_UNKNOWN;
     }
 }
 

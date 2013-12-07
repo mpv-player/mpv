@@ -50,7 +50,7 @@ static int control (vf_instance_t *vf, int request, void *data)
         args->out_image = mp_image_new_ref(vf->priv->current);
         return CONTROL_TRUE;
     }
-    return vf_next_control (vf, request, data);
+    return CONTROL_UNKNOWN;
 }
 
 static int query_format(struct vf_instance *vf, unsigned int fmt)

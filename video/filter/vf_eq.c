@@ -428,7 +428,7 @@ int control (vf_instance_t *vf, int request, void *data)
       break;
   }
 
-  return vf_next_control (vf, request, data);
+  return CONTROL_UNKNOWN;
 }
 
 static

@@ -120,11 +120,11 @@ static int control(vf_instance_t *vf, int request, void *data)
     switch (request) {
     case VFCTRL_SET_OSD_OBJ:
         vf->priv->osd = data;
-        break;
+        return CONTROL_TRUE;
     case VFCTRL_INIT_OSD:
         return CONTROL_TRUE;
     }
-    return vf_next_control(vf, request, data);
+    return CONTROL_UNKNOWN;
 }
 
 static int vf_open(vf_instance_t *vf)

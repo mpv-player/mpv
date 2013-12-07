@@ -364,11 +364,9 @@ static int control(struct vf_instance *vf, int request, void *data)
         if (mp_sws_set_vf_equalizer(sws, data) < 1)
             break;
         return CONTROL_TRUE;
-    default:
-        break;
     }
 
-    return vf_next_control(vf, request, data);
+    return CONTROL_UNKNOWN;
 }
 
 //===========================================================================//

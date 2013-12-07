@@ -143,10 +143,17 @@ const struct m_obj_list vf_obj_list = {
     .description = "video filters",
 };
 
+// Try the cmd on each filter (starting with the first), and stop at the first
+// filter which does not return CONTROL_UNKNOWN for it.
 int vf_control_any(struct vf_chain *c, int cmd, void *arg)
 {
-    if (c->first)
-        return c->first->control(c->first, cmd, arg);
+    for (struct vf_instance *cur = c->first; cur; cur = cur->next) {
+        if (cur->control) {
+            int r = cur->control(cur, cmd, arg);
+            if (r != CONTROL_UNKNOWN)
+                return r;
+        }
+    }
     return CONTROL_UNKNOWN;
 }
 
@@ -245,7 +252,6 @@ static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
         .opts = c->opts,
         .hwdec = c->hwdec,
         .config = vf_next_config,
-        .control = vf_next_control,
         .query_format = vf_default_query_format,
         .filter = vf_default_filter,
         .out_pool = talloc_steal(vf, mp_image_pool_new(16)),
@@ -391,9 +397,11 @@ void vf_seek_reset(struct vf_chain *c)
 {
     if (!c->first)
         return;
-    c->first->control(c->first, VFCTRL_SEEK_RESET, NULL);
-    for (struct vf_instance *cur = c->first; cur; cur = cur->next)
+    for (struct vf_instance *cur = c->first; cur; cur = cur->next) {
+        if (cur->control)
+            cur->control(cur, VFCTRL_SEEK_RESET, NULL);
         vf_forget_frames(cur);
+    }
 }
 
 static int vf_reconfig_wrapper(struct vf_instance *vf, const struct mp_image_params *p,
@@ -466,11 +474,6 @@ int vf_next_config(struct vf_instance *vf,
     mp_image_params_guess_csp(&p);
     int r = vf_reconfig_wrapper(vf->next, &p, voflags);
     return r < 0 ? 0 : 1;
-}
-
-int vf_next_control(struct vf_instance *vf, int request, void *data)
-{
-    return vf->next->control(vf->next, request, data);
 }
 
 int vf_next_query_format(struct vf_instance *vf, unsigned int fmt)

@@ -136,7 +136,6 @@ void vf_add_output_frame(struct vf_instance *vf, struct mp_image *img);
 int vf_next_config(struct vf_instance *vf,
                    int width, int height, int d_width, int d_height,
                    unsigned int flags, unsigned int outfmt);
-int vf_next_control(struct vf_instance *vf, int request, void *data);
 int vf_next_query_format(struct vf_instance *vf, unsigned int fmt);
 
 int vf_next_reconfig(struct vf_instance *vf, struct mp_image_params *params,

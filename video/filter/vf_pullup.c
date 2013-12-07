@@ -269,9 +269,9 @@ static int control(vf_instance_t *vf, int request, void *data)
     switch (request) {
     case VFCTRL_SEEK_RESET:
         reset(vf);
-        break;
+        return CONTROL_OK;
     }
-    return vf_next_control(vf, request, data);
+    return CONTROL_UNKNOWN;
 }
 
 static int vf_open(vf_instance_t *vf)
