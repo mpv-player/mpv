@@ -258,6 +258,7 @@ static struct vf_instance *vf_open(struct MPOpts *opts, vf_instance_t *next,
     return vf;
 
 error:
+    mp_msg(MSGT_VFILTER, MSGL_ERR, "Creating filter '%s' failed.\n", name);
     talloc_free(vf);
     return NULL;
 }
