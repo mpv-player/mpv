@@ -201,9 +201,7 @@ void mixer_getbalance(struct mixer *mixer, float *val)
  * af_pan instance that was automatically inserted for balance control
  * only and is otherwise an identity transform, but if the filter was
  * there for another reason, then ignoring and overriding the original
- * values is completely wrong. In particular, this will break
- * automatically inserted downmix filters; the original coefficients that
- * are significantly below 1 will be overwritten with much higher values.
+ * values is completely wrong.
  */
 
 void mixer_setbalance(struct mixer *mixer, float val)
