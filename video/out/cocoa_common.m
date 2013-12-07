@@ -267,7 +267,7 @@ static void create_window(struct vo *vo, uint32_t d_width, uint32_t d_height,
         window_mask = NSTitledWindowMask|NSClosableWindowMask|
                       NSMiniaturizableWindowMask|NSResizableWindowMask;
     } else {
-        window_mask = NSBorderlessWindowMask;
+        window_mask = NSBorderlessWindowMask|NSResizableWindowMask;
     }
 
     s->window =
