@@ -209,6 +209,7 @@ List of Input Commands
     will have after moving.)
 
 ``run "command" "arg1" "arg2" ...``
+    (Unix only)
     Run the given command. Unlike in MPlayer/mplayer2 and earlier versions of
     mpv (0.2.x and older), this doesn't call the shell. Instead, the command
     is run directly, with each argument passed separately. Each argument is
