@@ -116,6 +116,10 @@ static const vf_info_t *const filter_list[] = {
     NULL
 };
 
+static void vf_uninit_filter(vf_instance_t *vf);
+static int vf_reconfig_wrapper(struct vf_instance *vf,
+                               const struct mp_image_params *params, int flags);
+
 static bool get_desc(struct m_obj_desc *dst, int index)
 {
     if (index >= MP_ARRAY_SIZE(filter_list) - 1)
@@ -139,9 +143,11 @@ const struct m_obj_list vf_obj_list = {
     .description = "video filters",
 };
 
-int vf_control(struct vf_instance *vf, int cmd, void *arg)
+int vf_control_any(struct vf_chain *c, int cmd, void *arg)
 {
-    return vf->control(vf, cmd, arg);
+    if (c->first)
+        return c->first->control(c->first, cmd, arg);
+    return CONTROL_UNKNOWN;
 }
 
 static void vf_fix_img_params(struct mp_image *img, struct mp_image_params *p)
@@ -210,12 +216,12 @@ static void print_fmt(int msglevel, struct vf_format *fmt)
     }
 }
 
-void vf_print_filter_chain(int msglevel, struct vf_instance *vf)
+void vf_print_filter_chain(struct vf_chain *c, int msglevel)
 {
     if (!mp_msg_test(MSGT_VFILTER, msglevel))
         return;
 
-    for (vf_instance_t *f = vf; f; f = f->next) {
+    for (vf_instance_t *f = c->first; f; f = f->next) {
         mp_msg(MSGT_VFILTER, msglevel, " [%s] ", f->info->name);
         print_fmt(msglevel, &f->fmt_in);
         if (f->next) {
@@ -226,8 +232,8 @@ void vf_print_filter_chain(int msglevel, struct vf_instance *vf)
     }
 }
 
-static struct vf_instance *vf_open(struct MPOpts *opts, vf_instance_t *next,
-                                   const char *name, char **args)
+static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
+                                   char **args)
 {
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &vf_obj_list, bstr0(name))) {
@@ -238,16 +244,17 @@ static struct vf_instance *vf_open(struct MPOpts *opts, vf_instance_t *next,
     vf_instance_t *vf = talloc_zero(NULL, struct vf_instance);
     *vf = (vf_instance_t) {
         .info = desc.p,
-        .opts = opts,
-        .next = next,
+        .opts = c->opts,
+        .hwdec = c->hwdec,
         .config = vf_next_config,
         .control = vf_next_control,
         .query_format = vf_default_query_format,
         .filter = vf_default_filter,
         .out_pool = talloc_steal(vf, mp_image_pool_new(16)),
+        .chain = c,
     };
     struct m_config *config = m_config_from_obj_desc(vf, &desc);
-    if (m_config_apply_defaults(config, name, opts->vf_defs) < 0)
+    if (m_config_apply_defaults(config, name, c->opts->vf_defs) < 0)
         goto error;
     if (m_config_set_obj_params(config, args) < 0)
         goto error;
@@ -263,8 +270,8 @@ error:
     return NULL;
 }
 
-vf_instance_t *vf_open_filter(struct MPOpts *opts, vf_instance_t *next,
-                              const char *name, char **args)
+static vf_instance_t *vf_open_filter(struct vf_chain *c, const char *name,
+                                     char **args)
 {
     if (strcmp(name, "vo") != 0) {
         int i, l = 0;
@@ -279,7 +286,35 @@ vf_instance_t *vf_open_filter(struct MPOpts *opts, vf_instance_t *next,
         mp_msg(MSGT_VFILTER, MSGL_INFO, "%s[%s]\n",
                "Opening video filter: ", str);
     }
-    return vf_open(opts, next, name, args);
+    return vf_open(c, name, args);
+}
+
+struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
+                                     char **args)
+{
+    struct vf_instance *vf = vf_open_filter(c, name, args);
+    if (vf) {
+        // Insert it before the last filter, which is the "vo" filter
+        struct vf_instance **pprev = &c->first;
+        while (*pprev && (*pprev)->next)
+            pprev = &(*pprev)->next;
+        vf->next = *pprev ? *pprev : NULL;
+        *pprev = vf;
+    }
+    return vf;
+}
+
+int vf_append_filter_list(struct vf_chain *c, struct m_obj_settings *list)
+{
+    for (int n = 0; list && list[n].name; n++) {
+        struct vf_instance *vf =
+            vf_append_filter(c, list[n].name, list[n].attribs);
+        if (vf) {
+            if (list[n].label)
+                vf->label = talloc_strdup(vf, list[n].label);
+        }
+    }
+    return 0;
 }
 
 // Used by filters to add a filtered frame to the output queue.
@@ -304,9 +339,7 @@ static struct mp_image *vf_dequeue_output_frame(struct vf_instance *vf)
     return res;
 }
 
-// Input a frame into the filter chain.
-// Return >= 0 on success, < 0 on failure (even if output frames were produced)
-int vf_filter_frame(struct vf_instance *vf, struct mp_image *img)
+static int vf_do_filter(struct vf_instance *vf, struct mp_image *img)
 {
     assert(vf->fmt_in.configured);
     vf_fix_img_params(img, &vf->fmt_in.params);
@@ -319,12 +352,24 @@ int vf_filter_frame(struct vf_instance *vf, struct mp_image *img)
     }
 }
 
+// Input a frame into the filter chain. Ownership of img is transferred.
+// Return >= 0 on success, < 0 on failure (even if output frames were produced)
+int vf_filter_frame(struct vf_chain *c, struct mp_image *img)
+{
+    if (c->first) {
+        return vf_do_filter(c->first, img);
+    } else {
+        talloc_free(img);
+        return 0;
+    }
+}
+
 // Output the next queued image (if any) from the full filter chain.
-struct mp_image *vf_chain_output_queued_frame(struct vf_instance *vf)
+struct mp_image *vf_output_queued_frame(struct vf_chain *c)
 {
     while (1) {
         struct vf_instance *last = NULL;
-        for (struct vf_instance * cur = vf; cur; cur = cur->next) {
+        for (struct vf_instance * cur = c->first; cur; cur = cur->next) {
             if (cur->num_out_queued)
                 last = cur;
         }
@@ -333,7 +378,7 @@ struct mp_image *vf_chain_output_queued_frame(struct vf_instance *vf)
         struct mp_image *img = vf_dequeue_output_frame(last);
         if (!last->next)
             return img;
-        vf_filter_frame(last->next, img);
+        vf_do_filter(last->next, img);
     }
 }
 
@@ -344,15 +389,17 @@ static void vf_forget_frames(struct vf_instance *vf)
     vf->num_out_queued = 0;
 }
 
-void vf_chain_seek_reset(struct vf_instance *vf)
+void vf_seek_reset(struct vf_chain *c)
 {
-    vf->control(vf, VFCTRL_SEEK_RESET, NULL);
-    for (struct vf_instance *cur = vf; cur; cur = cur->next)
+    if (!c->first)
+        return;
+    c->first->control(c->first, VFCTRL_SEEK_RESET, NULL);
+    for (struct vf_instance *cur = c->first; cur; cur = cur->next)
         vf_forget_frames(cur);
 }
 
-int vf_reconfig_wrapper(struct vf_instance *vf, const struct mp_image_params *p,
-                        int flags)
+static int vf_reconfig_wrapper(struct vf_instance *vf, const struct mp_image_params *p,
+                               int flags)
 {
     vf_forget_frames(vf);
     mp_image_pool_clear(vf->out_pool);
@@ -382,7 +429,6 @@ int vf_reconfig_wrapper(struct vf_instance *vf, const struct mp_image_params *p,
 int vf_next_reconfig(struct vf_instance *vf, struct mp_image_params *p,
                      int outflags)
 {
-    struct MPOpts *opts = vf->opts;
     int flags = vf->next->query_format(vf->next, p->imgfmt);
     if (!flags) {
         // hmm. colorspace mismatch!!!
@@ -390,9 +436,10 @@ int vf_next_reconfig(struct vf_instance *vf, struct mp_image_params *p,
         vf_instance_t *vf2;
         if (vf->next->info == &vf_info_scale)
             return -1;                                // scale->scale
-        vf2 = vf_open_filter(opts, vf->next, "scale", NULL);
+        vf2 = vf_open_filter(vf->chain, "scale", NULL);
         if (!vf2)
             return -1;      // shouldn't happen!
+        vf2->next = vf->next;
         vf->next = vf2;
         flags = vf->next->query_format(vf->next, p->imgfmt);
         if (!flags) {
@@ -437,42 +484,58 @@ int vf_next_query_format(struct vf_instance *vf, unsigned int fmt)
 
 //============================================================================
 
-vf_instance_t *append_filters(vf_instance_t *last,
-                              struct m_obj_settings *vf_settings)
+int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
 {
-    struct MPOpts *opts = last->opts;
-    vf_instance_t *vf;
-    int i;
+    // check if libvo and codec has common outfmt (no conversion):
+    struct vf_instance *vf = c->first;
+    int flags = 0;
+    for (;;) {
+        mp_msg(MSGT_VFILTER, MSGL_V, "Trying filter chain:\n");
+        vf_print_filter_chain(c, MSGL_V);
 
-    if (vf_settings) {
-        // We want to add them in the 'right order'
-        for (i = 0; vf_settings[i].name; i++)
-            /* NOP */;
-        for (i--; i >= 0; i--) {
-            //printf("Open filter %s\n",vf_settings[i].name);
-            vf = vf_open_filter(opts, last, vf_settings[i].name,
-                                vf_settings[i].attribs);
-            if (vf) {
-                if (vf_settings[i].label)
-                    vf->label = talloc_strdup(vf, vf_settings[i].label);
-                last = vf;
-            }
+        flags = vf->query_format(vf, params->imgfmt);
+        mp_msg(MSGT_CPLAYER, MSGL_DBG2, "vo_debug: query(%s) returned 0x%X \n",
+               vo_format_name(params->imgfmt), flags);
+        if ((flags & VFCAP_CSP_SUPPORTED_BY_HW)
+            || (flags & VFCAP_CSP_SUPPORTED))
+        {
+            break;
         }
+        // TODO: no match - we should use conversion...
+        if (strcmp(vf->info->name, "scale")) {
+            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Could not find matching colorspace - retrying with -vf scale...\n");
+            vf = vf_open_filter(c, "scale", NULL);
+            vf->next = c->first;
+            c->first = vf;
+            continue;
+        }
+        mp_tmsg(MSGT_CPLAYER, MSGL_WARN,
+            "The selected video_out device is incompatible with this codec.\n"\
+            "Try appending the scale filter to your filter list,\n"\
+            "e.g. -vf filter,scale instead of -vf filter.\n");
+        mp_tmsg(MSGT_VFILTER, MSGL_WARN, "Attempted filter chain:\n");
+        vf_print_filter_chain(c, MSGL_WARN);
+        c->initialized = -1;
+        return -1;               // failed
     }
-    return last;
+
+    int r = vf_reconfig_wrapper(c->first, params, 0);
+    c->initialized = r >= 0 ? 1 : -1;
+    mp_tmsg(MSGT_VFILTER, MSGL_V, "Video filter chain:\n");
+    vf_print_filter_chain(c, MSGL_V);
+    return r;
 }
 
-vf_instance_t *vf_find_by_label(vf_instance_t *chain, const char *label)
+struct vf_instance *vf_find_by_label(struct vf_chain *c, const char *label)
 {
-    while (chain) {
-        if (chain->label && label && strcmp(chain->label, label) == 0)
-            return chain;
-        chain = chain->next;
+    struct vf_instance *vf = c->first;
+    while (vf) {
+        if (vf->label && label && strcmp(vf->label, label) == 0)
+            return vf;
+        vf = vf->next;
     }
     return NULL;
 }
-
-//============================================================================
 
 void vf_uninit_filter(vf_instance_t *vf)
 {
@@ -482,13 +545,25 @@ void vf_uninit_filter(vf_instance_t *vf)
     talloc_free(vf);
 }
 
-void vf_uninit_filter_chain(vf_instance_t *vf)
+struct vf_chain *vf_new(struct MPOpts *opts)
 {
-    while (vf) {
-        vf_instance_t *next = vf->next;
+    struct vf_chain *c = talloc_ptrtype(NULL, c);
+    *c = (struct vf_chain){
+        .opts = opts,
+    };
+    return c;
+}
+
+void vf_destroy(struct vf_chain *c)
+{
+    if (!c)
+        return;
+    while (c->first) {
+        vf_instance_t *vf = c->first;
+        c->first = vf->next;
         vf_uninit_filter(vf);
-        vf = next;
     }
+    talloc_free(c);
 }
 
 // When changing the size of an image that had old_w/old_h with

@@ -1189,13 +1189,13 @@ static int probe_deint_filters(struct MPContext *mpctx, const char *cmd)
 
 static int get_deinterlacing(struct MPContext *mpctx)
 {
-    vf_instance_t *vf = mpctx->d_video->vfilter;
+    struct vf_chain *c = mpctx->d_video->vfilter;
     int enabled = 0;
-    if (vf->control(vf, VFCTRL_GET_DEINTERLACE, &enabled) != CONTROL_OK)
+    if (vf_control_any(c, VFCTRL_GET_DEINTERLACE, &enabled) != CONTROL_OK)
         enabled = -1;
     if (enabled < 0) {
         // vf_lavfi doesn't support VFCTRL_GET_DEINTERLACE
-        if (vf_find_by_label(vf, VF_DEINTERLACE_LABEL))
+        if (vf_find_by_label(c, VF_DEINTERLACE_LABEL))
             enabled = 1;
     }
     return enabled;
@@ -1203,14 +1203,14 @@ static int get_deinterlacing(struct MPContext *mpctx)
 
 static void set_deinterlacing(struct MPContext *mpctx, bool enable)
 {
-    vf_instance_t *vf = mpctx->d_video->vfilter;
-    if (vf_find_by_label(vf, VF_DEINTERLACE_LABEL)) {
+    struct vf_chain *c = mpctx->d_video->vfilter;
+    if (vf_find_by_label(c, VF_DEINTERLACE_LABEL)) {
         if (!enable)
             edit_filters(mpctx, STREAM_VIDEO, "del", "@" VF_DEINTERLACE_LABEL);
     } else {
         if ((get_deinterlacing(mpctx) > 0) != enable) {
             int arg = enable;
-            if (vf->control(vf, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
+            if (vf_control_any(c, VFCTRL_SET_DEINTERLACE, &arg) != CONTROL_OK)
                 probe_deint_filters(mpctx, "pre");
         }
     }

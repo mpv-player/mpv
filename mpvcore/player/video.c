@@ -58,18 +58,19 @@ static void recreate_video_filters(struct MPContext *mpctx)
     struct dec_video *d_video = mpctx->d_video;
     assert(d_video);
 
-    vf_uninit_filter_chain(d_video->vfilter);
+    vf_destroy(d_video->vfilter);
+    d_video->vfilter = vf_new(opts);
+    d_video->vfilter->hwdec = &d_video->hwdec_info;
 
-    d_video->vfilter = vf_open_filter(opts, NULL, "vo", NULL);
-    if (!d_video->vfilter)
-        abort();
-    d_video->vfilter->control(d_video->vfilter, VFCTRL_SET_VO, mpctx->video_out);
+    vf_append_filter(d_video->vfilter, "vo", NULL);
+    vf_control_any(d_video->vfilter, VFCTRL_SET_VO, mpctx->video_out);
 
-    d_video->vfilter = append_filters(d_video->vfilter, opts->vf_settings);
+    vf_append_filter_list(d_video->vfilter, opts->vf_settings);
 
-    struct vf_instance *vf = d_video->vfilter;
+    // for vf_sub
+    vf_control_any(d_video->vfilter, VFCTRL_SET_OSD_OBJ, mpctx->osd);
     mpctx->osd->render_subs_in_filter
-        = vf->control(vf, VFCTRL_INIT_OSD, NULL) == VO_TRUE;
+        = vf_control_any(d_video->vfilter, VFCTRL_INIT_OSD, NULL) == CONTROL_OK;
 }
 
 int reinit_video_filters(struct MPContext *mpctx)
@@ -82,7 +83,7 @@ int reinit_video_filters(struct MPContext *mpctx)
     recreate_video_filters(mpctx);
     video_reinit_vo(d_video);
 
-    return d_video->vf_initialized > 0 ? 0 : -1;
+    return d_video->vfilter && d_video->vfilter->initialized > 0 ? 0 : -1;
 }
 
 int reinit_video_chain(struct MPContext *mpctx)
@@ -189,7 +190,7 @@ static bool filter_output_queued_frame(struct MPContext *mpctx)
     struct dec_video *d_video = mpctx->d_video;
     struct vo *video_out = mpctx->video_out;
 
-    struct mp_image *img = vf_chain_output_queued_frame(d_video->vfilter);
+    struct mp_image *img = vf_output_queued_frame(d_video->vfilter);
     if (img)
         vo_queue_image(video_out, img);
     talloc_free(img);
@@ -215,7 +216,7 @@ static void init_filter_params(struct MPContext *mpctx)
     // might recreate the chain a second time, which is not very elegant, but
     // allows us to test whether enabling deinterlacing works with the current
     // video format and other filters.
-    if (d_video->vf_initialized != 1)
+    if (!d_video->vfilter || d_video->vfilter->initialized != 1)
         return;
 
     if (d_video->vf_reconfig_count <= mpctx->last_vf_reconfig_count) {
@@ -286,7 +287,6 @@ double update_video(struct MPContext *mpctx, double endpts)
 {
     struct dec_video *d_video = mpctx->d_video;
     struct vo *video_out = mpctx->video_out;
-    vf_control(d_video->vfilter, VFCTRL_SET_OSD_OBJ, mpctx->osd); // for vf_sub
 
     if (d_video->header->attached_picture)
         return update_video_attached_pic(mpctx);

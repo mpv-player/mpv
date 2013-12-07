@@ -59,8 +59,8 @@ const vd_functions_t * const mpcodecs_vd_drivers[] = {
 void video_reset_decoding(struct dec_video *d_video)
 {
     video_vd_control(d_video, VDCTRL_RESET, NULL);
-    if (d_video->vf_initialized == 1)
-        vf_chain_seek_reset(d_video->vfilter);
+    if (d_video->vfilter && d_video->vfilter->initialized == 1)
+        vf_seek_reset(d_video->vfilter);
     d_video->num_buffered_pts = 0;
     d_video->last_pts = MP_NOPTS_VALUE;
     d_video->last_packet_pdts = MP_NOPTS_VALUE;
@@ -81,15 +81,14 @@ int video_vd_control(struct dec_video *d_video, int cmd, void *arg)
 
 int video_set_colors(struct dec_video *d_video, const char *item, int value)
 {
-    vf_instance_t *vf = d_video->vfilter;
     vf_equalizer_t data;
 
     data.item = item;
     data.value = value;
 
     mp_dbg(MSGT_DECVIDEO, MSGL_V, "set video colors %s=%d \n", item, value);
-    if (vf) {
-        int ret = vf_control(vf, VFCTRL_SET_EQUALIZER, &data);
+    if (d_video->vfilter) {
+        int ret = vf_control_any(d_video->vfilter, VFCTRL_SET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE)
             return 1;
     }
@@ -100,14 +99,13 @@ int video_set_colors(struct dec_video *d_video, const char *item, int value)
 
 int video_get_colors(struct dec_video *d_video, const char *item, int *value)
 {
-    vf_instance_t *vf = d_video->vfilter;
     vf_equalizer_t data;
 
     data.item = item;
 
     mp_dbg(MSGT_DECVIDEO, MSGL_V, "get video colors %s \n", item);
-    if (vf) {
-        int ret = vf_control(vf, VFCTRL_GET_EQUALIZER, &data);
+    if (d_video->vfilter) {
+        int ret = vf_control_any(d_video->vfilter, VFCTRL_GET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE) {
             *value = data.value;
             return 1;
@@ -128,7 +126,7 @@ void video_uninit(struct dec_video *d_video)
         d_video->vd_driver->uninit(d_video);
     }
     talloc_free(d_video->priv);
-    vf_uninit_filter_chain(d_video->vfilter);
+    vf_destroy(d_video->vfilter);
     talloc_free(d_video);
 }
 
@@ -383,7 +381,6 @@ int mpcodecs_reconfig_vo(struct dec_video *d_video,
                          const struct mp_image_params *params)
 {
     struct MPOpts *opts = d_video->opts;
-    vf_instance_t *vf = d_video->vfilter;
     struct mp_image_params p = *params;
     struct sh_video *sh = d_video->header->video;
 
@@ -396,37 +393,6 @@ int mpcodecs_reconfig_vo(struct dec_video *d_video,
 
     mp_msg(MSGT_DECVIDEO, MSGL_V, "VDec: vo config request - %d x %d (%s)\n",
            p.w, p.h, vo_format_name(p.imgfmt));
-
-    // check if libvo and codec has common outfmt (no conversion):
-    int flags = 0;
-    for (;;) {
-        mp_msg(MSGT_VFILTER, MSGL_V, "Trying filter chain:\n");
-        vf_print_filter_chain(MSGL_V, vf);
-
-        flags = vf->query_format(vf, p.imgfmt);
-        mp_msg(MSGT_CPLAYER, MSGL_DBG2, "vo_debug: query(%s) returned 0x%X \n",
-               vo_format_name(p.imgfmt), flags);
-        if ((flags & VFCAP_CSP_SUPPORTED_BY_HW)
-            || (flags & VFCAP_CSP_SUPPORTED))
-        {
-            break;
-        }
-        // TODO: no match - we should use conversion...
-        if (strcmp(vf->info->name, "scale")) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Could not find matching colorspace - retrying with -vf scale...\n");
-            vf = vf_open_filter(opts, vf, "scale", NULL);
-            continue;
-        }
-        mp_tmsg(MSGT_CPLAYER, MSGL_WARN,
-            "The selected video_out device is incompatible with this codec.\n"\
-            "Try appending the scale filter to your filter list,\n"\
-            "e.g. -vf filter,scale instead of -vf filter.\n");
-        mp_tmsg(MSGT_VFILTER, MSGL_WARN, "Attempted filter chain:\n");
-        vf_print_filter_chain(MSGL_WARN, vf);
-        d_video->vf_initialized = -1;
-        return -1;               // failed
-    }
-    d_video->vfilter = vf;
 
     float decoder_aspect = p.d_w / (float)p.d_h;
     if (d_video->initial_decoder_aspect == 0)
@@ -473,16 +439,10 @@ int mpcodecs_reconfig_vo(struct dec_video *d_video,
     mp_msg(MSGT_CPLAYER, MSGL_V, "VO Config (%dx%d->%dx%d,0x%X)\n",
            p.w, p.h, p.d_w, p.d_h, p.imgfmt);
 
-    if (vf_reconfig_wrapper(vf, &p, 0) < 0) {
+    if (vf_reconfig(d_video->vfilter, &p) < 0) {
         mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "FATAL: Cannot initialize video driver.\n");
-        d_video->vf_initialized = -1;
         return -1;
     }
-
-    mp_tmsg(MSGT_VFILTER, MSGL_V, "Video filter chain:\n");
-    vf_print_filter_chain(MSGL_V, vf);
-
-    d_video->vf_initialized = 1;
 
     d_video->vf_input = p;
 

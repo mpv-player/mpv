@@ -994,7 +994,8 @@ void run_playloop(struct MPContext *mpctx)
         if (!vo->frame_loaded && (!mpctx->paused || mpctx->restart_playback)) {
             double frame_time = update_video(mpctx, endpts);
             mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "*** ftime=%5.3f ***\n", frame_time);
-            if (mpctx->d_video->vf_initialized < 0) {
+            if (mpctx->d_video->vfilter && mpctx->d_video->vfilter->initialized < 0)
+            {
                 MP_FATAL(mpctx, "\nFATAL: Could not initialize video filters "
                          "(-vf) or video output (-vo).\n");
                 int uninit = INITIALIZED_VCODEC;

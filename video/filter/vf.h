@@ -29,6 +29,7 @@
 struct MPOpts;
 struct vf_instance;
 struct vf_priv_s;
+struct m_obj_settings;
 
 typedef struct vf_info {
     const char *description;
@@ -82,10 +83,24 @@ typedef struct vf_instance {
     struct mp_image_pool *out_pool;
     struct vf_priv_s *priv;
     struct MPOpts *opts;
+    struct mp_hwdec_info *hwdec;
 
     struct mp_image **out_queued;
     int num_out_queued;
+
+    // Temporary
+    struct vf_chain *chain;
 } vf_instance_t;
+
+// A chain of video filters
+struct vf_chain {
+    int initialized; // 0: no, 1: yes, -1: attempted to, but failed
+
+    struct vf_instance *first;
+
+    struct MPOpts *opts;
+    struct mp_hwdec_info *hwdec;
+};
 
 typedef struct vf_seteq {
     const char *item;
@@ -104,21 +119,25 @@ enum vf_ctrl {
      * access OSD/subtitle state outside of normal OSD draw time. */
     VFCTRL_SET_OSD_OBJ,
     VFCTRL_SET_VO,
-    VFCTRL_GET_HWDEC_INFO,   // for hwdec filters
 };
 
-int vf_control(struct vf_instance *vf, int cmd, void *arg);
+struct vf_chain *vf_new(struct MPOpts *opts);
+void vf_destroy(struct vf_chain *c);
+int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params);
+int vf_control_any(struct vf_chain *c, int cmd, void *arg);
+int vf_filter_frame(struct vf_chain *c, struct mp_image *img);
+struct mp_image *vf_output_queued_frame(struct vf_chain *c);
+void vf_seek_reset(struct vf_chain *c);
+struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
+                                     char **args);
+int vf_append_filter_list(struct vf_chain *c, struct m_obj_settings *list);
+struct vf_instance *vf_find_by_label(struct vf_chain *c, const char *label);
+void vf_print_filter_chain(struct vf_chain *c, int msglevel);
 
+// Filter internal API
 struct mp_image *vf_alloc_out_image(struct vf_instance *vf);
 void vf_make_out_image_writeable(struct vf_instance *vf, struct mp_image *img);
 void vf_add_output_frame(struct vf_instance *vf, struct mp_image *img);
-
-int vf_filter_frame(struct vf_instance *vf, struct mp_image *img);
-struct mp_image *vf_chain_output_queued_frame(struct vf_instance *vf);
-void vf_chain_seek_reset(struct vf_instance *vf);
-
-vf_instance_t *vf_open_filter(struct MPOpts *opts, vf_instance_t *next,
-                              const char *name, char **args);
 
 // default wrappers:
 int vf_next_config(struct vf_instance *vf,
@@ -130,18 +149,7 @@ int vf_next_query_format(struct vf_instance *vf, unsigned int fmt);
 int vf_next_reconfig(struct vf_instance *vf, struct mp_image_params *params,
                      int flags);
 
-struct m_obj_settings;
-vf_instance_t *append_filters(vf_instance_t *last,
-                              struct m_obj_settings *vf_settings);
-
-vf_instance_t *vf_find_by_label(vf_instance_t *chain, const char *label);
-
-void vf_uninit_filter(vf_instance_t *vf);
-void vf_uninit_filter_chain(vf_instance_t *vf);
-
-int vf_reconfig_wrapper(struct vf_instance *vf,
-                        const struct mp_image_params *params, int flags);
-void vf_print_filter_chain(int msglevel, struct vf_instance *vf);
+// Helpers
 
 void vf_rescale_dsize(int *d_width, int *d_height, int old_w, int old_h,
                       int new_w, int new_h);
