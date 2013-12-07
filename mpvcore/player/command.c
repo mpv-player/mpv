@@ -24,7 +24,6 @@
 #include <assert.h>
 #include <time.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 
 #include <libavutil/avstring.h>
 #include <libavutil/common.h>
@@ -66,6 +65,9 @@
 #include "screenshot.h"
 #if HAVE_SYS_MMAN_H
 #include <sys/mman.h>
+#endif
+#ifndef __MINGW32__
+#include <sys/wait.h>
 #endif
 
 #include "osdep/io.h"
