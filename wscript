@@ -383,12 +383,18 @@ audio_output_features = [
         'deps_neg': [ 'sdl2' ],
         'func': check_pkg_config('sdl')
     }, {
+        'name': 'oss-audio-4front',
+        'desc': 'OSS (implementation from opensound.com)',
+        'func': check_oss_4front,
+        'groups' : [ 'oss-audio' ]
+    }, {
         'name': 'oss-audio-native',
         'desc': 'OSS (platform-specific OSS implementation)',
         'func': check_cc(header_name='sys/soundcard.h',
                          defines=['PATH_DEV_DSP="/dev/dsp"',
                                   'PATH_DEV_MIXER="/dev/mixer"'],
                          fragment=load_fragment('oss_audio.c')),
+        'deps_neg': [ 'oss-audio-4front' ],
         'groups' : [ 'oss-audio' ]
     }, {
         'name': 'oss-audio-sunaudio',
@@ -398,13 +404,7 @@ audio_output_features = [
                          defines=['PATH_DEV_DSP="/dev/sound"',
                                   'PATH_DEV_MIXER="/dev/mixer"'],
                          fragment=load_fragment('oss_audio_sunaudio.c')),
-        'deps_neg': [ 'oss-audio-native' ],
-        'groups' : [ 'oss-audio' ]
-    }, {
-        'name': 'oss-audio-4front',
-        'desc': 'OSS (implementation from opensound.com)',
-        'func': check_oss_4front,
-        'deps_neg': [ 'oss-audio-native', 'oss-audio-sunaudio' ],
+        'deps_neg': [ 'oss-audio-4front', 'oss-audio-native' ],
         'groups' : [ 'oss-audio' ]
     }, {
         'name': '--oss-audio',
