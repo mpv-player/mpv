@@ -44,9 +44,14 @@ typedef struct vf_info {
 typedef struct vf_instance {
     const vf_info_t *info;
 
-    // Note: the callee is allowed to write *params.
-    int (*reconfig)(struct vf_instance *vf, struct mp_image_params *params,
-                    int flags);
+    // Initialize the filter. The filter must set *out to the same image
+    // params as the images the filter functions will return for the given
+    // *in format.
+    // Note that by default, only formats reported as supported by query_format
+    // will be allowed for *in.
+    // Returns >= 0 on success, < 0 on error.
+    int (*reconfig)(struct vf_instance *vf, struct mp_image_params *in,
+                    struct mp_image_params *out);
 
     // Legacy variant, use reconfig instead.
     int (*config)(struct vf_instance *vf,
@@ -80,8 +85,9 @@ typedef struct vf_instance {
     struct mp_image **out_queued;
     int num_out_queued;
 
-    // Temporary
-    struct vf_chain *chain;
+    // Caches valid output formats.
+    uint8_t last_outfmts[IMGFMT_END - IMGFMT_START];
+
     struct vf_instance *next;
 } vf_instance_t;
 
@@ -138,8 +144,6 @@ int vf_next_config(struct vf_instance *vf,
                    unsigned int flags, unsigned int outfmt);
 int vf_next_query_format(struct vf_instance *vf, unsigned int fmt);
 
-int vf_next_reconfig(struct vf_instance *vf, struct mp_image_params *params,
-                     int flags);
 
 // Helpers
 

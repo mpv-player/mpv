@@ -116,10 +116,6 @@ static const vf_info_t *const filter_list[] = {
     NULL
 };
 
-static void vf_uninit_filter(vf_instance_t *vf);
-static int vf_reconfig_wrapper(struct vf_instance *vf,
-                               const struct mp_image_params *params, int flags);
-
 static bool get_desc(struct m_obj_desc *dst, int index)
 {
     if (index >= MP_ARRAY_SIZE(filter_list) - 1)
@@ -194,17 +190,10 @@ void vf_make_out_image_writeable(struct vf_instance *vf, struct mp_image *img)
 
 //============================================================================
 
+// The default callback assumes all formats are passed through.
 static int vf_default_query_format(struct vf_instance *vf, unsigned int fmt)
 {
     return vf_next_query_format(vf, fmt);
-}
-
-
-static struct mp_image *vf_default_filter(struct vf_instance *vf,
-                                          struct mp_image *mpi)
-{
-    assert(!vf->filter_ext);
-    return mpi;
 }
 
 static void print_fmt(int msglevel, struct mp_image_params *p)
@@ -228,11 +217,7 @@ void vf_print_filter_chain(struct vf_chain *c, int msglevel)
 
     for (vf_instance_t *f = c->first; f; f = f->next) {
         mp_msg(MSGT_VFILTER, msglevel, " [%s] ", f->info->name);
-        print_fmt(msglevel, &f->fmt_in);
-        if (f->next) {
-            mp_msg(MSGT_VFILTER, msglevel, " -> ");
-            print_fmt(msglevel, &f->fmt_out);
-        }
+        print_fmt(msglevel, &f->fmt_out);
         mp_msg(MSGT_VFILTER, msglevel, "\n");
     }
 }
@@ -251,11 +236,8 @@ static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
         .info = desc.p,
         .opts = c->opts,
         .hwdec = c->hwdec,
-        .config = vf_next_config,
         .query_format = vf_default_query_format,
-        .filter = vf_default_filter,
         .out_pool = talloc_steal(vf, mp_image_pool_new(16)),
-        .chain = c,
     };
     struct m_config *config = m_config_from_obj_desc(vf, &desc);
     if (m_config_apply_defaults(config, name, c->opts->vf_defs) < 0)
@@ -299,7 +281,8 @@ struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
     struct vf_instance *vf = vf_open_filter(c, name, args);
     if (vf) {
         // Insert it before the last filter, which is the "vo" filter
-        struct vf_instance **pprev = &c->first;
+        // (But after the "in" pseudo-filter)
+        struct vf_instance **pprev = &c->first->next;
         while (*pprev && (*pprev)->next)
             pprev = &(*pprev)->next;
         vf->next = *pprev ? *pprev : NULL;
@@ -351,7 +334,9 @@ static int vf_do_filter(struct vf_instance *vf, struct mp_image *img)
     if (vf->filter_ext) {
         return vf->filter_ext(vf, img);
     } else {
-        vf_add_output_frame(vf, vf->filter(vf, img));
+        if (vf->filter)
+            img = vf->filter(vf, img);
+        vf_add_output_frame(vf, img);
         return 0;
     }
 }
@@ -360,17 +345,18 @@ static int vf_do_filter(struct vf_instance *vf, struct mp_image *img)
 // Return >= 0 on success, < 0 on failure (even if output frames were produced)
 int vf_filter_frame(struct vf_chain *c, struct mp_image *img)
 {
-    if (c->first) {
-        return vf_do_filter(c->first, img);
-    } else {
+    if (c->initialized < 1) {
         talloc_free(img);
-        return 0;
+        return -1;
     }
+    return vf_do_filter(c->first, img);
 }
 
 // Output the next queued image (if any) from the full filter chain.
 struct mp_image *vf_output_queued_frame(struct vf_chain *c)
 {
+    if (c->initialized < 1)
+        return NULL;
     while (1) {
         struct vf_instance *last = NULL;
         for (struct vf_instance * cur = c->first; cur; cur = cur->next) {
@@ -395,8 +381,6 @@ static void vf_forget_frames(struct vf_instance *vf)
 
 void vf_seek_reset(struct vf_chain *c)
 {
-    if (!c->first)
-        return;
     for (struct vf_instance *cur = c->first; cur; cur = cur->next) {
         if (cur->control)
             cur->control(cur, VFCTRL_SEEK_RESET, NULL);
@@ -404,62 +388,11 @@ void vf_seek_reset(struct vf_chain *c)
     }
 }
 
-static int vf_reconfig_wrapper(struct vf_instance *vf, const struct mp_image_params *p,
-                               int flags)
-{
-    vf_forget_frames(vf);
-    mp_image_pool_clear(vf->out_pool);
-
-    vf->fmt_in = *p;
-    vf->fmt_out = (struct mp_image_params){0};
-
-    int r;
-    if (vf->reconfig) {
-        struct mp_image_params params = *p;
-        r = vf->reconfig(vf, &params, flags);
-    } else {
-        r = vf->config(vf, p->w, p->h, p->d_w, p->d_h, flags, p->imgfmt);
-        r = r ? 0 : -1;
-    }
-    if (r >= 0) {
-        if (vf->next)
-            vf->fmt_out = vf->next->fmt_in;
-    } else {
-        vf->fmt_in = (struct mp_image_params){0};
-    }
-    return r;
-}
-
-int vf_next_reconfig(struct vf_instance *vf, struct mp_image_params *p,
-                     int outflags)
-{
-    int flags = vf->next->query_format(vf->next, p->imgfmt);
-    if (!flags) {
-        // hmm. colorspace mismatch!!!
-        // let's insert the 'scale' filter, it does the job for us:
-        vf_instance_t *vf2;
-        if (vf->next->info == &vf_info_scale)
-            return -1;                                // scale->scale
-        vf2 = vf_open_filter(vf->chain, "scale", NULL);
-        if (!vf2)
-            return -1;      // shouldn't happen!
-        vf2->next = vf->next;
-        vf->next = vf2;
-        flags = vf->next->query_format(vf->next, p->imgfmt);
-        if (!flags) {
-            mp_tmsg(MSGT_VFILTER, MSGL_ERR, "Cannot find matching colorspace, "
-                    "even by inserting 'scale' :(\n");
-            return -1; // FAIL
-        }
-    }
-    return vf_reconfig_wrapper(vf->next, p, outflags);
-}
-
 int vf_next_config(struct vf_instance *vf,
                    int width, int height, int d_width, int d_height,
                    unsigned int voflags, unsigned int outfmt)
 {
-    struct mp_image_params p = {
+    vf->fmt_out = (struct mp_image_params) {
         .imgfmt = outfmt,
         .w = width,
         .h = height,
@@ -470,58 +403,117 @@ int vf_next_config(struct vf_instance *vf,
         .chroma_location = vf->fmt_in.chroma_location,
         .outputlevels = vf->fmt_in.outputlevels,
     };
-    // Fix csp in case of pixel format change
-    mp_image_params_guess_csp(&p);
-    int r = vf_reconfig_wrapper(vf->next, &p, voflags);
-    return r < 0 ? 0 : 1;
+    return 1;
 }
 
 int vf_next_query_format(struct vf_instance *vf, unsigned int fmt)
 {
-    return vf->next->query_format(vf->next, fmt);
+    return fmt >= IMGFMT_START && fmt < IMGFMT_END
+           ? vf->last_outfmts[fmt - IMGFMT_START] : 0;
 }
 
-//============================================================================
+// Mark accepted input formats in fmts[]. Note that ->query_format will
+// typically (but not always) call vf_next_query_format() to check whether
+// an output format is supported.
+static void query_formats(uint8_t *fmts, struct vf_instance *vf)
+{
+    for (int n = IMGFMT_START; n < IMGFMT_END; n++)
+        fmts[n - IMGFMT_START] = vf->query_format(vf, n);
+}
+
+static bool is_conv_filter(struct vf_instance *vf)
+{
+    return vf && strcmp(vf->info->name, "scale") == 0;
+}
+
+static void update_formats(struct vf_chain *c, struct vf_instance *vf,
+                           uint8_t *fmts)
+{
+    if (vf->next)
+        update_formats(c, vf->next, vf->last_outfmts);
+    query_formats(fmts, vf);
+    bool has_in = false, has_out = false;
+    for (int n = IMGFMT_START; n < IMGFMT_END; n++) {
+        has_in |= !!fmts[n - IMGFMT_START];
+        has_out |= !!vf->last_outfmts[n - IMGFMT_START];
+    }
+    if (has_out && !has_in && !is_conv_filter(vf) &&
+        !is_conv_filter(vf->next))
+    {
+        // If there are output formats, but no input formats (meaning the
+        // filters after vf work, but vf can't output any format the filters
+        // after it accept), try to insert a conversion filter.
+        mp_tmsg(MSGT_VFILTER, MSGL_INFO, "Using conversion filter.\n");
+        struct vf_instance *conv = vf_open(c, "scale", NULL);
+        if (conv) {
+            conv->next = vf->next;
+            vf->next = conv;
+            update_formats(c, conv, vf->last_outfmts);
+            query_formats(fmts, vf);
+        }
+    }
+    for (int n = IMGFMT_START; n < IMGFMT_END; n++)
+        has_in |= !!fmts[n - IMGFMT_START];
+    if (!has_in) {
+        // Pretend all out formats work. All this does it getting better
+        // error messages in some cases, so we can configure all filter
+        // until it fails, which will be visible in vf_print_filter_chain().
+        for (int n = IMGFMT_START; n < IMGFMT_END; n++)
+            vf->last_outfmts[n - IMGFMT_START] = VFCAP_CSP_SUPPORTED;
+        query_formats(fmts, vf);
+    }
+}
+
+static int vf_reconfig_wrapper(struct vf_instance *vf,
+                               const struct mp_image_params *p)
+{
+    vf_forget_frames(vf);
+    if (vf->out_pool)
+        mp_image_pool_clear(vf->out_pool);
+
+    if (!vf->query_format(vf, p->imgfmt))
+        return -2;
+
+    vf->fmt_out = vf->fmt_in = *p;
+
+    int r;
+    if (vf->reconfig) {
+        r = vf->reconfig(vf, &vf->fmt_in, &vf->fmt_out);
+    } else if (vf->config) {
+        r = vf->config(vf, p->w, p->h, p->d_w, p->d_h, 0, p->imgfmt) ? 0 : -1;
+    } else {
+        r = 0;
+    }
+
+    if (!mp_image_params_equals(&vf->fmt_in, p))
+        r = -2;
+
+    // Fix csp in case of pixel format change
+    if (r >= 0)
+        mp_image_params_guess_csp(&vf->fmt_out);
+
+    return r;
+}
 
 int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
 {
-    // check if libvo and codec has common outfmt (no conversion):
-    struct vf_instance *vf = c->first;
-    int flags = 0;
-    for (;;) {
-        mp_msg(MSGT_VFILTER, MSGL_V, "Trying filter chain:\n");
-        vf_print_filter_chain(c, MSGL_V);
-
-        flags = vf->query_format(vf, params->imgfmt);
-        mp_msg(MSGT_CPLAYER, MSGL_DBG2, "vo_debug: query(%s) returned 0x%X \n",
-               vo_format_name(params->imgfmt), flags);
-        if ((flags & VFCAP_CSP_SUPPORTED_BY_HW)
-            || (flags & VFCAP_CSP_SUPPORTED))
-        {
+    struct mp_image_params cur = *params;
+    int r = 0;
+    c->first->fmt_in = *params;
+    uint8_t unused[IMGFMT_END - IMGFMT_START];
+    update_formats(c, c->first, unused);
+    for (struct vf_instance *vf = c->first; vf; vf = vf->next) {
+        r = vf_reconfig_wrapper(vf, &cur);
+        if (r < 0)
             break;
-        }
-        // TODO: no match - we should use conversion...
-        if (strcmp(vf->info->name, "scale")) {
-            mp_tmsg(MSGT_DECVIDEO, MSGL_INFO, "Could not find matching colorspace - retrying with -vf scale...\n");
-            vf = vf_open_filter(c, "scale", NULL);
-            vf->next = c->first;
-            c->first = vf;
-            continue;
-        }
-        mp_tmsg(MSGT_CPLAYER, MSGL_WARN,
-            "The selected video_out device is incompatible with this codec.\n"\
-            "Try appending the scale filter to your filter list,\n"\
-            "e.g. -vf filter,scale instead of -vf filter.\n");
-        mp_tmsg(MSGT_VFILTER, MSGL_WARN, "Attempted filter chain:\n");
-        vf_print_filter_chain(c, MSGL_WARN);
-        c->initialized = -1;
-        return -1;               // failed
+        cur = vf->fmt_out;
     }
-
-    int r = vf_reconfig_wrapper(c->first, params, 0);
-    c->initialized = r >= 0 ? 1 : -1;
-    mp_tmsg(MSGT_VFILTER, MSGL_V, "Video filter chain:\n");
-    vf_print_filter_chain(c, MSGL_V);
+    c->initialized = r < 0 ? -1 : 1;
+    int loglevel = r < 0 ? MSGL_WARN : MSGL_V;
+    if (r == -2)
+        mp_tmsg(MSGT_VFILTER, MSGL_ERR, "Image formats incompatible.\n");
+    mp_tmsg(MSGT_VFILTER, loglevel, "Video filter chain:\n");
+    vf_print_filter_chain(c, loglevel);
     return r;
 }
 
@@ -536,7 +528,7 @@ struct vf_instance *vf_find_by_label(struct vf_chain *c, const char *label)
     return NULL;
 }
 
-void vf_uninit_filter(vf_instance_t *vf)
+static void vf_uninit_filter(vf_instance_t *vf)
 {
     if (vf->uninit)
         vf->uninit(vf);
@@ -544,11 +536,25 @@ void vf_uninit_filter(vf_instance_t *vf)
     talloc_free(vf);
 }
 
+static int input_query_format(struct vf_instance *vf, unsigned int fmt)
+{
+    // Setting fmt_in is guaranteed by vf_reconfig().
+    if (fmt == vf->fmt_in.imgfmt)
+        return vf_next_query_format(vf, fmt);
+    return 0;
+}
+
 struct vf_chain *vf_new(struct MPOpts *opts)
 {
     struct vf_chain *c = talloc_ptrtype(NULL, c);
     *c = (struct vf_chain){
         .opts = opts,
+    };
+    static const struct vf_info in = { .name = "in" };
+    c->first = talloc(c, struct vf_instance);
+    *c->first = (struct vf_instance) {
+        .info = &in,
+        .query_format = input_query_format,
     };
     return c;
 }

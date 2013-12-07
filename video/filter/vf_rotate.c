@@ -66,24 +66,26 @@ static void rotate(unsigned char* dst,unsigned char* src,int dststride,int srcst
     }
 }
 
-static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags)
+static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
+                    struct mp_image_params *out)
 {
+    *out = *in;
     if (vf->priv->direction & 4) {
-        if (p->w < p->h)
+        if (in->w < in->h)
             vf->priv->direction &= 3;
     }
     if (vf->priv->direction & 4)
-        return vf_next_reconfig(vf, p, flags);
-    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(p->imgfmt);
-    int a_w = MP_ALIGN_DOWN(p->w, desc.align_x);
-    int a_h = MP_ALIGN_DOWN(p->h, desc.align_y);
-    vf_rescale_dsize(&p->d_w, &p->d_h, p->w, p->h, a_w, a_h);
-    p->w = a_h;
-    p->h = a_w;
-    int t = p->d_w;
-    p->d_w = p->d_h;
-    p->d_h = t;
-    return vf_next_reconfig(vf, p, flags);
+        return 0;
+    struct mp_imgfmt_desc desc = mp_imgfmt_get_desc(in->imgfmt);
+    int a_w = MP_ALIGN_DOWN(in->w, desc.align_x);
+    int a_h = MP_ALIGN_DOWN(in->h, desc.align_y);
+    vf_rescale_dsize(&out->d_w, &out->d_h, in->w, in->h, a_w, a_h);
+    out->w = a_h;
+    out->h = a_w;
+    int t = out->d_w;
+    out->d_w = out->d_h;
+    out->d_h = t;
+    return 0;
 }
 
 static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)

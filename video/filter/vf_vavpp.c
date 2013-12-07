@@ -240,15 +240,16 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *in)
     return 0;
 }
 
-static int reconfig(struct vf_instance *vf, struct mp_image_params *params,
-                    int flags)
+static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
+                    struct mp_image_params *out)
 {
     struct vf_priv_s *p = vf->priv;
 
     p->prev_pts = MP_NOPTS_VALUE;
-    p->params = *params;
-    params->imgfmt = IMGFMT_VAAPI;
-    return vf_next_reconfig(vf, params, flags);
+    p->params = *in;
+    *out = *in;
+    out->imgfmt = IMGFMT_VAAPI;
+    return 0;
 }
 
 static void uninit(struct vf_instance *vf)

@@ -35,10 +35,14 @@ struct vf_priv_s {
 };
 #define video_out (vf->priv->vo)
 
-static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags)
+static int reconfig(struct vf_instance *vf, struct mp_image_params *in,
+                    struct mp_image_params *out)
 {
     if (!video_out)
         return -1;
+
+    struct mp_image_params *p = in;
+    *out = *in;
 
     if (p->w <= 0 || p->h <= 0 || p->d_w <= 0 || p->d_h <= 0) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "VO: invalid dimensions!\n");
@@ -46,14 +50,13 @@ static int reconfig(struct vf_instance *vf, struct mp_image_params *p, int flags
     }
 
     const struct vo_driver *info = video_out->driver;
-    mp_msg(MSGT_CPLAYER, MSGL_INFO, "VO: [%s] %dx%d => %dx%d %s %s\n",
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "VO: [%s] %dx%d => %dx%d %s\n",
            info->name,
            p->w, p->h, p->d_w, p->d_h,
-           vo_format_name(p->imgfmt),
-           (flags & VOFLAG_FLIPPING) ? " [flip]" : "");
+           vo_format_name(p->imgfmt));
     mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Description: %s\n", info->description);
 
-    return vo_reconfig(video_out, p, flags);
+    return vo_reconfig(video_out, p, 0);
 }
 
 static int control(struct vf_instance *vf, int request, void *data)
