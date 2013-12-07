@@ -169,8 +169,8 @@ static void vf_fix_img_params(struct mp_image *img, struct mp_image_params *p)
 // the last vf_config call.
 struct mp_image *vf_alloc_out_image(struct vf_instance *vf)
 {
-    assert(vf->fmt_out.configured);
-    struct mp_image_params *p = &vf->fmt_out.params;
+    struct mp_image_params *p = &vf->fmt_out;
+    assert(p->imgfmt);
     struct mp_image *img = mp_image_pool_get(vf->out_pool, p->imgfmt, p->w, p->h);
     vf_fix_img_params(img, p);
     return img;
@@ -178,8 +178,8 @@ struct mp_image *vf_alloc_out_image(struct vf_instance *vf)
 
 void vf_make_out_image_writeable(struct vf_instance *vf, struct mp_image *img)
 {
-    struct mp_image_params *p = &vf->fmt_out.params;
-    assert(vf->fmt_out.configured);
+    struct mp_image_params *p = &vf->fmt_out;
+    assert(p->imgfmt);
     assert(p->imgfmt == img->imgfmt);
     assert(p->w == img->w && p->h == img->h);
     mp_image_pool_make_writeable(vf->out_pool, img);
@@ -200,15 +200,13 @@ static struct mp_image *vf_default_filter(struct vf_instance *vf,
     return mpi;
 }
 
-static void print_fmt(int msglevel, struct vf_format *fmt)
+static void print_fmt(int msglevel, struct mp_image_params *p)
 {
-    if (fmt && fmt->configured) {
-        struct mp_image_params *p = &fmt->params;
+    if (p && p->imgfmt) {
         mp_msg(MSGT_VFILTER, msglevel, "%dx%d", p->w, p->h);
         if (p->w != p->d_w || p->h != p->d_h)
             mp_msg(MSGT_VFILTER, msglevel, "->%dx%d", p->d_w, p->d_h);
-        mp_msg(MSGT_VFILTER, msglevel, " %s %#x", mp_imgfmt_to_name(p->imgfmt),
-               fmt->flags);
+        mp_msg(MSGT_VFILTER, msglevel, " %s", mp_imgfmt_to_name(p->imgfmt));
         mp_msg(MSGT_VFILTER, msglevel, " %s/%s", mp_csp_names[p->colorspace],
                mp_csp_levels_names[p->colorlevels]);
     } else {
@@ -323,8 +321,8 @@ void vf_add_output_frame(struct vf_instance *vf, struct mp_image *img)
 {
     if (img) {
         // vf_vo doesn't have output config
-        if (vf->fmt_out.configured)
-            vf_fix_img_params(img, &vf->fmt_out.params);
+        if (vf->fmt_out.imgfmt)
+            vf_fix_img_params(img, &vf->fmt_out);
         MP_TARRAY_APPEND(vf, vf->out_queued, vf->num_out_queued, img);
     }
 }
@@ -341,8 +339,8 @@ static struct mp_image *vf_dequeue_output_frame(struct vf_instance *vf)
 
 static int vf_do_filter(struct vf_instance *vf, struct mp_image *img)
 {
-    assert(vf->fmt_in.configured);
-    vf_fix_img_params(img, &vf->fmt_in.params);
+    assert(vf->fmt_in.imgfmt);
+    vf_fix_img_params(img, &vf->fmt_in);
 
     if (vf->filter_ext) {
         return vf->filter_ext(vf, img);
@@ -404,11 +402,8 @@ static int vf_reconfig_wrapper(struct vf_instance *vf, const struct mp_image_par
     vf_forget_frames(vf);
     mp_image_pool_clear(vf->out_pool);
 
-    vf->fmt_in = (struct vf_format) {
-        .params = *p,
-        .flags = flags,
-    };
-    vf->fmt_out = (struct vf_format){0};
+    vf->fmt_in = *p;
+    vf->fmt_out = (struct mp_image_params){0};
 
     int r;
     if (vf->reconfig) {
@@ -419,9 +414,10 @@ static int vf_reconfig_wrapper(struct vf_instance *vf, const struct mp_image_par
         r = r ? 0 : -1;
     }
     if (r >= 0) {
-        vf->fmt_in.configured = 1;
         if (vf->next)
             vf->fmt_out = vf->next->fmt_in;
+    } else {
+        vf->fmt_in = (struct mp_image_params){0};
     }
     return r;
 }
@@ -461,10 +457,10 @@ int vf_next_config(struct vf_instance *vf,
         .h = height,
         .d_w = d_width,
         .d_h = d_height,
-        .colorspace = vf->fmt_in.params.colorspace,
-        .colorlevels = vf->fmt_in.params.colorlevels,
-        .chroma_location = vf->fmt_in.params.chroma_location,
-        .outputlevels = vf->fmt_in.params.outputlevels,
+        .colorspace = vf->fmt_in.colorspace,
+        .colorlevels = vf->fmt_in.colorlevels,
+        .chroma_location = vf->fmt_in.chroma_location,
+        .outputlevels = vf->fmt_in.outputlevels,
     };
     // Fix csp in case of pixel format change
     mp_image_params_guess_csp(&p);

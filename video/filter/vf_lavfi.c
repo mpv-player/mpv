@@ -306,10 +306,9 @@ static int filter_ext(struct vf_instance *vf, struct mp_image *mpi)
 static void reset(vf_instance_t *vf)
 {
     struct vf_priv_s *p = vf->priv;
-    if (p->graph) {
-        struct mp_image_params *f = &vf->fmt_in.params;
+    struct mp_image_params *f = &vf->fmt_in;
+    if (p->graph && f->imgfmt)
         recreate_graph(vf, f->w, f->h, f->d_w, f->d_h, f->imgfmt);
-    }
 }
 
 static int control(vf_instance_t *vf, int request, void *data)

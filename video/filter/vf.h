@@ -41,12 +41,6 @@ typedef struct vf_info {
     void (*print_help)(void);
 } vf_info_t;
 
-struct vf_format {
-    int configured;
-    struct mp_image_params params;
-    int flags;
-};
-
 typedef struct vf_instance {
     const vf_info_t *info;
 
@@ -76,9 +70,7 @@ typedef struct vf_instance {
 
     char *label;
 
-    // data:
-    struct vf_format fmt_in, fmt_out;
-    struct vf_instance *next;
+    struct mp_image_params fmt_in, fmt_out;
 
     struct mp_image_pool *out_pool;
     struct vf_priv_s *priv;
@@ -90,6 +82,7 @@ typedef struct vf_instance {
 
     // Temporary
     struct vf_chain *chain;
+    struct vf_instance *next;
 } vf_instance_t;
 
 // A chain of video filters
