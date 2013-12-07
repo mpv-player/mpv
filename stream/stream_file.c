@@ -101,7 +101,7 @@ static int open_f(stream_t *stream, int mode)
     };
     stream->priv = priv;
 
-    mode_t m = O_CLOEXEC;
+    int m = O_CLOEXEC;
     if (mode == STREAM_READ)
         m |= O_RDONLY;
     else if (mode == STREAM_WRITE)
