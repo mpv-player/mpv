@@ -37,7 +37,6 @@ struct vf_priv_s {
     int pp;
     pp_mode *ppMode[PP_QUALITY_MAX+1];
     void *context;
-    unsigned int outfmt;
     char *arg;
 };
 
@@ -117,16 +116,6 @@ static struct mp_image *filter(struct vf_instance *vf, struct mp_image *mpi)
     return dmpi;
 }
 
-//===========================================================================//
-
-static const unsigned int fmt_list[]={
-    IMGFMT_420P,
-    IMGFMT_444P,
-    IMGFMT_422P,
-    IMGFMT_411P,
-    0
-};
-
 static int vf_open(vf_instance_t *vf){
     int i;
 
@@ -134,10 +123,6 @@ static int vf_open(vf_instance_t *vf){
     vf->config=config;
     vf->filter=filter;
     vf->uninit=uninit;
-
-    // check csp:
-    vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_420P);
-    if(!vf->priv->outfmt) return 0; // no csp match :(
 
 	for(i=0; i<=PP_QUALITY_MAX; i++){
             vf->priv->ppMode[i]= pp_get_mode_by_name_and_quality(vf->priv->arg, i);

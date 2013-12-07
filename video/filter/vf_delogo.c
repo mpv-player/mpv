@@ -41,7 +41,6 @@
 //===========================================================================//
 
 static struct vf_priv_s {
-    unsigned int outfmt;
     int xoff, yoff, lw, lh, band, show;
     char *file;
     struct timed_rectangle {
@@ -51,9 +50,7 @@ static struct vf_priv_s {
     int cur_timed_rect;
     struct vf_lw_opts *lw_opts;
 } const vf_priv_dflt = {
-    0,
-    0, 0, 0, 0, 1, 0,
-    NULL, NULL, 0, 0,
+    .band = 1,
 };
 
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
@@ -195,15 +192,10 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
     switch(fmt)
     {
     case IMGFMT_420P:
-        return vf_next_query_format(vf,vf->priv->outfmt);
+        return vf_next_query_format(vf,IMGFMT_420P);
     }
     return 0;
 }
-
-static const unsigned int fmt_list[]={
-    IMGFMT_420P,
-    0
-};
 
 static int load_timed_rectangles(struct vf_priv_s *delogo)
 {
@@ -300,13 +292,6 @@ static int vf_open(vf_instance_t *vf){
         vf->priv->cur_timed_rect = -1;
     }
     fix_band(vf->priv);
-
-    // check csp:
-    vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_420P);
-    if(!vf->priv->outfmt)
-    {
-        return 0; // no csp match :(
-    }
 
     return 1;
 }

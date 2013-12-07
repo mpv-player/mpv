@@ -51,7 +51,6 @@ typedef struct FilterParam {
 struct vf_priv_s {
     FilterParam lumaParam;
     FilterParam chromaParam;
-    unsigned int outfmt;
     struct vf_lw_opts *lw_opts;
 };
 
@@ -208,15 +207,10 @@ static void uninit( struct vf_instance *vf ) {
 static int query_format( struct vf_instance *vf, unsigned int fmt ) {
     switch(fmt) {
     case IMGFMT_420P:
-	return vf_next_query_format( vf, vf->priv->outfmt );
+	return vf_next_query_format( vf, IMGFMT_420P );
     }
     return 0;
 }
-
-static const unsigned int fmt_list[] = {
-    IMGFMT_420P,
-    0
-};
 
 static int vf_open( vf_instance_t *vf) {
     vf->config       = config;
@@ -236,13 +230,6 @@ static int vf_open( vf_instance_t *vf) {
                        >= 0)
     {
         return 1;
-    }
-
-    // check csp:
-    vf->priv->outfmt = vf_match_csp( &vf->next, fmt_list, IMGFMT_420P );
-    if( !vf->priv->outfmt ) {
-	uninit( vf );
-        return 0; // no csp match :(
     }
 
     return 1;

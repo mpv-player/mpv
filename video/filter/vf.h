@@ -120,9 +120,6 @@ void vf_chain_seek_reset(struct vf_instance *vf);
 vf_instance_t *vf_open_filter(struct MPOpts *opts, vf_instance_t *next,
                               const char *name, char **args);
 
-unsigned int vf_match_csp(vf_instance_t **vfp, const unsigned int *list,
-                          unsigned int preferred);
-
 // default wrappers:
 int vf_next_config(struct vf_instance *vf,
                    int width, int height, int d_width, int d_height,

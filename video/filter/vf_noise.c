@@ -64,7 +64,6 @@ typedef struct FilterParam{
 struct vf_priv_s {
 	FilterParam lumaParam;
 	FilterParam chromaParam;
-	unsigned int outfmt;
         int strength;
         int averaged;
         int pattern;
@@ -364,7 +363,7 @@ static int query_format(struct vf_instance *vf, unsigned int fmt){
 	switch(fmt)
 	{
 	case IMGFMT_420P:
-		return vf_next_query_format(vf,vf->priv->outfmt);
+		return vf_next_query_format(vf,IMGFMT_420P);
 	}
 	return 0;
 }
@@ -379,11 +378,6 @@ static void parse(FilterParam *fp, struct vf_priv_s *p){
 
 	if(fp->strength) initNoise(fp);
 }
-
-static const unsigned int fmt_list[]={
-    IMGFMT_420P,
-    0
-};
 
 static int vf_open(vf_instance_t *vf){
     vf->filter=filter;
@@ -401,15 +395,6 @@ static int vf_open(vf_instance_t *vf){
 
     parse(&vf->priv->lumaParam, vf->priv);
     parse(&vf->priv->chromaParam, vf->priv);
-
-    // check csp:
-    vf->priv->outfmt=vf_match_csp(&vf->next,fmt_list,IMGFMT_420P);
-    if(!vf->priv->outfmt)
-    {
-	uninit(vf);
-        return 0; // no csp match :(
-    }
-
 
 #if HAVE_MMX
     if(gCpuCaps.hasMMX){

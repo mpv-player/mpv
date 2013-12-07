@@ -282,60 +282,6 @@ vf_instance_t *vf_open_filter(struct MPOpts *opts, vf_instance_t *next,
     return vf_open(opts, next, name, args);
 }
 
-//============================================================================
-
-unsigned int vf_match_csp(vf_instance_t **vfp, const unsigned int *list,
-                          unsigned int preferred)
-{
-    vf_instance_t *vf = *vfp;
-    struct MPOpts *opts = vf->opts;
-    const unsigned int *p;
-    unsigned int best = 0;
-    int ret;
-    if ((p = list))
-        while (*p) {
-            ret = vf->query_format(vf, *p);
-            mp_msg(MSGT_VFILTER, MSGL_V, "[%s] query(%s) -> %x\n",
-                   vf->info->name, vo_format_name(*p), ret);
-            if (ret & VFCAP_CSP_SUPPORTED_BY_HW) {
-                best = *p;
-                break;
-            }
-            if (ret & VFCAP_CSP_SUPPORTED && !best)
-                best = *p;
-            ++p;
-        }
-    if (best)
-        return best;      // bingo, they have common csp!
-    // ok, then try with scale:
-    if (vf->info == &vf_info_scale)
-        return 0;     // avoid infinite recursion!
-    vf = vf_open_filter(opts, vf, "scale", NULL);
-    if (!vf)
-        return 0;     // failed to init "scale"
-    // try the preferred csp first:
-    if (preferred && vf->query_format(vf, preferred))
-        best = preferred;
-    else
-        // try the list again, now with "scaler" :
-        if ((p = list))
-            while (*p) {
-                ret = vf->query_format(vf, *p);
-                mp_msg(MSGT_VFILTER, MSGL_V, "[%s] query(%s) -> %x\n",
-                       vf->info->name, vo_format_name(*p), ret);
-                if (ret & VFCAP_CSP_SUPPORTED_BY_HW) {
-                    best = *p;
-                    break;
-                }
-                if (ret & VFCAP_CSP_SUPPORTED && !best)
-                    best = *p;
-            ++p;
-        }
-    if (best)
-        *vfp = vf;    // else uninit vf  !FIXME!
-    return best;
-}
-
 // Used by filters to add a filtered frame to the output queue.
 // Ownership of img is transferred from caller to the filter chain.
 void vf_add_output_frame(struct vf_instance *vf, struct mp_image *img)
