@@ -282,28 +282,6 @@ vf_instance_t *vf_open_filter(struct MPOpts *opts, vf_instance_t *next,
     return vf_open(opts, next, name, args);
 }
 
-/**
- * \brief adds a filter before the last one (which should be the vo filter).
- * \param vf start of the filter chain.
- * \param name name of the filter to add.
- * \param args argument list for the filter.
- * \return pointer to the filter instance that was created.
- */
-vf_instance_t *vf_add_before_vo(vf_instance_t **vf, char *name, char **args)
-{
-    struct MPOpts *opts = (*vf)->opts;
-    vf_instance_t *vo, *prev = NULL, *new;
-    // Find the last filter (should be vf_vo)
-    for (vo = *vf; vo->next; vo = vo->next)
-        prev = vo;
-    new = vf_open_filter(opts, vo, name, args);
-    if (prev)
-        prev->next = new;
-    else
-        *vf = new;
-    return new;
-}
-
 //============================================================================
 
 unsigned int vf_match_csp(vf_instance_t **vfp, const unsigned int *list,
