@@ -83,7 +83,7 @@ Available filters are:
         Rounds up to make both width and height divisible by <r> (default: 1).
 
 ``flip``
-    Flips the image upside down. See also ``--flip``.
+    Flips the image upside down.
 
 ``mirror``
     Mirrors the image on the Y axis.

@@ -405,7 +405,7 @@ profile name ``default`` to continue with normal options.
 
         [extension.flv]
         profile-desc="profile for .flv files"
-        flip=yes
+        vf=flip
 
         [ao.alsa]
         device=spdif
