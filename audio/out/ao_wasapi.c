@@ -1364,7 +1364,7 @@ static float get_delay(struct ao *ao)
     if (!ao || !ao->priv)
         return -1.0f;
     struct wasapi_state *state = (struct wasapi_state *)ao->priv;
-    return (float)(RING_BUFFER_COUNT * state->buffer_block_size - get_space(ao)) /
+    return (float)(RING_BUFFER_COUNT * state->buffer_block_size - get_space(ao) * ao->sstride) /
            (float)state->format.Format.nAvgBytesPerSec;
 }
 
