@@ -50,7 +50,7 @@ DEFINE_PROPERTYKEY(PKEY_Device_DeviceDesc,
                    0x67, 0xd1, 0x46, 0xa8, 0x50, 0xe0, 2);
 #endif
 
-#define RING_BUFFER_COUNT 64
+#define RING_BUFFER_COUNT 8
 
 /* 20 millisecond buffer? */
 #define BUFFER_TIME 20000000.0
