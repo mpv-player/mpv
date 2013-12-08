@@ -28,4 +28,16 @@
 #define AV_CPU_FLAG_MMX2 AV_CPU_FLAG_MMXEXT
 #endif
 
+// At least Libav 9 doesn't define the new symbols
+#ifndef AV_PIX_FMT_FLAG_BE
+#define AV_PIX_FMT_FLAG_BE         PIX_FMT_BE
+#define AV_PIX_FMT_FLAG_PAL        PIX_FMT_PAL
+#define AV_PIX_FMT_FLAG_BITSTREAM  PIX_FMT_BITSTREAM
+#define AV_PIX_FMT_FLAG_HWACCEL    PIX_FMT_HWACCEL
+#define AV_PIX_FMT_FLAG_PLANAR     PIX_FMT_PLANAR
+#define AV_PIX_FMT_FLAG_RGB        PIX_FMT_RGB
+#define AV_PIX_FMT_FLAG_PSEUDOPAL  PIX_FMT_PSEUDOPAL
+#define AV_PIX_FMT_FLAG_ALPHA      PIX_FMT_ALPHA
+#endif
+
 #endif /* MPV_LIBAV_COMPAT_H */

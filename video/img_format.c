@@ -22,6 +22,8 @@
 #include <libavutil/pixfmt.h>
 #include <libavutil/pixdesc.h>
 
+#include "compat/libav.h"
+
 #include "video/img_format.h"
 #include "video/mp_image.h"
 #include "video/fmt-conversion.h"
@@ -177,7 +179,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     };
 
     int planedepth[4] = {0};
-    int el_size = (pd->flags & PIX_FMT_BITSTREAM) ? 1 : 8;
+    int el_size = (pd->flags & AV_PIX_FMT_FLAG_BITSTREAM) ? 1 : 8;
     for (int c = 0; c < pd->nb_components; c++) {
         AVComponentDescriptor d = pd->comp[c];
         // multiple components per plane -> Y is definitive, ignore chroma
@@ -198,23 +200,25 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     {
         desc.flags |= MP_IMGFLAG_LE | MP_IMGFLAG_BE;
     } else {
-        desc.flags |= (pd->flags & PIX_FMT_BE) ? MP_IMGFLAG_BE : MP_IMGFLAG_LE;
+        desc.flags |= (pd->flags & AV_PIX_FMT_FLAG_BE)
+                      ? MP_IMGFLAG_BE : MP_IMGFLAG_LE;
     }
 
     desc.plane_bits = planedepth[0];
 
     if (mpfmt == IMGFMT_XYZ12_LE || mpfmt == IMGFMT_XYZ12_BE) {
         desc.flags |= MP_IMGFLAG_XYZ;
-    } else if (!(pd->flags & PIX_FMT_RGB) && fmt != AV_PIX_FMT_MONOBLACK &&
-               fmt != PIX_FMT_PAL8)
+    } else if (!(pd->flags & AV_PIX_FMT_FLAG_RGB) &&
+               fmt != AV_PIX_FMT_MONOBLACK &&
+               fmt != AV_PIX_FMT_PAL8)
     {
         desc.flags |= MP_IMGFLAG_YUV;
     } else {
         desc.flags |= MP_IMGFLAG_RGB;
     }
 
-#ifdef PIX_FMT_ALPHA
-    if (pd->flags & PIX_FMT_ALPHA)
+#ifdef AV_PIX_FMT_FLAG_ALPHA
+    if (pd->flags & AV_PIX_FMT_FLAG_ALPHA)
         desc.flags |= MP_IMGFLAG_ALPHA;
 #else
     if (desc.num_planes > 3)
@@ -227,7 +231,9 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
     if (desc.num_planes == pd->nb_components)
         desc.flags |= MP_IMGFLAG_PLANAR;
 
-    if (!(pd->flags & PIX_FMT_HWACCEL) && !(pd->flags & PIX_FMT_BITSTREAM)) {
+    if (!(pd->flags & AV_PIX_FMT_FLAG_HWACCEL) &&
+        !(pd->flags & AV_PIX_FMT_FLAG_BITSTREAM))
+    {
         desc.flags |= MP_IMGFLAG_BYTE_ALIGNED;
         for (int p = 0; p < desc.num_planes; p++)
             desc.bytes[p] = desc.bpp[p] / 8;
@@ -235,7 +241,7 @@ struct mp_imgfmt_desc mp_imgfmt_get_desc(int mpfmt)
 
     // PSEUDOPAL is a complete braindeath nightmare, however it seems various
     // parts of FFmpeg expect that it has a palette allocated.
-    if (pd->flags & (PIX_FMT_PAL | PIX_FMT_PSEUDOPAL))
+    if (pd->flags & (AV_PIX_FMT_FLAG_PAL | AV_PIX_FMT_FLAG_PSEUDOPAL))
         desc.flags |= MP_IMGFLAG_PAL;
 
     if ((desc.flags & MP_IMGFLAG_YUV) && (desc.flags & MP_IMGFLAG_BYTE_ALIGNED))
