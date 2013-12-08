@@ -87,6 +87,7 @@ typedef struct wasapi_state {
     /* Play */
     HANDLE hPlay;
     int is_playing;
+    int final_chunk;
 
     /* Reset */
     HANDLE hReset;
@@ -1032,6 +1033,7 @@ static void thread_feed(wasapi_state *state,int force_feed)
         /* should be smaller than buffer block size by now */
         memset(pData,0,client_buffer);
         mp_ring_read(state->ringbuff, (unsigned char *)pData, client_buffer);
+        state->final_chunk = 0;
     } else {
         /* buffer underrun?! abort */
         hr = IAudioRenderClient_ReleaseBuffer(state->pRenderClient,
@@ -1053,7 +1055,7 @@ exit_label:
 
 static void thread_play(wasapi_state *state)
 {
-    thread_feed(state, 0);
+    thread_feed(state, state->final_chunk);
     state->is_playing = 1;
     IAudioClient_Start(state->pAudioClient);
     return;
@@ -1154,7 +1156,7 @@ static DWORD __stdcall ThreadLoop(void *lpParameter)
         case (WAIT_OBJECT_0 + 6): /* feed */
             if (state->is_playing)
                 feedwatch = 1;
-            thread_feed(state, 0);
+            thread_feed(state, state->final_chunk);
             break;
         case WAIT_TIMEOUT: /* Did our feed die? */
             if (feedwatch)
@@ -1202,6 +1204,7 @@ static int get_space(struct ao *ao)
 
 static void reset_buffers(struct wasapi_state *state)
 {
+    state->final_chunk = 0;
     mp_ring_reset(state->ringbuff);
 }
 
@@ -1351,6 +1354,7 @@ static int play(struct ao *ao, void **data, int samples, int flags)
 
     int ret = mp_ring_write(state->ringbuff, data[0], samples * ao->sstride);
 
+    state->final_chunk |= flags & AOPLAY_FINAL_CHUNK;
     if (!state->is_playing) {
         /* start playing */
         state->is_playing = 1;
