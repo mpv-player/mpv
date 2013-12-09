@@ -103,7 +103,7 @@ def bundle_dependencies(binary_name):
     fix_dylibs_paths(target_binary(binary_name), lib_bundle_directory)
 
 def main():
-    version = sh("TOOLS/osxbundle/version.sh").strip()
+    version = sh("./version.sh --print").strip()
 
     usage = "usage: %prog [options] arg"
     parser = OptionParser(usage)
