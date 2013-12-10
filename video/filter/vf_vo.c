@@ -104,11 +104,6 @@ static int query_format(struct vf_instance *vf, unsigned int fmt)
 
 static void uninit(struct vf_instance *vf)
 {
-    if (vf->priv && video_out) {
-        /* Allow VO (which may live on to work with another instance of vf_vo)
-         * to get rid of numbered-mpi references that will now be invalid. */
-        vo_seek_reset(video_out);
-    }
 }
 
 static int vf_open(vf_instance_t *vf)
