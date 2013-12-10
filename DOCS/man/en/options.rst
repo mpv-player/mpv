@@ -1313,7 +1313,7 @@ OPTIONS
 
     Available options are:
 
-    :fps=<value>:  output fps (default: 25)
+    :fps=<value>:  output fps (default: 1)
     :type=<value>: input file type (available: jpeg, png, tga, sgi)
 
 ``--monitoraspect=<ratio>``

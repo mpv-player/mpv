@@ -44,7 +44,7 @@
 
 #include "mf.h"
 
-double mf_fps = 25.0;
+double mf_fps = 1.0;
 char *mf_type = NULL;  //"jpg";
 
 static void mf_add(mf_t *mf, const char *fname)
