@@ -313,7 +313,7 @@ void osd_changed_all(struct osd_state *osd)
 }
 
 // Scale factor to translate OSD coordinates to what the obj uses internally.
-// osd_coordinates * (sh, sh) = obj_coordinates
+// osd_coordinates * (sw, sh) = obj_coordinates
 void osd_object_get_scale_factor(struct osd_state *osd, struct osd_object *obj,
                                  double *sw, double *sh)
 {
