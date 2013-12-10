@@ -189,6 +189,7 @@ typedef struct MPOpts {
     float osd_bar_w;
     float osd_bar_h;
     float osd_scale;
+    int osd_scale_by_window;
     struct osd_style_opts *osd_style;
     struct osd_style_opts *sub_text_style;
     float sub_scale;

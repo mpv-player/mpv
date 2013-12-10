@@ -658,6 +658,7 @@ const m_option_t mp_opts[] = {
     OPT_INTRANGE("osd-duration", osd_duration, 0, 0, 3600000),
     OPT_FLAG("osd-fractions", osd_fractions, 0),
     OPT_FLOATRANGE("osd-scale", osd_scale, 0, 0, 100),
+    OPT_FLAG("osd-scale-by-window", osd_scale_by_window, 0),
 
     OPT_DOUBLE("sstep", step_sec, CONF_MIN, 0),
 
@@ -797,6 +798,7 @@ const struct MPOpts mp_default_opts = {
     .osd_bar_w = 75.0,
     .osd_bar_h = 3.125,
     .osd_scale = 1,
+    .osd_scale_by_window = 1,
     .lua_load_osc = 1,
     .loop_times = -1,
     .ordered_chapters = 1,

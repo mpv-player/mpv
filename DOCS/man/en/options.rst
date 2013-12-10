@@ -1558,6 +1558,12 @@ OPTIONS
 ``--osd-scale=<factor>``
     OSD font size multiplicator, multiplied with ``--osd-font-size`` value.
 
+``--osd-scale-by-window=yes|no``
+    Whether to scale the OSD with the window size (default: yes). If this is
+    disabled, ``--osd-font-size`` and other OSD options that use scaled pixels
+    are always in actual pixels. The effect is that changing the window size
+    won't change the OSD font size.
+
 ``--osd-shadow-color=<#RRGGBB>, --sub-text-shadow-color=<#RRGGBB>``
     See ``--osd-color``. Color used for OSD/sub text shadow.
 

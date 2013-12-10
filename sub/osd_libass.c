@@ -163,8 +163,13 @@ static void update_osd(struct osd_state *osd, struct osd_object *obj)
     struct osd_style_opts font = *opts->osd_style;
     font.font_size *= opts->osd_scale;
 
+    double playresy = obj->osd_track->PlayResY;
+    // Compensate for libass and mp_ass_set_style scaling the font etc.
+    if (!opts->osd_scale_by_window)
+        playresy *= 720.0 / obj->vo_res.h;
+
     ASS_Style *style = obj->osd_track->styles + obj->osd_track->default_style;
-    mp_ass_set_style(style, obj->osd_track->PlayResY, &font);
+    mp_ass_set_style(style, playresy, &font);
 
     char *text = mangle_ass(osd->osd_text);
     add_osd_ass_event(obj->osd_track, text);
