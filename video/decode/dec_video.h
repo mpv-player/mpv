@@ -25,12 +25,13 @@
 #include "video/hwdec.h"
 #include "video/mp_image.h"
 
-struct osd_state;
 struct mp_decoder_list;
+struct vo;
 
 struct dec_video {
     struct MPOpts *opts;
     struct vf_chain *vfilter;  // video filter chain
+    struct vo *vo;  // (still) needed by video_set/get_colors
     const struct vd_functions *vd_driver;
     struct mp_hwdec_info hwdec_info; // video output hwdec handles
     struct sh_stream *header;
@@ -94,5 +95,7 @@ int video_vd_control(struct dec_video *d_video, int cmd, void *arg);
 
 int video_reconfig_filters(struct dec_video *d_video,
                            const struct mp_image_params *params);
+
+int video_vf_vo_control(struct dec_video *d_video, int vf_cmd, void *data);
 
 #endif /* MPLAYER_DEC_VIDEO_H */

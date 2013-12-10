@@ -123,6 +123,7 @@ int reinit_video_chain(struct MPContext *mpctx)
     d_video->opts = mpctx->opts;
     d_video->header = sh;
     d_video->fps = sh->video->fps;
+    d_video->vo = mpctx->video_out;
     mpctx->initialized_flags |= INITIALIZED_VCODEC;
 
     vo_control(mpctx->video_out, VOCTRL_GET_HWDEC_INFO, &d_video->hwdec_info);

@@ -65,33 +65,6 @@ static int control(struct vf_instance *vf, int request, void *data)
         video_out = data;
         return CONTROL_OK;
     }
-    if (!video_out)
-        return CONTROL_FALSE;
-
-    switch (request) {
-    case VFCTRL_GET_DEINTERLACE:
-        return vo_control(video_out, VOCTRL_GET_DEINTERLACE, data) == VO_TRUE;
-    case VFCTRL_SET_DEINTERLACE:
-        return vo_control(video_out, VOCTRL_SET_DEINTERLACE, data) == VO_TRUE;
-    case VFCTRL_SET_EQUALIZER: {
-        vf_equalizer_t *eq = data;
-        if (!video_out->config_ok)
-            return CONTROL_FALSE;                       // vo not configured?
-        struct voctrl_set_equalizer_args param = {
-            eq->item, eq->value
-        };
-        return vo_control(video_out, VOCTRL_SET_EQUALIZER, &param) == VO_TRUE;
-    }
-    case VFCTRL_GET_EQUALIZER: {
-        vf_equalizer_t *eq = data;
-        if (!video_out->config_ok)
-            return CONTROL_FALSE;                       // vo not configured?
-        struct voctrl_get_equalizer_args param = {
-            eq->item, &eq->value
-        };
-        return vo_control(video_out, VOCTRL_GET_EQUALIZER, &param) == VO_TRUE;
-    }
-    }
     return CONTROL_UNKNOWN;
 }
 

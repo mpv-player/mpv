@@ -88,7 +88,7 @@ int video_set_colors(struct dec_video *d_video, const char *item, int value)
 
     mp_dbg(MSGT_DECVIDEO, MSGL_V, "set video colors %s=%d \n", item, value);
     if (d_video->vfilter) {
-        int ret = vf_control_any(d_video->vfilter, VFCTRL_SET_EQUALIZER, &data);
+        int ret = video_vf_vo_control(d_video, VFCTRL_SET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE)
             return 1;
     }
@@ -105,7 +105,7 @@ int video_get_colors(struct dec_video *d_video, const char *item, int *value)
 
     mp_dbg(MSGT_DECVIDEO, MSGL_V, "get video colors %s \n", item);
     if (d_video->vfilter) {
-        int ret = vf_control_any(d_video->vfilter, VFCTRL_GET_EQUALIZER, &data);
+        int ret = video_vf_vo_control(d_video, VFCTRL_GET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE) {
             *value = data.value;
             return 1;
@@ -451,4 +451,40 @@ int video_reconfig_filters(struct dec_video *d_video,
         video_set_colors(d_video, "hue", opts->gamma_hue);
 
     return 0;
+}
+
+// Send a VCTRL, or if it doesn't work, translate it to a VOCTRL and try the VO.
+int video_vf_vo_control(struct dec_video *d_video, int vf_cmd, void *data)
+{
+    if (d_video->vfilter && d_video->vfilter->initialized > 0) {
+        int r = vf_control_any(d_video->vfilter, vf_cmd, data);
+        if (r != CONTROL_UNKNOWN)
+            return r;
+    }
+
+    switch (vf_cmd) {
+    case VFCTRL_GET_DEINTERLACE:
+        return vo_control(d_video->vo, VOCTRL_GET_DEINTERLACE, data) == VO_TRUE;
+    case VFCTRL_SET_DEINTERLACE:
+        return vo_control(d_video->vo, VOCTRL_SET_DEINTERLACE, data) == VO_TRUE;
+    case VFCTRL_SET_EQUALIZER: {
+        vf_equalizer_t *eq = data;
+        if (!d_video->vo->config_ok)
+            return CONTROL_FALSE;                       // vo not configured?
+        struct voctrl_set_equalizer_args param = {
+            eq->item, eq->value
+        };
+        return vo_control(d_video->vo, VOCTRL_SET_EQUALIZER, &param) == VO_TRUE;
+    }
+    case VFCTRL_GET_EQUALIZER: {
+        vf_equalizer_t *eq = data;
+        if (!d_video->vo->config_ok)
+            return CONTROL_FALSE;                       // vo not configured?
+        struct voctrl_get_equalizer_args param = {
+            eq->item, &eq->value
+        };
+        return vo_control(d_video->vo, VOCTRL_GET_EQUALIZER, &param) == VO_TRUE;
+    }
+    }
+    return CONTROL_UNKNOWN;
 }
