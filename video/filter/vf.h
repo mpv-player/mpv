@@ -95,7 +95,10 @@ typedef struct vf_instance {
 struct vf_chain {
     int initialized; // 0: no, 1: yes, -1: attempted to, but failed
 
-    struct vf_instance *first;
+    struct vf_instance *first, *last;
+
+    struct mp_image_params output_params;
+    uint8_t allowed_output_formats[IMGFMT_END - IMGFMT_START];
 
     struct MPOpts *opts;
     struct mp_hwdec_info *hwdec;
@@ -117,7 +120,6 @@ enum vf_ctrl {
     /* Hack to make the OSD state object available to vf_sub which
      * access OSD/subtitle state outside of normal OSD draw time. */
     VFCTRL_SET_OSD_OBJ,
-    VFCTRL_SET_VO,
 };
 
 struct vf_chain *vf_new(struct MPOpts *opts);

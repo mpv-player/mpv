@@ -53,6 +53,51 @@ void update_fps(struct MPContext *mpctx)
 #endif
 }
 
+static void set_allowed_vo_formats(struct vf_chain *c, struct vo *vo)
+{
+    for (int fmt = IMGFMT_START; fmt < IMGFMT_END; fmt++) {
+        c->allowed_output_formats[fmt - IMGFMT_START] =
+            vo->driver->query_format(vo, fmt);
+    }
+}
+
+static void reconfig_video(struct MPContext *mpctx,
+                           const struct mp_image_params *params,
+                           bool probe_only)
+{
+    struct dec_video *d_video = mpctx->d_video;
+
+    d_video->decoder_output = *params;
+
+    set_allowed_vo_formats(d_video->vfilter, mpctx->video_out);
+
+    if (video_reconfig_filters(d_video, params) < 0) {
+        // Most video filters don't work with hardware decoding, so this
+        // might be the reason filter reconfig failed.
+        if (!probe_only &&
+            video_vd_control(d_video, VDCTRL_FORCE_HWDEC_FALLBACK, NULL) == CONTROL_OK)
+        {
+            // Fallback active; decoder will return software format next
+            // time. Don't abort video decoding.
+            d_video->vfilter->initialized = 0;
+        }
+        return;
+    }
+
+    if (d_video->vfilter->initialized < 1)
+        return;
+
+    struct mp_image_params p = d_video->vfilter->output_params;
+    const struct vo_driver *info = mpctx->video_out->driver;
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "VO: [%s] %dx%d => %dx%d %s\n",
+           info->name, p.w, p.h, p.d_w, p.d_h, vo_format_name(p.imgfmt));
+    mp_msg(MSGT_CPLAYER, MSGL_V, "VO: Description: %s\n", info->description);
+
+    int r = vo_reconfig(mpctx->video_out, &p, 0);
+    if (r < 0)
+        d_video->vfilter->initialized = -1;
+}
+
 static void recreate_video_filters(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -63,26 +108,25 @@ static void recreate_video_filters(struct MPContext *mpctx)
     d_video->vfilter = vf_new(opts);
     d_video->vfilter->hwdec = &d_video->hwdec_info;
 
-    vf_append_filter(d_video->vfilter, "vo", NULL);
-    vf_control_any(d_video->vfilter, VFCTRL_SET_VO, mpctx->video_out);
-
     vf_append_filter_list(d_video->vfilter, opts->vf_settings);
 
     // for vf_sub
     vf_control_any(d_video->vfilter, VFCTRL_SET_OSD_OBJ, mpctx->osd);
     mpctx->osd->render_subs_in_filter
         = vf_control_any(d_video->vfilter, VFCTRL_INIT_OSD, NULL) == CONTROL_OK;
+
+    set_allowed_vo_formats(d_video->vfilter, mpctx->video_out);
 }
 
 int reinit_video_filters(struct MPContext *mpctx)
 {
     struct dec_video *d_video = mpctx->d_video;
 
-    if (!d_video)
+    if (!d_video || !d_video->decoder_output.imgfmt)
         return -2;
 
     recreate_video_filters(mpctx);
-    video_reconfig_filters(d_video, &d_video->decoder_output);
+    reconfig_video(mpctx, &d_video->decoder_output, true);
 
     return d_video->vfilter && d_video->vfilter->initialized > 0 ? 0 : -1;
 }
@@ -208,6 +252,8 @@ static bool load_next_vo_frame(struct MPContext *mpctx, bool eof)
     return false;
 }
 
+// Called after video reinit. This can be generally used to try to insert more
+// filters using the filter chain edit functionality in command.c.
 static void init_filter_params(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
@@ -220,39 +266,19 @@ static void init_filter_params(struct MPContext *mpctx)
         mp_property_do("deinterlace", M_PROPERTY_SET, &opts->deinterlace, mpctx);
 }
 
-static void reconfig_video(struct MPContext *mpctx,
-                           const struct mp_image_params *params)
-{
-    struct dec_video *d_video = mpctx->d_video;
-
-    if (!mp_image_params_equals(&d_video->decoder_output, params) ||
-        d_video->vfilter->initialized < 1)
-    {
-        d_video->decoder_output = *params;
-        if (video_reconfig_filters(d_video, params) < 0) {
-            // Most video filters don't work with hardware decoding, so this
-            // might be the reason filter reconfig failed.
-            if (video_vd_control(d_video, VDCTRL_FORCE_HWDEC_FALLBACK, NULL)
-                == CONTROL_OK)
-            {
-                // Fallback active; decoder will return software format next
-                // time. Don't abort video decoding.
-                d_video->vfilter->initialized = 0;
-            }
-            return;
-        }
-        if (d_video->vfilter->initialized > 0)
-            init_filter_params(mpctx);
-    }
-}
-
 static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
 {
     struct dec_video *d_video = mpctx->d_video;
 
     struct mp_image_params params;
     mp_image_params_from_image(&params, frame);
-    reconfig_video(mpctx, &params);
+    if (!mp_image_params_equals(&d_video->decoder_output, &params) ||
+        d_video->vfilter->initialized < 1)
+    {
+        reconfig_video(mpctx, &params, false);
+        if (d_video->vfilter->initialized > 0)
+            init_filter_params(mpctx);
+    }
 
     if (d_video->vfilter->initialized < 1) {
         talloc_free(frame);

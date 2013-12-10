@@ -39,7 +39,6 @@
 
 #include "video/memcpy_pic.h"
 
-extern const vf_info_t vf_info_vo;
 extern const vf_info_t vf_info_crop;
 extern const vf_info_t vf_info_expand;
 extern const vf_info_t vf_info_pp;
@@ -75,7 +74,6 @@ static const vf_info_t *const filter_list[] = {
     &vf_info_crop,
     &vf_info_expand,
     &vf_info_scale,
-    &vf_info_vo,
     &vf_info_format,
     &vf_info_noformat,
     &vf_info_flip,
@@ -259,19 +257,17 @@ error:
 static vf_instance_t *vf_open_filter(struct vf_chain *c, const char *name,
                                      char **args)
 {
-    if (strcmp(name, "vo") != 0) {
-        int i, l = 0;
-        for (i = 0; args && args[2 * i]; i++)
-            l += 1 + strlen(args[2 * i]) + 1 + strlen(args[2 * i + 1]);
-        l += strlen(name);
-        char str[l + 1];
-        char *p = str;
-        p += sprintf(str, "%s", name);
-        for (i = 0; args && args[2 * i]; i++)
-            p += sprintf(p, " %s=%s", args[2 * i], args[2 * i + 1]);
-        mp_msg(MSGT_VFILTER, MSGL_INFO, "%s[%s]\n",
-               "Opening video filter: ", str);
-    }
+    int i, l = 0;
+    for (i = 0; args && args[2 * i]; i++)
+        l += 1 + strlen(args[2 * i]) + 1 + strlen(args[2 * i + 1]);
+    l += strlen(name);
+    char str[l + 1];
+    char *p = str;
+    p += sprintf(str, "%s", name);
+    for (i = 0; args && args[2 * i]; i++)
+        p += sprintf(p, " %s=%s", args[2 * i], args[2 * i + 1]);
+    mp_msg(MSGT_VFILTER, MSGL_INFO, "%s[%s]\n",
+           "Opening video filter: ", str);
     return vf_open(c, name, args);
 }
 
@@ -280,7 +276,7 @@ struct vf_instance *vf_append_filter(struct vf_chain *c, const char *name,
 {
     struct vf_instance *vf = vf_open_filter(c, name, args);
     if (vf) {
-        // Insert it before the last filter, which is the "vo" filter
+        // Insert it before the last filter, which is the "out" pseudo-filter
         // (But after the "in" pseudo-filter)
         struct vf_instance **pprev = &c->first->next;
         while (*pprev && (*pprev)->next)
@@ -309,9 +305,7 @@ int vf_append_filter_list(struct vf_chain *c, struct m_obj_settings *list)
 void vf_add_output_frame(struct vf_instance *vf, struct mp_image *img)
 {
     if (img) {
-        // vf_vo doesn't have output config
-        if (vf->fmt_out.imgfmt)
-            vf_fix_img_params(img, &vf->fmt_out);
+        vf_fix_img_params(img, &vf->fmt_out);
         MP_TARRAY_APPEND(vf, vf->out_queued, vf->num_out_queued, img);
     }
 }
@@ -508,6 +502,8 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
             break;
         cur = vf->fmt_out;
     }
+    if (r >= 0)
+        c->output_params = cur;
     c->initialized = r < 0 ? -1 : 1;
     int loglevel = r < 0 ? MSGL_WARN : MSGL_V;
     if (r == -2)
@@ -544,6 +540,14 @@ static int input_query_format(struct vf_instance *vf, unsigned int fmt)
     return 0;
 }
 
+static int output_query_format(struct vf_instance *vf, unsigned int fmt)
+{
+    struct vf_chain *c = (void *)vf->priv;
+    if (fmt >= IMGFMT_START && fmt < IMGFMT_END)
+        return c->allowed_output_formats[fmt - IMGFMT_START];
+    return 0;
+}
+
 struct vf_chain *vf_new(struct MPOpts *opts)
 {
     struct vf_chain *c = talloc_ptrtype(NULL, c);
@@ -555,6 +559,13 @@ struct vf_chain *vf_new(struct MPOpts *opts)
     *c->first = (struct vf_instance) {
         .info = &in,
         .query_format = input_query_format,
+    };
+    static const struct vf_info out = { .name = "out" };
+    c->first->next = talloc(c, struct vf_instance);
+    *c->first->next = (struct vf_instance) {
+        .info = &out,
+        .query_format = output_query_format,
+        .priv = (void *)c,
     };
     return c;
 }
