@@ -42,12 +42,9 @@ typedef struct vd_functions
 extern const vd_functions_t *const mpcodecs_vd_drivers[];
 
 enum vd_ctrl {
-    VDCTRL_GET_PARAMS = 1, // retrieve struct mp_image_params
-    VDCTRL_RESET, // reset decode state after seeking
+    VDCTRL_RESET = 1, // reset decode state after seeking
     VDCTRL_QUERY_UNSEEN_FRAMES, // current decoder lag
-    VDCTRL_REINIT_VO, // reinit filter/VO chain
+    VDCTRL_FORCE_HWDEC_FALLBACK, // force software decoding fallback
 };
-
-int mpcodecs_reconfig_vo(struct dec_video *vd, const struct mp_image_params *params);
 
 #endif /* MPLAYER_VD_H */

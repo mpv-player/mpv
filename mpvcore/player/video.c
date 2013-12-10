@@ -38,6 +38,7 @@
 #include "video/hwdec.h"
 #include "video/filter/vf.h"
 #include "video/decode/dec_video.h"
+#include "video/decode/vd.h"
 #include "video/out/vo.h"
 
 #include "mp_core.h"
@@ -81,7 +82,7 @@ int reinit_video_filters(struct MPContext *mpctx)
         return -2;
 
     recreate_video_filters(mpctx);
-    video_reinit_vo(d_video);
+    video_reconfig_filters(d_video, &d_video->decoder_output);
 
     return d_video->vfilter && d_video->vfilter->initialized > 0 ? 0 : -1;
 }
@@ -142,7 +143,6 @@ int reinit_video_chain(struct MPContext *mpctx)
     vo_control(mpctx->video_out, mpctx->paused ? VOCTRL_PAUSE
                                                : VOCTRL_RESUME, NULL);
 
-    mpctx->last_vf_reconfig_count = 0;
     mpctx->restart_playback = true;
     mpctx->sync_audio_to_video = !sh->attached_picture;
     mpctx->delay = 0;
@@ -210,31 +210,53 @@ static bool load_next_vo_frame(struct MPContext *mpctx, bool eof)
 static void init_filter_params(struct MPContext *mpctx)
 {
     struct MPOpts *opts = mpctx->opts;
+
+    // Note that the filter chain is already initialized. This code might
+    // recreate the chain a second time, which is not very elegant, but allows
+    // us to test whether enabling deinterlacing works with the current video
+    // format and other filters.
+    if (opts->deinterlace >= 0)
+        mp_property_do("deinterlace", M_PROPERTY_SET, &opts->deinterlace, mpctx);
+}
+
+static void reconfig_video(struct MPContext *mpctx,
+                           const struct mp_image_params *params)
+{
     struct dec_video *d_video = mpctx->d_video;
 
-    // Note that the video decoder already initializes the filter chain. This
-    // might recreate the chain a second time, which is not very elegant, but
-    // allows us to test whether enabling deinterlacing works with the current
-    // video format and other filters.
-    if (!d_video->vfilter || d_video->vfilter->initialized != 1)
-        return;
-
-    if (d_video->vf_reconfig_count <= mpctx->last_vf_reconfig_count) {
-        if (opts->deinterlace >= 0) {
-            mp_property_do("deinterlace", M_PROPERTY_SET, &opts->deinterlace,
-                           mpctx);
+    if (!mp_image_params_equals(&d_video->decoder_output, params) ||
+        d_video->vfilter->initialized < 1)
+    {
+        d_video->decoder_output = *params;
+        if (video_reconfig_filters(d_video, params) < 0) {
+            // Most video filters don't work with hardware decoding, so this
+            // might be the reason filter reconfig failed.
+            if (video_vd_control(d_video, VDCTRL_FORCE_HWDEC_FALLBACK, NULL)
+                == CONTROL_OK)
+            {
+                // Fallback active; decoder will return software format next
+                // time. Don't abort video decoding.
+                d_video->vfilter->initialized = 0;
+            }
+            return;
         }
+        if (d_video->vfilter->initialized > 0)
+            init_filter_params(mpctx);
     }
-    // Setting filter params has to be "stable" (no change if params already
-    // set) - checking the reconfig count is just an optimization.
-    mpctx->last_vf_reconfig_count = d_video->vf_reconfig_count;
 }
 
 static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
 {
     struct dec_video *d_video = mpctx->d_video;
 
-    init_filter_params(mpctx);
+    struct mp_image_params params;
+    mp_image_params_from_image(&params, frame);
+    reconfig_video(mpctx, &params);
+
+    if (d_video->vfilter->initialized < 1) {
+        talloc_free(frame);
+        return;
+    }
 
     mp_image_set_params(frame, &d_video->vf_input); // force csp/aspect overrides
     vf_filter_frame(d_video->vfilter, frame);

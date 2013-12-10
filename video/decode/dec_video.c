@@ -114,11 +114,6 @@ int video_get_colors(struct dec_video *d_video, const char *item, int *value)
     return 0;
 }
 
-void video_reinit_vo(struct dec_video *d_video)
-{
-    video_vd_control(d_video, VDCTRL_REINIT_VO, NULL);
-}
-
 void video_uninit(struct dec_video *d_video)
 {
     if (d_video->vd_driver) {
@@ -377,14 +372,12 @@ struct mp_image *video_decode(struct dec_video *d_video,
     return mpi;
 }
 
-int mpcodecs_reconfig_vo(struct dec_video *d_video,
-                         const struct mp_image_params *params)
+int video_reconfig_filters(struct dec_video *d_video,
+                           const struct mp_image_params *params)
 {
     struct MPOpts *opts = d_video->opts;
     struct mp_image_params p = *params;
     struct sh_video *sh = d_video->header->video;
-
-    d_video->vf_reconfig_count++;
 
     mp_msg(MSGT_DECVIDEO, MSGL_V,
            "VIDEO:  %dx%d  %5.3f fps  %5.1f kbps (%4.1f kB/s)\n",

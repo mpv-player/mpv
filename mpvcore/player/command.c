@@ -1261,7 +1261,7 @@ static int mp_property_colormatrix(m_option_t *prop, int action, void *arg,
 
     struct mp_image_params vd_csp = {0};
     if (mpctx->d_video)
-        video_vd_control(mpctx->d_video, VDCTRL_GET_PARAMS, &vd_csp);
+        vd_csp = mpctx->d_video->decoder_output;
 
     char *res = talloc_asprintf(NULL, "%s",
                                 mp_csp_names[opts->requested_colorspace]);
@@ -1295,7 +1295,7 @@ static int mp_property_colormatrix_input_range(m_option_t *prop, int action,
 
     struct mp_image_params vd_csp = {0};
     if (mpctx->d_video)
-        video_vd_control(mpctx->d_video, VDCTRL_GET_PARAMS, &vd_csp);
+        vd_csp = mpctx->d_video->decoder_output;
 
     char *res = talloc_asprintf(NULL, "%s",
                                 mp_csp_levels_names[opts->requested_input_range]);

@@ -32,12 +32,13 @@ struct dec_video {
     struct MPOpts *opts;
     struct vf_chain *vfilter;  // video filter chain
     const struct vd_functions *vd_driver;
-    long vf_reconfig_count; // incremented each mpcodecs_reconfig_vo() call
-    struct mp_image_params vf_input; // video filter input params
     struct mp_hwdec_info hwdec_info; // video output hwdec handles
     struct sh_stream *header;
 
     char *decoder_desc;
+
+    struct mp_image_params decoder_output; // last output of the decoder
+    struct mp_image_params vf_input; // video filter input params
 
     void *priv; // for free use by vd_driver
 
@@ -89,7 +90,9 @@ struct mp_image *video_decode(struct dec_video *d_video,
 int video_get_colors(struct dec_video *d_video, const char *item, int *value);
 int video_set_colors(struct dec_video *d_video, const char *item, int value);
 void video_reset_decoding(struct dec_video *d_video);
-void video_reinit_vo(struct dec_video *d_video);
 int video_vd_control(struct dec_video *d_video, int cmd, void *arg);
+
+int video_reconfig_filters(struct dec_video *d_video,
+                           const struct mp_image_params *params);
 
 #endif /* MPLAYER_DEC_VIDEO_H */

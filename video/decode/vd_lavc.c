@@ -383,8 +383,6 @@ static void init_avctx(struct dec_video *vd, const char *decoder,
 
     ctx->do_dr1 = ctx->do_hw_dr1 = 0;
     ctx->pix_fmt = AV_PIX_FMT_NONE;
-    ctx->image_params = (struct mp_image_params){0};
-    ctx->vo_image_params = (struct mp_image_params){0};
     ctx->hwdec = hwdec;
     ctx->avctx = avcodec_alloc_context3(lavc_codec);
     AVCodecContext *avctx = ctx->avctx;
@@ -494,7 +492,8 @@ static void uninit(struct dec_video *vd)
     uninit_avctx(vd);
 }
 
-static void update_image_params(struct dec_video *vd, AVFrame *frame)
+static void update_image_params(struct dec_video *vd, AVFrame *frame,
+                                struct mp_image_params *out_params)
 {
     vd_ffmpeg_ctx *ctx = vd->priv;
     int width = frame->width;
@@ -514,7 +513,7 @@ static void update_image_params(struct dec_video *vd, AVFrame *frame)
     int d_w, d_h;
     vf_set_dar(&d_w, &d_h, width, height, aspect);
 
-    ctx->image_params = (struct mp_image_params) {
+    *out_params = (struct mp_image_params) {
         .imgfmt = ctx->best_csp,
         .w = width,
         .h = height,
@@ -741,32 +740,36 @@ static int decode(struct dec_video *vd, struct demux_packet *packet,
     if (!got_picture)
         return 0;
 
-    update_image_params(vd, ctx->pic);
+    struct mp_image_params params;
+    update_image_params(vd, ctx->pic, &params);
     vd->codec_pts = mp_pts_from_av(ctx->pic->pkt_pts, NULL);
     vd->codec_dts = mp_pts_from_av(ctx->pic->pkt_dts, NULL);
 
     // Note: potentially resets ctx->pic as it is transferred to mpi
     struct mp_image *mpi = image_from_decoder(vd);
     assert(mpi->planes[0]);
-    mp_image_set_params(mpi, &ctx->image_params);
+    mp_image_set_params(mpi, &params);
 
     if (ctx->hwdec && ctx->hwdec->process_image)
         mpi = ctx->hwdec->process_image(ctx, mpi);
 
-    struct mp_image_params vo_params;
-    mp_image_params_from_image(&vo_params, mpi);
-
-    if (!mp_image_params_equals(&vo_params, &ctx->vo_image_params)) {
-        mp_image_pool_clear(ctx->non_dr1_pool);
-        if (mpcodecs_reconfig_vo(vd, &vo_params) < 0) {
-            talloc_free(mpi);
-            return -1;
-        }
-        ctx->vo_image_params = vo_params;
-    }
-
     *out_image = mpi;
     return 1;
+}
+
+static int force_fallback(struct dec_video *vd)
+{
+    vd_ffmpeg_ctx *ctx = vd->priv;
+    if (ctx->software_fallback_decoder) {
+        uninit_avctx(vd);
+        mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Error using hardware "
+                "decoding, falling back to software decoding.\n");
+        const char *decoder = ctx->software_fallback_decoder;
+        ctx->software_fallback_decoder = NULL;
+        init_avctx(vd, decoder, NULL);
+        return ctx->avctx ? CONTROL_OK : CONTROL_ERROR;
+    }
+    return CONTROL_FALSE;
 }
 
 static struct mp_image *decode_with_fallback(struct dec_video *vd,
@@ -778,27 +781,13 @@ static struct mp_image *decode_with_fallback(struct dec_video *vd,
 
     struct mp_image *mpi = NULL;
     int res = decode(vd, packet, flags, &mpi);
-    if (res >= 0)
-        return mpi;
-
-    // Failed hardware decoding? Try again in software.
-    if (ctx->software_fallback_decoder) {
-        uninit_avctx(vd);
-        mp_tmsg(MSGT_DECVIDEO, MSGL_ERR, "Error using hardware "
-                "decoding, falling back to software decoding.\n");
-        const char *decoder = ctx->software_fallback_decoder;
-        ctx->software_fallback_decoder = NULL;
-        init_avctx(vd, decoder, NULL);
-        if (ctx->avctx) {
-            mpi = NULL;
-            if (vd->vfilter && vd->vfilter->initialized < 0)
-                vd->vfilter->initialized = 0;
+    if (res < 0) {
+        // Failed hardware decoding? Try again in software.
+        if (force_fallback(vd) == CONTROL_OK)
             decode(vd, packet, flags, &mpi);
-            return mpi;
-        }
     }
 
-    return NULL;
+    return mpi;
 }
 
 static int control(struct dec_video *vd, int cmd, void *arg)
@@ -816,13 +805,8 @@ static int control(struct dec_video *vd, int cmd, void *arg)
             delay += avctx->thread_count - 1;
         *(int *)arg = delay;
         return CONTROL_TRUE;
-    case VDCTRL_REINIT_VO:
-        if (ctx->vo_image_params.imgfmt)
-            mpcodecs_reconfig_vo(vd, &ctx->vo_image_params);
-        return true;
-    case VDCTRL_GET_PARAMS:
-        *(struct mp_image_params *)arg = ctx->vo_image_params;
-        return ctx->vo_image_params.imgfmt ? true : CONTROL_NA;
+    case VDCTRL_FORCE_HWDEC_FALLBACK:
+        return force_fallback(vd);
     }
     return CONTROL_UNKNOWN;
 }
