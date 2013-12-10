@@ -61,6 +61,7 @@ void video_reset_decoding(struct dec_video *d_video)
     video_vd_control(d_video, VDCTRL_RESET, NULL);
     if (d_video->vfilter && d_video->vfilter->initialized == 1)
         vf_seek_reset(d_video->vfilter);
+    mp_image_unrefp(&d_video->waiting_decoded_mpi);
     d_video->num_buffered_pts = 0;
     d_video->last_pts = MP_NOPTS_VALUE;
     d_video->last_packet_pdts = MP_NOPTS_VALUE;
@@ -116,6 +117,7 @@ int video_get_colors(struct dec_video *d_video, const char *item, int *value)
 
 void video_uninit(struct dec_video *d_video)
 {
+    mp_image_unrefp(&d_video->waiting_decoded_mpi);
     if (d_video->vd_driver) {
         mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Uninit video.\n");
         d_video->vd_driver->uninit(d_video);

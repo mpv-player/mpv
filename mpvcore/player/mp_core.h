@@ -236,6 +236,11 @@ typedef struct MPContext {
     // the goal of making flip() calls finish (rather than start) at the
     // specified time.
     double last_vo_flip_duration;
+    // Display duration (as "intended") of the last flipped frame.
+    double last_frame_duration;
+    // Set to true some time after a new frame has been shown, and it turns out
+    // that this frame was the last one before video ends.
+    bool playing_last_frame;
     // How much video timing has been changed to make it match the audio
     // timeline. Used for status line information only.
     double total_avsync_change;
@@ -283,8 +288,8 @@ typedef struct MPContext {
     double start_timestamp;
 
     // Timestamp from the last time some timing functions read the
-    // current time, in (occasionally wrapping) microseconds. Used
-    // to turn a new time value to a delta from last time.
+    // current time, in microseconds.
+    // Used to turn a new time value to a delta from last time.
     int64_t last_time;
 
     // Used to communicate the parameters of a seek between parts
@@ -439,5 +444,6 @@ int reinit_video_filters(struct MPContext *mpctx);
 double update_video(struct MPContext *mpctx, double endpts);
 void mp_force_video_refresh(struct MPContext *mpctx);
 void update_fps(struct MPContext *mpctx);
+void video_execute_format_change(struct MPContext *mpctx);
 
 #endif /* MPLAYER_MP_CORE_H */

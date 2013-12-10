@@ -41,6 +41,9 @@ struct dec_video {
     struct mp_image_params decoder_output; // last output of the decoder
     struct mp_image_params vf_input; // video filter input params
 
+    // Used temporarily during format changes
+    struct mp_image *waiting_decoded_mpi;
+
     void *priv; // for free use by vd_driver
 
     // Last PTS from decoder (set with each vd_driver->decode() call)

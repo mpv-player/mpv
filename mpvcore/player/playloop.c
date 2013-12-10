@@ -184,6 +184,8 @@ static void seek_reset(struct MPContext *mpctx, bool reset_ao)
 
     mpctx->video_pts = MP_NOPTS_VALUE;
     mpctx->video_next_pts = MP_NOPTS_VALUE;
+    mpctx->playing_last_frame = false;
+    mpctx->last_frame_duration = 0;
     mpctx->delay = 0;
     mpctx->time_frame = 0;
     mpctx->restart_playback = true;
@@ -990,9 +992,31 @@ void run_playloop(struct MPContext *mpctx)
         struct vo *vo = mpctx->video_out;
         update_fps(mpctx);
 
-        video_left = vo->hasframe || vo->frame_loaded;
+        video_left = vo->hasframe || vo->frame_loaded || mpctx->playing_last_frame;
         if (!vo->frame_loaded && (!mpctx->paused || mpctx->restart_playback)) {
+
             double frame_time = update_video(mpctx, endpts);
+            if (frame_time < 0) {
+                if (!mpctx->playing_last_frame && mpctx->last_frame_duration > 0) {
+                    mpctx->time_frame += mpctx->last_frame_duration;
+                    mpctx->last_frame_duration = 0;
+                    mpctx->playing_last_frame = true;
+                }
+                if (mpctx->playing_last_frame) {
+                    frame_time = 0; // don't stop playback yet
+                } else if (mpctx->d_video->waiting_decoded_mpi) {
+                    // Format changes behave like EOF, and this call "unstucks"
+                    // the EOF condition (after waiting for the previous frame
+                    // to finish displaying).
+                    video_execute_format_change(mpctx);
+                    frame_time = update_video(mpctx, endpts);
+                    // We just displayed the previous frame, so display the
+                    // new frame immediately.
+                    if (frame_time > 0)
+                        frame_time = 0;
+                }
+            }
+
             mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "*** ftime=%5.3f ***\n", frame_time);
             if (mpctx->d_video->vfilter && mpctx->d_video->vfilter->initialized < 0)
             {
@@ -1027,7 +1051,7 @@ void run_playloop(struct MPContext *mpctx)
 
         if (!video_left || (mpctx->paused && !mpctx->restart_playback))
             break;
-        if (!vo->frame_loaded) {
+        if (!vo->frame_loaded && !mpctx->playing_last_frame) {
             sleeptime = 0;
             break;
         }
@@ -1071,6 +1095,11 @@ void run_playloop(struct MPContext *mpctx)
             break;
         }
         sleeptime = 0;
+        mpctx->playing_last_frame = false;
+
+        // last frame case (don't set video_left - consider format changes)
+        if (!vo->frame_loaded)
+            break;
 
         //=================== FLIP PAGE (VIDEO BLT): ======================
 
@@ -1096,8 +1125,14 @@ void run_playloop(struct MPContext *mpctx)
         int64_t pts_us = mpctx->last_time + time_frame * 1e6;
         int duration = -1;
         double pts2 = vo->next_pts2;
-        if (pts2 != MP_NOPTS_VALUE && opts->correct_pts &&
-                !mpctx->restart_playback) {
+        if (mpctx->video_pts != MP_NOPTS_VALUE && pts2 == MP_NOPTS_VALUE) {
+            // Make up a frame duration. Using the frame rate is not a good
+            // choice, since the frame rate could be unset/broken/random.
+            float fps = mpctx->d_video->fps;
+            double frame_time = fps > 0 ? 1.0 / fps : 0;
+            pts2 = mpctx->video_pts + frame_time;
+        }
+        if (pts2 != MP_NOPTS_VALUE) {
             // expected A/V sync correction is ignored
             double diff = (pts2 - mpctx->video_pts);
             diff /= opts->playback_speed;
@@ -1108,7 +1143,10 @@ void run_playloop(struct MPContext *mpctx)
             if (diff > 10)
                 diff = 10;
             duration = diff * 1e6;
+            mpctx->last_frame_duration = diff;
         }
+        if (mpctx->restart_playback)
+            duration = -1;
         vo_flip_page(vo, pts_us | 1, duration);
 
         mpctx->last_vo_flip_duration = (mp_time_us() - t2) * 0.000001;

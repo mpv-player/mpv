@@ -192,6 +192,8 @@ int reinit_video_chain(struct MPContext *mpctx)
     mpctx->sync_audio_to_video = !sh->attached_picture;
     mpctx->delay = 0;
     mpctx->video_next_pts = MP_NOPTS_VALUE;
+    mpctx->playing_last_frame = false;
+    mpctx->last_frame_duration = 0;
     mpctx->vo_pts_history_seek_ts++;
 
     vo_seek_reset(mpctx->video_out);
@@ -266,7 +268,8 @@ static void init_filter_params(struct MPContext *mpctx)
         mp_property_do("deinterlace", M_PROPERTY_SET, &opts->deinterlace, mpctx);
 }
 
-static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
+static void filter_video(struct MPContext *mpctx, struct mp_image *frame,
+                         bool reconfig_ok)
 {
     struct dec_video *d_video = mpctx->d_video;
 
@@ -275,6 +278,13 @@ static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
     if (!mp_image_params_equals(&d_video->decoder_output, &params) ||
         d_video->vfilter->initialized < 1)
     {
+        // In case we want to wait until filter chain is drained
+        if (!reconfig_ok) {
+            talloc_free(d_video->waiting_decoded_mpi);
+            d_video->waiting_decoded_mpi = frame;
+            return;
+        }
+
         reconfig_video(mpctx, &params, false);
         if (d_video->vfilter->initialized > 0)
             init_filter_params(mpctx);
@@ -288,6 +298,20 @@ static void filter_video(struct MPContext *mpctx, struct mp_image *frame)
     mp_image_set_params(frame, &d_video->vf_input); // force csp/aspect overrides
     vf_filter_frame(d_video->vfilter, frame);
     filter_output_queued_frame(mpctx);
+}
+
+// Reconfigure the video chain and the VO on a format change. This is separate,
+// because we wait with the reconfig until the currently buffered video has
+// finished displaying. Otherwise, we'd resize the window and then wait for the
+// video finishing, which would result in a black window for that frame.
+// Does nothing if there was no pending change.
+void video_execute_format_change(struct MPContext *mpctx)
+{
+    struct dec_video *d_video = mpctx->d_video;
+    struct mp_image *decoded_frame = d_video->waiting_decoded_mpi;
+    d_video->waiting_decoded_mpi = NULL;
+    if (decoded_frame)
+        filter_video(mpctx, decoded_frame, true);
 }
 
 static int check_framedrop(struct MPContext *mpctx, double frame_time)
@@ -326,7 +350,7 @@ static double update_video_attached_pic(struct MPContext *mpctx)
     struct mp_image *decoded_frame =
             video_decode(d_video, d_video->header->attached_picture, 0);
     if (decoded_frame)
-        filter_video(mpctx, decoded_frame);
+        filter_video(mpctx, decoded_frame, true);
     load_next_vo_frame(mpctx, true);
     mpctx->video_next_pts = MP_NOPTS_VALUE;
     return 0;
@@ -340,7 +364,14 @@ double update_video(struct MPContext *mpctx, double endpts)
     if (d_video->header->attached_picture)
         return update_video_attached_pic(mpctx);
 
-    if (!load_next_vo_frame(mpctx, false)) {
+    if (load_next_vo_frame(mpctx, false)) {
+        // Use currently queued VO frame
+    } else if (d_video->waiting_decoded_mpi) {
+        // Draining on reconfig
+        if (!load_next_vo_frame(mpctx, true))
+            return -1;
+    } else {
+        // Decode a new frame
         struct demux_packet *pkt = demux_read_packet(d_video->header);
         if (pkt && pkt->pts != MP_NOPTS_VALUE)
             pkt->pts += mpctx->video_offset;
@@ -355,13 +386,15 @@ double update_video(struct MPContext *mpctx, double endpts)
             video_decode(d_video, pkt, framedrop_type);
         talloc_free(pkt);
         if (decoded_frame) {
-            filter_video(mpctx, decoded_frame);
+            filter_video(mpctx, decoded_frame, false);
         } else if (!pkt) {
             if (!load_next_vo_frame(mpctx, true))
                 return -1;
         }
     }
 
+    // Whether the VO has an image queued.
+    // If it does, it will be used to time and display the next frame.
     if (!video_out->frame_loaded)
         return 0;
 
