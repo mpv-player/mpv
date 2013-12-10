@@ -165,6 +165,8 @@ static struct vo *vo_create(struct mpv_global *global,
         .event_fd = -1,
         .registered_fd = -1,
         .aspdat = { .monitor_par = 1 },
+        .next_pts = MP_NOPTS_VALUE,
+        .next_pts2 = MP_NOPTS_VALUE,
     };
     if (vo->driver->encode != !!vo->encode_lavc_ctx)
         goto error;
@@ -197,6 +199,7 @@ void vo_queue_image(struct vo *vo, struct mp_image *mpi)
     }
     vo->frame_loaded = true;
     vo->next_pts = mpi->pts;
+    vo->next_pts2 = MP_NOPTS_VALUE;
     assert(!vo->waiting_mpi);
     vo->waiting_mpi = mp_image_new_ref(mpi);
 }
@@ -265,6 +268,7 @@ void vo_flip_page(struct vo *vo, unsigned int pts_us, int duration)
     if (!vo->redrawing) {
         vo->frame_loaded = false;
         vo->next_pts = MP_NOPTS_VALUE;
+        vo->next_pts2 = MP_NOPTS_VALUE;
     }
     vo->want_redraw = false;
     vo->redrawing = false;
@@ -290,6 +294,8 @@ void vo_seek_reset(struct vo *vo)
 {
     vo_control(vo, VOCTRL_RESET, NULL);
     vo->frame_loaded = false;
+    vo->next_pts = MP_NOPTS_VALUE;
+    vo->next_pts2 = MP_NOPTS_VALUE;
     vo->hasframe = false;
     mp_image_unrefp(&vo->waiting_mpi);
 }
