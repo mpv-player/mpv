@@ -322,3 +322,34 @@ void osd_object_get_scale_factor(struct osd_state *osd, struct osd_object *obj,
     *sw = nw / (double)obj->vo_res.w;
     *sh = nh / (double)obj->vo_res.h;
 }
+
+// Position the subbitmaps in imgs on the screen. Basically, this fits the
+// subtitle canvas (of size frame_w x frame_h) onto the screen, such that it
+// fills the whole video area (especially if the video is magnified, e.g. on
+// fullscreen). If compensate_par is given, adjust the way the subtitles are
+// "stretched" on the screen, and letter-box the result.
+void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
+                         struct mp_osd_res res, double compensate_par)
+{
+    int vidw = res.w - res.ml - res.mr;
+    int vidh = res.h - res.mt - res.mb;
+    double xscale = (double)vidw / frame_w;
+    double yscale = (double)vidh / frame_h;
+    if (compensate_par > 0) {
+        if (compensate_par > 1.0) {
+            xscale /= compensate_par;
+        } else {
+            yscale *= compensate_par;
+        }
+    }
+    int cx = vidw / 2 - (int)(frame_w * xscale) / 2;
+    int cy = vidh / 2 - (int)(frame_h * yscale) / 2;
+    for (int i = 0; i < imgs->num_parts; i++) {
+        struct sub_bitmap *bi = &imgs->parts[i];
+        bi->x = bi->x * xscale + cx + res.ml;
+        bi->y = bi->y * yscale + cy + res.mt;
+        bi->dw = bi->w * xscale;
+        bi->dh = bi->h * yscale;
+    }
+    imgs->scaled = xscale != 1 || yscale != 1;
+}

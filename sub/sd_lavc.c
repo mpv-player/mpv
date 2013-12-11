@@ -212,45 +212,29 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     if (priv->endpts != MP_NOPTS_VALUE && (pts >= priv->endpts ||
                                            pts < priv->endpts - 300))
         clear(priv);
-    if (priv->bitmaps_changed && priv->count > 0)
-        priv->outbitmaps = talloc_memdup(priv, priv->inbitmaps,
-                                         talloc_get_size(priv->inbitmaps));
+    size_t size = talloc_get_size(priv->inbitmaps);
+    if (!priv->outbitmaps)
+        priv->outbitmaps = talloc_size(priv, size);
+    memcpy(priv->outbitmaps, priv->inbitmaps, size);
     int inw = priv->avctx->width;
     int inh = priv->avctx->height;
     guess_resolution(priv->avctx->codec_id, &inw, &inh);
-    int vidw = d.w - d.ml - d.mr;
-    int vidh = d.h - d.mt - d.mb;
-    double xscale = (double)vidw / inw;
-    double yscale = (double)vidh / inh;
-    if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&
-            opts->stretch_dvd_subs) {
-        // For DVD subs, try to keep the subtitle PAR at display PAR.
-        double video_par =
-              (priv->video_params.d_w / (double)priv->video_params.d_h)
-            / (priv->video_params.w   / (double)priv->video_params.h);
-        if (video_par > 1.0) {
-            xscale /= video_par;
-        } else {
-            yscale *= video_par;
-        }
-    }
-    int cx = vidw / 2 - (int)(inw * xscale) / 2;
-    int cy = vidh / 2 - (int)(inh * yscale) / 2;
-    for (int i = 0; i < priv->count; i++) {
-        struct sub_bitmap *bi = &priv->inbitmaps[i];
-        struct sub_bitmap *bo = &priv->outbitmaps[i];
-        bo->x = bi->x * xscale + cx + d.ml;
-        bo->y = bi->y * yscale + cy + d.mt;
-        bo->dw = bi->w * xscale;
-        bo->dh = bi->h * yscale;
-    }
     res->parts = priv->outbitmaps;
     res->num_parts = priv->count;
     if (priv->bitmaps_changed)
         res->bitmap_id = ++res->bitmap_pos_id;
     priv->bitmaps_changed = false;
     res->format = SUBBITMAP_INDEXED;
-    res->scaled = xscale != 1 || yscale != 1;
+
+    double video_par = -1;
+    if (priv->avctx->codec_id == AV_CODEC_ID_DVD_SUBTITLE &&
+            opts->stretch_dvd_subs) {
+        // For DVD subs, try to keep the subtitle PAR at display PAR.
+        video_par =
+              (priv->video_params.d_w / (double)priv->video_params.d_h)
+            / (priv->video_params.w   / (double)priv->video_params.h);
+    }
+    osd_rescale_bitmaps(res, inw, inh, d, video_par);
 }
 
 static void reset(struct sd *sd)

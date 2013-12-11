@@ -231,6 +231,9 @@ void osd_draw_on_image_p(struct osd_state *osd, struct mp_osd_res res,
 void osd_object_get_scale_factor(struct osd_state *osd, struct osd_object *obj,
                                  double *sw, double *sh);
 
+void osd_rescale_bitmaps(struct sub_bitmaps *imgs, int frame_w, int frame_h,
+                         struct mp_osd_res res, double compensate_par);
+
 // defined in osd_libass.c and osd_dummy.c
 
 void osd_object_get_bitmaps(struct osd_state *osd, struct osd_object *obj,
