@@ -254,6 +254,7 @@ If you really mean to compile without libass support use --disable-libass."
     }, {
         'name': '--dvdnav',
         'desc': 'dvdnav support',
+        'deps': [ 'dvdread' ],
         'func': check_pkg_config('dvdnav', '>= 4.2.0'),
     }, {
         'name': '--cdda',
