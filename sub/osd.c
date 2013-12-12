@@ -325,6 +325,23 @@ void osd_object_get_scale_factor(struct osd_state *osd, struct osd_object *obj,
     *sh = nh / (double)obj->vo_res.h;
 }
 
+// Turn *x and *y, which are given in OSD coordinates, to video coordinates.
+// frame_w and frame_h give the dimensions of the original, unscaled video.
+// (This gives correct results only after the OSD has been updated after a
+//  resize or video reconfig.)
+void osd_coords_to_video(struct osd_state *osd, int frame_w, int frame_h,
+                         int *x, int *y)
+{
+    struct mp_osd_res res = osd->objs[OSDTYPE_OSD]->vo_res;
+    int vidw = res.w - res.ml - res.mr;
+    int vidh = res.h - res.mt - res.mb;
+    double xscale = (double)vidw / frame_w;
+    double yscale = (double)vidh / frame_h;
+    // The OSD size + margins make up the scaled rectangle of the video.
+    *x = (*x - res.ml) / xscale;
+    *y = (*y - res.mt) / yscale;
+}
+
 // Position the subbitmaps in imgs on the screen. Basically, this fits the
 // subtitle canvas (of size frame_w x frame_h) onto the screen, such that it
 // fills the whole video area (especially if the video is magnified, e.g. on

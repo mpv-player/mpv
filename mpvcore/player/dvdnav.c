@@ -100,9 +100,22 @@ void mp_nav_user_input(struct MPContext *mpctx, char *command)
     struct mp_nav_state *nav = mpctx->nav_state;
     if (!nav)
         return;
-    struct mp_nav_cmd inp = {MP_NAV_CMD_MENU};
-    inp.u.menu.action = command;
-    stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+    if (strcmp(command, "mouse_move") == 0) {
+        struct mp_image_params vid = {0};
+        if (mpctx->d_video)
+            vid = mpctx->d_video->decoder_output;
+        struct mp_nav_cmd inp = {MP_NAV_CMD_MOUSE_POS};
+        int x, y;
+        mp_input_get_mouse_pos(mpctx->input, &x, &y);
+        osd_coords_to_video(mpctx->osd, vid.w, vid.h, &x, &y);
+        inp.u.mouse_pos.x = x;
+        inp.u.mouse_pos.y = y;
+        stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+    } else {
+        struct mp_nav_cmd inp = {MP_NAV_CMD_MENU};
+        inp.u.menu.action = command;
+        stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+    }
 }
 
 void mp_handle_nav(struct MPContext *mpctx)
