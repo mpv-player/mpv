@@ -2190,9 +2190,8 @@ void mp_input_disable_section(struct input_ctx *ictx, char *name)
     for (int i = ictx->num_active_sections - 1; i >= 0; i--) {
         struct active_section *as = &ictx->active_sections[i];
         if (strcmp(as->name, name) == 0) {
-            for (int x = i; i < ictx->num_active_sections - 1; i++)
-                ictx->active_sections[x] = ictx->active_sections[x + 1];
-            ictx->num_active_sections--;
+            MP_TARRAY_REMOVE_AT(ictx->active_sections,
+                                ictx->num_active_sections, i);
         }
     }
     input_unlock(ictx);
@@ -2205,10 +2204,19 @@ void mp_input_enable_section(struct input_ctx *ictx, char *name, int flags)
 
     mp_input_disable_section(ictx, name);
 
+    MP_VERBOSE(ictx, "enable section '%s'\n", name);
+
     if (ictx->num_active_sections < MAX_ACTIVE_SECTIONS) {
         ictx->active_sections[ictx->num_active_sections++] =
             (struct active_section) {name, flags};
     }
+
+    MP_DBG(ictx, "active section stack:\n");
+    for (int n = 0; n < ictx->num_active_sections; n++) {
+        MP_DBG(ictx, " %s %d\n", ictx->active_sections[n].name,
+               ictx->active_sections[n].flags);
+    }
+
     input_unlock(ictx);
 }
 
