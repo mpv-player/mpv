@@ -531,8 +531,6 @@ static int demux_open_lavf(demuxer_t *demuxer, enum demux_check check)
     if (!priv)
         return -1;
 
-    stream_seek(demuxer->stream, 0);
-
     avfc = avformat_alloc_context();
 
     if (lavfdopts->cryptokey)
