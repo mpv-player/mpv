@@ -523,6 +523,7 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
         .metadata = talloc_zero(demuxer, struct mp_tags),
     };
     demuxer->params = params; // temporary during open()
+    stream_seek(stream, stream->start_pos);
 
     mp_msg(MSGT_DEMUXER, MSGL_V, "Trying demuxer: %s (force-level: %s)\n",
            desc->name, d_level(check));
@@ -557,7 +558,6 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
     }
 
     free_demuxer(demuxer);
-    stream_seek(stream, stream->start_pos);
     return NULL;
 }
 
