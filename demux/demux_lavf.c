@@ -709,15 +709,10 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
     dp = new_demux_packet_fromdata(pkt->data, pkt->size);
     dp->avpacket = talloc_steal(dp, pkt);
 
-    if (pkt->pts != AV_NOPTS_VALUE) {
+    if (pkt->pts != AV_NOPTS_VALUE)
         dp->pts = pkt->pts * av_q2d(st->time_base);
-        priv->last_pts = dp->pts;
-    }
-    if (pkt->dts != AV_NOPTS_VALUE) {
+    if (pkt->dts != AV_NOPTS_VALUE)
         dp->dts = pkt->dts * av_q2d(st->time_base);
-        if (priv->last_pts == AV_NOPTS_VALUE)
-            priv->last_pts = pkt->dts;
-    }
     dp->duration = pkt->duration * av_q2d(st->time_base);
     if (pkt->convergence_duration > 0)
         dp->duration = pkt->convergence_duration * av_q2d(st->time_base);
@@ -728,6 +723,11 @@ static int demux_lavf_fill_buffer(demuxer_t *demux)
         double pts;
         if (stream_control(demux->stream, STREAM_CTRL_GET_CURRENT_TIME, &pts) > 0)
             dp->stream_pts = pts;
+    }
+    if (dp->pts != MP_NOPTS_VALUE) {
+        priv->last_pts = dp->pts * AV_TIME_BASE;
+    } else if (dp->dts != MP_NOPTS_VALUE) {
+        priv->last_pts = dp->dts * AV_TIME_BASE;
     }
     demuxer_add_packet(demux, stream, dp);
     return 1;
