@@ -1202,8 +1202,10 @@ goto_reopen_demuxer: ;
             else
                 dir = DVB_CHANNEL_LOWER;
 
-            if (dvb_step_channel(mpctx->stream, dir))
+            if (dvb_step_channel(mpctx->stream, dir)) {
                 mpctx->stop_play = PT_RELOAD_DEMUXER;
+                mpctx->stream->start_pos = stream_tell(mpctx->stream);
+            }
         }
 #endif
         goto terminate_playback;
