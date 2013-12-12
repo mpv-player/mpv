@@ -33,6 +33,8 @@ SOURCES-$(DVBIN)                += stream/dvb_tune.c \
                                    stream/stream_dvb.c
 SOURCES-$(DVDREAD)              += stream/stream_dvd.c \
                                    stream/stream_dvd_common.c
+SOURCES-$(DVDNAV)               += stream/stream_dvdnav.c \
+                                   stream/stream_dvd_common.c
 
 SOURCES-$(HAVE_SYS_MMAN_H)      += audio/filter/af_export.c
 SOURCES-$(LADSPA)               += audio/filter/af_ladspa.c
@@ -215,6 +217,7 @@ SOURCES = audio/audio.c \
           mpvcore/player/audio.c \
           mpvcore/player/configfiles.c \
           mpvcore/player/command.c \
+          mpvcore/player/dvdnav.c \
           mpvcore/player/loadfile.c \
           mpvcore/player/main.c \
           mpvcore/player/misc.c \

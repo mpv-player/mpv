@@ -201,7 +201,7 @@ char *mp_get_playback_resume_config_filename(const char *fname,
             goto exit;
         realpath = mp_path_join(tmp, bstr0(cwd), bstr0(fname));
     }
-#if HAVE_DVDREAD
+#if HAVE_DVDREAD || HAVE_DVDNAV
     if (bstr_startswith0(bfname, "dvd://"))
         realpath = talloc_asprintf(tmp, "%s - %s", realpath, dvd_device);
 #endif

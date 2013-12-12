@@ -83,6 +83,14 @@ static void guess_resolution(enum AVCodecID type, int *w, int *h)
     }
 }
 
+static void get_resolution(struct sd *sd, int wh[2])
+{
+    struct sd_lavc_priv *priv = sd->priv;
+    wh[0] = priv->avctx->width;
+    wh[1] = priv->avctx->height;
+    guess_resolution(priv->avctx->codec_id, &wh[0], &wh[1]);
+}
+
 static int init(struct sd *sd)
 {
     struct sd_lavc_priv *priv = talloc_zero(NULL, struct sd_lavc_priv);
@@ -216,9 +224,7 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
     if (!priv->outbitmaps)
         priv->outbitmaps = talloc_size(priv, size);
     memcpy(priv->outbitmaps, priv->inbitmaps, size);
-    int inw = priv->avctx->width;
-    int inh = priv->avctx->height;
-    guess_resolution(priv->avctx->codec_id, &inw, &inh);
+
     res->parts = priv->outbitmaps;
     res->num_parts = priv->count;
     if (priv->bitmaps_changed)
@@ -234,7 +240,9 @@ static void get_bitmaps(struct sd *sd, struct mp_osd_res d, double pts,
               (priv->video_params.d_w / (double)priv->video_params.d_h)
             / (priv->video_params.w   / (double)priv->video_params.h);
     }
-    osd_rescale_bitmaps(res, inw, inh, d, video_par);
+    int insize[2];
+    get_resolution(sd, insize);
+    osd_rescale_bitmaps(res, insize[0], insize[1], d, video_par);
 }
 
 static void reset(struct sd *sd)
@@ -263,6 +271,9 @@ static int control(struct sd *sd, enum sd_ctrl cmd, void *arg)
     switch (cmd) {
     case SD_CTRL_SET_VIDEO_PARAMS:
         priv->video_params = *(struct mp_image_params *)arg;
+        return CONTROL_OK;
+    case SD_CTRL_GET_RESOLUTION:
+        get_resolution(sd, arg);
         return CONTROL_OK;
     default:
         return CONTROL_UNKNOWN;

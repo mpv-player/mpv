@@ -47,6 +47,7 @@ enum stop_play_reason {
     PT_CURRENT_ENTRY,   // prepare to play mpctx->playlist->current
     PT_STOP,            // stop playback, clear playlist
     PT_RESTART,         // restart previous file
+    PT_RELOAD_DEMUXER,  // restart playback, but keep stream open
     PT_QUIT,            // stop playback, quit player
 };
 
@@ -310,7 +311,6 @@ typedef struct MPContext {
     struct ass_library *ass_library;
 
     int last_dvb_step;
-    int dvbin_reopen;
 
     bool paused;
     // step this many frames, then pause
@@ -329,6 +329,7 @@ typedef struct MPContext {
     struct command_ctx *command_ctx;
     struct encode_lavc_context *encode_lavc_ctx;
     struct lua_ctx *lua_ctx;
+    struct mp_nav_state *nav_state;
 } MPContext;
 
 // audio.c
@@ -353,6 +354,13 @@ void mp_load_playback_resume(struct m_config *conf, const char *file);
 void mp_write_watch_later_conf(struct MPContext *mpctx);
 struct playlist_entry *mp_resume_playlist(struct playlist *playlist,
                                           struct MPOpts *opts);
+
+// dvdnav.c
+void mp_nav_init(struct MPContext *mpctx);
+void mp_nav_reset(struct MPContext *mpctx);
+void mp_nav_destroy(struct MPContext *mpctx);
+void mp_nav_user_input(struct MPContext *mpctx, char *command);
+void mp_handle_nav(struct MPContext *mpctx);
 
 // loadfile.c
 void uninit_player(struct MPContext *mpctx, unsigned int mask);

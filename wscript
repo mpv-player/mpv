@@ -252,6 +252,10 @@ If you really mean to compile without libass support use --disable-libass."
         'desc': 'dvdread support',
         'func': check_pkg_config('dvdread', '>= 4.1.0'),
     }, {
+        'name': '--dvdnav',
+        'desc': 'dvdnav support',
+        'func': check_pkg_config('dvdnav', '>= 4.2.0'),
+    }, {
         'name': '--cdda',
         'desc': 'cdda support (libcdio)',
         'func': check_pkg_config('libcdio_paranoia'),

@@ -523,7 +523,6 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
         .metadata = talloc_zero(demuxer, struct mp_tags),
     };
     demuxer->params = params; // temporary during open()
-    stream_seek(stream, stream->start_pos);
 
     mp_msg(MSGT_DEMUXER, MSGL_V, "Trying demuxer: %s (force-level: %s)\n",
            desc->name, d_level(check));
@@ -542,6 +541,8 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
             demuxer->ts_resets_possible = false;
             // Doesn't work, because stream_pts is a "guess".
             demuxer->accurate_seek = false;
+            // Can be seekable even if the stream isn't.
+            demuxer->seekable = true;
         }
         add_stream_chapters(demuxer);
         demuxer_sort_chapters(demuxer);
@@ -556,6 +557,7 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
     }
 
     free_demuxer(demuxer);
+    stream_seek(stream, stream->start_pos);
     return NULL;
 }
 

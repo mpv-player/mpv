@@ -2957,8 +2957,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
 
             if (dvb_step_channel(mpctx->stream, dir)) {
-                mpctx->stop_play = PT_NEXT_ENTRY;
-                mpctx->dvbin_reopen = 1;
+                mpctx->stop_play = PT_RELOAD_DEMUXER;
             }
         }
 #endif /* HAVE_DVBIN */
@@ -2989,8 +2988,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
             if (dvb_set_channel(mpctx->stream, cmd->args[1].v.i,
                                 cmd->args[0].v.i)) {
-                mpctx->stop_play = PT_NEXT_ENTRY;
-                mpctx->dvbin_reopen = 1;
+                mpctx->stop_play = PT_RELOAD_DEMUXER;
             }
         }
         break;
@@ -3085,6 +3083,10 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
 
     case MP_CMD_DISABLE_INPUT_SECTION:
         mp_input_disable_section(mpctx->input, cmd->args[0].v.s);
+        break;
+
+    case MP_CMD_DVDNAV:
+        mp_nav_user_input(mpctx, cmd->args[0].v.s);
         break;
 
     case MP_CMD_VO_CMDLINE:

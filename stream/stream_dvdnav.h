@@ -1,0 +1,81 @@
+/*
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with MPlayer; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#ifndef MPLAYER_STREAM_DVDNAV_H
+#define MPLAYER_STREAM_DVDNAV_H
+
+#include <inttypes.h>
+#include <stdbool.h>
+#include "stream.h"
+
+// Sent from stream to player.
+// Note: order matters somewhat (stream_dvdnav sends them in numeric order)
+enum mp_nav_event_type {
+    MP_NAV_EVENT_NONE,
+    MP_NAV_EVENT_RESET,         // reinitialize some things
+    MP_NAV_EVENT_RESET_CLUT,    // reinitialize sub palette
+    MP_NAV_EVENT_RESET_ALL,     // reinitialize all things
+    MP_NAV_EVENT_DRAIN,         // reply with MP_NAV_CMD_DRAIN_OK
+    MP_NAV_EVENT_STILL_FRAME,   // keep displaying current frame
+    MP_NAV_EVENT_HIGHLIGHT,     // highlight changed
+    MP_NAV_EVENT_MENU_MODE,     // menu mode on/off
+    MP_NAV_EVENT_EOF,           // it's over
+};
+
+struct mp_nav_event {
+    enum mp_nav_event_type event;
+    union {
+        /*
+        struct {
+            int seconds;
+        } still_frame;
+        */
+        struct {
+            int display;
+            int sx, sy, ex, ey;
+            uint32_t palette;
+        } highlight;
+        struct {
+            bool enable;
+        } menu_mode;
+    } u;
+};
+
+// Sent from player to stream.
+enum mp_nav_cmd_type {
+    MP_NAV_CMD_NONE,
+    MP_NAV_CMD_ENABLE,        // enable interactive navigation
+    MP_NAV_CMD_DRAIN_OK,      // acknowledge EVENT_DRAIN
+    MP_NAV_CMD_RESUME,
+    MP_NAV_CMD_MENU,
+    MP_NAV_CMD_MOUSE_POS,
+};
+
+struct mp_nav_cmd {
+    enum mp_nav_cmd_type event;
+    union {
+        struct {
+            const char *action;
+        } menu;
+        struct {
+            int x, y;
+        } mouse_pos;
+    } u;
+};
+
+#endif /* MPLAYER_STREAM_DVDNAV_H */

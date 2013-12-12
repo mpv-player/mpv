@@ -477,7 +477,6 @@ void add_demuxer_tracks(struct MPContext *mpctx, struct demuxer *demuxer)
 
 static void add_dvd_tracks(struct MPContext *mpctx)
 {
-#if HAVE_DVDREAD
     struct demuxer *demuxer = mpctx->demuxer;
     struct stream *stream = demuxer->stream;
     struct stream_dvd_info_req info;
@@ -500,7 +499,6 @@ static void add_dvd_tracks(struct MPContext *mpctx)
         }
     }
     demuxer_enable_autoselect(demuxer);
-#endif
 }
 
 // Result numerically higher => better match. 0 == no match.
@@ -1078,6 +1076,9 @@ static void play_current_file(struct MPContext *mpctx)
         goto terminate_playback;
     }
 
+    // Must be called before enabling cache.
+    mp_nav_init(mpctx);
+
     // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
     int res = stream_enable_cache_percent(&mpctx->stream,
                                           opts->stream_cache_size,
@@ -1090,9 +1091,9 @@ static void play_current_file(struct MPContext *mpctx)
 
     stream_set_capture_file(mpctx->stream, opts->stream_capture);
 
-#if HAVE_DVBIN
 goto_reopen_demuxer: ;
-#endif
+
+    mp_nav_reset(mpctx);
 
     //============ Open DEMUXERS --- DETECT file type =======================
 
@@ -1201,10 +1202,8 @@ goto_reopen_demuxer: ;
             else
                 dir = DVB_CHANNEL_LOWER;
 
-            if (dvb_step_channel(mpctx->stream, dir)) {
-                mpctx->stop_play = PT_NEXT_ENTRY;
-                mpctx->dvbin_reopen = 1;
-            }
+            if (dvb_step_channel(mpctx->stream, dir))
+                mpctx->stop_play = PT_RELOAD_DEMUXER;
         }
 #endif
         goto terminate_playback;
@@ -1268,18 +1267,17 @@ goto_reopen_demuxer: ;
 
     MP_VERBOSE(mpctx, "EOF code: %d  \n", mpctx->stop_play);
 
-#if HAVE_DVBIN
-    if (mpctx->dvbin_reopen) {
-        mpctx->stop_play = 0;
+    if (mpctx->stop_play == PT_RELOAD_DEMUXER) {
+        mpctx->stop_play = KEEP_PLAYING;
         uninit_player(mpctx, INITIALIZED_ALL -
             (INITIALIZED_PLAYBACK | INITIALIZED_STREAM | INITIALIZED_GETCH2 |
              (opts->fixed_vo ? INITIALIZED_VO : 0)));
-        mpctx->dvbin_reopen = 0;
         goto goto_reopen_demuxer;
     }
-#endif
 
 terminate_playback:  // don't jump here after ao/vo/getch initialization!
+
+    mp_nav_destroy(mpctx);
 
     if (mpctx->stop_play == KEEP_PLAYING)
         mpctx->stop_play = AT_END_OF_FILE;

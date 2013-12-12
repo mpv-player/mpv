@@ -365,7 +365,7 @@ const m_option_t mp_opts[] = {
                       0, 40, ({"no", -1})),
 
     {"cdrom-device", &cdrom_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#if HAVE_DVDREAD
+#if HAVE_DVDREAD || HAVE_DVDNAV
     {"dvd-device", &dvd_device,  CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"dvd-speed", &dvd_speed, CONF_TYPE_INT, 0, 0, 0, NULL},
     {"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},

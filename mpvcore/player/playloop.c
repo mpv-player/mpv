@@ -1234,8 +1234,9 @@ void run_playloop(struct MPContext *mpctx)
                            }, true);
         } else
             mpctx->stop_play = AT_END_OF_FILE;
-        sleeptime = 0;
     }
+
+    mp_handle_nav(mpctx);
 
     if (!mpctx->stop_play && !mpctx->restart_playback) {
 
@@ -1269,6 +1270,8 @@ void run_playloop(struct MPContext *mpctx)
 
     if (!mpctx->stop_play) {
         double audio_sleep = 9;
+        if (mpctx->restart_playback)
+            sleeptime = 0;
         if (mpctx->d_audio && !mpctx->paused) {
             if (mpctx->ao->untimed) {
                 if (!video_left)

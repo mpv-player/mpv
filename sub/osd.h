@@ -86,6 +86,8 @@ enum mp_osdtype {
     OSDTYPE_SUB,
     OSDTYPE_SUBTEXT,
 
+    OSDTYPE_NAV_HIGHLIGHT,      // dvdnav fake highlights
+
     OSDTYPE_PROGBAR,
     OSDTYPE_OSD,
 
@@ -148,6 +150,8 @@ struct osd_state {
     struct sub_bitmaps external2;
     // OSDTYPE_SUB
     struct dec_sub *dec_sub;
+    // OSDTYPE_NAV_HIGHLIGHT
+    void *highlight_priv;
 
     struct MPOpts *opts;
 
@@ -243,5 +247,9 @@ void osd_object_get_resolution(struct osd_state *osd, struct osd_object *obj,
 void osd_get_function_sym(char *buffer, size_t buffer_size, int osd_function);
 void osd_init_backend(struct osd_state *osd);
 void osd_destroy_backend(struct osd_state *osd);
+
+// defined in player
+void mp_nav_get_highlight(struct osd_state *osd, struct mp_osd_res res,
+                          struct sub_bitmaps *out_imgs);
 
 #endif /* MPLAYER_SUB_H */

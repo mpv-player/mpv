@@ -319,6 +319,7 @@ Optional features:
   --disable-vcd          disable VCD support [autodetect]
   --disable-bluray       disable Blu-ray support [autodetect]
   --disable-dvdread      disable libdvdread [autodetect]
+  --disable-dvdnav       disable libdvdnav [autodetect]
   --disable-enca         disable ENCA charset oracle library [autodetect]
   --disable-pthreads     disable Posix threads support [autodetect]
   --disable-libass       disable subtitle rendering with libass [autodetect]
@@ -451,6 +452,7 @@ _libbs2b=auto
 _vcd=auto
 _bluray=auto
 _dvdread=auto
+_dvdnav=auto
 _lcms2=auto
 _xinerama=auto
 _vm=auto
@@ -639,6 +641,8 @@ for ac_option do
   --disable-bluray)     _bluray=no      ;;
   --enable-dvdread)     _dvdread=yes    ;;
   --disable-dvdread)    _dvdread=no     ;;
+  --enable-dvdnav)      _dvdnav=yes    ;;
+  --disable-dvdnav)     _dvdnav=no     ;;
   --enable-lcms2)       _lcms2=yes      ;;
   --disable-lcms2)      _lcms2=no       ;;
   --enable-xinerama)    _xinerama=yes   ;;
@@ -2467,6 +2471,21 @@ fi
 echores "$_dvdread"
 
 
+echocheck "dvdnav"
+if test "$_dvdnav" = auto ; then
+  _dvdnav=no
+  pkg_config_add 'dvdnav >= 4.2.0' && _dvdnav=yes
+fi
+if test "$_dvdnav" = yes ; then
+  def_dvdnav='#define HAVE_DVDNAV 1'
+  inputmodules="dvdnav $inputmodules"
+else
+  def_dvdnav='#define HAVE_DVDNAV 0'
+  noinputmodules="dvdnav $noinputmodules"
+fi
+echores "$_dvdnav"
+
+
 echocheck "libcdio"
 if test "$_libcdio" = auto ; then
     _libcdio=no
@@ -3249,6 +3268,7 @@ DSOUND = $_dsound
 WASAPI = $_wasapi
 DVBIN = $_dvbin
 DVDREAD = $_dvdread
+DVDNAV = $_dvdnav
 GL = $_gl
 GL_COCOA = $_gl_cocoa
 GL_WIN32 = $_gl_win32
@@ -3396,6 +3416,7 @@ $def_arch_x86_64
 $def_bluray
 $def_cdda
 $def_dvdread
+$def_dvdnav
 $def_vcd
 
 

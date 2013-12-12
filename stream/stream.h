@@ -89,6 +89,7 @@ enum stream_ctrl {
     STREAM_CTRL_GET_NUM_TITLES,
     STREAM_CTRL_GET_LANG,
     STREAM_CTRL_GET_CURRENT_TITLE,
+    STREAM_CTRL_SET_CURRENT_TITLE,
     STREAM_CTRL_GET_CACHE_SIZE,
     STREAM_CTRL_GET_CACHE_FILL,
     STREAM_CTRL_GET_CACHE_IDLE,
@@ -101,6 +102,8 @@ enum stream_ctrl {
     STREAM_CTRL_SET_CONTENTS,
     STREAM_CTRL_GET_METADATA,
     STREAM_CTRL_GET_BASE_FILENAME,
+    STREAM_CTRL_GET_NAV_EVENT,          // struct mp_nav_event**
+    STREAM_CTRL_NAV_CMD,                // struct mp_nav_cmd*
 };
 
 struct stream_lang_req {

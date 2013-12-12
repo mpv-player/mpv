@@ -1,0 +1,207 @@
+/*
+ * This file is part of mpv.
+ *
+ * mpv is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * mpv is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along
+ * with mpv.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#include <limits.h>
+#include <assert.h>
+
+#include "mp_core.h"
+
+#include "mpvcore/mp_msg.h"
+#include "mpvcore/mp_common.h"
+#include "mpvcore/input/input.h"
+
+#include "stream/stream_dvdnav.h"
+
+#include "sub/dec_sub.h"
+#include "sub/osd.h"
+
+#include "video/mp_image.h"
+#include "video/decode/dec_video.h"
+
+struct mp_nav_state {
+    struct mp_log *log;
+
+    bool nav_still_frame;
+    bool nav_eof;
+    bool nav_menu;
+    int hi_visible;
+    int highlight[4]; // x0 y0 x1 y1
+    int subsize[2];
+    struct sub_bitmap *hi_elem;
+};
+
+// Allocate state and enable navigation features. Must happen before
+// initializing cache, because the cache would read data. Since stream_dvdnav is
+// in a mode which skips all transitions on reading data (before enabling
+// data), this would skip stuff.
+void mp_nav_init(struct MPContext *mpctx)
+{
+    assert(!mpctx->nav_state);
+
+    // dvdnav is interactive
+    if (mpctx->encode_lavc_ctx)
+        return;
+
+    struct mp_nav_cmd inp = {MP_NAV_CMD_ENABLE};
+    if (stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp) < 1)
+        return;
+
+    mpctx->nav_state = talloc_zero(NULL, struct mp_nav_state);
+    mpctx->nav_state->log = mp_log_new(mpctx->nav_state, mpctx->log, "dvdnav");
+
+    MP_VERBOSE(mpctx->nav_state, "enabling\n");
+
+    mp_input_enable_section(mpctx->input, "dvdnav", 0);
+    mp_input_set_section_mouse_area(mpctx->input, "dvdnav-menu",
+                                    INT_MIN, INT_MIN, INT_MAX, INT_MAX);
+}
+
+void mp_nav_reset(struct MPContext *mpctx)
+{
+    struct mp_nav_state *nav = mpctx->nav_state;
+    if (!nav)
+        return;
+    struct mp_nav_cmd inp = {MP_NAV_CMD_RESUME};
+    stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+    nav->hi_visible = 0;
+    nav->nav_menu = false;
+    mp_input_disable_section(mpctx->input, "dvdnav-menu");
+    // Prevent demuxer init code to seek to the "start"
+    if (mpctx->stream)
+        mpctx->stream->start_pos = stream_tell(mpctx->stream);
+}
+
+void mp_nav_destroy(struct MPContext *mpctx)
+{
+    if (!mpctx->nav_state)
+        return;
+    mp_input_disable_section(mpctx->input, "dvdnav");
+    mp_input_disable_section(mpctx->input, "dvdnav-menu");
+    talloc_free(mpctx->nav_state);
+    mpctx->nav_state = NULL;
+}
+
+void mp_nav_user_input(struct MPContext *mpctx, char *command)
+{
+    struct mp_nav_state *nav = mpctx->nav_state;
+    if (!nav)
+        return;
+    struct mp_nav_cmd inp = {MP_NAV_CMD_MENU};
+    inp.u.menu.action = command;
+    stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+}
+
+void mp_handle_nav(struct MPContext *mpctx)
+{
+    struct mp_nav_state *nav = mpctx->nav_state;
+    if (!nav)
+        return;
+    while (1) {
+        struct mp_nav_event *ev = NULL;
+        stream_control(mpctx->stream, STREAM_CTRL_GET_NAV_EVENT, &ev);
+        if (!ev)
+            break;
+        switch (ev->event) {
+        case MP_NAV_EVENT_DRAIN: {
+            struct mp_nav_cmd inp = {MP_NAV_CMD_DRAIN_OK};
+            stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+            MP_VERBOSE(nav, "drain\n");
+            break;
+        }
+        case MP_NAV_EVENT_RESET_ALL: {
+            mpctx->stop_play = PT_RELOAD_DEMUXER;
+            MP_VERBOSE(nav, "reload\n");
+            break;
+        }
+        case MP_NAV_EVENT_EOF:
+            nav->nav_eof = true;
+            break;
+        case MP_NAV_EVENT_MENU_MODE:
+            nav->nav_menu = ev->u.menu_mode.enable;
+            if (nav->nav_menu) {
+                mp_input_enable_section(mpctx->input, "dvdnav-menu", 0);
+            } else {
+                mp_input_disable_section(mpctx->input, "dvdnav-menu");
+            }
+            break;
+        case MP_NAV_EVENT_HIGHLIGHT:
+            MP_VERBOSE(nav, "highlight: %d %d %d - %d %d\n",
+                       ev->u.highlight.display,
+                       ev->u.highlight.sx, ev->u.highlight.sy,
+                       ev->u.highlight.ex, ev->u.highlight.ey);
+            nav->highlight[0] = MPCLAMP(ev->u.highlight.sx, 0, 720);
+            nav->highlight[1] = MPCLAMP(ev->u.highlight.sy, 0, 480);
+            nav->highlight[2] = MPCLAMP(ev->u.highlight.ex, 0, 720);
+            nav->highlight[3] = MPCLAMP(ev->u.highlight.ey, 0, 480);
+            nav->hi_visible = ev->u.highlight.display;
+            mpctx->osd->highlight_priv = mpctx;
+            osd_changed(mpctx->osd, OSDTYPE_NAV_HIGHLIGHT);
+            break;
+        default: ; // ignore
+        }
+        talloc_free(ev);
+    }
+    // E.g. keep displaying still frames
+    if (mpctx->stop_play == AT_END_OF_FILE && !nav->nav_eof)
+        mpctx->stop_play = KEEP_PLAYING;
+}
+
+// Render "fake" highlights, because using actual dvd sub highlight elements
+// is too hard, and would require extra libavcodec to begin with.
+// Note: a proper solution would introduce something like
+//       SD_CTRL_APPLY_DVDNAV, which would crop the vobsub frame,
+//       and apply the current CLUT.
+void mp_nav_get_highlight(struct osd_state *osd, struct mp_osd_res res,
+                          struct sub_bitmaps *out_imgs)
+{
+    struct MPContext *mpctx = osd->highlight_priv;
+    struct mp_nav_state *nav = mpctx ? mpctx->nav_state : NULL;
+    if (!nav)
+        return;
+    struct sub_bitmap *sub = nav->hi_elem;
+    if (!sub)
+        sub = talloc_zero(nav, struct sub_bitmap);
+
+    nav->hi_elem = sub;
+    int sizes[2] = {0};
+    if (mpctx->d_sub)
+        sub_control(mpctx->d_sub, SD_CTRL_GET_RESOLUTION, sizes);
+    if (sizes[0] < 1 || sizes[1] < 1) {
+        struct mp_image_params vid = {0};
+        if (mpctx->d_video)
+            vid = mpctx->d_video->decoder_output;
+        sizes[0] = vid.w;
+        sizes[1] = vid.h;
+    }
+    if (sizes[0] < 1 || sizes[1] < 1)
+        return;
+    if (sizes[0] != nav->subsize[0] || sizes[1] != nav->subsize[1]) {
+        talloc_free(sub->bitmap);
+        sub->bitmap = talloc_array(sub, uint32_t, sizes[0] * sizes[1]);
+        memset(sub->bitmap, 0x80, talloc_get_size(sub->bitmap));
+    }
+
+    sub->x = nav->highlight[0];
+    sub->y = nav->highlight[1];
+    sub->w = MPMAX(nav->highlight[2] - sub->x, 0);
+    sub->h = MPMAX(nav->highlight[3] - sub->y, 0);
+    sub->stride = sub->w;
+    out_imgs->format = SUBBITMAP_RGBA;
+    out_imgs->parts = sub;
+    out_imgs->num_parts = sub->w > 0 && sub->h > 0 && nav->hi_visible;
+    osd_rescale_bitmaps(out_imgs, sizes[0], sizes[1], res, -1);
+}

@@ -75,6 +75,8 @@ enum mp_command_type {
     MP_CMD_ENABLE_INPUT_SECTION,
     MP_CMD_DISABLE_INPUT_SECTION,
 
+    MP_CMD_DVDNAV,
+
     /// DVB commands
     MP_CMD_DVB_SET_CHANNEL,
 

@@ -167,6 +167,8 @@ static void render_object(struct osd_state *osd, struct osd_object *obj,
             *out_imgs = osd->external2;
             osd->external2.bitmap_id = osd->external2.bitmap_pos_id = 0;
         }
+    } else if (obj->type == OSDTYPE_NAV_HIGHLIGHT) {
+        mp_nav_get_highlight(osd, obj->vo_res, out_imgs);
     } else {
         osd_object_get_bitmaps(osd, obj, out_imgs);
     }
