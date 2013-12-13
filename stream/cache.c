@@ -373,6 +373,10 @@ static int cache_get_cached_control(stream_t *cache, int cmd, void *arg)
         }
         return STREAM_UNSUPPORTED;
     }
+    case STREAM_CTRL_RESUME_CACHE:
+        s->idle = s->eof = false;
+        pthread_cond_signal(&s->wakeup);
+        return STREAM_OK;
     }
     return STREAM_ERROR;
 }
