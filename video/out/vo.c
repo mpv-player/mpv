@@ -508,10 +508,12 @@ static void src_dst_split_scaling(int src_size, int dst_size,
                                   int *dst_start, int *dst_end,
                                   int *osd_margin_a, int *osd_margin_b)
 {
-    if (unscaled)
+    if (unscaled) {
         scaled_src_size = src_size;
+        zoom = 0.0;
+    }
 
-    scaled_src_size += zoom * src_size;
+    scaled_src_size += zoom * scaled_src_size;
     align = (align + 1) / 2;
 
     *src_start = 0;
@@ -537,7 +539,7 @@ static void src_dst_split_scaling(int src_size, int dst_size,
         *dst_end = dst_size;
     }
 
-    if (unscaled && zoom == 1.0) {
+    if (unscaled) {
         // Force unscaled by reducing the range for src or dst
         int src_s = *src_end - *src_start;
         int dst_s = *dst_end - *dst_start;

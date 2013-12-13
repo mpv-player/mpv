@@ -2667,6 +2667,10 @@ OPTIONS
     ``--video-zoom`` option is set to a value other than ``1``, scaling is
     enabled, but the video isn't automatically scaled to the window size.)
 
+    The video and monitor aspects aspect will be ignored. Aspect correction
+    would require to scale the video in the X or Y direction, but this option
+    disables scaling, disabling all aspect correction.
+
     Note that the scaler algorithm may still be used, even if the video isn't
     scaled. For example, this can influence chroma conversion.
 
@@ -2674,10 +2678,11 @@ OPTIONS
 
 ``--video-zoom=<value>``
     Adjust the video display scale factor by the given value. The unit is in
-    fractions of original video size.
+    fractions of the (scaled) window video size.
 
-    For example, given a 1280x720 video, ``--video-zoom=-0.1`` would make the
-    video by 128 pixels smaller in X direction, and 72 pixels in Y direction.
+    For example, given a 1280x720 video shown in a 1280x720 window,
+    ``--video-zoom=-0.1`` would make the video by 128 pixels smaller in
+    X direction, and 72 pixels in Y direction.
 
     This option is disabled if the ``--no-keepaspect`` option is used.
 
