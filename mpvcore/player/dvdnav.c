@@ -47,7 +47,7 @@ struct mp_nav_state {
 // Allocate state and enable navigation features. Must happen before
 // initializing cache, because the cache would read data. Since stream_dvdnav is
 // in a mode which skips all transitions on reading data (before enabling
-// data), this would skip stuff.
+// navigation), this would skip some menu screens.
 void mp_nav_init(struct MPContext *mpctx)
 {
     assert(!mpctx->nav_state);
