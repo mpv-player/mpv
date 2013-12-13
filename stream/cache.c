@@ -89,6 +89,7 @@ struct priv {
     int64_t offset;         // buffer[offset] correponds to max_filepos
 
     bool idle;              // cache thread has stopped reading
+    int64_t reads;          // number of actual read attempts performed
 
     int64_t read_filepos;   // client read position (mirrors cache->pos)
     int control;            // requested STREAM_CTRL_... or CACHE_CTRL_...
@@ -172,10 +173,11 @@ static int cache_read(struct priv *s, unsigned char *buf, int size)
         return 0;
 
     double retry = 0;
+    int64_t eof_retry = s->reads - 1; // try at least 1 read on EOF
     while (s->read_filepos >= s->max_filepos ||
            s->read_filepos < s->min_filepos)
     {
-        if (s->eof && s->read_filepos >= s->max_filepos)
+        if (s->eof && s->read_filepos >= s->max_filepos && s->reads >= eof_retry)
             return 0;
         if (cache_wakeup_and_wait(s, &retry) == CACHE_INTERRUPTED)
             return 0;
@@ -210,7 +212,7 @@ static bool cache_fill(struct priv *s)
     if (read < s->min_filepos || read > s->max_filepos) {
         // seek...
         mp_msg(MSGT_CACHE, MSGL_DBG2,
-               "Out of boundaries... seeking to 0x%" PRIX64 "  \n", read);
+               "Out of boundaries... seeking to %" PRId64 "  \n", read);
         // drop cache contents only if seeking backward or too much fwd.
         // This is also done for on-disk files, since it loses the backseek cache.
         // That in turn can cause major bandwidth increase and performance
@@ -240,6 +242,7 @@ static bool cache_fill(struct priv *s)
 
     if (space < s->fill_limit) {
         s->idle = true;
+        s->reads++; // don't stuck main thread
         return false;
     }
 
@@ -273,8 +276,11 @@ static bool cache_fill(struct priv *s)
     if (pos + len == s->buffer_size)
         s->offset += s->buffer_size; // wrap...
 
-    s->eof = len > 0 ? 0 : 1;
+    s->eof = len <= 0;
     s->idle = s->eof;
+    s->reads++;
+    if (s->eof)
+        mp_msg(MSGT_CACHE, MSGL_V, "EOF reached.\n");
 
     pthread_cond_signal(&s->wakeup);
 
@@ -461,8 +467,8 @@ static int cache_seek(stream_t *cache, int64_t pos)
 
     pthread_mutex_lock(&s->mutex);
 
-    mp_msg(MSGT_CACHE, MSGL_DBG2, "CACHE2_SEEK: 0x%" PRIX64 " <= 0x%" PRIX64
-           " (0x%" PRIX64 ") <= 0x%" PRIX64 "  \n",
+    mp_msg(MSGT_CACHE, MSGL_DBG2, "request seek: %" PRId64 " <= to=%" PRId64
+           " (cur=%" PRId64 ") <= %" PRId64 "  \n",
            s->min_filepos, pos, s->read_filepos, s->max_filepos);
 
     cache->pos = s->read_filepos = pos;
