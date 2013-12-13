@@ -116,8 +116,10 @@ static void dvdnav_get_highlight(struct priv *priv, int display_mode)
         return;
 
     pnavpci = dvdnav_get_current_nav_pci(priv->dvdnav);
-    if (!pnavpci)
+    if (!pnavpci) {
+        hlev->display = 0;
         return;
+    }
 
     dvdnav_get_current_highlight(priv->dvdnav, &(hlev->buttonN));
     hlev->display = display_mode; /* show */
