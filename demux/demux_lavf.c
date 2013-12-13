@@ -902,6 +902,7 @@ redo:
          * call the new API instead of relying on av_seek_frame() to do this
          * for us.
          */
+        stream_drop_buffers(demuxer->stream);
         avio_flush(priv->avfc->pb);
         av_seek_frame(priv->avfc, 0, stream_tell(demuxer->stream),
                       AVSEEK_FLAG_BYTE);

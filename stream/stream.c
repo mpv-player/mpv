@@ -604,6 +604,15 @@ static int stream_skip_read(struct stream *s, int64_t len)
     return 1;
 }
 
+// Drop the internal buffer. Note that this will advance the stream position
+// (as seen by stream_tell()), because the real stream position is ahead of the
+// logical stream position by the amount of buffered but not yet read data.
+void stream_drop_buffers(stream_t *s)
+{
+    s->buf_pos = s->buf_len = 0;
+    s->eof = 0;
+}
+
 // Seek function bypassing the local stream buffer.
 static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 {
@@ -631,8 +640,7 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 // Unlike stream_seek_unbuffered(), it still fills the local buffer.
 static int stream_seek_long(stream_t *s, int64_t pos)
 {
-    s->buf_pos = s->buf_len = 0;
-    s->eof = 0;
+    stream_drop_buffers(s);
 
     if (s->mode == STREAM_WRITE) {
         if (!(s->flags & MP_STREAM_SEEK) || !s->seek(s, pos))
