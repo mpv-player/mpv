@@ -681,6 +681,9 @@ int stream_seek(stream_t *s, int64_t pos)
 
     mp_dbg(MSGT_DEMUX, MSGL_DBG3, "seek to 0x%llX\n", (long long)pos);
 
+    if (pos == stream_tell(s))
+        return 1;
+
     if (pos < 0) {
         mp_msg(MSGT_DEMUX, MSGL_ERR, "Invalid seek to negative position %llx!\n",
                (long long)pos);
