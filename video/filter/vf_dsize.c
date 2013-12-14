@@ -99,7 +99,7 @@ const vf_info_t vf_info_dsize = {
     },
     .options = (const struct m_option[]){
         OPT_INTRANGE("w", w, 0, -3, INT_MAX),
-        OPT_INTRANGE("h", w, 0, -3, INT_MAX),
+        OPT_INTRANGE("h", h, 0, -3, INT_MAX),
         OPT_INTRANGE("method", method, 0, -1, 3),
         OPT_INTRANGE("round", round, 0, 0, 9999),
         OPT_FLOAT("aspect", aspect, CONF_RANGE, .min = 0, .max = 10),
