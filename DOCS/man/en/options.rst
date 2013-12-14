@@ -1436,6 +1436,18 @@ OPTIONS
     search for video segments from other files, and will also ignore any
     chapter order specified for the main file.
 
+``--ordered-chapters-files=<playlist-file>``
+    Loads the given file as playlist, and tries to use the files contained in
+    it as reference files when opening a Matroska file that uses ordered
+    chapters. This overrides the normal mechanism for loading referenced
+    files by scanning the same directory the main file is located in.
+
+    Useful for loading ordered chapter files that are not located on the local
+    filesystem, or if the referenced files are in different directories.
+
+    Note: a playlist can be as simple as a text file containing filenames
+    separated by newlines.
+
 ``--osc``, ``--no-osc``
     Whether to load the on-screen-controller (default: yes).
 

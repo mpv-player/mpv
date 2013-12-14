@@ -36,6 +36,8 @@
 #include "mpvcore/path.h"
 #include "mpvcore/bstr.h"
 #include "mpvcore/mp_common.h"
+#include "mpvcore/playlist.h"
+#include "mpvcore/playlist_parser.h"
 #include "stream/stream.h"
 
 struct find_entry {
@@ -250,13 +252,23 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
                                         int *num_sources,
                                         struct matroska_segment_uid **uids)
 {
+    struct MPOpts *opts = mpctx->opts;
+    void *tmp = talloc_new(NULL);
     int num_filenames = 0;
     char **filenames = NULL;
     if (*num_sources > 1) {
         char *main_filename = mpctx->demuxer->filename;
         mp_msg(MSGT_CPLAYER, MSGL_INFO, "This file references data from "
                "other sources.\n");
-        if (mpctx->demuxer->stream->uncached_type != STREAMTYPE_FILE) {
+        if (opts->ordered_chapters_files && opts->ordered_chapters_files[0]) {
+            mp_msg(MSGT_CPLAYER, MSGL_INFO, "Loading references from '%s'.\n",
+                   opts->ordered_chapters_files);
+            struct playlist *pl =
+                playlist_parse_file(opts->ordered_chapters_files, opts);
+            talloc_steal(tmp, pl);
+            for (struct playlist_entry *e = pl->first; e; e = e->next)
+                MP_TARRAY_APPEND(tmp, filenames, num_filenames, e->filename);
+        } else if (mpctx->demuxer->stream->uncached_type != STREAMTYPE_FILE) {
             mp_msg(MSGT_CPLAYER, MSGL_WARN, "Playback source is not a "
                    "normal disk file. Will not search for related files.\n");
         } else {
@@ -264,6 +276,7 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
                    "same directory to find referenced sources.\n");
             filenames = find_files(main_filename, ".mkv");
             num_filenames = MP_TALLOC_ELEMS(filenames);
+            talloc_steal(tmp, filenames);
         }
         // Possibly get further segments appended to the first segment
         check_file(mpctx, sources, num_sources, uids, main_filename, 1);
@@ -281,7 +294,6 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
     /* Loop while we have new sources to look for. */
     } while (old_source_count != *num_sources);
 
-    talloc_free(filenames);
     if (missing(*sources, *num_sources)) {
         mp_msg(MSGT_CPLAYER, MSGL_ERR, "Failed to find ordered chapter part!\n"
                "There will be parts MISSING from the video!\n");
@@ -296,6 +308,8 @@ static int find_ordered_chapter_sources(struct MPContext *mpctx,
             }
         *num_sources = j;
     }
+
+    talloc_free(tmp);
     return *num_sources;
 }
 

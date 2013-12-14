@@ -684,6 +684,7 @@ const m_option_t mp_opts[] = {
     OPT_FLAG("save-position-on-quit", position_save_on_quit, 0),
 
     OPT_FLAG("ordered-chapters", ordered_chapters, 0),
+    OPT_STRING("ordered-chapters-files", ordered_chapters_files, 0),
     OPT_INTRANGE("chapter-merge-threshold", chapter_merge_threshold, 0, 0, 10000),
 
     OPT_DOUBLE("chapter-seek-threshold", chapter_seek_threshold, 0),
