@@ -1788,7 +1788,10 @@ static int read_mkv_segment_header(demuxer_t *demuxer)
         mp_msg(MSGT_DEMUX, MSGL_V, "[mkv]   (skipping)\n");
         if (len == EBML_UINT_INVALID)
             break;
-        if (!stream_seek(s, stream_tell(s) + len)) {
+        int64_t next = stream_tell(s) + len;
+        if (next >= s->end_pos)
+            return 0;
+        if (!stream_seek(s, next)) {
             mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Failed to seek in file\n");
             return 0;
         }
