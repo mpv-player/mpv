@@ -40,11 +40,9 @@ enum mp_nav_event_type {
 struct mp_nav_event {
     enum mp_nav_event_type event;
     union {
-        /*
         struct {
-            int seconds;
+            int seconds; // -1: infinite
         } still_frame;
-        */
         struct {
             int display;
             int sx, sy, ex, ey;
@@ -62,6 +60,7 @@ enum mp_nav_cmd_type {
     MP_NAV_CMD_ENABLE,        // enable interactive navigation
     MP_NAV_CMD_DRAIN_OK,      // acknowledge EVENT_DRAIN
     MP_NAV_CMD_RESUME,
+    MP_NAV_CMD_SKIP_STILL,    // after showing the frame in EVENT_STILL_FRAME
     MP_NAV_CMD_MENU,
     MP_NAV_CMD_MOUSE_POS,
 };

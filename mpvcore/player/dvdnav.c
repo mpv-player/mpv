@@ -35,7 +35,7 @@
 struct mp_nav_state {
     struct mp_log *log;
 
-    bool nav_still_frame;
+    int nav_still_frame;
     bool nav_eof;
     bool nav_menu;
     bool nav_draining;
@@ -81,6 +81,7 @@ void mp_nav_reset(struct MPContext *mpctx)
     nav->hi_visible = 0;
     nav->nav_menu = false;
     nav->nav_draining = false;
+    nav->nav_still_frame = 0;
     mp_input_disable_section(mpctx->input, "dvdnav-menu");
     // Prevent demuxer init code to seek to the "start"
     mpctx->stream->start_pos = stream_tell(mpctx->stream);
@@ -141,9 +142,20 @@ void mp_handle_nav(struct MPContext *mpctx)
             MP_VERBOSE(nav, "reload\n");
             break;
         }
+        case MP_NAV_EVENT_RESET: {
+            nav->nav_still_frame = 0;
+            break;
+        }
         case MP_NAV_EVENT_EOF:
             nav->nav_eof = true;
             break;
+        case MP_NAV_EVENT_STILL_FRAME: {
+            int len = ev->u.still_frame.seconds;
+            MP_VERBOSE(nav, "wait for %d seconds\n", len);
+            if (len > 0 && nav->nav_still_frame == 0)
+                nav->nav_still_frame = len;
+            break;
+        }
         case MP_NAV_EVENT_MENU_MODE:
             nav->nav_menu = ev->u.menu_mode.enable;
             if (nav->nav_menu) {
@@ -168,6 +180,17 @@ void mp_handle_nav(struct MPContext *mpctx)
         default: ; // ignore
         }
         talloc_free(ev);
+    }
+    if (mpctx->stop_play == AT_END_OF_FILE) {
+        if (nav->nav_still_frame > 0) {
+            // gross hack
+            mpctx->time_frame += nav->nav_still_frame;
+            mpctx->playing_last_frame = true;
+            nav->nav_still_frame = -2;
+        } else if (nav->nav_still_frame == -2) {
+            struct mp_nav_cmd inp = {MP_NAV_CMD_SKIP_STILL};
+            stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+        }
     }
     if (nav->nav_draining && mpctx->stop_play == AT_END_OF_FILE) {
         MP_VERBOSE(nav, "execute drain\n");

@@ -87,6 +87,7 @@ static char *mp_nav_cmd_types[] = {
     DNE(MP_NAV_CMD_ENABLE),
     DNE(MP_NAV_CMD_DRAIN_OK),
     DNE(MP_NAV_CMD_RESUME),
+    DNE(MP_NAV_CMD_SKIP_STILL),
     DNE(MP_NAV_CMD_MENU),
     DNE(MP_NAV_CMD_MOUSE_POS),
 };
@@ -144,11 +145,6 @@ static void dvdnav_get_highlight(struct priv *priv, int display_mode)
         hlev->sy = hlev->ey = 0;
         hlev->palette = hlev->buttonN = 0;
     }
-}
-
-static inline int dvdnav_get_duration(int length)
-{
-    return (length == 255) ? 0 : length * 1000;
 }
 
 static void handle_menu_input(stream_t *stream, const char *cmd)
@@ -287,6 +283,9 @@ static void handle_cmd(stream_t *s, struct mp_nav_cmd *ev)
     case MP_NAV_CMD_RESUME:
         priv->suspended_read = false;
         break;
+    case MP_NAV_CMD_SKIP_STILL:
+        dvdnav_still_skip(priv->dvdnav);
+        break;
     case MP_NAV_CMD_MENU:
         handle_menu_input(s, ev->u.menu.action);
         break;
@@ -318,6 +317,9 @@ static void fill_next_event(stream_t *s, struct mp_nav_event **ret)
             }
             case MP_NAV_EVENT_MENU_MODE:
                 e.u.menu_mode.enable = !dvdnav_is_domain_vts(priv->dvdnav);
+                break;
+            case MP_NAV_EVENT_STILL_FRAME:
+                e.u.still_frame.seconds = priv->still_length;
                 break;
             }
             break;
@@ -353,7 +355,7 @@ static int fill_buffer(stream_t *s, char *buf, int max_len)
                    event, dvdnav_err_to_string(dvdnav));
             return 0;
         }
-        if (1||event != DVDNAV_BLOCK_OK) {
+        if (event != DVDNAV_BLOCK_OK) {
             const char *name = LOOKUP_NAME(mp_dvdnav_events, event);
             mp_msg(MSGT_CPLAYER, MSGL_V, "DVDNAV: event %s (%d).\n", name, event);
             dvdnav_get_highlight(priv, 1);
@@ -370,9 +372,10 @@ static int fill_buffer(stream_t *s, char *buf, int max_len)
         case DVDNAV_STILL_FRAME: {
             dvdnav_still_event_t *still_event = (dvdnav_still_event_t *) buf;
             priv->still_length = still_event->length;
+            if (priv->still_length == 255)
+                priv->still_length = -1;
             mp_msg(MSGT_CPLAYER, MSGL_V, "len=%d\n", priv->still_length);
             /* set still frame duration */
-            priv->duration = dvdnav_get_duration(priv->still_length);
             if (priv->still_length <= 1) {
                 pci_t *pnavpci = dvdnav_get_current_nav_pci(dvdnav);
                 priv->duration = mp_dvdtimetomsec(&pnavpci->pci_gi.e_eltm);
@@ -428,22 +431,11 @@ static int fill_buffer(stream_t *s, char *buf, int max_len)
         }
         case DVDNAV_CELL_CHANGE: {
             dvdnav_cell_change_event_t *ev =  (dvdnav_cell_change_event_t *)buf;
-            uint32_t nextstill;
 
             priv->next_event |= 1 << MP_NAV_EVENT_RESET;
             priv->next_event |= 1 << MP_NAV_EVENT_MENU_MODE;
             if (ev->pgc_length)
                 priv->duration = ev->pgc_length / 90;
-
-            nextstill = dvdnav_get_next_still_flag(dvdnav);
-            if (nextstill) {
-                priv->duration = dvdnav_get_duration(nextstill);
-                priv->still_length = nextstill;
-                if (priv->still_length <= 1) {
-                    pci_t *pnavpci = dvdnav_get_current_nav_pci(dvdnav);
-                    priv->duration = mp_dvdtimetomsec(&pnavpci->pci_gi.e_eltm);
-                }
-            }
 
             dvdnav_get_highlight(priv, 1);
             break;
