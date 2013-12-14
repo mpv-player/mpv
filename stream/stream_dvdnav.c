@@ -60,7 +60,9 @@ struct priv {
 
 #define OPT_BASE_STRUCT struct priv
 static const m_option_t stream_opts_fields[] = {
-    OPT_INTRANGE("title", track, 0, 1, 99),
+    OPT_CHOICE_OR_INT("title", track, 0, 1, 99,
+                      ({"menu", -1},
+                       {"longest", 0})),
     OPT_STRING("device", device, 0),
     {0}
 };
@@ -664,6 +666,28 @@ static int open_s(stream_t *stream, int mode)
         return STREAM_UNSUPPORTED;
     }
 
+    if (p->track == 0) {
+        dvdnav_t *dvdnav = priv->dvdnav;
+        uint64_t best_length = 0;
+        int best_title = -1;
+        int32_t num_titles;
+        if (dvdnav_get_number_of_titles(dvdnav, &num_titles) == DVDNAV_STATUS_OK) {
+            for (int n = 1; n < num_titles; n++) {
+                uint64_t *parts = NULL, duration = 0;
+                dvdnav_describe_title_chapters(dvdnav, n, &parts, &duration);
+                if (parts) {
+                    if (duration > best_length) {
+                        best_length = duration;
+                        best_title = n;
+                    }
+                    free(parts);
+                }
+            }
+        }
+        mp_msg(MSGT_OPEN, MSGL_INFO, "Selecting title %d.\n", best_title);
+        p->track = best_title;
+    }
+
     if (p->track > 0) {
         priv->title = p->track;
         if (dvdnav_title_play(priv->dvdnav, p->track) != DVDNAV_STATUS_OK) {
@@ -673,7 +697,7 @@ static int open_s(stream_t *stream, int mode)
             return STREAM_UNSUPPORTED;
         }
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DVD_CURRENT_TITLE=%d\n", p->track);
-    } else if (p->track == 0) {
+    } else {
         if (dvdnav_menu_call(priv->dvdnav, DVD_MENU_Root) != DVDNAV_STATUS_OK)
             dvdnav_menu_call(priv->dvdnav, DVD_MENU_Title);
     }
@@ -689,10 +713,6 @@ static int open_s(stream_t *stream, int mode)
     stream->demuxer = "lavf";
     stream->lavf_type = "mpeg";
     stream->allow_caching = false;
-
-    if (!stream->pos && p->track > 0)
-        mp_msg(MSGT_OPEN, MSGL_ERR, "INIT ERROR: couldn't get init pos %s\r\n",
-               dvdnav_err_to_string(priv->dvdnav));
 
     return STREAM_OK;
 }

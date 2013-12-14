@@ -24,6 +24,7 @@ SYNOPSIS
 | **mpv** [options] {group of files and options}
 | **mpv** [bd]://[title][/device] [options]
 | **mpv** dvd://[title|[start\_title]-end\_title][/device] [options]
+| **mpv** dvdnav://[longest|menu|title][/device] [options]
 | **mpv** \vcd://[/device]
 | **mpv** \tv://[channel][/input_id] [options]
 | **mpv** radio://[channel|frequency][/capture] [options]
