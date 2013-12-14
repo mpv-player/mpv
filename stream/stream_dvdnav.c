@@ -539,13 +539,15 @@ static int control(stream_t *stream, int cmd, void *arg)
         int title = *((unsigned int *) arg);
         if (dvdnav_title_play(priv->dvdnav, title) != DVDNAV_STATUS_OK)
             break;
+        stream_drop_buffers(stream);
         return STREAM_OK;
     }
     case STREAM_CTRL_SEEK_TO_TIME: {
         uint64_t tm = (uint64_t) (*((double *)arg) * 90000);
-        if (dvdnav_time_search(dvdnav, tm) == DVDNAV_STATUS_OK)
-            return 1;
-        break;
+        if (dvdnav_time_search(dvdnav, tm) != DVDNAV_STATUS_OK)
+            break;
+        stream_drop_buffers(stream);
+        return STREAM_OK;
     }
     case STREAM_CTRL_GET_NUM_ANGLES: {
         uint32_t curr, angles;
