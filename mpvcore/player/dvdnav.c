@@ -38,6 +38,7 @@ struct mp_nav_state {
     bool nav_still_frame;
     bool nav_eof;
     bool nav_menu;
+    bool nav_draining;
     int hi_visible;
     int highlight[4]; // x0 y0 x1 y1
     int subsize[2];
@@ -79,10 +80,11 @@ void mp_nav_reset(struct MPContext *mpctx)
     stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
     nav->hi_visible = 0;
     nav->nav_menu = false;
+    nav->nav_draining = false;
     mp_input_disable_section(mpctx->input, "dvdnav-menu");
     // Prevent demuxer init code to seek to the "start"
-    if (mpctx->stream)
-        mpctx->stream->start_pos = stream_tell(mpctx->stream);
+    mpctx->stream->start_pos = stream_tell(mpctx->stream);
+    stream_control(mpctx->stream, STREAM_CTRL_RESUME_CACHE, NULL);
 }
 
 void mp_nav_destroy(struct MPContext *mpctx)
@@ -130,9 +132,8 @@ void mp_handle_nav(struct MPContext *mpctx)
             break;
         switch (ev->event) {
         case MP_NAV_EVENT_DRAIN: {
-            struct mp_nav_cmd inp = {MP_NAV_CMD_DRAIN_OK};
-            stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
-            MP_VERBOSE(nav, "drain\n");
+            nav->nav_draining = true;
+            MP_VERBOSE(nav, "drain requested\n");
             break;
         }
         case MP_NAV_EVENT_RESET_ALL: {
@@ -167,6 +168,13 @@ void mp_handle_nav(struct MPContext *mpctx)
         default: ; // ignore
         }
         talloc_free(ev);
+    }
+    if (nav->nav_draining && mpctx->stop_play == AT_END_OF_FILE) {
+        MP_VERBOSE(nav, "execute drain\n");
+        struct mp_nav_cmd inp = {MP_NAV_CMD_DRAIN_OK};
+        stream_control(mpctx->stream, STREAM_CTRL_NAV_CMD, &inp);
+        nav->nav_draining = false;
+        stream_control(mpctx->stream, STREAM_CTRL_RESUME_CACHE, NULL);
     }
     // E.g. keep displaying still frames
     if (mpctx->stop_play == AT_END_OF_FILE && !nav->nav_eof)
