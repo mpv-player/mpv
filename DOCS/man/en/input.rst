@@ -216,6 +216,9 @@ List of Input Commands
     expanded like in `Property Expansion`_. Note that there is a static limit
     of (as of this writing) 10 arguments (this limit could be raised on demand).
 
+    The program is run in a detached way. mpv doesn't wait until the command
+    is completed, but continues playback right after spawning it.
+
     To get the old behavior, use ``/bin/sh`` and ``-c`` as the first two
     arguments.
 
