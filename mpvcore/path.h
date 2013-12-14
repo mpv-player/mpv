@@ -36,6 +36,11 @@ char *mp_find_global_config_file(const char *filename);
 // Search for the input filename in the user configuration location.
 char *mp_find_user_config_file(const char *filename);
 
+// Normally returns a talloc_strdup'ed copy of the path, except for special
+// paths starting with '~'. Used to allow the user explicitly reference a
+// file from the user's home or mpv config directory.
+char *mp_get_user_path(void *talloc_ctx, const char *path);
+
 // Return pointer to filename part of path
 
 char *mp_basename(const char *path);

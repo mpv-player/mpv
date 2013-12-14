@@ -97,6 +97,28 @@ char *mp_find_global_config_file(const char *filename)
     }
 }
 
+char *mp_get_user_path(void *talloc_ctx, const char *path)
+{
+    if (!path)
+        return NULL;
+    bstr bpath = bstr0(path);
+    if (bstr_eatstart0(&bpath, "~")) {
+        // parse to "~" <prefix> "/" <rest>
+        bstr prefix, rest;
+        if (bstr_split_tok(bpath, "/", &prefix, &rest)) {
+            const char *rest0 = rest.start; // ok in this case
+            char *res = NULL;
+            if (bstr_equals0(prefix, "~"))
+                res = talloc_steal(talloc_ctx, mp_find_user_config_file(rest0));
+            if (bstr_equals0(prefix, ""))
+                res = mp_path_join(talloc_ctx, bstr0(getenv("HOME")), rest);
+            if (res)
+                return res;
+        }
+    }
+    return talloc_strdup(talloc_ctx, path);
+}
+
 char *mp_basename(const char *path)
 {
     char *s;

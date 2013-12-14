@@ -31,6 +31,7 @@
 #include "mpvcore/bstr.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/m_option.h"
+#include "mpvcore/path.h"
 
 #include "gl_video.h"
 #include "gl_lcms.h"
@@ -90,11 +91,13 @@ static void lcms2_error_handler(cmsContext ctx, cmsUInt32Number code,
 static struct bstr load_file(void *talloc_ctx, const char *filename)
 {
     struct bstr res = {0};
-    stream_t *s = stream_open(filename, NULL);
+    char *fname = mp_get_user_path(NULL, filename);
+    stream_t *s = stream_open(fname, NULL);
     if (s) {
         res = stream_read_complete(s, talloc_ctx, 1000000000);
         free_stream(s);
     }
+    talloc_free(fname);
     return res;
 }
 

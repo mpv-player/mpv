@@ -233,7 +233,10 @@ static char *create_fname(struct MPContext *mpctx, char *template,
     }
 
     res = talloc_strdup_append(res, template);
-    return talloc_asprintf_append(res, ".%s", file_ext);
+    res = talloc_asprintf_append(res, ".%s", file_ext);
+    char *fname = mp_get_user_path(NULL, res);
+    talloc_free(res);
+    return fname;
 
 error_exit:
     talloc_free(res);

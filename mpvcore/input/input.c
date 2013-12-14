@@ -2156,23 +2156,31 @@ static int parse_config(struct input_ctx *ictx, bool builtin, bstr data,
 
 static int parse_config_file(struct input_ctx *ictx, char *file, bool warn)
 {
+    int r = 0;
+    void *tmp = talloc_new(NULL);
+    stream_t *s = NULL;
+
+    file = mp_get_user_path(tmp, file);
     if (!mp_path_exists(file)) {
         MP_MSG(ictx, warn ? MSGL_ERR : MSGL_V,
                "Input config file %s not found.\n", file);
-        return 0;
+        goto done;
     }
-    stream_t *s = stream_open(file, NULL);
+    s = stream_open(file, NULL);
     if (!s) {
         MP_ERR(ictx, "Can't open input config file %s.\n", file);
-        return 0;
+        goto done;
     }
-    bstr res = stream_read_complete(s, NULL, 1000000);
-    free_stream(s);
+    bstr data = stream_read_complete(s, tmp, 1000000);
     MP_VERBOSE(ictx, "Parsing input config file %s\n", file);
-    int n_binds = parse_config(ictx, false, res, file, NULL);
-    talloc_free(res.start);
+    int n_binds = parse_config(ictx, false, data, file, NULL);
     MP_VERBOSE(ictx, "Input config file %s parsed: %d binds\n", file, n_binds);
-    return 1;
+    r = 1;
+
+done:
+    free_stream(s);
+    talloc_free(tmp);
+    return r;
 }
 
 // If name is NULL, return "default".
