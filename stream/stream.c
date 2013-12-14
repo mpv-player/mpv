@@ -290,6 +290,7 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
     s->url = talloc_strdup(s, url);
     s->path = talloc_strdup(s, path);
     s->source = underlying;
+    s->allow_caching = true;
 
     // Parse options
     if (sinfo->priv_size) {
@@ -805,7 +806,7 @@ static int stream_enable_cache(stream_t **stream, int64_t size, int64_t min,
 {
     stream_t *orig = *stream;
 
-    if (orig->mode != STREAM_READ)
+    if (orig->mode != STREAM_READ || !orig->allow_caching)
         return 1;
 
     stream_t *cache = new_stream();

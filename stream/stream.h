@@ -164,6 +164,7 @@ typedef struct stream {
     char *demuxer; // request demuxer to be used
     char *lavf_type; // name of expected demuxer type for lavf
     bool safe_origin; // used for playlists that can be opened safely
+    bool allow_caching; // stream cache makes sense
     struct MPOpts *opts;
 
     FILE *capture_file;

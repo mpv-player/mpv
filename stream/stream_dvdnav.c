@@ -696,13 +696,11 @@ static int open_s(stream_t *stream, int mode)
     stream->type = STREAMTYPE_DVD;
     stream->demuxer = "lavf";
     stream->lavf_type = "mpeg";
+    stream->allow_caching = false;
 
     if (!stream->pos && p->track > 0)
         mp_msg(MSGT_OPEN, MSGL_ERR, "INIT ERROR: couldn't get init pos %s\r\n",
                dvdnav_err_to_string(priv->dvdnav));
-
-    mp_msg(MSGT_OPEN, MSGL_INFO, "Remember to disable mpv's cache when "
-           "playing dvdnav:// streams (adding -no-cache to your command line)\n");
 
     return STREAM_OK;
 }
