@@ -16,11 +16,14 @@
  */
 
 #include <assert.h>
+#include <sys/stat.h>
+#include <dirent.h>
 #include "config.h"
 #include "playlist.h"
 #include "mpvcore/mp_common.h"
 #include "talloc.h"
 #include "mpvcore/path.h"
+#include "osdep/io.h"
 
 struct playlist_entry *playlist_entry_new(const char *filename)
 {
@@ -128,6 +131,102 @@ void playlist_move(struct playlist *pl, struct playlist_entry *entry,
     pl->current_was_replaced = save_replaced;
 }
 
+struct ino_elem {
+    ino_t ino;
+    dev_t dev;
+    struct ino_elem *next;
+};
+
+void playlist_add_filepath_wrk(struct playlist *pl, const char *filepath,
+            struct ino_elem *ino_list);
+
+int entry_compare(const struct playlist_entry **e1,
+        const struct playlist_entry **e2);
+
+void playlist_add_filepath(struct playlist *pl, const char *filepath)
+{
+    void *ctx = talloc_new(NULL);
+    struct playlist *new_pl = talloc_zero(ctx, struct playlist);
+    if (!mp_path_isdir(filepath)) {
+        playlist_add_file(pl, filepath);
+        talloc_free(ctx);
+        return;
+    }
+    struct ino_elem *ino_list = talloc_zero(ctx, struct ino_elem);
+    ino_list->ino = -1;
+    ino_list->dev = -1;
+    ino_list->next = NULL;
+    playlist_add_filepath_wrk(new_pl, filepath, ino_list);
+    playlist_sort(new_pl, entry_compare);
+    playlist_transfer_entries(pl, new_pl);
+    talloc_free(ctx);
+}
+
+void playlist_add_filepath_wrk(struct playlist *pl, const char *filepath,
+    struct ino_elem *ino_list)
+{
+    void *ctx = talloc_new(NULL);
+    struct playlist *new_pl = talloc_zero(ctx, struct playlist);
+    DIR *dir;
+    if (!mp_path_isdir(filepath) || (dir = opendir(filepath)) == NULL ) {
+        playlist_add_file(new_pl, filepath);
+        talloc_free(ctx);
+        return;
+    }
+    
+    // List of dir inodes, to detect symlink loops. List survives recursion.
+    struct ino_elem *new_ino_list;
+    if (ino_list == NULL) {
+        new_ino_list = talloc_zero(ctx, struct ino_elem);
+        new_ino_list->ino = -1;
+        new_ino_list->dev = -1;
+        new_ino_list->next = NULL;
+    } else {
+        new_ino_list = ino_list;
+    }
+    // If we aren't on windows, check and append to inode list.
+    #ifndef __MINGW32__
+    struct stat *buf = talloc_zero(ctx, struct stat);
+    if (stat(filepath, buf) == -1) {
+        closedir(dir);
+        talloc_free(ctx);
+        return;
+    }
+    struct ino_elem *ino_ptr = new_ino_list;
+    while ((ino_ptr = ino_ptr->next) != NULL) {
+        if (ino_ptr->ino == buf->st_ino && ino_ptr->dev == buf->st_dev) {
+            closedir(dir);
+            talloc_free(ctx);
+            return;
+        }
+    }
+    // Attach new inode_elem to ino_list ctx, since it's persistent.
+    ino_ptr = talloc_zero(new_ino_list, struct ino_elem);
+    ino_ptr->ino = buf->st_ino;
+    ino_ptr->dev = buf->st_dev;
+    ino_ptr->next = new_ino_list->next;
+    new_ino_list->next = ino_ptr;
+    #endif
+
+    struct dirent *entry;
+    bstr base_path = bstrdup(ctx,bstr0(filepath));
+    while ((entry = readdir(dir)) != NULL) {
+        bstr dname = bstrdup(ctx,bstr0(entry->d_name));
+        bstr new_path = bstr0(mp_path_join(ctx, base_path, dname));
+        if (bstr_startswith0(dname, ".") || bstrcmp0(dname, "") == 0) {
+            continue;
+        }
+        if (mp_path_isdir(new_path.start)) {
+            playlist_add_filepath_wrk(new_pl, new_path.start, new_ino_list);
+        } else {
+            playlist_add_file(new_pl, new_path.start);
+        }
+    }
+    closedir(dir);
+    playlist_transfer_entries(pl, new_pl);
+    talloc_free(ctx);
+}
+
 void playlist_add_file(struct playlist *pl, const char *filename)
 {
     playlist_add(pl, playlist_entry_new(filename));
@@ -158,6 +257,45 @@ void playlist_shuffle(struct playlist *pl)
         arr[n] = arr[other];
         arr[other] = tmp;
     }
+    for (int n = 0; n < count; n++)
+        playlist_add(pl, arr[n]);
+    talloc_free(arr);
+    pl->current = save_current;
+    pl->current_was_replaced = save_replaced;
+}
+
+// Compare function for playlist entries, based on directory, then filename.
+int entry_compare(const struct playlist_entry **e1,
+        const struct playlist_entry **e2)
+{
+    if (e1 == NULL || *e1 == NULL)
+        return -1;
+    if (e2 == NULL || *e2 == NULL)
+        return 1;
+    int compare = bstrcmp(mp_dirname((*e1)->filename),
+            mp_dirname((*e2)->filename));
+    if (compare != 0) {
+        return compare;
+    }
+    return strcmp(mp_basename((*e1)->filename),
+            mp_basename((*e2)->filename));
+}
+
+void playlist_sort(struct playlist *pl,
+        int (*compar)(const struct playlist_entry **e1,
+            const struct playlist_entry **e2))
+{
+    struct playlist_entry *save_current = pl->current;
+    bool save_replaced = pl->current_was_replaced;
+    int count = playlist_count(pl);
+    struct playlist_entry **arr = talloc_array(NULL, struct playlist_entry *,
+                                               count);
+    for (int n = 0; n < count; n++) {
+        arr[n] = pl->first;
+        playlist_unlink(pl, pl->first);
+    }
+    qsort(arr, count, sizeof(struct playlist_entry *),
+            (int (*)(const void *, const void *)) compar);
     for (int n = 0; n < count; n++)
         playlist_add(pl, arr[n]);
     talloc_free(arr);
