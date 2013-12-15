@@ -48,8 +48,6 @@ Arguments are separated by whitespace. This applies even to string arguments.
 For this reason, string arguments should be quoted with ``"``. Inside quotes,
 C-style escaping can be used.
 
-Optional arguments can be skipped with ``-``.
-
 You can bind multiple commands to one key. For example:
 
 | a show_text "command 1" ; show_text "command 2"
