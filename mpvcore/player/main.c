@@ -140,6 +140,8 @@ static MP_NORETURN void exit_player(struct MPContext *mpctx,
     mpctx->ass_library = NULL;
 #endif
 
+    getch2_disable();
+
     if (how != EXIT_NONE) {
         const char *reason;
         switch (how) {
@@ -389,6 +391,9 @@ static int mpv_main(int argc, char *argv[])
         mp_input_enable_section(mpctx->input, "encode", MP_INPUT_EXCLUSIVE);
     }
 #endif
+
+    if (opts->consolecontrols)
+        getch2_enable();
 
 #if HAVE_LIBASS
     mpctx->ass_library = mp_ass_init(opts);

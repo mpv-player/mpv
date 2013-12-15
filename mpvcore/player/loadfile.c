@@ -154,14 +154,6 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
         mpctx->video_out = NULL;
     }
 
-    // Must be after libvo uninit, as few vo drivers (svgalib) have tty code.
-    if (mask & INITIALIZED_GETCH2) {
-        mpctx->initialized_flags &= ~INITIALIZED_GETCH2;
-        MP_DBG(mpctx, "\n[[[uninit getch2]]]\n");
-        // restore terminal:
-        getch2_disable();
-    }
-
     if (mask & INITIALIZED_AO) {
         struct ao *ao = mpctx->ao;
         mpctx->initialized_flags &= ~INITIALIZED_AO;
@@ -1024,16 +1016,8 @@ static void play_current_file(struct MPContext *mpctx)
     load_per_file_options(mpctx->mconfig, mpctx->playlist->current->params,
                           mpctx->playlist->current->num_params);
 
-    // We must enable getch2 here to be able to interrupt network connection
-    // or cache filling
-    if (opts->consolecontrols && !opts->slave_mode) {
-        if (mpctx->initialized_flags & INITIALIZED_GETCH2)
-            MP_WARN(mpctx, "WARNING: getch2_init called twice!\n");
-        else
-            getch2_enable();  // prepare stdin for hotkeys...
-        mpctx->initialized_flags |= INITIALIZED_GETCH2;
-        MP_DBG(mpctx, "\n[[[init getch2]]]\n");
-    }
+    if (!opts->consolecontrols)
+        getch2_disable();
 
 #if HAVE_LIBASS
     if (opts->ass_style_override)
@@ -1270,7 +1254,7 @@ goto_reopen_demuxer: ;
     if (mpctx->stop_play == PT_RELOAD_DEMUXER) {
         mpctx->stop_play = KEEP_PLAYING;
         uninit_player(mpctx, INITIALIZED_ALL -
-            (INITIALIZED_PLAYBACK | INITIALIZED_STREAM | INITIALIZED_GETCH2 |
+            (INITIALIZED_PLAYBACK | INITIALIZED_STREAM |
              (opts->fixed_vo ? INITIALIZED_VO : 0)));
         goto goto_reopen_demuxer;
     }
@@ -1305,6 +1289,9 @@ terminate_playback:  // don't jump here after ao/vo/getch initialization!
     // xxx handle this as INITIALIZED_CONFIG?
     if (mpctx->stop_play != PT_RESTART)
         m_config_restore_backups(mpctx->mconfig);
+
+    if (opts->consolecontrols)
+        getch2_enable();
 
     mpctx->filename = NULL;
     talloc_free(mpctx->resolve_result);
