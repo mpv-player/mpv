@@ -142,7 +142,7 @@ static const struct mp_cmd_def mp_cmds[] = {
 
   { MP_CMD_SEEK, "seek", {
       ARG_TIME,
-      OARG_CHOICE(0, ({"relative", 0},          {"0", 0},
+      OARG_CHOICE(0, ({"relative", 0},          {"0", 0}, {"-", 0},
                       {"absolute-percent", 1},  {"1", 1},
                       {"absolute", 2},          {"2", 2})),
       OARG_CHOICE(0, ({"default-precise", 0},   {"0", 0},
@@ -191,7 +191,7 @@ static const struct mp_cmd_def mp_cmds[] = {
   { MP_CMD_SCREENSHOT, "screenshot", {
       OARG_CHOICE(2, ({"video", 0},
                       {"window", 1},
-                      {"subtitles", 2})),
+                      {"subtitles", 2}, {"-", 2})),
       OARG_CHOICE(0, ({"single", 0},
                       {"each-frame", 1})),
   }},
@@ -1022,14 +1022,8 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
             }
         } else {
             bool got_token = read_token(str, &str, &arg);
-            if (is_vararg) {
-                if (!got_token)
-                    continue;
-            } else {
-                // Explicitly select default for an optional argument
-                if (got_token && opt->defval && bstr_equals0(arg, "-"))
-                    got_token = false;
-            }
+            if (is_vararg && !got_token)
+                continue;
             // Skip optional arguments
             if (!got_token && opt->defval) {
                 struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
