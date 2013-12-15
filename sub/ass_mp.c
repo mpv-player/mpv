@@ -222,9 +222,10 @@ static void message_callback(int level, const char *format, va_list va, void *ct
 
 ASS_Library *mp_ass_init(struct MPOpts *opts)
 {
-    ASS_Library *priv;
     char *path = mp_find_user_config_file("fonts");
-    priv = ass_library_init();
+    ASS_Library *priv = ass_library_init();
+    if (!priv)
+        abort();
     ass_set_message_cb(priv, message_callback, NULL);
     if (path)
         ass_set_fonts_dir(priv, path);

@@ -115,8 +115,10 @@ struct osd_object {
     struct mp_osd_res vo_res;
 
     // Internally used by osd_libass.c
-    struct ass_track *osd_track;
     struct sub_bitmap *parts_cache;
+    struct ass_track *osd_track;
+    struct ass_renderer *osd_render;
+    struct ass_library *osd_ass_library;
 };
 
 struct osd_state {
@@ -155,10 +157,6 @@ struct osd_state {
 
     // Internal to sub.c
     struct mp_draw_sub_cache *draw_cache;
-
-    // Internally used by osd_libass.c
-    struct ass_renderer *osd_render;
-    struct ass_library *osd_ass_library;
 };
 
 // Start of OSD symbols in osd_font.pfb
