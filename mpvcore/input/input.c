@@ -918,14 +918,30 @@ error:
     return false;
 }
 
+struct flag {
+    const char *name;
+    unsigned int remove, add;
+};
+
+static const struct flag cmd_flags[] = {
+    {"pausing",             MP_PAUSING_FLAGS, MP_PAUSING},
+    {"pausing-toggle",      MP_PAUSING_FLAGS, MP_PAUSING_TOGGLE},
+    {"no-osd",              MP_ON_OSD_FLAGS, MP_ON_OSD_NO},
+    {"osd-bar",             MP_ON_OSD_FLAGS, MP_ON_OSD_BAR},
+    {"osd-msg",             MP_ON_OSD_FLAGS, MP_ON_OSD_MSG},
+    {"osd-msg-bar",         MP_ON_OSD_FLAGS, MP_ON_OSD_MSG | MP_ON_OSD_BAR},
+    {"osd-auto",            MP_ON_OSD_FLAGS, MP_ON_OSD_AUTO},
+    {"expand-properties",   0,                    MP_EXPAND_PROPERTIES},
+    {"raw",                 MP_EXPAND_PROPERTIES, 0},
+    {0}
+};
+
 // If dest is non-NULL when calling this function, append the command to the
 // list formed by dest->queue_next, otherwise just set *dest = new_cmd;
 static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
                      const char *loc)
 {
-    int pausing = 0;
-    int on_osd = MP_ON_OSD_AUTO;
-    bool raw_args = false;
+    int def_flags = MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES;
     struct mp_cmd *cmd = NULL;
     bstr start = str;
     void *tmp = talloc_new(NULL);
@@ -947,31 +963,15 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
     }
 
     while (1) {
-        if (eat_token(&str, "pausing")) {
-            pausing = 1;
-        } else if (eat_token(&str, "pausing_keep")) {
-            pausing = 2;
-        } else if (eat_token(&str, "pausing_toggle")) {
-            pausing = 3;
-        } else if (eat_token(&str, "pausing_keep_force")) {
-            pausing = 4;
-        } else if (eat_token(&str, "no-osd")) {
-            on_osd = MP_ON_OSD_NO;
-        } else if (eat_token(&str, "osd-bar")) {
-            on_osd = MP_ON_OSD_BAR;
-        } else if (eat_token(&str, "osd-msg")) {
-            on_osd = MP_ON_OSD_MSG;
-        } else if (eat_token(&str, "osd-msg-bar")) {
-            on_osd = MP_ON_OSD_MSG | MP_ON_OSD_BAR;
-        } else if (eat_token(&str, "osd-auto")) {
-            // default
-        } else if (eat_token(&str, "raw")) {
-            raw_args = true;
-        } else if (eat_token(&str, "expand-properties")) {
-            // default
-        } else {
-            break;
+        for (int n = 0; cmd_flags[n].name; n++) {
+            if (eat_token(&str, cmd_flags[n].name)) {
+                def_flags &= ~cmd_flags[n].remove;
+                def_flags |= cmd_flags[n].add;
+                goto cont;
+            }
         }
+        break;
+    cont: ;
     }
 
     int cmd_idx = 0;
@@ -991,9 +991,7 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
     *cmd = (struct mp_cmd) {
         .name = (char *)cmd_def->name,
         .id = cmd_def->id,
-        .pausing = pausing,
-        .on_osd = on_osd,
-        .raw_args = raw_args,
+        .flags = def_flags,
         .scale = 1,
         .def = cmd_def,
     };

@@ -2110,8 +2110,7 @@ static struct property_osd_display {
     {0}
 };
 
-static void show_property_osd(MPContext *mpctx, const char *pname,
-                              enum mp_on_osd osd_mode)
+static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
 {
     struct MPOpts *opts = mpctx->opts;
     struct m_option prop = {0};
@@ -2492,13 +2491,14 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
     struct command_ctx *cmdctx = mpctx->command_ctx;
     struct MPOpts *opts = mpctx->opts;
     int osd_duration = opts->osd_duration;
-    bool auto_osd = cmd->on_osd == MP_ON_OSD_AUTO;
-    bool msg_osd = auto_osd || (cmd->on_osd & MP_ON_OSD_MSG);
-    bool bar_osd = auto_osd || (cmd->on_osd & MP_ON_OSD_BAR);
+    int on_osd = cmd->flags & MP_ON_OSD_FLAGS;
+    bool auto_osd = on_osd == MP_ON_OSD_AUTO;
+    bool msg_osd = auto_osd || (on_osd & MP_ON_OSD_MSG);
+    bool bar_osd = auto_osd || (on_osd & MP_ON_OSD_BAR);
     bool msg_or_nobar_osd = msg_osd && !(auto_osd && opts->osd_bar_visible);
     int osdl = msg_osd ? 1 : OSD_LEVEL_INVISIBLE;
 
-    if (!cmd->raw_args) {
+    if (cmd->flags & MP_EXPAND_PROPERTIES) {
         for (int n = 0; n < cmd->nargs; n++) {
             if (cmd->args[n].type->type == CONF_TYPE_STRING) {
                 cmd->args[n].v.s =
@@ -2552,7 +2552,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         int r = mp_property_do(cmd->args[0].v.s, M_PROPERTY_SET_STRING,
                                cmd->args[1].v.s, mpctx);
         if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
-            show_property_osd(mpctx, cmd->args[0].v.s, cmd->on_osd);
+            show_property_osd(mpctx, cmd->args[0].v.s, on_osd);
         } else if (r == M_PROPERTY_UNKNOWN) {
             set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
                         "Unknown property: '%s'", cmd->args[0].v.s);
@@ -2582,7 +2582,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         }
         int r = mp_property_do(property, M_PROPERTY_SWITCH, &s, mpctx);
         if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
-            show_property_osd(mpctx, property, cmd->on_osd);
+            show_property_osd(mpctx, property, on_osd);
         } else if (r == M_PROPERTY_UNKNOWN) {
             set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
                         "Unknown property: '%s'", property);
@@ -2600,7 +2600,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         int r = mp_property_multiply(property, f, mpctx);
 
         if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
-            show_property_osd(mpctx, property, cmd->on_osd);
+            show_property_osd(mpctx, property, on_osd);
         } else if (r == M_PROPERTY_UNKNOWN) {
             set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
                         "Unknown property: '%s'", property);
@@ -2633,7 +2633,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             char *value = args[first + next];
             int r = mp_property_do(property, M_PROPERTY_SET_STRING, value, mpctx);
             if (r == M_PROPERTY_OK || r == M_PROPERTY_UNAVAILABLE) {
-                show_property_osd(mpctx, property, cmd->on_osd);
+                show_property_osd(mpctx, property, on_osd);
             } else if (r == M_PROPERTY_UNKNOWN) {
                 set_osd_msg(mpctx, OSD_MSG_TEXT, osdl, osd_duration,
                             "Unknown property: '%s'", property);
@@ -3148,16 +3148,13 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                "Received unknown cmd %s\n", cmd->name);
     }
 
-    switch (cmd->pausing) {
-    case 1:     // "pausing"
+    if (cmd->flags & MP_PAUSING)
         pause_player(mpctx);
-        break;
-    case 3:     // "pausing_toggle"
+    if (cmd->flags & MP_PAUSING_TOGGLE) {
         if (opts->pause)
             unpause_player(mpctx);
         else
             pause_player(mpctx);
-        break;
     }
 }
 

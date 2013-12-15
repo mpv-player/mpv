@@ -114,11 +114,18 @@ enum mp_command_type {
 // Key FIFO was full - release events may be lost, zero button-down status
 #define MP_INPUT_RELEASE_ALL -5
 
-enum mp_on_osd {
+enum mp_cmd_flags {
     MP_ON_OSD_NO = 0,           // prefer not using OSD
     MP_ON_OSD_AUTO = 1,         // use default behavior of the specific command
     MP_ON_OSD_BAR = 2,          // force a bar, if applicable
     MP_ON_OSD_MSG = 4,          // force a message, if applicable
+    MP_EXPAND_PROPERTIES = 8,   // expand strings as properties
+    MP_PAUSING = 16,            // pause after running command
+    MP_PAUSING_TOGGLE = 32,     // toggle pause after running command
+
+    MP_ON_OSD_FLAGS = MP_ON_OSD_NO | MP_ON_OSD_AUTO |
+                      MP_ON_OSD_BAR | MP_ON_OSD_MSG,
+    MP_PAUSING_FLAGS = MP_PAUSING | MP_PAUSING_TOGGLE,
 };
 
 enum mp_input_section_flags {
@@ -150,9 +157,7 @@ typedef struct mp_cmd {
     char *name;
     struct mp_cmd_arg args[MP_CMD_MAX_ARGS];
     int nargs;
-    int pausing;
-    bool raw_args;
-    enum mp_on_osd on_osd;
+    int flags; // mp_cmd_flags bitfield
     bstr original;
     char *input_section;
     bool key_up_follows;
