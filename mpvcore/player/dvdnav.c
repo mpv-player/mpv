@@ -169,10 +169,10 @@ void mp_handle_nav(struct MPContext *mpctx)
                        ev->u.highlight.display,
                        ev->u.highlight.sx, ev->u.highlight.sy,
                        ev->u.highlight.ex, ev->u.highlight.ey);
-            nav->highlight[0] = MPCLAMP(ev->u.highlight.sx, 0, 720);
-            nav->highlight[1] = MPCLAMP(ev->u.highlight.sy, 0, 480);
-            nav->highlight[2] = MPCLAMP(ev->u.highlight.ex, 0, 720);
-            nav->highlight[3] = MPCLAMP(ev->u.highlight.ey, 0, 480);
+            nav->highlight[0] = ev->u.highlight.sx;
+            nav->highlight[1] = ev->u.highlight.sy;
+            nav->highlight[2] = ev->u.highlight.ex;
+            nav->highlight[3] = ev->u.highlight.ey;
             nav->hi_visible = ev->u.highlight.display;
             mpctx->osd->highlight_priv = mpctx;
             osd_changed(mpctx->osd, OSDTYPE_NAV_HIGHLIGHT);
@@ -241,8 +241,8 @@ void mp_nav_get_highlight(struct osd_state *osd, struct mp_osd_res res,
 
     sub->x = nav->highlight[0];
     sub->y = nav->highlight[1];
-    sub->w = MPMAX(nav->highlight[2] - sub->x, 0);
-    sub->h = MPMAX(nav->highlight[3] - sub->y, 0);
+    sub->w = MPCLAMP(nav->highlight[2] - sub->x, 0, sizes[0]);
+    sub->h = MPCLAMP(nav->highlight[3] - sub->y, 0, sizes[1]);
     sub->stride = sub->w;
     out_imgs->format = SUBBITMAP_RGBA;
     out_imgs->parts = sub;
