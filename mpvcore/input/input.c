@@ -607,6 +607,7 @@ struct input_ctx {
 
     struct cmd_queue cmd_queue;
 
+    bool in_select;
     int wakeup_pipe[2];
 };
 
@@ -1798,6 +1799,7 @@ static void input_wait_read(struct input_ctx *ictx, int time)
     tv.tv_sec = time / 1000;
     tv.tv_usec = (time % 1000) * 1000;
     time_val = &tv;
+    ictx->in_select = true;
     input_unlock(ictx);
     if (select(max_fd + 1, &fds, NULL, NULL, time_val) < 0) {
         if (errno != EINTR)
@@ -1805,6 +1807,7 @@ static void input_wait_read(struct input_ctx *ictx, int time)
         FD_ZERO(&fds);
     }
     input_lock(ictx);
+    ictx->in_select = false;
     for (int i = 0; i < ictx->num_fds; i++) {
         if (ictx->fds[i].select && !FD_ISSET(ictx->fds[i].fd, &fds))
             continue;
@@ -1874,6 +1877,7 @@ int mp_input_queue_cmd(struct input_ctx *ictx, mp_cmd_t *cmd)
     if (cmd)
         queue_add_tail(&ictx->cmd_queue, cmd);
     input_unlock(ictx);
+    mp_input_wakeup(ictx);
     return 1;
 }
 
@@ -2511,8 +2515,12 @@ static int print_cmd_list(m_option_t *cfg, char *optname, char *optparam)
 
 void mp_input_wakeup(struct input_ctx *ictx)
 {
+    input_lock(ictx);
+    bool send_wakeup = ictx->in_select;
+    ictx->got_new_events = true;
+    input_unlock(ictx);
     // Safe without locking
-    if (ictx->wakeup_pipe[1] >= 0)
+    if (send_wakeup && ictx->wakeup_pipe[1] >= 0)
         write(ictx->wakeup_pipe[1], &(char){0}, 1);
 }
 
