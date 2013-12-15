@@ -1914,7 +1914,7 @@ mp_cmd_t *mp_input_get_cmd(struct input_ctx *ictx, int time, int peek_only)
 {
     input_lock(ictx);
     if (async_quit_request) {
-        struct mp_cmd *cmd = mp_input_parse_cmd(ictx, bstr0("quit 1"), "");
+        struct mp_cmd *cmd = mp_input_parse_cmd(ictx, bstr0("quit"), "");
         queue_add_head(&ictx->cmd_queue, cmd);
     }
 
