@@ -165,6 +165,14 @@ void mp_msg_log(struct mp_log *log, int lev, const char *format, ...)
 #define MP_DBG(obj, ...)        MP_MSG(obj, MSGL_DBG2, __VA_ARGS__)
 #define MP_TRACE(obj, ...)      MP_MSG(obj, MSGL_DBG5, __VA_ARGS__)
 
+#define mp_fatal(log, ...)      mp_msg_log(log, MSGL_FATAL, __VA_ARGS__)
+#define mp_err(log, ...)        mp_msg_log(log, MSGL_ERR, __VA_ARGS__)
+#define mp_warn(log, ...)       mp_msg_log(log, MSGL_WARN, __VA_ARGS__)
+#define mp_info(log, ...)       mp_msg_log(log, MSGL_INFO, __VA_ARGS__)
+#define mp_verbose(log, ...)    mp_msg_log(log, MSGL_V, __VA_ARGS__)
+//#define mp_dbg(log, ...)        mp_msg_log(log, MSGL_DBG2, __VA_ARGS__)
+#define mp_trace(log, ...)      mp_msg_log(log, MSGL_DBG5, __VA_ARGS__)
+
 struct mpv_global;
 void mp_msg_init(struct mpv_global *global);
 void mp_msg_uninit(struct mpv_global *global);
