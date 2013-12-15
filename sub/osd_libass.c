@@ -96,30 +96,35 @@ static void create_ass_track(struct osd_state *osd, struct osd_object *obj,
     track->PlayResY = res_y ? res_y : MP_ASS_FONT_PLAYRESY;
     track->PlayResX = res_x ? res_x : track->PlayResY * aspect;
     track->WrapStyle = 1; // end-of-line wrapping instead of smart wrapping
+    track->Kerning = true;
 
     // Force libass to clear its internal cache - it doesn't check for
     // PlayRes changes itself.
     if (old_res_x != track->PlayResX || old_res_y != track->PlayResY)
         ass_set_frame_size(obj->osd_render, 1, 1);
 
-    if (track->n_styles == 0) {
-        track->Kerning = true;
+    if (track->n_styles < 2) {
         int sid = ass_alloc_style(track);
         track->default_style = sid;
         ASS_Style *style = track->styles + sid;
         style->Alignment = 5; // top-title, left
         style->Name = strdup("OSD");
-        mp_ass_set_style(style, track->PlayResY, osd->opts->osd_style);
         // Set to neutral base direction, as opposed to VSFilter LTR default
         style->Encoding = -1;
 
         sid = ass_alloc_style(track);
+        assert(sid == track->default_style + 1);
         style = track->styles + sid;
         style->Name = strdup("Default");
-        const struct osd_style_opts *def = osd_style_conf.defaults;
-        mp_ass_set_style(style, track->PlayResY, def);
         style->Encoding = -1;
     }
+
+    ASS_Style *s_osd = track->styles + track->default_style;
+    mp_ass_set_style(s_osd, track->PlayResY, osd->opts->osd_style);
+
+    ASS_Style *s_def = track->styles + track->default_style + 1;
+    const struct osd_style_opts *def = osd_style_conf.defaults;
+    mp_ass_set_style(s_def, track->PlayResY, def);
 
     obj->osd_track = track;
 }
