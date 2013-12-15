@@ -974,19 +974,24 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
     cont: ;
     }
 
-    int cmd_idx = 0;
-    while (mp_cmds[cmd_idx].name != NULL) {
-        if (eat_token(&str, mp_cmds[cmd_idx].name))
+    bstr cmd_name;
+    if (!read_token(str, &str, &cmd_name)) {
+        MP_ERR(ictx, "Command name missing.\n");
+        goto error;
+    }
+    const struct mp_cmd_def *cmd_def = NULL;
+    for (int n = 0; mp_cmds[n].name; n++) {
+        if (bstr_equals0(cmd_name, mp_cmds[n].name)) {
+            cmd_def = &mp_cmds[n];
             break;
-        cmd_idx++;
+        }
     }
 
-    if (mp_cmds[cmd_idx].name == NULL) {
-        MP_ERR(ictx, "Command '%.*s' not found.\n", BSTR_P(str));
+    if (!cmd_def) {
+        MP_ERR(ictx, "Command '%.*s' not found.\n", BSTR_P(cmd_name));
         goto error;
     }
 
-    const struct mp_cmd_def *cmd_def = &mp_cmds[cmd_idx];
     cmd = talloc_ptrtype(NULL, cmd);
     *cmd = (struct mp_cmd) {
         .name = (char *)cmd_def->name,
