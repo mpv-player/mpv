@@ -211,8 +211,7 @@ void reinit_subs(struct MPContext *mpctx)
         set_dvdsub_fake_extradata(dec_sub, track->demuxer->stream, w, h);
         sub_set_video_res(dec_sub, w, h);
         sub_set_video_fps(dec_sub, fps);
-        sub_set_ass_renderer(dec_sub, mpctx->osd->ass_library,
-                             mpctx->osd->ass_renderer);
+        sub_set_ass_renderer(dec_sub, mpctx->ass_library, mpctx->ass_renderer);
         sub_init_from_sh(dec_sub, sh);
 
         // Don't do this if the file has video/audio streams. Don't do it even

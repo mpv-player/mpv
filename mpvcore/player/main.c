@@ -397,7 +397,7 @@ static int mpv_main(int argc, char *argv[])
     MP_WARN(mpctx, "There will be no OSD and no text subtitles.\n");
 #endif
 
-    mpctx->osd = osd_create(opts, mpctx->ass_library);
+    mpctx->osd = osd_create(opts);
 
     if (opts->force_vo) {
         opts->fixed_vo = 1;

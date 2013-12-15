@@ -122,8 +122,6 @@ struct osd_object {
 struct osd_state {
     struct osd_object *objs[MAX_OSD_PARTS];
 
-    struct ass_library *ass_library;
-    struct ass_renderer *ass_renderer;
     double video_offset;
     double vo_pts;
 
@@ -206,7 +204,7 @@ struct osd_style_opts {
 
 extern const struct m_sub_options osd_style_conf;
 
-struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib);
+struct osd_state *osd_create(struct MPOpts *opts);
 void osd_set_text(struct osd_state *osd, const char *text);
 void osd_set_sub(struct osd_state *osd, const char *text);
 void osd_changed(struct osd_state *osd, int new_value);

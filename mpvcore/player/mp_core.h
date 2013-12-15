@@ -308,6 +308,11 @@ typedef struct MPContext {
     int last_chapter_seek;
     double last_chapter_pts;
 
+    /* Subtitle renderer. This is separate, because we want to keep fonts
+     * loaded across ordered chapters, instead of reloading and rescanning
+     * them on each transition. (Both of these objects contain this state.)
+     */
+    struct ass_renderer *ass_renderer;
     struct ass_library *ass_library;
 
     int last_dvb_step;

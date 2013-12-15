@@ -91,9 +91,9 @@ void uninit_player(struct MPContext *mpctx, unsigned int mask)
     if (mask & INITIALIZED_LIBASS) {
         mpctx->initialized_flags &= ~INITIALIZED_LIBASS;
 #if HAVE_LIBASS
-        if (mpctx->osd->ass_renderer)
-            ass_renderer_done(mpctx->osd->ass_renderer);
-        mpctx->osd->ass_renderer = NULL;
+        if (mpctx->ass_renderer)
+            ass_renderer_done(mpctx->ass_renderer);
+        mpctx->ass_renderer = NULL;
         ass_clear_fonts(mpctx->ass_library);
 #endif
     }
@@ -847,13 +847,11 @@ static void init_sub_renderer(struct MPContext *mpctx)
 {
 #if HAVE_LIBASS
     assert(!(mpctx->initialized_flags & INITIALIZED_LIBASS));
-    assert(!mpctx->osd->ass_renderer);
+    assert(!mpctx->ass_renderer);
 
-    mpctx->osd->ass_renderer = ass_renderer_init(mpctx->osd->ass_library);
-    if (mpctx->osd->ass_renderer) {
-        mp_ass_configure_fonts(mpctx->osd->ass_renderer,
-                               mpctx->opts->sub_text_style);
-    }
+    mpctx->ass_renderer = ass_renderer_init(mpctx->ass_library);
+    if (mpctx->ass_renderer)
+        mp_ass_configure_fonts(mpctx->ass_renderer, mpctx->opts->sub_text_style);
     mpctx->initialized_flags |= INITIALIZED_LIBASS;
 #endif
 }

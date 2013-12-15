@@ -79,12 +79,11 @@ static bool osd_res_equals(struct mp_osd_res a, struct mp_osd_res b)
         && a.display_par == b.display_par;
 }
 
-struct osd_state *osd_create(struct MPOpts *opts, struct ass_library *asslib)
+struct osd_state *osd_create(struct MPOpts *opts)
 {
     struct osd_state *osd = talloc_zero(NULL, struct osd_state);
     *osd = (struct osd_state) {
         .opts = opts,
-        .ass_library = asslib,
         .osd_text = talloc_strdup(osd, ""),
         .sub_text = talloc_strdup(osd, ""),
         .progbar_type = -1,
