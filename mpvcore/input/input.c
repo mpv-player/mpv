@@ -1012,6 +1012,7 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
 
         str = bstr_lstrip(str);
         bstr arg = {0};
+        bool got_token = false;
         if (bstr_eatstart0(&str, "\"")) {
             if (!read_escaped_string(tmp, &str, &arg)) {
                 MP_ERR(ictx, "Command %s: argument %d has broken string escapes.\n",
@@ -1023,23 +1024,25 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
                        cmd->name, i + 1);
                 goto error;
             }
+            got_token = true;
         } else {
-            bool got_token = read_token(str, &str, &arg);
-            if (is_vararg && !got_token)
+            got_token = read_token(str, &str, &arg);
+        }
+
+        if (!got_token) {
+            if (is_vararg)
                 continue;
             // Skip optional arguments
-            if (!got_token && opt->defval) {
+            if (opt->defval) {
                 struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
                 cmdarg->type = opt;
                 memcpy(&cmdarg->v, opt->defval, opt->type->size);
                 cmd->nargs++;
                 continue;
             }
-            if (!got_token) {
-                MP_ERR(ictx, "Command %s requires more than %d arguments.\n",
-                       cmd->name, cmd->nargs);
-                goto error;
-            }
+            MP_ERR(ictx, "Command %s requires more than %d arguments.\n",
+                   cmd->name, cmd->nargs);
+            goto error;
         }
 
         struct mp_cmd_arg *cmdarg = &cmd->args[cmd->nargs];
