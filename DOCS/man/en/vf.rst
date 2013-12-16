@@ -75,7 +75,7 @@ Available filters are:
 
         .. admonition:: Example
 
-            ``expand=800:::::4/3``
+            ``expand=800::::4/3``
                 Expands to 800x600, unless the source is higher resolution, in
                 which case it expands to fill a 4/3 aspect.
 
