@@ -382,17 +382,38 @@ static int mp_property_time_pos(m_option_t *prop, int action,
     return property_time(prop, action, arg, get_current_time(mpctx));
 }
 
+static double time_remaining(MPContext *mpctx, double *len)
+{
+    *len = get_time_length(mpctx);
+    double pos = get_current_time(mpctx);
+    double start = get_start_time(mpctx);
+
+    return *len - (pos - start);
+}
+
 static int mp_property_remaining(m_option_t *prop, int action,
                                  void *arg, MPContext *mpctx)
 {
-    double len = get_time_length(mpctx);
-    double pos = get_current_time(mpctx);
-    double start = get_start_time(mpctx);
+    double len;
+    double remaining = time_remaining(mpctx, &len);
 
     if (!(int)len)
         return M_PROPERTY_UNAVAILABLE;
 
-    return property_time(prop, action, arg, len - (pos - start));
+    return property_time(prop, action, arg, remaining);
+}
+
+static int mp_property_playtime_remaining(m_option_t *prop, int action,
+                                      void *arg, MPContext *mpctx)
+{
+    double len;
+    double remaining = time_remaining(mpctx, &len);
+
+    if (!(int)len)
+        return M_PROPERTY_UNAVAILABLE;
+
+    double speed = mpctx->opts->playback_speed;
+    return property_time(prop, action, arg, remaining / speed);
 }
 
 /// Current chapter (RW)
@@ -1881,6 +1902,7 @@ static const m_option_t mp_properties[] = {
     { "time-pos", mp_property_time_pos, CONF_TYPE_TIME,
       M_OPT_MIN, 0, 0, NULL },
     { "time-remaining", mp_property_remaining, CONF_TYPE_TIME },
+    { "playtime-remaining", mp_property_playtime_remaining, CONF_TYPE_TIME },
     { "chapter", mp_property_chapter, CONF_TYPE_INT,
       M_OPT_MIN, -1, 0, NULL },
     M_OPTION_PROPERTY_CUSTOM("edition", mp_property_edition),
