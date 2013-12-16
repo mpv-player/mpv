@@ -104,7 +104,7 @@ static bool split_opt(struct parse_state *p)
         return r == 0;
     p->error = true;
 
-    mp_tmsg(MSGT_CFGPARSER, MSGL_FATAL,
+    mp_msg(MSGT_CFGPARSER, MSGL_FATAL,
             "Error parsing commandline option %.*s: %s\n",
             BSTR_P(p->arg), m_option_strerror(r));
     return false;
@@ -138,7 +138,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 goto err_out;
             }
             if (r < 0) {
-                mp_tmsg(MSGT_CFGPARSER, MSGL_FATAL,
+                mp_msg(MSGT_CFGPARSER, MSGL_FATAL,
                         "Setting commandline option --%.*s=%.*s failed.\n",
                         BSTR_P(p.arg), BSTR_P(p.param));
                 goto err_out;
@@ -192,7 +192,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                 struct playlist *pl = playlist_parse_file(param0, opts);
                 talloc_free(param0);
                 if (!pl) {
-                    mp_tmsg(MSGT_CFGPARSER, MSGL_FATAL,
+                    mp_msg(MSGT_CFGPARSER, MSGL_FATAL,
                             "Error reading playlist '%.*s'", BSTR_P(p.param));
                     goto err_out;
                 }
@@ -233,7 +233,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
                             playlist_add_file(files, f);
                         }
                     } else
-                        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                                 "Invalid play entry %s\n", file0);
 
                 } else // dvd:// or dvd://x entry
@@ -252,7 +252,7 @@ int m_config_parse_mp_command_line(m_config_t *config, struct playlist *files,
         goto err_out;
 
     if (mode != GLOBAL) {
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                 "Missing closing --} on command line.\n");
         goto err_out;
     }

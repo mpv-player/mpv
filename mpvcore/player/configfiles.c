@@ -95,7 +95,7 @@ void mp_load_per_protocol_config(m_config_t *conf, const char * const file)
     protocol[strlen(PROFILE_CFG_PROTOCOL) + strlen(file) - strlen(str)] = '\0';
     p = m_config_get_profile0(conf, protocol);
     if (p) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
+        mp_msg(MSGT_CPLAYER, MSGL_INFO,
                 "Loading protocol-related profile '%s'\n", protocol);
         m_config_set_profile(conf, p, FILE_LOCAL_FLAGS);
     }
@@ -118,7 +118,7 @@ void mp_load_per_extension_config(m_config_t *conf, const char * const file)
     strncat(extension, ++str, 7);
     p = m_config_get_profile0(conf, extension);
     if (p) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
+        mp_msg(MSGT_CPLAYER, MSGL_INFO,
                 "Loading extension-related profile '%s'\n", extension);
         m_config_set_profile(conf, p, FILE_LOCAL_FLAGS);
     }
@@ -135,7 +135,7 @@ void mp_load_per_output_config(m_config_t *conf, char *cfg, char *out)
     sprintf(profile, "%s%s", cfg, out);
     p = m_config_get_profile0(conf, profile);
     if (p) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_INFO,
+        mp_msg(MSGT_CPLAYER, MSGL_INFO,
                 "Loading extension-related profile '%s'\n", profile);
         m_config_set_profile(conf, p, FILE_LOCAL_FLAGS);
     }
@@ -149,7 +149,7 @@ static int try_load_config(m_config_t *conf, const char *file, int flags)
 {
     if (!mp_path_exists(file))
         return 0;
-    mp_tmsg(MSGT_CPLAYER, MSGL_INFO, "Loading config '%s'\n", file);
+    mp_msg(MSGT_CPLAYER, MSGL_INFO, "Loading config '%s'\n", file);
     m_config_parse_config_file(conf, file, flags);
     return 1;
 }

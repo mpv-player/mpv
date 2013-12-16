@@ -340,7 +340,7 @@ static int open_cdda(stream_t *st, int m)
 #endif
 
     if (!cdd) {
-        mp_tmsg(MSGT_OPEN, MSGL_ERR, "Can't open CDDA device.\n");
+        mp_msg(MSGT_OPEN, MSGL_ERR, "Can't open CDDA device.\n");
         return STREAM_ERROR;
     }
 
@@ -350,13 +350,13 @@ static int open_cdda(stream_t *st, int m)
         cdd->nsectors = p->sector_size;
 
     if (cdda_open(cdd) != 0) {
-        mp_tmsg(MSGT_OPEN, MSGL_ERR, "Can't open disc.\n");
+        mp_msg(MSGT_OPEN, MSGL_ERR, "Can't open disc.\n");
         cdda_close(cdd);
         return STREAM_ERROR;
     }
 
     cd_info = cd_info_new();
-    mp_tmsg(MSGT_OPEN, MSGL_INFO, "Found audio CD with %d tracks.\n",
+    mp_msg(MSGT_OPEN, MSGL_INFO, "Found audio CD with %d tracks.\n",
             (int)cdda_tracks(cdd));
     for (i = 0; i < cdd->tracks; i++) {
         char track_name[80];

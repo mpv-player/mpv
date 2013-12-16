@@ -258,7 +258,7 @@ static const struct fstype fstypes[] = {
 
 void fstype_help(void)
 {
-    mp_tmsg(MSGT_VO, MSGL_INFO, "Available fullscreen layer change modes:\n");
+    mp_msg(MSGT_VO, MSGL_INFO, "Available fullscreen layer change modes:\n");
     for (int n = 0; fstypes[n].sym; n++) {
         mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", fstypes[n].sym,
                fstypes[n].help);

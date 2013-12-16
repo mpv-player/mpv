@@ -113,16 +113,16 @@ static void setvolume_internal(struct mixer *mixer, float l, float r)
     struct ao_control_vol vol = {.left = l, .right = r};
     if (!mixer->softvol) {
         if (ao_control(mixer->ao, AOCONTROL_SET_VOLUME, &vol) != CONTROL_OK)
-            mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
+            mp_msg(MSGT_GLOBAL, MSGL_ERR,
                     "[Mixer] Failed to change audio output volume.\n");
         return;
     }
     float gain = (l + r) / 2.0 / 100.0 * mixer->opts->softvol_max / 100.0;
     if (!af_control_any_rev(mixer->af, AF_CONTROL_SET_VOLUME, &gain)) {
-        mp_tmsg(MSGT_GLOBAL, MSGL_V, "[Mixer] Inserting volume filter.\n");
+        mp_msg(MSGT_GLOBAL, MSGL_V, "[Mixer] Inserting volume filter.\n");
         if (!(af_add(mixer->af, "volume", NULL)
               && af_control_any_rev(mixer->af, AF_CONTROL_SET_VOLUME, &gain)))
-            mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
+            mp_msg(MSGT_GLOBAL, MSGL_ERR,
                     "[Mixer] No volume control available.\n");
     }
 }
@@ -223,7 +223,7 @@ void mixer_setbalance(struct mixer *mixer, float val)
         return;
 
     if (!(af_pan_balance = af_add(mixer->af, "pan", NULL))) {
-        mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
+        mp_msg(MSGT_GLOBAL, MSGL_ERR,
                 "[Mixer] No balance control available.\n");
         return;
     }
@@ -264,7 +264,7 @@ static void probe_softvol(struct mixer *mixer)
         ao_control_vol_t vol;
         if (ao_control(mixer->ao, AOCONTROL_GET_VOLUME, &vol) != CONTROL_OK) {
             mixer->softvol = true;
-            mp_tmsg(MSGT_GLOBAL, MSGL_WARN,
+            mp_msg(MSGT_GLOBAL, MSGL_WARN,
                     "[mixer] Hardware volume control unavailable.\n");
         }
     }

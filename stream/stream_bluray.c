@@ -307,7 +307,7 @@ static int bluray_stream_open(stream_t *s, int mode)
         device = bluray_device;
 
     if (!device) {
-        mp_tmsg(MSGT_OPEN, MSGL_ERR,
+        mp_msg(MSGT_OPEN, MSGL_ERR,
                 "No Blu-ray device/location was specified ...\n");
         return STREAM_UNSUPPORTED;
     }
@@ -315,7 +315,7 @@ static int bluray_stream_open(stream_t *s, int mode)
     /* open device */
     bd = bd_open(device, NULL);
     if (!bd) {
-        mp_tmsg(MSGT_OPEN, MSGL_ERR, "Couldn't open Blu-ray device: %s\n",
+        mp_msg(MSGT_OPEN, MSGL_ERR, "Couldn't open Blu-ray device: %s\n",
                device);
         return STREAM_UNSUPPORTED;
     }
@@ -400,7 +400,7 @@ err_no_info:
     s->flags       = MP_STREAM_SEEK;
     s->priv        = b;
 
-    mp_tmsg(MSGT_OPEN, MSGL_V, "Blu-ray successfully opened.\n");
+    mp_msg(MSGT_OPEN, MSGL_V, "Blu-ray successfully opened.\n");
 
     return STREAM_OK;
 }

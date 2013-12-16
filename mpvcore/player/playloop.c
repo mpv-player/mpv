@@ -606,7 +606,7 @@ static void update_avsync(struct MPContext *mpctx)
         mpctx->last_av_difference = MP_NOPTS_VALUE;
     if (mpctx->last_av_difference > 0.5 && mpctx->drop_frame_cnt > 50
         && !mpctx->drop_message_shown) {
-        MP_WARN(mpctx, "%s", mp_gtext(av_desync_help_text));
+        MP_WARN(mpctx, "%s", av_desync_help_text);
         mpctx->drop_message_shown = true;
     }
 }
@@ -1017,7 +1017,7 @@ void run_playloop(struct MPContext *mpctx)
                 }
             }
 
-            mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "*** ftime=%5.3f ***\n", frame_time);
+            mp_msg(MSGT_AVSYNC, MSGL_DBG2, "*** ftime=%5.3f ***\n", frame_time);
             if (mpctx->d_video->vfilter && mpctx->d_video->vfilter->initialized < 0)
             {
                 MP_FATAL(mpctx, "\nFATAL: Could not initialize video filters "
@@ -1059,7 +1059,7 @@ void run_playloop(struct MPContext *mpctx)
         mpctx->time_frame -= get_relative_time(mpctx);
         if (full_audio_buffers && !mpctx->restart_playback) {
             buffered_audio = ao_get_delay(mpctx->ao);
-            mp_dbg(MSGT_AVSYNC, MSGL_DBG2, "delay=%f\n", buffered_audio);
+            mp_msg(MSGT_AVSYNC, MSGL_DBG2, "delay=%f\n", buffered_audio);
 
             if (opts->autosync) {
                 /* Smooth reported playback position from AO by averaging

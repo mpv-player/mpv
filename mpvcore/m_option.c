@@ -45,18 +45,18 @@ char *m_option_strerror(int code)
 {
     switch (code) {
     case M_OPT_UNKNOWN:
-        return mp_gtext("option not found");
+        return "option not found";
     case M_OPT_MISSING_PARAM:
-        return mp_gtext("option requires parameter");
+        return "option requires parameter";
     case M_OPT_INVALID:
-        return mp_gtext("option parameter could not be parsed");
+        return "option parameter could not be parsed";
     case M_OPT_OUT_OF_RANGE:
-        return mp_gtext("parameter is outside values allowed for option");
+        return "parameter is outside values allowed for option";
     case M_OPT_DISALLOW_PARAM:
-        return mp_gtext("option doesn't take a parameter");
+        return "option doesn't take a parameter";
     case M_OPT_PARSER_ERR:
     default:
-        return mp_gtext("parser error");
+        return "parser error";
     }
 }
 
@@ -1161,7 +1161,8 @@ static int parse_print(const m_option_t *opt, struct bstr name,
                        struct bstr param, void *dst)
 {
     if (opt->type == CONF_TYPE_PRINT) {
-        mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", mp_gtext(opt->p));
+        const char *msg = opt->p;
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", msg);
     } else {
         char *name0 = bstrdup0(NULL, name);
         char *param0 = bstrdup0(NULL, param);

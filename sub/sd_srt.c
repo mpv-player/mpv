@@ -392,7 +392,7 @@ static void convert_subrip(const char *orig, char *dest, int dest_buffer_size)
                         tag->has_color = true;
                     } else {
                         // We didn't find any matching color
-                        mp_tmsg(MSGT_SUBREADER, MSGL_WARN,
+                        mp_msg(MSGT_SUBREADER, MSGL_WARN,
                                 "SubRip: unknown font color in subtitle: >%s<\n",
                                 orig);
                         append_text(&new_line, "{\\c}");
@@ -406,7 +406,7 @@ static void convert_subrip(const char *orig, char *dest, int dest_buffer_size)
                     tag->has_face = true;
                     has_valid_attr = true;
                 } else
-                    mp_tmsg(MSGT_SUBREADER, MSGL_WARN,"SubRip: unrecognized "
+                    mp_msg(MSGT_SUBREADER, MSGL_WARN,"SubRip: unrecognized "
                             "attribute \"%.*s\" in font tag\n", BSTR_P(attr));
             }
 

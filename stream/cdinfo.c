@@ -40,7 +40,7 @@ cd_info_new(void) {
 
 	cd_info = malloc(sizeof(cd_info_t));
 	if( cd_info==NULL ) {
-		mp_tmsg(MSGT_DEMUX, MSGL_ERR, "Memory allocation failed.\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "Memory allocation failed.\n");
 		return NULL;
 	}
 
@@ -74,14 +74,14 @@ cd_info_add_track(cd_info_t *cd_info, char *track_name, unsigned int track_nb, u
 
 	cd_track = malloc(sizeof(cd_track_t));
 	if( cd_track==NULL ) {
-		mp_tmsg(MSGT_DEMUX, MSGL_ERR, "Memory allocation failed.\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "Memory allocation failed.\n");
 		return NULL;
 	}
 	memset(cd_track, 0, sizeof(cd_track_t));
 
 	cd_track->name = malloc(strlen(track_name)+1);
 	if( cd_track->name==NULL ) {
-		mp_tmsg(MSGT_DEMUX, MSGL_ERR, "Memory allocation failed.\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "Memory allocation failed.\n");
 		free(cd_track);
 		return NULL;
 	}

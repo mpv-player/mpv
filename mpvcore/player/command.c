@@ -1022,7 +1022,7 @@ static int property_switch_track(m_option_t *prop, int action, void *arg,
         else {
             char *lang = track->lang;
             if (!lang)
-                lang = mp_gtext("unknown");
+                lang = "unknown";
 
             if (track->title)
                 *(char **)arg = talloc_asprintf(NULL, "(%d) %s (\"%s\")",
@@ -2148,7 +2148,7 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
     for (p = property_osd_display; p->name; p++) {
         if (!strcmp(p->name, prop.name)) {
             osd_progbar = p->seek_bar ? 1 : p->osd_progbar;
-            osd_name = p->seek_msg ? "" : mp_gtext(p->osd_name);
+            osd_name = p->seek_msg ? "" : p->osd_name;
             break;
         }
     }
@@ -2215,7 +2215,7 @@ static void show_property_osd(MPContext *mpctx, const char *pname, int osd_mode)
             int index = p - property_osd_display;
             osd_id = p->osd_id ? p->osd_id : OSD_MSG_PROPERTY + index;
         }
-        set_osd_tmsg(mpctx, osd_id, 1, opts->osd_duration, "%s", osd_msg);
+        set_osd_msg(mpctx, osd_id, 1, opts->osd_duration, "%s", osd_msg);
     }
 
     talloc_free(tmp);
@@ -2314,7 +2314,7 @@ static int edit_filters_osd(struct MPContext *mpctx, enum stream_type mediatype,
             const char *prop = filter_opt[mediatype];
             show_property_osd(mpctx, prop, MP_ON_OSD_MSG);
         } else {
-            set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts->osd_duration,
+            set_osd_msg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts->osd_duration,
                          "Changing filters failed!");
         }
     }
@@ -2729,7 +2729,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 if (cmd->id == MP_CMD_SUB_STEP) {
                     opts->sub_delay += a[0];
                     osd_changed_all(mpctx->osd);
-                    set_osd_tmsg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
+                    set_osd_msg(mpctx, OSD_MSG_SUB_DELAY, osdl, osd_duration,
                                  "Sub delay: %d ms", ROUND(opts->sub_delay * 1000));
                 } else {
                     // We can easily get stuck by failing to seek to the video
@@ -2760,7 +2760,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         else
             opts->osd_level = v > max ? max : v;
         if (msg_osd && opts->osd_level <= 1)
-            set_osd_tmsg(mpctx, OSD_MSG_OSD_STATUS, 0, osd_duration,
+            set_osd_msg(mpctx, OSD_MSG_OSD_STATUS, 0, osd_duration,
                          "OSD: %s", opts->osd_level ? "yes" : "no");
         else
             rm_osd_msg(mpctx, OSD_MSG_OSD_STATUS);
@@ -2810,7 +2810,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 mp_set_playlist_entry(mpctx, e ? e : mpctx->playlist->first);
             }
         } else {
-            mp_tmsg(MSGT_CPLAYER, MSGL_ERR,
+            mp_msg(MSGT_CPLAYER, MSGL_ERR,
                     "\nUnable to load playlist %s.\n", filename);
         }
         break;
@@ -2877,7 +2877,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
             else
                 radio_step_channel(mpctx->stream, RADIO_CHANNEL_LOWER);
             if (radio_get_channel_name(mpctx->stream)) {
-                set_osd_tmsg(mpctx, OSD_MSG_RADIO_CHANNEL, osdl, osd_duration,
+                set_osd_msg(mpctx, OSD_MSG_RADIO_CHANNEL, osdl, osd_duration,
                              "Channel: %s",
                              radio_get_channel_name(mpctx->stream));
             }
@@ -2888,7 +2888,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (mpctx->stream && mpctx->stream->type == STREAMTYPE_RADIO) {
             radio_set_channel(mpctx->stream, cmd->args[0].v.s);
             if (radio_get_channel_name(mpctx->stream)) {
-                set_osd_tmsg(mpctx, OSD_MSG_RADIO_CHANNEL, osdl, osd_duration,
+                set_osd_msg(mpctx, OSD_MSG_RADIO_CHANNEL, osdl, osd_duration,
                              "Channel: %s",
                              radio_get_channel_name(mpctx->stream));
             }
@@ -2951,7 +2951,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
                 tv_step_channel(get_tvh(mpctx), TV_CHANNEL_LOWER);
             }
             if (tv_channel_list) {
-                set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
+                set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
             }
         }
@@ -2987,7 +2987,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (get_tvh(mpctx)) {
             tv_set_channel(get_tvh(mpctx), cmd->args[0].v.s);
             if (tv_channel_list) {
-                set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
+                set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
             }
         }
@@ -3018,7 +3018,7 @@ void run_command(MPContext *mpctx, mp_cmd_t *cmd)
         if (get_tvh(mpctx)) {
             tv_last_channel(get_tvh(mpctx));
             if (tv_channel_list) {
-                set_osd_tmsg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
+                set_osd_msg(mpctx, OSD_MSG_TV_CHANNEL, osdl, osd_duration,
                              "Channel: %s", tv_channel_current->name);
             }
         }

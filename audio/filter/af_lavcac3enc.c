@@ -121,7 +121,7 @@ static int control(struct af_instance *af, int cmd, void *arg)
             s->lavc_actx->bit_rate = bit_rate;
 
             if (avcodec_open2(s->lavc_actx, s->lavc_acodec, NULL) < 0) {
-                mp_tmsg(MSGT_AFILTER, MSGL_ERR, "Couldn't open codec %s, br=%d.\n", "ac3", bit_rate);
+                mp_msg(MSGT_AFILTER, MSGL_ERR, "Couldn't open codec %s, br=%d.\n", "ac3", bit_rate);
                 return AF_ERROR;
             }
         }
@@ -257,13 +257,13 @@ static int af_open(struct af_instance* af){
 
     s->lavc_acodec = avcodec_find_encoder_by_name("ac3");
     if (!s->lavc_acodec) {
-        mp_tmsg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, couldn't find encoder for codec %s.\n", "ac3");
+        mp_msg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, couldn't find encoder for codec %s.\n", "ac3");
         return AF_ERROR;
     }
 
     s->lavc_actx = avcodec_alloc_context3(s->lavc_acodec);
     if (!s->lavc_actx) {
-        mp_tmsg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, couldn't allocate context!\n");
+        mp_msg(MSGT_AFILTER, MSGL_ERR, "Audio LAVC, couldn't allocate context!\n");
         return AF_ERROR;
     }
     const enum AVSampleFormat *fmts = s->lavc_acodec->sample_fmts;

@@ -181,14 +181,14 @@ struct ao *ao_init_best(struct mpv_global *global,
         for (int n = 0; ao_list[n].name; n++) {
             if (strlen(ao_list[n].name) == 0)
                 goto autoprobe;
-            mp_tmsg(MSGT_AO, MSGL_V, "Trying preferred audio driver '%s'\n",
+            mp_msg(MSGT_AO, MSGL_V, "Trying preferred audio driver '%s'\n",
                     ao_list[n].name);
             struct ao *ao = ao_create(false, global, input_ctx, encode_lavc_ctx,
                                       samplerate, format, channels,
                                       ao_list[n].name, ao_list[n].attribs);
             if (ao)
                 return ao;
-            mp_tmsg(MSGT_AO, MSGL_WARN, "Failed to initialize audio driver '%s'\n",
+            mp_msg(MSGT_AO, MSGL_WARN, "Failed to initialize audio driver '%s'\n",
                     ao_list[n].name);
         }
         return NULL;

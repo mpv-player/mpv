@@ -80,7 +80,7 @@ static bool reinit_audio_buffer(struct dec_audio *da)
 static void uninit_decoder(struct dec_audio *d_audio)
 {
     if (d_audio->ad_driver) {
-        mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Uninit audio decoder.\n");
+        mp_msg(MSGT_DECAUDIO, MSGL_V, "Uninit audio decoder.\n");
         d_audio->ad_driver->uninit(d_audio);
     }
     d_audio->ad_driver = NULL;
@@ -91,7 +91,7 @@ static void uninit_decoder(struct dec_audio *d_audio)
 static int init_audio_codec(struct dec_audio *d_audio, const char *decoder)
 {
     if (!d_audio->ad_driver->init(d_audio, decoder)) {
-        mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Audio decoder init failed.\n");
+        mp_msg(MSGT_DECAUDIO, MSGL_V, "Audio decoder init failed.\n");
         d_audio->ad_driver = NULL;
         uninit_decoder(d_audio);
         return 0;
@@ -148,14 +148,14 @@ int audio_init_best_codec(struct dec_audio *d_audio, char *audio_decoders)
         const struct ad_functions *driver = find_driver(sel->family);
         if (!driver)
             continue;
-        mp_tmsg(MSGT_DECAUDIO, MSGL_V, "Opening audio decoder %s:%s\n",
+        mp_msg(MSGT_DECAUDIO, MSGL_V, "Opening audio decoder %s:%s\n",
                 sel->family, sel->decoder);
         d_audio->ad_driver = driver;
         if (init_audio_codec(d_audio, sel->decoder)) {
             decoder = sel;
             break;
         }
-        mp_tmsg(MSGT_DECAUDIO, MSGL_WARN, "Audio decoder init failed for "
+        mp_msg(MSGT_DECAUDIO, MSGL_WARN, "Audio decoder init failed for "
                 "%s:%s\n", sel->family, sel->decoder);
     }
 
@@ -218,7 +218,7 @@ int audio_init_filters(struct dec_audio *d_audio, int in_samplerate,
 
     char *s_from = mp_audio_config_to_str(&afs->input);
     char *s_to = mp_audio_config_to_str(&afs->output);
-    mp_tmsg(MSGT_DECAUDIO, MSGL_V,
+    mp_msg(MSGT_DECAUDIO, MSGL_V,
             "Building audio filter chain for %s -> %s...\n", s_from, s_to);
     talloc_free(s_from);
     talloc_free(s_to);

@@ -123,7 +123,7 @@ static int open_f(stream_t *stream, int mode)
 
     if (!strcmp(filename, "-")) {
         if (mode == STREAM_READ) {
-            mp_tmsg(MSGT_OPEN, MSGL_INFO, "Reading from stdin...\n");
+            mp_msg(MSGT_OPEN, MSGL_INFO, "Reading from stdin...\n");
             fd = 0;
 #if HAVE_SETMODE
             setmode(fileno(stdin), O_BINARY);
@@ -144,14 +144,14 @@ static int open_f(stream_t *stream, int mode)
 #endif
         fd = open(filename, m | O_BINARY, openmode);
         if (fd < 0) {
-            mp_tmsg(MSGT_OPEN, MSGL_ERR, "Cannot open file '%s': %s\n",
+            mp_msg(MSGT_OPEN, MSGL_ERR, "Cannot open file '%s': %s\n",
                     filename, strerror(errno));
             return STREAM_ERROR;
         }
 #ifndef __MINGW32__
         struct stat st;
         if (fstat(fd, &st) == 0 && S_ISDIR(st.st_mode)) {
-            mp_tmsg(MSGT_OPEN, MSGL_ERR, "File is a directory: '%s'\n",
+            mp_msg(MSGT_OPEN, MSGL_ERR, "File is a directory: '%s'\n",
                     filename);
             close(fd);
             return STREAM_ERROR;

@@ -69,13 +69,13 @@ void dvd_set_speed(char *device, unsigned speed)
     return;
   case -1: /* restore default value */
     if (dvd_speed == 0) return; /* we haven't touched the speed setting */
-    mp_tmsg(MSGT_OPEN, MSGL_INFO, "Restoring DVD speed... ");
+    mp_msg(MSGT_OPEN, MSGL_INFO, "Restoring DVD speed... ");
     break;
   default: /* limit to <speed> KB/s */
     // speed < 100 is multiple of DVD single speed (1350KB/s)
     if (speed < 100)
       speed *= 1350;
-    mp_tmsg(MSGT_OPEN, MSGL_INFO, "Limiting DVD speed to %dKB/s... ", speed);
+    mp_msg(MSGT_OPEN, MSGL_INFO, "Limiting DVD speed to %dKB/s... ", speed);
     break;
   }
 
@@ -108,14 +108,14 @@ void dvd_set_speed(char *device, unsigned speed)
 
   fd = open(device, O_RDWR | O_NONBLOCK | O_CLOEXEC);
   if (fd == -1) {
-    mp_tmsg(MSGT_OPEN, MSGL_INFO, "Couldn't open DVD device for writing, changing DVD speed needs write access.\n");
+    mp_msg(MSGT_OPEN, MSGL_INFO, "Couldn't open DVD device for writing, changing DVD speed needs write access.\n");
     return;
   }
 
   if (ioctl(fd, SG_IO, &sghdr) < 0)
-    mp_tmsg(MSGT_OPEN, MSGL_INFO, "failed\n");
+    mp_msg(MSGT_OPEN, MSGL_INFO, "failed\n");
   else
-    mp_tmsg(MSGT_OPEN, MSGL_INFO, "successful\n");
+    mp_msg(MSGT_OPEN, MSGL_INFO, "successful\n");
 
   close(fd);
 #endif

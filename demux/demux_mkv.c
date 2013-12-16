@@ -278,7 +278,7 @@ static bstr demux_mkv_decode(mkv_track_t *track, bstr data, uint32_t type)
             zstream.zfree = (free_func) 0;
             zstream.opaque = (voidpf) 0;
             if (inflateInit(&zstream) != Z_OK) {
-                mp_tmsg(MSGT_DEMUX, MSGL_WARN,
+                mp_msg(MSGT_DEMUX, MSGL_WARN,
                         "[mkv] zlib initialization failed.\n");
                 goto error;
             }
@@ -294,7 +294,7 @@ static bstr demux_mkv_decode(mkv_track_t *track, bstr data, uint32_t type)
                 zstream.next_out = (Bytef *) (dest + zstream.total_out);
                 result = inflate(&zstream, Z_NO_FLUSH);
                 if (result != Z_OK && result != Z_STREAM_END) {
-                    mp_tmsg(MSGT_DEMUX, MSGL_WARN,
+                    mp_msg(MSGT_DEMUX, MSGL_WARN,
                             "[mkv] zlib decompression failed.\n");
                     talloc_free(dest);
                     dest = NULL;
@@ -323,7 +323,7 @@ static bstr demux_mkv_decode(mkv_track_t *track, bstr data, uint32_t type)
                 if (result == 0)
                     break;
                 if (!(result & AV_LZO_OUTPUT_FULL)) {
-                    mp_tmsg(MSGT_DEMUX, MSGL_WARN,
+                    mp_msg(MSGT_DEMUX, MSGL_WARN,
                             "[mkv] lzo decompression failed.\n");
                     talloc_free(dest);
                     dest = NULL;
@@ -400,7 +400,7 @@ static int demux_mkv_read_info(demuxer_t *demuxer)
                 }
             }
         }
-        mp_tmsg(MSGT_DEMUX, MSGL_INFO,
+        mp_msg(MSGT_DEMUX, MSGL_INFO,
                 "[mkv] This is not one of the wanted files. "
                 "Stopping attempt to open.\n");
         res = -2;
@@ -439,18 +439,18 @@ static void parse_trackencodings(struct demuxer *demuxer,
         }
 
         if (e.type == 1) {
-            mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[mkv] Track "
+            mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Track "
                     "number %u has been encrypted and "
                     "decryption has not yet been\n"
                     "[mkv] implemented. Skipping track.\n",
                     track->tnum);
         } else if (e.type != 0) {
-            mp_tmsg(MSGT_DEMUX, MSGL_WARN,
+            mp_msg(MSGT_DEMUX, MSGL_WARN,
                     "[mkv] Unknown content encoding type for "
                     "track %u. Skipping track.\n",
                     track->tnum);
         } else if (e.comp_algo != 0 && e.comp_algo != 2 && e.comp_algo != 3) {
-            mp_tmsg(MSGT_DEMUX, MSGL_WARN,
+            mp_msg(MSGT_DEMUX, MSGL_WARN,
                     "[mkv] Track %u has been compressed with "
                     "an unknown/unsupported compression\n"
                     "[mkv] algorithm (%" PRIu64 "). Skipping track.\n",
@@ -458,7 +458,7 @@ static void parse_trackencodings(struct demuxer *demuxer,
         }
 #if !HAVE_ZLIB
         else if (e.comp_algo == 0) {
-            mp_tmsg(MSGT_DEMUX, MSGL_WARN,
+            mp_msg(MSGT_DEMUX, MSGL_WARN,
                     "[mkv] Track %u was compressed with zlib "
                     "but mpv has not been compiled\n"
                     "[mkv] with support for zlib compression. "
@@ -1171,12 +1171,12 @@ static void display_create_tracks(demuxer_t *demuxer)
             break;
         }
         if (mkv_d->tracks[i]->name)
-            mp_tmsg(MSGT_DEMUX, MSGL_V,
+            mp_msg(MSGT_DEMUX, MSGL_V,
                     "[mkv] Track ID %u: %s (%s) \"%s\"\n",
                     mkv_d->tracks[i]->tnum, type, mkv_d->tracks[i]->codec_id,
                     mkv_d->tracks[i]->name);
         else
-            mp_tmsg(MSGT_DEMUX, MSGL_V, "[mkv] Track ID %u: %s (%s)\n",
+            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Track ID %u: %s (%s)\n",
                     mkv_d->tracks[i]->tnum, type, mkv_d->tracks[i]->codec_id);
     }
 }
@@ -1286,7 +1286,7 @@ static int demux_mkv_open_video(demuxer_t *demuxer, mkv_track_t *track)
                 extradata_size = track->private_size;
             }
             if (!vi->id) {
-                mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported "
+                mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported "
                         "CodecID (%s) or missing/bad CodecPrivate\n"
                         "[mkv] data (track %u).\n",
                         track->codec_id, track->tnum);
@@ -1652,7 +1652,7 @@ static int demux_mkv_open_audio(demuxer_t *demuxer, mkv_track_t *track)
     return 0;
 
  error:
-    mp_tmsg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported audio "
+    mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported audio "
             "codec ID '%s' for track %u or missing/faulty\n[mkv] "
             "private codec data.\n", track->codec_id, track->tnum);
     return 1;
@@ -1707,7 +1707,7 @@ static int demux_mkv_open_sub(demuxer_t *demuxer, mkv_track_t *track)
     sh->default_track = track->default_track;
 
     if (!subtitle_type) {
-        mp_tmsg(MSGT_DEMUX, MSGL_ERR,
+        mp_msg(MSGT_DEMUX, MSGL_ERR,
                 "[mkv] Subtitle type '%s' is not supported.\n",
                 track->codec_id);
     }
@@ -1829,7 +1829,7 @@ static int demux_mkv_open(demuxer_t *demuxer, enum demux_check check)
     while (1) {
         uint32_t id = ebml_read_id(s, NULL);
         if (s->eof) {
-            mp_tmsg(MSGT_DEMUX, MSGL_WARN,
+            mp_msg(MSGT_DEMUX, MSGL_WARN,
                     "[mkv] Unexpected end of file (no clusters found)\n");
             break;
         }

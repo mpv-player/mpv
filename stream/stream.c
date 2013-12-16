@@ -228,13 +228,13 @@ static bool parse_url(struct stream *st, struct m_config *config)
         if (f[n].len) {
             const char *opt = find_url_opt(st, f_names[n]);
             if (!opt) {
-                mp_tmsg(MSGT_OPEN, MSGL_ERR, "Stream type '%s' accepts no '%s' "
+                mp_msg(MSGT_OPEN, MSGL_ERR, "Stream type '%s' accepts no '%s' "
                         "field in URLs.\n", st->info->name, f_names[n]);
                 return false;
             }
             int r = m_config_set_option(config, bstr0(opt), f[n]);
             if (r < 0) {
-                mp_tmsg(MSGT_OPEN, MSGL_ERR, "Error setting stream option: %s\n",
+                mp_msg(MSGT_OPEN, MSGL_ERR, "Error setting stream option: %s\n",
                         m_option_strerror(r));
                 return false;
             }
@@ -302,7 +302,7 @@ static int open_internal(const stream_info_t *sinfo, struct stream *underlying,
         struct m_config *config = m_config_from_obj_desc(s, &desc);
         s->priv = config->optstruct;
         if (s->info->url_options && !parse_url(s, config)) {
-            mp_tmsg(MSGT_OPEN, MSGL_ERR, "URL parsing failed on url %s\n", url);
+            mp_msg(MSGT_OPEN, MSGL_ERR, "URL parsing failed on url %s\n", url);
             talloc_free(s);
             return STREAM_ERROR;
         }
@@ -351,13 +351,13 @@ struct stream *stream_create(const char *url, int flags, struct MPOpts *options)
         if (r == STREAM_NO_MATCH || r == STREAM_UNSUPPORTED)
             continue;
         if (r != STREAM_OK) {
-            mp_tmsg(MSGT_OPEN, MSGL_ERR, "Failed to open %s.\n", url);
+            mp_msg(MSGT_OPEN, MSGL_ERR, "Failed to open %s.\n", url);
             return NULL;
         }
     }
 
     if (!s) {
-        mp_tmsg(MSGT_OPEN, MSGL_ERR, "No stream found to handle url %s\n", url);
+        mp_msg(MSGT_OPEN, MSGL_ERR, "No stream found to handle url %s\n", url);
         return NULL;
     }
 
@@ -432,7 +432,7 @@ void stream_set_capture_file(stream_t *s, const char *filename)
             if (s->capture_file) {
                 s->capture_filename = talloc_strdup(NULL, filename);
             } else {
-                mp_tmsg(MSGT_GLOBAL, MSGL_ERR,
+                mp_msg(MSGT_GLOBAL, MSGL_ERR,
                         "Error opening capture file: %s\n", strerror(errno));
             }
         }
@@ -443,7 +443,7 @@ static void stream_capture_write(stream_t *s, void *buf, size_t len)
 {
     if (s->capture_file && len > 0) {
         if (fwrite(buf, len, 1, s->capture_file) < 1) {
-            mp_tmsg(MSGT_GLOBAL, MSGL_ERR, "Error writing capture file: %s\n",
+            mp_msg(MSGT_GLOBAL, MSGL_ERR, "Error writing capture file: %s\n",
                     strerror(errno));
             stream_set_capture_file(s, NULL);
         }
@@ -619,16 +619,16 @@ static int stream_seek_unbuffered(stream_t *s, int64_t newpos)
 {
     if (newpos != s->pos) {
         if (newpos > s->pos && !(s->flags & MP_STREAM_SEEK_FW)) {
-            mp_tmsg(MSGT_STREAM, MSGL_ERR, "Can not seek in this stream\n");
+            mp_msg(MSGT_STREAM, MSGL_ERR, "Can not seek in this stream\n");
             return 0;
         }
         if (newpos < s->pos && !(s->flags & MP_STREAM_SEEK_BW)) {
-            mp_tmsg(MSGT_STREAM, MSGL_ERR,
+            mp_msg(MSGT_STREAM, MSGL_ERR,
                     "Cannot seek backward in linear streams!\n");
             return 1;
         }
         if (s->seek(s, newpos) <= 0) {
-            mp_tmsg(MSGT_STREAM, MSGL_ERR, "Seek failed\n");
+            mp_msg(MSGT_STREAM, MSGL_ERR, "Seek failed\n");
             return 0;
         }
     }
@@ -680,7 +680,7 @@ static int stream_seek_long(stream_t *s, int64_t pos)
 int stream_seek(stream_t *s, int64_t pos)
 {
 
-    mp_dbg(MSGT_DEMUX, MSGL_DBG3, "seek to 0x%llX\n", (long long)pos);
+    mp_msg(MSGT_DEMUX, MSGL_DBG3, "seek to 0x%llX\n", (long long)pos);
 
     if (pos == stream_tell(s))
         return 1;

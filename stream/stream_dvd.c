@@ -123,14 +123,14 @@ int dvd_aid_from_lang(stream_t *stream, char **lang) {
       code = lang[n][1] | (lang[n][0] << 8);
       for(i=0;i<d->nr_of_channels;i++) {
         if(d->audio_streams[i].language==code) {
-          mp_tmsg(MSGT_OPEN,MSGL_INFO,"Selected DVD audio channel: %d language: %c%c\n",
+          mp_msg(MSGT_OPEN,MSGL_INFO,"Selected DVD audio channel: %d language: %c%c\n",
           d->audio_streams[i].id, lang[n][0], lang[n][1]);
           return d->audio_streams[i].id;
         }
         //printf("%X != %X  (%c%c)\n",code,d->audio_streams[i].language,lang[0],lang[1]);
       }
   }
-  mp_tmsg(MSGT_OPEN,MSGL_WARN,"No matching DVD audio language found!\n");
+  mp_msg(MSGT_OPEN,MSGL_WARN,"No matching DVD audio language found!\n");
   return -1;
 }
 
@@ -164,12 +164,12 @@ int dvd_sid_from_lang(stream_t *stream, char **lang) {
     code = lang[n][1] | (lang[n][0] << 8);
     for(i=0;i<d->nr_of_subtitles;i++) {
       if(d->subtitles[i].language==code) {
-        mp_tmsg(MSGT_OPEN,MSGL_INFO,"Selected DVD subtitle channel: %d language: %c%c\n", i, lang[n][0], lang[n][1]);
+        mp_msg(MSGT_OPEN,MSGL_INFO,"Selected DVD subtitle channel: %d language: %c%c\n", i, lang[n][0], lang[n][1]);
         return d->subtitles[i].id;
       }
     }
   }
-  mp_tmsg(MSGT_OPEN,MSGL_WARN,"No matching DVD subtitle language found!\n");
+  mp_msg(MSGT_OPEN,MSGL_WARN,"No matching DVD subtitle language found!\n");
   return -1;
 }
 
@@ -772,12 +772,12 @@ static int open_s(stream_t *stream, int mode)
         snprintf(temp_device, len, "/dev/rdisk%d", i);
         dvd = DVDOpen(temp_device);
         if(!dvd) {
-          mp_tmsg(MSGT_OPEN,MSGL_ERR,"Couldn't open DVD device: %s (%s)\n",temp_device, strerror(errno));
+          mp_msg(MSGT_OPEN,MSGL_ERR,"Couldn't open DVD device: %s (%s)\n",temp_device, strerror(errno));
         } else {
 #if DVDREAD_VERSION <= LIBDVDREAD_VERSION(0,9,4)
           dvd_file_t *dvdfile = DVDOpenFile(dvd,dvd_title,DVD_READ_INFO_FILE);
           if(!dvdfile) {
-            mp_tmsg(MSGT_OPEN,MSGL_ERR,"Couldn't open DVD device: %s (%s)\n",temp_device, strerror(errno));
+            mp_msg(MSGT_OPEN,MSGL_ERR,"Couldn't open DVD device: %s (%s)\n",temp_device, strerror(errno));
             DVDClose(dvd);
             continue;
           }
@@ -796,7 +796,7 @@ static int open_s(stream_t *stream, int mode)
     {
         dvd = DVDOpen(dvd_device_current);
         if(!dvd) {
-          mp_tmsg(MSGT_OPEN,MSGL_ERR,"Couldn't open DVD device: %s (%s)\n",dvd_device_current, strerror(errno));
+          mp_msg(MSGT_OPEN,MSGL_ERR,"Couldn't open DVD device: %s (%s)\n",dvd_device_current, strerror(errno));
           return STREAM_UNSUPPORTED;
         }
     }
@@ -809,7 +809,7 @@ static int open_s(stream_t *stream, int mode)
      */
     vmg_file = ifoOpen(dvd, 0);
     if(!vmg_file) {
-      mp_tmsg(MSGT_OPEN,MSGL_ERR, "Can't open VMG info!\n");
+      mp_msg(MSGT_OPEN,MSGL_ERR, "Can't open VMG info!\n");
       DVDClose( dvd );
       return STREAM_UNSUPPORTED;
     }
@@ -845,9 +845,9 @@ static int open_s(stream_t *stream, int mode)
     /**
      * Make sure our title number is valid.
      */
-    mp_tmsg(MSGT_OPEN,MSGL_STATUS, "There are %d titles on this DVD.\n", tt_srpt->nr_of_srpts );
+    mp_msg(MSGT_OPEN,MSGL_STATUS, "There are %d titles on this DVD.\n", tt_srpt->nr_of_srpts );
     if(dvd_title < 1 || dvd_title > tt_srpt->nr_of_srpts) {
-      mp_tmsg(MSGT_OPEN,MSGL_ERR, "Invalid DVD title number: %d\n", dvd_title);
+      mp_msg(MSGT_OPEN,MSGL_ERR, "Invalid DVD title number: %d\n", dvd_title);
       ifoClose( vmg_file );
       DVDClose( dvd );
       return STREAM_UNSUPPORTED;
@@ -857,9 +857,9 @@ static int open_s(stream_t *stream, int mode)
     /**
      * Make sure the angle number is valid for this title.
      */
-    mp_tmsg(MSGT_OPEN,MSGL_STATUS, "There are %d angles in this DVD title.\n", tt_srpt->title[dvd_title].nr_of_angles);
+    mp_msg(MSGT_OPEN,MSGL_STATUS, "There are %d angles in this DVD title.\n", tt_srpt->title[dvd_title].nr_of_angles);
     if(dvd_angle<1 || dvd_angle>tt_srpt->title[dvd_title].nr_of_angles) {
-      mp_tmsg(MSGT_OPEN,MSGL_ERR, "Invalid DVD angle number: %d\n", dvd_angle);
+      mp_msg(MSGT_OPEN,MSGL_ERR, "Invalid DVD angle number: %d\n", dvd_angle);
       goto fail;
     }
 
@@ -869,7 +869,7 @@ static int open_s(stream_t *stream, int mode)
      */
     vts_file = ifoOpen( dvd, tt_srpt->title[dvd_title].title_set_nr );
     if(!vts_file) {
-      mp_tmsg(MSGT_OPEN,MSGL_ERR, "Cannot open the IFO file for DVD title %d.\n", tt_srpt->title[dvd_title].title_set_nr );
+      mp_msg(MSGT_OPEN,MSGL_ERR, "Cannot open the IFO file for DVD title %d.\n", tt_srpt->title[dvd_title].title_set_nr );
       goto fail;
     }
     /**
@@ -877,7 +877,7 @@ static int open_s(stream_t *stream, int mode)
      */
     title = DVDOpenFile(dvd, tt_srpt->title[dvd_title].title_set_nr, DVD_READ_TITLE_VOBS);
     if(!title) {
-      mp_tmsg(MSGT_OPEN,MSGL_ERR, "Cannot open title VOBS (VTS_%02d_1.VOB).\n", tt_srpt->title[dvd_title].title_set_nr);
+      mp_msg(MSGT_OPEN,MSGL_ERR, "Cannot open title VOBS (VTS_%02d_1.VOB).\n", tt_srpt->title[dvd_title].title_set_nr);
       ifoClose( vts_file );
       goto fail;
     }
@@ -936,7 +936,7 @@ static int open_s(stream_t *stream, int mode)
            //  1 - stereo
            //  5 - 5.1
            audio_stream->channels=audio->channels;
-           mp_tmsg(MSGT_OPEN,MSGL_STATUS,"audio stream: %d format: %s (%s) language: %s aid: %d.\n",
+           mp_msg(MSGT_OPEN,MSGL_STATUS,"audio stream: %d format: %s (%s) language: %s aid: %d.\n",
              d->nr_of_channels,
              dvd_audio_stream_types[ audio->audio_format ],
              dvd_audio_stream_channels[ audio->channels ],
@@ -950,7 +950,7 @@ static int open_s(stream_t *stream, int mode)
            d->nr_of_channels++;
          }
       }
-      mp_tmsg(MSGT_OPEN,MSGL_STATUS,"number of audio channels on disk: %d.\n",d->nr_of_channels );
+      mp_msg(MSGT_OPEN,MSGL_STATUS,"number of audio channels on disk: %d.\n",d->nr_of_channels );
     }
 
     /**
@@ -982,13 +982,13 @@ static int open_s(stream_t *stream, int mode)
         else if(video->display_aspect_ratio == 3) /* 16:9 */
           sub_stream->id = pgc->subp_control[i] >> 8 & 31;
 
-        mp_tmsg(MSGT_OPEN,MSGL_STATUS,"subtitle ( sid ): %d language: %s\n", sub_stream->id, tmp);
+        mp_msg(MSGT_OPEN,MSGL_STATUS,"subtitle ( sid ): %d language: %s\n", sub_stream->id, tmp);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sub_stream->id);
         if(language && tmp[0])
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sub_stream->id, tmp);
         d->nr_of_subtitles++;
       }
-      mp_tmsg(MSGT_OPEN,MSGL_STATUS,"number of subtitles on disk: %d\n",d->nr_of_subtitles);
+      mp_msg(MSGT_OPEN,MSGL_STATUS,"number of subtitles on disk: %d\n",d->nr_of_subtitles);
     }
 
     /**
@@ -1038,7 +1038,7 @@ fail:
       DVDClose(dvd);
       return STREAM_UNSUPPORTED;
   }
-  mp_tmsg(MSGT_DVD,MSGL_ERR,"mpv was compiled without DVD support, exiting.\n");
+  mp_msg(MSGT_DVD,MSGL_ERR,"mpv was compiled without DVD support, exiting.\n");
   return STREAM_UNSUPPORTED;
 }
 

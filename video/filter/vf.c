@@ -225,7 +225,7 @@ static struct vf_instance *vf_open(struct vf_chain *c, const char *name,
 {
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &vf_obj_list, bstr0(name))) {
-        mp_tmsg(MSGT_VFILTER, MSGL_ERR,
+        mp_msg(MSGT_VFILTER, MSGL_ERR,
                 "Couldn't find video filter '%s'.\n", name);
         return NULL;
     }
@@ -437,7 +437,7 @@ static void update_formats(struct vf_chain *c, struct vf_instance *vf,
         // If there are output formats, but no input formats (meaning the
         // filters after vf work, but vf can't output any format the filters
         // after it accept), try to insert a conversion filter.
-        mp_tmsg(MSGT_VFILTER, MSGL_INFO, "Using conversion filter.\n");
+        mp_msg(MSGT_VFILTER, MSGL_INFO, "Using conversion filter.\n");
         struct vf_instance *conv = vf_open(c, "scale", NULL);
         if (conv) {
             conv->next = vf->next;
@@ -507,8 +507,8 @@ int vf_reconfig(struct vf_chain *c, const struct mp_image_params *params)
     c->initialized = r < 0 ? -1 : 1;
     int loglevel = r < 0 ? MSGL_WARN : MSGL_V;
     if (r == -2)
-        mp_tmsg(MSGT_VFILTER, MSGL_ERR, "Image formats incompatible.\n");
-    mp_tmsg(MSGT_VFILTER, loglevel, "Video filter chain:\n");
+        mp_msg(MSGT_VFILTER, MSGL_ERR, "Image formats incompatible.\n");
+    mp_msg(MSGT_VFILTER, loglevel, "Video filter chain:\n");
     vf_print_filter_chain(c, loglevel);
     return r;
 }

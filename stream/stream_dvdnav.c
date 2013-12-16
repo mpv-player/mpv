@@ -661,7 +661,7 @@ static int open_s(stream_t *stream, int mode)
     else
         filename = DEFAULT_DVD_DEVICE;
     if (!new_dvdnav_stream(priv, filename)) {
-        mp_tmsg(MSGT_OPEN, MSGL_ERR, "Couldn't open DVD device: %s\n",
+        mp_msg(MSGT_OPEN, MSGL_ERR, "Couldn't open DVD device: %s\n",
                 filename);
         return STREAM_UNSUPPORTED;
     }

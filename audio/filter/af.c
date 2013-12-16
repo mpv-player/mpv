@@ -177,7 +177,7 @@ static struct af_instance *af_create(struct af_stream *s, char *name,
 {
     struct m_obj_desc desc;
     if (!m_obj_list_find(&desc, &af_obj_list, bstr0(name))) {
-        mp_tmsg(MSGT_VFILTER, MSGL_ERR,
+        mp_msg(MSGT_VFILTER, MSGL_ERR,
                 "Couldn't find audio filter '%s'.\n", name);
         return NULL;
     }

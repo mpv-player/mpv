@@ -213,15 +213,6 @@ void set_osd_msg(struct MPContext *mpctx, int id, int level, int time,
     va_end(ap);
 }
 
-void set_osd_tmsg(struct MPContext *mpctx, int id, int level, int time,
-                  const char *fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    set_osd_msg_va(mpctx, id, level, time, mp_gtext(fmt), ap);
-    va_end(ap);
-}
-
 /**
  *  \brief Remove a message from the OSD stack
  *
@@ -451,14 +442,14 @@ static void add_seek_osd_messages(struct MPContext *mpctx)
     }
     if (mpctx->add_osd_seek_info & OSD_SEEK_INFO_CHAPTER_TEXT) {
         char *chapter = chapter_display_name(mpctx, get_current_chapter(mpctx));
-        set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts->osd_duration,
+        set_osd_msg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts->osd_duration,
                      "Chapter: %s", chapter);
         talloc_free(chapter);
     }
     if ((mpctx->add_osd_seek_info & OSD_SEEK_INFO_EDITION)
         && mpctx->master_demuxer)
     {
-        set_osd_tmsg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts->osd_duration,
+        set_osd_msg(mpctx, OSD_MSG_TEXT, 1, mpctx->opts->osd_duration,
                      "Playing edition %d of %d.",
                      mpctx->master_demuxer->edition + 1,
                      mpctx->master_demuxer->num_editions);

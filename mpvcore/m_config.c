@@ -75,11 +75,11 @@ static int parse_profile(struct m_config *config, const struct m_option *opt,
     if (!bstrcmp0(param, "help")) {
         struct m_profile *p;
         if (!config->profiles) {
-            mp_tmsg(MSGT_CFGPARSER, MSGL_INFO,
+            mp_msg(MSGT_CFGPARSER, MSGL_INFO,
                     "No profiles have been defined.\n");
             return M_OPT_EXIT - 1;
         }
-        mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "Available profiles:\n");
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Available profiles:\n");
         for (p = config->profiles; p; p = p->next)
             mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\t%s\t%s\n", p->name,
                    p->desc ? p->desc : "");
@@ -96,7 +96,7 @@ static int parse_profile(struct m_config *config, const struct m_option *opt,
     for (int i = 0; list[i]; i++) {
         struct m_profile *p = m_config_get_profile0(config, list[i]);
         if (!p) {
-            mp_tmsg(MSGT_CFGPARSER, MSGL_WARN, "Unknown profile '%s'.\n",
+            mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Unknown profile '%s'.\n",
                     list[i]);
             r = M_OPT_INVALID;
         } else if (set)
@@ -113,12 +113,12 @@ static int show_profile(struct m_config *config, bstr param)
     if (!param.len)
         return M_OPT_MISSING_PARAM;
     if (!(p = m_config_get_profile(config, param))) {
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "Unknown profile '%.*s'.\n",
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Unknown profile '%.*s'.\n",
                 BSTR_P(param));
         return M_OPT_EXIT - 1;
     }
     if (!config->profile_depth)
-        mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "Profile %s: %s\n", p->name,
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Profile %s: %s\n", p->name,
                 p->desc ? p->desc : "");
     config->profile_depth++;
     for (i = 0; i < p->num_opts; i++) {
@@ -284,7 +284,7 @@ void m_config_backup_opt(struct m_config *config, const char *opt)
     if (co) {
         ensure_backup(config, co);
     } else {
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "Option %s not found.\n", opt);
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s not found.\n", opt);
     }
 }
 
@@ -496,14 +496,14 @@ static int m_config_parse_option(struct m_config *config, struct bstr name,
 
     // Check if this option isn't forbidden in the current mode
     if ((flags & M_SETOPT_FROM_CONFIG_FILE) && (co->opt->flags & M_OPT_NOCFG)) {
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                 "The %.*s option can't be used in a config file.\n",
                 BSTR_P(name));
         return M_OPT_INVALID;
     }
     if (flags & M_SETOPT_BACKUP) {
         if (co->opt->flags & M_OPT_GLOBAL) {
-            mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                     "The %.*s option is global and can't be set per-file.\n",
                     BSTR_P(name));
             return M_OPT_INVALID;
@@ -563,7 +563,7 @@ static int parse_subopts(struct m_config *config, char *name, char *prefix,
         r = m_config_parse_option(config,bstr0(n), bstr0(lst[2 * i + 1]), flags);
         if (r < 0) {
             if (r > M_OPT_EXIT) {
-                mp_tmsg(MSGT_CFGPARSER, MSGL_ERR,
+                mp_msg(MSGT_CFGPARSER, MSGL_ERR,
                         "Error parsing suboption %s/%s (%s)\n",
                         name, lst[2 * i], m_option_strerror(r));
                 r = M_OPT_INVALID;
@@ -582,7 +582,7 @@ int m_config_parse_suboptions(struct m_config *config, char *name,
         return 0;
     int r = parse_subopts(config, name, "", bstr0(subopts), 0);
     if (r < 0 && r > M_OPT_EXIT) {
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "Error parsing suboption %s (%s)\n",
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Error parsing suboption %s (%s)\n",
                 name, m_option_strerror(r));
         r = M_OPT_INVALID;
     }
@@ -594,7 +594,7 @@ int m_config_set_option_ext(struct m_config *config, struct bstr name,
 {
     int r = m_config_parse_option(config, name, param, flags);
     if (r < 0 && r > M_OPT_EXIT) {
-        mp_tmsg(MSGT_CFGPARSER, MSGL_ERR, "Error parsing option %.*s (%s)\n",
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Error parsing option %.*s (%s)\n",
                 BSTR_P(name), m_option_strerror(r));
         r = M_OPT_INVALID;
     }
@@ -633,7 +633,7 @@ void m_config_print_option_list(const struct m_config *config)
     int count = 0;
     const char *prefix = config->is_toplevel ? "--" : "";
 
-    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "Options:\n\n");
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Options:\n\n");
     for (int i = 0; i < config->num_opts; i++) {
         struct m_config_option *co = &config->opts[i];
         const struct m_option *opt = co->opt;
@@ -675,7 +675,7 @@ void m_config_print_option_list(const struct m_config *config)
         mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
         count++;
     }
-    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\nTotal: %d options\n", count);
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\nTotal: %d options\n", count);
 }
 
 struct m_profile *m_config_get_profile(const struct m_config *config, bstr name)
@@ -731,7 +731,7 @@ void m_config_set_profile(struct m_config *config, struct m_profile *p,
                           int flags)
 {
     if (config->profile_depth > MAX_PROFILE_DEPTH) {
-        mp_tmsg(MSGT_CFGPARSER, MSGL_WARN,
+        mp_msg(MSGT_CFGPARSER, MSGL_WARN,
                 "WARNING: Profile inclusion too deep.\n");
         return;
     }

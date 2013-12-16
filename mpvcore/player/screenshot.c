@@ -80,7 +80,7 @@ static void screenshot_msg(screenshot_ctx *ctx, int status, const char *msg,
 
     mp_msg(MSGT_CPLAYER, status == SMSG_ERR ? MSGL_ERR : MSGL_INFO, "%s\n", s);
     if (ctx->osd) {
-        set_osd_tmsg(ctx->mpctx, OSD_MSG_TEXT, 1, ctx->mpctx->opts->osd_duration,
+        set_osd_msg(ctx->mpctx, OSD_MSG_TEXT, 1, ctx->mpctx->opts->osd_duration,
                      "%s", s);
     }
 

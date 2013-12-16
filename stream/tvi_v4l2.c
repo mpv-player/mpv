@@ -1759,7 +1759,7 @@ static void *audio_grabber(void *data)
 
 static double grab_audio_frame(priv_t *priv, char *buffer, int len)
 {
-    mp_dbg(MSGT_TV, MSGL_DBG2, "grab_audio_frame(priv=%p, buffer=%p, len=%d)\n",
+    mp_msg(MSGT_TV, MSGL_DBG2, "grab_audio_frame(priv=%p, buffer=%p, len=%d)\n",
         priv, buffer, len);
 
     // hack: if grab_audio_frame is called first, it means we are used by mplayer

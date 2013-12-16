@@ -366,7 +366,7 @@ static int mpv_main(int argc, char *argv[])
 
     if (!mpctx->playlist->first && !opts->player_idle_mode) {
         mp_print_version(true);
-        MP_INFO(mpctx, "%s", mp_gtext(mp_help_text));
+        MP_INFO(mpctx, "%s", mp_help_text);
         exit_player(mpctx, EXIT_NONE);
     }
 

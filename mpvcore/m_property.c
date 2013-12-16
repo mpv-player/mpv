@@ -306,7 +306,7 @@ void m_properties_print_help_list(const m_option_t *list)
     char min[50], max[50];
     int i, count = 0;
 
-    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO,
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO,
             "\n Name                 Type            Min        Max\n\n");
     for (i = 0; list[i].name; i++) {
         const m_option_t *opt = &list[i];
@@ -326,7 +326,7 @@ void m_properties_print_help_list(const m_option_t *list)
                max);
         count++;
     }
-    mp_tmsg(MSGT_CFGPARSER, MSGL_INFO, "\nTotal: %d properties\n", count);
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\nTotal: %d properties\n", count);
 }
 
 int m_property_int_ro(const m_option_t *prop, int action,

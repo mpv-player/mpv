@@ -355,7 +355,7 @@ int demuxer_add_packet(demuxer_t *demuxer, struct sh_stream *stream,
     if (stream->type != STREAM_VIDEO && dp->pts == MP_NOPTS_VALUE)
         dp->pts = dp->dts;
 
-    mp_dbg(MSGT_DEMUXER, MSGL_DBG2,
+    mp_msg(MSGT_DEMUXER, MSGL_DBG2,
            "DEMUX: Append packet to %s, len=%d  pts=%5.3f  pos=%"PRIu64" "
            "[packs: A=%d V=%d S=%d]\n", stream_type_name(stream->type),
            dp->len, dp->pts, dp->pos, count_packs(demuxer, STREAM_AUDIO),
@@ -375,13 +375,13 @@ static bool demux_check_queue_full(demuxer_t *demux)
 overflow:
 
     if (!demux->warned_queue_overflow) {
-        mp_tmsg(MSGT_DEMUXER, MSGL_ERR, "\nToo many packets in the demuxer "
+        mp_msg(MSGT_DEMUXER, MSGL_ERR, "\nToo many packets in the demuxer "
                 "packet queue (video: %d packets in %d bytes, audio: %d "
                 "packets in %d bytes, sub: %d packets in %d bytes).\n",
                 count_packs(demux, STREAM_VIDEO), count_bytes(demux, STREAM_VIDEO),
                 count_packs(demux, STREAM_AUDIO), count_bytes(demux, STREAM_AUDIO),
                 count_packs(demux, STREAM_SUB), count_bytes(demux, STREAM_SUB));
-        mp_tmsg(MSGT_DEMUXER, MSGL_HINT, "Maybe you are playing a non-"
+        mp_msg(MSGT_DEMUXER, MSGL_HINT, "Maybe you are playing a non-"
                 "interleaved stream/file or the codec failed?\n");
     }
     demux->warned_queue_overflow = true;
@@ -401,7 +401,7 @@ static void ds_get_packets(struct sh_stream *sh)
 {
     struct demux_stream *ds = sh->ds;
     demuxer_t *demux = sh->demuxer;
-    mp_dbg(MSGT_DEMUXER, MSGL_DBG3, "ds_get_packets (%s) called\n",
+    mp_msg(MSGT_DEMUXER, MSGL_DBG3, "ds_get_packets (%s) called\n",
            stream_type_name(sh->type));
     while (1) {
         if (ds->head)
@@ -532,10 +532,10 @@ static struct demuxer *open_given_type(struct MPOpts *opts,
     if (ret >= 0) {
         demuxer->params = NULL;
         if (demuxer->filetype)
-            mp_tmsg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s (%s)\n",
+            mp_msg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s (%s)\n",
                     demuxer->filetype, desc->desc);
         else
-            mp_tmsg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s\n",
+            mp_msg(MSGT_DEMUXER, MSGL_INFO, "Detected file format: %s\n",
                     desc->desc);
         if (stream_manages_timeline(demuxer->stream)) {
             // Incorrect, but fixes some behavior with DVD/BD
@@ -622,7 +622,7 @@ void demux_flush(demuxer_t *demuxer)
 int demux_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
     if (!demuxer->seekable) {
-        mp_tmsg(MSGT_DEMUXER, MSGL_WARN, "Cannot seek in this file.\n");
+        mp_msg(MSGT_DEMUXER, MSGL_WARN, "Cannot seek in this file.\n");
         return 0;
     }
 
@@ -718,7 +718,7 @@ int demux_info_add_bstr(demuxer_t *demuxer, struct bstr opt, struct bstr param)
     if (oldval) {
         if (bstrcmp0(param, oldval) == 0)
             return 0;
-        mp_tmsg(MSGT_DEMUX, MSGL_INFO, "Demuxer info %.*s changed to %.*s\n",
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "Demuxer info %.*s changed to %.*s\n",
                 BSTR_P(opt), BSTR_P(param));
     }
 
@@ -734,7 +734,7 @@ int demux_info_print(demuxer_t *demuxer)
     if (!info || !info->num_keys)
         return 0;
 
-    mp_tmsg(MSGT_DEMUX, MSGL_INFO, "Clip info:\n");
+    mp_msg(MSGT_DEMUX, MSGL_INFO, "Clip info:\n");
     for (n = 0; n < info->num_keys; n++) {
         mp_msg(MSGT_DEMUX, MSGL_INFO, " %s: %s\n", info->keys[n],
                info->values[n]);

@@ -818,13 +818,13 @@ static int af_open(struct af_instance *af) {
 
         if (LADSPA_IS_HINT_BOUNDED_BELOW(hint.HintDescriptor) &&
                 val < hint.LowerBound) {
-            mp_tmsg(MSGT_AFILTER, MSGL_ERR, "%s: Input control #%d is below lower boundary of %0.4f.\n",
+            mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: Input control #%d is below lower boundary of %0.4f.\n",
                                         setup->myname, i, hint.LowerBound);
             return AF_ERROR;
         }
         if (LADSPA_IS_HINT_BOUNDED_ABOVE(hint.HintDescriptor) &&
                 val > hint.UpperBound) {
-            mp_tmsg(MSGT_AFILTER, MSGL_ERR, "%s: Input control #%d is above upper boundary of %0.4f.\n",
+            mp_msg(MSGT_AFILTER, MSGL_ERR, "%s: Input control #%d is above upper boundary of %0.4f.\n",
                                         setup->myname, i, hint.UpperBound);
             return AF_ERROR;
         }

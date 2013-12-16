@@ -40,9 +40,9 @@ mp_input_lirc_init(void) {
   int lirc_sock;
   int mode;
 
-  mp_tmsg(MSGT_LIRC,MSGL_V,"Setting up LIRC support...\n");
+  mp_msg(MSGT_LIRC,MSGL_V,"Setting up LIRC support...\n");
   if((lirc_sock=lirc_init("mpv",0))==-1){
-    mp_tmsg(MSGT_LIRC,MSGL_V,"Failed to open LIRC support. You will not be able to use your remote control.\n");
+    mp_msg(MSGT_LIRC,MSGL_V,"Failed to open LIRC support. You will not be able to use your remote control.\n");
     return -1;
   }
 
@@ -55,7 +55,7 @@ mp_input_lirc_init(void) {
   }
 
   if(lirc_readconfig( lirc_configfile,&lirc_config,NULL )!=0 ){
-    mp_tmsg(MSGT_LIRC,MSGL_ERR,"Failed to read LIRC config file %s.\n",
+    mp_msg(MSGT_LIRC,MSGL_ERR,"Failed to read LIRC config file %s.\n",
 		    lirc_configfile == NULL ? "~/.lircrc" : lirc_configfile);
     lirc_deinit();
     return -1;

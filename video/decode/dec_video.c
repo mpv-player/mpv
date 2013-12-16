@@ -87,13 +87,13 @@ int video_set_colors(struct dec_video *d_video, const char *item, int value)
     data.item = item;
     data.value = value;
 
-    mp_dbg(MSGT_DECVIDEO, MSGL_V, "set video colors %s=%d \n", item, value);
+    mp_msg(MSGT_DECVIDEO, MSGL_V, "set video colors %s=%d \n", item, value);
     if (d_video->vfilter) {
         int ret = video_vf_vo_control(d_video, VFCTRL_SET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE)
             return 1;
     }
-    mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Video attribute '%s' is not supported by selected vo.\n",
+    mp_msg(MSGT_DECVIDEO, MSGL_V, "Video attribute '%s' is not supported by selected vo.\n",
            item);
     return 0;
 }
@@ -104,7 +104,7 @@ int video_get_colors(struct dec_video *d_video, const char *item, int *value)
 
     data.item = item;
 
-    mp_dbg(MSGT_DECVIDEO, MSGL_V, "get video colors %s \n", item);
+    mp_msg(MSGT_DECVIDEO, MSGL_V, "get video colors %s \n", item);
     if (d_video->vfilter) {
         int ret = video_vf_vo_control(d_video, VFCTRL_GET_EQUALIZER, &data);
         if (ret == CONTROL_TRUE) {
@@ -119,7 +119,7 @@ void video_uninit(struct dec_video *d_video)
 {
     mp_image_unrefp(&d_video->waiting_decoded_mpi);
     if (d_video->vd_driver) {
-        mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Uninit video.\n");
+        mp_msg(MSGT_DECVIDEO, MSGL_V, "Uninit video.\n");
         d_video->vd_driver->uninit(d_video);
     }
     talloc_free(d_video->priv);
@@ -130,7 +130,7 @@ void video_uninit(struct dec_video *d_video)
 static int init_video_codec(struct dec_video *d_video, const char *decoder)
 {
     if (!d_video->vd_driver->init(d_video, decoder)) {
-        mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Video decoder init failed.\n");
+        mp_msg(MSGT_DECVIDEO, MSGL_V, "Video decoder init failed.\n");
         return 0;
     }
     return 1;
@@ -179,7 +179,7 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
         const struct vd_functions *driver = find_driver(sel->family);
         if (!driver)
             continue;
-        mp_tmsg(MSGT_DECVIDEO, MSGL_V, "Opening video decoder %s:%s\n",
+        mp_msg(MSGT_DECVIDEO, MSGL_V, "Opening video decoder %s:%s\n",
                 sel->family, sel->decoder);
         d_video->vd_driver = driver;
         if (init_video_codec(d_video, sel->decoder)) {
@@ -187,7 +187,7 @@ bool video_init_best_codec(struct dec_video *d_video, char* video_decoders)
             break;
         }
         d_video->vd_driver = NULL;
-        mp_tmsg(MSGT_DECVIDEO, MSGL_WARN, "Video decoder init failed for "
+        mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Video decoder init failed for "
                 "%s:%s\n", sel->family, sel->decoder);
     }
 
@@ -410,7 +410,7 @@ int video_reconfig_filters(struct dec_video *d_video,
         vf_set_dar(&p.d_w, &p.d_h, p.w, p.h, force_aspect);
 
     if (abs(p.d_w - p.w) >= 4 || abs(p.d_h - p.h) >= 4) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_V, "Aspect ratio is %.2f:1 - "
+        mp_msg(MSGT_CPLAYER, MSGL_V, "Aspect ratio is %.2f:1 - "
                 "scaling to correct movie aspect.\n", sh->aspect);
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ASPECT=%1.4f\n", sh->aspect);
     } else {
@@ -434,7 +434,7 @@ int video_reconfig_filters(struct dec_video *d_video,
            p.w, p.h, p.d_w, p.d_h, p.imgfmt);
 
     if (vf_reconfig(d_video->vfilter, &p) < 0) {
-        mp_tmsg(MSGT_CPLAYER, MSGL_WARN, "FATAL: Cannot initialize video driver.\n");
+        mp_msg(MSGT_CPLAYER, MSGL_WARN, "FATAL: Cannot initialize video driver.\n");
         return -1;
     }
 

@@ -137,13 +137,9 @@ bool mp_msg_test_log(struct mp_log *log, int lev);
 #include "config.h"
 #include "mpvcore/mp_common.h"
 
-#define mp_gtext(x) ((char*)(x))
-
 // Note: using mp_msg_log or the MP_ERR/... macros is preferred.
 void mp_msg_va(int mod, int lev, const char *format, va_list va);
 void mp_msg(int mod, int lev, const char *format, ... ) PRINTF_ATTRIBUTE(3, 4);
-#define mp_tmsg mp_msg
-#define mp_dbg mp_msg
 
 struct mp_log *mp_log_new(void *talloc_ctx, struct mp_log *parent,
                           const char *name);
@@ -170,7 +166,7 @@ void mp_msg_log(struct mp_log *log, int lev, const char *format, ...)
 #define mp_warn(log, ...)       mp_msg_log(log, MSGL_WARN, __VA_ARGS__)
 #define mp_info(log, ...)       mp_msg_log(log, MSGL_INFO, __VA_ARGS__)
 #define mp_verbose(log, ...)    mp_msg_log(log, MSGL_V, __VA_ARGS__)
-//#define mp_dbg(log, ...)        mp_msg_log(log, MSGL_DBG2, __VA_ARGS__)
+#define mp_dbg(log, ...)        mp_msg_log(log, MSGL_DBG2, __VA_ARGS__)
 #define mp_trace(log, ...)      mp_msg_log(log, MSGL_DBG5, __VA_ARGS__)
 
 struct mpv_global;

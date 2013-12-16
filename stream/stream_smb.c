@@ -135,13 +135,13 @@ static int open_f (stream_t *stream, int mode)
 
   err = smbc_init(smb_auth_fn, 1);
   if (err < 0) {
-    mp_tmsg(MSGT_OPEN,MSGL_ERR,"Cannot init the libsmbclient library: %d\n",err);
+    mp_msg(MSGT_OPEN,MSGL_ERR,"Cannot init the libsmbclient library: %d\n",err);
     return STREAM_ERROR;
   }
 
   fd = smbc_open(filename, m,0644);
   if (fd < 0) {
-    mp_tmsg(MSGT_OPEN,MSGL_ERR,"Could not open from LAN: '%s'\n", filename);
+    mp_msg(MSGT_OPEN,MSGL_ERR,"Could not open from LAN: '%s'\n", filename);
     return STREAM_ERROR;
   }
 

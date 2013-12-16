@@ -546,7 +546,7 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
     if (size < 1)
         return -1;
 
-    mp_tmsg(MSGT_NETWORK, MSGL_INFO, "Cache size set to %" PRId64 " KiB\n",
+    mp_msg(MSGT_NETWORK, MSGL_INFO, "Cache size set to %" PRId64 " KiB\n",
             size / 1024);
 
     if (size > SIZE_MAX) {
@@ -610,7 +610,7 @@ int stream_cache_init(stream_t *cache, stream_t *stream, int64_t size,
             break;
         if (stream_control(s->cache, STREAM_CTRL_GET_CACHE_IDLE, &idle) < 0)
             break;
-        mp_tmsg(MSGT_CACHE, MSGL_STATUS, "\rCache fill: %5.2f%% "
+        mp_msg(MSGT_CACHE, MSGL_STATUS, "\rCache fill: %5.2f%% "
                 "(%" PRId64 " bytes)   ", 100.0 * fill / s->buffer_size, fill);
         if (fill >= min)
             break;
