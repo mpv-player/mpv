@@ -938,11 +938,11 @@ static const struct flag cmd_flags[] = {
 
 // If dest is non-NULL when calling this function, append the command to the
 // list formed by dest->queue_next, otherwise just set *dest = new_cmd;
-static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
-                     const char *loc)
+static struct mp_cmd *parse_cmd(struct input_ctx *ictx, bstr *pstr, const char *loc)
 {
     int def_flags = MP_ON_OSD_AUTO | MP_EXPAND_PROPERTIES;
     struct mp_cmd *cmd = NULL;
+    bstr str = *pstr;
     bstr start = str;
     void *tmp = talloc_new(NULL);
 
@@ -1069,50 +1069,56 @@ static int parse_cmd(struct input_ctx *ictx, struct mp_cmd **dest, bstr str,
     bstr orig = (bstr) {start.start, str.start - start.start};
     cmd->original = bstrdup(cmd, bstr_strip(orig));
 
-    while (*dest)
-        dest = &(*dest)->queue_next;
-    *dest = cmd;
-
-    str = bstr_lstrip(str);
-    if (bstr_eatstart0(&str, ";")) {
-        if (parse_cmd(ictx, dest, str, loc) < 0) {
-            *dest = NULL;
-            goto error;
-        }
-    }
+    *pstr = str;
 
     talloc_free(tmp);
-    return 1;
+    return cmd;
 
 error:
     MP_ERR(ictx, "Command was defined at %s.\n", loc);
     talloc_free(cmd);
     talloc_free(tmp);
-    return -1;
+    return NULL;
 }
 
 mp_cmd_t *mp_input_parse_cmd(struct input_ctx *ictx, bstr str, const char *loc)
 {
-    struct mp_cmd *cmd = NULL;
-    if (parse_cmd(ictx, &cmd, str, loc) < 0) {
-        assert(!cmd);
-    }
-    // Other input.c code uses queue_next for its own purposes, so explicitly
-    // wrap lists in a pseudo-command.
-    if (cmd && cmd->queue_next) {
-        struct mp_cmd *list = talloc_ptrtype(NULL, list);
-        *list = (struct mp_cmd) {
-            .id = MP_CMD_COMMAND_LIST,
-            .name = "list",
-            .original = bstrdup(list, str),
-        };
-        list->args[0].v.p = cmd;
-        while (cmd) {
+    bstr original = str;
+    struct mp_cmd *cmd = parse_cmd(ictx, &str, loc);
+    if (!cmd)
+        return NULL;
+
+    struct mp_cmd **p_prev = NULL;
+    while (1) {
+        str = bstr_lstrip(str);
+        // read_token just to check whether it's trailing whitespace only
+        bstr u1, u2;
+        if (!bstr_eatstart0(&str, ";") || !read_token(str, &u1, &u2))
+            break;
+        // Multi-command. Since other input.c code uses queue_next for its
+        // own purposes, a pseudo-command is used to wrap the command list.
+        if (!p_prev) {
+            struct mp_cmd *list = talloc_ptrtype(NULL, list);
+            *list = (struct mp_cmd) {
+                .id = MP_CMD_COMMAND_LIST,
+                .name = "list",
+                .original = bstrdup(list, original),
+            };
             talloc_steal(list, cmd);
-            cmd = cmd->queue_next;
+            list->args[0].v.p = cmd;
+            p_prev = &cmd->queue_next;
+            cmd = list;
         }
-        cmd = list;
+        struct mp_cmd *sub = parse_cmd(ictx, &str, loc);
+        if (!sub) {
+            talloc_free(cmd);
+            return NULL;
+        }
+        talloc_steal(cmd, sub);
+        *p_prev = sub;
+        p_prev = &sub->queue_next;
     }
+
     return cmd;
 }
 
