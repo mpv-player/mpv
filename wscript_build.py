@@ -71,16 +71,16 @@ def build(ctx):
         target = "sub/osd_font.h")
 
     ctx.file2string(
-        source = "mpvcore/player/lua/defaults.lua",
-        target = "mpvcore/player/lua/defaults.inc")
+        source = "player/lua/defaults.lua",
+        target = "player/lua/defaults.inc")
 
     ctx.file2string(
-        source = "mpvcore/player/lua/assdraw.lua",
-        target = "mpvcore/player/lua/assdraw.inc")
+        source = "player/lua/assdraw.lua",
+        target = "player/lua/assdraw.inc")
 
     ctx.file2string(
-        source = "mpvcore/player/lua/osc.lua",
-        target = "mpvcore/player/lua/osc.inc")
+        source = "player/lua/osc.lua",
+        target = "player/lua/osc.inc")
 
     ctx.matroska_header(
         source = "demux/ebml.c demux/demux_mkv.c",
@@ -166,22 +166,6 @@ def build(ctx):
         ( "mpvcore/input/input.c" ),
         ( "mpvcore/input/joystick.c",            "joystick" ),
         ( "mpvcore/input/lirc.c",                "lirc" ),
-        ( "mpvcore/player/audio.c" ),
-        ( "mpvcore/player/command.c" ),
-        ( "mpvcore/player/configfiles.c" ),
-        ( "mpvcore/player/dvdnav.c" ),
-        ( "mpvcore/player/loadfile.c" ),
-        ( "mpvcore/player/main.c" ),
-        ( "mpvcore/player/misc.c" ),
-        ( "mpvcore/player/mp_lua.c",             "lua" ),
-        ( "mpvcore/player/osd.c" ),
-        ( "mpvcore/player/playloop.c" ),
-        ( "mpvcore/player/screenshot.c" ),
-        ( "mpvcore/player/sub.c" ),
-        ( "mpvcore/player/timeline/tl_cue.c" ),
-        ( "mpvcore/player/timeline/tl_mpv_edl.c" ),
-        ( "mpvcore/player/timeline/tl_matroska.c" ),
-        ( "mpvcore/player/video.c" ),
         ( "mpvcore/asxparser.c" ),
         ( "mpvcore/av_common.c" ),
         ( "mpvcore/av_log.c" ),
@@ -221,6 +205,24 @@ def build(ctx):
         ( "demux/demux_subreader.c" ),
         ( "demux/ebml.c" ),
         ( "demux/mf.c" ),
+
+        ## Player
+        ( "player/audio.c" ),
+        ( "player/command.c" ),
+        ( "player/configfiles.c" ),
+        ( "player/dvdnav.c" ),
+        ( "player/loadfile.c" ),
+        ( "player/main.c" ),
+        ( "player/misc.c" ),
+        ( "player/mp_lua.c",                     "lua" ),
+        ( "player/osd.c" ),
+        ( "player/playloop.c" ),
+        ( "player/screenshot.c" ),
+        ( "player/sub.c" ),
+        ( "player/timeline/tl_cue.c" ),
+        ( "player/timeline/tl_mpv_edl.c" ),
+        ( "player/timeline/tl_matroska.c" ),
+        ( "player/video.c" ),
 
         ## Streams
         ( "stream/ai_alsa1x.c",                  "alsa" ),

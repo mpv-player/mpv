@@ -21,16 +21,16 @@
 #include "mp_lua.h"
 
 // List of builtin modules and their contents as strings.
-// All these are generated from mpvcore/lua/*.lua
+// All these are generated from player/lua/*.lua
 static const char *builtin_lua_scripts[][2] = {
     {"mp.defaults",
-#   include "mpvcore/player/lua/defaults.inc"
+#   include "player/lua/defaults.inc"
     },
     {"mp.assdraw",
-#   include "mpvcore/player/lua/assdraw.inc"
+#   include "player/lua/assdraw.inc"
     },
     {"@osc",
-#   include "mpvcore/player/lua/osc.inc"
+#   include "player/lua/osc.inc"
     },
     {0}
 };

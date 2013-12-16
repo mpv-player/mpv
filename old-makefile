@@ -133,7 +133,7 @@ SOURCES-$(WAYLAND)              += video/out/vo_wayland.c video/out/wayland_comm
 SOURCES-$(VF_LAVFI)             += video/filter/vf_lavfi.c
 SOURCES-$(AF_LAVFI)             += audio/filter/af_lavfi.c
 
-SOURCES-$(LUA)                  += mpvcore/player/mp_lua.c
+SOURCES-$(LUA)                  += player/mp_lua.c
 
 ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
     SOURCES-yes                 += video/decode/lavc_dr1.c
@@ -214,25 +214,25 @@ SOURCES = audio/audio.c \
           mpvcore/playlist_parser.c \
           mpvcore/version.c \
           mpvcore/input/input.c \
-          mpvcore/player/audio.c \
-          mpvcore/player/configfiles.c \
-          mpvcore/player/command.c \
-          mpvcore/player/dvdnav.c \
-          mpvcore/player/loadfile.c \
-          mpvcore/player/main.c \
-          mpvcore/player/misc.c \
-          mpvcore/player/osd.c \
-          mpvcore/player/playloop.c \
-          mpvcore/player/screenshot.c \
-          mpvcore/player/sub.c \
-          mpvcore/player/video.c \
-          mpvcore/player/timeline/tl_matroska.c \
-          mpvcore/player/timeline/tl_mpv_edl.c \
-          mpvcore/player/timeline/tl_cue.c \
           osdep/io.c \
           osdep/numcores.c \
           osdep/timer.c \
           osdep/threads.c \
+          player/audio.c \
+          player/configfiles.c \
+          player/command.c \
+          player/dvdnav.c \
+          player/loadfile.c \
+          player/main.c \
+          player/misc.c \
+          player/osd.c \
+          player/playloop.c \
+          player/screenshot.c \
+          player/sub.c \
+          player/video.c \
+          player/timeline/tl_matroska.c \
+          player/timeline/tl_mpv_edl.c \
+          player/timeline/tl_cue.c \
           stream/cookies.c \
           stream/rar.c \
           stream/stream.c \
@@ -421,16 +421,16 @@ sub/osd_libass.c: sub/osd_font.h
 sub/osd_font.h: TOOLS/file2string.pl sub/osd_font.otf
 	./$^ >$@
 
-mpvcore/player/mp_lua.c: mpvcore/player/lua/defaults.inc
-mpvcore/player/lua/defaults.inc: TOOLS/file2string.pl mpvcore/player/lua/defaults.lua
+player/mp_lua.c: player/lua/defaults.inc
+player/lua/defaults.inc: TOOLS/file2string.pl player/lua/defaults.lua
 	./$^ >$@
 
-mpvcore/player/mp_lua.c: mpvcore/player/lua/assdraw.inc
-mpvcore/player/lua/assdraw.inc: TOOLS/file2string.pl mpvcore/player/lua/assdraw.lua
+player/mp_lua.c: player/lua/assdraw.inc
+player/lua/assdraw.inc: TOOLS/file2string.pl player/lua/assdraw.lua
 	./$^ >$@
 
-mpvcore/player/mp_lua.c: mpvcore/player/lua/osc.inc
-mpvcore/player/lua/osc.inc: TOOLS/file2string.pl mpvcore/player/lua/osc.lua
+player/mp_lua.c: player/lua/osc.inc
+player/lua/osc.inc: TOOLS/file2string.pl player/lua/osc.lua
 	./$^ >$@
 
 # ./configure must be rerun if it changed
@@ -531,9 +531,9 @@ clean:
 	-$(RM) video/out/gl_video_shaders.h
 	-$(RM) video/out/x11_icon.inc
 	-$(RM) sub/osd_font.h
-	-$(RM) mpvcore/player/lua/defaults.inc
-	-$(RM) mpvcore/player/lua/assdraw.inc
-	-$(RM) mpvcore/player/lua/osc.inc
+	-$(RM) player/lua/defaults.inc
+	-$(RM) player/lua/assdraw.inc
+	-$(RM) player/lua/osc.inc
 
 distclean: clean
 	-$(RM) config.log old_build/config.h old_build/config.mak Makefile config.mak config.h TAGS tags
