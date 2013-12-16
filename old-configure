@@ -301,7 +301,6 @@ Optional features:
   --enable-termios       use termios database for key codes [autodetect]
   --disable-iconv        disable iconv for encoding conversion [autodetect]
   --enable-lirc          enable LIRC (remote control) support [autodetect]
-  --enable-lircc         enable LIRCCD (LIRC client daemon) input [autodetect]
   --enable-joystick      enable joystick support [disable]
   --disable-vm           disable X video mode extensions [autodetect]
   --disable-xf86keysym   disable support for multimedia keys [autodetect]
@@ -473,7 +472,6 @@ _libquvi9=auto
 _libguess=auto
 _joystick=no
 _lirc=auto
-_lircc=auto
 _terminfo=auto
 _termcap=auto
 _termios=auto
@@ -686,8 +684,6 @@ for ac_option do
   --lua=*)              lua_pkg=$(echo $ac_option | cut -d '=' -f 2) ;;
   --enable-lirc)        _lirc=yes       ;;
   --disable-lirc)       _lirc=no        ;;
-  --enable-lircc)       _lircc=yes      ;;
-  --disable-lircc)      _lircc=no       ;;
   --enable-terminfo)    _terminfo=yes   ;;
   --disable-terminfo)   _terminfo=no    ;;
   --enable-termcap)     _termcap=yes    ;;
@@ -3173,19 +3169,6 @@ else
 fi
 echores "$_lirc"
 
-echocheck "lircc"
-if test "$_lircc" = auto ; then
-  _lircc=no
-  header_check lirc/lircc.h -llircc && _lircc=yes
-fi
-if test "$_lircc" = yes ; then
-  def_lircc='#define HAVE_LIRCC 1'
-  libs_mplayer="$libs_mplayer -llircc"
-else
-  def_lircc='#define HAVE_LIRCC 0'
-fi
-echores "$_lircc"
-
 #############################################################################
 
 if mingw32 ; then
@@ -3457,7 +3440,6 @@ $def_libbs2b
 /* input */
 $def_joystick
 $def_lirc
-$def_lircc
 $def_pvr
 $def_radio
 $def_radio_capture

@@ -58,10 +58,6 @@
 #include "lirc.h"
 #endif
 
-#if HAVE_LIRCC
-#include <lirc/lircc.h>
-#endif
-
 #if HAVE_COCOA
 #include "osdep/macosx_events.h"
 #endif
@@ -638,7 +634,6 @@ const m_option_t mp_input_opts[] = {
     OPT_INTRANGE("doubleclick-time", input.doubleclick_time, 0, 0, 1000),
     OPT_FLAG("joystick", input.use_joystick, CONF_GLOBAL),
     OPT_FLAG("lirc", input.use_lirc, CONF_GLOBAL),
-    OPT_FLAG("lircc", input.use_lircc, CONF_GLOBAL),
     OPT_FLAG("right-alt-gr", input.use_alt_gr, CONF_GLOBAL),
 #if HAVE_COCOA
     OPT_FLAG("ar", input.use_ar, CONF_GLOBAL),
@@ -2406,14 +2401,6 @@ struct input_ctx *mp_input_init(struct mpv_global *global)
         if (fd > 0)
             mp_input_add_cmd_fd(ictx, fd, 0, mp_input_lirc_read,
                                 mp_input_lirc_close);
-    }
-#endif
-
-#if HAVE_LIRCC
-    if (input_conf->use_lircc) {
-        int fd = lircc_init("mpv", NULL);
-        if (fd >= 0)
-            mp_input_add_cmd_fd(ictx, fd, 1, NULL, lircc_cleanup);
     }
 #endif
 

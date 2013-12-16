@@ -230,10 +230,6 @@ If you really mean to compile without libass support use --disable-libass."
         'desc' : 'lirc',
         'func': check_cc(header_name='lirc/lirc_client.h', lib='lirc_client'),
     }, {
-        'name' : '--lircc',
-        'desc' : 'lircc',
-        'func': check_cc(header_name='lirc/lircc.h', lib='lircc'),
-    }, {
         'name' : '--vcd',
         'desc' : 'VCD support',
         'deps_any': [ 'os-linux', 'os-freebsd', 'os-netbsd', 'os-openbsd', 'os-darwin' ],

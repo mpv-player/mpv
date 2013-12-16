@@ -874,7 +874,6 @@ const struct MPOpts mp_default_opts = {
         .ar_rate = 40,
         .use_joystick = 1,
         .use_lirc = 1,
-        .use_lircc = 1,
         .use_alt_gr = 1,
 #if HAVE_COCOA
         .use_ar = 1,
