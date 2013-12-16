@@ -536,6 +536,7 @@ Name                            W Comment
 ``ratio-pos``                   x position in current file (0.0-1.0)
 ``time-pos``                    x position in current file in seconds
 ``time-remaining``                estimated remaining length of the file in seconds
+``playtime-remaining``            ``time-remaining`` scaled by the the current ``speed``
 ``chapter``                     x current chapter number
 ``edition``                     x current MKV edition number
 ``titles``                        number of DVD titles

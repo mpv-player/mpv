@@ -1020,9 +1020,9 @@ function osc_init()
     local contentF = function (ass)
         if state.rightTC_trem == true then
             if state.tc_ms then
-                ass:append("-" .. mp.property_get_string("time-remaining/full"))
+                ass:append("-" .. mp.property_get_string("playtime-remaining/full"))
             else
-                ass:append("-" .. mp.property_get_string("time-remaining"))
+                ass:append("-" .. mp.property_get_string("playtime-remaining"))
             end
         else
             if state.tc_ms then
