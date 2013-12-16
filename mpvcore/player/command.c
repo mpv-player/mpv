@@ -382,22 +382,22 @@ static int mp_property_time_pos(m_option_t *prop, int action,
     return property_time(prop, action, arg, get_current_time(mpctx));
 }
 
-static double time_remaining(MPContext *mpctx, double *len)
+static bool time_remaining(MPContext *mpctx, double *remaining)
 {
-    *len = get_time_length(mpctx);
+    double len = get_time_length(mpctx);
     double pos = get_current_time(mpctx);
     double start = get_start_time(mpctx);
 
-    return *len - (pos - start);
+    *remaining = len - (pos - start);
+
+    return !!(int)len;
 }
 
 static int mp_property_remaining(m_option_t *prop, int action,
                                  void *arg, MPContext *mpctx)
 {
-    double len;
-    double remaining = time_remaining(mpctx, &len);
-
-    if (!(int)len)
+    double remaining;
+    if (!time_remaining(mpctx, &remaining))
         return M_PROPERTY_UNAVAILABLE;
 
     return property_time(prop, action, arg, remaining);
@@ -406,10 +406,8 @@ static int mp_property_remaining(m_option_t *prop, int action,
 static int mp_property_playtime_remaining(m_option_t *prop, int action,
                                       void *arg, MPContext *mpctx)
 {
-    double len;
-    double remaining = time_remaining(mpctx, &len);
-
-    if (!(int)len)
+    double remaining;
+    if (!time_remaining(mpctx, &remaining))
         return M_PROPERTY_UNAVAILABLE;
 
     double speed = mpctx->opts->playback_speed;
