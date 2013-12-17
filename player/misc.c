@@ -33,7 +33,7 @@
 #include "mpvcore/resolve.h"
 #include "mpvcore/encode.h"
 #include "mpvcore/playlist.h"
-#include "mpvcore/input/input.h"
+#include "input/input.h"
 
 #include "audio/out/ao.h"
 #include "demux/demux.h"

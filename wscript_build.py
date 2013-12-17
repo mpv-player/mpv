@@ -60,7 +60,7 @@ def build(ctx):
 
     ctx.file2string(
         source = "etc/input.conf",
-        target = "mpvcore/input/input_conf.h")
+        target = "input/input_conf.h")
 
     ctx.file2string(
         source = "video/out/gl_video_shaders.glsl",
@@ -163,9 +163,6 @@ def build(ctx):
         ( "audio/out/ao_wasapi.c",               "wasapi" ),
 
         ## Core
-        ( "mpvcore/input/input.c" ),
-        ( "mpvcore/input/joystick.c",            "joystick" ),
-        ( "mpvcore/input/lirc.c",                "lirc" ),
         ( "mpvcore/asxparser.c" ),
         ( "mpvcore/av_common.c" ),
         ( "mpvcore/av_log.c" ),
@@ -205,6 +202,11 @@ def build(ctx):
         ( "demux/demux_subreader.c" ),
         ( "demux/ebml.c" ),
         ( "demux/mf.c" ),
+
+        ## Input
+        ( "input/input.c" ),
+        ( "input/joystick.c",                    "joystick" ),
+        ( "input/lirc.c",                        "lirc" ),
 
         ## Player
         ( "player/audio.c" ),

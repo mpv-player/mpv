@@ -43,8 +43,8 @@
 
 #include "mpvcore/mp_common.h"
 #include "mpvcore/bstr.h"
-#include "mpvcore/input/input.h"
-#include "mpvcore/input/keycodes.h"
+#include "input/input.h"
+#include "input/keycodes.h"
 #include "getch2.h"
 
 #if HAVE_TERMIOS

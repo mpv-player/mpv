@@ -30,7 +30,7 @@
 #include "audio/format.h"
 #include "mpvcore/mp_msg.h"
 #include "ao.h"
-#include "mpvcore/input/input.h"
+#include "input/input.h"
 
 #define PULSE_CLIENT_NAME "mpv"
 

@@ -645,7 +645,7 @@ const m_option_t mp_input_opts[] = {
 static int default_cmd_func(int fd, char *buf, int l);
 
 static const char builtin_input_conf[] =
-#include "mpvcore/input/input_conf.h"
+#include "input/input_conf.h"
 ;
 
 static bool test_rect(struct mp_rect *rc, int x, int y)

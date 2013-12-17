@@ -104,10 +104,10 @@ SOURCES-$(GL_WAYLAND)           += video/out/wayland_common.c \
                                    video/out/gl_wayland.c
 
 SOURCES-$(JACK)                 += audio/out/ao_jack.c
-SOURCES-$(JOYSTICK)             += mpvcore/input/joystick.c
+SOURCES-$(JOYSTICK)             += input/joystick.c
 SOURCES-$(LIBQUVI)              += mpvcore/resolve_quvi.c
 SOURCES-$(LIBQUVI9)             += mpvcore/resolve_quvi9.c
-SOURCES-$(LIRC)                 += mpvcore/input/lirc.c
+SOURCES-$(LIRC)                 += input/lirc.c
 SOURCES-$(OPENAL)               += audio/out/ao_openal.c
 SOURCES-$(OSS)                  += audio/out/ao_oss.c
 SOURCES-$(PULSE)                += audio/out/ao_pulse.c
@@ -192,6 +192,7 @@ SOURCES = audio/audio.c \
           demux/demux_subreader.c \
           demux/ebml.c \
           demux/mf.c \
+          input/input.c \
           mpvcore/asxparser.c \
           mpvcore/av_common.c \
           mpvcore/av_log.c \
@@ -213,7 +214,6 @@ SOURCES = audio/audio.c \
           mpvcore/playlist.c \
           mpvcore/playlist_parser.c \
           mpvcore/version.c \
-          mpvcore/input/input.c \
           osdep/io.c \
           osdep/numcores.c \
           osdep/timer.c \
@@ -335,11 +335,12 @@ DIRS =  . \
         audio/filter \
         audio/out \
         mpvcore \
-        mpvcore/input \
-        mpvcore/timeline \
+        input \
+        timeline \
         demux \
         osdep \
         osdep/ar \
+        player \
         stream \
         sub \
         video \
@@ -391,8 +392,8 @@ mpv$(EXESUF): $(OBJECTS)
 mpv$(EXESUF):
 	$(CC) -o $@ $^ $(EXTRALIBS)
 
-mpvcore/input/input.c: mpvcore/input/input_conf.h
-mpvcore/input/input_conf.h: TOOLS/file2string.pl etc/input.conf
+input/input.c: input/input_conf.h
+input/input_conf.h: TOOLS/file2string.pl etc/input.conf
 	./$^ >$@
 
 MKVLIB_DEPS = TOOLS/lib/Parse/Matroska.pm \
@@ -525,7 +526,7 @@ clean:
 	-$(RM) $(call ADDSUFFIXES,.pdf .tex .log .aux .out .toc,DOCS/man/*/mpv)
 	-$(RM) DOCS/man/*/mpv.1
 	-$(RM) version.h
-	-$(RM) mpvcore/input/input_conf.h
+	-$(RM) input/input_conf.h
 	-$(RM) video/out/vdpau_template.c
 	-$(RM) demux/ebml_types.h demux/ebml_defs.c
 	-$(RM) video/out/gl_video_shaders.h

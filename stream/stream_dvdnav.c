@@ -30,7 +30,7 @@
 
 #include "mpvcore/options.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/input/input.h"
+#include "input/input.h"
 #include "mpvcore/m_option.h"
 #include "osdep/timer.h"
 #include "stream.h"

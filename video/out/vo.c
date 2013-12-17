@@ -36,7 +36,7 @@
 #include "mpvcore/bstr.h"
 #include "vo.h"
 #include "aspect.h"
-#include "mpvcore/input/input.h"
+#include "input/input.h"
 #include "mpvcore/m_config.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/mpv_global.h"

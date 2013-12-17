@@ -43,8 +43,8 @@
 #include "aspect.h"
 #include "osdep/timer.h"
 
-#include "mpvcore/input/input.h"
-#include "mpvcore/input/keycodes.h"
+#include "input/input.h"
+#include "input/keycodes.h"
 
 #define MOD_SHIFT_MASK      0x01
 #define MOD_ALT_MASK        0x02

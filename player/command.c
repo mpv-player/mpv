@@ -33,7 +33,7 @@
 #include "command.h"
 #include "osdep/timer.h"
 #include "mpvcore/mp_common.h"
-#include "mpvcore/input/input.h"
+#include "input/input.h"
 #include "stream/stream.h"
 #include "demux/demux.h"
 #include "demux/stheader.h"

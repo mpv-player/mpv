@@ -11,7 +11,7 @@
 #include "mpvcore/m_property.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/m_option.h"
-#include "mpvcore/input/input.h"
+#include "input/input.h"
 #include "mpvcore/path.h"
 #include "mpvcore/bstr.h"
 #include "osdep/timer.h"

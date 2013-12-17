@@ -26,7 +26,7 @@
 #include "mpvcore/bstr.h"
 #include "mpvcore/options.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/input/input.h"
+#include "input/input.h"
 #include "libavutil/common.h"
 #include "x11_common.h"
 #include "talloc.h"
@@ -70,8 +70,8 @@
 #include <zlib.h>
 #endif
 
-#include "mpvcore/input/input.h"
-#include "mpvcore/input/keycodes.h"
+#include "input/input.h"
+#include "input/keycodes.h"
 
 #define vo_wm_LAYER 1
 #define vo_wm_FULLSCREEN 2

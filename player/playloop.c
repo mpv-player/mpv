@@ -31,7 +31,7 @@
 #include "mpvcore/encode.h"
 #include "mpvcore/m_property.h"
 #include "mpvcore/playlist.h"
-#include "mpvcore/input/input.h"
+#include "input/input.h"
 
 #include "osdep/timer.h"
 

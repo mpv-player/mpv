@@ -48,7 +48,7 @@
 #include "mpvcore/playlist.h"
 #include "mpvcore/playlist_parser.h"
 #include "mpvcore/options.h"
-#include "mpvcore/input/input.h"
+#include "input/input.h"
 
 #include "audio/decode/dec_audio.h"
 #include "audio/out/ao.h"

@@ -30,9 +30,9 @@
 
 #include <SDL.h>
 
-#include "mpvcore/input/input.h"
-#include "mpvcore/input/keycodes.h"
-#include "mpvcore/input/input.h"
+#include "input/input.h"
+#include "input/keycodes.h"
+#include "input/input.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/options.h"
 
