@@ -33,14 +33,14 @@
 
 #include "config.h"
 
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "video/out/vo.h"
 #include "video/out/aspect.h"
 
-#include "mpvcore/input/input.h"
+#include "input/input.h"
 #include "talloc.h"
 
-#include "mpvcore/mp_msg.h"
+#include "common/msg.h"
 
 static void vo_cocoa_fullscreen(struct vo *vo);
 static void vo_cocoa_ontop(struct vo *vo);

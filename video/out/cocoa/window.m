@@ -17,7 +17,7 @@
 
 #include <libavutil/common.h>
 
-#include "mpvcore/input/keycodes.h"
+#include "input/keycodes.h"
 
 #include "osdep/macosx_application.h"
 #include "osdep/macosx_events.h"
