@@ -28,7 +28,6 @@
 #include "talloc.h"
 #include "config.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/mp_talloc.h"
 
 #include "stream/stream.h"
 #include "demux.h"

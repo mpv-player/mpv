@@ -29,7 +29,7 @@
 #include "cookies.h"
 
 #include "mpvcore/bstr.h"
-#include "mpvcore/mp_talloc.h"
+#include "talloc.h"
 
 static int open_f(stream_t *stream, int mode);
 static char **read_icy(stream_t *stream);

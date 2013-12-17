@@ -71,4 +71,42 @@ char *ta_talloc_vasprintf_append_buffer(char *s, const char *fmt, va_list ap) TA
 char *ta_talloc_asprintf_append(char *s, const char *fmt, ...) TA_PRF(2, 3);
 char *ta_talloc_asprintf_append_buffer(char *s, const char *fmt, ...) TA_PRF(2, 3);
 
+// mpv specific stuff - should be made part of proper TA API
+
+#define TA_EXPAND_ARGS(...) __VA_ARGS__
+
+#define MP_TALLOC_ELEMS(p) (talloc_get_size(p) / sizeof((p)[0]))
+
+#define MP_RESIZE_ARRAY(ctx, p, count) do {         \
+        (p) = talloc_realloc_size((ctx), p, (count) * sizeof((p)[0])); } while (0)
+
+#define MP_TARRAY_GROW(ctx, p, nextidx)             \
+    do {                                            \
+        size_t nextidx_ = (nextidx);                \
+        if (nextidx_ >= MP_TALLOC_ELEMS(p))         \
+            MP_RESIZE_ARRAY(ctx, p, (nextidx_ + 1) * 2);\
+    } while (0)
+
+#define MP_GROW_ARRAY(p, nextidx) MP_TARRAY_GROW(NULL, p, nextidx)
+
+#define MP_TARRAY_APPEND(ctx, p, idxvar, ...)       \
+    do {                                            \
+        MP_TARRAY_GROW(ctx, p, idxvar);             \
+        (p)[(idxvar)] = (TA_EXPAND_ARGS(__VA_ARGS__));\
+        (idxvar)++;                                 \
+    } while (0)
+
+// Doesn't actually free any memory, or do any other talloc calls.
+#define MP_TARRAY_REMOVE_AT(p, idxvar, at)          \
+    do {                                            \
+        size_t at_ = (at);                          \
+        assert(at_ <= (idxvar));                    \
+        memmove((p) + at_, (p) + at_ + 1,           \
+                ((idxvar) - at_ - 1) * sizeof((p)[0])); \
+        (idxvar)--;                                 \
+    } while (0)
+
+#define talloc_struct(ctx, type, ...) \
+    talloc_memdup(ctx, &(type) TA_EXPAND_ARGS(__VA_ARGS__), sizeof(type))
+
 #endif

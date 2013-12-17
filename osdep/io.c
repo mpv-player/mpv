@@ -20,6 +20,8 @@
 
 #include <unistd.h>
 
+#include "talloc.h"
+
 #include "config.h"
 #include "osdep/io.h"
 
@@ -45,8 +47,6 @@ bool mp_set_cloexec(int fd)
 #include <wchar.h>
 #include <stdio.h>
 #include <stddef.h>
-
-#include "talloc.h"
 
 //copied and modified from libav
 //http://git.libav.org/?p=libav.git;a=blob;f=libavformat/os_support.c;h=a0fcd6c9ba2be4b0dbcc476f6c53587345cc1152;hb=HEADl30
@@ -78,8 +78,6 @@ char *mp_to_utf8(void *talloc_ctx, const wchar_t *s)
 #include <io.h>
 #include <fcntl.h>
 #include <pthread.h>
-
-#include "mpvcore/mp_talloc.h"
 
 //http://git.libav.org/?p=libav.git;a=blob;f=cmdutils.c;h=ade3f10ce2fc030e32e375a85fbd06c26d43a433#l161
 
