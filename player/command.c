@@ -390,7 +390,7 @@ static bool time_remaining(MPContext *mpctx, double *remaining)
 
     *remaining = len - (pos - start);
 
-    return !!(int)len;
+    return len > 0;
 }
 
 static int mp_property_remaining(m_option_t *prop, int action,
