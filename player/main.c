@@ -42,7 +42,6 @@
 #include "mpvcore/mp_common.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/mpv_global.h"
-#include "mpvcore/resolve.h"
 #include "mpvcore/parser-cfg.h"
 #include "mpvcore/parser-mpcmd.h"
 #include "mpvcore/playlist.h"

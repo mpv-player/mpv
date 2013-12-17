@@ -37,7 +37,7 @@
 #include "stream/stream.h"
 #include "demux/demux.h"
 #include "demux/stheader.h"
-#include "mpvcore/resolve.h"
+#include "stream/resolve/resolve.h"
 #include "mpvcore/playlist.h"
 #include "mpvcore/playlist_parser.h"
 #include "sub/osd.h"

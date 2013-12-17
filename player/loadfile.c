@@ -38,7 +38,6 @@
 #include "mpvcore/options.h"
 #include "mpvcore/m_property.h"
 #include "mpvcore/mp_common.h"
-#include "mpvcore/resolve.h"
 #include "mpvcore/encode.h"
 #include "input/input.h"
 
@@ -49,6 +48,7 @@
 #include "audio/out/ao.h"
 #include "demux/demux.h"
 #include "stream/stream.h"
+#include "stream/resolve/resolve.h"
 #include "sub/ass_mp.h"
 #include "sub/dec_sub.h"
 #include "sub/find_subfiles.h"

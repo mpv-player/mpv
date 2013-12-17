@@ -30,7 +30,6 @@
 #include "mpvcore/options.h"
 #include "mpvcore/m_property.h"
 #include "mpvcore/mp_common.h"
-#include "mpvcore/resolve.h"
 #include "mpvcore/encode.h"
 #include "mpvcore/playlist.h"
 #include "input/input.h"

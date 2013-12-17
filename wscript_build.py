@@ -184,8 +184,6 @@ def build(ctx):
         ( "mpvcore/path.c" ),
         ( "mpvcore/playlist.c" ),
         ( "mpvcore/playlist_parser.c" ),
-        ( "mpvcore/resolve_quvi.c",              "libquvi4" ),
-        ( "mpvcore/resolve_quvi9.c",             "libquvi9" ),
         ( "mpvcore/version.c" ),
 
         ## Demuxers
@@ -260,6 +258,8 @@ def build(ctx):
         ( "stream/tv.c",                         "tv" ),
         ( "stream/tvi_dummy.c",                  "tv" ),
         ( "stream/tvi_v4l2.c",                   "tv-v4l2"),
+        ( "stream/resolve/resolve_quvi.c",       "libquvi4" ),
+        ( "stream/resolve/resolve_quvi9.c",      "libquvi9" ),
 
         ## Subtitles
         ( "sub/ass_mp.c",                        "libass"),
