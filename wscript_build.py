@@ -214,7 +214,7 @@ def build(ctx):
         ( "player/loadfile.c" ),
         ( "player/main.c" ),
         ( "player/misc.c" ),
-        ( "player/mp_lua.c",                     "lua" ),
+        ( "player/lua.c",                        "lua" ),
         ( "player/osd.c" ),
         ( "player/playloop.c" ),
         ( "player/screenshot.c" ),

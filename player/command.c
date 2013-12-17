@@ -73,7 +73,7 @@
 #include "osdep/io.h"
 
 #include "core.h"
-#include "mp_lua.h"
+#include "lua.h"
 
 struct command_ctx {
     int events;

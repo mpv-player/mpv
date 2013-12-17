@@ -133,7 +133,7 @@ SOURCES-$(WAYLAND)              += video/out/vo_wayland.c video/out/wayland_comm
 SOURCES-$(VF_LAVFI)             += video/filter/vf_lavfi.c
 SOURCES-$(AF_LAVFI)             += audio/filter/af_lavfi.c
 
-SOURCES-$(LUA)                  += player/mp_lua.c
+SOURCES-$(LUA)                  += player/lua.c
 
 ifeq ($(HAVE_AVUTIL_REFCOUNTING),no)
     SOURCES-yes                 += video/decode/lavc_dr1.c
@@ -421,15 +421,15 @@ sub/osd_libass.c: sub/osd_font.h
 sub/osd_font.h: TOOLS/file2string.pl sub/osd_font.otf
 	./$^ >$@
 
-player/mp_lua.c: player/lua/defaults.inc
+player/lua.c: player/lua/defaults.inc
 player/lua/defaults.inc: TOOLS/file2string.pl player/lua/defaults.lua
 	./$^ >$@
 
-player/mp_lua.c: player/lua/assdraw.inc
+player/lua.c: player/lua/assdraw.inc
 player/lua/assdraw.inc: TOOLS/file2string.pl player/lua/assdraw.lua
 	./$^ >$@
 
-player/mp_lua.c: player/lua/osc.inc
+player/lua.c: player/lua/osc.inc
 player/lua/osc.inc: TOOLS/file2string.pl player/lua/osc.lua
 	./$^ >$@
 

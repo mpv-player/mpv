@@ -18,7 +18,7 @@
 #include "sub/osd.h"
 #include "core.h"
 #include "command.h"
-#include "mp_lua.h"
+#include "lua.h"
 
 // List of builtin modules and their contents as strings.
 // All these are generated from player/lua/*.lua
