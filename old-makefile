@@ -334,15 +334,20 @@ DIRS =  . \
         audio/decode \
         audio/filter \
         audio/out \
-        mpvcore \
+        bstr \
+        common \
+        compat \
         input \
-        timeline \
+        player/timeline \
         demux \
+        misc \
         osdep \
         osdep/ar \
         player \
         stream \
+        stream/resolve \
         sub \
+        ta \
         video \
         video/decode \
         video/filter \
@@ -452,7 +457,7 @@ version.h .version: version.sh
 
 ###### dependency declarations / specific CFLAGS ######
 
-mpvcore/version.c osdep/mpv-rc.o: version.h
+common/version.c osdep/mpv-rc.o: version.h
 
 osdep/mpv-rc.o: osdep/mpv.exe.manifest etc/mpv-icon.ico
 
