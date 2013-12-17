@@ -17,8 +17,8 @@
 
 #include <libavutil/common.h>
 
-#include "mpvcore/input/input.h"
-#include "mpvcore/input/keycodes.h"
+#include "input/input.h"
+#include "input/keycodes.h"
 
 #include "osdep/macosx_compat.h"
 #include "video/out/cocoa_common.h"

@@ -2,7 +2,7 @@ NOTE: DOCS/OUTDATED-tech/* may contain more detailed information, but most of it
       is possibly or definitely outdated. This file intends to give a big
       picture of how mpv is structured.
 
-mpvcore/player/*.c:
+player/*.c:
     Essentially makes up the player applications, including the main() function
     and the playback loop.
 
@@ -83,14 +83,14 @@ talloc.h & talloc.c:
              rid of the talloc emulation later and use TA natively.
              (See ta/README for details.)
 
-mpvcore/player/command.c:
+player/command.c:
     This contains the implementation for slave commands and properties.
     Properties are essentially dynamic variables changed by certain commands.
     This is basically responsible for all user commands, like initiating
     seeking, switching tracks, etc. It calls into other player/*.c files,
     where most of the work is done, but also calls other parts of mpv.
 
-mpvcore/player/mp_core.h:
+player/core.h:
     Data structures and function prototypes for most of player/*.c. They are
     usually not accessed by other parts of mpv for the sake of modularization.
 
@@ -98,7 +98,7 @@ mpvcore/player/mp_core.h:
     else. This is an ongoing transition, and eventually there should be no
     global variables anymore.
 
-mpvcore/options.h, mpvcore/options.c
+options/options.h, options/options.c
     options.h contains the global option struct MPOpts. The option declarations
     (option names, types, and MPOpts offsets for the option parser) are in
     options.c. Most default values for options and MPOpts are in
@@ -111,7 +111,7 @@ mpvcore/options.h, mpvcore/options.c
     The actual option parser is spread over m_option.c, m_config.c, and
     parser-mpcmd.c, and uses the option table in options.c.
 
-mpvcore/input/input.c:
+input/input.c:
     This translates keyboard input comming from libvo and other sources (such
     as remote control devices like Apple IR or slave mode commands) to the
     key bindings listed in the user's (or the builtin) input.conf and turns
@@ -123,7 +123,7 @@ mpvcore/input/input.c:
     direction of slave mode communication, mpv to application, consists of
     random mp_msg() calls all over the code in all parts of the player.)
 
-mpvcore/mp_msg.h:
+common/msg.h:
     All terminal output should go through mp_msg().
 
 stream/*:
@@ -240,7 +240,7 @@ sub/:
     detection as well as timing postprocessing work. (Timing postprocessing
     removes tiny gaps or overlaps between subtitle events.)
 
-mpvcore/player/timeline/:
+player/timeline/:
     A timeline is the abstraction used by loadfile.c to combine several files
     into one seemingly linear video. It's mainly used for ordered chapters
     playback. The high level code to find and load other files containing the

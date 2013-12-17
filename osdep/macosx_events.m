@@ -26,7 +26,7 @@
 #import <Cocoa/Cocoa.h>
 
 #include "talloc.h"
-#include "mpvcore/input/input.h"
+#include "input/input.h"
 // doesn't make much sense, but needed to access keymap functionality
 #include "video/out/vo.h"
 
