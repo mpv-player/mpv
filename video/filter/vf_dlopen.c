@@ -28,7 +28,7 @@
 #include "video/mp_image.h"
 #include "vf.h"
 
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 #include "vf_dlopen.h"
 

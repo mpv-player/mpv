@@ -7,8 +7,8 @@
 #include "osdep/io.h"
 
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/options.h"
-#include "mpvcore/path.h"
+#include "options/options.h"
+#include "options/path.h"
 #include "mpvcore/mp_common.h"
 #include "sub/find_subfiles.h"
 

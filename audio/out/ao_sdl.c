@@ -24,7 +24,7 @@
 #include "talloc.h"
 #include "ao.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "osdep/timer.h"
 
 #include <libavutil/fifo.h>

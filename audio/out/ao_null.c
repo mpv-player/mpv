@@ -30,7 +30,7 @@
 
 #include "config.h"
 #include "osdep/timer.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "mpvcore/mp_msg.h"
 #include "audio/format.h"
 #include "ao.h"

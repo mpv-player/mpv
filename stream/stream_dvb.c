@@ -47,8 +47,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
 #include "osdep/io.h"
 
 #include "stream.h"
-#include "mpvcore/m_option.h"
-#include "mpvcore/path.h"
+#include "options/m_option.h"
+#include "options/path.h"
 
 #include "dvbin.h"
 

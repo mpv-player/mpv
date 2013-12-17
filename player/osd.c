@@ -27,9 +27,9 @@
 #include "talloc.h"
 
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/mp_common.h"
-#include "mpvcore/m_property.h"
+#include "options/m_property.h"
 #include "mpvcore/encode.h"
 
 #include "osdep/getch2.h"

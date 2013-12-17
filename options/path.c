@@ -34,7 +34,7 @@
 #include <errno.h>
 #include "config.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/path.h"
+#include "options/path.h"
 #include "talloc.h"
 #include "osdep/io.h"
 #include "osdep/path.h"

@@ -25,7 +25,7 @@
 
 #include "config.h"
 
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "audio/format.h"
 #include "audio/chmap.h"
 #include "audio/audio.h"

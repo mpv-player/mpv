@@ -38,7 +38,7 @@
 #include "mpvcore/mp_common.h"
 #include "mpvcore/bstr.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/m_config.h"
+#include "options/m_config.h"
 #include "vo.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"

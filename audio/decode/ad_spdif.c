@@ -28,7 +28,7 @@
 #include "config.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/av_common.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "ad.h"
 
 #define OUTBUF_SIZE 65536

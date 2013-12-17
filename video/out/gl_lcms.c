@@ -30,8 +30,8 @@
 #include "mpvcore/mp_common.h"
 #include "mpvcore/bstr.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/m_option.h"
-#include "mpvcore/path.h"
+#include "options/m_option.h"
+#include "options/path.h"
 
 #include "gl_video.h"
 #include "gl_lcms.h"

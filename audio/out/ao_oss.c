@@ -35,7 +35,7 @@
 #include <string.h>
 
 #include "config.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/mp_msg.h"
 
 #if HAVE_SYS_SOUNDCARD_H

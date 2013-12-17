@@ -32,7 +32,7 @@
 #include "mpvcore/av_common.h"
 #include "mpvcore/codecs.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/av_opts.h"
 
 #include "ad.h"

@@ -27,8 +27,8 @@
 #include "osdep/timer.h"
 
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/options.h"
-#include "mpvcore/m_property.h"
+#include "options/options.h"
+#include "options/m_property.h"
 #include "mpvcore/mp_common.h"
 #include "mpvcore/encode.h"
 #include "mpvcore/playlist.h"

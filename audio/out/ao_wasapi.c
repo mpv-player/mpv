@@ -30,7 +30,7 @@
 #include <avrt.h>
 
 #include "config.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "mpvcore/m_config.h"
 #include "audio/format.h"
 #include "mpvcore/mp_msg.h"

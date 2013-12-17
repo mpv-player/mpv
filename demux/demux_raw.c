@@ -23,7 +23,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 #include "stream/stream.h"
 #include "demux.h"

@@ -32,12 +32,12 @@
 #include "osdep/io.h"
 
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/path.h"
-#include "mpvcore/m_config.h"
-#include "mpvcore/parser-cfg.h"
+#include "options/path.h"
+#include "options/m_config.h"
+#include "options/parse_configfile.h"
 #include "mpvcore/playlist.h"
-#include "mpvcore/options.h"
-#include "mpvcore/m_property.h"
+#include "options/options.h"
+#include "options/m_property.h"
 
 #include "stream/stream.h"
 

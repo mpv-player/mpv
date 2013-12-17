@@ -30,7 +30,7 @@
 #include "command.h"
 #include "mpvcore/bstr.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/path.h"
+#include "options/path.h"
 #include "video/mp_image.h"
 #include "video/decode/dec_video.h"
 #include "video/filter/vf.h"

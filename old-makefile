@@ -201,19 +201,19 @@ SOURCES = audio/audio.c \
           mpvcore/charset_conv.c \
           mpvcore/codecs.c \
           mpvcore/cpudetect.c \
-          mpvcore/m_config.c \
-          mpvcore/m_option.c \
-          mpvcore/m_property.c \
           mpvcore/mp_common.c \
           mpvcore/mp_msg.c \
           mpvcore/mp_ring.c \
-          mpvcore/options.c \
-          mpvcore/parser-cfg.c \
-          mpvcore/parser-mpcmd.c \
-          mpvcore/path.c \
           mpvcore/playlist.c \
           mpvcore/playlist_parser.c \
           mpvcore/version.c \
+          options/m_config.c \
+          options/m_option.c \
+          options/m_property.c \
+          options/options.c \
+          options/parse_commandline.c \
+          options/parse_configfile.c \
+          options/path.c \
           osdep/io.c \
           osdep/numcores.c \
           osdep/timer.c \

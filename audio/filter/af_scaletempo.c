@@ -39,7 +39,7 @@
 #include "mpvcore/mp_common.h"
 
 #include "af.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 // Data for specific instances of this filter
 typedef struct af_scaletempo_s

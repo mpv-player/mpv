@@ -33,7 +33,7 @@
 
 #include "osdep/io.h"
 
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "cookies.h"
 #include "mpvcore/mp_msg.h"
 

@@ -16,10 +16,10 @@
  */
 
 #include "mpvcore/mp_common.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/playlist.h"
-#include "mpvcore/path.h"
+#include "options/path.h"
 #include "stream/stream.h"
 #include "demux.h"
 

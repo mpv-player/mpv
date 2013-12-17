@@ -21,7 +21,7 @@
 
 #include <stdbool.h>
 #include "mpvcore/bstr.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 // All command IDs
 enum mp_command_type {

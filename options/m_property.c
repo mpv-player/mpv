@@ -30,7 +30,7 @@
 #include <libavutil/common.h>
 
 #include "talloc.h"
-#include "mpvcore/m_option.h"
+#include "m_option.h"
 #include "m_property.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/mp_common.h"

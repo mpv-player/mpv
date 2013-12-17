@@ -32,7 +32,7 @@
 #include "talloc.h"
 #include "video/out/vo.h"
 #include "sub/osd.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 #include "video/csputils.h"
 #include "video/vfcap.h"

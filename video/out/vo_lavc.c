@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include "compat/libav.h"
 #include "mpvcore/mp_common.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "video/fmt-conversion.h"
 #include "video/mp_image.h"
 #include "video/vfcap.h"

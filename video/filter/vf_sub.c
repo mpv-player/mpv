@@ -29,7 +29,7 @@
 
 #include "config.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -40,7 +40,7 @@
 #include "video/sws_utils.h"
 #include "video/memcpy_pic.h"
 
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 struct vf_priv_s {
     int opt_top_margin, opt_bottom_margin;

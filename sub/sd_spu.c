@@ -19,7 +19,7 @@
 #include <assert.h>
 
 #include "talloc.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "video/mp_image.h"
 #include "sd.h"
 #include "spudec.h"

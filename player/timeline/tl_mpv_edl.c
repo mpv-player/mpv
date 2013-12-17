@@ -27,7 +27,7 @@
 #include "player/core.h"
 #include "mpvcore/mp_msg.h"
 #include "demux/demux.h"
-#include "mpvcore/path.h"
+#include "options/path.h"
 #include "mpvcore/bstr.h"
 #include "mpvcore/mp_common.h"
 #include "stream/stream.h"

@@ -20,7 +20,7 @@
 
 #include "talloc.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "resolve.h"
 
 static void add_source(struct mp_resolve_result *res, const char *url,

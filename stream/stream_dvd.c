@@ -38,7 +38,7 @@
 #define FIRST_PCM_AID 160
 
 #include "stream.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 #include "stream_dvd.h"
 #include "stream_dvd_common.h"

@@ -34,7 +34,7 @@
 #include "config.h"
 #include "talloc.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "vo.h"
 #include "video/vfcap.h"
 #include "video/mp_image.h"

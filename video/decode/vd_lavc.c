@@ -33,7 +33,7 @@
 #include "talloc.h"
 #include "config.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/bstr.h"
 #include "mpvcore/av_opts.h"
 #include "mpvcore/av_common.h"
@@ -57,7 +57,7 @@
 #error palette too large, adapt video/mp_image.h:MP_PALETTE_SIZE
 #endif
 
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 static void init_avctx(struct dec_video *vd, const char *decoder,
                        struct vd_lavc_hwdec *hwdec);

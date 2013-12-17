@@ -42,8 +42,8 @@
 #include <assert.h>
 #include "talloc.h"
 #include "gl_common.h"
-#include "mpvcore/options.h"
-#include "mpvcore/m_option.h"
+#include "options/options.h"
+#include "options/m_option.h"
 
 //! \defgroup glgeneral OpenGL general helper functions
 

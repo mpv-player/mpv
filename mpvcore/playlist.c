@@ -20,7 +20,7 @@
 #include "playlist.h"
 #include "mpvcore/mp_common.h"
 #include "talloc.h"
-#include "mpvcore/path.h"
+#include "options/path.h"
 
 struct playlist_entry *playlist_entry_new(const char *filename)
 {

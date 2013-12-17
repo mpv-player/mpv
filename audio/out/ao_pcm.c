@@ -30,7 +30,7 @@
 
 #include "talloc.h"
 
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "audio/format.h"
 #include "audio/reorder_ch.h"
 #include "ao.h"

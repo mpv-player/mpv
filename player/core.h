@@ -22,7 +22,7 @@
 #include <stdbool.h>
 
 #include "mpvcore/mp_common.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 
 // definitions used internally by the core player code
 

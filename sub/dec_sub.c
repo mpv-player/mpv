@@ -26,7 +26,7 @@
 #include "demux/demux.h"
 #include "sd.h"
 #include "dec_sub.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/charset_conv.h"
 

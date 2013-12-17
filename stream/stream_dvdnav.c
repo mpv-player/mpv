@@ -28,10 +28,10 @@
 
 #include <dvdnav/dvdnav.h>
 
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/mp_msg.h"
 #include "input/input.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "osdep/timer.h"
 #include "stream.h"
 #include "demux/demux.h"

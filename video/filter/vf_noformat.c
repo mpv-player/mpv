@@ -28,7 +28,7 @@
 #include "video/mp_image.h"
 #include "vf.h"
 
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 static struct vf_priv_s {
     int fmt;

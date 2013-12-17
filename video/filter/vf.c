@@ -27,10 +27,10 @@
 #include "config.h"
 
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/m_option.h"
-#include "mpvcore/m_config.h"
+#include "options/m_option.h"
+#include "options/m_config.h"
 
-#include "mpvcore/options.h"
+#include "options/options.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"

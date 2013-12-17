@@ -27,9 +27,9 @@
 
 #include "osdep/io.h"
 
-#include "parser-cfg.h"
+#include "parse_configfile.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/m_option.h"
+#include "m_option.h"
 #include "m_config.h"
 
 /// Maximal include depth.

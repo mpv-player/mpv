@@ -28,8 +28,8 @@
 #include <d3d9.h>
 #include <inttypes.h>
 #include "config.h"
-#include "mpvcore/options.h"
-#include "mpvcore/m_option.h"
+#include "options/options.h"
+#include "options/m_option.h"
 #include "talloc.h"
 #include "vo.h"
 #include "video/vfcap.h"

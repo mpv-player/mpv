@@ -38,7 +38,7 @@
 #include "config.h"
 #include "talloc.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "stream.h"
 
 #define BLURAY_SECTOR_SIZE     6144

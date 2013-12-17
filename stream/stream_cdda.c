@@ -42,7 +42,7 @@
 #include "talloc.h"
 
 #include "stream.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "libavutil/common.h"
 #include "compat/mpbswap.h"
 

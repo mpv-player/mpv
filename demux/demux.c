@@ -29,7 +29,7 @@
 #include <sys/stat.h>
 
 #include "config.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/av_common.h"
 #include "talloc.h"
 #include "mpvcore/mp_msg.h"

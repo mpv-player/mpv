@@ -37,7 +37,7 @@ static void vf_lw_set_recreate_cb(struct vf_instance *vf,
                                   void (*recreate)(struct vf_instance *vf))
 {
 }
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 static const struct m_sub_options vf_lw_conf = {0};
 #endif
 

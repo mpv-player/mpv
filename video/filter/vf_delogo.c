@@ -36,7 +36,7 @@
 #include "vf_lavfi.h"
 #include "video/memcpy_pic.h"
 
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 //===========================================================================//
 

@@ -31,11 +31,11 @@
 
 #include "config.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/path.h"
+#include "options/path.h"
 #include "ass_mp.h"
 #include "osd.h"
 #include "stream/stream.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 
 // res_y should be track->PlayResY
 // It determines scaling of font sizes and more.

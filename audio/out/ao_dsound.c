@@ -41,7 +41,7 @@
 #include "audio/reorder_ch.h"
 #include "mpvcore/mp_msg.h"
 #include "osdep/timer.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 /**
 \todo use the definitions from the win32 api headers when they define these

@@ -31,7 +31,7 @@
 #include "talloc.h"
 
 #include "m_config.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "mpvcore/mp_msg.h"
 
 static const union m_option_value default_value;

@@ -43,7 +43,7 @@
 #include "video/memcpy_pic.h"
 #include "compat/x86_cpu.h"
 
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 #include "vf_lavfi.h"
 

@@ -26,7 +26,7 @@
 #include <portaudio.h>
 
 #include "config.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "audio/format.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/mp_ring.h"

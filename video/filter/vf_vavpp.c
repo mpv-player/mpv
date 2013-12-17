@@ -19,7 +19,7 @@
 #include <va/va_vpp.h>
 
 #include "config.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "vf.h"
 #include "video/vaapi.h"
 #include "video/hwdec.h"

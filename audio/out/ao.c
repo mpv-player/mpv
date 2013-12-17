@@ -27,8 +27,8 @@
 #include "ao.h"
 #include "audio/format.h"
 
-#include "mpvcore/options.h"
-#include "mpvcore/m_config.h"
+#include "options/options.h"
+#include "options/m_config.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/mpv_global.h"
 

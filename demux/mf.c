@@ -39,7 +39,7 @@
 #include "talloc.h"
 #include "mpvcore/mp_msg.h"
 #include "stream/stream.h"
-#include "mpvcore/path.h"
+#include "options/path.h"
 #include "mpvcore/mp_talloc.h"
 
 #include "mf.h"

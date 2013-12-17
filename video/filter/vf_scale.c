@@ -26,7 +26,7 @@
 
 #include "config.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 
 #include "video/img_format.h"
 #include "video/mp_image.h"
@@ -39,7 +39,7 @@
 #include "video/csputils.h"
 #include "video/out/vo.h"
 
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 static struct vf_priv_s {
     int w, h;

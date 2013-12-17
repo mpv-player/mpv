@@ -20,7 +20,7 @@
 
 #include "osdep/path.h"
 #include "osdep/io.h"
-#include "mpvcore/path.h"
+#include "options/path.h"
 
 // Warning: do not use PATH_MAX. Cygwin messed it up.
 

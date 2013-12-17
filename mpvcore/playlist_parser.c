@@ -36,13 +36,12 @@
 
 #include "talloc.h"
 #include "asxparser.h"
-#include "m_config.h"
 #include "playlist.h"
 #include "playlist_parser.h"
 #include "stream/stream.h"
 #include "demux/demux.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/path.h"
+#include "options/path.h"
 
 
 #define BUF_STEP 1024

@@ -34,7 +34,7 @@
 #include "config.h"
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/mp_common.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "stream/stream.h"
 #include "demux/demux.h"
 

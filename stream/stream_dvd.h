@@ -26,7 +26,7 @@
 #include <dvdread/ifo_read.h>
 #include <dvdread/nav_read.h>
 #include "stream.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 typedef struct {
   dvd_reader_t *dvd;

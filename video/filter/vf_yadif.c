@@ -26,7 +26,7 @@
 
 #include "config.h"
 #include "mpvcore/cpudetect.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 
 #include "mpvcore/mp_msg.h"
 #include "video/img_format.h"

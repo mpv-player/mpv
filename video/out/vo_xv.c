@@ -43,7 +43,7 @@
 #include <X11/extensions/Xv.h>
 #include <X11/extensions/Xvlib.h>
 
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "talloc.h"
 #include "mpvcore/mp_msg.h"
 #include "vo.h"
@@ -55,7 +55,7 @@
 #include "sub/osd.h"
 #include "sub/draw_bmp.h"
 #include "video/csputils.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "osdep/timer.h"
 
 #define CK_METHOD_NONE       0 // no colorkey drawing

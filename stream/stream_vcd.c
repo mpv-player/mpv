@@ -26,7 +26,7 @@
 
 #include "mpvcore/mp_msg.h"
 #include "stream.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 #include <fcntl.h>
 #include <stdlib.h>

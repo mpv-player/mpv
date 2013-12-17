@@ -37,9 +37,9 @@
 
 #include "talloc.h"
 #include "mpvcore/mp_common.h"
-#include "mpvcore/m_option.h"
-#include "mpvcore/m_config.h"
 #include "mpvcore/mp_msg.h"
+#include "m_option.h"
+#include "m_config.h"
 
 char *m_option_strerror(int code)
 {

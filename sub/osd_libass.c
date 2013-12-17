@@ -34,7 +34,7 @@ static const char osd_font_pfb[] =
 ;
 
 #include "sub/ass_mp.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 
 
 #define ASS_USE_OSD_FONT "{\\fnmpv-osd-symbols}"

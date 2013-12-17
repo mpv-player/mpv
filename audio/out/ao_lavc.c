@@ -30,7 +30,7 @@
 
 #include "compat/libav.h"
 #include "config.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/mp_common.h"
 #include "audio/format.h"
 #include "audio/fmt-conversion.h"

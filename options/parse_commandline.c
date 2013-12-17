@@ -26,11 +26,11 @@
 #include <stdbool.h>
 
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/m_option.h"
+#include "m_option.h"
 #include "m_config.h"
-#include "playlist.h"
-#include "playlist_parser.h"
-#include "parser-mpcmd.h"
+#include "mpvcore/playlist.h"
+#include "mpvcore/playlist_parser.h"
+#include "parse_commandline.h"
 
 #define GLOBAL 0
 #define LOCAL 1

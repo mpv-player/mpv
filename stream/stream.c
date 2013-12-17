@@ -40,12 +40,12 @@
 #include "mpvcore/mp_common.h"
 #include "mpvcore/bstr.h"
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/path.h"
+#include "options/path.h"
 #include "osdep/timer.h"
 #include "stream.h"
 
-#include "mpvcore/m_option.h"
-#include "mpvcore/m_config.h"
+#include "options/m_option.h"
+#include "options/m_config.h"
 
 // Includes additional padding in case sizes get rounded up by sector size.
 #define TOTAL_BUFFER_SIZE (STREAM_MAX_BUFFER_SIZE + STREAM_MAX_SECTOR_SIZE)

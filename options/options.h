@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "mpvcore/m_option.h"
+#include "m_option.h"
 
 typedef struct mp_vo_opts {
     struct m_obj_settings *video_driver_list, *vo_defs;

@@ -42,7 +42,7 @@
 #endif
 
 #include "talloc.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/bstr.h"
 #include "stream/stream.h"
 #include "demux.h"

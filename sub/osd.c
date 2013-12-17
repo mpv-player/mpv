@@ -30,7 +30,7 @@
 #include "osdep/timer.h"
 
 #include "talloc.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/mp_msg.h"
 #include "osd.h"
 #include "dec_sub.h"

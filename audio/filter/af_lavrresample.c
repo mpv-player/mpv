@@ -55,7 +55,7 @@
 #endif
 
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "mpvcore/av_opts.h"
 #include "audio/filter/af.h"
 #include "audio/fmt-conversion.h"

@@ -27,7 +27,7 @@
 #include "config.h"
 #include "mpvcore/bstr.h"
 #include "osdep/io.h"
-#include "mpvcore/path.h"
+#include "options/path.h"
 #include "talloc.h"
 #include "mpvcore/mp_msg.h"
 #include "video/out/vo.h"
@@ -38,7 +38,7 @@
 #include "video/image_writer.h"
 #include "video/sws_utils.h"
 #include "sub/osd.h"
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 
 struct priv {
     struct image_writer_opts *opts;

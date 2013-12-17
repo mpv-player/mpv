@@ -24,7 +24,7 @@
 
 #include "config.h"
 #include "mpvcore/bstr.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/mp_msg.h"
 #include "input/input.h"
 #include "libavutil/common.h"

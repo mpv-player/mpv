@@ -28,7 +28,7 @@
 
 #include "video/img_format.h"
 #include "mpvcore/mp_common.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 
 #define VO_EVENT_EXPOSE 1
 #define VO_EVENT_RESIZE 2

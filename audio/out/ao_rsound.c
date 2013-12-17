@@ -29,7 +29,7 @@
 
 #include "talloc.h"
 
-#include "mpvcore/m_option.h"
+#include "options/m_option.h"
 #include "osdep/timer.h"
 #include "audio/format.h"
 #include "ao.h"

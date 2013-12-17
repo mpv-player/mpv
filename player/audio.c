@@ -26,7 +26,7 @@
 #include "talloc.h"
 
 #include "mpvcore/mp_msg.h"
-#include "mpvcore/options.h"
+#include "options/options.h"
 #include "mpvcore/mp_common.h"
 
 #include "audio/mixer.h"
