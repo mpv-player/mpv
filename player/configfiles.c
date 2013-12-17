@@ -41,7 +41,7 @@
 
 #include "stream/stream.h"
 
-#include "mp_core.h"
+#include "core.h"
 #include "command.h"
 
 #define DEF_CONFIG "# Write your default config options here!\n\n\n"

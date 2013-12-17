@@ -38,7 +38,7 @@
 #include "demux/demux.h"
 #include "sub/osd.h"
 
-#include "mp_core.h"
+#include "core.h"
 #include "command.h"
 
 #define saddf(var, ...) (*(var) = talloc_asprintf_append((*var), __VA_ARGS__))

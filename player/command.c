@@ -72,7 +72,7 @@
 
 #include "osdep/io.h"
 
-#include "mp_core.h"
+#include "core.h"
 #include "mp_lua.h"
 
 struct command_ctx {

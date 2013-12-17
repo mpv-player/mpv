@@ -40,7 +40,7 @@
 #include "stream/stream.h"
 #include "video/out/vo.h"
 
-#include "mp_core.h"
+#include "core.h"
 #include "command.h"
 
 double get_relative_time(struct MPContext *mpctx)

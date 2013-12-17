@@ -41,7 +41,7 @@
 #include "video/decode/vd.h"
 #include "video/out/vo.h"
 
-#include "mp_core.h"
+#include "core.h"
 #include "command.h"
 
 void update_fps(struct MPContext *mpctx)

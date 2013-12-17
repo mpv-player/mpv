@@ -24,7 +24,7 @@
 
 #include "talloc.h"
 
-#include "player/mp_core.h"
+#include "player/core.h"
 #include "mpvcore/mp_msg.h"
 #include "demux/demux.h"
 #include "mpvcore/path.h"

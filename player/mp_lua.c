@@ -16,7 +16,7 @@
 #include "mpvcore/bstr.h"
 #include "osdep/timer.h"
 #include "sub/osd.h"
-#include "mp_core.h"
+#include "core.h"
 #include "command.h"
 #include "mp_lua.h"
 

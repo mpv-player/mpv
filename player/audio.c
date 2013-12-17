@@ -38,7 +38,7 @@
 #include "demux/demux.h"
 #include "video/decode/dec_video.h"
 
-#include "mp_core.h"
+#include "core.h"
 
 static int build_afilter_chain(struct MPContext *mpctx)
 {

@@ -39,7 +39,7 @@
 #include "audio/mixer.h"
 #include "audio/filter/af.h"
 #include "audio/decode/dec_audio.h"
-#include "player/mp_core.h"
+#include "player/core.h"
 #include "osdep/priority.h"
 
 int   network_bandwidth=0;

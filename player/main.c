@@ -60,7 +60,7 @@
 #include "video/decode/dec_video.h"
 #include "video/out/vo.h"
 
-#include "mp_core.h"
+#include "core.h"
 #include "mp_lua.h"
 #include "command.h"
 #include "screenshot.h"

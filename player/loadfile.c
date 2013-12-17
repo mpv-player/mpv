@@ -55,7 +55,7 @@
 #include "video/decode/dec_video.h"
 #include "video/out/vo.h"
 
-#include "mp_core.h"
+#include "core.h"
 #include "command.h"
 
 #if HAVE_DVBIN

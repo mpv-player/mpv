@@ -18,7 +18,7 @@
 #include <limits.h>
 #include <assert.h>
 
-#include "mp_core.h"
+#include "core.h"
 
 #include "mpvcore/mp_msg.h"
 #include "mpvcore/mp_common.h"

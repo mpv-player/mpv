@@ -26,7 +26,7 @@
 
 #include "talloc.h"
 #include "screenshot.h"
-#include "mp_core.h"
+#include "core.h"
 #include "command.h"
 #include "mpvcore/bstr.h"
 #include "mpvcore/mp_msg.h"
